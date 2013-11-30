@@ -44,7 +44,7 @@ io.sockets.on('connection', function (socket) {
 	});
 	socket.on('pvpwant', function (data) {
 		console.log(data);
-		if (pendinggame != null){
+		if (pendinggame != null && pendinggame in idtosock){
 			var ownId = socktoid[socket];
 			var seed = Math.random()*4294967296;
 			var first = seed<(4294967296/2)?pendinggame:ownId;

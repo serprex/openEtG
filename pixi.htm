@@ -12,6 +12,8 @@
 </head>
 <body>
 	<script>
+	var Cards;
+	loadcards(function(cards) { Cards = cards });
 	var m_w = 0;
 	var m_z = 987654321;
 	function seed(i) {
@@ -36,7 +38,6 @@
 		}
 		return array;
 	}
-	var Cards = loadcards();
 	var renderer = PIXI.autoDetectRenderer(920, 540);
 	document.body.appendChild(renderer.view);
 	var id = null;
@@ -45,8 +46,15 @@
 	var mainStage = menuui;
 
 	var nopic = PIXI.Texture.fromImage("bunny.png");
+	cimgcache = {};
 	function getCardImage(code){
-		return PIXI.Texture.fromImage("cards/"+code+".png");
+		if (code in cimgcache)return cimgcache[code];
+		else{
+			var loader = new PIXI.AssetLoader(["cards/"+code+".png"]);
+			loader.onComplete = function() { cimgcache[code]=new PIXI.Texture.fromImage("cards/"+code+".png"); };
+			loader.load();
+			return nopic;
+		}
 	}
 	var deck = ['4vc', '4vc', '4vc', '4vc', '4vc', '4vc', '4vc', '4vc', '4vc', '4vc', '4vc', '4vc', '4vc', '4vc', '4vc', '4vc', '4vc', '4vc', '4vc', '4vc', '4ve', '4ve', '4ve', '4ve', '4ve', '4vf', '4vf', '4vf', '4vf', '4vf'];
 	var gameDeck;
@@ -57,17 +65,18 @@
 	bpvp.setInteractive(true);
 	menuui.addChild(bpvp);
 	bpvp.click = function(x) {
-		if (id != null){
+		if (id != null && Cards != null){
 			socket.emit("pvpwant", {id: id});
 		}
 	}
-	hand = new Array(8);
+	var hand = new Array(8);
+	var handsprite = new Array(8);
 	for (var i=0; i<8; i++){
-		hand[i] = new PIXI.Sprite(nopic);
-		hand[i].position.x=600;
-		hand[i].position.y=200+20*i;
-		hand[i].setInteractive(true);
-		gameui.addChild(hand[i]);
+		handsprite[i] = new PIXI.Sprite(nopic);
+		handsprite[i].position.x=600;
+		handsprite[i].position.y=200+20*i;
+		handsprite[i].setInteractive(true);
+		gameui.addChild(handsprite[i]);
 	}
 	var socket = io.connect('http://localhost');
 	socket.on("idgive", function(data) {
@@ -77,13 +86,18 @@
 		foeId = data.foeId;
 		gameDeck = shuffle(deck).slice(0);
 		for(var i=0;i<7;i++){
-			hand[i].setTexture(getCardImage(gameDeck.pop()));
+			hand[i] = gameDeck.pop();
 		}
 		seed(data.seed)
 		mainStage = gameui;
 	});
 
 	function animate() {
+		if (mainStage == gameui){
+			for(var i=0;i<7;i++){
+				handsprite[i].setTexture(getCardImage(hand[i]));
+			}
+		}
 	    renderer.render(mainStage);
 		requestAnimFrame(animate);
 	}
