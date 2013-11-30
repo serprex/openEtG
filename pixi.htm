@@ -1,0 +1,93 @@
+<html>
+<head>
+	<title>openEtG</title>
+	<style>
+		body {
+			background-color: #000000;
+		}
+	</style>
+	<script src="pixi.js"></script>
+	<script src="/socket.io/socket.io.js"></script>
+	<script src="etg.js"></script>
+</head>
+<body>
+	<script>
+	var m_w = 0;
+	var m_z = 987654321;
+	function seed(i) {
+		m_w = i;
+	}
+	function random()
+	{
+		var mask = 0xffffffff;
+		m_z = (36969 * (m_z & 65535) + (m_z >> 16)) & mask;
+		m_w = (18000 * (m_w & 65535) + (m_w >> 16)) & mask;
+		var result = ((m_z << 16) + m_w) & mask;
+		result /= 4294967296;
+		return result + 0.5;
+	}
+	function shuffle(array) {
+		var counter = array.length, temp, index;
+		while (counter--) {
+			index = (Math.random() * counter) | 0;
+			temp = array[counter];
+			array[counter] = array[index];
+			array[index] = temp;
+		}
+		return array;
+	}
+	var Cards = loadcards();
+	var renderer = PIXI.autoDetectRenderer(920, 540);
+	document.body.appendChild(renderer.view);
+	var id = null;
+	var menuui = new PIXI.Stage(0x336699, true);
+	var gameui = new PIXI.Stage(0x336699, true);
+	var mainStage = menuui;
+
+	var nopic = PIXI.Texture.fromImage("bunny.png");
+	function getCardImage(code){
+		return PIXI.Texture.fromImage("cards/"+code+".png");
+	}
+	var deck = ['4vc', '4vc', '4vc', '4vc', '4vc', '4vc', '4vc', '4vc', '4vc', '4vc', '4vc', '4vc', '4vc', '4vc', '4vc', '4vc', '4vc', '4vc', '4vc', '4vc', '4ve', '4ve', '4ve', '4ve', '4ve', '4vf', '4vf', '4vf', '4vf', '4vf'];
+	var gameDeck;
+
+	var bpvp = new PIXI.Sprite(nopic);
+	bpvp.position.x = 200;
+	bpvp.position.y = 200;
+	bpvp.setInteractive(true);
+	menuui.addChild(bpvp);
+	bpvp.click = function(x) {
+		if (id != null){
+			socket.emit("pvpwant", {id: id});
+		}
+	}
+	hand = new Array(8);
+	for (var i=0; i<8; i++){
+		hand[i] = new PIXI.Sprite(nopic);
+		hand[i].position.x=600;
+		hand[i].position.y=200+20*i;
+		hand[i].setInteractive(true);
+		gameui.addChild(hand[i]);
+	}
+	var socket = io.connect('http://localhost');
+	socket.on("idgive", function(data) {
+		id = data.id;
+	});
+	socket.on("pvpgive", function(data) {
+		foeId = data.foeId;
+		gameDeck = shuffle(deck).slice(0);
+		for(var i=0;i<7;i++){
+			hand[i].setTexture(getCardImage(gameDeck.pop()));
+		}
+		seed(data.seed)
+		mainStage = gameui;
+	});
+
+	function animate() {
+	    renderer.render(mainStage);
+		requestAnimFrame(animate);
+	}
+	requestAnimFrame(animate);
+	</script>
+</body>
+</html>
