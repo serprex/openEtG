@@ -95,14 +95,14 @@
 				}
 				player1.hand.splice(index,1);
 			}
-		};
+		}
 		gameui.addChild(handsprite[i]);
 	}
 	var creasprite = new Array(23);
 	for (var i=0; i<23; i++){
 		creasprite[i] = new PIXI.Sprite(nopic);
-		creasprite[i].position.x=i*20;
-		creasprite[i].position.y=600;
+		creasprite[i].position.x=100+i*20;
+		creasprite[i].position.y=300;
 		creasprite[i].setInteractive(true);
 		creasprite[i].click = function (x){
 			var index = creasprite.indexOf(this);
@@ -111,6 +111,7 @@
 				targetingMode = -1;
 			}
 		}
+		gameui.addChild(creasprite[i]);
 	}
 	var socket = io.connect('http://localhost');
 	socket.on("idgive", function(data) {
@@ -122,7 +123,7 @@
 		player2 = new Player();
 		player1.deck = shuffle(deck).slice(0);
 		for(var i=0;i<7;i++){
-			player1.hand[i] = player1.deck.pop();
+			player1.hand[i] = Cards[player1.deck.pop()];
 		}
 		seed(data.seed);
 		mainStage = gameui;
@@ -132,7 +133,7 @@
 		if (mainStage == gameui){
 			for(var i=0;i<8;i++){
 				if (player1.hand[i]){
-					handsprite[i].setTexture(getCardImage(player1.hand[i]));
+					handsprite[i].setTexture(getCardImage(player1.hand[i].code));
 				}else handsprite[i].setTexture(nopic);
 			}
 			for(var i=0;i<23;i++){

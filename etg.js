@@ -62,7 +62,6 @@ function Player(){
 	this.mark = 0;
 }
 function summon(card, owner, target){
-	var c;
 	if (card.type <= Permanent){
 		if (card.type == Pillar){
 			if (card.upped){
@@ -76,11 +75,11 @@ function summon(card, owner, target){
 				}
 			}
 		}
-		c = permanent(card, owner)
+		var p = permanent(card, owner)
 		if (card.type == Weapon){
-			owner.weapon = c
+			owner.weapon = p
 		}else if (card.type == Shield){
-			owner.shield = c
+			owner.shield = p
 			if (card == DimensionalShield || card == PhaseShield){
 				c.charges = 3
 			}
@@ -88,18 +87,21 @@ function summon(card, owner, target){
 				c.charges = 5
 			}
 		}else{
-			owner.permanents.append(c)
+			owner.permanents.push(p)
 		}
+		return p;
 	}else if (card.type == Spell){
 		owner.card = card
 		card.active(owner, target)
 		return null;
 	}else {
 		for(var i=0; i<23; i++){
-			if (!owner.creatures[i])owner.creatures[i]=card.code;
+			if (!owner.creatures[i]){
+				owner.creatures[i]=card.code;
+				return card.code
+			}
 		}
 	}
-	return c;
 }
 Other = 0;
 Entropy = 1;
