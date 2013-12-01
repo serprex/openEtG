@@ -12,10 +12,9 @@
 </head>
 <body>
 	<script>
-	var Cards;
-	loadcards(function(cards) { Cards = cards });
-	var m_w = 0;
-	var m_z = 987654321;
+	var Cards, Targeting, targetingMode, targetingModeCb;
+	loadcards(function(cards, targeting) { Cards = cards, Targeting = targeting });
+	var m_w = 0, m_z = 987654321;
 	function seed(i) {
 		m_w = i;
 	}
@@ -31,12 +30,21 @@
 	function shuffle(array) {
 		var counter = array.length, temp, index;
 		while (counter--) {
-			index = (Math.random() * counter) | 0;
+			index = (random() * counter) | 0;
 			temp = array[counter];
 			array[counter] = array[index];
 			array[index] = temp;
 		}
 		return array;
+	}
+	function getTarget(active, cb){
+		var tmode = Targeting[active];
+		if (targetingMode == -1){
+			cb()
+		}else{
+			targetingMode = tmode;
+			targetingModeCb = cb;
+		}
 	}
 	var renderer = PIXI.autoDetectRenderer(920, 540);
 	document.body.appendChild(renderer.view);
@@ -57,7 +65,6 @@
 		}
 	}
 	var deck = ['4vc', '4vc', '4vc', '4vc', '4vc', '4vc', '4vc', '4vc', '4vc', '4vc', '4vc', '4vc', '4vc', '4vc', '4vc', '4vc', '4vc', '4vc', '4vc', '4vc', '4ve', '4ve', '4ve', '4ve', '4ve', '4vf', '4vf', '4vf', '4vf', '4vf'];
-	var gameDeck;
 
 	var bpvp = new PIXI.Sprite(nopic);
 	bpvp.position.x = 200;
@@ -68,15 +75,42 @@
 		if (id != null && Cards != null){
 			socket.emit("pvpwant", {id: id});
 		}
-	}
-	var hand = new Array(8);
+	};
 	var handsprite = new Array(8);
 	for (var i=0; i<8; i++){
 		handsprite[i] = new PIXI.Sprite(nopic);
 		handsprite[i].position.x=600;
 		handsprite[i].position.y=200+20*i;
 		handsprite[i].setInteractive(true);
+		handsprite[i].click = function (x){
+			var index = handsprite.indexOf(this);
+			var card = player1.hand[index];
+			if (card){
+				if (card.type != Spell){
+					summon(card, player1);
+				}else{
+					getTarget(card.active, function (tgt) {
+						summon(card, player1, tgt);
+					});
+				}
+				player1.hand.splice(index,1);
+			}
+		};
 		gameui.addChild(handsprite[i]);
+	}
+	var creasprite = new Array(23);
+	for (var i=0; i<23; i++){
+		creasprite[i] = new PIXI.Sprite(nopic);
+		creasprite[i].position.x=i*20;
+		creasprite[i].position.y=600;
+		creasprite[i].setInteractive(true);
+		creasprite[i].click = function (x){
+			var index = creasprite.indexOf(this);
+			if (targetingMode == Creature || targetingMode == 6){
+				targetingModeCb(player1.creatures[index]);
+				targetingMode = -1;
+			}
+		}
 	}
 	var socket = io.connect('http://localhost');
 	socket.on("idgive", function(data) {
@@ -84,18 +118,27 @@
 	});
 	socket.on("pvpgive", function(data) {
 		foeId = data.foeId;
-		gameDeck = shuffle(deck).slice(0);
+		player1 = new Player();
+		player2 = new Player();
+		player1.deck = shuffle(deck).slice(0);
 		for(var i=0;i<7;i++){
-			hand[i] = gameDeck.pop();
+			player1.hand[i] = player1.deck.pop();
 		}
-		seed(data.seed)
+		seed(data.seed);
 		mainStage = gameui;
 	});
 
 	function animate() {
 		if (mainStage == gameui){
-			for(var i=0;i<7;i++){
-				handsprite[i].setTexture(getCardImage(hand[i]));
+			for(var i=0;i<8;i++){
+				if (player1.hand[i]){
+					handsprite[i].setTexture(getCardImage(player1.hand[i]));
+				}else handsprite[i].setTexture(nopic);
+			}
+			for(var i=0;i<23;i++){
+				if (player1.creatures[i]){
+					creasprite[i].setTexture(getCardImage(player1.creatures[i]));
+				}else creasprite[i].setTexture(nopic);
 			}
 		}
 	    renderer.render(mainStage);

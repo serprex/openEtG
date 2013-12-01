@@ -25,7 +25,6 @@ except:
 	from getpass import getpass
 	email = input("gmail: ")
 	password = getpass("Password: ")
-# Request a file-like object containing the spreadsheet's contents
-for gid, db in enumerate(("creature", "pillar", "weapon", "shield", "permanent", "spell"), 6):
+for gid, db in enumerate(("creature", "pillar", "weapon", "shield", "permanent", "spell", "active"), 6):
 	print(db)
 	open(db+".csv", "wb").write(download(gid).read())
