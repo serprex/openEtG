@@ -55,4 +55,8 @@ io.sockets.on('connection', function (socket) {
 			pendinggame = data.id;
 		}
 	});
+	socket.on('endturn', function (data) {
+		console.log(data.foeId);
+		idtosock[data.foeId].emit('endturn');
+	});
 });

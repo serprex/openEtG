@@ -12,7 +12,7 @@
 </head>
 <body>
 	<script>
-	var Cards, Targeting, targetingMode, targetingModeCb;
+	var Cards, Targeting, targetingMode, targetingModeCb, myturn;
 	loadcards(function(cards, targeting) { Cards = cards, Targeting = targeting });
 	var m_w = 0, m_z = 987654321;
 	function seed(i) {
@@ -39,7 +39,7 @@
 	}
 	function getTarget(active, cb){
 		var tmode = Targeting[active];
-		if (targetingMode == -1){
+		if (targetingMode == undefined){
 			cb()
 		}else{
 			targetingMode = tmode;
@@ -70,12 +70,21 @@
 	bpvp.position.x = 200;
 	bpvp.position.y = 200;
 	bpvp.setInteractive(true);
-	menuui.addChild(bpvp);
 	bpvp.click = function(x) {
 		if (id != null && Cards != null){
 			socket.emit("pvpwant", {id: id});
 		}
 	};
+	menuui.addChild(bpvp);
+	var endturn = new PIXI.Sprite(nopic);
+	endturn.position.x = 100;
+	endturn.position.y = 100;
+	endturn.setInteractive(true);
+	endturn.click = function (x) {
+		myturn = false;
+		socket.emit("endturn", {foeId: foeId});
+	}
+	gameui.addChild(endturn);
 	var handsprite = new Array(8);
 	for (var i=0; i<8; i++){
 		handsprite[i] = new PIXI.Sprite(nopic);
@@ -85,7 +94,7 @@
 		handsprite[i].click = function (x){
 			var index = handsprite.indexOf(this);
 			var card = player1.hand[index];
-			if (card){
+			if (card && myturn){
 				if (card.type != Spell){
 					summon(card, player1);
 				}else{
@@ -119,14 +128,20 @@
 	});
 	socket.on("pvpgive", function(data) {
 		foeId = data.foeId;
+		myturn = id == data.first;
 		player1 = new Player();
 		player2 = new Player();
+		player1.foe = player2;
+		player2.foe = player1;
 		player1.deck = shuffle(deck).slice(0);
 		for(var i=0;i<7;i++){
 			player1.hand[i] = Cards[player1.deck.pop()];
 		}
 		seed(data.seed);
 		mainStage = gameui;
+	});
+	socket.on("endturn", function(data) {
+		myturn = true;
 	});
 
 	function animate() {
