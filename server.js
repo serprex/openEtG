@@ -4,7 +4,7 @@ var io = require('socket.io').listen(app);
 var fs = require('fs');
 app.listen(80);
 
-function handler (req, res) {
+function handler(req, res) {
 	if (req.url.indexOf("..") != -1)
 		return;
 	if (req.url.indexOf("/cards/") == 0){
@@ -18,7 +18,7 @@ function handler (req, res) {
 		});
 	}else{
 		var url = req.url == "/"?"/pixi.htm":req.url;
-		fs.readFile(__dirname + url, function (err, data) {
+		fs.readFile(__dirname + url, function(err, data) {
 			if (err) {
 				res.writeHead(500);
 				return res.end('Error loading '+url);
@@ -33,7 +33,7 @@ var pendinggame = null;
 var socktoid = {};
 var idtosock = {};
 
-io.sockets.on('connection', function (socket) {
+io.sockets.on('connection', function(socket) {
 	var sockId = Math.random();
 	idtosock[sockId] = socket;
 	socktoid[socket] = sockId;
@@ -42,21 +42,26 @@ io.sockets.on('connection', function (socket) {
 		delete idtosock[socktoid[socket]];
 		delete socktoid[socket];
 	});
-	socket.on('pvpwant', function (data) {
-		console.log(data);
+	socket.on('pvpwant', function(data) {
+		var id = data.id;
+		console.log(id + " " + pendinggame);
+		if (id == pendinggame){
+			return;
+		}
 		if (pendinggame != null && pendinggame in idtosock){
-			var ownId = socktoid[socket];
 			var seed = Math.random()*4294967296;
-			var first = seed<(4294967296/2)?pendinggame:ownId;
+			var first = seed<(4294967296/2)?pendinggame:id;
 			socket.emit("pvpgive", {foeId: pendinggame, first:first, seed:seed});
-			idtosock[pendinggame].emit("pvpgive", {foeId: ownId, first:first, seed:seed});
+			idtosock[pendinggame].emit("pvpgive", {foeId: id, first:first, seed:seed});
 			pendinggame = null;
 		}else{
-			pendinggame = data.id;
+			pendinggame = id;
 		}
 	});
-	socket.on('endturn', function (data) {
-		console.log(data.foeId);
+	socket.on('endturn', function(data) {
 		idtosock[data.foeId].emit('endturn');
+	});
+	socket.on('summon', function(data) {
+		idtosock[data.foeId].emit('summon', data);
 	});
 });

@@ -12,7 +12,7 @@
 </head>
 <body>
 	<script>
-	var Cards, Targeting, targetingMode, targetingModeCb, myturn;
+	var Cards, Targeting, targetingMode, targetingModeCb, myturn, player1, player2, players, id, foeId;
 	loadcards(function(cards, targeting) { Cards = cards, Targeting = targeting });
 	var m_w = 0, m_z = 987654321;
 	function seed(i) {
@@ -48,7 +48,6 @@
 	}
 	var renderer = PIXI.autoDetectRenderer(920, 540);
 	document.body.appendChild(renderer.view);
-	var id = null;
 	var menuui = new PIXI.Stage(0x336699, true);
 	var gameui = new PIXI.Stage(0x336699, true);
 	var mainStage = menuui;
@@ -77,12 +76,13 @@
 	};
 	menuui.addChild(bpvp);
 	var endturn = new PIXI.Sprite(nopic);
-	endturn.position.x = 100;
-	endturn.position.y = 100;
+	endturn.position.x = 50;
+	endturn.position.y = 300;
 	endturn.setInteractive(true);
 	endturn.click = function (x) {
-		myturn = false;
 		socket.emit("endturn", {foeId: foeId});
+		player1.endturn();
+		myturn = false;
 	}
 	gameui.addChild(endturn);
 	var handsprite = new Array(8);
@@ -94,8 +94,9 @@
 		handsprite[i].click = function (x){
 			var index = handsprite.indexOf(this);
 			var card = player1.hand[index];
-			if (card && myturn){
-				if (card.type != Spell){
+			if (card && myturn && (!card.cost || player1.spend(parseInt(card.element), parseInt(card.cost)))){
+				if (card.type != SpellEnum){
+					socket.emit("summon", {foeId: foeId, card: card.code});
 					summon(card, player1);
 				}else{
 					getTarget(card.active, function (tgt) {
@@ -115,33 +116,71 @@
 		creasprite[i].setInteractive(true);
 		creasprite[i].click = function (x){
 			var index = creasprite.indexOf(this);
-			if (targetingMode == Creature || targetingMode == 6){
+			if (targetingMode == CreatureEnum || targetingMode == 6){
 				targetingModeCb(player1.creatures[index]);
 				targetingMode = -1;
 			}
 		}
 		gameui.addChild(creasprite[i]);
 	}
+	var foecreasprite = new Array(23);
+	for (var i=0; i<23; i++){
+		foecreasprite[i] = new PIXI.Sprite(nopic);
+		foecreasprite[i].position.x=100+i*20;
+		foecreasprite[i].position.y=100;
+		foecreasprite[i].setInteractive(true);
+		foecreasprite[i].click = function (x){
+			var index = foecreasprite.indexOf(this);
+			if (targetingMode == Creature || targetingMode == 6){
+				targetingModeCb(player2.creatures[index]);
+				targetingMode = -1;
+			}
+		}
+		gameui.addChild(foecreasprite[i]);
+	}
+	var quantatext = new PIXI.Text("", {font: "12px Arial"});
+	quantatext.position.x=0;
+	quantatext.position.y=300;
+	gameui.addChild(quantatext);
+	var hptext = new PIXI.Text("", {font: "12px Arial"});
+	hptext.position.x=600;
+	hptext.position.y=180;
+	gameui.addChild(hptext);
+	var foehptext = new PIXI.Text("", {font: "12px Arial"});
+	foehptext.position.x=20;
+	foehptext.position.y=20;
+	gameui.addChild(foehptext);
 	var socket = io.connect('http://localhost');
 	socket.on("idgive", function(data) {
 		id = data.id;
 	});
 	socket.on("pvpgive", function(data) {
+		seed(data.seed);
 		foeId = data.foeId;
 		myturn = id == data.first;
 		player1 = new Player();
 		player2 = new Player();
 		player1.foe = player2;
 		player2.foe = player1;
-		player1.deck = shuffle(deck).slice(0);
+		players = [player1, player2];
+		if (myturn){
+			player1.deck = shuffle(deck).slice(0);
+			player2.deck = shuffle(deck).slice(0);
+		}else{
+			player2.deck = shuffle(deck).slice(0);
+			player1.deck = shuffle(deck).slice(0);
+		}
 		for(var i=0;i<7;i++){
 			player1.hand[i] = Cards[player1.deck.pop()];
 		}
-		seed(data.seed);
 		mainStage = gameui;
 	});
 	socket.on("endturn", function(data) {
+		player2.endturn();
 		myturn = true;
+	});
+	socket.on("summon", function(data) {
+		summon(Cards[data.card], player2);
 	});
 
 	function animate() {
@@ -153,9 +192,21 @@
 			}
 			for(var i=0;i<23;i++){
 				if (player1.creatures[i]){
-					creasprite[i].setTexture(getCardImage(player1.creatures[i]));
+					creasprite[i].setTexture(getCardImage(player1.creatures[i].card.code));
 				}else creasprite[i].setTexture(nopic);
 			}
+			for(var i=0;i<23;i++){
+				if (player2.creatures[i]){
+					foecreasprite[i].setTexture(getCardImage(player2.creatures[i].card.code));
+				}else foecreasprite[i].setTexture(nopic);
+			}
+			/*var qtext = "";
+			for(var i=1; i<13; i++){
+				qtext += player1.quanta[i] + "\n";
+			}
+			quantatext.setText(qtext);*/
+			//hptext.setText(player1.hp + "/" + player1.maxhp);
+			//foehptext.setText(player2.hp + "/" + player2.maxhp);
 		}
 	    renderer.render(mainStage);
 		requestAnimFrame(animate);

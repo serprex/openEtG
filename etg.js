@@ -14,7 +14,7 @@ function loadcards(cb){
 				var csv = this.responseText.split("\n");
 				var keys = csv[0].split(",");
 				for(var j=1; j<csv.length; j++){
-					var card = {type: i};
+					var card = {type: this.TYPE};
 					var carddata = csv[j].split(",");
 					var cardcode = carddata[2];
 					for(var k=0; k<carddata.length; k++)card[keys[k].toLowerCase()] = carddata[k];
@@ -24,6 +24,7 @@ function loadcards(cb){
 				maybeCallback();
 			}
 		};
+		xhr.TYPE = i;
 		xhr.send();
 	}
 	var xhr = new XMLHttpRequest();
@@ -39,6 +40,21 @@ function loadcards(cb){
 		}
 	}
 	xhr.send();
+}
+function randomquanta(quanta){
+	var nonzero = 0
+	for(var i=1; i<13; i++){
+		if (quanta[i] > 0)nonzero++;
+	}
+	if (nonzero == 0){
+		return -1;
+	}
+	nonzero = Math.floor(random()*nonzero);
+	for(var i=1; i<13; i++){
+		if (quanta[i]>0&&--nonzero == 0){
+			return i;
+		}
+	}
 }
 function Player(){
 	this.owner = this
@@ -59,27 +75,126 @@ function Player(){
 	this.deck = [];
 	this.creatures = new Array(23);
 	this.permanents = new Array(23);
-	this.quanta = [0]*12;
+	this.quanta = [undefined,0,0,0,0,0,0,0,0,0,0,0,0];
 	this.mark = 0;
 }
-function summon(card, owner, target){
-	if (card.type <= Permanent){
-		if (card.type == Pillar){
-			if (card.upped){
-				//bug upped marks grant like quantum tower
-				owner.spendquanta(card.element, -1)
+Player.prototype.spend = function(qtype, x) {
+	if (qtype == Other){
+		var b = x<0?-1:1;
+		var sum=0;
+		for (var i=1; i<13; i++){
+			sum += this.quanta[i];
+		}
+		if (sum >= x){
+			for (var i=x*b; i>0; i--){
+				this.quanta[b==-1?1+Math.floor(random()*12):randomquanta(this.quanta)] -= b
 			}
-			for (var i in owner.permanents){
-				if (owner.permanents[i].card.code == card.code){
-					owner.permanents[i].charges += 1
-					return p
+			return true;
+		}else return false;
+	}else if (this.quanta[qtype] >= x){
+		this.quanta[qtype] -= x;
+		return true;
+	}else return false;
+}
+Player.prototype.endturn = function() {
+	this.foe.hp -= this.foe.poison;
+	for (var i=0; i<23; i++){
+		if(this.creatures[i])attack(this.creatures[i], this.foe);
+	}
+	this.spend(this.mark, -1);
+	for (var i=0; i<23; i++){
+		if (this.permanents[i]){
+			var p = this.permanents[i];
+			if (p.card.type == PillarEnum || p.cast == -1){
+				p.active(p);
+			}
+			if (p.active == Actives.cloak || p.passive == "stasis"){
+				p.charges -= 1;
+				if (p.charges < 0){
+					delete this.permanents[i];
 				}
 			}
 		}
-		var p = permanent(card, owner)
-		if (card.type == Weapon){
+	}
+	/*
+	if (this.shield.active == Actives.evade100 || this.shield.active == Actives.wings){
+		this.shield.charges -= 1;
+		if (this.shield.charges < 0){
+			this.shield = new Permanent(noshield, this);
+		}
+	}
+	else if (this.shield.active == Actives.hope){
+		var hp = this.shield.card.upped?1:0;
+		for (var i=0; i<23; i++){
+			if (this.creatures[i] && this.creatures[i].active == Actives.light)
+				hp++;
+		}
+		this.shield.health = hp;
+	}
+	attack(this.weapon, this.foe);
+	*/
+	this.nova = 0;
+	this.nova2 = 0;
+}
+function Creature(card, owner){
+	this.card = card
+	this.maxhp = this.hp = parseInt(card.health)
+	this.atk = parseInt(card.attack)
+	this.buffatk = 0
+	this.airborne = card.airborne == "1"
+	this.active = Actives[card.active]
+	this.passive = card.passive
+	this.cast = parseInt(card.cast)
+	this.castele = parseInt(card.castele)
+	this.poison = 0
+	this.aflatoxin = false
+	this.delay = 0
+	this.frozen = 0
+	this.dive = 0
+	this.spelldamage = false
+	this.momentum = false
+	this.adrenaline = false
+	this.owner = owner
+	this.burrowed = card==Cards.Graboid || card==Cards.EliteGraboid
+	this.immaterial = card==Cards.Immortal || card==Cards.EliteImmortal || card==Cards.PhaseDragon || card==Cards.ElitePhaseDragon
+	this.usedactive = true
+}
+function Permanent(card, owner){
+	this.card = card
+	this.atk = parseInt(card.attack)
+	this.health = parseInt(card.health)
+	this.cast = parseInt(card.cast)
+	this.active = Actives[card.active]
+	this.passive = card.passive
+	this.charges = 0
+	this.usedactive = true
+	this.owner = owner
+	this.immaterial = false
+	//weapons:
+	self.frozen = 0
+	self.delay = 0
+}
+function attack(c, tgt){
+	tgt.hp -= c.atk;
+}
+function summon(card, owner, target){
+	if (card.type <= PermanentEnum){
+		if (card.type == PillarEnum){
+			if (card.upped){
+				//bug upped marks grant like quantum tower
+				owner.spend(card.element, -1);
+			}
+			for (var i=0; i<23; i++){
+				if (owner.permanents[i] != undefined && owner.permanents[i].card.code == card.code){
+					owner.permanents[i].charges += 1;
+					return owner.permanents[i];
+				}
+			}
+		}
+		var p = new Permanent(card, owner)
+		if (card.type == WeaponEnum){
 			owner.weapon = p
-		}else if (card.type == Shield){
+		}else if (card.type == ShieldEnum){
 			owner.shield = p
 			if (card == DimensionalShield || card == PhaseShield){
 				c.charges = 3
@@ -88,18 +203,21 @@ function summon(card, owner, target){
 				c.charges = 5
 			}
 		}else{
-			owner.permanents.push(p)
+			for(var i=0; i<23; i++){
+				if (!owner.permanents[i]){
+					return owner.permanents[i]=new Permanent(card, owner);
+				}
+			}
 		}
 		return p;
-	}else if (card.type == Spell){
+	}else if (card.type == SpellEnum){
 		owner.card = card
 		card.active(owner, target)
 		return null;
 	}else {
 		for(var i=0; i<23; i++){
 			if (!owner.creatures[i]){
-				owner.creatures[i]=card.code;
-				return card.code
+				return owner.creatures[i]=new Creature(card, owner);
 			}
 		}
 	}
@@ -125,12 +243,12 @@ Air = 9;
 Time = 10;
 Darkness = 11;
 Aether = 12;
-Pillar = 0;
-Weapon = 1;
-Shield = 2;
-Permanent = 3;
-Spell = 4;
-Creature = 5;
+PillarEnum = 0;
+WeaponEnum = 1;
+ShieldEnum = 2;
+PermanentEnum = 3;
+SpellEnum = 4;
+CreatureEnum = 5;
 TrueMarks = ["8pi", "8pj", "8pk", "8pl", "8pm", "8pn", "8po", "8pp", "8pq", "8pr", "8ps", "8pt", "8pu"];
 NymphList = [undefined, undefined,
 	"500", "6ug",
@@ -173,7 +291,7 @@ aflatoxin:function(c,t){
 	t.aflatoxin=true;
 },
 air:function(c,t){
-	spendquanta(c.owner.quanta, Air, -1);
+	c.owner.spend(Air, -1);
 },
 antimatter:function(c,t){
 	t.atk *= -1
@@ -255,7 +373,7 @@ dshield:function(c,t){
 duality:function(c,t){
 },
 earth:function(c,t){
-	spendquanta(c.owner.quanta, Earth, -1);
+	c.owner.spend(Earth, -1);
 },
 earthquake:function(c,t){
 },
@@ -271,7 +389,7 @@ evolve:function(c,t){
 fiery:function(c,t){
 },
 fire:function(c,t){
-	spendquanta(c.owner.quanta, Fire, -1);
+	c.owner.spend(Fire, -1);
 },
 firebolt:function(c,t){
 },
@@ -408,8 +526,8 @@ scavange:function(c,t){
 },
 scramble:function(c,t){
 	for (var i=0; i<9; i++){
-		if(t.spendquanta(Other, 1)){
-			t.spendquanta(Other, -1);
+		if(t.spend(Other, 1)){
+			t.spend(Other, -1);
 		}
 	}
 },
@@ -454,5 +572,8 @@ web:function(c,t){
 	t.airborne = false;
 },
 wisdom:function(c,t){
+},
+entropy:function(c,t){
+	c.owner.spend(Entropy,-c.charges);
 }
 }
