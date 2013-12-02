@@ -289,13 +289,13 @@ function summon(card, owner, target){
 		owner.card = card
 		card.active(owner, target)
 		return null;
-	}else {
+	}else if (card.type == CreatureEnum) {
 		for(var i=0; i<23; i++){
 			if (!owner.creatures[i]){
 				return owner.creatures[i]=new Creature(card, owner);
 			}
 		}
-	}
+	}else console.log("Unknown card type: "+card.type);
 }
 function removeItem(list, item){
 	var index=list.indexOf(item);
