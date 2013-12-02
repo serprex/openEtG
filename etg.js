@@ -14,12 +14,11 @@ function loadcards(cb){
 				var csv = this.responseText.split("\n");
 				var keys = csv[0].split(",");
 				for(var j=1; j<csv.length; j++){
-					var card = {type: this.TYPE};
 					var carddata = csv[j].split(",");
 					var cardcode = carddata[2];
-					for(var k=0; k<carddata.length; k++)card[keys[k].toLowerCase()] = carddata[k];
-					card.upped = parseInt(cardcode,32)>6999;
-					Cards[carddata[1] in Cards?carddata[1]+"Up":carddata[1]] = Cards[cardcode] = card;
+					var cardinfo = {};
+					for(var k=0; k<carddata.length; k++)cardinfo[keys[k]] = carddata[k];
+					Cards[carddata[1] in Cards?carddata[1]+"Up":carddata[1]] = Cards[cardcode] = new Card(this.TYPE, cardinfo);
 				}
 				maybeCallback();
 			}
@@ -40,6 +39,30 @@ function loadcards(cb){
 		}
 	}
 	xhr.send();
+}
+function etgReadCost(card, attr, cost, e){
+	if(cost.indexOf("+") == -1){
+		card[attr]=parseInt(cost);
+		card[attr+"ele"]=e;
+	}else{
+		var c=cost.split("+");
+		card[attr]=parseInt(c[0]);
+		card[attr+"ele"]=parseInt(c[1]);
+	}
+}
+function Card(type, info){
+	this.type = type;
+	this.element = parseInt(info.Element);
+	this.name = info.Name;
+	this.code = info.Code;
+	this.upped = parseInt(this.code,32)>6999;
+	this.attack = parseInt(info.Attack||"0");
+	this.health = parseInt(info.Health||"0");
+	etgReadCost(this, "cost", info.Cost||"0", this.element);
+	etgReadCost(this, "cast", info.Cast||"0", this.element);
+	this.active = Actives[info.Active];
+	this.passive = info.Passive||undefined;
+	this.airborne = info.Airborne == "1";
 }
 function randomquanta(quanta){
 	var nonzero = 0
@@ -106,7 +129,9 @@ Player.prototype.endturn = function() {
 		if (this.permanents[i]){
 			var p = this.permanents[i];
 			if (p.card.type == PillarEnum || p.cast == -1){
+				console.log(p.card.code);
 				p.active(p);
+				console.log(p.card.code + " DONE");
 			}
 			if (p.active == Actives.cloak || p.passive == "stasis"){
 				p.charges -= 1;
@@ -138,14 +163,14 @@ Player.prototype.endturn = function() {
 }
 function Creature(card, owner){
 	this.card = card
-	this.maxhp = this.hp = parseInt(card.health)
-	this.atk = parseInt(card.attack)
+	this.maxhp = this.hp = card.health
+	this.atk = card.attack
 	this.buffatk = 0
-	this.airborne = card.airborne == "1"
-	this.active = Actives[card.active]
+	this.airborne = card.airborne
+	this.active = card.active
 	this.passive = card.passive
-	this.cast = parseInt(card.cast)
-	this.castele = parseInt(card.castele)
+	this.cast = card.cast
+	this.castele = card.castele
 	this.poison = 0
 	this.aflatoxin = false
 	this.delay = 0
@@ -161,10 +186,11 @@ function Creature(card, owner){
 }
 function Permanent(card, owner){
 	this.card = card
-	this.atk = parseInt(card.attack)
-	this.health = parseInt(card.health)
-	this.cast = parseInt(card.cast)
-	this.active = Actives[card.active]
+	this.atk = card.attack
+	this.health = card.health
+	this.cast = card.cast
+	this.castele = card.castele
+	this.active = card.active
 	this.passive = card.passive
 	this.charges = 0
 	this.usedactive = true
@@ -191,16 +217,16 @@ function summon(card, owner, target){
 				}
 			}
 		}
-		var p = new Permanent(card, owner)
+		var p = new Permanent(card, owner);
 		if (card.type == WeaponEnum){
-			owner.weapon = p
+			owner.weapon = p;
 		}else if (card.type == ShieldEnum){
-			owner.shield = p
+			owner.shield = p;
 			if (card == DimensionalShield || card == PhaseShield){
-				c.charges = 3
+				c.charges = 3;
 			}
 			else if (card == Wings || card == WingsUp){
-				c.charges = 5
+				c.charges = 5;
 			}
 		}else{
 			for(var i=0; i<23; i++){
@@ -534,7 +560,7 @@ scramble:function(c,t){
 serendipity:function(c,t){
 },
 silence:function(c,t){
-	c.owner.silence = true
+	c.owner.silence = true;
 },
 skyblitz:function(c,t){
 },
@@ -546,8 +572,12 @@ sosa:function(c,t){
 	t.owner.truedmg(c.card.upped?40:48);
 },
 sskin:function(c,t){
+	c.buffhp(c.quanta[Earth]+c.card.cost);
 },
 steal:function(c,t){
+	var index=t.owner.permanents.indexOf(t);
+	delete t.owner[index];
+	c.owner.permanents
 },
 steam:function(c,t){
 },
@@ -559,6 +589,7 @@ storm2:function(c,t){
 storm3:function(c,t){
 },
 swave:function(c,t){
+	t.spelldmg(4);
 },
 sword:function(c,t){
 },
@@ -567,13 +598,18 @@ vampire:function(c,t){
 venom:function(c,t){
 },
 void:function(c,t){
+	c.owner.foe.buffhp(c.owner.mark==Darkness?-6:-3);
 },
 web:function(c,t){
 	t.airborne = false;
 },
 wisdom:function(c,t){
 },
-entropy:function(c,t){
-	c.owner.spend(Entropy,-c.charges);
+pillar:function(c,t){
+	c.owner.spend(c.card.element,-c.charges);
+},
+pend:function(c,t){
+	c.owner.spend(c.airborne?c.owner.mark:c.card.element,-c.charges);
+	c.airborne^=true;
 }
 }

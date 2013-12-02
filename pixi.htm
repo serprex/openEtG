@@ -13,7 +13,11 @@
 <body>
 	<script>
 	var Cards, Targeting, targetingMode, targetingModeCb, myturn, player1, player2, players, id, foeId;
-	loadcards(function(cards, targeting) { Cards = cards, Targeting = targeting });
+	loadcards(function(cards, targeting) {
+		Cards = cards;
+		Targeting = targeting;
+		console.log("Cards loaded");
+	});
 	var m_w = 0, m_z = 987654321;
 	function seed(i) {
 		m_w = i;
@@ -45,6 +49,9 @@
 			targetingMode = tmode;
 			targetingModeCb = cb;
 		}
+	}
+	function maybeSetText(textobject, text){
+		if (textobject.text != text)textobject.setText(text);
 	}
 	var renderer = PIXI.autoDetectRenderer(920, 540);
 	document.body.appendChild(renderer.view);
@@ -94,16 +101,17 @@
 		handsprite[i].click = function (x){
 			var index = handsprite.indexOf(this);
 			var card = player1.hand[index];
-			if (card && myturn && (!card.cost || player1.spend(parseInt(card.element), parseInt(card.cost)))){
+			if (card && myturn && (card.cost == 0 || player1.spend(card.costele, card.cost))){
 				if (card.type != SpellEnum){
 					socket.emit("summon", {foeId: foeId, card: card.code});
 					summon(card, player1);
+					player1.hand.splice(index,1);
 				}else{
 					getTarget(card.active, function (tgt) {
 						summon(card, player1, tgt);
+						player1.hand.splice(index,1);
 					});
 				}
-				player1.hand.splice(index,1);
 			}
 		}
 		gameui.addChild(handsprite[i]);
@@ -180,7 +188,9 @@
 		myturn = true;
 	});
 	socket.on("summon", function(data) {
-		summon(Cards[data.card], player2);
+		var card = Cards[data.card];
+		player2.spend(card.costele, card.cost);
+		summon(card, player2);
 	});
 
 	function animate() {
@@ -200,13 +210,13 @@
 					foecreasprite[i].setTexture(getCardImage(player2.creatures[i].card.code));
 				}else foecreasprite[i].setTexture(nopic);
 			}
-			/*var qtext = "";
+			var qtext = "";
 			for(var i=1; i<13; i++){
 				qtext += player1.quanta[i] + "\n";
 			}
-			quantatext.setText(qtext);*/
-			//hptext.setText(player1.hp + "/" + player1.maxhp);
-			//foehptext.setText(player2.hp + "/" + player2.maxhp);
+			maybeSetText(quantatext, qtext);
+			maybeSetText(hptext, player1.hp + "/" + player1.maxhp);
+			maybeSetText(foehptext, player2.hp + "/" + player2.maxhp);
 		}
 	    renderer.render(mainStage);
 		requestAnimFrame(animate);
