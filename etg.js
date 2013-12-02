@@ -93,7 +93,7 @@ function Player(){
 	this.nova = 0;
 	this.maxhp = 100;
 	this.hp = 100;
-	this.hand = new Array(8);
+	this.hand = [];
 	this.deck = [];
 	this.creatures = new Array(23);
 	this.permanents = new Array(23);
@@ -158,9 +158,9 @@ Player.prototype.endturn = function() {
 	this.nova = 0;
 	this.foe.drawcard();
 }
-Player.prototype.endturn = function() {
+Player.prototype.drawcard = function() {
 	if (this.hand.length<8){
-		this.hand.push(this.deck.pop());
+		this.hand[this.hand.length] = Cards[this.deck.pop()];
 	}
 }
 function Creature(card, owner){
@@ -271,7 +271,11 @@ function summon(card, owner, target){
 		}else{
 			for(var i=0; i<23; i++){
 				if (!owner.permanents[i]){
-					return owner.permanents[i]=new Permanent(card, owner);
+					var p=owner.permanents[i]=new Permanent(card, owner);
+					if (card.type == PillarEnum){
+						p.charges = 1;
+					}
+					return p;
 				}
 			}
 		}

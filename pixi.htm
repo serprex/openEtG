@@ -153,6 +153,10 @@
 	quantatext.position.x=0;
 	quantatext.position.y=300;
 	gameui.addChild(quantatext);
+	var foequantatext = new PIXI.Text("", {font: "12px Arial"});
+	foequantatext.position.x=300;
+	foequantatext.position.y=10;
+	gameui.addChild(foequantatext);
 	var hptext = new PIXI.Text("", {font: "12px Arial"});
 	hptext.position.x=600;
 	hptext.position.y=180;
@@ -183,13 +187,13 @@
 		}
 		for(var i=0;i<7;i++){
 			player1.hand[i] = Cards[player1.deck.pop()];
+			player2.hand[i] = Cards[player2.deck.pop()];
 		}
 		mainStage = gameui;
 	});
 	socket.on("endturn", function(data) {
 		player2.endturn();
 		myturn = true;
-		//6u2 6u2 6u2 6u2 6u2 6u2 744 744 744 744 744 744 744 744 744 744 744 744 744 745 745 745 745 745 745 74i 74i 74i 74i 74i 8pj
 	});
 	socket.on("summon", function(data) {
 		var card = Cards[data.card];
@@ -214,11 +218,13 @@
 					foecreasprite[i].setTexture(getCardImage(player2.creatures[i].card.code));
 				}else foecreasprite[i].setTexture(nopic);
 			}
-			var qtext = "";
-			for(var i=1; i<13; i++){
-				qtext += player1.quanta[i] + "\n";
+			var qtext = "", foeqtext = "";
+			for(var i=1; i<7; i++){
+				qtext += player1.quanta[i] + "\t" + player1.quanta[i+6] + "\n";
+				foeqtext += player2.quanta[i] + "\t" + player2.quanta[i+6] + "\n";
 			}
 			maybeSetText(quantatext, qtext);
+			maybeSetText(foequantatext, foeqtext);
 			maybeSetText(hptext, player1.hp + "/" + player1.maxhp);
 			maybeSetText(foehptext, player2.hp + "/" + player2.maxhp);
 		}
