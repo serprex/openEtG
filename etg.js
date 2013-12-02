@@ -33,7 +33,7 @@ function loadcards(cb){
 			var csv = this.responseText.split("\n");
 			for (var i=0; i<csv.length; i++){
 				var keypair = csv[i].split(",");
-				Targeting[keypair[0]] = parseInt(keypair[1],10);
+				Targeting[Actives[keypair[0]]] = parseInt(keypair[1],10);
 			}
 			maybeCallback();
 		}
@@ -192,6 +192,11 @@ Creature.prototype.addpoison = function(x) {
 		this.owner.foe.poison += x;
 	}
 }
+Creature.prototype.buffhp = function(x){
+	this.hp+=x;
+	this.maxhp+=x;
+}
+Creature.prototype.trueatk = function(){return this.atk+this.buffatk+this.dive;}
 Creature.prototype.die = function() {
 	var index = this.owner.creatures.indexOf(this);
 	delete this.owner.creatures[index];
@@ -440,7 +445,7 @@ die:function(c,t){
 	c.die();
 },
 dive:function(c,t){
-	c.diveatk += c.trueatk();
+	c.dive += c.trueatk();
 },
 divinity:function(c,t){
 	c.maxhp += c.mark==Light?24:16;
@@ -532,6 +537,7 @@ hasten:function(c,t){
 hatch:function(c,t){
 },
 heal:function(c,t){
+	t.heal(5);
 },
 heal20:function(c,t){
 	c.owner.heal(20);
@@ -715,7 +721,13 @@ sskin:function(c,t){
 steal:function(c,t){
 	var index=t.owner.permanents.indexOf(t);
 	delete t.owner[index];
-	c.owner.permanents
+	t.owner = c.owner;
+	for(var i=0; i<23; i++){
+		if(!c.owner.permanents[i]){
+			c.owner.permanents[i]=t;
+			break;
+		}
+	}
 },
 steam:function(c,t){
 },
