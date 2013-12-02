@@ -65,7 +65,7 @@
 		if (code in cimgcache)return cimgcache[code];
 		else{
 			var loader = new PIXI.AssetLoader(["cards/"+code+".png"]);
-			loader.onComplete = function() { cimgcache[code]=new PIXI.Texture.fromImage("cards/"+code+".png"); };
+			loader.onComplete = function() { cimgcache[code]=new PIXI.Texture.fromImage("cards/"+code+".png"); }
 			loader.load();
 			return nopic;
 		}
@@ -78,9 +78,12 @@
 	bpvp.setInteractive(true);
 	bpvp.click = function(x) {
 		if (id != null && Cards != null){
-			socket.emit("pvpwant", {id: id});
+			//DEBUG
+			var deckimport = document.getElementById("deckimport").value;
+			if (deckimport)deck = deckimport.split(" ");
+			socket.emit("pvpwant", {id: id, deck: deck});
 		}
-	};
+	}
 	menuui.addChild(bpvp);
 	var endturn = new PIXI.Sprite(nopic);
 	endturn.position.x = 50;
@@ -119,8 +122,8 @@
 	var creasprite = new Array(23);
 	for (var i=0; i<23; i++){
 		creasprite[i] = new PIXI.Sprite(nopic);
-		creasprite[i].position.x=100+i*20;
-		creasprite[i].position.y=300;
+		creasprite[i].position.x=100+(i%12)*30;
+		creasprite[i].position.y=300+(i%4)*20+(Math.floor(i/12)*30);
 		creasprite[i].setInteractive(true);
 		creasprite[i].click = function (x){
 			var index = creasprite.indexOf(this);
@@ -134,8 +137,8 @@
 	var foecreasprite = new Array(23);
 	for (var i=0; i<23; i++){
 		foecreasprite[i] = new PIXI.Sprite(nopic);
-		foecreasprite[i].position.x=100+i*20;
-		foecreasprite[i].position.y=100;
+		foecreasprite[i].position.x=100+(i%12)*30;
+		foecreasprite[i].position.y=100+(i%4)*20+(Math.floor(i/12)*30);
 		foecreasprite[i].setInteractive(true);
 		foecreasprite[i].click = function (x){
 			var index = foecreasprite.indexOf(this);
@@ -173,9 +176,9 @@
 		players = [player1, player2];
 		if (myturn){
 			player1.deck = shuffle(deck).slice(0);
-			player2.deck = shuffle(deck).slice(0);
+			player2.deck = shuffle(data.deck);
 		}else{
-			player2.deck = shuffle(deck).slice(0);
+			player2.deck = shuffle(data.deck);
 			player1.deck = shuffle(deck).slice(0);
 		}
 		for(var i=0;i<7;i++){
@@ -186,6 +189,7 @@
 	socket.on("endturn", function(data) {
 		player2.endturn();
 		myturn = true;
+		//6u2 6u2 6u2 6u2 6u2 6u2 744 744 744 744 744 744 744 744 744 744 744 744 744 745 745 745 745 745 745 74i 74i 74i 74i 74i 8pj
 	});
 	socket.on("summon", function(data) {
 		var card = Cards[data.card];
@@ -223,5 +227,6 @@
 	}
 	requestAnimFrame(animate);
 	</script>
+	<input id="deckimport" type="text" value="" />
 </body>
 </html>
