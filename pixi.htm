@@ -105,13 +105,13 @@
 		handsprite[i].position.y=200+20*i;
 		handsprite[i].setInteractive(true);
 		handsprite[i].click = function (x){
-			if (!myturn)return;
+			if (!myturn || player1.silence)return;
 			var index = handsprite.indexOf(this);
 			var card = player1.hand[index];
 			if (card && (card.cost == 0 || player1.spend(card.costele, card.cost))){
 				if (card.type != SpellEnum){
 					socket.emit("summon", {foeId: foeId, bits:6|index<<3});
-					summon(card, player1);
+					player1.summon(card);
 					player1.hand.splice(index,1);
 				}else{
 					console.log("Targeting");
@@ -283,7 +283,7 @@
 		var handindex = bits>>3&7;
 		var card = player2.hand[handindex];
 		player2.spend(card.costele, card.cost);
-		summon(card, player2, tgt);
+		player2.summon(card, tgt);
 		player2.hand.splice(handindex,1);
 	});
 
