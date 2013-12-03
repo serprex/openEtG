@@ -295,14 +295,22 @@ function attack(){
 	if (this.passive == "devour" && target.spend(Other, 1)){
 		this.owner.spend(Darkness, -1);
 	}
-	var stasis=false;
-	for(var i=0; i<23; i++){
-		if (this.owner.permanents[i] && (this.owner.permanents[i].passive == "stasis" || target.permanents[i].passive == "stasis")){
-			stasis=true;
-			break;
+	var stasis=this.frozen>0 || this.delay>0;
+	if (!stasis){
+		for(var i=0; i<23; i++){
+			if (this.owner.permanents[i] && (this.owner.permanents[i].passive == "stasis" || target.permanents[i].passive == "stasis")){
+				stasis=true;
+				break;
+			}
 		}
 	}
-	if (!stasis && this.frozen==0 && this.delay==0){
+	if (this.frozen > 0){
+		this.frozen -= 1;
+	}
+	if(this.delay > 0){
+		this.delay -= 1;
+	}
+	if (!stasis){
 		if (this.spelldamage){
 			target.spelldmg(this.trueatk)
 		}else if (this.momentum || this.trueatk() < 0){
@@ -339,12 +347,6 @@ function attack(){
 			}
 		}
 	}
-	if (this.frozen > 0){
-		this.frozen -= 1;
-	}
-	if(this.delay > 0){
-		this.delay -= 1;
-	}
 	this.dive = 0
 	if (this.active == Actives.dshield){
 		this.immaterial = false;
@@ -352,7 +354,7 @@ function attack(){
 	if (this.active == Actives.steam && this.steamatk>0){
 		this.steamatk--;
 	}
-	if(this.type==CreatureEnum&&this.hp <= 0){
+	if(this.type==CreatureEnum&&this.hp <= 0&&this.owner.creatures.indexOf(this)!=-1){
 		this.die();
 	}
 }
@@ -1007,5 +1009,48 @@ pillar:function(c,t){
 pend:function(c,t){
 	c.owner.spend(c.airborne?c.owner.mark:c.card.element,-c.charges);
 	c.airborne^=true;
-}
+},
+skull:function(c,t){
+	if (t.hp <= 0 || random() < .5/t.hp){
+		t.die();
+		place(t.owner, new Creature(t.card.upped?Cards.EliteSkeleton:Cards.Skeleton, t.owner));
+	}
+},
+bones:function(c,t){
+},
+weight:function(c,t){
+},
+thorn:function(c,t){
+	if (random()<.75){
+		t.addpoison(1);
+	}
+},
+reflect:function(c,t){
+},
+firewall:function(c,t){
+	t.dmg(1);
+},
+cold:function(c,t){
+	if (random()<.3){
+		t.freeze(3);
+	}
+},
+solar:function(c,t){
+	c.owner.spend(Light, -1);
+},
+reflect:function(c,t){
+},
+hope:function(c,t){
+},
+evade40:function(c,t){
+},
+wings:function(c,t){
+},
+slow:function(c,t){
+	t.delay = 1;
+},
+evade50:function(c,t){
+},
+evade100:function(c,t){
+},
 }
