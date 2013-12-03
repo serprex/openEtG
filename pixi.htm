@@ -12,6 +12,7 @@
 </head>
 <body>
 	<script>
+	"use strict"
 	var Cards, Targeting, targetingMode, targetingModeCb, myturn, player1, player2, players, id, foeId;
 	loadcards(function(cards, targeting) {
 		Cards = cards;
@@ -60,7 +61,7 @@
 	var mainStage = menuui;
 
 	var nopic = PIXI.Texture.fromImage("bunny.png");
-	cimgcache = {};
+	var cimgcache = {};
 	function getCardImage(code){
 		if (code in cimgcache)return cimgcache[code];
 		else{
@@ -208,19 +209,19 @@
 		}
 		gameui.addChild(foepermsprite[i]);
 	}
-	var quantatext = new PIXI.Text("", {font: "12px Arial"});
+	var quantatext = new PIXI.Text("", {font: "12px Arial bold"});
 	quantatext.position.x=800;
 	quantatext.position.y=40;
 	gameui.addChild(quantatext);
-	var foequantatext = new PIXI.Text("", {font: "12px Arial"});
+	var foequantatext = new PIXI.Text("", {font: "12px Arial bold"});
 	foequantatext.position.x=20;
 	foequantatext.position.y=320;
 	gameui.addChild(foequantatext);
-	var hptext = new PIXI.Text("", {font: "12px Arial"});
+	var hptext = new PIXI.Text("", {font: "12px Arial bold"});
 	hptext.position.x=800;
 	hptext.position.y=20;
 	gameui.addChild(hptext);
-	var foehptext = new PIXI.Text("", {font: "12px Arial"});
+	var foehptext = new PIXI.Text("", {font: "12px Arial bold"});
 	foehptext.position.x=20;
 	foehptext.position.y=300;
 	gameui.addChild(foehptext);

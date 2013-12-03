@@ -1,3 +1,4 @@
+"use strict"
 function loadcards(cb){
 	var Cards = {};
 	var Targeting = {};
@@ -401,27 +402,27 @@ function removeItem(list, item){
 	}
 	return false;
 }
-Other = 0;
-Entropy = 1;
-Death = 2;
-Gravity = 3;
-Earth = 4;
-Life = 5;
-Fire = 6;
-Water = 7;
-Light = 8;
-Air = 9;
-Time = 10;
-Darkness = 11;
-Aether = 12;
-PillarEnum = 0;
-WeaponEnum = 1;
-ShieldEnum = 2;
-PermanentEnum = 3;
-SpellEnum = 4;
-CreatureEnum = 5;
-TrueMarks = ["8pi", "8pj", "8pk", "8pl", "8pm", "8pn", "8po", "8pp", "8pq", "8pr", "8ps", "8pt", "8pu"];
-NymphList = [undefined, undefined,
+var Other = 0;
+var Entropy = 1;
+var Death = 2;
+var Gravity = 3;
+var Earth = 4;
+var Life = 5;
+var Fire = 6;
+var Water = 7;
+var Light = 8;
+var Air = 9;
+var Time = 10;
+var Darkness = 11;
+var Aether = 12;
+var PillarEnum = 0;
+var WeaponEnum = 1;
+var ShieldEnum = 2;
+var PermanentEnum = 3;
+var SpellEnum = 4;
+var CreatureEnum = 5;
+var TrueMarks = ["8pi", "8pj", "8pk", "8pl", "8pm", "8pn", "8po", "8pp", "8pq", "8pr", "8ps", "8pt", "8pu"];
+var NymphList = [undefined, undefined,
 	"500", "6ug",
 	"534", "71k",
 	"568", "74o",
@@ -434,7 +435,7 @@ NymphList = [undefined, undefined,
 	"5s4", "7qk",
 	"5v8", "7to",
 	"62c", "80s"];
-Actives={
+var Actives={
 ablaze:function(c,t){
 	c.atk+=2;
 },
