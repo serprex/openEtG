@@ -1,8 +1,8 @@
 "use strict"
-var http = require('http');
+var http = require("http");
 var app = http.createServer(handler);
-var io = require('socket.io').listen(app);
-var fs = require('fs');
+var io = require("socket.io").listen(app);
+var fs = require("fs");
 app.listen(80);
 
 function handler(req, res) {
@@ -22,7 +22,7 @@ function handler(req, res) {
 		fs.readFile(__dirname + url, function(err, data) {
 			if (err) {
 				res.writeHead(500);
-				return res.end('Error loading '+url);
+				return res.end("Error loading "+url);
 			}
 			res.writeHead(200);
 			res.end(data);
@@ -35,16 +35,16 @@ var socktoid = {};
 var idtosock = {};
 var idtodeck = {};
 
-io.sockets.on('connection', function(socket) {
+io.sockets.on("connection", function(socket) {
 	var sockId = Math.random();
 	idtosock[sockId] = socket;
 	socktoid[socket] = sockId;
-	socket.emit('idgive', {id: sockId});
-	socket.on('disconnect', function(data) {
+	socket.emit("idgive", {id: sockId});
+	socket.on("disconnect", function(data) {
 		delete idtosock[socktoid[socket]];
 		delete socktoid[socket];
 	});
-	socket.on('pvpwant', function(data) {
+	socket.on("pvpwant", function(data) {
 		var id = data.id;
 		console.log(id + " " + pendinggame);
 		if (id == pendinggame){
@@ -61,14 +61,19 @@ io.sockets.on('connection', function(socket) {
 			pendinggame = id;
 		}
 	});
-	socket.on('endturn', function(data) {
+	socket.on("endturn", function(data) {
 		if (data.foeId in idtosock){
-			idtosock[data.foeId].emit('endturn');
+			idtosock[data.foeId].emit("endturn");
 		}
 	});
-	socket.on('summon', function(data) {
+	socket.on("summon", function(data) {
 		if (data.foeId in idtosock){
-			idtosock[data.foeId].emit('summon', data);
+			idtosock[data.foeId].emit("summon", data);
+		}
+	});
+	socket.on("active", function(data) {
+		if (data.foeId in idtosock){
+			idtosock[data.foeId].emit("active", data);
 		}
 	});
 });
