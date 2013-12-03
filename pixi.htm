@@ -294,7 +294,7 @@
 					handsprite[i].setTexture(getCardImage(player1.hand[i].code));
 				}else handsprite[i].setTexture(nopic);
 				if (player2.hand[i]){
-					foehandsprite[i].setTexture(getCardImage("000"));
+					foehandsprite[i].setTexture(getCardImage(player1.precognition?player2.hand[i]:"000"));
 				}else foehandsprite[i].setTexture(nopic);
 			}
 			for(var i=0;i<23;i++){
