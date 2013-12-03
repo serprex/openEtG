@@ -43,7 +43,6 @@
 	}
 	function getTarget(active, cb){
 		var tmode = Targeting[active];
-		console.log(tmode);
 		if (tmode == undefined){
 			cb()
 		}else{
@@ -110,7 +109,6 @@
 			var card = player1.hand[index];
 			if (card && (card.cost == 0 || player1.spend(card.costele, card.cost))){
 				if (card.type != SpellEnum){
-					console.log(card.type+" "+6|index<<3);
 					socket.emit("summon", {foeId: foeId, bits:6|index<<3});
 					summon(card, player1);
 					player1.hand.splice(index,1);
@@ -154,7 +152,7 @@
 	for (var i=0; i<23; i++){
 		creasprite[i] = new PIXI.Sprite(nopic);
 		creasprite[i].position.x=100+(i%12)*30;
-		creasprite[i].position.y=300+(i%4)*20+(Math.floor(i/12)*30);
+		creasprite[i].position.y=370+(i%3)*20+(Math.floor(i/12)*30);
 		creasprite[i].setInteractive(true);
 		creasprite[i].click = function (x){
 			var index = creasprite.indexOf(this);
@@ -169,7 +167,7 @@
 	for (var i=0; i<23; i++){
 		foecreasprite[i] = new PIXI.Sprite(nopic);
 		foecreasprite[i].position.x=100+(i%12)*30;
-		foecreasprite[i].position.y=100+(i%4)*20+(Math.floor(i/12)*30);
+		foecreasprite[i].position.y=30+(i%3)*20+(Math.floor(i/12)*30);
 		foecreasprite[i].setInteractive(true);
 		foecreasprite[i].click = function (x){
 			var index = foecreasprite.indexOf(this);
@@ -184,7 +182,7 @@
 	for (var i=0; i<23; i++){
 		permsprite[i] = new PIXI.Sprite(nopic);
 		permsprite[i].position.x=100+(i%12)*30;
-		permsprite[i].position.y=380+(i%4)*20+(Math.floor(i/12)*30);
+		permsprite[i].position.y=500+(i%3)*20+(Math.floor(i/12)*30);
 		permsprite[i].setInteractive(true);
 		permsprite[i].click = function (x){
 			var index = permsprite.indexOf(this);
@@ -199,7 +197,7 @@
 	for (var i=0; i<23; i++){
 		foepermsprite[i] = new PIXI.Sprite(nopic);
 		foepermsprite[i].position.x=100+(i%12)*30;
-		foepermsprite[i].position.y=180+(i%4)*20+(Math.floor(i/12)*30);
+		foepermsprite[i].position.y=160+(i%3)*20+(Math.floor(i/12)*30);
 		foepermsprite[i].setInteractive(true);
 		foepermsprite[i].click = function (x){
 			var index = permsprite.indexOf(this);
@@ -208,7 +206,7 @@
 				targetingModeCb(player2.permanents[index]);
 			}
 		}
-		gameui.addChild(permsprite[i]);
+		gameui.addChild(foepermsprite[i]);
 	}
 	var quantatext = new PIXI.Text("", {font: "12px Arial"});
 	quantatext.position.x=800;
