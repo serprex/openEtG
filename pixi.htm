@@ -8,11 +8,10 @@
 	</style>
 	<script src="pixi.js"></script>
 	<script src="/socket.io/socket.io.js"></script>
-	<script src="etg.js"></script>
+	<script src="etg.js" type="text/javascript;version=1.7"></script>
 </head>
 <body>
-	<script>
-	"use strict"
+	<script type="text/javascript;version=1.7">
 	var Cards, Targeting, targetingMode=-1, targetingModeCb, myturn, player1, player2, players, id, foeId;
 	loadcards(function(cards, targeting) {
 		Cards = cards;
@@ -55,14 +54,14 @@
 		if (textobject.text != text)textobject.setText(text);
 	}
 	function tgtToBits(x){
-		if (tgt == undefined){
+		if (x == undefined){
 			return 6;
-		}else if (tgt == player1){
+		}else if (x == player1){
 			return 0;
-		}else if (tgt == player2){
+		}else if (x == player2){
 			return 1;
 		}else{
-			return (tgt instanceof Creature?2:4)+(tgt.owner==player1?0:1)|tgt.getIndex()<<3;
+			return (x instanceof Creature?2:4)+(x.owner==player1?0:1)|x.getIndex()<<3;
 		}
 	}
 	function bitsToTgt(x){
@@ -131,18 +130,18 @@
 		handsprite[i].position.x=800;
 		handsprite[i].position.y=200+20*i;
 		handsprite[i].setInteractive(true);
+		let _i=i;
 		handsprite[i].click = function (x){
 			if (!myturn || player1.silence)return;
-			var index = handsprite.indexOf(this);
-			var card = player1.hand[index];
+			var card = player1.hand[_i];
 			if (card && (card.cost == 0 || player1.spend(card.costele, card.cost))){
 				if (card.type != SpellEnum){
-					socket.emit("summon", {foeId: foeId, bits:index|6<<3});
-					player1.summon(index);
+					socket.emit("summon", {foeId: foeId, bits:_i|6<<3});
+					player1.summon(_i);
 				}else{
 					getTarget(card.active, function (tgt) {
-						socket.emit("summon", {foeId: foeId, bits:index|tgtToBits(tgt)<<3});
-						player1.summon(index, tgt);
+						socket.emit("summon", {foeId: foeId, bits:_i|tgtToBits(tgt)<<3});
+						player1.summon(_i, tgt);
 					});
 				}
 			}
@@ -162,8 +161,9 @@
 		creasprite[i].position.x=100+(i%12)*30;
 		creasprite[i].position.y=370+(i%3)*20+(Math.floor(i/12)*30);
 		creasprite[i].setInteractive(true);
+		let _i=i;
 		creasprite[i].click = function (x){
-			var crea = player1.creatures[creasprite.indexOf(this)];
+			var crea = player1.creatures[_i];
 			if (!crea)return;
 			if (targetingMode == CreatureEnum || targetingMode == 6){
 				targetingMode = -1;
@@ -185,11 +185,11 @@
 		foecreasprite[i].position.x=100+(i%12)*30;
 		foecreasprite[i].position.y=30+(i%3)*20+(Math.floor(i/12)*30);
 		foecreasprite[i].setInteractive(true);
+		let _i=i;
 		foecreasprite[i].click = function (x){
-			var index = foecreasprite.indexOf(this);
 			if (targetingMode == Creature || targetingMode == 6){
 				targetingMode = -1;
-				targetingModeCb(player2.creatures[index]);
+				targetingModeCb(player2.creatures[_i]);
 			}
 		}
 		gameui.addChild(foecreasprite[i]);
@@ -200,8 +200,9 @@
 		permsprite[i].position.x=100+(i%12)*30;
 		permsprite[i].position.y=500+(i%3)*20+(Math.floor(i/12)*30);
 		permsprite[i].setInteractive(true);
+		let _i=i;
 		permsprite[i].click = function (x){
-			var perm = player1.permanents[permsprite.indexOf(this)];
+			let perm = player1.permanents[_i];
 			if (!perm)return;
 			if (targetingMode <= PermanentEnum){
 				targetingMode = -1;
@@ -223,11 +224,11 @@
 		foepermsprite[i].position.x=100+(i%12)*30;
 		foepermsprite[i].position.y=160+(i%3)*20+(Math.floor(i/12)*30);
 		foepermsprite[i].setInteractive(true);
+		let _i=i;
 		foepermsprite[i].click = function (x){
-			var index = permsprite.indexOf(this);
 			if (targetingMode <= PermanentEnum){
 				targetingMode = -1;
-				targetingModeCb(player2.permanents[index]);
+				targetingModeCb(player2.permanents[_i]);
 			}
 		}
 		gameui.addChild(foepermsprite[i]);

@@ -1,4 +1,3 @@
-"use strict"
 function loadcards(cb){
 	var Cards = {};
 	var Targeting = {};
@@ -10,6 +9,7 @@ function loadcards(cb){
 	for(var i=0; i<names.length; i++){
 		var xhr = new XMLHttpRequest();
 		xhr.open("GET",names[i] + ".csv",true);
+		let _i=i;
 		xhr.onreadystatechange = function() {
 			if (this.readyState == 4 && this.status == 200){
 				var csv = this.responseText.split("\n");
@@ -19,12 +19,11 @@ function loadcards(cb){
 					var cardcode = carddata[2];
 					var cardinfo = {};
 					for(var k=0; k<carddata.length; k++)cardinfo[keys[k]] = carddata[k];
-					Cards[carddata[1] in Cards?carddata[1].replace(" ","")+"Up":carddata[1]] = Cards[cardcode] = new Card(this.TYPE, cardinfo);
+					Cards[carddata[1] in Cards?carddata[1].replace(" ","")+"Up":carddata[1]] = Cards[cardcode] = new Card(_i, cardinfo);
 				}
 				maybeCallback();
 			}
 		};
-		xhr.TYPE = i;
 		xhr.send();
 	}
 	var xhr = new XMLHttpRequest();
@@ -253,7 +252,7 @@ Creature.prototype.die = function() {
 		var pl=players[i];
 		for(var j=0; j<23; j++){
 			var c = pl.creatures[j];
-			if (c && c.active == A.scavange){
+			if (c && c.active == Actives.scavange){
 				c.atk += 1;
 				c.buffhp(1);
 			}
