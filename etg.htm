@@ -245,7 +245,7 @@
 	weapsprite.position.x=460;
 	weapsprite.position.y=500;
 	weapsprite.setInteractive(true);
-	weapsprite[i].click = function (x){
+	weapsprite.click = function (x){
 		if (targetingMode == PermanentEnum || targetingMode == WeaponEnum){
 			targetingMode = -1;
 			targetingModeCb(player1.weapon);
@@ -256,7 +256,7 @@
 	shiesprite.position.x=460;
 	shiesprite.position.y=520;
 	shiesprite.setInteractive(true);
-	shiesprite[i].click = function (x){
+	shiesprite.click = function (x){
 		if (targetingMode == PermanentEnum || targetingMode == WeaponEnum){
 			targetingMode = -1;
 			targetingModeCb(player2.weapon);
@@ -267,7 +267,7 @@
 	foeweapsprite.position.x=340;
 	foeweapsprite.position.y=160;
 	foeweapsprite.setInteractive(true);
-	foeweapsprite[i].click = function (x){
+	foeweapsprite.click = function (x){
 		if (targetingMode == PermanentEnum || targetingMode == ShieldEnum){
 			targetingMode = -1;
 			targetingModeCb(player1.shield);
@@ -278,7 +278,7 @@
 	foeshiesprite.position.x=340;
 	foeshiesprite.position.y=180;
 	foeshiesprite.setInteractive(true);
-	foeshiesprite[i].click = function (x){
+	foeshiesprite.click = function (x){
 		if (targetingMode == PermanentEnum || targetingMode == ShieldEnum){
 			targetingMode = -1;
 			targetingModeCb(player2.shield);

@@ -148,12 +148,12 @@ Player.prototype.endturn = function() {
 			}
 		}
 		else if (this.shield.active == Actives.hope){
-			var hp = this.shield.card.upped?1:0;
+			var dr = this.shield.card.upped?1:0;
 			for (var i=0; i<23; i++){
 				if (this.creatures[i] && this.creatures[i].active == Actives.light)
-					hp++;
+					dr++;
 			}
-			this.shield.health = hp;
+			this.shield.dr = dr;
 		}
 	}
 	if(this.weapon)this.weapon.attack();
@@ -271,24 +271,34 @@ Creature.prototype.die = function() {
 	}
 }
 function Permanent(card, owner){
+	if (card == undefined){
+		return;
+	}
+	this.owner = owner
 	this.card = card
-	this.atk = card.attack
-	this.health = card.health
 	this.cast = card.cast
 	this.castele = card.castele
 	this.active = card.active
 	this.passive = card.passive
 	this.charges = 0
 	this.usedactive = true
-	this.owner = owner
-	this.immaterial = card == Cards.Hope || card == Cards.HopeUp || this.active == Actives.reflect;
-	//weapons:
+	this.immaterial = card == Cards.MorningStar || card == Cards.MorningGlory || card == Cards.Hope || card == Cards.HopeUp || this.active == Actives.reflect;
+}
+function Weapon(card, owner){
+	Permanent.apply(this, arguments)
 	this.frozen = 0
 	this.delay = 0
+	this.atk = card.attack
 }
+function Shield(card, owner){
+	Permanent.apply(this, arguments)
+	this.dr = card.health
+}
+Weapon.prototype = new Permanent();
+Shield.prototype = new Permanent();
 Permanent.prototype.getIndex = function() { return this.owner.permanents.indexOf(this); }
 Permanent.prototype.die = function(){ delete this.owner.permanents[this.owner.permanents.getIndex()]; }
-Permanent.prototype.attack = Creature.prototype.attack = function(){
+Weapon.prototype.attack = Creature.prototype.attack = function(){
 	this.dmg(this.poison, true);
 	var target = this.owner.foe;
 	// Adrenaline will be annoying
@@ -320,7 +330,7 @@ Permanent.prototype.attack = Creature.prototype.attack = function(){
 			target.dmg(this.trueatk())
 		}else if (target.gpull){
 			this.owner.heal(target.gpull.dmg(this.trueatk()));
-		}else if (this.trueatk() > (target.shield?target.shield.health:0)){
+		}else if (this.trueatk() > (target.shield?target.shield.dr:0)){
 			if (target.shield && target.shield.active == Actives.bones){
 				this.owner.foe.shield.charges -= 1
 				if (target.shield.charges == 0)
@@ -334,7 +344,7 @@ Permanent.prototype.attack = Creature.prototype.attack = function(){
 					target.shield = undefined
 				}
 			}else if(!target.shield || !(shieldevades(target.shield, this.airborne || this.passive == "ranged") || (this.card.type == CreatureEnum && target.shield.active == Actives.weight && this.hp > 5))){
-				var dmg = this.trueatk() - (target.shield?target.shield.health:0)
+				var dmg = this.trueatk() - (target.shield?target.shield.dr:0)
 				target.dmg(dmg)
 				if (this.active == Actives.vampire){
 					this.owner.heal(dmg)
@@ -364,8 +374,7 @@ Permanent.prototype.attack = Creature.prototype.attack = function(){
 function place(array, item){
 	for (var i=0; i<array.length; i++){
 		if (!array[i]){
-			array[i]=item;
-			return item;
+			return array[i]=item;
 		}
 	}
 }
@@ -388,18 +397,19 @@ Player.prototype.summon = function(index, target){
 				}
 			}
 		}
-		var p = new Permanent(card, this);
 		if (card.type == WeaponEnum){
-			this.weapon = p;
+			return this.weapon = new Weapon(card, this);
 		}else if (card.type == ShieldEnum){
-			this.shield = p;
+			this.shield = new Shield(card, this);
 			if (card == Cards.DimensionalShield || card == Cards.PhaseShield){
-				c.charges = 3;
+				this.shield.charges = 3;
 			}
 			else if (card == Cards.Wings || card == Cards.WingsUp){
-				c.charges = 5;
+				this.shield.charges = 5;
 			}
+			return this.shield;
 		}else{
+			p = new Permanent(card, this);
 			if (card.type == PillarEnum){
 				p.charges = 1;
 			}
