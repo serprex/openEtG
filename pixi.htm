@@ -55,11 +55,19 @@
 	}
 	function tgtToBits(x){
 		if (x == undefined){
-			return 6;
-		}else if (x == player1){
 			return 0;
-		}else if (x == player2){
+		}else if (x == player1){
 			return 1;
+		}else if (x == player2){
+			return 9;
+		}else if (x == player1.weapon){
+			return 17;
+		}else if (x == player2.weapon){
+			return 25;
+		}else if (x == player1.shield){
+			return 33;
+		}else if (x == player2.shield){
+			return 41;
 		}else{
 			return (x instanceof Creature?2:4)+(x.owner==player1?0:1)|x.getIndex()<<3;
 		}
@@ -67,9 +75,9 @@
 	function bitsToTgt(x){
 		var tgtop=x&7;
 		if (tgtop == 0){
-			return player2;
+			return undefined;
 		}else if(tgtop==1){
-			return player1;
+			return [player2,player1,player2.weapon,player1.weapon,player2.shield,player1.shield][x>>3];
 		}else if (tgtop==2){
 			return player2.creatures[x>>3];
 		}else if (tgtop==3){
@@ -78,7 +86,7 @@
 			return player2.permanents[x>>3];
 		}else if (tgtop==5){
 			return player1.permanents[x>>3];
-		}else if (tgtop!=6)console.log("Unknown tgtop: "+tgtop);
+		}else console.log("Unknown tgtop: "+tgtop+", "+x);
 	}
 	var renderer = PIXI.autoDetectRenderer(900, 600);
 	document.body.appendChild(renderer.view);
@@ -182,7 +190,7 @@
 	var foecreasprite = new Array(23);
 	for (var i=0; i<23; i++){
 		foecreasprite[i] = new PIXI.Sprite(nopic);
-		foecreasprite[i].position.x=100+(i%12)*30;
+		foecreasprite[i].position.x=400+(i%12)*30;
 		foecreasprite[i].position.y=30+(i%3)*20+(Math.floor(i/12)*30);
 		foecreasprite[i].setInteractive(true);
 		let _i=i;
@@ -204,7 +212,7 @@
 		permsprite[i].click = function (x){
 			let perm = player1.permanents[_i];
 			if (!perm)return;
-			if (targetingMode <= PermanentEnum){
+			if (targetingMode == PermanentEnum){
 				targetingMode = -1;
 				targetingModeCb(perm);
 			}else if (targetingMode == -1 && !perm.usedactive && perm.cast != -1 && player1.spend(perm.castele, perm.cast)){
@@ -221,18 +229,62 @@
 	var foepermsprite = new Array(23);
 	for (var i=0; i<23; i++){
 		foepermsprite[i] = new PIXI.Sprite(nopic);
-		foepermsprite[i].position.x=100+(i%12)*30;
+		foepermsprite[i].position.x=400+(i%12)*30;
 		foepermsprite[i].position.y=160+(i%3)*20+(Math.floor(i/12)*30);
 		foepermsprite[i].setInteractive(true);
 		let _i=i;
 		foepermsprite[i].click = function (x){
-			if (targetingMode <= PermanentEnum){
+			if (targetingMode == PermanentEnum){
 				targetingMode = -1;
 				targetingModeCb(player2.permanents[_i]);
 			}
 		}
 		gameui.addChild(foepermsprite[i]);
 	}
+	var weapsprite = new PIXI.Sprite(nopic);
+	weapsprite.position.x=460;
+	weapsprite.position.y=500;
+	weapsprite.setInteractive(true);
+	weapsprite[i].click = function (x){
+		if (targetingMode == PermanentEnum || targetingMode == WeaponEnum){
+			targetingMode = -1;
+			targetingModeCb(player1.weapon);
+		}
+	}
+	gameui.addChild(weapsprite);
+	var shiesprite = new PIXI.Sprite(nopic);
+	shiesprite.position.x=460;
+	shiesprite.position.y=520;
+	shiesprite.setInteractive(true);
+	shiesprite[i].click = function (x){
+		if (targetingMode == PermanentEnum || targetingMode == WeaponEnum){
+			targetingMode = -1;
+			targetingModeCb(player2.weapon);
+		}
+	}
+	gameui.addChild(shiesprite);
+	var foeweapsprite = new PIXI.Sprite(nopic);
+	foeweapsprite.position.x=340;
+	foeweapsprite.position.y=160;
+	foeweapsprite.setInteractive(true);
+	foeweapsprite[i].click = function (x){
+		if (targetingMode == PermanentEnum || targetingMode == ShieldEnum){
+			targetingMode = -1;
+			targetingModeCb(player1.shield);
+		}
+	}
+	gameui.addChild(foeweapsprite);
+	var foeshiesprite = new PIXI.Sprite(nopic);
+	foeshiesprite.position.x=340;
+	foeshiesprite.position.y=180;
+	foeshiesprite.setInteractive(true);
+	foeshiesprite[i].click = function (x){
+		if (targetingMode == PermanentEnum || targetingMode == ShieldEnum){
+			targetingMode = -1;
+			targetingModeCb(player2.shield);
+		}
+	}
+	gameui.addChild(foeshiesprite);
 	var quantatext = new PIXI.Text("", {font: "12px Arial bold"});
 	quantatext.position.x=800;
 	quantatext.position.y=40;
