@@ -186,27 +186,30 @@ Player.prototype.heal = function(x) {
 	this.hp=Math.min(this.maxhp, this.hp+x);
 }
 function Creature(card, owner){
+	this.delay = 0
+	this.frozen = 0
+	this.dive = 0
+	this.poison = 0
+	this.steamatk = 0
+	this.adrenaline = false
+	this.aflatoxin = false
+	this.usedactive = true
+	if (this.card == undefined){
+		return;
+	}
+	this.owner = owner
 	this.card = card
 	this.maxhp = this.hp = card.health
 	this.atk = card.attack
-	this.steamatk = 0
 	this.airborne = card.airborne
 	this.active = card.active
 	this.passive = card.passive
 	this.cast = card.cast
 	this.castele = card.castele
-	this.poison = 0
-	this.aflatoxin = false
-	this.delay = 0
-	this.frozen = 0
-	this.dive = 0
 	this.spelldamage = card==Cards.Psion || card==Cards.PsionUp;
 	this.momentum = card==Cards.SapphireCharger || card==Cards.EliteCharger;
-	this.adrenaline = false
-	this.owner = owner
 	this.burrowed = card==Cards.Graboid || card==Cards.EliteGraboid
 	this.immaterial = card==Cards.Immortal || card==Cards.EliteImmortal || card==Cards.PhaseDragon || card==Cards.ElitePhaseDragon
-	this.usedactive = true
 }
 Creature.prototype.getIndex = function() { return this.owner.creatures.indexOf(this); }
 Creature.prototype.addpoison = function(x) {
@@ -536,6 +539,25 @@ catapult:function(c,t){
 	if (t.frozen && c.owner.foe.weapon != C.noweapon){
 		c.owner.foe.weapon.frozen = 3;
 	}
+},
+chimera=function(c,t){
+	var atk,hp;
+	for(var i=0; i<23; i++){
+		if (c.owner.creatures[i]){
+			atk+=c.owner.creatures[i].trueatk();
+			hp+=c.owner.creatures[i].hp;
+		}
+	}
+	var chim=new Creature();
+	chim.card=c.card;
+	chim.atk=atk;
+	chim.maxhp=hp;
+	chim.hp=hp;
+	chim.cast=0;
+	chim.castele=0;
+	chim.momentum=true;
+	c.owner.creatures=[chim];
+	c.owner.gpull=chim;
 },
 cpower:function(c,t){
 	t.buffhp(Math.ceil(random()*5));

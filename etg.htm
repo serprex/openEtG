@@ -144,7 +144,7 @@
 			var card = player1.hand[_i];
 			if (card && (card.cost == 0 || player1.spend(card.costele, card.cost))){
 				if (card.type != SpellEnum){
-					socket.emit("summon", {foeId: foeId, bits:_i|6<<3});
+					socket.emit("summon", {foeId: foeId, bits:_i});
 					player1.summon(_i);
 				}else{
 					getTarget(card.active, function (tgt) {

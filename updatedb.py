@@ -13,7 +13,7 @@ def get_auth_token():
 	req = Request(url, bytes(urlencode(params), "utf8"))
 	return re.findall(r"Auth=(.*)", str(urlopen(req).read(), "utf8"))[0]
 def download(gid):
-	return urlopen(Request("https://spreadsheets.google.com/feeds/download/spreadsheets/Export?key=0Ao07Zx9C3FLcdFdXV0tpOWhKeDExNmhTdHgwVkg0NFE&exportFormat=csv&gid=%i"%gid, headers={
+	return urlopen(Request("https://spreadsheets.google.com/feeds/download/spreadsheets/Export?key=0AhacMqaIJo6ddG5rTXpxaHFOR20wVUZwMWZZRUlEWkE&exportFormat=csv&gid=%i"%gid, headers={
 		"Authorization": "GoogleLogin auth=" + get_auth_token(),
 		"GData-Version": "3.0"
 	}))
