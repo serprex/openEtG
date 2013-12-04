@@ -18,7 +18,7 @@ function handler(req, res) {
 			});
 		});
 	}else{
-		var url = req.url == "/"?"/pixi.htm":req.url;
+		var url = req.url == "/"?"/etg.htm":req.url;
 		fs.readFile(__dirname + url, function(err, data) {
 			if (err) {
 				res.writeHead(500);
