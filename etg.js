@@ -262,10 +262,12 @@ Creature.prototype.die = function() {
 		}
 		for(var j=0; j<23; j++){
 			var p = pl.permanents[j];
-			if (p.passive == "boneyard"){
-				place(p.owner.creatures, new Creature(p.card.upped?EliteSkeleton:Skeleton,p.owner));
-			}else if (p.passive == "soulcatcher"){
-				pl.spend(Death, p.card.upped?-3:-2);
+			if(p){
+				if (p.passive == "boneyard"){
+					place(p.owner.creatures, new Creature(p.card.upped?EliteSkeleton:Skeleton,p.owner));
+				}else if (p.passive == "soulcatcher"){
+					pl.spend(Death, p.card.upped?-3:-2);
+				}
 			}
 		}
 		if (pl.shield && pl.shield.active == Actives.bones){
