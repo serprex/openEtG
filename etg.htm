@@ -195,7 +195,7 @@
 		foecreasprite[i].setInteractive(true);
 		let _i=i;
 		foecreasprite[i].click = function (x){
-			if (targetingMode == Creature || targetingMode == 6){
+			if (targetingMode == CreatureEnum || targetingMode == 6){
 				targetingMode = -1;
 				targetingModeCb(player2.creatures[_i]);
 			}
