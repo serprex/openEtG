@@ -31,49 +31,53 @@ function handler(req, res) {
 }
 
 var pendinggame = null;
-var socktoid = {};
-var idtosock = {};
-var idtodeck = {};
+var sockinfo = {};
 
 io.sockets.on("connection", function(socket) {
-	var sockId = Math.random();
-	idtosock[sockId] = socket;
-	socktoid[socket] = sockId;
-	socket.emit("idgive", {id: sockId});
+	sockinfo[socket.id] = {};
 	socket.on("disconnect", function(data) {
-		delete idtosock[socktoid[socket]];
-		delete socktoid[socket];
+		if (socket in sockinfo){
+			var foe = sockinfo[socket.id].foe;
+			if (foe && foe.connected){
+				foe.emit("foeleft");
+			}
+			delete sockinfo[socket.id];
+		}
 	});
 	socket.on("pvpwant", function(data) {
-		var id = data.id;
-		console.log(id + " " + pendinggame);
-		if (id == pendinggame){
+		console.log(socket.id + ": " + (pendinggame?pendinggame.id:"-"));
+		if (socket == pendinggame){
 			return;
 		}
-		idtodeck[id] = data.deck;
-		if (pendinggame != null && pendinggame in idtosock){
+		sockinfo[socket.id].deck = data.deck;
+		if (pendinggame && pendinggame.id in sockinfo){
 			var seed = Math.random()*4294967296;
-			var first = seed<(4294967296/2)?pendinggame:id;
-			socket.emit("pvpgive", {foeId: pendinggame, first:first, seed:seed, deck:idtodeck[pendinggame]});
-			idtosock[pendinggame].emit("pvpgive", {foeId: id, first:first, seed:seed, deck:data.deck});
+			var first = seed<(4294967296/2);
+			sockinfo[socket.id].foe = pendinggame;
+			sockinfo[pendinggame.id].foe = socket;
+			socket.emit("pvpgive", {first:first, seed:seed, deck:sockinfo[pendinggame.id].deck});
+			pendinggame.emit("pvpgive", {first:!first, seed:seed, deck:data.deck});
 			pendinggame = null;
 		}else{
-			pendinggame = id;
+			pendinggame = socket;
 		}
 	});
 	socket.on("endturn", function(data) {
-		if (data.foeId in idtosock){
-			idtosock[data.foeId].emit("endturn");
+		var foe = sockinfo[socket.id].foe;
+		if (foe.id in sockinfo){
+			foe.emit("endturn");
 		}
 	});
 	socket.on("summon", function(data) {
-		if (data.foeId in idtosock){
-			idtosock[data.foeId].emit("summon", data);
+		var foe = sockinfo[socket.id].foe;
+		if (foe.id in sockinfo){
+			foe.emit("summon", data);
 		}
 	});
 	socket.on("active", function(data) {
-		if (data.foeId in idtosock){
-			idtosock[data.foeId].emit("active", data);
+		var foe = sockinfo[socket.id].foe;
+		if (foe.id in sockinfo){
+			foe.emit("active", data);
 		}
 	});
 });

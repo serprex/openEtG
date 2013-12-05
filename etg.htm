@@ -12,7 +12,7 @@
 </head>
 <body>
 	<script type="text/javascript;version=1.7">
-	var Cards, Targeting, targetingMode=-1, targetingModeCb, myturn, player1, player2, players, id, foeId;
+	var Cards, Targeting, targetingMode=-1, targetingModeCb, myturn, player1, player2, players;
 	loadcards(function(cards, targeting) {
 		Cards = cards;
 		Targeting = targeting;
@@ -112,11 +112,11 @@
 	bpvp.position.y = 200;
 	bpvp.setInteractive(true);
 	bpvp.click = function(x) {
-		if (id != null && Cards != null){
+		if (Cards != null){
 			//DEBUG
 			var deckimport = document.getElementById("deckimport").value;
 			if (deckimport)deck = deckimport.split(" ");
-			socket.emit("pvpwant", {id: id, deck: deck});
+			socket.emit("pvpwant", {deck: deck});
 		}
 	}
 	menuui.addChild(bpvp);
@@ -126,7 +126,7 @@
 	endturn.setInteractive(true);
 	endturn.click = function (x) {
 		if (myturn){
-			socket.emit("endturn", {foeId: foeId});
+			socket.emit("endturn");
 			player1.endturn();
 			myturn = false;
 		}
@@ -144,11 +144,12 @@
 			var card = player1.hand[_i];
 			if (card && (card.cost == 0 || player1.spend(card.costele, card.cost))){
 				if (card.type != SpellEnum){
-					socket.emit("summon", {foeId: foeId, bits:_i});
+					console.log("summoning " + _i);
+					socket.emit("summon", {bits:_i});
 					player1.summon(_i);
 				}else{
 					getTarget(card.active, function (tgt) {
-						socket.emit("summon", {foeId: foeId, bits:_i|tgtToBits(tgt)<<3});
+						socket.emit("summon", {bits:_i|tgtToBits(tgt)<<3});
 						player1.summon(_i, tgt);
 					});
 				}
@@ -176,10 +177,10 @@
 			if (targetingMode == CreatureEnum || targetingMode == 6){
 				targetingMode = -1;
 				targetingModeCb(crea);
-			}else if (targetingMode == -1 && !crea.usedactive && crea.cast != -1 && player1.spend(crea.castele, crea.cast)){
+			}else if (targetingMode == -1 && crea.active && !crea.usedactive && crea.cast != -1 && player1.spend(crea.castele, crea.cast)){
 				getTarget(crea.active, function(tgt){
 					targetingMode = -1;
-					socket.emit("active", {foeId:foeId, bits:tgtToBits(crea)|tgtToBits(tgt)<<8});
+					socket.emit("active", {bits:tgtToBits(crea)|tgtToBits(tgt)<<8});
 					crea.usedactive = true;
 					crea.active(crea, tgt);
 				});
@@ -215,10 +216,10 @@
 			if (targetingMode == PermanentEnum){
 				targetingMode = -1;
 				targetingModeCb(perm);
-			}else if (targetingMode == -1 && !perm.usedactive && perm.cast != -1 && player1.spend(perm.castele, perm.cast)){
+			}else if (targetingMode == -1 && perm.active && !perm.usedactive && perm.cast != -1 && player1.spend(perm.castele, perm.cast)){
 				getTarget(perm.active, function(tgt){
 					targetingMode = -1;
-					socket.emit("active", {foeId:foeId, bits:tgtToBits(perm)|tgtToBits(tgt)<<8});
+					socket.emit("active", {bits:tgtToBits(perm)|tgtToBits(tgt)<<8});
 					perm.usedactive = true;
 					perm.active(perm, tgt);
 				});
@@ -302,13 +303,9 @@
 	foehptext.position.y=300;
 	gameui.addChild(foehptext);
 	var socket = io.connect("http://"+location.hostname+':13602');
-	socket.on("idgive", function(data) {
-		id = data.id;
-	});
 	socket.on("pvpgive", function(data) {
 		seed(data.seed);
-		foeId = data.foeId;
-		myturn = id == data.first;
+		myturn = data.first;
 		player1 = new Player();
 		player2 = new Player();
 		player1.foe = player2;

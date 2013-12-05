@@ -1059,8 +1059,8 @@ pillar:function(c,t){
 	c.owner.spend(c.card.element,-c.charges*(c.card.element>0?1:3));
 },
 pend:function(c,t){
-	c.owner.spend(c.airborne?c.owner.mark:c.card.element,-c.charges);
-	c.airborne^=true;
+	c.owner.spend(c.pendstate?c.owner.mark:c.card.element,-c.charges);
+	c.pendstate^=true;
 },
 skull:function(c,t){
 	if (t.hp <= 0 || random() < .5/t.hp){
