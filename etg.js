@@ -194,7 +194,7 @@ function Creature(card, owner){
 	this.adrenaline = false
 	this.aflatoxin = false
 	this.usedactive = true
-	if (this.card == undefined){
+	if (card == undefined){
 		return;
 	}
 	this.owner = owner
@@ -298,8 +298,16 @@ function Shield(card, owner){
 	Permanent.apply(this, arguments)
 	this.dr = card.health
 }
+function Pillar(card, owner){
+	this.owner = owner;
+	this.card = card;
+	this.active = card.active;
+	this.charges = 1;
+	this.pendstate = false;
+}
 Weapon.prototype = new Permanent();
 Shield.prototype = new Permanent();
+Pillar.prototype = new Permanent();
 Permanent.prototype.getIndex = function() { return this.owner.permanents.indexOf(this); }
 Permanent.prototype.die = function(){ delete this.owner.permanents[this.owner.permanents.getIndex()]; }
 Weapon.prototype.die = function() { this.owner.weapon = undefined; }
@@ -379,13 +387,13 @@ Player.prototype.summon = function(index, target){
 				this.spend(card.element, -1);
 			}
 			for (var i=0; i<23; i++){
-				if (this.permanents[i] != undefined && this.permanents[i].card.code == card.code){
+				if (this.permanents[i] && this.permanents[i].card == card){
 					this.permanents[i].charges += 1;
 					return this.permanents[i];
 				}
 			}
-		}
-		if (card.type == WeaponEnum){
+			return place(this.permanents, new Pillar(card, this));
+		}else if (card.type == WeaponEnum){
 			return this.weapon = new Weapon(card, this);
 		}else if (card.type == ShieldEnum){
 			this.shield = new Shield(card, this);
@@ -397,11 +405,7 @@ Player.prototype.summon = function(index, target){
 			}
 			return this.shield;
 		}else{
-			p = new Permanent(card, this);
-			if (card.type == PillarEnum){
-				p.charges = 1;
-			}
-			return place(this.permanents, p);
+			return place(this.permanents, new Permanent(card, this));
 		}
 		return p;
 	}else if (card.type == SpellEnum){
@@ -456,7 +460,7 @@ function randomcard(upped, onlycreature){
 }
 function masscc(player, func){
 	for (var i=0; i<23; i++){
-		if (player.creatures[i] && !player.creatures[i].immaterial){
+		if (player.creatures[i] && !player.creatures[i].immaterial && !player.creatures[i].burrowed){
 			func(player.creatures[i]);
 		}
 	}
@@ -540,7 +544,7 @@ catapult:function(c,t){
 		c.owner.foe.weapon.frozen = 3;
 	}
 },
-chimera=function(c,t){
+chimera:function(c,t){
 	var atk,hp;
 	for(var i=0; i<23; i++){
 		if (c.owner.creatures[i]){

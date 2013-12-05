@@ -3,7 +3,7 @@ var http = require("http");
 var app = http.createServer(handler);
 var io = require("socket.io").listen(app);
 var fs = require("fs");
-app.listen(80);
+app.listen(13602);
 
 function handler(req, res) {
 	if (req.url.indexOf("..") != -1)

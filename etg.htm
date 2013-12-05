@@ -301,7 +301,7 @@
 	foehptext.position.x=20;
 	foehptext.position.y=300;
 	gameui.addChild(foehptext);
-	var socket = io.connect('http://localhost');
+	var socket = io.connect('http://75.126.5.250:13602');
 	socket.on("idgive", function(data) {
 		id = data.id;
 	});
