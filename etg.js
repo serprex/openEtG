@@ -237,7 +237,7 @@ Creature.prototype.spelldmg = Creature.prototype.dmg = function(x,dontdie){
 	}else if(this.passive == "voodoo")this.owner.foe.dmg(x);
 	return dmg;
 }
-Creature.prototype.trueatk = function(){
+Weapon.prototype.trueatk = Creature.prototype.trueatk = function(){
 	var dmg=this.atk+this.steamatk+this.dive;
 	if (this.cast == -3)dmg+=this.active(this);
 	return this.burrowed?Math.ceil(dmg/2):dmg;
@@ -331,7 +331,7 @@ Weapon.prototype.attack = Creature.prototype.attack = function(){
 	var stasis=this.frozen>0 || this.delay>0;
 	if (isCreature&&!stasis){
 		for(var i=0; i<23; i++){
-			if (this.owner.permanents[i] && (this.owner.permanents[i].passive == "stasis" || target.permanents[i].passive == "stasis")){
+			if ((this.owner.permanents[i] && this.owner.permanents[i].passive == "stasis") || (target.permanents[i] && target.permanents[i].passive == "stasis")){
 				stasis=true;
 				break;
 			}
@@ -345,7 +345,7 @@ Weapon.prototype.attack = Creature.prototype.attack = function(){
 	}
 	if (!stasis){
 		if (this.spelldamage){
-			target.spelldmg(this.trueatk)
+			target.spelldmg(this.trueatk())
 		}else if (this.momentum || this.trueatk() < 0){
 			target.dmg(this.trueatk())
 		}else if (target.gpull){
@@ -508,7 +508,7 @@ blackhole:function(c,t){
 	if (!c.owner.foe.sanctuary){
 		quanta = c.owner.foe.quanta;
 		for (var q=1; q<13; q++){
-			c.owner.dmg(-Math.min(quanta[q],3));
+			c.owner.heal(Math.min(quanta[q],3));
 			quanta[q] = Math.max(quanta[q]-3,0);
 		}
 	}
