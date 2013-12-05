@@ -350,17 +350,18 @@
 		c.usedactive=true;
 		c.active(c,t);
 	});
+	socket.on("foeleft", function(data) {
+		mainStage = menuui;
+	});
 	function animate() {
 		if (mainStage == gameui){
 			for(var i=0;i<8;i++){
-				if (player1.hand[i]){
-					handsprite[i].setTexture(getCardImage(player1.hand[i].code));
-				}else handsprite[i].setTexture(nopic);
-				if (player2.hand[i]){
-					foehandsprite[i].setTexture(getCardImage(player1.precognition?player2.hand[i]:"000"));
-				}else foehandsprite[i].setTexture(nopic);
+				handsprite[i].setTexture(player1.hand[i]?getCardImage(player1.hand[i].code):nopic);
+				foehandsprite[i].setTexture(player2.hand[i]?getCardImage(player1.precognition?player2.hand[i]:"000"):nopic);
 			}
 			for(var i=0;i<23;i++){
+				creasprite[i].setTexture(player1.creatures[i]?getCardImage(player1.creatures[i].card.code):nopic);
+				foecreasprite[i].setTexture(player2.creatures[i]?getCardImage(player2.creatures[i].card.code):nopic);
 				if (player1.creatures[i]){
 					creasprite[i].setTexture(getCardImage(player1.creatures[i].card.code));
 				}else creasprite[i].setTexture(nopic);
@@ -369,13 +370,13 @@
 				}else foecreasprite[i].setTexture(nopic);
 			}
 			for(var i=0;i<23;i++){
-				if (player1.permanents[i]){
-					permsprite[i].setTexture(getCardImage(player1.permanents[i].card.code));
-				}else permsprite[i].setTexture(nopic);
-				if (player2.permanents[i]){
-					foepermsprite[i].setTexture(getCardImage(player2.permanents[i].card.code));
-				}else foepermsprite[i].setTexture(nopic);
+				permsprite[i].setTexture(player1.permanents[i]?getCardImage(player1.permanents[i].card.code):nopic);
+				foepermsprite[i].setTexture(player2.permanents[i]?getCardImage(player2.permanents[i].card.code):nopic);
 			}
+			weapsprite.setTexture(player1.weapon?getCardImage(player1.weapon.card.code):nopic);
+			foeweapsprite.setTexture(player2.weapon?getCardImage(player2.weapon.card.code):nopic);
+			shiesprite.setTexture(player1.shield?getCardImage(player1.shield.card.code):nopic);
+			foeshiesprite.setTexture(player2.shield?getCardImage(player2.shield.card.code):nopic);
 			var qtext = "", foeqtext = "";
 			for(var i=1; i<7; i++){
 				qtext += player1.quanta[i] + "\t" + player1.quanta[i+6] + "\n";

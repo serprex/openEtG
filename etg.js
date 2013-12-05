@@ -165,7 +165,7 @@ Player.prototype.drawcard = function() {
 	}
 }
 Player.prototype.freeze = function(x) {
-	if (this.weapon)this.weapon.frozen=x;
+	if (this.weapon)this.weapon.freeze(x);
 }
 Player.prototype.dmg = function(x) {
 	if (x<0){
@@ -178,12 +178,6 @@ Player.prototype.dmg = function(x) {
 		// todo win
 	}
 	return dmg;
-}
-Player.prototype.spelldmg = function(x) {
-	return (!this.shield || this.shield.active != Actives.reflect?this:this.foe).dmg(x);
-}
-Player.prototype.heal = function(x) {
-	this.hp=Math.min(this.maxhp, this.hp+x);
 }
 function Creature(card, owner){
 	this.delay = 0
@@ -210,70 +204,6 @@ function Creature(card, owner){
 	this.momentum = card==Cards.SapphireCharger || card==Cards.EliteCharger;
 	this.burrowed = card==Cards.Graboid || card==Cards.EliteGraboid
 	this.immaterial = card==Cards.Immortal || card==Cards.EliteImmortal || card==Cards.PhaseDragon || card==Cards.ElitePhaseDragon
-}
-Creature.prototype.getIndex = function() { return this.owner.creatures.indexOf(this); }
-Creature.prototype.addpoison = function(x) {
-	this.poison += x;
-	if (this.passive == "voodoo"){
-		this.owner.foe.poison += x;
-	}
-}
-Creature.prototype.buffhp = function(x){
-	this.hp+=x;
-	this.maxhp+=x;
-}
-Creature.prototype.heal = function(x){
-	this.hp=Math.min(this.maxhp,this.hp+x);
-}
-Creature.prototype.freeze = function(x){
-	this.frozen = x;
-	if(this.passive == "voodoo")this.owner.foe.freeze(x);
-}
-Creature.prototype.spelldmg = Creature.prototype.dmg = function(x,dontdie){
-	var dmg = Math.min(this.hp, x);
-	this.hp-=x;
-	if(this.hp<=0){
-		if(!dontdie)this.die();
-	}else if(this.passive == "voodoo")this.owner.foe.dmg(x);
-	return dmg;
-}
-Weapon.prototype.trueatk = Creature.prototype.trueatk = function(){
-	var dmg=this.atk+this.steamatk+this.dive;
-	if (this.cast == -3)dmg+=this.active(this);
-	return this.burrowed?Math.ceil(dmg/2):dmg;
-}
-Creature.prototype.die = function() {
-	var index = this.getIndex();
-	delete this.owner.creatures[index];
-	if (this.owner.gpull == this)this.owner.gpull = null;
-	if (this.aflatoxin){
-		this.owner.creatures[index] = new Creature(Cards.MalignantCell, this.owner);
-	}else if (this.active == Actives.phoenix){
-		this.owner.creatures[index] = new Creature(this.card.upped?Cards.AshUp:Cards.Ash, this.owner);
-	}
-	for(var i=0; i<2; i++){
-		var pl=players[i];
-		for(var j=0; j<23; j++){
-			var c = pl.creatures[j];
-			if (c && c.active == Actives.scavange){
-				c.atk += 1;
-				c.buffhp(1);
-			}
-		}
-		for(var j=0; j<23; j++){
-			var p = pl.permanents[j];
-			if(p){
-				if (p.passive == "boneyard"){
-					place(p.owner.creatures, new Creature(p.card.upped?EliteSkeleton:Skeleton,p.owner));
-				}else if (p.passive == "soulcatcher"){
-					pl.spend(Death, p.card.upped?-3:-2);
-				}
-			}
-		}
-		if (pl.shield && pl.shield.active == Actives.bones){
-			pl.shield.charges += 2
-		}
-	}
 }
 function Permanent(card, owner){
 	if (card == undefined){
@@ -310,6 +240,76 @@ function Pillar(card, owner){
 Weapon.prototype = new Permanent();
 Shield.prototype = new Permanent();
 Pillar.prototype = new Permanent();
+Player.prototype.spelldmg = function(x) {
+	return (!this.shield || this.shield.active != Actives.reflect?this:this.foe).dmg(x);
+}
+Player.prototype.heal = function(x) {
+	this.hp=Math.min(this.maxhp, this.hp+x);
+}
+Creature.prototype.getIndex = function() { return this.owner.creatures.indexOf(this); }
+Creature.prototype.addpoison = function(x) {
+	this.poison += x;
+	if (this.passive == "voodoo"){
+		this.owner.foe.poison += x;
+	}
+}
+Creature.prototype.buffhp = function(x){
+	this.hp+=x;
+	this.maxhp+=x;
+}
+Creature.prototype.heal = function(x){
+	this.hp=Math.min(this.maxhp,this.hp+x);
+}
+Weapon.prototype.freeze = Creature.prototype.freeze = function(x){
+	this.frozen = x;
+	if(this.passive == "voodoo")this.owner.foe.freeze(x);
+}
+Creature.prototype.spelldmg = Creature.prototype.dmg = function(x,dontdie){
+	var dmg = Math.min(this.hp, x);
+	this.hp-=x;
+	if(this.hp<=0){
+		if(!dontdie)this.die();
+	}else if(this.passive == "voodoo")this.owner.foe.dmg(x);
+	return dmg;
+}
+Creature.prototype.die = function() {
+	var index = this.getIndex();
+	delete this.owner.creatures[index];
+	if (this.owner.gpull == this)this.owner.gpull = null;
+	if (this.aflatoxin){
+		this.owner.creatures[index] = new Creature(Cards.MalignantCell, this.owner);
+	}else if (this.active == Actives.phoenix){
+		this.owner.creatures[index] = new Creature(this.card.upped?Cards.AshUp:Cards.Ash, this.owner);
+	}
+	for(var i=0; i<2; i++){
+		var pl=players[i];
+		for(var j=0; j<23; j++){
+			var c = pl.creatures[j];
+			if (c && c.active == Actives.scavange){
+				c.atk += 1;
+				c.buffhp(1);
+			}
+		}
+		for(var j=0; j<23; j++){
+			var p = pl.permanents[j];
+			if(p){
+				if (p.passive == "boneyard"){
+					place(p.owner.creatures, new Creature(p.card.upped?EliteSkeleton:Skeleton,p.owner));
+				}else if (p.passive == "soulcatcher"){
+					pl.spend(Death, p.card.upped?-3:-2);
+				}
+			}
+		}
+		if (pl.shield && pl.shield.active == Actives.bones){
+			pl.shield.charges += 2
+		}
+	}
+}
+Weapon.prototype.trueatk = Creature.prototype.trueatk = function(){
+	var dmg=this.atk+this.steamatk+this.dive;
+	if (this.cast == -3)dmg+=this.active(this);
+	return this.burrowed?Math.ceil(dmg/2):dmg;
+}
 Permanent.prototype.getIndex = function() { return this.owner.permanents.indexOf(this); }
 Permanent.prototype.die = function(){ delete this.owner.permanents[this.owner.permanents.getIndex()]; }
 Weapon.prototype.die = function() { this.owner.weapon = undefined; }
@@ -362,7 +362,7 @@ Weapon.prototype.attack = Creature.prototype.attack = function(){
 	if (this.active == Actives.dshield){
 		this.immaterial = false;
 	}
-	if (this.active == Actives.steam && this.steamatk>0){
+	if (this.steamatk>0){
 		this.steamatk--;
 	}
 	if(this.type==CreatureEnum&&this.hp <= 0&&this.getIndex()!=-1){
@@ -608,7 +608,7 @@ die:function(c,t){
 },
 disfield:function(c,t){
 	if (!c.owner.sanctuary){
-		if (!c.owner.spend(Other, this.trueatk())){
+		if (!c.owner.spend(Other, t.trueatk())){
 			c.owner.shield = undefined;
 		}
 		return true;
@@ -616,7 +616,7 @@ disfield:function(c,t){
 },
 disshield:function(c,t){
 	if (!c.owner.sanctuary){
-		if (!c.owner.spend(Entropy, Math.ceil(this.trueatk()/3))){
+		if (!c.owner.spend(Entropy, Math.ceil(t.trueatk()/3))){
 			c.owner.shield = undefined;
 		}
 		return true;
