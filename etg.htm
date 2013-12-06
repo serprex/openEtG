@@ -155,6 +155,7 @@
 	var quantatext = [new PIXI.Text("", {font: "12px Arial bold"}), new PIXI.Text("", {font: "12px Arial bold"})];
 	var hptext = [new PIXI.Text("", {font: "12px Arial bold"}), new PIXI.Text("", {font: "12px Arial bold"})];
 	for (var j=0; j<2; j++){
+		let _j=j;
 		for (var i=0; i<23; i++){
 			creasprite[j][i] = new PIXI.Sprite(nopic);
 			centerAnchor(creasprite[j][i]);
@@ -191,7 +192,7 @@
 				reflectPos(permsprite[j][i].position);
 			}
 			permsprite[j][i].setInteractive(true);
-			let _i=i,_j=j;
+			let _i=i;
 			permsprite[j][i].click = function (x){
 				let perm = players[_j].permanents[_i];
 				if (!perm)return;
@@ -220,9 +221,9 @@
 		shiesprite[j].setInteractive(true);
 		marksprite[j].position.x = 550;
 		marksprite[j].position.y = 470;
-		let _j=j;
 		weapsprite[j].click = function (x){
 			var weap = players[_j].weapon;
+			if (!weap)return
 			if (targetingMode && targetingMode(weap)){
 				targetingMode = undefined;
 				targetingModeCb(weap);
@@ -236,6 +237,7 @@
 			}
 		}
 		shiesprite[j].click = function (x){
+			if (!players[_j].shield)return
 			if (targetingMode && targetingMode(players[_j].shield)){
 				targetingMode = undefined;
 				targetingModeCb(players[_j].shield);

@@ -154,6 +154,7 @@ Player.prototype.endturn = function() {
 			if (p.card.type == PillarEnum || p.cast == -1){
 				p.active(p);
 			}
+			p.usedactive = false;
 			if (p.active == Actives.cloak || p.passive == "stasis"){
 				p.charges -= 1;
 				if (p.charges < 0){
@@ -178,7 +179,10 @@ Player.prototype.endturn = function() {
 			this.shield.dr = dr;
 		}
 	}
-	if(this.weapon)this.weapon.attack();
+	if (this.weapon)this.weapon.attack();
+	if (this.sosa > 0){
+		this.sosa--;
+	}
 	this.nova = 0;
 	this.foe.drawcard();
 }
