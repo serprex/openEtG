@@ -41,13 +41,13 @@ function loadcards(cb){
 	xhr.send();
 }
 function etgReadCost(card, attr, cost, e){
-	if(cost.indexOf("+") == -1){
-		card[attr]=parseInt(cost);
-		card[attr+"ele"]=e;
-	}else{
+	if(~cost.indexOf("+")){
 		var c=cost.split("+");
 		card[attr]=parseInt(c[0]);
 		card[attr+"ele"]=parseInt(c[1]);
+	}else{
+		card[attr]=parseInt(cost);
+		card[attr+"ele"]=e;
 	}
 }
 function Card(type, info){
@@ -224,7 +224,12 @@ function Weapon(card, owner){
 	this.spelldamage = false
 	this.frozen = 0
 	this.delay = 0
+	this.momentum = card == Cards.Titan || card == Cards.TitanUp
 	this.atk = card.attack
+	this.dive = 0
+	this.steamatk = 0
+	this.adrenaline = false
+	this.usedactive = true
 }
 function Shield(card, owner){
 	Permanent.apply(this, arguments)
@@ -586,6 +591,7 @@ deadly:function(c,t){
 	t.poison += 2
 },
 deja:function(c,t){
+	c.active = undefined;
 	parallel(c,c);
 },
 destroy:function(c,t){
@@ -818,7 +824,7 @@ mitosis:function(c,t){
 	place(c.owner.creatures, new Creature(c.card, c.owner))
 },
 mitosisspell:function(c,t){
-	if (c.card.type != WeaponEnum){
+	if (c.card.type == CreatureEnum){
 		c.castele = c.card.element;
 		c.cast = c.card.cost;
 		c.active = mitosis;

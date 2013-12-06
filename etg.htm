@@ -116,7 +116,8 @@
 			//DEBUG
 			var deckimport = document.getElementById("deckimport").value;
 			if (deckimport)deck = deckimport.split(" ");
-			socket.emit("pvpwant", {deck: deck});
+			var roomname = document.getElementById("roomname").value || undefined;
+			socket.emit("pvpwant", {deck: deck, room: roomname});
 		}
 	}
 	menuui.addChild(bpvp);
@@ -312,24 +313,31 @@
 		player2.foe = player1;
 		players = [player1, player2];
 		var idx;
-		if ((idx=TrueMarks.indexOf(deck[deck.length-1]))!=-1){
-			delete deck[deck.length-1];
-			player1.mark=idx;
-		}
-		if ((idx=TrueMarks.indexOf(data.deck[data.deck.length-1]))!=-1){
-			delete data.deck[data.deck.length-1];
-			player2.mark=idx;
-		}
 		if (myturn){
-			player1.deck = shuffle(deck).slice(0);
-			player2.deck = shuffle(data.deck);
+			shuffle(deck);
+			shuffle(data.deck);
 		}else{
-			player2.deck = shuffle(data.deck);
-			player1.deck = shuffle(deck).slice(0);
+			shuffle(data.deck);
+			shuffle(deck);
+		}
+		var idx,code;
+		for(var i=0; i<deck.length; i++){
+			if(Cards[code=deck[i]){
+				player1.deck.push(code);
+			}else if(~(idx=TrueMarks.indexOf(code))){
+				player1.mark=idx;
+			}
+		}
+		for(var i=0; i<data.deck.length; i++){
+			if(Cards[code=data.deck[i]]){
+				player2.deck.push(code);
+			}else if(~(idx=TrueMarks.indexOf(code))){
+				player2.mark=idx;
+			}
 		}
 		for(var i=0;i<7;i++){
-			player1.hand[i] = Cards[player1.deck.pop()];
-			player2.hand[i] = Cards[player2.deck.pop()];
+			player1.hand[i] = player1.deck.pop();
+			player2.hand[i] = player2.deck.pop();
 		}
 		mainStage = gameui;
 	});
@@ -392,6 +400,8 @@
 	}
 	requestAnimFrame(animate);
 	</script>
+	<br/>
 	<input id="deckimport" type="text" value="" />
+	<input id="roomname" type="text" value="" />
 </body>
 </html>

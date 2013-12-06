@@ -6,7 +6,7 @@ var fs = require("fs");
 app.listen(13602);
 
 function handler(req, res) {
-	if (req.url.indexOf("..") != -1)
+	if (!~req.url.indexOf(".."))
 		return;
 	if (req.url.indexOf("/cards/") == 0){
 		var request=http.get("http://dek.im/resources/card_header_images/"+req.url.substring(7), function (getres) {
@@ -30,11 +30,10 @@ function handler(req, res) {
 	}
 }
 
-var pendinggame;
+var rooms = {};
 var sockinfo = {};
 
 function dropsock(data){
-	console.log("dc "+this.id+" "+(this.id in sockinfo))
 	if (this.id in sockinfo){
 		var foe = sockinfo[this.id].foe;
 		if (foe){
@@ -49,6 +48,7 @@ io.sockets.on("connection", function(socket) {
 	socket.on("disconnect", dropsock);
 	socket.on("reconnect_failed", dropsock);
 	socket.on("pvpwant", function(data) {
+		var pendinggame=rooms[data.room];
 		console.log(this.id + ": " + (pendinggame?pendinggame.id:"-"));
 		if (this == pendinggame){
 			return;
@@ -61,9 +61,9 @@ io.sockets.on("connection", function(socket) {
 			sockinfo[pendinggame.id].foe = this;
 			this.emit("pvpgive", {first:first, seed:seed, deck:sockinfo[pendinggame.id].deck});
 			pendinggame.emit("pvpgive", {first:!first, seed:seed, deck:data.deck});
-			pendinggame = null;
+			delete rooms[data.room]
 		}else{
-			pendinggame = this;
+			rooms[data.room] = this;
 		}
 	});
 	socket.on("endturn", function(data) {
