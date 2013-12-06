@@ -33,12 +33,35 @@ function loadcards(cb){
 			var csv = this.responseText.split("\n");
 			for (var i=0; i<csv.length; i++){
 				var keypair = csv[i].split(",");
-				Targeting[Actives[keypair[0]]] = parseInt(keypair[1],10);
+				Targeting[Actives[keypair[0]]] = TargetFilters[keypair[1]];
 			}
 			maybeCallback();
 		}
 	}
 	xhr.send();
+}
+var m_w = 0, m_z = 987654321;
+function seed(i) {
+	m_w = i;
+}
+function random()
+{
+	var mask = 0xffffffff;
+	m_z = (36969 * (m_z & 65535) + (m_z >> 16)) & mask;
+	m_w = (18000 * (m_w & 65535) + (m_w >> 16)) & mask;
+	var result = ((m_z << 16) + m_w) & mask;
+	result /= 4294967296;
+	return result + 0.5;
+}
+function shuffle(array) {
+	var counter = array.length, temp, index;
+	while (counter--) {
+		index = (random() * counter) | 0;
+		temp = array[counter];
+		array[counter] = array[index];
+		array[index] = temp;
+	}
+	return array;
 }
 function etgReadCost(card, attr, cost, e){
 	if(~cost.indexOf("+")){
@@ -161,7 +184,7 @@ Player.prototype.endturn = function() {
 }
 Player.prototype.drawcard = function() {
 	if (this.hand.length<8){
-		this.hand[this.hand.length] = Cards[this.deck.pop()];
+		this.hand[this.hand.length] = this.deck.pop();
 	}
 }
 Player.prototype.drawhand = function() {
@@ -488,6 +511,43 @@ function masscc(player, func){
 		}
 	}
 }
+function creatgt(c,t){
+	return t instanceof Creature && !t.immaterial && !t.burrowed;
+}
+var TargetFilters={
+	pill:function(c,t){
+		return t instanceof Pillar;
+	},
+	weap:function(c,t){
+		return t instanceof Weapon;
+	},
+	perm:function(c,t){
+		return t instanceof Permanent;
+	},
+	crea:creatgt,
+	play:function(c,t){
+		return t instanceof Player;
+	},
+	creaorplay:function(c,t){
+		return creatgt(c,t) || t instanceof Player;
+	},
+	foeperm:function(c,t){
+		return c.owner!=t.owner && t instanceof Permanent;
+	},
+	devour:function(c,t){
+		return creatgt(c,t) && t.hp<c.hp;
+	},
+	paradox:function(c,t){
+		return creatgt(c,t) && t.hp<t.trueatk();
+	},
+	airbornecrea:function(c,t){
+		return creatgt(c,t) && t.airborne;
+	},
+	wisdom:function(c,t){
+		return t instanceof Creature && !t.burrowed;
+	}
+
+}
 var Actives={
 ablaze:function(c,t){
 	c.atk+=2;
@@ -668,7 +728,7 @@ dshield:function(c,t){
 },
 duality:function(c,t){
 	if (c.owner.foe.deck.length > 0 && c.owner.hand.length < 8){
-		c.owner.hand.push(Cards[c.owner.foe.deck[c.owner.foe.deck.length-1]])
+		c.owner.hand.push(c.owner.foe.deck[c.owner.foe.deck.length-1])
 	}
 },
 earth:function(c,t){
@@ -754,7 +814,7 @@ hasten:function(c,t){
 	c.owner.drawcard();
 },
 hatch:function(c,t){
-	c.owner.creatures[index]=new Creature(randomcard(c.card.upped,true), c.owner);
+	c.owner.creatures[c.getIndex()]=new Creature(randomcard(c.card.upped,true), c.owner);
 },
 heal:function(c,t){
 	t.heal(5);
@@ -854,14 +914,13 @@ momentumspell:function(c,t){
 	t.momentum=true;
 },
 mutation:function(c,t){
-	var index=t.getIndex();
 	var rnd=random();
 	if (rnd<.1){
 		t.die();
 	}else if(rnd<.5){
 		Actives.improve(c,t);
 	}else{
-		t.owner.creatures[index] = new Creature(Cards.Abomination, t.owner);
+		t.owner.creatures[t.getIndex()] = new Creature(Cards.Abomination, t.owner);
 	}
 },
 neuro:function(c,t){
@@ -936,7 +995,7 @@ poison2:function(c,t){
 	c.owner.foe.poison += 2;
 },
 precognition:function(c,t){
-	hasten(c,t);
+	c.owner.drawcard();
 	c.owner.precognition = true;
 },
 psion:function(c,t){

@@ -12,42 +12,18 @@
 </head>
 <body>
 	<script type="text/javascript;version=1.7">
-	var Cards, Targeting, targetingMode=-1, targetingModeCb, myturn, player1, player2, players;
+	var Cards, Targeting, targetingMode, targetingModeCb, myturn, player1, player2, players;
 	loadcards(function(cards, targeting) {
 		Cards = cards;
 		Targeting = targeting;
 		console.log("Cards loaded");
 	});
-	var m_w = 0, m_z = 987654321;
-	function seed(i) {
-		m_w = i;
-	}
-	function random()
-	{
-		var mask = 0xffffffff;
-		m_z = (36969 * (m_z & 65535) + (m_z >> 16)) & mask;
-		m_w = (18000 * (m_w & 65535) + (m_w >> 16)) & mask;
-		var result = ((m_z << 16) + m_w) & mask;
-		result /= 4294967296;
-		return result + 0.5;
-	}
-	function shuffle(array) {
-		var counter = array.length, temp, index;
-		while (counter--) {
-			index = (random() * counter) | 0;
-			temp = array[counter];
-			array[counter] = array[index];
-			array[index] = temp;
-		}
-		return array;
-	}
-	function getTarget(active, cb){
-		var tmode = Targeting[active];
-		if (tmode == undefined){
-			cb()
-		}else{
-			targetingMode = tmode;
+	function getTarget(src, active, cb){
+		if (active in Targeting){
+			targetingMode = function(t){return Targeting[active](src,t)};
 			targetingModeCb = cb;
+		}else{
+			cb();
 		}
 	}
 	function maybeSetText(textobject, text){
@@ -112,7 +88,7 @@
 			return nopic;
 		}
 	}
-	var deck = ['4vc', '4vc', '4vc', '4vc', '4vc', '4vc', '4vc', '4vc', '4vc', '4vc', '4vc', '4vc', '4vc', '4vc', '4vc', '4vc', '4vc', '4vc', '4ve', '4ve', '4ve', '6tt', '6tt', '6tt', '6tt', '4vf', '4vf', '4vf', '4vf', '4vf'];
+	var deck = ['4vc', '4vc', '4vc', '4vc', '4vc', '4vc', '4vc', '4vc', '4vc', '4vc', '4vc', '4vc', '4vc', '4vc', '4vc', '4vc', '4vc', '4vc', '4ve', '4ve', '4ve', '6tt', '6tt', '6tt', '6tt', '4vf', '4vf', '4vf', '4vf', '4vf', '8pj'];
 
 	var bpvp = new PIXI.Sprite(nopic);
 	bpvp.position.x = 200;
@@ -156,7 +132,7 @@
 					socket.emit("summon", {bits:_i});
 					player1.summon(_i);
 				}else{
-					getTarget(card.active, function (tgt) {
+					getTarget(player1, card.active, function (tgt) {
 						socket.emit("summon", {bits:_i|tgtToBits(tgt)<<3});
 						player1.summon(_i, tgt);
 					});
@@ -175,6 +151,7 @@
 	var permsprite = [new Array(23), new Array(23)];
 	var weapsprite = [new PIXI.Sprite(nopic), new PIXI.Sprite(nopic)];
 	var shiesprite = [new PIXI.Sprite(nopic), new PIXI.Sprite(nopic)];
+	var marksprite = [new PIXI.Sprite(nopic), new PIXI.Sprite(nopic)];
 	var quantatext = [new PIXI.Text("", {font: "12px Arial bold"}), new PIXI.Text("", {font: "12px Arial bold"})];
 	var hptext = [new PIXI.Text("", {font: "12px Arial bold"}), new PIXI.Text("", {font: "12px Arial bold"})];
 	for (var j=0; j<2; j++){
@@ -191,12 +168,12 @@
 			creasprite[j][i].click = function (x){
 				var crea = players[_j].creatures[_i];
 				if (!crea)return;
-				if (targetingMode == CreatureEnum || targetingMode == 6){
-					targetingMode = -1;
+				if (targetingMode && targetingMode(crea)){
+					targetingMode = undefined;
 					targetingModeCb(crea);
-				}else if (_j == 0 && targetingMode == -1 && crea.active && !crea.usedactive && crea.cast != -1 && players[_j].spend(crea.castele, crea.cast)){
-					getTarget(crea.active, function(tgt){
-						targetingMode = -1;
+				}else if (_j == 0 && !targetingMode && crea.active && !crea.usedactive && crea.cast != -1 && players[_j].spend(crea.castele, crea.cast)){
+					getTarget(crea, crea.active, function(tgt){
+						targetingMode = undefined;
 						socket.emit("active", {bits:tgtToBits(crea)|tgtToBits(tgt)<<8});
 						crea.usedactive = true;
 						crea.active(crea, tgt);
@@ -218,12 +195,12 @@
 			permsprite[j][i].click = function (x){
 				let perm = players[_j].permanents[_i];
 				if (!perm)return;
-				if (targetingMode == PermanentEnum){
-					targetingMode = -1;
+				if (targetingMode && targetingMode(perm)){
+					targetingMode = undefined;
 					targetingModeCb(perm);
-				}else if (_j == 0 && targetingMode == -1 && perm.active && !perm.usedactive && perm.cast != -1 && player1.spend(perm.castele, perm.cast)){
-					getTarget(perm.active, function(tgt){
-						targetingMode = -1;
+				}else if (_j == 0 && !targetingMode && perm.active && !perm.usedactive && perm.cast != -1 && player1.spend(perm.castele, perm.cast)){
+					getTarget(perm, perm.active, function(tgt){
+						targetingMode = undefined;
 						socket.emit("active", {bits:tgtToBits(perm)|tgtToBits(tgt)<<8});
 						perm.usedactive = true;
 						perm.active(perm, tgt);
@@ -234,31 +211,44 @@
 		}
 		centerAnchor(weapsprite[j]);
 		centerAnchor(shiesprite[j]);
+		centerAnchor(marksprite[j]);
 		weapsprite[j].position.x=550;
 		weapsprite[j].position.y=500;
 		weapsprite[j].setInteractive(true);
 		shiesprite[j].position.x=550;
 		shiesprite[j].position.y=530;
 		shiesprite[j].setInteractive(true);
+		marksprite[j].position.x = 550;
+		marksprite[j].position.y = 470;
 		let _j=j;
 		weapsprite[j].click = function (x){
-			if (targetingMode == PermanentEnum || targetingMode == WeaponEnum){
-				targetingMode = -1;
-				targetingModeCb(players[_j].weapon);
+			var weap = players[_j].weapon;
+			if (targetingMode && targetingMode(weap)){
+				targetingMode = undefined;
+				targetingModeCb(weap);
+			}else if (_j == 0 && !targetingMode && weap.active && !weap.usedactive && weap.cast != -1 && player1.spend(weap.castele, weap.cast)){
+				getTarget(weap, weap.active, function(tgt){
+					targetingMode = undefined;
+					socket.emit("active", {bits:tgtToBits(weap)|tgtToBits(tgt)<<8});
+					weap.usedactive = true;
+					weap.active(perm, tgt);
+				});
 			}
 		}
 		shiesprite[j].click = function (x){
-			if (targetingMode == PermanentEnum || targetingMode == ShieldEnum){
-				targetingMode = -1;
+			if (targetingMode && targetingMode(players[_j].shield)){
+				targetingMode = undefined;
 				targetingModeCb(players[_j].shield);
 			}
 		}
 		if(j){
 			reflectPos(weapsprite[j].position);
 			reflectPos(shiesprite[j].position);
+			reflectPos(marksprite[j].position);
 		}
 		gameui.addChild(weapsprite[j]);
 		gameui.addChild(shiesprite[j]);
+		gameui.addChild(marksprite[j]);
 		centerAnchor(quantatext[j]);
 		centerAnchor(hptext[j]);
 		quantatext[j].position.x=850;
@@ -281,19 +271,14 @@
 		player1.foe = player2;
 		player2.foe = player1;
 		players = [player1, player2];
-		var idx,code;
-		for(var i=0; i<deck.length; i++){
-			if(Cards[code=deck[i]]){
-				player1.deck.push(Cards[code]);
-			}else if(~(idx=TrueMarks.indexOf(code))){
-				player1.mark=idx;
-			}
-		}
-		for(var i=0; i<data.deck.length; i++){
-			if(Cards[code=data.deck[i]]){
-				player2.deck.push(Cards[code]);
-			}else if(~(idx=TrueMarks.indexOf(code))){
-				player2.mark=idx;
+		var idx,code, decks = [deck, data.deck];
+		for(var j=0; j<2; j++){
+			for(var i=0; i<decks[j].length; i++){
+				if(Cards[code=decks[j][i]]){
+					players[j].deck.push(Cards[code]);
+				}else if(~(idx=TrueMarks.indexOf(code))){
+					players[j].mark=idx;
+				}
 			}
 		}
 		if (myturn){
@@ -319,6 +304,7 @@
 	});
 	socket.on("active", function(data) {
 		var bits=data.bits, c=bitsToTgt(bits&255), t=bitsToTgt((bits>>8)&255);
+		console.log("active call: " + bits);
 		c.usedactive=true;
 		c.active(c,t);
 	});
@@ -339,6 +325,7 @@
 				}
 				weapsprite[j].setTexture(players[j].weapon?getCardImage(players[j].weapon.card.code):nopic);
 				shiesprite[j].setTexture(players[j].shield?getCardImage(players[j].shield.card.code):nopic);
+				marksprite[j].setTexture(getCardImage((5010+players[j].mark).toString(32)))
 				var qtext = "";
 				for(var i=1; i<7; i++){
 					qtext += players[j].quanta[i] + "\t" + players[j].quanta[i+6] + "\n";
