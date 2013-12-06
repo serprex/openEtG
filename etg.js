@@ -164,6 +164,22 @@ Player.prototype.drawcard = function() {
 		this.hand[this.hand.length] = Cards[this.deck.pop()];
 	}
 }
+Player.prototype.drawhand = function() {
+	shuffle(this.deck);
+	var mulligan = true;
+	for(var i=0; i<7; i++){
+		if (this.deck[i].cost == 0){
+			mulligan=false;
+			break;
+		}
+	}
+	if (mulligan){
+		shuffle(this.deck);
+	}
+	for(var i=0; i<7; i++){
+		this.hand.push(this.deck.pop());
+	}
+}
 Player.prototype.freeze = function(x) {
 	if (this.weapon)this.weapon.freeze(x);
 }

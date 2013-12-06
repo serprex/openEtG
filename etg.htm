@@ -312,32 +312,27 @@
 		player1.foe = player2;
 		player2.foe = player1;
 		players = [player1, player2];
-		var idx;
-		if (myturn){
-			shuffle(deck);
-			shuffle(data.deck);
-		}else{
-			shuffle(data.deck);
-			shuffle(deck);
-		}
 		var idx,code;
 		for(var i=0; i<deck.length; i++){
 			if(Cards[code=deck[i]){
-				player1.deck.push(code);
+				player1.deck.push(Cards[code]);
 			}else if(~(idx=TrueMarks.indexOf(code))){
 				player1.mark=idx;
 			}
 		}
 		for(var i=0; i<data.deck.length; i++){
 			if(Cards[code=data.deck[i]]){
-				player2.deck.push(code);
+				player2.deck.push(Cards[code]);
 			}else if(~(idx=TrueMarks.indexOf(code))){
 				player2.mark=idx;
 			}
 		}
-		for(var i=0;i<7;i++){
-			player1.hand[i] = player1.deck.pop();
-			player2.hand[i] = player2.deck.pop();
+		if (myturn){
+			player1.drawhand();
+			player2.drawhand();
+		}else{
+			player2.drawhand();
+			player1.drawhand();
 		}
 		mainStage = gameui;
 	});
@@ -370,12 +365,6 @@
 			for(var i=0;i<23;i++){
 				creasprite[i].setTexture(player1.creatures[i]?getCardImage(player1.creatures[i].card.code):nopic);
 				foecreasprite[i].setTexture(player2.creatures[i]?getCardImage(player2.creatures[i].card.code):nopic);
-				if (player1.creatures[i]){
-					creasprite[i].setTexture(getCardImage(player1.creatures[i].card.code));
-				}else creasprite[i].setTexture(nopic);
-				if (player2.creatures[i]){
-					foecreasprite[i].setTexture(getCardImage(player2.creatures[i].card.code));
-				}else foecreasprite[i].setTexture(nopic);
 			}
 			for(var i=0;i<23;i++){
 				permsprite[i].setTexture(player1.permanents[i]?getCardImage(player1.permanents[i].card.code):nopic);
