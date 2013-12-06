@@ -53,6 +53,13 @@
 	function maybeSetText(textobject, text){
 		if (textobject.text != text)textobject.setText(text);
 	}
+	function reflectPos(pos){
+		pos.x=900-pos.x;
+		pos.y=600-pos.y;
+	}
+	function centerAnchor(obj){
+		obj.anchor.x=obj.anchor.y=.5;
+	}
 	function tgtToBits(x){
 		if (x == undefined){
 			return 0;
@@ -133,14 +140,14 @@
 		}
 	}
 	gameui.addChild(endturn);
-	var handsprite = new Array(8);
+	var handsprite = [new Array(8), new Array(8)];
 	for (var i=0; i<8; i++){
-		handsprite[i] = new PIXI.Sprite(nopic);
-		handsprite[i].position.x=800;
-		handsprite[i].position.y=200+20*i;
-		handsprite[i].setInteractive(true);
+		handsprite[0][i] = new PIXI.Sprite(nopic);
+		handsprite[0][i].position.x=800;
+		handsprite[0][i].position.y=300+20*i;
+		handsprite[0][i].setInteractive(true);
 		let _i=i;
-		handsprite[i].click = function (x){
+		handsprite[0][i].click = function (x){
 			if (!myturn || player1.silence)return;
 			var card = player1.hand[_i];
 			if (card && (card.cost == 0 || player1.spend(card.costele, card.cost))){
@@ -156,153 +163,115 @@
 				}
 			}
 		}
-		gameui.addChild(handsprite[i]);
+		gameui.addChild(handsprite[0][i]);
 	}
-	var foehandsprite = new Array(8);
 	for (var i=0; i<8; i++){
-		foehandsprite[i] = new PIXI.Sprite(nopic);
-		foehandsprite[i].position.x=20;
-		foehandsprite[i].position.y=40+20*i;
-		gameui.addChild(foehandsprite[i]);
+		handsprite[1][i] = new PIXI.Sprite(nopic);
+		handsprite[1][i].position.x=20;
+		handsprite[1][i].position.y=40+20*i;
+		gameui.addChild(handsprite[1][i]);
 	}
-	var creasprite = new Array(23);
-	for (var i=0; i<23; i++){
-		creasprite[i] = new PIXI.Sprite(nopic);
-		creasprite[i].position.x=100+(i%12)*30;
-		creasprite[i].position.y=370+(i%3)*20+(Math.floor(i/12)*30);
-		creasprite[i].setInteractive(true);
-		let _i=i;
-		creasprite[i].click = function (x){
-			var crea = player1.creatures[_i];
-			if (!crea)return;
-			if (targetingMode == CreatureEnum || targetingMode == 6){
-				targetingMode = -1;
-				targetingModeCb(crea);
-			}else if (targetingMode == -1 && crea.active && !crea.usedactive && crea.cast != -1 && player1.spend(crea.castele, crea.cast)){
-				getTarget(crea.active, function(tgt){
+	var creasprite = [new Array(23), new Array(23)];
+	var permsprite = [new Array(23), new Array(23)];
+	var weapsprite = [new PIXI.Sprite(nopic), new PIXI.Sprite(nopic)];
+	var shiesprite = [new PIXI.Sprite(nopic), new PIXI.Sprite(nopic)];
+	var quantatext = [new PIXI.Text("", {font: "12px Arial bold"}), new PIXI.Text("", {font: "12px Arial bold"})];
+	var hptext = [new PIXI.Text("", {font: "12px Arial bold"}), new PIXI.Text("", {font: "12px Arial bold"})];
+	for (var j=0; j<2; j++){
+		for (var i=0; i<23; i++){
+			creasprite[j][i] = new PIXI.Sprite(nopic);
+			centerAnchor(creasprite[j][i]);
+			creasprite[j][i].position.x=160+(i%12)*30;
+			creasprite[j][i].position.y=360+(i%3)*20+(Math.floor(i/12)*30);
+			if(j){
+				reflectPos(creasprite[j][i].position);
+			}
+			creasprite[j][i].setInteractive(true);
+			let _i=i;
+			creasprite[j][i].click = function (x){
+				var crea = players[_j].creatures[_i];
+				if (!crea)return;
+				if (targetingMode == CreatureEnum || targetingMode == 6){
 					targetingMode = -1;
-					socket.emit("active", {bits:tgtToBits(crea)|tgtToBits(tgt)<<8});
-					crea.usedactive = true;
-					crea.active(crea, tgt);
-				});
+					targetingModeCb(crea);
+				}else if (_j == 0 && targetingMode == -1 && crea.active && !crea.usedactive && crea.cast != -1 && players[_j].spend(crea.castele, crea.cast)){
+					getTarget(crea.active, function(tgt){
+						targetingMode = -1;
+						socket.emit("active", {bits:tgtToBits(crea)|tgtToBits(tgt)<<8});
+						crea.usedactive = true;
+						crea.active(crea, tgt);
+					});
+				}
 			}
+			gameui.addChild(creasprite[j][i]);
 		}
-		gameui.addChild(creasprite[i]);
-	}
-	var foecreasprite = new Array(23);
-	for (var i=0; i<23; i++){
-		foecreasprite[i] = new PIXI.Sprite(nopic);
-		foecreasprite[i].position.x=400+(i%12)*30;
-		foecreasprite[i].position.y=30+(i%3)*20+(Math.floor(i/12)*30);
-		foecreasprite[i].setInteractive(true);
-		let _i=i;
-		foecreasprite[i].click = function (x){
-			if (targetingMode == CreatureEnum || targetingMode == 6){
-				targetingMode = -1;
-				targetingModeCb(player2.creatures[_i]);
+		for (var i=0; i<23; i++){
+			permsprite[j][i] = new PIXI.Sprite(nopic);
+			centerAnchor(permsprite[j][i]);
+			permsprite[j][i].position.x=160+(i%12)*30;
+			permsprite[j][i].position.y=490+(i%3)*20+(Math.floor(i/12)*30);
+			if(j){
+				reflectPos(permsprite[j][i].position);
 			}
-		}
-		gameui.addChild(foecreasprite[i]);
-	}
-	var permsprite = new Array(23);
-	for (var i=0; i<23; i++){
-		permsprite[i] = new PIXI.Sprite(nopic);
-		permsprite[i].position.x=100+(i%12)*30;
-		permsprite[i].position.y=500+(i%3)*20+(Math.floor(i/12)*30);
-		permsprite[i].setInteractive(true);
-		let _i=i;
-		permsprite[i].click = function (x){
-			let perm = player1.permanents[_i];
-			if (!perm)return;
-			if (targetingMode == PermanentEnum){
-				targetingMode = -1;
-				targetingModeCb(perm);
-			}else if (targetingMode == -1 && perm.active && !perm.usedactive && perm.cast != -1 && player1.spend(perm.castele, perm.cast)){
-				getTarget(perm.active, function(tgt){
+			permsprite[j][i].setInteractive(true);
+			let _i=i,_j=j;
+			permsprite[j][i].click = function (x){
+				let perm = players[_j].permanents[_i];
+				if (!perm)return;
+				if (targetingMode == PermanentEnum){
 					targetingMode = -1;
-					socket.emit("active", {bits:tgtToBits(perm)|tgtToBits(tgt)<<8});
-					perm.usedactive = true;
-					perm.active(perm, tgt);
-				});
+					targetingModeCb(perm);
+				}else if (_j == 0 && targetingMode == -1 && perm.active && !perm.usedactive && perm.cast != -1 && player1.spend(perm.castele, perm.cast)){
+					getTarget(perm.active, function(tgt){
+						targetingMode = -1;
+						socket.emit("active", {bits:tgtToBits(perm)|tgtToBits(tgt)<<8});
+						perm.usedactive = true;
+						perm.active(perm, tgt);
+					});
+				}
 			}
+			gameui.addChild(permsprite[j][i]);
 		}
-		gameui.addChild(permsprite[i]);
-	}
-	var foepermsprite = new Array(23);
-	for (var i=0; i<23; i++){
-		foepermsprite[i] = new PIXI.Sprite(nopic);
-		foepermsprite[i].position.x=400+(i%12)*30;
-		foepermsprite[i].position.y=160+(i%3)*20+(Math.floor(i/12)*30);
-		foepermsprite[i].setInteractive(true);
-		let _i=i;
-		foepermsprite[i].click = function (x){
-			if (targetingMode == PermanentEnum){
+		centerAnchor(weapsprite[j]);
+		centerAnchor(shiesprite[j]);
+		weapsprite[j].position.x=550;
+		weapsprite[j].position.y=500;
+		weapsprite[j].setInteractive(true);
+		shiesprite[j].position.x=550;
+		shiesprite[j].position.y=530;
+		shiesprite[j].setInteractive(true);
+		let _j=j;
+		weapsprite[j].click = function (x){
+			if (targetingMode == PermanentEnum || targetingMode == WeaponEnum){
 				targetingMode = -1;
-				targetingModeCb(player2.permanents[_i]);
+				targetingModeCb(players[_j].weapon);
 			}
 		}
-		gameui.addChild(foepermsprite[i]);
-	}
-	var weapsprite = new PIXI.Sprite(nopic);
-	weapsprite.position.x=460;
-	weapsprite.position.y=500;
-	weapsprite.setInteractive(true);
-	weapsprite.click = function (x){
-		if (targetingMode == PermanentEnum || targetingMode == WeaponEnum){
-			targetingMode = -1;
-			targetingModeCb(player1.weapon);
+		shiesprite[j].click = function (x){
+			if (targetingMode == PermanentEnum || targetingMode == ShieldEnum){
+				targetingMode = -1;
+				targetingModeCb(players[_j].shield);
+			}
 		}
-	}
-	gameui.addChild(weapsprite);
-	var shiesprite = new PIXI.Sprite(nopic);
-	shiesprite.position.x=460;
-	shiesprite.position.y=520;
-	shiesprite.setInteractive(true);
-	shiesprite.click = function (x){
-		if (targetingMode == PermanentEnum || targetingMode == WeaponEnum){
-			targetingMode = -1;
-			targetingModeCb(player2.weapon);
+		if(j){
+			reflectPos(weapsprite[j].position);
+			reflectPos(shiesprite[j].position);
 		}
-	}
-	gameui.addChild(shiesprite);
-	var foeweapsprite = new PIXI.Sprite(nopic);
-	foeweapsprite.position.x=340;
-	foeweapsprite.position.y=160;
-	foeweapsprite.setInteractive(true);
-	foeweapsprite.click = function (x){
-		if (targetingMode == PermanentEnum || targetingMode == ShieldEnum){
-			targetingMode = -1;
-			targetingModeCb(player1.shield);
+		gameui.addChild(weapsprite[j]);
+		gameui.addChild(shiesprite[j]);
+		centerAnchor(quantatext[j]);
+		centerAnchor(hptext[j]);
+		quantatext[j].position.x=850;
+		quantatext[j].position.y=200;
+		hptext[j].position.x=850;
+		hptext[j].position.y=50;
+		if (j){
+			reflectPos(quantatext[j].position);
+			reflectPos(hptext[j].position);
 		}
+		gameui.addChild(quantatext[j]);
+		gameui.addChild(hptext[j]);
 	}
-	gameui.addChild(foeweapsprite);
-	var foeshiesprite = new PIXI.Sprite(nopic);
-	foeshiesprite.position.x=340;
-	foeshiesprite.position.y=180;
-	foeshiesprite.setInteractive(true);
-	foeshiesprite.click = function (x){
-		if (targetingMode == PermanentEnum || targetingMode == ShieldEnum){
-			targetingMode = -1;
-			targetingModeCb(player2.shield);
-		}
-	}
-	gameui.addChild(foeshiesprite);
-	var quantatext = new PIXI.Text("", {font: "12px Arial bold"});
-	quantatext.position.x=800;
-	quantatext.position.y=40;
-	gameui.addChild(quantatext);
-	var foequantatext = new PIXI.Text("", {font: "12px Arial bold"});
-	foequantatext.position.x=20;
-	foequantatext.position.y=320;
-	gameui.addChild(foequantatext);
-	var hptext = new PIXI.Text("", {font: "12px Arial bold"});
-	hptext.position.x=800;
-	hptext.position.y=20;
-	gameui.addChild(hptext);
-	var foehptext = new PIXI.Text("", {font: "12px Arial bold"});
-	foehptext.position.x=20;
-	foehptext.position.y=300;
-	gameui.addChild(foehptext);
 	var socket = io.connect("http://"+location.hostname+':13602');
 	socket.on("pvpgive", function(data) {
 		seed(data.seed);
@@ -314,7 +283,7 @@
 		players = [player1, player2];
 		var idx,code;
 		for(var i=0; i<deck.length; i++){
-			if(Cards[code=deck[i]){
+			if(Cards[code=deck[i]]){
 				player1.deck.push(Cards[code]);
 			}else if(~(idx=TrueMarks.indexOf(code))){
 				player1.mark=idx;
@@ -358,31 +327,25 @@
 	});
 	function animate() {
 		if (mainStage == gameui){
-			for(var i=0;i<8;i++){
-				handsprite[i].setTexture(player1.hand[i]?getCardImage(player1.hand[i].code):nopic);
-				foehandsprite[i].setTexture(player2.hand[i]?getCardImage(player1.precognition?player2.hand[i]:"000"):nopic);
+			for(var j=0; j<2; j++){
+				for(var i=0;i<8;i++){
+					handsprite[j][i].setTexture(players[j].hand[i]?getCardImage(j==0||player1.precognition?players[j].hand[i].code:"000"):nopic);
+				}
+				for(var i=0;i<23;i++){
+					creasprite[j][i].setTexture(players[j].creatures[i]?getCardImage(players[j].creatures[i].card.code):nopic);
+				}
+				for(var i=0; i<23; i++){
+					permsprite[j][i].setTexture(players[j].permanents[i]?getCardImage(players[j].permanents[i].card.code):nopic);
+				}
+				weapsprite[j].setTexture(players[j].weapon?getCardImage(players[j].weapon.card.code):nopic);
+				shiesprite[j].setTexture(players[j].shield?getCardImage(players[j].shield.card.code):nopic);
+				var qtext = "";
+				for(var i=1; i<7; i++){
+					qtext += players[j].quanta[i] + "\t" + players[j].quanta[i+6] + "\n";
+				}
+				maybeSetText(quantatext[j], qtext);
+				maybeSetText(hptext[j], players[j].hp + "/" + players[j].maxhp);
 			}
-			for(var i=0;i<23;i++){
-				creasprite[i].setTexture(player1.creatures[i]?getCardImage(player1.creatures[i].card.code):nopic);
-				foecreasprite[i].setTexture(player2.creatures[i]?getCardImage(player2.creatures[i].card.code):nopic);
-			}
-			for(var i=0;i<23;i++){
-				permsprite[i].setTexture(player1.permanents[i]?getCardImage(player1.permanents[i].card.code):nopic);
-				foepermsprite[i].setTexture(player2.permanents[i]?getCardImage(player2.permanents[i].card.code):nopic);
-			}
-			weapsprite.setTexture(player1.weapon?getCardImage(player1.weapon.card.code):nopic);
-			foeweapsprite.setTexture(player2.weapon?getCardImage(player2.weapon.card.code):nopic);
-			shiesprite.setTexture(player1.shield?getCardImage(player1.shield.card.code):nopic);
-			foeshiesprite.setTexture(player2.shield?getCardImage(player2.shield.card.code):nopic);
-			var qtext = "", foeqtext = "";
-			for(var i=1; i<7; i++){
-				qtext += player1.quanta[i] + "\t" + player1.quanta[i+6] + "\n";
-				foeqtext += player2.quanta[i] + "\t" + player2.quanta[i+6] + "\n";
-			}
-			maybeSetText(quantatext, qtext);
-			maybeSetText(foequantatext, foeqtext);
-			maybeSetText(hptext, player1.hp + "/" + player1.maxhp);
-			maybeSetText(foehptext, player2.hp + "/" + player2.maxhp);
 		}
 	    renderer.render(mainStage);
 		requestAnimFrame(animate);

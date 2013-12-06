@@ -6,7 +6,7 @@ var fs = require("fs");
 app.listen(13602);
 
 function handler(req, res) {
-	if (!~req.url.indexOf(".."))
+	if (~req.url.indexOf(".."))
 		return;
 	if (req.url.indexOf("/cards/") == 0){
 		var request=http.get("http://dek.im/resources/card_header_images/"+req.url.substring(7), function (getres) {
