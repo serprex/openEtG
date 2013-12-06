@@ -166,7 +166,7 @@ Player.prototype.endturn = function() {
 		if (this.shield.active == Actives.evade100 || this.shield.active == Actives.wings){
 			this.shield.charges -= 1;
 			if (this.shield.charges < 0){
-				this.shield = new Permanent(noshield, this);
+				this.shield = undefined;
 			}
 		}
 		else if (this.shield.active == Actives.hope){
@@ -205,6 +205,15 @@ Player.prototype.drawhand = function() {
 }
 Player.prototype.freeze = function(x) {
 	if (this.weapon)this.weapon.freeze(x);
+}
+Weapon.prototype.addpoison = function(x) {
+	return this.owner.addpoison(x);
+}
+Weapon.prototype.spelldmg = function(x) {
+	return this.owner.spelldmg(x);
+}
+Weapon.prototype.dmg = function(x) {
+	return this.owner.dmg(x);
 }
 Player.prototype.dmg = function(x) {
 	if (x<0){
@@ -623,8 +632,8 @@ butterfly:function(c,t){
 catapult:function(c,t){
 	c.owner.foe.dmg(Math.ceil(t.hp*(t.frozen?150:100)/(t.hp+100)));
 	c.owner.foe.poison += t.poison;
-	if (t.frozen && c.owner.foe.weapon != C.noweapon){
-		c.owner.foe.weapon.frozen = 3;
+	if (t.frozen){
+		c.owner.foe.freeze(3);
 	}
 },
 chimera:function(c,t){
@@ -679,6 +688,8 @@ destroy:function(c,t){
 },
 devour:function(c,t){
 	if (c.hp > t.hp){
+		c.buffhp(1);
+		c.atk += 1;
 		if (t.passive == "poisonous"){
 			c.addpoison(1);
 		}
@@ -831,11 +842,7 @@ icebolt:function(c,t){
 	var bolts=1+Math.floor((c.owner.quanta[Water]+(c.card.costele==Water?c.card.cost:0))/10);
 	t.spelldmg(bolts*2);
 	if (random() < .3+bolts/10){
-		if (!t.isPlayer){
-			t.frozen = 3
-		}else if (t.weapon != C.noweapon){
-			t.weapon.frozen = 3
-		}
+		t.freeze(3);
 	}
 },
 ignite:function(c,t){
@@ -1032,7 +1039,7 @@ relic:function(c,t){
 },
 rewind:function(c,t){
 	delete t.owner.creatures[t.getIndex()];
-	t.owner.deck.push(t.card.code);
+	t.owner.deck.push(t.card);
 },
 sanctuary:function(c,t){
 	c.owner.sanctuary=true;
