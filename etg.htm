@@ -12,7 +12,7 @@
 </head>
 <body>
 	<script type="text/javascript;version=1.7">
-var Cards, Targeting, targetingMode, targetingModeCb, myturn, player1, player2, players, winner;
+var Cards, Targeting, targetingMode, targetingModeCb, myturn, player1, player2, players, winner, discarding;
 loadcards(function(cards, targeting) {
 	Cards = cards;
 	Targeting = targeting;
@@ -116,9 +116,13 @@ endturn.click = function(x) {
 	if (winner){
 		mainStage = menuui;
 	}else if (myturn){
-		socket.emit("endturn");
-		player1.endturn();
-		myturn = false;
+		if (player1.hand.length == 8){
+			discarding=true;
+		}else{
+			socket.emit("endturn");
+			player1.endturn();
+			myturn = false;
+		}
 	}
 }
 gameui.addChild(endturn);
@@ -145,16 +149,23 @@ for (var i=0; i<8; i++){
 	handsprite[0][i].setInteractive(true);
 	let _i=i;
 	handsprite[0][i].click = function(x){
+		if (discarding){
+			socket.emit("endturn", _i);
+			player1.discard(_i);
+			player1.endturn();
+			myturn=false;
+			discarding = false;
+		}
 		if (!myturn || player1.silence)return;
 		var card = player1.hand[_i];
 		if (card && (card.cost == 0 || player1.canspend(card.costele, card.cost))){
 			if (card.type != SpellEnum){
 				console.log("summoning " + _i);
-				socket.emit("summon", {bits:_i});
+				socket.emit("summon", _i);
 				player1.summon(_i);
 			}else{
 				getTarget(player1, card.active, function(tgt) {
-					socket.emit("summon", {bits:_i|tgtToBits(tgt)<<3});
+					socket.emit("summon", _i|tgtToBits(tgt)<<3);
 					player1.summon(_i, tgt);
 				});
 			}
@@ -195,10 +206,10 @@ for (var j=0; j<2; j++){
 			if (targetingMode && targetingMode(crea)){
 				targetingMode = undefined;
 				targetingModeCb(crea);
-			}else if (_j == 0 && !targetingMode && crea.active && !crea.usedactive && crea.cast != -1 && player1.canspend(crea.castele, crea.cast)){
+			}else if (_j == 0 && !targetingMode && crea.canactive()){
 				getTarget(crea, crea.active, function(tgt){
 					targetingMode = undefined;
-					socket.emit("active", {bits:tgtToBits(crea)|tgtToBits(tgt)<<8});
+					socket.emit("active", tgtToBits(crea)|tgtToBits(tgt)<<8);
 					player1.spend(crea.castele, crea.cast);
 					crea.usedactive = true;
 					crea.active(tgt);
@@ -223,10 +234,10 @@ for (var j=0; j<2; j++){
 			if (targetingMode && targetingMode(perm)){
 				targetingMode = undefined;
 				targetingModeCb(perm);
-			}else if (_j == 0 && !targetingMode && perm.active && !perm.usedactive && perm.cast != -1 && player1.canspend(perm.castele, perm.cast)){
+			}else if (_j == 0 && !targetingMode && perm.canactive()){
 				getTarget(perm, perm.active, function(tgt){
 					targetingMode = undefined;
-					socket.emit("active", {bits:tgtToBits(perm)|tgtToBits(tgt)<<8});
+					socket.emit("active", tgtToBits(perm)|tgtToBits(tgt)<<8);
 					player1.spend(perm.castele, perm.cast);
 					perm.usedactive = true;
 					perm.active(tgt);
@@ -252,10 +263,10 @@ for (var j=0; j<2; j++){
 		if (targetingMode && targetingMode(weap)){
 			targetingMode = undefined;
 			targetingModeCb(weap);
-		}else if (_j == 0 && !targetingMode && weap.active && !weap.usedactive && weap.cast != -1 && player1.canspend(weap.castele, weap.cast)){
+		}else if (_j == 0 && !targetingMode && weap.canactive()){
 			getTarget(weap, weap.active, function(tgt){
 				targetingMode = undefined;
-				socket.emit("active", {bits:tgtToBits(weap)|tgtToBits(tgt)<<8});
+				socket.emit("active", tgtToBits(weap)|tgtToBits(tgt)<<8);
 				player1.spend(weap.castele, weap.cast);
 				weap.usedactive = true;
 				weap.active(tgt);
@@ -331,19 +342,21 @@ socket.on("pvpgive", function(data) {
 	mainStage = gameui;
 });
 socket.on("endturn", function(data) {
+	if (data){
+		player2.discard(data);
+	}
 	player2.endturn();
 	myturn = true;
 });
-socket.on("summon", function(data) {
-	var bits = data.bits;
+socket.on("summon", function(bits) {
 	console.log("summon call: " + bits);
 	var handindex = bits&7;
 	var card = player2.hand[handindex];
 	player2.spend(card.costele, card.cost);
 	player2.summon(handindex, bitsToTgt(bits>>3));
 });
-socket.on("active", function(data) {
-	var bits=data.bits, c=bitsToTgt(bits&255), t=bitsToTgt((bits>>8)&255);
+socket.on("active", function(bits) {
+	var c=bitsToTgt(bits&255), t=bitsToTgt((bits>>8)&255);
 	console.log("active call: " + bits);
 	player2.spend(c.castele, c.cast);
 	c.usedactive=true;
@@ -354,7 +367,7 @@ socket.on("foeleft", function(data) {
 });
 function animate() {
 	if (mainStage == gameui){
-		maybeSetText(turntell, myturn?"Your Turn":"Their Turn");
+		maybeSetText(turntell, discarding?"Discard":myturn?"Your Turn":"Their Turn");
 		for(var j=0; j<2; j++){
 			for(var i=0;i<8;i++){
 				handsprite[j][i].setTexture(players[j].hand[i]?getCardImage(j==0||player1.precognition?players[j].hand[i].code:"000"):nopic);
@@ -384,8 +397,8 @@ function animate() {
 requestAnimFrame(animate);
 	</script>
 	<br/>
-	<input id="deckimport" type="text" value="" />
-	<input id="roomname" type="text" value="" />
+	<input id="deckimport" type="text" value="" placeholder="Deck" />
+	<input id="roomname" type="text" value="" placeholder="Room" />
 	<br/>Firefox only for now
 </body>
 </html>

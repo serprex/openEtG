@@ -155,6 +155,13 @@ Player.prototype.spend = function(qtype, x) {
 		return true;
 	}else return false;
 }
+Player.prototype.discard = function(index) {
+	var card=this.hand[index];
+	if (card.passive == "obsession"){
+		player1.dmg(card.upped?13:10);
+	}
+	this.hand.splice(index, 1);
+}
 Player.prototype.endturn = function() {
 	this.precognition = this.sanctuary = this.silence = false;
 	this.foe.hp -= this.foe.poison;
@@ -249,6 +256,11 @@ Player.prototype.dmg = function(x) {
 	}
 	return dmg;
 }
+function Thing(card, owner){
+	if (!card)return;
+	this.owner = owner;
+	this.card = card;
+}
 function Creature(card, owner){
 	this.delay = 0
 	this.frozen = 0
@@ -258,11 +270,10 @@ function Creature(card, owner){
 	this.adrenaline = false
 	this.aflatoxin = false
 	this.usedactive = true
-	if (card == undefined){
+	if (!card){
 		return;
 	}
-	this.owner = owner
-	this.card = card
+	Thing.apply(this, arguments);
 	this.maxhp = this.hp = card.health
 	this.atk = card.attack
 	this.airborne = card.airborne
@@ -276,11 +287,10 @@ function Creature(card, owner){
 	this.immaterial = card.passive == "immaterial";
 }
 function Permanent(card, owner){
-	if (card == undefined){
+	if (!card){
 		return;
 	}
-	this.owner = owner
-	this.card = card
+	Thing.apply(this, arguments)
 	this.cast = card.cast
 	this.castele = card.castele
 	this.active = card.active
@@ -311,6 +321,8 @@ function Pillar(card, owner){
 	this.charges = 1;
 	this.pendstate = false;
 }
+Creature.prototype = new Thing();
+Permanent.prototype = new Thing();
 Weapon.prototype = new Permanent();
 Shield.prototype = new Permanent();
 Pillar.prototype = new Permanent();
@@ -404,6 +416,9 @@ Permanent.prototype.getIndex = function() { return this.owner.permanents.indexOf
 Permanent.prototype.die = function(){ delete this.owner.permanents[this.owner.permanents.getIndex()]; }
 Weapon.prototype.die = function() { this.owner.weapon = undefined; }
 Shield.prototype.die = function() { this.owner.shield = undefined; }
+Thing.prototype.canactive = function() {
+	return this.active && !this.usedactive && this.cast != -1 && this.delay == 0 && this.frozen == 0 && this.owner.canspend(this.castele, this.cast);
+}
 Weapon.prototype.attack = Creature.prototype.attack = function(){
 	var isCreature = this instanceof Creature;
 	if (isCreature){

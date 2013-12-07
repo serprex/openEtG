@@ -69,7 +69,7 @@ io.sockets.on("connection", function(socket) {
 	socket.on("endturn", function(data) {
 		var foe = sockinfo[this.id].foe;
 		if (foe && foe.id in sockinfo){
-			foe.emit("endturn");
+			foe.emit("endturn", data);
 		}
 	});
 	socket.on("summon", function(data) {
