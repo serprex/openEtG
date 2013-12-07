@@ -110,7 +110,7 @@ bpvp.click = function(x) {
 menuui.addChild(bpvp);
 var endturn = new PIXI.Text("", {font: "16px Arial bold"});
 endturn.position.x = 800;
-endturn.position.y = 550;
+endturn.position.y = 540;
 endturn.setInteractive(true);
 endturn.click = function(x) {
 	if (winner){
@@ -132,6 +132,10 @@ cancel.click = function(x) {
 		targetingModeCb = null;
 	}
 }
+var turntell = new PIXI.Text("", {font: "16px Arial bold"});
+turntell.position.x = 800;
+turntell.position.y = 570;
+gameui.addChild(turntell);
 gameui.addChild(cancel);
 var handsprite = [new Array(8), new Array(8)];
 for (var i=0; i<8; i++){
@@ -350,6 +354,7 @@ socket.on("foeleft", function(data) {
 });
 function animate() {
 	if (mainStage == gameui){
+		maybeSetText(turntell, myturn?"Your Turn":"Their Turn");
 		for(var j=0; j<2; j++){
 			for(var i=0;i<8;i++){
 				handsprite[j][i].setTexture(players[j].hand[i]?getCardImage(j==0||player1.precognition?players[j].hand[i].code:"000"):nopic);

@@ -577,35 +577,35 @@ function creatgt(c, t){
 	return t instanceof Creature && !t.immaterial && !t.burrowed;
 }
 var TargetFilters={
-	pill:function(t){
+	pill:function(c, t){
 		return t instanceof Pillar;
 	},
-	weap:function(t){
+	weap:function(c, t){
 		return t instanceof Weapon;
 	},
-	perm:function(t){
+	perm:function(c, t){
 		return t instanceof Permanent;
 	},
 	crea:creatgt,
-	play:function(t){
+	play:function(c, t){
 		return t instanceof Player;
 	},
-	creaorplay:function(t){
+	creaorplay:function(c, t){
 		return creatgt(c, t) || t instanceof Player;
 	},
-	foeperm:function(t){
+	foeperm:function(c, t){
 		return c.owner!=t.owner && t instanceof Permanent;
 	},
-	devour:function(t){
+	devour:function(c, t){
 		return creatgt(c, t) && t.truehp()<c.truehp();
 	},
-	paradox:function(t){
+	paradox:function(c, t){
 		return creatgt(c, t) && t.truehp()<t.trueatk();
 	},
-	airbornecrea:function(t){
+	airbornecrea:function(c, t){
 		return creatgt(c, t) && t.airborne;
 	},
-	wisdom:function(t){
+	wisdom:function(c, t){
 		return t instanceof Creature && !t.burrowed;
 	}
 
