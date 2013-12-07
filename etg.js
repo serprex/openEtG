@@ -40,9 +40,10 @@ function loadcards(cb){
 	}
 	xhr.send();
 }
-var m_w = 0, m_z = 987654321;
+var m_w = 0, m_z = 0;
 function seed(i) {
 	m_w = i;
+	m_z = 987654321;
 }
 function random()
 {
