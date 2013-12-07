@@ -90,7 +90,7 @@ function getCardImage(code){
 }
 var deck = ['4vc', '4vc', '4vc', '4vc', '4vc', '4vc', '4vc', '4vc', '4vc', '4vc', '4vc', '4vc', '4vc', '4vc', '4vc', '4vc', '4vc', '4vc', '4ve', '4ve', '4ve', '6tt', '6tt', '6tt', '6tt', '4vf', '4vf', '4vf', '4vf', '4vf', '8pj'];
 
-var bpvp = new PIXI.Sprite(nopic);
+var bpvp = new PIXI.Text("Search", {font: "16px Arial bold"});
 bpvp.position.x = 200;
 bpvp.position.y = 200;
 bpvp.setInteractive(true);
@@ -104,7 +104,7 @@ bpvp.click = function(x) {
 	}
 }
 menuui.addChild(bpvp);
-var endturn = new PIXI.Sprite(nopic);
+var endturn = new PIXI.Text("End Turn", {font: "16px Arial bold"});
 endturn.position.x = 800;
 endturn.position.y = 550;
 endturn.setInteractive(true);
@@ -116,7 +116,7 @@ endturn.click = function(x) {
 	}
 }
 gameui.addChild(endturn);
-var cancel = new PIXI.Sprite(nopic);
+var cancel = new PIXI.Text("Cancel", {font: "16px Arial bold"});
 cancel.position.x = 800;
 cancel.position.y = 500;
 cancel.setInteractive(true);
@@ -163,8 +163,8 @@ var permsprite = [new Array(23), new Array(23)];
 var weapsprite = [new PIXI.Sprite(nopic), new PIXI.Sprite(nopic)];
 var shiesprite = [new PIXI.Sprite(nopic), new PIXI.Sprite(nopic)];
 var marksprite = [new PIXI.Sprite(nopic), new PIXI.Sprite(nopic)];
-var quantatext = [new PIXI.Text("", {font: "12px Arial bold"}), new PIXI.Text("", {font: "12px Arial bold"})];
-var hptext = [new PIXI.Text("", {font: "12px Arial bold"}), new PIXI.Text("", {font: "12px Arial bold"})];
+var quantatext = [new PIXI.Text("", {font: "16px Arial bold"}), new PIXI.Text("", {font: "18px Arial bold"})];
+var hptext = [new PIXI.Text("", {font: "18px Arial bold"}), new PIXI.Text("", {font: "18px Arial bold"})];
 for (var j=0; j<2; j++){
 	let _j=j;
 	for (var i=0; i<23; i++){
