@@ -20,7 +20,7 @@
 	});
 	function getTarget(src, active, cb){
 		if (active in Targeting){
-			targetingMode = function(t){return Targeting[active](src,t)};
+			targetingMode = function(t){ return Targeting[active](src, t) };
 			targetingModeCb = cb;
 		}else{
 			cb();
@@ -60,7 +60,7 @@
 		if (tgtop == 0){
 			return undefined;
 		}else if(tgtop==1){
-			return [player2,player1,player2.weapon,player1.weapon,player2.shield,player1.shield][x>>3];
+			return [player2, player1, player2.weapon, player1.weapon, player2.shield, player1.shield][x>>3];
 		}else if (tgtop==2){
 			return player2.creatures[x>>3];
 		}else if (tgtop==3){
@@ -273,7 +273,7 @@
 		player1.foe = player2;
 		player2.foe = player1;
 		players = [player1, player2];
-		var idx,code, decks = [deck, data.deck];
+		var idx, code, decks = [deck, data.deck];
 		for(var j=0; j<2; j++){
 			for(var i=0; i<decks[j].length; i++){
 				if(Cards[code=decks[j][i]]){
@@ -308,7 +308,7 @@
 		var bits=data.bits, c=bitsToTgt(bits&255), t=bitsToTgt((bits>>8)&255);
 		console.log("active call: " + bits);
 		c.usedactive=true;
-		c.active(c,t);
+		c.active(c, t);
 	});
 	socket.on("foeleft", function(data) {
 		mainStage = menuui;
