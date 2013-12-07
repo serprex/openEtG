@@ -29,9 +29,9 @@ function getTarget(src, active, cb){
 function maybeSetText(textobject, text){
 	if (textobject.text != text)textobject.setText(text);
 }
-function reflectPos(pos){
-	pos.x=900-pos.x;
-	pos.y=600-pos.y;
+function reflectPos(obj){
+	obj.position.x=900-obj.position.x;
+	obj.position.y=600-obj.position.y;
 }
 function centerAnchor(obj){
 	obj.anchor.x=obj.anchor.y=.5;
@@ -172,6 +172,7 @@ var marksprite = [new PIXI.Sprite(nopic), new PIXI.Sprite(nopic)];
 var quantatext = [new PIXI.Text("", {font: "16px Arial bold"}), new PIXI.Text("", {font: "16px Arial bold"})];
 var hptext = [new PIXI.Text("", {font: "18px Arial bold"}), new PIXI.Text("", {font: "18px Arial bold"})];
 var poisontext = [new PIXI.Text("", {font: "16px Arial bold"}), new PIXI.Text("", {font: "16px Arial bold"})];
+var decktext = [new PIXI.Text("", {font: "16px Arial bold"}), new PIXI.Text("", {font: "16px Arial bold"})];
 for (var j=0; j<2; j++){
 	let _j=j;
 	for (var i=0; i<23; i++){
@@ -180,7 +181,7 @@ for (var j=0; j<2; j++){
 		creasprite[j][i].position.x=160+(i%12)*30;
 		creasprite[j][i].position.y=360+(i%3)*20+(Math.floor(i/12)*30);
 		if(j){
-			reflectPos(creasprite[j][i].position);
+			reflectPos(creasprite[j][i]);
 		}
 		creasprite[j][i].setInteractive(true);
 		let _i=i;
@@ -208,7 +209,7 @@ for (var j=0; j<2; j++){
 		permsprite[j][i].position.x=160+(i%12)*30;
 		permsprite[j][i].position.y=490+(i%3)*20+(Math.floor(i/12)*30);
 		if(j){
-			reflectPos(permsprite[j][i].position);
+			reflectPos(permsprite[j][i]);
 		}
 		permsprite[j][i].setInteractive(true);
 		let _i=i;
@@ -265,9 +266,9 @@ for (var j=0; j<2; j++){
 		}
 	}
 	if(j){
-		reflectPos(weapsprite[j].position);
-		reflectPos(shiesprite[j].position);
-		reflectPos(marksprite[j].position);
+		reflectPos(weapsprite[j]);
+		reflectPos(shiesprite[j]);
+		reflectPos(marksprite[j]);
 	}
 	gameui.addChild(weapsprite[j]);
 	gameui.addChild(shiesprite[j]);
@@ -275,20 +276,25 @@ for (var j=0; j<2; j++){
 	centerAnchor(quantatext[j]);
 	centerAnchor(hptext[j]);
 	centerAnchor(poisontext[j]);
+	centerAnchor(decktext[j]);
 	quantatext[j].position.x=50;
 	quantatext[j].position.y=400;
 	hptext[j].position.x=50;
 	hptext[j].position.y=550;
 	poisontext[j].position.x=50;
 	poisontext[j].position.y=570;
+	decktext[j].position.x=50;
+	decktext[j].position.y=530;
 	if (j){
-		reflectPos(quantatext[j].position);
-		reflectPos(hptext[j].position);
-		reflectPos(poisontext[j].position);
+		reflectPos(quantatext[j]);
+		reflectPos(hptext[j]);
+		reflectPos(poisontext[j]);
+		reflectPos(decktext[j]);
 	}
 	gameui.addChild(quantatext[j]);
 	gameui.addChild(hptext[j]);
 	gameui.addChild(poisontext[j]);
+	gameui.addChild(decktext[j]);
 }
 var socket = io.connect("http://"+location.hostname+':13602');
 socket.on("pvpgive", function(data) {
@@ -363,7 +369,8 @@ function animate() {
 			}
 			maybeSetText(quantatext[j], qtext);
 			maybeSetText(hptext[j], players[j].hp + "/" + players[j].maxhp);
-			maybeSetText(poisontext[j], players[j].poison + "psn");
+			maybeSetText(poisontext[j], players[j].poison + (players[j].neuro?"psn!":"psn"));
+			maybeSetText(decktext[j], players[j].deck.length + "cards")
 		}
 	}
 	renderer.render(mainStage);
