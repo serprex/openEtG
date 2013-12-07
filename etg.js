@@ -65,7 +65,7 @@ function shuffle(array) {
 	return array;
 }
 function etgReadCost(card, attr, cost, e){
-	if(~cost.indexOf("+")){
+	if (~cost.indexOf("+")){
 		var c=cost.split("+");
 		card[attr]=parseInt(c[0]);
 		card[attr+"ele"]=parseInt(c[1]);
@@ -186,6 +186,17 @@ Player.prototype.endturn = function() {
 				if (p.charges < 0){
 					delete this.permanents[i];
 				}
+			}else if (p.passive == "flooding"){
+				if (this.spend(Water, 1)){
+					for (var j=0; j<2; j++){
+						for (var i=5; i<23; i++){
+							var cr = players[j].creatures[i];
+							if (cr && cr.card.element != Water && cr.card.element != Other){
+								cr.die();
+							}
+						}
+					}
+				else delete this.permanents[i];
 			}
 		}
 	}
@@ -216,7 +227,7 @@ Player.prototype.drawcard = function() {
 	if (this.hand.length<8){
 		if (this.deck.length>0){
 			this.hand[this.hand.length] = this.deck.pop();
-		}else if(!winner){
+		}else if (!winner){
 			setWinner(this.foe);
 		}
 	}
@@ -353,14 +364,14 @@ Creature.prototype.heal = function(x){
 }
 Weapon.prototype.freeze = Creature.prototype.freeze = function(x){
 	this.frozen = x;
-	if(this.passive == "voodoo")this.owner.foe.freeze(x);
+	if (this.passive == "voodoo")this.owner.foe.freeze(x);
 }
 Creature.prototype.spelldmg = Creature.prototype.dmg = function(x, dontdie){
 	var dmg = Math.min(this.hp, x);
 	this.hp-=x;
-	if(this.hp <= 0){
-		if(!dontdie)this.die();
-	}else if(this.passive == "voodoo")this.owner.foe.dmg(x);
+	if (this.hp <= 0){
+		if (!dontdie)this.die();
+	}else if (this.passive == "voodoo")this.owner.foe.dmg(x);
 	return dmg;
 }
 Creature.prototype.die = function() {
@@ -383,7 +394,7 @@ Creature.prototype.die = function() {
 		}
 		for(var j=0; j<23; j++){
 			var p = pl.permanents[j];
-			if(p){
+			if (p){
 				if (p.passive == "boneyard"){
 					place(p.owner.creatures, new Creature(p.card.upped?EliteSkeleton:Skeleton, p.owner));
 				}else if (p.passive == "soulcatcher"){
@@ -423,7 +434,7 @@ Permanent.prototype.die = function(){ delete this.owner.permanents[this.owner.pe
 Weapon.prototype.die = function() { this.owner.weapon = undefined; }
 Shield.prototype.die = function() { this.owner.shield = undefined; }
 Thing.prototype.canactive = function() {
-	return this.active && !this.usedactive && this.cast != -1 && this.delay == 0 && this.frozen == 0 && this.owner.canspend(this.castele, this.cast);
+	return myturn && this.active && !this.usedactive && this.cast != -1 && this.delay == 0 && this.frozen == 0 && this.owner.canspend(this.castele, this.cast);
 }
 function countAdrenaline(x){
 	return 5-Math.floor(Math.sqrt(Math.abs(x)));
@@ -460,7 +471,7 @@ Weapon.prototype.attack = Creature.prototype.attack = function(){
 	if (this.frozen > 0){
 		this.frozen -= 1;
 	}
-	if(this.delay > 0){
+	if (this.delay > 0){
 		this.delay -= 1;
 	}
 	if (!stasis){
@@ -583,9 +594,9 @@ function calcEclipse(){
 	for (var j=0; j<2; j++){
 		for (var i=0; i<23; i++){
 			if (players[j].permanents[i]){
-				if(players[j].permanents[i].card == Cards.Nightfall){
+				if (players[j].permanents[i].card == Cards.Nightfall){
 					bonus=1;
-				}else if(players[j].permanents[i].card == Cards.Eclipse){
+				}else if (players[j].permanents[i].card == Cards.Eclipse){
 					return 2;
 				}
 			}
@@ -596,7 +607,7 @@ function calcEclipse(){
 function randomcard(upped, onlycreature){
     var keys = [];
     for(var key in Cards) {
-       if(key.length == 3 && Cards[key].upped==upped && (!onlycreature || Cards[key].type == CreatureEnum)) {
+       if (key.length == 3 && Cards[key].upped==upped && (!onlycreature || Cards[key].type == CreatureEnum)) {
            keys.push(key);
        }
     }
@@ -1010,7 +1021,7 @@ mutation:function(t){
 	var rnd=random();
 	if (rnd<.1){
 		t.die();
-	}else if(rnd<.5){
+	}else if (rnd<.5){
 		Actives.improve.call(this, t);
 	}else{
 		t.owner.creatures[t.getIndex()] = new Creature(Cards.Abomination, t.owner);
@@ -1065,7 +1076,7 @@ pandemonium:function(t){
 	masscc(this.owner.foe, function(x){Actives.cseed.call(this,x)});
 },
 paradox:function(t){
-	if(t.trueatk()>t.truehp())t.die();
+	if (t.trueatk()>t.truehp())t.die();
 },
 parallel:function(t){
 	var copy=new Creature();
@@ -1146,7 +1157,7 @@ scavange:function(t){
 scramble:function(t){
 	if (!t.sanctuary){
 		for (var i=0; i<9; i++){
-			if(t.spend(Other, 1)){
+			if (t.spend(Other, 1)){
 				t.spend(Other, -1);
 			}
 		}
@@ -1190,7 +1201,7 @@ steal:function(t){
 	delete t.owner[index];
 	t.owner = this.owner;
 	for(var i=0; i<23; i++){
-		if(!this.owner.permanents[i]){
+		if (!this.owner.permanents[i]){
 			this.owner.permanents[i]=t;
 			break;
 		}

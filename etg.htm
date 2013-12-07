@@ -63,7 +63,7 @@ function bitsToTgt(x){
 	var tgtop=x&7;
 	if (tgtop == 0){
 		return undefined;
-	}else if(tgtop==1){
+	}else if (tgtop==1){
 		return [player2, player1, player2.weapon, player1.weapon, player2.shield, player1.shield][x>>3];
 	}else if (tgtop==2){
 		return player2.creatures[x>>3];
@@ -195,7 +195,7 @@ for (var j=0; j<2; j++){
 		centerAnchor(creasprite[j][i]);
 		creasprite[j][i].position.x=160+(i%12)*30;
 		creasprite[j][i].position.y=360+(i%3)*20+(Math.floor(i/12)*30);
-		if(j){
+		if (j){
 			reflectPos(creasprite[j][i]);
 		}
 		creasprite[j][i].setInteractive(true);
@@ -223,7 +223,7 @@ for (var j=0; j<2; j++){
 		centerAnchor(permsprite[j][i]);
 		permsprite[j][i].position.x=160+(i%12)*30;
 		permsprite[j][i].position.y=490+(i%3)*20+(Math.floor(i/12)*30);
-		if(j){
+		if (j){
 			reflectPos(permsprite[j][i]);
 		}
 		permsprite[j][i].setInteractive(true);
@@ -280,7 +280,7 @@ for (var j=0; j<2; j++){
 			targetingModeCb(players[_j].shield);
 		}
 	}
-	if(j){
+	if (j){
 		reflectPos(weapsprite[j]);
 		reflectPos(shiesprite[j]);
 		reflectPos(marksprite[j]);
@@ -323,9 +323,9 @@ socket.on("pvpgive", function(data) {
 	var idx, code, decks = [deck, data.deck];
 	for(var j=0; j<2; j++){
 		for(var i=0; i<decks[j].length; i++){
-			if(Cards[code=decks[j][i]]){
+			if (Cards[code=decks[j][i]]){
 				players[j].deck.push(Cards[code]);
-			}else if(~(idx=TrueMarks.indexOf(code))){
+			}else if (~(idx=TrueMarks.indexOf(code))){
 				players[j].mark=idx;
 			}
 		}
