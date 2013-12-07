@@ -269,10 +269,10 @@ function Creature(card, owner){
 	this.passive = card.passive
 	this.cast = card.cast
 	this.castele = card.castele
-	this.spelldamage = card==Cards.Psion || card==Cards.PsionUp;
-	this.momentum = card==Cards.SapphireCharger || card==Cards.EliteCharger;
-	this.burrowed = card==Cards.Graboid || card==Cards.EliteGraboid
-	this.immaterial = card==Cards.Immortal || card==Cards.EliteImmortal || card==Cards.PhaseDragon || card==Cards.ElitePhaseDragon
+	this.spelldamage = card.passive == "psion";
+	this.momentum = card.passive == "momentum";
+	this.burrowed = card.passive == "burrowed";
+	this.immaterial = card.passive == "immaterial";
 }
 function Permanent(card, owner){
 	if (card == undefined){
@@ -286,14 +286,14 @@ function Permanent(card, owner){
 	this.passive = card.passive
 	this.charges = 0
 	this.usedactive = true
-	this.immaterial = card == Cards.MorningStar || card == Cards.MorningGlory || card == Cards.Hope || card == Cards.HopeUp || this.active == Actives.reflect;
+	this.immaterial = card.passive == "immaterial" || card == Cards.Hope || card == Cards.HopeUp || this.active == Actives.reflect;
 }
 function Weapon(card, owner){
 	Permanent.apply(this, arguments)
 	this.spelldamage = false
 	this.frozen = 0
 	this.delay = 0
-	this.momentum = card == Cards.Titan || card == Cards.TitanUp
+	this.momentum = card.passive == "momentum"
 	this.atk = card.attack
 	this.dive = 0
 	this.steamatk = 0
@@ -903,8 +903,6 @@ ignite:function(t){
 	masscc(this.owner, function(x){x.dmg(1)});
 	this.owner.foe.spelldmg(20);
 },
-immaterial:function(t){
-},
 immolate:function(t){
 	t.die();
 	for(var i=1; i<13; i++)
@@ -967,8 +965,6 @@ mitosisspell:function(t){
 	}
 },
 momentum:function(t){
-},
-momentumspell:function(t){
 	t.atk+=1;
 	t.buffhp(1);
 	t.momentum=true;
@@ -1066,8 +1062,6 @@ poison3:function(t){
 precognition:function(t){
 	this.owner.drawcard();
 	this.owner.precognition = true;
-},
-psion:function(t){
 },
 purify:function(t){
 	t.poison=Math.max(t.poison-2,-2);
