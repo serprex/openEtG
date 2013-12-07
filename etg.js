@@ -918,6 +918,7 @@ improve:function(t){
 	cr.castele = cr.card.element;
 	cr.buffhp(Math.floor(random()*5));
 	cr.atk += Math.floor(random()*5);
+	t.owner.creatures[t.getIndex()]=cr;
 },
 infect:function(t){
 	t.addpoison(1);
