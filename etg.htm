@@ -12,7 +12,7 @@
 </head>
 <body>
 	<script type="text/javascript;version=1.7">
-var Cards, Targeting, targetingMode, targetingModeCb, myturn, player1, player2, players;
+var Cards, Targeting, targetingMode, targetingModeCb, myturn, player1, player2, players, winner;
 loadcards(function(cards, targeting) {
 	Cards = cards;
 	Targeting = targeting;
@@ -35,6 +35,10 @@ function reflectPos(pos){
 }
 function centerAnchor(obj){
 	obj.anchor.x=obj.anchor.y=.5;
+}
+function setWinner(play){
+	winner=play;
+	endturn.setText(play==player1?"Won":"Lost");
 }
 function tgtToBits(x){
 	if (x == undefined){
@@ -104,12 +108,14 @@ bpvp.click = function(x) {
 	}
 }
 menuui.addChild(bpvp);
-var endturn = new PIXI.Text("End Turn", {font: "16px Arial bold"});
+var endturn = new PIXI.Text("", {font: "16px Arial bold"});
 endturn.position.x = 800;
 endturn.position.y = 550;
 endturn.setInteractive(true);
 endturn.click = function(x) {
-	if (myturn){
+	if (winner){
+		mainStage = menuui;
+	}else if (myturn){
 		socket.emit("endturn");
 		player1.endturn();
 		myturn = false;
@@ -163,8 +169,9 @@ var permsprite = [new Array(23), new Array(23)];
 var weapsprite = [new PIXI.Sprite(nopic), new PIXI.Sprite(nopic)];
 var shiesprite = [new PIXI.Sprite(nopic), new PIXI.Sprite(nopic)];
 var marksprite = [new PIXI.Sprite(nopic), new PIXI.Sprite(nopic)];
-var quantatext = [new PIXI.Text("", {font: "16px Arial bold"}), new PIXI.Text("", {font: "18px Arial bold"})];
+var quantatext = [new PIXI.Text("", {font: "16px Arial bold"}), new PIXI.Text("", {font: "16px Arial bold"})];
 var hptext = [new PIXI.Text("", {font: "18px Arial bold"}), new PIXI.Text("", {font: "18px Arial bold"})];
+var poisontext = [new PIXI.Text("", {font: "16px Arial bold"}), new PIXI.Text("", {font: "16px Arial bold"})];
 for (var j=0; j<2; j++){
 	let _j=j;
 	for (var i=0; i<23; i++){
@@ -267,16 +274,21 @@ for (var j=0; j<2; j++){
 	gameui.addChild(marksprite[j]);
 	centerAnchor(quantatext[j]);
 	centerAnchor(hptext[j]);
+	centerAnchor(poisontext[j]);
 	quantatext[j].position.x=50;
 	quantatext[j].position.y=400;
 	hptext[j].position.x=50;
 	hptext[j].position.y=550;
+	poisontext[j].position.x=50;
+	poisontext[j].position.y=570;
 	if (j){
 		reflectPos(quantatext[j].position);
 		reflectPos(hptext[j].position);
+		reflectPos(poisontext[j].position);
 	}
 	gameui.addChild(quantatext[j]);
 	gameui.addChild(hptext[j]);
+	gameui.addChild(poisontext[j]);
 }
 var socket = io.connect("http://"+location.hostname+':13602');
 socket.on("pvpgive", function(data) {
@@ -304,6 +316,8 @@ socket.on("pvpgive", function(data) {
 		player2.drawhand();
 		player1.drawhand();
 	}
+	winner = undefined;
+	endturn.setText("End Turn");
 	mainStage = gameui;
 });
 socket.on("endturn", function(data) {
@@ -349,6 +363,7 @@ function animate() {
 			}
 			maybeSetText(quantatext[j], qtext);
 			maybeSetText(hptext[j], players[j].hp + "/" + players[j].maxhp);
+			maybeSetText(poisontext[j], players[j].poison + "psn");
 		}
 	}
 	renderer.render(mainStage);

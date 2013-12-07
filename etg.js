@@ -19,7 +19,7 @@ function loadcards(cb){
 					var cardcode = carddata[2];
 					var cardinfo = {};
 					for(var k=0; k<carddata.length; k++)cardinfo[keys[k]] = carddata[k];
-					Cards[carddata[1] in Cards?carddata[1].replace(" ", "")+"Up":carddata[1]] = Cards[cardcode] = new Card(_i, cardinfo);
+					Cards[(carddata[1] in Cards?carddata[1]+"Up":carddata[1]).replace(" ", "")] = Cards[cardcode] = new Card(_i, cardinfo);
 				}
 				maybeCallback();
 			}
@@ -201,7 +201,11 @@ Player.prototype.endturn = function() {
 }
 Player.prototype.drawcard = function() {
 	if (this.hand.length<8){
-		this.hand[this.hand.length] = this.deck.pop();
+		if (this.deck.length>0){
+			this.hand[this.hand.length] = this.deck.pop();
+		}else if(!winner){
+			setWinner(this.foe);
+		}
 	}
 }
 Player.prototype.drawhand = function() {
@@ -239,8 +243,8 @@ Player.prototype.dmg = function(x) {
 	}
 	var dmg=Math.min(this.hp,x);
 	this.hp-=x;
-	if (this.hp <= 0){
-		// todo win
+	if (this.hp <= 0 && !winner){
+		setWinner(this.foe);
 	}
 	return dmg;
 }
