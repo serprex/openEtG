@@ -772,15 +772,12 @@ deadalive:function(t){
 	this.die();
 	this.owner.creatures[index] = this;
 },
-deadly:function(t){
-	t.poison += 2
-},
 deja:function(t){
 	this.active = undefined;
 	parallel(this,this);
 },
 destroy:function(t){
-	if (t instanceof Pillar && t.charges>1){
+	if ((t instanceof Pillar || t.card == Cards.BoneWall || t.card == Cards.BoneWallUp) && t.charges>1){
 		t.charges--;
 	}else{
 		t.die();
@@ -1232,11 +1229,11 @@ unburrow:function(t){
 vampire:function(t){
 	this.owner.heal(this.dmgdone);
 },
-venom:function(t){
-	t.poison += 1
-},
 void:function(t){
-	this.owner.foe.buffhp(this.owner.mark==Darkness?-6:-3);
+	this.owner.foe.maxhp -= this.owner.mark==Darkness?-6:-3;
+	if (this.owner.foe.hp>this.owner.foe.maxhp){
+		this.owner.foe.hp = this.owner.foe.maxhp;
+	}
 },
 web:function(t){
 	t.airborne = false;
