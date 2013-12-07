@@ -28,7 +28,7 @@ function loadcards(cb){
 	}
 	var xhr = new XMLHttpRequest();
 	xhr.open("GET", "active.csv", true);
-	xhr.onreadystatechange = function () {
+	xhr.onreadystatechange = function() {
 		if (this.readyState == 4 && this.status == 200){
 			var csv = this.responseText.split("\n");
 			for (var i=0; i<csv.length; i++){
@@ -123,6 +123,17 @@ function Player(){
 	this.mark = 0;
 	this.quanta = [];
 	for(var i=1; i<13; i++)this.quanta[i]=0;
+}
+Player.prototype.canspend = function(qtype, x) {
+	if (x == 0)return true;
+	if (qtype == Other){
+		var b = x<0?-1:1;
+		var sum=0;
+		for (var i=1; i<13; i++){
+			sum += this.quanta[i];
+		}
+		return sum >= x;
+	}else return this.quanta[qtype] >= x;
 }
 Player.prototype.spend = function(qtype, x) {
 	if (x == 0)return true;
@@ -453,6 +464,7 @@ function place(array, item){
 Player.prototype.summon = function(index, target){
 	var card = this.hand[index];
 	this.hand.splice(index, 1);
+	this.spend(card.costele, card.cost);
 	if (this.neuro){
 		this.poison+=1;
 	}
@@ -475,9 +487,10 @@ Player.prototype.summon = function(index, target){
 			this.shield = new Shield(card, this);
 			if (card == Cards.DimensionalShield || card == Cards.PhaseShield){
 				this.shield.charges = 3;
-			}
-			else if (card == Cards.Wings || card == Cards.WingsUp){
+			}else if (card == Cards.Wings || card == Cards.WingsUp){
 				this.shield.charges = 5;
+			}else if (card == Cards.BoneWall || card == Cards.BoneWallUp){
+				this.shield.charges = 7;
 			}
 			return this.shield;
 		}else{
