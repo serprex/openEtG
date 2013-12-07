@@ -1013,7 +1013,7 @@ nova2:function(t){
 },
 nymph:function(t){
 	var e = t.card.element > 0?t.card.element:Math.ceil(random()*12);
-	destroy(this, t);
+	Actives.destroy.call(this, t);
 	place(this.owner.creatures, new Creature(Cards[NymphList[e*2+(t.card.upped?1:0)]], t.owner));
 },
 overdrive:function(t){
