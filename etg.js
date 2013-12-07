@@ -196,7 +196,7 @@ Player.prototype.endturn = function() {
 							}
 						}
 					}
-				else delete this.permanents[i];
+				}else delete this.permanents[i];
 			}
 		}
 	}
