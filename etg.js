@@ -714,7 +714,7 @@ cpower:function(t){
 	t.atk += Math.ceil(random()*5);
 },
 cseed:function(t){
-	Actives[["infect", "lightning", "icebolt", "firebolt", "freeze", "parallel", "lobotomize", "drainlife", "snipe", "rewind", "gpullspell"][Math.floor(random()*12)]](this, t)
+	Actives[["infect", "lightning", "icebolt", "firebolt", "freeze", "parallel", "lobotomize", "drainlife", "snipe", "rewind", "gpullspell"][Math.floor(random()*12)]].call(this, t)
 },
 cloak:function(t){
 },
