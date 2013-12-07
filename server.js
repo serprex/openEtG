@@ -68,19 +68,19 @@ io.sockets.on("connection", function(socket) {
 	});
 	socket.on("endturn", function(data) {
 		var foe = sockinfo[this.id].foe;
-		if (foe.id in sockinfo){
+		if (foe && foe.id in sockinfo){
 			foe.emit("endturn");
 		}
 	});
 	socket.on("summon", function(data) {
 		var foe = sockinfo[this.id].foe;
-		if (foe.id in sockinfo){
+		if (foe && foe.id in sockinfo){
 			foe.emit("summon", data);
 		}
 	});
 	socket.on("active", function(data) {
 		var foe = sockinfo[this.id].foe;
-		if (foe.id in sockinfo){
+		if (foe && foe.id in sockinfo){
 			foe.emit("active", data);
 		}
 	});
