@@ -104,7 +104,7 @@ var bpvp = new PIXI.Text("Search", {font: "16px Arial bold"});
 bpvp.position.x = 200;
 bpvp.position.y = 200;
 bpvp.setInteractive(true);
-bpvp.click = function(x) {
+bpvp.click = function() {
 	if (Cards != null){
 		//DEBUG
 		var deckimport = document.getElementById("deckimport").value;
@@ -118,7 +118,7 @@ var endturn = new PIXI.Text("", {font: "16px Arial bold"});
 endturn.position.x = 800;
 endturn.position.y = 540;
 endturn.setInteractive(true);
-endturn.click = function(x) {
+endturn.click = function() {
 	if (winner){
 		mainStage = menuui;
 	}else if (myturn){
@@ -128,6 +128,10 @@ endturn.click = function(x) {
 			socket.emit("endturn");
 			player1.endturn();
 			myturn = false;
+			for (var i=0; i<foeplays.length; i++){
+				gameui.removeChild(foeplays[i][1]);
+			}
+			foeplays = [];
 		}
 	}
 }
@@ -136,7 +140,7 @@ var cancel = new PIXI.Text("Cancel", {font: "16px Arial bold"});
 cancel.position.x = 800;
 cancel.position.y = 500;
 cancel.setInteractive(true);
-cancel.click = function(x) {
+cancel.click = function() {
 	if (myturn && targetingMode){
 		targetingMode = null;
 		targetingModeCb = null;
@@ -147,6 +151,16 @@ turntell.position.x = 800;
 turntell.position.y = 570;
 gameui.addChild(turntell);
 gameui.addChild(cancel);
+var foeplays = [];
+var infotext = new PIXI.Text("", {font: "16px Arial bold"});
+infotext.position.x=100;
+infotext.position.y=585;
+gameui.addChild(infotext);
+function setInfo(obj){
+	if(obj){
+		maybeSetText(infotext, obj.info());
+	}
+}
 var handsprite = [new Array(8), new Array(8)];
 for (var i=0; i<8; i++){
 	handsprite[0][i] = new PIXI.Sprite(nopic);
@@ -154,13 +168,17 @@ for (var i=0; i<8; i++){
 	handsprite[0][i].position.y=300+20*i;
 	handsprite[0][i].setInteractive(true);
 	let _i=i;
-	handsprite[0][i].click = function(x){
+	handsprite[0][i].mouseover = function(){
+		setInfo(player1.hand[_i]);
+	}
+	handsprite[0][i].click = function(){
 		if (discarding){
 			socket.emit("endturn", _i);
 			player1.discard(_i);
 			player1.endturn();
 			myturn=false;
 			discarding = false;
+			return;
 		}
 		if (!myturn || player1.silence)return;
 		var card = player1.hand[_i];
@@ -206,7 +224,10 @@ for (var j=0; j<2; j++){
 		}
 		creasprite[j][i].setInteractive(true);
 		let _i=i;
-		creasprite[j][i].click = function(x){
+		creasprite[j][i].mouseover = function(){
+			setInfo(players[_j].creatures[_i]);
+		}
+		creasprite[j][i].click = function(){
 			var crea = players[_j].creatures[_i];
 			if (!crea)return;
 			if (targetingMode && targetingMode(crea)){
@@ -232,7 +253,10 @@ for (var j=0; j<2; j++){
 		}
 		permsprite[j][i].setInteractive(true);
 		let _i=i;
-		permsprite[j][i].click = function(x){
+		permsprite[j][i].mouseover = function(){
+			setInfo(players[_j].permanents[_i]);
+		}
+		permsprite[j][i].click = function(){
 			let perm = players[_j].permanents[_i];
 			if (!perm)return;
 			if (targetingMode && targetingMode(perm)){
@@ -259,7 +283,13 @@ for (var j=0; j<2; j++){
 	shiesprite[j].setInteractive(true);
 	marksprite[j].position.x = 550;
 	marksprite[j].position.y = 470;
-	weapsprite[j].click = function(x){
+	weapsprite[j].mouseover = function(){
+			setInfo(players[_j].weapon);
+	}
+	shiesprite[j].mouseover = function(){
+			setInfo(players[_j].shield);
+	}
+	weapsprite[j].click = function(){
 		var weap = players[_j].weapon;
 		if (!weap)return
 		if (targetingMode && targetingMode(weap)){
@@ -273,7 +303,7 @@ for (var j=0; j<2; j++){
 			});
 		}
 	}
-	shiesprite[j].click = function(x){
+	shiesprite[j].click = function(){
 		if (!players[_j].shield)return
 		if (targetingMode && targetingMode(players[_j].shield)){
 			targetingMode = undefined;
@@ -354,6 +384,11 @@ socket.on("summon", function(bits) {
 	var card = player2.hand[handindex];
 	player2.spend(card.costele, card.cost);
 	player2.summon(handindex, bitsToTgt(bits>>3));
+	var sprite = new PIXI.Sprite(nopic);
+	foeplays.push([card, sprite]);
+	sprite.position.x=foeplays.length*40;
+	sprite.position.y=8;
+	gameui.addChild(sprite);
 });
 socket.on("active", function(bits) {
 	var c=bitsToTgt(bits&255), t=bitsToTgt((bits>>8)&255);
@@ -377,6 +412,9 @@ function maybeSendChat(e){
 function animate() {
 	if (mainStage == gameui){
 		maybeSetText(turntell, discarding?"Discard":myturn?"Your Turn":"Their Turn");
+		for(var i=0; i<foeplays.length; i++){
+			maybeSetTexture(foeplays[i][1], getCardImage(foeplays[i][0].code));
+		}
 		for(var j=0; j<2; j++){
 			for(var i=0;i<8;i++){
 				maybeSetTexture(handsprite[j][i], players[j].hand[i]?getCardImage(j==0||player1.precognition?players[j].hand[i].code:"000"):null);

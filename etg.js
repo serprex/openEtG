@@ -89,6 +89,9 @@ function Card(type, info){
 	this.passive = info.Passive;
 	this.airborne = info.Airborne == "1";
 }
+Card.prototype.info = function(){
+	return this.cost+":"+this.element+" "+this.attack+"|"+this.health+(this.airborne?" airborne ":" ")+(this.passive||"");
+}
 function randomquanta(quanta){
 	var nonzero = 0
 	for(var i=1; i<13; i++){
@@ -126,6 +129,76 @@ function Player(){
 	this.quanta = [];
 	for(var i=1; i<13; i++)this.quanta[i]=0;
 }
+function Thing(card, owner){
+	if (!card)return;
+	this.owner = owner;
+	this.card = card;
+}
+function Creature(card, owner){
+	this.delay = 0;
+	this.frozen = 0;
+	this.dive = 0;
+	this.poison = 0;
+	this.steamatk = 0;
+	this.adrenaline = 0;
+	this.aflatoxin = false;
+	this.usedactive = true;
+	if (!card){
+		return;
+	}
+	Thing.apply(this, arguments);
+	this.maxhp = this.hp = card.health;
+	this.atk = card.attack;
+	this.airborne = card.airborne;
+	this.active = card.active;
+	this.passive = card.passive;
+	this.cast = card.cast;
+	this.castele = card.castele;
+	this.spelldamage = card.passive == "psion";
+	this.momentum = card.passive == "momentum";
+	this.burrowed = card.passive == "burrowed";
+	this.immaterial = card.passive == "immaterial";
+}
+function Permanent(card, owner){
+	if (!card){
+		return;
+	}
+	Thing.apply(this, arguments);
+	this.cast = card.cast;
+	this.castele = card.castele;
+	this.active = card.active;
+	this.passive = card.passive;
+	this.charges = 0;
+	this.usedactive = true;
+	this.immaterial = card.passive == "immaterial" || card == Cards.Hope || card == Cards.HopeUp || this.active == Actives.reflect;
+}
+function Weapon(card, owner){
+	Permanent.apply(this, arguments);
+	this.spelldamage = false;
+	this.frozen = 0;
+	this.delay = 0;
+	this.momentum = card.passive == "momentum";
+	this.atk = card.attack;
+	this.dive = 0;
+	this.steamatk = 0;
+	this.adrenaline = 0;
+}
+function Shield(card, owner){
+	Permanent.apply(this, arguments)
+	this.dr = card.health
+}
+function Pillar(card, owner){
+	this.owner = owner;
+	this.card = card;
+	this.active = card.active;
+	this.charges = 1;
+	this.pendstate = false;
+}
+Creature.prototype = new Thing();
+Permanent.prototype = new Thing();
+Weapon.prototype = new Permanent();
+Shield.prototype = new Permanent();
+Pillar.prototype = new Permanent();
 Player.prototype.canspend = function(qtype, x) {
 	if (x == 0)return true;
 	if (qtype == Other){
@@ -249,6 +322,35 @@ Player.prototype.drawhand = function() {
 		this.hand.push(this.deck.pop());
 	}
 }
+Creature.prototype.info = function(){
+	var info=this.trueatk()+"|"+this.hp+" /"+this.maxhp;
+	if (this.frozen)info+=" "+this.frozen+"frozen";
+	if (this.delay)info+=" "+this.delay+"delay";
+	if (this.poison)info+=" "+this.poison+"psn";
+	if (this.aflatoxin)info+=" aflatoxin";
+	if (this.airborne)info+=" airborne";
+	if (this.momentum)info+=" momentum";
+	if (this.spelldamage)info+=" psion";
+	if (this.burrowed)info+=" burrowed";
+	if (this.immaterial)info+=" immaterial";
+	if (this.passive)info+=" "+this.passive;
+	return info;
+}
+Permanent.prototype.info = function(){
+	var info = this.charges?this.charges.toString():"";
+	if (this.immaterial)info += " immaterial";
+	return info;
+}
+Weapon.prototype.info = function(){
+	var info = "";
+	if (this.frozen)info += " "+this.frozen+"frozen";
+	if (this.delay)info += " "+this.delay+"delay";
+	if (this.immaterial)info += " immaterial";
+	return info;
+}
+Pillar.prototype.info = function(){
+	return this.charges + ":" + (this.pendstate?this.element:this.owner.mark);
+}
 Player.prototype.freeze = function(x) {
 	if (this.weapon)this.weapon.freeze(x);
 }
@@ -273,76 +375,6 @@ Player.prototype.dmg = function(x) {
 	}
 	return dmg;
 }
-function Thing(card, owner){
-	if (!card)return;
-	this.owner = owner;
-	this.card = card;
-}
-function Creature(card, owner){
-	this.delay = 0;
-	this.frozen = 0;
-	this.dive = 0;
-	this.poison = 0;
-	this.steamatk = 0;
-	this.adrenaline = 0;
-	this.aflatoxin = false;
-	this.usedactive = true;
-	if (!card){
-		return;
-	}
-	Thing.apply(this, arguments);
-	this.maxhp = this.hp = card.health;
-	this.atk = card.attack;
-	this.airborne = card.airborne;
-	this.active = card.active;
-	this.passive = card.passive;
-	this.cast = card.cast;
-	this.castele = card.castele;
-	this.spelldamage = card.passive == "psion";
-	this.momentum = card.passive == "momentum";
-	this.burrowed = card.passive == "burrowed";
-	this.immaterial = card.passive == "immaterial";
-}
-function Permanent(card, owner){
-	if (!card){
-		return;
-	}
-	Thing.apply(this, arguments);
-	this.cast = card.cast;
-	this.castele = card.castele;
-	this.active = card.active;
-	this.passive = card.passive;
-	this.charges = 0;
-	this.usedactive = true;
-	this.immaterial = card.passive == "immaterial" || card == Cards.Hope || card == Cards.HopeUp || this.active == Actives.reflect;
-}
-function Weapon(card, owner){
-	Permanent.apply(this, arguments);
-	this.spelldamage = false;
-	this.frozen = 0;
-	this.delay = 0;
-	this.momentum = card.passive == "momentum";
-	this.atk = card.attack;
-	this.dive = 0;
-	this.steamatk = 0;
-	this.adrenaline = 0;
-}
-function Shield(card, owner){
-	Permanent.apply(this, arguments)
-	this.dr = card.health
-}
-function Pillar(card, owner){
-	this.owner = owner;
-	this.card = card;
-	this.active = card.active;
-	this.charges = 1;
-	this.pendstate = false;
-}
-Creature.prototype = new Thing();
-Permanent.prototype = new Thing();
-Weapon.prototype = new Permanent();
-Shield.prototype = new Permanent();
-Pillar.prototype = new Permanent();
 Player.prototype.spelldmg = function(x) {
 	return (!this.shield || this.shield.active != Actives.reflect?this:this.foe).dmg(x);
 }
