@@ -92,21 +92,6 @@ function Card(type, info){
 Card.prototype.info = function(){
 	return this.cost+":"+this.element+" "+this.attack+"|"+this.health+(this.airborne?" airborne ":" ")+(this.passive||"");
 }
-function randomquanta(quanta){
-	var nonzero = 0
-	for(var i=1; i<13; i++){
-		nonzero += quanta[i];
-	}
-	if (nonzero == 0){
-		return -1;
-	}
-	nonzero = Math.ceil(random()*nonzero);
-	for(var i=1; i<13; i++){
-		if ((nonzero -= quanta[i])<=0){
-			return i;
-		}
-	}
-}
 function Player(){
 	this.owner = this
 	this.shield = null;
@@ -199,35 +184,45 @@ Permanent.prototype = new Thing();
 Weapon.prototype = new Permanent();
 Shield.prototype = new Permanent();
 Pillar.prototype = new Permanent();
-Player.prototype.canspend = function(qtype, x) {
-	if (x == 0)return true;
-	if (qtype == Other){
-		var b = x<0?-1:1;
-		var sum=0;
-		for (var i=1; i<13; i++){
-			sum += this.quanta[i];
+Player.prototype.randomquanta = function() {
+	var nonzero = 0
+	for(var i=1; i<13; i++){
+		nonzero += this.quanta[i];
+	}
+	if (nonzero == 0){
+		return -1;
+	}
+	nonzero = Math.ceil(random()*nonzero);
+	for(var i=1; i<13; i++){
+		if ((nonzero -= this.quanta[i])<=0){
+			return i;
 		}
-		return sum >= x;
+	}
+}
+Player.prototype.canspend = function(qtype, x) {
+	if (x <= 0)return true;
+	if (qtype == Other){
+		for (var i=1; i<13; i++){
+			x -= this.quanta[i];
+		}
+		return x<= 0;
 	}else return this.quanta[qtype] >= x;
 }
 Player.prototype.spend = function(qtype, x) {
 	if (x == 0)return true;
+	if (!this.canspend(qtype, x))return false;
 	if (qtype == Other){
 		var b = x<0?-1:1;
-		var sum=0;
-		for (var i=1; i<13; i++){
-			sum += this.quanta[i];
+		for (var i=x*b; i>0; i--){
+			this.quanta[b==-1?Math.ceil(random()*12):this.randomquanta()] -= b
 		}
-		if (sum >= x){
-			for (var i=x*b; i>0; i--){
-				this.quanta[b==-1?Math.ceil(random()*12):randomquanta(this.quanta)] -= b
-			}
-			return true;
-		}else return false;
-	}else if (this.quanta[qtype] >= x){
-		this.quanta[qtype] -= x;
-		return true;
-	}else return false;
+	}else this.quanta[qtype] -= x;
+	for (var i=1; i<13; i++){
+		if (this.quanta[qtype]>75){
+			this.quanta[qtype]=75;
+		}
+	}
+	return true;
 }
 Player.prototype.discard = function(index) {
 	var card=this.hand[index];
