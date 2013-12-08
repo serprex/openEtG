@@ -95,14 +95,14 @@ Card.prototype.info = function(){
 function randomquanta(quanta){
 	var nonzero = 0
 	for(var i=1; i<13; i++){
-		if (quanta[i] > 0)nonzero++;
+		nonzero += quanta[i];
 	}
 	if (nonzero == 0){
 		return -1;
 	}
-	nonzero = Math.floor(random()*nonzero);
+	nonzero = Math.ceil(random()*nonzero);
 	for(var i=1; i<13; i++){
-		if (quanta[i]>0&&--nonzero == 0){
+		if ((nonzero -= quanta[i])<=0){
 			return i;
 		}
 	}
