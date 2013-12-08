@@ -427,7 +427,7 @@ Creature.prototype.die = function() {
 		var pl = players[i];
 		for(var j=0; j<23; j++){
 			var c = pl.creatures[j];
-			if (c && c.active == Actives.scavange){
+			if (c && c.active == Actives.scavenger){
 				c.atk += 1;
 				c.buffhp(1);
 			}
@@ -670,40 +670,45 @@ function masscc(player, func){
 		}
 	}
 }
-function creatgt(c, t){
-	return t instanceof Creature && !t.immaterial && !t.burrowed;
+function isMaterialInstance(type,t){
+	return t instanceof type && !t.immaterial && !t.burrowed;
 }
 var TargetFilters = {
 	pill:function(c, t){
-		return t instanceof Pillar;
+		return isMaterialInstance(Pillar, t);
 	},
 	weap:function(c, t){
-		return t instanceof Weapon;
+		return isMaterialInstance(Weapon, t);
 	},
 	perm:function(c, t){
-		return t instanceof Permanent;
+		return isMaterialInstance(Permanent, t);
 	},
-	crea:creatgt,
+	crea:function(c, t){
+		return isMaterialInstance(Creature, t);
+	},
 	play:function(c, t){
 		return t instanceof Player;
 	},
 	creaorplay:function(c, t){
-		return creatgt(c, t) || t instanceof Player;
+		return t instanceof Player || isMaterialInstance(Creature, t);
 	},
 	foeperm:function(c, t){
-		return c.owner != t.owner && t instanceof Permanent;
+		return c.owner != t.owner && isMaterialInstance(Permanent, t);
+	},
+	butterfly:function(c, t){
+		return isMaterialInstance(Creature, t) && t.trueatk()<3;
 	},
 	devour:function(c, t){
-		return creatgt(c, t) && t.truehp()<c.truehp();
+		return isMaterialInstance(Creature, t) && t.truehp()<c.truehp();
 	},
 	paradox:function(c, t){
-		return creatgt(c, t) && t.truehp()<t.trueatk();
+		return isMaterialInstance(Creature, t) && t.truehp()<t.trueatk();
 	},
 	airbornecrea:function(c, t){
-		return creatgt(c, t) && t.airborne;
+		return isMaterialInstance(Creature, t) && t.airborne;
 	},
 	wisdom:function(c, t){
-		return t instanceof Creature && !t.burrowed;
+		return isMaterialInstance(Creature, t) && !t.burrowed;
 	}
 
 }
@@ -1014,7 +1019,7 @@ improve:function(t){
 	if (!cr.active){
 		cr.passive = random()<.5?"momentum":"immaterial";
 	}
-	cr.cast = Math.ceil(random(2));
+	cr.cast = Math.ceil(random()*2);
 	cr.castele = cr.card.element;
 	cr.buffhp(Math.floor(random()*5));
 	cr.atk += Math.floor(random()*5);
@@ -1228,7 +1233,7 @@ sanctuary:function(t){
 scarab:function(t){
 	place(this.owner.creatures, new Creature(this.upped?Cards.EliteScarab:Cards.Scarab, this.owner));
 },
-scavange:function(t){
+scavenger:function(t){
 },
 scramble:function(t){
 	if (!t.sanctuary){
