@@ -916,8 +916,13 @@ enchant:function(t){
 },
 endow:function(t){
 	this.active = t.active;
+	this.cast = t.cast;
+	this.castele = t.castele;
 	this.passive = t.passive;
-	this.atk += t.atk;
+	this.atk += t.trueatk();
+	if (t.cast == -3){
+		this.atk -= t.active();
+	}
 	this.buffhp(2);
 },
 evolve:function(t){
