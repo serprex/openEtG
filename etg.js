@@ -351,6 +351,9 @@ Weapon.prototype.info = function(){
 Pillar.prototype.info = function(){
 	return this.charges + ":" + (this.pendstate?this.element:this.owner.mark);
 }
+Player.prototype.delay = function(x) {
+	if (this.weapon)this.weapon.delay(x);
+}
 Player.prototype.freeze = function(x) {
 	if (this.weapon)this.weapon.freeze(x);
 }
@@ -394,6 +397,10 @@ Player.prototype.buffhp = Creature.prototype.buffhp = function(x){
 }
 Creature.prototype.heal = function(x){
 	this.hp = Math.min(this.maxhp, this.hp+x);
+}
+Weapon.prototype.delay = Creature.prototype.delay = function(x){
+	this.delay += x;
+	if (this.passive == "voodoo")this.owner.foe.delay(x);
 }
 Weapon.prototype.freeze = Creature.prototype.freeze = function(x){
 	this.frozen = x;
@@ -735,7 +742,7 @@ antimatter:function(t){
 },
 bblood:function(t){
 	t.buffhp(20);
-	t.delay += 6;
+	t.delay(6);
 },
 blackhole:function(t){
 	if (!this.owner.foe.sanctuary){
@@ -956,8 +963,8 @@ growth:function(t){
 	this.atk += 2;
 },
 guard:function(t){
-	this.delay++;
-	t.delay++;
+	this.delay(1);
+	t.delay(1);
 	if (!t.airborne){
 		t.dmg(this.trueatk());
 	}
@@ -990,9 +997,9 @@ icebolt:function(t){
 	}
 },
 ignite:function(t){
+	this.owner.foe.spelldmg(20);
 	masscc(this.owner.foe, function(x){x.dmg(1)});
 	masscc(this.owner, function(x){x.dmg(1)});
-	this.owner.foe.spelldmg(20);
 },
 immolate:function(t){
 	t.die();
@@ -1133,6 +1140,16 @@ parallel:function(t){
 	copy.owner = this.owner;
 	copy.usedactive = true;
 	place(this.owner.creatures, copy);
+	if (this.passive == "voodoo"){
+		this.owner.foe.dmg(copy.maxhp-copy.hp);
+		this.owner.foe.addpoison(copy.poison);
+		if (this.owner.foe.weapon){
+			this.owner.foe.delay(copy.delay);
+			if (copy.frozen>this.owner.foe.weapon.frozen){
+				this.owner.foe.freeze(copy.frozen);
+			}
+		}
+	}
 },
 phoenix:function(t){
 },
@@ -1359,7 +1376,7 @@ wings:function(t){
 	return t.airborne || t.passive == "ranged";
 },
 slow:function(t){
-	t.delay = 1;
+	t.delay(1);
 },
 evade50:function(t){
 	return random()>.5;

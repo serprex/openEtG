@@ -141,9 +141,13 @@ cancel.position.x = 800;
 cancel.position.y = 500;
 cancel.setInteractive(true);
 cancel.click = function() {
-	if (myturn && targetingMode){
-		targetingMode = null;
-		targetingModeCb = null;
+	if (myturn){
+		if (targetingMode){
+			targetingMode = null;
+			targetingModeCb = null;
+		}else if (discarding){
+			discarding = false;
+		}
 	}
 }
 var turntell = new PIXI.Text("", {font: "16px Arial bold"});
