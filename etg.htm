@@ -340,6 +340,12 @@ for (var j=0; j<2; j++){
 		reflectPos(poisontext[j]);
 		reflectPos(decktext[j]);
 	}
+	hptext[j].setInteractive(true);
+	hptext[j].click = function(){
+		if (targetingMode && targetingMode(players[_j])){
+			targetingModeCb(players[_j]);
+		}
+	}
 	gameui.addChild(quantatext[j]);
 	gameui.addChild(hptext[j]);
 	gameui.addChild(poisontext[j]);

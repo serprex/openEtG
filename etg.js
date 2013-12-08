@@ -531,7 +531,11 @@ Weapon.prototype.attack = Creature.prototype.attack = function(){
 		}else if (this.momentum || this.trueatk() < 0){
 			target.dmg(this.trueatk())
 		}else if (target.gpull){
-			this.owner.dmg(-target.gpull.dmg(this.trueatk()));
+			var dmg = target.gpull.dmg(this.trueatk());
+			if (this.adrenaline < 3 && this.cast == -2){
+				this.dmgdone = dmg;
+				this.active(target);
+			}
 		}else if (!target.shield || (this.trueatk() > target.shield.dr && (!target.shield.active || !target.shield.active(this)))){
 			var dmg = target.dmg(this.trueatk() - (target.shield?target.shield.dr:0));
 			if (this.adrenaline < 3 && this.cast == -2){
@@ -687,6 +691,12 @@ var TargetFilters = {
 	},
 	crea:function(c, t){
 		return isMaterialInstance(Creature, t);
+	},
+	creaonly:function(c, t){
+		return isMaterialInstance(Creature, t) && t.card.type == CreatureEnum;
+	},
+	creanonspell:function(c, t){
+		return isMaterialInstance(Creature, t) && t.card.type != SpellEnum;
 	},
 	play:function(c, t){
 		return t instanceof Player;
@@ -1070,11 +1080,9 @@ mitosis:function(t){
 	place(this.owner.creatures, new Creature(this.card, this.owner))
 },
 mitosisspell:function(t){
-	if (this.card.type == CreatureEnum){
-		this.castele = this.card.element;
-		this.cast = this.card.cost;
-		this.active = mitosis;
-	}
+	this.castele = this.card.element;
+	this.cast = this.card.cost;
+	this.active = mitosis;
 },
 momentum:function(t){
 	t.atk += 1;
@@ -1240,7 +1248,7 @@ scarab:function(t){
 scavenger:function(t){
 },
 scramble:function(t){
-	if (!t.sanctuary){
+	if (t instanceof Player && !t.sanctuary){
 		for (var i=0; i<9; i++){
 			if (t.spend(Other, 1)){
 				t.spend(Other, -1);
