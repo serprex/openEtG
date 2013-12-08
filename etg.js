@@ -423,9 +423,9 @@ Creature.prototype.truehp = function(){
 	if ((this.card.element == Darkness || this.card.element == Death) && calcEclipse() != 0){
 		hp++;
 	}
-	if (this.passive == "scarab"){
+	if (this.passive == "swarm"){
 		for (var i=0; i<23; i++){
-			if (this.owner.creatures[i] && this.owner.creatures[i].passive == "scarab" && this.owner.creatures[i] != this){
+			if (this.owner.creatures[i] && this.owner.creatures[i].passive == "swarm" && this.owner.creatures[i] != this){
 				hp++;
 			}
 		}
@@ -924,6 +924,7 @@ growth:function(t){
 	this.atk += 2;
 },
 guard:function(t){
+	this.delay++;
 	t.delay++;
 	if (!t.airborne){
 		t.dmg(this.trueatk());
