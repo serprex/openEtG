@@ -337,7 +337,7 @@ Creature.prototype.info = function(){
 	return info;
 }
 Permanent.prototype.info = function(){
-	var info = this.charges?this.charges.toString():"";
+	var info = this.charges?"x"+this.charges:"";
 	if (this.immaterial)info += " immaterial";
 	return info;
 }
@@ -347,6 +347,11 @@ Weapon.prototype.info = function(){
 	if (this.delay)info += " "+this.delay+"delay";
 	if (this.immaterial)info += " immaterial";
 	return info;
+}
+Shield.prototype.info = function(){
+	var info = this.dr.toString();
+	if (this.charges)info += " x"+this.charges;
+	if (this.immaterial)info += " immaterial";
 }
 Pillar.prototype.info = function(){
 	return this.charges + ":" + (this.pendstate?this.element:this.owner.mark);
