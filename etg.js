@@ -120,7 +120,7 @@ function Player(){
 	this.hand = [];
 	this.deck = [];
 	this.creatures = new Array(23);
-	this.permanents = new Array(23);
+	this.permanents = new Array(16);
 	this.mark = 0;
 	this.quanta = [];
 	for(var i=1; i<13; i++)this.quanta[i]=0;
@@ -174,7 +174,7 @@ Player.prototype.endturn = function() {
 		}
 	}
 	this.spend(this.mark, -1);
-	for (var i=0; i<23; i++){
+	for (var i=0; i<16; i++){
 		if (this.permanents[i]){
 			var p = this.permanents[i];
 			if (p instanceof Pillar || p.cast == -1){
@@ -392,7 +392,7 @@ Creature.prototype.die = function() {
 				c.buffhp(1);
 			}
 		}
-		for(var j=0; j<23; j++){
+		for(var j=0; j<16; j++){
 			var p = pl.permanents[j];
 			if (p){
 				if (p.passive == "boneyard"){
@@ -461,7 +461,7 @@ Weapon.prototype.attack = Creature.prototype.attack = function(){
 	}
 	var stasis=this.frozen>0 || this.delay>0;
 	if (isCreature&&!stasis){
-		for(var i=0; i<23; i++){
+		for(var i=0; i<16; i++){
 			if ((this.owner.permanents[i] && this.owner.permanents[i].passive == "stasis") || (target.permanents[i] && target.permanents[i].passive == "stasis")){
 				stasis=true;
 				break;
@@ -525,7 +525,7 @@ Player.prototype.summon = function(index, target){
 				//bug upped marks grant like quantum tower
 				this.spend(card.element, -1);
 			}
-			for (var i=0; i<23; i++){
+			for (var i=0; i<16; i++){
 				if (this.permanents[i] && this.permanents[i].card == card){
 					this.permanents[i].charges += 1;
 					return this.permanents[i];
@@ -592,7 +592,7 @@ var NymphList = [undefined, undefined,
 function calcEclipse(){
 	var bonus=0;
 	for (var j=0; j<2; j++){
-		for (var i=0; i<23; i++){
+		for (var i=0; i<16; i++){
 			if (players[j].permanents[i]){
 				if (players[j].permanents[i].card == Cards.Nightfall){
 					bonus=1;
@@ -1197,7 +1197,7 @@ steal:function(t){
 	var index=t.getIndex();
 	delete t.owner[index];
 	t.owner = this.owner;
-	for(var i=0; i<23; i++){
+	for(var i=0; i<16; i++){
 		if (!this.owner.permanents[i]){
 			this.owner.permanents[i]=t;
 			break;

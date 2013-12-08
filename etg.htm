@@ -186,7 +186,7 @@ for (var i=0; i<8; i++){
 	gameui.addChild(handsprite[1][i]);
 }
 var creasprite = [new Array(23), new Array(23)];
-var permsprite = [new Array(23), new Array(23)];
+var permsprite = [new Array(16), new Array(16)];
 var weapsprite = [new PIXI.Sprite(nopic), new PIXI.Sprite(nopic)];
 var shiesprite = [new PIXI.Sprite(nopic), new PIXI.Sprite(nopic)];
 var marksprite = [new PIXI.Sprite(nopic), new PIXI.Sprite(nopic)];
@@ -224,7 +224,7 @@ for (var j=0; j<2; j++){
 		}
 		gameui.addChild(creasprite[j][i]);
 	}
-	for (var i=0; i<23; i++){
+	for (var i=0; i<16; i++){
 		permsprite[j][i] = new PIXI.Sprite(nopic);
 		centerAnchor(permsprite[j][i]);
 		permsprite[j][i].position.x=160+(i%12)*30;
@@ -381,7 +381,7 @@ function animate() {
 			for(var i=0;i<23;i++){
 				maybeSetTexture(creasprite[j][i], players[j].creatures[i]?getCardImage(players[j].creatures[i].card.code):null);
 			}
-			for(var i=0; i<23; i++){
+			for(var i=0; i<16; i++){
 				maybeSetTexture(permsprite[j][i], players[j].permanents[i]?getCardImage(players[j].permanents[i].card.code):null);
 			}
 			maybeSetTexture(weapsprite[j], players[j].weapon?getCardImage(players[j].weapon.card.code):null);
