@@ -886,7 +886,7 @@ flyingweapon:function(t){
 		var cr = new Creature(t.weapon.card, t.owner);
 		cr.passive = t.weapon.passive;
 		cr.airborne = true;
-		place(this.owner.creatures, cr);
+		place(t.owner.creatures, cr);
 		t.weapon = undefined;
 	}
 },
@@ -928,7 +928,7 @@ hasten:function(t){
 	this.owner.drawcard();
 },
 hatch:function(t){
-	this.owner.creatures[this.getIndex()] = new Creature(randomcard(this.card.upped,true), this.owner);
+	this.owner.creatures[this.getIndex()] = new Creature(randomcard(this.card.upped, true), this.owner);
 },
 heal:function(t){
 	t.heal(5);
@@ -1152,8 +1152,14 @@ regenerate:function(t){
 relic:function(t){
 },
 rewind:function(t){
-	delete t.owner.creatures[t.getIndex()];
-	t.owner.deck.push(t.card);
+	if (t.passive == "undead"){
+		Actives.hatch.call(t);
+	}else if (t.passive == "mummy"){
+		t.owner.creatures[t.getIndex()] = new Creature(t.card.upped?Cards.Pharaoh:Cards.PharaohUp, t.owner);
+	}else{
+		delete t.owner.creatures[t.getIndex()];
+		t.owner.deck.push(t.card);
+	}
 },
 sanctuary:function(t){
 	this.owner.sanctuary = true;
