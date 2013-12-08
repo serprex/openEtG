@@ -439,6 +439,14 @@ Shield.prototype.die = function() { this.owner.shield = undefined; }
 Thing.prototype.canactive = function() {
 	return myturn && this.active && !this.usedactive && this.cast != -1 && this.delay == 0 && this.frozen == 0 && this.owner.canspend(this.castele, this.cast);
 }
+Thing.prototype.useactive = function(t) {
+	this.owner.spend(this.castele, this.cast);
+	this.usedactive = true;
+	this.active(t);
+	if (this.passive == "sacrifice"){
+		this.die();
+	}
+}
 function countAdrenaline(x){
 	return 5-Math.floor(Math.sqrt(Math.abs(x)));
 }
@@ -1072,7 +1080,7 @@ nymph:function(t){
 },
 overdrive:function(t){
 	this.atk += 3;
-	this.dmg(1,true);
+	this.dmg(1, true);
 },
 overdrivespell:function(t){
 	this.cast = -1;
@@ -1097,7 +1105,9 @@ phoenix:function(t){
 },
 photosynthesis:function(t){
 	this.owner.spend(Life, -2);
-	this.usedactive = false;
+	if (this.cast > 0){
+		this.usedactive = false;
+	}
 },
 plague:function(t){
 	masscc(this.owner.foe, function(x){x.addpoison(1)});

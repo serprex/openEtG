@@ -216,9 +216,7 @@ for (var j=0; j<2; j++){
 				getTarget(crea, crea.active, function(tgt){
 					targetingMode = undefined;
 					socket.emit("active", tgtToBits(crea)|tgtToBits(tgt)<<8);
-					player1.spend(crea.castele, crea.cast);
-					crea.usedactive = true;
-					crea.active(tgt);
+					crea.useactive(tgt);
 				});
 			}
 		}
@@ -244,9 +242,7 @@ for (var j=0; j<2; j++){
 				getTarget(perm, perm.active, function(tgt){
 					targetingMode = undefined;
 					socket.emit("active", tgtToBits(perm)|tgtToBits(tgt)<<8);
-					player1.spend(perm.castele, perm.cast);
-					perm.usedactive = true;
-					perm.active(tgt);
+					perm.useactive(tgt);
 				});
 			}
 		}
@@ -273,9 +269,7 @@ for (var j=0; j<2; j++){
 			getTarget(weap, weap.active, function(tgt){
 				targetingMode = undefined;
 				socket.emit("active", tgtToBits(weap)|tgtToBits(tgt)<<8);
-				player1.spend(weap.castele, weap.cast);
-				weap.usedactive = true;
-				weap.active(tgt);
+				weap.useactive(tgt);
 			});
 		}
 	}
@@ -364,9 +358,7 @@ socket.on("summon", function(bits) {
 socket.on("active", function(bits) {
 	var c=bitsToTgt(bits&255), t=bitsToTgt((bits>>8)&255);
 	console.log("active call: " + bits);
-	player2.spend(c.castele, c.cast);
-	c.usedactive=true;
-	c.active(t);
+	c.useactive(t);
 });
 socket.on("foeleft", function(data) {
 	mainStage = menuui;
