@@ -356,7 +356,7 @@ Creature.prototype.addpoison = function(x) {
 		this.owner.foe.poison += x;
 	}
 }
-Creature.prototype.buffhp = function(x){
+Player.prototype.buffhp = Creature.prototype.buffhp = function(x){
 	this.hp += x;
 	this.maxhp += x;
 }
@@ -445,7 +445,7 @@ function countAdrenaline(x){
 function calcAdrenaline(x,y){
 	if (y<2)return x;
 	var f1 = calcAdrenaline(x,y-1);
-	return Math.ceil(f1-(3-countAdrenaline(x))*f1*(y-1)/3);
+	return f1-Math.ceil((4-countAdrenaline(x))*f1*(y-1)/3);
 }
 Weapon.prototype.attack = Creature.prototype.attack = function(){
 	var isCreature = this instanceof Creature;
@@ -454,16 +454,15 @@ Weapon.prototype.attack = Creature.prototype.attack = function(){
 	}
 	var target = this.owner.foe;
 	if (this.adrenaline<3){
-		this.usedactive = false;
 		if (this.cast == -1){
-			this.active()
+			this.active();
 		}
 		if (this.passive == "devour" && target.spend(Other, 1)){
 			this.owner.spend(Darkness, -1);
 		}
 	}
 	var stasis = this.frozen>0 || this.delay>0;
-	if (isCreature&&!stasis){
+	if (isCreature && !stasis){
 		for(var i=0; i<16; i++){
 			if ((this.owner.permanents[i] && this.owner.permanents[i].passive == "stasis") || (target.permanents[i] && target.permanents[i].passive == "stasis")){
 				stasis = true;
@@ -486,12 +485,13 @@ Weapon.prototype.attack = Creature.prototype.attack = function(){
 			this.owner.heal(target.gpull.dmg(this.trueatk()));
 		}else if (!target.shield || (this.trueatk() > target.shield.dr && (!target.shield.active || !target.shield.active(this)))){
 			var dmg = target.dmg(this.trueatk() - (target.shield?target.shield.dr:0));
-			if (this.cast == -2){
+			if (this.adrenaline < 3 && this.cast == -2){
 				this.dmgdone = dmg;
 				this.active(target);
 			}
 		}
 	}
+	this.usedactive = false;
 	this.dive = 0
 	if (this.active == Actives.dshield){
 		this.immaterial = false;
@@ -884,7 +884,10 @@ firebolt:function(t){
 flyingweapon:function(t){
 	if (t.weapon){
 		var cr = new Creature(t.weapon.card, t.owner);
+		cr.passive = t.weapon.passive;
 		cr.airborne = true;
+		place(this.owner.creatures, cr);
+		t.weapon = undefined;
 	}
 },
 fractal:function(t){
@@ -894,7 +897,7 @@ fractal:function(t){
 	}
 },
 freeze:function(t){
-	t.frozen = this.card.upped ? 4 : 3;
+	t.freeze(this.card.upped ? 4 : 3);
 },
 gas:function(t){
 	place(this.owner.permanents, new Permanent(this.upped?Cards.UnstableGasUp:Cards.UnstableGas, this.owner))
@@ -958,8 +961,11 @@ immolate:function(t){
 },
 improve:function(t){
 	var cr = new Creature(randomcard(false, true), t.owner);
-	var abilities = ["hatch","freeze","burrow","destroy","steal","dive","heal","momentum","paradox","lycanthropy","scavenger","infection","gpull","devour","mutation","growth","ablaze","poison","deja","immaterial","endow","guard","mitosis"];
-	cr.active = Actives[abilities[Math.floor(random()*abilities.length)]]
+	var abilities = [null,null,"hatch","freeze","burrow","destroy","steal","dive","heal","paradox","lycanthropy","scavenger","infection","gpull","devour","mutation","growth","ablaze","poison","deja","endow","guard","mitosis"];
+	cr.active = Actives[abilities[Math.floor(random()*abilities.length)]];
+	if (!cr.active){
+		cr.passive = random()<.5?"momentum":"immaterial";
+	}
 	cr.cast = Math.ceil(random(2));
 	cr.castele = cr.card.element;
 	cr.buffhp(Math.floor(random()*5));
