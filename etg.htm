@@ -3,7 +3,9 @@
 	<title>openEtG</title>
 	<style>
 		body {
-			background-color: #000000;
+			background-color: black;
+			color: white;
+			margin:0;
 		}
 	</style>
 	<script src="pixi.js"></script>
@@ -83,12 +85,10 @@ function bitsToTgt(x){
 }
 var renderer = PIXI.autoDetectRenderer(900, 600);
 document.body.appendChild(renderer.view);
-var menuui = new PIXI.Stage(0x336699, true);
-var gameui = new PIXI.Stage(0x336699, true);
+var menuui = new PIXI.Stage(0x336699, true), gameui = new PIXI.Stage(0x336699, true);
 var mainStage = menuui;
 
-var nopic = PIXI.Texture.fromImage("null.png");
-var cimgcache = {};
+var nopic = PIXI.Texture.fromImage("null.png"), cimgcache = {};
 function getCardImage(code){
 	if (code in cimgcache)return cimgcache[code];
 	else{
@@ -361,8 +361,19 @@ socket.on("active", function(bits) {
 	c.useactive(t);
 });
 socket.on("foeleft", function(data) {
-	mainStage = menuui;
+	setWinner(player1);
 });
+socket.on("chat", function(data) {
+	document.getElementById("chatArea").value = data;
+});
+function maybeSendChat(e){
+	if (e.keyCode != 13)return;
+	var chat=document.getElementById("chatinput");
+	if (chat.value){
+		socket.emit("chat", chat.value);
+		chat.value = "";
+	}
+}
 function animate() {
 	if (mainStage == gameui){
 		maybeSetText(turntell, discarding?"Discard":myturn?"Your Turn":"Their Turn");
@@ -395,8 +406,10 @@ function animate() {
 requestAnimFrame(animate);
 	</script>
 	<br/>
-	<input id="deckimport" type="text" value="" placeholder="Deck" />
-	<input id="roomname" type="text" value="" placeholder="Room" />
-	<br/>Firefox only for now
+	<input id="deckimport" type="text" placeholder="Deck" />
+	<input id="roomname" type="text" placeholder="Room" />
+	Firefox only for now
+	<br/><input id="chatArea" type="text" style="width:100%;" readonly />
+	<br/><input id="chatinput" type="text" placeholder="Chat" style="width:100%" onkeyup="maybeSendChat(event)" />
 </body>
 </html>

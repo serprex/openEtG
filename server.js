@@ -42,6 +42,14 @@ function dropsock(data){
 		delete sockinfo[this.id];
 	}
 }
+function foeEcho(socket, event){
+	socket.on(event, function(data){
+		var foe = sockinfo[this.id].foe;
+		if (foe && foe.id in sockinfo){
+			foe.emit(event, data);
+		}
+	});
+}
 
 io.sockets.on("connection", function(socket) {
 	sockinfo[socket.id] = {};
@@ -66,22 +74,8 @@ io.sockets.on("connection", function(socket) {
 			rooms[data.room] = this;
 		}
 	});
-	socket.on("endturn", function(data) {
-		var foe = sockinfo[this.id].foe;
-		if (foe && foe.id in sockinfo){
-			foe.emit("endturn", data);
-		}
-	});
-	socket.on("summon", function(data) {
-		var foe = sockinfo[this.id].foe;
-		if (foe && foe.id in sockinfo){
-			foe.emit("summon", data);
-		}
-	});
-	socket.on("active", function(data) {
-		var foe = sockinfo[this.id].foe;
-		if (foe && foe.id in sockinfo){
-			foe.emit("active", data);
-		}
-	});
+	foeEcho(socket, "endturn");
+	foeEcho(socket, "summon");
+	foeEcho(socket, "active");
+	foeEcho(socket, "chat");
 });
