@@ -10,11 +10,12 @@
 	</style>
 	<script src="pixi.js"></script>
 	<script src="/socket.io/socket.io.js"></script>
+	<script src="MersenneTwister.js"></script>
 	<script src="etg.js" type="text/javascript;version=1.7"></script>
 </head>
 <body>
 	<script type="text/javascript;version=1.7">
-var Cards, Targeting, targetingMode, targetingModeCb, myturn, player1, player2, players, winner, discarding;
+var Cards, Targeting, targetingMode, targetingModeCb, targetingText, myturn, player1, player2, players, winner, discarding;
 loadcards(function(cards, targeting) {
 	Cards = cards;
 	Targeting = targeting;
@@ -22,10 +23,27 @@ loadcards(function(cards, targeting) {
 });
 function getTarget(src, active, cb){
 	if (active in Targeting){
-		targetingMode = function(t){ return Targeting[active](src, t) };
+		let targetingFilter = Targeting[active];
+		targetingMode = function(t){ return targetingFilter(src, t) };
 		targetingModeCb = cb;
+		for(var key in TargetFilters){
+			if (TargetFilters[key] == targetingFilter){
+				targetingText = "Target "+key;
+				break;
+			}
+		}
 	}else{
 		cb();
+	}
+}
+function targetingText(){
+	if (!targetingMode){
+		console.log("targetingtext called without mode");
+		return "";
+	}else{
+		for(var key in Targeting){
+		}
+		targetingMode
 	}
 }
 function maybeSetText(obj, text){
@@ -90,7 +108,7 @@ var mainStage = menuui;
 
 var nopic = PIXI.Texture.fromImage("null.png"), cimgcache = {};
 function getCardImage(code){
-	if (code in cimgcache)return cimgcache[code];
+	if (cimgcache[code])return cimgcache[code];
 	else{
 		var loader = new PIXI.AssetLoader(["cards/"+code+".png"]);
 		loader.onComplete = function() { cimgcache[code]=new PIXI.Texture.fromImage("cards/"+code+".png"); }
@@ -354,7 +372,7 @@ for (var j=0; j<2; j++){
 }
 var socket = io.connect("http://"+location.hostname+':13602');
 socket.on("pvpgive", function(data) {
-	seed(data.seed);
+	rng.seed(data.seed);
 	myturn = data.first;
 	player1 = new Player();
 	player2 = new Player();
@@ -422,7 +440,7 @@ function maybeSendChat(e){
 }
 function animate() {
 	if (mainStage == gameui){
-		maybeSetText(turntell, discarding?"Discard":myturn?"Your Turn":"Their Turn");
+		maybeSetText(turntell, discarding?"Discard":targetingMode?targetingText:myturn?"Your Turn":"Their Turn");
 		for(var i=0; i<foeplays.length; i++){
 			maybeSetTexture(foeplays[i][1], getCardImage(foeplays[i][0].code));
 		}

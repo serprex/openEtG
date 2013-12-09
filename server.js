@@ -63,8 +63,8 @@ io.sockets.on("connection", function(socket) {
 		}
 		sockinfo[this.id].deck = data.deck;
 		if (pendinggame && pendinggame.id in sockinfo){
-			var seed = Math.random()*4294967296;
-			var first = seed<(4294967296/2);
+			var seed = Math.random()*4000000000;
+			var first = seed<2000000000;
 			sockinfo[this.id].foe = pendinggame;
 			sockinfo[pendinggame.id].foe = this;
 			this.emit("pvpgive", {first:first, seed:seed, deck:sockinfo[pendinggame.id].deck});

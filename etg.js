@@ -1,3 +1,4 @@
+var rng = new MersenneTwister(0);
 function loadcards(cb){
 	var Cards = {};
 	var Targeting = {};
@@ -41,24 +42,10 @@ function loadcards(cb){
 	}
 	xhr.send();
 }
-var m_w = 0, m_z = 0;
-function seed(i) {
-	m_w = i;
-	m_z = 987654321;
-}
-function random()
-{
-	var mask = 0xffffffff;
-	m_z = (36969 * (m_z & 65535) + (m_z >> 16)) & mask;
-	m_w = (18000 * (m_w & 65535) + (m_w >> 16)) & mask;
-	var result = ((m_z << 16) + m_w) & mask;
-	result /= 4294967296;
-	return result + 0.5;
-}
 function shuffle(array) {
 	var counter = array.length, temp, index;
 	while (counter--) {
-		index = (random() * counter) | 0;
+		index = (rng.real() * counter) | 0;
 		temp = array[counter];
 		array[counter] = array[index];
 		array[index] = temp;
@@ -120,6 +107,7 @@ function Thing(card, owner){
 	this.card = card;
 }
 function Creature(card, owner){
+	Thing.apply(this, arguments);
 	this.delayed = 0;
 	this.frozen = 0;
 	this.dive = 0;
@@ -128,10 +116,6 @@ function Creature(card, owner){
 	this.adrenaline = 0;
 	this.aflatoxin = false;
 	this.usedactive = true;
-	if (!card){
-		return;
-	}
-	Thing.apply(this, arguments);
 	this.maxhp = this.hp = card.health;
 	this.atk = card.attack;
 	this.airborne = card.airborne;
@@ -192,7 +176,7 @@ Player.prototype.randomquanta = function() {
 	if (nonzero == 0){
 		return -1;
 	}
-	nonzero = Math.ceil(random()*nonzero);
+	nonzero = Math.ceil(rng.real()*nonzero);
 	for(var i=1; i<13; i++){
 		if ((nonzero -= this.quanta[i])<=0){
 			return i;
@@ -214,7 +198,7 @@ Player.prototype.spend = function(qtype, x) {
 	if (qtype == Other){
 		var b = x<0?-1:1;
 		for (var i=x*b; i>0; i--){
-			this.quanta[b==-1?Math.ceil(random()*12):this.randomquanta()] -= b
+			this.quanta[b==-1?Math.ceil(rng.real()*12):this.randomquanta()] -= b
 		}
 	}else this.quanta[qtype] -= x;
 	for (var i=1; i<13; i++){
@@ -673,7 +657,7 @@ function randomcard(upped, onlycreature){
 			}
 		}
 	}
-	return Cards[keys[Math.floor(random() * keys.length)]];
+	return Cards[keys[Math.floor(rng.real() * keys.length)]];
 }
 function activename(active){
 	for(var key in Actives){
@@ -837,8 +821,7 @@ chimera:function(t){
 			hp += this.owner.creatures[i].truehp();
 		}
 	}
-	var chim = new Creature();
-	chim.card = this.card;
+	var chim = new Creature(this.card, this.owner);
 	chim.atk = atk;
 	chim.maxhp = hp;
 	chim.hp = hp;
@@ -849,11 +832,11 @@ chimera:function(t){
 	this.owner.gpull = chim;
 },
 cpower:function(t){
-	t.buffhp(Math.ceil(random()*5));
-	t.atk += Math.ceil(random()*5);
+	t.buffhp(Math.ceil(rng.real()*5));
+	t.atk += Math.ceil(rng.real()*5);
 },
 cseed:function(t){
-	Actives[["infect", "lightning", "icebolt", "firebolt", "freeze", "parallel", "lobotomize", "drainlife", "snipe", "rewind", "gpullspell"][Math.floor(random()*12)]].call(this, t)
+	Actives[["infect", "lightning", "icebolt", "firebolt", "freeze", "parallel", "lobotomize", "drainlife", "snipe", "rewind", "gpullspell"][Math.floor(rng.real()*12)]].call(this, t)
 },
 cloak:function(t){
 },
@@ -1042,11 +1025,12 @@ holylight:function(t){
 icebolt:function(t){
 	var bolts = 1+Math.floor(this.owner.quanta[Water]/10);
 	t.spelldmg(bolts*2);
-	if (random() < .3+bolts/10){
+	if (rng.real() < .3+bolts/10){
 		t.freeze(3);
 	}
 },
 ignite:function(t){
+	this.die();
 	this.owner.foe.spelldmg(20);
 	masscc(this.owner.foe, function(x){x.dmg(1)});
 	masscc(this.owner, function(x){x.dmg(1)});
@@ -1060,14 +1044,14 @@ immolate:function(t){
 improve:function(t){
 	var cr = new Creature(randomcard(false, true), t.owner);
 	var abilities = [null,null,"hatch","freeze","burrow","destroy","steal","dive","heal","paradox","lycanthropy","scavenger","infection","gpull","devour","mutation","growth","ablaze","poison","deja","endow","guard","mitosis"];
-	cr.active = Actives[abilities[Math.floor(random()*abilities.length)]];
+	cr.active = Actives[abilities[Math.floor(rng.real()*abilities.length)]];
 	if (!cr.active){
-		cr.passive = random()<.5?"momentum":"immaterial";
+		cr.passive = rng.real()<.5?"momentum":"immaterial";
 	}
-	cr.cast = Math.ceil(random()*2);
+	cr.cast = Math.ceil(rng.real()*2);
 	cr.castele = cr.card.element;
-	cr.buffhp(Math.floor(random()*5));
-	cr.atk += Math.floor(random()*5);
+	cr.buffhp(Math.floor(rng.real()*5));
+	cr.atk += Math.floor(rng.real()*5);
 	t.owner.creatures[t.getIndex()] = cr;
 },
 infect:function(t){
@@ -1120,7 +1104,7 @@ momentum:function(t){
 	t.momentum = true;
 },
 mutation:function(t){
-	var rnd = random();
+	var rnd = rng.real();
 	if (rnd<.1){
 		t.die();
 	}else if (rnd<.5){
@@ -1160,7 +1144,7 @@ nova2:function(t){
 	}
 },
 nymph:function(t){
-	var e = t.card.element > 0?t.card.element:Math.ceil(random()*12);
+	var e = t.card.element > 0?t.card.element:Math.ceil(rng.real()*12);
 	Actives.destroy.call(this, t);
 	place(this.owner.creatures, new Creature(Cards[NymphList[e*2+(t.card.upped?1:0)]], t.owner));
 },
@@ -1179,7 +1163,7 @@ paradox:function(t){
 	if (t.trueatk()>t.truehp())t.die();
 },
 parallel:function(t){
-	var copy = new Creature();
+	var copy = new Creature(t.card, this.owner);
 	for(var attr in t){
 		if (t.hasOwnProperty(attr))copy[attr] = t[attr];
 	}
@@ -1290,7 +1274,7 @@ serendipity:function(t){
 		cards[i] = randomcard(this.card.upped);
 		anyentro|=cards[i].element == Entropy;
 	}
-	if (!anyentro){
+	if (!anyentro && num>0){
 		while (cards[0].element != Entropy){
 			cards[0] = randomcard(this.card.upped);
 		}
@@ -1394,7 +1378,7 @@ pend:function(t){
 },
 skull:function(t){
 	var thp = t.truehp();
-	if (thp <= 0 || random() < .5/thp){
+	if (thp <= 0 || rng.real() < .5/thp){
 		var index = t.getIndex()
 		t.die();
 		t.owner[index] = new Creature(t.card.upped?Cards.EliteSkeleton:Cards.Skeleton, t.owner);
@@ -1410,7 +1394,7 @@ weight:function(t){
 	return t.truehp()>5;
 },
 thorn:function(t){
-	if (random()<.75){
+	if (rng.real()<.75){
 		t.addpoison(1);
 	}
 },
@@ -1420,7 +1404,7 @@ firewall:function(t){
 	t.dmg(1);
 },
 cold:function(t){
-	if (random()<.3){
+	if (rng.real()<.3){
 		t.freeze(3);
 	}
 },
@@ -1432,7 +1416,7 @@ solar:function(t){
 hope:function(t){
 },
 evade40:function(t){
-	return random()>.4;
+	return rng.real()>.4;
 },
 wings:function(t){
 	return t.airborne || t.passive == "ranged";
@@ -1441,7 +1425,7 @@ slow:function(t){
 	t.delay(1);
 },
 evade50:function(t){
-	return random()>.5;
+	return rng.real()>.5;
 },
 evade100:function(t){
 	return true;
