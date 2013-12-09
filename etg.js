@@ -233,7 +233,7 @@ Player.prototype.discard = function(index) {
 }
 Player.prototype.endturn = function() {
 	this.precognition = this.sanctuary = this.silence = false;
-	this.foe.hp -= this.foe.poison;
+	this.foe.hp.dmg(this.foe.poison);
 	var cr;
 	for (var i=0; i<23; i++){
 		if ((cr = this.creatures[i])){
@@ -837,7 +837,7 @@ deadalive:function(t){
 },
 deja:function(t){
 	this.active = undefined;
-	parallel(this,this);
+	Actives.parallel.call(this, this);
 },
 destroy:function(t){
 	if ((t instanceof Pillar || t.card == Cards.BoneWall || t.card == Cards.BoneWallUp) && t.charges>1){
@@ -1152,7 +1152,7 @@ parallel:function(t){
 	copy.owner = this.owner;
 	copy.usedactive = true;
 	place(this.owner.creatures, copy);
-	if (this.passive == "voodoo"){
+	if (t.passive == "voodoo"){
 		this.owner.foe.dmg(copy.maxhp-copy.hp);
 		this.owner.foe.addpoison(copy.poison);
 		if (this.owner.foe.weapon){
@@ -1279,7 +1279,7 @@ snipe:function(t){
 	t.dmg(3);
 },
 sosa:function(t){
-	t.owner.sosa = 2;
+	t.owner.sosa += 2;
 	t.owner.dmg(this.card.upped?40:48, true);
 },
 sskin:function(t){
