@@ -604,9 +604,9 @@ Player.prototype.summon = function(index, target){
 			return this.shield;
 		}else{
 			var p = new Permanent(card, this);
-			if (card == Sundial || card == SundialUp){
+			if (card == Cards.Sundial || card == Cards.SundialUp){
 				p.charges = 1;
-			}else if(card == Cloak || card == CloakUp){
+			}else if(card == Cards.Cloak || card == Cards.CloakUp){
 				p.charges = 3;
 			}
 			return place(this.permanents, p);
