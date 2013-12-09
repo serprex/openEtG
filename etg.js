@@ -233,7 +233,7 @@ Player.prototype.discard = function(index) {
 }
 Player.prototype.endturn = function() {
 	this.precognition = this.sanctuary = this.silence = false;
-	this.foe.hp.dmg(this.foe.poison);
+	this.foe.dmg(this.foe.poison);
 	var cr;
 	for (var i=0; i<23; i++){
 		if ((cr = this.creatures[i])){
