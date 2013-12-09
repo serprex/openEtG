@@ -231,6 +231,8 @@ Player.prototype.endturn = function() {
 				p.charges -= 1;
 				if (p.charges < 0){
 					delete this.permanents[i];
+				}else if (p.passive == "stasis"){
+					stasisFlag = true;
 				}
 			}else if (p.passive == "flooding" && !floodingPaidFlag){
 				floodingPaidFlag = true;
@@ -240,8 +242,6 @@ Player.prototype.endturn = function() {
 				}
 			}else if (p.passive == "sopa"){
 				patienceFlag = true;
-			}else if (p.passive == "stasis"){
-				stasisFlag = true;
 			}
 		}
 		if ((p=this.foe.permanents[i])){
@@ -337,7 +337,7 @@ Creature.prototype.info = function(){
 	if (this.psion)info+=" psion";
 	if (this.burrowed)info+=" burrowed";
 	if (this.immaterial)info+=" immaterial";
-	if (this.passive && info.indexOf(this.passive)==-1)info+=" "+this.passive;
+	if (this.passive && !~info.indexOf(this.passive))info+=" "+this.passive;
 	return info;
 }
 Permanent.prototype.info = function(){
@@ -618,7 +618,6 @@ Player.prototype.summon = function(index, target){
 			}
 			return place(this.permanents, p);
 		}
-		return p;
 	}else if (card.type == SpellEnum){
 		this.card = card
 		card.active.call(this, target)
@@ -660,6 +659,19 @@ var NymphList = [undefined, undefined,
 	"5s4", "7qk",
 	"5v8", "7to",
 	"62c", "80s"];
+var ShardList = [undefined, undefined,
+	"50a", "6uq",
+	"53e", "71u",
+	"56i", "752",
+	"59m", "786",
+	"5cq", "7ba",
+	"5fu", "7ee",
+	"5j2", "7hi",
+	"5m6", "7km",
+	"5pa", "7nq",
+	"5se", "7qu",
+	"5vi", "7u2",
+	"62m", "816"];
 function calcEclipse(){
 	var bonus = 0;
 	for (var j=0; j<2; j++){
@@ -675,10 +687,10 @@ function calcEclipse(){
 	}
 	return bonus;
 }
-function randomcard(upped, onlycreature){
+function randomcard(upped, filter){
 	var keys = [];
 	for(var key in Cards) {
-	if (key.length == 3 && Cards[key].upped == upped && (!onlycreature || Cards[key].type == CreatureEnum)) {
+	if (key.length == 3 && Cards[key].upped == upped && (!filter || filter(Cards[key]))) {
 			var intKey = parseInt(key, 32);
 			// Skip marks
 			if (!((intKey>=5011&&intKey<=5022)||(intKey>=7011&&intKey<=7022))){
@@ -1041,7 +1053,7 @@ hasten:function(t){
 	this.owner.drawcard();
 },
 hatch:function(t){
-	this.owner.creatures[this.getIndex()] = new Creature(randomcard(this.card.upped, true), this.owner);
+	this.owner.creatures[this.getIndex()] = new Creature(randomcard(this.card.upped, function(x){return x.type == CreatureEnum}), this.owner);
 },
 heal:function(t){
 	t.dmg(-5);
@@ -1072,7 +1084,7 @@ immolate:function(t){
 	this.quanta[Fire] += this.card.upped?7:5;
 },
 improve:function(t){
-	var cr = new Creature(randomcard(false, true), t.owner);
+	var cr = new Creature(randomcard(false, function(x){return x.type == CreatureEnum}), t.owner);
 	var abilities = [null,null,"hatch","freeze","burrow","destroy","steal","dive","heal","paradox","lycanthropy","scavenger","infection","gpull","devour","mutation","growth","ablaze","poison","deja","endow","guard","mitosis"];
 	cr.active = Actives[abilities[Math.floor(rng.real()*abilities.length)]];
 	if (!cr.active){
@@ -1305,14 +1317,9 @@ scramble:function(t){
 },
 serendipity:function(t){
 	var cards = [], num = Math.min(8-this.owner.hand.length, 3), anyentro = false;
-	for(var i=0; i<num; i++){
-		cards[i] = randomcard(this.card.upped);
-		anyentro|=cards[i].element == Entropy;
-	}
-	if (!anyentro && num>0){
-		while (cards[0].element != Entropy){
-			cards[0] = randomcard(this.card.upped);
-		}
+	for(var i=num-1; i>=0; i--){
+		cards[i] = randomcard(this.card.upped, function(x){return !~NymphList.indexOf(x) && !~ShardList.indexOf(x) && (i>0 || anyentro || x.element == Entropy)});
+		anyentro |= cards[i].element == Entropy;
 	}
 	for(var i=0; i<num; i++){
 		this.owner.hand.push(cards[i]);
