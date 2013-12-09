@@ -139,7 +139,7 @@ function Creature(card, owner){
 	this.passive = card.passive;
 	this.cast = card.cast;
 	this.castele = card.castele;
-	this.spelldamage = card.passive == "psion";
+	this.psion = card.passive == "psion";
 	this.momentum = card.passive == "momentum";
 	this.burrowed = card.passive == "burrowed";
 	this.immaterial = card.passive == "immaterial";
@@ -159,7 +159,7 @@ function Permanent(card, owner){
 }
 function Weapon(card, owner){
 	Permanent.apply(this, arguments);
-	this.spelldamage = false;
+	this.psion = false;
 	this.frozen = 0;
 	this.delayed = 0;
 	this.momentum = card.passive == "momentum";
@@ -319,26 +319,29 @@ Player.prototype.drawhand = function() {
 	}
 }
 Creature.prototype.info = function(){
-	var info=this.trueatk()+"|"+this.hp+" /"+this.maxhp;
+	var info=this.trueatk()+"|"+this.hp+"/"+this.maxhp;
+	if (this.active)info+=" "+casttext(this.cast, this.castele)+":"+activename(this.active);
 	if (this.frozen)info+=" "+this.frozen+"frozen";
 	if (this.delayed)info+=" "+this.delayed+"delay";
 	if (this.poison)info+=" "+this.poison+"psn";
 	if (this.aflatoxin)info+=" aflatoxin";
 	if (this.airborne)info+=" airborne";
 	if (this.momentum)info+=" momentum";
-	if (this.spelldamage)info+=" psion";
+	if (this.psion)info+=" psion";
 	if (this.burrowed)info+=" burrowed";
 	if (this.immaterial)info+=" immaterial";
-	if (this.passive)info+=" "+this.passive;
+	if (this.passive && info.indexOf(this.passive)==-1)info+=" "+this.passive;
 	return info;
 }
 Permanent.prototype.info = function(){
 	var info = this.charges?"x"+this.charges:"";
+	if (this.active)info+=" "+casttext(this.cast, this.castele)+":"+activename(this.active);
 	if (this.immaterial)info += " immaterial";
 	return info;
 }
 Weapon.prototype.info = function(){
 	var info = "";
+	if (this.active)info+=" "+casttext(this.cast, this.castele)+":"+activename(this.active);
 	if (this.frozen)info += " "+this.frozen+"frozen";
 	if (this.delayed)info += " "+this.delayed+"delay";
 	if (this.immaterial)info += " immaterial";
@@ -346,6 +349,7 @@ Weapon.prototype.info = function(){
 }
 Shield.prototype.info = function(){
 	var info = this.dr.toString();
+	if (this.active)info+=" "+activename(this.active);
 	if (this.charges)info += " x"+this.charges;
 	if (this.immaterial)info += " immaterial";
 }
@@ -523,7 +527,7 @@ Weapon.prototype.attack = Creature.prototype.attack = function(){
 		this.delayed -= 1;
 	}
 	if (!stasis){
-		if (this.spelldamage){
+		if (this.psion){
 			target.spelldmg(this.trueatk())
 		}else if (this.momentum || this.trueatk() < 0){
 			target.dmg(this.trueatk())
@@ -668,6 +672,26 @@ function randomcard(upped, onlycreature){
 		}
 	}
 	return Cards[keys[Math.floor(random() * keys.length)]];
+}
+function activename(active){
+	for(var key in Actives){
+		if (Actives[key] == active){
+			return key;
+		}
+	}
+}
+function casttext(cast, castele){
+	if (cast > 0){
+		return cast + ":" + castele;
+	}else if (cast == 0){
+		return "0";
+	}else if (cast == -1){
+		return "per hit";
+	}else if (cast == -2){
+		return "on hit";
+	}else if (cast == -3){
+		return "buff";
+	}else console.log("Unknown cost: " + cast);
 }
 function masscc(player, func){
 	for (var i=0; i<23; i++){
@@ -1356,7 +1380,7 @@ web:function(t){
 wisdom:function(t){
 	t.atk += 4;
 	if (t.immaterial){
-		t.spelldamage = true;
+		t.psion = true;
 	}
 },
 pillar:function(t){
