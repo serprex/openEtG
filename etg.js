@@ -489,7 +489,8 @@ Weapon.prototype.attack = Creature.prototype.attack = function(){
 		this.dmg(this.poison, true);
 	}
 	var target = this.owner.foe;
-	if (this.adrenaline<3){
+	var stasis = this.frozen>0 || this.delayed>0;
+	if (!stasis && this.adrenaline<3){
 		if (this.cast == -1){
 			this.active();
 		}
@@ -497,7 +498,6 @@ Weapon.prototype.attack = Creature.prototype.attack = function(){
 			this.owner.spend(Darkness, -1);
 		}
 	}
-	var stasis = this.frozen>0 || this.delayed>0;
 	if (isCreature && !stasis){
 		for(var i=0; i<16; i++){
 			if ((this.owner.permanents[i] && this.owner.permanents[i].passive == "stasis") || (target.permanents[i] && target.permanents[i].passive == "stasis")){
@@ -1324,7 +1324,7 @@ steal:function(t){
 		}
 	}else{
 		var index = t.getIndex();
-		delete t.owner[index];
+		delete t.owner.permanents[index];
 		t.owner = this.owner;
 		place(this.owner.permanents, t);
 	}
@@ -1377,11 +1377,15 @@ pend:function(t){
 	this.pendstate ^= true;
 },
 skull:function(t){
-	var thp = t.truehp();
-	if (thp <= 0 || rng.real() < .5/thp){
-		var index = t.getIndex()
-		t.die();
-		t.owner[index] = new Creature(t.card.upped?Cards.EliteSkeleton:Cards.Skeleton, t.owner);
+	if (t instanceof Creature){
+		var thp = t.truehp();
+		if (thp <= 0 || rng.real() < .5/thp){
+			var index = t.getIndex()
+			t.die();
+			if (!t.owner.creatures[index] || t.owner.creatures[index].card != Cards.MalignantCell){
+				t.owner.creatures[index] = new Creature(t.card.upped?Cards.EliteSkeleton:Cards.Skeleton, t.owner);
+			}
+		}
 	}
 },
 bones:function(t){
@@ -1391,7 +1395,7 @@ bones:function(t){
 	return true;
 },
 weight:function(t){
-	return t.truehp()>5;
+	return t instanceof Creature && t.truehp()>5;
 },
 thorn:function(t){
 	if (rng.real()<.75){
