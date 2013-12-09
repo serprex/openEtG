@@ -235,7 +235,7 @@ Player.prototype.endturn = function() {
 			}else if (p.passive == "flooding" && !floodingPaidFlag){
 				floodingPaidFlag = true;
 				floodingFlag = true;
-				if (!this.spend(Water, 1){
+				if (!this.spend(Water, 1)){
 					delete this.permanents[i];
 				}
 			}else if (p.passive == "sopa"){
