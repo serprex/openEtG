@@ -387,7 +387,7 @@ Player.prototype.spelldmg = function(x) {
 	return (!this.shield || this.shield.active != Actives.reflect?this:this.foe).dmg(x);
 }
 Creature.prototype.getIndex = function() { return this.owner.creatures.indexOf(this); }
-Creature.prototype.addpoison = function(x) {
+Player.prototype.addpoison = Creature.prototype.addpoison = function(x) {
 	this.poison += x;
 	if (this.passive == "voodoo"){
 		this.owner.foe.poison += x;
@@ -471,7 +471,7 @@ Creature.prototype.truehp = function(){
 	return hp;
 }
 Permanent.prototype.getIndex = function() { return this.owner.permanents.indexOf(this); }
-Permanent.prototype.die = function(){ delete this.owner.permanents[this.owner.permanents.getIndex()]; }
+Permanent.prototype.die = function(){ delete this.owner.permanents[this.getIndex()]; }
 Weapon.prototype.die = function() { this.owner.weapon = undefined; }
 Shield.prototype.die = function() { this.owner.shield = undefined; }
 Thing.prototype.canactive = function() {
@@ -657,13 +657,17 @@ function calcEclipse(){
 	return bonus;
 }
 function randomcard(upped, onlycreature){
-    var keys = [];
-    for(var key in Cards) {
+	var keys = [];
+	for(var key in Cards) {
        if (key.length == 3 && Cards[key].upped == upped && (!onlycreature || Cards[key].type == CreatureEnum)) {
-           keys.push(key);
-       }
-    }
-    return Cards[keys[Math.floor(random() * keys.length)]];
+			var intKey = parseInt(key, 32);
+			// Skip marks
+			if (!((intKey>=5011&&intKey<=5022)||(intKey>=7011&&intKey<=7022))){
+				keys.push(key);
+			}
+		}
+	}
+	return Cards[keys[Math.floor(random() * keys.length)]];
 }
 function masscc(player, func){
 	for (var i=0; i<23; i++){
