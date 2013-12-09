@@ -217,20 +217,12 @@ Player.prototype.discard = function(index) {
 }
 Player.prototype.endturn = function() {
 	this.precognition = this.sanctuary = this.silence = false;
-	this.foe.dmg(this.foe.poison);
-	var cr;
-	for (var i=0; i<23; i++){
-		if ((cr = this.creatures[i])){
-			cr.attack();
-			if (cr.adrenaline>0){
-				cr.adrenaline=1;
-			}
-		}
-	}
 	this.spend(this.mark, -1);
-	for (var i=0; i<16; i++){
-		if (this.permanents[i]){
-			var p = this.permanents[i];
+	this.foe.dmg(this.foe.poison);
+	var patienceFlag = false, floodingFlag = false, stasisFlag = false, floodingPaidFlag = false;
+	for(var i=0; i<16; i++){
+		var p;
+		if ((p=this.permanents[i])){
 			if (p instanceof Pillar || p.cast == -1){
 				p.active();
 			}
@@ -240,17 +232,45 @@ Player.prototype.endturn = function() {
 				if (p.charges < 0){
 					delete this.permanents[i];
 				}
+			}else if (p.passive == "flooding" && !floodingPaidFlag){
+				floodingPaidFlag = true;
+				floodingFlag = true;
+				if (!this.spend(Water, 1){
+					delete this.permanents[i];
+				}
+			}else if (p.passive == "sopa"){
+				patienceFlag = true;
+			}else if (p.passive == "stasis"){
+				stasisFlag = true;
+			}
+		}
+		if ((p=this.foe.permanents[i])){
+			if (p.passive == "stasis"){
+				stasisFlag = true;
 			}else if (p.passive == "flooding"){
-				if (this.spend(Water, 1)){
-					for (var j=0; j<2; j++){
-						for (var i=5; i<23; i++){
-							var cr = players[j].creatures[i];
-							if (cr && cr.card.element != Water && cr.card.element != Other){
-								cr.die();
-							}
-						}
-					}
-				}else delete this.permanents[i];
+				floodingFlag = true;
+			}
+		}
+	}
+	if (patienceFlag){
+		for(var i=0; i<23; i++){
+			var c;
+			if ((c = this.creatures[i])){
+				let floodbuff = floodingFlag&&j>5&&c.card.element==Water;
+				c.atk += floodbuff?5:c.burrowed?4:2;
+				c.buffhp(floodbuff?5:2);
+			}
+		}
+	}
+	var cr;
+	for (var i=0; i<23; i++){
+		if ((cr = this.creatures[i])){
+			cr.attack(stasisFlag);
+			if (cr.adrenaline>0){
+				cr.adrenaline=1;
+			}
+			if (i>5 && floodingFlag && (cr.card.element != Water || cr.card.element != Other) && ~cr.getIndex()){
+				cr.die();
 			}
 		}
 	}
@@ -323,6 +343,7 @@ Permanent.prototype.info = function(){
 	var info = this.charges?"x"+this.charges:"";
 	if (this.active)info+=" "+casttext(this.cast, this.castele)+":"+activename(this.active);
 	if (this.immaterial)info += " immaterial";
+	if (this.passive)info += " " + this.passive;
 	return info;
 }
 Weapon.prototype.info = function(){
@@ -439,10 +460,10 @@ Creature.prototype.die = function() {
 Weapon.prototype.trueatk = Creature.prototype.trueatk = function(adrenaline){
 	var dmg = this.atk+this.steamatk+this.dive;
 	if (this.cast == -3)dmg += this.active();
+	dmg = this.burrowed?Math.ceil(dmg/2):dmg;
 	if (this instanceof Creature && (this.card.element == Death || this.card.element == Darkness)){
 		dmg+= calcEclipse();
 	}
-	dmg = this.burrowed?Math.ceil(dmg/2):dmg;
 	return calcAdrenaline(dmg, adrenaline||this.adrenaline);
 }
 Player.prototype.truehp = function(){ return this.hp; }
@@ -483,14 +504,14 @@ function calcAdrenaline(x,y){
 	var f1 = calcAdrenaline(x,y-1);
 	return f1-Math.ceil((4-countAdrenaline(x))*f1*(y-1)/3);
 }
-Weapon.prototype.attack = Creature.prototype.attack = function(){
+Weapon.prototype.attack = Creature.prototype.attack = function(stasis){
 	var isCreature = this instanceof Creature;
 	if (isCreature){
 		this.dmg(this.poison, true);
 	}
 	var target = this.owner.foe;
-	var stasis = this.frozen>0 || this.delayed>0;
-	if (!stasis && this.adrenaline<3){
+	var stopped = this.frozen>0 || this.delayed>0;
+	if (!stopped && this.adrenaline<3){
 		if (this.cast == -1){
 			this.active();
 		}
@@ -498,21 +519,14 @@ Weapon.prototype.attack = Creature.prototype.attack = function(){
 			this.owner.spend(Darkness, -1);
 		}
 	}
-	if (isCreature && !stasis){
-		for(var i=0; i<16; i++){
-			if ((this.owner.permanents[i] && this.owner.permanents[i].passive == "stasis") || (target.permanents[i] && target.permanents[i].passive == "stasis")){
-				stasis = true;
-				break;
-			}
-		}
-	}
+	stopped |= stasis;
 	if (this.frozen > 0){
 		this.frozen -= 1;
 	}
 	if (this.delayed > 0){
 		this.delayed -= 1;
 	}
-	if (!stasis){
+	if (!stopped){
 		if (this.psion){
 			target.spelldmg(this.trueatk())
 		}else if (this.momentum || this.trueatk() < 0){
