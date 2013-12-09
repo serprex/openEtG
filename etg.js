@@ -360,6 +360,7 @@ Shield.prototype.info = function(){
 	if (this.active)info+=" "+activename(this.active);
 	if (this.charges)info += " x"+this.charges;
 	if (this.immaterial)info += " immaterial";
+	return info;
 }
 Pillar.prototype.info = function(){
 	return this.charges + ":" + (this.pendstate?this.owner.mark:this.card.element);
@@ -380,19 +381,20 @@ Weapon.prototype.dmg = function(x) {
 	return this.owner.dmg(x);
 }
 Player.prototype.dmg = function(x, ignoresosa) {
-	if (this.sosa && !ignoresosa){
+	var sosa = this.sosa && !ignoresosa;
+	if (sosa){
 		x *= -1;
 	}
 	if (x<0){
 		var heal = Math.max(this.hp-this.maxhp, x);
 		this.hp = Math.min(this.maxhp, this.hp-x);
-		return heal;
+		return sosa?-x:heal;
 	}else{
 		this.hp -= x;
 		if (this.hp <= 0 && !winner){
 			setWinner(this.foe);
 		}
-		return x;
+		return sosa?-x:x;
 	}
 }
 Player.prototype.spelldmg = function(x) {
@@ -527,12 +529,16 @@ Weapon.prototype.attack = Creature.prototype.attack = function(stasis){
 	if (this.delayed > 0){
 		this.delayed -= 1;
 	}
-	var trueatk = this.trueatk();
-	if (!stopped && trueatk != 0){
+	var trueatk;
+	if (!stopped && (trueatk = this.trueatk()) != 0){
 		if (this.psion){
-			target.spelldmg(trueatk)
-		}else if (this.momentum || this.trueatk < 0){
-			target.dmg(this.trueatk)
+			target.spelldmg(trueatk);
+		}else if (this.momentum || trueatk < 0){
+			target.dmg(trueatk);
+			if (this.adrenaline < 3 && this.cast == -2){
+				this.dmgdone = trueatk;
+				this.active(target);
+			}
 		}else if (target.gpull){
 			var dmg = target.gpull.dmg(trueatk);
 			if (this.adrenaline < 3 && this.cast == -2){
@@ -540,7 +546,8 @@ Weapon.prototype.attack = Creature.prototype.attack = function(stasis){
 				this.active(target);
 			}
 		}else if (!target.shield || (trueatk > target.shield.dr && (!target.shield.active || !target.shield.active(this)))){
-			var dmg = target.dmg(trueatk - (target.shield?target.shield.dr:0));
+			var dmg = trueatk - (target.shield?target.shield.dr:0);
+			target.dmg(dmg);
 			if (this.adrenaline < 3 && this.cast == -2){
 				this.dmgdone = dmg;
 				this.active(target);
@@ -1112,7 +1119,11 @@ lycanthropy:function(t){
 },
 miracle:function(t){
 	this.quanta[Light] = 0;
-	if (this.hp<this.maxhp)this.hp = this.maxhp-1;
+	if (this.sosa){
+		this.hp = 1;
+	}else{
+		if (this.hp<this.maxhp)this.hp = this.maxhp-1;
+	}
 },
 mitosis:function(t){
 	place(this.owner.creatures, new Creature(this.card, this.owner))
@@ -1308,7 +1319,7 @@ serendipity:function(t){
 	}
 },
 silence:function(t){
-	this.owner.foe.silence = true;
+	this.owner.foe.silence = !this.owner.foe.sanctuary;
 },
 skyblitz:function(t){
 	this.quanta[Air] = 0;
@@ -1323,6 +1334,11 @@ snipe:function(t){
 },
 sosa:function(t){
 	this.sosa += 2;
+	for(var i=1; i<13; i++){
+		if (i != Death){
+			this.quanta[i] = 0;
+		}
+	}
 	this.dmg(this.card.upped?40:48, true);
 },
 sskin:function(t){
