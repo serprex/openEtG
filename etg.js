@@ -234,11 +234,12 @@ Player.prototype.discard = function(index) {
 Player.prototype.endturn = function() {
 	this.precognition = this.sanctuary = this.silence = false;
 	this.foe.hp -= this.foe.poison;
+	var cr;
 	for (var i=0; i<23; i++){
-		if (this.creatures[i]){
-			this.creatures[i].attack();
-			if (this.creatures[i].adrenaline>0){
-				this.creatures[i].adrenaline=1;
+		if ((cr = this.creatures[i])){
+			cr.attack();
+			if (cr.adrenaline>0){
+				cr.adrenaline=1;
 			}
 		}
 	}
@@ -405,15 +406,11 @@ Weapon.prototype.freeze = Creature.prototype.freeze = function(x){
 	if (this.passive == "voodoo")this.owner.foe.freeze(x);
 }
 Creature.prototype.spelldmg = Creature.prototype.dmg = function(x, dontdie){
-	if (x<0){
-		var heal = Math.max(this.hp-this.maxhp, x);
-		return heal;
-	}
-	var dmg = Math.min(this.hp, x);
-	this.hp -= x;
+	var dmg = x<0 ? Math.max(this.hp-this.maxhp, x) : Math.min(this.hp, x);
+	this.hp -= dmg;
 	if (this.truehp() <= 0){
 		if (!dontdie)this.die();
-	}else if (this.passive == "voodoo")this.owner.foe.dmg(x);
+	}else if (dmg>0 && this.passive == "voodoo")this.owner.foe.dmg(x);
 	return dmg;
 }
 Creature.prototype.die = function() {
@@ -578,7 +575,6 @@ Player.prototype.summon = function(index, target){
 	if (card.type <= PermanentEnum){
 		if (card.type == PillarEnum){
 			if (card.upped){
-				//bug upped marks grant like quantum tower
 				this.spend(card.element, card.element>0?-1:-3);
 			}
 			for (var i=0; i<16; i++){
@@ -1290,14 +1286,31 @@ sskin:function(t){
 	this.buffhp(this.quanta[Earth]+this.card.cost);
 },
 steal:function(t){
-	var index = t.getIndex();
-	delete t.owner[index];
-	t.owner = this.owner;
-	for(var i=0; i<16; i++){
-		if (!this.owner.permanents[i]){
-			this.owner.permanents[i] = t;
-			break;
+	if (t.card.type == PillarEnum){
+		Actives.destroy.call(this, t);
+		if (t.card.upped){
+			this.spend(t.card.element, t.card.element>0?-1:-3);
 		}
+		for(var i=0; i<16; i++){
+			if (this.owner.permanents[i] && this.owner.permanents[i].card == t.card){
+				this.owner.permanents[i].charges++;
+				return;
+			}
+		}
+		place(this.owner.permanents, new Pillar(t.card, this.owner));
+	}else if (t.card == Cards.BoneWall || t.card == Cards.BoneWallUp){
+		Actives.destroy.call(this, t);
+		if (this.owner.shield == Cards.BoneWall || this.owner.shield == Cards.BoneWallUp){
+			this.owner.shield.charges++;
+		}else{
+			this.owner.shield = new Shield(t.card.upped?Cards.BoneWallUp:Cards.BoneWall, this.owner);
+			this.owner.shield.charges = 1;
+		}
+	}else{
+		var index = t.getIndex();
+		delete t.owner[index];
+		t.owner = this.owner;
+		place(this.owner.permanents, t);
 	}
 },
 steam:function(t){
