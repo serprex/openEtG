@@ -453,7 +453,7 @@ Weapon.prototype.trueatk = Creature.prototype.trueatk = function(adrenaline){
 		dmg+= calcEclipse();
 	}
 	dmg = this.burrowed?Math.ceil(dmg/2):dmg;
-	return calcAdrenaline(dmg,adrenaline||this.adrenaline);
+	return calcAdrenaline(dmg, adrenaline||this.adrenaline);
 }
 Player.prototype.truehp = function(){ return this.hp; }
 Creature.prototype.truehp = function(){
@@ -475,12 +475,12 @@ Permanent.prototype.die = function(){ delete this.owner.permanents[this.getIndex
 Weapon.prototype.die = function() { this.owner.weapon = undefined; }
 Shield.prototype.die = function() { this.owner.shield = undefined; }
 Thing.prototype.canactive = function() {
-	return myturn && this.active && !this.usedactive && this.cast != -1 && this.delayed == 0 && this.frozen == 0 && this.owner.canspend(this.castele, this.cast);
+	return myturn && this.active && !this.usedactive && this.cast >= 0 && !this.delayed && !this.frozen && this.owner.canspend(this.castele, this.cast);
 }
 Thing.prototype.useactive = function(t) {
-	this.owner.spend(this.castele, this.cast);
 	this.usedactive = true;
 	this.active(t);
+	this.owner.spend(this.castele, this.cast);
 	if (this.passive == "sacrifice"){
 		this.die();
 	}
@@ -866,6 +866,9 @@ die:function(t){
 disfield:function(t){
 	if (!this.owner.sanctuary){
 		if (!this.owner.spend(Other, t.trueatk())){
+			for(var i=1; i<13; i++){
+				this.owner.quanta[i] = 0;
+			}
 			this.owner.shield = undefined;
 		}
 		return true;
@@ -874,6 +877,7 @@ disfield:function(t){
 disshield:function(t){
 	if (!this.owner.sanctuary){
 		if (!this.owner.spend(Entropy, Math.ceil(t.trueatk()/3))){
+			this.owner.quanta[Entropy] = 0;
 			this.owner.shield = undefined;
 		}
 		return true;
@@ -886,7 +890,7 @@ divinity:function(t){
 	this.owner.buffhp(this.owner.mark == Light?24:16);
 },
 drainlife:function(t){
-	this.dmg(-t.spelldmg(2+Math.floor((this.owner.quanta[Darkness]+(this.card.costele == Darkness?this.card.cost:0)/10)*2)));
+	this.dmg(-t.spelldmg(2+Math.floor(this.owner.quanta[Darkness]/10)*2));
 },
 dryspell:function(t){
 	dmg = this.card.upped?2:1;
@@ -948,7 +952,7 @@ fire:function(t){
 	this.owner.spend(Fire, -1);
 },
 firebolt:function(t){
-	t.spelldmg(3+Math.floor((this.owner.quanta[Fire]+(this.card.costele == Fire?this.card.cost:0))/10)*3);
+	t.spelldmg(3+Math.floor(this.owner.quanta[Fire]/10)*3);
 },
 flyingweapon:function(t){
 	if (t.weapon){
@@ -1010,7 +1014,7 @@ holylight:function(t){
 	t.dmg(!(t instanceof player) && (t.card.element == Darkness || t.card.element == Death)?10:-10);
 },
 icebolt:function(t){
-	var bolts = 1+Math.floor((this.owner.quanta[Water]+(this.card.costele == Water?this.card.cost:0))/10);
+	var bolts = 1+Math.floor(this.owner.quanta[Water]/10);
 	t.spelldmg(bolts*2);
 	if (random() < .3+bolts/10){
 		t.freeze(3);
@@ -1285,7 +1289,7 @@ sosa:function(t){
 	t.owner.dmg(this.card.upped?40:48, true);
 },
 sskin:function(t){
-	this.buffhp(this.quanta[Earth]+this.card.cost);
+	this.buffhp(this.quanta[Earth]);
 },
 steal:function(t){
 	if (t.card.type == PillarEnum){
