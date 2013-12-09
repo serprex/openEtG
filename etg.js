@@ -259,6 +259,7 @@ Player.prototype.endturn = function() {
 				let floodbuff = floodingFlag&&j>5&&c.card.element==Water;
 				c.atk += floodbuff?5:c.burrowed?4:2;
 				c.buffhp(floodbuff?5:2);
+				c.delay(1);
 			}
 		}
 	}
@@ -355,7 +356,7 @@ Weapon.prototype.info = function(){
 	return info;
 }
 Shield.prototype.info = function(){
-	var info = this.dr.toString();
+	var info = this.dr + "DR ";
 	if (this.active)info+=" "+activename(this.active);
 	if (this.charges)info += " x"+this.charges;
 	if (this.immaterial)info += " immaterial";
@@ -526,19 +527,20 @@ Weapon.prototype.attack = Creature.prototype.attack = function(stasis){
 	if (this.delayed > 0){
 		this.delayed -= 1;
 	}
-	if (!stopped){
+	var trueatk = this.trueatk();
+	if (!stopped && trueatk != 0){
 		if (this.psion){
-			target.spelldmg(this.trueatk())
-		}else if (this.momentum || this.trueatk() < 0){
-			target.dmg(this.trueatk())
+			target.spelldmg(trueatk)
+		}else if (this.momentum || this.trueatk < 0){
+			target.dmg(this.trueatk)
 		}else if (target.gpull){
-			var dmg = target.gpull.dmg(this.trueatk());
+			var dmg = target.gpull.dmg(trueatk);
 			if (this.adrenaline < 3 && this.cast == -2){
 				this.dmgdone = dmg;
 				this.active(target);
 			}
-		}else if (!target.shield || (this.trueatk() > target.shield.dr && (!target.shield.active || !target.shield.active(this)))){
-			var dmg = target.dmg(this.trueatk() - (target.shield?target.shield.dr:0));
+		}else if (!target.shield || (trueatk > target.shield.dr && (!target.shield.active || !target.shield.active(this)))){
+			var dmg = target.dmg(trueatk - (target.shield?target.shield.dr:0));
 			if (this.adrenaline < 3 && this.cast == -2){
 				this.dmgdone = dmg;
 				this.active(target);
@@ -558,7 +560,7 @@ Weapon.prototype.attack = Creature.prototype.attack = function(stasis){
 			this.die();
 		}else if (this.adrenaline > 0 && this.adrenaline < countAdrenaline(this.trueatk(0))){
 			this.adrenaline++;
-			this.attack();
+			this.attack(stasis);
 		}
 	}
 }
@@ -601,7 +603,13 @@ Player.prototype.summon = function(index, target){
 			}
 			return this.shield;
 		}else{
-			return place(this.permanents, new Permanent(card, this));
+			var p = new Permanent(card, this);
+			if (card == Sundial || card == SundialUp){
+				p.charges = 1;
+			}else if(card == Cloak || card == CloakUp){
+				p.charges = 3;
+			}
+			return place(this.permanents, p);
 		}
 		return p;
 	}else if (card.type == SpellEnum){
@@ -663,7 +671,7 @@ function calcEclipse(){
 function randomcard(upped, onlycreature){
 	var keys = [];
 	for(var key in Cards) {
-       if (key.length == 3 && Cards[key].upped == upped && (!onlycreature || Cards[key].type == CreatureEnum)) {
+	if (key.length == 3 && Cards[key].upped == upped && (!onlycreature || Cards[key].type == CreatureEnum)) {
 			var intKey = parseInt(key, 32);
 			// Skip marks
 			if (!((intKey>=5011&&intKey<=5022)||(intKey>=7011&&intKey<=7022))){
@@ -765,7 +773,7 @@ accretion:function(t){
 	this.buffhp(15);
 	if (this.truehp() > 45){
 		this.die();
-		this.hand.append(this.card.upped?Cards.BlackHoleUp:Cards.BlackHole);
+		this.owner.hand.append(this.card.upped?Cards.BlackHoleUp:Cards.BlackHole);
 	}
 },
 adrenaline:function(t){
@@ -917,8 +925,9 @@ drainlife:function(t){
 },
 dryspell:function(t){
 	dmg = this.card.upped?2:1;
+	var self=this;
 	function dryeffect(cr){
-		this.spend(Water, -cr.dmg(dmg));
+		self.spend(Water, -cr.dmg(dmg));
 	}
 	masscc(this.foe, dryeffect);
 	if (!this.card.upped){
@@ -996,7 +1005,7 @@ freeze:function(t){
 	t.freeze(this.card.upped ? 4 : 3);
 },
 gas:function(t){
-	place(this.owner.permanents, new Permanent(this.upped?Cards.UnstableGasUp:Cards.UnstableGas, this.owner))
+	place(this.owner.permanents, new Permanent(this.card.upped?Cards.UnstableGasUp:Cards.UnstableGas, this.owner))
 },
 gpull:function(t){
 	this.owner.gpull = this;
@@ -1099,6 +1108,7 @@ luciferin:function(t){
 lycanthropy:function(t){
 	this.buffhp(5);
 	this.atk += 5;
+	this.active = undefined;
 },
 miracle:function(t){
 	this.quanta[Light] = 0;
@@ -1229,7 +1239,7 @@ purify:function(t){
 	t.sosa = 0;
 },
 queen:function(t){
-	place(this.owner.creatures, new Creature(this.upped?Cards.EliteFirefly:Cards.Firefly, this.owner));
+	place(this.owner.creatures, new Creature(this.card.upped?Cards.EliteFirefly:Cards.Firefly, this.owner));
 },
 quint:function(t){
 	t.immaterial = true;
@@ -1241,7 +1251,7 @@ rage:function(t){
 	t.dmg(dmg);
 },
 readiness:function(t){
-	if (t.cast > 0){
+	if (t.cast >= 0){
 		t.cast = 0;
 		if (t.card.element == Time){
 			t.usedactive = false;
@@ -1249,7 +1259,7 @@ readiness:function(t){
 	}
 },
 rebirth:function(t){
-	this.owner.creatures[this.getIndex()] = new Creature(this.upped?Cards.MinorPhoenix:Cards.Phoenix, this.owner);
+	this.owner.creatures[this.getIndex()] = new Creature(this.card.upped?Cards.MinorPhoenix:Cards.Phoenix, this.owner);
 },
 regenerate:function(t){
 	this.owner.dmg(-5);
@@ -1269,7 +1279,7 @@ sanctuary:function(t){
 	this.owner.dmg(-4);
 },
 scarab:function(t){
-	place(this.owner.creatures, new Creature(this.upped?Cards.EliteScarab:Cards.Scarab, this.owner));
+	place(this.owner.creatures, new Creature(this.card.upped?Cards.EliteScarab:Cards.Scarab, this.owner));
 },
 scavenger:function(t){
 },
@@ -1301,16 +1311,19 @@ silence:function(t){
 	this.owner.foe.silence = true;
 },
 skyblitz:function(t){
+	this.quanta[Air] = 0;
 	for(var i=0; i<23; i++){
-		if (this.creatures[i])Actives.dive.call(this.creatures[i]);
+		if (this.creatures[i] && this.creatures[i].airborne){
+			Actives.dive.call(this.creatures[i]);
+		}
 	}
 },
 snipe:function(t){
 	t.dmg(3);
 },
 sosa:function(t){
-	t.owner.sosa += 2;
-	t.owner.dmg(this.card.upped?40:48, true);
+	this.sosa += 2;
+	this.dmg(this.card.upped?40:48, true);
 },
 sskin:function(t){
 	this.buffhp(this.quanta[Earth]);
@@ -1437,7 +1450,7 @@ evade40:function(t){
 	return rng.real()>.4;
 },
 wings:function(t){
-	return t.airborne || t.passive == "ranged";
+	return !t.airborne && t.passive != "ranged";
 },
 slow:function(t){
 	t.delay(1);
