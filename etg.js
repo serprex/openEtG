@@ -326,6 +326,8 @@ Creature.prototype.info = function(){
 	if (this.poison)info+=" "+this.poison+"psn";
 	if (this.aflatoxin)info+=" aflatoxin";
 	if (this.airborne)info+=" airborne";
+	if (this.owner.gpull == this)info += " gpull";
+	if (this.adrenaline)info += " adrenaline";
 	if (this.momentum)info+=" momentum";
 	if (this.psion)info+=" psion";
 	if (this.burrowed)info+=" burrowed";
