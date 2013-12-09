@@ -127,6 +127,7 @@ endturn.click = function() {
 		}else{
 			socket.emit("endturn");
 			player1.endturn();
+			targetingMode = undefined;
 			myturn = false;
 			for (var i=0; i<foeplays.length; i++){
 				gameui.removeChild(foeplays[i][1]);

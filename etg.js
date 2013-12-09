@@ -349,7 +349,7 @@ Shield.prototype.info = function(){
 	if (this.immaterial)info += " immaterial";
 }
 Pillar.prototype.info = function(){
-	return this.charges + ":" + (this.pendstate?this.element:this.owner.mark);
+	return this.charges + ":" + (this.pendstate?this.owner.mark:this.card.element);
 }
 Player.prototype.delay = function(x) {
 	if (this.weapon)this.weapon.delay(x);
@@ -579,7 +579,7 @@ Player.prototype.summon = function(index, target){
 		if (card.type == PillarEnum){
 			if (card.upped){
 				//bug upped marks grant like quantum tower
-				this.spend(card.element, -1);
+				this.spend(card.element, card.element>0?-1:-3);
 			}
 			for (var i=0; i<16; i++){
 				if (this.permanents[i] && this.permanents[i].card == card){
