@@ -348,7 +348,7 @@ Permanent.prototype.info = function(){
 	return info;
 }
 Weapon.prototype.info = function(){
-	var info = this.attack.toString();
+	var info = this.atk.toString();
 	if (this.active)info+=" "+casttext(this.cast, this.castele)+":"+activename(this.active);
 	if (this.frozen)info += " "+this.frozen+"frozen";
 	if (this.delayed)info += " "+this.delayed+"delay";
@@ -845,10 +845,11 @@ butterfly:function(t){
 	if (t.trueatk() < 3){
 		t.cast = 3;
 		t.castele = Entropy;
-		t.active = destroy;
+		t.active = Actives.destroy;
 	}
 },
 catapult:function(t){
+	t.die();
 	this.owner.foe.dmg(Math.ceil(t.truehp()*(t.frozen?150:100)/(t.truehp()+100)));
 	this.owner.foe.poison += t.poison;
 	if (t.frozen){
@@ -871,6 +872,7 @@ chimera:function(t){
 	chim.castele = 0;
 	chim.momentum = true;
 	this.owner.creatures = [chim];
+	this.owner.creatures.length = 23;
 	this.owner.gpull = chim;
 },
 cpower:function(t){
@@ -1226,7 +1228,7 @@ parallel:function(t){
 	copy.owner = this.owner;
 	copy.usedactive = true;
 	place(this.owner.creatures, copy);
-	if (t.passive == "voodoo"){
+	if (copy.passive == "voodoo"){
 		this.owner.foe.dmg(copy.maxhp-copy.hp);
 		this.owner.foe.addpoison(copy.poison);
 		if (this.owner.foe.weapon){

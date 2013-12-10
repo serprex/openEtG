@@ -107,7 +107,7 @@ var menuui = new PIXI.Stage(0x336699, true), gameui = new PIXI.Stage(0x336699, t
 var mainStage = menuui;
 
 var nopic = PIXI.Texture.fromImage("null.png"), cimgcache = {};
-var elecols = [0xddcc88,0xdb69bd,0x776677,0xdb8822,0xaa6611,0x22cc11,0xbb1100,0x2233aa,0xffffff,0x44aaee,0xeeee33,0xaaaaaa,0x0099dd];
+var elecols = [0xccbbaa,0xaa7799,0x888888,0xaa7766,0x504030,0x50a005,0xfcba05,0x205080,0xbbbbbb,0x3377dd,0xeeaa66,0x333333,0x99ccee];
 function lighten(c){
 	return (c&255)/2+127|((c>>8)&255)/2+127<<8|((c>>16)&255)/2+127<<16;
 }
@@ -376,6 +376,7 @@ for (var j=0; j<2; j++){
 	hptext[j].setInteractive(true);
 	hptext[j].click = function(){
 		if (targetingMode && targetingMode(players[_j])){
+			targetingMode = undefined;
 			targetingModeCb(players[_j]);
 		}
 	}
