@@ -430,10 +430,14 @@ Creature.prototype.spelldmg = Creature.prototype.dmg = function(x, dontdie){
 	}else if (dmg>0 && this.passive == "voodoo")this.owner.foe.dmg(x);
 	return dmg;
 }
-Creature.prototype.die = function() {
-	var index = this.getIndex();
+Creature.prototype.remove = function(index) {
+	index = index || this.getIndex();
 	delete this.owner.creatures[index];
 	if (this.owner.gpull == this)this.owner.gpull = null;
+	return index;
+}
+Creature.prototype.die = function() {
+	var index = this.remove();
 	if (this.aflatoxin){
 		this.owner.creatures[index] = new Creature(Cards.MalignantCell, this.owner);
 	}else if (this.active == Actives.phoenix){
@@ -999,7 +1003,7 @@ endow:function(t){
 	this.buffhp(2);
 },
 evolve:function(t){
-	var shrieker = this.owner.creatures[this.getIndex()] = new Creature(this.card.upped?Cards.EliteShrieker:Cards.Shrieker, this.owner);
+	var shrieker = this.owner.creatures[this.remove()] = new Creature(this.card.upped?Cards.EliteShrieker:Cards.Shrieker, this.owner);
 	shrieker.poison = this.poison;
 },
 fiery:function(t){
@@ -1059,7 +1063,7 @@ hasten:function(t){
 	this.owner.drawcard();
 },
 hatch:function(t){
-	this.owner.creatures[this.getIndex()] = new Creature(randomcard(this.card.upped, function(x){return x.type == CreatureEnum}), this.owner);
+	this.owner.creatures[this.remove()] = new Creature(randomcard(this.card.upped, function(x){return x.type == CreatureEnum}), this.owner);
 },
 heal:function(t){
 	t.dmg(-5);
@@ -1104,7 +1108,7 @@ improve:function(t){
 	}
 	cr.buffhp(Math.floor(rng.real()*5));
 	cr.atk += Math.floor(rng.real()*5);
-	t.owner.creatures[t.getIndex()] = cr;
+	t.owner.creatures[t.remove()] = cr;
 },
 infect:function(t){
 	t.addpoison(1);
@@ -1168,7 +1172,7 @@ mutation:function(t){
 	}else if (rnd<.5){
 		Actives.improve.call(this, t);
 	}else{
-		t.owner.creatures[t.getIndex()] = new Creature(Cards.Abomination, t.owner);
+		t.owner.creatures[t.remove()] = new Creature(Cards.Abomination, t.owner);
 	}
 },
 neuro:function(t){
@@ -1296,7 +1300,7 @@ readiness:function(t){
 	}
 },
 rebirth:function(t){
-	this.owner.creatures[this.getIndex()] = new Creature(this.card.upped?Cards.MinorPhoenix:Cards.Phoenix, this.owner);
+	this.owner.creatures[this.remove()] = new Creature(this.card.upped?Cards.MinorPhoenix:Cards.Phoenix, this.owner);
 },
 regenerate:function(t){
 	this.owner.dmg(-5);
@@ -1305,9 +1309,9 @@ rewind:function(t){
 	if (t.passive == "undead"){
 		Actives.hatch.call(t);
 	}else if (t.passive == "mummy"){
-		t.owner.creatures[t.getIndex()] = new Creature(t.card.upped?Cards.Pharaoh:Cards.PharaohUp, t.owner);
+		t.owner.creatures[t.remove()] = new Creature(t.card.upped?Cards.Pharaoh:Cards.PharaohUp, t.owner);
 	}else{
-		delete t.owner.creatures[t.getIndex()];
+		t.remove();
 		t.owner.deck.push(t.card);
 	}
 },
