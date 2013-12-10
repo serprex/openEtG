@@ -228,8 +228,7 @@ Player.prototype.endturn = function() {
 			}
 			p.usedactive = false;
 			if (p.active == Actives.cloak || p.passive == "stasis"){
-				p.charges -= 1;
-				if (p.charges < 0){
+				if (--p.charges < 0){
 					delete this.permanents[i];
 				}else if (p.passive == "stasis"){
 					stasisFlag = true;
@@ -246,6 +245,9 @@ Player.prototype.endturn = function() {
 		}
 		if ((p=this.foe.permanents[i])){
 			if (p.passive == "stasis"){
+				if (--p.charges < 0){
+					delete this.foe.permanents[i];
+				}
 				stasisFlag = true;
 			}else if (p.passive == "flooding"){
 				floodingFlag = true;
@@ -337,7 +339,7 @@ Creature.prototype.info = function(){
 	if (this.psion)info+=" psion";
 	if (this.burrowed)info+=" burrowed";
 	if (this.immaterial)info+=" immaterial";
-	if (this.passive && !~info.indexOf(this.passive))info+=" "+this.passive;
+	if (this.passive && this.passive != "momentum" && this.passive != "burrowed" && this.passive != "immaterial" && this.passive != "psion")info+=" "+this.passive;
 	return info;
 }
 Permanent.prototype.info = function(){
@@ -352,6 +354,7 @@ Weapon.prototype.info = function(){
 	if (this.active)info+=" "+casttext(this.cast, this.castele)+":"+activename(this.active);
 	if (this.frozen)info += " "+this.frozen+"frozen";
 	if (this.delayed)info += " "+this.delayed+"delay";
+	if (this.momentum)info += " momentum";
 	if (this.immaterial)info += " immaterial";
 	return info;
 }
@@ -513,8 +516,7 @@ Weapon.prototype.attack = Creature.prototype.attack = function(stasis){
 		this.dmg(this.poison, true);
 	}
 	var target = this.owner.foe;
-	var stopped = this.frozen>0 || this.delayed>0;
-	if (!stopped && this.adrenaline<3){
+	if (this.frozen == 0 && this.adrenaline<3){
 		if (this.cast == -1 && this.active){
 			this.active();
 		}
@@ -522,15 +524,8 @@ Weapon.prototype.attack = Creature.prototype.attack = function(stasis){
 			this.owner.spend(Darkness, -1);
 		}
 	}
-	stopped |= stasis;
-	if (this.frozen > 0){
-		this.frozen -= 1;
-	}
-	if (this.delayed > 0){
-		this.delayed -= 1;
-	}
 	var trueatk;
-	if (!stopped && (trueatk = this.trueatk()) != 0){
+	if (!(stasis || this.frozen>0 || this.delayed>0) && (trueatk = this.trueatk()) != 0){
 		if (this.psion){
 			target.spelldmg(trueatk);
 		}else if (this.momentum || trueatk < 0){
@@ -554,8 +549,14 @@ Weapon.prototype.attack = Creature.prototype.attack = function(stasis){
 			}
 		}
 	}
+	if (this.frozen > 0){
+		this.frozen -= 1;
+	}
+	if (this.delayed > 0){
+		this.delayed -= 1;
+	}
 	this.usedactive = false;
-	this.dive = 0
+	this.dive = 0;
 	if (this.active == Actives.dshield){
 		this.immaterial = false;
 	}
@@ -612,7 +613,7 @@ Player.prototype.summon = function(index, target){
 		}else{
 			var p = new Permanent(card, this);
 			if (card == Cards.Sundial || card == Cards.SundialUp){
-				p.charges = 1;
+				p.charges = 2;
 			}else if(card == Cards.Cloak || card == Cards.CloakUp){
 				p.charges = 3;
 			}
@@ -830,10 +831,12 @@ bow:function(t){
 	return this.owner.mark == Air?1:0;
 },
 bravery:function(t){
-	var maxdraw = this.owner.mark == Fire?3:2;
-	for(var i=0; i<maxdraw && this.owner.hand.length<8 && this.owner.foe.hand.length<8; i++){
-		this.owner.drawcard();
-		this.owner.foe.drawcard();
+	if (!this.owner.foe.sanctuary){
+		var maxdraw = this.owner.mark == Fire?3:2;
+		for(var i=0; i<maxdraw && this.owner.hand.length<8 && this.owner.foe.hand.length<8; i++){
+			this.owner.drawcard();
+			this.owner.foe.drawcard();
+		}
 	}
 },
 burrow:function(t){
