@@ -1,5 +1,7 @@
 __pycache__/*
 node_modules/*
 googleinfo.txt
+pushserver.sh
+js.js
 *.csv
 *.gz
