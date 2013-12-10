@@ -366,7 +366,7 @@ Shield.prototype.info = function(){
 	return info;
 }
 Pillar.prototype.info = function(){
-	return this.charges + ":" + (this.pendstate?this.owner.mark:this.card.element);
+	return this.charges + " " + (this.pendstate?this.owner.mark:this.card.element);
 }
 Player.prototype.delay = function(x) {
 	if (this.weapon)this.weapon.delay(x);
