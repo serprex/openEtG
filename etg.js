@@ -326,7 +326,7 @@ Player.prototype.drawhand = function() {
 	}
 }
 Creature.prototype.info = function(){
-	var info=this.trueatk()+"|"+this.hp+"/"+this.maxhp;
+	var info=this.trueatk()+"|"+this.truehp()+"/"+this.maxhp;
 	if (this.active)info+=" "+casttext(this.cast, this.castele)+":"+activename(this.active);
 	if (this.frozen)info+=" "+this.frozen+"frozen";
 	if (this.delayed)info+=" "+this.delayed+"delay";
@@ -436,13 +436,7 @@ Creature.prototype.remove = function(index) {
 	if (this.owner.gpull == this)this.owner.gpull = null;
 	return index;
 }
-Creature.prototype.die = function() {
-	var index = this.remove();
-	if (this.aflatoxin){
-		this.owner.creatures[index] = new Creature(Cards.MalignantCell, this.owner);
-	}else if (this.active == Actives.phoenix){
-		this.owner.creatures[index] = new Creature(this.card.upped?Cards.AshUp:Cards.Ash, this.owner);
-	}
+function deatheffect() {
 	for(var i=0; i<2; i++){
 		var pl = players[i];
 		for(var j=0; j<23; j++){
@@ -455,7 +449,7 @@ Creature.prototype.die = function() {
 		for(var j=0; j<16; j++){
 			var p = pl.permanents[j];
 			if (p){
-				if (p.passive == "boneyard"){
+				if (p.passive == "boneyard" && this.card != Cards.Skeleton && this.card != Cards.EliteSkeleton){
 					place(p.owner.creatures, new Creature(p.card.upped?Cards.EliteSkeleton:Cards.Skeleton, p.owner));
 				}else if (p.passive == "soulcatcher"){
 					pl.spend(Death, p.card.upped?-3:-2);
@@ -466,6 +460,15 @@ Creature.prototype.die = function() {
 			pl.shield.charges += 2
 		}
 	}
+}
+Creature.prototype.die = function() {
+	var index = this.remove();
+	if (this.aflatoxin){
+		this.owner.creatures[index] = new Creature(Cards.MalignantCell, this.owner);
+	}else if (this.active == Actives.phoenix){
+		this.owner.creatures[index] = new Creature(this.card.upped?Cards.AshUp:Cards.Ash, this.owner);
+	}
+	deatheffect();
 }
 Weapon.prototype.trueatk = Creature.prototype.trueatk = function(adrenaline){
 	var dmg = this.atk+this.steamatk+this.dive;
@@ -895,9 +898,7 @@ dagger:function(t){
 	return this.owner.mark == Darkness||this.owner.mark == Death?1:0;
 },
 deadalive:function(t){
-	var index = this.getIndex();
-	this.die();
-	this.owner.creatures[index] = this;
+	deatheffect();
 },
 deja:function(t){
 	this.active = undefined;
