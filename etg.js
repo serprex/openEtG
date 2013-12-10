@@ -449,7 +449,7 @@ Creature.prototype.die = function() {
 			var p = pl.permanents[j];
 			if (p){
 				if (p.passive == "boneyard"){
-					place(p.owner.creatures, new Creature(p.card.upped?EliteSkeleton:Skeleton, p.owner));
+					place(p.owner.creatures, new Creature(p.card.upped?Cards.EliteSkeleton:Cards.Skeleton, p.owner));
 				}else if (p.passive == "soulcatcher"){
 					pl.spend(Death, p.card.upped?-3:-2);
 				}
@@ -515,7 +515,7 @@ Weapon.prototype.attack = Creature.prototype.attack = function(stasis){
 	var target = this.owner.foe;
 	var stopped = this.frozen>0 || this.delayed>0;
 	if (!stopped && this.adrenaline<3){
-		if (this.cast == -1){
+		if (this.cast == -1 && this.active){
 			this.active();
 		}
 		if (this.passive == "devour" && target.spend(Other, 1)){
@@ -721,10 +721,10 @@ function casttext(cast, castele){
 		return "buff";
 	}else console.log("Unknown cost: " + cast);
 }
-function masscc(player, func){
+function masscc(player, caster, func){
 	for (var i=0; i<23; i++){
 		if (player.creatures[i] && !player.creatures[i].immaterial && !player.creatures[i].burrowed){
-			func(player.creatures[i]);
+			func.call(caster, player.creatures[i]);
 		}
 	}
 }
@@ -949,9 +949,9 @@ dryspell:function(t){
 	function dryeffect(cr){
 		self.spend(Water, -cr.dmg(dmg));
 	}
-	masscc(this.foe, dryeffect);
+	masscc(this.foe, this, dryeffect);
 	if (!this.card.upped){
-		masscc(this, dryeffect);
+		masscc(this, this, dryeffect);
 	}
 },
 dshield:function(t){
@@ -1022,7 +1022,7 @@ fractal:function(t){
 	}
 },
 freeze:function(t){
-	t.freeze(this.card && this.card.upped ? 4 : 3);
+	t.freeze(this.card.upped && this.card != Cards.PandemoniumUp ? 4 : 3);
 },
 gas:function(t){
 	place(this.owner.permanents, new Permanent(this.card.upped?Cards.UnstableGasUp:Cards.UnstableGas, this.owner))
@@ -1063,7 +1063,7 @@ heal20:function(t){
 	this.owner.dmg(-20);
 },
 holylight:function(t){
-	t.dmg(!(t instanceof player) && (t.card.element == Darkness || t.card.element == Death)?10:-10);
+	t.dmg(!(t instanceof Player) && (t.card.element == Darkness || t.card.element == Death)?10:-10);
 },
 icebolt:function(t){
 	var bolts = 1+Math.floor(this.owner.quanta[Water]/10);
@@ -1075,8 +1075,8 @@ icebolt:function(t){
 ignite:function(t){
 	this.die();
 	this.owner.foe.spelldmg(20);
-	masscc(this.owner.foe, function(x){x.dmg(1)});
-	masscc(this.owner, function(x){x.dmg(1)});
+	masscc(this.owner.foe, this, function(x){x.dmg(1)});
+	masscc(this.owner, this, function(x){x.dmg(1)});
 },
 immolate:function(t){
 	t.die();
@@ -1091,8 +1091,12 @@ improve:function(t){
 	if (!cr.active){
 		cr.passive = rng.real()<.5?"momentum":"immaterial";
 	}
-	cr.cast = Math.ceil(rng.real()*2);
-	cr.castele = cr.card.element;
+	if (cr.active == Actives.scavenger){
+		cr.cast = -1;
+	}else{
+		cr.cast = Math.ceil(rng.real()*2);
+		cr.castele = cr.card.element;
+	}
 	cr.buffhp(Math.floor(rng.real()*5));
 	cr.atk += Math.floor(rng.real()*5);
 	t.owner.creatures[t.getIndex()] = cr;
@@ -1120,7 +1124,7 @@ lobotomize:function(t){
 },
 luciferin:function(t){
 	this.owner.dmg(-10);
-	masscc(this.owner, function(x){
+	masscc(this.owner, this, function(x){
 		if (!x.active){
 			x.active = Actives.light;
 		}
@@ -1145,7 +1149,7 @@ mitosis:function(t){
 mitosisspell:function(t){
 	this.castele = this.card.element;
 	this.cast = this.card.cost;
-	this.active = mitosis;
+	this.active = Actives.Mitosis;
 },
 momentum:function(t){
 	t.atk += 1;
@@ -1206,7 +1210,10 @@ overdrivespell:function(t){
 	this.active = Actives.overdrive;
 },
 pandemonium:function(t){
-	masscc(this.owner.foe, function(x){Actives.cseed.call(this,x)});
+	masscc(this.owner.foe, this, Actives.cseed);
+	if (!this.card.upped){
+		masscc(this.owner, this, Actives.cseed);
+	}
 },
 paradox:function(t){
 	if (t.trueatk()>t.truehp())t.die();
@@ -1239,7 +1246,7 @@ photosynthesis:function(t){
 	}
 },
 plague:function(t){
-	masscc(this.owner.foe, function(x){x.addpoison(1)});
+	masscc(this.owner.foe, this, Actives.infect);
 },
 platearmor:function(t){
 	t.buffhp(this.card.upped?6:3);
@@ -1393,10 +1400,10 @@ stoneform:function(t){
 	this.buffhp(20);
 },
 storm2:function(t){
-	masscc(this.owner.foe, function(x){x.dmg(2)});
+	masscc(this.owner.foe, this, function(x){x.dmg(2)});
 },
 storm3:function(t){
-	masscc(this.owner.foe, function(x){x.dmg(3)});
+	masscc(this.owner.foe, this, Actives.snipe);
 },
 swave:function(t){
 	t.spelldmg(4);
