@@ -698,6 +698,7 @@ function randomcard(upped, filter){
 			}
 		}
 	}
+	keys.sort();
 	return Cards[keys[Math.floor(rng.real() * keys.length)]];
 }
 function activename(active){
