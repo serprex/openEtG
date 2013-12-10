@@ -8,26 +8,15 @@ app.listen(13602);
 function handler(req, res) {
 	if (~req.url.indexOf(".."))
 		return;
-	if (req.url.indexOf("/cards/") == 0){
-		var request=http.get("http://dek.im/resources/card_header_images/"+req.url.substring(7), function (getres) {
-			getres.on("data", function(data){
-				res.write(data);
-			});
-			getres.on("end", function(){
-				res.end();
-			});
-		});
-	}else{
-		var url = req.url == "/"?"/etg.htm":req.url;
-		fs.readFile(__dirname + url, function(err, data) {
-			if (err) {
-				res.writeHead(500);
-				return res.end("Error loading "+url);
-			}
-			res.writeHead(200);
-			res.end(data);
-		});
-	}
+	var url = req.url == "/"?"/etg.htm":req.url;
+	fs.readFile(__dirname + url, function(err, data) {
+		if (err) {
+			res.writeHead(500);
+			return res.end("Error loading "+url);
+		}
+		res.writeHead(200);
+		res.end(data);
+	});
 }
 
 var rooms = {};
