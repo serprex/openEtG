@@ -690,7 +690,7 @@ function calcEclipse(){
 function randomcard(upped, filter){
 	var keys = [];
 	for(var key in Cards) {
-	if (key.length == 3 && Cards[key].upped == upped && (!filter || filter(Cards[key]))) {
+		if (key.length == 3 && Cards[key].upped == upped && (!filter || filter(Cards[key]))) {
 			var intKey = parseInt(key, 32);
 			// Skip marks
 			if (!((intKey>=5011&&intKey<=5022)||(intKey>=7011&&intKey<=7022))){
@@ -1022,7 +1022,7 @@ fractal:function(t){
 	}
 },
 freeze:function(t){
-	t.freeze(this.card.upped ? 4 : 3);
+	t.freeze(this.card && this.card.upped ? 4 : 3);
 },
 gas:function(t){
 	place(this.owner.permanents, new Permanent(this.card.upped?Cards.UnstableGasUp:Cards.UnstableGas, this.owner))
@@ -1031,7 +1031,7 @@ gpull:function(t){
 	this.owner.gpull = this;
 },
 gpullspell:function(t){
-	this.owner.gpull = t;
+	t.owner.gpull = t;
 },
 gratitude:function(t){
 	this.owner.dmg(this.owner.mark == Life?-5:-3);
@@ -1116,12 +1116,13 @@ liquid:function(t){
 lobotomize:function(t){
 	t.active = undefined;
 	t.momentum = false;
+	t.psion = false;
 },
 luciferin:function(t){
 	this.owner.dmg(-10);
 	masscc(this.owner, function(x){
-		if (x.active == undefined){
-			x.active = light;
+		if (!x.active){
+			x.active = Actives.light;
 		}
 	})
 },
@@ -1353,7 +1354,7 @@ sskin:function(t){
 	this.buffhp(this.quanta[Earth]);
 },
 steal:function(t){
-	if (t.card.type == PillarEnum){
+	if (t instanceof Pillar){
 		Actives.destroy.call(this, t);
 		if (t.card.upped){
 			this.spend(t.card.element, t.card.element>0?-1:-3);
@@ -1374,10 +1375,15 @@ steal:function(t){
 			this.owner.shield.charges = 1;
 		}
 	}else{
-		var index = t.getIndex();
-		delete t.owner.permanents[index];
+		t.die();
 		t.owner = this.owner;
-		place(this.owner.permanents, t);
+		if (t instanceof Weapon){
+			this.owner.weapon = t;
+		}else if (t instanceof Shield){
+			this.owner.shield = t;
+		}else{
+			place(this.owner.permanents, t);
+		}
 	}
 },
 steam:function(t){
