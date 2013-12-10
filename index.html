@@ -8,10 +8,8 @@
 			margin:0;
 		}
 	</style>
-	<script src="pixi.js"></script>
 	<script src="/socket.io/socket.io.js"></script>
-	<script src="MersenneTwister.js"></script>
-	<script src="etg.js" type="text/javascript;version=1.7"></script>
+	<script src="js.js" type="text/javascript;version=1.7"></script>
 </head>
 <body>
 	<script type="text/javascript;version=1.7">
@@ -34,16 +32,6 @@ function getTarget(src, active, cb){
 		}
 	}else{
 		cb();
-	}
-}
-function targetingText(){
-	if (!targetingMode){
-		console.log("targetingtext called without mode");
-		return "";
-	}else{
-		for(var key in Targeting){
-		}
-		targetingMode
 	}
 }
 function maybeSetText(obj, text){

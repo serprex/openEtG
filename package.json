@@ -7,6 +7,11 @@
 	},
 	"dependencies": {
 		"socket.io":"",
+		"connect":"",
 		"connect-gzip":""
+	},
+	"devDependencies": {
+		"grunt":"",
+		"grunt-contrib-concat":""
 	}
 }
