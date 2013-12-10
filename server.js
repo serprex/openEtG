@@ -1,23 +1,11 @@
 "use strict"
-var http = require("http");
-var app = http.createServer(handler);
-var io = require("socket.io").listen(app);
 var fs = require("fs");
+var http = require("http");
+var connect = require("connect");
+var gzip = require("connect-gzip");
+var app = http.createServer(connect().use(gzip.staticGzip(__dirname)));
+var io = require("socket.io").listen(app);
 app.listen(13602);
-
-function handler(req, res) {
-	if (~req.url.indexOf(".."))
-		return;
-	var url = req.url == "/"?"/etg.htm":req.url;
-	fs.readFile(__dirname + url, function(err, data) {
-		if (err) {
-			res.writeHead(500);
-			return res.end("Error loading "+url);
-		}
-		res.writeHead(200);
-		res.end(data);
-	});
-}
 
 var rooms = {};
 var sockinfo = {};
