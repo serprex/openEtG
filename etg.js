@@ -855,7 +855,7 @@ catapult:function(t){
 	}
 },
 chimera:function(t){
-	var atk,hp;
+	var atk=0, hp=0;
 	for(var i=0; i<23; i++){
 		if (this.owner.creatures[i]){
 			atk += this.owner.creatures[i].trueatk();
@@ -1318,7 +1318,7 @@ scramble:function(t){
 serendipity:function(t){
 	var cards = [], num = Math.min(8-this.owner.hand.length, 3), anyentro = false;
 	for(var i=num-1; i>=0; i--){
-		cards[i] = randomcard(this.card.upped, function(x){return !~NymphList.indexOf(x) && !~ShardList.indexOf(x) && (i>0 || anyentro || x.element == Entropy)});
+		cards[i] = randomcard(this.card.upped, function(x){return !~NymphList.indexOf(x.code) && !~ShardList.indexOf(x.code) && (i>0 || anyentro || x.element == Entropy)});
 		anyentro |= cards[i].element == Entropy;
 	}
 	for(var i=0; i<num; i++){

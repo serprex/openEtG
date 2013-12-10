@@ -107,7 +107,10 @@ var menuui = new PIXI.Stage(0x336699, true), gameui = new PIXI.Stage(0x336699, t
 var mainStage = menuui;
 
 var nopic = PIXI.Texture.fromImage("null.png"), cimgcache = {};
-var elecols = [0xddcc88,0xdb69bd,0x776677,0xdb8822,0xaa6611,0x22cc11,0xbb1100,0x2233aa,0xffffff,0x44aaee,0xeeee33,0x000000,0x0099dd];
+var elecols = [0xddcc88,0xdb69bd,0x776677,0xdb8822,0xaa6611,0x22cc11,0xbb1100,0x2233aa,0xffffff,0x44aaee,0xeeee33,0xaaaaaa,0x0099dd];
+function lighten(c){
+	return (c&255)/2+127|((c>>8)&255)/2+127<<8|((c>>16)&255)/2+127<<16;
+}
 function getCardImage(code){
 	if (cimgcache[code])return cimgcache[code];
 	else{
@@ -115,11 +118,11 @@ function getCardImage(code){
 		var rend = new PIXI.RenderTexture(80, 20);
 		var graphics = new PIXI.Graphics();
 		graphics.lineStyle(2, 0x222222, 1);
-		graphics.beginFill(elecols[card?card.element:0]);
+		graphics.beginFill(card?(card.upped?lighten(elecols[card.element]):elecols[card.element]):elecols[0]);
 		graphics.drawRect(0, 0, 80, 20);
 		graphics.endFill();
 		if (card){
-			var text = new PIXI.Text(Cards[code].name, {font: "12px Arial bold"});
+			var text = new PIXI.Text(Cards[code].name, {font: "12px Arial bold", fill:card.upped?"black":"white"});
 			text.position.x = 2;
 			text.position.y = 5;
 			graphics.addChild(text);
