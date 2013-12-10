@@ -348,7 +348,7 @@ Permanent.prototype.info = function(){
 	return info;
 }
 Weapon.prototype.info = function(){
-	var info = "";
+	var info = this.attack.toString();
 	if (this.active)info+=" "+casttext(this.cast, this.castele)+":"+activename(this.active);
 	if (this.frozen)info += " "+this.frozen+"frozen";
 	if (this.delayed)info += " "+this.delayed+"delay";
@@ -878,7 +878,7 @@ cpower:function(t){
 	t.atk += Math.ceil(rng.real()*5);
 },
 cseed:function(t){
-	Actives[["infect", "lightning", "icebolt", "firebolt", "freeze", "parallel", "lobotomize", "drainlife", "snipe", "rewind", "gpullspell"][Math.floor(rng.real()*12)]].call(this, t)
+	Actives[["drainlife", "firebolt", "freeze", "gpullspell", "icebolt", "infect", "lightning", "lobotomize", "parallel", "rewind", "snipe", "swave"][Math.floor(rng.real()*12)]].call(this, t);
 },
 cloak:function(t){
 },
