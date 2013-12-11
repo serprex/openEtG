@@ -224,8 +224,8 @@ Player.prototype.spend = function(qtype, x) {
 		}
 	}else this.quanta[qtype] -= x;
 	for (var i=1; i<13; i++){
-		if (this.quanta[qtype]>75){
-			this.quanta[qtype]=75;
+		if (this.quanta[i]>75){
+			this.quanta[i]=75;
 		}
 	}
 	return true;
@@ -746,7 +746,7 @@ function calcEclipse(){
 function randomcard(upped, filter){
 	var keys = [];
 	for(var key in Cards) {
-		if (key.length == 3 && Cards[key].upped == upped && !(key in RandomCardSkip) && (!filter || filter(Cards[key]))) {
+		if (key.length == 3 && Cards[key].upped == upped && !~RandomCardSkip.indexOf(key) && (!filter || filter(Cards[key]))) {
 			var intKey = parseInt(key, 32);
 			// Skip marks
 			if (!((intKey>=5011&&intKey<=5022)||(intKey>=7011&&intKey<=7022))){
