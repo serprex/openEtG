@@ -552,7 +552,6 @@ function place(array, item){
 Player.prototype.summon = function(index, target){
 	var card = this.hand[index];
 	this.hand.splice(index, 1);
-	this.spend(card.costele, card.cost);
 	if (this.neuro){
 		this.poison += 1;
 	}
@@ -567,9 +566,9 @@ Player.prototype.summon = function(index, target){
 					return this.permanents[i];
 				}
 			}
-			return place(this.permanents, new Pillar(card, this));
+			place(this.permanents, new Pillar(card, this));
 		}else if (card.type == WeaponEnum){
-			return this.weapon = new Weapon(card, this);
+			this.weapon = new Weapon(card, this);
 		}else if (card.type == ShieldEnum){
 			this.shield = new Shield(card, this);
 			if (card == Cards.DimensionalShield || card == Cards.PhaseShield){
@@ -579,7 +578,6 @@ Player.prototype.summon = function(index, target){
 			}else if (card == Cards.BoneWall || card == Cards.BoneWallUp){
 				this.shield.charges = 7;
 			}
-			return this.shield;
 		}else{
 			var p = new Permanent(card, this);
 			if (card == Cards.Sundial || card == Cards.SundialUp){
@@ -587,17 +585,17 @@ Player.prototype.summon = function(index, target){
 			}else if(card == Cards.Cloak || card == Cards.CloakUp){
 				p.charges = 3;
 			}
-			return place(this.permanents, p);
+			place(this.permanents, p);
 		}
 	}else if (card.type == SpellEnum){
 		if (!target || !target.evade(this)){
 			this.card = card
 			card.active.call(this, target)
 		}
-		return undefined;
 	}else if (card.type == CreatureEnum) {
-		return place(this.creatures, new Creature(card, this));
+		place(this.creatures, new Creature(card, this));
 	}else console.log("Unknown card type: "+card.type);
+	this.spend(card.costele, card.cost);
 }
 function calcEclipse(){
 	var bonus = 0;

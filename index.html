@@ -146,6 +146,10 @@ endturn.setInteractive(true);
 endturn.click = function() {
 	if (winner){
 		myturn = false;
+		for (var i=0; i<foeplays.length; i++){
+			gameui.removeChild(foeplays[i][1]);
+		}
+		foeplays = [];
 		mainStage = menuui;
 	}else if (myturn){
 		if (player1.hand.length == 8){
@@ -425,14 +429,12 @@ socket.on("endturn", function(data) {
 socket.on("summon", function(bits) {
 	console.log("summon call: " + bits);
 	var handindex = bits&7;
-	var card = player2.hand[handindex];
-	player2.spend(card.costele, card.cost);
-	player2.summon(handindex, bitsToTgt(bits>>3));
 	var sprite = new PIXI.Sprite(nopic);
-	foeplays.push([card, sprite]);
 	sprite.position.x=foeplays.length*40;
 	sprite.position.y=8;
 	gameui.addChild(sprite);
+	foeplays.push([player2.hand[handindex], sprite]);
+	player2.summon(handindex, bitsToTgt(bits>>3));
 });
 socket.on("active", function(bits) {
 	var c=bitsToTgt(bits&255), t=bitsToTgt((bits>>8)&255);
