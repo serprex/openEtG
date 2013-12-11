@@ -372,7 +372,7 @@ Permanent.prototype.info = function(){
 	return info;
 }
 Weapon.prototype.info = function(){
-	var info = this.atk.toString();
+	var info = this.trueatk().toString();
 	if (this.active)info+=" "+casttext(this.cast, this.castele)+":"+activename(this.active);
 	if (this.frozen)info += " "+this.frozen+"frozen";
 	if (this.delayed)info += " "+this.delayed+"delay";
@@ -1214,7 +1214,7 @@ integrity:function(t){
 		momentum: shardTally[Gravity]>1,
 		adrenaline: shardTally[Life]>1?1:0,
 		active: Actives[active],
-		cast: shardCosts[cast]
+		cast: shardCosts[active]
 	};
 	place(this.owner.creatures, new Creature(Cards.ShardGolem, this.owner));
 },
