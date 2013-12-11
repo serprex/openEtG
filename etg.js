@@ -119,7 +119,9 @@ function Creature(card, owner, poison){
 	this.delayed = 0;
 	this.frozen = 0;
 	this.dive = 0;
-	this.poison = poison || 0;
+	if(this.poison = poison || 0){
+		this.owner.foe.addpoison(this.poison);
+	}
 	this.steamatk = 0;
 	this.adrenaline = 0;
 	this.aflatoxin = false;
@@ -297,6 +299,9 @@ Player.prototype.endturn = function() {
 			if (i>5 && floodingFlag && (cr.card.element != Water || cr.card.element != Other) && ~cr.getIndex()){
 				cr.die();
 			}
+		}
+		if ((cr = this.foe.creatures[i]) && cr.passive == "salvaged"){
+			cr.passive = "salvage";
 		}
 	}
 	if (this.shield){
@@ -492,6 +497,7 @@ Creature.prototype.die = function() {
 	}
 	deatheffect();
 }
+Player.prototype.evade = Thing.prototype.evade = function(sender) { return false; }
 Creature.prototype.evade = function(sender) {
 	if (sender != this.owner && this.airborne && this.card.element == Air){
 		var freedomChance = 0;
@@ -721,6 +727,7 @@ var ShardList = [undefined, undefined,
 	"5se", "7qu",
 	"5vi", "7u2",
 	"62m", "816"];
+var RandomCardSkip = ["4t8", "6ro", "4vr", "6ub", "597", "77n", "5fd", "7dt"];
 function calcEclipse(){
 	var bonus = 0;
 	for (var j=0; j<2; j++){
@@ -739,7 +746,7 @@ function calcEclipse(){
 function randomcard(upped, filter){
 	var keys = [];
 	for(var key in Cards) {
-		if (key.length == 3 && Cards[key].upped == upped && (!filter || filter(Cards[key]))) {
+		if (key.length == 3 && Cards[key].upped == upped && !(key in RandomCardSkip) && (!filter || filter(Cards[key]))) {
 			var intKey = parseInt(key, 32);
 			// Skip marks
 			if (!((intKey>=5011&&intKey<=5022)||(intKey>=7011&&intKey<=7022))){
@@ -945,11 +952,19 @@ deja:function(t){
 	this.active = undefined;
 	Actives.parallel.call(this, this);
 },
-destroy:function(t){
+destroy:function(t, dontsalvage){
 	if ((t instanceof Pillar || t.card == Cards.BoneWall || t.card == Cards.BoneWallUp) && t.charges>1){
 		t.charges--;
 	}else{
 		t.die();
+	}
+	if (!dontsalvage && t.owner.hand.length<8 && t.owner != this.owner){
+		for (var i=0; i<23; i++){
+			if (t.owner.creatures[i] && t.owner.creatures[i].passive == "salvage" && !t.owner.creatures[i].salvaged){
+				t.owner.creatures[i].passive = "salvaged";
+				t.owner.hand.push(t.card);
+			}
+		}
 	}
 },
 devour:function(t){
@@ -1135,7 +1150,7 @@ immolate:function(t){
 	this.quanta[Fire] += this.card.upped?7:5;
 },
 improve:function(t){
-	var cr = new Creature(randomcard(false, function(x){return x.type == CreatureEnum}), t.owner);
+	var cr = new Creature(randomcard(false, function(x){return x.type == CreatureEnum}), t.owner, this.poison);
 	var abilities = [null,null,"hatch","freeze","burrow","destroy","steal","dive","heal","paradox","lycanthropy","scavenger","infection","gpull","devour","mutation","growth","ablaze","poison","deja","endow","guard","mitosis"];
 	cr.active = Actives[abilities[Math.floor(rng.real()*abilities.length)]];
 	if (!cr.active){
@@ -1154,14 +1169,19 @@ improve:function(t){
 infect:function(t){
 	t.addpoison(1);
 },
+infest:function(t){
+	if(!this.usedactive){
+		place(this.owner.creatures, new Creature(Cards.MalignantCell, this.owner));
+	}
+},
 integrity:function(t){
 	var shardTally = [0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0];
 	var shardSkills = [
 		[],
 		["deadalive", "mutation", "paradox", "improve", "scramble", "antimatter"],
-		["infection", "scavenger", "poison", "poison", "aflatoxin", "poison2"],
+		["infect", "scavenger", "poison", "poison", "aflatoxin", "poison2"],
 		["devour", "devour", "devour", "devour", "devour", "blackhole"],
-		["burrow", "stoneform", "guard", "guard", "petrify", "petrify"],
+		["burrow", "stoneform", "guard", "guard", "bblood", "bblood"],
 		["growth", "adrenaline", "adrenaline", "adrenaline", "adrenaline", "adrenaline", "mitosis"],
 		["ablaze", "ablaze", "fiery", "destroy", "destroy", "rage"],
 		["steam", "steam", "freeze", "freeze", "nymph", "nymph"],
@@ -1274,7 +1294,7 @@ mutation:function(t){
 	}else if (rnd<.5){
 		Actives.improve.call(this, t);
 	}else{
-		t.owner.creatures[t.remove()] = new Creature(Cards.Abomination, t.owner);
+		t.owner.creatures[t.remove()] = new Creature(Cards.Abomination, t.owner, this.poison);
 	}
 },
 neuro:function(t){
@@ -1473,7 +1493,7 @@ sskin:function(t){
 },
 steal:function(t){
 	if (t instanceof Pillar){
-		Actives.destroy.call(this, t);
+		Actives.destroy.call(this, t, true);
 		if (t.card.upped){
 			this.spend(t.card.element, t.card.element>0?-1:-3);
 		}
@@ -1485,7 +1505,7 @@ steal:function(t){
 		}
 		place(this.owner.permanents, new Pillar(t.card, this.owner));
 	}else if (t.card == Cards.BoneWall || t.card == Cards.BoneWallUp){
-		Actives.destroy.call(this, t);
+		Actives.destroy.call(this, t, true);
 		if (this.owner.shield == Cards.BoneWall || this.owner.shield == Cards.BoneWallUp){
 			this.owner.shield.charges++;
 		}else{
