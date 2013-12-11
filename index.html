@@ -22,7 +22,7 @@ loadcards(function(cards, targeting) {
 function getTarget(src, active, cb){
 	if (active in Targeting){
 		let targetingFilter = Targeting[active];
-		targetingMode = function(t){ return (t == player2 || t.owner == player1 || !cloakgfx.visible) && targetingFilter(src, t) }
+		targetingMode = function(t){ return (t == player2 || t.owner == player1 || !cloakgfx.visible) && targetingFilter(src, t); }
 		targetingModeCb = cb;
 		for(var key in TargetFilters){
 			if (TargetFilters[key] == targetingFilter){

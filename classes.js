@@ -6,8 +6,8 @@ function Card(type, info){
 	this.upped = parseInt(this.code, 32)>6999;
 	this.attack = parseInt(info.Attack||"0");
 	this.health = parseInt(info.Health||"0");
-	this.readCost(this, "cost", info.Cost||"0", this.element);
-	this.readCost(this, "cast", info.Cast||"0", this.element);
+	this.readCost("cost", info.Cost||"0", this.element);
+	this.readCost("cast", info.Cast||"0", this.element);
 	this.active = Actives[info.Active];
 	this.passive = info.Passive;
 	this.airborne = info.Airborne == "1";
