@@ -20,7 +20,7 @@ function loadcards(cb){
 					var cardcode = carddata[2];
 					var cardinfo = {};
 					for(var k=0; k<carddata.length; k++)cardinfo[keys[k]] = carddata[k];
-					var nospacename = carddata[1].replace(" ","");
+					var nospacename = carddata[1].replace(/ /g,"");
 					Cards[nospacename in Cards?nospacename+"Up":nospacename] = Cards[cardcode] = new Card(_i, cardinfo);
 				}
 				maybeCallback();
@@ -778,7 +778,12 @@ function casttext(cast, castele){
 	}else console.log("Unknown cost: " + cast);
 }
 function masscc(player, caster, func){
-	for (var i=0; i<23; i++){
+	for(var i=0; i<16; i++){
+		if (player.permanents[i] && player.permanents[i].passive == "cloak"){
+			Actives.destroy.call(player, player.permanents[i]);
+		}
+	}
+	for(var i=0; i<23; i++){
 		if (player.creatures[i] && !player.creatures[i].immaterial && !player.creatures[i].burrowed){
 			func.call(caster, player.creatures[i]);
 		}
@@ -939,8 +944,6 @@ cpower:function(t){
 },
 cseed:function(t){
 	Actives[["drainlife", "firebolt", "freeze", "gpullspell", "icebolt", "infect", "lightning", "lobotomize", "parallel", "rewind", "snipe", "swave"][Math.floor(rng.real()*12)]].call(this, t);
-},
-cloak:function(t){
 },
 dagger:function(t){
 	return this.owner.mark == Darkness||this.owner.mark == Death?1:0;
