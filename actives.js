@@ -449,7 +449,7 @@ mitosis:function(t){
 mitosisspell:function(t){
 	t.castele = t.card.element;
 	t.cast = t.card.cost;
-	t.active = Actives.Mitosis;
+	t.active = Actives.mitosis;
 },
 momentum:function(t){
 	t.atk += 1;
