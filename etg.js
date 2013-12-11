@@ -114,7 +114,8 @@ Card.prototype.info = function(){
 }
 Player.prototype.info = function() {
 	var info = this.hp + "/" + this.maxhp + " " + this.deck.length + "cards";
-	if (this.poison)info += " "+this.poison+"psn";
+	if (this.nova)info += " " + this.nova + "nova";
+	if (this.poison)info += " " + this.poison + "psn";
 	if (this.neuro)info += " neuro";
 	if (this.sosa)info += " sosa";
 	if (this.silence)info += " silence";
@@ -675,6 +676,7 @@ function salvageScan(from, t){
 			if (t.owner.creatures[i] && t.owner.creatures[i].passive == "salvage"){
 				t.owner.creatures[i].passive = "salvaged";
 				t.owner.hand.push(t.card);
+				return;
 			}
 		}
 	}
