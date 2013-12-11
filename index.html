@@ -372,6 +372,9 @@ for (var j=0; j<2; j++){
 		reflectPos(decktext[j]);
 	}
 	hptext[j].setInteractive(true);
+	hptext[j].mouseover = function(){
+		setInfo(players[_j]);
+	}
 	hptext[j].click = function(){
 		if (targetingMode && targetingMode(players[_j])){
 			targetingMode = undefined;

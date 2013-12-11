@@ -112,6 +112,17 @@ Card.prototype.readCost = function(attr, cost, e){
 Card.prototype.info = function(){
 	return this.cost+":"+this.element+" "+this.attack+"|"+this.health+(this.airborne?" airborne ":" ")+(this.passive||"");
 }
+Player.prototype.info = function() {
+	var info = this.hp + "/" + this.maxhp + " " + this.deck.length + "cards";
+	if (this.poison)info += " "+this.poison+"psn";
+	if (this.neuro)info += " neuro";
+	if (this.sosa)info += " sosa";
+	if (this.silence)info += " silence";
+	if (this.sanctuary)info += " sanctuary";
+	if (this.precognition)info += " precognition";
+	if (this.gpull)info += " gpull";
+	return info;
+}
 Player.prototype.randomquanta = function() {
 	var nonzero = 0
 	for(var i=1; i<13; i++){
