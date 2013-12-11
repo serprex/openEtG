@@ -90,6 +90,11 @@ function bitsToTgt(x){
 	}else console.log("Unknown tgtop: "+tgtop+", "+x);
 }
 var renderer = PIXI.autoDetectRenderer(900, 600);
+document.addEventListener("keydown", function(e){
+	if (e.keyCode == 32){
+		endturn.click();
+	}
+});
 document.body.appendChild(renderer.view);
 var menuui = new PIXI.Stage(0x336699, true), gameui = new PIXI.Stage(0x336699, true);
 var mainStage = menuui;
@@ -140,6 +145,7 @@ endturn.position.y = 540;
 endturn.setInteractive(true);
 endturn.click = function() {
 	if (winner){
+		myturn = false;
 		mainStage = menuui;
 	}else if (myturn){
 		if (player1.hand.length == 8){
@@ -440,6 +446,7 @@ socket.on("chat", function(data) {
 	document.getElementById("chatArea").value = data;
 });
 function maybeSendChat(e){
+	e.cancelBubble = true;
 	if (e.keyCode != 13)return;
 	var chat=document.getElementById("chatinput");
 	if (chat.value){
@@ -492,6 +499,6 @@ requestAnimFrame(animate);
 	<input id="roomname" type="text" placeholder="Room" />
 	Firefox only for now
 	<br/><input id="chatArea" type="text" style="width:100%;" readonly />
-	<br/><input id="chatinput" type="text" placeholder="Chat" style="width:100%" onkeyup="maybeSendChat(event)" />
+	<br/><input id="chatinput" type="text" placeholder="Chat" style="width:100%" onkeydown="maybeSendChat(event)" />
 </body>
 </html>

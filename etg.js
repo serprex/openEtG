@@ -132,8 +132,11 @@ Player.prototype.canspend = function(qtype, x) {
 	if (qtype == Other){
 		for (var i=1; i<13; i++){
 			x -= this.quanta[i];
+			if (x <= 0){
+				return true;
+			}
 		}
-		return x<= 0;
+		return false;
 	}else return this.quanta[qtype] >= x;
 }
 Player.prototype.spend = function(qtype, x) {
