@@ -171,7 +171,7 @@ Player.prototype.endturn = function() {
 				p.active();
 			}
 			p.usedactive = false;
-			if (p.active == Actives.cloak || p.passive == "stasis"){
+			if (p.passive == "cloak" || p.passive == "stasis"){
 				if (--p.charges < 0){
 					delete this.permanents[i];
 				}else if (p.passive == "stasis"){
@@ -193,27 +193,21 @@ Player.prototype.endturn = function() {
 			if (p.passive == "stasis"){
 				if (--p.charges < 0){
 					delete this.foe.permanents[i];
-				}
-				stasisFlag = true;
+				}else stasisFlag = true;
 			}else if (p.passive == "flooding"){
 				floodingFlag = true;
-			}
-		}
-	}
-	if (patienceFlag){
-		for(var i=0; i<23; i++){
-			var c;
-			if ((c = this.creatures[i])){
-				let floodbuff = floodingFlag&&j>5&&c.card.element==Water;
-				c.atk += floodbuff?5:c.burrowed?4:2;
-				c.buffhp(floodbuff?5:2);
-				c.delay(1);
 			}
 		}
 	}
 	var cr;
 	for (var i=0; i<23; i++){
 		if ((cr = this.creatures[i])){
+			if (patienceFlag){
+				var floodbuff = floodingFlag && i>5 && c.card.element==Water;
+				cr.atk += floodbuff?5:cr.burrowed?4:2;
+				cr.buffhp(floodbuff?5:2);
+				cr.delay(1);
+			}
 			cr.attack(stasisFlag, freedomChance);
 			if (cr.adrenaline>0){
 				cr.adrenaline=1;
@@ -228,8 +222,7 @@ Player.prototype.endturn = function() {
 	}
 	if (this.shield){
 		if (this.shield.active == Actives.evade100 || this.shield.active == Actives.wings){
-			this.shield.charges -= 1;
-			if (this.shield.charges < 0){
+			if (--this.shield.charges < 0){
 				this.shield = undefined;
 			}
 		}
