@@ -100,6 +100,14 @@ function Player(){
 	this.mark = 0;
 	this.quanta = [];
 	for(var i=1; i<13; i++)this.quanta[i]=0;
+	this.shardgolem = {
+		atk: 0,
+		hp: 0,
+		adrenaline: 0,
+		active: Actives.burrow,
+		cast: 1
+	};
+
 }
 function Thing(card, owner){
 	if (!card)return;
@@ -127,6 +135,18 @@ function Creature(card, owner){
 	this.momentum = card.passive == "momentum";
 	this.burrowed = card.passive == "burrowed";
 	this.immaterial = card.passive == "immaterial";
+	if (card == Cards.ShardGolem){
+		var golem = this.owner.shardgolem;
+		this.maxhp = this.hp = golem.hp;
+		this.atk = golem.atk;
+		this.active = golem.active;
+		this.cast = golem.cast;
+		this.airborne = golem.airborne;
+		this.adrenaline = golem.adrenaline;
+		this.passive = golem.passive;
+		this.momentum = golem.momentum;
+		this.immaterial = golem.immaterial;
+	}
 }
 function Permanent(card, owner){
 	if (!card){
@@ -646,7 +666,7 @@ Player.prototype.summon = function(index, target){
 			return place(this.permanents, p);
 		}
 	}else if (card.type == SpellEnum){
-		if (!target.evade(this)){
+		if (!target || !target.evade(this)){
 			this.card = card
 			card.active.call(this, target)
 		}
@@ -1136,6 +1156,67 @@ infect:function(t){
 	t.addpoison(1);
 },
 integrity:function(t){
+	var shardTally = [0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0];
+	var shardSkills = [
+		[],
+		["burrow", "stoneform", "guard", "guard", "petrify", "petrify"],
+		["deadalive", "mutation", "paradox", "improve", "scramble", "antimatter"],
+		["infection", "scavenger", "poison", "poison", "aflatoxin", "poison2"],
+		["devour", "devour", "devour", "devour", "devour", "blackhole"],
+		["growth", "adrenaline", "adrenaline", "adrenaline", "adrenaline", "adrenaline", "mitosis"],
+		["ablaze", "ablaze", "fiery", "destroy", "destroy", "rage"],
+		["steam", "steam", "freeze", "freeze", "nymph", "nymph"],
+		["heal", "endow", "endow", "luciferin", "luciferin", "luciferin"],
+		["queen", "queen", "sniper", "dive", "gas", "gas"],
+		["scarab", "scarab", "deja", "neuro", "precognition", "precognition"],
+		["vampire", "vampire", "vampire", "liquid", "liquid", "steal"],
+		["lobotomize", "lobotomize", "lobotomize", "quint", "quint", "quint"],
+	];
+	var shardCosts = {
+		burrow:1, stoneform:1, guard:1, petrify:2,
+		deadalive:1, mutation: 2, paradox: 2, improve: 2, scramble: -2, antimatter: 4,
+		infection:1, scavenger: -1, poison: -2, aflatoxin: 2, poison2: -2,
+		devour: 3, blackhole: 4,
+		growth: 2, adrenaline: 2, mitosis: 4,
+		ablaze: 1, fiery: -3, destroy: 3, rage: 2,
+		steam: 2, freeze: 2, nymph: 4,
+		heal: 1, endow: 2, luciferin: 4,
+		queen: 2, sniper: 2, dive: 2, gas: 2,
+		scarab: 2, deja: 4, neuro: -2, precognition: 2,
+		vampire: -2, liquid: 2, steal: 3,
+		lobotomize: 2, quint: 2,
+	};
+	var hp=1, atk=4, bonus=this.card.upped?1:0;
+	for(var i=this.owner.hand.length-1; i>=0; i--){
+		var card = this.owner.hand[i];
+		if (~ShardList.indexOf(card.code)){
+			if (card.upped){
+				bonus++;
+			}
+			shardTally[card.element]++;
+			this.owner.hand.splice(i, 1);
+		}
+	}
+	var active = Actives.burrow, num;
+	for(var i=1; i<13; i++){
+		atk += shardTally[i]*(i==Gravity?0:i==Earth?1:i==Fire?3:2);
+		hp += shardTally[i]*(i==Gravity?6:i==Earth?4:i==Fire?0:2);
+		if (shardTally[i]>num){
+			active = shardSkills[i][shardTally[i]];
+		}
+	}
+	this.owner.shardgolem = {
+		atk: atk + bonus,
+		hp: hp + bonus,
+		airborne: shardTally[Air]>0,
+		passive: shardTally[Darkness]>1?"voodoo":shardTally[Darkness]==1?"devour":undefined,
+		immaterial: shardTally[Aether]>1,
+		momentum: shardTally[Gravity]>1,
+		adrenaline: shardTally[Life]>1?1:0,
+		active: Actives[active],
+		cast: shardCosts[cast]
+	};
+	place(this.owner.creatures, new Creature(Cards.ShardGolem, this.owner));
 },
 light:function(t){
 	this.owner.spend(Light, -1);
