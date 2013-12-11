@@ -219,7 +219,7 @@ Player.prototype.endturn = function() {
 	this.precognition = this.sanctuary = this.silence = false;
 	this.spend(this.mark, -1);
 	this.foe.dmg(this.foe.poison);
-	var patienceFlag = false, floodingFlag = false, stasisFlag = false, floodingPaidFlag = false;
+	var patienceFlag = false, floodingFlag = false, stasisFlag = false, floodingPaidFlag = false, freedomChance = 0;
 	for(var i=0; i<16; i++){
 		var p;
 		if ((p=this.permanents[i])){
@@ -241,6 +241,8 @@ Player.prototype.endturn = function() {
 				}
 			}else if (p.passive == "sopa"){
 				patienceFlag = true;
+			}else if (p.passive == "freedom"){
+				freedomChance += .25;
 			}
 		}
 		if ((p=this.foe.permanents[i])){
@@ -268,7 +270,7 @@ Player.prototype.endturn = function() {
 	var cr;
 	for (var i=0; i<23; i++){
 		if ((cr = this.creatures[i])){
-			cr.attack(stasisFlag);
+			cr.attack(stasisFlag, freedomChance);
 			if (cr.adrenaline>0){
 				cr.adrenaline=1;
 			}
@@ -470,6 +472,17 @@ Creature.prototype.die = function() {
 	}
 	deatheffect();
 }
+Creature.prototype.evade = function(sender) {
+	if (sender != this.owner && this.airborne && this.card.element == Air){
+		var freedomChance = 0;
+		for(var i=0; i<16; i++){
+			if (this.owner.permanents[i] && this.owner.permanents[i].passive == "freedom"){
+				freedomChance += .25;
+			}
+		}
+		return freedomChance && rng.real() < freedomChance;
+	}
+}
 Weapon.prototype.trueatk = Creature.prototype.trueatk = function(adrenaline){
 	var dmg = this.atk+this.steamatk+this.dive;
 	if (this.cast == -3)dmg += this.active();
@@ -503,7 +516,9 @@ Thing.prototype.canactive = function() {
 }
 Thing.prototype.useactive = function(t) {
 	this.usedactive = true;
-	this.active(t);
+	if (!t.evade(this.owner)){
+		this.active(t);
+	}
 	this.owner.spend(this.castele, this.cast);
 	if (this.passive == "sacrifice"){
 		this.die();
@@ -517,7 +532,7 @@ function calcAdrenaline(x,y){
 	var f1 = calcAdrenaline(x,y-1);
 	return f1-Math.ceil((4-countAdrenaline(x))*f1*(y-1)/3);
 }
-Weapon.prototype.attack = Creature.prototype.attack = function(stasis){
+Weapon.prototype.attack = Creature.prototype.attack = function(stasis, freedomChance){
 	var isCreature = this instanceof Creature;
 	if (isCreature){
 		this.dmg(this.poison, true);
@@ -531,11 +546,15 @@ Weapon.prototype.attack = Creature.prototype.attack = function(stasis){
 			this.owner.spend(Darkness, -1);
 		}
 	}
-	var trueatk;
+	var trueatk, momentum = this.momentum;
 	if (!(stasis || this.frozen>0 || this.delayed>0) && (trueatk = this.trueatk()) != 0){
+		if (this.airborne && freedomChance && rng.real() < freedomChance){
+			trueatk = Math.ceil(trueatk * 1.5);
+			momentum = true;
+		}
 		if (this.psion){
 			target.spelldmg(trueatk);
-		}else if (this.momentum || trueatk < 0){
+		}else if (momentum || trueatk < 0){
 			target.dmg(trueatk);
 			if (this.adrenaline < 3 && this.cast == -2){
 				this.dmgdone = trueatk;
@@ -575,7 +594,7 @@ Weapon.prototype.attack = Creature.prototype.attack = function(stasis){
 			this.die();
 		}else if (this.adrenaline > 0 && this.adrenaline < countAdrenaline(this.trueatk(0))){
 			this.adrenaline++;
-			this.attack(stasis);
+			this.attack(stasis, freedomChance);
 		}
 	}
 }
@@ -627,8 +646,10 @@ Player.prototype.summon = function(index, target){
 			return place(this.permanents, p);
 		}
 	}else if (card.type == SpellEnum){
-		this.card = card
-		card.active.call(this, target)
+		if (!target.evade(this)){
+			this.card = card
+			card.active.call(this, target)
+		}
 		return undefined;
 	}else if (card.type == CreatureEnum) {
 		return place(this.creatures, new Creature(card, this));
