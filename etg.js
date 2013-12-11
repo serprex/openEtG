@@ -1159,10 +1159,10 @@ integrity:function(t){
 	var shardTally = [0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0];
 	var shardSkills = [
 		[],
-		["burrow", "stoneform", "guard", "guard", "petrify", "petrify"],
 		["deadalive", "mutation", "paradox", "improve", "scramble", "antimatter"],
 		["infection", "scavenger", "poison", "poison", "aflatoxin", "poison2"],
 		["devour", "devour", "devour", "devour", "devour", "blackhole"],
+		["burrow", "stoneform", "guard", "guard", "petrify", "petrify"],
 		["growth", "adrenaline", "adrenaline", "adrenaline", "adrenaline", "adrenaline", "mitosis"],
 		["ablaze", "ablaze", "fiery", "destroy", "destroy", "rage"],
 		["steam", "steam", "freeze", "freeze", "nymph", "nymph"],
@@ -1197,7 +1197,7 @@ integrity:function(t){
 			this.owner.hand.splice(i, 1);
 		}
 	}
-	var active = Actives.burrow, num;
+	var active = Actives.burrow, num=0;
 	for(var i=1; i<13; i++){
 		atk += shardTally[i]*(i==Gravity?0:i==Earth?1:i==Fire?3:2);
 		hp += shardTally[i]*(i==Gravity?6:i==Earth?4:i==Fire?0:2);
