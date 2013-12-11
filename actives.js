@@ -472,7 +472,7 @@ neuro:function(t){
 	t.neuro = true
 },
 nightmare:function(t){
-	if (!this.owner.sanctuary){
+	if (!t.owner.sanctuary){
 		this.owner.dmg(-this.owner.foe.dmg(16-this.owner.foe.hand.length*2));
 		for(var i = this.owner.foe.hand.length; i<8; i++){
 			this.owner.foe.hand[i] = t.card;

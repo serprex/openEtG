@@ -8,7 +8,8 @@
 	"dependencies": {
 		"socket.io":"",
 		"connect":"",
-		"connect-gzip":""
+		"connect-gzip":"",
+		"requirejs":""
 	},
 	"devDependencies": {
 		"grunt":"",
