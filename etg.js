@@ -1281,9 +1281,9 @@ mitosis:function(t){
 	place(this.owner.creatures, new Creature(this.card, this.owner))
 },
 mitosisspell:function(t){
-	this.castele = this.card.element;
-	this.cast = this.card.cost;
-	this.active = Actives.Mitosis;
+	t.castele = t.card.element;
+	t.cast = t.card.cost;
+	t.active = Actives.Mitosis;
 },
 momentum:function(t){
 	t.atk += 1;
