@@ -221,6 +221,11 @@ endow:function(t){
 	if (t.active && t.cast == -3){
 		this.atk -= t.active();
 	}
+	this.momentum |= t.momentum;
+	this.psion |= t.psion;
+	if (t.adrenaline>0){
+		this.adrenaline = 1
+	}
 	this.buffhp(2);
 },
 evolve:function(t){

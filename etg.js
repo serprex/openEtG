@@ -668,7 +668,7 @@ var TargetFilters = {
 		return isMaterialInstance(Pillar, t);
 	},
 	weap:function(c, t){
-		return isMaterialInstance(Weapon, t);
+		return t.card.type == WeaponEnum && !t.immaterial && !t.burrowed;
 	},
 	perm:function(c, t){
 		return isMaterialInstance(Permanent, t);
