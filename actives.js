@@ -426,6 +426,7 @@ luciferin:function(t){
 	this.owner.dmg(-10);
 	masscc(this.owner, this, function(x){
 		if (!x.active){
+			x.cast = -1;
 			x.active = Actives.light;
 		}
 	})
