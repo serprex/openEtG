@@ -252,8 +252,8 @@ for (var j=0; j<2; j++){
 	for (var i=0; i<23; i++){
 		creasprite[j][i] = new PIXI.Sprite(nopic);
 		centerAnchor(creasprite[j][i]);
-		creasprite[j][i].position.x=160+(i%12)*30;
-		creasprite[j][i].position.y=360+(i%3)*20+(Math.floor(i/12)*30);
+		creasprite[j][i].position.x=160+i*16;
+		creasprite[j][i].position.y=360+(i%5)*20;
 		if (j){
 			reflectPos(creasprite[j][i]);
 		}
@@ -281,8 +281,8 @@ for (var j=0; j<2; j++){
 	for (var i=0; i<16; i++){
 		permsprite[j][i] = new PIXI.Sprite(nopic);
 		centerAnchor(permsprite[j][i]);
-		permsprite[j][i].position.x=160+(i%12)*30;
-		permsprite[j][i].position.y=490+(i%3)*20+(Math.floor(i/12)*30);
+		permsprite[j][i].position.x=160+i*16;
+		permsprite[j][i].position.y=490+(i%5)*20;
 		if (j){
 			reflectPos(permsprite[j][i]);
 		}
@@ -388,9 +388,8 @@ for (var j=0; j<2; j++){
 }
 var cloakgfx = new PIXI.Graphics();
 cloakgfx.beginFill(0);
-cloakgfx.drawRect(300, 30, 480, 220);
+cloakgfx.drawRect(300, 20, 490, 220);
 cloakgfx.endFill();
-cloakgfx.visible = false;
 gameui.addChild(cloakgfx);
 var socket = io.connect("http://"+location.hostname+':13602');
 socket.on("pvpgive", function(data) {
