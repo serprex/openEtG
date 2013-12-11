@@ -114,12 +114,12 @@ function Thing(card, owner){
 	this.owner = owner;
 	this.card = card;
 }
-function Creature(card, owner){
+function Creature(card, owner, poison){
 	Thing.apply(this, arguments);
 	this.delayed = 0;
 	this.frozen = 0;
 	this.dive = 0;
-	this.poison = 0;
+	this.poison = poison || 0;
 	this.steamatk = 0;
 	this.adrenaline = 0;
 	this.aflatoxin = false;
@@ -488,7 +488,7 @@ Creature.prototype.die = function() {
 	if (this.aflatoxin){
 		this.owner.creatures[index] = new Creature(Cards.MalignantCell, this.owner);
 	}else if (this.active == Actives.phoenix){
-		this.owner.creatures[index] = new Creature(this.card.upped?Cards.AshUp:Cards.Ash, this.owner);
+		this.owner.creatures[index] = new Creature(this.card.upped?Cards.AshUp:Cards.Ash, this.owner, this.poison);
 	}
 	deatheffect();
 }
@@ -536,7 +536,7 @@ Thing.prototype.canactive = function() {
 }
 Thing.prototype.useactive = function(t) {
 	this.usedactive = true;
-	if (!t.evade(this.owner)){
+	if (!t || !t.evade(this.owner)){
 		this.active(t);
 	}
 	this.owner.spend(this.castele, this.cast);
@@ -1045,8 +1045,7 @@ endow:function(t){
 	this.buffhp(2);
 },
 evolve:function(t){
-	var shrieker = this.owner.creatures[this.remove()] = new Creature(this.card.upped?Cards.EliteShrieker:Cards.Shrieker, this.owner);
-	shrieker.poison = this.poison;
+	this.owner.creatures[this.remove()] = new Creature(this.card.upped?Cards.EliteShrieker:Cards.Shrieker, this.owner, this.poison);
 },
 fiery:function(t){
 	return Math.floor(this.owner.quanta[Fire]/5);
@@ -1105,7 +1104,7 @@ hasten:function(t){
 	this.owner.drawcard();
 },
 hatch:function(t){
-	this.owner.creatures[this.remove()] = new Creature(randomcard(this.card.upped, function(x){return x.type == CreatureEnum}), this.owner);
+	this.owner.creatures[this.remove()] = new Creature(randomcard(this.card.upped, function(x){return x.type == CreatureEnum}), this.owner, this.poison);
 },
 heal:function(t){
 	t.dmg(-5);
@@ -1403,7 +1402,7 @@ readiness:function(t){
 	}
 },
 rebirth:function(t){
-	this.owner.creatures[this.remove()] = new Creature(this.card.upped?Cards.MinorPhoenix:Cards.Phoenix, this.owner);
+	this.owner.creatures[this.remove()] = new Creature(this.card.upped?Cards.MinorPhoenix:Cards.Phoenix, this.owner, this.poison);
 },
 regenerate:function(t){
 	this.owner.dmg(-5);
