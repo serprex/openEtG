@@ -420,9 +420,9 @@ function deatheffect() {
 Creature.prototype.die = function() {
 	var index = this.remove();
 	if (this.aflatoxin){
-		this.owner.creatures[index] = new Creature(Cards.MalignantCell, this.owner);
+		(this.owner.creatures[index] = new Creature(Cards.MalignantCell, this.owner)).usedactive = false;
 	}else if (this.active == Actives.phoenix){
-		this.owner.creatures[index] = new Creature(this.card.upped?Cards.AshUp:Cards.Ash, this.owner, this.poison);
+		this.owner.creatures[index] = new Creature(this.card.upped?Cards.AshUp:Cards.Ash, this.owner);
 	}
 	deatheffect();
 }
@@ -666,6 +666,16 @@ function masscc(player, caster, func){
 	for(var i=0; i<23; i++){
 		if (player.creatures[i] && !player.creatures[i].immaterial && !player.creatures[i].burrowed){
 			func.call(caster, player.creatures[i]);
+		}
+	}
+}
+function salvageScan(from, t){
+	if (t.owner.hand.length<8 && t.owner != from){
+		for (var i=0; i<23; i++){
+			if (t.owner.creatures[i] && t.owner.creatures[i].passive == "salvage"){
+				t.owner.creatures[i].passive = "salvaged";
+				t.owner.hand.push(t.card);
+			}
 		}
 	}
 }

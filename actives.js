@@ -7,15 +7,17 @@ acceleration:function(t){
 	this.dmg(1,true);
 },
 accelerationspell:function(t){
-	this.cast = -1;
-	this.active = Actives.acceleration;
+	t.cast = -1;
+	t.active = Actives.acceleration;
 },
 accretion:function(t){
 	Actives.destroy.call(this, t);
 	this.buffhp(15);
 	if (this.truehp() > 45){
 		this.die();
-		this.owner.hand.append(this.card.upped?Cards.BlackHoleUp:Cards.BlackHole);
+		if (this.owner.hand.length < 8){
+			this.owner.hand.push(this.card.upped?Cards.BlackHoleUp:Cards.BlackHole);
+		}
 	}
 },
 adrenaline:function(t){
@@ -122,13 +124,8 @@ destroy:function(t, dontsalvage){
 	}else{
 		t.die();
 	}
-	if (!dontsalvage && t.owner.hand.length<8 && t.owner != this.owner){
-		for (var i=0; i<23; i++){
-			if (t.owner.creatures[i] && t.owner.creatures[i].passive == "salvage" && !t.owner.creatures[i].salvaged){
-				t.owner.creatures[i].passive = "salvaged";
-				t.owner.hand.push(t.card);
-			}
-		}
+	if (!dontsalvage){
+		salvageScan(this.owner, t);
 	}
 },
 devour:function(t){
@@ -201,6 +198,7 @@ earthquake:function(t){
 	}else{
 		t.die();
 	}
+	salvageScan(this.owner, t);
 },
 empathy:function(t){
 	var healsum = 0;
@@ -472,7 +470,7 @@ neuro:function(t){
 	t.neuro = true
 },
 nightmare:function(t){
-	if (!t.owner.sanctuary){
+	if (!this.owner.foe.sanctuary){
 		this.owner.dmg(-this.owner.foe.dmg(16-this.owner.foe.hand.length*2));
 		for(var i = this.owner.foe.hand.length; i<8; i++){
 			this.owner.foe.hand[i] = t.card;
@@ -507,8 +505,8 @@ overdrive:function(t){
 	this.dmg(1, true);
 },
 overdrivespell:function(t){
-	this.cast = -1;
-	this.active = Actives.overdrive;
+	t.cast = -1;
+	t.active = Actives.overdrive;
 },
 pandemonium:function(t){
 	masscc(this.owner.foe, this, Actives.cseed);
