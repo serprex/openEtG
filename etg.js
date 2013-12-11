@@ -511,7 +511,7 @@ Creature.prototype.evade = function(sender) {
 }
 Weapon.prototype.trueatk = Creature.prototype.trueatk = function(adrenaline){
 	var dmg = this.atk+this.steamatk+this.dive;
-	if (this.cast == -3)dmg += this.active();
+	if (this.active && this.cast == -3)dmg += this.active();
 	dmg = this.burrowed?Math.ceil(dmg/2):dmg;
 	if (this instanceof Creature && (this.card.element == Death || this.card.element == Darkness)){
 		dmg+= calcEclipse();
@@ -582,20 +582,20 @@ Weapon.prototype.attack = Creature.prototype.attack = function(stasis, freedomCh
 			target.spelldmg(trueatk);
 		}else if (momentum || trueatk < 0){
 			target.dmg(trueatk);
-			if (this.adrenaline < 3 && this.cast == -2){
+			if (this.adrenaline < 3 && this.active && this.cast == -2){
 				this.dmgdone = trueatk;
 				this.active(target);
 			}
 		}else if (target.gpull){
 			var dmg = target.gpull.dmg(trueatk);
-			if (this.adrenaline < 3 && this.cast == -2){
+			if (this.adrenaline < 3 && this.active && this.cast == -2){
 				this.dmgdone = dmg;
 				this.active(target);
 			}
 		}else if (!target.shield || (trueatk > target.shield.dr && (!target.shield.active || !target.shield.active(this)))){
 			var dmg = trueatk - (target.shield?target.shield.dr:0);
 			target.dmg(dmg);
-			if (this.adrenaline < 3 && this.cast == -2){
+			if (this.adrenaline < 3 && this.active && this.cast == -2){
 				this.dmgdone = dmg;
 				this.active(target);
 			}
@@ -770,9 +770,9 @@ function casttext(cast, castele){
 	}else if (cast == 0){
 		return "0";
 	}else if (cast == -1){
-		return "per hit";
+		return "perhit";
 	}else if (cast == -2){
-		return "on hit";
+		return "onhit";
 	}else if (cast == -3){
 		return "buff";
 	}else console.log("Unknown cost: " + cast);
@@ -1057,7 +1057,7 @@ endow:function(t){
 	this.castele = t.castele;
 	this.passive = t.passive;
 	this.atk += t.trueatk();
-	if (t.cast == -3){
+	if (t.active && t.cast == -3){
 		this.atk -= t.active();
 	}
 	this.buffhp(2);
