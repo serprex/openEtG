@@ -728,7 +728,7 @@ var TargetFilters = {
 		return isMaterialInstance(Creature, t) && t.airborne;
 	},
 	wisdom:function(c, t){
-		return isMaterialInstance(Creature, t) && !t.burrowed;
+		return t instanceof Creature && !t.burrowed;
 	}
 
 }
