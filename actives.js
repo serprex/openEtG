@@ -388,7 +388,8 @@ integrity:function(t){
 		atk += shardTally[i]*(i==Gravity?0:i==Earth?1:i==Fire?3:2);
 		hp += shardTally[i]*(i==Gravity?6:i==Earth?4:i==Fire?0:2);
 		if (shardTally[i]>num){
-			active = shardSkills[i][shardTally[i]];
+			num = shardTally[i];
+			active = shardSkills[i][num];
 		}
 	}
 	this.owner.shardgolem = {
