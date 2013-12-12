@@ -57,22 +57,23 @@ function loadcards(cb){
 	for(var i=0; i<names.length; i++){
 		var xhr = new XMLHttpRequest();
 		xhr.open("GET", names[i] + ".csv", true);
-		let _i=i;
-		xhr.onreadystatechange = function() {
-			if (this.readyState == 4 && this.status == 200){
-				var csv = this.responseText.split("\n");
-				var keys = csv[0].split(",");
-				for(var j=1; j<csv.length; j++){
-					var carddata = csv[j].split(",");
-					var cardcode = carddata[2];
-					var cardinfo = {};
-					for(var k=0; k<carddata.length; k++)cardinfo[keys[k]] = carddata[k];
-					var nospacename = carddata[1].replace(/ /g,"");
-					Cards[nospacename in Cards?nospacename+"Up":nospacename] = Cards[cardcode] = new Card(_i, cardinfo);
+		(function(_i){
+			xhr.onreadystatechange = function() {
+				if (this.readyState == 4 && this.status == 200){
+					var csv = this.responseText.split("\n");
+					var keys = csv[0].split(",");
+					for(var j=1; j<csv.length; j++){
+						var carddata = csv[j].split(",");
+						var cardcode = carddata[2];
+						var cardinfo = {};
+						for(var k=0; k<carddata.length; k++)cardinfo[keys[k]] = carddata[k];
+						var nospacename = carddata[1].replace(/ /g,"");
+						Cards[nospacename in Cards?nospacename+"Up":nospacename] = Cards[cardcode] = new Card(_i, cardinfo);
+					}
+					maybeCallback();
 				}
-				maybeCallback();
 			}
-		};
+		})(i);
 		xhr.send();
 	}
 	var xhr = new XMLHttpRequest();

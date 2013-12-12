@@ -9,10 +9,12 @@
 		}
 	</style>
 	<script src="/socket.io/socket.io.js"></script>
-	<script src="js.js" type="text/javascript;version=1.7"></script>
+	<script src="js.js"></script>
 </head>
 <body>
-	<script type="text/javascript;version=1.7">
+	<script>
+"use strict"
+console.log(1);
 var Cards, Targeting, targetingMode, targetingModeCb, targetingText, myturn, player1, player2, players, winner, discarding;
 loadcards(function(cards, targeting) {
 	Cards = cards;
@@ -21,7 +23,7 @@ loadcards(function(cards, targeting) {
 });
 function getTarget(src, active, cb){
 	if (active in Targeting){
-		let targetingFilter = Targeting[active];
+		var targetingFilter = Targeting[active];
 		targetingMode = function(t){ return (t == player2 || t.owner == player1 || !cloakgfx.visible) && targetingFilter(src, t); }
 		targetingModeCb = cb;
 		for(var key in TargetFilters){
@@ -196,34 +198,35 @@ for (var i=0; i<8; i++){
 	handsprite[0][i].position.x=800;
 	handsprite[0][i].position.y=300+20*i;
 	handsprite[0][i].interactive = true;
-	let _i=i;
-	handsprite[0][i].mouseover = function(){
-		setInfo(player1.hand[_i]);
-	}
-	handsprite[0][i].click = function(){
-		if (discarding){
-			socket.emit("endturn", _i);
-			player1.discard(_i);
-			player1.endturn();
-			myturn=false;
-			discarding = false;
-			return;
+	(function(_i){
+		handsprite[0][i].mouseover = function(){
+			setInfo(player1.hand[_i]);
 		}
-		if (!myturn || player1.silence)return;
-		var card = player1.hand[_i];
-		if (card && (card.cost == 0 || player1.canspend(card.costele, card.cost))){
-			if (card.type != SpellEnum){
-				console.log("summoning " + _i);
-				socket.emit("summon", _i);
-				player1.summon(_i);
-			}else{
-				getTarget(player1, card.active, function(tgt) {
-					socket.emit("summon", _i|tgtToBits(tgt)<<3);
-					player1.summon(_i, tgt);
-				});
+		handsprite[0][i].click = function(){
+			if (discarding){
+				socket.emit("endturn", _i);
+				player1.discard(_i);
+				player1.endturn();
+				myturn=false;
+				discarding = false;
+				return;
+			}
+			if (!myturn || player1.silence)return;
+			var card = player1.hand[_i];
+			if (card && (card.cost == 0 || player1.canspend(card.costele, card.cost))){
+				if (card.type != SpellEnum){
+					console.log("summoning " + _i);
+					socket.emit("summon", _i);
+					player1.summon(_i);
+				}else{
+					getTarget(player1, card.active, function(tgt) {
+						socket.emit("summon", _i|tgtToBits(tgt)<<3);
+						player1.summon(_i, tgt);
+					});
+				}
 			}
 		}
-	}
+	})(i);
 	gameui.addChild(handsprite[0][i]);
 }
 for (var i=0; i<8; i++){
@@ -242,139 +245,142 @@ var hptext = [new PIXI.Text("", {font: "18px Arial bold"}), new PIXI.Text("", {f
 var poisontext = [new PIXI.Text("", {font: "16px Arial bold"}), new PIXI.Text("", {font: "16px Arial bold"})];
 var decktext = [new PIXI.Text("", {font: "16px Arial bold"}), new PIXI.Text("", {font: "16px Arial bold"})];
 for (var j=0; j<2; j++){
-	let _j=j;
-	for (var i=0; i<23; i++){
-		creasprite[j][i] = new PIXI.Sprite(nopic);
-		centerAnchor(creasprite[j][i]);
-		creasprite[j][i].position.x=160+i*16;
-		creasprite[j][i].position.y=360+(i%5)*20;
-		if (j){
-			reflectPos(creasprite[j][i]);
+	(function(_j){
+		for (var i=0; i<23; i++){
+			creasprite[j][i] = new PIXI.Sprite(nopic);
+			centerAnchor(creasprite[j][i]);
+			creasprite[j][i].position.x=160+i*16;
+			creasprite[j][i].position.y=360+(i%5)*20;
+			if (j){
+				reflectPos(creasprite[j][i]);
+			}
+			creasprite[j][i].interactive = true;
+			(function(_i){
+				creasprite[j][i].mouseover = function(){
+					setInfo(players[_j].creatures[_i]);
+				}
+				creasprite[j][i].click = function(){
+					var crea = players[_j].creatures[_i];
+					if (!crea)return;
+					if (targetingMode && targetingMode(crea)){
+						targetingMode = undefined;
+						targetingModeCb(crea);
+					}else if (_j == 0 && !targetingMode && crea.canactive()){
+						getTarget(crea, crea.active, function(tgt){
+							targetingMode = undefined;
+							socket.emit("active", tgtToBits(crea)|tgtToBits(tgt)<<8);
+							crea.useactive(tgt);
+						});
+					}
+				}
+			})(i);
+			gameui.addChild(creasprite[j][i]);
 		}
-		creasprite[j][i].interactive = true;
-		let _i=i;
-		creasprite[j][i].mouseover = function(){
-			setInfo(players[_j].creatures[_i]);
+		for (var i=0; i<16; i++){
+			permsprite[j][i] = new PIXI.Sprite(nopic);
+			centerAnchor(permsprite[j][i]);
+			permsprite[j][i].position.x=160+i*16;
+			permsprite[j][i].position.y=490+(i%5)*20;
+			if (j){
+				reflectPos(permsprite[j][i]);
+			}
+			permsprite[j][i].interactive = true;
+			(function(_i){
+				permsprite[j][i].mouseover = function(){
+					setInfo(players[_j].permanents[_i]);
+				}
+				permsprite[j][i].click = function(){
+					var perm = players[_j].permanents[_i];
+					if (!perm)return;
+					if (targetingMode && targetingMode(perm)){
+						targetingMode = undefined;
+						targetingModeCb(perm);
+					}else if (_j == 0 && !targetingMode && perm.canactive()){
+						getTarget(perm, perm.active, function(tgt){
+							targetingMode = undefined;
+							socket.emit("active", tgtToBits(perm)|tgtToBits(tgt)<<8);
+							perm.useactive(tgt);
+						});
+					}
+				}
+			})(i);
+			gameui.addChild(permsprite[j][i]);
 		}
-		creasprite[j][i].click = function(){
-			var crea = players[_j].creatures[_i];
-			if (!crea)return;
-			if (targetingMode && targetingMode(crea)){
+		centerAnchor(weapsprite[j]);
+		centerAnchor(shiesprite[j]);
+		centerAnchor(marksprite[j]);
+		weapsprite[j].position.x=550;
+		weapsprite[j].position.y=500;
+		weapsprite[j].interactive = true;
+		shiesprite[j].position.x=550;
+		shiesprite[j].position.y=530;
+		shiesprite[j].interactive = true;
+		marksprite[j].position.x = 550;
+		marksprite[j].position.y = 470;
+		weapsprite[j].mouseover = function(){
+			setInfo(players[_j].weapon);
+		}
+		shiesprite[j].mouseover = function(){
+			setInfo(players[_j].shield);
+		}
+		weapsprite[j].click = function(){
+			var weap = players[_j].weapon;
+			if (!weap)return
+			if (targetingMode && targetingMode(weap)){
 				targetingMode = undefined;
-				targetingModeCb(crea);
-			}else if (_j == 0 && !targetingMode && crea.canactive()){
-				getTarget(crea, crea.active, function(tgt){
+				targetingModeCb(weap);
+			}else if (_j == 0 && !targetingMode && weap.canactive()){
+				getTarget(weap, weap.active, function(tgt){
 					targetingMode = undefined;
-					socket.emit("active", tgtToBits(crea)|tgtToBits(tgt)<<8);
-					crea.useactive(tgt);
+					socket.emit("active", tgtToBits(weap)|tgtToBits(tgt)<<8);
+					weap.useactive(tgt);
 				});
 			}
 		}
-		gameui.addChild(creasprite[j][i]);
-	}
-	for (var i=0; i<16; i++){
-		permsprite[j][i] = new PIXI.Sprite(nopic);
-		centerAnchor(permsprite[j][i]);
-		permsprite[j][i].position.x=160+i*16;
-		permsprite[j][i].position.y=490+(i%5)*20;
-		if (j){
-			reflectPos(permsprite[j][i]);
-		}
-		permsprite[j][i].interactive = true;
-		let _i=i;
-		permsprite[j][i].mouseover = function(){
-			setInfo(players[_j].permanents[_i]);
-		}
-		permsprite[j][i].click = function(){
-			let perm = players[_j].permanents[_i];
-			if (!perm)return;
-			if (targetingMode && targetingMode(perm)){
+		shiesprite[j].click = function(){
+			if (!players[_j].shield)return
+			if (targetingMode && targetingMode(players[_j].shield)){
 				targetingMode = undefined;
-				targetingModeCb(perm);
-			}else if (_j == 0 && !targetingMode && perm.canactive()){
-				getTarget(perm, perm.active, function(tgt){
-					targetingMode = undefined;
-					socket.emit("active", tgtToBits(perm)|tgtToBits(tgt)<<8);
-					perm.useactive(tgt);
-				});
+				targetingModeCb(players[_j].shield);
 			}
 		}
-		gameui.addChild(permsprite[j][i]);
-	}
-	centerAnchor(weapsprite[j]);
-	centerAnchor(shiesprite[j]);
-	centerAnchor(marksprite[j]);
-	weapsprite[j].position.x=550;
-	weapsprite[j].position.y=500;
-	weapsprite[j].interactive = true;
-	shiesprite[j].position.x=550;
-	shiesprite[j].position.y=530;
-	shiesprite[j].interactive = true;
-	marksprite[j].position.x = 550;
-	marksprite[j].position.y = 470;
-	weapsprite[j].mouseover = function(){
-		setInfo(players[_j].weapon);
-	}
-	shiesprite[j].mouseover = function(){
-		setInfo(players[_j].shield);
-	}
-	weapsprite[j].click = function(){
-		var weap = players[_j].weapon;
-		if (!weap)return
-		if (targetingMode && targetingMode(weap)){
-			targetingMode = undefined;
-			targetingModeCb(weap);
-		}else if (_j == 0 && !targetingMode && weap.canactive()){
-			getTarget(weap, weap.active, function(tgt){
+		if (j){
+			reflectPos(weapsprite[j]);
+			reflectPos(shiesprite[j]);
+			reflectPos(marksprite[j]);
+		}
+		gameui.addChild(weapsprite[j]);
+		gameui.addChild(shiesprite[j]);
+		gameui.addChild(marksprite[j]);
+		centerAnchor(quantatext[j]);
+		centerAnchor(hptext[j]);
+		centerAnchor(poisontext[j]);
+		centerAnchor(decktext[j]);
+		quantatext[j].position.x=50;
+		quantatext[j].position.y=400;
+		hptext[j].position.x=50;
+		hptext[j].position.y=550;
+		poisontext[j].position.x=50;
+		poisontext[j].position.y=570;
+		decktext[j].position.x=50;
+		decktext[j].position.y=530;
+		if (j){
+			reflectPos(quantatext[j]);
+			reflectPos(hptext[j]);
+			reflectPos(poisontext[j]);
+			reflectPos(decktext[j]);
+		}
+		hptext[j].interactive = true;
+		hptext[j].mouseover = function(){
+			setInfo(players[_j]);
+		}
+		hptext[j].click = function(){
+			if (targetingMode && targetingMode(players[_j])){
 				targetingMode = undefined;
-				socket.emit("active", tgtToBits(weap)|tgtToBits(tgt)<<8);
-				weap.useactive(tgt);
-			});
+				targetingModeCb(players[_j]);
+			}
 		}
-	}
-	shiesprite[j].click = function(){
-		if (!players[_j].shield)return
-		if (targetingMode && targetingMode(players[_j].shield)){
-			targetingMode = undefined;
-			targetingModeCb(players[_j].shield);
-		}
-	}
-	if (j){
-		reflectPos(weapsprite[j]);
-		reflectPos(shiesprite[j]);
-		reflectPos(marksprite[j]);
-	}
-	gameui.addChild(weapsprite[j]);
-	gameui.addChild(shiesprite[j]);
-	gameui.addChild(marksprite[j]);
-	centerAnchor(quantatext[j]);
-	centerAnchor(hptext[j]);
-	centerAnchor(poisontext[j]);
-	centerAnchor(decktext[j]);
-	quantatext[j].position.x=50;
-	quantatext[j].position.y=400;
-	hptext[j].position.x=50;
-	hptext[j].position.y=550;
-	poisontext[j].position.x=50;
-	poisontext[j].position.y=570;
-	decktext[j].position.x=50;
-	decktext[j].position.y=530;
-	if (j){
-		reflectPos(quantatext[j]);
-		reflectPos(hptext[j]);
-		reflectPos(poisontext[j]);
-		reflectPos(decktext[j]);
-	}
-	hptext[j].interactive = true;
-	hptext[j].mouseover = function(){
-		setInfo(players[_j]);
-	}
-	hptext[j].click = function(){
-		if (targetingMode && targetingMode(players[_j])){
-			targetingMode = undefined;
-			targetingModeCb(players[_j]);
-		}
-	}
+	})(j);
 	gameui.addChild(quantatext[j]);
 	gameui.addChild(hptext[j]);
 	gameui.addChild(poisontext[j]);
@@ -515,7 +521,6 @@ document.addEventListener("keydown", function(e){
 	<br/>
 	<input id="deckimport" type="text" placeholder="Deck" />
 	<input id="roomname" type="text" placeholder="Room" />
-	Firefox only for now
 	<br/><input id="chatArea" type="text" style="width:100%;" readonly />
 	<br/><input id="chatinput" type="text" placeholder="Chat" style="width:100%" onkeydown="maybeSendChat(event)" />
 </body>
