@@ -3,7 +3,7 @@ module.exports = function(grunt) {
 		pkg: grunt.file.readJSON("package.json"),
 		concat: {
 			options: {
-				stripBanners: {all: true},
+				stripBanners: true,
 			},
 			dist: {
 				src: ["MersenneTwister.js", "classes.js", "actives.js", "etg.js", "pixi.js"],

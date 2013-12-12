@@ -110,7 +110,10 @@ Card.prototype.readCost = function(attr, cost, e){
 	}
 }
 Card.prototype.info = function(){
-	return this.cost+":"+this.element+" "+this.attack+"|"+this.health+(this.airborne?" airborne ":" ")+(this.passive||"");
+	var info = this.cost+":"+this.element+" "+this.attack+"|"+this.health;
+	if (this.airborne)info += " airborne";
+	if (this.passive)info += " " + this.passive;
+	return info;
 }
 Player.prototype.info = function() {
 	var info = this.hp + "/" + this.maxhp + " " + this.deck.length + "cards";
@@ -123,6 +126,16 @@ Player.prototype.info = function() {
 	if (this.precognition)info += " precognition";
 	if (this.gpull)info += " gpull";
 	return info;
+}
+Player.prototype.iterCreatures = function*(){
+	for(var i=0; i<23; i++){
+		if (this.creatures[i])yield this.creatures[i];
+	}
+}
+Player.prototype.iterPermanents = function*(){
+	for(var i=0; i<16; i++){
+		if (this.permanents[i])yield this.permanents[i];
+	}
 }
 Player.prototype.randomquanta = function() {
 	var nonzero = 0
@@ -243,8 +256,8 @@ Player.prototype.endturn = function() {
 		}
 		else if (this.shield.active == Actives.hope){
 			var dr = this.shield.card.upped?1:0;
-			for (var i=0; i<23; i++){
-				if (this.creatures[i] && this.creatures[i].active == Actives.light)
+			for(var cr in this.iterCreatures()){
+				if (cr.active == Actives.light)
 					dr++;
 			}
 			this.shield.dr = dr;
@@ -396,21 +409,17 @@ Creature.prototype.remove = function(index) {
 function deatheffect() {
 	for(var i=0; i<2; i++){
 		var pl = players[i];
-		for(var j=0; j<23; j++){
-			var c = pl.creatures[j];
-			if (c && c.active == Actives.scavenger){
+		for(var c in pl.iterCreatures()){
+			if (c.active == Actives.scavenger){
 				c.atk += 1;
 				c.buffhp(1);
 			}
 		}
-		for(var j=0; j<16; j++){
-			var p = pl.permanents[j];
-			if (p){
-				if (p.passive == "boneyard" && this.card != Cards.Skeleton && this.card != Cards.EliteSkeleton){
-					place(p.owner.creatures, new Creature(p.card.upped?Cards.EliteSkeleton:Cards.Skeleton, p.owner));
-				}else if (p.passive == "soulcatcher"){
-					pl.spend(Death, p.card.upped?-3:-2);
-				}
+		for(var p in pl.iterPermanents()){
+			if (p.passive == "boneyard" && this.card != Cards.Skeleton && this.card != Cards.EliteSkeleton){
+				place(p.owner.creatures, new Creature(p.card.upped?Cards.EliteSkeleton:Cards.Skeleton, p.owner));
+			}else if (p.passive == "soulcatcher"){
+				pl.spend(Death, p.card.upped?-3:-2);
 			}
 		}
 		if (pl.shield && pl.shield.active == Actives.bones){
@@ -431,8 +440,8 @@ Player.prototype.evade = Thing.prototype.evade = function(sender) { return false
 Creature.prototype.evade = function(sender) {
 	if (sender != this.owner && this.airborne && this.card.element == Air){
 		var freedomChance = 0;
-		for(var i=0; i<16; i++){
-			if (this.owner.permanents[i] && this.owner.permanents[i].passive == "freedom"){
+		for(var p in this.iterPermanents()){
+			if (p.passive == "freedom"){
 				freedomChance += .25;
 			}
 		}
@@ -455,8 +464,9 @@ Creature.prototype.truehp = function(){
 		hp++;
 	}
 	if (this.passive == "swarm"){
-		for (var i=0; i<23; i++){
-			if (this.owner.creatures[i] && this.owner.creatures[i].passive == "swarm" && this.owner.creatures[i] != this){
+		hp--; // Don't count self
+		for (var c in this.owner.iterCreatures()){
+			if (c.passive == "swarm"){
 				hp++;
 			}
 		}
@@ -572,10 +582,10 @@ Player.prototype.summon = function(index, target){
 			if (card.upped){
 				this.spend(card.element, card.element>0?-1:-3);
 			}
-			for (var i=0; i<16; i++){
-				if (this.permanents[i] && this.permanents[i].card == card){
-					this.permanents[i].charges += 1;
-					return this.permanents[i];
+			for (var p in this.iterPermanents()){
+				if (p.card == card){
+					p.charges++;
+					return;
 				}
 			}
 			place(this.permanents, new Pillar(card, this));
@@ -612,13 +622,11 @@ Player.prototype.summon = function(index, target){
 function calcEclipse(){
 	var bonus = 0;
 	for (var j=0; j<2; j++){
-		for (var i=0; i<16; i++){
-			if (players[j].permanents[i]){
-				if (players[j].permanents[i].card == Cards.Nightfall){
-					bonus = 1;
-				}else if (players[j].permanents[i].card == Cards.Eclipse){
-					return 2;
-				}
+		for (var p in players[j].iterPermanents()){
+			if (p.card == Cards.Nightfall){
+				bonus = 1;
+			}else if (p.card == Cards.Eclipse){
+				return 2;
 			}
 		}
 	}
@@ -659,22 +667,22 @@ function casttext(cast, castele){
 	}else console.log("Unknown cost: " + cast);
 }
 function masscc(player, caster, func){
-	for(var i=0; i<16; i++){
-		if (player.permanents[i] && player.permanents[i].passive == "cloak"){
-			Actives.destroy.call(player, player.permanents[i]);
+	for(var p in player.iterPermanents()){
+		if (p.passive == "cloak"){
+			Actives.destroy.call(player, p);
 		}
 	}
-	for(var i=0; i<23; i++){
-		if (player.creatures[i] && !player.creatures[i].immaterial && !player.creatures[i].burrowed){
-			func.call(caster, player.creatures[i]);
+	for(var c in player.iterCreatures()){
+		if (!c.immaterial && !c.burrowed){
+			func.call(caster, c);
 		}
 	}
 }
 function salvageScan(from, t){
 	if (t.owner.hand.length<8 && t.owner != from){
-		for (var i=0; i<23; i++){
-			if (t.owner.creatures[i] && t.owner.creatures[i].passive == "salvage"){
-				t.owner.creatures[i].passive = "salvaged";
+		for (var c in t.owner.iterCreatures()){
+			if (c && c.passive == "salvage"){
+				c.passive = "salvaged";
 				t.owner.hand.push(t.card);
 				return;
 			}

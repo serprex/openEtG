@@ -90,11 +90,6 @@ function bitsToTgt(x){
 	}else console.log("Unknown tgtop: "+tgtop+", "+x);
 }
 var renderer = PIXI.autoDetectRenderer(900, 600);
-document.addEventListener("keydown", function(e){
-	if (e.keyCode == 32){
-		endturn.click();
-	}
-});
 document.body.appendChild(renderer.view);
 var menuui = new PIXI.Stage(0x336699, true), gameui = new PIXI.Stage(0x336699, true);
 var mainStage = menuui;
@@ -125,11 +120,10 @@ function getCardImage(code){
 	}
 }
 var deck = ['4vc', '4vc', '4vc', '4vc', '4vc', '4vc', '4vc', '4vc', '4vc', '4vc', '4vc', '4vc', '4vc', '4vc', '4vc', '4vc', '4vc', '4vc', '4ve', '4ve', '4ve', '6tt', '6tt', '6tt', '6tt', '4vf', '4vf', '4vf', '4vf', '4vf', '8pj'];
-
 var bpvp = new PIXI.Text("Search", {font: "16px Arial bold"});
 bpvp.position.x = 200;
 bpvp.position.y = 200;
-bpvp.setInteractive(true);
+bpvp.interactive = true;
 bpvp.click = function() {
 	if (Cards != null){
 		var deckimport = document.getElementById("deckimport").value;
@@ -142,7 +136,7 @@ menuui.addChild(bpvp);
 var endturn = new PIXI.Text("", {font: "16px Arial bold"});
 endturn.position.x = 800;
 endturn.position.y = 540;
-endturn.setInteractive(true);
+endturn.interactive = true;
 endturn.click = function() {
 	if (winner){
 		myturn = false;
@@ -170,7 +164,7 @@ gameui.addChild(endturn);
 var cancel = new PIXI.Text("Cancel", {font: "16px Arial bold"});
 cancel.position.x = 800;
 cancel.position.y = 500;
-cancel.setInteractive(true);
+cancel.interactive = true;
 cancel.click = function() {
 	if (myturn){
 		if (targetingMode){
@@ -201,7 +195,7 @@ for (var i=0; i<8; i++){
 	handsprite[0][i] = new PIXI.Sprite(nopic);
 	handsprite[0][i].position.x=800;
 	handsprite[0][i].position.y=300+20*i;
-	handsprite[0][i].setInteractive(true);
+	handsprite[0][i].interactive = true;
 	let _i=i;
 	handsprite[0][i].mouseover = function(){
 		setInfo(player1.hand[_i]);
@@ -257,7 +251,7 @@ for (var j=0; j<2; j++){
 		if (j){
 			reflectPos(creasprite[j][i]);
 		}
-		creasprite[j][i].setInteractive(true);
+		creasprite[j][i].interactive = true;
 		let _i=i;
 		creasprite[j][i].mouseover = function(){
 			setInfo(players[_j].creatures[_i]);
@@ -286,7 +280,7 @@ for (var j=0; j<2; j++){
 		if (j){
 			reflectPos(permsprite[j][i]);
 		}
-		permsprite[j][i].setInteractive(true);
+		permsprite[j][i].interactive = true;
 		let _i=i;
 		permsprite[j][i].mouseover = function(){
 			setInfo(players[_j].permanents[_i]);
@@ -312,10 +306,10 @@ for (var j=0; j<2; j++){
 	centerAnchor(marksprite[j]);
 	weapsprite[j].position.x=550;
 	weapsprite[j].position.y=500;
-	weapsprite[j].setInteractive(true);
+	weapsprite[j].interactive = true;
 	shiesprite[j].position.x=550;
 	shiesprite[j].position.y=530;
-	shiesprite[j].setInteractive(true);
+	shiesprite[j].interactive = true;
 	marksprite[j].position.x = 550;
 	marksprite[j].position.y = 470;
 	weapsprite[j].mouseover = function(){
@@ -371,7 +365,7 @@ for (var j=0; j<2; j++){
 		reflectPos(poisontext[j]);
 		reflectPos(decktext[j]);
 	}
-	hptext[j].setInteractive(true);
+	hptext[j].interactive = true;
 	hptext[j].mouseover = function(){
 		setInfo(players[_j]);
 	}
@@ -386,6 +380,8 @@ for (var j=0; j<2; j++){
 	gameui.addChild(poisontext[j]);
 	gameui.addChild(decktext[j]);
 }
+var fgfx = new PIXI.Graphics();
+gameui.addChild(fgfx);
 var cloakgfx = new PIXI.Graphics();
 cloakgfx.beginFill(0);
 cloakgfx.drawRect(300, 20, 490, 220);
@@ -468,8 +464,21 @@ function animate() {
 		for(var i=0; i<16; i++){
 			if (player2.permanents[i] && player2.permanents[i].passive == "cloak"){
 				cloakgfx.visible = true;
+				break;
 			}
 		}
+		if (myturn){
+			fgfx.visible = true;
+			fgfx.clear();
+			for(var i=0; i<player1.hand.length; i++){
+				var card = player1.hand[i];
+				if (player1.canspend(card.costele, card.cost)){
+					fgfx.beginFill(elecols[card.element]);
+					fgfx.drawRect(handsprite[0][i].position.x+80, handsprite[0][i].position.y, 20, 20);
+					fgfx.endFill();
+				}
+			}
+		}else fgfx.visible = false;
 		for(var j=0; j<2; j++){
 			for(var i=0;i<8;i++){
 				maybeSetTexture(handsprite[j][i], players[j].hand[i]?getCardImage(j==0||player1.precognition?players[j].hand[i].code:"000"):null);
@@ -497,6 +506,11 @@ function animate() {
 	requestAnimFrame(animate);
 }
 requestAnimFrame(animate);
+document.addEventListener("keydown", function(e){
+	if (e.keyCode == 32){
+		endturn.click();
+	}
+});
 	</script>
 	<br/>
 	<input id="deckimport" type="text" placeholder="Deck" />
