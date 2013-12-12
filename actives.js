@@ -499,7 +499,7 @@ nova2:function(t){
 nymph:function(t){
 	var e = t.card.element > 0?t.card.element:Math.ceil(rng.real()*12);
 	Actives.destroy.call(this, t);
-	place(this.owner.creatures, new Creature(Cards[NymphList[e*2+(t.card.upped?1:0)]], t.owner));
+	place(t.owner.creatures, new Creature(Cards[NymphList[e*2+(t.card.upped?1:0)]], t.owner));
 },
 overdrive:function(t){
 	this.atk += 3;
