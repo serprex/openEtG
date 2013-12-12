@@ -111,17 +111,21 @@ Card.prototype.readCost = function(attr, cost, e){
 	}
 }
 Card.prototype.info = function(){
-	var info = this.cost+":"+this.element+" "+this.attack+"|"+this.health;
+	var typeString = ["Pillar", "Shield", "Weapon", "Permanent", "Spell", "Creature"];
+	var info = typeString[this.type] + " " + this.cost+":"+this.costele;
+	if (this.attack && this.health)info += " " + this.attack+"|"+this.health;
+	else if (this.type == ShieldEnum)info += " " + this.health + "dr";
+	if (this.active)info += " " + casttext(this.cast, this.castele) + ":" + activename(this.active);
 	if (this.airborne)info += " airborne";
 	if (this.passive)info += " " + this.passive;
 	return info;
 }
-Player.prototype.info = function() {
+Player.prototype.info = function(){
 	var info = this.hp + "/" + this.maxhp + " " + this.deck.length + "cards";
 	if (this.nova)info += " " + this.nova + "nova";
 	if (this.poison)info += " " + this.poison + "psn";
 	if (this.neuro)info += " neuro";
-	if (this.sosa)info += " sosa";
+	if (this.sosa)info += " " + this.sosa + "sosa";
 	if (this.silence)info += " silence";
 	if (this.sanctuary)info += " sanctuary";
 	if (this.precognition)info += " precognition";
