@@ -372,7 +372,7 @@ Player.prototype.addpoison = Creature.prototype.addpoison = function(x) {
 	}
 }
 Player.prototype.buffhp = Creature.prototype.buffhp = function(x){
-	this.maxhp += x;
+	this.maxhp = Math.min(this.maxhp+x, 500);
 	this.dmg(-x);
 }
 Weapon.prototype.delay = Creature.prototype.delay = function(x){
