@@ -47,14 +47,11 @@ function Thing(card, owner){
 	this.owner = owner;
 	this.card = card;
 }
-function Creature(card, owner, poison){
+function Creature(card, owner){
 	Thing.apply(this, arguments);
 	this.delayed = 0;
 	this.frozen = 0;
 	this.dive = 0;
-	if(this.poison = poison || 0){
-		this.owner.foe.addpoison(this.poison);
-	}
 	this.steamatk = 0;
 	this.adrenaline = 0;
 	this.aflatoxin = false;

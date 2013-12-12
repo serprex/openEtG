@@ -227,7 +227,7 @@ endow:function(t){
 	this.buffhp(2);
 },
 evolve:function(t){
-	this.owner.creatures[this.remove()] = new Creature(this.card.upped?Cards.EliteShrieker:Cards.Shrieker, this.owner, this.poison);
+	this.transform(this.card.upped?Cards.EliteShrieker:Cards.Shrieker);
 },
 fiery:function(t){
 	return Math.floor(this.owner.quanta[Fire]/5);
@@ -286,7 +286,7 @@ hasten:function(t){
 	this.owner.drawcard();
 },
 hatch:function(t){
-	this.owner.creatures[this.remove()] = new Creature(randomcard(this.card.upped, function(x){return x.type == CreatureEnum}), this.owner, this.poison);
+	this.transform(randomcard(this.card.upped, function(x){return x.type == CreatureEnum}));
 },
 heal:function(t){
 	t.dmg(-5);
@@ -317,21 +317,24 @@ immolate:function(t){
 	this.quanta[Fire] += this.card.upped?7:5;
 },
 improve:function(t){
-	var cr = new Creature(randomcard(false, function(x){return x.type == CreatureEnum}), t.owner, this.poison);
+	t.transform(randomcard(false, function(x){return x.type == CreatureEnum}));
 	var abilities = [null,null,"hatch","freeze","burrow","destroy","steal","dive","heal","paradox","lycanthropy","scavenger","infection","gpull","devour","mutation","growth","ablaze","poison","deja","endow","guard","mitosis"];
-	cr.active = Actives[abilities[Math.floor(rng.real()*abilities.length)]];
-	if (!cr.active){
-		cr.passive = rng.real()<.5?"momentum":"immaterial";
+	t.active = Actives[abilities[Math.floor(rng.real()*abilities.length)]];
+	if (!t.active){
+		if(rng.real()<.5){
+			t.momentum = true;
+		}else{
+			t.immaterial = true;
+		}
 	}
-	if (cr.active == Actives.scavenger){
-		cr.cast = -1;
+	if (t.active == Actives.scavenger){
+		t.cast = -1;
 	}else{
-		cr.cast = Math.ceil(rng.real()*2);
-		cr.castele = cr.card.element;
+		t.cast = Math.ceil(rng.real()*2);
+		t.castele = cr.card.element;
 	}
-	cr.buffhp(Math.floor(rng.real()*5));
-	cr.atk += Math.floor(rng.real()*5);
-	t.owner.creatures[t.remove()] = cr;
+	t.buffhp(Math.floor(rng.real()*5));
+	t.atk += Math.floor(rng.real()*5);
 },
 infect:function(t){
 	t.addpoison(1);
@@ -463,7 +466,7 @@ mutation:function(t){
 	}else if (rnd<.5){
 		Actives.improve.call(this, t);
 	}else{
-		t.owner.creatures[t.remove()] = new Creature(Cards.Abomination, t.owner, this.poison);
+		t.transform(Cards.Abomination);
 	}
 },
 neuro:function(t){
@@ -591,7 +594,7 @@ readiness:function(t){
 	}
 },
 rebirth:function(t){
-	this.owner.creatures[this.remove()] = new Creature(this.card.upped?Cards.MinorPhoenix:Cards.Phoenix, this.owner, this.poison);
+	this.transform(this.card.upped?Cards.MinorPhoenix:Cards.Phoenix);
 },
 regenerate:function(t){
 	this.owner.dmg(-5);
@@ -600,7 +603,7 @@ rewind:function(t){
 	if (t.passive == "undead"){
 		Actives.hatch.call(t);
 	}else if (t.passive == "mummy"){
-		t.owner.creatures[t.remove()] = new Creature(t.card.upped?Cards.Pharaoh:Cards.PharaohUp, t.owner);
+		t.transform(t.card.upped?Cards.Pharaoh:Cards.PharaohUp);
 	}else{
 		t.remove();
 		t.owner.deck.push(t.card);

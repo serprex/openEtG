@@ -430,6 +430,16 @@ Creature.prototype.die = function() {
 	}
 	deatheffect();
 }
+Creature.prototype.transform = function(card){
+	this.card = card;
+	this.maxhp = this.hp = card.health;
+	this.atk = card.attack;
+	this.active = card.active;
+	this.cast = card.cast;
+	this.castele = card.castele;
+	this.airborne = card.airborne;
+	this.passive = card.passive;
+}
 Player.prototype.evade = Thing.prototype.evade = function(sender) { return false; }
 Creature.prototype.evade = function(sender) {
 	if (sender != this.owner && this.airborne && this.card.element == Air){
