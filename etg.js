@@ -519,7 +519,7 @@ Weapon.prototype.attack = Creature.prototype.attack = function(stasis, freedomCh
 				this.dmgdone = trueatk;
 				this.active(target);
 			}
-		}else if (target.gpull){
+		}else if (isCreature && target.gpull){
 			var dmg = target.gpull.dmg(trueatk);
 			if (this.adrenaline < 3 && this.active && this.cast == -2){
 				this.dmgdone = dmg;
