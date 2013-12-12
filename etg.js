@@ -439,6 +439,10 @@ Creature.prototype.transform = function(card){
 	this.castele = card.castele;
 	this.airborne = card.airborne;
 	this.passive = card.passive;
+	this.burrowed |= card.passive == "burrowed";
+	this.psion |= card.passive == "psion";
+	this.momentum |= card.passive == "momentum";
+	this.immaterial |= card.passive == "immaterial";
 }
 Player.prototype.evade = Thing.prototype.evade = function(sender) { return false; }
 Creature.prototype.evade = function(sender) {

@@ -228,6 +228,7 @@ endow:function(t){
 },
 evolve:function(t){
 	this.transform(this.card.upped?Cards.EliteShrieker:Cards.Shrieker);
+	this.burrowed = false;
 },
 fiery:function(t){
 	return Math.floor(this.owner.quanta[Fire]/5);

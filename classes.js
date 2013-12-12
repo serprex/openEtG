@@ -48,25 +48,7 @@ function Thing(card, owner){
 	this.card = card;
 }
 function Creature(card, owner){
-	Thing.apply(this, arguments);
-	this.delayed = 0;
-	this.frozen = 0;
-	this.dive = 0;
-	this.steamatk = 0;
-	this.adrenaline = 0;
-	this.aflatoxin = false;
-	this.usedactive = true;
-	this.maxhp = this.hp = card.health;
-	this.atk = card.attack;
-	this.airborne = card.airborne;
-	this.active = card.active;
-	this.passive = card.passive;
-	this.cast = card.cast;
-	this.castele = card.castele;
-	this.psion = card.passive == "psion";
-	this.momentum = card.passive == "momentum";
-	this.burrowed = card.passive == "burrowed";
-	this.immaterial = card.passive == "immaterial";
+	this.owner = owner;
 	if (card == Cards.ShardGolem){
 		var golem = this.owner.shardgolem;
 		this.maxhp = this.hp = golem.hp;
@@ -78,7 +60,15 @@ function Creature(card, owner){
 		this.passive = golem.passive;
 		this.momentum = golem.momentum;
 		this.immaterial = golem.immaterial;
-	}
+	}else this.transform(card);
+	this.adrenaline = 0;
+	this.aflatoxin = false;
+	this.delayed = 0;
+	this.dive = 0;
+	this.frozen = 0;
+	this.poison = 0;
+	this.steamatk = 0;
+	this.usedactive = true;
 }
 function Permanent(card, owner){
 	if (!card){
