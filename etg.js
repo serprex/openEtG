@@ -459,7 +459,7 @@ Creature.prototype.truehp = function(){
 	}
 	if (this.passive == "swarm"){
 		for (var i=0; i<23; i++){
-			if (this.owner.creatures[i] && this.owner.creatures[i].passive == "swarm" && this.owner.creatures[i] != this){
+			if (this.owner.creatures[i] && this.owner.creatures[i].passive == "swarm"){
 				hp++;
 			}
 		}
