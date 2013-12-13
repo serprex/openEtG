@@ -702,6 +702,7 @@ steam:function(t){
 },
 stoneform:function(t){
 	this.buffhp(20);
+	this.active = undefined;
 },
 storm2:function(t){
 	masscc(this.owner.foe, this, function(x){x.dmg(2)});
@@ -711,8 +712,6 @@ storm3:function(t){
 },
 swave:function(t){
 	t.spelldmg(4);
-},
-sword:function(t){
 },
 unburrow:function(t){
 	this.burrowed = false;
