@@ -572,7 +572,48 @@ function animate() {
 				maybeSetTexture(handsprite[j][i], players[j].hand[i]?getCardImage(j==0||player1.precognition?players[j].hand[i].code:"000"):null);
 			}
 			for(var i=0;i<23;i++){
-				maybeSetTexture(creasprite[j][i], players[j].creatures[i]?getCardImage(players[j].creatures[i].card.code):null);
+				var cr = players[j].creatures[i];
+				maybeSetTexture(creasprite[j][i], cr?getCardImage(cr.card.code):null);
+				if(cr){
+					var pos = creasprite[j][i].position;
+					if (cr.frozen){
+						fgfx.beginFill(0x0000ff, .3);
+						fgfx.drawRect(pos.x-42, pos.y-12, 84, 24);
+						fgfx.endFill();
+					}
+					if (cr.delayed){
+						fgfx.beginFill(0xffff00, .3);
+						fgfx.drawRect(pos.x-42, pos.y-12, 84, 24);
+						fgfx.endFill();
+					}
+					fgfx.lineStyle(1, 0);
+					if (cr.adrenaline){
+						fgfx.beginFill(elecols[Life], .8);
+						fgfx.drawRect(pos.x-42, pos.y, 12, 12);
+						fgfx.endFill();
+					}
+					if (cr.momentum){
+						fgfx.beginFill(elecols[Gravity], .8);
+						fgfx.drawRect(pos.x-34, pos.y, 12, 12);
+						fgfx.endFill();
+					}
+					if (cr.psion){
+						fgfx.beginFill(elecols[Aether], .8);
+						fgfx.drawRect(pos.x-26, pos.y, 12, 12);
+						fgfx.endFill();
+					}
+					if (cr.burrowed){
+						fgfx.beginFill(elecols[Earth], .8);
+						fgfx.drawRect(pos.x-18, pos.y, 12, 12);
+						fgfx.endFill();
+					}
+					if (cr.poison){
+						fgfx.beginFill(cr.aflatoxin?elecols[Darkness]:elecols[Death], .8);
+						fgfx.drawRect(pos.x-10, pos.y, 12, 12);
+						fgfx.endFill();
+					}
+					fgfx.lineStyle(0, 0, 0);
+				}
 			}
 			for(var i=0;i<16;i++){
 				maybeSetTexture(permsprite[j][i], players[j].permanents[i]?getCardImage(players[j].permanents[i].card.code):null);
@@ -580,6 +621,19 @@ function animate() {
 			maybeSetTexture(weapsprite[j], players[j].weapon?getCardImage(players[j].weapon.card.code):null);
 			maybeSetTexture(shiesprite[j], players[j].shield?getCardImage(players[j].shield.card.code):null);
 			marksprite[j].setTexture(getCardImage((5010+players[j].mark).toString(32)));
+			if (players[j].weapon.frozen || players[j].weapon.delayed){
+				var pos = weapsprite[j].position;
+				if (cr.frozen){
+					fgfx.beginFill(0x0000ff, .3);
+					fgfx.drawRect(pos.x-42, pos.y-12, 84, 24);
+					fgfx.endFill();
+				}
+				if (cr.delayed){
+					fgfx.beginFill(0xffff00, .3);
+					fgfx.drawRect(pos.x-42, pos.y-12, 84, 24);
+					fgfx.endFill();
+				}
+			}
 			var qtext = "";
 			for(var i=1; i<7; i++){
 				qtext += players[j].quanta[i] + "\t" + players[j].quanta[i+6] + "\n";
