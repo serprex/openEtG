@@ -44,8 +44,9 @@ io.sockets.on("connection", function(socket) {
 			var first = seed<2000000000;
 			sockinfo[this.id].foe = pendinggame;
 			sockinfo[pendinggame.id].foe = this;
-			this.emit("pvpgive", {first:first, seed:seed, deck:sockinfo[pendinggame.id].deck});
-			pendinggame.emit("pvpgive", {first:!first, seed:seed, deck:data.deck});
+			var deck0=sockinfo[pendinggame.id].deck, deck1=data.deck;
+			this.emit("pvpgive", {first:first, seed:seed, deck:deck0, urdeck:deck1});
+			pendinggame.emit("pvpgive", {first:!first, seed:seed, deck:deck1, urdeck:deck0});
 			delete rooms[data.room]
 		}else{
 			rooms[data.room] = this;

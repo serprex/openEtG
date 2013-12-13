@@ -537,6 +537,9 @@ Weapon.prototype.attack = Creature.prototype.attack = function(stasis, freedomCh
 				Actives.quint.call(this, this);
 			}
 			if (rng.real()<.2){
+				Actives.scramble.call(this, this.owner);
+			}
+			if (rng.real()<.2){
 				Actives.blackhole.call(this.owner.foe);
 			}
 			if (rng.real()<.2){

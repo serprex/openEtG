@@ -121,20 +121,92 @@ function getCardImage(code){
 		return cimgcache[code] = rend;
 	}
 }
-var deck = ['4vc', '4vc', '4vc', '4vc', '4vc', '4vc', '4vc', '4vc', '4vc', '4vc', '4vc', '4vc', '4vc', '4vc', '4vc', '4vc', '4vc', '4vc', '4ve', '4ve', '4ve', '6tt', '6tt', '6tt', '6tt', '4vf', '4vf', '4vf', '4vf', '4vf', '8pj'];
+function initGame(data){
+	rng.seed(data.seed);
+	myturn = data.first;
+	player1 = new Player();
+	player2 = new Player();
+	player1.foe = player2;
+	player2.foe = player1;
+	players = [player1, player2];
+	var idx, code, decks = [data.urdeck, data.deck];
+	for(var j=0; j<2; j++){
+		for(var i=0; i<decks[j].length; i++){
+			if (Cards[code=decks[j][i]]){
+				players[j].deck.push(Cards[code]);
+			}else if (~(idx=TrueMarks.indexOf(code))){
+				players[j].mark=idx;
+			}
+		}
+	}
+	if (myturn){
+		player1.drawhand();
+		player2.drawhand();
+	}else{
+		player2.drawhand();
+		player1.drawhand();
+	}
+	winner = undefined;
+	endturn.setText("End Turn");
+	mainStage = gameui;
+}
+function getDeck(){
+	var deck = ['4vc', '4vc', '4vc', '4vc', '4vc', '4vc', '4vc', '4vc', '4vc', '4vc', '4vc', '4vc', '4vc', '4vc', '4vc', '4vc', '4vc', '4vc', '4ve', '4ve', '4ve', '6tt', '6tt', '6tt', '6tt', '4vf', '4vf', '4vf', '4vf', '4vf', '8pj'];
+	var deckimport = document.getElementById("deckimport").value;
+	return deckimport?deckimport.split(" "):['4vc', '4vc', '4vc', '4vc', '4vc', '4vc', '4vc', '4vc', '4vc', '4vc', '4vc', '4vc', '4vc', '4vc', '4vc', '4vc', '4vc', '4vc', '4ve', '4ve', '4ve', '6tt', '6tt', '6tt', '6tt', '4vf', '4vf', '4vf', '4vf', '4vf', '8pj'];
+}
 var bpvp = new PIXI.Text("Search", {font: "16px Arial bold"});
+var brandai = new PIXI.Text("Dumb AI", {font: "16px Arial bold"});
 bpvp.position.x = 200;
 bpvp.position.y = 200;
+brandai.position.x = 200;
+brandai.position.y = 240;
 bpvp.interactive = true;
+brandai.interactive = true;
 bpvp.click = function() {
-	if (Cards != null){
-		var deckimport = document.getElementById("deckimport").value;
-		if (deckimport)deck = deckimport.split(" ");
-		var roomname = document.getElementById("roomname").value || undefined;
-		socket.emit("pvpwant", {deck: deck, room: roomname});
+	if (Cards){
+		socket.emit("pvpwant", {deck: getDeck(), room: document.getElementById("roomname").value});
+	}
+}
+brandai.click = function() {
+	if (Cards){
+		var e0 = 1+Math.floor(rng.real()*12), e1=1+Math.floor(rng.real()*12);
+		var deck = [Cards.QuantumPillar, Cards.QuantumPillar, Cards.QuantumPillar, Cards.QuantumPillar];
+		var pillar = Cards[(5000+e0*100).toString(32)];
+		for(var i=0; i<20; i++){
+			deck.push(pillar);
+		}
+		for(var i=0; i<30; i++){
+			deck.push(randomcard(rng.real()<.3, function(x){return x.element == e0;}));
+		}
+		for(var i=0; i<10; i++){
+			deck.push(randomcard(rng.real()<.3, function(x){return x.element == e1;}));
+		}
+		for(var i=0; i<deck.length; i++){
+			deck[i] = deck[i].code;
+		}
+		deck.push(TrueMarks[e1]);
+		initGame({
+			seed:Math.random()*4000000000,
+			first:rng.real()<.5,
+			deck:deck,
+			urdeck:getDeck()
+		});
+		player2.ai = function(){
+			for(var i=this.hand.length-1; i>=0; i--){
+				if (this.hand[i].type == PillarEnum){
+					this.summon(i);
+				}
+			}
+			if (this.hand.length == 8){
+				this.discard(0);
+			}
+			this.endturn();
+		}
 	}
 }
 menuui.addChild(bpvp);
+menuui.addChild(brandai);
 var endturn = new PIXI.Text("", {font: "16px Arial bold"});
 endturn.position.x = 800;
 endturn.position.y = 540;
@@ -151,14 +223,18 @@ endturn.click = function() {
 		if (player1.hand.length == 8){
 			discarding=true;
 		}else{
-			socket.emit("endturn");
+			if(!player2.ai){
+				socket.emit("endturn");
+			}
 			player1.endturn();
 			targetingMode = undefined;
-			myturn = false;
 			for (var i=0; i<foeplays.length; i++){
 				gameui.removeChild(foeplays[i][1]);
 			}
 			foeplays = [];
+			if(player2.ai){
+				player2.ai();
+			}else myturn = false;
 		}
 	}
 }
@@ -394,35 +470,7 @@ cloakgfx.drawRect(300, 20, 490, 220);
 cloakgfx.endFill();
 gameui.addChild(cloakgfx);
 var socket = io.connect("http://"+location.hostname+':13602');
-socket.on("pvpgive", function(data) {
-	rng.seed(data.seed);
-	myturn = data.first;
-	player1 = new Player();
-	player2 = new Player();
-	player1.foe = player2;
-	player2.foe = player1;
-	players = [player1, player2];
-	var idx, code, decks = [deck, data.deck];
-	for(var j=0; j<2; j++){
-		for(var i=0; i<decks[j].length; i++){
-			if (Cards[code=decks[j][i]]){
-				players[j].deck.push(Cards[code]);
-			}else if (~(idx=TrueMarks.indexOf(code))){
-				players[j].mark=idx;
-			}
-		}
-	}
-	if (myturn){
-		player1.drawhand();
-		player2.drawhand();
-	}else{
-		player2.drawhand();
-		player1.drawhand();
-	}
-	winner = undefined;
-	endturn.setText("End Turn");
-	mainStage = gameui;
-});
+socket.on("pvpgive", initGame);
 socket.on("endturn", function(data) {
 	if (data){
 		player2.discard(data);
