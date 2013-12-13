@@ -23,7 +23,7 @@ DeathEffect.prototype.next = function(){
 	}else{
 		this.gfx.clear();
 		this.gfx.beginFill(0, (30-this.step)/30);
-		this.gfx.drawRect(this.position.x-40, this.position.y-10, 80, 20);
+		this.gfx.drawRect(this.position.x-40, this.position.y-15, 80, 30);
 		this.gfx.endFill();
 	}
 }
