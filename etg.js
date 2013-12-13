@@ -436,6 +436,7 @@ Creature.prototype.die = function() {
 	}else if (this.active == Actives.phoenix){
 		this.owner.creatures[index] = new Creature(this.card.upped?Cards.AshUp:Cards.Ash, this.owner);
 	}
+	new DeathEffect(creaturePos(this.owner == player1?0:1, index));
 	deatheffect();
 }
 Creature.prototype.transform = function(card){

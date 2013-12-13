@@ -46,6 +46,9 @@ function maybeSetTexture(obj, text){
 	}else obj.visible = false;
 }
 function reflectPos(obj){
+	if (obj instanceof PIXI.Point){
+		obj = {position: obj};
+	}
 	obj.position.x=900-obj.position.x;
 	obj.position.y=600-obj.position.y;
 }
@@ -90,6 +93,20 @@ function bitsToTgt(x){
 	}else if (tgtop==5){
 		return player1.permanents[x>>3];
 	}else console.log("Unknown tgtop: "+tgtop+", "+x);
+}
+function creaturePos(j, i){
+	var p = new PIXI.Point(160+i*16, 360+(i%5)*20);
+	if (j){
+		reflectPos(p);
+	}
+	return p;
+}
+function permanentPos(pl, idx){
+	var p = new PIXI.Point(160+i*16, 490+(i%5)*20);
+	if (j){
+		reflectPos(p);
+	}
+	return p;
 }
 var renderer = PIXI.autoDetectRenderer(900, 600);
 document.body.appendChild(renderer.view);
@@ -222,7 +239,7 @@ endturn.click = function() {
 		for (var i=0; i<foeplays.length; i++){
 			gameui.removeChild(foeplays[i][1]);
 		}
-		foeplays = [];
+		foeplays.length = 0;
 		mainStage = menuui;
 	}else if (myturn){
 		if (player1.hand.length == 8){
@@ -236,7 +253,7 @@ endturn.click = function() {
 			for (var i=0; i<foeplays.length; i++){
 				gameui.removeChild(foeplays[i][1]);
 			}
-			foeplays = [];
+			foeplays.length = 0;
 			if(player2.ai){
 				player2.ai();
 			}else myturn = false;
@@ -538,7 +555,7 @@ function animate() {
 			}
 		}
 		fgfx.beginFill(0, 0);
-		fgfx.lineStyle(2, 0xffffff, 1);
+		fgfx.lineStyle(2, 0xffffff);
 		var j=myturn?0:1;
 		for(var i=0; i<23; i++){
 			var cr=players[j].creatures[i];
@@ -576,6 +593,9 @@ function animate() {
 			maybeSetText(poisontext[j], players[j].poison + (players[j].neuro?"psn!":"psn"));
 			maybeSetText(decktext[j], players[j].deck.length + "cards");
 		}
+	}
+	for(var i=anims.length-1; i>=0; i--){
+		anims[i].next();
 	}
 	renderer.render(mainStage);
 	requestAnimFrame(animate);
