@@ -621,7 +621,7 @@ function animate() {
 			maybeSetTexture(weapsprite[j], players[j].weapon?getCardImage(players[j].weapon.card.code):null);
 			maybeSetTexture(shiesprite[j], players[j].shield?getCardImage(players[j].shield.card.code):null);
 			marksprite[j].setTexture(getCardImage((5010+players[j].mark).toString(32)));
-			if (players[j].weapon.frozen || players[j].weapon.delayed){
+			if (players[j].weapon && (players[j].weapon.frozen || players[j].weapon.delayed)){
 				var pos = weapsprite[j].position;
 				if (cr.frozen){
 					fgfx.beginFill(0x0000ff, .3);
