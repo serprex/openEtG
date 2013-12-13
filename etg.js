@@ -526,27 +526,27 @@ Weapon.prototype.attack = Creature.prototype.attack = function(stasis, freedomCh
 		if (this.passive == "devour" && target.spend(Other, 1)){
 			this.owner.spend(Darkness, -1);
 		}else if (this.passive == "singularity"){
-			if (!this.adrenaline && rng.real()<.3){
+			if (!this.adrenaline && rng.real()<.2){
 				this.adrenaline=1;
 			}
-			if (this.active != Actives.vampire && rng.real()<.3){
+			if (this.active != Actives.vampire && rng.real()<.2){
 				this.cast = -2;
 				this.active = Actives.vampire;
 			}
-			if (!this.immaterial && rng.real()<.3){
+			if (!this.immaterial && rng.real()<.2){
 				Actives.quint.call(this, this);
 			}
-			if (rng.real()<.3){
+			if (rng.real()<.2){
 				Actives.blackhole.call(this.owner.foe);
 			}
-			if (rng.real()<.3){
+			if (rng.real()<.2){
 				this.atk -= Math.floor(rng.real()*5);
 				this.buffhp(Math.floor(rng.real()*5));
 			}
-			if (rng.real()<.3/(this.owner.foe.nova+1)){
-				Actives.nova.call(this.foe);
+			if (rng.real()<.2/(this.owner.foe.nova+1)){
+				Actives.nova.call(this.owner.foe);
 			}
-			if (rng.real()<.3){
+			if (rng.real()<.2){
 				Actives.parallel.call(this, this);
 			}
 			if (rng.real()<.1){
