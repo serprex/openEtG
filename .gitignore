@@ -3,5 +3,6 @@ node_modules/*
 googleinfo.txt
 pushserver.sh
 js.js
+.ninja_log
 *.csv
 *.gz

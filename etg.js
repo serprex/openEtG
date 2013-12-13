@@ -525,6 +525,31 @@ Weapon.prototype.attack = Creature.prototype.attack = function(stasis, freedomCh
 		}
 		if (this.passive == "devour" && target.spend(Other, 1)){
 			this.owner.spend(Darkness, -1);
+		}else if (this.passive == "singularity"){
+			if (!this.adrenaline && rnd.real()<.3){
+				this.adrenaline=1;
+			}
+			if (this.active != Actives.vampire && rnd.real()<.3){
+				this.cast = -2;
+				this.active = Actives.vampire;
+			}
+			if (!this.immaterial && rnd.real()<.3){
+				Actives.quint.call(this, this);
+			}
+			if (rnd.real()<.3){
+				Actives.blackhole.call(this.owner.foe);
+			}
+			if (rnd.real()<.3){
+				this.atk -= Math.floor(rnd.real()*5);
+				this.buffhp(Math.floor(rnd.real()*5));
+			}
+			if (rnd.real()<.3/(this.owner.foe.nova+1)){
+				Actives.nova.call(this.foe);
+			}
+			if (rnd.real()<.3){
+				Actives.parallel.call(this, this);
+			}
+			this.dmg(this.trueatk(), true);
 		}
 	}
 	var trueatk, momentum = this.momentum;
