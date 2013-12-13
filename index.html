@@ -347,11 +347,7 @@ for (var j=0; j<2; j++){
 		for (var i=0; i<23; i++){
 			creasprite[j][i] = new PIXI.Sprite(nopic);
 			centerAnchor(creasprite[j][i]);
-			creasprite[j][i].position.x=160+i*16;
-			creasprite[j][i].position.y=360+(i%5)*20;
-			if (j){
-				reflectPos(creasprite[j][i]);
-			}
+			creasprite[j][i].position = creaturePos(j, i);
 			creasprite[j][i].interactive = true;
 			(function(_i){
 				creasprite[j][i].mouseover = function(){
@@ -377,11 +373,7 @@ for (var j=0; j<2; j++){
 		for (var i=0; i<16; i++){
 			permsprite[j][i] = new PIXI.Sprite(nopic);
 			centerAnchor(permsprite[j][i]);
-			permsprite[j][i].position.x=160+i*16;
-			permsprite[j][i].position.y=490+(i%5)*20;
-			if (j){
-				reflectPos(permsprite[j][i]);
-			}
+			permsprite[j][i].position = permanentPos(j, i);
 			permsprite[j][i].interactive = true;
 			(function(_i){
 				permsprite[j][i].mouseover = function(){
