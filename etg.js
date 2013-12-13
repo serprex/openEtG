@@ -527,25 +527,25 @@ Weapon.prototype.attack = Creature.prototype.attack = function(stasis, freedomCh
 			this.owner.spend(Darkness, -1);
 		}else if (this.passive == "singularity"){
 			var r = rng.real();
-			if (r < .9){
+			if (r > .9){
 				this.adrenaline=1;
-			}else if (r < .8){
+			}else if (r > .8){
 				this.cast = -2;
 				this.active = Actives.vampire;
-			}else if (r < .7){
+			}else if (r > .7){
 				Actives.quint.call(this, this);
-			}else if (r < .6){
+			}else if (r > .6){
 				Actives.scramble.call(this, this.owner);
-			}else if (r < .5){
+			}else if (r > .5){
 				Actives.blackhole.call(this.owner.foe);
-			}else if (r < .4){
+			}else if (r > .4){
 				this.atk -= Math.floor(rng.real()*5);
 				this.buffhp(Math.floor(rng.real()*5));
-			}else if (r < .3){
+			}else if (r > .3){
 				Actives.nova.call(this.owner.foe);
-			}else if (r < .2){
+			}else if (r > .2){
 				Actives.parallel.call(this, this);
-			}else{
+			}else if (r > .1){
 				this.owner.weapon = new Weapon(Cards.Dagger, this.owner);
 			}
 			this.dmg(this.trueatk(), true);
