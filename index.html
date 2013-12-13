@@ -14,7 +14,6 @@
 <body>
 	<script>
 "use strict"
-console.log(1);
 var Cards, Targeting, targetingMode, targetingModeCb, targetingText, myturn, player1, player2, players, winner, discarding;
 loadcards(function(cards, targeting) {
 	Cards = cards;
@@ -138,7 +137,7 @@ function getCardImage(code){
 		return cimgcache[code] = rend;
 	}
 }
-function initGame(data){
+function initGame(data, ai){
 	if(data.seed != undefined){
 		rng.seed(data.seed);
 	}
@@ -165,8 +164,12 @@ function initGame(data){
 	}else{
 		player2.drawhand();
 		player1.drawhand();
-		if (player2.ai){
+	}
+	if (ai){
+		player2.ai = ai;
+		if(!myturn){
 			player2.ai();
+			myturn=true;
 		}
 	}
 	endturn.setText("End Turn");
@@ -209,22 +212,19 @@ brandai.click = function() {
 			deck[i] = deck[i].code;
 		}
 		deck.push(TrueMarks[e1]);
-		initGame({
-			first:rng.real()<.5,
-			deck:deck,
-			urdeck:getDeck()
-		});
-		player2.ai = function(){
-			for(var i=this.hand.length-1; i>=0; i--){
-				if (this.hand[i].type == PillarEnum){
-					this.summon(i);
+		initGame({ first:rng.real()<.5, deck:deck, urdeck:getDeck() },
+			function(){
+				for(var i=this.hand.length-1; i>=0; i--){
+					if (this.hand[i].type == PillarEnum){
+						this.summon(i);
+					}
 				}
+				if (this.hand.length == 8){
+					this.discard(0);
+				}
+				this.endturn();
 			}
-			if (this.hand.length == 8){
-				this.discard(0);
-			}
-			this.endturn();
-		}
+		);
 	}
 }
 menuui.addChild(bpvp);
