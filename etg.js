@@ -543,6 +543,7 @@ Weapon.prototype.attack = Creature.prototype.attack = function(stasis, freedomCh
 				this.buffhp(Math.floor(rng.real()*5));
 			}else if (r > .3){
 				Actives.nova.call(this.owner.foe);
+				this.owner.foe.nova = 0;
 			}else if (r > .2){
 				Actives.parallel.call(this, this);
 			}else if (r > .1){
