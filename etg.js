@@ -751,7 +751,7 @@ var TargetFilters = {
 	crea:function(c, t){
 		return t.isMaterialInstance(Creature);
 	},
-	creaonly:function(c){
+	creaonly:function(c, t){
 		return t.isMaterialInstance(Creature) && t.card.type == CreatureEnum;
 	},
 	creanonspell:function(c, t){

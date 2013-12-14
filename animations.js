@@ -1,5 +1,5 @@
-function Effect(){
-}
+var anims = [];
+function Effect(){}
 Effect.prototype.remove = function(){
 	for(var i=0; i<anims.length; i++){
 		if (anims[i] == this){
@@ -23,8 +23,7 @@ DeathEffect.prototype.next = function(){
 	}else{
 		this.gfx.clear();
 		this.gfx.beginFill(0, (30-this.step)/30);
-		this.gfx.drawRect(this.position.x-40, this.position.y-15, 80, 30);
+		this.gfx.drawRect(this.position.x-60, this.position.y-15, 120, 30);
 		this.gfx.endFill();
 	}
 }
-var anims = [];
