@@ -175,14 +175,14 @@ Player.prototype.spend = function(qtype, x) {
 	}
 	return true;
 }
-Player.prototype.discard = function(index) {
-	var card=this.hand[index];
-	if (card.passive == "obsession"){
-		player1.dmg(card.upped?13:10);
+Player.prototype.endturn = function(discard) {
+	if (discard != undefined){
+		var card=this.hand[discard];
+		if (card.passive == "obsession"){
+			this.dmg(card.upped?13:10);
+		}
+		this.hand.splice(discard, 1);
 	}
-	this.hand.splice(index, 1);
-}
-Player.prototype.endturn = function() {
 	this.precognition = this.sanctuary = this.silence = false;
 	this.spend(this.mark, -1);
 	this.foe.dmg(this.foe.poison);

@@ -239,10 +239,7 @@ brandai.click = function() {
 						this.summon(i);
 					}
 				}
-				if (this.hand.length == 8){
-					this.discard(0);
-				}
-				this.endturn();
+				this.endturn(this.hand.length?0:null);
 			}
 		);
 	}
@@ -253,7 +250,7 @@ var endturn = new PIXI.Text("", {font: "16px Arial bold"});
 endturn.position.x = 800;
 endturn.position.y = 540;
 endturn.interactive = true;
-endturn.click = function() {
+endturn.click = function(e, discard) {
 	if (winner){
 		myturn = false;
 		for (var i=0; i<foeplays.length; i++){
@@ -262,13 +259,14 @@ endturn.click = function() {
 		foeplays.length = 0;
 		mainStage = menuui;
 	}else if (myturn){
-		if (player1.hand.length == 8){
-			discarding=true;
+		if (discard == undefined && player1.hand.length == 8){
+			discarding = true;
 		}else{
+			discarding = false;
 			if(!player2.ai){
-				socket.emit("endturn");
+				socket.emit("endturn", discard);
 			}
-			player1.endturn();
+			player1.endturn(discard);
 			targetingMode = undefined;
 			for (var i=0; i<foeplays.length; i++){
 				gameui.removeChild(foeplays[i][1]);
@@ -322,11 +320,7 @@ for (var i=0; i<8; i++){
 		}
 		handsprite[0][i].click = function(){
 			if (discarding){
-				socket.emit("endturn", _i);
-				player1.discard(_i);
-				player1.endturn();
-				myturn=false;
-				discarding = false;
+				endturn.click(null, _i);
 				return;
 			}
 			if (!myturn || player1.silence)return;
@@ -510,10 +504,7 @@ gameui.addChild(cloakgfx);
 var socket = io.connect("http://"+location.hostname+':13602');
 socket.on("pvpgive", initGame);
 socket.on("endturn", function(data) {
-	if (data){
-		player2.discard(data);
-	}
-	player2.endturn();
+	player2.endturn(data);
 	myturn = true;
 });
 socket.on("summon", function(bits) {
