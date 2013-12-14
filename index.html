@@ -112,10 +112,26 @@ document.body.appendChild(renderer.view);
 var menuui = new PIXI.Stage(0x336699, true), gameui = new PIXI.Stage(0x336699, true);
 var mainStage = menuui;
 
-var nopic = PIXI.Texture.fromImage("null.png"), caimgcache = {}, crimgcache = {};
+var nopic = PIXI.Texture.fromImage("null.png"), eicons, caimgcache = {}, crimgcache = {};
 var elecols = [0xccbbaa,0xaa7799,0x888888,0xaa7766,0x504030,0x50a005,0xfcba05,0x205080,0xbbbbbb,0x3377dd,0xeeaa66,0x333333,0x99ccee];
 function lighten(c){
 	return (c&255)/2+127|((c>>8)&255)/2+127<<8|((c>>16)&255)/2+127<<16;
+}
+function getIcon(ele){
+	if (eicons)return eicons[ele];
+	else{
+		var loader = new PIXI.AssetLoader(["esheet.png"]);
+		loader.onComplete = function(){
+			var baseTexture = PIXI.Texture.fromImage("esheet.png");
+			var icons = [];
+			for(var i=0; i<13; i++){
+				icons.push(new PIXI.Texture(baseTexture, new PIXI.Rectangle(i*32, 0, 32, 32)));
+			}
+			eicons = icons;
+		}
+		loader.load();
+		return nopic;
+	}
 }
 function getCardImage(code){
 	if (caimgcache[code])return caimgcache[code];
@@ -352,7 +368,7 @@ var permsprite = [new Array(16), new Array(16)];
 var weapsprite = [new PIXI.Sprite(nopic), new PIXI.Sprite(nopic)];
 var shiesprite = [new PIXI.Sprite(nopic), new PIXI.Sprite(nopic)];
 var marksprite = [new PIXI.Sprite(nopic), new PIXI.Sprite(nopic)];
-var quantatext = [new PIXI.Text("", {font: "16px Arial bold"}), new PIXI.Text("", {font: "16px Arial bold"})];
+var quantatext = [new PIXI.DisplayObjectContainer(), new PIXI.DisplayObjectContainer()];
 var hptext = [new PIXI.Text("", {font: "18px Arial bold"}), new PIXI.Text("", {font: "18px Arial bold"})];
 var poisontext = [new PIXI.Text("", {font: "16px Arial bold"}), new PIXI.Text("", {font: "16px Arial bold"})];
 var decktext = [new PIXI.Text("", {font: "16px Arial bold"}), new PIXI.Text("", {font: "16px Arial bold"})];
@@ -460,12 +476,11 @@ for (var j=0; j<2; j++){
 		gameui.addChild(weapsprite[j]);
 		gameui.addChild(shiesprite[j]);
 		gameui.addChild(marksprite[j]);
-		centerAnchor(quantatext[j]);
 		centerAnchor(hptext[j]);
 		centerAnchor(poisontext[j]);
 		centerAnchor(decktext[j]);
-		quantatext[j].position.x=50;
-		quantatext[j].position.y=400;
+		quantatext[j].position.x=j?772:0;
+		quantatext[j].position.y=j?100:308;
 		hptext[j].position.x=50;
 		hptext[j].position.y=550;
 		poisontext[j].position.x=50;
@@ -473,10 +488,20 @@ for (var j=0; j<2; j++){
 		decktext[j].position.x=50;
 		decktext[j].position.y=530;
 		if (j){
-			reflectPos(quantatext[j]);
 			reflectPos(hptext[j]);
 			reflectPos(poisontext[j]);
 			reflectPos(decktext[j]);
+		}
+		var child;
+		for(var k=1; k<13; k++){
+			quantatext[j].addChild(child=new PIXI.Text("", {font: "16px Arial bold"}));
+			child.position.x = (k&1)?32:86;
+			child.position.y = Math.floor((k-1)/2)*32+8;
+		}
+		for(var k=1; k<13; k++){
+			quantatext[j].addChild(child=new PIXI.Sprite(nopic));
+			child.position.x = (k&1)?0:54;
+			child.position.y = Math.floor((k-1)/2)*32;
 		}
 		hptext[j].interactive = true;
 		hptext[j].mouseover = function(){
@@ -636,7 +661,7 @@ function animate() {
 			}
 			maybeSetTexture(weapsprite[j], players[j].weapon?getCardImage(players[j].weapon.card.code):null);
 			maybeSetTexture(shiesprite[j], players[j].shield?getCardImage(players[j].shield.card.code):null);
-			marksprite[j].setTexture(getCardImage((5010+players[j].mark).toString(32)));
+			marksprite[j].setTexture(getIcon(players[j].mark));
 			if (players[j].weapon && (players[j].weapon.frozen || players[j].weapon.delayed)){
 				var pos = weapsprite[j].position;
 				if (cr.frozen){
@@ -650,11 +675,12 @@ function animate() {
 					fgfx.endFill();
 				}
 			}
-			var qtext = "";
-			for(var i=1; i<7; i++){
-				qtext += players[j].quanta[i] + "\t" + players[j].quanta[i+6] + "\n";
+			for(var i=1; i<13; i++){
+				maybeSetText(quantatext[j].getChildAt(i-1), players[j].quanta[i].toString());
 			}
-			maybeSetText(quantatext[j], qtext);
+			for(var i=1; i<13; i++){
+				quantatext[j].getChildAt(i+12-1).setTexture(getIcon(i));
+			}
 			maybeSetText(hptext[j], players[j].hp + "/" + players[j].maxhp);
 			maybeSetText(poisontext[j], players[j].poison + (players[j].neuro?"psn!":"psn"));
 			maybeSetText(decktext[j], players[j].deck.length + "cards");

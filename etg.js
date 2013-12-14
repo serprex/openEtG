@@ -490,11 +490,17 @@ Creature.prototype.evade = function(sender) {
 Weapon.prototype.trueatk = Creature.prototype.trueatk = function(adrenaline){
 	var dmg = this.atk+this.steamatk+this.dive;
 	if (this.active && this.cast == -3)dmg += this.active();
-	dmg = this.burrowed?Math.ceil(dmg/2):dmg;
+	if (this.burrowed)dmg = Math.ceil(dmg/2);
 	if (this instanceof Creature && (this.card.element == Death || this.card.element == Darkness)){
-		dmg+= calcEclipse();
+		dmg += calcEclipse();
 	}
-	return calcAdrenaline(dmg, adrenaline||this.adrenaline);
+	var y=adrenaline || this.adrenaline;
+	if (y<2)return dmg;
+	var attackCoefficient = 4-countAdrenaline(x);
+	for(var i=1; i<y; i++){
+		dmg -= Math.ceil(attackCoefficient*dmg*i/3);
+	}
+	return dmg;
 }
 Player.prototype.truehp = function(){ return this.hp; }
 Creature.prototype.truehp = function(){
@@ -533,11 +539,6 @@ Thing.prototype.useactive = function(t) {
 }
 function countAdrenaline(x){
 	return 5-Math.floor(Math.sqrt(Math.abs(x)));
-}
-function calcAdrenaline(x,y){
-	if (y<2)return x;
-	var f1 = calcAdrenaline(x,y-1);
-	return f1-Math.ceil((4-countAdrenaline(x))*f1*(y-1)/3);
 }
 Weapon.prototype.attack = Creature.prototype.attack = function(stasis, freedomChance){
 	var isCreature = this instanceof Creature;
@@ -608,18 +609,18 @@ Weapon.prototype.attack = Creature.prototype.attack = function(stasis, freedomCh
 		}
 	}
 	if (this.frozen > 0){
-		this.frozen -= 1;
+		this.frozen--;
 	}
 	if (this.delayed > 0){
-		this.delayed -= 1;
+		this.delayed--;
+	}
+	if (this.steamatk>0){
+		this.steamatk--;
 	}
 	this.usedactive = false;
 	this.dive = 0;
 	if (this.active == Actives.dshield){
 		this.immaterial = false;
-	}
-	if (this.steamatk>0){
-		this.steamatk--;
 	}
 	if (~this.getIndex()){
 		if (this instanceof Creature && this.truehp() <= 0){
