@@ -16,7 +16,7 @@ accretion:function(t){
 	if (this.truehp() > 45){
 		this.die();
 		if (this.owner.hand.length < 8){
-			this.owner.hand.push(this.card.upped?Cards.BlackHoleUp:Cards.BlackHole);
+			this.owner.hand.push(Cards.BlackHole.asUpped(this.card.upped));
 		}
 	}
 },
@@ -112,7 +112,7 @@ dagger:function(t){
 	return this.owner.mark == Darkness||this.owner.mark == Death?1:0;
 },
 deadalive:function(t){
-	deatheffect(this);
+	this.deatheffect();
 },
 deja:function(t){
 	this.active = undefined;
@@ -176,9 +176,9 @@ dryspell:function(t){
 	function dryeffect(cr){
 		self.spend(Water, -cr.dmg(dmg));
 	}
-	masscc(this.foe, this, dryeffect);
+	this.owner.foe.masscc(this, dryeffect);
 	if (!this.card.upped){
-		masscc(this, this, dryeffect);
+		this.owner.masscc(this, dryeffect);
 	}
 },
 dshield:function(t){
@@ -227,7 +227,7 @@ endow:function(t){
 	this.buffhp(2);
 },
 evolve:function(t){
-	this.transform(this.card.upped?Cards.EliteShrieker:Cards.Shrieker);
+	this.transform(Cards.Shrieker.asUpped(this.card.upped));
 	this.burrowed = false;
 },
 fiery:function(t){
@@ -258,7 +258,7 @@ freeze:function(t){
 	t.freeze(this.card.upped && this.card != Cards.PandemoniumUp ? 4 : 3);
 },
 gas:function(t){
-	place(this.owner.permanents, new Permanent(this.card.upped?Cards.UnstableGasUp:Cards.UnstableGas, this.owner))
+	place(this.owner.permanents, new Permanent(Cards.UnstableGas.asUpped(this.card.upped), this.owner));
 },
 gpull:function(t){
 	this.owner.gpull = this;
@@ -308,8 +308,8 @@ icebolt:function(t){
 ignite:function(t){
 	this.die();
 	this.owner.foe.spelldmg(20);
-	masscc(this.owner.foe, this, function(x){x.dmg(1)});
-	masscc(this.owner, this, function(x){x.dmg(1)});
+	this.owner.foe.masscc(this, function(x){x.dmg(1)});
+	this.owner.masscc(this, function(x){x.dmg(1)});
 },
 immolate:function(t){
 	t.die();
@@ -427,7 +427,7 @@ lobotomize:function(t){
 },
 luciferin:function(t){
 	this.owner.dmg(-10);
-	masscc(this.owner, this, function(x){
+	this.owner.masscc(this, function(x){
 		if (!x.active){
 			x.cast = -1;
 			x.active = Actives.light;
@@ -514,9 +514,9 @@ overdrivespell:function(t){
 	t.active = Actives.overdrive;
 },
 pandemonium:function(t){
-	masscc(this.owner.foe, this, Actives.cseed);
+	this.owner.foe.masscc(this, Actives.cseed);
 	if (!this.card.upped){
-		masscc(this.owner, this, Actives.cseed);
+		this.owner.masscc(this, Actives.cseed);
 	}
 },
 paradox:function(t){
@@ -550,7 +550,7 @@ photosynthesis:function(t){
 	}
 },
 plague:function(t){
-	masscc(this.owner.foe, this, Actives.infect);
+	this.owner.foe.masscc(this, Actives.infect);
 },
 platearmor:function(t){
 	t.buffhp(this.card.upped?6:3);
@@ -575,7 +575,7 @@ purify:function(t){
 	t.sosa = 0;
 },
 queen:function(t){
-	place(this.owner.creatures, new Creature(this.card.upped?Cards.EliteFirefly:Cards.Firefly, this.owner));
+	place(this.owner.creatures, new Creature(Cards.Firefly.asUpped(this.card.upped), this.owner));
 },
 quint:function(t){
 	t.immaterial = true;
@@ -595,7 +595,7 @@ readiness:function(t){
 	}
 },
 rebirth:function(t){
-	this.transform(this.card.upped?Cards.MinorPhoenix:Cards.Phoenix);
+	this.transform(Cards.Phoenix.asUpped(this.card.upped));
 },
 regenerate:function(t){
 	this.owner.dmg(-5);
@@ -604,7 +604,7 @@ rewind:function(t){
 	if (t.passive == "undead"){
 		Actives.hatch.call(t);
 	}else if (t.passive == "mummy"){
-		t.transform(t.card.upped?Cards.Pharaoh:Cards.PharaohUp);
+		t.transform(Cards.Pharaoh.asUpped(t.card.upped));
 	}else{
 		t.remove();
 		t.owner.deck.push(t.card);
@@ -615,7 +615,7 @@ sanctuary:function(t){
 	this.owner.dmg(-4);
 },
 scarab:function(t){
-	place(this.owner.creatures, new Creature(this.card.upped?Cards.EliteScarab:Cards.Scarab, this.owner));
+	place(this.owner.creatures, new Creature(Cards.Scarab.asUpped(this.card.upped), this.owner));
 },
 scavenger:function(t){
 },
@@ -682,7 +682,7 @@ steal:function(t){
 		if (this.owner.shield == Cards.BoneWall || this.owner.shield == Cards.BoneWallUp){
 			this.owner.shield.charges++;
 		}else{
-			this.owner.shield = new Shield(t.card.upped?Cards.BoneWallUp:Cards.BoneWall, this.owner);
+			this.owner.shield = new Shield(Cards.BoneWall.asUpped(t.card.upped), this.owner);
 			this.owner.shield.charges = 1;
 		}
 	}else{
@@ -705,10 +705,10 @@ stoneform:function(t){
 	this.active = undefined;
 },
 storm2:function(t){
-	masscc(this.owner.foe, this, function(x){x.dmg(2)});
+	this.owner.foe.masscc(this, function(x){x.dmg(2)});
 },
 storm3:function(t){
-	masscc(this.owner.foe, this, Actives.snipe);
+	this.owner.foe.masscc(this, Actives.snipe);
 },
 swave:function(t){
 	t.spelldmg(4);
@@ -750,7 +750,7 @@ skull:function(t){
 			var index = t.getIndex()
 			t.die();
 			if (!t.owner.creatures[index] || t.owner.creatures[index].card != Cards.MalignantCell){
-				t.owner.creatures[index] = new Creature(t.card.upped?Cards.EliteSkeleton:Cards.Skeleton, t.owner);
+				t.owner.creatures[index] = new Creature(Cards.Skeleton.asUpped(t.card.upped), t.owner);
 			}
 		}
 	}

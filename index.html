@@ -216,7 +216,7 @@ bpvp.click = function() {
 brandai.click = function() {
 	if (Cards){
 		rng.seed(Math.random()*4000000000);
-		var e0 = 1+Math.floor(rng.real()*12), e1=1+Math.floor(rng.real()*12);
+		var e0 = Math.ceil(rng.real()*12), e1=Math.ceil(rng.real()*12);
 		var deck = [Cards.QuantumPillar, Cards.QuantumPillar, Cards.QuantumPillar, Cards.QuantumPillar];
 		var pillar = Cards[(5000+e0*100).toString(32)];
 		for(var i=0; i<20; i++){

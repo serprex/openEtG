@@ -105,6 +105,7 @@ function Pillar(card, owner){
 	this.charges = 1;
 	this.pendstate = false;
 }
+Player.prototype = new Thing();
 Creature.prototype = new Thing();
 Permanent.prototype = new Thing();
 Weapon.prototype = new Permanent();

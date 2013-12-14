@@ -100,6 +100,13 @@ function shuffle(array) {
 	}
 	return array;
 }
+function place(array, item){
+	for (var i=0; i<array.length; i++){
+		if (!array[i]){
+			return array[i] = item;
+		}
+	}
+}
 Card.prototype.readCost = function(attr, cost, e){
 	if (~cost.indexOf("+")){
 		var c=cost.split("+");
@@ -119,6 +126,9 @@ Card.prototype.info = function(){
 	if (this.airborne)info += " airborne";
 	if (this.passive)info += " " + this.passive;
 	return info;
+}
+Card.prototype.asUpped = function(upped){
+	return this.upped == upped ? this : Cards[(this.upped?parseInt(this.code, 32)-2000:parseInt(this.code, 32)+2000).toString(32)];
 }
 Player.prototype.info = function(){
 	var info = this.hp + "/" + this.maxhp + " " + this.deck.length + "cards";
@@ -290,6 +300,18 @@ Player.prototype.drawhand = function() {
 		this.hand.push(this.deck.pop());
 	}
 }
+Player.prototype.masscc = function(caster, func){
+	for(var i=0; i<16; i++){
+		if (this.permanents[i] && this.permanents[i].passive == "cloak"){
+			Actives.destroy.call(this, this.permanents[i]);
+		}
+	}
+	for(var i=0; i<23; i++){
+		if (this.creatures[i] && !this.creatures[i].immaterial && !this.creatures[i].burrowed){
+			func.call(caster, this.creatures[i]);
+		}
+	}
+}
 Creature.prototype.info = function(){
 	var info=this.trueatk()+"|"+this.truehp()+"/"+this.maxhp;
 	if (this.active)info+=" "+casttext(this.cast, this.castele)+":"+activename(this.active);
@@ -404,7 +426,7 @@ Creature.prototype.remove = function(index) {
 	if (this.owner.gpull == this)this.owner.gpull = null;
 	return index;
 }
-function deatheffect(cr) {
+Creature.prototype.deatheffect = function() {
 	for(var i=0; i<2; i++){
 		var pl = players[i];
 		for(var j=0; j<23; j++){
@@ -417,8 +439,8 @@ function deatheffect(cr) {
 		for(var j=0; j<16; j++){
 			var p = pl.permanents[j];
 			if (p){
-				if (p.passive == "boneyard" && cr.card != Cards.Skeleton && cr.card != Cards.EliteSkeleton){
-					place(p.owner.creatures, new Creature(p.card.upped?Cards.EliteSkeleton:Cards.Skeleton, p.owner));
+				if (p.passive == "boneyard" && this.card != Cards.Skeleton && this.card != Cards.EliteSkeleton){
+					place(p.owner.creatures, new Creature(Cards.Skeleton.asUpped(p.card.upped), p.owner));
 				}else if (p.passive == "soulcatcher"){
 					pl.spend(Death, p.card.upped?-3:-2);
 				}
@@ -434,10 +456,10 @@ Creature.prototype.die = function() {
 	if (this.aflatoxin){
 		(this.owner.creatures[index] = new Creature(Cards.MalignantCell, this.owner)).usedactive = false;
 	}else if (this.active == Actives.phoenix){
-		this.owner.creatures[index] = new Creature(this.card.upped?Cards.AshUp:Cards.Ash, this.owner);
+		this.owner.creatures[index] = new Creature(Cards.Ash.asUpped(this.card.upped), this.owner);
 	}
 	new DeathEffect(creaturePos(this.owner == player1?0:1, index));
-	deatheffect(cr);
+	cr.deatheffect();
 }
 Creature.prototype.transform = function(card){
 	this.card = card;
@@ -453,7 +475,7 @@ Creature.prototype.transform = function(card){
 	this.momentum |= card.passive == "momentum";
 	this.immaterial |= card.passive == "immaterial";
 }
-Player.prototype.evade = Thing.prototype.evade = function(sender) { return false; }
+Thing.prototype.evade = function(sender) { return false; }
 Creature.prototype.evade = function(sender) {
 	if (sender != this.owner && this.airborne && this.card.element == Air){
 		var freedomChance = 0;
@@ -493,6 +515,9 @@ Permanent.prototype.getIndex = function() { return this.owner.permanents.indexOf
 Permanent.prototype.die = function(){ delete this.owner.permanents[this.getIndex()]; }
 Weapon.prototype.die = function() { this.owner.weapon = undefined; }
 Shield.prototype.die = function() { this.owner.shield = undefined; }
+Thing.prototype.isMaterialInstance = function(type) {
+	return this instanceof type && !this.immaterial && !this.burrowed;
+}
 Thing.prototype.canactive = function() {
 	return myturn && this.active && !this.usedactive && this.cast >= 0 && !this.delayed && !this.frozen && this.owner.canspend(this.castele, this.cast);
 }
@@ -605,13 +630,6 @@ Weapon.prototype.attack = Creature.prototype.attack = function(stasis, freedomCh
 		}
 	}
 }
-function place(array, item){
-	for (var i=0; i<array.length; i++){
-		if (!array[i]){
-			return array[i] = item;
-		}
-	}
-}
 Player.prototype.summon = function(index, target){
 	var card = this.hand[index];
 	this.hand.splice(index, 1);
@@ -709,18 +727,6 @@ function casttext(cast, castele){
 		return "buff";
 	}else console.log("Unknown cost: " + cast);
 }
-function masscc(player, caster, func){
-	for(var i=0; i<16; i++){
-		if (player.permanents[i] && player.permanents[i].passive == "cloak"){
-			Actives.destroy.call(player, player.permanents[i]);
-		}
-	}
-	for(var i=0; i<23; i++){
-		if (player.creatures[i] && !player.creatures[i].immaterial && !player.creatures[i].burrowed){
-			func.call(caster, player.creatures[i]);
-		}
-	}
-}
 function salvageScan(from, t){
 	if (t.owner.hand.length<8 && t.owner != from){
 		for (var i=0; i<23; i++){
@@ -732,51 +738,47 @@ function salvageScan(from, t){
 		}
 	}
 }
-function isMaterialInstance(type,t){
-	return t instanceof type && !t.immaterial && !t.burrowed;
-}
 var TargetFilters = {
 	pill:function(c, t){
-		return isMaterialInstance(Pillar, t);
+		return t.isMaterialInstance(Pillar);
 	},
 	weap:function(c, t){
 		return t.card.type == WeaponEnum && !t.immaterial && !t.burrowed;
 	},
 	perm:function(c, t){
-		return isMaterialInstance(Permanent, t);
+		return t.isMaterialInstance(Permanent);
 	},
 	crea:function(c, t){
-		return isMaterialInstance(Creature, t);
+		return t.isMaterialInstance(Creature);
 	},
-	creaonly:function(c, t){
-		return isMaterialInstance(Creature, t) && t.card.type == CreatureEnum;
+	creaonly:function(c){
+		return t.isMaterialInstance(Creature) && t.card.type == CreatureEnum;
 	},
 	creanonspell:function(c, t){
-		return isMaterialInstance(Creature, t) && t.card.type != SpellEnum;
+		return t.isMaterialInstance(Creature) && t.card.type != SpellEnum;
 	},
 	play:function(c, t){
 		return t instanceof Player;
 	},
 	creaorplay:function(c, t){
-		return t instanceof Player || isMaterialInstance(Creature, t);
+		return t instanceof Player || t.isMaterialInstance(Creature);
 	},
 	foeperm:function(c, t){
-		return c.owner != t.owner && isMaterialInstance(Permanent, t);
+		return c.owner != t.owner && t.isMaterialInstance(Permanent);
 	},
 	butterfly:function(c, t){
-		return isMaterialInstance(Creature, t) && t.trueatk()<3;
+		return t.isMaterialInstance(Creature) && t.trueatk()<3;
 	},
 	devour:function(c, t){
-		return isMaterialInstance(Creature, t) && t.truehp()<c.truehp();
+		return t.isMaterialInstance(Creature) && t.truehp()<c.truehp();
 	},
 	paradox:function(c, t){
-		return isMaterialInstance(Creature, t) && t.truehp()<t.trueatk();
+		return t.isMaterialInstance(Creature) && t.truehp()<t.trueatk();
 	},
 	airbornecrea:function(c, t){
-		return isMaterialInstance(Creature, t) && t.airborne;
+		return t.isMaterialInstance(Creature) && t.airborne;
 	},
 	wisdom:function(c, t){
 		return t instanceof Creature && !t.burrowed;
 	}
-
 }
