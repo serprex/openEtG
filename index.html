@@ -479,14 +479,14 @@ for (var j=0; j<2; j++){
 		centerAnchor(hptext[j]);
 		centerAnchor(poisontext[j]);
 		centerAnchor(decktext[j]);
-		quantatext[j].position.x=j?772:0;
+		quantatext[j].position.x=j?792:0;
 		quantatext[j].position.y=j?100:308;
 		hptext[j].position.x=50;
-		hptext[j].position.y=550;
+		hptext[j].position.y=540;
 		poisontext[j].position.x=50;
 		poisontext[j].position.y=570;
 		decktext[j].position.x=50;
-		decktext[j].position.y=530;
+		decktext[j].position.y=510;
 		if (j){
 			reflectPos(hptext[j]);
 			reflectPos(poisontext[j]);
@@ -563,6 +563,7 @@ function maybeSendChat(e){
 	}
 }
 function animate() {
+	setTimeout(requestAnimate, 40);
 	if (mainStage == gameui){
 		maybeSetText(turntell, discarding?"Discard":targetingMode?targetingText:myturn?"Your Turn":"Their Turn");
 		for(var i=0; i<foeplays.length; i++){
@@ -615,7 +616,9 @@ function animate() {
 				var cr = players[j].creatures[i];
 				maybeSetTexture(creasprite[j][i], cr?getCreatureImage(cr.card.code):null);
 				if(cr){
-					maybeSetText(creasprite[j][i].getChildAt(0), casttext(cr.cast, cr.castele) + ":" + activename(cr.active) + " " + cr.trueatk()+"|"+cr.truehp());
+					var child = creasprite[j][i].getChildAt(0);
+					child.visible = true; // PIXI bug: children visibility corrupted by parent
+					maybeSetText(child, (cr.active?casttext(cr.cast, cr.castele) + ":" + activename(cr.active) + " ":"") + cr.trueatk()+"|"+cr.truehp());
 					var pos = creasprite[j][i].position;
 					if (cr.frozen){
 						fgfx.beginFill(0x0000ff, .3);
@@ -659,8 +662,8 @@ function animate() {
 			for(var i=0;i<16;i++){
 				maybeSetTexture(permsprite[j][i], players[j].permanents[i]?getCardImage(players[j].permanents[i].card.code):null);
 			}
-			maybeSetTexture(weapsprite[j], players[j].weapon?getCardImage(players[j].weapon.card.code):null);
-			maybeSetTexture(shiesprite[j], players[j].shield?getCardImage(players[j].shield.card.code):null);
+			maybeSetTexture(weapsprite[j], players[j].weapon?getCreatureImage(players[j].weapon.card.code):null);
+			maybeSetTexture(shiesprite[j], players[j].shield?getCreatureImage(players[j].shield.card.code):null);
 			marksprite[j].setTexture(getIcon(players[j].mark));
 			if (players[j].weapon && (players[j].weapon.frozen || players[j].weapon.delayed)){
 				var pos = weapsprite[j].position;
@@ -690,9 +693,9 @@ function animate() {
 		anims[i].next();
 	}
 	renderer.render(mainStage);
-	requestAnimFrame(animate);
 }
-requestAnimFrame(animate);
+function requestAnimate(){ requestAnimFrame(animate); }
+requestAnimate();
 document.addEventListener("keydown", function(e){
 	if (e.keyCode == 32){
 		endturn.click();

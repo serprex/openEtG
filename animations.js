@@ -17,12 +17,12 @@ function DeathEffect(pos){
 }
 DeathEffect.prototype = new Effect();
 DeathEffect.prototype.next = function(){
-	if (++this.step==30){
+	if (++this.step==10){
 		gameui.removeChild(this.gfx);
 		this.remove();
 	}else{
 		this.gfx.clear();
-		this.gfx.beginFill(0, (30-this.step)/30);
+		this.gfx.beginFill(0, 1-this.step/10);
 		this.gfx.drawRect(this.position.x-60, this.position.y-15, 120, 30);
 		this.gfx.endFill();
 	}

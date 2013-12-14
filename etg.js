@@ -459,7 +459,7 @@ Creature.prototype.die = function() {
 		this.owner.creatures[index] = new Creature(Cards.Ash.asUpped(this.card.upped), this.owner);
 	}
 	new DeathEffect(creaturePos(this.owner == player1?0:1, index));
-	cr.deatheffect();
+	this.deatheffect();
 }
 Creature.prototype.transform = function(card){
 	this.card = card;
