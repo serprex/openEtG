@@ -35,10 +35,10 @@ io.sockets.on("connection", function(socket) {
 	socket.on("pvpwant", function(data) {
 		var pendinggame=rooms[data.room];
 		console.log(this.id + ": " + (pendinggame?pendinggame.id:"-"));
+		sockinfo[this.id].deck = data.deck;
 		if (this == pendinggame){
 			return;
 		}
-		sockinfo[this.id].deck = data.deck;
 		if (pendinggame && pendinggame.id in sockinfo){
 			var seed = Math.random()*4000000000;
 			var first = seed<2000000000;

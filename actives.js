@@ -112,7 +112,7 @@ dagger:function(t){
 	return this.owner.mark == Darkness||this.owner.mark == Death?1:0;
 },
 deadalive:function(t){
-	deatheffect();
+	deatheffect(this);
 },
 deja:function(t){
 	this.active = undefined;

@@ -404,7 +404,7 @@ Creature.prototype.remove = function(index) {
 	if (this.owner.gpull == this)this.owner.gpull = null;
 	return index;
 }
-function deatheffect() {
+function deatheffect(cr) {
 	for(var i=0; i<2; i++){
 		var pl = players[i];
 		for(var j=0; j<23; j++){
@@ -417,7 +417,7 @@ function deatheffect() {
 		for(var j=0; j<16; j++){
 			var p = pl.permanents[j];
 			if (p){
-				if (p.passive == "boneyard" && this.card != Cards.Skeleton && this.card != Cards.EliteSkeleton){
+				if (p.passive == "boneyard" && cr.card != Cards.Skeleton && cr.card != Cards.EliteSkeleton){
 					place(p.owner.creatures, new Creature(p.card.upped?Cards.EliteSkeleton:Cards.Skeleton, p.owner));
 				}else if (p.passive == "soulcatcher"){
 					pl.spend(Death, p.card.upped?-3:-2);
@@ -437,7 +437,7 @@ Creature.prototype.die = function() {
 		this.owner.creatures[index] = new Creature(this.card.upped?Cards.AshUp:Cards.Ash, this.owner);
 	}
 	new DeathEffect(creaturePos(this.owner == player1?0:1, index));
-	deatheffect();
+	deatheffect(cr);
 }
 Creature.prototype.transform = function(card){
 	this.card = card;
