@@ -122,7 +122,7 @@ Card.prototype.info = function(){
 	var info = typeString[this.type] + " " + this.cost+":"+this.costele;
 	if (this.attack && this.health)info += " " + this.attack+"|"+this.health;
 	else if (this.type == ShieldEnum)info += " " + this.health + "dr";
-	if (this.active)info += " " + casttext(this.cast, this.castele) + ":" + activename(this.active);
+	if (this.active)info += " " + casttext(this.cast, this.castele) + " " + activename(this.active);
 	if (this.airborne)info += " airborne";
 	if (this.passive)info += " " + this.passive;
 	return info;
@@ -314,7 +314,7 @@ Player.prototype.masscc = function(caster, func){
 }
 Creature.prototype.info = function(){
 	var info=this.trueatk()+"|"+this.truehp()+"/"+this.maxhp;
-	if (this.active)info+=" "+casttext(this.cast, this.castele)+":"+activename(this.active);
+	if (this.active)info+=" "+casttext(this.cast, this.castele)+" "+activename(this.active);
 	if (this.frozen)info+=" "+this.frozen+"frozen";
 	if (this.delayed)info+=" "+this.delayed+"delay";
 	if (this.poison)info+=" "+this.poison+"psn";
@@ -331,14 +331,14 @@ Creature.prototype.info = function(){
 }
 Permanent.prototype.info = function(){
 	var info = this.charges?"x"+this.charges:"";
-	if (this.active)info+=" "+casttext(this.cast, this.castele)+":"+activename(this.active);
+	if (this.active)info+=" "+casttext(this.cast, this.castele)+" "+activename(this.active);
 	if (this.immaterial)info += " immaterial";
 	if (this.passive)info += " " + this.passive;
 	return info;
 }
 Weapon.prototype.info = function(){
 	var info = this.trueatk().toString();
-	if (this.active)info+=" "+casttext(this.cast, this.castele)+":"+activename(this.active);
+	if (this.active)info+=" "+casttext(this.cast, this.castele)+" "+activename(this.active);
 	if (this.frozen)info += " "+this.frozen+"frozen";
 	if (this.delayed)info += " "+this.delayed+"delay";
 	if (this.momentum)info += " momentum";
@@ -721,7 +721,7 @@ function casttext(cast, castele){
 	}else if (cast == 0){
 		return "0";
 	}else if (cast == -1){
-		return "perhit";
+		return "";
 	}else if (cast == -2){
 		return "onhit";
 	}else if (cast == -3){

@@ -101,7 +101,7 @@ function creaturePos(j, i){
 	return p;
 }
 function permanentPos(j, i){
-	var p = new PIXI.Point(160+i*26, 520+(i%3)*20);
+	var p = new PIXI.Point(160+i*26, 490+(i%3)*30);
 	if (j){
 		reflectPos(p);
 	}
@@ -191,11 +191,11 @@ function getPermanentImage(code){
 	if (primgcache[code])return primgcache[code];
 	else{
 		var card = Cards[code];
-		var rend = new PIXI.RenderTexture(80, 20);
+		var rend = new PIXI.RenderTexture(80, 30);
 		var graphics = new PIXI.Graphics();
 		graphics.lineStyle(2, 0x222222, 1);
 		graphics.beginFill(card?(card.upped?lighten(elecols[card.element]):elecols[card.element]):elecols[0]);
-		graphics.drawRect(0, 0, 80, 20);
+		graphics.drawRect(0, 0, 80, 30);
 		graphics.endFill();
 		if (card){
 			var text = new PIXI.Text(Cards[code].name, {font: "12px Arial bold", fill:card.upped?"black":"white"});
@@ -440,6 +440,10 @@ for (var j=0; j<2; j++){
 		}
 		for (var i=0; i<16; i++){
 			permsprite[j][i] = new PIXI.Sprite(nopic);
+			var permtext = new PIXI.Text("", {font: "12px Arial bold"});
+			permtext.position.x = 38;
+			permtext.anchor.x = 1;
+			permsprite[j][i].addChild(permtext);
 			centerAnchor(permsprite[j][i]);
 			permsprite[j][i].position = permanentPos(j, i);
 			permsprite[j][i].interactive = true;
@@ -641,7 +645,7 @@ function animate() {
 		for(var i=0; i<16; i++){
 			var pr=players[j].permanents[i];
 			if (pr && !(pr instanceof Pillar) && pr.active && pr.cast >= 0 && !pr.usedactive){
-				fgfx.drawRect(permsprite[j][i].position.x-40, permsprite[j][i].position.y-10, 80, 20);
+				fgfx.drawRect(permsprite[j][i].position.x-40, permsprite[j][i].position.y-15, 80, 30);
 			}
 		}
 		var wp = players[j].weapon, sh = players[j].shield;
@@ -670,11 +674,12 @@ function animate() {
 			}
 			for(var i=0;i<23;i++){
 				var cr = players[j].creatures[i];
-				maybeSetTexture(creasprite[j][i], cr?getCreatureImage(cr.card.code):null);
 				if (cr){
+					creasprite[j][i].setTexture(getCreatureImage(cr.card.code));
+					creasprite[j][i].visible = true;
 					var child = creasprite[j][i].getChildAt(0);
 					child.visible = true; // PIXI bug: children visibility corrupted by parent
-					maybeSetText(child, (cr.active?casttext(cr.cast, cr.castele) + ":" + activename(cr.active) + " ":"") + cr.trueatk()+"|"+cr.truehp());
+					maybeSetText(child, (cr.active?casttext(cr.cast, cr.castele) + " " + activename(cr.active) + " ":"") + cr.trueatk()+"|"+cr.truehp());
 					var pos = creasprite[j][i].position;
 					if (cr.frozen){
 						fgfx.beginFill(0x0000ff, .3);
@@ -713,15 +718,24 @@ function animate() {
 						fgfx.endFill();
 					}
 					fgfx.lineStyle(0, 0, 0);
-				}
+				}else creasprite[j][i].visible = false;
 			}
 			for(var i=0;i<16;i++){
-				maybeSetTexture(permsprite[j][i], players[j].permanents[i]?getPermanentImage(players[j].permanents[i].card.code):null);
+				var pr = players[j].permanents[i];
+				if (pr){
+					permsprite[j][i].setTexture(getPermanentImage(pr.card.code));
+					permsprite[j][i].visible = true;
+					var child = permsprite[j][i].getChildAt(0);
+					child.visible = true; // PIXI bug: children visibility corrupted by parent
+					if (pr instanceof Pillar){
+						maybeSetText(child, (pr.active == Actives.pend?(pr.pendstate?pr.owner.mark:pr.card.element)+" ":"") + "x"+pr.charges);
+					}else maybeSetText(child, (pr.active?(pr.cast>=0?pr.castele+":"+pr.cast+" ":"") + activename(pr.active):"") + (pr.charges?" "+pr.charges:""));
+				}else permsprite[j][i].visible = false;
 			}
 			var wp = players[j].weapon;
 			if (wp){
 				var child = weapsprite[j].getChildAt(0);
-				maybeSetText(child, (wp.active?casttext(wp.cast, wp.castele) + ":" + activename(wp.active) + " ":"") + wp.trueatk());
+				maybeSetText(child, (wp.active?casttext(wp.cast, wp.castele) + " " + activename(wp.active) + " ":"") + wp.trueatk());
 				child.visible = true;
 				weapsprite[j].setTexture(getCreatureImage(wp.card.code));
 				weapsprite[j].visible =  true;
