@@ -54,7 +54,7 @@ bow:function(t){
 	return this.owner.mark == Air?1:0;
 },
 bravery:function(t){
-	if (!this.owner.foe.sanctuary && !this.owner.sanctuary){
+	if (!this.owner.foe.sanctuary){
 		var maxdraw = this.owner.mark == Fire?3:2;
 		for(var i=0; i<maxdraw && this.owner.hand.length<8 && this.owner.foe.hand.length<8; i++){
 			this.owner.drawcard();
