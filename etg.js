@@ -625,7 +625,7 @@ Weapon.prototype.attack = Creature.prototype.attack = function(stasis, freedomCh
 	if (~this.getIndex()){
 		if (this instanceof Creature && this.truehp() <= 0){
 			this.die();
-		}else if (this.adrenaline > 0 && this.adrenaline < countAdrenaline(this.trueatk(0))){
+		}else if (this.adrenaline > 0 && this.adrenaline < countAdrenaline(this.trueatk(1))){
 			this.adrenaline++;
 			this.attack(stasis, freedomChance);
 		}
