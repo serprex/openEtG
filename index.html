@@ -676,6 +676,7 @@ function animate() {
 				var cr = players[j].creatures[i];
 				if (cr){
 					creasprite[j][i].setTexture(getCreatureImage(cr.card.code));
+					creasprite[j][i].alpha = cr.immaterial?.7:1;
 					creasprite[j][i].visible = true;
 					var child = creasprite[j][i].getChildAt(0);
 					child.visible = true; // PIXI bug: children visibility corrupted by parent
