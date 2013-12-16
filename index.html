@@ -697,29 +697,34 @@ function animate() {
 						fgfx.endFill();
 					}
 					fgfx.lineStyle(1, 0);
+					if (cr.airborne){
+						fgfx.beginFill(elecols[Air], .8);
+						fgfx.drawRect(pos.x-62, pos.y, 12, 12);
+						fgfx.endFill();
+					}
 					if (cr.adrenaline){
 						fgfx.beginFill(elecols[Life], .8);
-						fgfx.drawRect(pos.x-62, pos.y, 12, 12);
+						fgfx.drawRect(pos.x-54, pos.y, 12, 12);
 						fgfx.endFill();
 					}
 					if (cr.momentum){
 						fgfx.beginFill(elecols[Gravity], .8);
-						fgfx.drawRect(pos.x-54, pos.y, 12, 12);
+						fgfx.drawRect(pos.x-46, pos.y, 12, 12);
 						fgfx.endFill();
 					}
 					if (cr.psion){
 						fgfx.beginFill(elecols[Aether], .8);
-						fgfx.drawRect(pos.x-46, pos.y, 12, 12);
+						fgfx.drawRect(pos.x-38, pos.y, 12, 12);
 						fgfx.endFill();
 					}
 					if (cr.burrowed){
 						fgfx.beginFill(elecols[Earth], .8);
-						fgfx.drawRect(pos.x-38, pos.y, 12, 12);
+						fgfx.drawRect(pos.x-20, pos.y, 12, 12);
 						fgfx.endFill();
 					}
 					if (cr.poison){
 						fgfx.beginFill(cr.aflatoxin?elecols[Darkness]:elecols[Death], .8);
-						fgfx.drawRect(pos.x-20, pos.y, 12, 12);
+						fgfx.drawRect(pos.x-2, pos.y, 12, 12);
 						fgfx.endFill();
 					}
 					fgfx.lineStyle(0, 0, 0);
