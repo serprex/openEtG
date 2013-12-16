@@ -638,7 +638,7 @@ function animate() {
 		var j=myturn?0:1;
 		for(var i=0; i<23; i++){
 			var cr=players[j].creatures[i];
-			if (cr && cr.active && cr.cast >= 0 && !cr.usedactive){
+			if (cr && cr.canactive(true)){
 				fgfx.drawRect(creasprite[j][i].position.x-60, creasprite[j][i].position.y-15, 120, 30);
 			}
 		}
@@ -681,6 +681,11 @@ function animate() {
 					child.visible = true; // PIXI bug: children visibility corrupted by parent
 					maybeSetText(child, (cr.active?casttext(cr.cast, cr.castele) + " " + activename(cr.active) + " ":"") + cr.trueatk()+"|"+cr.truehp());
 					var pos = creasprite[j][i].position;
+					if (cr == players[j].gpull){
+						fgfx.beginFill(0xffaa00, .3);
+						fgfx.drawRect(pos.x-62, pos.y-17, 124, 34);
+						fgfx.endFill();
+					}
 					if (cr.frozen){
 						fgfx.beginFill(0x0000ff, .3);
 						fgfx.drawRect(pos.x-62, pos.y-17, 124, 34);

@@ -524,8 +524,8 @@ Shield.prototype.die = function() { this.owner.shield = undefined; }
 Thing.prototype.isMaterialInstance = function(type) {
 	return this instanceof type && !this.immaterial && !this.burrowed;
 }
-Thing.prototype.canactive = function() {
-	return myturn && this.active && !this.usedactive && this.cast >= 0 && !this.delayed && !this.frozen && this.owner.canspend(this.castele, this.cast);
+Thing.prototype.canactive = function(turn) {
+	return (turn || myturn) && this.active && !this.usedactive && this.cast >= 0 && !this.delayed && !this.frozen && this.owner.canspend(this.castele, this.cast);
 }
 Thing.prototype.useactive = function(t) {
 	this.usedactive = true;
