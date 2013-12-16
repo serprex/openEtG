@@ -496,7 +496,7 @@ Weapon.prototype.trueatk = Creature.prototype.trueatk = function(adrenaline){
 	}
 	var y=adrenaline || this.adrenaline;
 	if (y<2)return dmg;
-	var attackCoefficient = 4-countAdrenaline(x);
+	var attackCoefficient = 4-countAdrenaline(dmg);
 	for(var i=1; i<y; i++){
 		dmg -= Math.ceil(attackCoefficient*dmg*i/3);
 	}
