@@ -735,6 +735,7 @@ function animate() {
 				var pr = players[j].permanents[i];
 				if (pr){
 					permsprite[j][i].setTexture(getPermanentImage(pr.card.code));
+					permsprite[j][i].alpha = pr.immaterial?.7:1;
 					permsprite[j][i].visible = true;
 					var child = permsprite[j][i].getChildAt(0);
 					child.visible = true; // PIXI bug: children visibility corrupted by parent
@@ -747,6 +748,7 @@ function animate() {
 			if (wp){
 				var child = weapsprite[j].getChildAt(0);
 				maybeSetText(child, (wp.active?casttext(wp.cast, wp.castele) + " " + activename(wp.active) + " ":"") + wp.trueatk());
+				weapsprite[j].alpha = wp.immaterial?.7:1;
 				child.visible = true;
 				weapsprite[j].setTexture(getCreatureImage(wp.card.code));
 				weapsprite[j].visible =  true;
@@ -755,6 +757,7 @@ function animate() {
 			if (sh){
 				var child = shiesprite[j].getChildAt(0);
 				maybeSetText(child, (sh.charges || "") + (sh.active?activename(sh.active) + " ":"") + (sh.dr || ""));
+				shiesprite[j].alpha = sh.immaterial?.7:1;
 				child.visible = true;
 				shiesprite[j].setTexture(getCreatureImage(sh.card.code));
 				shiesprite[j].visible = true;
