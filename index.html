@@ -23,7 +23,7 @@ loadcards(function(cards, targeting) {
 function getTarget(src, active, cb){
 	if (active in Targeting){
 		var targetingFilter = Targeting[active];
-		targetingMode = function(t){ return (t == player2 || t.owner == player1 || !cloakgfx.visible) && targetingFilter(src, t); }
+		targetingMode = function(t){ return (t == player2 || t.owner == player1 || t.passive == "cloak" || !player2.isCloaked()) && targetingFilter(src, t); }
 		targetingModeCb = cb;
 		for(var key in TargetFilters){
 			if (TargetFilters[key] == targetingFilter){
@@ -45,11 +45,9 @@ function maybeSetTexture(obj, text){
 	}else obj.visible = false;
 }
 function reflectPos(obj){
-	if (obj instanceof PIXI.Point){
-		obj = {position: obj};
-	}
-	obj.position.x=900-obj.position.x;
-	obj.position.y=600-obj.position.y;
+	var pos = obj instanceof PIXI.Point?obj:obj.position;
+	pos.x=900-pos.x;
+	pos.y=600-pos.y;
 }
 function centerAnchor(obj){
 	obj.anchor.x=obj.anchor.y=.5;
@@ -296,6 +294,11 @@ brandai.click = function() {
 }
 menuui.addChild(bpvp);
 menuui.addChild(brandai);
+var cloakgfx = new PIXI.Graphics();
+cloakgfx.beginFill(0);
+cloakgfx.drawRect(300, 20, 490, 220);
+cloakgfx.endFill();
+gameui.addChild(cloakgfx);
 var endturn = new PIXI.Text("", {font: "16px Arial bold"});
 endturn.position.x = 800;
 endturn.position.y = 540;
@@ -567,11 +570,6 @@ for (var j=0; j<2; j++){
 }
 var fgfx = new PIXI.Graphics();
 gameui.addChild(fgfx);
-var cloakgfx = new PIXI.Graphics();
-cloakgfx.beginFill(0);
-cloakgfx.drawRect(300, 20, 490, 220);
-cloakgfx.endFill();
-gameui.addChild(cloakgfx);
 var socket = io.connect("http://"+location.hostname+':13602');
 socket.on("pvpgive", initGame);
 socket.on("endturn", function(data) {
@@ -615,13 +613,7 @@ function animate() {
 		for(var i=0; i<foeplays.length; i++){
 			maybeSetTexture(foeplays[i][1], getPermanentImage(foeplays[i][0].code));
 		}
-		cloakgfx.visible = false;
-		for(var i=0; i<16; i++){
-			if (player2.permanents[i] && player2.permanents[i].passive == "cloak"){
-				cloakgfx.visible = true;
-				break;
-			}
-		}
+		cloakgfx.visible = player2.isCloaked();
 		fgfx.clear();
 		if (myturn && !player1.silence){
 			for(var i=0; i<player1.hand.length; i++){
@@ -672,9 +664,9 @@ function animate() {
 			for(var i=0;i<8;i++){
 				maybeSetTexture(handsprite[j][i], players[j].hand[i]?getCardImage(j==0||player1.precognition?players[j].hand[i].code:"000"):null);
 			}
-			for(var i=0;i<23;i++){
+			for(var i=0; i<23; i++){
 				var cr = players[j].creatures[i];
-				if (cr){
+				if (cr && !(j == 1 && cloakgfx.visible)){
 					creasprite[j][i].setTexture(getCreatureImage(cr.card.code));
 					creasprite[j][i].alpha = cr.immaterial?.7:1;
 					creasprite[j][i].visible = true;
@@ -731,9 +723,9 @@ function animate() {
 					fgfx.lineStyle(0, 0, 0);
 				}else creasprite[j][i].visible = false;
 			}
-			for(var i=0;i<16;i++){
+			for(var i=0; i<16; i++){
 				var pr = players[j].permanents[i];
-				if (pr){
+				if (pr && !(j == 1 && cloakgfx.visible && pr.passive != "cloak")){
 					permsprite[j][i].setTexture(getPermanentImage(pr.card.code));
 					permsprite[j][i].alpha = pr.immaterial?.7:1;
 					permsprite[j][i].visible = true;
@@ -745,7 +737,7 @@ function animate() {
 				}else permsprite[j][i].visible = false;
 			}
 			var wp = players[j].weapon;
-			if (wp){
+			if (wp && !(j == 1 && cloakgfx.visible)){
 				var child = weapsprite[j].getChildAt(0);
 				maybeSetText(child, (wp.active?casttext(wp.cast, wp.castele) + " " + activename(wp.active) + " ":"") + wp.trueatk());
 				weapsprite[j].alpha = wp.immaterial?.7:1;
@@ -754,7 +746,7 @@ function animate() {
 				weapsprite[j].visible =  true;
 			}else weapsprite[j].visible = false;
 			var sh = players[j].shield;
-			if (sh){
+			if (sh && !(j == 1 && cloakgfx.visible)){
 				var child = shiesprite[j].getChildAt(0);
 				maybeSetText(child, (sh.charges || "") + (sh.active?activename(sh.active) + " ":"") + (sh.dr || ""));
 				shiesprite[j].alpha = sh.immaterial?.7:1;

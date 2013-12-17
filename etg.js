@@ -130,6 +130,14 @@ Card.prototype.info = function(){
 Card.prototype.asUpped = function(upped){
 	return this.upped == upped ? this : Cards[(this.upped?parseInt(this.code, 32)-2000:parseInt(this.code, 32)+2000).toString(32)];
 }
+Player.prototype.isCloaked = function(){
+	for(var i=0; i<16; i++){
+		if (this.permanents[i] && this.permanents[i].passive == "cloak"){
+			return true;
+		}
+	}
+	return false;
+}
 Player.prototype.info = function(){
 	var info = this.hp + "/" + this.maxhp + " " + this.deck.length + "cards";
 	if (this.nova)info += " " + this.nova + "nova";
