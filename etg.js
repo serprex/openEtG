@@ -439,7 +439,7 @@ Creature.prototype.deatheffect = function() {
 		for(var j=0; j<16; j++){
 			var p = pl.permanents[j];
 			if (p){
-				if (p.passive == "boneyard" && this.card != Cards.Skeleton && this.card != Cards.EliteSkeleton){
+				if (p.passive == "boneyard" && this.card != Cards.Skeleton && this.card != Cards.SkeletonUp){
 					place(p.owner.creatures, new Creature(Cards.Skeleton.asUpped(p.card.upped), p.owner));
 				}else if (p.passive == "soulcatcher"){
 					pl.spend(Death, p.card.upped?-3:-2);
