@@ -141,12 +141,12 @@ function getCardImage(code){
 		graphics.drawRect(0, 0, 120, 20);
 		graphics.endFill();
 		if (card){
-			var text = new PIXI.Text(card.name, {font: "12px Arial bold", fill:card.upped?"black":"white"});
+			var text = new PIXI.Text(card.name, {font: "11px Arial bold", fill:card.upped?"black":"white"});
 			text.position.x = 2;
 			text.position.y = 5;
 			graphics.addChild(text);
 			if (card.cost){
-				text = new PIXI.Text(card.cost, {font: "12px Arial bold", fill:card.upped?"black":"white"});
+				text = new PIXI.Text(card.cost, {font: "11px Arial bold", fill:card.upped?"black":"white"});
 				text.anchor.x = 1;
 				text.position.x = 100;
 				text.position.y = 5;

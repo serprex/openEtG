@@ -413,7 +413,7 @@ Weapon.prototype.freeze = Creature.prototype.freeze = function(x){
 	if (this.passive == "voodoo")this.owner.foe.freeze(x);
 }
 Creature.prototype.spelldmg = Creature.prototype.dmg = function(x, dontdie){
-	var dmg = x<0 ? Math.max(this.hp-this.maxhp, x) : Math.min(this.hp, x);
+	var dmg = x<0 ? Math.max(this.hp-this.maxhp, x) : Math.min(this.truehp(), x);
 	this.hp -= dmg;
 	if (this.truehp() <= 0){
 		if (!dontdie)this.die();

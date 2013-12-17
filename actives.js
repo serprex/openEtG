@@ -94,8 +94,7 @@ chimera:function(t){
 	chim.atk = atk;
 	chim.maxhp = hp;
 	chim.hp = hp;
-	chim.cast = 0;
-	chim.castele = 0;
+	chim.active = undefined;
 	chim.momentum = true;
 	this.owner.creatures = [chim];
 	this.owner.creatures.length = 23;
@@ -587,7 +586,7 @@ rage:function(t){
 	t.dmg(dmg);
 },
 readiness:function(t){
-	if (t.cast >= 0){
+	if (t.active && t.cast >= 0){
 		t.cast = 0;
 		if (t.card.element == Time){
 			t.usedactive = false;
