@@ -332,7 +332,7 @@ improve:function(t){
 		t.cast = -1;
 	}else{
 		t.cast = Math.ceil(rng.real()*2);
-		t.castele = cr.card.element;
+		t.castele = t.card.element;
 	}
 	t.buffhp(Math.floor(rng.real()*5));
 	t.atk += Math.floor(rng.real()*5);
