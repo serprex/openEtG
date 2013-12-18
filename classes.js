@@ -38,6 +38,7 @@ function Player(){
 	this.shardgolem = {
 		atk: 0,
 		hp: 0,
+		passives: {},
 		adrenaline: 0,
 		active: Actives.burrow,
 		cast: 1
@@ -67,9 +68,11 @@ function Creature(card, owner){
 		this.atk = golem.atk;
 		this.active = golem.active;
 		this.cast = golem.cast;
-		this.airborne = golem.airborne;
+		this.passives = {};
+		for(var key in golem.passives){
+			this.passives[key] = true;
+		}
 		this.adrenaline = golem.adrenaline;
-		this.passive = golem.passive;
 		this.momentum = golem.momentum;
 		this.immaterial = golem.immaterial;
 	}else this.transform(card, owner);

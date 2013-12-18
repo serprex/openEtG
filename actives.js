@@ -401,11 +401,19 @@ integrity:function(t){
 			active = shardSkills[i][num];
 		}
 	}
+	var passives = {}
+	if (shardTally[Air]>0){
+		passives.airborne = true;
+	}
+	if (shardTally[Darkness]==1){
+		passives.devour = true;
+	}else if (shardTally[Darkness]>1){
+		passives.voodoo = true;
+	}
 	this.owner.shardgolem = {
 		atk: atk + bonus,
 		hp: hp + bonus,
-		airborne: shardTally[Air]>0,
-		passive: shardTally[Darkness]>1?"voodoo":shardTally[Darkness]==1?"devour":undefined,
+		passives: passives,
 		immaterial: shardTally[Aether]>1,
 		momentum: shardTally[Gravity]>1,
 		adrenaline: shardTally[Life]>1?1:0,
