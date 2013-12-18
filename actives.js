@@ -51,7 +51,7 @@ bless:function(t){
 	t.buffhp(3);
 },
 boneyard:function(t){
-	if (t.card != Cards.Skeleton && t.card != Cards.SkeletonUp){
+	if (t.card.isOf(Cards.Skeleton)){
 		place(this.owner.creatures, new Creature(Cards.Skeleton.asUpped(this.card.upped), this.owner));
 	}
 },
@@ -123,7 +123,7 @@ deja:function(t){
 	Actives.parallel.call(this, this);
 },
 destroy:function(t, dontsalvage){
-	if (t.stackable && t.charges>1){
+	if (t.passives.stackable && t.charges>1){
 		t.charges--;
 	}else{
 		t.die();
@@ -136,7 +136,7 @@ devour:function(t){
 	if (this.truehp() > t.truehp()){
 		this.buffhp(1);
 		this.atk += 1;
-		if (t.poisonous){
+		if (t.passives.poisonous){
 			this.addpoison(1);
 		}
 		t.die();
@@ -281,7 +281,7 @@ growth:function(t){
 guard:function(t){
 	this.delay(1);
 	t.delay(1);
-	if (!t.airborne){
+	if (!t.passives.airborne){
 		t.dmg(this.trueatk());
 	}
 },
@@ -654,7 +654,7 @@ silence:function(t){
 skyblitz:function(t){
 	this.quanta[Air] = 0;
 	for(var i=0; i<23; i++){
-		if (this.creatures[i] && this.creatures[i].airborne){
+		if (this.creatures[i] && this.creatures[i].passives.airborne){
 			Actives.dive.call(this.creatures[i]);
 		}
 	}
@@ -691,9 +691,9 @@ steal:function(t){
 			}
 		}
 		place(this.owner.permanents, new Pillar(t.card, this.owner));
-	}else if (t.card == Cards.BoneWall || t.card == Cards.BoneWallUp){
+	}else if (t.card.isOf(Cards.BoneWall)){
 		Actives.destroy.call(this, t, true);
-		if (this.owner.shield == Cards.BoneWall || this.owner.shield == Cards.BoneWallUp){
+		if (this.owner.shield && this.owner.shield.card.isOf(Cards.BoneWall)){
 			this.owner.shield.charges++;
 		}else{
 			this.owner.shield = new Shield(Cards.BoneWall.asUpped(t.card.upped), this.owner);
@@ -742,7 +742,7 @@ void:function(t){
 	}
 },
 web:function(t){
-	t.airborne = false;
+	t.passives.airborne = false;
 },
 wisdom:function(t){
 	t.atk += 4;
@@ -761,7 +761,7 @@ skull:function(t){
 	if (t instanceof Creature){
 		var thp = t.truehp();
 		if (thp <= 0 || rng.real() < .5/thp){
-			var index = t.getIndex()
+			var index = t.getIndex();
 			t.die();
 			if (!t.owner.creatures[index] || t.owner.creatures[index].card != Cards.MalignantCell){
 				t.owner.creatures[index] = new Creature(Cards.Skeleton.asUpped(t.card.upped), t.owner);
@@ -800,7 +800,7 @@ evade40:function(t){
 	return rng.real()>.4;
 },
 wings:function(t){
-	return !t.airborne && !t.ranged;
+	return !t.passives.airborne && !t.passives.ranged;
 },
 slow:function(t){
 	t.delay(1);

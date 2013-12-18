@@ -129,6 +129,9 @@ Card.prototype.info = function(){
 Card.prototype.asUpped = function(upped){
 	return this.upped == upped ? this : Cards[(this.upped?parseInt(this.code, 32)-2000:parseInt(this.code, 32)+2000).toString(32)];
 }
+Card.prototype.isOf = function(card){
+	return card.code == (this.upped ? (parseInt(this.code, 32)-2000).toString(32) : this.code);
+}
 Player.prototype.isCloaked = function(){
 	for(var i=0; i<16; i++){
 		if (this.permanents[i] && this.permanents[i].cloak){
@@ -266,7 +269,7 @@ Player.prototype.endturn = function(discard) {
 				this.shield = undefined;
 			}
 		}
-		else if (this.shield.hope){
+		else if (this.shield.passives.hope){
 			var dr = this.shield.card.upped?1:0;
 			for (var i=0; i<23; i++){
 				if (this.creatures[i] && this.creatures[i].active == Actives.light)
@@ -362,7 +365,7 @@ Shield.prototype.info = function(){
 Pillar.prototype.info = function(){
 	return this.charges + " " + (this.pendstate?this.owner.mark:this.card.element) + (this.immaterial?" immaterial":"");
 }
-Pillar.prototype.stackable = true;
+Pillar.prototype.passives = {stackable: true}
 Player.prototype.delay = function(x) {
 	if (this.weapon)this.weapon.delay(x);
 }
@@ -396,12 +399,12 @@ Player.prototype.dmg = function(x, ignoresosa) {
 	}
 }
 Player.prototype.spelldmg = function(x) {
-	return (!this.shield || this.shield.reflect?this:this.foe).dmg(x);
+	return (!this.shield || this.shield.passives.reflect?this:this.foe).dmg(x);
 }
 Creature.prototype.getIndex = function() { return this.owner.creatures.indexOf(this); }
 Player.prototype.addpoison = Creature.prototype.addpoison = function(x) {
 	this.poison += x;
-	if (this.voodoo){
+	if (this.passives.voodoo){
 		this.owner.foe.poison += x;
 	}
 }
@@ -414,22 +417,22 @@ Player.prototype.buffhp = Creature.prototype.buffhp = function(x){
 }
 Weapon.prototype.delay = Creature.prototype.delay = function(x){
 	this.delayed += x;
-	if (this.voodoo)this.owner.foe.delay(x);
+	if (this.passives.voodoo)this.owner.foe.delay(x);
 }
 Weapon.prototype.freeze = Creature.prototype.freeze = function(x){
 	this.frozen = x;
-	if (this.voodoo)this.owner.foe.freeze(x);
+	if (this.passives.voodoo)this.owner.foe.freeze(x);
 }
 Creature.prototype.spelldmg = Creature.prototype.dmg = function(x, dontdie){
 	var dmg = x<0 ? Math.max(this.hp-this.maxhp, x) : Math.min(this.truehp(), x);
 	this.hp -= dmg;
 	if (this.truehp() <= 0){
 		if (!dontdie)this.die();
-	}else if (dmg>0 && this.voodoo)this.owner.foe.dmg(x);
+	}else if (dmg>0 && this.passives.voodoo)this.owner.foe.dmg(x);
 	return dmg;
 }
 Creature.prototype.remove = function(index) {
-	index = index || this.getIndex();
+	if (index == undefined)index=this.getIndex();
 	delete this.owner.creatures[index];
 	if (this.owner.gpull == this)this.owner.gpull = null;
 	return index;
@@ -463,19 +466,16 @@ Creature.prototype.die = function() {
 	new DeathEffect(creaturePos(this.owner == player1?0:1, index));
 }
 Creature.prototype.transform = function(card){
-	this.card = card;
+	Thing.call(this, card, this.owner);
 	this.maxhp = this.hp = card.health;
 	this.atk = card.attack;
 	this.active = card.active;
 	this.cast = card.cast;
 	this.castele = card.castele;
-	for(var i=0; i<card.passives.length; i++){
-		this[card.passives[i]] = true;
-	}
 }
 Thing.prototype.evade = function(sender) { return false; }
 Creature.prototype.evade = function(sender) {
-	if (sender != this.owner && this.airborne && this.card.element == Air){
+	if (sender != this.owner && this.passives.airborne && this.card.element == Air){
 		var freedomChance = 0;
 		for(var i=0; i<16; i++){
 			if (this.owner.permanents[i] && this.owner.permanents[i].freedom){
@@ -506,9 +506,9 @@ Creature.prototype.truehp = function(){
 	if ((this.card.element == Darkness || this.card.element == Death) && calcEclipse() != 0){
 		hp++;
 	}
-	if (this.swarm){
+	if (this.passives.swarm){
 		for (var i=0; i<23; i++){
-			if (this.owner.creatures[i] && this.owner.creatures[i].swarm){
+			if (this.owner.creatures[i] && this.owner.creatures[i].passives.swarm){
 				hp++;
 			}
 		}
@@ -531,7 +531,7 @@ Thing.prototype.useactive = function(t) {
 		this.active(t);
 	}
 	this.owner.spend(this.castele, this.cast);
-	if (this.sacrifice){
+	if (this.passives.sacrifice){
 		this.die();
 	}
 }
@@ -548,7 +548,7 @@ Weapon.prototype.attack = Creature.prototype.attack = function(stasis, freedomCh
 		if (this.cast == -1 && this.active){
 			this.active();
 		}
-		if (this.devour && target.spend(Other, 1)){
+		if (this.passives.devour && target.spend(Other, 1)){
 			this.owner.spend(Darkness, -1);
 		}else if (this.singularity){
 			var r = rng.real();
@@ -579,7 +579,7 @@ Weapon.prototype.attack = Creature.prototype.attack = function(stasis, freedomCh
 	}
 	var trueatk, momentum = this.momentum;
 	if (!(stasis || this.frozen>0 || this.delayed>0) && (trueatk = this.trueatk()) != 0){
-		if (this.airborne && freedomChance && rng.real() < freedomChance){
+		if (this.passives.airborne && freedomChance && rng.real() < freedomChance){
 			trueatk = Math.ceil(trueatk * 1.5);
 			momentum = true;
 		}
@@ -651,18 +651,18 @@ Player.prototype.summon = function(index, target){
 			this.weapon = new Weapon(card, this);
 		}else if (card.type == ShieldEnum){
 			this.shield = new Shield(card, this);
-			if (card == Cards.DimensionalShield || card == Cards.PhaseShield){
+			if (card.isOf(Cards.DimensionalShield)){
 				this.shield.charges = 3;
-			}else if (card == Cards.Wings || card == Cards.WingsUp){
+			}else if (card.isOf(Cards.Wings)){
 				this.shield.charges = 5;
-			}else if (card == Cards.BoneWall || card == Cards.BoneWallUp){
+			}else if (card.isOf(Cards.BoneWall)){
 				this.shield.charges = 7;
 			}
 		}else{
 			var p = new Permanent(card, this);
-			if (card == Cards.Sundial || card == Cards.SundialUp){
+			if (card.isOf(Cards.Sundial)){
 				p.charges = 2;
-			}else if(card == Cards.Cloak || card == Cards.CloakUp){
+			}else if(card.isOf(Cards.Cloak)){
 				p.charges = 3;
 			}
 			place(this.permanents, p);
@@ -775,7 +775,7 @@ var TargetFilters = {
 		return t.isMaterialInstance(Creature) && t.truehp()<t.trueatk();
 	},
 	airbornecrea:function(c, t){
-		return t.isMaterialInstance(Creature) && t.airborne;
+		return t.isMaterialInstance(Creature) && t.passives.airborne;
 	},
 	wisdom:function(c, t){
 		return t instanceof Creature && !t.burrowed;

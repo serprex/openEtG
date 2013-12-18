@@ -9,9 +9,9 @@ function Card(type, info){
 	this.readCost("cost", info.Cost||"0", this.element);
 	this.readCost("cast", info.Cast||"0", this.element);
 	this.active = Actives[info.Active];
-	if (info.Passive){
-		this.passives=info.Passive.split("+");
-	}else this.passives = [];
+	this.status = info.Status;
+	this.passives = info.Passive || info.Passive.split("+");
+
 }
 function Player(){
 	this.owner = this
@@ -47,14 +47,21 @@ function Thing(card, owner){
 	if (!card)return;
 	this.owner = owner;
 	this.card = card;
-	for(var i=0; i<card.passives.length; i++){
-		this[card.passives[i]]=true;
+	if (card.status){
+		this[card.status] = true;
+	}
+	if (card.passives){
+		this.passives = {};
+		for(var i=0; i<card.passives.length; i++){
+			this.passives[card.passives[i]] = true;
+		}
 	}
 }
 function Creature(card, owner){
-	this.owner = owner;
 	if (card == Cards.ShardGolem){
-		var golem = this.owner.shardgolem;
+		this.card = card;
+		this.owner = owner;
+		var golem = owner.shardgolem;
 		this.maxhp = this.hp = golem.hp;
 		this.atk = golem.atk;
 		this.active = golem.active;
@@ -66,7 +73,6 @@ function Creature(card, owner){
 		this.immaterial = golem.immaterial;
 	}else this.transform(card);
 	this.adrenaline = 0;
-	this.aflatoxin = false;
 	this.delayed = 0;
 	this.dive = 0;
 	this.frozen = 0;
@@ -88,7 +94,6 @@ function Permanent(card, owner){
 }
 function Weapon(card, owner){
 	Permanent.apply(this, arguments);
-	this.psion = false;
 	this.frozen = 0;
 	this.delayed = 0;
 	this.atk = card.attack;
