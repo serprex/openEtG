@@ -118,7 +118,7 @@ deja:function(t){
 	Actives.parallel.call(this, this);
 },
 destroy:function(t, dontsalvage){
-	if ((t instanceof Pillar || t.card == Cards.BoneWall || t.card == Cards.BoneWallUp) && t.charges>1){
+	if (t.stackable && t.charges>1){
 		t.charges--;
 	}else{
 		t.die();
@@ -131,7 +131,7 @@ devour:function(t){
 	if (this.truehp() > t.truehp()){
 		this.buffhp(1);
 		this.atk += 1;
-		if (t.passive == "poisonous"){
+		if (t.poisonous){
 			this.addpoison(1);
 		}
 		t.die();
@@ -213,13 +213,13 @@ endow:function(t){
 	this.active = t.active;
 	this.cast = t.cast;
 	this.castele = t.castele;
-	this.passive = t.passive;
 	this.atk += t.trueatk();
 	if (t.active && t.cast == -3){
 		this.atk -= t.active();
 	}
-	this.momentum |= t.momentum;
-	this.psion |= t.psion;
+	for(var key in t){
+		if (t[key] === true)this[key] = true;
+	}
 	if (t.adrenaline>0){
 		this.adrenaline = 1
 	}
@@ -241,8 +241,9 @@ firebolt:function(t){
 flyingweapon:function(t){
 	if (t.weapon){
 		var cr = new Creature(t.weapon.card, t.owner);
-		cr.passive = t.weapon.passive;
-		cr.airborne = true;
+		for (var key in t.weapon){
+			if (t.weapon[key] === true)cr[key] = true;
+		}
 		place(t.owner.creatures, cr);
 		t.weapon = undefined;
 	}
@@ -529,7 +530,7 @@ parallel:function(t){
 	copy.owner = this.owner;
 	copy.usedactive = true;
 	place(this.owner.creatures, copy);
-	if (copy.passive == "voodoo"){
+	if (copy.voodoo){
 		this.owner.foe.dmg(copy.maxhp-copy.hp);
 		this.owner.foe.addpoison(copy.poison);
 		if (this.owner.foe.weapon){
@@ -600,9 +601,9 @@ regenerate:function(t){
 	this.owner.dmg(-5);
 },
 rewind:function(t){
-	if (t.passive == "undead"){
+	if (t.undead){
 		Actives.hatch.call(t);
-	}else if (t.passive == "mummy"){
+	}else if (t.mummy){
 		t.transform(Cards.Pharaoh.asUpped(t.card.upped));
 	}else{
 		t.remove();
@@ -664,6 +665,7 @@ sskin:function(t){
 	this.buffhp(this.quanta[Earth]);
 },
 steal:function(t){
+	//TODO use stackable
 	if (t instanceof Pillar){
 		Actives.destroy.call(this, t, true);
 		if (t.card.upped){
@@ -768,8 +770,6 @@ thorn:function(t){
 		t.addpoison(1);
 	}
 },
-reflect:function(t){
-},
 firewall:function(t){
 	t.dmg(1);
 },
@@ -783,13 +783,11 @@ solar:function(t){
 		this.owner.spend(Light, -1);
 	}
 },
-hope:function(t){
-},
 evade40:function(t){
 	return rng.real()>.4;
 },
 wings:function(t){
-	return !t.airborne && t.passive != "ranged";
+	return !t.airborne && !t.ranged;
 },
 slow:function(t){
 	t.delay(1);

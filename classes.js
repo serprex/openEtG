@@ -9,8 +9,9 @@ function Card(type, info){
 	this.readCost("cost", info.Cost||"0", this.element);
 	this.readCost("cast", info.Cast||"0", this.element);
 	this.active = Actives[info.Active];
-	this.passive = info.Passive;
-	this.airborne = info.Airborne == "1";
+	if (info.Passive){
+		this.passives=info.Passive.split("+");
+	}else this.passives = [];
 }
 function Player(){
 	this.owner = this
@@ -46,6 +47,9 @@ function Thing(card, owner){
 	if (!card)return;
 	this.owner = owner;
 	this.card = card;
+	for(var i=0; i<card.passives.length; i++){
+		this[card.passives[i]]=true;
+	}
 }
 function Creature(card, owner){
 	this.owner = owner;
