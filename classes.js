@@ -10,8 +10,9 @@ function Card(type, info){
 	this.readCost("cast", info.Cast||"0", this.element);
 	this.active = Actives[info.Active];
 	this.status = info.Status;
-	this.passives = info.Passive || info.Passive.split("+");
-
+	if (info.Passive != undefined){
+		this.passives = info.Passive.split("+");
+	}
 }
 function Player(){
 	this.owner = this
@@ -71,7 +72,7 @@ function Creature(card, owner){
 		this.passive = golem.passive;
 		this.momentum = golem.momentum;
 		this.immaterial = golem.immaterial;
-	}else this.transform(card);
+	}else this.transform(card, owner);
 	this.adrenaline = 0;
 	this.delayed = 0;
 	this.dive = 0;

@@ -465,8 +465,8 @@ Creature.prototype.die = function() {
 	this.deatheffect(index);
 	new DeathEffect(creaturePos(this.owner == player1?0:1, index));
 }
-Creature.prototype.transform = function(card){
-	Thing.call(this, card, this.owner);
+Creature.prototype.transform = function(card, owner){
+	Thing.call(this, card, owner || this.owner);
 	this.maxhp = this.hp = card.health;
 	this.atk = card.attack;
 	this.active = card.active;
