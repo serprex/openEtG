@@ -50,6 +50,11 @@ bless:function(t){
 	t.atk += 3;
 	t.buffhp(3);
 },
+boneyard:function(t){
+	if (t.card != Cards.Skeleton && t.card != Cards.SkeletonUp){
+		place(this.owner.creatures, new Creature(Cards.Skeleton.asUpped(this.card.upped), this.owner));
+	}
+},
 bow:function(t){
 	return this.owner.mark == Air?1:0;
 },
@@ -541,7 +546,10 @@ parallel:function(t){
 		}
 	}
 },
-phoenix:function(t){
+phoenix:function(t, index){
+	if (this == t && !this.owner.creatures[index]){
+		this.owner.creatures[index] = new Creature(Cards.Ash.asUpped(this.card.upped), this.owner);
+	}
 },
 photosynthesis:function(t){
 	this.owner.spend(Life, -2);
@@ -618,6 +626,8 @@ scarab:function(t){
 	place(this.owner.creatures, new Creature(Cards.Scarab.asUpped(this.card.upped), this.owner));
 },
 scavenger:function(t){
+	this.atk += 1;
+	this.buffhp(1);
 },
 scramble:function(t){
 	if (t instanceof Player && !t.sanctuary){
@@ -660,6 +670,9 @@ sosa:function(t){
 		}
 	}
 	this.dmg(this.card.upped?40:48, true);
+},
+soulcatch:function(t){
+	this.owner.spend(Death, this.card.upped?-3:-2);
 },
 sskin:function(t){
 	this.buffhp(this.quanta[Earth]);

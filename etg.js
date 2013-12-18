@@ -434,24 +434,19 @@ Creature.prototype.remove = function(index) {
 	if (this.owner.gpull == this)this.owner.gpull = null;
 	return index;
 }
-Creature.prototype.deatheffect = function() {
+Creature.prototype.deatheffect = function(index) {
 	for(var i=0; i<2; i++){
 		var pl = players[i];
 		for(var j=0; j<23; j++){
 			var c = pl.creatures[j];
-			if (c && c.active == Actives.scavenger){
-				c.atk += 1;
-				c.buffhp(1);
+			if (c && c.active && c.cast == -4){
+				c.active(this, index);
 			}
 		}
 		for(var j=0; j<16; j++){
 			var p = pl.permanents[j];
-			if (p){
-				if (p.boneyard && this.card != Cards.Skeleton && this.card != Cards.SkeletonUp){
-					place(p.owner.creatures, new Creature(Cards.Skeleton.asUpped(p.card.upped), p.owner));
-				}else if (p.soulcatcher){
-					pl.spend(Death, p.card.upped?-3:-2);
-				}
+			if (p && p.active && p.cast == -4){
+				p.active(this, index);
 			}
 		}
 		if (pl.shield && pl.shield.active == Actives.bones){
@@ -463,11 +458,9 @@ Creature.prototype.die = function() {
 	var index = this.remove();
 	if (this.aflatoxin){
 		(this.owner.creatures[index] = new Creature(Cards.MalignantCell, this.owner)).usedactive = false;
-	}else if (this.active == Actives.phoenix){
-		this.owner.creatures[index] = new Creature(Cards.Ash.asUpped(this.card.upped), this.owner);
 	}
+	this.deatheffect(index);
 	new DeathEffect(creaturePos(this.owner == player1?0:1, index));
-	this.deatheffect();
 }
 Creature.prototype.transform = function(card){
 	this.card = card;

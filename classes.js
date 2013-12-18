@@ -85,14 +85,12 @@ function Permanent(card, owner){
 	this.passive = card.passive;
 	this.charges = 0;
 	this.usedactive = true;
-	this.immaterial = card.passive == "immaterial" || card == Cards.Hope || card == Cards.HopeUp || this.active == Actives.reflect;
 }
 function Weapon(card, owner){
 	Permanent.apply(this, arguments);
 	this.psion = false;
 	this.frozen = 0;
 	this.delayed = 0;
-	this.momentum = card.passive == "momentum";
 	this.atk = card.attack;
 	this.dive = 0;
 	this.steamatk = 0;
