@@ -73,11 +73,9 @@ burrow:function(t){
 	this.cast = 0;
 },
 butterfly:function(t){
-	if (t.trueatk() < 3){
-		t.cast = 3;
-		t.castele = Entropy;
-		t.active = Actives.destroy;
-	}
+	t.cast = 3;
+	t.castele = Entropy;
+	t.active = Actives.destroy;
 },
 catapult:function(t){
 	t.die();
@@ -133,14 +131,12 @@ destroy:function(t, dontsalvage){
 	}
 },
 devour:function(t){
-	if (this.truehp() > t.truehp()){
-		this.buffhp(1);
-		this.atk += 1;
-		if (t.passives.poisonous){
-			this.addpoison(1);
-		}
-		t.die();
+	this.buffhp(1);
+	this.atk += 1;
+	if (t.passives.poisonous){
+		this.addpoison(1);
 	}
+	t.die();
 },
 die:function(t){
 	this.die();

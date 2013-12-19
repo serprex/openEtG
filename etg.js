@@ -630,6 +630,9 @@ Weapon.prototype.attack = Creature.prototype.attack = function(stasis, freedomCh
 	}
 }
 Player.prototype.summon = function(index, target){
+	if (this.silence){
+		return;
+	}
 	var card = this.hand[index];
 	this.hand.splice(index, 1);
 	if (this.neuro){
