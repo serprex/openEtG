@@ -401,14 +401,14 @@ integrity:function(t){
 			active = shardSkills[i][num];
 		}
 	}
-	var passives = {}
+	var passives = [];
 	if (shardTally[Air]>0){
-		passives.airborne = true;
+		passives.push("airborne");
 	}
 	if (shardTally[Darkness]==1){
-		passives.devour = true;
+		passives.push("devour");
 	}else if (shardTally[Darkness]>1){
-		passives.voodoo = true;
+		passives.push("voodoo");
 	}
 	this.owner.shardgolem = {
 		atk: atk + bonus,

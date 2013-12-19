@@ -1,0 +1,34 @@
+<html>
+<head>
+<title>Tests</title>
+<link rel="stylesheet" href="node_modules/qunitjs/qunit/qunit.css">
+</head>
+<body>
+<div id="qunit"></div>
+<div id="qunit-fixture"></div>
+<script src="node_modules/qunitjs/qunit/qunit.js"></script>
+<script src="js.js"></script>
+<script>
+"use strict"
+var Cards, Targeting, targetingMode, targetingModeCb, targetingText, myturn, player1, player2, players, winner, discarding;
+function setWinner(play){
+	winner = play;
+}
+loadcards(function(cards, targeting) {
+	Cards = cards;
+	Targeting = targeting;
+	test("Obsession", function() {
+		player1 = new Player();
+		player2 = new Player();
+		player1.foe = player2;
+		player2.foe = player1;
+		player1.hand = [Cards.GhostofthePast, Cards.GhostofthePast, Cards.GhostofthePast, Cards.GhostofthePast, Cards.GhostofthePast, Cards.GhostofthePast, Cards.GhostofthePast, Cards.GhostofthePast];
+		player2.hand = [];
+		player1.endturn(0);
+		ok(player1.hp == 90);
+		ok(winner == player1);
+	});
+});
+</script>
+</body>
+</html>
