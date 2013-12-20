@@ -92,7 +92,6 @@ function Permanent(card, owner){
 	this.cast = card.cast;
 	this.castele = card.castele;
 	this.active = card.active;
-	this.passive = card.passive;
 	this.charges = 0;
 	this.usedactive = true;
 }

@@ -54,6 +54,17 @@ loadcards(function(cards, targeting) {
 		ok(player1.hp == 90, "Damage");
 		ok(player1.hand.length == 7, "Discarded");
 	});
+	test("Reflect", function() {
+		initTest();
+		Actives.lightning.call(player1, player2);
+		ok(player1.hp == 100 && player2.hp == 95, "Plain spell");
+		player2.shield = new Shield(Cards.MirrorShield, player2);
+		Actives.lightning.call(player1, player2);
+		ok(player1.hp == 95 && player2.hp == 95, "Reflected spell");
+		player1.shield = new Shield(Cards.MirrorShield, player1);
+		Actives.lightning.call(player1, player2);
+		ok(player1.hp == 90 && player2.hp == 95, "Unreflected reflected spell");
+	});
 	test("Voodoo", function() {
 		initTest();
 		var voodoo = new Creature(Cards.VoodooDoll, player1);

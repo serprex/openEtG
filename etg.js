@@ -399,7 +399,7 @@ Player.prototype.dmg = function(x, ignoresosa) {
 	}
 }
 Player.prototype.spelldmg = function(x) {
-	return (!this.shield || this.shield.passives.reflect?this:this.foe).dmg(x);
+	return (!this.shield || !this.shield.passives.reflect?this:this.foe).dmg(x);
 }
 Creature.prototype.getIndex = function() { return this.owner.creatures.indexOf(this); }
 Player.prototype.addpoison = Creature.prototype.addpoison = function(x) {
