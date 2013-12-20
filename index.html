@@ -748,7 +748,7 @@ function animate() {
 			var sh = players[j].shield;
 			if (sh && !(j == 1 && cloakgfx.visible)){
 				var child = shiesprite[j].getChildAt(0);
-				maybeSetText(child, (sh.charges || "") + (sh.active?activename(sh.active) + " ":"") + (sh.dr || ""));
+				maybeSetText(child, (sh.charges || "") + (sh.effect?activename(sh.effect) + " ":"") + (sh.truedr() || ""));
 				shiesprite[j].alpha = sh.immaterial?.7:1;
 				child.visible = true;
 				shiesprite[j].setTexture(getCreatureImage(sh.card.code));

@@ -9,6 +9,7 @@ function Card(type, info){
 	this.readCost("cost", info.Cost||"0", this.element);
 	this.readCost("cast", info.Cast||"0", this.element);
 	this.active = Actives[info.Active];
+	this.effect = Actives[info.Effect];
 	this.status = info.Status;
 	if (info.Passive != undefined){
 		this.passives = {};
@@ -103,6 +104,7 @@ function Weapon(card, owner){
 function Shield(card, owner){
 	Permanent.apply(this, arguments)
 	this.dr = card.health
+	this.effect = card.effect;
 }
 function Pillar(card, owner){
 	this.owner = owner;

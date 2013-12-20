@@ -299,6 +299,15 @@ heal20:function(t){
 holylight:function(t){
 	t.dmg(!(t instanceof Player) && (t.card.element == Darkness || t.card.element == Death)?10:-10);
 },
+hope:function(t){
+	var dr=0;
+	for(var i=0; i<23; i++){
+		if(this.owner.creatures[i] && this.owner.creatures[i].active == Actives.light){
+			dr++;
+		}
+	}
+	return dr;
+},
 icebolt:function(t){
 	var bolts = 1+Math.floor(this.owner.quanta[Water]/10);
 	t.spelldmg(bolts*2);
@@ -433,6 +442,11 @@ lobotomize:function(t){
 	t.active = undefined;
 	t.momentum = false;
 	t.psion = false;
+},
+losecharge:function(t){
+	if(--this.charges<0){
+		this.die();
+	}
 },
 luciferin:function(t){
 	this.owner.dmg(-10);
@@ -738,8 +752,8 @@ unburrow:function(t){
 	this.active = Actives.burrow;
 	this.cast = 1;
 },
-vampire:function(t){
-	this.owner.dmg(-this.dmgdone);
+vampire:function(t, dmg){
+	this.owner.dmg(-dmg);
 },
 void:function(t){
 	this.owner.foe.maxhp = Math.max(this.owner.foe.maxhp-(this.owner.mark == Darkness?3:2), 1);

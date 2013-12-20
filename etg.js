@@ -118,7 +118,7 @@ Card.prototype.readCost = function(attr, cost, e){
 	}
 }
 Card.prototype.info = function(){
-	var typeString = ["Pillar", "Shield", "Weapon", "Permanent", "Spell", "Creature"];
+	var typeString = ["Pillar", "Weapon", "Shield", "Permanent", "Spell", "Creature"];
 	var info = typeString[this.type] + " " + this.cost+":"+this.costele;
 	if (this.attack && this.health)info += " " + this.attack+"|"+this.health;
 	else if (this.type == ShieldEnum)info += " " + this.health + "dr";
@@ -266,20 +266,8 @@ Player.prototype.endturn = function(discard) {
 			cr.salvaged = undefined;
 		}
 	}
-	if (this.shield){
-		if (this.shield.active == Actives.evade100 || this.shield.active == Actives.wings){
-			if (--this.shield.charges < 0){
-				this.shield = undefined;
-			}
-		}
-		else if (this.shield.passives.hope){
-			var dr = this.shield.card.upped?1:0;
-			for (var i=0; i<23; i++){
-				if (this.creatures[i] && this.creatures[i].active == Actives.light)
-					dr++;
-			}
-			this.shield.dr = dr;
-		}
+	if (this.shield && this.shield.active && this.shield.cast == -1){
+		this.shield.active();
 	}
 	if (this.weapon)this.weapon.attack();
 	if (this.sosa > 0){
@@ -334,7 +322,7 @@ Creature.prototype.info = function(){
 	if (this.owner.gpull == this)info += " gpull";
 	if (this.adrenaline)info += " adrenaline";
 	for (var key in this){
-		if (this[key] === true)info += " " + key;
+		if (this[key] === true && key != "usedactive")info += " " + key;
 	}
 	return info;
 }
@@ -342,7 +330,7 @@ Permanent.prototype.info = function(){
 	var info = this.charges?"x"+this.charges:"";
 	if (this.active)info+=" "+casttext(this.cast, this.castele)+" "+activename(this.active);
 	for (var key in this){
-		if (this[key] === true)info += " " + key;
+		if (this[key] === true && key != "usedactive")info += " " + key;
 	}
 	return info;
 }
@@ -352,16 +340,16 @@ Weapon.prototype.info = function(){
 	if (this.frozen)info += " "+this.frozen+"frozen";
 	if (this.delayed)info += " "+this.delayed+"delay";
 	for (var key in this){
-		if (this[key] === true)info += " " + key;
+		if (this[key] === true && key != "usedactive")info += " " + key;
 	}
 	return info;
 }
 Shield.prototype.info = function(){
-	var info = this.dr + "DR";
+	var info = this.truedr() + "DR";
 	if (this.active)info+=" "+activename(this.active);
 	if (this.charges)info += " x"+this.charges;
 	for (var key in this){
-		if (this[key] === true)info += " " + key;
+		if (this[key] === true && key != "usedactive")info += " " + key;
 	}
 	return info;
 }
@@ -503,6 +491,13 @@ Weapon.prototype.trueatk = Creature.prototype.trueatk = function(adrenaline){
 	}
 	return dmg;
 }
+Shield.prototype.truedr = function(){
+	var dr = this.dr;
+	if (this.cast == -3){
+		dr += this.active();
+	}
+	return dr;
+}
 Player.prototype.truehp = function(){ return this.hp; }
 Creature.prototype.truehp = function(){
 	var hp = this.hp;
@@ -588,7 +583,7 @@ Weapon.prototype.attack = Creature.prototype.attack = function(stasis, freedomCh
 			this.dmg(this.trueatk(), true);
 		}
 	}
-	var trueatk, momentum = this.momentum;
+	var trueatk, truedr = 0, momentum = this.momentum;
 	if (!(stasis || this.frozen>0 || this.delayed>0) && (trueatk = this.trueatk()) != 0){
 		if (this.passives.airborne && freedomChance && rng.real() < freedomChance){
 			trueatk = Math.ceil(trueatk * 1.5);
@@ -599,21 +594,18 @@ Weapon.prototype.attack = Creature.prototype.attack = function(stasis, freedomCh
 		}else if (momentum || trueatk < 0){
 			target.dmg(trueatk);
 			if (this.adrenaline < 3 && this.active && this.cast == -2){
-				this.dmgdone = trueatk;
-				this.active(target);
+				this.active(target, trueatk);
 			}
 		}else if (isCreature && target.gpull){
 			var dmg = target.gpull.dmg(trueatk);
 			if (this.adrenaline < 3 && this.active && this.cast == -2){
-				this.dmgdone = dmg;
-				this.active(target);
+				this.active(target, dmg);
 			}
-		}else if (!target.shield || (trueatk > target.shield.dr && (!target.shield.active || !target.shield.active(this)))){
-			var dmg = trueatk - (target.shield?target.shield.dr:0);
+		}else if (!target.shield || (trueatk > (truedr = target.shield.truedr()) && (!target.shield.active || !target.shield.active(this)))){
+			var dmg = trueatk - truedr;
 			target.dmg(dmg);
 			if (this.adrenaline < 3 && this.active && this.cast == -2){
-				this.dmgdone = dmg;
-				this.active(target);
+				this.active(target, dmg);
 			}
 		}
 	}
