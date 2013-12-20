@@ -706,6 +706,7 @@ steal:function(t){
 	}else{
 		t.die();
 		t.owner = this.owner;
+		t.usedactive = true;
 		if (t instanceof Weapon){
 			this.owner.weapon = t;
 		}else if (t instanceof Shield){

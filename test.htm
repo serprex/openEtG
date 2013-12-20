@@ -18,15 +18,60 @@ function initTest(){
 	player2 = new Player();
 	player1.foe = player2;
 	player2.foe = player1;
+	player1.mark = player2.mark = Entropy;
 	players = [player1, player2];
+	winner = undefined;
 }
 loadcards(function(cards, targeting) {
 	Cards = cards;
 	Targeting = targeting;
+	test("Adrenaline", function() {
+		initTest();
+		(player1.creatures[0] = new Creature(Cards.Devourer, player1)).adrenaline = 1;
+		(player1.creatures[1] = new Creature(Cards.HornedFrog, player1)).adrenaline = 1;
+		(player1.creatures[2] = new Creature(Cards.RubyDragon, player1)).adrenaline = 1;
+		player2.quanta[Life]=3;
+		player1.endturn();
+		ok(player2.hp == 68, "dmg");
+		console.log(player1.quanta[Darkness]);
+		ok(player1.quanta[Darkness] == 2, "Absorbed");
+		ok(player2.quanta[Life] == 1, "Lone Life");
+	});
 	test("Deckout", function() {
 		initTest();
 		player1.endturn();
 		ok(winner == player1);
+	});
+	test("Destroy", function() {
+		initTest();
+		player1.quanta[Death] = 10;
+		player1.hand = [Cards.AmethystPillar, Cards.AmethystPillar, Cards.SoulCatcher, Cards.Shield, Cards.Dagger];
+		while(player1.hand.length){
+			player1.summon(0);
+		}
+		ok(player1.permanents[0].charges == 2, "2 charges");
+		Actives.destroy.call(player2, player1.permanents[0]);
+		ok(player1.permanents[0].charges == 1, "1 charge");
+		Actives.destroy.call(player2, player1.permanents[0]);
+		ok(!player1.permanents[0], "poof");
+		ok(player1.permanents[1].card == Cards.SoulCatcher, "SoulCatcher");
+		Actives.destroy.call(player2, player1.permanents[1]);
+		ok(!player1.permanents[1], "SoulCatcher gone");
+		ok(player1.shield.card == Cards.Shield, "Shield");
+		Actives.destroy.call(player2, player1.shield);
+		ok(!player1.shield, "Shield gone");
+		ok(player1.weapon.card == Cards.Dagger, "Dagger");
+		Actives.destroy.call(player2, player1.weapon);
+		ok(!player1.weapon, "Dagger gone");
+		player1.hand = [Cards.BoneWall];
+		player1.summon(0);
+		ok(player1.shield.charges == 7, "7 bones");
+		Actives.destroy.call(player2, player1.shield);
+		ok(player1.shield.charges == 6, "6 bones");
+		for(var i=0; i<6; i++){
+			Actives.destroy.call(player2, player1.shield);
+		}
+		ok(!player1.shield, "This town is all in hell");
 	});
 	test("Devourer", function() {
 		initTest();
@@ -36,6 +81,21 @@ loadcards(function(cards, targeting) {
 		player1.endturn();
 		ok(player2.quanta[Light] == 0, "Light");
 		ok(player1.quanta[Darkness] == 1, "Darkness");
+	});
+	test("Earthquake", function() {
+		initTest();
+		player1.hand = [Cards.AmethystPillar, Cards.AmethystPillar, Cards.AmethystPillar, Cards.AmethystPillar, Cards.AmethystPillar, Cards.AmethystPillar, Cards.AmethystPillar, Cards.AmethystPillar];
+		for(var i=0; i<5; i++){
+			player1.summon(0);
+		}
+		ok(player1.hand.length == 3, "handlength");
+		var pillars = player1.permanents[0];
+		ok(pillars instanceof Pillar, "ispillar");
+		ok(pillars.charges == 5, "5 charges");
+		Actives.earthquake.call(player2, pillars);
+		ok(pillars.charges == 2, "2 charges");
+		Actives.earthquake.call(player2, pillars);
+		ok(!player1.permanents[0], "poof");
 	});
 	test("Hope", function() {
 		initTest();
