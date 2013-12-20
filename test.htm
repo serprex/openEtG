@@ -33,7 +33,6 @@ loadcards(function(cards, targeting) {
 		player2.quanta[Life]=3;
 		player1.endturn();
 		ok(player2.hp == 68, "dmg");
-		console.log(player1.quanta[Darkness]);
 		ok(player1.quanta[Darkness] == 2, "Absorbed");
 		ok(player2.quanta[Life] == 1, "Lone Life");
 	});

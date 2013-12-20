@@ -255,7 +255,7 @@ Player.prototype.endturn = function(discard) {
 			if (cr.adrenaline>0){
 				cr.adrenaline=1;
 			}
-			if (i>5 && floodingFlag && (cr.card.element != Water || cr.card.element != Other) && ~cr.getIndex()){
+			if (i>5 && floodingFlag && cr.card.element != Water && cr.card.element != Other && !cr.immaterial && !cr.burrowed && ~cr.getIndex()){
 				cr.die();
 			}
 		}
