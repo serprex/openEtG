@@ -19,8 +19,9 @@ function Card(type, info){
 		}
 	}
 }
-function Player(){
-	this.owner = this
+function Player(game){
+	this.game = game;
+	this.owner = this;
 	this.shield = null;
 	this.weapon = null;
 	this.poison = 0;

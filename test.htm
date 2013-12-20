@@ -9,18 +9,16 @@
 <script src="js.js"></script>
 <script>
 "use strict"
-var Cards, Targeting, targetingMode, targetingModeCb, player1, player2, players, winner;
+var Cards, Targeting, targetingMode, targetingModeCb, game, player1, player2, players;
 function setWinner(play){
-	winner = play;
+	game.winner = play;
 }
 function initTest(){
-	player1 = new Player();
-	player2 = new Player();
-	player1.foe = player2;
-	player2.foe = player1;
-	player1.mark = player2.mark = Entropy;
-	players = [player1, player2];
-	winner = undefined;
+	game = mkGame();
+	game.player1.mark = game.player2.mark = Entropy;
+	player1 = game.player1;
+	player2 = game.player2;
+	players = game.players;
 }
 loadcards(function(cards, targeting) {
 	Cards = cards;
@@ -39,7 +37,7 @@ loadcards(function(cards, targeting) {
 	test("Deckout", function() {
 		initTest();
 		player1.endturn();
-		ok(winner == player1);
+		ok(game.winner == player1);
 	});
 	test("Destroy", function() {
 		initTest();
@@ -103,7 +101,7 @@ loadcards(function(cards, targeting) {
 			player1.creatures[i] = new Creature(Cards.RayofLight, player1);
 		}
 		player1.endturn();
-		ok(player1.shield.dr == 3, "DR");
+		ok(player1.shield.truedr() == 3, "DR");
 		ok(player1.quanta[Light] == 3, "RoL");
 	});
 	test("Obsession", function() {

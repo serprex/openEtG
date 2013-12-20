@@ -46,6 +46,16 @@ var ShardList = [undefined, undefined,
 	"5vi", "7u2",
 	"62m", "816"];
 var RandomCardSkip = ["4t8", "6ro", "4vr", "6ub", "597", "77n", "5fd", "7dt", "Ash"];
+function mkGame(first){
+	var game={};
+	game.player1 = new Player(game);
+	game.player2 = new Player(game);
+	game.players = [game.player1, game.player2];
+	game.player1.foe = game.player2;
+	game.player2.foe = game.player1;
+	game.turn = first?player1:player2;
+	return game;
+}
 function loadcards(cb){
 	var Cards = {};
 	var Targeting = {};
@@ -280,7 +290,7 @@ Player.prototype.drawcard = function() {
 	if (this.hand.length<8){
 		if (this.deck.length>0){
 			this.hand[this.hand.length] = this.deck.pop();
-		}else if (!winner){
+		}else if (!this.game.winner){
 			setWinner(this.foe);
 		}
 	}
@@ -383,7 +393,7 @@ Player.prototype.dmg = function(x, ignoresosa) {
 		return sosa?-x:heal;
 	}else{
 		this.hp -= x;
-		if (this.hp <= 0 && !winner){
+		if (this.hp <= 0 && !this.game.winner){
 			setWinner(this.foe);
 		}
 		return sosa?-x:x;
@@ -528,8 +538,8 @@ Thing.prototype.copypassives = function(passives){
 		}
 	}
 }
-Thing.prototype.canactive = function(turn) {
-	return (turn || myturn) && this.active && !this.usedactive && this.cast >= 0 && !this.delayed && !this.frozen && this.owner.canspend(this.castele, this.cast);
+Thing.prototype.canactive = function() {
+	return this.owner.game.turn == this.owner && this.active && !this.usedactive && this.cast >= 0 && !this.delayed && !this.frozen && this.owner.canspend(this.castele, this.cast);
 }
 Thing.prototype.useactive = function(t) {
 	this.usedactive = true;
@@ -540,9 +550,6 @@ Thing.prototype.useactive = function(t) {
 	if (this.passives.sacrifice){
 		this.die();
 	}
-}
-function countAdrenaline(x){
-	return 5-Math.floor(Math.sqrt(Math.abs(x)));
 }
 Weapon.prototype.attack = Creature.prototype.attack = function(stasis, freedomChance){
 	var isCreature = this instanceof Creature;
@@ -632,6 +639,9 @@ Weapon.prototype.attack = Creature.prototype.attack = function(stasis, freedomCh
 		}
 	}
 }
+Player.prototype.cansummon = function(index, target){
+	return
+}
 Player.prototype.summon = function(index, target){
 	if (this.silence){
 		return;
@@ -683,6 +693,9 @@ Player.prototype.summon = function(index, target){
 	}else console.log("Unknown card type: "+card.type);
 	this.spend(card.costele, card.cost);
 }
+function countAdrenaline(x){
+	return 5-Math.floor(Math.sqrt(Math.abs(x)));
+}
 function calcEclipse(){
 	var bonus = 0;
 	for (var j=0; j<2; j++){
@@ -701,12 +714,9 @@ function calcEclipse(){
 function randomcard(upped, filter){
 	var keys = [];
 	for(var key in Cards) {
-		if (key.length == 3 && Cards[key].upped == upped && !~RandomCardSkip.indexOf(key) && (!filter || filter(Cards[key]))) {
-			var intKey = parseInt(key, 32);
-			// Skip marks
-			if (!((intKey>=5011&&intKey<=5022)||(intKey>=7011&&intKey<=7022))){
-				keys.push(key);
-			}
+		var card = Cards[key];
+		if (key.length == 3 && card.upped == upped && !~RandomCardSkip.indexOf(key) && (!filter || filter(card))) {
+			keys.push(key);
 		}
 	}
 	keys.sort();
@@ -735,7 +745,7 @@ function casttext(cast, castele){
 function salvageScan(from, t){
 	if (t.owner.hand.length<8 && t.owner != from){
 		for (var i=0; i<23; i++){
-			if (t.owner.creatures[i] && t.owner.creatures[i].salvage && !t.owner.creatures[i].salvaged){
+			if (t.owner.creatures[i] && t.owner.creatures[i].passives.salvage && !t.owner.creatures[i].salvaged){
 				t.owner.creatures[i].salvaged = true;
 				t.owner.hand.push(t.card);
 				return;

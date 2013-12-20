@@ -14,7 +14,7 @@
 <body>
 	<script>
 "use strict"
-var Cards, Targeting, targetingMode, targetingModeCb, targetingText, myturn, player1, player2, players, winner, discarding;
+var Cards, Targeting, targetingMode, targetingModeCb, targetingText, game, discarding;
 loadcards(function(cards, targeting) {
 	Cards = cards;
 	Targeting = targeting;
@@ -23,7 +23,7 @@ loadcards(function(cards, targeting) {
 function getTarget(src, active, cb){
 	if (active in Targeting){
 		var targetingFilter = Targeting[active];
-		targetingMode = function(t){ return (t == player2 || t.owner == player1 || t.passive == "cloak" || !player2.isCloaked()) && targetingFilter(src, t); }
+		targetingMode = function(t){ return (t == game.player2 || t.owner == game.player1 || t.passive == "cloak" || !game.player2.isCloaked()) && targetingFilter(src, t); }
 		targetingModeCb = cb;
 		for(var key in TargetFilters){
 			if (TargetFilters[key] == targetingFilter){
@@ -53,26 +53,26 @@ function centerAnchor(obj){
 	obj.anchor.x=obj.anchor.y=.5;
 }
 function setWinner(play){
-	winner=play;
-	endturn.setText(play==player1?"Won":"Lost");
+	game.winner=play;
+	endturn.setText(play==game.player1?"Won":"Lost");
 }
 function tgtToBits(x){
 	if (x == undefined){
 		return 0;
-	}else if (x == player1){
+	}else if (x == game.player1){
 		return 1;
-	}else if (x == player2){
+	}else if (x == game.player2){
 		return 9;
-	}else if (x == player1.weapon){
+	}else if (x == game.player1.weapon){
 		return 17;
-	}else if (x == player2.weapon){
+	}else if (x == game.player2.weapon){
 		return 25;
-	}else if (x == player1.shield){
+	}else if (x == game.player1.shield){
 		return 33;
-	}else if (x == player2.shield){
+	}else if (x == game.player2.shield){
 		return 41;
 	}else{
-		return (x instanceof Creature?2:4)+(x.owner==player1?0:1)|x.getIndex()<<3;
+		return (x instanceof Creature?2:4)+(x.owner==game.player1?0:1)|x.getIndex()<<3;
 	}
 }
 function bitsToTgt(x){
@@ -80,15 +80,15 @@ function bitsToTgt(x){
 	if (tgtop == 0){
 		return undefined;
 	}else if (tgtop==1){
-		return [player2, player1, player2.weapon, player1.weapon, player2.shield, player1.shield][x>>3];
+		return [game.player2, game.player1, game.player2.weapon, game.player1.weapon, game.player2.shield, game.player1.shield][x>>3];
 	}else if (tgtop==2){
-		return player2.creatures[x>>3];
+		return game.player2.creatures[x>>3];
 	}else if (tgtop==3){
-		return player1.creatures[x>>3];
+		return game.player1.creatures[x>>3];
 	}else if (tgtop==4){
-		return player2.permanents[x>>3];
+		return game.player2.permanents[x>>3];
 	}else if (tgtop==5){
-		return player1.permanents[x>>3];
+		return game.player1.permanents[x>>3];
 	}else console.log("Unknown tgtop: "+tgtop+", "+x);
 }
 function creaturePos(j, i){
@@ -209,13 +209,7 @@ function initGame(data, ai){
 	if(data.seed != undefined){
 		rng.seed(data.seed);
 	}
-	myturn = data.first;
-	winner = undefined;
-	player1 = new Player();
-	player2 = new Player();
-	player1.foe = player2;
-	player2.foe = player1;
-	players = [player1, player2];
+	game = mkGame(data.first);
 	var idx, code, decks = [data.urdeck, data.deck];
 	for(var j=0; j<2; j++){
 		for(var i=0; i<decks[j].length; i++){
@@ -226,25 +220,24 @@ function initGame(data, ai){
 			}
 		}
 	}
-	if (myturn){
-		player1.drawhand();
-		player2.drawhand();
+	if (game.turn == game.player1){
+		game.player1.drawhand();
+		game.player2.drawhand();
 	}else{
-		player2.drawhand();
-		player1.drawhand();
+		game.player2.drawhand();
+		game.player1.drawhand();
 	}
 	if (ai){
-		player2.ai = ai;
-		if(!myturn){
-			player2.ai();
-			myturn=true;
+		game.player2.ai = ai;
+		if(game.turn == game.player2){
+			game.player2.ai();
+			game.turn = game.player1;
 		}
 	}
 	endturn.setText("End Turn");
 	mainStage = gameui;
 }
 function getDeck(){
-	var deck = ['4vc', '4vc', '4vc', '4vc', '4vc', '4vc', '4vc', '4vc', '4vc', '4vc', '4vc', '4vc', '4vc', '4vc', '4vc', '4vc', '4vc', '4vc', '4ve', '4ve', '4ve', '6tt', '6tt', '6tt', '6tt', '4vf', '4vf', '4vf', '4vf', '4vf', '8pj'];
 	var deckimport = document.getElementById("deckimport").value;
 	return deckimport?deckimport.split(" "):['4vc', '4vc', '4vc', '4vc', '4vc', '4vc', '4vc', '4vc', '4vc', '4vc', '4vc', '4vc', '4vc', '4vc', '4vc', '4vc', '4vc', '4vc', '4ve', '4ve', '4ve', '6tt', '6tt', '6tt', '6tt', '4vf', '4vf', '4vf', '4vf', '4vf', '8pj'];
 }
@@ -304,30 +297,30 @@ endturn.position.x = 800;
 endturn.position.y = 540;
 endturn.interactive = true;
 endturn.click = function(e, discard) {
-	if (winner){
-		myturn = false;
+	if (game.winner){
 		for (var i=0; i<foeplays.length; i++){
 			gameui.removeChild(foeplays[i][1]);
 		}
 		foeplays.length = 0;
+		game = undefined;
 		mainStage = menuui;
-	}else if (myturn){
-		if (discard == undefined && player1.hand.length == 8){
+	}else if (game.turn == player1){
+		if (discard == undefined && game.player1.hand.length == 8){
 			discarding = true;
 		}else{
 			discarding = false;
-			if(!player2.ai){
+			if(!game.player2.ai){
 				socket.emit("endturn", discard);
 			}
-			player1.endturn(discard);
+			game.player1.endturn(discard);
 			targetingMode = undefined;
 			for (var i=0; i<foeplays.length; i++){
 				gameui.removeChild(foeplays[i][1]);
 			}
 			foeplays.length = 0;
-			if(player2.ai){
-				player2.ai();
-			}else myturn = false;
+			if(game.player2.ai){
+				game.player2.ai();
+			}else game.turn = player2;
 		}
 	}
 }
@@ -337,7 +330,7 @@ cancel.position.x = 800;
 cancel.position.y = 500;
 cancel.interactive = true;
 cancel.click = function() {
-	if (myturn){
+	if (game.turn == game.player1){
 		if (targetingMode){
 			targetingMode = null;
 			targetingModeCb = null;
@@ -369,24 +362,24 @@ for (var i=0; i<8; i++){
 	handsprite[0][i].interactive = true;
 	(function(_i){
 		handsprite[0][i].mouseover = function(){
-			setInfo(player1.hand[_i]);
+			setInfo(game.player1.hand[_i]);
 		}
 		handsprite[0][i].click = function(){
 			if (discarding){
 				endturn.click(null, _i);
 				return;
 			}
-			if (!myturn || player1.silence)return;
+			if (game.turn != game.player1 || game.player1.silence)return;
 			var card = player1.hand[_i];
-			if (card && (card.cost == 0 || player1.canspend(card.costele, card.cost))){
+			if (card && (card.cost == 0 || game.player1.canspend(card.costele, card.cost))){
 				if (card.type != SpellEnum){
 					console.log("summoning " + _i);
 					socket.emit("summon", _i);
-					player1.summon(_i);
+					game.player1.summon(_i);
 				}else{
-					getTarget(player1, card.active, function(tgt) {
+					getTarget(game.player1, card.active, function(tgt) {
 						socket.emit("summon", _i|tgtToBits(tgt)<<3);
-						player1.summon(_i, tgt);
+						game.player1.summon(_i, tgt);
 					});
 				}
 			}
@@ -573,8 +566,8 @@ gameui.addChild(fgfx);
 var socket = io.connect("http://"+location.hostname+':13602');
 socket.on("pvpgive", initGame);
 socket.on("endturn", function(data) {
-	player2.endturn(data);
-	myturn = true;
+	game.player2.endturn(data);
+	game.turn = player1;
 });
 socket.on("summon", function(bits) {
 	console.log("summon call: " + bits);
@@ -583,8 +576,8 @@ socket.on("summon", function(bits) {
 	sprite.position.x=foeplays.length*40;
 	sprite.position.y=8;
 	gameui.addChild(sprite);
-	foeplays.push([player2.hand[handindex], sprite]);
-	player2.summon(handindex, bitsToTgt(bits>>3));
+	foeplays.push([game.player2.hand[handindex], sprite]);
+	game.player2.summon(handindex, bitsToTgt(bits>>3));
 });
 socket.on("active", function(bits) {
 	var c=bitsToTgt(bits&255), t=bitsToTgt((bits>>8)&255);
@@ -592,7 +585,7 @@ socket.on("active", function(bits) {
 	c.useactive(t);
 });
 socket.on("foeleft", function(data) {
-	setWinner(player1);
+	setWinner(game.player1);
 });
 socket.on("chat", function(data) {
 	document.getElementById("chatArea").value = data;
@@ -609,16 +602,16 @@ function maybeSendChat(e){
 function animate() {
 	setTimeout(requestAnimate, 40);
 	if (mainStage == gameui){
-		maybeSetText(turntell, discarding?"Discard":targetingMode?targetingText:myturn?"Your Turn":"Their Turn");
+		maybeSetText(turntell, discarding?"Discard":targetingMode?targetingText:game.turn == game.player1?"Your Turn":"Their Turn");
 		for(var i=0; i<foeplays.length; i++){
 			maybeSetTexture(foeplays[i][1], getPermanentImage(foeplays[i][0].code));
 		}
-		cloakgfx.visible = player2.isCloaked();
+		cloakgfx.visible = game.player2.isCloaked();
 		fgfx.clear();
-		if (myturn && !player1.silence){
-			for(var i=0; i<player1.hand.length; i++){
-				var card = player1.hand[i];
-				if (player1.canspend(card.costele, card.cost)){
+		if (turn == game.player1 && !game.player1.silence){
+			for(var i=0; i<game.player1.hand.length; i++){
+				var card = game.player1.hand[i];
+				if (game.player1.canspend(card.costele, card.cost)){
 					fgfx.beginFill(elecols[card.costele]);
 					fgfx.drawRect(handsprite[0][i].position.x+120, handsprite[0][i].position.y, 20, 20);
 					fgfx.endFill();
@@ -627,10 +620,10 @@ function animate() {
 		}
 		fgfx.beginFill(0, 0);
 		fgfx.lineStyle(2, 0xffffff);
-		var j=myturn?0:1;
+		var j=game.turn == game.player1?0:1;
 		for(var i=0; i<23; i++){
 			var cr=players[j].creatures[i];
-			if (cr && cr.canactive(true)){
+			if (cr && cr.canactive()){
 				fgfx.drawRect(creasprite[j][i].position.x-60, creasprite[j][i].position.y-15, 120, 30);
 			}
 		}
@@ -662,7 +655,7 @@ function animate() {
 				fgfx.endFill();
 			}
 			for(var i=0;i<8;i++){
-				maybeSetTexture(handsprite[j][i], players[j].hand[i]?getCardImage(j==0||player1.precognition?players[j].hand[i].code:"000"):null);
+				maybeSetTexture(handsprite[j][i], players[j].hand[i]?getCardImage(j==0||game.player1.precognition?players[j].hand[i].code:"000"):null);
 			}
 			for(var i=0; i<23; i++){
 				var cr = players[j].creatures[i];
