@@ -536,6 +536,7 @@ parallel:function(t){
 	for(var attr in t){
 		if (t.hasOwnProperty(attr))copy[attr] = t[attr];
 	}
+	copy.copypassives(copy.passives);
 	copy.owner = this.owner;
 	copy.usedactive = true;
 	place(this.owner.creatures, copy);

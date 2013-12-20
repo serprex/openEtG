@@ -52,12 +52,7 @@ function Thing(card, owner){
 	if (card.status){
 		this[card.status] = true;
 	}
-	if (card.passives){
-		this.passives = {};
-		for(var i=0; i<card.passives.length; i++){
-			this.passives[card.passives[i]] = true;
-		}
-	}
+	this.copypassives(card.passives);
 }
 function Creature(card, owner){
 	if (card == Cards.ShardGolem){
@@ -68,10 +63,7 @@ function Creature(card, owner){
 		this.atk = golem.atk;
 		this.active = golem.active;
 		this.cast = golem.cast;
-		this.passives = {};
-		for(var i=0; i<golem.passives.length; i++){
-			this.passives[golem.passives[i]] = true;
-		}
+		this.copypassives(golem.passives);
 		this.adrenaline = golem.adrenaline;
 		this.momentum = golem.momentum;
 		this.immaterial = golem.immaterial;

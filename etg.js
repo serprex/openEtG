@@ -123,6 +123,9 @@ Card.prototype.info = function(){
 	if (this.attack && this.health)info += " " + this.attack+"|"+this.health;
 	else if (this.type == ShieldEnum)info += " " + this.health + "dr";
 	if (this.active)info += " " + casttext(this.cast, this.castele) + " " + activename(this.active);
+	for(var key in this){
+		if (this[key] === true)info += " " + key;
+	}
 	if (this.passives && this.passives.length)info += " " + this.passives.join(" ");
 	return info;
 }
@@ -521,6 +524,14 @@ Weapon.prototype.die = function() { this.owner.weapon = undefined; }
 Shield.prototype.die = function() { this.owner.shield = undefined; }
 Thing.prototype.isMaterialInstance = function(type) {
 	return this instanceof type && !this.immaterial && !this.burrowed;
+}
+Thing.prototype.copypassives = function(passives){
+	if (passives){
+		this.passives = {};
+		for(var i=0; i<passives.length; i++){
+			this.passives[passives[i]] = true;
+		}
+	}
 }
 Thing.prototype.canactive = function(turn) {
 	return (turn || myturn) && this.active && !this.usedactive && this.cast >= 0 && !this.delayed && !this.frozen && this.owner.canspend(this.castele, this.cast);
