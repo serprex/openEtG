@@ -53,7 +53,7 @@ function mkGame(first){
 	game.players = [game.player1, game.player2];
 	game.player1.foe = game.player2;
 	game.player2.foe = game.player1;
-	game.turn = first?player1:player2;
+	game.turn = first?game.player1:game.player2;
 	return game;
 }
 function loadcards(cb){
@@ -440,7 +440,7 @@ Creature.prototype.remove = function(index) {
 }
 Creature.prototype.deatheffect = function(index) {
 	for(var i=0; i<2; i++){
-		var pl = players[i];
+		var pl = this.owner.game.players[i];
 		for(var j=0; j<23; j++){
 			var c = pl.creatures[j];
 			if (c && c.active && c.cast == -4){
@@ -491,7 +491,7 @@ Weapon.prototype.trueatk = Creature.prototype.trueatk = function(adrenaline){
 	if (this.active && this.cast == -3)dmg += this.active();
 	if (this.burrowed)dmg = Math.ceil(dmg/2);
 	if (this instanceof Creature && (this.card.element == Death || this.card.element == Darkness)){
-		dmg += calcEclipse();
+		dmg += calcEclipse(this.owner.game);
 	}
 	var y=adrenaline || this.adrenaline;
 	if (y<2)return dmg;
@@ -511,7 +511,7 @@ Shield.prototype.truedr = function(){
 Player.prototype.truehp = function(){ return this.hp; }
 Creature.prototype.truehp = function(){
 	var hp = this.hp;
-	if ((this.card.element == Darkness || this.card.element == Death) && calcEclipse() != 0){
+	if ((this.card.element == Darkness || this.card.element == Death) && calcEclipse(this.owner.game) != 0){
 		hp++;
 	}
 	if (this.passives.swarm){
@@ -696,14 +696,14 @@ Player.prototype.summon = function(index, target){
 function countAdrenaline(x){
 	return 5-Math.floor(Math.sqrt(Math.abs(x)));
 }
-function calcEclipse(){
+function calcEclipse(game){
 	var bonus = 0;
 	for (var j=0; j<2; j++){
 		for (var i=0; i<16; i++){
-			if (players[j].permanents[i]){
-				if (players[j].permanents[i].card == Cards.Nightfall){
+			if (game.players[j].permanents[i]){
+				if (game.players[j].permanents[i].card == Cards.Nightfall){
 					bonus = 1;
-				}else if (players[j].permanents[i].card == Cards.Eclipse){
+				}else if (game.players[j].permanents[i].card == Cards.Eclipse){
 					return 2;
 				}
 			}

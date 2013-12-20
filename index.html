@@ -214,9 +214,9 @@ function initGame(data, ai){
 	for(var j=0; j<2; j++){
 		for(var i=0; i<decks[j].length; i++){
 			if (Cards[code=decks[j][i]]){
-				players[j].deck.push(Cards[code]);
+				game.players[j].deck.push(Cards[code]);
 			}else if (~(idx=TrueMarks.indexOf(code))){
-				players[j].mark=idx;
+				game.players[j].mark=idx;
 			}
 		}
 	}
@@ -304,7 +304,7 @@ endturn.click = function(e, discard) {
 		foeplays.length = 0;
 		game = undefined;
 		mainStage = menuui;
-	}else if (game.turn == player1){
+	}else if (game.turn == game.player1){
 		if (discard == undefined && game.player1.hand.length == 8){
 			discarding = true;
 		}else{
@@ -370,7 +370,7 @@ for (var i=0; i<8; i++){
 				return;
 			}
 			if (game.turn != game.player1 || game.player1.silence)return;
-			var card = player1.hand[_i];
+			var card = game.player1.hand[_i];
 			if (card && (card.cost == 0 || game.player1.canspend(card.costele, card.cost))){
 				if (card.type != SpellEnum){
 					console.log("summoning " + _i);
@@ -415,10 +415,10 @@ for (var j=0; j<2; j++){
 			creasprite[j][i].interactive = true;
 			(function(_i){
 				creasprite[j][i].mouseover = function(){
-					setInfo(players[_j].creatures[_i]);
+					setInfo(game.players[_j].creatures[_i]);
 				}
 				creasprite[j][i].click = function(){
-					var crea = players[_j].creatures[_i];
+					var crea = game.players[_j].creatures[_i];
 					if (!crea)return;
 					if (targetingMode && targetingMode(crea)){
 						targetingMode = undefined;
@@ -445,10 +445,10 @@ for (var j=0; j<2; j++){
 			permsprite[j][i].interactive = true;
 			(function(_i){
 				permsprite[j][i].mouseover = function(){
-					setInfo(players[_j].permanents[_i]);
+					setInfo(game.players[_j].permanents[_i]);
 				}
 				permsprite[j][i].click = function(){
-					var perm = players[_j].permanents[_i];
+					var perm = game.players[_j].permanents[_i];
 					if (!perm)return;
 					if (targetingMode && targetingMode(perm)){
 						targetingMode = undefined;
@@ -484,13 +484,13 @@ for (var j=0; j<2; j++){
 		shietext.anchor.x = 1;
 		shiesprite[j].addChild(shietext);
 		weapsprite[j].mouseover = function(){
-			setInfo(players[_j].weapon);
+			setInfo(game.players[_j].weapon);
 		}
 		shiesprite[j].mouseover = function(){
-			setInfo(players[_j].shield);
+			setInfo(game.players[_j].shield);
 		}
 		weapsprite[j].click = function(){
-			var weap = players[_j].weapon;
+			var weap = game.players[_j].weapon;
 			if (!weap)return
 			if (targetingMode && targetingMode(weap)){
 				targetingMode = undefined;
@@ -504,10 +504,10 @@ for (var j=0; j<2; j++){
 			}
 		}
 		shiesprite[j].click = function(){
-			if (!players[_j].shield)return
-			if (targetingMode && targetingMode(players[_j].shield)){
+			if (!game.players[_j].shield)return
+			if (targetingMode && targetingMode(game.players[_j].shield)){
 				targetingMode = undefined;
-				targetingModeCb(players[_j].shield);
+				targetingModeCb(game.players[_j].shield);
 			}
 		}
 		if (j){
@@ -547,12 +547,12 @@ for (var j=0; j<2; j++){
 		}
 		hptext[j].interactive = true;
 		hptext[j].mouseover = function(){
-			setInfo(players[_j]);
+			setInfo(game.players[_j]);
 		}
 		hptext[j].click = function(){
-			if (targetingMode && targetingMode(players[_j])){
+			if (targetingMode && targetingMode(game.players[_j])){
 				targetingMode = undefined;
-				targetingModeCb(players[_j]);
+				targetingModeCb(game.players[_j]);
 			}
 		}
 	})(j);
@@ -608,7 +608,7 @@ function animate() {
 		}
 		cloakgfx.visible = game.player2.isCloaked();
 		fgfx.clear();
-		if (turn == game.player1 && !game.player1.silence){
+		if (game.turn == game.player1 && !game.player1.silence){
 			for(var i=0; i<game.player1.hand.length; i++){
 				var card = game.player1.hand[i];
 				if (game.player1.canspend(card.costele, card.cost)){
@@ -622,43 +622,43 @@ function animate() {
 		fgfx.lineStyle(2, 0xffffff);
 		var j=game.turn == game.player1?0:1;
 		for(var i=0; i<23; i++){
-			var cr=players[j].creatures[i];
+			var cr=game.players[j].creatures[i];
 			if (cr && cr.canactive()){
 				fgfx.drawRect(creasprite[j][i].position.x-60, creasprite[j][i].position.y-15, 120, 30);
 			}
 		}
 		for(var i=0; i<16; i++){
-			var pr=players[j].permanents[i];
+			var pr=game.players[j].permanents[i];
 			if (pr && !(pr instanceof Pillar) && pr.active && pr.cast >= 0 && !pr.usedactive){
 				fgfx.drawRect(permsprite[j][i].position.x-40, permsprite[j][i].position.y-15, 80, 30);
 			}
 		}
-		var wp = players[j].weapon, sh = players[j].shield;
+		var wp = game.players[j].weapon, sh = game.players[j].shield;
 		if (wp && wp.active && wp.cast >= 0 && !wp.usedactive){
 			fgfx.drawRect(weapsprite[j].position.x-60, weapsprite[j].position.y-15, 120, 30);
 		}
 		fgfx.lineStyle(0, 0, 0);
 		fgfx.endFill();
 		for(var j=0; j<2; j++){
-			if (players[j].sosa){
+			if (game.players[j].sosa){
 				fgfx.beginFill(elecols[Death], .5);
 				fgfx.drawRect(hptext[j].position.x-30, hptext[j].position.y-10, 60, 20);
 				fgfx.endFill();
 			}
-			if (players[j].silence){
+			if (game.players[j].silence){
 				fgfx.beginFill(elecols[Aether], .3);
 				fgfx.drawRect(handsprite[j][0].position.x-2, handsprite[j][0].position.y-2, 124, 164);
 				fgfx.endFill();
-			}else if (players[j].sanctuary){
+			}else if (game.players[j].sanctuary){
 				fgfx.beginFill(elecols[Light], .3);
 				fgfx.drawRect(handsprite[j][0].position.x-2, handsprite[j][0].position.y-2, 124, 164);
 				fgfx.endFill();
 			}
 			for(var i=0;i<8;i++){
-				maybeSetTexture(handsprite[j][i], players[j].hand[i]?getCardImage(j==0||game.player1.precognition?players[j].hand[i].code:"000"):null);
+				maybeSetTexture(handsprite[j][i], game.players[j].hand[i]?getCardImage(j==0||game.player1.precognition?game.players[j].hand[i].code:"000"):null);
 			}
 			for(var i=0; i<23; i++){
-				var cr = players[j].creatures[i];
+				var cr = game.players[j].creatures[i];
 				if (cr && !(j == 1 && cloakgfx.visible)){
 					creasprite[j][i].setTexture(getCreatureImage(cr.card.code));
 					creasprite[j][i].alpha = cr.immaterial?.7:1;
@@ -667,7 +667,7 @@ function animate() {
 					child.visible = true; // PIXI bug: children visibility corrupted by parent
 					maybeSetText(child, (cr.active?casttext(cr.cast, cr.castele) + " " + activename(cr.active) + " ":"") + cr.trueatk()+"|"+cr.truehp());
 					var pos = creasprite[j][i].position;
-					if (cr == players[j].gpull){
+					if (cr == game.players[j].gpull){
 						fgfx.beginFill(0xffaa00, .3);
 						fgfx.drawRect(pos.x-62, pos.y-17, 124, 34);
 						fgfx.endFill();
@@ -717,7 +717,7 @@ function animate() {
 				}else creasprite[j][i].visible = false;
 			}
 			for(var i=0; i<16; i++){
-				var pr = players[j].permanents[i];
+				var pr = game.players[j].permanents[i];
 				if (pr && !(j == 1 && cloakgfx.visible && pr.passive != "cloak")){
 					permsprite[j][i].setTexture(getPermanentImage(pr.card.code));
 					permsprite[j][i].alpha = pr.immaterial?.7:1;
@@ -729,7 +729,7 @@ function animate() {
 					}else maybeSetText(child, (pr.active?(pr.cast>=0?pr.castele+":"+pr.cast+" ":"") + activename(pr.active):"") + (pr.charges?" "+pr.charges:""));
 				}else permsprite[j][i].visible = false;
 			}
-			var wp = players[j].weapon;
+			var wp = game.players[j].weapon;
 			if (wp && !(j == 1 && cloakgfx.visible)){
 				var child = weapsprite[j].getChildAt(0);
 				maybeSetText(child, (wp.active?casttext(wp.cast, wp.castele) + " " + activename(wp.active) + " ":"") + wp.trueatk());
@@ -738,7 +738,7 @@ function animate() {
 				weapsprite[j].setTexture(getCreatureImage(wp.card.code));
 				weapsprite[j].visible =  true;
 			}else weapsprite[j].visible = false;
-			var sh = players[j].shield;
+			var sh = game.players[j].shield;
 			if (sh && !(j == 1 && cloakgfx.visible)){
 				var child = shiesprite[j].getChildAt(0);
 				maybeSetText(child, (sh.charges || "") + (sh.effect?activename(sh.effect) + " ":"") + (sh.truedr() || ""));
@@ -747,8 +747,8 @@ function animate() {
 				shiesprite[j].setTexture(getCreatureImage(sh.card.code));
 				shiesprite[j].visible = true;
 			}else shiesprite[j].visible = false;
-			marksprite[j].setTexture(getIcon(players[j].mark));
-			if (players[j].weapon && (players[j].weapon.frozen || players[j].weapon.delayed)){
+			marksprite[j].setTexture(getIcon(game.players[j].mark));
+			if (game.players[j].weapon && (game.players[j].weapon.frozen || game.players[j].weapon.delayed)){
 				var pos = weapsprite[j].position;
 				if (cr.frozen){
 					fgfx.beginFill(0x0000ff, .3);
@@ -762,14 +762,14 @@ function animate() {
 				}
 			}
 			for(var i=1; i<13; i++){
-				maybeSetText(quantatext[j].getChildAt(i-1), players[j].quanta[i].toString());
+				maybeSetText(quantatext[j].getChildAt(i-1), game.players[j].quanta[i].toString());
 			}
 			for(var i=1; i<13; i++){
 				quantatext[j].getChildAt(i+12-1).setTexture(getIcon(i));
 			}
-			maybeSetText(hptext[j], players[j].hp + "/" + players[j].maxhp);
-			maybeSetText(poisontext[j], players[j].poison + (players[j].neuro?"psn!":"psn"));
-			maybeSetText(decktext[j], players[j].deck.length + "cards");
+			maybeSetText(hptext[j], game.players[j].hp + "/" + game.players[j].maxhp);
+			maybeSetText(poisontext[j], game.players[j].poison + (game.players[j].neuro?"psn!":"psn"));
+			maybeSetText(decktext[j], game.players[j].deck.length + "cards");
 		}
 	}
 	for(var i=anims.length-1; i>=0; i--){

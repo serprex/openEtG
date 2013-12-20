@@ -242,6 +242,7 @@ firebolt:function(t){
 flyingweapon:function(t){
 	if (t.weapon){
 		var cr = new Creature(t.weapon.card, t.owner);
+		cr.copypassives(t.weapon.passives);
 		for (var key in t.weapon){
 			if (t.weapon[key] === true)cr[key] = true;
 		}
@@ -363,7 +364,7 @@ integrity:function(t){
 		["infect", "scavenger", "poison", "poison", "aflatoxin", "poison2"],
 		["devour", "devour", "devour", "devour", "devour", "blackhole"],
 		["burrow", "stoneform", "guard", "guard", "bblood", "bblood"],
-		["growth", "adrenaline", "adrenaline", "adrenaline", "adrenaline", "adrenaline", "mitosis"],
+		["growth", "adrenaline", "adrenaline", "adrenaline", "adrenaline", "mitosis"],
 		["ablaze", "ablaze", "fiery", "destroy", "destroy", "rage"],
 		["steam", "steam", "freeze", "freeze", "nymph", "nymph"],
 		["heal", "endow", "endow", "luciferin", "luciferin", "luciferin"],
