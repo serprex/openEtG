@@ -201,7 +201,7 @@ Player.prototype.spend = function(qtype, x) {
 Player.prototype.endturn = function(discard) {
 	if (discard != undefined){
 		var card=this.hand[discard];
-		if (card.passives && ~card.passives.indexOf("obsession")){
+		if (card.passives && card.passives.obsession){
 			this.dmg(card.upped?13:10);
 		}
 		this.hand.splice(discard, 1);
@@ -528,8 +528,8 @@ Thing.prototype.isMaterialInstance = function(type) {
 Thing.prototype.copypassives = function(passives){
 	if (passives){
 		this.passives = {};
-		for(var i=0; i<passives.length; i++){
-			this.passives[passives[i]] = true;
+		for(var key in passives){
+			this.passives[key] = true;
 		}
 	}
 }

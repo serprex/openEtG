@@ -11,7 +11,11 @@ function Card(type, info){
 	this.active = Actives[info.Active];
 	this.status = info.Status;
 	if (info.Passive != undefined){
-		this.passives = info.Passive.split("+");
+		this.passives = {};
+		var passives = info.Passive.split("+");
+		for(var i=0; i<passives.length; i++){
+			this.passives[passives[i]] = true;
+		}
 	}
 }
 function Player(){

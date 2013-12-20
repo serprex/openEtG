@@ -113,6 +113,15 @@ loadcards(function(cards, targeting) {
 		ok(player1.hp == 90, "Damage");
 		ok(player1.hand.length == 7, "Discarded");
 	});
+	test("Parallel", function() {
+		initTest();
+		var damsel = new Creature(Cards.Damselfly, player1);
+		player1.creatures[0] = damsel;
+		Actives.parallel.call(player1, damsel);
+		ok(player1.creatures[1] && player1.creatures[1].card == Cards.Damselfly, "PU'd");
+		Actives.web.call(player1, damsel);
+		ok(!damsel.passives.airborne && player1.creatures[1].passives.airborne, "Web'd");
+	});
 	test("Reflect", function() {
 		initTest();
 		Actives.lightning.call(player1, player2);
