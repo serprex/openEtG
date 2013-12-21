@@ -852,6 +852,7 @@ function animate() {
 			editoreleicons[i].setTexture(getIcon(i));
 		}
 		for (var i=0; i<editordeck.length; i++){
+			editordecksprites[i].visible = true;
 			editordecksprites[i].setTexture(getCardImage(editordeck[i]));
 		}
 		for (;i<60; i++){
