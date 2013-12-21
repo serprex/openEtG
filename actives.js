@@ -754,10 +754,14 @@ vampire:function(t, dmg){
 	this.owner.dmg(-dmg);
 },
 void:function(t){
-	this.owner.foe.maxhp = Math.max(this.owner.foe.maxhp-(this.owner.mark == Darkness?3:2), 1);
+	this.owner.foe.maxhp = Math.max(this.owner.foe.maxhp-3, 1);
 	if (this.owner.foe.hp > this.owner.foe.maxhp){
 		this.owner.foe.hp = this.owner.foe.maxhp;
 	}
+},
+watergift:function(t){
+	this.spend(Water, -3);
+	this.spend(this.mark, -3);
 },
 web:function(t){
 	t.passives.airborne = false;

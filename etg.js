@@ -799,7 +799,7 @@ var TargetFilters = {
 		return c.owner != t.owner && t.isMaterialInstance(Permanent);
 	},
 	butterfly:function(c, t){
-		return t.isMaterialInstance(Creature) && t.trueatk()<3;
+		return t.trueatk && t.trueatk()<3;
 	},
 	devour:function(c, t){
 		return t.isMaterialInstance(Creature) && t.truehp()<c.truehp();
