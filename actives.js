@@ -121,11 +121,11 @@ deja:function(t){
 	Actives.parallel.call(this, this);
 },
 destroy:function(t, dontsalvage){
-	if (t.passives.stackable && t.charges>1){
-		t.charges--;
-	}else{
-		t.die();
-	}
+	if (t.passives.stackable){
+		if(--t.charges<=0){
+			t.die();
+		}
+	}else t.die();
 	if (!dontsalvage){
 		salvageScan(this.owner, t);
 	}
@@ -698,7 +698,6 @@ sskin:function(t){
 	this.buffhp(this.quanta[Earth]);
 },
 steal:function(t){
-	//TODO use stackable
 	if (t instanceof Pillar){
 		Actives.destroy.call(this, t, true);
 		if (t.card.upped){
@@ -711,13 +710,30 @@ steal:function(t){
 			}
 		}
 		place(this.owner.permanents, new Pillar(t.card, this.owner));
-	}else if (t.card.isOf(Cards.BoneWall)){
+	}else if (t.passives.stackable){
 		Actives.destroy.call(this, t, true);
-		if (this.owner.shield && this.owner.shield.card.isOf(Cards.BoneWall)){
-			this.owner.shield.charges++;
+		if (t instanceof Shield){
+			if (this.owner.shield && this.owner.shield.card == t.card){
+				this.owner.shield.charges++;
+			}else{
+				this.owner.shield = new Shield(t.card, this.owner);
+				this.owner.shield.charges = 1;
+			}
+		}else if (t instanceof Weapon){
+			if (this.owner.weapon && this.owner.weapon.card == t.card){
+				this.owner.shield.charges++;
+			}else{
+				this.owner.weapon = new Weapon(t.card, this.owner);
+				this.owner.weapon.charges = 1;
+			}
 		}else{
-			this.owner.shield = new Shield(Cards.BoneWall.asUpped(t.card.upped), this.owner);
-			this.owner.shield.charges = 1;
+			for(var i=0; i<16; i++){
+				if (this.owner.permanents[i] && this.owner.permanents[i].card == t.card){
+					this.owner.permanents[i].charges++;
+					return;
+				}
+			}
+			place(this.owner.permanents, new Permanent(t.card, this.owner));
 		}
 	}else{
 		t.die();

@@ -532,8 +532,8 @@ Thing.prototype.isMaterialInstance = function(type) {
 	return this instanceof type && !this.immaterial && !this.burrowed;
 }
 Thing.prototype.copypassives = function(passives){
+	this.passives = {};
 	if (passives){
-		this.passives = {};
 		for(var key in passives){
 			this.passives[key] = true;
 		}

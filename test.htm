@@ -131,6 +131,19 @@ loadcards(function(cards, targeting) {
 		Actives.lightning.call(player1, player2);
 		ok(player1.hp == 90 && player2.hp == 95, "Unreflected reflected spell");
 	});
+	test("Steal", function() {
+		initTest();
+		(player1.shield = new Shield(Cards.BoneWall, player1)).charges=3;
+		Actives.steal.call(player2, player1.shield);
+		ok(player1.shield && player1.shield.charges == 2, "Wish bones");
+		ok(player2.shield && player2.shield.charges == 1, "stole 1");
+		Actives.steal.call(player2, player1.shield);
+		ok(player1.shield && player1.shield.charges == 1, "Lone bone");
+		ok(player2.shield && player2.shield.charges == 2, "stole 2");
+		Actives.steal.call(player2, player1.shield);
+		ok(!player1.shield, "This town is all in hell");
+		ok(player2.shield && player2.shield.charges == 3, "stole 3");
+	});
 	test("Voodoo", function() {
 		initTest();
 		var voodoo = new Creature(Cards.VoodooDoll, player1);
