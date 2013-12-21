@@ -286,6 +286,7 @@ Player.prototype.endturn = function(discard) {
 	}
 	this.nova = 0;
 	this.foe.drawcard();
+	this.game.turn = this.foe;
 }
 Player.prototype.drawcard = function() {
 	if (this.hand.length<8){

@@ -231,7 +231,6 @@ function initGame(data, ai){
 		game.player2.ai = ai;
 		if(game.turn == game.player2){
 			game.player2.ai();
-			game.turn = game.player1;
 		}
 	}
 	endturn.setText("End Turn");
@@ -308,6 +307,14 @@ beditor.click = function() {
 		}
 		bsave.interactive = true;
 		editorui.addChild(bsave);
+		var bclear = new PIXI.Text("Clear", {font: "16px Arial bold"});
+		bclear.position.x = 8;
+		bclear.position.y = 28;
+		bclear.click = function(){
+			editordeck.length = 0;
+		}
+		bclear.interactive = true;
+		editorui.addChild(bclear);
 		editorcolumns = [];
 		editordecksprites = [];
 		editordeck = getDeck();
@@ -398,7 +405,7 @@ endturn.click = function(e, discard) {
 			foeplays.length = 0;
 			if(game.player2.ai){
 				game.player2.ai();
-			}else game.turn = player2;
+			}
 		}
 	}
 }
@@ -645,7 +652,6 @@ var socket = io.connect("http://"+location.hostname+':13602');
 socket.on("pvpgive", initGame);
 socket.on("endturn", function(data) {
 	game.player2.endturn(data);
-	game.turn = player1;
 });
 socket.on("summon", function(bits) {
 	console.log("summon call: " + bits);

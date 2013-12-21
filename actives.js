@@ -144,6 +144,12 @@ devour:function(t){
 die:function(t){
 	this.die();
 },
+disarm:function(t){
+	if (t.weapon && t.hand.length < 8){
+		t.hand.push(t.weapon.card);
+		t.weapon = undefined;
+	}
+},
 disfield:function(t){
 	if (!this.owner.sanctuary){
 		if (!this.owner.spend(Other, t.trueatk())){
@@ -501,6 +507,11 @@ neuro:function(t){
 	t.poison += 1
 	t.neuro = true
 },
+neuroify:function(t){
+	if (this.foe.poison>0){
+		this.foe.neuro = true;
+	}
+},
 nightmare:function(t){
 	if (!this.owner.foe.sanctuary){
 		this.owner.dmg(-this.owner.foe.dmg(16-this.owner.foe.hand.length*2));
@@ -601,9 +612,12 @@ precognition:function(t){
 },
 purify:function(t){
 	t.poison = Math.min(t.poison-2,-2);
-	t.neuro = false;
-	t.aflatoxin = false;
-	t.sosa = 0;
+	if (t instanceof Player){
+		t.neuro = false;
+		t.sosa = 0;
+	}else{
+		t.aflatoxin = false;
+	}
 },
 queen:function(t){
 	new Creature(Cards.Firefly.asUpped(this.card.upped), this.owner).place();
