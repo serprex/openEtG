@@ -10,7 +10,14 @@ function Card(type, info){
 	this.readCost("cast", info.Cast||"0", this.element);
 	this.active = Actives[info.Active];
 	this.effect = Actives[info.Effect];
-	this.status = info.Status;
+	if (info.Status){
+		this.status = {};
+		var statuses = info.Status.split("+");
+		for(var i=0; i<statuses.length; i++){
+			var status = statuses[i].split("=");
+			this.status[status[0]] = status.length==1 || parseInt(status[1]);
+		}
+	}
 	if (info.Passive){
 		this.passives = {};
 		var passives = info.Passive.split("+");
@@ -56,11 +63,20 @@ function Thing(card, owner){
 	this.owner = owner;
 	this.card = card;
 	if (card.status){
-		this[card.status] = true;
+		for(var key in card.status){
+			this[key] = card.status[key];
+		}
 	}
 	this.copypassives(card.passives);
 }
 function Creature(card, owner){
+	this.adrenaline = 0;
+	this.delayed = 0;
+	this.dive = 0;
+	this.frozen = 0;
+	this.poison = 0;
+	this.steamatk = 0;
+	this.usedactive = true;
 	if (card == Cards.ShardGolem){
 		this.card = card;
 		this.owner = owner;
@@ -74,38 +90,31 @@ function Creature(card, owner){
 		this.momentum = golem.momentum;
 		this.immaterial = golem.immaterial;
 	}else this.transform(card, owner);
-	this.adrenaline = 0;
-	this.delayed = 0;
-	this.dive = 0;
-	this.frozen = 0;
-	this.poison = 0;
-	this.steamatk = 0;
-	this.usedactive = true;
 }
 function Permanent(card, owner){
 	if (!card){
 		return;
 	}
-	Thing.apply(this, arguments);
+	this.charges = 0;
 	this.cast = card.cast;
 	this.castele = card.castele;
 	this.active = card.active;
-	this.charges = 0;
 	this.usedactive = true;
+	Thing.apply(this, arguments);
 }
 function Weapon(card, owner){
-	Permanent.apply(this, arguments);
 	this.frozen = 0;
 	this.delayed = 0;
-	this.atk = card.attack;
 	this.dive = 0;
 	this.steamatk = 0;
 	this.adrenaline = 0;
+	this.atk = card.attack;
+	Permanent.apply(this, arguments);
 }
 function Shield(card, owner){
-	Permanent.apply(this, arguments)
 	this.dr = card.health
 	this.effect = card.effect;
+	Permanent.apply(this, arguments)
 }
 function Pillar(card, owner){
 	this.owner = owner;

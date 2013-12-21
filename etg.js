@@ -367,7 +367,38 @@ Shield.prototype.info = function(){
 Pillar.prototype.info = function(){
 	return this.charges + " " + (this.pendstate?this.owner.mark:this.card.element) + (this.immaterial?" immaterial":"");
 }
-Pillar.prototype.passives = {stackable: true}
+Pillar.prototype.passives = {stackable: true, additive: true}
+Creature.prototype.place = function(){
+	place(this.owner.creatures, this);
+}
+Permanent.prototype.place = function(){
+	console.log(this.passives.additive);
+	if (this.passives.additive){
+		for(var i=0; i<16; i++){
+			if (this.owner.permanents[i] && this.owner.permanents[i].card == this.card){
+				this.owner.permanents[i].charges += this.charges;
+				return;
+			}
+		}
+	}
+	place(this.owner.permanents, this);
+}
+Weapon.prototype.place = function(){
+	this.owner.weapon = this;
+}
+Shield.prototype.place = function(){
+	if (this.passives.additive && this.owner.shield && this.owner.shield.card == this.card){
+		this.owner.shield.charges += this.charges;
+		return;
+	}
+	this.owner.shield = this;
+}
+Pillar.prototype.place = function(){
+	if (this.card.upped){
+		this.owner.spend(this.card.element, this.card.element>0?-1:-3);
+	}
+	Permanent.prototype.place.call(this);
+}
 Player.prototype.delay = function(x) {
 	if (this.weapon)this.weapon.delay(x);
 }
@@ -535,7 +566,7 @@ Thing.prototype.copypassives = function(passives){
 	this.passives = {};
 	if (passives){
 		for(var key in passives){
-			this.passives[key] = true;
+			this.passives[key] = passives[key];
 		}
 	}
 }
@@ -657,35 +688,13 @@ Player.prototype.summon = function(index, target){
 	}
 	if (card.type <= PermanentEnum){
 		if (card.type == PillarEnum){
-			if (card.upped){
-				this.spend(card.element, card.element>0?-1:-3);
-			}
-			for (var i=0; i<16; i++){
-				if (this.permanents[i] && this.permanents[i].card == card){
-					this.permanents[i].charges += 1;
-					return this.permanents[i];
-				}
-			}
-			place(this.permanents, new Pillar(card, this));
+			new Pillar(card, this).place();
 		}else if (card.type == WeaponEnum){
-			this.weapon = new Weapon(card, this);
+			new Weapon(card, this).place();
 		}else if (card.type == ShieldEnum){
-			this.shield = new Shield(card, this);
-			if (card.isOf(Cards.DimensionalShield)){
-				this.shield.charges = 3;
-			}else if (card.isOf(Cards.Wings)){
-				this.shield.charges = 5;
-			}else if (card.isOf(Cards.BoneWall)){
-				this.shield.charges = 7;
-			}
+			new Shield(card, this).place();
 		}else{
-			var p = new Permanent(card, this);
-			if (card.isOf(Cards.Sundial)){
-				p.charges = 2;
-			}else if(card.isOf(Cards.Cloak)){
-				p.charges = 3;
-			}
-			place(this.permanents, p);
+			new Permanent(card, this).place();
 		}
 	}else if (card.type == SpellEnum){
 		if (!target || !target.evade(this)){
@@ -693,7 +702,7 @@ Player.prototype.summon = function(index, target){
 			card.active.call(this, target)
 		}
 	}else if (card.type == CreatureEnum) {
-		place(this.creatures, new Creature(card, this));
+		new Creature(card, this).place();
 	}else console.log("Unknown card type: "+card.type);
 	this.spend(card.costele, card.cost);
 }

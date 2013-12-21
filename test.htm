@@ -30,14 +30,14 @@ loadcards(function(cards, targeting) {
 		(player1.creatures[2] = new Creature(Cards.RubyDragon, player1)).adrenaline = 1;
 		player2.quanta[Life]=3;
 		player1.endturn();
-		ok(player2.hp == 68, "dmg");
-		ok(player1.quanta[Darkness] == 2, "Absorbed");
-		ok(player2.quanta[Life] == 1, "Lone Life");
+		equal(player2.hp, 68, "dmg");
+		equal(player1.quanta[Darkness], 2, "Absorbed");
+		equal(player2.quanta[Life], 1, "Lone Life");
 	});
 	test("Deckout", function() {
 		initTest();
 		player1.endturn();
-		ok(game.winner == player1);
+		equal(game.winner, player1);
 	});
 	test("Destroy", function() {
 		initTest();
@@ -46,25 +46,25 @@ loadcards(function(cards, targeting) {
 		while(player1.hand.length){
 			player1.summon(0);
 		}
-		ok(player1.permanents[0].charges == 2, "2 charges");
+		equal(player1.permanents[0].charges, 2, "2 charges");
 		Actives.destroy.call(player2, player1.permanents[0]);
-		ok(player1.permanents[0].charges == 1, "1 charge");
+		equal(player1.permanents[0].charges, 1, "1 charge");
 		Actives.destroy.call(player2, player1.permanents[0]);
 		ok(!player1.permanents[0], "poof");
-		ok(player1.permanents[1].card == Cards.SoulCatcher, "SoulCatcher");
+		equal(player1.permanents[1].card, Cards.SoulCatcher, "SoulCatcher");
 		Actives.destroy.call(player2, player1.permanents[1]);
 		ok(!player1.permanents[1], "SoulCatcher gone");
-		ok(player1.shield.card == Cards.Shield, "Shield");
+		equal(player1.shield.card, Cards.Shield, "Shield");
 		Actives.destroy.call(player2, player1.shield);
 		ok(!player1.shield, "Shield gone");
-		ok(player1.weapon.card == Cards.Dagger, "Dagger");
+		equal(player1.weapon.card, Cards.Dagger, "Dagger");
 		Actives.destroy.call(player2, player1.weapon);
 		ok(!player1.weapon, "Dagger gone");
 		player1.hand = [Cards.BoneWall];
 		player1.summon(0);
-		ok(player1.shield.charges == 7, "7 bones");
+		equal(player1.shield.charges, 7, "7 bones");
 		Actives.destroy.call(player2, player1.shield);
-		ok(player1.shield.charges == 6, "6 bones");
+		equal(player1.shield.charges, 6, "6 bones");
 		for(var i=0; i<6; i++){
 			Actives.destroy.call(player2, player1.shield);
 		}
@@ -76,8 +76,8 @@ loadcards(function(cards, targeting) {
 		player1.creatures[0] = devourer;
 		player2.quanta[Light] = 1;
 		player1.endturn();
-		ok(player2.quanta[Light] == 0, "Light");
-		ok(player1.quanta[Darkness] == 1, "Darkness");
+		equal(player2.quanta[Light], 0, "Light");
+		equal(player1.quanta[Darkness], 1, "Darkness");
 	});
 	test("Earthquake", function() {
 		initTest();
@@ -85,12 +85,12 @@ loadcards(function(cards, targeting) {
 		for(var i=0; i<5; i++){
 			player1.summon(0);
 		}
-		ok(player1.hand.length == 3, "handlength");
+		equal(player1.hand.length, 3, "handlength");
 		var pillars = player1.permanents[0];
 		ok(pillars instanceof Pillar, "ispillar");
-		ok(pillars.charges == 5, "5 charges");
+		equal(pillars.charges, 5, "5 charges");
 		Actives.earthquake.call(player2, pillars);
-		ok(pillars.charges == 2, "2 charges");
+		equal(pillars.charges, 2, "2 charges");
 		Actives.earthquake.call(player2, pillars);
 		ok(!player1.permanents[0], "poof");
 	});
@@ -101,22 +101,22 @@ loadcards(function(cards, targeting) {
 			player1.creatures[i] = new Creature(Cards.RayofLight, player1);
 		}
 		player1.endturn();
-		ok(player1.shield.truedr() == 3, "DR");
-		ok(player1.quanta[Light] == 3, "RoL");
+		equal(player1.shield.truedr(), 3, "DR");
+		equal(player1.quanta[Light], 3, "RoL");
 	});
 	test("Obsession", function() {
 		initTest();
 		player1.hand = [Cards.GhostofthePast, Cards.GhostofthePast, Cards.GhostofthePast, Cards.GhostofthePast, Cards.GhostofthePast, Cards.GhostofthePast, Cards.GhostofthePast, Cards.GhostofthePast];
 		player1.endturn(0);
-		ok(player1.hp == 90, "Damage");
-		ok(player1.hand.length == 7, "Discarded");
+		equal(player1.hp, 90, "Damage");
+		equal(player1.hand.length, 7, "Discarded");
 	});
 	test("Parallel", function() {
 		initTest();
 		var damsel = new Creature(Cards.Damselfly, player1);
 		player1.creatures[0] = damsel;
 		Actives.parallel.call(player1, damsel);
-		ok(player1.creatures[1] && player1.creatures[1].card == Cards.Damselfly, "PU'd");
+		equal(player1.creatures[1].card, Cards.Damselfly, "PU'd");
 		Actives.web.call(player1, damsel);
 		ok(!damsel.passives.airborne && player1.creatures[1].passives.airborne, "Web'd");
 	});
@@ -150,13 +150,13 @@ loadcards(function(cards, targeting) {
 		player1.creatures[0] = voodoo;
 		Actives.lightning.call(player1, voodoo);
 		Actives.infect.call(player1, voodoo);
-		ok(voodoo.hp == 11, "dmg");
-		ok(player2.hp == 95, "foe dmg");
-		ok(voodoo.poison == 1, "psn");
-		ok(player2.poison == 1, "foe psn");
+		equal(voodoo.hp, 11, "dmg");
+		equal(player2.hp, 95, "foe dmg");
+		equal(voodoo.poison, 1, "psn");
+		equal(player2.poison, 1, "foe psn");
 		Actives.holylight.call(player1, voodoo);
-		ok(voodoo.hp == 1, "holy dmg");
-		ok(player2.hp == 85, "foe holy dmg");
+		equal(voodoo.hp, 1, "holy dmg");
+		equal(player2.hp, 85, "foe holy dmg");
 	});
 });
 </script>
