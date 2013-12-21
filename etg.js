@@ -139,6 +139,7 @@ Card.prototype.info = function(){
 	if (this.passives && this.passives.length)info += " " + this.passives.join(" ");
 	return info;
 }
+Card.prototype.toString = function(){ return this.code; }
 Card.prototype.asUpped = function(upped){
 	return this.upped == upped ? this : Cards[(this.upped?parseInt(this.code, 32)-2000:parseInt(this.code, 32)+2000).toString(32)];
 }
@@ -640,10 +641,13 @@ Weapon.prototype.attack = Creature.prototype.attack = function(stasis, freedomCh
 	}
 }
 Player.prototype.cansummon = function(index, target){
-	return
+	if (this.silence)return false;
+	var card = this.hand[index];
+	return card && this.canspend(card.costele, card.cost);
 }
 Player.prototype.summon = function(index, target){
-	if (this.silence){
+	if (!this.cansummon(index, target)){
+		console.log((this==this.game.player1?"1":"2") + " cannot summon " + index);
 		return;
 	}
 	var card = this.hand[index];
@@ -711,7 +715,7 @@ function calcEclipse(game){
 	}
 	return bonus;
 }
-function randomcard(upped, filter){
+function filtercards(upped, filter){
 	var keys = [];
 	for(var key in Cards) {
 		var card = Cards[key];
@@ -720,6 +724,10 @@ function randomcard(upped, filter){
 		}
 	}
 	keys.sort();
+	return keys;
+}
+function randomcard(upped, filter){
+	var keys = filtercards(upped, filter);
 	return Cards[keys[Math.floor(rng.real() * keys.length)]];
 }
 function activename(active){
