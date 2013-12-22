@@ -430,6 +430,18 @@ integrity:function(c,t){
 	if (shardTally[Darkness]>0){
 		passives.voodoo = true;
 	}
+	if (shardTally[Time]>0){
+		passives.swarm = true;
+	}
+	if (shardTally[Life]>0){
+		passives.poisonous = true;
+	}
+	if (shardTally[Death]>0){
+		passives.undead = true;
+	}
+	if (shardTally[Gravity]>0){
+		passives.salvage = true;
+	}
 	c.owner.shardgolem = {
 		atk: atk + bonus,
 		hp: hp + bonus,
@@ -721,6 +733,9 @@ soulcatch:function(c,t){
 },
 sskin:function(c,t){
 	c.buffhp(c.quanta[Earth]);
+},
+staff:function(c,t){
+	return c.owner.mark == Life||c.owner.mark == Water?1:0;
 },
 steal:function(c,t){
 	if (t.passives.stackable){
