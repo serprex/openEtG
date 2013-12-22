@@ -841,6 +841,9 @@ var TargetFilters = {
 	airbornecrea:function(c, t){
 		return t.isMaterialInstance(Creature) && t.passives.airborne;
 	},
+	groundcrea:function(c, t){
+		return t.isMaterialInstance(Creature) && !t.passives.airborne;
+	},
 	wisdom:function(c, t){
 		return t instanceof Creature && !t.burrowed;
 	}

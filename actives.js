@@ -717,6 +717,13 @@ serendipity:function(c,t){
 silence:function(c,t){
 	c.owner.foe.silence = !c.owner.foe.sanctuary;
 },
+sinkhole:function(c,t){
+	t.burrowed = true;
+	t.active.cast = Actives.unburrow;
+	t.cast = c.card.upped?1:0;
+	t.castele = Earth;
+	t.usedactive = true;
+},
 siphon:function(c,t){
 	if (c.owner.foe.spend(Other, 1)){
 		c.owner.spend(Darkness, -1)
