@@ -93,6 +93,7 @@ function loadcards(cb){
 			var csv = this.responseText.split("\n");
 			for (var i=0; i<csv.length; i++){
 				var keypair = csv[i].split(",");
+				// TODO function as indice is bad
 				Targeting[Actives[keypair[0]]] = TargetFilters[keypair[1]];
 			}
 			maybeCallback();
@@ -117,26 +118,41 @@ function place(array, item){
 		}
 	}
 }
-Card.prototype.readCost = function(attr, cost, e){
-	if (~cost.indexOf("+")){
-		var c=cost.split("+");
-		this[attr]=parseInt(c[0]);
-		this[attr+"ele"]=parseInt(c[1]);
-	}else{
-		this[attr]=parseInt(cost);
-		this[attr+"ele"]=e;
+function clone(obj){
+	var result = {};
+	if (obj){
+		for(var key in obj){
+			result[key] = obj[key];
+		}
 	}
+	return result;
+}
+Card.prototype.readCost = function(attr, cost){
+	var c=cost.split(":");
+	c = [parseInt(c[0]), (c.length==1?this.element:parseInt(c[1]))]
+	if (isNaN(c[0]))return;
+	this[attr]=c[0];
+	this[attr+"ele"]=c[1];
+	return true;
 }
 Card.prototype.info = function(){
 	var typeString = ["Pillar", "Weapon", "Shield", "Permanent", "Spell", "Creature"];
+	if (this.type == PillarEnum){
+		return this.element + " " + activename(this.active);
+	}
 	var info = typeString[this.type] + " " + this.cost+":"+this.costele;
+	if (this.type == SpellEnum){
+		return info + " " + activename(this.active);
+	}
 	if (this.attack && this.health)info += " " + this.attack+"|"+this.health;
 	else if (this.type == ShieldEnum)info += " " + this.health + "dr";
-	if (this.active)info += " " + casttext(this.cast, this.castele) + " " + activename(this.active);
+	info += Thing.prototype.activetext.call(this); // Hack
 	for(var key in this){
 		if (this[key] === true)info += " " + key;
 	}
-	if (this.passives && this.passives.length)info += " " + this.passives.join(" ");
+	for(var key in this.passives){
+		if (this.passives[key] === true)info += " " + key;
+	}
 	return info;
 }
 Card.prototype.toString = function(){ return this.code; }
@@ -224,8 +240,10 @@ Player.prototype.endturn = function(discard) {
 	for(var i=0; i<16; i++){
 		var p;
 		if ((p=this.permanents[i])){
-			if (p instanceof Pillar || p.cast == -1){
-				p.active();
+			if (p instanceof Pillar){
+				p.active(p);
+			}else if(p.active.auto){
+				p.active.auto(p);
 			}
 			p.usedactive = false;
 			if (p.cloak || p.stasis){
@@ -277,7 +295,7 @@ Player.prototype.endturn = function(discard) {
 			cr.salvaged = undefined;
 		}
 	}
-	if (this.shield && this.shield.active && this.shield.cast == -1){
+	if (this.shield && this.shield.active.auto){
 		this.shield.active();
 	}
 	if (this.weapon)this.weapon.attack();
@@ -316,18 +334,18 @@ Player.prototype.drawhand = function() {
 Player.prototype.masscc = function(caster, func){
 	for(var i=0; i<16; i++){
 		if (this.permanents[i] && this.permanents[i].cloak){
-			Actives.destroy.call(this, this.permanents[i]);
+			Actives.destroy(this, this.permanents[i]);
 		}
 	}
 	for(var i=0; i<23; i++){
 		if (this.creatures[i] && !this.creatures[i].immaterial && !this.creatures[i].burrowed){
-			func.call(caster, this.creatures[i]);
+			func(caster, this.creatures[i]);
 		}
 	}
 }
 Creature.prototype.info = function(){
 	var info=this.trueatk()+"|"+this.truehp()+"/"+this.maxhp;
-	if (this.active)info+=" "+casttext(this.cast, this.castele)+" "+activename(this.active);
+	info += this.activetext();
 	if (this.frozen)info+=" "+this.frozen+"frozen";
 	if (this.delayed)info+=" "+this.delayed+"delay";
 	if (this.poison)info+=" "+this.poison+"psn";
@@ -340,7 +358,7 @@ Creature.prototype.info = function(){
 }
 Permanent.prototype.info = function(){
 	var info = this.charges?"x"+this.charges:"";
-	if (this.active)info+=" "+casttext(this.cast, this.castele)+" "+activename(this.active);
+	info += this.activetext();
 	for (var key in this){
 		if (this[key] === true && key != "usedactive")info += " " + key;
 	}
@@ -348,7 +366,7 @@ Permanent.prototype.info = function(){
 }
 Weapon.prototype.info = function(){
 	var info = this.trueatk().toString();
-	if (this.active)info+=" "+casttext(this.cast, this.castele)+" "+activename(this.active);
+	info += this.activetext();
 	if (this.frozen)info += " "+this.frozen+"frozen";
 	if (this.delayed)info += " "+this.delayed+"delay";
 	for (var key in this){
@@ -357,8 +375,7 @@ Weapon.prototype.info = function(){
 	return info;
 }
 Shield.prototype.info = function(){
-	var info = this.truedr() + "DR";
-	if (this.active)info+=" "+activename(this.active);
+	var info = this.truedr() + "DR" + this.activetext();
 	if (this.charges)info += " x"+this.charges;
 	for (var key in this){
 		if (this[key] === true && key != "usedactive")info += " " + key;
@@ -367,6 +384,13 @@ Shield.prototype.info = function(){
 }
 Pillar.prototype.info = function(){
 	return this.charges + " " + (this.pendstate?this.owner.mark:this.card.element) + (this.immaterial?" immaterial":"");
+}
+Thing.prototype.activetext = function(){
+	var info = "";
+	for(var key in this.active){
+		if (this.active[key])info += " " + (key == "cast"?casttext(this.cast, this.castele):key) + " " + activename(this.active[key]);
+	}
+	return info;
 }
 Pillar.prototype.passives = {stackable: true, additive: true}
 Creature.prototype.place = function(){
@@ -476,18 +500,18 @@ Creature.prototype.deatheffect = function(index) {
 		var pl = this.owner.game.players[i];
 		for(var j=0; j<23; j++){
 			var c = pl.creatures[j];
-			if (c && c.active && c.cast == -4){
-				c.active(this, index);
+			if (c && c.active.death){
+				c.active.death(this, index);
 			}
 		}
 		for(var j=0; j<16; j++){
 			var p = pl.permanents[j];
-			if (p && p.active && p.cast == -4){
-				p.active(this, index);
+			if (p && p.active.death){
+				p.active.death(this, index);
 			}
 		}
-		if (pl.shield && pl.shield.active == Actives.bones){
-			pl.shield.charges += 2
+		if (pl.shield && pl.shield.active.death == -4){
+			pl.shield.active.death(pl, index);
 		}
 	}
 }
@@ -503,7 +527,7 @@ Creature.prototype.transform = function(card, owner){
 	Thing.call(this, card, owner || this.owner);
 	this.maxhp = this.hp = card.health;
 	this.atk = card.attack;
-	this.active = card.active;
+	this.active = clone(card.active);
 	this.cast = card.cast;
 	this.castele = card.castele;
 }
@@ -521,7 +545,7 @@ Creature.prototype.evade = function(sender) {
 }
 Weapon.prototype.trueatk = Creature.prototype.trueatk = function(adrenaline){
 	var dmg = this.atk+this.steamatk+this.dive;
-	if (this.active && this.cast == -3)dmg += this.active();
+	if (this.active.buff)dmg += this.active.buff(this);
 	if (this.burrowed)dmg = Math.ceil(dmg/2);
 	if (this instanceof Creature && (this.card.element == Death || this.card.element == Darkness)){
 		dmg += calcEclipse(this.owner.game);
@@ -536,8 +560,8 @@ Weapon.prototype.trueatk = Creature.prototype.trueatk = function(adrenaline){
 }
 Shield.prototype.truedr = function(){
 	var dr = this.dr;
-	if (this.cast == -3){
-		dr += this.active();
+	if (this.active.buff){
+		dr += this.active.buff(this);
 	}
 	return dr;
 }
@@ -563,21 +587,13 @@ Shield.prototype.die = function() { this.owner.shield = undefined; }
 Thing.prototype.isMaterialInstance = function(type) {
 	return this instanceof type && !this.immaterial && !this.burrowed;
 }
-Thing.prototype.copypassives = function(passives){
-	this.passives = {};
-	if (passives){
-		for(var key in passives){
-			this.passives[key] = passives[key];
-		}
-	}
-}
 Thing.prototype.canactive = function() {
-	return this.owner.game.turn == this.owner && this.active && !this.usedactive && this.cast >= 0 && !this.delayed && !this.frozen && this.owner.canspend(this.castele, this.cast);
+	return this.owner.game.turn == this.owner && this.active.cast && !this.usedactive && !this.delayed && !this.frozen && this.owner.canspend(this.castele, this.cast);
 }
 Thing.prototype.useactive = function(t) {
 	this.usedactive = true;
 	if (!t || !t.evade(this.owner)){
-		this.active(t);
+		this.active.cast(this, t);
 	}
 	this.owner.spend(this.castele, this.cast);
 	if (this.passives.sacrifice){
@@ -591,32 +607,29 @@ Weapon.prototype.attack = Creature.prototype.attack = function(stasis, freedomCh
 	}
 	var target = this.owner.foe;
 	if (this.frozen == 0 && this.adrenaline<3){
-		if (this.cast == -1 && this.active){
-			this.active();
+		if (this.active.auto){
+			this.active.auto(this);
 		}
-		if (this.passives.devour && target.spend(Other, 1)){
-			this.owner.spend(Darkness, -1);
-		}else if (this.singularity){
+		if (this.singularity){
 			var r = rng.real();
 			if (r > .9){
 				this.adrenaline=1;
 			}else if (r > .8){
-				this.cast = -2;
-				this.active = Actives.vampire;
+				this.active.hit = Actives.vampire;
 			}else if (r > .7){
-				Actives.quint.call(this, this);
+				Actives.quint(this, this);
 			}else if (r > .6){
-				Actives.scramble.call(this, this.owner);
+				Actives.scramble(this, this.owner);
 			}else if (r > .5){
-				Actives.blackhole.call(this.owner.foe);
+				Actives.blackhole(this.owner.foe);
 			}else if (r > .4){
 				this.atk -= Math.floor(rng.real()*5);
 				this.buffhp(Math.floor(rng.real()*5));
 			}else if (r > .3){
-				Actives.nova.call(this.owner.foe);
+				Actives.nova(this.owner.foe);
 				this.owner.foe.nova = 0;
 			}else if (r > .2){
-				Actives.parallel.call(this, this);
+				Actives.parallel(this, this);
 			}else if (r > .1){
 				this.owner.weapon = new Weapon(Cards.Dagger, this.owner);
 			}
@@ -633,19 +646,19 @@ Weapon.prototype.attack = Creature.prototype.attack = function(stasis, freedomCh
 			target.spelldmg(trueatk);
 		}else if (momentum || trueatk < 0){
 			target.dmg(trueatk);
-			if (this.adrenaline < 3 && this.active && this.cast == -2){
-				this.active(target, trueatk);
+			if (this.adrenaline < 3 && this.active.hit){
+				this.active.hit(target, trueatk);
 			}
 		}else if (isCreature && target.gpull){
 			var dmg = target.gpull.dmg(trueatk);
-			if (this.adrenaline < 3 && this.active && this.cast == -2){
-				this.active(target, dmg);
+			if (this.adrenaline < 3 && this.active.hit){
+				this.active.hit(target, dmg);
 			}
-		}else if (!target.shield || (trueatk > (truedr = target.shield.truedr()) && (!target.shield.active || !target.shield.active(this)))){
+		}else if (!target.shield || (trueatk > (truedr = target.shield.truedr()) && (!target.shield.active.shield || !target.shield.active.shield(target.shield, this)))){
 			var dmg = trueatk - truedr;
 			target.dmg(dmg);
-			if (this.adrenaline < 3 && this.active && this.cast == -2){
-				this.active(target, dmg);
+			if (this.adrenaline < 3 && this.active.hit){
+				this.active.hit(target, dmg);
 			}
 		}
 	}
@@ -660,7 +673,7 @@ Weapon.prototype.attack = Creature.prototype.attack = function(stasis, freedomCh
 	}
 	this.usedactive = false;
 	this.dive = 0;
-	if (this.active == Actives.dshield){
+	if (this.active.cast == Actives.dshield){
 		this.immaterial = false;
 	}
 	if (~this.getIndex()){
@@ -700,7 +713,7 @@ Player.prototype.summon = function(index, target){
 	}else if (card.type == SpellEnum){
 		if (!target || !target.evade(this)){
 			this.card = card
-			card.active.call(this, target)
+			card.active(this, target)
 		}
 	}else if (card.type == CreatureEnum) {
 		new Creature(card, this).place();
@@ -748,17 +761,7 @@ function activename(active){
 	}
 }
 function casttext(cast, castele){
-	if (cast > 0){
-		return cast + ":" + castele;
-	}else if (cast == 0){
-		return "0";
-	}else if (cast == -1){
-		return "";
-	}else if (cast == -2){
-		return "onhit";
-	}else if (cast == -3){
-		return "buff";
-	}else console.log("Unknown cost: " + cast);
+	return cast == 0?"0":cast + ":" + castele;
 }
 function salvageScan(from, t){
 	if (t.owner.hand.length<8 && t.owner != from){

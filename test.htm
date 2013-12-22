@@ -47,26 +47,26 @@ loadcards(function(cards, targeting) {
 			player1.summon(0);
 		}
 		equal(player1.permanents[0].charges, 2, "2 charges");
-		Actives.destroy.call(player2, player1.permanents[0]);
+		Actives.destroy(player2, player1.permanents[0]);
 		equal(player1.permanents[0].charges, 1, "1 charge");
-		Actives.destroy.call(player2, player1.permanents[0]);
+		Actives.destroy(player2, player1.permanents[0]);
 		ok(!player1.permanents[0], "poof");
 		equal(player1.permanents[1].card, Cards.SoulCatcher, "SoulCatcher");
-		Actives.destroy.call(player2, player1.permanents[1]);
+		Actives.destroy(player2, player1.permanents[1]);
 		ok(!player1.permanents[1], "SoulCatcher gone");
 		equal(player1.shield.card, Cards.Shield, "Shield");
-		Actives.destroy.call(player2, player1.shield);
+		Actives.destroy(player2, player1.shield);
 		ok(!player1.shield, "Shield gone");
 		equal(player1.weapon.card, Cards.Dagger, "Dagger");
-		Actives.destroy.call(player2, player1.weapon);
+		Actives.destroy(player2, player1.weapon);
 		ok(!player1.weapon, "Dagger gone");
 		player1.hand = [Cards.BoneWall];
 		player1.summon(0);
 		equal(player1.shield.charges, 7, "7 bones");
-		Actives.destroy.call(player2, player1.shield);
+		Actives.destroy(player2, player1.shield);
 		equal(player1.shield.charges, 6, "6 bones");
 		for(var i=0; i<6; i++){
-			Actives.destroy.call(player2, player1.shield);
+			Actives.destroy(player2, player1.shield);
 		}
 		ok(!player1.shield, "This town is all in hell");
 	});
@@ -89,9 +89,9 @@ loadcards(function(cards, targeting) {
 		var pillars = player1.permanents[0];
 		ok(pillars instanceof Pillar, "ispillar");
 		equal(pillars.charges, 5, "5 charges");
-		Actives.earthquake.call(player2, pillars);
+		Actives.earthquake(player2, pillars);
 		equal(pillars.charges, 2, "2 charges");
-		Actives.earthquake.call(player2, pillars);
+		Actives.earthquake(player2, pillars);
 		ok(!player1.permanents[0], "poof");
 	});
 	test("Hope", function() {
@@ -115,32 +115,32 @@ loadcards(function(cards, targeting) {
 		initTest();
 		var damsel = new Creature(Cards.Damselfly, player1);
 		player1.creatures[0] = damsel;
-		Actives.parallel.call(player1, damsel);
+		Actives.parallel(player1, damsel);
 		equal(player1.creatures[1].card, Cards.Damselfly, "PU'd");
-		Actives.web.call(player1, damsel);
+		Actives.web(player1, damsel);
 		ok(!damsel.passives.airborne && player1.creatures[1].passives.airborne, "Web'd");
 	});
 	test("Reflect", function() {
 		initTest();
-		Actives.lightning.call(player1, player2);
+		Actives.lightning(player1, player2);
 		ok(player1.hp == 100 && player2.hp == 95, "Plain spell");
 		player2.shield = new Shield(Cards.MirrorShield, player2);
-		Actives.lightning.call(player1, player2);
+		Actives.lightning(player1, player2);
 		ok(player1.hp == 95 && player2.hp == 95, "Reflected spell");
 		player1.shield = new Shield(Cards.MirrorShield, player1);
-		Actives.lightning.call(player1, player2);
+		Actives.lightning(player1, player2);
 		ok(player1.hp == 90 && player2.hp == 95, "Unreflected reflected spell");
 	});
 	test("Steal", function() {
 		initTest();
 		(player1.shield = new Shield(Cards.BoneWall, player1)).charges=3;
-		Actives.steal.call(player2, player1.shield);
+		Actives.steal(player2, player1.shield);
 		ok(player1.shield && player1.shield.charges == 2, "Wish bones");
 		ok(player2.shield && player2.shield.charges == 1, "stole 1");
-		Actives.steal.call(player2, player1.shield);
+		Actives.steal(player2, player1.shield);
 		ok(player1.shield && player1.shield.charges == 1, "Lone bone");
 		ok(player2.shield && player2.shield.charges == 2, "stole 2");
-		Actives.steal.call(player2, player1.shield);
+		Actives.steal(player2, player1.shield);
 		ok(!player1.shield, "This town is all in hell");
 		ok(player2.shield && player2.shield.charges == 3, "stole 3");
 	});
@@ -148,13 +148,13 @@ loadcards(function(cards, targeting) {
 		initTest();
 		var voodoo = new Creature(Cards.VoodooDoll, player1);
 		player1.creatures[0] = voodoo;
-		Actives.lightning.call(player1, voodoo);
-		Actives.infect.call(player1, voodoo);
+		Actives.lightning(player1, voodoo);
+		Actives.infect(player1, voodoo);
 		equal(voodoo.hp, 11, "dmg");
 		equal(player2.hp, 95, "foe dmg");
 		equal(voodoo.poison, 1, "psn");
 		equal(player2.poison, 1, "foe psn");
-		Actives.holylight.call(player1, voodoo);
+		Actives.holylight(player1, voodoo);
 		equal(voodoo.hp, 1, "holy dmg");
 		equal(player2.hp, 85, "foe holy dmg");
 	});

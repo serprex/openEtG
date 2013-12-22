@@ -6,10 +6,26 @@ function Card(type, info){
 	this.upped = parseInt(this.code, 32)>6999;
 	this.attack = parseInt(info.Attack||"0");
 	this.health = parseInt(info.Health||"0");
-	this.readCost("cost", info.Cost||"0", this.element);
-	this.readCost("cast", info.Cast||"0", this.element);
-	this.active = Actives[info.Active];
-	this.effect = Actives[info.Effect];
+	this.readCost("cost", info.Cost||"0");
+	if (info.Active){
+		if (this.type == PillarEnum || this.type == SpellEnum){
+			this.active = Actives[info.Active];
+		}else{
+			this.active = {};
+			var actives = info.Active.split("+");
+			for(var i=0; i<actives.length; i++){
+				if (actives[i] == ""){
+					continue;
+				}
+				var active = actives[i].split("=");
+				if (active.length == 1){
+					this.active["auto"] = Actives[active[0]];
+				}else{
+					this.active[this.readCost("cast", active[0])?"cast":active[0]] = Actives[active[1]];
+				}
+			}
+		}
+	}
 	if (info.Status){
 		this.status = {};
 		var statuses = info.Status.split("+");
@@ -67,7 +83,7 @@ function Thing(card, owner){
 			this[key] = card.status[key];
 		}
 	}
-	this.copypassives(card.passives);
+	this.passives = clone(card.passives);
 }
 function Creature(card, owner){
 	this.adrenaline = 0;
@@ -83,9 +99,9 @@ function Creature(card, owner){
 		var golem = owner.shardgolem;
 		this.maxhp = this.hp = golem.hp;
 		this.atk = golem.atk;
-		this.active = golem.active;
+		this.active = clone(golem.active);
 		this.cast = golem.cast;
-		this.copypassives(golem.passives);
+		this.passives = clone(golem.passives);
 		this.adrenaline = golem.adrenaline;
 		this.momentum = golem.momentum;
 		this.immaterial = golem.immaterial;
@@ -98,7 +114,7 @@ function Permanent(card, owner){
 	this.charges = 0;
 	this.cast = card.cast;
 	this.castele = card.castele;
-	this.active = card.active;
+	this.active = clone(card.active);
 	this.usedactive = true;
 	Thing.apply(this, arguments);
 }
@@ -113,7 +129,6 @@ function Weapon(card, owner){
 }
 function Shield(card, owner){
 	this.dr = card.health
-	this.effect = card.effect;
 	Permanent.apply(this, arguments)
 }
 function Pillar(card, owner){
