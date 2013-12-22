@@ -1,5 +1,5 @@
 var Actives = (function(){
-function mutantactive(c){
+function mutantactive(t){
 	var abilities = [null,null,"hatch","freeze","burrow","destroy","steal","dive","heal","paradox","lycanthropy","scavenger","infection","gpull","devour","mutation","growth","ablaze","poison","deja","endow","guard","mitosis"];
 	var active = Actives[abilities[Math.floor(rng.real()*abilities.length)]];
 	if (!active){
@@ -9,8 +9,7 @@ function mutantactive(c){
 			t.immaterial = true;
 		}
 	}else if (active == Actives.scavenger){
-		t.active.auto = active;
-		t.cast = -1;
+		t.addactive("auto", active);
 	}else{
 		t.active.cast = active;
 		t.cast = Math.ceil(rng.real()*2);
@@ -523,7 +522,7 @@ mutation:function(c,t){
 	var rnd = rng.real();
 	if (rnd<.1){
 		t.die();
-	}else if (rnd<(t.card.isOf(Cards.Abomination):.9?.5)){
+	}else if (rnd<(t.card.isOf(Cards.Abomination)?.9:.5)){
 		Actives.improve(c, t);
 	}else{
 		t.transform(Cards.Abomination);
