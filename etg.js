@@ -394,7 +394,7 @@ Pillar.prototype.info = function(){
 Thing.prototype.activetext = function(){
 	var info = "";
 	for(var key in this.active){
-		if (this.active[key])info += " " + (key == "cast"?casttext(this.cast, this.castele):key) + " " + activename(this.active[key]);
+		if (this.active[key])info += (key != "auto"?" " + (key == "cast"?casttext(this.cast, this.castele):key):"") + " " + activename(this.active[key]);
 	}
 	return info;
 }
@@ -466,10 +466,15 @@ Player.prototype.spelldmg = function(x) {
 	return (!this.shield || !this.shield.passives.reflect?this:this.foe).dmg(x);
 }
 Creature.prototype.getIndex = function() { return this.owner.creatures.indexOf(this); }
-Player.prototype.addpoison = Creature.prototype.addpoison = function(x) {
-	this.poison += x;
-	if (this.passives.voodoo){
-		this.owner.foe.poison += x;
+Player.prototype.addpoison = function(x) { this.poison += x; }
+Creature.prototype.addpoison = function(x) {
+	if (this.passives.malignant){
+		this.transform(Cards.MalignantCell);
+	}else{
+		this.poison += x;
+		if (this.passives.voodoo){
+			this.owner.foe.poison += x;
+		}
 	}
 }
 Player.prototype.buffhp = Creature.prototype.buffhp = function(x){
@@ -507,17 +512,17 @@ Creature.prototype.deatheffect = function(index) {
 		for(var j=0; j<23; j++){
 			var c = pl.creatures[j];
 			if (c && c.active.death){
-				c.active.death(this, index);
+				c.active.death(c, this, index);
 			}
 		}
 		for(var j=0; j<16; j++){
 			var p = pl.permanents[j];
 			if (p && p.active.death){
-				p.active.death(this, index);
+				p.active.death(p, this, index);
 			}
 		}
 		if (pl.shield && pl.shield.active.death == -4){
-			pl.shield.active.death(pl, index);
+			pl.shield.active.death(pl, this, index);
 		}
 	}
 }
@@ -527,7 +532,7 @@ Creature.prototype.die = function() {
 		(this.owner.creatures[index] = new Creature(Cards.MalignantCell, this.owner)).usedactive = false;
 	}
 	this.deatheffect(index);
-	new DeathEffect(creaturePos(this.owner == player1?0:1, index));
+	new DeathEffect(creaturePos(this.owner == this.owner.game.player1?0:1, index));
 }
 Creature.prototype.transform = function(card, owner){
 	Thing.call(this, card, owner || this.owner);

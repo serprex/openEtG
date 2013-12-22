@@ -559,6 +559,11 @@ nymph:function(c,t){
 	Actives.destroy(c, t);
 	new Creature(Cards[NymphList[e*2+(t.card.upped?1:0)]], t.owner).place();
 },
+ouija:function(c,t){
+	if(!c.owner.foe.sanctuary && c.owner.foe.hand.length<8){
+		c.owner.foe.hand.push(c.card);
+	}
+},
 overdrive:function(c,t){
 	c.atk += 3;
 	c.dmg(1, true);
@@ -787,6 +792,12 @@ unburrow:function(c,t){
 	c.active.cast = Actives.burrow;
 	c.cast = 1;
 },
+upkeep:function(c,t){
+	if (!c.owner.spend(c.card.element, 1)){
+		c.owner.quanta[c.card.element] = 0;
+		c.die();
+	}
+},
 vampire:function(c,t, dmg){
 	c.owner.dmg(-dmg);
 },
@@ -796,8 +807,8 @@ void:function(c,t){
 		c.owner.foe.hp = c.owner.foe.maxhp;
 	}
 },
-watergift:function(c,t){
-	c.spend(Water, -3);
+quantagift:function(c,t){
+	c.spend(c.card.element, -3);
 	c.spend(c.mark, -3);
 },
 web:function(c,t){
