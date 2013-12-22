@@ -127,6 +127,12 @@ function clone(obj){
 	}
 	return result;
 }
+function isEmpty(obj){
+	for(var key in obj){
+		return true;
+	}
+	return false;
+}
 Card.prototype.readCost = function(attr, cost){
 	var c=cost.split(":");
 	c = [parseInt(c[0]), (c.length==1?this.element:parseInt(c[1]))]

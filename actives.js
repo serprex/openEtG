@@ -370,6 +370,7 @@ infest:function(c,t){
 	}
 },
 integrity:function(c,t){
+	var activeType = ["auto", "hit", "buff", "death"];
 	var shardTally = [0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0];
 	var shardSkills = [
 		[],
@@ -383,13 +384,13 @@ integrity:function(c,t){
 		["heal", "endow", "endow", "luciferin", "luciferin", "luciferin"],
 		["queen", "queen", "sniper", "dive", "gas", "gas"],
 		["scarab", "scarab", "deja", "neuro", "precognition", "precognition"],
-		["vampire", "vampire", "vampire", "liquid", "liquid", "steal"],
+		["siphon", "vampire", "vampire", "liquid", "liquid", "steal"],
 		["lobotomize", "lobotomize", "lobotomize", "quint", "quint", "quint"],
 	];
 	var shardCosts = {
 		burrow:1, stoneform:1, guard:1, petrify:2,
 		deadalive:1, mutation: 2, paradox: 2, improve: 2, scramble: -2, antimatter: 4,
-		infection:1, scavenger: -1, poison: -2, aflatoxin: 2, poison2: -2,
+		infection:1, scavenger: -4, poison: -2, aflatoxin: 2, poison2: -2,
 		devour: 3, blackhole: 4,
 		growth: 2, adrenaline: 2, mitosis: 4,
 		ablaze: 1, fiery: -3, destroy: 3, rage: 2,
@@ -411,7 +412,7 @@ integrity:function(c,t){
 			c.owner.hand.splice(i, 1);
 		}
 	}
-	var active = Actives.burrow, num=0;
+	var active = "burrow", num=0, cast=0;
 	for(var i=1; i<13; i++){
 		atk += shardTally[i]*(i==Gravity?0:i==Earth?1:i==Fire?3:2);
 		hp += shardTally[i]*(i==Gravity?6:i==Earth?4:i==Fire?0:2);
@@ -420,14 +421,14 @@ integrity:function(c,t){
 			active = shardSkills[i][num];
 		}
 	}
-	var passives = [];
+	var actives = {}, cost = shardCosts[active];
+	actives[cost<0?activeType[~cost]:"cast"] = Actives[active];
+	var passives = {};
 	if (shardTally[Air]>0){
-		passives.push("airborne");
+		passives.airborne = true;
 	}
-	if (shardTally[Darkness]==1){
-		passives.push("devour");
-	}else if (shardTally[Darkness]>1){
-		passives.push("voodoo");
+	if (shardTally[Darkness]>0){
+		passives.voodoo = true;
 	}
 	c.owner.shardgolem = {
 		atk: atk + bonus,
@@ -436,8 +437,8 @@ integrity:function(c,t){
 		immaterial: shardTally[Aether]>1,
 		momentum: shardTally[Gravity]>1,
 		adrenaline: shardTally[Life]>1?1:0,
-		active: Actives[active],
-		cast: shardCosts[active]
+		active: actives,
+		cast: cast
 	};
 	new Creature(Cards.ShardGolem, c.owner).place();
 },
@@ -465,7 +466,7 @@ luciferin:function(c,t){
 	c.owner.dmg(-10);
 	c.owner.masscc(c, function(c,x){
 		// TODO OP? Need to make sure there's no other actives
-		if (!x.active.auto){
+		if (isEmpty(x.active)){
 			x.active.auto = Actives.light;
 		}
 	})
@@ -690,6 +691,11 @@ serendipity:function(c,t){
 silence:function(c,t){
 	c.owner.foe.silence = !c.owner.foe.sanctuary;
 },
+siphon:function(c,t){
+	if (c.owner.foe.spend(Other, 1)){
+		c.owner.spend(Darkness, -1)
+	}
+},
 skyblitz:function(c,t){
 	c.quanta[Air] = 0;
 	for(var i=0; i<23; i++){
@@ -743,11 +749,6 @@ steal:function(c,t){
 		t.owner = c.owner;
 		t.usedactive = true;
 		t.place();
-	}
-},
-stealtodark:function(c,t){
-	if (c.owner.foe.spend(Other, 1)){
-		c.owner.spend(Darkness, -1)
 	}
 },
 steam:function(c,t){
