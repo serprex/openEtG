@@ -523,7 +523,7 @@ mutation:function(c,t){
 	var rnd = rng.real();
 	if (rnd<.1){
 		t.die();
-	}else if (rnd<.5){
+	}else if (rnd<(t.card.isOf(Cards.Abomination):.9?.5)){
 		Actives.improve(c, t);
 	}else{
 		t.transform(Cards.Abomination);
