@@ -21,8 +21,8 @@ loadcards(function(cards, targeting) {
 	console.log("Cards loaded");
 });
 function getTarget(src, active, cb){
-	if (active in Targeting){
-		var targetingFilter = Targeting[active];
+	var targetingFilter = Targeting[active.activename];
+	if (targetingFilter){
 		targetingMode = function(t){ return (t == game.player2 || t.owner == game.player1 || t.passive == "cloak" || !game.player2.isCloaked()) && targetingFilter(src, t); }
 		targetingModeCb = cb;
 		for(var key in TargetFilters){

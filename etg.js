@@ -93,8 +93,7 @@ function loadcards(cb){
 			var csv = this.responseText.split("\n");
 			for (var i=0; i<csv.length; i++){
 				var keypair = csv[i].split(",");
-				// TODO function as indice is bad
-				Targeting[Actives[keypair[0]]] = TargetFilters[keypair[1]];
+				Targeting[keypair[0]] = TargetFilters[keypair[1]];
 			}
 			maybeCallback();
 		}
@@ -126,6 +125,17 @@ function clone(obj){
 		}
 	}
 	return result;
+}
+function combineactive(a1, a2){
+	if (!a1){
+		return a2;
+	}
+	var combine = function(){
+		a1.apply(null, arguments);
+		a2.apply(null, arguments);
+	}
+	combine.activename = a1.activename + " " + a2.activename;
+	return combine;
 }
 function isEmpty(obj){
 	for(var key in obj){
@@ -598,6 +608,13 @@ Shield.prototype.die = function() { this.owner.shield = undefined; }
 Thing.prototype.isMaterialInstance = function(type) {
 	return this instanceof type && !this.immaterial && !this.burrowed;
 }
+Thing.prototype.addactive = function(type, active){
+	this.active[type] = combineactive(this.active[type], active);
+}
+Thing.prototype.hasactive = function(type, activename) {
+	if (!this.active.type)return false;
+	return ~this.active.type.activename.split(" ").indexOf(activename);
+}
 Thing.prototype.canactive = function() {
 	return this.owner.game.turn == this.owner && this.active.cast && !this.usedactive && !this.delayed && !this.frozen && this.owner.canspend(this.castele, this.cast);
 }
@@ -658,18 +675,18 @@ Weapon.prototype.attack = Creature.prototype.attack = function(stasis, freedomCh
 		}else if (momentum || trueatk < 0){
 			target.dmg(trueatk);
 			if (this.adrenaline < 3 && this.active.hit){
-				this.active.hit(target, trueatk);
+				this.active.hit(this, target, trueatk);
 			}
 		}else if (isCreature && target.gpull){
 			var dmg = target.gpull.dmg(trueatk);
 			if (this.adrenaline < 3 && this.active.hit){
-				this.active.hit(target, dmg);
+				this.active.hit(this, target, dmg);
 			}
 		}else if (!target.shield || (trueatk > (truedr = target.shield.truedr()) && (!target.shield.active.shield || !target.shield.active.shield(target.shield, this)))){
 			var dmg = trueatk - truedr;
 			target.dmg(dmg);
 			if (this.adrenaline < 3 && this.active.hit){
-				this.active.hit(target, dmg);
+				this.active.hit(this, target, dmg);
 			}
 		}
 	}
@@ -765,11 +782,7 @@ function randomcard(upped, filter){
 	return Cards[keys[Math.floor(rng.real() * keys.length)]];
 }
 function activename(active){
-	for(var key in Actives){
-		if (Actives[key] == active){
-			return key;
-		}
-	}
+	return active?active.activename:"";
 }
 function casttext(cast, castele){
 	return cast == 0?"0":cast + ":" + castele;

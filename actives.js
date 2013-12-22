@@ -1,4 +1,5 @@
-function mutantactive(t){
+var Actives = (function(){
+function mutantactive(c){
 	var abilities = [null,null,"hatch","freeze","burrow","destroy","steal","dive","heal","paradox","lycanthropy","scavenger","infection","gpull","devour","mutation","growth","ablaze","poison","deja","endow","guard","mitosis"];
 	var active = Actives[abilities[Math.floor(rng.real()*abilities.length)]];
 	if (!active){
@@ -7,8 +8,7 @@ function mutantactive(t){
 		}else{
 			t.immaterial = true;
 		}
-	}
-	if (active == Actives.scavenger){
+	}else if (active == Actives.scavenger){
 		t.active.auto = active;
 		t.cast = -1;
 	}else{
@@ -26,7 +26,7 @@ acceleration:function(c,t){
 	c.dmg(1,true);
 },
 accelerationspell:function(c,t){
-	t.active.auto = Actives.acceleration;
+	t.addactive("auto", Actives.acceleration);
 },
 accretion:function(c,t){
 	Actives.destroy(c, t);
@@ -333,7 +333,7 @@ holylight:function(c,t){
 hope:function(c,t){
 	var dr=0;
 	for(var i=0; i<23; i++){
-		if(c.owner.creatures[i] && c.owner.creatures[i].active.auto == Actives.light){
+		if(c.owner.creatures[i] && c.owner.creatures[i].hasactive("auto", "light")){
 			dr++;
 		}
 	}
@@ -464,7 +464,7 @@ lightning:function(c,t){
 	t.spelldmg(5);
 },
 liquid:function(c,t){
-	t.active.hit = Actives.vampire;
+	t.addactive("hit", Actives.vampire);
 	t.addpoison(1);
 },
 lobotomize:function(c,t){
@@ -480,7 +480,6 @@ losecharge:function(c,t){
 luciferin:function(c,t){
 	c.owner.dmg(-10);
 	c.owner.masscc(c, function(c,x){
-		// TODO OP? Need to make sure there's no other actives
 		if (isEmpty(x.active)){
 			x.active.auto = Actives.light;
 		}
@@ -580,7 +579,7 @@ overdrive:function(c,t){
 	c.dmg(1, true);
 },
 overdrivespell:function(c,t){
-	t.active.auto = Actives.overdrive;
+	t.addactive("auto", Actives.overdrive);
 },
 pandemonium:function(c,t){
 	c.owner.foe.masscc(c, Actives.cseed);
@@ -896,3 +895,8 @@ evade100:function(c,t){
 	return true;
 },
 }
+for(var key in Actives){
+	Actives[key].activename = key;
+}
+return Actives;
+})();
