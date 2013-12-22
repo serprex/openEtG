@@ -106,6 +106,10 @@ function Creature(card, owner){
 		this.momentum = golem.momentum;
 		this.immaterial = golem.immaterial;
 	}else this.transform(card, owner);
+	if (this.active.play){
+		this.active.play(this);
+		this.active.play = undefined;
+	}
 }
 function Permanent(card, owner){
 	if (!card){

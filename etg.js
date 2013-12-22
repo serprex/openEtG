@@ -786,6 +786,9 @@ function salvageScan(from, t){
 	}
 }
 var TargetFilters = {
+	true:function(c, t){
+		return true;
+	},
 	pill:function(c, t){
 		return t.isMaterialInstance(Pillar);
 	},

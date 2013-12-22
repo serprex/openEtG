@@ -1,3 +1,22 @@
+function mutantactive(t){
+	var abilities = [null,null,"hatch","freeze","burrow","destroy","steal","dive","heal","paradox","lycanthropy","scavenger","infection","gpull","devour","mutation","growth","ablaze","poison","deja","endow","guard","mitosis"];
+	var active = Actives[abilities[Math.floor(rng.real()*abilities.length)]];
+	if (!active){
+		if(rng.real()<.5){
+			t.momentum = true;
+		}else{
+			t.immaterial = true;
+		}
+	}
+	if (active == Actives.scavenger){
+		t.active.auto = active;
+		t.cast = -1;
+	}else{
+		t.active.cast = active;
+		t.cast = Math.ceil(rng.real()*2);
+		t.castele = t.card.element;
+	}
+}
 var Actives = {
 ablaze:function(c,t){
 	c.atk += 2;
@@ -341,25 +360,9 @@ immolate:function(c,t){
 },
 improve:function(c,t){
 	t.transform(randomcard(false, function(x){return x.type == CreatureEnum}));
-	var abilities = [null,null,"hatch","freeze","burrow","destroy","steal","dive","heal","paradox","lycanthropy","scavenger","infection","gpull","devour","mutation","growth","ablaze","poison","deja","endow","guard","mitosis"];
-	var active = Actives[abilities[Math.floor(rng.real()*abilities.length)]];
-	if (!active){
-		if(rng.real()<.5){
-			t.momentum = true;
-		}else{
-			t.immaterial = true;
-		}
-	}
-	if (active == Actives.scavenger){
-		t.active.auto = active;
-		t.cast = -1;
-	}else{
-		t.active.cast = active;
-		t.cast = Math.ceil(rng.real()*2);
-		t.castele = t.card.element;
-	}
 	t.buffhp(Math.floor(rng.real()*5));
 	t.atk += Math.floor(rng.real()*5);
+	mutantactive(t);
 },
 infect:function(c,t){
 	t.addpoison(1);
@@ -488,6 +491,10 @@ lycanthropy:function(c,t){
 	c.atk += 5;
 	c.active.cast = undefined;
 },
+metamorph:function(c,t){
+	c.owner.mark = t.card.element;
+	c.owner.spend(c.owner.mark, c.card.upped?-2:-1);
+},
 miracle:function(c,t){
 	c.quanta[Light] = 0;
 	if (c.sosa){
@@ -508,6 +515,10 @@ momentum:function(c,t){
 	t.atk += 1;
 	t.buffhp(1);
 	t.momentum = true;
+},
+mutant:function(c,t){
+	mutantactive(c);
+	c.castele = Math.floor(rng.real()*13);
 },
 mutation:function(c,t){
 	var rnd = rng.real();
@@ -786,6 +797,9 @@ storm3:function(c,t){
 },
 swave:function(c,t){
 	t.spelldmg(4);
+},
+tempering:function(c,t){
+	t.atk += c.card.upped?5:2;
 },
 unburrow:function(c,t){
 	c.burrowed = false;
