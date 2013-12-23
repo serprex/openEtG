@@ -94,10 +94,28 @@ loadcards(function(cards, targeting) {
 		Actives.earthquake(player2, pillars);
 		ok(!player1.permanents[0], "poof");
 	});
+	test("Eclipse", function() {
+		initTest();
+		player1.deck = [Cards.Ash, Cards.Ash, Cards.Ash];
+		player2.deck = [Cards.Ash, Cards.Ash, Cards.Ash];
+		player1.creatures[0] = new Creature(Cards.Vampire, player1);
+		player1.creatures[1] = new Creature(Cards.Vampire, player1);
+		player1.hp = 50;
+		player1.endturn();
+		player2.endturn();
+		equal(player2.hp, 92, "Noclipse dmg'd");
+		equal(player1.hp, 58, "Noclipse vamp'd");
+		player1.permanents[0] = new Permanent(Cards.Eclipse, player1);
+		player1.endturn();
+		equal(player2.hp, 80, "Eclipse dmg'd");
+		equal(player1.hp, 70, "Eclipse vamp'd");
+		equal(player1.creatures[0].truehp(), 4, "hp buff'd");
+	});
 	test("Hope", function() {
 		initTest();
 		player1.shield = new Shield(Cards.Hope, player1);
-		for(var i=0; i<3; i++){
+		player1.creatures[0] = new Creature(Cards.Photon, player1);
+		for(var i=1; i<4; i++){
 			player1.creatures[i] = new Creature(Cards.RayofLight, player1);
 		}
 		player1.endturn();

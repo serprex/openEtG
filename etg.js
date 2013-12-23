@@ -633,8 +633,8 @@ Thing.prototype.addactive = function(type, active){
 	this.active[type] = combineactive(this.active[type], active);
 }
 Thing.prototype.hasactive = function(type, activename) {
-	if (!this.active.type)return false;
-	return ~this.active.type.activename.split(" ").indexOf(activename);
+	if (!this.active[type])return false;
+	return ~this.active[type].activename.split(" ").indexOf(activename);
 }
 Thing.prototype.canactive = function() {
 	return this.owner.game.turn == this.owner && this.active.cast && !this.usedactive && !this.delayed && !this.frozen && this.owner.canspend(this.castele, this.cast);
