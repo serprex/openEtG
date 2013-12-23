@@ -293,7 +293,7 @@ brandai.click = function() {
 		);
 	}
 }
-var editordeck, editorelement = 0, editordecksprites, editorcolumns, editoreleicons;
+var editordeck, editorelement = 0, editordecksprites, editorcolumns, editoreleicons, editormark, editormarksprite;
 beditor.click = function() {
 	if (Cards){
 		editorui = new PIXI.Stage(0x336699, true);
@@ -301,6 +301,7 @@ beditor.click = function() {
 		bsave.position.x = 8;
 		bsave.position.y = 8;
 		bsave.click = function(){
+			editordeck.push(TrueMarks[editormark]);
 			document.getElementById("deckimport").value = editordeck.join(" ");
 			mainStage = menuui;
 			editorui = undefined;
@@ -309,7 +310,7 @@ beditor.click = function() {
 		editorui.addChild(bsave);
 		var bclear = new PIXI.Text("Clear", {font: "16px Arial bold"});
 		bclear.position.x = 8;
-		bclear.position.y = 28;
+		bclear.position.y = 38;
 		bclear.click = function(){
 			editordeck.length = 0;
 		}
@@ -318,17 +319,36 @@ beditor.click = function() {
 		editorcolumns = [];
 		editordecksprites = [];
 		editordeck = getDeck();
+		editormarksprite = new PIXI.Sprite(nopic);
+		editormarksprite.position.x = 100;
+		editormarksprite.position.y = 8;
+		editorui.addChild(editormarksprite);
+		for(var i=editordeck.length-1; i>=0; i--){
+			if(!(editordeck[i] in Cards)){
+				var index = TrueMarks.indexOf(editordeck[i]);
+				if (index >= 0){
+					editormark = index;
+				}
+				editordeck.splice(i, 1);
+			}
+		}
 		editoreleicons = [];
 		for(var i=0; i<13; i++){
 			var sprite = new PIXI.Sprite(nopic);
 			sprite.position.x = 8;
 			sprite.position.y = 150 + i*32;
+			sprite.interactive = true;
+			var marksprite = new PIXI.Sprite(nopic);
+			marksprite.position.x = 100+i*32;
+			marksprite.position.y = 250;
+			marksprite.interactive = true;
 			(function(_i){
 				sprite.click = function() { editorelement = _i; }
+				marksprite.click = function() { editormark = _i; }
 			})(i);
-			sprite.interactive = true;
-			editoreleicons.push(sprite);
+			editoreleicons.push([sprite, marksprite]);
 			editorui.addChild(sprite);
+			editorui.addChild(marksprite);
 		}
 		for(var i=0; i<60; i++){
 			var sprite = new PIXI.Sprite(nopic);
@@ -857,8 +877,11 @@ function animate() {
 			maybeSetText(decktext[j], game.players[j].deck.length + "cards");
 		}
 	}else if(mainStage == editorui){
+		editormarksprite.setTexture(getIcon(editormark));
 		for (var i=0; i<13; i++){
-			editoreleicons[i].setTexture(getIcon(i));
+			for(var j=0; j<2; j++){
+				editoreleicons[i][j].setTexture(getIcon(i));
+			}
 		}
 		for (var i=0; i<editordeck.length; i++){
 			editordecksprites[i].visible = true;
