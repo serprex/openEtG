@@ -752,6 +752,11 @@ siphon:function(c,t){
 		c.owner.spend(Darkness, -1)
 	}
 },
+siphonstrength:function(c,t){
+	var n = c.card.upped?2:1;
+	t.atk -= n;
+	c.atk += n;
+},
 skyblitz:function(c,t){
 	c.quanta[Air] = 0;
 	for(var i=0; i<23; i++){
