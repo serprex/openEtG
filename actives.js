@@ -488,6 +488,7 @@ lycanthropy:function(c,t){
 	c.buffhp(5);
 	c.atk += 5;
 	c.active.cast = undefined;
+	c.passives.lycanthrope = true;
 },
 metamorph:function(c,t){
 	c.owner.mark = t.card.element;
@@ -716,6 +717,31 @@ serendipity:function(c,t){
 },
 silence:function(c,t){
 	c.owner.foe.silence = !c.owner.foe.sanctuary;
+},
+singularity:function(c,t){
+	var r = rng.real();
+	if (r > .9){
+		c.adrenaline = 1;
+	}else if (r > .8){
+		c.active.hit = Actives.vampire;
+	}else if (r > .7){
+		Actives.quint(c, c);
+	}else if (r > .6){
+		Actives.scramble(c, c.owner);
+	}else if (r > .5){
+		Actives.blackhole(c.owner.foe);
+	}else if (r > .4){
+		c.atk -= Math.floor(rng.real()*5);
+		c.buffhp(Math.floor(rng.real()*5));
+	}else if (r > .3){
+		Actives.nova(c.owner.foe);
+		c.owner.foe.nova = 0;
+	}else if (r > .2){
+		Actives.parallel(c, c);
+	}else if (r > .1){
+		c.owner.weapon = new Weapon(Cards.Dagger, c.owner);
+	}
+	c.dmg(c.trueatk(), true);
 },
 sinkhole:function(c,t){
 	t.burrowed = true;

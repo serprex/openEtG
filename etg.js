@@ -262,33 +262,36 @@ Player.prototype.endturn = function(discard) {
 				p.active.auto(p);
 			}
 			p.usedactive = false;
-			if (p.cloak || p.stasis){
+			if (p.passives.cloak || p.passives.stasis){
 				if (--p.charges < 0){
 					delete this.permanents[i];
 				}else if (p.stasis){
 					stasisFlag = true;
 				}
-			}else if (p.flooding && !floodingPaidFlag){
+			}else if (p.passives.flooding && !floodingPaidFlag){
 				floodingPaidFlag = true;
 				floodingFlag = true;
 				if (!this.spend(Water, 1)){
 					delete this.permanents[i];
 				}
-			}else if (p.sopa){
+			}else if (p.passives.patience){
 				patienceFlag = true;
-			}else if (p.freedom){
-				freedomChance += .25;
+			}else if (p.passives.freedom){
+				freedomChance++;
 			}
 		}
 		if ((p=this.foe.permanents[i])){
-			if (p.stasis){
+			if (p.passives.stasis){
 				if (--p.charges < 0){
 					delete this.foe.permanents[i];
 				}else stasisFlag = true;
-			}else if (p.flooding){
+			}else if (p.passives.flooding){
 				floodingFlag = true;
 			}
 		}
+	}
+	if (freedomChance){
+		freedomChance = (1-Math.pow(.7,freedomChance));
 	}
 	var cr;
 	for (var i=0; i<23; i++){
@@ -413,7 +416,6 @@ Creature.prototype.place = function(){
 	place(this.owner.creatures, this);
 }
 Permanent.prototype.place = function(){
-	console.log(this.passives.additive);
 	if (this.passives.additive){
 		for(var i=0; i<16; i++){
 			if (this.owner.permanents[i] && this.owner.permanents[i].card == this.card){
@@ -558,18 +560,37 @@ Creature.prototype.evade = function(sender) {
 		var freedomChance = 0;
 		for(var i=0; i<16; i++){
 			if (this.owner.permanents[i] && this.owner.permanents[i].freedom){
-				freedomChance += .25;
+				freedomChance++;
 			}
 		}
-		return freedomChance && rng.real() < freedomChance;
+		return freedomChance && rng.real() < 1-Math.pow(.7, freedomChance);
 	}
+}
+Creature.prototype.calcEclipse = function(){
+	if (this.card.element != Darkness && this.card.element != Death && !this.passives.lycanthrope){
+		return 0;
+	}
+	var players = this.owner.game.players;
+	var bonus = 0;
+	for (var j=0; j<2; j++){
+		for (var i=0; i<16; i++){
+			if (players[j].permanents[i]){
+				if (players[j].permanents[i].card == Cards.Nightfall){
+					bonus = 1;
+				}else if (players[j].permanents[i].card == Cards.Eclipse){
+					return 2;
+				}
+			}
+		}
+	}
+	return bonus;
 }
 Weapon.prototype.trueatk = Creature.prototype.trueatk = function(adrenaline){
 	var dmg = this.atk+this.steamatk+this.dive;
 	if (this.active.buff)dmg += this.active.buff(this);
 	if (this.burrowed)dmg = Math.ceil(dmg/2);
-	if (this instanceof Creature && (this.card.element == Death || this.card.element == Darkness)){
-		dmg += calcEclipse(this.owner.game);
+	if (this instanceof Creature){
+		dmg += this.calcEclipse();
 	}
 	var y=adrenaline || this.adrenaline;
 	if (y<2)return dmg;
@@ -589,7 +610,7 @@ Shield.prototype.truedr = function(){
 Player.prototype.truehp = function(){ return this.hp; }
 Creature.prototype.truehp = function(){
 	var hp = this.hp;
-	if ((this.card.element == Darkness || this.card.element == Death) && calcEclipse(this.owner.game) != 0){
+	if (this.calcEclipse(this.owner.game) != 0){
 		hp++;
 	}
 	if (this.passives.swarm){
@@ -751,21 +772,6 @@ Player.prototype.summon = function(index, target){
 function countAdrenaline(x){
 	return 5-Math.floor(Math.sqrt(Math.abs(x)));
 }
-function calcEclipse(game){
-	var bonus = 0;
-	for (var j=0; j<2; j++){
-		for (var i=0; i<16; i++){
-			if (game.players[j].permanents[i]){
-				if (game.players[j].permanents[i].card == Cards.Nightfall){
-					bonus = 1;
-				}else if (game.players[j].permanents[i].card == Cards.Eclipse){
-					return 2;
-				}
-			}
-		}
-	}
-	return bonus;
-}
 function filtercards(upped, filter){
 	var keys = [];
 	for(var key in Cards) {
@@ -830,7 +836,7 @@ var TargetFilters = {
 		return c.owner != t.owner && t.isMaterialInstance(Permanent);
 	},
 	butterfly:function(c, t){
-		return t.trueatk && t.trueatk()<3;
+		return (t.trueatk && t.trueatk()<3) || (t.truehp && t.truehp()<3);
 	},
 	devour:function(c, t){
 		return t.isMaterialInstance(Creature) && t.truehp()<c.truehp();
