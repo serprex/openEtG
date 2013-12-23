@@ -832,6 +832,10 @@ swave:function(c,t){
 tempering:function(c,t){
 	t.atk += c.card.upped?5:2;
 },
+throwrock:function(c,t){
+	t.spelldmg(c.card.upped?3:2);
+	t.owner.deck.push(c.card);
+},
 unburrow:function(c,t){
 	c.burrowed = false;
 	c.active.cast = Actives.burrow;

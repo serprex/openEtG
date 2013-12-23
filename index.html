@@ -23,7 +23,7 @@ loadcards(function(cards, targeting) {
 function getTarget(src, active, cb){
 	var targetingFilter = Targeting[active.activename];
 	if (targetingFilter){
-		targetingMode = function(t){ return (t == game.player2 || t.owner == game.player1 || t.passive == "cloak" || !game.player2.isCloaked()) && targetingFilter(src, t); }
+		targetingMode = function(t){ return (t == game.player2 || t.owner == game.player1 || t.passives.cloak || !game.player2.isCloaked()) && targetingFilter(src, t); }
 		targetingModeCb = cb;
 		for(var key in TargetFilters){
 			if (TargetFilters[key] == targetingFilter){
@@ -822,7 +822,7 @@ function animate() {
 			}
 			for(var i=0; i<16; i++){
 				var pr = game.players[j].permanents[i];
-				if (pr && !(j == 1 && cloakgfx.visible && pr.passive != "cloak")){
+				if (pr && !(j == 1 && cloakgfx.visible && !pr.passives.cloak)){
 					permsprite[j][i].setTexture(getPermanentImage(pr.card.code));
 					permsprite[j][i].alpha = pr.immaterial?.7:1;
 					permsprite[j][i].visible = true;

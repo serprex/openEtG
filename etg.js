@@ -180,7 +180,7 @@ Card.prototype.isOf = function(card){
 }
 Player.prototype.isCloaked = function(){
 	for(var i=0; i<16; i++){
-		if (this.permanents[i] && this.permanents[i].cloak){
+		if (this.permanents[i] && this.permanents[i].passives.cloak){
 			return true;
 		}
 	}
