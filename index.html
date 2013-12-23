@@ -677,7 +677,7 @@ socket.on("summon", function(bits) {
 	console.log("summon call: " + bits);
 	var handindex = bits&7;
 	var sprite = new PIXI.Sprite(nopic);
-	sprite.position.x=foeplays.length*40;
+	sprite.position.x=foeplays.length*90;
 	sprite.position.y=8;
 	gameui.addChild(sprite);
 	foeplays.push([game.player2.hand[handindex], sprite]);
@@ -708,7 +708,7 @@ function animate() {
 	if (mainStage == gameui){
 		maybeSetText(turntell, discarding?"Discard":targetingMode?targetingText:game.turn == game.player1?"Your Turn":"Their Turn");
 		for(var i=0; i<foeplays.length; i++){
-			maybeSetTexture(foeplays[i][1], getPermanentImage(foeplays[i][0].code));
+			maybeSetTexture(foeplays[i][1], getCardImage(foeplays[i][0].code));
 		}
 		cloakgfx.visible = game.player2.isCloaked();
 		fgfx.clear();
@@ -908,7 +908,7 @@ function animate() {
 function requestAnimate(){ requestAnimFrame(animate); }
 requestAnimate();
 document.addEventListener("keydown", function(e){
-	if (e.keyCode == 32){
+	if (e.keyCode == 32 && mainStage == gameui){
 		endturn.click();
 	}
 });

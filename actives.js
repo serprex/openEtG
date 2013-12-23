@@ -1,15 +1,12 @@
 var Actives = (function(){
 function mutantactive(t){
+	t.active = {}
 	var abilities = [null,null,"hatch","freeze","burrow","destroy","steal","dive","heal","paradox","lycanthropy","scavenger","infection","gpull","devour","mutation","growth","ablaze","poison","deja","endow","guard","mitosis"];
 	var active = Actives[abilities[Math.floor(rng.real()*abilities.length)]];
 	if (!active){
-		if(rng.real()<.5){
-			t.momentum = true;
-		}else{
-			t.immaterial = true;
-		}
+		t[rng.real()<.5?"momentum":"immaterial"] = true;
 	}else if (active == Actives.scavenger){
-		t.addactive("auto", active);
+		t.active.auto = active;
 	}else{
 		t.active.cast = active;
 		t.cast = Math.ceil(rng.real()*2);
@@ -197,15 +194,14 @@ drainlife:function(c,t){
 	c.dmg(-t.spelldmg(2+Math.floor(c.owner.quanta[Darkness]/10)*2));
 },
 dryspell:function(c,t){
-	dmg = c.card.upped?2:1;
-	var self=c;
-	function dryeffect(c,cr){
-		self.spend(Water, -cr.dmg(dmg));
+	function dryeffect(c,t){
+		c.spend(Water, -t.dmg(1));
 	}
-	c.owner.foe.masscc(c, dryeffect);
-	if (!c.card.upped){
-		c.owner.masscc(c, dryeffect);
-	}
+	c.masscc(c, dryeffect);
+	c.foe.masscc(c, dryeffect);
+},
+dryspell2:function(c,t){
+	t.masscc(c, function(c,t){ c.spend(Water, -t.dmg(2)); });
 },
 dshield:function(c,t){
 	c.immaterial = true;
@@ -582,10 +578,11 @@ overdrivespell:function(c,t){
 	t.addactive("auto", Actives.overdrive);
 },
 pandemonium:function(c,t){
-	c.owner.foe.masscc(c, Actives.cseed);
-	if (!c.card.upped){
-		c.owner.masscc(c, Actives.cseed);
-	}
+	c.foe.masscc(c, Actives.cseed);
+	c.masscc(c, Actives.cseed);
+},
+pandemonium2:function(c,t){
+	t.masscc(c, Actives.cseed);
 },
 paradox:function(c,t){
 	if (t.trueatk()>t.truehp())t.die();
@@ -622,7 +619,7 @@ photosynthesis:function(c,t){
 	}
 },
 plague:function(c,t){
-	c.owner.foe.masscc(c, Actives.infect);
+	t.masscc(c, Actives.infect);
 },
 platearmor:function(c,t){
 	t.buffhp(c.card.upped?6:3);
@@ -821,10 +818,10 @@ stoneform:function(c,t){
 	c.active.cast = undefined;
 },
 storm2:function(c,t){
-	c.owner.foe.masscc(c, function(c,x){x.dmg(2)});
+	t.masscc(c, function(c,x){x.dmg(2)});
 },
 storm3:function(c,t){
-	c.owner.foe.masscc(c, Actives.snipe);
+	t.masscc(c, Actives.snipe);
 },
 swave:function(c,t){
 	t.spelldmg(4);
@@ -834,7 +831,7 @@ tempering:function(c,t){
 },
 throwrock:function(c,t){
 	t.spelldmg(c.card.upped?3:2);
-	t.owner.deck.push(c.card);
+	t.owner.deck.splice(Math.floor(rng.real()*t.owner.deck.length), 0, c.card);
 },
 unburrow:function(c,t){
 	c.burrowed = false;

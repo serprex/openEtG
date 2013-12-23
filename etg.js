@@ -352,7 +352,7 @@ Player.prototype.drawhand = function() {
 }
 Player.prototype.masscc = function(caster, func){
 	for(var i=0; i<16; i++){
-		if (this.permanents[i] && this.permanents[i].cloak){
+		if (this.permanents[i] && this.permanents[i].passives.cloak){
 			Actives.destroy(this, this.permanents[i]);
 		}
 	}
