@@ -45,7 +45,7 @@ var ShardList = [undefined, undefined,
 	"5se", "7qu",
 	"5vi", "7u2",
 	"62m", "816"];
-var RandomCardSkip = ["4t8", "6ro", "4vr", "6ub", "597", "77n", "5fd", "7dt", "Ash"];
+var RandomCardSkip = ["4t8", "6ro", "4vr", "6ub", "597", "77n", "5fd", "7dt", "Ash", "Elf"];
 function mkGame(first){
 	var game={};
 	game.player1 = new Player(game);
@@ -139,9 +139,11 @@ function combineactive(a1, a2){
 }
 function isEmpty(obj){
 	for(var key in obj){
-		return true;
+		if (obj[key] !== undefined){
+			return false;
+		}
 	}
-	return false;
+	return true;
 }
 Card.prototype.readCost = function(attr, cost){
 	var c=cost.split(":");
@@ -761,8 +763,8 @@ Player.prototype.summon = function(index, target){
 		}
 	}else if (card.type == SpellEnum){
 		if (!target || !target.evade(this)){
-			this.card = card
-			card.active(this, target)
+			this.card = card;
+			card.active(this, target);
 		}
 	}else if (card.type == CreatureEnum) {
 		new Creature(card, this).place();

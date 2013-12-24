@@ -125,7 +125,11 @@ cpower:function(c,t){
 	t.atk += Math.ceil(rng.real()*5);
 },
 cseed:function(c,t){
-	Actives[["drainlife", "firebolt", "freeze", "gpullspell", "icebolt", "infect", "lightning", "lobotomize", "parallel", "rewind", "snipe", "swave"][Math.floor(rng.real()*12)]](c, t);
+	if (t.passives.fallible){
+		t.transform(Cards.FallenElf.asUpped(t.card.upped));
+	}else{
+		Actives[["drainlife", "firebolt", "freeze", "gpullspell", "icebolt", "infect", "lightning", "lobotomize", "parallel", "rewind", "snipe", "swave"][Math.floor(rng.real()*12)]](c, t);
+	}
 },
 dagger:function(c,t){
 	return c.owner.mark == Darkness||c.owner.mark == Death?1:0;
@@ -192,6 +196,13 @@ divinity:function(c,t){
 },
 drainlife:function(c,t){
 	c.dmg(-t.spelldmg(2+Math.floor(c.owner.quanta[Darkness]/10)*2));
+},
+draft:function(c,t){
+	if((t.passives.airborne = !t.passives.airborne)){
+		if (t.active.cast == Actives.burrow){
+			t.active.cast = undefined;
+		}
+	}
 },
 dryspell:function(c,t){
 	function dryeffect(c,t){

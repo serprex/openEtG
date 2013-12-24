@@ -787,7 +787,7 @@ function animate() {
 						fgfx.endFill();
 					}
 					fgfx.lineStyle(1, 0);
-					if (cr.airborne){
+					if (cr.passives.airborne){
 						fgfx.beginFill(elecols[Air], .8);
 						fgfx.drawRect(pos.x-62, pos.y+5, 12, 12);
 						fgfx.endFill();

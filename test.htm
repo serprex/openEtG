@@ -122,6 +122,13 @@ loadcards(function(cards, targeting) {
 		equal(player1.shield.truedr(), 3, "DR");
 		equal(player1.quanta[Light], 3, "RoL");
 	});
+	test("Lobotomize", function() {
+		initTest();
+		var dev = new Creature(Cards.Devourer, player1);
+		ok(!isEmpty(dev.active), "Actives");
+		Actives.lobotomize(player1, dev);
+		ok(isEmpty(dev.active), "No actives");
+	});
 	test("Obsession", function() {
 		initTest();
 		player1.hand = [Cards.GhostofthePast, Cards.GhostofthePast, Cards.GhostofthePast, Cards.GhostofthePast, Cards.GhostofthePast, Cards.GhostofthePast, Cards.GhostofthePast, Cards.GhostofthePast];
