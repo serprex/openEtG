@@ -293,10 +293,19 @@ brandai.click = function() {
 		);
 	}
 }
-var editordeck, editorelement = 0, editordecksprites, editorcolumns, editoreleicons, editormark, editormarksprite;
+var editordeck, editorelement = 0, editordecksprites, editorcolumns, editoreleicons, editormark, editormarksprite, editorinfo;
+function setEditorInfo(obj){
+	if(obj){
+		maybeSetText(editorinfo, obj.info());
+	}
+}
 beditor.click = function() {
 	if (Cards){
 		editorui = new PIXI.Stage(0x336699, true);
+		editorinfo = new PIXI.Text("", {font: "16px Arial bold"})
+		editorinfo.position.x=100;
+		editorinfo.position.y=585;
+		editorui.addChild(editorinfo);
 		var bsave = new PIXI.Text("Done", {font: "16px Arial bold"});
 		bsave.position.x = 8;
 		bsave.position.y = 8;
@@ -304,7 +313,7 @@ beditor.click = function() {
 			editordeck.push(TrueMarks[editormark]);
 			document.getElementById("deckimport").value = editordeck.join(" ");
 			mainStage = menuui;
-			editorui = undefined;
+			editordeck = editordecksprites = editorcolumns = editormarksprite = editorinfo = editorui = undefined;
 		}
 		bsave.interactive = true;
 		editorui.addChild(bsave);
@@ -358,6 +367,9 @@ beditor.click = function() {
 				sprite.click = function() {
 					editordeck.splice(_i, 1);
 				}
+				sprite.mouseover = function() {
+					setEditorInfo(Cards[editordeck[_i]]);
+				}
 			})(i);
 			sprite.interactive = true;
 			editorui.addChild(sprite);
@@ -374,6 +386,9 @@ beditor.click = function() {
 						if(editordeck.length<60){
 							editordeck.push(editorcolumns[_i][1][editorelement][_j]);
 						}
+					}
+					sprite.mouseover = function() {
+						setEditorInfo(Cards[editorcolumns[_i][1][editorelement][_j]]);
 					}
 				})(i, j);
 				sprite.interactive = true;

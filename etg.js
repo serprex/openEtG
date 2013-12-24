@@ -375,6 +375,9 @@ Creature.prototype.info = function(){
 	for (var key in this){
 		if (this[key] === true && key != "usedactive")info += " " + key;
 	}
+	for (var key in this.passives){
+		if (this.passives[key] === true)info += " " + key;
+	}
 	return info;
 }
 Permanent.prototype.info = function(){
@@ -382,6 +385,9 @@ Permanent.prototype.info = function(){
 	info += this.activetext();
 	for (var key in this){
 		if (this[key] === true && key != "usedactive")info += " " + key;
+	}
+	for (var key in this.passives){
+		if (this.passives[key] === true)info += " " + key;
 	}
 	return info;
 }
@@ -393,6 +399,9 @@ Weapon.prototype.info = function(){
 	for (var key in this){
 		if (this[key] === true && key != "usedactive")info += " " + key;
 	}
+	for (var key in this.passives){
+		if (this.passives[key] === true)info += " " + key;
+	}
 	return info;
 }
 Shield.prototype.info = function(){
@@ -400,6 +409,9 @@ Shield.prototype.info = function(){
 	if (this.charges)info += " x"+this.charges;
 	for (var key in this){
 		if (this[key] === true && key != "usedactive")info += " " + key;
+	}
+	for (var key in this.passives){
+		if (this.passives[key] === true)info += " " + key;
 	}
 	return info;
 }
