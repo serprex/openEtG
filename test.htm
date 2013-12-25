@@ -13,6 +13,10 @@ var Cards, Targeting, targetingMode, targetingModeCb, game, player1, player2, pl
 function setWinner(play){
 	game.winner = play;
 }
+var gameui = {addChild:function(){}};
+function creaturePos(){
+	return {x:0, y:0};
+}
 function initTest(){
 	game = mkGame();
 	game.player1.mark = game.player2.mark = Entropy;
@@ -110,6 +114,18 @@ loadcards(function(cards, targeting) {
 		equal(player2.hp, 80, "Eclipse dmg'd");
 		equal(player1.hp, 70, "Eclipse vamp'd");
 		equal(player1.creatures[0].truehp(), 4, "hp buff'd");
+	});
+	test("Gpull", function() {
+		initTest();
+		player2.creatures[0] = new Creature(Cards.MassiveDragon, player2);
+		player2.gpull = player2.creatures[0];
+		player1.creatures[0] = new Creature(Cards.Scorpion, player1);
+		player2.deck = [Cards.MassiveDragon];
+		player1.endturn();
+		equal(player2.gpull.hp, 29, "dmg redirected");
+		equal(player2.gpull.poison, 1, "psn redirected");
+		player2.gpull.die();
+		ok(!player2.gpull, "gpull death poof");
 	});
 	test("Hope", function() {
 		initTest();

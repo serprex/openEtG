@@ -537,8 +537,10 @@ mutation:function(c,t){
 	}
 },
 neuro:function(c,t){
-	t.poison += 1
-	t.neuro = true
+	t.addpoison(1);
+	if (t instanceof Player){
+		t.neuro = true;
+	}
 },
 neuroify:function(c,t){
 	if (c.foe.poison>0){
@@ -636,13 +638,13 @@ platearmor:function(c,t){
 	t.buffhp(c.card.upped?6:3);
 },
 poison:function(c,t){
-	c.owner.foe.poison += 1;
+	(t || c.owner.foe).addpoison(1);
 },
 poison2:function(c,t){
-	c.owner.foe.poison += 2;
+	(t || c.owner.foe).addpoison(2);
 },
 poison3:function(c,t){
-	c.owner.foe.poison += 3;
+	(t || c.owner.foe).addpoison(3);
 },
 precognition:function(c,t){
 	c.owner.drawcard();

@@ -527,9 +527,11 @@ Creature.prototype.spelldmg = Creature.prototype.dmg = function(x, dontdie){
 	return dmg;
 }
 Creature.prototype.remove = function(index) {
-	if (index == undefined)index=this.getIndex();
-	delete this.owner.creatures[index];
-	if (this.owner.gpull == this)this.owner.gpull = null;
+	if (this.owner.gpull == this)this.owner.gpull = undefined;
+	if (index === undefined)index=this.getIndex();
+	if (~index){
+		delete this.owner.creatures[index];
+	}
 	return index;
 }
 Thing.prototype.deatheffect = function(index) {
@@ -554,11 +556,13 @@ Thing.prototype.deatheffect = function(index) {
 }
 Creature.prototype.die = function() {
 	var index = this.remove();
-	if (this.aflatoxin){
-		(this.owner.creatures[index] = new Creature(Cards.MalignantCell, this.owner)).usedactive = false;
+	if (~index){
+		if (this.aflatoxin){
+			(this.owner.creatures[index] = new Creature(Cards.MalignantCell, this.owner)).usedactive = false;
+		}
+		this.deatheffect(index);
+		new DeathEffect(creaturePos(this.owner == this.owner.game.player1?0:1, index));
 	}
-	this.deatheffect(index);
-	new DeathEffect(creaturePos(this.owner == this.owner.game.player1?0:1, index));
 }
 Creature.prototype.transform = function(card, owner){
 	Thing.call(this, card, owner || this.owner);
@@ -714,7 +718,7 @@ Weapon.prototype.attack = Creature.prototype.attack = function(stasis, freedomCh
 		}else if (isCreature && target.gpull){
 			var dmg = target.gpull.dmg(trueatk);
 			if (this.adrenaline < 3 && this.active.hit){
-				this.active.hit(this, target, dmg);
+				this.active.hit(this, target.gpull, dmg);
 			}
 		}else if (!target.shield || (trueatk > (truedr = target.shield.truedr()) && (!target.shield.active.shield || !target.shield.active.shield(target.shield, this)))){
 			var dmg = trueatk - truedr;
