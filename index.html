@@ -299,6 +299,10 @@ function setEditorInfo(obj){
 		maybeSetText(editorinfo, obj.info());
 	}
 }
+function editorCardCmp(x,y){
+	var xn=Cards[x].cost, yn=Cards[y].cost;
+	return xn == yn?(x>y?1:-1):xn>yn?1:-1;
+}
 beditor.click = function() {
 	if (Cards){
 		editorui = new PIXI.Stage(0x336699, true);
@@ -384,7 +388,13 @@ beditor.click = function() {
 				(function(_i, _j){
 					sprite.click = function() {
 						if(editordeck.length<60){
-							editordeck.push(editorcolumns[_i][1][editorelement][_j]);
+							var code = editorcolumns[_i][1][editorelement][_j];
+							for(var i=0; i<editordeck.length; i++){
+								if(editorCardCmp(editordeck[i], code) == 1){
+									break;
+								}
+							}
+							editordeck.splice(i, 0, code);
 						}
 					}
 					sprite.mouseover = function() {
@@ -397,7 +407,9 @@ beditor.click = function() {
 			}
 			// TODO Rewrite to go through cards without filtercards; filter with one pass
 			for(var j=0; j<13; j++){
-				editorcolumns[i][1].push(filtercards(i>2, function(x){ return x.element == j && (((i==0 || i==3) && x.type == CreatureEnum)||((i==1 || i==4) && x.type <= PermanentEnum)||((i==2 || i==5) && x.type == SpellEnum)); }));
+				editorcolumns[i][1].push(filtercards(i>2,
+					function(x){ return x.element == j && (((i==0 || i==3) && x.type == CreatureEnum)||((i==1 || i==4) && x.type <= PermanentEnum)||((i==2 || i==5) && x.type == SpellEnum)); },
+					editorCardCmp));
 			}
 		}
 		mainStage = editorui;

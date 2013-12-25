@@ -305,7 +305,7 @@ gpullspell:function(c,t){
 	t.owner.gpull = t;
 },
 gratitude:function(c,t){
-	c.owner.dmg(c.owner.mark == Life?-5:-3);
+	c.owner.dmg(-4);
 },
 growth:function(c,t){
 	c.buffhp(2);
@@ -407,7 +407,7 @@ integrity:function(c,t){
 		heal: 1, endow: 2, luciferin: 4,
 		queen: 2, sniper: 2, dive: 2, gas: 2,
 		scarab: 2, deja: 4, neuro: -2, precognition: 2,
-		vampire: -2, liquid: 2, steal: 3,
+		siphon: -1, vampire: -2, liquid: 2, steal: 3,
 		lobotomize: 2, quint: 2,
 	};
 	var hp=1, atk=4, bonus=c.card.upped?1:0;
@@ -789,7 +789,7 @@ sosa:function(c,t){
 	c.dmg(c.card.upped?40:48, true);
 },
 soulcatch:function(c,t){
-	c.owner.spend(Death, c.card.upped?-3:-2);
+	c.owner.spend(Death, -3);
 },
 sskin:function(c,t){
 	c.buffhp(c.quanta[Earth]);

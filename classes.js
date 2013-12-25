@@ -84,6 +84,11 @@ function Thing(card, owner){
 		}
 	}
 	this.passives = clone(card.passives);
+	this.active = clone(card.active);
+	if (this.active.play){
+		this.active.play(this);
+		this.active.play = undefined;
+	}
 }
 function Creature(card, owner){
 	this.adrenaline = 0;
@@ -106,10 +111,6 @@ function Creature(card, owner){
 		this.momentum = golem.momentum;
 		this.immaterial = golem.immaterial;
 	}else this.transform(card, owner);
-	if (this.active.play){
-		this.active.play(this);
-		this.active.play = undefined;
-	}
 }
 function Permanent(card, owner){
 	if (!card){
@@ -118,7 +119,6 @@ function Permanent(card, owner){
 	this.charges = 0;
 	this.cast = card.cast;
 	this.castele = card.castele;
-	this.active = clone(card.active);
 	this.usedactive = true;
 	Thing.apply(this, arguments);
 }

@@ -532,7 +532,7 @@ Creature.prototype.remove = function(index) {
 	if (this.owner.gpull == this)this.owner.gpull = null;
 	return index;
 }
-Creature.prototype.deatheffect = function(index) {
+Thing.prototype.deatheffect = function(index) {
 	for(var i=0; i<2; i++){
 		var pl = this.owner.game.players[i];
 		for(var j=0; j<23; j++){
@@ -564,7 +564,6 @@ Creature.prototype.transform = function(card, owner){
 	Thing.call(this, card, owner || this.owner);
 	this.maxhp = this.hp = card.health;
 	this.atk = card.attack;
-	this.active = clone(card.active);
 	this.cast = card.cast;
 	this.castele = card.castele;
 }
@@ -786,7 +785,7 @@ Player.prototype.summon = function(index, target){
 function countAdrenaline(x){
 	return 5-Math.floor(Math.sqrt(Math.abs(x)));
 }
-function filtercards(upped, filter){
+function filtercards(upped, filter, cmp){
 	var keys = [];
 	for(var key in Cards) {
 		var card = Cards[key];
@@ -794,7 +793,7 @@ function filtercards(upped, filter){
 			keys.push(key);
 		}
 	}
-	keys.sort();
+	keys.sort(cmp);
 	return keys;
 }
 function randomcard(upped, filter){
