@@ -105,7 +105,7 @@ function permanentPos(j, i){
 	}
 	return p;
 }
-var renderer = PIXI.autoDetectRenderer(900, 600);
+var renderer = new PIXI.CanvasRenderer(900, 600); // setInfo was causing flickering with webGL
 document.body.appendChild(renderer.view);
 var loader = new PIXI.AssetLoader(["esheet.png"]);
 loader.onComplete = function(){
@@ -304,7 +304,7 @@ brandai.click = function() {
 var editordeck, editorelement = 0, editordecksprites, editorcolumns, editoreleicons, editormark, editormarksprite, editorinfo;
 function setEditorInfo(obj){
 	if(obj){
-		editorinfo.setTexture(getTextImage(obj.info(), "16px Arial bold"));
+		editorinfo.setTexture(getTextImage(obj.info(), 16));
 	}
 }
 function editorCardCmp(x,y){
@@ -316,7 +316,7 @@ beditor.click = function() {
 		editorui = new PIXI.Stage(0x336699, true);
 		editorinfo = new PIXI.Text("", {font: "16px Arial bold"})
 		editorinfo.position.x=100;
-		editorinfo.position.y=585;
+		editorinfo.position.y=584;
 		editorui.addChild(editorinfo);
 		var bsave = new PIXI.Text("Done", {font: "16px Arial bold"});
 		bsave.position.x = 8;
@@ -490,7 +490,7 @@ turntell.position.y = 570;
 gameui.addChild(turntell);
 gameui.addChild(cancel);
 var foeplays = [];
-var tximgcache = {};
+var tximgcache = [];
 function getTextImage(text, font){
 	if(!(font in tximgcache)){
 		tximgcache[font] = {};
@@ -515,7 +515,7 @@ function getTextImage(text, font){
 				doc.addChild(spr);
 			}
 		}else{
-			var txt = new PIXI.Text(piece, {font: font});
+			var txt = new PIXI.Text(piece, {font: font+"px Arial bold"});
 			txt.position.x = x;
 			x+=txt.width;
 			doc.addChild(txt);
@@ -523,15 +523,15 @@ function getTextImage(text, font){
 	}
 	var rtex = new PIXI.RenderTexture(x, 16);
 	rtex.render(doc);
-	tximgcache[font][text] = rtex;
+	return tximgcache[font][text]=rtex;
 }
 var infotext = new PIXI.Sprite(nopic);
 infotext.position.x=100;
-infotext.position.y=585;
+infotext.position.y=584;
 gameui.addChild(infotext);
 function setInfo(obj){
 	if(obj){
-		infotext.setTexture(getTextImage(obj.info(), {font: "16px Arial bold"}));
+		infotext.setTexture(getTextImage(obj.info(), 16));
 	}
 }
 var handsprite = [new Array(8), new Array(8)];
@@ -843,8 +843,8 @@ function animate() {
 					creasprite[j][i].alpha = cr.immaterial||cr.burrowed?.7:1;
 					creasprite[j][i].visible = true;
 					var child = creasprite[j][i].getChildAt(0);
-					child.visible = true; // PIXI bug: children visibility corrupted by parent
-					child.setTexture(getTextImage(cr.activetext() + cr.trueatk()+"|"+cr.truehp(), "12px Arial bold"));
+					child.visible = true;
+					child.setTexture(getTextImage(cr.activetext() + cr.trueatk()+"|"+cr.truehp(), 12));
 					var pos = creasprite[j][i].position;
 					if (cr == game.players[j].gpull){
 						fgfx.beginFill(0xffaa00, .3);
@@ -902,17 +902,17 @@ function animate() {
 					permsprite[j][i].alpha = pr.immaterial?.7:1;
 					permsprite[j][i].visible = true;
 					var child = permsprite[j][i].getChildAt(0);
-					child.visible = true; // PIXI bug: children visibility corrupted by parent
+					child.visible = true;
 					if (pr instanceof Pillar){
-						child.setTexture(getTextImage("1:"+(pr.active == Actives.pend && pr.pendstate?pr.owner.mark:pr.card.element) + " x"+pr.charges, "12px Arial bold"));
-					}else child.setTexture(getTextImage(pr.activetext() + (pr.charges?" "+pr.charges:""), "12px Arial bold"));
+						child.setTexture(getTextImage("1:"+(pr.active == Actives.pend && pr.pendstate?pr.owner.mark:pr.card.element) + " x"+pr.charges, 12));
+					}else child.setTexture(getTextImage(pr.activetext() + (pr.charges?" "+pr.charges:""), 12));
 				}else permsprite[j][i].visible = false;
 			}
 			var wp = game.players[j].weapon;
 			if (wp && !(j == 1 && cloakgfx.visible)){
 				weapsprite[j].visible = true;
 				var child = weapsprite[j].getChildAt(0);
-				child.setTexture(getTextImage(wp.activetext() + " " + wp.trueatk(), "12px Arial bold"));
+				child.setTexture(getTextImage(wp.activetext() + " " + wp.trueatk(), 12));
 				weapsprite[j].alpha = wp.immaterial?.7:1;
 				child.visible = true;
 				weapsprite[j].setTexture(getCreatureImage(wp.card.code));
@@ -923,7 +923,7 @@ function animate() {
 				var dr=sh.truedr();
 				var child = shiesprite[j].getChildAt(0);
 				child.visible = true;
-				child.setTexture(getTextImage((sh.active.shield?activename(sh.active.shield):"") + (sh.charges? " x"+sh.charges:"") + (dr?" "+dr+"DR":"")), "12px Arial bold");
+				child.setTexture(getTextImage((sh.active.shield?activename(sh.active.shield):"") + (sh.charges? " x"+sh.charges:"") + (dr?" "+dr+"DR":"")), 12);
 				shiesprite[j].alpha = sh.immaterial?.7:1;
 				shiesprite[j].setTexture(getCreatureImage(sh.card.code));
 			}else shiesprite[j].visible = false;

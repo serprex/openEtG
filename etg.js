@@ -156,7 +156,7 @@ Card.prototype.readCost = function(attr, cost){
 Card.prototype.info = function(){
 	var typeString = ["Pillar", "Weapon", "Shield", "Permanent", "Spell", "Creature"];
 	if (this.type == PillarEnum){
-		return this.element + " " + activename(this.active);
+		return "1:" + this.element + " " + activename(this.active);
 	}
 	var info = typeString[this.type] + " " + this.cost+" 1:"+this.costele;
 	if (this.type == SpellEnum){
@@ -416,7 +416,7 @@ Shield.prototype.info = function(){
 	return info;
 }
 Pillar.prototype.info = function(){
-	return this.charges + " " + (this.pendstate?this.owner.mark:this.card.element) + (this.immaterial?" immaterial":"");
+	return this.charges + " 1:" + (this.pendstate?this.owner.mark:this.card.element) + (this.immaterial?" immaterial":"");
 }
 Thing.prototype.activetext = function(){
 	var info = "";
@@ -494,7 +494,7 @@ Player.prototype.spelldmg = function(x) {
 Creature.prototype.getIndex = function() { return this.owner.creatures.indexOf(this); }
 Player.prototype.addpoison = function(x) { this.poison += x; }
 Creature.prototype.addpoison = function(x) {
-	if (this.passives.malignant){
+	if (this.card.isOf(Cards.Cell)){
 		this.transform(Cards.MalignantCell);
 	}else{
 		this.poison += x;
@@ -515,8 +515,12 @@ Weapon.prototype.delay = Creature.prototype.delay = function(x){
 	if (this.passives.voodoo)this.owner.foe.delay(x);
 }
 Weapon.prototype.freeze = Creature.prototype.freeze = function(x){
-	this.frozen = x;
-	if (this.passives.voodoo)this.owner.foe.freeze(x);
+	if (this.card.isOf(Cards.Squid)){
+		this.transform(Cards.ArcticSquid.asUpped(this.card.upped));
+	}else{
+		this.frozen = x;
+		if (this.passives.voodoo)this.owner.foe.freeze(x);
+	}
 }
 Creature.prototype.spelldmg = Creature.prototype.dmg = function(x, dontdie){
 	var dmg = x<0 ? Math.max(this.hp-this.maxhp, x) : Math.min(this.truehp(), x);

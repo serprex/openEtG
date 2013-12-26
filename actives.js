@@ -125,7 +125,7 @@ cpower:function(c,t){
 	t.atk += Math.ceil(rng.real()*5);
 },
 cseed:function(c,t){
-	if (t.passives.fallible){
+	if (t.card.isOf(Cards.Elf)){
 		t.transform(Cards.FallenElf.asUpped(t.card.upped));
 	}else{
 		Actives[["drainlife", "firebolt", "freeze", "gpullspell", "icebolt", "infect", "lightning", "lobotomize", "parallel", "rewind", "snipe", "swave"][Math.floor(rng.real()*12)]](c, t);
@@ -278,6 +278,8 @@ firebolt:function(c,t){
 flyingweapon:function(c,t){
 	if (t.weapon){
 		var cr = new Creature(t.weapon.card, t.owner);
+		cr.atk = t.weapon.atk;
+		cr.active = clone(t.weapon.active)
 		cr.passives = clone(t.weapon.passives);
 		for (var key in t.weapon){
 			if (t.weapon[key] === true)cr[key] = true;
@@ -378,6 +380,11 @@ infest:function(c,t){
 		new Creature(Cards.MalignantCell, c.owner).place();
 	}
 },
+ink:function(c,t){
+	var p=new Permanent(Cards.Cloak, c.owner);
+	p.charges = 1;
+	p.place();
+},
 integrity:function(c,t){
 	var activeType = ["auto", "hit", "buff", "death"];
 	var shardTally = [0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0];
@@ -472,6 +479,17 @@ lightning:function(c,t){
 liquid:function(c,t){
 	t.addactive("hit", Actives.vampire);
 	t.addpoison(1);
+},
+livingweapon:function(c,t){
+	var w = new Weapon(t.card, t.owner);
+	w.atk = t.atk;
+	w.active = clone(t.active);
+	w.passives = clone(t.passives);
+	for (var key in t){
+		if (t[key] === true)w[key] = true;
+	}
+	t.owner.weapon = w;
+	t.remove();
 },
 lobotomize:function(c,t){
 	t.active = {};
