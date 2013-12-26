@@ -19,7 +19,7 @@ ablaze:function(c,t){
 },
 acceleration:function(c,t){
 	c.atk += 2;
-	c.dmg(1,true);
+	c.dmg(1, true);
 },
 accelerationspell:function(c,t){
 	t.addactive("auto", Actives.acceleration);
@@ -788,7 +788,8 @@ sosa:function(c,t){
 			c.quanta[i] = 0;
 		}
 	}
-	c.dmg(c.card.upped?40:48, true);
+	var n = c.card.upped?40:48;
+	c.dmg(Math.max(Math.ceil(c.maxhp*n/100), n), true);
 },
 soulcatch:function(c,t){
 	c.owner.spend(Death, -3);

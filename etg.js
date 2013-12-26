@@ -158,7 +158,7 @@ Card.prototype.info = function(){
 	if (this.type == PillarEnum){
 		return this.element + " " + activename(this.active);
 	}
-	var info = typeString[this.type] + " " + this.cost+":"+this.costele;
+	var info = typeString[this.type] + " " + this.cost+" 1:"+this.costele;
 	if (this.type == SpellEnum){
 		return info + " " + activename(this.active);
 	}

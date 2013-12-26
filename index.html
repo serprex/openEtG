@@ -238,7 +238,7 @@ function initGame(data, ai){
 }
 function getDeck(){
 	var deckimport = document.getElementById("deckimport").value;
-	return deckimport?deckimport.split(" "):['4vc', '4vc', '4vc', '4vc', '4vc', '4vc', '4vc', '4vc', '4vc', '4vc', '4vc', '4vc', '4vc', '4vc', '4vc', '4vc', '4vc', '4vc', '4ve', '4ve', '4ve', '6tt', '6tt', '6tt', '6tt', '4vf', '4vf', '4vf', '4vf', '4vf', '8pj'];
+	return deckimport?deckimport.split(" "):[];
 }
 var bpvp = new PIXI.Text("Search", {font: "16px Arial bold"});
 var brandai = new PIXI.Text("Dumb AI", {font: "16px Arial bold"});
@@ -254,7 +254,11 @@ brandai.interactive = true;
 beditor.interactive = true;
 bpvp.click = function() {
 	if (Cards){
-		socket.emit("pvpwant", {deck: getDeck(), room: document.getElementById("roomname").value});
+		var deck = getDeck();
+		if (deck.length < 8){
+			deck = ['4vc', '4vc', '4vc', '4vc', '4vc', '4vc', '4vc', '4vc', '4vc', '4vc', '4vc', '4vc', '4vc', '4vc', '4vc', '4vc', '4vc', '4vc', '4ve', '4ve', '4ve', '6tt', '6tt', '6tt', '6tt', '4vf', '4vf', '4vf', '4vf', '4vf', '8pj']
+		}
+		socket.emit("pvpwant", { deck: deck, room: document.getElementById("roomname").value });
 	}
 }
 brandai.click = function() {
@@ -276,7 +280,11 @@ brandai.click = function() {
 			deck[i] = deck[i].code;
 		}
 		deck.push(TrueMarks[e1]);
-		initGame({ first:rng.real()<.5, deck:deck, urdeck:getDeck() },
+		var urdeck = getDeck();
+		if (urdeck.length < 8){
+			urdeck = ['4vc', '4vc', '4vc', '4vc', '4vc', '4vc', '4vc', '4vc', '4vc', '4vc', '4vc', '4vc', '4vc', '4vc', '4vc', '4vc', '4vc', '4vc', '4ve', '4ve', '4ve', '6tt', '6tt', '6tt', '6tt', '4vf', '4vf', '4vf', '4vf', '4vf', '8pj']
+		}
+		initGame({ first:rng.real()<.5, deck:deck, urdeck:urdeck },
 			function(){
 				for(var i=this.hand.length-1; i>=0; i--){
 					if (this.hand[i].type == PillarEnum){
@@ -296,7 +304,7 @@ brandai.click = function() {
 var editordeck, editorelement = 0, editordecksprites, editorcolumns, editoreleicons, editormark, editormarksprite, editorinfo;
 function setEditorInfo(obj){
 	if(obj){
-		maybeSetText(editorinfo, obj.info());
+		editorinfo.setTexture(getTextImage(obj.info(), "16px Arial bold"));
 	}
 }
 function editorCardCmp(x,y){
@@ -336,6 +344,7 @@ beditor.click = function() {
 		editormarksprite.position.x = 100;
 		editormarksprite.position.y = 8;
 		editorui.addChild(editormarksprite);
+		editormark = 0;
 		for(var i=editordeck.length-1; i>=0; i--){
 			if(!(editordeck[i] in Cards)){
 				var index = TrueMarks.indexOf(editordeck[i]);
@@ -396,6 +405,10 @@ beditor.click = function() {
 							}
 							editordeck.splice(i, 0, code);
 						}
+					}
+					var deck = getDeck();
+					if (deck.length < 8){
+						deck = ['4vc', '4vc', '4vc', '4vc', '4vc', '4vc', '4vc', '4vc', '4vc', '4vc', '4vc', '4vc', '4vc', '4vc', '4vc', '4vc', '4vc', '4vc', '4ve', '4ve', '4ve', '6tt', '6tt', '6tt', '6tt', '4vf', '4vf', '4vf', '4vf', '4vf', '8pj']
 					}
 					sprite.mouseover = function() {
 						setEditorInfo(Cards[editorcolumns[_i][1][editorelement][_j]]);
@@ -477,13 +490,48 @@ turntell.position.y = 570;
 gameui.addChild(turntell);
 gameui.addChild(cancel);
 var foeplays = [];
-var infotext = new PIXI.Text("", {font: "16px Arial bold"});
+var tximgcache = {};
+function getTextImage(text, font){
+	if(!(font in tximgcache)){
+		tximgcache[font] = {};
+	}else if(text in tximgcache[font]){
+		return tximgcache[font][text];
+	}
+	var doc = new PIXI.DisplayObjectContainer();
+	var pieces = text.split(/(\d+:\d+)/);
+	var x=0;
+	for(var i=0; i<pieces.length; i++){
+		var piece = pieces[i];
+		if (/^\d+:\d+$/.test(piece)){
+			var parse = piece.split(":");
+			var num = parseInt(parse[0]);
+			var icon = getIcon(parseInt(parse[1]));
+			for(var j=0; j<num; j++){
+				var spr = new PIXI.Sprite(icon);
+				spr.scale.x = .375;
+				spr.scale.y = .375;
+				spr.position.x = x;
+				x+=12;
+				doc.addChild(spr);
+			}
+		}else{
+			var txt = new PIXI.Text(piece, {font: font});
+			txt.position.x = x;
+			x+=txt.width;
+			doc.addChild(txt);
+		}
+	}
+	var rtex = new PIXI.RenderTexture(x, 16);
+	rtex.render(doc);
+	tximgcache[font][text] = rtex;
+}
+var infotext = new PIXI.Sprite(nopic);
 infotext.position.x=100;
 infotext.position.y=585;
 gameui.addChild(infotext);
 function setInfo(obj){
 	if(obj){
-		maybeSetText(infotext, obj.info());
+		infotext.setTexture(getTextImage(obj.info(), {font: "16px Arial bold"}));
 	}
 }
 var handsprite = [new Array(8), new Array(8)];
@@ -538,7 +586,7 @@ for (var j=0; j<2; j++){
 	(function(_j){
 		for (var i=0; i<23; i++){
 			creasprite[j][i] = new PIXI.Sprite(nopic);
-			var creatext = new PIXI.Text("", {font: "12px Arial bold"});
+			var creatext = new PIXI.Sprite(nopic);
 			creatext.position.x = 58;
 			creatext.anchor.x = 1;
 			creasprite[j][i].addChild(creatext);
@@ -568,7 +616,7 @@ for (var j=0; j<2; j++){
 		}
 		for (var i=0; i<16; i++){
 			permsprite[j][i] = new PIXI.Sprite(nopic);
-			var permtext = new PIXI.Text("", {font: "12px Arial bold"});
+			var permtext = new PIXI.Sprite(nopic);
 			permtext.position.x = 38;
 			permtext.anchor.x = 1;
 			permsprite[j][i].addChild(permtext);
@@ -607,11 +655,11 @@ for (var j=0; j<2; j++){
 		shiesprite[j].interactive = true;
 		marksprite[j].position.x = 690;
 		marksprite[j].position.y = 500;
-		var weaptext = new PIXI.Text("", {font: "12pt Arial bold"});
+		var weaptext = new PIXI.Sprite(nopic);
 		weaptext.position.x = 58;
 		weaptext.anchor.x = 1;
 		weapsprite[j].addChild(weaptext);
-		var shietext = new PIXI.Text("", {font: "12pt Arial bold"});
+		var shietext = new PIXI.Text(nopic);
 		shietext.position.x = 58;
 		shietext.anchor.x = 1;
 		shiesprite[j].addChild(shietext);
@@ -796,7 +844,7 @@ function animate() {
 					creasprite[j][i].visible = true;
 					var child = creasprite[j][i].getChildAt(0);
 					child.visible = true; // PIXI bug: children visibility corrupted by parent
-					maybeSetText(child, cr.activetext() + cr.trueatk()+"|"+cr.truehp());
+					child.setTexture(getTextImage(cr.activetext() + cr.trueatk()+"|"+cr.truehp(), "12px Arial bold"));
 					var pos = creasprite[j][i].position;
 					if (cr == game.players[j].gpull){
 						fgfx.beginFill(0xffaa00, .3);
@@ -856,28 +904,28 @@ function animate() {
 					var child = permsprite[j][i].getChildAt(0);
 					child.visible = true; // PIXI bug: children visibility corrupted by parent
 					if (pr instanceof Pillar){
-						maybeSetText(child, (pr.active == Actives.pend?(pr.pendstate?pr.owner.mark:pr.card.element)+" ":"") + "x"+pr.charges);
-					}else maybeSetText(child, pr.activetext() + (pr.charges?" "+pr.charges:""));
+						child.setTexture(getTextImage("1:"+(pr.active == Actives.pend && pr.pendstate?pr.owner.mark:pr.card.element) + " x"+pr.charges, "12px Arial bold"));
+					}else child.setTexture(getTextImage(pr.activetext() + (pr.charges?" "+pr.charges:""), "12px Arial bold"));
 				}else permsprite[j][i].visible = false;
 			}
 			var wp = game.players[j].weapon;
 			if (wp && !(j == 1 && cloakgfx.visible)){
+				weapsprite[j].visible = true;
 				var child = weapsprite[j].getChildAt(0);
-				maybeSetText(child, wp.activetext() + " " + wp.trueatk());
+				child.setTexture(getTextImage(wp.activetext() + " " + wp.trueatk(), "12px Arial bold"));
 				weapsprite[j].alpha = wp.immaterial?.7:1;
 				child.visible = true;
 				weapsprite[j].setTexture(getCreatureImage(wp.card.code));
-				weapsprite[j].visible =  true;
 			}else weapsprite[j].visible = false;
 			var sh = game.players[j].shield;
 			if (sh && !(j == 1 && cloakgfx.visible)){
-				var child = shiesprite[j].getChildAt(0);
-				var dr=sh.truedr();
-				maybeSetText(child, (sh.active.shield?activename(sh.active.shield):"") + (sh.charges? " x"+sh.charges:"") + (dr?" "+dr+"DR":""));
-				shiesprite[j].alpha = sh.immaterial?.7:1;
-				child.visible = true;
-				shiesprite[j].setTexture(getCreatureImage(sh.card.code));
 				shiesprite[j].visible = true;
+				var dr=sh.truedr();
+				var child = shiesprite[j].getChildAt(0);
+				child.visible = true;
+				child.setTexture(getTextImage((sh.active.shield?activename(sh.active.shield):"") + (sh.charges? " x"+sh.charges:"") + (dr?" "+dr+"DR":"")), "12px Arial bold");
+				shiesprite[j].alpha = sh.immaterial?.7:1;
+				shiesprite[j].setTexture(getCreatureImage(sh.card.code));
 			}else shiesprite[j].visible = false;
 			marksprite[j].setTexture(getIcon(game.players[j].mark));
 			if (game.players[j].weapon && (game.players[j].weapon.frozen || game.players[j].weapon.delayed)){
