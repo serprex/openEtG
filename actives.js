@@ -122,6 +122,14 @@ chimera:function(c,t){
 	c.owner.creatures.length = 23;
 	c.owner.gpull = chim;
 },
+clear:function(c,t){
+	t.adrenaline = 0;
+	t.poison = 0;
+	t.aflatoxin = false;
+	t.momentum = false;
+	t.psion = false;
+	t.dmg(-1);
+},
 cpower:function(c,t){
 	t.buffhp(Math.ceil(rng.real()*5));
 	t.atk += Math.ceil(rng.real()*5);

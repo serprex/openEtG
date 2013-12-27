@@ -162,8 +162,8 @@ Card.prototype.info = function(){
 	if (this.type == SpellEnum){
 		return info + " " + activename(this.active);
 	}
-	if (this.attack && this.health)info += " " + this.attack+"|"+this.health;
-	else if (this.type == ShieldEnum)info += " " + this.health + "dr";
+	if (this.type == ShieldEnum)info += " " + this.health + "dr";
+	else if (this.type != PermanentEnum)info += " " + this.attack+"|"+this.health;
 	info += Thing.prototype.activetext.call(this); // Hack
 	for(var key in this){
 		if (this[key] === true)info += " " + key;
@@ -315,8 +315,9 @@ Player.prototype.endturn = function(discard) {
 			delete cr.salvaged;
 		}
 	}
-	if (this.shield && this.shield.active.auto){
-		this.shield.active();
+	if (this.shield){
+		if(this.shield.active.auto)this.shield.active();
+		this.shield.usedactive = false;
 	}
 	if (this.weapon)this.weapon.attack();
 	if (this.sosa > 0){
