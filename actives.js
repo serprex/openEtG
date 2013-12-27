@@ -1,16 +1,18 @@
 var Actives = (function(){
 function mutantactive(t){
-	t.active = {}
-	var abilities = [null,null,"hatch","freeze","burrow","destroy","steal","dive","heal","paradox","lycanthropy","scavenger","infection","gpull","devour","mutation","growth","ablaze","poison","deja","endow","guard","mitosis"];
-	var active = Actives[abilities[Math.floor(rng.real()*abilities.length)]];
-	if (!active){
-		t[rng.real()<.5?"momentum":"immaterial"] = true;
-	}else if (active == Actives.scavenger){
-		t.active.auto = active;
+	t.active = {};
+	var abilities = ["hatch","freeze","burrow","destroy","steal","dive","heal","paradox","lycanthropy","scavenger","infection","gpull","devour","mutation","growth","ablaze","poison","deja","endow","guard","mitosis"];
+	var index = Math.floor(rng.real()*abilities.length)-2;
+	if (index<0){
+		t[["momentum","immaterial"][-index]] = true;
 	}else{
-		t.active.cast = active;
-		t.cast = Math.ceil(rng.real()*2);
-		t.castele = t.card.element;
+		var active = Actives[abilities[Math.floor(rng.real()*abilities.length)]];
+		if (active == Actives.scavenger){
+			t.active.death = active;
+		}else{
+			t.active.cast = active;
+			return true;
+		}
 	}
 }
 var Actives = {
@@ -370,7 +372,10 @@ improve:function(c,t){
 	t.transform(randomcard(false, function(x){return x.type == CreatureEnum}));
 	t.buffhp(Math.floor(rng.real()*5));
 	t.atk += Math.floor(rng.real()*5);
-	mutantactive(t);
+	if(mutantactive(t)){
+		t.cast = Math.ceil(rng.real()*2);
+		t.castele = t.card.element;
+	}
 },
 infect:function(c,t){
 	t.addpoison(1);
@@ -523,8 +528,8 @@ miracle:function(c,t){
 	c.quanta[Light] = 0;
 	if (c.sosa){
 		c.hp = 1;
-	}else{
-		if (c.hp<c.maxhp)c.hp = c.maxhp-1;
+	}else if (c.hp<c.maxhp){
+		c.hp = c.maxhp-1;
 	}
 },
 mitosis:function(c,t){
@@ -541,8 +546,10 @@ momentum:function(c,t){
 	t.momentum = true;
 },
 mutant:function(c,t){
-	mutantactive(c);
-	c.castele = Math.floor(rng.real()*13);
+	if (mutantactive(c)){
+		c.cast = Math.ceil(rng.real()*2);
+		c.castele = Math.floor(rng.real()*13);
+	}
 },
 mutation:function(c,t){
 	var rnd = rng.real();
@@ -624,6 +631,7 @@ parallel:function(c,t){
 		if (t.hasOwnProperty(attr))copy[attr] = t[attr];
 	}
 	copy.passives = clone(copy.passives);
+	copy.active = clone(copy.active);
 	copy.owner = c.owner;
 	copy.usedactive = true;
 	copy.place();

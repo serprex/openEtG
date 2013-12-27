@@ -251,7 +251,6 @@ Player.prototype.endturn = function(discard) {
 		}
 		this.hand.splice(discard, 1);
 	}
-	this.precognition = this.sanctuary = this.silence = false;
 	this.spend(this.mark, -1);
 	this.foe.dmg(this.foe.poison);
 	var patienceFlag = false, floodingFlag = false, stasisFlag = false, floodingPaidFlag = false, freedomChance = 0;
@@ -313,7 +312,7 @@ Player.prototype.endturn = function(discard) {
 			}
 		}
 		if ((cr = this.foe.creatures[i]) && cr.salvaged){
-			cr.salvaged = undefined;
+			delete cr.salvaged;
 		}
 	}
 	if (this.shield && this.shield.active.auto){
@@ -325,6 +324,7 @@ Player.prototype.endturn = function(discard) {
 	}
 	this.nova = 0;
 	this.foe.drawcard();
+	this.foe.precognition = this.foe.sanctuary = this.foe.silence = false;
 	this.game.turn = this.foe;
 }
 Player.prototype.drawcard = function() {
@@ -531,7 +531,7 @@ Creature.prototype.spelldmg = Creature.prototype.dmg = function(x, dontdie){
 	return dmg;
 }
 Creature.prototype.remove = function(index) {
-	if (this.owner.gpull == this)this.owner.gpull = undefined;
+	if (this.owner.gpull == this)delete this.owner.gpull;
 	if (index === undefined)index=this.getIndex();
 	if (~index){
 		delete this.owner.creatures[index];
@@ -569,11 +569,11 @@ Creature.prototype.die = function() {
 	}
 }
 Creature.prototype.transform = function(card, owner){
-	Thing.call(this, card, owner || this.owner);
 	this.maxhp = this.hp = card.health;
 	this.atk = card.attack;
 	this.cast = card.cast;
 	this.castele = card.castele;
+	Thing.call(this, card, owner || this.owner);
 }
 Thing.prototype.evade = function(sender) { return false; }
 Creature.prototype.evade = function(sender) {
@@ -645,8 +645,8 @@ Creature.prototype.truehp = function(){
 }
 Permanent.prototype.getIndex = function() { return this.owner.permanents.indexOf(this); }
 Permanent.prototype.die = function(){ delete this.owner.permanents[this.getIndex()]; }
-Weapon.prototype.die = function() { this.owner.weapon = undefined; }
-Shield.prototype.die = function() { this.owner.shield = undefined; }
+Weapon.prototype.die = function() { delete this.owner.weapon; }
+Shield.prototype.die = function() { delete this.owner.shield; }
 Thing.prototype.isMaterialInstance = function(type) {
 	return this instanceof type && !this.immaterial && !this.burrowed;
 }

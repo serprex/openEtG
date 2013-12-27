@@ -87,7 +87,7 @@ function Thing(card, owner){
 	this.active = clone(card.active);
 	if (this.active.play){
 		this.active.play(this);
-		this.active.play = undefined;
+		delete this.active.play;
 	}
 }
 function Creature(card, owner){
