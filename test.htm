@@ -29,9 +29,9 @@ loadcards(function(cards, targeting) {
 	Targeting = targeting;
 	test("Adrenaline", function() {
 		initTest();
-		(player1.creatures[0] = new Creature(Cards.Devourer, player1)).adrenaline = 1;
-		(player1.creatures[1] = new Creature(Cards.HornedFrog, player1)).adrenaline = 1;
-		(player1.creatures[2] = new Creature(Cards.RubyDragon, player1)).adrenaline = 1;
+		(player1.creatures[0] = new Creature(Cards.Devourer, player1)).status.adrenaline = 1;
+		(player1.creatures[1] = new Creature(Cards.HornedFrog, player1)).status.adrenaline = 1;
+		(player1.creatures[2] = new Creature(Cards.RubyDragon, player1)).status.adrenaline = 1;
 		player2.quanta[Life]=3;
 		player1.endturn();
 		equal(player2.hp, 68, "dmg");
@@ -50,9 +50,9 @@ loadcards(function(cards, targeting) {
 		while(player1.hand.length){
 			player1.summon(0);
 		}
-		equal(player1.permanents[0].charges, 2, "2 charges");
+		equal(player1.permanents[0].status.charges, 2, "2 charges");
 		Actives.destroy(player2, player1.permanents[0]);
-		equal(player1.permanents[0].charges, 1, "1 charge");
+		equal(player1.permanents[0].status.charges, 1, "1 charge");
 		Actives.destroy(player2, player1.permanents[0]);
 		ok(!player1.permanents[0], "poof");
 		equal(player1.permanents[1].card, Cards.SoulCatcher, "SoulCatcher");
@@ -66,9 +66,9 @@ loadcards(function(cards, targeting) {
 		ok(!player1.weapon, "Dagger gone");
 		player1.hand = [Cards.BoneWall];
 		player1.summon(0);
-		equal(player1.shield.charges, 7, "7 bones");
+		equal(player1.shield.status.charges, 7, "7 bones");
 		Actives.destroy(player2, player1.shield);
-		equal(player1.shield.charges, 6, "6 bones");
+		equal(player1.shield.status.charges, 6, "6 bones");
 		for(var i=0; i<6; i++){
 			Actives.destroy(player2, player1.shield);
 		}
@@ -92,9 +92,9 @@ loadcards(function(cards, targeting) {
 		equal(player1.hand.length, 3, "handlength");
 		var pillars = player1.permanents[0];
 		ok(pillars instanceof Pillar, "ispillar");
-		equal(pillars.charges, 5, "5 charges");
+		equal(pillars.status.charges, 5, "5 charges");
 		Actives.earthquake(player2, pillars);
-		equal(pillars.charges, 2, "2 charges");
+		equal(pillars.status.charges, 2, "2 charges");
 		Actives.earthquake(player2, pillars);
 		ok(!player1.permanents[0], "poof");
 	});
@@ -123,7 +123,7 @@ loadcards(function(cards, targeting) {
 		player2.deck = [Cards.MassiveDragon];
 		player1.endturn();
 		equal(player2.gpull.hp, 29, "dmg redirected");
-		equal(player2.gpull.poison, 1, "psn redirected");
+		equal(player2.gpull.status.poison, 1, "psn redirected");
 		player2.gpull.die();
 		ok(!player2.gpull, "gpull death poof");
 	});
@@ -174,16 +174,16 @@ loadcards(function(cards, targeting) {
 	});
 	test("Steal", function() {
 		initTest();
-		(player1.shield = new Shield(Cards.BoneWall, player1)).charges=3;
+		(player1.shield = new Shield(Cards.BoneWall, player1)).status.charges=3;
 		Actives.steal(player2, player1.shield);
-		ok(player1.shield && player1.shield.charges == 2, "Wish bones");
-		ok(player2.shield && player2.shield.charges == 1, "stole 1");
+		ok(player1.shield && player1.shield.status.charges == 2, "Wish bones");
+		ok(player2.shield && player2.shield.status.charges == 1, "stole 1");
 		Actives.steal(player2, player1.shield);
-		ok(player1.shield && player1.shield.charges == 1, "Lone bone");
-		ok(player2.shield && player2.shield.charges == 2, "stole 2");
+		ok(player1.shield && player1.shield.status.charges == 1, "Lone bone");
+		ok(player2.shield && player2.shield.status.charges == 2, "stole 2");
 		Actives.steal(player2, player1.shield);
 		ok(!player1.shield, "This town is all in hell");
-		ok(player2.shield && player2.shield.charges == 3, "stole 3");
+		ok(player2.shield && player2.shield.status.charges == 3, "stole 3");
 	});
 	test("Voodoo", function() {
 		initTest();
@@ -193,8 +193,8 @@ loadcards(function(cards, targeting) {
 		Actives.infect(player1, voodoo);
 		equal(voodoo.hp, 11, "dmg");
 		equal(player2.hp, 95, "foe dmg");
-		equal(voodoo.poison, 1, "psn");
-		equal(player2.poison, 1, "foe psn");
+		equal(voodoo.status.poison, 1, "psn");
+		equal(player2.status.poison, 1, "foe psn");
 		Actives.holylight(player1, voodoo);
 		equal(voodoo.hp, 1, "holy dmg");
 		equal(player2.hp, 85, "foe holy dmg");

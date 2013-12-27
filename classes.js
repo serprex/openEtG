@@ -47,7 +47,7 @@ function Player(game){
 	this.owner = this;
 	this.shield = null;
 	this.weapon = null;
-	this.poison = 0;
+	this.status = {poison:0};
 	this.neuro = false;
 	this.sosa = 0;
 	this.silence = false;
@@ -78,11 +78,7 @@ function Thing(card, owner){
 	if (!card)return;
 	this.owner = owner;
 	this.card = card;
-	if (card.status){
-		for(var key in card.status){
-			this[key] = card.status[key];
-		}
-	}
+	this.status = clone(card.status);
 	this.passives = clone(card.passives);
 	this.active = clone(card.active);
 	if (this.active.play){
@@ -91,12 +87,6 @@ function Thing(card, owner){
 	}
 }
 function Creature(card, owner){
-	this.adrenaline = 0;
-	this.delayed = 0;
-	this.dive = 0;
-	this.frozen = 0;
-	this.poison = 0;
-	this.steamatk = 0;
 	this.usedactive = true;
 	if (card == Cards.ShardGolem){
 		this.card = card;
@@ -106,17 +96,15 @@ function Creature(card, owner){
 		this.atk = golem.atk;
 		this.active = clone(golem.active);
 		this.cast = golem.cast;
+		this.castele = Earth;
 		this.passives = clone(golem.passives);
-		this.adrenaline = golem.adrenaline;
-		this.momentum = golem.momentum;
-		this.immaterial = golem.immaterial;
+		this.status = clone(golem.status);
 	}else this.transform(card, owner);
 }
 function Permanent(card, owner){
 	if (!card){
 		return;
 	}
-	this.charges = 0;
 	this.cast = card.cast;
 	this.castele = card.castele;
 	this.usedactive = true;
@@ -127,7 +115,6 @@ function Weapon(card, owner){
 	this.delayed = 0;
 	this.dive = 0;
 	this.steamatk = 0;
-	this.adrenaline = 0;
 	this.atk = card.attack;
 	Permanent.apply(this, arguments);
 }
@@ -139,7 +126,7 @@ function Pillar(card, owner){
 	this.owner = owner;
 	this.card = card;
 	this.active = card.active;
-	this.charges = 1;
+	this.status = {charges: 1};
 	this.pendstate = false;
 }
 Player.prototype = new Thing();

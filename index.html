@@ -850,7 +850,7 @@ function animate() {
 				var cr = game.players[j].creatures[i];
 				if (cr && !(j == 1 && cloakgfx.visible)){
 					creasprite[j][i].setTexture(getCreatureImage(cr.card.code));
-					creasprite[j][i].alpha = cr.immaterial||cr.burrowed?.7:1;
+					creasprite[j][i].alpha = cr.status.immaterial||cr.status.burrowed?.7:1;
 					creasprite[j][i].visible = true;
 					var child = creasprite[j][i].getChildAt(0);
 					child.visible = true;
@@ -861,12 +861,12 @@ function animate() {
 						fgfx.drawRect(pos.x-62, pos.y-17, 124, 34);
 						fgfx.endFill();
 					}
-					if (cr.frozen){
+					if (cr.status.frozen){
 						fgfx.beginFill(0x0000ff, .3);
 						fgfx.drawRect(pos.x-62, pos.y-17, 124, 34);
 						fgfx.endFill();
 					}
-					if (cr.delayed){
+					if (cr.status.delayed){
 						fgfx.beginFill(0xffff00, .3);
 						fgfx.drawRect(pos.x-62, pos.y-17, 124, 34);
 						fgfx.endFill();
@@ -877,27 +877,27 @@ function animate() {
 						fgfx.drawRect(pos.x-62, pos.y+5, 12, 12);
 						fgfx.endFill();
 					}
-					if (cr.adrenaline){
+					if (cr.status.adrenaline){
 						fgfx.beginFill(elecols[Life], .8);
 						fgfx.drawRect(pos.x-54, pos.y+5, 12, 12);
 						fgfx.endFill();
 					}
-					if (cr.momentum){
+					if (cr.status.momentum){
 						fgfx.beginFill(elecols[Gravity], .8);
 						fgfx.drawRect(pos.x-46, pos.y+5, 12, 12);
 						fgfx.endFill();
 					}
-					if (cr.psion){
+					if (cr.status.psion){
 						fgfx.beginFill(elecols[Aether], .8);
 						fgfx.drawRect(pos.x-38, pos.y+5, 12, 12);
 						fgfx.endFill();
 					}
-					if (cr.burrowed){
+					if (cr.status.burrowed){
 						fgfx.beginFill(elecols[Earth], .8);
 						fgfx.drawRect(pos.x-30, pos.y+5, 12, 12);
 						fgfx.endFill();
 					}
-					if (cr.poison){
+					if (cr.status.poison){
 						fgfx.beginFill(cr.aflatoxin?elecols[Darkness]:elecols[Death], .8);
 						fgfx.drawRect(pos.x-22, pos.y+5, 12, 12);
 						fgfx.endFill();
@@ -909,13 +909,13 @@ function animate() {
 				var pr = game.players[j].permanents[i];
 				if (pr && !(j == 1 && cloakgfx.visible && !pr.passives.cloak)){
 					permsprite[j][i].setTexture(getPermanentImage(pr.card.code));
-					permsprite[j][i].alpha = pr.immaterial?.7:1;
+					permsprite[j][i].alpha = pr.status.immaterial?.7:1;
 					permsprite[j][i].visible = true;
 					var child = permsprite[j][i].getChildAt(0);
 					child.visible = true;
 					if (pr instanceof Pillar){
-						child.setTexture(getTextImage("1:"+(pr.active == Actives.pend && pr.pendstate?pr.owner.mark:pr.card.element) + " x"+pr.charges, 12));
-					}else child.setTexture(getTextImage(pr.activetext() + (pr.charges?" "+pr.charges:""), 12));
+						child.setTexture(getTextImage("1:"+(pr.active == Actives.pend && pr.pendstate?pr.owner.mark:pr.card.element) + " x"+pr.status.charges, 12));
+					}else child.setTexture(getTextImage(pr.activetext() + (pr.status.charges?" "+pr.status.charges:""), 12));
 				}else permsprite[j][i].visible = false;
 			}
 			var wp = game.players[j].weapon;
@@ -933,24 +933,25 @@ function animate() {
 				var dr=sh.truedr();
 				var child = shiesprite[j].getChildAt(0);
 				child.visible = true;
-				child.setTexture(getTextImage((sh.charges? "x"+sh.charges:"") + sh.activetext().replace("shield ", "") + (dr?" "+dr:"")), 12);
-				shiesprite[j].alpha = sh.immaterial?.7:1;
+				child.setTexture(getTextImage((sh.status.charges? "x"+sh.status.charges:"") + sh.activetext().replace("shield ", "") + (dr?" "+dr:"")), 12);
+				shiesprite[j].alpha = sh.status.immaterial?.7:1;
 				shiesprite[j].setTexture(getCreatureImage(sh.card.code));
 			}else shiesprite[j].visible = false;
-			marksprite[j].setTexture(getIcon(game.players[j].mark));
-			if (game.players[j].weapon && (game.players[j].weapon.frozen || game.players[j].weapon.delayed)){
+			var wp = game.players[j].weapon;
+			if (wp){
 				var pos = weapsprite[j].position;
-				if (cr.frozen){
+				if (wp.status.frozen){
 					fgfx.beginFill(0x0000ff, .3);
 					fgfx.drawRect(pos.x-42, pos.y-12, 84, 24);
 					fgfx.endFill();
 				}
-				if (cr.delayed){
+				if (wp.status.delayed){
 					fgfx.beginFill(0xffff00, .3);
 					fgfx.drawRect(pos.x-42, pos.y-12, 84, 24);
 					fgfx.endFill();
 				}
 			}
+			marksprite[j].setTexture(getIcon(game.players[j].mark));
 			for(var i=1; i<13; i++){
 				maybeSetText(quantatext[j].getChildAt(i-1), game.players[j].quanta[i].toString());
 			}
@@ -958,7 +959,7 @@ function animate() {
 				quantatext[j].getChildAt(i+12-1).setTexture(getIcon(i));
 			}
 			maybeSetText(hptext[j], game.players[j].hp + "/" + game.players[j].maxhp);
-			maybeSetText(poisontext[j], game.players[j].poison + (game.players[j].neuro?"psn!":"psn"));
+			maybeSetText(poisontext[j], game.players[j].status.poison + (game.players[j].neuro?"psn!":"psn"));
 			maybeSetText(decktext[j], game.players[j].deck.length + "cards");
 		}
 	}else if(mainStage == editorui){

@@ -37,14 +37,14 @@ accretion:function(c,t){
 	}
 },
 accumulation:function(c,t){
-	return c.charges;
+	return c.status.charges;
 },
 adrenaline:function(c,t){
-	t.adrenaline = 1;
+	t.status.adrenaline = 1;
 },
 aflatoxin:function(c,t){
 	t.addpoison(2);
-	t.aflatoxin = true;
+	t.status.aflatoxin = true;
 },
 air:function(c,t){
 	c.owner.spend(Air, -1);
@@ -69,6 +69,11 @@ bless:function(c,t){
 	t.atk += 3;
 	t.buffhp(3);
 },
+blueprint:function(c,t){
+	if (c.owner.hand.length<8){
+		c.owner.hand.push(t.card);
+	}
+},
 boneyard:function(c,t){
 	if (t.card.isOf(Cards.Skeleton)){
 		new Creature(Cards.Skeleton.asUpped(c.card.upped), c.owner).place();
@@ -87,7 +92,7 @@ bravery:function(c,t){
 	}
 },
 burrow:function(c,t){
-	c.burrowed = true;
+	c.status.burrowed = true;
 	c.active.cast = Actives.unburrow;
 	c.cast = 0;
 },
@@ -99,8 +104,10 @@ butterfly:function(c,t){
 catapult:function(c,t){
 	t.die();
 	c.owner.foe.dmg(Math.ceil(t.truehp()*(t.frozen?150:100)/(t.truehp()+100)));
-	c.owner.foe.poison += t.poison;
-	if (t.frozen){
+	if (t.status.poison){
+		c.owner.foe.addpoison(t.status.poison);
+	}
+	if (t.status.frozen){
 		c.owner.foe.freeze(3);
 	}
 },
@@ -117,17 +124,23 @@ chimera:function(c,t){
 	chim.maxhp = hp;
 	chim.hp = hp;
 	chim.active = {};
-	chim.momentum = true;
+	chim.status.momentum = true;
 	c.owner.creatures = [chim];
 	c.owner.creatures.length = 23;
 	c.owner.gpull = chim;
 },
 clear:function(c,t){
-	t.adrenaline = 0;
-	t.poison = 0;
-	t.aflatoxin = false;
-	t.momentum = false;
-	t.psion = false;
+	t.status.adrenaline = 0;
+	t.status.poison = 0;
+	t.status.aflatoxin = false;
+	t.status.momentum = false;
+	t.status.psion = false;
+	if (t.delayed > 0){
+		t.delayed--;
+	}
+	if (t.frozen > 0){
+		t.frozen--;
+	}
 	t.dmg(-1);
 },
 cpower:function(c,t){
@@ -153,7 +166,7 @@ deja:function(c,t){
 },
 destroy:function(c,t, dontsalvage){
 	if (t.passives.stackable){
-		if(--t.charges<=0){
+		if(--t.status.charges<=0){
 			t.die();
 		}
 	}else t.die();
@@ -225,7 +238,7 @@ dryspell2:function(c,t){
 	t.masscc(c, function(c,t){ c.spend(Water, -t.dmg(2)); });
 },
 dshield:function(c,t){
-	c.immaterial = true;
+	c.status.immaterial = true;
 },
 duality:function(c,t){
 	if (c.owner.foe.deck.length > 0 && c.owner.hand.length < 8){
@@ -236,8 +249,8 @@ earth:function(c,t){
 	c.owner.spend(Earth, -1);
 },
 earthquake:function(c,t){
-	if (t.charges>3){
-		t.charges -= 3;
+	if (t.status.charges>3){
+		t.status.charges -= 3;
 	}else{
 		t.die();
 	}
@@ -251,30 +264,23 @@ empathy:function(c,t){
 	c.owner.dmg(-healsum);
 },
 enchant:function(c,t){
-	t.immaterial = true
+	t.status.immaterial = true
 },
 endow:function(c,t){
 	c.active = clone(t.active);
+	c.passives = clone(t.passives);
+	c.status = clone(t.status);
 	c.cast = t.cast;
 	c.castele = t.castele;
 	c.atk += t.trueatk();
 	if (t.active.buff){
 		c.atk -= t.active.buff(t);
 	}
-	for(var key in t){
-		if (t[key] === true && key != "usedactive")c[key] = true;
-	}
-	for(var key in t.passives){
-		c[key] = t.passives[t];
-	}
-	if (t.adrenaline>0){
-		c.adrenaline = 1
-	}
 	c.buffhp(2);
 },
 evolve:function(c,t){
 	c.transform(Cards.Shrieker.asUpped(c.card.upped));
-	c.burrowed = false;
+	c.status.burrowed = false;
 },
 fiery:function(c,t){
 	return Math.floor(c.owner.quanta[Fire]/5);
@@ -289,11 +295,9 @@ flyingweapon:function(c,t){
 	if (t.weapon){
 		var cr = new Creature(t.weapon.card, t.owner);
 		cr.atk = t.weapon.atk;
-		cr.active = clone(t.weapon.active)
+		cr.active = clone(t.weapon.active);
 		cr.passives = clone(t.weapon.passives);
-		for (var key in t.weapon){
-			if (t.weapon[key] === true)cr[key] = true;
-		}
+		cr.status = clone(t.weapon.status);
 		cr.place();
 		t.weapon = undefined;
 	}
@@ -395,7 +399,7 @@ infest:function(c,t){
 },
 ink:function(c,t){
 	var p=new Permanent(Cards.Cloak, c.owner);
-	p.charges = 1;
+	p.status.charges = 1;
 	p.place();
 },
 integrity:function(c,t){
@@ -453,6 +457,7 @@ integrity:function(c,t){
 	var actives = {}, cost = shardCosts[active];
 	actives[cost<0?activeType[~cost]:"cast"] = Actives[active];
 	var passives = {};
+	var status = {};
 	if (shardTally[Air]>0){
 		passives.airborne = true;
 	}
@@ -471,13 +476,20 @@ integrity:function(c,t){
 	if (shardTally[Gravity]>0){
 		passives.salvage = true;
 	}
+	if (shardTally[Aether]>1){
+		status.immaterial = true;
+	}
+	if (shardTally[Gravity]>1){
+		status.momentum = true;
+	}
+	if (shardTally[Life]>0){
+		status.adrenaline = 1;
+	}
 	c.owner.shardgolem = {
 		atk: atk + bonus,
 		hp: hp + bonus,
 		passives: passives,
-		immaterial: shardTally[Aether]>1,
-		momentum: shardTally[Gravity]>1,
-		adrenaline: shardTally[Life]>1?1:0,
+		status: status,
 		active: actives,
 		cast: cast
 	};
@@ -498,19 +510,17 @@ livingweapon:function(c,t){
 	w.atk = t.atk;
 	w.active = clone(t.active);
 	w.passives = clone(t.passives);
-	for (var key in t){
-		if (t[key] === true)w[key] = true;
-	}
+	w.status = clone(t.status);
 	t.owner.weapon = w;
 	t.remove();
 },
 lobotomize:function(c,t){
 	t.active = {};
-	t.momentum = false;
-	t.psion = false;
+	t.status.momentum = false;
+	t.status.psion = false;
 },
 losecharge:function(c,t){
-	if(--c.charges<0){
+	if(--c.status.charges<0){
 		c.die();
 	}
 },
@@ -551,7 +561,7 @@ mitosisspell:function(c,t){
 momentum:function(c,t){
 	t.atk += 1;
 	t.buffhp(1);
-	t.momentum = true;
+	t.status.momentum = true;
 },
 mutant:function(c,t){
 	if (mutantactive(c)){
@@ -576,7 +586,7 @@ neuro:function(c,t){
 	}
 },
 neuroify:function(c,t){
-	if (c.foe.poison>0){
+	if (c.foe.status.poison){
 		c.foe.neuro = true;
 	}
 },
@@ -638,18 +648,23 @@ parallel:function(c,t){
 	for(var attr in t){
 		if (t.hasOwnProperty(attr))copy[attr] = t[attr];
 	}
-	copy.passives = clone(copy.passives);
-	copy.active = clone(copy.active);
+	copy.passives = clone(t.passives);
+	copy.active = clone(t.active);
+	copy.status = clone(t.status);
 	copy.owner = c.owner;
 	copy.usedactive = true;
 	copy.place();
 	if (copy.voodoo){
 		c.owner.foe.dmg(copy.maxhp-copy.hp);
-		c.owner.foe.addpoison(copy.poison);
+		if (copy.status.poison){
+			c.owner.foe.addpoison(copy.status.poison);
+		}
 		if (c.owner.foe.weapon){
-			c.owner.foe.delay(copy.delayed);
-			if (copy.frozen>c.owner.foe.weapon.frozen){
-				c.owner.foe.freeze(copy.frozen);
+			if (copy.status.delayed){
+				c.owner.foe.delay(copy.status.delayed);
+			}
+			if (copy.status.delayed && copy.status.frozen>c.owner.foe.weapon.frozen){
+				c.owner.foe.freeze(copy.status.frozen);
 			}
 		}
 	}
@@ -685,20 +700,20 @@ precognition:function(c,t){
 	c.owner.precognition = true;
 },
 purify:function(c,t){
-	t.poison = Math.min(t.poison-2,-2);
+	t.status.poison = t.status.poison?Math.min(t.poison-2,-2):-2;
 	if (t instanceof Player){
 		t.neuro = false;
 		t.sosa = 0;
 	}else{
-		t.aflatoxin = false;
+		t.status.aflatoxin = false;
 	}
 },
 queen:function(c,t){
 	new Creature(Cards.Firefly.asUpped(c.card.upped), c.owner).place();
 },
 quint:function(c,t){
-	t.immaterial = true;
-	t.frozen = 0;
+	t.status.immaterial = true;
+	t.status.frozen = 0;
 },
 rage:function(c,t){
 	var dmg = c.card.upped?6:5;
@@ -765,7 +780,7 @@ silence:function(c,t){
 singularity:function(c,t){
 	var r = rng.real();
 	if (r > .9){
-		c.adrenaline = 1;
+		c.status.adrenaline = 1;
 	}else if (r > .8){
 		c.active.hit = Actives.vampire;
 	}else if (r > .7){
@@ -788,7 +803,7 @@ singularity:function(c,t){
 	c.dmg(c.trueatk(), true);
 },
 sinkhole:function(c,t){
-	t.burrowed = true;
+	t.status.burrowed = true;
 	t.active.cast = Actives.unburrow;
 	t.cast = c.card.upped?1:0;
 	t.castele = Earth;
@@ -839,17 +854,17 @@ steal:function(c,t){
 		Actives.destroy(c, t, true);
 		if (t instanceof Shield){
 			if (c.owner.shield && c.owner.shield.card == t.card){
-				c.owner.shield.charges++;
+				c.owner.shield.status.charges++;
 			}else{
 				c.owner.shield = new Shield(t.card, c.owner);
-				c.owner.shield.charges = 1;
+				c.owner.shield.status.charges = 1;
 			}
 		}else if (t instanceof Weapon){
 			if (c.owner.weapon && c.owner.weapon.card == t.card){
-				c.owner.shield.charges++;
+				c.owner.shield.status.charges++;
 			}else{
 				c.owner.weapon = new Weapon(t.card, c.owner);
-				c.owner.weapon.charges = 1;
+				c.owner.weapon.status.charges = 1;
 			}
 		}else if (t instanceof Pillar){
 			new Pillar(t.card, c.owner).place();
@@ -887,7 +902,7 @@ throwrock:function(c,t){
 	t.owner.deck.splice(Math.floor(rng.real()*t.owner.deck.length), 0, c.card);
 },
 unburrow:function(c,t){
-	c.burrowed = false;
+	c.status.burrowed = false;
 	c.active.cast = Actives.burrow;
 	c.cast = 1;
 },
@@ -915,15 +930,15 @@ web:function(c,t){
 },
 wisdom:function(c,t){
 	t.atk += 4;
-	if (t.immaterial){
-		t.psion = true;
+	if (t.status.immaterial){
+		t.status.psion = true;
 	}
 },
 pillar:function(c,t){
-	c.owner.spend(c.card.element,-c.charges*(c.card.element>0?1:3));
+	c.owner.spend(c.card.element,-c.status.charges*(c.card.element>0?1:3));
 },
 pend:function(c,t){
-	c.owner.spend(c.pendstate?c.owner.mark:c.card.element,-c.charges);
+	c.owner.spend(c.pendstate?c.owner.mark:c.card.element,-c.status.charges);
 	c.pendstate ^= true;
 },
 skull:function(c,t){
@@ -939,7 +954,7 @@ skull:function(c,t){
 	}
 },
 bones:function(c,t){
-	if (--c.charges <= 0){
+	if (--c.status.charges <= 0){
 		c.owner.shield = undefined;
 	}
 	return true;
