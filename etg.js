@@ -319,8 +319,8 @@ Player.prototype.endturn = function(discard) {
 				cr.die();
 			}
 		}
-		if ((cr = this.foe.creatures[i]) && cr.salvaged){
-			delete cr.salvaged;
+		if ((cr = this.foe.creatures[i]) && cr.status.salvaged){
+			delete cr.status.salvaged;
 		}
 	}
 	if (this.shield){
@@ -786,8 +786,8 @@ function casttext(cast, castele){
 function salvageScan(from, t){
 	if (t.owner.hand.length<8 && t.owner != from){
 		for (var i=0; i<23; i++){
-			if (t.owner.creatures[i] && t.owner.creatures[i].passives.salvage && !t.owner.creatures[i].salvaged){
-				t.owner.creatures[i].salvaged = true;
+			if (t.owner.creatures[i] && t.owner.creatures[i].passives.salvage && !t.owner.creatures[i].status.salvaged){
+				t.owner.creatures[i].status.salvaged = true;
 				t.owner.hand.push(t.card);
 				return;
 			}

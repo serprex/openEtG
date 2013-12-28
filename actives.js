@@ -69,11 +69,6 @@ bless:function(c,t){
 	t.atk += 3;
 	t.buffhp(3);
 },
-blueprint:function(c,t){
-	if (c.owner.hand.length<8){
-		c.owner.hand.push(t.card);
-	}
-},
 boneyard:function(c,t){
 	if (t.card.isOf(Cards.Skeleton)){
 		new Creature(Cards.Skeleton.asUpped(c.card.upped), c.owner).place();
@@ -506,13 +501,15 @@ liquid:function(c,t){
 	t.addpoison(1);
 },
 livingweapon:function(c,t){
-	var w = new Weapon(t.card, t.owner);
-	w.atk = t.atk;
-	w.active = clone(t.active);
-	w.passives = clone(t.passives);
-	w.status = clone(t.status);
-	t.owner.weapon = w;
-	t.remove();
+	if (!t.owner.weapon){
+		var w = new Weapon(t.card, t.owner);
+		w.atk = t.atk;
+		w.active = clone(t.active);
+		w.passives = clone(t.passives);
+		w.status = clone(t.status);
+		t.owner.weapon = w;
+		t.remove();
+	}
 },
 lobotomize:function(c,t){
 	t.active = {};
@@ -932,6 +929,11 @@ wisdom:function(c,t){
 	t.atk += 4;
 	if (t.status.immaterial){
 		t.status.psion = true;
+	}
+},
+yoink:function(c,t){
+	if (!c.owner.foe.sanctuary && c.owner.foe.hand.length > 0 && c.owner.hand.length<8){
+		c.owner.hand.push(c.owner.foe.hand.pop());
 	}
 },
 pillar:function(c,t){

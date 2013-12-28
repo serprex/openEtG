@@ -94,9 +94,9 @@ function Creature(card, owner){
 		var golem = owner.shardgolem;
 		this.maxhp = this.hp = golem.hp;
 		this.atk = golem.atk;
-		this.active = clone(golem.active);
 		this.cast = golem.cast;
 		this.castele = Earth;
+		this.active = clone(golem.active);
 		this.passives = clone(golem.passives);
 		this.status = clone(golem.status);
 	}else this.transform(card, owner);
@@ -111,10 +111,6 @@ function Permanent(card, owner){
 	Thing.apply(this, arguments);
 }
 function Weapon(card, owner){
-	this.frozen = 0;
-	this.delayed = 0;
-	this.dive = 0;
-	this.steamatk = 0;
 	this.atk = card.attack;
 	Permanent.apply(this, arguments);
 }
