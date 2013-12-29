@@ -78,7 +78,13 @@ function Thing(card, owner){
 	if (!card)return;
 	this.owner = owner;
 	this.card = card;
-	this.status = clone(card.status);
+	if (this.status){
+		for(var key in card.status){
+			this.status[key] = card.status[key];
+		}
+	}else{
+		this.status = clone(card.status)
+	}
 	this.passives = clone(card.passives);
 	this.active = clone(card.active);
 	if (this.active.play){
