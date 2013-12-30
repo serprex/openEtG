@@ -235,6 +235,7 @@ Player.prototype.canspend = function(qtype, x) {
 }
 Player.prototype.spend = function(qtype, x) {
 	if (x == 0)return true;
+	if (x<0 && this.flatline)return true;
 	if (!this.canspend(qtype, x))return false;
 	if (qtype == Other){
 		var b = x<0?-1:1;
@@ -333,7 +334,7 @@ Player.prototype.endturn = function(discard) {
 	}
 	this.nova = 0;
 	this.foe.drawcard();
-	this.foe.precognition = this.foe.sanctuary = this.foe.silence = false;
+	this.foe.flatline = this.foe.precognition = this.foe.sanctuary = this.foe.silence = false;
 	this.game.turn = this.foe;
 }
 Player.prototype.drawcard = function() {
@@ -805,7 +806,7 @@ var TargetFilters = {
 		return t.isMaterialInstance(Pillar);
 	},
 	weap:function(c, t){
-		return !(t instanceof Player) && t.card.type == WeaponEnum && !t.status.immaterial && !t.status.burrowed;
+		return !(t instanceof Player) && (t instanceof Weapon || t.card.type == WeaponEnum) && !t.status.immaterial && !t.status.burrowed;
 	},
 	perm:function(c, t){
 		return t.isMaterialInstance(Permanent);

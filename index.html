@@ -843,7 +843,13 @@ function animate() {
 		for(var j=0; j<2; j++){
 			if (game.players[j].sosa){
 				fgfx.beginFill(elecols[Death], .5);
-				fgfx.drawRect(hptext[j].position.x-30, hptext[j].position.y-10, 60, 20);
+				var spr = quantatext[j];
+				fgfx.drawRect(spr.position.x-spr.width/2, spr.position.y-spr.height/2, spr.width, spr.height);
+				fgfx.endFill();
+			}
+			if (game.players[j].flatline){
+				fgfx.beginFill(elecols[Death], .3);
+				fgfx.drawRect(handsprite[j][0].position.x-2, handsprite[j][0].position.y-2, 124, 164);
 				fgfx.endFill();
 			}
 			if (game.players[j].silence){

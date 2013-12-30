@@ -46,6 +46,15 @@ aflatoxin:function(c,t){
 	t.addpoison(2);
 	t.status.aflatoxin = true;
 },
+aggroskele:function(c,t){
+	var dmg = 0;
+	for (var i=0; i<23; i++){
+		if (c.creatures[i] && c.creatures[i].card.isOf(Cards.Skeleton)){
+			dmg += c.creatures[i].trueatk();
+		}
+	}
+	t.dmg(dmg);
+},
 air:function(c,t){
 	c.owner.spend(Air, -1);
 },
@@ -287,6 +296,11 @@ fire:function(c,t){
 firebolt:function(c,t){
 	t.spelldmg(3+Math.floor(c.owner.quanta[Fire]/10)*3);
 },
+flatline:function(c,t){
+	if (!c.owner.foe.sanctuary){
+		c.owner.foe.flatline = true;
+	}
+},
 flyingweapon:function(c,t){
 	if (t.weapon){
 		var cr = new Creature(t.weapon.card, t.owner);
@@ -373,8 +387,8 @@ ignite:function(c,t){
 immolate:function(c,t){
 	t.die();
 	for(var i=1; i<13; i++)
-		c.quanta[i]++;
-	c.quanta[Fire] += c.card.upped?7:5;
+		c.spend(i, -1);
+	c.spend(Fire, c.card.upped?-7:-5);
 },
 improve:function(c,t){
 	t.transform(randomcard(false, function(x){return x.type == CreatureEnum}));
@@ -596,7 +610,7 @@ nightmare:function(c,t){
 },
 nova:function(c,t){
 	for (var i=1; i<13; i++){
-		c.owner.quanta[i]++;
+		c.owner.spend(i, -1);
 	}
 	c.owner.nova++;
 	if (c.owner.nova >= 3){
@@ -605,7 +619,7 @@ nova:function(c,t){
 },
 nova2:function(c,t){
 	for (var i=1; i<13; i++){
-		c.owner.quanta[i] += 2;
+		c.owner.spend(i, -2);
 	}
 	c.owner.nova += 2;
 	if (c.owner.nova >= 3){
