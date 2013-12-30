@@ -324,8 +324,8 @@ Player.prototype.endturn = function(discard) {
 		}
 	}
 	if (this.shield){
-		if(this.shield.active.auto)this.shield.active();
 		this.shield.usedactive = false;
+		if(this.shield.active.auto)this.shield.active.auto(this.shield);
 	}
 	if (this.weapon)this.weapon.attack();
 	if (this.sosa > 0){
@@ -600,8 +600,8 @@ Creature.prototype.calcEclipse = function(){
 }
 Weapon.prototype.trueatk = Creature.prototype.trueatk = function(adrenaline){
 	var dmg = this.atk;
-	if (this.steamatk)dmg += this.steamatk;
-	if (this.dive)dmg += this.dive;
+	if (this.status.steamatk)dmg += this.status.steamatk;
+	if (this.status.dive)dmg += this.status.dive;
 	if (this.active.buff)dmg += this.active.buff(this);
 	if (this.status.burrowed)dmg = Math.ceil(dmg/2);
 	if (this instanceof Creature){
@@ -696,7 +696,7 @@ Weapon.prototype.attack = Creature.prototype.attack = function(stasis, freedomCh
 			if (this.active.hit && (!this.status.adrenaline || this.status.adrenaline < 3)){
 				this.active.hit(this, target.gpull, dmg);
 			}
-		}else if (!target.shield || (trueatk > (truedr = target.shield.truedr()) && (!target.shield.active.shield || !target.shield.active.shield(target.shield, this)))){
+		}else if (!target.shield || ((trueatk > (truedr = target.shield.truedr()) && (!target.shield.active.shield || !target.shield.active.shield(target.shield, this))))){
 			var dmg = trueatk - truedr;
 			target.dmg(dmg);
 			if (this.active.hit && (!this.status.adrenaline || this.status.adrenaline < 3)){
@@ -805,7 +805,7 @@ var TargetFilters = {
 		return t.isMaterialInstance(Pillar);
 	},
 	weap:function(c, t){
-		return t.card.type == WeaponEnum && !t.status.immaterial && !t.status.burrowed;
+		return !(t instanceof Player) && t.card.type == WeaponEnum && !t.status.immaterial && !t.status.burrowed;
 	},
 	perm:function(c, t){
 		return t.isMaterialInstance(Permanent);
@@ -829,7 +829,7 @@ var TargetFilters = {
 		return c.owner != t.owner && t.isMaterialInstance(Permanent);
 	},
 	butterfly:function(c, t){
-		return (t.trueatk && t.trueatk()<3) || (t.truehp && t.truehp()<3);
+		return !t.status.immaterial && !t.status.burrowed && ((t.trueatk && t.trueatk()<3) || (t.truehp && t.truehp()<3));
 	},
 	devour:function(c, t){
 		return t.isMaterialInstance(Creature) && t.truehp()<c.truehp();

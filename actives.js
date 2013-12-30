@@ -1,12 +1,12 @@
 var Actives = (function(){
 function mutantactive(t){
 	t.active = {};
-	var abilities = ["hatch","freeze","burrow","destroy","steal","dive","heal","paradox","lycanthropy","scavenger","infection","gpull","devour","mutation","growth","ablaze","poison","deja","endow","guard","mitosis"];
-	var index = Math.floor(rng.real()*abilities.length)-2;
+	var abilities = ["hatch","freeze","burrow","destroy","steal","dive","heal","paradox","lycanthropy","scavenger","infect","gpull","devour","mutation","growth","ablaze","poison","deja","endow","guard","mitosis"];
+	var index = Math.floor(rng.real()*(abilities.length+2))-2;
 	if (index<0){
-		t[["momentum","immaterial"][-index]] = true;
+		t.status[["momentum","immaterial"][~index]] = true;
 	}else{
-		var active = Actives[abilities[Math.floor(rng.real()*abilities.length)]];
+		var active = Actives[abilities[index]];
 		if (active == Actives.scavenger){
 			t.active.death = active;
 		}else{
@@ -207,7 +207,8 @@ disshield:function(c,t){
 	}
 },
 dive:function(c,t){
-	c.dive += c.trueatk();
+	c.defstatus("dive", 0);
+	c.status.dive += c.trueatk();
 },
 divinity:function(c,t){
 	c.owner.buffhp(c.owner.mark == Light?24:16);
