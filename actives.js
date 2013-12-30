@@ -429,12 +429,12 @@ integrity:function(c,t){
 		siphon: -1, vampire: -2, liquid: 2, steal: 3,
 		lobotomize: 2, quint: 2,
 	};
-	var hp=1, atk=4, bonus=c.card.upped?1:0;
+	var stat=c.card.upped?5:4;
 	for(var i=c.owner.hand.length-1; i>=0; i--){
 		var card = c.owner.hand[i];
 		if (~ShardList.indexOf(card.code)){
 			if (card.upped){
-				bonus++;
+				stat++;
 			}
 			shardTally[card.element]++;
 			c.owner.hand.splice(i, 1);
@@ -442,8 +442,7 @@ integrity:function(c,t){
 	}
 	var active = "burrow", num=0, cast=0;
 	for(var i=1; i<13; i++){
-		atk += shardTally[i]*(i==Gravity?0:i==Earth?1:i==Fire?3:2);
-		hp += shardTally[i]*(i==Gravity?6:i==Earth?4:i==Fire?0:2);
+		stat += shardTally[i]*2;
 		if (shardTally[i]>num){
 			num = shardTally[i];
 			active = shardSkills[i][num];
@@ -481,8 +480,7 @@ integrity:function(c,t){
 		status.adrenaline = 1;
 	}
 	c.owner.shardgolem = {
-		atk: atk + bonus,
-		hp: hp + bonus,
+		stat: stat,
 		passives: passives,
 		status: status,
 		active: actives,

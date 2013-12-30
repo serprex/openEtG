@@ -65,11 +65,10 @@ function Player(game){
 	this.quanta = [];
 	for(var i=1; i<13; i++)this.quanta[i]=0;
 	this.shardgolem = {
-		atk: 0,
-		hp: 0,
-		passives: [],
-		adrenaline: 0,
-		active: Actives.burrow,
+		stat: 1,
+		passives: {},
+		status: {},
+		active: {cast: Actives.burrow},
 		cast: 1
 	};
 
@@ -98,8 +97,7 @@ function Creature(card, owner){
 		this.card = card;
 		this.owner = owner;
 		var golem = owner.shardgolem;
-		this.maxhp = this.hp = golem.hp;
-		this.atk = golem.atk;
+		this.atk = this.maxhp = this.hp = golem.stat;
 		this.cast = golem.cast;
 		this.castele = Earth;
 		this.active = clone(golem.active);

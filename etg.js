@@ -497,7 +497,7 @@ Player.prototype.buffhp = Creature.prototype.buffhp = function(x){
 }
 Weapon.prototype.delay = Creature.prototype.delay = function(x){
 	this.defstatus("delayed", 0);
-	this.delayed += x;
+	this.status.delayed += x;
 	if (this.passives.voodoo)this.owner.foe.delay(x);
 }
 Weapon.prototype.freeze = Creature.prototype.freeze = function(x){
@@ -505,7 +505,7 @@ Weapon.prototype.freeze = Creature.prototype.freeze = function(x){
 		this.transform(Cards.ArcticSquid.asUpped(this.card.upped));
 	}else{
 		this.defstatus("frozen", 0);
-		this.frozen = x;
+		this.status.frozen = x;
 		if (this.passives.voodoo)this.owner.foe.freeze(x);
 	}
 }
@@ -688,7 +688,7 @@ Weapon.prototype.attack = Creature.prototype.attack = function(stasis, freedomCh
 			if (this.active.hit && (!this.status.adrenaline || this.status.adrenaline < 3)){
 				this.active.hit(this, target, trueatk);
 			}
-		}else if (isCreature && target.gpull){
+		}else if (target.gpull){
 			var dmg = target.gpull.dmg(trueatk);
 			if (this.active.hit && (!this.status.adrenaline || this.status.adrenaline < 3)){
 				this.active.hit(this, target.gpull, dmg);
