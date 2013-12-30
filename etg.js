@@ -552,6 +552,9 @@ Creature.prototype.die = function() {
 		if (this.aflatoxin){
 			(this.owner.creatures[index] = new Creature(Cards.MalignantCell, this.owner)).usedactive = false;
 		}
+		if (this.active.death){
+			this.active.death(this, this, index);
+		}
 		this.deatheffect(index);
 		new DeathEffect(creaturePos(this.owner == this.owner.game.player1?0:1, index));
 	}

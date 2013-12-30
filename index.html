@@ -292,7 +292,7 @@ brandai.click = function() {
 					}
 				}
 				for(var i=this.hand.length-1; i>=0; i--){
-					if ((this.hand[i].type == CreatureEnum || this.hand[i].type == PermanentEnum) && this.cansummon(i)){
+					if ((this.hand[i].type == CreatureEnum || this.hand[i].type <= PermanentEnum) && this.cansummon(i)){
 						this.summon(i);
 					}
 				}
@@ -776,13 +776,26 @@ socket.on("foeleft", function(data) {
 socket.on("chat", function(data) {
 	document.getElementById("chatArea").value = data;
 });
-function maybeSendChat(e){
+function maybeSendChat(e) {
 	e.cancelBubble = true;
 	if (e.keyCode != 13)return;
 	var chat=document.getElementById("chatinput");
 	if (chat.value){
 		socket.emit("chat", chat.value);
 		chat.value = "";
+	}
+}
+function drawBorder(obj, spr) {
+	if (obj){
+		if (targetingMode){
+			if(targetingMode(obj)){
+				fgfx.lineStyle(2, 0xff0000);
+				fgfx.drawRect(spr.position.x-spr.width/2, spr.position.y-spr.height/2, spr.width, spr.height);
+				fgfx.lineStyle(2, 0xffffff);
+			}
+		}else if (obj.canactive()){
+			fgfx.drawRect(spr.position.x-spr.width/2, spr.position.y-spr.height/2, spr.width, spr.height);
+		}
 	}
 }
 function animate() {
@@ -806,25 +819,24 @@ function animate() {
 		}
 		fgfx.beginFill(0, 0);
 		fgfx.lineStyle(2, 0xffffff);
-		var j=game.turn == game.player1?0:1;
-		for(var i=0; i<23; i++){
-			var cr=game.players[j].creatures[i];
-			if (cr && cr.canactive()){
-				fgfx.drawRect(creasprite[j][i].position.x-60, creasprite[j][i].position.y-15, 120, 30);
+		for (var j=0; j<2; j++){
+			for(var i=0; i<23; i++){
+				drawBorder(game.players[j].creatures[i], creasprite[j][i]);
 			}
-		}
-		for(var i=0; i<16; i++){
-			var pr=game.players[j].permanents[i];
-			if (pr && pr.canactive()){
-				fgfx.drawRect(permsprite[j][i].position.x-40, permsprite[j][i].position.y-15, 80, 30);
+			for(var i=0; i<16; i++){
+				drawBorder(game.players[j].permanents[i], permsprite[j][i]);
 			}
+			drawBorder(game.players[j].weapon, weapsprite[j]);
+			drawBorder(game.players[j].shield, shiesprite[j]);
 		}
-		var wp = game.players[j].weapon, sh = game.players[j].shield;
-		if (wp && wp.canactive()){
-			fgfx.drawRect(weapsprite[j].position.x-60, weapsprite[j].position.y-15, 120, 30);
-		}
-		if (sh && sh.canactive()){
-			fgfx.drawRect(shiesprite[j].position.x-60, shiesprite[j].position.y-15, 120, 30);
+		if (targetingMode){
+			for(var j=0; j<2; j++){
+				if (targetingMode(game.players[j])){
+					fgfx.lineStyle(2, 0xff0000);
+					var spr = hptext[j];
+					fgfx.drawRect(spr.position.x-spr.width/2, spr.position.y-spr.height/2, spr.width, spr.height);
+				}
+			}
 		}
 		fgfx.lineStyle(0, 0, 0);
 		fgfx.endFill();
