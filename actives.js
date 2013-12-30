@@ -24,7 +24,7 @@ acceleration:function(c,t){
 	c.dmg(1, true);
 },
 accelerationspell:function(c,t){
-	t.addactive("auto", Actives.acceleration);
+	t.active = {auto: Actives.acceleration};
 },
 accretion:function(c,t){
 	Actives.destroy(c, t);
@@ -97,11 +97,11 @@ bravery:function(c,t){
 },
 burrow:function(c,t){
 	c.status.burrowed = true;
-	c.active.cast = Actives.unburrow;
+	c.active = {cast: Actives.unburrow};
 	c.cast = 0;
 },
 butterfly:function(c,t){
-	t.active.cast = Actives.destroy;
+	t.active = {cast: Actives.destroy};
 	t.cast = 3;
 	t.castele = Entropy;
 },
@@ -165,7 +165,7 @@ deadalive:function(c,t){
 	c.deatheffect();
 },
 deja:function(c,t){
-	c.active.cast = undefined;
+	delete c.active.cast;
 	Actives.parallel(c, c);
 },
 destroy:function(c,t, dontsalvage){
@@ -228,7 +228,7 @@ drainlife:function(c,t){
 draft:function(c,t){
 	if((t.passives.airborne = !t.passives.airborne)){
 		if (t.active.cast == Actives.burrow){
-			t.active.cast = undefined;
+			delete t.active.cast;
 		}
 	}
 },
@@ -236,11 +236,8 @@ dryspell:function(c,t){
 	function dryeffect(c,t){
 		c.spend(Water, -t.dmg(1));
 	}
-	c.masscc(c, dryeffect);
 	c.foe.masscc(c, dryeffect);
-},
-dryspell2:function(c,t){
-	t.masscc(c, function(c,t){ c.spend(Water, -t.dmg(2)); });
+	c.masscc(c, dryeffect);
 },
 dshield:function(c,t){
 	c.status.immaterial = true;
@@ -510,7 +507,7 @@ lightning:function(c,t){
 	t.spelldmg(5);
 },
 liquid:function(c,t){
-	t.addactive("hit", Actives.vampire);
+	t.active = {hit: Actives.vampire};
 	t.addpoison(1);
 },
 livingweapon:function(c,t){
@@ -545,7 +542,7 @@ luciferin:function(c,t){
 lycanthropy:function(c,t){
 	c.buffhp(5);
 	c.atk += 5;
-	c.active.cast = undefined;
+	delete c.active.cast;
 	c.passives.lycanthrope = true;
 },
 metamorph:function(c,t){
@@ -641,7 +638,7 @@ overdrive:function(c,t){
 	c.dmg(1, true);
 },
 overdrivespell:function(c,t){
-	t.addactive("auto", Actives.overdrive);
+	t.active = {auto: Actives.overdrive};
 },
 pandemonium:function(c,t){
 	c.foe.masscc(c, Actives.cseed);
@@ -814,7 +811,7 @@ singularity:function(c,t){
 },
 sinkhole:function(c,t){
 	t.status.burrowed = true;
-	t.active.cast = Actives.unburrow;
+	t.active = {cast: Actives.unburrow};
 	t.cast = c.card.upped?1:0;
 	t.castele = Earth;
 	t.usedactive = true;
@@ -893,7 +890,7 @@ steam:function(c,t){
 },
 stoneform:function(c,t){
 	c.buffhp(20);
-	c.active.cast = undefined;
+	delete c.active.cast;
 },
 storm2:function(c,t){
 	t.masscc(c, function(c,x){x.dmg(2)});
