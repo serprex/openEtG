@@ -821,7 +821,7 @@ function animate() {
 	setTimeout(requestAnimate, 40);
 	if (mainStage == gameui){
 		var pos=gameui.interactionManager.mouse.global;
-		cardart.visible = pos.x>760 && pos.y>300 && pos.y<460;
+		cardart.visible = pos.x>760 && pos.y>300 && pos.y<300+20*game.player1.hand.length;
 		maybeSetText(turntell, discarding?"Discard":targetingMode?targetingText:game.turn == game.player1?"Your Turn":"Their Turn");
 		for(var i=0; i<foeplays.length; i++){
 			maybeSetTexture(foeplays[i][1], getCardImage(foeplays[i][0].code));
@@ -1043,5 +1043,6 @@ document.addEventListener("keydown", function(e){
 	<input id="roomname" type="text" placeholder="Room" />
 	<br/><input id="chatArea" type="text" style="width:100%;" readonly />
 	<br/><input id="chatinput" type="text" placeholder="Chat" style="width:100%" onkeydown="maybeSendChat(event)" />
+	<br/><a href="artcredit.htm">Art Credits</a>
 </body>
 </html>

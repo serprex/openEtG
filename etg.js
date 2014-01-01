@@ -814,6 +814,9 @@ var TargetFilters = {
 	crea:function(c, t){
 		return t.isMaterialInstance(Creature);
 	},
+	owncrea:function(c, t){
+		return t.owner == c.owner && t.isMaterialInstance(Creature);
+	},
 	creaonly:function(c, t){
 		return t.isMaterialInstance(Creature) && t.card.type == CreatureEnum;
 	},

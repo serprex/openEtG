@@ -88,8 +88,7 @@ bow:function(c,t){
 },
 bravery:function(c,t){
 	if (!c.owner.foe.sanctuary){
-		var maxdraw = c.owner.mark == Fire?3:2;
-		for(var i=0; i<maxdraw && c.owner.hand.length<8 && c.owner.foe.hand.length<8; i++){
+		for(var i=0; i<2 && c.owner.hand.length<8 && c.owner.foe.hand.length<8; i++){
 			c.owner.drawcard();
 			c.owner.foe.drawcard();
 		}
@@ -146,6 +145,14 @@ clear:function(c,t){
 		t.frozen--;
 	}
 	t.dmg(-1);
+},
+corpseexplosion:function(c,t){
+	function dmg1(c,t){ t.dmg(1); }
+	t.die();
+	c.foe.masscc(c, dmg1);
+	if (!c.card.upped){
+		c.masscc(c, dmg1);
+	}
 },
 cpower:function(c,t){
 	t.buffhp(Math.ceil(rng.real()*5));
@@ -220,7 +227,8 @@ dive:function(c,t){
 	c.status.dive += c.trueatk();
 },
 divinity:function(c,t){
-	c.owner.buffhp(c.owner.mark == Light?24:16);
+	c.maxhp += 8;
+	c.buffhp(16);
 },
 drainlife:function(c,t){
 	c.dmg(-t.spelldmg(2+Math.floor(c.owner.quanta[Darkness]/10)*2));
@@ -354,7 +362,7 @@ heal:function(c,t){
 	t.dmg(-5);
 },
 heal20:function(c,t){
-	c.owner.dmg(-20);
+	t.dmg(-20);
 },
 holylight:function(c,t){
 	t.dmg(!(t instanceof Player) && (t.card.element == Darkness || t.card.element == Death)?10:-10);
@@ -691,7 +699,7 @@ plague:function(c,t){
 	t.masscc(c, Actives.infect);
 },
 platearmor:function(c,t){
-	t.buffhp(c.card.upped?6:3);
+	t.buffhp(c.card.upped?6:4);
 },
 poison:function(c,t){
 	(t || c.owner.foe).addpoison(1);
@@ -936,7 +944,7 @@ web:function(c,t){
 	t.passives.airborne = false;
 },
 wisdom:function(c,t){
-	t.atk += 4;
+	t.atk += 3;
 	if (t.status.immaterial){
 		t.status.psion = true;
 	}
