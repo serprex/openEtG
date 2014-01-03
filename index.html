@@ -25,12 +25,7 @@ function getTarget(src, active, cb){
 	if (targetingFilter){
 		targetingMode = function(t){ return (t == game.player2 || t.owner == game.player1 || t.passives.cloak || !game.player2.isCloaked()) && targetingFilter(src, t); }
 		targetingModeCb = cb;
-		for(var key in TargetFilters){
-			if (TargetFilters[key] == targetingFilter){
-				targetingText = "Target "+key;
-				break;
-			}
-		}
+		targetingText = active.activename;
 	}else{
 		cb();
 	}
@@ -55,6 +50,20 @@ function centerAnchor(obj){
 function setWinner(play){
 	game.winner=play;
 	endturn.setText(play==game.player1?"Won":"Lost");
+}
+function player2summon(handindex, tgt){
+	var card = game.player2.hand[handindex];
+	var sprite = new PIXI.Sprite(nopic);
+	sprite.position.x=foeplays.length*90;
+	sprite.position.y=8;
+	sprite.interactive = true;
+	sprite.mouseover = function(){
+		setInfo(card);
+		cardart.setTexture(getArt(card.code));
+	}
+	gameui.addChild(sprite);
+	foeplays.push([card, sprite]);
+	game.player2.summon(handindex, tgt);
 }
 function tgtToBits(x){
 	if (x == undefined){
@@ -301,12 +310,12 @@ brandai.click = function() {
 			function(){
 				for(var i=this.hand.length-1; i>=0; i--){
 					if (this.hand[i].type == PillarEnum){
-						this.summon(i);
+						player2summon(i);
 					}
 				}
 				for(var i=this.hand.length-1; i>=0; i--){
 					if ((this.hand[i].type == CreatureEnum || this.hand[i].type <= PermanentEnum) && this.cansummon(i)){
-						this.summon(i);
+						player2summon(i);
 					}
 				}
 				this.endturn(this.hand.length==8?0:null);
@@ -321,8 +330,8 @@ function setEditorInfo(obj){
 	}
 }
 function editorCardCmp(x,y){
-	var xn=Cards[x].cost, yn=Cards[y].cost;
-	return xn == yn?(x>y?1:-1):xn>yn?1:-1;
+	var cardx = Cards[x], cardy = Cards[y];
+	return cardx.upped - cardy.upped || cardx.element - cardy.element || cardx.cost-cardy.cost || (x>y?1:-1);
 }
 beditor.click = function() {
 	if (Cards){
@@ -419,10 +428,6 @@ beditor.click = function() {
 							editordeck.splice(i, 0, code);
 						}
 					}
-					var deck = getDeck();
-					if (deck.length < 8){
-						deck = ['4vc', '4vc', '4vc', '4vc', '4vc', '4vc', '4vc', '4vc', '4vc', '4vc', '4vc', '4vc', '4vc', '4vc', '4vc', '4vc', '4vc', '4vc', '4ve', '4ve', '4ve', '6tt', '6tt', '6tt', '6tt', '4vf', '4vf', '4vf', '4vf', '4vf', '8pj']
-					}
 					sprite.mouseover = function() {
 						setEditorInfo(Cards[editorcolumns[_i][1][editorelement][_j]]);
 					}
@@ -434,7 +439,7 @@ beditor.click = function() {
 			// TODO Rewrite to go through cards without filtercards; filter with one pass
 			for(var j=0; j<13; j++){
 				editorcolumns[i][1].push(filtercards(i>2,
-					function(x){ return x.element == j && (((i==0 || i==3) && x.type == CreatureEnum)||((i==1 || i==4) && x.type <= PermanentEnum)||((i==2 || i==5) && x.type == SpellEnum)); },
+					function(x){ return x.element == j && ((i%3==0 && x.type == CreatureEnum)||(i%3==1 && x.type <= PermanentEnum)||(i%3==2 && x.type == SpellEnum)); },
 					editorCardCmp));
 			}
 		}
@@ -776,13 +781,7 @@ socket.on("endturn", function(data) {
 });
 socket.on("summon", function(bits) {
 	console.log("summon call: " + bits);
-	var handindex = bits&7;
-	var sprite = new PIXI.Sprite(nopic);
-	sprite.position.x=foeplays.length*90;
-	sprite.position.y=8;
-	gameui.addChild(sprite);
-	foeplays.push([game.player2.hand[handindex], sprite]);
-	game.player2.summon(handindex, bitsToTgt(bits>>3));
+	player2summon(bits&7, bitsToTgt(bits>>3));
 });
 socket.on("active", function(bits) {
 	var c=bitsToTgt(bits&255), t=bitsToTgt((bits>>8)&255);
@@ -817,11 +816,66 @@ function drawBorder(obj, spr) {
 		}
 	}
 }
+function drawStatus(obj, spr){
+	var x = spr.position.x, y=spr.position.y, wid = spr.width, hei = spr.height;
+	if (obj == obj.owner.gpull){
+		fgfx.beginFill(0xffaa00, .3);
+		fgfx.drawRect(x-wid/2-2, y-wid/2-2, wid+4, hei+4);
+		fgfx.endFill();
+	}
+	if (obj.status.frozen){
+		fgfx.beginFill(0x0000ff, .3);
+		fgfx.drawRect(x-wid/2-2, y-hei/2-2, wid+4, hei+4);
+		fgfx.endFill();
+	}
+	if (obj.status.delayed){
+		fgfx.beginFill(0xffff00, .3);
+		fgfx.drawRect(x-wid/2-2, y-hei/2-2, wid+4, hei+4);
+		fgfx.endFill();
+	}
+	fgfx.lineStyle(1, 0);
+	if (obj.passives.airborne || obj.passives.ranged){
+		fgfx.beginFill(elecols[Air], .8);
+		fgfx.drawRect(x-wid/2-2, y+hei/2-10, 12, 12);
+		fgfx.endFill();
+	}
+	if (obj.status.adrenaline){
+		fgfx.beginFill(elecols[Life], .8);
+		fgfx.drawRect(x-wid/2+6, y+hei/2-10, 12, 12);
+		fgfx.endFill();
+	}
+	if (obj.status.momentum){
+		fgfx.beginFill(elecols[Gravity], .8);
+		fgfx.drawRect(x-wid/2+14, y+hei/2-10, 12, 12);
+		fgfx.endFill();
+	}
+	if (obj.status.psion){
+		fgfx.beginFill(elecols[Aether], .8);
+		fgfx.drawRect(x-wid/2+22, y+hei/2-10, 12, 12);
+		fgfx.endFill();
+	}
+	if (obj.status.burrowed){
+		fgfx.beginFill(elecols[Earth], .8);
+		fgfx.drawRect(x-wid/2+30, y+hei/2-10, 12, 12);
+		fgfx.endFill();
+	}
+	if (obj.status.poison){
+		fgfx.beginFill(obj.aflatoxin?elecols[Darkness]:elecols[Death], .8);
+		fgfx.drawRect(x-wid/2+38, y+hei/2-10, 12, 12);
+		fgfx.endFill();
+	}
+	fgfx.lineStyle(0, 0, 0);
+}
 function animate() {
 	setTimeout(requestAnimate, 40);
 	if (mainStage == gameui){
 		var pos=gameui.interactionManager.mouse.global;
-		cardart.visible = pos.x>760 && pos.y>300 && pos.y<300+20*game.player1.hand.length;
+		var cardartvisible = (pos.x>760 && pos.y>300 && pos.y<300+20*game.player1.hand.length);
+		if (!cardartvisible && foeplays.length){ // Really need a better way to manage visibility
+			var first = foeplays[0][1], last = foeplays[foeplays.length-1][1];
+			cardartvisible = pos.y<last.position.y+last.height && pos.y>last.position.y && pos.x<last.position.x+last.width && pos.x>first.position.x;
+		}
+		cardart.visible = cardartvisible;
 		maybeSetText(turntell, discarding?"Discard":targetingMode?targetingText:game.turn == game.player1?"Your Turn":"Their Turn");
 		for(var i=0; i<foeplays.length; i++){
 			maybeSetTexture(foeplays[i][1], getCardImage(foeplays[i][0].code));
@@ -894,54 +948,7 @@ function animate() {
 					var child = creasprite[j][i].getChildAt(0);
 					child.visible = true;
 					child.setTexture(getTextImage(cr.activetext() + cr.trueatk()+"|"+cr.truehp(), 12));
-					var pos = creasprite[j][i].position;
-					if (cr == game.players[j].gpull){
-						fgfx.beginFill(0xffaa00, .3);
-						fgfx.drawRect(pos.x-62, pos.y-17, 124, 34);
-						fgfx.endFill();
-					}
-					if (cr.status.frozen){
-						fgfx.beginFill(0x0000ff, .3);
-						fgfx.drawRect(pos.x-62, pos.y-17, 124, 34);
-						fgfx.endFill();
-					}
-					if (cr.status.delayed){
-						fgfx.beginFill(0xffff00, .3);
-						fgfx.drawRect(pos.x-62, pos.y-17, 124, 34);
-						fgfx.endFill();
-					}
-					fgfx.lineStyle(1, 0);
-					if (cr.passives.airborne){
-						fgfx.beginFill(elecols[Air], .8);
-						fgfx.drawRect(pos.x-62, pos.y+5, 12, 12);
-						fgfx.endFill();
-					}
-					if (cr.status.adrenaline){
-						fgfx.beginFill(elecols[Life], .8);
-						fgfx.drawRect(pos.x-54, pos.y+5, 12, 12);
-						fgfx.endFill();
-					}
-					if (cr.status.momentum){
-						fgfx.beginFill(elecols[Gravity], .8);
-						fgfx.drawRect(pos.x-46, pos.y+5, 12, 12);
-						fgfx.endFill();
-					}
-					if (cr.status.psion){
-						fgfx.beginFill(elecols[Aether], .8);
-						fgfx.drawRect(pos.x-38, pos.y+5, 12, 12);
-						fgfx.endFill();
-					}
-					if (cr.status.burrowed){
-						fgfx.beginFill(elecols[Earth], .8);
-						fgfx.drawRect(pos.x-30, pos.y+5, 12, 12);
-						fgfx.endFill();
-					}
-					if (cr.status.poison){
-						fgfx.beginFill(cr.aflatoxin?elecols[Darkness]:elecols[Death], .8);
-						fgfx.drawRect(pos.x-22, pos.y+5, 12, 12);
-						fgfx.endFill();
-					}
-					fgfx.lineStyle(0, 0, 0);
+					drawStatus(cr, creasprite[j][i]);
 				}else creasprite[j][i].visible = false;
 			}
 			for(var i=0; i<16; i++){
@@ -965,6 +972,7 @@ function animate() {
 				weapsprite[j].alpha = wp.immaterial?.7:1;
 				child.visible = true;
 				weapsprite[j].setTexture(getCreatureImage(wp.card.code));
+				drawStatus(wp, weapsprite[j]);
 			}else weapsprite[j].visible = false;
 			var sh = game.players[j].shield;
 			if (sh && !(j == 1 && cloakgfx.visible)){
@@ -976,20 +984,6 @@ function animate() {
 				shiesprite[j].alpha = sh.status.immaterial?.7:1;
 				shiesprite[j].setTexture(getCreatureImage(sh.card.code));
 			}else shiesprite[j].visible = false;
-			var wp = game.players[j].weapon;
-			if (wp){
-				var pos = weapsprite[j].position;
-				if (wp.status.frozen){
-					fgfx.beginFill(0x0000ff, .3);
-					fgfx.drawRect(pos.x-42, pos.y-12, 84, 24);
-					fgfx.endFill();
-				}
-				if (wp.status.delayed){
-					fgfx.beginFill(0xffff00, .3);
-					fgfx.drawRect(pos.x-42, pos.y-12, 84, 24);
-					fgfx.endFill();
-				}
-			}
 			marksprite[j].setTexture(getIcon(game.players[j].mark));
 			for(var i=1; i<13; i++){
 				maybeSetText(quantatext[j].getChildAt(i-1), game.players[j].quanta[i].toString());
@@ -1035,6 +1029,7 @@ requestAnimate();
 document.addEventListener("keydown", function(e){
 	if (e.keyCode == 32 && mainStage == gameui){
 		endturn.click();
+		e.preventDefault();
 	}
 });
 	</script>

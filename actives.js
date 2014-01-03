@@ -44,7 +44,9 @@ adrenaline:function(c,t){
 },
 aflatoxin:function(c,t){
 	t.addpoison(2);
-	t.status.aflatoxin = true;
+	if (!(t instanceof Player)){
+		t.status.aflatoxin = true;
+	}
 },
 aggroskele:function(c,t){
 	var dmg = 0;
@@ -202,25 +204,21 @@ disarm:function(c,t){
 		t.weapon = undefined;
 	}
 },
-disfield:function(c,t){
-	if (!c.owner.sanctuary){
-		if (!c.owner.spend(Other, t.trueatk())){
-			for(var i=1; i<13; i++){
-				c.owner.quanta[i] = 0;
-			}
-			c.owner.shield = undefined;
+disfield:function(c,t, dmg){
+	if (!c.owner.spend(Other, dmg)){
+		for(var i=1; i<13; i++){
+			c.owner.quanta[i] = 0;
 		}
-		return true;
+		c.owner.shield = undefined;
 	}
+	return true;
 },
-disshield:function(c,t){
-	if (!c.owner.sanctuary){
-		if (!c.owner.spend(Entropy, Math.ceil(t.trueatk()/3))){
-			c.owner.quanta[Entropy] = 0;
-			c.owner.shield = undefined;
-		}
-		return true;
+disshield:function(c,t, dmg){
+	if (!c.owner.spend(Entropy, Math.ceil(dmg/3))){
+		c.owner.quanta[Entropy] = 0;
+		c.owner.shield = undefined;
 	}
+	return true;
 },
 dive:function(c,t){
 	c.defstatus("dive", 0);
@@ -333,7 +331,11 @@ gpull:function(c,t){
 	c.owner.gpull = c;
 },
 gpullspell:function(c,t){
-	t.owner.gpull = t;
+	if (t instanceof Player){
+		delete t.gpull;
+	}else{
+		t.owner.gpull = t;
+	}
 },
 gratitude:function(c,t){
 	c.owner.dmg(-4);
@@ -554,7 +556,7 @@ lycanthropy:function(c,t){
 	c.passives.lycanthrope = true;
 },
 metamorph:function(c,t){
-	c.owner.mark = t.card.element;
+	c.owner.mark = t instanceof Player?t.mark:t.card.element;
 	c.owner.spend(c.owner.mark, c.card.upped?-2:-1);
 },
 miracle:function(c,t){
@@ -572,6 +574,7 @@ mitosisspell:function(c,t){
 	t.active.cast = Actives.mitosis;
 	t.castele = t.card.element;
 	t.cast = t.card.cost;
+	t.buffhp(2);
 },
 momentum:function(c,t){
 	t.atk += 1;
@@ -790,7 +793,13 @@ serendipity:function(c,t){
 	}
 },
 silence:function(c,t){
-	c.owner.foe.silence = !c.owner.foe.sanctuary;
+	if (t instanceof Player){
+		if (!t.sanctuary){
+			t.silence = true;
+		}
+	}else{
+		t.usedactive = true;
+	}
 },
 singularity:function(c,t){
 	var r = rng.real();
@@ -961,6 +970,29 @@ pend:function(c,t){
 	c.owner.spend(c.pendstate?c.owner.mark:c.card.element,-c.status.charges);
 	c.pendstate ^= true;
 },
+bones:function(c,t){
+	if (--c.status.charges <= 0){
+		c.owner.shield = undefined;
+	}
+	return true;
+},
+cold:function(c,t){
+	if (rng.real()<.3){
+		t.freeze(3);
+	}
+},
+evade100:function(c,t){
+	return true;
+},
+evade40:function(c,t){
+	return rng.real()>.4;
+},
+evade50:function(c,t){
+	return rng.real()>.5;
+},
+firewall:function(c,t){
+	t.dmg(1);
+},
 skull:function(c,t){
 	if (t instanceof Creature){
 		var thp = t.truehp();
@@ -973,47 +1005,22 @@ skull:function(c,t){
 		}
 	}
 },
-bones:function(c,t){
-	if (--c.status.charges <= 0){
-		c.owner.shield = undefined;
-	}
-	return true;
+slow:function(c,t){
+	t.delay(1);
 },
-weight:function(c,t){
-	return t instanceof Creature && t.truehp()>5;
+solar:function(c,t){
+	c.owner.spend(Light, -1);
 },
 thorn:function(c,t){
 	if (rng.real()<.75){
 		t.addpoison(1);
 	}
 },
-firewall:function(c,t){
-	t.dmg(1);
-},
-cold:function(c,t){
-	if (rng.real()<.3){
-		t.freeze(3);
-	}
-},
-solar:function(c,t){
-	if (!c.owner.sanctuary){
-		c.owner.spend(Light, -1);
-	}
-},
-evade40:function(c,t){
-	return rng.real()>.4;
+weight:function(c,t){
+	return t instanceof Creature && t.truehp()>5;
 },
 wings:function(c,t){
 	return !t.passives.airborne && !t.passives.ranged;
-},
-slow:function(c,t){
-	t.delay(1);
-},
-evade50:function(c,t){
-	return rng.real()>.5;
-},
-evade100:function(c,t){
-	return true;
 },
 }
 for(var key in Actives){

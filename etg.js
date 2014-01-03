@@ -77,7 +77,10 @@ function loadcards(cb){
 						var cardcode = carddata[2];
 						var cardinfo = {};
 						for(var k=0; k<carddata.length; k++)cardinfo[keys[k]] = carddata[k];
-						var nospacename = carddata[1].replace(/ /g,"");
+						var nospacename = carddata[1].replace(/ |'/g,"");
+						if(cardcode in Cards){
+							console.log(cardcode + " duplicate");
+						}
 						Cards[nospacename in Cards?nospacename+"Up":nospacename] = Cards[cardcode] = new Card(_i, cardinfo);
 					}
 					maybeCallback();
@@ -313,9 +316,6 @@ Player.prototype.endturn = function(discard) {
 				cr.delay(1);
 			}
 			cr.attack(stasisFlag, freedomChance);
-			if (cr.status.adrenaline){
-				cr.status.adrenaline=1;
-			}
 			if (i>5 && floodingFlag && cr.card.element != Water && cr.card.element != Other && !cr.status.immaterial && !cr.status.burrowed && ~cr.getIndex()){
 				cr.die();
 			}
@@ -489,6 +489,7 @@ Creature.prototype.addpoison = function(x) {
 		}
 	}
 }
+Weapon.prototype.buffhp = function(){}
 Player.prototype.buffhp = Creature.prototype.buffhp = function(x){
 	this.maxhp += x;
 	if (this instanceof Player && this.maxhp>500){
@@ -697,9 +698,8 @@ Weapon.prototype.attack = Creature.prototype.attack = function(stasis, freedomCh
 			if (this.active.hit && (!this.status.adrenaline || this.status.adrenaline < 3)){
 				this.active.hit(this, target.gpull, dmg);
 			}
-		}else if (!target.shield || ((trueatk > (truedr = target.shield.truedr()) && (!target.shield.active.shield || !target.shield.active.shield(target.shield, this))))){
-			var dmg = trueatk - truedr;
-			target.dmg(dmg);
+		}else if (!target.shield || ((trueatk > (truedr = target.shield.truedr()) && (!target.shield.active.shield || !target.shield.active.shield(target.shield, this, trueatk - truedr))))){
+			var dmg = target.dmg(trueatk - truedr);
 			if (this.active.hit && (!this.status.adrenaline || this.status.adrenaline < 3)){
 				this.active.hit(this, target, dmg);
 			}
@@ -719,12 +719,14 @@ Weapon.prototype.attack = Creature.prototype.attack = function(stasis, freedomCh
 	if (this.active.cast == Actives.dshield){
 		delete this.status.immaterial;
 	}
-	if (~this.getIndex()){
-		if (this instanceof Creature && this.truehp() <= 0){
-			this.die();
-		}else if (this.status.adrenaline && this.status.adrenaline < countAdrenaline(this.trueatk(1))){
+	if (isCreature && ~this.getIndex() && this.truehp() <= 0){
+		this.die();
+	}else if (this.status.adrenaline){
+		if(this.status.adrenaline < countAdrenaline(this.trueatk(1))){
 			this.status.adrenaline++;
 			this.attack(stasis, freedomChance);
+		}else{
+			this.status.adrenaline = 1;
 		}
 	}
 }
@@ -829,6 +831,9 @@ var TargetFilters = {
 	creaorplay:function(c, t){
 		return t instanceof Player || t.isMaterialInstance(Creature);
 	},
+	creaorweap:function(c, t){
+		return t.isMaterialInstance(Creature) || t.isMaterialInstance(Weapon);
+	},
 	foeperm:function(c, t){
 		return c.owner != t.owner && t.isMaterialInstance(Permanent);
 	},
@@ -848,6 +853,6 @@ var TargetFilters = {
 		return t.isMaterialInstance(Creature) && !t.passives.airborne;
 	},
 	wisdom:function(c, t){
-		return t instanceof Creature && !t.status.burrowed;
+		return (t instanceof Creature || t instanceof Weapon) && !t.status.burrowed;
 	}
 }
