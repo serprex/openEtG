@@ -330,6 +330,9 @@ fractal:function(c,t){
 freeze:function(c,t){
 	t.freeze(c.card.upped && c.card != Cards.PandemoniumUp ? 4 : 3);
 },
+fungusrebirth: function (c, t) {
+    c.transform(Cards.Fungus.asUpped(c.card.upped));
+},
 gas:function(c,t){
 	new Permanent(Cards.UnstableGas.asUpped(c.card.upped), c.owner).place();
 },
@@ -871,6 +874,13 @@ sosa:function(c,t){
 },
 soulcatch:function(c,t){
 	c.owner.spend(Death, -3);
+},
+spores:function(c,t, index){
+    if (c == t && !c.owner.creatures[index]){
+        c.owner.creatures[index] = new Creature(Cards.Spore.asUpped(c.card.upped), c.owner);
+    }
+    new Creature(Cards.Spore.asUpped(c.card.upped), c.owner).place();
+    new Creature(Cards.Spore.asUpped(c.card.upped), c.owner).place();
 },
 sskin:function(c,t){
 	c.buffhp(c.quanta[Earth]);
