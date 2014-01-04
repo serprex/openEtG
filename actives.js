@@ -173,6 +173,9 @@ cseed:function(c,t){
 dagger:function(c,t){
 	return c.owner.mark == Darkness||c.owner.mark == Death?1:0;
 },
+darkness:function(c,t){
+	c.owner.spend(Darkness, -1);
+},
 deadalive:function(c,t){
 	c.deatheffect();
 },
@@ -981,6 +984,18 @@ bones:function(c,t){
 cold:function(c,t){
 	if (rng.real()<.3){
 		t.freeze(3);
+	}
+},
+despair:function(c,t){
+	var chance=0;
+	for(var i=0; i<23; i++){
+		if(c.owner.creatures[i] && (c.owner.creatures[i].hasactive("auto", "siphon")|| c.owner.creatures[i].hasactive("auto", "darkness"))) {
+			chance+=.05;
+		}
+	}
+	if (rng.real()<chance){
+		t.atk--;
+		t.dmg(1);
 	}
 },
 evade100:function(c,t){
