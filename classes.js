@@ -41,6 +41,9 @@ function Card(type, info){
 			this.passives[passives[i]] = true;
 		}
 	}
+	if (info.Text){
+		this.text = info.Text;
+	}
 }
 function Player(game){
 	this.game = game;

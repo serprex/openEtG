@@ -155,6 +155,9 @@ corpseexplosion:function(c,t){
 	if (!c.card.upped){
 		c.masscc(c, dmg1);
 	}
+	if (t.passives.poisonous){
+		c.foe.addpoison(1);
+	}
 },
 cpower:function(c,t){
 	t.buffhp(Math.ceil(rng.real()*5));
@@ -557,7 +560,7 @@ lycanthropy:function(c,t){
 },
 metamorph:function(c,t){
 	c.owner.mark = t instanceof Player?t.mark:t.card.element;
-	c.owner.spend(c.owner.mark, c.card.upped?-2:-1);
+	c.owner.spend(c.owner.mark, c.card.upped?-3:-2);
 },
 miracle:function(c,t){
 	c.quanta[Light] = 0;
@@ -839,9 +842,8 @@ siphon:function(c,t){
 	}
 },
 siphonstrength:function(c,t){
-	var n = c.card.upped?2:1;
-	t.atk -= n;
-	c.atk += n;
+	t.atk--;
+	c.atk++;
 },
 skyblitz:function(c,t){
 	c.quanta[Air] = 0;

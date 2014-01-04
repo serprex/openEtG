@@ -76,7 +76,17 @@ function loadcards(cb){
 						var carddata = csv[j].split(",");
 						var cardcode = carddata[2];
 						var cardinfo = {};
-						for(var k=0; k<carddata.length; k++)cardinfo[keys[k]] = carddata[k];
+						for(var k=0; k<carddata.length; k++){
+							if (carddata[k].charAt(0) == '"'){
+								for (var kk=k+1; kk<carddata.length; kk++){
+									carddata[k] += "," + carddata[kk];
+								}
+								cardinfo[keys[k]] = carddata[k].substring(1, carddata[k].length-1).replace(/""/g, '"');
+								break;
+							}else{
+								cardinfo[keys[k]] = carddata[k];
+							}
+						}
 						var nospacename = carddata[1].replace(/ |'/g,"");
 						if(cardcode in Cards){
 							console.log(cardcode + " duplicate");
@@ -168,19 +178,23 @@ Card.prototype.readCost = function(attr, cost){
 	return true;
 }
 Card.prototype.info = function(){
-	var typeString = ["Pillar", "Weapon", "Shield", "Permanent", "Spell", "Creature"];
 	if (this.type == PillarEnum){
 		return "1:" + this.element + " " + activename(this.active);
+	}else if (this.text){
+		var prefix = this.type == WeaponEnum?"Weapon: deal " + this.attack + " damage each turn. ":
+			this.type == ShieldEnum?"Shield: "+(this.health?"reduce damage by "+this.health+" ":""):
+			this.type == CreatureEnum?this.attack+"|"+this.health+" ":"";
+		return prefix + (this.text || "");
+	}else{
+		var info = ["", "Weapon", "Shield", "", "Spell", ""][this.type];
+		if (this.type == SpellEnum){
+			return info + " " + activename(this.active);
+		}
+		if (this.type == ShieldEnum)info += ": reduce damage by " + this.health;
+		else if (this.type == WeaponEnum)info += ": deal " + this.attack + " damage each turn.";
+		else if (this.type == CreatureEnum)info += " " + this.attack+"|"+this.health;
+		return info + Thing.prototype.activetext.call(this) + objinfo(this.status) + objinfo(this.passives);
 	}
-	var info = typeString[this.type] + " " + this.cost+" 1:"+this.costele;
-	if (this.type == SpellEnum){
-		return info + " " + activename(this.active);
-	}
-	if (this.type == ShieldEnum)info += " " + this.health + "dr";
-	else if (this.type != PermanentEnum)info += " " + this.attack+"|"+this.health;
-	info += Thing.prototype.activetext.call(this); // Hack
-	info += objinfo(this.status) + objinfo(this.passives);
-	return info;
 }
 Card.prototype.toString = function(){ return this.code; }
 Card.prototype.asUpped = function(upped){

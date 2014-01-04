@@ -314,7 +314,7 @@ brandai.click = function() {
 					}
 				}
 				for(var i=this.hand.length-1; i>=0; i--){
-					if ((this.hand[i].type == CreatureEnum || this.hand[i].type <= PermanentEnum) && this.cansummon(i)){
+					if ((this.hand[i].type == CreatureEnum || this.hand[i].type <= PermanentEnum || (this.hand[i].type == SpellEnum && !Targeting[this.hand[i].active.activename])) && this.cansummon(i)){
 						player2summon(i);
 					}
 				}
@@ -961,7 +961,7 @@ function animate() {
 					child.visible = true;
 					if (pr instanceof Pillar){
 						child.setTexture(getTextImage("1:"+(pr.active == Actives.pend && pr.pendstate?pr.owner.mark:pr.card.element) + " x"+pr.status.charges, 12));
-					}else child.setTexture(getTextImage(pr.activetext() + (pr.status.charges?" "+pr.status.charges:""), 12));
+					}else child.setTexture(getTextImage(pr.activetext().replace(" losecharge","") + (pr.status.charges?" "+pr.status.charges:""), 12));
 				}else permsprite[j][i].visible = false;
 			}
 			var wp = game.players[j].weapon;
@@ -980,7 +980,7 @@ function animate() {
 				var dr=sh.truedr();
 				var child = shiesprite[j].getChildAt(0);
 				child.visible = true;
-				child.setTexture(getTextImage((sh.status.charges? "x"+sh.status.charges:"") + sh.activetext().replace("shield ", "") + (dr?" "+dr:"")), 12);
+				child.setTexture(getTextImage((sh.status.charges? "x"+sh.status.charges:"") + sh.activetext().replace("shield ", "").replace(" losecharge","") + (dr?" "+dr:"")), 12);
 				shiesprite[j].alpha = sh.status.immaterial?.7:1;
 				shiesprite[j].setTexture(getCreatureImage(sh.card.code));
 			}else shiesprite[j].visible = false;
@@ -1027,8 +1027,17 @@ function animate() {
 function requestAnimate(){ requestAnimFrame(animate); }
 requestAnimate();
 document.addEventListener("keydown", function(e){
-	if (e.keyCode == 32 && mainStage == gameui){
-		endturn.click();
+	if (mainStage == gameui){
+		if(e.keyCode == 32){
+			endturn.click();
+		}else if(e.keyCode == 8){
+			cancel.click();
+		}else return;
+		e.preventDefault();
+	}
+});
+document.addEventListener("click", function(e){
+	if (mainStage == gameui){
 		e.preventDefault();
 	}
 });
