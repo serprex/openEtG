@@ -170,6 +170,9 @@ cseed:function(c,t){
 dagger:function(c,t){
 	return c.owner.mark == Darkness||c.owner.mark == Death?1:0;
 },
+darkness:function(c,t){
+	c.owner.spend(Darkness, -1);
+},
 deadalive:function(c,t){
 	c.deatheffect();
 },
