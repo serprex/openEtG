@@ -984,6 +984,18 @@ cold:function(c,t){
 		t.freeze(3);
 	}
 },
+despair:function(c,t){
+	var chance=0;
+	for(var i=0; i<23; i++){
+		if(c.owner.creatures[i] && (c.owner.creatures[i].hasactive("auto", "siphon")|| c.owner.creatures[i].hasactive("auto", "darkness"))) {
+			chance+=.05;
+		}
+	}
+	if (rng.real()>chance){
+		t.atk--;
+		t.dmg(1);
+	}
+},
 evade100:function(c,t){
 	return true;
 },
@@ -992,15 +1004,6 @@ evade40:function(c,t){
 },
 evade50:function(c,t){
 	return rng.real()>.5;
-},
-evadeX:function(c,t){
-	var n=0;
-	for(var i=0; i<23; i++){
-		if(c.owner.creatures[i] && (c.owner.creatures[i].hasactive("auto", "siphon")|| c.owner.creatures[i].hasactive("auto", "darkness"))) {
-			n+=.05;
-		}
-	}
-	return rng.real()>n;
 },
 firewall:function(c,t){
 	t.dmg(1);
