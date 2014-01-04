@@ -989,11 +989,12 @@ cold:function(c,t){
 despair:function(c,t){
 	var chance=0;
 	for(var i=0; i<23; i++){
-		if(c.owner.creatures[i] && (c.owner.creatures[i].hasactive("auto", "siphon")|| c.owner.creatures[i].hasactive("auto", "darkness"))) {
-			chance+=.05;
+		if (c.owner.creatures[i] && (c.owner.creatures[i].hasactive("auto", "siphon") || c.owner.creatures[i].hasactive("auto", "darkness"))) {
+			chance++;
 		}
 	}
-	if (rng.real()<chance){
+	console.log(chance);
+	if (rng.real() < chance*.05){
 		t.atk--;
 		t.dmg(1);
 	}
@@ -1002,10 +1003,10 @@ evade100:function(c,t){
 	return true;
 },
 evade40:function(c,t){
-	return rng.real()>.4;
+	return rng.real() < .4;
 },
 evade50:function(c,t){
-	return rng.real()>.5;
+	return rng.real() < .5;
 },
 firewall:function(c,t){
 	t.dmg(1);
@@ -1029,7 +1030,7 @@ solar:function(c,t){
 	c.owner.spend(Light, -1);
 },
 thorn:function(c,t){
-	if (rng.real()<.75){
+	if (rng.real() < .75){
 		t.addpoison(1);
 	}
 },
