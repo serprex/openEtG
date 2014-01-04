@@ -991,7 +991,7 @@ despair:function(c,t){
 			chance+=.05;
 		}
 	}
-	if (rng.real()>chance){
+	if (rng.real()<chance){
 		t.atk--;
 		t.dmg(1);
 	}
