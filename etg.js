@@ -352,11 +352,32 @@ Player.prototype.endturn = function(discard) {
 	this.game.turn = this.foe;
 }
 Player.prototype.drawcard = function() {
-	if (this.hand.length<8){
+    if (this.hand.length < 8) {
 		if (this.deck.length>0){
 			this.hand[this.hand.length] = this.deck.pop();
 		}else if (!this.game.winner){
 			setWinner(this.foe);
+		}
+		for (var i = 0; i < 2; i++) {
+		    var pl = this.owner.game.players[i];
+		    for (var j = 0; j < 23; j++) {
+		        var c = pl.creatures[j];
+		        if (c && c.active.draw) {
+		            c.active.draw(c, this);
+		        }
+		    }
+		    for (var j = 0; j < 16; j++) {
+		        var p = pl.permanents[j];
+		        if (p && p.active.draw) {
+		            p.active.draw(p, this);
+		        }
+		    }
+		    if (pl.shield && pl.shield.active.draw) {
+		        pl.shield.active.draw(pl, this);
+		    }
+		    if (pl.weapon && pl.weapon.active.draw) {
+		        pl.weapon.active.draw(pl, this);
+		    }
 		}
 	}
 }
@@ -557,8 +578,11 @@ Thing.prototype.deatheffect = function(index) {
 				p.active.death(p, this, index);
 			}
 		}
-		if (pl.shield && pl.shield.active.death == -4){
-			pl.shield.active.death(pl, this, index);
+		if (pl.shield && pl.shield.active.death){
+		    pl.shield.active.death(pl, this, index);
+		}
+		if (pl.weapon && pl.weapon.active.death){
+		    pl.weapon.active.death(pl, this, index);
 		}
 	}
 }

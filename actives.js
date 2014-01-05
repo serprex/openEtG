@@ -63,6 +63,9 @@ air:function(c,t){
 antimatter:function(c,t){
 	t.atk -= t.trueatk()*2;
 },
+barrier:function(c,t){
+    c.charges++;
+},
 bblood:function(c,t){
 	t.buffhp(20);
 	t.delay(6);
