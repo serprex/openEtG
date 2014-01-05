@@ -45,7 +45,7 @@ var ShardList = [undefined, undefined,
 	"5se", "7qu",
 	"5vi", "7u2",
 	"62m", "816"];
-var RandomCardSkip = ["4t8", "6ro", "4vr", "6ub", "597", "77n", "5fd", "7dt", "Ash", "Elf", "5cf", "7av"];
+var RandomCardSkip = ["4t8", "6ro", "4vr", "6ub", "597", "77n", "5fd", "7dt", "5cf", "7av", "Ash", "Elf"];
 function mkGame(first){
 	var game={};
 	game.player1 = new Player(game);
@@ -579,7 +579,7 @@ Thing.prototype.deatheffect = function(index) {
 			}
 		}
 		if (pl.shield && pl.shield.active.death){
-		    pl.shield.active.death(pl, this, index);
+			pl.shield.active.death(pl, this, index);
 		}
 		if (pl.weapon && pl.weapon.active.death){
 		    pl.weapon.active.death(pl, this, index);
@@ -638,11 +638,11 @@ Creature.prototype.calcEclipse = function(){
 	}
 	return bonus;
 }
-Weapon.prototype.trueatk = Creature.prototype.trueatk = function(adrenaline){
+Weapon.prototype.trueatk = Creature.prototype.trueatk = function(adrenaline, nobuff){
 	var dmg = this.atk;
 	if (this.status.steamatk)dmg += this.status.steamatk;
 	if (this.status.dive)dmg += this.status.dive;
-	if (this.active.buff)dmg += this.active.buff(this);
+	if (this.active.buff && !nobuff)dmg += this.active.buff(this);
 	if (this.status.burrowed)dmg = Math.ceil(dmg/2);
 	if (this instanceof Creature){
 		dmg += this.calcEclipse();

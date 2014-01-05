@@ -61,7 +61,7 @@ air:function(c,t){
 	c.owner.spend(Air, -1);
 },
 antimatter:function(c,t){
-	t.atk -= t.trueatk()*2;
+	t.atk -= t.trueatk(0, true)*2;
 },
 barrier:function(c,t){
     c.charges++;
@@ -336,6 +336,12 @@ freeze:function(c,t){
 fungusrebirth: function (c, t) {
     c.transform(Cards.Fungus.asUpped(c.card.upped));
 },
+gaincharge:function(c,t){
+	c.charge++;
+},
+gaincharge2:function(c,t){
+	c.charge += 2;
+},
 gas:function(c,t){
 	new Permanent(Cards.UnstableGas.asUpped(c.card.upped), c.owner).place();
 },
@@ -379,7 +385,7 @@ heal20:function(c,t){
 	t.dmg(-20);
 },
 holylight:function(c,t){
-	t.dmg(!(t instanceof Player) && (t.card.element == Darkness || t.card.element == Death)?10:-10);
+	t.dmg(!(t instanceof Player) && (t.card.element == Darkness || t.card.element == Death || t.passives.nocturnal)?10:-10);
 },
 hope:function(c,t){
 	var dr=0;
@@ -653,7 +659,7 @@ nymph:function(c,t){
 },
 ouija:function(c,t){
 	if(!c.owner.foe.sanctuary && c.owner.foe.hand.length<8){
-		c.owner.foe.hand.push(c.card);
+		c.owner.foe.hand.push(Cards.OuijaEssence);
 	}
 },
 overdrive:function(c,t){
@@ -988,7 +994,7 @@ pend:function(c,t){
 	c.owner.spend(c.pendstate?c.owner.mark:c.card.element,-c.status.charges);
 	c.pendstate ^= true;
 },
-bones:function(c,t){
+blockwithcharge:function(c,t){
 	if (--c.status.charges <= 0){
 		c.owner.shield = undefined;
 	}
@@ -1006,7 +1012,6 @@ despair:function(c,t){
 			chance++;
 		}
 	}
-	console.log(chance);
 	if (rng.real() < chance*.05){
 		t.atk--;
 		t.dmg(1);
