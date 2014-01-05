@@ -355,6 +355,27 @@ Player.prototype.drawcard = function() {
 	if (this.hand.length<8){
 		if (this.deck.length>0){
 			this.hand[this.hand.length] = this.deck.pop();
+			for(var i=0; i<2; i++){
+				var pl = i==0?this:this.foe;
+				for(var j=0; j<23; j++){
+					var c = pl.creatures[j];
+					if (c && c.active.draw){
+						c.active.draw(c, this);
+					}
+				}
+				for(var j=0; j<16; j++){
+					var p = pl.permanents[j];
+					if (p && p.active.draw){
+						p.active.draw(p, this);
+					}
+				}
+				if (pl.shield && pl.shield.active.draw){
+					pl.shield.active.draw(pl.shield, this);
+				}
+				if (pl.weapon && pl.weapon.active.draw){
+					pl.weapon.active.draw(pl.weapon, this);
+				}
+			}
 		}else if (!this.game.winner){
 			setWinner(this.foe);
 		}
@@ -544,7 +565,7 @@ Creature.prototype.remove = function(index) {
 }
 Thing.prototype.deatheffect = function(index) {
 	for(var i=0; i<2; i++){
-		var pl = this.owner.game.players[i];
+		var pl = i==0?this.owner:this.owner.foe;
 		for(var j=0; j<23; j++){
 			var c = pl.creatures[j];
 			if (c && c.active.death){
@@ -559,6 +580,9 @@ Thing.prototype.deatheffect = function(index) {
 		}
 		if (pl.shield && pl.shield.active.death){
 			pl.shield.active.death(pl.shield, this, index);
+		}
+		if (pl.weapon && pl.weapon.active.death){
+			pl.weapon.active.death(pl.weapon, this, index);
 		}
 	}
 }
