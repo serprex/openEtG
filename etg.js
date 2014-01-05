@@ -614,11 +614,11 @@ Creature.prototype.calcEclipse = function(){
 	}
 	return bonus;
 }
-Weapon.prototype.trueatk = Creature.prototype.trueatk = function(adrenaline){
+Weapon.prototype.trueatk = Creature.prototype.trueatk = function(adrenaline, nobuff){
 	var dmg = this.atk;
 	if (this.status.steamatk)dmg += this.status.steamatk;
 	if (this.status.dive)dmg += this.status.dive;
-	if (this.active.buff)dmg += this.active.buff(this);
+	if (this.active.buff && !nobuff)dmg += this.active.buff(this);
 	if (this.status.burrowed)dmg = Math.ceil(dmg/2);
 	if (this instanceof Creature){
 		dmg += this.calcEclipse();

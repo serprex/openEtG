@@ -61,7 +61,7 @@ air:function(c,t){
 	c.owner.spend(Air, -1);
 },
 antimatter:function(c,t){
-	t.atk -= t.trueatk()*2;
+	t.atk -= t.trueatk(0, true)*2;
 },
 bblood:function(c,t){
 	t.buffhp(20);
@@ -373,7 +373,7 @@ heal20:function(c,t){
 	t.dmg(-20);
 },
 holylight:function(c,t){
-	t.dmg(!(t instanceof Player) && (t.card.element == Darkness || t.card.element == Death)?10:-10);
+	t.dmg(!(t instanceof Player) && (t.card.element == Darkness || t.card.element == Death || t.passives.lycanthrope)?10:-10);
 },
 hope:function(c,t){
 	var dr=0;
@@ -647,7 +647,7 @@ nymph:function(c,t){
 },
 ouija:function(c,t){
 	if(!c.owner.foe.sanctuary && c.owner.foe.hand.length<8){
-		c.owner.foe.hand.push(c.card);
+		c.owner.foe.hand.push(Cards.OuijaEssence);
 	}
 },
 overdrive:function(c,t){
@@ -993,7 +993,6 @@ despair:function(c,t){
 			chance++;
 		}
 	}
-	console.log(chance);
 	if (rng.real() < chance*.05){
 		t.atk--;
 		t.dmg(1);
