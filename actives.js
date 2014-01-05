@@ -1009,7 +1009,7 @@ despair:function(c,t){
 			chance++;
 		}
 	}
-	if (rng.real() < chance*.05){
+	if (rng.real() < 1-Math.pow(.95, chance)){
 		t.atk--;
 		t.dmg(1);
 	}
