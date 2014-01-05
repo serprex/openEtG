@@ -980,7 +980,7 @@ function animate() {
 				var dr=sh.truedr();
 				var child = shiesprite[j].getChildAt(0);
 				child.visible = true;
-				child.setTexture(getTextImage((sh.status.charges? "x"+sh.status.charges:"") + sh.activetext().replace("shield ", "").replace(" losecharge","") + (dr?" "+dr:"")), 12);
+				child.setTexture(getTextImage((sh.status.charges? "x"+sh.status.charges:"") + (sh.active.shield?" "+sh.active.shield.activename:"") + (sh.active.buff?" "+sh.active.buff.activename:"") + (dr?" "+dr:"")), 12);
 				shiesprite[j].alpha = sh.status.immaterial?.7:1;
 				shiesprite[j].setTexture(getCreatureImage(sh.card.code));
 			}else shiesprite[j].visible = false;

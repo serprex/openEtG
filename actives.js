@@ -330,7 +330,7 @@ fractal:function(c,t){
 freeze:function(c,t){
 	t.freeze(c.card.upped && c.card != Cards.PandemoniumUp ? 4 : 3);
 },
-fungusrebirth: function (c, t) {
+fungusrebirth:function(c,t){
     c.transform(Cards.Fungus.asUpped(c.card.upped));
 },
 gaincharge:function(c,t){
