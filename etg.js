@@ -45,7 +45,7 @@ var ShardList = [undefined, undefined,
 	"5se", "7qu",
 	"5vi", "7u2",
 	"62m", "816"];
-var RandomCardSkip = ["4t8", "6ro", "4vr", "6ub", "597", "77n", "5fd", "7dt", "Ash", "Elf", "5cf", "7av"];
+var RandomCardSkip = ["4t8", "6ro", "4vr", "6ub", "597", "77n", "5fd", "7dt", "5cf", "7av", "Ash", "Elf"];
 function mkGame(first){
 	var game={};
 	game.player1 = new Player(game);
@@ -557,7 +557,7 @@ Thing.prototype.deatheffect = function(index) {
 				p.active.death(p, this, index);
 			}
 		}
-		if (pl.shield && pl.shield.active.death == -4){
+		if (pl.shield && pl.shield.active.death){
 			pl.shield.active.death(pl, this, index);
 		}
 	}

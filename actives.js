@@ -333,6 +333,12 @@ freeze:function(c,t){
 fungusrebirth: function (c, t) {
     c.transform(Cards.Fungus.asUpped(c.card.upped));
 },
+gaincharge:function(c,t){
+	c.charge++;
+},
+gaincharge2:function(c,t){
+	c.charge += 2;
+},
 gas:function(c,t){
 	new Permanent(Cards.UnstableGas.asUpped(c.card.upped), c.owner).place();
 },
@@ -376,7 +382,7 @@ heal20:function(c,t){
 	t.dmg(-20);
 },
 holylight:function(c,t){
-	t.dmg(!(t instanceof Player) && (t.card.element == Darkness || t.card.element == Death || t.passives.lycanthrope)?10:-10);
+	t.dmg(!(t instanceof Player) && (t.card.element == Darkness || t.card.element == Death || t.passives.nocturnal)?10:-10);
 },
 hope:function(c,t){
 	var dr=0;
@@ -985,7 +991,7 @@ pend:function(c,t){
 	c.owner.spend(c.pendstate?c.owner.mark:c.card.element,-c.status.charges);
 	c.pendstate ^= true;
 },
-bones:function(c,t){
+blockwithcharge:function(c,t){
 	if (--c.status.charges <= 0){
 		c.owner.shield = undefined;
 	}
