@@ -330,14 +330,14 @@ fractal:function(c,t){
 freeze:function(c,t){
 	t.freeze(c.card.upped && c.card != Cards.PandemoniumUp ? 4 : 3);
 },
-fungusrebirth: function (c, t) {
+fungusrebirth:function(c,t){
     c.transform(Cards.Fungus.asUpped(c.card.upped));
 },
 gaincharge:function(c,t){
-	c.charge++;
+	c.charges++;
 },
 gaincharge2:function(c,t){
-	c.charge += 2;
+	c.charges += 2;
 },
 gas:function(c,t){
 	new Permanent(Cards.UnstableGas.asUpped(c.card.upped), c.owner).place();

@@ -558,7 +558,7 @@ Thing.prototype.deatheffect = function(index) {
 			}
 		}
 		if (pl.shield && pl.shield.active.death){
-			pl.shield.active.death(pl, this, index);
+			pl.shield.active.death(pl.shield, this, index);
 		}
 	}
 }
