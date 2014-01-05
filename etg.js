@@ -373,10 +373,10 @@ Player.prototype.drawcard = function() {
 		        }
 		    }
 		    if (pl.shield && pl.shield.active.draw) {
-		        pl.shield.active.draw(pl, this);
+		        pl.shield.active.draw(pl.shield, this);
 		    }
 		    if (pl.weapon && pl.weapon.active.draw) {
-		        pl.weapon.active.draw(pl, this);
+		        pl.weapon.active.draw(pl.weapon, this);
 		    }
 		}
 	}
@@ -579,10 +579,10 @@ Thing.prototype.deatheffect = function(index) {
 			}
 		}
 		if (pl.shield && pl.shield.active.death){
-			pl.shield.active.death(pl, this, index);
+			pl.shield.active.death(pl.shield, this, index);
 		}
 		if (pl.weapon && pl.weapon.active.death){
-		    pl.weapon.active.death(pl, this, index);
+		    pl.weapon.active.death(pl.weapon, this, index);
 		}
 	}
 }
