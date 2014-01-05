@@ -878,10 +878,8 @@ soulcatch:function(c,t){
 spores:function(c,t, index){
     if (c == t && !c.owner.creatures[index]){
         c.owner.creatures[index] = new Creature(Cards.Spore.asUpped(c.card.upped), c.owner);
-        a = new Creature(Cards.Spore.asUpped(c.card.upped), c.owner).place();
-        b = new Creature(Cards.Spore.asUpped(c.card.upped), c.owner).place();
-        a.delay(1);
-        b.delay(1);
+        new Creature(Cards.Spore.asUpped(c.card.upped), c.owner).place();
+        new Creature(Cards.Spore.asUpped(c.card.upped), c.owner).place();
     }
 },
 sskin:function(c,t){
