@@ -562,7 +562,7 @@ lycanthropy:function(c,t){
 	c.buffhp(5);
 	c.atk += 5;
 	delete c.active.cast;
-	c.passives.lycanthrope = true;
+	c.passives.nocturnal = true;
 },
 metamorph:function(c,t){
 	c.owner.mark = t instanceof Player?t.mark:t.card.element;
@@ -878,9 +878,9 @@ soulcatch:function(c,t){
 spores:function(c,t, index){
     if (c == t && !c.owner.creatures[index]){
         c.owner.creatures[index] = new Creature(Cards.Spore.asUpped(c.card.upped), c.owner);
+        new Creature(Cards.Spore.asUpped(c.card.upped), c.owner).place();
+        new Creature(Cards.Spore.asUpped(c.card.upped), c.owner).place();
     }
-    new Creature(Cards.Spore.asUpped(c.card.upped), c.owner).place();
-    new Creature(Cards.Spore.asUpped(c.card.upped), c.owner).place();
 },
 sskin:function(c,t){
 	c.buffhp(c.quanta[Earth]);
