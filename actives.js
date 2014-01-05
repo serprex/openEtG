@@ -334,10 +334,10 @@ fungusrebirth:function(c,t){
     c.transform(Cards.Fungus.asUpped(c.card.upped));
 },
 gaincharge:function(c,t){
-	c.charges++;
+	c.status.charges++;
 },
 gaincharge2:function(c,t){
-	c.charges += 2;
+	c.status.charges += 2;
 },
 gas:function(c,t){
 	new Permanent(Cards.UnstableGas.asUpped(c.card.upped), c.owner).place();
