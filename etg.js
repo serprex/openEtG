@@ -45,7 +45,7 @@ var ShardList = [undefined, undefined,
 	"5se", "7qu",
 	"5vi", "7u2",
 	"62m", "816"];
-var RandomCardSkip = ["4t8", "6ro", "4vr", "6ub", "597", "77n", "5fd", "7dt", "Ash", "Elf"];
+var RandomCardSkip = ["4t8", "6ro", "4vr", "6ub", "597", "77n", "5fd", "7dt", "Ash", "Elf", "5cf", "7av"];
 function mkGame(first){
 	var game={};
 	game.player1 = new Player(game);
@@ -596,7 +596,7 @@ Creature.prototype.evade = function(sender) {
 	}
 }
 Creature.prototype.calcEclipse = function(){
-	if (this.card.element != Darkness && this.card.element != Death && !this.passives.lycanthrope){
+	if (this.card.element != Darkness && this.card.element != Death && !this.passives.nocturnal){
 		return 0;
 	}
 	var players = this.owner.game.players;
