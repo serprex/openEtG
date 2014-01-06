@@ -93,6 +93,7 @@ function Thing(card, owner){
 		this.active.play(this);
 		delete this.active.play;
 	}
+	delete this.active.discard;
 }
 function Creature(card, owner){
 	this.usedactive = true;

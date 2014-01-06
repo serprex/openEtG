@@ -1,6 +1,5 @@
 (function (root, factory) {
     'use strict';
-
     if (typeof exports === 'object') {
         module.exports = factory();
     } else if (typeof define === 'function' && define.amd) {
@@ -133,10 +132,6 @@
             mag01 = new Array(0, MATRIX_A);
 
         if (this.mti >= N) {
-            if (this.mti === N + 1) {
-                this.seed(5489);
-            }
-
             for (kk = 0; kk < N - M; kk++) {
                 y = (this.mt[kk] & UPPER_MASK) | (this.mt[kk + 1] & LOWER_MASK);
                 this.mt[kk] = this.mt[kk + M] ^ (y >>> 1) ^ mag01[y & 1];

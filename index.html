@@ -228,10 +228,7 @@ function getPermanentImage(code){
 	}
 }
 function initGame(data, ai){
-	if(data.seed != undefined){
-		rng.seed(data.seed);
-	}
-	game = mkGame(data.first);
+	game = mkGame(data.first, data.seed);
 	var idx, code, decks = [data.urdeck, data.deck];
 	for(var j=0; j<2; j++){
 		for(var i=0; i<decks[j].length; i++){
@@ -285,18 +282,17 @@ bpvp.click = function() {
 }
 brandai.click = function() {
 	if (Cards){
-		rng.seed(Math.random()*4000000000);
-		var e0 = Math.ceil(rng.real()*12), e1=Math.ceil(rng.real()*12);
+		var e0 = Math.ceil(Math.random()*12), e1=Math.ceil(Math.random()*12);
 		var deck = [Cards.QuantumPillar, Cards.QuantumPillar, Cards.QuantumPillar, Cards.QuantumPillar];
 		var pillar = Cards[(5000+e0*100).toString(32)];
 		for(var i=0; i<20; i++){
 			deck.push(pillar);
 		}
 		for(var i=0; i<30; i++){
-			deck.push(randomcard(rng.real()<.3, function(x){return x.element == e0;}));
+			deck.push(randomcard(Math.random()<.3, function(x){return x.element == e0;}));
 		}
 		for(var i=0; i<10; i++){
-			deck.push(randomcard(rng.real()<.3, function(x){return x.element == e1;}));
+			deck.push(randomcard(Math.random()<.3, function(x){return x.element == e1;}));
 		}
 		for(var i=0; i<deck.length; i++){
 			deck[i] = deck[i].code;
@@ -306,7 +302,7 @@ brandai.click = function() {
 		if (urdeck.length < 8){
 			urdeck = ['4vc', '4vc', '4vc', '4vc', '4vc', '4vc', '4vc', '4vc', '4vc', '4vc', '4vc', '4vc', '4vc', '4vc', '4vc', '4vc', '4vc', '4vc', '4ve', '4ve', '4ve', '6tt', '6tt', '6tt', '6tt', '4vf', '4vf', '4vf', '4vf', '4vf', '8pj']
 		}
-		initGame({ first:rng.real()<.5, deck:deck, urdeck:urdeck },
+		initGame({ first:Math.random()<.5, deck:deck, urdeck:urdeck, seed:Math.random()*4000000000 },
 			function(){
 				for(var i=this.hand.length-1; i>=0; i--){
 					if (this.hand[i].type == PillarEnum){

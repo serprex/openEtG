@@ -1,4 +1,3 @@
-var rng = new MersenneTwister(0);
 var Other = 0;
 var Entropy = 1;
 var Death = 2;
@@ -46,13 +45,13 @@ var ShardList = [undefined, undefined,
 	"5vi", "7u2",
 	"62m", "816"];
 var RandomCardSkip = ["4t8", "6ro", "4vr", "6ub", "597", "77n", "5fd", "7dt", "5cf", "7av", "Ash", "Elf"];
-function mkGame(first){
-	var game={};
+function mkGame(first, seed){
+	var game = { rng: new MersenneTwister(seed) };
 	game.player1 = new Player(game);
 	game.player2 = new Player(game);
-	game.players = [game.player1, game.player2];
 	game.player1.foe = game.player2;
 	game.player2.foe = game.player1;
+	game.players = [game.player1, game.player2];
 	game.turn = first?game.player1:game.player2;
 	return game;
 }
@@ -113,7 +112,7 @@ function loadcards(cb){
 	}
 	xhr.send();
 }
-function shuffle(array) {
+Player.prototype.shuffle = function(array) {
 	var counter = array.length, temp, index;
 	while (counter--) {
 		index = (rng.real() * counter) | 0;
@@ -203,6 +202,15 @@ Card.prototype.asUpped = function(upped){
 Card.prototype.isOf = function(card){
 	return card.code == (this.upped ? (parseInt(this.code, 32)-2000).toString(32) : this.code);
 }
+Player.prototype.rng = function(){
+	return this.game.rng.real();
+}
+Player.prototype.upto = function(x){
+	return Math.floor(this.game.rng.rnd()*x);
+}
+Player.prototype.uptoceil = function(x){
+	return Math.ceil((1-this.game.rng.rnd())*x);
+}
 Player.prototype.isCloaked = function(){
 	for(var i=0; i<16; i++){
 		if (this.permanents[i] && this.permanents[i].passives.cloak){
@@ -224,14 +232,14 @@ Player.prototype.info = function(){
 	return info;
 }
 Player.prototype.randomquanta = function() {
-	var nonzero = 0
+	var nonzero = 0;
 	for(var i=1; i<13; i++){
 		nonzero += this.quanta[i];
 	}
 	if (nonzero == 0){
 		return -1;
 	}
-	nonzero = Math.ceil(rng.real()*nonzero);
+	nonzero = this.uptoceil(nonzero);
 	for(var i=1; i<13; i++){
 		if ((nonzero -= this.quanta[i])<=0){
 			return i;
@@ -257,7 +265,7 @@ Player.prototype.spend = function(qtype, x) {
 	if (qtype == Other){
 		var b = x<0?-1:1;
 		for (var i=x*b; i>0; i--){
-			this.quanta[b==-1?Math.ceil(rng.real()*12):this.randomquanta()] -= b
+			this.quanta[b==-1?this.uptoceil(12):this.randomquanta()] -= b;
 		}
 	}else this.quanta[qtype] -= x;
 	for (var i=1; i<13; i++){
@@ -270,10 +278,10 @@ Player.prototype.spend = function(qtype, x) {
 Player.prototype.endturn = function(discard) {
 	if (discard != undefined){
 		var card=this.hand[discard];
-		if (card.passives && card.passives.obsession){
-			this.dmg(card.upped?13:10);
-		}
 		this.hand.splice(discard, 1);
+		if (card.active.discard){
+			card.active.discard(card, this);
+		}
 	}
 	this.spend(this.mark, -1);
 	if (this.foe.status.poison){
@@ -382,7 +390,7 @@ Player.prototype.drawcard = function() {
 	}
 }
 Player.prototype.drawhand = function() {
-	shuffle(this.deck);
+	this.shuffle(this.deck);
 	var mulligan = true;
 	for(var i=0; i<7; i++){
 		if (this.deck[i].cost == 0){
@@ -391,7 +399,7 @@ Player.prototype.drawhand = function() {
 		}
 	}
 	if (mulligan){
-		shuffle(this.deck);
+		this.shuffle(this.deck);
 	}
 	for(var i=0; i<7; i++){
 		this.hand.push(this.deck.pop());
@@ -616,7 +624,7 @@ Creature.prototype.evade = function(sender) {
 				freedomChance++;
 			}
 		}
-		return freedomChance && rng.real() < 1-Math.pow(.7, freedomChance);
+		return freedomChance && this.owner.rng() < 1-Math.pow(.7, freedomChance);
 	}
 }
 Creature.prototype.calcEclipse = function(){
@@ -720,7 +728,7 @@ Weapon.prototype.attack = Creature.prototype.attack = function(stasis, freedomCh
 	}
 	var trueatk, truedr = 0, momentum = this.status.momentum;
 	if (!(stasis || this.status.frozen || this.status.delayed) && (trueatk = this.trueatk()) != 0){
-		if (this.passives.airborne && freedomChance && rng.real() < freedomChance){
+		if (this.passives.airborne && freedomChance && this.owner.rng() < freedomChance){
 			trueatk = Math.ceil(trueatk * 1.5);
 			momentum = true;
 		}
@@ -817,9 +825,9 @@ function filtercards(upped, filter, cmp){
 	keys.sort(cmp);
 	return keys;
 }
-function randomcard(upped, filter){
+Player.prototype.randomcard = function(upped, filter){
 	var keys = filtercards(upped, filter);
-	return Cards[keys[Math.floor(rng.real() * keys.length)]];
+	return Cards[keys[this.upto(keys.length)]];
 }
 function activename(active){
 	return active?active.activename:"";

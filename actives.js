@@ -2,7 +2,7 @@ var Actives = (function(){
 function mutantactive(t){
 	t.active = {};
 	var abilities = ["hatch","freeze","burrow","destroy","steal","dive","heal","paradox","lycanthropy","scavenger","infect","gpull","devour","mutation","growth","ablaze","poison","deja","endow","guard","mitosis"];
-	var index = Math.floor(rng.real()*(abilities.length+2))-2;
+	var index = t.owner.upto(abilities.length+2)-2;
 	if (index<0){
 		t.status[["momentum","immaterial"][~index]] = true;
 	}else{
@@ -160,14 +160,14 @@ corpseexplosion:function(c,t){
 	}
 },
 cpower:function(c,t){
-	t.buffhp(Math.ceil(rng.real()*5));
-	t.atk += Math.ceil(rng.real()*5);
+	t.buffhp(c.owner.uptoceil(5));
+	t.atk += c.owner.uptoceil(5);
 },
 cseed:function(c,t){
 	if (t.card.isOf(Cards.Elf)){
 		t.transform(Cards.FallenElf.asUpped(t.card.upped));
 	}else{
-		Actives[["drainlife", "firebolt", "freeze", "gpullspell", "icebolt", "infect", "lightning", "lobotomize", "parallel", "rewind", "snipe", "swave"][Math.floor(rng.real()*12)]](c, t);
+		Actives[["drainlife", "firebolt", "freeze", "gpullspell", "icebolt", "infect", "lightning", "lobotomize", "parallel", "rewind", "snipe", "swave"][c.owner.upto(12)]](c, t);
 	}
 },
 dagger:function(c,t){
@@ -373,7 +373,7 @@ hasten:function(c,t){
 	c.owner.drawcard();
 },
 hatch:function(c,t){
-	c.transform(randomcard(c.card.upped, function(x){return x.type == CreatureEnum}));
+	c.transform(c.owner.randomcard(c.card.upped, function(x){return x.type == CreatureEnum}));
 },
 heal:function(c,t){
 	t.dmg(-5);
@@ -396,7 +396,7 @@ hope:function(c,t){
 icebolt:function(c,t){
 	var bolts = 1+Math.floor(c.owner.quanta[Water]/10);
 	t.spelldmg(bolts*2);
-	if (rng.real() < .3+bolts/10){
+	if (c.owner.rng() < .3+bolts/10){
 		t.freeze(3);
 	}
 },
@@ -413,11 +413,11 @@ immolate:function(c,t){
 	c.spend(Fire, c.card.upped?-7:-5);
 },
 improve:function(c,t){
-	t.transform(randomcard(false, function(x){return x.type == CreatureEnum}));
-	t.buffhp(Math.floor(rng.real()*5));
-	t.atk += Math.floor(rng.real()*5);
+	t.transform(c.owner.randomcard(false, function(x){return x.type == CreatureEnum}));
+	t.buffhp(c.owner.upto(5));
+	t.atk += c.owner.upto(5);
 	if(mutantactive(t)){
-		t.cast = Math.ceil(rng.real()*2);
+		t.cast = c.owner.uptoceil(2);
 		t.castele = t.card.element;
 	}
 },
@@ -598,12 +598,12 @@ momentum:function(c,t){
 },
 mutant:function(c,t){
 	if (mutantactive(c)){
-		c.cast = Math.ceil(rng.real()*2);
-		c.castele = Math.floor(rng.real()*13);
+		c.cast = c.owner.uptoceil(2);
+		c.castele = c.owner.upto(13);
 	}
 },
 mutation:function(c,t){
-	var rnd = rng.real();
+	var rnd = c.owner.rng();
 	if (rnd<.1){
 		t.die();
 	}else if (rnd<(t.card.isOf(Cards.Abomination)?.9:.5)){
@@ -650,9 +650,12 @@ nova2:function(c,t){
 	}
 },
 nymph:function(c,t){
-	var e = t.card.element > 0?t.card.element:Math.ceil(rng.real()*12);
+	var e = t.card.element || c.owner.uptoceil(12);
 	Actives.destroy(c, t);
 	new Creature(Cards[NymphList[e*2+(t.card.upped?1:0)]], t.owner).place();
+},
+obsession:function(c,t){
+	t.dmg(c.upped?13:10);
 },
 ouija:function(c,t){
 	if(!c.owner.foe.sanctuary && c.owner.foe.hand.length<8){
@@ -756,9 +759,7 @@ rage:function(c,t){
 readiness:function(c,t){
 	if (t.active.cast){
 		t.cast = 0;
-		if (t.card.element == Time){
-			t.usedactive = false;
-		}
+		t.usedactive = false;
 	}
 },
 rebirth:function(c,t){
@@ -800,7 +801,7 @@ scramble:function(c,t){
 serendipity:function(c,t){
 	var cards = [], num = Math.min(8-c.owner.hand.length, 3), anyentro = false;
 	for(var i=num-1; i>=0; i--){
-		cards[i] = randomcard(c.card.upped, function(x){return x.type != PillarEnum && !~NymphList.indexOf(x.code) && !~ShardList.indexOf(x.code) && (i>0 || anyentro || x.element == Entropy)});
+		cards[i] = c.owner.randomcard(c.card.upped, function(x){return x.type != PillarEnum && !~NymphList.indexOf(x.code) && !~ShardList.indexOf(x.code) && (i>0 || anyentro || x.element == Entropy)});
 		anyentro |= cards[i].element == Entropy;
 	}
 	for(var i=0; i<num; i++){
@@ -817,7 +818,7 @@ silence:function(c,t){
 	}
 },
 singularity:function(c,t){
-	var r = rng.real();
+	var r = c.owner.rng();
 	if (r > .9){
 		c.status.adrenaline = 1;
 	}else if (r > .8){
@@ -829,8 +830,8 @@ singularity:function(c,t){
 	}else if (r > .5){
 		Actives.blackhole(c.owner.foe);
 	}else if (r > .4){
-		c.atk -= Math.floor(rng.real()*5);
-		c.buffhp(Math.floor(rng.real()*5));
+		c.atk -= c.owner.uptoceil(5);
+		c.buffhp(c.owner.uptoceil(5));
 	}else if (r > .3){
 		Actives.nova(c.owner.foe);
 		c.owner.foe.nova = 0;
@@ -883,7 +884,6 @@ soulcatch:function(c,t){
 },
 spores:function(c,t, index){
     if (c == t && !c.owner.creatures[index]){
-        c.owner.creatures[index] = new Creature(Cards.Spore.asUpped(c.card.upped), c.owner);
         new Creature(Cards.Spore.asUpped(c.card.upped), c.owner).place();
         new Creature(Cards.Spore.asUpped(c.card.upped), c.owner).place();
     }
@@ -944,7 +944,7 @@ tempering:function(c,t){
 },
 throwrock:function(c,t){
 	t.spelldmg(c.card.upped?3:2);
-	t.owner.deck.splice(Math.floor(rng.real()*t.owner.deck.length), 0, c.card);
+	t.owner.deck.splice(c.owner.upto(t.owner.deck.length), 0, c.card);
 },
 unburrow:function(c,t){
 	c.status.burrowed = false;
@@ -998,7 +998,7 @@ blockwithcharge:function(c,t){
 	return true;
 },
 cold:function(c,t){
-	if (rng.real()<.3){
+	if (c.owner.rng()<.3){
 		t.freeze(3);
 	}
 },
@@ -1009,7 +1009,7 @@ despair:function(c,t){
 			chance++;
 		}
 	}
-	if (rng.real() < 1-Math.pow(.95, chance)){
+	if (c.owner.rng() < 1-Math.pow(.95, chance)){
 		t.atk--;
 		t.dmg(1);
 	}
@@ -1018,10 +1018,10 @@ evade100:function(c,t){
 	return true;
 },
 evade40:function(c,t){
-	return rng.real() < .4;
+	return c.owner.rng() < .4;
 },
 evade50:function(c,t){
-	return rng.real() < .5;
+	return c.owner.rng() < .5;
 },
 firewall:function(c,t){
 	t.dmg(1);
@@ -1029,7 +1029,7 @@ firewall:function(c,t){
 skull:function(c,t){
 	if (t instanceof Creature){
 		var thp = t.truehp();
-		if (thp <= 0 || rng.real() < .5/thp){
+		if (thp <= 0 || c.owner.rng() < .5/thp){
 			var index = t.getIndex();
 			t.die();
 			if (!t.owner.creatures[index] || t.owner.creatures[index].card != Cards.MalignantCell){
@@ -1045,7 +1045,7 @@ solar:function(c,t){
 	c.owner.spend(Light, -1);
 },
 thorn:function(c,t){
-	if (rng.real() < .75){
+	if (c.owner.rng() < .75){
 		t.addpoison(1);
 	}
 },
