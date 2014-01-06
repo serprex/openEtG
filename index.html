@@ -285,14 +285,15 @@ brandai.click = function() {
 		var e0 = Math.ceil(Math.random()*12), e1=Math.ceil(Math.random()*12);
 		var deck = [Cards.QuantumPillar, Cards.QuantumPillar, Cards.QuantumPillar, Cards.QuantumPillar];
 		var pillar = Cards[(5000+e0*100).toString(32)];
+		var pl = new Player({rng: new MersenneTwister(Math.random()*40000000)});
 		for(var i=0; i<20; i++){
 			deck.push(pillar);
 		}
 		for(var i=0; i<30; i++){
-			deck.push(randomcard(Math.random()<.3, function(x){return x.element == e0;}));
+			deck.push(pl.randomcard(Math.random()<.3, function(x){return x.element == e0;}));
 		}
 		for(var i=0; i<10; i++){
-			deck.push(randomcard(Math.random()<.3, function(x){return x.element == e1;}));
+			deck.push(pl.randomcard(Math.random()<.3, function(x){return x.element == e1;}));
 		}
 		for(var i=0; i<deck.length; i++){
 			deck[i] = deck[i].code;

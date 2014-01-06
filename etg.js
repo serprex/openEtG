@@ -115,7 +115,7 @@ function loadcards(cb){
 Player.prototype.shuffle = function(array) {
 	var counter = array.length, temp, index;
 	while (counter--) {
-		index = (rng.real() * counter) | 0;
+		index = this.upto(counter)|0;
 		temp = array[counter];
 		array[counter] = array[index];
 		array[index] = temp;
