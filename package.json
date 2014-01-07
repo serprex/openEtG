@@ -12,6 +12,7 @@
 	},
 	"devDependencies": {
 		"grunt":"",
-		"grunt-contrib-concat":""
+		"grunt-contrib-concat":"",
+		"qunitjs":""
 	}
 }

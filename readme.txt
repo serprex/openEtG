@@ -1,6 +1,6 @@
-How to setup on Windows:
-1. 	install node.js
-	install tortoisegit
+How Fippe setup on Windows:
+1. 	install node.js from http://nodejs.org
+	install tortoisegit from http://code.google.com/p/tortoisegit
 
 2. 	right click where you want the files to be and click Git Clone to create an openetg folder somewhere, use the URL: https://github.com/serprex/openEtG.git
 
@@ -23,4 +23,4 @@ How to setup on Windows:
 
 Note that every time you have edited a file you need to run step 6 before playing the game again. And every time you want to play the game you need to run step 7 and 8 again.
 
-If this does not work, you need help or you need to know how to send the update to serprex, contact serprex (or Fippe94 if you do not find serprex) in chat or otherwise.
+If this does not work, you need help, or you need to know how to send an update to serprex, contact serprex (or Fippe94 if you do not find serprex) in chat or otherwise.

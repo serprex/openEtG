@@ -158,6 +158,9 @@ corpseexplosion:function(c,t){
 	if (t.passives.poisonous){
 		c.foe.addpoison(1);
 	}
+	if (t.status.poison){
+		c.foe.addpoison(t.status.poison);
+	}
 },
 cpower:function(c,t){
 	t.buffhp(c.owner.uptoceil(5));
@@ -983,8 +986,9 @@ void:function(c,t){
 	}
 },
 quantagift:function(c,t){
-	c.spend(c.card.element, -3);
-	c.spend(c.mark, -3);
+	Actives.destroy(c, t);
+	t.owner.spend(c.card.element, -3);
+	t.owner.spend(t.owner.mark, -3);
 },
 web:function(c,t){
 	t.passives.airborne = false;

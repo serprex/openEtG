@@ -817,7 +817,7 @@ function drawStatus(obj, spr){
 	var x = spr.position.x, y=spr.position.y, wid = spr.width, hei = spr.height;
 	if (obj == obj.owner.gpull){
 		fgfx.beginFill(0xffaa00, .3);
-		fgfx.drawRect(x-wid/2-2, y-wid/2-2, wid+4, hei+4);
+		fgfx.drawRect(x-wid/2-2, y-hei/2-2, wid+4, hei+4);
 		fgfx.endFill();
 	}
 	if (obj.status.frozen){
