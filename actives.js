@@ -752,7 +752,7 @@ precognition:function(c,t){
 	c.owner.precognition = true;
 },
 purify:function(c,t){
-	t.status.poison = t.status.poison?Math.min(t.poison-2,-2):-2;
+	t.status.poison = t.status.poison?Math.min(t.status.poison-2,-2):-2;
 	if (t instanceof Player){
 		t.neuro = false;
 		t.sosa = 0;
