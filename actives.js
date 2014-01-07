@@ -345,6 +345,19 @@ gainchargeowner:function(c,t){
 gas:function(c,t){
 	new Permanent(Cards.UnstableGas.asUpped(c.card.upped), c.owner).place();
 },
+give:function(c,t){
+	if (t instanceof Creature){
+		if (t.hasactive("auto", "singularity")){
+			t.die();
+		}else{
+			t.remove();
+			t.owner = c.owner.foe;
+			t.place();
+		}
+	}else{
+		Actives.steal(c.owner.foe, t);
+	}
+},
 gpull:function(c,t){
 	c.owner.gpull = c;
 },
@@ -1012,7 +1025,7 @@ despair:function(c,t){
 			chance++;
 		}
 	}
-	if (c.owner.rng() < 1.25-Math.pow(.95, chance)){
+	if (c.owner.rng() < 1.2-Math.pow(.95, chance)){
 		t.atk--;
 		t.dmg(1);
 	}
