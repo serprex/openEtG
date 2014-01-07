@@ -317,6 +317,7 @@ flyingweapon:function(c,t){
 		cr.active = clone(t.weapon.active);
 		cr.passives = clone(t.weapon.passives);
 		cr.status = clone(t.weapon.status);
+		cr.passives.airborne = true;
 		cr.place();
 		t.weapon = undefined;
 	}
@@ -331,13 +332,15 @@ freeze:function(c,t){
 	t.freeze(c.card.upped && c.card != Cards.PandemoniumUp ? 4 : 3);
 },
 fungusrebirth:function(c,t){
-    c.transform(Cards.Fungus.asUpped(c.card.upped));
-},
-gaincharge:function(c,t){
-	c.status.charges++;
+	c.transform(Cards.Fungus.asUpped(c.card.upped));
 },
 gaincharge2:function(c,t){
 	c.status.charges += 2;
+},
+gainchargeowner:function(c,t){
+	if (c.owner == t){
+		c.status.charges++;
+	}
 },
 gas:function(c,t){
 	new Permanent(Cards.UnstableGas.asUpped(c.card.upped), c.owner).place();
@@ -883,10 +886,10 @@ soulcatch:function(c,t){
 	c.owner.spend(Death, -3);
 },
 spores:function(c,t, index){
-    if (c == t && !c.owner.creatures[index]){
-        new Creature(Cards.Spore.asUpped(c.card.upped), c.owner).place();
-        new Creature(Cards.Spore.asUpped(c.card.upped), c.owner).place();
-    }
+	if (c == t){
+		new Creature(Cards.Spore.asUpped(c.card.upped), c.owner).place();
+		new Creature(Cards.Spore.asUpped(c.card.upped), c.owner).place();
+	}
 },
 sskin:function(c,t){
 	c.buffhp(c.quanta[Earth]);
@@ -1009,7 +1012,7 @@ despair:function(c,t){
 			chance++;
 		}
 	}
-	if (c.owner.rng() < 1-Math.pow(.95, chance)){
+	if (c.owner.rng() < 1.25-Math.pow(.95, chance)){
 		t.atk--;
 		t.dmg(1);
 	}

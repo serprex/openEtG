@@ -279,7 +279,7 @@ Player.prototype.endturn = function(discard) {
 	if (discard != undefined){
 		var card=this.hand[discard];
 		this.hand.splice(discard, 1);
-		if (card.active.discard){
+		if (card.active && card.active.discard){
 			card.active.discard(card, this);
 		}
 	}
@@ -328,13 +328,13 @@ Player.prototype.endturn = function(discard) {
 	if (freedomChance){
 		freedomChance = (1-Math.pow(.7,freedomChance));
 	}
-	var cr;
+	var cr, crs = this.creatures.slice();
 	for (var i=0; i<23; i++){
-		if ((cr = this.creatures[i])){
+		if ((cr = crs[i])){
 			if (patienceFlag){
 				var floodbuff = floodingFlag && i>5 && c.card.element==Water;
 				cr.atk += floodbuff?5:cr.status.burrowed?4:2;
-				cr.buffhp(floodbuff?5:2);
+				cr.buffhp(floodbuff?2:1);
 				cr.delay(1);
 			}
 			cr.attack(stasisFlag, freedomChance);
@@ -342,8 +342,13 @@ Player.prototype.endturn = function(discard) {
 				cr.die();
 			}
 		}
-		if ((cr = this.foe.creatures[i]) && cr.status.salvaged){
-			delete cr.status.salvaged;
+		if ((cr = this.foe.creatures[i])){
+			if (cr.status.salvaged){
+				delete cr.status.salvaged;
+			}
+			if (cr.active.cast == Actives.dshield){
+				delete cr.status.immaterial;
+			}
 		}
 	}
 	if (this.shield){
@@ -359,31 +364,34 @@ Player.prototype.endturn = function(discard) {
 	this.foe.flatline = this.foe.precognition = this.foe.sanctuary = this.foe.silence = false;
 	this.game.turn = this.foe;
 }
+Player.prototype.procactive = function(name, func) {
+	for(var i=0; i<2; i++){
+		var pl = i==0?this:this.foe;
+		for(var j=0; j<23; j++){
+			var c = pl.creatures[j];
+			if (c && c.active[name]){
+				func(c, this);
+			}
+		}
+		for(var j=0; j<16; j++){
+			var p = pl.permanents[j];
+			if (p && p.active[name]){
+				func(p, this);
+			}
+		}
+		if (pl.shield && pl.shield.active[name]){
+			func(pl.shield, this);
+		}
+		if (pl.weapon && pl.weapon.active[name]){
+			func(pl.weapon, this);
+		}
+	}
+}
 Player.prototype.drawcard = function() {
 	if (this.hand.length<8){
 		if (this.deck.length>0){
 			this.hand[this.hand.length] = this.deck.pop();
-			for(var i=0; i<2; i++){
-				var pl = i==0?this:this.foe;
-				for(var j=0; j<23; j++){
-					var c = pl.creatures[j];
-					if (c && c.active.draw){
-						c.active.draw(c, this);
-					}
-				}
-				for(var j=0; j<16; j++){
-					var p = pl.permanents[j];
-					if (p && p.active.draw){
-						p.active.draw(p, this);
-					}
-				}
-				if (pl.shield && pl.shield.active.draw){
-					pl.shield.active.draw(pl.shield, this);
-				}
-				if (pl.weapon && pl.weapon.active.draw){
-					pl.weapon.active.draw(pl.weapon, this);
-				}
-			}
+			this.procactive("draw", function(c, p) { c.active.draw(c, p); });
 		}else if (!this.game.winner){
 			setWinner(this.foe);
 		}
@@ -411,9 +419,10 @@ Player.prototype.masscc = function(caster, func){
 			Actives.destroy(this, this.permanents[i]);
 		}
 	}
+	var crs = this.creatures.slice();
 	for(var i=0; i<23; i++){
-		if (this.creatures[i] && !this.creatures[i].status.immaterial && !this.creatures[i].status.burrowed){
-			func(caster, this.creatures[i]);
+		if (crs[i] && !crs[i].status.immaterial && !crs[i].status.burrowed){
+			func(caster, crs[i]);
 		}
 	}
 }
@@ -572,27 +581,7 @@ Creature.prototype.remove = function(index) {
 	return index;
 }
 Thing.prototype.deatheffect = function(index) {
-	for(var i=0; i<2; i++){
-		var pl = i==0?this.owner:this.owner.foe;
-		for(var j=0; j<23; j++){
-			var c = pl.creatures[j];
-			if (c && c.active.death){
-				c.active.death(c, this, index);
-			}
-		}
-		for(var j=0; j<16; j++){
-			var p = pl.permanents[j];
-			if (p && p.active.death){
-				p.active.death(p, this, index);
-			}
-		}
-		if (pl.shield && pl.shield.active.death){
-			pl.shield.active.death(pl.shield, this, index);
-		}
-		if (pl.weapon && pl.weapon.active.death){
-			pl.weapon.active.death(pl.weapon, this, index);
-		}
-	}
+	this.owner.procactive("death", function(c, p) { c.active.death(c, p, index) });
 }
 Creature.prototype.die = function() {
 	var index = this.remove();
@@ -704,11 +693,12 @@ Thing.prototype.canactive = function() {
 }
 Thing.prototype.useactive = function(t) {
 	this.usedactive = true;
+	var castele = this.castele, cast = this.cast, sacrifice = this.passives.sacrifice;
 	if (!t || !t.evade(this.owner)){
 		this.active.cast(this, t);
 	}
-	this.owner.spend(this.castele, this.cast);
-	if (this.passives.sacrifice){
+	this.owner.spend(castele, cast);
+	if (sacrifice){
 		this.die();
 	}
 }
@@ -762,9 +752,6 @@ Weapon.prototype.attack = Creature.prototype.attack = function(stasis, freedomCh
 	}
 	delete this.status.dive;
 	this.usedactive = false;
-	if (this.active.cast == Actives.dshield){
-		delete this.status.immaterial;
-	}
 	if (isCreature && ~this.getIndex() && this.truehp() <= 0){
 		this.die();
 	}else if (this.status.adrenaline){
