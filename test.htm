@@ -38,6 +38,20 @@ loadcards(function(cards, targeting) {
 		equal(player1.quanta[Darkness], 2, "Absorbed");
 		equal(player2.quanta[Life], 1, "Lone Life");
 	});
+	test("BoneWall", function() {
+		initTest();
+		player1.quanta[Death] = 10;
+		player1.hand = [Cards.BoneWall];
+		player1.summon(0);
+		new Creature(Cards.RubyDragon, player2).place();
+		new Creature(Cards.RubyDragon, player2).place();
+		new Creature(Cards.RubyDragon, player2).place();
+		player2.endturn();
+		ok(player1.shield, "BW exists");
+		equal(player1.shield.status.charges, 4, "4 charges");
+		player2.creatures[0].die();
+		equal(player1.shield.status.charges, 6, "6 charges");
+	});
 	test("Deckout", function() {
 		initTest();
 		player1.endturn();
@@ -76,8 +90,7 @@ loadcards(function(cards, targeting) {
 	});
 	test("Devourer", function() {
 		initTest();
-		var devourer = new Creature(Cards.Devourer, player1);
-		player1.creatures[0] = devourer;
+		new Creature(Cards.Devourer, player1).place();
 		player2.quanta[Light] = 1;
 		player1.endturn();
 		equal(player2.quanta[Light], 0, "Light");
@@ -102,8 +115,8 @@ loadcards(function(cards, targeting) {
 		initTest();
 		player1.deck = [Cards.Ash, Cards.Ash, Cards.Ash];
 		player2.deck = [Cards.Ash, Cards.Ash, Cards.Ash];
-		player1.creatures[0] = new Creature(Cards.Vampire, player1);
-		player1.creatures[1] = new Creature(Cards.Vampire, player1);
+		for(var i=0; i<2; i++)
+			new Creature(Cards.Vampire, player1).place();
 		player1.hp = 50;
 		player1.endturn();
 		player2.endturn();
@@ -117,9 +130,9 @@ loadcards(function(cards, targeting) {
 	});
 	test("Gpull", function() {
 		initTest();
-		player2.creatures[0] = new Creature(Cards.MassiveDragon, player2);
+		new Creature(Cards.MassiveDragon, player2).place();
 		player2.gpull = player2.creatures[0];
-		player1.creatures[0] = new Creature(Cards.Scorpion, player1);
+		new Creature(Cards.Scorpion, player1).place();
 		player2.deck = [Cards.MassiveDragon];
 		player1.endturn();
 		equal(player2.gpull.hp, 29, "dmg redirected");
@@ -130,7 +143,7 @@ loadcards(function(cards, targeting) {
 	test("Hope", function() {
 		initTest();
 		player1.shield = new Shield(Cards.Hope, player1);
-		player1.creatures[0] = new Creature(Cards.Photon, player1);
+		new Creature(Cards.Photon, player1).place();
 		for(var i=1; i<4; i++){
 			player1.creatures[i] = new Creature(Cards.RayofLight, player1);
 		}
@@ -155,11 +168,22 @@ loadcards(function(cards, targeting) {
 	test("Parallel", function() {
 		initTest();
 		var damsel = new Creature(Cards.Damselfly, player1);
-		player1.creatures[0] = damsel;
+		damsel.place();
 		Actives.parallel(player1, damsel);
 		equal(player1.creatures[1].card, Cards.Damselfly, "PU'd");
 		Actives.web(player1, damsel);
 		ok(!damsel.passives.airborne && player1.creatures[1].passives.airborne, "Web'd");
+	});
+	test("Purify", function() {
+		initTest();
+		Actives.poison3(player1);
+		equal(player2.status.poison, 3, "3");
+		Actives.poison3(player1, player2);
+		equal(player2.status.poison, 6, "6");
+		Actives.purify(player1, player2);
+		equal(player2.status.poison, -2, "-2");
+		Actives.purify(player1, player2);
+		equal(player2.status.poison, -4, "-4");
 	});
 	test("Reflect", function() {
 		initTest();
@@ -188,7 +212,7 @@ loadcards(function(cards, targeting) {
 	test("Voodoo", function() {
 		initTest();
 		var voodoo = new Creature(Cards.VoodooDoll, player1);
-		player1.creatures[0] = voodoo;
+		voodoo.place();
 		Actives.lightning(player1, voodoo);
 		Actives.infect(player1, voodoo);
 		equal(voodoo.hp, 11, "dmg");
