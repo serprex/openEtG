@@ -365,6 +365,9 @@ Player.prototype.endturn = function(discard) {
 	this.game.turn = this.foe;
 }
 Player.prototype.procactive = function(name, func) {
+	if (!func){
+		func = function(c,t){ c.active[name](c, t) };
+	}
 	for(var i=0; i<2; i++){
 		var pl = i==0?this:this.foe;
 		for(var j=0; j<23; j++){
@@ -391,7 +394,7 @@ Player.prototype.drawcard = function() {
 	if (this.hand.length<8){
 		if (this.deck.length>0){
 			this.hand[this.hand.length] = this.deck.pop();
-			this.procactive("draw", function(c, p) { c.active.draw(c, p); });
+			this.procactive("draw");
 		}else if (!this.game.winner){
 			setWinner(this.foe);
 		}
@@ -792,6 +795,7 @@ Player.prototype.summon = function(index, target){
 		if (!target || !target.evade(this)){
 			this.card = card;
 			card.active(this, target);
+			this.procactive("spell");
 		}
 	}else if (card.type == CreatureEnum) {
 		new Creature(card, this).place();

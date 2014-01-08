@@ -55,7 +55,6 @@ function player2summon(handindex, tgt){
 	var card = game.player2.hand[handindex];
 	var sprite = new PIXI.Sprite(nopic);
 	sprite.position.x=foeplays.length*90;
-	sprite.position.y=8;
 	sprite.interactive = true;
 	sprite.mouseover = function(){
 		setInfo(card);
@@ -101,14 +100,14 @@ function bitsToTgt(x){
 	}else console.log("Unknown tgtop: "+tgtop+", "+x);
 }
 function creaturePos(j, i){
-	var p = new PIXI.Point(160+i*24, 310+(i%5)*30);
+	var p = new PIXI.Point(165+Math.floor(i/5)*120+(i%5)*8, 315+(i%5)*30);
 	if (j){
 		reflectPos(p);
 	}
 	return p;
 }
 function permanentPos(j, i){
-	var p = new PIXI.Point(160+i*26, 490+(i%3)*30);
+	var p = new PIXI.Point(165+Math.floor(i/4)*120+(i%4)*8, 475+(i%4)*30);
 	if (j){
 		reflectPos(p);
 	}
@@ -211,11 +210,11 @@ function getPermanentImage(code){
 	if (primgcache[code])return primgcache[code];
 	else{
 		var card = Cards[code];
-		var rend = new PIXI.RenderTexture(80, 30);
+		var rend = new PIXI.RenderTexture(120, 30);
 		var graphics = new PIXI.Graphics();
 		graphics.lineStyle(2, 0x222222, 1);
 		graphics.beginFill(card?(card.upped?lighten(elecols[card.element]):elecols[card.element]):elecols[0]);
-		graphics.drawRect(0, 0, 80, 30);
+		graphics.drawRect(0, 0, 120, 30);
 		graphics.endFill();
 		if (card){
 			var text = new PIXI.Text(Cards[code].name, {font: "12px Arial bold", fill:card.upped?"black":"white"});
@@ -633,7 +632,7 @@ for (var j=0; j<2; j++){
 		for (var i=0; i<16; i++){
 			permsprite[j][i] = new PIXI.Sprite(nopic);
 			var permtext = new PIXI.Sprite(nopic);
-			permtext.position.x = 38;
+			permtext.position.x = 58;
 			permtext.anchor.x = 1;
 			permsprite[j][i].addChild(permtext);
 			centerAnchor(permsprite[j][i]);
@@ -968,7 +967,7 @@ function animate() {
 				child.setTexture(getTextImage(wp.activetext() + " " + wp.trueatk(), 12));
 				weapsprite[j].alpha = wp.immaterial?.7:1;
 				child.visible = true;
-				weapsprite[j].setTexture(getCreatureImage(wp.card.code));
+				weapsprite[j].setTexture(getPermanentImage(wp.card.code));
 				drawStatus(wp, weapsprite[j]);
 			}else weapsprite[j].visible = false;
 			var sh = game.players[j].shield;
@@ -977,9 +976,9 @@ function animate() {
 				var dr=sh.truedr();
 				var child = shiesprite[j].getChildAt(0);
 				child.visible = true;
-				child.setTexture(getTextImage((sh.status.charges? "x"+sh.status.charges:"") + (sh.active.shield?" "+sh.active.shield.activename:"") + (sh.active.buff?" "+sh.active.buff.activename:"") + (dr?" "+dr:"")), 12);
+				child.setTexture(getTextImage((sh.status.charges? "x"+sh.status.charges:"") + (sh.active.shield?" "+sh.active.shield.activename:"") + (sh.active.buff?" "+sh.active.buff.activename:"") + (sh.active.cast?casttext(sh.cast, sh.castele)+sh.active.cast.activename:"") + (dr?" "+dr:"")), 12);
 				shiesprite[j].alpha = sh.status.immaterial?.7:1;
-				shiesprite[j].setTexture(getCreatureImage(sh.card.code));
+				shiesprite[j].setTexture(getPermanentImage(sh.card.code));
 			}else shiesprite[j].visible = false;
 			marksprite[j].setTexture(getIcon(game.players[j].mark));
 			for(var i=1; i<13; i++){

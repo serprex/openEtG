@@ -321,6 +321,8 @@ flyingweapon:function(c,t){
 		var cr = new Creature(t.weapon.card, t.owner);
 		cr.atk = t.weapon.atk;
 		cr.active = clone(t.weapon.active);
+		cr.cast = t.weapon.cast;
+		cr.castele = t.weapon.castele;
 		cr.passives = clone(t.weapon.passives);
 		cr.status = clone(t.weapon.status);
 		cr.passives.airborne = true;
@@ -594,7 +596,7 @@ lycanthropy:function(c,t){
 },
 metamorph:function(c,t){
 	c.owner.mark = t instanceof Player?t.mark:t.card.element;
-	c.owner.spend(c.owner.mark, c.card.upped?-3:-2);
+	c.owner.spend(c.owner.mark, -2);
 },
 miracle:function(c,t){
 	c.quanta[Light] = 0;
@@ -677,7 +679,7 @@ nymph:function(c,t){
 	new Creature(Cards[NymphList[e*2+(t.card.upped?1:0)]], t.owner).place();
 },
 obsession:function(c,t){
-	t.dmg(c.upped?13:10);
+	t.dmg(c.upped?10:8);
 },
 ouija:function(c,t){
 	if(!c.owner.foe.sanctuary && c.owner.foe.hand.length<8){
@@ -798,6 +800,31 @@ rewind:function(c,t){
 	}else{
 		t.remove();
 		t.owner.deck.push(t.card);
+	}
+},
+ricochet:function(c,t){
+	var tgting = Targeting[t.card.active.activename];
+	var tgts = [];
+	function tgttest(x){
+		if (x && tgting(t, x) && tgting(t.foe, x)){
+			tgts.push(x);
+		}
+	}
+	if (tgting){
+		for(var i=0; i<2; i++){
+			var pl=i==0?t:t.foe;
+			for(var j=0; j<23; j++){
+				tgttest(pl.creatures[j]);
+			}
+			for(var j=0; j<16; j++){
+				tgttest(pl.permanents[j]);
+			}
+			tgttest(pl.shield);
+			tgttest(pl.weapon);
+		}
+		if (tgts.length > 0){
+			t.card.active(t.rng() < .5?t:t.foe, tgts[t.upto(tgts.length)]); // NB bypasses SoFr
+		}
 	}
 },
 sanctuary:function(c,t){
@@ -989,10 +1016,10 @@ void:function(c,t){
 	}
 },
 quantagift:function(c,t){
-	Actives.destroy(c, t);
-	t.owner.spend(c.card.element, -2);
-	t.owner.spend(t.card.element, -2);
-	t.owner.spend(t.owner.mark, -1);
+	c.spend(c.card.element, -2);
+	if (c.mark != c.card.element){
+		c.spend(c.mark, -3);
+	}
 },
 web:function(c,t){
 	t.passives.airborne = false;
