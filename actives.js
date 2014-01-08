@@ -295,6 +295,9 @@ endow:function(c,t){
 	}
 	c.buffhp(2);
 },
+atk2hp:function(c,t){
+	t.maxhp = t.hp = t.trueatk();
+},
 evolve:function(c,t){
 	c.transform(Cards.Shrieker.asUpped(c.card.upped));
 	c.status.burrowed = false;
@@ -959,7 +962,7 @@ swave:function(c,t){
 	t.spelldmg(4);
 },
 tempering:function(c,t){
-	t.atk += c.card.upped?5:2;
+	t.atk += c.card.upped?5:3;
 },
 throwrock:function(c,t){
 	t.spelldmg(c.card.upped?3:2);
@@ -987,8 +990,9 @@ void:function(c,t){
 },
 quantagift:function(c,t){
 	Actives.destroy(c, t);
-	t.owner.spend(c.card.element, -3);
-	t.owner.spend(t.owner.mark, -3);
+	t.owner.spend(c.card.element, -2);
+	t.owner.spend(t.card.element, -2);
+	t.owner.spend(t.owner.mark, -1);
 },
 web:function(c,t){
 	t.passives.airborne = false;
