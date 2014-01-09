@@ -211,7 +211,7 @@ destroy:function(c,t, dontsalvage){
 },
 destroycard:function(c,t){
 	if (!t.owner.sanctuary){
-		t.owner.hand.splice(t.index, 1); // Doesn't trigger discard effects. Incorrect behavior?
+		t.remove();
 	}
 },
 devour:function(c,t){
@@ -351,7 +351,7 @@ flyingweapon:function(c,t){
 fractal:function(c,t){
 	c.owner.quanta[Aether] = 0;
 	for(var i=c.owner.hand.length; i<8; i++){
-		c.owner.hand[i] = t.card;
+		c.owner.hand[i] = new CardInstance(t.card, c.owner);
 	}
 },
 freeze:function(c,t){
@@ -510,7 +510,7 @@ integrity:function(c,t){
 	};
 	var stat=c.card.upped?5:4;
 	for(var i=c.owner.hand.length-1; i>=0; i--){
-		var card = c.owner.hand[i];
+		var card = c.owner.hand[i].card;
 		if (~ShardList.indexOf(card.code)){
 			if (card.upped){
 				stat++;
@@ -672,7 +672,7 @@ nightmare:function(c,t){
 	if (!c.owner.foe.sanctuary){
 		c.owner.dmg(-c.owner.foe.dmg(16-c.owner.foe.hand.length*2));
 		for(var i = c.owner.foe.hand.length; i<8; i++){
-			c.owner.foe.hand[i] = t.card;
+			c.owner.foe.hand[i] = new CardInstance(t.card, c.owner.foe);
 		}
 	}
 },

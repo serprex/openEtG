@@ -277,7 +277,7 @@ Player.prototype.spend = function(qtype, x) {
 }
 Player.prototype.endturn = function(discard) {
 	if (discard != undefined){
-		var card=this.hand[discard];
+		var card=this.hand[discard].card;
 		this.hand.splice(discard, 1);
 		if (card.active && card.active.discard){
 			card.active.discard(card, this);
@@ -393,7 +393,7 @@ Player.prototype.procactive = function(name, func) {
 Player.prototype.drawcard = function() {
 	if (this.hand.length<8){
 		if (this.deck.length>0){
-			this.hand[this.hand.length] = this.deck.pop();
+			this.hand[this.hand.length] = new CardInstance(this.deck.pop(), this);
 			this.procactive("draw");
 		}else if (!this.game.winner){
 			setWinner(this.foe);
@@ -413,7 +413,7 @@ Player.prototype.drawhand = function() {
 		this.shuffle(this.deck);
 	}
 	for(var i=0; i<7; i++){
-		this.hand.push(this.deck.pop());
+		this.hand.push(new CardInstance(this.deck.pop(), this));
 	}
 }
 Player.prototype.masscc = function(caster, func){
@@ -492,6 +492,11 @@ Pillar.prototype.place = function(){
 	}
 	Permanent.prototype.place.call(this);
 }
+CardInstance.prototype.place = function(){
+	if (this.owner.hand.length < 8){
+		this.owner.hand.push(this);
+	}
+}
 Player.prototype.delay = function(x) {
 	if (this.weapon)this.weapon.delay(x);
 }
@@ -528,6 +533,7 @@ Player.prototype.dmg = function(x, ignoresosa) {
 Player.prototype.spelldmg = function(x) {
 	return (!this.shield || !this.shield.passives.reflect?this:this.foe).dmg(x);
 }
+CardInstance.prototype.getIndex = function() { return this.owner.hand.indexOf(this); }
 Creature.prototype.getIndex = function() { return this.owner.creatures.indexOf(this); }
 Player.prototype.addpoison = function(x) {
 	this.defstatus("poison", 0);
@@ -580,6 +586,13 @@ Creature.prototype.remove = function(index) {
 	if (index === undefined)index=this.getIndex();
 	if (~index){
 		delete this.owner.creatures[index];
+	}
+	return index;
+}
+CardInstance.prototype.remove = function(index) {
+	if (index === undefined)index=this.getIndex();
+	if (~index){
+		this.owner.hand.splice(index, 1);
 	}
 	return index;
 }
@@ -769,15 +782,15 @@ Weapon.prototype.attack = Creature.prototype.attack = function(stasis, freedomCh
 }
 Player.prototype.cansummon = function(index, target){
 	if (this.silence || this.game.turn != this)return false;
-	var card = this.hand[index];
-	return card && this.canspend(card.costele, card.cost);
+	var cardinst = this.hand[index];
+	return cardinst && this.canspend(cardinst.card.costele, cardinst.card.cost);
 }
 Player.prototype.summon = function(index, target){
 	if (!this.cansummon(index, target)){
 		console.log((this==this.game.player1?"1":"2") + " cannot summon " + index);
 		return;
 	}
-	var card = this.hand[index];
+	var card = this.hand[index].card;
 	this.hand.splice(index, 1);
 	if (this.neuro){
 		this.addpoison(1);
@@ -843,7 +856,7 @@ var TargetFilters = {
 		return true;
 	},
 	card:function(c, t){
-		return t instanceof CardPtr;
+		return t instanceof CardInstance;
 	},
 	pill:function(c, t){
 		return t.isMaterialInstance(Pillar);
