@@ -132,9 +132,15 @@ function Pillar(card, owner){
 	this.status = {charges: 1};
 	this.pendstate = false;
 }
+function CardPtr(owner, index){
+	this.owner = owner;
+	this.index = index;
+	this.card = owner.hand[index];
+}
 Player.prototype = new Thing();
 Creature.prototype = new Thing();
 Permanent.prototype = new Thing();
 Weapon.prototype = new Permanent();
 Shield.prototype = new Permanent();
 Pillar.prototype = new Permanent();
+CardPtr.prototype = new Thing();

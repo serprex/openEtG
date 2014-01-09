@@ -23,7 +23,7 @@ loadcards(function(cards, targeting) {
 function getTarget(src, active, cb){
 	var targetingFilter = Targeting[active.activename];
 	if (targetingFilter){
-		targetingMode = function(t){ return (t == game.player2 || t.owner == game.player1 || t.passives.cloak || !game.player2.isCloaked()) && targetingFilter(src, t); }
+		targetingMode = function(t){ return (t == game.player2 || t.owner == game.player1 || t instanceof CardPtr || t.passives.cloak || !game.player2.isCloaked()) && targetingFilter(src, t); }
 		targetingModeCb = cb;
 		targetingText = active.activename;
 	}else{
@@ -65,38 +65,37 @@ function player2summon(handindex, tgt){
 	game.player2.summon(handindex, tgt);
 }
 function tgtToBits(x){
+	var bits;
 	if (x == undefined){
 		return 0;
-	}else if (x == game.player1){
-		return 1;
-	}else if (x == game.player2){
-		return 9;
-	}else if (x == game.player1.weapon){
-		return 17;
-	}else if (x == game.player2.weapon){
-		return 25;
-	}else if (x == game.player1.shield){
-		return 33;
-	}else if (x == game.player2.shield){
-		return 41;
+	}else if (x instanceof Player){
+		bits = 1;
+	}else if (x instanceof Weapon){
+		bits = 17;
+	}else if (x instanceof Shield){
+		bits = 33;
+	}else if (x instanceof CardPtr){
+		bits = 5|x.index<<4;
 	}else{
-		return (x instanceof Creature?2:4)+(x.owner==game.player1?0:1)|x.getIndex()<<3;
+		bits = (x instanceof Creature?2:4)|x.getIndex()<<4;
 	}
+	if (x.owner == game.player2){
+		bits |= 8;
+	}
+	return bits;
 }
 function bitsToTgt(x){
-	var tgtop=x&7;
+	var tgtop=x&7, player=game.players[x&8?0:1];
 	if (tgtop == 0){
 		return undefined;
 	}else if (tgtop==1){
-		return [game.player2, game.player1, game.player2.weapon, game.player1.weapon, game.player2.shield, game.player1.shield][x>>3];
+		return player["owner", "weapon", "shield"][x>>4];
 	}else if (tgtop==2){
-		return game.player2.creatures[x>>3];
-	}else if (tgtop==3){
-		return game.player1.creatures[x>>3];
+		return player.creatures[x>>4];
 	}else if (tgtop==4){
-		return game.player2.permanents[x>>3];
+		return player.permanents[x>>4];
 	}else if (tgtop==5){
-		return game.player1.permanents[x>>3];
+		return new CardPtr(player, x>>4);
 	}else console.log("Unknown tgtop: "+tgtop+", "+x);
 }
 function creaturePos(j, i){
@@ -417,7 +416,7 @@ beditor.click = function() {
 						if(editordeck.length<60){
 							var code = editorcolumns[_i][1][editorelement][_j];
 							for(var i=0; i<editordeck.length; i++){
-								if(editorCardCmp(editordeck[i], code) == 1){
+								if(editorCardCmp(editordeck[i], code)>0){
 									break;
 								}
 							}
@@ -560,22 +559,27 @@ for (var i=0; i<8; i++){
 			cardart.setTexture(getArt(game.player1.hand[_i].code));
 		}
 		handsprite[0][i].click = function(){
-			if (discarding){
-				endturn.click(null, _i);
-				return;
-			}
-			if (game.turn != game.player1 || game.player1.silence)return;
 			var card = game.player1.hand[_i];
-			if (card && (card.cost == 0 || game.player1.canspend(card.costele, card.cost))){
-				if (card.type != SpellEnum){
-					console.log("summoning " + _i);
-					socket.emit("summon", _i);
-					game.player1.summon(_i);
-				}else{
-					getTarget(game.player1, card.active, function(tgt) {
-						socket.emit("summon", _i|tgtToBits(tgt)<<3);
-						game.player1.summon(_i, tgt);
-					});
+			if (card){
+				if (discarding){
+					endturn.click(null, _i);
+				}else if (targetingMode){
+					var cptr = new CardPtr(game.player1, _i);
+					if (targetingMode(cptr)){
+						targetingMode = undefined;
+						targetingModeCb(cptr);
+					}
+				}else if (game.player1.cansummon(_i)){
+					if (card.type != SpellEnum){
+						console.log("summoning " + _i);
+						socket.emit("summon", _i);
+						game.player1.summon(_i);
+					}else{
+						getTarget(game.player1, card.active, function(tgt) {
+							socket.emit("summon", _i|tgtToBits(tgt)<<3);
+							game.player1.summon(_i, tgt);
+						});
+					}
 				}
 			}
 		}
@@ -586,6 +590,24 @@ for (var i=0; i<8; i++){
 	handsprite[1][i] = new PIXI.Sprite(nopic);
 	handsprite[1][i].position.x = 20;
 	handsprite[1][i].position.y = 40+20*i;
+	handsprite[1][i].interactive = true;
+	(function(_i){
+		handsprite[1][i].mouseover = function(){
+			if (game.player1.precognition){
+				setInfo(game.player2.hand[_i]);
+				cardart.setTexture(getArt(game.player2.hand[_i].code));
+			}
+		}
+		handsprite[1][i].click = function(){
+			if (targetingMode){
+				var cptr = new CardPtr(game.player2, _i);
+				if (targetingMode(cptr)){
+					targetingMode = undefined;
+					targetingModeCb(cptr);
+				}
+			}
+		}
+	})(i);
 	gameui.addChild(handsprite[1][i]);
 }
 var creasprite = [new Array(23), new Array(23)];

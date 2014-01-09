@@ -140,11 +140,11 @@ clear:function(c,t){
 	t.status.aflatoxin = false;
 	t.status.momentum = false;
 	t.status.psion = false;
-	if (t.delayed > 0){
-		t.delayed--;
+	if (t.status.delayed > 0){
+		t.status.delayed--;
 	}
-	if (t.frozen > 0){
-		t.frozen--;
+	if (t.status.frozen > 0){
+		t.status.frozen--;
 	}
 	t.dmg(-1);
 },
@@ -160,6 +160,11 @@ corpseexplosion:function(c,t){
 	}
 	if (t.status.poison){
 		c.foe.addpoison(t.status.poison);
+	}
+},
+counter:function(c,t){
+	if (!c.status.frozen && !c.status.delayed){
+		t.dmg(c.trueatk());
 	}
 },
 cpower:function(c,t){
@@ -186,6 +191,14 @@ deja:function(c,t){
 	delete c.active.cast;
 	Actives.parallel(c, c);
 },
+deploy2blob:function(c,t){
+	if (c.trueatk()>1 && c.truehp()>1){
+		new Creature(Cards.Blob.asUpped(c.card.upped), c.owner).place();
+		new Creature(Cards.Blob.asUpped(c.card.upped), c.owner).place();
+		c.atk -= 2;
+		c.dmg(2);
+	}
+},
 destroy:function(c,t, dontsalvage){
 	if (t.passives.stackable){
 		if(--t.status.charges<=0){
@@ -194,6 +207,11 @@ destroy:function(c,t, dontsalvage){
 	}else t.die();
 	if (!dontsalvage){
 		salvageScan(c.owner, t);
+	}
+},
+destroycard:function(c,t){
+	if (!t.owner.sanctuary){
+		t.owner.hand.splice(t.index, 1); // Doesn't trigger discard effects. Incorrect behavior?
 	}
 },
 devour:function(c,t){
@@ -549,6 +567,9 @@ integrity:function(c,t){
 	};
 	new Creature(Cards.ShardGolem, c.owner).place();
 },
+layegg:function(c,t){
+	new Creature(Cards.FateEgg.asUpped(c.card.upped), c.owner).place();
+},
 light:function(c,t){
 	c.owner.spend(Light, -1);
 },
@@ -712,7 +733,6 @@ parallel:function(c,t){
 	copy.active = clone(t.active);
 	copy.status = clone(t.status);
 	copy.owner = c.owner;
-	copy.usedactive = true;
 	copy.place();
 	if (copy.voodoo){
 		c.owner.foe.dmg(copy.maxhp-copy.hp);
@@ -791,6 +811,11 @@ rebirth:function(c,t){
 },
 regenerate:function(c,t){
 	c.owner.dmg(-5);
+},
+reinforce:function(c,t){
+	t.atk += c.atk;
+	t.buffhp(c.truehp());
+	c.die();
 },
 rewind:function(c,t){
 	if (t.undead){
@@ -1009,6 +1034,14 @@ upkeep:function(c,t){
 vampire:function(c,t, dmg){
 	c.owner.dmg(-dmg);
 },
+virusinfect:function(c,t){
+	Actives.infect(c, t);
+	c.die();
+},
+virusplague:function(c,t){
+	Actives.plague(c, t);
+	c.die();
+},
 void:function(c,t){
 	c.owner.foe.maxhp = Math.max(c.owner.foe.maxhp-3, 1);
 	if (c.owner.foe.hp > c.owner.foe.maxhp){
@@ -1018,7 +1051,7 @@ void:function(c,t){
 quantagift:function(c,t){
 	c.spend(c.card.element, -2);
 	if (c.mark != c.card.element){
-		c.spend(c.mark, -3);
+		c.spend(c.mark, -2);
 	}
 },
 web:function(c,t){

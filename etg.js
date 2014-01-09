@@ -44,7 +44,7 @@ var ShardList = [undefined, undefined,
 	"5se", "7qu",
 	"5vi", "7u2",
 	"62m", "816"];
-var RandomCardSkip = ["4t8", "6ro", "4vr", "6ub", "597", "77n", "5fd", "7dt", "5cf", "7av", "Ash", "Elf"];
+var RandomCardSkip = ["4t8", "6ro", "4vr", "6ub", "597", "77n", "5fd", "7dt", "5cf", "7av", "567", "74m", "Ash", "Elf"];
 function mkGame(first, seed){
 	var game = { rng: new MersenneTwister(seed) };
 	game.player1 = new Player(game);
@@ -696,14 +696,11 @@ Thing.prototype.canactive = function() {
 }
 Thing.prototype.useactive = function(t) {
 	this.usedactive = true;
-	var castele = this.castele, cast = this.cast, sacrifice = this.passives.sacrifice;
+	var castele = this.castele, cast = this.cast;
 	if (!t || !t.evade(this.owner)){
 		this.active.cast(this, t);
 	}
 	this.owner.spend(castele, cast);
-	if (sacrifice){
-		this.die();
-	}
 }
 Player.prototype.defstatus = Thing.prototype.defstatus = function(key, def){
 	if (!(key in this.status)){
@@ -733,9 +730,13 @@ Weapon.prototype.attack = Creature.prototype.attack = function(stasis, freedomCh
 				this.active.hit(this, target, trueatk);
 			}
 		}else if (target.gpull){
-			var dmg = target.gpull.dmg(trueatk);
+			var gpull = target.gpull;
+			var dmg = gpull.dmg(trueatk);
 			if (this.active.hit && (!this.status.adrenaline || this.status.adrenaline < 3)){
-				this.active.hit(this, target.gpull, dmg);
+				this.active.hit(this, gpull, dmg);
+			}
+			if (target.gpull == gpull && gpull.active.shield){
+				gpull.active.shield(gpull, isCreature?this:this.owner, dmg);
 			}
 		}else if (!target.shield || ((trueatk > (truedr = target.shield.truedr()) && (!target.shield.active.shield || !target.shield.active.shield(target.shield, this, trueatk - truedr))))){
 			var dmg = target.dmg(trueatk - truedr);
@@ -767,7 +768,7 @@ Weapon.prototype.attack = Creature.prototype.attack = function(stasis, freedomCh
 	}
 }
 Player.prototype.cansummon = function(index, target){
-	if (this.silence)return false;
+	if (this.silence || this.game.turn != this)return false;
 	var card = this.hand[index];
 	return card && this.canspend(card.costele, card.cost);
 }
@@ -840,6 +841,9 @@ function salvageScan(from, t){
 var TargetFilters = {
 	true:function(c, t){
 		return true;
+	},
+	card:function(c, t){
+		return t instanceof CardPtr;
 	},
 	pill:function(c, t){
 		return t.isMaterialInstance(Pillar);
