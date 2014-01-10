@@ -450,9 +450,11 @@ ignite:function(c,t){
 },
 immolate:function(c,t){
 	t.die();
-	for(var i=1; i<13; i++)
-		c.spend(i, -1);
-	c.spend(Fire, c.card.upped?-7:-5);
+	if (!t.hasactive("auto", "singularity")){
+		for(var i=1; i<13; i++)
+			c.spend(i, -1);
+		c.spend(Fire, c.card.upped?-7:-5);
+	}
 },
 improve:function(c,t){
 	t.transform(c.owner.randomcard(false, function(x){return x.type == CreatureEnum}));
@@ -1064,8 +1066,12 @@ wisdom:function(c,t){
 	}
 },
 yoink:function(c,t){
-	if (!c.owner.foe.sanctuary && c.owner.foe.hand.length > 0 && c.owner.hand.length<8){
-		c.owner.hand.push(c.owner.foe.hand.pop());
+	if (!t.owner.sanctuary){
+		t.remove();
+		if (c.owner.hand.length < 8){
+			t.owner = c.owner;
+			c.owner.hand.push(t);
+		}
 	}
 },
 pillar:function(c,t){

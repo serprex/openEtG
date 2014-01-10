@@ -18,11 +18,16 @@ function creaturePos(){
 	return {x:0, y:0};
 }
 function initTest(){
-	game = mkGame(0, 5489);
+	game = mkGame(true, 5489);
 	game.player1.mark = game.player2.mark = Entropy;
 	player1 = game.player1;
 	player2 = game.player2;
 	players = game.players;
+}
+function initHand(pl){
+	for(var i=1; i<arguments.length; i++){
+		pl.hand[i-1] = new CardInstance(arguments[i], pl);
+	}
 }
 loadcards(function(cards, targeting) {
 	Cards = cards;
@@ -41,11 +46,12 @@ loadcards(function(cards, targeting) {
 	test("BoneWall", function() {
 		initTest();
 		player1.quanta[Death] = 10;
-		player1.hand = [Cards.BoneWall];
+		initHand(player1, Cards.BoneWall);
 		player1.summon(0);
 		new Creature(Cards.RubyDragon, player2).place();
 		new Creature(Cards.RubyDragon, player2).place();
 		new Creature(Cards.RubyDragon, player2).place();
+		player1.endturn();
 		player2.endturn();
 		ok(player1.shield, "BW exists");
 		equal(player1.shield.status.charges, 4, "4 charges");
@@ -60,7 +66,7 @@ loadcards(function(cards, targeting) {
 	test("Destroy", function() {
 		initTest();
 		player1.quanta[Death] = 10;
-		player1.hand = [Cards.AmethystPillar, Cards.AmethystPillar, Cards.SoulCatcher, Cards.Shield, Cards.Dagger];
+		initHand(player1, Cards.AmethystPillar, Cards.AmethystPillar, Cards.SoulCatcher, Cards.Shield, Cards.Dagger);
 		while(player1.hand.length){
 			player1.summon(0);
 		}
@@ -78,7 +84,7 @@ loadcards(function(cards, targeting) {
 		equal(player1.weapon.card, Cards.Dagger, "Dagger");
 		Actives.destroy(player2, player1.weapon);
 		ok(!player1.weapon, "Dagger gone");
-		player1.hand = [Cards.BoneWall];
+		initHand(player1, Cards.BoneWall);
 		player1.summon(0);
 		equal(player1.shield.status.charges, 7, "7 bones");
 		Actives.destroy(player2, player1.shield);
@@ -98,7 +104,7 @@ loadcards(function(cards, targeting) {
 	});
 	test("Earthquake", function() {
 		initTest();
-		player1.hand = [Cards.AmethystPillar, Cards.AmethystPillar, Cards.AmethystPillar, Cards.AmethystPillar, Cards.AmethystPillar, Cards.AmethystPillar, Cards.AmethystPillar, Cards.AmethystPillar];
+		initHand(player1, Cards.AmethystPillar, Cards.AmethystPillar, Cards.AmethystPillar, Cards.AmethystPillar, Cards.AmethystPillar, Cards.AmethystPillar, Cards.AmethystPillar, Cards.AmethystPillar);
 		for(var i=0; i<5; i++){
 			player1.summon(0);
 		}
@@ -160,9 +166,9 @@ loadcards(function(cards, targeting) {
 	});
 	test("Obsession", function() {
 		initTest();
-		player1.hand = [Cards.GhostofthePast, Cards.GhostofthePast, Cards.GhostofthePast, Cards.GhostofthePast, Cards.GhostofthePast, Cards.GhostofthePast, Cards.GhostofthePast, Cards.GhostofthePast];
+		initHand(player1, Cards.GhostofthePast, Cards.GhostofthePast, Cards.GhostofthePast, Cards.GhostofthePast, Cards.GhostofthePast, Cards.GhostofthePast, Cards.GhostofthePast, Cards.GhostofthePast);
 		player1.endturn(0);
-		equal(player1.hp, 90, "Damage");
+		equal(player1.hp, 92, "Damage");
 		equal(player1.hand.length, 7, "Discarded");
 	});
 	test("Parallel", function() {

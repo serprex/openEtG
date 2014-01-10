@@ -858,6 +858,9 @@ var TargetFilters = {
 	card:function(c, t){
 		return t instanceof CardInstance;
 	},
+	foecard:function(c, t){
+		return t instanceof CardInstance && t.owner != c.owner;
+	},
 	pill:function(c, t){
 		return t.isMaterialInstance(Pillar);
 	},
@@ -892,7 +895,7 @@ var TargetFilters = {
 		return t.isMaterialInstance(Creature) || t.isMaterialInstance(Weapon);
 	},
 	foeperm:function(c, t){
-		return c.owner != t.owner && t.isMaterialInstance(Permanent);
+		return t.owner != c.owner && t.isMaterialInstance(Permanent);
 	},
 	butterfly:function(c, t){
 		return !t.status.immaterial && !t.status.burrowed && ((t.trueatk && t.trueatk()<3) || (t.truehp && t.truehp()<3));
