@@ -44,7 +44,6 @@ var ShardList = [undefined, undefined,
 	"5se", "7qu",
 	"5vi", "7u2",
 	"62m", "816"];
-var RandomCardSkip = ["Ash", "Elf"];
 function mkGame(first, seed){
 	var game = { rng: new MersenneTwister(seed) };
 	game.player1 = new Player(game);
@@ -57,11 +56,12 @@ function mkGame(first, seed){
 }
 function loadcards(cb){
 	var Cards = {};
+	var CardCodes = {};
 	var Targeting = {};
 	var names = ["pillar", "weapon", "shield", "permanent", "spell", "creature"];
 	var count = 0;
 	function maybeCallback(){
-		if (++count == names.length+1)cb(Cards, Targeting);
+		if (++count == names.length+1)cb(Cards, CardCodes, Targeting);
 	}
 	for(var i=0; i<names.length; i++){
 		var xhr = new XMLHttpRequest();
@@ -87,10 +87,10 @@ function loadcards(cb){
 							}
 						}
 						var nospacename = carddata[1].replace(/ |'/g,"");
-						if(cardcode in Cards){
+						if(cardcode in CardCodes){
 							console.log(cardcode + " duplicate");
 						}
-						Cards[nospacename in Cards?nospacename+"Up":nospacename] = Cards[cardcode] = new Card(_i, cardinfo);
+						Cards[nospacename in Cards?nospacename+"Up":nospacename] = CardCodes[cardcode] = new Card(_i, cardinfo);
 					}
 					maybeCallback();
 				}
@@ -197,7 +197,7 @@ Card.prototype.info = function(){
 }
 Card.prototype.toString = function(){ return this.code; }
 Card.prototype.asUpped = function(upped){
-	return this.upped == upped ? this : Cards[(this.upped?parseInt(this.code, 32)-2000:parseInt(this.code, 32)+2000).toString(32)];
+	return this.upped == upped ? this : CardCodes[(this.upped?parseInt(this.code, 32)-2000:parseInt(this.code, 32)+2000).toString(32)];
 }
 Card.prototype.isOf = function(card){
 	return card.code == (this.upped ? (parseInt(this.code, 32)-2000).toString(32) : this.code);
@@ -824,9 +824,9 @@ function countAdrenaline(x){
 }
 function filtercards(upped, filter, cmp){
 	var keys = [];
-	for(var key in Cards) {
-		var card = Cards[key];
-		if (key.length == 3 && card.upped == upped && !(card.passives && card.passives.token) && !~RandomCardSkip.indexOf(key) && (!filter || filter(card))) {
+	for(var key in CardCodes) {
+		var card = CardCodes[key];
+		if (card.upped == upped && !(card.passives && card.passives.token) && (!filter || filter(card))) {
 			keys.push(key);
 		}
 	}
@@ -835,7 +835,7 @@ function filtercards(upped, filter, cmp){
 }
 Player.prototype.randomcard = function(upped, filter){
 	var keys = filtercards(upped, filter);
-	return Cards[keys[this.upto(keys.length)]];
+	return CardCodes[keys[this.upto(keys.length)]];
 }
 function activename(active){
 	return active?active.activename:"";

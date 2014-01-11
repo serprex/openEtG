@@ -719,7 +719,7 @@ nova2:function(c,t){
 nymph:function(c,t){
 	var e = t.card.element || c.owner.uptoceil(12);
 	Actives.destroy(c, t);
-	new Creature(Cards[NymphList[e*2+(t.card.upped?1:0)]], t.owner).place();
+	new Creature(CardCodes[NymphList[e*2+(t.card.upped?1:0)]], t.owner).place();
 },
 obsession:function(c,t){
 	t.dmg(c.upped?10:8);

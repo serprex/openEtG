@@ -14,9 +14,10 @@
 <body>
 	<script>
 "use strict"
-var Cards, Targeting, targetingMode, targetingModeCb, targetingText, game, discarding;
-loadcards(function(cards, targeting) {
+var Cards, CardCodes, Targeting, targetingMode, targetingModeCb, targetingText, game, discarding;
+loadcards(function(cards, cardcodes, targeting) {
 	Cards = cards;
+	CardCodes = cardcodes;
 	Targeting = targeting;
 	console.log("Cards loaded");
 });
@@ -134,7 +135,7 @@ function getIcon(ele){
 	return eicons?eicons[ele]:nopic;
 }
 function getArt(code){
-	var name=Cards[code].asUpped(false).name.replace(/ /g, "");
+	var name=CardCodes[code].asUpped(false).name.replace(/ /g, "");
 	if (artcache[name])return artcache[name]
 	else{
 		var loader = new PIXI.AssetLoader(["Cards/"+name+".png"]);
@@ -149,7 +150,7 @@ function getArt(code){
 function getCardImage(code){
 	if (caimgcache[code])return caimgcache[code];
 	else{
-		var card = Cards[code];
+		var card = CardCodes[code];
 		var rend = new PIXI.RenderTexture(120, 20);
 		var graphics = new PIXI.Graphics();
 		graphics.lineStyle(2, 0x222222, 1);
@@ -186,7 +187,7 @@ function getCardImage(code){
 function getCreatureImage(code){
 	if (crimgcache[code])return crimgcache[code];
 	else{
-		var card = Cards[code];
+		var card = CardCodes[code];
 		var rend = new PIXI.RenderTexture(120, 30);
 		var graphics = new PIXI.Graphics();
 		graphics.lineStyle(2, 0x222222, 1);
@@ -194,7 +195,7 @@ function getCreatureImage(code){
 		graphics.drawRect(0, 0, 120, 30);
 		graphics.endFill();
 		if (card){
-			var text = new PIXI.Text(Cards[code].name, {font: "12px Arial bold", fill:card.upped?"black":"white"});
+			var text = new PIXI.Text(CardCodes[code].name, {font: "12px Arial bold", fill:card.upped?"black":"white"});
 			text.position.x = 2;
 			text.position.y = 5;
 			graphics.addChild(text);
@@ -206,7 +207,7 @@ function getCreatureImage(code){
 function getPermanentImage(code){
 	if (primgcache[code])return primgcache[code];
 	else{
-		var card = Cards[code];
+		var card = CardCodes[code];
 		var rend = new PIXI.RenderTexture(120, 30);
 		var graphics = new PIXI.Graphics();
 		graphics.lineStyle(2, 0x222222, 1);
@@ -214,7 +215,7 @@ function getPermanentImage(code){
 		graphics.drawRect(0, 0, 120, 30);
 		graphics.endFill();
 		if (card){
-			var text = new PIXI.Text(Cards[code].name, {font: "12px Arial bold", fill:card.upped?"black":"white"});
+			var text = new PIXI.Text(CardCodes[code].name, {font: "12px Arial bold", fill:card.upped?"black":"white"});
 			text.position.x = 2;
 			text.position.y = 5;
 			graphics.addChild(text);
@@ -228,8 +229,8 @@ function initGame(data, ai){
 	var idx, code, decks = [data.urdeck, data.deck];
 	for(var j=0; j<2; j++){
 		for(var i=0; i<decks[j].length; i++){
-			if (Cards[code=decks[j][i]]){
-				game.players[j].deck.push(Cards[code]);
+			if (CardCodes[code=decks[j][i]]){
+				game.players[j].deck.push(CardCodes[code]);
 			}else if (~(idx=TrueMarks.indexOf(code))){
 				game.players[j].mark=idx;
 			}
@@ -280,7 +281,7 @@ brandai.click = function() {
 	if (Cards){
 		var e0 = Math.ceil(Math.random()*12), e1=Math.ceil(Math.random()*12);
 		var deck = [Cards.QuantumPillar, Cards.QuantumPillar, Cards.QuantumPillar, Cards.QuantumPillar];
-		var pillar = Cards[(5000+e0*100).toString(32)];
+		var pillar = CardCodes[(5000+e0*100).toString(32)];
 		var pl = new Player({rng: new MersenneTwister(Math.random()*40000000)});
 		for(var i=0; i<20; i++){
 			deck.push(pillar);
@@ -323,7 +324,7 @@ function setEditorInfo(obj){
 	}
 }
 function editorCardCmp(x,y){
-	var cardx = Cards[x], cardy = Cards[y];
+	var cardx = CardCodes[x], cardy = CardCodes[y];
 	return cardx.upped - cardy.upped || cardx.element - cardy.element || cardx.cost-cardy.cost || (x>y?1:-1);
 }
 beditor.click = function() {
@@ -361,7 +362,7 @@ beditor.click = function() {
 		editorui.addChild(editormarksprite);
 		editormark = 0;
 		for(var i=editordeck.length-1; i>=0; i--){
-			if(!(editordeck[i] in Cards)){
+			if(!(editordeck[i] in CardCodes)){
 				var index = TrueMarks.indexOf(editordeck[i]);
 				if (index >= 0){
 					editormark = index;
@@ -396,7 +397,7 @@ beditor.click = function() {
 					editordeck.splice(_i, 1);
 				}
 				sprite.mouseover = function() {
-					setEditorInfo(Cards[editordeck[_i]]);
+					setEditorInfo(CardCodes[editordeck[_i]]);
 				}
 			})(i);
 			sprite.interactive = true;
@@ -422,7 +423,7 @@ beditor.click = function() {
 						}
 					}
 					sprite.mouseover = function() {
-						setEditorInfo(Cards[editorcolumns[_i][1][editorelement][_j]]);
+						setEditorInfo(CardCodes[editorcolumns[_i][1][editorelement][_j]]);
 					}
 				})(i, j);
 				sprite.interactive = true;
