@@ -32,7 +32,7 @@ accretion:function(c,t){
 	if (c.truehp() > 45){
 		c.die();
 		if (c.owner.hand.length < 8){
-			c.owner.hand.push(Cards.BlackHole.asUpped(c.card.upped));
+			new CardInstance(Cards.BlackHole.asUpped(c.card.upped), c.owner).place();
 		}
 	}
 },
@@ -726,7 +726,7 @@ obsession:function(c,t){
 },
 ouija:function(c,t){
 	if(!c.owner.foe.sanctuary && c.owner.foe.hand.length<8){
-		c.owner.foe.hand.push(Cards.OuijaEssence);
+		new CardInstance(Cards.OuijaEssence, c.owner.foe).place();
 	}
 },
 overdrive:function(c,t){

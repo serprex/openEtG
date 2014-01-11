@@ -88,7 +88,7 @@ function bitsToTgt(x){
 	if (tgtop == 0){
 		return undefined;
 	}else if (tgtop==1){
-		return player["owner", "weapon", "shield"][x>>4];
+		return player[["owner", "weapon", "shield"][x>>4]];
 	}else if (tgtop==2){
 		return player.creatures[x>>4];
 	}else if (tgtop==4){
@@ -641,7 +641,7 @@ for (var j=0; j<2; j++){
 					}else if (_j == 0 && !targetingMode && crea.canactive()){
 						getTarget(crea, crea.active.cast, function(tgt){
 							targetingMode = undefined;
-							socket.emit("active", tgtToBits(crea)|tgtToBits(tgt)<<8);
+							socket.emit("active", tgtToBits(crea)|tgtToBits(tgt)<<9);
 							crea.useactive(tgt);
 						});
 					}
@@ -671,7 +671,7 @@ for (var j=0; j<2; j++){
 					}else if (_j == 0 && !targetingMode && perm.canactive()){
 						getTarget(perm, perm.active.cast, function(tgt){
 							targetingMode = undefined;
-							socket.emit("active", tgtToBits(perm)|tgtToBits(tgt)<<8);
+							socket.emit("active", tgtToBits(perm)|tgtToBits(tgt)<<9);
 							perm.useactive(tgt);
 						});
 					}
@@ -713,7 +713,7 @@ for (var j=0; j<2; j++){
 			}else if (_j == 0 && !targetingMode && weap.canactive()){
 				getTarget(weap, weap.active.cast, function(tgt){
 					targetingMode = undefined;
-					socket.emit("active", tgtToBits(weap)|tgtToBits(tgt)<<8);
+					socket.emit("active", tgtToBits(weap)|tgtToBits(tgt)<<9);
 					weap.useactive(tgt);
 				});
 			}
@@ -727,7 +727,7 @@ for (var j=0; j<2; j++){
 			}else if (_j == 0 && !targetingMode && shie.canactive()){
 				getTarget(shie, shie.active.cast, function(tgt){
 					targetingMode = undefined;
-					socket.emit("active", tgtToBits(shie)|tgtToBits(tgt)<<8);
+					socket.emit("active", tgtToBits(shie)|tgtToBits(tgt)<<9);
 					shie.useactive(tgt);
 				});
 			}
@@ -790,7 +790,7 @@ cardart.position.x = 600;
 cardart.position.y = 300;
 gameui.addChild(cardart);
 gameui.interactive = true;
-var socket = io.connect("http://"+location.hostname+':13602');
+var socket = io.connect("http://"+location.hostname, {"port:" :13602});
 socket.on("pvpgive", initGame);
 socket.on("endturn", function(data) {
 	game.player2.endturn(data);
@@ -800,7 +800,7 @@ socket.on("summon", function(bits) {
 	player2summon(bits&7, bitsToTgt(bits>>3));
 });
 socket.on("active", function(bits) {
-	var c=bitsToTgt(bits&255), t=bitsToTgt((bits>>8)&255);
+	var c=bitsToTgt(bits&511), t=bitsToTgt((bits>>9)&511);
 	console.log("active call: " + bits);
 	c.useactive(t);
 });

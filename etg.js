@@ -597,12 +597,13 @@ CardInstance.prototype.remove = function(index) {
 	return index;
 }
 Thing.prototype.deatheffect = function(index) {
-	this.owner.procactive("death", function(c, p) { c.active.death(c, p, index) });
+	var self = this;
+	this.owner.procactive("death", function(c, p) { c.active.death(c, self, index) });
 }
 Creature.prototype.die = function() {
 	var index = this.remove();
 	if (~index){
-		if (this.aflatoxin){
+		if (this.status.aflatoxin){
 			(this.owner.creatures[index] = new Creature(Cards.MalignantCell, this.owner)).usedactive = false;
 		}
 		if (this.active.death){
@@ -774,7 +775,7 @@ Weapon.prototype.attack = Creature.prototype.attack = function(stasis, freedomCh
 	this.usedactive = false;
 	if (isCreature && ~this.getIndex() && this.truehp() <= 0){
 		this.die();
-	}else if (this.status.adrenaline){
+	}else if (this.status.adrenaline && (!isCreature || ~this.getIndex())){
 		if(this.status.adrenaline < countAdrenaline(this.trueatk(1))){
 			this.status.adrenaline++;
 			this.attack(stasis, freedomChance);
@@ -868,7 +869,7 @@ function getTargetFilter(str){
 			filters[i] = TargetFilters[filters[i]];
 		}
 		return TargetFilters[str] = function(c, t){
-			if (!prefixFunc(c, t)){
+			if (prefixFunc && !prefixFunc(c, t)){
 				return false;
 			}
 			for(var i=0; i<filters.length; i++){
@@ -897,7 +898,7 @@ var TargetFilters = {
 		return t.isMaterialInstance(Pillar);
 	},
 	weap:function(c, t){
-		return !(t instanceof Player) && (t instanceof Weapon || t.card.type == WeaponEnum) && !t.status.immaterial && !t.status.burrowed;
+		return (t instanceof Weapon || (t instanceof Creature && t.card.type == WeaponEnum)) && !t.status.immaterial && !t.status.burrowed;
 	},
 	perm:function(c, t){
 		return t.isMaterialInstance(Permanent);
