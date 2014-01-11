@@ -44,7 +44,7 @@ var ShardList = [undefined, undefined,
 	"5se", "7qu",
 	"5vi", "7u2",
 	"62m", "816"];
-var RandomCardSkip = ["4t8", "6ro", "4vr", "6ub", "597", "77n", "5fd", "7dt", "5cf", "7av", "567", "74m", "Ash", "Elf"];
+var RandomCardSkip = ["Ash", "Elf"];
 function mkGame(first, seed){
 	var game = { rng: new MersenneTwister(seed) };
 	game.player1 = new Player(game);
@@ -105,7 +105,7 @@ function loadcards(cb){
 			var csv = this.responseText.split("\n");
 			for (var i=0; i<csv.length; i++){
 				var keypair = csv[i].split(",");
-				Targeting[keypair[0]] = TargetFilters[keypair[1]];
+				Targeting[keypair[0]] = getTargetFilter(keypair[1]);
 			}
 			maybeCallback();
 		}
@@ -269,8 +269,8 @@ Player.prototype.spend = function(qtype, x) {
 		}
 	}else this.quanta[qtype] -= x;
 	for (var i=1; i<13; i++){
-		if (this.quanta[i]>75){
-			this.quanta[i]=75;
+		if (this.quanta[i]>99){
+			this.quanta[i]=99;
 		}
 	}
 	return true;
@@ -622,14 +622,14 @@ Creature.prototype.transform = function(card, owner){
 Thing.prototype.evade = function(sender) { return false; }
 Creature.prototype.evade = function(sender) {
 	if (this.status.frozen)return false;
-	if (sender != this.owner && this.passives.airborne && this.card.element == Air){
+	if (sender != this.owner && this.passives.airborne){
 		var freedomChance = 0;
 		for(var i=0; i<16; i++){
 			if (this.owner.permanents[i] && this.owner.permanents[i].freedom){
 				freedomChance++;
 			}
 		}
-		return freedomChance && this.owner.rng() < 1-Math.pow(.7, freedomChance);
+		return freedomChance && this.owner.rng() < 1-Math.pow(.8, freedomChance);
 	}
 }
 Creature.prototype.calcEclipse = function(){
@@ -732,8 +732,11 @@ Weapon.prototype.attack = Creature.prototype.attack = function(stasis, freedomCh
 	var trueatk, truedr = 0, momentum = this.status.momentum;
 	if (!(stasis || this.status.frozen || this.status.delayed) && (trueatk = this.trueatk()) != 0){
 		if (this.passives.airborne && freedomChance && this.owner.rng() < freedomChance){
-			trueatk = Math.ceil(trueatk * 1.5);
-			momentum = true;
+			if (!momentum && !target.shield && !target.gpull && !this.status.psion){
+				trueatk = Math.ceil(trueatk * 1.5);
+			}else{
+				momentum = true;
+			}
 		}
 		if (this.status.psion){
 			target.spelldmg(trueatk);
@@ -823,7 +826,7 @@ function filtercards(upped, filter, cmp){
 	var keys = [];
 	for(var key in Cards) {
 		var card = Cards[key];
-		if (key.length == 3 && card.upped == upped && !~RandomCardSkip.indexOf(key) && (!filter || filter(card))) {
+		if (key.length == 3 && card.upped == upped && !(card.passives && card.passives.token) && !~RandomCardSkip.indexOf(key) && (!filter || filter(card))) {
 			keys.push(key);
 		}
 	}
@@ -851,15 +854,44 @@ function salvageScan(from, t){
 		}
 	}
 }
+function getTargetFilter(str){
+	if (str in TargetFilters){
+		return TargetFilters[str];
+	}else{
+		var colonIndex = str.indexOf(":"), prefixFunc, filterStr;
+		if (~colonIndex){
+			prefixFunc = TargetFilters[str.substring(0, colonIndex)];
+			filterStr = str.substring(colonIndex+1);
+		}else filterStr = str;
+		var filters = filterStr.split("+");
+		for(var i=0; i<filters.length; i++){
+			filters[i] = TargetFilters[filters[i]];
+		}
+		return TargetFilters[str] = function(c, t){
+			if (!prefixFunc(c, t)){
+				return false;
+			}
+			for(var i=0; i<filters.length; i++){
+				if (filters[i](c, t)){
+					return true;
+				}
+			}
+			return false;
+		}
+	}
+}
 var TargetFilters = {
+	own:function(c, t){
+		return c.owner == t.owner;
+	},
+	foe:function(c, t){
+		return c.owner != t.owner
+	},
 	true:function(c, t){
 		return true;
 	},
 	card:function(c, t){
 		return t instanceof CardInstance;
-	},
-	foecard:function(c, t){
-		return t instanceof CardInstance && t.owner != c.owner;
 	},
 	pill:function(c, t){
 		return t.isMaterialInstance(Pillar);
@@ -873,12 +905,6 @@ var TargetFilters = {
 	crea:function(c, t){
 		return t.isMaterialInstance(Creature);
 	},
-	owncrea:function(c, t){
-		return t.owner == c.owner && t.isMaterialInstance(Creature);
-	},
-	owncreaorperm:function(c, t){
-		return t.owner == c.owner && (t.isMaterialInstance(Creature) || t.isMaterialInstance(Permanent));
-	},
 	creaonly:function(c, t){
 		return t.isMaterialInstance(Creature) && t.card.type == CreatureEnum;
 	},
@@ -887,15 +913,6 @@ var TargetFilters = {
 	},
 	play:function(c, t){
 		return t instanceof Player;
-	},
-	creaorplay:function(c, t){
-		return t instanceof Player || t.isMaterialInstance(Creature);
-	},
-	creaorweap:function(c, t){
-		return t.isMaterialInstance(Creature) || t.isMaterialInstance(Weapon);
-	},
-	foeperm:function(c, t){
-		return t.owner != c.owner && t.isMaterialInstance(Permanent);
 	},
 	butterfly:function(c, t){
 		return !t.status.immaterial && !t.status.burrowed && ((t.trueatk && t.trueatk()<3) || (t.truehp && t.truehp()<3));

@@ -195,6 +195,7 @@ deploy2blob:function(c,t){
 	if (c.trueatk()>1 && c.truehp()>1){
 		new Creature(Cards.Blob.asUpped(c.card.upped), c.owner).place();
 		new Creature(Cards.Blob.asUpped(c.card.upped), c.owner).place();
+		new Creature(Cards.Blob.asUpped(c.card.upped), c.owner).place();
 		c.atk -= 2;
 		c.dmg(2);
 	}
@@ -256,7 +257,7 @@ divinity:function(c,t){
 	c.buffhp(16);
 },
 drainlife:function(c,t){
-	c.dmg(-t.spelldmg(2+Math.floor(c.owner.quanta[Darkness]/10)*2));
+	c.dmg(-t.spelldmg(2+Math.floor(c.owner.quanta[Darkness]/5)));
 },
 draft:function(c,t){
 	if((t.passives.airborne = !t.passives.airborne)){
@@ -320,6 +321,20 @@ evolve:function(c,t){
 	c.transform(Cards.Shrieker.asUpped(c.card.upped));
 	c.status.burrowed = false;
 },
+fickle:function(c,t){
+	var cards = [];
+	for(var i=0; i<t.owner.deck.length; i++){
+		var card = t.owner.deck[i];
+		if (t.owner.canspend(card.costele, card.cost)){
+			cards.push(i);
+		}
+	}
+	if (cards.length > 0){
+		var pick = t.owner.upto(cards.length);
+		t.owner.hand[t.getIndex()] = new CardInstance(t.owner.deck[cards[pick]], t.owner);
+		t.owner.deck[cards[pick]] = t.card;
+	}
+},
 fiery:function(c,t){
 	return Math.floor(c.owner.quanta[Fire]/5);
 },
@@ -327,7 +342,7 @@ fire:function(c,t){
 	c.owner.spend(Fire, -1);
 },
 firebolt:function(c,t){
-	t.spelldmg(3+Math.floor(c.owner.quanta[Fire]/10)*3);
+	t.spelldmg(3+Math.floor(c.owner.quanta[Fire]/7)*2);
 },
 flatline:function(c,t){
 	if (!c.owner.foe.sanctuary){
@@ -372,6 +387,7 @@ gas:function(c,t){
 	new Permanent(Cards.UnstableGas.asUpped(c.card.upped), c.owner).place();
 },
 give:function(c,t){
+	c.owner.dmg(-5);
 	if (t instanceof Creature){
 		if (t.hasactive("auto", "singularity")){
 			t.die();
@@ -380,8 +396,12 @@ give:function(c,t){
 			t.owner = c.owner.foe;
 			t.place();
 		}
-	}else{
+	}else if (t instanceof Permanent){
 		Actives.steal(c.owner.foe, t);
+	}else{
+		t.remove();
+		t.owner = c.owner.foe;
+		t.place();
 	}
 },
 gpull:function(c,t){
@@ -436,9 +456,9 @@ hope:function(c,t){
 	return dr;
 },
 icebolt:function(c,t){
-	var bolts = 1+Math.floor(c.owner.quanta[Water]/10);
-	t.spelldmg(bolts*2);
-	if (c.owner.rng() < .3+bolts/10){
+	var bolts = Math.floor(c.owner.quanta[Water]/5);
+	t.spelldmg(2+bolts);
+	if (c.owner.rng() < .35+bolts/20){
 		t.freeze(3);
 	}
 },
