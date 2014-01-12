@@ -191,7 +191,7 @@ deja:function(c,t){
 	delete c.active.cast;
 	Actives.parallel(c, c);
 },
-deploy2blob:function(c,t){
+deployblobs:function(c,t){
 	if (c.trueatk()>1 && c.truehp()>1){
 		new Creature(Cards.Blob.asUpped(c.card.upped), c.owner).place();
 		new Creature(Cards.Blob.asUpped(c.card.upped), c.owner).place();

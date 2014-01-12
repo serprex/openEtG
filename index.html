@@ -155,7 +155,7 @@ function getCardImage(code){
 		var rend = new PIXI.RenderTexture(120, 20);
 		var graphics = new PIXI.Graphics();
 		graphics.lineStyle(2, 0x222222, 1);
-		graphics.beginFill(card?(card.upped?lighten(elecols[card.element]):elecols[card.element]):elecols[0]);
+		graphics.beginFill(card?(card.upped?lighten(elecols[card.element]):elecols[card.element]):code=="0"?elecols[0]:elecols[11]);
 		graphics.drawRect(0, 0, 120, 20);
 		graphics.endFill();
 		if (card){
@@ -281,23 +281,29 @@ bpvp.click = function() {
 }
 brandai.click = function() {
 	if (Cards){
-		var e0 = Math.ceil(Math.random()*12), e1=Math.ceil(Math.random()*12);
-		var deck = [Cards.QuantumPillar, Cards.QuantumPillar, Cards.QuantumPillar, Cards.QuantumPillar];
-		var pillar = CardCodes[(5000+e0*100).toString(32)];
-		var pl = new Player({rng: new MersenneTwister(Math.random()*40000000)});
-		for(var i=0; i<20; i++){
-			deck.push(pillar);
+		var aideck = document.getElementById("aideck").value;
+		var deck;
+		if (aideck){
+			deck = aideck.split(" ");
+		}else{
+			var e0 = Math.ceil(Math.random()*12), e1=Math.ceil(Math.random()*12);
+			deck = [Cards.QuantumPillar, Cards.QuantumPillar, Cards.QuantumPillar, Cards.QuantumPillar];
+			var pillar = CardCodes[(5000+e0*100).toString(32)];
+			var pl = new Player({rng: new MersenneTwister(Math.random()*40000000)});
+			for(var i=0; i<20; i++){
+				deck.push(pillar);
+			}
+			for(var i=0; i<30; i++){
+				deck.push(pl.randomcard(Math.random()<.3, function(x){return x.element == e0;}));
+			}
+			for(var i=0; i<10; i++){
+				deck.push(pl.randomcard(Math.random()<.3, function(x){return x.element == e1;}));
+			}
+			for(var i=0; i<deck.length; i++){
+				deck[i] = deck[i].code;
+			}
+			deck.push(TrueMarks[e1]);
 		}
-		for(var i=0; i<30; i++){
-			deck.push(pl.randomcard(Math.random()<.3, function(x){return x.element == e0;}));
-		}
-		for(var i=0; i<10; i++){
-			deck.push(pl.randomcard(Math.random()<.3, function(x){return x.element == e1;}));
-		}
-		for(var i=0; i<deck.length; i++){
-			deck[i] = deck[i].code;
-		}
-		deck.push(TrueMarks[e1]);
 		var urdeck = getDeck();
 		if (urdeck.length < 8){
 			urdeck = ['4vc', '4vc', '4vc', '4vc', '4vc', '4vc', '4vc', '4vc', '4vc', '4vc', '4vc', '4vc', '4vc', '4vc', '4vc', '4vc', '4vc', '4vc', '4ve', '4ve', '4ve', '6tt', '6tt', '6tt', '6tt', '4vf', '4vf', '4vf', '4vf', '4vf', '8pj']
@@ -474,6 +480,9 @@ endturn.click = function(e, discard) {
 			}
 			if (game.phase == PlayPhase){
 				cancel.setText("Cancel");
+				if (game.turn == game.player2 && game.player2.ai){
+					game.player2.ai();
+				}
 			}
 		}else if (discard == undefined && game.player1.hand.length == 8){
 			discarding = true;
@@ -488,7 +497,7 @@ endturn.click = function(e, discard) {
 				gameui.removeChild(foeplays[i][1]);
 			}
 			foeplays.length = 0;
-			if(game.player2.ai){
+			if(!game.winner && game.player2.ai){
 				game.player2.ai();
 			}
 		}
@@ -932,7 +941,7 @@ function animate() {
 		}
 		cloakgfx.visible = game.player2.isCloaked();
 		fgfx.clear();
-		if (game.turn == game.player1 && !game.player1.silence){
+		if (game.turn == game.player1 && game.phase == PlayPhase && !game.player1.silence){
 			for(var i=0; i<game.player1.hand.length; i++){
 				var card = game.player1.hand[i].card;
 				if (game.player1.canspend(card.costele, card.cost)){
@@ -993,7 +1002,7 @@ function animate() {
 				fgfx.endFill();
 			}
 			for(var i=0;i<8;i++){
-				maybeSetTexture(handsprite[j][i], game.players[j].hand[i]?getCardImage(j==0||game.player1.precognition?game.players[j].hand[i].card.code:"000"):null);
+				maybeSetTexture(handsprite[j][i], getCardImage(game.players[j].hand[i]?(j==0||game.player1.precognition?game.players[j].hand[i].card.code:"0"):"1"));
 			}
 			for(var i=0; i<23; i++){
 				var cr = game.players[j].creatures[i];
@@ -1101,6 +1110,7 @@ document.addEventListener("click", function(e){
 	<br/>
 	<input id="deckimport" type="text" placeholder="Deck" />
 	<input id="roomname" type="text" placeholder="Room" />
+	<input id="aideck" type="text" placeholder="AI Deck" />
 	<br/><input id="chatArea" type="text" style="width:100%;" readonly />
 	<br/><input id="chatinput" type="text" placeholder="Chat" style="width:100%" onkeydown="maybeSendChat(event)" />
 	<br/><a href="artcredit.htm">Art Credits</a>
