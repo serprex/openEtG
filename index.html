@@ -50,7 +50,8 @@ function centerAnchor(obj){
 }
 function setWinner(play){
 	game.winner=play;
-	endturn.setText(play==game.player1?"Won":"Lost");
+	game.phase=EndPhase;
+	endturn.setText((play==game.player1?"Won ":"Lost ")+game.ply);
 }
 function player2summon(handindex, tgt){
 	var card = game.player2.hand[handindex].card;
@@ -237,18 +238,19 @@ function initGame(data, ai){
 		}
 	}
 	if (game.turn == game.player1){
-		game.player1.drawhand();
-		game.player2.drawhand();
+		game.player1.drawhand(7);
+		game.player2.drawhand(7);
 	}else{
-		game.player2.drawhand();
-		game.player1.drawhand();
+		game.player2.drawhand(7);
+		game.player1.drawhand(7);
 	}
 	if (ai){
 		game.player2.ai = ai;
 		if(game.turn == game.player2){
-			game.player2.ai();
+			progressMulligan(game);
 		}
 	}
+	cancel.setText("Mulligan");
 	endturn.setText("End Turn");
 	mainStage = gameui;
 }
@@ -462,7 +464,18 @@ endturn.click = function(e, discard) {
 		game = undefined;
 		mainStage = menuui;
 	}else if (game.turn == game.player1){
-		if (discard == undefined && game.player1.hand.length == 8){
+		if (game.phase == MulliganPhase1 || game.phase == MulliganPhase2){
+			if(!game.player2.ai){
+				socket.emit("mulligan", true);
+			}
+			progressMulligan(game);
+			if (game.phase == MulliganPhase2 && game.player2.ai){
+				progressMulligan(game);
+			}
+			if (game.phase == PlayPhase){
+				cancel.setText("Cancel");
+			}
+		}else if (discard == undefined && game.player1.hand.length == 8){
 			discarding = true;
 		}else{
 			discarding = false;
@@ -482,12 +495,15 @@ endturn.click = function(e, discard) {
 	}
 }
 gameui.addChild(endturn);
-var cancel = new PIXI.Text("Cancel", {font: "16px Arial bold"});
+var cancel = new PIXI.Text("", {font: "16px Arial bold"});
 cancel.position.x = 800;
 cancel.position.y = 500;
 cancel.interactive = true;
 cancel.click = function() {
-	if (game.turn == game.player1){
+	if ((game.phase == MulliganPhase1 || game.phase == MulliganPhase2) && game.turn == game.player1 && game.player1.hand.length>0){
+		game.player1.drawhand(game.player1.hand.length-1);
+		socket.emit("mulligan");
+	}else if (game.turn == game.player1){
 		if (targetingMode){
 			targetingMode = null;
 			targetingModeCb = null;
@@ -558,6 +574,7 @@ for (var i=0; i<8; i++){
 			cardart.setTexture(getArt(game.player1.hand[_i].card.code));
 		}
 		handsprite[0][i].click = function(){
+			if (game.phase != PlayPhase)return;
 			var cardinst = game.player1.hand[_i];
 			if (cardinst){
 				if (discarding){
@@ -597,6 +614,7 @@ for (var i=0; i<8; i++){
 			}
 		}
 		handsprite[1][i].click = function(){
+			if (game.phase != PlayPhase)return;
 			if (targetingMode){
 				var cardinst = game.player2.hand[_i];
 				if (cardinst && targetingMode(cardinst)){
@@ -633,6 +651,7 @@ for (var j=0; j<2; j++){
 					setInfo(game.players[_j].creatures[_i]);
 				}
 				creasprite[j][i].click = function(){
+					if (game.phase != PlayPhase)return;
 					var crea = game.players[_j].creatures[_i];
 					if (!crea)return;
 					if (targetingMode && targetingMode(crea)){
@@ -663,6 +682,7 @@ for (var j=0; j<2; j++){
 					setInfo(game.players[_j].permanents[_i]);
 				}
 				permsprite[j][i].click = function(){
+					if (game.phase != PlayPhase)return;
 					var perm = game.players[_j].permanents[_i];
 					if (!perm)return;
 					if (targetingMode && targetingMode(perm)){
@@ -705,6 +725,7 @@ for (var j=0; j<2; j++){
 			setInfo(game.players[_j].shield);
 		}
 		weapsprite[j].click = function(){
+			if (game.phase != PlayPhase)return;
 			var weap = game.players[_j].weapon;
 			if (!weap)return
 			if (targetingMode && targetingMode(weap)){
@@ -719,6 +740,7 @@ for (var j=0; j<2; j++){
 			}
 		}
 		shiesprite[j].click = function(){
+			if (game.phase != PlayPhase)return;
 			var shie = game.players[_j].shield;
 			if (!shie)return
 			if (targetingMode && targetingMode(shie)){
@@ -772,6 +794,7 @@ for (var j=0; j<2; j++){
 			setInfo(game.players[_j]);
 		}
 		hptext[j].click = function(){
+			if (game.phase != PlayPhase)return;
 			if (targetingMode && targetingMode(game.players[_j])){
 				targetingMode = undefined;
 				targetingModeCb(game.players[_j]);
@@ -808,6 +831,17 @@ socket.on("foeleft", function(data) {
 	setWinner(game.player1);
 });
 socket.on("chat", function(data) {
+	document.getElementById("chatArea").value = data;
+});
+socket.on("mulligan", function(data) {
+	if (data === true){
+		progressMulligan(game);
+		if (game.phase == PlayPhase){
+			cancel.setText("Cancel");
+		}
+	}else{
+		game.player2.drawhand(game.player2.hand.length-1);
+	}
 	document.getElementById("chatArea").value = data;
 });
 function maybeSendChat(e) {

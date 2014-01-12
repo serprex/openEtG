@@ -17,6 +17,10 @@ var ShieldEnum = 2;
 var PermanentEnum = 3;
 var SpellEnum = 4;
 var CreatureEnum = 5;
+var MulliganPhase1 = 0;
+var MulliganPhase2 = 1;
+var PlayPhase = 2;
+var EndPhase = 3;
 var TrueMarks = ["8pi", "8pj", "8pk", "8pl", "8pm", "8pn", "8po", "8pp", "8pq", "8pr", "8ps", "8pt", "8pu"];
 var NymphList = [undefined, undefined,
 	"500", "6ug",
@@ -45,7 +49,7 @@ var ShardList = [undefined, undefined,
 	"5vi", "7u2",
 	"62m", "816"];
 function mkGame(first, seed){
-	var game = { rng: new MersenneTwister(seed) };
+	var game = { rng: new MersenneTwister(seed), phase: MulliganPhase1, ply: 0 };
 	game.player1 = new Player(game);
 	game.player2 = new Player(game);
 	game.player1.foe = game.player2;
@@ -276,6 +280,7 @@ Player.prototype.spend = function(qtype, x) {
 	return true;
 }
 Player.prototype.endturn = function(discard) {
+	this.game.ply++;
 	if (discard != undefined){
 		var card=this.hand[discard].card;
 		this.hand.splice(discard, 1);
@@ -400,20 +405,15 @@ Player.prototype.drawcard = function() {
 		}
 	}
 }
-Player.prototype.drawhand = function() {
-	this.shuffle(this.deck);
-	var mulligan = true;
-	for(var i=0; i<7; i++){
-		if (this.deck[i].cost == 0){
-			mulligan=false;
-			break;
+Player.prototype.drawhand = function(x) {
+	if (x > 0){
+		while (this.hand.length > 0){
+			this.deck.push(this.hand.pop().card);
 		}
-	}
-	if (mulligan){
 		this.shuffle(this.deck);
-	}
-	for(var i=0; i<7; i++){
-		this.hand.push(new CardInstance(this.deck.pop(), this));
+		for(var i=0; i<x; i++){
+			this.hand.push(new CardInstance(this.deck.pop(), this));
+		}
 	}
 }
 Player.prototype.masscc = function(caster, func){
@@ -837,6 +837,17 @@ function filtercards(upped, filter, cmp){
 Player.prototype.randomcard = function(upped, filter){
 	var keys = filtercards(upped, filter);
 	return CardCodes[keys[this.upto(keys.length)]];
+}
+function progressMulligan(game){
+	if (game.phase == MulliganPhase1){
+		game.phase = MulliganPhase2;
+	}else if(game.phase == MulliganPhase2){
+		game.phase = PlayPhase;
+	}else{
+		console.log("Not mulligan phase: " + game.phase);
+		return;
+	}
+	game.turn = game.turn.foe;
 }
 function activename(active){
 	return active?active.activename:"";

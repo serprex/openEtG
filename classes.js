@@ -77,8 +77,7 @@ function Player(game){
 	this.precognition = false;
 	this.gpull = null;
 	this.nova = 0;
-	this.maxhp = 100;
-	this.hp = 100;
+	this.maxhp = this.hp = 100;
 	this.hand = [];
 	this.deck = [];
 	this.creatures = new Array(23);
