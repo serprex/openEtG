@@ -4,8 +4,7 @@ var http = require("http");
 var connect = require("connect");
 var gzip = require("connect-gzip");
 var app = http.createServer(connect().use(gzip.staticGzip(__dirname)));
-var io = require("socket.io").listen(app);
-app.listen(13602);
+var io = require("socket.io").listen(app.listen(13602));
 
 var rooms = {};
 var sockinfo = {};

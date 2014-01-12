@@ -81,7 +81,7 @@ bless:function(c,t){
 	t.buffhp(3);
 },
 boneyard:function(c,t){
-	if (t.card.isOf(Cards.Skeleton)){
+	if (!t.card.isOf(Cards.Skeleton)){
 		new Creature(Cards.Skeleton.asUpped(c.card.upped), c.owner).place();
 	}
 },
@@ -473,7 +473,7 @@ immolate:function(c,t){
 	if (!t.hasactive("auto", "singularity")){
 		for(var i=1; i<13; i++)
 			c.spend(i, -1);
-		c.spend(Fire, c.card.upped?-7:-5);
+		c.spend(Fire, c.card.upped?-8:-5);
 	}
 },
 improve:function(c,t){
@@ -839,6 +839,9 @@ reinforce:function(c,t){
 	t.buffhp(c.truehp());
 	c.die();
 },
+regrade:function(c,t){
+	t.card = t.card.asUpped(!t.card.upped);
+},
 rewind:function(c,t){
 	if (t.undead){
 		Actives.hatch(t);
@@ -1036,7 +1039,7 @@ swave:function(c,t){
 	t.spelldmg(4);
 },
 tempering:function(c,t){
-	t.atk += c.card.upped?5:3;
+	t.atk += c.card.upped?4:3;
 },
 throwrock:function(c,t){
 	t.spelldmg(c.card.upped?3:2);

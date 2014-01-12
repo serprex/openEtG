@@ -27,6 +27,6 @@ except:
 	email = input("gmail: ")
 	password = getpass("Password: ")
 for gid, db in enumerate(("creature", "pillar", "weapon", "shield", "permanent", "spell", "active"), 6):
-	if len(argv) == 1 or db in argv:
+	if len(argv) == 1 or any(a.startswith(db) for a in argv):
 		print(db)
 		open(db+".csv", "wb").write(download(gid).read())

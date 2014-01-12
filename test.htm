@@ -43,6 +43,13 @@ loadcards(function(cards, targeting) {
 		equal(player1.quanta[Darkness], 2, "Absorbed");
 		equal(player2.quanta[Life], 1, "Lone Life");
 	});
+	test("Aflatoxin", function() {
+		initTest();
+		(player1.creatures[0] = new Creature(Cards.Devourer, player1)).status.aflatoxin = true;
+		player1.creatures[0].die();
+		ok(player1.creatures[0], "Something");
+		equal(player1.creatures[0].card, Cards.MalignantCell, "Malignant");
+	});
 	test("BoneWall", function() {
 		initTest();
 		player1.quanta[Death] = 10;
@@ -57,6 +64,14 @@ loadcards(function(cards, targeting) {
 		equal(player1.shield.status.charges, 4, "4 charges");
 		player2.creatures[0].die();
 		equal(player1.shield.status.charges, 6, "6 charges");
+	});
+	test("Boneyard", function() {
+		initTest();
+		new Creature(Cards.Devourer, player1).place();
+		new Permanent(Cards.Boneyard, player1).place();
+		player1.creatures[0].die();
+		ok(player1.creatures[0], "Something");
+		equal(player1.creatures[0].card, Cards.Skeleton, "Skeleton");
 	});
 	test("Deckout", function() {
 		initTest();

@@ -790,7 +790,7 @@ cardart.position.x = 600;
 cardart.position.y = 300;
 gameui.addChild(cardart);
 gameui.interactive = true;
-var socket = io.connect("http://"+location.hostname, {"port:" :13602});
+var socket = io.connect(location.hostname, {"port:" :13602});
 socket.on("pvpgive", initGame);
 socket.on("endturn", function(data) {
 	game.player2.endturn(data);
