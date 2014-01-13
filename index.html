@@ -136,7 +136,7 @@ function getIcon(ele){
 	return eicons?eicons[ele]:nopic;
 }
 function getArt(code){
-	var name=CardCodes[code].asUpped(false).name.replace(/ /g, "");
+	var name=CardCodes[code].asUpped(false).code;
 	if (artcache[name])return artcache[name]
 	else{
 		var loader = new PIXI.AssetLoader(["Cards/"+name+".png"]);
@@ -152,26 +152,24 @@ function getCardImage(code){
 	if (caimgcache[code])return caimgcache[code];
 	else{
 		var card = CardCodes[code];
-		var rend = new PIXI.RenderTexture(120, 20);
+		var rend = new PIXI.RenderTexture(100, 20);
 		var graphics = new PIXI.Graphics();
 		graphics.lineStyle(2, 0x222222, 1);
 		graphics.beginFill(card?(card.upped?lighten(elecols[card.element]):elecols[card.element]):code=="0"?elecols[0]:elecols[11]);
-		graphics.drawRect(0, 0, 120, 20);
+		graphics.drawRect(0, 0, 100, 20);
 		graphics.endFill();
 		if (card){
-			var text = new PIXI.Text(card.name, {font: "11px Arial bold", fill:card.upped?"black":"white"});
-			text.position.x = 2;
-			text.position.y = 5;
-			graphics.addChild(text);
+			var clipwidth = 24;
 			if (card.cost){
 				text = new PIXI.Text(card.cost, {font: "11px Arial bold", fill:card.upped?"black":"white"});
 				text.anchor.x = 1;
-				text.position.x = 100;
+				text.position.x = rend.width-20;
 				text.position.y = 5;
+				clipwidth += text.width;
 				graphics.addChild(text);
 				if (card.costele){
 					var eleicon = new PIXI.Sprite(getIcon(card.costele));
-					eleicon.position.x = 119;
+					eleicon.position.x = rend.width-1;
 					eleicon.position.y = 10;
 					eleicon.anchor.x = 1;
 					eleicon.anchor.y = .5;
@@ -180,6 +178,11 @@ function getCardImage(code){
 					graphics.addChild(eleicon);
 				}
 			}
+			var text, loopi=0;
+			do text = new PIXI.Text(card.name.substring(0, card.name.length-(loopi++)), {font: "11px Arial bold", fill:card.upped?"black":"white"}); while(text.width>rend.width-clipwidth);
+			text.position.x = 2;
+			text.position.y = 5;
+			graphics.addChild(text);
 		}
 		rend.render(graphics);
 		return eicons?(caimgcache[code] = rend):rend;
@@ -327,7 +330,7 @@ brandai.click = function() {
 		);
 	}
 }
-var editordeck, editorelement = 0, editordecksprites, editorcolumns, editoreleicons, editormark, editormarksprite, editorinfo;
+var editordeck, editorelement = 0, editordecksprites, editorcolumns, editoreleicons, editormark, editormarksprite, editorinfo, editorCardArt;
 function setEditorInfo(obj){
 	if(obj){
 		editorinfo.setTexture(getTextImage(obj.info(), 16));
@@ -335,10 +338,11 @@ function setEditorInfo(obj){
 }
 function editorCardCmp(x,y){
 	var cardx = CardCodes[x], cardy = CardCodes[y];
-	return cardx.upped - cardy.upped || cardx.element - cardy.element || cardx.cost-cardy.cost || (x>y?1:-1);
+	return cardx.upped - cardy.upped || cardx.element - cardy.element || cardx.cost-cardy.cost || (x>y)-(x<y);
 }
 beditor.click = function() {
 	if (Cards){
+		chatArea.value = "Build a 30-60 card deck";
 		editorui = new PIXI.Stage(0x336699, true);
 		editorinfo = new PIXI.Text("", {font: "16px Arial bold"})
 		editorinfo.position.x=100;
@@ -351,7 +355,7 @@ beditor.click = function() {
 			editordeck.push(TrueMarks[editormark]);
 			document.getElementById("deckimport").value = editordeck.join(" ");
 			mainStage = menuui;
-			editordeck = editordecksprites = editorcolumns = editormarksprite = editorinfo = editorui = undefined;
+			editordeck = editordecksprites = editorcolumns = editormarksprite = editorinfo = editorCardArt = editorui = undefined;
 		}
 		bsave.interactive = true;
 		editorui.addChild(bsave);
@@ -400,7 +404,7 @@ beditor.click = function() {
 		}
 		for(var i=0; i<60; i++){
 			var sprite = new PIXI.Sprite(nopic);
-			sprite.position.x = 100+Math.floor(i/10)*120;
+			sprite.position.x = 100+Math.floor(i/10)*100;
 			sprite.position.y = 50+(i%10)*20;
 			(function(_i){
 				sprite.click = function() {
@@ -408,6 +412,7 @@ beditor.click = function() {
 				}
 				sprite.mouseover = function() {
 					setEditorInfo(CardCodes[editordeck[_i]]);
+					editorCardArt.setTexture(getArt(editordeck[_i]));
 				}
 			})(i);
 			sprite.interactive = true;
@@ -418,22 +423,33 @@ beditor.click = function() {
 			editorcolumns.push([[],[]]);
 			for(var j=0; j<15; j++){
 				var sprite = new PIXI.Sprite(nopic);
-				sprite.position.x = 100+i*120;
+				sprite.position.x = 100+i*100;
 				sprite.position.y = 300+j*20;
 				(function(_i, _j){
 					sprite.click = function() {
 						if(editordeck.length<60){
 							var code = editorcolumns[_i][1][editorelement][_j];
 							for(var i=0; i<editordeck.length; i++){
-								if(editorCardCmp(editordeck[i], code)>0){
-									break;
-								}
+								var cmp = editorCardCmp(editordeck[i], code);
+								if (cmp < 0)continue;
+								if (cmp == 0 && CardCodes[code].type != PillarEnum){
+									for(var j=1; j<6; j++){
+										if(editordeck[i+j] != code){
+											break;
+										}
+									}
+									if (j == 6){
+										return;
+									}
+								}else break;
 							}
 							editordeck.splice(i, 0, code);
 						}
 					}
 					sprite.mouseover = function() {
-						setEditorInfo(CardCodes[editorcolumns[_i][1][editorelement][_j]]);
+						var code = editorcolumns[_i][1][editorelement][_j];
+						setEditorInfo(CardCodes[code]);
+						editorCardArt.setTexture(getArt(code));
 					}
 				})(i, j);
 				sprite.interactive = true;
@@ -447,6 +463,10 @@ beditor.click = function() {
 					editorCardCmp));
 			}
 		}
+		editorCardArt = new PIXI.Sprite(nopic);
+		editorCardArt.position.x = 720;
+		editorCardArt.position.y = 300;
+		editorui.addChild(editorCardArt);
 		mainStage = editorui;
 	}
 }
@@ -576,13 +596,16 @@ function setInfo(obj){
 var handsprite = [new Array(8), new Array(8)];
 for (var i=0; i<8; i++){
 	handsprite[0][i] = new PIXI.Sprite(nopic);
-	handsprite[0][i].position.x=760;
+	handsprite[0][i].position.x=780;
 	handsprite[0][i].position.y=300+20*i;
 	handsprite[0][i].interactive = true;
 	(function(_i){
 		handsprite[0][i].mouseover = function(){
-			setInfo(game.player1.hand[_i].card);
-			cardart.setTexture(getArt(game.player1.hand[_i].card.code));
+			var cardinst = game.player1.hand[_i];
+			if (cardinst){
+				setInfo(cardinst.card);
+				cardart.setTexture(getArt(cardinst.card.code));
+			}
 		}
 		handsprite[0][i].click = function(){
 			if (game.phase != PlayPhase)return;
@@ -620,8 +643,11 @@ for (var i=0; i<8; i++){
 	(function(_i){
 		handsprite[1][i].mouseover = function(){
 			if (game.player1.precognition){
-				setInfo(game.player2.hand[_i].card);
-				cardart.setTexture(getArt(game.player2.hand[_i].card.code));
+				var cardinst = game.player2.hand[_i];
+				if (cardinst){
+					setInfo(cardinst.card);
+					cardart.setTexture(getArt(cardinst.card.code));
+				}
 			}
 		}
 		handsprite[1][i].click = function(){
@@ -948,7 +974,7 @@ function animate() {
 				var card = game.player1.hand[i].card;
 				if (game.player1.canspend(card.costele, card.cost)){
 					fgfx.beginFill(elecols[card.costele]);
-					fgfx.drawRect(handsprite[0][i].position.x+120, handsprite[0][i].position.y, 20, 20);
+					fgfx.drawRect(handsprite[0][i].position.x+100, handsprite[0][i].position.y, 20, 20);
 					fgfx.endFill();
 				}
 			}

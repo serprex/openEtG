@@ -658,10 +658,10 @@ Weapon.prototype.trueatk = Creature.prototype.trueatk = function(adrenaline, nob
 	if (this.status.steamatk)dmg += this.status.steamatk;
 	if (this.status.dive)dmg += this.status.dive;
 	if (this.active.buff && !nobuff)dmg += this.active.buff(this);
-	if (this.status.burrowed)dmg = Math.ceil(dmg/2);
 	if (this instanceof Creature){
 		dmg += this.calcEclipse();
 	}
+	if (this.status.burrowed)dmg = Math.ceil(dmg/2);
 	var y=adrenaline || this.status.adrenaline;
 	if (!y || y<2)return dmg;
 	var attackCoefficient = 4-countAdrenaline(dmg);
@@ -731,9 +731,17 @@ Weapon.prototype.attack = Creature.prototype.attack = function(stasis, freedomCh
 	if (this.active.auto && !this.status.frozen && (!this.status.adrenaline || this.status.adrenaline<3)){
 		this.active.auto(this);
 	}
-	var trueatk, truedr = 0, momentum = this.status.momentum;
+	var trueatk;
 	if (!(stasis || this.status.frozen || this.status.delayed) && (trueatk = this.trueatk()) != 0){
-		if (this.passives.airborne && freedomChance && this.owner.rng() < freedomChance){
+		var momentum = this.status.momentum, truedr = 0;
+		if (!momentum && this.status.burrowed){
+			for (var i=0; i<16; i++){
+				if (this.owner.permanents[i] && this.owner.permanents[i].passives.tunnel){
+					momentum = true;
+					break;
+				}
+			}
+		}else if (this.passives.airborne && freedomChance && this.owner.rng() < freedomChance){
 			if (!momentum && !target.shield && !target.gpull && !this.status.psion){
 				trueatk = Math.ceil(trueatk * 1.5);
 			}else{
