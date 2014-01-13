@@ -273,14 +273,20 @@ beditor.interactive = true;
 bpvp.click = function() {
 	if (Cards){
 		var deck = getDeck();
-		if (deck.length < 8){
-			deck = ['4vc', '4vc', '4vc', '4vc', '4vc', '4vc', '4vc', '4vc', '4vc', '4vc', '4vc', '4vc', '4vc', '4vc', '4vc', '4vc', '4vc', '4vc', '4ve', '4ve', '4ve', '6tt', '6tt', '6tt', '6tt', '4vf', '4vf', '4vf', '4vf', '4vf', '8pj']
+		if (deck.length < 30){
+			beditor.click();
+			return;
 		}
 		socket.emit("pvpwant", { deck: deck, room: document.getElementById("roomname").value });
 	}
 }
 brandai.click = function() {
 	if (Cards){
+		var urdeck = getDeck();
+		if (urdeck.length < 30){
+			beditor.click();
+			return;
+		}
 		var aideck = document.getElementById("aideck").value;
 		var deck;
 		if (aideck){
@@ -303,10 +309,6 @@ brandai.click = function() {
 				deck[i] = deck[i].code;
 			}
 			deck.push(TrueMarks[e1]);
-		}
-		var urdeck = getDeck();
-		if (urdeck.length < 8){
-			urdeck = ['4vc', '4vc', '4vc', '4vc', '4vc', '4vc', '4vc', '4vc', '4vc', '4vc', '4vc', '4vc', '4vc', '4vc', '4vc', '4vc', '4vc', '4vc', '4ve', '4ve', '4ve', '6tt', '6tt', '6tt', '6tt', '4vf', '4vf', '4vf', '4vf', '4vf', '8pj']
 		}
 		initGame({ first:Math.random()<.5, deck:deck, urdeck:urdeck, seed:Math.random()*4000000000 },
 			function(){
@@ -599,7 +601,7 @@ for (var i=0; i<8; i++){
 						socket.emit("summon", _i);
 						game.player1.summon(_i);
 					}else{
-						getTarget(game.player1, cardinst.card.active, function(tgt) {
+						getTarget(cardinst, cardinst.card.active, function(tgt) {
 							socket.emit("summon", _i|tgtToBits(tgt)<<3);
 							game.player1.summon(_i, tgt);
 						});

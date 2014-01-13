@@ -51,8 +51,8 @@ aflatoxin:function(c,t){
 aggroskele:function(c,t){
 	var dmg = 0;
 	for (var i=0; i<23; i++){
-		if (c.creatures[i] && c.creatures[i].card.isOf(Cards.Skeleton)){
-			dmg += c.creatures[i].trueatk();
+		if (c.owner.creatures[i] && c.owner.creatures[i].card.isOf(Cards.Skeleton)){
+			dmg += c.owner.creatures[i].trueatk();
 		}
 	}
 	t.dmg(dmg);
@@ -151,15 +151,15 @@ clear:function(c,t){
 corpseexplosion:function(c,t){
 	function dmg1(c,t){ t.dmg(1); }
 	t.die();
-	c.foe.masscc(c, dmg1);
+	c.owner.foe.masscc(c, dmg1);
 	if (!c.card.upped){
-		c.masscc(c, dmg1);
+		c.owner.masscc(c, dmg1);
 	}
 	if (t.passives.poisonous){
-		c.foe.addpoison(1);
+		c.owner.foe.addpoison(1);
 	}
 	if (t.status.poison){
-		c.foe.addpoison(t.status.poison);
+		c.owner.foe.addpoison(t.status.poison);
 	}
 },
 counter:function(c,t){
@@ -253,11 +253,11 @@ dive:function(c,t){
 	c.status.dive += c.trueatk();
 },
 divinity:function(c,t){
-	c.maxhp += 8;
-	c.buffhp(16);
+	c.owner.maxhp += 8;
+	c.owner.buffhp(16);
 },
 drainlife:function(c,t){
-	c.dmg(-t.spelldmg(2+Math.floor(c.owner.quanta[Darkness]/5)));
+	c.owner.dmg(-t.spelldmg(2+Math.floor(c.owner.quanta[Darkness]/5)));
 },
 draft:function(c,t){
 	if((t.passives.airborne = !t.passives.airborne)){
@@ -270,8 +270,8 @@ dryspell:function(c,t){
 	function dryeffect(c,t){
 		c.spend(Water, -t.dmg(1));
 	}
-	c.foe.masscc(c, dryeffect);
-	c.masscc(c, dryeffect);
+	c.owner.foe.masscc(c.owner, dryeffect);
+	c.owner.masscc(c.owner, dryeffect);
 },
 dshield:function(c,t){
 	c.status.immaterial = true;
@@ -498,6 +498,13 @@ ink:function(c,t){
 	p.status.charges = 1;
 	p.place();
 },
+innovation:function(c,t){
+	if (!t.owner.sanctuary && t.card != c){
+		t.remove();
+		t.owner.drawcard();
+		t.owner.drawcard();
+	}
+},
 integrity:function(c,t){
 	var activeType = ["auto", "hit", "buff", "death"];
 	var shardTally = [0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0];
@@ -642,11 +649,11 @@ metamorph:function(c,t){
 	c.owner.spend(c.owner.mark, -2);
 },
 miracle:function(c,t){
-	c.quanta[Light] = 0;
-	if (c.sosa){
-		c.hp = 1;
-	}else if (c.hp<c.maxhp){
-		c.hp = c.maxhp-1;
+	c.owner.quanta[Light] = 0;
+	if (c.owner.sosa){
+		c.owner.hp = 1;
+	}else if (c.owner.hp<c.owner.maxhp){
+		c.owner.hp = c.owner.maxhp-1;
 	}
 },
 mitosis:function(c,t){
@@ -722,7 +729,7 @@ nymph:function(c,t){
 	new Creature(CardCodes[NymphList[e*2+(t.card.upped?1:0)]], t.owner).place();
 },
 obsession:function(c,t){
-	t.dmg(c.upped?10:8);
+	t.dmg(c.card.upped?10:8);
 },
 ouija:function(c,t){
 	if(!c.owner.foe.sanctuary && c.owner.foe.hand.length<8){
@@ -737,8 +744,8 @@ overdrivespell:function(c,t){
 	t.active = {auto: Actives.overdrive};
 },
 pandemonium:function(c,t){
-	c.foe.masscc(c, Actives.cseed);
-	c.masscc(c, Actives.cseed);
+	c.owner.foe.masscc(c, Actives.cseed);
+	c.owner.masscc(c, Actives.cseed);
 },
 pandemonium2:function(c,t){
 	t.masscc(c, Actives.cseed);
@@ -856,7 +863,7 @@ ricochet:function(c,t){
 	var tgting = Targeting[t.card.active.activename];
 	var tgts = [];
 	function tgttest(x){
-		if (x && tgting(t, x) && tgting(t.foe, x)){
+		if (x && tgting(t.owner, x) && tgting(t.owner.foe, x)){
 			tgts.push(x);
 		}
 	}
@@ -958,10 +965,10 @@ siphonstrength:function(c,t){
 	c.atk++;
 },
 skyblitz:function(c,t){
-	c.quanta[Air] = 0;
+	c.owner.quanta[Air] = 0;
 	for(var i=0; i<23; i++){
-		if (c.creatures[i] && c.creatures[i].passives.airborne){
-			Actives.dive(c.creatures[i]);
+		if (c.owner.creatures[i] && c.owner.creatures[i].passives.airborne){
+			Actives.dive(c.owner.creatures[i]);
 		}
 	}
 },
@@ -969,14 +976,14 @@ snipe:function(c,t){
 	t.dmg(3);
 },
 sosa:function(c,t){
-	c.sosa += 2;
+	c.owner.sosa += 2;
 	for(var i=1; i<13; i++){
 		if (i != Death){
-			c.quanta[i] = 0;
+			c.owner.quanta[i] = 0;
 		}
 	}
 	var n = c.card.upped?40:48;
-	c.dmg(Math.max(Math.ceil(c.maxhp*n/100), n), true);
+	c.owner.dmg(Math.max(Math.ceil(c.owner.maxhp*n/100), n), true);
 },
 soulcatch:function(c,t){
 	c.owner.spend(Death, -3);
@@ -988,7 +995,7 @@ spores:function(c,t, index){
 	}
 },
 sskin:function(c,t){
-	c.buffhp(c.quanta[Earth]);
+	c.owner.buffhp(c.owner.quanta[Earth]);
 },
 staff:function(c,t){
 	return c.owner.mark == Life||c.owner.mark == Water?1:0;
@@ -1074,9 +1081,9 @@ void:function(c,t){
 	}
 },
 quantagift:function(c,t){
-	c.spend(c.card.element, -2);
-	if (c.mark != c.card.element){
-		c.spend(c.mark, -2);
+	c.owner.spend(c.card.element, -2);
+	if (c.owner.mark != c.card.element){
+		c.owner.spend(c.mark, -2);
 	}
 },
 web:function(c,t){

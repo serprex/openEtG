@@ -282,10 +282,11 @@ Player.prototype.spend = function(qtype, x) {
 Player.prototype.endturn = function(discard) {
 	this.game.ply++;
 	if (discard != undefined){
-		var card=this.hand[discard].card;
+		var cardinst = this.hand[discard];
+		var card = cardinst.card;
 		this.hand.splice(discard, 1);
 		if (card.active && card.active.discard){
-			card.active.discard(card, this);
+			card.active.discard(cardinst, this);
 		}
 	}
 	this.spend(this.mark, -1);
@@ -794,7 +795,8 @@ Player.prototype.summon = function(index, target){
 		console.log((this==this.game.player1?"1":"2") + " cannot summon " + index);
 		return;
 	}
-	var card = this.hand[index].card;
+	var cardinst = this.hand[index];
+	var card = cardinst.card;
 	this.hand.splice(index, 1);
 	if (this.neuro){
 		this.addpoison(1);
@@ -812,7 +814,7 @@ Player.prototype.summon = function(index, target){
 	}else if (card.type == SpellEnum){
 		if (!target || !target.evade(this)){
 			this.card = card;
-			card.active(this, target);
+			card.active(cardinst, target);
 			this.procactive("spell");
 		}
 	}else if (card.type == CreatureEnum) {
@@ -898,6 +900,9 @@ var TargetFilters = {
 	},
 	foe:function(c, t){
 		return c.owner != t.owner
+	},
+	notself:function(c, t){
+		return c != t;
 	},
 	true:function(c, t){
 		return true;
