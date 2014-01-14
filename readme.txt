@@ -11,15 +11,12 @@ How Fippe setup on Windows:
 
 4.	open cmd (probably have to do it as administrator) and navigate to the openetg folder, type "npm install"
 
-5.	copy server.js to server2.js and replace "gzip.staticGzip" with "connect.static", and remove the line starting with "var gzip = " (lines are seperated with ';')
-	NB On non Windows machines gzip is installed and this won't be necessary
-
-6.	type "copy /b MersenneTwister.js+classes.js+actives.js+animations.js+etg.js+pixi.js js.js" Press y if it asks you to overwrite.
+5.	type "copy /b MersenneTwister.js+classes.js+actives.js+animations.js+etg.js+pixi.js js.js" Press y if it asks you to overwrite.
 	NB if grunt is installed, one can merely grunt
 
-7.	in the cmd window, type "node server2.js"
+6.	in the cmd window, type "node server2.js"
 
-8.	open http://127.0.0.1:13602 in your web browser and it should work!
+7.	open http://127.0.0.1:13602 in your web browser and it should work!
 
 Note that every time you have edited a file you need to run step 6 before playing the game again. And every time you want to play the game you need to run step 7 and 8 again.
 

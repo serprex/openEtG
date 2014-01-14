@@ -472,8 +472,8 @@ immolate:function(c,t){
 	t.die();
 	if (!t.hasactive("auto", "singularity")){
 		for(var i=1; i<13; i++)
-			c.spend(i, -1);
-		c.spend(Fire, c.card.upped?-8:-5);
+			c.owner.spend(i, -1);
+		c.owner.spend(Fire, -7);
 	}
 },
 improve:function(c,t){
@@ -501,8 +501,9 @@ ink:function(c,t){
 innovation:function(c,t){
 	if (!t.owner.sanctuary && t.card != c){
 		t.remove();
-		t.owner.drawcard();
-		t.owner.drawcard();
+		for(var i=0; i<3; i++){
+			t.owner.drawcard();
+		}
 	}
 },
 integrity:function(c,t){

@@ -7,6 +7,10 @@
 			color: white;
 			margin:0;
 		}
+		a {
+			color: #6699FF;
+			text-decoration: none;
+		}
 	</style>
 	<script src="/socket.io/socket.io.js"></script>
 	<script src="js.js"></script>
@@ -159,8 +163,9 @@ function getCardImage(code){
 		graphics.drawRect(0, 0, 100, 20);
 		graphics.endFill();
 		if (card){
-			var clipwidth = 24;
+			var clipwidth = 2;
 			if (card.cost){
+				clipwidth += 22;
 				text = new PIXI.Text(card.cost, {font: "11px Arial bold", fill:card.upped?"black":"white"});
 				text.anchor.x = 1;
 				text.position.x = rend.width-20;
