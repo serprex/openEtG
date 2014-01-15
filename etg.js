@@ -68,9 +68,9 @@ function loadcards(cb){
 		if (++count == names.length+1)cb(Cards, CardCodes, Targeting);
 	}
 	for(var i=0; i<names.length; i++){
-		var xhr = new XMLHttpRequest();
-		xhr.open("GET", names[i] + ".csv", true);
 		(function(_i){
+			var xhr = new XMLHttpRequest();
+			xhr.open("GET", names[_i] + ".csv", true);
 			xhr.onreadystatechange = function() {
 				if (this.readyState == 4 && this.status == 200){
 					var csv = this.responseText.split("\n");
@@ -99,8 +99,8 @@ function loadcards(cb){
 					maybeCallback();
 				}
 			}
+			xhr.send();
 		})(i);
-		xhr.send();
 	}
 	var xhr = new XMLHttpRequest();
 	xhr.open("GET", "active.csv", true);

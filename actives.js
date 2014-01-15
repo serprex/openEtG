@@ -314,6 +314,11 @@ endow:function(c,t){
 	}
 	c.buffhp(2);
 },
+epidemic:function(c,t){
+	if (t.status.poison){
+		c.owner.foe.addpoison(t.status.poison);
+	}
+},
 atk2hp:function(c,t){
 	t.maxhp = t.hp = t.trueatk();
 },
@@ -960,6 +965,12 @@ siphon:function(c,t){
 	if (c.owner.foe.spend(Other, 1)){
 		c.owner.spend(Darkness, -1)
 	}
+},
+siphonactive:function(c,t){
+	c.active = t.active;
+	c.cast = t.cast;
+	c.castele = t.castele;
+	t.active = {};
 },
 siphonstrength:function(c,t){
 	t.atk--;

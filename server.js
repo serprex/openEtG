@@ -2,9 +2,26 @@
 var fs = require("fs");
 var http = require("http");
 var connect = require("connect");
-var app = http.createServer(connect().use(connect.compress()).use(connect.static(__dirname)));
+var app = http.createServer(connect().use(connect.compress()).use(connect.static(__dirname)).use(loginAuth));
 var io = require("socket.io").listen(app.listen(13602));
+var redis = require("redis"), db = redis.createClient();
 
+function loginAuth(req, res, next){
+	if (req.url.indexOf("/auth?") == 0){
+		res.writeHead("200");
+		var uname = req.url.substring(6);
+		db.hgetall("U:"+uname, function (err, obj){
+			if (!obj){
+				obj = {auth: uname, empty:true};
+			}
+			users[uname] = obj;
+			res.end(JSON.stringify(obj));
+		});
+	}else next();
+}
+
+var users = {};
+var duels = {};
 var rooms = {};
 var sockinfo = {};
 
@@ -26,10 +43,30 @@ function foeEcho(socket, event){
 	});
 }
 
+var starter = {
+	deck: "4sa4sa4sa4t44vj4vj4vj4vs52o52o52o55q55q5905bu5c15f65if5if5lc5lc5lc5og5oh5ri5ri5ri5un5un61q8pi",
+};
+
 io.sockets.on("connection", function(socket) {
 	sockinfo[socket.id] = {};
 	socket.on("disconnect", dropsock);
 	socket.on("reconnect_failed", dropsock);
+	socket.on("inituser", function(data) {
+		var u=data.u;
+		if (u in users){
+			users[u].deck = starter.deck;
+			db.hmset("U:"+u, users[u]);
+			socket.emit("userdump", users[u]);
+		}
+	});
+	socket.on("foewant", function(data) {
+		var u=data.u, f=data.f;
+		if (u in users && f in users){
+			if ()
+			duels[u] = data.f;
+			duels[data.f] =
+		}
+	});
 	socket.on("pvpwant", function(data) {
 		var pendinggame=rooms[data.room];
 		console.log(this.id + ": " + (pendinggame?pendinggame.id:"-"));
@@ -45,7 +82,7 @@ io.sockets.on("connection", function(socket) {
 			var deck0=sockinfo[pendinggame.id].deck, deck1=data.deck;
 			this.emit("pvpgive", {first:first, seed:seed, deck:deck0, urdeck:deck1});
 			pendinggame.emit("pvpgive", {first:!first, seed:seed, deck:deck1, urdeck:deck0});
-			delete rooms[data.room]
+			delete rooms[data.room];
 		}else{
 			rooms[data.room] = this;
 		}
