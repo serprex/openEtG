@@ -5,6 +5,7 @@ var connect = require("connect");
 var app = http.createServer(connect().use(connect.compress()).use(connect.static(__dirname)).use(loginAuth));
 var io = require("socket.io").listen(app.listen(13602));
 var redis = require("redis"), db = redis.createClient();
+var etgutil = require("./etgutil");
 
 function loginAuth(req, res, next){
 	if (req.url.indexOf("/auth?") == 0){
@@ -22,6 +23,7 @@ function loginAuth(req, res, next){
 
 var users = {};
 var duels = {};
+var usersock = {};
 var rooms = {};
 var sockinfo = {};
 
@@ -61,10 +63,23 @@ io.sockets.on("connection", function(socket) {
 	});
 	socket.on("foewant", function(data) {
 		var u=data.u, f=data.f;
+		if (u == f){
+			return;
+		}
+		console.log(u + " requesting " + f);
+		sockinfo[this.id].deck = data.deck;
 		if (u in users && f in users){
-			if ()
-			duels[u] = data.f;
-			duels[data.f] =
+			usersock[u] = this;
+			if (duels[u] == f){
+				var seed = Math.random()*4000000000;
+				var first = seed<2000000000;
+				sockinfo[this.id].foe = usersock[f];
+				sockinfo[usersock[f].id].foe = this;
+				var deck0=sockinfo[usersock[f].id].deck, deck1=data.deck;
+				this.emit("pvpgive", {first:first, seed:seed, deck:deck0, urdeck:deck1});
+				usersock[f].emit("pvpgive", {first:!first, seed:seed, deck:deck1, urdeck:deck0});
+				delete duels[u];
+			}else duels[f] = u;
 		}
 	});
 	socket.on("pvpwant", function(data) {

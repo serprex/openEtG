@@ -957,4 +957,4 @@ var TargetFilters = {
 	wisdom:function(c, t){
 		return (t instanceof Creature || t instanceof Weapon) && !t.status.burrowed;
 	}
-}
+};

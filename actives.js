@@ -699,8 +699,8 @@ neuro:function(c,t){
 	}
 },
 neuroify:function(c,t){
-	if (c.foe.status.poison){
-		c.foe.neuro = true;
+	if (c.owner.foe.status.poison){
+		c.owner.foe.neuro = true;
 	}
 },
 nightmare:function(c,t){
