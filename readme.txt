@@ -1,5 +1,6 @@
 How Fippe setup on Windows:
 1. 	install node.js from http://nodejs.org
+	install redis from http://redis.io (Fippe didn't install redis, instead opting to lobotomize server.js. Your pick)
 	install tortoisegit from http://code.google.com/p/tortoisegit
 
 2. 	right click where you want the files to be and click Git Clone to create an openetg folder somewhere, use the URL: https://github.com/serprex/openEtG.git
@@ -11,10 +12,10 @@ How Fippe setup on Windows:
 
 4.	open cmd (probably have to do it as administrator) and navigate to the openetg folder, type "npm install"
 
-5.	type "copy /b MersenneTwister.js+classes.js+actives.js+animations.js+etg.js+pixi.js js.js" Press y if it asks you to overwrite.
+5.	type "copy /b MersenneTwister.js+classes.js+actives.js+animations.js+etg.js js.js" Press y if it asks you to overwrite.
 	NB if grunt is installed, one can merely grunt
 
-6.	in the cmd window, type "node server2.js"
+6.	in the cmd window, type "node server.js"
 
 7.	open http://127.0.0.1:13602 in your web browser and it should work!
 
