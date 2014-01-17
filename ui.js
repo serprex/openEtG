@@ -96,8 +96,13 @@ function permanentPos(j, i){
 	}
 	return p;
 }
-renderer = new PIXI.CanvasRenderer(900, 600); // setInfo was causing flickering with webGL
-leftpane.appendChild(renderer.view);
+function refreshRenderer(){
+	if (renderer){
+		leftpane.removeChild(renderer.view);
+	}
+	renderer = new PIXI.CanvasRenderer(900, 600); // setInfo was causing flickering with webGL
+	leftpane.appendChild(renderer.view);
+}
 var loader = new PIXI.AssetLoader(["esheet.png"]);
 loader.onComplete = function(){
 	var baseTexture = PIXI.Texture.fromImage("esheet.png");
@@ -108,7 +113,7 @@ loader.onComplete = function(){
 	eicons = icons;
 }
 loader.load();
-var mainStage, menuui = new PIXI.Stage(0x336699, true), gameui = new PIXI.Stage(0x336699, true);
+var mainStage, menuui, gameui;
 var nopic = PIXI.Texture.fromImage("null.png"), eicons, caimgcache = {}, crimgcache = {}, primgcache = {}, artcache = {};
 var elecols = [0xa99683,0xaa5999,0x777777,0x996633,0x5f4930,0x50a005,0xcc6611,0x205080,0xa9a9a9,0x337ddd,0xccaa22,0x333333,0x77bbdd];
 function lighten(c){
@@ -284,8 +289,6 @@ function initGame(data, ai){
 			progressMulligan(game);
 		}
 	}
-	cancel.setText("Mulligan");
-	endturn.setText("End Turn");
 	startMatch();
 }
 function getDeck(){
@@ -517,20 +520,23 @@ beditor.click = function() {
 			}
 		}
 		mainStage = editorui;
+		refreshRenderer();
 	}
 }
 blogout.click = function(){
 	user = undefined;
 }
-menuui.addChild(bpvp);
-menuui.addChild(brandai);
-menuui.addChild(beditor);
-menuui.addChild(blogout);
 function startMenu(){
 	animCb = function(){
 		blogout.visible = !!user;
 	}
+	menuui = new PIXI.Stage(0x336699, true);
+	menuui.addChild(bpvp);
+	menuui.addChild(brandai);
+	menuui.addChild(beditor);
+	menuui.addChild(blogout);
 	mainStage = menuui;
+	refreshRenderer();
 }
 function startElementSelect(){
 	var stage = new PIXI.Stage(0x336699, true);
@@ -577,498 +583,73 @@ function startElementSelect(){
 		}
 	};
 	mainStage = stage;
+	refreshRenderer();
 }
 function startMatch(){
-	animCb = matchStep;
-	mainStage = gameui;
-}
-//gameui
-var cloakgfx = new PIXI.Graphics();
-cloakgfx.beginFill(0);
-cloakgfx.drawRect(300, 20, 490, 220);
-cloakgfx.endFill();
-gameui.addChild(cloakgfx);
-var endturn = new PIXI.Text("", {font: "16px Arial bold"});
-endturn.position.x = 800;
-endturn.position.y = 540;
-endturn.interactive = true;
-endturn.click = function(e, discard) {
-	if (game.winner){
-		for (var i=0; i<foeplays.length; i++){
-			gameui.removeChild(foeplays[i][1]);
-		}
-		foeplays.length = 0;
-		game = undefined;
-		startMenu();
-	}else if (game.turn == game.player1){
-		if (game.phase == MulliganPhase1 || game.phase == MulliganPhase2){
-			if(!game.player2.ai){
-				socket.emit("mulligan", true);
-			}
-			progressMulligan(game);
-			if (game.phase == MulliganPhase2 && game.player2.ai){
-				progressMulligan(game);
-			}
-			if (game.phase == PlayPhase){
-				cancel.setText("Cancel");
-				if (game.turn == game.player2 && game.player2.ai){
-					game.player2.ai();
-				}
-			}
-		}else if (discard == undefined && game.player1.hand.length == 8){
-			discarding = true;
-		}else{
-			discarding = false;
-			if(!game.player2.ai){
-				socket.emit("endturn", discard);
-			}
-			game.player1.endturn(discard);
-			targetingMode = undefined;
-			for (var i=0; i<foeplays.length; i++){
-				gameui.removeChild(foeplays[i][1]);
-			}
-			foeplays.length = 0;
-			if(!game.winner && game.player2.ai){
-				game.player2.ai();
-			}
-		}
-	}
-}
-gameui.addChild(endturn);
-var cancel = new PIXI.Text("", {font: "16px Arial bold"});
-cancel.position.x = 800;
-cancel.position.y = 500;
-cancel.interactive = true;
-cancel.click = function() {
-	if ((game.phase == MulliganPhase1 || game.phase == MulliganPhase2) && game.turn == game.player1 && game.player1.hand.length>0){
-		game.player1.drawhand(game.player1.hand.length-1);
-		socket.emit("mulligan");
-	}else if (game.turn == game.player1){
-		if (targetingMode){
-			targetingMode = null;
-			targetingModeCb = null;
-		}else if (discarding){
-			discarding = false;
-		}
-	}
-}
-var turntell = new PIXI.Text("", {font: "16px Arial bold"});
-turntell.position.x = 800;
-turntell.position.y = 570;
-gameui.addChild(turntell);
-gameui.addChild(cancel);
-var foeplays = [];
-var tximgcache = [];
-function getTextImage(text, font, color){
-	if (color === undefined)color = "black";
-	if(!(font in tximgcache)){
-		tximgcache[font] = {};
-	}
-	if(!(text in tximgcache[font])){
-		tximgcache[font][text] = {};
-	}else if(color in tximgcache[font][text]){
-		return tximgcache[font][text][color];
-	}
-	var doc = new PIXI.DisplayObjectContainer();
-	var pieces = text.split(/(\d+:\d+)/);
-	var x=0;
-	for(var i=0; i<pieces.length; i++){
-		var piece = pieces[i];
-		if (/^\d+:\d+$/.test(piece)){
-			var parse = piece.split(":");
-			var num = parseInt(parse[0]);
-			var icon = getIcon(parseInt(parse[1]));
-			for(var j=0; j<num; j++){
-				var spr = new PIXI.Sprite(icon);
-				spr.scale.x = .375;
-				spr.scale.y = .375;
-				spr.position.x = x;
-				x+=12;
-				doc.addChild(spr);
-			}
-		}else{
-			var txt = new PIXI.Text(piece, {font: font+"px Arial bold", fill:color});
-			txt.position.x = x;
-			x+=txt.width;
-			doc.addChild(txt);
-		}
-	}
-	var rtex = new PIXI.RenderTexture(x, 16);
-	rtex.render(doc);
-	return tximgcache[font][text][color] = rtex;
-}
-var infotext = new PIXI.Sprite(nopic);
-infotext.position.x=100;
-infotext.position.y=584;
-gameui.addChild(infotext);
-function setInfo(obj){
-	if(obj){
-		infotext.setTexture(getTextImage(obj.info(), 16));
-	}
-}
-var handsprite = [new Array(8), new Array(8)];
-for (var i=0; i<8; i++){
-	handsprite[0][i] = new PIXI.Sprite(nopic);
-	handsprite[0][i].position.x=780;
-	handsprite[0][i].position.y=300+20*i;
-	handsprite[0][i].interactive = true;
-	(function(_i){
-		handsprite[0][i].mouseover = function(){
-			var cardinst = game.player1.hand[_i];
-			if (cardinst){
-				setInfo(cardinst.card);
-				cardart.setTexture(getArt(cardinst.card.code));
-			}
-		}
-		handsprite[0][i].click = function(){
-			if (game.phase != PlayPhase)return;
-			var cardinst = game.player1.hand[_i];
-			if (cardinst){
-				if (discarding){
-					endturn.click(null, _i);
-				}else if (targetingMode){
-					if (targetingMode(cardinst)){
-						targetingMode = undefined;
-						targetingModeCb(cardinst);
-					}
-				}else if (game.player1.cansummon(_i)){
-					if (cardinst.card.type != SpellEnum){
-						console.log("summoning " + _i);
-						socket.emit("summon", _i);
-						game.player1.summon(_i);
-					}else{
-						getTarget(cardinst, cardinst.card.active, function(tgt) {
-							socket.emit("summon", _i|tgtToBits(tgt)<<3);
-							game.player1.summon(_i, tgt);
-						});
-					}
-				}
-			}
-		}
-	})(i);
-	gameui.addChild(handsprite[0][i]);
-}
-for (var i=0; i<8; i++){
-	handsprite[1][i] = new PIXI.Sprite(nopic);
-	handsprite[1][i].position.x = 20;
-	handsprite[1][i].position.y = 40+20*i;
-	handsprite[1][i].interactive = true;
-	(function(_i){
-		handsprite[1][i].mouseover = function(){
-			if (game.player1.precognition){
-				var cardinst = game.player2.hand[_i];
-				if (cardinst){
-					setInfo(cardinst.card);
-					cardart.setTexture(getArt(cardinst.card.code));
-				}
-			}
-		}
-		handsprite[1][i].click = function(){
-			if (game.phase != PlayPhase)return;
+	function drawBorder(obj, spr) {
+		if (obj){
 			if (targetingMode){
-				var cardinst = game.player2.hand[_i];
-				if (cardinst && targetingMode(cardinst)){
-					targetingMode = undefined;
-					targetingModeCb(cardinst);
+				if(targetingMode(obj)){
+					fgfx.lineStyle(2, 0xff0000);
+					fgfx.drawRect(spr.position.x-spr.width/2, spr.position.y-spr.height/2, spr.width, spr.height);
+					fgfx.lineStyle(2, 0xffffff);
 				}
-			}
-		}
-	})(i);
-	gameui.addChild(handsprite[1][i]);
-}
-var creasprite = [new Array(23), new Array(23)];
-var permsprite = [new Array(16), new Array(16)];
-var weapsprite = [new PIXI.Sprite(nopic), new PIXI.Sprite(nopic)];
-var shiesprite = [new PIXI.Sprite(nopic), new PIXI.Sprite(nopic)];
-var marksprite = [new PIXI.Sprite(nopic), new PIXI.Sprite(nopic)];
-var quantatext = [new PIXI.DisplayObjectContainer(), new PIXI.DisplayObjectContainer()];
-var hptext = [new PIXI.Text("", {font: "18px Arial bold"}), new PIXI.Text("", {font: "18px Arial bold"})];
-var poisontext = [new PIXI.Text("", {font: "16px Arial bold"}), new PIXI.Text("", {font: "16px Arial bold"})];
-var decktext = [new PIXI.Text("", {font: "16px Arial bold"}), new PIXI.Text("", {font: "16px Arial bold"})];
-for (var j=0; j<2; j++){
-	(function(_j){
-		for (var i=0; i<23; i++){
-			creasprite[j][i] = new PIXI.Sprite(nopic);
-			var creatext = new PIXI.Sprite(nopic);
-			creatext.position.x = 58;
-			creatext.anchor.x = 1;
-			creasprite[j][i].addChild(creatext);
-			centerAnchor(creasprite[j][i]);
-			creasprite[j][i].position = creaturePos(j, i);
-			creasprite[j][i].interactive = true;
-			(function(_i){
-				creasprite[j][i].mouseover = function(){
-					setInfo(game.players[_j].creatures[_i]);
-				}
-				creasprite[j][i].click = function(){
-					if (game.phase != PlayPhase)return;
-					var crea = game.players[_j].creatures[_i];
-					if (!crea)return;
-					if (targetingMode && targetingMode(crea)){
-						targetingMode = undefined;
-						targetingModeCb(crea);
-					}else if (_j == 0 && !targetingMode && crea.canactive()){
-						getTarget(crea, crea.active.cast, function(tgt){
-							targetingMode = undefined;
-							socket.emit("active", tgtToBits(crea)|tgtToBits(tgt)<<9);
-							crea.useactive(tgt);
-						});
-					}
-				}
-			})(i);
-			gameui.addChild(creasprite[j][i]);
-		}
-		for (var i=0; i<16; i++){
-			permsprite[j][i] = new PIXI.Sprite(nopic);
-			var permtext = new PIXI.Sprite(nopic);
-			permtext.position.x = 58;
-			permtext.anchor.x = 1;
-			permsprite[j][i].addChild(permtext);
-			centerAnchor(permsprite[j][i]);
-			permsprite[j][i].position = permanentPos(j, i);
-			permsprite[j][i].interactive = true;
-			(function(_i){
-				permsprite[j][i].mouseover = function(){
-					setInfo(game.players[_j].permanents[_i]);
-				}
-				permsprite[j][i].click = function(){
-					if (game.phase != PlayPhase)return;
-					var perm = game.players[_j].permanents[_i];
-					if (!perm)return;
-					if (targetingMode && targetingMode(perm)){
-						targetingMode = undefined;
-						targetingModeCb(perm);
-					}else if (_j == 0 && !targetingMode && perm.canactive()){
-						getTarget(perm, perm.active.cast, function(tgt){
-							targetingMode = undefined;
-							socket.emit("active", tgtToBits(perm)|tgtToBits(tgt)<<9);
-							perm.useactive(tgt);
-						});
-					}
-				}
-			})(i);
-			gameui.addChild(permsprite[j][i]);
-		}
-		centerAnchor(weapsprite[j]);
-		centerAnchor(shiesprite[j]);
-		centerAnchor(marksprite[j]);
-		weapsprite[j].position.x=690;
-		weapsprite[j].position.y=530;
-		weapsprite[j].interactive = true;
-		shiesprite[j].position.x=690;
-		shiesprite[j].position.y=560;
-		shiesprite[j].interactive = true;
-		marksprite[j].position.x = 690;
-		marksprite[j].position.y = 500;
-		var weaptext = new PIXI.Sprite(nopic);
-		weaptext.position.x = 58;
-		weaptext.anchor.x = 1;
-		weapsprite[j].addChild(weaptext);
-		var shietext = new PIXI.Text(nopic);
-		shietext.position.x = 58;
-		shietext.anchor.x = 1;
-		shiesprite[j].addChild(shietext);
-		weapsprite[j].mouseover = function(){
-			setInfo(game.players[_j].weapon);
-		}
-		shiesprite[j].mouseover = function(){
-			setInfo(game.players[_j].shield);
-		}
-		weapsprite[j].click = function(){
-			if (game.phase != PlayPhase)return;
-			var weap = game.players[_j].weapon;
-			if (!weap)return
-			if (targetingMode && targetingMode(weap)){
-				targetingMode = undefined;
-				targetingModeCb(weap);
-			}else if (_j == 0 && !targetingMode && weap.canactive()){
-				getTarget(weap, weap.active.cast, function(tgt){
-					targetingMode = undefined;
-					socket.emit("active", tgtToBits(weap)|tgtToBits(tgt)<<9);
-					weap.useactive(tgt);
-				});
-			}
-		}
-		shiesprite[j].click = function(){
-			if (game.phase != PlayPhase)return;
-			var shie = game.players[_j].shield;
-			if (!shie)return
-			if (targetingMode && targetingMode(shie)){
-				targetingMode = undefined;
-				targetingModeCb(shie);
-			}else if (_j == 0 && !targetingMode && shie.canactive()){
-				getTarget(shie, shie.active.cast, function(tgt){
-					targetingMode = undefined;
-					socket.emit("active", tgtToBits(shie)|tgtToBits(tgt)<<9);
-					shie.useactive(tgt);
-				});
-			}
-		}
-		if (j){
-			reflectPos(weapsprite[j]);
-			reflectPos(shiesprite[j]);
-			reflectPos(marksprite[j]);
-		}
-		gameui.addChild(weapsprite[j]);
-		gameui.addChild(shiesprite[j]);
-		gameui.addChild(marksprite[j]);
-		centerAnchor(hptext[j]);
-		centerAnchor(poisontext[j]);
-		centerAnchor(decktext[j]);
-		quantatext[j].position.x=j?792:0;
-		quantatext[j].position.y=j?100:308;
-		hptext[j].position.x=50;
-		hptext[j].position.y=560;
-		poisontext[j].position.x=50;
-		poisontext[j].position.y=580;
-		decktext[j].position.x=50;
-		decktext[j].position.y=540;
-		if (j){
-			reflectPos(hptext[j]);
-			reflectPos(poisontext[j]);
-			reflectPos(decktext[j]);
-		}
-		var child;
-		for(var k=1; k<13; k++){
-			quantatext[j].addChild(child=new PIXI.Text("", {font: "16px Arial bold"}));
-			child.position.x = (k&1)?32:86;
-			child.position.y = Math.floor((k-1)/2)*32+8;
-		}
-		for(var k=1; k<13; k++){
-			quantatext[j].addChild(child=new PIXI.Sprite(nopic));
-			child.position.x = (k&1)?0:54;
-			child.position.y = Math.floor((k-1)/2)*32;
-		}
-		hptext[j].interactive = true;
-		hptext[j].mouseover = function(){
-			setInfo(game.players[_j]);
-		}
-		hptext[j].click = function(){
-			if (game.phase != PlayPhase)return;
-			if (targetingMode && targetingMode(game.players[_j])){
-				targetingMode = undefined;
-				targetingModeCb(game.players[_j]);
-			}
-		}
-	})(j);
-	gameui.addChild(quantatext[j]);
-	gameui.addChild(hptext[j]);
-	gameui.addChild(poisontext[j]);
-	gameui.addChild(decktext[j]);
-}
-var fgfx = new PIXI.Graphics();
-gameui.addChild(fgfx);
-var cardart = new PIXI.Sprite(nopic);
-cardart.position.x = 600;
-cardart.position.y = 300;
-gameui.addChild(cardart);
-gameui.interactive = true;
-var socket = io.connect(location.hostname, {"port:" :13602});
-socket.on("pvpgive", initGame);
-socket.on("userdump", function(data){
-	user = data;
-});
-socket.on("endturn", function(data) {
-	game.player2.endturn(data);
-});
-socket.on("summon", function(bits) {
-	console.log("summon call: " + bits);
-	player2summon(bits&7, bitsToTgt(bits>>3));
-});
-socket.on("active", function(bits) {
-	var c=bitsToTgt(bits&511), t=bitsToTgt((bits>>9)&511);
-	console.log("active call: " + bits);
-	c.useactive(t);
-});
-socket.on("foeleft", function(data) {
-	setWinner(game.player1);
-});
-socket.on("chat", function(data) {
-	chatArea.value = data;
-});
-socket.on("mulligan", function(data) {
-	if (data === true){
-		progressMulligan(game);
-		if (game.phase == PlayPhase){
-			cancel.setText("Cancel");
-		}
-	}else{
-		game.player2.drawhand(game.player2.hand.length-1);
-	}
-});
-function maybeSendChat(e) {
-	e.cancelBubble = true;
-	if (e.keyCode != 13)return;
-	var chat=document.getElementById("chatinput");
-	if (chat.value){
-		socket.emit("chat", chat.value);
-		chat.value = "";
-	}
-}
-function drawBorder(obj, spr) {
-	if (obj){
-		if (targetingMode){
-			if(targetingMode(obj)){
-				fgfx.lineStyle(2, 0xff0000);
+			}else if (obj.canactive()){
 				fgfx.drawRect(spr.position.x-spr.width/2, spr.position.y-spr.height/2, spr.width, spr.height);
-				fgfx.lineStyle(2, 0xffffff);
 			}
-		}else if (obj.canactive()){
-			fgfx.drawRect(spr.position.x-spr.width/2, spr.position.y-spr.height/2, spr.width, spr.height);
 		}
 	}
-}
-function drawStatus(obj, spr){
-	var x = spr.position.x, y=spr.position.y, wid = spr.width, hei = spr.height;
-	if (obj == obj.owner.gpull){
-		fgfx.beginFill(0xffaa00, .3);
-		fgfx.drawRect(x-wid/2-2, y-hei/2-2, wid+4, hei+4);
-		fgfx.endFill();
+	function drawStatus(obj, spr){
+		var x = spr.position.x, y=spr.position.y, wid = spr.width, hei = spr.height;
+		if (obj == obj.owner.gpull){
+			fgfx.beginFill(0xffaa00, .3);
+			fgfx.drawRect(x-wid/2-2, y-hei/2-2, wid+4, hei+4);
+			fgfx.endFill();
+		}
+		if (obj.status.frozen){
+			fgfx.beginFill(0x0000ff, .3);
+			fgfx.drawRect(x-wid/2-2, y-hei/2-2, wid+4, hei+4);
+			fgfx.endFill();
+		}
+		if (obj.status.delayed){
+			fgfx.beginFill(0xffff00, .3);
+			fgfx.drawRect(x-wid/2-2, y-hei/2-2, wid+4, hei+4);
+			fgfx.endFill();
+		}
+		fgfx.lineStyle(1, 0);
+		if (obj.passives.airborne || obj.passives.ranged){
+			fgfx.beginFill(elecols[Air], .8);
+			fgfx.drawRect(x-wid/2-2, y+hei/2-10, 12, 12);
+			fgfx.endFill();
+		}
+		if (obj.status.adrenaline){
+			fgfx.beginFill(elecols[Life], .8);
+			fgfx.drawRect(x-wid/2+6, y+hei/2-10, 12, 12);
+			fgfx.endFill();
+		}
+		if (obj.status.momentum){
+			fgfx.beginFill(elecols[Gravity], .8);
+			fgfx.drawRect(x-wid/2+14, y+hei/2-10, 12, 12);
+			fgfx.endFill();
+		}
+		if (obj.status.psion){
+			fgfx.beginFill(elecols[Aether], .8);
+			fgfx.drawRect(x-wid/2+22, y+hei/2-10, 12, 12);
+			fgfx.endFill();
+		}
+		if (obj.status.burrowed){
+			fgfx.beginFill(elecols[Earth], .8);
+			fgfx.drawRect(x-wid/2+30, y+hei/2-10, 12, 12);
+			fgfx.endFill();
+		}
+		if (obj.status.poison){
+			fgfx.beginFill(obj.aflatoxin?elecols[Darkness]:elecols[Death], .8);
+			fgfx.drawRect(x-wid/2+38, y+hei/2-10, 12, 12);
+			fgfx.endFill();
+		}
+		fgfx.lineStyle(0, 0, 0);
 	}
-	if (obj.status.frozen){
-		fgfx.beginFill(0x0000ff, .3);
-		fgfx.drawRect(x-wid/2-2, y-hei/2-2, wid+4, hei+4);
-		fgfx.endFill();
-	}
-	if (obj.status.delayed){
-		fgfx.beginFill(0xffff00, .3);
-		fgfx.drawRect(x-wid/2-2, y-hei/2-2, wid+4, hei+4);
-		fgfx.endFill();
-	}
-	fgfx.lineStyle(1, 0);
-	if (obj.passives.airborne || obj.passives.ranged){
-		fgfx.beginFill(elecols[Air], .8);
-		fgfx.drawRect(x-wid/2-2, y+hei/2-10, 12, 12);
-		fgfx.endFill();
-	}
-	if (obj.status.adrenaline){
-		fgfx.beginFill(elecols[Life], .8);
-		fgfx.drawRect(x-wid/2+6, y+hei/2-10, 12, 12);
-		fgfx.endFill();
-	}
-	if (obj.status.momentum){
-		fgfx.beginFill(elecols[Gravity], .8);
-		fgfx.drawRect(x-wid/2+14, y+hei/2-10, 12, 12);
-		fgfx.endFill();
-	}
-	if (obj.status.psion){
-		fgfx.beginFill(elecols[Aether], .8);
-		fgfx.drawRect(x-wid/2+22, y+hei/2-10, 12, 12);
-		fgfx.endFill();
-	}
-	if (obj.status.burrowed){
-		fgfx.beginFill(elecols[Earth], .8);
-		fgfx.drawRect(x-wid/2+30, y+hei/2-10, 12, 12);
-		fgfx.endFill();
-	}
-	if (obj.status.poison){
-		fgfx.beginFill(obj.aflatoxin?elecols[Darkness]:elecols[Death], .8);
-		fgfx.drawRect(x-wid/2+38, y+hei/2-10, 12, 12);
-		fgfx.endFill();
-	}
-	fgfx.lineStyle(0, 0, 0);
-}
-function matchStep(){
+	function matchStep(){
 		var pos=gameui.interactionManager.mouse.global;
 		var cardartvisible = (pos.x>760 && pos.y>300 && pos.y<300+20*game.player1.hand.length);
 		if (!cardartvisible && foeplays.length){ // Really need a better way to manage visibility
@@ -1201,6 +782,432 @@ function matchStep(){
 			maybeSetText(poisontext[j], game.players[j].status.poison + (game.players[j].neuro?"psn!":"psn"));
 			maybeSetText(decktext[j], game.players[j].deck.length + "cards");
 		}
+	}
+	animCb = matchStep;
+	gameui = new PIXI.Stage(0x336699, true);
+	var cloakgfx = new PIXI.Graphics();
+	cloakgfx.beginFill(0);
+	cloakgfx.drawRect(300, 20, 490, 220);
+	cloakgfx.endFill();
+	gameui.addChild(cloakgfx);
+	var endturn = new PIXI.Text("End Turn", {font: "16px Arial bold"});
+	endturn.position.x = 800;
+	endturn.position.y = 540;
+	endturn.interactive = true;
+	endturn.click = function(e, discard) {
+		if (game.winner){
+			for (var i=0; i<foeplays.length; i++){
+				gameui.removeChild(foeplays[i][1]);
+			}
+			foeplays.length = 0;
+			game = undefined;
+			startMenu();
+		}else if (game.turn == game.player1){
+			if (game.phase == MulliganPhase1 || game.phase == MulliganPhase2){
+				if(!game.player2.ai){
+					socket.emit("mulligan", true);
+				}
+				progressMulligan(game);
+				if (game.phase == MulliganPhase2 && game.player2.ai){
+					progressMulligan(game);
+				}
+				if (game.phase == PlayPhase){
+					cancel.setText("Cancel");
+					if (game.turn == game.player2 && game.player2.ai){
+						game.player2.ai();
+					}
+				}
+			}else if (discard == undefined && game.player1.hand.length == 8){
+				discarding = true;
+			}else{
+				discarding = false;
+				if(!game.player2.ai){
+					socket.emit("endturn", discard);
+				}
+				game.player1.endturn(discard);
+				targetingMode = undefined;
+				for (var i=0; i<foeplays.length; i++){
+					gameui.removeChild(foeplays[i][1]);
+				}
+				foeplays.length = 0;
+				if(!game.winner && game.player2.ai){
+					game.player2.ai();
+				}
+			}
+		}
+	}
+	gameui.addChild(endturn);
+	var cancel = new PIXI.Text("Mulligan", {font: "16px Arial bold"});
+	cancel.position.x = 800;
+	cancel.position.y = 500;
+	cancel.interactive = true;
+	cancel.click = function() {
+		if ((game.phase == MulliganPhase1 || game.phase == MulliganPhase2) && game.turn == game.player1 && game.player1.hand.length>0){
+			game.player1.drawhand(game.player1.hand.length-1);
+			socket.emit("mulligan");
+		}else if (game.turn == game.player1){
+			if (targetingMode){
+				targetingMode = null;
+				targetingModeCb = null;
+			}else if (discarding){
+				discarding = false;
+			}
+		}
+	}
+	var turntell = new PIXI.Text("", {font: "16px Arial bold"});
+	turntell.position.x = 800;
+	turntell.position.y = 570;
+	gameui.addChild(turntell);
+	gameui.addChild(cancel);
+	var infotext = new PIXI.Sprite(nopic);
+	infotext.position.x=100;
+	infotext.position.y=584;
+	gameui.addChild(infotext);
+	function setInfo(obj){
+		if(obj){
+			infotext.setTexture(getTextImage(obj.info(), 16));
+		}
+	}
+	var handsprite = [new Array(8), new Array(8)];
+	for (var i=0; i<8; i++){
+		handsprite[0][i] = new PIXI.Sprite(nopic);
+		handsprite[0][i].position.x=780;
+		handsprite[0][i].position.y=300+20*i;
+		handsprite[0][i].interactive = true;
+		(function(_i){
+			handsprite[0][i].mouseover = function(){
+				var cardinst = game.player1.hand[_i];
+				if (cardinst){
+					setInfo(cardinst.card);
+					cardart.setTexture(getArt(cardinst.card.code));
+				}
+			}
+			handsprite[0][i].click = function(){
+				if (game.phase != PlayPhase)return;
+				var cardinst = game.player1.hand[_i];
+				if (cardinst){
+					if (discarding){
+						endturn.click(null, _i);
+					}else if (targetingMode){
+						if (targetingMode(cardinst)){
+							targetingMode = undefined;
+							targetingModeCb(cardinst);
+						}
+					}else if (game.player1.cansummon(_i)){
+						if (cardinst.card.type != SpellEnum){
+							console.log("summoning " + _i);
+							socket.emit("summon", _i);
+							game.player1.summon(_i);
+						}else{
+							getTarget(cardinst, cardinst.card.active, function(tgt) {
+								socket.emit("summon", _i|tgtToBits(tgt)<<3);
+								game.player1.summon(_i, tgt);
+							});
+						}
+					}
+				}
+			}
+		})(i);
+		gameui.addChild(handsprite[0][i]);
+	}
+	for (var i=0; i<8; i++){
+		handsprite[1][i] = new PIXI.Sprite(nopic);
+		handsprite[1][i].position.x = 20;
+		handsprite[1][i].position.y = 40+20*i;
+		handsprite[1][i].interactive = true;
+		(function(_i){
+			handsprite[1][i].mouseover = function(){
+				if (game.player1.precognition){
+					var cardinst = game.player2.hand[_i];
+					if (cardinst){
+						setInfo(cardinst.card);
+						cardart.setTexture(getArt(cardinst.card.code));
+					}
+				}
+			}
+			handsprite[1][i].click = function(){
+				if (game.phase != PlayPhase)return;
+				if (targetingMode){
+					var cardinst = game.player2.hand[_i];
+					if (cardinst && targetingMode(cardinst)){
+						targetingMode = undefined;
+						targetingModeCb(cardinst);
+					}
+				}
+			}
+		})(i);
+		gameui.addChild(handsprite[1][i]);
+	}
+	var creasprite = [new Array(23), new Array(23)];
+	var permsprite = [new Array(16), new Array(16)];
+	var weapsprite = [new PIXI.Sprite(nopic), new PIXI.Sprite(nopic)];
+	var shiesprite = [new PIXI.Sprite(nopic), new PIXI.Sprite(nopic)];
+	var marksprite = [new PIXI.Sprite(nopic), new PIXI.Sprite(nopic)];
+	var quantatext = [new PIXI.DisplayObjectContainer(), new PIXI.DisplayObjectContainer()];
+	var hptext = [new PIXI.Text("", {font: "18px Arial bold"}), new PIXI.Text("", {font: "18px Arial bold"})];
+	var poisontext = [new PIXI.Text("", {font: "16px Arial bold"}), new PIXI.Text("", {font: "16px Arial bold"})];
+	var decktext = [new PIXI.Text("", {font: "16px Arial bold"}), new PIXI.Text("", {font: "16px Arial bold"})];
+	for (var j=0; j<2; j++){
+		(function(_j){
+			for (var i=0; i<23; i++){
+				creasprite[j][i] = new PIXI.Sprite(nopic);
+				var creatext = new PIXI.Sprite(nopic);
+				creatext.position.x = 58;
+				creatext.anchor.x = 1;
+				creasprite[j][i].addChild(creatext);
+				centerAnchor(creasprite[j][i]);
+				creasprite[j][i].position = creaturePos(j, i);
+				creasprite[j][i].interactive = true;
+				(function(_i){
+					creasprite[j][i].mouseover = function(){
+						setInfo(game.players[_j].creatures[_i]);
+					}
+					creasprite[j][i].click = function(){
+						if (game.phase != PlayPhase)return;
+						var crea = game.players[_j].creatures[_i];
+						if (!crea)return;
+						if (targetingMode && targetingMode(crea)){
+							targetingMode = undefined;
+							targetingModeCb(crea);
+						}else if (_j == 0 && !targetingMode && crea.canactive()){
+							getTarget(crea, crea.active.cast, function(tgt){
+								targetingMode = undefined;
+								socket.emit("active", tgtToBits(crea)|tgtToBits(tgt)<<9);
+								crea.useactive(tgt);
+							});
+						}
+					}
+				})(i);
+				gameui.addChild(creasprite[j][i]);
+			}
+			for (var i=0; i<16; i++){
+				permsprite[j][i] = new PIXI.Sprite(nopic);
+				var permtext = new PIXI.Sprite(nopic);
+				permtext.position.x = 58;
+				permtext.anchor.x = 1;
+				permsprite[j][i].addChild(permtext);
+				centerAnchor(permsprite[j][i]);
+				permsprite[j][i].position = permanentPos(j, i);
+				permsprite[j][i].interactive = true;
+				(function(_i){
+					permsprite[j][i].mouseover = function(){
+						setInfo(game.players[_j].permanents[_i]);
+					}
+					permsprite[j][i].click = function(){
+						if (game.phase != PlayPhase)return;
+						var perm = game.players[_j].permanents[_i];
+						if (!perm)return;
+						if (targetingMode && targetingMode(perm)){
+							targetingMode = undefined;
+							targetingModeCb(perm);
+						}else if (_j == 0 && !targetingMode && perm.canactive()){
+							getTarget(perm, perm.active.cast, function(tgt){
+								targetingMode = undefined;
+								socket.emit("active", tgtToBits(perm)|tgtToBits(tgt)<<9);
+								perm.useactive(tgt);
+							});
+						}
+					}
+				})(i);
+				gameui.addChild(permsprite[j][i]);
+			}
+			centerAnchor(weapsprite[j]);
+			centerAnchor(shiesprite[j]);
+			centerAnchor(marksprite[j]);
+			weapsprite[j].position.x=690;
+			weapsprite[j].position.y=530;
+			weapsprite[j].interactive = true;
+			shiesprite[j].position.x=690;
+			shiesprite[j].position.y=560;
+			shiesprite[j].interactive = true;
+			marksprite[j].position.x = 690;
+			marksprite[j].position.y = 500;
+			var weaptext = new PIXI.Sprite(nopic);
+			weaptext.position.x = 58;
+			weaptext.anchor.x = 1;
+			weapsprite[j].addChild(weaptext);
+			var shietext = new PIXI.Text(nopic);
+			shietext.position.x = 58;
+			shietext.anchor.x = 1;
+			shiesprite[j].addChild(shietext);
+			weapsprite[j].mouseover = function(){
+				setInfo(game.players[_j].weapon);
+			}
+			shiesprite[j].mouseover = function(){
+				setInfo(game.players[_j].shield);
+			}
+			weapsprite[j].click = function(){
+				if (game.phase != PlayPhase)return;
+				var weap = game.players[_j].weapon;
+				if (!weap)return
+				if (targetingMode && targetingMode(weap)){
+					targetingMode = undefined;
+					targetingModeCb(weap);
+				}else if (_j == 0 && !targetingMode && weap.canactive()){
+					getTarget(weap, weap.active.cast, function(tgt){
+						targetingMode = undefined;
+						socket.emit("active", tgtToBits(weap)|tgtToBits(tgt)<<9);
+						weap.useactive(tgt);
+					});
+				}
+			}
+			shiesprite[j].click = function(){
+				if (game.phase != PlayPhase)return;
+				var shie = game.players[_j].shield;
+				if (!shie)return
+				if (targetingMode && targetingMode(shie)){
+					targetingMode = undefined;
+					targetingModeCb(shie);
+				}else if (_j == 0 && !targetingMode && shie.canactive()){
+					getTarget(shie, shie.active.cast, function(tgt){
+						targetingMode = undefined;
+						socket.emit("active", tgtToBits(shie)|tgtToBits(tgt)<<9);
+						shie.useactive(tgt);
+					});
+				}
+			}
+			if (j){
+				reflectPos(weapsprite[j]);
+				reflectPos(shiesprite[j]);
+				reflectPos(marksprite[j]);
+			}
+			gameui.addChild(weapsprite[j]);
+			gameui.addChild(shiesprite[j]);
+			gameui.addChild(marksprite[j]);
+			centerAnchor(hptext[j]);
+			centerAnchor(poisontext[j]);
+			centerAnchor(decktext[j]);
+			quantatext[j].position.x=j?792:0;
+			quantatext[j].position.y=j?100:308;
+			hptext[j].position.x=50;
+			hptext[j].position.y=560;
+			poisontext[j].position.x=50;
+			poisontext[j].position.y=580;
+			decktext[j].position.x=50;
+			decktext[j].position.y=540;
+			if (j){
+				reflectPos(hptext[j]);
+				reflectPos(poisontext[j]);
+				reflectPos(decktext[j]);
+			}
+			var child;
+			for(var k=1; k<13; k++){
+				quantatext[j].addChild(child=new PIXI.Text("", {font: "16px Arial bold"}));
+				child.position.x = (k&1)?32:86;
+				child.position.y = Math.floor((k-1)/2)*32+8;
+			}
+			for(var k=1; k<13; k++){
+				quantatext[j].addChild(child=new PIXI.Sprite(nopic));
+				child.position.x = (k&1)?0:54;
+				child.position.y = Math.floor((k-1)/2)*32;
+			}
+			hptext[j].interactive = true;
+			hptext[j].mouseover = function(){
+				setInfo(game.players[_j]);
+			}
+			hptext[j].click = function(){
+				if (game.phase != PlayPhase)return;
+				if (targetingMode && targetingMode(game.players[_j])){
+					targetingMode = undefined;
+					targetingModeCb(game.players[_j]);
+				}
+			}
+		})(j);
+		gameui.addChild(quantatext[j]);
+		gameui.addChild(hptext[j]);
+		gameui.addChild(poisontext[j]);
+		gameui.addChild(decktext[j]);
+	}
+	var fgfx = new PIXI.Graphics();
+	gameui.addChild(fgfx);
+	var cardart = new PIXI.Sprite(nopic);
+	cardart.position.x = 600;
+	cardart.position.y = 300;
+	gameui.addChild(cardart);
+	mainStage = gameui;
+	refreshRenderer();
+}
+var foeplays = [];
+var tximgcache = [];
+function getTextImage(text, font, color){
+	if (color === undefined)color = "black";
+	if(!(font in tximgcache)){
+		tximgcache[font] = {};
+	}
+	if(!(text in tximgcache[font])){
+		tximgcache[font][text] = {};
+	}else if(color in tximgcache[font][text]){
+		return tximgcache[font][text][color];
+	}
+	var doc = new PIXI.DisplayObjectContainer();
+	var pieces = text.split(/(\d+:\d+)/);
+	var x=0;
+	for(var i=0; i<pieces.length; i++){
+		var piece = pieces[i];
+		if (/^\d+:\d+$/.test(piece)){
+			var parse = piece.split(":");
+			var num = parseInt(parse[0]);
+			var icon = getIcon(parseInt(parse[1]));
+			for(var j=0; j<num; j++){
+				var spr = new PIXI.Sprite(icon);
+				spr.scale.x = .375;
+				spr.scale.y = .375;
+				spr.position.x = x;
+				x+=12;
+				doc.addChild(spr);
+			}
+		}else{
+			var txt = new PIXI.Text(piece, {font: font+"px Arial bold", fill:color});
+			txt.position.x = x;
+			x+=txt.width;
+			doc.addChild(txt);
+		}
+	}
+	var rtex = new PIXI.RenderTexture(x, 16);
+	rtex.render(doc);
+	return tximgcache[font][text][color] = rtex;
+}
+var socket = io.connect(location.hostname, {"port:" :13602});
+socket.on("pvpgive", initGame);
+socket.on("userdump", function(data){
+	user = data;
+});
+socket.on("endturn", function(data) {
+	game.player2.endturn(data);
+});
+socket.on("summon", function(bits) {
+	console.log("summon call: " + bits);
+	player2summon(bits&7, bitsToTgt(bits>>3));
+});
+socket.on("active", function(bits) {
+	var c=bitsToTgt(bits&511), t=bitsToTgt((bits>>9)&511);
+	console.log("active call: " + bits);
+	c.useactive(t);
+});
+socket.on("foeleft", function(data) {
+	setWinner(game.player1);
+});
+socket.on("chat", function(data) {
+	chatArea.value = data;
+});
+socket.on("mulligan", function(data) {
+	if (data === true){
+		progressMulligan(game);
+		if (game.phase == PlayPhase){
+			cancel.setText("Cancel");
+		}
+	}else{
+		game.player2.drawhand(game.player2.hand.length-1);
+	}
+});
+function maybeSendChat(e) {
+	e.cancelBubble = true;
+	if (e.keyCode != 13)return;
+	var chat=document.getElementById("chatinput");
+	if (chat.value){
+		socket.emit("chat", chat.value);
+		chat.value = "";
+	}
 }
 function animate() {
 	setTimeout(requestAnimate, 40);

@@ -1,4 +1,4 @@
 rule concat
  command=grunt concat
-build js.js:concat MersenneTwister.js classes.js actives.js animations.js etg.js pixi.js
+build js.js:concat MersenneTwister.js classes.js actives.js animations.js etg.js ui.js Gruntfile.js
 default js.js
