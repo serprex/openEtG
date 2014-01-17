@@ -6,7 +6,7 @@ module.exports = function(grunt) {
 				stripBanners: true,
 			},
 			dist: {
-				src: ["MersenneTwister.js", "classes.js", "actives.js", "animations.js", "etg.js", "ui.js"],
+				src: ["MersenneTwister.js", "classes.js", "actives.js", "animations.js", "etg.js"],
 				dest: "js.js",
 			}
 		}
