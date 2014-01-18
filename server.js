@@ -13,10 +13,12 @@ function loginAuth(req, res, next){
 		var uname = req.url.substring(6);
 		db.hgetall("U:"+uname, function (err, obj){
 			if (!obj){
-				obj = {auth: uname, empty:true};
+				users[uname] = {auth: uname};
+				res.end(JSON.stringify(users[uname]));
+			}else{
+				users[uname] = obj;
+				res.end(JSON.stringify(etgutil.useruser(obj)));
 			}
-			users[uname] = obj;
-			res.end(JSON.stringify(obj));
 		});
 	}else next();
 }
@@ -44,24 +46,43 @@ function foeEcho(socket, event){
 		}
 	});
 }
+function userEvent(socket, event, func){
+	socket.on(event, function(data){
+		var u=data.u;
+		if (!(u in users)){
+			db.hgetall("U:"+u, function(err, obj){
+				if (obj){
+					users[u] = obj;
+					func(data, obj);
+				}
+			});
+		}else{
+			func(data, users[u]);
+		}
+	});
+}
 
 var starter = {
-	deck: "4sa4sa4sa4t44vj4vj4vj4vs52o52o52o55q55q5905bu5c15f65if5if5lc5lc5lc5og5oh5ri5ri5ri5un5un61q8pi",
+	deck: "084sa014t3014tc0a4vc0250u034vi034vj014vq014vh044vk014vm034ve014vo014vu014vf0352o0155q0158p045ca025bu015c7035c6015cc015i5015rh015v1018pn",
+	pool: "084sa014t3014tc0a4vc0250u034vi034vj014vq014vh044vk014vm034ve014vo014vu014vf0352o0155q0158p045ca025bu015c7035c6015cc015i5015rh015v1018pn"
 };
 
 io.sockets.on("connection", function(socket) {
 	sockinfo[socket.id] = {};
 	socket.on("disconnect", dropsock);
 	socket.on("reconnect_failed", dropsock);
-	socket.on("inituser", function(data) {
+	userEvent(socket, "inituser", function(data) {
 		var u=data.u;
-		if (u in users){
-			users[u].deck = starter.deck;
-			db.hmset("U:"+u, users[u]);
-			socket.emit("userdump", users[u]);
-		}
+		users[u].deck = starter.deck;
+		users[u].pool = starter.pool;
+		socket.emit("userdump", etgutil.useruser(users[u]));
 	});
-	socket.on("foewant", function(data) {
+	userEvent(socket, "logout", function(data) {
+		var u=data.u;
+		db.hmset("U:"+u, users[u]);
+		delete users[u];
+	});
+	userEvent(socket, "foewant", function(data) {
 		var u=data.u, f=data.f;
 		if (u == f){
 			return;
