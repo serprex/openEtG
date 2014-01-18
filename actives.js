@@ -94,6 +94,7 @@ bounce:function(c,t, index){
 		if (coci && coci.card == Cards.MalignantCell){
 			coci.remove();
 		}
+		c.remove();
 		new CardInstance(c.card, c.owner).place();
 		return true;
 	}
@@ -796,7 +797,8 @@ parallel:function(c,t){
 },
 phoenix:function(c,t, index){
 	if (c == t && !c.owner.creatures[index]){
-		c.owner.creatures[index] = new Creature(Cards.Ash.asUpped(c.card.upped), c.owner);
+		c.transform(Cards.Ash.asUpped(c.card.upped));
+		c.owner.creatures[index] = c;
 	}
 },
 photosynthesis:function(c,t){

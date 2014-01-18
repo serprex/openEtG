@@ -164,8 +164,7 @@ function combineactive(a1, a2){
 		return a2;
 	}
 	var combine = function(){
-		a1.apply(null, arguments);
-		a2.apply(null, arguments);
+		return (a1.apply(null, arguments) || 0) + (a2.apply(null, arguments) || 0);
 	}
 	combine.activename = a1.activename + " " + a2.activename;
 	return combine;
