@@ -423,7 +423,6 @@ function startEditor(){
 		}else{
 			var editordeck = getDeck();
 		}
-		editordeck.sort(editorCardCmp);
 		var editormarksprite = new PIXI.Sprite(nopic);
 		editormarksprite.position.x = 100;
 		editormarksprite.position.y = 210;
@@ -438,6 +437,7 @@ function startEditor(){
 				editordeck.splice(i, 1);
 			}
 		}
+		editordeck.sort(editorCardCmp);
 		var editoreleicons = [];
 		for(var i=0; i<13; i++){
 			var sprite = new PIXI.Sprite(nopic);
@@ -491,24 +491,22 @@ function startEditor(){
 					sprite.click = function() {
 						if(editordeck.length<60){
 							var code = editorcolumns[_i][1][editorelement][_j];
-							if (usePool && (!(code in cardpool) || (code in cardminus && cardminus[code] >= cardpool[code]))){
-								console.log(JSON.stringify(cardminus));
-								console.log(JSON.stringify(cardpool));
-								return;
+							if (usePool){
+								if (!(code in cardpool) || (code in cardminus && cardminus[code] >= cardpool[code])){
+									console.log(JSON.stringify(cardminus));
+									console.log(JSON.stringify(cardpool));
+									return;
+								}
+								if (CardCodes[code].type != PillarEnum){
+									var card = CardCodes[code];
+									if ((cardminus[card.asUpped(false).code]||0)+(cardminus[card.asUpped(true).code]||0) == 6){
+										return;
+									}
+								}
 							}
 							for(var i=0; i<editordeck.length; i++){
 								var cmp = editorCardCmp(editordeck[i], code);
-								if (cmp < 0)continue;
-								if (cmp == 0 && CardCodes[code].type != PillarEnum){
-									for(var j=1; j<6; j++){
-										if(editordeck[i+j] != code){
-											break;
-										}
-									}
-									if (j == 6){
-										return;
-									}
-								}else break;
+								if (cmp >= 0)break;
 							}
 							editordeck.splice(i, 0, code);
 							if (usePool){

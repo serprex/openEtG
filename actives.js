@@ -88,12 +88,15 @@ boneyard:function(c,t){
 bow:function(c,t){
 	return c.owner.mark == Air?1:0;
 },
-bounce: function (c, t) {
-    if (c.owner.hand.length != 8) {
-        c.owner.hand.push(c.card);
-        c.remove();
-    }
-    
+bounce:function(c,t, index){
+	if (c.owner.hand.length < 8) {
+		var coci = c.owner.creatures[index];
+		if (coci && coci.card == Cards.MalignantCell){
+			coci.remove();
+		}
+		new CardInstance(c.card, c.owner).place();
+		return true;
+	}
 },
 bravery:function(c,t){
 	if (!c.owner.foe.sanctuary){
@@ -863,7 +866,7 @@ regrade:function(c,t){
 	t.card = t.card.asUpped(!t.card.upped);
 },
 ren:function(c,t){
-    t.addactive("death", Actives.bounce)
+    t.addactive("death", Actives.bounce);
 },
 rewind:function(c,t){
 	if (t.undead){
