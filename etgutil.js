@@ -1,4 +1,5 @@
 exports.encodedeck = function(deck){
+	if (!deck)return deck;
 	var count={}, out="";
 	for(var i=0; i<deck.length; i++){
 		if (deck[i] in count){
@@ -18,6 +19,7 @@ exports.encodedeck = function(deck){
 	return out;
 }
 exports.decodedeck = function(deck){
+	if (!deck)return deck;
 	var out = [];
 	for(var i=0; i<deck.length; i+=5){
 		var count = parseInt(deck.substr(i, 2), 32), code=deck.substr(i+2, 3);

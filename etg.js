@@ -58,6 +58,12 @@ function mkGame(first, seed){
 	game.turn = first?game.player1:game.player2;
 	return game;
 }
+function setWinner(game, play){
+	if (!game.winner){
+		game.winner=play;
+		game.phase=EndPhase;
+	}
+}
 function loadcards(cb){
 	var Cards = {};
 	var CardCodes = {};
@@ -401,9 +407,7 @@ Player.prototype.drawcard = function() {
 		if (this.deck.length>0){
 			this.hand[this.hand.length] = new CardInstance(this.deck.pop(), this);
 			this.procactive("draw");
-		}else if (!this.game.winner){
-			setWinner(this.foe);
-		}
+		}else setWinner(this.game, this.foe);
 	}
 }
 Player.prototype.drawhand = function(x) {
@@ -526,7 +530,7 @@ Player.prototype.dmg = function(x, ignoresosa) {
 	}else{
 		this.hp -= x;
 		if (this.hp <= 0 && !this.game.winner){
-			setWinner(this.foe);
+			setWinner(this.game, this.foe);
 		}
 		return sosa?-x:x;
 	}

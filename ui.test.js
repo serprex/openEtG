@@ -1,8 +1,5 @@
 "use strict"
 var Cards, Targeting, targetingMode, targetingModeCb, game, player1, player2, players;
-function setWinner(play){
-	game.winner = play;
-}
 var gameui = {addChild:function(){}};
 function creaturePos(){
 	return {x:0, y:0};

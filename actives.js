@@ -924,7 +924,7 @@ serendipity:function(c,t){
 		anyentro |= cards[i].element == Entropy;
 	}
 	for(var i=0; i<num; i++){
-		c.owner.hand.push(cards[i]);
+		new CardInstance(cards[i], c.owner).place();
 	}
 },
 silence:function(c,t){
