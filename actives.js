@@ -88,6 +88,10 @@ boneyard:function(c,t){
 bow:function(c,t){
 	return c.owner.mark == Air?1:0;
 },
+bounce: function (c, t) {
+    if (!c.owner.hand.length == 8)
+    c.owner.hand.push(c.card);    
+},
 bravery:function(c,t){
 	if (!c.owner.foe.sanctuary){
 		for(var i=0; i<2 && c.owner.hand.length<8 && c.owner.foe.hand.length<8; i++){
@@ -854,6 +858,9 @@ reinforce:function(c,t){
 },
 regrade:function(c,t){
 	t.card = t.card.asUpped(!t.card.upped);
+},
+ren:function(c,t){
+    c.actives = actives.bounce;
 },
 rewind:function(c,t){
 	if (t.undead){
