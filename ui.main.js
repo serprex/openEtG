@@ -1,4 +1,4 @@
-var Cards, CardCodes, Targeting, targetingMode, targetingModeCb, targetingText, game, discarding, animCb, user, renderer, endturnFunc, cancelFunc;
+var Cards, CardCodes, Targeting, targetingMode, targetingModeCb, targetingText, game, discarding, animCb, user, renderer, endturnFunc, cancelFunc, foeDeck, player2summon;
 loadcards(function(cards, cardcodes, targeting) {
 	Cards = cards;
 	CardCodes = cardcodes;
@@ -31,24 +31,6 @@ function reflectPos(obj){
 }
 function centerAnchor(obj){
 	obj.anchor.x=obj.anchor.y=.5;
-}
-function setWinner(play){
-	game.winner=play;
-	game.phase=EndPhase;
-	endturn.setText((play==game.player1?"Won ":"Lost ")+game.ply);
-}
-function player2summon(handindex, tgt){
-	var card = game.player2.hand[handindex].card;
-	var sprite = new PIXI.Sprite(nopic);
-	sprite.position.x=foeplays.length*90;
-	sprite.interactive = true;
-	sprite.mouseover = function(){
-		setInfo(card);
-		cardart.setTexture(getArt(card.code));
-	}
-	gameui.addChild(sprite);
-	foeplays.push([card, sprite]);
-	game.player2.summon(handindex, tgt);
 }
 function tgtToBits(x){
 	var bits;
@@ -276,6 +258,7 @@ function initGame(data, ai){
 			}
 		}
 	}
+	foeDeck = game.player2.deck.slice();
 	if (game.turn == game.player1){
 		game.player1.drawhand(7);
 		game.player2.drawhand(7);
@@ -283,15 +266,18 @@ function initGame(data, ai){
 		game.player2.drawhand(7);
 		game.player1.drawhand(7);
 	}
+	startMatch();
 	if (ai){
 		game.player2.ai = ai;
 		if(game.turn == game.player2){
 			progressMulligan(game);
 		}
 	}
-	startMatch();
 }
 function getDeck(){
+	if (user){
+		return user.deck || [];
+	}
 	var deckstring = deckimport.value;
 	return deckstring?deckstring.split(" "):[];
 }
@@ -337,13 +323,13 @@ function startMenu(){
 				deck = [Cards.QuantumPillar, Cards.QuantumPillar, Cards.QuantumPillar, Cards.QuantumPillar];
 				var pillar = CardCodes[(5000+e0*100).toString(32)];
 				var pl = new Player({rng: new MersenneTwister(Math.random()*40000000)});
-				for(var i=0; i<20; i++){
+				for(var i=0; i<18; i++){
 					deck.push(pillar);
 				}
-				for(var i=0; i<30; i++){
+				for(var i=0; i<29; i++){
 					deck.push(pl.randomcard(Math.random()<.3, function(x){return x.element == e0;}));
 				}
-				for(var i=0; i<10; i++){
+				for(var i=0; i<9; i++){
 					deck.push(pl.randomcard(Math.random()<.3, function(x){return x.element == e1;}));
 				}
 				for(var i=0; i<deck.length; i++){
@@ -353,14 +339,11 @@ function startMenu(){
 			}
 			initGame({ first:Math.random()<.5, deck:deck, urdeck:urdeck, seed:Math.random()*4000000000 },
 				function(){
-					for(var i=this.hand.length-1; i>=0; i--){
-						if (this.hand[i].card.type == PillarEnum){
-							player2summon(i);
-						}
-					}
-					for(var i=this.hand.length-1; i>=0; i--){
-						if ((this.hand[i].card.type != SpellEnum || (!Targeting[this.hand[i].card.active.activename])) && this.cansummon(i)){
-							player2summon(i);
+					for(var j=0; j<2; j++){
+						for(var i=this.hand.length-1; i>=0; i--){
+							if ((this.hand[i].card.type != SpellEnum || (!Targeting[this.hand[i].card.active.activename])) && this.cansummon(i)){
+								player2summon(i);
+							}
 						}
 					}
 					this.endturn(this.hand.length==8?0:null);
@@ -368,9 +351,7 @@ function startMenu(){
 			);
 		}
 	}
-	beditor.click = function() {
-		startEditor();
-	}
+	beditor.click = startEditor;
 	blogout.click = function(){
 		socket.emit("logout", {u:user.auth});
 		user = undefined;
@@ -406,6 +387,9 @@ function startEditor(){
 		bsave.click = function(){
 			editordeck.push(TrueMarks[editormark]);
 			deckimport.value = editordeck.join(" ");
+			if (usePool){
+				socket.emit("setdeck", {u:user.auth, d:editordeck});
+			}
 			startMenu();
 		}
 		bsave.interactive = true;
@@ -439,6 +423,7 @@ function startEditor(){
 		}else{
 			var editordeck = getDeck();
 		}
+		editordeck.sort(editorCardCmp);
 		var editormarksprite = new PIXI.Sprite(nopic);
 		editormarksprite.position.x = 100;
 		editormarksprite.position.y = 210;
@@ -634,6 +619,20 @@ function startElementSelect(){
 	refreshRenderer();
 }
 function startMatch(){
+	player2summon = function(handindex, tgt){
+		var card = game.player2.hand[handindex].card;
+		var sprite = new PIXI.Sprite(nopic);
+		sprite.position.x=foeplays.length*90;
+		sprite.interactive = true;
+		sprite.mouseover = function(){
+			if (game.winner != game.player1){
+				cardart.setTexture(getArt(card.code));
+			}
+		}
+		gameui.addChild(sprite);
+		foeplays.push([card, sprite]);
+		game.player2.summon(handindex, tgt);
+	}
 	function drawBorder(obj, spr) {
 		if (obj){
 			if (targetingMode){
@@ -697,14 +696,28 @@ function startMatch(){
 		}
 		fgfx.lineStyle(0, 0, 0);
 	}
+	var cardwon;
 	function matchStep(){
 		var pos=gameui.interactionManager.mouse.global;
-		var cardartvisible = (pos.x>760 && pos.y>300 && pos.y<300+20*game.player1.hand.length);
-		if (!cardartvisible && foeplays.length){ // Really need a better way to manage visibility
-			var first = foeplays[0][1], last = foeplays[foeplays.length-1][1];
-			cardartvisible = pos.y<last.position.y+last.height && pos.y>last.position.y && pos.x<last.position.x+last.width && pos.x>first.position.x;
+		maybeSetText(endturn, game.winner?(game.winner==game.player1?"Won ":"Lost ")+game.ply:"End Turn");
+		if (!game.winner || !user){
+			var cardartvisible = (pos.x>760 && pos.y>300 && pos.y<300+20*game.player1.hand.length);
+			if (!cardartvisible && foeplays.length){ // Really need a better way to manage visibility
+				var first = foeplays[0][1], last = foeplays[foeplays.length-1][1];
+				cardartvisible = pos.y<last.position.y+last.height && pos.y>last.position.y && pos.x<last.position.x+last.width && pos.x>first.position.x;
+			}
+			cardart.visible = cardartvisible;
+		}else if(game.winner == game.player1){
+			if (!cardwon){
+				cardwon = foeDeck[Math.floor(Math.random()*foeDeck.length)];
+				socket.emit("addcard", {u:user.auth, c:cardwon})
+				user.pool.push(cardwon);
+			}
+			cardart.setTexture(getArt(cardwon));
+			cardart.visible = true;
+		}else{
+			cardart.visible = false;
 		}
-		cardart.visible = cardartvisible;
 		maybeSetText(turntell, discarding?"Discard":targetingMode?targetingText:game.turn == game.player1?"Your Turn":"Their Turn");
 		for(var i=0; i<foeplays.length; i++){
 			maybeSetTexture(foeplays[i][1], getCardImage(foeplays[i][0].code));
@@ -925,8 +938,7 @@ function startMatch(){
 		(function(_i){
 			handsprite[0][i].mouseover = function(){
 				var cardinst = game.player1.hand[_i];
-				if (cardinst){
-					setInfo(cardinst.card);
+				if (cardinst && game.winner != game.player1){
 					cardart.setTexture(getArt(cardinst.card.code));
 				}
 			}
@@ -967,8 +979,7 @@ function startMatch(){
 			handsprite[1][i].mouseover = function(){
 				if (game.player1.precognition){
 					var cardinst = game.player2.hand[_i];
-					if (cardinst){
-						setInfo(cardinst.card);
+					if (cardinst && game.winner != game.player1){
 						cardart.setTexture(getArt(cardinst.card.code));
 					}
 				}
@@ -1233,7 +1244,7 @@ socket.on("active", function(bits) {
 	c.useactive(t);
 });
 socket.on("foeleft", function(data) {
-	setWinner(game.player1);
+	setWinner(game, game.player1);
 });
 socket.on("chat", function(data) {
 	chatArea.value = data;
@@ -1280,7 +1291,7 @@ document.addEventListener("keydown", function(e){
 	}
 });
 document.addEventListener("click", function(e){
-	if (e.pageX < 900 || e.pageY < 600){
+	if (e.pageX < 900 && e.pageY < 600){
 		e.preventDefault();
 	}
 });
