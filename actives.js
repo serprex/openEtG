@@ -88,14 +88,10 @@ boneyard:function(c,t){
 bow:function(c,t){
 	return c.owner.mark == Air?1:0;
 },
-bounce:function(c,t, index){
+bounce:function(c,t){
 	if (c.owner.hand.length < 8) {
-		var coci = c.owner.creatures[index];
-		if (coci && coci.card == Cards.MalignantCell){
-			coci.remove();
-		}
-		c.remove();
 		new CardInstance(c.card, c.owner).place();
+		c.remove();
 		return true;
 	}
 },
@@ -868,7 +864,7 @@ regrade:function(c,t){
 	t.card = t.card.asUpped(!t.card.upped);
 },
 ren:function(c,t){
-    t.addactive("death", Actives.bounce);
+    t.addactive("predeath", Actives.bounce);
 },
 rewind:function(c,t){
 	if (t.undead){

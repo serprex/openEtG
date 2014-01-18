@@ -602,6 +602,9 @@ CardInstance.prototype.remove = function(index) {
 }
 Thing.prototype.deatheffect = function(index) {
 	var self = this;
+	if (this.active.death){
+		this.active.death(this, this, index)
+	}
 	this.owner.procactive("death", function(c, p) { c.active.death(c, self, index) });
 }
 Creature.prototype.die = function() {
@@ -610,7 +613,7 @@ Creature.prototype.die = function() {
 		if (this.status.aflatoxin){
 			(this.owner.creatures[index] = new Creature(Cards.MalignantCell, this.owner)).usedactive = false;
 		}
-		if (!(this.active.death && this.active.death(this, this, index))){
+		if (!(this.active.predeath && this.active.predeath(this))){
 			this.deatheffect(index);
 		}
 		new DeathEffect(creaturePos(this.owner == this.owner.game.player1?0:1, index));
