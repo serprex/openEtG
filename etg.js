@@ -940,7 +940,7 @@ var TargetFilters = {
 		return t instanceof Player;
 	},
 	butterfly:function(c, t){
-		return !(t instanceof Player) && !t.status.immaterial && !t.status.burrowed && ((t.trueatk && t.trueatk()<3) || (t.truehp && t.truehp()<3));
+		return (t instanceof Creature || t instanceof Permanent) && !t.status.immaterial && !t.status.burrowed && ((t.trueatk && t.trueatk()<3) || (t.truehp && t.truehp()<3));
 	},
 	devour:function(c, t){
 		return t.isMaterialInstance(Creature) && t.truehp()<c.truehp();
