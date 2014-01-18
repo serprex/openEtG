@@ -89,8 +89,11 @@ bow:function(c,t){
 	return c.owner.mark == Air?1:0;
 },
 bounce: function (c, t) {
-    if (!c.owner.hand.length == 8)
-    c.owner.hand.push(c.card);    
+    if (c.owner.hand.length != 8) {
+        c.owner.hand.push(c.card);
+        c.remove();
+    }
+    
 },
 bravery:function(c,t){
 	if (!c.owner.foe.sanctuary){
@@ -860,7 +863,7 @@ regrade:function(c,t){
 	t.card = t.card.asUpped(!t.card.upped);
 },
 ren:function(c,t){
-    c.actives = actives.bounce;
+    t.addactive("death", Actives.bounce)
 },
 rewind:function(c,t){
 	if (t.undead){
