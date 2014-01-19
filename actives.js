@@ -1054,6 +1054,7 @@ steal:function(c,t){
 	}
 },
 steam:function(c,t){
+	c.defstatus("steamatk", 0);
 	c.status.steamatk += 5;
 },
 stoneform:function(c,t){
