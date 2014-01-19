@@ -26,19 +26,19 @@ function Card(type, info){
 			}
 		}
 	}
+	this.passives = {};
+	if (info.Passive){
+		var passives = info.Passive.split("+");
+		for(var i=0; i<passives.length; i++){
+			this.passives[passives[i]] = true;
+		}
+	}
 	if (info.Status){
 		this.status = {};
 		var statuses = info.Status.split("+");
 		for(var i=0; i<statuses.length; i++){
 			var status = statuses[i].split("=");
 			this.status[status[0]] = status.length==1 || parseInt(status[1]);
-		}
-	}
-	if (info.Passive){
-		this.passives = {};
-		var passives = info.Passive.split("+");
-		for(var i=0; i<passives.length; i++){
-			this.passives[passives[i]] = true;
 		}
 	}
 	if (info.Text){

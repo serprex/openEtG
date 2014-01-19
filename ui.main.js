@@ -728,11 +728,10 @@ function startMatch(){
 			cardart.visible = cardartvisible;
 		}else if(game.winner == game.player1){
 			if (!cardwon){
-				var cardwon = foeDeck[Math.floor(Math.random()*foeDeck.length)];
-				if (CardCodes[code].passives.ultrarare){
+				cardwon = foeDeck[Math.floor(Math.random()*foeDeck.length)];
+				if (cardwon.passives.ultrarare){
 					cardwon = randomcard(cardwon.upped, function(x){ return x.type == PillarEnum && x.element == cardwon.element && !x.passives.ultrarare; });
 				}
-				cardwoncode = cardwon.code;
 				socket.emit("addcard", {u:user.auth, c:cardwon.code})
 				user.pool.push(cardwon.code);
 			}
