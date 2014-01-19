@@ -282,32 +282,18 @@ function getDeck(){
 	return deckstring?deckstring.split(" "):[];
 }
 function startMenu(){
-	var bpvp = new PIXI.Text("Search", {font: "16px Arial bold"});
 	var brandai = new PIXI.Text("Dumb AI", {font: "16px Arial bold"});
 	var beditor = new PIXI.Text("Editor", {font: "16px Arial bold"});
 	var blogout = new PIXI.Text("Logout", {font: "16px Arial bold"});
-	bpvp.position.x = 200;
-	bpvp.position.y = 200;
 	brandai.position.x = 200;
 	brandai.position.y = 250;
 	beditor.position.x = 200;
 	beditor.position.y = 300;
 	blogout.position.x = 200;
 	blogout.position.y = 450;
-	bpvp.interactive = true;
 	brandai.interactive = true;
 	beditor.interactive = true;
 	blogout.interactive = true;
-	bpvp.click = function() {
-		if (Cards){
-			var deck = getDeck();
-			if (deck.length < 30){
-				beditor.click();
-				return;
-			}
-			socket.emit("pvpwant", { deck: deck, room: roomname.value });
-		}
-	}
 	brandai.click = function() {
 		if (Cards){
 			var urdeck = getDeck();
@@ -360,7 +346,6 @@ function startMenu(){
 		blogout.visible = !!user;
 	}
 	menuui = new PIXI.Stage(0x336699, true);
-	menuui.addChild(bpvp);
 	menuui.addChild(brandai);
 	menuui.addChild(beditor);
 	menuui.addChild(blogout);
@@ -377,57 +362,7 @@ function startEditor(){
 			cardminus[code] += x;
 		}else cardminus[code] = x;
 	}
-	if (Cards && (!user || user.deck)){
-		var usePool = !!(user && user.deck);
-		chatArea.value = "Build a 30-60 card deck";
-		var editorui = new PIXI.Stage(0x336699, true), editorelement = 0;
-		var bsave = new PIXI.Text("Done", {font: "16px Arial bold"});
-		bsave.position.x = 8;
-		bsave.position.y = 8;
-		bsave.click = function(){
-			editordeck.push(TrueMarks[editormark]);
-			deckimport.value = editordeck.join(" ");
-			if (usePool){
-				socket.emit("setdeck", {u:user.auth, d:editordeck});
-			}
-			startMenu();
-		}
-		bsave.interactive = true;
-		editorui.addChild(bsave);
-		var bclear = new PIXI.Text("Clear", {font: "16px Arial bold"});
-		bclear.position.x = 8;
-		bclear.position.y = 22;
-		bclear.click = function(){
-			if (usePool){
-				cardminus = {};
-			}
-			editordeck.length = 0;
-		}
-		bclear.interactive = true;
-		editorui.addChild(bclear);
-		var editorcolumns = [];
-		var editordecksprites = [];
-		if (usePool){
-			var editordeck = user.deck;
-			var cardminus = {}, cardpool = {};
-			for(var i=0; i<editordeck.length; i++){
-				adjustCardMinus(editordeck[i], 1);
-			}
-			for(var i=0; i<user.pool.length; i++){
-				if (user.pool[i] in cardpool){
-					cardpool[user.pool[i]]++;
-				}else{
-					cardpool[user.pool[i]] = 1;
-				}
-			}
-		}else{
-			var editordeck = getDeck();
-		}
-		var editormarksprite = new PIXI.Sprite(nopic);
-		editormarksprite.position.x = 100;
-		editormarksprite.position.y = 210;
-		editorui.addChild(editormarksprite);
-		var editormark = 0;
+	function processDeck(){
 		for(var i=editordeck.length-1; i>=0; i--){
 			if(!(editordeck[i] in CardCodes)){
 				var index = TrueMarks.indexOf(editordeck[i]);
@@ -438,6 +373,80 @@ function startEditor(){
 			}
 		}
 		editordeck.sort(editorCardCmp);
+		if (usePool){
+			cardminus = {};
+			cardpool = {};
+			for(var i=0; i<user.pool.length; i++){
+				if (user.pool[i] in cardpool){
+					cardpool[user.pool[i]]++;
+				}else{
+					cardpool[user.pool[i]] = 1;
+				}
+			}
+			for(var i=editordeck.length-1; i>=0; i--){
+				var code = editordeck[i];
+				if (CardCodes[code].type != PillarEnum){
+					var card = CardCodes[code];
+					if ((cardminus[card.asUpped(false).code]||0)+(cardminus[card.asUpped(true).code]||0) == 6){
+						editordeck.splice(i, 1);
+						continue;
+					}
+				}
+				if ((cardminus[code]||0)<(cardpool[code]||0)){
+					adjustCardMinus(code, 1);
+				}else{
+					editordeck.splice(i, 1);
+				}
+			}
+		}
+	}
+	if (Cards && (!user || user.deck)){
+		var usePool = !!(user && user.deck);
+		var cardminus, cardpool;
+		chatArea.value = "Build a 30-60 card deck";
+		var editorui = new PIXI.Stage(0x336699, true), editorelement = 0;
+		var bclear = new PIXI.Text("Clear", {font: "16px Arial bold"});
+		bclear.position.x = 8;
+		bclear.position.y = 8;
+		bclear.click = function(){
+			if (usePool){
+				cardminus = {};
+			}
+			editordeck.length = 0;
+		}
+		bclear.interactive = true;
+		editorui.addChild(bclear);
+		var bsave = new PIXI.Text("Done", {font: "16px Arial bold"});
+		bsave.position.x = 8;
+		bsave.position.y = 32;
+		bsave.click = function(){
+			editordeck.push(TrueMarks[editormark]);
+			deckimport.value = editordeck.join(" ");
+			if (usePool){
+				socket.emit("setdeck", {u:user.auth, d:editordeck});
+			}
+			startMenu();
+		}
+		bsave.interactive = true;
+		editorui.addChild(bsave);
+		var bimport = new PIXI.Text("Import", {font: "16px Arial bold"});
+		bimport.position.x = 8;
+		bimport.position.y = 56;
+		bimport.click = function(){
+			editordeck = deckimport.value.split(" ");
+			processDeck();
+		}
+		bimport.interactive = true;
+		editorui.addChild(bimport);
+		var editorcolumns = [];
+		var editordecksprites = [];
+		var editordeck = getDeck();
+		var editormarksprite = new PIXI.Sprite(nopic);
+		editormarksprite.position.x = 100;
+		editormarksprite.position.y = 210;
+		editorui.addChild(editormarksprite);
+		var editormark = 0;
+		processDeck();
 		var editoreleicons = [];
 		for(var i=0; i<13; i++){
 			var sprite = new PIXI.Sprite(nopic);
@@ -493,8 +502,6 @@ function startEditor(){
 							var code = editorcolumns[_i][1][editorelement][_j];
 							if (usePool){
 								if (!(code in cardpool) || (code in cardminus && cardminus[code] >= cardpool[code])){
-									console.log(JSON.stringify(cardminus));
-									console.log(JSON.stringify(cardpool));
 									return;
 								}
 								if (CardCodes[code].type != PillarEnum){
@@ -707,7 +714,7 @@ function startMatch(){
 			cardart.visible = cardartvisible;
 		}else if(game.winner == game.player1){
 			if (!cardwon){
-				cardwon = foeDeck[Math.floor(Math.random()*foeDeck.length)];
+				cardwon = foeDeck[Math.floor(Math.random()*foeDeck.length)].code;
 				socket.emit("addcard", {u:user.auth, c:cardwon})
 				user.pool.push(cardwon);
 			}
@@ -715,6 +722,9 @@ function startMatch(){
 			cardart.visible = true;
 		}else{
 			cardart.visible = false;
+		}
+		if ((cancel.visible = game.phase != EndPhase)){
+			maybeSetText(cancel, game.phase == PlayPhase?"Cancel":"Mulligan");
 		}
 		maybeSetText(turntell, discarding?"Discard":targetingMode?targetingText:game.turn == game.player1?"Your Turn":"Their Turn");
 		for(var i=0; i<foeplays.length; i++){
@@ -871,7 +881,6 @@ function startMatch(){
 					progressMulligan(game);
 				}
 				if (game.phase == PlayPhase){
-					cancel.setText("Cancel");
 					if (game.turn == game.player2 && game.player2.ai){
 						game.player2.ai();
 					}
@@ -1228,6 +1237,9 @@ var socket = io.connect(location.hostname, {"port:" :13602});
 socket.on("pvpgive", initGame);
 socket.on("userdump", function(data){
 	user = data;
+	if (user.deck){
+		deckimport.value = user.deck.join(" ");
+	}
 });
 socket.on("endturn", function(data) {
 	game.player2.endturn(data);
@@ -1242,7 +1254,9 @@ socket.on("active", function(bits) {
 	c.useactive(t);
 });
 socket.on("foeleft", function(data) {
-	setWinner(game, game.player1);
+	if (!game.player2.ai){
+		setWinner(game, game.player1);
+	}
 });
 socket.on("chat", function(data) {
 	chatArea.value = data;
@@ -1250,9 +1264,6 @@ socket.on("chat", function(data) {
 socket.on("mulligan", function(data) {
 	if (data === true){
 		progressMulligan(game);
-		if (game.phase == PlayPhase){
-			cancel.setText("Cancel");
-		}
 	}else{
 		game.player2.drawhand(game.player2.hand.length-1);
 	}
@@ -1263,6 +1274,20 @@ function maybeSendChat(e) {
 	if (chatinput.value){
 		socket.emit("chat", chatinput.value);
 		chatinput.value = "";
+	}
+}
+function maybeLogin(e) {
+	e.cancelBubble = true;
+	if (e.keyCode != 13)return;
+	if (username.value){
+		loginClick();
+	}
+}
+function maybeChallenge(e) {
+	e.cancelBubble = true;
+	if (e.keyCode != 13)return;
+	if (foename.value){
+		challengeClick();
 	}
 }
 function animate() {
@@ -1293,7 +1318,7 @@ document.addEventListener("click", function(e){
 		e.preventDefault();
 	}
 });
-function loginClick(e){
+function loginClick(){
 	var xhr = new XMLHttpRequest();
 	xhr.open("POST", "auth?"+username.value, true);
 	xhr.onreadystatechange = function() {
@@ -1310,8 +1335,17 @@ function loginClick(e){
 	}
 	xhr.send();
 }
-function challengeClick(e){
-	if (user && user.deck){
-		socket.emit("foewant", {u: user.auth, f: foename.value, deck: user.deck});
+function challengeClick(){
+	if (Cards){
+		if (user && user.deck){
+			socket.emit("foewant", {u: user.auth, f: foename.value, deck: user.deck});
+		}else{
+			var deck = getDeck();
+			if (deck.length < 30){
+				beditor.click();
+				return;
+			}
+			socket.emit("pvpwant", { deck: deck, room: foename.value });
+		}
 	}
 }
