@@ -217,6 +217,17 @@ loadcards(function(cards, targeting) {
 		ok(!player1.shield, "This town is all in hell");
 		ok(player2.shield && player2.shield.status.charges == 3, "stole 3");
 	});
+	test("Steam", function() {
+		initTest();
+		var steam = new Creature(Cards.SteamMachine, game.player1);
+		steam.usedactive = false;
+		steam.place();
+		equal(steam.trueatk(), 0, "0");
+		steam.useactive();
+		equal(steam.trueatk(), 5, "5");
+		steam.attack();
+		equal(steam.trueatk(), 4, "4");
+	});
 	test("Voodoo", function() {
 		initTest();
 		var voodoo = new Creature(Cards.VoodooDoll, player1);

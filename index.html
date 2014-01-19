@@ -23,7 +23,7 @@
 			position: absolute;
 		}
 		#leftpane {
-			background: #336699;
+			background-color: #336699;
 			width: 900px;
 			height: 600px;
 		}
@@ -36,17 +36,16 @@
 <body>
 	<div id="leftpane"/>
 	<div id="rightpane">
-		<a href="artcredit.htm">Art credits</a>&emsp;&emsp;<a href="http://github.com/serprex/openEtG">Git repo</a><br/><br/>
-		<input id="username" type="text" placeholder="Username" />
-		<input id="login" type="submit" value="Login" onclick="loginClick(event)" />
-		<br/>User accounts still in development. <b>Ignore this</b><br/>
-		<input id="foename" type="text" placeholder="Challenge" />
-		<input id="challenge" type="submit" value="Search" onclick="challengeClick(event)" />
+		<a href="artcredit.htm">Art credits</a>&emsp;&emsp;<a href="http://github.com/serprex/openEtG">Git repo</a>&emsp;&emsp;<a href="http://elementscommunity.org/forum/general-discussion/openetg">Forum topic</a><br/><br/>
+		<input id="username" type="text" placeholder="Username" onkeydown="maybeLogin(event)" />
+		<input id="login" type="submit" value="Login" onclick="loginClick()" /><br/>
+		<input id="foename" type="text" placeholder="Challenge" onkeydown="maybeChallenge(event)" />
+		<input id="challenge" type="submit" value="Search" onclick="challengeClick()" />
+		<br/><br/><br/><br/>
+		<input id="aideck" type="text" placeholder="AI Deck" style="width:100%" />
 	</div>
 	<div id="bottompane">
-		<input id="deckimport" type="text" placeholder="Deck" />
-		<input id="roomname" type="text" placeholder="Room" />
-		<input id="aideck" type="text" placeholder="AI Deck" />
+		<input id="deckimport" type="text" placeholder="Deck" style="width:100%" />
 		<br/><input id="chatArea" type="text" style="width:100%;" readonly />
 		<br/><input id="chatinput" type="text" placeholder="Chat" style="width:100%" onkeydown="maybeSendChat(event)" />
 	</div>

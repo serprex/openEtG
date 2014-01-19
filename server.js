@@ -10,21 +10,24 @@ var Cards = servcards.Cards;
 var CardCodes = servcards.CardCodes;
 */
 
+function loginRespond(res, servuser){
+	var user = etgutil.useruser(servuser), day = Math.floor(Date.now()/86400000);
+	if (!servuser.oracle || servuser.oracle < day){
+		servuser.oracle = day;
+		user.oracle = true;
+	}
+	res.end(JSON.stringify(user));
+}
 function loginAuth(req, res, next){
 	if (req.url.indexOf("/auth?") == 0){
 		res.writeHead("200");
 		var uname = req.url.substring(6);
 		if (uname in users){
-			res.end(JSON.stringify(etgutil.useruser(users[uname])));
+			loginRespond(res, users[uname]);
 		}else{
 			db.hgetall("U:"+uname, function (err, obj){
-				if (!obj){
-					users[uname] = {auth: uname};
-					res.end(JSON.stringify(users[uname]));
-				}else{
-					users[uname] = obj;
-					res.end(JSON.stringify(etgutil.useruser(obj)));
-				}
+				users[uname] = obj || {auth: uname};
+				loginRespond(res, users[uname]);
 			});
 		}
 	}else next();
@@ -60,30 +63,29 @@ function userEvent(socket, event, func){
 			db.hgetall("U:"+u, function(err, obj){
 				if (obj){
 					users[u] = obj;
-					func(data, obj);
+					func.call(socket, data, obj);
 				}
 			});
 		}else{
-			func(data, users[u]);
+			func.call(socket, data, users[u]);
 		}
 	});
 }
 
 var starter = [
-	"0q4sa024sc014t3014sb014tc064vj014vh014vs0252j0155u0155n0158p0158q015c1015c9015f3015f8015i6015ii015la015oo015oj015ri015rl025vb0101623016278po",
-	"084sa014t3014tc0a4vc0250u034vi034vj014vq014vh044vk014vm014vt034ve014vo014vf0152n0155u0155q0158p045ca025bu015c7035c6015cc015i5015os015rh015v1018pn",
-	"0254202620084sa014t3014tc014vd0a52g0352i0352m0352o0252j0352t0152h0155r0158t015c8015f4015i5015lc025oo025rp025rr025rk015s1025rv025un015uq018ps",
-	"",
-	"0156201590015910159201593015940159502596015980159901626084sa014t3014tc0155t0a58o025aa0258t0158u0258p0258q0158r015c2015f1025fb025fa025ij025i8015lc015le015om035rq015uv018po",
-	"",
-	"",
-	"",
-	"",
-	"",
-	"",
-	"",
-	"",
-	"",
+	"01530015660159001599016220d4sa034sb024sd014vm014vu0152p0155u015c1015cc015fa015il015in015lf015ln015os015oj015ri015rn015uo015uv018pi",
+	"0253101532034sa014t3094vc024vi034vk014vp024vs014vt014vd034ve014vf0452g0552m0152r018pk",
+	"0153002532015630256501566034sa014t30952g0152i0252m0152j0252k0152n0252p0352t0152r0152h0455k0255t018pl",
+	"0156203564035650159502599034sa014t30a55k0255q0355t0155r0255l0155o0358o0258t0158p0158q018pm",
+	"0259101593015940259603599034sa014t50858o0358u0258p0258q015a00158r055bs025c2015c7025c9018pn",
+	"034sa034td0b5bs035c0025c2015c8025c7035ce015c6015c9015c3015bt035f9025fh025fb015fa018po",
+	"034sa034t4085f0035f1035f3025f4025ff015fh015f6015f5015fc015f2014sp055i4015ia025ii015i9015ig018pp",
+	"044sa014td0a5i4025i5025i7015i8015ia015if015iq025ip035ie015id045oc015og025on025os015ot015or018pr",
+	"034sa014t3035l8015lc035lb015lf015ln0a5oc025od025oh035ok035oe025oo025ot015or015op015of018pq",
+	"034sa014t40a5l8015lj025lo025lp015ld045lf025lm015ll015ln015la045rg035rh015ri015s1025ru018ps",
+	"034sa014t3095rg035ri025rr025rk035rq015rl025ru015s0015rn015rm045uk035v1015v3025vb015uu018pi",
+	"016210162402627034sa014t3085uk035um015un025us015v1035v3025uq025ut015up015v2015uv015va015ul0461o0161q018pu",
+	"02620016240262601627034sa014t3054vc024ve024vo014vn0a61o0361q0361s0261t0161r0161v018pj"
 ];
 
 io.sockets.on("connection", function(socket) {
@@ -94,11 +96,16 @@ io.sockets.on("connection", function(socket) {
 		var u=data.u;
 		var startdeck = starter[data.e];
 		users[u].deck = users[u].pool = !startdeck || !startdeck.length?starter[data.e]:startdeck;
-		socket.emit("userdump", etgutil.useruser(users[u]));
+		this.emit("userdump", etgutil.useruser(users[u]));
 	});
 	userEvent(socket, "logout", function(data, user) {
 		var u=data.u;
 		db.hmset("U:"+u, user);
+		delete users[u];
+	});
+	userEvent(socket, "delete", function(data, user) {
+		var u=data.u;
+		db.del("U:"+u);
 		delete users[u];
 	});
 	userEvent(socket, "addcard", function(data, user) {

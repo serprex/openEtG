@@ -1,3 +1,6 @@
+function encodeCount(count){
+	return (count<32?"0":"") + count.toString(32);
+}
 exports.encodedeck = function(deck){
 	if (!deck)return deck;
 	var count={}, out="";
@@ -11,10 +14,7 @@ exports.encodedeck = function(deck){
 		}
 	}
 	for(var key in count){
-		if (count[key] < 32){
-			out += "0";
-		}
-		out += count[key].toString(32) + key;
+		out += encodeCount(count[key]) + key;
 	}
 	return out;
 }
@@ -33,8 +33,8 @@ exports.addcard = function(deck, card){
 	for(var i=0; i<deck.length; i+=5){
 		var code = deck.substr(i+2, 3);
 		if (code == card){
-			var count = parseInt(deck.substr(i, 2), 32);
-			return deck.substring(0, i) + (count+1).toString(32) + deck.substring(i+2);
+			var count = parseInt(deck.substr(i, 2), 32)+1;
+			return deck.substring(0, i) + encodeCount(count) + deck.substring(i+2);
 		}
 	}
 	return deck + "01" + card;

@@ -164,8 +164,7 @@ function combineactive(a1, a2){
 		return a2;
 	}
 	var combine = function(){
-		a1.apply(null, arguments);
-		a2.apply(null, arguments);
+		return (a1.apply(null, arguments) || 0) + (a2.apply(null, arguments) || 0);
 	}
 	combine.activename = a1.activename + " " + a2.activename;
 	return combine;
@@ -344,7 +343,7 @@ Player.prototype.endturn = function(discard) {
 	for (var i=0; i<23; i++){
 		if ((cr = crs[i])){
 			if (patienceFlag){
-				var floodbuff = floodingFlag && i>5 && c.card.element==Water;
+				var floodbuff = floodingFlag && i>4 && c.card.element==Water;
 				cr.atk += floodbuff?5:cr.status.burrowed?4:2;
 				cr.buffhp(floodbuff?2:1);
 				cr.delay(1);
@@ -373,7 +372,8 @@ Player.prototype.endturn = function(discard) {
 	}
 	this.nova = 0;
 	this.foe.drawcard();
-	this.foe.flatline = this.foe.precognition = this.foe.sanctuary = this.foe.silence = false;
+	this.flatline = this.silence = false;
+	this.foe.precognition = this.foe.sanctuary = false;
 	this.game.turn = this.foe;
 }
 Player.prototype.procactive = function(name, func) {
@@ -603,6 +603,9 @@ CardInstance.prototype.remove = function(index) {
 }
 Thing.prototype.deatheffect = function(index) {
 	var self = this;
+	if (this.active.death){
+		this.active.death(this, this, index)
+	}
 	this.owner.procactive("death", function(c, p) { c.active.death(c, self, index) });
 }
 Creature.prototype.die = function() {
@@ -611,10 +614,9 @@ Creature.prototype.die = function() {
 		if (this.status.aflatoxin){
 			(this.owner.creatures[index] = new Creature(Cards.MalignantCell, this.owner)).usedactive = false;
 		}
-		if (this.active.death){
-			this.active.death(this, this, index);
+		if (!(this.active.predeath && this.active.predeath(this))){
+			this.deatheffect(index);
 		}
-		this.deatheffect(index);
 		new DeathEffect(creaturePos(this.owner == this.owner.game.player1?0:1, index));
 	}
 }
@@ -735,6 +737,7 @@ Weapon.prototype.attack = Creature.prototype.attack = function(stasis, freedomCh
 	if (this.active.auto && !this.status.frozen && (!this.status.adrenaline || this.status.adrenaline<3)){
 		this.active.auto(this);
 	}
+	this.usedactive = false;
 	var trueatk;
 	if (!(stasis || this.status.frozen || this.status.delayed) && (trueatk = this.trueatk()) != 0){
 		var momentum = this.status.momentum, truedr = 0;
@@ -782,10 +785,9 @@ Weapon.prototype.attack = Creature.prototype.attack = function(stasis, freedomCh
 		this.status.delayed--;
 	}
 	if (this.status.steamatk){
-		this.steamatk--;
+		this.status.steamatk--;
 	}
 	delete this.status.dive;
-	this.usedactive = false;
 	if (isCreature && ~this.getIndex() && this.truehp() <= 0){
 		this.die();
 	}else if (this.status.adrenaline && (!isCreature || ~this.getIndex())){

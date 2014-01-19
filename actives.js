@@ -88,12 +88,12 @@ boneyard:function(c,t){
 bow:function(c,t){
 	return c.owner.mark == Air?1:0;
 },
-bounce: function (c, t) {
-    if (c.owner.hand.length != 8) {
-        c.owner.hand.push(c.card);
-        c.remove();
-    }
-    
+bounce:function(c,t){
+	if (c.owner.hand.length < 8) {
+		new CardInstance(c.card, c.owner).place();
+		c.remove();
+		return true;
+	}
 },
 bravery:function(c,t){
 	if (!c.owner.foe.sanctuary){
@@ -234,8 +234,8 @@ die:function(c,t){
 	c.die();
 },
 disarm:function(c,t){
-	if (t.weapon && t.hand.length < 8){
-		t.hand.push(t.weapon.card);
+	if (t instanceof Player && t.weapon && t.hand.length < 8){
+		new CardInstance(t.weapon.card, t);
 		t.weapon = undefined;
 	}
 },
@@ -285,7 +285,7 @@ dshield:function(c,t){
 },
 duality:function(c,t){
 	if (c.owner.foe.deck.length > 0 && c.owner.hand.length < 8){
-		c.owner.hand.push(c.owner.foe.deck[c.owner.foe.deck.length-1])
+		new CardInstance(c.owner.foe.deck[c.owner.foe.deck.length-1], c.owner).place();
 	}
 },
 earth:function(c,t){
@@ -793,7 +793,9 @@ parallel:function(c,t){
 },
 phoenix:function(c,t, index){
 	if (c == t && !c.owner.creatures[index]){
-		c.owner.creatures[index] = new Creature(Cards.Ash.asUpped(c.card.upped), c.owner);
+		c.transform(Cards.Ash.asUpped(c.card.upped));
+		c.owner.creatures[index] = c;
+		c.usedactive = true;
 	}
 },
 photosynthesis:function(c,t){
@@ -863,7 +865,7 @@ regrade:function(c,t){
 	t.card = t.card.asUpped(!t.card.upped);
 },
 ren:function(c,t){
-    t.addactive("death", Actives.bounce)
+    t.addactive("predeath", Actives.bounce);
 },
 rewind:function(c,t){
 	if (t.undead){
@@ -1052,7 +1054,8 @@ steal:function(c,t){
 	}
 },
 steam:function(c,t){
-	c.steamatk += 5;
+	c.defstatus("steamatk", 0);
+	c.status.steamatk += 5;
 },
 stoneform:function(c,t){
 	c.buffhp(20);
