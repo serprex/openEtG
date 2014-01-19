@@ -63,11 +63,11 @@ function userEvent(socket, event, func){
 			db.hgetall("U:"+u, function(err, obj){
 				if (obj){
 					users[u] = obj;
-					func(data, obj);
+					func.call(socket, data, obj);
 				}
 			});
 		}else{
-			func(data, users[u]);
+			func.call(socket, data, users[u]);
 		}
 	});
 }
@@ -97,7 +97,7 @@ io.sockets.on("connection", function(socket) {
 		var u=data.u;
 		var startdeck = starter[data.e];
 		users[u].deck = users[u].pool = !startdeck || !startdeck.length?starter[data.e]:startdeck;
-		socket.emit("userdump", etgutil.useruser(users[u]));
+		this.emit("userdump", etgutil.useruser(users[u]));
 	});
 	userEvent(socket, "logout", function(data, user) {
 		var u=data.u;
