@@ -10,21 +10,24 @@ var Cards = servcards.Cards;
 var CardCodes = servcards.CardCodes;
 */
 
+function loginRespond(res, servuser){
+	var user = etgutil.useruser(servuser), day = Math.floor(Date.now()/86400000);
+	if (!servuser.oracle || servuser.oracle < day){
+		servuser.oracle = day;
+		user.oracle = true;
+	}
+	res.end(JSON.stringify(user));
+}
 function loginAuth(req, res, next){
 	if (req.url.indexOf("/auth?") == 0){
 		res.writeHead("200");
 		var uname = req.url.substring(6);
 		if (uname in users){
-			res.end(JSON.stringify(etgutil.useruser(users[uname])));
+			loginRespond(res, users[uname]);
 		}else{
 			db.hgetall("U:"+uname, function (err, obj){
-				if (!obj){
-					users[uname] = {auth: uname};
-					res.end(JSON.stringify(users[uname]));
-				}else{
-					users[uname] = obj;
-					res.end(JSON.stringify(etgutil.useruser(obj)));
-				}
+				users[uname] = obj || {auth: uname};
+				loginRespond(res, users[uname]);
 			});
 		}
 	}else next();

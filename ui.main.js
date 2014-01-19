@@ -342,13 +342,27 @@ function startMenu(){
 		socket.emit("logout", {u:user.auth});
 		user = undefined;
 	}
-	animCb = function(){
-		blogout.visible = !!user;
-	}
 	menuui = new PIXI.Stage(0x336699, true);
 	menuui.addChild(brandai);
 	menuui.addChild(beditor);
 	menuui.addChild(blogout);
+	if (user && user.oracle){
+		// todo user.oracle should be a card, not true. The card is the card that the server itself added. This'll only show what was added
+		delete user.oracle;
+		var card = new Player({rng: new MersenneTwister(Math.random()*40000000)}).randomcard(false).code;
+		socket.emit("addcard", {u:user.auth, c:card});
+		user.pool.push(card);
+		var oracle = new PIXI.Sprite(nopic);
+		oracle.position.x = 600;
+		oracle.position.y = 250;
+		menuui.addChild(oracle);
+	}
+	animCb = function(){
+		blogout.visible = !!user;
+		if (oracle){
+			oracle.setTexture(getArt(card));
+		}
+	}
 	mainStage = menuui;
 	refreshRenderer();
 }
