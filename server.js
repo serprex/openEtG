@@ -103,6 +103,11 @@ io.sockets.on("connection", function(socket) {
 		db.hmset("U:"+u, user);
 		delete users[u];
 	});
+	userEvent(socket, "delete", function(data, user) {
+		var u=data.u;
+		db.del("U:"+u);
+		delete users[u];
+	});
 	userEvent(socket, "addcard", function(data, user) {
 		// Anything using this API call should eventually be serverside
 		user.pool = etgutil.addcard(user.pool, data.c);

@@ -234,8 +234,8 @@ die:function(c,t){
 	c.die();
 },
 disarm:function(c,t){
-	if (t.weapon && t.hand.length < 8){
-		t.hand.push(t.weapon.card);
+	if (t instanceof Player && t.weapon && t.hand.length < 8){
+		new CardInstance(t.weapon.card, t);
 		t.weapon = undefined;
 	}
 },
@@ -285,7 +285,7 @@ dshield:function(c,t){
 },
 duality:function(c,t){
 	if (c.owner.foe.deck.length > 0 && c.owner.hand.length < 8){
-		c.owner.hand.push(c.owner.foe.deck[c.owner.foe.deck.length-1])
+		new CardInstance(c.owner.foe.deck[c.owner.foe.deck.length-1], c.owner).place();
 	}
 },
 earth:function(c,t){

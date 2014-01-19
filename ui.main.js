@@ -285,15 +285,19 @@ function startMenu(){
 	var brandai = new PIXI.Text("Dumb AI", {font: "16px Arial bold"});
 	var beditor = new PIXI.Text("Editor", {font: "16px Arial bold"});
 	var blogout = new PIXI.Text("Logout", {font: "16px Arial bold"});
+	var bremove = new PIXI.Text("Delete Account", {font: "16px Arial bold"});
 	brandai.position.x = 200;
 	brandai.position.y = 250;
 	beditor.position.x = 200;
 	beditor.position.y = 300;
 	blogout.position.x = 200;
 	blogout.position.y = 500;
+	bremove.position.x = 400;
+	bremove.position.y = 500;
 	brandai.interactive = true;
 	beditor.interactive = true;
 	blogout.interactive = true;
+	bremove.interactive = true;
 	brandai.click = function() {
 		if (Cards){
 			var urdeck = getDeck();
@@ -354,10 +358,19 @@ function startMenu(){
 		socket.emit("logout", {u:user.auth});
 		user = undefined;
 	}
+	bremove.click = function(){
+		if (foename.value == user.auth){
+			socket.emit("delete", {u:user.auth});
+			user = undefined;
+		}else{
+			chatArea.value = "Input " + user.auth + " into Challenge to delete your account";
+		}
+	}
 	menuui = new PIXI.Stage(0x336699, true);
 	menuui.addChild(brandai);
 	menuui.addChild(beditor);
 	menuui.addChild(blogout);
+	menuui.addChild(bremove);
 	if (user && user.oracle){
 		// todo user.oracle should be a card, not true. The card is the card that the server itself added. This'll only show what was added
 		delete user.oracle;
@@ -370,7 +383,7 @@ function startMenu(){
 		menuui.addChild(oracle);
 	}
 	animCb = function(){
-		blogout.visible = !!user;
+		bremove.visible = blogout.visible = !!user;
 		if (oracle){
 			oracle.setTexture(getArt(card));
 		}
