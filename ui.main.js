@@ -290,7 +290,7 @@ function startMenu(){
 	beditor.position.x = 200;
 	beditor.position.y = 300;
 	blogout.position.x = 200;
-	blogout.position.y = 450;
+	blogout.position.y = 500;
 	brandai.interactive = true;
 	beditor.interactive = true;
 	blogout.interactive = true;
@@ -619,7 +619,7 @@ function startElementSelect(){
 		for(var i=0; i<13; i++){
 			elesel[i].setTexture(getIcon(i));
 		}
-	};
+	}
 	mainStage = stage;
 	refreshRenderer();
 }
@@ -714,9 +714,13 @@ function startMatch(){
 			cardart.visible = cardartvisible;
 		}else if(game.winner == game.player1){
 			if (!cardwon){
-				cardwon = foeDeck[Math.floor(Math.random()*foeDeck.length)].code;
-				socket.emit("addcard", {u:user.auth, c:cardwon})
-				user.pool.push(cardwon);
+				var cardwon = foeDeck[Math.floor(Math.random()*foeDeck.length)];
+				if (CardCodes[code].passives.ultrarare){
+					cardwon = randomcard(cardwon.upped, function(x){ return x.type == PillarEnum && x.element == cardwon.element && !x.passives.ultrarare; });
+				}
+				cardwoncode = cardwon.code;
+				socket.emit("addcard", {u:user.auth, c:cardwon.code})
+				user.pool.push(cardwon.code);
 			}
 			cardart.setTexture(getArt(cardwon));
 			cardart.visible = true;
@@ -1254,7 +1258,7 @@ socket.on("active", function(bits) {
 	c.useactive(t);
 });
 socket.on("foeleft", function(data) {
-	if (!game.player2.ai){
+	if (game && !game.player2.ai){
 		setWinner(game, game.player1);
 	}
 });
