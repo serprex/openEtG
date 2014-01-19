@@ -372,7 +372,8 @@ Player.prototype.endturn = function(discard) {
 	}
 	this.nova = 0;
 	this.foe.drawcard();
-	this.foe.flatline = this.foe.precognition = this.foe.sanctuary = this.foe.silence = false;
+	this.flatline = this.silence = false;
+	this.foe.precognition = this.foe.sanctuary = false;
 	this.game.turn = this.foe;
 }
 Player.prototype.procactive = function(name, func) {
