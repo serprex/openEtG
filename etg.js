@@ -343,7 +343,7 @@ Player.prototype.endturn = function(discard) {
 	for (var i=0; i<23; i++){
 		if ((cr = crs[i])){
 			if (patienceFlag){
-				var floodbuff = floodingFlag && i>5 && c.card.element==Water;
+				var floodbuff = floodingFlag && i>4 && c.card.element==Water;
 				cr.atk += floodbuff?5:cr.status.burrowed?4:2;
 				cr.buffhp(floodbuff?2:1);
 				cr.delay(1);
@@ -736,6 +736,7 @@ Weapon.prototype.attack = Creature.prototype.attack = function(stasis, freedomCh
 	if (this.active.auto && !this.status.frozen && (!this.status.adrenaline || this.status.adrenaline<3)){
 		this.active.auto(this);
 	}
+	this.usedactive = false;
 	var trueatk;
 	if (!(stasis || this.status.frozen || this.status.delayed) && (trueatk = this.trueatk()) != 0){
 		var momentum = this.status.momentum, truedr = 0;
@@ -783,10 +784,9 @@ Weapon.prototype.attack = Creature.prototype.attack = function(stasis, freedomCh
 		this.status.delayed--;
 	}
 	if (this.status.steamatk){
-		this.steamatk--;
+		this.status.steamatk--;
 	}
 	delete this.status.dive;
-	this.usedactive = false;
 	if (isCreature && ~this.getIndex() && this.truehp() <= 0){
 		this.die();
 	}else if (this.status.adrenaline && (!isCreature || ~this.getIndex())){

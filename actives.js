@@ -795,6 +795,7 @@ phoenix:function(c,t, index){
 	if (c == t && !c.owner.creatures[index]){
 		c.transform(Cards.Ash.asUpped(c.card.upped));
 		c.owner.creatures[index] = c;
+		c.usedactive = true;
 	}
 },
 photosynthesis:function(c,t){
@@ -1053,7 +1054,7 @@ steal:function(c,t){
 	}
 },
 steam:function(c,t){
-	c.steamatk += 5;
+	c.status.steamatk += 5;
 },
 stoneform:function(c,t){
 	c.buffhp(20);

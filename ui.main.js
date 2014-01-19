@@ -298,7 +298,7 @@ function startMenu(){
 		if (Cards){
 			var urdeck = getDeck();
 			if (urdeck.length < 30){
-				beditor.click();
+				startEditor();
 				return;
 			}
 			var aideckstring = aideck.value, deck;
@@ -313,10 +313,10 @@ function startMenu(){
 					deck.push(pillar);
 				}
 				for(var i=0; i<29; i++){
-					deck.push(pl.randomcard(Math.random()<.3, function(x){return x.element == e0;}));
+					deck.push(pl.randomcard(Math.random()<.2, function(x){return x.element == e0;}));
 				}
 				for(var i=0; i<9; i++){
-					deck.push(pl.randomcard(Math.random()<.3, function(x){return x.element == e1;}));
+					deck.push(pl.randomcard(Math.random()<.2, function(x){return x.element == e1;}));
 				}
 				for(var i=0; i<deck.length; i++){
 					deck[i] = deck[i].code;
@@ -330,6 +330,18 @@ function startMenu(){
 							if ((this.hand[i].card.type != SpellEnum || (!Targeting[this.hand[i].card.active.activename])) && this.cansummon(i)){
 								player2summon(i);
 							}
+						}
+					}
+					for(var i=0; i<16; i++){
+						var pr = this.permanents[i];
+						if (pr && pr.active.cast && !Targeting[pr.active.cast.activename] && pr.canactive()){
+							pr.useactive();
+						}
+					}
+					for(var i=0; i<23; i++){
+						var cr = this.creatures[i];
+						if (cr && cr.active.cast && !Targeting[cr.active.cast.activename] && cr.canactive()){
+							cr.useactive();
 						}
 					}
 					this.endturn(this.hand.length==8?0:null);
@@ -735,7 +747,7 @@ function startMatch(){
 				socket.emit("addcard", {u:user.auth, c:cardwon.code})
 				user.pool.push(cardwon.code);
 			}
-			cardart.setTexture(getArt(cardwon));
+			cardart.setTexture(getArt(cardwon.code));
 			cardart.visible = true;
 		}else{
 			cardart.visible = false;
@@ -1336,21 +1348,23 @@ document.addEventListener("click", function(e){
 	}
 });
 function loginClick(){
-	var xhr = new XMLHttpRequest();
-	xhr.open("POST", "auth?"+username.value, true);
-	xhr.onreadystatechange = function() {
-		if (this.readyState == 4 && this.status == 200){
-			user = JSON.parse(this.responseText);
-			if (!user){
-				chatArea.value = "No user";
-			}else if (!user.deck){
-				startElementSelect();
-			}else{
-				startMenu();
+	if (!user){
+		var xhr = new XMLHttpRequest();
+		xhr.open("POST", "auth?"+username.value, true);
+		xhr.onreadystatechange = function() {
+			if (this.readyState == 4 && this.status == 200){
+				user = JSON.parse(this.responseText);
+				if (!user){
+					chatArea.value = "No user";
+				}else if (!user.deck){
+					startElementSelect();
+				}else{
+					startMenu();
+				}
 			}
 		}
+		xhr.send();
 	}
-	xhr.send();
 }
 function challengeClick(){
 	if (Cards){
@@ -1359,7 +1373,7 @@ function challengeClick(){
 		}else{
 			var deck = getDeck();
 			if (deck.length < 30){
-				beditor.click();
+				startEditor();
 				return;
 			}
 			socket.emit("pvpwant", { deck: deck, room: foename.value });
