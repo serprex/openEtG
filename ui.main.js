@@ -32,6 +32,11 @@ function reflectPos(obj){
 function centerAnchor(obj){
 	obj.anchor.x=obj.anchor.y=.5;
 }
+function setInteractive(){
+	for(var i=0; i<arguments.length; i++){
+		arguments[i].interactive = true;
+	}
+}
 function tgtToBits(x){
 	var bits;
 	if (x == undefined){
@@ -294,10 +299,7 @@ function startMenu(){
 	blogout.position.y = 500;
 	bremove.position.x = 400;
 	bremove.position.y = 500;
-	brandai.interactive = true;
-	beditor.interactive = true;
-	blogout.interactive = true;
-	bremove.interactive = true;
+	setInteractive(brandai, beditor, blogout, bremove);
 	brandai.click = function() {
 		if (Cards){
 			var urdeck = getDeck();
@@ -317,10 +319,10 @@ function startMenu(){
 					deck.push(pillar);
 				}
 				for(var i=0; i<29; i++){
-					deck.push(pl.randomcard(Math.random()<.2, function(x){return x.element == e0;}));
+					deck.push(pl.randomcard(Math.random()<.2, function(x){return x.element == e0 && x.passives.rare != 2;}));
 				}
 				for(var i=0; i<9; i++){
-					deck.push(pl.randomcard(Math.random()<.2, function(x){return x.element == e1;}));
+					deck.push(pl.randomcard(Math.random()<.2, function(x){return x.element == e1 && x.passives.rare != 2;}));
 				}
 				for(var i=0; i<deck.length; i++){
 					deck[i] = deck[i].code;
@@ -363,7 +365,7 @@ function startMenu(){
 			socket.emit("delete", {u:user.auth});
 			user = undefined;
 		}else{
-			chatArea.value = "Input " + user.auth + " into Challenge to delete your account";
+			chatArea.value = "Input '" + user.auth + "' into Challenge to delete your account";
 		}
 	}
 	menuui = new PIXI.Stage(0x336699, true);
@@ -441,10 +443,14 @@ function startEditor(){
 	}
 	if (Cards && (!user || user.deck)){
 		var usePool = !!(user && user.deck);
-		var cardminus, cardpool;
+		var cardminus, cardpool, cardartcode;
 		chatArea.value = "Build a 30-60 card deck";
 		var editorui = new PIXI.Stage(0x336699, true), editorelement = 0;
 		var bclear = new PIXI.Text("Clear", {font: "16px Arial bold"});
+		var bsave = new PIXI.Text("Done", {font: "16px Arial bold"});
+		var bimport = new PIXI.Text("Import", {font: "16px Arial bold"});
+		var bpillar = new PIXI.Text("Pillarify", {font: "16px Arial bold"});
+		var brngcard = new PIXI.Text("Cardify", {font: "16px Arial bold"});
 		bclear.position.x = 8;
 		bclear.position.y = 8;
 		bclear.click = function(){
@@ -453,9 +459,6 @@ function startEditor(){
 			}
 			editordeck.length = 0;
 		}
-		bclear.interactive = true;
-		editorui.addChild(bclear);
-		var bsave = new PIXI.Text("Done", {font: "16px Arial bold"});
 		bsave.position.x = 8;
 		bsave.position.y = 32;
 		bsave.click = function(){
@@ -466,17 +469,77 @@ function startEditor(){
 			}
 			startMenu();
 		}
-		bsave.interactive = true;
-		editorui.addChild(bsave);
-		var bimport = new PIXI.Text("Import", {font: "16px Arial bold"});
 		bimport.position.x = 8;
 		bimport.position.y = 56;
 		bimport.click = function(){
 			editordeck = deckimport.value.split(" ");
 			processDeck();
 		}
-		bimport.interactive = true;
+		bpillar.position.x = 8;
+		bpillar.position.y = 80;
+		bpillar.click = function(){
+			if (foename.value != "trans"){
+				chatArea.value = "Input 'trans' into Challenge to transmute cards to pillars";
+				return;
+			}
+			var rm = editordeck;
+			editordeck = [];
+			var pillars = filtercards(false, function(x){ return x.type == PillarEnum && !x.passives.rare; });
+			for(var i=rm.length-1; i>=0; i--){
+				var card = CardCodes[rm[i]], pill;
+				if (card.passives.rare == 2){
+					rm.splice(i, 1);
+					continue;
+				}else editor.push(CardCodes[pillars[card.element*2+(card.passives.rare?1:0)]].asUpped(card.upped).code);
+			}
+			socket.emit("transmute", {u: user.auth, rm: rm, add: editordeck});
+			user.deck = editordeck;
+			for(var i=0; i<rm.length; i++){
+				user.pool.splice(user.pool.indexOf(rm[i]), 1);
+			}
+			for(var i=0; i<editordeck.length; i++){
+				user.pool.push(editordeck[i]);
+			}
+			processDeck();
+		}
+		brngcard.position.x = 8;
+		brngcard.position.y = 104;
+		brngcard.click = function(){
+			if (foename.value != "trans"){
+				chatArea.value = "Input 'trans' into Challenge to transmute a random card per 5 cards";
+			}else if (editordeck.length<5 || (editordeck.length%5)!=0){
+				chatArea.value = "Transmutation of random cards requires an input size divisible by 5";
+			}else{
+				for(var i=0; i<editordeck.length; i++){
+					if(CardCodes[editordeck[i]].passives.rare == 2){
+						chatArea.value = "Transmutation of ultrarares is ill advised";
+						return;
+					}
+				}
+				var rm = editordeck;
+				editordeck = [];
+				for(var i=0; i<rm.length; i+=5){
+					editordeck.push(new Player({rng: new MersenneTwister(Math.random()*40000000)}).randomcard(false, function(x){ return x.element == editormark && x.type != PillarEnum && !x.passives.rare; }).code);
+				}
+				socket.emit("transmute", {u: user.auth, rm: rm, add: editordeck});
+				user.deck = editordeck;
+				for(var i=0; i<rm.length; i++){
+					user.pool.splice(user.pool.indexOf(rm[i]), 1);
+				}
+				for(var i=0; i<editordeck.length; i++){
+					user.pool.push(editordeck[i]);
+				}
+				processDeck();
+			}
+		}
+		setInteractive(bclear, bsave, bimport, bpillar, brngcard);
+		editorui.addChild(bclear);
+		editorui.addChild(bsave);
 		editorui.addChild(bimport);
+		if (usePool){
+			editorui.addChild(bpillar);
+			editorui.addChild(brngcard);
+		}
 		var editorcolumns = [];
 		var editordecksprites = [];
 		var editordeck = getDeck();
@@ -491,11 +554,10 @@ function startEditor(){
 			var sprite = new PIXI.Sprite(nopic);
 			sprite.position.x = 8;
 			sprite.position.y = 184 + i*32;
-			sprite.interactive = true;
 			var marksprite = new PIXI.Sprite(nopic);
 			marksprite.position.x = 200+i*32;
 			marksprite.position.y = 210;
-			marksprite.interactive = true;
+			setInteractive(sprite, marksprite);
 			(function(_i){
 				sprite.click = function() { editorelement = _i; }
 				marksprite.click = function() { editormark = _i; }
@@ -516,7 +578,7 @@ function startEditor(){
 					editordeck.splice(_i, 1);
 				}
 				sprite.mouseover = function() {
-					editorCardArt.setTexture(getArt(editordeck[_i]));
+					cardartcode = editordeck[_i];
 				}
 			})(i);
 			sprite.interactive = true;
@@ -545,7 +607,7 @@ function startEditor(){
 								}
 								if (CardCodes[code].type != PillarEnum){
 									var card = CardCodes[code];
-									if ((cardminus[card.asUpped(false).code]||0)+(cardminus[card.asUpped(true).code]||0) == 6){
+									if ((cardminus[card.asUpped(false).code]||0)+(cardminus[card.asUpped(true).code]||0) >= 6){
 										return;
 									}
 								}
@@ -561,7 +623,7 @@ function startEditor(){
 						}
 					}
 					sprite.mouseover = function() {
-						editorCardArt.setTexture(getArt(editorcolumns[_i][1][editorelement][_j]));
+						cardartcode = editorcolumns[_i][1][editorelement][_j];
 					}
 				})(i, j);
 				sprite.interactive = true;
@@ -574,12 +636,15 @@ function startEditor(){
 					editorCardCmp));
 			}
 		}
-		var editorCardArt = new PIXI.Sprite(nopic);
-		editorCardArt.position.x = 734;
-		editorCardArt.position.y = 8;
-		editorui.addChild(editorCardArt);
+		var cardArt = new PIXI.Sprite(nopic);
+		cardArt.position.x = 734;
+		cardArt.position.y = 8;
+		editorui.addChild(cardArt);
 		animCb = function(){
 			editormarksprite.setTexture(getIcon(editormark));
+			if (cardartcode){
+				cardArt.setTexture(getArt(cardartcode));
+			}
 			for (var i=0; i<13; i++){
 				for(var j=0; j<2; j++){
 					editoreleicons[i][j].setTexture(getIcon(i));
@@ -754,8 +819,8 @@ function startMatch(){
 		}else if(game.winner == game.player1){
 			if (!cardwon){
 				cardwon = foeDeck[Math.floor(Math.random()*foeDeck.length)];
-				if (cardwon.passives.ultrarare){
-					cardwon = randomcard(cardwon.upped, function(x){ return x.type == PillarEnum && x.element == cardwon.element && !x.passives.ultrarare; });
+				if (cardwon.passives.rare == 2){
+					cardwon = new Player({rng: new MersenneTwister(Math.random()*40000000)}).randomcard(cardwon.upped, function(x){ return x.type == PillarEnum && x.element == cardwon.element && x.passives.rare != 2; });
 				}
 				socket.emit("addcard", {u:user.auth, c:cardwon.code})
 				user.pool.push(cardwon.code);
