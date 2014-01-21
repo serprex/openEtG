@@ -30,7 +30,8 @@ function Card(type, info){
 	if (info.Passive){
 		var passives = info.Passive.split("+");
 		for(var i=0; i<passives.length; i++){
-			this.passives[passives[i]] = true;
+			var passive = passives[i].split("=");
+			this.passives[passive[0]] = passive.length==1 || parseInt(passive[1]);
 		}
 	}
 	if (info.Status){

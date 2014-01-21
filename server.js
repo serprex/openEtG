@@ -38,7 +38,14 @@ var duels = {};
 var usersock = {};
 var rooms = {};
 var sockinfo = {};
-
+process.on("SIGTERM", process.exit);
+process.on("exit", function(){
+	for(var u in users){
+		var u=data.u;
+		db.hmset("U:"+u, users[u]);
+	}
+	db.quit();
+});
 function dropsock(data){
 	if (this.id in sockinfo){
 		var foe = sockinfo[this.id].foe;
@@ -77,26 +84,26 @@ var starter = [
 	"0253101532034sa014t3094vc024vi034vk014vp024vs014vt014vd034ve014vf0452g0552m0152r018pk",
 	"0153002532015630256501566034sa014t30952g0152i0252m0152j0252k0152n0252p0352t0152r0152h0455k0255t018pl",
 	"0156203564035650159502599034sa014t30a55k0255q0355t0155r0255l0155o0358o0258t0158p0158q018pm",
-	"0259101593015940259603599034sa014t50858o0358u0258p0258q015a00158r055bs025c2015c7025c9018pn",
+	"0259101593015940259603599034sa014t50858o0358u0258p0258q0159a0158r055bs025c2015c7025c9018pn",
 	"034sa034td0b5bs035c0025c2015c8025c7035ce015c6015c9015c3015bt035f9025fh025fb015fa018po",
-	"034sa034t4085f0035f1035f3025f4025ff015fh015f6015f5015fc015f2014sp055i4015ia025ii015i9015ig018pp",
+	"034sa034t4085f0035f1035f3025f4025ff015fh015f6015f5015fc015f2015f9055i4015ia025ii015i9015ig018pp",
 	"044sa014td0a5i4025i5025i7015i8015ia015if015iq025ip035ie015id045oc015og025on025os015ot015or018pr",
-	"034sa014t3035l8015lc035lb015lf015ln0a5oc025od025oh035ok035oe025oo025ot015or015op015of018pq",
 	"034sa014t40a5l8015lj025lo025lp015ld045lf025lm015ll015ln015la045rg035rh015ri015s1025ru018ps",
+	"034sa014t3035l8015lc035lb015lf015ln0a5oc025od025oh035ok035oe025oo025ot015or015op015of018pq",
 	"034sa014t3095rg035ri025rr025rk035rq015rl025ru015s0015rn015rm045uk035v1015v3025vb015uu018pi",
 	"016210162402627034sa014t3085uk035um015un025us015v1035v3025uq025ut015up015v2015uv015va015ul0461o0161q018pu",
-	"02620016240262601627034sa014t3054vc024ve024vo014vn0a61o0361q0361s0261t0161r0161v018pj"
+	"03620016240261p01627034sa014t3054vc024ve024vo014vk0a61o0361q0361s0161t0161r0161v018pj"
 ];
 
 io.sockets.on("connection", function(socket) {
 	sockinfo[socket.id] = {};
 	socket.on("disconnect", dropsock);
 	socket.on("reconnect_failed", dropsock);
-	userEvent(socket, "inituser", function(data) {
+	userEvent(socket, "inituser", function(data, user) {
 		var u=data.u;
 		var startdeck = starter[data.e];
-		users[u].deck = users[u].pool = !startdeck || !startdeck.length?starter[data.e]:startdeck;
-		this.emit("userdump", etgutil.useruser(users[u]));
+		user.deck = user.pool = starter[data.e] || starter[0];
+		this.emit("userdump", etgutil.useruser(user));
 	});
 	userEvent(socket, "logout", function(data, user) {
 		var u=data.u;
@@ -114,6 +121,16 @@ io.sockets.on("connection", function(socket) {
 	});
 	userEvent(socket, "setdeck", function(data, user){
 		user.deck = etgutil.encodedeck(data.d);
+	});
+	userEvent(socket, "transmute", function(data, user){
+		var rm = data.rm, add = data.add;
+		for(var i=0; i<rm.length; i++){
+			user.pool = etgutil.addcard(user.pool, rm[i], -1);
+		}
+		for(var i=0; i<add.length; i++){
+			user.pool = etgutil.addcard(user.pool, add[i]);
+		}
+		user.deck = etgutil.encodedeck(add);
 	});
 	userEvent(socket, "foewant", function(data) {
 		var u=data.u, f=data.f;

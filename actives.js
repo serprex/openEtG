@@ -871,9 +871,9 @@ ren:function(c,t){
     t.addactive("predeath", Actives.bounce);
 },
 rewind:function(c,t){
-	if (t.undead){
+	if (t.card.isOf(Cards.Skeleton)){
 		Actives.hatch(t);
-	}else if (t.mummy){
+	}else if (t.card.isOf(Cards.Mummy)){
 		t.transform(Cards.Pharaoh.asUpped(t.card.upped));
 	}else{
 		t.remove();

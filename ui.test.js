@@ -1,5 +1,5 @@
 "use strict"
-var Cards, Targeting, targetingMode, targetingModeCb, game, player1, player2, players;
+var Cards, CardCodes, Targeting, targetingMode, targetingModeCb, game, player1, player2, players;
 var gameui = {addChild:function(){}};
 function creaturePos(){
 	return {x:0, y:0};
@@ -16,9 +16,21 @@ function initHand(pl){
 		pl.hand[i-1] = new CardInstance(arguments[i], pl);
 	}
 }
-loadcards(function(cards, targeting) {
+loadcards(function(cards, cardcodes, targeting) {
 	Cards = cards;
+	CardCodes = cardcodes;
 	Targeting = targeting;
+	test("Upped Alignment", function() {
+		for(var key in CardCodes){
+			var card = CardCodes[key];
+			var un = card.asUpped(false), up=card.asUpped(true);
+			if (!un || !up){
+				console.log(key);
+				ok(false);
+			}
+		}
+		ok(true);
+	});
 	test("Adrenaline", function() {
 		initTest();
 		(player1.creatures[0] = new Creature(Cards.Devourer, player1)).status.adrenaline = 1;

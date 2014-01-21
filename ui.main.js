@@ -32,6 +32,14 @@ function reflectPos(obj){
 function centerAnchor(obj){
 	obj.anchor.x=obj.anchor.y=.5;
 }
+function hitTest(obj, pos){
+	return pos.x > obj.position.x && pos.y > obj.position.y && pos.x < obj.position.x+obj.width && pos.y < obj.position.y+obj.height;
+}
+function setInteractive(){
+	for(var i=0; i<arguments.length; i++){
+		arguments[i].interactive = true;
+	}
+}
 function tgtToBits(x){
 	var bits;
 	if (x == undefined){
@@ -116,16 +124,15 @@ function makeArt(card, art){
 		artspr.position.y = 20;
 		template.addChild(artspr);
 	}
-	var nametag = new PIXI.Text(card.name, {font: "12px Arial bold", fill:card.upped?"black":"white"});
+	var nametag = new PIXI.Text(card.name, {font: "12px Dosis", fill:card.upped?"black":"white"});
 	nametag.position.x = 2;
 	nametag.position.y = 4;
 	template.addChild(nametag);
 	if (card.cost){
-		var text = new PIXI.Text(card.cost, {font: "12px Arial bold", fill:card.upped?"black":"white"});
+		var text = new PIXI.Text(card.cost, {font: "12px Dosis", fill:card.upped?"black":"white"});
 		text.anchor.x = 1;
 		text.position.x = rend.width-20;
-		text.position.y = 4;
-		template.addChild(text);
+		text.position.y = 4;		template.addChild(text);
 		if (card.costele){
 			var eleicon = new PIXI.Sprite(getIcon(card.costele));
 			eleicon.position.x = rend.width-1;
@@ -147,7 +154,7 @@ function makeArt(card, art){
 		}
 		wordgfx.position.x = x;
 		wordgfx.position.y = y;
-		x += wordgfx.width + 4;
+		x += wordgfx.width + 3;
 		template.addChild(wordgfx);
 	}
 	rend.render(template);
@@ -179,7 +186,7 @@ function getCardImage(code){
 		if (card){
 			var clipwidth = 2;
 			if (card.cost){
-				var text = new PIXI.Text(card.cost, {font: "11px Arial bold", fill:card.upped?"black":"white"});
+				var text = new PIXI.Text(card.cost, {font: "11px Dosis", fill:card.upped?"black":"white"});
 				text.anchor.x = 1;
 				text.position.x = rend.width-20;
 				text.position.y = 5;
@@ -197,7 +204,7 @@ function getCardImage(code){
 				}
 			}
 			var text, loopi=0;
-			do text = new PIXI.Text(card.name.substring(0, card.name.length-(loopi++)), {font: "11px Arial bold", fill:card.upped?"black":"white"}); while(text.width>rend.width-clipwidth);
+			do text = new PIXI.Text(card.name.substring(0, card.name.length-(loopi++)), {font: "11px Dosis", fill:card.upped?"black":"white"}); while(text.width>rend.width-clipwidth);
 			text.position.x = 2;
 			text.position.y = 5;
 			graphics.addChild(text);
@@ -217,9 +224,9 @@ function getCreatureImage(code){
 		graphics.drawRect(0, 0, 120, 30);
 		graphics.endFill();
 		if (card){
-			var text = new PIXI.Text(CardCodes[code].name, {font: "12px Arial bold", fill:card.upped?"black":"white"});
+			var text = new PIXI.Text(CardCodes[code].name, {font: "12px Dosis", fill:card.upped?"black":"white"});
 			text.position.x = 2;
-			text.position.y = 5;
+			text.position.y = 2;
 			graphics.addChild(text);
 		}
 		rend.render(graphics);
@@ -237,9 +244,9 @@ function getPermanentImage(code){
 		graphics.drawRect(0, 0, 120, 30);
 		graphics.endFill();
 		if (card){
-			var text = new PIXI.Text(CardCodes[code].name, {font: "12px Arial bold", fill:card.upped?"black":"white"});
+			var text = new PIXI.Text(CardCodes[code].name, {font: "12px Dosis", fill:card.upped?"black":"white"});
 			text.position.x = 2;
-			text.position.y = 5;
+			text.position.y = 2;
 			graphics.addChild(text);
 		}
 		rend.render(graphics);
@@ -282,10 +289,10 @@ function getDeck(){
 	return deckstring?deckstring.split(" "):[];
 }
 function startMenu(){
-	var brandai = new PIXI.Text("Dumb AI", {font: "16px Arial bold"});
-	var beditor = new PIXI.Text("Editor", {font: "16px Arial bold"});
-	var blogout = new PIXI.Text("Logout", {font: "16px Arial bold"});
-	var bremove = new PIXI.Text("Delete Account", {font: "16px Arial bold"});
+	var brandai = new PIXI.Text("Dumb AI", {font: "16px Dosis"});
+	var beditor = new PIXI.Text("Editor", {font: "16px Dosis"});
+	var blogout = new PIXI.Text("Logout", {font: "16px Dosis"});
+	var bremove = new PIXI.Text("Delete Account", {font: "16px Dosis"});
 	brandai.position.x = 200;
 	brandai.position.y = 250;
 	beditor.position.x = 200;
@@ -294,14 +301,11 @@ function startMenu(){
 	blogout.position.y = 500;
 	bremove.position.x = 400;
 	bremove.position.y = 500;
-	brandai.interactive = true;
-	beditor.interactive = true;
-	blogout.interactive = true;
-	bremove.interactive = true;
+	setInteractive(brandai, beditor, blogout, bremove);
 	brandai.click = function() {
 		if (Cards){
 			var urdeck = getDeck();
-			if (urdeck.length < 30){
+			if ((user && user.deck && user.deck.length < 31) || urdeck.length < 11){
 				startEditor();
 				return;
 			}
@@ -317,10 +321,10 @@ function startMenu(){
 					deck.push(pillar);
 				}
 				for(var i=0; i<29; i++){
-					deck.push(pl.randomcard(Math.random()<.2, function(x){return x.element == e0;}));
+					deck.push(pl.randomcard(Math.random()<.2, function(x){return x.element == e0 && x.passives.rare != 2;}));
 				}
 				for(var i=0; i<9; i++){
-					deck.push(pl.randomcard(Math.random()<.2, function(x){return x.element == e1;}));
+					deck.push(pl.randomcard(Math.random()<.2, function(x){return x.element == e1 && x.passives.rare != 2;}));
 				}
 				for(var i=0; i<deck.length; i++){
 					deck[i] = deck[i].code;
@@ -363,7 +367,7 @@ function startMenu(){
 			socket.emit("delete", {u:user.auth});
 			user = undefined;
 		}else{
-			chatArea.value = "Input " + user.auth + " into Challenge to delete your account";
+			chatArea.value = "Input '" + user.auth + "' into Challenge to delete your account";
 		}
 	}
 	menuui = new PIXI.Stage(0x336699, true);
@@ -441,10 +445,14 @@ function startEditor(){
 	}
 	if (Cards && (!user || user.deck)){
 		var usePool = !!(user && user.deck);
-		var cardminus, cardpool;
+		var cardminus, cardpool, cardartcode;
 		chatArea.value = "Build a 30-60 card deck";
 		var editorui = new PIXI.Stage(0x336699, true), editorelement = 0;
-		var bclear = new PIXI.Text("Clear", {font: "16px Arial bold"});
+		var bclear = new PIXI.Text("Clear", {font: "16px Dosis"});
+		var bsave = new PIXI.Text("Done", {font: "16px Dosis"});
+		var bimport = new PIXI.Text("Import", {font: "16px Dosis"});
+		var bpillar = new PIXI.Text("Pillarify", {font: "16px Dosis"});
+		var brngcard = new PIXI.Text("Cardify", {font: "16px Dosis"});
 		bclear.position.x = 8;
 		bclear.position.y = 8;
 		bclear.click = function(){
@@ -453,9 +461,6 @@ function startEditor(){
 			}
 			editordeck.length = 0;
 		}
-		bclear.interactive = true;
-		editorui.addChild(bclear);
-		var bsave = new PIXI.Text("Done", {font: "16px Arial bold"});
 		bsave.position.x = 8;
 		bsave.position.y = 32;
 		bsave.click = function(){
@@ -466,17 +471,77 @@ function startEditor(){
 			}
 			startMenu();
 		}
-		bsave.interactive = true;
-		editorui.addChild(bsave);
-		var bimport = new PIXI.Text("Import", {font: "16px Arial bold"});
 		bimport.position.x = 8;
 		bimport.position.y = 56;
 		bimport.click = function(){
 			editordeck = deckimport.value.split(" ");
 			processDeck();
 		}
-		bimport.interactive = true;
+		bpillar.position.x = 8;
+		bpillar.position.y = 80;
+		bpillar.click = function(){
+			if (foename.value != "trans"){
+				chatArea.value = "Input 'trans' into Challenge to transmute cards to pillars";
+				return;
+			}
+			var rm = editordeck;
+			editordeck = [];
+			var pillars = filtercards(false, function(x){ return x.type == PillarEnum && !x.passives.rare; });
+			for(var i=rm.length-1; i>=0; i--){
+				var card = CardCodes[rm[i]], pill;
+				if (card.passives.rare == 2){
+					rm.splice(i, 1);
+					continue;
+				}else editor.push(CardCodes[pillars[card.element*2+(card.passives.rare?1:0)]].asUpped(card.upped).code);
+			}
+			socket.emit("transmute", {u: user.auth, rm: rm, add: editordeck});
+			user.deck = editordeck;
+			for(var i=0; i<rm.length; i++){
+				user.pool.splice(user.pool.indexOf(rm[i]), 1);
+			}
+			for(var i=0; i<editordeck.length; i++){
+				user.pool.push(editordeck[i]);
+			}
+			processDeck();
+		}
+		brngcard.position.x = 8;
+		brngcard.position.y = 104;
+		brngcard.click = function(){
+			if (foename.value != "trans"){
+				chatArea.value = "Input 'trans' into Challenge to transmute a random card per 5 cards";
+			}else if (editordeck.length<5 || (editordeck.length%5)!=0){
+				chatArea.value = "Transmutation of random cards requires an input size divisible by 5";
+			}else{
+				for(var i=0; i<editordeck.length; i++){
+					if(CardCodes[editordeck[i]].passives.rare == 2){
+						chatArea.value = "Transmutation of ultrarares is ill advised";
+						return;
+					}
+				}
+				var rm = editordeck;
+				editordeck = [];
+				for(var i=0; i<rm.length; i+=5){
+					editordeck.push(new Player({rng: new MersenneTwister(Math.random()*40000000)}).randomcard(false, function(x){ return x.element == editormark && x.type != PillarEnum && !x.passives.rare; }).code);
+				}
+				socket.emit("transmute", {u: user.auth, rm: rm, add: editordeck});
+				user.deck = editordeck;
+				for(var i=0; i<rm.length; i++){
+					user.pool.splice(user.pool.indexOf(rm[i]), 1);
+				}
+				for(var i=0; i<editordeck.length; i++){
+					user.pool.push(editordeck[i]);
+				}
+				processDeck();
+			}
+		}
+		setInteractive(bclear, bsave, bimport, bpillar, brngcard);
+		editorui.addChild(bclear);
+		editorui.addChild(bsave);
 		editorui.addChild(bimport);
+		if (usePool){
+			editorui.addChild(bpillar);
+			editorui.addChild(brngcard);
+		}
 		var editorcolumns = [];
 		var editordecksprites = [];
 		var editordeck = getDeck();
@@ -491,11 +556,10 @@ function startEditor(){
 			var sprite = new PIXI.Sprite(nopic);
 			sprite.position.x = 8;
 			sprite.position.y = 184 + i*32;
-			sprite.interactive = true;
 			var marksprite = new PIXI.Sprite(nopic);
 			marksprite.position.x = 200+i*32;
 			marksprite.position.y = 210;
-			marksprite.interactive = true;
+			setInteractive(sprite, marksprite);
 			(function(_i){
 				sprite.click = function() { editorelement = _i; }
 				marksprite.click = function() { editormark = _i; }
@@ -516,7 +580,7 @@ function startEditor(){
 					editordeck.splice(_i, 1);
 				}
 				sprite.mouseover = function() {
-					editorCardArt.setTexture(getArt(editordeck[_i]));
+					cardartcode = editordeck[_i];
 				}
 			})(i);
 			sprite.interactive = true;
@@ -530,7 +594,7 @@ function startEditor(){
 				sprite.position.x = 100+i*130;
 				sprite.position.y = 272+j*20;
 				if (usePool){
-					var sprcount = new PIXI.Text("", {font: "12px Arial"});
+					var sprcount = new PIXI.Text("", {font: "12px Dosis"});
 					sprcount.position.x = 102;
 					sprcount.position.y = 4;
 					sprite.addChild(sprcount);
@@ -545,7 +609,7 @@ function startEditor(){
 								}
 								if (CardCodes[code].type != PillarEnum){
 									var card = CardCodes[code];
-									if ((cardminus[card.asUpped(false).code]||0)+(cardminus[card.asUpped(true).code]||0) == 6){
+									if ((cardminus[card.asUpped(false).code]||0)+(cardminus[card.asUpped(true).code]||0) >= 6){
 										return;
 									}
 								}
@@ -561,7 +625,7 @@ function startEditor(){
 						}
 					}
 					sprite.mouseover = function() {
-						editorCardArt.setTexture(getArt(editorcolumns[_i][1][editorelement][_j]));
+						cardartcode = editorcolumns[_i][1][editorelement][_j];
 					}
 				})(i, j);
 				sprite.interactive = true;
@@ -574,12 +638,15 @@ function startEditor(){
 					editorCardCmp));
 			}
 		}
-		var editorCardArt = new PIXI.Sprite(nopic);
-		editorCardArt.position.x = 734;
-		editorCardArt.position.y = 8;
-		editorui.addChild(editorCardArt);
+		var cardArt = new PIXI.Sprite(nopic);
+		cardArt.position.x = 734;
+		cardArt.position.y = 8;
+		editorui.addChild(cardArt);
 		animCb = function(){
 			editormarksprite.setTexture(getIcon(editormark));
+			if (cardartcode){
+				cardArt.setTexture(getArt(cardartcode));
+			}
 			for (var i=0; i<13; i++){
 				for(var j=0; j<2; j++){
 					editoreleicons[i][j].setTexture(getIcon(i));
@@ -632,7 +699,7 @@ function startElementSelect(){
 		"Darkness",
 		"Aether"
 	];
-	var eledesc = new PIXI.Text("", {font: "24px Arial bold"});
+	var eledesc = new PIXI.Text("", {font: "24px Dosis"});
 	eledesc.position.x = 100;
 	eledesc.position.y = 250;
 	stage.addChild(eledesc);
@@ -666,13 +733,8 @@ function startMatch(){
 	player2summon = function(handindex, tgt){
 		var card = game.player2.hand[handindex].card;
 		var sprite = new PIXI.Sprite(nopic);
-		sprite.position.x=foeplays.length*90;
-		sprite.interactive = true;
-		sprite.mouseover = function(){
-			if (game.winner != game.player1){
-				cardart.setTexture(getArt(card.code));
-			}
-		}
+		sprite.position.x=(foeplays.length%9)*100;
+		sprite.position.y=Math.floor(foeplays.length/9)*20;
 		gameui.addChild(sprite);
 		foeplays.push([card, sprite]);
 		game.player2.summon(handindex, tgt);
@@ -745,17 +807,33 @@ function startMatch(){
 		var pos=gameui.interactionManager.mouse.global;
 		maybeSetText(endturn, game.winner?(game.winner==game.player1?"Won ":"Lost ")+game.ply:"End Turn");
 		if (!game.winner || !user){
-			var cardartvisible = (pos.x>760 && pos.y>300 && pos.y<300+20*game.player1.hand.length);
-			if (!cardartvisible && foeplays.length){ // Really need a better way to manage visibility
-				var first = foeplays[0][1], last = foeplays[foeplays.length-1][1];
-				cardartvisible = pos.y<last.position.y+last.height && pos.y>last.position.y && pos.x<last.position.x+last.width && pos.x>first.position.x;
+			var cardartcode;
+			for(var i=0; i<foeplays.length; i++){
+				if(hitTest(foeplays[i][1], pos)){
+					cardartcode = foeplays[i][0].code;
+				}
 			}
-			cardart.visible = cardartvisible;
+			if (game.player1.precognition){
+				for(var i=0; i<game.player2.hand.length; i++){
+					if(hitTest(handsprite[1][i], pos)){
+						cardartcode = game.player2.hand[i].card.code;
+					}
+				}
+			}
+			for(var i=0; i<game.player1.hand.length; i++){
+				if(hitTest(handsprite[0][i], pos)){
+					cardartcode = game.player1.hand[i].card.code;
+				}
+			}
+			if(cardartcode){
+				cardart.setTexture(getArt(cardartcode));
+				cardart.visible = true;
+			}else cardart.visible = false;
 		}else if(game.winner == game.player1){
 			if (!cardwon){
 				cardwon = foeDeck[Math.floor(Math.random()*foeDeck.length)];
-				if (cardwon.passives.ultrarare){
-					cardwon = randomcard(cardwon.upped, function(x){ return x.type == PillarEnum && x.element == cardwon.element && !x.passives.ultrarare; });
+				if (cardwon.passives.rare == 2){
+					cardwon = new Player({rng: new MersenneTwister(Math.random()*40000000)}).randomcard(cardwon.upped, function(x){ return x.type == PillarEnum && x.element == cardwon.element && x.passives.rare != 2; });
 				}
 				socket.emit("addcard", {u:user.auth, c:cardwon.code})
 				user.pool.push(cardwon.code);
@@ -845,7 +923,7 @@ function startMatch(){
 					creasprite[j][i].visible = true;
 					var child = creasprite[j][i].getChildAt(0);
 					child.visible = true;
-					child.setTexture(getTextImage(cr.activetext() + cr.trueatk()+"|"+cr.truehp(), 12));
+					child.setTexture(getTextImage(cr.activetext() + cr.trueatk()+"|"+cr.truehp(), 12, cr.card.upped?"black":"white"));
 					drawStatus(cr, creasprite[j][i]);
 				}else creasprite[j][i].visible = false;
 			}
@@ -858,15 +936,15 @@ function startMatch(){
 					var child = permsprite[j][i].getChildAt(0);
 					child.visible = true;
 					if (pr instanceof Pillar){
-						child.setTexture(getTextImage("1:"+(pr.active == Actives.pend && pr.pendstate?pr.owner.mark:pr.card.element) + " x"+pr.status.charges, 12));
-					}else child.setTexture(getTextImage(pr.activetext().replace(" losecharge","") + (pr.status.charges?" "+pr.status.charges:""), 12));
+						child.setTexture(getTextImage("1:"+(pr.active == Actives.pend && pr.pendstate?pr.owner.mark:pr.card.element) + " x"+pr.status.charges, 12, pr.card.upped?"black":"white"));
+					}else child.setTexture(getTextImage(pr.activetext().replace(" losecharge","") + (pr.status.charges?" "+pr.status.charges:""), 12, pr.card.upped?"black":"white"));
 				}else permsprite[j][i].visible = false;
 			}
 			var wp = game.players[j].weapon;
 			if (wp && !(j == 1 && cloakgfx.visible)){
 				weapsprite[j].visible = true;
 				var child = weapsprite[j].getChildAt(0);
-				child.setTexture(getTextImage(wp.activetext() + " " + wp.trueatk(), 12));
+				child.setTexture(getTextImage(wp.activetext() + " " + wp.trueatk(), 12, wp.card.upped?"black":"white"));
 				weapsprite[j].alpha = wp.immaterial?.7:1;
 				child.visible = true;
 				weapsprite[j].setTexture(getPermanentImage(wp.card.code));
@@ -878,7 +956,7 @@ function startMatch(){
 				var dr=sh.truedr();
 				var child = shiesprite[j].getChildAt(0);
 				child.visible = true;
-				child.setTexture(getTextImage((sh.status.charges? "x"+sh.status.charges:"") + (sh.active.shield?" "+sh.active.shield.activename:"") + (sh.active.buff?" "+sh.active.buff.activename:"") + (sh.active.cast?casttext(sh.cast, sh.castele)+sh.active.cast.activename:"") + (dr?" "+dr:"")), 12);
+				child.setTexture(getTextImage((sh.status.charges? "x"+sh.status.charges:"") + (sh.active.shield?" "+sh.active.shield.activename:"") + (sh.active.buff?" "+sh.active.buff.activename:"") + (sh.active.cast?casttext(sh.cast, sh.castele)+sh.active.cast.activename:"") + (dr?" "+dr:"")), 12, sh.card.upped?"black":"white");
 				shiesprite[j].alpha = sh.status.immaterial?.7:1;
 				shiesprite[j].setTexture(getPermanentImage(sh.card.code));
 			}else shiesprite[j].visible = false;
@@ -901,7 +979,7 @@ function startMatch(){
 	cloakgfx.drawRect(300, 20, 490, 220);
 	cloakgfx.endFill();
 	gameui.addChild(cloakgfx);
-	var endturn = new PIXI.Text("End Turn", {font: "16px Arial bold"});
+	var endturn = new PIXI.Text("End Turn", {font: "16px Dosis"});
 	endturn.position.x = 800;
 	endturn.position.y = 540;
 	endturn.interactive = true;
@@ -947,7 +1025,7 @@ function startMatch(){
 		}
 	}
 	gameui.addChild(endturn);
-	var cancel = new PIXI.Text("Mulligan", {font: "16px Arial bold"});
+	var cancel = new PIXI.Text("Mulligan", {font: "16px Dosis"});
 	cancel.position.x = 800;
 	cancel.position.y = 500;
 	cancel.interactive = true;
@@ -964,7 +1042,7 @@ function startMatch(){
 			}
 		}
 	}
-	var turntell = new PIXI.Text("", {font: "16px Arial bold"});
+	var turntell = new PIXI.Text("", {font: "16px Dosis"});
 	turntell.position.x = 800;
 	turntell.position.y = 570;
 	gameui.addChild(turntell);
@@ -985,12 +1063,6 @@ function startMatch(){
 		handsprite[0][i].position.y=300+20*i;
 		handsprite[0][i].interactive = true;
 		(function(_i){
-			handsprite[0][i].mouseover = function(){
-				var cardinst = game.player1.hand[_i];
-				if (cardinst && game.winner != game.player1){
-					cardart.setTexture(getArt(cardinst.card.code));
-				}
-			}
 			handsprite[0][i].click = function(){
 				if (game.phase != PlayPhase)return;
 				var cardinst = game.player1.hand[_i];
@@ -1025,14 +1097,6 @@ function startMatch(){
 		handsprite[1][i].position.y = 40+20*i;
 		handsprite[1][i].interactive = true;
 		(function(_i){
-			handsprite[1][i].mouseover = function(){
-				if (game.player1.precognition){
-					var cardinst = game.player2.hand[_i];
-					if (cardinst && game.winner != game.player1){
-						cardart.setTexture(getArt(cardinst.card.code));
-					}
-				}
-			}
 			handsprite[1][i].click = function(){
 				if (game.phase != PlayPhase)return;
 				if (targetingMode){
@@ -1052,9 +1116,9 @@ function startMatch(){
 	var shiesprite = [new PIXI.Sprite(nopic), new PIXI.Sprite(nopic)];
 	var marksprite = [new PIXI.Sprite(nopic), new PIXI.Sprite(nopic)];
 	var quantatext = [new PIXI.DisplayObjectContainer(), new PIXI.DisplayObjectContainer()];
-	var hptext = [new PIXI.Text("", {font: "18px Arial bold"}), new PIXI.Text("", {font: "18px Arial bold"})];
-	var poisontext = [new PIXI.Text("", {font: "16px Arial bold"}), new PIXI.Text("", {font: "16px Arial bold"})];
-	var decktext = [new PIXI.Text("", {font: "16px Arial bold"}), new PIXI.Text("", {font: "16px Arial bold"})];
+	var hptext = [new PIXI.Text("", {font: "18px Dosis"}), new PIXI.Text("", {font: "18px Dosis"})];
+	var poisontext = [new PIXI.Text("", {font: "16px Dosis"}), new PIXI.Text("", {font: "16px Dosis"})];
+	var decktext = [new PIXI.Text("", {font: "16px Dosis"}), new PIXI.Text("", {font: "16px Dosis"})];
 	for (var j=0; j<2; j++){
 		(function(_j){
 			for (var i=0; i<23; i++){
@@ -1200,7 +1264,7 @@ function startMatch(){
 			}
 			var child;
 			for(var k=1; k<13; k++){
-				quantatext[j].addChild(child=new PIXI.Text("", {font: "16px Arial bold"}));
+				quantatext[j].addChild(child=new PIXI.Text("", {font: "16px Dosis"}));
 				child.position.x = (k&1)?32:86;
 				child.position.y = Math.floor((k-1)/2)*32+8;
 			}
@@ -1248,7 +1312,7 @@ function getTextImage(text, font, color){
 		return tximgcache[font][text][color];
 	}
 	var doc = new PIXI.DisplayObjectContainer();
-	var pieces = text.split(/(\d+:\d+)/);
+	var pieces = text.replace(/\|/g," | ").split(/(\d+:\d+)/);
 	var x=0;
 	for(var i=0; i<pieces.length; i++){
 		var piece = pieces[i];
@@ -1265,7 +1329,7 @@ function getTextImage(text, font, color){
 				doc.addChild(spr);
 			}
 		}else{
-			var txt = new PIXI.Text(piece, {font: font+"px Arial bold", fill:color});
+			var txt = new PIXI.Text(piece, {font: font+"px Dosis", fill:color});
 			txt.position.x = x;
 			x+=txt.width;
 			doc.addChild(txt);
@@ -1385,7 +1449,7 @@ function challengeClick(){
 			socket.emit("foewant", {u: user.auth, f: foename.value, deck: user.deck});
 		}else{
 			var deck = getDeck();
-			if (deck.length < 30){
+			if ((user && user.deck && user.deck.length < 31) || urdeck.length < 11){
 				startEditor();
 				return;
 			}
