@@ -703,7 +703,7 @@ Permanent.prototype.die = function(){ delete this.owner.permanents[this.getIndex
 Weapon.prototype.die = function() { delete this.owner.weapon; }
 Shield.prototype.die = function() { delete this.owner.shield; }
 Thing.prototype.isMaterialInstance = function(type) {
-	return this instanceof type && !this.status.immaterial && !this.burrowed;
+	return this instanceof type && !this.status.immaterial && !this.status.burrowed;
 }
 Thing.prototype.addactive = function(type, active){
 	this.active[type] = combineactive(this.active[type], active);

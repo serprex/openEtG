@@ -32,6 +32,9 @@ function reflectPos(obj){
 function centerAnchor(obj){
 	obj.anchor.x=obj.anchor.y=.5;
 }
+function hitTest(obj, pos){
+	return pos.x > obj.position.x && pos.y > obj.position.y && pos.x < obj.position.x+obj.width && pos.y < obj.position.y+obj.height;
+}
 function setInteractive(){
 	for(var i=0; i<arguments.length; i++){
 		arguments[i].interactive = true;
@@ -223,7 +226,7 @@ function getCreatureImage(code){
 		if (card){
 			var text = new PIXI.Text(CardCodes[code].name, {font: "12px Dosis", fill:card.upped?"black":"white"});
 			text.position.x = 2;
-			text.position.y = 5;
+			text.position.y = 2;
 			graphics.addChild(text);
 		}
 		rend.render(graphics);
@@ -243,7 +246,7 @@ function getPermanentImage(code){
 		if (card){
 			var text = new PIXI.Text(CardCodes[code].name, {font: "12px Dosis", fill:card.upped?"black":"white"});
 			text.position.x = 2;
-			text.position.y = 5;
+			text.position.y = 2;
 			graphics.addChild(text);
 		}
 		rend.render(graphics);
@@ -301,11 +304,11 @@ function startMenu(){
 	setInteractive(brandai, beditor, blogout, bremove);
 	brandai.click = function() {
 		if (Cards){
-			if (user && user.deck && user.deck.length < 31){
+			var urdeck = getDeck();
+			if ((user && user.deck && user.deck.length < 31) || urdeck.length < 11){
 				startEditor();
 				return;
 			}
-			var urdeck = getDeck();
 			var aideckstring = aideck.value, deck;
 			if (aideckstring){
 				deck = aideckstring.split(" ");
@@ -730,13 +733,8 @@ function startMatch(){
 	player2summon = function(handindex, tgt){
 		var card = game.player2.hand[handindex].card;
 		var sprite = new PIXI.Sprite(nopic);
-		sprite.position.x=foeplays.length*90;
-		sprite.interactive = true;
-		sprite.mouseover = function(){
-			if (game.winner != game.player1){
-				cardart.setTexture(getArt(card.code));
-			}
-		}
+		sprite.position.x=(foeplays.length%9)*100;
+		sprite.position.y=Math.floor(foeplays.length/9)*20;
 		gameui.addChild(sprite);
 		foeplays.push([card, sprite]);
 		game.player2.summon(handindex, tgt);
@@ -809,12 +807,28 @@ function startMatch(){
 		var pos=gameui.interactionManager.mouse.global;
 		maybeSetText(endturn, game.winner?(game.winner==game.player1?"Won ":"Lost ")+game.ply:"End Turn");
 		if (!game.winner || !user){
-			var cardartvisible = (pos.x>760 && pos.y>300 && pos.y<300+20*game.player1.hand.length);
-			if (!cardartvisible && foeplays.length){ // Really need a better way to manage visibility
-				var first = foeplays[0][1], last = foeplays[foeplays.length-1][1];
-				cardartvisible = pos.y<last.position.y+last.height && pos.y>last.position.y && pos.x<last.position.x+last.width && pos.x>first.position.x;
+			var cardartcode;
+			for(var i=0; i<foeplays.length; i++){
+				if(hitTest(foeplays[i][1], pos)){
+					cardartcode = foeplays[i][0].code;
+				}
 			}
-			cardart.visible = cardartvisible;
+			if (game.player1.precognition){
+				for(var i=0; i<game.player2.hand.length; i++){
+					if(hitTest(handsprite[1][i], pos)){
+						cardartcode = game.player2.hand[i].card.code;
+					}
+				}
+			}
+			for(var i=0; i<game.player1.hand.length; i++){
+				if(hitTest(handsprite[0][i], pos)){
+					cardartcode = game.player1.hand[i].card.code;
+				}
+			}
+			if(cardartcode){
+				cardart.setTexture(getArt(cardartcode));
+				cardart.visible = true;
+			}else cardart.visible = false;
 		}else if(game.winner == game.player1){
 			if (!cardwon){
 				cardwon = foeDeck[Math.floor(Math.random()*foeDeck.length)];
@@ -1049,12 +1063,6 @@ function startMatch(){
 		handsprite[0][i].position.y=300+20*i;
 		handsprite[0][i].interactive = true;
 		(function(_i){
-			handsprite[0][i].mouseover = function(){
-				var cardinst = game.player1.hand[_i];
-				if (cardinst && game.winner != game.player1){
-					cardart.setTexture(getArt(cardinst.card.code));
-				}
-			}
 			handsprite[0][i].click = function(){
 				if (game.phase != PlayPhase)return;
 				var cardinst = game.player1.hand[_i];
@@ -1089,14 +1097,6 @@ function startMatch(){
 		handsprite[1][i].position.y = 40+20*i;
 		handsprite[1][i].interactive = true;
 		(function(_i){
-			handsprite[1][i].mouseover = function(){
-				if (game.player1.precognition){
-					var cardinst = game.player2.hand[_i];
-					if (cardinst && game.winner != game.player1){
-						cardart.setTexture(getArt(cardinst.card.code));
-					}
-				}
-			}
 			handsprite[1][i].click = function(){
 				if (game.phase != PlayPhase)return;
 				if (targetingMode){
@@ -1448,11 +1448,11 @@ function challengeClick(){
 		if (user && user.deck){
 			socket.emit("foewant", {u: user.auth, f: foename.value, deck: user.deck});
 		}else{
-			if (user && user.deck && user.deck.length < 31){
+			var deck = getDeck();
+			if ((user && user.deck && user.deck.length < 31) || urdeck.length < 11){
 				startEditor();
 				return;
 			}
-			var deck = getDeck();
 			socket.emit("pvpwant", { deck: deck, room: foename.value });
 		}
 	}
