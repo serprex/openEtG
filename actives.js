@@ -158,10 +158,7 @@ clear:function(c,t){
 corpseexplosion:function(c,t){
 	function dmg1(c,t){ t.dmg(1); }
 	t.die();
-	c.owner.foe.masscc(c, dmg1);
-	if (!c.card.upped){
-		c.owner.masscc(c, dmg1);
-	}
+	c.owner.foe.masscc(c, dmg1, !c.card.upped);
 	if (t.passives.poisonous){
 		c.owner.foe.addpoison(1);
 	}
@@ -277,8 +274,7 @@ dryspell:function(c,t){
 	function dryeffect(c,t){
 		c.spend(Water, -t.dmg(1));
 	}
-	c.owner.foe.masscc(c.owner, dryeffect);
-	c.owner.masscc(c.owner, dryeffect);
+	c.owner.foe.masscc(c.owner, dryeffect, true);
 },
 dshield:function(c,t){
 	c.status.immaterial = true;
@@ -477,8 +473,7 @@ icebolt:function(c,t){
 ignite:function(c,t){
 	c.die();
 	c.owner.foe.spelldmg(20);
-	c.owner.foe.masscc(c, function(c,x){x.dmg(1)});
-	c.owner.masscc(c, function(c,x){x.dmg(1)});
+	c.owner.foe.masscc(c, function(c,x){x.dmg(1)}, true);
 },
 immolate:function(c,t){
 	t.die();
@@ -649,7 +644,7 @@ luciferin:function(c,t){
 		if (isEmpty(x.active)){
 			x.active.auto = Actives.light;
 		}
-	})
+	});
 },
 lycanthropy:function(c,t){
 	c.buffhp(5);
@@ -757,8 +752,7 @@ overdrivespell:function(c,t){
 	t.active = {auto: Actives.overdrive};
 },
 pandemonium:function(c,t){
-	c.owner.foe.masscc(c, Actives.cseed);
-	c.owner.masscc(c, Actives.cseed);
+	c.owner.foe.masscc(c, Actives.cseed, true);
 },
 pandemonium2:function(c,t){
 	t.masscc(c, Actives.cseed);

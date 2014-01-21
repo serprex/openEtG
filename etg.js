@@ -421,16 +421,29 @@ Player.prototype.drawhand = function(x) {
 		}
 	}
 }
-Player.prototype.masscc = function(caster, func){
+Player.prototype.masscc = function(caster, func, massmass){
 	for(var i=0; i<16; i++){
-		if (this.permanents[i] && this.permanents[i].passives.cloak){
-			Actives.destroy(this, this.permanents[i]);
+		var pr = this.permanents[i];
+		if (pr && pr.passives.cloak){
+			Actives.destroy(this, pr);
+		}
+		if (massmass){
+			pr = this.foe.permanents[i];
+			if (pr && pr.passives.cloak){
+				Actives.destroy(this, pr);
+			}
 		}
 	}
-	var crs = this.creatures.slice();
+	var crs = this.creatures.slice(), crsfoe;
+	if (massmass){
+		crsfoe = this.foe.creatures.slice();
+	}
 	for(var i=0; i<23; i++){
 		if (crs[i] && !crs[i].status.immaterial && !crs[i].status.burrowed){
 			func(caster, crs[i]);
+		}
+		if (crsfoe && crsfoe[i] && !crsfoe[i].status.immaterial && !crsfoe[i].status.burrowed){
+			func(caster, crsfoe[i]);
 		}
 	}
 }
