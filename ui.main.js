@@ -121,16 +121,15 @@ function makeArt(card, art){
 		artspr.position.y = 20;
 		template.addChild(artspr);
 	}
-	var nametag = new PIXI.Text(card.name, {font: "12px Arial bold", fill:card.upped?"black":"white"});
+	var nametag = new PIXI.Text(card.name, {font: "12px Dosis", fill:card.upped?"black":"white"});
 	nametag.position.x = 2;
 	nametag.position.y = 4;
 	template.addChild(nametag);
 	if (card.cost){
-		var text = new PIXI.Text(card.cost, {font: "12px Arial bold", fill:card.upped?"black":"white"});
+		var text = new PIXI.Text(card.cost, {font: "12px Dosis", fill:card.upped?"black":"white"});
 		text.anchor.x = 1;
 		text.position.x = rend.width-20;
-		text.position.y = 4;
-		template.addChild(text);
+		text.position.y = 4;		template.addChild(text);
 		if (card.costele){
 			var eleicon = new PIXI.Sprite(getIcon(card.costele));
 			eleicon.position.x = rend.width-1;
@@ -152,7 +151,7 @@ function makeArt(card, art){
 		}
 		wordgfx.position.x = x;
 		wordgfx.position.y = y;
-		x += wordgfx.width + 4;
+		x += wordgfx.width + 3;
 		template.addChild(wordgfx);
 	}
 	rend.render(template);
@@ -184,7 +183,7 @@ function getCardImage(code){
 		if (card){
 			var clipwidth = 2;
 			if (card.cost){
-				var text = new PIXI.Text(card.cost, {font: "11px Arial bold", fill:card.upped?"black":"white"});
+				var text = new PIXI.Text(card.cost, {font: "11px Dosis", fill:card.upped?"black":"white"});
 				text.anchor.x = 1;
 				text.position.x = rend.width-20;
 				text.position.y = 5;
@@ -202,7 +201,7 @@ function getCardImage(code){
 				}
 			}
 			var text, loopi=0;
-			do text = new PIXI.Text(card.name.substring(0, card.name.length-(loopi++)), {font: "11px Arial bold", fill:card.upped?"black":"white"}); while(text.width>rend.width-clipwidth);
+			do text = new PIXI.Text(card.name.substring(0, card.name.length-(loopi++)), {font: "11px Dosis", fill:card.upped?"black":"white"}); while(text.width>rend.width-clipwidth);
 			text.position.x = 2;
 			text.position.y = 5;
 			graphics.addChild(text);
@@ -222,7 +221,7 @@ function getCreatureImage(code){
 		graphics.drawRect(0, 0, 120, 30);
 		graphics.endFill();
 		if (card){
-			var text = new PIXI.Text(CardCodes[code].name, {font: "12px Arial bold", fill:card.upped?"black":"white"});
+			var text = new PIXI.Text(CardCodes[code].name, {font: "12px Dosis", fill:card.upped?"black":"white"});
 			text.position.x = 2;
 			text.position.y = 5;
 			graphics.addChild(text);
@@ -242,7 +241,7 @@ function getPermanentImage(code){
 		graphics.drawRect(0, 0, 120, 30);
 		graphics.endFill();
 		if (card){
-			var text = new PIXI.Text(CardCodes[code].name, {font: "12px Arial bold", fill:card.upped?"black":"white"});
+			var text = new PIXI.Text(CardCodes[code].name, {font: "12px Dosis", fill:card.upped?"black":"white"});
 			text.position.x = 2;
 			text.position.y = 5;
 			graphics.addChild(text);
@@ -287,10 +286,10 @@ function getDeck(){
 	return deckstring?deckstring.split(" "):[];
 }
 function startMenu(){
-	var brandai = new PIXI.Text("Dumb AI", {font: "16px Arial bold"});
-	var beditor = new PIXI.Text("Editor", {font: "16px Arial bold"});
-	var blogout = new PIXI.Text("Logout", {font: "16px Arial bold"});
-	var bremove = new PIXI.Text("Delete Account", {font: "16px Arial bold"});
+	var brandai = new PIXI.Text("Dumb AI", {font: "16px Dosis"});
+	var beditor = new PIXI.Text("Editor", {font: "16px Dosis"});
+	var blogout = new PIXI.Text("Logout", {font: "16px Dosis"});
+	var bremove = new PIXI.Text("Delete Account", {font: "16px Dosis"});
 	brandai.position.x = 200;
 	brandai.position.y = 250;
 	beditor.position.x = 200;
@@ -302,11 +301,11 @@ function startMenu(){
 	setInteractive(brandai, beditor, blogout, bremove);
 	brandai.click = function() {
 		if (Cards){
-			var urdeck = getDeck();
-			if (urdeck.length < 30){
+			if (user && user.deck && user.deck.length < 31){
 				startEditor();
 				return;
 			}
+			var urdeck = getDeck();
 			var aideckstring = aideck.value, deck;
 			if (aideckstring){
 				deck = aideckstring.split(" ");
@@ -446,11 +445,11 @@ function startEditor(){
 		var cardminus, cardpool, cardartcode;
 		chatArea.value = "Build a 30-60 card deck";
 		var editorui = new PIXI.Stage(0x336699, true), editorelement = 0;
-		var bclear = new PIXI.Text("Clear", {font: "16px Arial bold"});
-		var bsave = new PIXI.Text("Done", {font: "16px Arial bold"});
-		var bimport = new PIXI.Text("Import", {font: "16px Arial bold"});
-		var bpillar = new PIXI.Text("Pillarify", {font: "16px Arial bold"});
-		var brngcard = new PIXI.Text("Cardify", {font: "16px Arial bold"});
+		var bclear = new PIXI.Text("Clear", {font: "16px Dosis"});
+		var bsave = new PIXI.Text("Done", {font: "16px Dosis"});
+		var bimport = new PIXI.Text("Import", {font: "16px Dosis"});
+		var bpillar = new PIXI.Text("Pillarify", {font: "16px Dosis"});
+		var brngcard = new PIXI.Text("Cardify", {font: "16px Dosis"});
 		bclear.position.x = 8;
 		bclear.position.y = 8;
 		bclear.click = function(){
@@ -592,7 +591,7 @@ function startEditor(){
 				sprite.position.x = 100+i*130;
 				sprite.position.y = 272+j*20;
 				if (usePool){
-					var sprcount = new PIXI.Text("", {font: "12px Arial"});
+					var sprcount = new PIXI.Text("", {font: "12px Dosis"});
 					sprcount.position.x = 102;
 					sprcount.position.y = 4;
 					sprite.addChild(sprcount);
@@ -697,7 +696,7 @@ function startElementSelect(){
 		"Darkness",
 		"Aether"
 	];
-	var eledesc = new PIXI.Text("", {font: "24px Arial bold"});
+	var eledesc = new PIXI.Text("", {font: "24px Dosis"});
 	eledesc.position.x = 100;
 	eledesc.position.y = 250;
 	stage.addChild(eledesc);
@@ -910,7 +909,7 @@ function startMatch(){
 					creasprite[j][i].visible = true;
 					var child = creasprite[j][i].getChildAt(0);
 					child.visible = true;
-					child.setTexture(getTextImage(cr.activetext() + cr.trueatk()+"|"+cr.truehp(), 12));
+					child.setTexture(getTextImage(cr.activetext() + cr.trueatk()+"|"+cr.truehp(), 12, cr.card.upped?"black":"white"));
 					drawStatus(cr, creasprite[j][i]);
 				}else creasprite[j][i].visible = false;
 			}
@@ -923,15 +922,15 @@ function startMatch(){
 					var child = permsprite[j][i].getChildAt(0);
 					child.visible = true;
 					if (pr instanceof Pillar){
-						child.setTexture(getTextImage("1:"+(pr.active == Actives.pend && pr.pendstate?pr.owner.mark:pr.card.element) + " x"+pr.status.charges, 12));
-					}else child.setTexture(getTextImage(pr.activetext().replace(" losecharge","") + (pr.status.charges?" "+pr.status.charges:""), 12));
+						child.setTexture(getTextImage("1:"+(pr.active == Actives.pend && pr.pendstate?pr.owner.mark:pr.card.element) + " x"+pr.status.charges, 12, pr.card.upped?"black":"white"));
+					}else child.setTexture(getTextImage(pr.activetext().replace(" losecharge","") + (pr.status.charges?" "+pr.status.charges:""), 12, pr.card.upped?"black":"white"));
 				}else permsprite[j][i].visible = false;
 			}
 			var wp = game.players[j].weapon;
 			if (wp && !(j == 1 && cloakgfx.visible)){
 				weapsprite[j].visible = true;
 				var child = weapsprite[j].getChildAt(0);
-				child.setTexture(getTextImage(wp.activetext() + " " + wp.trueatk(), 12));
+				child.setTexture(getTextImage(wp.activetext() + " " + wp.trueatk(), 12, wp.card.upped?"black":"white"));
 				weapsprite[j].alpha = wp.immaterial?.7:1;
 				child.visible = true;
 				weapsprite[j].setTexture(getPermanentImage(wp.card.code));
@@ -943,7 +942,7 @@ function startMatch(){
 				var dr=sh.truedr();
 				var child = shiesprite[j].getChildAt(0);
 				child.visible = true;
-				child.setTexture(getTextImage((sh.status.charges? "x"+sh.status.charges:"") + (sh.active.shield?" "+sh.active.shield.activename:"") + (sh.active.buff?" "+sh.active.buff.activename:"") + (sh.active.cast?casttext(sh.cast, sh.castele)+sh.active.cast.activename:"") + (dr?" "+dr:"")), 12);
+				child.setTexture(getTextImage((sh.status.charges? "x"+sh.status.charges:"") + (sh.active.shield?" "+sh.active.shield.activename:"") + (sh.active.buff?" "+sh.active.buff.activename:"") + (sh.active.cast?casttext(sh.cast, sh.castele)+sh.active.cast.activename:"") + (dr?" "+dr:"")), 12, sh.card.upped?"black":"white");
 				shiesprite[j].alpha = sh.status.immaterial?.7:1;
 				shiesprite[j].setTexture(getPermanentImage(sh.card.code));
 			}else shiesprite[j].visible = false;
@@ -966,7 +965,7 @@ function startMatch(){
 	cloakgfx.drawRect(300, 20, 490, 220);
 	cloakgfx.endFill();
 	gameui.addChild(cloakgfx);
-	var endturn = new PIXI.Text("End Turn", {font: "16px Arial bold"});
+	var endturn = new PIXI.Text("End Turn", {font: "16px Dosis"});
 	endturn.position.x = 800;
 	endturn.position.y = 540;
 	endturn.interactive = true;
@@ -1012,7 +1011,7 @@ function startMatch(){
 		}
 	}
 	gameui.addChild(endturn);
-	var cancel = new PIXI.Text("Mulligan", {font: "16px Arial bold"});
+	var cancel = new PIXI.Text("Mulligan", {font: "16px Dosis"});
 	cancel.position.x = 800;
 	cancel.position.y = 500;
 	cancel.interactive = true;
@@ -1029,7 +1028,7 @@ function startMatch(){
 			}
 		}
 	}
-	var turntell = new PIXI.Text("", {font: "16px Arial bold"});
+	var turntell = new PIXI.Text("", {font: "16px Dosis"});
 	turntell.position.x = 800;
 	turntell.position.y = 570;
 	gameui.addChild(turntell);
@@ -1117,9 +1116,9 @@ function startMatch(){
 	var shiesprite = [new PIXI.Sprite(nopic), new PIXI.Sprite(nopic)];
 	var marksprite = [new PIXI.Sprite(nopic), new PIXI.Sprite(nopic)];
 	var quantatext = [new PIXI.DisplayObjectContainer(), new PIXI.DisplayObjectContainer()];
-	var hptext = [new PIXI.Text("", {font: "18px Arial bold"}), new PIXI.Text("", {font: "18px Arial bold"})];
-	var poisontext = [new PIXI.Text("", {font: "16px Arial bold"}), new PIXI.Text("", {font: "16px Arial bold"})];
-	var decktext = [new PIXI.Text("", {font: "16px Arial bold"}), new PIXI.Text("", {font: "16px Arial bold"})];
+	var hptext = [new PIXI.Text("", {font: "18px Dosis"}), new PIXI.Text("", {font: "18px Dosis"})];
+	var poisontext = [new PIXI.Text("", {font: "16px Dosis"}), new PIXI.Text("", {font: "16px Dosis"})];
+	var decktext = [new PIXI.Text("", {font: "16px Dosis"}), new PIXI.Text("", {font: "16px Dosis"})];
 	for (var j=0; j<2; j++){
 		(function(_j){
 			for (var i=0; i<23; i++){
@@ -1265,7 +1264,7 @@ function startMatch(){
 			}
 			var child;
 			for(var k=1; k<13; k++){
-				quantatext[j].addChild(child=new PIXI.Text("", {font: "16px Arial bold"}));
+				quantatext[j].addChild(child=new PIXI.Text("", {font: "16px Dosis"}));
 				child.position.x = (k&1)?32:86;
 				child.position.y = Math.floor((k-1)/2)*32+8;
 			}
@@ -1313,7 +1312,7 @@ function getTextImage(text, font, color){
 		return tximgcache[font][text][color];
 	}
 	var doc = new PIXI.DisplayObjectContainer();
-	var pieces = text.split(/(\d+:\d+)/);
+	var pieces = text.replace(/\|/g," | ").split(/(\d+:\d+)/);
 	var x=0;
 	for(var i=0; i<pieces.length; i++){
 		var piece = pieces[i];
@@ -1330,7 +1329,7 @@ function getTextImage(text, font, color){
 				doc.addChild(spr);
 			}
 		}else{
-			var txt = new PIXI.Text(piece, {font: font+"px Arial bold", fill:color});
+			var txt = new PIXI.Text(piece, {font: font+"px Dosis", fill:color});
 			txt.position.x = x;
 			x+=txt.width;
 			doc.addChild(txt);
@@ -1449,11 +1448,11 @@ function challengeClick(){
 		if (user && user.deck){
 			socket.emit("foewant", {u: user.auth, f: foename.value, deck: user.deck});
 		}else{
-			var deck = getDeck();
-			if (deck.length < 30){
+			if (user && user.deck && user.deck.length < 31){
 				startEditor();
 				return;
 			}
+			var deck = getDeck();
 			socket.emit("pvpwant", { deck: deck, room: foename.value });
 		}
 	}
