@@ -425,6 +425,9 @@ gpullspell:function(c,t){
 gratitude:function(c,t){
 	c.owner.dmg(-4);
 },
+grave:function(c,t){
+    c.transform(t.card.asUpped(t.card.upped));
+},
 growth:function(c,t){
 	c.buffhp(2);
 	c.atk += 2;
