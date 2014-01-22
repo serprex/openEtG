@@ -68,11 +68,10 @@ bblood:function(c,t){
 	t.delay(6);
 },
 blackhole:function(c,t){
-	if (!c.owner.foe.sanctuary){
-		quanta = c.owner.foe.quanta;
+	if (!t.sanctuary){
 		for (var q=1; q<13; q++){
-			c.owner.dmg(-Math.min(quanta[q],3));
-			quanta[q] = Math.max(quanta[q]-3,0);
+			c.owner.dmg(-Math.min(t.quanta[q],3));
+			t.quanta[q] = Math.max(t.quanta[q]-3,0);
 		}
 	}
 },
@@ -254,7 +253,7 @@ disshield:function(c,t, dmg){
 },
 dive:function(c,t){
 	c.defstatus("dive", 0);
-	c.status.dive += c.trueatk();
+	c.status.dive = c.trueatk();
 },
 divinity:function(c,t){
 	c.owner.maxhp += 8;
@@ -765,7 +764,7 @@ pandemonium2:function(c,t){
 	t.masscc(c, Actives.cseed);
 },
 paradox:function(c,t){
-	if (t.trueatk()>t.truehp())t.die();
+	t.die();
 },
 parallel:function(c,t){
 	var copy = new Creature(t.card, c.owner);
@@ -866,7 +865,9 @@ regrade:function(c,t){
 	t.card = t.card.asUpped(!t.card.upped);
 },
 ren:function(c,t){
-    t.addactive("predeath", Actives.bounce);
+	if (!t.hasactive("predeath", "bounce")){
+		t.addactive("predeath", Actives.bounce);
+	}
 },
 rewind:function(c,t){
 	if (t.card.isOf(Cards.Skeleton)){
@@ -992,8 +993,10 @@ siphonstrength:function(c,t){
 skyblitz:function(c,t){
 	c.owner.quanta[Air] = 0;
 	for(var i=0; i<23; i++){
-		if (c.owner.creatures[i] && c.owner.creatures[i].passives.airborne){
-			Actives.dive(c.owner.creatures[i]);
+		var cr = c.owner.creatures[i];
+		if (cr && cr.passives.airborne){
+			cr.defstatus("dive", 0);
+			cr.status.dive += cr.trueatk();
 		}
 	}
 },

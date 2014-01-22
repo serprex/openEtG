@@ -325,12 +325,15 @@ function startMenu(){
 				}
 				deck = [];
 				var pl = new Player({rng: new MersenneTwister(Math.random()*40000000)});
+				var anyshield=0, anyweapon=0;
 				for(var j=0; j<2; j++){
 					for(var i=0; i<(j==0?20:10); i++){
-						var card = pl.randomcard(Math.random()<.1, function(x){return x.element == eles[j] && x.type != PillarEnum && x.passives.rare != 2 && cardcount[x.code] != 6;});
+						var card = pl.randomcard(Math.random()<.1, function(x){return x.element == eles[j] && x.type != PillarEnum && x.passives.rare != 2 && cardcount[x.code] != 6 && !(x.type == ShieldEnum && anyshield == 3) && !(x.type == WeaponEnum && anyweapon == 3);});
 						deck.push(card.code);
 						cardcount[card.code] = (cardcount[card.code] || 0) + 1;
-						ecost[card.costele] += card.cost;
+						if (!(((card.type == WeaponEnum && !anyweapon) || (card.type == ShieldEnum && !anyshield)) && cardcount[card.code])){
+							ecost[card.costele] += card.cost;
+						}
 						if (card.cast){
 							ecost[card.castele] += card.cast;
 						}
@@ -338,14 +341,9 @@ function startMenu(){
 							for(var k=1; k<13; k++){
 								ecost[k]--;
 							}
-						}
+						}else if (card.type == ShieldEnum)anyshield++;
+						else if (card.type == WeaponEnum)anyweapon++;
 					}
-				}
-				var anyshield, anyweapon;
-				for(var i=0; i<deck.length; i++){
-					var card = CardCodes[deck[i]];
-					if (card.type == ShieldEnum)anyshield = true;
-					else if (card.type == WeaponEnum)anyweapon = true;
 				}
 				if (!anyshield){
 					var oldcard = CardCodes[deck[0]];
@@ -361,12 +359,13 @@ function startMenu(){
 						eles[1]==Darkness||eles[1]==Death?Cards.Dagger:
 						Cards.ShortSword).asUpped(Math.random()<.1).code;
 				}
-				var pillarstart = deck.length;
-				for(var i=1; i<12; i++){
+				var pillarstart = deck.length, qp=3;
+				for(var i=1; i<13; i++){
 					if (i == eles[1] || !ecost[i])continue;
-					if (ecost[i]<5){
+					if (ecost[i]<qp){
 						deck.push(upCode(pillars[0], .1));
 						deck.push(upCode(pillars[0], .1));
+						qp--;
 					}else{
 						for(var j=0; j<Math.round(ecost[i]/5); j++){
 							deck.push(upCode(pillars[i*2], .1));
@@ -385,26 +384,50 @@ function startMenu(){
 					deck.push(upCode(pillars[eles[1]*2+(j&1)], .1));
 				}
 				deck.push(TrueMarks[eles[1]]);
+				chatArea.value = deck.join(" ");
 			}
 			initGame({ first:Math.random()<.5, deck:deck, urdeck:urdeck, seed:Math.random()*4000000000 },
 				function(){
+					function iterCore(c, active, useactive){
+						getTarget(c, active, function(t){
+							if (!t && !ActivesEval[active.activename](c)){
+								console.log("Hold "+active.activename);
+								return;
+							}
+							useactive(t);
+						});
+						if (targetingMode){
+							console.log("in " + active.activename);
+							var t = evalPickTarget(c, active, targetingMode);
+							console.log("out" + !!t);
+							if (t){
+								targetingModeCb(t);
+							}
+							targetingMode = targetingModeCb = null;
+						}
+					}
 					for(var j=0; j<2; j++){
 						for(var i=this.hand.length-1; i>=0; i--){
-							if ((this.hand[i].card.type != SpellEnum || (!Targeting[this.hand[i].card.active.activename])) && this.cansummon(i)){
-								player2summon(i);
+							var cardinst = this.hand[i];
+							if (cardinst && this.cansummon(i)){
+								if (cardinst.card.type != SpellEnum){
+									player2summon(i);
+								}else{
+									iterCore(cardinst, cardinst.card.active, function(t){ player2summon(i, t) });
+								}
 							}
 						}
 					}
 					for(var i=0; i<16; i++){
 						var pr = this.permanents[i];
-						if (pr && pr.active.cast && !Targeting[pr.active.cast.activename] && pr.canactive()){
-							pr.useactive();
+						if (pr && pr.active.cast && pr.canactive()){
+							iterCore(pr, pr.active.cast, function(t){ pr.useactive(t) });
 						}
 					}
 					for(var i=0; i<23; i++){
 						var cr = this.creatures[i];
-						if (cr && cr.active.cast && !Targeting[cr.active.cast.activename] && cr.canactive()){
-							cr.useactive();
+						if (cr && cr.active.cast && cr.canactive()){
+							iterCore(cr, cr.active.cast, function(t){ cr.useactive(t) });
 						}
 					}
 					this.endturn(this.hand.length==8?0:null);
@@ -565,9 +588,9 @@ function startEditor(){
 		brngcard.position.y = 104;
 		brngcard.click = function(){
 			if (foename.value != "trans"){
-				chatArea.value = "Input 'trans' into Challenge to transmute a random card of your deck's mark per 5 cards in deck";
-			}else if (editordeck.length<5 || (editordeck.length%5)!=0){
-				chatArea.value = "Transmutation of random cards requires an input size divisible by 5";
+				chatArea.value = "Input 'trans' into Challenge to transmute a random card of your deck's mark per 3 cards in deck";
+			}else if (editordeck.length<3 || (editordeck.length%3)!=0){
+				chatArea.value = "Transmutation of random cards requires an input size divisible by 3";
 			}else{
 				for(var i=0; i<editordeck.length; i++){
 					if(CardCodes[editordeck[i]].passives.rare == 2){
@@ -577,7 +600,7 @@ function startEditor(){
 				}
 				var rm = editordeck;
 				editordeck = [];
-				for(var i=0; i<rm.length; i+=5){
+				for(var i=0; i<rm.length; i+=3){
 					editordeck.push(new Player({rng: new MersenneTwister(Math.random()*40000000)}).randomcard(false, function(x){ return x.element == editormark && x.type != PillarEnum && !x.passives.rare; }).code);
 				}
 				socket.emit("transmute", {u: user.auth, rm: rm, add: editordeck});
@@ -1091,8 +1114,7 @@ function startMatch(){
 			socket.emit("mulligan");
 		}else if (game.turn == game.player1){
 			if (targetingMode){
-				targetingMode = null;
-				targetingModeCb = null;
+				targetingMode = targetingModeCb = null;
 			}else if (discarding){
 				discarding = false;
 			}
