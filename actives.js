@@ -330,6 +330,9 @@ evolve:function(c,t){
 	c.status.burrowed = false;
 },
 fickle:function(c,t){
+	if (t.owner != c.owner && t.owner.sanctuary){
+		return;
+	}
 	var cards = [];
 	for(var i=0; i<t.owner.deck.length; i++){
 		var card = t.owner.deck[i];

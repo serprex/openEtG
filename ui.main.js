@@ -524,6 +524,7 @@ function startEditor(){
 			deckimport.value = editordeck.join(" ");
 			if (usePool){
 				socket.emit("setdeck", {u:user.auth, d:editordeck});
+				user.deck = editordeck;
 			}
 			startMenu();
 		}
@@ -537,7 +538,7 @@ function startEditor(){
 		bpillar.position.y = 80;
 		bpillar.click = function(){
 			if (foename.value != "trans"){
-				chatArea.value = "Input 'trans' into Challenge to transmute cards to pillars";
+				chatArea.value = "Input 'trans' into Challenge to transmute deck's cards into pillars";
 				return;
 			}
 			var rm = editordeck;
@@ -564,7 +565,7 @@ function startEditor(){
 		brngcard.position.y = 104;
 		brngcard.click = function(){
 			if (foename.value != "trans"){
-				chatArea.value = "Input 'trans' into Challenge to transmute a random card per 5 cards";
+				chatArea.value = "Input 'trans' into Challenge to transmute a random card of your deck's mark per 5 cards in deck";
 			}else if (editordeck.length<5 || (editordeck.length%5)!=0){
 				chatArea.value = "Transmutation of random cards requires an input size divisible by 5";
 			}else{
@@ -908,7 +909,7 @@ function startMatch(){
 		}
 		cloakgfx.visible = game.player2.isCloaked();
 		fgfx.clear();
-		if (game.turn == game.player1 && !targetingMode && game.phase == PlayPhase){
+		if (game.turn == game.player1 && !targetingMode && game.phase != EndPhase){
 			for(var i=0; i<game.player1.hand.length; i++){
 				var card = game.player1.hand[i].card;
 				if (game.player1.canspend(card.costele, card.cost)){
@@ -979,7 +980,7 @@ function startMatch(){
 					creasprite[j][i].visible = true;
 					var child = creasprite[j][i].getChildAt(0);
 					child.visible = true;
-					child.setTexture(getTextImage(cr.activetext() + cr.trueatk()+"|"+cr.truehp(), 12, cr.card.upped?"black":"white"));
+					child.setTexture(getTextImage(cr.activetext() + " " + cr.trueatk()+"|"+cr.truehp(), 12, cr.card.upped?"black":"white"));
 					drawStatus(cr, creasprite[j][i]);
 				}else creasprite[j][i].visible = false;
 			}
