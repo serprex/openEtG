@@ -200,7 +200,7 @@ Card.prototype.info = function(){
 		}
 		if (this.type == ShieldEnum)info += ": reduce damage by " + this.health;
 		else if (this.type == WeaponEnum)info += ": deal " + this.attack + " damage each turn.";
-		else if (this.type == CreatureEnum)info += " " + this.attack+"|"+this.health;
+		else if (this.type == CreatureEnum)info += this.attack+"|"+this.health;
 		return info + Thing.prototype.activetext.call(this) + objinfo(this.status) + objinfo(this.passives);
 	}
 }
@@ -856,7 +856,7 @@ function filtercards(upped, filter, cmp){
 	var keys = [];
 	for(var key in CardCodes) {
 		var card = CardCodes[key];
-		if (card.upped == upped && !(card.passives && card.passives.token) && (!filter || filter(card))) {
+		if (card.upped == upped && !card.passives.token && (!filter || filter(card))) {
 			keys.push(key);
 		}
 	}

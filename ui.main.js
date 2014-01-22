@@ -132,7 +132,8 @@ function makeArt(card, art){
 		var text = new PIXI.Text(card.cost, {font: "12px Dosis", fill:card.upped?"black":"white"});
 		text.anchor.x = 1;
 		text.position.x = rend.width-20;
-		text.position.y = 4;		template.addChild(text);
+		text.position.y = 4;
+		template.addChild(text);
 		if (card.costele){
 			var eleicon = new PIXI.Sprite(getIcon(card.costele));
 			eleicon.position.x = rend.width-1;
@@ -432,7 +433,8 @@ function startMenu(){
 	if (user && user.oracle){
 		// todo user.oracle should be a card, not true. The card is the card that the server itself added. This'll only show what was added
 		delete user.oracle;
-		var card = new Player({rng: new MersenneTwister(Math.random()*40000000)}).randomcard(false).code;
+		var card = new Player({rng: new MersenneTwister(Math.random()*40000000)}).randomcard(false,
+			(function(y){return function(x){ return x.type != PillarEnum && ((x.passives.rare != 2) ^ y); }})(Math.random()<.03)).code;
 		socket.emit("addcard", {u:user.auth, c:card});
 		user.pool.push(card);
 		var oracle = new PIXI.Sprite(nopic);
@@ -1029,7 +1031,7 @@ function startMatch(){
 	gameui = new PIXI.Stage(0x336699, true);
 	var cloakgfx = new PIXI.Graphics();
 	cloakgfx.beginFill(0);
-	cloakgfx.drawRect(130, 20, 560, 280);
+	cloakgfx.drawRect(130, 20, 640, 280);
 	cloakgfx.endFill();
 	gameui.addChild(cloakgfx);
 	var endturn = new PIXI.Text("End Turn", {font: "16px Dosis"});
