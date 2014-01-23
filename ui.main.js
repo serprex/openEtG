@@ -361,27 +361,10 @@ function startMenu(){
 				}
 				var pillarstart = deck.length, qp=3;
 				for(var i=1; i<13; i++){
-					if (i == eles[1] || !ecost[i])continue;
-					if (ecost[i]<qp){
-						deck.push(upCode(pillars[0], .1));
-						deck.push(upCode(pillars[0], .1));
-						qp--;
-					}else{
-						for(var j=0; j<Math.round(ecost[i]/5); j++){
-							deck.push(upCode(pillars[i*2], .1));
-						}
+					if (!ecost[i])continue;
+					for(var j=0; j<Math.round(ecost[i]/5); j++){
+						deck.push(upCode(pillars[i*2], .1));
 					}
-				}
-				var pillarcount = deck.length-pillarstart, pillarexcess;
-				for(var j=0; j<Math.round(ecost[eles[1]]/3) && j<pillarcount; j++){
-					var poffset = pillarstart + Math.floor(pillarcount*Math.random());
-					var idx = pillars.indexOf(deck[poffset]);
-					if (!(idx&1)){
-						deck[poffset] = upCode(pillars[idx+1], .1);
-					}else pillarexcess++;
-				}
-				for(j=0; j<Math.round(ecost[eles[1]]/6-(pillarcount-pillarexcess)/2); j++){
-					deck.push(upCode(pillars[eles[1]*2+(j&1)], .1));
 				}
 				deck.push(TrueMarks[eles[1]]);
 				chatArea.value = deck.join(" ");
@@ -538,8 +521,9 @@ function startEditor(){
 		var bclear = new PIXI.Text("Clear", {font: "16px Dosis"});
 		var bsave = new PIXI.Text("Done", {font: "16px Dosis"});
 		var bimport = new PIXI.Text("Import", {font: "16px Dosis"});
-		var bpillar = new PIXI.Text("Pillarify", {font: "16px Dosis"});
 		var brngcard = new PIXI.Text("Cardify", {font: "16px Dosis"});
+		var bpillar = new PIXI.Text("Pillarify", {font: "16px Dosis"});
+		var bupgrade = new PIXI.Text("Upgrade", {font: "16px Dosis"});
 		bclear.position.x = 8;
 		bclear.position.y = 8;
 		bclear.click = function(){
@@ -565,35 +549,8 @@ function startEditor(){
 			editordeck = deckimport.value.split(" ");
 			processDeck();
 		}
-		bpillar.position.x = 8;
-		bpillar.position.y = 80;
-		bpillar.click = function(){
-			if (foename.value != "trans"){
-				chatArea.value = "Input 'trans' into Challenge to transmute deck's cards into pillars";
-				return;
-			}
-			var rm = editordeck;
-			editordeck = [];
-			var pillars = filtercards(true, function(x){ return x.type == PillarEnum && !x.passives.rare; });
-			for(var i=rm.length-1; i>=0; i--){
-				var card = CardCodes[rm[i]], pill;
-				if (card.passives.rare == 2){
-					rm.splice(i, 1);
-					continue;
-				}else editordeck.push(CardCodes[pillars[card.element*2+(card.passives.rare?1:0)]].asUpped(card.upped).code);
-			}
-			socket.emit("transmute", {u: user.auth, rm: rm, add: editordeck});
-			user.deck = editordeck;
-			for(var i=0; i<rm.length; i++){
-				user.pool.splice(user.pool.indexOf(rm[i]), 1);
-			}
-			for(var i=0; i<editordeck.length; i++){
-				user.pool.push(editordeck[i]);
-			}
-			processDeck();
-		}
 		brngcard.position.x = 8;
-		brngcard.position.y = 104;
+		brngcard.position.y = 80;
 		brngcard.click = function(){
 			if (foename.value != "trans"){
 				chatArea.value = "Input 'trans' into Challenge to transmute a random card of your deck's mark per 3 cards in deck";
@@ -626,13 +583,93 @@ function startEditor(){
 				processDeck();
 			}
 		}
-		setInteractive(bclear, bsave, bimport, bpillar, brngcard);
+		bpillar.position.x = 8;
+		bpillar.position.y = 104;
+		bpillar.click = function(){
+			if (foename.value != "trans"){
+				chatArea.value = "Input 'trans' into Challenge to transmute an upped pillar per 6 cards in deck";
+				return;
+			}else if (editordeck.length<6 || (editordeck.length%6)!=0){
+				chatArea.value = "Transmutation of upped pillars requires an input size divisible by 6";
+				return;
+			}
+			for(var i=0; i<editordeck.length; i++){
+				var card = CardCodes[editordeck[i]];
+				if(card.passives.rare == 2){
+					chatArea.value = "Transmutation of ultrarares is ill advised";
+					return;
+				}else if(card.type == PillarEnum){
+					chatArea.value = "Transmutation of pillars is a fool's errand";
+					return;
+				}
+			}
+			var pillars = filtercards(true, function(x){ return x.type == PillarEnum && !x.passives.rare; });
+			var rm = editordeck;
+			editordeck = [];
+			for(var i=0; i<rm.length; i+=3){
+				editordeck.push(new Player({rng: new MersenneTwister(Math.random()*40000000)}).randomcard(false, function(x){ return x.element == editormark && x.type != PillarEnum && !x.passives.rare; }).code);
+			}
+			socket.emit("transmute", {u: user.auth, rm: rm, add: editordeck});
+			user.deck = editordeck;
+			for(var i=0; i<rm.length; i++){
+				user.pool.splice(user.pool.indexOf(rm[i]), 1);
+			}
+			for(var i=0; i<editordeck.length; i++){
+				user.pool.push(editordeck[i]);
+			}
+		}
+		bupgrade.position.x = 8;
+		bupgrade.position.y = 128;
+		bupgrade.click = function(){
+			if (foename.value != "trans"){
+				chatArea.value = "Input 'trans' into Challenge to convert 6 cards into an upgraded copy";
+				return;
+			}
+			for(var i=0; i<editordeck.length; i++){
+				var card = CardCodes[editordeck[i]];
+				if(card.type == PillarEnum && card.passives.rare != 2){
+					chatArea.value = "Transmutation of pillars is a fool's errand";
+					return;
+				}
+			}
+			var rm = editordeck;
+			editordeck = [];
+			for(var i=0; i<rm.length; i+=6){
+				var card = CardCodes[rm[i]];
+				if (card.passives.rare == 2){
+					i-=5;
+					editordeck.push(card.asUpped(true).code);
+				}else{
+					for(var j=1; j<6; j++){
+						if (rm[i+j] != rm[i])break;
+					}
+					if (j == 6){
+						editordeck.push(card.asUpped(true).code);
+					}else{
+						chatArea.value = "Incomplete set of " + card.name + ". Only "+j+" copies";
+						editordeck = rm;
+						return;
+					}
+				}
+			}
+			socket.emit("transmute", {u: user.auth, rm: rm, add: editordeck});
+			user.deck = editordeck;
+			for(var i=0; i<rm.length; i++){
+				user.pool.splice(user.pool.indexOf(rm[i]), 1);
+			}
+			for(var i=0; i<editordeck.length; i++){
+				user.pool.push(editordeck[i]);
+			}
+			processDeck();
+		}
+		setInteractive(bclear, bsave, bimport, brngcard, bpillar, bupgrade);
 		editorui.addChild(bclear);
 		editorui.addChild(bsave);
 		editorui.addChild(bimport);
 		if (usePool){
 			editorui.addChild(bpillar);
 			editorui.addChild(brngcard);
+			editorui.addChild(bupgrade);
 		}
 		var editorcolumns = [];
 		var editordecksprites = [];
@@ -667,7 +704,7 @@ function startEditor(){
 			(function(_i){
 				sprite.click = function() {
 					var card = CardCodes[editordeck[_i]];
-					if (usePool && (card.type != PillarEnum || card.passives.rare == 2)){
+					if (usePool && (card.type != PillarEnum || card.upped || card.passives.rare == 2)){
 						adjustCardMinus(editordeck[_i], -1);
 					}
 					editordeck.splice(_i, 1);
@@ -696,12 +733,12 @@ function startEditor(){
 					sprite.click = function() {
 						if(editordeck.length<60){
 							var code = editorcolumns[_i][1][editorelement][_j], card = CardCodes[code];
-							if (usePool && (card.type != PillarEnum || card.passives.rare == 2)){
+							if (usePool && (card.type != PillarEnum || card.upped || card.passives.rare == 2)){
 								if (!(code in cardpool) || (code in cardminus && cardminus[code] >= cardpool[code]) ||
 									(CardCodes[code].type != PillarEnum && (cardminus[card.asUpped(false).code]||0)+(cardminus[card.asUpped(true).code]||0) >= 6)){
 									return;
 								}
-								adjustCardMinus(editordeck[i], 1);
+								adjustCardMinus(code, 1);
 							}
 							for(var i=0; i<editordeck.length; i++){
 								var cmp = editorCardCmp(editordeck[i], code);
@@ -750,7 +787,7 @@ function startEditor(){
 					var spr = editorcolumns[i][0][j], code = editorcolumns[i][1][editorelement][j], card = CardCodes[code];
 					spr.visible = true;
 					spr.setTexture(getCardImage(code));
-					if (usePool && (card.type != PillarEnum || card.passives.rare == 2)){
+					if (usePool && (card.type != PillarEnum || card.upped || card.passives.rare == 2)){
 						var txt = spr.getChildAt(0);
 						if ((txt.visible = code in cardpool)){
 							maybeSetText(txt, (cardpool[code] - (code in cardminus?cardminus[code]:0)).toString());
@@ -919,7 +956,7 @@ function startMatch(){
 			if (!cardwon){
 				var winnable = [];
 				for(var i=0; i<foeDeck.length; i++){
-					if (foeDeck[i].type != PillarEnum && foeDeck[i].rare != 2){
+					if (foeDeck[i].type != PillarEnum && foeDeck[i].passives.rare != 2){
 						winnable.push(foeDeck[i]);
 					}
 				}

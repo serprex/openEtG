@@ -308,10 +308,10 @@ Player.prototype.endturn = function(discard) {
 				p.active.auto(p);
 			}
 			p.usedactive = false;
-			if (p.passives.cloak || p.passives.stasis){
+			if (p.passives.stasis){
 				if (--p.status.charges < 0){
 					delete this.permanents[i];
-				}else if (p.stasis){
+				}else{
 					stasisFlag = true;
 				}
 			}else if (p.passives.flooding && !floodingPaidFlag){
@@ -815,7 +815,7 @@ Weapon.prototype.attack = Creature.prototype.attack = function(stasis, freedomCh
 Player.prototype.cansummon = function(index, target){
 	if (this.silence || this.game.turn != this)return false;
 	var cardinst = this.hand[index];
-	if (!cardinst.card){
+	if (!cardinst || !cardinst.card){
 		console.log("wtf cardless card");
 		return false;
 	}
