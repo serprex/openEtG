@@ -1188,7 +1188,7 @@ skull:function(c,t){
 	}
 },
 slow:function(c,t){
-	t.delay(1);
+	t.delay(2);
 },
 solar:function(c,t){
 	c.owner.spend(Light, -1);

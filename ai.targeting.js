@@ -323,7 +323,7 @@ plague:function(c,t){
 	return t != c.owner;
 },
 platearmor:function(c,t){
-	return 10-t.truehp();
+	return c.owner == t.owner && 10-t.truehp();
 },
 poison:function(c,t){
 	return true;
@@ -413,7 +413,7 @@ tempering:function(c,t){
 	return t.owner == c.owner;
 },
 throwrock:function(c,t){
-	return c.owner == t.owner && 10-c.truehp();
+	return c.owner == t.owner && 10-t.truehp();
 },
 unburrow:function(c,t){
 	return !ActivesEval.burrow(c, t);

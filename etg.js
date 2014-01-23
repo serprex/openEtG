@@ -697,6 +697,7 @@ Shield.prototype.truedr = function(){
 	return dr;
 }
 Player.prototype.truehp = function(){ return this.hp; }
+Weapon.prototype.truehp = function(){ return this.card.health; }
 Creature.prototype.truehp = function(){
 	var hp = this.hp;
 	if (this.calcEclipse(this.owner.game) != 0){
