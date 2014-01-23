@@ -290,7 +290,7 @@ function getDeck(){
 	return deckstring?deckstring.split(" "):[];
 }
 function startMenu(){
-	var brandai = new PIXI.Text("Dumb AI", {font: "16px Dosis"});
+	var brandai = new PIXI.Text("AI", {font: "16px Dosis"});
 	var beditor = new PIXI.Text("Editor", {font: "16px Dosis"});
 	var blogout = new PIXI.Text("Logout", {font: "16px Dosis"});
 	var bremove = new PIXI.Text("Delete Account", {font: "16px Dosis"});
@@ -335,7 +335,7 @@ function startMenu(){
 							ecost[card.costele] += card.cost;
 						}
 						if (card.cast){
-							ecost[card.castele] += card.cast;
+							ecost[card.castele] += card.cast*1.5;
 						}
 						if (card == Cards.Nova || card == Cards.SuperNova){
 							for(var k=1; k<13; k++){
@@ -388,8 +388,10 @@ function startMenu(){
 			}
 			initGame({ first:Math.random()<.5, deck:deck, urdeck:urdeck, seed:Math.random()*4000000000 },
 				function(){
+					var self = this;
 					function iterCore(c, active, useactive){
 						getTarget(c, active, function(t){
+							targetingMode = null;
 							if (!t && !ActivesEval[active.activename](c)){
 								console.log("Hold "+active.activename);
 								return;
@@ -403,10 +405,22 @@ function startMenu(){
 							if (t){
 								targetingModeCb(t);
 							}
-							targetingMode = targetingModeCb = null;
+							targetingMode = null;
 						}
 					}
 					for(var j=0; j<2; j++){
+						for(var i=0; i<23; i++){
+							var cr = this.creatures[i];
+							if (cr && cr.active.cast && cr.canactive()){
+								iterCore(cr, cr.active.cast, function(t){ cr.useactive(t) });
+							}
+						}
+						if (this.weapon && this.weapon.active.cast){
+							iterCore(this.weapon, this.weapon.active.cast, function(t){ self.weapon.useactive(t) });
+						}
+						if (this.shield && this.shield.active.cast){
+							iterCore(this.shield, this.shield.active.cast, function(t){ self.shield.useactive(t) });
+						}
 						for(var i=this.hand.length-1; i>=0; i--){
 							var cardinst = this.hand[i];
 							if (cardinst && this.cansummon(i)){
@@ -417,17 +431,11 @@ function startMenu(){
 								}
 							}
 						}
-					}
-					for(var i=0; i<16; i++){
-						var pr = this.permanents[i];
-						if (pr && pr.active.cast && pr.canactive()){
-							iterCore(pr, pr.active.cast, function(t){ pr.useactive(t) });
-						}
-					}
-					for(var i=0; i<23; i++){
-						var cr = this.creatures[i];
-						if (cr && cr.active.cast && cr.canactive()){
-							iterCore(cr, cr.active.cast, function(t){ cr.useactive(t) });
+						for(var i=0; i<16; i++){
+							var pr = this.permanents[i];
+							if (pr && pr.active.cast && pr.canactive()){
+								iterCore(pr, pr.active.cast, function(t){ pr.useactive(t) });
+							}
 						}
 					}
 					this.endturn(this.hand.length==8?0:null);
@@ -1527,7 +1535,7 @@ function challengeClick(){
 			socket.emit("foewant", {u: user.auth, f: foename.value, deck: user.deck});
 		}else{
 			var deck = getDeck();
-			if ((user && user.deck && user.deck.length < 31) || urdeck.length < 11){
+			if ((user && user.deck && user.deck.length < 31) || deck.length < 11){
 				startEditor();
 				return;
 			}

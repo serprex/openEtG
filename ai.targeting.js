@@ -34,6 +34,7 @@ function evalPickTarget(c, active, targeting){
 	}
 }
 function ActivesEvalMassCC(c,t){
+	if (c.owner == t)return false;
 	var a=0;
 	for (var i=0; i<23; i++){
 		var cr = c.owner.foe.creatures[i];
@@ -46,10 +47,10 @@ ablaze:function(c,t){
 	return true;
 },
 accelerationspell:function(c,t){
-	return c.owner == t.owner && t.truehp();
+	return c.owner == t.owner && t.active.cast != Actives.acceleration && t.truehp();
 },
 accretion:function(c,t){
-	return c.owner == t.owner && t.card.cost;
+	return c.owner == t.owner && t.card.cost+1;
 },
 adrenaline:function(c,t){
 	var atk = t.trueatk();
@@ -89,7 +90,7 @@ burrow:function(c,t){
 	return c.truehp()<3;
 },
 butterfly:function(c,t){
-	return c.owner == t.owner && (t.active.cast?t.cast:10)+t.truehp();
+	return c.owner == t.owner && t.active != Actives.destroy && (t.active.cast?t.cast:10)+t.truehp();
 },
 catapult:function(c,t){
 	return t.truehp() > 10 && Math.ceil(t.truehp()*(t.frozen?150:100)/(t.truehp()+100))+(t.status.poison || 0)-t.trueatk();
@@ -180,7 +181,7 @@ firebolt:function(c,t){
 	return t.truehp() <= 3+Math.floor(c.owner.quanta[Fire]/7)*2 && (t instanceof Player?99:t.trueatk());
 },
 flatline:function(c,t){
-	return !c.owner.foe.sanctuary;
+	return !c.owner.foe.sanctuary && !c.owner.foe.flatline;
 },
 flyingweapon:function(c,t){
 	return c.owner == t;
@@ -210,7 +211,7 @@ growth:function(c,t){
 	return true;
 },
 guard:function(c,t){
-	return t.trueatk();
+	return !t.status.delayed && t.trueatk();
 },
 hasten:function(c,t){
 	return c.owner.hand.length < 7 && c.owner.deck.length > 5;
@@ -246,7 +247,7 @@ ink:function(c,t){
 	return !c.owner.isCloaked();
 },
 innovation:function(c,t){
-	return t.card.cost > t.owner.quanta[t.card.castele];
+	return c.owner == t.owner && t.card.cost > t.owner.quanta[t.card.castele];
 },
 integrity:function(c,t){
 	return true;
@@ -255,10 +256,10 @@ layegg:function(c,t){
 	return true;
 },
 lightning:function(c,t){
-	return c.owner != t.owner && t.trueatk()/(Math.ceil(t.truehp()/5) || 1);
+	return c.owner != t.owner && (t instanceof Player?t.hp < 10:t.trueatk()/(Math.ceil(t.truehp()/5) || 1));
 },
 liquid:function(c,t){
-	return c.owner == t.owner && t.truehp();
+	return c.owner == t.owner && t.active.hit != Actives.vampire && t.truehp();
 },
 livingweapon:function(c,t){
 	return false;
@@ -282,7 +283,7 @@ mitosis:function(c,t){
 	return true;
 },
 mitosisspell:function(c,t){
-	return c.owner == t.owner && t.truehp();
+	return c.owner == t.owner && t.active.cast != Actives.mitosis && t.truehp();
 },
 momentum:function(c,t){
 	return c.owner == t.owner && t.trueatk()-(t.status.momentum?2:0);
@@ -294,7 +295,7 @@ neuroify:function(c,t){
 	return c.owner.foe.status.poison;
 },
 nightmare:function(c,t){
-	return !c.owner.foe.sanctuary && c.owner != t.owner && t.card.cost;
+	return !c.owner.foe.sanctuary && c.owner == t.owner && t.card.cost;
 },
 nova:function(c,t){
 	return c.owner.nova < 2;
@@ -306,7 +307,7 @@ nymph:function(c,t){
 	return c.owner == t.owner;
 },
 overdrivespell:function(c,t){
-	return ActivesEval.accelerationspell(c, t);
+	return c.owner == t.owner && t.active.cast != Actives.overdrive && t.truehp();
 },
 pandemonium:ActivesEvalMassCC,
 pandemonium2:ActivesEvalMassCC,
@@ -319,9 +320,7 @@ parallel:function(c,t){
 photosynthesis:function(c,t){
 	return true;
 },
-plague:function(c,t){
-	return t != c.owner;
-},
+plague:ActivesEvalMassCC,
 platearmor:function(c,t){
 	return c.owner == t.owner && 10-t.truehp();
 },
@@ -354,10 +353,10 @@ readiness:function(c,t){
 	return t.owner == c.owner && t.active.cast && t.cast;
 },
 reinforce:function(c,t){
-	return c.owner == t.owner && t.card.isOf(Cards.GravitonDeployer);
+	return c.owner == t.owner && (t.card.isOf(Cards.GravitonDeployer) || t.card.isOf(Cards.Otyugh));
 },
 regrade:function(c,t){
-	return t.owner == c.owner && !t.card.upped;
+	return (t.owner == c.owner) ^ t.card.upped;
 },
 ren:function(c,t){
 	return t.owner == c.owner && !t.hasactive("predeath", "bounce") && t.trueatk();
@@ -372,10 +371,10 @@ serendipity:function(c,t){
 	return c.owner.hand.length < 5;
 },
 silence:function(c,t){
-	return t == c.owner.foe && !t.sanctuary;
+	return t == c.owner.foe && !t.sanctuary && !t.silence;
 },
 sinkhole:function(c,t){
-	return t.owner != c.owner && !t.status.adrenaline && t.trueatk();
+	return t.owner != c.owner && (!t.status.adrenaline || t.trueatk() < 4) && t.trueatk();
 },
 siphonactive:function(c,t){
 	return c.owner != t.owner;
@@ -413,7 +412,7 @@ tempering:function(c,t){
 	return t.owner == c.owner;
 },
 throwrock:function(c,t){
-	return c.owner == t.owner && 10-t.truehp();
+	return c.owner != t.owner && 10-t.truehp();
 },
 unburrow:function(c,t){
 	return !ActivesEval.burrow(c, t);
@@ -421,9 +420,7 @@ unburrow:function(c,t){
 virusinfect:function(c,t){
 	return ActivesEval.infect(c, t);
 },
-virusplague:function(c,t){
-	return t != c.owner;
-},
+virusplague:ActivesEvalMassCC,
 quantagift:function(c,t){
 	return true;
 },
