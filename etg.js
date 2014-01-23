@@ -479,7 +479,6 @@ Thing.prototype.activetext = function(){
 	}
 	return info;
 }
-Pillar.prototype.passives = {stackable: true, additive: true}
 Creature.prototype.place = function(){
 	place(this.owner.creatures, this);
 }
@@ -816,6 +815,10 @@ Weapon.prototype.attack = Creature.prototype.attack = function(stasis, freedomCh
 Player.prototype.cansummon = function(index, target){
 	if (this.silence || this.game.turn != this)return false;
 	var cardinst = this.hand[index];
+	if (!cardinst.card){
+		console.log("wtf cardless card");
+		return false;
+	}
 	return cardinst && this.canspend(cardinst.card.costele, cardinst.card.cost);
 }
 Player.prototype.summon = function(index, target){

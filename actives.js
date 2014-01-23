@@ -677,7 +677,7 @@ mitosisspell:function(c,t){
 	t.active.cast = Actives.mitosis;
 	t.castele = t.card.element;
 	t.cast = t.card.cost;
-	t.buffhp(2);
+	t.buffhp(1);
 },
 momentum:function(c,t){
 	t.atk += 1;
@@ -859,7 +859,7 @@ regenerate:function(c,t){
 reinforce:function(c,t){
 	t.atk += c.atk;
 	t.buffhp(c.truehp());
-	c.die();
+	c.remove();
 },
 regrade:function(c,t){
 	t.card = t.card.asUpped(!t.card.upped);
@@ -954,7 +954,7 @@ singularity:function(c,t){
 	}else if (r > .6){
 		Actives.scramble(c, c.owner);
 	}else if (r > .5){
-		Actives.blackhole(c.owner.foe);
+		Actives.blackhole(c.owner.foe, c.owner);
 	}else if (r > .4){
 		c.atk -= c.owner.uptoceil(5);
 		c.buffhp(c.owner.uptoceil(5));

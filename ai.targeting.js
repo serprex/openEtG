@@ -50,7 +50,7 @@ accelerationspell:function(c,t){
 	return c.owner == t.owner && t.active.cast != Actives.acceleration && t.truehp();
 },
 accretion:function(c,t){
-	return c.owner == t.owner && t.card.cost+1;
+	return c.owner != t.owner && t.card.cost+1;
 },
 adrenaline:function(c,t){
 	var atk = t.trueatk();
@@ -75,19 +75,19 @@ antimatter:function(c,t){
 	return c.owner != t.owner && t.trueatk(0, true);
 },
 bblood:function(c,t){
-	return c.owner != t.owner && t.trueatk();
+	return c.owner != t.owner && !t.status.delayed && t.trueatk();
 },
 blackhole:function(c,t){
 	return c.owner != t && !t.sanctuary;
 },
 bless:function(c,t){
-	return c.owner == t.owner && (t.truehp() == 0?99:t.trueatk()/t.truehp());
+	return c.owner == t.owner && (t.truehp() == 0 || (t.active.hit && t.trueatk() == 0) ?99:t.trueatk()/t.truehp())
 },
 bravery:function(c,t){
 	return c.owner.hand.length < 6;
 },
 burrow:function(c,t){
-	return c.truehp()<3;
+	return (c.truehp()<3 && !c.status.poison) || t.trueatk()<1;
 },
 butterfly:function(c,t){
 	return c.owner == t.owner && t.active != Actives.destroy && (t.active.cast?t.cast:10)+t.truehp();
@@ -114,7 +114,7 @@ corpseexplosion:function(c,t){
 	return t.trueatk()<3 && (t.status.poison || 0) + (t.passives.poisonous?2:1);
 },
 cpower:function(c,t){
-	return c.owner == t.owner && (t.truehp() == 0?99:t.trueatk()/t.truehp());
+	return c.owner == t.owner && (t.truehp() == 0 || (t.active.hit && t.trueatk() == 0) ?99:t.trueatk()/t.truehp());
 },
 cseed:function(c,t){
 	return 10-t.truehp()+t.trueatk();
@@ -129,10 +129,10 @@ deployblobs:function(c,t){
 	return c.truehp() > 2;
 },
 destroy:function(c,t, dontsalvage){
-	return t.card.cost;
+	return c.owner != t.owner && t.card.cost;
 },
 destroycard:function(c,t){
-	return !t.owner.sanctuary;
+	return c.owner != t.owner && !t.owner.sanctuary;
 },
 devour:function(c,t){
 	return c.owner != t.owner && t.trueatk()-(t.passives.poisonous?2:0);
@@ -147,7 +147,7 @@ divinity:function(c,t){
 	return true;
 },
 drainlife:function(c,t){
-	return t.truehp() <= 2+Math.floor(c.owner.quanta[Darkness]/5) && (t instanceof Player?99:t.trueatk());
+	return c.owner != t.owner && t.truehp() <= 2+Math.floor(c.owner.quanta[Darkness]/5) && (t instanceof Player?99:t.trueatk());
 },
 draft:function(c,t){
 	return (c.owner == t.owner) ^ (!!t.passives.airborne);
@@ -163,7 +163,7 @@ earthquake:function(c,t){
 	return t.status.charges>1;
 },
 enchant:function(c,t){
-	return t.card.cost;
+	return c.owner == t.owner && t.card.cost;
 },
 endow:function(c,t){
 	return t.trueatk();
@@ -175,10 +175,10 @@ evolve:function(c,t){
 	return true;
 },
 fickle:function(c,t){
-	return !c.owner.cansummon(t);
+	return c.owner == t.owner && !c.owner.cansummon(t);
 },
 firebolt:function(c,t){
-	return t.truehp() <= 3+Math.floor(c.owner.quanta[Fire]/7)*2 && (t instanceof Player?99:t.trueatk());
+	return c.owner != t.owner && t.truehp() <= 3+Math.floor(c.owner.quanta[Fire]/7)*2 && (t instanceof Player?99:t.trueatk());
 },
 flatline:function(c,t){
 	return !c.owner.foe.sanctuary && !c.owner.foe.flatline;
@@ -190,7 +190,7 @@ fractal:function(c,t){
 	return c.owner == t.owner && c.owner.hand.length < 4;
 },
 freeze:function(c,t){
-	return t.owner != c.owner && t.trueatk();
+	return c.owner != t.owner && t.trueatk();
 },
 fungusrebirth:function(c,t){
 	return true;
@@ -205,13 +205,13 @@ gpull:function(c,t){
 	return !c.owner.gpull;
 },
 gpullspell:function(c,t){
-	return t.owner == c.owner && !t.owner.gpull && !(t instanceof Player) && t.truehp();
+	return c.owner == t.owner && !t.owner.gpull && !(t instanceof Player) && t.truehp();
 },
 growth:function(c,t){
 	return true;
 },
 guard:function(c,t){
-	return !t.status.delayed && t.trueatk();
+	return c.owner != t.owner && !t.status.delayed && t.trueatk();
 },
 hasten:function(c,t){
 	return c.owner.hand.length < 7 && c.owner.deck.length > 5;
@@ -220,7 +220,7 @@ hatch:function(c,t){
 	return true;
 },
 heal:function(c,t){
-	return t.owner == c.owner && t.hp < t.maxhp;
+	return c.owner == t.owner && t.hp < t.maxhp;
 },
 heal20:function(c,t){
 	return t == c.owner && c.owner.hp <= c.owner.maxhp-20;
@@ -229,16 +229,16 @@ holylight:function(c,t){
 	return t == c.owner && c.owner.hp <= c.owner.maxhp-10;
 },
 icebolt:function(c,t){
-	return t.truehp() <= 2+Math.floor(c.owner.quanta[Water]/5) && (t instanceof Player?99:t.trueatk());
+	return c.owner != t.owner && t.truehp() <= 2+Math.floor(c.owner.quanta[Water]/5) && (t instanceof Player?99:t.trueatk());
 },
 ignite:function(c,t){
 	return true;
 },
 immolate:function(c,t){
-	return t.card.cost < 2;
+	return t.card.cost < 3 && t.owner.quanta[Fire]<15 && 3 - t.card.cost + t.card.isOf(Cards.Phoenix);
 },
 improve:function(c,t){
-	return c.owner == t.owner && t.card.cost < 4;
+	return c.owner == t.owner && t.card.cost < 4 && t.trueatk()<5;
 },
 infect:function(c,t){
 	return c.owner != t.owner && t.trueatk();
@@ -259,7 +259,8 @@ lightning:function(c,t){
 	return c.owner != t.owner && (t instanceof Player?t.hp < 10:t.trueatk()/(Math.ceil(t.truehp()/5) || 1));
 },
 liquid:function(c,t){
-	return c.owner == t.owner && t.active.hit != Actives.vampire && t.truehp();
+	var hp;
+	return c.owner == t.owner && t.active.hit != Actives.vampire && (hp=t.truehp())>5 && hp;
 },
 livingweapon:function(c,t){
 	return false;
@@ -286,16 +287,16 @@ mitosisspell:function(c,t){
 	return c.owner == t.owner && t.active.cast != Actives.mitosis && t.truehp();
 },
 momentum:function(c,t){
-	return c.owner == t.owner && t.trueatk()-(t.status.momentum?2:0);
+	return c.owner == t.owner && (t.truehp() == 0 || (t.active.hit && t.trueatk() == 0) ?99:(t.trueatk()-(t.status.momentum?2:0))/t.truehp());
 },
 mutation:function(c,t){
-	return t.owner == c.owner?t.card.cost<3:t.card.cost>8;
+	return c.owner == t.owner?(t.card.cost<3 && 3-t.card.cost+t.card.isOf(Cards.Abomination)):(t.card.cost>8 && t.trueatk());
 },
 neuroify:function(c,t){
-	return c.owner.foe.status.poison;
+	return c.owner.foe.status.poison && !c.owner.foe.neuro;
 },
 nightmare:function(c,t){
-	return !c.owner.foe.sanctuary && c.owner == t.owner && t.card.cost;
+	return !c.owner.foe.sanctuary && c.owner.foe.hand.length<8 && c.owner == t.owner && (t.card.isOf(Cards.GhostofthePast) && c.owner.foe.quanta[Time]<t.card.cost?99:t.card.cost-c.owner.foe.quanta[t.card.costele]);
 },
 nova:function(c,t){
 	return c.owner.nova < 2;
@@ -312,7 +313,7 @@ overdrivespell:function(c,t){
 pandemonium:ActivesEvalMassCC,
 pandemonium2:ActivesEvalMassCC,
 paradox:function(c,t){
-	return t.trueatk();
+	return c.owner != t.owner && t.trueatk();
 },
 parallel:function(c,t){
 	return t.card.cost;
@@ -337,32 +338,35 @@ precognition:function(c,t){
 	return true;
 },
 purify:function(c,t){
-	return t.status.poison;
+	return c.owner == t.owner && t.status.poison;
 },
 queen:function(c,t){
 	return true;
 },
 quint:function(c,t){
-	return t.trueatk();
+	return c.owner == t.owner && t.trueatk();
 },
 rage:function(c,t){
 	var dmg = c.card.upped?6:5;
 	return c.owner == t.owner?(t.truehp()>dmg && t.truehp()):(t.truehp()<=dmg && t.trueatk());
 },
 readiness:function(c,t){
-	return t.owner == c.owner && t.active.cast && t.cast;
+	return c.owner == t.owner && t.active.cast && t.cast;
+},
+rebirth:function(c,t){
+	return true;
 },
 reinforce:function(c,t){
 	return c.owner == t.owner && (t.card.isOf(Cards.GravitonDeployer) || t.card.isOf(Cards.Otyugh));
 },
 regrade:function(c,t){
-	return (t.owner == c.owner) ^ t.card.upped;
+	return (c.owner == t.owner) ^ t.card.upped;
 },
 ren:function(c,t){
-	return t.owner == c.owner && !t.hasactive("predeath", "bounce") && t.trueatk();
+	return c.owner == t.owner && !t.hasactive("predeath", "bounce") && t.trueatk();
 },
 rewind:function(c,t){
-	return t.owner != c.owner && t.card.cost;
+	return c.owner != t.owner && t.card.cost;
 },
 scarab:function(c,t){
 	return true;
@@ -374,7 +378,7 @@ silence:function(c,t){
 	return t == c.owner.foe && !t.sanctuary && !t.silence;
 },
 sinkhole:function(c,t){
-	return t.owner != c.owner && (!t.status.adrenaline || t.trueatk() < 4) && t.trueatk();
+	return c.owner != t.owner && (!t.status.adrenaline || t.trueatk() < 4) && t.trueatk();
 },
 siphonactive:function(c,t){
 	return c.owner != t.owner;
@@ -392,7 +396,7 @@ sosa:function(c,t){
 	return c.owner.hp > (c.card.upped?40:48);
 },
 sskin:function(c,t){
-	return c.owner.hp < 50;
+	return c.owner.hp < 50 || c.owner.quanta[Earth] > 80;
 },
 steal:function(c,t){
 	return t.card.cost;
@@ -409,7 +413,7 @@ swave:function(c,t){
 	return ActivesEval.lightning(c, t);
 },
 tempering:function(c,t){
-	return t.owner == c.owner;
+	return c.owner == t.owner;
 },
 throwrock:function(c,t){
 	return c.owner != t.owner && 10-t.truehp();
@@ -425,7 +429,7 @@ quantagift:function(c,t){
 	return true;
 },
 web:function(c,t){
-	return t.owner != c.owner && t.passives.airborne;
+	return c.owner != t.owner && t.passives.airborne;
 },
 wisdom:function(c,t){
 	return c.owner == t.owner && t.truehp() + (t.status.immaterial?(t.status.psion?98:99):0);

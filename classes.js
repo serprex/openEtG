@@ -129,6 +129,7 @@ function Pillar(card, owner){
 	this.owner = owner;
 	this.card = card;
 	this.active = card.active;
+	this.passives = clone(card.passives);
 	this.status = {charges: 1};
 	this.pendstate = false;
 }
