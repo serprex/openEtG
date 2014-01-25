@@ -34,10 +34,9 @@ var duels = {};
 var usersock = {};
 var rooms = {};
 var sockinfo = {};
-process.on("SIGTERM", process.exit);
+process.on("SIGTERM", process.exit).on("SIGINT", process.exit);
 process.on("exit", function(){
 	for(var u in users){
-		var u=data.u;
 		db.hmset("U:"+u, users[u]);
 	}
 	db.quit();

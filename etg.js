@@ -187,7 +187,7 @@ Card.prototype.readCost = function(attr, cost){
 }
 Card.prototype.info = function(){
 	if (this.type == PillarEnum){
-		return "1:" + this.element + " " + activename(this.active);
+		return "1:" + this.element + " " + activename(this.active.cast);
 	}else if (this.text){
 		var prefix = this.type == WeaponEnum?"Weapon: deal " + this.attack + " damage each turn. ":
 			this.type == ShieldEnum?"Shield: "+(this.health?"reduce damage by "+this.health+" ":""):
