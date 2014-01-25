@@ -305,7 +305,7 @@ function aiFunc(){
 		if (targetingMode){
 			console.log("in " + active.activename);
 			var t = evalPickTarget(c, active, targetingMode);
-			console.log("out" + !!t);
+			console.log("out " + (t?(t instanceof Player?"player":t.card.name):""));
 			if (t){
 				targetingModeCb(t);
 			}
@@ -990,7 +990,6 @@ function startMatch(){
 		}
 		fgfx.lineStyle(0, 0, 0);
 		spr.alpha = obj.status.immaterial||obj.status.burrowed?.7:1;
-
 	}
 	var cardwon;
 	animCb = function(){
@@ -1135,6 +1134,7 @@ function startMatch(){
 				if (pr && !(j == 1 && cloakgfx.visible && !pr.passives.cloak)){
 					permsprite[j][i].setTexture(getPermanentImage(pr.card.code));
 					permsprite[j][i].visible = true;
+					permsprite[j][i].alpha = permsprite[j][i].status.immaterial?.7:1;
 					var child = permsprite[j][i].getChildAt(0);
 					child.visible = true;
 					if (pr instanceof Pillar){

@@ -6,7 +6,7 @@ function evalPickTarget(c, active, targeting){
 	function evalIter(t){
 		if (t && targeting(t)){
 			var v = eval(c, t);
-			console.log(active.activename + "\t" + c.card.name+ "\t" + (t instanceof Player?(t == c.owner):t.card.name) + ": "+v);
+			console.log("\t" + c.card.name+ "\t" + (t.owner == c.owner) + (t instanceof Player || t.card.name) + ": "+v);
 			if (v && v>-1){
 				candidates.push([v, t]);
 			}
@@ -117,7 +117,7 @@ cpower:function(c,t){
 	return c.owner == t.owner && (t.truehp() == 0 || (t.active.hit && t.trueatk() == 0) ?99:t.trueatk()/t.truehp());
 },
 cseed:function(c,t){
-	return 10-t.truehp()+t.trueatk();
+	return c.owner != t.owner && 10-t.truehp()+t.trueatk();
 },
 deadalive:function(c,t){
 	return true;

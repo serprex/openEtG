@@ -302,7 +302,7 @@ empathy:function(c,t){
 	c.owner.dmg(-healsum);
 },
 enchant:function(c,t){
-	t.status.immaterial = true
+	t.status.immaterial = true;
 },
 endow:function(c,t){
 	c.active = clone(t.active);
