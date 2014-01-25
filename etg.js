@@ -302,9 +302,7 @@ Player.prototype.endturn = function(discard) {
 	for(var i=0; i<16; i++){
 		var p;
 		if ((p=this.permanents[i])){
-			if (p instanceof Pillar){
-				p.active(p);
-			}else if(p.active.auto){
+			if(p.active.auto){
 				p.active.auto(p);
 			}
 			p.usedactive = false;
@@ -502,12 +500,6 @@ Shield.prototype.place = function(){
 		return;
 	}
 	this.owner.shield = this;
-}
-Pillar.prototype.place = function(){
-	if (this.card.upped){
-		this.owner.spend(this.card.element, this.card.element>0?-1:-3);
-	}
-	Permanent.prototype.place.call(this);
 }
 CardInstance.prototype.place = function(){
 	if (this.owner.hand.length < 8){

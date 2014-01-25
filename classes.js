@@ -8,7 +8,7 @@ function Card(type, info){
 	this.health = parseInt(info.Health||"0");
 	this.readCost("cost", info.Cost||"0");
 	if (info.Active){
-		if (this.type == PillarEnum || this.type == SpellEnum){
+		if (this.type == SpellEnum){
 			this.active = Actives[info.Active];
 		}else{
 			this.active = {};
@@ -126,12 +126,9 @@ function Shield(card, owner){
 	Permanent.apply(this, arguments)
 }
 function Pillar(card, owner){
-	this.owner = owner;
-	this.card = card;
-	this.active = card.active;
-	this.passives = clone(card.passives);
 	this.status = {charges: 1};
 	this.pendstate = false;
+	Thing.apply(this, arguments);
 }
 function CardInstance(card, owner){
 	this.owner = owner;

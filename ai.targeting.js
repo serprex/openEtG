@@ -384,7 +384,8 @@ silence:function(c,t){
 	return t == c.owner.foe && !t.sanctuary && !t.silence;
 },
 sinkhole:function(c,t){
-	return c.owner != t.owner && (!t.status.adrenaline || t.trueatk() < 4) && t.trueatk();
+	var atk;
+	return c.owner != t.owner && (!t.status.adrenaline || (atk = t.trueatk()) < 4) && (atk || t.trueatk()) + (t.active.cast?(t.active.cast == Actives.burrow?-1:1):0);
 },
 siphonactive:function(c,t){
 	return c.owner != t.owner;

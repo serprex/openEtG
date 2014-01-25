@@ -1128,7 +1128,7 @@ function startMatch(){
 					var child = permsprite[j][i].getChildAt(0);
 					child.visible = true;
 					if (pr instanceof Pillar){
-						child.setTexture(getTextImage("1:"+(pr.active == Actives.pend && pr.pendstate?pr.owner.mark:pr.card.element) + " x"+pr.status.charges, 12, pr.card.upped?"black":"white"));
+						child.setTexture(getTextImage("1:"+(pr.active.auto == Actives.pend && pr.pendstate?pr.owner.mark:pr.card.element) + " x"+pr.status.charges, 12, pr.card.upped?"black":"white"));
 					}else child.setTexture(getTextImage(pr.activetext().replace(" losecharge","") + (pr.status.charges !== undefined?" "+pr.status.charges:""), 12, pr.card.upped?"black":"white"));
 				}else permsprite[j][i].visible = false;
 			}

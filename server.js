@@ -129,7 +129,7 @@ io.sockets.on("connection", function(socket) {
 			var adeck = "05" + user.ocard + etgutil.encodedeck(data.d);
 			if (!obj || obj.card != user.ocard){
 				db.hmset(au, {day: etgutil.getDay(), deck: adeck});
-				db.zadd("arena", 500, data.u);
+				db.zadd("arena", 0, data.u);
 			}else{
 				db.hset(au, "deck", adeck);
 			}
