@@ -30,7 +30,7 @@ function evalPickTarget(c, active, targeting){
 		for(var i=1; i<candidates.length; i++){
 			if (candidates[i][0] != candidates[0][0])break;
 		}
-		return candidates[Math.floor(Math.random()*candidates.length)][1];
+		return candidates[Math.floor(Math.random()*i)][1];
 	}
 }
 function ActivesEvalMassCC(c,t){
@@ -111,7 +111,7 @@ clear:function(c,t){
 	return c.owner != t.owner? (c.owner.shield && t.status.momentum) || t.status.adrenaline : t.status.delayed || t.status.frozen || t.status.poison;
 },
 corpseexplosion:function(c,t){
-	return t.trueatk()<3 && (t.status.poison || 0) + (t.passives.poisonous?2:1);
+	return t.trueatk()<3 && (t.status.poison || 0) + (t.passives.poisonous?5:3) - t.card.cost;
 },
 cpower:function(c,t){
 	return c.owner == t.owner && (t.truehp() == 0 || (t.active.hit && t.trueatk() == 0) ?99:t.trueatk()/t.truehp());
@@ -135,7 +135,7 @@ destroycard:function(c,t){
 	return c.owner != t.owner && !t.owner.sanctuary;
 },
 devour:function(c,t){
-	return c.owner != t.owner && t.trueatk()-(t.passives.poisonous?2:0);
+	return c.owner != t.owner?(3+t.trueatk()-(t.passives.poisonous?2:0)):(!t.passives.poisonous && t.trueatk()<2);
 },
 die:function(c,t){
 	return true;

@@ -624,7 +624,7 @@ liquid:function(c,t){
 	t.addpoison(1);
 },
 livingweapon:function(c,t){
-	if (!t.owner.weapon){
+	if (c.owner == t.owner || !t.owner.weapon){
 		var w = new Weapon(t.card, t.owner);
 		w.atk = t.atk;
 		w.active = clone(t.active);

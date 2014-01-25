@@ -5,13 +5,9 @@ var app = http.createServer(connect().use(connect.compress()).use(connect.static
 var io = require("socket.io").listen(app.listen(13602));
 var redis = require("redis"), db = redis.createClient();
 var etgutil = require("./etgutil");
-/*var servutil = require("./srvcards");
-var Cards = servcards.Cards;
-var CardCodes = servcards.CardCodes;
-*/
 
 function loginRespond(res, servuser){
-	var user = etgutil.useruser(servuser), day = Math.floor(Date.now()/86400000);
+	var user = etgutil.useruser(servuser), day = etgutil.getDay();
 	if (!servuser.oracle || servuser.oracle < day){
 		servuser.oracle = day;
 		user.oracle = true;
@@ -66,6 +62,7 @@ function foeEcho(socket, event){
 function userEvent(socket, event, func){
 	socket.on(event, function(data){
 		var u=data.u;
+		console.log(u+": "+event);
 		if (!(u in users)){
 			db.hgetall("U:"+u, function(err, obj){
 				if (obj){
@@ -102,7 +99,8 @@ io.sockets.on("connection", function(socket) {
 	userEvent(socket, "inituser", function(data, user) {
 		var u=data.u;
 		var startdeck = starter[data.e];
-		user.deck = user.pool = starter[data.e] || starter[0];
+		user.deck = starter[data.e] || starter[0];
+		user.pool = user.deck.substring(0, user.deck.length-5);
 		this.emit("userdump", etgutil.useruser(user));
 	});
 	userEvent(socket, "logout", function(data, user) {
@@ -116,11 +114,44 @@ io.sockets.on("connection", function(socket) {
 		delete users[u];
 	});
 	userEvent(socket, "addcard", function(data, user) {
-		// Anything using this API call should eventually be serverside
+		// Anything using this should eventually be serverside
 		user.pool = etgutil.addcard(user.pool, data.c);
+		if (data.o){
+			user.ocard = data.o;
+		}
 	});
 	userEvent(socket, "setdeck", function(data, user){
 		user.deck = etgutil.encodedeck(data.d);
+	});
+	userEvent(socket, "setarena", function(data, user){
+		var au="A:" + data.u;
+		db.hgetall(au, function(err, obj){
+			var adeck = "05" + user.ocard + etgutil.encodedeck(data.d);
+			if (!obj || obj.card != user.ocard){
+				db.hmset(au, {day: etgutil.getDay(), deck: adeck});
+				db.zadd("arena", 500, data.u);
+			}else{
+				db.hset(au, "deck", adeck);
+			}
+		});
+	});
+	userEvent(socket, "modarena", function(data, user){
+		db.zincrby("arena", data.won?1:-1, data.aname);
+	});
+	userEvent(socket, "foearena", function(data, user){
+		db.zcard("arena", function(err, len){
+			if (!len)return;
+			var idx = Math.floor(Math.random()*Math.min(len, 500));
+			db.zrange("arena", idx, idx, function(err, aname){
+				console.log("deck: "+ aname + " " + idx);
+				db.hgetall("A:"+aname, function(err, adeck){
+					var day = etgutil.getDay();
+					var seed = Math.random()*4000000000;
+					var first = seed<2000000000;
+					socket.emit("foearena", {seed: seed, first: first, name: aname, hp:Math.max(202-Math.pow(2, 1+day-adeck.day), 1), deck: etgutil.decodedeck(adeck.deck)})
+				});
+			});
+		});
 	});
 	userEvent(socket, "transmute", function(data, user){
 		var rm = data.rm, add = data.add;

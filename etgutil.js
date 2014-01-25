@@ -43,6 +43,10 @@ exports.useruser = function(servuser){
 	return {
 		auth: servuser.auth,
 		deck: exports.decodedeck(servuser.deck),
-		pool: exports.decodedeck(servuser.pool)
+		pool: exports.decodedeck(servuser.pool),
+		ocard: servuser.ocard
 	};
+}
+exports.getDay = function(){
+	return Math.floor(Date.now()/86400000);
 }
