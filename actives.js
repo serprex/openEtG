@@ -793,9 +793,7 @@ parallel:function(c,t){
 },
 phoenix:function(c,t, index){
 	if (c == t && !c.owner.creatures[index]){
-		c.transform(Cards.Ash.asUpped(c.card.upped));
-		c.owner.creatures[index] = c;
-		c.usedactive = true;
+		c.owner.creatures[index] = new Creature(Cards.Ash.asUpped(c.card.upped), c.owner);
 	}
 },
 photosynthesis:function(c,t){

@@ -54,7 +54,7 @@ accretion:function(c,t){
 },
 adrenaline:function(c,t){
 	var atk = t.trueatk();
-	return c.owner == t.owner && atk>0 && atk<15 && [0, 3, 6, 9, 5, 6, 6, 8, 9, 3, 4, 4, 4, 5, 5, 5][atk];
+	return c.owner == t.owner && !t.status.adrenaline && atk>0 && atk<15 && [0, 3, 6, 9, 5, 6, 6, 8, 9, 3, 4, 4, 4, 5, 5, 5][atk];
 },
 aflatoxin:function(c,t){
 	return c.owner != t.owner && 20-t.truehp();

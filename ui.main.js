@@ -460,6 +460,12 @@ function startMenu(){
 	blogout.click = function(){
 		socket.emit("logout", {u:user.auth});
 		user = undefined;
+		menuui.removeChild(barenai);
+		menuui.removeChild(blogout);
+		menuui.removeChild(bremove);
+		if (oracle){
+			menuui.removeChild(oracle);
+		}
 	}
 	bremove.click = function(){
 		if (foename.value == user.auth){
@@ -472,26 +478,27 @@ function startMenu(){
 	menuui = new PIXI.Stage(0x336699, true);
 	menuui.addChild(brandai);
 	menuui.addChild(brandhb);
-	menuui.addChild(barenai);
 	menuui.addChild(beditor);
-	menuui.addChild(blogout);
-	menuui.addChild(bremove);
-	if (user && user.oracle){
-		// todo user.oracle should be a card, not true. The card is the card that the server itself added. This'll only show what was added
-		delete user.oracle;
-		var card = new Player({rng: new MersenneTwister(Math.random()*40000000)}).randomcard(false,
-			(function(y){return function(x){ return x.type != PillarEnum && ((x.passives.rare != 2) ^ y); }})(Math.random()<.03)).code;
-		socket.emit("addcard", {u:user.auth, c:card, o:card});
-		user.ocard = card;
-		user.pool.push(card);
-		var oracle = new PIXI.Sprite(nopic);
-		oracle.position.x = 600;
-		oracle.position.y = 250;
-		menuui.addChild(oracle);
+	if (user){
+		menuui.addChild(barenai);
+		menuui.addChild(blogout);
+		menuui.addChild(bremove);
+		if (user.oracle){
+			// todo user.oracle should be a card, not true. The card is the card that the server itself added. This'll only show what was added
+			delete user.oracle;
+			var card = new Player({rng: new MersenneTwister(Math.random()*40000000)}).randomcard(false,
+				(function(y){return function(x){ return x.type != PillarEnum && ((x.passives.rare != 2) ^ y); }})(Math.random()<.03)).code;
+			socket.emit("addcard", {u:user.auth, c:card, o:card});
+			user.ocard = card;
+			user.pool.push(card);
+			var oracle = new PIXI.Sprite(nopic);
+			oracle.position.x = 600;
+			oracle.position.y = 250;
+			menuui.addChild(oracle);
+		}
 	}
 	animCb = function(){
-		barenai.visible = bremove.visible = blogout.visible = !!user;
-		if (oracle){
+		if (user && oracle){
 			oracle.setTexture(getArt(card));
 		}
 	}
@@ -593,13 +600,16 @@ function startEditor(){
 		brngcard.click = function(){
 			if (foename.value != "trans"){
 				chatArea.value = "Input 'trans' into Challenge to transmute a random card of your deck's mark per 3 cards in deck";
-			}else if (editordeck.length<3 || (editordeck.length%3)!=0){
+			}else if (editordeck.length<2 || (editordeck.length%2)!=0){
 				chatArea.value = "Transmutation of random cards requires an input size divisible by 3";
 			}else{
 				for(var i=0; i<editordeck.length; i++){
 					var card = CardCodes[editordeck[i]];
 					if(card.passives.rare == 2){
 						chatArea.value = "Transmutation of ultrarares is ill advised";
+						return;
+					}else if(card.upped){
+						chatArea.value = "Transmutation of upped cards is ill advised. May generate 3 for 1 in the future"
 						return;
 					}else if(card.type == PillarEnum){
 						chatArea.value = "Transmutation of pillars is a fool's errand";
@@ -608,7 +618,7 @@ function startEditor(){
 				}
 				var rm = editordeck;
 				editordeck = [];
-				for(var i=0; i<rm.length; i+=3){
+				for(var i=0; i<rm.length; i+=2){
 					editordeck.push(new Player({rng: new MersenneTwister(Math.random()*40000000)}).randomcard(false, function(x){ return x.element == editormark && x.type != PillarEnum && !x.passives.rare; }).code);
 				}
 				socket.emit("transmute", {u: user.auth, rm: rm, add: editordeck});
@@ -645,7 +655,7 @@ function startEditor(){
 			var pillars = filtercards(true, function(x){ return x.type == PillarEnum && !x.passives.rare; });
 			var rm = editordeck;
 			editordeck = [];
-			for(var i=0; i<rm.length; i+=3){
+			for(var i=0; i<rm.length; i+=6){
 				editordeck.push(new Player({rng: new MersenneTwister(Math.random()*40000000)}).randomcard(false, function(x){ return x.element == editormark && x.type != PillarEnum && !x.passives.rare; }).code);
 			}
 			socket.emit("transmute", {u: user.auth, rm: rm, add: editordeck});
