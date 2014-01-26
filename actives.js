@@ -352,7 +352,7 @@ fire:function(c,t){
 	c.owner.spend(Fire, -1);
 },
 firebolt:function(c,t){
-	t.spelldmg(3+Math.floor(c.owner.quanta[Fire]/7)*2);
+	t.spelldmg(3+Math.floor(c.owner.quanta[Fire]/4));
 },
 flatline:function(c,t){
 	if (!c.owner.foe.sanctuary){

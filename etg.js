@@ -187,12 +187,12 @@ Card.prototype.readCost = function(attr, cost){
 }
 Card.prototype.info = function(){
 	if (this.type == PillarEnum){
-		return "1:" + this.element + " " + activename(this.active.cast);
+		return "1:" + this.element + " " + activename(this.active.auto);
 	}else if (this.text){
 		var prefix = this.type == WeaponEnum?"Weapon: deal " + this.attack + " damage each turn. ":
 			this.type == ShieldEnum?"Shield: "+(this.health?"reduce damage by "+this.health+" ":""):
 			this.type == CreatureEnum?this.attack+"|"+this.health+" ":"";
-		return prefix + (this.text || "");
+		return prefix + this.text;
 	}else{
 		var info = ["", "Weapon", "Shield", "", "Spell", ""][this.type];
 		if (this.type == SpellEnum){

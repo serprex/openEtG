@@ -33,7 +33,8 @@ function centerAnchor(obj){
 	obj.anchor.x=obj.anchor.y=.5;
 }
 function hitTest(obj, pos){
-	return pos.x > obj.position.x && pos.y > obj.position.y && pos.x < obj.position.x+obj.width && pos.y < obj.position.y+obj.height;
+	var x = obj.position.x-obj.width*obj.anchor.x, y = obj.position.y-obj.height*obj.anchor.y;
+	return pos.x > x && pos.y > y && pos.x < x+obj.width && pos.y < y+obj.height;
 }
 function setInteractive(){
 	for(var i=0; i<arguments.length; i++){
@@ -398,12 +399,12 @@ function mkAi(level){
 					}
 				}
 				if (!anyshield){
-					var oldcard = CardCodes[deck[0]];
+					var card = CardCodes[deck[0]];
 					ecost[card.costele] -= card.cost;
 					deck[0] = Cards.Shield.asUpped(Math.random()<uprate).code;
 				}
 				if (!anyweapon){
-					var oldcard = CardCodes[deck[1]];
+					var card = CardCodes[deck[1]];
 					ecost[card.costele] -= card.cost;
 					deck[1] = (eles[1]==Air?Cards.ShortBow:
 						eles[1]==Gravity||eles[1]==Earth?Cards.Hammer:
@@ -411,10 +412,21 @@ function mkAi(level){
 						eles[1]==Darkness||eles[1]==Death?Cards.Dagger:
 						Cards.ShortSword).asUpped(Math.random()<uprate).code;
 				}
-				var pillarstart = deck.length, qp=3;
+				var pillarstart = deck.length, qpe=0, qpemin=99;
 				for(var i=1; i<13; i++){
 					if (!ecost[i])continue;
-					for(var j=0; j<Math.round(ecost[i]/5); j++){
+					qpe++;
+					qpemin = Math.min(qpemin, ecost[i]);
+				}
+				if (qpe>=4){
+					for(var i=0; i<qpemin*.8; i++){
+						deck.push(upCode(Cards.QuantumPillar.code));
+						qpe++;
+					}
+				}
+				for(var i=1; i<13; i++){
+					if (!ecost[i])continue;
+					for(var j=0; j<Math.round((ecost[i]-qpemin)/5); j++){
 						deck.push(upCode(pillars[i*2]));
 					}
 				}
@@ -457,8 +469,7 @@ function startMenu(){
 		}
 	}
 	beditor.click = startEditor;
-	blogout.click = function(){
-		socket.emit("logout", {u:user.auth});
+	function logout(){
 		user = undefined;
 		menuui.removeChild(barenai);
 		menuui.removeChild(blogout);
@@ -467,10 +478,14 @@ function startMenu(){
 			menuui.removeChild(oracle);
 		}
 	}
+	blogout.click = function(){
+		socket.emit("logout", {u:user.auth});
+		logout();
+	}
 	bremove.click = function(){
 		if (foename.value == user.auth){
 			socket.emit("delete", {u:user.auth});
-			user = undefined;
+			logout();
 		}else{
 			chatArea.value = "Input '" + user.auth + "' into Challenge to delete your account";
 		}
@@ -1000,23 +1015,46 @@ function startMatch(){
 			for(var i=0; i<foeplays.length; i++){
 				if(hitTest(foeplays[i][1], pos)){
 					cardartcode = foeplays[i][0].code;
+					setInfo(foeplays[i][0]);
 				}
 			}
-			if (game.player1.precognition){
-				for(var i=0; i<game.player2.hand.length; i++){
-					if(hitTest(handsprite[1][i], pos)){
-						cardartcode = game.player2.hand[i].card.code;
+			for(var j=0; j<2; j++){
+				var pl = game.players[j];
+				if (j==0 || game.player1.precognition){
+					for(var i=0; i<pl.hand.length; i++){
+						if(hitTest(handsprite[j][i], pos)){
+							cardartcode = pl.hand[i].card.code;
+							setInfo(pl.hand[i].card);
+						}
 					}
 				}
-			}
-			for(var i=0; i<game.player1.hand.length; i++){
-				if(hitTest(handsprite[0][i], pos)){
-					cardartcode = game.player1.hand[i].card.code;
+				for(var i=0; i<23; i++){
+					var cr = pl.creatures[i];
+					if(cr && hitTest(creasprite[j][i], pos)){
+						cardartcode = cr.card.code;
+						setInfo(cr);
+					}
+				}
+				for(var i=0; i<16; i++){
+					var pr = pl.permanents[i];
+					if(pr && hitTest(permsprite[j][i], pos)){
+						cardartcode = pr.card.code;
+						setInfo(pr);
+					}
+				}
+				if (pl.weapon && hitTest(weapsprite[j], pos)){
+					cardartcode = pl.weapon.card.code;
+					setInfo(pl.weapon);
+				}
+				if (pl.shield && hitTest(shiesprite[j], pos)){
+					cardartcode = pl.shield.card.code;
+					setInfo(pl.shield);
 				}
 			}
 			if(cardartcode){
 				cardart.setTexture(getArt(cardartcode));
 				cardart.visible = true;
+				cardart.position.y = pos.y>300?44:300;
 			}else cardart.visible = false;
 		}else{
 			if(game.arena){
@@ -1046,7 +1084,9 @@ function startMatch(){
 				cardart.visible = false;
 			}
 		}
-		if ((cancel.visible = game.phase != EndPhase)){
+		if (game.phase != EndPhase){
+			cancel.visible = true;
+			maybeSetText(endturn, game.phase == PlayPhase?"End Turn":"Accept Hand");
 			maybeSetText(cancel, game.phase == PlayPhase?"Cancel":"Mulligan");
 		}
 		maybeSetText(turntell, discarding?"Discard":targetingMode?targetingText:game.turn == game.player1?"Your Turn":"Their Turn");
@@ -1134,7 +1174,7 @@ function startMatch(){
 				if (pr && !(j == 1 && cloakgfx.visible && !pr.passives.cloak)){
 					permsprite[j][i].setTexture(getPermanentImage(pr.card.code));
 					permsprite[j][i].visible = true;
-					permsprite[j][i].alpha = permsprite[j][i].status.immaterial?.7:1;
+					permsprite[j][i].alpha = pr.status.immaterial?.7:1;
 					var child = permsprite[j][i].getChildAt(0);
 					child.visible = true;
 					if (pr instanceof Pillar){
@@ -1179,7 +1219,7 @@ function startMatch(){
 	cloakgfx.drawRect(130, 20, 660, 280);
 	cloakgfx.endFill();
 	gameui.addChild(cloakgfx);
-	var endturn = new PIXI.Text("End Turn", {font: "16px Dosis"});
+	var endturn = new PIXI.Text("Accept Hand", {font: "16px Dosis"});
 	endturn.position.x = 800;
 	endturn.position.y = 540;
 	endturn.interactive = true;
@@ -1330,9 +1370,6 @@ function startMatch(){
 				creasprite[j][i].position = creaturePos(j, i);
 				creasprite[j][i].interactive = true;
 				(function(_i){
-					creasprite[j][i].mouseover = function(){
-						setInfo(game.players[_j].creatures[_i]);
-					}
 					creasprite[j][i].click = function(){
 						if (game.phase != PlayPhase)return;
 						var crea = game.players[_j].creatures[_i];
@@ -1361,9 +1398,6 @@ function startMatch(){
 				permsprite[j][i].position = permanentPos(j, i);
 				permsprite[j][i].interactive = true;
 				(function(_i){
-					permsprite[j][i].mouseover = function(){
-						setInfo(game.players[_j].permanents[_i]);
-					}
 					permsprite[j][i].click = function(){
 						if (game.phase != PlayPhase)return;
 						var perm = game.players[_j].permanents[_i];
@@ -1401,12 +1435,6 @@ function startMatch(){
 			shietext.position.x = 58;
 			shietext.anchor.x = 1;
 			shiesprite[j].addChild(shietext);
-			weapsprite[j].mouseover = function(){
-				setInfo(game.players[_j].weapon);
-			}
-			shiesprite[j].mouseover = function(){
-				setInfo(game.players[_j].shield);
-			}
 			weapsprite[j].click = function(){
 				if (game.phase != PlayPhase)return;
 				var weap = game.players[_j].weapon;

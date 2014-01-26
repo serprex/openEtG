@@ -84,13 +84,13 @@ bless:function(c,t){
 	return c.owner == t.owner && (t.truehp() == 0 || (t.active.hit && t.trueatk() == 0) ?99:t.trueatk()/t.truehp())
 },
 bravery:function(c,t){
-	return c.owner.hand.length < 6;
+	return c.owner.hand.length < 6 && t.owner.hand.length < 7;
 },
 burrow:function(c,t){
 	return (c.truehp()<3 && !c.status.poison) || c.trueatk()<1;
 },
 butterfly:function(c,t){
-	return c.owner == t.owner && t.active != Actives.destroy && (t.active.cast?t.cast:10)+t.truehp();
+	return c.owner == t.owner && t.active.cast != Actives.destroy && (t.active.cast?t.cast:10)+t.truehp();
 },
 catapult:function(c,t){
 	return t.truehp() > 10 && Math.ceil(t.truehp()*(t.frozen?150:100)/(t.truehp()+100))+(t.status.poison || 0)-t.trueatk();
@@ -178,7 +178,7 @@ fickle:function(c,t){
 	return c.owner == t.owner && !c.owner.cansummon(t);
 },
 firebolt:function(c,t){
-	return c.owner != t.owner && t.truehp() <= 3+Math.floor(c.owner.quanta[Fire]/7)*2 && (t instanceof Player?99:t.trueatk());
+	return c.owner != t.owner && t.truehp() <= 3+Math.floor(c.owner.quanta[Fire]/4) && (t instanceof Player?99:t.trueatk());
 },
 flatline:function(c,t){
 	return !c.owner.foe.sanctuary && !c.owner.foe.flatline;
