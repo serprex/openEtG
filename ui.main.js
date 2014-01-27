@@ -293,13 +293,22 @@ function getDeck(){
 	var deckstring = deckimport.value;
 	return deckstring?deckstring.split(" "):[];
 }
+var aiCommands = [], aiDelay = 0;
 function aiFunc(){
+	var gameBack = game;
+	game = cloneGame(game);
+	var self = game.player2;
 	function iterCore(c, active, useactive){
 		getTarget(c, active, function(t){
 			targetingMode = null;
 			if (!t && !ActivesEval[active.activename](c)){
 				console.log("Hold "+active.activename);
 				return;
+			}
+			if (c instanceof CardInstance){
+				aiCommands.push(["summon", c.getIndex()|tgtToBits(t)<<3]);
+			}else{
+				aiCommands.push(["active", tgtToBits(c)|tgtToBits(t)<<9]);
 			}
 			useactive(t);
 		});
@@ -315,44 +324,48 @@ function aiFunc(){
 	}
 	for(var j=0; j<2; j++){
 		for(var i=0; i<23; i++){
-			var cr = this.creatures[i];
+			var cr = self.creatures[i];
 			if (cr && cr.active.cast && cr.canactive()){
 				iterCore(cr, cr.active.cast, function(t){ cr.useactive(t) });
 			}
 		}
-		var wp=this.weapon, sh=this.shield;
+		var wp=self.weapon, sh=self.shield;
 		if (wp && wp.active.cast && wp.canactive()){
 			iterCore(wp, wp.active.cast, function(t){ wp.useactive(t) });
 		}
 		if (sh && sh.active.cast && sh.canactive()){
 			iterCore(sh, sh.active.cast, function(t){ sh.useactive(t) });
 		}
-		for(var i=this.hand.length-1; i>=0; i--){
-			if (this.cansummon(i)){
-				var cardinst = this.hand[i];
+		for(var i=self.hand.length-1; i>=0; i--){
+			if (self.cansummon(i)){
+				var cardinst = self.hand[i];
 				if (cardinst.card.type == SpellEnum){
-					iterCore(cardinst, cardinst.card.active, function(t){ player2summon(i, t) });
+					iterCore(cardinst, cardinst.card.active, function(t){ game.player2.summon(i, t) });
 				}else if(cardinst.card.type == WeaponEnum){
-					if (!this.weapon || this.weapon.card.cost < cardinst.card.cost){
-						player2summon(i);
+					if (!self.weapon || self.weapon.card.cost < cardinst.card.cost){
+						game.player2.summon(i);
+						aiCommands.push(["summon", i]);
 					}
 				}else if(cardinst.card.type == ShieldEnum){
-					if (!this.shield || this.shield.card.cost < cardinst.card.cost){
-						player2summon(i);
+					if (!self.shield || self.shield.card.cost < cardinst.card.cost){
+						game.player2.summon(i);
+						aiCommands.push(["summon", i]);
 					}
 				}else{
-					player2summon(i);
+					game.player2.summon(i);
+					aiCommands.push(["summon", i]);
 				}
 			}
 		}
 		for(var i=0; i<16; i++){
-			var pr = this.permanents[i];
+			var pr = self.permanents[i];
 			if (pr && pr.active.cast && pr.canactive()){
 				iterCore(pr, pr.active.cast, function(t){ pr.useactive(t) });
 			}
 		}
 	}
-	this.endturn(this.hand.length==8?0:null);
+	aiCommands.push(["endturn", self.hand.length==8?0:null]);
+	game = gameBack;
 }
 function mkAi(level){
 	return function() {
@@ -433,7 +446,7 @@ function mkAi(level){
 				deck.push(TrueMarks[eles[1]]);
 				chatArea.value = deck.join(" ");
 			}
-			initGame({ first:Math.random()<.5, deck:deck, urdeck:urdeck, seed:Math.random()*4000000000, hp:level==1?100:200 }, aiFunc);
+			initGame({ first:Math.random()<.5, deck:deck, urdeck:urdeck, seed:Math.random()*4000000000, hp:level==1?100:150 }, aiFunc);
 		}
 	}
 }
@@ -934,6 +947,7 @@ function startElementSelect(){
 }
 function startMatch(){
 	player2summon = function(handindex, tgt){
+		console.log("\t" + handindex + " " + game.player2.hand.length);
 		var card = game.player2.hand[handindex].card;
 		var sprite = new PIXI.Sprite(nopic);
 		sprite.position.x=(foeplays.length%9)*100;
@@ -1008,6 +1022,14 @@ function startMatch(){
 	}
 	var cardwon;
 	animCb = function(){
+		if (aiCommands.length && --aiDelay<=0){
+			aiDelay = parseInt(airefresh.value) || 0;
+			do {
+				var cmd = aiCommands.shift();
+				console.log("ai" + cmd[0] + " " + cmd[1]);
+				cmds[cmd[0]](cmd[1]);
+			}while (aiDelay<0 && cmds.length);
+		}
 		var pos=gameui.interactionManager.mouse.global;
 		maybeSetText(endturn, game.winner?(game.winner==game.player1?"Won ":"Lost ")+game.ply:"End Turn");
 		if (!game.winner || !user){
@@ -1137,7 +1159,7 @@ function startMatch(){
 		for(var j=0; j<2; j++){
 			if (game.players[j].sosa){
 				fgfx.beginFill(elecols[Death], .5);
-				var spr = quantatext[j];
+				var spr = hptext[j];
 				fgfx.drawRect(spr.position.x-spr.width/2, spr.position.y-spr.height/2, spr.width, spr.height);
 				fgfx.endFill();
 			}
@@ -1220,9 +1242,13 @@ function startMatch(){
 	cloakgfx.endFill();
 	gameui.addChild(cloakgfx);
 	var endturn = new PIXI.Text("Accept Hand", {font: "16px Dosis"});
+	var cancel = new PIXI.Text("Mulligan", {font: "16px Dosis"});
+	var resign = new PIXI.Text("Resign", {font: "16px Dosis"});
+	var turntell = new PIXI.Text("", {font: "16px Dosis"});
+	var infotext = new PIXI.Sprite(nopic);
+	setInteractive(endturn, cancel, resign);
 	endturn.position.x = 800;
 	endturn.position.y = 540;
-	endturn.interactive = true;
 	endturnFunc = endturn.click = function(e, discard) {
 		if (game.winner){
 			for (var i=0; i<foeplays.length; i++){
@@ -1265,12 +1291,12 @@ function startMatch(){
 		}
 	}
 	gameui.addChild(endturn);
-	var cancel = new PIXI.Text("Mulligan", {font: "16px Dosis"});
 	cancel.position.x = 800;
 	cancel.position.y = 500;
-	cancel.interactive = true;
 	cancelFunc = cancel.click = function() {
-		if ((game.phase == MulliganPhase1 || game.phase == MulliganPhase2) && game.turn == game.player1 && game.player1.hand.length>0){
+		if (resigning){
+			resigning = false;
+		}else if ((game.phase == MulliganPhase1 || game.phase == MulliganPhase2) && game.turn == game.player1 && game.player1.hand.length>0){
 			game.player1.drawhand(game.player1.hand.length-1);
 			socket.emit("mulligan");
 		}else if (game.turn == game.player1){
@@ -1281,12 +1307,25 @@ function startMatch(){
 			}
 		}
 	}
-	var turntell = new PIXI.Text("", {font: "16px Dosis"});
+	gameui.addChild(cancel);
+	resign.position.x = 8;
+	resign.position.y = 24;
+	var resigning;
+	resign.click = function(){
+		if (resign.text == "Resign"){
+			resign.setText("Confirm");
+			resigning = true;
+		}else{
+			if (!game.player2.ai){
+				socket.emit("foeleft");
+			}
+			startMenu();
+		}
+	}
+	gameui.addChild(resign);
 	turntell.position.x = 800;
 	turntell.position.y = 570;
 	gameui.addChild(turntell);
-	gameui.addChild(cancel);
-	var infotext = new PIXI.Sprite(nopic);
 	infotext.position.x=100;
 	infotext.position.y=584;
 	gameui.addChild(infotext);
@@ -1296,59 +1335,6 @@ function startMatch(){
 		}
 	}
 	var handsprite = [new Array(8), new Array(8)];
-	for (var i=0; i<8; i++){
-		handsprite[0][i] = new PIXI.Sprite(nopic);
-		handsprite[0][i].position.x=780;
-		handsprite[0][i].position.y=300+20*i;
-		handsprite[0][i].interactive = true;
-		(function(_i){
-			handsprite[0][i].click = function(){
-				if (game.phase != PlayPhase)return;
-				var cardinst = game.player1.hand[_i];
-				if (cardinst){
-					if (discarding){
-						endturn.click(null, _i);
-					}else if (targetingMode){
-						if (targetingMode(cardinst)){
-							targetingMode = undefined;
-							targetingModeCb(cardinst);
-						}
-					}else if (game.player1.cansummon(_i)){
-						if (cardinst.card.type != SpellEnum){
-							console.log("summoning " + _i);
-							socket.emit("summon", _i);
-							game.player1.summon(_i);
-						}else{
-							getTarget(cardinst, cardinst.card.active, function(tgt) {
-								socket.emit("summon", _i|tgtToBits(tgt)<<3);
-								game.player1.summon(_i, tgt);
-							});
-						}
-					}
-				}
-			}
-		})(i);
-		gameui.addChild(handsprite[0][i]);
-	}
-	for (var i=0; i<8; i++){
-		handsprite[1][i] = new PIXI.Sprite(nopic);
-		handsprite[1][i].position.x = 20;
-		handsprite[1][i].position.y = 40+20*i;
-		handsprite[1][i].interactive = true;
-		(function(_i){
-			handsprite[1][i].click = function(){
-				if (game.phase != PlayPhase)return;
-				if (targetingMode){
-					var cardinst = game.player2.hand[_i];
-					if (cardinst && targetingMode(cardinst)){
-						targetingMode = undefined;
-						targetingModeCb(cardinst);
-					}
-				}
-			}
-		})(i);
-		gameui.addChild(handsprite[1][i]);
-	}
 	var creasprite = [new Array(23), new Array(23)];
 	var permsprite = [new Array(16), new Array(16)];
 	var weapsprite = [new PIXI.Sprite(nopic), new PIXI.Sprite(nopic)];
@@ -1360,6 +1346,39 @@ function startMatch(){
 	var decktext = [new PIXI.Text("", {font: "16px Dosis"}), new PIXI.Text("", {font: "16px Dosis"})];
 	for (var j=0; j<2; j++){
 		(function(_j){
+			for (var i=0; i<8; i++){
+				handsprite[j][i] = new PIXI.Sprite(nopic);
+				handsprite[j][i].position.x=j?20:780;
+				handsprite[j][i].position.y=(j?140:300)+20*i;
+				(function(_i){
+					handsprite[j][i].click = function(){
+						if (game.phase != PlayPhase)return;
+						var cardinst = game.players[_j].hand[_i];
+						if (cardinst){
+							if (!_j && discarding){
+								endturn.click(null, _i);
+							}else if (targetingMode){
+								if (targetingMode(cardinst)){
+									targetingMode = undefined;
+									targetingModeCb(cardinst);
+								}
+							}else if (!_j && game.player1.cansummon(_i)){
+								if (cardinst.card.type != SpellEnum){
+									console.log("summoning " + _i);
+									socket.emit("summon", _i);
+									game.players[_j].summon(_i);
+								}else{
+									getTarget(cardinst, cardinst.card.active, function(tgt) {
+										socket.emit("summon", _i|tgtToBits(tgt)<<3);
+										game.players[_j].summon(_i, tgt);
+									});
+								}
+							}
+						}
+					}
+				})(i);
+				gameui.addChild(handsprite[j][i]);
+			}
 			for (var i=0; i<23; i++){
 				creasprite[j][i] = new PIXI.Sprite(nopic);
 				var creatext = new PIXI.Sprite(nopic);
@@ -1368,7 +1387,6 @@ function startMatch(){
 				creasprite[j][i].addChild(creatext);
 				centerAnchor(creasprite[j][i]);
 				creasprite[j][i].position = creaturePos(j, i);
-				creasprite[j][i].interactive = true;
 				(function(_i){
 					creasprite[j][i].click = function(){
 						if (game.phase != PlayPhase)return;
@@ -1396,7 +1414,6 @@ function startMatch(){
 				permsprite[j][i].addChild(permtext);
 				centerAnchor(permsprite[j][i]);
 				permsprite[j][i].position = permanentPos(j, i);
-				permsprite[j][i].interactive = true;
 				(function(_i){
 					permsprite[j][i].click = function(){
 						if (game.phase != PlayPhase)return;
@@ -1416,15 +1433,16 @@ function startMatch(){
 				})(i);
 				gameui.addChild(permsprite[j][i]);
 			}
+			setInteractive.apply(null, handsprite[j]);
+			setInteractive.apply(null, creasprite[j]);
+			setInteractive.apply(null, permsprite[j]);
 			centerAnchor(weapsprite[j]);
 			centerAnchor(shiesprite[j]);
 			centerAnchor(marksprite[j]);
 			weapsprite[j].position.x=690;
 			weapsprite[j].position.y=530;
-			weapsprite[j].interactive = true;
 			shiesprite[j].position.x=690;
 			shiesprite[j].position.y=560;
-			shiesprite[j].interactive = true;
 			marksprite[j].position.x = 690;
 			marksprite[j].position.y = 500;
 			var weaptext = new PIXI.Sprite(nopic);
@@ -1500,7 +1518,6 @@ function startMatch(){
 				child.position.x = (k&1)?0:54;
 				child.position.y = Math.floor((k-1)/2)*32;
 			}
-			hptext[j].interactive = true;
 			hptext[j].mouseover = function(){
 				setInfo(game.players[_j]);
 			}
@@ -1512,6 +1529,9 @@ function startMatch(){
 				}
 			}
 		})(j);
+		setInteractive.apply(null, weapsprite);
+		setInteractive.apply(null, shiesprite);
+		setInteractive.apply(null, hptext);
 		gameui.addChild(quantatext[j]);
 		gameui.addChild(hptext[j]);
 		gameui.addChild(poisontext[j]);
@@ -1566,6 +1586,19 @@ function getTextImage(text, font, color){
 	rtex.render(doc);
 	return tximgcache[font][text][color] = rtex;
 }
+var cmds = {};
+cmds.endturn = function(data) {
+	game.player2.endturn(data);
+}
+cmds.summon = function(bits) {
+	console.log("summon call: " + bits);
+	player2summon(bits&7, bitsToTgt(bits>>3));
+}
+cmds.active = function(bits) {
+	var c=bitsToTgt(bits&511), t=bitsToTgt((bits>>9)&511);
+	console.log("active call: " + bits);
+	c.useactive(t);
+}
 var socket = io.connect(location.hostname, {port: 13602});
 socket.on("pvpgive", initGame);
 socket.on("foearena", function(data){
@@ -1579,18 +1612,9 @@ socket.on("userdump", function(data){
 		deckimport.value = user.deck.join(" ");
 	}
 });
-socket.on("endturn", function(data) {
-	game.player2.endturn(data);
-});
-socket.on("summon", function(bits) {
-	console.log("summon call: " + bits);
-	player2summon(bits&7, bitsToTgt(bits>>3));
-});
-socket.on("active", function(bits) {
-	var c=bitsToTgt(bits&511), t=bitsToTgt((bits>>9)&511);
-	console.log("active call: " + bits);
-	c.useactive(t);
-});
+socket.on("endturn", cmds.endturn);
+socket.on("summon", cmds.summon);
+socket.on("active", cmds.active);
 socket.on("foeleft", function(data) {
 	if (game && !game.player2.ai){
 		setWinner(game, game.player1);

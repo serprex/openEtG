@@ -58,6 +58,25 @@ function mkGame(first, seed){
 	game.turn = first?game.player1:game.player2;
 	return game;
 }
+function cloneRng(rng){
+	var obj = new MersenneTwister(0);
+	obj.mti = rng.mti;
+	obj.mt = rng.mt.slice();
+	return obj;
+}
+function cloneGame(game){
+	var obj = {
+		rng: cloneRng(game.rng),
+		ply: game.ply
+	};
+	obj.player1 = game.player1.clone(obj),
+	obj.player2 = game.player2.clone(obj),
+	obj.player1.foe = obj.player2;
+	obj.player2.foe = obj.player1;
+	obj.players = [obj.player1, obj.player2];
+	obj.turn = game.turn == game.player1?obj.player1:obj.player2;
+	return obj;
+}
 function setWinner(game, play){
 	if (!game.winner){
 		game.winner=play;
@@ -176,6 +195,52 @@ function isEmpty(obj){
 		}
 	}
 	return true;
+}
+Player.prototype.clone = function(game){
+	var obj = new Player(game);
+	for(var key in this){
+		if (key == "status" || key == "shardgolem"){
+			obj[key] = clone(this[key]);
+		}else if (key != "owner" && key != "game"){
+			var val = this[key];
+			if (Array.isArray(val)){
+				var arr = obj[key] = val.slice();
+				if (key == "creatures" || key == "permanents" || key == "hand"){
+					for(var i=0; i<arr.length; i++){
+						if (arr[i]){
+							arr[i] = arr[i].clone(obj);
+						}
+					}
+				}
+			}else obj[key] = val;
+		}
+	}
+	return obj;
+}
+CardInstance.prototype.clone = function(owner){
+	return new CardInstance(this.card, owner);
+}
+Creature.prototype.clone = function(owner){
+	var obj = new Creature(this.card, owner);
+	for(var attr in this){
+		if (this.hasOwnProperty(attr))obj[attr] = this[attr];
+	}
+	obj.passives = clone(this.passives);
+	obj.active = clone(this.active);
+	obj.status = clone(this.status);
+	obj.owner = owner;
+	return obj;
+}
+Permanent.prototype.clone = function(owner){
+	var obj = new Permanent(this.card, owner);
+	for(var attr in this){
+		if (this.hasOwnProperty(attr))obj[attr] = this[attr];
+	}
+	obj.passives = clone(this.passives);
+	obj.active = clone(this.active);
+	obj.status = clone(this.status);
+	obj.owner = owner;
+	return obj;
 }
 Card.prototype.readCost = function(attr, cost){
 	var c=cost.split(":");
@@ -307,11 +372,7 @@ Player.prototype.endturn = function(discard) {
 			}
 			p.usedactive = false;
 			if (p.passives.stasis){
-				if (--p.status.charges < 0){
-					delete this.permanents[i];
-				}else{
-					stasisFlag = true;
-				}
+				stasisFlag = true;
 			}else if (p.passives.flooding && !floodingPaidFlag){
 				floodingPaidFlag = true;
 				floodingFlag = true;
@@ -326,9 +387,7 @@ Player.prototype.endturn = function(discard) {
 		}
 		if ((p=this.foe.permanents[i])){
 			if (p.passives.stasis){
-				if (--p.status.charges < 0){
-					delete this.foe.permanents[i];
-				}else stasisFlag = true;
+				stasisFlag = true;
 			}else if (p.passives.flooding){
 				floodingFlag = true;
 			}

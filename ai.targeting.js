@@ -42,6 +42,9 @@ function ActivesEvalMassCC(c,t){
 	}
 	return a>2;
 }
+function ActivesEvalFlatCC(c,t, dmg){
+	return c.owner != t.owner && (t instanceof Player?t.hp < 10 && 99:t.trueatk()/(Math.ceil(t.truehp()/dmg) || 5));
+}
 var ActivesEval = {
 ablaze:function(c,t){
 	return true;
@@ -60,9 +63,7 @@ aflatoxin:function(c,t){
 	return c.owner != t.owner && 20-t.truehp();
 },
 aggroskele:function(c,t){
-	if (c.owner == t.owner){
-		return false;
-	}
+	if (c.owner == t.owner)return false;
 	var dmg = 0;
 	for (var i=0; i<23; i++){
 		if (c.owner.creatures[i] && c.owner.creatures[i].card.isOf(Cards.Skeleton)){
@@ -84,10 +85,10 @@ bless:function(c,t){
 	return c.owner == t.owner && (t.truehp() == 0 || (t.active.hit && t.trueatk() == 0) ?99:t.trueatk()/t.truehp())
 },
 bravery:function(c,t){
-	return c.owner.hand.length < 6 && t.owner.hand.length < 7;
+	return c.owner.hand.length < 6 && c.owner.foe.hand.length < 7;
 },
 burrow:function(c,t){
-	return (c.truehp()<3 && !c.status.poison) || c.trueatk()<1;
+	return (c.truehp()<3 && !c.status.poison) || c.trueatk()<2;
 },
 butterfly:function(c,t){
 	return c.owner == t.owner && t.active.cast != Actives.destroy && (t.active.cast?t.cast:10)+t.truehp();
@@ -114,7 +115,7 @@ corpseexplosion:function(c,t){
 	return t.trueatk()<3 && (t.status.poison || 0) + (t.passives.poisonous?5:3) - t.card.cost;
 },
 cpower:function(c,t){
-	return c.owner == t.owner && (t.truehp() == 0 || (t.active.hit && t.trueatk() == 0) ?99:t.trueatk()/t.truehp());
+	return c.owner == t.owner && (t.truehp() == 0 || (t.active.hit && t.trueatk() == 0)?99:t.trueatk()/t.truehp());
 },
 cseed:function(c,t){
 	return c.owner != t.owner && 10-t.truehp()+t.trueatk();
@@ -199,7 +200,7 @@ gas:function(c,t){
 	return true;
 },
 give:function(c,t){
-	return false;
+	return (t instanceof Shield && c.owner.shield && t.card.cost-c.owner.shield.card.cost) || (t instanceof Weapon && c.owner.weapon && t.card.cost-c.owner.weapon.card.cost);
 },
 gpull:function(c,t){
 	return !c.owner.gpull;
@@ -261,9 +262,7 @@ integrity:function(c,t){
 layegg:function(c,t){
 	return true;
 },
-lightning:function(c,t){
-	return c.owner != t.owner && (t instanceof Player?t.hp < 10:t.trueatk()/(Math.ceil(t.truehp()/5) || 1));
-},
+lightning:function(c,t){ return ActivesEvalFlatCC(c, t, 5); },
 liquid:function(c,t){
 	var hp;
 	return c.owner == t.owner && t.active.hit != Actives.vampire && (hp=t.truehp())>5 && hp;
@@ -396,9 +395,7 @@ siphonstrength:function(c,t){
 skyblitz:function(c,t){
 	return true;
 },
-snipe:function(c,t){
-	return ActivesEval.lightning(c, t);
-},
+snipe:function(c,t){ return ActivesEvalFlatCC(c, t, 3); },
 sosa:function(c,t){
 	return c.owner.hp > (c.card.upped?40:48);
 },
@@ -417,7 +414,7 @@ stoneform:function(c,t){
 storm2:ActivesEvalMassCC,
 storm3:ActivesEvalMassCC,
 swave:function(c,t){
-	return ActivesEval.lightning(c, t);
+	return t.status.frozen?t.trueatk():ActivesEvalFlatCC(c, t, 4);
 },
 tempering:function(c,t){
 	return c.owner == t.owner;

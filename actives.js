@@ -231,7 +231,7 @@ die:function(c,t){
 },
 disarm:function(c,t){
 	if (t instanceof Player && t.weapon && t.hand.length < 8){
-		new CardInstance(t.weapon.card, t);
+		new CardInstance(t.weapon.card, t).place();
 		t.weapon = undefined;
 	}
 },
@@ -512,7 +512,7 @@ ink:function(c,t){
 	p.place();
 },
 innovation:function(c,t){
-	if (!t.owner.sanctuary && t.card != c){
+	if (!t.owner.sanctuary){
 		t.remove();
 		for(var i=0; i<3; i++){
 			t.owner.drawcard();
@@ -767,14 +767,7 @@ paradox:function(c,t){
 	t.die();
 },
 parallel:function(c,t){
-	var copy = new Creature(t.card, c.owner);
-	for(var attr in t){
-		if (t.hasOwnProperty(attr))copy[attr] = t[attr];
-	}
-	copy.passives = clone(t.passives);
-	copy.active = clone(t.active);
-	copy.status = clone(t.status);
-	copy.owner = c.owner;
+	var copy = t.clone(c.owner);
 	copy.place();
 	if (copy.voodoo){
 		c.owner.foe.dmg(copy.maxhp-copy.hp);
@@ -785,7 +778,7 @@ parallel:function(c,t){
 			if (copy.status.delayed){
 				c.owner.foe.delay(copy.status.delayed);
 			}
-			if (copy.status.delayed && copy.status.frozen>c.owner.foe.weapon.frozen){
+			if (copy.status.frozen>c.owner.foe.weapon.frozen){
 				c.owner.foe.freeze(copy.status.frozen);
 			}
 		}

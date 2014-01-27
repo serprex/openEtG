@@ -43,10 +43,6 @@
      * @param {number=} seed The initial seed value.
      */
     var MersenneTwister = function (seed) {
-        if (typeof seed === 'undefined') {
-            seed = new Date().getTime();
-        }
-
         this.mt = new Array(N);
         this.mti = N + 1;
 

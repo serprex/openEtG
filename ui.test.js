@@ -116,6 +116,14 @@ loadcards(function(cards, cardcodes, targeting) {
 		equal(player2.quanta[Light], 0, "Light");
 		equal(player1.quanta[Darkness], 1, "Darkness");
 	});
+	test("Disarm", function() {
+		initTest();
+		new Creature(Cards.Monk, player1).place();
+		new Weapon(Cards.Dagger, player2).place();
+		player1.endturn();
+		ok(!player2.weapon, "Disarmed");
+		equal(player2.hand[0].card, Cards.Dagger, "In hand");
+	});
 	test("Earthquake", function() {
 		initTest();
 		initHand(player1, Cards.AmethystPillar, Cards.AmethystPillar, Cards.AmethystPillar, Cards.AmethystPillar, Cards.AmethystPillar, Cards.AmethystPillar, Cards.AmethystPillar, Cards.AmethystPillar);

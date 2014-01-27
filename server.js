@@ -207,5 +207,6 @@ io.sockets.on("connection", function(socket) {
 	foeEcho(socket, "summon");
 	foeEcho(socket, "active");
 	foeEcho(socket, "chat");
+	foeEcho(socket, "foeleft");
 	foeEcho(socket, "mulligan");
 });
