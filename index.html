@@ -41,11 +41,13 @@
 		<a href="artcredit.htm">Art credits</a>&emsp;&emsp;<a href="http://github.com/serprex/openEtG">Git repo</a>&emsp;&emsp;<a href="http://elementscommunity.org/forum/general-discussion/openetg">Forum topic</a><br/><br/>
 		<input id="username" type="text" placeholder="Username" onkeydown="maybeLogin(event)" />
 		<input id="login" type="submit" value="Login" onclick="loginClick()" /><br/>
+		<input id="password" type="password" placeholder="Insecure Password" onkeydown="maybeLogin(event)" />
+		<input id="change" type="submit" value="Change" onclick="changeClick()" /><br/><br/>
 		<input id="foename" type="text" placeholder="Challenge" onkeydown="maybeChallenge(event)" />
 		<input id="challenge" type="submit" value="Search" onclick="challengeClick()" />
 		<br/><br/><br/><br/>
 		<input id="aideck" type="text" placeholder="AI Deck" style="width:100%" /><br/>
-		<input id="airefresh" type="text" placeholder="Frames per move" style="width:100%" value="5" />
+		<input id="airefresh" type="text" placeholder="AI Speed" style="width:100%" value="" />
 	</div>
 	<div id="bottompane">
 		<input id="deckimport" type="text" placeholder="Deck" style="width:100%" />

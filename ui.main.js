@@ -41,6 +41,12 @@ function setInteractive(){
 		arguments[i].interactive = true;
 	}
 }
+function userEmit(x, data){
+	if (!data)data = {};
+	data.u = user.name;
+	data.a = user.auth;
+	socket.emit(x, data);
+}
 function tgtToBits(x){
 	var bits;
 	if (x == undefined){
@@ -306,9 +312,9 @@ function aiFunc(){
 				return;
 			}
 			if (c instanceof CardInstance){
-				aiCommands.push(["summon", c.getIndex()|tgtToBits(t)<<3]);
+				aiCommands.push(["summon", c.getIndex()|(tgtToBits(t)^8)<<3]);
 			}else{
-				aiCommands.push(["active", tgtToBits(c)|tgtToBits(t)<<9]);
+				aiCommands.push(["active", (tgtToBits(c)^8)|(tgtToBits(t)^8)<<9]);
 			}
 			useactive(t);
 		});
@@ -318,8 +324,7 @@ function aiFunc(){
 			console.log("out " + (t?(t instanceof Player?"player":t.card.name):""));
 			if (t){
 				targetingModeCb(t);
-			}
-			targetingMode = null;
+			}else targetingMode = null;
 		}
 	}
 	for(var j=0; j<2; j++){
@@ -341,17 +346,8 @@ function aiFunc(){
 				var cardinst = self.hand[i];
 				if (cardinst.card.type == SpellEnum){
 					iterCore(cardinst, cardinst.card.active, function(t){ game.player2.summon(i, t) });
-				}else if(cardinst.card.type == WeaponEnum){
-					if (!self.weapon || self.weapon.card.cost < cardinst.card.cost){
-						game.player2.summon(i);
-						aiCommands.push(["summon", i]);
-					}
-				}else if(cardinst.card.type == ShieldEnum){
-					if (!self.shield || self.shield.card.cost < cardinst.card.cost){
-						game.player2.summon(i);
-						aiCommands.push(["summon", i]);
-					}
-				}else{
+				}else if (cardinst.card.type == WeaponEnum ? (!self.weapon || self.weapon.card.cost < cardinst.card.cost):
+					cardinst.card.type == ShieldEnum ? (!self.shield || self.shield.card.cost < cardinst.card.cost):true){
 					game.player2.summon(i);
 					aiCommands.push(["summon", i]);
 				}
@@ -478,7 +474,7 @@ function startMenu(){
 				startEditor();
 				return;
 			}
-			socket.emit("foearena", {u: user.auth});
+			userEmit("foearena");
 		}
 	}
 	beditor.click = startEditor;
@@ -492,15 +488,15 @@ function startMenu(){
 		}
 	}
 	blogout.click = function(){
-		socket.emit("logout", {u:user.auth});
+		userEmit("logout");
 		logout();
 	}
 	bremove.click = function(){
-		if (foename.value == user.auth){
-			socket.emit("delete", {u:user.auth});
+		if (foename.value == user.name){
+			userEmit("delete");
 			logout();
 		}else{
-			chatArea.value = "Input '" + user.auth + "' into Challenge to delete your account";
+			chatArea.value = "Input '" + user.name + "' into Challenge to delete your account";
 		}
 	}
 	menuui = new PIXI.Stage(0x336699, true);
@@ -516,7 +512,7 @@ function startMenu(){
 			delete user.oracle;
 			var card = new Player({rng: new MersenneTwister(Math.random()*40000000)}).randomcard(false,
 				(function(y){return function(x){ return x.type != PillarEnum && ((x.passives.rare != 2) ^ y); }})(Math.random()<.03)).code;
-			socket.emit("addcard", {u:user.auth, c:card, o:card});
+			userEmit("addcard", {c:card, o:card});
 			user.ocard = card;
 			user.pool.push(card);
 			var oracle = new PIXI.Sprite(nopic);
@@ -612,7 +608,7 @@ function startEditor(){
 			editordeck.push(TrueMarks[editormark]);
 			deckimport.value = editordeck.join(" ");
 			if (usePool){
-				socket.emit("setdeck", {u:user.auth, d:editordeck});
+				userEmit("setdeck", {d:editordeck});
 				user.deck = editordeck;
 			}
 			startMenu();
@@ -649,7 +645,7 @@ function startEditor(){
 				for(var i=0; i<rm.length; i+=2){
 					editordeck.push(new Player({rng: new MersenneTwister(Math.random()*40000000)}).randomcard(false, function(x){ return x.element == editormark && x.type != PillarEnum && !x.passives.rare; }).code);
 				}
-				socket.emit("transmute", {u: user.auth, rm: rm, add: editordeck});
+				userEmit("transmute", {rm: rm, add: editordeck});
 				user.deck = editordeck;
 				for(var i=0; i<rm.length; i++){
 					user.pool.splice(user.pool.indexOf(rm[i]), 1);
@@ -680,13 +676,13 @@ function startEditor(){
 					return;
 				}
 			}
-			var pillars = filtercards(true, function(x){ return x.type == PillarEnum && !x.passives.rare; });
 			var rm = editordeck;
 			editordeck = [];
+			var pillars = filtercards(true, function(x){ return x.type == PillarEnum && !x.passives.rare; });
 			for(var i=0; i<rm.length; i+=6){
-				editordeck.push(new Player({rng: new MersenneTwister(Math.random()*40000000)}).randomcard(false, function(x){ return x.element == editormark && x.type != PillarEnum && !x.passives.rare; }).code);
+				editordeck.push(pillars[editormark*2+Math.floor(Math.random()*2)]);
 			}
-			socket.emit("transmute", {u: user.auth, rm: rm, add: editordeck});
+			userEmit("transmute", {rm: rm, add: editordeck});
 			user.deck = editordeck;
 			for(var i=0; i<rm.length; i++){
 				user.pool.splice(user.pool.indexOf(rm[i]), 1);
@@ -694,6 +690,7 @@ function startEditor(){
 			for(var i=0; i<editordeck.length; i++){
 				user.pool.push(editordeck[i]);
 			}
+			processDeck();
 		}
 		bupgrade.position.x = 8;
 		bupgrade.position.y = 128;
@@ -729,7 +726,7 @@ function startEditor(){
 					}
 				}
 			}
-			socket.emit("transmute", {u: user.auth, rm: rm, add: editordeck});
+			userEmit("transmute", {rm: rm, add: editordeck});
 			user.deck = editordeck;
 			for(var i=0; i<rm.length; i++){
 				user.pool.splice(user.pool.indexOf(rm[i]), 1);
@@ -748,9 +745,14 @@ function startEditor(){
 			}
 			editordeck.push(TrueMarks[editormark]);
 			if (usePool){
-				socket.emit("setarena", {u:user.auth, d:editordeck});
+				userEmit("setarena", {d:editordeck});
 			}
 			startMenu();
+		}
+		barena.mouseover = function(){
+			if (user && user.ocard){
+				chatArea.value = "Oracle Card: " + CardCodes[user.ocard].name;
+			}
 		}
 		setInteractive(bclear, bsave, bimport, brngcard, bpillar, bupgrade, barena);
 		editorui.addChild(bclear);
@@ -928,9 +930,9 @@ function startElementSelect(){
 				maybeSetText(eledesc, descr[_i]);
 			}
 			elesel[_i].click = function(){
-				var auth = user.auth;
+				var msg = {u:user.name, a:user.auth, e:_i};
 				user = undefined;
-				socket.emit("inituser", {u:auth, e: _i});
+				socket.emit("inituser", msg);
 				startMenu();
 			}
 		})(i);
@@ -1026,7 +1028,6 @@ function startMatch(){
 			aiDelay = parseInt(airefresh.value) || 0;
 			do {
 				var cmd = aiCommands.shift();
-				console.log("ai" + cmd[0] + " " + cmd[1]);
 				cmds[cmd[0]](cmd[1]);
 			}while (aiDelay<0 && cmds.length);
 		}
@@ -1080,7 +1081,7 @@ function startMatch(){
 			}else cardart.visible = false;
 		}else{
 			if(game.arena){
-				socket.emit("modarena", {u:user.auth, aname:game.arena, won:game.winner == game.player2});
+				userEmit("modarena", {aname:game.arena, won:game.winner == game.player2});
 				delete game.arena;
 			}
 			if(game.winner == game.player1){
@@ -1097,7 +1098,7 @@ function startMatch(){
 						var elewin = foeDeck[Math.floor(Math.random()*foeDeck.length)];
 						cardwon = new Player({rng: new MersenneTwister(Math.random()*40000000)}).randomcard(elewin.upped, function(x){ return x.element == elewin.element && x.type != PillarEnum && x.passives.rare != 2; });
 					}
-					socket.emit("addcard", {u:user.auth, c:cardwon.code})
+					userEmit("addcard", {c:cardwon.code})
 					user.pool.push(cardwon.code);
 				}
 				cardart.setTexture(getArt(cardwon.code));
@@ -1611,6 +1612,11 @@ socket.on("userdump", function(data){
 	if (user.deck){
 		deckimport.value = user.deck.join(" ");
 	}
+	startMenu();
+});
+socket.on("passchange", function(data){
+	user.auth = data;
+	chatArea.value = "Password updated";
 });
 socket.on("endturn", cmds.endturn);
 socket.on("summon", cmds.summon);
@@ -1683,26 +1689,35 @@ document.addEventListener("click", function(e){
 function loginClick(){
 	if (!user){
 		var xhr = new XMLHttpRequest();
-		xhr.open("POST", "auth?"+username.value, true);
+		xhr.open("POST", "auth?u="+encodeURIComponent(username.value)+(password.value.length?"&p="+encodeURIComponent(password.value):""), true);
 		xhr.onreadystatechange = function() {
-			if (this.readyState == 4 && this.status == 200){
-				user = JSON.parse(this.responseText);
-				if (!user){
-					chatArea.value = "No user";
-				}else if (!user.deck){
-					startElementSelect();
-				}else{
-					startMenu();
+			if (this.readyState == 4){
+				if (this.status == 200){
+					user = JSON.parse(this.responseText);
+					if (!user){
+						chatArea.value = "No user";
+					}else if (!user.deck){
+						startElementSelect();
+					}else{
+						startMenu();
+					}
+				}else if (this.status == 404){
+					chatArea.value = "Incorrect password";
+				}else if (this.status == 502){
+					chatArea.value = "Error verifying password";
 				}
 			}
 		}
 		xhr.send();
 	}
 }
+function changeClick(){
+	userEmit("passchange", {p: password.value});
+}
 function challengeClick(){
 	if (Cards){
 		if (user && user.deck){
-			socket.emit("foewant", {u: user.auth, f: foename.value, deck: user.deck});
+			userEmit("foewant", {f: foename.value, deck: user.deck});
 		}else{
 			var deck = getDeck();
 			if ((user && (!user.deck || user.deck.length < 31)) || deck.length < 11){

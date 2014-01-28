@@ -212,7 +212,13 @@ Player.prototype.clone = function(game){
 						}
 					}
 				}
-			}else obj[key] = val;
+			}else if(key == "shield" || key == "weapon"){
+				if (val){
+					obj[key] = val.clone(obj);
+				}
+			}else{
+				obj[key] = val;
+			}
 		}
 	}
 	return obj;
@@ -233,6 +239,39 @@ Creature.prototype.clone = function(owner){
 }
 Permanent.prototype.clone = function(owner){
 	var obj = new Permanent(this.card, owner);
+	for(var attr in this){
+		if (this.hasOwnProperty(attr))obj[attr] = this[attr];
+	}
+	obj.passives = clone(this.passives);
+	obj.active = clone(this.active);
+	obj.status = clone(this.status);
+	obj.owner = owner;
+	return obj;
+}
+Weapon.prototype.clone = function(owner){
+	var obj = new Weapon(this.card, owner);
+	for(var attr in this){
+		if (this.hasOwnProperty(attr))obj[attr] = this[attr];
+	}
+	obj.passives = clone(this.passives);
+	obj.active = clone(this.active);
+	obj.status = clone(this.status);
+	obj.owner = owner;
+	return obj;
+}
+Shield.prototype.clone = function(owner){
+	var obj = new Shield(this.card, owner);
+	for(var attr in this){
+		if (this.hasOwnProperty(attr))obj[attr] = this[attr];
+	}
+	obj.passives = clone(this.passives);
+	obj.active = clone(this.active);
+	obj.status = clone(this.status);
+	obj.owner = owner;
+	return obj;
+}
+Pillar.prototype.clone = function(owner){
+	var obj = new Pillar(this.card, owner);
 	for(var attr in this){
 		if (this.hasOwnProperty(attr))obj[attr] = this[attr];
 	}

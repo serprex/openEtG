@@ -42,6 +42,7 @@ exports.addcard = function(deck, card, x){
 exports.useruser = function(servuser){
 	return {
 		auth: servuser.auth,
+		name: servuser.name,
 		deck: exports.decodedeck(servuser.deck),
 		pool: exports.decodedeck(servuser.pool),
 		ocard: servuser.ocard

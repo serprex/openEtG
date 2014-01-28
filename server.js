@@ -1,29 +1,63 @@
 "use strict"
+var qstring = require("querystring");
 var http = require("http");
+var crypto = require("crypto");
 var connect = require("connect");
 var app = http.createServer(connect().use(connect.compress()).use(connect.static(__dirname)).use(loginAuth));
 var io = require("socket.io").listen(app.listen(13602));
 var redis = require("redis"), db = redis.createClient();
 var etgutil = require("./etgutil");
 
-function loginRespond(res, servuser){
-	var user = etgutil.useruser(servuser), day = etgutil.getDay();
-	if (!servuser.oracle || servuser.oracle < day){
-		servuser.oracle = day;
-		user.oracle = true;
+function loginRespond(res, servuser, pass){
+	if(!servuser.name){
+		servuser.name = servuser.auth;
 	}
-	res.end(JSON.stringify(user));
+	function postHash(err, key){
+		if (err){
+			res.writeHead("503");
+			res.end();
+			return;
+		}
+		key = key.toString("base64");
+		if (!servuser.auth){
+			servuser.auth = key;
+		}else if (servuser.auth != key){
+			console.log("Failed login "+servuser.name);
+			res.writeHead("404");
+			res.end();
+			return;
+		}
+		var user = etgutil.useruser(servuser), day = etgutil.getDay();
+		if (!servuser.oracle || servuser.oracle < day){
+			servuser.oracle = day;
+			user.oracle = true;
+		}
+		res.writeHead("200");
+		res.end(JSON.stringify(user));
+	}
+	if(!servuser.salt){
+		servuser.salt = crypto.pseudoRandomBytes(16).toString("base64");
+		servuser.iter = 100000;
+	}
+	if (pass && pass.length){
+		crypto.pbkdf2(pass, servuser.salt, parseInt(servuser.iter), 64, postHash);
+	}else postHash(null, servuser.name);
 }
 function loginAuth(req, res, next){
 	if (req.url.indexOf("/auth?") == 0){
-		res.writeHead("200");
-		var uname = req.url.substring(6);
-		if (uname in users){
-			loginRespond(res, users[uname]);
+		var paramstring = req.url.substring(6);
+		var params = qstring.parse(paramstring);
+		var name = params.u || paramstring;
+		if (!name.length){
+			res.writeHead("404");
+			res.end();
+			return;
+		}else if (name in users){
+			loginRespond(res, users[name], params.p);
 		}else{
-			db.hgetall("U:"+uname, function (err, obj){
-				users[uname] = obj || {auth: uname};
-				loginRespond(res, users[uname]);
+			db.hgetall("U:"+name, function (err, obj){
+				users[name] = obj || {name: name};
+				loginRespond(res, users[name], params.p);
 			});
 		}
 	}else next();
@@ -66,10 +100,12 @@ function userEvent(socket, event, func){
 			db.hgetall("U:"+u, function(err, obj){
 				if (obj){
 					users[u] = obj;
-					func.call(socket, data, obj);
+					if (data.a == obj.auth){
+						func.call(socket, data, obj);
+					}
 				}
 			});
-		}else{
+		}else if (data.a == users[u].auth){
 			func.call(socket, data, users[u]);
 		}
 	});
@@ -162,7 +198,7 @@ io.sockets.on("connection", function(socket) {
 		}
 		user.deck = etgutil.encodedeck(add);
 	});
-	userEvent(socket, "foewant", function(data) {
+	userEvent(socket, "foewant", function(data){
 		var u=data.u, f=data.f;
 		if (u == f){
 			return;
@@ -181,6 +217,26 @@ io.sockets.on("connection", function(socket) {
 				usersock[f].emit("pvpgive", {first:!first, seed:seed, deck:deck1, urdeck:deck0});
 				delete duels[u];
 			}else duels[f] = u;
+		}
+	});
+	userEvent(socket, "passchange", function(data, user){
+		var pass = data.p || "";
+		if (!pass.length){
+			var hkey = "U:"+user.name;
+			db.hdel(hkey, "salt");
+			db.hdel(hkey, "iter");
+			db.hset(hkey, "auth", user.name);
+			delete user.salt;
+			delete user.iter;
+			user.auth = user.name;
+			socket.emit("passchange", user.name);
+		}else{
+			crypto.pbkdf2(pass, user.salt, parseInt(user.iter), 64, function(err, key){
+				if (!err){
+					user.auth = key.toString("base64");
+					socket.emit("passchange", user.auth);
+				}
+			});
 		}
 	});
 	socket.on("pvpwant", function(data) {
