@@ -1,4 +1,5 @@
 var Cards, CardCodes, Targeting, targetingMode, targetingModeCb, targetingText, game, discarding, animCb, user, renderer, endturnFunc, cancelFunc, foeDeck, player2summon;
+var etg = require("./etgutil.js");
 loadcards(function(cards, cardcodes, targeting) {
 	Cards = cards;
 	CardCodes = cardcodes;
@@ -582,6 +583,17 @@ function startEditor(){
 			}
 		}
 	}
+	function transmute(rm){
+		userEmit("transmute", {rm: etg.encodedeck(rm), add: etg.encodedeck(editordeck)});
+		user.deck = editordeck;
+		for(var i=0; i<rm.length; i++){
+			user.pool.splice(user.pool.indexOf(rm[i]), 1);
+		}
+		for(var i=0; i<editordeck.length; i++){
+			user.pool.push(editordeck[i]);
+		}
+		processDeck();
+	}
 	if (Cards && (!user || user.deck)){
 		var usePool = !!(user && user.deck);
 		var cardminus, cardpool, cardartcode;
@@ -608,7 +620,7 @@ function startEditor(){
 			editordeck.push(TrueMarks[editormark]);
 			deckimport.value = editordeck.join(" ");
 			if (usePool){
-				userEmit("setdeck", {d:editordeck});
+				userEmit("setdeck", {d:etg.encodedeck(editordeck)});
 				user.deck = editordeck;
 			}
 			startMenu();
@@ -632,10 +644,7 @@ function startEditor(){
 					if(card.passives.rare == 2){
 						chatArea.value = "Transmutation of ultrarares is ill advised";
 						return;
-					}else if(card.upped){
-						chatArea.value = "Transmutation of upped cards is ill advised. May generate 3 for 1 in the future"
-						return;
-					}else if(card.type == PillarEnum){
+					}else if(!card.upped && card.type == PillarEnum){
 						chatArea.value = "Transmutation of pillars is a fool's errand";
 						return;
 					}
@@ -643,17 +652,11 @@ function startEditor(){
 				var rm = editordeck;
 				editordeck = [];
 				for(var i=0; i<rm.length; i+=2){
-					editordeck.push(new Player({rng: new MersenneTwister(Math.random()*40000000)}).randomcard(false, function(x){ return x.element == editormark && x.type != PillarEnum && !x.passives.rare; }).code);
+					var upped = CardCodes[rm[i]].upped + CardCodes[rm[i+1]].upped;
+					upped = upped == 1?(Math.random()<.5):(upped == 2);
+					editordeck.push(new Player({rng: new MersenneTwister(Math.random()*40000000)}).randomcard(upped, function(x){ return x.element == editormark && x.type != PillarEnum && !x.passives.rare; }).code);
 				}
-				userEmit("transmute", {rm: rm, add: editordeck});
-				user.deck = editordeck;
-				for(var i=0; i<rm.length; i++){
-					user.pool.splice(user.pool.indexOf(rm[i]), 1);
-				}
-				for(var i=0; i<editordeck.length; i++){
-					user.pool.push(editordeck[i]);
-				}
-				processDeck();
+				transmute(rm);
 			}
 		}
 		bpillar.position.x = 8;
@@ -682,15 +685,7 @@ function startEditor(){
 			for(var i=0; i<rm.length; i+=6){
 				editordeck.push(pillars[editormark*2+Math.floor(Math.random()*2)]);
 			}
-			userEmit("transmute", {rm: rm, add: editordeck});
-			user.deck = editordeck;
-			for(var i=0; i<rm.length; i++){
-				user.pool.splice(user.pool.indexOf(rm[i]), 1);
-			}
-			for(var i=0; i<editordeck.length; i++){
-				user.pool.push(editordeck[i]);
-			}
-			processDeck();
+			transmute(rm);
 		}
 		bupgrade.position.x = 8;
 		bupgrade.position.y = 128;
@@ -726,15 +721,7 @@ function startEditor(){
 					}
 				}
 			}
-			userEmit("transmute", {rm: rm, add: editordeck});
-			user.deck = editordeck;
-			for(var i=0; i<rm.length; i++){
-				user.pool.splice(user.pool.indexOf(rm[i]), 1);
-			}
-			for(var i=0; i<editordeck.length; i++){
-				user.pool.push(editordeck[i]);
-			}
-			processDeck();
+			transmute(rm);
 		}
 		barena.position.x = 8;
 		barena.position.y = 152;
@@ -745,7 +732,7 @@ function startEditor(){
 			}
 			editordeck.push(TrueMarks[editormark]);
 			if (usePool){
-				userEmit("setarena", {d:editordeck});
+				userEmit("setarena", {d:etg.encodedeck(editordeck)});
 			}
 			startMenu();
 		}
@@ -1015,7 +1002,7 @@ function startMatch(){
 			fgfx.endFill();
 		}
 		if (obj.status.poison){
-			fgfx.beginFill(obj.aflatoxin?elecols[Darkness]:elecols[Death], .8);
+			fgfx.beginFill(obj.aflatoxin?elecols[Darkness]:obj.status.poison>0?elecols[Water]:elecols[Death], .8);
 			fgfx.drawRect(x-wid/2+38, y+hei/2-10, 12, 12);
 			fgfx.endFill();
 		}
@@ -1603,14 +1590,19 @@ cmds.active = function(bits) {
 var socket = io.connect(location.hostname, {port: 13602});
 socket.on("pvpgive", initGame);
 socket.on("foearena", function(data){
-	chatArea.value = data.name + ": " + data.deck.join(" ");
-	initGame({ first:data.first, deck:data.deck, urdeck:getDeck(), seed:data.seed, hp:data.hp }, aiFunc);
+	var deck = etg.decodedeck(data.deck);
+	chatArea.value = data.name + ": " + deck.join(" ");
+	initGame({ first:data.first, deck:deck, urdeck:getDeck(), seed:data.seed, hp:data.hp }, aiFunc);
 	game.arena = data.name;
 });
 socket.on("userdump", function(data){
 	user = data;
 	if (user.deck){
+		user.deck = etg.decodedeck(user.deck);
 		deckimport.value = user.deck.join(" ");
+	}
+	if (user.pool){
+		user.pool = etg.decodedeck(user.pool);
 	}
 	startMenu();
 });
@@ -1699,6 +1691,10 @@ function loginClick(){
 					}else if (!user.deck){
 						startElementSelect();
 					}else{
+						user.deck = etg.decodedeck(user.deck);
+						if (user.pool){
+							user.pool = etg.decodedeck(user.pool);
+						}
 						startMenu();
 					}
 				}else if (this.status == 404){

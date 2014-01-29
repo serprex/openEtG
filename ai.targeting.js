@@ -1,5 +1,4 @@
 function evalPickTarget(c, active, targeting){
-	if (!targeting)return;
 	var eval = ActivesEval[active.activename];
 	if (!eval)return;
 	var candidates = [];
@@ -15,6 +14,8 @@ function evalPickTarget(c, active, targeting){
 	for(var j=0; j<2; j++){
 		var pl = j==0?c.owner:c.owner.foe;
 		evalIter(pl);
+		evalIter(pl.weapon);
+		evalIter(pl.shield);
 		for(var i=0; i<23; i++){
 			evalIter(pl.creatures[i]);
 		}
@@ -50,7 +51,7 @@ ablaze:function(c,t){
 	return true;
 },
 accelerationspell:function(c,t){
-	return c.owner == t.owner && t.active.cast != Actives.acceleration && t.truehp();
+	return c.owner == t.owner && !t.hasactive("auto", "acceleration") && t.truehp();
 },
 accretion:function(c,t){
 	return c.owner != t.owner && t.card.cost+1;
@@ -313,7 +314,7 @@ nymph:function(c,t){
 	return c.owner == t.owner;
 },
 overdrivespell:function(c,t){
-	return c.owner == t.owner && t.active.cast != Actives.overdrive && t.truehp();
+	return c.owner == t.owner && !t.hasactive("auto", "overdrive") && t.truehp();
 },
 pandemonium:ActivesEvalMassCC,
 pandemonium2:ActivesEvalMassCC,

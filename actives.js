@@ -353,6 +353,7 @@ fire:function(c,t){
 },
 firebolt:function(c,t){
 	t.spelldmg(3+Math.floor(c.owner.quanta[Fire]/4));
+	t.status.frozen = 0;
 },
 flatline:function(c,t){
 	if (!c.owner.foe.sanctuary){
@@ -554,7 +555,7 @@ integrity:function(c,t){
 	var stat=c.card.upped?5:4;
 	for(var i=c.owner.hand.length-1; i>=0; i--){
 		var card = c.owner.hand[i].card;
-		if (~ShardList.indexOf(card.code)){
+		if (card.passives.shard){
 			if (card.upped){
 				stat++;
 			}
@@ -918,7 +919,7 @@ scramble:function(c,t){
 serendipity:function(c,t){
 	var cards = [], num = Math.min(8-c.owner.hand.length, 3), anyentro = false;
 	for(var i=num-1; i>=0; i--){
-		cards[i] = c.owner.randomcard(c.card.upped, function(x){return x.type != PillarEnum && !~NymphList.indexOf(x.code) && !~ShardList.indexOf(x.code) && (i>0 || anyentro || x.element == Entropy)});
+		cards[i] = c.owner.randomcard(c.card.upped, function(x){return x.type != PillarEnum && !~NymphList.indexOf(x.code) && !x.passives.shard && (i>0 || anyentro || x.element == Entropy)});
 		anyentro |= cards[i].element == Entropy;
 	}
 	for(var i=0; i<num; i++){

@@ -202,6 +202,13 @@ loadcards(function(cards, cardcodes, targeting) {
 		Actives.web(player1, damsel);
 		ok(!damsel.passives.airborne && player1.creatures[1].passives.airborne, "Web'd");
 	});
+	test("Phoenix", function() {
+		initTest();
+		var phoenix = new Creature(Cards.Phoenix, player1);
+		phoenix.place();
+		Actives.lightning(player1, phoenix);
+		equal(player1.creatures[0].card, Cards.Ash, "Ash");
+	});
 	test("Purify", function() {
 		initTest();
 		Actives.poison3(player1);

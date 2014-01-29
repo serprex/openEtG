@@ -35,19 +35,6 @@ var NymphList = [undefined, undefined,
 	"5s4", "7qk",
 	"5v8", "7to",
 	"62c", "80s"];
-var ShardList = [undefined, undefined,
-	"50a", "6uq",
-	"53e", "71u",
-	"56i", "752",
-	"59m", "786",
-	"5cq", "7ba",
-	"5fu", "7ee",
-	"5j2", "7hi",
-	"5m6", "7km",
-	"5pa", "7nq",
-	"5se", "7qu",
-	"5vi", "7u2",
-	"62m", "816"];
 function mkGame(first, seed){
 	var game = { rng: new MersenneTwister(seed), phase: MulliganPhase1, ply: 0 };
 	game.player1 = new Player(game);
@@ -197,11 +184,11 @@ function isEmpty(obj){
 	return true;
 }
 Player.prototype.clone = function(game){
-	var obj = new Player(game);
+	var obj = Object.create(Player.prototype);
 	for(var key in this){
 		if (key == "status" || key == "shardgolem"){
 			obj[key] = clone(this[key]);
-		}else if (key != "owner" && key != "game"){
+		}else{
 			var val = this[key];
 			if (Array.isArray(val)){
 				var arr = obj[key] = val.slice();
@@ -221,13 +208,15 @@ Player.prototype.clone = function(game){
 			}
 		}
 	}
+	obj.game = game;
+	obj.owner = obj;
 	return obj;
 }
 CardInstance.prototype.clone = function(owner){
 	return new CardInstance(this.card, owner);
 }
 Creature.prototype.clone = function(owner){
-	var obj = new Creature(this.card, owner);
+	var obj = Object.create(Creature.prototype);
 	for(var attr in this){
 		if (this.hasOwnProperty(attr))obj[attr] = this[attr];
 	}
@@ -238,7 +227,7 @@ Creature.prototype.clone = function(owner){
 	return obj;
 }
 Permanent.prototype.clone = function(owner){
-	var obj = new Permanent(this.card, owner);
+	var obj = Object.create(Permanent.prototype);
 	for(var attr in this){
 		if (this.hasOwnProperty(attr))obj[attr] = this[attr];
 	}
@@ -249,7 +238,7 @@ Permanent.prototype.clone = function(owner){
 	return obj;
 }
 Weapon.prototype.clone = function(owner){
-	var obj = new Weapon(this.card, owner);
+	var obj = Object.create(Weapon.prototype);
 	for(var attr in this){
 		if (this.hasOwnProperty(attr))obj[attr] = this[attr];
 	}
@@ -260,7 +249,7 @@ Weapon.prototype.clone = function(owner){
 	return obj;
 }
 Shield.prototype.clone = function(owner){
-	var obj = new Shield(this.card, owner);
+	var obj = Object.create(Shield.prototype);
 	for(var attr in this){
 		if (this.hasOwnProperty(attr))obj[attr] = this[attr];
 	}
@@ -271,7 +260,7 @@ Shield.prototype.clone = function(owner){
 	return obj;
 }
 Pillar.prototype.clone = function(owner){
-	var obj = new Pillar(this.card, owner);
+	var obj = Object.create(Pillar.prototype);
 	for(var attr in this){
 		if (this.hasOwnProperty(attr))obj[attr] = this[attr];
 	}

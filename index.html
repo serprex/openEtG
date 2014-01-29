@@ -32,6 +32,7 @@
 	</style>
 	<script src="/socket.io/socket.io.js"></script>
 	<script src="pixi.js"></script>
+	<script src="etgify.js"></script>
 	<script src="js.js"></script>
 	<script src="ui.main.js" defer></script>
 </head>
@@ -39,9 +40,9 @@
 	<div id="leftpane"/>
 	<div id="rightpane">
 		<a href="artcredit.htm">Art credits</a>&emsp;&emsp;<a href="http://github.com/serprex/openEtG">Git repo</a>&emsp;&emsp;<a href="http://elementscommunity.org/forum/general-discussion/openetg">Forum topic</a><br/><br/>
-		<input id="username" type="text" placeholder="Username" onkeydown="maybeLogin(event)" />
+		<input id="username" type="text" placeholder="Username" onkeydown="maybeLogin(event)" tabindex=1 />
 		<input id="login" type="submit" value="Login" onclick="loginClick()" /><br/>
-		<input id="password" type="password" placeholder="Insecure Password" onkeydown="maybeLogin(event)" />
+		<input id="password" type="password" placeholder="Insecure Password" onkeydown="maybeLogin(event)" tabindex=2 />
 		<input id="change" type="submit" value="Change" onclick="changeClick()" /><br/><br/>
 		<input id="foename" type="text" placeholder="Challenge" onkeydown="maybeChallenge(event)" />
 		<input id="challenge" type="submit" value="Search" onclick="challengeClick()" />

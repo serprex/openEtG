@@ -47,7 +47,6 @@ function Card(type, info){
 	}
 }
 function Thing(card, owner){
-	if (!card)return;
 	this.owner = owner;
 	this.card = card;
 	if (this.status){
@@ -109,9 +108,6 @@ function Creature(card, owner){
 	}else this.transform(card, owner);
 }
 function Permanent(card, owner){
-	if (!card){
-		return;
-	}
 	this.cast = card.cast;
 	this.castele = card.castele;
 	this.usedactive = true;
@@ -134,10 +130,10 @@ function CardInstance(card, owner){
 	this.owner = owner;
 	this.card = card;
 }
-Player.prototype = new Thing();
-Creature.prototype = new Thing();
-Permanent.prototype = new Thing();
-Weapon.prototype = new Permanent();
-Shield.prototype = new Permanent();
-Pillar.prototype = new Permanent();
-CardInstance.prototype = new Thing();
+Player.prototype = Object.create(Thing.prototype);
+Creature.prototype = Object.create(Thing.prototype);
+Permanent.prototype = Object.create(Thing.prototype);
+Weapon.prototype = Object.create(Permanent.prototype);
+Shield.prototype = Object.create(Permanent.prototype);
+Pillar.prototype = Object.create(Permanent.prototype);
+CardInstance.prototype = Object.create(Thing.prototype);

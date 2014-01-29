@@ -1,4 +1,7 @@
 rule concat
  command=grunt concat
+rule browserify
+ command=browserify -r ./etgutil.js -o etgify.js
 build js.js:concat MersenneTwister.js classes.js actives.js animations.js etg.js ai.targeting.js Gruntfile.js
+build etgify.js:browserify etgutil.js
 default js.js

@@ -39,15 +39,3 @@ exports.addcard = function(deck, card, x){
 	}
 	return x<=0?deck:deck + encodeCount(x) + card;
 }
-exports.useruser = function(servuser){
-	return {
-		auth: servuser.auth,
-		name: servuser.name,
-		deck: exports.decodedeck(servuser.deck),
-		pool: exports.decodedeck(servuser.pool),
-		ocard: servuser.ocard
-	};
-}
-exports.getDay = function(){
-	return Math.floor(Date.now()/86400000);
-}

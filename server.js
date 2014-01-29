@@ -27,7 +27,7 @@ function loginRespond(res, servuser, pass){
 			res.end();
 			return;
 		}
-		var user = etgutil.useruser(servuser), day = etgutil.getDay();
+		var user = useruser(servuser), day = getDay();
 		if (!servuser.oracle || servuser.oracle < day){
 			servuser.oracle = day;
 			user.oracle = true;
@@ -110,6 +110,18 @@ function userEvent(socket, event, func){
 		}
 	});
 }
+function useruser(servuser){
+	return {
+		auth: servuser.auth,
+		name: servuser.name,
+		deck: servuser.deck,
+		pool: servuser.pool,
+		ocard: servuser.ocard
+	};
+}
+function getDay(){
+	return Math.floor(Date.now()/86400000);
+}
 
 var starter = [
 	"01530015660159001599016220d4sa034sb024sd014vm014vu0152p0155u015c1015cc015fa015il015in015lf015ln015os015oj015ri015rn015uo015uv018pi",
@@ -136,7 +148,7 @@ io.sockets.on("connection", function(socket) {
 		var startdeck = starter[data.e];
 		user.deck = starter[data.e] || starter[0];
 		user.pool = user.deck.substring(0, user.deck.length-5);
-		this.emit("userdump", etgutil.useruser(user));
+		this.emit("userdump", useruser(user));
 	});
 	userEvent(socket, "logout", function(data, user) {
 		var u=data.u;
@@ -156,14 +168,14 @@ io.sockets.on("connection", function(socket) {
 		}
 	});
 	userEvent(socket, "setdeck", function(data, user){
-		user.deck = etgutil.encodedeck(data.d);
+		user.deck = data.d;
 	});
 	userEvent(socket, "setarena", function(data, user){
 		var au="A:" + data.u;
 		db.hgetall(au, function(err, obj){
-			var adeck = "05" + user.ocard + etgutil.encodedeck(data.d);
+			var adeck = "05" + user.ocard + data.d;
 			if (!obj || obj.card != user.ocard){
-				db.hmset(au, {day: etgutil.getDay(), deck: adeck});
+				db.hmset(au, {day: getDay(), deck: adeck});
 				db.zadd("arena", 0, data.u);
 			}else{
 				db.hset(au, "deck", adeck);
@@ -180,23 +192,23 @@ io.sockets.on("connection", function(socket) {
 			db.zrange("arena", idx, idx, function(err, aname){
 				console.log("deck: "+ aname + " " + idx);
 				db.hgetall("A:"+aname, function(err, adeck){
-					var day = etgutil.getDay();
+					var day = getDay();
 					var seed = Math.random()*4000000000;
 					var first = seed<2000000000;
-					socket.emit("foearena", {seed: seed, first: first, name: aname, hp:Math.max(202-Math.pow(2, 1+day-adeck.day), 1), deck: etgutil.decodedeck(adeck.deck)})
+					socket.emit("foearena", {seed: seed, first: first, name: aname, hp:Math.max(202-Math.pow(2, 1+day-adeck.day), 1), deck: adeck.deck})
 				});
 			});
 		});
 	});
 	userEvent(socket, "transmute", function(data, user){
-		var rm = data.rm, add = data.add;
+		var rm = etgutil.decodedeck(data.rm), add = etgutil.decodedeck(data.add);
 		for(var i=0; i<rm.length; i++){
 			user.pool = etgutil.addcard(user.pool, rm[i], -1);
 		}
 		for(var i=0; i<add.length; i++){
 			user.pool = etgutil.addcard(user.pool, add[i]);
 		}
-		user.deck = etgutil.encodedeck(add);
+		user.deck = data.add;
 	});
 	userEvent(socket, "foewant", function(data){
 		var u=data.u, f=data.f;
