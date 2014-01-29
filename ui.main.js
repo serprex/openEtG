@@ -361,7 +361,19 @@ function aiFunc(){
 			}
 		}
 	}
-	aiCommands.push(["endturn", self.hand.length==8?0:null]);
+	var value = 9999;
+	var worstcard = 0
+	for (var i = self.hand.length - 1; i >= 0; i--) {
+		var cardinst = self.hand[i];
+		cardvalue = self.quanta[cardinst.element] - cardinst.card.cost;
+		if (cardinst.card.active.discard != Actives.obsession) cardvalue -= 5;
+		if (cardvalue < value) {
+			value = cardvalue;
+			worstcard = i;
+		}
+
+	}
+	aiCommands.push(["endturn", self.hand.length==8?worstcard:null]);
 	game = gameBack;
 }
 function mkAi(level){
