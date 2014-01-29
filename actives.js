@@ -831,6 +831,9 @@ quint:function(c,t){
 	t.status.immaterial = true;
 	t.status.frozen = 0;
 },
+randomdr:function(c,t){
+	c.dr = c.owner.upto(c.card.upped?4:3);
+},
 rage:function(c,t){
 	var dmg = c.card.upped?6:5;
 	t.atk += dmg;
@@ -848,13 +851,13 @@ rebirth:function(c,t){
 regenerate:function(c,t){
 	c.owner.dmg(-5);
 },
+regrade:function(c,t){
+	t.card = t.card.asUpped(!t.card.upped);
+},
 reinforce:function(c,t){
 	t.atk += c.atk;
 	t.buffhp(c.truehp());
 	c.remove();
-},
-regrade:function(c,t){
-	t.card = t.card.asUpped(!t.card.upped);
 },
 ren:function(c,t){
 	if (!t.hasactive("predeath", "bounce")){
