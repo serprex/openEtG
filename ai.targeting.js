@@ -110,7 +110,7 @@ chimera:function(c,t){
 	return atk >= c.owner.foe.hp;
 },
 clear:function(c,t){
-	return c.owner != t.owner? (c.owner.shield && t.status.momentum) || t.status.adrenaline : t.status.delayed || t.status.frozen || t.status.poison;
+	return c.owner != t.owner? (c.owner.shield && t.status.momentum) || t.status.adrenaline : t.status.delayed || t.status.frozen || t.status.poison>0;
 },
 corpseexplosion:function(c,t){
 	return t.trueatk()<3 && (t.status.poison || 0) + (t.passives.poisonous?5:3) - t.card.cost;
@@ -269,7 +269,7 @@ liquid:function(c,t){
 	return c.owner == t.owner && t.active.hit != Actives.vampire && (hp=t.truehp())>5 && hp;
 },
 livingweapon:function(c,t){
-	return false;
+	return c.owner == t.owner && (t.truehp()<3 || t.status.poison>0) && t.trueatk();
 },
 lobotomize:function(c,t){
 	return c.owner != t.owner && (!isEmpty(t.active) || t.status.momentum || t.status.psion);
@@ -344,7 +344,7 @@ precognition:function(c,t){
 	return true;
 },
 purify:function(c,t){
-	return c.owner == t.owner && t.status.poison;
+	return c.owner == t.owner && t.status.poison>0;
 },
 queen:function(c,t){
 	return true;

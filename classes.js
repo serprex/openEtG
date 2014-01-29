@@ -49,6 +49,7 @@ function Card(type, info){
 function Thing(card, owner){
 	this.owner = owner;
 	this.card = card;
+	this.usedactive = true;
 	if (this.status){
 		for(var key in card.status){
 			this.status[key] = card.status[key];
@@ -94,7 +95,6 @@ function Player(game){
 	};
 }
 function Creature(card, owner){
-	this.usedactive = true;
 	if (card == Cards.ShardGolem){
 		this.card = card;
 		this.owner = owner;
@@ -110,7 +110,6 @@ function Creature(card, owner){
 function Permanent(card, owner){
 	this.cast = card.cast;
 	this.castele = card.castele;
-	this.usedactive = true;
 	Thing.apply(this, arguments);
 }
 function Weapon(card, owner){
@@ -118,8 +117,8 @@ function Weapon(card, owner){
 	Permanent.apply(this, arguments);
 }
 function Shield(card, owner){
-	this.dr = card.health
-	Permanent.apply(this, arguments)
+	this.dr = card.health;
+	Permanent.apply(this, arguments);
 }
 function Pillar(card, owner){
 	this.status = {charges: 1};

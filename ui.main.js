@@ -189,7 +189,7 @@ function getCardImage(code){
 		var rend = new PIXI.RenderTexture(100, 20);
 		var graphics = new PIXI.Graphics();
 		graphics.lineStyle(2, 0x222222, 1);
-		graphics.beginFill(card?(card.upped?lighten(elecols[card.element]):elecols[card.element]):code=="0"?elecols[0]:elecols[11]);
+		graphics.beginFill(card?(card.upped?lighten(elecols[card.element]):elecols[card.element]):code=="0"?0x887766:0x111111);
 		graphics.drawRect(0, 0, 100, 20);
 		graphics.endFill();
 		if (card){
