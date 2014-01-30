@@ -388,7 +388,7 @@ sinkhole:function(c,t){
 	return c.owner != t.owner && (!t.status.adrenaline || (atk = t.trueatk()) < 4) && (atk || t.trueatk()) + (t.active.cast?(t.active.cast == Actives.burrow?-1:1):0);
 },
 siphonactive:function(c,t){
-	return c.owner != t.owner;
+	return c.owner != t.owner && !isEmpty(t.active);
 },
 siphonstrength:function(c,t){
 	return c.owner != t.owner && t.truehp();

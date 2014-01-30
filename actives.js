@@ -619,6 +619,7 @@ light:function(c,t){
 },
 lightning:function(c,t){
 	t.spelldmg(5);
+	new TextEffect("-5", tgtToPos(t));
 },
 liquid:function(c,t){
 	t.active = {hit: Actives.vampire};

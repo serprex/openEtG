@@ -698,6 +698,7 @@ Thing.prototype.deatheffect = function(index) {
 		this.active.death(this, this, index)
 	}
 	this.owner.procactive("death", function(c, p) { c.active.death(c, self, index) });
+	new DeathEffect(creaturePos(this.owner == this.owner.game.player1?0:1, index));
 }
 Creature.prototype.die = function() {
 	var index = this.remove();
@@ -708,7 +709,6 @@ Creature.prototype.die = function() {
 		if (!(this.active.predeath && this.active.predeath(this))){
 			this.deatheffect(index);
 		}
-		new DeathEffect(creaturePos(this.owner == this.owner.game.player1?0:1, index));
 	}
 }
 Creature.prototype.transform = function(card, owner){

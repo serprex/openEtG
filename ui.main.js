@@ -94,6 +94,25 @@ function permanentPos(j, i){
 	}
 	return p;
 }
+function tgtToPos(t){
+	if (t instanceof Creature){
+		return creaturePos(t.owner == game.player2, t.getIndex());
+	}else if (t instanceof Weapon){
+		var p =new PIXI.Point(690, 530);
+		if (t == game.player2)reflectPos(p);
+		return p;
+	}else if (t instanceof Shield){
+		var p =new PIXI.Point(690, 560);
+		if (t == game.player2)reflectPos(p);
+		return p;
+	}else if (t instanceof Permanent){
+		return permanentPos(t.owner == game.player2, t.getIndex());
+	}else if (t instanceof Player){
+		var p =new PIXI.Point(50, 560);
+		if (t == game.player2)reflectPos(p);
+		return p;
+	}else console.log("Unknown target");
+}
 function refreshRenderer(){
 	if (renderer){
 		leftpane.removeChild(renderer.view);
@@ -305,6 +324,7 @@ function aiFunc(){
 	var gameBack = game;
 	game = cloneGame(game);
 	var self = game.player2;
+	disableEffects = true;
 	function iterCore(c, active, useactive){
 		getTarget(c, active, function(t){
 			targetingMode = null;
@@ -363,6 +383,7 @@ function aiFunc(){
 	}
 	aiCommands.push(["endturn", self.hand.length==8?0:null]);
 	game = gameBack;
+	disableEffects = false;
 }
 function mkAi(level){
 	return function() {
