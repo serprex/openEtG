@@ -692,7 +692,7 @@ CardInstance.prototype.remove = function(index) {
 	}
 	return index;
 }
-Thing.prototype.deatheffect = function(index) {
+Creature.prototype.deatheffect = function(index) {
 	var self = this;
 	if (this.active.death){
 		this.active.death(this, this, index)
@@ -704,7 +704,7 @@ Creature.prototype.die = function() {
 	var index = this.remove();
 	if (~index){
 		if (this.status.aflatoxin){
-			(this.owner.creatures[index] = new Creature(Cards.MalignantCell, this.owner)).usedactive = false;
+			this.owner.creatures[index] = new Creature(Cards.MalignantCell, this.owner);
 		}
 		if (!(this.active.predeath && this.active.predeath(this))){
 			this.deatheffect(index);

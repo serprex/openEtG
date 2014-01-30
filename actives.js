@@ -17,9 +17,11 @@ function mutantactive(t){
 }
 var Actives = {
 ablaze:function(c,t){
+	new TextEffect("2|0", tgtToPos(c));
 	c.atk += 2;
 },
 acceleration:function(c,t){
+	new TextEffect("2|-1", tgtToPos(c));
 	c.atk += 2;
 	c.dmg(1, true);
 },
@@ -40,9 +42,11 @@ accumulation:function(c,t){
 	return c.status.charges;
 },
 adrenaline:function(c,t){
+	new TextEffect("Adrenaline", tgtToPos(t));
 	t.status.adrenaline = 1;
 },
 aflatoxin:function(c,t){
+	new TextEffect("Aflatoxin", tgtToPos(t));
 	t.addpoison(2);
 	if (!(t instanceof Player)){
 		t.status.aflatoxin = true;
@@ -55,15 +59,18 @@ aggroskele:function(c,t){
 			dmg += c.owner.creatures[i].trueatk();
 		}
 	}
+	new TextEffect(-dmg, tgtToPos(t));
 	t.dmg(dmg);
 },
 air:function(c,t){
 	c.owner.spend(Air, -1);
 },
 antimatter:function(c,t){
+	new TextEffect("Antimatter", tgtToPos(t));
 	t.atk -= t.trueatk(0, true)*2;
 },
 bblood:function(c,t){
+	new TextEffect("0|20", tgtToPos(t));
 	t.buffhp(20);
 	t.delay(6);
 },
@@ -76,6 +83,7 @@ blackhole:function(c,t){
 	}
 },
 bless:function(c,t){
+	new TextEffect("3|3", tgtToPos(t));
 	t.atk += 3;
 	t.buffhp(3);
 },
@@ -113,6 +121,7 @@ butterfly:function(c,t){
 	t.castele = Entropy;
 },
 catapult:function(c,t){
+	new TextEffect("Catapult", tgtToPos(t));
 	t.die();
 	c.owner.foe.dmg(Math.ceil(t.truehp()*(t.frozen?150:100)/(t.truehp()+100)));
 	if (t.status.poison){
@@ -141,6 +150,7 @@ chimera:function(c,t){
 	c.owner.gpull = chim;
 },
 clear:function(c,t){
+	new TextEffect("Clear", tgtToPos(t));
 	t.status.adrenaline = 0;
 	t.status.poison = 0;
 	t.status.aflatoxin = false;
@@ -188,7 +198,7 @@ darkness:function(c,t){
 	c.owner.spend(Darkness, -1);
 },
 deadalive:function(c,t){
-	c.deatheffect();
+	c.deatheffect(c.getIndex());
 },
 deja:function(c,t){
 	delete c.active.cast;
@@ -299,6 +309,7 @@ empathy:function(c,t){
 	for(var i=0; i<23; i++){
 		if (c.owner.creatures[i])healsum++;
 	}
+	new TextEffect("+"+healsum, tgtToPos(t));
 	c.owner.dmg(-healsum);
 },
 enchant:function(c,t){
@@ -375,12 +386,14 @@ flyingweapon:function(c,t){
 	}
 },
 fractal:function(c,t){
+	new TextEffect("Fractal", tgtToPos(t));
 	c.owner.quanta[Aether] = 0;
 	for(var i=c.owner.hand.length; i<8; i++){
 		c.owner.hand[i] = new CardInstance(t.card, c.owner);
 	}
 },
 freeze:function(c,t){
+	new TextEffect("Freeze", tgtToPos(t));
 	t.freeze(c.card.upped && c.card != Cards.PandemoniumUp ? 4 : 3);
 },
 fungusrebirth:function(c,t){
@@ -416,16 +429,16 @@ give:function(c,t){
 	}
 },
 gpull:function(c,t){
+	new TextEffect("Pull", tgtToPos(t));
 	c.owner.gpull = c;
 },
 gpullspell:function(c,t){
 	if (t instanceof Player){
 		delete t.gpull;
-	}else{
-		t.owner.gpull = t;
-	}
+	}else Actives.gpull(t);
 },
 gratitude:function(c,t){
+	new TextEffect("+4", tgtToPos(t));
 	c.owner.dmg(-4);
 },
 grave:function(c,t){
@@ -500,12 +513,11 @@ improve:function(c,t){
 	}
 },
 infect:function(c,t){
+	new TextEffect("Infect", tgtToPos(t));
 	t.addpoison(1);
 },
 infest:function(c,t){
-	if(!c.usedactive){
-		new Creature(Cards.MalignantCell, c.owner).place();
-	}
+	new Creature(Cards.MalignantCell, c.owner).place();
 },
 ink:function(c,t){
 	var p=new Permanent(Cards.Cloak, c.owner);
@@ -618,8 +630,8 @@ light:function(c,t){
 	c.owner.spend(Light, -1);
 },
 lightning:function(c,t){
-	t.spelldmg(5);
 	new TextEffect("-5", tgtToPos(t));
+	t.spelldmg(5);
 },
 liquid:function(c,t){
 	t.active = {hit: Actives.vampire};
@@ -637,6 +649,7 @@ livingweapon:function(c,t){
 	}
 },
 lobotomize:function(c,t){
+	new TextEffect("Lobotomize", tgtToPos(t));
 	t.active = {};
 	t.status.momentum = false;
 	t.status.psion = false;
@@ -714,6 +727,7 @@ neuroify:function(c,t){
 	}
 },
 nightmare:function(c,t){
+	new TextEffect("Nightmare", tgtToPos(t));
 	if (!c.owner.foe.sanctuary){
 		c.owner.dmg(-c.owner.foe.dmg(16-c.owner.foe.hand.length*2));
 		for(var i = c.owner.foe.hand.length; i<8; i++){
@@ -740,6 +754,7 @@ nova2:function(c,t){
 	}
 },
 nymph:function(c,t){
+	new TextEffect("Nymph", tgtToPos(t));
 	var e = t.card.element || c.owner.uptoceil(12);
 	Actives.destroy(c, t);
 	new Creature(CardCodes[NymphList[e*2+(t.card.upped?1:0)]], t.owner).place();
@@ -753,6 +768,7 @@ ouija:function(c,t){
 	}
 },
 overdrive:function(c,t){
+	new TextEffect("2|-1", tgtToPos(c));
 	c.atk += 3;
 	c.dmg(1, true);
 },
@@ -769,6 +785,7 @@ paradox:function(c,t){
 	t.die();
 },
 parallel:function(c,t){
+	new TextEffect("Parallel", tgtToPos(t));
 	var copy = t.clone(c.owner);
 	copy.place();
 	if (copy.voodoo){
@@ -801,7 +818,9 @@ plague:function(c,t){
 	t.masscc(c, Actives.infect);
 },
 platearmor:function(c,t){
-	t.buffhp(c.card.upped?6:4);
+	var buff = c.card.upped?6:4;
+	new TextEffect(buff, tgtToPos(t));
+	t.buffhp(buff);
 },
 poison:function(c,t){
 	(t || c.owner.foe).addpoison(1);
@@ -841,6 +860,7 @@ rage:function(c,t){
 	t.dmg(dmg);
 },
 readiness:function(c,t){
+	new TextEffect("Ready", tgtToPos(t));
 	if (t.active.cast){
 		t.cast = 0;
 		t.usedactive = false;
@@ -871,6 +891,7 @@ rewind:function(c,t){
 	}else if (t.card.isOf(Cards.Mummy)){
 		t.transform(Cards.Pharaoh.asUpped(t.card.upped));
 	}else{
+		new TextEffect("Rewind", tgtToPos(t));
 		t.remove();
 		t.owner.deck.push(t.card);
 	}
@@ -997,6 +1018,7 @@ skyblitz:function(c,t){
 	}
 },
 snipe:function(c,t){
+	new TextEffect("-3", tgtToPos(t));
 	t.dmg(3);
 },
 sosa:function(c,t){
@@ -1068,7 +1090,13 @@ storm3:function(c,t){
 	t.masscc(c, Actives.snipe);
 },
 swave:function(c,t){
-	t.spelldmg(4);
+	if (t.status.frozen){
+		new TextEffect("Death", tgtToPos(t));
+		t.die();
+	}else{
+		new TextEffect("-4", tgtToPos(t));
+		t.spelldmg(4);
+	}
 },
 tempering:function(c,t){
 	t.atk += c.card.upped?4:3;
@@ -1112,6 +1140,7 @@ quantagift:function(c,t){
 	}
 },
 web:function(c,t){
+	new TextEffect("Web", tgtToPos(t));
 	t.passives.airborne = false;
 },
 wisdom:function(c,t){

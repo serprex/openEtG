@@ -119,7 +119,8 @@ cpower:function(c,t){
 	return c.owner == t.owner && (t.truehp() == 0 || (t.active.hit && t.trueatk() == 0)?99:t.trueatk()/t.truehp());
 },
 cseed:function(c,t){
-	return c.owner != t.owner && 10-t.truehp()+t.trueatk();
+	var atk;
+	return c.owner != t.owner && (atk=t.trueatk())>-1 && 10-t.truehp()+atk;
 },
 deadalive:function(c,t){
 	return true;
