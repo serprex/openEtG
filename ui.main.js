@@ -382,20 +382,20 @@ function aiFunc(){
 		}
 	}
 	if (self.hand.length == 8) {
-		var value = 9999;
-		var worstcard = 0
-		for (var i = 0; i < self.hand.length; i++) {
+		var mincardvalue = 999, worstcards;
+		for (var i = 0; i<8; i++) {
 			var cardinst = self.hand[i];
 			var cardvalue = self.quanta[cardinst.card.element] - cardinst.card.cost;
 			if (cardinst.card.type != SpellEnum && cardinst.card.active && cardinst.card.active.discard == Actives.obsession) { cardvalue += 5; }
-			if (cardvalue < value) {
-				value = cardvalue;
-				worstcard = i;
+			if (cardvalue == mincardvalue){
+				worstcards.push(i);
+			}else if (cardvalue < mincardvalue) {
+				mincardvalue = cardvalue;
+				worstcards = [i];
 			}
 		}
-	}
-
-	aiCommands.push(["endturn", self.hand.length==8?worstcard:null]);
+		aiCommands.push(["endturn", worstcards[Math.floor(Math.random()*worstcards.length)]]);
+	}else aiCommands.push(["endturn"]);
 	game = gameBack;
 	disableEffects = false;
 }
