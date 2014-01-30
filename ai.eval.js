@@ -1,4 +1,5 @@
-function evalGameState(game, player) {
+
+function evalGameState(game) {
 	gamevalue = 0
 
 	var ActivesValues = {
@@ -17,7 +18,7 @@ function evalGameState(game, player) {
 		bless:4,
 		boneyard:3,
 		bow:0,
-		bounce:5,
+		bounce:3,
 		bravery:3,
 		burrow:1,
 		butterfly:5,
@@ -33,7 +34,7 @@ function evalGameState(game, player) {
 		deployblobs:5,
 		destroy:8,
 		destroycard:3,
-		devour:7,
+		devour:5,
 		die:0,
 		disarm:5,
 		disfield:8,
@@ -43,7 +44,7 @@ function evalGameState(game, player) {
 		drainlife:4,
 		draft:2,
 		dryspell:5,
-		dshield:13,
+		dshield:4,
 		duality:4,
 		earth:1,
 		earthquake:5,
@@ -135,33 +136,142 @@ function evalGameState(game, player) {
 		regenerate:5,
 		regrade:3,
 		reinforce:4,
-		
-
-
-
-
-
-
+		ren:5,
+		rewind:6,
+		ricochet:4,
+		santuary:5,
+		scarab:3,
+		scavenger:3,
+		scramble:5,
+		serendepity:4,
+		silence:5,
+		singularity:-15,
+		sinkhole:3,
+		siphon:5,
+		siphonactive:6,
+		siphonstrength:4,
+		skyblitz:10,
+		snipe:7,
+		sosa:6,
+		soulcatch:2,
+		spores:4,
+		sskin:5,
+		staff:0,
+		steal:6,
+		steam:6,
+		stoneform:3,
+		storm2:4,
+		storm3:6,
+		swave:6,
+		tempering:3,
+		throwrock:2,
+		unburrow:2,
+		upkeep:0,
+		vampire:4,
+		virusinfect:2,
+		virusplague:4,
+		void:5,
+		quantagift:3,
+		web:2,
+		wisdom:4,
+		yoink:4,
+		pillar:0.3,
+		pend:0.3,
+		blockwithcharge:0,
+		cold:7,
+		despair:5,
+		evade100:10,
+		evade40:6,
+		evade60:7,
+		firewall:7,
+		skull:5,
+		slow:6,
+		solar:3,
+		thorn:5,
+		weight:5,
+		wings:6
 	}
-	for (var j = 1; j > -2; j-=2) {
-		player = j==-1?game.player1:game.player2;
+
+	checkpassivestatus = function(c){
+		score = 0;
+		if (c.status.immaterial) score += 8;
+		if (c.status.frozen || c.status.delayed) score += -3;
+		if (c.status.poison) score += -2;
+		if (c.status.aflatoxin) score += -4
+
+		if (c.passives.airborne) score += 1;
+		if (c.passives.voodoo) score += 2;
+		if (c.passives.swarm) score += 1;
+
+		if (c.passives.stasis) score += 5;
+		if (c.passives.flooding) score += 3;
+		if (c.passives.patience) score += 8;
+		if (c.passives.freeom) score += 6;
+		if (c.passives.nightfall) score += 4;
+		if (c.passives.cloak) score += 3;
+		if (c.passives.tunneling) score += 2;
+		return score;
+	}
+
+	truetrueatk = function (c, oppshield) {
+		var reflected = (oppshield && oppshield.passives.reflect && c.status.psion) ? -1 : 1;
+		var atk = c.trueatk() - (oppshield && !c.status.momentum ? oppshield.truedr() : 0);
+		if (c.status.adrenaline) {
+			dmg = c.trueatk() - (oppshield && !c.status.momentum ? oppshield.truedr() : 0), oldadrenaline = c.status.adrenaline;
+			while (c.status.adrenaline < countAdrenaline(this.trueatk(1))) {
+				adrenaline++;
+				dmg += c.trueatk() - (oppshield && !c.status.momentum ? oppshield.truedr() : 0);
+			}
+			adrenaline = oldadrenaline
+			atk = dmg;
+		}
+		atk *= reflected;
+		return atk;
+	}
+
+	for (var j = 0; j < 2; j++) {
+		var pscore = 0;
+		player = j==0?game.player1:game.player2;
 		foe = player.foe;
 		for (var i = 0; i < 23; i++) {
 			var cr = player.creatures[i];
+			if (cr) {
+				pscore += (cr.active.cast ? ActivesValues[cr.active.cast.activename] : 0);
+				pscore += (cr.active.auto ? ActivesValues[cr.active.auto.activename] : 0);
 
-			gamevalue += (cr.trueatk() - foe.shield?foe.shield.truedr():0) * j;
-			gamevalue += cr.truehp() / 5 * j;
+				pscore += truetrueatk(cr,foe.shield);
+				pscore += cr.truehp() / 2;
+				pscore += checkpassivestatus(cr);
+				
+			}
 		}
 		var wp = player.weapon, sh = player.shield;
 		if (wp) {
-			gamevalue += wp.trueatk();
+			pscore += (wp.active.cast ? ActivesValues[wp.active.cast.activename] : 0);
+			pscore += (wp.active.auto ? ActivesValues[wp.active.auto.activename] : 0);
+			pscore += truetrueatk(wp,foe.shield);
+			pscore += 3;
+			pscore += checkpassivestatus(wp);
 		}
 		if (sh) {
-			//evaluate shield abilities
+			pscore += (sh.active.cast ? ActivesValues[sh.active.cast.activename] : 0);
+			pscore += (sh.active.auto ? ActivesValues[sh.active.auto.activename] : 0);
 		}
 		for (var i = 0; i < 16; i++) {
-			
+			var pm = player.permanents[i];
+			if (pm) {
+				pscore += (pm.active.cast ? ActivesValues[pm.active.cast.activename] : 0);
+				pscore += (pm.active.auto ? ActivesValues[pm.active.auto.activename] : 0);
+				pscore += checkpassivestatus(pm);
 			}
 		}
+		if (player.gpull) {
+			pscore += -player.gpull.trueatk() / 3;
+			pscore += player.gpull.passives.voodoo ? 10 : 0;
+		}
+		gamevalue = (j == 0) ? gamevalue + pscore : gamevalue - pscore;
 	}
-}
+	//For testing only:
+	console.log("Game-value: " + evalGameState(this.game));
+	return gamevalue;
+	}
