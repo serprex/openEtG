@@ -381,7 +381,21 @@ function aiFunc(){
 			}
 		}
 	}
-	aiCommands.push(["endturn", self.hand.length==8?0:null]);
+	if (self.hand.length == 8) {
+		var value = 9999;
+		var worstcard = 0
+		for (var i = 0; i < self.hand.length; i++) {
+			var cardinst = self.hand[i];
+			var cardvalue = self.quanta[cardinst.card.element] - cardinst.card.cost;
+			if (cardinst.card.type != SpellEnum && cardinst.card.active && cardinst.card.active.discard == Actives.obsession) { cardvalue += 5; }
+			if (cardvalue < value) {
+				value = cardvalue;
+				worstcard = i;
+			}
+		}
+	}
+
+	aiCommands.push(["endturn", self.hand.length==8?worstcard:null]);
 	game = gameBack;
 	disableEffects = false;
 }
