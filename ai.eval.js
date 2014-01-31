@@ -208,10 +208,11 @@ function evalGameState(game) {
 			if (c.passives.stasis) score += 5;
 			if (c.passives.flooding) score += 3;
 			if (c.passives.patience) score += 8;
-			if (c.passives.freeom) score += 6;
+			if (c.passives.freedom) score += 6;
 			if (c.passives.nightfall) score += 4;
 			if (c.passives.cloak) score += 3;
 			if (c.passives.tunneling) score += 2;
+			if (c.passives.reflect) score += 1;
 		}
 		return score;
 	}
@@ -234,22 +235,46 @@ function evalGameState(game) {
 	evalcard = function (c) {
 		score = 0;
 		if (c) {
-			if (c.active) {
-				score += (c.active.cast ? ActivesValues[c.active.cast.activename] : 0);
-				score += (c.active.auto ? ActivesValues[c.active.auto.activename] : 0);
+			if (c.active && !isEmpty(c.active)) {
+				for (key in c.active) {
+					score += (c.active[key] ? ActivesValues[c.active[key].activename] : 0);
+				}
+				if (c.active.cast) score *= c.canactive() ? 1 : 0;
+			}
+			if (c instanceof Weapon) {
+				score += truetrueatk(c, foe.shield);
+				score += 3;
+			}
+			if (c instanceof Creature) {
+				score += truetrueatk(c, foe.shield);
+				score += c.truehp() / 5;
 			}
 			score += checkpassivestatus(c);
-		}
-		else if (c.type == WeaponEnum) {
-			score += truetrueatk(c, foe.shield);
-			score += 3;
-		}
-		else if (c.type == CreatureEnum) {
-			score += truetrueatk(c, foe.shield);
-			score += c.truehp() / 2;
+			console.log(c.card.name + " is worth " + score)
 		}
 		return score;
 
+	}
+	evalcardinstance = function (cardInst) {
+		c = cardInst.card;
+		score = 0;
+		if (c.type == SpellEnum)
+			score += ActivesValues[c.active.activename];
+		else {
+			if (c.active && !isEmpty(c.active)) {
+				for (key in c.active) {
+					score += (c.active[key] ? ActivesValues[c.active[key].activename] : 0);
+				}
+			}
+			if (c.type == CreatureEnum)
+				score += c.health / 5;
+			if (c.type == WeaponEnum || c.type == CreatureEnum)
+				score += c.attack;
+			if (c.type == ShieldEnum)
+				score += c.health;			
+		}
+		score += checkpassivestatus(c);
+		return score;
 	}
 
 	for (var j = 0; j < 2; j++) {
@@ -276,21 +301,22 @@ function evalGameState(game) {
 				pscore += evalcard(pm);
 			}
 		}
-		for (var i = 0; i > 12; i++) {
-			pscore += 0.1 * player.quanta[i];
-		}
 		for (var i = 0; i < player.hand.length; i++) {
-			pscore += evalcard(player.hand[i])*0.2;
+			cardvalue = evalcardinstance(player.hand[i]);
+			cardvalue *= player.cansummon(i) ? 0.5 : 0.2;
+			cardvalue *= player.quanta[player.hand[i].card.costele] == 0 ? 0 : 1;
+			pscore += cardvalue;
 		}
 
 		if (player.gpull) {
 			pscore += -player.gpull.trueatk() / 3;
 			pscore += player.gpull.passives.voodoo ? 10 : 0;
 		}
-		pscore += player.hp;
+		pscore += 100 * player.hp / (100 + player.hp);
+		if (game.winner == player) pscore=99999999;
 		gamevalue = (j == 0) ? gamevalue + pscore : gamevalue - pscore;
 	}
 	//For testing only:
-	console.log("Game-value: " + evalGameState(this.game));
+	console.log("Game-value: " + gamevalue);
 	return gamevalue;
 	}
