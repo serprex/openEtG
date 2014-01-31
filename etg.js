@@ -460,6 +460,7 @@ Player.prototype.endturn = function(discard) {
 	this.flatline = this.silence = false;
 	this.foe.precognition = this.foe.sanctuary = false;
 	this.game.turn = this.foe;
+	evalGameState(this.game);
 }
 Player.prototype.procactive = function(name, func) {
 	if (!func){

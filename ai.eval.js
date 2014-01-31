@@ -194,22 +194,25 @@ function evalGameState(game) {
 
 	checkpassivestatus = function(c){
 		score = 0;
-		if (c.status.immaterial) score += 8;
-		if (c.status.frozen || c.status.delayed) score += -3;
-		if (c.status.poison) score += -2;
-		if (c.status.aflatoxin) score += -4
+		if (c.status) {
+			if (c.status.immaterial) score += 8;
+			if (c.status.frozen || c.status.delayed) score += -3;
+			if (c.status.poison) score += -2;
+			if (c.status.aflatoxin) score += -4
+		}
+		if (c.passives) {
+			if (c.passives.airborne) score += 1;
+			if (c.passives.voodoo) score += 2;
+			if (c.passives.swarm) score += 1;
 
-		if (c.passives.airborne) score += 1;
-		if (c.passives.voodoo) score += 2;
-		if (c.passives.swarm) score += 1;
-
-		if (c.passives.stasis) score += 5;
-		if (c.passives.flooding) score += 3;
-		if (c.passives.patience) score += 8;
-		if (c.passives.freeom) score += 6;
-		if (c.passives.nightfall) score += 4;
-		if (c.passives.cloak) score += 3;
-		if (c.passives.tunneling) score += 2;
+			if (c.passives.stasis) score += 5;
+			if (c.passives.flooding) score += 3;
+			if (c.passives.patience) score += 8;
+			if (c.passives.freeom) score += 6;
+			if (c.passives.nightfall) score += 4;
+			if (c.passives.cloak) score += 3;
+			if (c.passives.tunneling) score += 2;
+		}
 		return score;
 	}
 
@@ -228,6 +231,26 @@ function evalGameState(game) {
 		atk *= reflected;
 		return atk;
 	}
+	evalcard = function (c) {
+		score = 0;
+		if (c) {
+			if (c.active) {
+				score += (c.active.cast ? ActivesValues[c.active.cast.activename] : 0);
+				score += (c.active.auto ? ActivesValues[c.active.auto.activename] : 0);
+			}
+			score += checkpassivestatus(c);
+		}
+		else if (c.type == WeaponEnum) {
+			score += truetrueatk(c, foe.shield);
+			score += 3;
+		}
+		else if (c.type == CreatureEnum) {
+			score += truetrueatk(c, foe.shield);
+			score += c.truehp() / 2;
+		}
+		return score;
+
+	}
 
 	for (var j = 0; j < 2; j++) {
 		var pscore = 0;
@@ -236,39 +259,35 @@ function evalGameState(game) {
 		for (var i = 0; i < 23; i++) {
 			var cr = player.creatures[i];
 			if (cr) {
-				pscore += (cr.active.cast ? ActivesValues[cr.active.cast.activename] : 0);
-				pscore += (cr.active.auto ? ActivesValues[cr.active.auto.activename] : 0);
-
-				pscore += truetrueatk(cr,foe.shield);
-				pscore += cr.truehp() / 2;
-				pscore += checkpassivestatus(cr);
+				pscore+=evalcard(cr);
 				
 			}
 		}
 		var wp = player.weapon, sh = player.shield;
 		if (wp) {
-			pscore += (wp.active.cast ? ActivesValues[wp.active.cast.activename] : 0);
-			pscore += (wp.active.auto ? ActivesValues[wp.active.auto.activename] : 0);
-			pscore += truetrueatk(wp,foe.shield);
-			pscore += 3;
-			pscore += checkpassivestatus(wp);
+			pscore += evalcard(wp);
 		}
 		if (sh) {
-			pscore += (sh.active.cast ? ActivesValues[sh.active.cast.activename] : 0);
-			pscore += (sh.active.auto ? ActivesValues[sh.active.auto.activename] : 0);
+			pscore += evalcard(sh);
 		}
 		for (var i = 0; i < 16; i++) {
 			var pm = player.permanents[i];
 			if (pm) {
-				pscore += (pm.active.cast ? ActivesValues[pm.active.cast.activename] : 0);
-				pscore += (pm.active.auto ? ActivesValues[pm.active.auto.activename] : 0);
-				pscore += checkpassivestatus(pm);
+				pscore += evalcard(pm);
 			}
 		}
+		for (var i = 0; i > 12; i++) {
+			pscore += 0.1 * player.quanta[i];
+		}
+		for (var i = 0; i < player.hand.length; i++) {
+			pscore += evalcard(player.hand[i])*0.2;
+		}
+
 		if (player.gpull) {
 			pscore += -player.gpull.trueatk() / 3;
 			pscore += player.gpull.passives.voodoo ? 10 : 0;
 		}
+		pscore += player.hp;
 		gamevalue = (j == 0) ? gamevalue + pscore : gamevalue - pscore;
 	}
 	//For testing only:
