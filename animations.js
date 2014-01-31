@@ -19,8 +19,9 @@ function DeathEffect(pos){
 function TextEffect(text, pos){
 	if (disableEffects)return;
 	this.step = 0;
-	this.gfx = new PIXI.Text(text, {font: "16px Dosis"});
+	this.gfx = new PIXI.Text(text, {font: "16px Dosis white"});
 	this.gfx.position = pos;
+	this.gfx.anchor.x = .5;
 	anims.push(this);
 	gameui.addChild(this.gfx);
 }
@@ -42,7 +43,7 @@ TextEffect.prototype.next = function(){
 		gameui.removeChild(this.gfx);
 		this.remove();
 	}else{
-		this.gfx.position.y -= 4;
-		this.alpha = 1-(Math.pow(this.step, 2)/100);
+		this.gfx.position.y -= 3;
+		this.alpha = 1-(Math.pow(this.step, 2)/225);
 	}
 }

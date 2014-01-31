@@ -468,7 +468,7 @@ function mkAi(level){
 						deck.push(upCode(Cards.QuantumPillar.code));
 						qpe++;
 					}
-				}
+				}else qpemin=0;
 				for(var i=1; i<13; i++){
 					if (!ecost[i])continue;
 					for(var j=0; j<Math.round((ecost[i]-qpemin)/5); j++){
@@ -1037,7 +1037,7 @@ function startMatch(){
 			fgfx.endFill();
 		}
 		if (obj.status.poison){
-			fgfx.beginFill(obj.aflatoxin?elecols[Darkness]:obj.status.poison>0?elecols[Water]:elecols[Death], .8);
+			fgfx.beginFill(obj.aflatoxin?elecols[Darkness]:obj.status.poison>0?elecols[Death]:elecols[Water], .8);
 			fgfx.drawRect(x-wid/2+38, y+hei/2-10, 12, 12);
 			fgfx.endFill();
 		}
@@ -1723,7 +1723,7 @@ function loginClick(){
 					user = JSON.parse(this.responseText);
 					if (!user){
 						chatArea.value = "No user";
-					}else if (!user.deck){
+					}else if (!user.pool){
 						startElementSelect();
 					}else{
 						user.deck = etg.decodedeck(user.deck);
