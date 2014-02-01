@@ -178,7 +178,7 @@ evolve:function(c,t){
 	return true;
 },
 fickle:function(c,t){
-	return c.owner == t.owner && !c.owner.cansummon(t);
+	return c.owner == t.owner && !c.owner.cansummon(t.getIndex());
 },
 firebolt:function(c,t){
 	return c.owner != t.owner && t.truehp() <= 3+Math.floor(c.owner.quanta[Fire]/4) && (t instanceof Player?99:t.trueatk());
@@ -267,7 +267,7 @@ layegg:function(c,t){
 lightning:function(c,t){ return ActivesEvalFlatCC(c, t, 5); },
 liquid:function(c,t){
 	var hp;
-	return c.owner == t.owner && t.active.hit != Actives.vampire && (hp=t.truehp())>5 && hp;
+	return c.owner == t.owner && t.active.hit != Actives.vampire && (hp=t.truehp())>5 && hp*t.trueatk();
 },
 livingweapon:function(c,t){
 	return c.owner == t.owner && (t.truehp()<3 || t.status.poison>0) && t.trueatk();
@@ -282,7 +282,7 @@ lycanthropy:function(c,t){
 	return true;
 },
 metamorph:function(c,t){
-	return false;
+	return c.owner == t;
 },
 miracle:function(c,t){
 	return c.owner.hp < 30;

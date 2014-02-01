@@ -31,7 +31,7 @@
 		}
 	</style>
 	<script src="/socket.io/socket.io.js"></script>
-	<script src="pixi.js"></script>
+	<script src="pixi.dev.js"></script>
 	<script src="etgify.js"></script>
 	<script src="js.js"></script>
 	<script src="ui.main.js" defer></script>
@@ -48,7 +48,7 @@
 		<input id="challenge" type="submit" value="Search" onclick="challengeClick()" />
 		<br/><br/><br/><br/>
 		<input id="aideck" type="text" placeholder="AI Deck" style="width:100%" /><br/>
-		<input id="airefresh" type="text" placeholder="AI Speed" style="width:100%" value="" />
+		<input id="airefresh" type="text" placeholder="AI Speed" style="width:100%" onkeydown="event.cancelBubble=true" />
 	</div>
 	<div id="bottompane">
 		<input id="deckimport" type="text" placeholder="Deck" style="width:100%" />

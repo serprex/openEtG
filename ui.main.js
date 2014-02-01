@@ -1,5 +1,6 @@
 var Cards, CardCodes, Targeting, targetingMode, targetingModeCb, targetingText, game, discarding, animCb, user, renderer, endturnFunc, cancelFunc, foeDeck, player2summon;
-var etg = require("./etgutil.js");
+var etg = require("./etgutil");
+var MersenneTwister = require("./MersenneTwister");
 loadcards(function(cards, cardcodes, targeting) {
 	Cards = cards;
 	CardCodes = cardcodes;
@@ -98,17 +99,17 @@ function tgtToPos(t){
 	if (t instanceof Creature){
 		return creaturePos(t.owner == game.player2, t.getIndex());
 	}else if (t instanceof Weapon){
-		var p =new PIXI.Point(690, 530);
+		var p = new PIXI.Point(690, 530);
 		if (t == game.player2)reflectPos(p);
 		return p;
 	}else if (t instanceof Shield){
-		var p =new PIXI.Point(690, 560);
+		var p = new PIXI.Point(690, 560);
 		if (t == game.player2)reflectPos(p);
 		return p;
 	}else if (t instanceof Permanent){
 		return permanentPos(t.owner == game.player2, t.getIndex());
 	}else if (t instanceof Player){
-		var p =new PIXI.Point(50, 560);
+		var p = new PIXI.Point(50, 560);
 		if (t == game.player2)reflectPos(p);
 		return p;
 	}else console.log("Unknown target");
@@ -971,7 +972,6 @@ function startElementSelect(){
 }
 function startMatch(){
 	player2summon = function(handindex, tgt){
-		console.log("\t" + handindex + " " + game.player2.hand.length);
 		var card = game.player2.hand[handindex].card;
 		var sprite = new PIXI.Sprite(nopic);
 		sprite.position.x=(foeplays.length%9)*100;
@@ -1048,10 +1048,14 @@ function startMatch(){
 	animCb = function(){
 		if (aiCommands.length && --aiDelay<=0){
 			aiDelay = parseInt(airefresh.value) || 0;
+			if (aiDelay == -2){
+				disableEffects = true;
+			}
 			do {
 				var cmd = aiCommands.shift();
 				cmds[cmd[0]](cmd[1]);
 			}while (aiDelay<0 && cmds.length);
+			disableEffects = false;
 		}
 		var pos=gameui.interactionManager.mouse.global;
 		maybeSetText(endturn, game.winner?(game.winner==game.player1?"Won ":"Lost ")+game.ply:"End Turn");
@@ -1581,25 +1585,25 @@ function getTextImage(text, font, color){
 	}else if(color in tximgcache[font][text]){
 		return tximgcache[font][text][color];
 	}
+	var fontprop = {font: font+"px Dosis", fill:color};
 	var doc = new PIXI.DisplayObjectContainer();
-	var pieces = text.replace(/\|/g," | ").split(/(\d+:\d+)/);
+	var pieces = text.replace(/\|/g," | ").split(/(\d\d?:\d\d?)/);
 	var x=0;
 	for(var i=0; i<pieces.length; i++){
 		var piece = pieces[i];
-		if (/^\d+:\d+$/.test(piece)){
+		if (/^\d\d?:\d\d?$/.test(piece)){
 			var parse = piece.split(":");
 			var num = parseInt(parse[0]);
 			var icon = getIcon(parseInt(parse[1]));
 			for(var j=0; j<num; j++){
 				var spr = new PIXI.Sprite(icon);
-				spr.scale.x = .375;
-				spr.scale.y = .375;
+				spr.scale.x = spr.scale.y = .375;
 				spr.position.x = x;
 				x+=12;
 				doc.addChild(spr);
 			}
 		}else{
-			var txt = new PIXI.Text(piece, {font: font+"px Dosis", fill:color});
+			var txt = new PIXI.Text(piece, fontprop);
 			txt.position.x = x;
 			x+=txt.width;
 			doc.addChild(txt);
@@ -1614,12 +1618,13 @@ cmds.endturn = function(data) {
 	game.player2.endturn(data);
 }
 cmds.summon = function(bits) {
-	console.log("summon call: " + bits);
-	player2summon(bits&7, bitsToTgt(bits>>3));
+	var cid = bits&7, t = bitsToTgt(bits>>3);
+	console.log("summon call: " + game.player2.hand[cid].card.name + " " + (t?(t instanceof Player?t == game.player1:t.card.name):"-"));
+	player2summon(cid, t);
 }
 cmds.active = function(bits) {
 	var c=bitsToTgt(bits&511), t=bitsToTgt((bits>>9)&511);
-	console.log("active call: " + bits);
+	console.log("active call: " + c.card.name + " " + (t?(t instanceof Player?t == game.player1:t.card.name):"-"));
 	c.useactive(t);
 }
 var socket = io.connect(location.hostname, {port: 13602});
@@ -1727,6 +1732,7 @@ function loginClick(){
 						startElementSelect();
 					}else{
 						user.deck = etg.decodedeck(user.deck);
+						deckimport.value = user.deck.join(" ");
 						if (user.pool){
 							user.pool = etg.decodedeck(user.pool);
 						}

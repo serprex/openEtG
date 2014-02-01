@@ -47,8 +47,8 @@ function loginAuth(req, res, next){
 	if (req.url.indexOf("/auth?") == 0){
 		var paramstring = req.url.substring(6);
 		var params = qstring.parse(paramstring);
-		var name = params.u || paramstring;
-		if (!name.length){
+		var name = params.u;
+		if (!name){
 			res.writeHead("404");
 			res.end();
 			return;
