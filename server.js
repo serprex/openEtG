@@ -183,7 +183,11 @@ io.sockets.on("connection", function(socket) {
 		});
 	});
 	userEvent(socket, "modarena", function(data, user){
-		db.zincrby("arena", data.won?1:-1, data.aname);
+		db.zincrby("arena", data.won?1:-1, data.aname, function(err, val){
+			if (val<-10){
+				db.zrem("arena", data.aname);
+			}
+		});
 	});
 	userEvent(socket, "foearena", function(data, user){
 		db.zcard("arena", function(err, len){
@@ -219,7 +223,8 @@ io.sockets.on("connection", function(socket) {
 		sockinfo[this.id].deck = data.deck;
 		if (f in users){
 			usersock[u] = this;
-			if (duels[u] == f){
+			if (duels[f] == u){
+				delete duels[f];
 				var seed = Math.random()*4000000000;
 				var first = seed<2000000000;
 				sockinfo[this.id].foe = usersock[f];
@@ -227,8 +232,7 @@ io.sockets.on("connection", function(socket) {
 				var deck0=sockinfo[usersock[f].id].deck, deck1=data.deck;
 				this.emit("pvpgive", {first:first, seed:seed, deck:deck0, urdeck:deck1});
 				usersock[f].emit("pvpgive", {first:!first, seed:seed, deck:deck1, urdeck:deck0});
-				delete duels[u];
-			}else duels[f] = u;
+			}else duels[u] = f;
 		}
 	});
 	userEvent(socket, "passchange", function(data, user){

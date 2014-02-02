@@ -100,11 +100,11 @@ function tgtToPos(t){
 		return creaturePos(t.owner == game.player2, t.getIndex());
 	}else if (t instanceof Weapon){
 		var p = new PIXI.Point(690, 530);
-		if (t == game.player2)reflectPos(p);
+		if (t.owner == game.player2)reflectPos(p);
 		return p;
 	}else if (t instanceof Shield){
 		var p = new PIXI.Point(690, 560);
-		if (t == game.player2)reflectPos(p);
+		if (t.owner == game.player2)reflectPos(p);
 		return p;
 	}else if (t instanceof Permanent){
 		return permanentPos(t.owner == game.player2, t.getIndex());
@@ -690,7 +690,7 @@ function startEditor(){
 				for(var i=0; i<rm.length; i+=2){
 					var upped = CardCodes[rm[i]].upped + CardCodes[rm[i+1]].upped;
 					upped = upped == 1?(Math.random()<.5):(upped == 2);
-					editordeck.push(new Player({rng: new MersenneTwister(Math.random()*40000000)}).randomcard(upped, function(x){ return x.element == editormark && x.type != PillarEnum && !x.passives.rare; }).code);
+					editordeck.push(new Player({rng: new MersenneTwister(Math.random()*40000000)}).randomcard(upped, function(x){ return x.element == editormark && x.type != PillarEnum && !x.passives.rare && !~rm.indexOf(x.code); }).code);
 				}
 				transmute(rm);
 			}
@@ -1124,7 +1124,10 @@ function startMatch(){
 						var elewin = foeDeck[Math.floor(Math.random()*foeDeck.length)];
 						cardwon = new Player({rng: new MersenneTwister(Math.random()*40000000)}).randomcard(elewin.upped, function(x){ return x.element == elewin.element && x.type != PillarEnum && x.passives.rare != 2; });
 					}
-					userEmit("addcard", {c:cardwon.code})
+					if (!game.player2.ai){
+						cardwon = cardwon.asUpped(false);
+					}
+					userEmit("addcard", {c:cardwon.code});
 					user.pool.push(cardwon.code);
 				}
 				cardart.setTexture(getArt(cardwon.code));

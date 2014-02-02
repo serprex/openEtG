@@ -338,6 +338,7 @@ Player.prototype.endturn = function(discard) {
 		var p;
 		if ((p=this.permanents[i])){
 			if(p.active.auto){
+				console.log(p.card.name + " auto " + p.active.auto.activename);
 				p.active.auto(p);
 			}
 			p.usedactive = false;
@@ -769,6 +770,7 @@ Weapon.prototype.attack = Creature.prototype.attack = function(stasis, freedomCh
 	}
 	var target = this.owner.foe;
 	if (this.active.auto && !this.status.frozen && (!this.status.adrenaline || this.status.adrenaline<3)){
+		console.log(this.card.name + " auto " + this.active.auto.activename);
 		this.active.auto(this);
 	}
 	this.usedactive = false;

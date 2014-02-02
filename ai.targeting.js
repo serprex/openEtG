@@ -80,7 +80,12 @@ bblood:function(c,t){
 	return c.owner != t.owner && !t.status.delayed && t.trueatk();
 },
 blackhole:function(c,t){
-	return c.owner != t && !t.sanctuary;
+	if (c.owner == t || t.sanctuary)return false;
+	var sum;
+	for(var i=1; i<13; i++){
+		sum += t.quanta[i];
+	}
+	return sum>3;
 },
 bless:function(c,t){
 	return c.owner == t.owner && (t.truehp() == 0 || (t.active.hit && t.trueatk() == 0) ?99:t.trueatk()/t.truehp())
