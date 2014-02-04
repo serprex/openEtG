@@ -335,8 +335,7 @@ function aiEvalFunc(){
 				game.player2.summon(index, t);
 			}
 		}
-		console.log("HERE " + currentEval);
-		var candidates = [[currentEval]];
+		var candidates = [fullCandidates[0], []];
 		function evalIter(t, ignoret){
 			if (ignoret || (t && targetingMode(t))){
 				var tbits = tgtToBits(t)^8;
@@ -345,11 +344,12 @@ function aiEvalFunc(){
 				var cone = bitsToTgt(cbits), tone = bitsToTgt(tbits);
 				useactive(cone, tone);
 				var v = evalGameState(game);
-				if (!candidates.length || v<candidates[0][0]){
-					candidates = [[v, [c, t, index]]];
-				}else if (v == candidates[0][0]){
-					candidates.push([v, [c, t, index]]);
-				}else console.log(v + " no good");
+				console.log(c + " " + t + " " + v);
+				if (v<candidates[0]){
+					candidates = [v, [[c, t, index]]];
+				}else if (v == candidates[0]){
+					candidates[1].push([c, t, index]);
+				}
 				game = gameBack2;
 			}
 		}
@@ -358,8 +358,18 @@ function aiEvalFunc(){
 				evalIter(undefined, true);
 			}
 			targetingMode = null;
-			if (candidates[0].length > 1){
-				fullCandidates.push(candidates[Math.floor(Math.random()*candidates.length)]);
+			console.log(candidates[1].length);
+			if (candidates[1].length){
+				var v = candidates[0], oldv = fullCandidates[0];
+				if (v > oldv){
+					return;
+				}else{
+					if (v < oldv){
+						fullCandidates = candidates;
+					}else{
+						fullCandidates[1].push(candidates[1][Math.floor(Math.random()*candidates[1].length)]);
+					}
+				}
 			}
 		});
 		if (targetingMode){
@@ -396,7 +406,7 @@ function aiEvalFunc(){
 		}
 		var currentEval = evalGameState(game);
 		console.log("Currently " + currentEval);
-		var fullCandidates = [[currentEval]];
+		var fullCandidates = [currentEval, []];
 		for(var i=0; i<23; i++){
 			var cr = self.creatures[i];
 			if (cr && cr.active.cast && cr.canactive()){
@@ -424,19 +434,18 @@ function aiEvalFunc(){
 				iterCore(pr, pr.active.cast);
 			}
 		}
-		fullCandidates.sort(function(x,y){return (x[0]>y[0])-(x[0]<y[0])});
-		if (fullCandidates[0][0] == currentEval){
+		if (fullCandidates[0] == currentEval){
 			break;
 		}else{
-			console.log(fullCandidates[0] + " " + currentEval);
-			var action = fullCandidates[0][1];
+			var actions = fullCandidates[1], action = actions[Math.floor(Math.random()*actions.length)];
+			console.log(action.join(":"))
 			var c = action[0], t = action[1], index = action[2];
 			if (index === undefined){
-				c.useactive(t);
 				aiCommands.push(["active", (tgtToBits(c)^8)|(tgtToBits(t)^8)<<9]);
+				c.useactive(t);
 			}else{
-				game.player2.summon(index, action[1]);
 				aiCommands.push(["summon", index|(tgtToBits(t)^8)<<3]);
+				game.player2.summon(index, t);
 			}
 		}
 	}
@@ -507,8 +516,8 @@ function aiFunc(){
 					iterCore(cardinst, cardinst.card.active, function(t){ game.player2.summon(i, t) });
 				}else if (cardinst.card.type == WeaponEnum ? (!self.weapon || self.weapon.card.cost < cardinst.card.cost):
 					cardinst.card.type == ShieldEnum ? (!self.shield || self.shield.card.cost < cardinst.card.cost):true){
-					game.player2.summon(i);
 					aiCommands.push(["summon", i]);
+					game.player2.summon(i);
 				}
 			}
 		}

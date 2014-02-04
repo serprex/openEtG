@@ -404,10 +404,11 @@ skyblitz:function(c,t){
 },
 snipe:function(c,t){ return ActivesEvalFlatCC(c, t, 3); },
 sosa:function(c,t){
-	return c.owner.hp > (c.card.upped?40:48);
+	var n = c.card.upped?40:48;
+	return c.owner.hp > Math.max(Math.ceil(c.owner.maxhp*n/100), n);
 },
 sskin:function(c,t){
-	return c.owner.hp < 50 || c.owner.quanta[Earth] > 80;
+	return c.owner.hp < 30 || c.owner.quanta[Earth] > 80;
 },
 steal:function(c,t){
 	return t.card.cost;
