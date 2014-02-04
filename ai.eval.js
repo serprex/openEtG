@@ -286,7 +286,7 @@ function evalGameState(game) {
 		var c = cardInst.card;
 		var score = 0;
 		if (c.type == SpellEnum)
-			score += evalactive(c, c.active);
+			score += evalactive(cardInst, c.active);
 		else {
 			if (c.active && !isEmpty(c.active)) {
 				for (key in c.active) {
