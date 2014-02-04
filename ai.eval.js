@@ -1,4 +1,5 @@
 function evalGameState(game) {
+	"use strict";
 	var disableLogging = true;
 	function log(){
 		if (!disableLogging){
@@ -9,7 +10,7 @@ function evalGameState(game) {
 		ablaze:3,
 		accelerationspell:5,
 		acceleration:function(c){
-			return c.truehp()/4-2;
+			return c.truehp()-2;
 		},
 		accretion:8,
 		adrenaline:8,
@@ -27,7 +28,9 @@ function evalGameState(game) {
 		},
 		bless:4,
 		boneyard:3,
-		bounce:3,
+		bounce:function(c){
+			return c.card.cost+(c.card.upped?1:0);
+		},
 		bravery:3,
 		burrow:1,
 		butterfly:4,
@@ -79,12 +82,14 @@ function evalGameState(game) {
 		grave:4,
 		growth:5,
 		guard:5,
-		hasten:3,
+		hasten:function(c){
+			return c.owner.deck.length/10;
+		},
 		hatch:3,
 		heal:3,
 		heal20:8,
 		holylight:2,
-		hope:7,
+		hope:2,
 		icebolt:4,
 		ignite:8,
 		immolate:5,
@@ -103,19 +108,21 @@ function evalGameState(game) {
 		lycanthropy:4,
 		metamorph:2,
 		miracle:12,
-		mitosis:6,
+		mitosis:function(c){
+			return c.card.cost;
+		},
 		mitosisspell:6,
 		momentum:2,
 		mutation:4,
 		neuro:7,
 		neurofy:7,
-		nightmare:3,
+		nightmare:12,
 		nova:6,
 		nova2:6,
 		nymph:7,
 		ouija:3,
 		overdrive:function(c){
-			return c.truehp()/4-1;
+			return c.truehp()-1;
 		},
 		overdrivespell:5,
 		pandemonium:3,
@@ -134,17 +141,17 @@ function evalGameState(game) {
 		queen:7,
 		quint:6,
 		rage:[5, 6],
-		readiness:4,
+		readiness:0,
 		rebirth:6,
 		regenerate:5,
 		regrade:3,
 		reinforce:4,
 		ren:5,
 		rewind:6,
-		ricochet:4,
+		ricochet:3,
 		santuary:5,
-		scarab:3,
-		scavenger:3,
+		scarab:4,
+		scavenger:4,
 		scramble:function(c){
 			var a=0, fq=c.owner.foe.quanta;
 			for(var i=1; i<13; i++){
@@ -185,8 +192,12 @@ function evalGameState(game) {
 		web:2,
 		wisdom:4,
 		yoink:4,
-		pillar:0.3,
-		pend:0.3,
+		pillar:function(c){
+			return c instanceof CardInstance?.2:c.status.charges/4;
+		},
+		pend:function(c){
+			return c instanceof CardInstance?.2:c.status.charges/4;
+		},
 		blockwithcharge:function(c){
 			return c.status?c.status.charges:c.card.status.charges;
 		},
@@ -210,7 +221,7 @@ function evalGameState(game) {
 		var aval = ActivesValues[active.activename];
 		return !aval?0:
 			aval instanceof Function?aval(c):
-			aval instanceof Array?aval[c.card.upped]:aval;
+			aval instanceof Array?aval[c.card.upped?1:0]:aval;
 	}
 
 	function checkpassivestatus(c){
@@ -240,13 +251,15 @@ function evalGameState(game) {
 
 	function truetrueatk(c) {
 		var foeshield = c.owner.foe.shield;
-		var momentum = c.status.momentum || c.status.psion;
+		var tatk = c.trueatk();
+		var momentum = atk<0 || c.status.momentum || c.status.psion;
 		var dr = foeshield && !momentum ? foeshield.truedr() : 0;
-		var atk = c.trueatk() - dr;
+		var atk = momentum?tatk:Math.max(tatk-dr, 0);
 		if (c.status.adrenaline) {
-			while (c.status.adrenaline < countAdrenaline(this.trueatk(1))) {
+			var attacks = countAdrenaline(tatk);
+			while (c.status.adrenaline < attacks) {
 				c.status.adrenaline++;
-				atk += c.trueatk() - dr;
+				atk += momentum?c.trueatk():Math.max(c.trueatk()-dr, 0);
 			}
 			c.status.adrenaline = 1;
 		}
@@ -254,42 +267,48 @@ function evalGameState(game) {
 	}
 
 	function evalcard(c) {
-		score = 0;
+		var score = 0;
 		if (c) {
-			if (c.active && !isEmpty(c.active)) {
-				for (key in c.active) {
-					score += evalactive(c, c.active[key]);
-				}
-			}
-			if (c instanceof Weapon && c instanceof Creature) {
+			if (c instanceof Weapon || c instanceof Creature) {
 				var ttatk = truetrueatk(c);
 				score += ttatk;
-				if (c instanceof Creature){
-					c.truehp() / 5;
+				if (c instanceof Creature && !c.status.immaterial){
+					if (ttatk>=0){
+						score += c.truehp() / 5;
+					}
 				}else{
-					score += 3;
-				}
-				if (ttatk && c.active.hit){
-					score += evalactive(c, c.active.hit)*(c.status.adrenaline?2:1);
-				}
-				if (c.owner.gpull == c && c.active.shield){
-					score += evalactive(c, c.active.shield);
+					score += 2;
 				}
 			}
+			if (!isEmpty(c.active)) {
+				for (var key in c.active) {
+					if (key == "hit"){
+						score += evalactive(c, c.active.hit)*(ttatk?1:.3)*(c.status.adrenaline?2:1);
+					}else if(key == "auto"){
+						score += evalactive(c, c.active.auto)*(c.status.frozen?.2:1)*(c.status.adrenaline?2:1);
+					}else if(key == "shield" && c instanceof Creature){
+						score += evalactive(c, c.active.shield)*(c.owner.gpull == c?1:.2);
+					}else{
+						score += evalactive(c, c.active[key]);
+					}
+				}
+				score -= c.active.cast?c.cast/2:0;
+			}
 			score += checkpassivestatus(c);
-			log("\t" + c.card.name + " worth " + score)
+			score *= (c.status.immaterial?1.2:1);
+			log("\t" + c.card.name + " worth " + score);
 		}
 		return score;
-
 	}
+
 	function evalcardinstance(cardInst) {
 		var c = cardInst.card;
 		var score = 0;
-		if (c.type == SpellEnum)
+		if (c.type == SpellEnum){
 			score += evalactive(cardInst, c.active);
-		else {
-			if (c.active && !isEmpty(c.active)) {
-				for (key in c.active) {
+		} else {
+			if (!isEmpty(c.active)) {
+				for (var key in c.active) {
 					score += evalactive(cardInst, c.active[key]);
 				}
 			}
@@ -302,6 +321,7 @@ function evalGameState(game) {
 			}
 			score += checkpassivestatus(c);
 		}
+		log("\tCard " + c.name + " worth " + score);
 		return score;
 	}
 
@@ -313,8 +333,7 @@ function evalGameState(game) {
 	}
 	var gamevalue = 0;
 	for (var j = 0; j < 2; j++) {
-		var pscore = 0;
-		var player = j==0?game.player1:game.player2;
+		var pscore = 0, player = game.players[j];
 		pscore += evalcard(player.weapon);
 		pscore += evalcard(player.shield);
 		for (var i = 0; i < 23; i++) {
@@ -326,19 +345,21 @@ function evalGameState(game) {
 		for (var i = 0; i < player.hand.length; i++) {
 			var cinst = player.hand[i], costless = !cinst.card.cost || !cinst.card.costele;
 			if (costless || player.quanta[cinst.card.costele]){
-				pscore += evalcardinstance(cinst) * (player.cansummon(i) ? 0.5 : 0.2) * (costless?1:Math.min(player.quanta[cinst.card.costele], 20)/10);
+				pscore += evalcardinstance(cinst) * (player.cansummon(i) ? 0.5 : 0.2) * (costless?1:Math.min(player.quanta[cinst.card.costele], 20)/20);
 			}else if (cinst.card.active && cinst.card.active.discard == Actives.obsession){
 				pscore -= 8;
 			}
 		}
-
 		if (player.gpull) {
 			pscore += player.gpull.truehp()/4 + (player.gpull.passives.voodoo ? 10 : 0) - player.gpull.trueatk();
 		}
 		pscore += 100 * player.hp / (100 + player.hp);
-		if (player.isCloaked()){
-			pscore += 5;
-		}
+		if (player.isCloaked()) pscore += 5;
+		if (player.status.poison) pscore -= player.status.poison;
+		if (player.precognition) pscore += 1;
+		if (player.silence) pscore -= 3;
+		if (player.flatline) pscore -= 1;
+		if (player.hand.length == 8) pscore -= 4;
 		log("\tpscore" + j + ": " + pscore);
 		gamevalue += pscore*(j == 0?1:-1);
 	}

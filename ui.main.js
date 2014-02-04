@@ -328,13 +328,6 @@ function aiEvalFunc(){
 	disableEffects = true;
 	function iterCore(c, active, index){
 		var cbits = tgtToBits(c)^8;
-		function useactive(c, t){
-			if (index === undefined){
-				c.useactive(t);
-			}else{
-				game.player2.summon(index, t);
-			}
-		}
 		var candidates = [fullCandidates[0], []];
 		function evalIter(t, ignoret){
 			if (ignoret || (t && targetingMode(t))){
@@ -342,23 +335,27 @@ function aiEvalFunc(){
 				var gameBack2 = game;
 				game = cloneGame(game);
 				var cone = bitsToTgt(cbits), tone = bitsToTgt(tbits);
-				useactive(cone, tone);
+				if (index === undefined){
+					cone.useactive(tone);
+				}else{
+					game.player2.summon(index, tone);
+				}
 				var v = evalGameState(game);
+				game = gameBack2;
 				console.log(c + " " + t + " " + v);
 				if (v<candidates[0]){
 					candidates = [v, [[c, t, index]]];
 				}else if (v == candidates[0]){
 					candidates[1].push([c, t, index]);
 				}
-				game = gameBack2;
 			}
 		}
-		getTarget(c, active, function(t){
+		getTarget(c, active || Actives.obsession, function(t){
 			if (!t){
 				evalIter(undefined, true);
 			}
 			targetingMode = null;
-			console.log(candidates[1].length);
+			console.log(candidates[1].length + candidates[1].join(" "));
 			if (candidates[1].length){
 				var v = candidates[0], oldv = fullCandidates[0];
 				if (v > oldv){
@@ -393,26 +390,10 @@ function aiEvalFunc(){
 			targetingModeCb(1);
 		}
 	}
+	var currentEval = evalGameState(game);
 	for(;;){
-		for(var i=self.hand.length-1; i>=0; i--){
-			if (self.cansummon(i)){
-				var cardinst = self.hand[i];
-				if (cardinst.card.type == WeaponEnum ? (!self.weapon || self.weapon.card.cost < cardinst.card.cost):
-					cardinst.card.type == ShieldEnum ? (!self.shield || self.shield.card.cost < cardinst.card.cost):cardinst.card.type != SpellEnum){
-					game.player2.summon(i);
-					aiCommands.push(["summon", i]);
-				}
-			}
-		}
-		var currentEval = evalGameState(game);
 		console.log("Currently " + currentEval);
 		var fullCandidates = [currentEval, []];
-		for(var i=0; i<23; i++){
-			var cr = self.creatures[i];
-			if (cr && cr.active.cast && cr.canactive()){
-				iterCore(cr, cr.active.cast);
-			}
-		}
 		var wp=self.weapon, sh=self.shield;
 		if (wp && wp.active.cast && wp.canactive()){
 			iterCore(wp, wp.active.cast);
@@ -420,12 +401,10 @@ function aiEvalFunc(){
 		if (sh && sh.active.cast && sh.canactive()){
 			iterCore(sh, sh.active.cast);
 		}
-		for(var i=self.hand.length-1; i>=0; i--){
-			if (self.cansummon(i)){
-				var cardinst = self.hand[i];
-				if (cardinst.card.type == SpellEnum){
-					iterCore(cardinst, cardinst.card.active, i);
-				}
+		for(var i=0; i<23; i++){
+			var cr = self.creatures[i];
+			if (cr && cr.active.cast && cr.canactive()){
+				iterCore(cr, cr.active.cast);
 			}
 		}
 		for(var i=0; i<16; i++){
@@ -434,9 +413,20 @@ function aiEvalFunc(){
 				iterCore(pr, pr.active.cast);
 			}
 		}
+		var codecache = {};
+		for(var i=self.hand.length-1; i>=0; i--){
+			if (self.cansummon(i)){
+				var cardinst = self.hand[i];
+				if (!(cardinst.card.code in codecache)){
+					codecache[cardinst.card.code] = true;
+					iterCore(cardinst, cardinst.card.type == SpellEnum && cardinst.card.active, i);
+				}
+			}
+		}
 		if (fullCandidates[0] == currentEval){
 			break;
 		}else{
+			currentEval = fullCandidates[0];
 			var actions = fullCandidates[1], action = actions[Math.floor(Math.random()*actions.length)];
 			console.log(action.join(":"))
 			var c = action[0], t = action[1], index = action[2];
