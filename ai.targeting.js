@@ -1,13 +1,17 @@
 function evalPickTarget(c, active, targeting){
 	var eval = ActivesEval[active.activename];
 	if (!eval)return;
-	var candidates = [];
+	var candidates = [0];
 	function evalIter(t){
 		if (t && targeting(t)){
 			var v = eval(c, t);
 			console.log("\t" + c.card.name+ "\t" + (t.owner == c.owner) + (t instanceof Player || t.card.name) + ": "+v);
-			if (v && v>-1){
-				candidates.push([v, t]);
+			if (v){
+				if (v>candidates[0]){
+					candidates = [v, t];
+				}else if(v == candidates[0]){
+					candidates.push(t);
+				}
 			}
 		}
 	}
@@ -26,12 +30,8 @@ function evalPickTarget(c, active, targeting){
 			evalIter(pl.hand[i]);
 		}
 	}
-	if (candidates.length > 0){
-		candidates.sort(function(x, y){ return (x[0]<y[0])-(x[0]>y[0]); });
-		for(var i=1; i<candidates.length; i++){
-			if (candidates[i][0] != candidates[0][0])break;
-		}
-		return candidates[Math.floor(Math.random()*i)][1];
+	if (candidates.length > 1){
+		return candidates[1+Math.floor(Math.random()*(candidates.length-1))];
 	}
 }
 function ActivesEvalMassCC(c,t){
