@@ -6,7 +6,7 @@ module.exports = function(grunt) {
 				stripBanners: true,
 			},
 			dist: {
-				src: ["etg.client.js", "classes.js", "actives.js", "animations.js", "ai.targeting.js", "etg.js"],
+				src: ["etg.client.js", "classes.js", "actives.js", "animations.js", "ai.targeting.js", "ai.eval.js", "etg.js"],
 				dest: "js.js",
 			}
 		}

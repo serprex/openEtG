@@ -54,7 +54,8 @@ function cloneRng(rng){
 function cloneGame(game){
 	var obj = {
 		rng: cloneRng(game.rng),
-		ply: game.ply
+		ply: game.ply,
+		phase: game.phase
 	};
 	obj.player1 = game.player1.clone(obj),
 	obj.player2 = game.player2.clone(obj),
@@ -402,8 +403,7 @@ Player.prototype.endturn = function(discard) {
 	this.foe.drawcard();
 	this.flatline = this.silence = false;
 	this.foe.precognition = this.foe.sanctuary = false;
-	this.game.turn = this.foe; 
-	evalGameState(this.game);
+	this.game.turn = this.foe;
 }
 Player.prototype.procactive = function(name, func) {
 	if (!func){
@@ -840,7 +840,7 @@ Player.prototype.cansummon = function(index, target){
 	if (this.silence || this.game.turn != this)return false;
 	var cardinst = this.hand[index];
 	if (!cardinst || !cardinst.card){
-		console.log("wtf cardless card "+!cardinst.card);
+		console.log("wtf cardless card "+(cardinst && !cardinst.card));
 		return false;
 	}
 	return cardinst && this.canspend(cardinst.card.costele, cardinst.card.cost);
@@ -915,8 +915,10 @@ function casttext(cast, castele){
 function salvageScan(from, t){
 	if (t.owner.hand.length<8 && t.owner != from){
 		for (var i=0; i<23; i++){
-			if (t.owner.creatures[i] && t.owner.creatures[i].passives.salvage && !t.owner.creatures[i].status.salvaged){
-				t.owner.creatures[i].status.salvaged = true;
+			var cr = t.owner.creatures[i];
+			if (cr && cr.passives.salvage && !cr.status.salvaged){
+				new TextEffect("Salvage", tgtToPos(cr));
+				cr.status.salvaged = true;
 				t.owner.hand.push(t.card);
 				return;
 			}

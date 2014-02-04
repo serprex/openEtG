@@ -215,6 +215,7 @@ deployblobs:function(c,t){
 	}
 },
 destroy:function(c,t, dontsalvage){
+	new TextEffect("Destroy", tgtToPos(t));
 	if (t.passives.stackable){
 		if(--t.status.charges<=0){
 			t.die();
@@ -446,7 +447,7 @@ gpullspell:function(c,t){
 	}else Actives.gpull(t);
 },
 gratitude:function(c,t){
-	new TextEffect("+4", tgtToPos(t));
+	new TextEffect("+4", tgtToPos(c));
 	c.owner.dmg(-4);
 },
 grave:function(c,t){
