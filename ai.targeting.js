@@ -198,7 +198,7 @@ fractal:function(c,t){
 	return c.owner == t.owner && c.owner.hand.length < 4;
 },
 freeze:function(c,t){
-	return c.owner != t.owner && t.trueatk();
+	return c.owner != t.owner && !t.status.frozen && t.trueatk();
 },
 fungusrebirth:function(c,t){
 	return true;

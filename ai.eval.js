@@ -46,7 +46,9 @@ function evalGameState(game) {
 		deployblobs:5,
 		destroy:8,
 		destroycard:1,
-		devour:5,
+		devour:function(c){
+			return 2+(c instanceof CardInstance?c.card.health:c.truehp());
+		},
 		disarm:5,
 		disfield:8,
 		disshield:7,
@@ -199,22 +201,27 @@ function evalGameState(game) {
 			return c instanceof CardInstance?.2:c.status.charges/4;
 		},
 		blockwithcharge:function(c){
-			return c.status?c.status.charges:c.card.status.charges;
+			return c instanceof CardInstance?c.card.status.charges:c.status?c.status.charges:c.card.status.charges;
 		},
 		cold:7,
 		despair:5,
 		evade100:function(c){
-			return c.status?(c.status.charges == 0 && c.owner == game.turn?0:10):10;
+			return c.status?(c.status.charges == 0 && c.owner == game.turn?0:1):1;
 		},
-		evade40:6,
-		evade50:7,
+		evade40:1,
+		evade50:1,
 		firewall:7,
 		skull:5,
 		slow:6,
-		solar:3,
+		solar:function(c){
+			var coq = c.owner.quanta[Light];
+			return 6*coq/(6+coq);
+		},
 		thorn:5,
 		weight:5,
-		wings:6
+		wings:function(c){
+			return c.status?(c.status.charges == 0 && c.owner == game.turn?0:6):6;
+		}
 	}
 
 	function evalactive(c, active){
@@ -224,17 +231,8 @@ function evalGameState(game) {
 			aval instanceof Array?aval[c.card.upped?1:0]:aval;
 	}
 
-	function checkpassivestatus(c){
+	function checkpassives(c){
 		var score = 0;
-		if (c.status) {
-			if (c.status.immaterial) score += 6;
-			var delaymix = Math.max((c.status.frozen||0), (c.status.delayed||0));
-			score -= delaymix;
-			if (c.status.poison){
-				score -= c.status.poison*truetrueatk(c)/c.truehp();
-				if (c.status.aflatoxin) score -= c.status.poison;
-			}
-		}
 		if (c.passives) {
 			if (c.passives.airborne) score += 1;
 			if (c.passives.voodoo) score += 1;
@@ -251,11 +249,11 @@ function evalGameState(game) {
 
 	function truetrueatk(c) {
 		var foeshield = c.owner.foe.shield;
-		var tatk = c.trueatk();
+		var tatk = c.trueatk(), fshactive = foeshield.active.shield;
 		var momentum = atk<0 || c.status.momentum || c.status.psion;
 		var dr = foeshield && !momentum ? foeshield.truedr() : 0;
-		var atk = momentum?tatk:Math.max(tatk-dr, 0);
-		if (c.status.adrenaline) {
+		var atk = momentum?tatk:Math.max(tatk-dr, 0)*(fshactive == Actives.evade100?1-fshield.status.charges/6:fshactive == Actives.evade50?.5:fshactive == Actives.evade40?.4:1);
+		if (atk>0 && c.status.adrenaline) {
 			var attacks = countAdrenaline(tatk);
 			while (c.status.adrenaline < attacks) {
 				c.status.adrenaline++;
@@ -266,18 +264,21 @@ function evalGameState(game) {
 		return atk * (foeshield && foeshield.passives.reflect && c.status.psion ? -1 : 1);
 	}
 
-	function evalcard(c) {
+	function evalthing(c) {
 		var score = 0;
 		if (c) {
-			if (c instanceof Weapon || c instanceof Creature) {
-				var ttatk = truetrueatk(c);
-				score += ttatk;
-				if (c instanceof Creature && !c.status.immaterial){
-					if (ttatk>=0){
-						score += c.truehp() / 5;
+			var isCreature = c instanceof Creature;
+			if (c instanceof Weapon || isCreature) {
+				var ttatk = truetrueatk(c), hp = c.truehp();
+				score += hp?ttatk:ttatk/2;
+				if (ttatk >= 0){
+					if (c.status.immaterial){
+						score += 4;
+					}else if (c instanceof Weapon){
+						score += 3;
+					}else{
+						score += hp*4/(hp+4);
 					}
-				}else{
-					score += 2;
 				}
 			}
 			if (!isEmpty(c.active)) {
@@ -286,7 +287,7 @@ function evalGameState(game) {
 						score += evalactive(c, c.active.hit)*(ttatk?1:.3)*(c.status.adrenaline?2:1);
 					}else if(key == "auto"){
 						score += evalactive(c, c.active.auto)*(c.status.frozen?.2:1)*(c.status.adrenaline?2:1);
-					}else if(key == "shield" && c instanceof Creature){
+					}else if(key == "shield" && isCreature){
 						score += evalactive(c, c.active.shield)*(c.owner.gpull == c?1:.2);
 					}else{
 						score += evalactive(c, c.active[key]);
@@ -294,7 +295,18 @@ function evalGameState(game) {
 				}
 				score -= c.active.cast?c.cast/2:0;
 			}
-			score += checkpassivestatus(c);
+			score += checkpassives(c);
+			if (isCreature){
+				var delaymix = Math.max((c.status.frozen||0), (c.status.delayed||0));
+				if (delaymix){
+					var delayed = Math.min(delaymix, 12);
+					score *= 1-(12*delayed/(12+delayed))/16;
+				}
+				if (c.status.poison){
+					score -= c.status.poison*ttatk/hp;
+					if (c.status.aflatoxin) score -= c.status.poison;
+				}
+			}
 			score *= (c.status.immaterial?1.2:1);
 			log("\t" + c.card.name + " worth " + score);
 		}
@@ -334,13 +346,13 @@ function evalGameState(game) {
 	var gamevalue = 0;
 	for (var j = 0; j < 2; j++) {
 		var pscore = 0, player = game.players[j];
-		pscore += evalcard(player.weapon);
-		pscore += evalcard(player.shield);
+		pscore += evalthing(player.weapon);
+		pscore += evalthing(player.shield);
 		for (var i = 0; i < 23; i++) {
-			pscore += evalcard(player.creatures[i]);
+			pscore += evalthing(player.creatures[i]);
 		}
 		for (var i = 0; i < 16; i++) {
-			pscore += evalcard(player.permanents[i]);
+			pscore += evalthing(player.permanents[i]);
 		}
 		for (var i = 0; i < player.hand.length; i++) {
 			var cinst = player.hand[i], costless = !cinst.card.cost || !cinst.card.costele;

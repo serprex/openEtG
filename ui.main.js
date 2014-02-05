@@ -428,7 +428,7 @@ function aiEvalFunc(){
 		}else{
 			currentEval = fullCandidates[0];
 			var actions = fullCandidates[1], action = actions[Math.floor(Math.random()*actions.length)];
-			console.log(action.join(":"))
+			console.log(action?action.join(":"):"actionless");
 			var c = action[0], t = action[1], index = action[2];
 			if (index === undefined){
 				aiCommands.push(["active", (tgtToBits(c)^8)|(tgtToBits(t)^8)<<9]);
