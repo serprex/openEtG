@@ -282,10 +282,8 @@ function evalGameState(game) {
 				if (ttatk >= 0){
 					if (c.status.immaterial){
 						score += 4;
-					}else if (c instanceof Weapon){
+					} else if (c instanceof Weapon) {
 						score += 3;
-					}else{
-						score += hp*4/(hp+4);
 					}
 				}
 			}
@@ -315,9 +313,11 @@ function evalGameState(game) {
 					if (c.status.aflatoxin) score -= c.status.poison;
 				}
 			}
-			score *= (c.status.immaterial?1.2:1);
+			score *= (c.status.immaterial ? 1.2 : 1);
+			score *= isCreature ? Math.sqrt(c.truehp)/2 : 1;
 			log("\t" + c.card.name + " worth " + score);
-		}
+			}
+
 		return score;
 	}
 
@@ -373,7 +373,7 @@ function evalGameState(game) {
 		if (player.gpull) {
 			pscore += player.gpull.truehp()/4 + (player.gpull.passives.voodoo ? 10 : 0) - player.gpull.trueatk();
 		}
-		pscore += 100 * player.hp / (100 + player.hp);
+		pscore += Math.sqrt(player.hp) * 5
 		if (player.isCloaked()) pscore += 5;
 		if (player.status.poison) pscore -= player.status.poison;
 		if (player.precognition) pscore += 1;
