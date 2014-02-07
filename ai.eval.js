@@ -151,7 +151,7 @@ function evalGameState(game) {
 		ren:5,
 		rewind:6,
 		ricochet:3,
-		santuary:5,
+		santuary:6,
 		scarab:4,
 		scavenger:4,
 		scramble:function(c){
@@ -185,7 +185,7 @@ function evalGameState(game) {
 		unburrow:0,
 		upkeep:-.5,
 		vampire:function(c){
-			return (c instanceof CardInstance?c.attack:truetrueatk(c))*.7;
+			return (c instanceof CardInstance?c.card.attack:truetrueatk(c))*.7;
 		},
 		virusinfect:0,
 		virusplague:1,
@@ -195,10 +195,10 @@ function evalGameState(game) {
 		wisdom:4,
 		yoink:4,
 		pillar:function(c){
-			return c instanceof CardInstance?.2:c.status.charges/4;
+			return c instanceof CardInstance?0:c.status.charges/4;
 		},
 		pend:function(c){
-			return c instanceof CardInstance?.2:c.status.charges/4;
+			return c instanceof CardInstance?0:c.status.charges/4;
 		},
 		blockwithcharge:function(c){
 			return c instanceof CardInstance?c.card.status.charges:c.status?c.status.charges:c.card.status.charges;
@@ -248,16 +248,16 @@ function evalGameState(game) {
 	}
 
 	function truetrueatk(c) {
-		var foeshield = c.owner.foe.shield;
-		var tatk = c.trueatk(), fshactive = foeshield && foeshield.active.shield;
+		var fsh = c.owner.foe.shield;
+		var tatk = c.trueatk(), fshactive = fsh && fsh.active.shield;
 		var momentum = atk<0 || c.status.momentum || c.status.psion;
 		var dr, atk;
 		if (momentum){
 			atk = tatk;
 		}else{
-			dr = foeshield?foeshield.truedr():0;
-			atk = Math.max(tatk-dr, 0)*(fshactive == Actives.evade100?1-fshield.status.charges/6:fshactive == Actives.evade50?.5:fshactive == Actives.evade40?.4:1);
-			if (fshactive == Actives.weight && c.truehp()>5){
+			dr = fsh?fsh.truedr():0;
+			atk = Math.max(tatk-dr, 0)*(fshactive == Actives.evade100?1-fsh.status.charges/6:fshactive == Actives.evade50?.5:fshactive == Actives.evade40?.4:1);
+			if (fshactive == Actives.weight && c instanceof Creature && c.truehp()>5){
 				atk = 0;
 			}
 		}
@@ -269,7 +269,7 @@ function evalGameState(game) {
 			}
 			c.status.adrenaline = 1;
 		}
-		return atk * (foeshield && foeshield.passives.reflect && c.status.psion ? -1 : 1);
+		return atk * (fsh && fsh.passives.reflect && c.status.psion ? -1 : 1);
 	}
 
 	function evalthing(c) {
@@ -277,7 +277,7 @@ function evalGameState(game) {
 		if (c) {
 			var isCreature = c instanceof Creature;
 			if (c instanceof Weapon || isCreature) {
-				var ttatk = truetrueatk(c), hp = c.truehp();
+				var ttatk = truetrueatk(c), hp = isCreature?Math.max(c.truehp(), 0):1;
 				score += hp?ttatk:ttatk/2;
 				if (ttatk >= 0){
 					if (c.status.immaterial){

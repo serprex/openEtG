@@ -334,9 +334,6 @@ function aiEvalFunc(){
 			var cbits = tgtToBits(c)^8;
 			var candidates = [fullCandidates[0]];
 			function evalIter(t, ignoret){
-				if (t){
-					console.log(t instanceof Object?t.constructor.name:"?");
-				}
 				if (ignoret || (t && targetingMode(t))){
 					var tbits = tgtToBits(t)^8;
 					var gameBack2 = game, targetingModeBack = targetingMode, targetingModeCbBack = targetingModeCb;
