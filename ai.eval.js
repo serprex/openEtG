@@ -249,10 +249,18 @@ function evalGameState(game) {
 
 	function truetrueatk(c) {
 		var foeshield = c.owner.foe.shield;
-		var tatk = c.trueatk(), fshactive = foeshield.active.shield;
+		var tatk = c.trueatk(), fshactive = foeshield && foeshield.active.shield;
 		var momentum = atk<0 || c.status.momentum || c.status.psion;
-		var dr = foeshield && !momentum ? foeshield.truedr() : 0;
-		var atk = momentum?tatk:Math.max(tatk-dr, 0)*(fshactive == Actives.evade100?1-fshield.status.charges/6:fshactive == Actives.evade50?.5:fshactive == Actives.evade40?.4:1);
+		var dr, atk;
+		if (momentum){
+			atk = tatk;
+		}else{
+			dr = foeshield?foeshield.truedr():0;
+			atk = Math.max(tatk-dr, 0)*(fshactive == Actives.evade100?1-fshield.status.charges/6:fshactive == Actives.evade50?.5:fshactive == Actives.evade40?.4:1);
+			if (fshactive == Actives.weight && c.truehp()>5){
+				atk = 0;
+			}
+		}
 		if (atk>0 && c.status.adrenaline) {
 			var attacks = countAdrenaline(tatk);
 			while (c.status.adrenaline < attacks) {
@@ -299,7 +307,7 @@ function evalGameState(game) {
 			if (isCreature){
 				var delaymix = Math.max((c.status.frozen||0), (c.status.delayed||0));
 				if (delaymix){
-					var delayed = Math.min(delaymix, 12);
+					var delayed = Math.min(delaymix*(c.status.adrenaline?.5:1), 12);
 					score *= 1-(12*delayed/(12+delayed))/16;
 				}
 				if (c.status.poison){
@@ -331,7 +339,7 @@ function evalGameState(game) {
 			}else if (c.type == ShieldEnum){
 				score += c.health;
 			}
-			score += checkpassivestatus(c);
+			score += checkpassives(c);
 		}
 		log("\tCard " + c.name + " worth " + score);
 		return score;

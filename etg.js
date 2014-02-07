@@ -757,7 +757,7 @@ Thing.prototype.useactive = function(t) {
 	var castele = this.castele, cast = this.cast;
 	if (!t || !t.evade(this.owner)){
 		this.active.cast(this, t);
-	}
+	}else new TextEffect("Evade", tgtToPos(t));
 	this.owner.spend(castele, cast);
 }
 Player.prototype.defstatus = Thing.prototype.defstatus = function(key, def){

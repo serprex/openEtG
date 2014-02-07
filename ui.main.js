@@ -326,74 +326,92 @@ function aiEvalFunc(){
 	game = cloneGame(game);
 	var self = game.player2;
 	disableEffects = true;
-	function iterCore(c, active, index){
-		var cbits = tgtToBits(c)^8;
-		var candidates = [fullCandidates[0], []];
-		function evalIter(t, ignoret){
-			if (ignoret || (t && targetingMode(t))){
-				var tbits = tgtToBits(t)^8;
-				var gameBack2 = game;
-				game = cloneGame(game);
-				var cone = bitsToTgt(cbits), tone = bitsToTgt(tbits);
-				if (index === undefined){
-					cone.useactive(tone);
-				}else{
-					game.player2.summon(index, tone);
+	function mkcommand(cbits, tbits, index){
+		return index === undefined ?["active", cbits|tbits<<9]:["summon", index|tbits<<3];
+	}
+	function iterLoop(n, commands, currentEval){
+		function iterCore(c, active, index){
+			var cbits = tgtToBits(c)^8;
+			var candidates = [fullCandidates[0]];
+			function evalIter(t, ignoret){
+				if (t){
+					console.log(t instanceof Object?t.constructor.name:"?");
 				}
-				var v = evalGameState(game);
-				game = gameBack2;
-				console.log(c + " " + t + " " + v);
-				if (v<candidates[0]){
-					candidates = [v, [[c, t, index]]];
-				}else if (v == candidates[0]){
-					candidates[1].push([c, t, index]);
+				if (ignoret || (t && targetingMode(t))){
+					var tbits = tgtToBits(t)^8;
+					var gameBack2 = game, targetingModeBack = targetingMode, targetingModeCbBack = targetingModeCb;
+					game = cloneGame(game);
+					var tone = bitsToTgt(tbits);
+					if (index === undefined){
+						bitsToTgt(cbits).useactive(tone);
+					}else{
+						game.player2.summon(index, tone);
+					}
+					var cmdcopy = commands.slice();
+					cmdcopy.push(mkcommand(cbits, tbits, index));
+					var v = evalGameState(game);
+					console.log(c + " " + t + " " + v);
+					if (v<candidates[0]){
+						candidates = [v, cmdcopy];
+					}/*else if (v == candidates[0]){
+						candidates.push(cmdcopy);
+					}*/
+					if (n){
+						var iterRet = iterLoop(n-1, cmdcopy, v);
+						if (iterRet[0] < candidates[0]){
+							candidates = iterRet;
+						}
+					}
+					game = gameBack2;
+					targetingMode = targetingModeBack;
+					targetingModeCb = targetingModeCbBack;
 				}
 			}
-		}
-		getTarget(c, active || Actives.obsession, function(t){
-			if (!t){
-				evalIter(undefined, true);
-			}
-			targetingMode = null;
-			console.log(candidates[1].length + candidates[1].join(" "));
-			if (candidates[1].length){
-				var v = candidates[0], oldv = fullCandidates[0];
-				if (v > oldv){
-					return;
-				}else{
+			getTarget(c, active || Actives.obsession, function(t){
+				if (!t){
+					evalIter(undefined, true);
+				}
+				targetingMode = null;
+				console.log(candidates.length + candidates.join(" "));
+				if (candidates.length > 1){
+					var v = candidates[0], oldv = fullCandidates[0];
 					if (v < oldv){
 						fullCandidates = candidates;
-					}else{
-						fullCandidates[1].push(candidates[1][Math.floor(Math.random()*candidates[1].length)]);
+					}/*else if (v == oldv){
+							fullCandidates.push(candidates[1+Math.floor(Math.random()*(candidates.length-1))]);
+					}*/
+				}
+			});
+			if (targetingMode){
+				console.log("in " + active.activename);
+				for(var j=0; j<2; j++){
+					var pl = j==0?c.owner:c.owner.foe;
+					console.log("1:" + (pl.game == game));
+					evalIter(pl);
+					console.log("2:" + (pl.game == game));
+					evalIter(pl.weapon);
+					evalIter(pl.shield);
+					for(var i=0; i<23; i++){
+						evalIter(pl.creatures[i]);
+					}
+					console.log("3:" + (pl.game == game));
+					for(var i=0; i<16; i++){
+						evalIter(pl.permanents[i]);
+					}
+					for(var i=0; i<pl.hand.length; i++){
+						evalIter(pl.hand[i]);
 					}
 				}
+				console.log("out");
+				targetingModeCb(1);
 			}
-		});
-		if (targetingMode){
-			console.log("in " + active.activename);
-			for(var j=0; j<2; j++){
-				var pl = j==0?c.owner:c.owner.foe;
-				evalIter(pl);
-				evalIter(pl.weapon);
-				evalIter(pl.shield);
-				for(var i=0; i<23; i++){
-					evalIter(pl.creatures[i]);
-				}
-				for(var i=0; i<16; i++){
-					evalIter(pl.permanents[i]);
-				}
-				for(var i=0; i<pl.hand.length; i++){
-					evalIter(pl.hand[i]);
-				}
-			}
-			console.log("out");
-			targetingModeCb(1);
 		}
-	}
-	var currentEval = evalGameState(game);
-	for(;;){
+		if (currentEval === undefined){
+			currentEval = evalGameState(game);
+		}
 		console.log("Currently " + currentEval);
-		var fullCandidates = [currentEval, []];
+		var fullCandidates = [currentEval];
+		var self = game.player2;
 		var wp=self.weapon, sh=self.shield;
 		if (wp && wp.active.cast && wp.canactive()){
 			iterCore(wp, wp.active.cast);
@@ -423,21 +441,20 @@ function aiEvalFunc(){
 				}
 			}
 		}
-		if (fullCandidates[0] == currentEval){
-			break;
-		}else{
-			currentEval = fullCandidates[0];
-			var actions = fullCandidates[1], action = actions[Math.floor(Math.random()*actions.length)];
-			console.log(action?action.join(":"):"actionless");
-			var c = action[0], t = action[1], index = action[2];
-			if (index === undefined){
-				aiCommands.push(["active", (tgtToBits(c)^8)|(tgtToBits(t)^8)<<9]);
-				c.useactive(t);
-			}else{
-				aiCommands.push(["summon", index|(tgtToBits(t)^8)<<3]);
-				game.player2.summon(index, t);
-			}
-		}
+		return fullCandidates;
+	}
+	aiCommands = [];
+	for(;;){
+		var cmd = iterLoop(1, [])[1];
+		if (cmd){
+			cmd = cmd[0];
+			aiCommands.push(cmd);
+			var oldp2s = player2summon;
+			player2summon = function(index, tgt){ game.player2.summon(index, tgt); };
+			console.log(cmd[0] + "(" + cmd[1] + ")");
+			cmds[cmd[0]](cmd[1]);
+			player2summon = oldp2s;
+		}else break;
 	}
 	if (self.hand.length == 8) {
 		var mincardvalue = 999, worstcards;
