@@ -276,17 +276,14 @@ function evalGameState(game) {
 		var score = 0;
 		if (c) {
 			var isCreature = c instanceof Creature;
+			var ttatk;
 			if (c instanceof Weapon || isCreature) {
-				var ttatk = truetrueatk(c), hp = isCreature?Math.max(c.truehp(), 0):1;
-				score += hp?ttatk:ttatk/2;
-				if (ttatk >= 0){
-					if (c.status.immaterial){
-						score += 4;
-					} else if (c instanceof Weapon) {
-						score += 3;
-					}
+				ttatk = truetrueatk(c);
+				score += ttatk;
+				if (c instanceof Weapon) {
+					score += 3;
 				}
-			}
+			}else ttatk = 0;
 			if (!isEmpty(c.active)) {
 				for (var key in c.active) {
 					if (key == "hit"){
@@ -313,11 +310,9 @@ function evalGameState(game) {
 					if (c.status.aflatoxin) score -= c.status.poison;
 				}
 			}
-			score *= (c.status.immaterial ? 1.2 : 1);
-			score *= isCreature ? Math.sqrt(c.truehp)/2 : 1;
+			score *= c.status.immaterial ? 2 : isCreature ? Math.sqrt(Math.max(c.truehp(), 0))/2 : 1;
 			log("\t" + c.card.name + " worth " + score);
-			}
-
+		}
 		return score;
 	}
 
@@ -373,7 +368,7 @@ function evalGameState(game) {
 		if (player.gpull) {
 			pscore += player.gpull.truehp()/4 + (player.gpull.passives.voodoo ? 10 : 0) - player.gpull.trueatk();
 		}
-		pscore += Math.sqrt(player.hp) * 5
+		pscore += Math.sqrt(player.hp) * 5;
 		if (player.isCloaked()) pscore += 5;
 		if (player.status.poison) pscore -= player.status.poison;
 		if (player.precognition) pscore += 1;
