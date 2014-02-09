@@ -256,7 +256,7 @@ function evalGameState(game) {
 			atk = tatk;
 		}else{
 			dr = fsh?fsh.truedr():0;
-			atk = Math.max(tatk-dr, 0)*(fshactive == Actives.evade100?1-fsh.status.charges/6:fshactive == Actives.evade50?.5:fshactive == Actives.evade40?.4:1);
+			atk = Math.max(tatk-dr, 0);
 			if (fshactive == Actives.weight && c instanceof Creature && c.truehp()>5){
 				atk = 0;
 			}
@@ -269,7 +269,8 @@ function evalGameState(game) {
 			}
 			c.status.adrenaline = 1;
 		}
-		return atk * (fsh && fsh.passives.reflect && c.status.psion ? -1 : 1);
+		// todo SoFr
+		return atk * (fshactive == Actives.evade100?1-fsh.status.charges/6:fshactive == Actives.evade50?.5:fshactive == Actives.evade40?.4:1) * (fsh && fsh.passives.reflect && c.status.psion ? -1 : 1);
 	}
 
 	function evalthing(c) {
@@ -300,6 +301,7 @@ function evalGameState(game) {
 			}
 			score += checkpassives(c);
 			if (isCreature){
+				var hp = Math.max(c.truehp(), 0);
 				var delaymix = Math.max((c.status.frozen||0), (c.status.delayed||0));
 				if (delaymix){
 					var delayed = Math.min(delaymix*(c.status.adrenaline?.5:1), 12);
@@ -307,10 +309,12 @@ function evalGameState(game) {
 				}
 				if (c.status.poison){
 					score -= c.status.poison*ttatk/hp;
-					if (c.status.aflatoxin) score -= c.status.poison;
+					if (c.status.aflatoxin) score -= 2;
 				}
+				score *= c.status.immaterial ? 2 : Math.sqrt(hp)/2;
+			}else if(c.status.immaterial){
+				score *= 1.5;
 			}
-			score *= c.status.immaterial ? 2 : isCreature ? Math.sqrt(Math.max(c.truehp(), 0))/2 : 1;
 			log("\t" + c.card.name + " worth " + score);
 		}
 		return score;
