@@ -277,6 +277,7 @@ function evalGameState(game) {
 		var score = 0;
 		if (c) {
 			var isCreature = c instanceof Creature;
+			var delaymix = Math.max((c.status.frozen||0), (c.status.delayed||0));
 			var ttatk;
 			if (c instanceof Weapon || isCreature) {
 				ttatk = truetrueatk(c);
@@ -288,13 +289,21 @@ function evalGameState(game) {
 			if (!isEmpty(c.active)) {
 				for (var key in c.active) {
 					if (key == "hit"){
-						score += evalactive(c, c.active.hit)*(ttatk?1:.3)*(c.status.adrenaline?2:1);
+						if (!delaymix){
+							score += evalactive(c, c.active.hit)*(ttatk?1:.3)*(c.status.adrenaline?2:1);
+						}
 					}else if(key == "auto"){
-						score += evalactive(c, c.active.auto)*(c.status.frozen?.2:1)*(c.status.adrenaline?2:1);
+						if (!c.status.frozen){
+							score += evalactive(c, c.active.auto)*(c.status.frozen?.2:1)*(c.status.adrenaline?2:1);
+						}
 					}else if(key == "shield" && isCreature){
-						score += evalactive(c, c.active.shield)*(c.owner.gpull == c?1:.2);
+						if (!delaymix){
+							score += evalactive(c, c.active.shield)*(c.owner.gpull == c?1:.2);
+						}
 					}else{
-						score += evalactive(c, c.active[key]);
+						if (key != "cast" || !delaymix){
+							score += evalactive(c, c.active[key]);
+						}
 					}
 				}
 				score -= c.active.cast?c.cast/2:0;
@@ -302,7 +311,6 @@ function evalGameState(game) {
 			score += checkpassives(c);
 			if (isCreature){
 				var hp = Math.max(c.truehp(), 0);
-				var delaymix = Math.max((c.status.frozen||0), (c.status.delayed||0));
 				if (delaymix){
 					var delayed = Math.min(delaymix*(c.status.adrenaline?.5:1), 12);
 					score *= 1-(12*delayed/(12+delayed))/16;
@@ -366,18 +374,19 @@ function evalGameState(game) {
 			if (costless || player.quanta[cinst.card.costele]){
 				pscore += evalcardinstance(cinst) * (player.cansummon(i) ? 0.5 : 0.2) * (costless?1:Math.min(player.quanta[cinst.card.costele], 20)/20);
 			}else if (cinst.card.active && cinst.card.active.discard == Actives.obsession){
-				pscore -= 8;
+				pscore -= 7;
 			}
 		}
 		if (player.gpull) {
 			pscore += player.gpull.truehp()/4 + (player.gpull.passives.voodoo ? 10 : 0) - player.gpull.trueatk();
 		}
 		pscore += Math.sqrt(player.hp) * 5;
-		if (player.isCloaked()) pscore += 5;
+		if (player.isCloaked()) pscore += 4;
 		if (player.status.poison) pscore -= player.status.poison;
 		if (player.precognition) pscore += 1;
 		if (player.silence) pscore -= 3;
 		if (player.flatline) pscore -= 1;
+		if (player.neuro) pscore -= 5;
 		if (player.hand.length == 8) pscore -= 4;
 		log("\tpscore" + j + ": " + pscore);
 		gamevalue += pscore*(j == 0?1:-1);
