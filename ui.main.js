@@ -307,12 +307,13 @@ function getDeck(){
 	var deckstring = deckimport.value;
 	return deckstring?deckstring.split(" "):[];
 }
-var aiCommands = [], aiDelay = 0;
+var aiDelay = 0;
 function aiEvalFunc(){
 	var gameBack = game;
+	var disableEffectsBack = disableEffects;
 	game = cloneGame(game);
-	var self = game.player2;
 	disableEffects = true;
+	var self = game.player2;
 	function mkcommand(cbits, tbits, index){
 		return index === undefined ?["active", cbits|tbits<<9]:["summon", index|tbits<<3];
 	}
@@ -337,9 +338,7 @@ function aiEvalFunc(){
 					console.log(c + " " + t + " " + v);
 					if (v<candidates[0]){
 						candidates = [v, cmdcopy];
-					}/*else if (v == candidates[0]){
-						candidates.push(cmdcopy);
-					}*/
+					}
 					if (n){
 						var iterRet = iterLoop(n-1, cmdcopy, v);
 						if (iterRet[0] < candidates[0]){
@@ -361,9 +360,7 @@ function aiEvalFunc(){
 					var v = candidates[0], oldv = fullCandidates[0];
 					if (v < oldv){
 						fullCandidates = candidates;
-					}/*else if (v == oldv){
-							fullCandidates.push(candidates[1+Math.floor(Math.random()*(candidates.length-1))]);
-					}*/
+					}
 				}
 			});
 			if (targetingMode){
@@ -427,20 +424,12 @@ function aiEvalFunc(){
 		}
 		return fullCandidates;
 	}
-	aiCommands = [];
-	for(;;){
-		var cmd = iterLoop(1, [])[1];
-		if (cmd){
-			cmd = cmd[0];
-			aiCommands.push(cmd);
-			var oldp2s = player2summon;
-			player2summon = function(index, tgt){ game.player2.summon(index, tgt); };
-			console.log(cmd[0] + "(" + cmd[1] + ")");
-			cmds[cmd[0]](cmd[1]);
-			player2summon = oldp2s;
-		}else break;
-	}
-	if (self.hand.length == 8) {
+	var cmd = iterLoop(1, [])[1];
+	game = gameBack;
+	disableEffects = disableEffectsBack;
+	if (cmd){
+		return cmd[0];
+	}else if (self.hand.length == 8) {
 		var mincardvalue = 999, worstcards;
 		for (var i = 0; i<8; i++) {
 			var cardinst = self.hand[i];
@@ -453,17 +442,13 @@ function aiEvalFunc(){
 				worstcards = [i];
 			}
 		}
-		aiCommands.push(["endturn", worstcards[Math.floor(Math.random()*worstcards.length)]]);
-	}else aiCommands.push(["endturn"]);
-	game = gameBack;
-	disableEffects = false;
+		return ["endturn", worstcards[Math.floor(Math.random()*worstcards.length)]];
+	}else return ["endturn"];
 }
 function aiFunc(){
-	var gameBack = game;
-	game = cloneGame(game);
-	var self = game.player2;
-	disableEffects = true;
-	function iterCore(c, active, useactive){
+	var self = this;
+	function iterCore(c, active){
+		var cmd;
 		getTarget(c, active, function(t){
 			targetingMode = null;
 			if (!t && !ActivesEval[active.activename](c)){
@@ -471,11 +456,10 @@ function aiFunc(){
 				return;
 			}
 			if (c instanceof CardInstance){
-				aiCommands.push(["summon", c.getIndex()|(tgtToBits(t)^8)<<3]);
+				cmd = ["summon", c.getIndex()|(tgtToBits(t)^8)<<3];
 			}else{
-				aiCommands.push(["active", (tgtToBits(c)^8)|(tgtToBits(t)^8)<<9]);
+				cmd = ["active", (tgtToBits(c)^8)|(tgtToBits(t)^8)<<9];
 			}
-			useactive(t);
 		});
 		if (targetingMode){
 			console.log("in " + active.activename);
@@ -485,38 +469,37 @@ function aiFunc(){
 				targetingModeCb(t);
 			}else targetingMode = null;
 		}
+		return cmd;
 	}
-	for(var j=0; j<2; j++){
-		for(var i=0; i<23; i++){
-			var cr = self.creatures[i];
-			if (cr && cr.active.cast && cr.canactive()){
-				iterCore(cr, cr.active.cast, function(t){ cr.useactive(t) });
+	var cmd;
+	for(var i=0; i<23; i++){
+		var cr = self.creatures[i];
+		if (cr && cr.active.cast && cr.canactive()){
+			if (cmd = iterCore(cr, cr.active.cast))return cmd;
+		}
+	}
+	var wp=self.weapon, sh=self.shield;
+	if (wp && wp.active.cast && wp.canactive()){
+		if (cmd = iterCore(wp, wp.active.cast))return cmd;
+	}
+	if (sh && sh.active.cast && sh.canactive()){
+		if (cmd = iterCore(sh, sh.active.cast))return cmd;
+	}
+	for(var i=self.hand.length-1; i>=0; i--){
+		if (self.cansummon(i)){
+			var cardinst = self.hand[i];
+			if (cardinst.card.type == SpellEnum){
+				if (cmd = iterCore(cardinst, cardinst.card.active))return cmd;
+			}else if (cardinst.card.type == WeaponEnum ? (!self.weapon || self.weapon.card.cost < cardinst.card.cost):
+				cardinst.card.type == ShieldEnum ? (!self.shield || self.shield.card.cost < cardinst.card.cost):true){
+				return ["summon", i];
 			}
 		}
-		var wp=self.weapon, sh=self.shield;
-		if (wp && wp.active.cast && wp.canactive()){
-			iterCore(wp, wp.active.cast, function(t){ wp.useactive(t) });
-		}
-		if (sh && sh.active.cast && sh.canactive()){
-			iterCore(sh, sh.active.cast, function(t){ sh.useactive(t) });
-		}
-		for(var i=self.hand.length-1; i>=0; i--){
-			if (self.cansummon(i)){
-				var cardinst = self.hand[i];
-				if (cardinst.card.type == SpellEnum){
-					iterCore(cardinst, cardinst.card.active, function(t){ game.player2.summon(i, t) });
-				}else if (cardinst.card.type == WeaponEnum ? (!self.weapon || self.weapon.card.cost < cardinst.card.cost):
-					cardinst.card.type == ShieldEnum ? (!self.shield || self.shield.card.cost < cardinst.card.cost):true){
-					aiCommands.push(["summon", i]);
-					game.player2.summon(i);
-				}
-			}
-		}
-		for(var i=0; i<16; i++){
-			var pr = self.permanents[i];
-			if (pr && pr.active.cast && pr.canactive()){
-				iterCore(pr, pr.active.cast, function(t){ pr.useactive(t) });
-			}
+	}
+	for(var i=0; i<16; i++){
+		var pr = self.permanents[i];
+		if (pr && pr.active.cast && pr.canactive()){
+			if (cmd = iterCore(pr, pr.active.cast))return cmd;
 		}
 	}
 	if (self.hand.length == 8) {
@@ -532,10 +515,8 @@ function aiFunc(){
 				worstcards = [i];
 			}
 		}
-		aiCommands.push(["endturn", worstcards[Math.floor(Math.random()*worstcards.length)]]);
-	}else aiCommands.push(["endturn"]);
-	game = gameBack;
-	disableEffects = false;
+		return ["endturn", worstcards[Math.floor(Math.random()*worstcards.length)]];
+	}else return ["endturn"];
 }
 function mkAi(level){
 	return function() {
@@ -1173,15 +1154,15 @@ function startMatch(){
 	}
 	var cardwon;
 	animCb = function(){
-		if (aiCommands.length && --aiDelay<=0){
+		if (game.turn == game.player2 && game.player2.ai && --aiDelay<=0){
 			aiDelay = parseInt(airefresh.value) || 0;
 			if (aiDelay == -2){
 				disableEffects = true;
 			}
 			do {
-				var cmd = aiCommands.shift();
+				var cmd = game.player2.ai();
 				cmds[cmd[0]](cmd[1]);
-			}while (aiDelay<0 && cmds.length);
+			}while (aiDelay<0 && game.turn == game.player2);
 			disableEffects = false;
 		}
 		var pos=gameui.interactionManager.mouse.global;
