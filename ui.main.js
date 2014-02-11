@@ -112,13 +112,15 @@ function tgtToPos(t){
 		var p = new PIXI.Point(50, 560);
 		if (t == game.player2)reflectPos(p);
 		return p;
+	}else if (t instanceof CardInstance){
+
 	}else console.log("Unknown target");
 }
 function refreshRenderer(){
 	if (renderer){
 		leftpane.removeChild(renderer.view);
 	}
-	renderer = new PIXI.CanvasRenderer(900, 600); // setInfo was causing flickering with webGL
+	renderer = new PIXI.CanvasRenderer(900, 600);
 	leftpane.appendChild(renderer.view);
 }
 var loader = new PIXI.AssetLoader(["esheet.png"]);
@@ -638,6 +640,7 @@ function startMenu(){
 	var brandhb = new PIXI.Text("AI2", {font: "16px Dosis"});
 	var barenai = new PIXI.Text("Arena AI", {font: "16px Dosis"});
 	var beditor = new PIXI.Text("Editor", {font: "16px Dosis"});
+	var barenainfo = new PIXI.Text("Arena Info", {font: "16px Dosis"});
 	var blogout = new PIXI.Text("Logout", {font: "16px Dosis"});
 	var bremove = new PIXI.Text("Delete Account", {font: "16px Dosis"});
 	brandai.position.x = 200;
@@ -648,11 +651,13 @@ function startMenu(){
 	barenai.position.y = 250;
 	beditor.position.x = 200;
 	beditor.position.y = 300;
+	barenainfo.position.x = 400;
+	barenainfo.position.y = 300;
 	blogout.position.x = 200;
 	blogout.position.y = 500;
 	bremove.position.x = 400;
 	bremove.position.y = 500;
-	setInteractive(brandai, brandhb, barenai, beditor, blogout, bremove);
+	setInteractive(brandai, brandhb, barenai, beditor, barenainfo, blogout, bremove);
 	brandai.click = mkAi(1);
 	brandhb.click = mkAi(2);
 	barenai.click = function(){
@@ -665,6 +670,11 @@ function startMenu(){
 		}
 	}
 	beditor.click = startEditor;
+	barenainfo.click = function(){
+		if (Cards){
+			userEmit("arenainfo");
+		}
+	}
 	function logout(){
 		user = undefined;
 		menuui.removeChild(barenai);
@@ -692,6 +702,7 @@ function startMenu(){
 	menuui.addChild(beditor);
 	if (user){
 		menuui.addChild(barenai);
+		menuui.addChild(barenainfo);
 		menuui.addChild(blogout);
 		menuui.addChild(bremove);
 		if (user.oracle){
@@ -916,11 +927,12 @@ function startEditor(){
 				chatArea.value = "30 cards required before submission";
 				return;
 			}
-			editordeck.push(TrueMarks[editormark]);
 			if (usePool){
+				editordeck.push(TrueMarks[editormark]);
 				userEmit("setarena", {d:etg.encodedeck(editordeck)});
+				editordeck.pop();
+				chatArea.value = "Arena deck submitted";
 			}
-			startMenu();
 		}
 		barena.mouseover = function(){
 			if (user && user.ocard){
@@ -1121,6 +1133,11 @@ function startElementSelect(){
 	refreshRenderer();
 }
 function startMatch(){
+	if (anims.length){
+		while (anims.length){
+			anims[0].remove();
+		}
+	}
 	player2summon = function(handindex, tgt){
 		var card = game.player2.hand[handindex].card;
 		var sprite = new PIXI.Sprite(nopic);
@@ -1432,7 +1449,9 @@ function startMatch(){
 	endturnFunc = endturn.click = function(e, discard) {
 		if (game.winner){
 			for (var i=0; i<foeplays.length; i++){
-				gameui.removeChild(foeplays[i][1]);
+				if (foeplays[i][1].parent){
+					foeplays[i][1].parent.removeChild(foeplays[i][1]);
+				}
 			}
 			foeplays.length = 0;
 			game = undefined;
@@ -1461,7 +1480,9 @@ function startMatch(){
 				game.player1.endturn(discard);
 				targetingMode = undefined;
 				for (var i=0; i<foeplays.length; i++){
-					gameui.removeChild(foeplays[i][1]);
+					if (foeplays[i][1].parent){
+						foeplays[i][1].parent.removeChild(foeplays[i][1]);
+					}
 				}
 				foeplays.length = 0;
 				if(!game.winner && game.player2.ai){
@@ -1726,6 +1747,33 @@ function startMatch(){
 	mainStage = gameui;
 	refreshRenderer();
 }
+function startArenaInfo(info){
+	if (!info){
+		chatArea.value = "You do not have an arena deck";
+	}
+	var stage = new PIXI.Stage(0x336699, true);
+	var winloss = new PIXI.Text((info.won || 0) + " - " + (info.loss || 0), {font: "16px Dosis"});
+	winloss.position.x = 200;
+	winloss.position.y = 200;
+	stage.addChild(winloss);
+	var bret = new PIXI.Text("Return", {font: "16px Dosis"});
+	bret.position.x = 200;
+	bret.position.y = 400;
+	bret.interactive = true;
+	bret.click = startMenu;
+	stage.addChild(bret);
+	var ocard = new PIXI.Sprite(nopic);
+	ocard.position.x = 600;
+	ocard.position.y = 300;
+	stage.addChild(ocard);
+	animCb = function(){
+		if (info.card){
+			ocard.setTexture(getArt(info.card));
+		}
+	}
+	mainStage = stage;
+	refreshRenderer();
+}
 var foeplays = [];
 var tximgcache = [];
 function getTextImage(text, font, color){
@@ -1788,6 +1836,7 @@ socket.on("foearena", function(data){
 	initGame({ first:data.first, deck:deck, urdeck:getDeck(), seed:data.seed, hp:data.hp }, aievalopt.checked?aiEvalFunc:aiFunc);
 	game.arena = data.name;
 });
+socket.on("arenainfo", startArenaInfo);
 socket.on("userdump", function(data){
 	user = data;
 	if (user.deck){

@@ -1,6 +1,9 @@
 var anims = [], disableEffects = false;
 function Effect(){}
 Effect.prototype.remove = function(){
+	if (this.gfx && this.gfx.parent){
+		this.gfx.parent.removeChild(this.gfx);
+	}
 	for(var i=0; i<anims.length; i++){
 		if (anims[i] == this){
 			anims.splice(i, 1);
@@ -29,7 +32,6 @@ DeathEffect.prototype = Object.create(Effect.prototype);
 TextEffect.prototype = Object.create(Effect.prototype);
 DeathEffect.prototype.next = function(){
 	if (++this.step==10){
-		gameui.removeChild(this.gfx);
 		this.remove();
 	}else{
 		this.gfx.clear();
@@ -40,7 +42,6 @@ DeathEffect.prototype.next = function(){
 }
 TextEffect.prototype.next = function(){
 	if (++this.step==15){
-		gameui.removeChild(this.gfx);
 		this.remove();
 	}else{
 		this.gfx.position.y -= 3;

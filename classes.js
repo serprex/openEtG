@@ -3,9 +3,15 @@ function Card(type, info){
 	this.element = parseInt(info.Element);
 	this.name = info.Name;
 	this.code = info.Code;
-	this.upped = parseInt(this.code, 32)>6999;
-	this.attack = parseInt(info.Attack||"0");
-	this.health = parseInt(info.Health||"0");
+	if (parseInt(this.code, 32)>6999){
+		this.upped = true;
+	}
+	if (info.Attack){
+		this.attack = parseInt(info.Attack);
+	}
+	if (info.Health){
+		this.health = parseInt(info.Health);
+	}
 	this.readCost("cost", info.Cost||"0");
 	if (info.Active){
 		if (this.type == SpellEnum){
@@ -136,3 +142,6 @@ Weapon.prototype = Object.create(Permanent.prototype);
 Shield.prototype = Object.create(Permanent.prototype);
 Pillar.prototype = Object.create(Permanent.prototype);
 CardInstance.prototype = Object.create(Thing.prototype);
+Card.prototype.attack = 0;
+Card.prototype.health = 0;
+Card.prototype.upped = false;
