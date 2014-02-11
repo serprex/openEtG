@@ -28,11 +28,10 @@ function maybeSetTexture(obj, text){
 }
 function reflectPos(obj){
 	var pos = obj instanceof PIXI.Point?obj:obj.position;
-	pos.x=900-pos.x;
-	pos.y=600-pos.y;
+	pos.set(900-pos.x, 600-pos.y);
 }
 function centerAnchor(obj){
-	obj.anchor.x=obj.anchor.y=.5;
+	obj.anchor.set(.5, .5);
 }
 function hitTest(obj, pos){
 	var x = obj.position.x-obj.width*obj.anchor.x, y = obj.position.y-obj.height*obj.anchor.y;
@@ -150,28 +149,22 @@ function makeArt(card, art){
 	template.endFill();
 	if (art){
 		var artspr = new PIXI.Sprite(art);
-		artspr.position.x = 2;
-		artspr.position.y = 20;
+		artspr.position.set(2, 20);
 		template.addChild(artspr);
 	}
 	var nametag = new PIXI.Text(card.name, {font: "12px Dosis", fill:card.upped?"black":"white"});
-	nametag.position.x = 2;
-	nametag.position.y = 4;
+	nametag.position.set(2, 4);
 	template.addChild(nametag);
 	if (card.cost){
 		var text = new PIXI.Text(card.cost, {font: "12px Dosis", fill:card.upped?"black":"white"});
 		text.anchor.x = 1;
-		text.position.x = rend.width-20;
-		text.position.y = 4;
+		text.position.set(rend.width-20, 4);
 		template.addChild(text);
 		if (card.costele){
 			var eleicon = new PIXI.Sprite(getIcon(card.costele));
-			eleicon.position.x = rend.width-1;
-			eleicon.position.y = 10;
-			eleicon.anchor.x = 1;
-			eleicon.anchor.y = .5;
-			eleicon.scale.x = .5;
-			eleicon.scale.y = .5;
+			eleicon.position.set(rend.width-1, 10);
+			eleicon.anchor.set(1, .5);
+			eleicon.scale.set(.5, .5);
 			template.addChild(eleicon);
 		}
 	}
@@ -183,8 +176,7 @@ function makeArt(card, art){
 			x = 2;
 			y += 12;
 		}
-		wordgfx.position.x = x;
-		wordgfx.position.y = y;
+		wordgfx.position.set(x, y);
 		x += wordgfx.width + 3;
 		template.addChild(wordgfx);
 	}
@@ -219,25 +211,20 @@ function getCardImage(code){
 			if (card.cost){
 				var text = new PIXI.Text(card.cost, {font: "11px Dosis", fill:card.upped?"black":"white"});
 				text.anchor.x = 1;
-				text.position.x = rend.width-20;
-				text.position.y = 5;
+				text.position.set(rend.width-20, 5);
 				graphics.addChild(text);
 				clipwidth += text.width + 22;
 				if (card.costele){
 					var eleicon = new PIXI.Sprite(getIcon(card.costele));
-					eleicon.position.x = rend.width-1;
-					eleicon.position.y = 10;
-					eleicon.anchor.x = 1;
-					eleicon.anchor.y = .5;
-					eleicon.scale.x = .5;
-					eleicon.scale.y = .5;
+					eleicon.position.set(rend.width-1, 10);
+					eleicon.anchor.set(1, .5);
+					eleicon.scale.set(.5, .5);
 					graphics.addChild(eleicon);
 				}
 			}
 			var text, loopi=0;
 			do text = new PIXI.Text(card.name.substring(0, card.name.length-(loopi++)), {font: "11px Dosis", fill:card.upped?"black":"white"}); while(text.width>rend.width-clipwidth);
-			text.position.x = 2;
-			text.position.y = 5;
+			text.position.set(2, 5);
 			graphics.addChild(text);
 		}
 		rend.render(graphics);
@@ -256,8 +243,7 @@ function getCreatureImage(code){
 		graphics.endFill();
 		if (card){
 			var text = new PIXI.Text(CardCodes[code].name, {font: "12px Dosis", fill:card.upped?"black":"white"});
-			text.position.x = 2;
-			text.position.y = 2;
+			text.position.set(2, 2);
 			graphics.addChild(text);
 		}
 		rend.render(graphics);
@@ -276,8 +262,7 @@ function getPermanentImage(code){
 		graphics.endFill();
 		if (card){
 			var text = new PIXI.Text(CardCodes[code].name, {font: "12px Dosis", fill:card.upped?"black":"white"});
-			text.position.x = 2;
-			text.position.y = 2;
+			text.position.set(2, 2);
 			graphics.addChild(text);
 		}
 		rend.render(graphics);
@@ -643,20 +628,13 @@ function startMenu(){
 	var barenainfo = new PIXI.Text("Arena Info", {font: "16px Dosis"});
 	var blogout = new PIXI.Text("Logout", {font: "16px Dosis"});
 	var bremove = new PIXI.Text("Delete Account", {font: "16px Dosis"});
-	brandai.position.x = 200;
-	brandai.position.y = 250;
-	brandhb.position.x = 300;
-	brandhb.position.y = 250;
-	barenai.position.x = 400;
-	barenai.position.y = 250;
-	beditor.position.x = 200;
-	beditor.position.y = 300;
-	barenainfo.position.x = 400;
-	barenainfo.position.y = 300;
-	blogout.position.x = 200;
-	blogout.position.y = 500;
-	bremove.position.x = 400;
-	bremove.position.y = 500;
+	brandai.position.set(200, 250);
+	brandhb.position.set(300, 250);
+	barenai.position.set(400, 250);
+	beditor.position.set(200, 300);
+	barenainfo.position.set(400, 300);
+	blogout.position.set(200, 500);
+	bremove.position.set(400, 500);
 	setInteractive(brandai, brandhb, barenai, beditor, barenainfo, blogout, bremove);
 	brandai.click = mkAi(1);
 	brandhb.click = mkAi(2);
@@ -714,8 +692,7 @@ function startMenu(){
 			user.ocard = card;
 			user.pool.push(card);
 			var oracle = new PIXI.Sprite(nopic);
-			oracle.position.x = 600;
-			oracle.position.y = 250;
+			oracle.position.set(600, 250);
 			menuui.addChild(oracle);
 		}
 	}
@@ -803,16 +780,14 @@ function startEditor(){
 		var bpillar = new PIXI.Text("Pillarify", {font: "16px Dosis"});
 		var bupgrade = new PIXI.Text("Upgrade", {font: "16px Dosis"});
 		var barena = new PIXI.Text("Arena", {font: "16px Dosis"});
-		bclear.position.x = 8;
-		bclear.position.y = 8;
+		bclear.position.set(8, 8);
 		bclear.click = function(){
 			if (usePool){
 				cardminus = {};
 			}
 			editordeck.length = 0;
 		}
-		bsave.position.x = 8;
-		bsave.position.y = 32;
+		bsave.position.set(8, 32);
 		bsave.click = function(){
 			editordeck.push(TrueMarks[editormark]);
 			deckimport.value = editordeck.join(" ");
@@ -822,14 +797,12 @@ function startEditor(){
 			}
 			startMenu();
 		}
-		bimport.position.x = 8;
-		bimport.position.y = 56;
+		bimport.position.set(8, 56);
 		bimport.click = function(){
 			editordeck = deckimport.value.split(" ");
 			processDeck();
 		}
-		brngcard.position.x = 8;
-		brngcard.position.y = 80;
+		brngcard.position.set(8, 80);
 		brngcard.click = function(){
 			if (foename.value != "trans"){
 				chatArea.value = "Input 'trans' into Challenge to transmute a random card of your deck's mark per 3 cards in deck";
@@ -856,8 +829,7 @@ function startEditor(){
 				transmute(rm);
 			}
 		}
-		bpillar.position.x = 8;
-		bpillar.position.y = 104;
+		bpillar.position.set(8, 104);
 		bpillar.click = function(){
 			if (foename.value != "trans"){
 				chatArea.value = "Input 'trans' into Challenge to transmute an upped pillar per 6 cards in deck";
@@ -884,8 +856,7 @@ function startEditor(){
 			}
 			transmute(rm);
 		}
-		bupgrade.position.x = 8;
-		bupgrade.position.y = 128;
+		bupgrade.position.set(8, 128);
 		bupgrade.click = function(){
 			if (foename.value != "trans"){
 				chatArea.value = "Input 'trans' into Challenge to convert 6 cards into an upgraded copy";
@@ -920,8 +891,7 @@ function startEditor(){
 			}
 			transmute(rm);
 		}
-		barena.position.x = 8;
-		barena.position.y = 152;
+		barena.position.set(8, 152);
 		barena.click = function(){
 			if (editordeck.length<30){
 				chatArea.value = "30 cards required before submission";
@@ -955,19 +925,16 @@ function startEditor(){
 		var editordecksprites = [];
 		var editordeck = getDeck();
 		var editormarksprite = new PIXI.Sprite(nopic);
-		editormarksprite.position.x = 100;
-		editormarksprite.position.y = 210;
+		editormarksprite.position.set(100, 210);
 		editorui.addChild(editormarksprite);
 		var editormark = 0;
 		processDeck();
 		var editoreleicons = [];
 		for(var i=0; i<13; i++){
 			var sprite = new PIXI.Sprite(nopic);
-			sprite.position.x = 8;
-			sprite.position.y = 184 + i*32;
+			sprite.position.set(8, 184 + i*32);
 			var marksprite = new PIXI.Sprite(nopic);
-			marksprite.position.x = 200+i*32;
-			marksprite.position.y = 210;
+			marksprite.position.set(200+i*32, 210);
 			setInteractive(sprite, marksprite);
 			(function(_i){
 				sprite.click = function() { editorelement = _i; }
@@ -979,8 +946,7 @@ function startEditor(){
 		}
 		for(var i=0; i<60; i++){
 			var sprite = new PIXI.Sprite(nopic);
-			sprite.position.x = 100+Math.floor(i/10)*100;
-			sprite.position.y = 8+(i%10)*20;
+			sprite.position.set(100+Math.floor(i/10)*100, 8+(i%10)*20);
 			(function(_i){
 				sprite.click = function() {
 					var card = CardCodes[editordeck[_i]];
@@ -1001,12 +967,10 @@ function startEditor(){
 			editorcolumns.push([[],[]]);
 			for(var j=0; j<15; j++){
 				var sprite = new PIXI.Sprite(nopic);
-				sprite.position.x = 100+i*130;
-				sprite.position.y = 272+j*20;
+				sprite.position.set(100+i*130, 272+j*20);
 				if (usePool){
 					var sprcount = new PIXI.Text("", {font: "12px Dosis"});
-					sprcount.position.x = 102;
-					sprcount.position.y = 4;
+					sprcount.position.set(102, 4);
 					sprite.addChild(sprcount);
 				}
 				(function(_i, _j){
@@ -1042,8 +1006,7 @@ function startEditor(){
 			}
 		}
 		var cardArt = new PIXI.Sprite(nopic);
-		cardArt.position.x = 734;
-		cardArt.position.y = 8;
+		cardArt.position.set(734, 8);
 		editorui.addChild(cardArt);
 		animCb = function(){
 			editormarksprite.setTexture(getIcon(editormark));
@@ -1103,13 +1066,11 @@ function startElementSelect(){
 		"Aether"
 	];
 	var eledesc = new PIXI.Text("", {font: "24px Dosis"});
-	eledesc.position.x = 100;
-	eledesc.position.y = 250;
+	eledesc.position.set(100, 250);
 	stage.addChild(eledesc);
 	for(var i=0; i<13; i++){
 		elesel[i] = new PIXI.Sprite(nopic);
-		elesel[i].position.x = 100+i*32;
-		elesel[i].position.y = 300;
+		elesel[i].position.set(100+i*32, 300);
 		(function(_i){
 			elesel[_i].mouseover = function(){
 				maybeSetText(eledesc, descr[_i]);
@@ -1141,8 +1102,7 @@ function startMatch(){
 	player2summon = function(handindex, tgt){
 		var card = game.player2.hand[handindex].card;
 		var sprite = new PIXI.Sprite(nopic);
-		sprite.position.x=(foeplays.length%9)*100;
-		sprite.position.y=Math.floor(foeplays.length/9)*20;
+		sprite.position.set((foeplays.length%9)*100, Math.floor(foeplays.length/9)*20);
 		gameui.addChild(sprite);
 		foeplays.push([card, sprite]);
 		game.player2.summon(handindex, tgt);
@@ -1444,8 +1404,7 @@ function startMatch(){
 	var turntell = new PIXI.Text("", {font: "16px Dosis"});
 	var infotext = new PIXI.Sprite(nopic);
 	setInteractive(endturn, cancel, resign);
-	endturn.position.x = 800;
-	endturn.position.y = 540;
+	endturn.position.set(800, 540);
 	endturnFunc = endturn.click = function(e, discard) {
 		if (game.winner){
 			for (var i=0; i<foeplays.length; i++){
@@ -1492,8 +1451,7 @@ function startMatch(){
 		}
 	}
 	gameui.addChild(endturn);
-	cancel.position.x = 800;
-	cancel.position.y = 500;
+	cancel.position.set(800, 500);
 	cancelFunc = cancel.click = function() {
 		if (resigning){
 			resigning = false;
@@ -1509,8 +1467,7 @@ function startMatch(){
 		}
 	}
 	gameui.addChild(cancel);
-	resign.position.x = 8;
-	resign.position.y = 24;
+	resign.position.set(8, 24);
 	var resigning;
 	resign.click = function(){
 		if (resign.text == "Resign"){
@@ -1524,11 +1481,9 @@ function startMatch(){
 		}
 	}
 	gameui.addChild(resign);
-	turntell.position.x = 800;
-	turntell.position.y = 570;
+	turntell.position.set(800, 570);
 	gameui.addChild(turntell);
-	infotext.position.x=100;
-	infotext.position.y=584;
+	infotext.position.set(100, 584);
 	gameui.addChild(infotext);
 	function setInfo(obj){
 		if(obj){
@@ -1549,8 +1504,7 @@ function startMatch(){
 		(function(_j){
 			for (var i=0; i<8; i++){
 				handsprite[j][i] = new PIXI.Sprite(nopic);
-				handsprite[j][i].position.x=j?20:780;
-				handsprite[j][i].position.y=(j?140:300)+20*i;
+				handsprite[j][i].position.set(j?20:780, (j?140:300)+20*i);
 				(function(_i){
 					handsprite[j][i].click = function(){
 						if (game.phase != PlayPhase)return;
@@ -1640,12 +1594,9 @@ function startMatch(){
 			centerAnchor(weapsprite[j]);
 			centerAnchor(shiesprite[j]);
 			centerAnchor(marksprite[j]);
-			weapsprite[j].position.x=690;
-			weapsprite[j].position.y=530;
-			shiesprite[j].position.x=690;
-			shiesprite[j].position.y=560;
-			marksprite[j].position.x = 690;
-			marksprite[j].position.y = 500;
+			weapsprite[j].position.set(690, 530);
+			shiesprite[j].position.set(690, 560);
+			marksprite[j].position.set(690, 500);
 			var weaptext = new PIXI.Sprite(nopic);
 			weaptext.position.x = 58;
 			weaptext.anchor.x = 1;
@@ -1695,14 +1646,10 @@ function startMatch(){
 			centerAnchor(hptext[j]);
 			centerAnchor(poisontext[j]);
 			centerAnchor(decktext[j]);
-			quantatext[j].position.x=j?792:0;
-			quantatext[j].position.y=j?100:308;
-			hptext[j].position.x=50;
-			hptext[j].position.y=560;
-			poisontext[j].position.x=50;
-			poisontext[j].position.y=580;
-			decktext[j].position.x=50;
-			decktext[j].position.y=540;
+			quantatext[j].position.set(j?792:0, j?100:308);
+			hptext[j].position.set(50, 560);
+			poisontext[j].position.set(50, 580);
+			decktext[j].position.set(50, 540);
 			if (j){
 				reflectPos(hptext[j]);
 				reflectPos(poisontext[j]);
@@ -1711,13 +1658,11 @@ function startMatch(){
 			var child;
 			for(var k=1; k<13; k++){
 				quantatext[j].addChild(child=new PIXI.Text("", {font: "16px Dosis"}));
-				child.position.x = (k&1)?32:86;
-				child.position.y = Math.floor((k-1)/2)*32+8;
+				child.position.set((k&1)?32:86, Math.floor((k-1)/2)*32+8);
 			}
 			for(var k=1; k<13; k++){
 				quantatext[j].addChild(child=new PIXI.Sprite(nopic));
-				child.position.x = (k&1)?0:54;
-				child.position.y = Math.floor((k-1)/2)*32;
+				child.position.set((k&1)?0:54, Math.floor((k-1)/2)*32);
 			}
 			hptext[j].mouseover = function(){
 				setInfo(game.players[_j]);
@@ -1741,8 +1686,7 @@ function startMatch(){
 	var fgfx = new PIXI.Graphics();
 	gameui.addChild(fgfx);
 	var cardart = new PIXI.Sprite(nopic);
-	cardart.position.x = 600;
-	cardart.position.y = 300;
+	cardart.position.set(600, 300);
 	gameui.addChild(cardart);
 	mainStage = gameui;
 	refreshRenderer();
@@ -1753,18 +1697,15 @@ function startArenaInfo(info){
 	}
 	var stage = new PIXI.Stage(0x336699, true);
 	var winloss = new PIXI.Text((info.won || 0) + " - " + (info.loss || 0), {font: "16px Dosis"});
-	winloss.position.x = 200;
-	winloss.position.y = 200;
+	winloss.position.set(200, 200);
 	stage.addChild(winloss);
 	var bret = new PIXI.Text("Return", {font: "16px Dosis"});
-	bret.position.x = 200;
-	bret.position.y = 400;
+	bret.position.set(200, 400);
 	bret.interactive = true;
 	bret.click = startMenu;
 	stage.addChild(bret);
 	var ocard = new PIXI.Sprite(nopic);
-	ocard.position.x = 600;
-	ocard.position.y = 300;
+	ocard.position.set(600, 300);
 	stage.addChild(ocard);
 	animCb = function(){
 		if (info.card){
@@ -1798,7 +1739,7 @@ function getTextImage(text, font, color){
 			var icon = getIcon(parseInt(parse[1]));
 			for(var j=0; j<num; j++){
 				var spr = new PIXI.Sprite(icon);
-				spr.scale.x = spr.scale.y = .375;
+				spr.scale.set(.375, .375);
 				spr.position.x = x;
 				x+=12;
 				doc.addChild(spr);
