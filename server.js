@@ -285,8 +285,7 @@ io.sockets.on("connection", function(socket) {
 		}
 	});
 	foeEcho(socket, "endturn");
-	foeEcho(socket, "summon");
-	foeEcho(socket, "active");
+	foeEcho(socket, "cast");
 	foeEcho(socket, "chat");
 	foeEcho(socket, "foeleft");
 	foeEcho(socket, "mulligan");

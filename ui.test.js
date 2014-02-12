@@ -58,7 +58,7 @@ loadcards(function(cards, cardcodes, targeting) {
 		initTest();
 		player1.quanta[Death] = 10;
 		initHand(player1, Cards.BoneWall);
-		player1.summon(0);
+		player1.hand[0].useactive();
 		new Creature(Cards.RubyDragon, player2).place();
 		new Creature(Cards.RubyDragon, player2).place();
 		new Creature(Cards.RubyDragon, player2).place();
@@ -87,7 +87,7 @@ loadcards(function(cards, cardcodes, targeting) {
 		player1.quanta[Death] = 10;
 		initHand(player1, Cards.AmethystPillar, Cards.AmethystPillar, Cards.SoulCatcher, Cards.Shield, Cards.Dagger);
 		while(player1.hand.length){
-			player1.summon(0);
+			player1.hand[0].useactive();
 		}
 		equal(player1.permanents[0].status.charges, 2, "2 charges");
 		Actives.destroy(player2, player1.permanents[0]);
@@ -104,7 +104,7 @@ loadcards(function(cards, cardcodes, targeting) {
 		Actives.destroy(player2, player1.weapon);
 		ok(!player1.weapon, "Dagger gone");
 		initHand(player1, Cards.BoneWall);
-		player1.summon(0);
+		player1.hand[0].useactive();
 		equal(player1.shield.status.charges, 7, "7 bones");
 		Actives.destroy(player2, player1.shield);
 		equal(player1.shield.status.charges, 6, "6 bones");
@@ -133,7 +133,7 @@ loadcards(function(cards, cardcodes, targeting) {
 		initTest();
 		initHand(player1, Cards.AmethystPillar, Cards.AmethystPillar, Cards.AmethystPillar, Cards.AmethystPillar, Cards.AmethystPillar, Cards.AmethystPillar, Cards.AmethystPillar, Cards.AmethystPillar);
 		for(var i=0; i<5; i++){
-			player1.summon(0);
+			player1.hand[0].useactive();
 		}
 		equal(player1.hand.length, 3, "handlength");
 		var pillars = player1.permanents[0];

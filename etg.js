@@ -836,46 +836,43 @@ Weapon.prototype.attack = Creature.prototype.attack = function(stasis, freedomCh
 		}
 	}
 }
-Player.prototype.cansummon = function(index, target){
-	if (this.silence || this.game.turn != this)return false;
-	var cardinst = this.hand[index];
-	if (!cardinst || !cardinst.card){
-		console.log("wtf cardless card "+(cardinst && !cardinst.card));
+CardInstance.prototype.canactive = function(){
+	if (this.owner.silence || this.owner.game.turn != this.owner)return false;
+	if (!this.card){
+		console.log("wtf cardless card");
 		return false;
 	}
-	return cardinst && this.canspend(cardinst.card.costele, cardinst.card.cost);
+	return this.owner.canspend(this.card.costele, this.card.cost);
 }
-Player.prototype.summon = function(index, target){
-	if (!this.cansummon(index, target)){
-		console.log((this==this.game.player1?"1":"2") + " cannot summon " + index);
+CardInstance.prototype.useactive = function(target){
+	if (!this.canactive()){
+		console.log((this.owner==this.game.player1?"1":"2") + " cannot cast " + (this.card?this.card.name:"nil"));
 		return;
 	}
-	var cardinst = this.hand[index];
-	var card = cardinst.card;
-	this.hand.splice(index, 1);
-	if (this.neuro){
-		this.addpoison(1);
+	var owner = this.owner, card = this.card;
+	this.remove();
+	if (owner.neuro){
+		owner.addpoison(1);
 	}
 	if (card.type <= PermanentEnum){
 		if (card.type == PillarEnum){
-			new Pillar(card, this).place();
+			new Pillar(card, owner).place();
 		}else if (card.type == WeaponEnum){
-			new Weapon(card, this).place();
+			new Weapon(card, owner).place();
 		}else if (card.type == ShieldEnum){
-			new Shield(card, this).place();
+			new Shield(card, owner).place();
 		}else{
-			new Permanent(card, this).place();
+			new Permanent(card, owner).place();
 		}
 	}else if (card.type == SpellEnum){
-		if (!target || !target.evade(this)){
-			this.card = card;
-			card.active(cardinst, target);
-			this.procactive("spell");
+		if (!target || !target.evade(owner)){
+			card.active(this, target);
+			owner.procactive("spell");
 		}
-	}else if (card.type == CreatureEnum) {
-		new Creature(card, this).place();
+	}else if (card.type == CreatureEnum){
+		new Creature(card, owner).place();
 	}else console.log("Unknown card type: "+card.type);
-	this.spend(card.costele, card.cost);
+	owner.spend(card.costele, card.cost);
 }
 function countAdrenaline(x){
 	return 5-Math.floor(Math.sqrt(Math.abs(x)));

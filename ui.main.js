@@ -30,9 +30,6 @@ function reflectPos(obj){
 	var pos = obj instanceof PIXI.Point?obj:obj.position;
 	pos.set(900-pos.x, 600-pos.y);
 }
-function centerAnchor(obj){
-	obj.anchor.set(.5, .5);
-}
 function hitTest(obj, pos){
 	var x = obj.position.x-obj.width*obj.anchor.x, y = obj.position.y-obj.height*obj.anchor.y;
 	return pos.x > x && pos.y > y && pos.x < x+obj.width && pos.y < y+obj.height;
@@ -112,7 +109,7 @@ function tgtToPos(t){
 		if (t == game.player2)reflectPos(p);
 		return p;
 	}else if (t instanceof CardInstance){
-
+		return new PIXI.Point(j?20:780, (j?140:300)+20*i);
 	}else console.log("Unknown target");
 }
 function refreshRenderer(){
@@ -314,11 +311,11 @@ function aiEvalFunc(){
 	game = cloneGame(game);
 	disableEffects = true;
 	var self = game.player2;
-	function mkcommand(cbits, tbits, index){
-		return index === undefined ?["active", cbits|tbits<<9]:["summon", index|tbits<<3];
+	function mkcommand(cbits, tbits){
+		return ["cast", cbits|tbits<<9];
 	}
 	function iterLoop(n, commands, currentEval){
-		function iterCore(c, active, index){
+		function iterCore(c, active){
 			var cbits = tgtToBits(c)^8;
 			var candidates = [fullCandidates[0]];
 			function evalIter(t, ignoret){
@@ -327,13 +324,9 @@ function aiEvalFunc(){
 					var gameBack2 = game, targetingModeBack = targetingMode, targetingModeCbBack = targetingModeCb;
 					game = cloneGame(game);
 					var tone = bitsToTgt(tbits);
-					if (index === undefined){
-						bitsToTgt(cbits).useactive(tone);
-					}else{
-						game.player2.summon(index, tone);
-					}
+					bitsToTgt(cbits).useactive(tone);
 					var cmdcopy = commands.slice();
-					cmdcopy.push(mkcommand(cbits, tbits, index));
+					cmdcopy.push(mkcommand(cbits, tbits));
 					var v = evalGameState(game);
 					console.log(c + " " + t + " " + v);
 					if (v<candidates[0]){
@@ -414,11 +407,11 @@ function aiEvalFunc(){
 		}
 		var codecache = {};
 		for(var i=self.hand.length-1; i>=0; i--){
-			if (self.cansummon(i)){
-				var cardinst = self.hand[i];
+			var cardinst = self.hand[i];
+			if (cardinst.canactive()){
 				if (!(cardinst.card.code in codecache)){
 					codecache[cardinst.card.code] = true;
-					iterCore(cardinst, cardinst.card.type == SpellEnum && cardinst.card.active, i);
+					iterCore(cardinst, cardinst.card.type == SpellEnum && cardinst.card.active);
 				}
 			}
 		}
@@ -455,11 +448,7 @@ function aiFunc(){
 				console.log("Hold "+active.activename);
 				return;
 			}
-			if (c instanceof CardInstance){
-				cmd = ["summon", c.getIndex()|(tgtToBits(t)^8)<<3];
-			}else{
-				cmd = ["active", (tgtToBits(c)^8)|(tgtToBits(t)^8)<<9];
-			}
+			cmd = ["cast", (tgtToBits(c)^8)|(tgtToBits(t)^8)<<9];
 		});
 		if (targetingMode){
 			console.log("in " + active.activename);
@@ -486,13 +475,13 @@ function aiFunc(){
 		if (cmd = iterCore(sh, sh.active.cast))return cmd;
 	}
 	for(var i=self.hand.length-1; i>=0; i--){
-		if (self.cansummon(i)){
-			var cardinst = self.hand[i];
+		var cardinst = self.hand[i];
+		if (cardinst.canactive()){
 			if (cardinst.card.type == SpellEnum){
 				if (cmd = iterCore(cardinst, cardinst.card.active))return cmd;
 			}else if (cardinst.card.type == WeaponEnum ? (!self.weapon || self.weapon.card.cost < cardinst.card.cost):
 				cardinst.card.type == ShieldEnum ? (!self.shield || self.shield.card.cost < cardinst.card.cost):true){
-				return ["summon", i];
+				return ["cast", tgtToBits(cardinst)^8];
 			}
 		}
 	}
@@ -1080,13 +1069,12 @@ function startMatch(){
 			anims[0].remove();
 		}
 	}
-	player2summon = function(handindex, tgt){
-		var card = game.player2.hand[handindex].card;
+	player2summon = function(cardinst){
+		var card = cardinst.card;
 		var sprite = new PIXI.Sprite(nopic);
 		sprite.position.set((foeplays.length%9)*100, Math.floor(foeplays.length/9)*20);
 		gameui.addChild(sprite);
 		foeplays.push([card, sprite]);
-		game.player2.summon(handindex, tgt);
 	}
 	function drawBorder(obj, spr) {
 		if (obj){
@@ -1405,11 +1393,6 @@ function startMatch(){
 				if (game.phase == MulliganPhase2 && game.player2.ai){
 					progressMulligan(game);
 				}
-				if (game.phase == PlayPhase){
-					if (game.turn == game.player2 && game.player2.ai){
-						game.player2.ai();
-					}
-				}
 			}else if (discard == undefined && game.player1.hand.length == 8){
 				discarding = true;
 			}else{
@@ -1425,9 +1408,6 @@ function startMatch(){
 					}
 				}
 				foeplays.length = 0;
-				if(!game.winner && game.player2.ai){
-					game.player2.ai();
-				}
 			}
 		}
 	}
@@ -1498,15 +1478,15 @@ function startMatch(){
 									targetingMode = undefined;
 									targetingModeCb(cardinst);
 								}
-							}else if (!_j && game.player1.cansummon(_i)){
+							}else if (!_j && cardinst.canactive()){
 								if (cardinst.card.type != SpellEnum){
 									console.log("summoning " + _i);
-									socket.emit("summon", _i);
-									game.players[_j].summon(_i);
+									socket.emit("cast", tgtToBits(cardinst));
+									cardinst.useactive();
 								}else{
 									getTarget(cardinst, cardinst.card.active, function(tgt) {
-										socket.emit("summon", _i|tgtToBits(tgt)<<3);
-										game.players[_j].summon(_i, tgt);
+										socket.emit("cast", tgtToBits(cardinst)|tgtToBits(tgt)<<9);
+										cardinst.useactive(tgt);
 									});
 								}
 							}
@@ -1521,7 +1501,7 @@ function startMatch(){
 				creatext.position.x = 58;
 				creatext.anchor.x = 1;
 				creasprite[j][i].addChild(creatext);
-				centerAnchor(creasprite[j][i]);
+				creasprite[j][i].anchor.set(.5, .5);
 				creasprite[j][i].position = creaturePos(j, i);
 				(function(_i){
 					creasprite[j][i].click = function(){
@@ -1534,7 +1514,7 @@ function startMatch(){
 						}else if (_j == 0 && !targetingMode && crea.canactive()){
 							getTarget(crea, crea.active.cast, function(tgt){
 								targetingMode = undefined;
-								socket.emit("active", tgtToBits(crea)|tgtToBits(tgt)<<9);
+								socket.emit("cast", tgtToBits(crea)|tgtToBits(tgt)<<9);
 								crea.useactive(tgt);
 							});
 						}
@@ -1548,7 +1528,7 @@ function startMatch(){
 				permtext.position.x = 58;
 				permtext.anchor.x = 1;
 				permsprite[j][i].addChild(permtext);
-				centerAnchor(permsprite[j][i]);
+				permsprite[j][i].anchor.set(.5, .5);
 				permsprite[j][i].position = permanentPos(j, i);
 				(function(_i){
 					permsprite[j][i].click = function(){
@@ -1561,7 +1541,7 @@ function startMatch(){
 						}else if (_j == 0 && !targetingMode && perm.canactive()){
 							getTarget(perm, perm.active.cast, function(tgt){
 								targetingMode = undefined;
-								socket.emit("active", tgtToBits(perm)|tgtToBits(tgt)<<9);
+								socket.emit("cast", tgtToBits(perm)|tgtToBits(tgt)<<9);
 								perm.useactive(tgt);
 							});
 						}
@@ -1572,9 +1552,9 @@ function startMatch(){
 			setInteractive.apply(null, handsprite[j]);
 			setInteractive.apply(null, creasprite[j]);
 			setInteractive.apply(null, permsprite[j]);
-			centerAnchor(weapsprite[j]);
-			centerAnchor(shiesprite[j]);
-			centerAnchor(marksprite[j]);
+			weapsprite[j].anchor.set(.5, .5);
+			shiesprite[j].anchor.set(.5, .5);
+			marksprite[j].anchor.set(.5, .5);
 			weapsprite[j].position.set(690, 530);
 			shiesprite[j].position.set(690, 560);
 			marksprite[j].position.set(690, 500);
@@ -1596,7 +1576,7 @@ function startMatch(){
 				}else if (_j == 0 && !targetingMode && weap.canactive()){
 					getTarget(weap, weap.active.cast, function(tgt){
 						targetingMode = undefined;
-						socket.emit("active", tgtToBits(weap)|tgtToBits(tgt)<<9);
+						socket.emit("cast", tgtToBits(weap)|tgtToBits(tgt)<<9);
 						weap.useactive(tgt);
 					});
 				}
@@ -1611,7 +1591,7 @@ function startMatch(){
 				}else if (_j == 0 && !targetingMode && shie.canactive()){
 					getTarget(shie, shie.active.cast, function(tgt){
 						targetingMode = undefined;
-						socket.emit("active", tgtToBits(shie)|tgtToBits(tgt)<<9);
+						socket.emit("cast", tgtToBits(shie)|tgtToBits(tgt)<<9);
 						shie.useactive(tgt);
 					});
 				}
@@ -1624,9 +1604,9 @@ function startMatch(){
 			gameui.addChild(weapsprite[j]);
 			gameui.addChild(shiesprite[j]);
 			gameui.addChild(marksprite[j]);
-			centerAnchor(hptext[j]);
-			centerAnchor(poisontext[j]);
-			centerAnchor(decktext[j]);
+			hptext[j].anchor.set(.5, .5);
+			poisontext[j].anchor.set(.5, .5);
+			decktext[j].anchor.set(.5, .5);
 			quantatext[j].position.set(j?792:0, j?100:308);
 			hptext[j].position.set(50, 560);
 			poisontext[j].position.set(50, 580);
@@ -1740,14 +1720,12 @@ var cmds = {};
 cmds.endturn = function(data) {
 	game.player2.endturn(data);
 }
-cmds.summon = function(bits) {
-	var cid = bits&7, t = bitsToTgt(bits>>3);
-	console.log("summon call: " + game.player2.hand[cid].card.name + " " + (t?(t instanceof Player?t == game.player1:t.card.name):"-"));
-	player2summon(cid, t);
-}
-cmds.active = function(bits) {
+cmds.cast = function(bits) {
 	var c=bitsToTgt(bits&511), t=bitsToTgt((bits>>9)&511);
-	console.log("active call: " + c.card.name + " " + (t?(t instanceof Player?t == game.player1:t.card.name):"-"));
+	console.log("cast: " + c.card.name + " " + (t?(t instanceof Player?t == game.player1:t.card.name):"-"));
+	if (c instanceof CardInstance){
+		player2summon(c);
+	}
 	c.useactive(t);
 }
 var socket = io.connect(location.hostname, {port: 13602});
@@ -1775,8 +1753,7 @@ socket.on("passchange", function(data){
 	chatArea.value = "Password updated";
 });
 socket.on("endturn", cmds.endturn);
-socket.on("summon", cmds.summon);
-socket.on("active", cmds.active);
+socket.on("cast", cmds.cast);
 socket.on("foeleft", function(data) {
 	if (game && !game.player2.ai){
 		setWinner(game, game.player1);
