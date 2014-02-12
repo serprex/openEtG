@@ -11,7 +11,7 @@ How Fippe setup on Windows:
 
 4.	open cmd (probably have to do it as administrator) and navigate to the openetg folder, type "npm install"
 
-5.	type "copy /B etg.client.js+ai.eval.js+ai.targeting.js+classes.js+actives.js+animations.js+etg.js js.js /Y"
+5.	type "copy /B etg.client.js+classes.js+actives.js+animations.js+ai.eval.js+ai.targeting.js+etg.js js.js /Y"
 	NB if grunt is installed, one can merely grunt
 
 6. "npm install -g browserify" so that one can run "browserify -r ./etgutil -r ./MersenneTwister -o etgify.js"
