@@ -895,10 +895,11 @@ regenerate:function(c,t){
 	new TextEffect("+5", tgtToPos(c));
 	c.owner.dmg(-5);
 },
-regenerationspell:function(c,t){
+regeneratespell:function(c,t){
 	t.active = { auto: Actives.regenerate };
-	if (t instanceof Permanent)
+	if (t instanceof Permanent){
 		t.passives = {};
+	}
 },
 regrade:function(c,t){
 	t.card = t.card.asUpped(!t.card.upped);

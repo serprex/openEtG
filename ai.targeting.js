@@ -371,8 +371,8 @@ rebirth:function(c,t){
 reinforce:function(c,t){
 	return c.owner == t.owner && (t.card.isOf(Cards.GravitonDeployer) || t.card.isOf(Cards.Otyugh));
 },
-regenerationspell:function(c,t){
-	return (c.owner == t.owner) && isEmpty(t.active);
+regeneratespell:function(c,t){
+	return c.owner == t.owner && isEmpty(t.active);
 },
 regrade:function(c,t){
 	return (c.owner == t.owner) ^ t.card.upped;

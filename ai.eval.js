@@ -146,7 +146,7 @@ function evalGameState(game) {
 		readiness:0,
 		rebirth:6,
 		regenerate: 5,
-		regenerationspell: 5,
+		regeneratespell: 5,
 		regrade:3,
 		reinforce:4,
 		ren:5,
