@@ -56,7 +56,7 @@ function evalGameState(game) {
 			return c instanceof CardInstance?c.card.attack:truetrueatk(c)-c.cast-(c.status.dive||0);
 		},
 		divinity:3,
-		drainlife:4,
+		drainlife:10,
 		draft:1,
 		dryspell:5,
 		dshield:4,
@@ -70,7 +70,7 @@ function evalGameState(game) {
 		evolve:5,
 		fickle:3,
 		fire:1,
-		firebolt:6,
+		firebolt:10,
 		flatline:1,
 		flyingweapon:1,
 		fractal:9,
@@ -92,7 +92,7 @@ function evalGameState(game) {
 		heal20:8,
 		holylight:2,
 		hope:2,
-		icebolt:4,
+		icebolt:10,
 		ignite:8,
 		immolate:5,
 		improve:6,
@@ -319,7 +319,7 @@ function evalGameState(game) {
 					score -= c.status.poison*ttatk/hp;
 					if (c.status.aflatoxin) score -= 2;
 				}
-				score *= c.status.immaterial ? 2 : Math.sqrt(hp)/2;
+				score *= hp?(c.status.immaterial || c.status.burrowed ? 2 : Math.sqrt(hp)/2):.2;
 			}else if(c.status.immaterial){
 				score *= 1.5;
 			}
@@ -372,7 +372,7 @@ function evalGameState(game) {
 		for (var i = 0; i < player.hand.length; i++) {
 			var cinst = player.hand[i], costless = !cinst.card.cost || !cinst.card.costele;
 			if (costless || player.quanta[cinst.card.costele]){
-				pscore += evalcardinstance(cinst) * (player.cansummon(i) ? 0.5 : 0.2) * (costless?1:Math.min(player.quanta[cinst.card.costele], 20)/20);
+				pscore += evalcardinstance(cinst) * (cinst.canactive() ? 0.5 : 0.2) * (costless?1:Math.min(player.quanta[cinst.card.costele], 20)/20);
 			}else if (cinst.card.active && cinst.card.active.discard == Actives.obsession){
 				pscore -= 7;
 			}

@@ -47,8 +47,8 @@ function loginAuth(req, res, next){
 	if (req.url.indexOf("/auth?") == 0){
 		var paramstring = req.url.substring(6);
 		var params = qstring.parse(paramstring);
-		var name = params.u;
-		if (!name){
+		var name = (params.u || "").trim();
+		if (!name.length){
 			res.writeHead("404");
 			res.end();
 			return;
@@ -201,7 +201,7 @@ io.sockets.on("connection", function(socket) {
 	userEvent(socket, "foearena", function(data, user){
 		db.zcard("arena", function(err, len){
 			if (!len)return;
-			var idx = Math.floor(Math.random()*Math.min(len, 500));
+			var idx = Math.floor(Math.random()*Math.min(len, 10));
 			db.zrange("arena", idx, idx, function(err, aname){
 				console.log("deck: "+ aname + " " + idx);
 				db.hgetall("A:"+aname, function(err, adeck){

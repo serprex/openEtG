@@ -1,18 +1,17 @@
 How Fippe setup on Windows:
 1. 	install node.js @ http://nodejs.org
-	install redis @ http://redis.io (Fippe didn't install redis, instead opting to lobotomize server.js. Your pick)
+	install redis @ http://redis.io
 	install tortoisegit @ http://code.google.com/p/tortoisegit
 
 2. 	right click where you want the files to be and click Git Clone to create an openetg folder somewhere, use the URL: https://github.com/serprex/openEtG.git
 
-3.	download every sheet from here: https://docs.google.com/spreadsheet/ccc?key=0AhacMqaIJo6ddG5rTXpxaHFOR20wVUZwMWZZRUlEWkE
-	as an csv file and add them to the folder.
-	name the cvs files to the name of the sheet minus DB (you name the creature sheet "creature", the shield sheet "shield" and so on)
+3.	download every sheet from https://docs.google.com/spreadsheet/ccc?key=0AhacMqaIJo6ddG5rTXpxaHFOR20wVUZwMWZZRUlEWkE as csv files
+	name the csv files to the name of the sheet minus DB (you name the creature sheet "creature", the shield sheet "shield", etc)
 	NB if Python is installed, updatedb.py will do this
 
 4.	open cmd (probably have to do it as administrator) and navigate to the openetg folder, type "npm install"
 
-5.	type "copy /b MersenneTwister.js+classes.js+actives.js+animations.js+etg.js js.js" Press y if it asks you to overwrite.
+5.	type "copy /B MersenneTwister.js+etg.client.js+ai.eval.js+ai.targeting.js+classes.js+actives.js+animations.js+etg.js js.js /Y"
 	NB if grunt is installed, one can merely grunt
 
 6.	in the cmd window, type "node server.js"
