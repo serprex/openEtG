@@ -11,12 +11,14 @@ How Fippe setup on Windows:
 
 4.	open cmd (probably have to do it as administrator) and navigate to the openetg folder, type "npm install"
 
-5.	type "copy /B MersenneTwister.js+etg.client.js+ai.eval.js+ai.targeting.js+classes.js+actives.js+animations.js+etg.js js.js /Y"
+5.	type "copy /B etg.client.js+ai.eval.js+ai.targeting.js+classes.js+actives.js+animations.js+etg.js js.js /Y"
 	NB if grunt is installed, one can merely grunt
 
-6.	in the cmd window, type "node server.js"
+6. "npm install -g browserify" so that one can run "browserify -r ./etgutil -r ./MersenneTwister -o etgify.js"
 
-7.	open http://127.0.0.1:13602 in your web browser and it should work!
+7.	in the cmd window, type "node server.js"
+
+8.	open http://127.0.0.1:13602 in your web browser and it should work!
 
 Note that every time you have edited a file you need to run step 6 before playing the game again. And every time you want to play the game you need to run step 7 and 8 again
 

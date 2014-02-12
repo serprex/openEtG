@@ -183,7 +183,7 @@ evolve:function(c,t){
 	return true;
 },
 fickle:function(c,t){
-	return c.owner == t.owner && !c.owner.cansummon(t.getIndex());
+	return c.owner == t.owner && !t.canactive();
 },
 firebolt:function(c,t){
 	return c.owner != t.owner && t.truehp() <= 3+Math.floor(c.owner.quanta[Fire]/4) && (t instanceof Player?99:t.trueatk());
