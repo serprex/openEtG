@@ -394,21 +394,21 @@ function aiEvalFunc(){
 		var fullCandidates = [currentEval];
 		var self = game.player2;
 		var wp=self.weapon, sh=self.shield;
-		if (wp && wp.active.cast && wp.canactive()){
+		if (wp && wp.canactive()){
 			iterCore(wp, wp.active.cast);
 		}
-		if (sh && sh.active.cast && sh.canactive()){
+		if (sh && sh.canactive()){
 			iterCore(sh, sh.active.cast);
 		}
 		for(var i=0; i<23; i++){
 			var cr = self.creatures[i];
-			if (cr && cr.active.cast && cr.canactive()){
+			if (cr && cr.canactive()){
 				iterCore(cr, cr.active.cast);
 			}
 		}
 		for(var i=0; i<16; i++){
 			var pr = self.permanents[i];
-			if (pr && pr.active.cast && pr.canactive()){
+			if (pr && pr.canactive()){
 				iterCore(pr, pr.active.cast);
 			}
 		}
@@ -474,15 +474,15 @@ function aiFunc(){
 	var cmd;
 	for(var i=0; i<23; i++){
 		var cr = self.creatures[i];
-		if (cr && cr.active.cast && cr.canactive()){
+		if (cr && cr.canactive()){
 			if (cmd = iterCore(cr, cr.active.cast))return cmd;
 		}
 	}
 	var wp=self.weapon, sh=self.shield;
-	if (wp && wp.active.cast && wp.canactive()){
+	if (wp && wp.canactive()){
 		if (cmd = iterCore(wp, wp.active.cast))return cmd;
 	}
-	if (sh && sh.active.cast && sh.canactive()){
+	if (sh && sh.canactive()){
 		if (cmd = iterCore(sh, sh.active.cast))return cmd;
 	}
 	for(var i=self.hand.length-1; i>=0; i--){
@@ -498,7 +498,7 @@ function aiFunc(){
 	}
 	for(var i=0; i<16; i++){
 		var pr = self.permanents[i];
-		if (pr && pr.active.cast && pr.canactive()){
+		if (pr && pr.canactive()){
 			if (cmd = iterCore(pr, pr.active.cast))return cmd;
 		}
 	}
@@ -1154,7 +1154,7 @@ function startMatch(){
 	}
 	var cardwon;
 	animCb = function(){
-		if (game.turn == game.player2 && game.player2.ai && --aiDelay<=0){
+		if (game.phase == PlayPhase && game.turn == game.player2 && game.player2.ai && --aiDelay<=0){
 			aiDelay = parseInt(airefresh.value) || 0;
 			if (aiDelay == -2){
 				disableEffects = true;
@@ -1267,7 +1267,7 @@ function startMatch(){
 		}
 		fgfx.beginFill(0, 0);
 		fgfx.lineStyle(2, 0xffffff);
-		for (var j=0; j<2 && !(j == 1 && cloakgfx.visible); j++){
+		for (var j=0; j<2; j++){
 			for(var i=0; i<23; i++){
 				drawBorder(game.players[j].creatures[i], creasprite[j][i]);
 			}
