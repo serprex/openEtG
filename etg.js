@@ -973,6 +973,9 @@ var TargetFilters = {
 	perm:function(c, t){
 		return t.isMaterialInstance(Permanent);
 	},
+	permnonstack:function(c,t){
+		return t.isMaterialInstance(Permanent) && !t.passives.stackable;
+	},
 	crea:function(c, t){
 		return t.isMaterialInstance(Creature);
 	},
