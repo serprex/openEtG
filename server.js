@@ -57,6 +57,7 @@ function loginAuth(req, res, next){
 		}else{
 			db.hgetall("U:"+name, function (err, obj){
 				users[name] = obj || {name: name};
+				prepuser(users[name]);
 				loginRespond(res, users[name], params.p);
 			});
 		}
@@ -99,6 +100,7 @@ function userEvent(socket, event, func){
 		if (!(u in users)){
 			db.hgetall("U:"+u, function(err, obj){
 				if (obj){
+					prepuser(obj);
 					users[u] = obj;
 					if (data.a == obj.auth){
 						func.call(socket, data, obj);
@@ -110,12 +112,16 @@ function userEvent(socket, event, func){
 		}
 	});
 }
+function prepuser(servuser){
+	servuser.gold = parseInt(servuser.gold || 0);
+}
 function useruser(servuser){
 	return {
 		auth: servuser.auth,
 		name: servuser.name,
 		deck: servuser.deck,
 		pool: servuser.pool,
+		gold: servuser.gold,
 		ocard: servuser.ocard
 	};
 }
@@ -163,9 +169,15 @@ io.sockets.on("connection", function(socket) {
 	userEvent(socket, "addcard", function(data, user) {
 		// Anything using this should eventually be serverside
 		user.pool = etgutil.addcard(user.pool, data.c);
+		if (data.g){
+			user.gold += data.g;
+		}
 		if (data.o){
 			user.ocard = data.o;
 		}
+	});
+	userEvent(socket, "subgold", function(data, user){
+		user.gold -= data.g;
 	});
 	userEvent(socket, "setdeck", function(data, user){
 		user.deck = data.d;
@@ -208,7 +220,7 @@ io.sockets.on("connection", function(socket) {
 					var day = getDay();
 					var seed = Math.random()*4000000000;
 					var first = seed<2000000000;
-					socket.emit("foearena", {seed: seed, first: first, name: aname, hp:Math.max(202-Math.pow(2, 1+day-adeck.day), 1), deck: adeck.deck})
+					socket.emit("foearena", {seed: seed, first: first, name: aname, hp:Math.max(202-Math.pow(2, 1+day-adeck.day), 100), deck: adeck.deck})
 				});
 			});
 		});

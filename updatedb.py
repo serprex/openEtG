@@ -14,7 +14,7 @@ def get_auth_token():
 	req = Request(url, bytes(urlencode(params), "utf8"))
 	return findall(r"Auth=(.*)", str(urlopen(req).read(), "utf8"))[0]
 def download(gid):
-	return urlopen(Request("https://spreadsheets.google.com/feeds/download/spreadsheets/Export?key=0AhacMqaIJo6ddG5rTXpxaHFOR20wVUZwMWZZRUlEWkE&exportFormat=csv&gid=%i"%gid, headers={
+	return urlopen(Request("https://docs.google.com/spreadsheets/d/1dfKGdHqqLAAHdnw2mKBwaYwDIFODjQIjlg8ZPyRFVmA/export?format=csv&id=1dfKGdHqqLAAHdnw2mKBwaYwDIFODjQIjlg8ZPyRFVmA&gid="+gid, headers={
 		"Authorization": "GoogleLogin auth=" + get_auth_token(),
 		"GData-Version": "3.0"
 	}))
@@ -26,7 +26,7 @@ except:
 	from getpass import getpass
 	email = input("gmail: ")
 	password = getpass("Password: ")
-for gid, db in enumerate(("creature", "pillar", "weapon", "shield", "permanent", "spell", "active"), 6):
+for db, gid in (("pillar", "0"), ("weapon", "1863409466"), ("shield", "457582620"), ("permanent", "420516648"), ("spell", "1605384839"), ("creature", "1045918250"), ("active", "657211460")):
 	if len(argv) == 1 or any(a.startswith(db) for a in argv):
 		print(db)
 		open(db+".csv", "wb").write(download(gid).read())

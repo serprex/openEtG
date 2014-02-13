@@ -523,6 +523,14 @@ function mkAi(level){
 			if (!user && aideckstring){
 				deck = aideckstring.split(" ");
 			}else{
+				if (user && level>1){
+					if (user.gold<10){
+						chatArea.value = "Requires 10\u00A4";
+						return;
+					}
+					user.gold -= 10;
+					userEmit("subgold", {g: 10});
+				}
 				var cardcount = {};
 				var eles = [Math.ceil(Math.random()*12), Math.ceil(Math.random()*12)], ecost = [];
 				var pillars = filtercards(false, function(x){ return x.type == PillarEnum && !x.passives.rare; });
@@ -587,6 +595,7 @@ function mkAi(level){
 				chatArea.value = deck.join(" ");
 			}
 			initGame({ first:Math.random()<.5, deck:deck, urdeck:urdeck, seed:Math.random()*4000000000, hp:level==1?100:150 }, aievalopt.checked?aiEvalFunc:aiFunc);
+			game.gold = level==1?5:20;
 		}
 	}
 }
@@ -614,6 +623,12 @@ function startMenu(){
 				startEditor();
 				return;
 			}
+			if (user.gold<10){
+				chatArea.value = "Requires 10\u00A4";
+				return;
+			}
+			user.gold -= 10;
+			userEmit("subgold", {g: 10});
 			userEmit("foearena");
 		}
 	}
@@ -628,6 +643,7 @@ function startMenu(){
 		menuui.removeChild(barenai);
 		menuui.removeChild(blogout);
 		menuui.removeChild(bremove);
+		menuui.removeChild(goldcount);
 		if (oracle){
 			menuui.removeChild(oracle);
 		}
@@ -653,6 +669,9 @@ function startMenu(){
 		menuui.addChild(barenainfo);
 		menuui.addChild(blogout);
 		menuui.addChild(bremove);
+		var goldcount = new PIXI.Text(user.gold + "\u00A4", {font: "16px Dosis"});
+		goldcount.position.set(200, 200);
+		menuui.addChild(goldcount);
 		if (user.oracle){
 			// todo user.oracle should be a card, not true. The card is the card that the server itself added. This'll only show what was added
 			delete user.oracle;
@@ -775,9 +794,9 @@ function startEditor(){
 		brngcard.position.set(8, 80);
 		brngcard.click = function(){
 			if (foename.value != "trans"){
-				chatArea.value = "Input 'trans' into Challenge to transmute a random card of your deck's mark per 3 cards in deck";
+				chatArea.value = "Input 'trans' into Challenge to transmute a random card of your deck's mark per 2 cards in deck";
 			}else if (editordeck.length<2 || (editordeck.length%2)!=0){
-				chatArea.value = "Transmutation of random cards requires an input size divisible by 3";
+				chatArea.value = "Transmutation of random cards requires an input size divisible by 2";
 			}else{
 				for(var i=0; i<editordeck.length; i++){
 					var card = CardCodes[editordeck[i]];
@@ -1202,10 +1221,6 @@ function startMatch(){
 				cardart.position.y = pos.y>300?44:300;
 			}else cardart.visible = false;
 		}else{
-			if(game.arena){
-				userEmit("modarena", {aname:game.arena, won:game.winner == game.player2});
-				delete game.arena;
-			}
 			if(game.winner == game.player1){
 				if (!cardwon){
 					var winnable = [];
@@ -1223,7 +1238,14 @@ function startMatch(){
 					if (!game.player2.ai){
 						cardwon = cardwon.asUpped(false);
 					}
-					userEmit("addcard", {c:cardwon.code});
+					var data = {c:cardwon.code};
+					if (game.gold){
+						var goldwon = Math.floor(game.gold*(game.player1.hp == game.player1.maxhp?2:.5+game.player1.hp/(game.player1.maxhp*2)));
+						console.log(goldwon);
+						data.g = goldwon;
+						user.gold += goldwon;
+					}
+					userEmit("addcard", data);
 					user.pool.push(cardwon.code);
 				}
 				cardart.setTexture(getArt(cardwon.code));
@@ -1382,6 +1404,10 @@ function startMatch(){
 				}
 			}
 			foeplays.length = 0;
+			if (user && game.arena){
+				userEmit("modarena", {aname: game.arena, won: game.winner == game.player2});
+				delete game.arena;
+			}
 			game = undefined;
 			startMenu();
 		}else if (game.turn == game.player1){
@@ -1735,6 +1761,7 @@ socket.on("foearena", function(data){
 	chatArea.value = data.name + ": " + deck.join(" ");
 	initGame({ first:data.first, deck:deck, urdeck:getDeck(), seed:data.seed, hp:data.hp }, aievalopt.checked?aiEvalFunc:aiFunc);
 	game.arena = data.name;
+	game.gold = 20;
 });
 socket.on("arenainfo", startArenaInfo);
 socket.on("userdump", function(data){
