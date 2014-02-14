@@ -116,8 +116,8 @@ function evalGameState(game) {
 		mitosisspell:6,
 		momentum:2,
 		mutation:4,
-		neuro:7,
-		neurofy:7,
+		neuro:6,
+		neurofy:6,
 		nightmare:12,
 		nova:6,
 		nova2:6,
@@ -282,7 +282,7 @@ function evalGameState(game) {
 			var ttatk;
 			if (c instanceof Weapon || isCreature) {
 				ttatk = truetrueatk(c);
-				score += ttatk;
+				score += ttatk*(delaymix?1-Math.min(delaymix/10, .5):1);
 				if (c instanceof Weapon) {
 					score += 3;
 				}
@@ -301,28 +301,28 @@ function evalGameState(game) {
 						if (!delaymix){
 							score += evalactive(c, c.active.shield)*(c.owner.gpull == c?1:.2);
 						}
-					}else{
-						if (key != "cast" || !delaymix){
-							score += evalactive(c, c.active[key]);
+					}else if (key != "cast"){
+						if (!delaymix){
+							score += evalactive(c, c.active[key]) - (c.usedactive?.02:0);
 						}
-					}
+					}else score += evalactive(c, c.active[key]);
 				}
 				score -= c.active.cast?c.cast/2:0;
 			}
 			score += checkpassives(c);
 			if (isCreature){
 				var hp = Math.max(c.truehp(), 0);
-				if (delaymix){
-					var delayed = Math.min(delaymix*(c.status.adrenaline?.5:1), 12);
-					score *= 1-(12*delayed/(12+delayed))/16;
-				}
 				if (c.status.poison){
 					score -= c.status.poison*ttatk/hp;
 					if (c.status.aflatoxin) score -= 2;
 				}
-				score *= hp?(c.status.immaterial || c.status.burrowed ? 2 : Math.sqrt(hp)/2):.2;
+				score *= hp?(c.status.immaterial || c.status.burrowed ? 2 : Math.sqrt(Math.min(hp, 15))/2):.2;
 			}else if(c.status.immaterial){
 				score *= 1.5;
+			}
+			if (delaymix){
+				var delayed = Math.min(delaymix*(c.status.adrenaline?.5:1), 12);
+				score *= 1-(12*delayed/(12+delayed))/16;
 			}
 			log("\t" + c.card.name + " worth " + score);
 		}

@@ -190,7 +190,7 @@ io.sockets.on("connection", function(socket) {
 		db.hget(au, "card", function(err, card){
 			var adeck = "05" + user.ocard + data.d;
 			if (card != user.ocard){
-				db.hmset(au, {day: getDay(), deck: adeck, card: user.ocard});
+				db.hmset(au, {day: getDay(), deck: adeck, card: user.ocard, win:0, loss:0});
 				db.zadd("arena", 0, data.u);
 			}else{
 				db.hset(au, "deck", adeck);
@@ -204,11 +204,7 @@ io.sockets.on("connection", function(socket) {
 	});
 	userEvent(socket, "modarena", function(data, user){
 		db.hincrby("A:"+data.aname, data.won?"win":"loss", 1);
-		db.zincrby("arena", data.won?1:-1, data.aname, function(err, val){
-			if (val<-10){
-				db.zrem("arena", data.aname);
-			}
-		});
+		db.zincrby("arena", data.won?1:-1, data.aname);
 	});
 	userEvent(socket, "foearena", function(data, user){
 		db.zcard("arena", function(err, len){

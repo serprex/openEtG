@@ -1683,7 +1683,7 @@ function startArenaInfo(info){
 		chatArea.value = "You do not have an arena deck";
 	}
 	var stage = new PIXI.Stage(0x336699, true);
-	var winloss = new PIXI.Text((info.won || 0) + " - " + (info.loss || 0), {font: "16px Dosis"});
+	var winloss = new PIXI.Text((info.win || 0) + " - " + (info.loss || 0), {font: "16px Dosis"});
 	winloss.position.set(200, 200);
 	stage.addChild(winloss);
 	var bret = new PIXI.Text("Return", {font: "16px Dosis"});
