@@ -30,8 +30,7 @@ loadcards(function(cards, cardcodes, targeting) {
 			var card = CardCodes[key];
 			var un = card.asUpped(false), up=card.asUpped(true);
 			if (!un || !up){
-				console.log(key);
-				ok(false);
+				ok(false, key);
 			}
 		}
 		ok(true);

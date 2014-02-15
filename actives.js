@@ -688,6 +688,9 @@ lycanthropy:function(c,t){
 	delete c.active.cast;
 	c.passives.nocturnal = true;
 },
+martyr:function(c,t){
+	return c.maxhp-c.hp;
+},
 metamorph:function(c,t){
 	c.owner.mark = t instanceof Player?t.mark:t.card.element;
 	c.owner.spend(c.owner.mark, -2);
@@ -916,6 +919,9 @@ ren:function(c,t){
 		new TextEffect("Ren", tgtToPos(t));
 		t.addactive("predeath", Actives.bounce);
 	}
+},
+reveal:function(c,t){
+	c.owner.precognition = true;
 },
 rewind:function(c,t){
 	if (t.card.isOf(Cards.Skeleton)){
@@ -1147,7 +1153,7 @@ tempering:function(c,t){
 	t.atk += atk;
 },
 throwrock:function(c,t){
-	var dmg = c.card.upped?3:2;
+	var dmg = c.card.upped?4:3;
 	new TextEffect("-"+dmg, tgtToPos(t));
 	t.spelldmg(dmg);
 	t.owner.deck.splice(c.owner.upto(t.owner.deck.length), 0, c.card);

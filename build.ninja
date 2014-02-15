@@ -1,7 +1,7 @@
-rule concat
- command=grunt concat
+rule cat
+ command=cat $in > $out
 rule browserify
  command=browserify -r ./etgutil -r ./MersenneTwister -o etgify.js
-build js.js:concat etg.client.js classes.js actives.js animations.js etg.js ai.targeting.js ai.eval.js Gruntfile.js
-build etgify.js:browserify etgutil.js
-default js.js
+build js.js:cat etg.client.js classes.js actives.js animations.js etg.js ai.targeting.js ai.eval.js
+build etgify.js:browserify etgutil.js MersenneTwister.js
+default js.js etgify.js

@@ -12,8 +12,6 @@
 		"redis":""
 	},
 	"devDependencies": {
-		"grunt":"",
-		"grunt-contrib-concat":"",
 		"qunitjs":""
 	}
 }
