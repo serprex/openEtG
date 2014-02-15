@@ -12,7 +12,6 @@ How Fippe setup on Windows:
 4.	open cmd (probably have to do it as administrator) and navigate to the openetg folder, type "npm install"
 
 5.	type "copy /B etg.client.js+classes.js+actives.js+animations.js+ai.eval.js+ai.targeting.js+etg.js js.js /Y"
-	NB if grunt is installed, one can merely grunt
 
 6. "npm install -g browserify" so that one can run "browserify -r ./etgutil -r ./MersenneTwister -o etgify.js"
 
@@ -20,6 +19,6 @@ How Fippe setup on Windows:
 
 8.	open http://127.0.0.1:13602 in your web browser and it should work!
 
-Note that every time you have edited a file you need to run step 6 before playing the game again. And every time you want to play the game you need to run step 7 and 8 again
+Note that every time you have edited a file you need to run step 5 or 6 to update the game. And every time you want to play the game you need to have node running
 
 If this does not work, you need help, or you need to know how to send an update to serprex, contact serprex (or Fippe94 if you do not find serprex) in Elements chat @ http://elementscommunity.org/chat/blab.php
