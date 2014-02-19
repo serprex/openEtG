@@ -538,7 +538,7 @@ function mkAi(level){
 					ecost[i] = 0;
 				}
 				deck = [];
-				var pl = new Player({rng: new MersenneTwister(Math.random()*40000000)});
+				var pl = PlayerRng;
 				var anyshield=0, anyweapon=0;
 				for(var j=0; j<2; j++){
 					for(var i=0; i<(j==0?20:10); i++){
@@ -594,7 +594,7 @@ function mkAi(level){
 				deck.push(TrueMarks[eles[1]]);
 				chatArea.value = deck.join(" ");
 			}
-			initGame({ first:Math.random()<.5, deck:deck, urdeck:urdeck, seed:Math.random()*4000000000, hp:level==1?100:150 }, aievalopt.checked?aiEvalFunc:aiFunc);
+			initGame({ first:Math.random()<.5, deck:deck, urdeck:urdeck, seed:Math.random()*etg.MAX_INT, hp:level==1?100:150 }, aievalopt.checked?aiEvalFunc:aiFunc);
 			game.gold = level==1?5:20;
 		}
 	}
@@ -675,7 +675,7 @@ function startMenu(){
 		if (user.oracle){
 			// todo user.oracle should be a card, not true. The card is the card that the server itself added. This'll only show what was added
 			delete user.oracle;
-			var card = new Player({rng: new MersenneTwister(Math.random()*40000000)}).randomcard(false,
+			var card = PlayerRng.randomcard(false,
 				(function(y){return function(x){ return x.type != PillarEnum && ((x.passives.rare != 2) ^ y); }})(Math.random()<.03)).code;
 			userEmit("addcard", {c:card, o:card});
 			user.ocard = card;
@@ -813,7 +813,7 @@ function startEditor(){
 				for(var i=0; i<rm.length; i+=2){
 					var upped = CardCodes[rm[i]].upped + CardCodes[rm[i+1]].upped;
 					upped = upped == 1?(Math.random()<.5):(upped == 2);
-					editordeck.push(new Player({rng: new MersenneTwister(Math.random()*40000000)}).randomcard(upped, function(x){ return x.element == editormark && x.type != PillarEnum && !x.passives.rare && !~rm.indexOf(x.code); }).code);
+					editordeck.push(PlayerRng.randomcard(upped, function(x){ return x.element == editormark && x.type != PillarEnum && !x.passives.rare && !~rm.indexOf(x.code); }).code);
 				}
 				transmute(rm);
 			}
@@ -1233,7 +1233,7 @@ function startMatch(){
 						cardwon = winnable[Math.floor(Math.random()*winnable.length)];
 					}else{
 						var elewin = foeDeck[Math.floor(Math.random()*foeDeck.length)];
-						cardwon = new Player({rng: new MersenneTwister(Math.random()*40000000)}).randomcard(elewin.upped, function(x){ return x.element == elewin.element && x.type != PillarEnum && x.passives.rare != 2; });
+						cardwon = PlayerRng.randomcard(elewin.upped, function(x){ return x.element == elewin.element && x.type != PillarEnum && x.passives.rare != 2; });
 					}
 					if (!game.player2.ai){
 						cardwon = cardwon.asUpped(false);

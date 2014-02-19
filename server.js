@@ -214,9 +214,9 @@ io.sockets.on("connection", function(socket) {
 				console.log("deck: "+ aname + " " + idx);
 				db.hgetall("A:"+aname, function(err, adeck){
 					var day = getDay();
-					var seed = Math.random()*4000000000;
-					var first = seed<2000000000;
-					socket.emit("foearena", {seed: seed, first: first, name: aname, hp:Math.max(202-Math.pow(2, 1+day-adeck.day), 100), deck: adeck.deck})
+					var seed = Math.random();
+					var first = seed<.5;
+					socket.emit("foearena", {seed: seed*etgutil.MAX_INT, first: first, name: aname, hp:Math.max(202-Math.pow(2, 1+day-adeck.day), 100), deck: adeck.deck})
 				});
 			});
 		});
@@ -242,8 +242,8 @@ io.sockets.on("connection", function(socket) {
 			usersock[u] = this;
 			if (duels[f] == u){
 				delete duels[f];
-				var seed = Math.random()*4000000000;
-				var first = seed<2000000000;
+				var seed = Math.random()*etgutil.MAX_INT;
+				var first = seed<etgutil.MAX_INT/2;
 				sockinfo[this.id].foe = usersock[f];
 				sockinfo[usersock[f].id].foe = this;
 				var deck0=sockinfo[usersock[f].id].deck, deck1=data.deck;
@@ -280,8 +280,8 @@ io.sockets.on("connection", function(socket) {
 			return;
 		}
 		if (pendinggame && pendinggame.id in sockinfo){
-			var seed = Math.random()*4000000000;
-			var first = seed<2000000000;
+			var seed = Math.random()*etgutil.MAX_INT;
+			var first = seed<etgutil.MAX_INT/2;
 			sockinfo[this.id].foe = pendinggame;
 			sockinfo[pendinggame.id].foe = this;
 			var deck0=sockinfo[pendinggame.id].deck, deck1=data.deck;

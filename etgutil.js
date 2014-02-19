@@ -39,3 +39,4 @@ exports.addcard = function(deck, card, x){
 	}
 	return x<=0?deck:deck + encodeCount(x) + card;
 }
+exports.MAX_INT = 4294967296;

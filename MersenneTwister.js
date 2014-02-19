@@ -4,7 +4,7 @@ var MAX_INT = 4294967296,
 	N = 624, M = 397,
 	UPPER_MASK = 0x80000000,
 	LOWER_MASK = 0x7fffffff,
-	MATRIX_A = 0x9908b0df;
+	MAG_01 = [0, 0x9908b0df];
 
 function MersenneTwister(seed) {
 	this.mt = new Array(N);
@@ -13,44 +13,36 @@ function MersenneTwister(seed) {
 };
 
 MersenneTwister.prototype.seed = function (seed) {
-	var s;
-
 	this.mt[0] = seed >>> 0;
-
 	for (this.mti = 1; this.mti < N; this.mti++) {
-		s = this.mt[this.mti - 1] ^ (this.mt[this.mti - 1] >>> 30);
+		var s = this.mt[this.mti - 1] ^ (this.mt[this.mti - 1] >>> 30);
 		this.mt[this.mti] =
-			(((((s & 0xffff0000) >>> 16) * 1812433253) << 16) + (s & 0x0000ffff) * 1812433253) + this.mti;
-		this.mt[this.mti] >>>= 0;
+			((((((s & 0xffff0000) >>> 16) * 1812433253) << 16) + (s & 0x0000ffff) * 1812433253) + this.mti) >>> 0;
 	}
 };
 
 MersenneTwister.prototype.int = function () {
-	var y, mag01 = [0, MATRIX_A];
-
+	var y;
 	if (this.mti >= N) {
 		for (var kk = 0; kk < N - M; kk++) {
 			y = (this.mt[kk] & UPPER_MASK) | (this.mt[kk + 1] & LOWER_MASK);
-			this.mt[kk] = this.mt[kk + M] ^ (y >>> 1) ^ mag01[y & 1];
+			this.mt[kk] = this.mt[kk + M] ^ (y >>> 1) ^ MAG_01[y & 1];
 		}
 
 		for (; kk < N - 1; kk++) {
 			y = (this.mt[kk] & UPPER_MASK) | (this.mt[kk + 1] & LOWER_MASK);
-			this.mt[kk] = this.mt[kk + (M - N)] ^ (y >>> 1) ^ mag01[y & 1];
+			this.mt[kk] = this.mt[kk + (M - N)] ^ (y >>> 1) ^ MAG_01[y & 1];
 		}
 
 		y = (this.mt[N - 1] & UPPER_MASK) | (this.mt[0] & LOWER_MASK);
-		this.mt[N - 1] = this.mt[M - 1] ^ (y >>> 1) ^ mag01[y & 1];
+		this.mt[N - 1] = this.mt[M - 1] ^ (y >>> 1) ^ MAG_01[y & 1];
 		this.mti = 0;
 	}
-
 	y = this.mt[this.mti++];
-
 	y ^= (y >>> 11);
 	y ^= (y << 7) & 0x9d2c5680;
 	y ^= (y << 15) & 0xefc60000;
 	y ^= (y >>> 18);
-
 	return y >>> 0;
 };
 

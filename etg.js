@@ -22,6 +22,10 @@ var MulliganPhase2 = 1;
 var PlayPhase = 2;
 var EndPhase = 3;
 var TrueMarks = ["8pi", "8pj", "8pk", "8pl", "8pm", "8pn", "8po", "8pp", "8pq", "8pr", "8ps", "8pt", "8pu"];
+var PlayerRng = Object.create(Player.prototype);
+PlayerRng.rng = Math.random;
+PlayerRng.upto = function(x){ return Math.floor(Math.random()*x); }
+PlayerRng.uptoceil = function(x){ return Math.ceil((1-Math.random())*x); }
 var NymphList = [undefined, undefined,
 	"500", "6ug",
 	"534", "71k",
@@ -867,7 +871,8 @@ CardInstance.prototype.useactive = function(target){
 	}else if (card.type == SpellEnum){
 		if (!target || !target.evade(owner)){
 			card.active(this, target);
-			owner.procactive("spell");
+			var self = this;
+			owner.procactive("spell", function(c, t) { c.active.spell(c, self, target); });
 		}
 	}else if (card.type == CreatureEnum){
 		new Creature(card, owner).place();
