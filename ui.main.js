@@ -605,6 +605,7 @@ function startMenu(){
 	var barenai = new PIXI.Text("Arena AI", {font: "16px Dosis"});
 	var beditor = new PIXI.Text("Editor", {font: "16px Dosis"});
 	var barenainfo = new PIXI.Text("Arena Info", {font: "16px Dosis"});
+	var barenatop = new PIXI.Text("Arena T10", {font: "16px Dosis"});
 	var blogout = new PIXI.Text("Logout", {font: "16px Dosis"});
 	var bremove = new PIXI.Text("Delete Account", {font: "16px Dosis"});
 	brandai.position.set(200, 250);
@@ -612,9 +613,10 @@ function startMenu(){
 	barenai.position.set(400, 250);
 	beditor.position.set(200, 300);
 	barenainfo.position.set(400, 300);
+	barenatop.position.set(400, 350);
 	blogout.position.set(200, 500);
 	bremove.position.set(400, 500);
-	setInteractive(brandai, brandhb, barenai, beditor, barenainfo, blogout, bremove);
+	setInteractive(brandai, brandhb, barenai, beditor, barenainfo, barenatop, blogout, bremove);
 	brandai.click = mkAi(1);
 	brandhb.click = mkAi(2);
 	barenai.click = function(){
@@ -638,9 +640,16 @@ function startMenu(){
 			userEmit("arenainfo");
 		}
 	}
+	barenatop.click = function(){
+		if (Cards){
+			userEmit("arenatop");
+		}
+	}
 	function logout(){
 		user = undefined;
 		menuui.removeChild(barenai);
+		menuui.removeChild(barenainfo);
+		menuui.removeChild(barenatop);
 		menuui.removeChild(blogout);
 		menuui.removeChild(bremove);
 		menuui.removeChild(goldcount);
@@ -667,6 +676,7 @@ function startMenu(){
 	if (user){
 		menuui.addChild(barenai);
 		menuui.addChild(barenainfo);
+		menuui.addChild(barenatop);
 		menuui.addChild(blogout);
 		menuui.addChild(bremove);
 		var goldcount = new PIXI.Text(user.gold + "\u00A4", {font: "16px Dosis"});
@@ -1702,6 +1712,24 @@ function startArenaInfo(info){
 	mainStage = stage;
 	refreshRenderer();
 }
+function startArenaTop(info){
+	if (!info){
+		chatArea.value = "??";
+	}
+	var stage = new PIXI.Stage(0x336699, true);
+	for(var i=0; i<info.length; i++){
+		var infotxt = new PIXI.Text(info[i], {font: "16px Dosis"});
+		infotxt.position.set(200, 100+i*20);
+		stage.addChild(infotxt);
+	}
+	var bret = new PIXI.Text("Return", {font: "16px Dosis"});
+	bret.position.set(200, 400);
+	bret.interactive = true;
+	bret.click = startMenu;
+	stage.addChild(bret);
+	mainStage = stage;
+	refreshRenderer();
+}
 var foeplays = [];
 var tximgcache = [];
 function getTextImage(text, font, color){
@@ -1764,6 +1792,7 @@ socket.on("foearena", function(data){
 	game.gold = 20;
 });
 socket.on("arenainfo", startArenaInfo);
+socket.on("arenatop", startArenaTop);
 socket.on("userdump", function(data){
 	user = data;
 	if (user.deck){

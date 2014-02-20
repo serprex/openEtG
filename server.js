@@ -188,7 +188,7 @@ io.sockets.on("connection", function(socket) {
 			return;
 		}
 		db.hget(au, "card", function(err, card){
-			var adeck = "05" + user.ocard + data.d;
+			var adeck = etg.addcard(data.d, user.ocard, 5);
 			if (card != user.ocard){
 				db.hmset(au, {day: getDay(), deck: adeck, card: user.ocard, win:0, loss:0});
 				db.zadd("arena", 0, data.u);
@@ -200,6 +200,11 @@ io.sockets.on("connection", function(socket) {
 	userEvent(socket, "arenainfo", function(data, user){
 		db.hgetall("A:" + data.u, function(err, obj){
 			socket.emit("arenainfo", obj);
+		});
+	});
+	userEvent(socket, "arenatop", function(data, user){
+		db.zrange("arena", 0, 10, function(err, obj){
+			socket.emit("arenatop", obj);
 		});
 	});
 	userEvent(socket, "modarena", function(data, user){
