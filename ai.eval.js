@@ -182,7 +182,10 @@ function evalGameState(game) {
 		storm3:6,
 		swave:6,
 		tempering:3,
-		throwrock:2,
+		throwrock: 2,
+		tick:function(c){
+			return c instanceof CardInstance ? 4 : (7 - c.truehp());
+		},
 		unburrow:0,
 		upkeep:-.5,
 		vampire:function(c){
