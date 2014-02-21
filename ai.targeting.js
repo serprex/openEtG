@@ -433,6 +433,9 @@ tempering:function(c,t){
 throwrock:function(c,t){
 	return c.owner != t.owner && 10-t.truehp();
 },
+tick:function(c,t){
+	return true;
+},
 unburrow:function(c,t){
 	return !ActivesEval.burrow(c, t);
 },

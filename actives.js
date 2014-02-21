@@ -1165,6 +1165,12 @@ throwrock:function(c,t){
 	t.spelldmg(dmg);
 	t.owner.deck.splice(c.owner.upto(t.owner.deck.length), 0, c.card);
 },
+tick:function(c,t){
+	c.dmg(c.card.upped?2:1);
+	if (c.hp <= 0) {
+		c.card.upped ? c.owner.foe.masscc(c, function (c, x) { x.dmg(4) }, false) : c.owner.foe.spelldmg(9);
+		}	
+},
 unburrow:function(c,t){
 	c.status.burrowed = false;
 	c.active.cast = Actives.burrow;
