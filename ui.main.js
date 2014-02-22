@@ -188,8 +188,13 @@ function getArt(code){
 		loader.onComplete = function(){
 			artcache[code] = makeArt(CardCodes[code], PIXI.Texture.fromImage("Cards/"+name+".png"));
 		}
+		var uppedLoader = new PIXI.AssetLoader(["Cards/" + code + ".png"]);
+		uppedLoader.onComplete = function () {
+			artcache[code] = makeArt(CardCodes[code], PIXI.Texture.fromImage("Cards/"+code+".png"));
+		}
 		artcache[code] = makeArt(CardCodes[code]);
 		loader.load();
+		uppedLoader.load();
 		return artcache[code];
 	}
 }
