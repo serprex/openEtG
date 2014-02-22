@@ -181,20 +181,14 @@ function makeArt(card, art){
 	return rend;
 }
 function getArt(code){
-	var name=CardCodes[code].asUpped(false).code;
 	if (artcache[code])return artcache[code];
 	else{
-		var loader = new PIXI.AssetLoader(["Cards/"+name+".png"]);
+		var loader = new PIXI.AssetLoader(["Cards/" + code + ".png"]);
 		loader.onComplete = function(){
 			artcache[code] = makeArt(CardCodes[code], PIXI.Texture.fromImage("Cards/"+name+".png"));
 		}
-		var uppedLoader = new PIXI.AssetLoader(["Cards/" + code + ".png"]);
-		uppedLoader.onComplete = function () {
-			artcache[code] = makeArt(CardCodes[code], PIXI.Texture.fromImage("Cards/"+code+".png"));
-		}
 		artcache[code] = makeArt(CardCodes[code]);
 		loader.load();
-		uppedLoader.load();
 		return artcache[code];
 	}
 }

@@ -3,7 +3,8 @@ var qstring = require("querystring");
 var http = require("http");
 var crypto = require("crypto");
 var connect = require("connect");
-var app = http.createServer(connect().use(connect.compress()).use(connect.static(__dirname)).use(loginAuth));
+var fs = require("fs");
+var app = http.createServer(connect().use(connect.compress()).use(cardRedirect).use(connect.static(__dirname)).use(loginAuth));
 var io = require("socket.io").listen(app.listen(13602));
 var redis = require("redis"), db = redis.createClient();
 var etgutil = require("./etgutil");
@@ -62,6 +63,21 @@ function loginAuth(req, res, next){
 			});
 		}
 	}else next();
+}
+function cardRedirect(req, res, next){
+	if (req.url.match(/^\/Cards\/...\.png$/)){
+		var code = req.url.substr(7, 3), intCode = parseInt(code, 32);
+		if (intCode >= 7000){
+			fs.exists(req.url.substr(1), function(exists){
+				if (!exists){
+					req.url = "/Cards/" + (intCode-2000).toString(32) + ".png";
+				}
+				next();
+			});
+			return;
+		}
+	}
+	next();
 }
 
 var users = {};
