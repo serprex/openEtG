@@ -601,8 +601,9 @@ function mkAi(level){
 function startMenu(){
 	var brandai = new PIXI.Text("AI1", {font: "16px Dosis"});
 	var brandhb = new PIXI.Text("AI2", {font: "16px Dosis"});
-	var barenai = new PIXI.Text("Arena AI", {font: "16px Dosis"});
-	var beditor = new PIXI.Text("Editor", {font: "16px Dosis"});
+	var barenai = new PIXI.Text("Arena AI", { font: "16px Dosis" });
+	var beditor = new PIXI.Text("Editor", { font: "16px Dosis" });
+	var bstore = new PIXI.Text("Booster Store", { font: "16px Dosis" });
 	var barenainfo = new PIXI.Text("Arena Info", {font: "16px Dosis"});
 	var barenatop = new PIXI.Text("Arena T10", {font: "16px Dosis"});
 	var blogout = new PIXI.Text("Logout", {font: "16px Dosis"});
@@ -611,11 +612,12 @@ function startMenu(){
 	brandhb.position.set(300, 250);
 	barenai.position.set(400, 250);
 	beditor.position.set(200, 300);
+	bstore.position.set(300, 300);
 	barenainfo.position.set(400, 300);
 	barenatop.position.set(400, 350);
 	blogout.position.set(200, 500);
 	bremove.position.set(400, 500);
-	setInteractive(brandai, brandhb, barenai, beditor, barenainfo, barenatop, blogout, bremove);
+	setInteractive(brandai, brandhb, barenai, beditor, barenainfo, barenatop, blogout, bremove, bstore);
 	brandai.click = mkAi(1);
 	brandhb.click = mkAi(2);
 	barenai.click = function(){
@@ -634,6 +636,7 @@ function startMenu(){
 		}
 	}
 	beditor.click = startEditor;
+	bstore.click = startStore;
 	barenainfo.click = function(){
 		if (Cards){
 			userEmit("arenainfo");
@@ -652,6 +655,7 @@ function startMenu(){
 		menuui.removeChild(blogout);
 		menuui.removeChild(bremove);
 		menuui.removeChild(goldcount);
+		menuui.removeChild(bstore);
 		if (oracle){
 			menuui.removeChild(oracle);
 		}
@@ -678,6 +682,7 @@ function startMenu(){
 		menuui.addChild(barenatop);
 		menuui.addChild(blogout);
 		menuui.addChild(bremove);
+		menuui.addChild(bstore);
 		var goldcount = new PIXI.Text(user.gold + "\u00A4", {font: "16px Dosis"});
 		goldcount.position.set(200, 200);
 		menuui.addChild(goldcount);
@@ -705,6 +710,97 @@ function startMenu(){
 function editorCardCmp(x,y){
 	var cardx = CardCodes[x], cardy = CardCodes[y];
 	return cardx.upped - cardy.upped || cardx.element - cardy.element || cardx.cost-cardy.cost || (x>y)-(x<y);
+}
+function startStore() {
+	var newCards = [];
+	var newCardsArt = [];
+	var storeui = new PIXI.Stage(0x336699, true);
+	var bsave = new PIXI.Text("Done", { font: "16px Dosis" });
+	var bbuy = new PIXI.Text("Buy Booster", { font: "16px Dosis" });
+	var bgetcards = new PIXI.Text("Take cards", { font: "16px Dosis" });
+	var boostermark = 1;
+	bsave.position.set(8,8);
+	bsave.click = function () {
+		if (isEmpty(newCards))
+			startMenu();
+		else
+			chatArea.value = "Get your cards before leaving!";
+	}
+	bbuy.position.set(100,100);
+	bbuy.click = function () {
+		if (isEmpty(newCards) && user.gold >= 10) {
+			user.gold -= 10;
+			userEmit("subgold", { g: 10 });
+			for (var i = 0; i < 3; i++) {
+				var rareWon = Math.random() < .03 ? 1 : 0;
+				newCards.push(PlayerRng.randomcard(false, function (x) { return x.element == boostermark && x.type != PillarEnum && ((rareWon > 0 && x.passives.rare == rareWon) || (rareWon == 0 && !x.passives.rare)) }).code);				
+				newCardsArt[i].setTexture(getArt(newCards[i]));
+				newCardsArt[i].visible = true;
+				storeui.addChild(bgetcards);
+			}
+		}
+		else if (user.gold < 10)
+			chatArea.value = "You can't afford more cards, you need 10 gold!";
+		else
+			chatArea.value = "Take the cards before buying more!";
+		
+	}
+	bgetcards.position.set(400, 250);
+	bgetcards.click = function () {
+		userEmit("add", { add: etg.encodedeck(newCards)});
+		for (var i = 0; i < 3; i++) {			
+			user.pool.push(newCards[i]);
+			newCardsArt[i].visible = false;
+		}
+		newCards = [];		
+		storeui.removeChild(bgetcards);
+		
+	}
+	var storemarksprite = new PIXI.Sprite(nopic);
+	storemarksprite.position.set(100, 130);
+	storeui.addChild(storemarksprite);
+	var boostereleicons = [];
+	for (var i = 0; i < 13; i++) {
+		var sprite = new PIXI.Sprite(nopic);
+		sprite.position.set(120 +i*32, 30);
+		setInteractive(sprite);
+		(function (_i) {
+			sprite.click = function () { boostermark = _i; }
+		})(i);
+		
+		boostereleicons.push(sprite);
+		storeui.addChild(sprite);
+	}
+	var goldcount = new PIXI.Text(user.gold + "\u00A4", { font: "16px Dosis" });
+	goldcount.position.set(600, 50);
+	storeui.addChild(goldcount);
+
+	setInteractive(bsave, bbuy, bgetcards);
+	storeui.addChild(bsave);
+	storeui.addChild(bbuy);
+
+	for (var i = 0; i < 3; i++) {
+		var cardArt = new PIXI.Sprite(nopic);
+		cardArt.position.set(200 + 150 * i, 300);
+		storeui.addChild(cardArt);
+		newCardsArt.push(cardArt);
+	}
+
+	animCb = function() {
+		storemarksprite.setTexture(getIcon(boostermark));
+		for (var i = 0; i < 3; i++) {
+			if (newCards[i])
+				newCardsArt[i].setTexture(getArt(newCards[i]));
+		}
+		for (var i = 0; i < 13; i++) {
+			boostereleicons[i].setTexture(getIcon(i));
+		}
+		goldcount.setText(user.gold + "\u00A4");
+	}
+
+	mainStage = storeui;
+	refreshRenderer();
+	
 }
 function startEditor(){
 	function adjustCardMinus(code, x){

@@ -252,6 +252,12 @@ io.sockets.on("connection", function(socket) {
 		}
 		user.deck = data.add;
 	});
+	userEvent(socket, "add", function (data, user) {
+		var add = etgutil.decodedeck(data.add);
+		for (var i = 0; i < add.length; i++) {
+			user.pool = etgutil.addcard(user.pool, add[i]);
+		}
+	});
 	userEvent(socket, "foewant", function(data){
 		var u=data.u, f=data.f;
 		if (u == f){
