@@ -185,7 +185,7 @@ function getArt(code){
 	else{
 		var loader = new PIXI.AssetLoader(["Cards/" + code + ".png"]);
 		loader.onComplete = function(){
-			artcache[code] = makeArt(CardCodes[code], PIXI.Texture.fromImage("Cards/"+name+".png"));
+			artcache[code] = makeArt(CardCodes[code], PIXI.Texture.fromImage("Cards/"+code+".png"));
 		}
 		artcache[code] = makeArt(CardCodes[code]);
 		loader.load();
