@@ -1121,7 +1121,8 @@ function startEditor(){
 			for (var i=0; i<6; i++){
 				for(var j=0; j<editorcolumns[i][1][editorelement].length; j++){
 					var spr = editorcolumns[i][0][j], code = editorcolumns[i][1][editorelement][j], card = CardCodes[code];
-					spr.visible = true;
+					if (!usePool || card in cardpool || isFreeCard(card)) spr.visible = true;
+					else spr.visible = false;
 					spr.setTexture(getCardImage(code));
 					if (usePool){
 						var txt = spr.getChildAt(0), card = CardCodes[code], inf = isFreeCard(card);

@@ -274,7 +274,7 @@ function evalGameState(game) {
 			c.status.adrenaline = 1;
 		}
 		// todo SoFr
-		return atk * (fshactive == Actives.evade100?1-fsh.status.charges/6:fshactive == Actives.evade50?.5:fshactive == Actives.evade40?.4:1) * (fsh && fsh.passives.reflect && c.status.psion ? -1 : 1);
+		return atk * (fshactive == Actives.evade100 ? 1 - fsh.status.charges / 6 : fshactive == Actives.evade50 ? .5 : fshactive == Actives.evade40 ? .4 : 1) * ((fsh && fsh.passives.reflect && c.status.psion) || foe.sosa ? -1 : 1);
 	}
 
 	function evalthing(c) {
