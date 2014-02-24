@@ -734,7 +734,7 @@ function startStore() {
 				userEmit("subgold", { g: 10 });
 				for (var i = 0; i < 3; i++) {
 					var rareWon = Math.random() < .03 ? 1 : 0;
-					newCards.push(PlayerRng.randomcard(false, function (x) { return x.element == boostermark && x.type != PillarEnum && ((rareWon > 0 && x.passives.rare == rareWon) || (rareWon == 0 && !x.passives.rare)) }).code);
+					newCards.push(PlayerRng.randomcard(false, function (x) { return x.element == boostermark && x.type != PillarEnum && x.passives.rare == rareWon }).code);
 					newCardsArt[i].setTexture(getArt(newCards[i]));
 					newCardsArt[i].visible = true;
 					storeui.addChild(bgetcards);
