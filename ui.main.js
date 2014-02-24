@@ -10,7 +10,7 @@ loadcards(function(cards, cardcodes, targeting) {
 function getTarget(src, active, cb){
 	var targetingFilter = Targeting[active.activename];
 	if (targetingFilter){
-		targetingMode = function(t){ return (t == game.player2 || t.owner == game.player1 || t instanceof CardInstance || t.passives.cloak || !game.player2.isCloaked()) && targetingFilter(src, t); }
+		targetingMode = function(t){ return (t instanceof Player || t instanceof CardInstance || t.owner == game.turn || t.passives.cloak || !t.owner.isCloaked()) && targetingFilter(src, t); }
 		targetingModeCb = cb;
 		targetingText = active.activename;
 	}else{
@@ -728,33 +728,33 @@ function startStore() {
 	}
 	bbuy.position.set(100,100);
 	bbuy.click = function () {
-		if (isEmpty(newCards) && user.gold >= 10) {
-			user.gold -= 10;
-			userEmit("subgold", { g: 10 });
-			for (var i = 0; i < 3; i++) {
-				var rareWon = Math.random() < .03 ? 1 : 0;
-				newCards.push(PlayerRng.randomcard(false, function (x) { return x.element == boostermark && x.type != PillarEnum && ((rareWon > 0 && x.passives.rare == rareWon) || (rareWon == 0 && !x.passives.rare)) }).code);				
-				newCardsArt[i].setTexture(getArt(newCards[i]));
-				newCardsArt[i].visible = true;
-				storeui.addChild(bgetcards);
+		if (isEmpty(newCards)){
+			if (user.gold >= 10) {
+				user.gold -= 10;
+				userEmit("subgold", { g: 10 });
+				for (var i = 0; i < 3; i++) {
+					var rareWon = Math.random() < .03 ? 1 : 0;
+					newCards.push(PlayerRng.randomcard(false, function (x) { return x.element == boostermark && x.type != PillarEnum && ((rareWon > 0 && x.passives.rare == rareWon) || (rareWon == 0 && !x.passives.rare)) }).code);
+					newCardsArt[i].setTexture(getArt(newCards[i]));
+					newCardsArt[i].visible = true;
+					storeui.addChild(bgetcards);
+				}
+			}else{
+				chatArea.value = "You can't afford more cards, you need 10 gold!";
 			}
-		}
-		else if (user.gold < 10)
-			chatArea.value = "You can't afford more cards, you need 10 gold!";
-		else
+		}else{
 			chatArea.value = "Take the cards before buying more!";
-		
+		}
 	}
 	bgetcards.position.set(400, 250);
 	bgetcards.click = function () {
 		userEmit("add", { add: etg.encodedeck(newCards)});
-		for (var i = 0; i < 3; i++) {			
+		for (var i = 0; i < 3; i++) {
 			user.pool.push(newCards[i]);
 			newCardsArt[i].visible = false;
 		}
-		newCards = [];		
+		newCards = [];
 		storeui.removeChild(bgetcards);
-		
 	}
 	var storemarksprite = new PIXI.Sprite(nopic);
 	storemarksprite.position.set(100, 130);
@@ -767,7 +767,7 @@ function startStore() {
 		(function (_i) {
 			sprite.click = function () { boostermark = _i; }
 		})(i);
-		
+
 		boostereleicons.push(sprite);
 		storeui.addChild(sprite);
 	}
@@ -800,7 +800,6 @@ function startStore() {
 
 	mainStage = storeui;
 	refreshRenderer();
-	
 }
 function startEditor(){
 	function adjustCardMinus(code, x){
