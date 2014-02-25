@@ -68,7 +68,7 @@ function cardRedirect(req, res, next){
 	if (req.url.match(/^\/Cards\/...\.png$/)){
 		var code = req.url.substr(7, 3), intCode = parseInt(code, 32);
 		if (intCode >= 7000){
-			fs.exists("openEtG" + req.url, function(exists){
+			fs.exists(__dirname + req.url, function(exists){
 				if (!exists){
 					req.url = "/Cards/" + (intCode-2000).toString(32) + ".png";
 				}
