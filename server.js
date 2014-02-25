@@ -280,7 +280,7 @@ io.sockets.on("connection", function(socket) {
 				usersock[f].emit("pvpgive", { first: !first, seed: seed, deck: deck1, urdeck: deck0 });
 			} else {
 				duels[u] = f;
-
+				usersock[f].emit("chat", { u: "Message", message: u + " wants to duel with you!" });
 			}
 		}
 	});
@@ -288,26 +288,23 @@ io.sockets.on("connection", function(socket) {
 		var u = data.u;
 		sockinfo[this.id].tradecard = data.card;
 		sockinfo[this.id].oppcard = data.oppcard;
-		var other = usersock[sockinfo[this.id].foe];
-		if (sockinfo[other.id].tradeaccepted) {
+		var other = sockinfo[this.id].foe;
+		if (sockinfo[other.id] && sockinfo[other.id].tradeaccepted) {
 			var player1Card = sockinfo[this.id].tradecard;
 			var player2Card = sockinfo[other.id].tradecard;
 			//if (player1Card == sockinfo[other.id].oppcard && sockinfo[this.id].oppcard == player2Card) {
-				u.pool = etgutil.addcard(user.pool, player1Card, -1);
-				u.pool = etgutil.addcard(user.pool, player2Card);
-				sockinfo[u].foe.pool = etgutil.addcard(user.pool, player2Card, -1);
-				sockinfo[u].foe.pool = etgutil.addcard(user.pool, player1Card);
-				socket.emit("tradedone", { oldcard: player1Card, newcard: player2Card })
-				sockinfo[other.id].emit("tradedone", { oldcard: player2Card, newcard: player1Card })
-				delete sockinfo[this.id].tradecard;
-				delete sockinfo[other.id].tradecard;
-				delete sockinfo[this.id].oppcard;
-				delete sockinfo[other.id].oppcard;
-				delete sockinfo[this.id].tradeaccepted;
-				delete sockinfo[other].tradeaccepted;
-
+			users[u].pool = etgutil.addcard(users[u].pool, player1Card, -1);
+			users[u].pool = etgutil.addcard(users[u].pool, player2Card);
+			users[sockinfo[this.id].foename].pool = etgutil.addcard(users[sockinfo[this.id].foename].pool, player2Card, -1);
+			users[sockinfo[this.id].foename].pool = etgutil.addcard(users[sockinfo[this.id].foename].pool, player1Card);
+			this.emit("tradedone", { oldcard: player1Card, newcard: player2Card })
+			other.emit("tradedone", { oldcard: player2Card, newcard: player1Card })
+			delete sockinfo[this.id];
+			delete sockinfo[other.id];
 			//}
-		} else sockinfo[this.id].tradeaccepted = true;
+		} else {
+			sockinfo[this.id].tradeaccepted = true;
+		}
 	});
 	userEvent(socket, "tradewant", function (data) {
 		var u = data.u, f = data.f;
@@ -317,14 +314,18 @@ io.sockets.on("connection", function(socket) {
 		console.log(u + " requesting " + f);
 		if (f in users)
 		{
-			usersock[u] = this;
-			if (trades[f] == u){
+			if (trades[f] == u) {
 				delete trades[f];
 				sockinfo[this.id].foe = usersock[f];
 				sockinfo[usersock[f].id].foe = this;
-				this.emit("tradegive", {first: false})
-				usersock[f].emit("tradegive", {first: true})
-			}else trades[u] = f;
+				sockinfo[this.id].foename = f;
+				sockinfo[usersock[f].id].foename = u;
+				this.emit("tradegive", { first: false })
+				usersock[f].emit("tradegive", { first: true })
+			} else {
+				trades[u] = f;
+				if (usersock[f]) usersock[f].emit("chat", { u: "Message", message: u + " wants to trade with you!" });
+			}
 		}
 	});
 	userEvent(socket, "passchange", function(data, user){

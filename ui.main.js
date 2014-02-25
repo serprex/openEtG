@@ -1,7 +1,8 @@
-var Cards, CardCodes, Targeting, targetingMode, targetingModeCb, targetingText, game, discarding, animCb, user, renderer, endturnFunc, cancelFunc, foeDeck, player2summon, myTurn, player2Card;
+var Cards, CardCodes, Targeting, targetingMode, targetingModeCb, targetingText, game, discarding, animCb, user, renderer, endturnFunc, cancelFunc, foeDeck, player2summon, myTurn, cardChosen, player2Card;
 var etg = require("./etgutil");
 var MersenneTwister = require("./MersenneTwister");
 var myTurn = false;
+var cardChosen = false;
 loadcards(function(cards, cardcodes, targeting) {
 	Cards = cards;
 	CardCodes = cardcodes;
@@ -277,14 +278,16 @@ function initTrade(data) {
 	var bconfirm = new PIXI.Text("Confirm trade", { font: "16px Dosis" });
 	var editorcolumns = [];
 	var selectedCard;
+
 	
 	var cardartcode;
 	btrade.position.set(100, 100);
 	btrade.click = function () {
-		if (selectedCard && myTurn) {
+		if (myTurn) {
 			userEmit("cardchosen", { card: selectedCard })
 			console.log("Card sent")
 			myTurn = false;
+			cardChosen = true;
 			editorui.removeChild(btrade);
 			editorui.addChild(bconfirm);
 		}
@@ -293,9 +296,13 @@ function initTrade(data) {
 	}
 	bconfirm.position.set(100, 150);
 	bconfirm.click = function () {
-		userEmit("confirmtrade", { card: selectedCard, oppcard: player2Card });
+		if (player2Card) {
+			console.log("Confirmed!");
+			myTurn = false;
+			userEmit("confirmtrade", { card: selectedCard, oppcard: player2Card });
+		}
 	}
-	setInteractive(btrade);
+	setInteractive(btrade, bconfirm);
 	editorui.addChild(btrade);
 
 
@@ -329,7 +336,7 @@ function initTrade(data) {
 			sprite.addChild(sprcount);
 			(function (_i, _j) {
 				sprite.click = function () {
-					if (myTurn) selectedCard = cardartcode;
+					if (myTurn && !cardChosen) selectedCard = cardartcode;
 				}
 				sprite.mouseover = function () {
 					cardartcode = editorcolumns[_i][1][tradeelement][_j];
@@ -2054,8 +2061,9 @@ socket.on("cardchosen", function (data) {
 	console.log(player2Card);
 });
 socket.on("tradedone", function (data) {
+	console.log("Trade done!")
 	user.pool.push(data.newcard);
-	user.pool.splice(user.pool.indexOf(oldcard), 1);
+	user.pool.splice(user.pool.indexOf(data.oldcard), 1);
 	startMenu();
 });
 function maybeSendChat(e) {
