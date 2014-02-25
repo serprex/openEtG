@@ -82,6 +82,8 @@ function cardRedirect(req, res, next){
 
 var users = {};
 var duels = {};
+var trades = {};
+var pendingtrade = {};
 var usersock = {};
 var rooms = {};
 var sockinfo = {};
@@ -267,16 +269,62 @@ io.sockets.on("connection", function(socket) {
 		sockinfo[this.id].deck = data.deck;
 		if (f in users){
 			usersock[u] = this;
-			if (duels[f] == u){
+			if (duels[f] == u) {
 				delete duels[f];
-				var seed = Math.random()*etgutil.MAX_INT;
-				var first = seed<etgutil.MAX_INT/2;
+				var seed = Math.random() * etgutil.MAX_INT;
+				var first = seed < etgutil.MAX_INT / 2;
 				sockinfo[this.id].foe = usersock[f];
 				sockinfo[usersock[f].id].foe = this;
-				var deck0=sockinfo[usersock[f].id].deck, deck1=data.deck;
-				this.emit("pvpgive", {first:first, seed:seed, deck:deck0, urdeck:deck1});
-				usersock[f].emit("pvpgive", {first:!first, seed:seed, deck:deck1, urdeck:deck0});
-			}else duels[u] = f;
+				var deck0 = sockinfo[usersock[f].id].deck, deck1 = data.deck;
+				this.emit("pvpgive", { first: first, seed: seed, deck: deck0, urdeck: deck1 });
+				usersock[f].emit("pvpgive", { first: !first, seed: seed, deck: deck1, urdeck: deck0 });
+			} else {
+				duels[u] = f;
+
+			}
+		}
+	});
+	userEvent(socket, "confirmtrade", function (data) {
+		var u = data.u;
+		sockinfo[this.id].tradecard = data.card;
+		sockinfo[this.id].oppcard = data.oppcard;
+		var other = usersock[sockinfo[this.id].foe];
+		if (sockinfo[other.id].tradeaccepted) {
+			var player1Card = sockinfo[this.id].tradecard;
+			var player2Card = sockinfo[other.id].tradecard;
+			//if (player1Card == sockinfo[other.id].oppcard && sockinfo[this.id].oppcard == player2Card) {
+				u.pool = etgutil.addcard(user.pool, player1Card, -1);
+				u.pool = etgutil.addcard(user.pool, player2Card);
+				sockinfo[u].foe.pool = etgutil.addcard(user.pool, player2Card, -1);
+				sockinfo[u].foe.pool = etgutil.addcard(user.pool, player1Card);
+				socket.emit("tradedone", { oldcard: player1Card, newcard: player2Card })
+				sockinfo[other.id].emit("tradedone", { oldcard: player2Card, newcard: player1Card })
+				delete sockinfo[this.id].tradecard;
+				delete sockinfo[other.id].tradecard;
+				delete sockinfo[this.id].oppcard;
+				delete sockinfo[other.id].oppcard;
+				delete sockinfo[this.id].tradeaccepted;
+				delete sockinfo[other].tradeaccepted;
+
+			//}
+		} else sockinfo[this.id].tradeaccepted = true;
+	});
+	userEvent(socket, "tradewant", function (data) {
+		var u = data.u, f = data.f;
+		if (u == f) {
+			return;
+		}
+		console.log(u + " requesting " + f);
+		if (f in users)
+		{
+			usersock[u] = this;
+			if (trades[f] == u){
+				delete trades[f];
+				sockinfo[this.id].foe = usersock[f];
+				sockinfo[usersock[f].id].foe = this;
+				this.emit("tradegive", {first: false})
+				usersock[f].emit("tradegive", {first: true})
+			}else trades[u] = f;
 		}
 	});
 	userEvent(socket, "passchange", function(data, user){
@@ -298,6 +346,9 @@ io.sockets.on("connection", function(socket) {
 				}
 			});
 		}
+	});
+	userEvent(socket, "chat", function (data) {
+		io.sockets.emit("chat", data);
 	});
 	socket.on("pvpwant", function(data) {
 		var pendinggame=rooms[data.room];
@@ -321,7 +372,7 @@ io.sockets.on("connection", function(socket) {
 	});
 	foeEcho(socket, "endturn");
 	foeEcho(socket, "cast");
-	foeEcho(socket, "chat");
 	foeEcho(socket, "foeleft");
 	foeEcho(socket, "mulligan");
+	foeEcho(socket, "cardchosen");
 });

@@ -1,6 +1,7 @@
-var Cards, CardCodes, Targeting, targetingMode, targetingModeCb, targetingText, game, discarding, animCb, user, renderer, endturnFunc, cancelFunc, foeDeck, player2summon;
+var Cards, CardCodes, Targeting, targetingMode, targetingModeCb, targetingText, game, discarding, animCb, user, renderer, endturnFunc, cancelFunc, foeDeck, player2summon, myTurn, player2Card;
 var etg = require("./etgutil");
 var MersenneTwister = require("./MersenneTwister");
+var myTurn = false;
 loadcards(function(cards, cardcodes, targeting) {
 	Cards = cards;
 	CardCodes = cardcodes;
@@ -264,6 +265,126 @@ function getPermanentImage(code){
 		rend.render(graphics);
 		return primgcache[code] = rend;
 	}
+}
+function initTrade(data) {
+	function isFreeCard(card) {
+		return card.type == PillarEnum && !card.upped && !card.passives.rare;
+	}
+	
+	if (data.first) myTurn = true;
+	var editorui = new PIXI.Stage(0x336699, true), tradeelement = 0;
+	var btrade = new PIXI.Text("Trade", { font: "16px Dosis" });
+	var bconfirm = new PIXI.Text("Confirm trade", { font: "16px Dosis" });
+	var editorcolumns = [];
+	var selectedCard;
+	
+	var cardartcode;
+	btrade.position.set(100, 100);
+	btrade.click = function () {
+		if (selectedCard && myTurn) {
+			userEmit("cardchosen", { card: selectedCard })
+			console.log("Card sent")
+			myTurn = false;
+			editorui.removeChild(btrade);
+			editorui.addChild(bconfirm);
+		}
+		else
+			chatArea.value = "You need to wait for your friend to choose a card first";
+	}
+	bconfirm.position.set(100, 150);
+	bconfirm.click = function () {
+		userEmit("confirmtrade", { card: selectedCard, oppcard: player2Card });
+	}
+	setInteractive(btrade);
+	editorui.addChild(btrade);
+
+
+	var cardpool = {};
+	for (var i = 0; i < user.pool.length; i++) {
+		if (user.pool[i] in cardpool) {
+			cardpool[user.pool[i]]++;
+		} else {
+			cardpool[user.pool[i]] = 1;
+		}
+	}
+
+	var editoreleicons = [];
+	for (var i = 0; i < 13; i++) {
+		var sprite = new PIXI.Sprite(nopic);
+		sprite.position.set(8, 184 + i * 32);
+		setInteractive(sprite);
+		(function (_i) {
+			sprite.click = function () { tradeelement = _i; }
+		})(i);
+		editoreleicons.push(sprite);
+		editorui.addChild(sprite);
+	}
+	for (var i = 0; i < 6; i++) {
+		editorcolumns.push([[], []]);
+		for (var j = 0; j < 15; j++) {
+			var sprite = new PIXI.Sprite(nopic);
+			sprite.position.set(100 + i * 130, 272 + j * 20);
+			var sprcount = new PIXI.Text("", { font: "12px Dosis" });
+			sprcount.position.set(102, 4);
+			sprite.addChild(sprcount);
+			(function (_i, _j) {
+				sprite.click = function () {
+					if (myTurn) selectedCard = cardartcode;
+				}
+				sprite.mouseover = function () {
+					cardartcode = editorcolumns[_i][1][tradeelement][_j];
+				}
+			})(i, j);
+			sprite.interactive = true;
+			editorui.addChild(sprite);
+			editorcolumns[i][0].push(sprite);
+		}
+		for (var j = 0; j < 13; j++) {
+			editorcolumns[i][1].push(filtercards(i > 2,
+				function (x) { return x.element == j && ((i % 3 == 0 && x.type == CreatureEnum) || (i % 3 == 1 && x.type <= PermanentEnum) || (i % 3 == 2 && x.type == SpellEnum)); },
+				editorCardCmp));
+		}
+	}
+	var cardArt = new PIXI.Sprite(nopic);
+	cardArt.position.set(734, 8);
+	editorui.addChild(cardArt);
+	var selectedCardArt = new PIXI.Sprite(nopic);
+	selectedCardArt.position.set(334, 8);
+	editorui.addChild(selectedCardArt);
+	var player2CardArt = new PIXI.Sprite(nopic);
+	player2CardArt.position.set(534, 8);
+	editorui.addChild(player2CardArt);
+	animCb = function () {
+		if (cardartcode) {
+			cardArt.setTexture(getArt(cardartcode));
+		}
+		if (selectedCard) {
+			selectedCardArt.setTexture(getArt(selectedCard));
+		}
+		if (player2Card) {
+			player2CardArt.setTexture(getArt(player2Card));
+		}
+		for (var i = 0; i < 13; i++) {
+			editoreleicons[i].setTexture(getIcon(i));
+		}
+		for (var i = 0; i < 6; i++) {
+			for (var j = 0; j < editorcolumns[i][1][tradeelement].length; j++) {
+				var spr = editorcolumns[i][0][j], code = editorcolumns[i][1][tradeelement][j], card = CardCodes[code];
+				if (card in cardpool || isFreeCard(card)) spr.visible = true;
+				else spr.visible = false;
+				spr.setTexture(getCardImage(code));
+				var txt = spr.getChildAt(0), card = CardCodes[code], inf = isFreeCard(card);
+				if ((txt.visible = inf || code in cardpool)) {
+					maybeSetText(txt, inf ? "-" : (cardpool[code].toString()));
+				}
+			}
+			for (; j < 15; j++) {
+				editorcolumns[i][0][j].visible = false;
+			}
+		}
+	}
+	mainStage = editorui;
+	refreshRenderer();
 }
 function initGame(data, ai){
 	game = mkGame(data.first, data.seed);
@@ -1879,6 +2000,7 @@ cmds.cast = function(bits) {
 }
 var socket = io.connect(location.hostname, {port: 13602});
 socket.on("pvpgive", initGame);
+socket.on("tradegive", initTrade)
 socket.on("foearena", function(data){
 	var deck = etg.decodedeck(data.deck);
 	chatArea.value = data.name + ": " + deck.join(" ");
@@ -1910,8 +2032,13 @@ socket.on("foeleft", function(data) {
 		setWinner(game, game.player1);
 	}
 });
-socket.on("chat", function(data) {
-	chatArea.value = data;
+socket.on("chat", function (data) {
+	console.log("message gotten");
+	if (chatBox.value !== "") {
+		chatBox.value += "\n";
+	}
+	chatBox.value += data.u + ": " + data.message;
+	chatBox.scrollTop = chatBox.scrollHeight;
 });
 socket.on("mulligan", function(data) {
 	if (data === true){
@@ -1920,11 +2047,22 @@ socket.on("mulligan", function(data) {
 		game.player2.drawhand(game.player2.hand.length-1);
 	}
 });
+socket.on("cardchosen", function (data) {
+	player2Card = data.card;
+	myTurn = true;
+	console.log("Card recieved")
+	console.log(player2Card);
+});
+socket.on("tradedone", function (data) {
+	user.pool.push(data.newcard);
+	user.pool.splice(user.pool.indexOf(oldcard), 1);
+	startMenu();
+});
 function maybeSendChat(e) {
 	e.cancelBubble = true;
 	if (e.keyCode != 13)return;
-	if (chatinput.value){
-		socket.emit("chat", chatinput.value);
+	if (chatinput.value && user){
+		userEmit("chat", { message: chatinput.value });
 		chatinput.value = "";
 	}
 }
@@ -2016,4 +2154,8 @@ function challengeClick(){
 			socket.emit("pvpwant", { deck: deck, room: foename.value });
 		}
 	}
+}
+function tradeClick() {
+	if (Cards && user)
+		userEmit("tradewant", { f: foename.value });
 }
