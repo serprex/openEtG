@@ -119,11 +119,13 @@ function userEvent(socket, event, func){
 					prepuser(obj);
 					users[u] = obj;
 					if (data.a == obj.auth){
+						usersock[u] = socket;
 						func.call(socket, data, obj);
 					}
 				}
 			});
 		}else if (data.a == users[u].auth){
+			usersock[u] = socket;
 			func.call(socket, data, users[u]);
 		}
 	});
@@ -266,7 +268,6 @@ io.sockets.on("connection", function(socket) {
 		console.log(u + " requesting " + f);
 		sockinfo[this.id].deck = data.deck;
 		if (f in users){
-			usersock[u] = this;
 			if (duels[f] == u){
 				delete duels[f];
 				var seed = Math.random()*etgutil.MAX_INT;
