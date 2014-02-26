@@ -40,7 +40,6 @@ function Card(type, info){
 			this.passives[passive[0]] = passive.length==1 || parseInt(passive[1]);
 		}
 	}
-	if (!this.passives.rare) this.passives.rare = 0;
 	if (info.Status){
 		this.status = {};
 		var statuses = info.Status.split("+");

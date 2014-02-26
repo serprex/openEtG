@@ -281,7 +281,7 @@ function initTrade(data) {
 	function isFreeCard(card) {
 		return card.type == PillarEnum && !card.upped && !card.passives.rare;
 	}
-	
+
 	if (data.first) myTurn = true;
 	var editorui = new PIXI.Stage(0x336699, true), tradeelement = 0;
 	var btrade = new PIXI.Text("Trade", { font: "16px Dosis" });
@@ -289,7 +289,7 @@ function initTrade(data) {
 	var editorcolumns = [];
 	var selectedCard;
 
-	
+
 	var cardartcode;
 	btrade.position.set(100, 100);
 	btrade.click = function () {
@@ -872,7 +872,7 @@ function startStore() {
 				userEmit("subgold", { g: 10 });
 				for (var i = 0; i < 3; i++) {
 					var rareWon = Math.random() < .03 ? 1 : 0;
-					newCards.push(PlayerRng.randomcard(false, function (x) { return x.element == boostermark && x.type != PillarEnum && x.passives.rare == rareWon }).code);
+					newCards.push(PlayerRng.randomcard(false, function (x) { return x.element == boostermark && x.type != PillarEnum && (x.passives.rare || 0) == rareWon }).code);
 					newCardsArt[i].setTexture(getArt(newCards[i]));
 					newCardsArt[i].visible = true;
 					storeui.addChild(bgetcards);
