@@ -284,26 +284,28 @@ io.sockets.on("connection", function(socket) {
 			}
 		}
 	});
-	userEvent(socket, "confirmtrade", function (data) {
-		var u = data.u;
-		sockinfo[this.id].tradecard = data.card;
-		sockinfo[this.id].oppcard = data.oppcard;
-		var other = sockinfo[this.id].foe;
-		if (sockinfo[other.id] && sockinfo[other.id].tradeaccepted) {
-			var player1Card = sockinfo[this.id].tradecard;
-			var player2Card = sockinfo[other.id].tradecard;
-			//if (player1Card == sockinfo[other.id].oppcard && sockinfo[this.id].oppcard == player2Card) {
-			users[u].pool = etgutil.addcard(users[u].pool, player1Card, -1);
-			users[u].pool = etgutil.addcard(users[u].pool, player2Card);
+	userEvent(socket, "confirmtrade", function (data, user) {
+		var u = data.u, thistrade = sockinfo[this.id].trade;
+		if (!thistrade){
+			return;
+		}
+		thistrade.tradecard = data.card;
+		thistrade.oppcard = data.oppcard;
+		if (thattrade.accepted) {
+			var other = thistrade.foe;
+			var player1Card = thistrade.tradecard, player2Card = thattrade.tradecard;
+			//if (player1Card == thattrade.oppcard && thistrade.oppcard == player2Card) {
+			user.pool = etgutil.addcard(user.pool, player1Card, -1);
+			user.pool = etgutil.addcard(user.pool, player2Card);
 			users[sockinfo[this.id].foename].pool = etgutil.addcard(users[sockinfo[this.id].foename].pool, player2Card, -1);
 			users[sockinfo[this.id].foename].pool = etgutil.addcard(users[sockinfo[this.id].foename].pool, player1Card);
-			this.emit("tradedone", { oldcard: player1Card, newcard: player2Card })
-			other.emit("tradedone", { oldcard: player2Card, newcard: player1Card })
-			delete sockinfo[this.id];
-			delete sockinfo[other.id];
+			this.emit("tradedone", { oldcard: player1Card, newcard: player2Card });
+			other.emit("tradedone", { oldcard: player2Card, newcard: player1Card });
+			delete sockinfo[this.id].trade;
+			delete sockinfo[other.id].trade;
 			//}
 		} else {
-			sockinfo[this.id].tradeaccepted = true;
+			thistrade.accepted = true;
 		}
 	});
 	userEvent(socket, "tradewant", function (data) {
@@ -312,16 +314,15 @@ io.sockets.on("connection", function(socket) {
 			return;
 		}
 		console.log(u + " requesting " + f);
-		if (f in users)
-		{
+		if (f in users) {
 			if (trades[f] == u) {
 				delete trades[f];
-				sockinfo[this.id].foe = usersock[f];
-				sockinfo[usersock[f].id].foe = this;
-				sockinfo[this.id].foename = f;
-				sockinfo[usersock[f].id].foename = u;
-				this.emit("tradegive", { first: false })
-				usersock[f].emit("tradegive", { first: true })
+				sockinfo[this.id].trade = {foe: usersock[f], foename: f };
+				sockinfo[usersock[f].id].trade = {foe: this, foename: u };
+				sockinfo[this.id].trade.foetrade = sockinfo[usersock[f].id].trade;
+				sockinfo[usersock[f].id].trade.foetrade = sockinfo[this.id].trade;
+				this.emit("tradegive", { first: false });
+				usersock[f].emit("tradegive", { first: true });
 			} else {
 				trades[u] = f;
 				if (usersock[f]) usersock[f].emit("chat", { u: "Message", message: u + " wants to trade with you!" });
