@@ -207,7 +207,7 @@ io.sockets.on("connection", function(socket) {
 			return;
 		}
 		db.hget(au, "card", function(err, card){
-			var adeck = etg.addcard(data.d, user.ocard, 5);
+			var adeck = etgutil.addcard(data.d, user.ocard, 5);
 			if (card != user.ocard){
 				db.hmset(au, {day: getDay(), deck: adeck, card: user.ocard, win:0, loss:0});
 				db.zadd("arena", 0, data.u);
