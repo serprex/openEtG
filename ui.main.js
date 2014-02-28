@@ -1,4 +1,4 @@
-var Cards, CardCodes, Targeting, targetingMode, targetingModeCb, targetingText, game, discarding, animCb, user, renderer, endturnFunc, cancelFunc, foeDeck, player2summon, myTurn, cardChosen, player2Card;
+var Cards, CardCodes,Targeting, targetingMode, targetingModeCb, targetingText, game, discarding, animCb, user, renderer, endturnFunc, cancelFunc, foeDeck, player2summon, player2Card;
 var etg = require("./etgutil");
 var MersenneTwister = require("./MersenneTwister");
 var myTurn = false;
@@ -130,22 +130,37 @@ loader.onComplete = function(){
 	}
 	eicons = icons;
 }
+var cardBacks = [];
+var backLoader = new PIXI.AssetLoader(["backsheet.png"]);
+backLoader.onComplete = function () {
+	var baseTexture = PIXI.Texture.fromImage("backsheet.png");
+	var backs = [];
+	for (var i = 0; i < 26; i++) {
+		backs.push(new PIXI.Texture(baseTexture, new PIXI.Rectangle(i * 132, 0, 132, 256)));
+	}
+	cardBacks = backs;
+}
 loader.load();
+backLoader.load();
 var mainStage, menuui, gameui;
-var nopic = PIXI.Texture.fromImage("null.png"), eicons, caimgcache = {}, crimgcache = {}, primgcache = {}, artcache = {};
-var elecols = [0xa99683,0xaa5999,0x777777,0x996633,0x5f4930,0x50a005,0xcc6611,0x205080,0xa9a9a9,0x337ddd,0xccaa22,0x333333,0x77bbdd];
+var nopic = PIXI.Texture.fromImage("null.png"),cardBacks, eicons, caimgcache = {}, crimgcache = {}, primgcache = {}, artcache = {};
+var elecols = [0xa99683, 0xaa5999, 0x777777, 0x996633, 0x5f4930, 0x50a005, 0xcc6611, 0x205080, 0xa9a9a9, 0x337ddd, 0xccaa22, 0x333333, 0x77bbdd];
 function lighten(c){
 	return (c&255)/2+127|((c>>8)&255)/2+127<<8|((c>>16)&255)/2+127<<16;
 }
 function getIcon(ele){
 	return eicons?eicons[ele]:nopic;
 }
+function getBack(ele, upped) {
+	var offset = upped ? 13 : 0;
+	return cardBacks?cardBacks[ele + offset]:nopic;
+}
 function makeArt(card, art){
 	var rend = new PIXI.RenderTexture(132, 256);
+	var background = new PIXI.Sprite(getBack(card.element,card.upped));
 	var template = new PIXI.Graphics();
-	template.beginFill(card.upped?lighten(elecols[card.element]):elecols[card.element]);
-	template.drawRect(0, 0, rend.width, rend.height);
-	template.endFill();
+	background.position.set(0, 0);
+	template.addChild(background);
 	if (art){
 		var artspr = new PIXI.Sprite(art);
 		artspr.position.set(2, 20);
@@ -271,7 +286,7 @@ function initTrade(data) {
 	function isFreeCard(card) {
 		return card.type == PillarEnum && !card.upped && !card.passives.rare;
 	}
-
+	
 	if (data.first) myTurn = true;
 	var editorui = new PIXI.Stage(0x336699, true), tradeelement = 0;
 	var btrade = new PIXI.Text("Trade", { font: "16px Dosis" });
@@ -279,7 +294,7 @@ function initTrade(data) {
 	var editorcolumns = [];
 	var selectedCard;
 
-
+	
 	var cardartcode;
 	btrade.position.set(100, 100);
 	btrade.click = function () {
@@ -862,7 +877,7 @@ function startStore() {
 				userEmit("subgold", { g: 10 });
 				for (var i = 0; i < 3; i++) {
 					var rareWon = Math.random() < .03 ? 1 : 0;
-					newCards.push(PlayerRng.randomcard(false, function (x) { return x.element == boostermark && x.type != PillarEnum && (x.passives.rare || 0) == rareWon }).code);
+					newCards.push(PlayerRng.randomcard(false, function (x) { return x.element == boostermark && x.type != PillarEnum && x.passives.rare == rareWon }).code);
 					newCardsArt[i].setTexture(getArt(newCards[i]));
 					newCardsArt[i].visible = true;
 					storeui.addChild(bgetcards);
