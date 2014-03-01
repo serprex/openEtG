@@ -350,6 +350,7 @@ io.sockets.on("connection", function(socket) {
 		}
 	});
 	userEvent(socket, "chat", function (data) {
+		delete data.a;
 		io.sockets.emit("chat", data);
 	});
 	socket.on("pvpwant", function(data) {
