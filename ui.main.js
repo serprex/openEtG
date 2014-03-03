@@ -140,8 +140,19 @@ backLoader.onComplete = function () {
 	}
 	cardBacks = backs;
 }
+var rarityicons = [];
+var rarityLoader = new PIXI.AssetLoader(["raritysheet.png"]);
+rarityLoader.onComplete = function () {
+	var baseTexture = PIXI.Texture.fromImage("raritysheet.png");
+	var rarities = [];
+	for (var i = 0; i < 6; i++) {
+		rarities.push(new PIXI.Texture(baseTexture, new PIXI.Rectangle(i * 10, 0, 10, 10)));
+	}
+	rarityicons = rarities;
+}
 loader.load();
 backLoader.load();
+rarityLoader.load();
 var mainStage, menuui, gameui;
 var nopic = PIXI.Texture.fromImage("null.png"),cardBacks, eicons, caimgcache = {}, crimgcache = {}, primgcache = {}, artcache = {};
 var elecols = [0xa99683, 0xaa5999, 0x777777, 0x996633, 0x5f4930, 0x50a005, 0xcc6611, 0x205080, 0xa9a9a9, 0x337ddd, 0xccaa22, 0x333333, 0x77bbdd];
@@ -153,14 +164,20 @@ function getIcon(ele){
 }
 function getBack(ele, upped) {
 	var offset = upped ? 13 : 0;
-	return cardBacks?cardBacks[ele + offset]:nopic;
+	return cardBacks ? cardBacks[ele + offset] : nopic;
+}
+function getRareIcon(rarity) {
+	return rarityicons ? rarityicons[rarity] : nopic;
 }
 function makeArt(card, art){
 	var rend = new PIXI.RenderTexture(132, 256);
-	var background = new PIXI.Sprite(getBack(card.element,card.upped));
+	var background = new PIXI.Sprite(getBack(card.element, card.upped));
+	var rarity = new PIXI.Sprite(getRareIcon(card.rarity));
 	var template = new PIXI.Graphics();
 	background.position.set(0, 0);
 	template.addChild(background);
+	rarity.position.set(66, 241);
+	template.addChild(rarity);
 	if (art){
 		var artspr = new PIXI.Sprite(art);
 		artspr.position.set(2, 20);
@@ -876,8 +893,8 @@ function startStore() {
 				user.gold -= 10;
 				userEmit("subgold", { g: 10 });
 				for (var i = 0; i < 3; i++) {
-					var rareWon = boostermark && Math.random() < .03 ? 1 : 0;
-					newCards.push(PlayerRng.randomcard(false, function (x) { return x.element == boostermark && x.type != PillarEnum && x.passives.rare == rareWon }).code);
+					var rareWon = boostermark && Math.random() < .3 ? (Math.random() < 0.1 ? 3: 2) : 1;
+					newCards.push(PlayerRng.randomcard(false, function (x) { return x.element == boostermark && x.type != PillarEnum && x.rarity == rareWon }).code);
 					newCardsArt[i].setTexture(getArt(newCards[i]));
 					newCardsArt[i].visible = true;
 					storeui.addChild(bgetcards);
