@@ -906,6 +906,7 @@ regeneratespell:function(c,t){
 },
 regrade:function(c,t){
 	t.card = t.card.asUpped(!t.card.upped);
+	c.owner.spend(t.card.element, -2);
 },
 reinforce:function(c,t){
 	var atk = c.trueatk(), hp = c.truehp()

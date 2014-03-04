@@ -104,7 +104,7 @@ function dropsock(data){
 }
 function foeEcho(socket, event){
 	socket.on(event, function(data){
-		var foe = sockinfo[this.id].foe;
+		var foe = sockinfo[this.id].foe || sockinfo[this.id].trade.foe;
 		if (foe && foe.id in sockinfo){
 			foe.emit(event, data);
 		}
@@ -285,7 +285,7 @@ io.sockets.on("connection", function(socket) {
 		}
 	});
 	userEvent(socket, "confirmtrade", function (data, user) {
-		var u = data.u, thistrade = sockinfo[this.id].trade;
+		var u = data.u, thistrade = sockinfo[this.id].trade, thattrade = sockinfo[this.id].trade.foetrade;
 		if (!thistrade){
 			return;
 		}
@@ -297,8 +297,8 @@ io.sockets.on("connection", function(socket) {
 			//if (player1Card == thattrade.oppcard && thistrade.oppcard == player2Card) {
 			user.pool = etgutil.addcard(user.pool, player1Card, -1);
 			user.pool = etgutil.addcard(user.pool, player2Card);
-			users[sockinfo[this.id].foename].pool = etgutil.addcard(users[sockinfo[this.id].foename].pool, player2Card, -1);
-			users[sockinfo[this.id].foename].pool = etgutil.addcard(users[sockinfo[this.id].foename].pool, player1Card);
+			users[sockinfo[this.id].trade.foename].pool = etgutil.addcard(users[sockinfo[this.id].trade.foename].pool, player2Card, -1);
+			users[sockinfo[this.id].trade.foename].pool = etgutil.addcard(users[sockinfo[this.id].trade.foename].pool, player1Card);
 			this.emit("tradedone", { oldcard: player1Card, newcard: player2Card });
 			other.emit("tradedone", { oldcard: player2Card, newcard: player1Card });
 			delete sockinfo[this.id].trade;
