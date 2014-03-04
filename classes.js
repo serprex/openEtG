@@ -51,7 +51,7 @@ function Card(type, info){
 	if (info.Text){
 		this.text = info.Text;
 	}
-	this.rarity = info.Rarity ? info.Rarity : 0;
+	this.rarity = info.Rarity ? parseInt(info.Rarity) : 0;
 }
 function Thing(card, owner){
 	this.owner = owner;
