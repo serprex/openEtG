@@ -1,4 +1,10 @@
 var Cards, CardCodes,Targeting, targetingMode, targetingModeCb, targetingText, game, discarding, animCb, user, renderer, endturnFunc, cancelFunc, foeDeck, player2summon, player2Card;
+(function(g){
+	var htmlElements = ["leftpane", "chatArea", "chatinput", "deckimport", "aideck", "foename", "airefresh", "change", "login", "password", "challenge", "aievalopt", "chatBox", "trade", "bottompane"];
+	for(var i=0; i<htmlElements.length; i++){
+		g[htmlElements[i]] = document.getElementById(htmlElements[i]);
+	}
+})(window);
 var etg = require("./etgutil");
 var MersenneTwister = require("./MersenneTwister");
 var myTurn = false;
@@ -916,7 +922,7 @@ function startStore() {
 				if (packtype == 3) allowedElements = [2, 5, 8, 11];
 				userEmit("subgold", { g: 20 });
 				for (var i = 0; i < 10; i++) {
-					var rarity = i < 6 ? 1 : (i < 9 ? 2 : (Math.random() < .2 ? 4: 3))  
+					var rarity = i < 6 ? 1 : (i < 9 ? 2 : (Math.random() < .2 ? 4: 3))
 					newCards.push(PlayerRng.randomcard(false, function (x) { return allowedElements.indexOf(x.element) != -1 && x.type != PillarEnum && x.rarity == rarity }).code);
 					newCardsArt[i].setTexture(getArt(newCards[i]));
 					newCardsArt[i].visible = true;
