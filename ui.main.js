@@ -692,7 +692,7 @@ function mkAi(level){
 				}
 				var cardcount = {};
 				var eles = [Math.ceil(Math.random()*12), Math.ceil(Math.random()*12)], ecost = [];
-				var pillars = filtercards(false, function(x){ return x.type == PillarEnum && !x.rare; });
+				var pillars = filtercards(false, function(x){ return x.type == PillarEnum && !x.rarity; });
 				for(var i=0; i<13; i++){
 					ecost[i] = 0;
 				}
