@@ -51,7 +51,9 @@ function Card(type, info){
 	if (info.Text){
 		this.text = info.Text;
 	}
-	this.rarity = info.Rarity ? parseInt(info.Rarity) : 0;
+	if (info.Rarity){
+		this.rarity = parseInt(info.Rarity);
+	}
 }
 function Thing(card, owner){
 	this.owner = owner;
@@ -143,6 +145,7 @@ Weapon.prototype = Object.create(Permanent.prototype);
 Shield.prototype = Object.create(Permanent.prototype);
 Pillar.prototype = Object.create(Permanent.prototype);
 CardInstance.prototype = Object.create(Thing.prototype);
+Card.prototype.rarity = 0;
 Card.prototype.attack = 0;
 Card.prototype.health = 0;
 Card.prototype.upped = false;
