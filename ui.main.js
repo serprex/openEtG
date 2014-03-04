@@ -1072,7 +1072,6 @@ function startEditor(){
 		var bclear = new PIXI.Text("Clear", {font: "16px Dosis"});
 		var bsave = new PIXI.Text("Done", {font: "16px Dosis"});
 		var bimport = new PIXI.Text("Import", {font: "16px Dosis"});
-		var brngcard = new PIXI.Text("Cardify", {font: "16px Dosis"});
 		var bpillar = new PIXI.Text("Pillarify", {font: "16px Dosis"});
 		var bupgrade = new PIXI.Text("Upgrade", {font: "16px Dosis"});
 		var barena = new PIXI.Text("Arena", {font: "16px Dosis"});
@@ -1097,33 +1096,6 @@ function startEditor(){
 		bimport.click = function(){
 			editordeck = deckimport.value.split(" ");
 			processDeck();
-		}
-		brngcard.position.set(8, 80);
-		brngcard.click = function(){
-			if (foename.value != "trans"){
-				chatArea.value = "Input 'trans' into Challenge to transmute a random card of your deck's mark per 2 cards in deck";
-			}else if (editordeck.length<2 || (editordeck.length%2)!=0){
-				chatArea.value = "Transmutation of random cards requires an input size divisible by 2";
-			}else{
-				for(var i=0; i<editordeck.length; i++){
-					var card = CardCodes[editordeck[i]];
-					if(card.rarity == 5){
-						chatArea.value = "Transmutation of ultrarares is ill advised";
-						return;
-					}else if(!card.upped && card.type == PillarEnum){
-						chatArea.value = "Transmutation of pillars is a fool's errand";
-						return;
-					}
-				}
-				var rm = editordeck;
-				editordeck = [];
-				for(var i=0; i<rm.length; i+=2){
-					var upped = CardCodes[rm[i]].upped + CardCodes[rm[i+1]].upped;
-					upped = upped == 1?(Math.random()<.5):(upped == 2);
-					editordeck.push(PlayerRng.randomcard(upped, function(x){ return x.element == editormark && x.type != PillarEnum && !x.rarity <= 2 && !~rm.indexOf(x.code); }).code);
-				}
-				transmute(rm);
-			}
 		}
 		bpillar.position.set(8, 104);
 		bpillar.click = function(){
@@ -1205,13 +1177,12 @@ function startEditor(){
 				chatArea.value = "Oracle Card: " + CardCodes[user.ocard].name;
 			}
 		}
-		setInteractive(bclear, bsave, bimport, brngcard, bpillar, bupgrade, barena);
+		setInteractive(bclear, bsave, bimport, bpillar, bupgrade, barena);
 		editorui.addChild(bclear);
 		editorui.addChild(bsave);
 		editorui.addChild(bimport);
 		if (usePool){
 			editorui.addChild(bpillar);
-			editorui.addChild(brngcard);
 			editorui.addChild(bupgrade);
 			if (user.ocard){
 				editorui.addChild(barena);
