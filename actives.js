@@ -1239,6 +1239,15 @@ blockwithcharge:function(c,t){
 	}
 	return true;
 },
+chaos:function(c,t){
+	randomchance = c.owner.rng();
+	if (randomchance < .25) {
+		return true;
+	}
+	else if (t instanceof Creature && randomchance < .5) {
+		Actives.cseed(c, t);
+	}
+},
 cold:function(c,t){
 	if (c.owner.rng()<.3){
 		new TextEffect("Freeze", tgtToPos(t));

@@ -1538,7 +1538,7 @@ function startMatch(){
 				if (!cardwon){
 					var winnable = [];
 					for(var i=0; i<foeDeck.length; i++){
-						if (foeDeck[i].type != PillarEnum && foeDeck[i].rarity != 5){
+						if (foeDeck[i].type != PillarEnum && foeDeck[i].rarity < 3){
 							winnable.push(foeDeck[i]);
 						}
 					}
@@ -1546,7 +1546,7 @@ function startMatch(){
 						cardwon = winnable[Math.floor(Math.random()*winnable.length)];
 					}else{
 						var elewin = foeDeck[Math.floor(Math.random()*foeDeck.length)];
-						cardwon = PlayerRng.randomcard(elewin.upped, function(x){ return x.element == elewin.element && x.type != PillarEnum && x.rarity != 5; });
+						cardwon = PlayerRng.randomcard(elewin.upped, function(x){ return x.element == elewin.element && x.type != PillarEnum && x.rarity < 3; });
 					}
 					if (!game.player2.ai){
 						cardwon = cardwon.asUpped(false);
