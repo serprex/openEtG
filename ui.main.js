@@ -314,20 +314,29 @@ function initTrade(data) {
 	var editorui = new PIXI.Stage(0x336699, true), tradeelement = 0;
 	var btrade = new PIXI.Text("Trade", { font: "16px Dosis" });
 	var bconfirm = new PIXI.Text("Confirm trade", { font: "16px Dosis" });
+	var bconfirmed = new PIXI.Text("Confirmed!", { font: "16px Dosis" });
+	var bcancel = new PIXI.Text("Cancel Trade", { font: "16px Dosis" });
 	var editorcolumns = [];
 	var selectedCard;
-
-
 	var cardartcode;
+	bcancel.position.set(10, 10);
+	bcancel.click = function () {
+		userEmit("canceltrade");
+		startMenu();
+	}
 	btrade.position.set(100, 100);
 	btrade.click = function () {
 		if (myTurn) {
-			userEmit("cardchosen", { card: selectedCard })
-			console.log("Card sent")
-			myTurn = false;
-			cardChosen = true;
-			editorui.removeChild(btrade);
-			editorui.addChild(bconfirm);
+			if (selectedCard) {
+				userEmit("cardchosen", { card: selectedCard })
+				console.log("Card sent")
+				myTurn = false;
+				cardChosen = true;
+				editorui.removeChild(btrade);
+				editorui.addChild(bconfirm);
+			}
+			else
+				chatArea.value = "You have to choose a card!"
 		}
 		else
 			chatArea.value = "You need to wait for your friend to choose a card first";
@@ -338,10 +347,16 @@ function initTrade(data) {
 			console.log("Confirmed!");
 			myTurn = false;
 			userEmit("confirmtrade", { card: selectedCard, oppcard: player2Card });
+			editorui.removeChild(bconfirm);
+			editorui.addChild(bconfirmed);
 		}
+		else
+			chatArea.value = "Wait for your friend to choose a card!"
 	}
-	setInteractive(btrade, bconfirm);
+	bconfirmed.position.set(100, 180);
+	setInteractive(btrade, bconfirm, bcancel);
 	editorui.addChild(btrade);
+	editorui.addChild(bcancel);
 
 
 	var cardpool = {};
@@ -374,7 +389,11 @@ function initTrade(data) {
 			sprite.addChild(sprcount);
 			(function (_i, _j) {
 				sprite.click = function () {
-					if (myTurn && !cardChosen) selectedCard = cardartcode;
+					if (player2Card && CardCodes[player2Card].rarity != CardCodes[cardartcode].rarity) chatArea.value = "You can only trade cards with the same rarity";
+					else if (cardChosen) chatArea.value = "You have already selected a card";
+					else if (!myTurn) chatArea.value = "You need to wait for your friend to choose a card first";
+					else if (isFreeCard(CardCodes[cardartcode])) chatArea.value = "You can't trade a free card, that would just be cheating!";
+					else selectedCard = cardartcode;
 				}
 				sprite.mouseover = function () {
 					cardartcode = editorcolumns[_i][1][tradeelement][_j];
@@ -1040,6 +1059,15 @@ function startEditor(){
 					cardpool[user.pool[i]] = 1;
 				}
 			}
+			if (user.starter) {
+				for (var i = 0; i < user.starter.length; i++) {
+					if (user.starter[i] in cardpool) {
+						cardpool[user.starter[i]]++;
+					} else {
+						cardpool[user.starter[i]] = 1;
+					}
+				}
+			}
 			for(var i=editordeck.length-1; i>=0; i--){
 				var code = editordeck[i];
 				if (CardCodes[code].type != PillarEnum){
@@ -1071,7 +1099,7 @@ function startEditor(){
 		processDeck();
 	}
 	if (Cards && (!user || user.deck)){
-		var usePool = !!(user && user.deck);
+		var usePool = !!(user && (user.deck || user.starter));
 		var cardminus, cardpool, cardartcode;
 		chatArea.value = "Build a 30-60 card deck";
 		var editorui = new PIXI.Stage(0x336699, true), editorelement = 0;
@@ -2078,6 +2106,9 @@ socket.on("userdump", function(data){
 	if (user.pool){
 		user.pool = etg.decodedeck(user.pool);
 	}
+	if (user.starter) {
+		user.starter = etg.decodedeck(user.starter);
+	}
 	startMenu();
 });
 socket.on("passchange", function(data){
@@ -2116,6 +2147,9 @@ socket.on("tradedone", function (data) {
 	console.log("Trade done!")
 	user.pool.push(data.newcard);
 	user.pool.splice(user.pool.indexOf(data.oldcard), 1);
+	startMenu();
+});
+socket.on("tradecanceled", function (data) {
 	startMenu();
 });
 function maybeSendChat(e) {
@@ -2178,13 +2212,16 @@ function loginClick(){
 					user = JSON.parse(this.responseText);
 					if (!user){
 						chatArea.value = "No user";
-					}else if (!user.pool){
+					}else if (!user.pool && !user.starter){
 						startElementSelect();
 					}else{
 						user.deck = etg.decodedeck(user.deck);
 						deckimport.value = user.deck.join(" ");
 						if (user.pool){
 							user.pool = etg.decodedeck(user.pool);
+						}
+						if (user.starter) {
+							user.starter = etg.decodedeck(user.starter);
 						}
 						startMenu();
 					}

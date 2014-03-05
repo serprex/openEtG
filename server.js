@@ -104,7 +104,7 @@ function dropsock(data){
 }
 function foeEcho(socket, event){
 	socket.on(event, function(data){
-		var foe = sockinfo[this.id].foe || sockinfo[this.id].trade.foe;
+		var foe = sockinfo[this.id].foe || sockinfo[this.id].trade ? sockinfo[this.id].trade.foe : false;
 		if (foe && foe.id in sockinfo){
 			foe.emit(event, data);
 		}
@@ -141,7 +141,8 @@ function useruser(servuser){
 		deck: servuser.deck,
 		pool: servuser.pool,
 		gold: servuser.gold,
-		ocard: servuser.ocard
+		ocard: servuser.ocard,
+		starter: servuser.starter ? servuser.starter : null
 	};
 }
 function getDay(){
@@ -171,8 +172,9 @@ io.sockets.on("connection", function(socket) {
 	userEvent(socket, "inituser", function(data, user) {
 		var u=data.u;
 		var startdeck = starter[data.e];
-		user.deck = starter[data.e] || starter[0];
-		user.pool = user.deck.substring(0, user.deck.length-5);
+		user.deck = startdeck || starter[0];
+		user.starter = user.deck;
+		user.pool = "";
 		this.emit("userdump", useruser(user));
 	});
 	userEvent(socket, "logout", function(data, user) {
@@ -284,8 +286,14 @@ io.sockets.on("connection", function(socket) {
 			}
 		}
 	});
+	userEvent(socket, "canceltrade", function (data, user) {
+		sockinfo[this.id].trade.foe.emit("tradecanceled");
+		sockinfo[this.id].trade.foe.emit("chat", { u: "Message", message: data.u + " have canceled the trade." })
+		delete sockinfo[sockinfo[this.id].trade.foe.id].trade;
+		delete sockinfo[this.id].trade;
+	});
 	userEvent(socket, "confirmtrade", function (data, user) {
-		var u = data.u, thistrade = sockinfo[this.id].trade, thattrade = sockinfo[this.id].trade.foetrade;
+		var u = data.u, thistrade = sockinfo[this.id].trade, thattrade = thistrade.foetrade;
 		if (!thistrade){
 			return;
 		}
@@ -297,8 +305,8 @@ io.sockets.on("connection", function(socket) {
 			//if (player1Card == thattrade.oppcard && thistrade.oppcard == player2Card) {
 			user.pool = etgutil.addcard(user.pool, player1Card, -1);
 			user.pool = etgutil.addcard(user.pool, player2Card);
-			users[sockinfo[this.id].trade.foename].pool = etgutil.addcard(users[sockinfo[this.id].trade.foename].pool, player2Card, -1);
-			users[sockinfo[this.id].trade.foename].pool = etgutil.addcard(users[sockinfo[this.id].trade.foename].pool, player1Card);
+			users[thistrade.foename].pool = etgutil.addcard(users[thistrade.foename].pool, player2Card, -1);
+			users[thistrade.foename].pool = etgutil.addcard(users[thistrade.foename].pool, player1Card);
 			this.emit("tradedone", { oldcard: player1Card, newcard: player2Card });
 			other.emit("tradedone", { oldcard: player2Card, newcard: player1Card });
 			delete sockinfo[this.id].trade;
