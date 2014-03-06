@@ -309,7 +309,8 @@ function initTrade(data) {
 	function isFreeCard(card) {
 		return card.type == PillarEnum && !card.upped && !card.rarity;
 	}
-
+	player2Card = null;
+	cardChosen = false;
 	if (data.first) myTurn = true;
 	var editorui = new PIXI.Stage(0x336699, true), tradeelement = 0;
 	var btrade = new PIXI.Text("Trade", { font: "16px Dosis" });
