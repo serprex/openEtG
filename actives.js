@@ -66,6 +66,19 @@ air:function(c,t){
 	new TextEffect("1:9", tgtToPos(c));
 	c.owner.spend(Air, -1);
 },
+animateweapon: function (c, t) {
+	if (t.weapon) {
+		var cr = new Creature(t.weapon.card, t.owner);
+		cr.atk = t.weapon.atk;
+		cr.active = clone(t.weapon.active);
+		cr.cast = t.weapon.cast;
+		cr.castele = t.weapon.castele;
+		cr.passives = clone(t.weapon.passives);
+		cr.status = clone(t.weapon.status);
+		cr.place();
+		t.weapon = undefined;
+	}
+},
 antimatter:function(c,t){
 	new TextEffect("Antimatter", tgtToPos(t));
 	t.atk -= t.trueatk(0, true)*2;

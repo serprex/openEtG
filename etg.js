@@ -858,6 +858,7 @@ CardInstance.prototype.useactive = function(target){
 	if (owner.neuro){
 		owner.addpoison(1);
 	}
+	owner.spend(card.costele, card.cost);
 	if (card.type <= PermanentEnum){
 		if (card.type == PillarEnum){
 			new Pillar(card, owner).place();
@@ -877,7 +878,6 @@ CardInstance.prototype.useactive = function(target){
 	}else if (card.type == CreatureEnum){
 		new Creature(card, owner).place();
 	}else console.log("Unknown card type: "+card.type);
-	owner.spend(card.costele, card.cost);
 }
 function countAdrenaline(x){
 	return 5-Math.floor(Math.sqrt(Math.abs(x)));
