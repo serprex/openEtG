@@ -66,6 +66,10 @@ air:function(c,t){
 	new TextEffect("1:9", tgtToPos(c));
 	c.owner.spend(Air, -1);
 },
+alphawolf: function (c, t) {
+	new Creature(Cards.PackWolf.asUpped(c.card.upped), c.owner).place();
+	new Creature(Cards.PackWolf.asUpped(c.card.upped), c.owner).place();
+},
 animateweapon: function (c, t) {
 	if (t.weapon) {
 		var cr = new Creature(t.weapon.card, t.owner);
@@ -707,6 +711,11 @@ martyr:function(c,t){
 metamorph:function(c,t){
 	c.owner.mark = t instanceof Player?t.mark:t.card.element;
 	c.owner.spend(c.owner.mark, -2);
+},
+mimic: function (c, t) {
+	//if (c == t || !t) return;
+	c.transform(t.card);
+	c.addactive("play", mimic);
 },
 miracle:function(c,t){
 	c.owner.quanta[Light] = 0;

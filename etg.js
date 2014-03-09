@@ -336,7 +336,8 @@ Player.prototype.endturn = function(discard) {
 			card.active.discard(cardinst, this);
 		}
 	}
-	this.spend(this.mark, -1);
+	var markpower = this.markpower ? this.markpower : 1;
+	this.spend(this.mark, -1 * markpower);
 	if (this.foe.status.poison){
 		this.foe.dmg(this.foe.status.poison);
 	}
@@ -515,6 +516,8 @@ Thing.prototype.activetext = function(){
 }
 Creature.prototype.place = function(){
 	place(this.owner.creatures, this);
+	var self = this;
+	this.owner.procactive("play", function (c, p) { c.active.play(c, self) });
 }
 Permanent.prototype.place = function(){
 	if (this.passives.additive){
@@ -859,6 +862,7 @@ CardInstance.prototype.useactive = function(target){
 		owner.addpoison(1);
 	}
 	owner.spend(card.costele, card.cost);
+	var self = this;	
 	if (card.type <= PermanentEnum){
 		if (card.type == PillarEnum){
 			new Pillar(card, owner).place();
@@ -872,7 +876,6 @@ CardInstance.prototype.useactive = function(target){
 	}else if (card.type == SpellEnum){
 		if (!target || !target.evade(owner)){
 			card.active(this, target);
-			var self = this;
 			owner.procactive("spell", function(c, t) { c.active.spell(c, self, target); });
 		}
 	}else if (card.type == CreatureEnum){

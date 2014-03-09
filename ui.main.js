@@ -456,6 +456,9 @@ function initGame(data, ai){
 	if (data.hp){
 		game.player2.maxhp = game.player2.hp = data.hp;
 	}
+	if (data.aimarkpower) {
+		game.player2.markpower = data.aimarkpower;
+	}
 	var idx, code, decks = [data.urdeck, data.deck];
 	for(var j=0; j<2; j++){
 		for(var i=0; i<decks[j].length; i++){
@@ -692,9 +695,38 @@ function aiFunc(){
 		return ["endturn", worstcards[Math.floor(Math.random()*worstcards.length)]];
 	}else return ["endturn"];
 }
+function mkDemigod()
+{
+	if (user) {
+		if (user.gold < 20) {
+			chatArea.value = "Requires 20\u00A4";
+			return;
+		}
+		user.gold -= 20;
+		userEmit("subgold", { g: 20 });
+	}
+	var demigodDeck = ["7ne 7ne 7ne 7ne 7n9 7n9 7t4 7t4 7t4 7t4 7t4 7t4 7t4 7t4 7t4 7t4 7t4 7t4 7t4 7t4 7t4 7t9 7t9 7t9 7tb 7tb 7ta 7ta 7ta 7td 7td 7td 7td 7t5 7t5 8pr",
+	"7an 7an 7an 7an 7ap 7ap 7ap 7ap 7aj 7aj 7gk 7gk 7gk 7gk 7gk 7gk 7gk 7gk 7gk 7gk 7gk 7gk 7gk 7gk 7h4 7h4 7h4 7h4 7h4 7gq 7gq 7gq 7h1 7h1 7h1 7gr 7gr 7gr 7gu 7gu 7gu 7gu 7gu 7gu 8pn",
+	"744 744 744 744 744 744 744 744 744 744 744 744 744 744 744 74f 74f 74f 74f 74f 74f 745 745 745 745 745 7k9 7k9 7k9 7k9 7k9 7k9 7jv 7jv 7jv 7jv 7jv 7k7 7k7 7k7 7k1 8pq",
+	"6ts 6ts 6ts 6ts 6ts 6ts 6ts 6ts 6ts 6ts 6ve 6ve 6ve 6ve 6ve 6ve 6u2 6u2 6u2 6u2 6u2 6u2 6u1 6u1 6u1 6u1 6u1 6u1 6ud 6ud 6ud 6ud 6u7 6u7 6u7 6u7 7th 7th 7tj 7tj 7tj 7ta 7ta 8pt",
+	"718 718 718 718 718 718 71a 71a 71a 71a 71a 7n2 7n2 7n2 7n2 7q0 7q0 7q0 7q0 7q0 7q0 7q0 7q0 7q0 7q0 7q0 7q0 7q0 7q0 7q0 7q0 7q0 7q4 7q4 7q4 7qf 7qf 7qf 7q5 7q5 7q5 7q5 7q5 7q5 7qg 7qg 7qg 7qg 8pk",
+	"7ac 7ac 7ac 7ac 7ac 7ac 7ac 7ac 7ac 7ac 7ac 7bu 7bu 7bu 7bu 7bu 7bu 7ae 7ae 7ae 7ae 7ae 7ae 7al 7am 7am 7am 7as 7as 7as 7as 80d 80d 80d 80d 80i 80i 80i 8pu",
+	"7ac 7ac 7ac 7ac 7ac 7ac 7ac 7ac 7ac 7ac 7ac 7ac 7bu 7bu 7bu 7bu 7bu 7am 7am 7am 7dm 7dm 7dn 7dn 7do 7do 7n0 7n6 7n6 7n6 7n6 7n3 7n3 7n3 7n3 7n3 7n3 7nb 7n9 7n9 7n9 8pr",
+	"7dg 7dg 7dg 7dg 7dg 7dg 7dg 7dg 7dg 7dg 7dg 7dg 7dg 7dg 7dg 7dg 7dg 7e0 7e0 7e0 7e0 7e0 7e0 7dv 7dv 7dv 7dv 7dv 7dv 7n2 7n2 7n2 7n2 7qb 7qb 7qb 7th 7th 7th 7th 7tb 7tb 7tb 7tb 7tb 7tb 7ta 7ta 8pt",
+	"710 710 710 710 710 710 710 710 710 710 710 710 710 710 72i 72i 72i 72i 71l 71l 71l 71l 717 717 717 71b 71b 71b 711 711 7t7 7t7 7t7 7t7 7t7 7t7 7t9 7t9 7t9 7ti 7ti 7ti 7ti 7ta 7ta 8pt"]
+	var deck = demigodDeck[Math.floor(Math.random() * demigodDeck.length)].split(" ");
+	deck = deck.slice(0,deck.length-2).concat(deck);
+	var urdeck = getDeck();
+	if ((user && (!user.deck || user.deck.length < 31)) || urdeck.length < 11){
+		startEditor();
+		return;
+	}
+	initGame({ first: Math.random() < .5, deck: deck, urdeck: urdeck, seed: Math.random() * etg.MAX_INT, hp: 200, aimarkpower: 3}, aievalopt.checked ? aiEvalFunc : aiFunc);
+	game.gold = 40;
+}
 function mkAi(level){
 	return function() {
-		var uprate = level==1?0:.1;
+		var uprate = level==1?0:(level==2?.1:.3);
 		function upCode(x){
 			return CardCodes[x].asUpped(Math.random()<uprate).code;
 		}
@@ -726,8 +758,9 @@ function mkAi(level){
 				var pl = PlayerRng;
 				var anyshield=0, anyweapon=0;
 				for(var j=0; j<2; j++){
-					for(var i=0; i<(j==0?20:10); i++){
-						var card = pl.randomcard(Math.random()<uprate, function(x){return x.element == eles[j] && x.type != PillarEnum && x.rarity != 5 && cardcount[x.code] != 6 && !(x.type == ShieldEnum && anyshield == 3) && !(x.type == WeaponEnum && anyweapon == 3);});
+					for (var i = 0; i < (j == 0 ? 20 : 10) ; i++) {
+						var maxRarity = level==1?3:(level==2?3:4);
+						var card = pl.randomcard(Math.random()<uprate, function(x){return x.element == eles[j] && x.type != PillarEnum && x.rarity <= maxRarity && cardcount[x.code] != 6 && !(x.type == ShieldEnum && anyshield == 3) && !(x.type == WeaponEnum && anyweapon == 3);});
 						deck.push(card.code);
 						cardcount[card.code] = (cardcount[card.code] || 0) + 1;
 						if (!(((card.type == WeaponEnum && !anyweapon) || (card.type == ShieldEnum && !anyshield)) && cardcount[card.code])){
@@ -779,33 +812,53 @@ function mkAi(level){
 				deck.push(TrueMarks[eles[1]]);
 				chatArea.value = deck.join(" ");
 			}
-			initGame({ first:Math.random()<.5, deck:deck, urdeck:urdeck, seed:Math.random()*etg.MAX_INT, hp:level==1?100:150 }, aievalopt.checked?aiEvalFunc:aiFunc);
-			game.gold = level==1?5:20;
+			initGame({ first:Math.random()<.5, deck:deck, urdeck:urdeck, seed:Math.random()*etg.MAX_INT, hp:level==1?100:(level==2?125:150) , aimarkpower:level==3?2:1}, aievalopt.checked?aiEvalFunc:aiFunc);
+			game.gold = level==1?5:(level==2?20:30);
 		}
 	}
 }
-function startMenu(){
-	var brandai = new PIXI.Text("AI1", {font: "16px Dosis"});
-	var brandhb = new PIXI.Text("AI2", {font: "16px Dosis"});
+function startMenu() {
+	var binfo = new PIXI.Text("", { font: "16px Dosis" });
+	var brandai = new PIXI.Text("Commoner", { font: "16px Dosis" });
+	var bmage = new PIXI.Text("Mage", { font: "16px Dosis" });
+	var brandhb = new PIXI.Text("Champion", { font: "16px Dosis" });
+	var bdemigod = new PIXI.Text("Demigod", { font: "16px Dosis" });
 	var barenai = new PIXI.Text("Arena AI", { font: "16px Dosis" });
 	var beditor = new PIXI.Text("Editor", { font: "16px Dosis" });
 	var bstore = new PIXI.Text("Booster Store", { font: "16px Dosis" });
 	var barenainfo = new PIXI.Text("Arena Info", {font: "16px Dosis"});
 	var barenatop = new PIXI.Text("Arena T10", {font: "16px Dosis"});
 	var blogout = new PIXI.Text("Logout", {font: "16px Dosis"});
-	var bremove = new PIXI.Text("Delete Account", {font: "16px Dosis"});
-	brandai.position.set(200, 250);
+	var bremove = new PIXI.Text("Delete Account", { font: "16px Dosis" });
+	binfo.position.set(50, 150);
+	brandai.position.set(100, 250);
+	bmage.position.set(200, 250);
 	brandhb.position.set(300, 250);
-	barenai.position.set(400, 250);
+	bdemigod.position.set(400, 250);
+	barenai.position.set(500, 250);
 	beditor.position.set(200, 300);
 	bstore.position.set(300, 300);
 	barenainfo.position.set(400, 300);
 	barenatop.position.set(400, 350);
 	blogout.position.set(200, 500);
 	bremove.position.set(400, 500);
-	setInteractive(brandai, brandhb, barenai, beditor, barenainfo, barenatop, blogout, bremove, bstore);
+	setInteractive(brandai, bmage, brandhb, bdemigod, barenai, beditor, barenainfo, barenatop, blogout, bremove, bstore);
 	brandai.click = mkAi(1);
-	brandhb.click = mkAi(2);
+	brandai.mouseover = function () {
+		binfo.setText("Commoners aren't very strong, and free to play against.")
+	}
+	bmage.click = mkAi(2);
+	bmage.mouseover = function () {
+		binfo.setText("Mages are more powerful than commoners, and have a few upgraded cards. Costs 10 gold to play against.")
+	}
+	brandhb.click = mkAi(3);
+	brandhb.mouseover = function () {
+		binfo.setText("Champions have several upgraded cards, so you should come well prepared. Costs 10 gold to play against.")
+	}
+	bdemigod.click = mkDemigod;
+	bdemigod.mouseover = function () {
+		binfo.setText("Demigods are among the strongest beings in the world. Unless you are very powerful, you shouldn't even try. Costs 20 gold to play against.")
+	}
 	barenai.click = function(){
 		if (Cards){
 			if (!user.deck || user.deck.length < 31){
@@ -821,17 +874,32 @@ function startMenu(){
 			userEmit("foearena");
 		}
 	}
+	barenai.mouseover = function () {
+		binfo.setText("In the arena you will face decks from other players.")
+	}
 	beditor.click = startEditor;
+	beditor.mouseover = function () {
+		binfo.setText("Here you can edit your deck, as well as upgrade your cards.")
+	}
 	bstore.click = startStore;
+	bstore.mouseover = function () {
+		binfo.setText("Here you can buy booster packs which contains ten cards from the elements you choose.")
+	}
 	barenainfo.click = function(){
 		if (Cards){
 			userEmit("arenainfo");
 		}
 	}
+	barenainfo.mouseover = function () {
+		binfo.setText("Check how your arena deck is doing.")
+	}
 	barenatop.click = function(){
 		if (Cards){
 			userEmit("arenatop");
 		}
+	}
+	barenatop.mouseover = function () {
+		binfo.setText("Here you can see who the top players in arena are right now.")
 	}
 	function logout(){
 		user = undefined;
@@ -850,6 +918,9 @@ function startMenu(){
 		userEmit("logout");
 		logout();
 	}
+	blogout.mouseover = function () {
+		binfo.setText("Click here if you want to log out.")
+	}
 	bremove.click = function(){
 		if (foename.value == user.name){
 			userEmit("delete");
@@ -858,10 +929,16 @@ function startMenu(){
 			chatArea.value = "Input '" + user.name + "' into Challenge to delete your account";
 		}
 	}
+	bremove.mouseover = function () {
+		binfo.setText("Click here if you want to remove your account.")
+	}
 	menuui = new PIXI.Stage(0x336699, true);
 	menuui.addChild(brandai);
+	menuui.addChild(bmage);
 	menuui.addChild(brandhb);
+	menuui.addChild(bdemigod);
 	menuui.addChild(beditor);
+	menuui.addChild(binfo);
 	if (user){
 		menuui.addChild(barenai);
 		menuui.addChild(barenainfo);
