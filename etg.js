@@ -963,7 +963,7 @@ var TargetFilters = {
 	notself:function(c, t){
 		return c != t;
 	},
-	true:function(c, t){
+	all:function(c, t){
 		return true;
 	},
 	card:function(c, t){

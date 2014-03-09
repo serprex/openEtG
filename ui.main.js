@@ -933,14 +933,14 @@ function startStore() {
 	bbuy.position.set(150,150);
 	bbuy.click = function () {
 		if (isEmpty(newCards)){
-			if (user.gold >= 20) {
-				user.gold -= 20;
+			if (user.gold >= 30) {
+				user.gold -= 30;
 				var allowedElements = []
 				if (!packtype) allowedElements = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12];
 				if (packtype == 1) allowedElements = [4, 6, 7, 9];
 				if (packtype == 2) allowedElements = [1, 3, 10, 12];
 				if (packtype == 3) allowedElements = [2, 5, 8, 11];
-				userEmit("subgold", { g: 20 });
+				userEmit("subgold", { g: 30 });
 				for (var i = 0; i < 10; i++) {
 					var rarity = i < 6 ? 1 : (i < 9 ? 2 : (Math.random() < .2 ? 4: 3))
 					newCards.push(PlayerRng.randomcard(false, function (x) { return allowedElements.indexOf(x.element) != -1 && x.type != PillarEnum && x.rarity == rarity }).code);
@@ -949,7 +949,7 @@ function startStore() {
 					storeui.addChild(bgetcards);
 				}
 			}else{
-				chatArea.value = "You can't afford more cards, you need 20 gold!";
+				chatArea.value = "You can't afford more cards, you need 30 gold!";
 			}
 		}else{
 			chatArea.value = "Take the cards before buying more!";
