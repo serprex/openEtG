@@ -16,7 +16,8 @@ function evalGameState(game) {
 		adrenaline:8,
 		aflatoxin:5,
 		aggreskele:2,
-		air:1,
+		air: 1,
+		alphawolf:2,
 		antimatter:12,
 		bblood:7,
 		blackhole:function(c){
@@ -108,7 +109,8 @@ function evalGameState(game) {
 		lobotomize:6,
 		luciferin:3,
 		lycanthropy:4,
-		metamorph:2,
+		metamorph: 2,
+		mimic: 3,
 		miracle:12,
 		mitosis:function(c){
 			return c.card.cost;
