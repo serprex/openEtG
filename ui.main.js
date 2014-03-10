@@ -999,7 +999,6 @@ function startStore() {
 	blife.position.set(100, 90);
 	blife.click = function () { packtype = 3; bchosenpack.setText("Chosen pack: " + blife.text);}
 	bchosenpack.position.set(150, 200);
-	//var boostermark = 1;
 	bsave.position.set(8,8);
 	bsave.click = function () {
 		if (isEmpty(newCards))
@@ -1042,21 +1041,6 @@ function startStore() {
 		newCards = [];
 		storeui.removeChild(bgetcards);
 	}
-	/*var storemarksprite = new PIXI.Sprite(nopic);
-	storemarksprite.position.set(100, 130);
-	storeui.addChild(storemarksprite);
-	var boostereleicons = [];
-	for (var i = 0; i < 13; i++) {
-		var sprite = new PIXI.Sprite(nopic);
-		sprite.position.set(120 +i*32, 30);
-		setInteractive(sprite);
-		(function (_i) {
-			sprite.click = function () { boostermark = _i; }
-		})(i);
-
-		boostereleicons.push(sprite);
-		storeui.addChild(sprite);
-	}*/
 	var goldcount = new PIXI.Text(user.gold + "\u00A4", { font: "16px Dosis" });
 	goldcount.position.set(600, 50);
 	storeui.addChild(goldcount);
@@ -1093,14 +1077,10 @@ function startStore() {
 		if (cardartcode) {
 			cardArt.setTexture(getArt(cardartcode));
 		}
-		//storemarksprite.setTexture(getIcon(boostermark));
 		for (var i = 0; i < 10; i++) {
 			if (newCards[i])
 				newCardsArt[i].setTexture(getArt(newCards[i]));
 		}
-		/*for (var i = 0; i < 13; i++) {
-			boostereleicons[i].setTexture(getIcon(i));
-		}*/
 		goldcount.setText(user.gold + "\u00A4");
 	}
 

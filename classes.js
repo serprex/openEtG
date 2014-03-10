@@ -68,10 +68,6 @@ function Thing(card, owner){
 	}
 	this.passives = clone(card.passives);
 	this.active = clone(card.active);
-	if (this.active.play){
-		this.active.play(this);
-		delete this.active.play;
-	}
 	delete this.active.discard;
 }
 function Player(game){

@@ -337,7 +337,7 @@ Player.prototype.endturn = function(discard) {
 		}
 	}
 	var markpower = this.markpower ? this.markpower : 1;
-	this.spend(this.mark, -1 * markpower);
+	this.spend(this.mark, -markpower);
 	if (this.foe.status.poison){
 		this.foe.dmg(this.foe.status.poison);
 	}
@@ -514,24 +514,31 @@ Thing.prototype.activetext = function(){
 	}
 	return info;
 }
-Creature.prototype.place = function(){
-	place(this.owner.creatures, this);
+Thing.prototype.place = function(){
 	var self = this;
 	this.owner.procactive("play", function (c, p) { c.active.play(c, self) });
+}
+Creature.prototype.place = function(){
+	place(this.owner.creatures, this);
+	Thing.prototype.place.call(this);
+	
 }
 Permanent.prototype.place = function(){
 	if (this.passives.additive){
 		for(var i=0; i<16; i++){
 			if (this.owner.permanents[i] && this.owner.permanents[i].card == this.card){
 				this.owner.permanents[i].status.charges += this.status.charges;
+				Thing.prototype.place.call(this.owner.permanents[i]);
 				return;
 			}
 		}
 	}
 	place(this.owner.permanents, this);
+	Thing.prototype.place.call(this);
 }
 Weapon.prototype.place = function(){
 	this.owner.weapon = this;
+	Thing.prototype.place.call(this);
 }
 Shield.prototype.place = function(){
 	if (this.passives.additive && this.owner.shield && this.owner.shield.card == this.card){
@@ -539,6 +546,7 @@ Shield.prototype.place = function(){
 		return;
 	}
 	this.owner.shield = this;
+	Thing.prototype.place.call(this);
 }
 CardInstance.prototype.place = function(){
 	if (this.owner.hand.length < 8){

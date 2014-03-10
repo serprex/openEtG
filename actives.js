@@ -67,6 +67,7 @@ air:function(c,t){
 	c.owner.spend(Air, -1);
 },
 alphawolf: function (c, t) {
+	if (c != t) return;
 	new Creature(Cards.PackWolf.asUpped(c.card.upped), c.owner).place();
 	new Creature(Cards.PackWolf.asUpped(c.card.upped), c.owner).place();
 },
@@ -713,9 +714,10 @@ metamorph:function(c,t){
 	c.owner.spend(c.owner.mark, -2);
 },
 mimic: function (c, t) {
-	//if (c == t || !t) return;
+	console.log(t);
+	if (c == t || !(t instanceof Creature)) return;
 	c.transform(t.card);
-	c.addactive("play", mimic);
+	c.addactive("play", Actives.mimic);
 },
 miracle:function(c,t){
 	c.owner.quanta[Light] = 0;
@@ -740,7 +742,8 @@ momentum:function(c,t){
 	t.buffhp(1);
 	t.status.momentum = true;
 },
-mutant:function(c,t){
+mutant: function (c, t) {
+	if (c != t) return;
 	if (mutantactive(c)){
 		c.cast = c.owner.uptoceil(2);
 		c.castele = c.owner.upto(13);
@@ -943,7 +946,8 @@ ren:function(c,t){
 		t.addactive("predeath", Actives.bounce);
 	}
 },
-reveal:function(c,t){
+reveal: function (c, t) {
+	if (c != t) return;	
 	c.owner.precognition = true;
 },
 rewind:function(c,t){
@@ -1249,7 +1253,10 @@ yoink:function(c,t){
 	}
 },
 pillar:function(c,t){
-	c.owner.spend(c.card.element,-c.status.charges*(c.card.element>0?1:3));
+	if (!t)
+		c.owner.spend(c.card.element, -c.status.charges * (c.card.element > 0 ? 1 : 3));
+	else if (c==t) 
+		c.owner.spend(c.card.element, -(c.card.element > 0 ? 1 : 3));
 },
 pend:function(c,t){
 	c.owner.spend(c.pendstate?c.owner.mark:c.card.element,-c.status.charges);
