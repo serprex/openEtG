@@ -191,8 +191,8 @@ firebolt:function(c,t){
 flatline:function(c,t){
 	return !c.owner.foe.sanctuary && !c.owner.foe.flatline;
 },
-flyingweapon:function(c,t){
-	return c.owner == t;
+flyingweapon: function (c, t) {
+	return c.owner == t && !!t.weapon;
 },
 fractal:function(c,t){
 	return c.owner == t.owner && c.owner.hand.length < 4;
@@ -380,8 +380,8 @@ regrade:function(c,t){
 ren:function(c,t){
 	return c.owner == t.owner && !t.hasactive("predeath", "bounce") && t.trueatk();
 },
-rewind:function(c,t){
-	return c.owner != t.owner && t.card.cost;
+rewind: function (c, t) {
+	return c.owner != t.owner && t.card.cost ? (t.active.play? t.card.cost-4:t.card.cost):false;
 },
 scarab:function(c,t){
 	return true;
@@ -403,7 +403,7 @@ siphonstrength:function(c,t){
 	return c.owner != t.owner && t.truehp();
 },
 skyblitz:function(c,t){
-	return true;
+	return c.owner.creatures.filter(function(x){return x.passives.airborne}).length > 4;
 },
 snipe:function(c,t){ return ActivesEvalFlatCC(c, t, 3); },
 sosa:function(c,t){

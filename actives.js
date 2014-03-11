@@ -1229,7 +1229,7 @@ void:function(c,t){
 quantagift:function(c,t){
 	c.owner.spend(c.card.element, -2);
 	if (c.owner.mark != c.card.element){
-		c.owner.spend(c.mark, -2);
+		c.owner.spend(c.owner.mark, -2);
 	}
 },
 web:function(c,t){
