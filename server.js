@@ -224,7 +224,7 @@ io.sockets.on("connection", function(socket) {
 		});
 	});
 	userEvent(socket, "arenatop", function(data, user){
-		db.zrange("arena", 0, 10, function(err, obj){
+		db.zrange("arena", 0, 9, function(err, obj){
 			socket.emit("arenatop", obj);
 		});
 	});
