@@ -722,12 +722,14 @@ function mkDemigod()
 		startEditor();
 		return;
 	}
-	initGame({ first: Math.random() < .5, deck: deck, urdeck: urdeck, seed: Math.random() * etg.MAX_INT, hp: 200, aimarkpower: 3}, aievalopt.checked ? aiEvalFunc : aiFunc);
-	game.gold = 40;
+	initGame({ first: Math.random() < .5, deck: deck, urdeck: urdeck, seed: Math.random() * etg.MAX_INT, hp: 200, aimarkpower: 3 }, aievalopt.checked ? aiEvalFunc : aiFunc);
+	game.cost = 20;
+	game.gold = 30;
 }
 function mkAi(level){
 	return function() {
 		var uprate = level==1?0:(level==2?.1:.3);
+		var gameprice = 0;
 		function upCode(x){
 			return CardCodes[x].asUpped(Math.random()<uprate).code;
 		}
@@ -740,14 +742,15 @@ function mkAi(level){
 			var aideckstring = aideck.value, deck;
 			if (!user && aideckstring){
 				deck = aideckstring.split(" ");
-			}else{
+			} else {
 				if (user && level>1){
 					if (user.gold<10){
 						chatArea.value = "Requires 10\u00A4";
 						return;
 					}
 					user.gold -= 10;
-					userEmit("subgold", {g: 10});
+					userEmit("subgold", { g: 10 });
+					gameprice = 10;
 				}
 				var cardcount = {};
 				var eles = [Math.ceil(Math.random()*12), Math.ceil(Math.random()*12)], ecost = [];
@@ -760,7 +763,7 @@ function mkAi(level){
 				var anyshield=0, anyweapon=0;
 				for(var j=0; j<2; j++){
 					for (var i = 0; i < (j == 0 ? 20 : 10) ; i++) {
-						var maxRarity = level==1?3:(level==2?3:4);
+						var maxRarity = level==1?2:(level==2?3:4);
 						var card = pl.randomcard(Math.random()<uprate, function(x){return x.element == eles[j] && x.type != PillarEnum && x.rarity <= maxRarity && cardcount[x.code] != 6 && !(x.type == ShieldEnum && anyshield == 3) && !(x.type == WeaponEnum && anyweapon == 3);});
 						deck.push(card.code);
 						cardcount[card.code] = (cardcount[card.code] || 0) + 1;
@@ -813,8 +816,9 @@ function mkAi(level){
 				deck.push(TrueMarks[eles[1]]);
 				chatArea.value = deck.join(" ");
 			}
-			initGame({ first:Math.random()<.5, deck:deck, urdeck:urdeck, seed:Math.random()*etg.MAX_INT, hp:level==1?100:(level==2?125:150) , aimarkpower:level==3?2:1}, aievalopt.checked?aiEvalFunc:aiFunc);
-			game.gold = level==1?5:(level==2?20:30);
+			initGame({ first: Math.random() < .5, deck: deck, urdeck: urdeck, seed: Math.random() * etg.MAX_INT, hp: level == 1 ? 100 : (level == 2 ? 125 : 150), aimarkpower: level == 3 ? 2 : 1}, aievalopt.checked ? aiEvalFunc : aiFunc);
+			game.cost = gameprice;
+			game.gold = level==1?5:(level==2?10:20);
 		}
 	}
 }
@@ -1604,16 +1608,18 @@ function startMatch(){
 					if (winnable.length){
 						cardwon = winnable[Math.floor(Math.random()*winnable.length)];
 					}else{
-						var elewin = foeDeck[Math.floor(Math.random()*foeDeck.length)];
-						cardwon = PlayerRng.randomcard(elewin.upped, function(x){ return x.element == elewin.element && x.type != PillarEnum && x.rarity < 3; });
+						var elewin = foeDeck[Math.floor(Math.random() * foeDeck.length)];
+						rareAllowed = Math.random() < .3 ? 3 : 2;
+						cardwon = PlayerRng.randomcard(elewin.upped, function(x){ return x.element == elewin.element && x.type != PillarEnum && x.rarity <= rareAllowed; });
 					}
 					if (!game.player2.ai){
 						cardwon = cardwon.asUpped(false);
 					}
 					var data = {c:cardwon.code};
 					if (game.gold){
-						var goldwon = Math.floor(game.gold*(game.player1.hp == game.player1.maxhp?2:.5+game.player1.hp/(game.player1.maxhp*2)));
+						var goldwon = Math.floor(game.gold * (game.player1.hp == game.player1.maxhp ? 2 : .5 + game.player1.hp / (game.player1.maxhp * 2)));
 						console.log(goldwon);
+						if(game.cost) goldwon += game.cost;
 						data.g = goldwon;
 						user.gold += goldwon;
 					}
@@ -2150,9 +2156,10 @@ socket.on("tradegive", initTrade)
 socket.on("foearena", function(data){
 	var deck = etg.decodedeck(data.deck);
 	chatArea.value = data.name + ": " + deck.join(" ");
-	initGame({ first:data.first, deck:deck, urdeck:getDeck(), seed:data.seed, hp:data.hp }, aievalopt.checked?aiEvalFunc:aiFunc);
+	initGame({ first:data.first, deck:deck, urdeck:getDeck(), seed:data.seed, hp:data.hp, cost:data.cost }, aievalopt.checked?aiEvalFunc:aiFunc);
 	game.arena = data.name;
 	game.gold = 20;
+	game.cost = 10;
 });
 socket.on("arenainfo", startArenaInfo);
 socket.on("arenatop", startArenaTop);
@@ -2183,10 +2190,17 @@ socket.on("foeleft", function(data) {
 });
 socket.on("chat", function (data) {
 	console.log("message gotten");
-	if (chatBox.value !== "") {
-		chatBox.value += "\n";
+	var u = data.u ? data.u + ": " : "";
+	var color = "black";
+	if (data.mode) {
+		if (data.mode == "pm") {
+			color= "blue";
+		}
+		if (data.mode == "info")
+			color = "red";
 	}
-	chatBox.value += data.u + ": " + data.message;
+	chatBox.innerHTML += "<font color=" + color + ">" + u + data.message.replace(/</g, "&lt;").replace(/>/g,"&gt;") + "</font>";
+	chatBox.innerHTML += "<br>";
 	chatBox.scrollTop = chatBox.scrollHeight;
 });
 socket.on("mulligan", function(data) {

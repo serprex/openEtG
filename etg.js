@@ -541,8 +541,9 @@ Weapon.prototype.place = function(){
 	Thing.prototype.place.call(this);
 }
 Shield.prototype.place = function(){
-	if (this.passives.additive && this.owner.shield && this.owner.shield.card == this.card){
+	if (this.passives.additive && this.owner.shield && this.owner.shield.card.asUpped(this.card.upped) == this.card){
 		this.owner.shield.status.charges += this.status.charges;
+		Thing.prototype.place.call(this);
 		return;
 	}
 	this.owner.shield = this;

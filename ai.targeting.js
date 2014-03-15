@@ -293,7 +293,7 @@ miracle:function(c,t){
 	return c.owner.hp < 30;
 },
 mitosis:function(c,t){
-	return true;
+	return c.owner.creatures.filter(function (x) { return !!x }).length < 23;
 },
 mitosisspell:function(c,t){
 	return c.owner == t.owner && t.active.cast != Actives.mitosis && t.truehp();

@@ -235,7 +235,7 @@ io.sockets.on("connection", function(socket) {
 	userEvent(socket, "foearena", function(data, user){
 		db.zcard("arena", function(err, len){
 			if (!len)return;
-			var idx = Math.floor(Math.random()*Math.min(len, 10));
+			var idx = Math.floor(Math.random()*Math.min(len, 20));
 			db.zrange("arena", idx, idx, function(err, aname){
 				console.log("deck: "+ aname + " " + idx);
 				db.hgetall("A:"+aname, function(err, adeck){
@@ -288,7 +288,7 @@ io.sockets.on("connection", function(socket) {
 	});
 	userEvent(socket, "canceltrade", function (data, user) {
 		sockinfo[this.id].trade.foe.emit("tradecanceled");
-		sockinfo[this.id].trade.foe.emit("chat", { u: "Message", message: data.u + " have canceled the trade." })
+		sockinfo[this.id].trade.foe.emit("chat", { mode:"info", message: data.u + " have canceled the trade." })
 		delete sockinfo[sockinfo[this.id].trade.foe.id].trade;
 		delete sockinfo[this.id].trade;
 	});
@@ -333,7 +333,7 @@ io.sockets.on("connection", function(socket) {
 				usersock[f].emit("tradegive", { first: true });
 			} else {
 				trades[u] = f;
-				if (usersock[f]) usersock[f].emit("chat", { u: "Message", message: u + " wants to trade with you!" });
+				if (usersock[f]) usersock[f].emit("chat", { mode:"info", message: u + " wants to trade with you!" });
 			}
 		}
 	});
@@ -359,7 +359,17 @@ io.sockets.on("connection", function(socket) {
 	});
 	userEvent(socket, "chat", function (data) {
 		delete data.a;
-		io.sockets.emit("chat", data);
+		var message = data.message.split(" ");
+		if (message[0] == "/w") {
+			if (usersock[message[1]]) {
+				usersock[message[1]].emit("chat", { message: message.slice(2).join(" "), mode: "pm", u: data.u })
+				socket.emit("chat", { message: message.slice(2).join(" "), mode: "pm", u: "To " + message[1] })
+			}
+			else
+				socket.emit("chat", { mode: "info", message: message[1] + " is not here right now." })
+		}
+		else
+			io.sockets.emit("chat", data);
 	});
 	socket.on("pvpwant", function(data) {
 		var pendinggame=rooms[data.room];

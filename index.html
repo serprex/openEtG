@@ -47,20 +47,16 @@
 		<input id="foename" type="text" placeholder="Challenge" onkeydown="maybeChallenge(event)" />
 		<input id="challenge" type="submit" value="PvP" onclick="challengeClick()" />
 		<input id="trade" type="submit" value="Trade" onclick="tradeClick()" />
-		<br><br><br><br>
+		<br><br>
 		<input id="aideck" type="text" placeholder="AI Deck" style="width:100%" /><br>
 		<input id="airefresh" type="text" placeholder="AI Speed" style="width:100%" onkeydown="event.cancelBubble=true" /><br>
 		<input id="aievalopt" type="checkbox" /> Enable Experimental AI<br>
-		<textarea id="chatBox" readonly="readonly"
-				  style="width: 320px; height: 250px;
-                             margin: 2px; resize: none">
-
-		</textarea>
+		<div id="chatBox" style="width:300px; height: 350px; overflow: scroll; border: 2px solid #000; background-color:white"></div>
 	</div>
 	<div id="bottompane">
-		<input id="deckimport" type="text" placeholder="Deck" style="width:100%" />
-		<br><input id="chatArea" type="text" style="width:100%;" readonly />
-		<br><input id="chatinput" type="text" placeholder="Chat" style="width:100%" onkeydown="maybeSendChat(event)" />
+		<input id="deckimport" type="text" placeholder="Deck" style="width:1200px" />
+		<br><input id="chatArea" type="text" style="width:1200px" readonly />
+		<br><input id="chatinput" type="text" placeholder="Chat" style="width:1200px" onkeydown="maybeSendChat(event)" />
 	</div>
 </body>
 </html>
