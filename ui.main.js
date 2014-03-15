@@ -1634,8 +1634,8 @@ function startMatch(){
 		}
 		if (game.phase != EndPhase){
 			cancel.visible = true;
-			maybeSetText(endturn, game.phase == PlayPhase?"End Turn":"Accept Hand");
-			maybeSetText(cancel, game.phase == PlayPhase?"Cancel":"Mulligan");
+			maybeSetText(endturn, game.turn == game.player1?(game.phase == PlayPhase ? "End Turn" : "Accept Hand"):"");
+			maybeSetText(cancel, game.turn == game.player1?(game.phase != PlayPhase ? "Mulligan" : (targetingMode || discarding) ? "Cancel" : ""):"");
 		}
 		maybeSetText(turntell, discarding?"Discard":targetingMode?targetingText:game.turn == game.player1?"Your Turn":"Their Turn");
 		for(var i=0; i<foeplays.length; i++){
