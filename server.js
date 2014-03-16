@@ -104,7 +104,7 @@ function dropsock(data){
 }
 function foeEcho(socket, event){
 	socket.on(event, function(data){
-		var foe = sockinfo[this.id].foe || sockinfo[this.id].trade ? sockinfo[this.id].trade.foe : false;
+		var foe =  sockinfo[this.id].trade ? sockinfo[this.id].trade.foe : sockinfo[this.id].foe;
 		if (foe && foe.id in sockinfo){
 			foe.emit(event, data);
 		}
@@ -175,6 +175,7 @@ io.sockets.on("connection", function(socket) {
 		user.deck = startdeck || starter[0];
 		user.starter = user.deck;
 		user.pool = "";
+		user.quest = 0;
 		this.emit("userdump", useruser(user));
 	});
 	userEvent(socket, "logout", function(data, user) {
@@ -370,6 +371,9 @@ io.sockets.on("connection", function(socket) {
 		}
 		else
 			io.sockets.emit("chat", data);
+	});
+	userEvent(socket, "updatequest", function (data, user) {
+		user.quest = data.newquest;
 	});
 	socket.on("pvpwant", function(data) {
 		var pendinggame=rooms[data.room];

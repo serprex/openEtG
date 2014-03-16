@@ -337,7 +337,7 @@ Player.prototype.endturn = function(discard) {
 		}
 	}
 	var markpower = this.markpower ? this.markpower : 1;
-	this.spend(this.mark, -markpower);
+	this.spend(this.mark, -markpower * (this.mark > 0 ? 1 : 3));
 	if (this.foe.status.poison){
 		this.foe.dmg(this.foe.status.poison);
 	}
