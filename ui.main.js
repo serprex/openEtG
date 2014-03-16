@@ -822,138 +822,223 @@ function mkAi(level){
 		}
 	}
 }
+
+function makeButton(x, y, w, h) {
+	var button = new PIXI.Graphics();
+	
+	button.beginFill(0xFFFFFF);
+	button.lineStyle(2, 0x000000);
+	button.drawRect(x, y, w, h);
+	button.endFill();
+	
+	button.interactive = true;
+	button.hitArea = new PIXI.Rectangle(x, y, w, h);
+	button.buttonMode = true;
+	
+	return button;
+}
+
+function makeButtonText(x, y, t) {
+	var text = new PIXI.Text(t, {font: "bold 16px Dosis"});
+	text.position.set(x+1, y+1);
+	
+	return text;
+}
+
 function startMenu() {
-	var binfo = new PIXI.Text("", { font: "16px Dosis" });
-	var brandai = new PIXI.Text("Commoner", { font: "16px Dosis" });
-	var bmage = new PIXI.Text("Mage", { font: "16px Dosis" });
-	var brandhb = new PIXI.Text("Champion", { font: "16px Dosis" });
-	var bdemigod = new PIXI.Text("Demigod", { font: "16px Dosis" });
-	var barenai = new PIXI.Text("Arena AI", { font: "16px Dosis" });
-	var beditor = new PIXI.Text("Editor", { font: "16px Dosis" });
-	var bstore = new PIXI.Text("Booster Store", { font: "16px Dosis" });
-	var barenainfo = new PIXI.Text("Arena Info", {font: "16px Dosis"});
-	var barenatop = new PIXI.Text("Arena T10", {font: "16px Dosis"});
-	var blogout = new PIXI.Text("Logout", {font: "16px Dosis"});
-	var bremove = new PIXI.Text("Delete Account", { font: "16px Dosis" });
-	binfo.position.set(50, 150);
-	brandai.position.set(100, 250);
-	bmage.position.set(200, 250);
-	brandhb.position.set(300, 250);
-	bdemigod.position.set(400, 250);
-	barenai.position.set(500, 250);
-	beditor.position.set(200, 300);
-	bstore.position.set(300, 300);
-	barenainfo.position.set(400, 300);
-	barenatop.position.set(400, 350);
-	blogout.position.set(200, 500);
-	bremove.position.set(400, 500);
-	setInteractive(brandai, bmage, brandhb, bdemigod, barenai, beditor, barenainfo, barenatop, blogout, bremove, bstore);
-	brandai.click = mkAi(1);
-	brandai.mouseover = function () {
-		binfo.setText("Commoners aren't very strong, and free to play against.")
+	menuui = new PIXI.Stage(0x336699, true);
+	
+	//background to clear text
+	var bempty = new PIXI.Graphics();
+	bempty.interactive = true;
+	bempty.hitArea = new PIXI.Rectangle(0, 0, 900, 670);
+	bempty.mouseover = function () { 
+		tinfo.setText(""); 
+		tcost.setText("");
 	}
-	bmage.click = mkAi(2);
-	bmage.mouseover = function () {
-		binfo.setText("Mages are more powerful than commoners, and have a few upgraded cards. Costs 10 gold to play against.")
+	
+	menuui.addChild(bempty);
+	
+	//gold text
+	var tgold = new PIXI.Text(user ? user.gold + "g" : "Sandbox", {font: "bold 16px Dosis"});
+	tgold.position.set(800, 25);
+	menuui.addChild(tgold);
+	
+	//info text
+	var tinfo = new PIXI.Text("", { font: "bold 16px Dosis" });
+	tinfo.position.set(50, 50);
+	
+	menuui.addChild(tinfo);
+	
+	//cost text
+	var tcost = new PIXI.Text("", {font: "bold 16px Dosis"});
+	tcost.position.set(50, 70);
+	
+	menuui.addChild(tcost);
+	
+	//ai0 button
+	var bai0 = makeButton(50, 100, 75, 18);
+	var bai0t = makeButtonText(50, 100, "Commoner");
+	bai0.click = mkAi(1);
+	bai0.mouseover = function () {
+		tinfo.setText("Commoners aren't very strong.");
+		tcost.setText("Cost: 0g");
 	}
-	brandhb.click = mkAi(3);
-	brandhb.mouseover = function () {
-		binfo.setText("Champions have several upgraded cards, so you should come well prepared. Costs 10 gold to play against.")
+	
+	menuui.addChild(bai0);
+	menuui.addChild(bai0t);
+	
+	//ai1 button
+	var bai1 = makeButton(150, 100, 75, 18);
+	var bai1t = makeButtonText(150, 100, "Mage");
+	bai1.click = mkAi(2);
+	bai1.mouseover = function () {
+		tinfo.setText("Mages are more powerful than commoners, and have a few upgraded cards.");
+		tcost.setText("Cost: 10g");
 	}
-	bdemigod.click = mkDemigod;
-	bdemigod.mouseover = function () {
-		binfo.setText("Demigods are among the strongest beings in the world. Unless you are very powerful, you shouldn't even try. Costs 20 gold to play against.")
+	
+	menuui.addChild(bai1);
+	menuui.addChild(bai1t);
+	
+	//ai2 button
+	var bai2 = makeButton(250, 100, 75, 18);
+	var bai2t = makeButtonText(250, 100, "Champion");
+	bai2.click = mkAi(3);
+	bai2.mouseover = function () {
+		tinfo.setText("Champions have several upgraded cards, so you should come well prepared.");
+		tcost.setText("Cost: 10g");
 	}
-	barenai.click = function(){
-		if (Cards){
-			if (!user.deck || user.deck.length < 31){
+	
+	menuui.addChild(bai2);
+	menuui.addChild(bai2t);
+	
+	//ai3 button
+	var bai3 = makeButton(350, 100, 75, 18);
+	var bai3t = makeButtonText(350, 100, "Demigod");
+	bai3.click = mkDemigod;
+	bai3.mouseover = function () {
+		tinfo.setText("Demigods are among the strongest beings in the world. Unless you are very powerful, you shouldn't even try.");
+		tcost.setText("Cost: 20g");
+	}
+	
+	menuui.addChild(bai3);
+	menuui.addChild(bai3t);
+	
+	//ai arena button
+	var baia = makeButton(650, 100, 75, 18);
+	var baiat = makeButtonText(650, 100, "Arena AI");
+	baia.click = function() {
+		if (Cards) {
+			if (!user.deck || user.deck.length < 31) {
 				startEditor();
 				return;
 			}
-			if (user.gold<10){
-				chatArea.value = "Requires 10\u00A4";
+			
+			if (user.gold < 10) {
+				chatArea.value = "Requires 10g";
 				return;
 			}
+			
 			user.gold -= 10;
 			userEmit("subgold", {g: 10});
 			userEmit("foearena");
 		}
 	}
-	barenai.mouseover = function () {
-		binfo.setText("In the arena you will face decks from other players.")
+	baia.mouseover = function () {
+		tinfo.setText("In the arena you will face decks from other players.");
+		tcost.setText("Cost: 10g");
 	}
-	beditor.click = startEditor;
-	beditor.mouseover = function () {
-		binfo.setText("Here you can edit your deck, as well as upgrade your cards.")
-	}
-	bstore.click = startStore;
-	bstore.mouseover = function () {
-		binfo.setText("Here you can buy booster packs which contains ten cards from the elements you choose.")
-	}
-	barenainfo.click = function(){
+	
+	//arena info button
+	var binfoa = makeButton(650, 150, 75, 18);
+	var binfoat = makeButtonText(650, 150, "Arena Info");
+	binfoa.click = function(){
 		if (Cards){
 			userEmit("arenainfo");
 		}
 	}
-	barenainfo.mouseover = function () {
-		binfo.setText("Check how your arena deck is doing.")
+	binfoa.mouseover = function () {
+		tinfo.setText("Check how your arena deck is doing.")
+		tcost.setText("");
 	}
-	barenatop.click = function(){
+	
+	//arena top10 button
+	var btopa = makeButton(650, 200, 75, 18);
+	var btopat = makeButtonText(650, 200, "Arena T10");
+	btopa.click = function(){
 		if (Cards){
 			userEmit("arenatop");
 		}
 	}
-	barenatop.mouseover = function () {
-		binfo.setText("Here you can see who the top players in arena are right now.")
+	btopa.mouseover = function () {
+		tinfo.setText("Here you can see who the top players in arena are right now.")
+		tcost.setText("");
 	}
-	function logout(){
-		user = undefined;
-		menuui.removeChild(barenai);
-		menuui.removeChild(barenainfo);
-		menuui.removeChild(barenatop);
-		menuui.removeChild(blogout);
-		menuui.removeChild(bremove);
-		menuui.removeChild(goldcount);
-		menuui.removeChild(bstore);
-		if (oracle){
-			menuui.removeChild(oracle);
-		}
+	
+	//edit button
+	var bedit = makeButton(50, 200, 75, 18);
+	var beditt = makeButtonText(50, 200, "Editor");
+	bedit.click = startEditor;
+	bedit.mouseover = function () {
+		tinfo.setText("Here you can edit your deck, as well as upgrade your cards.");
+		tcost.setText("");
 	}
+	
+	menuui.addChild(bedit);
+	menuui.addChild(beditt);
+	
+	//shop button
+	var bshop = makeButton(150, 200, 75, 18);
+	var bshopt = makeButtonText(150, 200, "Shop");
+	bshop.click = startStore;
+	bshop.mouseover = function () {
+		tinfo.setText("Here you can buy booster packs which contains ten cards from the elements you choose.");
+		tcost.setText("");
+	}
+	
+	//logout button
+	var blogout = makeButton(750, 100, 75, 18);
+	var blogoutt = makeButtonText(750, 100, "Logout");
 	blogout.click = function(){
 		userEmit("logout");
 		logout();
 	}
 	blogout.mouseover = function () {
-		binfo.setText("Click here if you want to log out.")
+		tinfo.setText("Click here if you want to log out.")
+		tcost.setText("");
 	}
-	bremove.click = function(){
-		if (foename.value == user.name){
+	
+	//delete account button
+	var bdelete = makeButton(750, 500, 100, 18);
+	var bdeletet = makeButtonText(750, 500, "Delete Account");
+	bdelete.click = function(){
+		if (foename.value == user.name) {
 			userEmit("delete");
 			logout();
-		}else{
+		} else {
 			chatArea.value = "Input '" + user.name + "' into Challenge to delete your account";
 		}
 	}
-	bremove.mouseover = function () {
-		binfo.setText("Click here if you want to remove your account.")
+	bdeletet.mouseover = function () {
+		tinfo.setText("Click here if you want to remove your account.")
+		tcost.setText("");
 	}
-	menuui = new PIXI.Stage(0x336699, true);
-	menuui.addChild(brandai);
-	menuui.addChild(bmage);
-	menuui.addChild(brandhb);
-	menuui.addChild(bdemigod);
-	menuui.addChild(beditor);
-	menuui.addChild(binfo);
-	if (user){
-		menuui.addChild(barenai);
-		menuui.addChild(barenainfo);
-		menuui.addChild(barenatop);
+	
+	//only display if user is logged in
+	if (user){		
+		menuui.addChild(baia);
+		menuui.addChild(baiat);
+		menuui.addChild(bshop);
+		menuui.addChild(bshopt);
+		menuui.addChild(binfoa);
+		menuui.addChild(binfoat);
+		menuui.addChild(btopa);
+		menuui.addChild(btopat);
 		menuui.addChild(blogout);
-		menuui.addChild(bremove);
-		menuui.addChild(bstore);
-		var goldcount = new PIXI.Text(user.gold + "\u00A4", {font: "16px Dosis"});
-		goldcount.position.set(200, 200);
-		menuui.addChild(goldcount);
+		menuui.addChild(blogoutt);
+		menuui.addChild(bdelete);
+		menuui.addChild(bdeletet);
+		
 		if (user.oracle){
 			// todo user.oracle should be a card, not true. The card is the card that the server itself added. This'll only show what was added
 			delete user.oracle;
@@ -963,18 +1048,42 @@ function startMenu() {
 			user.ocard = card;
 			user.pool.push(card);
 			var oracle = new PIXI.Sprite(nopic);
-			oracle.position.set(600, 250);
+			oracle.position.set(50, 300);
 			menuui.addChild(oracle);
 		}
 	}
-	animCb = function(){
-		if (user && oracle){
+		
+	function logout(){
+		user = undefined;
+		tgold.setText("Sandbox");
+		menuui.removeChild(baia);
+		menuui.removeChild(baiat);
+		menuui.removeChild(bshop);
+		menuui.removeChild(bshopt);
+		menuui.removeChild(binfoa);
+		menuui.removeChild(binfoat);
+		menuui.removeChild(btopa);
+		menuui.removeChild(btopat);
+		menuui.removeChild(blogout);
+		menuui.removeChild(blogoutt);
+		menuui.removeChild(bdelete);
+		menuui.removeChild(bdeletet);
+		
+		if (oracle){
+			menuui.removeChild(oracle);
+		}
+	}
+	
+	animCb = function() {
+		if (user && oracle) {
 			oracle.setTexture(getArt(card));
 		}
 	}
+	
 	mainStage = menuui;
 	refreshRenderer();
 }
+
 function editorCardCmp(x,y){
 	var cardx = CardCodes[x], cardy = CardCodes[y];
 	return cardx.upped - cardy.upped || cardx.element - cardy.element || cardx.cost-cardy.cost || (x>y)-(x<y);
