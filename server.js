@@ -175,6 +175,7 @@ io.sockets.on("connection", function(socket) {
 		user.deck = startdeck || starter[0];
 		user.starter = user.deck;
 		user.pool = "";
+		user.quest = 0;
 		this.emit("userdump", useruser(user));
 	});
 	userEvent(socket, "logout", function(data, user) {
@@ -370,6 +371,9 @@ io.sockets.on("connection", function(socket) {
 		}
 		else
 			io.sockets.emit("chat", data);
+	});
+	userEvent(socket, "updatequest", function (data, user) {
+		user.quest = data.newquest;
 	});
 	socket.on("pvpwant", function(data) {
 		var pendinggame=rooms[data.room];

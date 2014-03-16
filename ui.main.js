@@ -823,7 +823,11 @@ function mkAi(level){
 	}
 }
 function startMenu() {
+	var questInfoTexts = [];
+	questInfoTexts.push("Welcome to the elemental world. You are an Elemental Summoner, a person able to control the magical energies in the universe.\nThe first thing you should do is to try out your new power. Win against a Commoner, and the next part of your training will begin.");
+	questInfoTexts.push("Congratulations! Did you like your deck? You can always go to Editor to add or remove cards to it. Since you are just beginning your training,\nthere is not many changes you can right now.But don't worry, I will learn you how to obtain several new cards.\nFirst, you need to gather 30 gold by winning more duels. You can now/nface the Mage too. He is a bit stronger, but gives a higher reward. Good luck!");
 	var binfo = new PIXI.Text("", { font: "16px Dosis" });
+	var bquest = new PIXI.Text("", { font: "16px Doxis" });
 	var brandai = new PIXI.Text("Commoner", { font: "16px Dosis" });
 	var bmage = new PIXI.Text("Mage", { font: "16px Dosis" });
 	var brandhb = new PIXI.Text("Champion", { font: "16px Dosis" });
@@ -836,6 +840,8 @@ function startMenu() {
 	var blogout = new PIXI.Text("Logout", {font: "16px Dosis"});
 	var bremove = new PIXI.Text("Delete Account", { font: "16px Dosis" });
 	binfo.position.set(50, 150);
+	bquest.position.set(10, 50);
+	if (user) bquest.setText(questInfoTexts[user.quest] || "");
 	brandai.position.set(100, 250);
 	bmage.position.set(200, 250);
 	brandhb.position.set(300, 250);
@@ -915,6 +921,7 @@ function startMenu() {
 		menuui.removeChild(bremove);
 		menuui.removeChild(goldcount);
 		menuui.removeChild(bstore);
+		menuui.removeChild(bquest);
 		if (oracle){
 			menuui.removeChild(oracle);
 		}
@@ -951,6 +958,7 @@ function startMenu() {
 		menuui.addChild(blogout);
 		menuui.addChild(bremove);
 		menuui.addChild(bstore);
+		menuui.addChild(bquest);
 		var goldcount = new PIXI.Text(user.gold + "\u00A4", {font: "16px Dosis"});
 		goldcount.position.set(200, 200);
 		menuui.addChild(goldcount);
@@ -1625,6 +1633,10 @@ function startMatch(){
 					}
 					userEmit("addcard", data);
 					user.pool.push(cardwon.code);
+					if (user.quest == 0) {
+						userEmit("updatequest", { newquest: 1 });
+						user.quest = 1;
+					}
 				}
 				cardart.setTexture(getArt(cardwon.code));
 				cardart.visible = true;
@@ -2296,6 +2308,8 @@ function loginClick(){
 						if (user.starter) {
 							user.starter = etg.decodedeck(user.starter);
 						}
+						if (!user.quest)
+							user.quest = 0;
 						startMenu();
 					}
 				}else if (this.status == 404){
