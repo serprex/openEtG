@@ -845,34 +845,34 @@ function makeButtonText(x, y, t) {
 	return text;
 }
 
-function startMenu() {
+function startMenu() {	
 	menuui = new PIXI.Stage(0x336699, true);
 	
-	//background to clear text
-	var bempty = new PIXI.Graphics();
-	bempty.interactive = true;
-	bempty.hitArea = new PIXI.Rectangle(0, 0, 900, 670);
-	bempty.mouseover = function () { 
+	//lobby background
+	var bglobby = PIXI.Sprite.fromImage("assets/lobbybg.png");
+	bglobby.interactive = true;
+	bglobby.hitArea = new PIXI.Rectangle(0, 0, 900, 670);
+	bglobby.mouseover = function () { 
 		tinfo.setText(""); 
 		tcost.setText("");
 	}
 	
-	menuui.addChild(bempty);
+	menuui.addChild(bglobby);
 	
 	//gold text
 	var tgold = new PIXI.Text(user ? user.gold + "g" : "Sandbox", {font: "bold 16px Dosis"});
-	tgold.position.set(800, 25);
+	tgold.position.set(750, 100);
 	menuui.addChild(tgold);
 	
 	//info text
 	var tinfo = new PIXI.Text("", { font: "bold 16px Dosis" });
-	tinfo.position.set(50, 50);
+	tinfo.position.set(50, 25);
 	
 	menuui.addChild(tinfo);
 	
 	//cost text
 	var tcost = new PIXI.Text("", {font: "bold 16px Dosis"});
-	tcost.position.set(50, 70);
+	tcost.position.set(50, 50);
 	
 	menuui.addChild(tcost);
 	
@@ -997,8 +997,8 @@ function startMenu() {
 	}
 	
 	//logout button
-	var blogout = makeButton(750, 100, 75, 18);
-	var blogoutt = makeButtonText(750, 100, "Logout");
+	var blogout = makeButton(750, 250, 75, 18);
+	var blogoutt = makeButtonText(750, 250, "Logout");
 	blogout.click = function(){
 		userEmit("logout");
 		logout();
@@ -1009,8 +1009,8 @@ function startMenu() {
 	}
 	
 	//delete account button
-	var bdelete = makeButton(750, 500, 100, 18);
-	var bdeletet = makeButtonText(750, 500, "Delete Account");
+	var bdelete = makeButton(750, 550, 100, 18);
+	var bdeletet = makeButtonText(750, 550, "Delete Account");
 	bdelete.click = function(){
 		if (foename.value == user.name) {
 			userEmit("delete");
@@ -1019,7 +1019,7 @@ function startMenu() {
 			chatArea.value = "Input '" + user.name + "' into Challenge to delete your account";
 		}
 	}
-	bdeletet.mouseover = function () {
+	bdelete.mouseover = function () {
 		tinfo.setText("Click here if you want to remove your account.")
 		tcost.setText("");
 	}
