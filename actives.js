@@ -66,6 +66,24 @@ air:function(c,t){
 	new TextEffect("1:9", tgtToPos(c));
 	c.owner.spend(Air, -1);
 },
+alphawolf: function (c, t) {
+	if (c != t) return;
+	new Creature(Cards.PackWolf.asUpped(c.card.upped), c.owner).place();
+	new Creature(Cards.PackWolf.asUpped(c.card.upped), c.owner).place();
+},
+animateweapon: function (c, t) {
+	if (t.weapon) {
+		var cr = new Creature(t.weapon.card, t.owner);
+		cr.atk = t.weapon.atk;
+		cr.active = clone(t.weapon.active);
+		cr.cast = t.weapon.cast;
+		cr.castele = t.weapon.castele;
+		cr.passives = clone(t.weapon.passives);
+		cr.status = clone(t.weapon.status);
+		cr.place();
+		t.weapon = undefined;
+	}
+},
 antimatter:function(c,t){
 	new TextEffect("Antimatter", tgtToPos(t));
 	t.atk -= t.trueatk(0, true)*2;
@@ -695,6 +713,12 @@ metamorph:function(c,t){
 	c.owner.mark = t instanceof Player?t.mark:t.card.element;
 	c.owner.spend(c.owner.mark, -2);
 },
+mimic: function (c, t) {
+	console.log(t);
+	if (c == t || !(t instanceof Creature)) return;
+	c.transform(t.card);
+	c.addactive("play", Actives.mimic);
+},
 miracle:function(c,t){
 	c.owner.quanta[Light] = 0;
 	if (c.owner.sosa){
@@ -718,7 +742,8 @@ momentum:function(c,t){
 	t.buffhp(1);
 	t.status.momentum = true;
 },
-mutant:function(c,t){
+mutant: function (c, t) {
+	if (c != t) return;
 	if (mutantactive(c)){
 		c.cast = c.owner.uptoceil(2);
 		c.castele = c.owner.upto(13);
@@ -921,7 +946,8 @@ ren:function(c,t){
 		t.addactive("predeath", Actives.bounce);
 	}
 },
-reveal:function(c,t){
+reveal: function (c, t) {
+	if (c != t) return;	
 	c.owner.precognition = true;
 },
 rewind:function(c,t){
@@ -1203,7 +1229,7 @@ void:function(c,t){
 quantagift:function(c,t){
 	c.owner.spend(c.card.element, -2);
 	if (c.owner.mark != c.card.element){
-		c.owner.spend(c.mark, -2);
+		c.owner.spend(c.owner.mark, -2);
 	}
 },
 web:function(c,t){
@@ -1227,7 +1253,10 @@ yoink:function(c,t){
 	}
 },
 pillar:function(c,t){
-	c.owner.spend(c.card.element,-c.status.charges*(c.card.element>0?1:3));
+	if (!t)
+		c.owner.spend(c.card.element, -c.status.charges * (c.card.element > 0 ? 1 : 3));
+	else if (c==t) 
+		c.owner.spend(c.card.element, -(c.card.element > 0 ? 1 : 3));
 },
 pend:function(c,t){
 	c.owner.spend(c.pendstate?c.owner.mark:c.card.element,-c.status.charges);
@@ -1238,6 +1267,15 @@ blockwithcharge:function(c,t){
 		c.owner.shield = undefined;
 	}
 	return true;
+},
+chaos:function(c,t){
+	randomchance = c.owner.rng();
+	if (randomchance < .25) {
+		return true;
+	}
+	else if (t instanceof Creature && randomchance < .5) {
+		Actives.cseed(c, t);
+	}
 },
 cold:function(c,t){
 	if (c.owner.rng()<.3){

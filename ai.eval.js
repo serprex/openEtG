@@ -16,7 +16,8 @@ function evalGameState(game) {
 		adrenaline:8,
 		aflatoxin:5,
 		aggreskele:2,
-		air:1,
+		air: 1,
+		alphawolf:2,
 		antimatter:12,
 		bblood:7,
 		blackhole:function(c){
@@ -108,7 +109,8 @@ function evalGameState(game) {
 		lobotomize:6,
 		luciferin:3,
 		lycanthropy:4,
-		metamorph:2,
+		metamorph: 2,
+		mimic: 3,
 		miracle:12,
 		mitosis:function(c){
 			return c.card.cost;
@@ -355,6 +357,16 @@ function evalGameState(game) {
 		log("\tCard " + c.name + " worth " + score);
 		return score;
 	}
+	function caneventuallyactive(element, pl){
+		if (!element) return true;
+		if (pl.quanta[element]) return true;
+		if (pl.mark == element) return true;
+		for (var i = 0; i < 16; i++) {
+			if (pl.permanents[i].type == PillarEnum && pl.permanents[i].element == element)
+				return true;
+		}
+		return false;
+	}
 
 	if (game.turn.foe.deck.length == 0){
 		return game.turn == game.player1?99999990:-99999990;
@@ -375,10 +387,13 @@ function evalGameState(game) {
 		}
 		for (var i = 0; i < player.hand.length; i++) {
 			var cinst = player.hand[i], costless = !cinst.card.cost || !cinst.card.costele;
-			if (costless || player.quanta[cinst.card.costele]){
+			if (caneventuallyactive(cinst.card.costele,player) || costless){
 				pscore += evalcardinstance(cinst) * (cinst.canactive() ? 0.5 : 0.2) * (costless?1:Math.min(player.quanta[cinst.card.costele], 20)/20);
-			}else if (cinst.card.active && cinst.card.active.discard == Actives.obsession){
-				pscore -= 7;
+			}else {
+				if (cinst.card.active && cinst.card.active.discard == Actives.obsession){
+					pscore -= 7;
+				}
+				pscore -5;
 			}
 		}
 		if (player.gpull) {

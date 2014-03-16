@@ -39,7 +39,7 @@
 <body>
 	<div id="leftpane"/>
 	<div id="rightpane">
-		<a href="artcredit.htm">Art credits</a>&emsp;&emsp;<a href="http://github.com/serprex/openEtG">Git repo</a>&emsp;&emsp;<a href="http://elementscommunity.org/forum/general-discussion/openetg">Forum topic</a><br><br>
+		<a href="artcredit.htm">Art credits</a>&emsp;&emsp;<a href="http://github.com/Fippe94/openEtG">Git repo</a>&emsp;&emsp;<a href="http://elementscommunity.org/forum/general-discussion/openetg">Forum topic</a><br><br>
 		<input id="username" type="text" placeholder="Username" onkeydown="maybeLogin(event)" tabindex=1 />
 		<input id="login" type="submit" value="Login" onclick="loginClick()" /><br>
 		<input id="password" type="password" placeholder="Insecure Password" onkeydown="maybeLogin(event)" tabindex=2 />
@@ -47,20 +47,16 @@
 		<input id="foename" type="text" placeholder="Challenge" onkeydown="maybeChallenge(event)" />
 		<input id="challenge" type="submit" value="PvP" onclick="challengeClick()" />
 		<input id="trade" type="submit" value="Trade" onclick="tradeClick()" />
-		<br><br><br><br>
+		<br><br>
 		<input id="aideck" type="text" placeholder="AI Deck" style="width:100%" /><br>
 		<input id="airefresh" type="text" placeholder="AI Speed" style="width:100%" onkeydown="event.cancelBubble=true" /><br>
 		<input id="aievalopt" type="checkbox" /> Enable Experimental AI<br>
-		<textarea id="chatBox" readonly="readonly"
-				  style="width: 290px; height: 250px;
-                             margin: 2px; resize: none">
-
-		</textarea>
+		<div id="chatBox" style="width:300px; height: 350px; overflow: scroll; border: 2px solid #000; background-color:white"></div>
 	</div>
 	<div id="bottompane">
-		<input id="deckimport" type="text" placeholder="Deck" style="width:100%" />
-		<br><input id="chatArea" type="text" style="width:100%;" readonly />
-		<br><input id="chatinput" type="text" placeholder="Chat" style="width:100%" onkeydown="maybeSendChat(event)" />
+		<input id="deckimport" type="text" placeholder="Deck" style="width:1200px" />
+		<br><input id="chatArea" type="text" style="width:1200px" readonly />
+		<br><input id="chatinput" type="text" placeholder="Chat" style="width:1200px" onkeydown="maybeSendChat(event)" />
 	</div>
 </body>
 </html>

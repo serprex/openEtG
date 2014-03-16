@@ -336,7 +336,8 @@ Player.prototype.endturn = function(discard) {
 			card.active.discard(cardinst, this);
 		}
 	}
-	this.spend(this.mark, -1);
+	var markpower = this.markpower ? this.markpower : 1;
+	this.spend(this.mark, -markpower * (this.mark > 0 ? 1 : 3));
 	if (this.foe.status.poison){
 		this.foe.dmg(this.foe.status.poison);
 	}
@@ -513,29 +514,40 @@ Thing.prototype.activetext = function(){
 	}
 	return info;
 }
+Thing.prototype.place = function(){
+	var self = this;
+	this.owner.procactive("play", function (c, p) { c.active.play(c, self) });
+}
 Creature.prototype.place = function(){
 	place(this.owner.creatures, this);
+	Thing.prototype.place.call(this);
+	
 }
 Permanent.prototype.place = function(){
 	if (this.passives.additive){
 		for(var i=0; i<16; i++){
 			if (this.owner.permanents[i] && this.owner.permanents[i].card == this.card){
 				this.owner.permanents[i].status.charges += this.status.charges;
+				Thing.prototype.place.call(this.owner.permanents[i]);
 				return;
 			}
 		}
 	}
 	place(this.owner.permanents, this);
+	Thing.prototype.place.call(this);
 }
 Weapon.prototype.place = function(){
 	this.owner.weapon = this;
+	Thing.prototype.place.call(this);
 }
 Shield.prototype.place = function(){
-	if (this.passives.additive && this.owner.shield && this.owner.shield.card == this.card){
+	if (this.passives.additive && this.owner.shield && this.owner.shield.card.asUpped(this.card.upped) == this.card){
 		this.owner.shield.status.charges += this.status.charges;
+		Thing.prototype.place.call(this);
 		return;
 	}
 	this.owner.shield = this;
+	Thing.prototype.place.call(this);
 }
 CardInstance.prototype.place = function(){
 	if (this.owner.hand.length < 8){
@@ -858,6 +870,8 @@ CardInstance.prototype.useactive = function(target){
 	if (owner.neuro){
 		owner.addpoison(1);
 	}
+	owner.spend(card.costele, card.cost);
+	var self = this;	
 	if (card.type <= PermanentEnum){
 		if (card.type == PillarEnum){
 			new Pillar(card, owner).place();
@@ -871,13 +885,11 @@ CardInstance.prototype.useactive = function(target){
 	}else if (card.type == SpellEnum){
 		if (!target || !target.evade(owner)){
 			card.active(this, target);
-			var self = this;
 			owner.procactive("spell", function(c, t) { c.active.spell(c, self, target); });
 		}
 	}else if (card.type == CreatureEnum){
 		new Creature(card, owner).place();
 	}else console.log("Unknown card type: "+card.type);
-	owner.spend(card.costele, card.cost);
 }
 function countAdrenaline(x){
 	return 5-Math.floor(Math.sqrt(Math.abs(x)));
@@ -963,7 +975,7 @@ var TargetFilters = {
 	notself:function(c, t){
 		return c != t;
 	},
-	true:function(c, t){
+	all:function(c, t){
 		return true;
 	},
 	card:function(c, t){

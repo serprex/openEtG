@@ -309,25 +309,35 @@ function initTrade(data) {
 	function isFreeCard(card) {
 		return card.type == PillarEnum && !card.upped && !card.rarity;
 	}
-
+	player2Card = null;
+	cardChosen = false;
 	if (data.first) myTurn = true;
 	var editorui = new PIXI.Stage(0x336699, true), tradeelement = 0;
 	var btrade = new PIXI.Text("Trade", { font: "16px Dosis" });
 	var bconfirm = new PIXI.Text("Confirm trade", { font: "16px Dosis" });
+	var bconfirmed = new PIXI.Text("Confirmed!", { font: "16px Dosis" });
+	var bcancel = new PIXI.Text("Cancel Trade", { font: "16px Dosis" });
 	var editorcolumns = [];
 	var selectedCard;
-
-
 	var cardartcode;
+	bcancel.position.set(10, 10);
+	bcancel.click = function () {
+		userEmit("canceltrade");
+		startMenu();
+	}
 	btrade.position.set(100, 100);
 	btrade.click = function () {
 		if (myTurn) {
-			userEmit("cardchosen", { card: selectedCard })
-			console.log("Card sent")
-			myTurn = false;
-			cardChosen = true;
-			editorui.removeChild(btrade);
-			editorui.addChild(bconfirm);
+			if (selectedCard) {
+				userEmit("cardchosen", { card: selectedCard })
+				console.log("Card sent")
+				myTurn = false;
+				cardChosen = true;
+				editorui.removeChild(btrade);
+				editorui.addChild(bconfirm);
+			}
+			else
+				chatArea.value = "You have to choose a card!"
 		}
 		else
 			chatArea.value = "You need to wait for your friend to choose a card first";
@@ -338,10 +348,16 @@ function initTrade(data) {
 			console.log("Confirmed!");
 			myTurn = false;
 			userEmit("confirmtrade", { card: selectedCard, oppcard: player2Card });
+			editorui.removeChild(bconfirm);
+			editorui.addChild(bconfirmed);
 		}
+		else
+			chatArea.value = "Wait for your friend to choose a card!"
 	}
-	setInteractive(btrade, bconfirm);
+	bconfirmed.position.set(100, 180);
+	setInteractive(btrade, bconfirm, bcancel);
 	editorui.addChild(btrade);
+	editorui.addChild(bcancel);
 
 
 	var cardpool = {};
@@ -374,7 +390,11 @@ function initTrade(data) {
 			sprite.addChild(sprcount);
 			(function (_i, _j) {
 				sprite.click = function () {
-					if (myTurn && !cardChosen) selectedCard = cardartcode;
+					if (player2Card && CardCodes[player2Card].rarity != CardCodes[cardartcode].rarity) chatArea.value = "You can only trade cards with the same rarity";
+					else if (cardChosen) chatArea.value = "You have already selected a card";
+					else if (!myTurn) chatArea.value = "You need to wait for your friend to choose a card first";
+					else if (isFreeCard(CardCodes[cardartcode])) chatArea.value = "You can't trade a free card, that would just be cheating!";
+					else selectedCard = cardartcode;
 				}
 				sprite.mouseover = function () {
 					cardartcode = editorcolumns[_i][1][tradeelement][_j];
@@ -435,6 +455,9 @@ function initGame(data, ai){
 	game = mkGame(data.first, data.seed);
 	if (data.hp){
 		game.player2.maxhp = game.player2.hp = data.hp;
+	}
+	if (data.aimarkpower) {
+		game.player2.markpower = data.aimarkpower;
 	}
 	var idx, code, decks = [data.urdeck, data.deck];
 	for(var j=0; j<2; j++){
@@ -672,9 +695,41 @@ function aiFunc(){
 		return ["endturn", worstcards[Math.floor(Math.random()*worstcards.length)]];
 	}else return ["endturn"];
 }
+function mkDemigod()
+{
+	if (user) {
+		if (user.gold < 20) {
+			chatArea.value = "Requires 20\u00A4";
+			return;
+		}
+		user.gold -= 20;
+		userEmit("subgold", { g: 20 });
+	}
+	var demigodDeck = ["7ne 7ne 7ne 7ne 7n9 7n9 7t4 7t4 7t4 7t4 7t4 7t4 7t4 7t4 7t4 7t4 7t4 7t4 7t4 7t4 7t4 7t9 7t9 7t9 7tb 7tb 7ta 7ta 7ta 7td 7td 7td 7td 7t5 7t5 8pr",
+	"7an 7an 7an 7an 7ap 7ap 7ap 7ap 7aj 7aj 7gk 7gk 7gk 7gk 7gk 7gk 7gk 7gk 7gk 7gk 7gk 7gk 7gk 7gk 7h4 7h4 7h4 7h4 7h4 7gq 7gq 7gq 7h1 7h1 7h1 7gr 7gr 7gr 7gu 7gu 7gu 7gu 7gu 7gu 8pn",
+	"744 744 744 744 744 744 744 744 744 744 744 744 744 744 744 74f 74f 74f 74f 74f 74f 745 745 745 745 745 7k9 7k9 7k9 7k9 7k9 7k9 7jv 7jv 7jv 7jv 7jv 7k7 7k7 7k7 7k1 8pq",
+	"6ts 6ts 6ts 6ts 6ts 6ts 6ts 6ts 6ts 6ts 6ve 6ve 6ve 6ve 6ve 6ve 6u2 6u2 6u2 6u2 6u2 6u2 6u1 6u1 6u1 6u1 6u1 6u1 6ud 6ud 6ud 6ud 6u7 6u7 6u7 6u7 7th 7th 7tj 7tj 7tj 7ta 7ta 8pt",
+	"718 718 718 718 718 718 71a 71a 71a 71a 71a 7n2 7n2 7n2 7n2 7q0 7q0 7q0 7q0 7q0 7q0 7q0 7q0 7q0 7q0 7q0 7q0 7q0 7q0 7q0 7q0 7q0 7q4 7q4 7q4 7qf 7qf 7qf 7q5 7q5 7q5 7q5 7q5 7q5 7qg 7qg 7qg 7qg 8pk",
+	"7ac 7ac 7ac 7ac 7ac 7ac 7ac 7ac 7ac 7ac 7ac 7bu 7bu 7bu 7bu 7bu 7bu 7ae 7ae 7ae 7ae 7ae 7ae 7al 7am 7am 7am 7as 7as 7as 7as 80d 80d 80d 80d 80i 80i 80i 8pu",
+	"7ac 7ac 7ac 7ac 7ac 7ac 7ac 7ac 7ac 7ac 7ac 7ac 7bu 7bu 7bu 7bu 7bu 7am 7am 7am 7dm 7dm 7dn 7dn 7do 7do 7n0 7n6 7n6 7n6 7n6 7n3 7n3 7n3 7n3 7n3 7n3 7nb 7n9 7n9 7n9 8pr",
+	"7dg 7dg 7dg 7dg 7dg 7dg 7dg 7dg 7dg 7dg 7dg 7dg 7dg 7dg 7dg 7dg 7dg 7e0 7e0 7e0 7e0 7e0 7e0 7dv 7dv 7dv 7dv 7dv 7dv 7n2 7n2 7n2 7n2 7qb 7qb 7qb 7th 7th 7th 7th 7tb 7tb 7tb 7tb 7tb 7tb 7ta 7ta 8pt",
+	"710 710 710 710 710 710 710 710 710 710 710 710 710 710 72i 72i 72i 72i 71l 71l 71l 71l 717 717 717 71b 71b 71b 711 711 7t7 7t7 7t7 7t7 7t7 7t7 7t9 7t9 7t9 7ti 7ti 7ti 7ti 7ta 7ta 8pt",
+	"778 778 778 778 778 778 778 778 778 778 778 778 778 778 778 778 778 778 778 77g 77g 77g 77g 77g 77g 77q 77q 77h 77h 77h 77h 77h 77b 77b 77b 7q4 7q4 7q4 7ql 7ql 7ql 7ql 7ql 7q3 7q3 8ps"]
+	var deck = demigodDeck[Math.floor(Math.random() * demigodDeck.length)].split(" ");
+	deck = deck.slice(0,deck.length-2).concat(deck);
+	var urdeck = getDeck();
+	if ((user && (!user.deck || user.deck.length < 31)) || urdeck.length < 11){
+		startEditor();
+		return;
+	}
+	initGame({ first: Math.random() < .5, deck: deck, urdeck: urdeck, seed: Math.random() * etg.MAX_INT, hp: 200, aimarkpower: 3 }, aievalopt.checked ? aiEvalFunc : aiFunc);
+	game.cost = 20;
+	game.gold = 30;
+}
 function mkAi(level){
 	return function() {
-		var uprate = level==1?0:.1;
+		var uprate = level==1?0:(level==2?.1:.3);
+		var gameprice = 0;
 		function upCode(x){
 			return CardCodes[x].asUpped(Math.random()<uprate).code;
 		}
@@ -687,18 +742,19 @@ function mkAi(level){
 			var aideckstring = aideck.value, deck;
 			if (!user && aideckstring){
 				deck = aideckstring.split(" ");
-			}else{
+			} else {
 				if (user && level>1){
 					if (user.gold<10){
 						chatArea.value = "Requires 10\u00A4";
 						return;
 					}
 					user.gold -= 10;
-					userEmit("subgold", {g: 10});
+					userEmit("subgold", { g: 10 });
+					gameprice = 10;
 				}
 				var cardcount = {};
 				var eles = [Math.ceil(Math.random()*12), Math.ceil(Math.random()*12)], ecost = [];
-				var pillars = filtercards(false, function(x){ return x.type == PillarEnum && !x.rare; });
+				var pillars = filtercards(false, function(x){ return x.type == PillarEnum && !x.rarity; });
 				for(var i=0; i<13; i++){
 					ecost[i] = 0;
 				}
@@ -706,8 +762,9 @@ function mkAi(level){
 				var pl = PlayerRng;
 				var anyshield=0, anyweapon=0;
 				for(var j=0; j<2; j++){
-					for(var i=0; i<(j==0?20:10); i++){
-						var card = pl.randomcard(Math.random()<uprate, function(x){return x.element == eles[j] && x.type != PillarEnum && x.rarity != 5 && cardcount[x.code] != 6 && !(x.type == ShieldEnum && anyshield == 3) && !(x.type == WeaponEnum && anyweapon == 3);});
+					for (var i = 0; i < (j == 0 ? 20 : 10) ; i++) {
+						var maxRarity = level==1?2:(level==2?3:4);
+						var card = pl.randomcard(Math.random()<uprate, function(x){return x.element == eles[j] && x.type != PillarEnum && x.rarity <= maxRarity && cardcount[x.code] != 6 && !(x.type == ShieldEnum && anyshield == 3) && !(x.type == WeaponEnum && anyweapon == 3);});
 						deck.push(card.code);
 						cardcount[card.code] = (cardcount[card.code] || 0) + 1;
 						if (!(((card.type == WeaponEnum && !anyweapon) || (card.type == ShieldEnum && !anyshield)) && cardcount[card.code])){
@@ -759,99 +816,229 @@ function mkAi(level){
 				deck.push(TrueMarks[eles[1]]);
 				chatArea.value = deck.join(" ");
 			}
-			initGame({ first:Math.random()<.5, deck:deck, urdeck:urdeck, seed:Math.random()*etg.MAX_INT, hp:level==1?100:150 }, aievalopt.checked?aiEvalFunc:aiFunc);
-			game.gold = level==1?5:20;
+			initGame({ first: Math.random() < .5, deck: deck, urdeck: urdeck, seed: Math.random() * etg.MAX_INT, hp: level == 1 ? 100 : (level == 2 ? 125 : 150), aimarkpower: level == 3 ? 2 : 1}, aievalopt.checked ? aiEvalFunc : aiFunc);
+			game.cost = gameprice;
+			game.gold = level==1?5:(level==2?10:20);
 		}
 	}
 }
-function startMenu(){
-	var brandai = new PIXI.Text("AI1", {font: "16px Dosis"});
-	var brandhb = new PIXI.Text("AI2", {font: "16px Dosis"});
-	var barenai = new PIXI.Text("Arena AI", { font: "16px Dosis" });
-	var beditor = new PIXI.Text("Editor", { font: "16px Dosis" });
-	var bstore = new PIXI.Text("Booster Store", { font: "16px Dosis" });
-	var barenainfo = new PIXI.Text("Arena Info", {font: "16px Dosis"});
-	var barenatop = new PIXI.Text("Arena T10", {font: "16px Dosis"});
-	var blogout = new PIXI.Text("Logout", {font: "16px Dosis"});
-	var bremove = new PIXI.Text("Delete Account", {font: "16px Dosis"});
-	brandai.position.set(200, 250);
-	brandhb.position.set(300, 250);
-	barenai.position.set(400, 250);
-	beditor.position.set(200, 300);
-	bstore.position.set(300, 300);
-	barenainfo.position.set(400, 300);
-	barenatop.position.set(400, 350);
-	blogout.position.set(200, 500);
-	bremove.position.set(400, 500);
-	setInteractive(brandai, brandhb, barenai, beditor, barenainfo, barenatop, blogout, bremove, bstore);
-	brandai.click = mkAi(1);
-	brandhb.click = mkAi(2);
-	barenai.click = function(){
-		if (Cards){
-			if (!user.deck || user.deck.length < 31){
+
+function makeButton(x, y, w, h) {
+	var button = new PIXI.Graphics();
+	
+	button.beginFill(0xFFFFFF);
+	button.lineStyle(2, 0x000000);
+	button.drawRect(x, y, w, h);
+	button.endFill();
+	
+	button.interactive = true;
+	button.hitArea = new PIXI.Rectangle(x, y, w, h);
+	button.buttonMode = true;
+	
+	return button;
+}
+
+function makeButtonText(x, y, t) {
+	var text = new PIXI.Text(t, {font: "bold 16px Dosis"});
+	text.position.set(x+1, y+1);
+	
+	return text;
+}
+
+function startMenu() {
+	menuui = new PIXI.Stage(0x336699, true);
+	
+	//background to clear text
+	var bempty = new PIXI.Graphics();
+	bempty.interactive = true;
+	bempty.hitArea = new PIXI.Rectangle(0, 0, 900, 670);
+	bempty.mouseover = function () { 
+		tinfo.setText(""); 
+		tcost.setText("");
+	}
+	
+	menuui.addChild(bempty);
+	
+	//gold text
+	var tgold = new PIXI.Text(user ? user.gold + "g" : "Sandbox", {font: "bold 16px Dosis"});
+	tgold.position.set(800, 25);
+	menuui.addChild(tgold);
+	
+	//info text
+	var tinfo = new PIXI.Text("", { font: "bold 16px Dosis" });
+	tinfo.position.set(50, 50);
+	
+	menuui.addChild(tinfo);
+	
+	//cost text
+	var tcost = new PIXI.Text("", {font: "bold 16px Dosis"});
+	tcost.position.set(50, 70);
+	
+	menuui.addChild(tcost);
+	
+	//ai0 button
+	var bai0 = makeButton(50, 100, 75, 18);
+	var bai0t = makeButtonText(50, 100, "Commoner");
+	bai0.click = mkAi(1);
+	bai0.mouseover = function () {
+		tinfo.setText("Commoners aren't very strong.");
+		tcost.setText("Cost: 0g");
+	}
+	
+	menuui.addChild(bai0);
+	menuui.addChild(bai0t);
+	
+	//ai1 button
+	var bai1 = makeButton(150, 100, 75, 18);
+	var bai1t = makeButtonText(150, 100, "Mage");
+	bai1.click = mkAi(2);
+	bai1.mouseover = function () {
+		tinfo.setText("Mages are more powerful than commoners, and have a few upgraded cards.");
+		tcost.setText("Cost: 10g");
+	}
+	
+	menuui.addChild(bai1);
+	menuui.addChild(bai1t);
+	
+	//ai2 button
+	var bai2 = makeButton(250, 100, 75, 18);
+	var bai2t = makeButtonText(250, 100, "Champion");
+	bai2.click = mkAi(3);
+	bai2.mouseover = function () {
+		tinfo.setText("Champions have several upgraded cards, so you should come well prepared.");
+		tcost.setText("Cost: 10g");
+	}
+	
+	menuui.addChild(bai2);
+	menuui.addChild(bai2t);
+	
+	//ai3 button
+	var bai3 = makeButton(350, 100, 75, 18);
+	var bai3t = makeButtonText(350, 100, "Demigod");
+	bai3.click = mkDemigod;
+	bai3.mouseover = function () {
+		tinfo.setText("Demigods are among the strongest beings in the world. Unless you are very powerful, you shouldn't even try.");
+		tcost.setText("Cost: 20g");
+	}
+	
+	menuui.addChild(bai3);
+	menuui.addChild(bai3t);
+	
+	//ai arena button
+	var baia = makeButton(650, 100, 75, 18);
+	var baiat = makeButtonText(650, 100, "Arena AI");
+	baia.click = function() {
+		if (Cards) {
+			if (!user.deck || user.deck.length < 31) {
 				startEditor();
 				return;
 			}
-			if (user.gold<10){
-				chatArea.value = "Requires 10\u00A4";
+			
+			if (user.gold < 10) {
+				chatArea.value = "Requires 10g";
 				return;
 			}
+			
 			user.gold -= 10;
 			userEmit("subgold", {g: 10});
 			userEmit("foearena");
 		}
 	}
-	beditor.click = startEditor;
-	bstore.click = startStore;
-	barenainfo.click = function(){
+	baia.mouseover = function () {
+		tinfo.setText("In the arena you will face decks from other players.");
+		tcost.setText("Cost: 10g");
+	}
+	
+	//arena info button
+	var binfoa = makeButton(650, 150, 75, 18);
+	var binfoat = makeButtonText(650, 150, "Arena Info");
+	binfoa.click = function(){
 		if (Cards){
 			userEmit("arenainfo");
 		}
 	}
-	barenatop.click = function(){
+	binfoa.mouseover = function () {
+		tinfo.setText("Check how your arena deck is doing.")
+		tcost.setText("");
+	}
+	
+	//arena top10 button
+	var btopa = makeButton(650, 200, 75, 18);
+	var btopat = makeButtonText(650, 200, "Arena T10");
+	btopa.click = function(){
 		if (Cards){
 			userEmit("arenatop");
 		}
 	}
-	function logout(){
-		user = undefined;
-		menuui.removeChild(barenai);
-		menuui.removeChild(barenainfo);
-		menuui.removeChild(barenatop);
-		menuui.removeChild(blogout);
-		menuui.removeChild(bremove);
-		menuui.removeChild(goldcount);
-		menuui.removeChild(bstore);
-		if (oracle){
-			menuui.removeChild(oracle);
-		}
+	btopa.mouseover = function () {
+		tinfo.setText("Here you can see who the top players in arena are right now.")
+		tcost.setText("");
 	}
+	
+	//edit button
+	var bedit = makeButton(50, 200, 75, 18);
+	var beditt = makeButtonText(50, 200, "Editor");
+	bedit.click = startEditor;
+	bedit.mouseover = function () {
+		tinfo.setText("Here you can edit your deck, as well as upgrade your cards.");
+		tcost.setText("");
+	}
+	
+	menuui.addChild(bedit);
+	menuui.addChild(beditt);
+	
+	//shop button
+	var bshop = makeButton(150, 200, 75, 18);
+	var bshopt = makeButtonText(150, 200, "Shop");
+	bshop.click = startStore;
+	bshop.mouseover = function () {
+		tinfo.setText("Here you can buy booster packs which contains ten cards from the elements you choose.");
+		tcost.setText("");
+	}
+	
+	//logout button
+	var blogout = makeButton(750, 100, 75, 18);
+	var blogoutt = makeButtonText(750, 100, "Logout");
 	blogout.click = function(){
 		userEmit("logout");
 		logout();
 	}
-	bremove.click = function(){
-		if (foename.value == user.name){
+	blogout.mouseover = function () {
+		tinfo.setText("Click here if you want to log out.")
+		tcost.setText("");
+	}
+	
+	//delete account button
+	var bdelete = makeButton(750, 500, 100, 18);
+	var bdeletet = makeButtonText(750, 500, "Delete Account");
+	bdelete.click = function(){
+		if (foename.value == user.name) {
 			userEmit("delete");
 			logout();
-		}else{
+		} else {
 			chatArea.value = "Input '" + user.name + "' into Challenge to delete your account";
 		}
 	}
-	menuui = new PIXI.Stage(0x336699, true);
-	menuui.addChild(brandai);
-	menuui.addChild(brandhb);
-	menuui.addChild(beditor);
-	if (user){
-		menuui.addChild(barenai);
-		menuui.addChild(barenainfo);
-		menuui.addChild(barenatop);
+	bdeletet.mouseover = function () {
+		tinfo.setText("Click here if you want to remove your account.")
+		tcost.setText("");
+	}
+	
+	//only display if user is logged in
+	if (user){		
+		menuui.addChild(baia);
+		menuui.addChild(baiat);
+		menuui.addChild(bshop);
+		menuui.addChild(bshopt);
+		menuui.addChild(binfoa);
+		menuui.addChild(binfoat);
+		menuui.addChild(btopa);
+		menuui.addChild(btopat);
 		menuui.addChild(blogout);
-		menuui.addChild(bremove);
-		menuui.addChild(bstore);
-		var goldcount = new PIXI.Text(user.gold + "\u00A4", {font: "16px Dosis"});
-		goldcount.position.set(200, 200);
-		menuui.addChild(goldcount);
+		menuui.addChild(blogoutt);
+		menuui.addChild(bdelete);
+		menuui.addChild(bdeletet);
+		
 		if (user.oracle){
 			// todo user.oracle should be a card, not true. The card is the card that the server itself added. This'll only show what was added
 			delete user.oracle;
@@ -861,18 +1048,42 @@ function startMenu(){
 			user.ocard = card;
 			user.pool.push(card);
 			var oracle = new PIXI.Sprite(nopic);
-			oracle.position.set(600, 250);
+			oracle.position.set(50, 300);
 			menuui.addChild(oracle);
 		}
 	}
-	animCb = function(){
-		if (user && oracle){
+		
+	function logout(){
+		user = undefined;
+		tgold.setText("Sandbox");
+		menuui.removeChild(baia);
+		menuui.removeChild(baiat);
+		menuui.removeChild(bshop);
+		menuui.removeChild(bshopt);
+		menuui.removeChild(binfoa);
+		menuui.removeChild(binfoat);
+		menuui.removeChild(btopa);
+		menuui.removeChild(btopat);
+		menuui.removeChild(blogout);
+		menuui.removeChild(blogoutt);
+		menuui.removeChild(bdelete);
+		menuui.removeChild(bdeletet);
+		
+		if (oracle){
+			menuui.removeChild(oracle);
+		}
+	}
+	
+	animCb = function() {
+		if (user && oracle) {
 			oracle.setTexture(getArt(card));
 		}
 	}
+	
 	mainStage = menuui;
 	refreshRenderer();
 }
+
 function editorCardCmp(x,y){
 	var cardx = CardCodes[x], cardy = CardCodes[y];
 	return cardx.upped - cardy.upped || cardx.element - cardy.element || cardx.cost-cardy.cost || (x>y)-(x<y);
@@ -902,7 +1113,6 @@ function startStore() {
 	blife.position.set(100, 90);
 	blife.click = function () { packtype = 3; bchosenpack.setText("Chosen pack: " + blife.text);}
 	bchosenpack.position.set(150, 200);
-	//var boostermark = 1;
 	bsave.position.set(8,8);
 	bsave.click = function () {
 		if (isEmpty(newCards))
@@ -913,14 +1123,14 @@ function startStore() {
 	bbuy.position.set(150,150);
 	bbuy.click = function () {
 		if (isEmpty(newCards)){
-			if (user.gold >= 20) {
-				user.gold -= 20;
+			if (user.gold >= 30) {
+				user.gold -= 30;
 				var allowedElements = []
 				if (!packtype) allowedElements = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12];
 				if (packtype == 1) allowedElements = [4, 6, 7, 9];
 				if (packtype == 2) allowedElements = [1, 3, 10, 12];
 				if (packtype == 3) allowedElements = [2, 5, 8, 11];
-				userEmit("subgold", { g: 20 });
+				userEmit("subgold", { g: 30 });
 				for (var i = 0; i < 10; i++) {
 					var rarity = i < 6 ? 1 : (i < 9 ? 2 : (Math.random() < .2 ? 4: 3))
 					newCards.push(PlayerRng.randomcard(false, function (x) { return allowedElements.indexOf(x.element) != -1 && x.type != PillarEnum && x.rarity == rarity }).code);
@@ -929,7 +1139,7 @@ function startStore() {
 					storeui.addChild(bgetcards);
 				}
 			}else{
-				chatArea.value = "You can't afford more cards, you need 20 gold!";
+				chatArea.value = "You can't afford more cards, you need 30 gold!";
 			}
 		}else{
 			chatArea.value = "Take the cards before buying more!";
@@ -945,21 +1155,6 @@ function startStore() {
 		newCards = [];
 		storeui.removeChild(bgetcards);
 	}
-	/*var storemarksprite = new PIXI.Sprite(nopic);
-	storemarksprite.position.set(100, 130);
-	storeui.addChild(storemarksprite);
-	var boostereleicons = [];
-	for (var i = 0; i < 13; i++) {
-		var sprite = new PIXI.Sprite(nopic);
-		sprite.position.set(120 +i*32, 30);
-		setInteractive(sprite);
-		(function (_i) {
-			sprite.click = function () { boostermark = _i; }
-		})(i);
-
-		boostereleicons.push(sprite);
-		storeui.addChild(sprite);
-	}*/
 	var goldcount = new PIXI.Text(user.gold + "\u00A4", { font: "16px Dosis" });
 	goldcount.position.set(600, 50);
 	storeui.addChild(goldcount);
@@ -996,14 +1191,10 @@ function startStore() {
 		if (cardartcode) {
 			cardArt.setTexture(getArt(cardartcode));
 		}
-		//storemarksprite.setTexture(getIcon(boostermark));
 		for (var i = 0; i < 10; i++) {
 			if (newCards[i])
 				newCardsArt[i].setTexture(getArt(newCards[i]));
 		}
-		/*for (var i = 0; i < 13; i++) {
-			boostereleicons[i].setTexture(getIcon(i));
-		}*/
 		goldcount.setText(user.gold + "\u00A4");
 	}
 
@@ -1040,6 +1231,15 @@ function startEditor(){
 					cardpool[user.pool[i]] = 1;
 				}
 			}
+			if (user.starter) {
+				for (var i = 0; i < user.starter.length; i++) {
+					if (user.starter[i] in cardpool) {
+						cardpool[user.starter[i]]++;
+					} else {
+						cardpool[user.starter[i]] = 1;
+					}
+				}
+			}
 			for(var i=editordeck.length-1; i>=0; i--){
 				var code = editordeck[i];
 				if (CardCodes[code].type != PillarEnum){
@@ -1071,14 +1271,13 @@ function startEditor(){
 		processDeck();
 	}
 	if (Cards && (!user || user.deck)){
-		var usePool = !!(user && user.deck);
+		var usePool = !!(user && (user.deck || user.starter));
 		var cardminus, cardpool, cardartcode;
 		chatArea.value = "Build a 30-60 card deck";
 		var editorui = new PIXI.Stage(0x336699, true), editorelement = 0;
 		var bclear = new PIXI.Text("Clear", {font: "16px Dosis"});
 		var bsave = new PIXI.Text("Done", {font: "16px Dosis"});
 		var bimport = new PIXI.Text("Import", {font: "16px Dosis"});
-		var brngcard = new PIXI.Text("Cardify", {font: "16px Dosis"});
 		var bpillar = new PIXI.Text("Pillarify", {font: "16px Dosis"});
 		var bupgrade = new PIXI.Text("Upgrade", {font: "16px Dosis"});
 		var barena = new PIXI.Text("Arena", {font: "16px Dosis"});
@@ -1103,33 +1302,6 @@ function startEditor(){
 		bimport.click = function(){
 			editordeck = deckimport.value.split(" ");
 			processDeck();
-		}
-		brngcard.position.set(8, 80);
-		brngcard.click = function(){
-			if (foename.value != "trans"){
-				chatArea.value = "Input 'trans' into Challenge to transmute a random card of your deck's mark per 2 cards in deck";
-			}else if (editordeck.length<2 || (editordeck.length%2)!=0){
-				chatArea.value = "Transmutation of random cards requires an input size divisible by 2";
-			}else{
-				for(var i=0; i<editordeck.length; i++){
-					var card = CardCodes[editordeck[i]];
-					if(card.rarity == 5){
-						chatArea.value = "Transmutation of ultrarares is ill advised";
-						return;
-					}else if(!card.upped && card.type == PillarEnum){
-						chatArea.value = "Transmutation of pillars is a fool's errand";
-						return;
-					}
-				}
-				var rm = editordeck;
-				editordeck = [];
-				for(var i=0; i<rm.length; i+=2){
-					var upped = CardCodes[rm[i]].upped + CardCodes[rm[i+1]].upped;
-					upped = upped == 1?(Math.random()<.5):(upped == 2);
-					editordeck.push(PlayerRng.randomcard(upped, function(x){ return x.element == editormark && x.type != PillarEnum && !x.rarity <= 2 && !~rm.indexOf(x.code); }).code);
-				}
-				transmute(rm);
-			}
 		}
 		bpillar.position.set(8, 104);
 		bpillar.click = function(){
@@ -1211,13 +1383,12 @@ function startEditor(){
 				chatArea.value = "Oracle Card: " + CardCodes[user.ocard].name;
 			}
 		}
-		setInteractive(bclear, bsave, bimport, brngcard, bpillar, bupgrade, barena);
+		setInteractive(bclear, bsave, bimport, bpillar, bupgrade, barena);
 		editorui.addChild(bclear);
 		editorui.addChild(bsave);
 		editorui.addChild(bimport);
 		if (usePool){
 			editorui.addChild(bpillar);
-			editorui.addChild(brngcard);
 			editorui.addChild(bupgrade);
 			if (user.ocard){
 				editorui.addChild(barena);
@@ -1539,23 +1710,25 @@ function startMatch(){
 				if (!cardwon){
 					var winnable = [];
 					for(var i=0; i<foeDeck.length; i++){
-						if (foeDeck[i].type != PillarEnum && foeDeck[i].rarity != 5){
+						if (foeDeck[i].type != PillarEnum && foeDeck[i].rarity < 3){
 							winnable.push(foeDeck[i]);
 						}
 					}
 					if (winnable.length){
 						cardwon = winnable[Math.floor(Math.random()*winnable.length)];
 					}else{
-						var elewin = foeDeck[Math.floor(Math.random()*foeDeck.length)];
-						cardwon = PlayerRng.randomcard(elewin.upped, function(x){ return x.element == elewin.element && x.type != PillarEnum && x.rarity != 5; });
+						var elewin = foeDeck[Math.floor(Math.random() * foeDeck.length)];
+						rareAllowed = Math.random() < .3 ? 3 : 2;
+						cardwon = PlayerRng.randomcard(elewin.upped, function(x){ return x.element == elewin.element && x.type != PillarEnum && x.rarity <= rareAllowed; });
 					}
 					if (!game.player2.ai){
 						cardwon = cardwon.asUpped(false);
 					}
 					var data = {c:cardwon.code};
 					if (game.gold){
-						var goldwon = Math.floor(game.gold*(game.player1.hp == game.player1.maxhp?2:.5+game.player1.hp/(game.player1.maxhp*2)));
+						var goldwon = Math.floor(game.gold * (game.player1.hp == game.player1.maxhp ? 2 : .5 + game.player1.hp / (game.player1.maxhp * 2)));
 						console.log(goldwon);
+						if(game.cost) goldwon += game.cost;
 						data.g = goldwon;
 						user.gold += goldwon;
 					}
@@ -1570,8 +1743,8 @@ function startMatch(){
 		}
 		if (game.phase != EndPhase){
 			cancel.visible = true;
-			maybeSetText(endturn, game.phase == PlayPhase?"End Turn":"Accept Hand");
-			maybeSetText(cancel, game.phase == PlayPhase?"Cancel":"Mulligan");
+			maybeSetText(endturn, game.turn == game.player1?(game.phase == PlayPhase ? "End Turn" : "Accept Hand"):"");
+			maybeSetText(cancel, game.turn == game.player1?(game.phase != PlayPhase ? "Mulligan" : (targetingMode || discarding) ? "Cancel" : ""):"");
 		}
 		maybeSetText(turntell, discarding?"Discard":targetingMode?targetingText:game.turn == game.player1?"Your Turn":"Their Turn");
 		for(var i=0; i<foeplays.length; i++){
@@ -2092,9 +2265,10 @@ socket.on("tradegive", initTrade)
 socket.on("foearena", function(data){
 	var deck = etg.decodedeck(data.deck);
 	chatArea.value = data.name + ": " + deck.join(" ");
-	initGame({ first:data.first, deck:deck, urdeck:getDeck(), seed:data.seed, hp:data.hp }, aievalopt.checked?aiEvalFunc:aiFunc);
+	initGame({ first:data.first, deck:deck, urdeck:getDeck(), seed:data.seed, hp:data.hp, cost:data.cost }, aievalopt.checked?aiEvalFunc:aiFunc);
 	game.arena = data.name;
 	game.gold = 20;
+	game.cost = 10;
 });
 socket.on("arenainfo", startArenaInfo);
 socket.on("arenatop", startArenaTop);
@@ -2106,6 +2280,9 @@ socket.on("userdump", function(data){
 	}
 	if (user.pool){
 		user.pool = etg.decodedeck(user.pool);
+	}
+	if (user.starter) {
+		user.starter = etg.decodedeck(user.starter);
 	}
 	startMenu();
 });
@@ -2122,10 +2299,17 @@ socket.on("foeleft", function(data) {
 });
 socket.on("chat", function (data) {
 	console.log("message gotten");
-	if (chatBox.value !== "") {
-		chatBox.value += "\n";
+	var u = data.u ? data.u + ": " : "";
+	var color = "black";
+	if (data.mode) {
+		if (data.mode == "pm") {
+			color= "blue";
+		}
+		if (data.mode == "info")
+			color = "red";
 	}
-	chatBox.value += data.u + ": " + data.message;
+	chatBox.innerHTML += "<font color=" + color + ">" + u + data.message.replace(/</g, "&lt;").replace(/>/g,"&gt;") + "</font>";
+	chatBox.innerHTML += "<br>";
 	chatBox.scrollTop = chatBox.scrollHeight;
 });
 socket.on("mulligan", function(data) {
@@ -2145,6 +2329,9 @@ socket.on("tradedone", function (data) {
 	console.log("Trade done!")
 	user.pool.push(data.newcard);
 	user.pool.splice(user.pool.indexOf(data.oldcard), 1);
+	startMenu();
+});
+socket.on("tradecanceled", function (data) {
 	startMenu();
 });
 function maybeSendChat(e) {
@@ -2207,13 +2394,16 @@ function loginClick(){
 					user = JSON.parse(this.responseText);
 					if (!user){
 						chatArea.value = "No user";
-					}else if (!user.pool){
+					}else if (!user.pool && !user.starter){
 						startElementSelect();
 					}else{
 						user.deck = etg.decodedeck(user.deck);
 						deckimport.value = user.deck.join(" ");
 						if (user.pool){
 							user.pool = etg.decodedeck(user.pool);
+						}
+						if (user.starter) {
+							user.starter = etg.decodedeck(user.starter);
 						}
 						startMenu();
 					}
