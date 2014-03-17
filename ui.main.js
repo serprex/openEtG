@@ -823,110 +823,91 @@ function mkAi(level){
 	}
 }
 
-function makeButton(x, y, w, h) {
+function makeButton(x, y, w, h, t) {
 	var button = new PIXI.Graphics();
-	
 	button.beginFill(0xFFFFFF);
 	button.lineStyle(2, 0x000000);
 	button.drawRect(x, y, w, h);
 	button.endFill();
-	
 	button.interactive = true;
 	button.hitArea = new PIXI.Rectangle(x, y, w, h);
 	button.buttonMode = true;
 	
+	var text = new PIXI.Text(t, {font: "bold 16px Dosis"});
+	button.addChild(text);
+	text.anchor.set(0.5, 0.5);
+	text.position.set(x + (w/2), y+2 + (h/2));
+
 	return button;
 }
 
-function makeButtonText(x, y, t) {
-	var text = new PIXI.Text(t, {font: "bold 16px Dosis"});
-	text.position.set(x+1, y+1);
-	
-	return text;
-}
-
-function startMenu() {
+function startMenu() {	
 	menuui = new PIXI.Stage(0x336699, true);
 	
-	//background to clear text
-	var bempty = new PIXI.Graphics();
-	bempty.interactive = true;
-	bempty.hitArea = new PIXI.Rectangle(0, 0, 900, 670);
-	bempty.mouseover = function () { 
+	//lobby background
+	var bglobby = PIXI.Sprite.fromImage("assets/lobbybg.png");
+	bglobby.interactive = true;
+	bglobby.hitArea = new PIXI.Rectangle(0, 0, 900, 670);
+	bglobby.mouseover = function () { 
 		tinfo.setText(""); 
 		tcost.setText("");
-	}
-	
-	menuui.addChild(bempty);
+	}	
+	menuui.addChild(bglobby);
 	
 	//gold text
-	var tgold = new PIXI.Text(user ? user.gold + "g" : "Sandbox", {font: "bold 16px Dosis"});
-	tgold.position.set(800, 25);
+	var tgold = new PIXI.Text((user ? user.gold + "g" : "Sandbox"), {font: "bold 16px Dosis"});
+	tgold.position.set(750, 100);
 	menuui.addChild(tgold);
 	
 	//info text
 	var tinfo = new PIXI.Text("", { font: "bold 16px Dosis" });
-	tinfo.position.set(50, 50);
-	
+	tinfo.position.set(50, 25);	
 	menuui.addChild(tinfo);
 	
 	//cost text
 	var tcost = new PIXI.Text("", {font: "bold 16px Dosis"});
-	tcost.position.set(50, 70);
-	
+	tcost.position.set(50, 50);	
 	menuui.addChild(tcost);
 	
 	//ai0 button
-	var bai0 = makeButton(50, 100, 75, 18);
-	var bai0t = makeButtonText(50, 100, "Commoner");
+	var bai0 = makeButton(50, 100, 75, 18, "Commoner");
 	bai0.click = mkAi(1);
 	bai0.mouseover = function () {
 		tinfo.setText("Commoners aren't very strong.");
 		tcost.setText("Cost: 0g");
 	}
-	
 	menuui.addChild(bai0);
-	menuui.addChild(bai0t);
 	
 	//ai1 button
-	var bai1 = makeButton(150, 100, 75, 18);
-	var bai1t = makeButtonText(150, 100, "Mage");
+	var bai1 = makeButton(150, 100, 75, 18, "Mage");
 	bai1.click = mkAi(2);
 	bai1.mouseover = function () {
 		tinfo.setText("Mages are more powerful than commoners, and have a few upgraded cards.");
 		tcost.setText("Cost: 10g");
 	}
-	
 	menuui.addChild(bai1);
-	menuui.addChild(bai1t);
 	
 	//ai2 button
-	var bai2 = makeButton(250, 100, 75, 18);
-	var bai2t = makeButtonText(250, 100, "Champion");
+	var bai2 = makeButton(250, 100, 75, 18, "Champion");
 	bai2.click = mkAi(3);
 	bai2.mouseover = function () {
 		tinfo.setText("Champions have several upgraded cards, so you should come well prepared.");
 		tcost.setText("Cost: 10g");
 	}
-	
 	menuui.addChild(bai2);
-	menuui.addChild(bai2t);
+
 	
 	//ai3 button
-	var bai3 = makeButton(350, 100, 75, 18);
-	var bai3t = makeButtonText(350, 100, "Demigod");
+	var bai3 = makeButton(350, 100, 75, 18, "Demigod");
 	bai3.click = mkDemigod;
 	bai3.mouseover = function () {
 		tinfo.setText("Demigods are among the strongest beings in the world. Unless you are very powerful, you shouldn't even try.");
 		tcost.setText("Cost: 20g");
 	}
-	
 	menuui.addChild(bai3);
-	menuui.addChild(bai3t);
 	
 	//ai arena button
-	var baia = makeButton(650, 100, 75, 18);
-	var baiat = makeButtonText(650, 100, "Arena AI");
+	var baia = makeButton(650, 100, 75, 18, "Arena AI");
 	baia.click = function() {
 		if (Cards) {
 			if (!user.deck || user.deck.length < 31) {
@@ -950,8 +931,7 @@ function startMenu() {
 	}
 	
 	//arena info button
-	var binfoa = makeButton(650, 150, 75, 18);
-	var binfoat = makeButtonText(650, 150, "Arena Info");
+	var binfoa = makeButton(650, 150, 75, 18, "Arena Info");
 	binfoa.click = function(){
 		if (Cards){
 			userEmit("arenainfo");
@@ -963,8 +943,7 @@ function startMenu() {
 	}
 	
 	//arena top10 button
-	var btopa = makeButton(650, 200, 75, 18);
-	var btopat = makeButtonText(650, 200, "Arena T10");
+	var btopa = makeButton(650, 200, 75, 18, "Arena T10");
 	btopa.click = function(){
 		if (Cards){
 			userEmit("arenatop");
@@ -976,20 +955,16 @@ function startMenu() {
 	}
 	
 	//edit button
-	var bedit = makeButton(50, 200, 75, 18);
-	var beditt = makeButtonText(50, 200, "Editor");
+	var bedit = makeButton(50, 200, 75, 18, "Editor");
 	bedit.click = startEditor;
 	bedit.mouseover = function () {
 		tinfo.setText("Here you can edit your deck, as well as upgrade your cards.");
 		tcost.setText("");
 	}
-	
 	menuui.addChild(bedit);
-	menuui.addChild(beditt);
-	
+
 	//shop button
-	var bshop = makeButton(150, 200, 75, 18);
-	var bshopt = makeButtonText(150, 200, "Shop");
+	var bshop = makeButton(150, 200, 75, 18, "Shop");
 	bshop.click = startStore;
 	bshop.mouseover = function () {
 		tinfo.setText("Here you can buy booster packs which contains ten cards from the elements you choose.");
@@ -997,8 +972,7 @@ function startMenu() {
 	}
 	
 	//logout button
-	var blogout = makeButton(750, 100, 75, 18);
-	var blogoutt = makeButtonText(750, 100, "Logout");
+	var blogout = makeButton(750, 250, 75, 18, "Logout");
 	blogout.click = function(){
 		userEmit("logout");
 		logout();
@@ -1009,8 +983,7 @@ function startMenu() {
 	}
 	
 	//delete account button
-	var bdelete = makeButton(750, 500, 100, 18);
-	var bdeletet = makeButtonText(750, 500, "Delete Account");
+	var bdelete = makeButton(750, 550, 100, 18, "Delete Account");
 	bdelete.click = function(){
 		if (foename.value == user.name) {
 			userEmit("delete");
@@ -1019,7 +992,7 @@ function startMenu() {
 			chatArea.value = "Input '" + user.name + "' into Challenge to delete your account";
 		}
 	}
-	bdeletet.mouseover = function () {
+	bdelete.mouseover = function () {
 		tinfo.setText("Click here if you want to remove your account.")
 		tcost.setText("");
 	}
@@ -1027,17 +1000,11 @@ function startMenu() {
 	//only display if user is logged in
 	if (user){		
 		menuui.addChild(baia);
-		menuui.addChild(baiat);
 		menuui.addChild(bshop);
-		menuui.addChild(bshopt);
 		menuui.addChild(binfoa);
-		menuui.addChild(binfoat);
 		menuui.addChild(btopa);
-		menuui.addChild(btopat);
 		menuui.addChild(blogout);
-		menuui.addChild(blogoutt);
 		menuui.addChild(bdelete);
-		menuui.addChild(bdeletet);
 		
 		if (user.oracle){
 			// todo user.oracle should be a card, not true. The card is the card that the server itself added. This'll only show what was added
@@ -1057,17 +1024,11 @@ function startMenu() {
 		user = undefined;
 		tgold.setText("Sandbox");
 		menuui.removeChild(baia);
-		menuui.removeChild(baiat);
 		menuui.removeChild(bshop);
-		menuui.removeChild(bshopt);
 		menuui.removeChild(binfoa);
-		menuui.removeChild(binfoat);
 		menuui.removeChild(btopa);
-		menuui.removeChild(btopat);
 		menuui.removeChild(blogout);
-		menuui.removeChild(blogoutt);
 		menuui.removeChild(bdelete);
-		menuui.removeChild(bdeletet);
 		
 		if (oracle){
 			menuui.removeChild(oracle);
@@ -1088,6 +1049,7 @@ function editorCardCmp(x,y){
 	var cardx = CardCodes[x], cardy = CardCodes[y];
 	return cardx.upped - cardy.upped || cardx.element - cardy.element || cardx.cost-cardy.cost || (x>y)-(x<y);
 }
+
 function startStore() {
 	var newCards = [];
 	var newCardsArt = [];
@@ -1201,6 +1163,7 @@ function startStore() {
 	mainStage = storeui;
 	refreshRenderer();
 }
+
 function startEditor(){
 	function adjustCardMinus(code, x){
 		if (code in cardminus){
@@ -1520,6 +1483,7 @@ function startEditor(){
 		refreshRenderer();
 	}
 }
+
 function startElementSelect(){
 	var stage = new PIXI.Stage(0x336699, true);
 	chatArea.value = "Select your starter element";
@@ -1567,6 +1531,7 @@ function startElementSelect(){
 	mainStage = stage;
 	refreshRenderer();
 }
+
 function startMatch(){
 	if (anims.length){
 		while (anims.length){
@@ -2165,6 +2130,7 @@ function startMatch(){
 	mainStage = gameui;
 	refreshRenderer();
 }
+
 function startArenaInfo(info){
 	if (!info){
 		chatArea.value = "You do not have an arena deck";
@@ -2189,6 +2155,7 @@ function startArenaInfo(info){
 	mainStage = stage;
 	refreshRenderer();
 }
+
 function startArenaTop(info){
 	if (!info){
 		chatArea.value = "??";
@@ -2207,8 +2174,10 @@ function startArenaTop(info){
 	mainStage = stage;
 	refreshRenderer();
 }
+
 var foeplays = [];
 var tximgcache = [];
+
 function getTextImage(text, font, color){
 	if (color === undefined)color = "black";
 	if(!(font in tximgcache)){
@@ -2247,6 +2216,7 @@ function getTextImage(text, font, color){
 	rtex.render(doc);
 	return tximgcache[font][text][color] = rtex;
 }
+
 var cmds = {};
 cmds.endturn = function(data) {
 	game.player2.endturn(data);
