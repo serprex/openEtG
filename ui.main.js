@@ -833,20 +833,12 @@ function makeButton(x, y, w, h, t) {
 	button.hitArea = new PIXI.Rectangle(x, y, w, h);
 	button.buttonMode = true;
 	
-	if (t) {
 	var text = new PIXI.Text(t, {font: "bold 16px Dosis"});
 	button.addChild(text);
 	text.anchor.set(0.5, 0.5);
 	text.position.set(x + (w/2), y+2 + (h/2));
-	}
-	return button;
-}
 
-function makeButtonText(x, y, t) {
-	var text = new PIXI.Text(t, {font: "bold 16px Dosis"});
-	text.position.set(x+1, y+1);
-	
-	return text;
+	return button;
 }
 
 function startMenu() {	
@@ -981,7 +973,6 @@ function startMenu() {
 	
 	//logout button
 	var blogout = makeButton(750, 250, 75, 18, "Logout");
-	var blogoutt = makeButtonText(750, 250, "Logout");
 	blogout.click = function(){
 		userEmit("logout");
 		logout();
