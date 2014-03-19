@@ -1072,6 +1072,10 @@ function editorCardCmp(x,y){
 function startStore() {
 	var cardartcode;
 	var packtype = 0;
+	var packrarity = 0;
+	var cardamount = 0;
+	var packimage = "";
+	var cost = 0;
 	var newCards = [];
 	var newCardsArt = [];
 	
@@ -1086,10 +1090,13 @@ function startStore() {
 	goldcount.position.set(750, 100);
 	storeui.addChild(goldcount);
 	
-	//info text
-	var tinfo = new PIXI.Text("Select a pack", {font: "bold 16px Dosis"});
+    //info text
+	var tinfo = new PIXI.Text("Select an element", { font: "bold 16px Dosis" });
 	tinfo.position.set(50, 25);
 	storeui.addChild(tinfo);
+	var tinfo2 = new PIXI.Text("Select a pack", { font: "bold 16px Dosis" });
+	tinfo2.position.set(100, 50);
+	storeui.addChild(tinfo2);
 	
 	//cost text
 	var tcost = new PIXI.Text("", {font: "bold 16px Dosis"});
@@ -1125,24 +1132,27 @@ function startStore() {
 	var bbuy = makeButton(750, 150, 75, 18, "Buy");
 	bbuy.click = function() {
 		if (isEmpty(newCards)) {
-			if (user.gold >= 30) {
+			if (user.gold >= cost) {
 				var allowedElements = []
-
-				if (packtype == 1) allowedElements = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12];
-				else if (packtype == 2) allowedElements = [4, 6, 7, 9];
-				else if (packtype == 3) allowedElements = [1, 3, 10, 12];
-				else if (packtype == 4) allowedElements = [2, 5, 8, 11];
-				else {
+                if (!packrarity || !packtype) {
 					tinfo.setText("Select a pack first");
 					tcost.setText("");
 					return;
 				}
-				
-				user.gold -= 30;
-				userEmit("subgold", { g: 30 });
-				
-				for (var i = 0; i < 10; i++) {
-					var rarity = i < 6 ? 1 : (i < 9 ? 2 : (Math.random() < .2 ? 4: 3))
+				if (packtype == 1) allowedElements = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12];
+				else if (packtype == 2) allowedElements = [0, 4, 6, 7, 9];
+				else if (packtype == 3) allowedElements = [0, 1, 3, 10, 12];
+				else if (packtype == 4) allowedElements = [0, 2, 5, 8, 11];
+				user.gold -= cost;
+				userEmit("subgold", { g: cost });
+				for (var i = 0; i < cardamount; i++) {
+				    var rarity = 1;
+				    if (((packrarity == 2 || packrarity == 3) && i >= 3) || packrarity == 4)
+				        rarity = 2;
+                    if ((packrarity == 3 && i >= 7) || (packrarity == 4 && i >= 3))
+                        rarity = 3;
+                    if (packrarity == 4 && i >= 5)
+                        rarity = 3;
 					newCards.push(PlayerRng.randomcard(false, function (x) { return allowedElements.indexOf(x.element) != -1 && x.type != PillarEnum && x.rarity == rarity }).code);
 					newCardsArt[i].setTexture(getArt(newCards[i]));
 					newCardsArt[i].visible = true;
@@ -1162,40 +1172,77 @@ function startStore() {
 	storeui.addChild(bbuy);
 	
 	//Rainbow pack
-	var brainbow = makeButtonSprite(50, 100, 100, 200, "assets/rainbowbooster.png", "10 Cards");
+	var brainbow = makeButtonSprite(50, 100, 100, 200, "assets/rainbowbooster.png", "");
 	brainbow.click = function() {
 		packtype = 1;
-		tinfo.setText("Selected pack: Rainbow"); 
-		tcost.setText("Cost: 30g");
+		tinfo.setText("Selected Elements: Rainbow"); 
 	}
 	storeui.addChild(brainbow);
 	
 	//FiWaEaAi pack
-	var bfwea = makeButtonSprite(175, 100, 100, 200, "assets/fweabooster.png", "10 Cards");
+	var bfwea = makeButtonSprite(175, 100, 100, 200, "assets/fweabooster.png", "");
 	bfwea.click = function() {
 		packtype = 2;
-		tinfo.setText("Selected pack: Fire/Water/Earth/Air"); 
-		tcost.setText("Cost: 30g");
+		tinfo.setText("Selected Elements: Fire/Water/Earth/Air");
 	}
 	storeui.addChild(bfwea);
 	
 	//AeTiGrEn pack
-	var batge = makeButtonSprite(300, 100, 100, 200, "assets/atgebooster.png", "10 Cards");
+	var batge = makeButtonSprite(300, 100, 100, 200, "assets/atgebooster.png", "");
 	batge.click = function() {
 		packtype = 3;
-		tinfo.setText("Selected pack: Aether/Time/Gravity/Entropy"); 
-		tcost.setText("Cost: 30g");
+		tinfo.setText("Selected Elements: Aether/Time/Gravity/Entropy");
 	}
 	storeui.addChild(batge);
 	
 	//LiDeDaLi pack
-	var blddl = makeButtonSprite(425, 100, 100, 200, "assets/lddlbooster.png", "10 Cards");
+	var blddl = makeButtonSprite(425, 100, 100, 200, "assets/lddlbooster.png", "");
 	blddl.click = function() {
 		packtype = 4;
-		tinfo.setText("Selected pack: Life/Death/Darkness/Light"); 
-		tcost.setText("Cost: 30g");
+		tinfo.setText("Selected Elements: Life/Death/Darkness/Light");
 	}
 	storeui.addChild(blddl);
+
+    // The different pack types
+	var bbronze = makeButtonSprite(50, 310, 100, 200, "assets/bronzebooster.png", "Bronze Pack");
+	bbronze.click = function () {
+	    packrarity = 1;
+	    tinfo2.setText("Bronze Pack, contains 9 Commons");
+	    tcost.setText("Cost 15g");
+	    cardamount = 9;
+	    cost = 15;
+	}
+	storeui.addChild(bbronze);
+
+	var bsilver = makeButtonSprite(175, 310, 100, 200, "assets/silverbooster.png", "Silver Pack");
+	bsilver.click = function () {
+	    packrarity = 2;
+	    tinfo2.setText("Silver Pack, contains 3 Commons, 3 Uncommons");
+	    tcost.setText("Cost 25g");
+	    cardamount = 6;
+        cost = 25
+	}
+	storeui.addChild(bsilver);
+
+	var bgold = makeButtonSprite(300, 310, 100, 200, "assets/goldbooster.png", "Gold Pack");
+	bgold.click = function () {
+	    packrarity = 3;
+	    tinfo2.setText("Gold Pack, contains 3 Commons, 4 Uncommons, 1 Rare, with chance of being Very Rare.");
+	    tcost.setText("Cost 60g");
+	    cardamount = 8;
+	    cost = 60;
+	}
+	storeui.addChild(bgold);
+
+	var bplatinum = makeButtonSprite(425, 310, 100, 200, "assets/platinumbooster.png", "Platinum Pack");
+	bplatinum.click = function () {
+	    packrarity = 4;
+	    tinfo2.setText("Platinum Pack, contains 3 Uncommons, 2 Rares, and 1 Very Rare.");
+	    tcost.setText("Cost 110g");
+	    cardamount = 6;
+	    cost = 110;
+	}
+	storeui.addChild(bplatinum);
 
 	//draw cards that are pulled from a pack
 	for (var i = 0; i < 10; i++) {
@@ -2440,9 +2487,11 @@ function loginClick(){
 					}else{
 						user.deck = etg.decodedeck(user.deck);
 						deckimport.value = user.deck.join(" ");
-						if (user.pool){
-							user.pool = etg.decodedeck(user.pool);
+						if (user.pool) {
+						    user.pool = etg.decodedeck(user.pool);
 						}
+						else
+						    user.pool = [];
 						if (user.starter) {
 							user.starter = etg.decodedeck(user.starter);
 						}
