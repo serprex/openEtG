@@ -697,7 +697,9 @@ function aiFunc(){
 		return ["endturn", worstcards[Math.floor(Math.random()*worstcards.length)]];
 	}else return ["endturn"];
 }
-
+function doubleDeck(deck) {
+    return deck.slice(0, deck.length - 2).concat(deck);
+}
 function mkDemigod() {
 	if (user) {
 		if (user.gold < 20) {
@@ -718,7 +720,7 @@ function mkDemigod() {
 	"710 710 710 710 710 710 710 710 710 710 710 710 710 710 72i 72i 72i 72i 71l 71l 71l 71l 717 717 717 71b 71b 71b 711 711 7t7 7t7 7t7 7t7 7t7 7t7 7t9 7t9 7t9 7ti 7ti 7ti 7ti 7ta 7ta 8pt",
 	"778 778 778 778 778 778 778 778 778 778 778 778 778 778 778 778 778 778 778 77g 77g 77g 77g 77g 77g 77q 77q 77h 77h 77h 77h 77h 77b 77b 77b 7q4 7q4 7q4 7ql 7ql 7ql 7ql 7ql 7q3 7q3 8ps"]
 	var deck = demigodDeck[Math.floor(Math.random() * demigodDeck.length)].split(" ");
-	deck = deck.slice(0,deck.length-2).concat(deck);
+	deck = doubleDeck(deck);
 	var urdeck = getDeck();
 	if ((user && (!user.deck || user.deck.length < 31)) || urdeck.length < 11){
 		startEditor();
@@ -1061,7 +1063,7 @@ function startMenu() {
 		tgold.position.set(770, 100);
 		igold.visible = true;	
 		
-	//	if (user.oracle){
+		if (user.oracle){
 			// todo user.oracle should be a card, not true. The card is the card that the server itself added. This'll only show what was added
 			delete user.oracle;
 			var card = PlayerRng.randomcard(false,
@@ -1072,7 +1074,7 @@ function startMenu() {
 			var oracle = new PIXI.Sprite(nopic);
 			oracle.position.set(450, 100);
 			menuui.addChild(oracle);
-		//}
+		}
 	}
 		
 	function logout(){
@@ -2461,12 +2463,13 @@ cmds.cast = function(bits) {
 var socket = io.connect(location.hostname, {port: 13602});
 socket.on("pvpgive", initGame);
 socket.on("tradegive", initTrade)
-socket.on("foearena", function(data){
+socket.on("foearena", function (data) {
 	var deck = etg.decodedeck(data.deck);
+    deck = doubleDeck(deck);
 	chatArea.value = data.name + ": " + deck.join(" ");
-	initGame({ first:data.first, deck:deck, urdeck:getDeck(), seed:data.seed, hp:data.hp, cost:data.cost }, aievalopt.checked?aiEvalFunc:aiFunc);
+	initGame({ first:data.first, deck:deck, urdeck:getDeck(), seed:data.seed, hp:data.hp, cost:data.cost, foename:data.name }, aievalopt.checked?aiEvalFunc:aiFunc);
 	game.arena = data.name;
-	game.gold = 20;
+	game.gold = 10;
 	game.cost = 10;
 });
 socket.on("arenainfo", startArenaInfo);
@@ -2598,14 +2601,13 @@ function loginClick(){
 					}else{
 						user.deck = etg.decodedeck(user.deck);
 						deckimport.value = user.deck.join(" ");
-						if (user.pool) {
+						if (user.pool || user.pool == "") {
 						    user.pool = etg.decodedeck(user.pool);
 						}
-						else
-						    user.pool = [];
 						if (user.starter) {
 							user.starter = etg.decodedeck(user.starter);
 						}
+						console.log(user.pool);
 						startMenu();
 					}
 				}else if (this.status == 404){
