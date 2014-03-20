@@ -810,7 +810,6 @@ var cardBacks = [];
 var backLoader = new PIXI.AssetLoader(["assets/backsheet.png"]);
 backLoader.onComplete = function() {
 	var tex = PIXI.Texture.fromImage("assets/backsheet.png");
-	var backs = [];
 	for (var i = 0; i < 26; i++) cardBacks.push(new PIXI.Texture(tex, new PIXI.Rectangle(i*132, 0, 132, 256)));
 }
 backLoader.load();
