@@ -248,6 +248,10 @@ io.sockets.on("connection", function(socket) {
 			});
 		});
 	});
+	userEvent(socket, "upgrade", function (data, user) {
+	    user.pool = etgutil.addcard(user.pool, data.card, -6);
+	    user.pool = etgutil.addcard(user.pool, data.newcard);
+	});
 	userEvent(socket, "transmute", function(data, user){
 		var rm = etgutil.decodedeck(data.rm), add = etgutil.decodedeck(data.add);
 		for(var i=0; i<rm.length; i++){
@@ -279,17 +283,17 @@ io.sockets.on("connection", function(socket) {
 				sockinfo[this.id].foe = usersock[f];
 				sockinfo[usersock[f].id].foe = this;
 				var deck0 = sockinfo[usersock[f].id].deck, deck1 = data.deck;
-				this.emit("pvpgive", { first: first, seed: seed, deck: deck0, urdeck: deck1 });
-				usersock[f].emit("pvpgive", { first: !first, seed: seed, deck: deck1, urdeck: deck0 });
+				this.emit("pvpgive", { first: first, seed: seed, deck: deck0, urdeck: deck1, foename:f});
+				usersock[f].emit("pvpgive", { first: !first, seed: seed, deck: deck1, urdeck: deck0, foename:u});
 			} else {
 				duels[u] = f;
-				usersock[f].emit("chat", { u: "Message", message: u + " wants to duel with you!" });
+				usersock[f].emit("chat", { u: "Message", message: u + " wants to duel with you!", mode:"info" });
 			}
 		}
 	});
 	userEvent(socket, "canceltrade", function (data, user) {
 		sockinfo[this.id].trade.foe.emit("tradecanceled");
-		sockinfo[this.id].trade.foe.emit("chat", { mode:"info", message: data.u + " have canceled the trade." })
+		sockinfo[this.id].trade.foe.emit("chat", { mode:"info", message: data.u + " have canceled the trade."})
 		delete sockinfo[sockinfo[this.id].trade.foe.id].trade;
 		delete sockinfo[this.id].trade;
 	});
