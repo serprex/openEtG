@@ -127,41 +127,11 @@ function refreshRenderer(){
 	renderer = new PIXI.CanvasRenderer(900, 600);
 	leftpane.appendChild(renderer.view);
 }
-var loader = new PIXI.AssetLoader(["esheet.png"]);
-loader.onComplete = function(){
-	var baseTexture = PIXI.Texture.fromImage("esheet.png");
-	var icons = [];
-	for(var i=0; i<13; i++){
-		icons.push(new PIXI.Texture(baseTexture, new PIXI.Rectangle(i*32, 0, 32, 32)));
-	}
-	eicons = icons;
-}
-var cardBacks = [];
-var backLoader = new PIXI.AssetLoader(["backsheet.png"]);
-backLoader.onComplete = function () {
-	var baseTexture = PIXI.Texture.fromImage("backsheet.png");
-	var backs = [];
-	for (var i = 0; i < 26; i++) {
-		backs.push(new PIXI.Texture(baseTexture, new PIXI.Rectangle(i * 132, 0, 132, 256)));
-	}
-	cardBacks = backs;
-}
-var rarityicons = [];
-var rarityLoader = new PIXI.AssetLoader(["raritysheet.png"]);
-rarityLoader.onComplete = function () {
-	var baseTexture = PIXI.Texture.fromImage("raritysheet.png");
-	var rarities = [];
-	for (var i = 0; i < 6; i++) {
-		rarities.push(new PIXI.Texture(baseTexture, new PIXI.Rectangle(i * 10, 0, 10, 10)));
-	}
-	rarityicons = rarities;
-}
-loader.load();
-backLoader.load();
-rarityLoader.load();
+
 var mainStage, menuui, gameui;
-var nopic = PIXI.Texture.fromImage("null.png"),cardBacks, eicons, caimgcache = {}, crimgcache = {}, primgcache = {}, artcache = {};
+var caimgcache = {}, crimgcache = {}, primgcache = {}, artcache = {};
 var elecols = [0xa99683, 0xaa5999, 0x777777, 0x996633, 0x5f4930, 0x50a005, 0xcc6611, 0x205080, 0xa9a9a9, 0x337ddd, 0xccaa22, 0x333333, 0x77bbdd];
+
 function lighten(c){
 	return (c&255)/2+127|((c>>8)&255)/2+127<<8|((c>>16)&255)/2+127<<16;
 }
@@ -825,50 +795,88 @@ function mkAi(level){
 	}
 }
 
-function makeButton(x, y, w, h, t) {
-	var button = new PIXI.Graphics();
-	button.beginFill(0xFFFFFF);
-	button.lineStyle(2, 0x000000);
-	button.drawRect(x, y, w, h);
-	button.endFill();
-	button.interactive = true;
-	button.hitArea = new PIXI.Rectangle(x, y, w, h);
-	button.buttonMode = true;
-	
-	var text = new PIXI.Text(t, {font: "bold 16px Dosis"});
-	text.anchor.set(0.5, 0.5);
-	text.position.set(x + (w/2), y+2 + (h/2));
-	button.addChild(text);
-	
-	return button;
-}
+// Asset Loaders
+var nopic = PIXI.Texture.fromImage("assets/null.png")
 
-function makeButtonSprite(x, y, w, h, i, t, sz) {
-		var button = PIXI.Sprite.fromImage(i);
-		button.position.set(x, y);
-		button.interactive = true;
-		button.hitArea = new PIXI.Rectangle(0, 0, w, h);
-		button.buttonMode = true;
-		
-		if (t) {
-			var text = new PIXI.Text(t, {font: "bold "+(sz ? sz : "16")+"px Dosis"});
-			text.anchor.set(0.5, 0.5);
-			text.position.set(w / 2, h / 2);
-			button.addChild(text);
+var eicons = [];
+var eleLoader = new PIXI.AssetLoader(["assets/esheet.png"]);
+eleLoader.onComplete = function() {
+	var tex = PIXI.Texture.fromImage("assets/esheet.png");
+	for(var i = 0; i < 13; i++) eicons.push(new PIXI.Texture(tex, new PIXI.Rectangle(i*32, 0, 32, 32)));
+}
+eleLoader.load();
+
+var cardBacks = [];
+var backLoader = new PIXI.AssetLoader(["assets/backsheet.png"]);
+backLoader.onComplete = function() {
+	var tex = PIXI.Texture.fromImage("assets/backsheet.png");
+	var backs = [];
+	for (var i = 0; i < 26; i++) cardBacks.push(new PIXI.Texture(tex, new PIXI.Rectangle(i*132, 0, 132, 256)));
+}
+backLoader.load();
+
+var rarityicons = [];
+var rarityLoader = new PIXI.AssetLoader(["assets/raritysheet.png"]);
+rarityLoader.onComplete = function() {
+	var tex = PIXI.Texture.fromImage("assets/raritysheet.png");
+	for (var i = 0; i < 6; i++) rarityicons.push(new PIXI.Texture(tex, new PIXI.Rectangle(i * 10, 0, 10, 10)));
+}
+rarityLoader.load();
+
+var buttons = [];
+var buttonLoader = new PIXI.AssetLoader(["assets/buttons.png"]);
+buttonLoader.onComplete = function() {
+	var tex = PIXI.Texture.fromImage("assets/buttons.png");
+	for (var i = 0; i < 4; i++) {
+		for (var j = 0; j < 4; j++) {
+			buttons.push(new PIXI.Texture(tex, new PIXI.Rectangle(j*75, i*25, 75, 25)));
 		}
-		
-		return button;
+	}
+}
+buttonLoader.load();
+
+var boosters = [];
+var boosterLoader = new PIXI.AssetLoader(["assets/boosters.png"]);
+boosterLoader.onComplete = function() {
+	var tex = PIXI.Texture.fromImage("assets/boosters.png");
+	for (var i = 0; i < 4; i++) boosters.push(new PIXI.Texture(tex, new PIXI.Rectangle(i*100, 0, 100, 150)));
+}
+boosterLoader.load();
+	
+function makeButton(x, y, w, h, i) {
+	var b = new PIXI.Sprite(i);
+	b.position.set(x, y);
+	b.interactive = true;
+	b.hitArea = new PIXI.Rectangle(0, 0, w, h);
+	b.buttonMode = true;
+
+	return b;
 }
 
+function makeText(x, y, txt, vis) {
+	var t = new PIXI.Text(txt, {font: "14px Verdana", fill: "white", stroke: "black", strokeThickness: 2});
+	t.position.set(x, y);
+	t.visible = vis;
+	
+	return t;
+}
+
+function toggleB() {
+	for (var i = 0; i < arguments.length; i++) {
+		arguments[i].visible = !arguments[i].visible;
+		arguments[i].interactive = !arguments[i].interactive;
+		arguments[i].buttonMode = !arguments[i].buttonMode;
+	}
+}
+	
 function startMenu() {	
 	menuui = new PIXI.Stage(0x336699, true);
-	var smenu = {font: "14px Verdana", fill: "white", stroke: "black", strokeThickness: 2}
-	
+		
 	//lobby background
-	var bglobby = PIXI.Sprite.fromImage("assets/mmbgt.png");
+	var bglobby = PIXI.Sprite.fromImage("assets/bg_lobby.png");
 	bglobby.interactive = true;
 	bglobby.hitArea = new PIXI.Rectangle(0, 0, 900, 670);
-	bglobby.mouseover = function () { 
+	bglobby.mouseover = function() { 
 		tinfo.setText(""); 
 		tcost.setText("");
 		igold2.visible = false;
@@ -876,9 +884,16 @@ function startMenu() {
 	menuui.addChild(bglobby);
 	
 	//gold text
-	var tgold = new PIXI.Text(user ? user.gold : "Sandbox", smenu);
-	tgold.position.set(755, 101);
+	var tgold = makeText(755, 101, (user ? user.gold : "Sandbox"), true);
 	menuui.addChild(tgold);
+	
+	//info text
+	var tinfo = makeText(50, 26, "", true)
+	menuui.addChild(tinfo);
+	
+	//cost text
+	var tcost = makeText(50, 51, "", true);
+	menuui.addChild(tcost);
 	
 	//gold icons
 	var igold = PIXI.Sprite.fromImage("assets/gold.png");
@@ -891,18 +906,8 @@ function startMenu() {
 	igold2.visible = false;
 	menuui.addChild(igold2);
 	
-	//info text
-	var tinfo = new PIXI.Text("", smenu);
-	tinfo.position.set(50, 26);	
-	menuui.addChild(tinfo);
-	
-	//cost text
-	var tcost = new PIXI.Text("", smenu);
-	tcost.position.set(50, 51);	
-	menuui.addChild(tcost);
-	
 	//ai0 button
-	var bai0 = makeButtonSprite(50, 100, 75, 25, "assets/bai0.png");
+	var bai0 = makeButton(50, 100, 75, 25, buttons[4]);
 	bai0.click = mkAi(1);
 	bai0.mouseover = function () {
 		tinfo.setText("Commoners have no upgraded cards.");
@@ -912,7 +917,7 @@ function startMenu() {
 	menuui.addChild(bai0);
 	
 	//ai1 button
-	var bai1 = makeButtonSprite(150, 100, 75, 25, "assets/bai1.png");
+	var bai1 = makeButton(150, 100, 75, 25, buttons[5]);
 	bai1.click = mkAi(2);
 	bai1.mouseover = function () {
 		tinfo.setText("Mages have a few upgraded cards.");
@@ -922,7 +927,7 @@ function startMenu() {
 	menuui.addChild(bai1);
 	
 	//ai2 button
-	var bai2 = makeButtonSprite(250, 100, 75, 25, "assets/bai2.png");
+	var bai2 = makeButton(250, 100, 75, 25, buttons[6]);
 	bai2.click = mkAi(3);
 	bai2.mouseover = function () {
 		tinfo.setText("Champions have some upgraded cards.");
@@ -933,7 +938,7 @@ function startMenu() {
 
 	
 	//ai3 button
-	var bai3 = makeButtonSprite(350, 100, 75, 25, "assets/bai3.png");
+	var bai3 = makeButton(350, 100, 75, 25, buttons[7]);
 	bai3.click = mkDemigod;
 	bai3.mouseover = function () {
 		tinfo.setText("Demigods are extremely powerful. Come prepared for anything.");
@@ -943,7 +948,7 @@ function startMenu() {
 	menuui.addChild(bai3);
 	
 	//ai arena button
-	var baia = makeButtonSprite(50, 200, 75, 25, "assets/baia.png");
+	var baia = makeButton(50, 200, 75, 25, buttons[3]);
 	baia.click = function() {
 		if (Cards) {
 			if (!user.deck || user.deck.length < 31) {
@@ -969,7 +974,7 @@ function startMenu() {
 	menuui.addChild(baia);
 	
 	//arena info button
-	var binfoa = makeButtonSprite(50, 245, 75, 25, "assets/binfo.png");
+	var binfoa = makeButton(50, 245, 75, 25, buttons[1]);
 	binfoa.click = function(){
 		if (Cards){
 			userEmit("arenainfo");
@@ -982,7 +987,7 @@ function startMenu() {
 	menuui.addChild(binfoa);
 	
 	//arena top10 button
-	var btopa = makeButtonSprite(150, 245, 75, 25, "assets/btop.png");
+	var btopa = makeButton(150, 245, 75, 25, buttons[2]);
 	btopa.click = function(){
 		if (Cards){
 			userEmit("arenatop");
@@ -995,7 +1000,7 @@ function startMenu() {
 	menuui.addChild(btopa);
 	
 	//edit button
-	var bedit = makeButtonSprite(50, 300, 75, 25, "assets/bedit.png");
+	var bedit = makeButton(50, 300, 75, 25, buttons[9]);
 	bedit.click = startEditor;
 	bedit.mouseover = function () {
 		tinfo.setText("Here you can edit your deck, as well as upgrade your cards.");
@@ -1004,7 +1009,7 @@ function startMenu() {
 	menuui.addChild(bedit);
 
 	//shop button
-	var bshop = makeButtonSprite(150, 300, 75, 25, "assets/bshop.png");
+	var bshop = makeButton(150, 300, 75, 25, buttons[10]);
 	bshop.click = startStore;
 	bshop.mouseover = function () {
 		tinfo.setText("Here you can buy booster packs which contains ten cards from the elements you choose.");
@@ -1013,7 +1018,7 @@ function startMenu() {
 	menuui.addChild(bshop);
 	
 	//logout button
-	var blogout = makeButtonSprite(750, 246, 75, 25, "assets/blogout.png");
+	var blogout = makeButton(750, 246, 75, 25, buttons[0]);
 	blogout.click = function(){
 		userEmit("logout");
 		logout();
@@ -1026,7 +1031,7 @@ function startMenu() {
 	menuui.addChild(blogout);
 	
 	//delete account button
-	var bdelete = makeButtonSprite(750, 550, 75, 25, "assets/bdelete.png");
+	var bdelete = makeButton(750, 550, 75, 25, buttons[8]);
 	bdelete.click = function(){
 		if (foename.value == user.name) {
 			userEmit("delete");
@@ -1078,14 +1083,6 @@ function startMenu() {
 		}
 	}
 	
-	function toggleB() {
-		for (var i = 0; i < arguments.length; i++) {
-			arguments[i].visible = !arguments[i].visible;
-			arguments[i].interactive = !arguments[i].interactive;
-			arguments[i].buttonMode = !arguments[i].buttonMode;
-		}
-	}
-	
 	animCb = function() {
 		if (user && oracle) {
 			oracle.setTexture(getArt(card));
@@ -1110,7 +1107,7 @@ function startStore() {
 	var storeui = new PIXI.Stage(0x336699, true);
 	
 	//shop background
-	var bgshop = PIXI.Sprite.fromImage("assets/shopbg.png");
+	var bgshop = PIXI.Sprite.fromImage("assets/bg_shop.png");
 	storeui.addChild(bgshop);
 	
 	//gold text
@@ -1129,7 +1126,7 @@ function startStore() {
 	storeui.addChild(tcost);
 	
 	//get cards button
-	var bget = makeButton(750, 150, 75, 18, "Take Cards");
+	var bget = makeButton(750, 150, 75, 18, buttons[13]);
 	bget.click = function() {
 		userEmit("add", {add: etg.encodedeck(newCards)});
 		for (var i = 0; i < 10; i++) {
@@ -1143,7 +1140,7 @@ function startStore() {
 	}
 	
 	//exit button
-	var bexit = makeButton(750, 250, 75, 18, "Exit");
+	var bexit = makeButton(750, 250, 75, 180, buttons[11]);
 	bexit.click = function() {
 		if (isEmpty(newCards)) {
 			startMenu();
@@ -1154,7 +1151,7 @@ function startStore() {
 	storeui.addChild(bexit);
 	
 	//buy button
-	var bbuy = makeButton(750, 150, 75, 18, "Buy");
+	var bbuy = makeButton(750, 150, 75, 18, buttons[12]);
 	bbuy.click = function() {
 		if (isEmpty(newCards)) {
 			if (user.gold >= 30) {
@@ -1194,7 +1191,7 @@ function startStore() {
 	storeui.addChild(bbuy);
 	
 	//Rainbow pack
-	var brainbow = makeButtonSprite(50, 100, 100, 200, "assets/rainbowbooster.png", "10 Cards");
+	var brainbow = makeButton(50, 100, 100, 200, boosters[0]);
 	brainbow.click = function() {
 		packtype = 1;
 		tinfo.setText("Selected pack: Rainbow"); 
@@ -1203,7 +1200,7 @@ function startStore() {
 	storeui.addChild(brainbow);
 	
 	//FiWaEaAi pack
-	var bfwea = makeButtonSprite(175, 100, 100, 200, "assets/fweabooster.png", "10 Cards");
+	var bfwea = makeButton(175, 100, 100, 200, boosters[1]);
 	bfwea.click = function() {
 		packtype = 2;
 		tinfo.setText("Selected pack: Fire/Water/Earth/Air"); 
@@ -1212,7 +1209,7 @@ function startStore() {
 	storeui.addChild(bfwea);
 	
 	//AeTiGrEn pack
-	var batge = makeButtonSprite(300, 100, 100, 200, "assets/atgebooster.png", "10 Cards");
+	var batge = makeButton(300, 100, 100, 200, boosters[2]);
 	batge.click = function() {
 		packtype = 3;
 		tinfo.setText("Selected pack: Aether/Time/Gravity/Entropy"); 
@@ -1221,7 +1218,7 @@ function startStore() {
 	storeui.addChild(batge);
 	
 	//LiDeDaLi pack
-	var blddl = makeButtonSprite(425, 100, 100, 200, "assets/lddlbooster.png", "10 Cards");
+	var blddl = makeButton(425, 100, 100, 200, boosters[3]);
 	blddl.click = function() {
 		packtype = 4;
 		tinfo.setText("Selected pack: Life/Death/Darkness/Light"); 
