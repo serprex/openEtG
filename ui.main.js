@@ -1000,7 +1000,7 @@ function startMenu() {
 	var bedit = makeButtonSprite(50, 300, 75, 25, "assets/bedit.png");
 	bedit.click = startEditor;
 	bedit.mouseover = function () {
-		tinfo.setText("Here you can edit your deck, as well as upgrade your cards.");
+		tinfo.setText("Here you can edit your deck, as well as submit an arena deck.");
 		tcost.setText("");
 	}
 	menuui.addChild(bedit);
@@ -1061,7 +1061,7 @@ function startMenu() {
 		tgold.position.set(770, 100);
 		igold.visible = true;	
 		
-		if (user.oracle){
+	//	if (user.oracle){
 			// todo user.oracle should be a card, not true. The card is the card that the server itself added. This'll only show what was added
 			delete user.oracle;
 			var card = PlayerRng.randomcard(false,
@@ -1070,9 +1070,9 @@ function startMenu() {
 			user.ocard = card;
 			user.pool.push(card);
 			var oracle = new PIXI.Sprite(nopic);
-			oracle.position.set(50, 300);
+			oracle.position.set(450, 100);
 			menuui.addChild(oracle);
-		}
+		//}
 	}
 		
 	function logout(){
@@ -1137,7 +1137,7 @@ function upgradestore() {
                     user.pool.push(card.asUpped(true).code);
                     adjustdeck();
                 }
-                else twarning.setText("You need at least 40 gold to be able to upgrade a pillar!");
+                else twarning.setText("You need at least 50 gold to be able to upgrade a pillar!");
             }
         }
         else twarning.setText("You can't upgrade an already upgraded card!");
@@ -1203,7 +1203,7 @@ function upgradestore() {
                 sprite.click = function () {
                     selectedCard = cardartcode;
                     if (isFreeCard(CardCodes[cardartcode]))
-                        tinfo.setText("Costs 40 gold to upgrade");
+                        tinfo.setText("Costs 50 gold to upgrade");
                     else tinfo.setText("Convert 6 of these into an upgraded version.");
                     twarning.setText("");
                 }
