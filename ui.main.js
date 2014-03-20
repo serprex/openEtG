@@ -1341,7 +1341,7 @@ function startStore() {
                     if ((packrarity == 3 && i >= 7) || (packrarity == 4 && i >= 3))
                         rarity = 3;
                     if (packrarity == 4 && i >= 5)
-                        rarity = 3;
+                        rarity = 4;
 					newCards.push(PlayerRng.randomcard(false, function (x) { return allowedElements.indexOf(x.element) != -1 && x.type != PillarEnum && x.rarity == rarity }).code);
 					newCardsArt[i].setTexture(getArt(newCards[i]));
 					newCardsArt[i].visible = true;
@@ -2061,6 +2061,7 @@ function startMatch(){
 			maybeSetText(hptext[j], game.players[j].hp + "/" + game.players[j].maxhp);
 			maybeSetText(poisontext[j], game.players[j].status.poison + (game.players[j].neuro?"psn!":"psn"));
 			maybeSetText(decktext[j], game.players[j].deck.length + "cards");
+			maybeSetText(damagetext[j], game.players[j].foe.expectedDamage ? "Next HP-loss:" + game.players[j].foe.expectedDamage : "");
 		}
 	}
 	gameui = new PIXI.Stage(0x336699, true);
@@ -2167,7 +2168,8 @@ function startMatch(){
 	var shiesprite = [new PIXI.Sprite(nopic), new PIXI.Sprite(nopic)];
 	var marksprite = [new PIXI.Sprite(nopic), new PIXI.Sprite(nopic)];
 	var quantatext = [new PIXI.DisplayObjectContainer(), new PIXI.DisplayObjectContainer()];
-	var hptext = [new PIXI.Text("", {font: "18px Dosis"}), new PIXI.Text("", {font: "18px Dosis"})];
+	var hptext = [new PIXI.Text("", { font: "18px Dosis" }), new PIXI.Text("", { font: "18px Dosis" })];
+	var damagetext = [new PIXI.Text("", { font: "14px Dosis" }), new PIXI.Text("", { font: "14px Dosis" })];
 	var poisontext = [new PIXI.Text("", {font: "16px Dosis"}), new PIXI.Text("", {font: "16px Dosis"})];
 	var decktext = [new PIXI.Text("", {font: "16px Dosis"}), new PIXI.Text("", {font: "16px Dosis"})];
 	for (var j=0; j<2; j++){
@@ -2316,14 +2318,17 @@ function startMatch(){
 			hptext[j].anchor.set(.5, .5);
 			poisontext[j].anchor.set(.5, .5);
 			decktext[j].anchor.set(.5, .5);
+			damagetext[j].anchor.set(.5, .5);
 			quantatext[j].position.set(j?792:0, j?100:308);
 			hptext[j].position.set(50, 560);
 			poisontext[j].position.set(50, 580);
 			decktext[j].position.set(50, 540);
+			damagetext[j].position.set(50, 520);
 			if (j){
 				reflectPos(hptext[j]);
 				reflectPos(poisontext[j]);
 				reflectPos(decktext[j]);
+				reflectPos(damagetext[j]);
 			}
 			var child;
 			for(var k=1; k<13; k++){
@@ -2352,6 +2357,7 @@ function startMatch(){
 		gameui.addChild(hptext[j]);
 		gameui.addChild(poisontext[j]);
 		gameui.addChild(decktext[j]);
+		gameui.addChild(damagetext[j]);
 	}
 	var fgfx = new PIXI.Graphics();
 	gameui.addChild(fgfx);
