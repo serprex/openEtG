@@ -862,7 +862,7 @@ function makeButtonSprite(x, y, w, h, i, t, sz) {
 
 function startMenu() {	
 	menuui = new PIXI.Stage(0x336699, true);
-	var smenu = {font: "14px Verdana", fill: "white", stroke: "black", strokeThickness: 2, align: "right"}
+	var smenu = {font: "14px Verdana", fill: "white", stroke: "black", strokeThickness: 2}
 	
 	//lobby background
 	var bglobby = PIXI.Sprite.fromImage("assets/mmbgt.png");
@@ -871,19 +871,25 @@ function startMenu() {
 	bglobby.mouseover = function () { 
 		tinfo.setText(""); 
 		tcost.setText("");
+		igold2.visible = false;
 	}	
 	menuui.addChild(bglobby);
 	
 	//gold text
-	var tgold = new PIXI.Text(((user ? user.gold : "Sandbox") + "\n"), smenu);
-	tgold.position.set(755, 100);
+	var tgold = new PIXI.Text(user ? user.gold : "Sandbox", smenu);
+	tgold.position.set(755, 101);
 	menuui.addChild(tgold);
 	
-	//gold icon
+	//gold icons
 	var igold = PIXI.Sprite.fromImage("assets/gold.png");
-	igold.position.set(810, 100);
+	igold.position.set(750, 100);
 	igold.visible = false;
 	menuui.addChild(igold);
+	
+	var igold2 = PIXI.Sprite.fromImage("assets/gold.png");
+	igold2.position.set(95, 50);
+	igold2.visible = false;
+	menuui.addChild(igold2);
 	
 	//info text
 	var tinfo = new PIXI.Text("", smenu);
@@ -900,7 +906,8 @@ function startMenu() {
 	bai0.click = mkAi(1);
 	bai0.mouseover = function () {
 		tinfo.setText("Commoners have no upgraded cards.");
-		tcost.setText("Cost: 0g");
+		tcost.setText("Cost:     0");
+		igold2.visible = true;
 	}
 	menuui.addChild(bai0);
 	
@@ -909,7 +916,8 @@ function startMenu() {
 	bai1.click = mkAi(2);
 	bai1.mouseover = function () {
 		tinfo.setText("Mages have a few upgraded cards.");
-		tcost.setText("Cost: 10g");
+		tcost.setText("Cost:     10");
+		igold2.visible = true;
 	}
 	menuui.addChild(bai1);
 	
@@ -918,7 +926,8 @@ function startMenu() {
 	bai2.click = mkAi(3);
 	bai2.mouseover = function () {
 		tinfo.setText("Champions have some upgraded cards.");
-		tcost.setText("Cost: 10g");
+		tcost.setText("Cost:     10");
+		igold2.visible = true;
 	}
 	menuui.addChild(bai2);
 
@@ -928,7 +937,8 @@ function startMenu() {
 	bai3.click = mkDemigod;
 	bai3.mouseover = function () {
 		tinfo.setText("Demigods are extremely powerful. Come prepared for anything.");
-		tcost.setText("Cost: 20g");
+		tcost.setText("Cost:     20");
+		igold2.visible = true;
 	}
 	menuui.addChild(bai3);
 	
@@ -953,7 +963,8 @@ function startMenu() {
 	}
 	baia.mouseover = function () {
 		tinfo.setText("In the arena you will face decks from other players.");
-		tcost.setText("Cost: 10g");
+		tcost.setText("Cost:     10");
+		igold2.visible = true;
 	}
 	menuui.addChild(baia);
 	
@@ -1036,7 +1047,7 @@ function startMenu() {
 	if (user){	
 		toggleB(baia, bshop, binfoa, btopa, blogout, bdelete);
 		
-		tgold.position.set(795, 100);
+		tgold.position.set(770, 100);
 		igold.visible = true;	
 		
 		if (user.oracle){
