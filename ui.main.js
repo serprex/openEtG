@@ -864,71 +864,88 @@ function makeButtonSprite(x, y, w, h, i, t, sz) {
 
 function startMenu() {	
 	menuui = new PIXI.Stage(0x336699, true);
+	var smenu = {font: "14px Verdana", fill: "white", stroke: "black", strokeThickness: 2}
 	
 	//lobby background
-	var bglobby = PIXI.Sprite.fromImage("assets/lobbybg.png");
+	var bglobby = PIXI.Sprite.fromImage("assets/mmbgt.png");
 	bglobby.interactive = true;
 	bglobby.hitArea = new PIXI.Rectangle(0, 0, 900, 670);
 	bglobby.mouseover = function () { 
 		tinfo.setText(""); 
 		tcost.setText("");
+		igold2.visible = false;
 	}	
 	menuui.addChild(bglobby);
 	
 	//gold text
-	var tgold = new PIXI.Text((user ? user.gold + "g" : "Sandbox"), {font: "bold 16px Dosis"});
-	tgold.position.set(750, 100);
+	var tgold = new PIXI.Text(user ? user.gold : "Sandbox", smenu);
+	tgold.position.set(755, 101);
 	menuui.addChild(tgold);
 	
+	//gold icons
+	var igold = PIXI.Sprite.fromImage("assets/gold.png");
+	igold.position.set(750, 100);
+	igold.visible = false;
+	menuui.addChild(igold);
+	
+	var igold2 = PIXI.Sprite.fromImage("assets/gold.png");
+	igold2.position.set(95, 50);
+	igold2.visible = false;
+	menuui.addChild(igold2);
+	
 	//info text
-	var tinfo = new PIXI.Text("", { font: "bold 16px Dosis" });
-	tinfo.position.set(50, 25);	
+	var tinfo = new PIXI.Text("", smenu);
+	tinfo.position.set(50, 26);	
 	menuui.addChild(tinfo);
 	
 	//cost text
-	var tcost = new PIXI.Text("", {font: "bold 16px Dosis"});
-	tcost.position.set(50, 50);	
+	var tcost = new PIXI.Text("", smenu);
+	tcost.position.set(50, 51);	
 	menuui.addChild(tcost);
 	
 	//ai0 button
-	var bai0 = makeButton(50, 100, 75, 18, "Commoner");
+	var bai0 = makeButtonSprite(50, 100, 75, 25, "assets/bai0.png");
 	bai0.click = mkAi(1);
 	bai0.mouseover = function () {
-		tinfo.setText("Commoners aren't very strong.");
-		tcost.setText("Cost: 0g");
+		tinfo.setText("Commoners have no upgraded cards.");
+		tcost.setText("Cost:     0");
+		igold2.visible = true;
 	}
 	menuui.addChild(bai0);
 	
 	//ai1 button
-	var bai1 = makeButton(150, 100, 75, 18, "Mage");
+	var bai1 = makeButtonSprite(150, 100, 75, 25, "assets/bai1.png");
 	bai1.click = mkAi(2);
 	bai1.mouseover = function () {
-		tinfo.setText("Mages are more powerful than commoners, and have a few upgraded cards.");
-		tcost.setText("Cost: 10g");
+		tinfo.setText("Mages have a few upgraded cards.");
+		tcost.setText("Cost:     10");
+		igold2.visible = true;
 	}
 	menuui.addChild(bai1);
 	
 	//ai2 button
-	var bai2 = makeButton(250, 100, 75, 18, "Champion");
+	var bai2 = makeButtonSprite(250, 100, 75, 25, "assets/bai2.png");
 	bai2.click = mkAi(3);
 	bai2.mouseover = function () {
-		tinfo.setText("Champions have several upgraded cards, so you should come well prepared.");
-		tcost.setText("Cost: 10g");
+		tinfo.setText("Champions have some upgraded cards.");
+		tcost.setText("Cost:     10");
+		igold2.visible = true;
 	}
 	menuui.addChild(bai2);
 
 	
 	//ai3 button
-	var bai3 = makeButton(350, 100, 75, 18, "Demigod");
+	var bai3 = makeButtonSprite(350, 100, 75, 25, "assets/bai3.png");
 	bai3.click = mkDemigod;
 	bai3.mouseover = function () {
-		tinfo.setText("Demigods are among the strongest beings in the world. Unless you are very powerful, you shouldn't even try.");
-		tcost.setText("Cost: 20g");
+		tinfo.setText("Demigods are extremely powerful. Come prepared for anything.");
+		tcost.setText("Cost:     20");
+		igold2.visible = true;
 	}
 	menuui.addChild(bai3);
 	
 	//ai arena button
-	var baia = makeButton(650, 100, 75, 18, "Arena AI");
+	var baia = makeButtonSprite(50, 200, 75, 25, "assets/baia.png");
 	baia.click = function() {
 		if (Cards) {
 			if (!user.deck || user.deck.length < 31) {
@@ -948,11 +965,13 @@ function startMenu() {
 	}
 	baia.mouseover = function () {
 		tinfo.setText("In the arena you will face decks from other players.");
-		tcost.setText("Cost: 10g");
+		tcost.setText("Cost:     10");
+		igold2.visible = true;
 	}
+	menuui.addChild(baia);
 	
 	//arena info button
-	var binfoa = makeButton(650, 150, 75, 18, "Arena Info");
+	var binfoa = makeButtonSprite(50, 245, 75, 25, "assets/binfo.png");
 	binfoa.click = function(){
 		if (Cards){
 			userEmit("arenainfo");
@@ -962,9 +981,10 @@ function startMenu() {
 		tinfo.setText("Check how your arena deck is doing.")
 		tcost.setText("");
 	}
+	menuui.addChild(binfoa);
 	
 	//arena top10 button
-	var btopa = makeButton(650, 200, 75, 18, "Arena T10");
+	var btopa = makeButtonSprite(150, 245, 75, 25, "assets/btop.png");
 	btopa.click = function(){
 		if (Cards){
 			userEmit("arenatop");
@@ -974,9 +994,10 @@ function startMenu() {
 		tinfo.setText("Here you can see who the top players in arena are right now.")
 		tcost.setText("");
 	}
+	menuui.addChild(btopa);
 	
 	//edit button
-	var bedit = makeButton(50, 200, 75, 18, "Editor");
+	var bedit = makeButtonSprite(50, 300, 75, 25, "assets/bedit.png");
 	bedit.click = startEditor;
 	bedit.mouseover = function () {
 		tinfo.setText("Here you can edit your deck, as well as upgrade your cards.");
@@ -985,34 +1006,38 @@ function startMenu() {
 	menuui.addChild(bedit);
 
     //shop button
-	var bshop = makeButton(150, 200, 75, 18, "Shop");
+	var bshop = makeButtonSprite(150, 300, 75, 25, "assets/bshop.png");
 	bshop.click = startStore;
 	bshop.mouseover = function () {
 	    tinfo.setText("Here you can buy booster packs which contains ten cards from the elements you choose.");
 	    tcost.setText("");
 	}
+	menuui.addChild(bshop);
 
     //upgrade button
-	var bupgrade = makeButton(250, 200, 75, 18, "Upgrade");
+	var bupgrade = makeButtonSprite(250, 300, 75, 18, "assets/bupgrade.png");
 	bupgrade.click = upgradestore;
 	bupgrade.mouseover = function () {
 	    tinfo.setText("Here you can upgrade cards as well as buy upgraded Pillars");
 	    tcost.setText("");
 	}
+	menuui.addChild(bupgrade);
 	
 	//logout button
-	var blogout = makeButton(750, 250, 75, 18, "Logout");
+	var blogout = makeButtonSprite(750, 246, 75, 25, "assets/blogout.png");
 	blogout.click = function(){
 		userEmit("logout");
 		logout();
+		
 	}
 	blogout.mouseover = function () {
 		tinfo.setText("Click here if you want to log out.")
 		tcost.setText("");
 	}
+	menuui.addChild(blogout);
 	
 	//delete account button
-	var bdelete = makeButton(750, 550, 100, 18, "Delete Account");
+	var bdelete = makeButtonSprite(750, 550, 75, 25, "assets/bdelete.png");
 	bdelete.click = function(){
 		if (foename.value == user.name) {
 			userEmit("delete");
@@ -1025,16 +1050,16 @@ function startMenu() {
 		tinfo.setText("Click here if you want to remove your account.")
 		tcost.setText("");
 	}
+	menuui.addChild(bdelete);
+	
+	toggleB(baia, bshop, bupgrade, binfoa, btopa, blogout, bdelete);
 	
 	//only display if user is logged in
-	if (user){		
-	    menuui.addChild(baia);
-	    menuui.addChild(bshop);
-	    menuui.addChild(bupgrade);
-		menuui.addChild(binfoa);
-		menuui.addChild(btopa);
-		menuui.addChild(blogout);
-		menuui.addChild(bdelete);
+	if (user){	
+		toggleB(baia, bshop, bupgrade, binfoa, btopa, blogout, bdelete);
+		
+		tgold.position.set(770, 100);
+		igold.visible = true;	
 		
 		if (user.oracle){
 			// todo user.oracle should be a card, not true. The card is the card that the server itself added. This'll only show what was added
@@ -1052,17 +1077,23 @@ function startMenu() {
 		
 	function logout(){
 		user = undefined;
+		
+		toggleB(baia, bshop, bupgrade, binfoa, btopa, blogout, bdelete);
+		
 		tgold.setText("Sandbox");
-		menuui.removeChild(baia);
-		menuui.removeChild(bshop);
-		menuui.removeChild(bupgrade);
-		menuui.removeChild(binfoa);
-		menuui.removeChild(btopa);
-		menuui.removeChild(blogout);
-		menuui.removeChild(bdelete);
+		tgold.position.set(755, 100);
+		igold.visible = false;
 		
 		if (oracle){
 			menuui.removeChild(oracle);
+		}
+	}
+	
+	function toggleB() {
+		for (var i = 0; i < arguments.length; i++) {
+			arguments[i].visible = !arguments[i].visible;
+			arguments[i].interactive = !arguments[i].interactive;
+			arguments[i].buttonMode = !arguments[i].buttonMode;
 		}
 	}
 	
@@ -1088,12 +1119,10 @@ function upgradestore() {
         if (!card.upped) {
             if (!isFreeCard(card)) {
                 if (cardpool[card.code] >= 6) {
-                    upgradedCard = []
+                    userEmit("upgrade", { card: card.code, newcard: card.asUpped(true).code });
                     for (var i = 0; i < 6; i++) {
-                        upgradedCard.push(card.code);
-                    }
-                    userEmit("upgrade", { card:card.code, newcard:card.asUpped(true).code});
-                    user.pool.splice(user.pool.indexOf(card.code), 6);
+                        user.pool.splice(user.pool.indexOf(card.code), 1);
+                    }                    
                     user.pool.push(card.asUpped(true).code);
                     adjustdeck();
                 }
