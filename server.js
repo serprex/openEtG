@@ -112,7 +112,13 @@ function foeEcho(socket, event){
 }
 function userEvent(socket, event, func){
 	socket.on(event, function(data){
+		if (!data){
+			return;
+		}
 		var u=data.u;
+		if (!u){
+			return;
+		}
 		console.log(u+": "+event);
 		if (!(u in users)){
 			db.hgetall("U:"+u, function(err, obj){
