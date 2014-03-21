@@ -326,6 +326,43 @@ Player.prototype.spend = function(qtype, x) {
 	}
 	return true;
 }
+function expectedDamage(player) {
+    function truetrueatk(c) {
+        var fsh = c.owner.foe.shield;
+        var tatk = c.trueatk(), fshactive = fsh && fsh.active.shield;
+        var momentum = atk < 0 || c.status.momentum || c.status.psion;
+        var dr, atk;
+        if (momentum) {
+            atk = tatk;
+        } else {
+            dr = fsh ? fsh.truedr() : 0;
+            atk = Math.max(tatk - dr, 0);
+            if (fshactive == Actives.weight && c instanceof Creature && c.truehp() > 5) {
+                atk = 0;
+            }
+        }
+        if (c.status.frozen || c.status.delayed)
+            atk = 0;
+        if (atk > 0 && c.status.adrenaline) {
+            var attacks = countAdrenaline(tatk);
+            while (c.status.adrenaline < attacks) {
+                c.status.adrenaline++;
+                atk += momentum ? c.trueatk() : Math.max(c.trueatk() - dr, 0);
+            }
+            c.status.adrenaline = 1;
+        }
+        // todo SoFr
+        return atk * (fshactive == Actives.evade100 ? 0 : fshactive == Actives.evade50 ? .5 : fshactive == Actives.evade40 ? .6 : fshactive == Actives.chaos ? .75 : 1) * (fsh && fsh.passives.reflect && c.status.psion ? 0 : (c.owner.foe.sosa ? -1 : 1));
+    }
+    totalDamage = 0;
+    for (var i = 0; i < 23; i++) {
+        if (player.creatures[i])
+            totalDamage += truetrueatk(player.creatures[i]);
+    }
+    if (player.weapon) totalDamage += truetrueatk(player.weapon);
+    if (player.foe.status.poison) totalDamage += player.foe.status.poison;
+    return totalDamage;
+}
 Player.prototype.endturn = function(discard) {
 	this.game.ply++;
 	if (discard != undefined){
@@ -410,6 +447,7 @@ Player.prototype.endturn = function(discard) {
 	this.flatline = this.silence = false;
 	this.foe.precognition = this.foe.sanctuary = false;
 	this.game.turn = this.foe;
+	this.expectedDamage = expectedDamage(this);
 }
 Player.prototype.procactive = function(name, func) {
 	if (!func){
@@ -775,6 +813,7 @@ Thing.prototype.useactive = function(t) {
 		this.active.cast(this, t);
 	}else new TextEffect("Evade", tgtToPos(t));
 	this.owner.spend(castele, cast);
+	this.owner.expectedDamage = expectedDamage(this.owner);
 }
 Player.prototype.defstatus = Thing.prototype.defstatus = function(key, def){
 	if (!(key in this.status)){
@@ -889,7 +928,8 @@ CardInstance.prototype.useactive = function(target){
 		}
 	}else if (card.type == CreatureEnum){
 		new Creature(card, owner).place();
-	}else console.log("Unknown card type: "+card.type);
+	} else console.log("Unknown card type: " + card.type);
+	owner.expectedDamage = expectedDamage(owner);
 }
 function countAdrenaline(x){
 	return 5-Math.floor(Math.sqrt(Math.abs(x)));

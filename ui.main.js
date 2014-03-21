@@ -667,7 +667,9 @@ function aiFunc(){
 		return ["endturn", worstcards[Math.floor(Math.random()*worstcards.length)]];
 	}else return ["endturn"];
 }
-
+function doubleDeck(deck) {
+    return deck.slice(0, deck.length - 2).concat(deck);
+}
 function mkDemigod() {
 	if (user) {
 		if (user.gold < 20) {
@@ -688,7 +690,7 @@ function mkDemigod() {
 	"710 710 710 710 710 710 710 710 710 710 710 710 710 710 72i 72i 72i 72i 71l 71l 71l 71l 717 717 717 71b 71b 71b 711 711 7t7 7t7 7t7 7t7 7t7 7t7 7t9 7t9 7t9 7ti 7ti 7ti 7ti 7ta 7ta 8pt",
 	"778 778 778 778 778 778 778 778 778 778 778 778 778 778 778 778 778 778 778 77g 77g 77g 77g 77g 77g 77q 77q 77h 77h 77h 77h 77h 77b 77b 77b 7q4 7q4 7q4 7ql 7ql 7ql 7ql 7ql 7q3 7q3 8ps"]
 	var deck = demigodDeck[Math.floor(Math.random() * demigodDeck.length)].split(" ");
-	deck = deck.slice(0,deck.length-2).concat(deck);
+	deck = doubleDeck(deck);
 	var urdeck = getDeck();
 	if ((user && (!user.deck || user.deck.length < 31)) || urdeck.length < 11){
 		startEditor();
@@ -1075,11 +1077,11 @@ function startMenu() {
 	if (!user) toggleB(baia, bshop, bupgrade, binfoa, btopa, blogout, bdelete);
 	
 	//only display if user is logged in
-	if (user){		
+	if (user) {		
 		tgold.position.set(770, 101);
 		igold.visible = true;	
 		
-	if (user.oracle){
+		if (user.oracle){
 			// todo user.oracle should be a card, not true. The card is the card that the server itself added. This'll only show what was added
 			delete user.oracle;
 			var card = PlayerRng.randomcard(false,
@@ -2064,6 +2066,7 @@ function startMatch(){
 			maybeSetText(hptext[j], game.players[j].hp + "/" + game.players[j].maxhp);
 			maybeSetText(poisontext[j], game.players[j].status.poison + (game.players[j].neuro?"psn!":"psn"));
 			maybeSetText(decktext[j], game.players[j].deck.length + "cards");
+			maybeSetText(damagetext[j], game.players[j].foe.expectedDamage ? "Next HP-loss:" + game.players[j].foe.expectedDamage : "");
 		}
 	}
 	gameui = new PIXI.Stage(0x336699, true);
@@ -2170,7 +2173,8 @@ function startMatch(){
 	var shiesprite = [new PIXI.Sprite(nopic), new PIXI.Sprite(nopic)];
 	var marksprite = [new PIXI.Sprite(nopic), new PIXI.Sprite(nopic)];
 	var quantatext = [new PIXI.DisplayObjectContainer(), new PIXI.DisplayObjectContainer()];
-	var hptext = [new PIXI.Text("", {font: "18px Dosis"}), new PIXI.Text("", {font: "18px Dosis"})];
+	var hptext = [new PIXI.Text("", { font: "18px Dosis" }), new PIXI.Text("", { font: "18px Dosis" })];
+	var damagetext = [new PIXI.Text("", { font: "14px Dosis" }), new PIXI.Text("", { font: "14px Dosis" })];
 	var poisontext = [new PIXI.Text("", {font: "16px Dosis"}), new PIXI.Text("", {font: "16px Dosis"})];
 	var decktext = [new PIXI.Text("", {font: "16px Dosis"}), new PIXI.Text("", {font: "16px Dosis"})];
 	for (var j=0; j<2; j++){
@@ -2319,14 +2323,17 @@ function startMatch(){
 			hptext[j].anchor.set(.5, .5);
 			poisontext[j].anchor.set(.5, .5);
 			decktext[j].anchor.set(.5, .5);
+			damagetext[j].anchor.set(.5, .5);
 			quantatext[j].position.set(j?792:0, j?100:308);
 			hptext[j].position.set(50, 560);
 			poisontext[j].position.set(50, 580);
 			decktext[j].position.set(50, 540);
+			damagetext[j].position.set(50, 520);
 			if (j){
 				reflectPos(hptext[j]);
 				reflectPos(poisontext[j]);
 				reflectPos(decktext[j]);
+				reflectPos(damagetext[j]);
 			}
 			var child;
 			for(var k=1; k<13; k++){
@@ -2355,6 +2362,7 @@ function startMatch(){
 		gameui.addChild(hptext[j]);
 		gameui.addChild(poisontext[j]);
 		gameui.addChild(decktext[j]);
+		gameui.addChild(damagetext[j]);
 	}
 	var fgfx = new PIXI.Graphics();
 	gameui.addChild(fgfx);
@@ -2466,12 +2474,13 @@ cmds.cast = function(bits) {
 var socket = io.connect(location.hostname, {port: 13602});
 socket.on("pvpgive", initGame);
 socket.on("tradegive", initTrade)
-socket.on("foearena", function(data){
+socket.on("foearena", function (data) {
 	var deck = etg.decodedeck(data.deck);
+    deck = doubleDeck(deck);
 	chatArea.value = data.name + ": " + deck.join(" ");
-	initGame({ first:data.first, deck:deck, urdeck:getDeck(), seed:data.seed, hp:data.hp, cost:data.cost }, aievalopt.checked?aiEvalFunc:aiFunc);
+	initGame({ first:data.first, deck:deck, urdeck:getDeck(), seed:data.seed, hp:data.hp, cost:data.cost, foename:data.name }, aievalopt.checked?aiEvalFunc:aiFunc);
 	game.arena = data.name;
-	game.gold = 20;
+	game.gold = 10;
 	game.cost = 10;
 });
 socket.on("arenainfo", startArenaInfo);
@@ -2603,14 +2612,13 @@ function loginClick(){
 					}else{
 						user.deck = etg.decodedeck(user.deck);
 						deckimport.value = user.deck.join(" ");
-						if (user.pool) {
+						if (user.pool || user.pool == "") {
 						    user.pool = etg.decodedeck(user.pool);
 						}
-						else
-						    user.pool = [];
 						if (user.starter) {
 							user.starter = etg.decodedeck(user.starter);
 						}
+						console.log(user.pool);
 						startMenu();
 					}
 				}else if (this.status == 404){
