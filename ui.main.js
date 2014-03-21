@@ -854,13 +854,14 @@ function mkAi(level){
 
 // Asset Loaders
 var nopic = PIXI.Texture.fromImage("assets/null.png")
-
+var imageLoadingNumber = 7;
 var backgrounds = ["assets/bg_lobby.png", "assets/bg_shop.png"];
 var bgLoader = new PIXI.AssetLoader(backgrounds);
 bgLoader.onComplete = function() {
 	var tmp = [];
 	for(var i = 0; i < 2; i++) tmp.push(PIXI.Texture.fromImage(backgrounds[i]));
 	backgrounds = tmp;
+	maybeStartMenu()
 }
 bgLoader.load();
 
@@ -868,7 +869,8 @@ var eicons = [];
 var eleLoader = new PIXI.AssetLoader(["assets/esheet.png"]);
 eleLoader.onComplete = function() {
 	var tex = PIXI.Texture.fromImage("assets/esheet.png");
-	for(var i = 0; i < 13; i++) eicons.push(new PIXI.Texture(tex, new PIXI.Rectangle(i*32, 0, 32, 32)));
+	for (var i = 0; i < 13; i++) eicons.push(new PIXI.Texture(tex, new PIXI.Rectangle(i * 32, 0, 32, 32)));
+	maybeStartMenu()
 }
 eleLoader.load();
 
@@ -876,7 +878,8 @@ var cardBacks = [];
 var backLoader = new PIXI.AssetLoader(["assets/backsheet.png"]);
 backLoader.onComplete = function() {
 	var tex = PIXI.Texture.fromImage("assets/backsheet.png");
-	for (var i = 0; i < 26; i++) cardBacks.push(new PIXI.Texture(tex, new PIXI.Rectangle(i*132, 0, 132, 256)));
+	for (var i = 0; i < 26; i++) cardBacks.push(new PIXI.Texture(tex, new PIXI.Rectangle(i * 132, 0, 132, 256)));
+	maybeStartMenu()
 }
 backLoader.load();
 
@@ -885,6 +888,7 @@ var rarityLoader = new PIXI.AssetLoader(["assets/raritysheet.png"]);
 rarityLoader.onComplete = function() {
 	var tex = PIXI.Texture.fromImage("assets/raritysheet.png");
 	for (var i = 0; i < 6; i++) rarityicons.push(new PIXI.Texture(tex, new PIXI.Rectangle(i * 10, 0, 10, 10)));
+	maybeStartMenu()
 }
 rarityLoader.load();
 
@@ -897,6 +901,7 @@ buttonLoader.onComplete = function() {
 			buttons.push(new PIXI.Texture(tex, new PIXI.Rectangle(j*75, i*25, 75, 25)));
 		}
 	}
+	maybeStartMenu()
 }
 buttonLoader.load();
 
@@ -906,14 +911,16 @@ boosterLoader.onComplete = function() {
 	var tex = PIXI.Texture.fromImage("assets/boosters.png");
 	for (var i = 0; i < 2; i++) 
 		for (var j = 0; j < 4; j++) 
-			boosters.push(new PIXI.Texture(tex, new PIXI.Rectangle(j*100, i*150, 100, 150)));
+		    boosters.push(new PIXI.Texture(tex, new PIXI.Rectangle(j * 100, i * 150, 100, 150)));
+	maybeStartMenu()
 }
 boosterLoader.load();
 
 var popups = [];
 var popupLoader = new PIXI.AssetLoader(["assets/popup_booster.png"]);
 popupLoader.onComplete = function() {
-	for(var i = 0; i < 1; i++) popups.push(PIXI.Texture.fromImage("assets/popup_booster.png"));
+    for (var i = 0; i < 1; i++) popups.push(PIXI.Texture.fromImage("assets/popup_booster.png"));
+    maybeStartMenu()
 }
 popupLoader.load();
 
@@ -942,7 +949,11 @@ function toggleB() {
 		arguments[i].buttonMode = !arguments[i].buttonMode;
 	}
 }
-	
+function maybeStartMenu() {
+    imageLoadingNumber--;
+    if (imageLoadingNumber == 0)
+        startMenu();
+}
 function startMenu() {	
 	menuui = new PIXI.Stage(0x000000, true);
 		
@@ -2633,7 +2644,6 @@ function animate() {
 	renderer.render(mainStage);
 }
 function requestAnimate(){ requestAnimFrame(animate); }
-startMenu();
 requestAnimate();
 document.addEventListener("keydown", function(e){
 	if (mainStage == gameui){
