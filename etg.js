@@ -352,7 +352,8 @@ function expectedDamage(player) {
             c.status.adrenaline = 1;
         }
         // todo SoFr
-        return atk * (fshactive == Actives.evade100 ? 0 : fshactive == Actives.evade50 ? .5 : fshactive == Actives.evade40 ? .6 : fshactive == Actives.chaos ? .75 : 1) * (fsh && fsh.passives.reflect && c.status.psion ? 0 : (c.owner.foe.sosa ? -1 : 1));
+        var result = atk * (fshactive == Actives.evade100 ? 0 : fshactive == Actives.evade50 ? .5 : fshactive == Actives.evade40 ? .6 : fshactive == Actives.chaos ? .75 : 1) * (fsh && fsh.passives.reflect && c.status.psion ? 0 : (c.owner.foe.sosa ? -1 : 1));
+        return Math.floor(result);
     }
     totalDamage = 0;
     for (var i = 0; i < 23; i++) {
