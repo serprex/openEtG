@@ -2646,6 +2646,7 @@ function animate() {
 	renderer.render(mainStage);
 }
 function requestAnimate(){ requestAnimFrame(animate); }
+requestAnimate();
 document.addEventListener("keydown", function(e){
 	if (mainStage == gameui){
 		if(e.keyCode == 32){
