@@ -800,6 +800,15 @@ function mkAi(level){
 // Asset Loaders
 var nopic = PIXI.Texture.fromImage("assets/null.png")
 
+var backgrounds = ["assets/bg_lobby.png", "assets/bg_shop.png"];
+var bgLoader = new PIXI.AssetLoader(backgrounds);
+bgLoader.onComplete = function() {
+	var tmp = [];
+	for(var i = 0; i < 2; i++) tmp.push(PIXI.Texture.fromImage(backgrounds[i]));
+	backgrounds = tmp;
+}
+bgLoader.load();
+
 var eicons = [];
 var eleLoader = new PIXI.AssetLoader(["assets/esheet.png"]);
 eleLoader.onComplete = function() {
@@ -840,17 +849,26 @@ var boosters = [];
 var boosterLoader = new PIXI.AssetLoader(["assets/boosters.png"]);
 boosterLoader.onComplete = function() {
 	var tex = PIXI.Texture.fromImage("assets/boosters.png");
-	for (var i = 0; i < 4; i++) boosters.push(new PIXI.Texture(tex, new PIXI.Rectangle(i*100, 0, 100, 150)));
+	for (var i = 0; i < 2; i++) 
+		for (var j = 0; j < 4; j++) 
+			boosters.push(new PIXI.Texture(tex, new PIXI.Rectangle(j*100, i*150, 100, 150)));
 }
 boosterLoader.load();
-	
+
+var popups = [];
+var popupLoader = new PIXI.AssetLoader(["assets/popup_booster.png"]);
+popupLoader.onComplete = function() {
+	for(var i = 0; i < 1; i++) popups.push(PIXI.Texture.fromImage("assets/popup_booster.png"));
+}
+popupLoader.load();
+
 function makeButton(x, y, w, h, i) {
 	var b = new PIXI.Sprite(i);
 	b.position.set(x, y);
 	b.interactive = true;
 	b.hitArea = new PIXI.Rectangle(0, 0, w, h);
 	b.buttonMode = true;
-
+	
 	return b;
 }
 
@@ -871,10 +889,10 @@ function toggleB() {
 }
 	
 function startMenu() {	
-	menuui = new PIXI.Stage(0x336699, true);
+	menuui = new PIXI.Stage(0x000000, true);
 		
 	//lobby background
-	var bglobby = PIXI.Sprite.fromImage("assets/bg_lobby.png");
+	var bglobby = new PIXI.Sprite(backgrounds[0]);
 	bglobby.interactive = true;
 	bglobby.hitArea = new PIXI.Rectangle(0, 0, 900, 670);
 	bglobby.mouseover = function() { 
@@ -937,7 +955,6 @@ function startMenu() {
 	}
 	menuui.addChild(bai2);
 
-	
 	//ai3 button
 	var bai3 = makeButton(350, 100, 75, 25, buttons[7]);
 	bai3.click = mkDemigod;
@@ -1010,7 +1027,6 @@ function startMenu() {
 	menuui.addChild(bedit);
 
 	var bshop = makeButton(150, 300, 75, 25, buttons[10]);
-
 	bshop.click = startStore;
 	bshop.mouseover = function () {
 	    tinfo.setText("Here you can buy booster packs which contains ten cards from the elements you choose.");
@@ -1019,7 +1035,7 @@ function startMenu() {
 	menuui.addChild(bshop);
 
     //upgrade button
-	var bupgrade = makeButtonSprite(250, 300, 75, 18, "assets/bupgrade.png");
+	var bupgrade = makeButton(250, 300, 75, 18, buttons[14]);
 	bupgrade.click = upgradestore;
 	bupgrade.mouseover = function () {
 	    tinfo.setText("Here you can upgrade cards as well as buy upgraded Pillars");
@@ -1056,16 +1072,14 @@ function startMenu() {
 	}
 	menuui.addChild(bdelete);
 	
-	toggleB(baia, bshop, bupgrade, binfoa, btopa, blogout, bdelete);
+	if (!user) toggleB(baia, bshop, bupgrade, binfoa, btopa, blogout, bdelete);
 	
 	//only display if user is logged in
-	if (user){	
-		toggleB(baia, bshop, bupgrade, binfoa, btopa, blogout, bdelete);
-		
-		tgold.position.set(770, 100);
+	if (user){		
+		tgold.position.set(770, 101);
 		igold.visible = true;	
 		
-	//	if (user.oracle){
+	if (user.oracle){
 			// todo user.oracle should be a card, not true. The card is the card that the server itself added. This'll only show what was added
 			delete user.oracle;
 			var card = PlayerRng.randomcard(false,
@@ -1076,7 +1090,7 @@ function startMenu() {
 			var oracle = new PIXI.Sprite(nopic);
 			oracle.position.set(450, 100);
 			menuui.addChild(oracle);
-		//}
+		}
 	}
 		
 	function logout(){
@@ -1085,7 +1099,7 @@ function startMenu() {
 		toggleB(baia, bshop, bupgrade, binfoa, btopa, blogout, bdelete);
 		
 		tgold.setText("Sandbox");
-		tgold.position.set(755, 100);
+		tgold.position.set(755, 101);
 		igold.visible = false;
 		
 		if (oracle){
@@ -1107,6 +1121,7 @@ function editorCardCmp(x,y){
 	var cardx = CardCodes[x], cardy = CardCodes[y];
 	return cardx.upped - cardy.upped || cardx.element - cardy.element || cardx.cost-cardy.cost || (x>y)-(x<y);
 }
+
 function upgradestore() {
     function isFreeCard(card) {
         return card.type == PillarEnum && !card.upped && !card.rarity;
@@ -1152,12 +1167,12 @@ function upgradestore() {
     var goldcount = new PIXI.Text(user.gold + "g", { font: "bold 16px Dosis" });
     goldcount.position.set(30, 100);
     upgradeui.addChild(goldcount);
-    var bupgrade = makeButton(150, 100, 75, 18, "Upgrade");
+    var bupgrade = makeButton(150, 100, 75, 18, buttons[14]);
     bupgrade.click = function () {
         upgradeCard(CardCodes[selectedCard]);
     };
     upgradeui.addChild(bupgrade);
-    var bexit = makeButton(50, 50, 75, 18, "Exit");
+    var bexit = makeButton(50, 50, 75, 18, buttons[11]);
     bexit.click = function () {
         startMenu();
     };
@@ -1253,6 +1268,7 @@ function upgradestore() {
     mainStage = upgradeui;
     refreshRenderer();
 }
+
 function startStore() {
 	var cardartcode;
 	var packtype = 0;
@@ -1262,32 +1278,31 @@ function startStore() {
 	var newCards = [];
 	var newCardsArt = [];
 	
-	var storeui = new PIXI.Stage(0x336699, true);
+	var storeui = new PIXI.Stage(0x000000, true);
 	
 	//shop background
-	var bgshop = PIXI.Sprite.fromImage("assets/bg_shop.png");
+	var bgshop = new PIXI.Sprite(backgrounds[1]);
 	storeui.addChild(bgshop);
 	
 	//gold text
-	var goldcount = new PIXI.Text(user.gold + "g", {font: "bold 16px Dosis"});
-	goldcount.position.set(750, 100);
-	storeui.addChild(goldcount);
+	var tgold = makeText(770, 101, user.gold, true);
+	storeui.addChild(tgold);
 	
     //info text
-	var tinfo = new PIXI.Text("Select an element", { font: "bold 16px Dosis" });
-	tinfo.position.set(50, 25);
+	var tinfo = makeText(50, 26, "Select which elements you want.", true);
 	storeui.addChild(tinfo);
-	var tinfo2 = new PIXI.Text("Select a pack", { font: "bold 16px Dosis" });
-	tinfo2.position.set(150, 50);
+	
+	var tinfo2 = makeText(50, 51, "Select which type of booster you want.", true);
 	storeui.addChild(tinfo2);
 	
-	//cost text
-	var tcost = new PIXI.Text("", {font: "bold 16px Dosis"});
-	tcost.position.set(50, 50);
-	storeui.addChild(tcost);
-	
+	//gold icon
+	var igold = PIXI.Sprite.fromImage("assets/gold.png");
+	igold.position.set(750, 100);
+	storeui.addChild(igold);
+
 	//get cards button
-	var bget = makeButton(750, 150, 75, 18, buttons[13]);
+	var bget = makeButton(750, 156, 75, 18, buttons[13]);
+	toggleB(bget);
 	bget.click = function() {
 		userEmit("add", {add: etg.encodedeck(newCards)});
 		for (var i = 0; i < 10; i++) {
@@ -1295,39 +1310,44 @@ function startStore() {
 			newCardsArt[i].visible = false;
 		}
 		
+		toggleB(brainbow, bfwea, batge, blddl, bbronze, bsilver, bgold, bplatinum, bget, bbuy);
+		popbooster.visible = false;
 		newCards = [];
-		storeui.removeChild(bget);
-		storeui.addChild(bbuy);
 	}
+	storeui.addChild(bget);
 	
 	//exit button
-	var bexit = makeButton(750, 250, 75, 180, buttons[11]);
+	var bexit = makeButton(750, 246, 75, 18, buttons[11]);
 	bexit.click = function() {
 		if (isEmpty(newCards)) {
 			startMenu();
 		} else {
 			tinfo.setText("Get your cards before leaving!");
+			tinfo2.setText("");
 		}
 	}
 	storeui.addChild(bexit);
 	
 	//buy button
-	var bbuy = makeButton(750, 150, 75, 18, buttons[12]);
+	var bbuy = makeButton(750, 156, 75, 18, buttons[12]);
 	bbuy.click = function() {
 		if (isEmpty(newCards)) {
 			if (user.gold >= cost) {
 				var allowedElements = []
                 if (!packrarity || !packtype) {
-					tinfo.setText("Select a pack first");
-					tcost.setText("");
+					tinfo.setText("Select a pack first!");
+					tinfo2.setText("");
 					return;
 				}
+				
 				if (packtype == 1) allowedElements = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12];
 				else if (packtype == 2) allowedElements = [0, 4, 6, 7, 9];
 				else if (packtype == 3) allowedElements = [0, 1, 3, 10, 12];
 				else if (packtype == 4) allowedElements = [0, 2, 5, 8, 11];
+				
 				user.gold -= cost;
 				userEmit("subgold", { g: cost });
+				
 				for (var i = 0; i < cardamount; i++) {
 				    var rarity = 1;
 				    if (((packrarity == 2 || packrarity == 3) && i >= 3) || packrarity == 4)
@@ -1335,21 +1355,21 @@ function startStore() {
                     if ((packrarity == 3 && i >= 7) || (packrarity == 4 && i >= 3))
                         rarity = 3;
                     if (packrarity == 4 && i >= 5)
-                        rarity = 3;
+                        rarity = 4;
 					newCards.push(PlayerRng.randomcard(false, function (x) { return allowedElements.indexOf(x.element) != -1 && x.type != PillarEnum && x.rarity == rarity }).code);
 					newCardsArt[i].setTexture(getArt(newCards[i]));
 					newCardsArt[i].visible = true;
 				}
 				
-				storeui.removeChild(bbuy);
-				storeui.addChild(bget);
+				toggleB(brainbow, bfwea, batge, blddl, bbronze, bsilver, bgold, bplatinum, bget, bbuy);
+				popbooster.visible = true;
 			} else {
-				tinfo.setText("You can't afford that");
-				tcost.setText("");
+				tinfo.setText("You can't afford that!");
+				tinfo2.setText("");
 			}
 		} else {
-			tinfo.setText("Take your cards before you buy more");
-			tcost.setText("");
+			tinfo.setText("Take your cards before you buy more!");
+			tinfo2.setText("");
 		}
 	}
 	storeui.addChild(bbuy);
@@ -1364,7 +1384,6 @@ function startStore() {
 	
 	//FiWaEaAi pack
 	var bfwea = makeButton(175, 100, 100, 200, boosters[1]);
-	var bfwea = makeButtonSprite(175, 100, 100, 200, "assets/fweabooster.png");
 	bfwea.click = function() {
 		packtype = 2;
 		tinfo.setText("Selected Elements: Fire/Water/Earth/Air");
@@ -1388,78 +1407,67 @@ function startStore() {
 	storeui.addChild(blddl);
 
     // The different pack types
-	var bbronze = makeButtonSprite(50, 310, 100, 200, "assets/bronzebooster.png", "Bronze");
+	var bbronze = makeButton(50, 280, 100, 200, boosters[4]);
 	bbronze.click = function () {
 	    packrarity = 1;
-	    tinfo2.setText("Bronze Pack, contains 9 Commons.");
-	    tcost.setText("Cost 15g");
+	    tinfo2.setText("Bronze Pack: 9x Common");
 	    cardamount = 9;
 	    cost = 15;
 	}
 	storeui.addChild(bbronze);
 
-	var bsilver = makeButtonSprite(175, 310, 100, 200, "assets/silverbooster.png", "Silver");
+	var bsilver = makeButton(175, 280, 100, 200, boosters[5]);
 	bsilver.click = function () {
 	    packrarity = 2;
-	    tinfo2.setText("Silver Pack, contains 3 Commons, 3 Uncommons.");
-	    tcost.setText("Cost 25g");
+	    tinfo2.setText("Silver Pack: 3x Common + 3x Uncommon");
 	    cardamount = 6;
         cost = 25
 	}
 	storeui.addChild(bsilver);
 
-	var bgold = makeButtonSprite(300, 310, 100, 200, "assets/goldbooster.png", "Gold");
+	var bgold = makeButton(300, 280, 100, 200, boosters[6]);
 	bgold.click = function () {
 	    packrarity = 3;
-	    tinfo2.setText("Gold Pack, contains 3 Commons, 4 Uncommons, 1 Rare.");
-	    tcost.setText("Cost 60g");
+	    tinfo2.setText("Gold Pack: 3x Common + 4x Uncommon + 1x Rare");
 	    cardamount = 8;
 	    cost = 60;
 	}
 	storeui.addChild(bgold);
 
-	var bplatinum = makeButtonSprite(425, 310, 100, 200, "assets/platinumbooster.png", "Platinum");
+	var bplatinum = makeButton(425, 280, 100, 200, boosters[7]);
 	bplatinum.click = function () {
 	    packrarity = 4;
-	    tinfo2.setText("Platinum Pack, contains 3 Uncommons, 2 Rares, and 1 Very Rare.");
-	    tcost.setText("Cost 110g");
+	    tinfo2.setText("Platinum Pack: 3x Uncommon + 2x Rare + 1x Very Rare");
 	    cardamount = 6;
 	    cost = 110;
 	}
 	storeui.addChild(bplatinum);
-
+	
+	//booster popup
+	var popbooster = new PIXI.Sprite(popups[0]);
+	popbooster.position.set(43, 93);
+	popbooster.visible = false;
+	storeui.addChild(popbooster);
+	
 	//draw cards that are pulled from a pack
-	for (var i = 0; i < 10; i++) {
-		var cardArt = new PIXI.Sprite(nopic);
-		cardArt.scale = new PIXI.Point(0.6, 0.6)
-		
-		cardArt.position.set(575, 100 + (i*30));
-		(function (_i) {
-			cardArt.mouseover = function () {
-				cardartcode = newCards[_i];
-				console.log(cardartcode);
-			}
-		})(i);
-		cardArt.interactive = true;
-		storeui.addChild(cardArt);
-		newCardsArt.push(cardArt);
+	for (var i = 0; i < 2; i++) {
+		for (var j = 0; j < 5; j++) {
+			var cardArt = new PIXI.Sprite(nopic);
+			cardArt.scale = new PIXI.Point(0.85, 0.85)
+			cardArt.position.set(50 + (j*125), 100 + (i*225));
+			storeui.addChild(cardArt);
+			
+			newCardsArt.push(cardArt);
+		}
 	}
-
-	var cardArt = new PIXI.Sprite(nopic);
-	cardArt.position.set(723, 300);
-	storeui.addChild(cardArt);
 	
 	//update loop
 	animCb = function() {
-		if (cardartcode) {
-			cardArt.setTexture(getArt(cardartcode));
-		}
-		
 		for (var i = 0; i < 10; i++) {
 			if (newCards[i]) newCardsArt[i].setTexture(getArt(newCards[i]));
 		}
 		
-		goldcount.setText(user.gold + "g");
+		tgold.setText(user.gold);
 	}
 
 	mainStage = storeui;
