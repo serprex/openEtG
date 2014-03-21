@@ -704,7 +704,7 @@ function mkDemigod() {
 		"Suwako",
 		"Akan",
 		"Gobannus",
-		"Osiris",
+		"Anubis",
 		"Pele"
 	];
 	
