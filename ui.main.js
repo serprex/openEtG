@@ -127,41 +127,11 @@ function refreshRenderer(){
 	renderer = new PIXI.CanvasRenderer(900, 600);
 	leftpane.appendChild(renderer.view);
 }
-var loader = new PIXI.AssetLoader(["esheet.png"]);
-loader.onComplete = function(){
-	var baseTexture = PIXI.Texture.fromImage("esheet.png");
-	var icons = [];
-	for(var i=0; i<13; i++){
-		icons.push(new PIXI.Texture(baseTexture, new PIXI.Rectangle(i*32, 0, 32, 32)));
-	}
-	eicons = icons;
-}
-var cardBacks = [];
-var backLoader = new PIXI.AssetLoader(["backsheet.png"]);
-backLoader.onComplete = function () {
-	var baseTexture = PIXI.Texture.fromImage("backsheet.png");
-	var backs = [];
-	for (var i = 0; i < 26; i++) {
-		backs.push(new PIXI.Texture(baseTexture, new PIXI.Rectangle(i * 132, 0, 132, 256)));
-	}
-	cardBacks = backs;
-}
-var rarityicons = [];
-var rarityLoader = new PIXI.AssetLoader(["raritysheet.png"]);
-rarityLoader.onComplete = function () {
-	var baseTexture = PIXI.Texture.fromImage("raritysheet.png");
-	var rarities = [];
-	for (var i = 0; i < 6; i++) {
-		rarities.push(new PIXI.Texture(baseTexture, new PIXI.Rectangle(i * 10, 0, 10, 10)));
-	}
-	rarityicons = rarities;
-}
-loader.load();
-backLoader.load();
-rarityLoader.load();
+
 var mainStage, menuui, gameui;
-var nopic = PIXI.Texture.fromImage("null.png"),cardBacks, eicons, caimgcache = {}, crimgcache = {}, primgcache = {}, artcache = {};
+var caimgcache = {}, crimgcache = {}, primgcache = {}, artcache = {};
 var elecols = [0xa99683, 0xaa5999, 0x777777, 0x996633, 0x5f4930, 0x50a005, 0xcc6611, 0x205080, 0xa9a9a9, 0x337ddd, 0xccaa22, 0x333333, 0x77bbdd];
+
 function lighten(c){
 	return (c&255)/2+127|((c>>8)&255)/2+127<<8|((c>>16)&255)/2+127<<16;
 }
@@ -697,9 +667,11 @@ function aiFunc(){
 		return ["endturn", worstcards[Math.floor(Math.random()*worstcards.length)]];
 	}else return ["endturn"];
 }
+
 function doubleDeck(deck) {
     return deck.slice(0, deck.length - 2).concat(deck);
 }
+
 function mkDemigod() {
 	if (user) {
 		if (user.gold < 20) {
@@ -709,24 +681,43 @@ function mkDemigod() {
 		user.gold -= 20;
 		userEmit("subgold", { g: 20 });
 	}
-	var demigodDeck = ["7ne 7ne 7ne 7ne 7n9 7n9 7t4 7t4 7t4 7t4 7t4 7t4 7t4 7t4 7t4 7t4 7t4 7t4 7t4 7t4 7t4 7t9 7t9 7t9 7tb 7tb 7ta 7ta 7ta 7td 7td 7td 7td 7t5 7t5 8pr",
-	"7an 7an 7an 7an 7ap 7ap 7ap 7ap 7aj 7aj 7gk 7gk 7gk 7gk 7gk 7gk 7gk 7gk 7gk 7gk 7gk 7gk 7gk 7gk 7h4 7h4 7h4 7h4 7h4 7gq 7gq 7gq 7h1 7h1 7h1 7gr 7gr 7gr 7gu 7gu 7gu 7gu 7gu 7gu 8pn",
-	"744 744 744 744 744 744 744 744 744 744 744 744 744 744 744 74f 74f 74f 74f 74f 74f 745 745 745 745 745 7k9 7k9 7k9 7k9 7k9 7k9 7jv 7jv 7jv 7jv 7jv 7k7 7k7 7k7 7k1 8pq",
-	"6ts 6ts 6ts 6ts 6ts 6ts 6ts 6ts 6ts 6ts 6ve 6ve 6ve 6ve 6ve 6ve 6u2 6u2 6u2 6u2 6u2 6u2 6u1 6u1 6u1 6u1 6u1 6u1 6ud 6ud 6ud 6ud 6u7 6u7 6u7 6u7 7th 7th 7tj 7tj 7tj 7ta 7ta 8pt",
-	"718 718 718 718 718 718 71a 71a 71a 71a 71a 7n2 7n2 7n2 7n2 7q0 7q0 7q0 7q0 7q0 7q0 7q0 7q0 7q0 7q0 7q0 7q0 7q0 7q0 7q0 7q0 7q0 7q4 7q4 7q4 7qf 7qf 7qf 7q5 7q5 7q5 7q5 7q5 7q5 7qg 7qg 7qg 7qg 8pk",
-	"7ac 7ac 7ac 7ac 7ac 7ac 7ac 7ac 7ac 7ac 7ac 7bu 7bu 7bu 7bu 7bu 7bu 7ae 7ae 7ae 7ae 7ae 7ae 7al 7am 7am 7am 7as 7as 7as 7as 80d 80d 80d 80d 80i 80i 80i 8pu",
-	"7ac 7ac 7ac 7ac 7ac 7ac 7ac 7ac 7ac 7ac 7ac 7ac 7bu 7bu 7bu 7bu 7bu 7am 7am 7am 7dm 7dm 7dn 7dn 7do 7do 7n0 7n6 7n6 7n6 7n6 7n3 7n3 7n3 7n3 7n3 7n3 7nb 7n9 7n9 7n9 8pr",
-	"7dg 7dg 7dg 7dg 7dg 7dg 7dg 7dg 7dg 7dg 7dg 7dg 7dg 7dg 7dg 7dg 7dg 7e0 7e0 7e0 7e0 7e0 7e0 7dv 7dv 7dv 7dv 7dv 7dv 7n2 7n2 7n2 7n2 7qb 7qb 7qb 7th 7th 7th 7th 7tb 7tb 7tb 7tb 7tb 7tb 7ta 7ta 8pt",
-	"710 710 710 710 710 710 710 710 710 710 710 710 710 710 72i 72i 72i 72i 71l 71l 71l 71l 717 717 717 71b 71b 71b 711 711 7t7 7t7 7t7 7t7 7t7 7t7 7t9 7t9 7t9 7ti 7ti 7ti 7ti 7ta 7ta 8pt",
-	"778 778 778 778 778 778 778 778 778 778 778 778 778 778 778 778 778 778 778 77g 77g 77g 77g 77g 77g 77q 77q 77h 77h 77h 77h 77h 77b 77b 77b 7q4 7q4 7q4 7ql 7ql 7ql 7ql 7ql 7q3 7q3 8ps"]
-	var deck = demigodDeck[Math.floor(Math.random() * demigodDeck.length)].split(" ");
+	
+	var demigodDeck = [
+		"7ne 7ne 7ne 7ne 7n9 7n9 7t4 7t4 7t4 7t4 7t4 7t4 7t4 7t4 7t4 7t4 7t4 7t4 7t4 7t4 7t4 7t9 7t9 7t9 7tb 7tb 7ta 7ta 7ta 7td 7td 7td 7td 7t5 7t5 8pr",
+		"7an 7an 7an 7an 7ap 7ap 7ap 7ap 7aj 7aj 7gk 7gk 7gk 7gk 7gk 7gk 7gk 7gk 7gk 7gk 7gk 7gk 7gk 7gk 7h4 7h4 7h4 7h4 7h4 7gq 7gq 7gq 7h1 7h1 7h1 7gr 7gr 7gr 7gu 7gu 7gu 7gu 7gu 7gu 8pn",
+		"744 744 744 744 744 744 744 744 744 744 744 744 744 744 744 74f 74f 74f 74f 74f 74f 745 745 745 745 745 7k9 7k9 7k9 7k9 7k9 7k9 7jv 7jv 7jv 7jv 7jv 7k7 7k7 7k7 7k1 8pq",
+		"6ts 6ts 6ts 6ts 6ts 6ts 6ts 6ts 6ts 6ts 6ve 6ve 6ve 6ve 6ve 6ve 6u2 6u2 6u2 6u2 6u2 6u2 6u1 6u1 6u1 6u1 6u1 6u1 6ud 6ud 6ud 6ud 6u7 6u7 6u7 6u7 7th 7th 7tj 7tj 7tj 7ta 7ta 8pt",
+		"718 718 718 718 718 718 71a 71a 71a 71a 71a 7n2 7n2 7n2 7n2 7q0 7q0 7q0 7q0 7q0 7q0 7q0 7q0 7q0 7q0 7q0 7q0 7q0 7q0 7q0 7q0 7q0 7q4 7q4 7q4 7qf 7qf 7qf 7q5 7q5 7q5 7q5 7q5 7q5 7qg 7qg 7qg 7qg 8pk",
+		"7ac 7ac 7ac 7ac 7ac 7ac 7ac 7ac 7ac 7ac 7ac 7bu 7bu 7bu 7bu 7bu 7bu 7ae 7ae 7ae 7ae 7ae 7ae 7al 7am 7am 7am 7as 7as 7as 7as 80d 80d 80d 80d 80i 80i 80i 8pu",
+		"7ac 7ac 7ac 7ac 7ac 7ac 7ac 7ac 7ac 7ac 7ac 7ac 7bu 7bu 7bu 7bu 7bu 7am 7am 7am 7dm 7dm 7dn 7dn 7do 7do 7n0 7n6 7n6 7n6 7n6 7n3 7n3 7n3 7n3 7n3 7n3 7nb 7n9 7n9 7n9 8pr",
+		"7dg 7dg 7dg 7dg 7dg 7dg 7dg 7dg 7dg 7dg 7dg 7dg 7dg 7dg 7dg 7dg 7dg 7e0 7e0 7e0 7e0 7e0 7e0 7dv 7dv 7dv 7dv 7dv 7dv 7n2 7n2 7n2 7n2 7qb 7qb 7qb 7th 7th 7th 7th 7tb 7tb 7tb 7tb 7tb 7tb 7ta 7ta 8pt",
+		"710 710 710 710 710 710 710 710 710 710 710 710 710 710 72i 72i 72i 72i 71l 71l 71l 71l 717 717 717 71b 71b 71b 711 711 7t7 7t7 7t7 7t7 7t7 7t7 7t9 7t9 7t9 7ti 7ti 7ti 7ti 7ta 7ta 8pt",
+		"778 778 778 778 778 778 778 778 778 778 778 778 778 778 778 778 778 778 778 77g 77g 77g 77g 77g 77g 77q 77q 77h 77h 77h 77h 77h 77b 77b 77b 7q4 7q4 7q4 7ql 7ql 7ql 7ql 7ql 7q3 7q3 8ps"
+	];
+	
+	var demigodNames = [
+		"Atomsk",
+		"Thetis",
+		"Kenosis",
+		"Lycaon",
+		"Nirrti",
+		"Suwako",
+		"Akan",
+		"Gobannus",
+		"Anubis",
+		"Pele"
+	];
+	
+	var rand = Math.floor(Math.random() * demigodNames.length);
+	var dgname = "Demigod\n" + demigodNames[rand];
+	var deck = demigodDeck[rand].split(" ");
 	deck = doubleDeck(deck);
 	var urdeck = getDeck();
 	if ((user && (!user.deck || user.deck.length < 31)) || urdeck.length < 11){
 		startEditor();
 		return;
 	}
-	initGame({ first: Math.random() < .5, deck: deck, urdeck: urdeck, seed: Math.random() * etg.MAX_INT, hp: 200, aimarkpower: 3 , foename: "Demigod"}, aievalopt.checked ? aiEvalFunc : aiFunc);
+	initGame({ first: Math.random() < .5, deck: deck, urdeck: urdeck, seed: Math.random() * etg.MAX_INT, hp: 200, aimarkpower: 3 , foename: dgname}, aievalopt.checked ? aiEvalFunc : aiFunc);
 	game.cost = 20;
 	game.gold = 30;
 }
@@ -821,7 +812,39 @@ function mkAi(level){
 				deck.push(TrueMarks[eles[1]]);
 				chatArea.value = deck.join(" ");
 			}
-			var foename = level == 1 ? "Commoner" : (level == 2 ? "Mage" : "Champion");
+			
+			var randomNames = [
+				"Sherman",
+				"Billie",
+				"Monroe",
+				"Brendon",
+				"Murray",
+				"Ronald",
+				"Garland",
+				"Emory",
+				"Dane",
+				"Rocky",
+				"Stormy",
+				"Audrie",
+				"Page",
+				"Martina",
+				"Adrienne",
+				"Yuriko",
+				"Margie",
+				"Tammi",
+				"Digna",
+				"Mariah",
+				"Seth"
+			];
+			
+			var typeName = [
+				"Commoner",
+				"Mage",
+				"Champion"
+			];
+			
+			var foename = typeName[level-1] + "\n" + randomNames[Math.floor(Math.random() * randomNames.length)];
+			
 			initGame({ first: Math.random() < .5, deck: deck, urdeck: urdeck, seed: Math.random() * etg.MAX_INT, hp: level == 1 ? 100 : (level == 2 ? 125 : 150), aimarkpower: level == 3 ? 2 : 1, foename:foename}, aievalopt.checked ? aiEvalFunc : aiFunc);
 			game.cost = gameprice;
 			game.gold = level==1?5:(level==2?10:20);
@@ -829,50 +852,105 @@ function mkAi(level){
 	}
 }
 
-function makeButton(x, y, w, h, t) {
-	var button = new PIXI.Graphics();
-	button.beginFill(0xFFFFFF);
-	button.lineStyle(2, 0x000000);
-	button.drawRect(x, y, w, h);
-	button.endFill();
-	button.interactive = true;
-	button.hitArea = new PIXI.Rectangle(x, y, w, h);
-	button.buttonMode = true;
-	
-	var text = new PIXI.Text(t, {font: "bold 16px Dosis"});
-	text.anchor.set(0.5, 0.5);
-	text.position.set(x + (w/2), y+2 + (h/2));
-	button.addChild(text);
-	
-	return button;
-}
+// Asset Loaders
+var nopic = PIXI.Texture.fromImage("assets/null.png")
 
-function makeButtonSprite(x, y, w, h, i, t, sz) {
-		var button = PIXI.Sprite.fromImage(i);
-		button.position.set(x, y);
-		button.interactive = true;
-		button.hitArea = new PIXI.Rectangle(0, 0, w, h);
-		button.buttonMode = true;
-		
-		if (t) {
-			var text = new PIXI.Text(t, {font: "bold "+(sz ? sz : "16")+"px Dosis"});
-			text.anchor.set(0.5, 0.5);
-			text.position.set(w / 2, h / 2);
-			button.addChild(text);
+var backgrounds = ["assets/bg_lobby.png", "assets/bg_shop.png"];
+var bgLoader = new PIXI.AssetLoader(backgrounds);
+bgLoader.onComplete = function() {
+	var tmp = [];
+	for(var i = 0; i < 2; i++) tmp.push(PIXI.Texture.fromImage(backgrounds[i]));
+	backgrounds = tmp;
+}
+bgLoader.load();
+
+var eicons = [];
+var eleLoader = new PIXI.AssetLoader(["assets/esheet.png"]);
+eleLoader.onComplete = function() {
+	var tex = PIXI.Texture.fromImage("assets/esheet.png");
+	for(var i = 0; i < 13; i++) eicons.push(new PIXI.Texture(tex, new PIXI.Rectangle(i*32, 0, 32, 32)));
+}
+eleLoader.load();
+
+var cardBacks = [];
+var backLoader = new PIXI.AssetLoader(["assets/backsheet.png"]);
+backLoader.onComplete = function() {
+	var tex = PIXI.Texture.fromImage("assets/backsheet.png");
+	for (var i = 0; i < 26; i++) cardBacks.push(new PIXI.Texture(tex, new PIXI.Rectangle(i*132, 0, 132, 256)));
+}
+backLoader.load();
+
+var rarityicons = [];
+var rarityLoader = new PIXI.AssetLoader(["assets/raritysheet.png"]);
+rarityLoader.onComplete = function() {
+	var tex = PIXI.Texture.fromImage("assets/raritysheet.png");
+	for (var i = 0; i < 6; i++) rarityicons.push(new PIXI.Texture(tex, new PIXI.Rectangle(i * 10, 0, 10, 10)));
+}
+rarityLoader.load();
+
+var buttons = [];
+var buttonLoader = new PIXI.AssetLoader(["assets/buttons.png"]);
+buttonLoader.onComplete = function() {
+	var tex = PIXI.Texture.fromImage("assets/buttons.png");
+	for (var i = 0; i < 4; i++) {
+		for (var j = 0; j < 4; j++) {
+			buttons.push(new PIXI.Texture(tex, new PIXI.Rectangle(j*75, i*25, 75, 25)));
 		}
-		
-		return button;
+	}
+}
+buttonLoader.load();
+
+var boosters = [];
+var boosterLoader = new PIXI.AssetLoader(["assets/boosters.png"]);
+boosterLoader.onComplete = function() {
+	var tex = PIXI.Texture.fromImage("assets/boosters.png");
+	for (var i = 0; i < 2; i++) 
+		for (var j = 0; j < 4; j++) 
+			boosters.push(new PIXI.Texture(tex, new PIXI.Rectangle(j*100, i*150, 100, 150)));
+}
+boosterLoader.load();
+
+var popups = [];
+var popupLoader = new PIXI.AssetLoader(["assets/popup_booster.png"]);
+popupLoader.onComplete = function() {
+	for(var i = 0; i < 1; i++) popups.push(PIXI.Texture.fromImage("assets/popup_booster.png"));
+}
+popupLoader.load();
+
+function makeButton(x, y, w, h, i) {
+	var b = new PIXI.Sprite(i);
+	b.position.set(x, y);
+	b.interactive = true;
+	b.hitArea = new PIXI.Rectangle(0, 0, w, h);
+	b.buttonMode = true;
+	
+	return b;
 }
 
-function startMenu() {	
-	menuui = new PIXI.Stage(0x336699, true);
-	var smenu = {font: "14px Verdana", fill: "white", stroke: "black", strokeThickness: 2}
+function makeText(x, y, txt, vis) {
+	var t = new PIXI.Text(txt, {font: "14px Verdana", fill: "white", stroke: "black", strokeThickness: 2});
+	t.position.set(x, y);
+	t.visible = vis;
 	
+	return t;
+}
+
+function toggleB() {
+	for (var i = 0; i < arguments.length; i++) {
+		arguments[i].visible = !arguments[i].visible;
+		arguments[i].interactive = !arguments[i].interactive;
+		arguments[i].buttonMode = !arguments[i].buttonMode;
+	}
+}
+	
+function startMenu() {	
+	menuui = new PIXI.Stage(0x000000, true);
+		
 	//lobby background
-	var bglobby = PIXI.Sprite.fromImage("assets/mmbgt.png");
+	var bglobby = new PIXI.Sprite(backgrounds[0]);
 	bglobby.interactive = true;
 	bglobby.hitArea = new PIXI.Rectangle(0, 0, 900, 670);
-	bglobby.mouseover = function () { 
+	bglobby.mouseover = function() { 
 		tinfo.setText(""); 
 		tcost.setText("");
 		igold2.visible = false;
@@ -880,9 +958,16 @@ function startMenu() {
 	menuui.addChild(bglobby);
 	
 	//gold text
-	var tgold = new PIXI.Text(user ? user.gold : "Sandbox", smenu);
-	tgold.position.set(755, 101);
+	var tgold = makeText(755, 101, (user ? user.gold : "Sandbox"), true);
 	menuui.addChild(tgold);
+	
+	//info text
+	var tinfo = makeText(50, 26, "", true)
+	menuui.addChild(tinfo);
+	
+	//cost text
+	var tcost = makeText(50, 51, "", true);
+	menuui.addChild(tcost);
 	
 	//gold icons
 	var igold = PIXI.Sprite.fromImage("assets/gold.png");
@@ -895,18 +980,8 @@ function startMenu() {
 	igold2.visible = false;
 	menuui.addChild(igold2);
 	
-	//info text
-	var tinfo = new PIXI.Text("", smenu);
-	tinfo.position.set(50, 26);	
-	menuui.addChild(tinfo);
-	
-	//cost text
-	var tcost = new PIXI.Text("", smenu);
-	tcost.position.set(50, 51);	
-	menuui.addChild(tcost);
-	
 	//ai0 button
-	var bai0 = makeButtonSprite(50, 100, 75, 25, "assets/bai0.png");
+	var bai0 = makeButton(50, 100, 75, 25, buttons[4]);
 	bai0.click = mkAi(1);
 	bai0.mouseover = function () {
 		tinfo.setText("Commoners have no upgraded cards.");
@@ -916,7 +991,7 @@ function startMenu() {
 	menuui.addChild(bai0);
 	
 	//ai1 button
-	var bai1 = makeButtonSprite(150, 100, 75, 25, "assets/bai1.png");
+	var bai1 = makeButton(150, 100, 75, 25, buttons[5]);
 	bai1.click = mkAi(2);
 	bai1.mouseover = function () {
 		tinfo.setText("Mages have a few upgraded cards.");
@@ -926,7 +1001,7 @@ function startMenu() {
 	menuui.addChild(bai1);
 	
 	//ai2 button
-	var bai2 = makeButtonSprite(250, 100, 75, 25, "assets/bai2.png");
+	var bai2 = makeButton(250, 100, 75, 25, buttons[6]);
 	bai2.click = mkAi(3);
 	bai2.mouseover = function () {
 		tinfo.setText("Champions have some upgraded cards.");
@@ -935,9 +1010,8 @@ function startMenu() {
 	}
 	menuui.addChild(bai2);
 
-	
 	//ai3 button
-	var bai3 = makeButtonSprite(350, 100, 75, 25, "assets/bai3.png");
+	var bai3 = makeButton(350, 100, 75, 25, buttons[7]);
 	bai3.click = mkDemigod;
 	bai3.mouseover = function () {
 		tinfo.setText("Demigods are extremely powerful. Come prepared for anything.");
@@ -947,7 +1021,7 @@ function startMenu() {
 	menuui.addChild(bai3);
 	
 	//ai arena button
-	var baia = makeButtonSprite(50, 200, 75, 25, "assets/baia.png");
+	var baia = makeButton(50, 200, 75, 25, buttons[3]);
 	baia.click = function() {
 		if (Cards) {
 			if (!user.deck || user.deck.length < 31) {
@@ -973,7 +1047,7 @@ function startMenu() {
 	menuui.addChild(baia);
 	
 	//arena info button
-	var binfoa = makeButtonSprite(50, 245, 75, 25, "assets/binfo.png");
+	var binfoa = makeButton(50, 245, 75, 25, buttons[1]);
 	binfoa.click = function(){
 		if (Cards){
 			userEmit("arenainfo");
@@ -986,7 +1060,7 @@ function startMenu() {
 	menuui.addChild(binfoa);
 	
 	//arena top10 button
-	var btopa = makeButtonSprite(150, 245, 75, 25, "assets/btop.png");
+	var btopa = makeButton(150, 245, 75, 25, buttons[2]);
 	btopa.click = function(){
 		if (Cards){
 			userEmit("arenatop");
@@ -999,7 +1073,7 @@ function startMenu() {
 	menuui.addChild(btopa);
 	
 	//edit button
-	var bedit = makeButtonSprite(50, 300, 75, 25, "assets/bedit.png");
+	var bedit = makeButton(50, 300, 75, 25, buttons[9]);
 	bedit.click = startEditor;
 	bedit.mouseover = function () {
 		tinfo.setText("Here you can edit your deck, as well as submit an arena deck.");
@@ -1007,8 +1081,7 @@ function startMenu() {
 	}
 	menuui.addChild(bedit);
 
-    //shop button
-	var bshop = makeButtonSprite(150, 300, 75, 25, "assets/bshop.png");
+	var bshop = makeButton(150, 300, 75, 25, buttons[10]);
 	bshop.click = startStore;
 	bshop.mouseover = function () {
 	    tinfo.setText("Here you can buy booster packs which contains ten cards from the elements you choose.");
@@ -1017,7 +1090,7 @@ function startMenu() {
 	menuui.addChild(bshop);
 
     //upgrade button
-	var bupgrade = makeButtonSprite(250, 300, 75, 18, "assets/bupgrade.png");
+	var bupgrade = makeButton(250, 300, 75, 18, buttons[14]);
 	bupgrade.click = upgradestore;
 	bupgrade.mouseover = function () {
 	    tinfo.setText("Here you can upgrade cards as well as buy upgraded Pillars");
@@ -1026,7 +1099,7 @@ function startMenu() {
 	menuui.addChild(bupgrade);
 	
 	//logout button
-	var blogout = makeButtonSprite(750, 246, 75, 25, "assets/blogout.png");
+	var blogout = makeButton(750, 246, 75, 25, buttons[0]);
 	blogout.click = function(){
 		userEmit("logout");
 		logout();
@@ -1039,7 +1112,7 @@ function startMenu() {
 	menuui.addChild(blogout);
 	
 	//delete account button
-	var bdelete = makeButtonSprite(750, 550, 75, 25, "assets/bdelete.png");
+	var bdelete = makeButton(750, 550, 75, 25, buttons[8]);
 	bdelete.click = function(){
 		if (foename.value == user.name) {
 			userEmit("delete");
@@ -1054,13 +1127,11 @@ function startMenu() {
 	}
 	menuui.addChild(bdelete);
 	
-	toggleB(baia, bshop, bupgrade, binfoa, btopa, blogout, bdelete);
+	if (!user) toggleB(baia, bshop, bupgrade, binfoa, btopa, blogout, bdelete);
 	
 	//only display if user is logged in
-	if (user){	
-		toggleB(baia, bshop, bupgrade, binfoa, btopa, blogout, bdelete);
-		
-		tgold.position.set(770, 100);
+	if (user) {		
+		tgold.position.set(770, 101);
 		igold.visible = true;	
 		
 		if (user.oracle){
@@ -1083,19 +1154,11 @@ function startMenu() {
 		toggleB(baia, bshop, bupgrade, binfoa, btopa, blogout, bdelete);
 		
 		tgold.setText("Sandbox");
-		tgold.position.set(755, 100);
+		tgold.position.set(755, 101);
 		igold.visible = false;
 		
 		if (oracle){
 			menuui.removeChild(oracle);
-		}
-	}
-	
-	function toggleB() {
-		for (var i = 0; i < arguments.length; i++) {
-			arguments[i].visible = !arguments[i].visible;
-			arguments[i].interactive = !arguments[i].interactive;
-			arguments[i].buttonMode = !arguments[i].buttonMode;
 		}
 	}
 	
@@ -1113,6 +1176,7 @@ function editorCardCmp(x,y){
 	var cardx = CardCodes[x], cardy = CardCodes[y];
 	return cardx.upped - cardy.upped || cardx.element - cardy.element || cardx.cost-cardy.cost || (x>y)-(x<y);
 }
+
 function upgradestore() {
     function isFreeCard(card) {
         return card.type == PillarEnum && !card.upped && !card.rarity;
@@ -1158,12 +1222,12 @@ function upgradestore() {
     var goldcount = new PIXI.Text(user.gold + "g", { font: "bold 16px Dosis" });
     goldcount.position.set(30, 100);
     upgradeui.addChild(goldcount);
-    var bupgrade = makeButton(150, 100, 75, 18, "Upgrade");
+    var bupgrade = makeButton(150, 100, 75, 18, buttons[14]);
     bupgrade.click = function () {
         upgradeCard(CardCodes[selectedCard]);
     };
     upgradeui.addChild(bupgrade);
-    var bexit = makeButton(50, 50, 75, 18, "Exit");
+    var bexit = makeButton(50, 50, 75, 18, buttons[11]);
     bexit.click = function () {
         startMenu();
     };
@@ -1259,6 +1323,7 @@ function upgradestore() {
     mainStage = upgradeui;
     refreshRenderer();
 }
+
 function startStore() {
 	var cardartcode;
 	var packtype = 0;
@@ -1268,32 +1333,31 @@ function startStore() {
 	var newCards = [];
 	var newCardsArt = [];
 	
-	var storeui = new PIXI.Stage(0x336699, true);
+	var storeui = new PIXI.Stage(0x000000, true);
 	
 	//shop background
-	var bgshop = PIXI.Sprite.fromImage("assets/shopbg.png");
+	var bgshop = new PIXI.Sprite(backgrounds[1]);
 	storeui.addChild(bgshop);
 	
 	//gold text
-	var goldcount = new PIXI.Text(user.gold + "g", {font: "bold 16px Dosis"});
-	goldcount.position.set(750, 100);
-	storeui.addChild(goldcount);
+	var tgold = makeText(770, 101, user.gold, true);
+	storeui.addChild(tgold);
 	
     //info text
-	var tinfo = new PIXI.Text("Select an element", { font: "bold 16px Dosis" });
-	tinfo.position.set(50, 25);
+	var tinfo = makeText(50, 26, "Select which elements you want.", true);
 	storeui.addChild(tinfo);
-	var tinfo2 = new PIXI.Text("Select a pack", { font: "bold 16px Dosis" });
-	tinfo2.position.set(150, 50);
+	
+	var tinfo2 = makeText(50, 51, "Select which type of booster you want.", true);
 	storeui.addChild(tinfo2);
 	
-	//cost text
-	var tcost = new PIXI.Text("", {font: "bold 16px Dosis"});
-	tcost.position.set(50, 50);
-	storeui.addChild(tcost);
-	
+	//gold icon
+	var igold = PIXI.Sprite.fromImage("assets/gold.png");
+	igold.position.set(750, 100);
+	storeui.addChild(igold);
+
 	//get cards button
-	var bget = makeButton(750, 150, 75, 18, "Take Cards");
+	var bget = makeButton(750, 156, 75, 18, buttons[13]);
+	toggleB(bget);
 	bget.click = function() {
 		userEmit("add", {add: etg.encodedeck(newCards)});
 		for (var i = 0; i < 10; i++) {
@@ -1301,39 +1365,44 @@ function startStore() {
 			newCardsArt[i].visible = false;
 		}
 		
+		toggleB(brainbow, bfwea, batge, blddl, bbronze, bsilver, bgold, bplatinum, bget, bbuy);
+		popbooster.visible = false;
 		newCards = [];
-		storeui.removeChild(bget);
-		storeui.addChild(bbuy);
 	}
+	storeui.addChild(bget);
 	
 	//exit button
-	var bexit = makeButton(750, 250, 75, 18, "Exit");
+	var bexit = makeButton(750, 246, 75, 18, buttons[11]);
 	bexit.click = function() {
 		if (isEmpty(newCards)) {
 			startMenu();
 		} else {
 			tinfo.setText("Get your cards before leaving!");
+			tinfo2.setText("");
 		}
 	}
 	storeui.addChild(bexit);
 	
 	//buy button
-	var bbuy = makeButton(750, 150, 75, 18, "Buy");
+	var bbuy = makeButton(750, 156, 75, 18, buttons[12]);
 	bbuy.click = function() {
 		if (isEmpty(newCards)) {
 			if (user.gold >= cost) {
 				var allowedElements = []
                 if (!packrarity || !packtype) {
-					tinfo.setText("Select a pack first");
-					tcost.setText("");
+					tinfo.setText("Select a pack first!");
+					tinfo2.setText("");
 					return;
 				}
+				
 				if (packtype == 1) allowedElements = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12];
 				else if (packtype == 2) allowedElements = [0, 4, 6, 7, 9];
 				else if (packtype == 3) allowedElements = [0, 1, 3, 10, 12];
 				else if (packtype == 4) allowedElements = [0, 2, 5, 8, 11];
+				
 				user.gold -= cost;
 				userEmit("subgold", { g: cost });
+				
 				for (var i = 0; i < cardamount; i++) {
 				    var rarity = 1;
 				    if (((packrarity == 2 || packrarity == 3) && i >= 3) || packrarity == 4)
@@ -1347,21 +1416,21 @@ function startStore() {
 					newCardsArt[i].visible = true;
 				}
 				
-				storeui.removeChild(bbuy);
-				storeui.addChild(bget);
+				toggleB(brainbow, bfwea, batge, blddl, bbronze, bsilver, bgold, bplatinum, bget, bbuy);
+				popbooster.visible = true;
 			} else {
-				tinfo.setText("You can't afford that");
-				tcost.setText("");
+				tinfo.setText("You can't afford that!");
+				tinfo2.setText("");
 			}
 		} else {
-			tinfo.setText("Take your cards before you buy more");
-			tcost.setText("");
+			tinfo.setText("Take your cards before you buy more!");
+			tinfo2.setText("");
 		}
 	}
 	storeui.addChild(bbuy);
 	
 	//Rainbow pack
-	var brainbow = makeButtonSprite(50, 100, 100, 200, "assets/rainbowbooster.png");
+	var brainbow = makeButton(50, 100, 100, 200, boosters[0]);
 	brainbow.click = function() {
 		packtype = 1;
 		tinfo.setText("Selected Elements: Rainbow"); 
@@ -1369,7 +1438,7 @@ function startStore() {
 	storeui.addChild(brainbow);
 	
 	//FiWaEaAi pack
-	var bfwea = makeButtonSprite(175, 100, 100, 200, "assets/fweabooster.png");
+	var bfwea = makeButton(175, 100, 100, 200, boosters[1]);
 	bfwea.click = function() {
 		packtype = 2;
 		tinfo.setText("Selected Elements: Fire/Water/Earth/Air");
@@ -1377,7 +1446,7 @@ function startStore() {
 	storeui.addChild(bfwea);
 	
 	//AeTiGrEn pack
-	var batge = makeButtonSprite(300, 100, 100, 200, "assets/atgebooster.png");
+	var batge = makeButton(300, 100, 100, 200, boosters[2]);
 	batge.click = function() {
 		packtype = 3;
 		tinfo.setText("Selected Elements: Aether/Time/Gravity/Entropy");
@@ -1385,7 +1454,7 @@ function startStore() {
 	storeui.addChild(batge);
 	
 	//LiDeDaLi pack
-	var blddl = makeButtonSprite(425, 100, 100, 200, "assets/lddlbooster.png");
+	var blddl = makeButton(425, 100, 100, 200, boosters[3]);
 	blddl.click = function() {
 		packtype = 4;
 		tinfo.setText("Selected Elements: Life/Death/Darkness/Light");
@@ -1393,78 +1462,67 @@ function startStore() {
 	storeui.addChild(blddl);
 
     // The different pack types
-	var bbronze = makeButtonSprite(50, 310, 100, 200, "assets/bronzebooster.png", "Bronze");
+	var bbronze = makeButton(50, 280, 100, 200, boosters[4]);
 	bbronze.click = function () {
 	    packrarity = 1;
-	    tinfo2.setText("Bronze Pack, contains 9 Commons.");
-	    tcost.setText("Cost 15g");
+	    tinfo2.setText("Bronze Pack: 9x Common");
 	    cardamount = 9;
 	    cost = 15;
 	}
 	storeui.addChild(bbronze);
 
-	var bsilver = makeButtonSprite(175, 310, 100, 200, "assets/silverbooster.png", "Silver");
+	var bsilver = makeButton(175, 280, 100, 200, boosters[5]);
 	bsilver.click = function () {
 	    packrarity = 2;
-	    tinfo2.setText("Silver Pack, contains 3 Commons, 3 Uncommons.");
-	    tcost.setText("Cost 25g");
+	    tinfo2.setText("Silver Pack: 3x Common + 3x Uncommon");
 	    cardamount = 6;
         cost = 25
 	}
 	storeui.addChild(bsilver);
 
-	var bgold = makeButtonSprite(300, 310, 100, 200, "assets/goldbooster.png", "Gold");
+	var bgold = makeButton(300, 280, 100, 200, boosters[6]);
 	bgold.click = function () {
 	    packrarity = 3;
-	    tinfo2.setText("Gold Pack, contains 3 Commons, 4 Uncommons, 1 Rare.");
-	    tcost.setText("Cost 60g");
+	    tinfo2.setText("Gold Pack: 3x Common + 4x Uncommon + 1x Rare");
 	    cardamount = 8;
 	    cost = 60;
 	}
 	storeui.addChild(bgold);
 
-	var bplatinum = makeButtonSprite(425, 310, 100, 200, "assets/platinumbooster.png", "Platinum");
+	var bplatinum = makeButton(425, 280, 100, 200, boosters[7]);
 	bplatinum.click = function () {
 	    packrarity = 4;
-	    tinfo2.setText("Platinum Pack, contains 3 Uncommons, 2 Rares, and 1 Very Rare.");
-	    tcost.setText("Cost 110g");
+	    tinfo2.setText("Platinum Pack: 3x Uncommon + 2x Rare + 1x Very Rare");
 	    cardamount = 6;
 	    cost = 110;
 	}
 	storeui.addChild(bplatinum);
-
+	
+	//booster popup
+	var popbooster = new PIXI.Sprite(popups[0]);
+	popbooster.position.set(43, 93);
+	popbooster.visible = false;
+	storeui.addChild(popbooster);
+	
 	//draw cards that are pulled from a pack
-	for (var i = 0; i < 10; i++) {
-		var cardArt = new PIXI.Sprite(nopic);
-		cardArt.scale = new PIXI.Point(0.6, 0.6)
-		
-		cardArt.position.set(575, 100 + (i*30));
-		(function (_i) {
-			cardArt.mouseover = function () {
-				cardartcode = newCards[_i];
-				console.log(cardartcode);
-			}
-		})(i);
-		cardArt.interactive = true;
-		storeui.addChild(cardArt);
-		newCardsArt.push(cardArt);
+	for (var i = 0; i < 2; i++) {
+		for (var j = 0; j < 5; j++) {
+			var cardArt = new PIXI.Sprite(nopic);
+			cardArt.scale = new PIXI.Point(0.85, 0.85)
+			cardArt.position.set(50 + (j*125), 100 + (i*225));
+			storeui.addChild(cardArt);
+			
+			newCardsArt.push(cardArt);
+		}
 	}
-
-	var cardArt = new PIXI.Sprite(nopic);
-	cardArt.position.set(723, 300);
-	storeui.addChild(cardArt);
 	
 	//update loop
 	animCb = function() {
-		if (cardartcode) {
-			cardArt.setTexture(getArt(cardartcode));
-		}
-		
 		for (var i = 0; i < 10; i++) {
 			if (newCards[i]) newCardsArt[i].setTexture(getArt(newCards[i]));
 		}
 		
-		goldcount.setText(user.gold + "g");
+		tgold.setText(user.gold);
 	}
 
 	mainStage = storeui;
@@ -2075,8 +2133,8 @@ function startMatch(){
 	var resign = new PIXI.Text("Resign", {font: "16px Dosis"});
 	var turntell = new PIXI.Text("", {font: "16px Dosis"});
 	var infotext = new PIXI.Sprite(nopic);
-	var foename = new PIXI.Text(game.foename || "Unknown opponent", { font: "bold 18px Dosis" });
-	foename.position.set(10, 100);
+	var foename = new PIXI.Text(game.foename || "Unknown Opponent", { font: "bold 18px Dosis", align: "center" });
+	foename.position.set(25, 75);
 	gameui.addChild(foename);
 	setInteractive(endturn, cancel, resign);
 	endturn.position.set(800, 540);
