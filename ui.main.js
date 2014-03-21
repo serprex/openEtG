@@ -667,9 +667,11 @@ function aiFunc(){
 		return ["endturn", worstcards[Math.floor(Math.random()*worstcards.length)]];
 	}else return ["endturn"];
 }
+
 function doubleDeck(deck) {
     return deck.slice(0, deck.length - 2).concat(deck);
 }
+
 function mkDemigod() {
 	if (user) {
 		if (user.gold < 20) {
@@ -707,7 +709,7 @@ function mkDemigod() {
 	];
 	
 	var rand = Math.floor(Math.random() * demigodNames.length);
-	var dgname = demigodNames[rand];
+	var dgname = "Demigod\n" + demigodNames[rand];
 	var deck = demigodDeck[rand].split(" ");
 	deck = doubleDeck(deck);
 	var urdeck = getDeck();
@@ -810,7 +812,39 @@ function mkAi(level){
 				deck.push(TrueMarks[eles[1]]);
 				chatArea.value = deck.join(" ");
 			}
-			var foename = level == 1 ? "Commoner" : (level == 2 ? "Mage" : "Champion");
+			
+			var randomNames = [
+				"Sherman",
+				"Billie",
+				"Monroe",
+				"Brendon",
+				"Murray",
+				"Ronald",
+				"Garland",
+				"Emory",
+				"Dane",
+				"Rocky",
+				"Stormy",
+				"Audrie",
+				"Page",
+				"Martina",
+				"Adrienne",
+				"Yuriko",
+				"Margie",
+				"Tammi",
+				"Digna",
+				"Mariah",
+				"Seth"
+			];
+			
+			var typeName = [
+				"Commoner",
+				"Mage",
+				"Champion"
+			];
+			
+			var foename = typeName[level-1] + "\n" + randomNames[Math.floor(Math.random() * randomNames.length)];
+			
 			initGame({ first: Math.random() < .5, deck: deck, urdeck: urdeck, seed: Math.random() * etg.MAX_INT, hp: level == 1 ? 100 : (level == 2 ? 125 : 150), aimarkpower: level == 3 ? 2 : 1, foename:foename}, aievalopt.checked ? aiEvalFunc : aiFunc);
 			game.cost = gameprice;
 			game.gold = level==1?5:(level==2?10:20);
@@ -2099,8 +2133,8 @@ function startMatch(){
 	var resign = new PIXI.Text("Resign", {font: "16px Dosis"});
 	var turntell = new PIXI.Text("", {font: "16px Dosis"});
 	var infotext = new PIXI.Sprite(nopic);
-	var foename = new PIXI.Text(game.foename || "Unknown opponent", { font: "bold 18px Dosis" });
-	foename.position.set(10, 100);
+	var foename = new PIXI.Text(game.foename || "Unknown Opponent", { font: "bold 18px Dosis", align: "center" });
+	foename.position.set(25, 75);
 	gameui.addChild(foename);
 	setInteractive(endturn, cancel, resign);
 	endturn.position.set(800, 540);
