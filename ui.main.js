@@ -2557,7 +2557,7 @@ socket.on("userdump", function(data){
 		user.deck = etg.decodedeck(user.deck);
 		deckimport.value = user.deck.join(" ");
 	}
-	if (user.pool){
+	if (user.pool || user.pool == ""){
 		user.pool = etg.decodedeck(user.pool);
 	}
 	if (user.starter) {

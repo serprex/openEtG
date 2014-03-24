@@ -16,16 +16,17 @@ exports.encodedeck = function(deck){
 	}
 	return out;
 }
-exports.decodedeck = function(deck){
-	if (!deck)return deck;
-	var out = [];
-	for(var i=0; i<deck.length; i+=5){
-		var count = parseInt(deck.substr(i, 2), 32), code=deck.substr(i+2, 3);
-		for(var j=0; j<count; j++){
-			out.push(code);
-		}
-	}
-	return out;
+exports.decodedeck = function (deck) {
+    if (deck == "") return [];
+    if (!deck) return deck;
+    var out = [];
+    for (var i = 0; i < deck.length; i += 5) {
+        var count = parseInt(deck.substr(i, 2), 32), code = deck.substr(i + 2, 3);
+        for (var j = 0; j < count; j++) {
+            out.push(code);
+        }
+    }
+    return out;
 }
 exports.addcard = function(deck, card, x){
 	if(x === undefined)x=1;
