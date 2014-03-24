@@ -416,7 +416,7 @@ Player.prototype.endturn = function(discard) {
 	for (var i=0; i<23; i++){
 		if ((cr = crs[i])){
 			if (patienceFlag){
-				var floodbuff = floodingFlag && i>4 && c.card.element==Water;
+				var floodbuff = floodingFlag && i>4 && cr.card.element==Water;
 				cr.atk += floodbuff?5:cr.status.burrowed?4:2;
 				cr.buffhp(floodbuff?2:1);
 				cr.delay(1);
