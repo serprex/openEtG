@@ -174,7 +174,7 @@ io.sockets.on("connection", function(socket) {
 		var startdeck = starter[data.e];
 		user.deck = startdeck || starter[0];
 		user.starter = user.deck;
-		user.pool = "";
+		user.pool = [];
 		user.quest = 0;
 		this.emit("userdump", useruser(user));
 	});
