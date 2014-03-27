@@ -564,7 +564,7 @@ innovation:function(c,t){
 },
 integrity:function(c,t){
 	var activeType = ["auto", "hit", "buff", "death"];
-	var shardTally = [0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0];
+	var shardTally = [0, 0, 0,0 , 1, 0, 0, 0, 0, 0, 0, 0, 0];
 	var shardSkills = [
 		[],
 		["deadalive", "mutation", "paradox", "improve", "scramble", "antimatter"],
@@ -594,7 +594,7 @@ integrity:function(c,t){
 		siphon: -1, vampire: -2, liquid: 2, steal: 3,
 		lobotomize: 2, quint: 2,
 	};
-	var stat=c.card.upped?5:4;
+	var stat=c.card.upped?1:0;
 	for(var i=c.owner.hand.length-1; i>=0; i--){
 		var card = c.owner.hand[i].card;
 		if (card.passives.shard){
@@ -610,11 +610,12 @@ integrity:function(c,t){
 		stat += shardTally[i]*2;
 		if (shardTally[i]>num){
 			num = shardTally[i];
-			active = shardSkills[i][num];
+			active = shardSkills[i][num-1];
 		}
 	}
 	var actives = {}, cost = shardCosts[active];
-	actives[cost<0?activeType[~cost]:"cast"] = Actives[active];
+	actives[cost < 0 ? activeType[~cost] : "cast"] = Actives[active];
+	cast = cost;
 	var passives = {};
 	var status = {};
 	if (shardTally[Air]>0){

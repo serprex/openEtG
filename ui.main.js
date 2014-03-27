@@ -1505,7 +1505,7 @@ function startStore() {
 	var bplatinum = makeButton(425, 280, 100, 200, boosters[7]);
 	bplatinum.click = function () {
 	    packrarity = 4;
-	    tinfo2.setText("Platinum Pack: 3x Uncommon + 2x Rare + 1x Very Rare");
+	    tinfo2.setText("Platinum Pack: 3x Uncommon + 2x Rare + 1x Shard");
 	    cardamount = 6;
 	    cost = 110;
 	}
