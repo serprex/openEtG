@@ -379,6 +379,9 @@ io.sockets.on("connection", function(socket) {
 	userEvent(socket, "updatequest", function (data, user) {
 		user.quest = data.newquest;
 	});
+	socket.on("guestchat", function (data) {
+        io.sockets.emit("chat", {message: data.message, u:"Guest" + (data.name ? "_" + data.name : ""), mode:"guest"})
+	});
 	socket.on("pvpwant", function(data) {
 		var pendinggame=rooms[data.room];
 		console.log(this.id + ": " + (pendinggame?pendinggame.id:"-"));

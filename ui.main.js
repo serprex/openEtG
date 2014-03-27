@@ -2587,7 +2587,10 @@ socket.on("chat", function (data) {
 		if (data.mode == "info")
 			color = "red";
 	}
-	chatBox.innerHTML += "<font color=" + color + ">" + u + data.message.replace(/</g, "&lt;").replace(/>/g,"&gt;") + "</font>";
+    if (data.mode == "guest")
+        chatBox.innerHTML += "<font color=black><i>" + u + data.message.replace(/</g, "&lt;").replace(/>/g, "&gt;") + "</i></font>";
+	else
+        chatBox.innerHTML += "<font color=" + color + ">" + u + data.message.replace(/</g, "&lt;").replace(/>/g, "&gt;") + "</font>";
 	chatBox.innerHTML += "<br>";
 	chatBox.scrollTop = chatBox.scrollHeight;
 });
@@ -2616,8 +2619,11 @@ socket.on("tradecanceled", function (data) {
 function maybeSendChat(e) {
 	e.cancelBubble = true;
 	if (e.keyCode != 13)return;
-	if (chatinput.value && user){
-		userEmit("chat", { message: chatinput.value });
+	if (chatinput.value) {
+        if (user)
+            userEmit("chat", { message: chatinput.value });
+        else
+            socket.emit("guestchat", {message: chatinput.value, name: username.value});
 		chatinput.value = "";
 	}
 }
