@@ -150,10 +150,10 @@ function getDay(){
 }
 
 var starter = [
-	"01530015660159001599016220d4sa034sb024sd014vm014vu0152p0155u015c1015cc015fa015il015in015lf015ln015os015oj015ri015rn015uo015uv018pi",
-	"0253101532034sa014t3094vc024vi034vk014vp024vs014vt014vd034ve014vf0452g0552m0152r018pk",
+	"0156501598015990d4sa034sd014td034vj0152l0155t0158q015c1015cc015fi015f6015if015ii015lb015ll015os015oj015rl015v3015uv0161s018pi", //New
+	"01502034sa014t3014sd0b4vc024vi014vj014vh014vv014vp034vs024vd014ve014vf055uk015us015v3015uq015up015uv018pt", //New
 	"0153002532015630256501566034sa014t30952g0152i0252m0152j0252k0152n0252p0352t0152r0152h0455k0255t018pl",
-	"0156203564035650159502599034sa014t30a55k0255q0355t0155r0255l0155o0358o0258t0158p0158q018pm",
+	"0156203564025650159502599034sa014sd014t50b55k0155q0255t0255r0255l0155o0458o0158t0258q018pm",
 	"0259101593015940259603599034sa014t50858o0358u0258p0258q0159a0158r055bs025c2015c7025c9018pn",
 	"034sa034td0b5bs035c0025c2015c8025c7035ce015c6015c9015c3015bt035f9025fh025fb015fa018po",
 	"034sa034t4085f0035f1035f3025f4025ff015fh015f6015f5015fc015f2015f9055i4015ia025ii015i9015ig018pp",
@@ -287,7 +287,8 @@ io.sockets.on("connection", function(socket) {
 				usersock[f].emit("pvpgive", { first: !first, seed: seed, deck: deck1, urdeck: deck0, foename:u});
 			} else {
 				duels[u] = f;
-				usersock[f].emit("chat", { u: "Message", message: u + " wants to duel with you!", mode:"info" });
+				usersock[f].emit("chat", { message: u + " wants to duel with you!", mode: "info" });
+				this.emit("chat", { mode: "info", message: "You have sent a PvP request to " + f + "!" });
 			}
 		}
 	});
@@ -337,8 +338,9 @@ io.sockets.on("connection", function(socket) {
 				this.emit("tradegive", { first: false });
 				usersock[f].emit("tradegive", { first: true });
 			} else {
-				trades[u] = f;
-				if (usersock[f]) usersock[f].emit("chat", { mode:"info", message: u + " wants to trade with you!" });
+			    trades[u] = f;
+			    if (usersock[f]) usersock[f].emit("chat", { mode: "info", message: u + " wants to trade with you!" });
+			    this.emit("chat", { mode: "info", message: "You have sent a trade request to " + f + "!" });
 			}
 		}
 	});

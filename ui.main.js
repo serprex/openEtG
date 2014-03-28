@@ -1,4 +1,4 @@
-var Cards, CardCodes,Targeting, targetingMode, targetingModeCb, targetingText, game, discarding, animCb, user, renderer, endturnFunc, cancelFunc, foeDeck, player2summon, player2Card;
+var Cards, CardCodes, Targeting, targetingMode, targetingModeCb, targetingText, game, discarding, animCb, user, renderer, endturnFunc, cancelFunc, foeDeck, player2summon, player2Card, guestname;
 (function(g){
 	var htmlElements = ["leftpane", "chatArea", "chatinput", "deckimport", "aideck", "foename", "airefresh", "change", "login", "password", "challenge", "aievalopt", "chatBox", "trade", "bottompane"];
 	for(var i=0; i<htmlElements.length; i++){
@@ -350,6 +350,18 @@ function initTrade(data) {
 		editoreleicons.push(sprite);
 		editorui.addChild(sprite);
 	}
+	function adjustRarity(card){
+	    var rarity = card.rarity;
+	    if (card.upped){
+	        if (rarity == 1)
+	            rarity = 2;
+	        else if (rarity == 3)
+	            rarity = 4;
+	        else
+                rarity += 6
+	    }
+	    return rarity;
+	}
 	for (var i = 0; i < 6; i++) {
 		editorcolumns.push([[], []]);
 		for (var j = 0; j < 15; j++) {
@@ -359,8 +371,8 @@ function initTrade(data) {
 			sprcount.position.set(102, 4);
 			sprite.addChild(sprcount);
 			(function (_i, _j) {
-				sprite.click = function () {
-					if (player2Card && CardCodes[player2Card].rarity != CardCodes[cardartcode].rarity) chatArea.value = "You can only trade cards with the same rarity";
+			    sprite.click = function () {
+					if (player2Card && adjustRarity(CardCodes[player2Card]) != adjustRarity(CardCodes[cardartcode])) chatArea.value = "You can only trade cards with the same rarity";
 					else if (cardChosen) chatArea.value = "You have already selected a card";
 					else if (!myTurn) chatArea.value = "You need to wait for your friend to choose a card first";
 					else if (isFreeCard(CardCodes[cardartcode])) chatArea.value = "You can't trade a free card, that would just be cheating!";
@@ -737,16 +749,17 @@ function mkAi(level){
 			}
 			var aideckstring = aideck.value, deck;
 			if (!user && aideckstring){
-				deck = aideckstring.split(" ");
+			    deck = aideckstring.split(" ");
+			    gameprice = (level == 1 ? 0 : (level == 2 ? 5 : 10));
 			} else {
-				if (user && level>1){
-					if (user.gold<10){
-						chatArea.value = "Requires 10\u00A4";
-						return;
-					}
-					user.gold -= 10;
-					userEmit("subgold", { g: 10 });
-					gameprice = 10;
+			    if (user){
+			        if (user.gold < gameprice) {
+			            chatArea.value = "Requires " + gameprice + "\u00A4";
+			            return;
+			        }			       
+					user.gold -= gameprice;
+					userEmit("subgold", { g: gameprice });
+
 				}
 				var cardcount = {};
 				var eles = [Math.ceil(Math.random()*12), Math.ceil(Math.random()*12)], ecost = [];
@@ -847,6 +860,7 @@ function mkAi(level){
 			
 			initGame({ first: Math.random() < .5, deck: deck, urdeck: urdeck, seed: Math.random() * etg.MAX_INT, hp: level == 1 ? 100 : (level == 2 ? 125 : 150), aimarkpower: level == 3 ? 2 : 1, foename:foename}, aievalopt.checked ? aiEvalFunc : aiFunc);
 			game.cost = gameprice;
+			game.level = level;
 			game.gold = level==1?5:(level==2?10:20);
 		}
 	}
@@ -1008,7 +1022,7 @@ function startMenu() {
 	bai1.click = mkAi(2);
 	bai1.mouseover = function () {
 		tinfo.setText("Mages have a few upgraded cards.");
-		tcost.setText("Cost:     10");
+		tcost.setText("Cost:     5");
 		igold2.visible = true;
 	}
 	menuui.addChild(bai1);
@@ -1983,9 +1997,10 @@ function startMatch(){
 					}else{
 						var elewin = foeDeck[Math.floor(Math.random() * foeDeck.length)];
 						rareAllowed = Math.random() < .3 ? 3 : 2;
+                        uppedAllowed = 
 						cardwon = PlayerRng.randomcard(elewin.upped, function(x){ return x.element == elewin.element && x.type != PillarEnum && x.rarity <= rareAllowed; });
 					}
-					if (!game.player2.ai){
+					if (!game.player2.ai || game.level < 3){
 						cardwon = cardwon.asUpped(false);
 					}
 					var data = {c:cardwon.code};
@@ -2588,9 +2603,9 @@ socket.on("chat", function (data) {
 			color = "red";
 	}
     if (data.mode == "guest")
-        chatBox.innerHTML += "<font color=black><i>" + u + data.message.replace(/</g, "&lt;").replace(/>/g, "&gt;") + "</i></font>";
+        chatBox.innerHTML += "<font color=black><i><b>" + u + "</b>" + data.message.replace(/</g, "&lt;").replace(/>/g, "&gt;") + "</i></font>";
 	else
-        chatBox.innerHTML += "<font color=" + color + ">" + u + data.message.replace(/</g, "&lt;").replace(/>/g, "&gt;") + "</font>";
+        chatBox.innerHTML += "<font color=" + color + "><b>" + u + "</b>" + data.message.replace(/</g, "&lt;").replace(/>/g, "&gt;") + "</font>";
 	chatBox.innerHTML += "<br>";
 	chatBox.scrollTop = chatBox.scrollHeight;
 });
@@ -2620,12 +2635,23 @@ function maybeSendChat(e) {
 	e.cancelBubble = true;
 	if (e.keyCode != 13)return;
 	if (chatinput.value) {
-        if (user)
-            userEmit("chat", { message: chatinput.value });
-        else
-            socket.emit("guestchat", {message: chatinput.value, name: username.value});
+	    if (user)
+	        userEmit("chat", { message: chatinput.value });
+	    else {
+	        if (!guestname) guestname = randomGuestName();
+	        var name = username.value ? username.value : guestname;
+
+	        socket.emit("guestchat", { message: chatinput.value, name: name });
+	    }
 		chatinput.value = "";
 	}
+}
+function randomGuestName() {
+    res = "";
+    for (var i = 0; i < 5; i++) {
+        res += Math.floor(Math.random() * 10);
+    }
+    return res;
 }
 function maybeLogin(e) {
 	e.cancelBubble = true;
