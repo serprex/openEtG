@@ -12,7 +12,7 @@ How to setup on Windows:
 	name the csv files to the name of the sheet minus DB (you name the creature sheet "creature", the shield sheet "shield", etc)
 	If you did install Python 3: Run updatedb.py
 
-4.	Hold Shift and right-click on your openEtG folder that you created in step 1, click Open command window here, type "npm install"
+4.	Hold Shift and right-click on your openEtG folder that you created in step 2, click Open command window here, type "npm install"
 
 5. 	then run "npm install -g browserify"
 

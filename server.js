@@ -34,7 +34,11 @@ function loginRespond(res, servuser, pass){
 			user.oracle = true;
 		}
 		res.writeHead("200");
-		res.end(JSON.stringify(user));
+		db.hgetall("Q:" + user.name, function (err, obj) {
+		    user.quest = obj;
+            res.end(JSON.stringify(user));
+		});
+		
 	}
 	if(!servuser.salt){
 		servuser.salt = crypto.pseudoRandomBytes(16).toString("base64");
@@ -143,32 +147,26 @@ function useruser(servuser){
         gold: servuser.gold,
         ocard: servuser.ocard,
         starter: servuser.starter ? servuser.starter : null,
-        quest: servuser.quest | null
 	};
 }
 function getDay(){
 	return Math.floor(Date.now()/86400000);
 }
-//To add: Water: 4sa 4sa 4sa 4sd 4sd 4td 55k 55k 55k 55k 55t 55t 55r 565 565 5i4 5i4 5i4 5i4 5i4 5i4 5i4 5i4 5i4 5i4 5i4 5i4 5i8 5i8 5i6 5i6 5i6 5ip 5ip 5ie 5ie 5i9 5ig 5ig 5id 8pl
-// Light: 4sa 4sa 4sa 4sd 4tb 5l8 5l8 5l8 5l8 5l8 5l8 5l8 5l8 5l8 5l8 5l8 5lo 5lo 5lp 5lp 5lb 5lb 5lb 5ld 5lm 5lm 5ln 5ll 5ll 5la 5oc 5oc 5oc 5oc 5on 5on 5os 5os 5oe 5or 8pr
-//Air: 4sa 4sa 4sa 4sd 4t4 5f0 5f0 5f0 5f0 5f0 5f3 5f4 5f4 5f6 5fc 5oc 5oc 5oc 5oc 5oc 5oc 5oc 5oc 5oc 5oc 5oc 5oc 5od 5od 5og 5os 5os 5oh 5oe 5ou 5ou 5om 5or 5or 5of 8po
-//Time: 4sa 4sa 4sa 4sd 4sd 4t4 5rg 5rg 5rg 5rg 5rg 5rg 5rg 5rg 5rg 5rg 5rg 5rg 5ri 5ri 5rr 5rr 5rl 5ru 5ru 5s0 5rn 5rm 61o 61o 61o 61o 61o 61q 61q 627 627 627 61t 61t 8pu
-//Darkness: 4sa 4sa 4sa 4sd 4t4 52g 52g 52g 52g 52p 52t 52t 5uk 5uk 5uk 5uk 5uk 5uk 5uk 5uk 5uk 5uk 5um 5um 5um 5un 5un 5us 5v3 5v3 5uq 5ut 5ut 5ut 5up 5vb 5uo 5uv 5uv 5ul 8pk
-//Aether:  4sa 4sa 4sa 4sd 4t4 4vc 4vc 4vc 4vc 4vc 4vc 4vp 4vp 4vs 4vs 4vs 502 61o 61o 61o 61o 61o 61o 61o 61o 61o 61o 61o 61q 61q 620 620 627 627 61s 61s 61s 61t 61t 61v 8pj  
+//Aether:    
 var starter = [
-	"0156501598015990d4sa034sd014td034vj0152l0155t0158q015c1015cc015fi015f6015if015ii015lb015ll015os015oj015rl015v3015uv0161s018pi", //New
-	"01502034sa014t3014sd0b4vc024vi014vj014vh014vv014vp034vs024vd014ve014vf055uk015us015v3015uq015up015uv018pt", //New
-	"0153002532015630256501566034sa014t30952g0152i0252m0152j0252k0152n0252p0352t0152r0152h0455k0255t018pl",
-	"0156203564025650159502599034sa014sd014t50b55k0155q0255t0255r0255l0155o0458o0158t0258q018pm", //New
-	"03590015910159403599034sa014sd014t40b58o0258u0158p0258q0158s0158r045rg025ri025rr015rn018ps", //New
-	"034sa014sd014td0c5bs015bu025c1015cb025c0015c8025c7015c6015cr015c3015bt045i4015ia015i6025il025ie018ps", //New
-	"034sa014sd024t40b5f0025f1025f3015f4025fh025fi025fa015f5025fc015f2045l8025lp025lr018pq", //New
-	"044sa014td0a5i4025i5025i7015i8015ia015if015iq025ip035ie015id045oc015og025on025os015ot015or018pr",
-	"034sa014t40a5l8015lj025lo025lp015ld045lf025lm015ln015ll015la045rg035rh015ri015s1025ru018ps",
-	"034sa014t3035l8015lc035lb015lf015ln0a5oc025od025oh035ok035oe025oo025ot015or015op015of018pq",
-	"034sa014t30a5rg025ri015rp025rr025rk035rq015s1015rl015ru015s0015rn015rm035uk035v1015v3025vb015uu018pi",
-	"016210162402627034sa014t3085uk035um015un025us015v1035v3025uq025ut015up015v2015uv015va015ul0461o0161q018pu",
-	"016200162101623026240162501627034sa014t3034vc014vi024vk014vt014ve024vo0a61o0261p0261q0261s0161t0161r0161v018pj"
+	"0156501598015990d4sa034sd014td034vj0152l0155t0158q015c1015cc015fi015f6015if015ii015lb015ll015os015oj015rl015v3015uv0161s018pi",
+	"01502034sa014t3014sd0b4vc024vi014vj014vh014vv014vp034vs024vd014ve014vf055uk015us015v3015uq015up015uv018pt",
+	"0153102532034sa014sd014t40c52g0252i0252j0252k0252n0152p0152t0152r0152h045bs025cb025cr018pn",
+	"0156203564025650159502599034sa014sd014t50b55k0155q0255t0255r0255l0155o0458o0158t0258q018pm",
+	"03590015910159403599034sa014sd014t40b58o0258u0158p0258q0158s0158r045rg025ri025rr015rn018ps",
+	"034sa014sd014td0c5bs015bu025c1015cb025c0015c8025c7015c6015cr015c3015bt045i4015ia015i6025il025ie018ps",
+	"034sa014sd024t40b5f0025f1025f3015f4025fh025fi025fa015f5025fc015f2045l8025lp025lr018pq",
+	"02565034sa024sd014td0455k0255t0155r0c5i4025i8035i6025ip025ie015i9025ig015id018pl",
+	"034sa014sd014tb0b5l8025lo025lp035lb015ld025lm015ln025ll015la045oc025on025os015oe015or018pr",
+	"034sa014sd014t4055f0015f3025f4015f6015fc0c5oc025od015og025os015oh015oe025ou015om025or015of018po",
+	"03627034sa024sd014t40c5rg025ri025rr015rl025ru015s0015rn015rm0561o0261q0261t018pu",
+	"034sa014sd014t40452g0152p0252t0a5uk035um025un015us025v3015uq035ut015up015vb015uo025uv015ul018pk",
+	"015020262002627034sa014sd014t4064vc024vp034vs0b61o0261q0361s0261t0161v018pj"
 ];
 
 io.sockets.on("connection", function(socket) {
@@ -190,8 +188,9 @@ io.sockets.on("connection", function(socket) {
 		delete users[u];
 	});
 	userEvent(socket, "delete", function(data, user) {
-		var u=data.u;
-		db.del("U:"+u);
+	    var u = data.u;
+	    db.del("U:" + u);
+	    db.del("Q:" + u);
 		delete users[u];
 	});
 	userEvent(socket, "addcard", function(data, user) {
@@ -385,7 +384,8 @@ io.sockets.on("connection", function(socket) {
 			io.sockets.emit("chat", data);
 	});
 	userEvent(socket, "updatequest", function (data, user) {
-		user.quest[data.quest] = data.newstage;
+	    var qu = "Q:" + data.u;
+	    db.hset(qu, data.quest, data.newstage);
 	});
 	socket.on("guestchat", function (data) {
         io.sockets.emit("chat", {message: data.message, u:"Guest" + (data.name ? "_" + data.name : ""), mode:"guest"})

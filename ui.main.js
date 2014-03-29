@@ -733,20 +733,30 @@ function mkDemigod() {
 	game.cost = 20;
 	game.gold = 30;
 }
-var questNecromancerDecks = ["52g 52g 52g 52g 52g 52g 52g 52g 52g 52g 52g 52m 52m 52m 52m 52m 52m 52m 52m 52m 52m 52m 52m 531 531 531 531 52n 52n 52n 52n 717 717 8pk"];
+var questNecromancerDecks = ["52g 52g 52g 52g 52g 52g 52g 52g 52g 52g 52g 52m 52m 52m 52m 52m 52m 52m 52m 52m 52m 52m 52m 531 531 531 531 52n 52n 52n 52n 717 717 8pk", "5bs 5bs 5bs 5bs 5bs 5bs 5bs 5bs 5bs 5bs 5bs 5bs 5bs 5bu 5bu 5bu 5bu 5c1 5c1 5c1 5c1 5ca 5ca 8pp",
+"52g 52g 52g 52g 52g 52g 52g 52g 52g 52g 52m 52m 52m 52m 52m 52m 52m 531 531 531 52l 52l 52l 535 535 535 535 717 717 717 8pk"];
 function mkQuestAi(quest, stage) {
     console.log(quest, stage);
     var deck;
     var foename;
-    var markpower;
-    var hp;
+    var markpower = 1;
+    var hp = 100;
     if (quest == "necromancer") {
-        if (stage == 1) {
-            deck = questNecromancerDecks[0].split(" ");
+        deck = questNecromancerDecks[stage].split(" ");
+        if (stage == 0) {
             foename = "Skeleton Horde";
             hp = 80;
             markpower = 2;
         }
+        else if(stage == 1){
+            foename = "Forest Wildlife"
+            hp = 60;
+        }
+        else if(stage = 2){
+            foename = "Evil Necromancer";
+            hp = 120;
+            markpower = 2;
+        }            
         else 
             return;
     }
@@ -899,16 +909,16 @@ var questLoader = new PIXI.AssetLoader(["assets/questIcons.png"])
 questLoader.onComplete = function () {
     var tex =  PIXI.Texture.fromImage("assets/questIcons.png");
     for (var i = 0; i < 2; i++) {
-        questIcons.push(new PIXI.Texture(tex,new PIXI.Rectangle(i*64,0,64,64)));
+        questIcons.push(new PIXI.Texture(tex,new PIXI.Rectangle(i*32,0,32,32)));
     }    
     maybeStartMenu();
 }
 questLoader.load();
-var backgrounds = ["assets/bg_lobby.png", "assets/bg_shop.png"];
+var backgrounds = ["assets/bg_default.png", "assets/bg_lobby.png", "assets/bg_shop.png", "assets/bg_quest.png"];
 var bgLoader = new PIXI.AssetLoader(backgrounds);
 bgLoader.onComplete = function() {
 	var tmp = [];
-	for(var i = 0; i < 2; i++) tmp.push(PIXI.Texture.fromImage(backgrounds[i]));
+	for(var i = 0; i < 4; i++) tmp.push(PIXI.Texture.fromImage(backgrounds[i]));
 	backgrounds = tmp;
 	maybeStartMenu();
 }
@@ -1010,7 +1020,7 @@ function startMenu() {
 	menuui = new PIXI.Stage(0x000000, true);
 		
 	//lobby background
-	var bglobby = new PIXI.Sprite(backgrounds[0]);
+	var bglobby = new PIXI.Sprite(backgrounds[1]);
 	bglobby.interactive = true;
 	bglobby.hitArea = new PIXI.Rectangle(0, 0, 900, 670);
 	bglobby.mouseover = function() { 
@@ -1243,24 +1253,41 @@ function startMenu() {
 	refreshRenderer();
 }
 function startQuestWindow() {
-    questui = new PIXI.Stage(0x454545, true);
-    var tinfo = makeText(50, 26, "", true)
-    var necroProgress = user.quest.necromancer ? user.quest.necromancer : 1;
-    var quest1Button = makeButton(200, 200, 64, 64, necroProgress > 1 ? questIcons[1] : questIcons[0]);
-    quest1Button.mouseover = function () {
-        tinfo.setText("A horde of skeletons have beens seen nearby, perhaps you should go investigating.")
+    var questui = new PIXI.Stage(0x454545, true);
+    var bgquest = new PIXI.Sprite(backgrounds[3]);
+    bgquest.interactive = true;
+    bgquest.hitArea = new PIXI.Rectangle(0, 0, 900, 670);
+    bgquest.mouseover = function () {
+        tinfo.setText("");
     }
-    quest1Button.click = function(){
-        mkQuestAi("necromancer",1);
-    };
+    questui.addChild(bgquest);
+    var tinfo = makeText(50, 26, "", true)
+    var quest1Buttons = [];
+    function makeQuestButton(quest, stage, text, pos) {
+        var button = makeButton(pos[0], pos[1], 64, 64, user.quest[quest] > stage ? questIcons[1] : questIcons[0]);
+        button.mouseover = function () {
+            tinfo.setText(text);
+        }
+        button.click = function () {
+            mkQuestAi(quest, stage);
+        }
+        return button;
+    }
+    var necromancerTexts = ["A horde of skeletons have been seen nearby, perhaps you should go investigating.", "They seemed to come from the forest, so you go inside.", "Deep inside the forest you find the necromancer responsible for filling the lands with undead!"];
+    var necromancerPos = [[200, 200], [200, 250], [225, 300]];
+    for (var i = 0; i <= user.quest.necromancer; i++) {
+        if (necromancerTexts[i]) {
+            var button = makeQuestButton("necromancer", i, necromancerTexts[i], necromancerPos[i]);
+            questui.addChild(button);
+        }
+    }
     var bexit = makeButton(750, 246, 75, 18, buttons[11]);
     bexit.click = function () {
         startMenu();
     }
     questui.addChild(tinfo);
-    questui.addChild(quest1Button);
     questui.addChild(bexit);
-
+    animCb = undefined;
     mainStage = questui;
     refreshRenderer();
 }
@@ -1311,6 +1338,9 @@ function upgradestore() {
         }
     }
     var upgradeui = new PIXI.Stage(0x336699, true);
+    var bg = new PIXI.Sprite(backgrounds[0]);
+    upgradeui.addChild(bg);
+
     var goldcount = new PIXI.Text(user.gold + "g", { font: "bold 16px Dosis" });
     goldcount.position.set(30, 100);
     upgradeui.addChild(goldcount);
@@ -1428,7 +1458,7 @@ function startStore() {
 	var storeui = new PIXI.Stage(0x000000, true);
 	
 	//shop background
-	var bgshop = new PIXI.Sprite(backgrounds[1]);
+	var bgshop = new PIXI.Sprite(backgrounds[2]);
 	storeui.addChild(bgshop);
 	
 	//gold text
@@ -1684,6 +1714,8 @@ function startEditor(){
 		var cardminus, cardpool, cardartcode;
 		chatArea.value = "Build a 30-60 card deck";
 		var editorui = new PIXI.Stage(0x336699, true), editorelement = 0;
+		var bg = new PIXI.Sprite(backgrounds[0]);
+		editorui.addChild(bg);
 		var bclear = new PIXI.Text("Clear", {font: "16px Dosis"});
 		var bsave = new PIXI.Text("Done", {font: "16px Dosis"});
 		var bimport = new PIXI.Text("Import", {font: "16px Dosis"});
@@ -2249,7 +2281,7 @@ function startMatch(){
 			        user.quest[game.quest[0]] = game.quest[1] + 1;
 			    }
 			    game = undefined;
-			    startMenu();
+			    startQuestWindow();
 			}
 			else {
 			    game = undefined;
@@ -2653,6 +2685,8 @@ socket.on("userdump", function(data){
 	if (user.starter) {
 		user.starter = etg.decodedeck(user.starter);
 	}
+	if (!user.quest)
+	    user.quest = { necromancer: 0 };
 	startMenu();
 });
 socket.on("passchange", function(data){
@@ -2791,7 +2825,7 @@ function loginClick(){
 							user.starter = etg.decodedeck(user.starter);
 						}
 						if (!user.quest) {
-						    user.quest = { "necromancer": 1 };
+						    user.quest = { necromancer: 0 };
 						}
 						console.log(user.quest);
 						startMenu();
