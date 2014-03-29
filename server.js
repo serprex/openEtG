@@ -135,28 +135,34 @@ function prepuser(servuser){
 	servuser.gold = parseInt(servuser.gold || 0);
 }
 function useruser(servuser){
-	return {
-		auth: servuser.auth,
-		name: servuser.name,
-		deck: servuser.deck,
-		pool: servuser.pool,
-		gold: servuser.gold,
-		ocard: servuser.ocard,
-		starter: servuser.starter ? servuser.starter : null
+    return {
+        auth: servuser.auth,
+        name: servuser.name,
+        deck: servuser.deck,
+        pool: servuser.pool,
+        gold: servuser.gold,
+        ocard: servuser.ocard,
+        starter: servuser.starter ? servuser.starter : null,
+        quest: servuser.quest | null
 	};
 }
 function getDay(){
 	return Math.floor(Date.now()/86400000);
 }
-
+//To add: Water: 4sa 4sa 4sa 4sd 4sd 4td 55k 55k 55k 55k 55t 55t 55r 565 565 5i4 5i4 5i4 5i4 5i4 5i4 5i4 5i4 5i4 5i4 5i4 5i4 5i8 5i8 5i6 5i6 5i6 5ip 5ip 5ie 5ie 5i9 5ig 5ig 5id 8pl
+// Light: 4sa 4sa 4sa 4sd 4tb 5l8 5l8 5l8 5l8 5l8 5l8 5l8 5l8 5l8 5l8 5l8 5lo 5lo 5lp 5lp 5lb 5lb 5lb 5ld 5lm 5lm 5ln 5ll 5ll 5la 5oc 5oc 5oc 5oc 5on 5on 5os 5os 5oe 5or 8pr
+//Air: 4sa 4sa 4sa 4sd 4t4 5f0 5f0 5f0 5f0 5f0 5f3 5f4 5f4 5f6 5fc 5oc 5oc 5oc 5oc 5oc 5oc 5oc 5oc 5oc 5oc 5oc 5oc 5od 5od 5og 5os 5os 5oh 5oe 5ou 5ou 5om 5or 5or 5of 8po
+//Time: 4sa 4sa 4sa 4sd 4sd 4t4 5rg 5rg 5rg 5rg 5rg 5rg 5rg 5rg 5rg 5rg 5rg 5rg 5ri 5ri 5rr 5rr 5rl 5ru 5ru 5s0 5rn 5rm 61o 61o 61o 61o 61o 61q 61q 627 627 627 61t 61t 8pu
+//Darkness: 4sa 4sa 4sa 4sd 4t4 52g 52g 52g 52g 52p 52t 52t 5uk 5uk 5uk 5uk 5uk 5uk 5uk 5uk 5uk 5uk 5um 5um 5um 5un 5un 5us 5v3 5v3 5uq 5ut 5ut 5ut 5up 5vb 5uo 5uv 5uv 5ul 8pk
+//Aether:  4sa 4sa 4sa 4sd 4t4 4vc 4vc 4vc 4vc 4vc 4vc 4vp 4vp 4vs 4vs 4vs 502 61o 61o 61o 61o 61o 61o 61o 61o 61o 61o 61o 61q 61q 620 620 627 627 61s 61s 61s 61t 61t 61v 8pj  
 var starter = [
 	"0156501598015990d4sa034sd014td034vj0152l0155t0158q015c1015cc015fi015f6015if015ii015lb015ll015os015oj015rl015v3015uv0161s018pi", //New
 	"01502034sa014t3014sd0b4vc024vi014vj014vh014vv014vp034vs024vd014ve014vf055uk015us015v3015uq015up015uv018pt", //New
 	"0153002532015630256501566034sa014t30952g0152i0252m0152j0252k0152n0252p0352t0152r0152h0455k0255t018pl",
-	"0156203564025650159502599034sa014sd014t50b55k0155q0255t0255r0255l0155o0458o0158t0258q018pm",
-	"0259101593015940259603599034sa014t50858o0358u0258p0258q0159a0158r055bs025c2015c7025c9018pn",
-	"034sa034td0b5bs035c0025c2015c8025c7035ce015c6015c9015c3015bt035f9025fh025fb015fa018po",
-	"034sa034t4085f0035f1035f3025f4025ff015fh015f6015f5015fc015f2015f9055i4015ia025ii015i9015ig018pp",
+	"0156203564025650159502599034sa014sd014t50b55k0155q0255t0255r0255l0155o0458o0158t0258q018pm", //New
+	"03590015910159403599034sa014sd014t40b58o0258u0158p0258q0158s0158r045rg025ri025rr015rn018ps", //New
+	"034sa014sd014td0c5bs015bu025c1015cb025c0015c8025c7015c6015cr015c3015bt045i4015ia015i6025il025ie018ps", //New
+	"034sa014sd024t40b5f0025f1025f3015f4025fh025fi025fa015f5025fc015f2045l8025lp025lr018pq", //New
 	"044sa014td0a5i4025i5025i7015i8015ia015if015iq025ip035ie015id045oc015og025on025os015ot015or018pr",
 	"034sa014t40a5l8015lj025lo025lp015ld045lf025lm015ln015ll015la045rg035rh015ri015s1025ru018ps",
 	"034sa014t3035l8015lc035lb015lf015ln0a5oc025od025oh035ok035oe025oo025ot015or015op015of018pq",
@@ -175,7 +181,7 @@ io.sockets.on("connection", function(socket) {
 		user.deck = startdeck || starter[0];
 		user.starter = user.deck;
 		user.pool = [];
-		user.quest = 0;
+		user.quest = { necromancer: 1 };
 		this.emit("userdump", useruser(user));
 	});
 	userEvent(socket, "logout", function(data, user) {
@@ -379,7 +385,7 @@ io.sockets.on("connection", function(socket) {
 			io.sockets.emit("chat", data);
 	});
 	userEvent(socket, "updatequest", function (data, user) {
-		user.quest = data.newquest;
+		user.quest[data.quest] = data.newstage;
 	});
 	socket.on("guestchat", function (data) {
         io.sockets.emit("chat", {message: data.message, u:"Guest" + (data.name ? "_" + data.name : ""), mode:"guest"})

@@ -733,11 +733,37 @@ function mkDemigod() {
 	game.cost = 20;
 	game.gold = 30;
 }
-
+var questNecromancerDecks = ["52g 52g 52g 52g 52g 52g 52g 52g 52g 52g 52g 52m 52m 52m 52m 52m 52m 52m 52m 52m 52m 52m 52m 531 531 531 531 52n 52n 52n 52n 717 717 8pk"];
+function mkQuestAi(quest, stage) {
+    console.log(quest, stage);
+    var deck;
+    var foename;
+    var markpower;
+    var hp;
+    if (quest == "necromancer") {
+        if (stage == 1) {
+            deck = questNecromancerDecks[0].split(" ");
+            foename = "Skeleton Horde";
+            hp = 80;
+            markpower = 2;
+        }
+        else 
+            return;
+    }
+    else 
+        return;
+    var urdeck = getDeck();
+    if ((user && (!user.deck || user.deck.length < 31)) || urdeck.length < 11) {
+        startEditor();
+        return;
+    }
+    initGame({ first: Math.random() < .5, deck: deck, urdeck: urdeck, seed: Math.random() * etg.MAX_INT, hp: hp, aimarkpower: markpower, foename: foename }, aievalopt.checked ? aiEvalFunc : aiFunc);
+    game.quest = [quest,stage];
+}
 function mkAi(level){
 	return function() {
 		var uprate = level==1?0:(level==2?.1:.3);
-		var gameprice = 0;
+		var gameprice = (level == 1 ? 0 : (level == 2 ? 5 : 10));
 		function upCode(x){
 			return CardCodes[x].asUpped(Math.random()<uprate).code;
 		}
@@ -750,7 +776,6 @@ function mkAi(level){
 			var aideckstring = aideck.value, deck;
 			if (!user && aideckstring){
 			    deck = aideckstring.split(" ");
-			    gameprice = (level == 1 ? 0 : (level == 2 ? 5 : 10));
 			} else {
 			    if (user){
 			        if (user.gold < gameprice) {
@@ -868,14 +893,24 @@ function mkAi(level){
 
 // Asset Loaders
 var nopic = PIXI.Texture.fromImage("assets/null.png")
-var imageLoadingNumber = 7;
+var imageLoadingNumber = 8;
+var questIcons = [];
+var questLoader = new PIXI.AssetLoader(["assets/questIcons.png"])
+questLoader.onComplete = function () {
+    var tex =  PIXI.Texture.fromImage("assets/questIcons.png");
+    for (var i = 0; i < 2; i++) {
+        questIcons.push(new PIXI.Texture(tex,new PIXI.Rectangle(i*64,0,64,64)));
+    }    
+    maybeStartMenu();
+}
+questLoader.load();
 var backgrounds = ["assets/bg_lobby.png", "assets/bg_shop.png"];
 var bgLoader = new PIXI.AssetLoader(backgrounds);
 bgLoader.onComplete = function() {
 	var tmp = [];
 	for(var i = 0; i < 2; i++) tmp.push(PIXI.Texture.fromImage(backgrounds[i]));
 	backgrounds = tmp;
-	maybeStartMenu()
+	maybeStartMenu();
 }
 bgLoader.load();
 
@@ -884,7 +919,7 @@ var eleLoader = new PIXI.AssetLoader(["assets/esheet.png"]);
 eleLoader.onComplete = function() {
 	var tex = PIXI.Texture.fromImage("assets/esheet.png");
 	for (var i = 0; i < 13; i++) eicons.push(new PIXI.Texture(tex, new PIXI.Rectangle(i * 32, 0, 32, 32)));
-	maybeStartMenu()
+	maybeStartMenu();
 }
 eleLoader.load();
 
@@ -893,7 +928,7 @@ var backLoader = new PIXI.AssetLoader(["assets/backsheet.png"]);
 backLoader.onComplete = function() {
 	var tex = PIXI.Texture.fromImage("assets/backsheet.png");
 	for (var i = 0; i < 26; i++) cardBacks.push(new PIXI.Texture(tex, new PIXI.Rectangle(i * 132, 0, 132, 256)));
-	maybeStartMenu()
+	maybeStartMenu();
 }
 backLoader.load();
 
@@ -902,7 +937,7 @@ var rarityLoader = new PIXI.AssetLoader(["assets/raritysheet.png"]);
 rarityLoader.onComplete = function() {
 	var tex = PIXI.Texture.fromImage("assets/raritysheet.png");
 	for (var i = 0; i < 6; i++) rarityicons.push(new PIXI.Texture(tex, new PIXI.Rectangle(i * 10, 0, 10, 10)));
-	maybeStartMenu()
+	maybeStartMenu();
 }
 rarityLoader.load();
 
@@ -915,7 +950,7 @@ buttonLoader.onComplete = function() {
 			buttons.push(new PIXI.Texture(tex, new PIXI.Rectangle(j*75, i*25, 75, 25)));
 		}
 	}
-	maybeStartMenu()
+	maybeStartMenu();
 }
 buttonLoader.load();
 
@@ -926,7 +961,7 @@ boosterLoader.onComplete = function() {
 	for (var i = 0; i < 2; i++) 
 		for (var j = 0; j < 4; j++) 
 		    boosters.push(new PIXI.Texture(tex, new PIXI.Rectangle(j * 100, i * 150, 100, 150)));
-	maybeStartMenu()
+	maybeStartMenu();
 }
 boosterLoader.load();
 
@@ -934,7 +969,7 @@ var popups = [];
 var popupLoader = new PIXI.AssetLoader(["assets/popup_booster.png"]);
 popupLoader.onComplete = function() {
     for (var i = 0; i < 1; i++) popups.push(PIXI.Texture.fromImage("assets/popup_booster.png"));
-    maybeStartMenu()
+    maybeStartMenu();
 }
 popupLoader.load();
 
@@ -965,6 +1000,7 @@ function toggleB() {
 }
 function maybeStartMenu() {
     imageLoadingNumber--;
+    console.log(imageLoadingNumber);
     if (imageLoadingNumber == 0) {
         startMenu();
         requestAnimate();
@@ -1047,6 +1083,14 @@ function startMenu() {
 	}
 	menuui.addChild(bai3);
 	
+    //Quests button
+	var bquest = makeButton(50, 145, 75, 25, buttons[15]);
+	bquest.click = startQuestWindow;
+	bquest.mouseover = function () {
+	    tinfo.setText("Go on adventure!");
+	}
+	menuui.addChild(bquest);
+
 	//ai arena button
 	var baia = makeButton(50, 200, 75, 25, buttons[3]);
 	baia.click = function() {
@@ -1154,7 +1198,7 @@ function startMenu() {
 	}
 	menuui.addChild(bdelete);
 	
-	if (!user) toggleB(baia, bshop, bupgrade, binfoa, btopa, blogout, bdelete);
+	if (!user) toggleB(baia, bshop, bupgrade, binfoa, btopa, blogout, bdelete, bquest);
 	
 	//only display if user is logged in
 	if (user) {		
@@ -1178,7 +1222,7 @@ function startMenu() {
 	function logout(){
 		user = undefined;
 		
-		toggleB(baia, bshop, bupgrade, binfoa, btopa, blogout, bdelete);
+		toggleB(baia, bshop, bupgrade, binfoa, btopa, blogout, bdelete, bquest);
 		
 		tgold.setText("Sandbox");
 		tgold.position.set(755, 101);
@@ -1198,7 +1242,28 @@ function startMenu() {
 	mainStage = menuui;
 	refreshRenderer();
 }
+function startQuestWindow() {
+    questui = new PIXI.Stage(0x454545, true);
+    var tinfo = makeText(50, 26, "", true)
+    var necroProgress = user.quest.necromancer ? user.quest.necromancer : 1;
+    var quest1Button = makeButton(200, 200, 64, 64, necroProgress > 1 ? questIcons[1] : questIcons[0]);
+    quest1Button.mouseover = function () {
+        tinfo.setText("A horde of skeletons have beens seen nearby, perhaps you should go investigating.")
+    }
+    quest1Button.click = function(){
+        mkQuestAi("necromancer",1);
+    };
+    var bexit = makeButton(750, 246, 75, 18, buttons[11]);
+    bexit.click = function () {
+        startMenu();
+    }
+    questui.addChild(tinfo);
+    questui.addChild(quest1Button);
+    questui.addChild(bexit);
 
+    mainStage = questui;
+    refreshRenderer();
+}
 function editorCardCmp(x,y){
 	var cardx = CardCodes[x], cardy = CardCodes[y];
 	return cardx.upped - cardy.upped || cardx.element - cardy.element || cardx.cost-cardy.cost || (x>y)-(x<y);
@@ -1984,7 +2049,7 @@ function startMatch(){
 				cardart.position.y = pos.y>300?44:300;
 			}else cardart.visible = false;
 		}else{
-			if(game.winner == game.player1){
+			if(game.winner == game.player1 && !game.quest){
 				if (!cardwon){
 					var winnable = [];
 					for(var i=0; i<foeDeck.length; i++){
@@ -2000,7 +2065,7 @@ function startMatch(){
                         uppedAllowed = 
 						cardwon = PlayerRng.randomcard(elewin.upped, function(x){ return x.element == elewin.element && x.type != PillarEnum && x.rarity <= rareAllowed; });
 					}
-					if (!game.player2.ai || game.level < 3){
+					if (!game.player2.ai || (game.level && game.level < 3)){
 						cardwon = cardwon.asUpped(false);
 					}
 					var data = {c:cardwon.code};
@@ -2178,8 +2243,18 @@ function startMatch(){
 				userEmit("modarena", {aname: game.arena, won: game.winner == game.player2});
 				delete game.arena;
 			}
-			game = undefined;
-			startMenu();
+			if (user && game.quest) {
+			    if (game.winner == game.player1 && (user.quest[game.quest[0]] <= game.quest[1] || !(game.quest[0] in user.quest))) {
+			        userEmit("updatequest", { quest: game.quest[0], newstage: game.quest[1] + 1 });
+			        user.quest[game.quest[0]] = game.quest[1] + 1;
+			    }
+			    game = undefined;
+			    startMenu();
+			}
+			else {
+			    game = undefined;
+			    startMenu();
+			}
 		}else if (game.turn == game.player1){
 			if (game.phase == MulliganPhase1 || game.phase == MulliganPhase2){
 				if(!game.player2.ai){
@@ -2715,7 +2790,10 @@ function loginClick(){
 						if (user.starter) {
 							user.starter = etg.decodedeck(user.starter);
 						}
-						console.log(user.pool);
+						if (!user.quest) {
+						    user.quest = { "necromancer": 1 };
+						}
+						console.log(user.quest);
 						startMenu();
 					}
 				}else if (this.status == 404){
