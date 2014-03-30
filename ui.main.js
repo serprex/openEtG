@@ -1252,7 +1252,16 @@ function startMenu() {
 	mainStage = menuui;
 	refreshRenderer();
 }
+function startQuest(questname) {
+    if (!user.quest[questname] && user.quest[questname] != 0) {
+        user.quest[questname] = 0;
+        userEmit("updatequest", { quest: questname, newstage: 0 });
+    }
+}
 function startQuestWindow() {
+    //Start the first quest
+    startQuest("necromancer");
+
     var questui = new PIXI.Stage(0x454545, true);
     var bgquest = new PIXI.Sprite(backgrounds[3]);
     bgquest.interactive = true;
@@ -1275,10 +1284,12 @@ function startQuestWindow() {
     }
     var necromancerTexts = ["A horde of skeletons have been seen nearby, perhaps you should go investigating.", "They seemed to come from the forest, so you go inside.", "Deep inside the forest you find the necromancer responsible for filling the lands with undead!"];
     var necromancerPos = [[200, 200], [200, 250], [225, 300]];
-    for (var i = 0; i <= user.quest.necromancer; i++) {
-        if (necromancerTexts[i]) {
-            var button = makeQuestButton("necromancer", i, necromancerTexts[i], necromancerPos[i]);
-            questui.addChild(button);
+    if (user.quest.necromancer || user.quest.necromancer == 0) {
+        for (var i = 0; i <= user.quest.necromancer; i++) {
+            if (necromancerTexts[i]) {
+                var button = makeQuestButton("necromancer", i, necromancerTexts[i], necromancerPos[i]);
+                questui.addChild(button);
+            }
         }
     }
     var bexit = makeButton(750, 246, 75, 18, buttons[11]);
@@ -2686,7 +2697,8 @@ socket.on("userdump", function(data){
 		user.starter = etg.decodedeck(user.starter);
 	}
 	if (!user.quest)
-	    user.quest = { necromancer: 0 };
+	    user.quest = {};
+	convertQuest();
 	startMenu();
 });
 socket.on("passchange", function(data){
@@ -2803,6 +2815,11 @@ document.addEventListener("click", function(e){
 		e.preventDefault();
 	}
 });
+function convertQuest() {
+    for (var q in user.quest) {
+        q = parseInt(q);
+    }
+}
 function loginClick(){
 	if (!user){
 		var xhr = new XMLHttpRequest();
@@ -2825,9 +2842,10 @@ function loginClick(){
 							user.starter = etg.decodedeck(user.starter);
 						}
 						if (!user.quest) {
-						    user.quest = { necromancer: 0 };
+						    user.quest = {};
 						}
 						console.log(user.quest);
+						convertQuest();
 						startMenu();
 					}
 				}else if (this.status == 404){
