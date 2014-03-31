@@ -679,6 +679,55 @@ function aiFunc(){
 		return ["endturn", worstcards[Math.floor(Math.random()*worstcards.length)]];
 	}else return ["endturn"];
 }
+function victoryScreen(goldreward, cardreward) {
+    victoryui = new PIXI.Stage(0x000000, true);
+
+    //lobby background
+    var bgvictory = new PIXI.Sprite(backgrounds[0]);
+    victoryui.addChild(bgvictory);
+
+    var victoryText = game.quest ? game.wintext : "You have won!";
+    var posX = 450;
+    var posY = game.cardreward ? 130 : 250;
+    tinfo = makeText(posX, posY, victoryText, true);
+    tinfo.anchor.x = 0.5;
+    var bexit = makeButton(420,430, 75, 18, buttons[11]);
+    bexit.click = function () {
+        if (game.cardreward) {
+            userEmit("addcard", { c: game.cardreward });
+            user.pool.push(game.cardreward);
+        }
+        if (game.goldreward) {
+            userEmit("addgold", { g: game.goldreward });
+            user.gold += game.goldreward;
+        }
+        if (game.quest)
+            startQuestWindow();
+        else
+            startMenu();
+        game = undefined;
+    }
+    if (game.goldreward) {
+        tgold = makeText(340, 550, "Gold won:      " + game.goldreward, true);
+        var igold = PIXI.Sprite.fromImage("assets/gold.png");
+        igold.position.set(420, 550);
+        igold.visible = true;
+        victoryui.addChild(tgold);
+        victoryui.addChild(igold);
+    }
+    if (game.cardreward) {
+        var cardArt = new PIXI.Sprite(getArt(game.cardreward));
+        cardArt.position.set(380, 170);
+        victoryui.addChild(cardArt);
+    }
+    victoryui.addChild(tinfo);
+    victoryui.addChild(bexit);
+
+    animCb = undefined;
+
+    mainStage = victoryui;
+    refreshRenderer();
+}
 
 function doubleDeck(deck) {
     return deck.slice(0, deck.length - 2).concat(deck);
@@ -736,26 +785,29 @@ function mkDemigod() {
 var questNecromancerDecks = ["52g 52g 52g 52g 52g 52g 52g 52g 52g 52g 52g 52m 52m 52m 52m 52m 52m 52m 52m 52m 52m 52m 52m 531 531 531 531 52n 52n 52n 52n 717 717 8pk", "5bs 5bs 5bs 5bs 5bs 5bs 5bs 5bs 5bs 5bs 5bs 5bs 5bs 5bu 5bu 5bu 5bu 5c1 5c1 5c1 5c1 5ca 5ca 8pp",
 "52g 52g 52g 52g 52g 52g 52g 52g 52g 52g 52g 52g 52g 52m 52m 52m 52m 52m 52m 531 531 531 531 531 52l 52l 52l 52t 52t 52t 52t 52t 535 535 535 535 717 717 717 717 8pk"];
 function mkQuestAi(quest, stage) {
-    console.log(quest, stage);
     var deck;
-    var foename;
+    var foename = "";
     var markpower = 1;
     var hp = 100;
+    var wintext = "";
     if (quest == "necromancer") {
         deck = questNecromancerDecks[stage].split(" ");
         if (stage == 0) {
             foename = "Skeleton Horde";
             hp = 80;
             markpower = 2;
+            wintext = "You defeated the horde, but you should find out where they came from"
         }
         else if(stage == 1){
             foename = "Forest Wildlife"
             hp = 60;
+            wintext = "The creatures seemed very afraid of something, like there was something in the forest that did not belong there."
         }
         else if(stage = 2){
             foename = "Evil Necromancer";
             hp = 120;
             markpower = 2;
+            wintext = "You defeated the evil necromancer and stopped his undead from spreading through the land!"
         }            
         else 
             return;
@@ -768,7 +820,8 @@ function mkQuestAi(quest, stage) {
         return;
     }
     initGame({ first: Math.random() < .5, deck: deck, urdeck: urdeck, seed: Math.random() * etg.MAX_INT, hp: hp, aimarkpower: markpower, foename: foename }, aievalopt.checked ? aiEvalFunc : aiFunc);
-    game.quest = [quest,stage];
+    game.quest = [quest, stage];
+    game.wintext = wintext;
 }
 function mkAi(level){
 	return function() {
@@ -1282,7 +1335,7 @@ function startQuestWindow() {
         }
         return button;
     }
-    var necromancerTexts = ["A horde of skeletons have been seen nearby, perhaps you should go investigating.", "They seemed to come from the forest, so you go inside.", "Deep inside the forest you find the necromancer responsible for filling the lands with undead!"];
+    var necromancerTexts = ["A horde of skeletons have been seen nearby, perhaps you should go investigate?", "They seemed to come from the forest, so you go inside.", "Deep inside the forest you find the necromancer responsible for filling the lands with undead!"];
     var necromancerPos = [[200, 200], [200, 250], [225, 300]];
     if (user.quest.necromancer || user.quest.necromancer == 0) {
         for (var i = 0; i <= user.quest.necromancer; i++) {
@@ -2106,24 +2159,19 @@ function startMatch(){
 						var elewin = foeDeck[Math.floor(Math.random() * foeDeck.length)];
 						rareAllowed = Math.random() < .3 ? 3 : 2;
                         uppedAllowed = 
-						cardwon = PlayerRng.randomcard(elewin.upped, function(x){ return x.element == elewin.element && x.type != PillarEnum && x.rarity <= rareAllowed; });
+						cardwon = PlayerRng.randomcard(elewin.upped, function (x) { return x.element == elewin.element && x.type != PillarEnum && x.rarity <= rareAllowed; });
 					}
 					if (!game.player2.ai || (game.level && game.level < 3)){
 						cardwon = cardwon.asUpped(false);
 					}
-					var data = {c:cardwon.code};
 					if (game.gold){
 						var goldwon = Math.floor(game.gold * (game.player1.hp == game.player1.maxhp ? 2 : .5 + game.player1.hp / (game.player1.maxhp * 2)));
 						console.log(goldwon);
 						if(game.cost) goldwon += game.cost;
-						data.g = goldwon;
-						user.gold += goldwon;
+						game.goldreward = goldwon;
 					}
-					userEmit("addcard", data);
-					user.pool.push(cardwon.code);
+					game.cardreward = cardwon.code;
 				}
-				cardart.setTexture(getArt(cardwon.code));
-				cardart.visible = true;
 			}else{
 				cardart.visible = false;
 			}
@@ -2291,12 +2339,16 @@ function startMatch(){
 			        userEmit("updatequest", { quest: game.quest[0], newstage: game.quest[1] + 1 });
 			        user.quest[game.quest[0]] = game.quest[1] + 1;
 			    }
-			    game = undefined;
-			    startQuestWindow();
+			}
+			if (user && game.winner == game.player1) {
+			    victoryScreen();
 			}
 			else {
+			    if (game.quest)
+			        startQuestWindow();
+                else 
+			        startMenu();
 			    game = undefined;
-			    startMenu();
 			}
 		}else if (game.turn == game.player1){
 			if (game.phase == MulliganPhase1 || game.phase == MulliganPhase2){

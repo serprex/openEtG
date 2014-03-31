@@ -194,7 +194,7 @@ io.sockets.on("connection", function(socket) {
 		delete users[u];
 	});
 	userEvent(socket, "addcard", function(data, user) {
-		// Anything using this should eventually be serverside
+	    // Anything using this should eventually be serverside
 		user.pool = etgutil.addcard(user.pool, data.c);
 		if (data.g){
 			user.gold += data.g;
@@ -203,8 +203,11 @@ io.sockets.on("connection", function(socket) {
 			user.ocard = data.o;
 		}
 	});
-	userEvent(socket, "subgold", function(data, user){
-		user.gold -= data.g;
+	userEvent(socket, "subgold", function (data, user) {
+	    user.gold -= data.g;
+	});
+	userEvent(socket, "addgold", function (data, user) {
+	    user.gold += data.g;
 	});
 	userEvent(socket, "setdeck", function(data, user){
 		user.deck = data.d;
