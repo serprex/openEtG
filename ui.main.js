@@ -691,7 +691,7 @@ function victoryScreen(goldreward, cardreward) {
     var posY = game.cardreward ? 130 : 250;
     tinfo = makeText(posX, posY, victoryText, true);
     tinfo.anchor.x = 0.5;
-    var bexit = makeButton(420,430, 75, 18, buttons[11]);
+    var bexit = makeButton(420,430, 75, 18, buttons.exit);
     bexit.click = function () {
         if (game.cardreward) {
             userEmit("addcard", { c: game.cardreward });
@@ -1004,16 +1004,48 @@ rarityLoader.onComplete = function() {
 }
 rarityLoader.load();
 
-var buttons = [];
-var buttonLoader = new PIXI.AssetLoader(["assets/buttons.png"]);
-buttonLoader.onComplete = function() {
-	var tex = PIXI.Texture.fromImage("assets/buttons.png");
-	for (var i = 0; i < 4; i++) {
-		for (var j = 0; j < 4; j++) {
-			buttons.push(new PIXI.Texture(tex, new PIXI.Rectangle(j*75, i*25, 75, 25)));
-		}
-	}
+var buttonsList = [];
+var buttonsClicked = [];
+var buttonsMouseOver = [];
+var buttons = {};
+var buttonLoader = new PIXI.AssetLoader(["assets/buttons.png", "assets/buttons_mouseover.png", "assets/buttons_clicked.png"]);
+buttonLoader.onComplete = function () {
+    var tex = PIXI.Texture.fromImage("assets/buttons.png");
+    var texClick = PIXI.Texture.fromImage("assets/buttons_clicked.png");
+    var texOver = PIXI.Texture.fromImage("assets/buttons_mouseover.png");
+    for (var i = 0; i < 4; i++) {
+        for (var j = 0; j < 4; j++) {
+            buttonsList.push(new PIXI.Texture(tex, new PIXI.Rectangle(j * 75, i * 25, 75, 25)));
+            buttonsMouseOver.push(new PIXI.Texture(texOver, new PIXI.Rectangle(j * 75, i * 25, 75, 25)));
+            buttonsClicked.push(new PIXI.Texture(texClick, new PIXI.Rectangle(j * 75, i * 25, 75, 25)));
+        }
+    }
+    buttons = {
+        logout: buttonsList[0],
+        arenainfo: buttonsList[1],
+        arenat10: buttonsList[2],
+        arenaai: buttonsList[3],
+        commoner: buttonsList[4],
+        mage: buttonsList[5],
+        champion: buttonsList[6],
+        demigod: buttonsList[7],
+        wipeaccount: buttonsList[8],
+        editor: buttonsList[9],
+        shop: buttonsList[10],
+        exit: buttonsList[11],
+        buypack: buttonsList[12],
+        takecards: buttonsList[13],
+        upgrade: buttonsList[14],
+        quests: buttonsList[15]
+}
 	maybeStartMenu();
+}
+
+function buttonArtClicked(button) {
+    return buttonsClicked[buttonsList.indexOf(button)];
+}
+function buttonArtMouseover(button) {
+    return buttonsMouseOver[buttonsList.indexOf(button)];
 }
 buttonLoader.load();
 
@@ -1036,13 +1068,27 @@ popupLoader.onComplete = function() {
 }
 popupLoader.load();
 
-function makeButton(x, y, w, h, i) {
+function makeButton(x, y, w, h, i, mouseoverfunc) {
 	var b = new PIXI.Sprite(i);
 	b.position.set(x, y);
 	b.interactive = true;
 	b.hitArea = new PIXI.Rectangle(0, 0, w, h);
 	b.buttonMode = true;
-	
+	b.standardImage = i;
+	if (~buttonsList.indexOf(i)){
+	    b.mousedown = function() {
+	        b.setTexture(buttonArtClicked(b.standardImage));
+	    }
+	    b.mouseover = b.mouseup = function() {
+	        if (mouseoverfunc) mouseoverfunc();
+	        console.log("standard=" + i + ", new=" + buttonArtMouseover(b.standardImage))
+	        b.setTexture(buttonArtMouseover(b.standardImage));
+	    }
+	    b.mouseout = function () {
+	        b.setTexture(b.standardImage);
+	    }
+	}
+
 	return b;
 }
 
@@ -1071,7 +1117,9 @@ function maybeStartMenu() {
 }
 function startMenu() {	
 	menuui = new PIXI.Stage(0x000000, true);
-		
+	var buttonList = [];
+	var mouseroverButton;
+	var clickedButton;
 	//lobby background
 	var bglobby = new PIXI.Sprite(backgrounds[1]);
 	bglobby.interactive = true;
@@ -1107,55 +1155,54 @@ function startMenu() {
 	menuui.addChild(igold2);
 	
 	//ai0 button
-	var bai0 = makeButton(50, 100, 75, 25, buttons[4]);
+	var bai0 = makeButton(50, 100, 75, 25, buttons.commoner, function () {
+	    tinfo.setText("Commoners have no upgraded cards.");
+	    tcost.setText("Cost:     0");
+	    igold2.visible = true;
+	});
 	bai0.click = mkAi(1);
-	bai0.mouseover = function () {
-		tinfo.setText("Commoners have no upgraded cards.");
-		tcost.setText("Cost:     0");
-		igold2.visible = true;
-	}
 	menuui.addChild(bai0);
 	
 	//ai1 button
-	var bai1 = makeButton(150, 100, 75, 25, buttons[5]);
+	var bai1 = makeButton(150, 100, 75, 25, buttons.mage, function () {
+	    tinfo.setText("Mages have a few upgraded cards.");
+	    tcost.setText("Cost:     5");
+	    igold2.visible = true;
+	});
 	bai1.click = mkAi(2);
-	bai1.mouseover = function () {
-		tinfo.setText("Mages have a few upgraded cards.");
-		tcost.setText("Cost:     5");
-		igold2.visible = true;
-	}
 	menuui.addChild(bai1);
 	
 	//ai2 button
-	var bai2 = makeButton(250, 100, 75, 25, buttons[6]);
+	var bai2 = makeButton(250, 100, 75, 25, buttons.champion, function () {
+	    tinfo.setText("Champions have some upgraded cards.");
+	    tcost.setText("Cost:     10");
+	    igold2.visible = true;
+	});
 	bai2.click = mkAi(3);
-	bai2.mouseover = function () {
-		tinfo.setText("Champions have some upgraded cards.");
-		tcost.setText("Cost:     10");
-		igold2.visible = true;
-	}
 	menuui.addChild(bai2);
 
 	//ai3 button
-	var bai3 = makeButton(350, 100, 75, 25, buttons[7]);
+	var bai3 = makeButton(350, 100, 75, 25, buttons.demigod, function () {
+	    tinfo.setText("Demigods are extremely powerful. Come prepared for anything.");
+	    tcost.setText("Cost:     20");
+	    igold2.visible = true;
+	});
 	bai3.click = mkDemigod;
-	bai3.mouseover = function () {
-		tinfo.setText("Demigods are extremely powerful. Come prepared for anything.");
-		tcost.setText("Cost:     20");
-		igold2.visible = true;
-	}
 	menuui.addChild(bai3);
 	
     //Quests button
-	var bquest = makeButton(50, 145, 75, 25, buttons[15]);
-	bquest.click = startQuestWindow;
-	bquest.mouseover = function () {
+	var bquest = makeButton(50, 145, 75, 25, buttons.quests, function () {
 	    tinfo.setText("Go on adventure!");
-	}
+	});
+	bquest.click = startQuestWindow;
 	menuui.addChild(bquest);
 
 	//ai arena button
-	var baia = makeButton(50, 200, 75, 25, buttons[3]);
+	var baia = makeButton(50, 200, 75, 25, buttons.arenaai, function () {
+	    tinfo.setText("In the arena you will face decks from other players.");
+	    tcost.setText("Cost:     10");
+	    igold2.visible = true;
+	});
 	baia.click = function() {
 		if (Cards) {
 			if (!user.deck || user.deck.length < 31) {
@@ -1173,80 +1220,72 @@ function startMenu() {
 			userEmit("foearena");
 		}
 	}
-	baia.mouseover = function () {
-		tinfo.setText("In the arena you will face decks from other players.");
-		tcost.setText("Cost:     10");
-		igold2.visible = true;
-	}
 	menuui.addChild(baia);
 	
 	//arena info button
-	var binfoa = makeButton(50, 245, 75, 25, buttons[1]);
+	var binfoa = makeButton(50, 245, 75, 25, buttons.arenainfo, function () {
+	    tinfo.setText("Check how your arena deck is doing.")
+	    tcost.setText("");
+	});
 	binfoa.click = function(){
 		if (Cards){
 			userEmit("arenainfo");
 		}
 	}
-	binfoa.mouseover = function () {
-		tinfo.setText("Check how your arena deck is doing.")
-		tcost.setText("");
-	}
 	menuui.addChild(binfoa);
 	
 	//arena top10 button
-	var btopa = makeButton(150, 245, 75, 25, buttons[2]);
+	var btopa = makeButton(150, 245, 75, 25, buttons.arenat10, function () {
+	    tinfo.setText("Here you can see who the top players in arena are right now.")
+	    tcost.setText("");
+	});
 	btopa.click = function(){
 		if (Cards){
 			userEmit("arenatop");
 		}
 	}
-	btopa.mouseover = function () {
-		tinfo.setText("Here you can see who the top players in arena are right now.")
-		tcost.setText("");
-	}
 	menuui.addChild(btopa);
 	
 	//edit button
-	var bedit = makeButton(50, 300, 75, 25, buttons[9]);
+	var bedit = makeButton(50, 300, 75, 25, buttons.editor, function () {
+	    tinfo.setText("Here you can edit your deck, as well as submit an arena deck.");
+	    tcost.setText("");
+	});
 	bedit.click = startEditor;
-	bedit.mouseover = function () {
-		tinfo.setText("Here you can edit your deck, as well as submit an arena deck.");
-		tcost.setText("");
-	}
 	menuui.addChild(bedit);
 
-	var bshop = makeButton(150, 300, 75, 25, buttons[10]);
-	bshop.click = startStore;
-	bshop.mouseover = function () {
+	var bshop = makeButton(150, 300, 75, 25, buttons.shop, function () {
 	    tinfo.setText("Here you can buy booster packs which contains ten cards from the elements you choose.");
 	    tcost.setText("");
-	}
+	});
+	bshop.click = startStore;
 	menuui.addChild(bshop);
 
     //upgrade button
-	var bupgrade = makeButton(250, 300, 75, 18, buttons[14]);
-	bupgrade.click = upgradestore;
-	bupgrade.mouseover = function () {
+	var bupgrade = makeButton(250, 300, 75, 18, buttons.upgrade, function () {
 	    tinfo.setText("Here you can upgrade cards as well as buy upgraded Pillars");
 	    tcost.setText("");
-	}
+	});
+	bupgrade.click = upgradestore;
 	menuui.addChild(bupgrade);
 	
 	//logout button
-	var blogout = makeButton(750, 246, 75, 25, buttons[0]);
+	var blogout = makeButton(750, 246, 75, 25, buttons.logout, function () {
+	    tinfo.setText("Click here if you want to log out.")
+	    tcost.setText("");
+	});
 	blogout.click = function(){
 		userEmit("logout");
 		logout();
 		
 	}
-	blogout.mouseover = function () {
-		tinfo.setText("Click here if you want to log out.")
-		tcost.setText("");
-	}
 	menuui.addChild(blogout);
 	
 	//delete account button
-	var bdelete = makeButton(750, 550, 75, 25, buttons[8]);
+	var bdelete = makeButton(750, 550, 75, 25, buttons.wipeaccount, function () {
+	    tinfo.setText("Click here if you want to remove your account.")
+	    tcost.setText("");
+	});
 	bdelete.click = function(){
 		if (foename.value == user.name) {
 			userEmit("delete");
@@ -1254,10 +1293,6 @@ function startMenu() {
 		} else {
 			chatArea.value = "Input '" + user.name + "' into Challenge to delete your account";
 		}
-	}
-	bdelete.mouseover = function () {
-		tinfo.setText("Click here if you want to remove your account.")
-		tcost.setText("");
 	}
 	menuui.addChild(bdelete);
 	
@@ -1345,7 +1380,7 @@ function startQuestWindow() {
             }
         }
     }
-    var bexit = makeButton(750, 246, 75, 18, buttons[11]);
+    var bexit = makeButton(750, 246, 75, 18, buttons.exit);
     bexit.click = function () {
         startMenu();
     }
@@ -1408,12 +1443,12 @@ function upgradestore() {
     var goldcount = new PIXI.Text(user.gold + "g", { font: "bold 16px Dosis" });
     goldcount.position.set(30, 100);
     upgradeui.addChild(goldcount);
-    var bupgrade = makeButton(150, 100, 75, 18, buttons[14]);
+    var bupgrade = makeButton(150, 100, 75, 18, buttons.upgrade);
     bupgrade.click = function () {
         upgradeCard(CardCodes[selectedCard]);
     };
     upgradeui.addChild(bupgrade);
-    var bexit = makeButton(50, 50, 75, 18, buttons[11]);
+    var bexit = makeButton(50, 50, 75, 18, buttons.exit);
     bexit.click = function () {
         startMenu();
     };
@@ -1542,7 +1577,7 @@ function startStore() {
 	storeui.addChild(igold);
 
 	//get cards button
-	var bget = makeButton(750, 156, 75, 18, buttons[13]);
+	var bget = makeButton(750, 156, 75, 18, buttons.takecards);
 	toggleB(bget);
 	bget.click = function() {
 		userEmit("add", {add: etg.encodedeck(newCards)});
@@ -1558,7 +1593,7 @@ function startStore() {
 	storeui.addChild(bget);
 	
 	//exit button
-	var bexit = makeButton(750, 246, 75, 18, buttons[11]);
+	var bexit = makeButton(750, 246, 75, 18, buttons.exit);
 	bexit.click = function() {
 		if (isEmpty(newCards)) {
 			startMenu();
@@ -1570,7 +1605,7 @@ function startStore() {
 	storeui.addChild(bexit);
 	
 	//buy button
-	var bbuy = makeButton(750, 156, 75, 18, buttons[12]);
+	var bbuy = makeButton(750, 156, 75, 18, buttons.buypack);
 	bbuy.click = function() {
 		if (isEmpty(newCards)) {
 			if (user.gold >= cost) {
