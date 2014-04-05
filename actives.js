@@ -472,7 +472,8 @@ grave:function(c,t){
 	delete c.status.burrowed;
 	c.transform(t.card);
 },
-growth:function(c,t){
+growth: function (c, t) {
+    new TextEffect("2|2", tgtToPos(c))
 	c.buffhp(2);
 	c.atk += 2;
 },
