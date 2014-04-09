@@ -790,7 +790,8 @@ function mkDemigod() {
 	game.gold = 30;
 }
 var questNecromancerDecks = ["52g 52g 52g 52g 52g 52g 52g 52g 52g 52g 52g 52m 52m 52m 52m 52m 52m 52m 52m 52m 52m 52m 52m 531 531 531 531 52n 52n 52n 52n 717 717 8pk", "5bs 5bs 5bs 5bs 5bs 5bs 5bs 5bs 5bs 5bs 5bs 5bs 5bs 5bu 5bu 5bu 5bu 5c1 5c1 5c1 5c1 5ca 5ca 8pp",
-"52g 52g 52g 52g 52g 52g 52g 52g 52g 52g 52g 52g 52g 52m 52m 52m 52m 52m 52m 531 531 531 531 531 52l 52l 52l 52t 52t 52t 52t 52t 535 535 535 535 717 717 717 717 8pk","606 606 606 606 606 606 606 606 606 606 606 606 5um 5um 5um 5um 5us 5us 5us 5us 5v3 5v3 5v3 5v3 5uu 5uu 5v2 5v2 5va 5va 8pi"];
+							 "52g 52g 52g 52g 52g 52g 52g 52g 52g 52g 52g 52g 52g 52m 52m 52m 52m 52m 52m 531 531 531 531 531 52l 52l 52l 52t 52t 52t 52t 52t 535 535 535 535 717 717 717 717 8pk","606 606 606 606 606 606 606 606 606 606 606 606 5um 5um 5um 5um 5us 5us 5us 5us 5v3 5v3 5v3 5v3 5uu 5uu 5v2 5v2 5va 5va 8pi",
+							 "50u 50u 50u 50u 50u 50u 50u 50u 50u 50u 50u 50u 50u 50u 50u 50u 50u 50u 4vi 4vi 4vi 4vi 4vh 4vh 4vh 4vl 501 4vn 4vn 5ur 5uq 5uq 5ut 5ut 5ut 5up 5up 5up 5up 5v2 8pt"];
 function mkQuestAi(quest, stage) {
 	var deck;
 	var foename = "";
@@ -819,7 +820,12 @@ function mkQuestAi(quest, stage) {
 		else if (stage == 3) {
 			foename = "Evil spirit";
 			hp = 150
-			wintext = "You have defeated the evil spirit and stopped its dark influence from spreading through the land!"
+			wintext = "You have defeated the evil spirit and stopped its dark influence from spreading through the land!/n But something is still troubling this region. Though the spirits fall has lessened the intensity of the nascient dread energy, you sense a cold chill air coming from a portal looming darkly at the back of the cave."
+		}
+		else if (stage == 4) {
+			foename = "Portal guardian";
+			hp = 175
+			wintext = "The portal guardian lies vanquished, but despite your best efforts you cannot close the portal from this side.\n Examining the guardian's remains you find an ancient tome which describes the portal before you and the lands beyond\n The incubus key lies in a large fortress at the center of the realm. You will have to venture forth."
 		}
 		else
 			return;
@@ -1391,8 +1397,11 @@ function startQuestWindow() {
 		}
 		return button;
 	}
-	var necromancerTexts = ["A horde of skeletons have been seen nearby, perhaps you should go investigate?", "They seemed to come from the forest, so you go inside.", "Deep inside the forest you find the necromancer responsible for filling the lands with undead!","You pursue the energy trail of the spirit to a dark cavern. \n At first you think it has eluded you, but as you turn to leave, its dark shadowy form rises in front of you"];
-	var necromancerPos = [[200, 200], [200, 250], [225, 300], [275,350]];
+	var necromancerTexts = ["A horde of skeletons have been seen nearby, perhaps you should go investigate?", "They seemed to come from the forest, so you go inside.", 
+							"Deep inside the forest you find the necromancer responsible for filling the lands with undead!",
+							"You pursue the energy trail of the spirit to a dark cavern. \n At first you think it has eluded you, but as you turn to leave, its dark shadowy form rises in front of you",
+							"You approach the portal and a large Elemental steps out of the shadows, purple energy swirling about it.\n'Only the worthy may pass'...You state that your only intention is to destroy the portal not pass through it.\n 'only the incubus key can close this portal.' The guardian glowers at you darkly.\n If you wish to find it you must first pass my test.' The guardian attacks!"];
+	var necromancerPos = [[200, 200], [200, 250], [225, 300], [275,350], [325,375]];
 	if (user.quest.necromancer || user.quest.necromancer == 0) {
 		for (var i = 0;i <= user.quest.necromancer;i++) {
 			if (necromancerTexts[i]) {
