@@ -790,8 +790,11 @@ function mkDemigod() {
 	game.gold = 30;
 }
 var questNecromancerDecks = ["52g 52g 52g 52g 52g 52g 52g 52g 52g 52g 52g 52m 52m 52m 52m 52m 52m 52m 52m 52m 52m 52m 52m 531 531 531 531 52n 52n 52n 52n 717 717 8pk", "5bs 5bs 5bs 5bs 5bs 5bs 5bs 5bs 5bs 5bs 5bs 5bs 5bs 5bu 5bu 5bu 5bu 5c1 5c1 5c1 5c1 5ca 5ca 8pp",
-							 "52g 52g 52g 52g 52g 52g 52g 52g 52g 52g 52g 52g 52g 52m 52m 52m 52m 52m 52m 531 531 531 531 531 52l 52l 52l 52t 52t 52t 52t 52t 535 535 535 535 717 717 717 717 8pk","606 606 606 606 606 606 606 606 606 606 606 606 5um 5um 5um 5um 5us 5us 5us 5us 5v3 5v3 5v3 5v3 5uu 5uu 5v2 5v2 5va 5va 8pi",
-							 "50u 50u 50u 50u 50u 50u 50u 50u 50u 50u 50u 50u 50u 50u 50u 50u 50u 50u 4vi 4vi 4vi 4vi 4vh 4vh 4vh 4vl 501 4vn 4vn 5ur 5uq 5uq 5ut 5ut 5ut 5up 5up 5up 5up 5v2 8pt"];
+							 "52g 52g 52g 52g 52g 52g 52g 52g 52g 52g 52g 52g 52g 52m 52m 52m 52m 52m 52m 531 531 531 531 531 52l 52l 52l 52t 52t 52t 52t 52t 535 535 535 535 717 717 717 717 8pk",
+							 "606 606 606 606 606 606 606 606 606 606 606 606 5um 5um 5um 5um 5us 5us 5us 5us 5v3 5v3 5v3 5v3 5uu 5uu 5v2 5v2 5va 5va 8pi",
+							 "50u 50u 50u 50u 50u 50u 50u 50u 50u 50u 50u 50u 50u 50u 50u 50u 50u 50u 4vi 4vi 4vi 4vi 4vh 4vh 4vh 4vl 501 4vn 4vn 5ur 5uq 5uq 5ut 5ut 5ut 5up 5up 5up 5up 5v2 8pt",
+							 "4vq 4vq 4vq 4vq 4vk 4vk 4vk 4vv 4vv 4vo 542 542 542 542 542 542 542 542 542 542 52v 52v 52v 52v 52k 52k 52n 52n 52n 530 530 534 8pj",
+							 "5og 5og 5on 5on 5on 5on 5on 5on 5ot 5ot 5ot 5ot 5ot 5ot 6rb 6rb 6rb 6rb 6rb 6rb 6rb 6rb 6rb 6rb 7n6 7n6 7n6 7n6 7n6 7n6 8po"];
 function mkQuestAi(quest, stage) {
 	var deck;
 	var foename = "";
@@ -815,17 +818,27 @@ function mkQuestAi(quest, stage) {
 			foename = "An Evil Necromancer";
 			hp = 120;
 			markpower = 2;
-			wintext = "You defeated the evil necromancer and stopped his undead from spreading through the land!"
+			wintext = "You defeat the evil necromancer but he was merely being possesed.\n The spirit rushes out suddenly and flies to a nearby cave!\nThe poor haggard victim doesn't even remember anything that has happend."
 		}
 		else if (stage == 3) {
 			foename = "Evil spirit";
 			hp = 150
-			wintext = "You have defeated the evil spirit and stopped its dark influence from spreading through the land!/n But something is still troubling this region. Though the spirits fall has lessened the intensity of the nascient dread energy, you sense a cold chill air coming from a portal looming darkly at the back of the cave."
+			wintext = "You have defeated the evil spirit and stopped its dark influence from spreading through the land!/n ... But a dark energy is still troubling this region... \nYou sense a cold, chill air coming from a portal looming darkly at the back of the cave."
 		}
 		else if (stage == 4) {
 			foename = "Portal guardian";
 			hp = 175
 			wintext = "The portal guardian lies vanquished, but despite your best efforts you cannot close the portal from this side.\n Examining the guardian's remains you find an ancient tome which describes the portal before you and the lands beyond\n The incubus key lies in a large fortress at the center of the realm. You will have to venture forth."
+		}
+		else if (stage == 5) {
+			foename = "Grim Maiden";
+			hp = 175
+			wintext = "The maiden's swarm of skeletal minions seems endless but they are weak and fall easily.\nHer pet cats and vultures tear viciously at your allies, but you finally manage to push past them.\nThe Grim Maiden is a truly powerful foe. Her magic wreaking havoc upon your allies.\n Just as you are about to land the final blow, she vanishes.\nYou can hear her eerie voice echoing off of the wind, growing faint and distant.\n 'Turn back foolish mortal. This road will only lead to your doom. My sisters will not be so forgiving!'"
+		}
+		else if (stage == 6) {
+			foename = "Swamp Gas";
+			hp = 80
+			wintext = "You escape the deadly explosions, just barely... A massive storm is approaching. You will need shelter.\nA nearby abandoned mansion may be your only option. Warily you open the door. It creaks forebodingly.\nYou are greated by dank and musty air, but it seems otherwise empty. You sit and wait out the storm.\nWhile waiting you could swear you hear footsteps in other rooms and voices talking.\nHowever, every search turns up nothing but empty ill kept rooms and dust.\n Just as you are about to leave, an evil laugh from behind you sends chills down your spine\n The shadows on the wall begin to move of their own accord. And all the doors slam shut with conviction.\nYou turn to face your assailant, apparently a sister of the maiden you fell earlier."
 		}
 		else
 			return;
@@ -1397,11 +1410,15 @@ function startQuestWindow() {
 		}
 		return button;
 	}
-	var necromancerTexts = ["A horde of skeletons have been seen nearby, perhaps you should go investigate?", "They seemed to come from the forest, so you go inside.", 
+	var necromancerTexts = ["A horde of skeletons have been seen nearby, perhaps you should go investigate?", 
+							"They seemed to come from the forest, so you go inside.", 
 							"Deep inside the forest you find the necromancer responsible for filling the lands with undead!",
 							"You pursue the energy trail of the spirit to a dark cavern. \n At first you think it has eluded you, but as you turn to leave, its dark shadowy form rises in front of you",
-							"You approach the portal and a large Elemental steps out of the shadows, purple energy swirling about it.\n'Only the worthy may pass'...You state that your only intention is to destroy the portal not pass through it.\n 'only the incubus key can close this portal.' The guardian glowers at you darkly.\n If you wish to find it you must first pass my test.' The guardian attacks!"];
-	var necromancerPos = [[200, 200], [200, 250], [225, 300], [275,350], [325,375]];
+							"You approach the portal and a large Elemental steps out of the shadows, purple energy swirling about it.\n'Only the worthy may pass'...You state that your only intention is to destroy the portal not pass through it.\n 'only the incubus key can close this portal.' The guardian glowers at you darkly.\n If you wish to find it you must first pass my test.' The guardian attacks!",
+							"You step through the portal and are wisked off to a shifting expanse of swampland. Purple lightning crackles above. \nFar off, in the distant center of the dark and brooding expanse, stands an ominous fortress. \nThe gravel road before you winds its way toward it like a great serpent slithering its way through a desolate bog. \nA lone maiden blocks your path. In a voice like claws upon glass she shrieks 'you do not belong here... DIE!' ",
+							"As you continue up the road, a foul stench assaults your nose... Then you hear a poping sound.\nTo the side of the road a sign reads 'Danger, swamp gas is explosive. Travelers beware'\nYou decide that NOW would be a good time to run!... But a flock of giant angry birds is in your way"
+							];
+	var necromancerPos = [[200, 200], [200, 250], [225, 300], [275,350], [325,375], [500,200], [500,250]];
 	if (user.quest.necromancer || user.quest.necromancer == 0) {
 		for (var i = 0;i <= user.quest.necromancer;i++) {
 			if (necromancerTexts[i]) {
