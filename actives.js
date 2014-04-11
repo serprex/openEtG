@@ -54,6 +54,7 @@ aflatoxin:function(c,t){
 },
 aggroskele:function(c,t){
 	var dmg = 0;
+	new Creature(Cards.Skeleton.asUpped(c.card.upped), c.owner).place();
 	for (var i=0; i<23; i++){
 		if (c.owner.creatures[i] && c.owner.creatures[i].card.isOf(Cards.Skeleton)){
 			dmg += c.owner.creatures[i].trueatk();
