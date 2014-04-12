@@ -218,7 +218,6 @@ function getArtImage(code){
 		var loader = new PIXI.AssetLoader(["Cards/" + code + ".png"]);
 		loader.onComplete = function() {
 			artimagecache[code] = PIXI.Texture.fromImage("Cards/" + code + ".png");
-			//console.log(CardCodes[code] + " loaded")
 		}
 		artimagecache[code] = null;
 		loader.load();
@@ -1087,7 +1086,6 @@ var borderLoader = new PIXI.AssetLoader(["assets/cardborders.png"]);
 borderLoader.onComplete = function() {
 	var tex = PIXI.Texture.fromImage("assets/cardborders.png");
 	for (var i = 0;i < 26;i++) cardBorders.push(new PIXI.Texture(tex, new PIXI.Rectangle(i * 128, 0, 128, 162)));
-	console.log(cardBorders);
 	maybeStartMenu();
 }
 borderLoader.load();
@@ -1361,7 +1359,7 @@ function startMenu() {
 	menuui.addChild(bedit);
 
 	var bshop = makeButton(150, 300, 75, 25, buttons.shop, function() {
-		tinfo.setText("Here you can buy booster packs which contains ten cards from the elements you choose.");
+		tinfo.setText("Here you can buy booster packs which contains cards from the elements you choose.");
 		tcost.setText("");
 	});
 	bshop.click = startStore;
@@ -1522,7 +1520,6 @@ function upgradestore() {
 				if (user.gold >= 50) {
 					user.gold -= 50;
 					userEmit("subgold", { g: 50 });
-					console.log(card.code);
 					userEmit("addcard", { c: card.asUpped(true).code });
 					user.pool.push(card.asUpped(true).code);
 					adjustdeck();
@@ -1692,7 +1689,7 @@ function startStore() {
 			newCardsArt[i].visible = false;
 		}
 
-		toggleB(brainbow, bfwea, batge, blddl, bbronze, bsilver, bgold, bplatinum, bget, bbuy);
+		toggleB(bbronze, bsilver, bgold, bplatinum, bget, bbuy);
 		popbooster.visible = false;
 		newCards = [];
 	}
@@ -1722,29 +1719,25 @@ function startStore() {
 					return;
 				}
 
-				if (packtype == 1) allowedElements = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12];
-				else if (packtype == 2) allowedElements = [4, 6, 7, 9];
-				else if (packtype == 3) allowedElements = [1, 3, 10, 12];
-				else if (packtype == 4) allowedElements = [2, 5, 8, 11];
 
 				user.gold -= cost;
 				userEmit("subgold", { g: cost });
 
 				for (var i = 0;i < cardamount;i++) {
 					var rarity = 1;
-					if (((packrarity == 2 || packrarity == 3) && i >= 3) || packrarity == 4)
+					if ((packrarity == 2 && i >= 3) || (packrarity == 3 && i >= 3) || (packrarity == 4 && i>=4))
 						rarity = 2;
-					if ((packrarity == 3 && i >= 7) || (packrarity == 4 && i >= 3))
+					if ((packrarity == 3 && i >= 7) || (packrarity == 4 && i >= 7))
 						rarity = 3;
-					if (packrarity == 4 && i >= 5)
+					if (packrarity == 4 && i >= 8)
 						rarity = 4;
-					var elements = Math.random() > .5 ? allowedElements.concat([0]) : allowedElements;
-					newCards.push(PlayerRng.randomcard(false, function(x) { return elements.indexOf(x.element) != -1 && x.type != PillarEnum && x.rarity == rarity }).code);
+					var fromElement = Math.random() < .4 ? false : true;
+					newCards.push(PlayerRng.randomcard(false, function(x) { return (x.element == packtype) ^ fromElement && x.type != PillarEnum && x.rarity == rarity }).code);
 					newCardsArt[i].setTexture(getArt(newCards[i]));
 					newCardsArt[i].visible = true;
 				}
 
-				toggleB(brainbow, bfwea, batge, blddl, bbronze, bsilver, bgold, bplatinum, bget, bbuy);
+				toggleB(bbronze, bsilver, bgold, bplatinum, bget, bbuy);
 				popbooster.visible = true;
 			} else {
 				tinfo.setText("You can't afford that!");
@@ -1757,38 +1750,7 @@ function startStore() {
 	}
 	storeui.addChild(bbuy);
 
-	//Rainbow pack
-	var brainbow = makeButton(50, 100, 100, 200, boosters[0]);
-	brainbow.click = function() {
-		packtype = 1;
-		tinfo.setText("Selected Elements: Rainbow");
-	}
-	storeui.addChild(brainbow);
-
-	//FiWaEaAi pack
-	var bfwea = makeButton(175, 100, 100, 200, boosters[1]);
-	bfwea.click = function() {
-		packtype = 2;
-		tinfo.setText("Selected Elements: Fire/Water/Earth/Air");
-	}
-	storeui.addChild(bfwea);
-
-	//AeTiGrEn pack
-	var batge = makeButton(300, 100, 100, 200, boosters[2]);
-	batge.click = function() {
-		packtype = 3;
-		tinfo.setText("Selected Elements: Aether/Time/Gravity/Entropy");
-	}
-	storeui.addChild(batge);
-
-	//LiDeDaLi pack
-	var blddl = makeButton(425, 100, 100, 200, boosters[3]);
-	blddl.click = function() {
-		packtype = 4;
-		tinfo.setText("Selected Elements: Life/Death/Darkness/Light");
-	}
-	storeui.addChild(blddl);
-
+	
 	// The different pack types
 	var bbronze = makeButton(50, 280, 100, 200, boosters[4]);
 	bbronze.click = function() {
@@ -1813,18 +1775,29 @@ function startStore() {
 		packrarity = 3;
 		tinfo2.setText("Gold Pack: 3x Common + 4x Uncommon + 1x Rare");
 		cardamount = 8;
-		cost = 60;
+		cost = 65;
 	}
 	storeui.addChild(bgold);
 
 	var bplatinum = makeButton(425, 280, 100, 200, boosters[7]);
 	bplatinum.click = function() {
 		packrarity = 4;
-		tinfo2.setText("Platinum Pack: 3x Uncommon + 2x Rare + 1x Shard");
-		cardamount = 6;
-		cost = 110;
+		tinfo2.setText("Platinum Pack: 4x Common + 3x Uncommon + 1x Rare + 1x Shard");
+		cardamount = 9;
+		cost = 100;
 	}
 	storeui.addChild(bplatinum);
+
+	for (var i = 1;i < 13;i++) {
+		var elementbutton = makeButton(75 + Math.floor((i-1) / 2)*75, 120 + ((i-1) % 2)*75, 32, 32, eicons[i]);
+		(function(_i) {
+			elementbutton.click = function() {
+				packtype = _i;
+				tinfo.setText("Selected Element: " + descr[_i]);
+			}
+		})(i);
+		storeui.addChild(elementbutton);
+	}
 
 	//booster popup
 	var popbooster = new PIXI.Sprite(popups[0]);
@@ -2093,12 +2066,7 @@ function startEditor() {
 		refreshRenderer();
 	}
 }
-
-function startElementSelect() {
-	var stage = new PIXI.Stage(0x336699, true);
-	chatArea.value = "Select your starter element";
-	var elesel = [];
-	var descr = [
+var descr = [
         "Chroma",
         "Entropy",
         "Death",
@@ -2112,7 +2080,11 @@ function startElementSelect() {
         "Time",
         "Darkness",
         "Aether"
-	];
+];
+function startElementSelect() {
+	var stage = new PIXI.Stage(0x336699, true);
+	chatArea.value = "Select your starter element";
+	var elesel = [];
 	var eledesc = new PIXI.Text("", { font: "24px Dosis" });
 	eledesc.position.set(100, 250);
 	stage.addChild(eledesc);
@@ -2164,6 +2136,7 @@ function startMatch() {
 					fgfx.lineStyle(2, 0xffffff);
 				}
 			} else if (obj.canactive()) {
+				fgfx.lineStyle(2, obj.card.upped ?  "black" : "white" );
 				fgfx.drawRect(spr.position.x - spr.width / 2, spr.position.y - spr.height / 2, spr.width, (obj instanceof Weapon || obj instanceof Shield ? 8 : 10));
 			}
 		}
@@ -2297,9 +2270,10 @@ function startMatch() {
 						cardwon = winnable[Math.floor(Math.random() * winnable.length)];
 					} else {
 						var elewin = foeDeck[Math.floor(Math.random() * foeDeck.length)];
-						rareAllowed = Math.random() < .3 ? 3 : 2;
-						uppedAllowed =
-                        cardwon = PlayerRng.randomcard(elewin.upped, function(x) { return x.element == elewin.element && x.type != PillarEnum && x.rarity <= rareAllowed; });
+						rareAllowed = 3;
+						cardwon = PlayerRng.randomcard(elewin.upped, function(x) { return x.element == elewin.element && x.type != PillarEnum && x.rarity <= rareAllowed; });
+						if (cardwon.rarity == 3 && Math.random() > .5)
+							cardwon = PlayerRng.randomcard(elewin.upped, function(x) { return x.element == elewin.element && x.type != PillarEnum && x.rarity <= rareAllowed; });
 					}
 					if (!game.player2.ai || (game.level && game.level < 3)) {
 						cardwon = cardwon.asUpped(false);
@@ -2619,7 +2593,6 @@ function startMatch() {
 		graphics.addChild(template);
 		rend.render(graphics);
 		infobox.setTexture(rend);
-		console.log(gameui.getMousePosition())
 		infobox.anchor.set(0.5, 0);
 		infobox.position.set(gameui.getMousePosition().x, gameui.getMousePosition().y-(y+10));
 		infobox.visible = true;

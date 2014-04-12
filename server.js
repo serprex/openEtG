@@ -34,6 +34,7 @@ function loginRespond(res, servuser, pass){
 			user.oracle = true;
 		}
 		res.writeHead("200");
+		updateActive(user.name);
 		db.hgetall("Q:" + user.name, function (err, obj) {
 		    user.quest = obj;
             res.end(JSON.stringify(user));
@@ -85,9 +86,10 @@ function cardRedirect(req, res, next){
 }
 
 var users = {};
+var activeusers = {};
 var duels = {};
 var trades = {};
-var usersock = {};
+var usersock = [];
 var rooms = {};
 var sockinfo = {};
 process.on("SIGTERM", process.exit).on("SIGINT", process.exit);
@@ -114,6 +116,14 @@ function foeEcho(socket, event){
 		}
 	});
 }
+function updateActive(user) {
+	if (user) users[user].lastActive = Date.now();
+	activeusers = [];
+	for (var user in users) {
+		if (Date.now() - users[user].lastActive <= 1000 * 60 * 15)
+			activeusers.push(user);
+	}
+}
 function userEvent(socket, event, func){
 	socket.on(event, function(data){
 		var u=data.u;
@@ -123,13 +133,15 @@ function userEvent(socket, event, func){
 				if (obj){
 					prepuser(obj);
 					users[u] = obj;
-					if (data.a == obj.auth){
+					if (data.a == obj.auth) {
+						updateActive(u);
 						usersock[u] = socket;
 						func.call(socket, data, obj);
 					}
 				}
 			});
-		}else if (data.a == users[u].auth){
+		} else if (data.a == users[u].auth) {
+			updateActive(u);
 			usersock[u] = socket;
 			func.call(socket, data, users[u]);
 		}
@@ -183,15 +195,18 @@ io.sockets.on("connection", function(socket) {
 		this.emit("userdump", useruser(user));
 	});
 	userEvent(socket, "logout", function(data, user) {
+		activeusers.remo
 		var u=data.u;
 		db.hmset("U:"+u, user);
 		delete users[u];
+		updateActive();
 	});
 	userEvent(socket, "delete", function(data, user) {
 	    var u = data.u;
 	    db.del("U:" + u);
 	    db.del("Q:" + u);
-		delete users[u];
+	    delete users[u];
+	    updateActive();
 	});
 	userEvent(socket, "addcard", function(data, user) {
 	    // Anything using this should eventually be serverside
@@ -383,6 +398,14 @@ io.sockets.on("connection", function(socket) {
 			else
 				socket.emit("chat", { mode: "info", message: message[1] + " is not here right now." })
 		}
+		else if (data.message == "/who") {
+			var usersonline = "";
+			for (var i = 0;i < activeusers.length;i++) {
+				usersonline += activeusers[i] + ", ";
+			}
+			if (usersonline) usersonline = usersonline.substring(0, usersonline.length - 2);
+			socket.emit("chat" , {mode:"info", message: usersonline ? "Users online: " + usersonline + "." : "There are no users online :("})
+		}
 		else
 			io.sockets.emit("chat", data);
 	});
@@ -390,8 +413,17 @@ io.sockets.on("connection", function(socket) {
 	    var qu = "Q:" + data.u;
 	    db.hset(qu, data.quest, data.newstage);
 	});
-	socket.on("guestchat", function (data) {
-        io.sockets.emit("chat", {message: data.message, u:"Guest" + (data.name ? "_" + data.name : ""), mode:"guest"})
+	socket.on("guestchat", function(data) {
+		if (data.message == "/who") {
+			var usersonline = "";
+			for (var i = 0; i < activeusers.length; i++) {
+				usersonline += activeusers[i] + ", ";
+			}
+			if (usersonline) usersonline = usersonline.substring(0, usersonline.length - 2);
+			socket.emit("chat", { mode: "info", message: usersonline ? "Users online: " + usersonline + "." : "There are no users online :(" })
+		}
+		else
+			io.sockets.emit("chat", {message: data.message, u:"Guest" + (data.name ? "_" + data.name : ""), mode:"guest"})
 	});
 	socket.on("pvpwant", function(data) {
 		var pendinggame=rooms[data.room];
