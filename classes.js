@@ -110,6 +110,7 @@ function Creature(card, owner){
 		this.active = clone(golem.active);
 		this.passives = clone(golem.passives);
 		this.status = clone(golem.status);
+		this.usedactive = true;
 	}else this.transform(card, owner);
 }
 function Permanent(card, owner){

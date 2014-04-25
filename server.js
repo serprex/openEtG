@@ -34,7 +34,12 @@ function loginRespond(res, servuser, pass){
 			user.oracle = true;
 		}
 		res.writeHead("200");
-		res.end(JSON.stringify(user));
+		updateActive(user.name);
+		db.hgetall("Q:" + user.name, function (err, obj) {
+		    user.quest = obj;
+            res.end(JSON.stringify(user));
+		});
+		
 	}
 	if(!servuser.salt){
 		servuser.salt = crypto.pseudoRandomBytes(16).toString("base64");
@@ -81,9 +86,10 @@ function cardRedirect(req, res, next){
 }
 
 var users = {};
+var activeusers = {};
 var duels = {};
 var trades = {};
-var usersock = {};
+var usersock = [];
 var rooms = {};
 var sockinfo = {};
 process.on("SIGTERM", process.exit).on("SIGINT", process.exit);
@@ -110,6 +116,14 @@ function foeEcho(socket, event){
 		}
 	});
 }
+function updateActive(user) {
+	if (user) users[user].lastActive = Date.now();
+	activeusers = [];
+	for (var user in users) {
+		if (Date.now() - users[user].lastActive <= 1000 * 60 * 15)
+			activeusers.push(user);
+	}
+}
 function userEvent(socket, event, func){
 	socket.on(event, function(data){
 		if (!data){
@@ -125,13 +139,15 @@ function userEvent(socket, event, func){
 				if (obj){
 					prepuser(obj);
 					users[u] = obj;
-					if (data.a == obj.auth){
+					if (data.a == obj.auth) {
+						updateActive(u);
 						usersock[u] = socket;
 						func.call(socket, data, obj);
 					}
 				}
 			});
-		}else if (data.a == users[u].auth){
+		} else if (data.a == users[u].auth) {
+			updateActive(u);
 			usersock[u] = socket;
 			func.call(socket, data, users[u]);
 		}
@@ -141,34 +157,34 @@ function prepuser(servuser){
 	servuser.gold = parseInt(servuser.gold || 0);
 }
 function useruser(servuser){
-	return {
-		auth: servuser.auth,
-		name: servuser.name,
-		deck: servuser.deck,
-		pool: servuser.pool,
-		gold: servuser.gold,
-		ocard: servuser.ocard,
-		starter: servuser.starter ? servuser.starter : null
+    return {
+        auth: servuser.auth,
+        name: servuser.name,
+        deck: servuser.deck,
+        pool: servuser.pool,
+        gold: servuser.gold,
+        ocard: servuser.ocard,
+        starter: servuser.starter ? servuser.starter : null,
 	};
 }
 function getDay(){
 	return Math.floor(Date.now()/86400000);
 }
-
+//Aether:    
 var starter = [
-	"01530015660159001599016220d4sa034sb024sd014vm014vu0152p0155u015c1015cc015fa015il015in015lf015ln015os015oj015ri015rn015uo015uv018pi",
-	"0253101532034sa014t3094vc024vi034vk014vp024vs014vt014vd034ve014vf0452g0552m0152r018pk",
-	"0153002532015630256501566034sa014t30952g0152i0252m0152j0252k0152n0252p0352t0152r0152h0455k0255t018pl",
-	"0156203564035650159502599034sa014t30a55k0255q0355t0155r0255l0155o0358o0258t0158p0158q018pm",
-	"0259101593015940259603599034sa014t50858o0358u0258p0258q0159a0158r055bs025c2015c7025c9018pn",
-	"034sa034td0b5bs035c0025c2015c8025c7035ce015c6015c9015c3015bt035f9025fh025fb015fa018po",
-	"034sa034t4085f0035f1035f3025f4025ff015fh015f6015f5015fc015f2015f9055i4015ia025ii015i9015ig018pp",
-	"044sa014td0a5i4025i5025i7015i8015ia015if015iq025ip035ie015id045oc015og025on025os015ot015or018pr",
-	"034sa014t40a5l8015lj025lo025lp015ld045lf025lm015ln015ll015la045rg035rh015ri015s1025ru018ps",
-	"034sa014t3035l8015lc035lb015lf015ln0a5oc025od025oh035ok035oe025oo025ot015or015op015of018pq",
-	"034sa014t30a5rg025ri015rp025rr025rk035rq015s1015rl015ru015s0015rn015rm035uk035v1015v3025vb015uu018pi",
-	"016210162402627034sa014t3085uk035um015un025us015v1035v3025uq025ut015up015v2015uv015va015ul0461o0161q018pu",
-	"016200162101623026240162501627034sa014t3034vc014vi024vk014vt014ve024vo0a61o0261p0261q0261s0161t0161r0161v018pj"
+	"015990g4sa014sd014t4014vi014vs0152o0152t0155u0155p0158q015ca015fi015f6015if015il015lo015lb015ou015s5025rq015v3015ut0161s018pi",
+	"01502034sa014t3014sd0b4vc024vi014vj014vh014vv014vp034vs024vd014ve014vf055uk015us015v3015uq015up015uv018pt",
+	"0153102532034sa014sd014t40c52g0252i0252j0252k0252n0152p0152t0152r0152h045bs025cb025cr018pn",
+	"0156203564025650159502599034sa014sd014t50b55k0155q0255t0255r0255l0155o0458o0158t0258q018pm",
+	"03590015910159403599034sa014sd014t40b58o0258u0158p0258q0158s0158r045rg025ri025rr015rn018ps",
+	"034sa014sd014td0c5bs015bu025c1015cb025c0015c8025c7015c6015cr015c3015bt045i4015ia015i6025il025ie018ps",
+	"034sa014sd024t40b5f0025f1025f3015f4025fh025fi025fa015f5025fc015f2045l8025lp025lr018pq",
+	"02565034sa024sd014td0455k0255t0155r0c5i4025i8035i6025ip025ie015i9025ig015id018pl",
+	"034sa014sd014tb0b5l8025lo025lp035lb015ld025lm015ln025ll015la045oc025on025os015oe015or018pr",
+	"034sa014sd014t4055f0015f3025f4015f6015fc0c5oc025od015og025os015oh015oe025ou015om025or015of018po",
+	"03627034sa024sd014t40c5rg025ri025rr015rl025ru015s0015rn015rm0561o0261q0261t018pu",
+	"034sa014sd014t40452g0152p0252t0a5uk035um025un015us025v3015uq035ut015up015vb015uo025uv015ul018pk",
+	"015020262002627034sa014sd014t4064vc024vp034vs0b61o0261q0361s0261t0161v018pj"
 ];
 
 io.sockets.on("connection", function(socket) {
@@ -180,22 +196,26 @@ io.sockets.on("connection", function(socket) {
 		var startdeck = starter[data.e];
 		user.deck = startdeck || starter[0];
 		user.starter = user.deck;
-		user.pool = "";
-		user.quest = 0;
+		user.pool = [];
+		user.quest = { necromancer: 1 };
 		this.emit("userdump", useruser(user));
 	});
 	userEvent(socket, "logout", function(data, user) {
+		activeusers.remo
 		var u=data.u;
 		db.hmset("U:"+u, user);
 		delete users[u];
+		updateActive();
 	});
 	userEvent(socket, "delete", function(data, user) {
-		var u=data.u;
-		db.del("U:"+u);
-		delete users[u];
+	    var u = data.u;
+	    db.del("U:" + u);
+	    db.del("Q:" + u);
+	    delete users[u];
+	    updateActive();
 	});
 	userEvent(socket, "addcard", function(data, user) {
-		// Anything using this should eventually be serverside
+	    // Anything using this should eventually be serverside
 		user.pool = etgutil.addcard(user.pool, data.c);
 		if (data.g){
 			user.gold += data.g;
@@ -204,8 +224,11 @@ io.sockets.on("connection", function(socket) {
 			user.ocard = data.o;
 		}
 	});
-	userEvent(socket, "subgold", function(data, user){
-		user.gold -= data.g;
+	userEvent(socket, "subgold", function (data, user) {
+	    user.gold -= data.g;
+	});
+	userEvent(socket, "addgold", function (data, user) {
+	    user.gold += data.g;
 	});
 	userEvent(socket, "setdeck", function(data, user){
 		user.deck = data.d;
@@ -293,7 +316,8 @@ io.sockets.on("connection", function(socket) {
 				usersock[f].emit("pvpgive", { first: !first, seed: seed, deck: deck1, urdeck: deck0, foename:u});
 			} else {
 				duels[u] = f;
-				usersock[f].emit("chat", { u: "Message", message: u + " wants to duel with you!", mode:"info" });
+				usersock[f].emit("chat", { message: u + " wants to duel with you!", mode: "info" });
+				this.emit("chat", { mode: "info", message: "You have sent a PvP request to " + f + "!" });
 			}
 		}
 	});
@@ -343,8 +367,9 @@ io.sockets.on("connection", function(socket) {
 				this.emit("tradegive", { first: false });
 				usersock[f].emit("tradegive", { first: true });
 			} else {
-				trades[u] = f;
-				if (usersock[f]) usersock[f].emit("chat", { mode:"info", message: u + " wants to trade with you!" });
+			    trades[u] = f;
+			    if (usersock[f]) usersock[f].emit("chat", { mode: "info", message: u + " wants to trade with you!" });
+			    this.emit("chat", { mode: "info", message: "You have sent a trade request to " + f + "!" });
 			}
 		}
 	});
@@ -379,11 +404,32 @@ io.sockets.on("connection", function(socket) {
 			else
 				socket.emit("chat", { mode: "info", message: message[1] + " is not here right now." })
 		}
+		else if (data.message == "/who") {
+			var usersonline = "";
+			for (var i = 0;i < activeusers.length;i++) {
+				usersonline += activeusers[i] + ", ";
+			}
+			if (usersonline) usersonline = usersonline.substring(0, usersonline.length - 2);
+			socket.emit("chat" , {mode:"info", message: usersonline ? "Users online: " + usersonline + "." : "There are no users online :("})
+		}
 		else
 			io.sockets.emit("chat", data);
 	});
 	userEvent(socket, "updatequest", function (data, user) {
-		user.quest = data.newquest;
+	    var qu = "Q:" + data.u;
+	    db.hset(qu, data.quest, data.newstage);
+	});
+	socket.on("guestchat", function(data) {
+		if (data.message == "/who") {
+			var usersonline = "";
+			for (var i = 0; i < activeusers.length; i++) {
+				usersonline += activeusers[i] + ", ";
+			}
+			if (usersonline) usersonline = usersonline.substring(0, usersonline.length - 2);
+			socket.emit("chat", { mode: "info", message: usersonline ? "Users online: " + usersonline + "." : "There are no users online :(" })
+		}
+		else
+			io.sockets.emit("chat", {message: data.message, u:"Guest" + (data.name ? "_" + data.name : ""), mode:"guest"})
 	});
 	socket.on("pvpwant", function(data) {
 		var pendinggame=rooms[data.room];
