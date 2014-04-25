@@ -283,7 +283,7 @@ function getCreatureImage(code) {
 		if (card) {
 			var boxGraphics = new PIXI.Graphics();
 			boxGraphics.beginFill(card ? (card.upped ? lighten(elecols[card.element]) : elecols[card.element]) : elecols[0]);
-			boxGraphics.drawRect(0, 9, 17, 10);
+			boxGraphics.drawRect(0, 9, 17, 12);
 			boxGraphics.endFill();
 			graphics.addChild(boxGraphics);
 			var text = new PIXI.Text(CardCodes[code].name, { font: "8px Dosis", fill: card.upped ? "black" : "white" });
@@ -525,6 +525,9 @@ function initGame(data, ai) {
 	}
 	if (data.aimarkpower) {
 		game.player2.markpower = data.aimarkpower;
+	}
+	if (data.aidrawpower) {
+	    game.player2.drawpower = data.aidrawpower;
 	}
 	var idx, code, decks = [data.urdeck, data.deck];
 	for (var j = 0;j < 2;j++) {
@@ -864,7 +867,7 @@ function mkDemigod() {
 		startEditor();
 		return;
 	}
-	initGame({ first: Math.random() < .5, deck: deck, urdeck: urdeck, seed: Math.random() * etg.MAX_INT, hp: 200, aimarkpower: 3, foename: dgname }, aievalopt.checked ? aiEvalFunc : aiFunc);
+	initGame({ first: Math.random() < .5, deck: deck, urdeck: urdeck, seed: Math.random() * etg.MAX_INT, hp: 200, aimarkpower: 3, aidrawpower: 2, foename: dgname }, aievalopt.checked ? aiEvalFunc : aiFunc);
 	game.cost = 20;
 	game.gold = 30;
 }
@@ -874,6 +877,7 @@ function mkQuestAi(quest, stage) {
 	var deck;
 	var foename = "";
 	var markpower = 1;
+	var drawpower = 1;
 	var hp = 100;
 	var wintext = "";
 	if (quest == "necromancer") {
@@ -905,7 +909,7 @@ function mkQuestAi(quest, stage) {
 		startEditor();
 		return;
 	}
-	initGame({ first: Math.random() < .5, deck: deck, urdeck: urdeck, seed: Math.random() * etg.MAX_INT, hp: hp, aimarkpower: markpower, foename: foename }, aievalopt.checked ? aiEvalFunc : aiFunc);
+	initGame({ first: Math.random() < .5, deck: deck, urdeck: urdeck, seed: Math.random() * etg.MAX_INT, hp: hp, aimarkpower: markpower, foename: foename, aidrawpower:drawpower }, aievalopt.checked ? aiEvalFunc : aiFunc);
 	game.quest = [quest, stage];
 	game.wintext = wintext;
 }
@@ -1411,10 +1415,15 @@ function startMenu() {
 			// todo user.oracle should be a card, not true. The card is the card that the server itself added. This'll only show what was added
 			delete user.oracle;
 			var card = PlayerRng.randomcard(false,
-                (function(y) { return function(x) { return x.type != PillarEnum && ((x.rarity != 5) ^ y); } })(Math.random() < .03)).code;
-			userEmit("addcard", { c: card, o: card });
-			user.ocard = card;
-			user.pool.push(card);
+                (function (y) { return function (x) { return x.type != PillarEnum && ((x.rarity != 5) ^ y); } })(Math.random() < .03));
+			cardcode = card.code;
+			var bound = card.rarity >= 2
+			userEmit("addcard", { c: cardcode, o: cardcode, accountbound: bound });
+			user.ocard = cardcode;
+            if (bound)
+                user.accountbound.push(cardcode);
+			else
+                user.pool.push(cardcode);
 			var oracle = new PIXI.Sprite(nopic);
 			oracle.position.set(450, 100);
 			menuui.addChild(oracle);
@@ -1437,7 +1446,7 @@ function startMenu() {
 
 	animCb = function() {
 		if (user && oracle) {
-			oracle.setTexture(getArt(card));
+			oracle.setTexture(getArt(cardcode));
 		}
 	}
 
@@ -1565,7 +1574,8 @@ function upgradestore() {
 
 	var editorcolumns = [];
 	var selectedCard;
-	var cardartcode;
+	var upgradedCard;
+	var mouseovercode;
 	var cardpool = {};
 	var chosenelement = 0;
 	adjustdeck();
@@ -1591,14 +1601,15 @@ function upgradestore() {
 			sprite.addChild(sprcount);
 			(function(_i, _j) {
 				sprite.click = function() {
-					selectedCard = cardartcode;
-					if (isFreeCard(CardCodes[cardartcode]))
+				    selectedCard = mouseovercode;
+                    upgradedCard = CardCodes[mouseovercode].asUpped(true).code
+				    if (isFreeCard(CardCodes[mouseovercode]))
 						tinfo.setText("Costs 50 gold to upgrade");
 					else tinfo.setText("Convert 6 of these into an upgraded version.");
 					twarning.setText("");
 				}
 				sprite.mouseover = function() {
-					cardartcode = editorcolumns[_i][1][chosenelement][_j];
+				    mouseovercode = editorcolumns[_i][1][chosenelement][_j];
 				}
 			})(i, j);
 			sprite.interactive = true;
@@ -1618,8 +1629,8 @@ function upgradestore() {
 	selectedCardArt.position.set(534, 8);
 	upgradeui.addChild(selectedCardArt);
 	animCb = function() {
-		if (cardartcode) {
-			cardArt.setTexture(getArt(cardartcode));
+	    if (upgradedCard) {
+	        cardArt.setTexture(getArt(upgradedCard));
 		}
 		if (selectedCard) {
 			selectedCardArt.setTexture(getArt(selectedCard));
@@ -1656,6 +1667,7 @@ function startStore() {
 	var cost = 0;
 	var newCards = [];
 	var newCardsArt = [];
+	var accountbound = false;
 
 	var storeui = new PIXI.Stage(0x000000, true);
 
@@ -1674,6 +1686,10 @@ function startStore() {
 	var tinfo2 = makeText(50, 51, "Select which type of booster you want.", true);
 	storeui.addChild(tinfo2);
 
+    //free packs text
+	var freeinfo = makeText(300, 26, "", true);
+	storeui.addChild(freeinfo);
+
 	//gold icon
 	var igold = PIXI.Sprite.fromImage("assets/gold.png");
 	igold.position.set(750, 100);
@@ -1682,16 +1698,26 @@ function startStore() {
 	//get cards button
 	var bget = makeButton(750, 156, 75, 18, buttons.takecards);
 	toggleB(bget);
-	bget.click = function() {
-		userEmit("add", { add: etg.encodedeck(newCards) });
-		for (var i = 0;i < 10;i++) {
-			user.pool.push(newCards[i]);
-			newCardsArt[i].visible = false;
-		}
+	bget.click = function () {
+	    if (!accountbound) {
+	        userEmit("add", { add: etg.encodedeck(newCards) });
+	        for (var i = 0; i < newCards.length; i++) {
+	            user.pool.push(newCards[i]);
+	            newCardsArt[i].visible = false;
+	        }
+	    }
+	    else {
+	        userEmit("addaccountbound", { add: etg.encodedeck(newCards) });
+	        for (var i = 0; i < newCards.length; i++) {
+	            user.accountbound.push(newCards[i]);
+	            newCardsArt[i].visible = false;
+	        }
+	    }
 
 		toggleB(bbronze, bsilver, bgold, bplatinum, bget, bbuy);
 		popbooster.visible = false;
 		newCards = [];
+		accountbound = false;
 	}
 	storeui.addChild(bget);
 
@@ -1710,18 +1736,27 @@ function startStore() {
 	//buy button
 	var bbuy = makeButton(750, 156, 75, 18, buttons.buypack);
 	bbuy.click = function() {
-		if (isEmpty(newCards)) {
-			if (user.gold >= cost) {
+	    if (isEmpty(newCards)) {
+	        if (!packrarity) {
+	            tinfo2.setText("Select a pack first!");
+	            return;
+	        }
+	        if (!packtype) {
+	            tinfo.setText("Select an element first!");
+	            return;
+	        }
+			if (user.gold >= cost || user.freepacks[packrarity-1] > 0) {
 				var allowedElements = []
-				if (!packrarity || !packtype) {
-					tinfo.setText("Select a pack first!");
-					tinfo2.setText("");
-					return;
+				
+				if (user.freepacks[packrarity - 1] > 0){
+				    userEmit("usefreepack", {type: packrarity-1,amount:1});
+				    user.freepacks[packrarity - 1]--;
+				    accountbound = true;
 				}
-
-
-				user.gold -= cost;
-				userEmit("subgold", { g: cost });
+				else {
+				    user.gold -= cost;
+				    userEmit("subgold", { g: cost });
+				}
 
 				for (var i = 0;i < cardamount;i++) {
 					var rarity = 1;
@@ -1739,9 +1774,9 @@ function startStore() {
 
 				toggleB(bbronze, bsilver, bgold, bplatinum, bget, bbuy);
 				popbooster.visible = true;
+				updateFreeText()
 			} else {
-				tinfo.setText("You can't afford that!");
-				tinfo2.setText("");
+				tinfo2.setText("You can't afford that!");
 			}
 		} else {
 			tinfo.setText("Take your cards before you buy more!");
@@ -1750,6 +1785,10 @@ function startStore() {
 	}
 	storeui.addChild(bbuy);
 
+	function updateFreeText(){
+	    if (user.freepacks[packrarity - 1]) freeinfo.setText("Free boosters of this type left: " + user.freepacks[packrarity - 1]);
+	    else freeinfo.setText("");
+        }
 	
 	// The different pack types
 	var bbronze = makeButton(50, 280, 100, 200, boosters[4]);
@@ -1758,6 +1797,7 @@ function startStore() {
 		tinfo2.setText("Bronze Pack: 9x Common");
 		cardamount = 9;
 		cost = 15;
+		updateFreeText()
 	}
 	storeui.addChild(bbronze);
 
@@ -1767,6 +1807,7 @@ function startStore() {
 		tinfo2.setText("Silver Pack: 3x Common + 3x Uncommon");
 		cardamount = 6;
 		cost = 25
+		updateFreeText()
 	}
 	storeui.addChild(bsilver);
 
@@ -1776,6 +1817,7 @@ function startStore() {
 		tinfo2.setText("Gold Pack: 3x Common + 4x Uncommon + 1x Rare");
 		cardamount = 8;
 		cost = 65;
+		updateFreeText()
 	}
 	storeui.addChild(bgold);
 
@@ -1785,6 +1827,7 @@ function startStore() {
 		tinfo2.setText("Platinum Pack: 4x Common + 3x Uncommon + 1x Rare + 1x Shard");
 		cardamount = 9;
 		cost = 100;
+		updateFreeText()
 	}
 	storeui.addChild(bplatinum);
 
@@ -1861,13 +1904,22 @@ function startEditor() {
 				}
 			}
 			if (user.starter) {
-				for (var i = 0;i < user.starter.length;i++) {
-					if (user.starter[i] in cardpool) {
-						cardpool[user.starter[i]]++;
-					} else {
-						cardpool[user.starter[i]] = 1;
-					}
-				}
+			    for (var i = 0; i < user.starter.length; i++) {
+			        if (user.starter[i] in cardpool) {
+			            cardpool[user.starter[i]]++;
+			        } else {
+			            cardpool[user.starter[i]] = 1;
+			        }
+			    }
+			}
+			if (user.accountbound) {
+			    for (var i = 0; i < user.accountbound.length; i++) {
+			        if (user.accountbound[i] in cardpool) {
+			            cardpool[user.accountbound[i]]++;
+			        } else {
+			            cardpool[user.accountbound[i]] = 1;
+			        }
+			    }
 			}
 			for (var i = editordeck.length - 1;i >= 0;i--) {
 				var code = editordeck[i];
@@ -2937,10 +2989,17 @@ socket.on("userdump", function(data) {
 		user.pool = etg.decodedeck(user.pool);
 	}
 	if (user.starter) {
-		user.starter = etg.decodedeck(user.starter);
+	    user.starter = etg.decodedeck(user.starter);
+	}
+	if (user.accountbound) {
+	    user.accountbound = etg.decodedeck(user.accountbound);
 	}
 	if (!user.quest)
-		user.quest = {};
+	    user.quest = {};
+	if (user.freepacks) {
+	    user.freepacks = user.freepacks.split(",");
+	    convertIntInList(user.freepacks);
+	}
 	convertQuest();
 	startMenu();
 });
@@ -3065,6 +3124,11 @@ function convertQuest() {
 		q = parseInt(q);
 	}
 }
+function convertIntInList(list) {
+    for (var i = 0; i < list.length; i++) {
+        list[i] = parseInt(list[i]);
+    }
+}
 function loginClick() {
 	if (!user) {
 		var xhr = new XMLHttpRequest();
@@ -3084,10 +3148,17 @@ function loginClick() {
 							user.pool = etg.decodedeck(user.pool);
 						}
 						if (user.starter) {
-							user.starter = etg.decodedeck(user.starter);
+						    user.starter = etg.decodedeck(user.starter);
+						}
+						if (user.accountbound) {
+						    user.accountbound = etg.decodedeck(user.accountbound);
 						}
 						if (!user.quest) {
 							user.quest = {};
+						}
+						if (user.freepacks) {
+						    user.freepacks = user.freepacks.split(",");
+						    convertIntInList(user.freepacks);
 						}
 						console.log(user.quest);
 						convertQuest();

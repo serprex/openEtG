@@ -86,10 +86,10 @@ function cardRedirect(req, res, next){
 }
 
 var users = {};
-var activeusers = {};
+var activeusers = [];
 var duels = {};
 var trades = {};
-var usersock = [];
+var usersock = {};
 var rooms = {};
 var sockinfo = {};
 process.on("SIGTERM", process.exit).on("SIGINT", process.exit);
@@ -164,7 +164,9 @@ function useruser(servuser){
         pool: servuser.pool,
         gold: servuser.gold,
         ocard: servuser.ocard,
-        starter: servuser.starter ? servuser.starter : null,
+        starter: servuser.starter || null,
+        freepacks: servuser.freepacks || "0,0,0,0",
+        accountbound: servuser.accountbound || []
 	};
 }
 function getDay(){
@@ -197,6 +199,8 @@ io.sockets.on("connection", function(socket) {
 		user.deck = startdeck || starter[0];
 		user.starter = user.deck;
 		user.pool = [];
+		user.accountbound = [];
+		user.freepacks = "3,2,0,0";
 		user.quest = { necromancer: 1 };
 		this.emit("userdump", useruser(user));
 	});
@@ -216,7 +220,12 @@ io.sockets.on("connection", function(socket) {
 	});
 	userEvent(socket, "addcard", function(data, user) {
 	    // Anything using this should eventually be serverside
-		user.pool = etgutil.addcard(user.pool, data.c);
+	    if (data.accountbound) {
+	        if (!user.accountbound) user.accountbound = "";
+	        user.accountbound = etgutil.addcard(user.accountbound, data.c);
+	    }
+	    else
+	        user.pool = etgutil.addcard(user.pool, data.c);
 		if (data.g){
 			user.gold += data.g;
 		}
@@ -292,10 +301,17 @@ io.sockets.on("connection", function(socket) {
 		user.deck = data.add;
 	});
 	userEvent(socket, "add", function (data, user) {
-		var add = etgutil.decodedeck(data.add);
-		for (var i = 0; i < add.length; i++) {
-			user.pool = etgutil.addcard(user.pool, add[i]);
-		}
+	    var add = etgutil.decodedeck(data.add);
+	    for (var i = 0; i < add.length; i++) {
+	        user.pool = etgutil.addcard(user.pool, add[i]);
+	    }
+	});
+	userEvent(socket, "addaccountbound", function (data, user) {
+	    if (!user.accountbound) user.accountbound = "";
+	    var add = etgutil.decodedeck(data.add);
+	    for (var i = 0; i < add.length; i++) {
+	        user.accountbound = etgutil.addcard(user.accountbound, add[i]);
+	    }
 	});
 	userEvent(socket, "foewant", function(data){
 		var u=data.u, f=data.f;
@@ -418,6 +434,14 @@ io.sockets.on("connection", function(socket) {
 	userEvent(socket, "updatequest", function (data, user) {
 	    var qu = "Q:" + data.u;
 	    db.hset(qu, data.quest, data.newstage);
+	});
+	userEvent(socket, "usefreepack", function (data, user) {
+	    var packlist = user.freepacks.split(",");
+	    for (var i = 0; i < packlist.length; i++) {
+	        packlist[i] = parseInt(packlist[i]);
+	    }
+	    packlist[data.type] -= data.amount;
+	    user.freepacks = packlist.join();
 	});
 	socket.on("guestchat", function(data) {
 		if (data.message == "/who") {
