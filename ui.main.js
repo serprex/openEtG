@@ -1,6 +1,6 @@
 var Cards, CardCodes, Targeting, targetingMode, targetingModeCb, targetingText, game, discarding, animCb, user, renderer, endturnFunc, cancelFunc, accepthandfunc, foeDeck, player2summon, player2Card, guestname;
 (function(g) {
-	var htmlElements = ["leftpane", "chatArea", "chatinput", "deckimport", "aideck", "foename", "airefresh", "change", "login", "password", "challenge", "aievalopt", "chatBox", "trade", "bottompane"];
+	var htmlElements = ["leftpane", "chatArea", "chatinput", "deckimport", "aideck", "foename", "airefresh", "change", "login", "password", "challenge", "aievalopt", "chatBox", "trade", "bottompane", "demigodmode"];
 	for (var i = 0;i < htmlElements.length;i++) {
 		g[htmlElements[i]] = document.getElementById(htmlElements[i]);
 	}
@@ -529,6 +529,18 @@ function initGame(data, ai) {
 	if (data.aidrawpower) {
 	    game.player2.drawpower = data.aidrawpower;
 	}
+	if (data.demigod) {
+	    game.player1.maxhp = game.player1.hp = 200;
+	    game.player1.drawpower = 2;
+	    data.urdeck = doubleDeck(data.urdeck);
+	    game.player1.markpower = 3;
+	}
+	if (data.foedemigod) {
+	    game.player2.maxhp = game.player2.hp = 200;
+	    game.player2.drawpower = 2;
+	    data.deck = doubleDeck(data.deck);
+	    game.player2.markpower = 3;
+	}
 	var idx, code, decks = [data.urdeck, data.deck];
 	for (var j = 0;j < 2;j++) {
 		for (var i = 0;i < decks[j].length;i++) {
@@ -557,8 +569,8 @@ function initGame(data, ai) {
 	}
 }
 function getDeck() {
-	if (user) {
-		return user.deck || [];
+    if (user) {
+		return user.decks[user.selectedDeck] || [];
 	}
 	var deckstring = deckimport.value;
 	return deckstring ? deckstring.split(" ") : [];
@@ -1145,7 +1157,9 @@ buttonLoader.onComplete = function() {
 		cancel: buttonsList[22],
 		accepthand: buttonsList[23],
 		confirm: buttonsList[24],
-
+		deck1: buttonsList[25],
+		deck2: buttonsList[26],
+		deck3: buttonsList[27]
 	}
 	maybeStartMenu();
 }
@@ -1950,6 +1964,9 @@ function startEditor() {
 		var bclear = makeButton(8, 8, 75, 18, buttons.clear);
 		var bsave = makeButton(8, 32, 75, 18, buttons.done);
 		var bimport = makeButton(8, 56, 75, 18, buttons.import);
+		var bdeck1 = makeButton(8, 80, 75, 18, buttons.deck1);
+		var bdeck2 = makeButton(8, 104, 75, 18, buttons.deck2);
+		var bdeck3 = makeButton(8, 128, 75, 18, buttons.deck3);
 		var barena = makeButton(8, 152, 75, 18, buttons.arenaai, function() {
 			if (user && user.ocard) {
 				chatArea.value = "Oracle Card: " + CardCodes[user.ocard].name;
@@ -1965,7 +1982,7 @@ function startEditor() {
 			editordeck.push(TrueMarks[editormark]);
 			deckimport.value = editordeck.join(" ");
 			if (usePool) {
-				userEmit("setdeck", { d: etg.encodedeck(editordeck) });
+				userEmit("setdeck", { d: etg.encodedeck(editordeck), number: user.selectedDeck });
 				user.deck = editordeck;
 			}
 			startMenu();
@@ -1973,6 +1990,27 @@ function startEditor() {
 		bimport.click = function() {
 			editordeck = deckimport.value.split(" ");
 			processDeck();
+		}
+		bdeck1.click = function () {
+		    editordeck.push(TrueMarks[editormark]);
+		    userEmit("setdeck", { d: etg.encodedeck(editordeck), number: user.selectedDeck });
+		    user.selectedDeck = 1;
+		    editordeck = getDeck();
+		    processDeck();
+		}
+		bdeck2.click = function () {
+		    editordeck.push(TrueMarks[editormark]);
+		    userEmit("setdeck", { d: etg.encodedeck(editordeck), number: user.selectedDeck });
+		    user.selectedDeck = 2;
+		    editordeck = getDeck();
+		    processDeck();
+		}
+		bdeck3.click = function () {
+		    editordeck.push(TrueMarks[editormark]);
+		    userEmit("setdeck", { d: etg.encodedeck(editordeck), number: user.selectedDeck });
+		    user.selectedDeck = 3;
+		    editordeck = getDeck();
+		    processDeck();
 		}
 		barena.click = function() {
 			if (editordeck.length < 30) {
@@ -1989,6 +2027,11 @@ function startEditor() {
 		editorui.addChild(bclear);
 		editorui.addChild(bsave);
 		editorui.addChild(bimport);
+		if (usePool) {
+		    editorui.addChild(bdeck1);
+		    editorui.addChild(bdeck2);
+		    editorui.addChild(bdeck3);
+		}
 		if (usePool && user.ocard) {
 			editorui.addChild(barena);
 		}
@@ -2310,7 +2353,7 @@ function startMatch() {
 				cardart.position.y = pos.y > 300 ? 44 : 300;
 			} else cardart.visible = false;
 		} else {
-			if (game.winner == game.player1 && !game.quest) {
+			if (game.winner == game.player1 && !game.quest && game.player2.ai) {
 				if (!cardwon) {
 					var winnable = [];
 					for (var i = 0;i < foeDeck.length;i++) {
@@ -2327,7 +2370,7 @@ function startMatch() {
 						if (cardwon.rarity == 3 && Math.random() > .5)
 							cardwon = PlayerRng.randomcard(elewin.upped, function(x) { return x.element == elewin.element && x.type != PillarEnum && x.rarity <= rareAllowed; });
 					}
-					if (!game.player2.ai || (game.level && game.level < 3)) {
+					if (game.level && game.level < 3) {
 						cardwon = cardwon.asUpped(false);
 					}
 					if (game.gold) {
@@ -2336,6 +2379,7 @@ function startMatch() {
 						if (game.cost) goldwon += game.cost;
 						game.goldreward = goldwon;
 					}
+					cardart.visible = false;
 					game.cardreward = cardwon.code;
 				}
 			} else {
@@ -2982,7 +3026,11 @@ socket.on("arenatop", startArenaTop);
 socket.on("userdump", function(data) {
 	user = data;
 	if (user.deck) {
-		user.deck = etg.decodedeck(user.deck);
+	    user.decks = [];
+	    user.decks[1] = etg.decodedeck(user.deck1);
+	    user.decks[2] = etg.decodedeck(user.deck2);
+	    user.decks[3] = etg.decodedeck(user.deck3);
+	    user.deck = getDeck()
 		deckimport.value = user.deck.join(" ");
 	}
 	if (user.pool) {
@@ -3142,7 +3190,11 @@ function loginClick() {
 					} else if (!user.pool && !user.starter) {
 						startElementSelect();
 					} else {
-						user.deck = etg.decodedeck(user.deck);
+					    user.decks = [];
+					    user.decks[1] = etg.decodedeck(user.deck1);
+					    user.decks[2] = etg.decodedeck(user.deck2);
+					    user.decks[3] = etg.decodedeck(user.deck3);
+						user.deck = getDeck()
 						deckimport.value = user.deck.join(" ");
 						if (user.pool || user.pool == "") {
 							user.pool = etg.decodedeck(user.pool);
@@ -3180,14 +3232,14 @@ function changeClick() {
 function challengeClick() {
 	if (Cards) {
 		if (user && user.deck) {
-			userEmit("foewant", { f: foename.value, deck: user.deck });
+			userEmit("foewant", { f: foename.value, deck: user.deck, DGmode:demigodmode.checked });
 		} else {
 			var deck = getDeck();
 			if ((user && (!user.deck || user.deck.length < 31)) || deck.length < 11) {
 				startEditor();
 				return;
 			}
-			socket.emit("pvpwant", { deck: deck, room: foename.value });
+			socket.emit("pvpwant", { deck: deck, room: foename.value, DGmode: demigodmode.checked });
 		}
 	}
 }
