@@ -89,7 +89,7 @@ var users = {};
 var activeusers = [];
 var duels = {};
 var trades = {};
-var usersock = [];
+var usersock = {};
 var rooms = {};
 var sockinfo = {};
 process.on("SIGTERM", process.exit).on("SIGINT", process.exit);
@@ -119,14 +119,20 @@ function foeEcho(socket, event){
 function updateActive(user) {
 	if (user) users[user].lastActive = Date.now();
 	activeusers = [];
-	for (var user in users) {
-		if (Date.now() - users[user].lastActive <= 1000 * 60 * 15)
-			activeusers.push(user);
+	for (var username in users) {
+		if (Date.now() - users[username].lastActive <= 1000 * 60 * 15)
+			activeusers.push(username);
 	}
 }
 function userEvent(socket, event, func){
 	socket.on(event, function(data){
+		if (!data){
+			return;
+		}
 		var u=data.u;
+		if (!u){
+			return;
+		}
 		console.log(u+": "+event);
 		if (!(u in users)){
 			db.hgetall("U:"+u, function(err, obj){
@@ -154,11 +160,16 @@ function useruser(servuser){
     return {
         auth: servuser.auth,
         name: servuser.name,
-        deck: servuser.deck,
+        deck1: servuser.deck1 || servuser.deck,
+        deck2: servuser.deck2 || "",
+        deck3: servuser.deck3 || "",
+        selectedDeck: servuser.selectedDeck || 1,
         pool: servuser.pool,
         gold: servuser.gold,
         ocard: servuser.ocard,
-        starter: servuser.starter ? servuser.starter : null,
+        starter: servuser.starter || null,
+        freepacks: servuser.freepacks || "0,0,0,0",
+        accountbound: servuser.accountbound || []
 	};
 }
 function getDay(){
@@ -188,9 +199,14 @@ io.sockets.on("connection", function(socket) {
 	userEvent(socket, "inituser", function(data, user) {
 		var u=data.u;
 		var startdeck = starter[data.e];
-		user.deck = startdeck || starter[0];
-		user.starter = user.deck;
+		user.deck1 = startdeck || starter[0];
+		user.starter = user.deck1;
+		user.deck2 = "";
+		user.deck3 = "";
+		user.selectedDeck = 1;
 		user.pool = [];
+		user.accountbound = [];
+		user.freepacks = "3,2,0,0";
 		user.quest = { necromancer: 1 };
 		this.emit("userdump", useruser(user));
 	});
@@ -210,7 +226,12 @@ io.sockets.on("connection", function(socket) {
 	});
 	userEvent(socket, "addcard", function(data, user) {
 	    // Anything using this should eventually be serverside
-		user.pool = etgutil.addcard(user.pool, data.c);
+	    if (data.accountbound) {
+	        if (!user.accountbound) user.accountbound = "";
+	        user.accountbound = etgutil.addcard(user.accountbound, data.c);
+	    }
+	    else
+	        user.pool = etgutil.addcard(user.pool, data.c);
 		if (data.g){
 			user.gold += data.g;
 		}
@@ -224,8 +245,17 @@ io.sockets.on("connection", function(socket) {
 	userEvent(socket, "addgold", function (data, user) {
 	    user.gold += data.g;
 	});
-	userEvent(socket, "setdeck", function(data, user){
-		user.deck = data.d;
+	userEvent(socket, "setdeck", function (data, user) {
+	    switch (data.number) {
+	        case 1: user.deck1 = data.d;
+	            break;
+	        case 2: user.deck2 = data.d;
+	            break;
+	        case 3: user.deck3 = data.d;
+	            break;
+	        default: break;
+	    }
+	    user.selectedDeck = data.number;
 	});
 	userEvent(socket, "setarena", function(data, user){
 		var au="A:" + data.u;
@@ -286,10 +316,17 @@ io.sockets.on("connection", function(socket) {
 		user.deck = data.add;
 	});
 	userEvent(socket, "add", function (data, user) {
-		var add = etgutil.decodedeck(data.add);
-		for (var i = 0; i < add.length; i++) {
-			user.pool = etgutil.addcard(user.pool, add[i]);
-		}
+	    var add = etgutil.decodedeck(data.add);
+	    for (var i = 0; i < add.length; i++) {
+	        user.pool = etgutil.addcard(user.pool, add[i]);
+	    }
+	});
+	userEvent(socket, "addaccountbound", function (data, user) {
+	    if (!user.accountbound) user.accountbound = "";
+	    var add = etgutil.decodedeck(data.add);
+	    for (var i = 0; i < add.length; i++) {
+	        user.accountbound = etgutil.addcard(user.accountbound, add[i]);
+	    }
 	});
 	userEvent(socket, "foewant", function(data){
 		var u=data.u, f=data.f;
@@ -298,6 +335,7 @@ io.sockets.on("connection", function(socket) {
 		}
 		console.log(u + " requesting " + f);
 		sockinfo[this.id].deck = data.deck;
+		sockinfo[this.id].demigod = data.DGmode;
 		if (f in users){
 			if (duels[f] == u) {
 				delete duels[f];
@@ -306,11 +344,12 @@ io.sockets.on("connection", function(socket) {
 				sockinfo[this.id].foe = usersock[f];
 				sockinfo[usersock[f].id].foe = this;
 				var deck0 = sockinfo[usersock[f].id].deck, deck1 = data.deck;
-				this.emit("pvpgive", { first: first, seed: seed, deck: deck0, urdeck: deck1, foename:f});
-				usersock[f].emit("pvpgive", { first: !first, seed: seed, deck: deck1, urdeck: deck0, foename:u});
+				var DG = sockinfo[this.id].demigod, DGfoe = sockinfo[usersock[f].id].demigod;
+				this.emit("pvpgive", { first: first, seed: seed, deck: deck0, urdeck: deck1, foename:f, demigod: DG, foedemigod: DGfoe});
+				usersock[f].emit("pvpgive", { first: !first, seed: seed, deck: deck1, urdeck: deck0, foename:u, demigod:DGfoe, foedemigod:DG});
 			} else {
 				duels[u] = f;
-				usersock[f].emit("chat", { message: u + " wants to duel with you!", mode: "info" });
+				if (usersock[f]) usersock[f].emit("chat", { message: u + " wants to duel with you!", mode: "info" });
 				this.emit("chat", { mode: "info", message: "You have sent a PvP request to " + f + "!" });
 			}
 		}
@@ -413,8 +452,17 @@ io.sockets.on("connection", function(socket) {
 	    var qu = "Q:" + data.u;
 	    db.hset(qu, data.quest, data.newstage);
 	});
-	socket.on("guestchat", function(data) {
-		if (data.message.replace(/ /g, "") == "/who") {
+	userEvent(socket, "usefreepack", function (data, user) {
+	    var packlist = user.freepacks.split(",");
+	    for (var i = 0; i < packlist.length; i++) {
+	        packlist[i] = parseInt(packlist[i]);
+	    }
+	    packlist[data.type] -= data.amount;
+	    user.freepacks = packlist.join();
+	});
+	socket.on("guestchat", function (data) {
+	    if (data.message == "/who") {
+	        updateActive();
 			var usersonline = "";
 			for (var i = 0; i < activeusers.length; i++) {
 				usersonline += activeusers[i] + ", ";

@@ -444,7 +444,11 @@ Player.prototype.endturn = function(discard) {
 		this.sosa--;
 	}
 	this.nova = 0;
-	this.foe.drawcard();
+	var drawpower = this.foe.drawpower || 1;
+	for (var i = 0; i < drawpower; i++) {
+        this.foe.drawcard();
+	}
+	
 	this.flatline = this.silence = false;
 	this.foe.precognition = this.foe.sanctuary = false;
 	this.game.turn = this.foe;
