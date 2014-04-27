@@ -711,7 +711,7 @@ Creature.prototype.die = function() {
 		}
 	}
 }
-Creature.prototype.transform = function(card, owner){
+Creature.prototype.transform = Weapon.prototype.transform = function(card, owner){
 	this.maxhp = this.hp = card.health;
 	this.atk = card.attack;
 	this.cast = card.cast;

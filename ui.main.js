@@ -2136,7 +2136,7 @@ function startMatch() {
 					fgfx.lineStyle(2, 0xffffff);
 				}
 			} else if (obj.canactive()) {
-				fgfx.lineStyle(2, obj.card.upped ?  "black" : "white" );
+				fgfx.lineStyle(2, obj.card.element ==  8 ?  0x000000 : 0xffffff );
 				fgfx.drawRect(spr.position.x - spr.width / 2, spr.position.y - spr.height / 2, spr.width, (obj instanceof Weapon || obj instanceof Shield ? 8 : 10));
 			}
 		}
@@ -2262,18 +2262,18 @@ function startMatch() {
 				if (!cardwon) {
 					var winnable = [];
 					for (var i = 0;i < foeDeck.length;i++) {
-						if (foeDeck[i].type != PillarEnum && foeDeck[i].rarity < 3) {
+						if (foeDeck[i].type != PillarEnum && foeDeck[i].rarity < 4) {
 							winnable.push(foeDeck[i]);
 						}
 					}
 					if (winnable.length) {
 						cardwon = winnable[Math.floor(Math.random() * winnable.length)];
+						if (cardwon.rarity == 3 && Math.random() < .5)
+							cardwon = winnable[Math.floor(Math.random() * winnable.length)];
 					} else {
 						var elewin = foeDeck[Math.floor(Math.random() * foeDeck.length)];
 						rareAllowed = 3;
 						cardwon = PlayerRng.randomcard(elewin.upped, function(x) { return x.element == elewin.element && x.type != PillarEnum && x.rarity <= rareAllowed; });
-						if (cardwon.rarity == 3 && Math.random() > .5)
-							cardwon = PlayerRng.randomcard(elewin.upped, function(x) { return x.element == elewin.element && x.type != PillarEnum && x.rarity <= rareAllowed; });
 					}
 					if (!game.player2.ai || (game.level && game.level < 3)) {
 						cardwon = cardwon.asUpped(false);

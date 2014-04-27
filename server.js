@@ -86,7 +86,7 @@ function cardRedirect(req, res, next){
 }
 
 var users = {};
-var activeusers = {};
+var activeusers = [];
 var duels = {};
 var trades = {};
 var usersock = [];
@@ -398,7 +398,7 @@ io.sockets.on("connection", function(socket) {
 			else
 				socket.emit("chat", { mode: "info", message: message[1] + " is not here right now." })
 		}
-		else if (data.message == "/who") {
+		else if (data.message.replace(/ /g, "") == "/who") {
 			var usersonline = "";
 			for (var i = 0;i < activeusers.length;i++) {
 				usersonline += activeusers[i] + ", ";
@@ -414,7 +414,7 @@ io.sockets.on("connection", function(socket) {
 	    db.hset(qu, data.quest, data.newstage);
 	});
 	socket.on("guestchat", function(data) {
-		if (data.message == "/who") {
+		if (data.message.replace(/ /g, "") == "/who") {
 			var usersonline = "";
 			for (var i = 0; i < activeusers.length; i++) {
 				usersonline += activeusers[i] + ", ";
