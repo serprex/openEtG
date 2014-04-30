@@ -54,6 +54,7 @@ aflatoxin:function(c,t){
 },
 aggroskele:function(c,t){
 	var dmg = 0;
+	new Creature(Cards.Skeleton.asUpped(c.card.upped), c.owner).place();
 	for (var i=0; i<23; i++){
 		if (c.owner.creatures[i] && c.owner.creatures[i].card.isOf(Cards.Skeleton)){
 			dmg += c.owner.creatures[i].trueatk();
@@ -676,6 +677,8 @@ livingweapon:function(c,t){
 		var w = new Weapon(t.card, t.owner);
 		w.atk = t.atk;
 		w.active = clone(t.active);
+		w.castele = t.castele;
+		w.cast = t.cast;
 		w.passives = clone(t.passives);
 		w.status = clone(t.status);
 		t.owner.weapon = w;

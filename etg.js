@@ -444,7 +444,11 @@ Player.prototype.endturn = function(discard) {
 		this.sosa--;
 	}
 	this.nova = 0;
-	this.foe.drawcard();
+	var drawpower = this.foe.drawpower || 1;
+	for (var i = 0; i < drawpower; i++) {
+        this.foe.drawcard();
+	}
+	
 	this.flatline = this.silence = false;
 	this.foe.precognition = this.foe.sanctuary = false;
 	this.game.turn = this.foe;
@@ -711,7 +715,7 @@ Creature.prototype.die = function() {
 		}
 	}
 }
-Creature.prototype.transform = function(card, owner){
+Creature.prototype.transform = Weapon.prototype.transform = function(card, owner){
 	this.maxhp = this.hp = card.health;
 	this.atk = card.attack;
 	this.cast = card.cast;
