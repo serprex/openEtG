@@ -756,6 +756,28 @@ function deckMorph(deck,MorphFrom,morphTo) {
 	return deckout;
 }
 
+function deckLimitEnforce(deck,limitList,minList,maxList) {
+	var deckout=[];
+	var deckcounts=[];
+	var minCounts=[];
+	var maxCounts=[];
+	var count;
+	for (var i=0; i < limitList.length; i++) {
+		minCounts.push({key: limitList[i],value: minList[i]});
+		maxCounts.push({key: limitList[i],value: maxList[i]});
+	}
+	for (var i=0; i < deck.length; i++) {
+		cardStr = deck[i];
+		if (!(cardStr in deckCounts)) {
+			deckCounts.push(key:cardStr , value: 1);
+		}
+		else {
+			deckCounts[cardStr]=deckCounts[cardStr]+1
+		}
+	}
+	for (var i=0; i < deckCounts.length
+}
+
 function mkDemigod() {
 	if (user) {
 		if (user.gold < 20) {
@@ -885,13 +907,16 @@ function mkQuestAi(quest, stage) {
 		}
 		else if (stage == 7) {
 			foename = "Spirit of the Dark Maiden"
-			hp = 80
+			hp = 100
 			wintext =	"As the maiden falls, your powers return to normal, and your allies settle back into their original forms.\n\
 						the shadows that gripped and drained your energies recede. Your strength returns to its former glory.\n\
 						You are still feeling tired from the fight, but the storm has passed, leaving an oddly purple sky.\n\
 						In light of recent events, you decide it is probably best to get out while you can, tired or not.\n\
 						Afterall whatever lies down the road has to be less painful than risking encountering another spirit.\n\
 						...right? ... You open the creaky door and head back out down the gravel path.\n\
+						as you take your first step you hear the maiden's silvery voice echoing from the house behind you.\n\
+						'It appears you may be as stong as my sister claims. Your soul shall make a most delectable morsel.\n\
+						'We shall meet again... Don't die before then. I'ld hate to lose my favorite toy.' She fades into the darkness.\n\
 						Off in the distance the storm has settled above the castle, the echos of ominous thunder growing fainter.\n\
 						You hope it will be gone by the time you get there... but given your luck so far, you don't think it will.\n\
 						Storm or not, you didn't come this far just to turn back, so you continue your treck down the path."
