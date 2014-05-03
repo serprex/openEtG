@@ -453,6 +453,7 @@ Player.prototype.endturn = function(discard) {
 	this.foe.precognition = this.foe.sanctuary = false;
 	this.game.turn = this.foe;
 	this.expectedDamage = expectedDamage(this);
+	this.foe.expectedDamage = expectedDamage(this.foe);
 }
 Player.prototype.procactive = function(name, func) {
 	if (!func){
@@ -819,6 +820,7 @@ Thing.prototype.useactive = function(t) {
 	}else new TextEffect("Evade", tgtToPos(t));
 	this.owner.spend(castele, cast);
 	this.owner.expectedDamage = expectedDamage(this.owner);
+	this.owner.foe.expectedDamage = expectedDamage(this.owner.foe);
 }
 Player.prototype.defstatus = Thing.prototype.defstatus = function(key, def){
 	if (!(key in this.status)){
@@ -935,6 +937,7 @@ CardInstance.prototype.useactive = function(target){
 		new Creature(card, owner).place();
 	} else console.log("Unknown card type: " + card.type);
 	owner.expectedDamage = expectedDamage(owner);
+	owner.foe.expectedDamage = expectedDamage(owner.foe);
 }
 function countAdrenaline(x){
 	return 5-Math.floor(Math.sqrt(Math.abs(x)));

@@ -1047,8 +1047,8 @@ function mkAi(level) {
 			];
 
 			var foename = typeName[level - 1] + "\n" + randomNames[Math.floor(Math.random() * randomNames.length)];
-
-			initGame({ first: Math.random() < .5, deck: deck, urdeck: urdeck, seed: Math.random() * etg.MAX_INT, hp: level == 1 ? 100 : (level == 2 ? 125 : 150), aimarkpower: level == 3 ? 2 : 1, foename: foename }, aievalopt.checked ? aiEvalFunc : aiFunc);
+			if (level == 3) deck = doubleDeck(deck);
+			initGame({ first: Math.random() < .5, deck: deck, urdeck: urdeck, seed: Math.random() * etg.MAX_INT, hp: level == 1 ? 100 : (level == 2 ? 125 : 150), aimarkpower: level == 3 ? 2 : 1, foename: foename, aidrawpower: level == 3 ? 2 : 1 }, aievalopt.checked ? aiEvalFunc : aiFunc);
 			game.cost = gameprice;
 			game.level = level;
 			game.gold = level == 1 ? 5 : (level == 2 ? 10 : 20);
@@ -1989,6 +1989,11 @@ function startEditor() {
 		}
 		bimport.click = function() {
 			editordeck = deckimport.value.split(" ");
+			if (usePool) {
+				userEmit("setdeck", { d: etg.encodedeck(editordeck), number: user.selectedDeck });
+				user.decks[user.selectedDeck] = editordeck.slice();
+				editordeck = getDeck();
+			}
 			processDeck();
 		}
 		bdeck1.click = function () {
@@ -3025,14 +3030,12 @@ socket.on("arenainfo", startArenaInfo);
 socket.on("arenatop", startArenaTop);
 socket.on("userdump", function(data) {
 	user = data;
-	if (user.deck) {
-	    user.decks = [];
+	user.decks = [];
 	    user.decks[1] = etg.decodedeck(user.deck1);
 	    user.decks[2] = etg.decodedeck(user.deck2);
 	    user.decks[3] = etg.decodedeck(user.deck3);
 	    user.deck = getDeck()
 		deckimport.value = user.deck.join(" ");
-	}
 	if (user.pool) {
 		user.pool = etg.decodedeck(user.pool);
 	}

@@ -343,11 +343,14 @@ enchant:function(c,t){
 },
 endow:function(c,t){
 	new TextEffect("Endow", tgtToPos(t));
-	c.active = clone(t.active);
 	c.passives = clone(t.passives);
 	c.status = clone(t.status);
-	c.cast = t.cast;
-	c.castele = t.castele;
+		c.active = clone(t.active);
+		c.cast = t.cast;
+		c.castele = t.castele;
+		if (c.active.cast && c.active.cast.activename == "endow") {
+			c.active.cast = null;
+		}
 	c.atk += t.trueatk();
 	if (t.active.buff){
 		c.atk -= t.active.buff(t);
