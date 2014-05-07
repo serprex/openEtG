@@ -435,18 +435,6 @@ function initTrade(data) {
 		editoreleicons.push(sprite);
 		editorui.addChild(sprite);
 	}
-	function adjustRarity(card) {
-		var rarity = card.rarity;
-		if (card.upped) {
-			if (rarity == 1)
-				rarity = 2;
-			else if (rarity == 3)
-				rarity = 4;
-			else
-				rarity += 6
-		}
-		return rarity;
-	}
 	for (var i = 0;i < 6;i++) {
 		editorcolumns.push([[], []]);
 		for (var j = 0;j < 15;j++) {
@@ -457,7 +445,7 @@ function initTrade(data) {
 			sprite.addChild(sprcount);
 			(function(_i, _j) {
 				sprite.click = function() {
-					if (player2Card && adjustRarity(CardCodes[player2Card]) != adjustRarity(CardCodes[cardartcode])) chatArea.value = "You can only trade cards with the same rarity";
+					if (player2Card && (CardCodes[cardartcode].rarity == 5) != (CardCodes[player2Card].rarity == 5) ) chatArea.value = "You can only trade this card for another with the same rarity";
 					else if (cardChosen) chatArea.value = "You have already selected a card";
 					else if (!myTurn) chatArea.value = "You need to wait for your friend to choose a card first";
 					else if (isFreeCard(CardCodes[cardartcode])) chatArea.value = "You can't trade a free card, that would just be cheating!";
@@ -835,6 +823,11 @@ function doubleDeck(deck) {
 }
 
 function mkDemigod() {
+	var urdeck = getDeck();
+	if ((user && (!user.deck || user.deck.length < 31)) || urdeck.length < 11) {
+		startEditor();
+		return;
+	}
 	if (user) {
 		if (user.gold < 20) {
 			chatArea.value = "Requires 20\u00A4";
@@ -874,16 +867,16 @@ function mkDemigod() {
 	var dgname = "Demigod\n" + demigodNames[rand];
 	var deck = demigodDeck[rand].split(" ");
 	deck = doubleDeck(deck);
+	initGame({ first: Math.random() < .5, deck: deck, urdeck: urdeck, seed: Math.random() * etg.MAX_INT, hp: 200, aimarkpower: 3, aidrawpower: 2, foename: dgname }, aievalopt.checked ? aiEvalFunc : aiFunc);
+	game.cost = 20;
+	game.level = 4;
+}
+function mkMage() {
 	var urdeck = getDeck();
 	if ((user && (!user.deck || user.deck.length < 31)) || urdeck.length < 11) {
 		startEditor();
 		return;
 	}
-	initGame({ first: Math.random() < .5, deck: deck, urdeck: urdeck, seed: Math.random() * etg.MAX_INT, hp: 200, aimarkpower: 3, aidrawpower: 2, foename: dgname }, aievalopt.checked ? aiEvalFunc : aiFunc);
-	game.cost = 20;
-	game.gold = 30;
-}
-function mkMage() {
 	if (user) {
 		if (user.gold < 5) {
 			chatArea.value = "Requires 5\u00A4";
@@ -939,14 +932,9 @@ function mkMage() {
 	var rand = Math.floor(Math.random() * mageNames.length);
 	var mname = mageNames[rand];
 	var deck = mageDecks[rand].split(" ");
-	var urdeck = getDeck();
-	if ((user && (!user.deck || user.deck.length < 31)) || urdeck.length < 11) {
-		startEditor();
-		return;
-	}
 	initGame({ first: Math.random() < .5, deck: deck, urdeck: urdeck, seed: Math.random() * etg.MAX_INT, hp: 125, foename: mname }, aievalopt.checked ? aiEvalFunc : aiFunc);
 	game.cost = 5;
-	game.gold = 10;
+	game.level = 2;
 }
 var questNecromancerDecks = ["52g 52g 52g 52g 52g 52g 52g 52g 52g 52g 52g 52m 52m 52m 52m 52m 52m 52m 52m 52m 52m 52m 52m 531 531 531 531 52n 52n 52n 52n 717 717 8pk", "5bs 5bs 5bs 5bs 5bs 5bs 5bs 5bs 5bs 5bs 5bs 5bs 5bs 5bu 5bu 5bu 5bu 5c1 5c1 5c1 5c1 5ca 5ca 8pp",
 "52g 52g 52g 52g 52g 52g 52g 52g 52g 52g 52g 52g 52g 52m 52m 52m 52m 52m 52m 531 531 531 531 531 52l 52l 52l 52t 52t 52t 52t 52t 535 535 535 535 717 717 717 717 8pk"];
@@ -2443,8 +2431,11 @@ function startMatch() {
 					if (game.level && game.level < 3) {
 						cardwon = cardwon.asUpped(false);
 					}
-					if (game.gold) {
-						var goldwon = Math.floor(game.gold * (game.player1.hp == game.player1.maxhp ? 2 : .5 + game.player1.hp / (game.player1.maxhp * 2)));
+					if (game.level) {
+						var baserewards = [1, 6, 11, 31];
+						var hpfactor = [11, 7, 6, 2];
+						var i = game.level-1
+						var goldwon = Math.floor((baserewards[i] + Math.floor(game.player1.hp / hpfactor[i])) * (game.player1.hp == game.player1.maxhp ? 1.5 : 1));
 						console.log(goldwon);
 						if (game.cost) goldwon += game.cost;
 						game.goldreward = goldwon;

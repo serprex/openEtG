@@ -127,8 +127,15 @@ cseed:function(c,t){
 	var atk;
 	return c.owner != t.owner && (atk=t.trueatk())>-1 && 10-t.truehp()+atk;
 },
-deadalive:function(c,t){
-	return true;
+deadalive: function(c, t) {
+	for (var i = 0;i < 16;i++) {
+		if (c.owner.permanents[i] && c.owner.permanents[i].active.death) return true;
+	}
+	for (var i = 0;i < 23;i++) {
+		if (c.owner.creatures[i] && c.owner.creatures[i].active.death) return true;
+	}
+	if ((c.owner.weapon && c.owner.weapon.active.death) || (c.owner.shield && c.owner.shield)) return true;
+	return false;
 },
 deja:function(c,t){
 	return true;

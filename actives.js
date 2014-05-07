@@ -843,7 +843,7 @@ parallel:function(c,t){
 	new TextEffect("Parallel", tgtToPos(t));
 	var copy = t.clone(c.owner);
 	copy.place();
-	if (copy.voodoo){
+	if (copy.passives.voodoo){
 		c.owner.foe.dmg(copy.maxhp-copy.hp);
 		if (copy.status.poison){
 			c.owner.foe.addpoison(copy.status.poison);
