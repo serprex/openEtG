@@ -996,13 +996,14 @@ function mkAi(level) {
 				deck = aideckstring.split(" ");
 			} else {
 				if (user) {
-					if (user.gold < gameprice) {
-						chatArea.value = "Requires " + gameprice + "\u00A4";
-						return;
+					if (gameprice) {
+						if (user.gold < gameprice) {
+							chatArea.value = "Requires " + gameprice + "\u00A4";
+							return;
+						}
+						user.gold -= gameprice;
+						userEmit("subgold", { g: gameprice });
 					}
-					user.gold -= gameprice;
-					userEmit("subgold", { g: gameprice });
-
 				}
 				var cardcount = {};
 				var eles = [Math.ceil(Math.random() * 12), Math.ceil(Math.random() * 12)], ecost = [];
@@ -2349,7 +2350,7 @@ function startMatch() {
 	animCb = function() {
 		if (game.phase == PlayPhase && game.turn == game.player2 && game.player2.ai && --aiDelay <= 0) {
 			aiDelay = parseInt(airefresh.value) || 8;
-			if (aiDelay == -2) {
+			if (aiDelay < 0) {
 				disableEffects = true;
 			}
 			do {
@@ -2358,6 +2359,10 @@ function startMatch() {
 			} while (aiDelay < 0 && game.turn == game.player2);
 			disableEffects = false;
 		}
+		if (game.phase == PlayPhase && game.turn == game.player2 && (parseInt(airefresh.value) || 8) < 3)
+			disableEffects = true;
+		else
+			disableEffects = false;
 		var pos = gameui.interactionManager.mouse.global;
 		maybeSetText(winnername, game.winner ? (game.winner == game.player1 ? "Won " : "Lost ") + game.ply : "");
 		maybeSetButton(game.winner ? null : endturn, endturn);
@@ -2436,6 +2441,11 @@ function startMatch() {
 						var hpfactor = [11, 7, 6, 2];
 						var i = game.level-1
 						var goldwon = Math.floor((baserewards[i] + Math.floor(game.player1.hp / hpfactor[i])) * (game.player1.hp == game.player1.maxhp ? 1.5 : 1));
+						console.log(goldwon);
+						if (game.cost) goldwon += game.cost;
+						game.goldreward = goldwon;
+					} else if (game.gold) {
+						var goldwon = game.gold
 						console.log(goldwon);
 						if (game.cost) goldwon += game.cost;
 						game.goldreward = goldwon;
@@ -3079,7 +3089,7 @@ socket.on("foearena", function(data) {
 	chatArea.value = data.name + ": " + deck.join(" ");
 	initGame({ first: data.first, deck: deck, urdeck: getDeck(), seed: data.seed, hp: data.hp, cost: data.cost, foename: data.name }, aievalopt.checked ? aiEvalFunc : aiFunc);
 	game.arena = data.name;
-	game.gold = 10;
+	game.gold = 15;
 	game.cost = 10;
 });
 socket.on("arenainfo", startArenaInfo);

@@ -132,7 +132,7 @@ bravery:function(c,t){
 },
 burrow:function(c,t){
 	c.status.burrowed = true;
-	c.active = {cast: Actives.unburrow};
+	c.active.cast = Actives.unburrow;
 	c.cast = 0;
 },
 butterfly:function(c,t){
@@ -345,12 +345,12 @@ endow:function(c,t){
 	new TextEffect("Endow", tgtToPos(t));
 	c.passives = clone(t.passives);
 	c.status = clone(t.status);
-		c.active = clone(t.active);
-		c.cast = t.cast;
-		c.castele = t.castele;
-		if (c.active.cast && c.active.cast.activename == "endow") {
-			c.active.cast = null;
-		}
+	c.active = clone(t.active);
+	c.cast = t.cast;
+	c.castele = t.castele;
+	if (c.active.cast && c.active.cast.activename == "endow") {
+		c.active.cast = null;
+	}
 	c.atk += t.trueatk();
 	if (t.active.buff){
 		c.atk -= t.active.buff(t);
@@ -1110,7 +1110,7 @@ snipe:function(c,t){
 	t.dmg(3);
 },
 sosa:function(c,t){
-	c.owner.sosa += 2;
+	c.owner.sosa += 3;
 	for(var i=1; i<13; i++){
 		if (i != Death){
 			c.owner.quanta[i] = 0;
@@ -1317,7 +1317,7 @@ firewall:function(c,t){
 	t.dmg(1);
 },
 skull:function(c,t){
-	if (t instanceof Creature){
+	if (t instanceof Creature && !t.card.isOf(Cards.Skeleton)) {
 		var thp = t.truehp();
 		if (thp <= 0 || c.owner.rng() < .5/thp){
 			var index = t.getIndex();
