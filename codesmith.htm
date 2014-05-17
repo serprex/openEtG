@@ -1,0 +1,23 @@
+<script>
+function maybeMake(e){
+	e.cancelBubble = true;
+	if (e.keyCode == 13 && passwd.value && codetype.value){
+		var xhr = new XMLHttpRequest();
+		xhr.open("POST", "code?p=" + encodeURIComponent(passwd.value) + "&t=" + encodeURIComponent(codetype.value), true);
+		xhr.onreadystatechange = function() {
+			if (this.readyState == 4) {
+				if (this.status == 200) {
+					passwd.value = this.responseText;
+				} else if (this.status == 404) {
+					chatArea.value = "Incorrect password";
+				} else if (this.status == 502) {
+					chatArea.value = "Error verifying password";
+				}
+			}
+		}
+		xhr.send();
+	}
+}
+</script>
+<input id="passwd" type="text" placeholder="Code" onkeydown="maybeMake(event)" /><br>
+<input id="codetype" type="text" placeholder="Type" onkeydown="maybeMake(event)" />

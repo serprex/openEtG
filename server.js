@@ -4,7 +4,7 @@ var http = require("http");
 var crypto = require("crypto");
 var connect = require("connect");
 var fs = require("fs");
-var app = http.createServer(connect().use(connect.compress()).use(cardRedirect).use(connect.static(__dirname)).use(loginAuth));
+var app = http.createServer(connect().use(connect.compress()).use(cardRedirect).use(connect.static(__dirname)).use(loginAuth).use(codeSmith));
 var io = require("socket.io").listen(app.listen(13602));
 var redis = require("redis"), db = redis.createClient();
 var etgutil = require("./etgutil");
@@ -39,7 +39,7 @@ function loginRespond(res, servuser, pass){
 		    user.quest = obj;
             res.end(JSON.stringify(user));
 		});
-		
+
 	}
 	if(!servuser.salt){
 		servuser.salt = crypto.pseudoRandomBytes(16).toString("base64");
@@ -67,6 +67,46 @@ function loginAuth(req, res, next){
 				loginRespond(res, users[name], params.p);
 			});
 		}
+	}else next();
+}
+function codeSmithLoop(res, iter, params){
+	if (iter == 1000){
+		res.writeHead("503");
+		res.end();
+	}else{
+		var code = [];
+		for (var i=0; i<8; i++){
+			code.push(33+Math.floor(Math.random()*94));
+		}
+		code = String.fromCharCode.apply(String, code);
+		db.hexists("CodeHash", code, function(err, exists){
+			if (exists){
+				codeSmithLoop(res, iter+1, params);
+			}else{
+				db.hset("CodeHash", code, params.t)
+				res.writeHead("200");
+				res.end(code);
+			}
+		});
+	}
+}
+function codeSmith(req, res, next){
+	if (req.url.indexOf("/code?") == 0){
+		var paramstring = req.url.substring(6);
+		var params = qstring.parse(paramstring);
+		fs.readFile("codepsw", function (err, data) {
+			if (err){
+				if (err.code == "ENOENT"){
+					data = params.p;
+				}else throw err;
+			}
+			if (params.p == data){
+				codeSmithLoop(res, 0, params);
+			}else{
+				res.writeHead("404");
+				res.end();
+			}
+		});
 	}else next();
 }
 function cardRedirect(req, res, next){
@@ -175,7 +215,7 @@ function useruser(servuser){
 function getDay(){
 	return Math.floor(Date.now()/86400000);
 }
-//Aether:    
+
 var starter = [
 	"015990g4sa014sd014t4014vi014vs0152o0152t0155u0155p0158q015ca015fi015f6015if015il015lo015lb015ou015s5025rq015v3015ut0161s018pi",
 	"01502034sa014t3014sd0b4vc024vi014vj014vh014vv014vp034vs024vd014ve014vf055uk015us015v3015uq015up015uv018pt",
@@ -314,6 +354,37 @@ io.sockets.on("connection", function(socket) {
 			user.pool = etgutil.addcard(user.pool, add[i]);
 		}
 		user.deck = data.add;
+	});
+	userEvent(socket, "codesubmit", function(data, user){
+		db.hget("CodeHash", data.code, function(err, data){
+			if (!data){
+				socket.emit("codereject", "Code does not exist");
+			}else if (data.charAt(0) == "G"){
+				var g = parseInt(data.substr(1));
+				if (isNaN(g)){
+					socket.emit("codereject", "Invalid gold code type: " + data);
+				}else{
+					user.gold += g;
+					socket.emit("codegold", g);
+				}
+			}else if (data == "mark" || data == "shard"){
+				socket.emit("code" + data);
+			}else{
+				socket.emit("codereject", "Unknown code type: " + data);
+			}
+		});
+	});
+	userEvent(socket, "codesubmit2", function(data, user){
+		db.hget("CodeHash", data.code, function(err, type){
+			if (!type){
+				socket.emit("codereject", "Code does not exist");
+			}else if (type == "mark" || type == "shard"){
+				user.pool = etgutil.addcard(user.pool, data.card);
+				socket.emit("codecard");
+			}else{
+				socket.emit("codereject", "Unknown code type: " + type);
+			}
+		});
 	});
 	userEvent(socket, "add", function (data, user) {
 	    var add = etgutil.decodedeck(data.add);
