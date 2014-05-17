@@ -94,7 +94,7 @@ function codeSmith(req, res, next){
 	if (req.url.indexOf("/code?") == 0){
 		var paramstring = req.url.substring(6);
 		var params = qstring.parse(paramstring);
-		fs.readFile("codepsw", function (err, data) {
+		fs.readFile(__dirname + "codepsw", function (err, data) {
 			if (err){
 				if (err.code == "ENOENT"){
 					data = params.p;
@@ -356,22 +356,22 @@ io.sockets.on("connection", function(socket) {
 		user.deck = data.add;
 	});
 	userEvent(socket, "codesubmit", function(data, user){
-		db.hget("CodeHash", data.code, function(err, data){
-			if (!data){
+		db.hget("CodeHash", data.code, function(err, type){
+			if (!type){
 				socket.emit("codereject", "Code does not exist");
-			}else if (data.charAt(0) == "G"){
-				var g = parseInt(data.substr(1));
+			}else if (type.charAt(0) == "G"){
+				var g = parseInt(type.substr(1));
 				if (isNaN(g)){
-					socket.emit("codereject", "Invalid gold code type: " + data);
+					socket.emit("codereject", "Invalid gold code type: " + type);
 				}else{
 					user.gold += g;
 					socket.emit("codegold", g);
 					db.hdel("CodeHash", data.code);
 				}
-			}else if (data == "mark" || data == "shard"){
-				socket.emit("codecard", data);
+			}else if (type == "mark" || type == "shard"){
+				socket.emit("codecard", type);
 			}else{
-				socket.emit("codereject", "Unknown code type: " + data);
+				socket.emit("codereject", "Unknown code type: " + type);
 			}
 		});
 	});
