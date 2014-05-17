@@ -366,9 +366,10 @@ io.sockets.on("connection", function(socket) {
 				}else{
 					user.gold += g;
 					socket.emit("codegold", g);
+					db.hdel("CodeHash", data.code);
 				}
 			}else if (data == "mark" || data == "shard"){
-				socket.emit("codecard", data);;
+				socket.emit("codecard", data);
 			}else{
 				socket.emit("codereject", "Unknown code type: " + data);
 			}
@@ -381,6 +382,7 @@ io.sockets.on("connection", function(socket) {
 			}else if (type == "mark" || type == "shard"){
 				user.pool = etgutil.addcard(user.pool, data.card);
 				socket.emit("codedone", data);
+				db.hdel("CodeHash", data.code);
 			}else{
 				socket.emit("codereject", "Unknown code type: " + type);
 			}
