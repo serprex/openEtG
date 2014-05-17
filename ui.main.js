@@ -1523,7 +1523,8 @@ function startMenu() {
 }
 function startRewardWindow(reward) {
 	var rewardList = [];
-	if (reward == "codemark") rewardList = filtercards(false, function(x) { return x.rarity == 5 });
+	if (reward == "mark") rewardList = filtercards(false, function(x) { return x.rarity == 5 });
+	if (reward == "shard") rewardList = filtercards(false, function(x) { return x.rarity == 4 });
 	var rewardUI = new PIXI.Stage(0x454545, true);
 	var bgreward = new PIXI.Sprite(backgrounds[0]);
 	rewardUI.addChild(bgreward);
@@ -1535,6 +1536,10 @@ function startRewardWindow(reward) {
 	rewardUI.addChild(exitButton);
 
 	var confirmButton = makeButton(10, 40, 75, 18, buttons.done);
+	confirmButton.click = function() {
+		if (chosenReward)
+			userEmit("codesubmit2", { code: foename.value, card: chosenReward });
+	}
 
 	rewardUI.addChild(confirmButton);
 	//setInteractive(exitButton, confirmButton);
@@ -3214,9 +3219,21 @@ socket.on("tradedone", function(data) {
 socket.on("tradecanceled", function(data) {
 	startMenu();
 });
-socket.on("codevalidated", function(data) {
-	startRewardScreen(data.rewards);
+socket.on("codecard", function(data) {
+	startRewardWindow(data);
 });
+socket.on("codereject", function(data) {
+	chatBox.innerHTML += "<font color=red>" + data + "</font><br>";
+});
+socket.on("codegold", function(data) {
+	user.gold += data;
+	chatBox.innerHTML += "<font color=red>" + data + " Gold added!</font><br>";
+});
+socket.on("codedone", function(data) {
+	user.pool.push(data.card);
+	chatBox.innerHTML += "<font color=red>Card Added!</font><br>"
+	startMenu();
+})
 function maybeSendChat(e) {
 	e.cancelBubble = true;
 	if (e.keyCode != 13) return;
@@ -3363,6 +3380,5 @@ function tradeClick() {
 		userEmit("tradewant", { f: foename.value });
 }
 function rewardClick() {
-	//userEmit("submitcode", { code: foename.value });
-	startRewardWindow(["4tc", "5f5", "5f5", "5lg"]);
+	userEmit("codesubmit", { code: foename.value });
 }

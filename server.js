@@ -368,7 +368,7 @@ io.sockets.on("connection", function(socket) {
 					socket.emit("codegold", g);
 				}
 			}else if (data == "mark" || data == "shard"){
-				socket.emit("code" + data);
+				socket.emit("codecard", data);;
 			}else{
 				socket.emit("codereject", "Unknown code type: " + data);
 			}
@@ -380,7 +380,7 @@ io.sockets.on("connection", function(socket) {
 				socket.emit("codereject", "Code does not exist");
 			}else if (type == "mark" || type == "shard"){
 				user.pool = etgutil.addcard(user.pool, data.card);
-				socket.emit("codecard");
+				socket.emit("codedone", data);
 			}else{
 				socket.emit("codereject", "Unknown code type: " + type);
 			}
