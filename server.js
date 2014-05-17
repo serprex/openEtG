@@ -94,7 +94,7 @@ function codeSmith(req, res, next){
 	if (req.url.indexOf("/code?") == 0){
 		var paramstring = req.url.substring(6);
 		var params = qstring.parse(paramstring);
-		fs.readFile(__dirname + "codepsw", function (err, data) {
+		fs.readFile(__dirname + "/codepsw", function(err, data) {
 			if (err){
 				if (err.code == "ENOENT"){
 					data = params.p;

@@ -1516,6 +1516,9 @@ function startMenu() {
 		if (user && oracle) {
 			oracle.setTexture(getArt(cardcode));
 		}
+		if (user) {
+			tgold.setText(user.gold)
+		}
 	}
 
 	mainStage = menuui;
