@@ -1521,6 +1521,49 @@ function startMenu() {
 	mainStage = menuui;
 	refreshRenderer();
 }
+function startRewardWindow(reward) {
+	var rewardList = [];
+	if (reward == "codemark") rewardList = filtercards(false, function(x) { return x.rarity == 5 });
+	var rewardUI = new PIXI.Stage(0x454545, true);
+	var bgreward = new PIXI.Sprite(backgrounds[0]);
+	rewardUI.addChild(bgreward);
+
+	var exitButton = makeButton(10, 10, 75, 18, buttons.exit);
+	exitButton.click = function() {
+		startMenu();
+	}
+	rewardUI.addChild(exitButton);
+
+	var confirmButton = makeButton(10, 40, 75, 18, buttons.done);
+
+	rewardUI.addChild(confirmButton);
+	//setInteractive(exitButton, confirmButton);
+
+	var chosenRewardImage = new PIXI.Sprite(nopic);
+	chosenRewardImage.position.set(250, 20)
+	rewardUI.addChild(chosenRewardImage);
+	var chosenReward = null;
+	for (var i = 0; i < rewardList.length; i++) {
+		var card = new PIXI.Sprite(getCardImage(rewardList[i]));
+		card.position.set(100 + Math.floor(i/12) * 130, 272 + (i%12) * 20);
+		(function(_i){
+			card.click = function(){
+				chosenReward = rewardList[_i]
+			}
+		})(i);
+		rewardUI.addChild(card);
+		setInteractive(card);
+	}
+
+	animCb = function() {
+		if (chosenReward)
+			chosenRewardImage.setTexture(getArt(chosenReward))
+	}
+
+	mainStage = rewardUI;
+	refreshRenderer();
+
+}
 function startQuest(questname) {
 	if (!user.quest[questname] && user.quest[questname] != 0) {
 		user.quest[questname] = 0;
@@ -3171,6 +3214,9 @@ socket.on("tradedone", function(data) {
 socket.on("tradecanceled", function(data) {
 	startMenu();
 });
+socket.on("codevalidated", function(data) {
+	startRewardScreen(data.rewards);
+});
 function maybeSendChat(e) {
 	e.cancelBubble = true;
 	if (e.keyCode != 13) return;
@@ -3315,4 +3361,8 @@ function challengeClick() {
 function tradeClick() {
 	if (Cards && user)
 		userEmit("tradewant", { f: foename.value });
+}
+function rewardClick() {
+	//userEmit("submitcode", { code: foename.value });
+	startRewardWindow(["4tc", "5f5", "5f5", "5lg"]);
 }
