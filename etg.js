@@ -981,7 +981,7 @@ function salvageScan(from, t){
 			if (cr && cr.passives.salvage && !cr.status.salvaged){
 				new TextEffect("Salvage", tgtToPos(cr));
 				cr.status.salvaged = true;
-				t.owner.hand.push(t.card);
+				t.owner.hand.push(new CardInstance(t.card, t.owner));
 				return;
 			}
 		}

@@ -160,7 +160,7 @@ function updateActive(user) {
 	if (user) users[user].lastActive = Date.now();
 	activeusers = [];
 	for (var username in users) {
-		if (Date.now() - users[username].lastActive <= 1000 * 60 * 15)
+		if (Date.now() - users[username].lastActive <= 1000 * 60 * 60 * 2) //Milliseconds/Sec * Seconds/Min * Minutes/Hr * Hours
 			activeusers.push(username);
 	}
 }

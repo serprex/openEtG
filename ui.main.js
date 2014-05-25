@@ -2401,6 +2401,7 @@ function startMatch() {
 	animCb = function() {
 		if (game.phase == PlayPhase && game.turn == game.player2 && game.player2.ai && --aiDelay <= 0) {
 			aiDelay = parseInt(airefresh.value) || 8;
+			aiDelay = Math.max(aiDelay, 5);
 			if (aiDelay < 0) {
 				disableEffects = true;
 			}
