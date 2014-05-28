@@ -167,6 +167,12 @@ function makeArt(card, art) {
 		artspr.position.set(2, 20);
 		template.addChild(artspr);
 	}
+	if (card.type != CreatureEnum && card.type != PillarEnum) {
+		var typemark = new PIXI.Text(" !@#*".charAt(card.type), { font: "12px Dosis", fill: "white" });
+		typemark.anchor.set(1, 1);
+		typemark.position.set(128, 146);
+		template.addChild(typemark);
+	}
 	var nametag = new PIXI.Text(card.name, { font: "12px Dosis", fill: card.upped ? "black" : "white" });
 	nametag.position.set(2, 4);
 	template.addChild(nametag);
@@ -1866,7 +1872,7 @@ function startStore() {
 	        }
 			if (user.gold >= cost || user.freepacks[packrarity-1] > 0) {
 				var allowedElements = []
-				
+
 				if (user.freepacks[packrarity - 1] > 0){
 				    userEmit("usefreepack", {type: packrarity-1,amount:1});
 				    user.freepacks[packrarity - 1]--;
@@ -1908,7 +1914,7 @@ function startStore() {
 	    if (user.freepacks[packrarity - 1]) freeinfo.setText("Free boosters of this type left: " + user.freepacks[packrarity - 1]);
 	    else freeinfo.setText("");
         }
-	
+
 	// The different pack types
 	var bbronze = makeButton(50, 280, 100, 200, boosters[4]);
 	bbronze.click = function() {
