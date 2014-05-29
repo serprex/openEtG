@@ -9,6 +9,8 @@
 	"dependencies": {
 		"socket.io":"",
 		"connect":"",
+		"compression":"",
+		"serve-static":"",
 		"redis":""
 	},
 	"devDependencies": {
