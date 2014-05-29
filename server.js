@@ -4,8 +4,8 @@ var http = require("http");
 var crypto = require("crypto");
 var connect = require("connect");
 var fs = require("fs");
-var app = http.createServer(connect().use(connect.compress()).use(cardRedirect).use(connect.static(__dirname)).use(loginAuth).use(codeSmith));
-var io = require("socket.io").listen(app.listen(13602));
+var app = http.createServer(connect().use(require("compression")()).use(cardRedirect).use(require("serve-static")(__dirname)).use(loginAuth).use(codeSmith));
+var io = require("socket.io")(app.listen(13602));
 var redis = require("redis"), db = redis.createClient();
 var etgutil = require("./etgutil");
 
@@ -232,7 +232,7 @@ var starter = [
 	"015020262002627034sa014sd014t4064vc024vp034vs0b61o0261q0361s0261t0161v018pj"
 ];
 
-io.sockets.on("connection", function(socket) {
+io.on("connection", function(socket) {
 	sockinfo[socket.id] = {};
 	socket.on("disconnect", dropsock);
 	socket.on("reconnect_failed", dropsock);
@@ -519,7 +519,7 @@ io.sockets.on("connection", function(socket) {
 			socket.emit("chat" , {mode:"info", message: usersonline ? "Users online: " + usersonline + "." : "There are no users online :("})
 		}
 		else
-			io.sockets.emit("chat", data);
+			io.emit("chat", data);
 	});
 	userEvent(socket, "updatequest", function (data, user) {
 	    var qu = "Q:" + data.u;
@@ -544,7 +544,7 @@ io.sockets.on("connection", function(socket) {
 			socket.emit("chat", { mode: "info", message: usersonline ? "Users online: " + usersonline + "." : "There are no users online :(" })
 		}
 		else
-			io.sockets.emit("chat", {message: data.message, u:"Guest" + (data.name ? "_" + data.name : ""), mode:"guest"})
+			io.emit("chat", {message: data.message, u:"Guest" + (data.name ? "_" + data.name : ""), mode:"guest"})
 	});
 	socket.on("pvpwant", function(data) {
 		var pendinggame=rooms[data.room];
