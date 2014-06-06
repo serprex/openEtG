@@ -520,6 +520,9 @@ function initGame(data, ai) {
 	if (data.aimarkpower) {
 		game.player2.markpower = data.aimarkpower;
 	}
+	if (data.urhp) {
+		game.player1.maxhp = game.player1.hp = data.urhp
+	}
 	if (data.aidrawpower) {
 	    game.player2.drawpower = data.aidrawpower;
 	}
@@ -828,6 +831,41 @@ function doubleDeck(deck) {
 	return deck.slice(0, deck.length - 2).concat(deck);
 }
 
+function deckMorph(deck,MorphFrom,morphTo) {
+	var deckout =[];
+	for (var i =0; i < deck.length; i++) {
+		var morphMatchInd = MorphFrom.indexOf(deck[i]);
+		if (morphMatchInd > -1) {
+			deckout.push(morphTo[morphMatchInd]);
+		} else {
+			deckout.push(deck[i]);
+		}
+	}
+	return deckout;
+}
+
+/*function deckLimitEnforce(deck,limitList,minList,maxList) {
+	var deckout=[];
+	var deckcounts=[];
+	var minCounts=[];
+	var maxCounts=[];
+	var count;
+	for (var i=0; i < limitList.length; i++) {
+		minCounts.push({key: limitList[i],value: minList[i]});
+		maxCounts.push({key: limitList[i],value: maxList[i]});
+	}
+	for (var i=0; i < deck.length; i++) {
+		cardStr = deck[i];
+		if (!(cardStr in deckCounts)) {
+			deckCounts.push(key:cardStr , value: 1);
+		}
+		else {
+			deckCounts[cardStr]=deckCounts[cardStr]+1
+		}
+	}
+	for (var i=0; i < deckCounts.length
+}*/
+
 function mkDemigod() {
 	var urdeck = getDeck();
 	if ((user && (!user.deck || user.deck.length < 31)) || urdeck.length < 11) {
@@ -891,57 +929,56 @@ function mkMage() {
 		user.gold -= 5;
 		userEmit("subgold", { g: 5 });
 	}
+		var mageDecks = [
+			"5de 5de 5de 5de 5de 5de 5de 5de 5de 5de 5de 5de 5de 5de 5c5 5c2 5c2 5c2 5c2 5c8 5c8 5c8 5c8 5ci 5c3 5l8 5l8 5mq 5mq 5lo 5lo 5lm 5lm 5lm 5lm 5ln 5ln 5la 5la 5li 8pq",
+			"5bs 5bs 5bs 5bs 5bs 5bs 5bs 5bs 5bs 5de 5de 5de 5de 5de 5de 5de 5de 5cb 5cb 5cb 5cb 5ce 5c6 5c6 5c6 5c6 5c9 5c9 5ca 5ca 5cr 5cr 5cr 5cr 8pn",
+			"4t4 4t4 4t4 4t4 4tc 4tc 4td 4td 4td 4td 5c7 5c7 5c7 5c7 5c4 5gi 5gi 5gi 5gi 5gi 5gi 5gi 5gi 5gi 5gi 5gi 5gi 5gi 5gi 5ff 5ff 5ff 5ff 5fh 5fh 5fh 5fh 5f6 5f6 5f8 8pn",
+			"55q 55q 564 564 564 564 560 566 566 5t2 5t2 5t2 5t2 5t2 5t2 5t2 5t2 5t2 5t2 5t2 5t2 5t2 5t2 5rk 5rk 5rk 5rk 5rq 5rq 5rq 5rq 5rq 5rq 5rs 8pl",
+			"4sa 4sa 4sa 4sa 4sa 4sa 4sa 4sa 4sa 4sa 4sa 4sa 4sa 4sa 4sa 502 502 535 55v 599 599 599 5cc 5fc 5in 5lq 5lq 5os 5rl 5vb 5vb 623 623 623 623 8pu",
+			"58o 58o 58o 58o 58o 58o 58o 58o 598 598 598 593 58s 5i4 5i4 5i4 5i4 5i4 5i4 5i4 5i4 5i4 5i4 5i4 5i4 5i6 5i6 5i6 5i6 5ib 5ic 5ig 5ig 5ig 5ig 8pm",
+			"576 576 576 576 576 576 576 576 576 576 576 576 576 576 563 563 55p 55p 55r 55r 55r 55r 58t 58t 58t 58t 58q 58q 58v 591 591 591 8pm",
+			"5f0 5f0 5f0 5f0 5f0 5f0 5f0 5f0 5gi 5gi 5gi 5gi 5gi 5gi 5gi 5gi 5f4 5f4 5f4 5f4 5f6 5f6 5f6 5f6 5f7 5fb 5fb 5fb 5fb 5fg 5f8 5f8 5fc 5fc 5fc 5fc 5fe 8po",
+			"5lb 5lb 5lb 5lb 5lf 5lf 5lf 5lf 5lh 5oc 5oc 5oc 5oc 5oc 5oc 5pu 5pu 5pu 5pu 5pu 5pu 5pu 5pu 5pu 5pu 5oe 5oe 5oe 5oe 5ol 5or 5or 5op 8pq",
+			"5rg 5rg 5rg 5rg 5rg 5rg 5rg 5rg 5rg 5rg 5t2 5t2 5t2 5t2 5t2 5t2 5t2 5t2 5t2 5t2 5rk 5rk 5rk 5rk 5s1 5rl 5rl 5rl 5rl 5ro 5ru 5ru 5ru 5ru 5s0 5s0 5s0 5s0 5rm 5rm 8ps",
+			"52g 52g 52g 52g 52g 52g 542 542 542 542 542 542 52o 52o 52o 52o 52q 52u 52u 52u 52u 52p 52p 52r 52r 5un 5un 5un 5un 5uq 5uq 5uq 5uq 8pt",
+			"50u 50u 50u 50u 50u 50u 50u 50u 50u 50u 50u 50u 50u 50u 50u 50u 50u 4vi 4vi 4vi 4vi 4vk 4vk 4vk 4vk 4vl 4vs 4vs 4vs 4vs 4vt 501 501 8pi",
+			"55k 55k 55k 55k 55k 55k 55k 55k 576 576 576 576 576 576 576 576 55t 55t 561 561 561 562 562 562 562 55p 55m 55m 55m 55m 55s 565 565 55o 55o 8pl",
+			"61o 61o 61o 61o 61o 61o 61o 61o 63a 63a 63a 63a 63a 63a 63a 63a 61q 61q 61u 620 620 620 620 625 625 625 625 627 627 627 627 61t 61t 61t 61t 622 8pu",
+			"5uk 5uk 5uk 5uk 5uk 5uk 606 606 606 606 606 606 5ur 5us 5us 5us 5us 5v3 5v3 5v3 5v3 5uq 5uq 5ut 5ut 5ut 5ut 5up 5up 5uo 8pt",
+			"4sa 4sa 4sa 4sa 4sc 4sc 4sc 4sc 4vj 4vj 4vj 4vj 4vj 4vj 4vh 4vk 52i 532 55u 563 599 598 5cc 5fi 5iq 5il 5lp 5os 5ri 5un 627 8pi",
+			"5f0 5f0 5f0 5f0 5f0 5f0 5f0 5f0 5f0 5f0 5f1 5f1 5f1 5f1 5f3 5f3 5f3 5f3 5f9 5f9 5f9 5f9 5f9 5f9 5f4 5f4 5f4 5f4 5fa 5fa 5fa 5fa 5l9 5l9 5l9 5l9 8pm",
+			"4vq 4vq 4vq 4vq 52g 52g 52g 52g 52g 52g 52g 52g 52v 52v 52v 52v 52v 52v 52k 52k 52n 52n 52n 52n 531 531 531 531 52p 52p 52r 52r 8pj"
+		];
 
-	var mageDecks = [
-        "5de 5de 5de 5de 5de 5de 5de 5de 5de 5de 5de 5de 5de 5de 5c5 5c2 5c2 5c2 5c2 5c8 5c8 5c8 5c8 5ci 5c3 5l8 5l8 5mq 5mq 5lo 5lo 5lm 5lm 5lm 5lm 5ln 5ln 5la 5la 5li 8pq",
-		"5bs 5bs 5bs 5bs 5bs 5bs 5bs 5bs 5bs 5de 5de 5de 5de 5de 5de 5de 5de 5cb 5cb 5cb 5cb 5ce 5c6 5c6 5c6 5c6 5c9 5c9 5ca 5ca 5cr 5cr 5cr 5cr 8pn",
-		"4t4 4t4 4t4 4t4 4tc 4tc 4td 4td 4td 4td 5c7 5c7 5c7 5c7 5c4 5gi 5gi 5gi 5gi 5gi 5gi 5gi 5gi 5gi 5gi 5gi 5gi 5gi 5gi 5ff 5ff 5ff 5ff 5fh 5fh 5fh 5fh 5f6 5f6 5f8 8pn",
-		"55q 55q 564 564 564 564 560 566 566 5t2 5t2 5t2 5t2 5t2 5t2 5t2 5t2 5t2 5t2 5t2 5t2 5t2 5t2 5rk 5rk 5rk 5rk 5rq 5rq 5rq 5rq 5rq 5rq 5rs 8pl",
-		"4sa 4sa 4sa 4sa 4sa 4sa 4sa 4sa 4sa 4sa 4sa 4sa 4sa 4sa 4sa 502 502 535 55v 599 599 599 5cc 5fc 5in 5lq 5lq 5os 5rl 5vb 5vb 623 623 623 623 8pu",
-		"58o 58o 58o 58o 58o 58o 58o 58o 598 598 598 593 58s 5i4 5i4 5i4 5i4 5i4 5i4 5i4 5i4 5i4 5i4 5i4 5i4 5i6 5i6 5i6 5i6 5ib 5ic 5ig 5ig 5ig 5ig 8pm",
-		"576 576 576 576 576 576 576 576 576 576 576 576 576 576 563 563 55p 55p 55r 55r 55r 55r 58t 58t 58t 58t 58q 58q 58v 591 591 591 8pm",
-		"5f0 5f0 5f0 5f0 5f0 5f0 5f0 5f0 5gi 5gi 5gi 5gi 5gi 5gi 5gi 5gi 5f4 5f4 5f4 5f4 5f6 5f6 5f6 5f6 5f7 5fb 5fb 5fb 5fb 5fg 5f8 5f8 5fc 5fc 5fc 5fc 5fe 8po",
-		"5lb 5lb 5lb 5lb 5lf 5lf 5lf 5lf 5lh 5oc 5oc 5oc 5oc 5oc 5oc 5pu 5pu 5pu 5pu 5pu 5pu 5pu 5pu 5pu 5pu 5oe 5oe 5oe 5oe 5ol 5or 5or 5op 8pq",
-		"5rg 5rg 5rg 5rg 5rg 5rg 5rg 5rg 5rg 5rg 5t2 5t2 5t2 5t2 5t2 5t2 5t2 5t2 5t2 5t2 5rk 5rk 5rk 5rk 5s1 5rl 5rl 5rl 5rl 5ro 5ru 5ru 5ru 5ru 5s0 5s0 5s0 5s0 5rm 5rm 8ps",
-		"52g 52g 52g 52g 52g 52g 542 542 542 542 542 542 52o 52o 52o 52o 52q 52u 52u 52u 52u 52p 52p 52r 52r 5un 5un 5un 5un 5uq 5uq 5uq 5uq 8pt",
-		"50u 50u 50u 50u 50u 50u 50u 50u 50u 50u 50u 50u 50u 50u 50u 50u 50u 4vi 4vi 4vi 4vi 4vk 4vk 4vk 4vk 4vl 4vs 4vs 4vs 4vs 4vt 501 501 8pi",
-		"55k 55k 55k 55k 55k 55k 55k 55k 576 576 576 576 576 576 576 576 55t 55t 561 561 561 562 562 562 562 55p 55m 55m 55m 55m 55s 565 565 55o 55o 8pl",
-		"61o 61o 61o 61o 61o 61o 61o 61o 63a 63a 63a 63a 63a 63a 63a 63a 61q 61q 61u 620 620 620 620 625 625 625 625 627 627 627 627 61t 61t 61t 61t 622 8pu",
-		"5uk 5uk 5uk 5uk 5uk 5uk 606 606 606 606 606 606 5ur 5us 5us 5us 5us 5v3 5v3 5v3 5v3 5uq 5uq 5ut 5ut 5ut 5ut 5up 5up 5uo 8pt",
-		"4sa 4sa 4sa 4sa 4sc 4sc 4sc 4sc 4vj 4vj 4vj 4vj 4vj 4vj 4vh 4vk 52i 532 55u 563 599 598 5cc 5fi 5iq 5il 5lp 5os 5ri 5un 627 8pi",
-		"5f0 5f0 5f0 5f0 5f0 5f0 5f0 5f0 5f0 5f0 5f1 5f1 5f1 5f1 5f3 5f3 5f3 5f3 5f9 5f9 5f9 5f9 5f9 5f9 5f4 5f4 5f4 5f4 5fa 5fa 5fa 5fa 5l9 5l9 5l9 5l9 8pm",
-		"4vq 4vq 4vq 4vq 52g 52g 52g 52g 52g 52g 52g 52g 52v 52v 52v 52v 52v 52v 52k 52k 52n 52n 52n 52n 531 531 531 531 52p 52p 52r 52r 8pj"
-	];
+		var mageNames = [
+			"The Wall",
+			"The Horde",
+			"The Weaponsmith",
+			"The Swarm",
+			"The Mirror",
+			"The Waves",
+			"The Eater",
+			"The Ashes",
+			"The Gale",
+			"The Clock",
+			"The Contagion",
+			"The Uncertainty",
+			"The Weight",
+			"The Ethereal",
+			"The Vacuum",
+			"The Chromatic",
+			"The Pyre",
+			"The Dead",
+			"The Clock"
+		];
 
-	var mageNames = [
-        "The Wall",
-        "The Horde",
-        "The Weaponsmith",
-        "The Swarm",
-        "The Mirror",
-        "The Waves",
-        "The Eater",
-        "The Ashes",
-        "The Gale",
-        "The Clock",
-        "The Contagion",
-        "The Uncertainty",
-        "The Weight",
-        "The Ethereal",
-        "The Vacuum",
-        "The Chromatic",
-        "The Pyre",
-        "The Dead",
-        "The Clock"
-	];
-
-	var rand = Math.floor(Math.random() * mageNames.length);
-	var mname = mageNames[rand];
-	var deck = mageDecks[rand].split(" ");
-	initGame({ first: Math.random() < .5, deck: deck, urdeck: urdeck, seed: Math.random() * etg.MAX_INT, hp: 125, foename: mname }, aievalopt.checked ? aiEvalFunc : aiFunc);
-	game.cost = 5;
-	game.level = 2;
-}
+		var rand = Math.floor(Math.random() * mageNames.length);
+		var mname = mageNames[rand];
+		var deck = mageDecks[rand].split(" ");
+		initGame({ first: Math.random() < .5, deck: deck, urdeck: urdeck, seed: Math.random() * etg.MAX_INT, hp: 125, foename: mname }, aievalopt.checked ? aiEvalFunc : aiFunc);
+		game.cost = 5;
+		game.level = 2;
+	}
 function mkQuestAi(questname, stage) {
 	var quest = quests[questname][stage];
 	if (!quest)
@@ -951,12 +988,20 @@ function mkQuestAi(questname, stage) {
 	var markpower = quest.markpower || 1;
 	var drawpower = quest.drawpower || 1;
 	var hp = quest.hp || 100;
+	var playerHPstart = quest.urhp || 100;
 	var urdeck = getDeck();
-	if ((user && (!user.deck || user.deck.length < 31)) || urdeck.length < 11) {
-		startEditor();
-		return;
+	if ( quest.morph ) {
+		if ( quest.morph.to.length != quest.morph.from.length ) {
+			console.log("Warning: morphFrom is not the same length as morphTo. Aborting player deck morph for stage", stage);
+		} else {
+			urdeck = deckMorph(urdeck, quest.morph.from.split(" "), quest.morph.to.split(" "));
+		}							 
 	}
-	initGame({ first: Math.random() < .5, deck: deck, urdeck: urdeck, seed: Math.random() * etg.MAX_INT, hp: hp, aimarkpower: markpower, foename: foename, aidrawpower:drawpower }, aievalopt.checked ? aiEvalFunc : aiFunc);
+	if ((user && (!user.deck || user.deck.length < 31)) || urdeck.length < 11) {
+		/*startEditor();*/
+		return "ERROR: Your deck is invalid or missing! Please exit and create a valid deck in the deck editor.";
+	}
+	initGame({ first: Math.random() < .5, deck: deck, urdeck: urdeck, seed: Math.random() * etg.MAX_INT, hp: hp, aimarkpower: markpower, foename: foename, urhp : playerHPstart, aidrawpower:drawpower }, aievalopt.checked ? aiEvalFunc : aiFunc);
 	game.quest = [questname, stage];
 	game.wintext = quest.wintext || "";
 }
@@ -1573,6 +1618,7 @@ function startQuestWindow() {
 	}
 	questui.addChild(bgquest);
 	var tinfo = makeText(50, 26, "", true)
+	var errinfo = makeText(50,125,"",true)
 	var quest1Buttons = [];
 	function makeQuestButton(quest, stage, text, pos) {
 		var button = makeButton(pos[0], pos[1], 64, 64, user.quest[quest] > stage ? questIcons[1] : questIcons[0]);
@@ -1580,7 +1626,10 @@ function startQuestWindow() {
 			tinfo.setText(text);
 		}
 		button.click = function() {
-			mkQuestAi(quest, stage);
+			var errText = mkQuestAi(quest, stage);
+			/*console.log("error text was: ",errText)
+			console.log("errText ? evaluates as:", errText ? "true" : "false")*/
+			errText ? errinfo.setText(errText) : errinfo.setText("");
 		}
 		return button;
 	}
@@ -1600,6 +1649,7 @@ function startQuestWindow() {
 		startMenu();
 	}
 	questui.addChild(tinfo);
+	questui.addChild(errinfo);
 	questui.addChild(bexit);
 	animCb = undefined;
 	mainStage = questui;
