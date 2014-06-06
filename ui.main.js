@@ -942,47 +942,23 @@ function mkMage() {
 	game.cost = 5;
 	game.level = 2;
 }
-var questNecromancerDecks = ["52g 52g 52g 52g 52g 52g 52g 52g 52g 52g 52g 52m 52m 52m 52m 52m 52m 52m 52m 52m 52m 52m 52m 531 531 531 531 52n 52n 52n 52n 717 717 8pk", "5bs 5bs 5bs 5bs 5bs 5bs 5bs 5bs 5bs 5bs 5bs 5bs 5bs 5bu 5bu 5bu 5bu 5c1 5c1 5c1 5c1 5ca 5ca 8pp",
-"52g 52g 52g 52g 52g 52g 52g 52g 52g 52g 52g 52g 52g 52m 52m 52m 52m 52m 52m 531 531 531 531 531 52l 52l 52l 52t 52t 52t 52t 52t 535 535 535 535 717 717 717 717 8pk"];
-function mkQuestAi(quest, stage) {
-	var deck;
-	var foename = "";
-	var markpower = 1;
-	var drawpower = 1;
-	var hp = 100;
-	var wintext = "";
-	if (quest == "necromancer") {
-		deck = questNecromancerDecks[stage].split(" ");
-		if (stage == 0) {
-			foename = "Skeleton Horde";
-			hp = 80;
-			markpower = 2;
-			wintext = "You defeated the horde, but you should find out where they came from"
-		}
-		else if (stage == 1) {
-			foename = "Forest Wildlife"
-			hp = 60;
-			wintext = "The creatures seemed very afraid of something, like there was something in the forest that did not belong there."
-		}
-		else if (stage = 2) {
-			foename = "Evil Necromancer";
-			hp = 120;
-			markpower = 2;
-			wintext = "You defeated the evil necromancer and stopped his undead from spreading through the land!"
-		}
-		else
-			return;
-	}
-	else
+function mkQuestAi(questname, stage) {
+	var quest = quests[questname][stage];
+	if (!quest)
 		return;
+	var deck = quest.deck.split(" ");
+	var foename = quest.name || "";
+	var markpower = quest.markpower || 1;
+	var drawpower = quest.drawpower || 1;
+	var hp = quest.hp || 100;
 	var urdeck = getDeck();
 	if ((user && (!user.deck || user.deck.length < 31)) || urdeck.length < 11) {
 		startEditor();
 		return;
 	}
 	initGame({ first: Math.random() < .5, deck: deck, urdeck: urdeck, seed: Math.random() * etg.MAX_INT, hp: hp, aimarkpower: markpower, foename: foename, aidrawpower:drawpower }, aievalopt.checked ? aiEvalFunc : aiFunc);
-	game.quest = [quest, stage];
-	game.wintext = wintext;
+	game.quest = [questname, stage];
+	game.wintext = quest.wintext || "";
 }
 function mkAi(level) {
 	return function() {
@@ -1608,13 +1584,14 @@ function startQuestWindow() {
 		}
 		return button;
 	}
-	var necromancerTexts = ["A horde of skeletons have been seen nearby, perhaps you should go investigate?", "They seemed to come from the forest, so you go inside.", "Deep inside the forest you find the necromancer responsible for filling the lands with undead!"];
-	var necromancerPos = [[200, 200], [200, 250], [225, 300]];
-	if (user.quest.necromancer || user.quest.necromancer == 0) {
-		for (var i = 0;i <= user.quest.necromancer;i++) {
-			if (necromancerTexts[i]) {
-				var button = makeQuestButton("necromancer", i, necromancerTexts[i], necromancerPos[i]);
-				questui.addChild(button);
+	for (key in user.quest)
+	{
+		if ((user.quest[key] || user.quest[key] == 0) && quests[key]) {
+			for (var i = 0;i <= user.quest[key];i++) {
+				if (questInfo[key].pos[i]) {
+					var button = makeQuestButton(key, i, questInfo[key].text[i], questInfo[key].pos[i]);
+					questui.addChild(button);
+				}
 			}
 		}
 	}
