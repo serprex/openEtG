@@ -968,8 +968,7 @@ function mkMage() {
 			"The Vacuum",
 			"The Chromatic",
 			"The Pyre",
-			"The Dead",
-			"The Clock"
+			"The Dead"
 		];
 
 		var rand = Math.floor(Math.random() * mageNames.length);

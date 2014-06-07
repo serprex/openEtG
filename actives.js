@@ -1110,7 +1110,7 @@ snipe:function(c,t){
 	t.dmg(3);
 },
 sosa:function(c,t){
-	c.owner.sosa += 3;
+	c.owner.sosa += c.owner.sosa ? 2 : 3;
 	for(var i=1; i<13; i++){
 		if (i != Death){
 			c.owner.quanta[i] = 0;
