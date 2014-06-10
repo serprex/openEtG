@@ -167,12 +167,10 @@ function makeArt(card, art) {
 		artspr.position.set(2, 20);
 		template.addChild(artspr);
 	}
-	if (card.type != CreatureEnum && card.type != PillarEnum) {
-		var typemark = new PIXI.Text(" !@#*".charAt(card.type), { font: "12px Dosis", fill: "white" });
-		typemark.anchor.set(1, 1);
-		typemark.position.set(128, 146);
-		template.addChild(typemark);
-	}
+	var typemark = new PIXI.Sprite(typeicons[card.type]);
+	typemark.anchor.set(1, 1);
+	typemark.position.set(128, 252);
+	template.addChild(typemark);
 	var nametag = new PIXI.Text(card.name, { font: "12px Dosis", fill: card.upped ? "black" : "white" });
 	nametag.position.set(2, 4);
 	template.addChild(nametag);
@@ -1138,7 +1136,7 @@ function mkAi(level) {
 
 // Asset Loaders
 var nopic = PIXI.Texture.fromImage("assets/null.png")
-var imageLoadingNumber = 9;
+var imageLoadingNumber = 10;
 var questIcons = [];
 var questLoader = new PIXI.AssetLoader(["assets/questIcons.png"])
 questLoader.onComplete = function() {
@@ -1270,7 +1268,16 @@ popupLoader.onComplete = function() {
 	maybeStartMenu();
 }
 popupLoader.load();
-
+var typeicons = [];
+var typeloader = new PIXI.AssetLoader(["assets/typesheet.png"]);
+typeloader.onComplete = function() {
+	var sheet = PIXI.Texture.fromImage("assets/typesheet.png");
+	for (var i = 0;i < 6;i++) {
+		typeicons.push(new PIXI.Texture(sheet, new PIXI.Rectangle(25*i,0,25,25)));
+	}
+	maybeStartMenu();
+}
+typeloader.load();
 function makeButton(x, y, w, h, i, mouseoverfunc) {
 	var b = new PIXI.Sprite(i);
 	b.position.set(x, y);
