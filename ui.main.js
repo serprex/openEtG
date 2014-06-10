@@ -1197,16 +1197,13 @@ var buttonsList = [];
 var buttonsClicked = [];
 var buttonsMouseOver = [];
 var buttons = {};
-var buttonLoader = new PIXI.AssetLoader(["assets/buttons.png", "assets/buttons_mouseover.png", "assets/buttons_clicked.png"]);
+var buttonLoader = new PIXI.AssetLoader(["assets/buttons.png"]);
 buttonLoader.onComplete = function() {
 	var tex = PIXI.Texture.fromImage("assets/buttons.png");
-	var texClick = PIXI.Texture.fromImage("assets/buttons_clicked.png");
-	var texOver = PIXI.Texture.fromImage("assets/buttons_mouseover.png");
-	for (var i = 0;i < 7;i++) {
-		for (var j = 0;j < 4;j++) {
-			buttonsList.push(new PIXI.Texture(tex, new PIXI.Rectangle(j * 75 + 7, i * 28 + 19, 75, 25)));
-			buttonsMouseOver.push(new PIXI.Texture(texOver, new PIXI.Rectangle(j * 75 + 7, i * 28 + 19, 75, 25)));
-			buttonsClicked.push(new PIXI.Texture(texClick, new PIXI.Rectangle(j * 75 + 7, i * 28 + 19, 75, 25)));
+	for (var i = 0;i < 10;i++) {
+		for (var j = 0;j < 5;j++) {
+			buttonsList.push(new PIXI.Texture(tex, new PIXI.Rectangle(j * 72, i * 22, 72, 22)));
+			console.log(i +", " + j)
 		}
 	}
 	buttons = {
@@ -1237,7 +1234,9 @@ buttonLoader.onComplete = function() {
 		confirm: buttonsList[24],
 		deck1: buttonsList[25],
 		deck2: buttonsList[26],
-		deck3: buttonsList[27]
+		deck3: buttonsList[27],
+		sell: buttonsList[28],
+		sellupgrade: buttonsList[29]
 	}
 	maybeStartMenu();
 }
@@ -1287,14 +1286,14 @@ function makeButton(x, y, w, h, i, mouseoverfunc) {
 	b.standardImage = i;
 	if (~buttonsList.indexOf(i)) {
 		b.mousedown = function() {
-			b.setTexture(buttonArtClicked(b.standardImage));
+			b.tint = 0x666666;
 		}
 		b.mouseover = b.mouseup = function() {
 			if (mouseoverfunc) mouseoverfunc();
-			b.setTexture(buttonArtMouseover(b.standardImage));
+			b.tint = 0xAAAAAA;
 		}
 		b.mouseout = function() {
-			b.setTexture(b.standardImage);
+			b.tint = 0xFFFFFF;
 		}
 	}
 
@@ -1471,8 +1470,8 @@ function startMenu() {
 	menuui.addChild(bshop);
 
 	//upgrade button
-	var bupgrade = makeButton(250, 300, 75, 18, buttons.upgrade, function() {
-		tinfo.setText("Here you can upgrade cards as well as buy upgraded Pillars");
+	var bupgrade = makeButton(250, 300, 75, 18, buttons.sellupgrade, function() {
+		tinfo.setText("Here you can upgrade or sell your cards.");
 		tcost.setText("");
 	});
 	bupgrade.click = upgradestore;
@@ -1696,6 +1695,23 @@ function upgradestore() {
 		}
 		else twarning.setText("You can't upgrade an already upgraded card!");
 	}
+	cardValues = [5, 1, 3, 15, 20];
+	function sellCard(card) {
+		if (card.rarity != 0 || card.upped) {
+			if (card.rarity <= 4) {
+				if (cardpool[card.code] > 0) {
+					user.pool.splice(user.pool.indexOf(card.code), 1);
+					sellValue = cardValues[card.rarity];
+					if (card.upped) sellValue *= 5;
+					user.gold += sellValue
+					userEmit("sellcard", { card: card.code, gold: sellValue});
+					adjustdeck();
+				}
+			}
+			else twarning.setText("You really don't want to sell that, trust me.")
+		}
+		else twarning.setText("You can't sell a pillar or pendulum, silly!")
+	}
 	function adjustdeck() {
 		cardpool = {};
 		for (var i = 0;i < user.pool.length;i++) {
@@ -1713,21 +1729,29 @@ function upgradestore() {
 	var goldcount = new PIXI.Text(user.gold + "g", { font: "bold 16px Dosis" });
 	goldcount.position.set(30, 100);
 	upgradeui.addChild(goldcount);
-	var bupgrade = makeButton(150, 100, 75, 18, buttons.upgrade);
+	var bupgrade = makeButton(150, 80, 75, 18, buttons.upgrade);
 	bupgrade.click = function() {
 		upgradeCard(CardCodes[selectedCard]);
 	};
 	upgradeui.addChild(bupgrade);
-	var bexit = makeButton(50, 50, 75, 18, buttons.exit);
+	var bsell = makeButton(150, 140, 75, 18, buttons.sell);
+	bsell.click = function() {
+		sellCard(CardCodes[selectedCard]);
+	};
+	upgradeui.addChild(bsell);
+	var bexit = makeButton(5, 50, 75, 18, buttons.exit);
 	bexit.click = function() {
 		startMenu();
 	};
 	upgradeui.addChild(bexit);
 	var tinfo = new PIXI.Text("", { font: "bold 16px Dosis" });
-	tinfo.position.set(130, 120);
+	tinfo.position.set(150, 102);
 	upgradeui.addChild(tinfo);
+	var tinfo2 = new PIXI.Text("", { font: "bold 16px Dosis" });
+	tinfo2.position.set(150, 162);
+	upgradeui.addChild(tinfo2);
 	var twarning = new PIXI.Text("", { font: "bold 16px Dosis" });
-	twarning.position.set(100, 70);
+	twarning.position.set(100, 50);
 	upgradeui.addChild(twarning);
 
 	var editorcolumns = [];
@@ -1759,11 +1783,16 @@ function upgradestore() {
 			sprite.addChild(sprcount);
 			(function(_i, _j) {
 				sprite.click = function() {
-				    selectedCard = mouseovercode;
-                    upgradedCard = CardCodes[mouseovercode].asUpped(true).code
-				    if (isFreeCard(CardCodes[mouseovercode]))
+					selectedCard = mouseovercode;
+					var card = CardCodes[mouseovercode]
+                    upgradedCard = card.asUpped(true).code
+                    if (isFreeCard(card))
 						tinfo.setText("Costs 50 gold to upgrade");
-					else tinfo.setText("Convert 6 of these into an upgraded version.");
+				    else tinfo.setText("Convert 6 of these into an upgraded version.");
+                    if ((card.rarity > 0 || card.upped) && card.rarity < 5)
+                    	tinfo2.setText("Sells for " + (card.upped ? cardValues[card.rarity]*5 : cardValues[card.rarity]) + " gold.")
+				    else
+						tinfo2.setText("")
 					twarning.setText("");
 				}
 				sprite.mouseover = function() {

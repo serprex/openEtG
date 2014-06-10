@@ -279,6 +279,10 @@ io.on("connection", function(socket) {
 			user.ocard = data.o;
 		}
 	});
+	userEvent(socket, "sellcard", function(data, user) {
+		user.pool = etgutil.addcard(user.pool, data.card, -1);
+		user.gold += data.gold;
+	})
 	userEvent(socket, "subgold", function (data, user) {
 	    user.gold -= data.g;
 	});
