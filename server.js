@@ -209,7 +209,11 @@ function useruser(servuser){
         ocard: servuser.ocard,
         starter: servuser.starter || null,
         freepacks: servuser.freepacks || "0,0,0,0",
-        accountbound: servuser.accountbound || []
+        accountbound: servuser.accountbound || [],
+        aiwins: parseInt(servuser.aiwins) || 0,
+        ailosses: parseInt(servuser.ailosses) || 0,
+        pvpwins: parseInt(servuser.pvpwins) || 0,
+        pvplosses: parseInt(servuser.pvplosses) || 0
 	};
 }
 function getDay(){
@@ -248,6 +252,10 @@ io.on("connection", function(socket) {
 		user.accountbound = [];
 		user.freepacks = "3,2,0,0";
 		user.quest = { necromancer: 1 };
+		user.aiwins = 0;
+		user.ailosses = 0;
+		user.pvpwins = 0;
+		user.pvplosses = 0;
 		this.emit("userdump", useruser(user));
 	});
 	userEvent(socket, "logout", function(data, user) {
@@ -512,7 +520,7 @@ io.on("connection", function(socket) {
 				socket.emit("chat", { message: message.slice(2).join(" "), mode: "pm", u: "To " + message[1] })
 			}
 			else
-				socket.emit("chat", { mode: "info", message: message[1] + " is not here right now." })
+				socket.emit("chat", { mode: "info", message: message[1] ? message[1] + " is not here right now." : "I need to know who to message..."})
 		}
 		else if (data.message.replace(/ /g, "") == "/who") {
 			var usersonline = "";
@@ -536,6 +544,22 @@ io.on("connection", function(socket) {
 	    }
 	    packlist[data.type] -= data.amount;
 	    user.freepacks = packlist.join();
+	});
+	userEvent(socket, "addloss", function(data, user) {
+		console.log(user.ailosses);
+		if (data.pvp) user.pvplosses = (user.pvplosses ? parseInt(user.pvplosses) + 1 : 1);
+		else user.ailosses = (user.ailosses ? parseInt(user.ailosses) + 1 : 1);
+		console.log(user.ailosses);
+	});
+	userEvent(socket, "addwin", function(data, user) {
+		if (data.pvp) {
+			user.pvpwins = user.pvpwins ? parseInt(user.pvpwins) + 1 : 1;
+			user.pvplosses = user.pvplosses ? parseInt(user.pvplosses) - 1 : 0;
+		}
+		else {
+			user.aiwins = user.aiwins ? parseInt(user.aiwins) + 1 : 1;
+			user.ailosses = user.ailosses ? parseInt(user.ailosses) - 1 : 0;
+		}
 	});
 	socket.on("guestchat", function (data) {
 	    if (data.message == "/who") {

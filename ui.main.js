@@ -555,13 +555,13 @@ function initGame(data, ai) {
 		game.player1.drawhand(7);
 	}
 	if (data.foename) game.foename = data.foename;
-	startMatch();
 	if (ai) {
 		game.player2.ai = ai;
 		if (game.turn == game.player2) {
 			progressMulligan(game);
 		}
 	}
+	startMatch();
 }
 function getDeck() {
     if (user) {
@@ -1194,8 +1194,6 @@ rarityLoader.onComplete = function() {
 rarityLoader.load();
 
 var buttonsList = [];
-var buttonsClicked = [];
-var buttonsMouseOver = [];
 var buttons = {};
 var buttonLoader = new PIXI.AssetLoader(["assets/buttons.png"]);
 buttonLoader.onComplete = function() {
@@ -1203,7 +1201,6 @@ buttonLoader.onComplete = function() {
 	for (var i = 0;i < 10;i++) {
 		for (var j = 0;j < 5;j++) {
 			buttonsList.push(new PIXI.Texture(tex, new PIXI.Rectangle(j * 72, i * 22, 72, 22)));
-			console.log(i +", " + j)
 		}
 	}
 	buttons = {
@@ -1239,13 +1236,6 @@ buttonLoader.onComplete = function() {
 		sellupgrade: buttonsList[29]
 	}
 	maybeStartMenu();
-}
-
-function buttonArtClicked(button) {
-	return buttonsClicked[buttonsList.indexOf(button)];
-}
-function buttonArtMouseover(button) {
-	return buttonsMouseOver[buttonsList.indexOf(button)];
 }
 buttonLoader.load();
 
@@ -1284,19 +1274,16 @@ function makeButton(x, y, w, h, i, mouseoverfunc) {
 	b.hitArea = new PIXI.Rectangle(0, 0, w, h);
 	b.buttonMode = true;
 	b.standardImage = i;
-	if (~buttonsList.indexOf(i)) {
-		b.mousedown = function() {
-			b.tint = 0x666666;
-		}
-		b.mouseover = b.mouseup = function() {
-			if (mouseoverfunc) mouseoverfunc();
-			b.tint = 0xAAAAAA;
-		}
-		b.mouseout = function() {
-			b.tint = 0xFFFFFF;
-		}
+	b.mousedown = function() {
+		b.tint = 0x666666;
 	}
-
+	b.mouseover = b.mouseup = function() {
+		if (mouseoverfunc) mouseoverfunc();
+		b.tint = 0xAAAAAA;
+	}
+	b.mouseout = function() {
+		b.tint = 0xFFFFFF;
+	}
 	return b;
 }
 
@@ -1342,6 +1329,12 @@ function startMenu() {
 	//gold text
 	var tgold = makeText(755, 101, (user ? user.gold : "Sandbox"), true);
 	menuui.addChild(tgold);
+
+	var taiwinloss = makeText(750, 125,(user ? "AI w/l:\n" + user.aiwins + "/" + user.ailosses : ""), true);
+	menuui.addChild(taiwinloss);
+
+	var tpvpwinloss = makeText(750, 165, (user?"PVP w/l:\n" + user.pvpwins + "/" + user.pvplosses : ""), true);
+	menuui.addChild(tpvpwinloss);
 
 	//info text
 	var tinfo = makeText(50, 26, "", true)
@@ -1504,7 +1497,7 @@ function startMenu() {
 	}
 	menuui.addChild(bdelete);
 
-	if (!user) toggleB(baia, bshop, bupgrade, binfoa, btopa, blogout, bdelete, bquest);
+	if (!user) toggleB(baia, bshop, bupgrade, binfoa, btopa, blogout, bdelete, bquest, taiwinloss, tpvpwinloss);
 
 	//only display if user is logged in
 	if (user) {
@@ -1533,7 +1526,7 @@ function startMenu() {
 	function logout() {
 		user = undefined;
 
-		toggleB(baia, bshop, bupgrade, binfoa, btopa, blogout, bdelete, bquest);
+		toggleB(baia, bshop, bupgrade, binfoa, btopa, blogout, bdelete, bquest, taiwinloss, tpvpwinloss);
 
 		tgold.setText("Sandbox");
 		tgold.position.set(755, 101);
@@ -2726,6 +2719,9 @@ function startMatch() {
 			maybeSetText(damagetext[j], game.players[j].foe.expectedDamage ? "Next HP-loss:" + game.players[j].foe.expectedDamage : "");
 		}
 	}
+	userEmit("addloss", { pvp: !game.player2.ai });
+	if (!game.player2.ai) user.pvplosses++;
+	else user.ailosses++;
 	gameui = new PIXI.Stage(0x336699, true);
 	var cloakgfx = new PIXI.Graphics();
 	var bggame = new PIXI.Sprite(backgrounds[4]);
@@ -2757,6 +2753,17 @@ function startMatch() {
 	gameui.addChild(foename);
 	endturnFunc = endturn.click = function(e, discard) {
 		if (game.winner) {
+			userEmit("addwin", { pvp: !game.player2.ai });
+			if (game.winner == game.player1) {
+				if (game.player2.ai) {
+					user.aiwins++;
+					user.ailosses--;
+				}
+				else {
+					user.pvpwins++;
+					user.pvplosses--;
+				}
+			}
 			for (var i = 0;i < foeplays.length;i++) {
 				if (foeplays[i][1].parent) {
 					foeplays[i][1].parent.removeChild(foeplays[i][1]);
@@ -2779,8 +2786,9 @@ function startMatch() {
 			else {
 				if (game.quest)
 					startQuestWindow();
-				else
+				else {
 					startMenu();
+				}
 				game = undefined;
 			}
 		} else if (game.turn == game.player1) {
@@ -3237,6 +3245,10 @@ socket.on("userdump", function(data) {
 	    user.freepacks = user.freepacks.split(",");
 	    convertIntInList(user.freepacks);
 	}
+	if (!user.ailosses) user.ailosses = 0;
+	if (!user.aiwins) user.aiwins = 0;
+	if (!user.pvplosses) user.pvplosses = 0;
+	if (!user.pvpwins) user.pvpwins = 0;
 	convertQuest();
 	startMenu();
 });
@@ -3416,6 +3428,10 @@ function loginClick() {
 						    user.freepacks = user.freepacks.split(",");
 						    convertIntInList(user.freepacks);
 						}
+						if (!user.ailosses) user.ailosses = 0;
+						if (!user.aiwins) user.aiwins = 0;
+						if (!user.pvplosses) user.pvplosses = 0;
+						if (!user.pvpwins) user.pvpwins = 0;
 						console.log(user.quest);
 						convertQuest();
 						startMenu();
