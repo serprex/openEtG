@@ -117,6 +117,15 @@ chimera:function(c,t){
 clear:function(c,t){
 	return c.owner != t.owner? (c.owner.shield && t.status.momentum) || t.status.adrenaline : t.status.delayed || t.status.frozen || t.status.poison>0;
 },
+cloak: function(c, t) {
+	var perm = c.owner.permanents;
+	for(var i=0; i<16; i++){
+		if (perm[i] && perm[i].passives.cloak && perm[i].status.charges){
+			return false;
+		}
+	}
+	return true;
+},
 corpseexplosion:function(c,t){
 	return t.trueatk()<3 && (t.status.poison || 0) + (t.passives.poisonous?5:3) - t.card.cost;
 },

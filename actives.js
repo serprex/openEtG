@@ -184,6 +184,9 @@ clear:function(c,t){
 	}
 	t.dmg(-1);
 },
+cloak:function(c,t){
+	//This is only here to allow ai targeting logic, the actual cloak effect lies in its passive.
+},
 corpseexplosion:function(c,t){
 	function dmg1(c,t){ t.dmg(1); }
 	t.die();
@@ -926,6 +929,9 @@ readiness:function(c,t){
 },
 rebirth:function(c,t){
 	c.transform(Cards.Phoenix.asUpped(c.card.upped));
+},
+regen:function(c,t){
+	c.owner.status.poison--;
 },
 regenerate:function(c,t){
 	new TextEffect("+5", tgtToPos(c));

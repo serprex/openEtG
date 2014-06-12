@@ -697,13 +697,14 @@ CardInstance.prototype.remove = function(index) {
 	}
 	return index;
 }
-Creature.prototype.deatheffect = function(index) {
+Creature.prototype.deatheffect = Weapon.prototype.deatheffect = function(index) {
+	console.log("death index: " +  index);
 	var self = this;
 	if (this.active.death){
 		this.active.death(this, this, index)
 	}
 	this.owner.procactive("death", function(c, p) { c.active.death(c, self, index) });
-	new DeathEffect(creaturePos(this.owner == this.owner.game.player1?0:1, index));
+	if (index>=0) new DeathEffect(creaturePos(this.owner == this.owner.game.player1?0:1, index));
 }
 Creature.prototype.die = function() {
 	var index = this.remove();

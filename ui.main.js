@@ -746,8 +746,13 @@ function aiFunc() {
 		if (cardinst.canactive()) {
 			if (cardinst.card.type == SpellEnum) {
 				if (cmd = iterCore(cardinst, cardinst.card.active)) return cmd;
-			} else if (cardinst.card.type == WeaponEnum ? (!self.weapon || self.weapon.card.cost < cardinst.card.cost) :
-                cardinst.card.type == ShieldEnum ? (!self.shield || self.shield.card.cost < cardinst.card.cost) : true) {
+			} 
+			else if (cardinst.card.type == PermanentEnum) {
+				if (!cardinst.card.active || !cardinst.card.active.play || !ActivesEval[cardinst.card.active.play.activename]) return ["cast", tgtToBits(cardinst) ^ 8]
+				if (cmd = iterCore(cardinst, cardinst.card.active.play)) return cmd;
+			}
+			else if (cardinst.card.type == WeaponEnum ? (!self.weapon || self.weapon.card.cost < cardinst.card.cost) :
+                cardinst.card.type == ShieldEnum ? (!self.shield || self.shield.card.cost < cardinst.card.cost || self.shield.passives.additive) : true) {
 				return ["cast", tgtToBits(cardinst) ^ 8];
 			}
 		}
@@ -774,7 +779,11 @@ function aiFunc() {
 		return ["endturn", worstcards[Math.floor(Math.random() * worstcards.length)]];
 	} else return ["endturn"];
 }
-function victoryScreen(goldreward, cardreward) {
+function listify(maybeArray) {
+	if (maybeArray instanceof Array) return maybeArray;
+	else return maybeArray.split();
+}
+function victoryScreen() {
 	victoryui = new PIXI.Stage(0x000000, true);
 
 	//lobby background
@@ -787,10 +796,13 @@ function victoryScreen(goldreward, cardreward) {
 	tinfo = makeText(posX, posY, victoryText, true);
 	tinfo.anchor.x = 0.5;
 	var bexit = makeButton(420, 430, 75, 18, buttons.exit);
+
 	bexit.click = function() {
 		if (game.cardreward) {
-			userEmit("addcard", { c: game.cardreward });
-			user.pool.push(game.cardreward);
+			userEmit("add", { add: etg.encodedeck(game.cardreward)});
+			for (var i = 0;i < game.cardreward.length;i++) {
+				user.pool.push(game.cardreward[i]);
+			}			
 		}
 		if (game.goldreward) {
 			userEmit("addgold", { g: game.goldreward });
@@ -812,9 +824,13 @@ function victoryScreen(goldreward, cardreward) {
 		victoryui.addChild(igold);
 	}
 	if (game.cardreward) {
-		var cardArt = new PIXI.Sprite(getArt(game.cardreward));
-		cardArt.position.set(380, 170);
-		victoryui.addChild(cardArt);
+		game.cardreward = listify(game.cardreward);
+		console.log("rewards: " + game.cardreward);
+		for (var i = 0;i < game.cardreward.length;i++) {
+			var cardArt = new PIXI.Sprite(getArt(game.cardreward[i]));
+			cardArt.position.set(380-game.cardreward.length*20+i*40, 170);
+			victoryui.addChild(cardArt);
+		}
 	}
 	victoryui.addChild(tinfo);
 	victoryui.addChild(bexit);
@@ -984,6 +1000,7 @@ function mkQuestAi(questname, stage) {
 	var foename = quest.name || "";
 	var markpower = quest.markpower || 1;
 	var drawpower = quest.drawpower || 1;
+	if (quest.doubledeck) deck = doubleDeck(deck);
 	var hp = quest.hp || 100;
 	var playerHPstart = quest.urhp || 100;
 	var urdeck = getDeck();
@@ -1001,6 +1018,8 @@ function mkQuestAi(questname, stage) {
 	initGame({ first: Math.random() < .5, deck: deck, urdeck: urdeck, seed: Math.random() * etg.MAX_INT, hp: hp, aimarkpower: markpower, foename: foename, urhp : playerHPstart, aidrawpower:drawpower }, aievalopt.checked ? aiEvalFunc : aiFunc);
 	game.quest = [questname, stage];
 	game.wintext = quest.wintext || "";
+	game.autonext = quest.autonext || false;
+	if ((user.quest[questname] <= stage || !(questname in user.quest))) game.cardreward = quest.cardreward;
 }
 function mkAi(level) {
 	return function() {
@@ -1606,6 +1625,7 @@ function startQuest(questname) {
 function startQuestWindow() {
 	//Start the first quest
 	startQuest("necromancer");
+	startQuest("bombmaker");
 
 	var questui = new PIXI.Stage(0x454545, true);
 	var bgquest = new PIXI.Sprite(backgrounds[3]);
@@ -1619,7 +1639,7 @@ function startQuestWindow() {
 	var errinfo = makeText(50,125,"",true)
 	var quest1Buttons = [];
 	function makeQuestButton(quest, stage, text, pos) {
-		var button = makeButton(pos[0], pos[1], 64, 64, user.quest[quest] > stage ? questIcons[1] : questIcons[0]);
+		var button = makeButton(pos[0], pos[1], 32, 32, user.quest[quest] > stage ? questIcons[1] : questIcons[0]);
 		button.mouseover = function() {
 			tinfo.setText(text);
 		}
@@ -2719,9 +2739,11 @@ function startMatch() {
 			maybeSetText(damagetext[j], game.players[j].foe.expectedDamage ? "Next HP-loss:" + game.players[j].foe.expectedDamage : "");
 		}
 	}
-	userEmit("addloss", { pvp: !game.player2.ai });
-	if (!game.player2.ai) user.pvplosses++;
-	else user.ailosses++;
+	if (user) {
+		userEmit("addloss", { pvp: !game.player2.ai });
+		if (!game.player2.ai) user.pvplosses++;
+		else user.ailosses++;
+	}
 	gameui = new PIXI.Stage(0x336699, true);
 	var cloakgfx = new PIXI.Graphics();
 	var bggame = new PIXI.Sprite(backgrounds[4]);
@@ -2753,15 +2775,17 @@ function startMatch() {
 	gameui.addChild(foename);
 	endturnFunc = endturn.click = function(e, discard) {
 		if (game.winner) {
-			userEmit("addwin", { pvp: !game.player2.ai });
-			if (game.winner == game.player1) {
-				if (game.player2.ai) {
-					user.aiwins++;
-					user.ailosses--;
-				}
-				else {
-					user.pvpwins++;
-					user.pvplosses--;
+			if (user) {
+				if (game.winner == game.player1) {
+					userEmit("addwin", { pvp: !game.player2.ai });
+					if (game.player2.ai) {
+						user.aiwins++;
+						user.ailosses--;
+					}
+					else {
+						user.pvpwins++;
+						user.pvplosses--;
+					}
 				}
 			}
 			for (var i = 0;i < foeplays.length;i++) {
@@ -2775,12 +2799,15 @@ function startMatch() {
 				delete game.arena;
 			}
 			if (user && game.quest) {
-				if (game.winner == game.player1 && (user.quest[game.quest[0]] <= game.quest[1] || !(game.quest[0] in user.quest))) {
+				if (game.winner == game.player1 && (user.quest[game.quest[0]] <= game.quest[1] || !(game.quest[0] in user.quest)) && !game.autonext) {
 					userEmit("updatequest", { quest: game.quest[0], newstage: game.quest[1] + 1 });
 					user.quest[game.quest[0]] = game.quest[1] + 1;
 				}
 			}
-			if (user && game.winner == game.player1) {
+			if (user && game.winner == game.player1 && game.quest && game.autonext) {
+				mkQuestAi(game.quest[0], game.quest[1] + 1);
+			}
+			else if (user && game.winner == game.player1) {
 				victoryScreen();
 			}
 			else {

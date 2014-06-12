@@ -401,7 +401,7 @@ io.on("connection", function(socket) {
 		});
 	});
 	userEvent(socket, "add", function (data, user) {
-	    var add = etgutil.decodedeck(data.add);
+		var add = etgutil.decodedeck(data.add);
 	    for (var i = 0; i < add.length; i++) {
 	        user.pool = etgutil.addcard(user.pool, add[i]);
 	    }
@@ -546,10 +546,8 @@ io.on("connection", function(socket) {
 	    user.freepacks = packlist.join();
 	});
 	userEvent(socket, "addloss", function(data, user) {
-		console.log(user.ailosses);
 		if (data.pvp) user.pvplosses = (user.pvplosses ? parseInt(user.pvplosses) + 1 : 1);
 		else user.ailosses = (user.ailosses ? parseInt(user.ailosses) + 1 : 1);
-		console.log(user.ailosses);
 	});
 	userEvent(socket, "addwin", function(data, user) {
 		if (data.pvp) {
