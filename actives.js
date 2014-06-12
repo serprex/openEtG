@@ -72,18 +72,16 @@ alphawolf: function (c, t) {
 	new Creature(Cards.PackWolf.asUpped(c.card.upped), c.owner).place();
 	new Creature(Cards.PackWolf.asUpped(c.card.upped), c.owner).place();
 },
-animateweapon: function (c, t) {
-	if (t.weapon) {
-		var cr = new Creature(t.weapon.card, t.owner);
-		cr.atk = t.weapon.atk;
-		cr.active = clone(t.weapon.active);
-		cr.cast = t.weapon.cast;
-		cr.castele = t.weapon.castele;
-		cr.passives = clone(t.weapon.passives);
-		cr.status = clone(t.weapon.status);
-		cr.place();
-		t.weapon = undefined;
-	}
+animateweapon: function(c, t) {
+	var cr = new Creature(t.card, t.owner);
+	cr.atk = t.atk;
+	cr.active = clone(t.active);
+	cr.cast = t.cast;
+	cr.castele = t.castele;
+	cr.passives = clone(t.passives);
+	cr.status = clone(t.status);
+	cr.place();
+	t.owner.weapon = undefined;
 },
 antimatter:function(c,t){
 	new TextEffect("Antimatter", tgtToPos(t));
@@ -405,19 +403,17 @@ flatline:function(c,t){
 		c.owner.foe.flatline = true;
 	}
 },
-flyingweapon:function(c,t){
-	if (t.weapon){
-		var cr = new Creature(t.weapon.card, t.owner);
-		cr.atk = t.weapon.atk;
-		cr.active = clone(t.weapon.active);
-		cr.cast = t.weapon.cast;
-		cr.castele = t.weapon.castele;
-		cr.passives = clone(t.weapon.passives);
-		cr.status = clone(t.weapon.status);
-		cr.passives.airborne = true;
-		cr.place();
-		t.weapon = undefined;
-	}
+flyingweapon: function(c, t) {
+	var cr = new Creature(t.card, t.owner);
+	cr.atk = t.atk;
+	cr.active = clone(t.active);
+	cr.cast = t.cast;
+	cr.castele = t.castele;
+	cr.passives = clone(t.passives);
+	cr.status = clone(t.status);
+	cr.passives.airborne = true;
+	cr.place();
+	t.owner.weapon = undefined;
 },
 fractal:function(c,t){
 	new TextEffect("Fractal", tgtToPos(t));

@@ -208,7 +208,7 @@ flatline:function(c,t){
 	return !c.owner.foe.sanctuary && !c.owner.foe.flatline;
 },
 flyingweapon: function (c, t) {
-	return c.owner == t && !!t.weapon;
+	return c.owner == t.owner;
 },
 fractal:function(c,t){
 	return c.owner == t.owner && c.owner.hand.length < 4;
@@ -449,8 +449,8 @@ tempering:function(c,t){
 throwrock:function(c,t){
 	return c.owner != t.owner && 10-t.truehp();
 },
-tick:function(c,t){
-	return true;
+tick: function(c, t) {
+	return c.truehp() > 2 || !c.card.upped ? true : ActivesEvalMassCC(c,c.owner.foe);
 },
 unburrow:function(c,t){
 	return !ActivesEval.burrow(c, t);

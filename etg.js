@@ -1036,6 +1036,9 @@ var TargetFilters = {
 	weap:function(c, t){
 		return (t instanceof Weapon || (t instanceof Creature && t.card.type == WeaponEnum)) && !t.status.immaterial && !t.status.burrowed;
 	},
+	playerweap:function(c,t){
+		return t instanceof Weapon && t == t.owner.weapon;
+	},
 	perm:function(c, t){
 		return t.isMaterialInstance(Permanent);
 	},

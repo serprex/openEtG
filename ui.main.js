@@ -1626,6 +1626,7 @@ function startQuestWindow() {
 	//Start the first quest
 	startQuest("necromancer");
 	startQuest("bombmaker");
+	startQuest("blacksummoner");
 
 	var questui = new PIXI.Stage(0x454545, true);
 	var bgquest = new PIXI.Sprite(backgrounds[3]);

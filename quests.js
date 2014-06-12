@@ -74,6 +74,9 @@ quests.bombmaker = {};
 quests.bombmaker[0] = { deck: "5t2 5t2 5t2 5t2 5t2 5t2 5t2 5t2 5t2 5t2 5t2 5t2 5t2 5t2 5t2 5s5 5s5 5s5 5s5 5s5 5s5 622 622 622 622 80d 80d 80d 80d 80d 80d 8pu", name: "Bomb Maker 1", autonext: true };
 quests.bombmaker[1] = { deck: "5rg 5rg 5rg 5rg 5rg 5rg 5rg 5rg 5rg 5rg 5rg 5rg 5rg 5rg 5rg 5rk 5rk 5rk 5rk 5ro 5ro 5ro 5ru 5ru 5ru 5ru 5ru 5ru 5v1 5v1 5v1 5v1 5v1 5v1 7ql 7ql 7ql 7ql 7ql 7ql 8pt", name: "Bomb Maker 2", autonext: true };
 quests.bombmaker[2] = { deck: "5f4 5f4 5f4 5f6 5f6 5f6 5f6 5f6 5f6 5f5 5f5 5f8 5f8 5oc 5oc 5oc 5oc 5oc 5oc 5oc 5oc 5oc 5oc 5oc 5oc 5oc 5oc 5om 5om 5om 5om 5om 5om 5p0 5p0 8po", name: "Bomb Maker 3", doubledeck: true, markpower: 3, drawpower: 2, cardreward: ["5om", "5om", "5om", "5om", "5s5", "5s5", "5s5", "7ql", "7ql"], wintext: "Congratulations! Here, take some of my bombs as the reward!" };
+
+quests.blacksummoner = {};
+quests.blacksummoner[0] = { deck: "7t5 7t5 7t5 7t5 7t5 7t5 7t5 7t5 7t5 7t5 7t5 7t5 7t5 7t5 7t5 8pt", name: "The Black Summoner", markpower: 12, cardreward: ["7t5", "7t5"], wintext: "You defeat the Dark Summoner that controlled the dragons. The dragons fly away, but two of them stays, looking at you.\nYou decide to let them join you!" }
 //Menu info
 questInfo = {};
 questInfo.necromancer = { pos: [[200, 200], [200, 250], [225, 300]], text: ["A horde of skeletons have been seen nearby, perhaps you should go investigate?", "They seemed to come from the forest, so you go inside.", "Deep inside the forest you find the necromancer responsible for filling the lands with undead!"] };
@@ -94,5 +97,5 @@ questInfo.spirit = { pos: [[275, 350], [325, 375], [500, 200], [500, 250], [525,
 							'You must think yourself dreaming... Well this is the nightmare realm, and I am the one in control.\n\
 							I think I will toy with you first... before I swallow your soul.' The shadows lunge toward you in a vicious attack."]};
 questInfo.bombmaker = {pos: [[600,400]], text:["A bomb maker have set up shop nearby. He have put up a sign promising a reward if you can beat him\n and his bombs three times in a row."]}
-
+questInfo.blacksummoner = {pos:[[500,420]], text:["A swarm of dragons can be seen nearby. Maybe you could manage to tame one of them?"]}
 
