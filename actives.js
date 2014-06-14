@@ -1064,7 +1064,7 @@ singularity:function(c,t){
 		c.owner.foe.nova = 0;
 	}else if (r > .2){
 		Actives.parallel(c, c);
-	}else if (r > .1){
+	}else if (r > .1 && c.owner.weapon){
 		c.owner.weapon = new Weapon(Cards.Dagger, c.owner);
 	}
 	c.dmg(c.trueatk(), true);
