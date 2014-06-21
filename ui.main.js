@@ -130,13 +130,15 @@ function tgtToPos(t) {
 	} else console.log("Unknown target");
 }
 function refreshRenderer() {
-	if (renderer) {
-		leftpane.removeChild(renderer.view);
+	if (realStage.children.length > 0){
+		realStage.removeChild(realStage.children[0]);
 	}
-	renderer = new PIXI.CanvasRenderer(900, 600);
-	leftpane.appendChild(renderer.view);
+	realStage.addChild(mainStage);
 }
 
+var realStage = new PIXI.Stage(0x336699, true);
+renderer = new PIXI.CanvasRenderer(900, 600);
+leftpane.appendChild(renderer.view);
 var mainStage, menuui, gameui;
 var caimgcache = {}, crimgcache = {}, primgcache = {}, artcache = {}, artimagecache = {};
 var elecols = [0xa99683, 0xaa5999, 0x777777, 0x996633, 0x5f4930, 0x50a005, 0xcc6611, 0x205080, 0xa9a9a9, 0x337ddd, 0xccaa22, 0x333333, 0x77bbdd];
@@ -372,7 +374,8 @@ function initTrade(data) {
 	player2Card = null;
 	cardChosen = false;
 	if (data.first) myTurn = true;
-	var editorui = new PIXI.Stage(0x336699, true), tradeelement = 0;
+	var editorui = new PIXI.DisplayObjectContainer(), tradeelement = 0;
+	editorui.interactive = true;
 	var btrade = new PIXI.Text("Trade", { font: "16px Dosis" });
 	var bconfirm = new PIXI.Text("Confirm trade", { font: "16px Dosis" });
 	var bconfirmed = new PIXI.Text("Confirmed!", { font: "16px Dosis" });
@@ -785,7 +788,8 @@ function listify(maybeArray) {
 	else return maybeArray.split();
 }
 function victoryScreen() {
-	victoryui = new PIXI.Stage(0x000000, true);
+	victoryui = new PIXI.DisplayObjectContainer();
+	victoryui.interactive = true;
 
 	//lobby background
 	var bgvictory = new PIXI.Sprite(backgrounds[0]);
@@ -858,28 +862,6 @@ function deckMorph(deck,MorphFrom,morphTo) {
 	}
 	return deckout;
 }
-
-/*function deckLimitEnforce(deck,limitList,minList,maxList) {
-	var deckout=[];
-	var deckcounts=[];
-	var minCounts=[];
-	var maxCounts=[];
-	var count;
-	for (var i=0; i < limitList.length; i++) {
-		minCounts.push({key: limitList[i],value: minList[i]});
-		maxCounts.push({key: limitList[i],value: maxList[i]});
-	}
-	for (var i=0; i < deck.length; i++) {
-		cardStr = deck[i];
-		if (!(cardStr in deckCounts)) {
-			deckCounts.push(key:cardStr , value: 1);
-		}
-		else {
-			deckCounts[cardStr]=deckCounts[cardStr]+1
-		}
-	}
-	for (var i=0; i < deckCounts.length
-}*/
 
 function mkDemigod() {
 	var urdeck = getDeck();
@@ -1331,7 +1313,8 @@ function maybeStartMenu() {
 	}
 }
 function startMenu() {
-	menuui = new PIXI.Stage(0x000000, true);
+	menuui = new PIXI.DisplayObjectContainer();
+	menuui.interactive = true;
 	var buttonList = [];
 	var mouseroverButton;
 	var clickedButton;
@@ -1573,7 +1556,8 @@ function startRewardWindow(reward) {
 	var rewardList = [];
 	if (reward == "mark") rewardList = filtercards(false, function(x) { return x.rarity == 5 });
 	if (reward == "shard") rewardList = filtercards(false, function(x) { return x.rarity == 4 });
-	var rewardUI = new PIXI.Stage(0x454545, true);
+	var rewardUI = new PIXI.DisplayObjectContainer();
+	rewardUI.interactive = true;
 	var bgreward = new PIXI.Sprite(backgrounds[0]);
 	rewardUI.addChild(bgreward);
 
@@ -1629,7 +1613,8 @@ function startQuestWindow() {
 	startQuest("bombmaker");
 	startQuest("blacksummoner");
 
-	var questui = new PIXI.Stage(0x454545, true);
+	var questui = new PIXI.DisplayObjectContainer();
+	questui.interactive = true;
 	var bgquest = new PIXI.Sprite(backgrounds[3]);
 	bgquest.interactive = true;
 	bgquest.hitArea = new PIXI.Rectangle(0, 0, 900, 670);
@@ -1737,7 +1722,8 @@ function upgradestore() {
 			}
 		}
 	}
-	var upgradeui = new PIXI.Stage(0x336699, true);
+	var upgradeui = new PIXI.DisplayObjectContainer();
+	upgradeui.interactive = true;
 	var bg = new PIXI.Sprite(backgrounds[0]);
 	upgradeui.addChild(bg);
 
@@ -1871,7 +1857,8 @@ function startStore() {
 	var newCardsArt = [];
 	var accountbound = false;
 
-	var storeui = new PIXI.Stage(0x000000, true);
+	var storeui = new PIXI.DisplayObjectContainer();
+	storeui.interactive = true;
 
 	//shop background
 	var bgshop = new PIXI.Sprite(backgrounds[2]);
@@ -2146,7 +2133,8 @@ function startEditor() {
 		var usePool = !!(user && (user.deck || user.starter));
 		var cardminus, cardpool, cardartcode;
 		chatArea.value = "Build a 30-60 card deck";
-		var editorui = new PIXI.Stage(0x336699, true), editorelement = 0;
+		var editorui = new PIXI.DisplayObjectContainer(), editorelement = 0;
+		editorui.interactive = true;
 		var bg = new PIXI.Sprite(backgrounds[0]);
 		editorui.addChild(bg);
 		var bclear = makeButton(8, 8, 75, 18, buttons.clear);
@@ -2370,7 +2358,8 @@ var descr = [
         "Aether"
 ];
 function startElementSelect() {
-	var stage = new PIXI.Stage(0x336699, true);
+	var stage = new PIXI.DisplayObjectContainer();
+	stage.interactive = true;
 	chatArea.value = "Select your starter element";
 	var elesel = [];
 	var eledesc = new PIXI.Text("", { font: "24px Dosis" });
@@ -2498,7 +2487,7 @@ function startMatch() {
 			disableEffects = true;
 		else
 			disableEffects = false;
-		var pos = gameui.interactionManager.mouse.global;
+		var pos = realStage.interactionManager.mouse.global;
 		maybeSetText(winnername, game.winner ? (game.winner == game.player1 ? "Won " : "Lost ") + game.ply : "");
 		maybeSetButton(game.winner ? null : endturn, endturn);
 		if (!game.winner || !user) {
@@ -2746,7 +2735,8 @@ function startMatch() {
 		if (!game.player2.ai) user.pvplosses++;
 		else user.ailosses++;
 	}
-	gameui = new PIXI.Stage(0x336699, true);
+	gameui = new PIXI.DisplayObjectContainer();
+	gameui.interactive = true;
 	var cloakgfx = new PIXI.Graphics();
 	var bggame = new PIXI.Sprite(backgrounds[4]);
 	gameui.addChild(bggame);
@@ -2918,7 +2908,8 @@ function startMatch() {
 		rend.render(graphics);
 		infobox.setTexture(rend);
 		infobox.anchor.set(0.5, 0);
-		infobox.position.set(gameui.getMousePosition().x, gameui.getMousePosition().y-(y+10));
+		var mousePosition = realStage.getMousePosition();
+		infobox.position.set(mousePosition.x, mousePosition.y-(y+10));
 		infobox.visible = true;
 	}
 	var handsprite = [new Array(8), new Array(8)];
@@ -3142,7 +3133,8 @@ function startArenaInfo(info) {
 	if (!info) {
 		chatArea.value = "You do not have an arena deck";
 	}
-	var stage = new PIXI.Stage(0x336699, true);
+	var stage = new PIXI.DisplayObjectContainer();
+	stage.interactive = true;
 	var winloss = new PIXI.Text((info.win || 0) + " - " + (info.loss || 0), { font: "16px Dosis" });
 	winloss.position.set(200, 200);
 	stage.addChild(winloss);
@@ -3167,7 +3159,8 @@ function startArenaTop(info) {
 	if (!info) {
 		chatArea.value = "??";
 	}
-	var stage = new PIXI.Stage(0x336699, true);
+	var stage = new PIXI.DisplayObjectContainer();
+	stage.interactive = true;
 	for (var i = 0;i < info.length;i++) {
 		var infotxt = new PIXI.Text(info[i], { font: "16px Dosis" });
 		infotxt.position.set(200, 100 + i * 20);
@@ -3391,7 +3384,7 @@ function animate() {
 	for (var i = anims.length - 1;i >= 0;i--) {
 		anims[i].next();
 	}
-	renderer.render(mainStage);
+	renderer.render(realStage);
 }
 function requestAnimate() { requestAnimFrame(animate); }
 document.addEventListener("keydown", function(e) {
