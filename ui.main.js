@@ -137,7 +137,7 @@ function refreshRenderer() {
 }
 
 var realStage = new PIXI.Stage(0x336699, true);
-renderer = new PIXI.CanvasRenderer(900, 600);
+renderer = new PIXI.WebGLRenderer(900, 600);
 leftpane.appendChild(renderer.view);
 var mainStage, menuui, gameui;
 var caimgcache = {}, crimgcache = {}, primgcache = {}, artcache = {}, artimagecache = {};
