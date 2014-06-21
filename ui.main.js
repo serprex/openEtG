@@ -1396,7 +1396,7 @@ function startMenu() {
 
 	//Quests button
 	var bquest = makeButton(50, 145, 75, 25, buttons.quests, function() {
-		tinfo.setText("Go on adventure!");
+		tinfo.setText("Go on an adventure!");
 	});
 	bquest.click = startQuestWindow;
 	menuui.addChild(bquest);
