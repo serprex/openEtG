@@ -1,6 +1,7 @@
 "use strict"
 var Cards, CardCodes, Targeting, targetingMode, targetingModeCb, game, player1, player2, players;
 var MersenneTwister = require("./MersenneTwister");
+var Actives = require("./Actives");
 var gameui = {addChild:function(){}};
 disableEffects = true;
 function tgtToPos(){

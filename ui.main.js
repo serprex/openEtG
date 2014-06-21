@@ -7,6 +7,7 @@ var Cards, CardCodes, Targeting, targetingMode, targetingModeCb, targetingText, 
 })(window);
 var etg = require("./etgutil");
 var MersenneTwister = require("./MersenneTwister");
+var Actives = require("./Actives");
 var myTurn = false;
 var cardChosen = false;
 loadcards(function(cards, cardcodes, targeting) {
@@ -746,7 +747,7 @@ function aiFunc() {
 		if (cardinst.canactive()) {
 			if (cardinst.card.type == SpellEnum) {
 				if (cmd = iterCore(cardinst, cardinst.card.active)) return cmd;
-			} 
+			}
 			else if (cardinst.card.type == PermanentEnum) {
 				if (!cardinst.card.active || !cardinst.card.active.play || !ActivesEval[cardinst.card.active.play.activename]) return ["cast", tgtToBits(cardinst) ^ 8]
 				if (cmd = iterCore(cardinst, cardinst.card.active.play)) return cmd;
@@ -802,7 +803,7 @@ function victoryScreen() {
 			userEmit("add", { add: etg.encodedeck(game.cardreward)});
 			for (var i = 0;i < game.cardreward.length;i++) {
 				user.pool.push(game.cardreward[i]);
-			}			
+			}
 		}
 		if (game.goldreward) {
 			userEmit("addgold", { g: game.goldreward });
@@ -1009,7 +1010,7 @@ function mkQuestAi(questname, stage) {
 			console.log("Warning: morphFrom is not the same length as morphTo. Aborting player deck morph for stage", stage);
 		} else {
 			urdeck = deckMorph(urdeck, quest.morph.from.split(" "), quest.morph.to.split(" "));
-		}							 
+		}
 	}
 	if ((user && (!user.deck || user.deck.length < 31)) || urdeck.length < 11) {
 		/*startEditor();*/

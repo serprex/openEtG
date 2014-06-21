@@ -1,4 +1,3 @@
-var Actives = (function(){
 function mutantactive(t){
 	t.active = {};
 	var abilities = ["hatch","freeze","burrow","destroy","steal","dive","heal","paradox","lycanthropy","scavenger","infect","gpull","devour","mutation","growth","ablaze","poison","deja","endow","guard","mitosis"];
@@ -957,7 +956,7 @@ ren:function(c,t){
 	}
 },
 reveal: function (c, t) {
-	if (c != t) return;	
+	if (c != t) return;
 	c.owner.precognition = true;
 },
 rewind:function(c,t){
@@ -1206,7 +1205,7 @@ tick:function(c,t){
 	c.dmg(c.card.upped?2:1);
 	if (c.hp <= 0) {
 		c.card.upped ? c.owner.foe.masscc(c, function (c, x) { x.dmg(4) }, false) : c.owner.foe.spelldmg(9);
-		}	
+		}
 },
 unburrow:function(c,t){
 	c.status.burrowed = false;
@@ -1351,5 +1350,4 @@ wings:function(c,t){
 for(var key in Actives){
 	Actives[key].activename = key;
 }
-return Actives;
-})();
+module.exports = Actives
