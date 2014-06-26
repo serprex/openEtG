@@ -2711,8 +2711,8 @@ function startMatch() {
 				shiesprite[j].visible = true;
 				var dr = sh.truedr();
 				var child = shiesprite[j].getChildAt(0);
-				child.visible = true;
 				child.setTexture(getTextImage((sh.active.shield ? " " + sh.active.shield.activename : "") + (sh.active.buff ? " " + sh.active.buff.activename : "") + (sh.active.cast ? casttext(sh.cast, sh.castele) + sh.active.cast.activename : ""), 12, sh.card.upped ? "black" : "white"));
+				child.visible = true;
 				var child2 = shiesprite[j].getChildAt(1);
 				child2.setTexture(getTextImage(sh.status.charges ? "x" + sh.status.charges: "" + sh.truedr() + "", 12, sh.card.upped ? "black" : "white"));
 				child2.visible = true;
@@ -3033,7 +3033,7 @@ function startMatch() {
 			atktext.position.set(-39, -39);
 			weapsprite[j].addChild(weaptext);
 			weapsprite[j].addChild(atktext);
-			var shietext = new PIXI.Text(nopic);
+			var shietext = new PIXI.Sprite(nopic);
 			shietext.position.set(-40, -51);
 			var deftext = new PIXI.Sprite(nopic);
 			deftext.position.set(-39, -39);
