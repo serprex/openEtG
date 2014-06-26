@@ -906,8 +906,9 @@ quint:function(c,t){
 	t.status.immaterial = true;
 	t.status.frozen = 0;
 },
-randomdr:function(c,t){
-	c.dr = c.owner.upto(c.card.upped?4:3);
+randomdr: function(c, t) {
+	if (c==t)
+		c.dr = c.owner.upto(c.card.upped?4:3);
 },
 rage:function(c,t){
 	var dmg = c.card.upped?6:5;

@@ -2868,6 +2868,7 @@ function startMatch() {
 		if (!game.player2.ai) {
 			socket.emit("foeleft");
 		}
+		foeplays.length = 0;
 		startMenu();
 	}
 
@@ -3299,9 +3300,9 @@ socket.on("chat", function(data) {
 			color = "red";
 	}
 	if (data.mode == "guest")
-		chatBox.innerHTML += "<font color=black><i><b>" + u + "</b>" + data.message.replace(/</g, "&lt;").replace(/>/g, "&gt;") + "</i></font>";
+		chatBox.innerHTML += "<font color=black><i><b>" + u.replace(/</g, "&lt;").replace(/>/g, "&gt;") + "</b>" + data.message.replace(/</g, "&lt;").replace(/>/g, "&gt;") + "</i></font>";
 	else
-		chatBox.innerHTML += "<font color=" + color + "><b>" + u + "</b>" + data.message.replace(/</g, "&lt;").replace(/>/g, "&gt;") + "</font>";
+		chatBox.innerHTML += "<font color=" + color + "><b>" + u.replace(/</g, "&lt;").replace(/>/g, "&gt;") + "</b>" + data.message.replace(/</g, "&lt;").replace(/>/g, "&gt;") + "</font>";
 	chatBox.innerHTML += "<br>";
 	chatBox.scrollTop = chatBox.scrollHeight;
 });

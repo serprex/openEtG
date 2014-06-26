@@ -184,7 +184,7 @@ duality:function(c,t){
 	return c.owner.hand.length < 7;
 },
 earthquake:function(c,t){
-	return t.status.charges>1;
+	return t.status.charges>1 && c.owner != t.owner;
 },
 enchant:function(c,t){
 	return c.owner == t.owner && t.card.cost;
