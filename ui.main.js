@@ -504,7 +504,7 @@ function initTrade(data) {
 	for (var i = 0;i < 30;i++) {
 		var sprite = new PIXI.Sprite(nopic);
 		sprite.position.set(450 + Math.floor(i / 10) * 100, 8 + (i % 10) * 20);
-		(function(_i) {			
+		(function(_i) {
 			sprite.mouseover = function() {
 				cardartcode = player2Cards.length[_i];
 			}
@@ -3368,7 +3368,7 @@ socket.on("tradedone", function(data) {
 	}
 	for (var i = 0;i < data.oldcards.length;i++) {
 		user.pool.splice(user.pool.indexOf(data.oldcards[i]), 1);
-	}	
+	}
 	startMenu();
 });
 socket.on("tradecanceled", function(data) {
@@ -3405,11 +3405,7 @@ function maybeSendChat(e) {
 	}
 }
 function randomGuestName() {
-	res = "";
-	for (var i = 0;i < 5;i++) {
-		res += Math.floor(Math.random() * 10);
-	}
-	return res;
+	return (10000 + Math.floor(Math.random() * 89999)) + "";
 }
 function maybeLogin(e) {
 	e.cancelBubble = true;
