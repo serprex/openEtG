@@ -862,7 +862,7 @@ phoenix:function(c,t, index){
 	}
 },
 photosynthesis:function(c,t){
-	new TextEffect("2:8", tgtToPos(c));
+	new TextEffect("2:5", tgtToPos(c));
 	c.owner.spend(Life, -2);
 	if (c.cast > 0){
 		c.usedactive = false;
@@ -906,8 +906,9 @@ quint:function(c,t){
 	t.status.immaterial = true;
 	t.status.frozen = 0;
 },
-randomdr:function(c,t){
-	c.dr = c.owner.upto(c.card.upped?4:3);
+randomdr: function(c, t) {
+	if (c==t)
+		c.dr = c.owner.upto(c.card.upped?4:3);
 },
 rage:function(c,t){
 	var dmg = c.card.upped?6:5;
