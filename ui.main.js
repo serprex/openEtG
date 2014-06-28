@@ -3184,9 +3184,7 @@ function startArenaInfo(info) {
 	var winloss = new PIXI.Text((info.win || 0) + " - " + (info.loss || 0), { font: "16px Dosis" });
 	winloss.position.set(200, 200);
 	stage.addChild(winloss);
-	var bret = new PIXI.Text("Return", { font: "16px Dosis" });
-	bret.position.set(200, 400);
-	bret.interactive = true;
+	var bret = makeButton(200, 400, 72, 22, buttons.exit);
 	bret.click = startMenu;
 	stage.addChild(bret);
 	var ocard = new PIXI.Sprite(nopic);
@@ -3208,14 +3206,15 @@ function startArenaTop(info) {
 	console.log(info);
 	var stage = new PIXI.DisplayObjectContainer();
 	stage.interactive = true;
-	for (var i = 0;i < info.length;i++) {
+	for (var i = 0;i < info.length;i+=2) {
 		var infotxt = new PIXI.Text(info[i], { font: "16px Dosis" });
 		infotxt.position.set(200, 100 + i * 20);
+		var scoretxt = new PIXI.Text(info[i + 1], { font: "16px Dosis" });
+		scoretxt.position.set(300, 100 + i * 20);
 		stage.addChild(infotxt);
+		stage.addChild(scoretxt);
 	}
-	var bret = new PIXI.Text("Return", { font: "16px Dosis" });
-	bret.position.set(200, 400);
-	bret.interactive = true;
+	var bret = makeButton(100, 400, 72, 22, buttons.exit);
 	bret.click = startMenu;
 	stage.addChild(bret);
 	mainStage = stage;

@@ -330,7 +330,7 @@ io.on("connection", function(socket) {
 		});
 	});
 	userEvent(socket, "arenatop", function(data, user){
-		db.zrange("arena", 0, 9, function(err, obj){
+		db.zrevrange("arena", 0, 9,'withscores', function(err, obj){
 			socket.emit("arenatop", obj);
 		});
 	});
@@ -342,7 +342,7 @@ io.on("connection", function(socket) {
 		db.zcard("arena", function(err, len){
 			if (!len)return;
 			var idx = Math.floor(Math.random()*Math.min(len, 20));
-			db.zrange("arena", idx, idx, function(err, aname){
+			db.zrevrange("arena", idx, idx, function(err, aname){
 				console.log("deck: "+ aname + " " + idx);
 				db.hgetall("A:"+aname, function(err, adeck){
 					var day = getDay();

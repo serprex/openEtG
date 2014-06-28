@@ -165,7 +165,7 @@ die:function(c,t){
 	return true;
 },
 dive:function(c,t){
-	return t.trueatk() > 0;
+	return c.trueatk() > 0;
 },
 divinity:function(c,t){
 	return true;
