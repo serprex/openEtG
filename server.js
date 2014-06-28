@@ -450,18 +450,22 @@ io.on("connection", function(socket) {
 		if (!thistrade){
 			return;
 		}
-		thistrade.tradecard = data.card;
-		thistrade.oppcard = data.oppcard;
+		thistrade.tradecards = data.cards;
+		thistrade.oppcards = data.oppcards;
 		if (thattrade.accepted) {
 			var other = thistrade.foe;
-			var player1Card = thistrade.tradecard, player2Card = thattrade.tradecard;
+			var player1Cards = thistrade.tradecards, player2Cards = thattrade.tradecards;
 			//if (player1Card == thattrade.oppcard && thistrade.oppcard == player2Card) {
-			user.pool = etgutil.addcard(user.pool, player1Card, -1);
-			user.pool = etgutil.addcard(user.pool, player2Card);
-			users[thistrade.foename].pool = etgutil.addcard(users[thistrade.foename].pool, player2Card, -1);
-			users[thistrade.foename].pool = etgutil.addcard(users[thistrade.foename].pool, player1Card);
-			this.emit("tradedone", { oldcard: player1Card, newcard: player2Card });
-			other.emit("tradedone", { oldcard: player2Card, newcard: player1Card });
+			for (var i = 0;i < player1Cards.length;i++) {
+				user.pool = etgutil.addcard(user.pool, player1Cards[i], -1);
+				users[thistrade.foename].pool = etgutil.addcard(users[thistrade.foename].pool, player1Cards[i]);
+			}
+			for (var i = 0;i < player2Cards.length;i++) {
+				user.pool = etgutil.addcard(user.pool, player2Cards[i]);
+				users[thistrade.foename].pool = etgutil.addcard(users[thistrade.foename].pool, player2Cards[i], -1);
+			}
+			this.emit("tradedone", { oldcards: player1Cards, newcards: player2Cards });
+			other.emit("tradedone", { oldcards: player2Cards, newcards: player1Cards });
 			delete sockinfo[this.id].trade;
 			delete sockinfo[other.id].trade;
 			//}

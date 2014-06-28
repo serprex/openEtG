@@ -165,7 +165,7 @@ die:function(c,t){
 	return true;
 },
 dive:function(c,t){
-	return true;
+	return t.trueatk() > 0;
 },
 divinity:function(c,t){
 	return true;
@@ -396,8 +396,11 @@ regrade:function(c,t){
 ren:function(c,t){
 	return c.owner == t.owner && !t.hasactive("predeath", "bounce") && t.trueatk();
 },
-rewind: function (c, t) {
-	return c.owner != t.owner && t.card.cost ? (t.active.play? t.card.cost-4:t.card.cost):false;
+rewind: function(c, t) {
+	if (t.card.isOf(Cards.Skeleton))
+		return c.owner == t.owner;
+	else
+		return c.owner != t.owner && t.card.cost ? (t.active.play? t.card.cost-4:t.card.cost):false;
 },
 scarab:function(c,t){
 	return true;

@@ -1,4 +1,4 @@
-var Cards, CardCodes, Targeting, targetingMode, targetingModeCb, targetingText, game, discarding, animCb, user, renderer, endturnFunc, cancelFunc, accepthandfunc, foeDeck, player2summon, player2Card, guestname;
+var Cards, CardCodes, Targeting, targetingMode, targetingModeCb, targetingText, game, discarding, animCb, user, renderer, endturnFunc, cancelFunc, accepthandfunc, foeDeck, player2summon, player2Cards, guestname;
 (function(g) {
 	var htmlElements = ["leftpane", "chatArea", "chatinput", "deckimport", "aideck", "foename", "airefresh", "change", "login", "password", "challenge", "aievalopt", "chatBox", "trade", "bottompane", "demigodmode"];
 	for (var i = 0;i < htmlElements.length;i++) {
@@ -368,57 +368,59 @@ function getWeaponShieldImage(code) {
 	}
 }
 function initTrade(data) {
+	function adjustCardMinus(code, x) {
+		if (code in cardminus) {
+			cardminus[code] += x;
+		} else cardminus[code] = x;
+	}
 	function isFreeCard(card) {
 		return card.type == PillarEnum && !card.upped && !card.rarity;
 	}
-	player2Card = null;
+	player2Cards = [];
 	cardChosen = false;
 	if (data.first) myTurn = true;
 	var editorui = new PIXI.DisplayObjectContainer(), tradeelement = 0;
 	editorui.interactive = true;
-	var btrade = new PIXI.Text("Trade", { font: "16px Dosis" });
-	var bconfirm = new PIXI.Text("Confirm trade", { font: "16px Dosis" });
+	var background = new PIXI.Sprite(backgrounds[0]);
+	editorui.addChild(background);
+	var cardminus = {};
+	var btrade = makeButton(10, 40, 72, 22, buttons.trade);
+	var bconfirm = makeButton(10, 70, 72, 22, buttons.confirm);
 	var bconfirmed = new PIXI.Text("Confirmed!", { font: "16px Dosis" });
-	var bcancel = new PIXI.Text("Cancel Trade", { font: "16px Dosis" });
+	var bcancel = makeButton(10, 10, 72, 22, buttons.exit);
 	var editorcolumns = [];
-	var selectedCard;
+	var selectedCards = [];
+	var selectedCardsprites = [];
+	var player2Cardsprites = [];
+	player2Cards = [];
 	var cardartcode;
-	bcancel.position.set(10, 10);
 	bcancel.click = function() {
 		userEmit("canceltrade");
 		startMenu();
 	}
-	btrade.position.set(100, 100);
 	btrade.click = function() {
-		if (myTurn) {
-			if (selectedCard) {
-				userEmit("cardchosen", { card: selectedCard })
-				console.log("Card sent")
-				myTurn = false;
-				cardChosen = true;
-				editorui.removeChild(btrade);
-				editorui.addChild(bconfirm);
-			}
-			else
-				chatArea.value = "You have to choose a card!"
+		if (selectedCards.length > 0) {
+			userEmit("cardchosen", { cards: selectedCards })
+			console.log("Card sent")
+			cardChosen = true;
+			editorui.removeChild(btrade);
+			editorui.addChild(bconfirm);
 		}
 		else
-			chatArea.value = "You need to wait for your friend to choose a card first";
+			chatArea.value = "You have to choose a card!"
 	}
-	bconfirm.position.set(100, 150);
 	bconfirm.click = function() {
-		if (player2Card) {
+		if (player2Cards.length > 0) {
 			console.log("Confirmed!");
-			myTurn = false;
-			userEmit("confirmtrade", { card: selectedCard, oppcard: player2Card });
+			userEmit("confirmtrade", { cards: selectedCards, oppcards: player2Cards });
 			editorui.removeChild(bconfirm);
 			editorui.addChild(bconfirmed);
 		}
 		else
 			chatArea.value = "Wait for your friend to choose a card!"
 	}
-	bconfirmed.position.set(100, 180);
-	setInteractive(btrade, bconfirm, bcancel);
+	bconfirmed.position.set(10, 110);
+	setInteractive(btrade);
 	editorui.addChild(btrade);
 	editorui.addChild(bcancel);
 
@@ -453,11 +455,18 @@ function initTrade(data) {
 			sprite.addChild(sprcount);
 			(function(_i, _j) {
 				sprite.click = function() {
-					if (player2Card && (CardCodes[cardartcode].rarity == 5) != (CardCodes[player2Card].rarity == 5) ) chatArea.value = "You can only trade this card for another with the same rarity";
-					else if (cardChosen) chatArea.value = "You have already selected a card";
-					else if (!myTurn) chatArea.value = "You need to wait for your friend to choose a card first";
-					else if (isFreeCard(CardCodes[cardartcode])) chatArea.value = "You can't trade a free card, that would just be cheating!";
-					else selectedCard = cardartcode;
+					var code = editorcolumns[_i][1][tradeelement][_j], card = CardCodes[code];
+					if (selectedCards.length < 30 && !isFreeCard(card) && code in cardpool ) {
+						if (!(code in cardpool) || (code in cardminus && cardminus[code] >= cardpool[code])){
+							return;
+						}
+						adjustCardMinus(code, 1);
+						for (var i = 0;i < selectedCards.length;i++) {
+							var cmp = editorCardCmp(selectedCards[i], code);
+							if (cmp >= 0) break;
+						}
+						selectedCards.splice(i, 0, code);
+					}
 				}
 				sprite.mouseover = function() {
 					cardartcode = editorcolumns[_i][1][tradeelement][_j];
@@ -473,24 +482,58 @@ function initTrade(data) {
                 editorCardCmp));
 		}
 	}
+	for (var i = 0;i < 30;i++) {
+		var sprite = new PIXI.Sprite(nopic);
+		sprite.position.set(100 + Math.floor(i / 10) * 100, 8 + (i % 10) * 20);
+		(function(_i) {
+			sprite.click = function() {
+				var card = CardCodes[selectedCards[_i]];
+				if (!isFreeCard(card)) {
+					adjustCardMinus(selectedCards[_i], -1);
+				}
+				selectedCards.splice(_i, 1);
+			}
+			sprite.mouseover = function() {
+				cardartcode = selectedCards[_i];
+			}
+		})(i);
+		sprite.interactive = true;
+		editorui.addChild(sprite);
+		selectedCardsprites.push(sprite);
+	}
+	for (var i = 0;i < 30;i++) {
+		var sprite = new PIXI.Sprite(nopic);
+		sprite.position.set(450 + Math.floor(i / 10) * 100, 8 + (i % 10) * 20);
+		(function(_i) {			
+			sprite.mouseover = function() {
+				cardartcode = player2Cards.length[_i];
+			}
+		})(i);
+		sprite.interactive = true;
+		editorui.addChild(sprite);
+		player2Cardsprites.push(sprite);
+	}
 	var cardArt = new PIXI.Sprite(nopic);
 	cardArt.position.set(734, 8);
 	editorui.addChild(cardArt);
-	var selectedCardArt = new PIXI.Sprite(nopic);
-	selectedCardArt.position.set(334, 8);
-	editorui.addChild(selectedCardArt);
-	var player2CardArt = new PIXI.Sprite(nopic);
-	player2CardArt.position.set(534, 8);
-	editorui.addChild(player2CardArt);
 	animCb = function() {
 		if (cardartcode) {
 			cardArt.setTexture(getArt(cardartcode));
 		}
-		if (selectedCard) {
-			selectedCardArt.setTexture(getArt(selectedCard));
+		for (var i = 0;i < player2Cards.length;i++) {
+			player2Cardsprites[i].visible = true;
+			player2Cardsprites[i].setTexture(getCardImage(player2Cards[i]));
 		}
-		if (player2Card) {
-			player2CardArt.setTexture(getArt(player2Card));
+		for (;i<30;i++)	{
+			player2Cardsprites[i].visible = false;
+		}
+		for (var i = 0;i < selectedCards.length;i++) {
+			selectedCardsprites[i].visible = true;
+			selectedCardsprites[i].setTexture(getCardImage(selectedCards[i]));
+		}
+		for (;i<30;i++)
+		{
+			selectedCardsprites[i].visible = false;
 		}
 		for (var i = 0;i < 13;i++) {
 			editoreleicons[i].setTexture(getIcon(i));
@@ -498,12 +541,12 @@ function initTrade(data) {
 		for (var i = 0;i < 6;i++) {
 			for (var j = 0;j < editorcolumns[i][1][tradeelement].length;j++) {
 				var spr = editorcolumns[i][0][j], code = editorcolumns[i][1][tradeelement][j], card = CardCodes[code];
-				if (card in cardpool || isFreeCard(card)) spr.visible = true;
+				if (card in cardpool) spr.visible = true;
 				else spr.visible = false;
 				spr.setTexture(getCardImage(code));
 				var txt = spr.getChildAt(0), card = CardCodes[code], inf = isFreeCard(card);
 				if ((txt.visible = inf || code in cardpool)) {
-					maybeSetText(txt, inf ? "-" : (cardpool[code].toString()));
+					maybeSetText(txt, inf ? "-" : (cardpool[code] - (code in cardminus ? cardminus[code] : 0)).toString());
 				}
 			}
 			for (;j < 15;j++) {
@@ -1235,7 +1278,8 @@ buttonLoader.onComplete = function() {
 		deck2: buttonsList[26],
 		deck3: buttonsList[27],
 		sell: buttonsList[28],
-		sellupgrade: buttonsList[29]
+		sellupgrade: buttonsList[29],
+		trade: buttonsList[30]
 	}
 	maybeStartMenu();
 }
@@ -1574,7 +1618,6 @@ function startRewardWindow(reward) {
 	}
 
 	rewardUI.addChild(confirmButton);
-	//setInteractive(exitButton, confirmButton);
 
 	var chosenRewardImage = new PIXI.Sprite(nopic);
 	chosenRewardImage.position.set(250, 20)
@@ -3162,6 +3205,7 @@ function startArenaTop(info) {
 	if (!info) {
 		chatArea.value = "??";
 	}
+	console.log(info);
 	var stage = new PIXI.DisplayObjectContainer();
 	stage.interactive = true;
 	for (var i = 0;i < info.length;i++) {
@@ -3314,15 +3358,18 @@ socket.on("mulligan", function(data) {
 	}
 });
 socket.on("cardchosen", function(data) {
-	player2Card = data.card;
-	myTurn = true;
+	player2Cards = data.cards;
 	console.log("Card recieved")
-	console.log(player2Card);
+	console.log(player2Cards);
 });
 socket.on("tradedone", function(data) {
 	console.log("Trade done!")
-	user.pool.push(data.newcard);
-	user.pool.splice(user.pool.indexOf(data.oldcard), 1);
+	for (var i = 0;i < data.newcards.length;i++) {
+		user.pool.push(data.newcards[i]);
+	}
+	for (var i = 0;i < data.oldcards.length;i++) {
+		user.pool.splice(user.pool.indexOf(data.oldcards[i]), 1);
+	}	
 	startMenu();
 });
 socket.on("tradecanceled", function(data) {
