@@ -1077,10 +1077,12 @@ sinkhole:function(c,t){
 	t.castele = Earth;
 	t.usedactive = true;
 },
-siphon:function(c,t){
-	new TextEffect("1:11", tgtToPos(c));
-	if (c.owner.foe.spend(Other, 1)){
-		c.owner.spend(Darkness, -1)
+siphon: function(c, t) {
+	if (!c.owner.foe.sanctuary) {
+		if (c.owner.foe.spend(Other, 1)) {
+			new TextEffect("1:11", tgtToPos(c));
+			c.owner.spend(Darkness, -1)
+		}
 	}
 },
 siphonactive:function(c,t){
