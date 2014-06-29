@@ -8,6 +8,7 @@ var Cards, CardCodes, Targeting, targetingMode, targetingModeCb, targetingText, 
 var etg = require("./etgutil");
 var MersenneTwister = require("./MersenneTwister");
 var Actives = require("./Actives");
+var Effect = require("./Effect");
 var myTurn = false;
 var cardChosen = false;
 loadcards(function(cards, cardcodes, targeting) {
@@ -620,9 +621,9 @@ function getDeck() {
 var aiDelay = 0;
 function aiEvalFunc() {
 	var gameBack = game;
-	var disableEffectsBack = disableEffects;
+	var disableEffectsBack = Effect.disable;
+	Effect.disable = true;
 	game = cloneGame(game);
-	disableEffects = true;
 	var self = game.player2;
 	function mkcommand(cbits, tbits) {
 		return ["cast", cbits | tbits << 9];
@@ -732,7 +733,7 @@ function aiEvalFunc() {
 	}
 	var cmd = iterLoop(1, [])[1];
 	game = gameBack;
-	disableEffects = disableEffectsBack;
+	Effect.disable = disableEffectsBack;
 	if (cmd) {
 		return cmd[0];
 	} else if (self.hand.length == 8) {
@@ -2435,11 +2436,7 @@ function startElementSelect() {
 }
 
 function startMatch() {
-	if (anims.length) {
-		while (anims.length) {
-			anims[0].remove();
-		}
-	}
+	Effect.clear();
 	player2summon = function(cardinst) {
 		var card = cardinst.card;
 		var sprite = new PIXI.Sprite(nopic);
@@ -2456,7 +2453,7 @@ function startMatch() {
 					fgfx.lineStyle(2, 0xffffff);
 				}
 			} else if (obj.canactive()) {
-				fgfx.lineStyle(2, obj.card.element ==  8 ?  0x000000 : 0xffffff );
+				fgfx.lineStyle(2, obj.card.element == 8 ? 0x000000 : 0xffffff );
 				fgfx.drawRect(spr.position.x - spr.width / 2, spr.position.y - spr.height / 2, spr.width, (obj instanceof Weapon || obj instanceof Shield ? 8 : 10));
 			}
 		}
@@ -2514,22 +2511,14 @@ function startMatch() {
 	}
 	var cardwon;
 	animCb = function() {
+		Effect.disable = airefresh.value == "0" && game.turn == game.player2;
 		if (game.phase == PlayPhase && game.turn == game.player2 && game.player2.ai && --aiDelay <= 0) {
-			aiDelay = parseInt(airefresh.value) || 8;
-			aiDelay = Math.max(aiDelay, 5);
-			if (aiDelay < 0) {
-				disableEffects = true;
-			}
+			aiDelay = Math.max(parseInt(airefresh.value) || 8, 5);
 			do {
 				var cmd = game.player2.ai();
 				cmds[cmd[0]](cmd[1]);
 			} while (aiDelay < 0 && game.turn == game.player2);
-			disableEffects = false;
 		}
-		if (game.phase == PlayPhase && game.turn == game.player2 && (parseInt(airefresh.value) || 8) < 3)
-			disableEffects = true;
-		else
-			disableEffects = false;
 		var pos = realStage.interactionManager.mouse.global;
 		maybeSetText(winnername, game.winner ? (game.winner == game.player1 ? "Won " : "Lost ") + game.ply : "");
 		maybeSetButton(game.winner ? null : endturn, endturn);
@@ -3426,9 +3415,7 @@ function animate() {
 	if (animCb) {
 		animCb();
 	}
-	for (var i = anims.length - 1;i >= 0;i--) {
-		anims[i].next();
-	}
+	Effect.next();
 	renderer.render(realStage);
 }
 function requestAnimate() { requestAnimFrame(animate); }

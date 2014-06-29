@@ -1,7 +1,7 @@
 rule cat
  command=cat $in > $out
 rule browserify
- command=browserify -r ./etgutil -r ./MersenneTwister -r ./Actives -o etgify.js
-build js.js:cat etg.client.js classes.js animations.js etg.js ai.targeting.js ai.eval.js
-build etgify.js:browserify etgutil.js Actives.js MersenneTwister.js
+ command=browserify -r ./etgutil -r ./MersenneTwister -r ./Actives -r ./Effect -o etgify.js
+build js.js:cat etg.client.js classes.js etg.js ai.targeting.js ai.eval.js
+build etgify.js:browserify etgutil.js Actives.js MersenneTwister.js Effect.js
 default js.js etgify.js
