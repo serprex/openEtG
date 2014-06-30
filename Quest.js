@@ -1,21 +1,20 @@
-quests = {};
-//Quest info
-quests.necromancer = [];
-quests.necromancer[0] = { deck: "52g 52g 52g 52g 52g 52g 52g 52g 52g 52g 52g 52m 52m 52m 52m 52m 52m 52m 52m 52m 52m 52m 52m 531 531 531 531 52n 52n 52n 52n 717 717 8pk", name: "Skeleton Horde", hp: 80, markpower: 2, wintext: "You defeated the horde, but you should find out where they came from" };
-quests.necromancer[1] = { deck: "5bs 5bs 5bs 5bs 5bs 5bs 5bs 5bs 5bs 5bs 5bs 5bs 5bs 5bu 5bu 5bu 5bu 5c1 5c1 5c1 5c1 5ca 5ca 8pp", name: "Forest Wildlife", hp: 60, wintext: "The creatures seemed very afraid of something, like there was something in the forest that did not belong there." };
-quests.necromancer[2] = { deck: "52g 52g 52g 52g 52g 52g 52g 52g 52g 52g 52g 52g 52g 52m 52m 52m 52m 52m 52m 531 531 531 531 531 52l 52l 52l 52t 52t 52t 52t 52t 535 535 535 535 717 717 717 717 8pk", name: "Evil Necromancer", hp: 120, markpower: 2, wintext: "You defeated the evil necromancer and stopped his undead from spreading through the land!" };
+//Quest data
+exports.necromancer = {};
+exports.necromancer[0] = { deck: "52g 52g 52g 52g 52g 52g 52g 52g 52g 52g 52g 52m 52m 52m 52m 52m 52m 52m 52m 52m 52m 52m 52m 531 531 531 531 52n 52n 52n 52n 717 717 8pk", name: "Skeleton Horde", hp: 80, markpower: 2, wintext: "You defeated the horde, but you should find out where they came from" };
+exports.necromancer[1] = { deck: "5bs 5bs 5bs 5bs 5bs 5bs 5bs 5bs 5bs 5bs 5bs 5bs 5bs 5bu 5bu 5bu 5bu 5c1 5c1 5c1 5c1 5ca 5ca 8pp", name: "Forest Wildlife", hp: 60, wintext: "The creatures seemed very afraid of something, like there was something in the forest that did not belong there." };
+exports.necromancer[2] = { deck: "52g 52g 52g 52g 52g 52g 52g 52g 52g 52g 52g 52g 52g 52m 52m 52m 52m 52m 52m 531 531 531 531 531 52l 52l 52l 52t 52t 52t 52t 52t 535 535 535 535 717 717 717 717 8pk", name: "Evil Necromancer", hp: 120, markpower: 2, wintext: "You defeated the evil necromancer and stopped his undead from spreading through the land!" };
 
-quests.spirit = [];
-quests.spirit[0] = {
+exports.spirit = {};
+exports.spirit[0] = {
 	deck: "606 606 606 606 606 606 606 606 606 606 606 606 5um 5um 5um 5um 5us 5us 5us 5us 5v3 5v3 5v3 5v3 5uu 5uu 5v2 5v2 5va 5va 8pi", name: "Evil Spirit", hp: 150, wintext: "You have defeated the evil spirit and stopped its dark influence from spreading through the land!\n\
 			... But a dark energy is still troubling this region... \n\
 			You sense a cold, chill air coming from a portal looming darkly at the back of the cave."};
-quests.spirit[1] = {
+exports.spirit[1] = {
 	deck: "50u 50u 50u 50u 50u 50u 50u 50u 50u 50u 50u 50u 50u 50u 50u 50u 50u 50u 4vi 4vi 4vi 4vi 4vh 4vh 4vh 4vl 501 4vn 4vn 5ur 5uq 5uq 5ut 5ut 5ut 5up 5up 5up 5up 5v2 8pt", name: "Portal Guardian", hp: 175, wintext: "The portal guardian lies vanquished, but despite your best efforts you cannot close the portal from this side.\n\
 			Examining the guardian's remains you find an ancient tome which describes the portal before you and the lands beyond\n\
 			The incubus key lies in a large fortress at the center of the realm. You will have to venture forth."
 };
-quests.spirit[2] = {
+exports.spirit[2] = {
 	deck: "4vq 4vq 4vq 4vq 4vk 4vk 4vk 4vv 4vv 4vo 542 542 542 542 542 542 542 542 542 542 52v 52v 52v 52v 52k 52k 52n 52n 52n 530 530 534 8pj", name: "Grim Maiden", hp: 175, wintext: "The maiden's swarm of skeletal minions seems endless but they are weak and fall easily.\n\
 			Her pet cats and vultures tear viciously at your allies, but you finally manage to push past them.\n\
 			The Grim Maiden is a truly powerful foe. Her magic wreaking havoc upon your allies.\n\
@@ -23,7 +22,7 @@ quests.spirit[2] = {
 			You can hear her eerie voice echoing off of the wind, growing faint and distant.\n\
 			'Turn back foolish mortal. This road will only lead to your doom. My sisters will not be so forgiving!'"
 };
-quests.spirit[3] = {
+exports.spirit[3] = {
 	deck: "5og 5og 5on 5on 5on 5on 5on 5on 5ot 5ot 5ot 5ot 5ot 5ot 6rb 6rb 6rb 6rb 6rb 6rb 6rb 6rb 6rb 6rb 7n6 7n6 7n6 7n6 7n6 7n6 8po", name: "Swamp Gas", wintext: "You escape the deadly explosions, just barely... A massive storm is approaching. You will need shelter.\n\
 			A nearby abandoned mansion may be your only option. Warily you open the door. It creaks forebodingly.\n\
 			You are greated by dank and musty air, but it seems otherwise empty. You sit and wait out the storm.\n\
@@ -33,7 +32,7 @@ quests.spirit[3] = {
 			The shadows on the wall begin to move of their own accord. And all the doors slam shut with conviction.\n\
 			You turn to face your assailant, apparently a sister of the maiden you fell earlier."
 };
-quests.spirit[4] = {
+exports.spirit[4] = {
 	deck: "606 606 606 606 606 606 606 606 606 606 606 5ur 5us 5us 5up 5up 5up 5uu 5uu 5v2 5v2 5vb 5vb 5vb 5uo 5uv 5uv 5v8 5ul 5ul 8pi", name: "Spirit of the Dark Maiden", morph: {
 		from: "4t8 6ro 4vd 6tt 4ve 6tu 4vf 6tv 4vh 6u1 4vm 6u6 4vq 6ua 4vr 6ub 4vs 6uc 4vu 6ue 502 6ui 500 6ug 52h 711 " +
 									 "52i 712 52j 713 52k 714 52m 716 52t 71d 52u 71e 534 71k 535 71l 55l 745 55m 746 55n 747 55o 748 55r 74b 55u " +
@@ -70,17 +69,16 @@ quests.spirit[4] = {
 						You hope it will be gone by the time you get there... but given your luck so far, you don't think it will.\n\
 						Storm or not, you didn't come this far just to turn back, so you continue your treck down the path."};
 
-quests.bombmaker = {};
-quests.bombmaker[0] = { deck: "5t2 5t2 5t2 5t2 5t2 5t2 5t2 5t2 5t2 5t2 5t2 5t2 5t2 5t2 5t2 5s5 5s5 5s5 5s5 5s5 5s5 622 622 622 622 80d 80d 80d 80d 80d 80d 8pu", name: "Bomb Maker 1", autonext: true };
-quests.bombmaker[1] = { deck: "5rg 5rg 5rg 5rg 5rg 5rg 5rg 5rg 5rg 5rg 5rg 5rg 5rg 5rg 5rg 5rk 5rk 5rk 5rk 5ro 5ro 5ro 5ru 5ru 5ru 5ru 5ru 5ru 5v1 5v1 5v1 5v1 5v1 5v1 7ql 7ql 7ql 7ql 7ql 7ql 8pt", name: "Bomb Maker 2", autonext: true };
-quests.bombmaker[2] = { deck: "5f4 5f4 5f4 5f6 5f6 5f6 5f6 5f6 5f6 5f5 5f5 5f8 5f8 5oc 5oc 5oc 5oc 5oc 5oc 5oc 5oc 5oc 5oc 5oc 5oc 5oc 5oc 5om 5om 5om 5om 5om 5om 5p0 5p0 8po", name: "Bomb Maker 3", doubledeck: true, markpower: 3, drawpower: 2, cardreward: ["5om", "5om", "5om", "5om", "5s5", "5s5", "5s5", "7ql", "7ql"], wintext: "Congratulations! Here, take some of my bombs as the reward!" };
+exports.bombmaker = {};
+exports.bombmaker[0] = { deck: "5t2 5t2 5t2 5t2 5t2 5t2 5t2 5t2 5t2 5t2 5t2 5t2 5t2 5t2 5t2 5s5 5s5 5s5 5s5 5s5 5s5 622 622 622 622 80d 80d 80d 80d 80d 80d 8pu", name: "Bomb Maker 1", autonext: true };
+exports.bombmaker[1] = { deck: "5rg 5rg 5rg 5rg 5rg 5rg 5rg 5rg 5rg 5rg 5rg 5rg 5rg 5rg 5rg 5rk 5rk 5rk 5rk 5ro 5ro 5ro 5ru 5ru 5ru 5ru 5ru 5ru 5v1 5v1 5v1 5v1 5v1 5v1 7ql 7ql 7ql 7ql 7ql 7ql 8pt", name: "Bomb Maker 2", autonext: true };
+exports.bombmaker[2] = { deck: "5f4 5f4 5f4 5f6 5f6 5f6 5f6 5f6 5f6 5f5 5f5 5f8 5f8 5oc 5oc 5oc 5oc 5oc 5oc 5oc 5oc 5oc 5oc 5oc 5oc 5oc 5oc 5om 5om 5om 5om 5om 5om 5p0 5p0 8po", name: "Bomb Maker 3", doubledeck: true, markpower: 3, drawpower: 2, cardreward: ["5om", "5om", "5om", "5om", "5s5", "5s5", "5s5", "7ql", "7ql"], wintext: "Congratulations! Here, take some of my bombs as the reward!" };
 
-quests.blacksummoner = {};
-quests.blacksummoner[0] = { deck: "7t5 7t5 7t5 7t5 7t5 7t5 7t5 7t5 7t5 7t5 7t5 7t5 7t5 7t5 7t5 8pt", name: "The Black Summoner", markpower: 12, cardreward: ["7t5", "7t5"], wintext: "You defeat the Dark Summoner that controlled the dragons. The dragons fly away, but two of them stays, looking at you.\nYou decide to let them join you!" }
+exports.blacksummoner = {};
+exports.blacksummoner[0] = { deck: "7t5 7t5 7t5 7t5 7t5 7t5 7t5 7t5 7t5 7t5 7t5 7t5 7t5 7t5 7t5 8pt", name: "The Black Summoner", markpower: 12, cardreward: ["7t5", "7t5"], wintext: "You defeat the Dark Summoner that controlled the dragons. The dragons fly away, but two of them stays, looking at you.\nYou decide to let them join you!" }
 //Menu info
-questInfo = {};
-questInfo.necromancer = { pos: [[200, 200], [200, 250], [225, 300]], text: ["A horde of skeletons have been seen nearby, perhaps you should go investigate?", "They seemed to come from the forest, so you go inside.", "Deep inside the forest you find the necromancer responsible for filling the lands with undead!"] };
-questInfo.spirit = { pos: [[275, 350], [325, 375], [500, 200], [500, 250], [525, 275]], text:["You pursue the energy trail of the spirit to a dark cavern.\n\At first you think it has eluded you, but as you turn to leave, its dark shadowy form rises in front of you",
+exports.necromancer.info = { pos: [[200, 200], [200, 250], [225, 300]], text: ["A horde of skeletons have been seen nearby, perhaps you should go investigate?", "They seemed to come from the forest, so you go inside.", "Deep inside the forest you find the necromancer responsible for filling the lands with undead!"] };
+exports.spirit.info = { pos: [[275, 350], [325, 375], [500, 200], [500, 250], [525, 275]], text:["You pursue the energy trail of the spirit to a dark cavern.\n\At first you think it has eluded you, but as you turn to leave, its dark shadowy form rises in front of you",
 	"You approach the portal and a large Elemental steps out of the shadows, purple energy swirling about it.\n\
 							'Only the worthy may pass'...You state that your only intention is to destroy the portal not pass through it.\n\
 							'only the incubus key can close this portal.' The guardian glowers at you darkly.\n\
@@ -96,6 +94,5 @@ questInfo.spirit = { pos: [[275, 350], [325, 375], [500, 200], [500, 250], [525,
 							Your allies come to your aid but their forms have all been twisted. The dark lady laughs mischeviously.\n\
 							'You must think yourself dreaming... Well this is the nightmare realm, and I am the one in control.\n\
 							I think I will toy with you first... before I swallow your soul.' The shadows lunge toward you in a vicious attack."]};
-questInfo.bombmaker = {pos: [[600,400]], text:["A bomb maker have set up shop nearby. He have put up a sign promising a reward if you can beat him\n and his bombs three times in a row."]}
-questInfo.blacksummoner = {pos:[[500,420]], text:["A swarm of dragons can be seen nearby. Maybe you could manage to tame one of them?"]}
-
+exports.bombmaker.info = {pos: [[600,400]], text:["A bomb maker have set up shop nearby. He have put up a sign promising a reward if you can beat him\n and his bombs three times in a row."]}
+exports.blacksummoner.info = {pos:[[500,420]], text:["A swarm of dragons can be seen nearby. Maybe you could manage to tame one of them?"]}

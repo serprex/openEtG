@@ -9,6 +9,7 @@ var etg = require("./etgutil");
 var MersenneTwister = require("./MersenneTwister");
 var Actives = require("./Actives");
 var Effect = require("./Effect");
+var Quest = require("./Quest");
 var myTurn = false;
 var cardChosen = false;
 loadcards(function(cards, cardcodes, targeting) {
@@ -1020,7 +1021,7 @@ function mkMage() {
 	game.level = 2;
 }
 function mkQuestAi(questname, stage) {
-	var quest = quests[questname][stage];
+	var quest = Quest[questname][stage];
 	if (!quest)
 		return;
 	var deck = quest.deck.split(" ");
@@ -1684,10 +1685,10 @@ function startQuestWindow() {
 	}
 	for (key in user.quest)
 	{
-		if ((user.quest[key] || user.quest[key] == 0) && quests[key]) {
+		if ((user.quest[key] || user.quest[key] == 0) && Quest[key]) {
 			for (var i = 0;i <= user.quest[key];i++) {
-				if (questInfo[key].pos[i]) {
-					var button = makeQuestButton(key, i, questInfo[key].text[i], questInfo[key].pos[i]);
+				if (Quest[key].info.pos[i]) {
+					var button = makeQuestButton(key, i, Quest[key].info.text[i], Quest[key].info.pos[i]);
 					questui.addChild(button);
 				}
 			}
