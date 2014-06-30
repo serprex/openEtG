@@ -433,7 +433,7 @@ sskin:function(c,t){
 	return c.owner.hp < 30 || c.owner.quanta[Earth] > 80;
 },
 steal:function(c,t){
-	return t.card.cost;
+	return c.owner != t.owner && t.card.cost;
 },
 steam:function(c,t){
 	return true;

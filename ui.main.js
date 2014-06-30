@@ -2436,7 +2436,6 @@ function startElementSelect() {
 }
 
 function startMatch() {
-	Effect.clear();
 	player2summon = function(cardinst) {
 		var card = cardinst.card;
 		var sprite = new PIXI.Sprite(nopic);
@@ -2771,9 +2770,9 @@ function startMatch() {
 	}
 	gameui = new PIXI.DisplayObjectContainer();
 	gameui.interactive = true;
-	var cloakgfx = new PIXI.Graphics();
 	var bggame = new PIXI.Sprite(backgrounds[4]);
 	gameui.addChild(bggame);
+	var cloakgfx = new PIXI.Graphics();
 	cloakgfx.beginFill(0);
 	cloakgfx.drawRect(130, 20, 660, 280);
 	cloakgfx.endFill();
@@ -3157,6 +3156,9 @@ function startMatch() {
 	gameui.addChild(infobox);
 	var fgfx = new PIXI.Graphics();
 	gameui.addChild(fgfx);
+	var anims = new PIXI.DisplayObjectContainer();
+	gameui.addChild(anims);
+	Effect.register(anims);
 	var cardart = new PIXI.Sprite(nopic);
 	cardart.position.set(600, 300);
 	gameui.addChild(cardart);
@@ -3214,6 +3216,7 @@ var foeplays = [];
 var tximgcache = [];
 
 function getTextImage(text, font, color, iconsize) {
+	if (!text) return nopic;
 	if (color === undefined) color = "black";
 	if (!(font in tximgcache)) {
 		tximgcache[font] = {};

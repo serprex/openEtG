@@ -186,7 +186,7 @@ function evalGameState(game) {
 		tempering:3,
 		throwrock: 2,
 		tick:function(c){
-			return c instanceof CardInstance ? 4 : (7 - c.truehp());
+			return c instanceof CardInstance ? 3 : (6 - c.truehp()*1.5);
 		},
 		unburrow:0,
 		upkeep:-.5,
@@ -287,7 +287,7 @@ function evalGameState(game) {
 			var ttatk;
 			if (c instanceof Weapon || isCreature) {
 				ttatk = truetrueatk(c);
-				score += ttatk*(delaymix?1-Math.min(delaymix/10, .5):1);
+				score += ttatk*(delaymix?1-Math.min(delaymix/5, .6):1);
 				if (c instanceof Weapon) {
 					score += 3;
 				}
