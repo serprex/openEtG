@@ -3,10 +3,13 @@ exports.disable = false;
 exports.register = function(doc){
 	anims = doc;
 }
-exports.next = function(){
+exports.next = function(p2cloaked){
 	if (anims){
 		for (var i = anims.children.length - 1;i >= 0;i--) {
-			anims.children[i].next();
+			var child = anims.children[i];
+			if ((p2cloaked && new PIXI.Rectangle(130, 20, 660, 280).contains(child.position.x, child.position.y)) || child.next()){
+				anims.removeChild(child);
+			}
 		}
 	}
 }
@@ -29,21 +32,19 @@ Death.prototype = Object.create(PIXI.Graphics.prototype);
 Text.prototype = Object.create(PIXI.Sprite.prototype);
 Death.prototype.next = function(){
 	if (++this.step==10){
-		anims.removeChild(this);
-	}else{
-		this.clear();
-		this.beginFill(0, 1-this.step/10);
-		this.drawRect(-30, -30, 60, 60);
-		this.endFill();
+		return true;
 	}
+	this.clear();
+	this.beginFill(0, 1-this.step/10);
+	this.drawRect(-30, -30, 60, 60);
+	this.endFill();
 }
 Text.prototype.next = function(){
 	if (++this.step==15){
-		anims.removeChild(this);
-	}else{
-		this.position.y -= 3;
-		this.alpha = 1-((1<<this.step)/225);
+		return true;
 	}
+	this.position.y -= 3;
+	this.alpha = 1-((1<<this.step)/225);
 }
 exports.Death = Death;
 exports.Text = Text;

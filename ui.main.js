@@ -2762,6 +2762,7 @@ function startMatch() {
 			maybeSetText(decktext[j], game.players[j].deck.length + "cards");
 			maybeSetText(damagetext[j], game.players[j].foe.expectedDamage ? "Next HP-loss:" + game.players[j].foe.expectedDamage : "");
 		}
+		Effect.next(cloakgfx.visible);
 	}
 	if (user) {
 		userEmit("addloss", { pvp: !game.player2.ai });
@@ -3418,7 +3419,6 @@ function animate() {
 	if (animCb) {
 		animCb();
 	}
-	Effect.next();
 	renderer.render(realStage);
 }
 function requestAnimate() { requestAnimFrame(animate); }
