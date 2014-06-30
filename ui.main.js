@@ -2438,11 +2438,10 @@ function startElementSelect() {
 
 function startMatch() {
 	player2summon = function(cardinst) {
-		var card = cardinst.card;
 		var sprite = new PIXI.Sprite(nopic);
-		sprite.position.set((foeplays.length % 9) * 100, Math.floor(foeplays.length / 9) * 20);
-		gameui.addChild(sprite);
-		foeplays.push([card, sprite]);
+		sprite.position.set((foeplays.children.length % 9) * 100, Math.floor(foeplays.children.length / 9) * 20);
+		sprite.card = cardinst.card;
+		foeplays.addChild(sprite);
 	}
 	function drawBorder(obj, spr) {
 		if (obj) {
@@ -2519,16 +2518,16 @@ function startMatch() {
 				cmds[cmd[0]](cmd[1]);
 			} while (aiDelay < 0 && game.turn == game.player2);
 		}
-		var pos = realStage.interactionManager.mouse.global;
+		var pos = realStage.getMousePosition();
 		maybeSetText(winnername, game.winner ? (game.winner == game.player1 ? "Won " : "Lost ") + game.ply : "");
 		maybeSetButton(game.winner ? null : endturn, endturn);
 		if (!game.winner || !user) {
 			var cardartcode;
-			setInfo();
-			for (var i = 0;i < foeplays.length;i++) {
-				if (hitTest(foeplays[i][1], pos)) {
-					cardartcode = foeplays[i][0].code;
-					setInfo(foeplays[i][0]);
+			infobox.setTexture(nopic);
+			for (var i = 0;i < foeplays.children.length;i++) {
+				var foeplay = foeplays.children[i];
+				if (hitTest(foeplay, pos)) {
+					cardartcode = foeplay.card.code;
 				}
 			}
 			for (var j = 0;j < 2;j++) {
@@ -2537,7 +2536,6 @@ function startMatch() {
 					for (var i = 0;i < pl.hand.length;i++) {
 						if (hitTest(handsprite[j][i], pos)) {
 							cardartcode = pl.hand[i].card.code;
-							setInfo(pl.hand[i].card);
 						}
 					}
 				}
@@ -2621,8 +2619,8 @@ function startMatch() {
 			maybeSetButton(cancelButton, game.turn == game.player1 ? (game.phase != PlayPhase ? mulligan : (targetingMode || discarding) ? cancel : null) : null);
 		}
 		maybeSetText(turntell, discarding ? "Discard" : targetingMode ? targetingText : game.turn == game.player1 ? "Your Turn" : "Their Turn");
-		for (var i = 0;i < foeplays.length;i++) {
-			maybeSetTexture(foeplays[i][1], getCardImage(foeplays[i][0].code));
+		for (var i = 0;i < foeplays.children.length;i++) {
+			maybeSetTexture(foeplays.children[i], getCardImage(foeplays.children[i].card.code));
 		}
 		cloakgfx.visible = game.player2.isCloaked();
 		fgfx.clear();
@@ -2694,11 +2692,9 @@ function startMatch() {
 			for (var i = 0;i < 23;i++) {
 				var cr = game.players[j].creatures[i];
 				if (cr && !(j == 1 && cloakgfx.visible)) {
-
 					creasprite[j][i].setTexture(getCreatureImage(cr.card));
 					creasprite[j][i].visible = true;
 					var child = creasprite[j][i].getChildAt(0);
-					child.visible = true;
 					child.setTexture(getTextImage(cr.trueatk() + "|" + cr.truehp(), 10, cr.card.upped ? "black" : "white"));
 					var child2 = creasprite[j][i].getChildAt(1);
 					var activetext = cr.active.cast ? casttext(cr.cast, cr.castele) + cr.active.cast.activename : (cr.active.hit ? cr.active.hit.activename : "");
@@ -2713,7 +2709,6 @@ function startMatch() {
 					permsprite[j][i].visible = true;
 					permsprite[j][i].alpha = pr.status.immaterial ? .7 : 1;
 					var child = permsprite[j][i].getChildAt(0);
-					child.visible = true;
 					if (pr instanceof Pillar) {
 						child.setTexture(getTextImage("1:" + (pr.active.auto == Actives.pend && pr.pendstate ? pr.owner.mark : pr.card.element) + " x" + pr.status.charges, 10, pr.card.upped ? "black" : "white"),0.8);
 					}
@@ -2796,7 +2791,6 @@ function startMatch() {
 	gameui.addChild(confirm);
 	confirm.visible = cancel.visible = endturn.visible = false;
 	var turntell = new PIXI.Text("", { font: "16px Dosis" });
-	var infotext = new PIXI.Sprite(nopic);
 	var foename = new PIXI.Text(game.foename || "Unknown Opponent", { font: "bold 18px Dosis", align: "center" });
 	foename.position.set(5, 75);
 	gameui.addChild(foename);
@@ -2815,12 +2809,6 @@ function startMatch() {
 					}
 				}
 			}
-			for (var i = 0;i < foeplays.length;i++) {
-				if (foeplays[i][1].parent) {
-					foeplays[i][1].parent.removeChild(foeplays[i][1]);
-				}
-			}
-			foeplays.length = 0;
 			if (user && game.arena) {
 				userEmit("modarena", { aname: game.arena, won: game.winner == game.player2 });
 				delete game.arena;
@@ -2856,12 +2844,7 @@ function startMatch() {
 				}
 				game.player1.endturn(discard);
 				targetingMode = undefined;
-				for (var i = 0;i < foeplays.length;i++) {
-					if (foeplays[i][1].parent) {
-						foeplays[i][1].parent.removeChild(foeplays[i][1]);
-					}
-				}
-				foeplays.length = 0;
+				foeplays.removeChildren();
 			}
 		}
 	}
@@ -2901,52 +2884,41 @@ function startMatch() {
 		if (!game.player2.ai) {
 			socket.emit("foeleft");
 		}
-		foeplays.length = 0;
 		startMenu();
 	}
 
 	turntell.position.set(800, 570);
 	gameui.addChild(turntell);
-	infotext.position.set(100, 584);
-	gameui.addChild(infotext);
 	function setInfo(obj) {
-		if (obj && !(obj.owner == game.player2 && cloakgfx.visible)) {
-			infotext.setTexture(getTextImage(obj.info(), 16));
-			if (obj.card) {
-				setInfoBox(obj);
+		if (obj.owner != game.player2 || !cloakgfx.visible || !obj.card || obj.card.isOf(Cards.Cloak)) {
+			var rend = new PIXI.RenderTexture((obj instanceof Weapon || obj instanceof Shield ? 80 : 64)+12, 200);
+			var graphics = new PIXI.Graphics();
+			var words = obj.info().split(" ");
+			var x = 2, y = 2;
+			var template = new PIXI.Graphics();
+			for (var i = 0;i < words.length;i++) {
+				var wordgfx = new PIXI.Sprite(getTextImage(words[i], 10,"white"));
+				if (x + wordgfx.width > rend.width - 2) {
+					x = 2;
+					y += 12;
+				}
+				wordgfx.position.set(x, y);
+				x += wordgfx.width + 3;
+				template.addChild(wordgfx);
 			}
-		}
-		else {
-			infotext.setTexture(nopic);
+			graphics.beginFill("black", 0.7);
+			graphics.drawRect(0, 0, rend.width, y+12);
+			graphics.endFill();
+			graphics.addChild(template);
+			rend.render(graphics);
+			infobox.setTexture(rend);
+			infobox.anchor.set(0.5, 0);
+			var mousePosition = realStage.getMousePosition();
+			infobox.position.set(mousePosition.x, mousePosition.y-(y+10));
+			infobox.visible = true;
+		} else {
 			infobox.setTexture(nopic);
 		}
-	}
-	function setInfoBox(obj) {
-		var rend = new PIXI.RenderTexture((obj instanceof Weapon || obj instanceof Shield ? 80 : 64)+12, 200);
-		var graphics = new PIXI.Graphics();
-		var words = obj.info().split(" ");
-		var x = 2, y = 2;
-		var template = new PIXI.Graphics();
-		for (var i = 0;i < words.length;i++) {
-			var wordgfx = new PIXI.Sprite(getTextImage(words[i], 10,"white"));
-			if (x + wordgfx.width > rend.width - 2) {
-				x = 2;
-				y += 12;
-			}
-			wordgfx.position.set(x, y);
-			x += wordgfx.width + 3;
-			template.addChild(wordgfx);
-		}
-		graphics.beginFill("black", 0.7);
-		graphics.drawRect(0, 0, rend.width, y+12);
-		graphics.endFill();
-		graphics.addChild(template);
-		rend.render(graphics);
-		infobox.setTexture(rend);
-		infobox.anchor.set(0.5, 0);
-		var mousePosition = realStage.getMousePosition();
-		infobox.position.set(mousePosition.x, mousePosition.y-(y+10));
-		infobox.visible = true;
 	}
 	var handsprite = [new Array(8), new Array(8)];
 	var creasprite = [new Array(23), new Array(23)];
@@ -3154,6 +3126,8 @@ function startMatch() {
 		gameui.addChild(decktext[j]);
 		gameui.addChild(damagetext[j]);
 	}
+	var foeplays = new PIXI.DisplayObjectContainer();
+	gameui.addChild(foeplays);
 	var infobox = new PIXI.Sprite(nopic);
 	gameui.addChild(infobox);
 	var fgfx = new PIXI.Graphics();
@@ -3214,7 +3188,6 @@ function startArenaTop(info) {
 	refreshRenderer();
 }
 
-var foeplays = [];
 var tximgcache = [];
 
 function getTextImage(text, font, color, iconsize) {
