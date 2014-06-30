@@ -8,6 +8,8 @@ var Cards, CardCodes, Targeting, targetingMode, targetingModeCb, targetingText, 
 var etg = require("./etgutil");
 var MersenneTwister = require("./MersenneTwister");
 var Actives = require("./Actives");
+var Effect = require("./Effect");
+var Quest = require("./Quest");
 var myTurn = false;
 var cardChosen = false;
 loadcards(function(cards, cardcodes, targeting) {
@@ -504,7 +506,7 @@ function initTrade(data) {
 	for (var i = 0;i < 30;i++) {
 		var sprite = new PIXI.Sprite(nopic);
 		sprite.position.set(450 + Math.floor(i / 10) * 100, 8 + (i % 10) * 20);
-		(function(_i) {			
+		(function(_i) {
 			sprite.mouseover = function() {
 				cardartcode = player2Cards.length[_i];
 			}
@@ -620,9 +622,9 @@ function getDeck() {
 var aiDelay = 0;
 function aiEvalFunc() {
 	var gameBack = game;
-	var disableEffectsBack = disableEffects;
+	var disableEffectsBack = Effect.disable;
+	Effect.disable = true;
 	game = cloneGame(game);
-	disableEffects = true;
 	var self = game.player2;
 	function mkcommand(cbits, tbits) {
 		return ["cast", cbits | tbits << 9];
@@ -732,7 +734,7 @@ function aiEvalFunc() {
 	}
 	var cmd = iterLoop(1, [])[1];
 	game = gameBack;
-	disableEffects = disableEffectsBack;
+	Effect.disable = disableEffectsBack;
 	if (cmd) {
 		return cmd[0];
 	} else if (self.hand.length == 8) {
@@ -1019,7 +1021,7 @@ function mkMage() {
 	game.level = 2;
 }
 function mkQuestAi(questname, stage) {
-	var quest = quests[questname][stage];
+	var quest = Quest[questname][stage];
 	if (!quest)
 		return;
 	var deck = quest.deck.split(" ");
@@ -1440,7 +1442,7 @@ function startMenu() {
 
 	//Quests button
 	var bquest = makeButton(50, 145, 75, 25, buttons.quests, function() {
-		tinfo.setText("Go on adventure!");
+		tinfo.setText("Go on an adventure!");
 	});
 	bquest.click = startQuestWindow;
 	menuui.addChild(bquest);
@@ -1683,10 +1685,10 @@ function startQuestWindow() {
 	}
 	for (key in user.quest)
 	{
-		if ((user.quest[key] || user.quest[key] == 0) && quests[key]) {
+		if ((user.quest[key] || user.quest[key] == 0) && Quest[key]) {
 			for (var i = 0;i <= user.quest[key];i++) {
-				if (questInfo[key].pos[i]) {
-					var button = makeQuestButton(key, i, questInfo[key].text[i], questInfo[key].pos[i]);
+				if (Quest[key].info.pos[i]) {
+					var button = makeQuestButton(key, i, Quest[key].info.text[i], Quest[key].info.pos[i]);
 					questui.addChild(button);
 				}
 			}
@@ -2435,11 +2437,6 @@ function startElementSelect() {
 }
 
 function startMatch() {
-	if (anims.length) {
-		while (anims.length) {
-			anims[0].remove();
-		}
-	}
 	player2summon = function(cardinst) {
 		var card = cardinst.card;
 		var sprite = new PIXI.Sprite(nopic);
@@ -2456,7 +2453,7 @@ function startMatch() {
 					fgfx.lineStyle(2, 0xffffff);
 				}
 			} else if (obj.canactive()) {
-				fgfx.lineStyle(2, obj.card.element ==  8 ?  0x000000 : 0xffffff );
+				fgfx.lineStyle(2, obj.card.element == 8 ? 0x000000 : 0xffffff );
 				fgfx.drawRect(spr.position.x - spr.width / 2, spr.position.y - spr.height / 2, spr.width, (obj instanceof Weapon || obj instanceof Shield ? 8 : 10));
 			}
 		}
@@ -2514,22 +2511,14 @@ function startMatch() {
 	}
 	var cardwon;
 	animCb = function() {
+		Effect.disable = airefresh.value == "0" && game.turn == game.player2;
 		if (game.phase == PlayPhase && game.turn == game.player2 && game.player2.ai && --aiDelay <= 0) {
-			aiDelay = parseInt(airefresh.value) || 8;
-			aiDelay = Math.max(aiDelay, 5);
-			if (aiDelay < 0) {
-				disableEffects = true;
-			}
+			aiDelay = Math.max(parseInt(airefresh.value) || 8, 5);
 			do {
 				var cmd = game.player2.ai();
 				cmds[cmd[0]](cmd[1]);
 			} while (aiDelay < 0 && game.turn == game.player2);
-			disableEffects = false;
 		}
-		if (game.phase == PlayPhase && game.turn == game.player2 && (parseInt(airefresh.value) || 8) < 3)
-			disableEffects = true;
-		else
-			disableEffects = false;
 		var pos = realStage.interactionManager.mouse.global;
 		maybeSetText(winnername, game.winner ? (game.winner == game.player1 ? "Won " : "Lost ") + game.ply : "");
 		maybeSetButton(game.winner ? null : endturn, endturn);
@@ -2774,6 +2763,7 @@ function startMatch() {
 			maybeSetText(decktext[j], game.players[j].deck.length + "cards");
 			maybeSetText(damagetext[j], game.players[j].foe.expectedDamage ? "Next HP-loss:" + game.players[j].foe.expectedDamage : "");
 		}
+		Effect.next(cloakgfx.visible);
 	}
 	if (user) {
 		userEmit("addloss", { pvp: !game.player2.ai });
@@ -2782,9 +2772,9 @@ function startMatch() {
 	}
 	gameui = new PIXI.DisplayObjectContainer();
 	gameui.interactive = true;
-	var cloakgfx = new PIXI.Graphics();
 	var bggame = new PIXI.Sprite(backgrounds[4]);
 	gameui.addChild(bggame);
+	var cloakgfx = new PIXI.Graphics();
 	cloakgfx.beginFill(0);
 	cloakgfx.drawRect(130, 20, 660, 280);
 	cloakgfx.endFill();
@@ -3168,6 +3158,9 @@ function startMatch() {
 	gameui.addChild(infobox);
 	var fgfx = new PIXI.Graphics();
 	gameui.addChild(fgfx);
+	var anims = new PIXI.DisplayObjectContainer();
+	gameui.addChild(anims);
+	Effect.register(anims);
 	var cardart = new PIXI.Sprite(nopic);
 	cardart.position.set(600, 300);
 	gameui.addChild(cardart);
@@ -3225,6 +3218,7 @@ var foeplays = [];
 var tximgcache = [];
 
 function getTextImage(text, font, color, iconsize) {
+	if (!text) return nopic;
 	if (color === undefined) color = "black";
 	if (!(font in tximgcache)) {
 		tximgcache[font] = {};
@@ -3368,7 +3362,7 @@ socket.on("tradedone", function(data) {
 	}
 	for (var i = 0;i < data.oldcards.length;i++) {
 		user.pool.splice(user.pool.indexOf(data.oldcards[i]), 1);
-	}	
+	}
 	startMenu();
 });
 socket.on("tradecanceled", function(data) {
@@ -3405,11 +3399,7 @@ function maybeSendChat(e) {
 	}
 }
 function randomGuestName() {
-	res = "";
-	for (var i = 0;i < 5;i++) {
-		res += Math.floor(Math.random() * 10);
-	}
-	return res;
+	return (10000 + Math.floor(Math.random() * 89999)) + "";
 }
 function maybeLogin(e) {
 	e.cancelBubble = true;
@@ -3429,9 +3419,6 @@ function animate() {
 	setTimeout(requestAnimate, 40);
 	if (animCb) {
 		animCb();
-	}
-	for (var i = anims.length - 1;i >= 0;i--) {
-		anims[i].next();
 	}
 	renderer.render(realStage);
 }

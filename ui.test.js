@@ -2,8 +2,9 @@
 var Cards, CardCodes, Targeting, targetingMode, targetingModeCb, game, player1, player2, players;
 var MersenneTwister = require("./MersenneTwister");
 var Actives = require("./Actives");
+var Effect = require("./Effect");
 var gameui = {addChild:function(){}};
-disableEffects = true;
+Effect.disable = true;
 function tgtToPos(){
 	return {x:0, y:0};
 }
