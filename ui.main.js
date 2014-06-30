@@ -2754,6 +2754,9 @@ function startMatch() {
 				quantatext[j].getChildAt(i + 12 - 1).setTexture(getIcon(i));
 			}
 			maybeSetText(hptext[j], game.players[j].hp + "/" + game.players[j].maxhp);
+			if (hitTest(hptext[j], pos)){
+				setInfo(game.players[j]);
+			}
 			maybeSetText(poisontext[j], game.players[j].status.poison + (game.players[j].neuro ? "psn!" : "psn"));
 			maybeSetText(decktext[j], game.players[j].deck.length + "cards");
 			maybeSetText(damagetext[j], game.players[j].foe.expectedDamage ? "Next HP-loss:" + game.players[j].foe.expectedDamage : "");
@@ -3105,9 +3108,6 @@ function startMatch() {
 			for (var k = 1;k < 13;k++) {
 				quantatext[j].addChild(child = new PIXI.Sprite(nopic));
 				child.position.set((k & 1) ? 0 : 54, Math.floor((k - 1) / 2) * 32);
-			}
-			hptext[j].mouseover = function() {
-				setInfo(game.players[_j]);
 			}
 			hptext[j].click = function() {
 				if (game.phase != PlayPhase) return;
