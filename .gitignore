@@ -2,8 +2,10 @@ __pycache__/*
 node_modules/*
 googleinfo.txt
 pushserver.sh
-server2.js
 js.js
+etgify.js
 .ninja_log
+.ninja_deps
+dump.rdb
 *.csv
 *.gz

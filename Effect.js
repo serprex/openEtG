@@ -13,20 +13,35 @@ exports.next = function(p2cloaked){
 		}
 	}
 }
+function make(cons){
+	return function(){
+		if (exports.disable || !anims) return;
+		var effect = Object.create(cons.prototype);
+		var effectOverride = cons.apply(effect, arguments);
+		anims.addChild(effectOverride === undefined ? effect : effectOverride);
+	}
+}
+function makemake(){
+	for(var i=0; i<arguments.length; i++){
+		var cons = arguments[i];
+		exports[cons.name] = cons;
+		exports["mk" + cons.name] = make(cons);
+	}
+}
 function Death(pos){
-	if (exports.disable || !anims)return;
 	PIXI.Graphics.call(this);
 	this.step = 0;
 	this.position = pos;
-	anims.addChild(this);
 }
 function Text(text, pos){
-	if (exports.disable || !anims || !pos)return;
+	if (!pos){
+		console.log("Blank position " + text);
+		pos = new PIXI.Point(-99, -99);
+	}
 	PIXI.Sprite.call(this, getTextImage(text, 16));
 	this.step = 0;
 	this.position = pos;
 	this.anchor.x = .5;
-	anims.addChild(this);
 }
 Death.prototype = Object.create(PIXI.Graphics.prototype);
 Text.prototype = Object.create(PIXI.Sprite.prototype);
@@ -46,5 +61,4 @@ Text.prototype.next = function(){
 	this.position.y -= 3;
 	this.alpha = 1-((1<<this.step)/225);
 }
-exports.Death = Death;
-exports.Text = Text;
+makemake(Death, Text);
