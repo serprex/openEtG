@@ -2780,7 +2780,7 @@ function startMatch() {
 	cloakgfx.endFill();
 	gameui.addChild(cloakgfx);
 	var winnername = new PIXI.Text("", { font: "16px Dosis" });
-	winnername.position.set(800, 540);
+	winnername.position.set(800, 500);
 	gameui.addChild(winnername);
 	var endturn = makeButton(800, 540, 75, 18, buttons.endturn);
 	var accepthand = makeButton(800, 540, 75, 18, buttons.accepthand);
