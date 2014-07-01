@@ -2655,7 +2655,7 @@ function startMatch() {
 					child.setTexture(getTextImage(cr.trueatk() + "|" + cr.truehp(), 10, cr.card.upped ? "black" : "white"));
 					var statbg = creasprite[j][i].getChildAt(0);
 					statbg.clear();
-					statbg.beginFill(cr.card.upped ? lighten(elecols(cr.card.element)) : elecols[cr.card.element]);
+					statbg.beginFill(cr.card.upped ? lighten(elecols[cr.card.element]) : elecols[cr.card.element]);
 					statbg.drawRect(child.position.x - 1, child.position.y, child.width + 1, child.height + 1);
 					statbg.endFill();
 					var child2 = creasprite[j][i].getChildAt(2);
