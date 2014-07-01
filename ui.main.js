@@ -142,7 +142,7 @@ var realStage = new PIXI.Stage(0x336699, true);
 renderer = new PIXI.WebGLRenderer(900, 600);
 leftpane.appendChild(renderer.view);
 var mainStage, menuui, gameui;
-var caimgcache = {}, crimgcache = {}, primgcache = {}, artcache = {}, artimagecache = {};
+var caimgcache = {}, crimgcache = {}, artcache = {}, artimagecache = {};
 var elecols = [0xa99683, 0xaa5999, 0x777777, 0x996633, 0x5f4930, 0x50a005, 0xcc6611, 0x205080, 0xa9a9a9, 0x337ddd, 0xccaa22, 0x333333, 0x77bbdd];
 
 function lighten(c) {
@@ -207,30 +207,24 @@ function makeArt(card, art) {
 	rend.render(template);
 	return rend;
 }
+function getArtImage(code, cb){
+	if (artimagecache[code]){
+		return cb(artimagecache[code]);
+	}else {
+		var loader = new PIXI.AssetLoader(["Cards/" + code + ".png"]);
+		loader.onComplete = function() {
+			return cb(artimagecache[code] = PIXI.Texture.fromImage("Cards/" + code + ".png"));
+		}
+		loader.load();
+		return cb(artimagecache[code]);
+	}
+}
 function getArt(code) {
 	if (artcache[code]) return artcache[code];
 	else {
-		var loader = new PIXI.AssetLoader(["Cards/" + code + ".png"]);
-		loader.onComplete = function() {
-			var cardArt = PIXI.Texture.fromImage("Cards/" + code + ".png")
-			artcache[code] = makeArt(CardCodes[code], cardArt);
-			artimagecache[code] = cardArt;
-		}
-		artcache[code] = makeArt(CardCodes[code]);
-		loader.load();
-		return artcache[code];
-	}
-}
-function getArtImage(code){
-	if (artimagecache[code]) return artimagecache[code];
-	else {
-		var loader = new PIXI.AssetLoader(["Cards/" + code + ".png"]);
-		loader.onComplete = function() {
-			artimagecache[code] = PIXI.Texture.fromImage("Cards/" + code + ".png");
-		}
-		artimagecache[code] = null;
-		loader.load();
-		return artimagecache[code];
+		return getArtImage(code, function(art){
+			return artcache[code] = makeArt(CardCodes[code], art);
+		});
 	}
 }
 function getCardImage(code) {
@@ -269,104 +263,72 @@ function getCardImage(code) {
 	}
 }
 //Yes, this code and the namings of the caches are starting to get weird...
-var crimgartcache = {};
 function getCreatureImage(code) {
-	if (crimgcache[code] && crimgartcache[crimgcache[code]]) return crimgcache[code];
+	if (crimgcache[code]) return crimgcache[code];
 	else {
-		var card = CardCodes[code];
-		var rend = new PIXI.RenderTexture(64, 82);
-		var graphics = new PIXI.Graphics();
-		var border = (new PIXI.Sprite(cardBorders[card.element + (card.upped ? 13 : 0)]));
-		border.scale.set(0.5, 0.5);
-		graphics.addChild(border);
-		graphics.beginFill(card ? (card.upped ? lighten(elecols[card.element]) : elecols[card.element]) : elecols[0]);
-		graphics.drawRect(0, 9, 64, 64);
-		graphics.endFill();
-		var art = getArtImage(code);
-		if (art) {
-			art = new PIXI.Sprite(art);
-			art.scale.set(0.5, 0.5);
-			art.position.set(0, 9);
-			graphics.addChild(art);
-		}
-		if (card) {
-			var boxGraphics = new PIXI.Graphics();
-			boxGraphics.beginFill(card ? (card.upped ? lighten(elecols[card.element]) : elecols[card.element]) : elecols[0]);
-			boxGraphics.drawRect(0, 9, 17, 12);
-			boxGraphics.endFill();
-			graphics.addChild(boxGraphics);
-			var text = new PIXI.Text(CardCodes[code].name, { font: "8px Dosis", fill: card.upped ? "black" : "white" });
-			text.anchor.set(0.5, 0.5);
-			text.position.set(33, 77);
-			graphics.addChild(text);
-		}
-		rend.render(graphics);
-		crimgcache[code] = rend;
-		crimgartcache[rend] = art;
-		return rend;
+		return getArtImage(code, function(art){
+			var card = CardCodes[code];
+			var rend = new PIXI.RenderTexture(64, 82);
+			var graphics = new PIXI.Graphics();
+			var border = new PIXI.Sprite(cardBorders[card.element + (card.upped ? 13 : 0)]);
+			border.scale.set(0.5, 0.5);
+			graphics.addChild(border);
+			graphics.beginFill(card ? (card.upped ? lighten(elecols[card.element]) : elecols[card.element]) : elecols[0]);
+			graphics.drawRect(0, 9, 64, 64);
+			graphics.endFill();
+			if (art) {
+				art = new PIXI.Sprite(art);
+				art.scale.set(0.5, 0.5);
+				art.position.set(0, 9);
+				graphics.addChild(art);
+			}
+			if (card) {
+				var boxGraphics = new PIXI.Graphics();
+				boxGraphics.beginFill(card ? (card.upped ? lighten(elecols[card.element]) : elecols[card.element]) : elecols[0]);
+				boxGraphics.drawRect(0, 9, 17, 12);
+				boxGraphics.endFill();
+				graphics.addChild(boxGraphics);
+				var text = new PIXI.Text(CardCodes[code].name, { font: "8px Dosis", fill: card.upped ? "black" : "white" });
+				text.anchor.set(0.5, 0.5);
+				text.position.set(33, 77);
+				graphics.addChild(text);
+			}
+			rend.render(graphics);
+			crimgcache[code] = rend;
+			return rend;
+		});
 	}
 }
-var primgartcache = {};
-function getPermanentImage(code) {
-	if (primgcache[code] && primgartcache[primgcache[code]]) return primgcache[code];
-	else {
-		var card = CardCodes[code];
-		var rend = new PIXI.RenderTexture(64, 82);
-		var graphics = new PIXI.Graphics();
-		var border = (new PIXI.Sprite(cardBorders[card.element + (card.upped ? 13 : 0)]));
-		border.scale.set(0.5, 0.5);
-		graphics.addChild(border);
-		graphics.beginFill(card ? (card.upped ? lighten(elecols[card.element]) : elecols[card.element]) : elecols[0]);
-		graphics.drawRect(0, 9, 64, 64);
-		graphics.endFill();
-		var art = getArtImage(code);
-		if (art) {
-			art = new PIXI.Sprite(art);
-			art.scale.set(0.5, 0.5);
-			art.position.set(0, 9);
-			graphics.addChild(art);
-		}
-		if (card) {
-			var text = new PIXI.Text(CardCodes[code].name, { font: "8px Dosis", fill: card.upped ? "black" : "white" });
-			text.anchor.set(0.5, 0.5);
-			text.position.set(33, 77);
-			graphics.addChild(text);
-		}
-		rend.render(graphics);
-		primgcache[code] = rend;
-		primgartcache[rend] = art;
-		return rend;
-	}
-}
+getPermanentImage = getCreatureImage; // Different name in case a makeover happens
 function getWeaponShieldImage(code) {
-	if (primgcache[code] && primgartcache[primgcache[code]]) return primgcache[code];
+	if (crimgcache[code]) return crimgcache[code];
 	else {
-		var card = CardCodes[code];
-		var rend = new PIXI.RenderTexture(80, 102);
-		var graphics = new PIXI.Graphics();
-		var border = (new PIXI.Sprite(cardBorders[card.element + (card.upped ? 13 : 0)]));
-		border.scale.set(5/8, 5/8);
-		graphics.addChild(border);
-		graphics.beginFill(card ? (card.upped ? lighten(elecols[card.element]) : elecols[card.element]) : elecols[0]);
-		graphics.drawRect(0, 11, 80, 80);
-		graphics.endFill();
-		var art = getArtImage(code);
-		if (art) {
-			art = new PIXI.Sprite(art);
-			art.scale.set(5/8, 5/8);
-			art.position.set(0, 11);
-			graphics.addChild(art);
-		}
-		if (card) {
-			var text = new PIXI.Text(CardCodes[code].name, { font: "10px Dosis", fill: card.upped ? "black" : "white" });
-			text.anchor.set(0.5, 0.5);
-			text.position.set(40, 95);
-			graphics.addChild(text);
-		}
-		rend.render(graphics);
-		primgcache[code] = rend;
-		primgartcache[rend] = art;
-		return rend;
+		return getArtImage(code, function(art){
+			var card = CardCodes[code];
+			var rend = new PIXI.RenderTexture(80, 102);
+			var graphics = new PIXI.Graphics();
+			var border = (new PIXI.Sprite(cardBorders[card.element + (card.upped ? 13 : 0)]));
+			border.scale.set(5/8, 5/8);
+			graphics.addChild(border);
+			graphics.beginFill(card ? (card.upped ? lighten(elecols[card.element]) : elecols[card.element]) : elecols[0]);
+			graphics.drawRect(0, 11, 80, 80);
+			graphics.endFill();
+			if (art) {
+				art = new PIXI.Sprite(art);
+				art.scale.set(5/8, 5/8);
+				art.position.set(0, 11);
+				graphics.addChild(art);
+			}
+			if (card) {
+				var text = new PIXI.Text(CardCodes[code].name, { font: "10px Dosis", fill: card.upped ? "black" : "white" });
+				text.anchor.set(0.5, 0.5);
+				text.position.set(40, 95);
+				graphics.addChild(text);
+			}
+			rend.render(graphics);
+			crimgcache[code] = rend;
+			return rend;
+		});
 	}
 }
 function initTrade(data) {
