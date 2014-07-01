@@ -840,7 +840,7 @@ Weapon.prototype.attack = Creature.prototype.attack = function(stasis, freedomCh
 	this.usedactive = false;
 	var trueatk;
 	if (!(stasis || this.status.frozen || this.status.delayed) && (trueatk = this.trueatk()) != 0){
-		var momentum = this.status.momentum, truedr = 0;
+		var momentum = this.status.momentum;
 		if (!momentum && this.status.burrowed){
 			for (var i=0; i<16; i++){
 				if (this.owner.permanents[i] && this.owner.permanents[i].passives.tunnel){
@@ -871,10 +871,13 @@ Weapon.prototype.attack = Creature.prototype.attack = function(stasis, freedomCh
 			if (target.gpull == gpull && gpull.active.shield){
 				gpull.active.shield(gpull, isCreature?this:this.owner, dmg);
 			}
-		}else if (!target.shield || ((trueatk > (truedr = target.shield.truedr()) && (!target.shield.active.shield || !target.shield.active.shield(target.shield, this, trueatk - truedr))))){
-			var dmg = target.dmg(trueatk - truedr);
-			if (this.active.hit && (!this.status.adrenaline || this.status.adrenaline < 3)){
-				this.active.hit(this, target, dmg);
+		}else{
+			var truedr = target.shield.truedr();
+			if (!target.shield || !target.shield.active.shield || !target.shield.active.shield(target.shield, this, Math.max(trueatk - truedr, 0))){
+				var dmg = target.dmg(Math.max(trueatk - truedr, 0));
+				if (this.active.hit && (!this.status.adrenaline || this.status.adrenaline < 3)){
+					this.active.hit(this, target, dmg);
+				}
 			}
 		}
 	}

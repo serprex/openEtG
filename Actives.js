@@ -234,8 +234,10 @@ deployblobs:function(c,t){
 		c.dmg(2);
 	}
 },
-destroy:function(c,t, dontsalvage){
-	Effect.mkText("Destroy", tgtToPos(t));
+destroy:function(c,t, dontsalvage, donttalk){
+	if (!donttalk){
+		Effect.mkText("Destroy", tgtToPos(t));
+	}
 	if (t.passives.stackable){
 		if(--t.status.charges<=0){
 			t.die();
@@ -351,7 +353,7 @@ endow:function(c,t){
 		else if (typeof t.status[key] == "number")
 			c.status[key] = t.status[key] + (c.status[key] ? c.status[key] : 0);
 	}
- 	if (c.status.adrenaline && c.status.adrenaline > 1)
+ 	if (c.status.adrenaline > 1)
 		c.status.adrenaline = 1;
 	c.active = clone(t.active);
 	c.cast = t.cast;
@@ -816,7 +818,7 @@ nova2:function(c,t){
 nymph:function(c,t){
 	Effect.mkText("Nymph", tgtToPos(t));
 	var e = t.card.element || c.owner.uptoceil(12);
-	Actives.destroy(c, t);
+	Actives.destroy(c, t, false, true);
 	new Creature(CardCodes[NymphList[e*2+(t.card.upped?1:0)]], t.owner).place();
 },
 obsession:function(c,t){
