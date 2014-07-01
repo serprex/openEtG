@@ -345,7 +345,14 @@ enchant:function(c,t){
 endow:function(c,t){
 	Effect.mkText("Endow", tgtToPos(t));
 	c.passives = clone(t.passives);
-	c.status = clone(t.status);
+	for (key in t.status) {
+		if (typeof t.status[key] == "boolean")
+			c.status[key] = c.status[key] || t.status[key]
+		else if (typeof t.status[key] == "number")
+			c.status[key] = t.status[key] + (c.status[key] ? c.status[key] : 0);
+	}
+ 	if (c.status.adrenaline && c.status.adrenaline > 1)
+		c.status.adrenaline = 1;
 	c.active = clone(t.active);
 	c.cast = t.cast;
 	c.castele = t.castele;
@@ -821,7 +828,7 @@ ouija:function(c,t){
 	}
 },
 overdrive:function(c,t){
-	Effect.mkText("2|-1", tgtToPos(c));
+	Effect.mkText("3|-1", tgtToPos(c));
 	c.atk += 3;
 	c.dmg(1, true);
 },
@@ -1201,7 +1208,7 @@ throwrock:function(c,t){
 	var dmg = c.card.upped?4:3;
 	Effect.mkText("-"+dmg, tgtToPos(t));
 	t.spelldmg(dmg);
-	t.owner.deck.splice(c.owner.upto(t.owner.deck.length), 0, c.card);
+	t.owner.deck.splice(c.owner.upto(t.owner.deck.length), 0, Card.ThrowRock.asUpped(c.card.upped));
 },
 tick:function(c,t){
 	c.dmg(c.card.upped?2:1);
