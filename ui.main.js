@@ -283,12 +283,7 @@ function getCreatureImage(code) {
 				graphics.addChild(art);
 			}
 			if (card) {
-				var boxGraphics = new PIXI.Graphics();
-				boxGraphics.beginFill(card ? (card.upped ? lighten(elecols[card.element]) : elecols[card.element]) : elecols[0]);
-				boxGraphics.drawRect(0, 9, 17, 12);
-				boxGraphics.endFill();
-				graphics.addChild(boxGraphics);
-				var text = new PIXI.Text(CardCodes[code].name, { font: "8px Dosis", fill: card.upped ? "black" : "white" });
+				var text = new PIXI.Text(card.name, { font: "8px Dosis", fill: card.upped ? "black" : "white" });
 				text.anchor.set(0.5, 0.5);
 				text.position.set(33, 77);
 				graphics.addChild(text);
@@ -320,7 +315,7 @@ function getWeaponShieldImage(code) {
 				graphics.addChild(art);
 			}
 			if (card) {
-				var text = new PIXI.Text(CardCodes[code].name, { font: "10px Dosis", fill: card.upped ? "black" : "white" });
+				var text = new PIXI.Text(card.name, { font: "10px Dosis", fill: card.upped ? "black" : "white" });
 				text.anchor.set(0.5, 0.5);
 				text.position.set(40, 95);
 				graphics.addChild(text);
@@ -2656,9 +2651,14 @@ function startMatch() {
 				if (cr && !(j == 1 && cloakgfx.visible)) {
 					creasprite[j][i].setTexture(getCreatureImage(cr.card));
 					creasprite[j][i].visible = true;
-					var child = creasprite[j][i].getChildAt(0);
+					var child = creasprite[j][i].getChildAt(1);
 					child.setTexture(getTextImage(cr.trueatk() + "|" + cr.truehp(), 10, cr.card.upped ? "black" : "white"));
-					var child2 = creasprite[j][i].getChildAt(1);
+					var statbg = creasprite[j][i].getChildAt(0);
+					statbg.clear();
+					statbg.beginFill(cr.card.upped ? lighten(elecols(cr.card.element)) : elecols[cr.card.element]);
+					statbg.drawRect(child.position.x - 1, child.position.y, child.width + 1, child.height + 1);
+					statbg.endFill();
+					var child2 = creasprite[j][i].getChildAt(2);
 					var activetext = cr.active.cast ? casttext(cr.cast, cr.castele) + cr.active.cast.activename : (cr.active.hit ? cr.active.hit.activename : "");
 					child2.setTexture(getTextImage(activetext, 8, cr.card.upped ? "black" : "white"), 0.6);
 					drawStatus(cr, creasprite[j][i]);
@@ -2932,10 +2932,12 @@ function startMatch() {
 			}
 			for (var i = 0;i < 23;i++) {
 				creasprite[j][i] = new PIXI.Sprite(nopic);
+				var statbg = new PIXI.Graphics();
 				var stattext = new PIXI.Sprite(nopic);
 				stattext.position.set(-31, -32);
 				var activetext = new PIXI.Sprite(nopic);
 				activetext.position.set(-31, -42);
+				creasprite[j][i].addChild(statbg);
 				creasprite[j][i].addChild(stattext);
 				creasprite[j][i].addChild(activetext);
 				creasprite[j][i].anchor.set(.5, .5);
@@ -3188,7 +3190,7 @@ function getTextImage(text, font, color, iconsize) {
 			doc.addChild(txt);
 		}
 	}
-	var rtex = new PIXI.RenderTexture(x, 16);
+	var rtex = new PIXI.RenderTexture(x, 12);
 	rtex.render(doc);
 	return tximgcache[font][text][color] = rtex;
 }
