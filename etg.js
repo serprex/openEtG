@@ -362,7 +362,7 @@ function expectedDamage(player) {
     }
     if (player.weapon) totalDamage += truetrueatk(player.weapon);
     if (player.foe.status.poison) totalDamage += player.foe.status.poison;
-    return totalDamage * (c.owner.foe.sosa ? -1 : 1);;
+    return totalDamage * (player.foe.sosa ? -1 : 1);
 }
 Player.prototype.endturn = function(discard) {
 	this.game.ply++;
@@ -872,7 +872,7 @@ Weapon.prototype.attack = Creature.prototype.attack = function(stasis, freedomCh
 				gpull.active.shield(gpull, isCreature?this:this.owner, dmg);
 			}
 		}else{
-			var truedr = target.shield.truedr();
+			var truedr = target.shield ? target.shield.truedr() : 0;
 			if (!target.shield || !target.shield.active.shield || !target.shield.active.shield(target.shield, this, Math.max(trueatk - truedr, 0))){
 				var dmg = target.dmg(Math.max(trueatk - truedr, 0));
 				if (this.active.hit && (!this.status.adrenaline || this.status.adrenaline < 3)){

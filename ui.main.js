@@ -2847,7 +2847,8 @@ function startMatch() {
 				}
 				game.player1.endturn(discard);
 				targetingMode = undefined;
-				foeplays.removeChildren();
+				if (foeplays.children.length)
+					foeplays.removeChildren();
 			}
 		}
 	}

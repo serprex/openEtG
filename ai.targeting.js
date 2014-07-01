@@ -153,7 +153,7 @@ deployblobs:function(c,t){
 	return c.truehp() > 2;
 },
 destroy:function(c,t, dontsalvage){
-	return c.owner != t.owner && t.card.cost;
+	return c.owner != t.owner && (!t.status.charges || t.status.charges <= 4) && t.card.cost;
 },
 destroycard:function(c,t){
 	return c.owner != t.owner && !t.owner.sanctuary;
@@ -433,7 +433,7 @@ sskin:function(c,t){
 	return c.owner.hp < 30 || c.owner.quanta[Earth] > 80;
 },
 steal:function(c,t){
-	return c.owner != t.owner && t.card.cost;
+	return c.owner != t.owner && (!t.status.charges || t.status.charges <= 4) && t.card.cost;
 },
 steam:function(c,t){
 	return true;
