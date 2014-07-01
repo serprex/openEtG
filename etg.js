@@ -352,8 +352,8 @@ function expectedDamage(player) {
             c.status.adrenaline = 1;
         }
         // todo SoFr
-        var result = atk * (fshactive == Actives.evade100 ? 0 : fshactive == Actives.evade50 ? .5 : fshactive == Actives.evade40 ? .6 : fshactive == Actives.chaos ? .75 : 1) * (fsh && fsh.passives.reflect && c.status.psion ? 0 : (c.owner.foe.sosa ? -1 : 1));
-        return Math.floor(result);
+        var result = atk * (fshactive == Actives.evade100 ? 0 : fshactive == Actives.evade50 ? .5 : fshactive == Actives.evade40 ? .6 : fshactive == Actives.chaos ? .75 : 1) * (fsh && fsh.passives.reflect && c.status.psion ? 0 : 1);
+        return Math.floor(result)
     }
     totalDamage = 0;
     for (var i = 0; i < 23; i++) {
@@ -362,7 +362,7 @@ function expectedDamage(player) {
     }
     if (player.weapon) totalDamage += truetrueatk(player.weapon);
     if (player.foe.status.poison) totalDamage += player.foe.status.poison;
-    return totalDamage;
+    return totalDamage * (c.owner.foe.sosa ? -1 : 1);;
 }
 Player.prototype.endturn = function(discard) {
 	this.game.ply++;
