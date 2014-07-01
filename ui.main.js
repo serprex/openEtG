@@ -2147,7 +2147,7 @@ function startEditor() {
 		var bdeck3 = makeButton(8, 128, 75, 18, buttons.deck3);
 		var barena = makeButton(8, 152, 75, 18, buttons.arenaai, function() {
 			if (user && user.ocard) {
-				chatArea.value = "Oracle Card: " + CardCodes[user.ocard].name;
+				cardartcode = user.ocard;
 			}
 		});
 		bclear.click = function() {
