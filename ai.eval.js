@@ -44,7 +44,9 @@ function evalGameState(game) {
 		darkness:1,
 		deadalive:2,
 		deja:4,
-		deployblobs:5,
+		deployblobs: function(c) {
+			return 2+(c instanceof CardInstance ? c.card.health : c.truehp());
+		},
 		destroy:8,
 		destroycard:1,
 		devour:function(c){

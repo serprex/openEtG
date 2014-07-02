@@ -754,8 +754,16 @@ function aiFunc() {
 				if (cmd = iterCore(cardinst, cardinst.card.active)) return cmd;
 			}
 			else if (cardinst.card.type == PermanentEnum) {
-				if (!cardinst.card.active || !cardinst.card.active.play || !ActivesEval[cardinst.card.active.play.activename]) return ["cast", tgtToBits(cardinst) ^ 8]
-				if (cmd = iterCore(cardinst, cardinst.card.active.play)) return cmd;
+				if (self.countpermanents() < 16) {
+					if (!cardinst.card.active || !cardinst.card.active.play || !ActivesEval[cardinst.card.active.play.activename]) return ["cast", tgtToBits(cardinst) ^ 8]
+					if (cmd = iterCore(cardinst, cardinst.card.active.play)) return cmd;
+				}
+			}
+			else if (cardinst.card.type == CreatureEnum) {
+				if (self.countcreatures() < 23 && !self.foe.sosa) {
+					if (!cardinst.card.active || !cardinst.card.active.play || !ActivesEval[cardinst.card.active.play.activename]) return ["cast", tgtToBits(cardinst) ^ 8]
+					if (cmd = iterCore(cardinst, cardinst.card.active.play)) return cmd;
+				}
 			}
 			else if (cardinst.card.type == WeaponEnum ? (!self.weapon || self.weapon.card.cost < cardinst.card.cost) :
                 cardinst.card.type == ShieldEnum ? (!self.shield || self.shield.card.cost < cardinst.card.cost || self.shield.passives.additive) : true) {
