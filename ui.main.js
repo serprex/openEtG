@@ -142,7 +142,7 @@ var realStage = new PIXI.Stage(0x336699, true);
 renderer = new PIXI.WebGLRenderer(900, 600);
 leftpane.appendChild(renderer.view);
 var mainStage, menuui, gameui;
-var caimgcache = {}, crimgcache = {}, artcache = {}, artimagecache = {};
+var caimgcache = {}, crimgcache = {}, wsimgcache = {}, artcache = {}, artimagecache = {};
 var elecols = [0xa99683, 0xaa5999, 0x777777, 0x996633, 0x5f4930, 0x50a005, 0xcc6611, 0x205080, 0xa9a9a9, 0x337ddd, 0xccaa22, 0x333333, 0x77bbdd];
 
 function lighten(c) {
@@ -296,7 +296,7 @@ function getCreatureImage(code) {
 }
 getPermanentImage = getCreatureImage; // Different name in case a makeover happens
 function getWeaponShieldImage(code) {
-	if (crimgcache[code]) return crimgcache[code];
+	if (wsimgcache[code]) return wsimgcache[code];
 	else {
 		return getArtImage(code, function(art){
 			var card = CardCodes[code];
@@ -321,7 +321,7 @@ function getWeaponShieldImage(code) {
 				graphics.addChild(text);
 			}
 			rend.render(graphics);
-			crimgcache[code] = rend;
+			wsimgcache[code] = rend;
 			return rend;
 		});
 	}
