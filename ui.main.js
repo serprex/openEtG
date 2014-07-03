@@ -3410,10 +3410,11 @@ function loginClick() {
 					} else if (!user.pool && !user.starter) {
 						startElementSelect();
 					} else {
-					    user.decks = [];
-					    user.decks[1] = etg.decodedeck(user.deck1);
-					    user.decks[2] = etg.decodedeck(user.deck2);
-					    user.decks[3] = etg.decodedeck(user.deck3);
+					    user.decks = [
+							etg.decodedeck(user.deck1),
+							etg.decodedeck(user.deck2),
+							etg.decodedeck(user.deck3),
+						];
 						user.deck = getDeck()
 						deckimport.value = user.deck.join(" ");
 						if (user.pool || user.pool == "") {

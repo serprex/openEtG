@@ -200,7 +200,7 @@ function useruser(servuser){
     return {
         auth: servuser.auth,
         name: servuser.name,
-        deck1: servuser.deck1 || servuser.deck,
+        deck1: servuser.deck1 || servuser.deck || "",
         deck2: servuser.deck2 || "",
         deck3: servuser.deck3 || "",
         selectedDeck: servuser.selectedDeck || 1,
@@ -298,15 +298,7 @@ io.on("connection", function(socket) {
 	    user.gold += data.g;
 	});
 	userEvent(socket, "setdeck", function (data, user) {
-	    switch (data.number) {
-	        case 1: user.deck1 = data.d;
-	            break;
-	        case 2: user.deck2 = data.d;
-	            break;
-	        case 3: user.deck3 = data.d;
-	            break;
-	        default: break;
-	    }
+		user["deck" + data.number] = data.d;
 	    user.selectedDeck = data.number;
 	});
 	userEvent(socket, "setarena", function(data, user){
@@ -356,16 +348,6 @@ io.on("connection", function(socket) {
 	userEvent(socket, "upgrade", function (data, user) {
 	    user.pool = etgutil.addcard(user.pool, data.card, -6);
 	    user.pool = etgutil.addcard(user.pool, data.newcard);
-	});
-	userEvent(socket, "transmute", function(data, user){
-		var rm = etgutil.decodedeck(data.rm), add = etgutil.decodedeck(data.add);
-		for(var i=0; i<rm.length; i++){
-			user.pool = etgutil.addcard(user.pool, rm[i], -1);
-		}
-		for(var i=0; i<add.length; i++){
-			user.pool = etgutil.addcard(user.pool, add[i]);
-		}
-		user.deck = data.add;
 	});
 	userEvent(socket, "codesubmit", function(data, user){
 		db.hget("CodeHash", data.code, function(err, type){
