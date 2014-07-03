@@ -248,8 +248,8 @@ io.on("connection", function(socket) {
 		user.deck2 = "";
 		user.deck3 = "";
 		user.selectedDeck = 1;
-		user.pool = [];
-		user.accountbound = [];
+		user.pool = "";
+		user.accountbound = "";
 		user.freepacks = "3,2,0,0";
 		user.quest = { necromancer: 1 };
 		user.aiwins = 0;
