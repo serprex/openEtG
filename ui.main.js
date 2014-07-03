@@ -142,7 +142,7 @@ var realStage = new PIXI.Stage(0x336699, true);
 renderer = new PIXI.WebGLRenderer(900, 600);
 leftpane.appendChild(renderer.view);
 var mainStage, menuui, gameui;
-var caimgcache = {}, crimgcache = {}, artcache = {}, artimagecache = {};
+var caimgcache = {}, crimgcache = {}, wsimgcache = {}, artcache = {}, artimagecache = {};
 var elecols = [0xa99683, 0xaa5999, 0x777777, 0x996633, 0x5f4930, 0x50a005, 0xcc6611, 0x205080, 0xa9a9a9, 0x337ddd, 0xccaa22, 0x333333, 0x77bbdd];
 
 function lighten(c) {
@@ -296,7 +296,7 @@ function getCreatureImage(code) {
 }
 getPermanentImage = getCreatureImage; // Different name in case a makeover happens
 function getWeaponShieldImage(code) {
-	if (crimgcache[code]) return crimgcache[code];
+	if (wsimgcache[code]) return wsimgcache[code];
 	else {
 		return getArtImage(code, function(art){
 			var card = CardCodes[code];
@@ -321,7 +321,7 @@ function getWeaponShieldImage(code) {
 				graphics.addChild(text);
 			}
 			rend.render(graphics);
-			crimgcache[code] = rend;
+			wsimgcache[code] = rend;
 			return rend;
 		});
 	}
@@ -754,8 +754,16 @@ function aiFunc() {
 				if (cmd = iterCore(cardinst, cardinst.card.active)) return cmd;
 			}
 			else if (cardinst.card.type == PermanentEnum) {
-				if (!cardinst.card.active || !cardinst.card.active.play || !ActivesEval[cardinst.card.active.play.activename]) return ["cast", tgtToBits(cardinst) ^ 8]
-				if (cmd = iterCore(cardinst, cardinst.card.active.play)) return cmd;
+				if (self.countpermanents() < 16) {
+					if (!cardinst.card.active || !cardinst.card.active.play || !ActivesEval[cardinst.card.active.play.activename]) return ["cast", tgtToBits(cardinst) ^ 8]
+					if (cmd = iterCore(cardinst, cardinst.card.active.play)) return cmd;
+				}
+			}
+			else if (cardinst.card.type == CreatureEnum) {
+				if (self.countcreatures() < 23 && !self.foe.sosa) {
+					if (!cardinst.card.active || !cardinst.card.active.play || !ActivesEval[cardinst.card.active.play.activename]) return ["cast", tgtToBits(cardinst) ^ 8]
+					if (cmd = iterCore(cardinst, cardinst.card.active.play)) return cmd;
+				}
 			}
 			else if (cardinst.card.type == WeaponEnum ? (!self.weapon || self.weapon.card.cost < cardinst.card.cost) :
                 cardinst.card.type == ShieldEnum ? (!self.shield || self.shield.card.cost < cardinst.card.cost || self.shield.passives.additive) : true) {
@@ -2147,7 +2155,7 @@ function startEditor() {
 		var bdeck3 = makeButton(8, 128, 75, 18, buttons.deck3);
 		var barena = makeButton(8, 152, 75, 18, buttons.arenaai, function() {
 			if (user && user.ocard) {
-				chatArea.value = "Oracle Card: " + CardCodes[user.ocard].name;
+				cardartcode = user.ocard;
 			}
 		});
 		bclear.click = function() {

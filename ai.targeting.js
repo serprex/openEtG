@@ -366,7 +366,7 @@ precognition:function(c,t){
 	return true;
 },
 purify:function(c,t){
-	return c.owner == t.owner && t.status.poison>0;
+	return c.owner == t.owner ? t.status.poison>0 : t.sosa; 
 },
 queen:function(c,t){
 	return true;

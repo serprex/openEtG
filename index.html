@@ -1,4 +1,4 @@
-<html>
+<!DOCTYPE html>
 <head>
 	<title>openEtG</title>
 	<link href="http://fonts.googleapis.com/css?family=Dosis" rel="stylesheet" type="text/css">
@@ -34,10 +34,9 @@
 	<script src="pixi.dev.js"></script>
 	<script src="etgify.js"></script>
 	<script src="js.js"></script>
-	<script src="ui.main.js" defer></script>
 </head>
 <body>
-	<div id="leftpane"/>
+	<div id="leftpane"></div>
 	<div id="rightpane">
         <a href="artcredit.htm" target="_blank">Art credits</a>&emsp;&emsp;<a href="http://github.com/Fippe94/openEtG" target="_blank">Git repo</a>&emsp;&emsp;<a href="http://oetg.boards.net/" target="_blank">Forum</a>&emsp;&emsp;<a href="http://elementscommunity.org/forum/general-discussion/openetg" target="_blank">Forum topic</a><br><br>
 		<input id="username" type="text" placeholder="Username" onkeydown="maybeLogin(event)" tabindex=1 />
@@ -59,5 +58,6 @@
 		<br><input id="chatArea" type="text" style="width:1200px" readonly />
 		<br><input id="chatinput" type="text" placeholder="Chat" style="width:1200px" onkeydown="maybeSendChat(event)" />
 	</div>
+    <script src="ui.main.js"></script>
 </body>
 </html>
