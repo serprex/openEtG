@@ -4,30 +4,30 @@
 	<link href="http://fonts.googleapis.com/css?family=Dosis" rel="stylesheet" type="text/css">
 	<style>
 		body {
-			background-color: black;
-			color: white;
-			margin: 0;
-			font-family: Dosis;
+			background-color:black;
+			color:white;
+			margin:0;
+			font-family:Dosis;
 		}
 		a {
-			color: #6699FF;
-			text-decoration: none;
+			color:#6699FF;
+			text-decoration:none;
 		}
 		#rightpane {
-			left: 900px;
-			top: 0px;
-			position: absolute;
+			left:900px;
+			top:0px;
+			position:absolute;
 		}
 		#bottompane {
-			left: 0px;
-			top: 600px;
-			width: 100%;
-			position: absolute;
+			left:0px;
+			top:600px;
+			width:900px;
+			position:absolute;
 		}
 		#leftpane {
-			background-color: #336699;
-			width: 900px;
-			height: 600px;
+			background-color:#336699;
+			width:900px;
+			height:600px;
 		}
 	</style>
 	<script src="/socket.io/socket.io.js"></script>
@@ -51,12 +51,12 @@
 		<input id="aideck" type="text" placeholder="AI Deck" style="width:100%" /><br>
 		<input id="airefresh" type="text" placeholder="AI Speed" style="width:100%" onkeydown="event.cancelBubble=true" /><br>
 		<input id="aievalopt" type="checkbox" /> Enable Experimental AI<br>
-		<div id="chatBox" style="width:300px; height: 350px; overflow: scroll; border: 2px solid #000; background-color:white; font: 14px courier"></div>
+		<div id="chatBox" style="width:300px;height:350px;overflow:scroll;margin:2px;background-color:white"></div>
+		<textarea id="chatinput" placeholder="Chat" style="width:300px;height:100%;margin:2px" onkeydown="maybeSendChat(event)"></textarea>
 	</div>
 	<div id="bottompane">
-		<input id="deckimport" type="text" placeholder="Deck" style="width:1200px" />
-		<br><input id="chatArea" type="text" style="width:1200px" readonly />
-		<br><input id="chatinput" type="text" placeholder="Chat" style="width:1200px" onkeydown="maybeSendChat(event)" />
+		<input id="deckimport" type="text" placeholder="Deck" style="width:890px" />
+		<br><input id="chatArea" type="text" placeholder="Info" style="width:890px" readonly tabIndex="-1" />
 	</div>
     <script src="ui.main.js"></script>
 </body>

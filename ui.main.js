@@ -997,8 +997,8 @@ function mkQuestAi(questname, stage) {
 	var hp = quest.hp || 100;
 	var playerHPstart = quest.urhp || 100;
 	var urdeck = getDeck();
-	if ( quest.morph ) {
-		if ( quest.morph.to.length != quest.morph.from.length ) {
+	if (quest.morph) {
+		if (quest.morph.to.length != quest.morph.from.length) {
 			console.log("Warning: morphFrom is not the same length as morphTo. Aborting player deck morph for stage", stage);
 		} else {
 			urdeck = deckMorph(urdeck, quest.morph.from.split(" "), quest.morph.to.split(" "));
@@ -3259,19 +3259,12 @@ socket.on("foeleft", function(data) {
 });
 socket.on("chat", function(data) {
 	console.log("message gotten");
-	var u = data.u ? data.u + ": " : "";
-	var color = "black";
-	if (data.mode) {
-		if (data.mode == "pm") {
-			color = "blue";
-		}
-		if (data.mode == "info")
-			color = "red";
-	}
+	var msg = (data.u ? "<b>" + sanitizeHtml(data.u) + ":</b> " : "") + sanitizeHtml(data.message);
+	var color = data.mode == "pm" ? "blue" : data.mode == "info" ? "red" : "black";
 	if (data.mode == "guest")
-		chatBox.innerHTML += "<font color=black><i><b>" + u.replace(/</g, "&lt;").replace(/>/g, "&gt;") + "</b>" + data.message.replace(/</g, "&lt;").replace(/>/g, "&gt;") + "</i></font>";
+		chatBox.innerHTML += "<font color=black><i>" + msg + "</i></font>";
 	else
-		chatBox.innerHTML += "<font color=" + color + "><b>" + u.replace(/</g, "&lt;").replace(/>/g, "&gt;") + "</b>" + data.message.replace(/</g, "&lt;").replace(/>/g, "&gt;") + "</font>";
+		chatBox.innerHTML += "<font color=" + color + ">" + msg + "</font>";
 	chatBox.innerHTML += "<br>";
 	chatBox.scrollTop = chatBox.scrollHeight;
 });
@@ -3324,11 +3317,14 @@ function maybeSendChat(e) {
 		else {
 			if (!guestname) guestname = randomGuestName();
 			var name = username.value ? username.value : guestname;
-
 			socket.emit("guestchat", { message: chatinput.value, u: name });
 		}
 		chatinput.value = "";
+		e.preventDefault();
 	}
+}
+function sanitizeHtml(x) {
+	return x.replace(/</g, "&lt;").replace(/>/g, "&gt;");
 }
 function randomGuestName() {
 	return (10000 + Math.floor(Math.random() * 89999)) + "";
@@ -3357,13 +3353,19 @@ function animate() {
 function requestAnimate() { requestAnimFrame(animate); }
 document.addEventListener("keydown", function(e) {
 	if (mainStage == gameui) {
-		if (e.keyCode == 32) {
+		if (e.keyCode == 32) { // spc
 			if (game.turn == game.player1 && (game.phase == MulliganPhase1 || game.phase == MulliganPhase2))
 				accepthandfunc();
 			else
 				endturnFunc();
-		} else if (e.keyCode == 8) {
+		} else if (e.keyCode == 8) { // bsp
 			cancelFunc();
+		} else if (e.keyCode == 83 || e.keyCode == 87) { // s/w
+			var p = game.players[e.keyCode == 83 ? 0 : 1];
+			if (targetingMode && targetingMode(p)) {
+				targetingMode = undefined;
+				targetingModeCb(p);
+			}
 		} else return;
 		e.preventDefault();
 	}
