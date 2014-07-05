@@ -875,7 +875,7 @@ function deckMorph(deck,MorphFrom,morphTo) {
 
 function mkDemigod() {
 	var urdeck = getDeck();
-	if ((user && (!user.deck || user.deck.length < 31)) || urdeck.length < 11) {
+	if (urdeck.length < (user ? 31 : 11)) {
 		startEditor();
 		return;
 	}
@@ -924,7 +924,7 @@ function mkDemigod() {
 }
 function mkMage() {
 	var urdeck = getDeck();
-	if ((user && (!user.deck || user.deck.length < 31)) || urdeck.length < 11) {
+	if (urdeck.length < (user ? 31 : 11)) {
 		startEditor();
 		return;
 	}
@@ -1004,7 +1004,7 @@ function mkQuestAi(questname, stage) {
 			urdeck = deckMorph(urdeck, quest.morph.from.split(" "), quest.morph.to.split(" "));
 		}
 	}
-	if ((user && (!user.deck || user.deck.length < 31)) || urdeck.length < 11) {
+	if (urdeck.length < (user ? 31 : 11)) {
 		/*startEditor();*/
 		return "ERROR: Your deck is invalid or missing! Please exit and create a valid deck in the deck editor.";
 	}
@@ -1023,7 +1023,7 @@ function mkAi(level) {
 		}
 		if (Cards) {
 			var urdeck = getDeck();
-			if ((user && (!user.deck || user.deck.length < 31)) || urdeck.length < 11) {
+			if (urdeck.length < (user ? 31 : 11)) {
 				startEditor();
 				return;
 			}
@@ -1420,7 +1420,7 @@ function startMenu() {
 	});
 	baia.click = function() {
 		if (Cards) {
-			if (!user.deck || user.deck.length < 31) {
+			if (getDeck().length < 31) {
 				startEditor();
 				return;
 			}
@@ -2092,7 +2092,7 @@ function startEditor() {
 			}
 		}
 		editordeck.sort(editorCardCmp);
-		if (usePool) {
+		if (user) {
 			cardminus = {};
 			cardpool = {};
 			for (var i = 0;i < user.pool.length;i++) {
@@ -2139,8 +2139,7 @@ function startEditor() {
 			}
 		}
 	}
-	if (Cards && (!user || user.deck)) {
-		var usePool = !!(user && (user.deck || user.starter));
+	if (Cards) {
 		var cardminus, cardpool, cardartcode;
 		chatArea.value = "Build a 30-60 card deck";
 		var editorui = new PIXI.DisplayObjectContainer(), editorelement = 0;
@@ -2159,7 +2158,7 @@ function startEditor() {
 			}
 		});
 		bclear.click = function() {
-			if (usePool) {
+			if (user) {
 				cardminus = {};
 			}
 			editordeck.length = 0;
@@ -2167,15 +2166,15 @@ function startEditor() {
 		bsave.click = function() {
 			editordeck.push(TrueMarks[editormark]);
 			deckimport.value = editordeck.join(" ");
-			if (usePool) {
+			if (user) {
 				userEmit("setdeck", { d: etg.encodedeck(editordeck), number: user.selectedDeck });
-				user.deck = editordeck;
+				user.decks[user.selectedDeck] = editordeck;
 			}
 			startMenu();
 		}
 		bimport.click = function() {
 			editordeck = deckimport.value.split(" ");
-			if (usePool) {
+			if (user) {
 				userEmit("setdeck", { d: etg.encodedeck(editordeck), number: user.selectedDeck });
 				user.decks[user.selectedDeck] = editordeck.slice();
 				editordeck = getDeck();
@@ -2208,7 +2207,7 @@ function startEditor() {
 				chatArea.value = "30 cards required before submission";
 				return;
 			}
-			if (usePool) {
+			if (user) {
 				editordeck.push(TrueMarks[editormark]);
 				userEmit("setarena", { d: etg.encodedeck(editordeck) });
 				editordeck.pop();
@@ -2218,12 +2217,12 @@ function startEditor() {
 		editorui.addChild(bclear);
 		editorui.addChild(bsave);
 		editorui.addChild(bimport);
-		if (usePool) {
+		if (user) {
 		    editorui.addChild(bdeck1);
 		    editorui.addChild(bdeck2);
 		    editorui.addChild(bdeck3);
 		}
-		if (usePool && user.ocard) {
+		if (user && user.ocard) {
 			editorui.addChild(barena);
 		}
 		var editorcolumns = [];
@@ -2255,7 +2254,7 @@ function startEditor() {
 			(function(_i) {
 				sprite.click = function() {
 					var card = CardCodes[editordeck[_i]];
-					if (usePool && !isFreeCard(card)) {
+					if (user && !isFreeCard(card)) {
 						adjustCardMinus(editordeck[_i], -1);
 					}
 					editordeck.splice(_i, 1);
@@ -2273,7 +2272,7 @@ function startEditor() {
 			for (var j = 0;j < 15;j++) {
 				var sprite = new PIXI.Sprite(nopic);
 				sprite.position.set(100 + i * 130, 272 + j * 20);
-				if (usePool) {
+				if (user) {
 					var sprcount = new PIXI.Text("", { font: "12px Dosis" });
 					sprcount.position.set(102, 4);
 					sprite.addChild(sprcount);
@@ -2282,7 +2281,7 @@ function startEditor() {
 					sprite.click = function() {
 						if (editordeck.length < 60) {
 							var code = editorcolumns[_i][1][editorelement][_j], card = CardCodes[code];
-							if (usePool && !isFreeCard(card)) {
+							if (user && !isFreeCard(card)) {
 								if (!(code in cardpool) || (code in cardminus && cardminus[code] >= cardpool[code]) ||
                                     (CardCodes[code].type != PillarEnum && (cardminus[card.asUpped(false).code] || 0) + (cardminus[card.asUpped(true).code] || 0) >= 6)) {
 									return;
@@ -2333,10 +2332,10 @@ function startEditor() {
 			for (var i = 0;i < 6;i++) {
 				for (var j = 0;j < editorcolumns[i][1][editorelement].length;j++) {
 					var spr = editorcolumns[i][0][j], code = editorcolumns[i][1][editorelement][j], card = CardCodes[code];
-					if (!usePool || card in cardpool || isFreeCard(card)) spr.visible = true;
+					if (!user || card in cardpool || isFreeCard(card)) spr.visible = true;
 					else spr.visible = false;
 					spr.setTexture(getCardImage(code));
-					if (usePool) {
+					if (user) {
 						var txt = spr.getChildAt(0), card = CardCodes[code], inf = isFreeCard(card);
 						if ((txt.visible = inf || code in cardpool)) {
 							maybeSetText(txt, inf ? "-" : (cardpool[code] - (code in cardminus ? cardminus[code] : 0)).toString());
@@ -3232,12 +3231,12 @@ socket.on("arenainfo", startArenaInfo);
 socket.on("arenatop", startArenaTop);
 socket.on("userdump", function(data) {
 	user = data;
-	user.decks = [];
-	    user.decks[1] = etg.decodedeck(user.deck1);
-	    user.decks[2] = etg.decodedeck(user.deck2);
-	    user.decks[3] = etg.decodedeck(user.deck3);
-	    user.deck = getDeck()
-		deckimport.value = user.deck.join(" ");
+	user.decks = [
+		etg.decodedeck(user.deck1),
+		etg.decodedeck(user.deck2),
+		etg.decodedeck(user.deck3)
+	];
+	deckimport.value = getDeck().join(" ");
 	if (user.pool) {
 		user.pool = etg.decodedeck(user.pool);
 	}
@@ -3415,8 +3414,7 @@ function loginClick() {
 							etg.decodedeck(user.deck2),
 							etg.decodedeck(user.deck3),
 						];
-						user.deck = getDeck()
-						deckimport.value = user.deck.join(" ");
+						deckimport.value = getDeck().join(" ");
 						if (user.pool || user.pool == "") {
 							user.pool = etg.decodedeck(user.pool);
 						}
@@ -3456,14 +3454,14 @@ function changeClick() {
 }
 function challengeClick() {
 	if (Cards) {
-		if (user && user.deck) {
-			userEmit("foewant", { f: foename.value, deck: user.deck, DGmode:demigodmode.checked });
-		} else {
-			var deck = getDeck();
-			if ((user && (!user.deck || user.deck.length < 31)) || deck.length < 11) {
-				startEditor();
-				return;
-			}
+		var deck = getDeck();
+		if (deck.length < (user ? 31 : 11)){
+			startEditor();
+			return;
+		}
+		if (user) {
+			userEmit("foewant", { f: foename.value, DGmode:demigodmode.checked });
+		}else{
 			socket.emit("pvpwant", { deck: deck, room: foename.value, DGmode: demigodmode.checked });
 		}
 	}

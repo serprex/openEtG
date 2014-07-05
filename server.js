@@ -401,7 +401,7 @@ io.on("connection", function(socket) {
 			return;
 		}
 		console.log(u + " requesting " + f);
-		sockinfo[this.id].deck = data.deck;
+		sockinfo[this.id].deck = user["deck" + user.selectedDeck];
 		sockinfo[this.id].demigod = data.DGmode;
 		if (f in users){
 			if (duels[f] == u) {
@@ -410,7 +410,7 @@ io.on("connection", function(socket) {
 				var first = seed < etgutil.MAX_INT / 2;
 				sockinfo[this.id].foe = usersock[f];
 				sockinfo[usersock[f].id].foe = this;
-				var deck0 = sockinfo[usersock[f].id].deck, deck1 = data.deck;
+				var deck0 = sockinfo[usersock[f].id].deck, deck1 = sockinfo[this.id].deck;
 				var DG = sockinfo[this.id].demigod, DGfoe = sockinfo[usersock[f].id].demigod;
 				this.emit("pvpgive", { first: first, seed: seed, deck: deck0, urdeck: deck1, foename:f, demigod: DG, foedemigod: DGfoe});
 				usersock[f].emit("pvpgive", { first: !first, seed: seed, deck: deck1, urdeck: deck0, foename:u, demigod:DGfoe, foedemigod:DG});
@@ -437,7 +437,6 @@ io.on("connection", function(socket) {
 		if (thattrade.accepted) {
 			var other = thistrade.foe;
 			var player1Cards = thistrade.tradecards, player2Cards = thattrade.tradecards;
-			//if (player1Card == thattrade.oppcard && thistrade.oppcard == player2Card) {
 			for (var i = 0;i < player1Cards.length;i++) {
 				user.pool = etgutil.addcard(user.pool, player1Cards[i], -1);
 				users[thistrade.foename].pool = etgutil.addcard(users[thistrade.foename].pool, player1Cards[i]);
@@ -450,7 +449,6 @@ io.on("connection", function(socket) {
 			other.emit("tradedone", { oldcards: player2Cards, newcards: player1Cards });
 			delete sockinfo[this.id].trade;
 			delete sockinfo[other.id].trade;
-			//}
 		} else {
 			thistrade.accepted = true;
 		}
