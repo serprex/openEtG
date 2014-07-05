@@ -3325,7 +3325,7 @@ function maybeSendChat(e) {
 			if (!guestname) guestname = randomGuestName();
 			var name = username.value ? username.value : guestname;
 
-			socket.emit("guestchat", { message: chatinput.value, name: name });
+			socket.emit("guestchat", { message: chatinput.value, u: name });
 		}
 		chatinput.value = "";
 	}

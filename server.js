@@ -34,12 +34,10 @@ function loginRespond(res, servuser, pass){
 			user.oracle = true;
 		}
 		res.writeHead("200");
-		updateActive(user.name);
 		db.hgetall("Q:" + user.name, function (err, obj) {
 		    user.quest = obj;
             res.end(JSON.stringify(user));
 		});
-
 	}
 	if(!servuser.salt){
 		servuser.salt = crypto.pseudoRandomBytes(16).toString("base64");
@@ -126,7 +124,6 @@ function cardRedirect(req, res, next){
 }
 
 var users = {};
-var activeusers = [];
 var duels = {};
 var trades = {};
 var usersock = {};
@@ -156,13 +153,15 @@ function foeEcho(socket, event){
 		}
 	});
 }
-function updateActive(user) {
-	if (user) users[user].lastActive = Date.now();
-	activeusers = [];
+function activeUsers() {
+	var activeusers = [];
 	for (var username in users) {
-		if (Date.now() - users[username].lastActive <= 1000 * 60 * 60 * 2) //Milliseconds/Sec * Seconds/Min * Minutes/Hr * Hours
+		var sock = usersock[username];
+		if (sock && sock.connected){
 			activeusers.push(username);
+		}
 	}
+	return activeusers;
 }
 function userEvent(socket, event, func){
 	socket.on(event, function(data){
@@ -180,14 +179,12 @@ function userEvent(socket, event, func){
 					prepuser(obj);
 					users[u] = obj;
 					if (data.a == obj.auth) {
-						updateActive(u);
 						usersock[u] = socket;
 						func.call(socket, data, obj);
 					}
 				}
 			});
 		} else if (data.a == users[u].auth) {
-			updateActive(u);
 			usersock[u] = socket;
 			func.call(socket, data, users[u]);
 		}
@@ -222,6 +219,13 @@ function useruser(servuser){
 function getDay(){
 	return Math.floor(Date.now()/86400000);
 }
+function genericChat(socket, data){
+	if (data.message == "/who") {
+		var usersonline = activeUsers().join(", ");
+		socket.emit("chat", { mode: "info", message: usersonline ? "Users online: " + usersonline + "." : "There are no users online :(" })
+	}
+	else io.emit("chat", data)
+}
 
 var starter = [
 	"015990g4sa014sd014t4014vi014vs0152o0152t0155u0155p0158q015ca015fi015f6015if015il015lo015lb015ou015s5025rq015v3015ut0161s018pi",
@@ -238,7 +242,6 @@ var starter = [
 	"034sa014sd014t40452g0152p0252t0a5uk035um025un015us025v3015uq035ut015up015vb015uo025uv015ul018pk",
 	"015020262002627034sa014sd014t4064vc024vp034vs0b61o0261q0361s0261t0161v018pj"
 ];
-
 io.on("connection", function(socket) {
 	sockinfo[socket.id] = {};
 	socket.on("disconnect", dropsock);
@@ -260,18 +263,16 @@ io.on("connection", function(socket) {
 		this.emit("userdump", useruser(user));
 	});
 	userEvent(socket, "logout", function(data, user) {
-		activeusers.remo
 		var u=data.u;
 		db.hmset("U:"+u, user);
 		delete users[u];
-		updateActive();
+		delete usersock[u];
 	});
 	userEvent(socket, "delete", function(data, user) {
 	    var u = data.u;
 	    db.del("U:" + u);
 	    db.del("Q:" + u);
 	    delete users[u];
-	    updateActive();
 	});
 	userEvent(socket, "addcard", function(data, user) {
 	    // Anything using this should eventually be serverside
@@ -497,26 +498,19 @@ io.on("connection", function(socket) {
 		}
 	});
 	userEvent(socket, "chat", function (data) {
-		delete data.a;
 		var message = data.message.split(" ");
 		if (message[0] == "/w") {
 			if (usersock[message[1]]) {
-				usersock[message[1]].emit("chat", { message: message.slice(2).join(" "), mode: "pm", u: data.u })
-				socket.emit("chat", { message: message.slice(2).join(" "), mode: "pm", u: "To " + message[1] })
+				usersock[message[1]].emit("chat", { message: message.slice(2).join(" "), mode: "pm", u: data.u });
+				socket.emit("chat", { message: message.slice(2).join(" "), mode: "pm", u: "To " + message[1] });
 			}
 			else
-				socket.emit("chat", { mode: "info", message: message[1] ? message[1] + " is not here right now." : "I need to know who to message..."})
+				socket.emit("chat", { mode: "info", message: message[1] ? message[1] + " is not here right now." : "I need to know who to message..."});
 		}
-		else if (data.message.replace(/ /g, "") == "/who") {
-			var usersonline = "";
-			for (var i = 0;i < activeusers.length;i++) {
-				usersonline += activeusers[i] + ", ";
-			}
-			if (usersonline) usersonline = usersonline.substring(0, usersonline.length - 2);
-			socket.emit("chat" , {mode:"info", message: usersonline ? "Users online: " + usersonline + "." : "There are no users online :("})
+		else{
+			delete data.a;
+			genericChat(socket, data);
 		}
-		else
-			io.emit("chat", data);
 	});
 	userEvent(socket, "updatequest", function (data, user) {
 	    var qu = "Q:" + data.u;
@@ -545,17 +539,9 @@ io.on("connection", function(socket) {
 		}
 	});
 	socket.on("guestchat", function (data) {
-	    if (data.message == "/who") {
-	        updateActive();
-			var usersonline = "";
-			for (var i = 0; i < activeusers.length; i++) {
-				usersonline += activeusers[i] + ", ";
-			}
-			if (usersonline) usersonline = usersonline.substring(0, usersonline.length - 2);
-			socket.emit("chat", { mode: "info", message: usersonline ? "Users online: " + usersonline + "." : "There are no users online :(" })
-		}
-		else
-			io.emit("chat", {message: data.message, u:"Guest" + (data.name ? "_" + data.name : ""), mode:"guest"})
+		data.mode = "guest";
+		data.u = "Guest" + (data.u ? "_" + data.u : "");
+		genericChat(socket, data);
 	});
 	socket.on("pvpwant", function(data) {
 		var pendinggame=rooms[data.room];
