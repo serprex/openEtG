@@ -2102,15 +2102,6 @@ function startEditor() {
 					cardpool[user.pool[i]] = 1;
 				}
 			}
-			if (user.starter) {
-			    for (var i = 0; i < user.starter.length; i++) {
-			        if (user.starter[i] in cardpool) {
-			            cardpool[user.starter[i]]++;
-			        } else {
-			            cardpool[user.starter[i]] = 1;
-			        }
-			    }
-			}
 			if (user.accountbound) {
 			    for (var i = 0; i < user.accountbound.length; i++) {
 			        if (user.accountbound[i] in cardpool) {
@@ -2176,29 +2167,28 @@ function startEditor() {
 			editordeck = deckimport.value.split(" ");
 			if (user) {
 				userEmit("setdeck", { d: etg.encodedeck(editordeck), number: user.selectedDeck });
-				user.decks[user.selectedDeck] = editordeck.slice();
-				editordeck = getDeck();
+				user.decks[user.selectedDeck] = editordeck;
 			}
 			processDeck();
 		}
 		bdeck1.click = function () {
 		    editordeck.push(TrueMarks[editormark]);
 		    userEmit("setdeck", { d: etg.encodedeck(editordeck), number: user.selectedDeck });
-		    user.selectedDeck = 1;
+		    user.selectedDeck = 0;
 		    editordeck = getDeck();
 		    processDeck();
 		}
 		bdeck2.click = function () {
 		    editordeck.push(TrueMarks[editormark]);
 		    userEmit("setdeck", { d: etg.encodedeck(editordeck), number: user.selectedDeck });
-		    user.selectedDeck = 2;
+		    user.selectedDeck = 1;
 		    editordeck = getDeck();
 		    processDeck();
 		}
 		bdeck3.click = function () {
 		    editordeck.push(TrueMarks[editormark]);
 		    userEmit("setdeck", { d: etg.encodedeck(editordeck), number: user.selectedDeck });
-		    user.selectedDeck = 3;
+		    user.selectedDeck = 2;
 		    editordeck = getDeck();
 		    processDeck();
 		}
@@ -3232,16 +3222,13 @@ socket.on("arenatop", startArenaTop);
 socket.on("userdump", function(data) {
 	user = data;
 	user.decks = [
+		etg.decodedeck(user.deck0),
 		etg.decodedeck(user.deck1),
-		etg.decodedeck(user.deck2),
-		etg.decodedeck(user.deck3)
+		etg.decodedeck(user.deck2)
 	];
 	deckimport.value = getDeck().join(" ");
 	if (user.pool) {
 		user.pool = etg.decodedeck(user.pool);
-	}
-	if (user.starter) {
-	    user.starter = etg.decodedeck(user.starter);
 	}
 	if (user.accountbound) {
 	    user.accountbound = etg.decodedeck(user.accountbound);
@@ -3406,20 +3393,17 @@ function loginClick() {
 					user = JSON.parse(this.responseText);
 					if (!user) {
 						chatArea.value = "No user";
-					} else if (!user.pool && !user.starter) {
+					} else if (!user.pool) {
 						startElementSelect();
 					} else {
 					    user.decks = [
+							etg.decodedeck(user.deck0),
 							etg.decodedeck(user.deck1),
 							etg.decodedeck(user.deck2),
-							etg.decodedeck(user.deck3),
 						];
 						deckimport.value = getDeck().join(" ");
 						if (user.pool || user.pool == "") {
 							user.pool = etg.decodedeck(user.pool);
-						}
-						if (user.starter) {
-						    user.starter = etg.decodedeck(user.starter);
 						}
 						if (user.accountbound) {
 						    user.accountbound = etg.decodedeck(user.accountbound);

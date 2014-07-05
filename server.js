@@ -195,21 +195,24 @@ function userEvent(socket, event, func){
 }
 function prepuser(servuser){
 	servuser.gold = parseInt(servuser.gold || 0);
+	if (servuser.starter){
+		servuser.accountbound += servuser.starter;
+		servuser.starter = "";
+	}
 }
 function useruser(servuser){
     return {
         auth: servuser.auth,
         name: servuser.name,
-        deck1: servuser.deck1 || servuser.deck || "",
+        deck0: servuser.deck0 || "",
+        deck1: servuser.deck1 || "",
         deck2: servuser.deck2 || "",
-        deck3: servuser.deck3 || "",
-        selectedDeck: servuser.selectedDeck || 1,
+        selectedDeck: servuser.selectedDeck || 0,
         pool: servuser.pool,
         gold: servuser.gold,
         ocard: servuser.ocard,
-        starter: servuser.starter || null,
         freepacks: servuser.freepacks || "0,0,0,0",
-        accountbound: servuser.accountbound || [],
+        accountbound: servuser.accountbound || "",
         aiwins: parseInt(servuser.aiwins) || 0,
         ailosses: parseInt(servuser.ailosses) || 0,
         pvpwins: parseInt(servuser.pvpwins) || 0,
@@ -242,14 +245,12 @@ io.on("connection", function(socket) {
 	socket.on("reconnect_failed", dropsock);
 	userEvent(socket, "inituser", function(data, user) {
 		var u=data.u;
-		var startdeck = starter[data.e];
-		user.deck1 = startdeck || starter[0];
-		user.starter = user.deck1;
+		user.deck0 = starter[data.e] || starter[0];
+		user.deck1 = "";
 		user.deck2 = "";
-		user.deck3 = "";
-		user.selectedDeck = 1;
+		user.selectedDeck = 0;
 		user.pool = "";
-		user.accountbound = "";
+		user.accountbound = user.deck0;
 		user.freepacks = "3,2,0,0";
 		user.quest = { necromancer: 1 };
 		user.aiwins = 0;
