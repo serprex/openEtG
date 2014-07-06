@@ -889,10 +889,13 @@ Weapon.prototype.attack = Creature.prototype.attack = function(stasis, freedomCh
 			}
 		}else{
 			var truedr = target.shield ? target.shield.truedr() : 0;
-			if (!target.shield || !target.shield.active.shield || !target.shield.active.shield(target.shield, this, Math.max(trueatk - truedr, 0))){
-				var dmg = target.dmg(Math.max(trueatk - truedr, 0));
-				if (this.active.hit && (!this.status.adrenaline || this.status.adrenaline < 3)){
-					this.active.hit(this, target, dmg);
+			var tryDmg = Math.max(trueatk - truedr, 0);
+			if (!target.shield || !target.shield.active.shield || !target.shield.active.shield(target.shield, this, tryDmg)){
+				if (tryDmg > 0){
+					var dmg = target.dmg(dmg);
+					if (this.active.hit && (!this.status.adrenaline || this.status.adrenaline < 3)){
+						this.active.hit(this, target, dmg);
+					}
 				}
 			}
 		}

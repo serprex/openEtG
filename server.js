@@ -211,7 +211,7 @@ function useruser(servuser){
         gold: servuser.gold,
         ocard: servuser.ocard,
         freepacks: servuser.freepacks || "0,0,0,0",
-        accountbound: servuser.accountbound || "",
+        accountbound: servuser.accountbound,
         aiwins: parseInt(servuser.aiwins) || 0,
         ailosses: parseInt(servuser.ailosses) || 0,
         pvpwins: parseInt(servuser.pvpwins) || 0,

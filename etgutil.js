@@ -2,7 +2,7 @@ function encodeCount(count){
 	return count>1023?"vv":(count<32?"0":"") + count.toString(32);
 }
 exports.encodedeck = function(deck){
-	if (!deck)return deck;
+	if (!deck)return "";
 	var count={}, out="";
 	for(var i=0; i<deck.length; i++){
 		if (deck[i] in count){
@@ -17,8 +17,7 @@ exports.encodedeck = function(deck){
 	return out;
 }
 exports.decodedeck = function (deck) {
-    if (deck == "") return [];
-    if (!deck) return deck;
+    if (!deck) return [];
     var out = [];
     for (var i = 0; i < deck.length; i += 5) {
         var count = parseInt(deck.substr(i, 2), 32), code = deck.substr(i + 2, 3);

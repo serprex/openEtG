@@ -1291,15 +1291,19 @@ function adjust(cardminus, code, x) {
 	} else cardminus[code] = x;
 }
 function makeCardSelector(cardmouseover, cardclick){
+	var poolcache = {};
 	var cardsel = new PIXI.DisplayObjectContainer();
 	cardsel.interactive = true;
 	var elefilter = 0, rarefilter = 0;
-	var eleicons = [], rareicons = [], columns = [];
+	var eleicons = [], rareicons = [], columns = [[],[],[],[],[],[]], columnspr = [[],[],[],[],[],[]];
 	for (var i = 0;i < 13;i++) {
 		var sprite = new PIXI.Sprite(nopic);
 		sprite.position.set(8, 184 + i * 32);
 		(function(_i) {
-			sprite.click = function() { elefilter = _i; }
+			sprite.click = function() {
+				elefilter = _i;
+				makeColumns();
+			}
 		})(i);
 		eleicons.push(sprite);
 		cardsel.addChild(sprite);
@@ -1308,7 +1312,10 @@ function makeCardSelector(cardmouseover, cardclick){
 		var sprite = new PIXI.Sprite(nopic);
 		sprite.position.set(48, 196 + i * 32);
 		(function(_i) {
-			sprite.click = function() { rarefilter = _i; }
+			sprite.click = function() {
+				rarefilter = _i;
+				makeColumns();
+			}
 		})(i);
 		rareicons.push(sprite);
 		cardsel.addChild(sprite);
@@ -1316,7 +1323,6 @@ function makeCardSelector(cardmouseover, cardclick){
 	setInteractive.apply(null, eleicons);
 	setInteractive.apply(null, rareicons);
 	for (var i = 0;i < 6;i++) {
-		columns.push([[], []]);
 		for (var j = 0;j < 15;j++) {
 			var sprite = new PIXI.Sprite(nopic);
 			sprite.position.set(100 + i * 130, 272 + j * 20);
@@ -1326,26 +1332,32 @@ function makeCardSelector(cardmouseover, cardclick){
 			(function(_i, _j) {
 				if (cardclick){
 					sprite.click = function() {
-						cardclick(columns[_i][1][elefilter][_j]);
+						cardclick(columns[_i][_j]);
 					}
 				}
 				if (cardmouseover){
 					sprite.mouseover = function(){
-						cardmouseover(columns[_i][1][elefilter][_j]);
+						cardmouseover(columns[_i][_j]);
 					}
 				}
 			})(i, j);
 			sprite.interactive = true;
 			cardsel.addChild(sprite);
-			columns[i][0].push(sprite);
-		}
-		for (var j = 0;j < 13;j++) {
-			columns[i][1].push(filtercards(i > 2,
-                function(x) { return x.element == j && ((i % 3 == 0 && x.type == CreatureEnum) || (i % 3 == 1 && x.type <= PermanentEnum) || (i % 3 == 2 && x.type == SpellEnum)); },
-                editorCardCmp));
+			columnspr[i].push(sprite);
 		}
 	}
+	function makeColumns(){
+		for (var i = 0;i < 6;i++) {
+			columns[i] = filtercards(i > 2,
+				function(x) { return x.element == elefilter &&
+					((i % 3 == 0 && x.type == CreatureEnum) || (i % 3 == 1 && x.type <= PermanentEnum) || (i % 3 == 2 && x.type == SpellEnum)) &&
+					(!user || (x in poolcache && (!rarefilter || rarefilter == x.rarity)) || isFreeCard(x));
+				}, editorCardCmp);
+		}
+	}
+	makeColumns();
 	cardsel.next = function(cardpool, cardminus){
+		poolcache = cardpool;
 		for (var i = 0;i < 13;i++) {
 			eleicons[i].setTexture(getIcon(i));
 		}
@@ -1353,12 +1365,10 @@ function makeCardSelector(cardmouseover, cardclick){
 			rareicons[i].setTexture(getRareIcon(i));
 		}
 		for (var i = 0;i < 6;i++) {
-			for (var j = 0;j < columns[i][1][elefilter].length;j++) {
-				var spr = columns[i][0][j], code = columns[i][1][elefilter][j], card = CardCodes[code];
-				spr.visible = !user || (card in cardpool && (!rarefilter || rarefilter == card.rarity)) || isFreeCard(card);
-				if (spr.visible){
-					spr.setTexture(getCardImage(code));
-				}
+			for (var j = 0;j < columns[i].length;j++) {
+				var spr = columnspr[i][j], code = columns[i][j], card = CardCodes[code];
+				spr.setTexture(getCardImage(code));
+				spr.visible = true;
 				if (user) {
 					var txt = spr.getChildAt(0), card = CardCodes[code], inf = isFreeCard(card);
 					if ((txt.visible = inf || code in cardpool)) {
@@ -1367,7 +1377,7 @@ function makeCardSelector(cardmouseover, cardclick){
 				}
 			}
 			for (;j < 15;j++) {
-				columns[i][0][j].visible = false;
+				columnspr[i][j].visible = false;
 			}
 		}
 	};
@@ -3347,10 +3357,10 @@ function loginClick() {
 							etg.decodedeck(user.deck2),
 						];
 						deckimport.value = getDeck().join(" ");
-						if (user.pool || user.pool == "") {
+						if (user.pool !== undefined) {
 							user.pool = etg.decodedeck(user.pool);
 						}
-						if (user.accountbound) {
+						if (user.accountbound !== undefined) {
 						    user.accountbound = etg.decodedeck(user.accountbound);
 						}
 						if (!user.quest) {
