@@ -417,7 +417,6 @@ function initTrade(data) {
 				cardartcode = selectedCards[_i];
 			}
 		})(i);
-		sprite.interactive = true;
 		editorui.addChild(sprite);
 		selectedCardsprites.push(sprite);
 	}
@@ -429,15 +428,16 @@ function initTrade(data) {
 				cardartcode = player2Cards.length[_i];
 			}
 		})(i);
-		sprite.interactive = true;
 		editorui.addChild(sprite);
 		player2Cardsprites.push(sprite);
 	}
+	setInteractive.apply(null, selectedCardsprites);
+	setInteractive.apply(null, player2Cardsprites);
 	var cardArt = new PIXI.Sprite(nopic);
 	cardArt.position.set(734, 8);
 	editorui.addChild(cardArt);
 	animCb = function() {
-		cardsel.next(cardsel, cardminus);
+		cardsel.next(cardpool, cardminus);
 		if (cardartcode) {
 			cardArt.setTexture(getArt(cardartcode));
 		}
@@ -3309,7 +3309,7 @@ function loginClick() {
 					user = JSON.parse(this.responseText);
 					if (!user) {
 						chatArea.value = "No user";
-					} else if (!user.pool) {
+					} else if (!user.accountbound && !user.pool) {
 						startElementSelect();
 					} else {
 					    user.decks = [

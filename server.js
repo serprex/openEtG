@@ -192,7 +192,7 @@ function userEvent(socket, event, func){
 }
 function prepuser(servuser){
 	servuser.gold = parseInt(servuser.gold || 0);
-	if (servuser.starter){
+	if (servuser.starter && servuser.accountbound){
 		servuser.accountbound += servuser.starter;
 		servuser.starter = "";
 	}
@@ -213,7 +213,8 @@ function useruser(servuser){
         aiwins: parseInt(servuser.aiwins) || 0,
         ailosses: parseInt(servuser.ailosses) || 0,
         pvpwins: parseInt(servuser.pvpwins) || 0,
-        pvplosses: parseInt(servuser.pvplosses) || 0
+        pvplosses: parseInt(servuser.pvplosses) || 0,
+		quest: servuser.quest
 	};
 }
 function getDay(){
@@ -247,7 +248,6 @@ io.on("connection", function(socket) {
 	socket.on("disconnect", dropsock);
 	socket.on("reconnect_failed", dropsock);
 	userEvent(socket, "inituser", function(data, user) {
-		var u=data.u;
 		user.deck0 = starter[data.e] || starter[0];
 		user.deck1 = "";
 		user.deck2 = "";
