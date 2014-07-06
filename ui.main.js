@@ -3357,12 +3357,8 @@ function loginClick() {
 							etg.decodedeck(user.deck2),
 						];
 						deckimport.value = getDeck().join(" ");
-						if (user.pool !== undefined) {
-							user.pool = etg.decodedeck(user.pool);
-						}
-						if (user.accountbound !== undefined) {
-						    user.accountbound = etg.decodedeck(user.accountbound);
-						}
+						user.pool = etg.decodedeck(user.pool);
+						user.accountbound = etg.decodedeck(user.accountbound);
 						if (!user.quest) {
 							user.quest = {};
 						}
