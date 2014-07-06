@@ -262,7 +262,6 @@ function getCardImage(code) {
 		return eicons ? (caimgcache[code] = rend) : rend;
 	}
 }
-//Yes, this code and the namings of the caches are starting to get weird...
 function getCreatureImage(code) {
 	if (crimgcache[code]) return crimgcache[code];
 	else {
@@ -327,14 +326,6 @@ function getWeaponShieldImage(code) {
 	}
 }
 function initTrade(data) {
-	function adjustCardMinus(code, x) {
-		if (code in cardminus) {
-			cardminus[code] += x;
-		} else cardminus[code] = x;
-	}
-	function isFreeCard(card) {
-		return card.type == PillarEnum && !card.upped && !card.rarity;
-	}
 	player2Cards = [];
 	cardChosen = false;
 	if (data.first) myTurn = true;
@@ -347,7 +338,6 @@ function initTrade(data) {
 	var bconfirm = makeButton(10, 70, 72, 22, buttons.confirm);
 	var bconfirmed = new PIXI.Text("Confirmed!", { font: "16px Dosis" });
 	var bcancel = makeButton(10, 10, 72, 22, buttons.exit);
-	var editorcolumns = [];
 	var selectedCards = [];
 	var selectedCardsprites = [];
 	var player2Cardsprites = [];
@@ -383,7 +373,6 @@ function initTrade(data) {
 	editorui.addChild(btrade);
 	editorui.addChild(bcancel);
 
-
 	var cardpool = {};
 	for (var i = 0;i < user.pool.length;i++) {
 		if (user.pool[i] in cardpool) {
@@ -393,54 +382,26 @@ function initTrade(data) {
 		}
 	}
 
-	var editoreleicons = [];
-	for (var i = 0;i < 13;i++) {
-		var sprite = new PIXI.Sprite(nopic);
-		sprite.position.set(8, 184 + i * 32);
-		setInteractive(sprite);
-		(function(_i) {
-			sprite.click = function() { tradeelement = _i; }
-		})(i);
-		editoreleicons.push(sprite);
-		editorui.addChild(sprite);
-	}
-	for (var i = 0;i < 6;i++) {
-		editorcolumns.push([[], []]);
-		for (var j = 0;j < 15;j++) {
-			var sprite = new PIXI.Sprite(nopic);
-			sprite.position.set(100 + i * 130, 272 + j * 20);
-			var sprcount = new PIXI.Text("", { font: "12px Dosis" });
-			sprcount.position.set(102, 4);
-			sprite.addChild(sprcount);
-			(function(_i, _j) {
-				sprite.click = function() {
-					var code = editorcolumns[_i][1][tradeelement][_j], card = CardCodes[code];
-					if (selectedCards.length < 30 && !isFreeCard(card) && code in cardpool ) {
-						if (!(code in cardpool) || (code in cardminus && cardminus[code] >= cardpool[code])){
-							return;
-						}
-						adjustCardMinus(code, 1);
-						for (var i = 0;i < selectedCards.length;i++) {
-							var cmp = editorCardCmp(selectedCards[i], code);
-							if (cmp >= 0) break;
-						}
-						selectedCards.splice(i, 0, code);
-					}
+	var cardsel = makeCardSelector(
+		function(code){
+			cardartcode = code;
+		},
+		function(code){
+			var card = CardCodes[code];
+			if (selectedCards.length < 30 && !isFreeCard(card) && code in cardpool) {
+				if (!(code in cardpool) || (code in cardminus && cardminus[code] >= cardpool[code])){
+					return;
 				}
-				sprite.mouseover = function() {
-					cardartcode = editorcolumns[_i][1][tradeelement][_j];
+				adjust(cardminus, code, 1);
+				for (var i = 0;i < selectedCards.length;i++) {
+					var cmp = editorCardCmp(selectedCards[i], code);
+					if (cmp >= 0) break;
 				}
-			})(i, j);
-			sprite.interactive = true;
-			editorui.addChild(sprite);
-			editorcolumns[i][0].push(sprite);
+				selectedCards.splice(i, 0, code);
+			}
 		}
-		for (var j = 0;j < 13;j++) {
-			editorcolumns[i][1].push(filtercards(i > 2,
-                function(x) { return x.element == j && ((i % 3 == 0 && x.type == CreatureEnum) || (i % 3 == 1 && x.type <= PermanentEnum) || (i % 3 == 2 && x.type == SpellEnum)); },
-                editorCardCmp));
-		}
-	}
+	);
+	editorui.addChild(cardsel);
 	for (var i = 0;i < 30;i++) {
 		var sprite = new PIXI.Sprite(nopic);
 		sprite.position.set(100 + Math.floor(i / 10) * 100, 8 + (i % 10) * 20);
@@ -448,7 +409,7 @@ function initTrade(data) {
 			sprite.click = function() {
 				var card = CardCodes[selectedCards[_i]];
 				if (!isFreeCard(card)) {
-					adjustCardMinus(selectedCards[_i], -1);
+					adjust(cardminus, selectedCards[_i], -1);
 				}
 				selectedCards.splice(_i, 1);
 			}
@@ -476,6 +437,7 @@ function initTrade(data) {
 	cardArt.position.set(734, 8);
 	editorui.addChild(cardArt);
 	animCb = function() {
+		cardsel.next(cardsel, cardminus);
 		if (cardartcode) {
 			cardArt.setTexture(getArt(cardartcode));
 		}
@@ -490,27 +452,8 @@ function initTrade(data) {
 			selectedCardsprites[i].visible = true;
 			selectedCardsprites[i].setTexture(getCardImage(selectedCards[i]));
 		}
-		for (;i<30;i++)
-		{
+		for (;i<30;i++) {
 			selectedCardsprites[i].visible = false;
-		}
-		for (var i = 0;i < 13;i++) {
-			editoreleicons[i].setTexture(getIcon(i));
-		}
-		for (var i = 0;i < 6;i++) {
-			for (var j = 0;j < editorcolumns[i][1][tradeelement].length;j++) {
-				var spr = editorcolumns[i][0][j], code = editorcolumns[i][1][tradeelement][j], card = CardCodes[code];
-				if (card in cardpool) spr.visible = true;
-				else spr.visible = false;
-				spr.setTexture(getCardImage(code));
-				var txt = spr.getChildAt(0), card = CardCodes[code], inf = isFreeCard(card);
-				if ((txt.visible = inf || code in cardpool)) {
-					maybeSetText(txt, inf ? "-" : (cardpool[code] - (code in cardminus ? cardminus[code] : 0)).toString());
-				}
-			}
-			for (;j < 15;j++) {
-				editorcolumns[i][0][j].visible = false;
-			}
 		}
 	}
 	mainStage = editorui;
@@ -1159,12 +1102,12 @@ questLoader.onComplete = function() {
 	maybeStartMenu();
 }
 questLoader.load();
-var backgrounds = ["assets/bg_default.png", "assets/bg_lobby.png", "assets/bg_shop.png", "assets/bg_quest.png","assets/bg_game.png" ];
+var backgrounds = ["assets/bg_default.png", "assets/bg_lobby.png", "assets/bg_shop.png", "assets/bg_quest.png", "assets/bg_game.png"];
 var bgLoader = new PIXI.AssetLoader(backgrounds);
 bgLoader.onComplete = function() {
-	var tmp = [];
-	for (var i = 0;i < 5;i++) tmp.push(PIXI.Texture.fromImage(backgrounds[i]));
-	backgrounds = tmp;
+	for (var i = 0;i < 5;i++){
+		backgrounds[i] = PIXI.Texture.fromImage(backgrounds[i]);
+	}
 	maybeStartMenu();
 }
 bgLoader.load();
@@ -1304,7 +1247,6 @@ function makeText(x, y, txt, vis) {
 	var t = new PIXI.Text(txt, { font: "14px Verdana", fill: "white", stroke: "black", strokeThickness: 2 });
 	t.position.set(x, y);
 	t.visible = vis;
-
 	return t;
 }
 
@@ -1314,6 +1256,101 @@ function toggleB() {
 		arguments[i].interactive = !arguments[i].interactive;
 		arguments[i].buttonMode = !arguments[i].buttonMode;
 	}
+}
+function isFreeCard(card) {
+	return card.type == PillarEnum && !card.upped && !card.rarity;
+}
+function editorCardCmp(x, y) {
+	var cardx = CardCodes[x], cardy = CardCodes[y];
+	return cardx.upped - cardy.upped || cardx.element - cardy.element || cardx.cost - cardy.cost || (x > y) - (x < y);
+}
+function adjust(cardminus, code, x) {
+	if (code in cardminus) {
+		cardminus[code] += x;
+	} else cardminus[code] = x;
+}
+function makeCardSelector(cardmouseover, cardclick){
+	var cardsel = new PIXI.DisplayObjectContainer();
+	cardsel.interactive = true;
+	var elefilter = 0, rarefilter = 0;
+	var eleicons = [], rareicons = [], columns = [];
+	for (var i = 0;i < 13;i++) {
+		var sprite = new PIXI.Sprite(nopic);
+		sprite.position.set(8, 184 + i * 32);
+		(function(_i) {
+			sprite.click = function() { elefilter = _i; }
+		})(i);
+		eleicons.push(sprite);
+		cardsel.addChild(sprite);
+	}
+	for (var i = 0;i < 5; i++){
+		var sprite = new PIXI.Sprite(nopic);
+		sprite.position.set(48, 196 + i * 32);
+		(function(_i) {
+			sprite.click = function() { rarefilter = _i; }
+		})(i);
+		rareicons.push(sprite);
+		cardsel.addChild(sprite);
+	}
+	setInteractive.apply(null, eleicons);
+	setInteractive.apply(null, rareicons);
+	for (var i = 0;i < 6;i++) {
+		columns.push([[], []]);
+		for (var j = 0;j < 15;j++) {
+			var sprite = new PIXI.Sprite(nopic);
+			sprite.position.set(100 + i * 130, 272 + j * 20);
+			var sprcount = new PIXI.Text("", { font: "12px Dosis" });
+			sprcount.position.set(102, 4);
+			sprite.addChild(sprcount);
+			(function(_i, _j) {
+				if (cardclick){
+					sprite.click = function() {
+						cardclick(columns[_i][1][elefilter][_j]);
+					}
+				}
+				if (cardmouseover){
+					sprite.mouseover = function(){
+						cardmouseover(columns[_i][1][elefilter][_j]);
+					}
+				}
+			})(i, j);
+			sprite.interactive = true;
+			cardsel.addChild(sprite);
+			columns[i][0].push(sprite);
+		}
+		for (var j = 0;j < 13;j++) {
+			columns[i][1].push(filtercards(i > 2,
+                function(x) { return x.element == j && ((i % 3 == 0 && x.type == CreatureEnum) || (i % 3 == 1 && x.type <= PermanentEnum) || (i % 3 == 2 && x.type == SpellEnum)); },
+                editorCardCmp));
+		}
+	}
+	cardsel.next = function(cardpool, cardminus){
+		for (var i = 0;i < 13;i++) {
+			eleicons[i].setTexture(getIcon(i));
+		}
+		for (var i = 0;i < 5;i++) {
+			rareicons[i].setTexture(getRareIcon(i));
+		}
+		for (var i = 0;i < 6;i++) {
+			for (var j = 0;j < columns[i][1][elefilter].length;j++) {
+				var spr = columns[i][0][j], code = columns[i][1][elefilter][j], card = CardCodes[code];
+				spr.visible = !user || (card in cardpool && (!rarefilter || rarefilter == card.rarity)) || isFreeCard(card);
+				if (spr.visible){
+					spr.setTexture(getCardImage(code));
+				}
+				if (user) {
+					var txt = spr.getChildAt(0), card = CardCodes[code], inf = isFreeCard(card);
+					if ((txt.visible = inf || code in cardpool)) {
+						maybeSetText(txt, inf ? "-" : (cardpool[code] - (code in cardminus ? cardminus[code] : 0)).toString());
+					}
+				}
+			}
+			for (;j < 15;j++) {
+				columns[i][0][j].visible = false;
+			}
+		}
+	};
+	return cardsel;
 }
 function maybeStartMenu() {
 	imageLoadingNumber--;
@@ -1670,15 +1707,8 @@ function startQuestWindow() {
 	mainStage = questui;
 	refreshRenderer();
 }
-function editorCardCmp(x, y) {
-	var cardx = CardCodes[x], cardy = CardCodes[y];
-	return cardx.upped - cardy.upped || cardx.element - cardy.element || cardx.cost - cardy.cost || (x > y) - (x < y);
-}
 
 function upgradestore() {
-	function isFreeCard(card) {
-		return card.type == PillarEnum && !card.upped && !card.rarity;
-	}
 	function upgradeCard(card) {
 		if (!card.upped) {
 			if (!isFreeCard(card)) {
@@ -1765,61 +1795,23 @@ function upgradestore() {
 	twarning.position.set(100, 50);
 	upgradeui.addChild(twarning);
 
-	var editorcolumns = [];
+	var cardsel = makeCardSelector(null,
+		function(code){
+			var card = CardCodes[code];
+			selectedCard = code;
+			upgradedCard = card.asUpped(true).code;
+			tinfo.setText(isFreeCard(card) ? "Costs 50 gold to upgrade" : "Convert 6 of these into an upgraded version.");
+			tinfo2.setText((card.rarity > 0 || card.upped) && card.rarity < 5 ?
+				"Sells for " + (card.upped ? cardValues[card.rarity]*5 : cardValues[card.rarity]) + " gold." : "");
+			twarning.setText("");
+		}
+	);
+	upgradeui.addChild(cardsel);
 	var selectedCard;
 	var upgradedCard;
-	var mouseovercode;
 	var cardpool = {};
-	var chosenelement = 0;
 	adjustdeck();
 
-	var editoreleicons = [];
-	for (var i = 0;i < 13;i++) {
-		var sprite = new PIXI.Sprite(nopic);
-		sprite.position.set(8, 184 + i * 32);
-		setInteractive(sprite);
-		(function(_i) {
-			sprite.click = function() { chosenelement = _i; }
-		})(i);
-		editoreleicons.push(sprite);
-		upgradeui.addChild(sprite);
-	}
-	for (var i = 0;i < 6;i++) {
-		editorcolumns.push([[], []]);
-		for (var j = 0;j < 15;j++) {
-			var sprite = new PIXI.Sprite(nopic);
-			sprite.position.set(100 + i * 130, 272 + j * 20);
-			var sprcount = new PIXI.Text("", { font: "12px Dosis" });
-			sprcount.position.set(102, 4);
-			sprite.addChild(sprcount);
-			(function(_i, _j) {
-				sprite.click = function() {
-					selectedCard = mouseovercode;
-					var card = CardCodes[mouseovercode]
-                    upgradedCard = card.asUpped(true).code
-                    if (isFreeCard(card))
-						tinfo.setText("Costs 50 gold to upgrade");
-				    else tinfo.setText("Convert 6 of these into an upgraded version.");
-                    if ((card.rarity > 0 || card.upped) && card.rarity < 5)
-                    	tinfo2.setText("Sells for " + (card.upped ? cardValues[card.rarity]*5 : cardValues[card.rarity]) + " gold.")
-				    else
-						tinfo2.setText("")
-					twarning.setText("");
-				}
-				sprite.mouseover = function() {
-				    mouseovercode = editorcolumns[_i][1][chosenelement][_j];
-				}
-			})(i, j);
-			sprite.interactive = true;
-			upgradeui.addChild(sprite);
-			editorcolumns[i][0].push(sprite);
-		}
-		for (var j = 0;j < 13;j++) {
-			editorcolumns[i][1].push(filtercards(i > 2,
-                function(x) { return x.element == j && ((i % 3 == 0 && x.type == CreatureEnum) || (i % 3 == 1 && x.type <= PermanentEnum) || (i % 3 == 2 && x.type == SpellEnum)); },
-                editorCardCmp));
-		}
-	}
 	var cardArt = new PIXI.Sprite(nopic);
 	cardArt.position.set(734, 8);
 	upgradeui.addChild(cardArt);
@@ -1827,29 +1819,12 @@ function upgradestore() {
 	selectedCardArt.position.set(534, 8);
 	upgradeui.addChild(selectedCardArt);
 	animCb = function() {
+		cardsel.next(cardpool, {});
 	    if (upgradedCard) {
 	        cardArt.setTexture(getArt(upgradedCard));
 		}
 		if (selectedCard) {
 			selectedCardArt.setTexture(getArt(selectedCard));
-		}
-		for (var i = 0;i < 13;i++) {
-			editoreleicons[i].setTexture(getIcon(i));
-		}
-		for (var i = 0;i < 6;i++) {
-			for (var j = 0;j < editorcolumns[i][1][chosenelement].length;j++) {
-				var spr = editorcolumns[i][0][j], code = editorcolumns[i][1][chosenelement][j], card = CardCodes[code];
-				if (card in cardpool || isFreeCard(card)) spr.visible = true;
-				else spr.visible = false;
-				spr.setTexture(getCardImage(code));
-				var txt = spr.getChildAt(0), card = CardCodes[code], inf = isFreeCard(card);
-				if ((txt.visible = inf || code in cardpool)) {
-					maybeSetText(txt, inf ? "-" : (cardpool[code].toString()));
-				}
-			}
-			for (;j < 15;j++) {
-				editorcolumns[i][0][j].visible = false;
-			}
 		}
 		goldcount.setText(user.gold + "g");
 	}
@@ -2073,14 +2048,6 @@ function startStore() {
 }
 
 function startEditor() {
-	function adjustCardMinus(code, x) {
-		if (code in cardminus) {
-			cardminus[code] += x;
-		} else cardminus[code] = x;
-	}
-	function isFreeCard(card) {
-		return card.type == PillarEnum && !card.upped && !card.rarity;
-	}
 	function processDeck() {
 		for (var i = editordeck.length - 1;i >= 0;i--) {
 			if (!(editordeck[i] in CardCodes)) {
@@ -2122,7 +2089,7 @@ function startEditor() {
 				}
 				if (!isFreeCard(CardCodes[code])) {
 					if ((cardminus[code] || 0) < (cardpool[code] || 0)) {
-						adjustCardMinus(code, 1);
+						adjust(cardminus, code, 1);
 					} else {
 						editordeck.splice(i, 1);
 					}
@@ -2215,7 +2182,6 @@ function startEditor() {
 		if (user && user.ocard) {
 			editorui.addChild(barena);
 		}
-		var editorcolumns = [];
 		var editordecksprites = [];
 		var editordeck = getDeck();
 		var editormarksprite = new PIXI.Sprite(nopic);
@@ -2223,21 +2189,17 @@ function startEditor() {
 		editorui.addChild(editormarksprite);
 		var editormark = 0;
 		processDeck();
-		var editoreleicons = [];
+		var editormarkicons = [];
 		for (var i = 0;i < 13;i++) {
 			var sprite = new PIXI.Sprite(nopic);
-			sprite.position.set(8, 184 + i * 32);
-			var marksprite = new PIXI.Sprite(nopic);
-			marksprite.position.set(200 + i * 32, 210);
-			setInteractive(sprite, marksprite);
+			sprite.position.set(200 + i * 32, 210);
 			(function(_i) {
-				sprite.click = function() { editorelement = _i; }
-				marksprite.click = function() { editormark = _i; }
+				sprite.click = function() { editormark = _i; }
 			})(i);
-			editoreleicons.push([sprite, marksprite]);
+			editormarkicons.push(sprite);
 			editorui.addChild(sprite);
-			editorui.addChild(marksprite);
 		}
+		setInteractive.apply(null, editormarkicons);
 		for (var i = 0;i < 60;i++) {
 			var sprite = new PIXI.Sprite(nopic);
 			sprite.position.set(100 + Math.floor(i / 10) * 100, 8 + (i % 10) * 20);
@@ -2245,7 +2207,7 @@ function startEditor() {
 				sprite.click = function() {
 					var card = CardCodes[editordeck[_i]];
 					if (user && !isFreeCard(card)) {
-						adjustCardMinus(editordeck[_i], -1);
+						adjust(cardminus, editordeck[_i], -1);
 					}
 					editordeck.splice(_i, 1);
 				}
@@ -2257,60 +2219,38 @@ function startEditor() {
 			editorui.addChild(sprite);
 			editordecksprites.push(sprite);
 		}
-		for (var i = 0;i < 6;i++) {
-			editorcolumns.push([[], []]);
-			for (var j = 0;j < 15;j++) {
-				var sprite = new PIXI.Sprite(nopic);
-				sprite.position.set(100 + i * 130, 272 + j * 20);
-				if (user) {
-					var sprcount = new PIXI.Text("", { font: "12px Dosis" });
-					sprcount.position.set(102, 4);
-					sprite.addChild(sprcount);
-				}
-				(function(_i, _j) {
-					sprite.click = function() {
-						if (editordeck.length < 60) {
-							var code = editorcolumns[_i][1][editorelement][_j], card = CardCodes[code];
-							if (user && !isFreeCard(card)) {
-								if (!(code in cardpool) || (code in cardminus && cardminus[code] >= cardpool[code]) ||
-                                    (CardCodes[code].type != PillarEnum && (cardminus[card.asUpped(false).code] || 0) + (cardminus[card.asUpped(true).code] || 0) >= 6)) {
-									return;
-								}
-								adjustCardMinus(code, 1);
-							}
-							for (var i = 0;i < editordeck.length;i++) {
-								var cmp = editorCardCmp(editordeck[i], code);
-								if (cmp >= 0) break;
-							}
-							editordeck.splice(i, 0, code);
+		setInteractive.apply(null, editordecksprites);
+		var cardsel = makeCardSelector(
+			function(code){
+				cardartcode = code;
+			},
+			function(code){
+				if (editordeck.length < 60) {
+					var card = CardCodes[code];
+					if (user && !isFreeCard(card)) {
+						if (!(code in cardpool) || (code in cardminus && cardminus[code] >= cardpool[code]) ||
+							(CardCodes[code].type != PillarEnum && (cardminus[card.asUpped(false).code] || 0) + (cardminus[card.asUpped(true).code] || 0) >= 6)) {
+							return;
 						}
+						adjust(cardminus, code, 1);
 					}
-					sprite.mouseover = function() {
-						cardartcode = editorcolumns[_i][1][editorelement][_j];
+					for (var i = 0;i < editordeck.length;i++) {
+						var cmp = editorCardCmp(editordeck[i], code);
+						if (cmp >= 0) break;
 					}
-				})(i, j);
-				sprite.interactive = true;
-				editorui.addChild(sprite);
-				editorcolumns[i][0].push(sprite);
+					editordeck.splice(i, 0, code);
+				}
 			}
-			for (var j = 0;j < 13;j++) {
-				editorcolumns[i][1].push(filtercards(i > 2,
-                    function(x) { return x.element == j && ((i % 3 == 0 && x.type == CreatureEnum) || (i % 3 == 1 && x.type <= PermanentEnum) || (i % 3 == 2 && x.type == SpellEnum)); },
-                    editorCardCmp));
-			}
-		}
+		);
+		editorui.addChild(cardsel);
 		var cardArt = new PIXI.Sprite(nopic);
 		cardArt.position.set(734, 8);
 		editorui.addChild(cardArt);
 		animCb = function() {
+			cardsel.next(cardpool, cardminus);
 			editormarksprite.setTexture(getIcon(editormark));
 			if (cardartcode) {
 				cardArt.setTexture(getArt(cardartcode));
-			}
-			for (var i = 0;i < 13;i++) {
-				for (var j = 0;j < 2;j++) {
-					editoreleicons[i][j].setTexture(getIcon(i));
-				}
 			}
 			for (var i = 0;i < editordeck.length;i++) {
 				editordecksprites[i].visible = true;
@@ -2318,23 +2258,6 @@ function startEditor() {
 			}
 			for (;i < 60;i++) {
 				editordecksprites[i].visible = false;
-			}
-			for (var i = 0;i < 6;i++) {
-				for (var j = 0;j < editorcolumns[i][1][editorelement].length;j++) {
-					var spr = editorcolumns[i][0][j], code = editorcolumns[i][1][editorelement][j], card = CardCodes[code];
-					if (!user || card in cardpool || isFreeCard(card)) spr.visible = true;
-					else spr.visible = false;
-					spr.setTexture(getCardImage(code));
-					if (user) {
-						var txt = spr.getChildAt(0), card = CardCodes[code], inf = isFreeCard(card);
-						if ((txt.visible = inf || code in cardpool)) {
-							maybeSetText(txt, inf ? "-" : (cardpool[code] - (code in cardminus ? cardminus[code] : 0)).toString());
-						}
-					}
-				}
-				for (;j < 15;j++) {
-					editorcolumns[i][0][j].visible = false;
-				}
 			}
 		}
 		mainStage = editorui;
@@ -3236,14 +3159,12 @@ socket.on("userdump", function(data) {
 	if (!user.quest)
 	    user.quest = {};
 	if (user.freepacks) {
-	    user.freepacks = user.freepacks.split(",");
-	    convertIntInList(user.freepacks);
+	    user.freepacks = user.freepacks.split(",").map(unaryParseInt);
 	}
 	if (!user.ailosses) user.ailosses = 0;
 	if (!user.aiwins) user.aiwins = 0;
 	if (!user.pvplosses) user.pvplosses = 0;
 	if (!user.pvpwins) user.pvpwins = 0;
-	convertQuest();
 	startMenu();
 });
 socket.on("passchange", function(data) {
@@ -3259,7 +3180,11 @@ socket.on("foeleft", function(data) {
 });
 socket.on("chat", function(data) {
 	console.log("message gotten");
-	var msg = (data.u ? "<b>" + sanitizeHtml(data.u) + ":</b> " : "") + sanitizeHtml(data.message);
+	var now = new Date(), h = now.getHours(), m = now.getMinutes(), s = now.getSeconds();
+	if (h < 10) h = "0"+h;
+	if (m < 10) m = "0"+m;
+	if (s < 10) s = "0"+s;
+	var msg = h + " " + m + " " + s + " " + (data.u ? "<b>" + sanitizeHtml(data.u) + ":</b> " : "") + sanitizeHtml(data.message);
 	var color = data.mode == "pm" ? "blue" : data.mode == "info" ? "red" : "black";
 	if (data.mode == "guest")
 		chatBox.innerHTML += "<font color=black><i>" + msg + "</i></font>";
@@ -3277,8 +3202,7 @@ socket.on("mulligan", function(data) {
 });
 socket.on("cardchosen", function(data) {
 	player2Cards = data.cards;
-	console.log("Card recieved")
-	console.log(player2Cards);
+	console.log("Card received: " + player2Cards);
 });
 socket.on("tradedone", function(data) {
 	console.log("Trade done!")
@@ -3375,16 +3299,6 @@ document.addEventListener("click", function(e) {
 		e.preventDefault();
 	}
 });
-function convertQuest() {
-	for (var q in user.quest) {
-		q = parseInt(q);
-	}
-}
-function convertIntInList(list) {
-    for (var i = 0; i < list.length; i++) {
-        list[i] = parseInt(list[i]);
-    }
-}
 function loginClick() {
 	if (!user) {
 		var xhr = new XMLHttpRequest();
@@ -3414,15 +3328,13 @@ function loginClick() {
 							user.quest = {};
 						}
 						if (user.freepacks) {
-						    user.freepacks = user.freepacks.split(",");
-						    convertIntInList(user.freepacks);
+						    user.freepacks = user.freepacks.split(",").map(unaryParseInt);
 						}
 						if (!user.ailosses) user.ailosses = 0;
 						if (!user.aiwins) user.aiwins = 0;
 						if (!user.pvplosses) user.pvplosses = 0;
 						if (!user.pvpwins) user.pvpwins = 0;
 						console.log(user.quest);
-						convertQuest();
 						startMenu();
 					}
 				} else if (this.status == 404) {
@@ -3453,9 +3365,12 @@ function challengeClick() {
 	}
 }
 function tradeClick() {
-	if (Cards && user)
+	if (Cards)
 		userEmit("tradewant", { f: foename.value });
 }
 function rewardClick() {
 	userEmit("codesubmit", { code: foename.value });
+}
+function unaryParseInt(x) {
+	return parseInt(x, 10);
 }
