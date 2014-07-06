@@ -291,7 +291,7 @@ liquid:function(c,t){
 	return c.owner == t.owner && t.active.hit != Actives.vampire && (hp=t.truehp())>5 && hp*t.trueatk();
 },
 livingweapon:function(c,t){
-	return c.owner == t.owner && (t.truehp()<3 || t.status.poison>0) && t.trueatk();
+	return c.owner == t.owner && (t.truehp()<3 || t.status.poison>0) && (!t.owner.weapon || t.trueatk() > t.owner.weapon.trueatk()) && t.trueatk();
 },
 lobotomize:function(c,t){
 	return c.owner != t.owner && (!isEmpty(t.active) || t.status.momentum || t.status.psion);
@@ -366,7 +366,7 @@ precognition:function(c,t){
 	return true;
 },
 purify:function(c,t){
-	return c.owner == t.owner ? t.status.poison>0 : t.sosa; 
+	return c.owner == t.owner ? t.status.poison>0 : t.sosa;
 },
 queen:function(c,t){
 	return true;

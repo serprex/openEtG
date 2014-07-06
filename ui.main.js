@@ -1291,7 +1291,7 @@ function adjust(cardminus, code, x) {
 	} else cardminus[code] = x;
 }
 function makeCardSelector(cardmouseover, cardclick){
-	var poolcache = {};
+	var poolcache;
 	var cardsel = new PIXI.DisplayObjectContainer();
 	cardsel.interactive = true;
 	var elefilter = 0, rarefilter = 0;
@@ -1355,9 +1355,12 @@ function makeCardSelector(cardmouseover, cardclick){
 				}, editorCardCmp);
 		}
 	}
-	makeColumns();
 	cardsel.next = function(cardpool, cardminus){
+		var needToMakeCols = poolcache != cardpool;
 		poolcache = cardpool;
+		if (needToMakeCols){
+			makeColumns();
+		}
 		for (var i = 0;i < 13;i++) {
 			eleicons[i].setTexture(getIcon(i));
 		}

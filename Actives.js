@@ -1210,7 +1210,7 @@ throwrock:function(c,t){
 	var dmg = c.card.upped?4:3;
 	Effect.mkText("-"+dmg, tgtToPos(t));
 	t.spelldmg(dmg);
-	t.owner.deck.splice(c.owner.upto(t.owner.deck.length), 0, Card.ThrowRock.asUpped(c.card.upped));
+	t.owner.deck.splice(c.owner.upto(t.owner.deck.length), 0, Cards.ThrowRock.asUpped(c.card.upped));
 },
 tick:function(c,t){
 	c.dmg(c.card.upped?2:1);
