@@ -203,9 +203,9 @@ function useruser(servuser){
     return {
         auth: servuser.auth,
         name: servuser.name,
-        deck0: servuser.deck0 || "",
-        deck1: servuser.deck1 || "",
-        deck2: servuser.deck2 || "",
+        deck0: servuser.deck0,
+        deck1: servuser.deck1,
+        deck2: servuser.deck2,
         selectedDeck: servuser.selectedDeck || 0,
         pool: servuser.pool,
         gold: servuser.gold,
@@ -326,7 +326,7 @@ io.on("connection", function(socket) {
 		});
 	});
 	userEvent(socket, "arenatop", function(data, user){
-		db.zrevrange("arena", 0, 9,'withscores', function(err, obj){
+		db.zrevrange("arena", 0, 9, "withscores", function(err, obj){
 			socket.emit("arenatop", obj);
 		});
 	});

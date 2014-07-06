@@ -1308,7 +1308,7 @@ function makeCardSelector(cardmouseover, cardclick){
 		eleicons.push(sprite);
 		cardsel.addChild(sprite);
 	}
-	for (var i = 0;i < 5; i++){
+	for (var i = 0;i < 6; i++){
 		var sprite = new PIXI.Sprite(nopic);
 		sprite.position.set(48, 196 + i * 32);
 		(function(_i) {
@@ -1361,7 +1361,7 @@ function makeCardSelector(cardmouseover, cardclick){
 		for (var i = 0;i < 13;i++) {
 			eleicons[i].setTexture(getIcon(i));
 		}
-		for (var i = 0;i < 5;i++) {
+		for (var i = 0;i < 6;i++) {
 			rareicons[i].setTexture(getRareIcon(i));
 		}
 		for (var i = 0;i < 6;i++) {
