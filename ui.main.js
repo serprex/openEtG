@@ -1,8 +1,22 @@
 var Cards, CardCodes, Targeting, targetingMode, targetingModeCb, targetingText, game, discarding, animCb, user, renderer, endturnFunc, cancelFunc, accepthandfunc, foeDeck, player2summon, player2Cards, guestname;
 (function(g) {
-	var htmlElements = ["leftpane", "chatArea", "chatinput", "deckimport", "aideck", "foename", "airefresh", "change", "login", "password", "challenge", "aievalopt", "chatBox", "trade", "bottompane", "demigodmode"];
+	var htmlElements = ["leftpane", "chatArea", "chatinput", "deckimport", "aideck", "foename", "airefresh", "change", "login", "password", "challenge", "aievalopt", "chatBox", "trade", "bottompane", "demigodmode", "username"];
 	for (var i = 0;i < htmlElements.length;i++) {
 		g[htmlElements[i]] = document.getElementById(htmlElements[i]);
+	}
+	if (localStorage){
+		var store = [airefresh, username, aievalopt];
+		for (var i=0; i<store.length; i++){
+			(function(storei){
+				if (localStorage[storei.id] !== undefined){
+					storei[storei.type == "checkbox" ? "checked" : "value"] = localStorage[storei.id];
+				}
+				storei.onchange = function(e){
+					console.log(storei.id + " " + storei.value);
+					localStorage[storei.id] = storei[storei.type == "checkbox" ? "checked" : "value"];
+				}
+			})(store[i]);
+		}
 	}
 })(window);
 var etg = require("./etgutil");
@@ -326,7 +340,6 @@ function getWeaponShieldImage(code) {
 	}
 }
 function initTrade(data) {
-	player2Cards = [];
 	cardChosen = false;
 	if (data.first) myTurn = true;
 	var editorui = new PIXI.DisplayObjectContainer(), tradeelement = 0;
@@ -753,7 +766,7 @@ function victoryScreen() {
 	var posY = game.cardreward ? 130 : 250;
 	tinfo = makeText(posX, posY, victoryText, true);
 	tinfo.anchor.x = 0.5;
-	var bexit = makeButton(420, 430, 75, 18, buttons.exit);
+	var bexit = makeButton(412, 430, 75, 18, buttons.exit);
 
 	bexit.click = function() {
 		if (game.cardreward) {
@@ -777,23 +790,31 @@ function victoryScreen() {
 		tgold = makeText(340, 550, "Gold won:      " + goldshown, true);
 		var igold = PIXI.Sprite.fromImage("assets/gold.png");
 		igold.position.set(420, 550);
-		igold.visible = true;
 		victoryui.addChild(tgold);
 		victoryui.addChild(igold);
 	}
 	if (game.cardreward) {
+		var rewards = [];
 		game.cardreward = listify(game.cardreward);
 		console.log("rewards: " + game.cardreward);
 		for (var i = 0;i < game.cardreward.length;i++) {
-			var cardArt = new PIXI.Sprite(getArt(game.cardreward[i]));
-			cardArt.position.set(380-game.cardreward.length*20+i*40, 170);
+			var cardArt = new PIXI.Sprite(nopic);
+			cardArt.anchor.x = .5;
+			cardArt.position.set(470-game.cardreward.length*20+i*40, 170);
+			rewards.push(cardArt);
 			victoryui.addChild(cardArt);
 		}
 	}
 	victoryui.addChild(tinfo);
 	victoryui.addChild(bexit);
 
-	animCb = undefined;
+	animCb = function(){
+		if (game.cardreward){
+			for(var i=0; i<game.cardreward.length; i++){
+				rewards[i].setTexture(getArt(game.cardreward[i]));
+			}
+		}
+	}
 
 	mainStage = victoryui;
 	refreshRenderer();
@@ -2252,6 +2273,9 @@ function startEditor() {
 			if (cardartcode) {
 				cardArt.setTexture(getArt(cardartcode));
 			}
+			for (var i = 0;i < 13;i++) {
+				editormarkicons[i].setTexture(getIcon(i));
+			}
 			for (var i = 0;i < editordeck.length;i++) {
 				editordecksprites[i].visible = true;
 				editordecksprites[i].setTexture(getCardImage(editordeck[i]));
@@ -2399,7 +2423,7 @@ function startMatch() {
 		maybeSetText(winnername, game.winner ? (game.winner == game.player1 ? "Won " : "Lost ") + game.ply : "");
 		maybeSetButton(game.winner ? null : endturn, endturn);
 		if (!game.winner || !user) {
-			var cardartcode;
+			var cardartcode, cardartx;
 			infobox.setTexture(nopic);
 			for (var i = 0;i < foeplays.children.length;i++) {
 				var foeplay = foeplays.children[i];
@@ -2421,6 +2445,7 @@ function startMatch() {
 						var cr = pl.creatures[i];
 						if (cr && hitTest(creasprite[j][i], pos)) {
 							cardartcode = cr.card.code;
+							cardartx = creasprite[j][i].position.x;
 							setInfo(cr);
 						}
 					}
@@ -2428,15 +2453,18 @@ function startMatch() {
 						var pr = pl.permanents[i];
 						if (pr && hitTest(permsprite[j][i], pos)) {
 							cardartcode = pr.card.code;
+							cardartx = permsprite[j][i].position.x;
 							setInfo(pr);
 						}
 					}
 					if (pl.weapon && hitTest(weapsprite[j], pos)) {
 						cardartcode = pl.weapon.card.code;
+						cardartx = weapsprite[j].position.x;
 						setInfo(pl.weapon);
 					}
 					if (pl.shield && hitTest(shiesprite[j], pos)) {
 						cardartcode = pl.shield.card.code;
+						cardartx = shiesprite[j].position.x;
 						setInfo(pl.shield);
 					}
 				}
@@ -2444,7 +2472,7 @@ function startMatch() {
 			if (cardartcode) {
 				cardart.setTexture(getArt(cardartcode));
 				cardart.visible = true;
-				cardart.position.y = pos.y > 300 ? 44 : 300;
+				cardart.position.set(cardartx || 654, pos.y > 300 ? 44 : 300);
 			} else cardart.visible = false;
 		} else {
 			if (game.winner == game.player1 && !game.quest && game.player2.ai) {
@@ -2505,7 +2533,7 @@ function startMatch() {
 			for (var i = 0;i < game.player1.hand.length;i++) {
 				var card = game.player1.hand[i].card;
 				if (game.player1.canspend(card.costele, card.cost)) {
-					fgfx.beginFill(elecols[card.costele]);
+					fgfx.beginFill(elecols[Light]);
 					fgfx.drawRect(handsprite[0][i].position.x + 100, handsprite[0][i].position.y, 20, 20);
 					fgfx.endFill();
 				}
@@ -2798,7 +2826,7 @@ function startMatch() {
 			graphics.addChild(template);
 			rend.render(graphics);
 			infobox.setTexture(rend);
-			infobox.anchor.set(0.5, 0);
+			infobox.anchor.x = 0.5;
 			var mousePosition = realStage.getMousePosition();
 			infobox.position.set(mousePosition.x, mousePosition.y-(y+10));
 			infobox.visible = true;
@@ -3021,7 +3049,8 @@ function startMatch() {
 	gameui.addChild(anims);
 	Effect.register(anims);
 	var cardart = new PIXI.Sprite(nopic);
-	cardart.position.set(600, 300);
+	cardart.position.set(654, 300);
+	cardart.anchor.set(.5, 0);
 	gameui.addChild(cardart);
 	mainStage = gameui;
 	refreshRenderer();

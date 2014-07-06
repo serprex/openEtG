@@ -132,7 +132,9 @@ var sockinfo = {};
 process.on("SIGTERM", process.exit).on("SIGINT", process.exit);
 process.on("exit", function(){
 	for(var u in users){
-		db.hmset("U:"+u, users[u]);
+		if (users.pool || users.accountbound){
+			db.hmset("U:"+u, users[u]);
+		}
 	}
 	db.quit();
 });
@@ -155,7 +157,7 @@ function foeEcho(socket, event){
 }
 function activeUsers() {
 	var activeusers = [];
-	for (var username in users) {
+	for (var username in usersock) {
 		var sock = usersock[username];
 		if (sock && sock.connected){
 			activeusers.push(username);
