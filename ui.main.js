@@ -1798,12 +1798,12 @@ function upgradestore() {
 
 function startStore() {
 	var packdata = [
-		{amount: 9, cost: 15, info: "Bronze Pack: 9x Common"},
-		{amount: 6, cost: 25, info: "Silver Pack: 3x Common + 3x Uncommon"},
-		{amount: 8, cost: 65, info: "Gold Pack: 3x Common + 4x Uncommon + 1x Rare"},
-		{amount: 9, cost: 100, info: "Platinum Pack: 4x Common + 3x Uncommon + 1x Rare + 1x Shard"},
+		{amount: 9, cost: 15, rare: [], info: "Bronze Pack: 9 Commons"},
+		{amount: 6, cost: 25, rare: [3], info: "Silver Pack: 3 Commons, 3 Uncommons"},
+		{amount: 8, cost: 65, rare: [3, 7], info: "Gold Pack: 3 Commons, 4 Uncommons, 1 Rare"},
+		{amount: 9, cost: 100, rare: [4, 7, 8], info: "Platinum Pack: 4 Commons, 3 Uncommons, 1 Rare, 1 Shard"},
 	];
-	var packtype = 0, packrarity = 0, newCards = [], newCardsArt = [];
+	var packele = -1, packrarity = -1, newCards = [], newCardsArt = [];
 
 	var storeui = new PIXI.DisplayObjectContainer();
 	storeui.interactive = true;
@@ -1850,21 +1850,21 @@ function startStore() {
 	//buy button
 	var bbuy = makeButton(750, 156, 75, 18, buttons.buypack);
 	bbuy.click = function() {
-		if (!packrarity) {
+		if (packrarity == -1) {
 			tinfo2.setText("Select a pack first!");
 			return;
 		}
-		if (!packtype) {
+		if (packele == -1) {
 			tinfo.setText("Select an element first!");
 			return;
 		}
-		var pack = packdata[packrarity-1];
-		if (user.gold >= pack.cost || user.freepacks[packrarity-1] > 0) {
+		var pack = packdata[packrarity];
+		if (user.gold >= pack.cost || user.freepacks[packrarity] > 0) {
 			var accountbound = false;
 
-			if (user.freepacks[packrarity - 1] > 0){
-				userEmit("usefreepack", {type: packrarity-1});
-				user.freepacks[packrarity - 1]--;
+			if (user.freepacks[packrarity] > 0){
+				userEmit("usefreepack", {type: packrarity});
+				user.freepacks[packrarity]--;
 				accountbound = true;
 			}
 			else {
@@ -1874,14 +1874,9 @@ function startStore() {
 
 			for (var i = 0;i < pack.amount;i++) {
 				var rarity = 1;
-				if ((packrarity == 2 && i >= 3) || (packrarity == 3 && i >= 3) || (packrarity == 4 && i>=4))
-					rarity = 2;
-				if ((packrarity == 3 && i >= 7) || (packrarity == 4 && i >= 7))
-					rarity = 3;
-				if (packrarity == 4 && i >= 8)
-					rarity = 4;
+				while (i >= pack.rare[rarity-1]) rarity++;
 				var fromElement = Math.random() > .4;
-				newCards[i] = PlayerRng.randomcard(false, function(x) { return (x.element == packtype) ^ fromElement && x.type != PillarEnum && x.rarity == rarity }).code;
+				newCards[i] = PlayerRng.randomcard(false, function(x) { return (x.element == packele) ^ fromElement && x.type != PillarEnum && x.rarity == rarity }).code;
 				newCardsArt[i].visible = true;
 			}
 			for (; i < newCardsArt.length; i++){
@@ -1905,13 +1900,13 @@ function startStore() {
 	storeui.addChild(bbuy);
 
 	function updateFreeText(){
-		freeinfo.setText(user.freepacks[packrarity - 1] ? "Free boosters of this type left: " + user.freepacks[packrarity - 1] : "");
+		freeinfo.setText(user.freepacks[packrarity] ? "Free boosters of this type left: " + user.freepacks[packrarity] : "");
 	}
 
 	// The different pack types
 	function gradeSelect(x){
 		return function(){
-			packrarity = x+1;
+			packrarity = x;
 			tinfo2.setText(packdata[x].info);
 			updateFreeText();
 		}
@@ -1929,12 +1924,12 @@ function startStore() {
 	bplatinum.click = gradeSelect(3);
 	storeui.addChild(bplatinum);
 
-	for (var i = 1;i < 13;i++) {
-		var elementbutton = makeButton(75 + Math.floor((i-1) / 2)*75, 120 + ((i-1) % 2)*75, 32, 32, eicons[i]);
+	for (var i = 0;i < 12;i++) {
+		var elementbutton = makeButton(75 + Math.floor(i / 2)*75, 120 + (i % 2)*75, 32, 32, eicons[i]);
 		(function(_i) {
 			elementbutton.click = function() {
-				packtype = _i;
-				tinfo.setText("Selected Element: " + descr[_i]);
+				packele = _i + 1;
+				tinfo.setText("Selected Element: " + descr[packele]);
 			}
 		})(i);
 		storeui.addChild(elementbutton);
@@ -2193,19 +2188,19 @@ function startEditor() {
 	}
 }
 var descr = [
-        "Chroma",
-        "Entropy",
-        "Death",
-        "Gravity",
-        "Earth",
-        "Life",
-        "Fire",
-        "Water",
-        "Light",
-        "Air",
-        "Time",
-        "Darkness",
-        "Aether"
+	"Chroma",
+	"Entropy",
+	"Death",
+	"Gravity",
+	"Earth",
+	"Life",
+	"Fire",
+	"Water",
+	"Light",
+	"Air",
+	"Time",
+	"Darkness",
+	"Aether"
 ];
 function startElementSelect() {
 	var stage = new PIXI.DisplayObjectContainer();
