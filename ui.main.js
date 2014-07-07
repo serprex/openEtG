@@ -1803,15 +1803,13 @@ function upgradestore() {
 }
 
 function startStore() {
-	var packtype = 0;
-	var packrarity = 0;
-	var cardamount = 0;
-	var cost = 0;
-	var newCards = [];
-	var newCardsArt = new PIXI.DisplayObjectContainer();
+	var packtype = 0, packrarity = 0, cardamount = 0, cost = 0, newCards = [];
 
 	var storeui = new PIXI.DisplayObjectContainer();
 	storeui.interactive = true;
+
+	var newCardsArt = new PIXI.DisplayObjectContainer();
+	storeui.addChild(newCardsArt);
 
 	//shop background
 	var bgshop = new PIXI.Sprite(backgrounds[2]);
