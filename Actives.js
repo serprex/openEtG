@@ -450,7 +450,7 @@ gas:function(c,t){
 	new Permanent(Cards.UnstableGas.asUpped(c.card.upped), c.owner).place();
 },
 give:function(c,t){
-	c.owner.dmg(-5);
+	c.owner.dmg(c.card.upped?-10:-5);
 	if (t instanceof Creature){
 		if (t.hasactive("auto", "singularity")){
 			t.die();
