@@ -35,8 +35,8 @@ function loginRespond(res, servuser, pass){
 		}
 		res.writeHead("200");
 		db.hgetall("Q:" + user.name, function (err, obj) {
-		    user.quest = obj;
-            res.end(JSON.stringify(user));
+			user.quest = quests[user.name] = obj;
+			res.end(JSON.stringify(user));
 		});
 	}
 	if(!servuser.salt){
@@ -124,6 +124,7 @@ function cardRedirect(req, res, next){
 }
 
 var users = {};
+var quests = {};
 var duels = {};
 var trades = {};
 var usersock = {};
@@ -194,10 +195,6 @@ function userEvent(socket, event, func){
 }
 function prepuser(servuser){
 	servuser.gold = parseInt(servuser.gold || 0);
-	if (servuser.starter && servuser.accountbound){
-		servuser.accountbound += servuser.starter;
-		servuser.starter = "";
-	}
 }
 function useruser(servuser){
     return {
@@ -216,7 +213,7 @@ function useruser(servuser){
         ailosses: parseInt(servuser.ailosses) || 0,
         pvpwins: parseInt(servuser.pvpwins) || 0,
         pvplosses: parseInt(servuser.pvplosses) || 0,
-		quest: servuser.quest
+		quest: quests[servuser.name]
 	};
 }
 function getDay(){
@@ -257,7 +254,7 @@ io.on("connection", function(socket) {
 		user.pool = "";
 		user.accountbound = user.deck0;
 		user.freepacks = "3,2,0,0";
-		user.quest = { necromancer: 1 };
+		quests[user.name] = { necromancer: 1 };
 		user.aiwins = 0;
 		user.ailosses = 0;
 		user.pvpwins = 0;

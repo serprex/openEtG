@@ -70,7 +70,7 @@ function evalGameState(game) {
 		enchant:6,
 		endow:4,
 		epidemic:4,
-		evolve:5,
+		evolve:2,
 		fickle:3,
 		fire:1,
 		firebolt:10,
