@@ -1860,18 +1860,6 @@ function startStore() {
 		}
 		var pack = packdata[packrarity];
 		if (user.gold >= pack.cost || user.freepacks[packrarity] > 0) {
-			var accountbound = false;
-
-			if (user.freepacks[packrarity] > 0){
-				userEmit("usefreepack", {type: packrarity});
-				user.freepacks[packrarity]--;
-				accountbound = true;
-			}
-			else {
-				user.gold -= pack.cost;
-				userEmit("subgold", { g: pack.cost });
-			}
-
 			for (var i = 0;i < pack.amount;i++) {
 				var rarity = 1;
 				while (i >= pack.rare[rarity-1]) rarity++;
@@ -1882,11 +1870,15 @@ function startStore() {
 			for (; i < newCardsArt.length; i++){
 				newCardsArt[i].visible = false;
 			}
-			if (!accountbound) {
+			if (user.freepacks[packrarity] > 0) {
+				user.freepacks[packrarity]--;
+				userEmit("usefreepack", {type: packrarity});
 				userEmit("add", { add: etg.encodedeck(newCards) });
 				Array.prototype.push.apply(user.pool, newCards);
 			}
 			else {
+				user.gold -= pack.cost;
+				userEmit("subgold", { g: pack.cost });
 				userEmit("addaccountbound", { add: etg.encodedeck(newCards) });
 				Array.prototype.push.apply(user.accountbound, newCards);
 			}
