@@ -1,4 +1,4 @@
-function evalGameState(game) {
+module.exports = function(game) {
 	"use strict";
 	var disableLogging = true;
 	function log(){

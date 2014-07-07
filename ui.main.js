@@ -8,12 +8,12 @@ var Cards, CardCodes, Targeting, targetingMode, targetingModeCb, targetingText, 
 		var store = [airefresh, username, aievalopt];
 		for (var i=0; i<store.length; i++){
 			(function(storei){
+				var field = storei.type == "checkbox" ? "checked" : "value";
 				if (localStorage[storei.id] !== undefined){
-					storei[storei.type == "checkbox" ? "checked" : "value"] = localStorage[storei.id];
+					storei[field] = localStorage[storei.id];
 				}
 				storei.onchange = function(e){
-					console.log(storei.id + " " + storei.value);
-					localStorage[storei.id] = storei[storei.type == "checkbox" ? "checked" : "value"];
+					localStorage[storei.id] = field == "checked" && !storei[field] ? "" : storei[field];
 				}
 			})(store[i]);
 		}
@@ -24,6 +24,8 @@ var MersenneTwister = require("./MersenneTwister");
 var Actives = require("./Actives");
 var Effect = require("./Effect");
 var Quest = require("./Quest");
+var aiTargeting = require("./ai.targeting");
+var evalGameState = require("./ai.eval");
 var myTurn = false;
 var cardChosen = false;
 loadcards(function(cards, cardcodes, targeting) {
@@ -525,12 +527,12 @@ function initGame(data, ai) {
 	}
 	startMatch();
 }
-function getDeck() {
-    if (user) {
-		return user.decks[user.selectedDeck] || [];
+function getDeck(limit) {
+	var deck = user ? user.decks[user.selectedDeck] : (deckimport.value || "").split(" ");
+	if (limit && deck.length > 60){
+		deck.length = 60;
 	}
-	var deckstring = deckimport.value;
-	return deckstring ? deckstring.split(" ") : [];
+	return deck;
 }
 var aiDelay = 0;
 function aiEvalFunc() {
@@ -539,6 +541,7 @@ function aiEvalFunc() {
 	Effect.disable = true;
 	game = cloneGame(game);
 	var self = game.player2;
+	var limit = 9000000;
 	function mkcommand(cbits, tbits) {
 		return ["cast", cbits | tbits << 9];
 	}
@@ -547,10 +550,11 @@ function aiEvalFunc() {
 			var cbits = tgtToBits(c) ^ 8;
 			var candidates = [fullCandidates[0]];
 			function evalIter(t, ignoret) {
-				if (ignoret || (t && targetingMode(t))) {
+				if ((ignoret || (t && targetingMode(t))) && limit > 0) {
 					var tbits = tgtToBits(t) ^ 8;
 					var gameBack2 = game, targetingModeBack = targetingMode, targetingModeCbBack = targetingModeCb;
 					game = cloneGame(game);
+					limit--;
 					var tone = bitsToTgt(tbits);
 					bitsToTgt(cbits).useactive(tone);
 					var cmdcopy = commands.slice();
@@ -588,15 +592,12 @@ function aiEvalFunc() {
 				console.log("in " + active.activename);
 				for (var j = 0;j < 2;j++) {
 					var pl = j == 0 ? c.owner : c.owner.foe;
-					console.log("1:" + (pl.game == game));
 					evalIter(pl);
-					console.log("2:" + (pl.game == game));
 					evalIter(pl.weapon);
 					evalIter(pl.shield);
 					for (var i = 0;i < 23;i++) {
 						evalIter(pl.creatures[i]);
 					}
-					console.log("3:" + (pl.game == game));
 					for (var i = 0;i < 16;i++) {
 						evalIter(pl.permanents[i]);
 					}
@@ -646,6 +647,7 @@ function aiEvalFunc() {
 		return fullCandidates;
 	}
 	var cmd = iterLoop(1, [])[1];
+	console.log("Leftover iters: " + limit);
 	game = gameBack;
 	Effect.disable = disableEffectsBack;
 	if (cmd) {
@@ -673,7 +675,7 @@ function aiFunc() {
 		var cmd;
 		getTarget(c, active, function(t) {
 			targetingMode = null;
-			if (!t && !ActivesEval[active.activename](c)) {
+			if (!t && !aiTargeting.evalFuncs[active.activename](c)) {
 				console.log("Hold " + active.activename);
 				return;
 			}
@@ -681,7 +683,7 @@ function aiFunc() {
 		});
 		if (targetingMode) {
 			console.log("in " + active.activename);
-			var t = evalPickTarget(c, active, targetingMode);
+			var t = aiTargeting.pickTarget(c, active, targetingMode);
 			console.log("out " + (t ? (t instanceof Player ? "player" : t.card.name) : ""));
 			if (t) {
 				targetingModeCb(t);
@@ -1110,65 +1112,42 @@ function mkAi(level) {
 	}
 }
 
-// Asset Loaders
+// Asset Loading
 var nopic = PIXI.Texture.fromImage("assets/null.png")
-var imageLoadingNumber = 9;
 var goldtex = nopic;
-var goldLoader = new PIXI.AssetLoader(["assets/gold.png"]);
-goldLoader.onComplete = function() {
-	goldtex = PIXI.Texture.fromImage("assets/gold.png");
-	maybeStartMenu();
-}
-goldLoader.load();
-
-var questIcons = [];
-var questLoader = new PIXI.AssetLoader(["assets/questIcons.png"]);
-questLoader.onComplete = function() {
-	var tex = PIXI.Texture.fromImage("assets/questIcons.png");
+var backgrounds = ["assets/bg_default.png", "assets/bg_lobby.png", "assets/bg_shop.png", "assets/bg_quest.png", "assets/bg_game.png"];
+var questIcons = [], eicons = [], rarityicons = [], cardBacks = [], cardBorders = [], boosters = [], popups = [], typeicons = [];
+var buttonsList = [];
+var buttons = {};
+var preLoader = new PIXI.AssetLoader(["assets/gold.png", "assets/questIcons.png", "assets/esheet.png", "assets/raritysheet.png", "assets/backsheet.png",
+	"assets/cardborders.png", "assets/boosters.png", "assets/popup_booster.png", "assets/typesheet.png", "assets/buttons.png"].concat(backgrounds));
+preLoader.onComplete = function() {
+	goldtex = PIXI.Texture.fromFrame("assets/gold.png");
+	var tex = PIXI.Texture.fromFrame("assets/questIcons.png");
 	for (var i = 0;i < 2;i++) {
 		questIcons.push(new PIXI.Texture(tex, new PIXI.Rectangle(i * 32, 0, 32, 32)));
 	}
-	maybeStartMenu();
-}
-questLoader.load();
-
-var backgrounds = ["assets/bg_default.png", "assets/bg_lobby.png", "assets/bg_shop.png", "assets/bg_quest.png", "assets/bg_game.png"];
-var bgLoader = new PIXI.AssetLoader(backgrounds);
-bgLoader.onComplete = function() {
-	for (var i = 0;i < 5;i++){
-		backgrounds[i] = PIXI.Texture.fromImage(backgrounds[i]);
+	for (var i = 0;i < backgrounds.length;i++){
+		backgrounds[i] = PIXI.Texture.fromFrame(backgrounds[i]);
 	}
-	maybeStartMenu();
-}
-bgLoader.load();
-
-var eicons = [], rarityicons = [];
-var eleLoader = new PIXI.AssetLoader(["assets/esheet.png", "assets/raritysheet.png"]);
-eleLoader.onComplete = function() {
-	var tex = PIXI.Texture.fromImage("assets/esheet.png");
+	var tex = PIXI.Texture.fromFrame("assets/esheet.png");
 	for (var i = 0;i < 13;i++) eicons.push(new PIXI.Texture(tex, new PIXI.Rectangle(i * 32, 0, 32, 32)));
-	var tex = PIXI.Texture.fromImage("assets/raritysheet.png");
+	var tex = PIXI.Texture.fromFrame("assets/raritysheet.png");
 	for (var i = 0;i < 6;i++) rarityicons.push(new PIXI.Texture(tex, new PIXI.Rectangle(i * 10, 0, 10, 10)));
-	maybeStartMenu();
-}
-eleLoader.load();
-
-var cardBacks = [], cardBorders = [];
-var backLoader = new PIXI.AssetLoader(["assets/backsheet.png", "assets/cardborders.png"]);
-backLoader.onComplete = function() {
-	var tex = PIXI.Texture.fromImage("assets/backsheet.png");
+	var tex = PIXI.Texture.fromFrame("assets/backsheet.png");
 	for (var i = 0;i < 26;i++) cardBacks.push(new PIXI.Texture(tex, new PIXI.Rectangle(i * 132, 0, 132, 256)));
-	var tex = PIXI.Texture.fromImage("assets/cardborders.png");
+	var tex = PIXI.Texture.fromFrame("assets/cardborders.png");
 	for (var i = 0;i < 26;i++) cardBorders.push(new PIXI.Texture(tex, new PIXI.Rectangle(i * 128, 0, 128, 162)));
-	maybeStartMenu();
-}
-backLoader.load();
-
-var buttonsList = [];
-var buttons = {};
-var buttonLoader = new PIXI.AssetLoader(["assets/buttons.png"]);
-buttonLoader.onComplete = function() {
-	var tex = PIXI.Texture.fromImage("assets/buttons.png");
+	var tex = PIXI.Texture.fromFrame("assets/boosters.png");
+	for (var i = 0;i < 2;i++)
+		for (var j = 0;j < 4;j++)
+			boosters.push(new PIXI.Texture(tex, new PIXI.Rectangle(j * 100, i * 150, 100, 150)));
+	popups.push(PIXI.Texture.fromFrame("assets/popup_booster.png"));
+	var tex = PIXI.Texture.fromFrame("assets/typesheet.png");
+	for (var i = 0;i < 6;i++) {
+		typeicons.push(new PIXI.Texture(tex, new PIXI.Rectangle(25*i,0,25,25)));
+	}
+	var tex = PIXI.Texture.fromFrame("assets/buttons.png");
 	for (var i = 0;i < 10;i++) {
 		for (var j = 0;j < 5;j++) {
 			buttonsList.push(new PIXI.Texture(tex, new PIXI.Rectangle(j * 72, i * 22, 72, 22)));
@@ -1207,38 +1186,10 @@ buttonLoader.onComplete = function() {
 		sellupgrade: buttonsList[29],
 		trade: buttonsList[30]
 	}
-	maybeStartMenu();
+	startMenu();
+	requestAnimate();
 }
-buttonLoader.load();
-
-var boosters = [];
-var boosterLoader = new PIXI.AssetLoader(["assets/boosters.png"]);
-boosterLoader.onComplete = function() {
-	var tex = PIXI.Texture.fromImage("assets/boosters.png");
-	for (var i = 0;i < 2;i++)
-		for (var j = 0;j < 4;j++)
-			boosters.push(new PIXI.Texture(tex, new PIXI.Rectangle(j * 100, i * 150, 100, 150)));
-	maybeStartMenu();
-}
-boosterLoader.load();
-
-var popups = [];
-var popupLoader = new PIXI.AssetLoader(["assets/popup_booster.png"]);
-popupLoader.onComplete = function() {
-	for (var i = 0;i < 1;i++) popups.push(PIXI.Texture.fromImage("assets/popup_booster.png"));
-	maybeStartMenu();
-}
-popupLoader.load();
-var typeicons = [];
-var typeloader = new PIXI.AssetLoader(["assets/typesheet.png"]);
-typeloader.onComplete = function() {
-	var sheet = PIXI.Texture.fromImage("assets/typesheet.png");
-	for (var i = 0;i < 6;i++) {
-		typeicons.push(new PIXI.Texture(sheet, new PIXI.Rectangle(25*i,0,25,25)));
-	}
-	maybeStartMenu();
-}
-typeloader.load();
+preLoader.load();
 function makeButton(x, y, w, h, i, mouseoverfunc) {
 	var b = new PIXI.Sprite(i);
 	b.position.set(x, y);
@@ -1380,14 +1331,6 @@ function makeCardSelector(cardmouseover, cardclick){
 		}
 	};
 	return cardsel;
-}
-function maybeStartMenu() {
-	imageLoadingNumber--;
-	console.log(imageLoadingNumber);
-	if (imageLoadingNumber == 0) {
-		startMenu();
-		requestAnimate();
-	}
 }
 function startMenu() {
 	menuui = new PIXI.DisplayObjectContainer();
@@ -1708,8 +1651,6 @@ function startQuestWindow() {
 		}
 		button.click = function() {
 			var errText = mkQuestAi(quest, stage);
-			/*console.log("error text was: ",errText)
-			console.log("errText ? evaluates as:", errText ? "true" : "false")*/
 			errText ? errinfo.setText(errText) : errinfo.setText("");
 		}
 		return button;
@@ -2161,6 +2102,9 @@ function startEditor() {
 		}
 		bimport.click = function() {
 			editordeck = deckimport.value.split(" ");
+			if (editordeck.length > 60){
+				editordeck.length = 60;
+			}
 			if (user) {
 				userEmit("setdeck", { d: etg.encodedeck(editordeck), number: user.selectedDeck });
 				user.decks[user.selectedDeck] = editordeck;
@@ -2171,21 +2115,21 @@ function startEditor() {
 		    editordeck.push(TrueMarks[editormark]);
 		    userEmit("setdeck", { d: etg.encodedeck(editordeck), number: user.selectedDeck });
 		    user.selectedDeck = 0;
-		    editordeck = getDeck();
+		    editordeck = getDeck(true);
 		    processDeck();
 		}
 		bdeck2.click = function () {
 		    editordeck.push(TrueMarks[editormark]);
 		    userEmit("setdeck", { d: etg.encodedeck(editordeck), number: user.selectedDeck });
 		    user.selectedDeck = 1;
-		    editordeck = getDeck();
+		    editordeck = getDeck(true);
 		    processDeck();
 		}
 		bdeck3.click = function () {
 		    editordeck.push(TrueMarks[editormark]);
 		    userEmit("setdeck", { d: etg.encodedeck(editordeck), number: user.selectedDeck });
 		    user.selectedDeck = 2;
-		    editordeck = getDeck();
+		    editordeck = getDeck(true);
 		    processDeck();
 		}
 		barena.click = function() {
@@ -2212,7 +2156,7 @@ function startEditor() {
 			editorui.addChild(barena);
 		}
 		var editordecksprites = [];
-		var editordeck = getDeck();
+		var editordeck = getDeck(true);
 		var editormarksprite = new PIXI.Sprite(nopic);
 		editormarksprite.position.set(100, 210);
 		editorui.addChild(editormarksprite);

@@ -1,4 +1,4 @@
-function evalPickTarget(c, active, targeting){
+exports.pickTarget = function(c, active, targeting){
 	var eval = ActivesEval[active.activename];
 	if (!eval)return;
 	var candidates = [0];
@@ -475,3 +475,4 @@ yoink:function(c,t){
 	return !t.owner.sanctuary && c.owner.hand.length < 8 && (!c.owner.precognition || t.owner.quanta[t.card.costele] >= t.card.cost);
 },
 }
+exports.evalFuncs = ActivesEval;
