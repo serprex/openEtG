@@ -396,7 +396,7 @@ io.on("connection", function(socket) {
 	        user.accountbound = etgutil.addcard(user.accountbound, add[i]);
 	    }
 	});
-	userEvent(socket, "foewant", function(data){
+	userEvent(socket, "foewant", function(data, user){
 		var u=data.u, f=data.f;
 		if (u == f){
 			return;
@@ -411,7 +411,7 @@ io.on("connection", function(socket) {
 				var first = seed < etgutil.MAX_INT / 2;
 				sockinfo[this.id].foe = usersock[f];
 				sockinfo[usersock[f].id].foe = this;
-				var deck0 = sockinfo[usersock[f].id].deck, deck1 = sockinfo[this.id].deck;
+				var deck0 = etgutil.decodedeck(sockinfo[usersock[f].id].deck), deck1 = etgutil.decodedeck(sockinfo[this.id].deck);
 				var DG = sockinfo[this.id].demigod, DGfoe = sockinfo[usersock[f].id].demigod;
 				this.emit("pvpgive", { first: first, seed: seed, deck: deck0, urdeck: deck1, foename:f, demigod: DG, foedemigod: DGfoe});
 				usersock[f].emit("pvpgive", { first: !first, seed: seed, deck: deck1, urdeck: deck0, foename:u, demigod:DGfoe, foedemigod:DG});
