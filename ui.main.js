@@ -1911,8 +1911,8 @@ function startStore() {
 	// The different pack types
 	function gradeSelect(x){
 		return function(){
-			packrarity = x;
-			tinfo2.setText(packdata[x-1].info);
+			packrarity = x+1;
+			tinfo2.setText(packdata[x].info);
 			updateFreeText();
 		}
 	}
