@@ -788,7 +788,7 @@ function victoryScreen() {
 	if (game.goldreward) {
 		var goldshown = game.cost ? (game.goldreward - game.cost) : game.goldreward;
 		tgold = makeText(340, 550, "Gold won:      " + goldshown, true);
-		var igold = PIXI.Sprite.fromImage("assets/gold.png");
+		var igold = new PIXI.Sprite(goldtex);
 		igold.position.set(420, 550);
 		victoryui.addChild(tgold);
 		victoryui.addChild(igold);
@@ -1112,9 +1112,17 @@ function mkAi(level) {
 
 // Asset Loaders
 var nopic = PIXI.Texture.fromImage("assets/null.png")
-var imageLoadingNumber = 10;
+var imageLoadingNumber = 9;
+var goldtex = nopic;
+var goldLoader = new PIXI.AssetLoader(["assets/gold.png"]);
+goldLoader.onComplete = function() {
+	goldtex = PIXI.Texture.fromImage("assets/gold.png");
+	maybeStartMenu();
+}
+goldLoader.load();
+
 var questIcons = [];
-var questLoader = new PIXI.AssetLoader(["assets/questIcons.png"])
+var questLoader = new PIXI.AssetLoader(["assets/questIcons.png"]);
 questLoader.onComplete = function() {
 	var tex = PIXI.Texture.fromImage("assets/questIcons.png");
 	for (var i = 0;i < 2;i++) {
@@ -1123,6 +1131,7 @@ questLoader.onComplete = function() {
 	maybeStartMenu();
 }
 questLoader.load();
+
 var backgrounds = ["assets/bg_default.png", "assets/bg_lobby.png", "assets/bg_shop.png", "assets/bg_quest.png", "assets/bg_game.png"];
 var bgLoader = new PIXI.AssetLoader(backgrounds);
 bgLoader.onComplete = function() {
@@ -1133,41 +1142,27 @@ bgLoader.onComplete = function() {
 }
 bgLoader.load();
 
-var eicons = [];
-var eleLoader = new PIXI.AssetLoader(["assets/esheet.png"]);
+var eicons = [], rarityicons = [];
+var eleLoader = new PIXI.AssetLoader(["assets/esheet.png", "assets/raritysheet.png"]);
 eleLoader.onComplete = function() {
 	var tex = PIXI.Texture.fromImage("assets/esheet.png");
 	for (var i = 0;i < 13;i++) eicons.push(new PIXI.Texture(tex, new PIXI.Rectangle(i * 32, 0, 32, 32)));
-	maybeStartMenu();
-}
-eleLoader.load();
-
-var cardBacks = [];
-var backLoader = new PIXI.AssetLoader(["assets/backsheet.png"]);
-backLoader.onComplete = function() {
-	var tex = PIXI.Texture.fromImage("assets/backsheet.png");
-	for (var i = 0;i < 26;i++) cardBacks.push(new PIXI.Texture(tex, new PIXI.Rectangle(i * 132, 0, 132, 256)));
-	maybeStartMenu();
-}
-backLoader.load();
-
-var cardBorders = []
-var borderLoader = new PIXI.AssetLoader(["assets/cardborders.png"]);
-borderLoader.onComplete = function() {
-	var tex = PIXI.Texture.fromImage("assets/cardborders.png");
-	for (var i = 0;i < 26;i++) cardBorders.push(new PIXI.Texture(tex, new PIXI.Rectangle(i * 128, 0, 128, 162)));
-	maybeStartMenu();
-}
-borderLoader.load();
-
-var rarityicons = [];
-var rarityLoader = new PIXI.AssetLoader(["assets/raritysheet.png"]);
-rarityLoader.onComplete = function() {
 	var tex = PIXI.Texture.fromImage("assets/raritysheet.png");
 	for (var i = 0;i < 6;i++) rarityicons.push(new PIXI.Texture(tex, new PIXI.Rectangle(i * 10, 0, 10, 10)));
 	maybeStartMenu();
 }
-rarityLoader.load();
+eleLoader.load();
+
+var cardBacks = [], cardBorders = [];
+var backLoader = new PIXI.AssetLoader(["assets/backsheet.png", "assets/cardborders.png"]);
+backLoader.onComplete = function() {
+	var tex = PIXI.Texture.fromImage("assets/backsheet.png");
+	for (var i = 0;i < 26;i++) cardBacks.push(new PIXI.Texture(tex, new PIXI.Rectangle(i * 132, 0, 132, 256)));
+	var tex = PIXI.Texture.fromImage("assets/cardborders.png");
+	for (var i = 0;i < 26;i++) cardBorders.push(new PIXI.Texture(tex, new PIXI.Rectangle(i * 128, 0, 128, 162)));
+	maybeStartMenu();
+}
+backLoader.load();
 
 var buttonsList = [];
 var buttons = {};
@@ -1430,12 +1425,12 @@ function startMenu() {
 	menuui.addChild(tcost);
 
 	//gold icons
-	var igold = PIXI.Sprite.fromImage("assets/gold.png");
+	var igold = new PIXI.Sprite(goldtex);
 	igold.position.set(750, 100);
 	igold.visible = false;
 	menuui.addChild(igold);
 
-	var igold2 = PIXI.Sprite.fromImage("assets/gold.png");
+	var igold2 = new PIXI.Sprite(goldtex);
 	igold2.position.set(95, 50);
 	igold2.visible = false;
 	menuui.addChild(igold2);
@@ -1899,7 +1894,7 @@ function startStore() {
 	storeui.addChild(freeinfo);
 
 	//gold icon
-	var igold = PIXI.Sprite.fromImage("assets/gold.png");
+	var igold = new PIXI.Sprite(goldtex);
 	igold.position.set(750, 100);
 	storeui.addChild(igold);
 
