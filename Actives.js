@@ -984,8 +984,9 @@ rewind:function(c,t){
 ricochet:function(c,t){
 	var tgting = Targeting[t.card.active.activename];
 	function tgttest(x){
-		if (x && tgting(t.owner, x) && tgting(t.owner.foe, x)){
-			tgts.push(x);
+		if (x) {
+			if (tgting(t.owner, x)) tgts.push([x, t.owner]);
+			if (tgting(t.owner.foe, x)) tgts.push([x, t.owner.foe]);
 		}
 	}
 	if (tgting){
@@ -1002,14 +1003,10 @@ ricochet:function(c,t){
 			tgttest(pl.weapon);
 		}
 		if (tgts.length > 0){
-			var flip = c.owner.rng() < .5;
-			if (flip){
-				c.owner = c.owner.foe;
-			}
-			t.card.active(c, tgts[c.owner.upto(tgts.length)]); // NB bypasses SoFr
-			if (flip){
-				c.owner = c.owner.foe;
-			}
+			var tgt = tgts[c.owner.upto(tgts.length)], cown = c.owner;
+			c.owner = tgt[1];
+			t.card.active(c, tgt[0]); // NB bypasses SoFr
+			c.owner = cown;
 		}
 	}
 },

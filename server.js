@@ -330,6 +330,11 @@ io.on("connection", function(socket) {
 	userEvent(socket, "modarena", function(data, user){
 		db.hincrby("A:"+data.aname, data.won?"win":"loss", 1);
 		db.zincrby("arena", data.won?1:-1, data.aname);
+		if (data.aname in users){
+			users[data.aname].gold++;
+		}else{
+			db.hincrby("U:"+data.aname, "gold", 1);
+		}
 	});
 	userEvent(socket, "foearena", function(data, user){
 		db.zcard("arena", function(err, len){

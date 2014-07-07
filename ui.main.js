@@ -299,8 +299,8 @@ function getCreatureImage(code) {
 			}
 			if (card) {
 				var text = new PIXI.Text(card.name, { font: "8px Dosis", fill: card.upped ? "black" : "white" });
-				text.anchor.set(0.5, 0.5);
-				text.position.set(33, 77);
+				text.anchor.x = 0.5;
+				text.position.set(33, 72);
 				graphics.addChild(text);
 			}
 			rend.render(graphics);
@@ -331,8 +331,8 @@ function getWeaponShieldImage(code) {
 			}
 			if (card) {
 				var text = new PIXI.Text(card.name, { font: "10px Dosis", fill: card.upped ? "black" : "white" });
-				text.anchor.set(0.5, 0.5);
-				text.position.set(40, 95);
+				text.anchor.x = 0.5;
+				text.position.set(40, 91);
 				graphics.addChild(text);
 			}
 			rend.render(graphics);
@@ -365,7 +365,7 @@ function initTrade(data) {
 	btrade.click = function() {
 		if (selectedCards.length > 0) {
 			userEmit("cardchosen", { cards: selectedCards })
-			console.log("Card sent")
+			console.log("Card sent");
 			cardChosen = true;
 			editorui.removeChild(btrade);
 			editorui.addChild(bconfirm);
@@ -541,7 +541,7 @@ function aiEvalFunc() {
 	Effect.disable = true;
 	game = cloneGame(game);
 	var self = game.player2;
-	var limit = 9000000;
+	var limit = 999;
 	function mkcommand(cbits, tbits) {
 		return ["cast", cbits | tbits << 9];
 	}
@@ -1297,7 +1297,7 @@ function makeCardSelector(cardmouseover, cardclick){
 			columns[i] = filtercards(i > 2,
 				function(x) { return x.element == elefilter &&
 					((i % 3 == 0 && x.type == CreatureEnum) || (i % 3 == 1 && x.type <= PermanentEnum) || (i % 3 == 2 && x.type == SpellEnum)) &&
-					(!user || (x in poolcache && (!rarefilter || rarefilter == x.rarity)) || isFreeCard(x));
+					(!user || x in poolcache || isFreeCard(x)) && (!rarefilter || rarefilter == x.rarity);
 				}, editorCardCmp);
 		}
 	}
@@ -2305,8 +2305,8 @@ function startMatch() {
 					fgfx.lineStyle(2, 0xffffff);
 				}
 			} else if (obj.canactive()) {
-				fgfx.lineStyle(2, obj.card.element == 8 ? 0x000000 : 0xffffff );
-				fgfx.drawRect(spr.position.x - spr.width / 2, spr.position.y - spr.height / 2, spr.width, (obj instanceof Weapon || obj instanceof Shield ? 8 : 10));
+				fgfx.lineStyle(2, obj.card.element == 8 ? 0x000000 : 0xffffff);
+				fgfx.drawRect(spr.position.x - spr.width / 2, spr.position.y - spr.height / 2, spr.width, (obj instanceof Weapon || obj instanceof Shield ? 12 : 10));
 			}
 		}
 	}
