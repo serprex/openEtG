@@ -1582,9 +1582,7 @@ function startRewardWindow(reward) {
 	rewardUI.addChild(bgreward);
 
 	var exitButton = makeButton(10, 10, 75, 18, buttons.exit);
-	exitButton.click = function() {
-		startMenu();
-	}
+	exitButton.click = startMenu;
 	rewardUI.addChild(exitButton);
 
 	var confirmButton = makeButton(10, 40, 75, 18, buttons.done);
@@ -1667,9 +1665,7 @@ function startQuestWindow() {
 		}
 	}
 	var bexit = makeButton(750, 246, 75, 18, buttons.exit);
-	bexit.click = function() {
-		startMenu();
-	}
+	bexit.click = startMenu;
 	questui.addChild(tinfo);
 	questui.addChild(errinfo);
 	questui.addChild(bexit);
@@ -1751,9 +1747,7 @@ function upgradestore() {
 	};
 	upgradeui.addChild(bsell);
 	var bexit = makeButton(5, 50, 75, 18, buttons.exit);
-	bexit.click = function() {
-		startMenu();
-	};
+	bexit.click = startMenu;
 	upgradeui.addChild(bexit);
 	var tinfo = new PIXI.Text("", { font: "bold 16px Dosis" });
 	tinfo.position.set(150, 102);
@@ -1803,13 +1797,16 @@ function upgradestore() {
 }
 
 function startStore() {
-	var packtype = 0, packrarity = 0, cardamount = 0, cost = 0, newCards = [];
+	var packdata = [
+		{amount: 9, cost: 15, info: "Bronze Pack: 9x Common"},
+		{amount: 6, cost: 25, info: "Silver Pack: 3x Common + 3x Uncommon"},
+		{amount: 8, cost: 65, info: "Gold Pack: 3x Common + 4x Uncommon + 1x Rare"},
+		{amount: 9, cost: 100, info: "Platinum Pack: 4x Common + 3x Uncommon + 1x Rare + 1x Shard"},
+	];
+	var packtype = 0, packrarity = 0, newCards = [], newCardsArt = [];
 
 	var storeui = new PIXI.DisplayObjectContainer();
 	storeui.interactive = true;
-
-	var newCardsArt = new PIXI.DisplayObjectContainer();
-	storeui.addChild(newCardsArt);
 
 	//shop background
 	var bgshop = new PIXI.Sprite(backgrounds[2]);
@@ -1820,7 +1817,7 @@ function startStore() {
 	storeui.addChild(tgold);
 
 	//info text
-	var tinfo = makeText(50, 26, "Select which elements you want.", true);
+	var tinfo = makeText(50, 26, "Select from which element you want.", true);
 	storeui.addChild(tinfo);
 
 	var tinfo2 = makeText(50, 51, "Select which type of booster you want.", true);
@@ -1847,71 +1844,62 @@ function startStore() {
 
 	//exit button
 	var bexit = makeButton(750, 246, 75, 18, buttons.exit);
-	bexit.click = function() {
-		if (newCards.length != 0){
-			bget.click();
-		}
-		startMenu();
-	}
+	bexit.click = startMenu;
 	storeui.addChild(bexit);
 
 	//buy button
 	var bbuy = makeButton(750, 156, 75, 18, buttons.buypack);
 	bbuy.click = function() {
-	    if (newCards.length == 0) {
-	        if (!packrarity) {
-	            tinfo2.setText("Select a pack first!");
-	            return;
-	        }
-	        if (!packtype) {
-	            tinfo.setText("Select an element first!");
-	            return;
-	        }
-			if (user.gold >= cost || user.freepacks[packrarity-1] > 0) {
-				var allowedElements = [], accountbound = false;
+		if (!packrarity) {
+			tinfo2.setText("Select a pack first!");
+			return;
+		}
+		if (!packtype) {
+			tinfo.setText("Select an element first!");
+			return;
+		}
+		var pack = packdata[packrarity-1];
+		if (user.gold >= pack.cost || user.freepacks[packrarity-1] > 0) {
+			var accountbound = false;
 
-				if (user.freepacks[packrarity - 1] > 0){
-				    userEmit("usefreepack", {type: packrarity-1,amount:1});
-				    user.freepacks[packrarity - 1]--;
-				    accountbound = true;
-				}
-				else {
-				    user.gold -= cost;
-				    userEmit("subgold", { g: cost });
-				}
-
-				for (var i = 0;i < cardamount;i++) {
-					var rarity = 1;
-					if ((packrarity == 2 && i >= 3) || (packrarity == 3 && i >= 3) || (packrarity == 4 && i>=4))
-						rarity = 2;
-					if ((packrarity == 3 && i >= 7) || (packrarity == 4 && i >= 7))
-						rarity = 3;
-					if (packrarity == 4 && i >= 8)
-						rarity = 4;
-					var fromElement = Math.random() < .4 ? false : true;
-					newCards.push(PlayerRng.randomcard(false, function(x) { return (x.element == packtype) ^ fromElement && x.type != PillarEnum && x.rarity == rarity }).code);
-					if (!accountbound) {
-						userEmit("add", { add: etg.encodedeck(newCards) });
-						for (var i = 0; i < newCards.length; i++) {
-							user.pool.push(newCards[i]);
-						}
-					}
-					else {
-						userEmit("addaccountbound", { add: etg.encodedeck(newCards) });
-						for (var i = 0; i < newCards.length; i++) {
-							user.accountbound.push(newCards[i]);
-						}
-					}
-				}
-				toggleB(bbronze, bsilver, bgold, bplatinum, bget, bbuy);
-				popbooster.visible = true;
-				updateFreeText();
-			} else {
-				tinfo2.setText("You can't afford that!");
+			if (user.freepacks[packrarity - 1] > 0){
+				userEmit("usefreepack", {type: packrarity-1});
+				user.freepacks[packrarity - 1]--;
+				accountbound = true;
 			}
+			else {
+				user.gold -= pack.cost;
+				userEmit("subgold", { g: pack.cost });
+			}
+
+			for (var i = 0;i < pack.amount;i++) {
+				var rarity = 1;
+				if ((packrarity == 2 && i >= 3) || (packrarity == 3 && i >= 3) || (packrarity == 4 && i>=4))
+					rarity = 2;
+				if ((packrarity == 3 && i >= 7) || (packrarity == 4 && i >= 7))
+					rarity = 3;
+				if (packrarity == 4 && i >= 8)
+					rarity = 4;
+				var fromElement = Math.random() > .4;
+				newCards[i] = PlayerRng.randomcard(false, function(x) { return (x.element == packtype) ^ fromElement && x.type != PillarEnum && x.rarity == rarity }).code;
+				newCardsArt[i].visible = true;
+			}
+			for (; i < newCardsArt.length; i++){
+				newCardsArt[i].visible = false;
+			}
+			if (!accountbound) {
+				userEmit("add", { add: etg.encodedeck(newCards) });
+				Array.prototype.push.apply(user.pool, newCards);
+			}
+			else {
+				userEmit("addaccountbound", { add: etg.encodedeck(newCards) });
+				Array.prototype.push.apply(user.accountbound, newCards);
+			}
+			toggleB(bbronze, bsilver, bgold, bplatinum, bget, bbuy);
+			popbooster.visible = true;
+			updateFreeText();
 		} else {
-			tinfo.setText("Take your cards before you buy more!");
-			tinfo2.setText("");
+			tinfo2.setText("You can't afford that!");
 		}
 	}
 	storeui.addChild(bbuy);
@@ -1921,44 +1909,24 @@ function startStore() {
 	}
 
 	// The different pack types
+	function gradeSelect(x){
+		return function(){
+			packrarity = x;
+			tinfo2.setText(packdata[x-1].info);
+			updateFreeText();
+		}
+	}
 	var bbronze = makeButton(50, 280, 100, 200, boosters[4]);
-	bbronze.click = function() {
-		packrarity = 1;
-		tinfo2.setText("Bronze Pack: 9x Common");
-		cardamount = 9;
-		cost = 15;
-		updateFreeText()
-	}
+	bbronze.click = gradeSelect(0);
 	storeui.addChild(bbronze);
-
 	var bsilver = makeButton(175, 280, 100, 200, boosters[5]);
-	bsilver.click = function() {
-		packrarity = 2;
-		tinfo2.setText("Silver Pack: 3x Common + 3x Uncommon");
-		cardamount = 6;
-		cost = 25
-		updateFreeText()
-	}
+	bsilver.click = gradeSelect(1);
 	storeui.addChild(bsilver);
-
 	var bgold = makeButton(300, 280, 100, 200, boosters[6]);
-	bgold.click = function() {
-		packrarity = 3;
-		tinfo2.setText("Gold Pack: 3x Common + 4x Uncommon + 1x Rare");
-		cardamount = 8;
-		cost = 65;
-		updateFreeText()
-	}
+	bgold.click = gradeSelect(2);
 	storeui.addChild(bgold);
-
 	var bplatinum = makeButton(425, 280, 100, 200, boosters[7]);
-	bplatinum.click = function() {
-		packrarity = 4;
-		tinfo2.setText("Platinum Pack: 4x Common + 3x Uncommon + 1x Rare + 1x Shard");
-		cardamount = 9;
-		cost = 100;
-		updateFreeText()
-	}
+	bplatinum.click = gradeSelect(3);
 	storeui.addChild(bplatinum);
 
 	for (var i = 1;i < 13;i++) {
@@ -1983,21 +1951,18 @@ function startStore() {
 		for (var j = 0;j < 5;j++) {
 			var cardArt = new PIXI.Sprite(nopic);
 			cardArt.scale.set(0.85, 0.85);
-			cardArt.position.set(50 + (j * 125), 100 + (i * 225));
-			newCardsArt.addChild(cardArt);
+			cardArt.position.set(7 + (j * 125), 7 + (i * 225));
+			popbooster.addChild(cardArt);
+			newCardsArt.push(cardArt);
 		}
 	}
 
 	//update loop
 	animCb = function() {
-		for (var i = 0;i < 10;i++) {
-			if (newCards[i]){
-				newCardsArt.children[i].setTexture(getArt(newCards[i]));
-				newCardsArt.children[i].visible = true;
-			}else newCardsArt.children[i].visible = false;
+		for (var i = 0;i < newCards.length;i++) {
+			newCardsArt[i].setTexture(getArt(newCards[i]));
 		}
-
-		tgold.setText(user.gold);
+		maybeSetText(tgold, user.gold.toString());
 	}
 
 	mainStage = storeui;

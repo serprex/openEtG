@@ -525,7 +525,7 @@ io.on("connection", function(socket) {
 	    for (var i = 0; i < packlist.length; i++) {
 	        packlist[i] = parseInt(packlist[i]);
 	    }
-	    packlist[data.type] -= data.amount;
+	    packlist[data.type]--;
 	    user.freepacks = packlist.join();
 	});
 	userEvent(socket, "addloss", function(data, user) {
