@@ -1873,14 +1873,14 @@ function startStore() {
 			if (user.freepacks[packrarity] > 0) {
 				user.freepacks[packrarity]--;
 				userEmit("usefreepack", {type: packrarity});
-				userEmit("add", { add: etg.encodedeck(newCards) });
-				Array.prototype.push.apply(user.pool, newCards);
+				userEmit("addaccountbound", { add: etg.encodedeck(newCards) });
+				Array.prototype.push.apply(user.accountbound, newCards);
 			}
 			else {
 				user.gold -= pack.cost;
 				userEmit("subgold", { g: pack.cost });
-				userEmit("addaccountbound", { add: etg.encodedeck(newCards) });
-				Array.prototype.push.apply(user.accountbound, newCards);
+				userEmit("add", { add: etg.encodedeck(newCards) });
+				Array.prototype.push.apply(user.pool, newCards);
 			}
 			toggleB(bbronze, bsilver, bgold, bplatinum, bget, bbuy);
 			popbooster.visible = true;
