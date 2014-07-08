@@ -1561,10 +1561,10 @@ function startMenu() {
 	}
 
 	animCb = function() {
-		if (user && oracle) {
-			oracle.setTexture(getArt(cardcode));
-		}
 		if (user) {
+			if (oracle) {
+				oracle.setTexture(getArt(cardcode));
+			}
 			tgold.setText(user.gold)
 		}
 	}
@@ -1616,8 +1616,8 @@ function startRewardWindow(reward) {
 
 	mainStage = rewardUI;
 	refreshRenderer();
-
 }
+
 function startQuest(questname) {
 	if (!user.quest[questname] && user.quest[questname] != 0) {
 		user.quest[questname] = 0;
@@ -2300,7 +2300,6 @@ function startMatch() {
 		fgfx.lineStyle(0, 0, 0);
 		spr.alpha = obj.status.immaterial || obj.status.burrowed ? .7 : 1;
 	}
-	var cardwon;
 	animCb = function() {
 		Effect.disable = airefresh.value == "0" && game.turn == game.player2;
 		if (game.phase == PlayPhase && game.turn == game.player2 && game.player2.ai && --aiDelay <= 0) {
@@ -2313,99 +2312,90 @@ function startMatch() {
 		var pos = realStage.getMousePosition();
 		maybeSetText(winnername, game.winner ? (game.winner == game.player1 ? "Won " : "Lost ") + game.ply : "");
 		maybeSetButton(game.winner ? null : endturn, endturn);
-		if (!game.winner || !user) {
-			var cardartcode, cardartx;
-			infobox.setTexture(nopic);
-			for (var i = 0;i < foeplays.children.length;i++) {
-				var foeplay = foeplays.children[i];
-				if (hitTest(foeplay, pos)) {
-					cardartcode = foeplay.card.code;
-				}
+		var cardartcode, cardartx;
+		infobox.setTexture(nopic);
+		for (var i = 0;i < foeplays.children.length;i++) {
+			var foeplay = foeplays.children[i];
+			if (hitTest(foeplay, pos)) {
+				cardartcode = foeplay.card.code;
 			}
-			for (var j = 0;j < 2;j++) {
-				var pl = game.players[j];
-				if (j == 0 || game.player1.precognition) {
-					for (var i = 0;i < pl.hand.length;i++) {
-						if (hitTest(handsprite[j][i], pos)) {
-							cardartcode = pl.hand[i].card.code;
-						}
-					}
-				}
-				if (j == 0 || !(cloakgfx.visible)) {
-					for (var i = 0;i < 23;i++) {
-						var cr = pl.creatures[i];
-						if (cr && hitTest(creasprite[j][i], pos)) {
-							cardartcode = cr.card.code;
-							cardartx = creasprite[j][i].position.x;
-							setInfo(cr);
-						}
-					}
-					for (var i = 0;i < 16;i++) {
-						var pr = pl.permanents[i];
-						if (pr && hitTest(permsprite[j][i], pos)) {
-							cardartcode = pr.card.code;
-							cardartx = permsprite[j][i].position.x;
-							setInfo(pr);
-						}
-					}
-					if (pl.weapon && hitTest(weapsprite[j], pos)) {
-						cardartcode = pl.weapon.card.code;
-						cardartx = weapsprite[j].position.x;
-						setInfo(pl.weapon);
-					}
-					if (pl.shield && hitTest(shiesprite[j], pos)) {
-						cardartcode = pl.shield.card.code;
-						cardartx = shiesprite[j].position.x;
-						setInfo(pl.shield);
+		}
+		for (var j = 0;j < 2;j++) {
+			var pl = game.players[j];
+			if (j == 0 || game.player1.precognition) {
+				for (var i = 0;i < pl.hand.length;i++) {
+					if (hitTest(handsprite[j][i], pos)) {
+						cardartcode = pl.hand[i].card.code;
 					}
 				}
 			}
-			if (cardartcode) {
-				cardart.setTexture(getArt(cardartcode));
-				cardart.visible = true;
-				cardart.position.set(cardartx || 654, pos.y > 300 ? 44 : 300);
-			} else cardart.visible = false;
-		} else {
-			if (game.winner == game.player1 && !game.quest && game.player2.ai) {
-				if (!cardwon) {
-					var winnable = [];
-					for (var i = 0;i < foeDeck.length;i++) {
-						if (foeDeck[i].type != PillarEnum && foeDeck[i].rarity < 4) {
-							winnable.push(foeDeck[i]);
-						}
+			if (j == 0 || !(cloakgfx.visible)) {
+				for (var i = 0;i < 23;i++) {
+					var cr = pl.creatures[i];
+					if (cr && hitTest(creasprite[j][i], pos)) {
+						cardartcode = cr.card.code;
+						cardartx = creasprite[j][i].position.x;
+						setInfo(cr);
 					}
-					if (winnable.length) {
-						cardwon = winnable[Math.floor(Math.random() * winnable.length)];
-						if (cardwon.rarity == 3 && Math.random() < .5)
-							cardwon = winnable[Math.floor(Math.random() * winnable.length)];
-					} else {
-						var elewin = foeDeck[Math.floor(Math.random() * foeDeck.length)];
-						rareAllowed = 3;
-						cardwon = PlayerRng.randomcard(elewin.upped, function(x) { return x.element == elewin.element && x.type != PillarEnum && x.rarity <= rareAllowed; });
-					}
-					if (game.level && game.level < 3) {
-						cardwon = cardwon.asUpped(false);
-					}
-					if (game.level) {
-						var baserewards = [1, 6, 11, 31];
-						var hpfactor = [11, 7, 6, 2];
-						var i = game.level-1
-						var goldwon = Math.floor((baserewards[i] + Math.floor(game.player1.hp / hpfactor[i])) * (game.player1.hp == game.player1.maxhp ? 1.5 : 1));
-						console.log(goldwon);
-						if (game.cost) goldwon += game.cost;
-						game.goldreward = goldwon;
-					} else if (game.gold) {
-						var goldwon = game.gold
-						console.log(goldwon);
-						if (game.cost) goldwon += game.cost;
-						game.goldreward = goldwon;
-					}
-					cardart.visible = false;
-					game.cardreward = cardwon.code;
 				}
+				for (var i = 0;i < 16;i++) {
+					var pr = pl.permanents[i];
+					if (pr && hitTest(permsprite[j][i], pos)) {
+						cardartcode = pr.card.code;
+						cardartx = permsprite[j][i].position.x;
+						setInfo(pr);
+					}
+				}
+				if (pl.weapon && hitTest(weapsprite[j], pos)) {
+					cardartcode = pl.weapon.card.code;
+					cardartx = weapsprite[j].position.x;
+					setInfo(pl.weapon);
+				}
+				if (pl.shield && hitTest(shiesprite[j], pos)) {
+					cardartcode = pl.shield.card.code;
+					cardartx = shiesprite[j].position.x;
+					setInfo(pl.shield);
+				}
+			}
+		}
+		if (cardartcode) {
+			cardart.setTexture(getArt(cardartcode));
+			cardart.visible = true;
+			cardart.position.set(cardartx || 654, pos.y > 300 ? 44 : 300);
+		} else cardart.visible = false;
+		if (game.winner == game.player1 && user && !game.quest && game.player2.ai && !game.cardreward) {
+			var winnable = [], cardwon;
+			for (var i = 0;i < foeDeck.length;i++) {
+				if (foeDeck[i].type != PillarEnum && foeDeck[i].rarity < 4) {
+					winnable.push(foeDeck[i]);
+				}
+			}
+			if (winnable.length) {
+				cardwon = winnable[Math.floor(Math.random() * winnable.length)];
+				if (cardwon == 3 && Math.random() < .5)
+					cardwon = winnable[Math.floor(Math.random() * winnable.length)];
 			} else {
-				cardart.visible = false;
+				var elewin = foeDeck[Math.floor(Math.random() * foeDeck.length)];
+				cardwon = PlayerRng.randomcard(elewin.upped, function(x) { return x.element == elewin.element && x.type != PillarEnum && x.rarity <= 3; });
 			}
+			if (game.level) {
+				if (game.level < 3) {
+					cardwon = cardwon.asUpped(false);
+				}
+				var baserewards = [1, 6, 11, 31];
+				var hpfactor = [11, 7, 6, 2];
+				var i = game.level-1
+				var goldwon = Math.floor((baserewards[i] + Math.floor(game.player1.hp / hpfactor[i])) * (game.player1.hp == game.player1.maxhp ? 1.5 : 1));
+				console.log(goldwon);
+				if (game.cost) goldwon += game.cost;
+				game.goldreward = goldwon;
+			} else if (game.gold) {
+				var goldwon = game.gold
+				console.log(goldwon);
+				if (game.cost) goldwon += game.cost;
+				game.goldreward = goldwon;
+			}
+			game.cardreward = cardwon.code;
 		}
 		if (game.phase != EndPhase) {
 			cancel.visible = true;
