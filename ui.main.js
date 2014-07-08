@@ -147,17 +147,17 @@ function tgtToPos(t) {
 		return new PIXI.Point(j ? 20 : 780, (j ? 140 : 300) + 20 * i);
 	} else console.log("Unknown target");
 }
-function refreshRenderer() {
+function refreshRenderer(stage) {
 	if (realStage.children.length > 0){
-		realStage.removeChild(realStage.children[0]);
+		realStage.removeChildren();
 	}
-	realStage.addChild(mainStage);
+	realStage.addChild(stage);
 }
 
 var realStage = new PIXI.Stage(0x336699, true);
-renderer = new PIXI.WebGLRenderer(900, 600);
+renderer = new PIXI.autoDetectRenderer(900, 600);
 leftpane.appendChild(renderer.view);
-var mainStage, menuui, gameui;
+var menuui, gameui;
 var caimgcache = {}, crimgcache = {}, wsimgcache = {}, artcache = {}, artimagecache = {};
 var elecols = [0xa99683, 0xaa5999, 0x777777, 0x996633, 0x5f4930, 0x50a005, 0xcc6611, 0x205080, 0xa9a9a9, 0x337ddd, 0xccaa22, 0x333333, 0x77bbdd];
 
@@ -471,8 +471,7 @@ function initTrade(data) {
 			selectedCardsprites[i].visible = false;
 		}
 	}
-	mainStage = editorui;
-	refreshRenderer();
+	refreshRenderer(editorui);
 }
 function initGame(data, ai) {
 	game = mkGame(data.first, data.seed);
@@ -818,8 +817,7 @@ function victoryScreen() {
 		}
 	}
 
-	mainStage = victoryui;
-	refreshRenderer();
+	refreshRenderer(victoryui);
 }
 
 function doubleDeck(deck) {
@@ -1099,14 +1097,21 @@ function mkAi(level) {
 }
 
 // Asset Loading
-var nopic = PIXI.Texture.fromImage("assets/null.png")
-var goldtex = nopic;
+var nopic, goldtex;
 var backgrounds = ["assets/bg_default.png", "assets/bg_lobby.png", "assets/bg_shop.png", "assets/bg_quest.png", "assets/bg_game.png"];
 var questIcons = [], eicons = [], rarityicons = [], cardBacks = [], cardBorders = [], boosters = [], popups = [], typeicons = [];
 var buttons = {};
-var preLoader = new PIXI.AssetLoader(["assets/gold.png", "assets/questIcons.png", "assets/esheet.png", "assets/raritysheet.png", "assets/backsheet.png",
+var preLoader = new PIXI.AssetLoader(["assets/null.png", "assets/gold.png", "assets/questIcons.png", "assets/esheet.png", "assets/raritysheet.png", "assets/backsheet.png",
 	"assets/cardborders.png", "assets/boosters.png", "assets/popup_booster.png", "assets/typesheet.png", "assets/buttons.png"].concat(backgrounds));
+var loadingBarProgress = 0, loadingBarGraphic = new PIXI.Graphics();
+preLoader.onProgress = function() {
+	loadingBarGraphic.clear();
+	loadingBarGraphic.beginFill(0xFFFFFF);
+	loadingBarGraphic.drawRect(0, 284, 900*(1-this.loadCount/this.assetURLs.length), 32);
+	loadingBarGraphic.endFill();
+}
 preLoader.onComplete = function() {
+	nopic = PIXI.Texture.fromFrame("assets/null.png");
 	goldtex = PIXI.Texture.fromFrame("assets/gold.png");
 	var tex = PIXI.Texture.fromFrame("assets/questIcons.png");
 	for (var i = 0;i < 2;i++) {
@@ -1145,9 +1150,11 @@ preLoader.onComplete = function() {
 		buttons[buttonnames[buttonList.length-1]] = buttonList[buttonList.length-1];
 	}
 	startMenu();
-	requestAnimate();
 }
+animCb = undefined;
+refreshRenderer(loadingBarGraphic);
 preLoader.load();
+requestAnimate();
 function makeButton(x, y, w, h, i, mouseoverfunc) {
 	var b = new PIXI.Sprite(i);
 	b.position.set(x, y);
@@ -1527,21 +1534,20 @@ function startMenu() {
 		}
 	}
 
-	mainStage = menuui;
-	refreshRenderer();
+	refreshRenderer(menuui);
 }
 function startRewardWindow(reward) {
 	var rewardList = [];
 	if (reward == "mark") rewardList = filtercards(false, function(x) { return x.rarity == 5 });
 	if (reward == "shard") rewardList = filtercards(false, function(x) { return x.rarity == 4 });
-	var rewardUI = new PIXI.DisplayObjectContainer();
-	rewardUI.interactive = true;
+	var rewardui = new PIXI.DisplayObjectContainer();
+	rewardui.interactive = true;
 	var bgreward = new PIXI.Sprite(backgrounds[0]);
-	rewardUI.addChild(bgreward);
+	rewardui.addChild(bgreward);
 
 	var exitButton = makeButton(10, 10, 75, 18, buttons.exit);
 	exitButton.click = startMenu;
-	rewardUI.addChild(exitButton);
+	rewardui.addChild(exitButton);
 
 	var confirmButton = makeButton(10, 40, 75, 18, buttons.done);
 	confirmButton.click = function() {
@@ -1549,11 +1555,11 @@ function startRewardWindow(reward) {
 			userEmit("codesubmit2", { code: foename.value, card: chosenReward });
 	}
 
-	rewardUI.addChild(confirmButton);
+	rewardui.addChild(confirmButton);
 
 	var chosenRewardImage = new PIXI.Sprite(nopic);
 	chosenRewardImage.position.set(250, 20)
-	rewardUI.addChild(chosenRewardImage);
+	rewardui.addChild(chosenRewardImage);
 	var chosenReward = null;
 	for (var i = 0; i < rewardList.length; i++) {
 		var card = new PIXI.Sprite(getCardImage(rewardList[i]));
@@ -1563,7 +1569,7 @@ function startRewardWindow(reward) {
 				chosenReward = rewardList[_i]
 			}
 		})(i);
-		rewardUI.addChild(card);
+		rewardui.addChild(card);
 		setInteractive(card);
 	}
 
@@ -1572,8 +1578,7 @@ function startRewardWindow(reward) {
 			chosenRewardImage.setTexture(getArt(chosenReward))
 	}
 
-	mainStage = rewardUI;
-	refreshRenderer();
+	refreshRenderer(rewardui);
 }
 
 function startQuest(questname) {
@@ -1628,8 +1633,7 @@ function startQuestWindow() {
 	questui.addChild(errinfo);
 	questui.addChild(bexit);
 	animCb = undefined;
-	mainStage = questui;
-	refreshRenderer();
+	refreshRenderer(questui);
 }
 
 function upgradestore() {
@@ -1750,8 +1754,7 @@ function upgradestore() {
 		}
 		goldcount.setText(user.gold + "g");
 	}
-	mainStage = upgradeui;
-	refreshRenderer();
+	refreshRenderer(upgradeui);
 }
 
 function startStore() {
@@ -1910,8 +1913,7 @@ function startStore() {
 		maybeSetText(tgold, user.gold.toString());
 	}
 
-	mainStage = storeui;
-	refreshRenderer();
+	refreshRenderer(storeui);
 }
 
 function startEditor() {
@@ -2133,8 +2135,7 @@ function startEditor() {
 				editordecksprites[i].visible = false;
 			}
 		}
-		mainStage = editorui;
-		refreshRenderer();
+		refreshRenderer(editorui);
 	}
 }
 var descr = [
@@ -2182,8 +2183,7 @@ function startElementSelect() {
 			elesel[i].setTexture(getIcon(i));
 		}
 	}
-	mainStage = stage;
-	refreshRenderer();
+	refreshRenderer(stage);
 }
 
 function startMatch() {
@@ -2891,8 +2891,7 @@ function startMatch() {
 	cardart.position.set(654, 300);
 	cardart.anchor.set(.5, 0);
 	gameui.addChild(cardart);
-	mainStage = gameui;
-	refreshRenderer();
+	refreshRenderer(gameui);
 }
 
 function startArenaInfo(info) {
@@ -2915,8 +2914,7 @@ function startArenaInfo(info) {
 			ocard.setTexture(getArt(info.card));
 		}
 	}
-	mainStage = stage;
-	refreshRenderer();
+	refreshRenderer(stage);
 }
 
 function startArenaTop(info) {
@@ -2937,8 +2935,7 @@ function startArenaTop(info) {
 	var bret = makeButton(100, 400, 72, 22, buttons.exit);
 	bret.click = startMenu;
 	stage.addChild(bret);
-	mainStage = stage;
-	refreshRenderer();
+	refreshRenderer(stage);
 }
 
 var tximgcache = [];
@@ -3144,7 +3141,7 @@ function animate() {
 }
 function requestAnimate() { requestAnimFrame(animate); }
 document.addEventListener("keydown", function(e) {
-	if (mainStage == gameui) {
+	if (realStage.children[0] == gameui) {
 		if (e.keyCode == 32) { // spc
 			if (game.turn == game.player1 && (game.phase == MulliganPhase1 || game.phase == MulliganPhase2))
 				accepthandfunc();
