@@ -788,7 +788,7 @@ function victoryScreen() {
 		game = undefined;
 	}
 	if (game.goldreward) {
-		var goldshown = game.cost ? (game.goldreward - game.cost) : game.goldreward;
+		var goldshown = game.goldreward - (game.cost || 0);
 		tgold = makeText(340, 550, "Gold won:      " + goldshown, true);
 		var igold = new PIXI.Sprite(goldtex);
 		igold.position.set(420, 550);
@@ -886,7 +886,7 @@ function mkDemigod() {
 	deck = doubleDeck(deck);
 	initGame({ first: Math.random() < .5, deck: deck, urdeck: urdeck, seed: Math.random() * etg.MAX_INT, hp: 200, aimarkpower: 3, aidrawpower: 2, foename: dgname }, aievalopt.checked ? aiEvalFunc : aiFunc);
 	game.cost = 20;
-	game.level = 4;
+	game.level = 3;
 }
 function mkMage() {
 	var urdeck = getDeck();
@@ -949,7 +949,7 @@ function mkMage() {
 	var deck = mageDecks[rand].split(" ");
 	initGame({ first: Math.random() < .5, deck: deck, urdeck: urdeck, seed: Math.random() * etg.MAX_INT, hp: 125, foename: mname }, aievalopt.checked ? aiEvalFunc : aiFunc);
 	game.cost = 5;
-	game.level = 2;
+	game.level = 1;
 }
 function mkQuestAi(questname, stage) {
 	var quest = Quest[questname][stage];
@@ -982,8 +982,8 @@ function mkQuestAi(questname, stage) {
 }
 function mkAi(level) {
 	return function() {
-		var uprate = level == 1 ? 0 : (level == 2 ? .1 : .3);
-		var gameprice = (level == 1 ? 0 : (level == 2 ? 5 : 10));
+		var uprate = level == 0 ? 0 : level == 1 ? .1 : .3;
+		var gameprice = level == 0 ? 0 : level == 1 ? 5 : 10;
 		function upCode(x) {
 			return CardCodes[x].asUpped(Math.random() < uprate).code;
 		}
@@ -1018,7 +1018,7 @@ function mkAi(level) {
 				var anyshield = 0, anyweapon = 0;
 				for (var j = 0;j < 2;j++) {
 					for (var i = 0;i < (j == 0 ? 20 : 10) ;i++) {
-						var maxRarity = level == 1 ? 2 : (level == 2 ? 3 : 4);
+						var maxRarity = level == 0 ? 2 : (level == 1 ? 3 : 4);
 						var card = pl.randomcard(Math.random() < uprate, function(x) { return x.element == eles[j] && x.type != PillarEnum && x.rarity <= maxRarity && cardcount[x.code] != 6 && !(x.type == ShieldEnum && anyshield == 3) && !(x.type == WeaponEnum && anyweapon == 3); });
 						deck.push(card.code);
 						cardcount[card.code] = (cardcount[card.code] || 0) + 1;
@@ -1073,41 +1073,27 @@ function mkAi(level) {
 			}
 
 			var randomNames = [
-                "Sherman",
-                "Billie",
-                "Monroe",
-                "Brendon",
-                "Murray",
-                "Ronald",
-                "Garland",
-                "Emory",
-                "Dane",
-                "Rocky",
-                "Stormy",
-                "Audrie",
-                "Page",
-                "Martina",
-                "Adrienne",
-                "Yuriko",
-                "Margie",
-                "Tammi",
-                "Digna",
-                "Mariah",
-                "Seth"
+				"Adrienne", "Audrie",
+				"Billie", "Brendon",
+				"Dane", "Digna",
+				"Emory",
+				"Garland",
+				"Margie", "Mariah", "Martina", "Monroe", "Murray",
+				"Page",
+				"Rocky", "Ronald",
+				"Seth", "Sherman", "Stormy",
+				"Tammi",
+				"Yuriko"
 			];
 
-			var typeName = [
-                "Commoner",
-                "Mage",
-                "Champion"
-			];
+			var typeName = ["Commoner", "Mage", "Champion"];
 
-			var foename = typeName[level - 1] + "\n" + randomNames[Math.floor(Math.random() * randomNames.length)];
-			if (level == 3) deck = doubleDeck(deck);
-			initGame({ first: Math.random() < .5, deck: deck, urdeck: urdeck, seed: Math.random() * etg.MAX_INT, hp: level == 1 ? 100 : (level == 2 ? 125 : 150), aimarkpower: level == 3 ? 2 : 1, foename: foename, aidrawpower: level == 3 ? 2 : 1 }, aievalopt.checked ? aiEvalFunc : aiFunc);
+			var foename = typeName[level] + "\n" + randomNames[Math.floor(Math.random() * randomNames.length)];
+			if (level == 2) deck = doubleDeck(deck);
+			initGame({ first: Math.random() < .5, deck: deck, urdeck: urdeck, seed: Math.random() * etg.MAX_INT, hp: level == 0 ? 100 : level == 1 ? 125 : 150, aimarkpower: level == 2 ? 2 : 1, foename: foename, aidrawpower: level == 2 ? 2 : 1 }, aievalopt.checked ? aiEvalFunc : aiFunc);
 			game.cost = gameprice;
 			game.level = level;
-			game.gold = level == 1 ? 5 : (level == 2 ? 10 : 20);
+			game.gold = level == 0 ? 5 : (level == 1 ? 10 : 20);
 		}
 	}
 }
@@ -1384,7 +1370,7 @@ function startMenu() {
 		tcost.setText("Cost:     0");
 		igold2.visible = true;
 	});
-	bai0.click = mkAi(1);
+	bai0.click = mkAi(0);
 	menuui.addChild(bai0);
 
 	//ai1 button
@@ -1402,7 +1388,7 @@ function startMenu() {
 		tcost.setText("Cost:     10");
 		igold2.visible = true;
 	});
-	bai2.click = mkAi(3);
+	bai2.click = mkAi(2);
 	menuui.addChild(bai2);
 
 	//ai3 button
@@ -1533,7 +1519,7 @@ function startMenu() {
 			var card = PlayerRng.randomcard(false,
                 (function (y) { return function (x) { return x.type != PillarEnum && ((x.rarity != 5) ^ y); } })(Math.random() < .03));
 			cardcode = card.code;
-			var bound = card.rarity >= 2
+			var bound = card.rarity >= 2;
 			userEmit("addcard", { c: cardcode, o: cardcode, accountbound: bound });
 			user.ocard = cardcode;
             if (bound)
@@ -2379,12 +2365,12 @@ function startMatch() {
 				cardwon = PlayerRng.randomcard(elewin.upped, function(x) { return x.element == elewin.element && x.type != PillarEnum && x.rarity <= 3; });
 			}
 			if (game.level) {
-				if (game.level < 3) {
+				if (game.level < 2) {
 					cardwon = cardwon.asUpped(false);
 				}
 				var baserewards = [1, 6, 11, 31];
 				var hpfactor = [11, 7, 6, 2];
-				var i = game.level-1
+				var i = game.level;
 				var goldwon = Math.floor((baserewards[i] + Math.floor(game.player1.hp / hpfactor[i])) * (game.player1.hp == game.player1.maxhp ? 1.5 : 1));
 				console.log(goldwon);
 				if (game.cost) goldwon += game.cost;
@@ -2920,7 +2906,7 @@ function startMatch() {
 		gameui.addChild(decktext[j]);
 		gameui.addChild(damagetext[j]);
 	}
-	var foeplays = new PIXI.DisplayObjectContainer();
+	var foeplays = new PIXI.SpriteBatch();
 	gameui.addChild(foeplays);
 	var infobox = new PIXI.Sprite(nopic);
 	gameui.addChild(infobox);
