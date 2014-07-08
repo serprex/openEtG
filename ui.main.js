@@ -993,9 +993,9 @@ function mkAi(level) {
 				startEditor();
 				return;
 			}
-			var aideckstring = aideck.value, deck;
-			if (!user && aideckstring) {
-				deck = aideckstring.split(" ");
+			var deck;
+			if (!user && aideck.value) {
+				deck = aideck.value.split(" ");
 			} else {
 				if (user) {
 					if (gameprice) {
@@ -1103,7 +1103,6 @@ var nopic = PIXI.Texture.fromImage("assets/null.png")
 var goldtex = nopic;
 var backgrounds = ["assets/bg_default.png", "assets/bg_lobby.png", "assets/bg_shop.png", "assets/bg_quest.png", "assets/bg_game.png"];
 var questIcons = [], eicons = [], rarityicons = [], cardBacks = [], cardBorders = [], boosters = [], popups = [], typeicons = [];
-var buttonsList = [];
 var buttons = {};
 var preLoader = new PIXI.AssetLoader(["assets/gold.png", "assets/questIcons.png", "assets/esheet.png", "assets/raritysheet.png", "assets/backsheet.png",
 	"assets/cardborders.png", "assets/boosters.png", "assets/popup_booster.png", "assets/typesheet.png", "assets/buttons.png"].concat(backgrounds));
@@ -1125,52 +1124,25 @@ preLoader.onComplete = function() {
 	var tex = PIXI.Texture.fromFrame("assets/cardborders.png");
 	for (var i = 0;i < 26;i++) cardBorders.push(new PIXI.Texture(tex, new PIXI.Rectangle(i * 128, 0, 128, 162)));
 	var tex = PIXI.Texture.fromFrame("assets/boosters.png");
-	for (var i = 0;i < 2;i++)
-		for (var j = 0;j < 4;j++)
-			boosters.push(new PIXI.Texture(tex, new PIXI.Rectangle(j * 100, i * 150, 100, 150)));
+	for (var i = 0;i < 4;i++) boosters.push(new PIXI.Texture(tex, new PIXI.Rectangle(i * 100, 0, 100, 150)));
 	popups.push(PIXI.Texture.fromFrame("assets/popup_booster.png"));
 	var tex = PIXI.Texture.fromFrame("assets/typesheet.png");
 	for (var i = 0;i < 6;i++) {
 		typeicons.push(new PIXI.Texture(tex, new PIXI.Rectangle(25*i,0,25,25)));
 	}
+	var buttonnames = ["logout", "arenainfo", "arenat10", "arenaai", "commoner",
+		"mage", "champion", "demigod", "wipeaccount", "editor",
+		"shop", "exit", "buypack", "takecards", "upgrade",
+		"quests", "clear", "done", "import", "resign",
+		"mulligan", "endturn", "cancel", "accepthand", "confirm",
+		"deck1", "deck2", "deck3", "sell", "sellupgrade",
+		"trade"];
+	var buttonList = [];
 	var tex = PIXI.Texture.fromFrame("assets/buttons.png");
-	for (var i = 0;i < 10;i++) {
-		for (var j = 0;j < 5;j++) {
-			buttonsList.push(new PIXI.Texture(tex, new PIXI.Rectangle(j * 72, i * 22, 72, 22)));
-		}
-	}
-	buttons = {
-		logout: buttonsList[0],
-		arenainfo: buttonsList[1],
-		arenat10: buttonsList[2],
-		arenaai: buttonsList[3],
-		commoner: buttonsList[4],
-		mage: buttonsList[5],
-		champion: buttonsList[6],
-		demigod: buttonsList[7],
-		wipeaccount: buttonsList[8],
-		editor: buttonsList[9],
-		shop: buttonsList[10],
-		exit: buttonsList[11],
-		buypack: buttonsList[12],
-		takecards: buttonsList[13],
-		upgrade: buttonsList[14],
-		quests: buttonsList[15],
-		clear: buttonsList[16],
-		done: buttonsList[17],
-		import: buttonsList[18],
-		resign: buttonsList[19],
-		mulligan: buttonsList[20],
-		endturn: buttonsList[21],
-		cancel: buttonsList[22],
-		accepthand: buttonsList[23],
-		confirm: buttonsList[24],
-		deck1: buttonsList[25],
-		deck2: buttonsList[26],
-		deck3: buttonsList[27],
-		sell: buttonsList[28],
-		sellupgrade: buttonsList[29],
-		trade: buttonsList[30]
+	for (var i = 0;buttonList.length < buttonnames.length;i++) {
+		var x = i%5, y = Math.floor(i/5);
+		buttonList.push(new PIXI.Texture(tex, new PIXI.Rectangle(x * 72, y * 22, 72, 22)));
+		buttons[buttonnames[buttonList.length-1]] = buttonList[buttonList.length-1];
 	}
 	startMenu();
 	requestAnimate();
@@ -1889,16 +1861,16 @@ function startStore() {
 			updateFreeText();
 		}
 	}
-	var bbronze = makeButton(50, 280, 100, 200, boosters[4]);
+	var bbronze = makeButton(50, 280, 100, 200, boosters[0]);
 	bbronze.click = gradeSelect(0);
 	storeui.addChild(bbronze);
-	var bsilver = makeButton(175, 280, 100, 200, boosters[5]);
+	var bsilver = makeButton(175, 280, 100, 200, boosters[1]);
 	bsilver.click = gradeSelect(1);
 	storeui.addChild(bsilver);
-	var bgold = makeButton(300, 280, 100, 200, boosters[6]);
+	var bgold = makeButton(300, 280, 100, 200, boosters[2]);
 	bgold.click = gradeSelect(2);
 	storeui.addChild(bgold);
-	var bplatinum = makeButton(425, 280, 100, 200, boosters[7]);
+	var bplatinum = makeButton(425, 280, 100, 200, boosters[3]);
 	bplatinum.click = gradeSelect(3);
 	storeui.addChild(bplatinum);
 
