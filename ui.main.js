@@ -1917,7 +1917,7 @@ function startStore() {
 	storeui.addChild(bplatinum);
 
 	for (var i = 0;i < 12;i++) {
-		var elementbutton = makeButton(75 + Math.floor(i / 2)*75, 120 + (i % 2)*75, 32, 32, eicons[i]);
+		var elementbutton = makeButton(75 + Math.floor(i / 2)*75, 120 + (i % 2)*75, 32, 32, eicons[i+1]);
 		(function(_i) {
 			elementbutton.click = function() {
 				packele = _i + 1;
