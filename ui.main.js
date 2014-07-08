@@ -28,7 +28,7 @@ var aiTargeting = require("./ai.targeting");
 var evalGameState = require("./ai.eval");
 var myTurn = false;
 var cardChosen = false;
-loadcards(function(cards, cardcodes, targeting) {
+require("./etg.client").loadcards(function(cards, cardcodes, targeting) {
 	Cards = cards;
 	CardCodes = cardcodes;
 	Targeting = targeting;

@@ -23,7 +23,7 @@ function initHand(pl){
 		pl.hand[i-1] = new CardInstance(arguments[i], pl);
 	}
 }
-loadcards(function(cards, cardcodes, targeting) {
+require("./etg.client").loadcards(function(cards, cardcodes, targeting) {
 	Cards = cards;
 	CardCodes = cardcodes;
 	Targeting = targeting;

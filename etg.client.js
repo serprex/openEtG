@@ -1,4 +1,4 @@
-function loadcards(cb){
+exports.loadcards = function(cb){
 	var Cards = {};
 	var CardCodes = {};
 	var Targeting = {};
