@@ -1,11 +1,11 @@
 var Cards, CardCodes, Targeting, targetingMode, targetingModeCb, targetingText, game, discarding, animCb, user, renderer, endturnFunc, cancelFunc, accepthandfunc, foeDeck, player2summon, player2Cards, guestname;
 (function(g) {
-	var htmlElements = ["leftpane", "chatArea", "chatinput", "deckimport", "aideck", "foename", "airefresh", "change", "login", "password", "challenge", "aievalopt", "chatBox", "trade", "bottompane", "demigodmode", "username"];
+	var htmlElements = ["leftpane", "chatArea", "chatinput", "deckimport", "aideck", "foename", "airefresh", "change", "login", "password", "challenge", "chatBox", "trade", "bottompane", "demigodmode", "username"];
 	for (var i = 0;i < htmlElements.length;i++) {
 		g[htmlElements[i]] = document.getElementById(htmlElements[i]);
 	}
 	if (localStorage){
-		var store = [airefresh, username, aievalopt];
+		var store = [airefresh, username];
 		for (var i=0; i<store.length; i++){
 			(function(storei){
 				var field = storei.type == "checkbox" ? "checked" : "value";
@@ -24,7 +24,6 @@ var MersenneTwister = require("./MersenneTwister");
 var Actives = require("./Actives");
 var Effect = require("./Effect");
 var Quest = require("./Quest");
-var aiTargeting = require("./ai.targeting");
 var evalGameState = require("./ai.eval");
 var myTurn = false;
 var cardChosen = false;
@@ -665,89 +664,6 @@ function aiEvalFunc() {
 		return ["endturn", worstcards[Math.floor(Math.random() * worstcards.length)]];
 	} else return ["endturn"];
 }
-
-function aiFunc() {
-	var self = this;
-	function iterCore(c, active) {
-		var cmd;
-		getTarget(c, active, function(t) {
-			targetingMode = null;
-			if (!t && !aiTargeting.evalFuncs[active.activename](c)) {
-				console.log("Hold " + active.activename);
-				return;
-			}
-			cmd = ["cast", (tgtToBits(c) ^ 8) | (tgtToBits(t) ^ 8) << 9];
-		});
-		if (targetingMode) {
-			console.log("in " + active.activename);
-			var t = aiTargeting.pickTarget(c, active, targetingMode);
-			console.log("out " + (t ? (t instanceof Player ? "player" : t.card.name) : ""));
-			if (t) {
-				targetingModeCb(t);
-			} else targetingMode = null;
-		}
-		return cmd;
-	}
-	var cmd;
-	for (var i = 0;i < 23;i++) {
-		var cr = self.creatures[i];
-		if (cr && cr.canactive()) {
-			if (cmd = iterCore(cr, cr.active.cast)) return cmd;
-		}
-	}
-	var wp = self.weapon, sh = self.shield;
-	if (wp && wp.canactive()) {
-		if (cmd = iterCore(wp, wp.active.cast)) return cmd;
-	}
-	if (sh && sh.canactive()) {
-		if (cmd = iterCore(sh, sh.active.cast)) return cmd;
-	}
-	for (var i = self.hand.length - 1;i >= 0;i--) {
-		var cardinst = self.hand[i];
-		if (cardinst.canactive()) {
-			if (cardinst.card.type == SpellEnum) {
-				if (cmd = iterCore(cardinst, cardinst.card.active)) return cmd;
-			}
-			else if (cardinst.card.type == PermanentEnum) {
-				if (self.countpermanents() < 16) {
-					if (!cardinst.card.active || !cardinst.card.active.play || !aiTargeting.evalFuncs[cardinst.card.active.play.activename]) return ["cast", tgtToBits(cardinst) ^ 8]
-					if (cmd = iterCore(cardinst, cardinst.card.active.play)) return cmd;
-				}
-			}
-			else if (cardinst.card.type == CreatureEnum) {
-				if (self.countcreatures() < 23 && !self.foe.sosa) {
-					if (!cardinst.card.active || !cardinst.card.active.play || !aiTargeting.evalFuncs[cardinst.card.active.play.activename]) return ["cast", tgtToBits(cardinst) ^ 8]
-					if (cmd = iterCore(cardinst, cardinst.card.active.play)) return cmd;
-				}
-			}
-			else if (cardinst.card.type == WeaponEnum ? (!self.weapon || self.weapon.card.cost < cardinst.card.cost) :
-                cardinst.card.type == ShieldEnum ? (!self.shield || self.shield.card.cost < cardinst.card.cost || self.shield.passives.additive) : true) {
-				return ["cast", tgtToBits(cardinst) ^ 8];
-			}
-		}
-	}
-	for (var i = 0;i < 16;i++) {
-		var pr = self.permanents[i];
-		if (pr && pr.canactive()) {
-			if (cmd = iterCore(pr, pr.active.cast)) return cmd;
-		}
-	}
-	if (self.hand.length == 8) {
-		var mincardvalue = 999, worstcards;
-		for (var i = 0;i < 8;i++) {
-			var cardinst = self.hand[i];
-			var cardvalue = self.quanta[cardinst.card.element] - cardinst.card.cost;
-			if (cardinst.card.type != SpellEnum && cardinst.card.active && cardinst.card.active.discard == Actives.obsession) { cardvalue += 5; }
-			if (cardvalue == mincardvalue) {
-				worstcards.push(i);
-			} else if (cardvalue < mincardvalue) {
-				mincardvalue = cardvalue;
-				worstcards = [i];
-			}
-		}
-		return ["endturn", worstcards[Math.floor(Math.random() * worstcards.length)]];
-	} else return ["endturn"];
-}
 function listify(maybeArray) {
 	if (maybeArray instanceof Array) return maybeArray;
 	else return maybeArray.split();
@@ -868,7 +784,7 @@ function mkDemigod() {
 	var dgname = "Demigod\n" + demigod[0];
 	var deck = demigod[1].split(" ");
 	deck = doubleDeck(deck);
-	initGame({ first: Math.random() < .5, deck: deck, urdeck: urdeck, seed: Math.random() * etg.MAX_INT, hp: 200, aimarkpower: 3, aidrawpower: 2, foename: dgname }, aievalopt.checked ? aiEvalFunc : aiFunc);
+	initGame({ first: Math.random() < .5, deck: deck, urdeck: urdeck, seed: Math.random() * etg.MAX_INT, hp: 200, aimarkpower: 3, aidrawpower: 2, foename: dgname }, aiEvalFunc);
 	game.cost = 20;
 	game.level = 3;
 }
@@ -931,7 +847,7 @@ function mkMage() {
 	var rand = Math.floor(Math.random() * mageNames.length);
 	var mname = mageNames[rand];
 	var deck = mageDecks[rand].split(" ");
-	initGame({ first: Math.random() < .5, deck: deck, urdeck: urdeck, seed: Math.random() * etg.MAX_INT, hp: 125, foename: mname }, aievalopt.checked ? aiEvalFunc : aiFunc);
+	initGame({ first: Math.random() < .5, deck: deck, urdeck: urdeck, seed: Math.random() * etg.MAX_INT, hp: 125, foename: mname }, aiEvalFunc);
 	game.cost = 5;
 	game.level = 1;
 }
@@ -958,7 +874,7 @@ function mkQuestAi(questname, stage) {
 		/*startEditor();*/
 		return "ERROR: Your deck is invalid or missing! Please exit and create a valid deck in the deck editor.";
 	}
-	initGame({ first: Math.random() < .5, deck: deck, urdeck: urdeck, seed: Math.random() * etg.MAX_INT, hp: hp, aimarkpower: markpower, foename: foename, urhp : playerHPstart, aidrawpower:drawpower }, aievalopt.checked ? aiEvalFunc : aiFunc);
+	initGame({ first: Math.random() < .5, deck: deck, urdeck: urdeck, seed: Math.random() * etg.MAX_INT, hp: hp, aimarkpower: markpower, foename: foename, urhp : playerHPstart, aidrawpower:drawpower }, aiEvalFunc);
 	game.quest = [questname, stage];
 	game.wintext = quest.wintext || "";
 	game.autonext = quest.autonext || false;
@@ -1074,7 +990,7 @@ function mkAi(level) {
 
 			var foename = typeName[level] + "\n" + randomNames[Math.floor(Math.random() * randomNames.length)];
 			if (level == 2) deck = doubleDeck(deck);
-			initGame({ first: Math.random() < .5, deck: deck, urdeck: urdeck, seed: Math.random() * etg.MAX_INT, hp: level == 0 ? 100 : level == 1 ? 125 : 150, aimarkpower: level == 2 ? 2 : 1, foename: foename, aidrawpower: level == 2 ? 2 : 1 }, aievalopt.checked ? aiEvalFunc : aiFunc);
+			initGame({ first: Math.random() < .5, deck: deck, urdeck: urdeck, seed: Math.random() * etg.MAX_INT, hp: level == 0 ? 100 : level == 1 ? 125 : 150, aimarkpower: level == 2 ? 2 : 1, foename: foename, aidrawpower: level == 2 ? 2 : 1 }, aiEvalFunc);
 			game.cost = gameprice;
 			game.level = level;
 			game.gold = level == 0 ? 5 : (level == 1 ? 10 : 20);
@@ -2327,7 +2243,7 @@ function startMatch() {
 				}
 				var basereward = [1, 6, 11, 31][game.level];
 				var hpfactor = [11, 7, 6, 2][game.level];
-				goldwon = Math.floor((basereward + game.player1.hp / hpfactor) * (game.player1.hp == game.player1.maxhp ? 1 + game.player1.maxhp / 222 : 1));
+				goldwon = Math.floor((basereward + game.player1.hp / hpfactor) * (game.player1.hp == game.player1.maxhp ? 1.5 : 1));
 			}
 			if (goldwon !== undefined){
 				game.goldreward = goldwon + (game.cost || 0);
@@ -2978,7 +2894,7 @@ socket.on("foearena", function(data) {
 	var deck = etg.decodedeck(data.deck);
 	deck = doubleDeck(deck);
 	chatArea.value = data.name + ": " + deck.join(" ");
-	initGame({ first: data.first, deck: deck, urdeck: getDeck(), seed: data.seed, hp: data.hp, cost: data.cost, foename: data.name }, aievalopt.checked ? aiEvalFunc : aiFunc);
+	initGame({ first: data.first, deck: deck, urdeck: getDeck(), seed: data.seed, hp: data.hp, cost: data.cost, foename: data.name }, aiEvalFunc);
 	game.arena = data.name;
 	game.gold = 15;
 	game.cost = 10;
