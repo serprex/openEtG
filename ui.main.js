@@ -1142,12 +1142,10 @@ preLoader.onComplete = function() {
 		"mulligan", "endturn", "cancel", "accepthand", "confirm",
 		"deck1", "deck2", "deck3", "sell", "sellupgrade",
 		"trade"];
-	var buttonList = [];
 	var tex = PIXI.Texture.fromFrame("assets/buttons.png");
-	for (var i = 0;buttonList.length < buttonnames.length;i++) {
+	for (var i = 0;i < buttonnames.length;i++) {
 		var x = i%5, y = Math.floor(i/5);
-		buttonList.push(new PIXI.Texture(tex, new PIXI.Rectangle(x * 72, y * 22, 72, 22)));
-		buttons[buttonnames[buttonList.length-1]] = buttonList[buttonList.length-1];
+		buttons[buttonnames[i]] = new PIXI.Texture(tex, new PIXI.Rectangle(x * 72, y * 22, 72, 22));
 	}
 	startMenu();
 }
@@ -2336,7 +2334,7 @@ function startMatch() {
 				var elewin = foeDeck[Math.floor(Math.random() * foeDeck.length)];
 				cardwon = PlayerRng.randomcard(elewin.upped, function(x) { return x.element == elewin.element && x.type != PillarEnum && x.rarity <= 3; });
 			}
-			if (game.level) {
+			if (game.level !== undefined) {
 				if (game.level < 2) {
 					cardwon = cardwon.asUpped(false);
 				}
@@ -3044,18 +3042,18 @@ socket.on("foeleft", function(data) {
 	}
 });
 socket.on("chat", function(data) {
-	console.log("message gotten");
 	var now = new Date(), h = now.getHours(), m = now.getMinutes(), s = now.getSeconds();
 	if (h < 10) h = "0"+h;
 	if (m < 10) m = "0"+m;
 	if (s < 10) s = "0"+s;
 	var msg = h + " " + m + " " + s + " " + (data.u ? "<b>" + sanitizeHtml(data.u) + ":</b> " : "") + sanitizeHtml(data.message);
 	var color = data.mode == "pm" ? "blue" : data.mode == "info" ? "red" : "black";
-	if (data.mode == "guest")
-		chatBox.innerHTML += "<font color=black><i>" + msg + "</i></font>";
-	else
-		chatBox.innerHTML += "<font color=" + color + ">" + msg + "</font>";
-	chatBox.innerHTML += "<br>";
+	chatBox.innerHTML += data.mode == "guest" ? "<font color=black><i>" + msg + "</i></font><br>" : "<font color=" + color + ">" + msg + "</font><br>";
+	if (Notification && user && ~data.message.indexOf(user.name) && !document.hasFocus()){
+		Notification.requestPermission();
+		var n = new Notification(data.u, {body: data.message});
+		n.onclick = window.focus;
+	}
 	chatBox.scrollTop = chatBox.scrollHeight;
 });
 socket.on("mulligan", function(data) {

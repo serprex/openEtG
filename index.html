@@ -48,11 +48,10 @@
         <input id="trade" type="submit" value="Trade" onclick="tradeClick()" />
         <input id="reward" type="submit" value="Reward" onclick="rewardClick()" /><br>
         <input id="demigodmode" type="checkbox" />Enable Demigod Mode<br><br>
-		<input id="aideck" type="text" placeholder="AI Deck" style="width:100%" /><br>
-		<input id="airefresh" type="text" placeholder="AI Speed" style="width:100%" onkeydown="event.cancelBubble=true" /><br>
+		<input id="airefresh" type="text" placeholder="AI Speed" onkeydown="event.cancelBubble=true" /> <input id="aideck" type="text" placeholder="AI Deck" /><br>
 		<input id="aievalopt" type="checkbox" />Enable Experimental AI<br>
-		<div id="chatBox" style="width:99%;height:350px;overflow:scroll;margin:2px;background-color:white"></div>
-		<textarea id="chatinput" placeholder="Chat" style="width:99%;height:99%;margin:2px" onkeydown="maybeSendChat(event)"></textarea>
+		<div id="chatBox" style="width:350px;height:380px;overflow-y:scroll;overflow-x:hidden;background-color:white"></div>
+		<textarea id="chatinput" placeholder="Chat" style="width:350px;height:40px;resize:none" onkeydown="maybeSendChat(event)"></textarea>
 	</div>
 	<div id="bottompane">
 		<input id="deckimport" type="text" placeholder="Deck" style="width:890px" />
