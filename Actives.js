@@ -132,8 +132,8 @@ bravery:function(c,t){
 		}
 	}
 },
-brokenmirror:function(c,t){
-	if (t instanceof Creature && c.owner != t.owner){
+brokenmirror:function(c,t, fromhand){
+	if (fromhand && t instanceof Creature && c.owner != t.owner){
 		new Creature(Cards.Ghost.asUpped(c.card.upped), c.owner).place();
 	}
 },

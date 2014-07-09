@@ -722,21 +722,20 @@ Thing.prototype.activetext = function(){
 	}
 	return info;
 }
-Thing.prototype.place = function(){
+Thing.prototype.place = function(fromhand){
 	var self = this;
-	this.owner.procactive("play", function (c, p) { c.active.play(c, self) });
+	this.owner.procactive("play", function (c, p) { c.active.play(c, self, fromhand) });
 }
-Creature.prototype.place = function(){
+Creature.prototype.place = function(fromhand){
 	place(this.owner.creatures, this);
-	Thing.prototype.place.call(this);
-
+	Thing.prototype.place.call(this, fromhand);
 }
-Permanent.prototype.place = function(){
+Permanent.prototype.place = function(fromhand){
 	if (this.passives.additive){
 		for(var i=0; i<16; i++){
 			if (this.owner.permanents[i] && this.owner.permanents[i].card == this.card){
 				this.owner.permanents[i].status.charges += this.status.charges;
-				Thing.prototype.place.call(this.owner.permanents[i]);
+				Thing.prototype.place.call(this.owner.permanents[i], fromhand);
 				return;
 			}
 		}
@@ -744,18 +743,18 @@ Permanent.prototype.place = function(){
 	place(this.owner.permanents, this);
 	Thing.prototype.place.call(this);
 }
-Weapon.prototype.place = function(){
+Weapon.prototype.place = function(fromhand){
 	this.owner.weapon = this;
-	Thing.prototype.place.call(this);
+	Thing.prototype.place.call(this, fromhand);
 }
-Shield.prototype.place = function(){
+Shield.prototype.place = function(fromhand){
 	if (this.passives.additive && this.owner.shield && this.owner.shield.card.asUpped(this.card.upped) == this.card){
 		this.owner.shield.status.charges += this.status.charges;
-		Thing.prototype.place.call(this);
+		Thing.prototype.place.call(this, fromhand);
 		return;
 	}
 	this.owner.shield = this;
-	Thing.prototype.place.call(this);
+	Thing.prototype.place.call(this, fromhand);
 }
 CardInstance.prototype.place = function(){
 	if (this.owner.hand.length < 8){
@@ -1091,13 +1090,13 @@ CardInstance.prototype.useactive = function(target){
 	var self = this;
 	if (card.type <= PermanentEnum){
 		if (card.type == PillarEnum){
-			new Pillar(card, owner).place();
+			new Pillar(card, owner).place(true);
 		}else if (card.type == WeaponEnum){
-			new Weapon(card, owner).place();
+			new Weapon(card, owner).place(true);
 		}else if (card.type == ShieldEnum){
-			new Shield(card, owner).place();
+			new Shield(card, owner).place(true);
 		}else{
-			new Permanent(card, owner).place();
+			new Permanent(card, owner).place(true);
 		}
 	}else if (card.type == SpellEnum){
 		if (!target || !target.evade(owner)){
@@ -1105,7 +1104,7 @@ CardInstance.prototype.useactive = function(target){
 			owner.procactive("spell", function(c, t) { c.active.spell(c, self, target); });
 		}
 	}else if (card.type == CreatureEnum){
-		new Creature(card, owner).place();
+		new Creature(card, owner).place(true);
 	} else console.log("Unknown card type: " + card.type);
 	owner.expectedDamage = expectedDamage(owner);
 	owner.foe.expectedDamage = expectedDamage(owner.foe);
