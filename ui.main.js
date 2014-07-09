@@ -3007,14 +3007,17 @@ socket.on("codecard", function(data) {
 });
 socket.on("codereject", function(data) {
 	chatBox.innerHTML += "<font color=red>" + data + "</font><br>";
+	chatBox.scrollTop = chatBox.scrollHeight;
 });
 socket.on("codegold", function(data) {
 	user.gold += data;
 	chatBox.innerHTML += "<font color=red>" + data + " Gold added!</font><br>";
+	chatBox.scrollTop = chatBox.scrollHeight;
 });
 socket.on("codedone", function(data) {
 	user.pool.push(data.card);
 	chatBox.innerHTML += "<font color=red>Card Added!</font><br>"
+	chatBox.scrollTop = chatBox.scrollHeight;
 	startMenu();
 })
 function maybeSendChat(e) {
