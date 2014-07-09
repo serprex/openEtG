@@ -43,11 +43,12 @@
 		<input id="login" type="submit" value="Login" onclick="loginClick()" /><br>
 		<input id="password" type="password" placeholder="Insecure Password" onkeydown="maybeLogin(event)" tabindex=2 />
 		<input id="change" type="submit" value="Change" onclick="changeClick()" /><br><br>
-		<input id="foename" type="text" placeholder="Challenge" onkeydown="maybeChallenge(event)" />
+		<input id="foename" type="text" placeholder="Challenge" onkeydown="maybeChallenge(event)" /> <input id="demigodmode" type="checkbox" />Enable Demigod Mode<br>
 		<input id="challenge" type="submit" value="PvP" onclick="challengeClick()" />
-        <input id="trade" type="submit" value="Trade" onclick="tradeClick()" />
-        <input id="reward" type="submit" value="Reward" onclick="rewardClick()" /><br>
-        <input id="demigodmode" type="checkbox" />Enable Demigod Mode<br><br>
+		<input id="trade" type="submit" value="Trade" onclick="tradeClick()" />
+		<input id="reward" type="submit" value="Reward" onclick="rewardClick()" />
+		<input id="library" type="submit" value="Library" onclick="libraryClick()" /><br>
+		<input id="demigodmode" type="checkbox" />Enable Demigod Mode<br><br>
 		<input id="airefresh" type="text" placeholder="AI Speed" onkeydown="event.cancelBubble=true" /> <input id="aideck" type="text" placeholder="AI Deck" /><br><br>
 		<div id="chatBox" style="width:350px;height:380px;overflow-y:scroll;overflow-x:hidden;background-color:white"></div>
 		<textarea id="chatinput" placeholder="Chat" style="width:350px;height:40px;resize:none" onkeydown="maybeSendChat(event)"></textarea>

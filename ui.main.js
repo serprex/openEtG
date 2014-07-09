@@ -472,6 +472,40 @@ function initTrade(data) {
 	}
 	refreshRenderer(editorui);
 }
+function initLibrary(pool){
+	console.log(pool);
+	var editorui = new PIXI.DisplayObjectContainer(), cardartcode;
+	editorui.interactive = true;
+	var background = new PIXI.Sprite(backgrounds[0]);
+	editorui.addChild(background);
+	var bexit = makeButton(10, 10, 72, 22, buttons.exit);
+	bexit.click = startMenu;
+	editorui.addChild(bexit);
+	var cardminus = {}, cardpool = {};
+	pool = etg.decodedeck(pool);
+	for (var i = 0;i < pool.length;i++) {
+		if (pool[i] in cardpool) {
+			cardpool[pool[i]]++;
+		} else {
+			cardpool[pool[i]] = 1;
+		}
+	}
+	var cardsel = makeCardSelector(
+		function(code){
+			cardartcode = code;
+		}, null);
+	editorui.addChild(cardsel);
+	var cardArt = new PIXI.Sprite(nopic);
+	cardArt.position.set(734, 8);
+	editorui.addChild(cardArt);
+	animCb = function(){
+		cardsel.next(cardpool, cardminus);
+		if (cardartcode) {
+			cardArt.setTexture(getArt(cardartcode));
+		}
+	}
+	refreshRenderer(editorui);
+}
 function initGame(data, ai) {
 	game = mkGame(data.first, data.seed);
 	if (data.hp) {
@@ -2880,7 +2914,8 @@ cmds.cast = function(bits) {
 }
 var socket = io(location.hostname + ":13602");
 socket.on("pvpgive", initGame);
-socket.on("tradegive", initTrade)
+socket.on("tradegive", initTrade);
+socket.on("librarygive", initLibrary);
 socket.on("foearena", function(data) {
 	var deck = etg.decodedeck(data.deck);
 	deck = doubleDeck(deck);
@@ -3115,7 +3150,12 @@ function tradeClick() {
 		userEmit("tradewant", { f: foename.value });
 }
 function rewardClick() {
-	userEmit("codesubmit", { code: foename.value });
+	if (Cards)
+		userEmit("codesubmit", { code: foename.value });
+}
+function libraryClick() {
+	if (Cards)
+		socket.emit("librarywant", { f: foename.value });
 }
 function unaryParseInt(x) {
 	return parseInt(x, 10);

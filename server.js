@@ -567,6 +567,11 @@ io.on("connection", function(socket) {
 			rooms[data.room] = this;
 		}
 	});
+	socket.on("librarywant", function(data){
+		db.hget("U:"+data.f, "pool", function(err, pool){
+			socket.emit("librarygive", pool);
+		});
+	});
 	foeEcho(socket, "endturn");
 	foeEcho(socket, "cast");
 	foeEcho(socket, "foeleft");
