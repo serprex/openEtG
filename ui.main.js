@@ -2333,22 +2333,19 @@ function startMatch() {
 				var elewin = foeDeck[Math.floor(Math.random() * foeDeck.length)];
 				cardwon = PlayerRng.randomcard(elewin.upped, function(x) { return x.element == elewin.element && x.type != PillarEnum && x.rarity <= 3; });
 			}
+			var goldwon = game.gold;
 			if (game.level !== undefined) {
 				if (game.level < 2){
 					cardwon = cardwon.asUpped(false);
 				}
-				var baserewards = [1, 6, 11, 31];
-				var hpfactor = [11, 7, 6, 2];
-				var i = game.level;
-				var goldwon = Math.floor((baserewards[i] + game.player1.hp / hpfactor[i]) * (game.player1.hp == game.player1.maxhp ? 1 + game.player1.maxhp / 222 : 1));
-				console.log(goldwon);
+				var basereward = [1, 6, 11, 31][game.level];
+				var hpfactor = [11, 7, 6, 2][game.level];
+				var goldwon = Math.floor((basereward + game.player1.hp / hpfactor) * (game.player1.hp == game.player1.maxhp ? 1 + game.player1.maxhp / 222 : 1));
 				if (game.cost) goldwon += game.cost;
 				game.goldreward = goldwon;
-			} else if (game.gold) {
-				var goldwon = game.gold
-				console.log(goldwon);
-				if (game.cost) goldwon += game.cost;
-				game.goldreward = goldwon;
+			}
+			if (goldwon !== undefined){
+				game.goldreward = goldwon + (game.cost || 0);
 			}
 			game.cardreward = cardwon.code;
 		}
