@@ -133,8 +133,9 @@ var sockinfo = {};
 process.on("SIGTERM", process.exit).on("SIGINT", process.exit);
 process.on("exit", function(){
 	for(var u in users){
-		if (users.pool || users.accountbound){
-			db.hmset("U:"+u, users[u]);
+		var user = users[u];
+		if (user.pool || user.accountbound){
+			db.hmset("U:"+u, user);
 		}
 	}
 	db.quit();
