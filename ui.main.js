@@ -2340,9 +2340,7 @@ function startMatch() {
 				}
 				var basereward = [1, 6, 11, 31][game.level];
 				var hpfactor = [11, 7, 6, 2][game.level];
-				var goldwon = Math.floor((basereward + game.player1.hp / hpfactor) * (game.player1.hp == game.player1.maxhp ? 1 + game.player1.maxhp / 222 : 1));
-				if (game.cost) goldwon += game.cost;
-				game.goldreward = goldwon;
+				goldwon = Math.floor((basereward + game.player1.hp / hpfactor) * (game.player1.hp == game.player1.maxhp ? 1 + game.player1.maxhp / 222 : 1));
 			}
 			if (goldwon !== undefined){
 				game.goldreward = goldwon + (game.cost || 0);
