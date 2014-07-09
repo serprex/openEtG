@@ -669,26 +669,23 @@ function listify(maybeArray) {
 	else return maybeArray.split();
 }
 function victoryScreen() {
-	victoryui = new PIXI.DisplayObjectContainer();
+	var victoryui = new PIXI.DisplayObjectContainer();
 	victoryui.interactive = true;
 
 	//lobby background
 	var bgvictory = new PIXI.Sprite(backgrounds[0]);
 	victoryui.addChild(bgvictory);
 
-	var victoryText = game.quest ? game.wintext : "You have won!";
-	var posX = 450;
-	var posY = game.cardreward ? 130 : 250;
-	tinfo = makeText(posX, posY, victoryText, true);
+	victoryui.addChild(makeText(10, 10, game.ply + "\n" + (Date.now()-game.startTime), true));
+	var victoryText = game.winner == game.player2 ? "You loser..." : game.quest ? game.wintext : "You have won!";
+	var tinfo = makeText(450, game.cardreward ? 130 : 250, victoryText, true);
 	tinfo.anchor.x = 0.5;
 	var bexit = makeButton(412, 430, 75, 18, buttons.exit);
 
 	bexit.click = function() {
 		if (game.cardreward) {
 			userEmit("add", { add: etg.encodedeck(game.cardreward)});
-			for (var i = 0;i < game.cardreward.length;i++) {
-				user.pool.push(game.cardreward[i]);
-			}
+			Array.prototype.push.apply(user.pool, game.cardreward);
 		}
 		if (game.goldreward) {
 			userEmit("addgold", { g: game.goldreward });
@@ -701,15 +698,15 @@ function victoryScreen() {
 		game = undefined;
 	}
 	if (game.goldreward) {
-		var goldshown = game.goldreward - (game.cost || 0);
+		var goldshown = (game.goldreward || 0) - (game.cost || 0);
 		tgold = makeText(340, 550, "Gold won:      " + goldshown, true);
 		var igold = new PIXI.Sprite(goldtex);
 		igold.position.set(420, 550);
 		victoryui.addChild(tgold);
 		victoryui.addChild(igold);
 	}
+	var rewards = [];
 	if (game.cardreward) {
-		var rewards = [];
 		game.cardreward = listify(game.cardreward);
 		for (var i = 0;i < game.cardreward.length;i++) {
 			var cardArt = new PIXI.Sprite(nopic);
@@ -993,7 +990,6 @@ function mkAi(level) {
 			initGame({ first: Math.random() < .5, deck: deck, urdeck: urdeck, seed: Math.random() * etg.MAX_INT, hp: level == 0 ? 100 : level == 1 ? 125 : 150, aimarkpower: level == 2 ? 2 : 1, foename: foename, aidrawpower: level == 2 ? 2 : 1 }, aiEvalFunc);
 			game.cost = gameprice;
 			game.level = level;
-			game.gold = level == 0 ? 5 : (level == 1 ? 10 : 20);
 		}
 	}
 }
@@ -2236,7 +2232,7 @@ function startMatch() {
 				var elewin = foeDeck[Math.floor(Math.random() * foeDeck.length)];
 				cardwon = PlayerRng.randomcard(elewin.upped, function(x) { return x.element == elewin.element && x.type != PillarEnum && x.rarity <= 3; });
 			}
-			var goldwon = game.gold;
+			var goldwon;
 			if (game.level !== undefined) {
 				if (game.level < 2){
 					cardwon = cardwon.asUpped(false);
@@ -2244,7 +2240,7 @@ function startMatch() {
 				var basereward = [1, 6, 11, 31][game.level];
 				var hpfactor = [11, 7, 6, 2][game.level];
 				goldwon = Math.floor((basereward + Math.floor(game.player1.hp / hpfactor)) * (game.player1.hp == game.player1.maxhp ? 1.5 : 1));
-			}
+			}else goldwon = game.gold;
 			if (goldwon !== undefined){
 				game.goldreward = goldwon + (game.cost || 0);
 			}
@@ -2455,29 +2451,24 @@ function startMatch() {
 						user.pvplosses--;
 					}
 				}
-			}
-			if (user && game.arena) {
-				userEmit("modarena", { aname: game.arena, won: game.winner == game.player2 });
-				delete game.arena;
-			}
-			if (user && game.quest) {
-				if (game.winner == game.player1 && (user.quest[game.quest[0]] <= game.quest[1] || !(game.quest[0] in user.quest)) && !game.autonext) {
-					userEmit("updatequest", { quest: game.quest[0], newstage: game.quest[1] + 1 });
-					user.quest[game.quest[0]] = game.quest[1] + 1;
+				if (game.arena) {
+					userEmit("modarena", { aname: game.arena, won: game.winner == game.player2 });
+					delete game.arena;
 				}
-			}
-			if (user && game.winner == game.player1 && game.quest && game.autonext) {
-				mkQuestAi(game.quest[0], game.quest[1] + 1);
-			}
-			else if (user && game.winner == game.player1) {
-				victoryScreen();
+				if (game.quest) {
+					if (game.winner == game.player1 && (user.quest[game.quest[0]] <= game.quest[1] || !(game.quest[0] in user.quest)) && !game.autonext) {
+						userEmit("updatequest", { quest: game.quest[0], newstage: game.quest[1] + 1 });
+						user.quest[game.quest[0]] = game.quest[1] + 1;
+					}
+				}
+				if (game.winner == game.player1 && game.quest && game.autonext) {
+					mkQuestAi(game.quest[0], game.quest[1] + 1);
+				}else{
+					victoryScreen();
+				}
 			}
 			else {
-				if (game.quest)
-					startQuestWindow();
-				else {
-					startMenu();
-				}
+				startMenu();
 				game = undefined;
 			}
 		} else if (game.turn == game.player1) {

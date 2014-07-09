@@ -196,6 +196,7 @@ function mkGame(first, seed){
 	game.player2.foe = game.player1;
 	game.players = [game.player1, game.player2];
 	game.turn = first?game.player1:game.player2;
+	game.startTime = Date.now();
 	return game;
 }
 function cloneRng(rng){
