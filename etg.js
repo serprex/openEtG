@@ -146,6 +146,7 @@ Card.prototype.rarity = 0;
 Card.prototype.attack = 0;
 Card.prototype.health = 0;
 Card.prototype.upped = false;
+Player.prototype.markpower = 1;
 var Other = 0;
 var Entropy = 1;
 var Death = 2;
@@ -538,8 +539,7 @@ Player.prototype.endturn = function(discard) {
 			card.active.discard(cardinst, this);
 		}
 	}
-	var markpower = this.markpower ? this.markpower : 1;
-	this.spend(this.mark, -markpower * (this.mark > 0 ? 1 : 3));
+	this.spend(this.mark, this.markpower * (this.mark > 0 ? -1 : -3));
 	if (this.foe.status.poison){
 		this.foe.dmg(this.foe.status.poison);
 	}
@@ -586,7 +586,7 @@ Player.prototype.endturn = function(discard) {
 				cr.delay(1);
 			}
 			cr.attack(stasisFlag, freedomChance);
-			if (i>5 && floodingFlag && cr.card.element != Water && cr.card.element != Other && !cr.status.immaterial && !cr.status.burrowed && ~cr.getIndex()){
+			if (i>4 && floodingFlag && cr.card.element != Water && cr.card.element != Other && !cr.status.immaterial && !cr.status.burrowed && ~cr.getIndex()){
 				cr.die();
 			}
 		}
@@ -997,7 +997,7 @@ Weapon.prototype.attack = Creature.prototype.attack = function(stasis, freedomCh
 	if (isCreature){
 		this.dmg(this.status.poison, true);
 	}
-	var target = this.owner.foe;
+	var target = this.active.cast == Actives.appease && !this.status.appeased ? this.owner : this.owner.foe;
 	if (this.active.auto && !this.status.frozen && (!this.status.adrenaline || this.status.adrenaline<3)){
 		this.active.auto(this);
 	}

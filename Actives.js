@@ -87,6 +87,10 @@ antimatter:function(c,t){
 	Effect.mkText("Antimatter", tgtToPos(t));
 	t.atk -= t.trueatk(0, true)*2;
 },
+appease:function(c,t){
+	t.die();
+	c.status.appeased = true;
+},
 bblood:function(c,t){
 	Effect.mkText("0|20", tgtToPos(t));
 	t.buffhp(20);
@@ -1214,6 +1218,9 @@ tick:function(c,t){
 	if (c.hp <= 0) {
 		c.card.upped ? c.owner.foe.masscc(c, function (c, x) { x.dmg(4) }, false) : c.owner.foe.spelldmg(9);
 		}
+},
+unappease:function(c,t){
+	delete c.status.appeased;
 },
 unburrow:function(c,t){
 	c.status.burrowed = false;
