@@ -797,7 +797,6 @@ function victoryScreen() {
 	if (game.cardreward) {
 		var rewards = [];
 		game.cardreward = listify(game.cardreward);
-		console.log("rewards: " + game.cardreward);
 		for (var i = 0;i < game.cardreward.length;i++) {
 			var cardArt = new PIXI.Sprite(nopic);
 			cardArt.anchor.x = .5;
@@ -2335,13 +2334,13 @@ function startMatch() {
 				cardwon = PlayerRng.randomcard(elewin.upped, function(x) { return x.element == elewin.element && x.type != PillarEnum && x.rarity <= 3; });
 			}
 			if (game.level !== undefined) {
-				if (game.level < 2) {
+				if (game.level < 2){
 					cardwon = cardwon.asUpped(false);
 				}
 				var baserewards = [1, 6, 11, 31];
 				var hpfactor = [11, 7, 6, 2];
 				var i = game.level;
-				var goldwon = Math.floor((baserewards[i] + Math.floor(game.player1.hp / hpfactor[i])) * (game.player1.hp == game.player1.maxhp ? 1.5 : 1));
+				var goldwon = Math.floor((baserewards[i] + game.player1.hp / hpfactor[i]) * (game.player1.hp == game.player1.maxhp ? 1 + game.player1.maxhp / 222 : 1));
 				console.log(goldwon);
 				if (game.cost) goldwon += game.cost;
 				game.goldreward = goldwon;
