@@ -87,6 +87,26 @@ antimatter:function(c,t){
 	Effect.mkText("Antimatter", tgtToPos(t));
 	t.atk -= t.trueatk(0, true)*2;
 },
+/*appease: function(c, t) {     TO BE ADDED IF PEOPLE AGREE
+	targets = [];
+	lowesthp = 9999;
+	for (var i = 0;i < c.owner.creatures.length;i++) {
+		if (!c.owner.creatures[i] || c == c.owner.creatures[i]) continue;
+		if (c.owner.creatures[i].truehp() == lowesthp) {
+			targets.push();
+		} else if (c.owner.creatures[i].truehp() < lowesthp) {
+			lowesthp = c.owner.creatures[i].truehp();
+			targets = [i];
+		}
+	}
+	if (targets.length > 0) {
+		var target = c.owner.creatures[targets[Math.floor(Math.random() * targets.length)]];
+		target.die();
+		c.status.appeased = true;
+	}
+	else
+		delete c.status.appeased;
+},*/
 appease:function(c,t){
 	t.die();
 	c.status.appeased = true;
@@ -521,7 +541,7 @@ heal20:function(c,t){
 },
 heatmirror: function(c, t, fromhand) {
 	if (fromhand && t instanceof Creature && c.owner != t.owner) {
-		new Creature(Cards.HeatWave.asUpped(c.card.upped), c.owner).place();
+		new Creature(Cards.Spark.asUpped(c.card.upped), c.owner).place();
 	}
 },
 holylight:function(c,t){
