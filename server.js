@@ -568,9 +568,13 @@ io.on("connection", function(socket) {
 		}
 	});
 	socket.on("librarywant", function(data){
-		db.hget("U:"+data.f, "pool", function(err, pool){
-			socket.emit("librarygive", pool);
-		});
+		if (data.f in users){
+			socket.emit("librarygive", users[data.f].pool);
+		}else{
+			db.hget("U:"+data.f, "pool", function(err, pool){
+				socket.emit("librarygive", pool);
+			});
+		}
 	});
 	foeEcho(socket, "endturn");
 	foeEcho(socket, "cast");
