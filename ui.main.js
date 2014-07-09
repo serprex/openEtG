@@ -710,7 +710,7 @@ function victoryScreen() {
 	var bgvictory = new PIXI.Sprite(backgrounds[0]);
 	victoryui.addChild(bgvictory);
 
-	victoryui.addChild(makeText(10, 10,"Plies: " + game.ply + "\nTime: " + ((Date.now()-game.startTime)/1000).toFixed(1) + " seconds, true));
+	victoryui.addChild(makeText(10, 10,"Plies: " + game.ply + "\nTime: " + ((Date.now()-game.startTime)/1000).toFixed(1) + " seconds", true));
 	var victoryText = game.winner == game.player2 ? "You loser..." : game.quest ? game.wintext : "You have won!";
 	var tinfo = makeText(450, game.cardreward ? 130 : 250, victoryText, true);
 	tinfo.anchor.x = 0.5;
