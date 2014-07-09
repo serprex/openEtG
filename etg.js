@@ -1162,25 +1162,15 @@ function getTargetFilter(str){
 	if (str in TargetFilters){
 		return TargetFilters[str];
 	}else{
-		var colonIndex = str.indexOf(":"), prefixFunc, filterStr;
-		if (~colonIndex){
-			prefixFunc = TargetFilters[str.substring(0, colonIndex)];
-			filterStr = str.substring(colonIndex+1);
-		}else filterStr = str;
-		var filters = filterStr.split("+");
+		var prefixes = str.split(":"), filters = prefixes.pop().split("+");
+		for(var i=0; i<prefixes.length; i++){
+			prefixes[i] = TargetFilters[prefixes[i]];
+		}
 		for(var i=0; i<filters.length; i++){
 			filters[i] = TargetFilters[filters[i]];
 		}
 		return TargetFilters[str] = function(c, t){
-			if (prefixFunc && !prefixFunc(c, t)){
-				return false;
-			}
-			for(var i=0; i<filters.length; i++){
-				if (filters[i](c, t)){
-					return true;
-				}
-			}
-			return false;
+			return !prefixes.some(function(x){return !x(c, t);}) && filters.some(function(x){return x(c, t);});
 		}
 	}
 }
