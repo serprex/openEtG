@@ -2987,7 +2987,7 @@ cmds.cast = function(bits) {
 	}
 	c.useactive(t);
 }
-var socket = io.connect(location.hostname, { port: 13602 });
+var socket = io(location.hostname + ":13602");
 socket.on("pvpgive", initGame);
 socket.on("tradegive", initTrade)
 socket.on("foearena", function(data) {
