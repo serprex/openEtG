@@ -559,9 +559,9 @@ function aiEvalFunc() {
 					var cmdcopy = commands.slice();
 					cmdcopy.push(mkcommand(cbits, tbits));
 					var v = evalGameState(game);
-					console.log(c + " " + t + " " + v);
 					if (v < candidates[0]) {
 						candidates = [v, cmdcopy];
+						console.log(c + " " + t + " " + v);
 					}
 					if (n) {
 						var iterRet = iterLoop(n - 1, cmdcopy, v);
@@ -579,7 +579,6 @@ function aiEvalFunc() {
 					evalIter(undefined, true);
 				}
 				targetingMode = null;
-				console.log(candidates.length + candidates.join(" "));
 				if (candidates.length > 1) {
 					var v = candidates[0], oldv = fullCandidates[0];
 					if (v < oldv) {
@@ -611,7 +610,6 @@ function aiEvalFunc() {
 		if (currentEval === undefined) {
 			currentEval = evalGameState(game);
 		}
-		console.log("Currently " + currentEval);
 		var fullCandidates = [currentEval];
 		var self = game.player2;
 		var wp = self.weapon, sh = self.shield;
@@ -2428,7 +2426,7 @@ function startMatch() {
 					statbg.endFill();
 					var child2 = creasprite[j][i].getChildAt(2);
 					var activetext = cr.active.cast ? casttext(cr.cast, cr.castele) + cr.active.cast.activename : (cr.active.hit ? cr.active.hit.activename : "");
-					child2.setTexture(getTextImage(activetext, 8, cr.card.upped ? "black" : "white"), 0.6);
+					child2.setTexture(getTextImage(activetext, 8, cr.card.upped ? "black" : "white"));
 					drawStatus(cr, creasprite[j][i]);
 				} else creasprite[j][i].visible = false;
 			}
@@ -2440,12 +2438,12 @@ function startMatch() {
 					permsprite[j][i].alpha = pr.status.immaterial ? .7 : 1;
 					var child = permsprite[j][i].getChildAt(0);
 					if (pr instanceof Pillar) {
-						child.setTexture(getTextImage("1:" + (pr.active.auto == Actives.pend && pr.pendstate ? pr.owner.mark : pr.card.element) + " x" + pr.status.charges, 10, pr.card.upped ? "black" : "white"),0.8);
+						child.setTexture(getTextImage("1:" + (pr.active.auto == Actives.pend && pr.pendstate ? pr.owner.mark : pr.card.element) + " x" + pr.status.charges, 10, pr.card.upped ? "black" : "white"));
 					}
 					else child.setTexture(getTextImage(pr.status.charges !== undefined ? " " + pr.status.charges : ""));
 					var child2 = permsprite[j][i].getChildAt(1);
 					if (!(pr instanceof Pillar)) {
-						child2.setTexture(getTextImage(pr.activetext().replace(" losecharge", ""), 8, pr.card.upped ? "black" : "white"), 0.6);
+						child2.setTexture(getTextImage(pr.activetext().replace(" losecharge", ""), 8, pr.card.upped ? "black" : "white"));
 					}
 					else
 						child2.setTexture(nopic);
@@ -2921,7 +2919,7 @@ function startArenaTop(info) {
 
 var tximgcache = [];
 
-function getTextImage(text, font, color, iconsize) {
+function getTextImage(text, font, color) {
 	if (!text) return nopic;
 	if (color === undefined) color = "black";
 	if (!(font in tximgcache)) {
@@ -2944,10 +2942,9 @@ function getTextImage(text, font, color, iconsize) {
 			var icon = getIcon(parseInt(parse[1]));
 			for (var j = 0;j < num;j++) {
 				var spr = new PIXI.Sprite(icon);
-				size = iconsize || 1;
-				spr.scale.set(.375*size, .375*size);
+				spr.scale.set(font/32, font/32);
 				spr.position.x = x;
-				x += 12;
+				x += font;
 				doc.addChild(spr);
 			}
 		} else {
@@ -2957,7 +2954,7 @@ function getTextImage(text, font, color, iconsize) {
 			doc.addChild(txt);
 		}
 	}
-	var rtex = new PIXI.RenderTexture(x, 12);
+	var rtex = new PIXI.RenderTexture(x, font * 1.125);
 	rtex.render(doc);
 	return tximgcache[font][text][color] = rtex;
 }

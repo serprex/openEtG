@@ -1,4 +1,4 @@
 rule browserify
- command=browserify -r ./etg.client -r ./etgutil -r ./MersenneTwister -r ./Actives -r ./Effect -r ./Quest -r ./ai.targeting -r ./ai.eval -o $out
+ command=browserify ui.main.js ui.art.js ui.test.js -o $out
 build etgify.js:browserify etg.client.js etgutil.js Actives.js MersenneTwister.js Effect.js Quest.js ai.targeting.js ai.eval.js
 default etgify.js
