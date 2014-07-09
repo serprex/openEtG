@@ -74,7 +74,7 @@ var ActivesValues = {
 	fire:1,
 	firebolt:10,
 	flatline:1,
-	flyingweapon:1,
+	flyingweapon:5,
 	fractal:9,
 	freeze:3,
 	fungusrebirth:2,

@@ -132,6 +132,11 @@ bravery:function(c,t){
 		}
 	}
 },
+brokenmirror:function(c,t){
+	if (t instanceof Creature && c.owner != t.owner){
+		new Creature(Cards.Ghost.asUpped(c.card.upped), c.owner).place();
+	}
+},
 burrow:function(c,t){
 	c.status.burrowed = true;
 	c.active.cast = Actives.unburrow;
@@ -185,9 +190,6 @@ clear:function(c,t){
 		t.status.frozen--;
 	}
 	t.dmg(-1);
-},
-cloak:function(c,t){
-	//This is only here to allow ai targeting logic, the actual cloak effect lies in its passive.
 },
 corpseexplosion:function(c,t){
 	function dmg1(c,t){ t.dmg(1); }
