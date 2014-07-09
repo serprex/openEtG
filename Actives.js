@@ -519,9 +519,10 @@ heal:function(c,t){
 heal20:function(c,t){
 	t.dmg(-20);
 },
-heatmirror:function(c,t){
-	if (t instanceof Creature && c.owner != t.owner){
+heatmirror: function(c, t, fromhand) {
+	if (fromhand && t instanceof Creature && c.owner != t.owner) {
 		new Creature(Cards.HeatWave.asUpped(c.card.upped), c.owner).place();
+	}
 },
 holylight:function(c,t){
 	t.dmg(!(t instanceof Player) && (t.card.element == Darkness || t.card.element == Death || t.passives.nocturnal)?10:-10);
