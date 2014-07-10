@@ -3001,7 +3001,7 @@ function maybeSendChat(e) {
 			var checkPm = message.split(" ");
 			if (checkPm[0] == "/w") {
 				var to = (message.match(/"(?:[^"\\]|\\.)*"/) ? message.match(/"(?:[^"\\]|\\.)*"/)[0] : false) || checkPm[1];
-				message = checkPm.slice(1).join(" ").replace(to, "");
+				message = message.substring(3).replace(to, "");
 				chatinput.value = "/w " + to + " ";
 			}
 			userEmit("chat", { message: message, to: to ? to.replace(/"/g, "") : null });
@@ -3009,7 +3009,7 @@ function maybeSendChat(e) {
 		else {
 			if (!guestname) guestname = randomGuestName();
 			var name = username.value ? username.value : guestname;
-			socket.emit("guestchat", { message: chatinput.value, u: name });
+			socket.emit("guestchat", { message: message, u: name });
 		}
 		e.preventDefault();
 	}

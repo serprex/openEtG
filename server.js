@@ -503,7 +503,6 @@ io.on("connection", function(socket) {
 		}
 	});
 	userEvent(socket, "chat", function (data) {
-		var message = data.message.split(" ");
 		if (data.to) {
 			var to = data.to;
 			if (usersock[to]) {
