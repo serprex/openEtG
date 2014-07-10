@@ -363,7 +363,7 @@ function evalcardinstance(cardInst) {
 function caneventuallyactive(element, pl){
 	if (!element || pl.quanta[element] || pl.mark == element) return true;
 	for (var i = 0; i < 16; i++) {
-		if (pl.permanents[i] && pl.permanents[i].type == PillarEnum && (!pl.permanents[i] || pl.permanents[i].element == element))
+		if (pl.permanents[i] && pl.permanents[i].type == PillarEnum && (!pl.permanents[i].element || pl.permanents[i].element == element))
 			return true;
 	}
 	return false;
