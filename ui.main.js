@@ -210,7 +210,7 @@ function makeArt(card, art) {
 	var words = card.info().split(" ");
 	var x = 2, y = 150;
 	for (var i = 0;i < words.length;i++) {
-		var wordgfx = new PIXI.Sprite(getTextImage(words[i], 11, card.upped ? "black" : "white"));
+		var wordgfx = new PIXI.Sprite(getTextImage(words[i], mkFont(11, card.upped ? "black" : "white")));
 		if (x + wordgfx.width > rend.width - 2) {
 			x = 2;
 			y += 12;
@@ -1070,8 +1070,6 @@ function makeButton(x, y, w, h, i, mouseoverfunc) {
 	b.position.set(x, y);
 	b.interactive = true;
 	b.hitArea = new PIXI.Rectangle(0, 0, w, h);
-	b.buttonMode = true;
-	b.standardImage = i;
 	b.mousedown = function() {
 		b.tint = 0x666666;
 	}
@@ -1096,7 +1094,6 @@ function toggleB() {
 	for (var i = 0;i < arguments.length;i++) {
 		arguments[i].visible = !arguments[i].visible;
 		arguments[i].interactive = !arguments[i].interactive;
-		arguments[i].buttonMode = !arguments[i].buttonMode;
 	}
 }
 function isFreeCard(card) {
@@ -2344,7 +2341,7 @@ function startMatch() {
 					creasprite[j][i].setTexture(getCreatureImage(cr.card));
 					creasprite[j][i].visible = true;
 					var child = creasprite[j][i].getChildAt(1);
-					child.setTexture(getTextImage(cr.trueatk() + "|" + cr.truehp(), 10, cr.card.upped ? "black" : "white"));
+					child.setTexture(getTextImage(cr.trueatk() + "|" + cr.truehp(), mkFont(10, cr.card.upped ? "black" : "white")));
 					var statbg = creasprite[j][i].getChildAt(0);
 					statbg.clear();
 					statbg.beginFill(cr.card.upped ? lighten(elecols[cr.card.element]) : elecols[cr.card.element]);
@@ -2352,7 +2349,7 @@ function startMatch() {
 					statbg.endFill();
 					var child2 = creasprite[j][i].getChildAt(2);
 					var activetext = cr.active.cast ? casttext(cr.cast, cr.castele) + cr.active.cast.activename : (cr.active.hit ? cr.active.hit.activename : "");
-					child2.setTexture(getTextImage(activetext, 8, cr.card.upped ? "black" : "white"));
+					child2.setTexture(getTextImage(activetext, mkFont(8, cr.card.upped ? "black" : "white")));
 					drawStatus(cr, creasprite[j][i]);
 				} else creasprite[j][i].visible = false;
 			}
@@ -2364,12 +2361,12 @@ function startMatch() {
 					permsprite[j][i].alpha = pr.status.immaterial ? .7 : 1;
 					var child = permsprite[j][i].getChildAt(0);
 					if (pr instanceof Pillar) {
-						child.setTexture(getTextImage("1:" + (pr.active.auto == Actives.pend && pr.pendstate ? pr.owner.mark : pr.card.element) + " x" + pr.status.charges, 10, pr.card.upped ? "black" : "white"));
+						child.setTexture(getTextImage("1:" + (pr.active.auto == Actives.pend && pr.pendstate ? pr.owner.mark : pr.card.element) + " x" + pr.status.charges, mkFont(10, pr.card.upped ? "black" : "white")));
 					}
-					else child.setTexture(getTextImage(pr.status.charges !== undefined ? " " + pr.status.charges : ""));
+					else child.setTexture(getTextImage(pr.status.charges !== undefined ? " " + pr.status.charges : ""), mkFont(10, pr.card.upped ? "black" : "white"));
 					var child2 = permsprite[j][i].getChildAt(1);
 					if (!(pr instanceof Pillar)) {
-						child2.setTexture(getTextImage(pr.activetext().replace(" losecharge", ""), 8, pr.card.upped ? "black" : "white"));
+						child2.setTexture(getTextImage(pr.activetext().replace(" losecharge", ""), mkFont(8, pr.card.upped ? "black" : "white")));
 					}
 					else
 						child2.setTexture(nopic);
@@ -2379,10 +2376,10 @@ function startMatch() {
 			if (wp && !(j == 1 && cloakgfx.visible)) {
 				weapsprite[j].visible = true;
 				var child = weapsprite[j].getChildAt(0);
-				child.setTexture(getTextImage(wp.activetext(), 12, wp.card.upped ? "black" : "white"));
+				child.setTexture(getTextImage(wp.activetext(), mkFont(12, wp.card.upped ? "black" : "white")));
 				child.visible = true;
 				var child2 = weapsprite[j].getChildAt(1);
-				child2.setTexture(getTextImage(wp.trueatk() + "", 12, wp.card.upped ? "black" : "white"));
+				child2.setTexture(getTextImage(wp.trueatk() + "", mkFont(12, wp.card.upped ? "black" : "white")));
 				child2.visible = true;
 				weapsprite[j].setTexture(getWeaponShieldImage(wp.card.code));
 				drawStatus(wp, weapsprite[j]);
@@ -2392,10 +2389,10 @@ function startMatch() {
 				shiesprite[j].visible = true;
 				var dr = sh.truedr();
 				var child = shiesprite[j].getChildAt(0);
-				child.setTexture(getTextImage((sh.active.shield ? " " + sh.active.shield.activename : "") + (sh.active.buff ? " " + sh.active.buff.activename : "") + (sh.active.cast ? casttext(sh.cast, sh.castele) + sh.active.cast.activename : ""), 12, sh.card.upped ? "black" : "white"));
+				child.setTexture(getTextImage((sh.active.shield ? " " + sh.active.shield.activename : "") + (sh.active.buff ? " " + sh.active.buff.activename : "") + (sh.active.cast ? casttext(sh.cast, sh.castele) + sh.active.cast.activename : ""), mkFont(12, sh.card.upped ? "black" : "white")));
 				child.visible = true;
 				var child2 = shiesprite[j].getChildAt(1);
-				child2.setTexture(getTextImage(sh.status.charges ? "x" + sh.status.charges: "" + sh.truedr() + "", 12, sh.card.upped ? "black" : "white"));
+				child2.setTexture(getTextImage(sh.status.charges ? "x" + sh.status.charges: "" + sh.truedr() + "", mkFont(12, sh.card.upped ? "black" : "white")));
 				child2.visible = true;
 				shiesprite[j].alpha = sh.status.immaterial ? .7 : 1;
 				shiesprite[j].setTexture(getWeaponShieldImage(sh.card.code));
@@ -2550,7 +2547,7 @@ function startMatch() {
 			var x = 2, y = 2;
 			var template = new PIXI.Graphics();
 			for (var i = 0;i < words.length;i++) {
-				var wordgfx = new PIXI.Sprite(getTextImage(words[i], 10,"white"));
+				var wordgfx = new PIXI.Sprite(getTextImage(words[i], mkFont(10, "white")));
 				if (x + wordgfx.width > rend.width - 2) {
 					x = 2;
 					y += 12;
@@ -2838,24 +2835,29 @@ function startArenaTop(info) {
 	refreshRenderer(stage);
 }
 
+function mkFont(font, color){
+	if (typeof font == "number"){
+		font += "px Dosis";
+	}
+	return {font: font, fill: color || "black"};
+}
+
 var tximgcache = {};
-function getTextImage(text, font, color, bgcolor) {
+function getTextImage(text, font, bgcolor) {
 	if (!text) return nopic;
-	if (color === undefined) color = "black";
 	if (bgcolor === undefined) bgcolor = "";
 	var size;
 	if (typeof font == "number"){
 		size = font;
-		font = font + "px Dosis";
-	}else size = parseInt(font);
-	var fontcolor = font + color + bgcolor;
-	if (!(fontcolor in tximgcache)) {
-		tximgcache[fontcolor] = {};
+		font = mkFont(font);
+	}else size = parseInt(font.font);
+	var fontkey = JSON.stringify(font) + bgcolor;
+	if (!(fontkey in tximgcache)) {
+		tximgcache[fontkey] = {};
 	}
-	if (!(text in tximgcache[font+color])) {
-		tximgcache[fontcolor][text] = {};
+	if (!(text in tximgcache[fontkey])) {
+		tximgcache[fontkey][text] = {};
 	}
-	var fontprop = { font: font, fill: color };
 	var doc = new PIXI.DisplayObjectContainer();
 	if (bgcolor !== ""){
 		var bg = new PIXI.Graphics();
@@ -2883,7 +2885,7 @@ function getTextImage(text, font, color, bgcolor) {
 				doc.addChild(spr);
 			}
 		} else {
-			var txt = new PIXI.Text(piece, fontprop);
+			var txt = new PIXI.Text(piece, font);
 			txt.position.x = x;
 			x += txt.width;
 			if (txt.height > h) h = txt.height;
@@ -2897,7 +2899,7 @@ function getTextImage(text, font, color, bgcolor) {
 	}
 	var rtex = new PIXI.RenderTexture(x, h);
 	rtex.render(doc);
-	return tximgcache[fontcolor][text] = rtex;
+	return tximgcache[fontkey][text] = rtex;
 }
 
 var cmds = {};
