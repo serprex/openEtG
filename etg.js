@@ -200,7 +200,7 @@ function mkGame(first, seed){
 	return game;
 }
 function cloneRng(rng){
-	var obj = new MersenneTwister(0);
+	var obj = Object.create(MersenneTwister.prototype);
 	obj.mti = rng.mti;
 	obj.mt = rng.mt.slice();
 	return obj;
@@ -208,7 +208,6 @@ function cloneRng(rng){
 function cloneGame(game){
 	var obj = {
 		rng: cloneRng(game.rng),
-		ply: game.ply,
 		phase: game.phase
 	};
 	obj.player1 = game.player1.clone(obj),

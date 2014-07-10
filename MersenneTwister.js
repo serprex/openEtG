@@ -8,7 +8,6 @@ var MAX_INT = 4294967296,
 
 function MersenneTwister(seed) {
 	this.mt = new Array(N);
-	this.mti = N + 1;
 	this.seed(seed);
 };
 

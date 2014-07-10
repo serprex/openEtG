@@ -2171,7 +2171,7 @@ function startMatch() {
 	animCb = function() {
 		Effect.disable = airefresh.value == "0" && game.turn == game.player2;
 		if (game.phase == PlayPhase && game.turn == game.player2 && game.player2.ai && --aiDelay <= 0) {
-			aiDelay = Math.max(parseInt(airefresh.value) || 8, 5);
+			aiDelay = Math.max(parseInt(airefresh.value) || 5, 5);
 			do {
 				var cmd = game.player2.ai();
 				cmds[cmd[0]](cmd[1]);
@@ -2840,46 +2840,66 @@ function startArenaTop(info) {
 	refreshRenderer(stage);
 }
 
-var tximgcache = [];
-
-function getTextImage(text, font, color) {
+var tximgcache = {};
+function getTextImage(text, font, color, bgcolor) {
 	if (!text) return nopic;
 	if (color === undefined) color = "black";
-	if (!(font in tximgcache)) {
-		tximgcache[font] = {};
+	if (bgcolor === undefined) bgcolor = "";
+	var size;
+	if (typeof font == "number"){
+		size = font;
+		font = font + "px Dosis";
+	}else size = parseInt(font);
+	var fontcolor = font + color + bgcolor;
+	if (!(fontcolor in tximgcache)) {
+		tximgcache[fontcolor] = {};
 	}
-	if (!(text in tximgcache[font])) {
-		tximgcache[font][text] = {};
-	} else if (color in tximgcache[font][text]) {
-		return tximgcache[font][text][color];
+	if (!(text in tximgcache[font+color])) {
+		tximgcache[fontcolor][text] = {};
 	}
-	var fontprop = { font: font + "px Dosis", fill: color };
+	var fontprop = { font: font, fill: color };
 	var doc = new PIXI.DisplayObjectContainer();
-	var pieces = text.replace(/\|/g, " | ").split(/(\d\d?:\d\d?)/);
-	var x = 0;
+	if (bgcolor !== ""){
+		var bg = new PIXI.Graphics();
+		doc.addChild(bg);
+	}
+	var pieces = text.replace(/\|/g, " | ").split(/(\d\d?:\d\d?)|\$/);
+	var x = 0, h = size;
 	for (var i = 0;i < pieces.length;i++) {
 		var piece = pieces[i];
-		if (/^\d\d?:\d\d?$/.test(piece)) {
+		if (piece == "$"){
+			var spr = new PIXI.Sprite(goldtex);
+			spr.scale.set(size/16, size/16);
+			spr.position.x = x;
+			x += size;
+			doc.addChild(spr);
+		}else if (/^\d\d?:\d\d?$/.test(piece)) {
 			var parse = piece.split(":");
 			var num = parseInt(parse[0]);
 			var icon = getIcon(parseInt(parse[1]));
 			for (var j = 0;j < num;j++) {
 				var spr = new PIXI.Sprite(icon);
-				spr.scale.set(font/32, font/32);
+				spr.scale.set(size/32, size/32);
 				spr.position.x = x;
-				x += font;
+				x += size;
 				doc.addChild(spr);
 			}
 		} else {
 			var txt = new PIXI.Text(piece, fontprop);
 			txt.position.x = x;
 			x += txt.width;
+			if (txt.height > h) h = txt.height;
 			doc.addChild(txt);
 		}
 	}
-	var rtex = new PIXI.RenderTexture(x, font * 1.125);
+	if (bg){
+		bg.beginFill(bgcolor);
+		bg.drawRect(0, 0, x, h);
+		bg.endFill();
+	}
+	var rtex = new PIXI.RenderTexture(x, h);
 	rtex.render(doc);
-	return tximgcache[font][text][color] = rtex;
+	return tximgcache[fontcolor][text] = rtex;
 }
 
 var cmds = {};
