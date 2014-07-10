@@ -157,7 +157,7 @@ var realStage = new PIXI.Stage(0x336699, true);
 renderer = new PIXI.autoDetectRenderer(900, 600);
 leftpane.appendChild(renderer.view);
 var menuui, gameui;
-var caimgcache = {}, crimgcache = {}, wsimgcache = {}, artcache = {}, artimagecache = {};
+var caimgcache = {}, crimgcache = {}, wsimgcache = {}, artcache = {}, artimagecache = {}, tximgcache = {};
 var elecols = [0xa99683, 0xaa5999, 0x777777, 0x996633, 0x5f4930, 0x50a005, 0xcc6611, 0x205080, 0xa9a9a9, 0x337ddd, 0xccaa22, 0x333333, 0x77bbdd];
 
 function lighten(c) {
@@ -710,10 +710,10 @@ function victoryScreen() {
 	var bgvictory = new PIXI.Sprite(backgrounds[0]);
 	victoryui.addChild(bgvictory);
 
-	victoryui.addChild(makeText(10, 290, "Plies: " + game.ply + "\nTime: " + ((Date.now()-game.startTime)/1000).toFixed(1) + " seconds", true));
+	victoryui.addChild(makeText(10, 290, "Plies: " + game.ply + "\nTime: " + ((Date.now()-game.startTime)/1000).toFixed(1) + " seconds"));
 	if (game.winner == game.player1){
 		var victoryText = game.quest ? game.wintext : "You won!";
-		var tinfo = makeText(450, game.cardreward ? 130 : 250, victoryText, true);
+		var tinfo = makeText(450, game.cardreward ? 130 : 250, victoryText);
 		tinfo.anchor.x = 0.5;
 		victoryui.addChild(tinfo);
 	}
@@ -737,11 +737,8 @@ function victoryScreen() {
 	victoryui.addChild(bexit);
 	if (game.goldreward) {
 		var goldshown = (game.goldreward || 0) - (game.cost || 0);
-		tgold = makeText(340, 550, "Gold won:      " + goldshown, true);
-		var igold = new PIXI.Sprite(goldtex);
-		igold.position.set(420, 550);
+		tgold = makeText(340, 550, "Gold won: $" + goldshown);
 		victoryui.addChild(tgold);
-		victoryui.addChild(igold);
 	}
 	var rewards = [];
 	if (game.cardreward) {
@@ -1084,9 +1081,12 @@ function makeButton(x, y, w, h, i, mouseoverfunc) {
 }
 
 function makeText(x, y, txt, vis) {
-	var t = new PIXI.Text(txt, { font: "14px Verdana", fill: "white", stroke: "black", strokeThickness: 2 });
+	var t = new PIXI.Sprite(getTextImage(txt, { font: "14px Verdana", fill: "white", stroke: "black", strokeThickness: 2 }));
 	t.position.set(x, y);
-	t.visible = vis;
+	t.visible = vis === undefined || vis;
+	t.setText = function(x){
+		t.setTexture(getTextImage(x, { font: "14px Verdana", fill: "white", stroke: "black", strokeThickness: 2 }));
+	}
 	return t;
 }
 
@@ -1217,44 +1217,28 @@ function startMenu() {
 	bglobby.mouseover = function() {
 		tinfo.setText("");
 		tcost.setText("");
-		igold2.visible = false;
 	}
 	menuui.addChild(bglobby);
 
 	//gold text
-	var tgold = makeText(755, 101, (user ? user.gold : "Sandbox"), true);
+	var tgold = makeText(755, 101, (user ? user.gold : "Sandbox"));
 	menuui.addChild(tgold);
 
-	var taiwinloss = makeText(750, 125,(user ? "AI w/l:\n" + user.aiwins + "/" + user.ailosses : ""), true);
+	var taiwinloss = makeText(750, 125,(user ? "AI w/l:\n" + user.aiwins + "/" + user.ailosses + "\nPVP w/l:\n" + user.pvpwins + "/" + user.pvplosses : ""));
 	menuui.addChild(taiwinloss);
 
-	var tpvpwinloss = makeText(750, 165, (user?"PVP w/l:\n" + user.pvpwins + "/" + user.pvplosses : ""), true);
-	menuui.addChild(tpvpwinloss);
-
 	//info text
-	var tinfo = makeText(50, 26, "", true)
+	var tinfo = makeText(50, 26, "")
 	menuui.addChild(tinfo);
 
 	//cost text
-	var tcost = makeText(50, 51, "", true);
+	var tcost = makeText(50, 51, "");
 	menuui.addChild(tcost);
-
-	//gold icons
-	var igold = new PIXI.Sprite(goldtex);
-	igold.position.set(750, 100);
-	igold.visible = false;
-	menuui.addChild(igold);
-
-	var igold2 = new PIXI.Sprite(goldtex);
-	igold2.position.set(95, 50);
-	igold2.visible = false;
-	menuui.addChild(igold2);
 
 	//ai0 button
 	var bai0 = makeButton(50, 100, 75, 25, buttons.commoner, function() {
 		tinfo.setText("Commoners have no upgraded cards.");
-		tcost.setText("Cost:     0");
-		igold2.visible = true;
+		tcost.setText("Cost: $0");
 	});
 	bai0.click = mkAi(0);
 	menuui.addChild(bai0);
@@ -1262,8 +1246,7 @@ function startMenu() {
 	//ai1 button
 	var bai1 = makeButton(150, 100, 75, 25, buttons.mage, function() {
 		tinfo.setText("Mages have a few upgraded cards.");
-		tcost.setText("Cost:     5");
-		igold2.visible = true;
+		tcost.setText("Cost: $5");
 	});
 	bai1.click = mkMage;
 	menuui.addChild(bai1);
@@ -1271,8 +1254,7 @@ function startMenu() {
 	//ai2 button
 	var bai2 = makeButton(250, 100, 75, 25, buttons.champion, function() {
 		tinfo.setText("Champions have some upgraded cards.");
-		tcost.setText("Cost:     10");
-		igold2.visible = true;
+		tcost.setText("Cost: $10");
 	});
 	bai2.click = mkAi(2);
 	menuui.addChild(bai2);
@@ -1280,8 +1262,7 @@ function startMenu() {
 	//ai3 button
 	var bai3 = makeButton(350, 100, 75, 25, buttons.demigod, function() {
 		tinfo.setText("Demigods are extremely powerful. Come prepared for anything.");
-		tcost.setText("Cost:     20");
-		igold2.visible = true;
+		tcost.setText("Cost: $20");
 	});
 	bai3.click = mkDemigod;
 	menuui.addChild(bai3);
@@ -1296,8 +1277,7 @@ function startMenu() {
 	//ai arena button
 	var baia = makeButton(50, 200, 75, 25, buttons.arenaai, function() {
 		tinfo.setText("In the arena you will face decks from other players.");
-		tcost.setText("Cost:     10");
-		igold2.visible = true;
+		tcost.setText("Cost: $10");
 	});
 	baia.click = function() {
 		if (Cards) {
@@ -1392,13 +1372,10 @@ function startMenu() {
 	}
 	menuui.addChild(bdelete);
 
-	if (!user) toggleB(baia, bshop, bupgrade, binfoa, btopa, blogout, bdelete, bquest, taiwinloss, tpvpwinloss);
+	if (!user) toggleB(baia, bshop, bupgrade, binfoa, btopa, blogout, bdelete, bquest, taiwinloss);
 
 	//only display if user is logged in
 	if (user) {
-		tgold.position.set(770, 101);
-		igold.visible = true;
-
 		if (user.oracle) {
 			// todo user.oracle should be a card, not true. The card is the card that the server itself added. This'll only show what was added
 			delete user.oracle;
@@ -1421,11 +1398,10 @@ function startMenu() {
 	function logout() {
 		user = undefined;
 
-		toggleB(baia, bshop, bupgrade, binfoa, btopa, blogout, bdelete, bquest, taiwinloss, tpvpwinloss);
+		toggleB(baia, bshop, bupgrade, binfoa, btopa, blogout, bdelete, bquest, taiwinloss);
 
 		tgold.setText("Sandbox");
 		tgold.position.set(755, 101);
-		igold.visible = false;
 
 		if (oracle) {
 			menuui.removeChild(oracle);
@@ -1437,7 +1413,7 @@ function startMenu() {
 			if (oracle) {
 				oracle.setTexture(getArt(cardcode));
 			}
-			tgold.setText(user.gold)
+			tgold.setText("$" + user.gold)
 		}
 	}
 
@@ -1509,8 +1485,8 @@ function startQuestWindow() {
 		tinfo.setText("");
 	}
 	questui.addChild(bgquest);
-	var tinfo = makeText(50, 26, "", true)
-	var errinfo = makeText(50,125,"",true)
+	var tinfo = makeText(50, 26, "")
+	var errinfo = makeText(50, 125, "")
 	var quest1Buttons = [];
 	function makeQuestButton(quest, stage, text, pos) {
 		var button = makeButton(pos[0], pos[1], 32, 32, user.quest[quest] > stage ? questIcons[1] : questIcons[0]);
@@ -1602,8 +1578,7 @@ function upgradestore() {
 	var bg = new PIXI.Sprite(backgrounds[0]);
 	upgradeui.addChild(bg);
 
-	var goldcount = new PIXI.Text(user.gold + "g", { font: "bold 16px Dosis" });
-	goldcount.position.set(30, 100);
+	var goldcount = makeText(30, 100, "$" + user.gold);
 	upgradeui.addChild(goldcount);
 	var bupgrade = makeButton(150, 80, 75, 18, buttons.upgrade);
 	bupgrade.click = function() {
@@ -1681,24 +1656,19 @@ function startStore() {
 	storeui.addChild(bgshop);
 
 	//gold text
-	var tgold = makeText(770, 101, user.gold, true);
+	var tgold = makeText(770, 101, "$" + user.gold);
 	storeui.addChild(tgold);
 
 	//info text
-	var tinfo = makeText(50, 26, "Select from which element you want.", true);
+	var tinfo = makeText(50, 26, "Select from which element you want.");
 	storeui.addChild(tinfo);
 
-	var tinfo2 = makeText(50, 51, "Select which type of booster you want.", true);
+	var tinfo2 = makeText(50, 51, "Select which type of booster you want.");
 	storeui.addChild(tinfo2);
 
     //free packs text
-	var freeinfo = makeText(300, 26, "", true);
+	var freeinfo = makeText(300, 26, "");
 	storeui.addChild(freeinfo);
-
-	//gold icon
-	var igold = new PIXI.Sprite(goldtex);
-	igold.position.set(750, 100);
-	storeui.addChild(igold);
 
 	//get cards button
 	var bget = makeButton(750, 156, 75, 18, buttons.takecards);
@@ -2844,7 +2814,6 @@ function mkFont(font, color){
 	return {font: font, fill: color || "black"};
 }
 
-var tximgcache = {};
 function getTextImage(text, font, bgcolor) {
 	if (!text) return nopic;
 	if (bgcolor === undefined) bgcolor = "";
@@ -2857,15 +2826,15 @@ function getTextImage(text, font, bgcolor) {
 	if (!(fontkey in tximgcache)) {
 		tximgcache[fontkey] = {};
 	}
-	if (!(text in tximgcache[fontkey])) {
-		tximgcache[fontkey][text] = {};
+	if (text in tximgcache[fontkey]) {
+		return tximgcache[fontkey][text];
 	}
 	var doc = new PIXI.DisplayObjectContainer();
 	if (bgcolor !== ""){
 		var bg = new PIXI.Graphics();
 		doc.addChild(bg);
 	}
-	var pieces = text.replace(/\|/g, " | ").split(/(\d\d?:\d\d?)|\$/);
+	var pieces = text.replace(/\|/g, " | ").split(/(\d\d?:\d\d?|\$)/);
 	var x = 0, h = size;
 	for (var i = 0;i < pieces.length;i++) {
 		var piece = pieces[i];
