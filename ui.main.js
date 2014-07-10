@@ -1221,7 +1221,7 @@ function startMenu() {
 	menuui.addChild(bglobby);
 
 	//gold text
-	var tgold = makeText(755, 101, (user ? "$" + user.gold : "Sandbox"));
+	var tgold = makeText(750, 101, (user ? "$" + user.gold : "Sandbox"));
 	menuui.addChild(tgold);
 
 	var taiwinloss = makeText(750, 125,(user ? "AI w/l:\n" + user.aiwins + "/" + user.ailosses + "\nPVP w/l:\n" + user.pvpwins + "/" + user.pvplosses : ""));
@@ -1656,7 +1656,7 @@ function startStore() {
 	storeui.addChild(bgshop);
 
 	//gold text
-	var tgold = makeText(770, 101, "$" + user.gold);
+	var tgold = makeText(750, 101, "$" + user.gold);
 	storeui.addChild(tgold);
 
 	//info text
@@ -2310,14 +2310,9 @@ function startMatch() {
 				if (cr && !(j == 1 && cloakgfx.visible)) {
 					creasprite[j][i].setTexture(getCreatureImage(cr.card));
 					creasprite[j][i].visible = true;
-					var child = creasprite[j][i].getChildAt(1);
-					child.setTexture(getTextImage(cr.trueatk() + "|" + cr.truehp(), mkFont(10, cr.card.upped ? "black" : "white")));
-					var statbg = creasprite[j][i].getChildAt(0);
-					statbg.clear();
-					statbg.beginFill(cr.card.upped ? lighten(elecols[cr.card.element]) : elecols[cr.card.element]);
-					statbg.drawRect(child.position.x - 1, child.position.y, child.width + 1, child.height + 1);
-					statbg.endFill();
-					var child2 = creasprite[j][i].getChildAt(2);
+					var child = creasprite[j][i].getChildAt(0);
+					child.setTexture(getTextImage(cr.trueatk() + "|" + cr.truehp(), mkFont(10, cr.card.upped ? "black" : "white"), cr.card.upped ? lighten(elecols[cr.card.element]) : elecols[cr.card.element]));
+					var child2 = creasprite[j][i].getChildAt(1);
 					var activetext = cr.active.cast ? casttext(cr.cast, cr.castele) + cr.active.cast.activename : (cr.active.hit ? cr.active.hit.activename : "");
 					child2.setTexture(getTextImage(activetext, mkFont(8, cr.card.upped ? "black" : "white")));
 					drawStatus(cr, creasprite[j][i]);
@@ -2589,12 +2584,10 @@ function startMatch() {
 			}
 			for (var i = 0;i < 23;i++) {
 				creasprite[j][i] = new PIXI.Sprite(nopic);
-				var statbg = new PIXI.Graphics();
 				var stattext = new PIXI.Sprite(nopic);
 				stattext.position.set(-31, -32);
 				var activetext = new PIXI.Sprite(nopic);
 				activetext.position.set(-31, -42);
-				creasprite[j][i].addChild(statbg);
 				creasprite[j][i].addChild(stattext);
 				creasprite[j][i].addChild(activetext);
 				creasprite[j][i].anchor.set(.5, .5);
