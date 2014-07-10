@@ -2333,7 +2333,7 @@ function startMatch() {
 					if (pr instanceof Pillar) {
 						child.setTexture(getTextImage("1:" + (pr.active.auto == Actives.pend && pr.pendstate ? pr.owner.mark : pr.card.element) + " x" + pr.status.charges, mkFont(10, pr.card.upped ? "black" : "white"), maybeLighten(pr.card)));
 					}
-					else child.setTexture(getTextImage(pr.status.charges !== undefined ? " " + pr.status.charges : ""), mkFont(10, pr.card.upped ? "black" : "white"), maybeLighten(pr.card));
+					else child.setTexture(getTextImage(pr.status.charges !== undefined ? " " + pr.status.charges : "", mkFont(10, pr.card.upped ? "black" : "white"), maybeLighten(pr.card)));
 					var child2 = permsprite[j][i].getChildAt(1);
 					if (!(pr instanceof Pillar)) {
 						child2.setTexture(getTextImage(pr.activetext().replace(" losecharge", ""), mkFont(8, pr.card.upped ? "black" : "white")));
