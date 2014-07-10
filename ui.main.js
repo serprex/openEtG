@@ -2408,7 +2408,9 @@ function startMatch() {
 			if (hitTest(hptext[j], pos)){
 				setInfo(game.players[j]);
 			}
-			maybeSetText(poisontext[j], game.players[j].status.poison + (game.players[j].neuro ? "psn!" : "psn"));
+			var poison = game.players[j].status.poison;
+			var poisoninfo = !poison ? "" : (poison > 0 ? poison + " 1:2" : -poison + " 1:7") + (game.players[j].neuro ? " 1:10" : "");
+			poisontext[j].setTexture(getTextImage(poisoninfo,16));
 			maybeSetText(decktext[j], game.players[j].deck.length + "cards");
 			maybeSetText(damagetext[j], game.players[j].foe.expectedDamage ? "Next HP-loss:" + game.players[j].foe.expectedDamage : "");
 		}
@@ -2579,7 +2581,7 @@ function startMatch() {
 	var quantatext = [new PIXI.DisplayObjectContainer(), new PIXI.DisplayObjectContainer()];
 	var hptext = [new PIXI.Text("", { font: "18px Dosis" }), new PIXI.Text("", { font: "18px Dosis" })];
 	var damagetext = [new PIXI.Text("", { font: "14px Dosis" }), new PIXI.Text("", { font: "14px Dosis" })];
-	var poisontext = [new PIXI.Text("", { font: "16px Dosis" }), new PIXI.Text("", { font: "16px Dosis" })];
+	var poisontext = [new PIXI.Sprite(nopic), new PIXI.Sprite(nopic)];
 	var decktext = [new PIXI.Text("", { font: "16px Dosis" }), new PIXI.Text("", { font: "16px Dosis" })];
 	for (var j = 0;j < 2;j++) {
 		(function(_j) {
