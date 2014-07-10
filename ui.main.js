@@ -1221,7 +1221,7 @@ function startMenu() {
 	menuui.addChild(bglobby);
 
 	//gold text
-	var tgold = makeText(755, 101, (user ? user.gold : "Sandbox"));
+	var tgold = makeText(755, 101, (user ? "$" + user.gold : "Sandbox"));
 	menuui.addChild(tgold);
 
 	var taiwinloss = makeText(750, 125,(user ? "AI w/l:\n" + user.aiwins + "/" + user.ailosses + "\nPVP w/l:\n" + user.pvpwins + "/" + user.pvplosses : ""));
@@ -1578,7 +1578,7 @@ function upgradestore() {
 	var bg = new PIXI.Sprite(backgrounds[0]);
 	upgradeui.addChild(bg);
 
-	var goldcount = makeText(30, 100, "$" + user.gold);
+	var goldcount = makeText(30, 100, "");
 	upgradeui.addChild(goldcount);
 	var bupgrade = makeButton(150, 80, 75, 18, buttons.upgrade);
 	bupgrade.click = function() {
@@ -1634,7 +1634,7 @@ function upgradestore() {
 		if (selectedCard) {
 			selectedCardArt.setTexture(getArt(selectedCard));
 		}
-		goldcount.setText(user.gold + "g");
+		goldcount.setText("$" + user.gold);
 	}
 	refreshRenderer(upgradeui);
 }
@@ -1787,7 +1787,7 @@ function startStore() {
 		for (var i = 0;i < newCards.length;i++) {
 			newCardsArt[i].setTexture(getArt(newCards[i]));
 		}
-		maybeSetText(tgold, user.gold.toString());
+		tgold.setText("$" + user.gold);
 	}
 
 	refreshRenderer(storeui);
