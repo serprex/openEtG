@@ -309,7 +309,7 @@ function evalthing(c) {
 					if (!delaymix){
 						score += evalactive(c, c.active.shield)*(c.owner.gpull == c?1:.2);
 					}
-				}else if (key != "cast"){
+				}else if (key == "cast"){
 					if (!delaymix){
 						score += evalactive(c, c.active[key]) - (c.usedactive?.02:0);
 					}

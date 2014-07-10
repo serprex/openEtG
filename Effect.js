@@ -43,8 +43,24 @@ function Text(text, pos){
 	this.position = pos;
 	this.anchor.x = .5;
 }
+function Notification(text, pos) {
+	if (!pos)
+		pos = new PIXI.Point(450, 300);
+	PIXI.Graphics.call(this);
+	var pixitext = new PIXI.Text(text, { fill: 'white', font: "20px Dosis" });
+	pixitext.position.set(0, 0);
+	pixitext.anchor.set(0.5, 0.5);
+	//pixitext.anchor.y = 0.5;
+	this.beginFill(0);
+	this.drawRect(-pixitext.width / 2-2, -pixitext.height / 2-2, pixitext.width+4, pixitext.height+4);
+	this.endFill();
+	this.addChild(pixitext);
+	this.step = 0;
+	this.position = pos;
+}
 Death.prototype = Object.create(PIXI.Graphics.prototype);
 Text.prototype = Object.create(PIXI.Sprite.prototype);
+Notification.prototype = Object.create(PIXI.Graphics.prototype);
 Death.prototype.next = function(){
 	if (++this.step==10){
 		return true;
@@ -61,4 +77,10 @@ Text.prototype.next = function(){
 	this.position.y -= 3;
 	this.alpha = 1-((1<<this.step)/225);
 }
-makemake(Death, Text);
+Notification.prototype.next = function() {
+	if (++this.step == 80) {
+		return true;
+	}
+	if (this.step > 40) this.alpha = 1 - ((this.step-40) / 50);
+}
+makemake(Death, Text, Notification);
