@@ -1070,6 +1070,7 @@ function makeButton(x, y, w, h, i, mouseoverfunc) {
 	b.position.set(x, y);
 	b.interactive = true;
 	b.hitArea = new PIXI.Rectangle(0, 0, w, h);
+	b.buttonmode = true;
 	b.mousedown = function() {
 		b.tint = 0x666666;
 	}
@@ -1097,6 +1098,7 @@ function toggleB() {
 	for (var i = 0;i < arguments.length;i++) {
 		arguments[i].visible = !arguments[i].visible;
 		arguments[i].interactive = !arguments[i].interactive;
+		arguments[i].buttonMode = !arguments[i].buttonMode;
 	}
 }
 function isFreeCard(card) {
