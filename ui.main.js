@@ -1070,7 +1070,7 @@ function makeButton(x, y, w, h, i, mouseoverfunc) {
 	b.position.set(x, y);
 	b.interactive = true;
 	b.hitArea = new PIXI.Rectangle(0, 0, w, h);
-	b.buttonmode = true;
+	b.buttonMode = true;
 	b.mousedown = function() {
 		b.tint = 0x666666;
 	}
@@ -2995,18 +2995,23 @@ function maybeSendChat(e) {
 	e.cancelBubble = true;
 	if (e.keyCode != 13) return;
 	if (chatinput.value) {
-		if (user)
-			userEmit("chat", { message: chatinput.value });
+		var message = chatinput.value;
+		chatinput.value = "";
+		if (user){
+			var checkPm = message.split(" ");
+			if (checkPm[0] == "/w") {
+
+				var name = (message.match(/"(?:[^"\\]|\\.)*"/) ? message.match(/"(?:[^"\\]|\\.)*"/)[0] : false) || checkPm[1];	
+				message = checkPm.slice(1).join(" ").replace(name, "");
+				chatinput.value = "/w " + name + " ";
+			}
+			userEmit("chat", { message: message, name: name ? name.replace(/"/g, "") : null });
+		}
 		else {
 			if (!guestname) guestname = randomGuestName();
 			var name = username.value ? username.value : guestname;
 			socket.emit("guestchat", { message: chatinput.value, u: name });
 		}
-		var checkPm = chatinput.value.split(" ");
-		if (checkPm[0] == "/w")
-			chatinput.value = checkPm[0] + " " + checkPm[1] + " ";
-		else
-			chatinput.value = "";
 		e.preventDefault();
 	}
 }
