@@ -48,9 +48,7 @@ function Notification(text, pos) {
 		pos = new PIXI.Point(450, 300);
 	PIXI.Graphics.call(this);
 	var pixitext = new PIXI.Text(text, { fill: 'white', font: "20px Dosis" });
-	pixitext.position.set(0, 0);
 	pixitext.anchor.set(0.5, 0.5);
-	//pixitext.anchor.y = 0.5;
 	this.beginFill(0);
 	this.drawRect(-pixitext.width / 2-2, -pixitext.height / 2-2, pixitext.width+4, pixitext.height+4);
 	this.endFill();

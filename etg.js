@@ -863,7 +863,6 @@ CardInstance.prototype.remove = function(index) {
 	return index;
 }
 Creature.prototype.deatheffect = Weapon.prototype.deatheffect = function(index) {
-	console.log("death index: " +  index);
 	var self = this;
 	if (this.active.death){
 		this.active.death(this, this, index)
