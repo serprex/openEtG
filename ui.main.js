@@ -835,7 +835,7 @@ function mkMage() {
 		user.gold -= 5;
 		userEmit("subgold", { g: 5 });
 	}
-	var mageDecks = [
+	var mages = [
 		["The Wall", "5de 5de 5de 5de 5de 5de 5de 5de 5de 5de 5de 5de 5de 5de 5c5 5c2 5c2 5c2 5c2 5c8 5c8 5c8 5c8 5ci 5c3 5l8 5l8 5mq 5mq 5lo 5lo 5lm 5lm 5lm 5lm 5ln 5ln 5la 5la 5li 8pq"],
 		["The Horde", "5bs 5bs 5bs 5bs 5bs 5bs 5bs 5bs 5bs 5de 5de 5de 5de 5de 5de 5de 5de 5cb 5cb 5cb 5cb 5ce 5c6 5c6 5c6 5c6 5c9 5c9 5ca 5ca 5cr 5cr 5cr 5cr 8pn"],
 		["The Weaponsmith", "4t4 4t4 4t4 4t4 4tc 4tc 4td 4td 4td 4td 5c7 5c7 5c7 5c7 5c4 5gi 5gi 5gi 5gi 5gi 5gi 5gi 5gi 5gi 5gi 5gi 5gi 5gi 5gi 5ff 5ff 5ff 5ff 5fh 5fh 5fh 5fh 5f6 5f6 5f8 8pn"],
