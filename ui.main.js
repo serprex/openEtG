@@ -2939,12 +2939,12 @@ socket.on("chat", function(data) {
 	if (h < 10) h = "0"+h;
 	if (m < 10) m = "0"+m;
 	if (s < 10) s = "0"+s;
-	var msg = h + ":" + m + ":" + s + " " + (data.u ? "<b>" + sanitizeHtml(data.u) + ":</b> " : "") + sanitizeHtml(data.message);
+	var msg = h + ":" + m + ":" + s + " " + (data.u ? "<b>" + sanitizeHtml(data.u) + ":</b> " : "") + sanitizeHtml(data.msg);
 	var color = data.mode == "pm" ? "blue" : data.mode == "info" ? "red" : "black";
 	chatBox.innerHTML += data.mode == "guest" ? "<font color=black><i>" + msg + "</i></font><br>" : "<font color=" + color + ">" + msg + "</font><br>";
-	if (Notification && user && ~data.message.indexOf(user.name) && !document.hasFocus()){
+	if (Notification && user && ~data.msg.indexOf(user.name) && !document.hasFocus()){
 		Notification.requestPermission();
-		var n = new Notification(data.u, {body: data.message});
+		var n = new Notification(data.u, {body: data.msg});
 		n.onclick = window.focus;
 	}
 	chatBox.scrollTop = chatBox.scrollHeight;
@@ -2995,22 +2995,38 @@ function maybeSendChat(e) {
 	e.cancelBubble = true;
 	if (e.keyCode != 13) return;
 	if (chatinput.value) {
-		var message = chatinput.value;
+		var msg = chatinput.value;
 		chatinput.value = "";
 		if (user){
-			var checkPm = message.split(" ");
-			if (checkPm[0] == "/w") {
-
-				var name = (message.match(/"(?:[^"\\]|\\.)*"/) ? message.match(/"(?:[^"\\]|\\.)*"/)[0] : false) || checkPm[1];	
-				message = checkPm.slice(1).join(" ").replace(name, "");
-				chatinput.value = "/w " + name + " ";
-			}
-			userEmit("chat", { message: message, name: name ? name.replace(/"/g, "") : null });
+			var data = {};
+			if (msg.startsWith("/w ")) {
+				var secondSpace;
+				var quoted = msg.charAt(3) == '"';
+				if (quoted){
+					secondSpace = 4;
+					for (;;) {
+						secondSpace = msg.indexOf('" ', secondSpace+1);
+						if (secondSpace == -1 || msg.charAt(secondSpace-1) != '"') break;
+					}
+					secondSpace++;
+				}else secondSpace = msg.indexOf(" ", 4);
+				if (secondSpace < 1){
+					chatinput.value = msg;
+					e.preventDefault();
+					return;
+				}
+				data.to = msg.substring(3+quoted, secondSpace-quoted);
+				if (quoted){
+					data.to = data.to.replace(/""/g, '"');
+				}
+				data.msg = msg.substr(4+data.to.length+quoted*2);
+				chatinput.value = msg.substr(0, 4+data.to.length+quoted*2);
+			}else data.msg = msg;
+			userEmit("chat", data);
 		}
 		else {
-			if (!guestname) guestname = randomGuestName();
-			var name = username.value ? username.value : guestname;
-			socket.emit("guestchat", { message: chatinput.value, u: name });
+			var name = username.value || guestname || (guestname = randomGuestName());
+			socket.emit("guestchat", { msg: msg, u: name });
 		}
 		e.preventDefault();
 	}

@@ -221,9 +221,9 @@ function getDay(){
 	return Math.floor(Date.now()/86400000);
 }
 function genericChat(socket, data){
-	if (data.message == "/who") {
+	if (data.msg == "/who") {
 		var usersonline = activeUsers().join(", ");
-		socket.emit("chat", { mode: "info", message: usersonline ? "Users online: " + usersonline + "." : "There are no users online :(" })
+		socket.emit("chat", { mode: "info", msg: usersonline ? "Users online: " + usersonline + "." : "There are no users online :(" })
 	}
 	else io.emit("chat", data)
 }
@@ -423,14 +423,14 @@ io.on("connection", function(socket) {
 				usersock[f].emit("pvpgive", { first: !first, seed: seed, deck: deck1, urdeck: deck0, foename:u, demigod:DGfoe, foedemigod:DG});
 			} else {
 				duels[u] = f;
-				if (usersock[f]) usersock[f].emit("chat", { message: u + " wants to duel with you!", mode: "info" });
-				this.emit("chat", { mode: "info", message: "You have sent a PvP request to " + f + "!" });
+				if (usersock[f]) usersock[f].emit("chat", { msg: u + " wants to duel with you!", mode: "info" });
+				this.emit("chat", { mode: "info", msg: "You have sent a PvP request to " + f + "!" });
 			}
 		}
 	});
 	userEvent(socket, "canceltrade", function (data, user) {
 		sockinfo[this.id].trade.foe.emit("tradecanceled");
-		sockinfo[this.id].trade.foe.emit("chat", { mode:"info", message: data.u + " have canceled the trade."})
+		sockinfo[this.id].trade.foe.emit("chat", { mode:"info", msg: data.u + " have canceled the trade."})
 		delete sockinfo[sockinfo[this.id].trade.foe.id].trade;
 		delete sockinfo[this.id].trade;
 	});
@@ -477,8 +477,8 @@ io.on("connection", function(socket) {
 				usersock[f].emit("tradegive", { first: true });
 			} else {
 			    trades[u] = f;
-			    if (usersock[f]) usersock[f].emit("chat", { mode: "info", message: u + " wants to trade with you!" });
-			    this.emit("chat", { mode: "info", message: "You have sent a trade request to " + f + "!" });
+			    if (usersock[f]) usersock[f].emit("chat", { mode: "info", msg: u + " wants to trade with you!" });
+			    this.emit("chat", { mode: "info", msg: "You have sent a trade request to " + f + "!" });
 			}
 		}
 	});
@@ -503,15 +503,14 @@ io.on("connection", function(socket) {
 		}
 	});
 	userEvent(socket, "chat", function (data) {
-		var message = data.message.split(" ");
-		if (data.name) {
-			var name = data.name;
+		if (data.to) {
+			var name = data.to;
 			if (usersock[name]) {
-				usersock[name].emit("chat", { message: data.message, mode: "pm", u: data.u });
-				socket.emit("chat", { message: data.message, mode: "pm", u: "To " + name });
+				usersock[name].emit("chat", { msg: data.msg, mode: "pm", u: data.u });
+				socket.emit("chat", { msg: data.msg, mode: "pm", u: "To " + name });
 			}
 			else
-				socket.emit("chat", { mode: "info", message: name ? name + " is not here right now." : "I need to know who to message..." });
+				socket.emit("chat", { mode: "info", msg: name ? name + " is not here right now." : "I need to know who to message..." });
 		}
 		else{
 			delete data.a;
