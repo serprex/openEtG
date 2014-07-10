@@ -2924,7 +2924,7 @@ socket.on("foearena", function(data) {
 	chatArea.value = data.name + ": " + deck.join(" ");
 	initGame({ first: data.first, deck: deck, urdeck: getDeck(), seed: data.seed, hp: data.hp, cost: data.cost, foename: data.name }, aiEvalFunc);
 	game.arena = data.name;
-	game.gold = 15;
+	game.level = 1;
 	game.cost = 10;
 });
 socket.on("arenainfo", startArenaInfo);
