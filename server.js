@@ -504,14 +504,14 @@ io.on("connection", function(socket) {
 	});
 	userEvent(socket, "chat", function (data) {
 		var message = data.message.split(" ");
-		if (data.name) {
-			var name = data.name;
-			if (usersock[name]) {
-				usersock[name].emit("chat", { message: data.message, mode: "pm", u: data.u });
-				socket.emit("chat", { message: data.message, mode: "pm", u: "To " + name });
+		if (data.to) {
+			var to = data.to;
+			if (usersock[to]) {
+				usersock[to].emit("chat", { message: data.message, mode: "pm", u: data.u });
+				socket.emit("chat", { message: data.message, mode: "pm", u: "To " + to });
 			}
 			else
-				socket.emit("chat", { mode: "info", message: name ? name + " is not here right now." : "I need to know who to message..." });
+				socket.emit("chat", { mode: "info", message: to ? to + " is not here right now." : "I need to know who to message..." });
 		}
 		else{
 			delete data.a;

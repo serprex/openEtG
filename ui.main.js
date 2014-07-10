@@ -3000,12 +3000,11 @@ function maybeSendChat(e) {
 		if (user){
 			var checkPm = message.split(" ");
 			if (checkPm[0] == "/w") {
-
-				var name = (message.match(/"(?:[^"\\]|\\.)*"/) ? message.match(/"(?:[^"\\]|\\.)*"/)[0] : false) || checkPm[1];	
-				message = checkPm.slice(1).join(" ").replace(name, "");
-				chatinput.value = "/w " + name + " ";
+				var to = (message.match(/"(?:[^"\\]|\\.)*"/) ? message.match(/"(?:[^"\\]|\\.)*"/)[0] : false) || checkPm[1];
+				message = checkPm.slice(1).join(" ").replace(to, "");
+				chatinput.value = "/w " + to + " ";
 			}
-			userEmit("chat", { message: message, name: name ? name.replace(/"/g, "") : null });
+			userEmit("chat", { message: message, to: to ? to.replace(/"/g, "") : null });
 		}
 		else {
 			if (!guestname) guestname = randomGuestName();
