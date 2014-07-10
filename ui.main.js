@@ -711,11 +711,14 @@ function victoryScreen() {
 	victoryui.addChild(bgvictory);
 
 	victoryui.addChild(makeText(10, 10, game.ply + "\n" + (Date.now()-game.startTime), true));
-	var victoryText = game.winner == game.player2 ? "You loser..." : game.quest ? game.wintext : "You have won!";
-	var tinfo = makeText(450, game.cardreward ? 130 : 250, victoryText, true);
-	tinfo.anchor.x = 0.5;
-	var bexit = makeButton(412, 430, 75, 18, buttons.exit);
+	if (game.winner == game.player1){
+		var victoryText = game.quest ? game.wintext : "You won!";
+		var tinfo = makeText(450, game.cardreward ? 130 : 250, victoryText, true);
+		tinfo.anchor.x = 0.5;
+		victoryui.addChild(tinfo);
+	}
 
+	var bexit = makeButton(412, 430, 75, 18, buttons.exit);
 	bexit.click = function() {
 		if (game.cardreward) {
 			userEmit("add", { add: etg.encodedeck(game.cardreward)});
@@ -731,6 +734,7 @@ function victoryScreen() {
 			startMenu();
 		game = undefined;
 	}
+	victoryui.addChild(bexit);
 	if (game.goldreward) {
 		var goldshown = (game.goldreward || 0) - (game.cost || 0);
 		tgold = makeText(340, 550, "Gold won:      " + goldshown, true);
@@ -750,8 +754,6 @@ function victoryScreen() {
 			victoryui.addChild(cardArt);
 		}
 	}
-	victoryui.addChild(tinfo);
-	victoryui.addChild(bexit);
 
 	animCb = function(){
 		if (game.cardreward){
