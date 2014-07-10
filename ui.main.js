@@ -163,6 +163,9 @@ var elecols = [0xa99683, 0xaa5999, 0x777777, 0x996633, 0x5f4930, 0x50a005, 0xcc6
 function lighten(c) {
 	return (c & 255) / 2 + 127 | ((c >> 8) & 255) / 2 + 127 << 8 | ((c >> 16) & 255) / 2 + 127 << 16;
 }
+function maybeLighten(card){
+	return card.upped ? lighten(elecols[card.element]) : elecols[card.element];
+}
 function getIcon(ele) {
 	return eicons ? eicons[ele] : nopic;
 }
@@ -249,7 +252,7 @@ function getCardImage(code) {
 		var rend = new PIXI.RenderTexture(100, 20);
 		var graphics = new PIXI.Graphics();
 		graphics.lineStyle(2, 0x222222, 1);
-		graphics.beginFill(card ? (card.upped ? lighten(elecols[card.element]) : elecols[card.element]) : code == "0" ? 0x887766 : 0x111111);
+		graphics.beginFill(card ? maybeLighten(card) : code == "0" ? 0x887766 : 0x111111);
 		graphics.drawRect(0, 0, 100, 20);
 		graphics.endFill();
 		if (card) {
@@ -287,7 +290,7 @@ function getCreatureImage(code) {
 			var border = new PIXI.Sprite(cardBorders[card.element + (card.upped ? 13 : 0)]);
 			border.scale.set(0.5, 0.5);
 			graphics.addChild(border);
-			graphics.beginFill(card ? (card.upped ? lighten(elecols[card.element]) : elecols[card.element]) : elecols[0]);
+			graphics.beginFill(card ? maybeLighten(card) : elecols[0]);
 			graphics.drawRect(0, 9, 64, 64);
 			graphics.endFill();
 			if (art) {
@@ -319,7 +322,7 @@ function getWeaponShieldImage(code) {
 			var border = (new PIXI.Sprite(cardBorders[card.element + (card.upped ? 13 : 0)]));
 			border.scale.set(5/8, 5/8);
 			graphics.addChild(border);
-			graphics.beginFill(card ? (card.upped ? lighten(elecols[card.element]) : elecols[card.element]) : elecols[0]);
+			graphics.beginFill(card ? maybeLighten(card) : elecols[0]);
 			graphics.drawRect(0, 11, 80, 80);
 			graphics.endFill();
 			if (art) {
@@ -2311,7 +2314,7 @@ function startMatch() {
 					creasprite[j][i].setTexture(getCreatureImage(cr.card));
 					creasprite[j][i].visible = true;
 					var child = creasprite[j][i].getChildAt(0);
-					child.setTexture(getTextImage(cr.trueatk() + "|" + cr.truehp(), mkFont(10, cr.card.upped ? "black" : "white"), cr.card.upped ? lighten(elecols[cr.card.element]) : elecols[cr.card.element]));
+					child.setTexture(getTextImage(cr.trueatk() + "|" + cr.truehp(), mkFont(10, cr.card.upped ? "black" : "white"), maybeLighten(cr.card)));
 					var child2 = creasprite[j][i].getChildAt(1);
 					var activetext = cr.active.cast ? casttext(cr.cast, cr.castele) + cr.active.cast.activename : (cr.active.hit ? cr.active.hit.activename : "");
 					child2.setTexture(getTextImage(activetext, mkFont(8, cr.card.upped ? "black" : "white")));
@@ -2326,9 +2329,9 @@ function startMatch() {
 					permsprite[j][i].alpha = pr.status.immaterial ? .7 : 1;
 					var child = permsprite[j][i].getChildAt(0);
 					if (pr instanceof Pillar) {
-						child.setTexture(getTextImage("1:" + (pr.active.auto == Actives.pend && pr.pendstate ? pr.owner.mark : pr.card.element) + " x" + pr.status.charges, mkFont(10, pr.card.upped ? "black" : "white")));
+						child.setTexture(getTextImage("1:" + (pr.active.auto == Actives.pend && pr.pendstate ? pr.owner.mark : pr.card.element) + " x" + pr.status.charges, mkFont(10, pr.card.upped ? "black" : "white"), maybeLighten(pr.card)));
 					}
-					else child.setTexture(getTextImage(pr.status.charges !== undefined ? " " + pr.status.charges : ""), mkFont(10, pr.card.upped ? "black" : "white"));
+					else child.setTexture(getTextImage(pr.status.charges !== undefined ? " " + pr.status.charges : ""), mkFont(10, pr.card.upped ? "black" : "white"), maybeLighten(pr.card));
 					var child2 = permsprite[j][i].getChildAt(1);
 					if (!(pr instanceof Pillar)) {
 						child2.setTexture(getTextImage(pr.activetext().replace(" losecharge", ""), mkFont(8, pr.card.upped ? "black" : "white")));
@@ -2344,7 +2347,7 @@ function startMatch() {
 				child.setTexture(getTextImage(wp.activetext(), mkFont(12, wp.card.upped ? "black" : "white")));
 				child.visible = true;
 				var child2 = weapsprite[j].getChildAt(1);
-				child2.setTexture(getTextImage(wp.trueatk() + "", mkFont(12, wp.card.upped ? "black" : "white")));
+				child2.setTexture(getTextImage(wp.trueatk() + "", mkFont(12, wp.card.upped ? "black" : "white"), maybeLighten(wp.card)));
 				child2.visible = true;
 				weapsprite[j].setTexture(getWeaponShieldImage(wp.card.code));
 				drawStatus(wp, weapsprite[j]);
@@ -2357,7 +2360,7 @@ function startMatch() {
 				child.setTexture(getTextImage((sh.active.shield ? " " + sh.active.shield.activename : "") + (sh.active.buff ? " " + sh.active.buff.activename : "") + (sh.active.cast ? casttext(sh.cast, sh.castele) + sh.active.cast.activename : ""), mkFont(12, sh.card.upped ? "black" : "white")));
 				child.visible = true;
 				var child2 = shiesprite[j].getChildAt(1);
-				child2.setTexture(getTextImage(sh.status.charges ? "x" + sh.status.charges: "" + sh.truedr() + "", mkFont(12, sh.card.upped ? "black" : "white")));
+				child2.setTexture(getTextImage(sh.status.charges ? "x" + sh.status.charges: "" + sh.truedr() + "", mkFont(12, sh.card.upped ? "black" : "white"), maybeLighten(sh.card)));
 				child2.visible = true;
 				shiesprite[j].alpha = sh.status.immaterial ? .7 : 1;
 				shiesprite[j].setTexture(getWeaponShieldImage(sh.card.code));
