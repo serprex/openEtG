@@ -710,7 +710,7 @@ function victoryScreen() {
 	var bgvictory = new PIXI.Sprite(backgrounds[0]);
 	victoryui.addChild(bgvictory);
 
-	victoryui.addChild(makeText(10, 10, game.ply + "\n" + (Date.now()-game.startTime), true));
+	victoryui.addChild(makeText(10, 10,"Plies: " + game.ply + "\nTime: " + ((Date.now()-game.startTime)/1000).toFixed(1) + " seconds", true));
 	if (game.winner == game.player1){
 		var victoryText = game.quest ? game.wintext : "You won!";
 		var tinfo = makeText(450, game.cardreward ? 130 : 250, victoryText, true);
@@ -2970,7 +2970,7 @@ socket.on("chat", function(data) {
 	if (h < 10) h = "0"+h;
 	if (m < 10) m = "0"+m;
 	if (s < 10) s = "0"+s;
-	var msg = h + " " + m + " " + s + " " + (data.u ? "<b>" + sanitizeHtml(data.u) + ":</b> " : "") + sanitizeHtml(data.message);
+	var msg = h + ":" + m + ":" + s + " " + (data.u ? "<b>" + sanitizeHtml(data.u) + ":</b> " : "") + sanitizeHtml(data.message);
 	var color = data.mode == "pm" ? "blue" : data.mode == "info" ? "red" : "black";
 	chatBox.innerHTML += data.mode == "guest" ? "<font color=black><i>" + msg + "</i></font><br>" : "<font color=" + color + ">" + msg + "</font><br>";
 	if (Notification && user && ~data.message.indexOf(user.name) && !document.hasFocus()){
@@ -3033,7 +3033,11 @@ function maybeSendChat(e) {
 			var name = username.value ? username.value : guestname;
 			socket.emit("guestchat", { message: chatinput.value, u: name });
 		}
-		chatinput.value = "";
+		var checkPm = chatinput.value.split(" ");
+		if (checkPm[0] == "/w")
+			chatinput.value = checkPm[0] + " " + checkPm[1] + " ";
+		else
+			chatinput.value = "";
 		e.preventDefault();
 	}
 }
