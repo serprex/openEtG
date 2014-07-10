@@ -15,7 +15,7 @@ var ActivesValues = {
 	adrenaline:8,
 	aflatoxin:5,
 	aggreskele:2,
-	air: 1,
+	air:1,
 	alphawolf:2,
 	antimatter:12,
 	bblood:7,
@@ -296,7 +296,7 @@ function evalthing(c) {
 		if (!isEmpty(c.active)) {
 			for (var key in c.active) {
 				if (key == "play"){
-					// worthless now
+					// ignoring for now due to Wolf
 				}else if (key == "hit"){
 					if (!delaymix){
 						score += evalactive(c, c.active.hit)*(ttatk?1:.3)*(c.status.adrenaline?2:1);
@@ -309,7 +309,7 @@ function evalthing(c) {
 					if (!delaymix){
 						score += evalactive(c, c.active.shield)*(c.owner.gpull == c?1:.2);
 					}
-				}else if (key != "cast"){
+				}else if (key == "cast"){
 					if (!delaymix){
 						score += evalactive(c, c.active[key]) - (c.usedactive?.02:0);
 					}
@@ -324,7 +324,7 @@ function evalthing(c) {
 				score -= c.status.poison*ttatk/hp;
 				if (c.status.aflatoxin) score -= 2;
 			}
-			score *= hp?(c.status.immaterial || c.status.burrowed ? 2 : Math.sqrt(Math.min(hp, 15))/2):.2;
+			score *= hp?(c.status.immaterial || c.status.burrowed ? (c.status.poison ? 1.5 : 2) : Math.sqrt(Math.min(hp, 15))/2):.2;
 		}else if(c.status.immaterial){
 			score *= 1.5;
 		}
@@ -363,7 +363,7 @@ function evalcardinstance(cardInst) {
 function caneventuallyactive(element, pl){
 	if (!element || pl.quanta[element] || pl.mark == element) return true;
 	for (var i = 0; i < 16; i++) {
-		if (pl.permanents[i] && pl.permanents[i].type == PillarEnum && pl.permanents[i].element == element)
+		if (pl.permanents[i] && pl.permanents[i].type == PillarEnum && (!pl.permanents[i] || pl.permanents[i].element == element))
 			return true;
 	}
 	return false;
@@ -398,7 +398,7 @@ module.exports = function(game) {
 		if (player.gpull) {
 			pscore += player.gpull.truehp()/4 + (player.gpull.passives.voodoo ? 10 : 0) - player.gpull.trueatk();
 		}
-		pscore += Math.sqrt(player.hp) * 5;
+		pscore += Math.sqrt(player.hp);
 		if (player.isCloaked()) pscore += 4;
 		if (player.status.poison) pscore -= player.status.poison;
 		if (player.precognition) pscore += 1;
