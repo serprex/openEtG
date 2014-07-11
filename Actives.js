@@ -154,7 +154,7 @@ bravery:function(c,t){
 },
 brokenmirror:function(c,t, fromhand){
 	if (fromhand && t instanceof Creature && c.owner != t.owner){
-		new Creature(Cards.Ghost.asUpped(c.card.upped), c.owner).place();
+		new Creature(Cards.Phantom.asUpped(c.card.upped), c.owner).place();
 	}
 },
 burrow:function(c,t){
