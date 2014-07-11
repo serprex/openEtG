@@ -1,11 +1,11 @@
 var Cards, CardCodes, Targeting, targetingMode, targetingModeCb, targetingText, game, discarding, animCb, user, renderer, endturnFunc, cancelFunc, accepthandfunc, foeDeck, player2summon, player2Cards, guestname;
 (function(g) {
-	var htmlElements = ["leftpane", "chatArea", "chatinput", "deckimport", "aideck", "foename", "airefresh", "change", "login", "password", "challenge", "chatBox", "trade", "bottompane", "demigodmode", "username"];
+	var htmlElements = ["leftpane", "chatArea", "chatinput", "deckimport", "aideck", "foename", "change", "login", "password", "challenge", "chatBox", "trade", "bottompane", "demigodmode", "username"];
 	for (var i = 0;i < htmlElements.length;i++) {
 		g[htmlElements[i]] = document.getElementById(htmlElements[i]);
 	}
 	if (localStorage){
-		var store = [airefresh, username];
+		var store = [username];
 		for (var i=0; i<store.length; i++){
 			(function(storei){
 				var field = storei.type == "checkbox" ? "checked" : "value";
@@ -569,7 +569,6 @@ function getDeck(limit) {
 	}
 	return deck;
 }
-var aiDelay = 0;
 function aiEvalFunc() {
 	var gameBack = game;
 	var disableEffectsBack = Effect.disable;
@@ -594,7 +593,7 @@ function aiEvalFunc() {
 					bitsToTgt(cbits).useactive(tone);
 					var cmdcopy = commands.slice();
 					cmdcopy.push(mkcommand(cbits, tbits));
-					var v = evalGameState(game);
+					var v = evalGameState(cloneGame(game));
 					if (v < candidates[0]) {
 						candidates = [v, cmdcopy];
 						console.log(c + " " + t + " " + v);
@@ -2140,14 +2139,13 @@ function startMatch() {
 		fgfx.lineStyle(0, 0, 0);
 		spr.alpha = obj.status.immaterial || obj.status.burrowed ? .7 : 1;
 	}
+	var aiDelay = 0;
 	animCb = function() {
-		Effect.disable = airefresh.value == "0" && game.turn == game.player2;
-		if (game.phase == PlayPhase && game.turn == game.player2 && game.player2.ai && --aiDelay <= 0) {
-			aiDelay = Math.max(parseInt(airefresh.value) || 5, 5);
-			do {
-				var cmd = game.player2.ai();
-				cmds[cmd[0]](cmd[1]);
-			} while (aiDelay < 0 && game.turn == game.player2);
+		var now;
+		if (game.phase == PlayPhase && game.turn == game.player2 && game.player2.ai && (now = Date.now()) >= aiDelay) {
+			aiDelay = now + 100;
+			var cmd = game.player2.ai();
+			cmds[cmd[0]](cmd[1]);
 		}
 		var pos = realStage.getMousePosition();
 		maybeSetText(winnername, game.winner ? (game.winner == game.player1 ? "Won " : "Lost ") + game.ply : "");
