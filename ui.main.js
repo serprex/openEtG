@@ -1469,17 +1469,18 @@ function startQuest(questname) {
 function startQuestWindow(){
 	var questui = new PIXI.DisplayObjectContainer();
 	questui.interactive = true;
-	var bgquest = new PIXI.Sprite(backgrounds[3]);
-	questui.addChild(questui);
+	var bgquest = new PIXI.Sprite(backgrounds[0]);
+	questui.addChild(bgquest);
+	var tinfo = makeText(32, 32, "");
+	questui.addChild(tinfo);
 	for (key in mapareas) {
-		area = mapareas[key];
-		image = area.image;
-		button = makeButton(area.x, area.y, image.width, image.height, image);
-		(function(_i){
+		(function(k){
+			var area = mapareas[k];
+			button = makeButton(area.x, area.y, area.image.width, area.image.height, area.image, function() {
+				tinfo.setText(k);
+			});
 			button.click = function() {
-				console.log(0);
-				if (_i in Quest.areas) startQuestArea(_i);
-				console.log(0);
+				if (k in Quest.areas) startQuestArea(k);
 			}
 		})(key);
 		questui.addChild(button);
@@ -1487,7 +1488,6 @@ function startQuestWindow(){
 	refreshRenderer(questui);
 }
 function startQuestArea(area) {
-	//Start the first quest
 	startQuest("necromancer");
 	startQuest("bombmaker");
 	startQuest("blacksummoner");
@@ -1501,9 +1501,8 @@ function startQuestArea(area) {
 		tinfo.setText("");
 	}
 	questui.addChild(bgquest);
-	var tinfo = makeText(50, 26, "")
-	var errinfo = makeText(50, 125, "")
-	var quest1Buttons = [];
+	var tinfo = makeText(50, 26, "");
+	var errinfo = makeText(50, 125, "");
 	console.log(1);
 	function makeQuestButton(quest, stage, text, pos) {
 		var button = makeButton(pos[0], pos[1], 32, 32, user.quest[quest] > stage ? questIcons[1] : questIcons[0]);
@@ -1519,11 +1518,10 @@ function startQuestArea(area) {
 	console.log(1);
 	for (var i = 0;i < Quest.areas[area].length;i++) {
 		var key = Quest.areas[area][i];
-		if ((user.quest[key] || user.quest[key] == 0) && Quest[key]) {
-			for (var i = 0;i <= user.quest[key];i++) {
-				if (Quest[key].info.pos[i]) {
-					var button = makeQuestButton(key, i, Quest[key].info.text[i], Quest[key].info.pos[i]);
-					questui.addChild(button);
+		if ((user.quest[key] !== undefined) && Quest[key]) {
+			for (var j = 0;j <= user.quest[key];j++) {
+				if (Quest[key].info.pos[j]) {
+					questui.addChild(makeQuestButton(key, j, Quest[key].info.text[j], Quest[key].info.pos[j]));
 				}
 			}
 		}
