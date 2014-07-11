@@ -178,8 +178,8 @@ function makeArt(card, art) {
 	background.position.set(0, 0);
 	template.addChild(background);
 	var rarity = new PIXI.Sprite(ricons[card.rarity]);
-	rarity.anchor.set(.5, 1);
-	rarity.position.set(66, 252);
+	rarity.anchor.set(0, 1);
+	rarity.position.set(5, 252);
 	template.addChild(rarity);
 	if (art) {
 		var artspr = new PIXI.Sprite(art);
@@ -1003,12 +1003,12 @@ function mkAi(level) {
 
 // Asset Loading
 var nopic, goldtex;
-var backgrounds = ["assets/bg_default.png", "assets/bg_lobby.png", "assets/bg_shop.png", "assets/bg_quest.png", "assets/bg_game.png"];
+var backgrounds = ["assets/bg_default.png", "assets/bg_lobby.png", "assets/bg_shop.png", "assets/bg_quest.png", "assets/bg_game.png", "assets/bg_questmap.png"];
 var questIcons = [], eicons = [], ricons = [], cardBacks = [], cardBorders = [], boosters = [], popups = [], ticons = [];
 var buttons = {};
 var mapareas = {};
 var preLoader = new PIXI.AssetLoader(["assets/null.png", "assets/gold.png", "assets/questIcons.png", "assets/esheet.png", "assets/raritysheet.png", "assets/backsheet.png",
-	"assets/cardborders.png", "assets/boosters.png", "assets/popup_booster.png", "assets/typesheet.png", "assets/buttons.png", "assets/mapsheet.png"].concat(backgrounds));
+	"assets/cardborders.png", "assets/boosters.png", "assets/popup_booster.png", "assets/typesheet.png", "assets/buttons.png"].concat(backgrounds));
 var loadingBarProgress = 0, loadingBarGraphic = new PIXI.Graphics();
 preLoader.onProgress = function() {
 	loadingBarGraphic.clear();
@@ -1050,15 +1050,6 @@ preLoader.onComplete = function() {
 	for (var i = 0;i < buttonnames.length;i++) {
 		var x = i%5, y = Math.floor(i/5);
 		buttons[buttonnames[i]] = new PIXI.Texture(tex, new PIXI.Rectangle(x * 72, y * 22, 72, 22));
-	}
-	var tex = PIXI.Texture.fromFrame("assets/mapsheet.png");
-	var areanames = ["ice", "forest", "city", "harbor", "desert",""];
-	var areapos = [[134,172],[458,223],[260,311],[247,192],[164,265],[0,0]]
-	for (var x = 0;x < 3;x++) {
-		for (var y = 0;y < 2;y++) {
-			var i = y * 3 + x;
-			mapareas[areanames[i]] = { x: areapos[i][0], y: areapos[i][1], image: new PIXI.Texture(tex, new PIXI.Rectangle(x * 260, y * 248, 260, 248)) };
-		}
 	}
 	startMenu();
 }
@@ -1470,21 +1461,38 @@ function startQuest(questname) {
 function startQuestWindow(){
 	var questui = new PIXI.DisplayObjectContainer();
 	questui.interactive = true;
-	var bgquest = new PIXI.Sprite(backgrounds[0]);
+	var bgquest = new PIXI.Sprite(backgrounds[5]);
+	bgquest.mouseover = function(){
+		tinfo.setText("");
+	};
+	bgquest.interactive = true;
 	questui.addChild(bgquest);
 	var tinfo = makeText(32, 32, "");
 	questui.addChild(tinfo);
-	for (key in mapareas) {
-		(function(k){
-			var area = mapareas[k];
-			button = makeButton(area.x, area.y, area.image, function() {
-				tinfo.setText(k);
-			});
-			button.click = function() {
+	var bexit = makeButton(750, 246, buttons.exit);
+	bexit.click = startMenu;
+	questui.addChild(bexit);
+	var areainfo = {
+		forest: ["Spooky Forest", new PIXI.Polygon(555, 221, 456, 307, 519, 436, 520, 472, 631, 440, 652, 390, 653, 351, 666, 321, 619, 246)],
+		city: ["Capital City", new PIXI.Polygon(456,307, 519, 436, 520, 472,328,496,258,477,259,401)],
+		harbor: ["The Harbor", new PIXI.Polygon(245,262,258,477,205,448,179,397,180,350,161,313)],
+		ice: ["Icy Caves", new PIXI.Polygon(161,313,245,262,283,190,236,167,184,186,168,213,138,223,131,263)],
+		desert:["Lonely Desert", new PIXI.Polygon(245,262,283,190,326,202,466,196,511,219,555,221,456,307,259,401)]
+	};
+	for (key in areainfo) {
+		var graphics = new PIXI.Graphics();
+		graphics.interactive = true;
+		graphics.buttonMode = true;
+		(function (k) {
+			graphics.hitArea = areainfo[k][1];
+			graphics.click = function () {
 				if (k in Quest.areas) startQuestArea(k);
 			}
+			graphics.mouseover = function() {
+				tinfo.setText(areainfo[k][0]);
+			}
 		})(key);
-		questui.addChild(button);
+		questui.addChild(graphics);
 	}
 	refreshRenderer(questui);
 }
@@ -1492,7 +1500,6 @@ function startQuestArea(area) {
 	startQuest("necromancer");
 	startQuest("bombmaker");
 	startQuest("blacksummoner");
-	console.log(1);
 	var questui = new PIXI.DisplayObjectContainer();
 	questui.interactive = true;
 	var bgquest = new PIXI.Sprite(backgrounds[3]);
@@ -1528,7 +1535,7 @@ function startQuestArea(area) {
 	}
 	console.log(1);
 	var bexit = makeButton(750, 246, buttons.exit);
-	bexit.click = startMenu;
+	bexit.click = startQuestWindow;
 	questui.addChild(tinfo);
 	questui.addChild(errinfo);
 	questui.addChild(bexit);
