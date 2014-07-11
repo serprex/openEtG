@@ -1,4 +1,4 @@
-var Cards, CardCodes, Targeting, targetingMode, targetingModeCb, targetingText, game, discarding, animCb, user, renderer, endturnFunc, cancelFunc, accepthandfunc, foeDeck, player2summon, player2Cards, guestname;
+var Cards, CardCodes, Targeting, targetingMode, targetingModeCb, targetingText, game, discarding, user, renderer, endturnFunc, cancelFunc, accepthandfunc, foeDeck, player2summon, player2Cards, guestname;
 (function(g) {
 	var htmlElements = ["leftpane", "chatArea", "chatinput", "deckimport", "aideck", "foename", "change", "login", "password", "challenge", "chatBox", "trade", "bottompane", "demigodmode", "username"];
 	for (var i = 0;i < htmlElements.length;i++) {
@@ -146,11 +146,12 @@ function tgtToPos(t) {
 		return new PIXI.Point(j ? 20 : 780, (j ? 140 : 300) + 20 * i);
 	} else console.log("Unknown target");
 }
-function refreshRenderer(stage) {
+function refreshRenderer(stage, animCb) {
 	if (realStage.children.length > 0){
 		realStage.removeChildren();
 	}
 	realStage.addChild(stage);
+	realStage.next = animCb;
 }
 
 var realStage = new PIXI.Stage(0x336699, true);
@@ -165,9 +166,6 @@ function lighten(c) {
 }
 function maybeLighten(card){
 	return card.upped ? lighten(elecols[card.element]) : elecols[card.element];
-}
-function getIcon(ele) {
-	return eicons ? eicons[ele] : nopic;
 }
 function getBack(ele, upped) {
 	var offset = upped ? 13 : 0;
@@ -203,7 +201,7 @@ function makeArt(card, art) {
 		text.position.set(rend.width - 20, 4);
 		template.addChild(text);
 		if (card.costele) {
-			var eleicon = new PIXI.Sprite(getIcon(card.costele));
+			var eleicon = new PIXI.Sprite(eicons[card.costele]);
 			eleicon.position.set(rend.width - 1, 10);
 			eleicon.anchor.set(1, .5);
 			eleicon.scale.set(.5, .5);
@@ -264,7 +262,7 @@ function getCardImage(code) {
 				graphics.addChild(text);
 				clipwidth += text.width + 22;
 				if (card.costele) {
-					var eleicon = new PIXI.Sprite(getIcon(card.costele));
+					var eleicon = new PIXI.Sprite(eicons[card.costele]);
 					eleicon.position.set(rend.width - 1, 10);
 					eleicon.anchor.set(1, .5);
 					eleicon.scale.set(.5, .5);
@@ -277,7 +275,8 @@ function getCardImage(code) {
 			graphics.addChild(text);
 		}
 		rend.render(graphics);
-		return eicons ? (caimgcache[code] = rend) : rend;
+		caimgcache[code] = rend;
+		return rend;
 	}
 }
 function getCreatureImage(code) {
@@ -453,7 +452,7 @@ function initTrade(data) {
 	var cardArt = new PIXI.Sprite(nopic);
 	cardArt.position.set(734, 8);
 	editorui.addChild(cardArt);
-	animCb = function() {
+	refreshRenderer(editorui, function() {
 		cardsel.next(cardpool, cardminus);
 		if (cardartcode) {
 			cardArt.setTexture(getArt(cardartcode));
@@ -472,8 +471,7 @@ function initTrade(data) {
 		for (;i<30;i++) {
 			selectedCardsprites[i].visible = false;
 		}
-	}
-	refreshRenderer(editorui);
+	});
 }
 function initLibrary(pool){
 	console.log(pool);
@@ -501,13 +499,12 @@ function initLibrary(pool){
 	var cardArt = new PIXI.Sprite(nopic);
 	cardArt.position.set(734, 8);
 	editorui.addChild(cardArt);
-	animCb = function(){
+	refreshRenderer(function(){
 		cardsel.next(cardpool, cardminus);
 		if (cardartcode) {
 			cardArt.setTexture(getArt(cardartcode));
 		}
-	}
-	refreshRenderer(editorui);
+	});
 }
 function initGame(data, ai) {
 	game = mkGame(data.first, data.seed);
@@ -593,7 +590,7 @@ function aiEvalFunc() {
 					bitsToTgt(cbits).useactive(tone);
 					var cmdcopy = commands.slice();
 					cmdcopy.push(mkcommand(cbits, tbits));
-					var v = evalGameState(cloneGame(game));
+					var v = evalGameState(game);
 					if (v < candidates[0]) {
 						candidates = [v, cmdcopy];
 						console.log(c + " " + t + " " + v);
@@ -754,15 +751,13 @@ function victoryScreen() {
 		}
 	}
 
-	animCb = function(){
+	refreshRenderer(victoryui, function(){
 		if (game.cardreward){
 			for(var i=0; i<game.cardreward.length; i++){
 				rewards[i].setTexture(getArt(game.cardreward[i]));
 			}
 		}
-	}
-
-	refreshRenderer(victoryui);
+	});
 }
 
 function doubleDeck(deck) {
@@ -1060,7 +1055,6 @@ preLoader.onComplete = function() {
 	}
 	startMenu();
 }
-animCb = undefined;
 refreshRenderer(loadingBarGraphic);
 preLoader.load();
 requestAnimate();
@@ -1117,9 +1111,10 @@ function makeCardSelector(cardmouseover, cardclick){
 	var cardsel = new PIXI.DisplayObjectContainer();
 	cardsel.interactive = true;
 	var elefilter = 0, rarefilter = 0;
-	var eleicons = [], rareicons = [], columns = [[],[],[],[],[],[]], columnspr = [[],[],[],[],[],[]];
+	var columns = [[],[],[],[],[],[]], columnspr = [[],[],[],[],[],[]];
 	for (var i = 0;i < 13;i++) {
-		var sprite = new PIXI.Sprite(nopic);
+		var sprite = new PIXI.Sprite(eicons[i]);
+		sprite.interactive = true;
 		sprite.position.set(8, 184 + i * 32);
 		(function(_i) {
 			sprite.click = function() {
@@ -1127,11 +1122,11 @@ function makeCardSelector(cardmouseover, cardclick){
 				makeColumns();
 			}
 		})(i);
-		eleicons.push(sprite);
 		cardsel.addChild(sprite);
 	}
 	for (var i = 0;i < 6; i++){
-		var sprite = new PIXI.Sprite(nopic);
+		var sprite = new PIXI.Sprite(getRareIcon(i));
+		sprite.interactive = true;
 		sprite.position.set(48, 196 + i * 32);
 		(function(_i) {
 			sprite.click = function() {
@@ -1139,11 +1134,8 @@ function makeCardSelector(cardmouseover, cardclick){
 				makeColumns();
 			}
 		})(i);
-		rareicons.push(sprite);
 		cardsel.addChild(sprite);
 	}
-	setInteractive.apply(null, eleicons);
-	setInteractive.apply(null, rareicons);
 	for (var i = 0;i < 6;i++) {
 		for (var j = 0;j < 15;j++) {
 			var sprite = new PIXI.Sprite(nopic);
@@ -1182,12 +1174,6 @@ function makeCardSelector(cardmouseover, cardclick){
 		poolcache = cardpool;
 		if (needToMakeCols){
 			makeColumns();
-		}
-		for (var i = 0;i < 13;i++) {
-			eleicons[i].setTexture(getIcon(i));
-		}
-		for (var i = 0;i < 6;i++) {
-			rareicons[i].setTexture(getRareIcon(i));
 		}
 		for (var i = 0;i < 6;i++) {
 			for (var j = 0;j < columns[i].length;j++) {
@@ -1412,16 +1398,14 @@ function startMenu() {
 		}
 	}
 
-	animCb = function() {
+	refreshRenderer(menuui, function() {
 		if (user) {
 			if (oracle) {
 				oracle.setTexture(getArt(cardcode));
 			}
 			tgold.setText("$" + user.gold)
 		}
-	}
-
-	refreshRenderer(menuui);
+	});
 }
 function startRewardWindow(reward) {
 	var rewardList = [];
@@ -1460,12 +1444,10 @@ function startRewardWindow(reward) {
 		setInteractive(card);
 	}
 
-	animCb = function() {
+	refreshRenderer(rewardui, function() {
 		if (chosenReward)
 			chosenRewardImage.setTexture(getArt(chosenReward))
-	}
-
-	refreshRenderer(rewardui);
+	});
 }
 
 function startQuest(questname) {
@@ -1519,7 +1501,6 @@ function startQuestWindow() {
 	questui.addChild(tinfo);
 	questui.addChild(errinfo);
 	questui.addChild(bexit);
-	animCb = undefined;
 	refreshRenderer(questui);
 }
 
@@ -1630,7 +1611,7 @@ function upgradestore() {
 	var selectedCardArt = new PIXI.Sprite(nopic);
 	selectedCardArt.position.set(534, 8);
 	upgradeui.addChild(selectedCardArt);
-	animCb = function() {
+	refreshRenderer(upgradeui, function() {
 		cardsel.next(cardpool, {});
 	    if (upgradedCard) {
 	        cardArt.setTexture(getArt(upgradedCard));
@@ -1639,8 +1620,7 @@ function upgradestore() {
 			selectedCardArt.setTexture(getArt(selectedCard));
 		}
 		goldcount.setText("$" + user.gold);
-	}
-	refreshRenderer(upgradeui);
+	});
 }
 
 function startStore() {
@@ -1786,15 +1766,12 @@ function startStore() {
 		}
 	}
 
-	//update loop
-	animCb = function() {
+	refreshRenderer(storeui, function() {
 		for (var i = 0;i < newCards.length;i++) {
 			newCardsArt[i].setTexture(getArt(newCards[i]));
 		}
 		tgold.setText("$" + user.gold);
-	}
-
-	refreshRenderer(storeui);
+	});
 }
 
 function startEditor() {
@@ -1937,22 +1914,23 @@ function startEditor() {
 		}
 		var editordecksprites = [];
 		var editordeck = getDeck(true);
-		var editormarksprite = new PIXI.Sprite(nopic);
+		var editormarksprite = new PIXI.Sprite(eicons[0]);
 		editormarksprite.position.set(100, 210);
 		editorui.addChild(editormarksprite);
 		var editormark = 0;
 		processDeck();
-		var editormarkicons = [];
 		for (var i = 0;i < 13;i++) {
-			var sprite = new PIXI.Sprite(nopic);
+			var sprite = new PIXI.Sprite(eicons[i]);
+			sprite.interactive = true;
 			sprite.position.set(200 + i * 32, 210);
 			(function(_i) {
-				sprite.click = function() { editormark = _i; }
+				sprite.click = function() {
+					editormark = _i;
+					editormarksprite.setTexture(this.texture);
+				}
 			})(i);
-			editormarkicons.push(sprite);
 			editorui.addChild(sprite);
 		}
-		setInteractive.apply(null, editormarkicons);
 		for (var i = 0;i < 60;i++) {
 			var sprite = new PIXI.Sprite(nopic);
 			sprite.position.set(100 + Math.floor(i / 10) * 100, 8 + (i % 10) * 20);
@@ -1999,14 +1977,10 @@ function startEditor() {
 		var cardArt = new PIXI.Sprite(nopic);
 		cardArt.position.set(734, 8);
 		editorui.addChild(cardArt);
-		animCb = function() {
+		refreshRenderer(editorui, function() {
 			cardsel.next(cardpool, cardminus);
-			editormarksprite.setTexture(getIcon(editormark));
 			if (cardartcode) {
 				cardArt.setTexture(getArt(cardartcode));
-			}
-			for (var i = 0;i < 13;i++) {
-				editormarkicons[i].setTexture(getIcon(i));
 			}
 			for (var i = 0;i < editordeck.length;i++) {
 				editordecksprites[i].visible = true;
@@ -2015,8 +1989,7 @@ function startEditor() {
 			for (;i < 60;i++) {
 				editordecksprites[i].visible = false;
 			}
-		}
-		refreshRenderer(editorui);
+		});
 	}
 }
 var descr = [
@@ -2043,7 +2016,7 @@ function startElementSelect() {
 	eledesc.position.set(100, 250);
 	stage.addChild(eledesc);
 	for (var i = 0;i < 13;i++) {
-		elesel[i] = new PIXI.Sprite(nopic);
+		elesel[i] = new PIXI.Sprite(eicons[i]);
 		elesel[i].position.set(100 + i * 32, 300);
 		(function(_i) {
 			elesel[_i].mouseover = function() {
@@ -2058,11 +2031,6 @@ function startElementSelect() {
 		})(i);
 		elesel[i].interactive = true;
 		stage.addChild(elesel[i]);
-	}
-	animCb = function() {
-		for (var i = 0;i < 13;i++) {
-			elesel[i].setTexture(getIcon(i));
-		}
 	}
 	refreshRenderer(stage);
 }
@@ -2140,7 +2108,7 @@ function startMatch() {
 		spr.alpha = obj.status.immaterial || obj.status.burrowed ? .7 : 1;
 	}
 	var aiDelay = 0;
-	animCb = function() {
+	var animCb = function() {
 		var now;
 		if (game.phase == PlayPhase && game.turn == game.player2 && game.player2.ai && (now = Date.now()) >= aiDelay) {
 			aiDelay = now + 100;
@@ -2365,12 +2333,9 @@ function startMatch() {
 				shiesprite[j].alpha = sh.status.immaterial ? .7 : 1;
 				shiesprite[j].setTexture(getWeaponShieldImage(sh.card.code));
 			} else shiesprite[j].visible = false;
-			marksprite[j].setTexture(getIcon(game.players[j].mark));
+			marksprite[j].setTexture(eicons[game.players[j].mark]);
 			for (var i = 1;i < 13;i++) {
 				maybeSetText(quantatext[j].getChildAt(i - 1), game.players[j].quanta[i].toString());
-			}
-			for (var i = 1;i < 13;i++) {
-				quantatext[j].getChildAt(i + 12 - 1).setTexture(getIcon(i));
 			}
 			maybeSetText(hptext[j], game.players[j].hp + "/" + game.players[j].maxhp);
 			if (hitTest(hptext[j], pos)){
@@ -2721,9 +2686,7 @@ function startMatch() {
 			for (var k = 1;k < 13;k++) {
 				quantatext[j].addChild(child = new PIXI.Text("", { font: "16px Dosis" }));
 				child.position.set((k & 1) ? 32 : 86, Math.floor((k - 1) / 2) * 32 + 8);
-			}
-			for (var k = 1;k < 13;k++) {
-				quantatext[j].addChild(child = new PIXI.Sprite(nopic));
+				quantatext[j].addChild(child = new PIXI.Sprite(eicons[k]));
 				child.position.set((k & 1) ? 0 : 54, Math.floor((k - 1) / 2) * 32);
 			}
 			hptext[j].click = function() {
@@ -2756,7 +2719,7 @@ function startMatch() {
 	cardart.position.set(654, 300);
 	cardart.anchor.set(.5, 0);
 	gameui.addChild(cardart);
-	refreshRenderer(gameui);
+	refreshRenderer(gameui, animCb);
 }
 
 function startArenaInfo(info) {
@@ -2774,12 +2737,11 @@ function startArenaInfo(info) {
 	var ocard = new PIXI.Sprite(nopic);
 	ocard.position.set(600, 300);
 	stage.addChild(ocard);
-	animCb = function() {
+	refreshRenderer(stage, function() {
 		if (info.card) {
 			ocard.setTexture(getArt(info.card));
 		}
-	}
-	refreshRenderer(stage);
+	});
 }
 
 function startArenaTop(info) {
@@ -2843,7 +2805,7 @@ function getTextImage(text, font, bgcolor) {
 		}else if (/^\d\d?:\d\d?$/.test(piece)) {
 			var parse = piece.split(":");
 			var num = parseInt(parse[0]);
-			var icon = getIcon(parseInt(parse[1]));
+			var icon = eicons[parseInt(parse[1])];
 			for (var j = 0;j < num;j++) {
 				var spr = new PIXI.Sprite(icon);
 				spr.scale.set(size/32, size/32);
@@ -3034,8 +2996,8 @@ function maybeChallenge(e) {
 }
 function animate() {
 	setTimeout(requestAnimate, 40);
-	if (animCb) {
-		animCb();
+	if (realStage.next) {
+		realStage.next();
 	}
 	renderer.render(realStage);
 }
