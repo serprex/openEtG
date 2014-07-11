@@ -171,24 +171,22 @@ function getBack(ele, upped) {
 	var offset = upped ? 13 : 0;
 	return cardBacks ? cardBacks[ele + offset] : nopic;
 }
-function getRareIcon(rarity) {
-	return rarityicons ? rarityicons[rarity] : nopic;
-}
 function makeArt(card, art) {
 	var rend = new PIXI.RenderTexture(132, 256);
-	var background = new PIXI.Sprite(getBack(card.element, card.upped));
-	var rarity = new PIXI.Sprite(getRareIcon(card.rarity));
 	var template = new PIXI.Graphics();
+	var background = new PIXI.Sprite(getBack(card.element, card.upped));
 	background.position.set(0, 0);
 	template.addChild(background);
-	rarity.position.set(66, 241);
+	var rarity = new PIXI.Sprite(ricons[card.rarity]);
+	rarity.anchor.set(.5, 1);
+	rarity.position.set(66, 252);
 	template.addChild(rarity);
 	if (art) {
 		var artspr = new PIXI.Sprite(art);
 		artspr.position.set(2, 20);
 		template.addChild(artspr);
 	}
-	var typemark = new PIXI.Sprite(typeicons[card.type]);
+	var typemark = new PIXI.Sprite(ticons[card.type]);
 	typemark.anchor.set(1, 1);
 	typemark.position.set(128, 252);
 	template.addChild(typemark);
@@ -1006,7 +1004,7 @@ function mkAi(level) {
 // Asset Loading
 var nopic, goldtex;
 var backgrounds = ["assets/bg_default.png", "assets/bg_lobby.png", "assets/bg_shop.png", "assets/bg_quest.png", "assets/bg_game.png"];
-var questIcons = [], eicons = [], rarityicons = [], cardBacks = [], cardBorders = [], boosters = [], popups = [], typeicons = [];
+var questIcons = [], eicons = [], ricons = [], cardBacks = [], cardBorders = [], boosters = [], popups = [], ticons = [];
 var buttons = {};
 var mapareas = {};
 var preLoader = new PIXI.AssetLoader(["assets/null.png", "assets/gold.png", "assets/questIcons.png", "assets/esheet.png", "assets/raritysheet.png", "assets/backsheet.png",
@@ -1031,7 +1029,7 @@ preLoader.onComplete = function() {
 	var tex = PIXI.Texture.fromFrame("assets/esheet.png");
 	for (var i = 0;i < 13;i++) eicons.push(new PIXI.Texture(tex, new PIXI.Rectangle(i * 32, 0, 32, 32)));
 	var tex = PIXI.Texture.fromFrame("assets/raritysheet.png");
-	for (var i = 0;i < 6;i++) rarityicons.push(new PIXI.Texture(tex, new PIXI.Rectangle(i * 10, 0, 10, 10)));
+	for (var i = 0;i < 6;i++) ricons.push(new PIXI.Texture(tex, new PIXI.Rectangle(i * 25, 0, 25, 25)));
 	var tex = PIXI.Texture.fromFrame("assets/backsheet.png");
 	for (var i = 0;i < 26;i++) cardBacks.push(new PIXI.Texture(tex, new PIXI.Rectangle(i * 132, 0, 132, 256)));
 	var tex = PIXI.Texture.fromFrame("assets/cardborders.png");
@@ -1040,9 +1038,7 @@ preLoader.onComplete = function() {
 	for (var i = 0;i < 4;i++) boosters.push(new PIXI.Texture(tex, new PIXI.Rectangle(i * 100, 0, 100, 150)));
 	popups.push(PIXI.Texture.fromFrame("assets/popup_booster.png"));
 	var tex = PIXI.Texture.fromFrame("assets/typesheet.png");
-	for (var i = 0;i < 6;i++) {
-		typeicons.push(new PIXI.Texture(tex, new PIXI.Rectangle(25*i,0,25,25)));
-	}
+	for (var i = 0;i < 6;i++) ticons.push(new PIXI.Texture(tex, new PIXI.Rectangle(25 * i, 0, 25, 25)));
 	var buttonnames = ["logout", "arenainfo", "arenat10", "arenaai", "commoner",
 		"mage", "champion", "demigod", "wipeaccount", "editor",
 		"shop", "exit", "buypack", "takecards", "upgrade",
@@ -1092,7 +1088,12 @@ function makeText(x, y, txt, vis) {
 	t.position.set(x, y);
 	t.visible = vis === undefined || vis;
 	t.setText = function(x){
-		t.setTexture(getTextImage(x, { font: "14px Verdana", fill: "white", stroke: "black", strokeThickness: 2 }));
+		if (x){
+			t.setTexture(getTextImage(x, { font: "14px Verdana", fill: "white", stroke: "black", strokeThickness: 2 }));
+			t.visible = true;
+		}else{
+			t.visible = false;
+		}
 	}
 	return t;
 }
@@ -1135,9 +1136,9 @@ function makeCardSelector(cardmouseover, cardclick){
 		cardsel.addChild(sprite);
 	}
 	for (var i = 0;i < 6; i++){
-		var sprite = new PIXI.Sprite(getRareIcon(i));
+		var sprite = new PIXI.Sprite(ricons[i]);
 		sprite.interactive = true;
-		sprite.position.set(48, 196 + i * 32);
+		sprite.position.set(40, 190 + i * 32);
 		(function(_i) {
 			sprite.click = function() {
 				rarefilter = _i;
@@ -1510,8 +1511,7 @@ function startQuestArea(area) {
 			tinfo.setText(text);
 		}
 		button.click = function() {
-			var errText = mkQuestAi(quest, stage);
-			errText ? errinfo.setText(errText) : errinfo.setText("");
+			errinfo.setText(mkQuestAi(quest, stage) || "");
 		}
 		return button;
 	}
