@@ -2335,7 +2335,7 @@ function startMatch() {
 			} else shiesprite[j].visible = false;
 			marksprite[j].setTexture(eicons[game.players[j].mark]);
 			for (var i = 1;i < 13;i++) {
-				maybeSetText(quantatext[j].getChildAt(i - 1), game.players[j].quanta[i].toString());
+				maybeSetText(quantatext[j].getChildAt(i*2-2), game.players[j].quanta[i].toString());
 			}
 			maybeSetText(hptext[j], game.players[j].hp + "/" + game.players[j].maxhp);
 			if (hitTest(hptext[j], pos)){
