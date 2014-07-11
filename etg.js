@@ -1188,7 +1188,7 @@ var TargetFilters = {
 		return true;
 	},
 	card:function(c, t){
-		return t instanceof CardInstance;
+		return c != t && t instanceof CardInstance;
 	},
 	pill:function(c, t){
 		return t.isMaterialInstance(Pillar);
