@@ -577,6 +577,7 @@ function aiEvalFunc() {
 		return ["cast", cbits | tbits << 9];
 	}
 	function iterLoop(n, commands, currentEval) {
+		var log = n>=1?console.log.bind(console):function(){};
 		function iterCore(c, active) {
 			var cbits = tgtToBits(c) ^ 8;
 			var candidates = [fullCandidates[0]];
@@ -593,7 +594,7 @@ function aiEvalFunc() {
 					var v = evalGameState(game);
 					if (v < candidates[0]) {
 						candidates = [v, cmdcopy];
-						console.log(c + " " + t + " " + v);
+						log("\t" + c + " " + (t || "-") + " " + v);
 					}
 					if (n) {
 						var iterRet = iterLoop(n - 1, cmdcopy, v);
@@ -619,7 +620,7 @@ function aiEvalFunc() {
 				}
 			});
 			if (targetingMode) {
-				console.log("in " + active.activename);
+				log("in " + active.activename);
 				for (var j = 0;j < 2;j++) {
 					var pl = j == 0 ? c.owner : c.owner.foe;
 					evalIter(pl);
@@ -635,7 +636,7 @@ function aiEvalFunc() {
 						evalIter(pl.hand[i]);
 					}
 				}
-				console.log("out");
+				log("out");
 				targetingModeCb(1);
 			}
 		}

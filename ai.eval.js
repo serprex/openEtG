@@ -360,8 +360,8 @@ function evalcardinstance(cardInst) {
 	log("\tCard " + c.name + " worth " + score);
 	return score;
 }
-function caneventuallyactive(element, pl){
-	if (!element || pl.quanta[element] || pl.mark == element) return true;
+function caneventuallyactive(element, cost, pl){
+	if (!cost || !element || pl.quanta[element] || pl.mark == element) return true;
 	for (var i = 0; i < 16; i++) {
 		if (pl.permanents[i] && pl.permanents[i].type == PillarEnum && (!pl.permanents[i].element || pl.permanents[i].element == element))
 			return true;
@@ -388,8 +388,8 @@ module.exports = function(game) {
 			pscore += evalthing(player.permanents[i]);
 		}
 		for (var i = 0; i < player.hand.length; i++) {
-			var cinst = player.hand[i], costless = !cinst.card.cost || !cinst.card.costele;
-			if (caneventuallyactive(cinst.card.costele,player) || costless){
+			var cinst = player.hand[i];
+			if (caneventuallyactive(cinst.card.costele, cinst.card.cost, player) || costless){
 				pscore += evalcardinstance(cinst) * (cinst.canactive() ? 0.5 : 0.2) * (costless?1:Math.min(player.quanta[cinst.card.costele], 20)/20);
 			}else {
 				pscore -= cinst.card.active && cinst.card.active.discard == Actives.obsession ? 7 : 4;
