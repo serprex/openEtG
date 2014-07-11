@@ -432,7 +432,9 @@ fire:function(c,t){
 firebolt:function(c,t){
 	t.spelldmg(3+Math.floor(c.owner.quanta[Fire]/4));
 	if (t instanceof Player){
-		t.weapon.status.frozen = 0;
+		if (t.weapon){
+			t.weapon.status.frozen = 0;
+		}
 	}else{
 		t.status.frozen = 0;
 	}
