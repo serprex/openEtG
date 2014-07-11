@@ -2998,35 +2998,19 @@ function maybeSendChat(e) {
 		var msg = chatinput.value;
 		chatinput.value = "";
 		if (user){
-			var data = {};
-			if (msg.startsWith("/w ")) {
-				var secondSpace;
-				var quoted = msg.charAt(3) == '"';
-				if (quoted){
-					secondSpace = 4;
-					for (;;) {
-						secondSpace = msg.indexOf('" ', secondSpace+1);
-						if (secondSpace == -1 || msg.charAt(secondSpace-1) != '"') break;
-					}
-					secondSpace++;
-				}else secondSpace = msg.indexOf(" ", 4);
-				if (secondSpace < 1){
-					chatinput.value = msg;
-					e.preventDefault();
-					return;
-				}
-				data.to = msg.substring(3+quoted, secondSpace-quoted);
-				if (quoted){
-					data.to = data.to.replace(/""/g, '"');
-				}
-				data.msg = msg.substr(4+data.to.length+quoted*2);
-				chatinput.value = msg.substr(0, 4+data.to.length+quoted*2);
-			}else data.msg = msg;
-			userEmit("chat", data);
+			var checkPm = message.split(" ");
+			if (checkPm[0] == "/w") {
+				var match = message.match(/"(?:[^"\\]|\\.)*"/);
+				var to = (match && match[0]) || checkPm[1];
+				message = message.substring(3).replace(to, "");
+				chatinput.value = "/w " + to + " ";
+			}
+			userEmit("chat", { message: message, to: to ? to.replace(/"/g, "") : null });
 		}
 		else {
-			var name = username.value || guestname || (guestname = randomGuestName());
-			socket.emit("guestchat", { msg: msg, u: name });
+			if (!guestname) guestname = randomGuestName();
+			var name = username.value ? username.value : guestname;
+			socket.emit("guestchat", { message: message, u: name });
 		}
 		e.preventDefault();
 	}
