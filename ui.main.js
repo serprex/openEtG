@@ -2996,19 +2996,18 @@ function maybeSendChat(e) {
 		var msg = chatinput.value;
 		chatinput.value = "";
 		if (user){
-			var checkPm = message.split(" ");
+			var checkPm = msg.split(" ");
 			if (checkPm[0] == "/w") {
-				var match = message.match(/"(?:[^"\\]|\\.)*"/);
+				var match = msg.match(/"(?:[^"\\]|\\.)*"/);
 				var to = (match && match[0]) || checkPm[1];
-				message = message.substring(3).replace(to, "");
+				msg = msg.substring(3).replace(to, "");
 				chatinput.value = "/w " + to + " ";
 			}
-			userEmit("chat", { message: message, to: to ? to.replace(/"/g, "") : null });
+			userEmit("chat", { msg: msg, to: to ? to.replace(/"/g, "") : null });
 		}
 		else {
-			if (!guestname) guestname = randomGuestName();
-			var name = username.value ? username.value : guestname;
-			socket.emit("guestchat", { message: message, u: name });
+			var name = username.value || guestname || (guestname = randomGuestName());
+			socket.emit("guestchat", { msg: msg, u: name });
 		}
 		e.preventDefault();
 	}
