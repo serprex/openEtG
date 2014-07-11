@@ -1007,8 +1007,9 @@ var nopic, goldtex;
 var backgrounds = ["assets/bg_default.png", "assets/bg_lobby.png", "assets/bg_shop.png", "assets/bg_quest.png", "assets/bg_game.png"];
 var questIcons = [], eicons = [], rarityicons = [], cardBacks = [], cardBorders = [], boosters = [], popups = [], typeicons = [];
 var buttons = {};
+var mapareas = {};
 var preLoader = new PIXI.AssetLoader(["assets/null.png", "assets/gold.png", "assets/questIcons.png", "assets/esheet.png", "assets/raritysheet.png", "assets/backsheet.png",
-	"assets/cardborders.png", "assets/boosters.png", "assets/popup_booster.png", "assets/typesheet.png", "assets/buttons.png"].concat(backgrounds));
+	"assets/cardborders.png", "assets/boosters.png", "assets/popup_booster.png", "assets/typesheet.png", "assets/buttons.png", "assets/mapsheet.png"].concat(backgrounds));
 var loadingBarProgress = 0, loadingBarGraphic = new PIXI.Graphics();
 preLoader.onProgress = function() {
 	loadingBarGraphic.clear();
@@ -1052,6 +1053,15 @@ preLoader.onComplete = function() {
 	for (var i = 0;i < buttonnames.length;i++) {
 		var x = i%5, y = Math.floor(i/5);
 		buttons[buttonnames[i]] = new PIXI.Texture(tex, new PIXI.Rectangle(x * 72, y * 22, 72, 22));
+	}
+	var tex = PIXI.Texture.fromFrame("assets/mapsheet.png");
+	var areanames = ["ice", "forest", "city", "harbor", "desert",""];
+	var areapos = [[134,172],[458,223],[260,311],[247,192],[164,265],[0,0]]
+	for (var x = 0;x < 3;x++) {
+		for (var y = 0;y < 2;y++) {
+			var i = y * 3 + x;
+			mapareas[areanames[i]] = { x: areapos[i][0], y: areapos[i][1], image: new PIXI.Texture(tex, new PIXI.Rectangle(x * 260, y * 248, 260, 248)) };
+		}
 	}
 	startMenu();
 }
@@ -1456,12 +1466,32 @@ function startQuest(questname) {
 		userEmit("updatequest", { quest: questname, newstage: 0 });
 	}
 }
-function startQuestWindow() {
+function startQuestWindow(){
+	var questui = new PIXI.DisplayObjectContainer();
+	questui.interactive = true;
+	var bgquest = new PIXI.Sprite(backgrounds[3]);
+	questui.addChild(questui);
+	for (key in mapareas) {
+		area = mapareas[key];
+		image = area.image;
+		button = makeButton(area.x, area.y, image.width, image.height, image);
+		(function(_i){
+			button.click = function() {
+				console.log(0);
+				if (_i in Quest.areas) startQuestArea(_i);
+				console.log(0);
+			}
+		})(key);
+		questui.addChild(button);
+	}
+	refreshRenderer(questui);
+}
+function startQuestArea(area) {
 	//Start the first quest
 	startQuest("necromancer");
 	startQuest("bombmaker");
 	startQuest("blacksummoner");
-
+	console.log(1);
 	var questui = new PIXI.DisplayObjectContainer();
 	questui.interactive = true;
 	var bgquest = new PIXI.Sprite(backgrounds[3]);
@@ -1474,6 +1504,7 @@ function startQuestWindow() {
 	var tinfo = makeText(50, 26, "")
 	var errinfo = makeText(50, 125, "")
 	var quest1Buttons = [];
+	console.log(1);
 	function makeQuestButton(quest, stage, text, pos) {
 		var button = makeButton(pos[0], pos[1], 32, 32, user.quest[quest] > stage ? questIcons[1] : questIcons[0]);
 		button.mouseover = function() {
@@ -1485,8 +1516,9 @@ function startQuestWindow() {
 		}
 		return button;
 	}
-	for (key in user.quest)
-	{
+	console.log(1);
+	for (var i = 0;i < Quest.areas[area].length;i++) {
+		var key = Quest.areas[area][i];
 		if ((user.quest[key] || user.quest[key] == 0) && Quest[key]) {
 			for (var i = 0;i <= user.quest[key];i++) {
 				if (Quest[key].info.pos[i]) {
@@ -1496,11 +1528,13 @@ function startQuestWindow() {
 			}
 		}
 	}
+	console.log(1);
 	var bexit = makeButton(750, 246, 75, 18, buttons.exit);
 	bexit.click = startMenu;
 	questui.addChild(tinfo);
 	questui.addChild(errinfo);
 	questui.addChild(bexit);
+	console.log(1);
 	refreshRenderer(questui);
 }
 
@@ -1781,6 +1815,7 @@ function startEditor() {
 				var index = TrueMarks.indexOf(editordeck[i]);
 				if (index >= 0) {
 					editormark = index;
+					editormarksprite.setTexture(eicons[editormark]);
 				}
 				editordeck.splice(i, 1);
 			}
@@ -2111,7 +2146,7 @@ function startMatch() {
 	var animCb = function() {
 		var now;
 		if (game.phase == PlayPhase && game.turn == game.player2 && game.player2.ai && (now = Date.now()) >= aiDelay) {
-			aiDelay = now + 100;
+			aiDelay = now + 300;
 			var cmd = game.player2.ai();
 			cmds[cmd[0]](cmd[1]);
 		}

@@ -96,3 +96,4 @@ exports.spirit.info = { pos: [[275, 350], [325, 375], [500, 200], [500, 250], [5
 		I think I will toy with you first... before I swallow your soul.' The shadows lunge toward you in a vicious attack."]};
 exports.bombmaker.info = {pos: [[600,400]], text:["A bomb maker have set up shop nearby. He have put up a sign promising a reward if you can beat him\n and his bombs three times in a row."]}
 exports.blacksummoner.info = {pos:[[500,420]], text:["A swarm of dragons can be seen nearby. Maybe you could manage to tame one of them?"]}
+exports.areas = { forest: ["necromancer", "spirit", "bombmaker", "blacksummoner"] };
