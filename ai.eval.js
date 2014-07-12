@@ -391,7 +391,7 @@ module.exports = function(game) {
 			var cinst = player.hand[i];
 			if (caneventuallyactive(cinst.card.costele, cinst.card.cost, player)){
 				var costless = !cinst.card.cost || !cinst.card.costele;
-				pscore += evalcardinstance(cinst) * (cinst.canactive() ? 0.5 : 0.2) * (costless?1:Math.min(player.quanta[cinst.card.costele], 20)/20);
+				pscore += evalcardinstance(cinst) * (cinst.canactive() ? 0.4 : 0.3) * (costless?1:(20+Math.min(player.quanta[cinst.card.costele], 20))/40);
 			}else {
 				pscore -= cinst.card.active && cinst.card.active.discard == Actives.obsession ? 7 : 4;
 			}
