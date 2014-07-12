@@ -1511,7 +1511,6 @@ function startQuestArea(area) {
 	questui.addChild(bgquest);
 	var tinfo = makeText(50, 26, "");
 	var errinfo = makeText(50, 125, "");
-	console.log(1);
 	function makeQuestButton(quest, stage, text, pos) {
 		var button = makeButton(pos[0], pos[1], user.quest[quest] > stage ? questIcons[1] : questIcons[0]);
 		button.mouseover = function() {
@@ -1522,7 +1521,6 @@ function startQuestArea(area) {
 		}
 		return button;
 	}
-	console.log(1);
 	for (var i = 0;i < Quest.areas[area].length;i++) {
 		var key = Quest.areas[area][i];
 		if ((user.quest[key] !== undefined) && Quest[key]) {
@@ -1533,13 +1531,11 @@ function startQuestArea(area) {
 			}
 		}
 	}
-	console.log(1);
 	var bexit = makeButton(750, 246, buttons.exit);
 	bexit.click = startQuestWindow;
 	questui.addChild(tinfo);
 	questui.addChild(errinfo);
 	questui.addChild(bexit);
-	console.log(1);
 	refreshRenderer(questui);
 }
 

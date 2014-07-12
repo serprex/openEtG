@@ -320,7 +320,7 @@ function evalthing(c) {
 		score += checkpassives(c);
 		if (isCreature){
 			var hp = Math.max(c.truehp(), 0);
-			if (c.status.poison){
+			if (c.status.poison && hp){
 				score -= c.status.poison*ttatk/hp;
 				if (c.status.aflatoxin) score -= 2;
 			}
@@ -349,15 +349,21 @@ function evalcardinstance(cardInst) {
 			}
 		}
 		if (c.type == CreatureEnum){
-			score += c.attack + c.health / 5;
-		}else if (c.type == WeaponEnum){
 			score += c.attack;
+			var hp = Math.max(c.health, 0);
+			if (c.status && c.status.poison && hp){
+				score -= c.status.poison*c.attack/hp;
+				if (c.status.aflatoxin) score -= 2;
+			}
+			score *= hp?(c.status && (c.status.immaterial || c.status.burrowed) ? (c.status.poison ? 1.5 : 2) : Math.sqrt(Math.min(hp, 15))/2):.2;
+		}else if (c.type == WeaponEnum){
+			score += c.attack - (c.owner.weapon ? 2 : 0);
 		}else if (c.type == ShieldEnum){
-			score += c.health;
+			score += c.health*c.health - (c.owner.shield ? 2 : 0);
 		}
 		score += checkpassives(c);
 	}
-	log("\tCard " + c.name + " worth " + score);
+	log("\t:: " + c.name + " worth " + score);
 	return score;
 }
 function caneventuallyactive(element, cost, pl){
