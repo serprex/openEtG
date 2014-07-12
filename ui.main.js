@@ -2742,15 +2742,15 @@ function startMatch() {
 		gameui.addChild(decktext[j]);
 		gameui.addChild(damagetext[j]);
 	}
-	var foeplays = new PIXI.SpriteBatch();
-	gameui.addChild(foeplays);
-	var infobox = new PIXI.Sprite(nopic);
-	gameui.addChild(infobox);
 	var fgfx = new PIXI.Graphics();
 	gameui.addChild(fgfx);
 	var anims = new PIXI.DisplayObjectContainer();
 	gameui.addChild(anims);
 	Effect.register(anims);
+	var foeplays = new PIXI.SpriteBatch();
+	gameui.addChild(foeplays);
+	var infobox = new PIXI.Sprite(nopic);
+	gameui.addChild(infobox);
 	var cardart = new PIXI.Sprite(nopic);
 	cardart.position.set(654, 300);
 	cardart.anchor.set(.5, 0);
