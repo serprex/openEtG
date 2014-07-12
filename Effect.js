@@ -43,22 +43,15 @@ function Text(text, pos){
 	this.position = pos;
 	this.anchor.x = .5;
 }
-function Notification(text, pos) {
-	if (!pos)
-		pos = new PIXI.Point(450, 300);
-	PIXI.Graphics.call(this);
-	var pixitext = new PIXI.Text(text, { fill: 'white', font: "20px Dosis" });
-	pixitext.anchor.set(0.5, 0.5);
-	this.beginFill(0);
-	this.drawRect(-pixitext.width / 2-2, -pixitext.height / 2-2, pixitext.width+4, pixitext.height+4);
-	this.endFill();
-	this.addChild(pixitext);
+function SpriteFade(texture, pos) {
+	PIXI.Sprite.call(this, texture);
+	this.anchor.set(0.5, 0.5);
 	this.step = 0;
-	this.position = pos;
+	this.position = pos || new PIXI.Point(450, 300);
 }
 Death.prototype = Object.create(PIXI.Graphics.prototype);
 Text.prototype = Object.create(PIXI.Sprite.prototype);
-Notification.prototype = Object.create(PIXI.Graphics.prototype);
+SpriteFade.prototype = Object.create(PIXI.Sprite.prototype);
 Death.prototype.next = function(){
 	if (++this.step==10){
 		return true;
@@ -75,10 +68,10 @@ Text.prototype.next = function(){
 	this.position.y -= 3;
 	this.alpha = 1-((1<<this.step)/225);
 }
-Notification.prototype.next = function() {
+SpriteFade.prototype.next = function() {
 	if (++this.step == 80) {
 		return true;
 	}
 	if (this.step > 40) this.alpha = 1 - ((this.step-40) / 50);
 }
-makemake(Death, Text, Notification);
+makemake(Death, Text, SpriteFade);
