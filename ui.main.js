@@ -2884,7 +2884,7 @@ cmds.cast = function(bits) {
 	c.useactive(t);
 }
 function addChatMessage(message) {
-	var scroll = chatBox.scrollTop == chatBox.scrollHeight;
+	var scroll = chatBox.scrollTop == (chatBox.scrollHeight - chatBox.offsetHeight);
 	chatBox.innerHTML += message;
 	if (scroll) chatBox.scrollTop = chatBox.scrollHeight;
 }
