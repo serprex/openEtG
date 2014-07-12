@@ -16,7 +16,9 @@ var ActivesValues = {
 	aflatoxin:5,
 	aggroskele:2,
 	air:1,
-	alphawolf:2,
+	alphawolf:function(c){
+		return c instanceof CardInstance?2:0;
+	},
 	antimatter:12,
 	bblood:7,
 	blackhole:function(c){
@@ -65,7 +67,9 @@ var ActivesValues = {
 	duality:4,
 	earth:1,
 	earthquake:5,
-	empathy:7,
+	empathy:function(c){
+		return c.owner.countcreatures();
+	},
 	enchant:6,
 	endow:4,
 	epidemic:4,
@@ -296,9 +300,7 @@ function evalthing(c) {
 		}else ttatk = 0;
 		if (!isEmpty(c.active)) {
 			for (var key in c.active) {
-				if (key == "play"){
-					// ignoring for now due to Wolf
-				}else if (key == "hit"){
+				if (key == "hit"){
 					if (!delaymix){
 						score += evalactive(c, c.active.hit)*(ttatk?1:.3)*(c.status.adrenaline?2:1);
 					}
