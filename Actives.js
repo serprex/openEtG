@@ -1236,7 +1236,7 @@ swave:function(c,t){
 	}
 },
 tempering:function(c,t){
-	var atk = c.card.upped?4:3;
+	var atk = c.card.upped?5:3;
 	Effect.mkText(atk+"|0", tgtToPos(t));
 	t.atk += atk;
 },
