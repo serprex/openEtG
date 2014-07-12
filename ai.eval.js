@@ -14,7 +14,7 @@ var ActivesValues = {
 	accretion:8,
 	adrenaline:8,
 	aflatoxin:5,
-	aggreskele:2,
+	aggroskele:2,
 	air:1,
 	alphawolf:2,
 	antimatter:12,
@@ -218,6 +218,7 @@ var ActivesValues = {
 	evade40:1,
 	evade50:1,
 	firewall:7,
+	chaos:9,
 	skull:5,
 	slow:6,
 	solar:function(c){
@@ -357,9 +358,11 @@ function evalcardinstance(cardInst) {
 			}
 			score *= hp?(c.status && (c.status.immaterial || c.status.burrowed) ? (c.status.poison ? 1.5 : 2) : Math.sqrt(Math.min(hp, 15))/2):.2;
 		}else if (c.type == WeaponEnum){
-			score += c.attack - (cardInst.owner.weapon ? 2 : 0);
+			score += c.attack;
+			if (cardInst.owner.weapon) score /= 2;
 		}else if (c.type == ShieldEnum){
-			score += c.health*c.health - (cardInst.owner.shield ? 2 : 0);
+			score += c.health*c.health;
+			if (cardInst.owner.shield) score /= 2;
 		}
 		score += checkpassives(c);
 	}
