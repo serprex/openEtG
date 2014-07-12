@@ -76,6 +76,17 @@ exports.bombmaker[2] = { deck: "5f4 5f4 5f4 5f6 5f6 5f6 5f6 5f6 5f6 5f5 5f5 5f8 
 
 exports.blacksummoner = {};
 exports.blacksummoner[0] = { deck: "7t5 7t5 7t5 7t5 7t5 7t5 7t5 7t5 7t5 7t5 7t5 7t5 7t5 7t5 7t5 8pt", name: "The Black Summoner", markpower: 12, cardreward: ["7t5", "7t5"], wintext: "You defeat the Dark Summoner that controlled the dragons. The dragons fly away, but two of them stays, looking at you.\nYou decide to let them join you!" }
+
+exports.icecave = {};
+exports.icecave[0] = { deck: "5i4 5i4 5i4 5i4 5i4 5i4 5i4 5i4 5i4 5i4 5i4 5i4 5i4 5i4 5i8 5i8 5i8 5i8 5i8 5i9 5i9 5id 5id 5id 8pp", name: "Snow Storm", hp: 75, wintext: "You get through the storm and finally reach the mysterious cave \nwhere the weapon is said to reside." };
+exports.icecave[1] = { deck: "5i4 5i4 5i4 5i4 5i4 5i4 5i4 5i4 5ik 5ik 5ik 5ik 5ik 5ik 5ia 5ia 5ia 5ib 5ib 5ib 5ic 5ic 5id 5id 5id 5id 8pp", name: "Cave Guardians??", hp: 75, wintext: "You defeat the creatures that were attacking, and can finally take the rare weapon \nthat was hiding in the cave; a Trident! But before you can grab it, you hear strange sounds behind you..." };
+exports.icecave[2] = { deck: "4sa 4sa 4sa 4sa 4sa 4sc 4sc 4sc 4sc 4sc 4sc 4sc 4sc 4sc 4sc 5i5 5i5 5im 5iq 5iq 5ic 5il 5il 5ii 5ii 5ie 5ie 5ig 5ig 5ig 8pp", name: "Cave Guardians", hp: 75, wintext: "After defeating the Guardians, you quickly get out of the cave, ready to head home as fast as you can..." };
+exports.icecave[3] = { deck: "5i4 5i4 5i4 5i4 5i4 5i4 5i4 5i4 5i4 5i4 5i4 5i4 5i4 5i4 5i4 5ib 5ib 5ib 5ih 5ih 5i9 5i9 5ig 5ig 7gt 7gt 7gt 7gt 8pp", name: "Ice Storm", hp: 75, wintext: "You finally get though the storm and reach the safety of the city. \nYou got the weapon you were looking for, and some other ice souvenirs as well.", cardreward: ["5i8", "5i8", "5ic"] };
+
+exports.inventor = {};
+exports.inventor[0] = {deck: "55k 55k 55k 55k 55k 55k 55k 55k 55k 55k 55k 55k 55k 561 561 561 55m 55m 55m 55m 55m 55m 55s 55s 595 595 595 595 595 595 8pm", name: "Defense Catapults", hp:125, wintext: "You manage to get past the crazy inventor's defense system, and get closer to his big house." };
+exports.inventor[1] = {deck: "5f1 5f1 5f1 5f1 5f1 5f1 5ff 5ff 5ff 5ff 5f7 5f7 5f7 5i4 5i4 5i4 5i4 5i4 5i4 5i4 5ik 5ik 5ik 5ik 5ik 5ik 5ii 5ii 5ii 5ii 8po", name: "Armored Machines", hp:120, wintext: "Defeating the machines that were terrorizing the village, you head inside to face the inventor"};
+exports.inventor[2] = {deck: "5de 5de 5de 5de 5de 5de 5de 5de 5de 5de 5de 5de 5de 5c5 5c5 5c5 5c5 5c5 5c5 5fh 5fh 5fh 5fh 5fh 5fh 5f7 5f7 5f7 5f7 5f7 5f7 8po", name: "Crazy Inventor", hp:125, wintext: "Even with his inventions, you manage to defeat him. 'No, please, spare me, I will never hurt anyone again!' he cries. \nYou agree to let him go, but only if he leaves the area and never comes back. You see him walking away \nand can't help but thinking that you haven't seen the last of him... On your way out of \nthe house, you find some of his inventions and decide that they can be useful!", cardreward:["561", "561","561","5fh","5fh","5ii", "5ii"]};
 //Menu info
 exports.necromancer.info = { pos: [[200, 200], [200, 250], [225, 300]], text: ["A horde of skeletons have been seen nearby, perhaps you should go investigate?", "They seemed to come from the forest, so you go inside.", "Deep inside the forest you find the necromancer responsible for filling the lands with undead!"] };
 exports.spirit.info = { pos: [[275, 350], [325, 375], [500, 200], [500, 250], [525, 275]], text:["You pursue the energy trail of the spirit to a dark cavern.\n\At first you think it has eluded you, but as you turn to leave, its dark shadowy form rises in front of you",
@@ -95,5 +106,15 @@ exports.spirit.info = { pos: [[275, 350], [325, 375], [500, 200], [500, 250], [5
 		'You must think yourself dreaming... Well this is the nightmare realm, and I am the one in control.\n\
 		I think I will toy with you first... before I swallow your soul.' The shadows lunge toward you in a vicious attack."]};
 exports.bombmaker.info = {pos: [[600,400]], text:["A bomb maker have set up shop nearby. He have put up a sign promising a reward if you can beat him\n and his bombs three times in a row."]}
-exports.blacksummoner.info = {pos:[[500,420]], text:["A swarm of dragons can be seen nearby. Maybe you could manage to tame one of them?"]}
-exports.areas = { forest: ["necromancer", "spirit"], city:["bombmaker"], desert:["blacksummoner"] };
+exports.blacksummoner.info = { pos: [[500, 420]], text: ["A swarm of dragons can be seen nearby. Maybe you could manage to tame one of them?"] }
+exports.icecave.info = { pos: [[300, 350], [260, 250], [220, 250], [200,350]], text: ["You heard a story about a rare weapon hidden in a cave up north. You decide to look for the weapon. \nOn the way there you are caught in the middle of a big snow storm.",
+	"You enter the cave, it is dark and icy. Suddenly you meet some creatures there, which promptly attacks you. \nYou seem to glimpse the rare weapon right behind them though...",
+	"You look behind you and see a range of different creatures, which you can swear were not here before. \n'We are the Guardians of this Cave, and we will not allow you to take our treasure!'",
+	"The storm you got past while heading here is still raging, and it seems to have gotten a lot worse."]
+}
+exports.inventor.info = {
+	pos: [[500, 300], [510, 360], [505, 410]], text: ["You come across a small village that claims they are being regularly attacked by machines coming from a crazy inventor \nliving nearby. You decide to put a stop to this crazy man's evil endeavors. On your way there you suddenly \nsee a big Armagio landing in front of you. 'Catapults!' you think, and get ready to fight.",
+	"In front of the house some machines seems to stand guards. \nThese must be the machines that were attacking the village!",
+	"'All I wanted was to test the offensive capabilities of my machines. \nBut now when you are here, I can test this on you!' says the crazy inventor and laughs."]
+}
+exports.areas = { forest: ["necromancer", "spirit", "inventor"], city:["bombmaker"], desert:["blacksummoner"], ice:["icecave"] };
