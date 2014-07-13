@@ -1008,11 +1008,11 @@ function mkAi(level) {
 // Asset Loading
 var nopic, goldtex;
 var backgrounds = ["assets/bg_default.png", "assets/bg_lobby.png", "assets/bg_shop.png", "assets/bg_quest.png", "assets/bg_game.png", "assets/bg_questmap.png"];
-var questIcons = [], eicons = [], ricons = [], cardBacks = [], cardBorders = [], boosters = [], popups = [], ticons = [];
+var questIcons = [], eicons = [], ricons = [], cardBacks = [], cardBorders = [], boosters = [], popups = [], sicons = [], ticons = [];
 var buttons = {};
 var mapareas = {};
 var preLoader = new PIXI.AssetLoader(["assets/null.png", "assets/gold.png", "assets/questIcons.png", "assets/esheet.png", "assets/raritysheet.png", "assets/backsheet.png",
-	"assets/cardborders.png", "assets/boosters.png", "assets/popup_booster.png", "assets/typesheet.png", "assets/buttons.png"].concat(backgrounds));
+	"assets/cardborders.png", "assets/boosters.png", "assets/popup_booster.png", "assets/statussheet.png", "assets/typesheet.png", "assets/buttons.png"].concat(backgrounds));
 var loadingBarProgress = 0, loadingBarGraphic = new PIXI.Graphics();
 preLoader.onProgress = function() {
 	loadingBarGraphic.clear();
@@ -1041,6 +1041,8 @@ preLoader.onComplete = function() {
 	var tex = PIXI.Texture.fromFrame("assets/boosters.png");
 	for (var i = 0;i < 4;i++) boosters.push(new PIXI.Texture(tex, new PIXI.Rectangle(i * 100, 0, 100, 150)));
 	popups.push(PIXI.Texture.fromFrame("assets/popup_booster.png"));
+	var tex = PIXI.Texture.fromFrame("assets/statussheet.png");
+	for (var i = 0;i < 6;i++) sicons.push(new PIXI.Texture(tex, new PIXI.Rectangle(13 * i, 0, 13, 13)));
 	var tex = PIXI.Texture.fromFrame("assets/typesheet.png");
 	for (var i = 0;i < 6;i++) ticons.push(new PIXI.Texture(tex, new PIXI.Rectangle(25 * i, 0, 25, 25)));
 	var buttonnames = ["logout", "arenainfo", "arenat10", "arenaai", "commoner",
@@ -2136,11 +2138,6 @@ function startMatch() {
 			fgfx.drawRect(x - wid / 2 + 22, y + hei / 2 - 10, 12, 12);
 			fgfx.endFill();
 		}
-		if (obj.status.burrowed) {
-			fgfx.beginFill(elecols[Earth], .8);
-			fgfx.drawRect(x - wid / 2 + 30, y + hei / 2 - 10, 12, 12);
-			fgfx.endFill();
-		}
 		if (obj.status.poison) {
 			fgfx.beginFill(obj.aflatoxin ? elecols[Darkness] : obj.status.poison > 0 ? elecols[Death] : elecols[Water], .8);
 			fgfx.drawRect(x - wid / 2 + 38, y + hei / 2 - 10, 12, 12);
@@ -2354,11 +2351,11 @@ function startMatch() {
 			if (wp && !(j == 1 && cloakgfx.visible)) {
 				weapsprite[j].visible = true;
 				var child = weapsprite[j].getChildAt(0);
+				child.setTexture(getTextImage(wp.trueatk() + "", mkFont(12, wp.card.upped ? "black" : "white"), maybeLighten(wp.card)));
+				child.visible = true;
+				var child = weapsprite[j].getChildAt(1);
 				child.setTexture(getTextImage(wp.activetext(), mkFont(12, wp.card.upped ? "black" : "white")));
 				child.visible = true;
-				var child2 = weapsprite[j].getChildAt(1);
-				child2.setTexture(getTextImage(wp.trueatk() + "", mkFont(12, wp.card.upped ? "black" : "white"), maybeLighten(wp.card)));
-				child2.visible = true;
 				weapsprite[j].setTexture(getWeaponShieldImage(wp.card.code));
 				drawStatus(wp, weapsprite[j]);
 			} else weapsprite[j].visible = false;
@@ -2367,11 +2364,11 @@ function startMatch() {
 				shiesprite[j].visible = true;
 				var dr = sh.truedr();
 				var child = shiesprite[j].getChildAt(0);
+				child.setTexture(getTextImage(sh.status.charges ? "x" + sh.status.charges: "" + sh.truedr() + "", mkFont(12, sh.card.upped ? "black" : "white"), maybeLighten(sh.card)));
+				child.visible = true;
+				var child = shiesprite[j].getChildAt(1);
 				child.setTexture(getTextImage((sh.active.shield ? " " + sh.active.shield.activename : "") + (sh.active.buff ? " " + sh.active.buff.activename : "") + (sh.active.cast ? casttext(sh.cast, sh.castele) + sh.active.cast.activename : ""), mkFont(12, sh.card.upped ? "black" : "white")));
 				child.visible = true;
-				var child2 = shiesprite[j].getChildAt(1);
-				child2.setTexture(getTextImage(sh.status.charges ? "x" + sh.status.charges: "" + sh.truedr() + "", mkFont(12, sh.card.upped ? "black" : "white"), maybeLighten(sh.card)));
-				child2.visible = true;
 				shiesprite[j].alpha = sh.status.immaterial ? .7 : 1;
 				shiesprite[j].setTexture(getWeaponShieldImage(sh.card.code));
 			} else shiesprite[j].visible = false;
@@ -2592,122 +2589,52 @@ function startMatch() {
 				})(i);
 				gameui.addChild(handsprite[j][i]);
 			}
-			for (var i = 0;i < 23;i++) {
-				creasprite[j][i] = new PIXI.Sprite(nopic);
+			function makeInst(insts, i, pos, scale){
+				if (scale === undefined) scale = 1;
+				var spr = new PIXI.Sprite(nopic);
 				var stattext = new PIXI.Sprite(nopic);
-				stattext.position.set(-31, -32);
+				stattext.position.set(-31 * scale, -32 * scale);
+				spr.addChild(stattext);
 				var activetext = new PIXI.Sprite(nopic);
-				activetext.position.set(-31, -42);
-				creasprite[j][i].addChild(stattext);
-				creasprite[j][i].addChild(activetext);
-				creasprite[j][i].anchor.set(.5, .5);
-				creasprite[j][i].position = creaturePos(j, i);
-				(function(_i) {
-					creasprite[j][i].click = function() {
-						if (game.phase != PlayPhase) return;
-						var crea = game.players[_j].creatures[_i];
-						if (!crea) return;
-						if (targetingMode && targetingMode(crea)) {
+				activetext.position.set(-31 * scale, -42 * scale);
+				spr.addChild(activetext);
+				spr.anchor.set(.5, .5);
+				spr.position = pos;
+				spr.click = function() {
+					if (game.phase != PlayPhase) return;
+					var inst = insts ? insts[i] : game.players[_j][i];
+					if (!inst) return;
+					if (targetingMode && targetingMode(inst)) {
+						targetingMode = undefined;
+						targetingModeCb(inst);
+					} else if (_j == 0 && !targetingMode && inst.canactive()) {
+						getTarget(inst, inst.active.cast, function(tgt) {
 							targetingMode = undefined;
-							targetingModeCb(crea);
-						} else if (_j == 0 && !targetingMode && crea.canactive()) {
-							getTarget(crea, crea.active.cast, function(tgt) {
-								targetingMode = undefined;
-								socket.emit("cast", tgtToBits(crea) | tgtToBits(tgt) << 9);
-								crea.useactive(tgt);
-							});
-						}
+							socket.emit("cast", tgtToBits(inst) | tgtToBits(tgt) << 9);
+							inst.useactive(tgt);
+						});
 					}
-				})(i);
-				gameui.addChild(creasprite[j][i]);
+				}
+				return spr;
+			}
+			for (var i = 0;i < 23;i++) {
+				gameui.addChild(creasprite[j][i] = makeInst(game.players[j].creatures, i, creaturePos(j, i)));
 			}
 			for (var i = 0;i < 16;i++) {
-				permsprite[j][i] = new PIXI.Sprite(nopic);
-				var permtext = new PIXI.Sprite(nopic);
-				permtext.position.set(-31, -32);
-				var activetext = new PIXI.Sprite(nopic);
-				activetext.position.set(-31, -42);
-				permsprite[j][i].addChild(permtext);
-				permsprite[j][i].addChild(activetext);
-				permsprite[j][i].anchor.set(.5, .5);
-				permsprite[j][i].position = permanentPos(j, i);
-				(function(_i) {
-					permsprite[j][i].click = function() {
-						if (game.phase != PlayPhase) return;
-						var perm = game.players[_j].permanents[_i];
-						if (!perm) return;
-						if (targetingMode && targetingMode(perm)) {
-							targetingMode = undefined;
-							targetingModeCb(perm);
-						} else if (_j == 0 && !targetingMode && perm.canactive()) {
-							getTarget(perm, perm.active.cast, function(tgt) {
-								targetingMode = undefined;
-								socket.emit("cast", tgtToBits(perm) | tgtToBits(tgt) << 9);
-								perm.useactive(tgt);
-							});
-						}
-					}
-				})(i);
-				gameui.addChild(permsprite[j][i]);
+				gameui.addChild(permsprite[j][i] = makeInst(game.players[j].permanents, i, permanentPos(j, i)));
 			}
 			setInteractive.apply(null, handsprite[j]);
 			setInteractive.apply(null, creasprite[j]);
 			setInteractive.apply(null, permsprite[j]);
-			weapsprite[j].anchor.set(.5, .5);
-			shiesprite[j].anchor.set(.5, .5);
 			marksprite[j].anchor.set(.5, .5);
-			weapsprite[j].position.set(666, 512);
-			shiesprite[j].position.set(710, 532);
 			marksprite[j].position.set(750, 470);
-			var weaptext = new PIXI.Sprite(nopic);
-			weaptext.position.set(-40, -51);
-			var atktext = new PIXI.Sprite(nopic);
-			atktext.position.set(-39, -39);
-			weapsprite[j].addChild(weaptext);
-			weapsprite[j].addChild(atktext);
-			var shietext = new PIXI.Sprite(nopic);
-			shietext.position.set(-40, -51);
-			var deftext = new PIXI.Sprite(nopic);
-			deftext.position.set(-39, -39);
-			shiesprite[j].addChild(shietext);
-			shiesprite[j].addChild(deftext);
-			weapsprite[j].click = function() {
-				if (game.phase != PlayPhase) return;
-				var weap = game.players[_j].weapon;
-				if (!weap) return
-				if (targetingMode && targetingMode(weap)) {
-					targetingMode = undefined;
-					targetingModeCb(weap);
-				} else if (_j == 0 && !targetingMode && weap.canactive()) {
-					getTarget(weap, weap.active.cast, function(tgt) {
-						targetingMode = undefined;
-						socket.emit("cast", tgtToBits(weap) | tgtToBits(tgt) << 9);
-						weap.useactive(tgt);
-					});
-				}
-			}
-			shiesprite[j].click = function() {
-				if (game.phase != PlayPhase) return;
-				var shie = game.players[_j].shield;
-				if (!shie) return
-				if (targetingMode && targetingMode(shie)) {
-					targetingMode = undefined;
-					targetingModeCb(shie);
-				} else if (_j == 0 && !targetingMode && shie.canactive()) {
-					getTarget(shie, shie.active.cast, function(tgt) {
-						targetingMode = undefined;
-						socket.emit("cast", tgtToBits(shie) | tgtToBits(tgt) << 9);
-						shie.useactive(tgt);
-					});
-				}
-			}
+			gameui.addChild(weapsprite[j] = makeInst(null, "weapon", new PIXI.Point(666, 512), 5/4));
+			gameui.addChild(shiesprite[j] = makeInst(null, "shield", new PIXI.Point(710, 532), 5/4));
 			if (j) {
 				reflectPos(weapsprite[j]);
 				reflectPos(shiesprite[j]);
 				reflectPos(marksprite[j]);
 			}
-			gameui.addChild(weapsprite[j]);
-			gameui.addChild(shiesprite[j]);
 			gameui.addChild(marksprite[j]);
 			hptext[j].anchor.set(.5, .5);
 			poisontext[j].anchor.set(.5, .5);
