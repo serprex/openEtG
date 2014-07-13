@@ -1,0 +1,46 @@
+<script src="pixi.js"></script>
+<script src="etg.js"></script>
+<script src="etgify.js"></script>
+
+<input id="deckcode" type="text" placeholder="Deck" style="width:890px"/><br>
+<input id="legality" type="text" readonly style="width:300px" />
+<input id="test" type="submit" value="Test Deck" onclick="testDeck()" />
+<select id="rulesets">
+    <option value="commoner">Commoner's Duel</option>
+</select>
+<script>
+    var deckcode = document.getElementById("deckcode");
+    var legality = document.getElementById("legality");
+    var rulesets = document.getElementById("rulesets");
+    var Actives = require("./Actives");
+    var Cards, CardCodes, Targeting;
+    require("./etg.client").loadcards(function(cards, cardCodes, targeting) {
+        Cards = cards;
+        CardCodes = cardCodes;
+        Targeting = targeting;
+    });
+    var verifiers = {};
+    verifiers["commoner"] = function(deck) {
+        for (var i = 0;i < deck.length;i++) {
+            var card = deck[i];
+            if (card.rarity > 1)
+                return card.name + " is too high in rarity";
+        }
+        return "Legal";
+    }
+    function testDeck() {
+        var code = deckcode.value.split(" ");
+        var deck = [];
+        var markele;
+        for (var i = 0;i < code.length;i++) {
+            var maybeMark = ~TrueMarks.indexOf(code[i]);
+            if (maybeMark) markele = maybeMark;
+            else if (CardCodes[code[i]]) deck.push(CardCodes[code[i]]);
+            else {
+                legality.value = "Not a real deck code."
+                return;
+            }
+        }
+        legality.value = verifiers[rulesets.options[rulesets.selectedIndex].value](deck, markele);
+    }
+</script>

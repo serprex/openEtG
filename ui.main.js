@@ -703,13 +703,13 @@ function listify(maybeArray) {
 function victoryScreen() {
 	var victoryui = new PIXI.DisplayObjectContainer();
 	victoryui.interactive = true;
-
+	var winner = game.winner == game.player1;
 	//lobby background
 	var bgvictory = new PIXI.Sprite(backgrounds[0]);
 	victoryui.addChild(bgvictory);
 
 	victoryui.addChild(makeText(10, 290, "Plies: " + game.ply + "\nTime: " + ((Date.now()-game.startTime)/1000).toFixed(1) + " seconds"));
-	if (game.winner == game.player1){
+	if (winner){
 		var victoryText = game.quest ? game.wintext : "You won!";
 		var tinfo = makeText(450, game.cardreward ? 130 : 250, victoryText);
 		tinfo.anchor.x = 0.5;
@@ -719,13 +719,15 @@ function victoryScreen() {
 
 	var bexit = makeButton(412, 430, buttons.exit);
 	bexit.click = function() {
-		if (game.cardreward) {
-			userEmit("add", { add: etg.encodedeck(game.cardreward)});
-			Array.prototype.push.apply(user.pool, game.cardreward);
-		}
-		if (game.goldreward) {
-			userEmit("addgold", { g: game.goldreward });
-			user.gold += game.goldreward;
+		if (winner) {
+			if (game.cardreward) {
+				userEmit("add", { add: etg.encodedeck(game.cardreward) });
+				Array.prototype.push.apply(user.pool, game.cardreward);
+			}
+			if (game.goldreward) {
+				userEmit("addgold", { g: game.goldreward });
+				user.gold += game.goldreward;
+			}
 		}
 		if (game.quest)
 			startQuestArea(game.area);
@@ -734,13 +736,13 @@ function victoryScreen() {
 		game = undefined;
 	}
 	victoryui.addChild(bexit);
-	if (game.goldreward) {
+	if (game.goldreward && winner) {
 		var goldshown = (game.goldreward || 0) - (game.cost || 0);
 		tgold = makeText(340, 550, "Gold won: $" + goldshown);
 		victoryui.addChild(tgold);
 	}
 	var rewards = [];
-	if (game.cardreward) {
+	if (game.cardreward && winner) {
 		game.cardreward = listify(game.cardreward);
 		for (var i = 0;i < game.cardreward.length;i++) {
 			var cardArt = new PIXI.Sprite(nopic);
@@ -752,7 +754,7 @@ function victoryScreen() {
 	}
 
 	refreshRenderer(victoryui, function(){
-		if (game.cardreward){
+		if (game.cardreward && winner){
 			for(var i=0; i<game.cardreward.length; i++){
 				rewards[i].setTexture(getArt(game.cardreward[i]));
 			}
