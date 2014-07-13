@@ -286,57 +286,56 @@ function truetrueatk(c) {
 }
 
 function evalthing(c) {
+	if (!c) return 0;
 	var score = 0;
-	if (c) {
-		var isCreature = c instanceof Creature;
-		var delaymix = Math.max((c.status.frozen||0), (c.status.delayed||0));
-		var ttatk;
-		if (c instanceof Weapon || isCreature) {
-			ttatk = truetrueatk(c);
-			score += ttatk*(delaymix?1-Math.min(delaymix/5, .6):1);
-			if (c instanceof Weapon) {
-				score += 3;
-			}
-		}else ttatk = 0;
-		if (!isEmpty(c.active)) {
-			for (var key in c.active) {
-				if (key == "hit"){
-					if (!delaymix){
-						score += evalactive(c, c.active.hit)*(ttatk?1:.3)*(c.status.adrenaline?2:1);
-					}
-				}else if(key == "auto"){
-					if (!c.status.frozen){
-						score += evalactive(c, c.active.auto)*(c.status.frozen?.2:1)*(c.status.adrenaline?2:1);
-					}
-				}else if(key == "shield" && isCreature){
-					if (!delaymix){
-						score += evalactive(c, c.active.shield)*(c.owner.gpull == c?1:.2);
-					}
-				}else if (key == "cast"){
-					if (!delaymix){
-						score += evalactive(c, c.active[key]) - (c.usedactive?.02:0);
-					}
-				}else score += evalactive(c, c.active[key]);
-			}
-			score -= c.active.cast?c.cast/2:0;
+	var isCreature = c instanceof Creature;
+	var delaymix = Math.max((c.status.frozen||0), (c.status.delayed||0));
+	var ttatk;
+	if (c instanceof Weapon || isCreature) {
+		ttatk = truetrueatk(c);
+		score += ttatk*(delaymix?1-Math.min(delaymix/5, .6):1);
+		if (c instanceof Weapon) {
+			score += 3;
 		}
-		score += checkpassives(c);
-		if (isCreature){
-			var hp = Math.max(c.truehp(), 0);
-			if (c.status.poison && hp){
-				score -= c.status.poison*ttatk/hp;
-				if (c.status.aflatoxin) score -= 2;
-			}
-			score *= hp?(c.status.immaterial || c.status.burrowed ? (c.status.poison ? 1.5 : 2) : Math.sqrt(Math.min(hp, 15))/2):.2;
-		}else if(c.status.immaterial){
-			score *= 1.5;
+	}else ttatk = 0;
+	if (!isEmpty(c.active)) {
+		for (var key in c.active) {
+			if (key == "hit"){
+				if (!delaymix){
+					score += evalactive(c, c.active.hit)*(ttatk?1:.3)*(c.status.adrenaline?2:1);
+				}
+			}else if(key == "auto"){
+				if (!c.status.frozen){
+					score += evalactive(c, c.active.auto)*(c.status.frozen?.2:1)*(c.status.adrenaline?2:1);
+				}
+			}else if(key == "shield" && isCreature){
+				if (!delaymix){
+					score += evalactive(c, c.active.shield)*(c.owner.gpull == c?1:.2);
+				}
+			}else if (key == "cast"){
+				if (!delaymix){
+					score += evalactive(c, c.active[key]) - (c.usedactive?.02:0);
+				}
+			}else score += evalactive(c, c.active[key]);
 		}
-		if (delaymix){
-			var delayed = Math.min(delaymix*(c.status.adrenaline?.5:1), 12);
-			score *= 1-(12*delayed/(12+delayed))/16;
-		}
-		log("\t" + c.card.name + " worth " + score);
+		score -= c.active.cast?c.cast/2:0;
 	}
+	score += checkpassives(c);
+	if (isCreature){
+		var hp = Math.max(c.truehp(), 0);
+		if (c.status.poison && hp){
+			score -= c.status.poison*ttatk/hp;
+			if (c.status.aflatoxin) score -= 2;
+		}
+		score *= hp?(c.status.immaterial || c.status.burrowed ? (c.status.poison ? 1.5 : 2) : Math.sqrt(Math.min(hp, 15))/2):.2;
+	}else if(c.status.immaterial){
+		score *= 1.5;
+	}
+	if (delaymix){
+		var delayed = Math.min(delaymix*(c.status.adrenaline?.5:1), 12);
+		score *= 1-(12*delayed/(12+delayed))/16;
+	}
+	log("\t" + c.card.name + " worth " + score);
 	return score;
 }
 
@@ -414,7 +413,7 @@ module.exports = function(game) {
 		if (player.isCloaked()) pscore += 4;
 		if (player.status.poison) pscore -= player.status.poison;
 		if (player.precognition) pscore += 1;
-		if (player.silence) pscore -= 3;
+		if (player.silence) pscore -= player.hand.length+1;
 		if (player.flatline) pscore -= 1;
 		if (player.neuro) pscore -= 5;
 		if (player.hand.length == 8) pscore -= 4;
