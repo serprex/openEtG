@@ -409,7 +409,8 @@ module.exports = function(game) {
 		if (player.gpull) {
 			pscore += player.gpull.truehp()/4 + (player.gpull.passives.voodoo ? 10 : 0) - player.gpull.trueatk();
 		}
-		pscore += Math.sqrt(player.hp);
+		pscore += Math.sqrt(player.hp)*4;
+		log("\thp=" + player.hp);
 		if (player.isCloaked()) pscore += 4;
 		if (player.status.poison) pscore -= player.status.poison;
 		if (player.precognition) pscore += 1;

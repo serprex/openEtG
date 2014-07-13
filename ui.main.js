@@ -713,6 +713,7 @@ function victoryScreen() {
 		var victoryText = game.quest ? game.wintext : "You won!";
 		var tinfo = makeText(450, game.cardreward ? 130 : 250, victoryText);
 		tinfo.anchor.x = 0.5;
+		tinfo.anchor.y = 1;
 		victoryui.addChild(tinfo);
 	}
 
@@ -727,7 +728,7 @@ function victoryScreen() {
 			user.gold += game.goldreward;
 		}
 		if (game.quest)
-			startQuestWindow();
+			startQuestArea(game.area);
 		else
 			startMenu();
 		game = undefined;
@@ -855,7 +856,7 @@ function mkMage() {
 	game.cost = 5;
 	game.level = 1;
 }
-function mkQuestAi(questname, stage) {
+function mkQuestAi(questname, stage, area) {
 	var quest = Quest[questname][stage];
 	if (!quest)
 		return;
@@ -882,6 +883,7 @@ function mkQuestAi(questname, stage) {
 	game.quest = [questname, stage];
 	game.wintext = quest.wintext || "";
 	game.autonext = quest.autonext || false;
+	game.area = area;
 	if ((user.quest[questname] <= stage || !(questname in user.quest))) game.cardreward = quest.cardreward;
 }
 function mkAi(level) {
@@ -1502,6 +1504,8 @@ function startQuestArea(area) {
 	startQuest("necromancer");
 	startQuest("bombmaker");
 	startQuest("blacksummoner");
+	startQuest("icecave");
+	startQuest("inventor");
 	var questui = new PIXI.DisplayObjectContainer();
 	questui.interactive = true;
 	var bgquest = new PIXI.Sprite(backgrounds[3]);
@@ -1519,7 +1523,7 @@ function startQuestArea(area) {
 			tinfo.setText(text);
 		}
 		button.click = function() {
-			errinfo.setText(mkQuestAi(quest, stage) || "");
+			errinfo.setText(mkQuestAi(quest, stage, area) || "");
 		}
 		return button;
 	}
@@ -2441,7 +2445,7 @@ function startMatch() {
 					}
 				}
 				if (game.winner == game.player1 && game.quest && game.autonext) {
-					mkQuestAi(game.quest[0], game.quest[1] + 1);
+					mkQuestAi(game.quest[0], game.quest[1] + 1, game.area);
 				}else{
 					victoryScreen();
 				}
@@ -2806,6 +2810,11 @@ cmds.cast = function(bits) {
 	}
 	c.useactive(t);
 }
+function addChatMessage(message) {
+	var scroll = chatBox.scrollTop == (chatBox.scrollHeight - chatBox.offsetHeight);
+	chatBox.innerHTML += message;
+	if (scroll) chatBox.scrollTop = chatBox.scrollHeight;
+}
 var socket = io(location.hostname + ":13602");
 socket.on("pvpgive", initGame);
 socket.on("tradegive", initTrade);
@@ -2864,13 +2873,12 @@ socket.on("chat", function(data) {
 	if (s < 10) s = "0"+s;
 	var msg = h + ":" + m + ":" + s + " " + (data.u ? "<b>" + sanitizeHtml(data.u) + ":</b> " : "") + sanitizeHtml(data.msg);
 	var color = data.mode == "pm" ? "blue" : data.mode == "info" ? "red" : "black";
-	chatBox.innerHTML += data.mode == "guest" ? "<font color=black><i>" + msg + "</i></font><br>" : "<font color=" + color + ">" + msg + "</font><br>";
+	addChatMessage(data.mode == "guest" ? "<font color=black><i>" + msg + "</i></font><br>" : "<font color=" + color + ">" + msg + "</font><br>");
 	if (Notification && user && ~data.msg.indexOf(user.name) && !document.hasFocus()){
 		Notification.requestPermission();
 		var n = new Notification(data.u, {body: data.msg});
 		n.onclick = window.focus;
 	}
-	chatBox.scrollTop = chatBox.scrollHeight;
 });
 socket.on("mulligan", function(data) {
 	if (data === true) {
@@ -2900,18 +2908,15 @@ socket.on("codecard", function(data) {
 	startRewardWindow(data);
 });
 socket.on("codereject", function(data) {
-	chatBox.innerHTML += "<font color=red>" + data + "</font><br>";
-	chatBox.scrollTop = chatBox.scrollHeight;
+	addChatMessage("<font color=red>" + data + "</font><br>");
 });
 socket.on("codegold", function(data) {
 	user.gold += data;
-	chatBox.innerHTML += "<font color=red>" + data + " Gold added!</font><br>";
-	chatBox.scrollTop = chatBox.scrollHeight;
+	addChatMessage("<font color=red>" + data + " Gold added!</font><br>");
 });
 socket.on("codedone", function(data) {
 	user.pool.push(data.card);
-	chatBox.innerHTML += "<font color=red>Card Added!</font><br>"
-	chatBox.scrollTop = chatBox.scrollHeight;
+	addChatMessage("<font color=red>Card Added!</font><br>");
 	startMenu();
 })
 function maybeSendChat(e) {
