@@ -2584,7 +2584,7 @@ function startMatch() {
 						var icon = new PIXI.Sprite(sicons[k]);
 						icon.alpha = .8;
 						icon.anchor.y = 1;
-						icon.position.set(-34 * scale + k * 12, 44 * scale);
+						icon.position.set(-34 * scale + k * 8, 30 * scale);
 						statuses.addChild(icon);
 					}
 					spr.addChild(statuses);
