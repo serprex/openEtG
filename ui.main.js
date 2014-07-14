@@ -497,7 +497,7 @@ function initLibrary(pool){
 	var cardArt = new PIXI.Sprite(nopic);
 	cardArt.position.set(734, 8);
 	editorui.addChild(cardArt);
-	refreshRenderer(function(){
+	refreshRenderer(editorui, function(){
 		cardsel.next(cardpool, cardminus);
 		if (cardartcode) {
 			cardArt.setTexture(getArt(cardartcode));

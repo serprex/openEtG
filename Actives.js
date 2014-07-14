@@ -359,12 +359,13 @@ earthquake:function(c,t){
 	salvageScan(c.owner, t);
 },
 empathy:function(c,t){
-	var healsum = 0;
-	for(var i=0; i<23; i++){
-		if (c.owner.creatures[i])healsum++;
-	}
+	var healsum = c.owner.countcreatures();
 	Effect.mkText("+"+healsum, tgtToPos(c));
 	c.owner.dmg(-healsum);
+	if (!c.owner.spend(Life, Math.floor(healsum/8))){
+		c.owner.quanta[Life] = 0;
+		c.die();
+	}
 },
 enchant:function(c,t){
 	Effect.mkText("Enchant", tgtToPos(t));
