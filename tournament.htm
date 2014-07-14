@@ -46,12 +46,14 @@
         return "Legal";
     }
     verifiers["dodrio"] = function(deck) {
+        var bannedCards = ["4vj", "4vl", "55v", "593", "5f9", "5ik", "5ig"];
         var elementList = [];
         var eleCount;
         var rareElement;
         for (var i = 0;i < deck.length;i++) {
             var card = deck[i];
             if (card.upped) return "Your deck contains at least one upgraded card";
+            if (~bannedCards.indexOf(card.code)) return card.name + " is banned";
             var ele = card.element;
             if (ele) {
                 if (!elementList[ele]) {
