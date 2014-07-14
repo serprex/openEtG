@@ -1042,7 +1042,7 @@ preLoader.onComplete = function() {
 	for (var i = 0;i < 4;i++) boosters.push(new PIXI.Texture(tex, new PIXI.Rectangle(i * 100, 0, 100, 150)));
 	popups.push(PIXI.Texture.fromFrame("assets/popup_booster.png"));
 	var tex = PIXI.Texture.fromFrame("assets/statussheet.png");
-	for (var i = 0;i < 6;i++) sicons.push(new PIXI.Texture(tex, new PIXI.Rectangle(13 * i, 0, 13, 13)));
+	for (var i = 0;i < 7;i++) sicons.push(new PIXI.Texture(tex, new PIXI.Rectangle(13 * i, 0, 13, 13)));
 	var tex = PIXI.Texture.fromFrame("assets/typesheet.png");
 	for (var i = 0;i < 6;i++) ticons.push(new PIXI.Texture(tex, new PIXI.Rectangle(25 * i, 0, 25, 25)));
 	var buttonnames = ["logout", "arenainfo", "arenat10", "arenaai", "commoner",
@@ -2117,33 +2117,13 @@ function startMatch() {
 			fgfx.drawRect(x - wid / 2 - 2, y - hei / 2 - 2, wid + 4, hei + 4);
 			fgfx.endFill();
 		}
-		fgfx.lineStyle(1, 0);
-		if (obj.passives.airborne || obj.passives.ranged) {
-			fgfx.beginFill(elecols[Air], .8);
-			fgfx.drawRect(x - wid / 2 - 2, y + hei / 2 - 10, 12, 12);
-			fgfx.endFill();
-		}
-		if (obj.status.adrenaline) {
-			fgfx.beginFill(elecols[Life], .8);
-			fgfx.drawRect(x - wid / 2 + 6, y + hei / 2 - 10, 12, 12);
-			fgfx.endFill();
-		}
-		if (obj.status.momentum) {
-			fgfx.beginFill(elecols[Gravity], .8);
-			fgfx.drawRect(x - wid / 2 + 14, y + hei / 2 - 10, 12, 12);
-			fgfx.endFill();
-		}
-		if (obj.status.psion) {
-			fgfx.beginFill(elecols[Aether], .8);
-			fgfx.drawRect(x - wid / 2 + 22, y + hei / 2 - 10, 12, 12);
-			fgfx.endFill();
-		}
-		if (obj.status.poison) {
-			fgfx.beginFill(obj.aflatoxin ? elecols[Darkness] : obj.status.poison > 0 ? elecols[Death] : elecols[Water], .8);
-			fgfx.drawRect(x - wid / 2 + 38, y + hei / 2 - 10, 12, 12);
-			fgfx.endFill();
-		}
-		fgfx.lineStyle(0, 0, 0);
+		spr.getChildAt(2).getChildAt(0).visible = !!obj.status.psion;
+		spr.getChildAt(2).getChildAt(1).visible = !!obj.status.aflatoxin;
+		spr.getChildAt(2).getChildAt(2).visible = obj.status.poison > 0;
+		spr.getChildAt(2).getChildAt(3).visible = !!(obj.passives.airborne || obj.passives.ranged);
+		spr.getChildAt(2).getChildAt(4).visible = !!obj.status.momentum;
+		spr.getChildAt(2).getChildAt(5).visible = !!obj.status.adrenaline;
+		spr.getChildAt(2).getChildAt(6).visible = obj.status.poison < 0;
 		spr.alpha = obj.status.immaterial || obj.status.burrowed ? .7 : 1;
 	}
 	var aiDelay = 0;
@@ -2589,7 +2569,7 @@ function startMatch() {
 				})(i);
 				gameui.addChild(handsprite[j][i]);
 			}
-			function makeInst(insts, i, pos, scale){
+			function makeInst(makestatuses, insts, i, pos, scale){
 				if (scale === undefined) scale = 1;
 				var spr = new PIXI.Sprite(nopic);
 				var stattext = new PIXI.Sprite(nopic);
@@ -2598,6 +2578,17 @@ function startMatch() {
 				var activetext = new PIXI.Sprite(nopic);
 				activetext.position.set(-31 * scale, -42 * scale);
 				spr.addChild(activetext);
+				if (makestatuses){
+					var statuses = new PIXI.SpriteBatch();
+					for (var k=0; k<7; k++){
+						var icon = new PIXI.Sprite(sicons[k]);
+						icon.alpha = .8;
+						icon.anchor.y = 1;
+						icon.position.set(-34 * scale + k * 12, 44 * scale);
+						statuses.addChild(icon);
+					}
+					spr.addChild(statuses);
+				}
 				spr.anchor.set(.5, .5);
 				spr.position = pos;
 				spr.click = function() {
@@ -2618,18 +2609,18 @@ function startMatch() {
 				return spr;
 			}
 			for (var i = 0;i < 23;i++) {
-				gameui.addChild(creasprite[j][i] = makeInst(game.players[j].creatures, i, creaturePos(j, i)));
+				gameui.addChild(creasprite[j][i] = makeInst(true, game.players[j].creatures, i, creaturePos(j, i)));
 			}
 			for (var i = 0;i < 16;i++) {
-				gameui.addChild(permsprite[j][i] = makeInst(game.players[j].permanents, i, permanentPos(j, i)));
+				gameui.addChild(permsprite[j][i] = makeInst(false, game.players[j].permanents, i, permanentPos(j, i)));
 			}
 			setInteractive.apply(null, handsprite[j]);
 			setInteractive.apply(null, creasprite[j]);
 			setInteractive.apply(null, permsprite[j]);
 			marksprite[j].anchor.set(.5, .5);
 			marksprite[j].position.set(750, 470);
-			gameui.addChild(weapsprite[j] = makeInst(null, "weapon", new PIXI.Point(666, 512), 5/4));
-			gameui.addChild(shiesprite[j] = makeInst(null, "shield", new PIXI.Point(710, 532), 5/4));
+			gameui.addChild(weapsprite[j] = makeInst(true, null, "weapon", new PIXI.Point(666, 512), 5/4));
+			gameui.addChild(shiesprite[j] = makeInst(false, null, "shield", new PIXI.Point(710, 532), 5/4));
 			if (j) {
 				reflectPos(weapsprite[j]);
 				reflectPos(shiesprite[j]);
