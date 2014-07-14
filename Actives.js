@@ -874,6 +874,9 @@ overdrive:function(c,t){
 overdrivespell:function(c,t){
 	t.active = {auto: Actives.overdrive};
 },
+pacify:function(c,t){
+	t.atk -= t.trueatk();
+},
 pandemonium:function(c,t){
 	c.owner.foe.masscc(c, Actives.cseed, true);
 },
