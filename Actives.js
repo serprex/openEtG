@@ -135,7 +135,7 @@ boneyard:function(c,t){
 	}
 },
 bow:function(c,t){
-	return c.owner.mark == Air?1:0;
+	return c.owner.mark == Air || c.owner.mark == Light?1:0;
 },
 bounce:function(c,t){
 	if (c.owner.hand.length < 8) {
