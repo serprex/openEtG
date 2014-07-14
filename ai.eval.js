@@ -150,7 +150,7 @@ var ActivesValues = {
 	queen:7,
 	quint:6,
 	rage:[5, 6],
-	readiness:0,
+	readiness: 4,
 	rebirth:6,
 	regenerate: 5,
 	regeneratespell: 5,

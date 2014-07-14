@@ -3,9 +3,10 @@
 <script src="etgify.js"></script>
 
 <input id="deckcode" type="text" placeholder="Deck" style="width:890px"/><br>
-<input id="legality" type="text" readonly style="width:300px" />
+<input id="legality" type="text" readonly style="width:400px" />
 <input id="test" type="submit" value="Test Deck" onclick="testDeck()" />
 <select id="rulesets">
+    <option value="dodrio">Dodrio</option>
     <option value="commoner">Commoner's Duel</option>
 </select>
 <script>
@@ -19,13 +20,57 @@
         CardCodes = cardCodes;
         Targeting = targeting;
     });
+    var descr = [
+	"Chroma",
+	"Entropy",
+	"Death",
+	"Gravity",
+	"Earth",
+	"Life",
+	"Fire",
+	"Water",
+	"Light",
+	"Air",
+	"Time",
+	"Darkness",
+	"Aether"
+    ];
     var verifiers = {};
     verifiers["commoner"] = function(deck) {
         for (var i = 0;i < deck.length;i++) {
             var card = deck[i];
             if (card.rarity > 1)
                 return card.name + " is too high in rarity";
+            if (card.upped) return "Your deck contains at least one upgraded card";
         }
+        return "Legal";
+    }
+    verifiers["dodrio"] = function(deck) {
+        var elementList = [];
+        var eleCount;
+        var rareElement;
+        for (var i = 0;i < deck.length;i++) {
+            var card = deck[i];
+            if (card.upped) return "Your deck contains at least one upgraded card";
+            var ele = card.element;
+            if (ele) {
+                if (!elementList[ele]) {
+                    elementList[ele] = 0;
+                    eleCount++;
+                }
+                elementList[ele]++;
+                if (eleCount > 3)
+                    return "Your deck contains too many elements";
+            }
+            if (card.rarity >= 3) {
+                if (!rareElement) rareElement = card.element;
+                else if (rareElement != card.element) return "Your deck contains rare cards from more than one element";
+            }
+        }
+        for (var i = 0;i < elementList.length;i++) {
+            if (elementList[i] && elementList[i] < 6) return "You have too few " + descr[i] + " cards.";
+        }
+        if (eleCount < 3) return "Your deck contains too few elements";
         return "Legal";
     }
     function testDeck() {
@@ -37,10 +82,10 @@
             if (maybeMark) markele = maybeMark;
             else if (CardCodes[code[i]]) deck.push(CardCodes[code[i]]);
             else {
-                legality.value = "Not a real deck code."
+                legality.value = "Not a real deck code.";
                 return;
             }
         }
-        legality.value = verifiers[rulesets.options[rulesets.selectedIndex].value](deck, markele);
+        legality.value = deck.length > 60 ? "Your deck is too large" : deck.length < 30 ? "Your deck is too small" : verifiers[rulesets.options[rulesets.selectedIndex].value](deck, markele);
     }
 </script>
