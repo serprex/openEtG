@@ -239,7 +239,7 @@ cseed:function(c,t){
 	}
 },
 dagger:function(c,t){
-	return c.owner.mark == Darkness||c.owner.mark == Death?1:0;
+	return (c.owner.mark == Darkness||c.owner.mark == Death) + c.owner.isCloaked();
 },
 darkness:function(c,t){
 	c.owner.spend(Darkness, -1);
