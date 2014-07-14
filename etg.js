@@ -898,7 +898,7 @@ Creature.prototype.evade = function(sender) {
 				freedomChance++;
 			}
 		}
-		return freedomChance && this.owner.rng() < 1-Math.pow(.8, freedomChance);
+		return freedomChance && this.owner.rng() > Math.pow(.8, freedomChance);
 	}
 }
 Creature.prototype.calcEclipse = function(){

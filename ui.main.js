@@ -2573,18 +2573,18 @@ function startMatch() {
 				if (scale === undefined) scale = 1;
 				var spr = new PIXI.Sprite(nopic);
 				var stattext = new PIXI.Sprite(nopic);
-				stattext.position.set(-31 * scale, -32 * scale);
+				stattext.position.set(-32 * scale, -32 * scale);
 				spr.addChild(stattext);
 				var activetext = new PIXI.Sprite(nopic);
-				activetext.position.set(-31 * scale, -42 * scale);
+				activetext.position.set(-32 * scale, -42 * scale);
 				spr.addChild(activetext);
 				if (makestatuses){
 					var statuses = new PIXI.SpriteBatch();
 					for (var k=0; k<7; k++){
 						var icon = new PIXI.Sprite(sicons[k]);
-						icon.alpha = .8;
+						icon.alpha = .6;
 						icon.anchor.y = 1;
-						icon.position.set(-34 * scale + k * 8, 30 * scale);
+						icon.position.set(-34 * scale + [4, 1, 1, 0, 3, 2, 1][k] * 8, 30 * scale);
 						statuses.addChild(icon);
 					}
 					spr.addChild(statuses);

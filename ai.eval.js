@@ -171,7 +171,7 @@ var ActivesValues = {
 	},
 	serendepity:4,
 	silence:1,
-	singularity:-16,
+	singularity:-20,
 	sinkhole:3,
 	siphon:5,
 	siphonactive:6,
@@ -191,7 +191,7 @@ var ActivesValues = {
 	tempering:3,
 	throwrock: 2,
 	tick:function(c){
-		return c instanceof CardInstance ? 3 : (6 - c.truehp()*1.5);
+		return c instanceof CardInstance ? 3 : c.maxhp - c.truehp();
 	},
 	unburrow:0,
 	upkeep:-.5,
