@@ -269,19 +269,20 @@ io.on("connection", function(socket) {
 		delete usersock[u];
 	});
 	userEvent(socket, "delete", function(data, user) {
-	    var u = data.u;
-	    db.del("U:" + u);
-	    db.del("Q:" + u);
-	    delete users[u];
+		var u = data.u;
+		db.del("U:" + u);
+		db.del("Q:" + u);
+		delete users[u];
+		delete usersock[u];
 	});
 	userEvent(socket, "addcard", function(data, user) {
-	    // Anything using this should eventually be serverside
-	    if (data.accountbound) {
-	        if (!user.accountbound) user.accountbound = "";
-	        user.accountbound = etgutil.addcard(user.accountbound, data.c);
-	    }
-	    else
-	        user.pool = etgutil.addcard(user.pool, data.c);
+		// Anything using this should eventually be serverside
+		if (data.accountbound) {
+			if (!user.accountbound) user.accountbound = "";
+			user.accountbound = etgutil.addcard(user.accountbound, data.c);
+		}
+		else
+			user.pool = etgutil.addcard(user.pool, data.c);
 		if (data.g){
 			user.gold += data.g;
 		}
@@ -294,14 +295,14 @@ io.on("connection", function(socket) {
 		user.gold += data.gold;
 	})
 	userEvent(socket, "subgold", function (data, user) {
-	    user.gold -= data.g;
+		user.gold -= data.g;
 	});
 	userEvent(socket, "addgold", function (data, user) {
-	    user.gold += data.g;
+		user.gold += data.g;
 	});
 	userEvent(socket, "setdeck", function (data, user) {
 		user["deck" + data.number] = data.d;
-	    user.selectedDeck = data.number;
+		user.selectedDeck = data.number;
 	});
 	userEvent(socket, "setarena", function(data, user){
 		var au="A:" + data.u;
@@ -353,8 +354,8 @@ io.on("connection", function(socket) {
 		});
 	});
 	userEvent(socket, "upgrade", function (data, user) {
-	    user.pool = etgutil.addcard(user.pool, data.card, -6);
-	    user.pool = etgutil.addcard(user.pool, data.newcard);
+		user.pool = etgutil.addcard(user.pool, data.card, -6);
+		user.pool = etgutil.addcard(user.pool, data.newcard);
 	});
 	userEvent(socket, "codesubmit", function(data, user){
 		db.hget("CodeHash", data.code, function(err, type){
@@ -391,16 +392,16 @@ io.on("connection", function(socket) {
 	});
 	userEvent(socket, "add", function (data, user) {
 		var add = etgutil.decodedeck(data.add);
-	    for (var i = 0; i < add.length; i++) {
-	        user.pool = etgutil.addcard(user.pool, add[i]);
-	    }
+		for (var i = 0; i < add.length; i++) {
+			user.pool = etgutil.addcard(user.pool, add[i]);
+		}
 	});
 	userEvent(socket, "addaccountbound", function (data, user) {
-	    if (!user.accountbound) user.accountbound = "";
-	    var add = etgutil.decodedeck(data.add);
-	    for (var i = 0; i < add.length; i++) {
-	        user.accountbound = etgutil.addcard(user.accountbound, add[i]);
-	    }
+		if (!user.accountbound) user.accountbound = "";
+		var add = etgutil.decodedeck(data.add);
+		for (var i = 0; i < add.length; i++) {
+			user.accountbound = etgutil.addcard(user.accountbound, add[i]);
+		}
 	});
 	userEvent(socket, "foewant", function(data, user){
 		var u=data.u, f=data.f;
@@ -476,9 +477,9 @@ io.on("connection", function(socket) {
 				this.emit("tradegive", { first: false });
 				usersock[f].emit("tradegive", { first: true });
 			} else {
-			    trades[u] = f;
-			    if (usersock[f]) usersock[f].emit("chat", { mode: "info", msg: u + " wants to trade with you!" });
-			    this.emit("chat", { mode: "info", msg: "You have sent a trade request to " + f + "!" });
+				trades[u] = f;
+				if (usersock[f]) usersock[f].emit("chat", { mode: "info", msg: u + " wants to trade with you!" });
+				this.emit("chat", { mode: "info", msg: "You have sent a trade request to " + f + "!" });
 			}
 		}
 	});
@@ -518,16 +519,16 @@ io.on("connection", function(socket) {
 		}
 	});
 	userEvent(socket, "updatequest", function (data, user) {
-	    var qu = "Q:" + data.u;
-	    db.hset(qu, data.quest, data.newstage);
+		var qu = "Q:" + data.u;
+		db.hset(qu, data.quest, data.newstage);
 	});
 	userEvent(socket, "usefreepack", function (data, user) {
-	    var packlist = user.freepacks.split(",");
-	    for (var i = 0; i < packlist.length; i++) {
-	        packlist[i] = parseInt(packlist[i]);
-	    }
-	    packlist[data.type]--;
-	    user.freepacks = packlist.join();
+		var packlist = user.freepacks.split(",");
+		for (var i = 0; i < packlist.length; i++) {
+			packlist[i] = parseInt(packlist[i]);
+		}
+		packlist[data.type]--;
+		user.freepacks = packlist.join();
 	});
 	userEvent(socket, "addloss", function(data, user) {
 		if (data.pvp) user.pvplosses = (user.pvplosses ? parseInt(user.pvplosses) + 1 : 1);

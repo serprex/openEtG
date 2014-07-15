@@ -719,16 +719,6 @@ function victoryScreen() {
 
 	var bexit = makeButton(412, 430, buttons.exit);
 	bexit.click = function() {
-		if (winner) {
-			if (game.cardreward) {
-				userEmit("add", { add: etg.encodedeck(game.cardreward) });
-				Array.prototype.push.apply(user.pool, game.cardreward);
-			}
-			if (game.goldreward) {
-				userEmit("addgold", { g: game.goldreward });
-				user.gold += game.goldreward;
-			}
-		}
 		if (game.quest)
 			startQuestArea(game.area);
 		else
@@ -740,6 +730,8 @@ function victoryScreen() {
 		var goldshown = (game.goldreward || 0) - (game.cost || 0);
 		tgold = makeText(340, 550, "Gold won: $" + goldshown);
 		victoryui.addChild(tgold);
+		user.gold += game.goldreward;
+		userEmit("addgold", { g: game.goldreward });
 	}
 	var rewards = [];
 	if (game.cardreward && winner) {
@@ -751,6 +743,8 @@ function victoryScreen() {
 			rewards.push(cardArt);
 			victoryui.addChild(cardArt);
 		}
+		Array.prototype.push.apply(user.pool, game.cardreward);
+		userEmit("add", { add: etg.encodedeck(game.cardreward) });
 	}
 
 	refreshRenderer(victoryui, function(){
@@ -1351,7 +1345,6 @@ function startMenu() {
 	blogout.click = function() {
 		userEmit("logout");
 		logout();
-
 	}
 	menuui.addChild(blogout);
 
