@@ -25,7 +25,6 @@ var Actives = require("./Actives");
 var Effect = require("./Effect");
 var Quest = require("./Quest");
 var evalGameState = require("./ai.eval");
-var myTurn = false;
 var cardChosen = false;
 require("./etg.client").loadcards(function(cards, cardcodes, targeting) {
 	Cards = cards;
@@ -174,9 +173,7 @@ function getBack(ele, upped) {
 function makeArt(card, art) {
 	var rend = new PIXI.RenderTexture(132, 256);
 	var template = new PIXI.Graphics();
-	var background = new PIXI.Sprite(getBack(card.element, card.upped));
-	background.position.set(0, 0);
-	template.addChild(background);
+	template.addChild(new PIXI.Sprite(getBack(card.element, card.upped)));
 	var rarity = new PIXI.Sprite(ricons[card.rarity]);
 	rarity.anchor.set(0, 1);
 	rarity.position.set(5, 252);
@@ -333,11 +330,9 @@ function getWeaponShieldImage(code) {
 }
 function initTrade(data) {
 	cardChosen = false;
-	if (data.first) myTurn = true;
-	var editorui = new PIXI.DisplayObjectContainer(), tradeelement = 0;
+	var editorui = new PIXI.DisplayObjectContainer();
 	editorui.interactive = true;
-	var background = new PIXI.Sprite(backgrounds[0]);
-	editorui.addChild(background);
+	editorui.addChild(new PIXI.Sprite(backgrounds[0]));
 	var cardminus = {};
 	var btrade = makeButton(10, 40, buttons.trade);
 	var bconfirm = makeButton(10, 70, buttons.confirm);
@@ -430,7 +425,7 @@ function initTrade(data) {
 		sprite.position.set(450 + Math.floor(i / 10) * 100, 8 + (i % 10) * 20);
 		(function(_i) {
 			sprite.mouseover = function() {
-				cardartcode = player2Cards.length[_i];
+				cardartcode = player2Cards[_i];
 			}
 		})(i);
 		editorui.addChild(sprite);
@@ -466,8 +461,7 @@ function initLibrary(pool){
 	console.log(pool);
 	var editorui = new PIXI.DisplayObjectContainer(), cardartcode;
 	editorui.interactive = true;
-	var background = new PIXI.Sprite(backgrounds[0]);
-	editorui.addChild(background);
+	editorui.addChild(new PIXI.Sprite(backgrounds[0]));
 	var bexit = makeButton(10, 10, buttons.exit);
 	bexit.click = startMenu;
 	editorui.addChild(bexit);
@@ -1407,8 +1401,7 @@ function startRewardWindow(reward) {
 	if (reward == "shard") rewardList = filtercards(false, function(x) { return x.rarity == 4 });
 	var rewardui = new PIXI.DisplayObjectContainer();
 	rewardui.interactive = true;
-	var bgreward = new PIXI.Sprite(backgrounds[0]);
-	rewardui.addChild(bgreward);
+	rewardui.addChild(new PIXI.Sprite(backgrounds[0]));
 
 	var exitButton = makeButton(10, 10, buttons.exit);
 	exitButton.click = startMenu;
@@ -1589,8 +1582,7 @@ function upgradestore() {
 	}
 	var upgradeui = new PIXI.DisplayObjectContainer();
 	upgradeui.interactive = true;
-	var bg = new PIXI.Sprite(backgrounds[0]);
-	upgradeui.addChild(bg);
+	upgradeui.addChild(new PIXI.Sprite(backgrounds[0]));
 
 	var goldcount = makeText(30, 100, "");
 	upgradeui.addChild(goldcount);
@@ -1665,8 +1657,7 @@ function startStore() {
 	storeui.interactive = true;
 
 	//shop background
-	var bgshop = new PIXI.Sprite(backgrounds[2]);
-	storeui.addChild(bgshop);
+	storeui.addChild(new PIXI.Sprite(backgrounds[2]));
 
 	//gold text
 	var tgold = makeText(750, 101, "$" + user.gold);
@@ -1808,13 +1799,13 @@ function startEditor() {
 		for (var i = editordeck.length - 1;i >= 0;i--) {
 			if (!(editordeck[i] in CardCodes)) {
 				var index = TrueMarks.indexOf(editordeck[i]);
-				if (index >= 0) {
+				if (~index) {
 					editormark = index;
-					editormarksprite.setTexture(eicons[editormark]);
 				}
 				editordeck.splice(i, 1);
 			}
 		}
+		editormarksprite.setTexture(eicons[editormark]);
 		editordeck.sort(editorCardCmp);
 		if (user) {
 			cardminus = {};
@@ -1859,8 +1850,7 @@ function startEditor() {
 		chatArea.value = "Build a 30-60 card deck";
 		var editorui = new PIXI.DisplayObjectContainer(), editorelement = 0;
 		editorui.interactive = true;
-		var bg = new PIXI.Sprite(backgrounds[0]);
-		editorui.addChild(bg);
+		editorui.addChild(new PIXI.Sprite(backgrounds[0]));
 		var bclear = makeButton(8, 8, buttons.clear);
 		var bsave = makeButton(8, 32, buttons.done);
 		var bimport = makeButton(8, 56, buttons.import);
@@ -1944,7 +1934,7 @@ function startEditor() {
 		}
 		var editordecksprites = [];
 		var editordeck = getDeck(true);
-		var editormarksprite = new PIXI.Sprite(eicons[0]);
+		var editormarksprite = new PIXI.Sprite(nopic);
 		editormarksprite.position.set(100, 210);
 		editorui.addChild(editormarksprite);
 		var editormark = 0;
@@ -2348,8 +2338,7 @@ function startMatch() {
 	}
 	gameui = new PIXI.DisplayObjectContainer();
 	gameui.interactive = true;
-	var bggame = new PIXI.Sprite(backgrounds[4]);
-	gameui.addChild(bggame);
+	gameui.addChild(new PIXI.Sprite(backgrounds[4]));
 	var cloakgfx = new PIXI.Graphics();
 	cloakgfx.beginFill(0);
 	cloakgfx.drawRect(130, 20, 660, 280);
@@ -2815,23 +2804,7 @@ socket.on("arenainfo", startArenaInfo);
 socket.on("arenatop", startArenaTop);
 socket.on("userdump", function(data) {
 	user = data;
-	user.decks = [
-		etg.decodedeck(user.deck0),
-		etg.decodedeck(user.deck1),
-		etg.decodedeck(user.deck2)
-	];
-	deckimport.value = getDeck().join(" ");
-	user.pool = etg.decodedeck(user.pool);
-	user.accountbound = etg.decodedeck(user.accountbound);
-	if (!user.quest)
-	    user.quest = {};
-	if (user.freepacks) {
-	    user.freepacks = user.freepacks.split(",").map(unaryParseInt);
-	}
-	if (!user.ailosses) user.ailosses = 0;
-	if (!user.aiwins) user.aiwins = 0;
-	if (!user.pvplosses) user.pvplosses = 0;
-	if (!user.pvpwins) user.pvpwins = 0;
+	prepuser();
 	startMenu();
 });
 socket.on("passchange", function(data) {
@@ -2872,9 +2845,7 @@ socket.on("cardchosen", function(data) {
 });
 socket.on("tradedone", function(data) {
 	console.log("Trade done!")
-	for (var i = 0;i < data.newcards.length;i++) {
-		user.pool.push(data.newcards[i]);
-	}
+	Array.prototype.push.apply(user.pool, data.newcards);
 	for (var i = 0;i < data.oldcards.length;i++) {
 		user.pool.splice(user.pool.indexOf(data.oldcards[i]), 1);
 	}
@@ -2973,6 +2944,26 @@ document.addEventListener("click", function(e) {
 		e.preventDefault();
 	}
 });
+function prepuser(){
+	user.decks = [
+		etg.decodedeck(user.deck0),
+		etg.decodedeck(user.deck1),
+		etg.decodedeck(user.deck2),
+	];
+	deckimport.value = getDeck().join(" ");
+	user.pool = etg.decodedeck(user.pool);
+	user.accountbound = etg.decodedeck(user.accountbound);
+	if (!user.quest) {
+		user.quest = {};
+	}
+	if (user.freepacks) {
+		user.freepacks = user.freepacks.split(",").map(unaryParseInt);
+	}
+	if (!user.ailosses) user.ailosses = 0;
+	if (!user.aiwins) user.aiwins = 0;
+	if (!user.pvplosses) user.pvplosses = 0;
+	if (!user.pvpwins) user.pvpwins = 0;
+}
 function loginClick() {
 	if (!user) {
 		var xhr = new XMLHttpRequest();
@@ -2986,25 +2977,7 @@ function loginClick() {
 					} else if (!user.accountbound && !user.pool) {
 						startElementSelect();
 					} else {
-					    user.decks = [
-							etg.decodedeck(user.deck0),
-							etg.decodedeck(user.deck1),
-							etg.decodedeck(user.deck2),
-						];
-						deckimport.value = getDeck().join(" ");
-						user.pool = etg.decodedeck(user.pool);
-						user.accountbound = etg.decodedeck(user.accountbound);
-						if (!user.quest) {
-							user.quest = {};
-						}
-						if (user.freepacks) {
-						    user.freepacks = user.freepacks.split(",").map(unaryParseInt);
-						}
-						if (!user.ailosses) user.ailosses = 0;
-						if (!user.aiwins) user.aiwins = 0;
-						if (!user.pvplosses) user.pvplosses = 0;
-						if (!user.pvpwins) user.pvpwins = 0;
-						console.log(user.quest);
+						prepuser();
 						startMenu();
 					}
 				} else if (this.status == 404) {

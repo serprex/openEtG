@@ -134,6 +134,7 @@ var ActivesValues = {
 		return c.truehp()-1;
 	},
 	overdrivespell:5,
+	pacify:4,
 	pandemonium:3,
 	pandemonium2:4,
 	paradox:5,
@@ -322,12 +323,12 @@ function evalthing(c) {
 	}
 	score += checkpassives(c);
 	if (isCreature){
-		var hp = Math.max(c.truehp(), 0);
-		if (c.status.poison && hp){
-			score -= c.status.poison*ttatk/hp;
+		var hp = Math.max(c.truehp(), 0), poison = Math.min((c.status.poison || 0), hp);
+		if (poison > 0){
+			hp = Math.min(hp - poison, 0);
 			if (c.status.aflatoxin) score -= 2;
 		}
-		score *= hp?(c.status.immaterial || c.status.burrowed ? (c.status.poison ? 1.5 : 2) : Math.sqrt(Math.min(hp, 15))/2):.2;
+		score *= hp?(c.status.immaterial || c.status.burrowed ? (poison > 0 ? 1.5 : 2) : Math.sqrt(Math.min(hp, 15))/2):.2;
 	}else if(c.status.immaterial){
 		score *= 1.5;
 	}
@@ -355,7 +356,6 @@ function evalcardinstance(cardInst) {
 			var hp = Math.max(c.health, 0);
 			if (c.status && c.status.poison && hp){
 				score -= c.status.poison*c.attack/hp;
-				if (c.status.aflatoxin) score -= 2;
 			}
 			score *= hp?(c.status && (c.status.immaterial || c.status.burrowed) ? (c.status.poison ? 1.5 : 2) : Math.sqrt(Math.min(hp, 15))/2):.2;
 		}else if (c.type == WeaponEnum){

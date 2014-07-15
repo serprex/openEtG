@@ -1044,9 +1044,10 @@ ricochet:function(c,t){
 			tgttest(pl.weapon);
 		}
 		if (tgts.length > 0){
-			var tgt = tgts[c.owner.upto(tgts.length)];
+			var tgt = tgts[c.owner.upto(tgts.length)], town = t.owner;
 			t.owner = tgt[1];
 			t.card.active(t, tgt[0]); // NB bypasses SoFr
+			t.owner = town;
 		}
 	}
 },
