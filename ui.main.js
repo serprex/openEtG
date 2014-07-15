@@ -2831,12 +2831,8 @@ socket.on("userdump", function(data) {
 		etg.decodedeck(user.deck2)
 	];
 	deckimport.value = getDeck().join(" ");
-	if (user.pool) {
-		user.pool = etg.decodedeck(user.pool);
-	}
-	if (user.accountbound) {
-	    user.accountbound = etg.decodedeck(user.accountbound);
-	}
+	user.pool = etg.decodedeck(user.pool);
+	user.accountbound = etg.decodedeck(user.accountbound);
 	if (!user.quest)
 	    user.quest = {};
 	if (user.freepacks) {
