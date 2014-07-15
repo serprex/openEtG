@@ -2714,6 +2714,23 @@ function getTextImage(text, font, bgcolor, width) {
 	}
 	var pieces = text.replace(/\|/g, " | ").split(/(\d\d?:\d\d?|\$|\n)/);
 	var x = 0, y = 0, h = Math.max(size, new PIXI.Text("j", font).height), w = 0;
+	function pushChild(){
+		var w = 0;
+		for (var i = 0; i<arguments.length; i++){
+			var c = arguments[i];
+			w += c.width;
+		}
+		if (width && x + w > width){
+			x = 0;
+			y += h;
+		}
+		for (var i = 0; i<arguments.length; i++){
+			var c = arguments[i];
+			c.position.set(x, y);
+			x += c.width;
+			doc.addChild(c);
+		}
+	}
 	for (var i = 0;i < pieces.length;i++) {
 		var piece = pieces[i];
 		if (piece == "\n"){
@@ -2723,60 +2740,33 @@ function getTextImage(text, font, bgcolor, width) {
 		}else if (piece == "$"){
 			var spr = new PIXI.Sprite(goldtex);
 			spr.scale.set(size/16, size/16);
-			if (width && x + size > width){
-				x = 0;
-				y += h;
-			}
-			spr.position.set(x, y);
-			x += size;
-			doc.addChild(spr);
+			pushChild(spr);
 		}else if (/^\d\d?:\d\d?$/.test(piece)) {
 			var parse = piece.split(":");
 			var num = parseInt(parse[0]);
 			var icon = eicons[parseInt(parse[1])];
 			if (num < 4) {
+				var icons = [];
 				for (var j = 0;j < num;j++) {
 					var spr = new PIXI.Sprite(icon);
 					spr.scale.set(size/32, size/32);
-					if (width && x + size > width){
-						x = 0;
-						y += h;
-					}
-					spr.position.set(x, y);
-					x += size;
-					doc.addChild(spr);
+					icons.push(spr);
 				}
+				pushChild.apply(null, icons);
 			}else{
-				var txt = new PIXI.Text(num, font);
 				var spr = new PIXI.Sprite(icon);
 				spr.scale.set(size/32, size/32);
-				if (width && txt.width + size > width){
-					x = 0;
-					y += h;
-				}
-				txt.position.set(x, y);
-				spr.position.set(x + txt.width, y);
-				x += txt.width + size;
-				doc.addChild(txt);
-				doc.addChild(spr);
+				pushChild(new PIXI.Text(num, font), spr);
 			}
 		} else {
 			var txt = new PIXI.Text(piece, font);
 			if (!width || x + txt.width < width){
-				txt.position.set(x, y);
-				x += txt.width;
-				doc.addChild(txt);
+				pushChild(txt);
 			}else{
 				var words = piece.split(" ");
 				for (var j = 0;j < words.length;j++) {
-					var wordgfx = new PIXI.Text(words[j], font);
-					if (x + wordgfx.width > width) {
-						x = 0;
-						y += h;
-					}
-					wordgfx.position.set(x, y);
-					x += wordgfx.width + 3;
-					doc.addChild(wordgfx);
+					pushChild(new PIXI.Text(words[j], font));
+					x += 3;
 				}
 			}
 		}
