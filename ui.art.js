@@ -6,7 +6,7 @@ require("./etg.client").loadcards(function(Cards, CardCodes, Targeting) {
 		[["serprex", "http://fiction.wikia.com/wiki/User:Serprex"], ["622"]],
 		[["vrt", "http://vrt-designs.com"], ["Donation thread", "http://elementscommunity.org/forum/card-art/help-support-an-artist"],
 			["5ll", "52t", "5v3", "5ul", "61t", "562", "5um", "5uk", "591", "5rt", "61o", "5ij", "5rs", "624", "4vc", "55r", "626", "4vh", "5uv", "5fc", "5oc", "5c1", "560", "563", "625", "4ve", "5i5", "5ut", "5rk", "5i7", "55o", "5c9", "55l", "5f2"]],
-		[["willowdream", "http://willowdream.carbonmade.com"], ["Status Icons", "assets/statussheet.png"], ["5od", "5oe", "5ok", "5oo", "5os", "5p0"]],
+		[["willowdream", "http://willowdream.carbonmade.com"], ["Status Icons", "assets/statussheet.png"], ["Status Borders", "assets/statusborders.png"], ["5od", "5oe", "5ok", "5oo", "5os", "5p0"]],
 		[["Ravizant", "http://elementscommunity.org/forum/profile/?u=8037"], ["Element Icons", "assets/esheet.png"], ["Card Backgrounds", "assets/backsheet.png"],
 			["4sc", "50u", "4vi", "4vj", "4vq", "50a", "4vt", "4vu", "542", "53e", "576", "55q", "564", "55v", "56i", "599", "59m", "58q", "5de", "5cb", "5cq", "5ce", "5c3", "5cg", "5gi", "5f3", "5fi", "5fu", "5jm", "5ia", "5j2", "5l9", "5mq", "5m6", "5pu",
 			"5pa", "5ou", "5t2", "5se", "5vi", "5uq", "5uu", "61p", "61q", "620", "62m", "627", "61v", "6u3", "77p", "77a", "7au", "7dj", "7e2", "7ta", "809", "80a", "5cf", "7av", "5fd"]],

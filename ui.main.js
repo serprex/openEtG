@@ -1002,11 +1002,11 @@ function mkAi(level) {
 // Asset Loading
 var nopic, goldtex;
 var backgrounds = ["assets/bg_default.png", "assets/bg_lobby.png", "assets/bg_shop.png", "assets/bg_quest.png", "assets/bg_game.png", "assets/bg_questmap.png"];
-var questIcons = [], eicons = [], ricons = [], cardBacks = [], cardBorders = [], boosters = [], popups = [], sicons = [], ticons = [];
+var questIcons = [], eicons = [], ricons = [], cardBacks = [], cardBorders = [], boosters = [], popups = [], sicons = [], ticons = [], sborders = [];
 var buttons = {};
 var mapareas = {};
 var preLoader = new PIXI.AssetLoader(["assets/null.png", "assets/gold.png", "assets/questIcons.png", "assets/esheet.png", "assets/raritysheet.png", "assets/backsheet.png",
-	"assets/cardborders.png", "assets/boosters.png", "assets/popup_booster.png", "assets/statussheet.png", "assets/typesheet.png", "assets/buttons.png"].concat(backgrounds));
+	"assets/cardborders.png", "assets/boosters.png", "assets/popup_booster.png", "assets/statussheet.png", "assets/statusborders.png", "assets/typesheet.png", "assets/buttons.png"].concat(backgrounds));
 var loadingBarProgress = 0, loadingBarGraphic = new PIXI.Graphics();
 preLoader.onProgress = function() {
 	loadingBarGraphic.clear();
@@ -1037,6 +1037,8 @@ preLoader.onComplete = function() {
 	popups.push(PIXI.Texture.fromFrame("assets/popup_booster.png"));
 	var tex = PIXI.Texture.fromFrame("assets/statussheet.png");
 	for (var i = 0;i < 7;i++) sicons.push(new PIXI.Texture(tex, new PIXI.Rectangle(13 * i, 0, 13, 13)));
+	var tex = PIXI.Texture.fromFrame("assets/statusborders.png");
+	for (var i = 0;i < 3;i++) sborders.push(new PIXI.Texture(tex, new PIXI.Rectangle(64 * i, 0, 64, 81)));
 	var tex = PIXI.Texture.fromFrame("assets/typesheet.png");
 	for (var i = 0;i < 6;i++) ticons.push(new PIXI.Texture(tex, new PIXI.Rectangle(25 * i, 0, 25, 25)));
 	var buttonnames = ["logout", "arenainfo", "arenat10", "arenaai", "commoner",
@@ -2094,29 +2096,16 @@ function startMatch() {
 		}
 	}
 	function drawStatus(obj, spr) {
-		var x = spr.position.x, y = spr.position.y, wid = spr.width, hei = spr.height;
-		if (obj == obj.owner.gpull) {
-			fgfx.beginFill(0xffaa00, .3);
-			fgfx.drawRect(x - wid / 2 - 2, y - hei / 2 - 2, wid + 4, hei + 4);
-			fgfx.endFill();
-		}
-		if (obj.status.frozen) {
-			fgfx.beginFill(0x0000ff, .3);
-			fgfx.drawRect(x - wid / 2 - 2, y - hei / 2 - 2, wid + 4, hei + 4);
-			fgfx.endFill();
-		}
-		if (obj.status.delayed) {
-			fgfx.beginFill(0xffff00, .3);
-			fgfx.drawRect(x - wid / 2 - 2, y - hei / 2 - 2, wid + 4, hei + 4);
-			fgfx.endFill();
-		}
-		spr.getChildAt(2).getChildAt(0).visible = !!obj.status.psion;
-		spr.getChildAt(2).getChildAt(1).visible = !!obj.status.aflatoxin;
+		spr.getChildAt(2).getChildAt(0).visible = obj.status.psion;
+		spr.getChildAt(2).getChildAt(1).visible = obj.status.aflatoxin;
 		spr.getChildAt(2).getChildAt(2).visible = obj.status.poison > 0;
-		spr.getChildAt(2).getChildAt(3).visible = !!(obj.passives.airborne || obj.passives.ranged);
-		spr.getChildAt(2).getChildAt(4).visible = !!obj.status.momentum;
-		spr.getChildAt(2).getChildAt(5).visible = !!obj.status.adrenaline;
+		spr.getChildAt(2).getChildAt(3).visible = obj.passives.airborne || obj.passives.ranged;
+		spr.getChildAt(2).getChildAt(4).visible = obj.status.momentum;
+		spr.getChildAt(2).getChildAt(5).visible = obj.status.adrenaline;
 		spr.getChildAt(2).getChildAt(6).visible = obj.status.poison < 0;
+		spr.getChildAt(2).getChildAt(7).visible = obj.status.delayed;
+		spr.getChildAt(2).getChildAt(8).visible = obj == obj.owner.gpull;
+		spr.getChildAt(2).getChildAt(9).visible = obj.status.frozen;
 		spr.alpha = obj.status.immaterial || obj.status.burrowed ? .7 : 1;
 	}
 	var aiDelay = 0;
@@ -2578,6 +2567,12 @@ function startMatch() {
 						icon.alpha = .6;
 						icon.anchor.y = 1;
 						icon.position.set(-34 * scale + [4, 1, 1, 0, 3, 2, 1][k] * 8, 30 * scale);
+						statuses.addChild(icon);
+					}
+					for (var k=0; k<3; k++){
+						var icon = new PIXI.Sprite(sborders[k]);
+						icon.position.set(-32 * scale, -40 * scale);
+						icon.scale.set(scale, scale);
 						statuses.addChild(icon);
 					}
 					spr.addChild(statuses);
