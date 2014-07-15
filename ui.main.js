@@ -408,9 +408,7 @@ function initTrade(data) {
 		(function(_i) {
 			sprite.click = function() {
 				var card = CardCodes[selectedCards[_i]];
-				if (!isFreeCard(card)) {
-					adjust(cardminus, selectedCards[_i], -1);
-				}
+				adjust(cardminus, selectedCards[_i], -1);
 				selectedCards.splice(_i, 1);
 			}
 			sprite.mouseover = function() {
