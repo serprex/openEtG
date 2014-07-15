@@ -206,18 +206,9 @@ function makeArt(card, art) {
 			template.addChild(eleicon);
 		}
 	}
-	var words = card.info().split(" ");
-	var x = 2, y = 150;
-	for (var i = 0;i < words.length;i++) {
-		var wordgfx = new PIXI.Sprite(getTextImage(words[i], mkFont(11, card.upped ? "black" : "white")));
-		if (x + wordgfx.width > rend.width - 2) {
-			x = 2;
-			y += 12;
-		}
-		wordgfx.position.set(x, y);
-		x += wordgfx.width + 3;
-		template.addChild(wordgfx);
-	}
+	var infospr = new PIXI.Sprite(getTextImage(card.info(), mkFont(11, card.upped ? "black" : "white"), "", rend.width-4))
+	infospr.position.set(2, 150);
+	template.addChild(infospr);
 	rend.render(template);
 	return rend;
 }
@@ -1218,7 +1209,7 @@ function startMenu() {
 	var tgold = makeText(750, 101, (user ? "$" + user.gold : "Sandbox"));
 	menuui.addChild(tgold);
 
-	var taiwinloss = makeText(750, 125,(user ? "AI w/l:\n" + user.aiwins + "/" + user.ailosses + "\nPVP w/l:\n" + user.pvpwins + "/" + user.pvplosses : ""));
+	var taiwinloss = makeText(750, 125, (user ? "AI w/l:\n" + user.aiwins + "/" + user.ailosses + "\nPVP w/l:\n" + user.pvpwins + "/" + user.pvplosses : ""));
 	menuui.addChild(taiwinloss);
 
 	//info text
@@ -2477,30 +2468,9 @@ function startMatch() {
 	gameui.addChild(turntell);
 	function setInfo(obj) {
 		if (obj.owner != game.player2 || !cloakgfx.visible || !obj.card || obj.card.isOf(Cards.Cloak)) {
-			var rend = new PIXI.RenderTexture((obj instanceof Weapon || obj instanceof Shield ? 80 : 64)+12, 200);
-			var graphics = new PIXI.Graphics();
-			var words = obj.info().split(" ");
-			var x = 2, y = 2;
-			var template = new PIXI.Graphics();
-			for (var i = 0;i < words.length;i++) {
-				var wordgfx = new PIXI.Sprite(getTextImage(words[i], mkFont(10, "white")));
-				if (x + wordgfx.width > rend.width - 2) {
-					x = 2;
-					y += 12;
-				}
-				wordgfx.position.set(x, y);
-				x += wordgfx.width + 3;
-				template.addChild(wordgfx);
-			}
-			graphics.beginFill("black", 0.7);
-			graphics.drawRect(0, 0, rend.width, y+12);
-			graphics.endFill();
-			graphics.addChild(template);
-			rend.render(graphics);
-			infobox.setTexture(rend);
-			infobox.anchor.x = 0.5;
+			infobox.setTexture(getTextImage(obj.info(), mkFont(10, "white"), 0, (obj instanceof Weapon || obj instanceof Shield ? 92 : 76)));
 			var mousePosition = realStage.getMousePosition();
-			infobox.position.set(mousePosition.x, mousePosition.y-(y+10));
+			infobox.position.set(mousePosition.x, mousePosition.y);
 			infobox.visible = true;
 		} else {
 			infobox.setTexture(nopic);
@@ -2662,6 +2632,8 @@ function startMatch() {
 	var foeplays = new PIXI.SpriteBatch();
 	gameui.addChild(foeplays);
 	var infobox = new PIXI.Sprite(nopic);
+	infobox.alpha = .7;
+	infobox.anchor.set(.5, .5);
 	gameui.addChild(infobox);
 	var cardart = new PIXI.Sprite(nopic);
 	cardart.position.set(654, 300);
@@ -2720,7 +2692,7 @@ function mkFont(font, color){
 	return {font: font, fill: color || "black"};
 }
 
-function getTextImage(text, font, bgcolor) {
+function getTextImage(text, font, bgcolor, width) {
 	if (!text) return nopic;
 	if (bgcolor === undefined) bgcolor = "";
 	var size;
@@ -2728,7 +2700,7 @@ function getTextImage(text, font, bgcolor) {
 		size = font;
 		font = mkFont(font);
 	}else size = parseInt(font.font);
-	var fontkey = JSON.stringify(font) + bgcolor;
+	var fontkey = JSON.stringify(font) + bgcolor + "w" + width;
 	if (!(fontkey in tximgcache)) {
 		tximgcache[fontkey] = {};
 	}
@@ -2740,41 +2712,81 @@ function getTextImage(text, font, bgcolor) {
 		var bg = new PIXI.Graphics();
 		doc.addChild(bg);
 	}
-	var pieces = text.replace(/\|/g, " | ").split(/(\d\d?:\d\d?|\$)/);
-	var x = 0, h = size;
+	var pieces = text.replace(/\|/g, " | ").split(/(\d\d?:\d\d?|\$|\n)/);
+	var x = 0, y = 0, h = Math.max(size, new PIXI.Text("j", font).height), w = 0;
 	for (var i = 0;i < pieces.length;i++) {
 		var piece = pieces[i];
-		if (piece == "$"){
+		if (piece == "\n"){
+			w = Math.max(w, x);
+			x = 0;
+			y += h;
+		}else if (piece == "$"){
 			var spr = new PIXI.Sprite(goldtex);
 			spr.scale.set(size/16, size/16);
-			spr.position.x = x;
+			if (width && x + size > width){
+				x = 0;
+				y += h;
+			}
+			spr.position.set(x, y);
 			x += size;
 			doc.addChild(spr);
 		}else if (/^\d\d?:\d\d?$/.test(piece)) {
 			var parse = piece.split(":");
 			var num = parseInt(parse[0]);
 			var icon = eicons[parseInt(parse[1])];
-			for (var j = 0;j < num;j++) {
+			if (num < 4) {
+				for (var j = 0;j < num;j++) {
+					var spr = new PIXI.Sprite(icon);
+					spr.scale.set(size/32, size/32);
+					if (width && x + size > width){
+						x = 0;
+						y += h;
+					}
+					spr.position.set(x, y);
+					x += size;
+					doc.addChild(spr);
+				}
+			}else{
+				var txt = new PIXI.Text(num, font);
 				var spr = new PIXI.Sprite(icon);
 				spr.scale.set(size/32, size/32);
-				spr.position.x = x;
-				x += size;
+				if (width && txt.width + size > width){
+					x = 0;
+					y += h;
+				}
+				txt.position.set(x, y);
+				spr.position.set(x + txt.width, y);
+				x += txt.width + size;
+				doc.addChild(txt);
 				doc.addChild(spr);
 			}
 		} else {
 			var txt = new PIXI.Text(piece, font);
-			txt.position.x = x;
-			x += txt.width;
-			if (txt.height > h) h = txt.height;
-			doc.addChild(txt);
+			if (!width || x + txt.width < width){
+				txt.position.set(x, y);
+				x += txt.width;
+				doc.addChild(txt);
+			}else{
+				var words = piece.split(" ");
+				for (var j = 0;j < words.length;j++) {
+					var wordgfx = new PIXI.Text(words[j], font);
+					if (x + wordgfx.width > width) {
+						x = 0;
+						y += h;
+					}
+					wordgfx.position.set(x, y);
+					x += wordgfx.width + 3;
+					doc.addChild(wordgfx);
+				}
+			}
 		}
 	}
+	var rtex = new PIXI.RenderTexture(width || Math.max(w, x), y+h);
 	if (bg){
 		bg.beginFill(bgcolor);
-		bg.drawRect(0, 0, x, h);
+		bg.drawRect(0, 0, rtex.width, rtex.height);
 		bg.endFill();
 	}
-	var rtex = new PIXI.RenderTexture(x, h);
 	rtex.render(doc);
 	return tximgcache[fontkey][text] = rtex;
 }

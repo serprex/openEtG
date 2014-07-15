@@ -1090,15 +1090,8 @@ CardInstance.prototype.useactive = function(target){
 	owner.spend(card.costele, card.cost);
 	var self = this;
 	if (card.type <= PermanentEnum){
-		if (card.type == PillarEnum){
-			new Pillar(card, owner).place(true);
-		}else if (card.type == WeaponEnum){
-			new Weapon(card, owner).place(true);
-		}else if (card.type == ShieldEnum){
-			new Shield(card, owner).place(true);
-		}else{
-			new Permanent(card, owner).place(true);
-		}
+		var cons = [Pillar, Weapon, Shield, Permanent][card.type];
+		new cons(card, owner).place(true);
 	}else if (card.type == SpellEnum){
 		if (!target || !target.evade(owner)){
 			card.active(this, target);
