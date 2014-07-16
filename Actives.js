@@ -87,26 +87,6 @@ antimatter:function(c,t){
 	Effect.mkText("Antimatter", tgtToPos(t));
 	t.atk -= t.trueatk(0, true)*2;
 },
-/*appease: function(c, t) {     TO BE ADDED IF PEOPLE AGREE
-	targets = [];
-	lowesthp = 9999;
-	for (var i = 0;i < c.owner.creatures.length;i++) {
-		if (!c.owner.creatures[i] || c == c.owner.creatures[i]) continue;
-		if (c.owner.creatures[i].truehp() == lowesthp) {
-			targets.push();
-		} else if (c.owner.creatures[i].truehp() < lowesthp) {
-			lowesthp = c.owner.creatures[i].truehp();
-			targets = [i];
-		}
-	}
-	if (targets.length > 0) {
-		var target = c.owner.creatures[targets[Math.floor(Math.random() * targets.length)]];
-		target.die();
-		c.status.appeased = true;
-	}
-	else
-		delete c.status.appeased;
-},*/
 appease:function(c,t){
 	t.die();
 	c.status.appeased = true;
@@ -295,6 +275,14 @@ disarm:function(c,t){
 		new CardInstance(t.weapon.card, t).place();
 		t.weapon = undefined;
 	}
+},
+disc:function(c,t){
+	return c.owner.mark == Entropy || c.owner.mark == Aether;
+},
+discping:function(c,t){
+	t.dmg(1);
+	c.die();
+	new CardInstance(c.card, c.owner).place();
 },
 disfield:function(c,t, dmg){
 	if (!c.owner.spend(Other, dmg)){
@@ -1251,10 +1239,11 @@ throwrock:function(c,t){
 	t.owner.deck.splice(c.owner.upto(t.owner.deck.length), 0, Cards.ThrowRock.asUpped(c.card.upped));
 },
 tick:function(c,t){
-	c.dmg(c.card.upped?2:1);
+	c.dmg(c.trueatk() + (c.card.upped?2:1));
 	if (c.hp <= 0) {
-		c.card.upped ? c.owner.foe.masscc(c, function (c, x) { x.dmg(4) }, false) : c.owner.foe.spelldmg(9);
-		}
+		if (c.card.upped) c.owner.foe.masscc(c, function (c, x) { x.dmg(4) });
+		else c.owner.foe.spelldmg(15);
+	}
 },
 unappease:function(c,t){
 	delete c.status.appeased;

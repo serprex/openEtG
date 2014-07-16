@@ -334,10 +334,10 @@ function initTrade(data) {
 	editorui.interactive = true;
 	editorui.addChild(new PIXI.Sprite(backgrounds[0]));
 	var cardminus = {};
-	var btrade = makeButton(10, 40, buttons.trade);
-	var bconfirm = makeButton(10, 70, buttons.confirm);
+	var btrade = makeButton(10, 40, "Trade");
+	var bconfirm = makeButton(10, 70, "Confirm");
 	var bconfirmed = new PIXI.Text("Confirmed!", { font: "16px Dosis" });
-	var bcancel = makeButton(10, 10, buttons.exit);
+	var bcancel = makeButton(10, 10, "Exit");
 	var selectedCards = [];
 	var selectedCardsprites = [];
 	var player2Cardsprites = [];
@@ -356,7 +356,7 @@ function initTrade(data) {
 			editorui.addChild(bconfirm);
 		}
 		else
-			chatArea.value = "You have to choose a card!"
+			chatArea.value = "You have to choose at least a card!"
 	}
 	bconfirm.click = function() {
 		if (player2Cards.length > 0) {
@@ -366,7 +366,7 @@ function initTrade(data) {
 			editorui.addChild(bconfirmed);
 		}
 		else
-			chatArea.value = "Wait for your friend to choose a card!"
+			chatArea.value = "Wait for your friend to choose!"
 	}
 	bconfirmed.position.set(10, 110);
 	setInteractive(btrade);
@@ -388,10 +388,7 @@ function initTrade(data) {
 		},
 		function(code){
 			var card = CardCodes[code];
-			if (selectedCards.length < 30 && !isFreeCard(card) && code in cardpool) {
-				if (!(code in cardpool) || (code in cardminus && cardminus[code] >= cardpool[code])){
-					return;
-				}
+			if (selectedCards.length < 30 && !isFreeCard(card) && code in cardpool && !(code in cardminus && cardminus[code] >= cardpool[code])) {
 				adjust(cardminus, code, 1);
 				for (var i = 0;i < selectedCards.length;i++) {
 					var cmp = editorCardCmp(selectedCards[i], code);
@@ -460,7 +457,7 @@ function initLibrary(pool){
 	var editorui = new PIXI.DisplayObjectContainer(), cardartcode;
 	editorui.interactive = true;
 	editorui.addChild(new PIXI.Sprite(backgrounds[0]));
-	var bexit = makeButton(10, 10, buttons.exit);
+	var bexit = makeButton(10, 10, "Exit");
 	bexit.click = startMenu;
 	editorui.addChild(bexit);
 	var cardminus = {}, cardpool = {};
@@ -700,7 +697,7 @@ function victoryScreen() {
 		victoryui.addChild(tinfo);
 	}
 
-	var bexit = makeButton(412, 430, buttons.exit);
+	var bexit = makeButton(412, 430, "Exit");
 	bexit.click = function() {
 		if (game.quest)
 			startQuestArea(game.area);
@@ -983,13 +980,13 @@ function mkAi(level) {
 }
 
 // Asset Loading
-var nopic, goldtex;
+var nopic, goldtex, buttex;
 var backgrounds = ["assets/bg_default.png", "assets/bg_lobby.png", "assets/bg_shop.png", "assets/bg_quest.png", "assets/bg_game.png", "assets/bg_questmap.png"];
 var questIcons = [], eicons = [], ricons = [], cardBacks = [], cardBorders = [], boosters = [], popups = [], sicons = [], ticons = [], sborders = [];
 var buttons = {};
 var mapareas = {};
-var preLoader = new PIXI.AssetLoader(["assets/null.png", "assets/gold.png", "assets/questIcons.png", "assets/esheet.png", "assets/raritysheet.png", "assets/backsheet.png",
-	"assets/cardborders.png", "assets/boosters.png", "assets/popup_booster.png", "assets/statussheet.png", "assets/statusborders.png", "assets/typesheet.png", "assets/buttons.png"].concat(backgrounds));
+var preLoader = new PIXI.AssetLoader(["assets/null.png", "assets/gold.png", "assets/button.png", "assets/questIcons.png", "assets/esheet.png", "assets/raritysheet.png", "assets/backsheet.png",
+	"assets/cardborders.png", "assets/boosters.png", "assets/popup_booster.png", "assets/statussheet.png", "assets/statusborders.png", "assets/typesheet.png"].concat(backgrounds));
 var loadingBarProgress = 0, loadingBarGraphic = new PIXI.Graphics();
 preLoader.onProgress = function() {
 	loadingBarGraphic.clear();
@@ -1000,6 +997,7 @@ preLoader.onProgress = function() {
 preLoader.onComplete = function() {
 	nopic = PIXI.Texture.fromFrame("assets/null.png");
 	goldtex = PIXI.Texture.fromFrame("assets/gold.png");
+	buttex = PIXI.Texture.fromFrame("assets/button.png");
 	var tex = PIXI.Texture.fromFrame("assets/questIcons.png");
 	for (var i = 0;i < 2;i++) {
 		questIcons.push(new PIXI.Texture(tex, new PIXI.Rectangle(i * 32, 0, 32, 32)));
@@ -1031,10 +1029,8 @@ preLoader.onComplete = function() {
 		"mulligan", "endturn", "cancel", "accepthand", "confirm",
 		"deck1", "deck2", "deck3", "sell", "sellupgrade",
 		"trade"];
-	var tex = PIXI.Texture.fromFrame("assets/buttons.png");
 	for (var i = 0;i < buttonnames.length;i++) {
-		var x = i%5, y = Math.floor(i/5);
-		buttons[buttonnames[i]] = new PIXI.Texture(tex, new PIXI.Rectangle(x * 72, y * 22, 72, 22));
+		buttons[buttonnames[i]] = buttonnames[i];
 	}
 	startMenu();
 }
@@ -1042,10 +1038,15 @@ refreshRenderer(loadingBarGraphic);
 preLoader.load();
 requestAnimate();
 function makeButton(x, y, i, mouseoverfunc) {
-	var b = new PIXI.Sprite(i);
+	var b = new PIXI.Sprite(buttex);
 	b.position.set(x, y);
 	b.interactive = true;
 	b.buttonMode = true;
+	var txt = new PIXI.Text(i, {font: "14px Dosis"});
+	txt.anchor.set(.5, .5);
+	txt.position.set(b.width/2, b.height/2);
+	if (txt.width>b.width-6) txt.width=b.width-6;
+	b.addChild(txt);
 	b.mousedown = function() {
 		b.tint = 0x666666;
 	}
@@ -1213,7 +1214,7 @@ function startMenu() {
 	menuui.addChild(tcost);
 
 	//ai0 button
-	var bai0 = makeButton(50, 100, buttons.commoner, function() {
+	var bai0 = makeButton(50, 100, "Commoner", function() {
 		tinfo.setText("Commoners have no upgraded cards.");
 		tcost.setText("Cost: $0");
 	});
@@ -1221,7 +1222,7 @@ function startMenu() {
 	menuui.addChild(bai0);
 
 	//ai1 button
-	var bai1 = makeButton(150, 100, buttons.mage, function() {
+	var bai1 = makeButton(150, 100, "Mage", function() {
 		tinfo.setText("Mages have a few upgraded cards.");
 		tcost.setText("Cost: $5");
 	});
@@ -1229,7 +1230,7 @@ function startMenu() {
 	menuui.addChild(bai1);
 
 	//ai2 button
-	var bai2 = makeButton(250, 100, buttons.champion, function() {
+	var bai2 = makeButton(250, 100, "Champion", function() {
 		tinfo.setText("Champions have some upgraded cards.");
 		tcost.setText("Cost: $10");
 	});
@@ -1237,7 +1238,7 @@ function startMenu() {
 	menuui.addChild(bai2);
 
 	//ai3 button
-	var bai3 = makeButton(350, 100, buttons.demigod, function() {
+	var bai3 = makeButton(350, 100, "Demigod", function() {
 		tinfo.setText("Demigods are extremely powerful. Come prepared for anything.");
 		tcost.setText("Cost: $20");
 	});
@@ -1245,14 +1246,14 @@ function startMenu() {
 	menuui.addChild(bai3);
 
 	//Quests button
-	var bquest = makeButton(50, 145, buttons.quests, function() {
+	var bquest = makeButton(50, 145, "Quests", function() {
 		tinfo.setText("Go on an adventure!");
 	});
 	bquest.click = startQuestWindow;
 	menuui.addChild(bquest);
 
 	//ai arena button
-	var baia = makeButton(50, 200, buttons.arenaai, function() {
+	var baia = makeButton(50, 200, "Arena AI", function() {
 		tinfo.setText("In the arena you will face decks from other players.");
 		tcost.setText("Cost: $10");
 	});
@@ -1276,7 +1277,7 @@ function startMenu() {
 	menuui.addChild(baia);
 
 	//arena info button
-	var binfoa = makeButton(50, 245, buttons.arenainfo, function() {
+	var binfoa = makeButton(50, 245, "Arena Info", function() {
 		tinfo.setText("Check how your arena deck is doing.")
 		tcost.setText("");
 	});
@@ -1288,7 +1289,7 @@ function startMenu() {
 	menuui.addChild(binfoa);
 
 	//arena top10 button
-	var btopa = makeButton(150, 245, buttons.arenat10, function() {
+	var btopa = makeButton(150, 245, "Arena T20", function() {
 		tinfo.setText("Here you can see who the top players in arena are right now.")
 		tcost.setText("");
 	});
@@ -1300,14 +1301,14 @@ function startMenu() {
 	menuui.addChild(btopa);
 
 	//edit button
-	var bedit = makeButton(50, 300, buttons.editor, function() {
+	var bedit = makeButton(50, 300, "Editor", function() {
 		tinfo.setText("Here you can edit your deck, as well as submit an arena deck.");
 		tcost.setText("");
 	});
 	bedit.click = startEditor;
 	menuui.addChild(bedit);
 
-	var bshop = makeButton(150, 300, buttons.shop, function() {
+	var bshop = makeButton(150, 300, "Shop", function() {
 		tinfo.setText("Here you can buy booster packs which contains cards from the elements you choose.");
 		tcost.setText("");
 	});
@@ -1315,7 +1316,7 @@ function startMenu() {
 	menuui.addChild(bshop);
 
 	//upgrade button
-	var bupgrade = makeButton(250, 300, buttons.sellupgrade, function() {
+	var bupgrade = makeButton(250, 300, "Sell/Upgrade", function() {
 		tinfo.setText("Here you can upgrade or sell your cards.");
 		tcost.setText("");
 	});
@@ -1323,7 +1324,7 @@ function startMenu() {
 	menuui.addChild(bupgrade);
 
 	//logout button
-	var blogout = makeButton(750, 246, buttons.logout, function() {
+	var blogout = makeButton(750, 246, "Logout", function() {
 		tinfo.setText("Click here if you want to log out.")
 		tcost.setText("");
 	});
@@ -1334,7 +1335,7 @@ function startMenu() {
 	menuui.addChild(blogout);
 
 	//delete account button
-	var bdelete = makeButton(750, 550, buttons.wipeaccount, function() {
+	var bdelete = makeButton(750, 550, "Wipe Account", function() {
 		tinfo.setText("Click here if you want to remove your account.")
 		tcost.setText("");
 	});
@@ -1401,11 +1402,11 @@ function startRewardWindow(reward) {
 	rewardui.interactive = true;
 	rewardui.addChild(new PIXI.Sprite(backgrounds[0]));
 
-	var exitButton = makeButton(10, 10, buttons.exit);
+	var exitButton = makeButton(10, 10, "Exit");
 	exitButton.click = startMenu;
 	rewardui.addChild(exitButton);
 
-	var confirmButton = makeButton(10, 40, buttons.done);
+	var confirmButton = makeButton(10, 40, "Done");
 	confirmButton.click = function() {
 		if (chosenReward)
 			userEmit("codesubmit2", { code: foename.value, card: chosenReward });
@@ -1452,7 +1453,7 @@ function startQuestWindow(){
 	questui.addChild(bgquest);
 	var tinfo = makeText(32, 32, "");
 	questui.addChild(tinfo);
-	var bexit = makeButton(750, 246, buttons.exit);
+	var bexit = makeButton(750, 246, "Exit");
 	bexit.click = startMenu;
 	questui.addChild(bexit);
 	var areainfo = {
@@ -1516,7 +1517,7 @@ function startQuestArea(area) {
 			}
 		}
 	}
-	var bexit = makeButton(750, 246, buttons.exit);
+	var bexit = makeButton(750, 246, "Exit");
 	bexit.click = startQuestWindow;
 	questui.addChild(tinfo);
 	questui.addChild(errinfo);
@@ -1584,17 +1585,17 @@ function upgradestore() {
 
 	var goldcount = makeText(30, 100, "");
 	upgradeui.addChild(goldcount);
-	var bupgrade = makeButton(150, 80, buttons.upgrade);
+	var bupgrade = makeButton(150, 80, "Upgrade");
 	bupgrade.click = function() {
 		upgradeCard(CardCodes[selectedCard]);
 	};
 	upgradeui.addChild(bupgrade);
-	var bsell = makeButton(150, 140, buttons.sell);
+	var bsell = makeButton(150, 140, "Sell");
 	bsell.click = function() {
 		sellCard(CardCodes[selectedCard]);
 	};
 	upgradeui.addChild(bsell);
-	var bexit = makeButton(5, 50, buttons.exit);
+	var bexit = makeButton(5, 50, "Exit");
 	bexit.click = startMenu;
 	upgradeui.addChild(bexit);
 	var tinfo = new PIXI.Text("", { font: "bold 16px Dosis" });
@@ -1673,7 +1674,7 @@ function startStore() {
 	storeui.addChild(freeinfo);
 
 	//get cards button
-	var bget = makeButton(750, 156, buttons.takecards);
+	var bget = makeButton(750, 156, "Take Cards");
 	toggleB(bget);
 	bget.click = function () {
 		toggleB(bbronze, bsilver, bgold, bplatinum, bget, bbuy);
@@ -1683,12 +1684,12 @@ function startStore() {
 	storeui.addChild(bget);
 
 	//exit button
-	var bexit = makeButton(750, 246, buttons.exit);
+	var bexit = makeButton(750, 246, "Exit");
 	bexit.click = startMenu;
 	storeui.addChild(bexit);
 
 	//buy button
-	var bbuy = makeButton(750, 156, buttons.buypack);
+	var bbuy = makeButton(750, 156, "Buy Pack");
 	bbuy.click = function() {
 		if (packrarity == -1) {
 			tinfo2.setText("Select a pack first!");
@@ -1849,13 +1850,13 @@ function startEditor() {
 		var editorui = new PIXI.DisplayObjectContainer(), editorelement = 0;
 		editorui.interactive = true;
 		editorui.addChild(new PIXI.Sprite(backgrounds[0]));
-		var bclear = makeButton(8, 8, buttons.clear);
-		var bsave = makeButton(8, 32, buttons.done);
-		var bimport = makeButton(8, 56, buttons.import);
-		var bdeck1 = makeButton(8, 80, buttons.deck1);
-		var bdeck2 = makeButton(8, 104, buttons.deck2);
-		var bdeck3 = makeButton(8, 128, buttons.deck3);
-		var barena = makeButton(8, 152, buttons.arenaai, function() {
+		var bclear = makeButton(8, 8, "Clear");
+		var bsave = makeButton(8, 32, "Done");
+		var bimport = makeButton(8, 56, "Import");
+		var bdeck1 = makeButton(8, 80, "Deck 1");
+		var bdeck2 = makeButton(8, 104, "Deck 2");
+		var bdeck3 = makeButton(8, 128, "Deck 3");
+		var barena = makeButton(8, 152, "Arena AI", function() {
 			if (user && user.ocard) {
 				cardartcode = user.ocard;
 			}
@@ -1880,33 +1881,20 @@ function startEditor() {
 			if (editordeck.length > 60){
 				editordeck.length = 60;
 			}
-			if (user) {
-				userEmit("setdeck", { d: etg.encodedeck(editordeck), number: user.selectedDeck });
-				user.decks[user.selectedDeck] = editordeck;
-			}
 			processDeck();
 		}
-		bdeck1.click = function () {
-		    editordeck.push(TrueMarks[editormark]);
-		    userEmit("setdeck", { d: etg.encodedeck(editordeck), number: user.selectedDeck });
-		    user.selectedDeck = 0;
-		    editordeck = getDeck(true);
-		    processDeck();
+		function switchDeckCb(x){
+			return function(){
+				editordeck.push(TrueMarks[editormark]);
+				userEmit("setdeck", { d: etg.encodedeck(editordeck), number: user.selectedDeck });
+				user.selectedDeck = x;
+				editordeck = getDeck(true);
+				processDeck();
+			}
 		}
-		bdeck2.click = function () {
-		    editordeck.push(TrueMarks[editormark]);
-		    userEmit("setdeck", { d: etg.encodedeck(editordeck), number: user.selectedDeck });
-		    user.selectedDeck = 1;
-		    editordeck = getDeck(true);
-		    processDeck();
-		}
-		bdeck3.click = function () {
-		    editordeck.push(TrueMarks[editormark]);
-		    userEmit("setdeck", { d: etg.encodedeck(editordeck), number: user.selectedDeck });
-		    user.selectedDeck = 2;
-		    editordeck = getDeck(true);
-		    processDeck();
-		}
+		bdeck1.click = switchDeckCb(0);
+		bdeck2.click = switchDeckCb(1);
+		bdeck3.click = switchDeckCb(2);
 		barena.click = function() {
 			if (editordeck.length < 30) {
 				chatArea.value = "30 cards required before submission";
@@ -2345,12 +2333,12 @@ function startMatch() {
 	var winnername = new PIXI.Text("", { font: "16px Dosis" });
 	winnername.position.set(800, 500);
 	gameui.addChild(winnername);
-	var endturn = makeButton(800, 540, buttons.endturn);
-	var accepthand = makeButton(800, 540, buttons.accepthand);
-	var cancel = makeButton(800, 500, buttons.cancel);
-	var mulligan = makeButton(800, 500, buttons.mulligan);
-	var resign = makeButton(8, 24, buttons.resign);
-	var confirm = makeButton(8, 24, buttons.confirm);
+	var endturn = makeButton(800, 540, "End Turn");
+	var accepthand = makeButton(800, 540, "Accept Hand");
+	var cancel = makeButton(800, 500, "Cancel");
+	var mulligan = makeButton(800, 500, "Mulligan");
+	var resign = makeButton(8, 24, "Resign");
+	var confirm = makeButton(8, 24, "Confirm");
 	gameui.addChild(endturn);
 	gameui.addChild(cancel);
 	gameui.addChild(mulligan);
@@ -2636,14 +2624,32 @@ function startArenaInfo(info) {
 	var stage = new PIXI.DisplayObjectContainer();
 	stage.interactive = true;
 	var winloss = new PIXI.Text((info.win || 0) + " - " + (info.loss || 0), { font: "16px Dosis" });
-	winloss.position.set(200, 200);
+	winloss.position.set(200, 300);
 	stage.addChild(winloss);
-	var bret = makeButton(200, 400, buttons.exit);
+	var bret = makeButton(200, 400, "Exit");
 	bret.click = startMenu;
 	stage.addChild(bret);
+	var batch = new PIXI.SpriteBatch();
 	var ocard = new PIXI.Sprite(nopic);
 	ocard.position.set(600, 300);
-	stage.addChild(ocard);
+	batch.addChild(ocard);
+	var deck = etg.decodedeck(info.deck), mark;
+	chatArea.value = deck.join(" ");
+	for (var i=0; i<deck.length; i++){
+		var ismark = TrueMarks.indexOf(deck[i]);
+		if (~ismark){
+			mark = ismark;
+			deck.splice(i--, 1);
+			continue;
+		}
+		var spr = new PIXI.Sprite(getCardImage(deck[i]));
+		spr.position.set(100 + Math.floor(i / 10) * 100, 8 + (i % 10) * 20);
+		batch.addChild(spr);
+	}
+	var spr = new PIXI.Sprite(eicons[mark || 0]);
+	spr.position.set(100, 210);
+	batch.addChild(spr);
+	stage.addChild(batch);
 	refreshRenderer(stage, function() {
 		if (info.card) {
 			ocard.setTexture(getArt(info.card));
@@ -2654,19 +2660,22 @@ function startArenaInfo(info) {
 function startArenaTop(info) {
 	if (!info) {
 		chatArea.value = "??";
+		return;
 	}
-	console.log(info);
 	var stage = new PIXI.DisplayObjectContainer();
 	stage.interactive = true;
-	for (var i = 0;i < info.length;i+=2) {
-		var infotxt = new PIXI.Text(info[i], { font: "16px Dosis" });
-		infotxt.position.set(200, 100 + i * 20);
-		var scoretxt = new PIXI.Text(info[i + 1], { font: "16px Dosis" });
-		scoretxt.position.set(300, 100 + i * 20);
+	for (var i = 0;i < info[1].length; i++) {
+		var infotxt = new PIXI.Text((i+1) + "  " + info[0][i*2], { font: "16px Dosis" });
+		infotxt.position.set(150, 50 + i * 24);
+		var scoretxt = new PIXI.Text(info[0][i*2 + 1], { font: "16px Dosis" });
+		scoretxt.position.set(400, 50 + i * 24);
+		var winlosstxt = new PIXI.Text(info[1][i], { font: "16px Dosis" });
+		winlosstxt.position.set(450, 50 + i * 24);
 		stage.addChild(infotxt);
 		stage.addChild(scoretxt);
+		stage.addChild(winlosstxt);
 	}
-	var bret = makeButton(100, 400, buttons.exit);
+	var bret = makeButton(50, 300, "Exit");
 	bret.click = startMenu;
 	stage.addChild(bret);
 	refreshRenderer(stage);
@@ -2839,10 +2848,8 @@ socket.on("mulligan", function(data) {
 });
 socket.on("cardchosen", function(data) {
 	player2Cards = data.cards;
-	console.log("Card received: " + player2Cards);
 });
 socket.on("tradedone", function(data) {
-	console.log("Trade done!")
 	Array.prototype.push.apply(user.pool, data.newcards);
 	for (var i = 0;i < data.oldcards.length;i++) {
 		user.pool.splice(user.pool.indexOf(data.oldcards[i]), 1);

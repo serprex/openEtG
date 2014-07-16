@@ -325,8 +325,18 @@ io.on("connection", function(socket) {
 		});
 	});
 	userEvent(socket, "arenatop", function(data, user){
-		db.zrevrange("arena", 0, 9, "withscores", function(err, obj){
-			socket.emit("arenatop", obj);
+		db.zrevrange("arena", 0, 19, "withscores", function(err, obj){
+			var winloss = [];
+			function getwinloss(i){
+				db.hmget("A:" + obj[i], "win", "loss", function(err, wl){
+					if (i == obj.length){
+						socket.emit("arenatop", [obj, winloss]);
+					}
+					winloss.push(wl ? wl[0] + "-" + wl[1] : "?");
+					getwinloss(i+2);
+				});
+			}
+			getwinloss(0);
 		});
 	});
 	userEvent(socket, "modarena", function(data, user){
@@ -348,7 +358,7 @@ io.on("connection", function(socket) {
 					var day = getDay();
 					var seed = Math.random();
 					var first = seed<.5;
-					socket.emit("foearena", {seed: seed*etgutil.MAX_INT, first: first, name: aname, hp:Math.max(202-Math.pow(2, 1+day-adeck.day), 100), deck: adeck.deck})
+					socket.emit("foearena", {seed: seed*etgutil.MAX_INT, first: first, name: aname, hp:Math.max(200-(day-adeck.day)*5, 100), deck: adeck.deck})
 				});
 			});
 		});
