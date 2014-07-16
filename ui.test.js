@@ -1,23 +1,14 @@
 "use strict"
-var Cards, CardCodes, Targeting, targetingMode, targetingModeCb, game, player1, player2, players;
-var MersenneTwister = require("./MersenneTwister");
-var Actives = require("./Actives");
-var Effect = require("./Effect");
+var Cards, CardCodes, Targeting, game, player1, player2;
 var etg = require("./etg");
+var Actives = require("./Actives");
+var ui = require("./uiutil");
 var gameui = {addChild:function(){}};
-Effect.disable = true;
-function tgtToPos(){
-	return {x:0, y:0};
-}
-function creaturePos(){
-	return {x:0, y:0};
-}
 function initTest(){
-	game = etg.mkGame(true, 5489);
+	game = new etg.Game(true, 5489);
 	game.player1.mark = game.player2.mark = etg.Entropy;
 	player1 = game.player1;
 	player2 = game.player2;
-	players = game.players;
 }
 function initHand(pl){
 	for(var i=1; i<arguments.length; i++){

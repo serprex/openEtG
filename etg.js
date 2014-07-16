@@ -1,6 +1,7 @@
 var MersenneTwister = require("./MersenneTwister");
 var Actives = require("./Actives");
 var Effect = require("./Effect");
+var ui = require("./uiutil");
 function Game(first, seed){
 	this.rng = new MersenneTwister(seed);
 	this.phase = MulliganPhase1;
@@ -877,7 +878,7 @@ Creature.prototype.deatheffect = Weapon.prototype.deatheffect = function(index) 
 		this.active.death(this, this, index)
 	}
 	this.owner.procactive("death", function(c, p) { c.active.death(c, self, index) });
-	if (index>=0) Effect.mkDeath(creaturePos(this.owner == this.owner.game.player1?0:1, index));
+	if (index>=0) Effect.mkDeath(ui.creaturePos(this.owner == this.owner.game.player1?0:1, index));
 }
 Creature.prototype.die = function() {
 	var index = this.remove();
@@ -991,7 +992,7 @@ Thing.prototype.useactive = function(t) {
 	var castele = this.castele, cast = this.cast;
 	if (!t || !t.evade(this.owner)){
 		this.active.cast(this, t);
-	}else Effect.mkText("Evade", tgtToPos(t));
+	}else Effect.mkText("Evade", ui.tgtToPos(t));
 	this.owner.spend(castele, cast);
 	this.owner.expectedDamage = expectedDamage(this.owner);
 	this.owner.foe.expectedDamage = expectedDamage(this.owner.foe);
@@ -1141,7 +1142,7 @@ function salvageScan(from, t){
 		for (var i=0; i<23; i++){
 			var cr = t.owner.creatures[i];
 			if (cr && cr.passives.salvage && !cr.status.salvaged){
-				Effect.mkText("Salvage", tgtToPos(cr));
+				Effect.mkText("Salvage", ui.tgtToPos(cr));
 				cr.status.salvaged = true;
 				t.owner.hand.push(new CardInstance(t.card, t.owner));
 				return;

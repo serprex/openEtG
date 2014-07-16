@@ -1,8 +1,6 @@
 var etg = require("./etg");
 exports.loadcards = function(cb){
-	var Cards = {};
-	var CardCodes = {};
-	var Targeting = {};
+	var Cards = {}, CardCodes = {}, Targeting = {};
 	var names = ["pillar", "weapon", "shield", "permanent", "spell", "creature"];
 	var count = 0;
 	function maybeCallback(){

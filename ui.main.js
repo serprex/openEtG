@@ -1,24 +1,26 @@
-var Cards, CardCodes, Targeting, targetingMode, targetingModeCb, targetingText, game, discarding, user, renderer, endturnFunc, cancelFunc, accepthandfunc, foeDeck, player2summon, player2Cards, guestname;
-(function(g) {
-	var htmlElements = ["leftpane", "chatArea", "chatinput", "deckimport", "aideck", "foename", "change", "login", "password", "challenge", "chatBox", "trade", "bottompane", "demigodmode", "username"];
-	for (var i = 0;i < htmlElements.length;i++) {
-		g[htmlElements[i]] = document.getElementById(htmlElements[i]);
+(function() {
+var htmlElements = ["leftpane", "chatArea", "chatinput", "deckimport", "aideck", "foename", "change", "login", "password", "challenge", "chatBox", "trade", "bottompane", "demigodmode", "username"];
+for (var i = 0;i < htmlElements.length;i++) {
+	window[htmlElements[i]] = document.getElementById(htmlElements[i]);
+}
+if (localStorage){
+	var store = [username];
+	for (var i=0; i<store.length; i++){
+		(function(storei){
+			var field = storei.type == "checkbox" ? "checked" : "value";
+			if (localStorage[storei.id] !== undefined){
+				storei[field] = localStorage[storei.id];
+			}
+			storei.onchange = function(e){
+				localStorage[storei.id] = field == "checked" && !storei[field] ? "" : storei[field];
+			}
+		})(store[i]);
 	}
-	if (localStorage){
-		var store = [username];
-		for (var i=0; i<store.length; i++){
-			(function(storei){
-				var field = storei.type == "checkbox" ? "checked" : "value";
-				if (localStorage[storei.id] !== undefined){
-					storei[field] = localStorage[storei.id];
-				}
-				storei.onchange = function(e){
-					localStorage[storei.id] = field == "checked" && !storei[field] ? "" : storei[field];
-				}
-			})(store[i]);
-		}
-	}
-})(window);
+}
+})();
+var Cards, CardCodes, Targeting, game;
+(function(){
+var targetingMode, targetingModeCb, targetingText, discarding, user, renderer, endturnFunc, cancelFunc, accepthandfunc, foeDeck, player2summon, player2Cards, guestname, cardChosen;
 var etgutil = require("./etgutil");
 var etg = require("./etg");
 var MersenneTwister = require("./MersenneTwister");
@@ -26,7 +28,7 @@ var Actives = require("./Actives");
 var Effect = require("./Effect");
 var Quest = require("./Quest");
 var evalGameState = require("./ai.eval");
-var cardChosen = false;
+var ui = require("./uiutil");
 require("./etg.client").loadcards(function(cards, cardcodes, targeting) {
 	Cards = cards;
 	CardCodes = cardcodes;
@@ -57,10 +59,6 @@ function maybeSetButton(oldbutton, newbutton) {
 		oldbutton.visible = false;
 	if (newbutton)
 		newbutton.visible = true;
-}
-function reflectPos(obj) {
-	var pos = obj instanceof PIXI.Point ? obj : obj.position;
-	pos.set(900 - pos.x, 600 - pos.y);
 }
 function hitTest(obj, pos) {
 	var x = obj.position.x - obj.width * obj.anchor.x, y = obj.position.y - obj.height * obj.anchor.y;
@@ -109,43 +107,6 @@ function bitsToTgt(x) {
 		return player.hand[x >> 4];
 	} else console.log("Unknown tgtop: " + tgtop + ", " + x);
 }
-function creaturePos(j, i) {
-	var row = i < 8 ? 0 : i < 15 ? 1 : 2;
-	var column = row == 2 ? (i+1) % 8 : i % 8;
-	var p = new PIXI.Point( 151 + column * 79 + (row == 1 ? 79/2 : 0), 344 + row * 33);
-	if (j) {
-		reflectPos(p);
-	}
-	return p;
-}
-function permanentPos(j, i) {
-	var p = new PIXI.Point(140 + (i % 8) * 64  , 504 + Math.floor(i / 8) * 40);
-	if (j) {
-		reflectPos(p);
-	}
-	return p;
-}
-function tgtToPos(t) {
-	if (t instanceof etg.Creature) {
-		return creaturePos(t.owner == game.player2, t.getIndex());
-	} else if (t instanceof etg.Weapon) {
-		var p = new PIXI.Point(666, 512);
-		if (t.owner == game.player2) reflectPos(p);
-		return p;
-	} else if (t instanceof etg.Shield) {
-		var p = new PIXI.Point(710, 532);
-		if (t.owner == game.player2) reflectPos(p);
-		return p;
-	} else if (t instanceof etg.Permanent) {
-		return permanentPos(t.owner == game.player2, t.getIndex());
-	} else if (t instanceof etg.Player) {
-		var p = new PIXI.Point(50, 560);
-		if (t == game.player2) reflectPos(p);
-		return p;
-	} else if (t instanceof etg.CardInstance) {
-		return new PIXI.Point(j ? 20 : 780, (j ? 140 : 300) + 20 * i);
-	} else console.log("Unknown target");
-}
 function refreshRenderer(stage, animCb) {
 	if (realStage.children.length > 0){
 		realStage.removeChildren();
@@ -162,7 +123,7 @@ var caimgcache = {}, crimgcache = {}, wsimgcache = {}, artcache = {}, artimageca
 var elecols = [0xa99683, 0xaa5999, 0x777777, 0x996633, 0x5f4930, 0x50a005, 0xcc6611, 0x205080, 0xa9a9a9, 0x337ddd, 0xccaa22, 0x333333, 0x77bbdd];
 
 function lighten(c) {
-	return (c & 255) / 2 + 127 | ((c >> 8) & 255) / 2 + 127 << 8 | ((c >> 16) & 255) / 2 + 127 << 16;
+	return ((c & 255) + 127 >> 1) | (((c >> 8) & 255) + 127 << 7) | (((c >> 16) & 255) + 127 << 15);
 }
 function maybeLighten(card){
 	return card.upped ? lighten(elecols[card.element]) : elecols[card.element];
@@ -2525,10 +2486,10 @@ function startMatch() {
 				return spr;
 			}
 			for (var i = 0;i < 23;i++) {
-				gameui.addChild(creasprite[j][i] = makeInst(true, game.players[j].creatures, i, creaturePos(j, i)));
+				gameui.addChild(creasprite[j][i] = makeInst(true, game.players[j].creatures, i, ui.creaturePos(j, i)));
 			}
 			for (var i = 0;i < 16;i++) {
-				gameui.addChild(permsprite[j][i] = makeInst(false, game.players[j].permanents, i, permanentPos(j, i)));
+				gameui.addChild(permsprite[j][i] = makeInst(false, game.players[j].permanents, i, ui.permanentPos(j, i)));
 			}
 			setInteractive.apply(null, handsprite[j]);
 			setInteractive.apply(null, creasprite[j]);
@@ -2538,9 +2499,9 @@ function startMatch() {
 			gameui.addChild(weapsprite[j] = makeInst(true, null, "weapon", new PIXI.Point(666, 512), 5/4));
 			gameui.addChild(shiesprite[j] = makeInst(false, null, "shield", new PIXI.Point(710, 532), 5/4));
 			if (j) {
-				reflectPos(weapsprite[j]);
-				reflectPos(shiesprite[j]);
-				reflectPos(marksprite[j]);
+				ui.reflectPos(weapsprite[j]);
+				ui.reflectPos(shiesprite[j]);
+				ui.reflectPos(marksprite[j]);
 			}
 			gameui.addChild(marksprite[j]);
 			hptext[j].anchor.set(.5, .5);
@@ -2553,10 +2514,10 @@ function startMatch() {
 			decktext[j].position.set(50, 530);
 			damagetext[j].position.set(50, 510);
 			if (j) {
-				reflectPos(hptext[j]);
-				reflectPos(poisontext[j]);
-				reflectPos(decktext[j]);
-				reflectPos(damagetext[j]);
+				ui.reflectPos(hptext[j]);
+				ui.reflectPos(poisontext[j]);
+				ui.reflectPos(decktext[j]);
+				ui.reflectPos(damagetext[j]);
 			}
 			var child;
 			for (var k = 1;k < 13;k++) {
@@ -2874,7 +2835,7 @@ function maybeSendChat(e) {
 			userEmit("chat", { msg: msg, to: to ? to.replace(/"/g, "") : null });
 		}
 		else {
-			var name = username.value || guestname || (guestname = randomGuestName());
+			var name = username.value || guestname || (guestname = (10000 + Math.floor(Math.random() * 89999)) + "");
 			socket.emit("guestchat", { msg: msg, u: name });
 		}
 		e.preventDefault();
@@ -2883,8 +2844,8 @@ function maybeSendChat(e) {
 function sanitizeHtml(x) {
 	return x.replace(/</g, "&lt;").replace(/>/g, "&gt;");
 }
-function randomGuestName() {
-	return (10000 + Math.floor(Math.random() * 89999)) + "";
+function unaryParseInt(x) {
+	return parseInt(x, 10);
 }
 function maybeLogin(e) {
 	e.cancelBubble = true;
@@ -3007,6 +2968,8 @@ function libraryClick() {
 	if (Cards)
 		socket.emit("librarywant", { f: foename.value });
 }
-function unaryParseInt(x) {
-	return parseInt(x, 10);
+var expofuncs = [maybeLogin, maybeChallenge, maybeSendChat, changeClick, challengeClick, tradeClick, rewardClick, libraryClick, loginClick, getTextImage];
+for(var i=0; i<expofuncs.length; i++){
+	window[expofuncs[i].name] = expofuncs[i];
 }
+})();

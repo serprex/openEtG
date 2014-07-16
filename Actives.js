@@ -1,5 +1,6 @@
 var Effect = require("./Effect");
 var E = require("./etg");
+var ui = require("./uiutil");
 function mutantactive(t){
 	t.active = {};
 	var abilities = ["hatch","freeze","burrow","destroy","steal","dive","heal","paradox","lycanthropy","scavenger","infect","gpull","devour","mutation","growth","ablaze","poison","deja","endow","guard","mitosis"];
@@ -18,11 +19,11 @@ function mutantactive(t){
 }
 var Actives = {
 ablaze:function(c,t){
-	Effect.mkText("2|0", tgtToPos(c));
+	Effect.mkText("2|0", ui.tgtToPos(c));
 	c.atk += 2;
 },
 acceleration:function(c,t){
-	Effect.mkText("2|-1", tgtToPos(c));
+	Effect.mkText("2|-1", ui.tgtToPos(c));
 	c.atk += 2;
 	c.dmg(1, true);
 },
@@ -43,11 +44,11 @@ accumulation:function(c,t){
 	return c.status.charges;
 },
 adrenaline:function(c,t){
-	Effect.mkText("Adrenaline", tgtToPos(t));
+	Effect.mkText("Adrenaline", ui.tgtToPos(t));
 	t.status.adrenaline = 1;
 },
 aflatoxin:function(c,t){
-	Effect.mkText("Aflatoxin", tgtToPos(t));
+	Effect.mkText("Aflatoxin", ui.tgtToPos(t));
 	t.addpoison(2);
 	if (!(t instanceof E.Player)){
 		t.status.aflatoxin = true;
@@ -61,11 +62,11 @@ aggroskele:function(c,t){
 			dmg += c.owner.creatures[i].trueatk();
 		}
 	}
-	Effect.mkText("-"+dmg, tgtToPos(t));
+	Effect.mkText("-"+dmg, ui.tgtToPos(t));
 	t.dmg(dmg);
 },
 air:function(c,t){
-	Effect.mkText("1:9", tgtToPos(c));
+	Effect.mkText("1:9", ui.tgtToPos(c));
 	c.owner.spend(E.Air, -1);
 },
 alphawolf: function (c, t) {
@@ -85,7 +86,7 @@ animateweapon: function(c, t) {
 	t.owner.weapon = undefined;
 },
 antimatter:function(c,t){
-	Effect.mkText("Antimatter", tgtToPos(t));
+	Effect.mkText("Antimatter", ui.tgtToPos(t));
 	t.atk -= t.trueatk(0, true)*2;
 },
 appease:function(c,t){
@@ -93,7 +94,7 @@ appease:function(c,t){
 	c.status.appeased = true;
 },
 bblood:function(c,t){
-	Effect.mkText("0|20", tgtToPos(t));
+	Effect.mkText("0|20", ui.tgtToPos(t));
 	t.buffhp(20);
 	t.delay(6);
 },
@@ -106,7 +107,7 @@ blackhole:function(c,t){
 	}
 },
 bless:function(c,t){
-	Effect.mkText("3|3", tgtToPos(t));
+	Effect.mkText("3|3", ui.tgtToPos(t));
 	t.atk += 3;
 	t.buffhp(3);
 },
@@ -146,10 +147,10 @@ burrow:function(c,t){
 butterfly:function(c,t){
 	t.active = {cast: Actives.destroy};
 	t.cast = 3;
-	t.castele = Entropy;
+	t.castele = E.Entropy;
 },
 catapult:function(c,t){
-	Effect.mkText("Catapult", tgtToPos(t));
+	Effect.mkText("Catapult", ui.tgtToPos(t));
 	t.die();
 	c.owner.foe.dmg(Math.ceil(t.truehp()*(t.frozen?150:100)/(t.truehp()+100)));
 	if (t.status.poison){
@@ -178,7 +179,7 @@ chimera:function(c,t){
 	c.owner.gpull = chim;
 },
 clear:function(c,t){
-	Effect.mkText("Clear", tgtToPos(t));
+	Effect.mkText("Clear", ui.tgtToPos(t));
 	t.status.adrenaline = 0;
 	t.status.poison = 0;
 	t.status.aflatoxin = false;
@@ -243,7 +244,7 @@ deployblobs:function(c,t){
 },
 destroy:function(c,t, dontsalvage, donttalk){
 	if (!donttalk){
-		Effect.mkText("Destroy", tgtToPos(t));
+		Effect.mkText("Destroy", ui.tgtToPos(t));
 	}
 	if (t.passives.stackable){
 		if(--t.status.charges<=0){
@@ -260,7 +261,7 @@ destroycard:function(c,t){
 	}
 },
 devour:function(c,t){
-	Effect.mkText("1|1", tgtToPos(c));
+	Effect.mkText("1|1", ui.tgtToPos(c));
 	c.buffhp(1);
 	c.atk += 1;
 	if (t.passives.poisonous){
@@ -302,7 +303,7 @@ disshield:function(c,t, dmg){
 	return true;
 },
 dive:function(c,t){
-	Effect.mkText("Dive", tgtToPos(c));
+	Effect.mkText("Dive", ui.tgtToPos(c));
 	c.defstatus("dive", 0);
 	c.status.dive = c.trueatk();
 },
@@ -335,11 +336,11 @@ duality:function(c,t){
 	}
 },
 earth:function(c,t){
-	Effect.mkText("1:4", tgtToPos(c));
+	Effect.mkText("1:4", ui.tgtToPos(c));
 	c.owner.spend(E.Earth, -1);
 },
 earthquake:function(c,t){
-	Effect.mkText("Earthquake", tgtToPos(t));
+	Effect.mkText("Earthquake", ui.tgtToPos(t));
 	if (t.status.charges>3){
 		t.status.charges -= 3;
 	}else{
@@ -349,7 +350,7 @@ earthquake:function(c,t){
 },
 empathy:function(c,t){
 	var healsum = c.owner.countcreatures();
-	Effect.mkText("+"+healsum, tgtToPos(c));
+	Effect.mkText("+"+healsum, ui.tgtToPos(c));
 	c.owner.dmg(-healsum);
 	if (!c.owner.spend(E.Life, Math.floor(healsum/8))){
 		c.owner.quanta[E.Life] = 0;
@@ -357,11 +358,11 @@ empathy:function(c,t){
 	}
 },
 enchant:function(c,t){
-	Effect.mkText("Enchant", tgtToPos(t));
+	Effect.mkText("Enchant", ui.tgtToPos(t));
 	t.status.immaterial = true;
 },
 endow:function(c,t){
-	Effect.mkText("Endow", tgtToPos(t));
+	Effect.mkText("Endow", ui.tgtToPos(t));
 	c.passives = clone(t.passives);
 	for (key in t.status) {
 		if (typeof t.status[key] == "boolean")
@@ -416,7 +417,7 @@ fiery:function(c,t){
 	return Math.floor(c.owner.quanta[E.Fire]/5);
 },
 fire:function(c,t){
-	Effect.mkText("1:6", tgtToPos(c));
+	Effect.mkText("1:6", ui.tgtToPos(c));
 	c.owner.spend(E.Fire, -1);
 },
 firebolt:function(c,t){
@@ -447,14 +448,14 @@ flyingweapon: function(c, t) {
 	t.owner.weapon = undefined;
 },
 fractal:function(c,t){
-	Effect.mkText("Fractal", tgtToPos(t));
+	Effect.mkText("Fractal", ui.tgtToPos(t));
 	c.owner.quanta[E.Aether] = 0;
 	for(var i=c.owner.hand.length; i<8; i++){
 		c.owner.hand[i] = new E.CardInstance(t.card, c.owner);
 	}
 },
 freeze:function(c,t){
-	Effect.mkText("Freeze", tgtToPos(t));
+	Effect.mkText("Freeze", ui.tgtToPos(t));
 	t.freeze(c.card.upped && c.card != Cards.PandemoniumUp ? 4 : 3);
 },
 fungusrebirth:function(c,t){
@@ -490,7 +491,7 @@ give:function(c,t){
 	}
 },
 gpull:function(c,t){
-	Effect.mkText("Pull", tgtToPos(c));
+	Effect.mkText("Pull", ui.tgtToPos(c));
 	c.owner.gpull = c;
 },
 gpullspell:function(c,t){
@@ -499,7 +500,7 @@ gpullspell:function(c,t){
 	}else Actives.gpull(t);
 },
 gratitude:function(c,t){
-	Effect.mkText("+4", tgtToPos(c));
+	Effect.mkText("+4", ui.tgtToPos(c));
 	c.owner.dmg(-4);
 },
 grave:function(c,t){
@@ -507,12 +508,12 @@ grave:function(c,t){
 	c.transform(t.card);
 },
 growth: function (c, t) {
-    Effect.mkText("2|2", tgtToPos(c))
+    Effect.mkText("2|2", ui.tgtToPos(c))
 	c.buffhp(2);
 	c.atk += 2;
 },
 guard:function(c,t){
-	Effect.mkText("Guard", tgtToPos(t));
+	Effect.mkText("Guard", ui.tgtToPos(t));
 	c.delay(1);
 	t.delay(1);
 	if (!t.passives.airborne){
@@ -526,7 +527,7 @@ hasten:function(c,t){
 	c.owner.drawcard();
 },
 hatch:function(c,t){
-	Effect.mkText("Hatch", tgtToPos(c));
+	Effect.mkText("Hatch", ui.tgtToPos(c));
 	c.transform(c.owner.randomcard(c.card.upped, function(x){return x.type == E.CreatureEnum}));
 },
 heal:function(c,t){
@@ -573,7 +574,7 @@ immolate:function(c,t){
 	}
 },
 improve:function(c,t){
-	Effect.mkText("Improve", tgtToPos(t));
+	Effect.mkText("Improve", ui.tgtToPos(t));
 	t.transform(c.owner.randomcard(false, function(x){return x.type == E.CreatureEnum}));
 	t.buffhp(c.owner.upto(5));
 	t.atk += c.owner.upto(5);
@@ -583,7 +584,7 @@ improve:function(c,t){
 	}
 },
 infect:function(c,t){
-	Effect.mkText("Infect", tgtToPos(t));
+	Effect.mkText("Infect", ui.tgtToPos(t));
 	t.addpoison(1);
 },
 infest:function(c,t){
@@ -698,15 +699,15 @@ layegg:function(c,t){
 	new E.Creature(Cards.FateEgg.asUpped(c.card.upped), c.owner).place();
 },
 light:function(c,t){
-	Effect.mkText("1:8", tgtToPos(c));
+	Effect.mkText("1:8", ui.tgtToPos(c));
 	c.owner.spend(E.Light, -1);
 },
 lightning:function(c,t){
-	Effect.mkText("-5", tgtToPos(t));
+	Effect.mkText("-5", ui.tgtToPos(t));
 	t.spelldmg(5);
 },
 liquid:function(c,t){
-	Effect.mkText("Liquid", tgtToPos(t));
+	Effect.mkText("Liquid", ui.tgtToPos(t));
 	t.active = {hit: Actives.vampire};
 	t.addpoison(1);
 },
@@ -724,7 +725,7 @@ livingweapon:function(c,t){
 	}
 },
 lobotomize:function(c,t){
-	Effect.mkText("Lobotomize", tgtToPos(t));
+	Effect.mkText("Lobotomize", ui.tgtToPos(t));
 	t.active = {};
 	t.status.momentum = false;
 	t.status.psion = false;
@@ -743,7 +744,7 @@ luciferin:function(c,t){
 	});
 },
 lycanthropy:function(c,t){
-	Effect.mkText("5|5", tgtToPos(c));
+	Effect.mkText("5|5", ui.tgtToPos(c));
 	c.buffhp(5);
 	c.atk += 5;
 	delete c.active.cast;
@@ -757,7 +758,6 @@ metamorph:function(c,t){
 	c.owner.spend(c.owner.mark, -2);
 },
 mimic: function (c, t) {
-	console.log(t);
 	if (c == t || !(t instanceof E.Creature)) return;
 	c.transform(t.card);
 	c.addactive("play", Actives.mimic);
@@ -780,7 +780,7 @@ mitosisspell:function(c,t){
 	t.buffhp(1);
 },
 momentum:function(c,t){
-	Effect.mkText("Momentum", tgtToPos(t));
+	Effect.mkText("Momentum", ui.tgtToPos(t));
 	t.atk += 1;
 	t.buffhp(1);
 	t.status.momentum = true;
@@ -795,12 +795,12 @@ mutant: function (c, t) {
 mutation:function(c,t){
 	var rnd = c.owner.rng();
 	if (rnd<.1){
-		Effect.mkText("Death", tgtToPos(t));
+		Effect.mkText("Death", ui.tgtToPos(t));
 		t.die();
 	}else if (rnd<(t.card.isOf(Cards.Abomination)?.9:.5)){
 		Actives.improve(c, t);
 	}else{
-		Effect.mkText("Abomination", tgtToPos(t));
+		Effect.mkText("Abomination", ui.tgtToPos(t));
 		t.transform(Cards.Abomination);
 	}
 },
@@ -816,7 +816,7 @@ neuroify:function(c,t){
 	}
 },
 nightmare:function(c,t){
-	Effect.mkText("Nightmare", tgtToPos(t));
+	Effect.mkText("Nightmare", ui.tgtToPos(t));
 	if (!c.owner.foe.sanctuary){
 		c.owner.dmg(-c.owner.foe.dmg(16-c.owner.foe.hand.length*2));
 		for(var i = c.owner.foe.hand.length; i<8; i++){
@@ -843,7 +843,7 @@ nova2:function(c,t){
 	}
 },
 nymph:function(c,t){
-	Effect.mkText("Nymph", tgtToPos(t));
+	Effect.mkText("Nymph", ui.tgtToPos(t));
 	var e = t.card.element || c.owner.uptoceil(12);
 	Actives.destroy(c, t, false, true);
 	new E.Creature(CardCodes[E.NymphList[e*2+(t.card.upped?1:0)]], t.owner).place();
@@ -857,7 +857,7 @@ ouija:function(c,t){
 	}
 },
 overdrive:function(c,t){
-	Effect.mkText("3|-1", tgtToPos(c));
+	Effect.mkText("3|-1", ui.tgtToPos(c));
 	c.atk += 3;
 	c.dmg(1, true);
 },
@@ -874,11 +874,11 @@ pandemonium2:function(c,t){
 	t.masscc(c, Actives.cseed);
 },
 paradox:function(c,t){
-	Effect.mkText("Paradox", tgtToPos(t));
+	Effect.mkText("Paradox", ui.tgtToPos(t));
 	t.die();
 },
 parallel:function(c,t){
-	Effect.mkText("Parallel", tgtToPos(t));
+	Effect.mkText("Parallel", ui.tgtToPos(t));
 	var copy = t.clone(c.owner);
 	copy.place();
 	if (copy.passives.voodoo){
@@ -902,7 +902,7 @@ phoenix:function(c,t, index){
 	}
 },
 photosynthesis:function(c,t){
-	Effect.mkText("2:5", tgtToPos(c));
+	Effect.mkText("2:5", ui.tgtToPos(c));
 	c.owner.spend(E.Life, -2);
 	if (c.cast > 0){
 		c.usedactive = false;
@@ -913,7 +913,7 @@ plague:function(c,t){
 },
 platearmor:function(c,t){
 	var buff = c.card.upped?6:4;
-	Effect.mkText("0|"+buff, tgtToPos(t));
+	Effect.mkText("0|"+buff, ui.tgtToPos(t));
 	t.buffhp(buff);
 },
 poison:function(c,t){
@@ -942,7 +942,7 @@ queen:function(c,t){
 	new E.Creature(Cards.Firefly.asUpped(c.card.upped), c.owner).place();
 },
 quint:function(c,t){
-	Effect.mkText("Immaterial", tgtToPos(t));
+	Effect.mkText("Immaterial", ui.tgtToPos(t));
 	t.status.immaterial = true;
 	t.status.frozen = 0;
 },
@@ -952,12 +952,12 @@ randomdr: function(c, t) {
 },
 rage:function(c,t){
 	var dmg = c.card.upped?6:5;
-	Effect.mkText(dmg+"|-"+dmg, tgtToPos(t));
+	Effect.mkText(dmg+"|-"+dmg, ui.tgtToPos(t));
 	t.atk += dmg;
 	t.dmg(dmg);
 },
 readiness:function(c,t){
-	Effect.mkText("Ready", tgtToPos(t));
+	Effect.mkText("Ready", ui.tgtToPos(t));
 	if (t.active.cast){
 		t.cast = 0;
 		t.usedactive = false;
@@ -970,7 +970,7 @@ regen:function(c,t){
 	c.owner.status.poison--;
 },
 regenerate:function(c,t){
-	Effect.mkText("+5", tgtToPos(c));
+	Effect.mkText("+5", ui.tgtToPos(c));
 	c.owner.dmg(-5);
 },
 regeneratespell:function(c,t){
@@ -985,14 +985,14 @@ regrade:function(c,t){
 },
 reinforce:function(c,t){
 	var atk = c.trueatk(), hp = c.truehp()
-	Effect.mkText(atk+"|"+hp, tgtToPos(t));
+	Effect.mkText(atk+"|"+hp, ui.tgtToPos(t));
 	t.atk += atk;
 	t.buffhp(hp);
 	c.remove();
 },
 ren:function(c,t){
 	if (!t.hasactive("predeath", "bounce")){
-		Effect.mkText("Ren", tgtToPos(t));
+		Effect.mkText("Ren", ui.tgtToPos(t));
 		t.addactive("predeath", Actives.bounce);
 	}
 },
@@ -1006,7 +1006,7 @@ rewind:function(c,t){
 	}else if (t.card.isOf(Cards.Mummy)){
 		t.transform(Cards.Pharaoh.asUpped(t.card.upped));
 	}else{
-		Effect.mkText("Rewind", tgtToPos(t));
+		Effect.mkText("Rewind", ui.tgtToPos(t));
 		t.remove();
 		t.owner.deck.push(t.card);
 	}
@@ -1042,14 +1042,14 @@ ricochet:function(c,t){
 },
 sanctuary:function(c,t){
 	c.owner.sanctuary = true;
-	Effect.mkText("+4", tgtToPos(c));
+	Effect.mkText("+4", ui.tgtToPos(c));
 	c.owner.dmg(-4);
 },
 scarab:function(c,t){
 	new E.Creature(Cards.Scarab.asUpped(c.card.upped), c.owner).place();
 },
 scavenger:function(c,t){
-	Effect.mkText("1|1", tgtToPos(c));
+	Effect.mkText("1|1", ui.tgtToPos(c));
 	c.atk += 1;
 	c.buffhp(1);
 },
@@ -1107,29 +1107,29 @@ singularity:function(c,t){
 	c.dmg(c.trueatk(), true);
 },
 sinkhole:function(c,t){
-	Effect.mkText("Sinkhole", tgtToPos(t));
+	Effect.mkText("Sinkhole", ui.tgtToPos(t));
 	t.status.burrowed = true;
 	t.active = {cast: Actives.unburrow};
 	t.cast = c.card.upped?1:0;
-	t.castele = Earth;
+	t.castele = E.Earth;
 	t.usedactive = true;
 },
 siphon: function(c, t) {
 	if (!c.owner.foe.sanctuary && c.owner.foe.spend(E.Other, 1)) {
-		Effect.mkText("1:11", tgtToPos(c));
+		Effect.mkText("1:11", ui.tgtToPos(c));
 		c.owner.spend(E.Darkness, -1);
 	}
 },
 siphonactive:function(c,t){
-	Effect.mkText("Siphon", tgtToPos(t));
+	Effect.mkText("Siphon", ui.tgtToPos(t));
 	c.active = t.active;
 	c.cast = t.cast;
 	c.castele = t.castele;
 	t.active = {};
 },
 siphonstrength:function(c,t){
-	Effect.mkText("+1|0", tgtToPos(c));
-	Effect.mkText("-1|0", tgtToPos(t));
+	Effect.mkText("+1|0", ui.tgtToPos(c));
+	Effect.mkText("-1|0", ui.tgtToPos(t));
 	t.atk--;
 	c.atk++;
 },
@@ -1138,14 +1138,14 @@ skyblitz:function(c,t){
 	for(var i=0; i<23; i++){
 		var cr = c.owner.creatures[i];
 		if (cr && cr.passives.airborne){
-			Effect.mkText("Dive", tgtToPos(cr));
+			Effect.mkText("Dive", ui.tgtToPos(cr));
 			cr.defstatus("dive", 0);
 			cr.status.dive += cr.trueatk();
 		}
 	}
 },
 snipe:function(c,t){
-	Effect.mkText("-3", tgtToPos(t));
+	Effect.mkText("-3", ui.tgtToPos(t));
 	t.dmg(3);
 },
 sosa:function(c,t){
@@ -1159,7 +1159,7 @@ sosa:function(c,t){
 	c.owner.dmg(Math.max(Math.ceil(c.owner.maxhp*n/100), n), true);
 },
 soulcatch:function(c,t){
-	Effect.mkText("Soul", tgtToPos(c));
+	Effect.mkText("Soul", ui.tgtToPos(c));
 	c.owner.spend(E.Death, -3);
 },
 spores:function(c,t, index){
@@ -1204,12 +1204,12 @@ steal:function(c,t){
 	}
 },
 steam:function(c,t){
-	Effect.mkText("5|0", tgtToPos(c));
+	Effect.mkText("5|0", ui.tgtToPos(c));
 	c.defstatus("steamatk", 0);
 	c.status.steamatk += 5;
 },
 stoneform:function(c,t){
-	Effect.mkText("0|20", tgtToPos(c));
+	Effect.mkText("0|20", ui.tgtToPos(c));
 	c.buffhp(20);
 	delete c.active.cast;
 },
@@ -1221,21 +1221,21 @@ storm3:function(c,t){
 },
 swave:function(c,t){
 	if (t.status.frozen){
-		Effect.mkText("Death", tgtToPos(t));
+		Effect.mkText("Death", ui.tgtToPos(t));
 		t.die();
 	}else{
-		Effect.mkText("-4", tgtToPos(t));
+		Effect.mkText("-4", ui.tgtToPos(t));
 		t.spelldmg(4);
 	}
 },
 tempering:function(c,t){
 	var atk = c.card.upped?5:3;
-	Effect.mkText(atk+"|0", tgtToPos(t));
+	Effect.mkText(atk+"|0", ui.tgtToPos(t));
 	t.atk += atk;
 },
 throwrock:function(c,t){
 	var dmg = c.card.upped?4:3;
-	Effect.mkText("-"+dmg, tgtToPos(t));
+	Effect.mkText("-"+dmg, ui.tgtToPos(t));
 	t.spelldmg(dmg);
 	t.owner.deck.splice(c.owner.upto(t.owner.deck.length), 0, Cards.ThrowRock.asUpped(c.card.upped));
 },
@@ -1284,11 +1284,11 @@ quantagift:function(c,t){
 	}
 },
 web:function(c,t){
-	Effect.mkText("Web", tgtToPos(t));
+	Effect.mkText("Web", ui.tgtToPos(t));
 	t.passives.airborne = false;
 },
 wisdom:function(c,t){
-	Effect.mkText("3|0", tgtToPos(t));
+	Effect.mkText("3|0", ui.tgtToPos(t));
 	t.atk += 3;
 	if (t.status.immaterial){
 		t.status.psion = true;
@@ -1330,7 +1330,7 @@ chaos:function(c,t){
 },
 cold:function(c,t){
 	if (c.owner.rng()<.3){
-		Effect.mkText("Freeze", tgtToPos(t));
+		Effect.mkText("Freeze", ui.tgtToPos(t));
 		t.freeze(3);
 	}
 },
@@ -1342,7 +1342,7 @@ despair:function(c,t){
 		}
 	}
 	if (c.owner.rng() < 1.2-Math.pow(.95, chance)){
-		Effect.mkText("-1|-1", tgtToPos(t));
+		Effect.mkText("-1|-1", ui.tgtToPos(t));
 		t.atk--;
 		t.dmg(1);
 	}

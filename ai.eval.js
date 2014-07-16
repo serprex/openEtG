@@ -1,5 +1,6 @@
 "use strict";
 var etg = require("./etg");
+var Actives = require("./Actives");
 var disableLogging = true;
 function log(){
 	if (!disableLogging){
@@ -229,7 +230,7 @@ var ActivesValues = {
 	skull:5,
 	slow:6,
 	solar:function(c){
-		var coq = c.owner.quanta[Light];
+		var coq = c.owner.quanta[etg.Light];
 		return 6*coq/(6+coq);
 	},
 	thorn:5,
