@@ -1037,16 +1037,21 @@ preLoader.onComplete = function() {
 refreshRenderer(loadingBarGraphic);
 preLoader.load();
 requestAnimate();
-function makeButton(x, y, i, mouseoverfunc) {
-	var b = new PIXI.Sprite(buttex);
-	b.position.set(x, y);
+function makeButton(x, y, img, mouseoverfunc) {
+	var b;
+	if (typeof img == "string"){
+		b = new PIXI.Sprite(buttex);
+		var txt = new PIXI.Text(img, {font: "14px Dosis"});
+		txt.anchor.set(.5, .5);
+		txt.position.set(b.width/2, b.height/2);
+		if (txt.width>b.width-6) txt.width=b.width-6;
+		b.addChild(txt);
+	}else{
+		b = new PIXI.Sprite(img);
+	}
 	b.interactive = true;
 	b.buttonMode = true;
-	var txt = new PIXI.Text(i, {font: "14px Dosis"});
-	txt.anchor.set(.5, .5);
-	txt.position.set(b.width/2, b.height/2);
-	if (txt.width>b.width-6) txt.width=b.width-6;
-	b.addChild(txt);
+	b.position.set(x, y);
 	b.mousedown = function() {
 		b.tint = 0x666666;
 	}
