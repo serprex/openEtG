@@ -548,7 +548,6 @@ function aiEvalFunc() {
 	var gameBack = game;
 	var disableEffectsBack = Effect.disable;
 	Effect.disable = true;
-	game = cloneGame(game);
 	var self = game.player2;
 	var limit = 999;
 	function mkcommand(cbits, tbits) {
@@ -562,7 +561,7 @@ function aiEvalFunc() {
 			function evalIter(t, ignoret) {
 				if ((ignoret || (t && targetingMode(t))) && limit > 0) {
 					var tbits = tgtToBits(t) ^ 8;
-					var gameBack2 = game, targetingModeBack = targetingMode, targetingModeCbBack = targetingModeCb;
+					var gameBack = game, targetingModeBack = targetingMode, targetingModeCbBack = targetingModeCb;
 					game = cloneGame(game);
 					limit--;
 					var tone = bitsToTgt(tbits);
@@ -580,7 +579,7 @@ function aiEvalFunc() {
 							candidates = iterRet;
 						}
 					}
-					game = gameBack2;
+					game = gameBack;
 					targetingMode = targetingModeBack;
 					targetingModeCb = targetingModeCbBack;
 				}
@@ -656,7 +655,6 @@ function aiEvalFunc() {
 	}
 	var cmd = iterLoop(1, [])[1];
 	console.log("Leftover iters: " + limit);
-	game = gameBack;
 	Effect.disable = disableEffectsBack;
 	if (cmd) {
 		return cmd[0];
