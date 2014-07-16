@@ -486,7 +486,7 @@ function initLibrary(pool){
 	});
 }
 function initGame(data, ai) {
-	game = etg.mkGame(data.first, data.seed);
+	game = new etg.Game(data.first, data.seed);
 	if (data.hp) {
 		game.player2.maxhp = game.player2.hp = data.hp;
 	}
@@ -522,18 +522,13 @@ function initGame(data, ai) {
 		}
 	}
 	foeDeck = game.player2.deck.slice();
-	if (game.turn == game.player1) {
-		game.player1.drawhand(7);
-		game.player2.drawhand(7);
-	} else {
-		game.player2.drawhand(7);
-		game.player1.drawhand(7);
-	}
+	game.turn.drawhand(7);
+	game.turn.foe.drawhand(7);
 	if (data.foename) game.foename = data.foename;
 	if (ai) {
 		game.player2.ai = ai;
 		if (game.turn == game.player2) {
-			etg.progressMulligan(game);
+			game.progressMulligan();
 		}
 	}
 	startMatch();
@@ -549,7 +544,6 @@ function aiEvalFunc() {
 	var gameBack = game;
 	var disableEffectsBack = Effect.disable;
 	Effect.disable = true;
-	var self = game.player2;
 	var limit = 999;
 	function mkcommand(cbits, tbits) {
 		return ["cast", cbits | tbits << 9];
@@ -563,7 +557,7 @@ function aiEvalFunc() {
 				if ((ignoret || (t && targetingMode(t))) && limit > 0) {
 					var tbits = tgtToBits(t) ^ 8;
 					var gameBack = game, targetingModeBack = targetingMode, targetingModeCbBack = targetingModeCb;
-					game = etg.cloneGame(game);
+					game = game.clone();
 					limit--;
 					var tone = bitsToTgt(tbits);
 					bitsToTgt(cbits).useactive(tone);
@@ -657,6 +651,7 @@ function aiEvalFunc() {
 	var cmd = iterLoop(1, [])[1];
 	console.log("Leftover iters: " + limit);
 	Effect.disable = disableEffectsBack;
+	var self = game.player2;
 	if (cmd) {
 		return cmd[0];
 	} else if (self.hand.length == 8) {
@@ -2394,9 +2389,9 @@ function startMatch() {
 		if (!game.player2.ai) {
 			socket.emit("mulligan", true);
 		}
-		etg.progressMulligan(game);
+		game.progressMulligan();
 		if (game.phase == etg.MulliganPhase2 && game.player2.ai) {
-			etg.progressMulligan(game);
+			game.progressMulligan();
 		}
 	}
 	cancelFunc = cancel.click = function() {
@@ -2810,7 +2805,7 @@ socket.on("endturn", cmds.endturn);
 socket.on("cast", cmds.cast);
 socket.on("foeleft", function(data) {
 	if (game && !game.player2.ai) {
-		etg.setWinner(game, game.player1);
+		game.setWinner(game.player1);
 	}
 });
 socket.on("chat", function(data) {
@@ -2829,7 +2824,7 @@ socket.on("chat", function(data) {
 });
 socket.on("mulligan", function(data) {
 	if (data === true) {
-		etg.progressMulligan(game);
+		game.progressMulligan();
 	} else {
 		game.player2.drawhand(game.player2.hand.length - 1);
 	}

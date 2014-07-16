@@ -1,3 +1,18 @@
+var MersenneTwister = require("./MersenneTwister");
+var Actives = require("./Actives");
+var Effect = require("./Effect");
+function Game(first, seed){
+	this.rng = new MersenneTwister(seed);
+	this.phase = MulliganPhase1;
+	this.ply = 0;
+	this.player1 = new Player(this);
+	this.player2 = new Player(this);
+	this.player1.foe = this.player2;
+	this.player2.foe = this.player1;
+	this.players = [this.player1, this.player2];
+	this.turn = first?this.player1:this.player2;
+	this.startTime = Date.now();
+}
 function Card(type, info){
 	this.type = type;
 	this.element = parseInt(info.Element);
@@ -188,35 +203,35 @@ var NymphList = [undefined, undefined,
 	"5s4", "7qk",
 	"5v8", "7to",
 	"62c", "80s"];
-function mkGame(first, seed){
-	var game = { rng: new MersenneTwister(seed), phase: MulliganPhase1, ply: 0 };
-	game.player1 = new Player(game);
-	game.player2 = new Player(game);
-	game.player1.foe = game.player2;
-	game.player2.foe = game.player1;
-	game.players = [game.player1, game.player2];
-	game.turn = first?game.player1:game.player2;
-	game.startTime = Date.now();
-	return game;
-}
-function cloneGame(game){
-	var obj = {
-		rng: game.rng.clone(),
-		phase: game.phase
-	};
-	obj.player1 = game.player1.clone(obj),
-	obj.player2 = game.player2.clone(obj),
+Game.prototype.clone = function(){
+	var obj = Object.create(Game.prototype);
+	obj.rng = this.rng.clone();
+	obj.phase = this.phase;
+	obj.ply = this.ply;
+	obj.player1 = this.player1.clone(obj);
+	obj.player2 = this.player2.clone(obj);
 	obj.player1.foe = obj.player2;
 	obj.player2.foe = obj.player1;
 	obj.players = [obj.player1, obj.player2];
-	obj.turn = game.turn == game.player1?obj.player1:obj.player2;
+	obj.turn = this.turn == this.player1?obj.player1:obj.player2;
 	return obj;
 }
-function setWinner(game, play){
-	if (!game.winner){
-		game.winner=play;
-		game.phase=EndPhase;
+Game.prototype.setWinner = function(play){
+	if (!this.winner){
+		this.winner=play;
+		this.phase=EndPhase;
 	}
+}
+Game.prototype.progressMulligan = function(){
+	if (this.phase == MulliganPhase1){
+		this.phase = MulliganPhase2;
+	}else if(this.phase == MulliganPhase2){
+		this.phase = PlayPhase;
+	}else{
+		console.log("Not mulligan phase: " + game.phase);
+		return;
+	}
+	this.turn = this.turn.foe;
 }
 Player.prototype.shuffle = function(array) {
 	var counter = array.length, temp, index;
@@ -646,7 +661,7 @@ Player.prototype.drawcard = function() {
 			this.procactive("draw");
 			if (this.deck.length == 0 && this.game.player1 == this)
 				Effect.mkSpriteFade(getTextImage("This was your last card!", mkFont(32, "white"), 0));
-		}else setWinner(this.game, this.foe);
+		}else this.game.setWinner(this.foe);
 	}
 }
 Player.prototype.drawhand = function(x) {
@@ -785,7 +800,7 @@ Player.prototype.dmg = function(x, ignoresosa) {
 	}else{
 		this.hp -= x;
 		if (this.hp <= 0 && !this.game.winner){
-			setWinner(this.game, this.foe);
+			this.game.setWinner(this.foe);
 		}
 		return sosa?-x:x;
 	}
@@ -1115,17 +1130,6 @@ Player.prototype.randomcard = function(upped, filter){
 	var keys = filtercards(upped, filter);
 	return CardCodes[keys[this.upto(keys.length)]];
 }
-function progressMulligan(game){
-	if (game.phase == MulliganPhase1){
-		game.phase = MulliganPhase2;
-	}else if(game.phase == MulliganPhase2){
-		game.phase = PlayPhase;
-	}else{
-		console.log("Not mulligan phase: " + game.phase);
-		return;
-	}
-	game.turn = game.turn.foe;
-}
 function activename(active){
 	return active?active.activename:"";
 }
@@ -1225,6 +1229,7 @@ var TargetFilters = {
 };
 
 module.exports = {
+	Game: Game,
 	Card: Card,
 	Player: Player,
 	CardInstance: CardInstance,
@@ -1234,11 +1239,7 @@ module.exports = {
 	Permanent: Permanent,
 	Creature: Creature,
 	isEmpty: isEmpty,
-	cloneGame: cloneGame,
-	mkGame: mkGame,
-	setWinner: setWinner,
 	salvageScan: salvageScan,
-	progressMulligan: progressMulligan,
 	filtercards: filtercards,
 	countAdrenaline: countAdrenaline,
 	casttext: casttext,
