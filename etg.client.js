@@ -1,3 +1,4 @@
+var etg = require("./etg");
 exports.loadcards = function(cb){
 	var Cards = {};
 	var CardCodes = {};
@@ -34,7 +35,7 @@ exports.loadcards = function(cb){
 						if(cardcode in CardCodes){
 							console.log(cardcode + " duplicate");
 						}
-						Cards[nospacename in Cards?nospacename+"Up":nospacename] = CardCodes[cardcode] = new Card(_i, cardinfo);
+						Cards[nospacename in Cards?nospacename+"Up":nospacename] = CardCodes[cardcode] = new etg.Card(_i, cardinfo);
 					}
 					maybeCallback();
 				}
@@ -49,7 +50,7 @@ exports.loadcards = function(cb){
 			var csv = this.responseText.split("\n");
 			for (var i=0; i<csv.length; i++){
 				var keypair = csv[i].split(",");
-				Targeting[keypair[0]] = getTargetFilter(keypair[1]);
+				Targeting[keypair[0]] = etg.getTargetFilter(keypair[1]);
 			}
 			maybeCallback();
 		}

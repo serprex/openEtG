@@ -68,4 +68,11 @@ MersenneTwister.prototype.rndHiRes = function () {
 	return (a * 67108864.0 + b) * (1.0 / 9007199254740992.0);
 };
 
+MersenneTwister.prototype.clone = function () {
+	var obj = Object.create(MersenneTwister.prototype);
+	obj.mti = this.mti;
+	obj.mt = this.mt.slice();
+	return obj;
+};
+
 module.exports = MersenneTwister;

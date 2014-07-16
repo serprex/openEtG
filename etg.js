@@ -199,15 +199,9 @@ function mkGame(first, seed){
 	game.startTime = Date.now();
 	return game;
 }
-function cloneRng(rng){
-	var obj = Object.create(MersenneTwister.prototype);
-	obj.mti = rng.mti;
-	obj.mt = rng.mt.slice();
-	return obj;
-}
 function cloneGame(game){
 	var obj = {
-		rng: cloneRng(game.rng),
+		rng: game.rng.clone(),
 		phase: game.phase
 	};
 	obj.player1 = game.player1.clone(obj),
@@ -1228,4 +1222,51 @@ var TargetFilters = {
 	wisdom:function(c, t){
 		return (t instanceof Creature || t instanceof Weapon) && !t.status.burrowed;
 	}
+};
+
+module.exports = {
+	Card: Card,
+	Player: Player,
+	CardInstance: CardInstance,
+	Pillar: Pillar,
+	Weapon: Weapon,
+	Shield: Shield,
+	Permanent: Permanent,
+	Creature: Creature,
+	isEmpty: isEmpty,
+	cloneGame: cloneGame,
+	mkGame: mkGame,
+	setWinner: setWinner,
+	salvageScan: salvageScan,
+	progressMulligan: progressMulligan,
+	filtercards: filtercards,
+	countAdrenaline: countAdrenaline,
+	casttext: casttext,
+	getTargetFilter: getTargetFilter,
+	NymphList: NymphList,
+	TrueMarks: TrueMarks,
+	PlayerRng: PlayerRng,
+	Other: 0,
+	Entropy: 1,
+	Death: 2,
+	Gravity: 3,
+	Earth: 4,
+	Life: 5,
+	Fire: 6,
+	Water: 7,
+	Light: 8,
+	Air: 9,
+	Time: 10,
+	Darkness: 11,
+	Aether: 12,
+	PillarEnum: 0,
+	WeaponEnum: 1,
+	ShieldEnum: 2,
+	PermanentEnum: 3,
+	SpellEnum: 4,
+	CreatureEnum: 5,
+	MulliganPhase1: 0,
+	MulliganPhase2: 1,
+	PlayPhase: 2,
+	EndPhase: 3,
 };

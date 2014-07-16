@@ -1,4 +1,5 @@
 "use strict";
+var etg = require("./etg");
 var disableLogging = true;
 function log(){
 	if (!disableLogging){
@@ -17,8 +18,9 @@ var ActivesValues = {
 	aggroskele:2,
 	air:1,
 	alphawolf:function(c){
-		return c instanceof CardInstance?2:0;
+		return c instanceof etg.CardInstance?2:0;
 	},
+	animateweapon:4,
 	antimatter:12,
 	bblood:7,
 	blackhole:function(c){
@@ -46,18 +48,18 @@ var ActivesValues = {
 	deadalive:2,
 	deja:4,
 	deployblobs: function(c) {
-		return 2+(c instanceof CardInstance ? c.card.health : c.truehp());
+		return 2+(c instanceof etg.CardInstance ? c.card.health : c.truehp());
 	},
 	destroy:8,
 	destroycard:1,
 	devour:function(c){
-		return 2+(c instanceof CardInstance?c.card.health:c.truehp());
+		return 2+(c instanceof etg.CardInstance?c.card.health:c.truehp());
 	},
 	disarm:5,
 	disfield:8,
 	disshield:7,
 	dive:function(c){
-		return c instanceof CardInstance?c.card.attack:truetrueatk(c)-c.cast-(c.status.dive||0);
+		return c instanceof etg.CardInstance?c.card.attack:truetrueatk(c)-c.cast-(c.status.dive||0);
 	},
 	divinity:3,
 	drainlife:10,
@@ -192,12 +194,12 @@ var ActivesValues = {
 	tempering:3,
 	throwrock: 2,
 	tick:function(c){
-		return c instanceof CardInstance ? 3 : c.maxhp - c.truehp();
+		return c instanceof etg.CardInstance ? 3 : c.maxhp - c.truehp();
 	},
 	unburrow:0,
 	upkeep:-.5,
 	vampire:function(c){
-		return (c instanceof CardInstance?c.card.attack:truetrueatk(c))*.7;
+		return (c instanceof etg.CardInstance?c.card.attack:truetrueatk(c))*.7;
 	},
 	virusinfect:0,
 	virusplague:1,
@@ -207,13 +209,13 @@ var ActivesValues = {
 	wisdom:4,
 	yoink:4,
 	pillar:function(c){
-		return c instanceof CardInstance?0:c.status.charges/4;
+		return c instanceof etg.CardInstance?0:c.status.charges/4;
 	},
 	pend:function(c){
-		return c instanceof CardInstance?0:c.status.charges/4;
+		return c instanceof etg.CardInstance?0:c.status.charges/4;
 	},
 	blockwithcharge:function(c){
-		return c instanceof CardInstance?c.card.status.charges:c.status?c.status.charges:c.card.status.charges;
+		return c instanceof etg.CardInstance?c.card.status.charges:c.status?c.status.charges:c.card.status.charges;
 	},
 	cold:7,
 	despair:5,
@@ -270,12 +272,12 @@ function truetrueatk(c) {
 	}else{
 		dr = fsh?fsh.truedr():0;
 		atk = Math.max(tatk-dr, 0);
-		if (fshactive == Actives.weight && c instanceof Creature && c.truehp()>5){
+		if (fshactive == Actives.weight && c instanceof etg.Creature && c.truehp()>5){
 			atk = 0;
 		}
 	}
 	if (atk>0 && c.status.adrenaline) {
-		var attacks = countAdrenaline(tatk);
+		var attacks = etg.countAdrenaline(tatk);
 		while (c.status.adrenaline < attacks) {
 			c.status.adrenaline++;
 			atk += momentum?c.trueatk():Math.max(c.trueatk()-dr, 0);
@@ -289,17 +291,14 @@ function truetrueatk(c) {
 function evalthing(c) {
 	if (!c) return 0;
 	var score = 0;
-	var isCreature = c instanceof Creature;
+	var isCreature = c instanceof etg.Creature, isWeapon = c instanceof etg.Weapon;
 	var delaymix = Math.max((c.status.frozen||0), (c.status.delayed||0));
 	var ttatk;
-	if (c instanceof Weapon || isCreature) {
+	if (isWeapon || isCreature) {
 		ttatk = truetrueatk(c);
 		score += ttatk*(delaymix?1-Math.min(delaymix/5, .6):1);
-		if (c instanceof Weapon) {
-			score += 3;
-		}
 	}else ttatk = 0;
-	if (!isEmpty(c.active)) {
+	if (!etg.isEmpty(c.active)) {
 		for (var key in c.active) {
 			if (key == "hit"){
 				if (!delaymix){
@@ -315,7 +314,7 @@ function evalthing(c) {
 				}
 			}else if (key == "cast"){
 				if (!delaymix){
-					score += evalactive(c, c.active[key]) - (c.usedactive?.02:0);
+					score += evalactive(c, c.active.cast) - (c.usedactive?.02:0);
 				}
 			}else score += evalactive(c, c.active[key]);
 		}
@@ -329,8 +328,8 @@ function evalthing(c) {
 			if (c.status.aflatoxin) score -= 2;
 		}
 		score *= hp?(c.status.immaterial || c.status.burrowed ? (poison > 0 ? 1.5 : 2) : Math.sqrt(Math.min(hp, 15))/2):.2;
-	}else if(c.status.immaterial){
-		score *= 1.5;
+	}else{
+		score *= c.status.immaterial?2:1.5;
 	}
 	if (delaymix){
 		var delayed = Math.min(delaymix*(c.status.adrenaline?.5:1), 12);
@@ -343,25 +342,25 @@ function evalthing(c) {
 function evalcardinstance(cardInst) {
 	var c = cardInst.card;
 	var score = 0;
-	if (c.type == SpellEnum){
+	if (c.type == etg.SpellEnum){
 		score += evalactive(cardInst, c.active);
 	} else {
-		if (!isEmpty(c.active)) {
+		if (!etg.isEmpty(c.active)) {
 			for (var key in c.active) {
 				score += evalactive(cardInst, c.active[key]);
 			}
 		}
-		if (c.type == CreatureEnum){
+		if (c.type == etg.CreatureEnum){
 			score += c.attack;
 			var hp = Math.max(c.health, 0);
 			if (c.status && c.status.poison && hp){
 				score -= c.status.poison*c.attack/hp;
 			}
 			score *= hp?(c.status && (c.status.immaterial || c.status.burrowed) ? (c.status.poison ? 1.5 : 2) : Math.sqrt(Math.min(hp, 15))/2):.2;
-		}else if (c.type == WeaponEnum){
+		}else if (c.type == etg.WeaponEnum){
 			score += c.attack;
 			if (cardInst.owner.weapon) score /= 2;
-		}else if (c.type == ShieldEnum){
+		}else if (c.type == etg.ShieldEnum){
 			score += c.health*c.health;
 			if (cardInst.owner.shield) score /= 2;
 		}
@@ -373,7 +372,7 @@ function evalcardinstance(cardInst) {
 function caneventuallyactive(element, cost, pl){
 	if (!cost || !element || pl.quanta[element] || pl.mark == element) return true;
 	for (var i = 0; i < 16; i++) {
-		if (pl.permanents[i] && pl.permanents[i].type == PillarEnum && (!pl.permanents[i].element || pl.permanents[i].element == element))
+		if (pl.permanents[i] && pl.permanents[i].type == etg.PillarEnum && (!pl.permanents[i].element || pl.permanents[i].element == element))
 			return true;
 	}
 	return false;
@@ -410,7 +409,6 @@ module.exports = function(game) {
 			pscore += player.gpull.truehp()/4 + (player.gpull.passives.voodoo ? 10 : 0) - player.gpull.trueatk();
 		}
 		pscore += Math.sqrt(player.hp)*4;
-		log("\thp=" + player.hp);
 		if (player.isCloaked()) pscore += 4;
 		if (player.status.poison) pscore -= player.status.poison;
 		if (player.precognition) pscore += 1;

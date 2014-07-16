@@ -3,6 +3,7 @@ var Cards, CardCodes, Targeting, targetingMode, targetingModeCb, game, player1, 
 var MersenneTwister = require("./MersenneTwister");
 var Actives = require("./Actives");
 var Effect = require("./Effect");
+var etg = require("./etg");
 var gameui = {addChild:function(){}};
 Effect.disable = true;
 function tgtToPos(){
@@ -12,15 +13,15 @@ function creaturePos(){
 	return {x:0, y:0};
 }
 function initTest(){
-	game = mkGame(true, 5489);
-	game.player1.mark = game.player2.mark = Entropy;
+	game = etg.mkGame(true, 5489);
+	game.player1.mark = game.player2.mark = etg.Entropy;
 	player1 = game.player1;
 	player2 = game.player2;
 	players = game.players;
 }
 function initHand(pl){
 	for(var i=1; i<arguments.length; i++){
-		pl.hand[i-1] = new CardInstance(arguments[i], pl);
+		pl.hand[i-1] = new etg.CardInstance(arguments[i], pl);
 	}
 }
 require("./etg.client").loadcards(function(cards, cardcodes, targeting) {
@@ -39,30 +40,30 @@ require("./etg.client").loadcards(function(cards, cardcodes, targeting) {
 	});
 	test("Adrenaline", function() {
 		initTest();
-		(player1.creatures[0] = new Creature(Cards.Devourer, player1)).status.adrenaline = 1;
-		(player1.creatures[1] = new Creature(Cards.HornedFrog, player1)).status.adrenaline = 1;
-		(player1.creatures[2] = new Creature(Cards.RubyDragon, player1)).status.adrenaline = 1;
-		player2.quanta[Life]=3;
+		(player1.creatures[0] = new etg.Creature(Cards.Devourer, player1)).status.adrenaline = 1;
+		(player1.creatures[1] = new etg.Creature(Cards.HornedFrog, player1)).status.adrenaline = 1;
+		(player1.creatures[2] = new etg.Creature(Cards.RubyDragon, player1)).status.adrenaline = 1;
+		player2.quanta[etg.Life]=3;
 		player1.endturn();
 		equal(player2.hp, 68, "dmg");
-		equal(player1.quanta[Darkness], 2, "Absorbed");
-		equal(player2.quanta[Life], 1, "Lone Life");
+		equal(player1.quanta[etg.Darkness], 2, "Absorbed");
+		equal(player2.quanta[etg.Life], 1, "Lone Life");
 	});
 	test("Aflatoxin", function() {
 		initTest();
-		(player1.creatures[0] = new Creature(Cards.Devourer, player1)).status.aflatoxin = true;
+		(player1.creatures[0] = new etg.Creature(Cards.Devourer, player1)).status.aflatoxin = true;
 		player1.creatures[0].die();
 		ok(player1.creatures[0], "Something");
 		equal(player1.creatures[0].card, Cards.MalignantCell, "Malignant");
 	});
 	test("BoneWall", function() {
 		initTest();
-		player1.quanta[Death] = 10;
+		player1.quanta[etg.Death] = 10;
 		initHand(player1, Cards.BoneWall);
 		player1.hand[0].useactive();
-		new Creature(Cards.RubyDragon, player2).place();
-		new Creature(Cards.RubyDragon, player2).place();
-		new Creature(Cards.RubyDragon, player2).place();
+		new etg.Creature(Cards.RubyDragon, player2).place();
+		new etg.Creature(Cards.RubyDragon, player2).place();
+		new etg.Creature(Cards.RubyDragon, player2).place();
 		player1.endturn();
 		player2.endturn();
 		ok(player1.shield, "BW exists");
@@ -72,8 +73,8 @@ require("./etg.client").loadcards(function(cards, cardcodes, targeting) {
 	});
 	test("Boneyard", function() {
 		initTest();
-		new Creature(Cards.Devourer, player1).place();
-		new Permanent(Cards.Boneyard, player1).place();
+		new etg.Creature(Cards.Devourer, player1).place();
+		new etg.Permanent(Cards.Boneyard, player1).place();
 		player1.creatures[0].die();
 		ok(player1.creatures[0], "Something");
 		equal(player1.creatures[0].card, Cards.Skeleton, "Skeleton");
@@ -85,7 +86,7 @@ require("./etg.client").loadcards(function(cards, cardcodes, targeting) {
 	});
 	test("Destroy", function() {
 		initTest();
-		player1.quanta[Death] = 10;
+		player1.quanta[etg.Death] = 10;
 		initHand(player1, Cards.AmethystPillar, Cards.AmethystPillar, Cards.SoulCatcher, Cards.Shield, Cards.Dagger);
 		while(player1.hand.length){
 			player1.hand[0].useactive();
@@ -116,16 +117,16 @@ require("./etg.client").loadcards(function(cards, cardcodes, targeting) {
 	});
 	test("Devourer", function() {
 		initTest();
-		new Creature(Cards.Devourer, player1).place();
-		player2.quanta[Light] = 1;
+		new etg.Creature(Cards.Devourer, player1).place();
+		player2.quanta[etg.Light] = 1;
 		player1.endturn();
-		equal(player2.quanta[Light], 0, "Light");
-		equal(player1.quanta[Darkness], 1, "Darkness");
+		equal(player2.quanta[etg.Light], 0, "Light");
+		equal(player1.quanta[etg.Darkness], 1, "Darkness");
 	});
 	test("Disarm", function() {
 		initTest();
-		new Creature(Cards.Monk, player1).place();
-		new Weapon(Cards.Dagger, player2).place();
+		new etg.Creature(Cards.Monk, player1).place();
+		new etg.Weapon(Cards.Dagger, player2).place();
 		player1.endturn();
 		ok(!player2.weapon, "Disarmed");
 		equal(player2.hand[0].card, Cards.Dagger, "In hand");
@@ -138,7 +139,7 @@ require("./etg.client").loadcards(function(cards, cardcodes, targeting) {
 		}
 		equal(player1.hand.length, 3, "handlength");
 		var pillars = player1.permanents[0];
-		ok(pillars instanceof Pillar, "ispillar");
+		ok(pillars instanceof etg.Pillar, "ispillar");
 		equal(pillars.status.charges, 5, "5 charges");
 		Actives.earthquake(player2, pillars);
 		equal(pillars.status.charges, 2, "2 charges");
@@ -150,13 +151,13 @@ require("./etg.client").loadcards(function(cards, cardcodes, targeting) {
 		player1.deck = [Cards.Ash, Cards.Ash, Cards.Ash];
 		player2.deck = [Cards.Ash, Cards.Ash, Cards.Ash];
 		for(var i=0; i<2; i++)
-			new Creature(Cards.Vampire, player1).place();
+			new etg.Creature(Cards.Vampire, player1).place();
 		player1.hp = 50;
 		player1.endturn();
 		player2.endturn();
 		equal(player2.hp, 92, "Noclipse dmg'd");
 		equal(player1.hp, 58, "Noclipse vamp'd");
-		player1.permanents[0] = new Permanent(Cards.Eclipse, player1);
+		player1.permanents[0] = new etg.Permanent(Cards.Eclipse, player1);
 		player1.endturn();
 		equal(player2.hp, 80, "Eclipse dmg'd");
 		equal(player1.hp, 70, "Eclipse vamp'd");
@@ -164,9 +165,9 @@ require("./etg.client").loadcards(function(cards, cardcodes, targeting) {
 	});
 	test("Gpull", function() {
 		initTest();
-		new Creature(Cards.MassiveDragon, player2).place();
+		new etg.Creature(Cards.MassiveDragon, player2).place();
 		player2.gpull = player2.creatures[0];
-		new Creature(Cards.Scorpion, player1).place();
+		new etg.Creature(Cards.Scorpion, player1).place();
 		player2.deck = [Cards.MassiveDragon];
 		player1.endturn();
 		equal(player2.gpull.hp, 29, "dmg redirected");
@@ -176,21 +177,21 @@ require("./etg.client").loadcards(function(cards, cardcodes, targeting) {
 	});
 	test("Hope", function() {
 		initTest();
-		player1.shield = new Shield(Cards.Hope, player1);
-		new Creature(Cards.Photon, player1).place();
+		player1.shield = new etg.Shield(Cards.Hope, player1);
+		new etg.Creature(Cards.Photon, player1).place();
 		for(var i=1; i<4; i++){
-			player1.creatures[i] = new Creature(Cards.RayofLight, player1);
+			player1.creatures[i] = new etg.Creature(Cards.RayofLight, player1);
 		}
 		player1.endturn();
 		equal(player1.shield.truedr(), 3, "DR");
-		equal(player1.quanta[Light], 3, "RoL");
+		equal(player1.quanta[etg.Light], 3, "RoL");
 	});
 	test("Lobotomize", function() {
 		initTest();
-		var dev = new Creature(Cards.Devourer, player1);
-		ok(!isEmpty(dev.active), "Actives");
+		var dev = new etg.Creature(Cards.Devourer, player1);
+		ok(!etg.isEmpty(dev.active), "Actives");
 		Actives.lobotomize(player1, dev);
-		ok(isEmpty(dev.active), "No actives");
+		ok(etg.isEmpty(dev.active), "No actives");
 	});
 	test("Obsession", function() {
 		initTest();
@@ -201,7 +202,7 @@ require("./etg.client").loadcards(function(cards, cardcodes, targeting) {
 	});
 	test("Parallel", function() {
 		initTest();
-		var damsel = new Creature(Cards.Damselfly, player1);
+		var damsel = new etg.Creature(Cards.Damselfly, player1);
 		damsel.place();
 		Actives.parallel(player1, damsel);
 		equal(player1.creatures[1].card, Cards.Damselfly, "PU'd");
@@ -210,7 +211,7 @@ require("./etg.client").loadcards(function(cards, cardcodes, targeting) {
 	});
 	test("Phoenix", function() {
 		initTest();
-		var phoenix = new Creature(Cards.Phoenix, player1);
+		var phoenix = new etg.Creature(Cards.Phoenix, player1);
 		phoenix.place();
 		Actives.lightning(player1, phoenix);
 		equal(player1.creatures[0].card, Cards.Ash, "Ash");
@@ -230,16 +231,16 @@ require("./etg.client").loadcards(function(cards, cardcodes, targeting) {
 		initTest();
 		Actives.lightning(player1, player2);
 		ok(player1.hp == 100 && player2.hp == 95, "Plain spell");
-		player2.shield = new Shield(Cards.MirrorShield, player2);
+		player2.shield = new etg.Shield(Cards.MirrorShield, player2);
 		Actives.lightning(player1, player2);
 		ok(player1.hp == 95 && player2.hp == 95, "Reflected spell");
-		player1.shield = new Shield(Cards.MirrorShield, player1);
+		player1.shield = new etg.Shield(Cards.MirrorShield, player1);
 		Actives.lightning(player1, player2);
 		ok(player1.hp == 90 && player2.hp == 95, "Unreflected reflected spell");
 	});
 	test("Steal", function() {
 		initTest();
-		(player1.shield = new Shield(Cards.BoneWall, player1)).status.charges=3;
+		(player1.shield = new etg.Shield(Cards.BoneWall, player1)).status.charges=3;
 		Actives.steal(player2, player1.shield);
 		ok(player1.shield && player1.shield.status.charges == 2, "Wish bones");
 		ok(player2.shield && player2.shield.status.charges == 1, "stole 1");
@@ -252,7 +253,7 @@ require("./etg.client").loadcards(function(cards, cardcodes, targeting) {
 	});
 	test("Steam", function() {
 		initTest();
-		var steam = new Creature(Cards.SteamMachine, game.player1);
+		var steam = new etg.Creature(Cards.SteamMachine, game.player1);
 		steam.usedactive = false;
 		steam.place();
 		equal(steam.trueatk(), 0, "0");
@@ -263,7 +264,7 @@ require("./etg.client").loadcards(function(cards, cardcodes, targeting) {
 	});
 	test("Voodoo", function() {
 		initTest();
-		var voodoo = new Creature(Cards.VoodooDoll, player1);
+		var voodoo = new etg.Creature(Cards.VoodooDoll, player1);
 		voodoo.place();
 		Actives.lightning(player1, voodoo);
 		Actives.infect(player1, voodoo);
