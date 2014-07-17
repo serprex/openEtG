@@ -5,88 +5,91 @@
 <input id="legality" type="text" readonly style="width:400px" />
 <input id="test" type="submit" value="Test Deck" onclick="testDeck()" />
 <select id="rulesets">
-    <option value="dodrio">Dodrio</option>
-    <option value="commoner">Commoner's Duel</option>
+	<option value="dodrio">Dodrio</option>
+	<option value="commoner">Commoner's Duel</option>
 </select>
 <script>
-    var deckcode = document.getElementById("deckcode");
-    var legality = document.getElementById("legality");
-    var rulesets = document.getElementById("rulesets");
-    var Actives = require("./Actives");
-    var Cards, CardCodes, Targeting;
-    require("./etg.client").loadcards(function(cards, cardCodes, targeting) {
-        Cards = cards;
-        CardCodes = cardCodes;
-        Targeting = targeting;
-    });
-    var descr = [
-	"Chroma",
-	"Entropy",
-	"Death",
-	"Gravity",
-	"Earth",
-	"Life",
-	"Fire",
-	"Water",
-	"Light",
-	"Air",
-	"Time",
-	"Darkness",
-	"Aether"
-    ];
-    var verifiers = {};
-    verifiers["commoner"] = function(deck) {
-        for (var i = 0;i < deck.length;i++) {
-            var card = deck[i];
-            if (card.rarity > 1)
-                return card.name + " is too high in rarity";
-            if (card.upped) return "Your deck contains at least one upgraded card";
-        }
-        return "Legal";
-    }
-    verifiers["dodrio"] = function(deck) {
-        var bannedCards = ["4vj", "4vl", "55v", "593", "5f9", "5ik", "5ig"];
-        var elementList = [];
-        var eleCount;
-        var rareElement;
-        for (var i = 0;i < deck.length;i++) {
-            var card = deck[i];
-            if (card.upped) return "Your deck contains at least one upgraded card";
-            if (~bannedCards.indexOf(card.code)) return card.name + " is banned";
-            var ele = card.element;
-            if (ele) {
-                if (!elementList[ele]) {
-                    elementList[ele] = 0;
-                    eleCount++;
-                }
-                elementList[ele]++;
-                if (eleCount > 3)
-                    return "Your deck contains too many elements";
-            }
-            if (card.rarity >= 3) {
-                if (!rareElement) rareElement = card.element;
-                else if (rareElement != card.element) return "Your deck contains rare cards from more than one element";
-            }
-        }
-        for (var i = 0;i < elementList.length;i++) {
-            if (elementList[i] && elementList[i] < 6) return "You have too few " + descr[i] + " cards.";
-        }
-        if (eleCount < 3) return "Your deck contains too few elements";
-        return "Legal";
-    }
-    function testDeck() {
-        var code = deckcode.value.split(" ");
-        var deck = [];
-        var markele;
-        for (var i = 0;i < code.length;i++) {
-            var maybeMark = ~TrueMarks.indexOf(code[i]);
-            if (maybeMark) markele = maybeMark;
-            else if (CardCodes[code[i]]) deck.push(CardCodes[code[i]]);
-            else {
-                legality.value = "Not a real deck code.";
-                return;
-            }
-        }
-        legality.value = deck.length > 60 ? "Your deck is too large" : deck.length < 30 ? "Your deck is too small" : verifiers[rulesets.options[rulesets.selectedIndex].value](deck, markele);
-    }
+	var deckcode = document.getElementById("deckcode");
+	var legality = document.getElementById("legality");
+	var rulesets = document.getElementById("rulesets");
+	var Actives = require("./Actives");
+	var Cards, CardCodes, Targeting;
+	require("./etg.client").loadcards(function(cards, cardCodes, targeting) {
+		Cards = cards;
+		CardCodes = cardCodes;
+		Targeting = targeting;
+	});
+	var descr = [
+		"Chroma",
+		"Entropy",
+		"Death",
+		"Gravity",
+		"Earth",
+		"Life",
+		"Fire",
+		"Water",
+		"Light",
+		"Air",
+		"Time",
+		"Darkness",
+		"Aether"
+	];
+	var verifiers = {};
+	verifiers["commoner"] = function(deck) {
+		for (var i = 0;i < deck.length;i++) {
+			var card = deck[i];
+			if (card.rarity > 1)
+				return card.name + " is too high in rarity";
+			if (card.upped) return "Your deck contains at least one upgraded card";
+		}
+		return "Legal";
+	}
+	verifiers["dodrio"] = function(deck) {
+		var bannedCards = ["4vj", "4vl", "55v", "593", "5f9", "5ik", "5ig", "5io"];
+		var elementList = [];
+		var eleCount, rareElement;
+		for (var i = 0;i < deck.length;i++) {
+			var card = deck[i];
+			if (card.upped) return "Your deck contains at least one upgraded card";
+			if (~bannedCards.indexOf(card.code)) return card.name + " is banned";
+			var ele = card.element;
+			if (ele) {
+				if (!elementList[ele]) {
+					elementList[ele] = 0;
+					eleCount++;
+				}
+				elementList[ele]++;
+				if (eleCount > 3)
+					return "Your deck contains too many elements";
+			}
+			if (card.rarity >= 3) {
+				if (!rareElement) rareElement = card.element;
+				else if (rareElement != card.element) return "Your deck contains rare cards from more than one element";
+			}
+		}
+		for (var i = 0;i < elementList.length;i++) {
+			if (elementList[i] && elementList[i] < 6) return "You have too few " + descr[i] + " cards";
+		}
+		if (eleCount < 3) return "Your deck contains too few elements (only " + eleCount + ")";
+		return "Legal";
+	}
+	function testDeck() {
+		if (!Cards){
+			legality.value = "Card DB not yet downloaded";
+			return;
+		}
+		var code = deckcode.value.split(" ");
+		var deck = [];
+		var markele;
+		for (var i = 0;i < code.length;i++) {
+			var maybeMark = ~TrueMarks.indexOf(code[i]);
+			if (maybeMark) markele = maybeMark;
+			else if (CardCodes[code[i]]) deck.push(CardCodes[code[i]]);
+			else {
+				legality.value = "Not a real deck code. " + (code[i] || "???");
+				return;
+			}
+		}
+		legality.value = deck.length > 60 ? "Your deck is too large" : deck.length < 30 ? "Your deck is too small" : verifiers[rulesets.options[rulesets.selectedIndex].value](deck, markele);
+	}
 </script>
