@@ -364,7 +364,7 @@ io.on("connection", function(socket) {
 		});
 	});
 	userEvent(socket, "upgrade", function (data, user) {
-		user.pool = etgutil.addcard(user.pool, data.card, -6);
+		user.pool = etgutil.addcard(user.pool, data.card, data.use);
 		user.pool = etgutil.addcard(user.pool, data.newcard);
 	});
 	userEvent(socket, "codesubmit", function(data, user){

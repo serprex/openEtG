@@ -1,4 +1,3 @@
-var Actives = require("./Actives");
 require("./etg.client").loadcards(function(Cards, CardCodes, Targeting) {
 	var credits = [
 		[["andretimpa", "http://andretimpa.deviantart.com"], ["Element Icons", "assets/esheet.png"], ["Rarity Icons", "assets/raritysheet.png"], ["4sa", "4si", "4sk", "4sl", "55s", "4sn", "4so", "4sp", "4sq", "4ss", "4st", "4su", "4vr", "6ub"]],

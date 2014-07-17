@@ -646,7 +646,7 @@ integrity:function(c,t){
 			c.owner.hand.splice(i, 1);
 		}
 	}
-	var active = "burrow", num=0, cast=0;
+	var active = "burrow", num=0;
 	for(var i=1; i<13; i++){
 		stat += shardTally[i]*2;
 		if (shardTally[i]>num){
@@ -656,34 +656,32 @@ integrity:function(c,t){
 	}
 	var actives = {}, cost = shardCosts[active];
 	actives[cost < 0 ? activeType[~cost] : "cast"] = Actives[active];
-	cast = cost;
-	var passives = {};
-	var status = {};
-	if (shardTally[Air]>0){
+	var passives = {}, status = {};
+	if (shardTally[E.Air]>0){
 		passives.airborne = true;
 	}
-	if (shardTally[Darkness]>0){
+	if (shardTally[E.Darkness]>0){
 		passives.voodoo = true;
 	}
-	if (shardTally[Time]>0){
+	if (shardTally[E.Time]>0){
 		passives.swarm = true;
 	}
-	if (shardTally[Life]>0){
+	if (shardTally[E.Life]>0){
 		passives.poisonous = true;
 	}
-	if (shardTally[Death]>0){
+	if (shardTally[E.Death]>0){
 		passives.undead = true;
 	}
-	if (shardTally[Gravity]>0){
+	if (shardTally[E.Gravity]>0){
 		passives.salvage = true;
 	}
-	if (shardTally[Aether]>1){
+	if (shardTally[E.Aether]>1){
 		status.immaterial = true;
 	}
-	if (shardTally[Gravity]>1){
+	if (shardTally[E.Gravity]>1){
 		status.momentum = true;
 	}
-	if (shardTally[Life]>0){
+	if (shardTally[E.Life]>0){
 		status.adrenaline = 1;
 	}
 	c.owner.shardgolem = {
@@ -691,7 +689,7 @@ integrity:function(c,t){
 		passives: passives,
 		status: status,
 		active: actives,
-		cast: cast
+		cast: cost
 	};
 	new E.Creature(Cards.ShardGolem, c.owner).place();
 },

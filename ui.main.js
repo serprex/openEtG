@@ -23,7 +23,6 @@ var Cards, CardCodes, Targeting, game;
 var targetingMode, targetingModeCb, targetingText, discarding, user, renderer, endturnFunc, cancelFunc, accepthandfunc, foeDeck, player2summon, player2Cards, guestname, cardChosen;
 var etgutil = require("./etgutil");
 var etg = require("./etg");
-var MersenneTwister = require("./MersenneTwister");
 var Actives = require("./Actives");
 var Effect = require("./Effect");
 var Quest = require("./Quest");
@@ -1479,15 +1478,16 @@ function upgradestore() {
 	function upgradeCard(card) {
 		if (!card.upped) {
 			if (!isFreeCard(card)) {
-				if (cardpool[card.code] >= 6) {
-					userEmit("upgrade", { card: card.code, newcard: card.asUpped(true).code });
-					for (var i = 0;i < 6;i++) {
+				var use = card.rarity < 5 ? 6 : 1;
+				if (cardpool[card.code] >= use) {
+					userEmit("upgrade", { card: card.code, newcard: card.asUpped(true).code, use: -use });
+					for (var i = 0;i < use;i++) {
 						user.pool.splice(user.pool.indexOf(card.code), 1);
 					}
 					user.pool.push(card.asUpped(true).code);
 					adjustdeck();
 				}
-				else twarning.setText("You need at least 6 copies to be able to upgrade this card!");
+				else twarning.setText("You need at least " + use + " copies to be able to upgrade this card!");
 			}
 			else {
 				if (user.gold >= 50) {
@@ -1502,14 +1502,13 @@ function upgradestore() {
 		}
 		else twarning.setText("You can't upgrade an already upgraded card!");
 	}
-	cardValues = [5, 1, 3, 15, 20];
+	var cardValues = [5, 1, 3, 15, 20];
 	function sellCard(card) {
 		if (card.rarity != 0 || card.upped) {
 			if (card.rarity <= 4) {
 				if (cardpool[card.code] > 0) {
 					user.pool.splice(user.pool.indexOf(card.code), 1);
-					sellValue = cardValues[card.rarity];
-					if (card.upped) sellValue *= 5;
+					var sellValue = cardValues[card.rarity] * (card.upped ? 5 : 1);
 					user.gold += sellValue
 					userEmit("sellcard", { card: card.code, gold: sellValue});
 					adjustdeck();
@@ -1563,16 +1562,15 @@ function upgradestore() {
 			var card = CardCodes[code];
 			selectedCard = code;
 			upgradedCard = card.asUpped(true).code;
-			tinfo.setText(isFreeCard(card) ? "Costs 50 gold to upgrade" : "Convert 6 of these into an upgraded version.");
+			tinfo.setText(isFreeCard(card) ? "Costs 50 gold to upgrade" : card.rarity < 5 ? "Convert 6 of these into an upgraded version." : "Convert into an upgraded version.");
 			tinfo2.setText((card.rarity > 0 || card.upped) && card.rarity < 5 ?
-				"Sells for " + (card.upped ? cardValues[card.rarity]*5 : cardValues[card.rarity]) + " gold." : "");
+				"Sells for " + cardValues[card.rarity] * (card.upped ? 5 : 1) + " gold." : "");
 			twarning.setText("");
 		}
 	);
 	upgradeui.addChild(cardsel);
-	var selectedCard;
-	var upgradedCard;
-	var cardpool = {};
+	var selectedCard, upgradedCard;
+	var cardpool;
 	adjustdeck();
 
 	var cardArt = new PIXI.Sprite(nopic);

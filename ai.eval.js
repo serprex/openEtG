@@ -370,6 +370,7 @@ function evalcardinstance(cardInst) {
 	log("\t:: " + c.name + " worth " + score);
 	return score;
 }
+
 function caneventuallyactive(element, cost, pl){
 	if (!cost || !element || pl.quanta[element] || pl.mark == element) return true;
 	for (var i = 0; i < 16; i++) {
@@ -401,9 +402,9 @@ module.exports = function(game) {
 			var cinst = player.hand[i];
 			if (caneventuallyactive(cinst.card.costele, cinst.card.cost, player)){
 				var costless = !cinst.card.cost || !cinst.card.costele;
-				pscore += evalcardinstance(cinst) * (cinst.canactive() ? 0.4 : 0.3) * (costless?1:(20+Math.min(player.quanta[cinst.card.costele], 20))/40);
+				pscore += evalcardinstance(cinst) * (cinst.canactive() ? 0.6 : 0.5) * (costless?1:(15+Math.min(player.quanta[cinst.card.costele], 10))/30);
 			}else {
-				pscore -= cinst.card.active && cinst.card.active.discard == Actives.obsession ? 7 : 4;
+				pscore -= cinst.card.active && cinst.card.active.discard == Actives.obsession ? 7 : 2;
 			}
 		}
 		if (player.gpull) {
@@ -416,7 +417,7 @@ module.exports = function(game) {
 		if (player.silence) pscore -= player.hand.length+1;
 		if (player.flatline) pscore -= 1;
 		if (player.neuro) pscore -= 5;
-		if (player.hand.length == 8) pscore -= 4;
+		if (player.hand.length == 8) pscore -= 3;
 		log("\tpscore" + j + ": " + pscore);
 		gamevalue += pscore*(j == 0?1:-1);
 	}
