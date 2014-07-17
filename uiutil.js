@@ -7,6 +7,12 @@ if (typeof PIXI === "undefined"){
 	}
 	PIXI.Point.prototype.set = PIXI.Point;
 }
+function mkFont(font, color){
+	if (typeof font == "number"){
+		font += "px Dosis";
+	}
+	return {font: font, fill: color || "black"};
+}
 function reflectPos(obj) {
 	var pos = obj instanceof PIXI.Point ? obj : obj.position;
 	pos.set(900 - pos.x, 600 - pos.y);
@@ -48,6 +54,7 @@ function tgtToPos(t) {
 		return new PIXI.Point(j ? 20 : 780, (j ? 140 : 300) + 20 * i);
 	} else console.log("Unknown target");
 }
+exports.mkFont = mkFont;
 exports.reflectPos = reflectPos;
 exports.creaturePos = creaturePos;
 exports.permanentPos = permanentPos;

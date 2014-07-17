@@ -164,7 +164,7 @@ function makeArt(card, art) {
 			template.addChild(eleicon);
 		}
 	}
-	var infospr = new PIXI.Sprite(getTextImage(card.info(), mkFont(11, card.upped ? "black" : "white"), "", rend.width-4))
+	var infospr = new PIXI.Sprite(getTextImage(card.info(), ui.mkFont(11, card.upped ? "black" : "white"), "", rend.width-4))
 	infospr.position.set(2, 150);
 	template.addChild(infospr);
 	rend.render(template);
@@ -2198,10 +2198,10 @@ function startMatch() {
 					creasprite[j][i].setTexture(getCreatureImage(cr.card));
 					creasprite[j][i].visible = true;
 					var child = creasprite[j][i].getChildAt(0);
-					child.setTexture(getTextImage(cr.trueatk() + "|" + cr.truehp(), mkFont(10, cr.card.upped ? "black" : "white"), maybeLighten(cr.card)));
+					child.setTexture(getTextImage(cr.trueatk() + "|" + cr.truehp(), ui.mkFont(10, cr.card.upped ? "black" : "white"), maybeLighten(cr.card)));
 					var child2 = creasprite[j][i].getChildAt(1);
 					var activetext = cr.active.cast ? etg.casttext(cr.cast, cr.castele) + cr.active.cast.activename : (cr.active.hit ? cr.active.hit.activename : "");
-					child2.setTexture(getTextImage(activetext, mkFont(8, cr.card.upped ? "black" : "white")));
+					child2.setTexture(getTextImage(activetext, ui.mkFont(8, cr.card.upped ? "black" : "white")));
 					drawStatus(cr, creasprite[j][i]);
 				} else creasprite[j][i].visible = false;
 			}
@@ -2213,21 +2213,21 @@ function startMatch() {
 					permsprite[j][i].alpha = pr.status.immaterial ? .7 : 1;
 					var child = permsprite[j][i].getChildAt(0);
 					if (pr instanceof etg.Pillar) {
-						child.setTexture(getTextImage("1:" + (pr.active.auto == Actives.pend && pr.pendstate ? pr.owner.mark : pr.card.element) + " x" + pr.status.charges, mkFont(10, pr.card.upped ? "black" : "white"), maybeLighten(pr.card)));
+						child.setTexture(getTextImage("1:" + (pr.active.auto == Actives.pend && pr.pendstate ? pr.owner.mark : pr.card.element) + " x" + pr.status.charges, ui.mkFont(10, pr.card.upped ? "black" : "white"), maybeLighten(pr.card)));
 					}
-					else child.setTexture(getTextImage(pr.status.charges !== undefined ? " " + pr.status.charges : "", mkFont(10, pr.card.upped ? "black" : "white"), maybeLighten(pr.card)));
+					else child.setTexture(getTextImage(pr.status.charges !== undefined ? " " + pr.status.charges : "", ui.mkFont(10, pr.card.upped ? "black" : "white"), maybeLighten(pr.card)));
 					var child2 = permsprite[j][i].getChildAt(1);
-					child2.setTexture(pr instanceof etg.Pillar ? nopic : getTextImage(pr.activetext().replace(" losecharge", ""), mkFont(8, pr.card.upped ? "black" : "white")));
+					child2.setTexture(pr instanceof etg.Pillar ? nopic : getTextImage(pr.activetext().replace(" losecharge", ""), ui.mkFont(8, pr.card.upped ? "black" : "white")));
 				} else permsprite[j][i].visible = false;
 			}
 			var wp = game.players[j].weapon;
 			if (wp && !(j == 1 && cloakgfx.visible)) {
 				weapsprite[j].visible = true;
 				var child = weapsprite[j].getChildAt(0);
-				child.setTexture(getTextImage(wp.trueatk() + "", mkFont(12, wp.card.upped ? "black" : "white"), maybeLighten(wp.card)));
+				child.setTexture(getTextImage(wp.trueatk() + "", ui.mkFont(12, wp.card.upped ? "black" : "white"), maybeLighten(wp.card)));
 				child.visible = true;
 				var child = weapsprite[j].getChildAt(1);
-				child.setTexture(getTextImage(wp.activetext(), mkFont(12, wp.card.upped ? "black" : "white")));
+				child.setTexture(getTextImage(wp.activetext(), ui.mkFont(12, wp.card.upped ? "black" : "white")));
 				child.visible = true;
 				weapsprite[j].setTexture(getWeaponShieldImage(wp.card.code));
 				drawStatus(wp, weapsprite[j]);
@@ -2237,10 +2237,10 @@ function startMatch() {
 				shiesprite[j].visible = true;
 				var dr = sh.truedr();
 				var child = shiesprite[j].getChildAt(0);
-				child.setTexture(getTextImage(sh.status.charges ? "x" + sh.status.charges: "" + sh.truedr() + "", mkFont(12, sh.card.upped ? "black" : "white"), maybeLighten(sh.card)));
+				child.setTexture(getTextImage(sh.status.charges ? "x" + sh.status.charges: "" + sh.truedr() + "", ui.mkFont(12, sh.card.upped ? "black" : "white"), maybeLighten(sh.card)));
 				child.visible = true;
 				var child = shiesprite[j].getChildAt(1);
-				child.setTexture(getTextImage((sh.active.shield ? " " + sh.active.shield.activename : "") + (sh.active.buff ? " " + sh.active.buff.activename : "") + (sh.active.cast ? etg.casttext(sh.cast, sh.castele) + sh.active.cast.activename : ""), mkFont(12, sh.card.upped ? "black" : "white")));
+				child.setTexture(getTextImage((sh.active.shield ? " " + sh.active.shield.activename : "") + (sh.active.buff ? " " + sh.active.buff.activename : "") + (sh.active.cast ? etg.casttext(sh.cast, sh.castele) + sh.active.cast.activename : ""), ui.mkFont(12, sh.card.upped ? "black" : "white")));
 				child.visible = true;
 				shiesprite[j].alpha = sh.status.immaterial ? .7 : 1;
 				shiesprite[j].setTexture(getWeaponShieldImage(sh.card.code));
@@ -2387,7 +2387,7 @@ function startMatch() {
 	gameui.addChild(turntell);
 	function setInfo(obj) {
 		if (obj.owner != game.player2 || !cloakgfx.visible || !obj.card || obj.card.isOf(Cards.Cloak)) {
-			infobox.setTexture(getTextImage(obj.info(), mkFont(10, "white"), 0, (obj instanceof etg.Weapon || obj instanceof etg.Shield ? 92 : 76)));
+			infobox.setTexture(getTextImage(obj.info(), ui.mkFont(10, "white"), 0, (obj instanceof etg.Weapon || obj instanceof etg.Shield ? 92 : 76)));
 			var mousePosition = realStage.getMousePosition();
 			infobox.position.set(mousePosition.x, mousePosition.y);
 			infobox.visible = true;
@@ -2623,20 +2623,13 @@ function startArenaTop(info) {
 	refreshRenderer(stage);
 }
 
-function mkFont(font, color){
-	if (typeof font == "number"){
-		font += "px Dosis";
-	}
-	return {font: font, fill: color || "black"};
-}
-
 function getTextImage(text, font, bgcolor, width) {
 	if (!text) return nopic;
 	if (bgcolor === undefined) bgcolor = "";
 	var size;
 	if (typeof font == "number"){
 		size = font;
-		font = mkFont(font);
+		font = ui.mkFont(font);
 	}else size = parseInt(font.font);
 	var fontkey = JSON.stringify(font) + bgcolor + "w" + width;
 	if (!(fontkey in tximgcache)) {
