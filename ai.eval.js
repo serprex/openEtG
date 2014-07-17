@@ -328,7 +328,7 @@ function evalthing(c) {
 			hp = Math.min(hp - poison, 0);
 			if (c.status.aflatoxin) score -= 2;
 		}
-		score *= hp?(c.status.immaterial || c.status.burrowed ? (poison > 0 ? 1.5 : 2) : Math.sqrt(Math.min(hp, 15))/2):.2;
+		score *= hp?(c.status.immaterial || c.status.burrowed ? 2 : Math.pow(Math.min(hp, 15), .3)):.2;
 	}else{
 		score *= c.status.immaterial?2:1.5;
 	}
@@ -357,7 +357,7 @@ function evalcardinstance(cardInst) {
 			if (c.status && c.status.poison && hp){
 				score -= c.status.poison*c.attack/hp;
 			}
-			score *= hp?(c.status && (c.status.immaterial || c.status.burrowed) ? (c.status.poison ? 1.5 : 2) : Math.sqrt(Math.min(hp, 15))/2):.2;
+			score *= hp?(c.status && (c.status.immaterial || c.status.burrowed) ? 2 : Math.pow(Math.min(hp, 15), .3)):.2;
 		}else if (c.type == etg.WeaponEnum){
 			score += c.attack;
 			if (cardInst.owner.weapon) score /= 2;
