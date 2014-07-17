@@ -557,6 +557,7 @@ io.on("connection", function(socket) {
 		}
 	});
 	userEvent(socket, "booster", function(data, user) {
+		if (!user.freepacks) user.freepacks = "0,0,0,0";
 		var freepacklist = user.freepacks.split(",");
 		for (var i = 0;i < freepacklist.length;i++) {
 			freepacklist[i] = parseInt(freepacklist[i]);
@@ -580,8 +581,20 @@ io.on("connection", function(socket) {
 			}
 			if (freepacklist[data.pack] > 0) {
 				freepacklist[data.pack]--;
+				var empty = true;
+				for (var i = 0;i < freepacklist.length;i++) {
+					if (freepacklist[i] > 0) {
+						empty = false;
+						break;
+					}
+				}
+				if (empty) {
+					db.hdel("U:" + user.name, "freepacks");
+					delete user.freepacks;
+				}
+				else
+					user.freepacks = freepacklist.join(",");
 				accountbound = true;
-				user.freepacks = freepacklist.join(",");
 			}
 			else {
 				user.gold -= pack.cost;
