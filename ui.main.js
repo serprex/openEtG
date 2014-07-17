@@ -501,7 +501,6 @@ function getDeck(limit) {
 	return deck;
 }
 function aiEvalFunc() {
-	var gameBack = game;
 	var disableEffectsBack = Effect.disable;
 	Effect.disable = true;
 	var limit = 999;
@@ -1698,7 +1697,7 @@ function startStore() {
 		(function(_i) {
 			elementbutton.click = function() {
 				packele = _i + 1;
-				tinfo.setText("Selected Element: " + descr[packele]);
+				tinfo.setText("Selected Element: " + etg.eleNames[packele]);
 			}
 		})(i);
 		storeui.addChild(elementbutton);
@@ -1940,21 +1939,6 @@ function startEditor() {
 		});
 	}
 }
-var descr = [
-	"Chroma",
-	"Entropy",
-	"Death",
-	"Gravity",
-	"Earth",
-	"Life",
-	"Fire",
-	"Water",
-	"Light",
-	"Air",
-	"Time",
-	"Darkness",
-	"Aether"
-];
 function startElementSelect() {
 	var stage = new PIXI.DisplayObjectContainer();
 	stage.interactive = true;
@@ -1968,7 +1952,7 @@ function startElementSelect() {
 		elesel[i].position.set(100 + i * 32, 300);
 		(function(_i) {
 			elesel[_i].mouseover = function() {
-				maybeSetText(eledesc, descr[_i]);
+				maybeSetText(eledesc, etg.eleNames[_i]);
 			}
 			elesel[_i].click = function() {
 				var msg = { u: user.name, a: user.auth, e: _i };

@@ -1271,3 +1271,4 @@ exports.MulliganPhase1 = 0;
 exports.MulliganPhase2 = 1;
 exports.PlayPhase = 2;
 exports.EndPhase = 3;
+exports.eleNames = ["Chroma", "Entropy", "Death", "Gravity", "Earth", "Life", "Fire", "Water", "Light", "Air", "Time", "Darkness", "Aether"];
