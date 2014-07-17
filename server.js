@@ -241,6 +241,18 @@ function genericChat(socket, data){
 	}
 	else io.emit("chat", data)
 }
+function addCards(user, cards, accbound) {
+	if (accbound) {
+		for (var i = 0;i < cards.length;i++) {
+			user.accountbound = etgutil.addcard(user.accountbound, cards[i]);
+		}
+	}
+	else {
+		for (var i = 0;i < cards.length;i++) {
+			user.pool = etgutil.addcard(user.pool, cards[i]);
+		}
+	}
+}
 
 var starter = [
 	"015990g4sa014sd014t4014vi014vs0152o0152t0155u0155p0158q015ca015fi015f6015if015il015lo015lb015ou015s5025rq015v3015ut0161s018pi",
@@ -293,16 +305,9 @@ io.on("connection", function(socket) {
 		delete users[u];
 		delete usersock[u];
 	});
-	userEvent(socket, "addcard", function(data, user) {
-		// Anything using this should eventually be serverside
-		if (data.accountbound) {
-			user.accountbound = etgutil.addcard(user.accountbound, data.c);
-		}
-		else
-			user.pool = etgutil.addcard(user.pool, data.c);
-		if (data.g){
-			user.gold += data.g;
-		}
+	userEvent(socket, "addcards", function(data, user) {
+		var cards = etgutil.decodedeck(data.c);
+		addCards(user, cards, data.accountbound);
 	});
 	userEvent(socket, "sellcard", function(data, user) {
 		user.pool = etgutil.addcard(user.pool, data.card, -1);
@@ -417,19 +422,6 @@ io.on("connection", function(socket) {
 				socket.emit("codereject", "Unknown code type: " + type);
 			}
 		});
-	});
-	userEvent(socket, "add", function (data, user) {
-		var add = etgutil.decodedeck(data.add);
-		for (var i = 0; i < add.length; i++) {
-			user.pool = etgutil.addcard(user.pool, add[i]);
-		}
-	});
-	userEvent(socket, "addaccountbound", function (data, user) {
-		if (!user.accountbound) user.accountbound = "";
-		var add = etgutil.decodedeck(data.add);
-		for (var i = 0; i < add.length; i++) {
-			user.accountbound = etgutil.addcard(user.accountbound, add[i]);
-		}
 	});
 	userEvent(socket, "foewant", function(data, user){
 		var u=data.u, f=data.f;
@@ -550,14 +542,6 @@ io.on("connection", function(socket) {
 		var qu = "Q:" + data.u;
 		db.hset(qu, data.quest, data.newstage);
 	});
-	userEvent(socket, "usefreepack", function (data, user) {
-		var packlist = user.freepacks.split(",");
-		for (var i = 0; i < packlist.length; i++) {
-			packlist[i] = parseInt(packlist[i]);
-		}
-		packlist[data.type]--;
-		user.freepacks = packlist.join();
-	});
 	userEvent(socket, "addloss", function(data, user) {
 		if (data.pvp) user.pvplosses = (user.pvplosses ? parseInt(user.pvplosses) + 1 : 1);
 		else user.ailosses = (user.ailosses ? parseInt(user.ailosses) + 1 : 1);
@@ -570,6 +554,40 @@ io.on("connection", function(socket) {
 		else {
 			user.aiwins = user.aiwins ? parseInt(user.aiwins) + 1 : 1;
 			user.ailosses = user.ailosses ? parseInt(user.ailosses) - 1 : 0;
+		}
+	});
+	userEvent(socket, "booster", function(data, user) {
+		var freepacklist = user.freepacks.split(",");
+		for (var i = 0;i < freepacklist.length;i++) {
+			freepacklist[i] = parseInt(freepacklist[i]);
+		}
+		var packdata = [
+		{ amount: 9, cost: 15, rare: []},
+		{ amount: 6, cost: 25, rare: [3]},
+		{ amount: 8, cost: 65, rare: [3, 7]},
+		{ amount: 9, cost: 100, rare: [4, 7, 8]},
+		];
+		var pack = packdata[data.pack];
+		var element = data.element;
+		if (user.gold >= pack.cost || freepacklist[data.pack] > 0) {
+			var accountbound = false;
+			var newCards = [];
+			for (var i = 0;i < pack.amount;i++) {
+				var rarity = 1;
+				while (i >= pack.rare[rarity - 1]) rarity++;
+				var fromElement = Math.random() > .4;
+				newCards[i] = etg.PlayerRng.randomcard(false, function(x) { return (x.element == element) ^ fromElement && x.type != etg.PillarEnum && x.rarity == rarity }).code;
+			}
+			if (freepacklist[data.pack] > 0) {
+				freepacklist[data.pack]--;
+				accountbound = true;
+				user.freepacks = freepacklist.join(",");
+			}
+			else {
+				user.gold -= pack.cost;
+			}
+			addCards(user, newCards, accountbound);
+			socket.emit("boostergive", { cards: etgutil.encodedeck(newCards), accountbound: accountbound, cost:pack.cost, packtype:data.pack });
 		}
 	});
 	socket.on("guestchat", function (data) {
