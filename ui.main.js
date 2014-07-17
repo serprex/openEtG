@@ -454,7 +454,7 @@ function initGame(data, ai) {
 		game.player2.markpower = data.aimarkpower;
 	}
 	if (data.urhp) {
-		game.player1.maxhp = game.player1.hp = data.urhp
+		game.player1.maxhp = game.player1.hp = data.urhp;
 	}
 	if (data.aidrawpower) {
 	    game.player2.drawpower = data.aidrawpower;
@@ -691,7 +691,7 @@ function victoryScreen() {
 }
 
 function doubleDeck(deck) {
-	return deck.slice(0, deck.length - 2).concat(deck);
+	return deck.concat(deck);
 }
 
 function deckMorph(deck,MorphFrom,morphTo) {
@@ -739,8 +739,8 @@ function mkDemigod() {
 
 	var demigod = demigods[Math.floor(Math.random() * demigods.length)];
 	var dgname = "Demigod\n" + demigod[0];
-	var deck = user || !aideck.value ? demigod[1].split(" ") : aideck.value.split(" ");
-	deck = doubleDeck(deck);
+	var deck = (!user && aideck.value) || demigod[1];
+	deck = (deck + " " + deck).split(" ");
 	initGame({ first: Math.random() < .5, deck: deck, urdeck: urdeck, seed: Math.random() * etgutil.MAX_INT, hp: 200, aimarkpower: 3, aidrawpower: 2, foename: dgname }, aiEvalFunc);
 	game.cost = 20;
 	game.level = 3;
@@ -781,7 +781,7 @@ function mkMage() {
 	];
 
 	var mage = mages[Math.floor(Math.random() * mages.length)];
-	var deck = user || !aideck.value ? mage[1].split(" ") : aideck.value.split(" ");
+	var deck = ((!user && aideck.value) || mage[1]).split(" ");
 	initGame({ first: Math.random() < .5, deck: deck, urdeck: urdeck, seed: Math.random() * etgutil.MAX_INT, hp: 125, foename: mage[0] }, aiEvalFunc);
 	game.cost = 5;
 	game.level = 1;
@@ -2728,8 +2728,7 @@ socket.on("pvpgive", initGame);
 socket.on("tradegive", initTrade);
 socket.on("librarygive", initLibrary);
 socket.on("foearena", function(data) {
-	var deck = etgutil.decodedeck(data.deck);
-	deck = doubleDeck(deck);
+	var deck = etgutil.decodedeck(data.deck + data.deck);
 	chatArea.value = data.name + ": " + deck.join(" ");
 	initGame({ first: data.first, deck: deck, urdeck: getDeck(), seed: data.seed, hp: data.hp, cost: data.cost, foename: data.name }, aiEvalFunc);
 	game.arena = data.name;
