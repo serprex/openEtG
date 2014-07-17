@@ -12,28 +12,13 @@
 	var deckcode = document.getElementById("deckcode");
 	var legality = document.getElementById("legality");
 	var rulesets = document.getElementById("rulesets");
-	var Actives = require("./Actives");
 	var Cards, CardCodes, Targeting;
+	var etg = require("./etg");
 	require("./etg.client").loadcards(function(cards, cardCodes, targeting) {
 		Cards = cards;
 		CardCodes = cardCodes;
 		Targeting = targeting;
 	});
-	var descr = [
-		"Chroma",
-		"Entropy",
-		"Death",
-		"Gravity",
-		"Earth",
-		"Life",
-		"Fire",
-		"Water",
-		"Light",
-		"Air",
-		"Time",
-		"Darkness",
-		"Aether"
-	];
 	var verifiers = {
 		commoner: function(deck) {
 			for (var i = 0;i < deck.length;i++) {
@@ -68,7 +53,7 @@
 				}
 			}
 			for (var i = 0;i < elementList.length;i++) {
-				if (elementList[i] && elementList[i] < 6) return "You have too few " + descr[i] + " cards";
+				if (elementList[i] && elementList[i] < 6) return "You have too few " + etg.eleNames[i] + " cards";
 			}
 			if (eleCount < 3) return "Your deck contains too few elements (only " + eleCount + ")";
 			return "Legal";
@@ -83,7 +68,7 @@
 		var deck = [];
 		var markele;
 		for (var i = 0;i < code.length;i++) {
-			var maybeMark = ~TrueMarks.indexOf(code[i]);
+			var maybeMark = ~etg.TrueMarks.indexOf(code[i]);
 			if (maybeMark) markele = maybeMark;
 			else if (CardCodes[code[i]]) deck.push(CardCodes[code[i]]);
 			else {

@@ -454,7 +454,7 @@ function initGame(data, ai) {
 		game.player2.markpower = data.aimarkpower;
 	}
 	if (data.urhp) {
-		game.player1.maxhp = game.player1.hp = data.urhp
+		game.player1.maxhp = game.player1.hp = data.urhp;
 	}
 	if (data.aidrawpower) {
 	    game.player2.drawpower = data.aidrawpower;
@@ -501,7 +501,6 @@ function getDeck(limit) {
 	return deck;
 }
 function aiEvalFunc() {
-	var gameBack = game;
 	var disableEffectsBack = Effect.disable;
 	Effect.disable = true;
 	var limit = 999;
@@ -691,7 +690,7 @@ function victoryScreen() {
 }
 
 function doubleDeck(deck) {
-	return deck.slice(0, deck.length - 2).concat(deck);
+	return deck.concat(deck);
 }
 
 function deckMorph(deck,MorphFrom,morphTo) {
@@ -739,8 +738,8 @@ function mkDemigod() {
 
 	var demigod = demigods[Math.floor(Math.random() * demigods.length)];
 	var dgname = "Demigod\n" + demigod[0];
-	var deck = user || !aideck.value ? demigod[1].split(" ") : aideck.value.split(" ");
-	deck = doubleDeck(deck);
+	var deck = (!user && aideck.value) || demigod[1];
+	deck = (deck + " " + deck).split(" ");
 	initGame({ first: Math.random() < .5, deck: deck, urdeck: urdeck, seed: Math.random() * etgutil.MAX_INT, hp: 200, aimarkpower: 3, aidrawpower: 2, foename: dgname }, aiEvalFunc);
 	game.cost = 20;
 	game.level = 3;
@@ -781,7 +780,7 @@ function mkMage() {
 	];
 
 	var mage = mages[Math.floor(Math.random() * mages.length)];
-	var deck = user || !aideck.value ? mage[1].split(" ") : aideck.value.split(" ");
+	var deck = ((!user && aideck.value) || mage[1]).split(" ");
 	initGame({ first: Math.random() < .5, deck: deck, urdeck: urdeck, seed: Math.random() * etgutil.MAX_INT, hp: 125, foename: mage[0] }, aiEvalFunc);
 	game.cost = 5;
 	game.level = 1;
@@ -1678,7 +1677,7 @@ function startStore() {
 		(function(_i) {
 			elementbutton.click = function() {
 				packele = _i + 1;
-				tinfo.setText("Selected Element: " + descr[packele]);
+				tinfo.setText("Selected Element: " + etg.eleNames[packele]);
 			}
 		})(i);
 		storeui.addChild(elementbutton);
@@ -1920,21 +1919,6 @@ function startEditor() {
 		});
 	}
 }
-var descr = [
-	"Chroma",
-	"Entropy",
-	"Death",
-	"Gravity",
-	"Earth",
-	"Life",
-	"Fire",
-	"Water",
-	"Light",
-	"Air",
-	"Time",
-	"Darkness",
-	"Aether"
-];
 function startElementSelect() {
 	var stage = new PIXI.DisplayObjectContainer();
 	stage.interactive = true;
@@ -1948,7 +1932,7 @@ function startElementSelect() {
 		elesel[i].position.set(100 + i * 32, 300);
 		(function(_i) {
 			elesel[_i].mouseover = function() {
-				maybeSetText(eledesc, descr[_i]);
+				maybeSetText(eledesc, etg.eleNames[_i]);
 			}
 			elesel[_i].click = function() {
 				var msg = { u: user.name, a: user.auth, e: _i };
@@ -2708,8 +2692,7 @@ socket.on("pvpgive", initGame);
 socket.on("tradegive", initTrade);
 socket.on("librarygive", initLibrary);
 socket.on("foearena", function(data) {
-	var deck = etgutil.decodedeck(data.deck);
-	deck = doubleDeck(deck);
+	var deck = etgutil.decodedeck(data.deck + data.deck);
 	chatArea.value = data.name + ": " + deck.join(" ");
 	initGame({ first: data.first, deck: deck, urdeck: getDeck(), seed: data.seed, hp: data.hp, cost: data.cost, foename: data.name }, aiEvalFunc);
 	game.arena = data.name;
