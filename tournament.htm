@@ -34,45 +34,46 @@
 		"Darkness",
 		"Aether"
 	];
-	var verifiers = {};
-	verifiers["commoner"] = function(deck) {
-		for (var i = 0;i < deck.length;i++) {
-			var card = deck[i];
-			if (card.rarity > 1)
-				return card.name + " is too high in rarity";
-			if (card.upped) return "Your deck contains at least one upgraded card";
-		}
-		return "Legal";
-	}
-	verifiers["dodrio"] = function(deck) {
-		var bannedCards = ["4vj", "4vl", "55v", "593", "5f9", "5ik", "5ig", "5io"];
-		var elementList = [];
-		var eleCount, rareElement;
-		for (var i = 0;i < deck.length;i++) {
-			var card = deck[i];
-			if (card.upped) return "Your deck contains at least one upgraded card";
-			if (~bannedCards.indexOf(card.code)) return card.name + " is banned";
-			var ele = card.element;
-			if (ele) {
-				if (!elementList[ele]) {
-					elementList[ele] = 0;
-					eleCount++;
+	var verifiers = {
+		commoner: function(deck) {
+			for (var i = 0;i < deck.length;i++) {
+				var card = deck[i];
+				if (card.rarity > 1)
+					return card.name + " is too high in rarity";
+				if (card.upped) return "Your deck contains at least one upgraded card";
+			}
+			return "Legal";
+		},
+		dodrio: function(deck) {
+			var bannedCards = ["4vj", "4vl", "55v", "593", "5f9", "5ik", "5ig", "5io"];
+			var elementList = [];
+			var eleCount, rareElement;
+			for (var i = 0;i < deck.length;i++) {
+				var card = deck[i];
+				if (card.upped) return "Your deck contains at least one upgraded card";
+				if (~bannedCards.indexOf(card.code)) return card.name + " is banned";
+				var ele = card.element;
+				if (ele) {
+					if (!elementList[ele]) {
+						elementList[ele] = 0;
+						eleCount++;
+					}
+					elementList[ele]++;
+					if (eleCount > 3)
+						return "Your deck contains too many elements";
 				}
-				elementList[ele]++;
-				if (eleCount > 3)
-					return "Your deck contains too many elements";
+				if (card.rarity >= 3) {
+					if (!rareElement) rareElement = card.element;
+					else if (rareElement != card.element) return "Your deck contains rare cards from more than one element";
+				}
 			}
-			if (card.rarity >= 3) {
-				if (!rareElement) rareElement = card.element;
-				else if (rareElement != card.element) return "Your deck contains rare cards from more than one element";
+			for (var i = 0;i < elementList.length;i++) {
+				if (elementList[i] && elementList[i] < 6) return "You have too few " + descr[i] + " cards";
 			}
+			if (eleCount < 3) return "Your deck contains too few elements (only " + eleCount + ")";
+			return "Legal";
 		}
-		for (var i = 0;i < elementList.length;i++) {
-			if (elementList[i] && elementList[i] < 6) return "You have too few " + descr[i] + " cards";
-		}
-		if (eleCount < 3) return "Your deck contains too few elements (only " + eleCount + ")";
-		return "Legal";
-	}
+	};
 	function testDeck() {
 		if (!Cards){
 			legality.value = "Card DB not yet downloaded";

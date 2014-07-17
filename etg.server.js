@@ -1,9 +1,10 @@
 var fs = require("fs");
 var etg = require("./etg");
-exports.loadcards = function(Cards, CardCodes, Targeting){
+exports.loadcards = function(cb){
+	var Cards = {}, CardCodes = {}, Targeting = {};
 	var names = ["pillar", "weapon", "shield", "permanent", "spell", "creature"];
 	for(var i=0; i<names.length; i++){
-		var csv = fs.readFileSync(names[_i] + ".csv").split("\n");
+		var csv = fs.readFileSync(names[i] + ".csv").toString().split("\n");
 		var keys = csv[0].split(",");
 		for(var j=1; j<csv.length; j++){
 			var carddata = csv[j].split(",");
@@ -21,12 +22,13 @@ exports.loadcards = function(Cards, CardCodes, Targeting){
 				}
 			}
 			var nospacename = carddata[1].replace(/ |'/g,"");
-			Cards[nospacename in Cards?nospacename+"Up":nospacename] = CardCodes[cardcode] = new etg.Card(_i, cardinfo);
+			Cards[nospacename in Cards?nospacename+"Up":nospacename] = CardCodes[cardcode] = new etg.Card(i, cardinfo);
 		}
 	}
-	var csv = fs.readFileSync("active.csv").split("\n");
+	var csv = fs.readFileSync("active.csv").toString().split("\n");
 	for (var i=0; i<csv.length; i++){
 		var keypair = csv[i].split(",");
 		Targeting[keypair[0]] = etg.getTargetFilter(keypair[1]);
 	}
+	cb(Cards, CardCodes, Targeting);
 }

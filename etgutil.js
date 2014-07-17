@@ -28,7 +28,8 @@ exports.decodedeck = function (deck) {
     return out;
 }
 exports.addcard = function(deck, card, x){
-	if(x === undefined)x=1;
+	if (deck === undefined) deck = "";
+	if (x === undefined) x = 1;
 	for(var i=0; i<deck.length; i+=5){
 		var code = deck.substr(i+2, 3);
 		if (code == card){

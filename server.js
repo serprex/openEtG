@@ -8,6 +8,12 @@ var app = http.createServer(connect().use(require("compression")()).use(cardRedi
 var io = require("socket.io")(app.listen(13602));
 var redis = require("redis"), db = redis.createClient();
 var etgutil = require("./etgutil");
+var etg = require("./etg");
+require("./etg.server").loadcards(function(cards, codes, tgt){
+	global.Cards = cards;
+	global.CardCodes = codes;
+	global.Targeting = tgt;
+});
 
 function loginRespond(res, servuser, pass){
 	if(!servuser.name){
@@ -28,10 +34,18 @@ function loginRespond(res, servuser, pass){
 			res.end();
 			return;
 		}
-		var user = useruser(servuser), day = getDay();
-		if (!servuser.oracle || servuser.oracle < day){
+		var day, user = useruser(servuser);
+		if (servuser.oracle !== undefined && servuser.oracle < (day = getDay())){
 			servuser.oracle = day;
-			user.oracle = true;
+			var card = etg.PlayerRng.randomcard(false,
+                (function (y) { return function (x) { return x.type != etg.PillarEnum && ((x.rarity != 5) ^ y); } })(Math.random() < .03));
+			if (card.rarity >= 2) {
+				servuser.accountbound = user.accountbound = etgutil.addcard(user.accountbound, card.code);
+			}
+			else {
+				servuser.pool = user.pool = etgutil.addcard(user.pool, card.code);
+			}
+			servuser.ocard = user.ocard = user.oracle = card.code;
 		}
 		res.writeHead("200");
 		db.hgetall("Q:" + user.name, function (err, obj) {
@@ -260,6 +274,7 @@ io.on("connection", function(socket) {
 		user.ailosses = 0;
 		user.pvpwins = 0;
 		user.pvplosses = 0;
+		user.oracle = 0;
 		this.emit("userdump", useruser(user));
 	});
 	userEvent(socket, "logout", function(data, user) {
@@ -278,16 +293,12 @@ io.on("connection", function(socket) {
 	userEvent(socket, "addcard", function(data, user) {
 		// Anything using this should eventually be serverside
 		if (data.accountbound) {
-			if (!user.accountbound) user.accountbound = "";
 			user.accountbound = etgutil.addcard(user.accountbound, data.c);
 		}
 		else
 			user.pool = etgutil.addcard(user.pool, data.c);
 		if (data.g){
 			user.gold += data.g;
-		}
-		if (data.o){
-			user.ocard = data.o;
 		}
 	});
 	userEvent(socket, "sellcard", function(data, user) {

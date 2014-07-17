@@ -1300,24 +1300,12 @@ function startMenu() {
 	if (!user) toggleB(baia, bshop, bupgrade, binfoa, btopa, blogout, bdelete, bquest, taiwinloss);
 
 	//only display if user is logged in
-	if (user) {
-		if (user.oracle) {
-			// todo user.oracle should be a card, not true. The card is the card that the server itself added. This'll only show what was added
-			delete user.oracle;
-			var card = etg.PlayerRng.randomcard(false,
-                (function (y) { return function (x) { return x.type != etg.PillarEnum && ((x.rarity != 5) ^ y); } })(Math.random() < .03));
-			cardcode = card.code;
-			var bound = card.rarity >= 2;
-			userEmit("addcard", { c: cardcode, o: cardcode, accountbound: bound });
-			user.ocard = cardcode;
-            if (bound)
-                user.accountbound.push(cardcode);
-			else
-                user.pool.push(cardcode);
-			var oracle = new PIXI.Sprite(nopic);
-			oracle.position.set(450, 100);
-			menuui.addChild(oracle);
-		}
+	if (user && user.oracle) {
+		cardcode = user.oracle;
+		delete user.oracle;
+		var oracle = new PIXI.Sprite(nopic);
+		oracle.position.set(450, 100);
+		menuui.addChild(oracle);
 	}
 
 	function logout() {
