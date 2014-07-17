@@ -1832,11 +1832,17 @@ function startEditor() {
 		bdeck2.click = switchDeckCb(1);
 		bdeck3.click = switchDeckCb(2);
 		barena.click = function() {
-			if (editordeck.length < 30) {
-				chatArea.value = "30 cards required before submission";
-				return;
-			}
 			if (user) {
+				if (!user.ocard){
+					chatArea.value = "You lack an oracle card";
+					return;
+				}else if (editordeck.length < 30) {
+					chatArea.value = "30 cards required before submission";
+					return;
+				}else if (~editordeck.indexOf(user.ocard)){
+					chatArea.value = "Your deck cannot contain any of your oracle card; it'll be there when it gets there";
+					return;
+				}
 				editordeck.push(etg.TrueMarks[editormark]);
 				userEmit("setarena", { d: etgutil.encodedeck(editordeck) });
 				editordeck.pop();

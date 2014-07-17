@@ -34,22 +34,21 @@ function loginRespond(res, servuser, pass){
 			res.end();
 			return;
 		}
-		var day, user = useruser(servuser);
-		if (servuser.oracle !== undefined && servuser.oracle < (day = getDay())){
-			servuser.oracle = day;
-			var card = etg.PlayerRng.randomcard(false,
-                (function (y) { return function (x) { return x.type != etg.PillarEnum && ((x.rarity != 5) ^ y); } })(Math.random() < .03));
-			if (card.rarity >= 2) {
-				servuser.accountbound = user.accountbound = etgutil.addcard(user.accountbound, card.code);
+		useruser(servuser, function(user){
+			var day;
+			if (servuser.oracle !== undefined && servuser.oracle < (day = getDay())){
+				servuser.oracle = day;
+				var card = etg.PlayerRng.randomcard(false,
+					(function (y) { return function (x) { return x.type != etg.PillarEnum && ((x.rarity != 5) ^ y); } })(Math.random() < .03));
+				if (card.rarity >= 2) {
+					servuser.accountbound = user.accountbound = etgutil.addcard(user.accountbound, card.code);
+				}
+				else {
+					servuser.pool = user.pool = etgutil.addcard(user.pool, card.code);
+				}
+				servuser.ocard = user.ocard = user.oracle = card.code;
 			}
-			else {
-				servuser.pool = user.pool = etgutil.addcard(user.pool, card.code);
-			}
-			servuser.ocard = user.ocard = user.oracle = card.code;
-		}
-		res.writeHead("200");
-		db.hgetall("Q:" + user.name, function (err, obj) {
-			user.quest = quests[user.name] = obj;
+			res.writeHead("200");
 			res.end(JSON.stringify(user));
 		});
 	}
@@ -138,7 +137,6 @@ function cardRedirect(req, res, next){
 }
 
 var users = {};
-var quests = {};
 var duels = {};
 var trades = {};
 var usersock = {};
@@ -211,25 +209,27 @@ function userEvent(socket, event, func){
 function prepuser(servuser){
 	servuser.gold = parseInt(servuser.gold || 0);
 }
-function useruser(servuser){
-    return {
-        auth: servuser.auth,
-        name: servuser.name,
-        deck0: servuser.deck0,
-        deck1: servuser.deck1,
-        deck2: servuser.deck2,
-        selectedDeck: servuser.selectedDeck || 0,
-        pool: servuser.pool,
-        gold: servuser.gold,
-        ocard: servuser.ocard,
-        freepacks: servuser.freepacks || "0,0,0,0",
-        accountbound: servuser.accountbound,
-        aiwins: parseInt(servuser.aiwins) || 0,
-        ailosses: parseInt(servuser.ailosses) || 0,
-        pvpwins: parseInt(servuser.pvpwins) || 0,
-        pvplosses: parseInt(servuser.pvplosses) || 0,
-		quest: quests[servuser.name]
-	};
+function useruser(servuser, cb){
+	db.hgetall("Q:" + servuser.name, function (err, obj) {
+		cb({
+			auth: servuser.auth,
+			name: servuser.name,
+			deck0: servuser.deck0,
+			deck1: servuser.deck1,
+			deck2: servuser.deck2,
+			selectedDeck: servuser.selectedDeck || 0,
+			pool: servuser.pool,
+			gold: servuser.gold,
+			ocard: servuser.ocard,
+			freepacks: servuser.freepacks || "0,0,0,0",
+			accountbound: servuser.accountbound,
+			aiwins: parseInt(servuser.aiwins) || 0,
+			ailosses: parseInt(servuser.ailosses) || 0,
+			pvpwins: parseInt(servuser.pvpwins) || 0,
+			pvplosses: parseInt(servuser.pvplosses) || 0,
+			quest: obj
+		});
+	});
 }
 function getDay(){
 	return Math.floor(Date.now()/86400000);
@@ -269,13 +269,16 @@ io.on("connection", function(socket) {
 		user.pool = "";
 		user.accountbound = user.deck0;
 		user.freepacks = "3,2,0,0";
-		quests[user.name] = { necromancer: 1 };
 		user.aiwins = 0;
 		user.ailosses = 0;
 		user.pvpwins = 0;
 		user.pvplosses = 0;
 		user.oracle = 0;
-		this.emit("userdump", useruser(user));
+		db.hset("Q:"+user.name, "necromancer", 1, function(err, obj){
+			useruser(user, function(clientuser){
+				this.emit("userdump", clientuser);
+			});
+		});
 	});
 	userEvent(socket, "logout", function(data, user) {
 		var u=data.u;
@@ -356,7 +359,11 @@ io.on("connection", function(socket) {
 		if (data.aname in users){
 			users[data.aname].gold++;
 		}else{
-			db.hincrby("U:"+data.aname, "gold", 1);
+			db.exists("U:"+data.aname, function(err, exists){
+				if (exists){
+					db.hincrby("U:"+data.aname, "gold", 1);
+				}
+			});
 		}
 	});
 	userEvent(socket, "foearena", function(data, user){

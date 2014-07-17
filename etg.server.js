@@ -30,5 +30,6 @@ exports.loadcards = function(cb){
 		var keypair = csv[i].split(",");
 		Targeting[keypair[0]] = etg.getTargetFilter(keypair[1]);
 	}
+	console.log("Cards loaded");
 	cb(Cards, CardCodes, Targeting);
 }
