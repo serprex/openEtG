@@ -20,7 +20,7 @@ if (localStorage){
 })();
 var Cards, CardCodes, Targeting, game;
 (function(){
-var targetingMode, targetingModeCb, targetingText, discarding, user, renderer, endturnFunc, cancelFunc, accepthandfunc, foeDeck, player2summon, player2Cards, guestname, cardChosen;
+var targetingMode, targetingModeCb, targetingText, discarding, user, renderer, endturnFunc, cancelFunc, accepthandfunc, foeDeck, player2summon, player2Cards, guestname, cardChosen, newCards;
 var etgutil = require("./etgutil");
 var etg = require("./etg");
 var Actives = require("./Actives");
@@ -678,7 +678,7 @@ function victoryScreen() {
 			victoryui.addChild(cardArt);
 		}
 		Array.prototype.push.apply(user.pool, game.cardreward);
-		userEmit("add", { add: etgutil.encodedeck(game.cardreward) });
+		userEmit("addcards", { c: etgutil.encodedeck(game.cardreward) });
 	}
 
 	refreshRenderer(victoryui, function(){
@@ -1481,7 +1481,7 @@ function upgradestore() {
 				if (user.gold >= 50) {
 					user.gold -= 50;
 					userEmit("subgold", { g: 50 });
-					userEmit("addcard", { c: card.asUpped(true).code });
+					userEmit("addcards", { c: etgutil.encodedeck([card.asUpped(true).code]) });
 					user.pool.push(card.asUpped(true).code);
 					adjustdeck();
 				}
@@ -1581,12 +1581,13 @@ function upgradestore() {
 
 function startStore() {
 	var packdata = [
-		{amount: 9, cost: 15, rare: [], info: "Bronze Pack: 9 Commons"},
-		{amount: 6, cost: 25, rare: [3], info: "Silver Pack: 3 Commons, 3 Uncommons"},
-		{amount: 8, cost: 65, rare: [3, 7], info: "Gold Pack: 3 Commons, 4 Uncommons, 1 Rare"},
-		{amount: 9, cost: 100, rare: [4, 7, 8], info: "Platinum Pack: 4 Commons, 3 Uncommons, 1 Rare, 1 Shard"},
+		{cost: 15, info: "Bronze Pack: 9 Commons"},
+		{cost: 25, info: "Silver Pack: 3 Commons, 3 Uncommons"},
+		{cost: 65, info: "Gold Pack: 3 Commons, 4 Uncommons, 1 Rare"},
+		{cost: 100, info: "Platinum Pack: 4 Commons, 3 Uncommons, 1 Rare, 1 Shard"},
 	];
-	var packele = -1, packrarity = -1, newCards = [], newCardsArt = [];
+	var packele = -1, packrarity = -1, newCardsArt = [];
+	newCards = []
 
 	var storeui = new PIXI.DisplayObjectContainer();
 	storeui.interactive = true;
@@ -1637,28 +1638,7 @@ function startStore() {
 		}
 		var pack = packdata[packrarity];
 		if (user.gold >= pack.cost || user.freepacks[packrarity] > 0) {
-			for (var i = 0;i < pack.amount;i++) {
-				var rarity = 1;
-				while (i >= pack.rare[rarity-1]) rarity++;
-				var fromElement = Math.random() > .4;
-				newCards[i] = etg.PlayerRng.randomcard(false, function(x) { return (x.element == packele) ^ fromElement && x.type != etg.PillarEnum && x.rarity == rarity }).code;
-				newCardsArt[i].visible = true;
-			}
-			for (; i < newCardsArt.length; i++){
-				newCardsArt[i].visible = false;
-			}
-			if (user.freepacks[packrarity] > 0) {
-				user.freepacks[packrarity]--;
-				userEmit("usefreepack", {type: packrarity});
-				userEmit("addaccountbound", { add: etgutil.encodedeck(newCards) });
-				Array.prototype.push.apply(user.accountbound, newCards);
-			}
-			else {
-				user.gold -= pack.cost;
-				userEmit("subgold", { g: pack.cost });
-				userEmit("add", { add: etgutil.encodedeck(newCards) });
-				Array.prototype.push.apply(user.pool, newCards);
-			}
+			userEmit("booster", { pack: packrarity, element:packele });
 			toggleB(bbronze, bsilver, bgold, bplatinum, bget, bbuy);
 			popbooster.visible = true;
 			updateFreeText();
@@ -2801,7 +2781,18 @@ socket.on("codedone", function(data) {
 	user.pool.push(data.card);
 	addChatMessage("<font color=red>Card Added!</font><br>");
 	startMenu();
-})
+});
+socket.on("boostergive", function(data) {
+	newCards = etgutil.decodedeck(data.cards);
+	if (data.accountbound) {
+		Array.prototype.push.apply(user.pool, newCards);
+		user.freepacks[data.packtype]--;
+	}
+	else {
+		Array.prototype.push.apply(user.accountbound, newCards);
+		user.gold -= data.cost;
+	}
+});
 function maybeSendChat(e) {
 	e.cancelBubble = true;
 	if (e.keyCode != 13) return;
@@ -2811,7 +2802,7 @@ function maybeSendChat(e) {
 		if (user){
 			var checkPm = msg.split(" ");
 			if (checkPm[0] == "/w") {
-				var match = msg.match(/"(?:[^"\\]|\\.)*"/);
+				var match = msg.match(/^\/w"(?:[^"\\]|\\.)*"/);
 				var to = (match && match[0]) || checkPm[1];
 				msg = msg.substring(3).replace(to, "");
 				chatinput.value = "/w " + to + " ";
