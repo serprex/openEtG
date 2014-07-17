@@ -123,7 +123,7 @@ var caimgcache = {}, crimgcache = {}, wsimgcache = {}, artcache = {}, artimageca
 var elecols = [0xa99683, 0xaa5999, 0x777777, 0x996633, 0x5f4930, 0x50a005, 0xcc6611, 0x205080, 0xa9a9a9, 0x337ddd, 0xccaa22, 0x333333, 0x77bbdd];
 
 function lighten(c) {
-	return ((c & 255) + 127 >> 1) | (((c >> 8) & 255) + 127 << 7) | (((c >> 16) & 255) + 127 << 15);
+	return ((c & 255) + 255 >> 1) | (((c >> 8) & 255) + 255 >> 1 << 8) | (((c >> 16) & 255) + 255 >> 1 << 16);
 }
 function maybeLighten(card){
 	return card.upped ? lighten(elecols[card.element]) : elecols[card.element];

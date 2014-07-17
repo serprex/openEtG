@@ -77,11 +77,11 @@ alphawolf: function (c, t) {
 animateweapon: function(c, t) {
 	var cr = new E.Creature(t.card, t.owner);
 	cr.atk = t.atk;
-	cr.active = clone(t.active);
+	cr.active = E.clone(t.active);
 	cr.cast = t.cast;
 	cr.castele = t.castele;
-	cr.passives = clone(t.passives);
-	cr.status = clone(t.status);
+	cr.passives = E.clone(t.passives);
+	cr.status = E.clone(t.status);
 	cr.place();
 	t.owner.weapon = undefined;
 },
@@ -363,7 +363,7 @@ enchant:function(c,t){
 },
 endow:function(c,t){
 	Effect.mkText("Endow", ui.tgtToPos(t));
-	c.passives = clone(t.passives);
+	c.passives = E.clone(t.passives);
 	for (key in t.status) {
 		if (typeof t.status[key] == "boolean")
 			c.status[key] = c.status[key] || t.status[key]
@@ -372,7 +372,7 @@ endow:function(c,t){
 	}
  	if (c.status.adrenaline > 1)
 		c.status.adrenaline = 1;
-	c.active = clone(t.active);
+	c.active = E.clone(t.active);
 	c.cast = t.cast;
 	c.castele = t.castele;
 	if (c.active.cast && c.active.cast.activename == "endow") {
@@ -438,11 +438,11 @@ flatline:function(c,t){
 flyingweapon: function(c, t) {
 	var cr = new E.Creature(t.card, t.owner);
 	cr.atk = t.atk;
-	cr.active = clone(t.active);
+	cr.active = E.clone(t.active);
 	cr.cast = t.cast;
 	cr.castele = t.castele;
-	cr.passives = clone(t.passives);
-	cr.status = clone(t.status);
+	cr.passives = E.clone(t.passives);
+	cr.status = E.clone(t.status);
 	cr.passives.airborne = true;
 	cr.place();
 	t.owner.weapon = undefined;
@@ -715,11 +715,11 @@ livingweapon:function(c,t){
 	if (c.owner == t.owner || !t.owner.weapon){
 		var w = new E.Weapon(t.card, t.owner);
 		w.atk = t.atk;
-		w.active = clone(t.active);
+		w.active = E.clone(t.active);
 		w.castele = t.castele;
 		w.cast = t.cast;
-		w.passives = clone(t.passives);
-		w.status = clone(t.status);
+		w.passives = E.clone(t.passives);
+		w.status = E.clone(t.status);
 		t.owner.weapon = w;
 		t.remove();
 	}

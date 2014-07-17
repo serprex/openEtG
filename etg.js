@@ -1242,6 +1242,7 @@ exports.isEmpty = isEmpty;
 exports.salvageScan = salvageScan;
 exports.filtercards = filtercards;
 exports.countAdrenaline = countAdrenaline;
+exports.clone = clone;
 exports.casttext = casttext;
 exports.getTargetFilter = getTargetFilter;
 exports.NymphList = NymphList;
