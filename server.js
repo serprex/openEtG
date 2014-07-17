@@ -562,10 +562,10 @@ io.on("connection", function(socket) {
 			freepacklist[i] = parseInt(freepacklist[i]);
 		}
 		var packdata = [
-		{ amount: 9, cost: 15, rare: []},
-		{ amount: 6, cost: 25, rare: [3]},
-		{ amount: 8, cost: 65, rare: [3, 7]},
-		{ amount: 9, cost: 100, rare: [4, 7, 8]},
+			{ amount: 9, cost: 15, rare: []},
+			{ amount: 6, cost: 25, rare: [3]},
+			{ amount: 8, cost: 65, rare: [3, 7]},
+			{ amount: 9, cost: 100, rare: [4, 7, 8]},
 		];
 		var pack = packdata[data.pack];
 		var element = data.element;
