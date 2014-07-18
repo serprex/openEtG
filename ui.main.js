@@ -1842,7 +1842,7 @@ function startEditor() {
 				}else if (editordeck.length < 30) {
 					chatArea.value = "30 cards required before submission";
 					return;
-				}else if (~editordeck.indexOf(user.ocard)){
+				}else if (~editordeck.indexOf(user.ocard) || ~editordeck.indexOf(CardCodes[user.ocard].asUpped(true).code)){
 					chatArea.value = "Your deck cannot contain any of your oracle card; it'll be there when it gets there";
 					return;
 				}
