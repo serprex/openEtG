@@ -401,11 +401,7 @@ Card.prototype.info = function(){
 		}else if (this.type == SpellEnum){
 			return activename(this.active);
 		}
-		var info = "";
-		if (this.type == ShieldEnum)info += "Reduce damage by " + this.health;
-		else if (this.type == WeaponEnum)info += "Deal " + this.attack + " damage.";
-		else if (this.type == CreatureEnum)info += this.attack+"|"+this.health;
-		return info + Thing.prototype.activetext.call(this) + objinfo(this.status) + objinfo(this.passives);
+		return prefix + Thing.prototype.activetext.call(this) + objinfo(this.status) + objinfo(this.passives);
 	}
 }
 Thing.prototype.toString = function(){ return this.card.name; }
