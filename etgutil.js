@@ -1,6 +1,7 @@
 function encodeCount(count){
 	return count>1023?"vv":(count<32?"0":"") + count.toString(32);
 }
+exports.MAX_INT = 4294967296;
 exports.encodedeck = function(deck){
 	if (!deck)return "";
 	var count={}, out="";
@@ -40,4 +41,10 @@ exports.addcard = function(deck, card, x){
 	}
 	return x<=0?deck:deck + encodeCount(x) + card;
 }
-exports.MAX_INT = 4294967296;
+exports.countcard = function(deck, card){
+	if (!deck || !card) return -1;
+	for(var i=0; i<deck.length; i+=5){
+		if (card == deck.substr(i+2, 3)) return parseInt(deck.substr(i, 2), 32);
+	}
+	return -1;
+}

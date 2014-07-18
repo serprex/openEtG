@@ -387,8 +387,18 @@ io.on("connection", function(socket) {
 		});
 	});
 	userEvent(socket, "upgrade", function (data, user) {
-		user.pool = etgutil.addcard(user.pool, data.card, data.use);
-		user.pool = etgutil.addcard(user.pool, data.newcard);
+		var card = CardCodes[data.card];
+		var newcard = card.asUpped(true).code;
+		var use = card.rarity < 5 ? 6 : 1;
+		if (data.bound){
+			var count = etgutil.countcard(user.accountbound, card.code), usepool = Math.max(use - count, 0);
+			user.accountbound = etgutil.addcard(user.accountbound, -use);
+			if (usepool) user.pool = etgutil.addcard(user.pool, -usepool);
+			user.accountbound = etgutil.addcard(user.accountbound, newcard);
+		}else{
+			user.pool = etgutil.addcard(user.pool, card.code, -use);
+			user.pool = etgutil.addcard(user.pool, newcard);
+		}
 	});
 	userEvent(socket, "codesubmit", function(data, user){
 		db.hget("CodeHash", data.code, function(err, type){
@@ -557,7 +567,6 @@ io.on("connection", function(socket) {
 		}
 	});
 	userEvent(socket, "booster", function(data, user) {
-		if (!user.freepacks) user.freepacks = "0,0,0,0";
 		var freepacklist = user.freepacks.split(",");
 		for (var i = 0;i < freepacklist.length;i++) {
 			freepacklist[i] = parseInt(freepacklist[i]);
@@ -581,20 +590,8 @@ io.on("connection", function(socket) {
 			}
 			if (freepacklist[data.pack] > 0) {
 				freepacklist[data.pack]--;
-				var empty = true;
-				for (var i = 0;i < freepacklist.length;i++) {
-					if (freepacklist[i] > 0) {
-						empty = false;
-						break;
-					}
-				}
-				if (empty) {
-					db.hdel("U:" + user.name, "freepacks");
-					delete user.freepacks;
-				}
-				else
-					user.freepacks = freepacklist.join(",");
 				accountbound = true;
+				user.freepacks = freepacklist.join(",");
 			}
 			else {
 				user.gold -= pack.cost;

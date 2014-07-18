@@ -633,6 +633,14 @@ function listify(maybeArray) {
 	if (maybeArray instanceof Array) return maybeArray;
 	else return maybeArray.split();
 }
+function count(haystack, needle){
+	var c = 0, i=-1;
+	for(;;){
+		i = haystack.indexOf(needle, i+1);
+		if (~i) c++;
+		else return c;
+	}
+}
 function victoryScreen() {
 	var victoryui = new PIXI.DisplayObjectContainer();
 	victoryui.interactive = true;
@@ -1467,11 +1475,17 @@ function upgradestore() {
 			if (!isFreeCard(card)) {
 				var use = card.rarity < 5 ? 6 : 1;
 				if (cardpool[card.code] >= use) {
-					userEmit("upgrade", { card: card.code, newcard: card.asUpped(true).code, use: -use });
+					var bound = count(user.pool, card.code) < use;
+					userEmit("upgrade", { card: card.code, bound: bound });
 					for (var i = 0;i < use;i++) {
-						user.pool.splice(user.pool.indexOf(card.code), 1);
+						var idx;
+						if (bound && ~(idx = user.accountbound.indexOf(card.code))){
+							user.accountbound.splice(idx, 1);
+						}else{
+							user.pool.splice(user.pool.indexOf(card.code), 1);
+						}
 					}
-					user.pool.push(card.asUpped(true).code);
+					user[bound?"accountbound":"pool"].push(card.asUpped(true).code);
 					adjustdeck();
 				}
 				else twarning.setText("You need at least " + use + " copies to be able to upgrade this card!");
@@ -1512,6 +1526,13 @@ function upgradestore() {
 				cardpool[user.pool[i]]++;
 			} else {
 				cardpool[user.pool[i]] = 1;
+			}
+		}
+		for (var i = 0;i < user.accountbound.length;i++) {
+			if (user.accountbound[i] in cardpool) {
+				cardpool[user.accountbound[i]]++;
+			} else {
+				cardpool[user.accountbound[i]] = 1;
 			}
 		}
 	}
@@ -2769,11 +2790,11 @@ socket.on("codedone", function(data) {
 socket.on("boostergive", function(data) {
 	newCards = etgutil.decodedeck(data.cards);
 	if (data.accountbound) {
-		Array.prototype.push.apply(user.pool, newCards);
+		Array.prototype.push.apply(user.accountbound, newCards);
 		user.freepacks[data.packtype]--;
 	}
 	else {
-		Array.prototype.push.apply(user.accountbound, newCards);
+		Array.prototype.push.apply(user.pool, newCards);
 		user.gold -= data.cost;
 	}
 });
