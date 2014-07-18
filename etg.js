@@ -387,18 +387,23 @@ Card.prototype.readCost = function(attr, cost){
 Card.prototype.info = function(){
 	if (this.type == PillarEnum){
 		return "1:" + this.element + " " + activename(this.active.auto);
-	}else if (this.text){
-		var prefix = this.type == WeaponEnum?"Weapon: deal " + this.attack + " damage. ":
-			this.type == ShieldEnum?"Shield: "+(this.health?"reduce damage by "+this.health+" ":""):
-			this.type == CreatureEnum?this.attack+"|"+this.health+" ":"";
-		return prefix + this.text;
 	}else{
-		var info = ["", "Weapon", "Shield", "", "Spell", ""][this.type];
-		if (this.type == SpellEnum){
-			return info + " " + activename(this.active);
+		var dmgtype = "";
+		if (this.type == WeaponEnum){
+			if (this.passives && this.passives.ranged) dmgtype = " ranged";
+			if (this.status && this.status.psion) dmgtype += " spell";
 		}
-		if (this.type == ShieldEnum)info += ": reduce damage by " + this.health;
-		else if (this.type == WeaponEnum)info += ": deal " + this.attack + " damage.";
+		var prefix = this.type == WeaponEnum?"Deal " + this.attack + dmgtype + " damage. ":
+			this.type == ShieldEnum?""+(this.health?"Reduce damage by "+this.health+" ":""):
+			this.type == CreatureEnum?this.attack+"|"+this.health+" ":"";
+		if (this.text){
+			return prefix + this.text;
+		}else if (this.type == SpellEnum){
+			return activename(this.active);
+		}
+		var info = "";
+		if (this.type == ShieldEnum)info += "Reduce damage by " + this.health;
+		else if (this.type == WeaponEnum)info += "Deal " + this.attack + " damage.";
 		else if (this.type == CreatureEnum)info += this.attack+"|"+this.health;
 		return info + Thing.prototype.activetext.call(this) + objinfo(this.status) + objinfo(this.passives);
 	}
