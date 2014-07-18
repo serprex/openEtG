@@ -289,31 +289,23 @@ function isEmpty(obj){
 	}
 	return true;
 }
+function maybeClone(x){
+	return x && x.clone();
+}
 Player.prototype.clone = function(game){
 	var obj = Object.create(Player.prototype);
-	for(var key in this){
-		if (key == "status" || key == "shardgolem"){
-			obj[key] = clone(this[key]);
-		}else{
-			var val = this[key];
-			if (Array.isArray(val)){
-				var arr = obj[key] = val.slice();
-				if (key == "creatures" || key == "permanents" || key == "hand"){
-					for(var i=0; i<arr.length; i++){
-						if (arr[i]){
-							arr[i] = arr[i].clone(obj);
-						}
-					}
-				}
-			}else if(key == "shield" || key == "weapon"){
-				if (val){
-					obj[key] = val.clone(obj);
-				}
-			}else{
-				obj[key] = val;
-			}
+	for(var attr in this){
+		if (this.hasOwnProperty(attr)){
+			obj[attr] =  this[attr] instanceof Array ? this[attr].slice() : this[attr];
 		}
 	}
+	obj.status = clone(this.status);
+	obj.shardgolem = clone(this.shardgolem);
+	obj.shield = maybeClone(this.shield);
+	obj.weapon = maybeClone(this.weapon);
+	obj.creatures = this.creatures.map(maybeClone);
+	obj.permanents = this.permanents.map(maybeClone);
+	obj.hand = this.hand.map(maybeClone);
 	obj.game = game;
 	obj.owner = obj;
 	return obj;
@@ -321,8 +313,8 @@ Player.prototype.clone = function(game){
 CardInstance.prototype.clone = function(owner){
 	return new CardInstance(this.card, owner);
 }
-Creature.prototype.clone = function(owner){
-	var obj = Object.create(Creature.prototype);
+Thing.prototype.clone = function(owner, proto){
+	var obj = Object.create(proto.prototype);
 	for(var attr in this){
 		if (this.hasOwnProperty(attr))obj[attr] = this[attr];
 	}
@@ -331,50 +323,21 @@ Creature.prototype.clone = function(owner){
 	obj.status = clone(this.status);
 	obj.owner = owner;
 	return obj;
+}
+Creature.prototype.clone = function(owner){
+	return Thing.prototype.clone.call(this, owner, Creature);
 }
 Permanent.prototype.clone = function(owner){
-	var obj = Object.create(Permanent.prototype);
-	for(var attr in this){
-		if (this.hasOwnProperty(attr))obj[attr] = this[attr];
-	}
-	obj.passives = clone(this.passives);
-	obj.active = clone(this.active);
-	obj.status = clone(this.status);
-	obj.owner = owner;
-	return obj;
+	return Thing.prototype.clone.call(this, owner, Permanent);
 }
 Weapon.prototype.clone = function(owner){
-	var obj = Object.create(Weapon.prototype);
-	for(var attr in this){
-		if (this.hasOwnProperty(attr))obj[attr] = this[attr];
-	}
-	obj.passives = clone(this.passives);
-	obj.active = clone(this.active);
-	obj.status = clone(this.status);
-	obj.owner = owner;
-	return obj;
+	return Thing.prototype.clone.call(this, owner, Weapon);
 }
 Shield.prototype.clone = function(owner){
-	var obj = Object.create(Shield.prototype);
-	for(var attr in this){
-		if (this.hasOwnProperty(attr))obj[attr] = this[attr];
-	}
-	obj.passives = clone(this.passives);
-	obj.active = clone(this.active);
-	obj.status = clone(this.status);
-	obj.owner = owner;
-	return obj;
+	return Thing.prototype.clone.call(this, owner, Shield);
 }
 Pillar.prototype.clone = function(owner){
-	var obj = Object.create(Pillar.prototype);
-	for(var attr in this){
-		if (this.hasOwnProperty(attr))obj[attr] = this[attr];
-	}
-	obj.passives = clone(this.passives);
-	obj.active = clone(this.active);
-	obj.status = clone(this.status);
-	obj.owner = owner;
-	return obj;
+	return Thing.prototype.clone.call(this, owner, Pillar);
 }
 Card.prototype.readCost = function(attr, cost){
 	var c=cost.split(":");
