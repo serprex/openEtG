@@ -2787,6 +2787,10 @@ socket.on("codegold", function(data) {
 	user.gold += data;
 	addChatMessage("<font color=red>" + data + " Gold added!</font><br>");
 });
+socket.on("codecode", function(data) {
+	user.pool.push(data);
+	addChatMessage("<font color=red>" + CardCodes[data].name + " added!</font><br>");
+});
 socket.on("codedone", function(data) {
 	user.pool.push(data.card);
 	addChatMessage("<font color=red>Card Added!</font><br>");

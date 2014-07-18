@@ -413,6 +413,13 @@ io.on("connection", function(socket) {
 					socket.emit("codegold", g);
 					db.hdel("CodeHash", data.code);
 				}
+			}else if (type.charAt(0) == "C"){
+				var c = type.substr(1);
+				if (c in CardCodes){
+					user.pool = etgutil.addcard(user.pool, c);
+					socket.emit("codecode", c);
+					db.hdel("CodeHash", data.code);
+				}else socket.emit("codereject", "Unknown card: " + type);
 			}else if (type == "mark" || type == "shard"){
 				socket.emit("codecard", type);
 			}else{
