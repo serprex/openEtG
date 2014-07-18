@@ -1507,8 +1507,9 @@ function upgradestore() {
 	function sellCard(card) {
 		if (card.rarity != 0 || card.upped) {
 			if (card.rarity <= 4) {
-				if (cardpool[card.code] > 0) {
-					user.pool.splice(user.pool.indexOf(card.code), 1);
+				var idx = user.pool.indexOf(card.code);
+				if (~idx) {
+					user.pool.splice(idx, 1);
 					var sellValue = cardValues[card.rarity] * (card.upped ? 5 : 1);
 					user.gold += sellValue
 					userEmit("sellcard", { card: card.code, gold: sellValue});
