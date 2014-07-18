@@ -2221,6 +2221,7 @@ function startMatch() {
 				shiesprite[j].setTexture(getWeaponShieldImage(sh.card.code));
 			} else shiesprite[j].visible = false;
 			marksprite[j].setTexture(eicons[game.players[j].mark]);
+			maybeSetText(marktext[j], "x" + game.players[j].markpower);
 			for (var i = 1;i < 13;i++) {
 				maybeSetText(quantatext[j].getChildAt(i*2-2), game.players[j].quanta[i].toString());
 			}
@@ -2374,6 +2375,7 @@ function startMatch() {
 	var weapsprite = [new PIXI.Sprite(nopic), new PIXI.Sprite(nopic)];
 	var shiesprite = [new PIXI.Sprite(nopic), new PIXI.Sprite(nopic)];
 	var marksprite = [new PIXI.Sprite(nopic), new PIXI.Sprite(nopic)];
+	var marktext = [new PIXI.Text("", { font: "18px Dosis" }), new PIXI.Text("", { font: "18px Dosis" })];
 	var quantatext = [new PIXI.DisplayObjectContainer(), new PIXI.DisplayObjectContainer()];
 	var hptext = [new PIXI.Text("", { font: "18px Dosis" }), new PIXI.Text("", { font: "18px Dosis" })];
 	var damagetext = [new PIXI.Text("", { font: "14px Dosis" }), new PIXI.Text("", { font: "14px Dosis" })];
@@ -2468,7 +2470,7 @@ function startMatch() {
 			setInteractive.apply(null, creasprite[j]);
 			setInteractive.apply(null, permsprite[j]);
 			marksprite[j].anchor.set(.5, .5);
-			marksprite[j].position.set(750, 470);
+			marksprite[j].position.set(740, 470);
 			gameui.addChild(weapsprite[j] = makeInst(true, null, "weapon", new PIXI.Point(666, 512), 5/4));
 			gameui.addChild(shiesprite[j] = makeInst(false, null, "shield", new PIXI.Point(710, 532), 5/4));
 			if (j) {
@@ -2477,16 +2479,19 @@ function startMatch() {
 				ui.reflectPos(marksprite[j]);
 			}
 			gameui.addChild(marksprite[j]);
+			marktext[j].anchor.set(.5, .5);
 			hptext[j].anchor.set(.5, .5);
 			poisontext[j].anchor.set(.5, .5);
 			decktext[j].anchor.set(.5, .5);
 			damagetext[j].anchor.set(.5, .5);
+			marktext[j].position.set(768,470);
 			quantatext[j].position.set(j ? 792 : 0, j ? 100 : 308);
 			hptext[j].position.set(50, 550);
 			poisontext[j].position.set(50, 570);
 			decktext[j].position.set(50, 530);
 			damagetext[j].position.set(50, 510);
 			if (j) {
+				ui.reflectPos(marktext[j]);
 				ui.reflectPos(hptext[j]);
 				ui.reflectPos(poisontext[j]);
 				ui.reflectPos(decktext[j]);
@@ -2510,6 +2515,7 @@ function startMatch() {
 		setInteractive.apply(null, weapsprite);
 		setInteractive.apply(null, shiesprite);
 		setInteractive.apply(null, hptext);
+		gameui.addChild(marktext[j]);
 		gameui.addChild(quantatext[j]);
 		gameui.addChild(hptext[j]);
 		gameui.addChild(poisontext[j]);
