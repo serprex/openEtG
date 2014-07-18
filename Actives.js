@@ -385,7 +385,7 @@ endow:function(c,t){
 	c.cast = t.cast;
 	c.castele = t.castele;
 	if (c.active.cast && c.active.cast.activename == "endow") {
-		c.active.cast = null;
+		delete c.active.cast;
 	}
 	c.atk += t.trueatk();
 	if (t.active.buff){
