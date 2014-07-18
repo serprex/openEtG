@@ -1056,9 +1056,8 @@ function makeCardSelector(cardmouseover, cardclick){
 	var elefilter = 0, rarefilter = 0;
 	var columns = [[],[],[],[],[],[]], columnspr = [[],[],[],[],[],[]];
 	for (var i = 0;i < 13;i++) {
-		var sprite = new PIXI.Sprite(eicons[i]);
+		var sprite = makeButton(8, 184 + i * 32, eicons[i]);
 		sprite.interactive = true;
-		sprite.position.set(8, 184 + i * 32);
 		(function(_i) {
 			sprite.click = function() {
 				elefilter = _i;
@@ -1068,9 +1067,8 @@ function makeCardSelector(cardmouseover, cardclick){
 		cardsel.addChild(sprite);
 	}
 	for (var i = 0;i < 6; i++){
-		var sprite = new PIXI.Sprite(ricons[i]);
+		var sprite = makeButton(40, 188 + i * 32, ricons[i]);
 		sprite.interactive = true;
-		sprite.position.set(40, 190 + i * 32);
 		(function(_i) {
 			sprite.click = function() {
 				rarefilter = _i;
@@ -1873,9 +1871,8 @@ function startEditor() {
 		var editormark = 0;
 		processDeck();
 		for (var i = 0;i < 13;i++) {
-			var sprite = new PIXI.Sprite(eicons[i]);
+			var sprite = makeButton(200 + i * 32, 210, eicons[i]);
 			sprite.interactive = true;
-			sprite.position.set(200 + i * 32, 210);
 			(function(_i) {
 				sprite.click = function() {
 					editormark = _i;
