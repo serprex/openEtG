@@ -1616,6 +1616,7 @@ function startStore() {
 		toggleB(bbronze, bsilver, bgold, bplatinum, bget, bbuy);
 		popbooster.visible = false;
 		newCards.length = 0;
+		newCardsArt.length = 0;
 	}
 	storeui.addChild(bget);
 
