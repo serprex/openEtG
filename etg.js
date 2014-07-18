@@ -396,12 +396,7 @@ Card.prototype.info = function(){
 		var prefix = this.type == WeaponEnum?"Deal " + this.attack + dmgtype + " damage. ":
 			this.type == ShieldEnum?""+(this.health?"Reduce damage by "+this.health+" ":""):
 			this.type == CreatureEnum?this.attack+"|"+this.health+" ":"";
-		if (this.text){
-			return prefix + this.text;
-		}else if (this.type == SpellEnum){
-			return activename(this.active);
-		}
-		return prefix + Thing.prototype.activetext.call(this) + objinfo(this.status) + objinfo(this.passives);
+		return prefix + (this.text || (this.type == SpellEnum ? activename(this.active) : Thing.prototype.activetext.call(this) + objinfo(this.status) + objinfo(this.passives)));
 	}
 }
 Thing.prototype.toString = function(){ return this.card.name; }
