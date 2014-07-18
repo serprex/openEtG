@@ -1637,10 +1637,6 @@ function startStore() {
 		toggleB(bbronze, bsilver, bgold, bplatinum, bget, bbuy);
 		popbooster.visible = false;
 		newCards.length = 0;
-		newCardsArt.length = 0;
-		if (popbooster.children.length){
-			popbooster.removeChildren();
-		}
 	}
 	storeui.addChild(bget);
 
@@ -1728,6 +1724,10 @@ function startStore() {
 	refreshRenderer(storeui, function() {
 		for (var i = 0;i < newCards.length;i++) {
 			newCardsArt[i].setTexture(getArt(newCards[i]));
+			newCardsArt[i].visible = true;
+		}
+		for (; i < newCardsArt[i].length; i++) {
+			newCardsArt[i].visible = false;
 		}
 		tgold.setText("$" + user.gold);
 	});
