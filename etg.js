@@ -388,7 +388,7 @@ Card.prototype.info = function(){
 	if (this.type == PillarEnum){
 		return "1:" + this.element + " " + activename(this.active.auto);
 	}else if (this.text){
-		var prefix = this.type == WeaponEnum?"Weapon: deal " + this.attack + " damage each turn. ":
+		var prefix = this.type == WeaponEnum?"Weapon: deal " + this.attack + " damage. ":
 			this.type == ShieldEnum?"Shield: "+(this.health?"reduce damage by "+this.health+" ":""):
 			this.type == CreatureEnum?this.attack+"|"+this.health+" ":"";
 		return prefix + this.text;
@@ -398,7 +398,7 @@ Card.prototype.info = function(){
 			return info + " " + activename(this.active);
 		}
 		if (this.type == ShieldEnum)info += ": reduce damage by " + this.health;
-		else if (this.type == WeaponEnum)info += ": deal " + this.attack + " damage each turn.";
+		else if (this.type == WeaponEnum)info += ": deal " + this.attack + " damage.";
 		else if (this.type == CreatureEnum)info += this.attack+"|"+this.health;
 		return info + Thing.prototype.activetext.call(this) + objinfo(this.status) + objinfo(this.passives);
 	}

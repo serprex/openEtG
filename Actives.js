@@ -93,6 +93,15 @@ appease:function(c,t){
 	t.die();
 	c.status.appeased = true;
 },
+axe:function(c,t){
+	return c.owner.mark == E.Fire || c.owner.mark == E.Time?1:0;
+},
+axedraw:function(c,t){
+	c.defstatus("dive", 0);
+	if (c.status.dive < 4){
+		c.status.dive++;
+	}
+},
 bblood:function(c,t){
 	Effect.mkText("0|20", ui.tgtToPos(t));
 	t.buffhp(20);

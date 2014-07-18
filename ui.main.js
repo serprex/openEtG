@@ -2675,8 +2675,12 @@ function getTextImage(text, font, bgcolor, width) {
 			}else{
 				var words = piece.split(" ");
 				for (var j = 0;j < words.length;j++) {
-					pushChild(new PIXI.Text(words[j], font));
-					x += 3;
+					if (words[j]){
+						pushChild(new PIXI.Text(words[j], font));
+						if (x){
+							x += 3;
+						}
+					}
 				}
 			}
 		}
