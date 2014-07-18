@@ -518,8 +518,7 @@ function aiEvalFunc() {
 					var gameBack = game, targetingModeBack = targetingMode, targetingModeCbBack = targetingModeCb;
 					game = game.clone();
 					limit--;
-					var tone = bitsToTgt(tbits);
-					bitsToTgt(cbits).useactive(tone);
+					bitsToTgt(cbits).useactive(bitsToTgt(tbits));
 					var cmdcopy = commands.slice();
 					cmdcopy.push(mkcommand(cbits, tbits));
 					var v = evalGameState(game);
@@ -571,9 +570,6 @@ function aiEvalFunc() {
 				targetingModeCb(1);
 			}
 		}
-		if (currentEval === undefined) {
-			currentEval = evalGameState(game);
-		}
 		var fullCandidates = [currentEval];
 		var self = game.player2;
 		var wp = self.weapon, sh = self.shield;
@@ -607,7 +603,7 @@ function aiEvalFunc() {
 		}
 		return fullCandidates;
 	}
-	var cmd = iterLoop(1, [])[1];
+	var cmd = iterLoop(1, [], evalGameState(game))[1];
 	console.log("Leftover iters: " + limit);
 	Effect.disable = disableEffectsBack;
 	var self = game.player2;
