@@ -1985,7 +1985,7 @@ function startMatch() {
 					fgfx.drawRect(spr.position.x - spr.width / 2, spr.position.y - spr.height / 2, spr.width, spr.height);
 					fgfx.lineStyle(2, 0xffffff);
 				}
-			} else if (obj.canactive()) {
+			} else if (obj.canactive() && !(obj.owner == game.player2 && game.player2.isCloaked())) {
 				fgfx.lineStyle(2, obj.card.element == 8 ? 0x000000 : 0xffffff);
 				fgfx.drawRect(spr.position.x - spr.width / 2, spr.position.y - spr.height / 2, spr.width, (obj instanceof etg.Weapon || obj instanceof etg.Shield ? 12 : 10));
 			}
@@ -2106,7 +2106,7 @@ function startMatch() {
 		for (var i = 0;i < foeplays.children.length;i++) {
 			maybeSetTexture(foeplays.children[i], getCardImage(foeplays.children[i].card.code));
 		}
-		cloakgfx.visible = game.player2.isCloaked();
+		foeplays.visible = cloakgfx.visible = game.player2.isCloaked();
 		fgfx.clear();
 		if (game.turn == game.player1 && !targetingMode && game.phase != etg.EndPhase) {
 			for (var i = 0;i < game.player1.hand.length;i++) {
@@ -2121,16 +2121,14 @@ function startMatch() {
 		fgfx.beginFill(0, 0);
 		fgfx.lineStyle(2, 0xffffff);
 		for (var j = 0;j < 2;j++) {
-			if (j == 0 || !cloakgfx.visible){
-				for (var i = 0;i < 23;i++) {
-					drawBorder(game.players[j].creatures[i], creasprite[j][i]);
-				}
-				for (var i = 0;i < 16;i++) {
-					drawBorder(game.players[j].permanents[i], permsprite[j][i]);
-				}
-				drawBorder(game.players[j].weapon, weapsprite[j]);
-				drawBorder(game.players[j].shield, shiesprite[j]);
+			for (var i = 0;i < 23;i++) {
+				drawBorder(game.players[j].creatures[i], creasprite[j][i]);
 			}
+			for (var i = 0;i < 16;i++) {
+				drawBorder(game.players[j].permanents[i], permsprite[j][i]);
+			}
+			drawBorder(game.players[j].weapon, weapsprite[j]);
+			drawBorder(game.players[j].shield, shiesprite[j]);
 		}
 		if (targetingMode) {
 			fgfx.lineStyle(2, 0xff0000);
