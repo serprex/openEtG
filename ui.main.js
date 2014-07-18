@@ -1638,6 +1638,9 @@ function startStore() {
 		popbooster.visible = false;
 		newCards.length = 0;
 		newCardsArt.length = 0;
+		if (popbooster.children.length){
+			popbooster.removeChildren();
+		}
 	}
 	storeui.addChild(bget);
 
