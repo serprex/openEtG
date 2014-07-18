@@ -2106,7 +2106,7 @@ function startMatch() {
 		for (var i = 0;i < foeplays.children.length;i++) {
 			maybeSetTexture(foeplays.children[i], getCardImage(foeplays.children[i].card.code));
 		}
-		foeplays.visible = cloakgfx.visible = game.player2.isCloaked();
+		foeplays.visible = !(cloakgfx.visible = game.player2.isCloaked());
 		fgfx.clear();
 		if (game.turn == game.player1 && !targetingMode && game.phase != etg.EndPhase) {
 			for (var i = 0;i < game.player1.hand.length;i++) {
