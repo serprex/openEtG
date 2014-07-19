@@ -1115,7 +1115,7 @@ function getTargetFilter(str){
 			filters[i] = TargetFilters[filters[i]];
 		}
 		return TargetFilters[str] = function(c, t){
-			return !prefixes.some(function(x){return !x(c, t);}) && filters.some(function(x){return x(c, t);});
+			return prefixes.every(function(x){return x(c, t);}) && filters.some(function(x){return x(c, t);});
 		}
 	}
 }
