@@ -505,7 +505,7 @@ function aiEvalFunc() {
 	Effect.disable = true;
 	var limit = 999;
 	var cmdct, currentEval = evalGameState(game);
-	function iterLoop(n) {
+	function iterLoop(n, cmdct0) {
 		var log = n ? console.log.bind(console) : function(){};
 		function iterCore(c, active) {
 			var cbits = tgtToBits(c) ^ 8;
@@ -517,14 +517,12 @@ function aiEvalFunc() {
 					bitsToTgt(cbits).useactive(bitsToTgt(tbits));
 					var v = evalGameState(game);
 					if (v < currentEval) {
-						if (n) {
-							cmdct = cbits | tbits << 9;
-						}
+						cmdct = cmdct0 || (cbits | tbits << 9);
 						currentEval = v;
 						log("\t" + c + " " + (t || "-") + " " + v);
 					}
 					if (n) {
-						iterLoop(0);
+						iterLoop(0, cbits | tbits << 9);
 					}
 					game = gameBack;
 					targetingMode = targetingModeBack;
