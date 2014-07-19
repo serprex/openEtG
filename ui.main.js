@@ -504,73 +504,51 @@ function aiEvalFunc() {
 	var disableEffectsBack = Effect.disable;
 	Effect.disable = true;
 	var limit = 999;
-	function mkcommand(cbits, tbits) {
-		return ["cast", cbits | tbits << 9];
-	}
-	function iterLoop(n, commands, currentEval) {
-		var log = n>=1?console.log.bind(console):function(){};
+	var cmdct, currentEval = evalGameState(game);
+	function iterLoop(n) {
+		var log = n ? console.log.bind(console) : function(){};
 		function iterCore(c, active) {
 			var cbits = tgtToBits(c) ^ 8;
-			var candidates = [fullCandidates[0]];
-			function evalIter(t, ignoret) {
-				if ((ignoret || (t && targetingMode(t))) && limit > 0) {
+			function evalIter(t) {
+				if ((!targetingMode || (t && targetingMode(t))) && limit-- > 0) {
 					var tbits = tgtToBits(t) ^ 8;
 					var gameBack = game, targetingModeBack = targetingMode, targetingModeCbBack = targetingModeCb;
 					game = game.clone();
-					limit--;
 					bitsToTgt(cbits).useactive(bitsToTgt(tbits));
-					var cmdcopy = commands.slice();
-					cmdcopy.push(mkcommand(cbits, tbits));
 					var v = evalGameState(game);
-					if (v < candidates[0]) {
-						candidates = [v, cmdcopy];
+					if (v < currentEval) {
+						if (n) {
+							cmdct = cbits | tbits << 9;
+						}
+						currentEval = v;
 						log("\t" + c + " " + (t || "-") + " " + v);
 					}
 					if (n) {
-						var iterRet = iterLoop(n - 1, cmdcopy, v);
-						if (iterRet[0] < candidates[0]) {
-							candidates = iterRet;
-						}
+						iterLoop(0);
 					}
 					game = gameBack;
 					targetingMode = targetingModeBack;
 					targetingModeCb = targetingModeCbBack;
 				}
 			}
-			getTarget(c, active || Actives.obsession, function(t) {
-				if (!t) {
-					evalIter(undefined, true);
-				}
-				targetingMode = null;
-				if (candidates.length > 1) {
-					var v = candidates[0], oldv = fullCandidates[0];
-					if (v < oldv) {
-						fullCandidates = candidates;
-					}
-				}
-			});
-			if (targetingMode) {
+			if (active && active.activename in Targeting) {
 				log("in " + active.activename);
+				getTarget(c, active);
 				for (var j = 0;j < 2;j++) {
 					var pl = j == 0 ? c.owner : c.owner.foe;
 					evalIter(pl);
 					evalIter(pl.weapon);
 					evalIter(pl.shield);
-					for (var i = 0;i < 23;i++) {
-						evalIter(pl.creatures[i]);
-					}
-					for (var i = 0;i < 16;i++) {
-						evalIter(pl.permanents[i]);
-					}
-					for (var i = 0;i < pl.hand.length;i++) {
-						evalIter(pl.hand[i]);
-					}
+					pl.creatures.forEach(evalIter);
+					pl.permanents.forEach(evalIter);
+					pl.hand.forEach(evalIter);
 				}
 				log("out");
-				targetingModeCb(1);
+				targetingMode = null;
+			}else{
+				evalIter();
 			}
 		}
-		var fullCandidates = [currentEval];
 		var self = game.player2;
 		var wp = self.weapon, sh = self.shield;
 		if (wp && wp.canactive()) {
@@ -592,28 +570,26 @@ function aiEvalFunc() {
 			}
 		}
 		var codecache = {};
-		for (var i = self.hand.length - 1;i >= 0;i--) {
+		for (var i = 0; i < self.hand.length; i++) {
 			var cardinst = self.hand[i];
-			if (cardinst.canactive()) {
-				if (!(cardinst.card.code in codecache)) {
-					codecache[cardinst.card.code] = true;
+			if (!(cardinst.card.code in codecache)) {
+				codecache[cardinst.card.code] = true;
+				if (cardinst.canactive()) {
 					iterCore(cardinst, cardinst.card.type == etg.SpellEnum && cardinst.card.active);
 				}
 			}
 		}
-		return fullCandidates;
 	}
-	var cmd = iterLoop(1, [], evalGameState(game))[1];
+	iterLoop(1, evalGameState(game));
 	console.log("Leftover iters: " + limit);
 	Effect.disable = disableEffectsBack;
-	var self = game.player2;
-	if (cmd) {
-		return cmd[0];
-	} else if (self.hand.length == 8) {
+	if (cmdct) {
+		return ["cast", cmdct];
+	} else if (game.player2.hand.length == 8) {
 		var mincardvalue = 999, worstcards;
 		for (var i = 0;i < 8;i++) {
-			var cardinst = self.hand[i];
-			var cardvalue = self.quanta[cardinst.card.element] - cardinst.card.cost;
+			var cardinst = game.player2.hand[i];
+			var cardvalue = game.player2.quanta[cardinst.card.element] - cardinst.card.cost;
 			if (cardinst.card.type != etg.SpellEnum && cardinst.card.active && cardinst.card.active.discard == Actives.obsession) { cardvalue += 5; }
 			if (cardvalue == mincardvalue) {
 				worstcards.push(i);
