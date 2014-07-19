@@ -23,6 +23,9 @@ var ActivesValues = {
 	},
 	animateweapon:4,
 	antimatter:12,
+	appease:function(c){
+		return c instanceof etg.CardInstance?-6:c.status.appeased?0:c.attack*-1.5;
+	},
 	bblood:7,
 	blackhole:function(c){
 		var a=0, fq=c.owner.foe.quanta;
