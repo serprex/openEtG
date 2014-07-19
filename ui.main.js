@@ -580,7 +580,7 @@ function aiEvalFunc() {
 			}
 		}
 	}
-	iterLoop(1, evalGameState(game));
+	iterLoop(1);
 	console.log("Leftover iters: " + limit);
 	Effect.disable = disableEffectsBack;
 	if (cmdct) {
