@@ -937,11 +937,12 @@ function mkAi(level) {
 }
 
 // Asset Loading
-var nopic, goldtex, buttex;
+var nopic = PIXI.Texture.fromImage("");
+var goldtex, buttex;
 var backgrounds = ["assets/bg_default.png", "assets/bg_lobby.png", "assets/bg_shop.png", "assets/bg_quest.png", "assets/bg_game.png", "assets/bg_questmap.png"];
 var questIcons = [], eicons = [], ricons = [], cardBacks = [], cardBorders = [], boosters = [], popups = [], sicons = [], ticons = [], sborders = [];
 var mapareas = {};
-var preLoader = new PIXI.AssetLoader(["assets/null.png", "assets/gold.png", "assets/button.png", "assets/questIcons.png", "assets/esheet.png", "assets/raritysheet.png", "assets/backsheet.png",
+var preLoader = new PIXI.AssetLoader(["assets/gold.png", "assets/button.png", "assets/questIcons.png", "assets/esheet.png", "assets/raritysheet.png", "assets/backsheet.png",
 	"assets/cardborders.png", "assets/boosters.png", "assets/popup_booster.png", "assets/statussheet.png", "assets/statusborders.png", "assets/typesheet.png"].concat(backgrounds));
 var loadingBarProgress = 0, loadingBarGraphic = new PIXI.Graphics();
 preLoader.onProgress = function() {
@@ -951,7 +952,6 @@ preLoader.onProgress = function() {
 	loadingBarGraphic.endFill();
 }
 preLoader.onComplete = function() {
-	nopic = PIXI.Texture.fromFrame("assets/null.png");
 	goldtex = PIXI.Texture.fromFrame("assets/gold.png");
 	buttex = PIXI.Texture.fromFrame("assets/button.png");
 	var tex = PIXI.Texture.fromFrame("assets/questIcons.png");
@@ -1717,12 +1717,14 @@ function startStore() {
 	}
 
 	refreshRenderer(storeui, function() {
-		for (var i = 0;i < newCards.length;i++) {
-			newCardsArt[i].setTexture(getArt(newCards[i]));
-			newCardsArt[i].visible = true;
-		}
-		for (; i < newCardsArt[i].length; i++) {
-			newCardsArt[i].visible = false;
+		for (var i = 0; i < newCardsArt.length; i++) {
+			if (newCards[i]){
+				newCardsArt[i].setTexture(getArt(newCards[i]));
+				newCardsArt[i].visible = true;
+			}else{
+				newCardsArt[i].setTexture(nopic);
+				newCardsArt[i].visible = false;
+			}
 		}
 		tgold.setText("$" + user.gold);
 	});
@@ -2221,7 +2223,9 @@ function startMatch() {
 				shiesprite[j].setTexture(getWeaponShieldImage(sh.card.code));
 			} else shiesprite[j].visible = false;
 			marksprite[j].setTexture(eicons[game.players[j].mark]);
-			maybeSetText(marktext[j], "x" + game.players[j].markpower);
+			if (game.players[j].markpower != 1){
+				maybeSetText(marktext[j], "x" + game.players[j].markpower);
+			}else marktext[j].visible = false;
 			for (var i = 1;i < 13;i++) {
 				maybeSetText(quantatext[j].getChildAt(i*2-2), game.players[j].quanta[i].toString());
 			}
