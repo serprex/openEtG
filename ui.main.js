@@ -414,12 +414,11 @@ function initLibrary(pool){
 	bexit.click = startMenu;
 	editorui.addChild(bexit);
 	var cardminus = {}, cardpool = {};
-	pool = etgutil.decodedeck(pool);
-	for (var i = 0;i < pool.length;i++) {
-		if (pool[i] in cardpool) {
-			cardpool[pool[i]]++;
+	etgutil.iterdeck(pool, function(code){
+		if (code in cardpool) {
+			cardpool[code]++;
 		} else {
-			cardpool[pool[i]] = 1;
+			cardpool[code] = 1;
 		}
 	}
 	var cardsel = makeCardSelector(
