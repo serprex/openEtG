@@ -3,9 +3,10 @@ function encodeCount(count){
 }
 exports.MAX_INT = 4294967296;
 exports.iterdeck = function(deck, func){
+	var len = 0;
 	for(var i=0; i<deck.length; i+=5){
 		var count = parseInt(deck.substr(i, 2), 32), code = deck.substr(i+2, 3);
-		for(var j=0; j<count; j++) func(code, j);
+		for(var j=0; j<count; j++) func(code, len++);
 	}
 }
 exports.count = function(deck, code){

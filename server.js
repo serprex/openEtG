@@ -487,7 +487,7 @@ io.on("connection", function(socket) {
 			var player1Cards = thistrade.tradecards, player2Cards = thattrade.tradecards;
 			user.pool = etgutil.removedecks(user.pool, player1Cards);
 			user.pool = etgutil.mergedecks(user.pool, player2Cards);
-			otherUser.pool = etgutil.removedecks(otherUser.pool, player2Cards, -1);
+			otherUser.pool = etgutil.removedecks(otherUser.pool, player2Cards);
 			otherUser.pool = etgutil.mergedecks(otherUser.pool, player1Cards);
 			this.emit("tradedone", { oldcards: player1Cards, newcards: player2Cards });
 			other.emit("tradedone", { oldcards: player2Cards, newcards: player1Cards });
