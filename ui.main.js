@@ -20,7 +20,7 @@ if (localStorage){
 })();
 var Cards, CardCodes, Targeting, game;
 (function(){
-var targetingMode, targetingModeCb, targetingText, discarding, user, renderer, endturnFunc, cancelFunc, accepthandfunc, foeDeck, player2summon, player2Cards, guestname, cardChosen, newCards;
+var targetingMode, targetingModeCb, targetingText, discarding, user, renderer, endturnFunc, cancelFunc, foeDeck, player2summon, player2Cards, guestname, cardChosen, newCards;
 var etgutil = require("./etgutil");
 var etg = require("./etg");
 var Actives = require("./Actives");
@@ -52,12 +52,6 @@ function maybeSetTexture(obj, text) {
 		obj.visible = true;
 		obj.setTexture(text);
 	} else obj.visible = false;
-}
-function maybeSetButton(oldbutton, newbutton) {
-	if (oldbutton)
-		oldbutton.visible = false;
-	if (newbutton)
-		newbutton.visible = true;
 }
 function hitTest(obj, pos) {
 	var x = obj.position.x - obj.width * obj.anchor.x, y = obj.position.y - obj.height * obj.anchor.y;
@@ -968,6 +962,12 @@ function makeButton(x, y, img, mouseoverfunc) {
 		txt.position.set(b.width/2, b.height/2);
 		if (txt.width>b.width-6) txt.width=b.width-6;
 		b.addChild(txt);
+		b.setText = function(x){
+			if (x){
+				maybeSetText(txt, x.toString());
+				this.visible = true;
+			}else this.visible = false;
+		}
 	}else{
 		b = new PIXI.Sprite(img);
 	}
@@ -988,9 +988,8 @@ function makeButton(x, y, img, mouseoverfunc) {
 }
 
 function makeText(x, y, txt, vis) {
-	var t = new PIXI.Sprite(getTextImage(txt, { font: "14px Verdana", fill: "white", stroke: "black", strokeThickness: 2 }));
+	var t = new PIXI.Sprite(nopic);
 	t.position.set(x, y);
-	t.visible = vis === undefined || vis;
 	t.setText = function(x){
 		if (x){
 			t.setTexture(getTextImage(x, { font: "14px Verdana", fill: "white", stroke: "black", strokeThickness: 2 }));
@@ -999,6 +998,8 @@ function makeText(x, y, txt, vis) {
 			t.visible = false;
 		}
 	}
+	t.setText(txt);
+	t.visible = vis === undefined || vis;
 	return t;
 }
 
@@ -1990,8 +1991,10 @@ function startMatch() {
 			cmds[cmd[0]](cmd[1]);
 		}
 		var pos = realStage.getMousePosition();
-		maybeSetText(winnername, game.winner ? (game.winner == game.player1 ? "Won " : "Lost ") + game.ply : "");
-		maybeSetButton(game.winner ? null : endturn, endturn);
+		if (game.winner){
+			maybeSetText(winnername, (game.winner == game.player1 ? "Won " : "Lost ") + game.ply);
+			endturn.visible = true;
+		}
 		var cardartcode, cardartx;
 		infobox.setTexture(nopic);
 		for (var i = 0;i < foeplays.children.length;i++) {
@@ -2073,11 +2076,12 @@ function startMatch() {
 			game.cardreward = cardwon.code;
 		}
 		if (game.phase != etg.EndPhase) {
-			cancel.visible = true;
-			var endturnButton = accepthand.visible ? accepthand : (endturn.visible ? endturn : null);
-			var cancelButton = mulligan.visible ? mulligan : (cancel.visible ? cancel : null);
-			maybeSetButton(endturnButton, game.turn == game.player1 ? (game.phase == etg.PlayPhase ? endturn : accepthand) : null);
-			maybeSetButton(cancelButton, game.turn == game.player1 ? (game.phase != etg.PlayPhase ? mulligan : (targetingMode || discarding) ? cancel : null) : null);
+			mulligan.visible = cancel.visible = false;
+			if (game.turn == game.player1){
+				endturn.setText(game.phase == etg.PlayPhase ? "End Turn" : "Accept Hand");
+				if (game.phase != etg.PlayPhase) mulligan.visible = true;
+				else if (targetingMode || discarding || resigning) cancel.visible = true;
+			}else endturn.visible = false;
 		}
 		maybeSetText(turntell, discarding ? "Discard" : targetingMode ? targetingText : game.turn == game.player1 ? "Your Turn" : "Their Turn");
 		for (var i = 0;i < foeplays.children.length;i++) {
@@ -2237,24 +2241,28 @@ function startMatch() {
 	winnername.position.set(800, 500);
 	gameui.addChild(winnername);
 	var endturn = makeButton(800, 540, "End Turn");
-	var accepthand = makeButton(800, 540, "Accept Hand");
 	var cancel = makeButton(800, 500, "Cancel");
 	var mulligan = makeButton(800, 500, "Mulligan");
 	var resign = makeButton(8, 24, "Resign");
-	var confirm = makeButton(8, 24, "Confirm");
 	gameui.addChild(endturn);
 	gameui.addChild(cancel);
 	gameui.addChild(mulligan);
-	gameui.addChild(accepthand);
 	gameui.addChild(resign);
-	gameui.addChild(confirm);
-	confirm.visible = cancel.visible = endturn.visible = false;
+	cancel.visible = false;
 	var turntell = new PIXI.Text("", { font: "16px Dosis" });
 	var foename = new PIXI.Text(game.foename || "Unknown Opponent", { font: "bold 18px Dosis", align: "center" });
 	foename.position.set(5, 75);
 	gameui.addChild(foename);
 	endturnFunc = endturn.click = function(e, discard) {
-		if (game.winner) {
+		if (game.turn == game.player1 && (game.phase == etg.MulliganPhase1 || game.phase == etg.MulliganPhase2)){
+			if (!game.player2.ai) {
+				socket.emit("mulligan", true);
+			}
+			game.progressMulligan();
+			if (game.phase == etg.MulliganPhase2 && game.player2.ai) {
+				game.progressMulligan();
+			}
+		}else if (game.winner) {
 			if (user) {
 				if (game.winner == game.player1) {
 					userEmit("addwin", { pvp: !game.player2.ai });
@@ -2303,18 +2311,9 @@ function startMatch() {
 			}
 		}
 	}
-	accepthandfunc = accepthand.click = function() {
-		if (!game.player2.ai) {
-			socket.emit("mulligan", true);
-		}
-		game.progressMulligan();
-		if (game.phase == etg.MulliganPhase2 && game.player2.ai) {
-			game.progressMulligan();
-		}
-	}
 	cancelFunc = cancel.click = function() {
 		if (resigning) {
-			maybeSetButton(confirm, resign);
+			resign.setText("Resign");
 			resigning = false;
 		} else if (game.turn == game.player1) {
 			if (targetingMode) {
@@ -2332,14 +2331,15 @@ function startMatch() {
 	}
 	var resigning;
 	resign.click = function() {
-		maybeSetButton(resign, confirm);
-		resigning = true;
-	}
-	confirm.click = function() {
-		if (!game.player2.ai) {
-			socket.emit("foeleft");
+		if (resigning){
+			if (!game.player2.ai) {
+				socket.emit("foeleft");
+			}
+			startMenu();
+		}else{
+			resign.setText("Confirm");
+			resigning = true;
 		}
-		startMenu();
 	}
 
 	turntell.position.set(800, 570);
@@ -2847,10 +2847,7 @@ function requestAnimate() { requestAnimFrame(animate); }
 document.addEventListener("keydown", function(e) {
 	if (realStage.children[0] == gameui) {
 		if (e.keyCode == 32) { // spc
-			if (game.turn == game.player1 && (game.phase == etg.MulliganPhase1 || game.phase == etg.MulliganPhase2))
-				accepthandfunc();
-			else
-				endturnFunc();
+			endturnFunc();
 		} else if (e.keyCode == 8) { // bsp
 			cancelFunc();
 		} else if (e.keyCode == 83 || e.keyCode == 87) { // s/w
