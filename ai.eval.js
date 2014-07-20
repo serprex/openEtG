@@ -345,6 +345,9 @@ function evalthing(c) {
 
 function evalcardinstance(cardInst) {
 	var c = cardInst.card;
+	if (!caneventuallyactive(cinst.card.costele, cinst.card.cost, player)){
+		return cinst.card.active && cinst.card.active.discard == Actives.obsession ? -7 : -2;
+	}
 	var score = 0;
 	if (c.type == etg.SpellEnum){
 		score += evalactive(cardInst, c.active);
@@ -370,6 +373,7 @@ function evalcardinstance(cardInst) {
 		}
 		score += checkpassives(c);
 	}
+	score *= (cinst.canactive() ? 0.6 : 0.5) * (!cinst.card.cost || !cinst.card.costele?1:(15+Math.min(player.quanta[cinst.card.costele], 10))/30);
 	log("\t:: " + c.name + " worth " + score);
 	return score;
 }
@@ -402,13 +406,15 @@ module.exports = function(game) {
 			pscore += evalthing(player.permanents[i]);
 		}
 		for (var i = 0; i < player.hand.length; i++) {
-			var cinst = player.hand[i];
-			if (caneventuallyactive(cinst.card.costele, cinst.card.cost, player)){
-				var costless = !cinst.card.cost || !cinst.card.costele;
-				pscore += evalcardinstance(cinst) * (cinst.canactive() ? 0.6 : 0.5) * (costless?1:(15+Math.min(player.quanta[cinst.card.costele], 10))/30);
-			}else {
-				pscore -= cinst.card.active && cinst.card.active.discard == Actives.obsession ? 7 : 2;
-			}
+			pscore += evalcardinstance(player.hand[i]);
+		}
+		// Remove this if logic is updated to call endturn
+		if (player != game.turn && player.hand.length < 8 && player.deck.length > 0){
+			var code = player.deck.pop();
+			player.hand.push(new etg.CardInstance(code, player));
+			pscore += evalcardinstance(player.hand[player.hand.length-1]);
+			player.hand.pop();
+			player.deck.push(code);
 		}
 		if (player.gpull) {
 			pscore += player.gpull.truehp()/4 + (player.gpull.passives.voodoo ? 10 : 0) - player.gpull.trueatk();

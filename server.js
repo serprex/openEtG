@@ -264,6 +264,12 @@ var starter = [
 	"034sa014sd014t40452g0152p0252t0a5uk035um025un015us025v3015uq035ut015up015vb015uo025uv015ul018pk",
 	"015020262002627034sa014sd014t4064vc024vp034vs0b61o0261q0361s0261t0161v018pj"
 ];
+var packdata = [
+	{ amount: 9, cost: 15, rare: []},
+	{ amount: 6, cost: 25, rare: [3]},
+	{ amount: 8, cost: 65, rare: [3, 7]},
+	{ amount: 9, cost: 100, rare: [4, 7, 8]},
+];
 io.on("connection", function(socket) {
 	sockinfo[socket.id] = {};
 	socket.on("disconnect", dropsock);
@@ -572,12 +578,6 @@ io.on("connection", function(socket) {
 		if (user.freepacks){
 			freepacklist = user.freepacks.split(",");
 		}
-		var packdata = [
-			{ amount: 9, cost: 15, rare: []},
-			{ amount: 6, cost: 25, rare: [3]},
-			{ amount: 8, cost: 65, rare: [3, 7]},
-			{ amount: 9, cost: 100, rare: [4, 7, 8]},
-		];
 		var pack = packdata[data.pack], bound = freepacklist && freepacklist[data.pack] > 0;
 		if (bound || user.gold >= pack.cost) {
 			var newCards = "";
