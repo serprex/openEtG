@@ -521,12 +521,12 @@ function aiEvalFunc() {
 						currentEval = v;
 					}
 					if (n) {
-						log("\t" + c + " " + (t || "-") + " " + v);
 						var targetingModeBack = targetingMode, targetingModeCbBack = targetingModeCb;
 						targetingMode = undefined;
 						iterLoop(0, cbits | tbits << 9);
 						targetingMode = targetingModeBack;
 						targetingModeCb = targetingModeCbBack;
+						log("\t" + c + " " + (t || "-") + " " + v);
 					}
 					game = gameBack;
 				}
