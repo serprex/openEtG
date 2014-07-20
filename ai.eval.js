@@ -105,7 +105,7 @@ var ActivesValues = {
 	holylight:2,
 	hope:2,
 	icebolt:10,
-	ignite:8,
+	ignite:4,
 	immolate:5,
 	improve:6,
 	infect:4,
@@ -129,7 +129,9 @@ var ActivesValues = {
 	mitosisspell:6,
 	momentum:2,
 	mutation:4,
-	neuro:6,
+	neuro: function(c) {
+		return c.owner.foe.neuro?ActivesValues["poison"]+.1:6;
+	},
 	neurofy:6,
 	nightmare:12,
 	nova:6,
