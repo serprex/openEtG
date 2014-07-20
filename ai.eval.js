@@ -166,7 +166,7 @@ var ActivesValues = {
 	ren:5,
 	rewind:6,
 	ricochet:3,
-	santuary:6,
+	sanctuary:6,
 	scarab:4,
 	scavenger:4,
 	scramble:function(c){
@@ -427,7 +427,6 @@ module.exports = function(game) {
 		if (player.silence) pscore -= player.hand.length+1;
 		if (player.flatline) pscore -= 1;
 		if (player.neuro) pscore -= 5;
-		if (player.hand.length == 8) pscore -= 3;
 		log("\tpscore" + j + ": " + pscore);
 		gamevalue += pscore*(j == 0?1:-1);
 	}
