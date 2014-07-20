@@ -1267,6 +1267,11 @@ upkeep:function(c,t){
 		c.die();
 	}
 },
+upload:function(c,t){
+	t.atk += 2;
+	Effect.mkText(2 + "|" + 0, ui.tgtToPos(t));
+	c.dmg(1);
+},
 vampire:function(c,t, dmg){
 	c.owner.dmg(-dmg);
 },
