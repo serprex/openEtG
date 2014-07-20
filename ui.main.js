@@ -2848,11 +2848,6 @@ document.addEventListener("keydown", function(e) {
 		e.preventDefault();
 	}
 });
-document.addEventListener("click", function(e) {
-	if (e.pageX < 900 && e.pageY < 600) {
-		e.preventDefault();
-	}
-});
 function prepuser(){
 	user.decks = [
 		etgutil.decodedeck(user.deck0),
