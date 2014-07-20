@@ -112,7 +112,7 @@ renderer = new PIXI.autoDetectRenderer(900, 600);
 leftpane.appendChild(renderer.view);
 var realStage = new PIXI.Stage(0x336699, true);
 realStage.click = chatArea.focus.bind(chatArea);
-var menuui, gameui;
+var gameui;
 var caimgcache = {}, crimgcache = {}, wsimgcache = {}, artcache = {}, artimagecache = {}, tximgcache = {};
 var elecols = [0xa99683, 0xaa5999, 0x777777, 0x996633, 0x5f4930, 0x50a005, 0xcc6611, 0x205080, 0xa9a9a9, 0x337ddd, 0xccaa22, 0x333333, 0x77bbdd];
 
@@ -327,13 +327,13 @@ function initTrade(data) {
 	editorui.addChild(bcancel);
 
 	var cardpool = {};
-	for (var i = 0;i < user.pool.length;i++) {
-		if (user.pool[i] in cardpool) {
-			cardpool[user.pool[i]]++;
+	etgutil.iterdeck(user.pool, function(code){
+		if (code in cardpool) {
+			cardpool[code]++;
 		} else {
-			cardpool[user.pool[i]] = 1;
+			cardpool[code] = 1;
 		}
-	}
+	});
 
 	var cardsel = makeCardSelector(
 		function(code){
@@ -640,23 +640,23 @@ function victoryScreen() {
 	}
 	var rewards = [];
 	if (game.cardreward && winner) {
-		game.cardreward = listify(game.cardreward);
-		for (var i = 0;i < game.cardreward.length;i++) {
+		var cardrewardlength = etgutil.decklength(game.cardreward);
+		etgutil.iterdeck(game.cardreward, function(code, i){
 			var cardArt = new PIXI.Sprite(nopic);
 			cardArt.anchor.x = .5;
-			cardArt.position.set(470-game.cardreward.length*20+i*40, 170);
+			cardArt.position.set(470-cardrewardlength*20+i*40, 170);
 			rewards.push(cardArt);
 			victoryui.addChild(cardArt);
-		}
-		Array.prototype.push.apply(user.pool, game.cardreward);
-		userEmit("addcards", { c: etgutil.encodedeck(game.cardreward) });
+		});
+		user.pool = etgutil.mergedecks(user.pool, game.cardreward);
+		userEmit("addcards", { c: game.cardreward });
 	}
 
 	refreshRenderer(victoryui, function(){
 		if (game.cardreward && winner){
-			for(var i=0; i<game.cardreward.length; i++){
-				rewards[i].setTexture(getArt(game.cardreward[i]));
-			}
+			etgutil.iterdeck(game.cardreward, function(code, i){
+				rewards[i].setTexture(getArt(code));
+			});
 		}
 	});
 }
@@ -785,7 +785,7 @@ function mkQuestAi(questname, stage, area) {
 	game.wintext = quest.wintext || "";
 	game.autonext = quest.autonext || false;
 	game.area = area;
-	if ((user.quest[questname] <= stage || !(questname in user.quest))) game.cardreward = quest.cardreward;
+	if ((user.quest[questname] <= stage || !(questname in user.quest))) game.cardreward = etgutil.encodedeck(quest.cardreward);
 }
 function mkAi(level) {
 	return function() {
@@ -1107,7 +1107,7 @@ function makeCardSelector(cardmouseover, cardclick){
 	return cardsel;
 }
 function startMenu() {
-	menuui = new PIXI.DisplayObjectContainer();
+	var menuui = new PIXI.DisplayObjectContainer();
 	menuui.interactive = true;
 	var buttonList = [];
 	var mouseroverButton;
@@ -1444,17 +1444,21 @@ function upgradestore() {
 			if (!isFreeCard(card)) {
 				var use = card.rarity < 5 ? 6 : 1;
 				if (cardpool[card.code] >= use) {
-					var bound = count(user.pool, card.code) < use;
+					var bound = etgutil.count(user.pool, card.code) < use;
 					userEmit("upgrade", { card: card.code, bound: bound });
 					for (var i = 0;i < use;i++) {
 						var idx;
 						if (bound && ~(idx = user.accountbound.indexOf(card.code))){
 							user.accountbound.splice(idx, 1);
 						}else{
-							user.pool.splice(user.pool.indexOf(card.code), 1);
+							user.pool = user.pool.addcard(user.pool, card.code, -1);
 						}
 					}
-					user[bound?"accountbound":"pool"].push(card.asUpped(true).code);
+					if (bound){
+						user.accountbound.push(card.asUpped(true).code);
+					}else{
+						user.pool = etgutil.addcard(user.pool, card.asUpped(true).code);
+					}
 					adjustdeck();
 				}
 				else twarning.setText("You need at least " + use + " copies to be able to upgrade this card!");
@@ -1464,7 +1468,7 @@ function upgradestore() {
 					user.gold -= 50;
 					userEmit("subgold", { g: 50 });
 					userEmit("addcards", { c: etgutil.encodedeck([card.asUpped(true).code]) });
-					user.pool.push(card.asUpped(true).code);
+					user.pool = etgutil.addcard(user.pool, card.asUpped(true).code);
 					adjustdeck();
 				}
 				else twarning.setText("You need at least 50 gold to be able to upgrade a pillar!");
@@ -1476,9 +1480,9 @@ function upgradestore() {
 	function sellCard(card) {
 		if (card.rarity != 0 || card.upped) {
 			if (card.rarity <= 4) {
-				var idx = user.pool.indexOf(card.code);
-				if (~idx) {
-					user.pool.splice(idx, 1);
+				var codecount = etgutil.count(user.pool, card.code);
+				if (codecount) {
+					user.pool = etgutil.addcard(user.pool, -1);
 					var sellValue = cardValues[card.rarity] * (card.upped ? 5 : 1);
 					user.gold += sellValue
 					userEmit("sellcard", { card: card.code, gold: sellValue});
@@ -1491,13 +1495,13 @@ function upgradestore() {
 	}
 	function adjustdeck() {
 		cardpool = {};
-		for (var i = 0;i < user.pool.length;i++) {
-			if (user.pool[i] in cardpool) {
-				cardpool[user.pool[i]]++;
+		etgutil.iterdeck(user.pool, function(code){
+			if (code in cardpool) {
+				cardpool[code]++;
 			} else {
-				cardpool[user.pool[i]] = 1;
+				cardpool[code] = 1;
 			}
-		}
+		});
 		for (var i = 0;i < user.accountbound.length;i++) {
 			if (user.accountbound[i] in cardpool) {
 				cardpool[user.accountbound[i]]++;
@@ -1724,13 +1728,13 @@ function startEditor() {
 		if (user) {
 			cardminus = {};
 			cardpool = {};
-			for (var i = 0;i < user.pool.length;i++) {
-				if (user.pool[i] in cardpool) {
-					cardpool[user.pool[i]]++;
+			etgutil.iterdeck(user.pool, function(code){
+				if (code in cardpool) {
+					cardpool[code]++;
 				} else {
-					cardpool[user.pool[i]] = 1;
+					cardpool[code] = 1;
 				}
-			}
+			});
 			if (user.accountbound) {
 			    for (var i = 0; i < user.accountbound.length; i++) {
 			        if (user.accountbound[i] in cardpool) {
@@ -2067,7 +2071,7 @@ function startMatch() {
 			if (goldwon !== undefined){
 				game.goldreward = goldwon + (game.cost || 0);
 			}
-			game.cardreward = cardwon.code;
+			game.cardreward = "01" + cardwon.code;
 		}
 		if (game.phase != etg.EndPhase) {
 			if (game.turn == game.player1){
@@ -2741,10 +2745,8 @@ socket.on("cardchosen", function(data) {
 	player2Cards = data.cards;
 });
 socket.on("tradedone", function(data) {
-	Array.prototype.push.apply(user.pool, data.newcards);
-	for (var i = 0;i < data.oldcards.length;i++) {
-		user.pool.splice(user.pool.indexOf(data.oldcards[i]), 1);
-	}
+	user.pool = etgutil.mergedecks(user.pool, etgutil.encodedeck(data.newcards));
+	user.pool = etgutil.removedecks(user.pool, etgutil.encodedeck(data.oldcards));
 	startMenu();
 });
 socket.on("tradecanceled", function(data) {
@@ -2761,11 +2763,11 @@ socket.on("codegold", function(data) {
 	addChatMessage("<font color=red>" + data + " Gold added!</font><br>");
 });
 socket.on("codecode", function(data) {
-	user.pool.push(data);
+	user.pool = etgutil.addcard(user.pool, data);
 	addChatMessage("<font color=red>" + CardCodes[data].name + " added!</font><br>");
 });
 socket.on("codedone", function(data) {
-	user.pool.push(data.card);
+	user.pool = etgutil.addcard(user.pool, data.card);
 	addChatMessage("<font color=red>Card Added!</font><br>");
 	startMenu();
 });
@@ -2778,7 +2780,7 @@ socket.on("boostergive", function(data) {
 		}
 	}
 	else {
-		Array.prototype.push.apply(user.pool, newCards);
+		user.pool = etgutil.mergedecks(user.pool, etgutil.encodedeck(newCards));
 		user.gold -= data.cost;
 	}
 });
@@ -2846,7 +2848,6 @@ document.addEventListener("keydown", function(e) {
 				targetingModeCb(p);
 			}
 		} else return;
-		e.preventDefault();
 	}
 });
 function prepuser(){
@@ -2856,7 +2857,7 @@ function prepuser(){
 		etgutil.decodedeck(user.deck2),
 	];
 	deckimport.value = getDeck().join(" ");
-	user.pool = etgutil.decodedeck(user.pool);
+	user.pool = user.pool || "";
 	user.accountbound = etgutil.decodedeck(user.accountbound);
 	if (!user.quest) {
 		user.quest = {};
