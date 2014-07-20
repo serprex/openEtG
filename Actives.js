@@ -823,9 +823,9 @@ neuroify:function(c,t){
 	}
 },
 nightmare:function(c,t){
-	Effect.mkText("Nightmare", ui.tgtToPos(t));
 	if (!c.owner.foe.sanctuary){
-		c.owner.dmg(-c.owner.foe.dmg(16-c.owner.foe.hand.length*2));
+		Effect.mkText("Nightmare", ui.tgtToPos(t));
+		c.owner.dmg(-c.owner.foe.spelldmg(16-c.owner.foe.hand.length*2));
 		for(var i = c.owner.foe.hand.length; i<8; i++){
 			c.owner.foe.hand[i] = new E.CardInstance(t.card, c.owner.foe);
 		}

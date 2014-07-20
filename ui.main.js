@@ -216,8 +216,7 @@ function getCardImage(code) {
 			graphics.addChild(text);
 		}
 		rend.render(graphics);
-		caimgcache[code] = rend;
-		return rend;
+		return caimgcache[code] = rend;
 	}
 }
 function getCreatureImage(code) {
@@ -246,8 +245,7 @@ function getCreatureImage(code) {
 				graphics.addChild(text);
 			}
 			rend.render(graphics);
-			crimgcache[code] = rend;
-			return rend;
+			return crimgcache[code] = rend;
 		});
 	}
 }
@@ -278,8 +276,7 @@ function getWeaponShieldImage(code) {
 				graphics.addChild(text);
 			}
 			rend.render(graphics);
-			wsimgcache[code] = rend;
-			return rend;
+			return wsimgcache[code] = rend;
 		});
 	}
 }
@@ -2237,14 +2234,14 @@ function startMatch() {
 	var winnername = new PIXI.Text("", { font: "16px Dosis" });
 	winnername.position.set(800, 500);
 	gameui.addChild(winnername);
-	var endturn = makeButton(800, 540, "End Turn");
-	var cancel = makeButton(800, 500, "Cancel");
+	var endturn = makeButton(800, 540, "Accept Hand");
+	var cancel = makeButton(800, 500, "Mulligan");
 	var resign = makeButton(8, 24, "Resign");
 	gameui.addChild(endturn);
 	gameui.addChild(cancel);
 	gameui.addChild(resign);
 	var turntell = new PIXI.Text("", { font: "16px Dosis" });
-	var foename = new PIXI.Text(game.foename || "Unknown Opponent", { font: "bold 18px Dosis", align: "center" });
+	var foename = new PIXI.Text(game.foename || "Unknown Opponent", { font: "18px Dosis bold", align: "center" });
 	foename.position.set(5, 75);
 	gameui.addChild(foename);
 	endturnFunc = endturn.click = function(e, discard) {
