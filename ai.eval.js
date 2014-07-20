@@ -345,8 +345,8 @@ function evalthing(c) {
 
 function evalcardinstance(cardInst) {
 	var c = cardInst.card;
-	if (!caneventuallyactive(cinst.card.costele, cinst.card.cost, player)){
-		return cinst.card.active && cinst.card.active.discard == Actives.obsession ? -7 : -2;
+	if (!caneventuallyactive(cardInst.card.costele, cardInst.card.cost, cardInst.owner)){
+		return cardInst.card.active && cardInst.card.active.discard == Actives.obsession ? -7 : -2;
 	}
 	var score = 0;
 	if (c.type == etg.SpellEnum){
@@ -373,7 +373,7 @@ function evalcardinstance(cardInst) {
 		}
 		score += checkpassives(c);
 	}
-	score *= (cinst.canactive() ? 0.6 : 0.5) * (!cinst.card.cost || !cinst.card.costele?1:(15+Math.min(player.quanta[cinst.card.costele], 10))/30);
+	score *= (cardInst.canactive() ? 0.6 : 0.5) * (!cardInst.card.cost || !cardInst.card.costele?1:(15+Math.min(cardInst.owner.quanta[cardInst.card.costele], 10))/30);
 	log("\t:: " + c.name + " worth " + score);
 	return score;
 }
