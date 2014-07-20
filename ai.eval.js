@@ -303,7 +303,7 @@ function evalthing(c) {
 		for (var key in c.active) {
 			if (key == "hit"){
 				if (!delaymix){
-					score += evalactive(c, c.active.hit)*(ttatk?1:.3)*(c.status.adrenaline?2:1);
+					score += evalactive(c, c.active.hit)*(ttatk?1:c.status.immaterial?0:.3)*(c.status.adrenaline?2:1);
 				}
 			}else if(key == "auto"){
 				if (!c.status.frozen){
