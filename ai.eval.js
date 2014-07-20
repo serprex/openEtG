@@ -129,7 +129,9 @@ var ActivesValues = {
 	mitosisspell:6,
 	momentum:2,
 	mutation:4,
-	neuro:6,
+	neuro: function(c) {
+		return c.owner.foe.neuro?ActivesValues["poison"]+.1:6;
+	},
 	neurofy:6,
 	nightmare:12,
 	nova:6,
