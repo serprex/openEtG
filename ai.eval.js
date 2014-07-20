@@ -105,7 +105,7 @@ var ActivesValues = {
 	holylight:2,
 	hope:2,
 	icebolt:10,
-	ignite:8,
+	ignite:4,
 	immolate:5,
 	improve:6,
 	infect:4,
