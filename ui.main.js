@@ -1448,14 +1448,14 @@ function upgradestore() {
 					userEmit("upgrade", { card: card.code, bound: bound });
 					for (var i = 0;i < use;i++) {
 						var idx;
-						if (bound && ~(idx = user.accountbound.indexOf(card.code))){
-							user.accountbound.splice(idx, 1);
+						if (bound && etgutil.count(user.accountbound, card.code)){
+							user.accountbound = etgutil.addcard(user.accountbound, card.code, -1);
 						}else{
-							user.pool = user.pool.addcard(user.pool, card.code, -1);
+							user.pool = etgutil.addcard(user.pool, card.code, -1);
 						}
 					}
 					if (bound){
-						user.accountbound.push(card.asUpped(true).code);
+						user.accountbound = etgutil.addcard(user.accountbound, card.asUpped(true).code);
 					}else{
 						user.pool = etgutil.addcard(user.pool, card.asUpped(true).code);
 					}
@@ -1502,13 +1502,13 @@ function upgradestore() {
 				cardpool[code] = 1;
 			}
 		});
-		for (var i = 0;i < user.accountbound.length;i++) {
-			if (user.accountbound[i] in cardpool) {
-				cardpool[user.accountbound[i]]++;
+		etgutil.iterdeck(user.accountbound, function(code){
+			if (code in cardpool) {
+				cardpool[code]++;
 			} else {
-				cardpool[user.accountbound[i]] = 1;
+				cardpool[code] = 1;
 			}
-		}
+		});
 	}
 	var upgradeui = new PIXI.DisplayObjectContainer();
 	upgradeui.interactive = true;
@@ -1736,13 +1736,13 @@ function startEditor() {
 				}
 			});
 			if (user.accountbound) {
-			    for (var i = 0; i < user.accountbound.length; i++) {
-			        if (user.accountbound[i] in cardpool) {
-			            cardpool[user.accountbound[i]]++;
-			        } else {
-			            cardpool[user.accountbound[i]] = 1;
-			        }
-			    }
+				etgutil.iterdeck(user.accountbound, function(code){
+					if (code in cardpool) {
+						cardpool[code]++;
+					} else {
+						cardpool[code] = 1;
+					}
+				});
 			}
 			for (var i = editordeck.length - 1;i >= 0;i--) {
 				var code = editordeck[i];
@@ -2774,7 +2774,7 @@ socket.on("codedone", function(data) {
 socket.on("boostergive", function(data) {
 	newCards = etgutil.decodedeck(data.cards);
 	if (data.accountbound) {
-		Array.prototype.push.apply(user.accountbound, newCards);
+		user.accountbound = etgutil.mergedecks(user.accountbound, etgutil.encodedeck(newCards));
 		if (user.freepacks){
 			user.freepacks[data.packtype]--;
 		}
@@ -2858,7 +2858,7 @@ function prepuser(){
 	];
 	deckimport.value = getDeck().join(" ");
 	user.pool = user.pool || "";
-	user.accountbound = etgutil.decodedeck(user.accountbound);
+	user.accountbound = user.accountbound || "";
 	if (!user.quest) {
 		user.quest = {};
 	}
