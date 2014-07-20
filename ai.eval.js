@@ -19,10 +19,13 @@ var ActivesValues = {
 	aggroskele:2,
 	air:1,
 	alphawolf:function(c){
-		return c instanceof etg.CardInstance?2:0;
+		return c instanceof etg.CardInstance?3:0;
 	},
 	animateweapon:4,
 	antimatter:12,
+	appease:function(c){
+		return c instanceof etg.CardInstance?-6:c.status.appeased?0:c.attack*-1.5;
+	},
 	bblood:7,
 	blackhole:function(c){
 		var a=0, fq=c.owner.foe.quanta;
@@ -216,7 +219,7 @@ var ActivesValues = {
 		return c instanceof etg.CardInstance?0:c.status.charges/4;
 	},
 	blockwithcharge:function(c){
-		return c instanceof etg.CardInstance?c.card.status.charges:c.status?c.status.charges:c.card.status.charges;
+		return c instanceof etg.CardInstance?c.card.status.charges:c.status.charges;
 	},
 	cold:7,
 	despair:5,
@@ -342,6 +345,9 @@ function evalthing(c) {
 
 function evalcardinstance(cardInst) {
 	var c = cardInst.card;
+	if (!caneventuallyactive(cardInst.card.costele, cardInst.card.cost, cardInst.owner)){
+		return cardInst.card.active && cardInst.card.active.discard == Actives.obsession ? -7 : -2;
+	}
 	var score = 0;
 	if (c.type == etg.SpellEnum){
 		score += evalactive(cardInst, c.active);
@@ -367,6 +373,7 @@ function evalcardinstance(cardInst) {
 		}
 		score += checkpassives(c);
 	}
+	score *= (cardInst.canactive() ? 0.6 : 0.5) * (!cardInst.card.cost || !cardInst.card.costele?1:(15+Math.min(cardInst.owner.quanta[cardInst.card.costele], 10))/30);
 	log("\t:: " + c.name + " worth " + score);
 	return score;
 }
@@ -399,13 +406,15 @@ module.exports = function(game) {
 			pscore += evalthing(player.permanents[i]);
 		}
 		for (var i = 0; i < player.hand.length; i++) {
-			var cinst = player.hand[i];
-			if (caneventuallyactive(cinst.card.costele, cinst.card.cost, player)){
-				var costless = !cinst.card.cost || !cinst.card.costele;
-				pscore += evalcardinstance(cinst) * (cinst.canactive() ? 0.6 : 0.5) * (costless?1:(15+Math.min(player.quanta[cinst.card.costele], 10))/30);
-			}else {
-				pscore -= cinst.card.active && cinst.card.active.discard == Actives.obsession ? 7 : 2;
-			}
+			pscore += evalcardinstance(player.hand[i]);
+		}
+		// Remove this if logic is updated to call endturn
+		if (player != game.turn && player.hand.length < 8 && player.deck.length > 0){
+			var code = player.deck.pop();
+			player.hand.push(new etg.CardInstance(code, player));
+			pscore += evalcardinstance(player.hand[player.hand.length-1]);
+			player.hand.pop();
+			player.deck.push(code);
 		}
 		if (player.gpull) {
 			pscore += player.gpull.truehp()/4 + (player.gpull.passives.voodoo ? 10 : 0) - player.gpull.trueatk();

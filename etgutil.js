@@ -48,3 +48,12 @@ exports.countcard = function(deck, card){
 	}
 	return -1;
 }
+exports.mergedecks = function(deck){
+	for (var i=1; i<arguments.length; i++){
+		var from = arguments[i];
+		for(var j=0; j<from.length; j+=5){
+			deck = exports.addcard(deck, from.substr(j+2, 3), parseInt(from.substr(j, 2), 32));
+		}
+	}
+	return deck;
+}

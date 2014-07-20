@@ -51,7 +51,7 @@ function tgtToPos(t) {
 		if (t == game.player2) reflectPos(p);
 		return p;
 	} else if (t instanceof etg.CardInstance) {
-		return new PIXI.Point(j ? 20 : 780, (j ? 140 : 300) + 20 * i);
+		return new PIXI.Point(t.owner == game.player2 ? 20 : 780, (t.owner == game.player2 ? 140 : 300) + 20 * t.owner.hand.indexOf(t));
 	} else console.log("Unknown target");
 }
 exports.mkFont = mkFont;

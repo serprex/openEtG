@@ -20,7 +20,7 @@ if (localStorage){
 })();
 var Cards, CardCodes, Targeting, game;
 (function(){
-var targetingMode, targetingModeCb, targetingText, discarding, user, renderer, endturnFunc, cancelFunc, accepthandfunc, foeDeck, player2summon, player2Cards, guestname, cardChosen, newCards;
+var targetingMode, targetingModeCb, targetingText, discarding, user, renderer, endturnFunc, cancelFunc, foeDeck, player2summon, player2Cards, guestname, cardChosen, newCards;
 var etgutil = require("./etgutil");
 var etg = require("./etg");
 var Actives = require("./Actives");
@@ -52,12 +52,6 @@ function maybeSetTexture(obj, text) {
 		obj.visible = true;
 		obj.setTexture(text);
 	} else obj.visible = false;
-}
-function maybeSetButton(oldbutton, newbutton) {
-	if (oldbutton)
-		oldbutton.visible = false;
-	if (newbutton)
-		newbutton.visible = true;
 }
 function hitTest(obj, pos) {
 	var x = obj.position.x - obj.width * obj.anchor.x, y = obj.position.y - obj.height * obj.anchor.y;
@@ -114,9 +108,10 @@ function refreshRenderer(stage, animCb) {
 	realStage.next = animCb;
 }
 
-var realStage = new PIXI.Stage(0x336699, true);
 renderer = new PIXI.autoDetectRenderer(900, 600);
 leftpane.appendChild(renderer.view);
+var realStage = new PIXI.Stage(0x336699, true);
+realStage.click = chatArea.focus.bind(chatArea);
 var menuui, gameui;
 var caimgcache = {}, crimgcache = {}, wsimgcache = {}, artcache = {}, artimagecache = {}, tximgcache = {};
 var elecols = [0xa99683, 0xaa5999, 0x777777, 0x996633, 0x5f4930, 0x50a005, 0xcc6611, 0x205080, 0xa9a9a9, 0x337ddd, 0xccaa22, 0x333333, 0x77bbdd];
@@ -222,8 +217,7 @@ function getCardImage(code) {
 			graphics.addChild(text);
 		}
 		rend.render(graphics);
-		caimgcache[code] = rend;
-		return rend;
+		return caimgcache[code] = rend;
 	}
 }
 function getCreatureImage(code) {
@@ -252,8 +246,7 @@ function getCreatureImage(code) {
 				graphics.addChild(text);
 			}
 			rend.render(graphics);
-			crimgcache[code] = rend;
-			return rend;
+			return crimgcache[code] = rend;
 		});
 	}
 }
@@ -284,8 +277,7 @@ function getWeaponShieldImage(code) {
 				graphics.addChild(text);
 			}
 			rend.render(graphics);
-			wsimgcache[code] = rend;
-			return rend;
+			return wsimgcache[code] = rend;
 		});
 	}
 }
@@ -504,73 +496,51 @@ function aiEvalFunc() {
 	var disableEffectsBack = Effect.disable;
 	Effect.disable = true;
 	var limit = 999;
-	function mkcommand(cbits, tbits) {
-		return ["cast", cbits | tbits << 9];
-	}
-	function iterLoop(n, commands, currentEval) {
-		var log = n>=1?console.log.bind(console):function(){};
+	var cmdct, currentEval = evalGameState(game);
+	function iterLoop(n, cmdct0) {
+		var log = n ? console.log.bind(console) : function(){};
 		function iterCore(c, active) {
 			var cbits = tgtToBits(c) ^ 8;
-			var candidates = [fullCandidates[0]];
-			function evalIter(t, ignoret) {
-				if ((ignoret || (t && targetingMode(t))) && limit > 0) {
+			function evalIter(t) {
+				if ((!targetingMode || (t && targetingMode(t))) && limit-- > 0) {
 					var tbits = tgtToBits(t) ^ 8;
-					var gameBack = game, targetingModeBack = targetingMode, targetingModeCbBack = targetingModeCb;
+					var gameBack = game;
 					game = game.clone();
-					limit--;
 					bitsToTgt(cbits).useactive(bitsToTgt(tbits));
-					var cmdcopy = commands.slice();
-					cmdcopy.push(mkcommand(cbits, tbits));
 					var v = evalGameState(game);
-					if (v < candidates[0]) {
-						candidates = [v, cmdcopy];
-						log("\t" + c + " " + (t || "-") + " " + v);
+					if (v < currentEval) {
+						cmdct = cmdct0 || (cbits | tbits << 9);
+						currentEval = v;
 					}
 					if (n) {
-						var iterRet = iterLoop(n - 1, cmdcopy, v);
-						if (iterRet[0] < candidates[0]) {
-							candidates = iterRet;
-						}
+						var targetingModeBack = targetingMode, targetingModeCbBack = targetingModeCb;
+						targetingMode = undefined;
+						iterLoop(0, cbits | tbits << 9);
+						targetingMode = targetingModeBack;
+						targetingModeCb = targetingModeCbBack;
+						log("\t" + c + " " + (t || "-") + " " + v);
 					}
 					game = gameBack;
-					targetingMode = targetingModeBack;
-					targetingModeCb = targetingModeCbBack;
 				}
 			}
-			getTarget(c, active || Actives.obsession, function(t) {
-				if (!t) {
-					evalIter(undefined, true);
-				}
-				targetingMode = null;
-				if (candidates.length > 1) {
-					var v = candidates[0], oldv = fullCandidates[0];
-					if (v < oldv) {
-						fullCandidates = candidates;
-					}
-				}
-			});
-			if (targetingMode) {
+			if (active && active.activename in Targeting) {
 				log("in " + active.activename);
+				getTarget(c, active);
 				for (var j = 0;j < 2;j++) {
 					var pl = j == 0 ? c.owner : c.owner.foe;
 					evalIter(pl);
 					evalIter(pl.weapon);
 					evalIter(pl.shield);
-					for (var i = 0;i < 23;i++) {
-						evalIter(pl.creatures[i]);
-					}
-					for (var i = 0;i < 16;i++) {
-						evalIter(pl.permanents[i]);
-					}
-					for (var i = 0;i < pl.hand.length;i++) {
-						evalIter(pl.hand[i]);
-					}
+					pl.creatures.forEach(evalIter);
+					pl.permanents.forEach(evalIter);
+					pl.hand.forEach(evalIter);
 				}
-				log("out");
-				targetingModeCb(1);
+				log("out " + currentEval);
+				targetingMode = null;
+			}else{
+				evalIter();
 			}
 		}
-		var fullCandidates = [currentEval];
 		var self = game.player2;
 		var wp = self.weapon, sh = self.shield;
 		if (wp && wp.canactive()) {
@@ -592,28 +562,26 @@ function aiEvalFunc() {
 			}
 		}
 		var codecache = {};
-		for (var i = self.hand.length - 1;i >= 0;i--) {
+		for (var i = 0; i < self.hand.length; i++) {
 			var cardinst = self.hand[i];
-			if (cardinst.canactive()) {
-				if (!(cardinst.card.code in codecache)) {
-					codecache[cardinst.card.code] = true;
+			if (!(cardinst.card.code in codecache)) {
+				codecache[cardinst.card.code] = true;
+				if (cardinst.canactive()) {
 					iterCore(cardinst, cardinst.card.type == etg.SpellEnum && cardinst.card.active);
 				}
 			}
 		}
-		return fullCandidates;
 	}
-	var cmd = iterLoop(1, [], evalGameState(game))[1];
+	iterLoop(1);
 	console.log("Leftover iters: " + limit);
 	Effect.disable = disableEffectsBack;
-	var self = game.player2;
-	if (cmd) {
-		return cmd[0];
-	} else if (self.hand.length == 8) {
+	if (cmdct) {
+		return ["cast", cmdct];
+	} else if (game.player2.hand.length == 8) {
 		var mincardvalue = 999, worstcards;
 		for (var i = 0;i < 8;i++) {
-			var cardinst = self.hand[i];
-			var cardvalue = self.quanta[cardinst.card.element] - cardinst.card.cost;
+			var cardinst = game.player2.hand[i];
+			var cardvalue = game.player2.quanta[cardinst.card.element] - cardinst.card.cost;
 			if (cardinst.card.type != etg.SpellEnum && cardinst.card.active && cardinst.card.active.discard == Actives.obsession) { cardvalue += 5; }
 			if (cardvalue == mincardvalue) {
 				worstcards.push(i);
@@ -937,11 +905,12 @@ function mkAi(level) {
 }
 
 // Asset Loading
-var nopic, goldtex, buttex;
+var nopic = PIXI.Texture.fromImage("");
+var goldtex, buttex;
 var backgrounds = ["assets/bg_default.png", "assets/bg_lobby.png", "assets/bg_shop.png", "assets/bg_quest.png", "assets/bg_game.png", "assets/bg_questmap.png"];
 var questIcons = [], eicons = [], ricons = [], cardBacks = [], cardBorders = [], boosters = [], popups = [], sicons = [], ticons = [], sborders = [];
 var mapareas = {};
-var preLoader = new PIXI.AssetLoader(["assets/null.png", "assets/gold.png", "assets/button.png", "assets/questIcons.png", "assets/esheet.png", "assets/raritysheet.png", "assets/backsheet.png",
+var preLoader = new PIXI.AssetLoader(["assets/gold.png", "assets/button.png", "assets/questIcons.png", "assets/esheet.png", "assets/raritysheet.png", "assets/backsheet.png",
 	"assets/cardborders.png", "assets/boosters.png", "assets/popup_booster.png", "assets/statussheet.png", "assets/statusborders.png", "assets/typesheet.png"].concat(backgrounds));
 var loadingBarProgress = 0, loadingBarGraphic = new PIXI.Graphics();
 preLoader.onProgress = function() {
@@ -951,7 +920,6 @@ preLoader.onProgress = function() {
 	loadingBarGraphic.endFill();
 }
 preLoader.onComplete = function() {
-	nopic = PIXI.Texture.fromFrame("assets/null.png");
 	goldtex = PIXI.Texture.fromFrame("assets/gold.png");
 	buttex = PIXI.Texture.fromFrame("assets/button.png");
 	var tex = PIXI.Texture.fromFrame("assets/questIcons.png");
@@ -992,6 +960,12 @@ function makeButton(x, y, img, mouseoverfunc) {
 		txt.position.set(b.width/2, b.height/2);
 		if (txt.width>b.width-6) txt.width=b.width-6;
 		b.addChild(txt);
+		b.setText = function(x){
+			if (x){
+				maybeSetText(txt, x.toString());
+				this.visible = true;
+			}else this.visible = false;
+		}
 	}else{
 		b = new PIXI.Sprite(img);
 	}
@@ -1012,9 +986,8 @@ function makeButton(x, y, img, mouseoverfunc) {
 }
 
 function makeText(x, y, txt, vis) {
-	var t = new PIXI.Sprite(getTextImage(txt, { font: "14px Verdana", fill: "white", stroke: "black", strokeThickness: 2 }));
+	var t = new PIXI.Sprite(nopic);
 	t.position.set(x, y);
-	t.visible = vis === undefined || vis;
 	t.setText = function(x){
 		if (x){
 			t.setTexture(getTextImage(x, { font: "14px Verdana", fill: "white", stroke: "black", strokeThickness: 2 }));
@@ -1023,6 +996,8 @@ function makeText(x, y, txt, vis) {
 			t.visible = false;
 		}
 	}
+	t.setText(txt);
+	t.visible = vis === undefined || vis;
 	return t;
 }
 
@@ -1622,8 +1597,15 @@ function startStore() {
 	storeui.addChild(tinfo2);
 
     //free packs text
-	var freeinfo = makeText(300, 26, "");
-	storeui.addChild(freeinfo);
+	if (user.freepacks){
+		var freeinfo = makeText(300, 26, "");
+		storeui.addChild(freeinfo);
+	}
+	function updateFreeText(){
+		if (user.freepacks){
+			freeinfo.setText(user.freepacks[packrarity] ? "Free boosters of this type left: " + user.freepacks[packrarity] : "");
+		}
+	}
 
 	//get cards button
 	var bget = makeButton(750, 156, "Take Cards");
@@ -1652,7 +1634,7 @@ function startStore() {
 			return;
 		}
 		var pack = packdata[packrarity];
-		if (user.gold >= pack.cost || user.freepacks[packrarity] > 0) {
+		if (user.gold >= pack.cost || (user.freepacks && user.freepacks[packrarity] > 0)) {
 			userEmit("booster", { pack: packrarity, element:packele });
 			toggleB(bbronze, bsilver, bgold, bplatinum, bget, bbuy);
 			popbooster.visible = true;
@@ -1662,10 +1644,6 @@ function startStore() {
 		}
 	}
 	storeui.addChild(bbuy);
-
-	function updateFreeText(){
-		freeinfo.setText(user.freepacks[packrarity] ? "Free boosters of this type left: " + user.freepacks[packrarity] : "");
-	}
 
 	// The different pack types
 	function gradeSelect(x){
@@ -1717,12 +1695,14 @@ function startStore() {
 	}
 
 	refreshRenderer(storeui, function() {
-		for (var i = 0;i < newCards.length;i++) {
-			newCardsArt[i].setTexture(getArt(newCards[i]));
-			newCardsArt[i].visible = true;
-		}
-		for (; i < newCardsArt[i].length; i++) {
-			newCardsArt[i].visible = false;
+		for (var i = 0; i < newCardsArt.length; i++) {
+			if (newCards[i]){
+				newCardsArt[i].setTexture(getArt(newCards[i]));
+				newCardsArt[i].visible = true;
+			}else{
+				newCardsArt[i].setTexture(nopic);
+				newCardsArt[i].visible = false;
+			}
 		}
 		tgold.setText("$" + user.gold);
 	});
@@ -2009,8 +1989,6 @@ function startMatch() {
 			cmds[cmd[0]](cmd[1]);
 		}
 		var pos = realStage.getMousePosition();
-		maybeSetText(winnername, game.winner ? (game.winner == game.player1 ? "Won " : "Lost ") + game.ply : "");
-		maybeSetButton(game.winner ? null : endturn, endturn);
 		var cardartcode, cardartx;
 		infobox.setTexture(nopic);
 		for (var i = 0;i < foeplays.children.length;i++) {
@@ -2092,11 +2070,13 @@ function startMatch() {
 			game.cardreward = cardwon.code;
 		}
 		if (game.phase != etg.EndPhase) {
-			cancel.visible = true;
-			var endturnButton = accepthand.visible ? accepthand : (endturn.visible ? endturn : null);
-			var cancelButton = mulligan.visible ? mulligan : (cancel.visible ? cancel : null);
-			maybeSetButton(endturnButton, game.turn == game.player1 ? (game.phase == etg.PlayPhase ? endturn : accepthand) : null);
-			maybeSetButton(cancelButton, game.turn == game.player1 ? (game.phase != etg.PlayPhase ? mulligan : (targetingMode || discarding) ? cancel : null) : null);
+			if (game.turn == game.player1){
+				endturn.setText(game.phase == etg.PlayPhase ? "End Turn" : "Accept Hand");
+				cancel.setText(game.phase != etg.PlayPhase ? "Mulligan" : targetingMode || discarding || resigning ? "Cancel" : null);
+			}else cancel.visible = endturn.visible = false;
+		}else{
+			winnername.setText((game.winner == game.player1 ? "Won " : "Lost ") + game.ply);
+			endturn.setText("Continue");
 		}
 		maybeSetText(turntell, discarding ? "Discard" : targetingMode ? targetingText : game.turn == game.player1 ? "Your Turn" : "Their Turn");
 		for (var i = 0;i < foeplays.children.length;i++) {
@@ -2221,7 +2201,9 @@ function startMatch() {
 				shiesprite[j].setTexture(getWeaponShieldImage(sh.card.code));
 			} else shiesprite[j].visible = false;
 			marksprite[j].setTexture(eicons[game.players[j].mark]);
-			maybeSetText(marktext[j], "x" + game.players[j].markpower);
+			if (game.players[j].markpower != 1){
+				maybeSetText(marktext[j], "x" + game.players[j].markpower);
+			}else marktext[j].visible = false;
 			for (var i = 1;i < 13;i++) {
 				maybeSetText(quantatext[j].getChildAt(i*2-2), game.players[j].quanta[i].toString());
 			}
@@ -2253,25 +2235,26 @@ function startMatch() {
 	var winnername = new PIXI.Text("", { font: "16px Dosis" });
 	winnername.position.set(800, 500);
 	gameui.addChild(winnername);
-	var endturn = makeButton(800, 540, "End Turn");
-	var accepthand = makeButton(800, 540, "Accept Hand");
-	var cancel = makeButton(800, 500, "Cancel");
-	var mulligan = makeButton(800, 500, "Mulligan");
+	var endturn = makeButton(800, 540, "Accept Hand");
+	var cancel = makeButton(800, 500, "Mulligan");
 	var resign = makeButton(8, 24, "Resign");
-	var confirm = makeButton(8, 24, "Confirm");
 	gameui.addChild(endturn);
 	gameui.addChild(cancel);
-	gameui.addChild(mulligan);
-	gameui.addChild(accepthand);
 	gameui.addChild(resign);
-	gameui.addChild(confirm);
-	confirm.visible = cancel.visible = endturn.visible = false;
 	var turntell = new PIXI.Text("", { font: "16px Dosis" });
 	var foename = new PIXI.Text(game.foename || "Unknown Opponent", { font: "bold 18px Dosis", align: "center" });
 	foename.position.set(5, 75);
 	gameui.addChild(foename);
 	endturnFunc = endturn.click = function(e, discard) {
-		if (game.winner) {
+		if (game.turn == game.player1 && (game.phase == etg.MulliganPhase1 || game.phase == etg.MulliganPhase2)){
+			if (!game.player2.ai) {
+				socket.emit("mulligan", true);
+			}
+			game.progressMulligan();
+			if (game.phase == etg.MulliganPhase2 && game.player2.ai) {
+				game.progressMulligan();
+			}
+		}else if (game.winner) {
 			if (user) {
 				if (game.winner == game.player1) {
 					userEmit("addwin", { pvp: !game.player2.ai });
@@ -2320,43 +2303,32 @@ function startMatch() {
 			}
 		}
 	}
-	accepthandfunc = accepthand.click = function() {
-		if (!game.player2.ai) {
-			socket.emit("mulligan", true);
-		}
-		game.progressMulligan();
-		if (game.phase == etg.MulliganPhase2 && game.player2.ai) {
-			game.progressMulligan();
-		}
-	}
 	cancelFunc = cancel.click = function() {
 		if (resigning) {
-			maybeSetButton(confirm, resign);
+			resign.setText("Resign");
 			resigning = false;
 		} else if (game.turn == game.player1) {
-			if (targetingMode) {
+			if ((game.phase == etg.MulliganPhase1 || game.phase == etg.MulliganPhase2) && game.player1.hand.length > 0) {
+				game.player1.drawhand(game.player1.hand.length - 1);
+				socket.emit("mulligan");
+			} else if (targetingMode) {
 				targetingMode = targetingModeCb = null;
 			} else if (discarding) {
 				discarding = false;
 			}
 		}
 	}
-	mulligan.click = function() {
-		if ((game.phase == etg.MulliganPhase1 || game.phase == etg.MulliganPhase2) && game.turn == game.player1 && game.player1.hand.length > 0) {
-			game.player1.drawhand(game.player1.hand.length - 1);
-			socket.emit("mulligan");
-		}
-	}
 	var resigning;
 	resign.click = function() {
-		maybeSetButton(resign, confirm);
-		resigning = true;
-	}
-	confirm.click = function() {
-		if (!game.player2.ai) {
-			socket.emit("foeleft");
+		if (resigning){
+			if (!game.player2.ai) {
+				socket.emit("foeleft");
+			}
+			startMenu();
+		}else{
+			resign.setText("Confirm");
+			resigning = true;
 		}
-		startMenu();
 	}
 
 	turntell.position.set(800, 570);
@@ -2801,7 +2773,9 @@ socket.on("boostergive", function(data) {
 	newCards = etgutil.decodedeck(data.cards);
 	if (data.accountbound) {
 		Array.prototype.push.apply(user.accountbound, newCards);
-		user.freepacks[data.packtype]--;
+		if (user.freepacks){
+			user.freepacks[data.packtype]--;
+		}
 	}
 	else {
 		Array.prototype.push.apply(user.pool, newCards);
@@ -2862,10 +2836,7 @@ function requestAnimate() { requestAnimFrame(animate); }
 document.addEventListener("keydown", function(e) {
 	if (realStage.children[0] == gameui) {
 		if (e.keyCode == 32) { // spc
-			if (game.turn == game.player1 && (game.phase == etg.MulliganPhase1 || game.phase == etg.MulliganPhase2))
-				accepthandfunc();
-			else
-				endturnFunc();
+			endturnFunc();
 		} else if (e.keyCode == 8) { // bsp
 			cancelFunc();
 		} else if (e.keyCode == 83 || e.keyCode == 87) { // s/w
@@ -2875,11 +2846,6 @@ document.addEventListener("keydown", function(e) {
 				targetingModeCb(p);
 			}
 		} else return;
-		e.preventDefault();
-	}
-});
-document.addEventListener("click", function(e) {
-	if (e.pageX < 900 && e.pageY < 600) {
 		e.preventDefault();
 	}
 });

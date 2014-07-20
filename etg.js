@@ -619,7 +619,7 @@ Player.prototype.drawcard = function() {
 	}
 }
 Player.prototype.drawhand = function(x) {
-	if (x > 0){
+	if (x >= 0){
 		while (this.hand.length > 0){
 			this.deck.push(this.hand.pop().card);
 		}
@@ -1115,7 +1115,7 @@ function getTargetFilter(str){
 			filters[i] = TargetFilters[filters[i]];
 		}
 		return TargetFilters[str] = function(c, t){
-			return !prefixes.some(function(x){return !x(c, t);}) && filters.some(function(x){return x(c, t);});
+			return prefixes.every(function(x){return x(c, t);}) && filters.some(function(x){return x(c, t);});
 		}
 	}
 }
