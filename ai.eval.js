@@ -19,7 +19,7 @@ var ActivesValues = {
 	aggroskele:2,
 	air:1,
 	alphawolf:function(c){
-		return c instanceof etg.CardInstance?2:0;
+		return c instanceof etg.CardInstance?3:0;
 	},
 	animateweapon:4,
 	antimatter:12,

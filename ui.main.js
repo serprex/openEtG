@@ -512,21 +512,23 @@ function aiEvalFunc() {
 			function evalIter(t) {
 				if ((!targetingMode || (t && targetingMode(t))) && limit-- > 0) {
 					var tbits = tgtToBits(t) ^ 8;
-					var gameBack = game, targetingModeBack = targetingMode, targetingModeCbBack = targetingModeCb;
+					var gameBack = game;
 					game = game.clone();
 					bitsToTgt(cbits).useactive(bitsToTgt(tbits));
 					var v = evalGameState(game);
 					if (v < currentEval) {
 						cmdct = cmdct0 || (cbits | tbits << 9);
 						currentEval = v;
-						log("\t" + c + " " + (t || "-") + " " + v);
 					}
 					if (n) {
+						log("\t" + c + " " + (t || "-") + " " + v);
+						var targetingModeBack = targetingMode, targetingModeCbBack = targetingModeCb;
+						targetingMode = undefined;
 						iterLoop(0, cbits | tbits << 9);
+						targetingMode = targetingModeBack;
+						targetingModeCb = targetingModeCbBack;
 					}
 					game = gameBack;
-					targetingMode = targetingModeBack;
-					targetingModeCb = targetingModeCbBack;
 				}
 			}
 			if (active && active.activename in Targeting) {
