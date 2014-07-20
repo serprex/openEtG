@@ -2,6 +2,28 @@ function encodeCount(count){
 	return count>1023?"vv":(count<32?"0":"") + count.toString(32);
 }
 exports.MAX_INT = 4294967296;
+exports.iterdeck = function(deck, func){
+	var len = 0;
+	for(var i=0; i<deck.length; i+=5){
+		var count = parseInt(deck.substr(i, 2), 32), code = deck.substr(i+2, 3);
+		for(var j=0; j<count; j++) func(code, len++);
+	}
+}
+exports.count = function(deck, code){
+	for(var i=0; i<deck.length; i+=5){
+		if (code == deck.substr(i+2, 3)){
+			return parseInt(deck.substr(i, 2), 32);
+		}
+	}
+	return 0;
+}
+exports.decklength = function(deck){
+	var r = 0;
+	for(var i=0; i<deck.length; i+=5){
+		r += parseInt(deck.substr(i, 2), 32);
+	}
+	return r;
+}
 exports.encodedeck = function(deck){
 	if (!deck)return "";
 	var count={}, out="";
@@ -53,6 +75,15 @@ exports.mergedecks = function(deck){
 		var from = arguments[i];
 		for(var j=0; j<from.length; j+=5){
 			deck = exports.addcard(deck, from.substr(j+2, 3), parseInt(from.substr(j, 2), 32));
+		}
+	}
+	return deck;
+}
+exports.removedecks = function(deck){
+	for (var i=1; i<arguments.length; i++){
+		var from = arguments[i];
+		for(var j=0; j<from.length; j+=5){
+			deck = exports.addcard(deck, from.substr(j+2, 3), -parseInt(from.substr(j, 2), 32));
 		}
 	}
 	return deck;
