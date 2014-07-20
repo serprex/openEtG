@@ -1991,10 +1991,6 @@ function startMatch() {
 			cmds[cmd[0]](cmd[1]);
 		}
 		var pos = realStage.getMousePosition();
-		if (game.winner){
-			maybeSetText(winnername, (game.winner == game.player1 ? "Won " : "Lost ") + game.ply);
-			endturn.visible = true;
-		}
 		var cardartcode, cardartx;
 		infobox.setTexture(nopic);
 		for (var i = 0;i < foeplays.children.length;i++) {
@@ -2076,12 +2072,13 @@ function startMatch() {
 			game.cardreward = cardwon.code;
 		}
 		if (game.phase != etg.EndPhase) {
-			mulligan.visible = cancel.visible = false;
 			if (game.turn == game.player1){
 				endturn.setText(game.phase == etg.PlayPhase ? "End Turn" : "Accept Hand");
-				if (game.phase != etg.PlayPhase) mulligan.visible = true;
-				else if (targetingMode || discarding || resigning) cancel.visible = true;
-			}else endturn.visible = false;
+				cancel.setText(game.phase != etg.PlayPhase ? "Mulligan" : targetingMode || discarding || resigning ? "Cancel" : null);
+			}else cancel.visible = endturn.visible = false;
+		}else{
+			winnername.setText((game.winner == game.player1 ? "Won " : "Lost ") + game.ply);
+			endturn.setText("Continue");
 		}
 		maybeSetText(turntell, discarding ? "Discard" : targetingMode ? targetingText : game.turn == game.player1 ? "Your Turn" : "Their Turn");
 		for (var i = 0;i < foeplays.children.length;i++) {
@@ -2242,13 +2239,10 @@ function startMatch() {
 	gameui.addChild(winnername);
 	var endturn = makeButton(800, 540, "End Turn");
 	var cancel = makeButton(800, 500, "Cancel");
-	var mulligan = makeButton(800, 500, "Mulligan");
 	var resign = makeButton(8, 24, "Resign");
 	gameui.addChild(endturn);
 	gameui.addChild(cancel);
-	gameui.addChild(mulligan);
 	gameui.addChild(resign);
-	cancel.visible = false;
 	var turntell = new PIXI.Text("", { font: "16px Dosis" });
 	var foename = new PIXI.Text(game.foename || "Unknown Opponent", { font: "bold 18px Dosis", align: "center" });
 	foename.position.set(5, 75);
@@ -2316,17 +2310,14 @@ function startMatch() {
 			resign.setText("Resign");
 			resigning = false;
 		} else if (game.turn == game.player1) {
-			if (targetingMode) {
+			if ((game.phase == etg.MulliganPhase1 || game.phase == etg.MulliganPhase2) && game.player1.hand.length > 0) {
+				game.player1.drawhand(game.player1.hand.length - 1);
+				socket.emit("mulligan");
+			} else if (targetingMode) {
 				targetingMode = targetingModeCb = null;
 			} else if (discarding) {
 				discarding = false;
 			}
-		}
-	}
-	mulligan.click = function() {
-		if ((game.phase == etg.MulliganPhase1 || game.phase == etg.MulliganPhase2) && game.turn == game.player1 && game.player1.hand.length > 0) {
-			game.player1.drawhand(game.player1.hand.length - 1);
-			socket.emit("mulligan");
 		}
 	}
 	var resigning;

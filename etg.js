@@ -619,7 +619,7 @@ Player.prototype.drawcard = function() {
 	}
 }
 Player.prototype.drawhand = function(x) {
-	if (x > 0){
+	if (x >= 0){
 		while (this.hand.length > 0){
 			this.deck.push(this.hand.pop().card);
 		}
