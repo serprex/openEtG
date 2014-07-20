@@ -201,7 +201,8 @@ var ActivesValues = {
 		return c instanceof etg.CardInstance ? 3 : c.maxhp - c.truehp();
 	},
 	unburrow:0,
-	upkeep:-.5,
+	upkeep: -.5,
+	upload:3,
 	vampire:function(c){
 		return (c instanceof etg.CardInstance?c.card.attack:truetrueatk(c))*.7;
 	},
