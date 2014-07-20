@@ -108,9 +108,10 @@ function refreshRenderer(stage, animCb) {
 	realStage.next = animCb;
 }
 
-var realStage = new PIXI.Stage(0x336699, true);
 renderer = new PIXI.autoDetectRenderer(900, 600);
 leftpane.appendChild(renderer.view);
+var realStage = new PIXI.Stage(0x336699, true);
+realStage.click = chatArea.focus.bind(chatArea);
 var menuui, gameui;
 var caimgcache = {}, crimgcache = {}, wsimgcache = {}, artcache = {}, artimagecache = {}, tximgcache = {};
 var elecols = [0xa99683, 0xaa5999, 0x777777, 0x996633, 0x5f4930, 0x50a005, 0xcc6611, 0x205080, 0xa9a9a9, 0x337ddd, 0xccaa22, 0x333333, 0x77bbdd];
@@ -2241,7 +2242,7 @@ function startMatch() {
 	gameui.addChild(cancel);
 	gameui.addChild(resign);
 	var turntell = new PIXI.Text("", { font: "16px Dosis" });
-	var foename = new PIXI.Text(game.foename || "Unknown Opponent", { font: "18px Dosis bold", align: "center" });
+	var foename = new PIXI.Text(game.foename || "Unknown Opponent", { font: "bold 18px Dosis", align: "center" });
 	foename.position.set(5, 75);
 	gameui.addChild(foename);
 	endturnFunc = endturn.click = function(e, discard) {
