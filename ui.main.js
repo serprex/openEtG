@@ -541,7 +541,7 @@ function aiEvalFunc() {
 					pl.permanents.forEach(evalIter);
 					pl.hand.forEach(evalIter);
 				}
-				log("out");
+				log("out " + currentEval);
 				targetingMode = null;
 			}else{
 				evalIter();
@@ -1596,8 +1596,15 @@ function startStore() {
 	storeui.addChild(tinfo2);
 
     //free packs text
-	var freeinfo = makeText(300, 26, "");
-	storeui.addChild(freeinfo);
+	if (user.freepacks){
+		var freeinfo = makeText(300, 26, "");
+		storeui.addChild(freeinfo);
+	}
+	function updateFreeText(){
+		if (user.freepacks){
+			freeinfo.setText(user.freepacks[packrarity] ? "Free boosters of this type left: " + user.freepacks[packrarity] : "");
+		}
+	}
 
 	//get cards button
 	var bget = makeButton(750, 156, "Take Cards");
@@ -1626,7 +1633,7 @@ function startStore() {
 			return;
 		}
 		var pack = packdata[packrarity];
-		if (user.gold >= pack.cost || user.freepacks[packrarity] > 0) {
+		if (user.gold >= pack.cost || (user.freepacks && user.freepacks[packrarity] > 0)) {
 			userEmit("booster", { pack: packrarity, element:packele });
 			toggleB(bbronze, bsilver, bgold, bplatinum, bget, bbuy);
 			popbooster.visible = true;
@@ -1636,10 +1643,6 @@ function startStore() {
 		}
 	}
 	storeui.addChild(bbuy);
-
-	function updateFreeText(){
-		freeinfo.setText(user.freepacks[packrarity] ? "Free boosters of this type left: " + user.freepacks[packrarity] : "");
-	}
 
 	// The different pack types
 	function gradeSelect(x){
@@ -2779,7 +2782,9 @@ socket.on("boostergive", function(data) {
 	newCards = etgutil.decodedeck(data.cards);
 	if (data.accountbound) {
 		Array.prototype.push.apply(user.accountbound, newCards);
-		user.freepacks[data.packtype]--;
+		if (user.freepacks){
+			user.freepacks[data.packtype]--;
+		}
 	}
 	else {
 		Array.prototype.push.apply(user.pool, newCards);

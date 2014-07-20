@@ -221,7 +221,7 @@ function useruser(servuser, cb){
 			pool: servuser.pool,
 			gold: servuser.gold,
 			ocard: servuser.ocard,
-			freepacks: servuser.freepacks || "0,0,0,0",
+			freepacks: servuser.freepacks,
 			accountbound: servuser.accountbound,
 			aiwins: parseInt(servuser.aiwins) || 0,
 			ailosses: parseInt(servuser.ailosses) || 0,
@@ -241,16 +241,11 @@ function genericChat(socket, data){
 	}
 	else io.emit("chat", data)
 }
-function addCards(user, cards, accbound) {
-	if (accbound) {
-		for (var i = 0;i < cards.length;i++) {
-			user.accountbound = etgutil.addcard(user.accountbound, cards[i]);
-		}
-	}
-	else {
-		for (var i = 0;i < cards.length;i++) {
-			user.pool = etgutil.addcard(user.pool, cards[i]);
-		}
+function addCards(user, cards, bound) {
+	if (bound) {
+		user.accountbound = etgutil.mergedecks(user.accountbound, cards);
+	}else{
+		user.pool = etgutil.mergedecks(user.pool, cards);
 	}
 }
 
@@ -306,8 +301,7 @@ io.on("connection", function(socket) {
 		delete usersock[u];
 	});
 	userEvent(socket, "addcards", function(data, user) {
-		var cards = etgutil.decodedeck(data.c);
-		addCards(user, cards, data.accountbound);
+		addCards(user, data.c, data.accountbound);
 	});
 	userEvent(socket, "sellcard", function(data, user) {
 		user.pool = etgutil.addcard(user.pool, data.card, -1);
@@ -574,10 +568,9 @@ io.on("connection", function(socket) {
 		}
 	});
 	userEvent(socket, "booster", function(data, user) {
-		if (!user.freepacks) user.freepacks = "0,0,0,0";
-		var freepacklist = user.freepacks.split(",");
-		for (var i = 0;i < freepacklist.length;i++) {
-			freepacklist[i] = parseInt(freepacklist[i]);
+		var freepacklist;
+		if (user.freepacks){
+			freepacklist = user.freepacks.split(",");
 		}
 		var packdata = [
 			{ amount: 9, cost: 15, rare: []},
@@ -585,39 +578,29 @@ io.on("connection", function(socket) {
 			{ amount: 8, cost: 65, rare: [3, 7]},
 			{ amount: 9, cost: 100, rare: [4, 7, 8]},
 		];
-		var pack = packdata[data.pack];
-		var element = data.element;
-		if (user.gold >= pack.cost || freepacklist[data.pack] > 0) {
-			var accountbound = false;
-			var newCards = [];
+		var pack = packdata[data.pack], bound = freepacklist && freepacklist[data.pack] > 0;
+		if (bound || user.gold >= pack.cost) {
+			var newCards = "";
 			for (var i = 0;i < pack.amount;i++) {
 				var rarity = 1;
 				while (i >= pack.rare[rarity - 1]) rarity++;
-				var fromElement = Math.random() > .4;
-				newCards[i] = etg.PlayerRng.randomcard(false, function(x) { return (x.element == element) ^ fromElement && x.type != etg.PillarEnum && x.rarity == rarity }).code;
+				var notFromElement = Math.random() > .4;
+				newCards = etgutil.addcard(newCards, etg.PlayerRng.randomcard(false, function(x) { return (x.element == data.element) ^ notFromElement && x.type != etg.PillarEnum && x.rarity == rarity }).code);
 			}
-			if (freepacklist[data.pack] > 0) {
+			if (bound) {
 				freepacklist[data.pack]--;
-				var empty = true;
-					for (var i = 0;i < freepacklist.length;i++) {
-						if (freepacklist[i] > 0) {
-							empty = false;
-							break;
-						}
-					}
-				if (empty) {
+				if (freepacklist.every(function(x){return x == 0})) {
 					db.hdel("U:" + user.name, "freepacks");
 					delete user.freepacks;
 				}
 				else
 					user.freepacks = freepacklist.join(",");
-				accountbound = true;
 			}
 			else {
 				user.gold -= pack.cost;
 			}
-			addCards(user, newCards, accountbound);
-			socket.emit("boostergive", { cards: etgutil.encodedeck(newCards), accountbound: accountbound, cost:pack.cost, packtype:data.pack });
+			addCards(user, newCards, bound);
+			socket.emit("boostergive", { cards: newCards, accountbound: bound, cost:pack.cost, packtype:data.pack });
 		}
 	});
 	socket.on("guestchat", function (data) {
