@@ -480,16 +480,15 @@ io.on("connection", function(socket) {
 		thistrade.tradecards = data.cards;
 		thistrade.oppcards = data.oppcards;
 		if (thattrade.accepted) {
-			var other = thistrade.foe;
+			var other = thistrade.foe, otherUser = users[thistrade.foename];
+			if (!otherUser){
+				return; // Cancel
+			}
 			var player1Cards = thistrade.tradecards, player2Cards = thattrade.tradecards;
-			for (var i = 0;i < player1Cards.length;i++) {
-				user.pool = etgutil.addcard(user.pool, player1Cards[i], -1);
-				users[thistrade.foename].pool = etgutil.addcard(users[thistrade.foename].pool, player1Cards[i]);
-			}
-			for (var i = 0;i < player2Cards.length;i++) {
-				user.pool = etgutil.addcard(user.pool, player2Cards[i]);
-				users[thistrade.foename].pool = etgutil.addcard(users[thistrade.foename].pool, player2Cards[i], -1);
-			}
+			user.pool = etgutil.removedecks(user.pool, player1Cards);
+			user.pool = etgutil.mergedecks(user.pool, player2Cards);
+			otherUser.pool = etgutil.removedecks(otherUser.pool, player2Cards, -1);
+			otherUser.pool = etgutil.mergedecks(otherUser.pool, player1Cards);
 			this.emit("tradedone", { oldcards: player1Cards, newcards: player2Cards });
 			other.emit("tradedone", { oldcards: player2Cards, newcards: player1Cards });
 			delete sockinfo[this.id].trade;

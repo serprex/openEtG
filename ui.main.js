@@ -314,7 +314,7 @@ function initTrade(data) {
 	bconfirm.click = function() {
 		if (player2Cards.length > 0) {
 			console.log("Confirmed!");
-			userEmit("confirmtrade", { cards: selectedCards, oppcards: player2Cards });
+			userEmit("confirmtrade", { cards: etgutil.encodedeck(selectedCards), oppcards: etgutil.encodedeck(player2Cards) });
 			editorui.removeChild(bconfirm);
 			editorui.addChild(bconfirmed);
 		}
@@ -2745,8 +2745,8 @@ socket.on("cardchosen", function(data) {
 	player2Cards = data.cards;
 });
 socket.on("tradedone", function(data) {
-	user.pool = etgutil.mergedecks(user.pool, etgutil.encodedeck(data.newcards));
-	user.pool = etgutil.removedecks(user.pool, etgutil.encodedeck(data.oldcards));
+	user.pool = etgutil.mergedecks(user.pool, data.newcards);
+	user.pool = etgutil.removedecks(user.pool, data.oldcards);
 	startMenu();
 });
 socket.on("tradecanceled", function(data) {
@@ -2774,13 +2774,13 @@ socket.on("codedone", function(data) {
 socket.on("boostergive", function(data) {
 	newCards = etgutil.decodedeck(data.cards);
 	if (data.accountbound) {
-		user.accountbound = etgutil.mergedecks(user.accountbound, etgutil.encodedeck(newCards));
+		user.accountbound = etgutil.mergedecks(user.accountbound, data.cards);
 		if (user.freepacks){
 			user.freepacks[data.packtype]--;
 		}
 	}
 	else {
-		user.pool = etgutil.mergedecks(user.pool, etgutil.encodedeck(newCards));
+		user.pool = etgutil.mergedecks(user.pool, data.cards);
 		user.gold -= data.cost;
 	}
 });
