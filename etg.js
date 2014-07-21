@@ -314,9 +314,10 @@ Player.prototype.clone = function(game){
 CardInstance.prototype.clone = function(owner){
 	return new CardInstance(this.card, owner);
 }
-function mkCloneFunc(proto){
-	proto = proto.prototype;
-	return function(owner){
+var thingtypes = [Creature, Permanent, Weapon, Shield, Pillar];
+thingtypes.forEach(function(type){
+	var proto = type.prototype;
+	type.prototype.clone = function(owner){
 		var obj = Object.create(proto);
 		obj.passives = clone(this.passives);
 		obj.active = clone(this.active);
@@ -327,12 +328,36 @@ function mkCloneFunc(proto){
 		}
 		return obj;
 	}
+});
+CardInstance.prototype.hash = function(){
+	return parseInt(this.card.code, 32) << 1 | (this.owner == this.owner.game.player1?1:0);
 }
-Creature.prototype.clone = mkCloneFunc(Creature);
-Permanent.prototype.clone = mkCloneFunc(Permanent);
-Weapon.prototype.clone = mkCloneFunc(Weapon);
-Shield.prototype.clone = mkCloneFunc(Shield);
-Pillar.prototype.clone = mkCloneFunc(Pillar);
+function hashString(str){
+	var hash = 0;
+	for (var i=0; i<str.length; i++){
+		hash = ((hash << 5) - hash) + str.charCodeAt(i) & 0x7FFFFFFF;
+	}
+	return hash;
+}
+function hashObj(obj){
+	var hash = 0;
+	for (var key in obj){
+		hash ^= hashString(key) ^ obj[key];
+	}
+	return hash;
+}
+Creature.prototype.hash = function(){
+	var hash = this.owner == this.owner.game.player1 ? 17 : 19;
+	hash ^= hashObj(this.passives) ^ hashObj(this.status) ^ (this.hp*17 + this.atk*31 - this.maxhp - this.usedactive * 3);
+	hash ^= parseInt(this.card.code, 32);
+	for (var key in this.active){
+		hash ^= hashString(key) ^ hashString(this.active[key].activename);
+	}
+	if (this.active.cast){
+		hash ^= this.cast * 7 + this.castele * 23;
+	}
+	return hash & 0x7FFFFFFF;
+}
 Card.prototype.readCost = function(attr, cost){
 	var c=cost.split(":");
 	c = [parseInt(c[0]), (c.length==1?this.element:parseInt(c[1]))]

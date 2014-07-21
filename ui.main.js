@@ -498,9 +498,21 @@ function aiEvalFunc() {
 	var cmdct, currentEval = evalGameState(game), cdepth = 2;
 	function iterLoop(n, cmdct0) {
 		var log = n ? console.log.bind(console) : function(){};
+		var casthash = {};
 		function iterCore(c, active) {
+			if (c.hash){
+				var ch = c.hash();
+				if (ch in casthash) return;
+				else casthash[ch] = true;
+			}
 			var cbits = tgtToBits(c) ^ 8;
+			var tgthash = {};
 			function evalIter(t) {
+				if (t && t.hash){
+					var th = t.hash();
+					if (th in tgthash) return;
+					else tgthash[th] = true;
+				}
 				if ((!targetingMode || (t && targetingMode(t))) && limit-- > 0) {
 					var tbits = tgtToBits(t) ^ 8;
 					var gameBack = game;
@@ -560,14 +572,10 @@ function aiEvalFunc() {
 				iterCore(pr, pr.active.cast);
 			}
 		}
-		var codecache = {};
 		for (var i = 0; i < self.hand.length; i++) {
 			var cardinst = self.hand[i];
-			if (!(cardinst.card.code in codecache)) {
-				codecache[cardinst.card.code] = true;
-				if (cardinst.canactive()) {
-					iterCore(cardinst, cardinst.card.type == etg.SpellEnum && cardinst.card.active);
-				}
+			if (cardinst.canactive()) {
+				iterCore(cardinst, cardinst.card.type == etg.SpellEnum && cardinst.card.active);
 			}
 		}
 	}
