@@ -2694,9 +2694,9 @@ socket.on("pvpgive", initGame);
 socket.on("tradegive", initTrade);
 socket.on("librarygive", initLibrary);
 socket.on("foearena", function(data) {
-	var deck = etgutil.decodedeck(data.deck + data.deck);
+	var deck = etgutil.decodedeck(data.deck);
 	chatArea.value = data.name + ": " + deck.join(" ");
-	initGame({ first: data.first, deck: deck, urdeck: getDeck(), seed: data.seed, hp: data.hp, cost: data.cost, foename: data.name }, aiEvalFunc);
+	initGame({ first: data.first, deck: doubleDeck(deck), urdeck: getDeck(), seed: data.seed, hp: data.hp, cost: data.cost, foename: data.name }, aiEvalFunc);
 	game.arena = data.name;
 	game.level = 1;
 	game.cost = 10;
