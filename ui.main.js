@@ -2447,15 +2447,13 @@ function startMatch() {
 				creasprite[j][i] = makeInst(true, game.players[j].creatures, i, ui.creaturePos(j, i));
 			}
 			for (var i = 0;i < 23;i++){
-				gameui.addChild(creasprite[0][i]);
-				gameui.addChild(creasprite[1][22-i]);
+				gameui.addChild(creasprite[j][j?22-i:i]);
 			}
 			for (var i = 0;i < 16;i++) {
 				permsprite[j][i] = makeInst(false, game.players[j].permanents, i, ui.permanentPos(j, i));
 			}
 			for (var i = 0;i < 16;i++){
-				gameui.addChild(permsprite[0][i]);
-				gameui.addChild(permsprite[1][15-i]);
+				gameui.addChild(permsprite[j][j?15-i:i]);
 			}
 			setInteractive.apply(null, handsprite[j]);
 			setInteractive.apply(null, creasprite[j]);
