@@ -535,7 +535,7 @@ function aiEvalFunc() {
 				}
 			}
 			if (active && active.activename in Targeting) {
-				log("in " + active.activename);
+				log("in " + active.activename + " " + currentEval);
 				getTarget(c, active);
 				for (var j = 0;j < 2;j++) {
 					var pl = j == 0 ? c.owner : c.owner.foe;

@@ -333,10 +333,12 @@ function evalthing(c) {
 	}
 	score += checkpassives(c);
 	if (isCreature){
-		var hp = Math.max(c.truehp(), 0), poison = Math.min((c.status.poison || 0), hp);
+		var hp = Math.max(c.truehp(), 0), poison = c.status.poison || 0;
 		if (poison > 0){
 			hp = Math.min(hp - poison, 0);
 			if (c.status.aflatoxin) score -= 2;
+		}else if (poison < 0){
+			hp += Math.max(-poison, c.maxhp-c.hp);
 		}
 		score *= hp?(c.status.immaterial || c.status.burrowed ? 2 : Math.pow(Math.min(hp, 15), .3)):.2;
 	}else{
@@ -367,8 +369,8 @@ function evalcardinstance(cardInst) {
 		if (c.type == etg.CreatureEnum){
 			score += c.attack;
 			var hp = Math.max(c.health, 0);
-			if (c.status && c.status.poison && hp){
-				score -= c.status.poison*c.attack/hp;
+			if (c.status && c.status.poison > 0){
+				score -= hp/c.status.poison;
 			}
 			score *= hp?(c.status && (c.status.immaterial || c.status.burrowed) ? 2 : Math.pow(Math.min(hp, 15), .3)):.2;
 		}else if (c.type == etg.WeaponEnum){
