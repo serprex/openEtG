@@ -130,7 +130,7 @@ var ActivesValues = {
 	momentum:2,
 	mutation:4,
 	neuro: function(c) {
-		return c.owner.foe.neuro?ActivesValues["poison"]+.1:6;
+		return c.owner.foe.neuro?evalactive(c, "poison")+.1:6;
 	},
 	neurofy:6,
 	nightmare:12,
@@ -313,7 +313,7 @@ function evalthing(c) {
 				}
 			}else if(key == "auto"){
 				if (!c.status.frozen){
-					score += evalactive(c, c.active.auto)*(c.status.frozen?.2:1)*(c.status.adrenaline?2:1);
+					score += evalactive(c, c.active.auto)*(c.status.adrenaline?2:1);
 				}
 			}else if(key == "shield" && isCreature){
 				if (!delaymix){

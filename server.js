@@ -1,10 +1,9 @@
 "use strict"
 var qstring = require("querystring");
-var http = require("http");
 var crypto = require("crypto");
 var connect = require("connect");
 var fs = require("fs");
-var app = http.createServer(connect().use(require("compression")()).use(cardRedirect).use(require("serve-static")(__dirname)).use(loginAuth).use(codeSmith));
+var app = require("http").createServer(connect().use(require("compression")()).use(cardRedirect).use(require("serve-static")(__dirname)).use(loginAuth).use(codeSmith));
 var io = require("socket.io")(app.listen(13602));
 var redis = require("redis"), db = redis.createClient();
 var etgutil = require("./etgutil");
@@ -122,13 +121,13 @@ function codeSmith(req, res, next){
 }
 function cardRedirect(req, res, next){
 	if (req.url.match(/^\/Cards\/...\.png$/)){
-		var code = req.url.substr(7, 3), intCode = parseInt(code, 32);
+		var intCode = parseInt(req.url.substr(7, 3), 32);
 		if (intCode >= 7000){
 			fs.exists(__dirname + req.url, function(exists){
 				if (!exists){
-					req.url = "/Cards/" + (intCode-2000).toString(32) + ".png";
-				}
-				next();
+					res.writeHead("302", {Location: "http://" + req.headers.host + "/Cards/" + (intCode-2000).toString(32) + ".png"});
+					res.end();
+				}else next();
 			});
 			return;
 		}
