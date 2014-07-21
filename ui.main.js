@@ -242,7 +242,7 @@ function getCreatureImage(code) {
 			if (card) {
 				var text = new PIXI.Text(card.name, { font: "8px Dosis", fill: card.upped ? "black" : "white" });
 				text.anchor.x = 0.5;
-				text.position.set(33, 72);
+				text.position.set(33, 0);
 				graphics.addChild(text);
 			}
 			rend.render(graphics);
@@ -273,7 +273,7 @@ function getWeaponShieldImage(code) {
 			if (card) {
 				var text = new PIXI.Text(card.name, { font: "10px Dosis", fill: card.upped ? "black" : "white" });
 				text.anchor.x = 0.5;
-				text.position.set(40, 91);
+				text.position.set(40, 0);
 				graphics.addChild(text);
 			}
 			rend.render(graphics);
@@ -1966,7 +1966,7 @@ function startMatch() {
 				}
 			} else if (obj.canactive() && !(obj.owner == game.player2 && game.player2.isCloaked())) {
 				fgfx.lineStyle(2, obj.card.element == 8 ? 0x000000 : 0xffffff);
-				fgfx.drawRect(spr.position.x - spr.width / 2, spr.position.y - spr.height / 2, spr.width, (obj instanceof etg.Weapon || obj instanceof etg.Shield ? 12 : 10));
+				fgfx.drawRect(spr.position.x - spr.width / 2, spr.position.y + spr.height / 2, spr.width, (obj instanceof etg.Weapon || obj instanceof etg.Shield ? -12 : -10));
 			}
 		}
 	}
@@ -2397,7 +2397,7 @@ function startMatch() {
 				stattext.position.set(-32 * scale, -32 * scale);
 				spr.addChild(stattext);
 				var activetext = new PIXI.Sprite(nopic);
-				activetext.position.set(-32 * scale, -42 * scale);
+				activetext.position.set(-32 * scale, 32 * scale);
 				spr.addChild(activetext);
 				if (makestatuses){
 					var statuses = new PIXI.SpriteBatch();
