@@ -495,7 +495,7 @@ function aiEvalFunc() {
 	var disableEffectsBack = Effect.disable;
 	Effect.disable = true;
 	var limit = 999;
-	var cmdct, currentEval = evalGameState(game), cdepth;
+	var cmdct, currentEval = evalGameState(game), cdepth = 2;
 	function iterLoop(n, cmdct0) {
 		var log = n ? console.log.bind(console) : function(){};
 		function iterCore(c, active) {
@@ -507,7 +507,7 @@ function aiEvalFunc() {
 					game = game.clone();
 					bitsToTgt(cbits).useactive(bitsToTgt(tbits));
 					var v = evalGameState(game);
-					if (v < currentEval || (v == currentEval && n)) {
+					if (v < currentEval || (v == currentEval && n > cdepth)) {
 						cmdct = cmdct0 || (cbits | tbits << 9);
 						currentEval = v;
 					}

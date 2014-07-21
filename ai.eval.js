@@ -24,7 +24,7 @@ var ActivesValues = {
 	animateweapon:4,
 	antimatter:12,
 	appease:function(c){
-		return c instanceof etg.CardInstance?-6:c.status.appeased?0:c.attack*-1.5;
+		return c instanceof etg.CardInstance?-6:c.status.appeased?0:c.trueatk()*-1.5;
 	},
 	bblood:7,
 	blackhole:function(c){
