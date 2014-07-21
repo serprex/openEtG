@@ -59,7 +59,9 @@ var ActivesValues = {
 	devour:function(c){
 		return 2+(c instanceof etg.CardInstance?c.card.health:c.truehp());
 	},
-	disarm:5,
+	disarm:function(c){
+		return !c.owner.foe.weapon ? .1 : c.owner.foe.hand.length == 8 ? .5 : c.owner.foe.weapon.card.cost;
+	},
 	disfield:8,
 	disshield:7,
 	dive:function(c){
@@ -129,10 +131,12 @@ var ActivesValues = {
 	mitosisspell:6,
 	momentum:2,
 	mutation:4,
-	neuro: function(c) {
+	neuro:function(c) {
 		return c.owner.foe.neuro?evalactive(c, "poison")+.1:6;
 	},
-	neurofy:6,
+	neurofy:function(c) {
+		return c.owner.foe.neuro?1:5;
+	},
 	nightmare:12,
 	nova:6,
 	nova2:6,
@@ -142,7 +146,7 @@ var ActivesValues = {
 		return c.truehp()-1;
 	},
 	overdrivespell:5,
-	pacify:4,
+	pacify:5,
 	pandemonium:3,
 	pandemonium2:4,
 	paradox:5,
