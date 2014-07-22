@@ -433,7 +433,7 @@ io.on("connection", function(socket) {
 			return;
 		}
 		console.log(u + " requesting " + f);
-		sockinfo[this.id].deck = user["deck" + user.selectedDeck];
+		sockinfo[this.id].deck = user.decks.split(",")[user.selectedDeck];
 		sockinfo[this.id].demigod = data.DGmode;
 		if (f in users){
 			if (duels[f] == u) {
