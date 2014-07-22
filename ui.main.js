@@ -126,8 +126,8 @@ function getBack(ele, upped) {
 	var offset = upped ? 13 : 0;
 	return cardBacks ? cardBacks[ele + offset] : nopic;
 }
-function makeArt(card, art) {
-	var rend = new PIXI.RenderTexture(132, 256);
+function makeArt(card, art, oldrend) {
+	var rend = oldrend || new PIXI.RenderTexture(132, 256);
 	var template = new PIXI.Graphics();
 	template.addChild(new PIXI.Sprite(getBack(card.element, card.upped)));
 	var rarity = new PIXI.Sprite(ricons[card.rarity]);
@@ -162,7 +162,7 @@ function makeArt(card, art) {
 	var infospr = new PIXI.Sprite(getTextImage(card.info(), ui.mkFont(11, card.upped ? "black" : "white"), "", rend.width-4))
 	infospr.position.set(2, 150);
 	template.addChild(infospr);
-	rend.render(template);
+	rend.render(template, null, true);
 	return rend;
 }
 function getArtImage(code, cb){
@@ -181,7 +181,7 @@ function getArt(code) {
 	if (artcache[code]) return artcache[code];
 	else {
 		return getArtImage(code, function(art){
-			return artcache[code] = makeArt(CardCodes[code], art);
+			return artcache[code] = makeArt(CardCodes[code], art, artcache[code]);
 		});
 	}
 }
@@ -645,27 +645,19 @@ function victoryScreen() {
 		user.gold += game.goldreward;
 		userEmit("addgold", { g: game.goldreward });
 	}
-	var rewards = [];
 	if (game.cardreward && winner) {
 		var cardrewardlength = etgutil.decklength(game.cardreward);
 		etgutil.iterdeck(game.cardreward, function(code, i){
-			var cardArt = new PIXI.Sprite(nopic);
+			var cardArt = new PIXI.Sprite(getArt(code));
 			cardArt.anchor.x = .5;
 			cardArt.position.set(470-cardrewardlength*20+i*40, 170);
-			rewards.push(cardArt);
 			victoryui.addChild(cardArt);
 		});
 		user.pool = etgutil.mergedecks(user.pool, game.cardreward);
 		userEmit("addcards", { c: game.cardreward });
 	}
 
-	refreshRenderer(victoryui, function(){
-		if (game.cardreward && winner){
-			etgutil.iterdeck(game.cardreward, function(code, i){
-				rewards[i].setTexture(getArt(code));
-			});
-		}
-	});
+	refreshRenderer(victoryui);
 }
 
 function deckMorph(deck,MorphFrom,morphTo) {
@@ -1243,11 +1235,10 @@ function startMenu() {
 	if (!user) toggleB.apply(null, usertoggle);
 
 	if (user && user.oracle) {
-		cardcode = user.oracle;
-		delete user.oracle;
-		var oracle = new PIXI.Sprite(nopic);
+		var oracle = new PIXI.Sprite(getArt(user.oracle));
 		oracle.position.set(450, 100);
 		menuui.addChild(oracle);
+		delete user.oracle;
 	}
 
 	function logout() {
@@ -1265,9 +1256,6 @@ function startMenu() {
 
 	refreshRenderer(menuui, function() {
 		if (user) {
-			if (oracle) {
-				oracle.setTexture(getArt(cardcode));
-			}
 			tgold.setText("$" + user.gold)
 		}
 	});
@@ -1501,12 +1489,20 @@ function upgradestore() {
 	var twarning = new PIXI.Text("", { font: "bold 16px Dosis" });
 	twarning.position.set(100, 50);
 	upgradeui.addChild(twarning);
+	var cardArt = new PIXI.Sprite(nopic);
+	cardArt.position.set(734, 8);
+	upgradeui.addChild(cardArt);
+	var selectedCardArt = new PIXI.Sprite(nopic);
+	selectedCardArt.position.set(534, 8);
+	upgradeui.addChild(selectedCardArt);
 
 	var cardsel = makeCardSelector(null,
 		function(code){
 			var card = CardCodes[code];
+			selectedCardArt.setTexture(getArt(code));
+			cardArt.setTexture(getArt(card.asUpped(true).code));
 			selectedCard = code;
-			upgradedCard = card.asUpped(true).code;
+			card.asUpped(true).code;
 			tinfo.setText(isFreeCard(card) ? "Costs 50 gold to upgrade" : card.rarity < 5 ? "Convert 6 of these into an upgraded version." : "Convert into an upgraded version.");
 			tinfo2.setText((card.rarity > 0 || card.upped) && card.rarity < 5 ?
 				"Sells for " + cardValues[card.rarity] * (card.upped ? 5 : 1) + " gold." : "");
@@ -1514,24 +1510,10 @@ function upgradestore() {
 		}
 	);
 	upgradeui.addChild(cardsel);
-	var selectedCard, upgradedCard;
-	var cardpool;
+	var cardpool, selectedCard;
 	adjustdeck();
-
-	var cardArt = new PIXI.Sprite(nopic);
-	cardArt.position.set(734, 8);
-	upgradeui.addChild(cardArt);
-	var selectedCardArt = new PIXI.Sprite(nopic);
-	selectedCardArt.position.set(534, 8);
-	upgradeui.addChild(selectedCardArt);
 	refreshRenderer(upgradeui, function() {
 		cardsel.next(cardpool, {});
-	    if (upgradedCard) {
-	        cardArt.setTexture(getArt(upgradedCard));
-		}
-		if (selectedCard) {
-			selectedCardArt.setTexture(getArt(selectedCard));
-		}
 		goldcount.setText("$" + user.gold);
 	});
 }
@@ -1712,7 +1694,7 @@ function startEditor(arena, acard, startempty) {
 			}
 		}
 	}
-	var cardminus, cardpool, cardartcode;
+	var cardminus, cardpool;
 	if (user){
 		cardminus = {};
 		cardpool = {};
@@ -1733,7 +1715,7 @@ function startEditor(arena, acard, startempty) {
 	editorui.interactive = true;
 	var bg = new PIXI.Sprite(backgrounds[0]);
 	bg.mouseover = function() {
-		cardartcode = null;
+		cardArt.visible = false;
 	}
 	bg.interactive = true;
 	editorui.addChild(bg);
@@ -1839,7 +1821,8 @@ function startEditor(arena, acard, startempty) {
 				}
 			}
 			sprite.mouseover = function() {
-				cardartcode = editordeck[_i];
+				cardArt.setTexture(getArt(code));
+				cardArt.visible = true;
 			}
 		})(i);
 		sprite.interactive = true;
@@ -1849,7 +1832,8 @@ function startEditor(arena, acard, startempty) {
 	setInteractive.apply(null, editordecksprites);
 	var cardsel = makeCardSelector(
 		function(code){
-			cardartcode = code;
+			cardArt.setTexture(getArt(code));
+			cardArt.visible = true;
 		},
 		function(code){
 			if (editordeck.length < 60) {
@@ -1875,11 +1859,6 @@ function startEditor(arena, acard, startempty) {
 	editorui.addChild(cardArt);
 	refreshRenderer(editorui, function() {
 		cardsel.next(cardpool, cardminus);
-		if (cardartcode) {
-			cardArt.setTexture(getArt(cardartcode));
-		}
-		else
-			cardArt.setTexture(nopic);
 		for (var i = 0;i < editordeck.length;i++) {
 			editordecksprites[i].visible = true;
 			editordecksprites[i].setTexture(getCardImage(editordeck[i]));
@@ -2501,7 +2480,7 @@ function startArenaInfo(info) {
 			startEditor(info, info.lv ? CardCodes[user.ocard].asUpped(true).code : user.ocard, true);
 		}
 		stage.addChild(bmake);
-		var ocard = new PIXI.Sprite(nopic);
+		var ocard = new PIXI.Sprite(getArt(user.ocard));
 		ocard.position.set(734, 300);
 		batch.addChild(ocard);
 	}
@@ -2533,18 +2512,11 @@ function startArenaInfo(info) {
 		var spr = new PIXI.Sprite(eicons[mark || 0]);
 		spr.position.set(100, 210);
 		batch.addChild(spr);
-		var acard = new PIXI.Sprite(nopic);
+		var acard = new PIXI.Sprite(getArt(info.card));
 		acard.position.set(734, 8);
 		batch.addChild(acard);
 	}
-	refreshRenderer(stage, function() {
-		if (ocard) {
-			ocard.setTexture(getArt(user.ocard));
-		}
-		if (acard) {
-			acard.setTexture(getArt(info.card))
-		}
-	});
+	refreshRenderer(stage);
 }
 
 function startArenaTop(info) {
