@@ -213,9 +213,7 @@ function useruser(servuser, cb){
 		cb({
 			auth: servuser.auth,
 			name: servuser.name,
-			deck0: servuser.deck0,
-			deck1: servuser.deck1,
-			deck2: servuser.deck2,
+			deck2: servuser.decks || servuser.deck0 + (servuser.deck1 ? "," + servuser.deck1 : "") + (servuser.deck2 ?"," + servuser.deck2 : ""),
 			selectedDeck: servuser.selectedDeck || 0,
 			pool: servuser.pool,
 			gold: servuser.gold,
@@ -274,9 +272,7 @@ io.on("connection", function(socket) {
 	socket.on("disconnect", dropsock);
 	socket.on("reconnect_failed", dropsock);
 	userEvent(socket, "inituser", function(data, user) {
-		user.deck0 = starter[data.e] || starter[0];
-		user.deck1 = "";
-		user.deck2 = "";
+		user.decks = starter[data.e] || starter[0];
 		user.selectedDeck = 0;
 		user.pool = "";
 		user.accountbound = user.deck0;
@@ -318,8 +314,10 @@ io.on("connection", function(socket) {
 	userEvent(socket, "addgold", function (data, user) {
 		user.gold += data.g;
 	});
-	userEvent(socket, "setdeck", function (data, user) {
-		user["deck" + data.number] = data.d;
+	userEvent(socket, "setdeck", function(data, user) {
+		var decks = user.decks.split(",");
+		decks[data.number] = data.d;
+		user.decks = decks.join(",");
 		user.selectedDeck = data.number;
 	});
 	userEvent(socket, "setarena", function(data, user){

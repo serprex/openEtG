@@ -1810,9 +1810,6 @@ function startEditor() {
 				processDeck();
 			}
 		}
-		bdeck1.click = switchDeckCb(0);
-		bdeck2.click = switchDeckCb(1);
-		bdeck3.click = switchDeckCb(2);
 		barena.click = function() {
 			if (user) {
 				if (!user.ocard){
@@ -2850,11 +2847,10 @@ document.addEventListener("keydown", function(e) {
 	}
 });
 function prepuser(){
-	user.decks = [
-		etgutil.decodedeck(user.deck0),
-		etgutil.decodedeck(user.deck1),
-		etgutil.decodedeck(user.deck2),
-	];
+	user.decks = user.decks.split(",");
+	for (var i = 0;i < decks.length;i++) {
+		user.decks[i] = etgutil.decodedeck(user.decks[i]);
+	}
 	deckimport.value = getDeck().join(" ");
 	user.pool = user.pool || "";
 	user.accountbound = user.accountbound || "";
