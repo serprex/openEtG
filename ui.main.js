@@ -1429,16 +1429,13 @@ function upgradestore() {
 				}
 				else twarning.setText("You need at least " + use + " copies to be able to upgrade this card!");
 			}
-			else {
-				if (user.gold >= 50) {
-					user.gold -= 50;
-					userEmit("addgold", { g: -50 });
-					userEmit("addcards", { c: etgutil.encodedeck([card.asUpped(true).code]) });
-					user.pool = etgutil.addcard(user.pool, card.asUpped(true).code);
-					adjustdeck();
-				}
-				else twarning.setText("You need at least 50 gold to be able to upgrade a pillar!");
+			else if (user.gold >= 50) {
+				userEmit("uppillar", { c: card.code });
+				user.gold -= 50;
+				user.pool = etgutil.addcard(user.pool, card.asUpped(true).code);
+				adjustdeck();
 			}
+			else twarning.setText("You need at least 50 gold to be able to upgrade a pillar!");
 		}
 		else twarning.setText("You can't upgrade an already upgraded card!");
 	}

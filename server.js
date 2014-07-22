@@ -390,6 +390,12 @@ io.on("connection", function(socket) {
 			user.pool = etgutil.addcard(user.pool, newcard);
 		}
 	});
+	userEvent(socket, "uppillar", function(data, user){
+		if (user.gold >= 50 && data.c && CardCodes[data.c].rarity === 0){
+			user.gold -= 50;
+			user.pool = etgutil.addcard(user.pool, CardCodes[data.c].asUpped(true).code);
+		}
+	});
 	userEvent(socket, "codesubmit", function(data, user){
 		db.hget("CodeHash", data.code, function(err, type){
 			if (!type){
