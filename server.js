@@ -213,7 +213,7 @@ function useruser(servuser, cb){
 		cb({
 			auth: servuser.auth,
 			name: servuser.name,
-			decks: servuser.decks || servuser.deck0 + (servuser.deck1 ? "," + servuser.deck1 : "") + (servuser.deck2 ?"," + servuser.deck2 : ""),
+			decks: servuser.decks,
 			selectedDeck: servuser.selectedDeck || 0,
 			pool: servuser.pool,
 			gold: servuser.gold,
@@ -269,7 +269,7 @@ io.on("connection", function(socket) {
 		user.decks = starters[data.e] || starters[0];
 		user.selectedDeck = 0;
 		user.pool = "";
-		user.accountbound = user.deck0;
+		user.accountbound = user.decks;
 		user.freepacks = "3,2,0,0";
 		user.aiwins = 0;
 		user.ailosses = 0;
