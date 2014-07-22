@@ -351,7 +351,7 @@ Creature.prototype.hash = function(){
 	hash ^= hashObj(this.passives) ^ hashObj(this.status) ^ (this.hp*17 + this.atk*31 - this.maxhp - this.usedactive * 3);
 	hash ^= parseInt(this.card.code, 32);
 	for (var key in this.active){
-		hash ^= hashString(key) ^ hashString(this.active[key].activename);
+		hash ^= hashString(key + ":" + this.active[key].activename);
 	}
 	if (this.active.cast){
 		hash ^= this.cast * 7 + this.castele * 23;
@@ -595,9 +595,8 @@ Player.prototype.endturn = function(discard) {
 	if (this.sosa > 0){
 		this.sosa--;
 	}
-	this.nova = 0;
-	var drawpower = this.foe.drawpower || 1;
-	for (var i = 0; i < drawpower; i++) {
+	this.nova = 0;dr
+	for (var i = this.foe.drawpower || 1; i >= 0; i--) {
         this.foe.drawcard();
 	}
 

@@ -1316,10 +1316,10 @@ yoink:function(c,t){
 	}
 },
 pillar:function(c,t){
-    if (!t)
-        c.owner.spend(c.card.element, -c.status.charges * (c.card.element > 0 ? 1 : 3));
-    else if (c == t)
-        c.owner.spend(c.card.element, -(c.card.element > 0 ? 1 : 3))
+	if (!t)
+		c.owner.spend(c.card.element, -c.status.charges * (c.card.element > 0 ? 1 : 3));
+	else if (c == t)
+		c.owner.spend(c.card.element, -(c.card.element > 0 ? 1 : 3))
 },
 pend:function(c,t){
     c.owner.spend(c.pendstate ? c.owner.mark : c.card.element, -c.status.charges * (c.card.element > 0 ? 1 : 3));
