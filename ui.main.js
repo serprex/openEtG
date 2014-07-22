@@ -1196,16 +1196,16 @@ function startMenu() {
 
 	var usertoggle = [bquest, bshop, bupgrade, blogout, bdelete, taiwinloss];
 	for (var i=0; i<2; i++){
-		var baia = makeButton(50, 200+i*50, "Arena AI", function() {
-			tinfo.setText("In the arena you will face decks from other players.\nCost: $" + (i+1)*5);
-		});
+		var baia = makeButton(50, 200+i*50, "Arena AI", (function(cost){return function() {
+			tinfo.setText("In the arena you will face decks from other players.\nCost: $" + cost);
+		}})(5+i*5));
 		menuui.addChild(baia);
 		var binfoa = makeButton(150, 200+i*50, "Arena Info", function() {
-			tinfo.setText("Check how your arena deck is doing.")
+			tinfo.setText("Check how your arena deck is doing.");
 		});
 		menuui.addChild(binfoa);
 		var btopa = makeButton(250, 200+i*50, "Arena T20", function() {
-			tinfo.setText("Here you can see who the top players in arena are right now.")
+			tinfo.setText("Here you can see who the top players in arena are right now.");
 		});
 		menuui.addChild(btopa);
 		usertoggle.push(baia, binfoa, btopa);
@@ -1821,7 +1821,7 @@ function startEditor(arena, acard, startempty) {
 				}
 			}
 			sprite.mouseover = function() {
-				cardArt.setTexture(getArt(code));
+				cardArt.setTexture(getArt(editordeck[_i]));
 				cardArt.visible = true;
 			}
 		})(i);
@@ -2216,7 +2216,7 @@ function startMatch() {
 					}
 				}
 				if (game.arena) {
-					userEmit("modarena", { aname: game.arena, won: game.winner == game.player2 });
+					userEmit("modarena", { aname: game.arena, won: game.winner == game.player2, lv: game.cost == 5?0:1 });
 					delete game.arena;
 				}
 				if (game.quest) {
@@ -2475,12 +2475,13 @@ function startArenaInfo(info) {
 	var batch = new PIXI.SpriteBatch();
 	stage.addChild(batch);
 	if (user.ocard){
+		var uocard = info.lv ? CardCodes[user.ocard].asUpped(true).code : user.ocard;
 		var bmake = makeButton(200, 440, "Create");
 		bmake.click = function(){
-			startEditor(info, info.lv ? CardCodes[user.ocard].asUpped(true).code : user.ocard, true);
+			startEditor(info, uocard, true);
 		}
 		stage.addChild(bmake);
-		var ocard = new PIXI.Sprite(getArt(user.ocard));
+		var ocard = new PIXI.Sprite(getArt(uocard));
 		ocard.position.set(734, 300);
 		batch.addChild(ocard);
 	}

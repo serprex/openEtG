@@ -350,11 +350,11 @@ io.on("connection", function(socket) {
 		db.hincrby((data.lv?"B:":"A:")+data.aname, data.won?"win":"loss", 1);
 		db.zincrby("arena"+(data.lv?"1":""), data.won?1:-1, data.aname);
 		if (data.aname in users){
-			users[data.aname].gold++;
+			users[data.aname].gold += data.lv+1;
 		}else{
 			db.exists("U:"+data.aname, function(err, exists){
 				if (exists){
-					db.hincrby("U:"+data.aname, "gold", 1);
+					db.hincrby("U:"+data.aname, "gold", data.lv+1);
 				}
 			});
 		}
