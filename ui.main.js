@@ -2696,7 +2696,7 @@ socket.on("foearena", function(data) {
 	if (data.lv){
 		deck = doubleDeck(deck);
 	}
-	initGame({ first: data.seed < etgutil.MAX_INT/2, deck: deck, urdeck: getDeck(), seed: data.seed, hp: data.hp, cost: data.cost, foename: data.name }, aiEvalFunc);
+	initGame({ first: data.seed < etgutil.MAX_INT/2, deck: deck, urdeck: getDeck(), seed: data.seed, hp: data.hp, cost: data.cost, foename: data.name, aidrawpower: data.lv+1 }, aiEvalFunc);
 	game.arena = data.name;
 	game.level = 1;
 	game.cost = 10;
