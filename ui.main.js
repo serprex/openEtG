@@ -242,7 +242,7 @@ function getCreatureImage(code) {
 			if (card) {
 				var text = new PIXI.Text(card.name, { font: "8px Dosis", fill: card.upped ? "black" : "white" });
 				text.anchor.x = 0.5;
-				text.position.set(33, 0);
+				text.position.set(33, 72);
 				graphics.addChild(text);
 			}
 			rend.render(graphics);
@@ -273,7 +273,7 @@ function getWeaponShieldImage(code) {
 			if (card) {
 				var text = new PIXI.Text(card.name, { font: "10px Dosis", fill: card.upped ? "black" : "white" });
 				text.anchor.x = 0.5;
-				text.position.set(40, 0);
+				text.position.set(40, 91);
 				graphics.addChild(text);
 			}
 			rend.render(graphics);
@@ -498,9 +498,21 @@ function aiEvalFunc() {
 	var cmdct, currentEval = evalGameState(game), cdepth = 2;
 	function iterLoop(n, cmdct0) {
 		var log = n ? console.log.bind(console) : function(){};
+		var casthash = {};
 		function iterCore(c, active) {
+			if (c.hash){
+				var ch = c.hash();
+				if (ch in casthash) return;
+				else casthash[ch] = true;
+			}
 			var cbits = tgtToBits(c) ^ 8;
+			var tgthash = {};
 			function evalIter(t) {
+				if (t && t.hash){
+					var th = t.hash();
+					if (th in tgthash) return;
+					else tgthash[th] = true;
+				}
 				if ((!targetingMode || (t && targetingMode(t))) && limit-- > 0) {
 					var tbits = tgtToBits(t) ^ 8;
 					var gameBack = game;
@@ -523,7 +535,7 @@ function aiEvalFunc() {
 				}
 			}
 			if (active && active.activename in Targeting) {
-				log("in " + active.activename);
+				log("in " + active.activename + " " + currentEval);
 				getTarget(c, active);
 				for (var j = 0;j < 2;j++) {
 					var pl = j == 0 ? c.owner : c.owner.foe;
@@ -560,14 +572,10 @@ function aiEvalFunc() {
 				iterCore(pr, pr.active.cast);
 			}
 		}
-		var codecache = {};
 		for (var i = 0; i < self.hand.length; i++) {
 			var cardinst = self.hand[i];
-			if (!(cardinst.card.code in codecache)) {
-				codecache[cardinst.card.code] = true;
-				if (cardinst.canactive()) {
-					iterCore(cardinst, cardinst.card.type == etg.SpellEnum && cardinst.card.active);
-				}
+			if (cardinst.canactive()) {
+				iterCore(cardinst, cardinst.card.type == etg.SpellEnum && cardinst.card.active);
 			}
 		}
 	}
@@ -577,19 +585,18 @@ function aiEvalFunc() {
 	if (cmdct) {
 		return ["cast", cmdct];
 	} else if (game.player2.hand.length == 8) {
-		var mincardvalue = 999, worstcards;
+		var mincardvalue = 999, worstcard = 0;
 		for (var i = 0;i < 8;i++) {
 			var cardinst = game.player2.hand[i];
 			var cardvalue = game.player2.quanta[cardinst.card.element] - cardinst.card.cost;
-			if (cardinst.card.type != etg.SpellEnum && cardinst.card.active && cardinst.card.active.discard == Actives.obsession) { cardvalue += 5; }
-			if (cardvalue == mincardvalue) {
-				worstcards.push(i);
-			} else if (cardvalue < mincardvalue) {
+			if (cardinst.card.active && cardinst.card.active.discard == Actives.obsession) { cardvalue -= 5; }
+			if (cardinst.card.active && cardinst.card.active.discard == Actives.hasten) { cardvalue += 3; }
+			if (cardvalue < mincardvalue) {
 				mincardvalue = cardvalue;
-				worstcards = [i];
+				worstcard = i;
 			}
 		}
-		return ["endturn", worstcards[Math.floor(Math.random() * worstcards.length)]];
+		return ["endturn", worstcard];
 	} else return ["endturn"];
 }
 function listify(maybeArray) {
@@ -689,7 +696,7 @@ function mkDemigod() {
 			return;
 		}
 		user.gold -= 20;
-		userEmit("subgold", { g: 20 });
+		userEmit("addgold", { g: -20 });
 	}
 
 	var demigods = [
@@ -727,7 +734,7 @@ function mkMage() {
 			return;
 		}
 		user.gold -= 5;
-		userEmit("subgold", { g: 5 });
+		userEmit("addgold", { g: -5 });
 	}
 	var mages = [
 		["The Wall", "5de 5de 5de 5de 5de 5de 5de 5de 5de 5de 5de 5de 5de 5de 5c5 5c2 5c2 5c2 5c2 5c8 5c8 5c8 5c8 5ci 5c3 5l8 5l8 5mq 5mq 5lo 5lo 5lm 5lm 5lm 5lm 5ln 5ln 5la 5la 5li 8pq"],
@@ -810,7 +817,7 @@ function mkAi(level) {
 							return;
 						}
 						user.gold -= gameprice;
-						userEmit("subgold", { g: gameprice });
+						userEmit("addgold", { g: -gameprice });
 					}
 				}
 				var cardcount = {};
@@ -1117,139 +1124,68 @@ function startMenu() {
 	bglobby.hitArea = new PIXI.Rectangle(0, 0, 900, 670);
 	bglobby.mouseover = function() {
 		tinfo.setText("");
-		tcost.setText("");
 	}
 	menuui.addChild(bglobby);
 
-	//gold text
 	var tgold = makeText(750, 101, (user ? "$" + user.gold : "Sandbox"));
 	menuui.addChild(tgold);
 
 	var taiwinloss = makeText(750, 125, (user ? "AI w/l:\n" + user.aiwins + "/" + user.ailosses + "\nPVP w/l:\n" + user.pvpwins + "/" + user.pvplosses : ""));
 	menuui.addChild(taiwinloss);
 
-	//info text
 	var tinfo = makeText(50, 26, "")
 	menuui.addChild(tinfo);
 
-	//cost text
-	var tcost = makeText(50, 51, "");
-	menuui.addChild(tcost);
-
-	//ai0 button
 	var bai0 = makeButton(50, 100, "Commoner", function() {
-		tinfo.setText("Commoners have no upgraded cards.");
-		tcost.setText("Cost: $0");
+		tinfo.setText("Commoners have no upgraded cards.\nCost: $0");
 	});
 	bai0.click = mkAi(0);
 	menuui.addChild(bai0);
 
-	//ai1 button
 	var bai1 = makeButton(150, 100, "Mage", function() {
-		tinfo.setText("Mages have a few upgraded cards.");
-		tcost.setText("Cost: $5");
+		tinfo.setText("Mages have a few upgraded cards.\nCost: $5");
 	});
 	bai1.click = mkMage;
 	menuui.addChild(bai1);
 
-	//ai2 button
 	var bai2 = makeButton(250, 100, "Champion", function() {
-		tinfo.setText("Champions have some upgraded cards.");
-		tcost.setText("Cost: $10");
+		tinfo.setText("Champions have some upgraded cards.\nCost: $10");
 	});
 	bai2.click = mkAi(2);
 	menuui.addChild(bai2);
 
-	//ai3 button
 	var bai3 = makeButton(350, 100, "Demigod", function() {
-		tinfo.setText("Demigods are extremely powerful. Come prepared for anything.");
-		tcost.setText("Cost: $20");
+		tinfo.setText("Demigods are extremely powerful. Come prepared for anything.\nCost: $20");
 	});
 	bai3.click = mkDemigod;
 	menuui.addChild(bai3);
 
-	//Quests button
 	var bquest = makeButton(50, 145, "Quests", function() {
 		tinfo.setText("Go on an adventure!");
 	});
 	bquest.click = startQuestWindow;
 	menuui.addChild(bquest);
 
-	//ai arena button
-	var baia = makeButton(50, 200, "Arena AI", function() {
-		tinfo.setText("In the arena you will face decks from other players.");
-		tcost.setText("Cost: $10");
-	});
-	baia.click = function() {
-		if (Cards) {
-			if (getDeck().length < 31) {
-				startEditor();
-				return;
-			}
-
-			if (user.gold < 10) {
-				chatArea.value = "Requires 10g";
-				return;
-			}
-
-			user.gold -= 10;
-			userEmit("subgold", { g: 10 });
-			userEmit("foearena");
-		}
-	}
-	menuui.addChild(baia);
-
-	//arena info button
-	var binfoa = makeButton(50, 245, "Arena Info", function() {
-		tinfo.setText("Check how your arena deck is doing.")
-		tcost.setText("");
-	});
-	binfoa.click = function() {
-		if (Cards) {
-			userEmit("arenainfo");
-		}
-	}
-	menuui.addChild(binfoa);
-
-	//arena top10 button
-	var btopa = makeButton(150, 245, "Arena T20", function() {
-		tinfo.setText("Here you can see who the top players in arena are right now.")
-		tcost.setText("");
-	});
-	btopa.click = function() {
-		if (Cards) {
-			userEmit("arenatop");
-		}
-	}
-	menuui.addChild(btopa);
-
-	//edit button
 	var bedit = makeButton(50, 300, "Editor", function() {
 		tinfo.setText("Here you can edit your deck, as well as submit an arena deck.");
-		tcost.setText("");
 	});
 	bedit.click = startEditor;
 	menuui.addChild(bedit);
 
 	var bshop = makeButton(150, 300, "Shop", function() {
 		tinfo.setText("Here you can buy booster packs which contains cards from the elements you choose.");
-		tcost.setText("");
 	});
 	bshop.click = startStore;
 	menuui.addChild(bshop);
 
-	//upgrade button
 	var bupgrade = makeButton(250, 300, "Sell/Upgrade", function() {
 		tinfo.setText("Here you can upgrade or sell your cards.");
-		tcost.setText("");
 	});
 	bupgrade.click = upgradestore;
 	menuui.addChild(bupgrade);
 
-	//logout button
 	var blogout = makeButton(750, 246, "Logout", function() {
-		tinfo.setText("Click here if you want to log out.")
-		tcost.setText("");
+		tinfo.setText("Click here to log out.")
 	});
 	blogout.click = function() {
 		userEmit("logout");
@@ -1259,8 +1195,7 @@ function startMenu() {
 
 	//delete account button
 	var bdelete = makeButton(750, 550, "Wipe Account", function() {
-		tinfo.setText("Click here if you want to remove your account.")
-		tcost.setText("");
+		tinfo.setText("Click here to permanently remove your account.")
 	});
 	bdelete.click = function() {
 		if (foename.value == user.name) {
@@ -1272,9 +1207,53 @@ function startMenu() {
 	}
 	menuui.addChild(bdelete);
 
-	if (!user) toggleB(baia, bshop, bupgrade, binfoa, btopa, blogout, bdelete, bquest, taiwinloss);
+	var usertoggle = [bquest, bshop, bupgrade, blogout, bdelete, taiwinloss];
+	for (var i=0; i<2; i++){
+		var baia = makeButton(50, 200+i*50, "Arena AI", function() {
+			tinfo.setText("In the arena you will face decks from other players.\nCost: $10");
+		});
+		menuui.addChild(baia);
+		var binfoa = makeButton(150, 200+i*50, "Arena Info", function() {
+			tinfo.setText("Check how your arena deck is doing.")
+		});
+		menuui.addChild(binfoa);
+		var btopa = makeButton(250, 200+i*50, "Arena T20", function() {
+			tinfo.setText("Here you can see who the top players in arena are right now.")
+		});
+		menuui.addChild(btopa);
+		usertoggle.push(baia, binfoa, btopa);
+		(function(lvi){
+			baia.click = function() {
+				if (Cards) {
+					if (getDeck().length < 31) {
+						startEditor();
+						return;
+					}
+					if (user.gold < 10) {
+						chatArea.value = "Requires 10g";
+						return;
+					}
 
-	//only display if user is logged in
+					user.gold -= 10;
+					userEmit("addgold", { g: -10 });
+					userEmit("foearena", lvi);
+				}
+			}
+			binfoa.click = function() {
+				if (Cards) {
+					userEmit("arenainfo", lvi);
+				}
+			}
+			btopa.click = function() {
+				if (Cards) {
+					userEmit("arenatop", lvi);
+				}
+			}
+		})({lv:i});
+	}
+
+	if (!user) toggleB.apply(null, usertoggle);
+
 	if (user && user.oracle) {
 		cardcode = user.oracle;
 		delete user.oracle;
@@ -1286,7 +1265,7 @@ function startMenu() {
 	function logout() {
 		user = undefined;
 
-		toggleB(baia, bshop, bupgrade, binfoa, btopa, blogout, bdelete, bquest, taiwinloss);
+		toggleB.apply(null, usertoggle);
 
 		tgold.setText("Sandbox");
 		tgold.position.set(755, 101);
@@ -1465,7 +1444,7 @@ function upgradestore() {
 			else {
 				if (user.gold >= 50) {
 					user.gold -= 50;
-					userEmit("subgold", { g: 50 });
+					userEmit("addgold", { g: -50 });
 					userEmit("addcards", { c: etgutil.encodedeck([card.asUpped(true).code]) });
 					user.pool = etgutil.addcard(user.pool, card.asUpped(true).code);
 					adjustdeck();
@@ -1711,7 +1690,9 @@ function startStore() {
 	});
 }
 
-function startEditor() {
+function startEditor(arena, acard, startempty) {
+	if (!Cards) return;
+	if (arena && (!user || arena.deck === undefined || acard === undefined)) arena = false;
 	function processDeck() {
 		for (var i = editordeck.length - 1;i >= 0;i--) {
 			if (!(editordeck[i] in CardCodes)) {
@@ -1725,34 +1706,15 @@ function startEditor() {
 		editormarksprite.setTexture(eicons[editormark]);
 		editordeck.sort(editorCardCmp);
 		if (user) {
-			cardminus = {};
-			cardpool = {};
-			etgutil.iterdeck(user.pool, function(code){
-				if (code in cardpool) {
-					cardpool[code]++;
-				} else {
-					cardpool[code] = 1;
-				}
-			});
-			if (user.accountbound) {
-				etgutil.iterdeck(user.accountbound, function(code){
-					if (code in cardpool) {
-						cardpool[code]++;
-					} else {
-						cardpool[code] = 1;
-					}
-				});
-			}
 			for (var i = editordeck.length - 1;i >= 0;i--) {
-				var code = editordeck[i];
-				if (CardCodes[code].type != etg.PillarEnum) {
-					var card = CardCodes[code];
+				var code = editordeck[i], card = CardCodes[code];
+				if (card.type != etg.PillarEnum) {
 					if ((cardminus[card.asUpped(false).code] || 0) + (cardminus[card.asUpped(true).code] || 0) == 6) {
 						editordeck.splice(i, 1);
 						continue;
 					}
 				}
-				if (!isFreeCard(CardCodes[code])) {
+				if (!isFreeCard(card)) {
 					if ((cardminus[code] || 0) < (cardpool[code] || 0)) {
 						adjust(cardminus, code, 1);
 					} else {
@@ -1760,31 +1722,63 @@ function startEditor() {
 					}
 				}
 			}
+			if (arena){
+				editordeck.unshift(acard, acard, acard, acard, acard);
+			}
 		}
 	}
-	if (Cards) {
-		var cardminus, cardpool, cardartcode;
-		chatArea.value = "Build a 30-60 card deck";
-		var editorui = new PIXI.DisplayObjectContainer(), editorelement = 0;
-		editorui.interactive = true;
-		editorui.addChild(new PIXI.Sprite(backgrounds[0]));
-		var bclear = makeButton(8, 8, "Clear");
-		var bsave = makeButton(8, 32, "Done");
-		var bimport = makeButton(8, 56, "Import");
-		var bdeck1 = makeButton(8, 80, "Deck 1");
-		var bdeck2 = makeButton(8, 104, "Deck 2");
-		var bdeck3 = makeButton(8, 128, "Deck 3");
-		var barena = makeButton(8, 152, "Arena AI", function() {
-			if (user && user.ocard) {
-				cardartcode = user.ocard;
+	var cardminus, cardpool, cardartcode;
+	if (user){
+		cardminus = {};
+		cardpool = {};
+		function incrpool(code){
+			if (!arena || (code != acard && (arena.lv || !CardCodes[code].upped))){
+				if (code in cardpool) {
+					cardpool[code]++;
+				} else {
+					cardpool[code] = 1;
+				}
 			}
-		});
-		bclear.click = function() {
-			if (user) {
-				cardminus = {};
-			}
-			editordeck.length = 0;
 		}
+		etgutil.iterdeck(user.pool, incrpool);
+		etgutil.iterdeck(user.accountbound, incrpool);
+	}
+	chatArea.value = "Build a " + (arena?35:30) + "-60 card deck";
+	var editorui = new PIXI.DisplayObjectContainer();
+	editorui.interactive = true;
+	editorui.addChild(new PIXI.Sprite(backgrounds[0]));
+	var bclear = makeButton(8, 8, "Clear");
+	var bsave = makeButton(8, 32, "Save & Exit");
+	bclear.click = function() {
+		if (user) {
+			cardminus = {};
+		}
+		editordeck.length = arena?5:0;
+	}
+	editorui.addChild(bclear);
+	editorui.addChild(bsave);
+	if (arena){
+		var bexit = makeButton(8, 56, "Exit");
+		bexit.click = function() {
+			startArenaInfo(arena);
+		}
+		editorui.addChild(bexit);
+		bsave.click = function() {
+			if (editordeck.length < 35) {
+				chatArea.value = "35 cards required before submission";
+				return;
+			}
+			editordeck.push(etg.TrueMarks[editormark]);
+			var data = { d: etgutil.encodedeck(editordeck.slice(5)), lv: arena.lv };
+			if (acard != user.ocard){
+				data.mod = true;
+			}
+			userEmit("setarena", data);
+			editordeck.pop();
+			chatArea.value = "Arena deck submitted";
+			startMenu();
+		}
+	}else{
 		bsave.click = function() {
 			editordeck.push(etg.TrueMarks[editormark]);
 			deckimport.value = editordeck.join(" ");
@@ -1794,6 +1788,7 @@ function startEditor() {
 			}
 			startMenu();
 		}
+		var bimport = makeButton(8, 56, "Import");
 		bimport.click = function() {
 			editordeck = deckimport.value.split(" ");
 			if (editordeck.length > 60){
@@ -1801,122 +1796,108 @@ function startEditor() {
 			}
 			processDeck();
 		}
-		function switchDeckCb(x){
-			return function(){
-				editordeck.push(etg.TrueMarks[editormark]);
-				userEmit("setdeck", { d: etgutil.encodedeck(editordeck), number: user.selectedDeck });
-				user.selectedDeck = x;
-				editordeck = getDeck(true);
-				processDeck();
-			}
-		}
-		barena.click = function() {
-			if (user) {
-				if (!user.ocard){
-					chatArea.value = "You lack an oracle card";
-					return;
-				}else if (editordeck.length < 30) {
-					chatArea.value = "30 cards required before submission";
-					return;
-				}else if (~editordeck.indexOf(user.ocard) || ~editordeck.indexOf(CardCodes[user.ocard].asUpped(true).code)){
-					chatArea.value = "Your deck cannot contain any of your oracle card; it'll be there when it gets there";
-					return;
-				}
-				editordeck.push(etg.TrueMarks[editormark]);
-				userEmit("setarena", { d: etgutil.encodedeck(editordeck) });
-				editordeck.pop();
-				chatArea.value = "Arena deck submitted";
-			}
-		}
-		editorui.addChild(bclear);
-		editorui.addChild(bsave);
 		editorui.addChild(bimport);
-		if (user) {
-		    editorui.addChild(bdeck1);
-		    editorui.addChild(bdeck2);
-		    editorui.addChild(bdeck3);
-		}
-		if (user && user.ocard) {
-			editorui.addChild(barena);
-		}
-		var editordecksprites = [];
-		var editordeck = getDeck(true);
-		var editormarksprite = new PIXI.Sprite(nopic);
-		editormarksprite.position.set(100, 210);
-		editorui.addChild(editormarksprite);
-		var editormark = 0;
-		processDeck();
-		for (var i = 0;i < 13;i++) {
-			var sprite = makeButton(200 + i * 32, 210, eicons[i]);
-			sprite.interactive = true;
-			(function(_i) {
-				sprite.click = function() {
-					editormark = _i;
-					editormarksprite.setTexture(this.texture);
+		if (user){
+			function switchDeckCb(x){
+				return function(){
+					editordeck.push(etg.TrueMarks[editormark]);
+					userEmit("setdeck", { d: etgutil.encodedeck(editordeck), number: user.selectedDeck });
+					user.selectedDeck = x;
+					editordeck = getDeck(true);
+					cardminus = {};
+					processDeck();
 				}
-			})(i);
-			editorui.addChild(sprite);
+			}
+			var bdeck1 = makeButton(8, 80, "Deck 1");
+			var bdeck2 = makeButton(8, 104, "Deck 2");
+			var bdeck3 = makeButton(8, 128, "Deck 3");
+			bdeck1.click = switchDeckCb(0);
+			bdeck2.click = switchDeckCb(1);
+			bdeck3.click = switchDeckCb(2);
+			editorui.addChild(bdeck1);
+			editorui.addChild(bdeck2);
+			editorui.addChild(bdeck3);
 		}
-		for (var i = 0;i < 60;i++) {
-			var sprite = new PIXI.Sprite(nopic);
-			sprite.position.set(100 + Math.floor(i / 10) * 100, 8 + (i % 10) * 20);
-			(function(_i) {
-				sprite.click = function() {
-					var card = CardCodes[editordeck[_i]];
+	}
+	var editordecksprites = [];
+	var editordeck = arena ? (startempty ? [] : etgutil.decodedeck(arena.deck)) : getDeck(true);
+	var editormarksprite = new PIXI.Sprite(nopic);
+	editormarksprite.position.set(100, 210);
+	editorui.addChild(editormarksprite);
+	var editormark = 0;
+	processDeck();
+	for (var i = 0;i < 13;i++) {
+		var sprite = makeButton(200 + i * 32, 210, eicons[i]);
+		sprite.interactive = true;
+		(function(_i) {
+			sprite.click = function() {
+				editormark = _i;
+				editormarksprite.setTexture(eicons[_i]);
+			}
+		})(i);
+		editorui.addChild(sprite);
+	}
+	for (var i = 0;i < 60;i++) {
+		var sprite = new PIXI.Sprite(nopic);
+		sprite.position.set(100 + Math.floor(i / 10) * 100, 8 + (i % 10) * 20);
+		(function(_i) {
+			sprite.click = function() {
+				var card = CardCodes[editordeck[_i]];
+				if (!arena || card.asUpped(false).code != acard){
 					if (user && !isFreeCard(card)) {
 						adjust(cardminus, editordeck[_i], -1);
 					}
 					editordeck.splice(_i, 1);
 				}
-				sprite.mouseover = function() {
-					cardartcode = editordeck[_i];
-				}
-			})(i);
-			sprite.interactive = true;
-			editorui.addChild(sprite);
-			editordecksprites.push(sprite);
-		}
-		setInteractive.apply(null, editordecksprites);
-		var cardsel = makeCardSelector(
-			function(code){
-				cardartcode = code;
-			},
-			function(code){
-				if (editordeck.length < 60) {
-					var card = CardCodes[code];
-					if (user && !isFreeCard(card)) {
-						if (!(code in cardpool) || (code in cardminus && cardminus[code] >= cardpool[code]) ||
-							(CardCodes[code].type != etg.PillarEnum && (cardminus[card.asUpped(false).code] || 0) + (cardminus[card.asUpped(true).code] || 0) >= 6)) {
-							return;
-						}
-						adjust(cardminus, code, 1);
-					}
-					for (var i = 0;i < editordeck.length;i++) {
-						var cmp = editorCardCmp(editordeck[i], code);
-						if (cmp >= 0) break;
-					}
-					editordeck.splice(i, 0, code);
-				}
 			}
-		);
-		editorui.addChild(cardsel);
-		var cardArt = new PIXI.Sprite(nopic);
-		cardArt.position.set(734, 8);
-		editorui.addChild(cardArt);
-		refreshRenderer(editorui, function() {
-			cardsel.next(cardpool, cardminus);
-			if (cardartcode) {
-				cardArt.setTexture(getArt(cardartcode));
+			sprite.mouseover = function() {
+				cardartcode = editordeck[_i];
 			}
-			for (var i = 0;i < editordeck.length;i++) {
-				editordecksprites[i].visible = true;
-				editordecksprites[i].setTexture(getCardImage(editordeck[i]));
-			}
-			for (;i < 60;i++) {
-				editordecksprites[i].visible = false;
-			}
-		});
+		})(i);
+		sprite.interactive = true;
+		editorui.addChild(sprite);
+		editordecksprites.push(sprite);
 	}
+	setInteractive.apply(null, editordecksprites);
+	var cardsel = makeCardSelector(
+		function(code){
+			cardartcode = code;
+		},
+		function(code){
+			if (editordeck.length < 60) {
+				var card = CardCodes[code];
+				if (user && !isFreeCard(card)) {
+					if (!(code in cardpool) || (code in cardminus && cardminus[code] >= cardpool[code]) ||
+						(CardCodes[code].type != etg.PillarEnum && (cardminus[card.asUpped(false).code] || 0) + (cardminus[card.asUpped(true).code] || 0) >= 6)) {
+						return;
+					}
+					adjust(cardminus, code, 1);
+				}
+				for (var i = arena?5:0;i < editordeck.length;i++) {
+					var cmp = editorCardCmp(editordeck[i], code);
+					if (cmp >= 0) break;
+				}
+				editordeck.splice(i, 0, code);
+			}
+		}
+	);
+	editorui.addChild(cardsel);
+	var cardArt = new PIXI.Sprite(nopic);
+	cardArt.position.set(734, 8);
+	editorui.addChild(cardArt);
+	refreshRenderer(editorui, function() {
+		cardsel.next(cardpool, cardminus);
+		if (cardartcode) {
+			cardArt.setTexture(getArt(cardartcode));
+		}
+		for (var i = 0;i < editordeck.length;i++) {
+			editordecksprites[i].visible = true;
+			editordecksprites[i].setTexture(getCardImage(editordeck[i]));
+		}
+		for (;i < 60;i++) {
+			editordecksprites[i].visible = false;
+		}
+	});
 }
 function startElementSelect() {
 	var stage = new PIXI.DisplayObjectContainer();
@@ -1963,7 +1944,7 @@ function startMatch() {
 				}
 			} else if (obj.canactive() && !(obj.owner == game.player2 && game.player2.isCloaked())) {
 				fgfx.lineStyle(2, obj.card.element == 8 ? 0x000000 : 0xffffff);
-				fgfx.drawRect(spr.position.x - spr.width / 2, spr.position.y + spr.height / 2, spr.width, (obj instanceof etg.Weapon || obj instanceof etg.Shield ? -12 : -10));
+				fgfx.drawRect(spr.position.x - spr.width / 2, spr.position.y - spr.height / 2, spr.width, (obj instanceof etg.Weapon || obj instanceof etg.Shield ? 12 : 10));
 			}
 		}
 	}
@@ -2168,7 +2149,7 @@ function startMatch() {
 					permsprite[j][i].alpha = pr.status.immaterial ? .7 : 1;
 					var child = permsprite[j][i].getChildAt(0);
 					if (pr instanceof etg.Pillar) {
-						child.setTexture(getTextImage("1:" + (pr.active.auto == Actives.pend && pr.pendstate ? pr.owner.mark : pr.card.element) + " x" + pr.status.charges, ui.mkFont(10, pr.card.upped ? "black" : "white"), maybeLighten(pr.card)));
+						child.setTexture(getTextImage("1:" + (pr.pendstate ? pr.owner.mark : pr.card.element) + " x" + pr.status.charges, ui.mkFont(10, pr.card.upped ? "black" : "white"), maybeLighten(pr.card)));
 					}
 					else child.setTexture(getTextImage(pr.status.charges !== undefined ? " " + pr.status.charges : "", ui.mkFont(10, pr.card.upped ? "black" : "white"), maybeLighten(pr.card)));
 					var child2 = permsprite[j][i].getChildAt(1);
@@ -2394,7 +2375,7 @@ function startMatch() {
 				stattext.position.set(-32 * scale, -32 * scale);
 				spr.addChild(stattext);
 				var activetext = new PIXI.Sprite(nopic);
-				activetext.position.set(-32 * scale, 32 * scale);
+				activetext.position.set(-32 * scale, -42 * scale);
 				spr.addChild(activetext);
 				if (makestatuses){
 					var statuses = new PIXI.SpriteBatch();
@@ -2433,10 +2414,16 @@ function startMatch() {
 				return spr;
 			}
 			for (var i = 0;i < 23;i++) {
-				gameui.addChild(creasprite[j][i] = makeInst(true, game.players[j].creatures, i, ui.creaturePos(j, i)));
+				creasprite[j][i] = makeInst(true, game.players[j].creatures, i, ui.creaturePos(j, i));
+			}
+			for (var i = 0;i < 23;i++){
+				gameui.addChild(creasprite[j][j?22-i:i]);
 			}
 			for (var i = 0;i < 16;i++) {
-				gameui.addChild(permsprite[j][i] = makeInst(false, game.players[j].permanents, i, ui.permanentPos(j, i)));
+				permsprite[j][i] = makeInst(false, game.players[j].permanents, i, ui.permanentPos(j, i));
+			}
+			for (var i = 0;i < 16;i++){
+				gameui.addChild(permsprite[j][j?15-i:i]);
 			}
 			setInteractive.apply(null, handsprite[j]);
 			setInteractive.apply(null, creasprite[j]);
@@ -2513,38 +2500,51 @@ function startMatch() {
 }
 
 function startArenaInfo(info) {
-	if (!info) {
-		chatArea.value = "You do not have an arena deck";
-	}
+	if (!info) return;
 	var stage = new PIXI.DisplayObjectContainer();
 	stage.interactive = true;
-	var winloss = new PIXI.Text((info.win || 0) + " - " + (info.loss || 0), { font: "16px Dosis" });
-	winloss.position.set(200, 300);
+	stage.addChild(new PIXI.Sprite(backgrounds[0]));
+	var winloss = makeText(200, 350, (info.win || 0) + " - " + (info.loss || 0) + "\nAge: " + info.day);
 	stage.addChild(winloss);
-	var bret = makeButton(200, 400, "Exit");
+	var bmake = makeButton(200, 440, "Create");
+	bmake.click = function(){
+		startEditor(info, info.lv ? CardCodes[user.ocard].asUpped(true).code : user.ocard, true);
+	}
+	stage.addChild(bmake);
+	var bret = makeButton(200, 500, "Exit");
 	bret.click = startMenu;
 	stage.addChild(bret);
 	var batch = new PIXI.SpriteBatch();
+	stage.addChild(batch);
 	var ocard = new PIXI.Sprite(nopic);
 	ocard.position.set(600, 300);
 	batch.addChild(ocard);
-	var deck = etgutil.decodedeck(info.deck), mark;
-	chatArea.value = deck.join(" ");
-	for (var i=0; i<deck.length; i++){
-		var ismark = etg.TrueMarks.indexOf(deck[i]);
-		if (~ismark){
-			mark = ismark;
-			deck.splice(i--, 1);
-			continue;
+	if (info.card){
+		if (info.lv){
+			info.card = CardCodes[info.card].asUpped(true).code;
 		}
-		var spr = new PIXI.Sprite(getCardImage(deck[i]));
-		spr.position.set(100 + Math.floor(i / 10) * 100, 8 + (i % 10) * 20);
+		var bmod = makeButton(200, 470, "Modify");
+		bmod.click = function(){
+			startEditor(info, info.card);
+		}
+		stage.addChild(bmod);
+		var deck = etgutil.decodedeck("05" + info.card + info.deck), mark;
+		chatArea.value = deck.join(" ");
+		for (var i=0; i<deck.length; i++){
+			var ismark = etg.TrueMarks.indexOf(deck[i]);
+			if (~ismark){
+				mark = ismark;
+				deck.splice(i--, 1);
+				continue;
+			}
+			var spr = new PIXI.Sprite(getCardImage(deck[i]));
+			spr.position.set(100 + Math.floor(i / 10) * 100, 8 + (i % 10) * 20);
+			batch.addChild(spr);
+		}
+		var spr = new PIXI.Sprite(eicons[mark || 0]);
+		spr.position.set(100, 210);
 		batch.addChild(spr);
 	}
-	var spr = new PIXI.Sprite(eicons[mark || 0]);
-	spr.position.set(100, 210);
-	batch.addChild(spr);
-	stage.addChild(batch);
 	refreshRenderer(stage, function() {
 		if (info.card) {
 			ocard.setTexture(getArt(info.card));
@@ -2693,7 +2693,10 @@ socket.on("librarygive", initLibrary);
 socket.on("foearena", function(data) {
 	var deck = etgutil.decodedeck(data.deck);
 	chatArea.value = data.name + ": " + deck.join(" ");
-	initGame({ first: data.first, deck: doubleDeck(deck), urdeck: getDeck(), seed: data.seed, hp: data.hp, cost: data.cost, foename: data.name }, aiEvalFunc);
+	if (data.lv){
+		deck = doubleDeck(deck);
+	}
+	initGame({ first: data.seed < etgutil.MAX_INT/2, deck: deck, urdeck: getDeck(), seed: data.seed, hp: data.hp, cost: data.cost, foename: data.name, aidrawpower: data.lv+1 }, aiEvalFunc);
 	game.arena = data.name;
 	game.level = 1;
 	game.cost = 10;

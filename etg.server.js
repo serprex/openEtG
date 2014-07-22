@@ -25,7 +25,7 @@ exports.loadcards = function(cb){
 			Cards[nospacename in Cards?nospacename+"Up":nospacename] = CardCodes[cardcode] = new etg.Card(i, cardinfo);
 		}
 	}
-	var csv = fs.readFileSync(__dirname + "/" + "active.csv").toString().split("\n");
+	var csv = fs.readFileSync(__dirname + "/active.csv").toString().split("\n");
 	for (var i=0; i<csv.length; i++){
 		var keypair = csv[i].split(",");
 		Targeting[keypair[0]] = etg.getTargetFilter(keypair[1]);

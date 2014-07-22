@@ -1268,9 +1268,8 @@ upkeep:function(c,t){
 	}
 },
 upload:function(c,t){
-	t.atk += 2;
 	Effect.mkText(2 + "|" + 0, ui.tgtToPos(t));
-	c.dmg(1);
+	t.atk += c.dmg(2);
 },
 vampire:function(c,t, dmg){
 	c.owner.dmg(-dmg);
@@ -1316,10 +1315,10 @@ yoink:function(c,t){
 	}
 },
 pillar:function(c,t){
-    if (!t)
-        c.owner.spend(c.card.element, -c.status.charges * (c.card.element > 0 ? 1 : 3));
-    else if (c == t)
-        c.owner.spend(c.card.element, -(c.card.element > 0 ? 1 : 3))
+	if (!t)
+		c.owner.spend(c.card.element, -c.status.charges * (c.card.element > 0 ? 1 : 3));
+	else if (c == t)
+		c.owner.spend(c.card.element, -(c.card.element > 0 ? 1 : 3))
 },
 pend:function(c,t){
     c.owner.spend(c.pendstate ? c.owner.mark : c.card.element, -c.status.charges * (c.card.element > 0 ? 1 : 3));
