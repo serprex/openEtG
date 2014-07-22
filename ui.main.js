@@ -1205,7 +1205,7 @@ function startMenu() {
 	var usertoggle = [bquest, bshop, bupgrade, blogout, bdelete, taiwinloss];
 	for (var i=0; i<2; i++){
 		var baia = makeButton(50, 200+i*50, "Arena AI", function() {
-			tinfo.setText("In the arena you will face decks from other players.\nCost: $10");
+			tinfo.setText("In the arena you will face decks from other players.\nCost: $" + (i+1)*5);
 		});
 		menuui.addChild(baia);
 		var binfoa = makeButton(150, 200+i*50, "Arena Info", function() {
@@ -1224,13 +1224,6 @@ function startMenu() {
 						startEditor();
 						return;
 					}
-					if (user.gold < 10) {
-						chatArea.value = "Requires 10g";
-						return;
-					}
-
-					user.gold -= 10;
-					userEmit("addgold", { g: -10 });
 					userEmit("foearena", lvi);
 				}
 			}
@@ -2044,10 +2037,8 @@ function startMatch() {
 				var basereward = [1, 6, 11, 31][game.level];
 				var hpfactor = [11, 7, 6, 2][game.level];
 				goldwon = Math.floor((basereward + Math.floor(game.player1.hp / hpfactor)) * (game.player1.hp == game.player1.maxhp ? 1.5 : 1));
-			}else goldwon = game.gold;
-			if (goldwon !== undefined){
-				game.goldreward = goldwon + (game.cost || 0);
-			}
+			}else goldwon = 0;
+			game.goldreward = goldwon + (game.cost || 0);
 			game.cardreward = "01" + cardwon.code;
 		}
 		if (game.phase != etg.EndPhase) {
@@ -2269,7 +2260,6 @@ function startMatch() {
 				game = undefined;
 			}
 		} else if (game.turn == game.player1) {
-
 			if (discard == undefined && game.player1.hand.length == 8) {
 				discarding = true;
 			} else {
@@ -2703,8 +2693,9 @@ socket.on("foearena", function(data) {
 	chatArea.value = data.name + ": " + deck.join(" ");
 	initGame({ first: data.seed < etgutil.MAX_INT/2, deck: deck, urdeck: getDeck(), seed: data.seed, hp: data.hp, cost: data.cost, foename: data.name, aidrawpower: data.lv+1 }, aiEvalFunc);
 	game.arena = data.name;
-	game.level = 1;
-	game.cost = 10;
+	game.level = data.lv+1;
+	game.cost = 5+data.lv*5;
+	user.gold -= game.cost;
 });
 socket.on("arenainfo", startArenaInfo);
 socket.on("arenatop", startArenaTop);
