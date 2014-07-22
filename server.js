@@ -306,9 +306,6 @@ io.on("connection", function(socket) {
 		user.pool = etgutil.addcard(user.pool, data.card, -1);
 		user.gold += data.gold;
 	})
-	userEvent(socket, "subgold", function (data, user) {
-		user.gold -= data.g;
-	});
 	userEvent(socket, "addgold", function (data, user) {
 		user.gold += data.g;
 	});
@@ -325,19 +322,19 @@ io.on("connection", function(socket) {
 			db.hset(au, "deck", data.d);
 		}else{
 			db.hmset(au, {day: getDay(), deck: data.d, card: user.ocard, win:0, loss:0});
-			db.zadd("arena", 0, data.u);
+			db.zadd("arena"+(data.lv?"1":""), 0, data.u);
 		}
 	});
 	userEvent(socket, "arenainfo", function(data, user){
 		db.hgetall((data.lv?"B:":"A:") + data.u, function(err, obj){
 			if (!obj) obj = {deck:""};
-			else obj.days -= getDay();
+			else obj.day = getDay() - obj.day;
 			obj.lv = data.lv;
 			socket.emit("arenainfo", obj);
 		});
 	});
 	userEvent(socket, "arenatop", function(data, user){
-		db.zrevrange("arena", 0, 19, "withscores", function(err, obj){
+		db.zrevrange("arena"+(data.lv?"1":""), 0, 19, "withscores", function(err, obj){
 			var winloss = [];
 			function getwinloss(i){
 				db.hmget((data.lv?"B:":"A:") + obj[i], "win", "loss", function(err, wl){
@@ -353,7 +350,7 @@ io.on("connection", function(socket) {
 	});
 	userEvent(socket, "modarena", function(data, user){
 		db.hincrby((data.lv?"B:":"A:")+data.aname, data.won?"win":"loss", 1);
-		db.zincrby("arena", data.won?1:-1, data.aname);
+		db.zincrby("arena"+(data.lv?"1":""), data.won?1:-1, data.aname);
 		if (data.aname in users){
 			users[data.aname].gold++;
 		}else{
@@ -365,17 +362,15 @@ io.on("connection", function(socket) {
 		}
 	});
 	userEvent(socket, "foearena", function(data, user){
-		db.zcard("arena", function(err, len){
+		db.zcard("arena"+(data.lv?"1":""), function(err, len){
 			if (!len)return;
 			var idx = Math.floor(Math.random()*Math.min(len, 20));
-			db.zrevrange("arena", idx, idx, function(err, aname){
+			db.zrevrange("arena"+(data.lv?"1":""), idx, idx, function(err, aname){
 				console.log("deck: "+ aname + " " + idx);
 				db.hgetall((data.lv?"B:":"A:")+aname, function(err, adeck){
-					var day = getDay();
 					var seed = Math.random();
-					var first = seed<.5;
 					if (data.lv) adeck.card = CardCodes[adeck.card].asUpped(true).code;
-					socket.emit("foearena", {seed: seed*etgutil.MAX_INT, first: first, name: aname, hp:Math.max(200-(day-adeck.day)*5, 100), deck: adeck.deck + "05" + adeck.card, lv:data.lv})
+					socket.emit("foearena", {seed: seed*etgutil.MAX_INT, name: aname, hp:Math.max(200-(getDay()-adeck.day)*5, 100), deck: adeck.deck + "05" + adeck.card, lv:data.lv});
 				});
 			});
 		});

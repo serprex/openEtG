@@ -1268,9 +1268,8 @@ upkeep:function(c,t){
 	}
 },
 upload:function(c,t){
-	t.atk += 2;
 	Effect.mkText(2 + "|" + 0, ui.tgtToPos(t));
-	c.dmg(1);
+	t.atk += c.dmg(2);
 },
 vampire:function(c,t, dmg){
 	c.owner.dmg(-dmg);

@@ -595,7 +595,7 @@ Player.prototype.endturn = function(discard) {
 	if (this.sosa > 0){
 		this.sosa--;
 	}
-	this.nova = 0;dr
+	this.nova = 0;
 	for (var i = this.foe.drawpower || 1; i >= 0; i--) {
         this.foe.drawcard();
 	}
