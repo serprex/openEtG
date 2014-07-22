@@ -1812,7 +1812,7 @@ function startEditor(arena, acard, startempty) {
 					cardminus = {};
 					processDeck();
 				}
-			}			
+			}
 			var deckButtons = [];
 			for (var i = 0;i < 10;i++) {
 				var button = makeButton(80 + i*72, 8, "Deck " + (i + 1));
@@ -2511,19 +2511,21 @@ function startArenaInfo(info) {
 	stage.addChild(new PIXI.Sprite(backgrounds[0]));
 	var winloss = makeText(200, 350, (info.win || 0) + " - " + (info.loss || 0) + "\nAge: " + info.day);
 	stage.addChild(winloss);
-	var bmake = makeButton(200, 440, "Create");
-	bmake.click = function(){
-		startEditor(info, info.lv ? CardCodes[user.ocard].asUpped(true).code : user.ocard, true);
+	var batch = new PIXI.SpriteBatch();
+	stage.addChild(batch);
+	if (user.ocard){
+		var bmake = makeButton(200, 440, "Create");
+		bmake.click = function(){
+			startEditor(info, info.lv ? CardCodes[user.ocard].asUpped(true).code : user.ocard, true);
+		}
+		stage.addChild(bmake);
+		var ocard = new PIXI.Sprite(nopic);
+		ocard.position.set(734, 300);
+		batch.addChild(ocard);
 	}
-	stage.addChild(bmake);
 	var bret = makeButton(200, 500, "Exit");
 	bret.click = startMenu;
 	stage.addChild(bret);
-	var batch = new PIXI.SpriteBatch();
-	stage.addChild(batch);
-	var ocard = new PIXI.Sprite(nopic);
-	ocard.position.set(600, 300);
-	batch.addChild(ocard);
 	if (info.card){
 		if (info.lv){
 			info.card = CardCodes[info.card].asUpped(true).code;
@@ -2549,10 +2551,16 @@ function startArenaInfo(info) {
 		var spr = new PIXI.Sprite(eicons[mark || 0]);
 		spr.position.set(100, 210);
 		batch.addChild(spr);
+		var acard = new PIXI.Sprite(nopic);
+		acard.position.set(734, 8);
+		batch.addChild(acard);
 	}
 	refreshRenderer(stage, function() {
-		if (info.card) {
-			ocard.setTexture(getArt(info.card));
+		if (ocard) {
+			ocard.setTexture(getArt(user.ocard));
+		}
+		if (acard) {
+			acard.setTexture(getArt(info.card))
 		}
 	});
 }

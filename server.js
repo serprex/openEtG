@@ -5,7 +5,7 @@ var connect = require("connect");
 var fs = require("fs");
 var app = require("http").createServer(connect().use(require("compression")()).use(cardRedirect).use(require("serve-static")(__dirname)).use(loginAuth).use(codeSmith));
 var io = require("socket.io")(app.listen(13602));
-var redis = require("redis"), db = redis.createClient();
+var db = require("redis").createClient();
 var etgutil = require("./etgutil");
 var etg = require("./etg");
 require("./etg.server").loadcards(function(cards, codes, tgt){
@@ -38,8 +38,8 @@ function loginRespond(res, servuser, pass){
 			return;
 		}
 		useruser(servuser, function(user){
-			var day;
-			if (servuser.oracle !== undefined && servuser.oracle < (day = getDay())){
+			var day = getDay();
+			if (servuser.oracle < day){
 				servuser.oracle = day;
 				var card = etg.PlayerRng.randomcard(false,
 					(function (y) { return function (x) { return x.type != etg.PillarEnum && ((x.rarity != 5) ^ y); } })(Math.random() < .03));
