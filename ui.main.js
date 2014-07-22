@@ -485,7 +485,7 @@ function initGame(data, ai) {
 	startMatch();
 }
 function getDeck(limit) {
-	var deck = user ? user.decks[user.selectedDeck] : (deckimport.value || "").split(" ");
+	var deck = user ? user.decks[user.selectedDeck] || [] : (deckimport.value || "").split(" ");
 	if (limit && deck.length > 60){
 		deck.length = 60;
 	}
@@ -1746,9 +1746,14 @@ function startEditor(arena, acard, startempty) {
 	chatArea.value = "Build a " + (arena?35:30) + "-60 card deck";
 	var editorui = new PIXI.DisplayObjectContainer();
 	editorui.interactive = true;
-	editorui.addChild(new PIXI.Sprite(backgrounds[0]));
-	var bclear = makeButton(8, 8, "Clear");
-	var bsave = makeButton(8, 32, "Save & Exit");
+	var bg = new PIXI.Sprite(backgrounds[0]);
+	bg.mouseover = function() {
+		cardartcode = null;
+	}
+	bg.interactive = true;
+	editorui.addChild(bg);
+	var bclear = makeButton(8, 32, "Clear");
+	var bsave = makeButton(8, 56, "Save & Exit");
 	bclear.click = function() {
 		if (user) {
 			cardminus = {};
@@ -1758,7 +1763,7 @@ function startEditor(arena, acard, startempty) {
 	editorui.addChild(bclear);
 	editorui.addChild(bsave);
 	if (arena){
-		var bexit = makeButton(8, 56, "Exit");
+		var bexit = makeButton(8, 80, "Exit");
 		bexit.click = function() {
 			startArenaInfo(arena);
 		}
@@ -1788,7 +1793,7 @@ function startEditor(arena, acard, startempty) {
 			}
 			startMenu();
 		}
-		var bimport = makeButton(8, 56, "Import");
+		var bimport = makeButton(8, 80, "Import");
 		bimport.click = function() {
 			editordeck = deckimport.value.split(" ");
 			if (editordeck.length > 60){
@@ -1799,7 +1804,7 @@ function startEditor(arena, acard, startempty) {
 		editorui.addChild(bimport);
 		if (user){
 			function switchDeckCb(x){
-				return function(){
+				return function() {
 					editordeck.push(etg.TrueMarks[editormark]);
 					userEmit("setdeck", { d: etgutil.encodedeck(editordeck), number: user.selectedDeck });
 					user.selectedDeck = x;
@@ -1807,27 +1812,25 @@ function startEditor(arena, acard, startempty) {
 					cardminus = {};
 					processDeck();
 				}
+			}			
+			var deckButtons = [];
+			for (var i = 0;i < 10;i++) {
+				var button = makeButton(80 + i*72, 8, "Deck " + (i + 1));
+				button.click = switchDeckCb(i);
+				deckButtons.push(button);
+				editorui.addChild(button);
 			}
-			var bdeck1 = makeButton(8, 80, "Deck 1");
-			var bdeck2 = makeButton(8, 104, "Deck 2");
-			var bdeck3 = makeButton(8, 128, "Deck 3");
-			bdeck1.click = switchDeckCb(0);
-			bdeck2.click = switchDeckCb(1);
-			bdeck3.click = switchDeckCb(2);
-			editorui.addChild(bdeck1);
-			editorui.addChild(bdeck2);
-			editorui.addChild(bdeck3);
 		}
 	}
 	var editordecksprites = [];
 	var editordeck = arena ? (startempty ? [] : etgutil.decodedeck(arena.deck)) : getDeck(true);
 	var editormarksprite = new PIXI.Sprite(nopic);
-	editormarksprite.position.set(100, 210);
+	editormarksprite.position.set(100, 234);
 	editorui.addChild(editormarksprite);
 	var editormark = 0;
 	processDeck();
 	for (var i = 0;i < 13;i++) {
-		var sprite = makeButton(200 + i * 32, 210, eicons[i]);
+		var sprite = makeButton(200 + i * 32, 234, eicons[i]);
 		sprite.interactive = true;
 		(function(_i) {
 			sprite.click = function() {
@@ -1839,7 +1842,7 @@ function startEditor(arena, acard, startempty) {
 	}
 	for (var i = 0;i < 60;i++) {
 		var sprite = new PIXI.Sprite(nopic);
-		sprite.position.set(100 + Math.floor(i / 10) * 100, 8 + (i % 10) * 20);
+		sprite.position.set(100 + Math.floor(i / 10) * 100, 32 + (i % 10) * 20);
 		(function(_i) {
 			sprite.click = function() {
 				var card = CardCodes[editordeck[_i]];
@@ -1890,6 +1893,8 @@ function startEditor(arena, acard, startempty) {
 		if (cardartcode) {
 			cardArt.setTexture(getArt(cardartcode));
 		}
+		else
+			cardArt.setTexture(nopic);
 		for (var i = 0;i < editordeck.length;i++) {
 			editordecksprites[i].visible = true;
 			editordecksprites[i].setTexture(getCardImage(editordeck[i]));
@@ -2851,8 +2856,8 @@ document.addEventListener("keydown", function(e) {
 });
 function prepuser(){
 	user.decks = user.decks.split(",");
-	for (var i = 0;i < decks.length;i++) {
-		user.decks[i] = etgutil.decodedeck(user.decks[i]);
+	for (var i = 0;i < user.decks.length;i++) {
+		user.decks[i] = user.decks[i] ? etgutil.decodedeck(user.decks[i]) : [];
 	}
 	deckimport.value = getDeck().join(" ");
 	user.pool = user.pool || "";

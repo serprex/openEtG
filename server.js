@@ -213,7 +213,7 @@ function useruser(servuser, cb){
 		cb({
 			auth: servuser.auth,
 			name: servuser.name,
-			deck2: servuser.decks || servuser.deck0 + (servuser.deck1 ? "," + servuser.deck1 : "") + (servuser.deck2 ?"," + servuser.deck2 : ""),
+			decks: servuser.decks || servuser.deck0 + (servuser.deck1 ? "," + servuser.deck1 : "") + (servuser.deck2 ?"," + servuser.deck2 : ""),
 			selectedDeck: servuser.selectedDeck || 0,
 			pool: servuser.pool,
 			gold: servuser.gold,
@@ -266,9 +266,7 @@ io.on("connection", function(socket) {
 			"034sa014sd014t40452g0152p0252t0a5uk035um025un015us025v3015uq035ut015up015vb015uo025uv015ul018pk",
 			"015020262002627034sa014sd014t4064vc024vp034vs0b61o0261q0361s0261t0161v018pj"
 		];
-		user.deck0 = starters[data.e] || starters[0];
-		user.deck1 = "";
-		user.deck2 = "";
+		user.decks = starters[data.e] || starters[0];
 		user.selectedDeck = 0;
 		user.pool = "";
 		user.accountbound = user.deck0;
@@ -308,7 +306,7 @@ io.on("connection", function(socket) {
 		user.gold += data.g;
 	});
 	userEvent(socket, "setdeck", function(data, user) {
-		var decks = user.decks.split(",");
+		var decks = user.decks ? user.decks.split(",") : [];
 		decks[data.number] = data.d;
 		user.decks = decks.join(",");
 		user.selectedDeck = data.number;
