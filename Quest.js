@@ -72,7 +72,7 @@ exports.spirit[4] = {
 exports.bombmaker = {};
 exports.bombmaker[0] = { deck: "5t2 5t2 5t2 5t2 5t2 5t2 5t2 5t2 5t2 5t2 5t2 5t2 5t2 5t2 5t2 5s5 5s5 5s5 5s5 5s5 5s5 622 622 622 622 80d 80d 80d 80d 80d 80d 8pu", name: "Bomb Maker 1", autonext: true };
 exports.bombmaker[1] = { deck: "5rg 5rg 5rg 5rg 5rg 5rg 5rg 5rg 5rg 5rg 5rg 5rg 5rg 5rg 5rg 5rk 5rk 5rk 5rk 5ro 5ro 5ro 5ru 5ru 5ru 5ru 5ru 5ru 5v1 5v1 5v1 5v1 5v1 5v1 7ql 7ql 7ql 7ql 7ql 7ql 8pt", name: "Bomb Maker 2", autonext: true };
-exports.bombmaker[2] = { deck: "5f4 5f4 5f4 5f6 5f6 5f6 5f6 5f6 5f6 5f5 5f5 5f8 5f8 5oc 5oc 5oc 5oc 5oc 5oc 5oc 5oc 5oc 5oc 5oc 5oc 5oc 5oc 5om 5om 5om 5om 5om 5om 5p0 5p0 8po", name: "Bomb Maker 3", doubledeck: true, markpower: 3, drawpower: 2, cardreward: ["5om", "5om", "5om", "5om", "5s5", "5s5", "5s5", "7ql", "7ql"], wintext: "Congratulations! Here, take some of my bombs as the reward!" };
+exports.bombmaker[2] = { deck: "5f4 5f4 5f4 5f6 5f6 5f6 5f6 5f6 5f6 5f5 5f5 5f8 5f8 5oc 5oc 5oc 5oc 5oc 5oc 5oc 5oc 5oc 5oc 5oc 5oc 5oc 5oc 5om 5om 5om 5om 5om 5om 5p0 5p0 8po", name: "Bomb Maker 3", markpower: 3, drawpower: 2, cardreward: ["5om", "5om", "5om", "5om", "5s5", "5s5", "5s5", "7ql", "7ql"], wintext: "Congratulations! Here, take some of my bombs as the reward!" };
 
 exports.blacksummoner = {};
 exports.blacksummoner[0] = { deck: "7t5 7t5 7t5 7t5 7t5 7t5 7t5 7t5 7t5 7t5 7t5 7t5 7t5 7t5 7t5 8pt", name: "The Black Summoner", markpower: 12, cardreward: ["7t5", "7t5"], wintext: "You defeat the Dark Summoner that controlled the dragons. The dragons fly away, but two of them stays, looking at you.\nYou decide to let them join you!" }

@@ -447,23 +447,24 @@ function initGame(data, ai) {
 	if (data.urhp) {
 		game.player1.maxhp = game.player1.hp = data.urhp;
 	}
-	if (data.aidrawpower) {
+	if (data.aidrawpower > 1) {
 	    game.player2.drawpower = data.aidrawpower;
 	}
 	if (data.demigod) {
 	    game.player1.maxhp = game.player1.hp = 200;
 	    game.player1.drawpower = 2;
-	    data.urdeck = doubleDeck(data.urdeck);
 	    game.player1.markpower = 3;
 	}
 	if (data.foedemigod) {
 	    game.player2.maxhp = game.player2.hp = 200;
 	    game.player2.drawpower = 2;
-	    data.deck = doubleDeck(data.deck);
 	    game.player2.markpower = 3;
 	}
 	var idx, code, decks = [data.urdeck, data.deck];
 	for (var j = 0;j < 2;j++) {
+		if (game.players[j].drawpower > 1){
+			decks[j] = decks[j].concat(decks[j]);
+		}
 		for (var i = 0;i < decks[j].length;i++) {
 			if (CardCodes[code = decks[j][i]]) {
 				game.players[j].deck.push(CardCodes[code]);
@@ -667,10 +668,6 @@ function victoryScreen() {
 	});
 }
 
-function doubleDeck(deck) {
-	return deck.concat(deck);
-}
-
 function deckMorph(deck,MorphFrom,morphTo) {
 	var deckout =[];
 	for (var i =0; i < deck.length; i++) {
@@ -771,7 +768,6 @@ function mkQuestAi(questname, stage, area) {
 	var foename = quest.name || "";
 	var markpower = quest.markpower || 1;
 	var drawpower = quest.drawpower || 1;
-	if (quest.doubledeck) deck = doubleDeck(deck);
 	var hp = quest.hp || 100;
 	var playerHPstart = quest.urhp || 100;
 	var urdeck = getDeck();
@@ -902,7 +898,6 @@ function mkAi(level) {
 			var typeName = ["Commoner", "Mage", "Champion"];
 
 			var foename = typeName[level] + "\n" + randomNames[Math.floor(Math.random() * randomNames.length)];
-			if (level == 2) deck = doubleDeck(deck);
 			initGame({ first: Math.random() < .5, deck: deck, urdeck: urdeck, seed: Math.random() * etgutil.MAX_INT, hp: level == 0 ? 100 : level == 1 ? 125 : 150, aimarkpower: level == 2 ? 2 : 1, foename: foename, aidrawpower: level == 2 ? 2 : 1 }, aiEvalFunc);
 			game.cost = gameprice;
 			game.level = level;
@@ -1775,7 +1770,7 @@ function startEditor(arena, acard, startempty) {
 			}
 			editordeck.push(etg.TrueMarks[editormark]);
 			var data = { d: etgutil.encodedeck(editordeck.slice(5)), lv: arena.lv };
-			if (acard != user.ocard){
+			if (!startempty){
 				data.mod = true;
 			}
 			userEmit("setarena", data);
@@ -2706,9 +2701,6 @@ socket.on("librarygive", initLibrary);
 socket.on("foearena", function(data) {
 	var deck = etgutil.decodedeck(data.deck);
 	chatArea.value = data.name + ": " + deck.join(" ");
-	if (data.lv){
-		deck = doubleDeck(deck);
-	}
 	initGame({ first: data.seed < etgutil.MAX_INT/2, deck: deck, urdeck: getDeck(), seed: data.seed, hp: data.hp, cost: data.cost, foename: data.name, aidrawpower: data.lv+1 }, aiEvalFunc);
 	game.arena = data.name;
 	game.level = 1;
