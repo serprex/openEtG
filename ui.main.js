@@ -1699,7 +1699,7 @@ function startEditor(arena, acard, startempty) {
 		cardminus = {};
 		cardpool = {};
 		function incrpool(code){
-			if (code in CardCodes && (!arena || (!CardCodes[code].isOf(CardCodes[acard].asUpped(false).code)) && (arena.lv || !CardCodes[code].upped))){
+			if (code in CardCodes && (!arena || (!CardCodes[code].isOf(CardCodes[acard].asUpped(false))) && (arena.lv || !CardCodes[code].upped))){
 				if (code in cardpool) {
 					cardpool[code]++;
 				} else {
