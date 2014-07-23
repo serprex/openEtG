@@ -1433,7 +1433,7 @@ function upgradestore() {
 			if (card.rarity <= 4) {
 				var codecount = etgutil.count(user.pool, card.code);
 				if (codecount) {
-					user.pool = etgutil.addcard(user.pool, -1);
+					user.pool = etgutil.addcard(user.pool, card.code, -1);
 					var sellValue = cardValues[card.rarity] * (card.upped ? 5 : 1);
 					user.gold += sellValue
 					userEmit("sellcard", { card: card.code, gold: sellValue});
