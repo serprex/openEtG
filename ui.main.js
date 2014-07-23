@@ -1439,6 +1439,7 @@ function upgradestore() {
 					userEmit("sellcard", { card: card.code, gold: sellValue});
 					adjustdeck();
 				}
+				else twarning.setText("This card is bound to your account; you cannot sell it.")
 			}
 			else twarning.setText("You really don't want to sell that, trust me.")
 		}
