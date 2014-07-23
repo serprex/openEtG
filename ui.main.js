@@ -1673,6 +1673,7 @@ function startEditor(arena, acard, startempty) {
 		editormarksprite.setTexture(eicons[editormark]);
 		editordeck.sort(editorCardCmp);
 		if (user) {
+			cardminus = {};
 			for (var i = editordeck.length - 1;i >= 0;i--) {
 				var code = editordeck[i], card = CardCodes[code];
 				if (card.type != etg.PillarEnum) {
@@ -1766,6 +1767,8 @@ function startEditor(arena, acard, startempty) {
 			if (editordeck.length > 60){
 				editordeck.length = 60;
 			}
+			if (user)
+				user.decks[user.selectedDeck] = editordeck;
 			processDeck();
 		}
 		editorui.addChild(bimport);
