@@ -904,7 +904,7 @@ var backgrounds = ["assets/bg_default.png", "assets/bg_lobby.png", "assets/bg_sh
 var questIcons = [], eicons = [], ricons = [], cardBacks = [], cardBorders = [], boosters = [], popups = [], sicons = [], ticons = [], sborders = [];
 var mapareas = {};
 var preLoader = new PIXI.AssetLoader(["assets/gold.png", "assets/button.png", "assets/questIcons.png", "assets/esheet.png", "assets/raritysheet.png", "assets/backsheet.png",
-	"assets/cardborders.png", "assets/boosters.png", "assets/popup_booster.png", "assets/statussheet.png", "assets/statusborders.png", "assets/typesheet.png"].concat(backgrounds));
+	"assets/cardborders.png", "assets/popup_booster.png", "assets/statussheet.png", "assets/statusborders.png", "assets/typesheet.png"].concat(backgrounds));
 var loadingBarProgress = 0, loadingBarGraphic = new PIXI.Graphics();
 preLoader.onProgress = function() {
 	loadingBarGraphic.clear();
@@ -930,8 +930,6 @@ preLoader.onComplete = function() {
 	for (var i = 0;i < 26;i++) cardBacks.push(new PIXI.Texture(tex, new PIXI.Rectangle(i * 132, 0, 132, 256)));
 	var tex = PIXI.Texture.fromFrame("assets/cardborders.png");
 	for (var i = 0;i < 26;i++) cardBorders.push(new PIXI.Texture(tex, new PIXI.Rectangle(i * 128, 0, 128, 162)));
-	var tex = PIXI.Texture.fromFrame("assets/boosters.png");
-	for (var i = 0;i < 4;i++) boosters.push(new PIXI.Texture(tex, new PIXI.Rectangle(i * 100, 0, 100, 150)));
 	popups.push(PIXI.Texture.fromFrame("assets/popup_booster.png"));
 	var tex = PIXI.Texture.fromFrame("assets/statussheet.png");
 	for (var i = 0;i < 7;i++) sicons.push(new PIXI.Texture(tex, new PIXI.Rectangle(13 * i, 0, 13, 13)));
@@ -939,6 +937,12 @@ preLoader.onComplete = function() {
 	for (var i = 0;i < 3;i++) sborders.push(new PIXI.Texture(tex, new PIXI.Rectangle(64 * i, 0, 64, 81)));
 	var tex = PIXI.Texture.fromFrame("assets/typesheet.png");
 	for (var i = 0;i < 6;i++) ticons.push(new PIXI.Texture(tex, new PIXI.Rectangle(25 * i, 0, 25, 25)));
+	var boosterLoader = new PIXI.AssetLoader(["assets/boosters.png"]);
+	boosterLoader.onComplete = function() {
+		var tex = PIXI.Texture.fromFrame("assets/boosters.png");
+		for (var i = 0;i < 4;i++) boosters.push(new PIXI.Texture(tex, new PIXI.Rectangle(i * 100, 0, 100, 150)));
+	}
+	boosterLoader.load();
 	startMenu();
 }
 refreshRenderer(loadingBarGraphic);
