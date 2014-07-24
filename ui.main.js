@@ -1703,6 +1703,9 @@ function startEditor(arena, acard, startempty) {
 			}
 			editordeck.push(etg.TrueMarks[editormark]);
 			var data = { d: etgutil.encodedeck(editordeck.slice(5)), lv: arena.lv };
+			for(var k in arattr){
+				data[k] = arattr[k];
+			}
 			if (!startempty){
 				data.mod = true;
 			}
@@ -1716,6 +1719,56 @@ function startEditor(arena, acard, startempty) {
 			startArenaInfo(arena);
 		}
 		editorui.addChild(bexit);
+		var arpts = arena.lv?116:96, arattr = {hp:arena.hp || 200, mark:arena.mark || 1, draw:arena.draw || (arena.lv+1)};
+		var artable = {
+			hp: { min: 90, max: 200, incr: 5, cost: 0.2 },
+			mark: { max: 9, cost: 9 },
+			draw: { max: 3, cost: 27 },
+		};
+		function sumscore(){
+			var sum = 0;
+			for(var k in artable){
+				sum += arattr[k]*artable[k].cost;
+			}
+			return sum;
+		}
+		var curpts = new PIXI.Text(sumscore(), ui.mkFont(16, "black"));
+		curpts.position.set(8, 108);
+		function makeattrui(y, name){
+			y = 128+y*20;
+			var data = artable[name];
+			var bt = new PIXI.Text(name, ui.mkFont(16, "black"));
+			bt.position.set(8, y);
+			var bm = makeButton(50, y, getTextImage("-", ui.mkFont(16, "black"), 0xFFFFFFFF));
+			var bv = new PIXI.Text(arattr[name], ui.mkFont(16, "black"));
+			bv.position.set(64, y);
+			var bp = makeButton(90, y, getTextImage("+", ui.mkFont(16, "black"), 0xFFFFFFFF));
+			function modattr(x){
+				arattr[name] += x;
+				if (arattr[name] >= (data.min || 0)) && (!data.max || arattr[name] <= data.max){
+					var sum = sumscore();
+					if (sum >= arpts && name != "hp" && arattr.hp - data.cost*5 > 90){
+						arattr.hp -= data.cost*5;
+						sum = sumscore();
+					}
+					if (sum < arpts){
+						bv.setText(arattr[name]);
+						curpts.setText(sum);
+						return;
+					}
+				}
+				arattr[name] -= x;
+			}
+			bm.click = modattr.bind(null, -(data.incr || 1));
+			bp.click = modattr.bind(null, data.incr || 1)
+			editorui.addChild(bt);
+			editorui.addChild(bm);
+			editorui.addChild(bv);
+			editorui.addChild(bp);
+		}
+		makeattrui(0, "hp");
+		makeattrui(1, "mark");
+		makeattrui(2, "draw");
 	}else{
 		bsave.click = function() {
 			editordeck.push(etg.TrueMarks[editormark]);
@@ -2436,7 +2489,7 @@ function startArenaInfo(info) {
 	var stage = new PIXI.DisplayObjectContainer();
 	stage.interactive = true;
 	stage.addChild(new PIXI.Sprite(backgrounds[0]));
-	var winloss = makeText(200, 350, (info.win || 0) + " - " + (info.loss || 0) + "\nAge: " + info.day);
+	var winloss = makeText(200, 300, (info.win || 0) + " - " + (info.loss || 0) + "\nAge: " + info.day + "\nInitial HP: " + info.hp + "\nMark: " + info.mark + "\nDraw: " + info.draw);
 	stage.addChild(winloss);
 	var batch = new PIXI.SpriteBatch();
 	stage.addChild(batch);
@@ -2627,7 +2680,7 @@ socket.on("librarygive", initLibrary);
 socket.on("foearena", function(data) {
 	var deck = etgutil.decodedeck(data.deck);
 	chatArea.value = data.name + ": " + deck.join(" ");
-	initGame({ first: data.seed < etgutil.MAX_INT/2, deck: deck, urdeck: getDeck(), seed: data.seed, hp: data.hp, cost: data.cost, foename: data.name, aidrawpower: data.lv+1 }, aiEvalFunc);
+	initGame({ first: data.seed < etgutil.MAX_INT/2, deck: deck, urdeck: getDeck(), seed: data.seed, hp: data.hp, cost: data.cost, foename: data.name, aidrawpower: data.draw, aimarkpower: data.mark }, aiEvalFunc);
 	game.arena = data.name;
 	game.level = data.lv+1;
 	game.cost = 5+data.lv*5;

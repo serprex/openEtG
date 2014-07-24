@@ -90,7 +90,7 @@ antimatter:function(c,t){
 	t.atk -= t.trueatk(0, true)*2;
 },
 appease:function(c,t){
-	t.die();
+	Actives.devour(c, t);
 	c.status.appeased = true;
 },
 axe:function(c,t){

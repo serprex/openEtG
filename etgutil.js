@@ -56,7 +56,7 @@ exports.decodedeck = function (deck) {
 exports.deck2pool = function (deck, pool) {
 	if (!deck) return {};
 	pool = pool || {};
-	etgutil.iterraw(function(code, count){
+	exports.iterraw(deck, function(code, count){
 		if (code in pool){
 			pool[code] += count;
 		} else {

@@ -104,7 +104,7 @@ var ActivesValues = {
 	hatch:3,
 	heal:3,
 	heal20:8,
-	holylight:2,
+	holylight:3,
 	hope:2,
 	icebolt:10,
 	ignite:4,
@@ -198,11 +198,11 @@ var ActivesValues = {
 	steal:6,
 	steam:6,
 	stoneform:3,
-	storm2:4,
-	storm3:6,
+	storm2:6,
+	storm3:12,
 	swave:6,
 	tempering:3,
-	throwrock: 2,
+	throwrock:4,
 	tick:function(c){
 		return c instanceof etg.CardInstance ? 3 : c.maxhp - c.truehp();
 	},
@@ -338,7 +338,7 @@ function evalthing(c) {
 			hp = Math.max(hp - poison, 0);
 			if (c.status.aflatoxin) score -= 2;
 		}else if (poison < 0){
-			hp += Math.max(-poison, c.maxhp-c.hp);
+			hp += Math.min(-poison, c.maxhp-c.hp);
 		}
 		score *= hp?(c.status.immaterial || c.status.burrowed ? 2 : Math.pow(Math.min(hp, 15), .3)):.2;
 	}else{

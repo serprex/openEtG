@@ -337,9 +337,9 @@ io.on("connection", function(socket) {
 		}
 		var au=(data.lv?"B:":"A:") + data.u;
 		if (data.mod){
-			db.hset(au, "deck", data.d);
+			db.hmset(au, {deck: data.d, hp: data.hp, draw: data.draw, mark: data.mark});
 		}else{
-			db.hmset(au, {day: getDay(), deck: data.d, card: user.ocard, win:0, loss:0});
+			db.hmset(au, {day: getDay(), deck: data.d, card: user.ocard, win:0, loss:0, hp: data.hp, draw: data.draw, mark: data.mark});
 			db.zadd("arena"+(data.lv?"1":""), 0, data.u);
 		}
 	});
@@ -391,7 +391,7 @@ io.on("connection", function(socket) {
 				db.hgetall((data.lv?"B:":"A:")+aname, function(err, adeck){
 					var seed = Math.random();
 					if (data.lv) adeck.card = CardCodes[adeck.card].asUpped(true).code;
-					socket.emit("foearena", {seed: seed*etgutil.MAX_INT, name: aname, hp:Math.max(200-(getDay()-adeck.day)*5, 100), deck: adeck.deck + "05" + adeck.card, lv:data.lv});
+					socket.emit("foearena", {seed: seed*etgutil.MAX_INT, name: aname, hp:Math.max((adeck.hp || 200)-(getDay()-adeck.day)*5, 100), mark:(adeck.mark || (1+data.lv)), draw: (adeck.draw || 1), deck: adeck.deck + "05" + adeck.card, lv:data.lv});
 				});
 			});
 		});
