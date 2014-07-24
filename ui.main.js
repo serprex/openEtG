@@ -1785,11 +1785,9 @@ function startEditor(arena, acard, startempty) {
 					processDeck();
 				}
 			}
-			var deckButtons = [];
 			for (var i = 0;i < 10;i++) {
 				var button = makeButton(80 + i*72, 8, "Deck " + (i + 1));
 				button.click = switchDeckCb(i);
-				deckButtons.push(button);
 				editorui.addChild(button);
 			}
 		}

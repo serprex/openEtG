@@ -154,6 +154,7 @@ function clearInactiveUsers(){
 		if (u in usersock && !usersock[u].connected){
 			dropsock.call(usersock[u]);
 			delete usersock[u];
+			delete users[u];
 		}
 	}
 }
