@@ -1437,12 +1437,13 @@ function upgradestore() {
 			if (card.rarity <= 4) {
 				var codecount = etgutil.count(user.pool, card.code);
 				if (codecount) {
-					user.pool = etgutil.addcard(user.pool, -1);
+					user.pool = etgutil.addcard(user.pool, card.code, -1);
 					var sellValue = cardValues[card.rarity] * (card.upped ? 5 : 1);
 					user.gold += sellValue
 					userEmit("sellcard", { card: card.code, gold: sellValue});
 					adjustdeck();
 				}
+				else twarning.setText("This card is bound to your account; you cannot sell it.")
 			}
 			else twarning.setText("You really don't want to sell that, trust me.")
 		}
@@ -1677,6 +1678,7 @@ function startEditor(arena, acard, startempty) {
 		editormarksprite.setTexture(eicons[editormark]);
 		editordeck.sort(editorCardCmp);
 		if (user) {
+			cardminus = {};
 			for (var i = editordeck.length - 1;i >= 0;i--) {
 				var code = editordeck[i], card = CardCodes[code];
 				if (card.type != etg.PillarEnum) {
@@ -1770,6 +1772,8 @@ function startEditor(arena, acard, startempty) {
 			if (editordeck.length > 60){
 				editordeck.length = 60;
 			}
+			if (user)
+				user.decks[user.selectedDeck] = editordeck;
 			processDeck();
 		}
 		editorui.addChild(bimport);
