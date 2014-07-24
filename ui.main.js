@@ -295,7 +295,6 @@ function initTrade(data) {
 	var selectedCardsprites = [];
 	var player2Cardsprites = [];
 	player2Cards = [];
-	var cardartcode;
 	bcancel.click = function() {
 		userEmit("canceltrade");
 		startMenu();
@@ -326,18 +325,10 @@ function initTrade(data) {
 	editorui.addChild(btrade);
 	editorui.addChild(bcancel);
 
-	var cardpool = {};
-	etgutil.iterdeck(user.pool, function(code){
-		if (code in cardpool) {
-			cardpool[code]++;
-		} else {
-			cardpool[code] = 1;
-		}
-	});
-
+	var cardpool = etgutil.deck2pool(user.pool);
 	var cardsel = makeCardSelector(
 		function(code){
-			cardartcode = code;
+			cardArt.setTexture(getArt(code));
 		},
 		function(code){
 			var card = CardCodes[code];
@@ -362,7 +353,7 @@ function initTrade(data) {
 				selectedCards.splice(_i, 1);
 			}
 			sprite.mouseover = function() {
-				cardartcode = selectedCards[_i];
+				cardArt.setTexture(getArt(selectedCards[_i]));
 			}
 		})(i);
 		editorui.addChild(sprite);
@@ -373,7 +364,7 @@ function initTrade(data) {
 		sprite.position.set(450 + Math.floor(i / 10) * 100, 8 + (i % 10) * 20);
 		(function(_i) {
 			sprite.mouseover = function() {
-				cardartcode = player2Cards[_i];
+				cardArt.setTexture(getArt(player2Cards[_i]));
 			}
 		})(i);
 		editorui.addChild(sprite);
@@ -386,9 +377,6 @@ function initTrade(data) {
 	editorui.addChild(cardArt);
 	refreshRenderer(editorui, function() {
 		cardsel.next(cardpool, cardminus);
-		if (cardartcode) {
-			cardArt.setTexture(getArt(cardartcode));
-		}
 		for (var i = 0;i < player2Cards.length;i++) {
 			player2Cardsprites[i].visible = true;
 			player2Cardsprites[i].setTexture(getCardImage(player2Cards[i]));
@@ -406,24 +394,16 @@ function initTrade(data) {
 	});
 }
 function initLibrary(pool){
-	console.log(pool);
-	var editorui = new PIXI.DisplayObjectContainer(), cardartcode;
+	var editorui = new PIXI.DisplayObjectContainer();
 	editorui.interactive = true;
 	editorui.addChild(new PIXI.Sprite(backgrounds[0]));
 	var bexit = makeButton(10, 10, "Exit");
 	bexit.click = startMenu;
 	editorui.addChild(bexit);
-	var cardminus = {}, cardpool = {};
-	etgutil.iterdeck(pool, function(code) {
-		if (code in cardpool) {
-			cardpool[code]++;
-		} else {
-			cardpool[code] = 1;
-		}
-	});
+	var cardminus = {}, cardpool = etgutil.deck2pool(pool);
 	var cardsel = makeCardSelector(
 		function(code){
-			cardartcode = code;
+			cardArt.setTexture(getArt(code));
 		}, null);
 	editorui.addChild(cardsel);
 	var cardArt = new PIXI.Sprite(nopic);
@@ -431,9 +411,6 @@ function initLibrary(pool){
 	editorui.addChild(cardArt);
 	refreshRenderer(editorui, function(){
 		cardsel.next(cardpool, cardminus);
-		if (cardartcode) {
-			cardArt.setTexture(getArt(cardartcode));
-		}
 	});
 }
 function initGame(data, ai) {
@@ -771,7 +748,6 @@ function mkQuestAi(questname, stage, area) {
 		}
 	}
 	if (urdeck.length < (user ? 31 : 11)) {
-		/*startEditor();*/
 		return "ERROR: Your deck is invalid or missing! Please exit and create a valid deck in the deck editor.";
 	}
 	initGame({ first: Math.random() < .5, deck: deck, urdeck: urdeck, seed: Math.random() * etgutil.MAX_INT, hp: hp, aimarkpower: markpower, foename: foename, urhp : playerHPstart, aidrawpower:drawpower }, aiEvalFunc);
@@ -1021,7 +997,7 @@ function makeCardSelector(cardmouseover, cardclick){
 	var elefilter = 0, rarefilter = 0;
 	var columns = [[],[],[],[],[],[]], columnspr = [[],[],[],[],[],[]];
 	for (var i = 0;i < 13;i++) {
-		var sprite = makeButton(8, 184 + i * 32, eicons[i]);
+		var sprite = makeButton((i>6?40:4), 300 + (i%7) * 32 + (i>6?32:0), eicons[i]);
 		sprite.interactive = true;
 		(function(_i) {
 			sprite.click = function() {
@@ -1032,7 +1008,7 @@ function makeCardSelector(cardmouseover, cardclick){
 		cardsel.addChild(sprite);
 	}
 	for (var i = 0;i < 6; i++){
-		var sprite = makeButton(40, 188 + i * 32, ricons[i]);
+		var sprite = makeButton(74, 338 + i * 32, ricons[i]);
 		sprite.interactive = true;
 		(function(_i) {
 			sprite.click = function() {
@@ -1077,8 +1053,8 @@ function makeCardSelector(cardmouseover, cardclick){
 	}
 	cardsel.next = function(cardpool, cardminus){
 		var needToMakeCols = poolcache != cardpool;
-		poolcache = cardpool;
 		if (needToMakeCols){
+			poolcache = cardpool;
 			makeColumns();
 		}
 		for (var i = 0;i < 6;i++) {
@@ -1447,21 +1423,8 @@ function upgradestore() {
 		else twarning.setText("You can't sell a pillar or pendulum, silly!")
 	}
 	function adjustdeck() {
-		cardpool = {};
-		etgutil.iterdeck(user.pool, function(code){
-			if (code in cardpool) {
-				cardpool[code]++;
-			} else {
-				cardpool[code] = 1;
-			}
-		});
-		etgutil.iterdeck(user.accountbound, function(code){
-			if (code in cardpool) {
-				cardpool[code]++;
-			} else {
-				cardpool[code] = 1;
-			}
-		});
+		cardpool = etgutil.deck2pool(user.pool);
+		cardpool = etgutil.deck2pool(user.accountbound, cardpool);
 	}
 	var upgradeui = new PIXI.DisplayObjectContainer();
 	upgradeui.interactive = true;
@@ -1701,17 +1664,17 @@ function startEditor(arena, acard, startempty) {
 	if (user){
 		cardminus = {};
 		cardpool = {};
-		function incrpool(code){
+		function incrpool(code, count){
 			if (code in CardCodes && (!arena || (!CardCodes[code].isOf(CardCodes[acard].asUpped(false))) && (arena.lv || !CardCodes[code].upped))){
 				if (code in cardpool) {
-					cardpool[code]++;
+					cardpool[code] += count;
 				} else {
-					cardpool[code] = 1;
+					cardpool[code] = count;
 				}
 			}
 		}
-		etgutil.iterdeck(user.pool, incrpool);
-		etgutil.iterdeck(user.accountbound, incrpool);
+		etgutil.iterraw(user.pool, incrpool);
+		etgutil.iterraw(user.accountbound, incrpool);
 	}
 	chatArea.value = "Build a " + (arena?35:30) + "-60 card deck";
 	var editorui = new PIXI.DisplayObjectContainer();
@@ -1733,11 +1696,6 @@ function startEditor(arena, acard, startempty) {
 	editorui.addChild(bclear);
 	editorui.addChild(bsave);
 	if (arena){
-		var bexit = makeButton(8, 80, "Exit");
-		bexit.click = function() {
-			startArenaInfo(arena);
-		}
-		editorui.addChild(bexit);
 		bsave.click = function() {
 			if (editordeck.length < 35) {
 				chatArea.value = "35 cards required before submission";
@@ -1753,6 +1711,11 @@ function startEditor(arena, acard, startempty) {
 			chatArea.value = "Arena deck submitted";
 			startMenu();
 		}
+		var bexit = makeButton(8, 80, "Exit");
+		bexit.click = function() {
+			startArenaInfo(arena);
+		}
+		editorui.addChild(bexit);
 	}else{
 		bsave.click = function() {
 			editordeck.push(etg.TrueMarks[editormark]);
@@ -2510,11 +2473,11 @@ function startArenaInfo(info) {
 				continue;
 			}
 			var spr = new PIXI.Sprite(getCardImage(deck[i]));
-			spr.position.set(100 + Math.floor(i / 10) * 100, 8 + (i % 10) * 20);
+			spr.position.set(100 + Math.floor(i / 10) * 100, 32 + (i % 10) * 20);
 			batch.addChild(spr);
 		}
 		var spr = new PIXI.Sprite(eicons[mark || 0]);
-		spr.position.set(100, 210);
+		spr.position.set(100, 234);
 		batch.addChild(spr);
 		var acard = new PIXI.Sprite(getArt(info.card));
 		acard.position.set(734, 8);

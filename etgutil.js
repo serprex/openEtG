@@ -9,6 +9,12 @@ exports.iterdeck = function(deck, func){
 		for(var j=0; j<count; j++) func(code, len++);
 	}
 }
+exports.iterraw = function(deck, func){
+	for(var i=0; i<deck.length; i+=5){
+		var count = parseInt(deck.substr(i, 2), 32), code = deck.substr(i+2, 3);
+		func(code, count);
+	}
+}
 exports.count = function(deck, code){
 	for(var i=0; i<deck.length; i+=5){
 		if (code == deck.substr(i+2, 3)){
@@ -42,13 +48,22 @@ exports.encodedeck = function(deck){
 exports.decodedeck = function (deck) {
     if (!deck) return [];
     var out = [];
-    for (var i = 0; i < deck.length; i += 5) {
-        var count = parseInt(deck.substr(i, 2), 32), code = deck.substr(i + 2, 3);
-        for (var j = 0; j < count; j++) {
-            out.push(code);
-        }
-    }
+	exports.iterdeck(deck, function(code){
+		out.push(code);
+	});
     return out;
+}
+exports.deck2pool = function (deck, pool) {
+	if (!deck) return {};
+	pool = pool || {};
+	etgutil.iterraw(function(code, count){
+		if (code in pool){
+			pool[code] += count;
+		} else {
+			pool[code] = count;
+		}
+	});
+	return pool;
 }
 exports.addcard = function(deck, card, x){
 	if (deck === undefined) deck = "";
@@ -73,18 +88,18 @@ exports.countcard = function(deck, card){
 exports.mergedecks = function(deck){
 	for (var i=1; i<arguments.length; i++){
 		var from = arguments[i];
-		for(var j=0; j<from.length; j+=5){
-			deck = exports.addcard(deck, from.substr(j+2, 3), parseInt(from.substr(j, 2), 32));
-		}
+		exports.iterraw(from, function(code, count){
+			deck = exports.addcard(deck, code, count);
+		});
 	}
 	return deck;
 }
 exports.removedecks = function(deck){
 	for (var i=1; i<arguments.length; i++){
 		var from = arguments[i];
-		for(var j=0; j<from.length; j+=5){
-			deck = exports.addcard(deck, from.substr(j+2, 3), -parseInt(from.substr(j, 2), 32));
-		}
+		exports.iterraw(from, function(code, count){
+			deck = exports.addcard(deck, code, -count);
+		});
 	}
 	return deck;
 }
