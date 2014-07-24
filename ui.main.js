@@ -1745,7 +1745,7 @@ function startEditor(arena, acard, startempty) {
 			var bp = makeButton(90, y, getTextImage("+", ui.mkFont(16, "black"), 0xFFFFFFFF));
 			function modattr(x){
 				arattr[name] += x;
-				if (arattr[name] >= (data.min || 0)) && (!data.max || arattr[name] <= data.max){
+				if (arattr[name] >= (data.min || 0) && (!data.max || arattr[name] <= data.max)){
 					var sum = sumscore();
 					if (sum >= arpts && name != "hp" && arattr.hp - data.cost*5 > 90){
 						arattr.hp -= data.cost*5;
