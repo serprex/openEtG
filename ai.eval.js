@@ -335,7 +335,7 @@ function evalthing(c) {
 	if (isCreature){
 		var hp = Math.max(c.truehp(), 0), poison = c.status.poison || 0;
 		if (poison > 0){
-			hp = Math.min(hp - poison, 0);
+			hp = Math.max(hp - poison, 0);
 			if (c.status.aflatoxin) score -= 2;
 		}else if (poison < 0){
 			hp += Math.max(-poison, c.maxhp-c.hp);

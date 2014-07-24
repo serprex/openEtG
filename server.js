@@ -153,9 +153,13 @@ process.on("exit", function(){
 });
 function dropsock(data){
 	if (this.id in sockinfo){
-		var foe = sockinfo[this.id].foe;
-		if (foe){
-			foe.emit("foeleft");
+		var info = sockinfo[this.id];
+		if (info.foe){
+			info.foe.emit("foeleft");
+		}
+		if (info.trade && info.trade.foe){
+			info.trade.foe.emit("tradecanceled");
+			delete sockinfo[sockinfo[this.id].trade.foe.id].trade;
 		}
 		delete sockinfo[this.id];
 	}

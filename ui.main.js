@@ -913,6 +913,9 @@ preLoader.onProgress = function() {
 	loadingBarGraphic.endFill();
 }
 preLoader.onComplete = function() {
+	// Start loading assets we don't require to be loaded before starting
+	for (var i = 0;i < 4;i++) boosters.push(new PIXI.Texture(PIXI.BaseTexture.fromImage("assets/boosters.png"), new PIXI.Rectangle(i * 100, 0, 100, 150)));
+	// Load assets we preloaded
 	goldtex = PIXI.Texture.fromFrame("assets/gold.png");
 	buttex = PIXI.Texture.fromFrame("assets/button.png");
 	var tex = PIXI.Texture.fromFrame("assets/questIcons.png");
@@ -937,12 +940,6 @@ preLoader.onComplete = function() {
 	for (var i = 0;i < 3;i++) sborders.push(new PIXI.Texture(tex, new PIXI.Rectangle(64 * i, 0, 64, 81)));
 	var tex = PIXI.Texture.fromFrame("assets/typesheet.png");
 	for (var i = 0;i < 6;i++) ticons.push(new PIXI.Texture(tex, new PIXI.Rectangle(25 * i, 0, 25, 25)));
-	var boosterLoader = new PIXI.AssetLoader(["assets/boosters.png"]);
-	boosterLoader.onComplete = function() {
-		var tex = PIXI.Texture.fromFrame("assets/boosters.png");
-		for (var i = 0;i < 4;i++) boosters.push(new PIXI.Texture(tex, new PIXI.Rectangle(i * 100, 0, 100, 150)));
-	}
-	boosterLoader.load();
 	startMenu();
 }
 refreshRenderer(loadingBarGraphic);
