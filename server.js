@@ -141,14 +141,29 @@ var trades = {};
 var usersock = {};
 var rooms = {};
 var sockinfo = {};
-process.on("SIGTERM", process.exit).on("SIGINT", process.exit);
-process.on("exit", function(){
+function storeUsers(){
 	for(var u in users){
 		var user = users[u];
 		if (user.pool || user.accountbound){
 			db.hmset("U:"+u, user);
 		}
 	}
+}
+function clearInactiveUsers(){
+	for(var u in users){
+		if (u in usersock && !usersock[u].connected){
+			dropsock.call(usersock[u]);
+			delete usersock[u];
+		}
+	}
+}
+setInterval(function(){
+	storeUsers();
+	clearInactiveUsers();
+}, 300000);
+process.on("SIGTERM", process.exit).on("SIGINT", process.exit);
+process.on("exit", function(){
+	storeUsers();
 	db.quit();
 });
 function dropsock(data){
