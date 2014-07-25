@@ -1719,11 +1719,11 @@ function startEditor(arena, acard, startempty) {
 			startArenaInfo(arena);
 		}
 		editorui.addChild(bexit);
-		var arpts = arena.lv?116:96, arattr = {hp:arena.hp || 200, mark:arena.mark || 1, draw:arena.draw || (arena.lv+1)};
+		var arpts = arena.lv?515:470, arattr = {hp:parseInt(arena.hp || 200), mark:parseInt(arena.mark || 1), draw:parseInt(arena.draw || 1)};
 		var artable = {
-			hp: { min: 90, max: 200, incr: 5, cost: 0.2 },
-			mark: { max: 9, cost: 9 },
-			draw: { max: 3, cost: 27 },
+			hp: { min: 65, max: 200, incr: 45, cost: 1 },
+			mark: { cost: 45 },
+			draw: { cost: 135 },
 		};
 		function sumscore(){
 			var sum = 0;
@@ -1732,9 +1732,9 @@ function startEditor(arena, acard, startempty) {
 			}
 			return sum;
 		}
-		var curpts = new PIXI.Text(sumscore(), ui.mkFont(16, "black"));
-		curpts.position.set(8, 108);
-		var bvhp;
+		var curpts = new PIXI.Text((arpts-sumscore())/45, ui.mkFont(16, "black"));
+		curpts.position.set(8, 100);
+		editorui.addChild(curpts);
 		function makeattrui(y, name){
 			y = 128+y*20;
 			var data = artable[name];
@@ -1743,19 +1743,14 @@ function startEditor(arena, acard, startempty) {
 			var bm = makeButton(50, y, getTextImage("-", ui.mkFont(16, "black"), 0xFFFFFFFF));
 			var bv = new PIXI.Text(arattr[name], ui.mkFont(16, "black"));
 			bv.position.set(64, y);
-			if (name == "hp") bvhp = bv;
 			var bp = makeButton(90, y, getTextImage("+", ui.mkFont(16, "black"), 0xFFFFFFFF));
 			function modattr(x){
 				arattr[name] += x;
 				if (arattr[name] >= (data.min || 0) && (!data.max || arattr[name] <= data.max)){
 					var sum = sumscore();
-					if (sum >= arpts && name != "hp" && arattr.hp - data.cost*5 > 90){
-						bvhp.setText(arattr.hp -= data.cost*5);
-						sum = sumscore();
-					}
-					if (sum < arpts){
+					if (sum <= arpts){
 						bv.setText(arattr[name]);
-						curpts.setText(sum);
+						curpts.setText((arpts-sum)/45);
 						return;
 					}
 				}
