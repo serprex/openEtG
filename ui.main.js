@@ -1162,11 +1162,11 @@ function startMenu() {
 		tinfo.setText("Click here to permanently remove your account.")
 	});
 	bdelete.click = function() {
-		if (foename.value == user.name) {
+		if (foename.value == user.name + "yesdelete") {
 			userEmit("delete");
 			logout();
 		} else {
-			chatArea.value = "Input '" + user.name + "' into Challenge to delete your account";
+			chatArea.value = "Input '" + user.name + "yesdelete' into Challenge to delete your account";
 		}
 	}
 	menuui.addChild(bdelete);
@@ -2542,18 +2542,27 @@ function startArenaTop(info) {
 	}
 	var stage = new PIXI.DisplayObjectContainer();
 	stage.interactive = true;
-	for (var i = 0;i < info[1].length; i++) {
-		var infotxt = new PIXI.Text((i+1) + "  " + info[0][i*2], { font: "16px Dosis" });
-		infotxt.position.set(150, 50 + i * 24);
-		var scoretxt = new PIXI.Text(info[0][i*2 + 1], { font: "16px Dosis" });
-		scoretxt.position.set(400, 50 + i * 24);
-		var winlosstxt = new PIXI.Text(info[1][i], { font: "16px Dosis" });
-		winlosstxt.position.set(450, 50 + i * 24);
+	for (var i = 0;i < info.length; i++) {
+		var data = info[i];
+		var infotxt = new PIXI.Text((i+1) + "  " + data[0], { font: "16px Dosis" });
+		infotxt.position.set(120, 50 + i * 24);
+		var scoretxt = new PIXI.Text(data[1], { font: "16px Dosis" });
+		scoretxt.position.set(370, 50 + i * 24);
+		var winlosstxt = new PIXI.Text(data[2] + "-" + data[3], { font: "16px Dosis" });
+		winlosstxt.position.set(410, 50 + i * 24);
+		var agetxt = new PIXI.Text(data[4], { font: "16px Dosis" });
+		agetxt.position.set(460, 50 + i * 24);
+		if (data[5] in CardCodes){
+			var cardtxt = new PIXI.Text(CardCodes[data[5]].name, { font: "16px Dosis" });
+			cardtxt.position.set(500, 50 + i * 24);
+			stage.addChild(cardtxt);
+		}
 		stage.addChild(infotxt);
 		stage.addChild(scoretxt);
 		stage.addChild(winlosstxt);
+		stage.addChild(agetxt);
 	}
-	var bret = makeButton(50, 300, "Exit");
+	var bret = makeButton(8, 300, "Exit");
 	bret.click = startMenu;
 	stage.addChild(bret);
 	refreshRenderer(stage);

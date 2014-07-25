@@ -353,15 +353,17 @@ io.on("connection", function(socket) {
 	});
 	userEvent(socket, "arenatop", function(data, user){
 		db.zrevrange("arena"+(data.lv?"1":""), 0, 19, "withscores", function(err, obj){
-			var winloss = [];
+			var t20 = [];
 			function getwinloss(i){
-				db.hmget((data.lv?"B:":"A:") + obj[i], "win", "loss", function(err, wl){
-					if (i == obj.length){
-						socket.emit("arenatop", [obj, winloss]);
-					}
-					winloss.push(wl ? wl[0] + "-" + wl[1] : "?");
-					getwinloss(i+2);
-				});
+				if (i == obj.length){
+					socket.emit("arenatop", t20);
+				}else{
+					db.hmget((data.lv?"B:":"A:") + obj[i], "win", "loss", "day", "card", function(err, wl){
+						wl[2] = getDay()-wl[2];
+						t20.push([obj[i], obj[i+1]].concat(wl));
+						getwinloss(i+2);
+					});
+				}
 			}
 			getwinloss(0);
 		});
