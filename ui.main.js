@@ -2179,7 +2179,7 @@ function startMatch() {
 			maybeSetText(decktext[j], game.players[j].deck.length + "cards");
 			maybeSetText(damagetext[j], game.players[j].foe.expectedDamage ? "Next HP loss: " + game.players[j].foe.expectedDamage : "");
 		}
-		damagetext[1].visible = cloakgfx.visible;
+		damagetext[1].visible = !cloakgfx.visible;
 		Effect.next(cloakgfx.visible);
 	}
 	if (user) {
