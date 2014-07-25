@@ -32,16 +32,16 @@ exports.decklength = function(deck){
 }
 exports.encodedeck = function(deck){
 	if (!deck)return "";
-	var count={}, out="";
-	for(var i=0; i<deck.length; i++){
-		if (deck[i] in count){
-			count[deck[i]]++;
+	var pool={}, out="";
+	deck.forEach(function(code){
+		if (code in pool){
+			pool[code]++;
 		}else{
-			count[deck[i]]=1;
+			pool[code]=1;
 		}
-	}
-	for(var key in count){
-		out += encodeCount(count[key]) + key;
+	});
+	for(var code in pool){
+		out += encodeCount(pool[code]) + code;
 	}
 	return out;
 }
