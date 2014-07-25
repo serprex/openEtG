@@ -12,7 +12,7 @@ require("./etg.client").loadcards(function(Cards, CardCodes, Targeting) {
 		[["serprex", "http://fiction.wikia.com/wiki/User:Serprex"], ["622"]],
 		[["vrt", "http://vrt-designs.com"], ["Donation thread", "http://elementscommunity.org/forum/card-art/help-support-an-artist"],
 			["5ll", "52t", "5v3", "5ul", "61t", "562", "5um", "5uk", "591", "5rt", "61o", "5ij", "5rs", "624", "4vc", "55r", "626", "4vh", "5uv", "5fc", "5oc", "5c1", "560", "563", "625", "4ve", "5i5", "5ut", "5rk", "5i7", "55o", "5c9", "55l", "5f2"]],
-		[["willowdream", "http://willowdream.carbonmade.com"], ["Status Icons", "assets/statussheet.png"], ["Status Borders", "assets/statusborders.png"], ["5fb", "5ib", "5il", "5iq", "5od", "5oe", "5ok", "5om", "5oo", "5os", "5p0", "5uo", "7h5", "7gr"]],
+		[["willowdream", "http://willowdream.carbonmade.com"], ["Status Icons", "assets/statussheet.png"], ["Status Borders", "assets/statusborders.png"], ["5fb", "5ib", "5il", "5iq", "5od", "5oe", "5ok", "5om", "5oo", "5os", "5p0", "5uo", "5v2", "7h5", "7gr"]],
 	];
 	var str = "<br>";
 	for(var i=0; i<credits.length; i++){

@@ -324,12 +324,13 @@ function evalthing(c) {
 					score += evalactive(c, c.active.shield)*(c.owner.gpull == c?1:.2);
 				}
 			}else if (key == "cast"){
-				if (!delaymix){
+				if (!delaymix && caneventuallyactive(c.castele, c.cast, c.owner)){
 					score += evalactive(c, c.active.cast) - (c.usedactive?.02:0);
 				}
-			}else score += evalactive(c, c.active[key]);
+			}else if (key != "death" || isCreature){
+				score += evalactive(c, c.active[key]);
+			}
 		}
-		score -= c.active.cast?c.cast/2:0;
 	}
 	score += checkpassives(c);
 	if (isCreature){

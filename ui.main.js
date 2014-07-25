@@ -1734,6 +1734,7 @@ function startEditor(arena, acard, startempty) {
 		}
 		var curpts = new PIXI.Text(sumscore(), ui.mkFont(16, "black"));
 		curpts.position.set(8, 108);
+		var bvhp;
 		function makeattrui(y, name){
 			y = 128+y*20;
 			var data = artable[name];
@@ -1742,13 +1743,14 @@ function startEditor(arena, acard, startempty) {
 			var bm = makeButton(50, y, getTextImage("-", ui.mkFont(16, "black"), 0xFFFFFFFF));
 			var bv = new PIXI.Text(arattr[name], ui.mkFont(16, "black"));
 			bv.position.set(64, y);
+			if (name == "hp") bvhp = bv;
 			var bp = makeButton(90, y, getTextImage("+", ui.mkFont(16, "black"), 0xFFFFFFFF));
 			function modattr(x){
 				arattr[name] += x;
 				if (arattr[name] >= (data.min || 0) && (!data.max || arattr[name] <= data.max)){
 					var sum = sumscore();
 					if (sum >= arpts && name != "hp" && arattr.hp - data.cost*5 > 90){
-						arattr.hp -= data.cost*5;
+						bvhp.setText(arattr.hp -= data.cost*5);
 						sum = sumscore();
 					}
 					if (sum < arpts){
@@ -1785,8 +1787,6 @@ function startEditor(arena, acard, startempty) {
 			if (editordeck.length > 60){
 				editordeck.length = 60;
 			}
-			if (user)
-				user.decks[user.selectedDeck] = editordeck;
 			processDeck();
 		}
 		editorui.addChild(bimport);
@@ -1795,9 +1795,9 @@ function startEditor(arena, acard, startempty) {
 				return function() {
 					editordeck.push(etg.TrueMarks[editormark]);
 					userEmit("setdeck", { d: etgutil.encodedeck(editordeck), number: user.selectedDeck });
+					user.decks[user.selectedDeck] = editordeck;
 					user.selectedDeck = x;
 					editordeck = getDeck(true);
-					cardminus = {};
 					processDeck();
 				}
 			}
@@ -2775,7 +2775,7 @@ function maybeSendChat(e) {
 		var msg = chatinput.value;
 		chatinput.value = "";
 		if (user){
-			var checkPm = msg.split(" ");
+			var checkPm = msg.split(" ", 2);
 			if (checkPm[0] == "/w") {
 				var match = msg.match(/^\/w"(?:[^"\\]|\\.)*"/);
 				var to = (match && match[0]) || checkPm[1];
