@@ -64,8 +64,8 @@ var ActivesValues = {
 	},
 	disfield:8,
 	disshield:7,
-	dive:function(c){
-		return c instanceof etg.CardInstance?c.card.attack:truetrueatk(c)-c.cast-(c.status.dive||0);
+	dive:function(c, ttatk){
+		return c instanceof etg.CardInstance?c.card.attack:ttatk-c.cast-(c.status.dive||0);
 	},
 	divinity:3,
 	drainlife:10,
@@ -97,7 +97,7 @@ var ActivesValues = {
 	gratitude:4,
 	grave:4,
 	growth:5,
-	guard:5,
+	guard:4,
 	hasten:function(c){
 		return c.owner.deck.length/10;
 	},
@@ -209,8 +209,8 @@ var ActivesValues = {
 	unburrow:0,
 	upkeep: -.5,
 	upload:3,
-	vampire:function(c){
-		return (c instanceof etg.CardInstance?c.card.attack:truetrueatk(c))*.7;
+	vampire:function(c, ttatk){
+		return (c instanceof etg.CardInstance?c.card.attack:ttatk)*.7;
 	},
 	virusinfect:0,
 	virusplague:1,
@@ -250,17 +250,17 @@ var ActivesValues = {
 	}
 }
 
-function evalactive(c, active){
+function evalactive(c, active, extra){
 	var aval = ActivesValues[active.activename];
 	return !aval?0:
-		aval instanceof Function?aval(c):
+		aval instanceof Function?aval(c, extra):
 		aval instanceof Array?aval[c.card.upped?1:0]:aval;
 }
 
 function checkpassives(c){
 	var score = 0;
 	if (c.passives) {
-		if (c.passives.airborne) score += 1;
+		if (c.passives.airborne) score += 0.2;
 		if (c.passives.voodoo) score += 1;
 		if (c.passives.swarm) score += 1;
 		if (c.passives.stasis) score += 5;
@@ -313,7 +313,7 @@ function evalthing(c) {
 		for (var key in c.active) {
 			if (key == "hit"){
 				if (!delaymix){
-					score += evalactive(c, c.active.hit)*(ttatk?1:c.status.immaterial?0:.3)*(c.status.adrenaline?2:1);
+					score += evalactive(c, c.active.hit, ttatk)*(ttatk?1:c.status.immaterial?0:.3)*(c.status.adrenaline?2:1);
 				}
 			}else if(key == "auto"){
 				if (!c.status.frozen){
@@ -325,7 +325,7 @@ function evalthing(c) {
 				}
 			}else if (key == "cast"){
 				if (!delaymix && caneventuallyactive(c.castele, c.cast, c.owner)){
-					score += evalactive(c, c.active.cast) - (c.usedactive?.02:0);
+					score += evalactive(c, c.active.cast, ttatk) - (c.usedactive?.02:0);
 				}
 			}else if (key != "death" || isCreature){
 				score += evalactive(c, c.active[key]);
