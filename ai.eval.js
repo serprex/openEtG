@@ -315,7 +315,7 @@ function evalthing(c) {
 		}else if (poison < 0){
 			hp += Math.min(-poison, c.maxhp-c.hp);
 		}
-		score *= hp?(c.status.immaterial || c.status.burrowed ? 2 : Math.pow(Math.min(hp, 15), .3)):.2;
+		score *= hp?(c.status.immaterial || c.status.burrowed ? 1.5 : 1+Math.log(Math.min(hp, 33))/7):.2;
 	}else{
 		score *= c.status.immaterial?2:1.5;
 	}
