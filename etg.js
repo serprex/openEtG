@@ -625,7 +625,7 @@ Thing.prototype.procactive = function(name, params) {
 	}
 	if (params === undefined) params = [this, this];
 	else params.unshift(this, this);
-	if (!(this instanceof Player) && this.active["own" + name]){
+	if (this.active && this.active["own" + name]){
 		this.active["own" + name].apply(null, params);
 	}
 	for(var i=0; i<2; i++){
@@ -1083,7 +1083,7 @@ CardInstance.prototype.useactive = function(target){
 	}else if (card.type == SpellEnum){
 		if (!target || !target.evade(owner)){
 			card.active(this, target);
-			owner.procactive("spell", [target]);
+			this.procactive("spell", [target]);
 		}
 	}else if (card.type == CreatureEnum){
 		new Creature(card, owner).place(true);

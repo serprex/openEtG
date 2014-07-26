@@ -2542,19 +2542,15 @@ function startArenaTop(info) {
 	}
 	var stage = new PIXI.DisplayObjectContainer();
 	stage.interactive = true;
+	stage.addChild(new PIXI.Sprite(backgrounds[0]));
 	for (var i = 0;i < info.length; i++) {
-		var data = info[i];
-		var infotxt = new PIXI.Text((i+1) + "  " + data[0], { font: "16px Dosis" });
-		infotxt.position.set(120, 50 + i * 24);
-		var scoretxt = new PIXI.Text(data[1], { font: "16px Dosis" });
-		scoretxt.position.set(370, 50 + i * 24);
-		var winlosstxt = new PIXI.Text(data[2] + "-" + data[3], { font: "16px Dosis" });
-		winlosstxt.position.set(410, 50 + i * 24);
-		var agetxt = new PIXI.Text(data[4], { font: "16px Dosis" });
-		agetxt.position.set(460, 50 + i * 24);
+		var data = info[i], y = 50 + i * 24;
+		var infotxt = makeText(120, y, (i+1) + "  " + data[0]);
+		var scoretxt = makeText(350, y, data[1]);
+		var winlosstxt = makeText(400, y, data[2] + "-" + data[3]);
+		var agetxt = makeText(460, y, data[4].toString());
 		if (data[5] in CardCodes){
-			var cardtxt = new PIXI.Text(CardCodes[data[5]].name, { font: "16px Dosis" });
-			cardtxt.position.set(500, 50 + i * 24);
+			var cardtxt = makeText(500, y, CardCodes[data[5]].name);
 			stage.addChild(cardtxt);
 		}
 		stage.addChild(infotxt);
