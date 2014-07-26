@@ -237,8 +237,8 @@ Game.prototype.progressMulligan = function(){
 }
 Game.prototype.updateExpectedDamage = function(){
 	if (this.expectedDamage){
-		this.expectedDamage[0] = this.player1.expectedDamage();
-		this.expectedDamage[1] = this.player2.expectedDamage();
+		this.expectedDamage[0] = this.player2.expectedDamage();
+		this.expectedDamage[1] = this.player1.expectedDamage();
 	}
 }
 Player.prototype.shuffle = function(array) {

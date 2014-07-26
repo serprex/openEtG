@@ -455,7 +455,7 @@ function initGame(data, ai) {
 	game.turn.foe.drawhand(7);
 	if (data.foename) game.foename = data.foename;
 	if (ai) {
-		game.player2.ai = ai;
+		game.ai = true;
 		if (game.turn == game.player2) {
 			game.progressMulligan();
 		}
@@ -684,7 +684,7 @@ function mkDemigod() {
 	var dgname = "Demigod\n" + demigod[0];
 	var deck = (!user && aideck.value) || demigod[1];
 	deck = (deck + " " + deck).split(" ");
-	initGame({ first: Math.random() < .5, deck: deck, urdeck: urdeck, seed: Math.random() * etgutil.MAX_INT, hp: 200, aimarkpower: 3, aidrawpower: 2, foename: dgname }, aiEvalFunc);
+	initGame({ first: Math.random() < .5, deck: deck, urdeck: urdeck, seed: Math.random() * etgutil.MAX_INT, hp: 200, aimarkpower: 3, aidrawpower: 2, foename: dgname }, true);
 	game.cost = 20;
 	game.level = 3;
 }
@@ -725,7 +725,7 @@ function mkMage() {
 
 	var mage = mages[Math.floor(Math.random() * mages.length)];
 	var deck = ((!user && aideck.value) || mage[1]).split(" ");
-	initGame({ first: Math.random() < .5, deck: deck, urdeck: urdeck, seed: Math.random() * etgutil.MAX_INT, hp: 125, foename: mage[0] }, aiEvalFunc);
+	initGame({ first: Math.random() < .5, deck: deck, urdeck: urdeck, seed: Math.random() * etgutil.MAX_INT, hp: 125, foename: mage[0] }, true);
 	game.cost = 5;
 	game.level = 1;
 }
@@ -750,7 +750,7 @@ function mkQuestAi(questname, stage, area) {
 	if (urdeck.length < (user ? 31 : 11)) {
 		return "ERROR: Your deck is invalid or missing! Please exit and create a valid deck in the deck editor.";
 	}
-	initGame({ first: Math.random() < .5, deck: deck, urdeck: urdeck, seed: Math.random() * etgutil.MAX_INT, hp: hp, aimarkpower: markpower, foename: foename, urhp : playerHPstart, aidrawpower:drawpower }, aiEvalFunc);
+	initGame({ first: Math.random() < .5, deck: deck, urdeck: urdeck, seed: Math.random() * etgutil.MAX_INT, hp: hp, aimarkpower: markpower, foename: foename, urhp : playerHPstart, aidrawpower:drawpower }, true);
 	game.quest = [questname, stage];
 	game.wintext = quest.wintext || "";
 	game.autonext = quest.autonext || false;
@@ -866,7 +866,7 @@ function mkAi(level) {
 			var typeName = ["Commoner", "Mage", "Champion"];
 
 			var foename = typeName[level] + "\n" + randomNames[Math.floor(Math.random() * randomNames.length)];
-			initGame({ first: Math.random() < .5, deck: deck, urdeck: urdeck, seed: Math.random() * etgutil.MAX_INT, hp: level == 0 ? 100 : level == 1 ? 125 : 150, aimarkpower: level == 2 ? 2 : 1, foename: foename, aidrawpower: level == 2 ? 2 : 1 }, aiEvalFunc);
+			initGame({ first: Math.random() < .5, deck: deck, urdeck: urdeck, seed: Math.random() * etgutil.MAX_INT, hp: level == 0 ? 100 : level == 1 ? 125 : 150, aimarkpower: level == 2 ? 2 : 1, foename: foename, aidrawpower: level == 2 ? 2 : 1 }, true);
 			game.cost = gameprice;
 			game.level = level;
 		}
@@ -1947,9 +1947,9 @@ function startMatch() {
 	var aiDelay = 0;
 	var animCb = function() {
 		var now;
-		if (game.phase == etg.PlayPhase && game.turn == game.player2 && game.player2.ai && (now = Date.now()) >= aiDelay) {
+		if (game.phase == etg.PlayPhase && game.turn == game.player2 && game.ai && (now = Date.now()) >= aiDelay) {
 			aiDelay = now + 300;
-			var cmd = game.player2.ai();
+			var cmd = aiEvalFunc();
 			cmds[cmd[0]](cmd[1]);
 		}
 		var pos = realStage.getMousePosition();
@@ -2004,7 +2004,7 @@ function startMatch() {
 			cardart.visible = true;
 			cardart.position.set(cardartx || 654, pos.y > 300 ? 44 : 300);
 		} else cardart.visible = false;
-		if (game.winner == game.player1 && user && !game.quest && game.player2.ai && !game.cardreward) {
+		if (game.winner == game.player1 && user && !game.quest && game.ai && !game.cardreward) {
 			var winnable = [], cardwon;
 			for (var i = 0;i < foeDeck.length;i++) {
 				if (foeDeck[i].type != etg.PillarEnum && foeDeck[i].rarity < 4) {
@@ -2183,8 +2183,8 @@ function startMatch() {
 		Effect.next(cloakgfx.visible);
 	}
 	if (user) {
-		userEmit("addloss", { pvp: !game.player2.ai });
-		if (!game.player2.ai) user.pvplosses++;
+		userEmit("addloss", { pvp: !game.ai });
+		if (!game.ai) user.pvplosses++;
 		else user.ailosses++;
 	}
 	gameui = new PIXI.DisplayObjectContainer();
@@ -2210,18 +2210,18 @@ function startMatch() {
 	gameui.addChild(foename);
 	endturnFunc = endturn.click = function(e, discard) {
 		if (game.turn == game.player1 && (game.phase == etg.MulliganPhase1 || game.phase == etg.MulliganPhase2)){
-			if (!game.player2.ai) {
+			if (!game.ai) {
 				socket.emit("mulligan", true);
 			}
 			game.progressMulligan();
-			if (game.phase == etg.MulliganPhase2 && game.player2.ai) {
+			if (game.phase == etg.MulliganPhase2 && game.ai) {
 				game.progressMulligan();
 			}
 		}else if (game.winner) {
 			if (user) {
 				if (game.winner == game.player1) {
-					userEmit("addwin", { pvp: !game.player2.ai });
-					if (game.player2.ai) {
+					userEmit("addwin", { pvp: !game.ai });
+					if (game.ai) {
 						user.aiwins++;
 						user.ailosses--;
 					}
@@ -2255,7 +2255,7 @@ function startMatch() {
 				discarding = true;
 			} else {
 				discarding = false;
-				if (!game.player2.ai) {
+				if (!game.ai) {
 					socket.emit("endturn", discard);
 				}
 				game.player1.endturn(discard);
@@ -2283,7 +2283,7 @@ function startMatch() {
 	var resigning;
 	resign.click = function() {
 		if (resigning){
-			if (!game.player2.ai) {
+			if (!game.ai) {
 				socket.emit("foeleft");
 			}
 			startMenu();
@@ -2685,7 +2685,7 @@ socket.on("librarygive", initLibrary);
 socket.on("foearena", function(data) {
 	var deck = etgutil.decodedeck(data.deck);
 	chatArea.value = data.name + ": " + deck.join(" ");
-	initGame({ first: data.seed < etgutil.MAX_INT/2, deck: deck, urdeck: getDeck(), seed: data.seed, hp: data.hp, cost: data.cost, foename: data.name, aidrawpower: data.draw, aimarkpower: data.mark }, aiEvalFunc);
+	initGame({ first: data.seed < etgutil.MAX_INT/2, deck: deck, urdeck: getDeck(), seed: data.seed, hp: data.hp, cost: data.cost, foename: data.name, aidrawpower: data.draw, aimarkpower: data.mark }, true);
 	game.arena = data.name;
 	game.level = data.lv+1;
 	game.cost = 5+data.lv*5;
@@ -2705,7 +2705,7 @@ socket.on("passchange", function(data) {
 socket.on("endturn", cmds.endturn);
 socket.on("cast", cmds.cast);
 socket.on("foeleft", function(data) {
-	if (game && !game.player2.ai) {
+	if (game && !game.ai) {
 		game.setWinner(game.player1);
 	}
 });
