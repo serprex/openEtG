@@ -1045,6 +1045,11 @@ ricochet:function(c,t){
 		}
 	}
 },
+sadism:function(c, t, dmg){
+	if (dmg > 0 && (!c.card.upped || c.owner == t.owner)){
+		c.owner.dmg(-dmg);
+	}
+},
 sanctuary:function(c,t){
 	c.owner.sanctuary = true;
 	Effect.mkText("+4", ui.tgtToPos(c));

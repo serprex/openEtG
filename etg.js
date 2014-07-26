@@ -41,7 +41,7 @@ function Card(type, info){
 				}
 				var active = actives[i].split("=");
 				if (active.length == 1){
-					this.active["auto"] = Actives[active[0]];
+					this.active.auto = Actives[active[0]];
 				}else{
 					this.active[this.readCost("cast", active[0])?"cast":active[0]] = Actives[active[1]];
 				}
