@@ -2177,7 +2177,7 @@ function startMatch() {
 			var poisoninfo = !poison ? "" : (poison > 0 ? poison + " 1:2" : -poison + " 1:7") + (game.players[j].neuro ? " 1:10" : "");
 			poisontext[j].setTexture(getTextImage(poisoninfo,16));
 			maybeSetText(decktext[j], game.players[j].deck.length + "cards");
-			maybeSetText(damagetext[j], game.players[j].foe.expectedDamage ? "Next HP loss: " + game.players[j].foe.expectedDamage : "");
+			maybeSetText(damagetext[j], game.expectedDamage[j] ? "Next HP loss: " + game.expectedDamage[j] : "");
 		}
 		damagetext[1].visible = !cloakgfx.visible;
 		Effect.next(cloakgfx.visible);

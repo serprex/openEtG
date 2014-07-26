@@ -273,32 +273,6 @@ function checkpassives(c){
 	return score;
 }
 
-function truetrueatk(c) {
-	var fsh = c.owner.foe.shield;
-	var tatk = c.trueatk(), fshactive = fsh && fsh.active.shield;
-	var momentum = atk<0 || c.status.momentum || c.status.psion;
-	var dr, atk;
-	if (momentum){
-		atk = tatk;
-	}else{
-		dr = fsh?fsh.truedr():0;
-		atk = Math.max(tatk-dr, 0);
-		if (fshactive == Actives.weight && c instanceof etg.Creature && c.truehp()>5){
-			atk = 0;
-		}
-	}
-	if (atk>0 && c.status.adrenaline) {
-		var attacks = etg.countAdrenaline(tatk);
-		while (c.status.adrenaline < attacks) {
-			c.status.adrenaline++;
-			atk += momentum?c.trueatk():Math.max(c.trueatk()-dr, 0);
-		}
-		c.status.adrenaline = 1;
-	}
-	// todo SoFr
-	return atk * (fshactive == Actives.evade100 ? 1 - fsh.status.charges / 6 : fshactive == Actives.evade50 ? .5 : fshactive == Actives.evade40 ? .6 : fshactive == Actives.chaos ? .75 : 1) * (((fsh && fsh.passives.reflect && c.status.psion) || c.owner.foe.sosa) ? -1 : 1);
-}
-
 function evalthing(c) {
 	if (!c) return 0;
 	var score = 0;
@@ -306,7 +280,7 @@ function evalthing(c) {
 	var delaymix = Math.max((c.status.frozen||0), (c.status.delayed||0));
 	var ttatk;
 	if (isWeapon || isCreature) {
-		ttatk = truetrueatk(c);
+		ttatk = c.estimateDamage();
 		score += ttatk*(delaymix?1-Math.min(delaymix/5, .6):1);
 	}else ttatk = 0;
 	if (!etg.isEmpty(c.active)) {
