@@ -508,8 +508,8 @@ Player.prototype.expectedDamage = function() {
 			totalDamage += this.creatures[i].estimateDamage();
 	}
 	if (this.weapon) totalDamage += this.weapon.estimateDamage();
-	if (player.foe.status.poison) totalDamage += player.foe.status.poison;
-	return Math.round(totalDamage) * (player.foe.sosa ? -1 : 1);
+	if (this.foe.status.poison) totalDamage += this.foe.status.poison;
+	return Math.round(totalDamage);
 }
 Player.prototype.countcreatures = function() {
 	var res = 0;
