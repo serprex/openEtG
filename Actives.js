@@ -70,7 +70,6 @@ air:function(c,t){
 	c.owner.spend(etg.Air, -1);
 },
 alphawolf: function (c, t) {
-	if (c != t) return;
 	new etg.Creature(Cards.PackWolf.asUpped(c.card.upped), c.owner).place();
 	new etg.Creature(Cards.PackWolf.asUpped(c.card.upped), c.owner).place();
 },
@@ -765,9 +764,10 @@ metamorph:function(c,t){
 	c.owner.spend(c.owner.mark, -2);
 },
 mimic: function (c, t) {
-	if (c == t || !(t instanceof etg.Creature)) return;
-	c.transform(t.card);
-	c.addactive("play", Actives.mimic);
+	if (c != t && t instanceof etg.Creature) {
+		c.transform(t.card);
+		c.addactive("play", Actives.mimic);
+	}
 },
 miracle:function(c,t){
 	c.owner.quanta[etg.Light] = 0;
@@ -793,7 +793,6 @@ momentum:function(c,t){
 	t.status.momentum = true;
 },
 mutant: function (c, t) {
-	if (c != t) return;
 	if (mutantactive(c)){
 		c.cast = c.owner.uptoceil(2);
 		c.castele = c.owner.upto(13);
@@ -904,7 +903,7 @@ parallel:function(c,t){
 	}
 },
 phoenix:function(c,t, index){
-	if (c == t && !c.owner.creatures[index]){
+	if (!c.owner.creatures[index]){
 		c.owner.creatures[index] = new etg.Creature(Cards.Ash.asUpped(c.card.upped), c.owner);
 	}
 },
@@ -1004,7 +1003,6 @@ ren:function(c,t){
 	}
 },
 reveal: function (c, t) {
-	if (c != t) return;
 	c.owner.precognition = true;
 },
 rewind:function(c,t){
@@ -1170,10 +1168,8 @@ soulcatch:function(c,t){
 	c.owner.spend(etg.Death, -3);
 },
 spores:function(c,t, index){
-	if (c == t){
-		new etg.Creature(Cards.Spore.asUpped(c.card.upped), c.owner).place();
-		new etg.Creature(Cards.Spore.asUpped(c.card.upped), c.owner).place();
-	}
+	new etg.Creature(Cards.Spore.asUpped(c.card.upped), c.owner).place();
+	new etg.Creature(Cards.Spore.asUpped(c.card.upped), c.owner).place();
 },
 sskin:function(c,t){
 	c.owner.buffhp(c.owner.quanta[etg.Earth]);

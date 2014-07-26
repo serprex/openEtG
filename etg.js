@@ -606,15 +606,21 @@ Player.prototype.endturn = function(discard) {
 	this.expectedDamage = expectedDamage(this);
 	this.foe.expectedDamage = expectedDamage(this.foe);
 }
-Player.prototype.procactive = function(name, func) {
+Thing.prototype.procactive = function(name, params) {
 	function proc(c){
 		var a;
 		if (c && (a = c.active[name])){
-			func(a, c);
+			params[0] = c;
+			a.apply(null, params);
 		}
 	}
+	if (params === undefined) params = [this, this];
+	else params.unshift(this, this);
+	if (!(this instanceof Player) && this.active["own" + name]){
+		this.active["own" + name].apply(null, params);
+	}
 	for(var i=0; i<2; i++){
-		var pl = i==0?this:this.foe;
+		var pl = i==0?this.owner:this.owner.foe;
 		pl.creatures.forEach(proc);
 		pl.permanents.forEach(proc);
 		proc(pl.shield);
@@ -625,8 +631,7 @@ Player.prototype.drawcard = function() {
 	if (this.hand.length<8){
 		if (this.deck.length>0){
 			this.hand[this.hand.length] = new CardInstance(this.deck.pop(), this);
-			var self = this;
-			this.procactive("draw", function(f, c) { f(c, self) });
+			this.procactive("draw");
 			if (this.deck.length == 0 && this.game.player1 == this)
 				Effect.mkSpriteFade(getTextImage("This was your last card!", ui.mkFont(32, "white"), 0));
 		}else this.game.setWinner(this.foe);
@@ -702,8 +707,7 @@ Thing.prototype.activetext = function(){
 	return info;
 }
 Thing.prototype.place = function(fromhand){
-	var self = this;
-	this.owner.procactive("play", function (f, c) { f(c, self, fromhand) });
+	this.procactive("play", [fromhand]);
 }
 Creature.prototype.place = function(fromhand){
 	place(this.owner.creatures, this);
@@ -819,8 +823,7 @@ Creature.prototype.spelldmg = Creature.prototype.dmg = function(x, dontdie){
 	if (!x)return 0;
 	var dmg = x<0 ? Math.max(this.hp-this.maxhp, x) : Math.min(this.truehp(), x);
 	this.hp -= dmg;
-	var self = this;
-	this.owner.procactive("dmg", function(f, c) { f(c, self, dmg) });
+	this.procactive("dmg", [dmg]);
 	if (this.truehp() <= 0){
 		if (!dontdie)this.die();
 	}else if (dmg>0 && this.passives.voodoo)this.owner.foe.dmg(x);
@@ -842,11 +845,10 @@ CardInstance.prototype.remove = function(index) {
 	return index;
 }
 Creature.prototype.deatheffect = Weapon.prototype.deatheffect = function(index) {
-	var self = this;
 	if (this.active.death){
-		this.active.death(this, this, index)
+		this.active.death(this, this, index);
 	}
-	this.owner.procactive("death", function(f, c) { f(c, self, index) });
+	this.procactive("death", [index]);
 	if (index>=0) Effect.mkDeath(ui.creaturePos(this.owner == this.owner.game.player1?0:1, index));
 }
 Creature.prototype.die = function() {
@@ -1067,14 +1069,13 @@ CardInstance.prototype.useactive = function(target){
 		owner.addpoison(1);
 	}
 	owner.spend(card.costele, card.cost);
-	var self = this;
 	if (card.type <= PermanentEnum){
 		var cons = [Pillar, Weapon, Shield, Permanent][card.type];
 		new cons(card, owner).place(true);
 	}else if (card.type == SpellEnum){
 		if (!target || !target.evade(owner)){
 			card.active(this, target);
-			owner.procactive("spell", function(f, c) { f(c, self, target) });
+			owner.procactive("spell", [target]);
 		}
 	}else if (card.type == CreatureEnum){
 		new Creature(card, owner).place(true);
