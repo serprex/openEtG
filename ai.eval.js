@@ -301,7 +301,7 @@ function evalthing(c) {
 				if (!delaymix && caneventuallyactive(c.castele, c.cast, c.owner)){
 					score += evalactive(c, c.active.cast, ttatk) - (c.usedactive?.02:0);
 				}
-			}else if (key != "death" || isCreature){
+			}else if (key != "owndeath" || isCreature){
 				score += evalactive(c, c.active[key]);
 			}
 		}
