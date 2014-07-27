@@ -16,8 +16,8 @@ exports.upgrade = function(data, user){
 		var boundCount = etgutil.countcard(user.accountbound, card.code);
 		if (poolCount + boundCount >= use){
 			usepool = Math.max(use - boundCount, 0);
-			user.accountbound = etgutil.addcard(user.accountbound, -use);
-			if (usepool) user.pool = etgutil.addcard(user.pool, -usepool);
+			user.accountbound = etgutil.addcard(user.accountbound, card.code, -use);
+			if (usepool) user.pool = etgutil.addcard(user.pool, card.code, -usepool);
 			user.accountbound = etgutil.addcard(user.accountbound, newcard);
 		}
 	}else{

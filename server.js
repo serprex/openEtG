@@ -554,8 +554,7 @@ io.on("connection", function(socket) {
 		}
 	});
 	userEvent("updatequest", function (data, user) {
-		var qu = "Q:" + data.u;
-		db.hset(qu, data.quest, data.newstage);
+		db.hset("Q:" + data.u, data.quest, data.newstage);
 	});
 	userEvent("booster", function(data, user) {
 		var freepacklist;
