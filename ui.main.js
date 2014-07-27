@@ -1377,18 +1377,15 @@ function upgradestore() {
 				if (cardpool[card.code] >= use) {
 					var bound = etgutil.count(user.pool, card.code) < use;
 					userEmit("upgrade", { card: card.code, bound: bound });
-					for (var i = 0;i < use;i++) {
-						var idx;
-						if (bound && etgutil.count(user.accountbound, card.code)){
-							user.accountbound = etgutil.addcard(user.accountbound, card.code, -1);
-						}else{
-							user.pool = etgutil.addcard(user.pool, card.code, -1);
-						}
-					}
+					var newcard = card.asUpped(true).code;
 					if (bound){
-						user.accountbound = etgutil.addcard(user.accountbound, card.asUpped(true).code);
+						var count = etgutil.countcard(user.accountbound, card.code), usepool = Math.max(use - count, 0);
+						user.accountbound = etgutil.addcard(user.accountbound, -use);
+						if (usepool) user.pool = etgutil.addcard(user.pool, -usepool);
+						user.accountbound = etgutil.addcard(user.accountbound, newcard);
 					}else{
-						user.pool = etgutil.addcard(user.pool, card.asUpped(true).code);
+						user.pool = etgutil.addcard(user.pool, card.code, -use);
+						user.pool = etgutil.addcard(user.pool, newcard);
 					}
 					adjustdeck();
 				}
