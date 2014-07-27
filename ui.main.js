@@ -655,7 +655,7 @@ function deckMorph(deck,MorphFrom,morphTo) {
 	return deckout;
 }
 
-function mkDemigod(daily, extrafunc) {
+function mkDemigod(daily) {
 	return function() {
 		var urdeck = getDeck();
 		if (urdeck.length < (user ? 31 : 11)) {
@@ -676,10 +676,9 @@ function mkDemigod(daily, extrafunc) {
 		initGame({ first: Math.random() < .5, deck: deck, urdeck: urdeck, seed: Math.random() * etgutil.MAX_INT, hp: 200, aimarkpower: 3, aidrawpower: 2, foename: dgname }, true);
 		game.cost = daily ? 0 : 20;
 		game.level = 3;
-		if (extrafunc) extrafunc(game);
 	}
 }
-function mkMage(daily, extrafunc) {
+function mkMage(daily) {
 	return function() {
 		var urdeck = getDeck();
 		if (urdeck.length < (user ? 31 : 11)) {
@@ -699,7 +698,6 @@ function mkMage(daily, extrafunc) {
 		initGame({ first: Math.random() < .5, deck: deck, urdeck: urdeck, seed: Math.random() * etgutil.MAX_INT, hp: 125, foename: mage[0] }, true);
 		game.cost = daily ? 0 : 5;
 		game.level = 1;
-		if (extrafunc) extrafunc(game);
 	}
 }
 function mkQuestAi(questname, stage, area) {
@@ -730,7 +728,7 @@ function mkQuestAi(questname, stage, area) {
 	game.area = area;
 	if ((user.quest[questname] <= stage || !(questname in user.quest))) game.cardreward = etgutil.encodedeck(quest.cardreward);
 }
-function mkAi(level, daily, extrafunc) {
+function mkAi(level, daily) {
 	return function() {
 		var uprate = level == 0 ? 0 : level == 1 ? .1 : .3;
 		var gameprice = level == 0 ? 0 : level == 1 ? 5 : 10;
@@ -841,7 +839,6 @@ function mkAi(level, daily, extrafunc) {
 			initGame({ first: Math.random() < .5, deck: deck, urdeck: urdeck, seed: Math.random() * etgutil.MAX_INT, hp: level == 0 ? 100 : level == 1 ? 125 : 150, aimarkpower: level == 2 ? 2 : 1, foename: foename, aidrawpower: level == 2 ? 2 : 1 }, true);
 			game.cost = daily ? 0 : gameprice;
 			game.level = level;
-			if (extrafunc) extrafunc(game);
 		}
 	}
 }
@@ -1582,9 +1579,9 @@ function startStore() {
 }
 function addToGame(data) {
 	for (key in data) {
-		if (key == "playerhp")
+		if (key == "player1.hp")
 			game.player1.hp = data[key];
-		else if (key == "playermaxhp")
+		else if (key == "player1.maxhp")
 			game.player1.maxhp = data[key];
 		else
 			game[key] = data[key];
@@ -1593,7 +1590,7 @@ function addToGame(data) {
 function mkDaily(type) {
 	if (type == 1) {
 		return function() {
-			var dataNext = { goldreward: 75, endurance: 2, cost: 0, daily: 1 , cardreward: ""};
+			var dataNext = { goldreward: 75, endurance: 2, cost: 0, daily: 1 , cardreward: "", noheal: true};
 			mkAi(0)();
 			addToGame(dataNext);
 			game.dataNext = dataNext;
@@ -1628,11 +1625,15 @@ function startColosseum(){
 		coloui.addChild(new PIXI.Sprite(backgrounds[0]));
 		var magename = aiDecks.mage[user.dailymage][0];
 		var dgname = aiDecks.demigod[user.dailydg][0];
-		var events = [{name:"Novice Endurance", desc:"Fight 3 Commoners in a row without healing in between. Can try until you win."},{name:"Expert Endurance", desc:"Fight 3 Champions in a row. Can try until you win"},{name:"Novice Duel", desc:"Fight " + magename +", Only one attempt allowed"},{name:"Expert Duel",desc:"Fight " + dgname + ". Only one attempt allowed"}];
+		var events = [
+			{ name: "Novice Endurance", desc: "Fight 3 Commoners in a row without healing in between. Can try until you win." },
+			{ name: "Expert Endurance", desc: "Fight 3 Champions in a row. Can try until you win" },
+			{ name: "Novice Duel", desc: "Fight " + magename + ", Only one attempt allowed" },
+			{ name: "Expert Duel", desc: "Fight " + dgname + ". Only one attempt allowed" }
+		];
 
 		for (var i = 1;i < 5;i++) {
 			var active = !(user.daily & (1 << i));
-			active = true;
 			if (active) {
 				var button = makeButton(50, 100 + 30 * i, "Fight!");
 				(function(_i) { button.click = mkDaily(_i) })(i);
@@ -2026,8 +2027,10 @@ function startMatch() {
 				else if (game.winner == game.player1 && game.daily && game.endurance !== undefined) {
 					if (game.endurance) {
 						var data = game.dataNext;
-						data.playerhp = game.player1.hp;
-						data.playermaxhp = game.player1.maxhp;
+						if (game.noheal) {
+							data["player1.hp"] = game.player1.hp;
+							data["player1.maxhp"] = game.player1.maxhp;
+						}
 						data.endurance--;
 						mkAi(game.level)();
 						addToGame(data);
@@ -2359,7 +2362,7 @@ function startMatch() {
 					var hpfactor = [11, 7, 6, 2][game.level];
 					goldwon = Math.floor((basereward + Math.floor(game.player1.hp / hpfactor)) * (game.player1.hp == game.player1.maxhp ? 1.5 : 1));
 				} else goldwon = 0;
-				game.goldreward = goldwon + (game.cost || 0) + game.addonreward || 0;
+				game.goldreward = goldwon + (game.cost || 0) + (game.addonreward || 0);
 			}
 		}
 		if (game.phase != etg.EndPhase) {

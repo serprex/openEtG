@@ -216,8 +216,8 @@ function useruser(servuser, cb){
 			pvplosses: parseInt(servuser.pvplosses) || 0,
 			quest: obj,
 			daily: parseInt(servuser.daily) || 0,
-			dailymage: parseInt(servuser.dailymage) || -1,
-			dailydg: parseInt(servuser.dailydg) || -1
+			dailymage: parseInt(servuser.dailymage) || 0,
+			dailydg: parseInt(servuser.dailydg) || 0
 		});
 	});
 }
