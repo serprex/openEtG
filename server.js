@@ -61,7 +61,7 @@ function loginRespond(res, servuser, pass){
 	}else postHash(null, servuser.name);
 }
 function loginAuth(req, res, next){
-	if (req.url.indexOf("/auth?") == 0){
+	if (req.url.substr(0, 6) == "/auth?"){
 		var paramstring = req.url.substring(6);
 		var params = qstring.parse(paramstring);
 		var name = (params.u || "").trim();
@@ -102,7 +102,7 @@ function codeSmithLoop(res, iter, params){
 	}
 }
 function codeSmith(req, res, next){
-	if (req.url.indexOf("/code?") == 0){
+	if (req.url.substr(0, 6) == "/code?"){
 		var paramstring = req.url.substring(6);
 		var params = qstring.parse(paramstring);
 		fs.readFile(__dirname + "/codepsw", function(err, data) {
@@ -224,14 +224,6 @@ function genericChat(socket, data){
 	}
 	else io.emit("chat", data)
 }
-function addCards(user, cards, bound) {
-	if (bound) {
-		user.accountbound = etgutil.mergedecks(user.accountbound, cards);
-	}else{
-		user.pool = etgutil.mergedecks(user.pool, cards);
-	}
-}
-
 io.on("connection", function(socket) {
 	sockinfo[socket.id] = {};
 	socket.on("disconnect", dropsock);
@@ -285,6 +277,7 @@ io.on("connection", function(socket) {
 	utilEvent("addgold");
 	utilEvent("addloss");
 	utilEvent("addwin");
+	utilEvent("addcards");
 	userEvent("inituser", function(data, user) {
 		var starters = [
 			"015990g4sa014sd014t4014vi014vs0152o0152t0155u0155p0158q015ca015fi015f6015if015il015lo015lb015ou015s5025rq015v3015ut0161s018pi",
@@ -329,9 +322,6 @@ io.on("connection", function(socket) {
 		db.del("Q:" + u);
 		delete users[u];
 		delete usersock[u];
-	});
-	userEvent("addcards", function(data, user) {
-		addCards(user, data.c, data.accountbound);
 	});
 	userEvent("setdeck", function(data, user) {
 		var decks = user.decks ? user.decks.split(",") : [];
@@ -590,17 +580,19 @@ io.on("connection", function(socket) {
 			}
 			if (bound) {
 				freepacklist[data.pack]--;
+				user.accountbound = etgutil.mergedecks(user.accountbound, newCards);
 				if (freepacklist.every(function(x){return x == 0})) {
 					db.hdel("U:" + user.name, "freepacks");
 					delete user.freepacks;
 				}
-				else
+				else{
 					user.freepacks = freepacklist.join(",");
+				}
 			}
 			else {
 				user.gold -= pack.cost;
+				user.pool = etgutil.mergedecks(user.pool, newCards);
 			}
-			addCards(user, newCards, bound);
 			socket.emit("boostergive", { cards: newCards, accountbound: bound, cost:pack.cost, packtype:data.pack });
 		}
 	});

@@ -48,3 +48,6 @@ exports.addwin = function(data, user) {
 		user.ailosses = user.ailosses ? parseInt(user.ailosses) - 1 : 0;
 	}
 }
+exports.addcards = function(data, user) {
+	user.pool = etgutil.mergedecks(user.pool, data.c);
+}

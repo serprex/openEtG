@@ -635,8 +635,7 @@ function victoryScreen() {
 			cardArt.position.set(470-cardrewardlength*20+i*40, 170);
 			victoryui.addChild(cardArt);
 		});
-		user.pool = etgutil.mergedecks(user.pool, game.cardreward);
-		userEmit("addcards", { c: game.cardreward });
+		userExec("addcards", { c: game.cardreward });
 	}
 
 	refreshRenderer(victoryui);
