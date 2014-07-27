@@ -20,8 +20,9 @@ if (localStorage){
 })();
 var Cards, CardCodes, Targeting, game;
 (function(){
-var targetingMode, targetingModeCb, targetingText, discarding, user, renderer, endturnFunc, cancelFunc, foeDeck, player2summon, player2Cards, guestname, cardChosen, newCards;
+var targetingMode, targetingModeCb, targetingText, discarding, user, renderer, endturnFunc, cancelFunc, foeDeck, player2summon, player2Cards, guestname, cardChosen, newCards, muteset = {};
 var etgutil = require("./etgutil");
+var userutil = require("./userutil");
 var etg = require("./etg");
 var Actives = require("./Actives");
 var Effect = require("./Effect");
@@ -67,6 +68,11 @@ function userEmit(x, data) {
 	data.u = user.name;
 	data.a = user.auth;
 	socket.emit(x, data);
+}
+function userExec(x, data){
+	if (!data) data = {};
+	userEmit(x, data);
+	userutil[x](data, user);
 }
 function tgtToBits(x) {
 	var bits;
@@ -295,7 +301,6 @@ function initTrade(data) {
 	var selectedCardsprites = [];
 	var player2Cardsprites = [];
 	player2Cards = [];
-	var cardartcode;
 	bcancel.click = function() {
 		userEmit("canceltrade");
 		startMenu();
@@ -326,18 +331,10 @@ function initTrade(data) {
 	editorui.addChild(btrade);
 	editorui.addChild(bcancel);
 
-	var cardpool = {};
-	etgutil.iterdeck(user.pool, function(code){
-		if (code in cardpool) {
-			cardpool[code]++;
-		} else {
-			cardpool[code] = 1;
-		}
-	});
-
+	var cardpool = etgutil.deck2pool(user.pool);
 	var cardsel = makeCardSelector(
 		function(code){
-			cardartcode = code;
+			cardArt.setTexture(getArt(code));
 		},
 		function(code){
 			var card = CardCodes[code];
@@ -362,7 +359,7 @@ function initTrade(data) {
 				selectedCards.splice(_i, 1);
 			}
 			sprite.mouseover = function() {
-				cardartcode = selectedCards[_i];
+				cardArt.setTexture(getArt(selectedCards[_i]));
 			}
 		})(i);
 		editorui.addChild(sprite);
@@ -373,7 +370,7 @@ function initTrade(data) {
 		sprite.position.set(450 + Math.floor(i / 10) * 100, 8 + (i % 10) * 20);
 		(function(_i) {
 			sprite.mouseover = function() {
-				cardartcode = player2Cards[_i];
+				cardArt.setTexture(getArt(player2Cards[_i]));
 			}
 		})(i);
 		editorui.addChild(sprite);
@@ -386,9 +383,6 @@ function initTrade(data) {
 	editorui.addChild(cardArt);
 	refreshRenderer(editorui, function() {
 		cardsel.next(cardpool, cardminus);
-		if (cardartcode) {
-			cardArt.setTexture(getArt(cardartcode));
-		}
 		for (var i = 0;i < player2Cards.length;i++) {
 			player2Cardsprites[i].visible = true;
 			player2Cardsprites[i].setTexture(getCardImage(player2Cards[i]));
@@ -406,24 +400,16 @@ function initTrade(data) {
 	});
 }
 function initLibrary(pool){
-	console.log(pool);
-	var editorui = new PIXI.DisplayObjectContainer(), cardartcode;
+	var editorui = new PIXI.DisplayObjectContainer();
 	editorui.interactive = true;
 	editorui.addChild(new PIXI.Sprite(backgrounds[0]));
 	var bexit = makeButton(10, 10, "Exit");
 	bexit.click = startMenu;
 	editorui.addChild(bexit);
-	var cardminus = {}, cardpool = {};
-	etgutil.iterdeck(pool, function(code) {
-		if (code in cardpool) {
-			cardpool[code]++;
-		} else {
-			cardpool[code] = 1;
-		}
-	});
+	var cardminus = {}, cardpool = etgutil.deck2pool(pool);
 	var cardsel = makeCardSelector(
 		function(code){
-			cardartcode = code;
+			cardArt.setTexture(getArt(code));
 		}, null);
 	editorui.addChild(cardsel);
 	var cardArt = new PIXI.Sprite(nopic);
@@ -431,9 +417,6 @@ function initLibrary(pool){
 	editorui.addChild(cardArt);
 	refreshRenderer(editorui, function(){
 		cardsel.next(cardpool, cardminus);
-		if (cardartcode) {
-			cardArt.setTexture(getArt(cardartcode));
-		}
 	});
 }
 function initGame(data, ai) {
@@ -478,7 +461,7 @@ function initGame(data, ai) {
 	game.turn.foe.drawhand(7);
 	if (data.foename) game.foename = data.foename;
 	if (ai) {
-		game.player2.ai = ai;
+		game.ai = true;
 		if (game.turn == game.player2) {
 			game.progressMulligan();
 		}
@@ -642,8 +625,7 @@ function victoryScreen() {
 		var goldshown = (game.goldreward || 0) - (game.cost || 0);
 		tgold = makeText(340, 550, "Gold won: $" + goldshown);
 		victoryui.addChild(tgold);
-		user.gold += game.goldreward;
-		userEmit("addgold", { g: game.goldreward });
+		userExec("addgold", { g: game.goldreward });
 	}
 	if (game.cardreward && winner) {
 		var cardrewardlength = etgutil.decklength(game.cardreward);
@@ -653,8 +635,7 @@ function victoryScreen() {
 			cardArt.position.set(470-cardrewardlength*20+i*40, 170);
 			victoryui.addChild(cardArt);
 		});
-		user.pool = etgutil.mergedecks(user.pool, game.cardreward);
-		userEmit("addcards", { c: game.cardreward });
+		userExec("addcards", { c: game.cardreward });
 	}
 
 	refreshRenderer(victoryui);
@@ -684,8 +665,7 @@ function mkDemigod() {
 			chatArea.value = "Requires 20\u00A4";
 			return;
 		}
-		user.gold -= 20;
-		userEmit("addgold", { g: -20 });
+		userExec("addgold", { g: -20 });
 	}
 
 	var demigods = [
@@ -707,7 +687,7 @@ function mkDemigod() {
 	var dgname = "Demigod\n" + demigod[0];
 	var deck = (!user && aideck.value) || demigod[1];
 	deck = (deck + " " + deck).split(" ");
-	initGame({ first: Math.random() < .5, deck: deck, urdeck: urdeck, seed: Math.random() * etgutil.MAX_INT, hp: 200, aimarkpower: 3, aidrawpower: 2, foename: dgname }, aiEvalFunc);
+	initGame({ first: Math.random() < .5, deck: deck, urdeck: urdeck, seed: Math.random() * etgutil.MAX_INT, hp: 200, aimarkpower: 3, aidrawpower: 2, foename: dgname }, true);
 	game.cost = 20;
 	game.level = 3;
 }
@@ -722,8 +702,7 @@ function mkMage() {
 			chatArea.value = "Requires 5\u00A4";
 			return;
 		}
-		user.gold -= 5;
-		userEmit("addgold", { g: -5 });
+		userExec("addgold", { g: -5 });
 	}
 	var mages = [
 		["The Wall", "5de 5de 5de 5de 5de 5de 5de 5de 5de 5de 5de 5de 5de 5de 5c5 5c2 5c2 5c2 5c2 5c8 5c8 5c8 5c8 5ci 5c3 5l8 5l8 5mq 5mq 5lo 5lo 5lm 5lm 5lm 5lm 5ln 5ln 5la 5la 5li 8pq"],
@@ -748,7 +727,7 @@ function mkMage() {
 
 	var mage = mages[Math.floor(Math.random() * mages.length)];
 	var deck = ((!user && aideck.value) || mage[1]).split(" ");
-	initGame({ first: Math.random() < .5, deck: deck, urdeck: urdeck, seed: Math.random() * etgutil.MAX_INT, hp: 125, foename: mage[0] }, aiEvalFunc);
+	initGame({ first: Math.random() < .5, deck: deck, urdeck: urdeck, seed: Math.random() * etgutil.MAX_INT, hp: 125, foename: mage[0] }, true);
 	game.cost = 5;
 	game.level = 1;
 }
@@ -771,10 +750,9 @@ function mkQuestAi(questname, stage, area) {
 		}
 	}
 	if (urdeck.length < (user ? 31 : 11)) {
-		/*startEditor();*/
 		return "ERROR: Your deck is invalid or missing! Please exit and create a valid deck in the deck editor.";
 	}
-	initGame({ first: Math.random() < .5, deck: deck, urdeck: urdeck, seed: Math.random() * etgutil.MAX_INT, hp: hp, aimarkpower: markpower, foename: foename, urhp : playerHPstart, aidrawpower:drawpower }, aiEvalFunc);
+	initGame({ first: Math.random() < .5, deck: deck, urdeck: urdeck, seed: Math.random() * etgutil.MAX_INT, hp: hp, aimarkpower: markpower, foename: foename, urhp : playerHPstart, aidrawpower:drawpower }, true);
 	game.quest = [questname, stage];
 	game.wintext = quest.wintext || "";
 	game.autonext = quest.autonext || false;
@@ -804,8 +782,7 @@ function mkAi(level) {
 							chatArea.value = "Requires " + gameprice + "\u00A4";
 							return;
 						}
-						user.gold -= gameprice;
-						userEmit("addgold", { g: -gameprice });
+						userExec("addgold", { g: -gameprice });
 					}
 				}
 				var cardcount = {};
@@ -890,7 +867,7 @@ function mkAi(level) {
 			var typeName = ["Commoner", "Mage", "Champion"];
 
 			var foename = typeName[level] + "\n" + randomNames[Math.floor(Math.random() * randomNames.length)];
-			initGame({ first: Math.random() < .5, deck: deck, urdeck: urdeck, seed: Math.random() * etgutil.MAX_INT, hp: level == 0 ? 100 : level == 1 ? 125 : 150, aimarkpower: level == 2 ? 2 : 1, foename: foename, aidrawpower: level == 2 ? 2 : 1 }, aiEvalFunc);
+			initGame({ first: Math.random() < .5, deck: deck, urdeck: urdeck, seed: Math.random() * etgutil.MAX_INT, hp: level == 0 ? 100 : level == 1 ? 125 : 150, aimarkpower: level == 2 ? 2 : 1, foename: foename, aidrawpower: level == 2 ? 2 : 1 }, true);
 			game.cost = gameprice;
 			game.level = level;
 		}
@@ -904,7 +881,7 @@ var backgrounds = ["assets/bg_default.png", "assets/bg_lobby.png", "assets/bg_sh
 var questIcons = [], eicons = [], ricons = [], cardBacks = [], cardBorders = [], boosters = [], popups = [], sicons = [], ticons = [], sborders = [];
 var mapareas = {};
 var preLoader = new PIXI.AssetLoader(["assets/gold.png", "assets/button.png", "assets/questIcons.png", "assets/esheet.png", "assets/raritysheet.png", "assets/backsheet.png",
-	"assets/cardborders.png", "assets/boosters.png", "assets/popup_booster.png", "assets/statussheet.png", "assets/statusborders.png", "assets/typesheet.png"].concat(backgrounds));
+	"assets/cardborders.png", "assets/popup_booster.png", "assets/statussheet.png", "assets/statusborders.png", "assets/typesheet.png"].concat(backgrounds));
 var loadingBarProgress = 0, loadingBarGraphic = new PIXI.Graphics();
 preLoader.onProgress = function() {
 	loadingBarGraphic.clear();
@@ -913,6 +890,9 @@ preLoader.onProgress = function() {
 	loadingBarGraphic.endFill();
 }
 preLoader.onComplete = function() {
+	// Start loading assets we don't require to be loaded before starting
+	for (var i = 0;i < 4;i++) boosters.push(new PIXI.Texture(PIXI.BaseTexture.fromImage("assets/boosters.png"), new PIXI.Rectangle(i * 100, 0, 100, 150)));
+	// Load assets we preloaded
 	goldtex = PIXI.Texture.fromFrame("assets/gold.png");
 	buttex = PIXI.Texture.fromFrame("assets/button.png");
 	var tex = PIXI.Texture.fromFrame("assets/questIcons.png");
@@ -930,8 +910,6 @@ preLoader.onComplete = function() {
 	for (var i = 0;i < 26;i++) cardBacks.push(new PIXI.Texture(tex, new PIXI.Rectangle(i * 132, 0, 132, 256)));
 	var tex = PIXI.Texture.fromFrame("assets/cardborders.png");
 	for (var i = 0;i < 26;i++) cardBorders.push(new PIXI.Texture(tex, new PIXI.Rectangle(i * 128, 0, 128, 162)));
-	var tex = PIXI.Texture.fromFrame("assets/boosters.png");
-	for (var i = 0;i < 4;i++) boosters.push(new PIXI.Texture(tex, new PIXI.Rectangle(i * 100, 0, 100, 150)));
 	popups.push(PIXI.Texture.fromFrame("assets/popup_booster.png"));
 	var tex = PIXI.Texture.fromFrame("assets/statussheet.png");
 	for (var i = 0;i < 7;i++) sicons.push(new PIXI.Texture(tex, new PIXI.Rectangle(13 * i, 0, 13, 13)));
@@ -1020,7 +998,7 @@ function makeCardSelector(cardmouseover, cardclick){
 	var elefilter = 0, rarefilter = 0;
 	var columns = [[],[],[],[],[],[]], columnspr = [[],[],[],[],[],[]];
 	for (var i = 0;i < 13;i++) {
-		var sprite = makeButton(8, 184 + i * 32, eicons[i]);
+		var sprite = makeButton((i>6?40:4), 300 + (i%7) * 32 + (i>6?32:0), eicons[i]);
 		sprite.interactive = true;
 		(function(_i) {
 			sprite.click = function() {
@@ -1031,7 +1009,7 @@ function makeCardSelector(cardmouseover, cardclick){
 		cardsel.addChild(sprite);
 	}
 	for (var i = 0;i < 6; i++){
-		var sprite = makeButton(40, 188 + i * 32, ricons[i]);
+		var sprite = makeButton(74, 338 + i * 32, ricons[i]);
 		sprite.interactive = true;
 		(function(_i) {
 			sprite.click = function() {
@@ -1076,8 +1054,8 @@ function makeCardSelector(cardmouseover, cardclick){
 	}
 	cardsel.next = function(cardpool, cardminus){
 		var needToMakeCols = poolcache != cardpool;
-		poolcache = cardpool;
 		if (needToMakeCols){
+			poolcache = cardpool;
 			makeColumns();
 		}
 		for (var i = 0;i < 6;i++) {
@@ -1185,11 +1163,11 @@ function startMenu() {
 		tinfo.setText("Click here to permanently remove your account.")
 	});
 	bdelete.click = function() {
-		if (foename.value == user.name) {
+		if (foename.value == user.name + "yesdelete") {
 			userEmit("delete");
 			logout();
 		} else {
-			chatArea.value = "Input '" + user.name + "' into Challenge to delete your account";
+			chatArea.value = "Input '" + user.name + "yesdelete' into Challenge to delete your account";
 		}
 	}
 	menuui.addChild(bdelete);
@@ -1398,29 +1376,13 @@ function upgradestore() {
 			if (!isFreeCard(card)) {
 				var use = card.rarity < 5 ? 6 : 1;
 				if (cardpool[card.code] >= use) {
-					var bound = etgutil.count(user.pool, card.code) < use;
-					userEmit("upgrade", { card: card.code, bound: bound });
-					for (var i = 0;i < use;i++) {
-						var idx;
-						if (bound && etgutil.count(user.accountbound, card.code)){
-							user.accountbound = etgutil.addcard(user.accountbound, card.code, -1);
-						}else{
-							user.pool = etgutil.addcard(user.pool, card.code, -1);
-						}
-					}
-					if (bound){
-						user.accountbound = etgutil.addcard(user.accountbound, card.asUpped(true).code);
-					}else{
-						user.pool = etgutil.addcard(user.pool, card.asUpped(true).code);
-					}
+					userExec("upgrade", { card: card.code });
 					adjustdeck();
 				}
 				else twarning.setText("You need at least " + use + " copies to be able to upgrade this card!");
 			}
 			else if (user.gold >= 50) {
-				userEmit("uppillar", { c: card.code });
-				user.gold -= 50;
-				user.pool = etgutil.addcard(user.pool, card.asUpped(true).code);
+				userExec("uppillar", { c: card.code });
 				adjustdeck();
 			}
 			else twarning.setText("You need at least 50 gold to be able to upgrade a pillar!");
@@ -1433,10 +1395,7 @@ function upgradestore() {
 			if (card.rarity <= 4) {
 				var codecount = etgutil.count(user.pool, card.code);
 				if (codecount) {
-					user.pool = etgutil.addcard(user.pool, card.code, -1);
-					var sellValue = cardValues[card.rarity] * (card.upped ? 5 : 1);
-					user.gold += sellValue
-					userEmit("sellcard", { card: card.code, gold: sellValue});
+					userExec("sellcard", { card: card.code });
 					adjustdeck();
 				}
 				else twarning.setText("This card is bound to your account; you cannot sell it.")
@@ -1446,21 +1405,8 @@ function upgradestore() {
 		else twarning.setText("You can't sell a pillar or pendulum, silly!")
 	}
 	function adjustdeck() {
-		cardpool = {};
-		etgutil.iterdeck(user.pool, function(code){
-			if (code in cardpool) {
-				cardpool[code]++;
-			} else {
-				cardpool[code] = 1;
-			}
-		});
-		etgutil.iterdeck(user.accountbound, function(code){
-			if (code in cardpool) {
-				cardpool[code]++;
-			} else {
-				cardpool[code] = 1;
-			}
-		});
+		cardpool = etgutil.deck2pool(user.pool);
+		cardpool = etgutil.deck2pool(user.accountbound, cardpool);
 	}
 	var upgradeui = new PIXI.DisplayObjectContainer();
 	upgradeui.interactive = true;
@@ -1700,17 +1646,17 @@ function startEditor(arena, acard, startempty) {
 	if (user){
 		cardminus = {};
 		cardpool = {};
-		function incrpool(code){
+		function incrpool(code, count){
 			if (code in CardCodes && (!arena || (!CardCodes[code].isOf(CardCodes[acard].asUpped(false))) && (arena.lv || !CardCodes[code].upped))){
 				if (code in cardpool) {
-					cardpool[code]++;
+					cardpool[code] += count;
 				} else {
-					cardpool[code] = 1;
+					cardpool[code] = count;
 				}
 			}
 		}
-		etgutil.iterdeck(user.pool, incrpool);
-		etgutil.iterdeck(user.accountbound, incrpool);
+		etgutil.iterraw(user.pool, incrpool);
+		etgutil.iterraw(user.accountbound, incrpool);
 	}
 	chatArea.value = "Build a " + (arena?35:30) + "-60 card deck";
 	var editorui = new PIXI.DisplayObjectContainer();
@@ -1732,11 +1678,6 @@ function startEditor(arena, acard, startempty) {
 	editorui.addChild(bclear);
 	editorui.addChild(bsave);
 	if (arena){
-		var bexit = makeButton(8, 80, "Exit");
-		bexit.click = function() {
-			startArenaInfo(arena);
-		}
-		editorui.addChild(bexit);
 		bsave.click = function() {
 			if (editordeck.length < 35) {
 				chatArea.value = "35 cards required before submission";
@@ -1744,6 +1685,9 @@ function startEditor(arena, acard, startempty) {
 			}
 			editordeck.push(etg.TrueMarks[editormark]);
 			var data = { d: etgutil.encodedeck(editordeck.slice(5)), lv: arena.lv };
+			for(var k in arattr){
+				data[k] = arattr[k];
+			}
 			if (!startempty){
 				data.mod = true;
 			}
@@ -1752,6 +1696,58 @@ function startEditor(arena, acard, startempty) {
 			chatArea.value = "Arena deck submitted";
 			startMenu();
 		}
+		var bexit = makeButton(8, 80, "Exit");
+		bexit.click = function() {
+			startArenaInfo(arena);
+		}
+		editorui.addChild(bexit);
+		var arpts = arena.lv?515:470, arattr = {hp:parseInt(arena.hp || 200), mark:parseInt(arena.mark || 1), draw:parseInt(arena.draw || 1)};
+		var artable = {
+			hp: { min: 65, max: 200, incr: 45, cost: 1 },
+			mark: { cost: 45 },
+			draw: { cost: 135 },
+		};
+		function sumscore(){
+			var sum = 0;
+			for(var k in artable){
+				sum += arattr[k]*artable[k].cost;
+			}
+			return sum;
+		}
+		var curpts = new PIXI.Text((arpts-sumscore())/45, ui.mkFont(16, "black"));
+		curpts.position.set(8, 100);
+		editorui.addChild(curpts);
+		function makeattrui(y, name){
+			y = 128+y*20;
+			var data = artable[name];
+			var bt = new PIXI.Text(name, ui.mkFont(16, "black"));
+			bt.position.set(8, y);
+			var bm = makeButton(50, y, getTextImage("-", ui.mkFont(16, "black"), 0xFFFFFFFF));
+			var bv = new PIXI.Text(arattr[name], ui.mkFont(16, "black"));
+			bv.position.set(64, y);
+			var bp = makeButton(90, y, getTextImage("+", ui.mkFont(16, "black"), 0xFFFFFFFF));
+			function modattr(x){
+				arattr[name] += x;
+				if (arattr[name] >= (data.min || 0) && (!data.max || arattr[name] <= data.max)){
+					var sum = sumscore();
+					if (sum <= arpts){
+						bv.setText(arattr[name]);
+						curpts.setText((arpts-sum)/45);
+						return;
+					}
+				}
+				arattr[name] -= x;
+			}
+			bm.click = modattr.bind(null, -(data.incr || 1));
+			bp.click = modattr.bind(null, data.incr || 1)
+			editorui.addChild(bt);
+			editorui.addChild(bm);
+			editorui.addChild(bv);
+			editorui.addChild(bp);
+		}
+		makeattrui(0, "hp");
+		makeattrui(1, "mark");
+		makeattrui(2, "draw");
 	}else{
 		bsave.click = function() {
 			editordeck.push(etg.TrueMarks[editormark]);
@@ -1768,8 +1764,6 @@ function startEditor(arena, acard, startempty) {
 			if (editordeck.length > 60){
 				editordeck.length = 60;
 			}
-			if (user)
-				user.decks[user.selectedDeck] = editordeck;
 			processDeck();
 		}
 		editorui.addChild(bimport);
@@ -1778,17 +1772,15 @@ function startEditor(arena, acard, startempty) {
 				return function() {
 					editordeck.push(etg.TrueMarks[editormark]);
 					userEmit("setdeck", { d: etgutil.encodedeck(editordeck), number: user.selectedDeck });
+					user.decks[user.selectedDeck] = editordeck;
 					user.selectedDeck = x;
 					editordeck = getDeck(true);
-					cardminus = {};
 					processDeck();
 				}
 			}
-			var deckButtons = [];
 			for (var i = 0;i < 10;i++) {
 				var button = makeButton(80 + i*72, 8, "Deck " + (i + 1));
 				button.click = switchDeckCb(i);
-				deckButtons.push(button);
 				editorui.addChild(button);
 			}
 		}
@@ -1937,9 +1929,9 @@ function startMatch() {
 	var aiDelay = 0;
 	var animCb = function() {
 		var now;
-		if (game.phase == etg.PlayPhase && game.turn == game.player2 && game.player2.ai && (now = Date.now()) >= aiDelay) {
+		if (game.phase == etg.PlayPhase && game.turn == game.player2 && game.ai && (now = Date.now()) >= aiDelay) {
 			aiDelay = now + 300;
-			var cmd = game.player2.ai();
+			var cmd = aiEvalFunc();
 			cmds[cmd[0]](cmd[1]);
 		}
 		var pos = realStage.getMousePosition();
@@ -1994,7 +1986,7 @@ function startMatch() {
 			cardart.visible = true;
 			cardart.position.set(cardartx || 654, pos.y > 300 ? 44 : 300);
 		} else cardart.visible = false;
-		if (game.winner == game.player1 && user && !game.quest && game.player2.ai && !game.cardreward) {
+		if (game.winner == game.player1 && user && !game.quest && game.ai && !game.cardreward) {
 			var winnable = [], cardwon;
 			for (var i = 0;i < foeDeck.length;i++) {
 				if (foeDeck[i].type != etg.PillarEnum && foeDeck[i].rarity < 4) {
@@ -2167,14 +2159,13 @@ function startMatch() {
 			var poisoninfo = !poison ? "" : (poison > 0 ? poison + " 1:2" : -poison + " 1:7") + (game.players[j].neuro ? " 1:10" : "");
 			poisontext[j].setTexture(getTextImage(poisoninfo,16));
 			maybeSetText(decktext[j], game.players[j].deck.length + "cards");
-			maybeSetText(damagetext[j], game.players[j].foe.expectedDamage ? "Next HP-loss:" + game.players[j].foe.expectedDamage : "");
+			maybeSetText(damagetext[j], game.expectedDamage[j] ? "Next HP loss: " + game.expectedDamage[j] : "");
 		}
+		damagetext[1].visible = !cloakgfx.visible;
 		Effect.next(cloakgfx.visible);
 	}
 	if (user) {
-		userEmit("addloss", { pvp: !game.player2.ai });
-		if (!game.player2.ai) user.pvplosses++;
-		else user.ailosses++;
+		userExec("addloss", { pvp: !game.ai });
 	}
 	gameui = new PIXI.DisplayObjectContainer();
 	gameui.interactive = true;
@@ -2199,25 +2190,17 @@ function startMatch() {
 	gameui.addChild(foename);
 	endturnFunc = endturn.click = function(e, discard) {
 		if (game.turn == game.player1 && (game.phase == etg.MulliganPhase1 || game.phase == etg.MulliganPhase2)){
-			if (!game.player2.ai) {
+			if (!game.ai) {
 				socket.emit("mulligan", true);
 			}
 			game.progressMulligan();
-			if (game.phase == etg.MulliganPhase2 && game.player2.ai) {
+			if (game.phase == etg.MulliganPhase2 && game.ai) {
 				game.progressMulligan();
 			}
 		}else if (game.winner) {
 			if (user) {
 				if (game.winner == game.player1) {
-					userEmit("addwin", { pvp: !game.player2.ai });
-					if (game.player2.ai) {
-						user.aiwins++;
-						user.ailosses--;
-					}
-					else {
-						user.pvpwins++;
-						user.pvplosses--;
-					}
+					userExec("addwin", { pvp: !game.ai });
 				}
 				if (game.arena) {
 					userEmit("modarena", { aname: game.arena, won: game.winner == game.player2, lv: game.cost == 5?0:1 });
@@ -2244,7 +2227,7 @@ function startMatch() {
 				discarding = true;
 			} else {
 				discarding = false;
-				if (!game.player2.ai) {
+				if (!game.ai) {
 					socket.emit("endturn", discard);
 				}
 				game.player1.endturn(discard);
@@ -2272,7 +2255,7 @@ function startMatch() {
 	var resigning;
 	resign.click = function() {
 		if (resigning){
-			if (!game.player2.ai) {
+			if (!game.ai) {
 				socket.emit("foeleft");
 			}
 			startMenu();
@@ -2474,7 +2457,7 @@ function startArenaInfo(info) {
 	var stage = new PIXI.DisplayObjectContainer();
 	stage.interactive = true;
 	stage.addChild(new PIXI.Sprite(backgrounds[0]));
-	var winloss = makeText(200, 350, (info.win || 0) + " - " + (info.loss || 0) + "\nAge: " + info.day);
+	var winloss = makeText(200, 300, (info.win || 0) + " - " + (info.loss || 0) + "\nAge: " + info.day + "\nInitial HP: " + info.hp + "\nMark: " + info.mark + "\nDraw: " + info.draw);
 	stage.addChild(winloss);
 	var batch = new PIXI.SpriteBatch();
 	stage.addChild(batch);
@@ -2511,11 +2494,11 @@ function startArenaInfo(info) {
 				continue;
 			}
 			var spr = new PIXI.Sprite(getCardImage(deck[i]));
-			spr.position.set(100 + Math.floor(i / 10) * 100, 8 + (i % 10) * 20);
+			spr.position.set(100 + Math.floor(i / 10) * 100, 32 + (i % 10) * 20);
 			batch.addChild(spr);
 		}
 		var spr = new PIXI.Sprite(eicons[mark || 0]);
-		spr.position.set(100, 210);
+		spr.position.set(100, 234);
 		batch.addChild(spr);
 		var acard = new PIXI.Sprite(getArt(info.card));
 		acard.position.set(734, 8);
@@ -2531,18 +2514,23 @@ function startArenaTop(info) {
 	}
 	var stage = new PIXI.DisplayObjectContainer();
 	stage.interactive = true;
-	for (var i = 0;i < info[1].length; i++) {
-		var infotxt = new PIXI.Text((i+1) + "  " + info[0][i*2], { font: "16px Dosis" });
-		infotxt.position.set(150, 50 + i * 24);
-		var scoretxt = new PIXI.Text(info[0][i*2 + 1], { font: "16px Dosis" });
-		scoretxt.position.set(400, 50 + i * 24);
-		var winlosstxt = new PIXI.Text(info[1][i], { font: "16px Dosis" });
-		winlosstxt.position.set(450, 50 + i * 24);
+	stage.addChild(new PIXI.Sprite(backgrounds[0]));
+	for (var i = 0;i < info.length; i++) {
+		var data = info[i], y = 50 + i * 24;
+		var infotxt = makeText(120, y, (i+1) + "  " + data[0]);
+		var scoretxt = makeText(350, y, data[1]);
+		var winlosstxt = makeText(400, y, data[2] + "-" + data[3]);
+		var agetxt = makeText(460, y, data[4].toString());
+		if (data[5] in CardCodes){
+			var cardtxt = makeText(500, y, CardCodes[data[5]].name);
+			stage.addChild(cardtxt);
+		}
 		stage.addChild(infotxt);
 		stage.addChild(scoretxt);
 		stage.addChild(winlosstxt);
+		stage.addChild(agetxt);
 	}
-	var bret = makeButton(50, 300, "Exit");
+	var bret = makeButton(8, 300, "Exit");
 	bret.click = startMenu;
 	stage.addChild(bret);
 	refreshRenderer(stage);
@@ -2665,7 +2653,7 @@ socket.on("librarygive", initLibrary);
 socket.on("foearena", function(data) {
 	var deck = etgutil.decodedeck(data.deck);
 	chatArea.value = data.name + ": " + deck.join(" ");
-	initGame({ first: data.seed < etgutil.MAX_INT/2, deck: deck, urdeck: getDeck(), seed: data.seed, hp: data.hp, cost: data.cost, foename: data.name, aidrawpower: data.lv+1 }, aiEvalFunc);
+	initGame({ first: data.seed < etgutil.MAX_INT/2, deck: deck, urdeck: getDeck(), seed: data.seed, hp: data.hp, cost: data.cost, foename: data.name, aidrawpower: data.draw, aimarkpower: data.mark }, true);
 	game.arena = data.name;
 	game.level = data.lv+1;
 	game.cost = 5+data.lv*5;
@@ -2685,11 +2673,12 @@ socket.on("passchange", function(data) {
 socket.on("endturn", cmds.endturn);
 socket.on("cast", cmds.cast);
 socket.on("foeleft", function(data) {
-	if (game && !game.player2.ai) {
+	if (game && !game.ai) {
 		game.setWinner(game.player1);
 	}
 });
 socket.on("chat", function(data) {
+	if (data.u in muteset) return;
 	var now = new Date(), h = now.getHours(), m = now.getMinutes(), s = now.getSeconds();
 	if (h < 10) h = "0"+h;
 	if (m < 10) m = "0"+m;
@@ -2699,8 +2688,7 @@ socket.on("chat", function(data) {
 	addChatMessage(data.mode == "guest" ? "<font color=black><i>" + msg + "</i></font><br>" : "<font color=" + color + ">" + msg + "</font><br>");
 	if (Notification && user && ~data.msg.indexOf(user.name) && !document.hasFocus()){
 		Notification.requestPermission();
-		var n = new Notification(data.u, {body: data.msg});
-		n.onclick = window.focus;
+		new Notification(data.u, {body: data.msg}).onclick = window.focus;
 	}
 });
 socket.on("mulligan", function(data) {
@@ -2759,8 +2747,12 @@ function maybeSendChat(e) {
 	if (chatinput.value) {
 		var msg = chatinput.value;
 		chatinput.value = "";
-		if (user){
-			var checkPm = msg.split(" ");
+		if (msg.substr(0, 6) == "/mute "){
+			muteset[msg.substring(6)] = true;
+		}else if (msg.substr(0, 8) == "/unmute "){
+			delete muteset[msg.substring(8)];
+		}else if (user){
+			var checkPm = msg.split(" ", 2);
 			if (checkPm[0] == "/w") {
 				var match = msg.match(/^\/w"(?:[^"\\]|\\.)*"/);
 				var to = (match && match[0]) || checkPm[1];

@@ -64,8 +64,8 @@ var ActivesValues = {
 	},
 	disfield:8,
 	disshield:7,
-	dive:function(c){
-		return c instanceof etg.CardInstance?c.card.attack:truetrueatk(c)-c.cast-(c.status.dive||0);
+	dive:function(c, ttatk){
+		return c instanceof etg.CardInstance?c.card.attack:ttatk-c.cast-(c.status.dive||0);
 	},
 	divinity:3,
 	drainlife:10,
@@ -97,14 +97,14 @@ var ActivesValues = {
 	gratitude:4,
 	grave:4,
 	growth:5,
-	guard:5,
+	guard:4,
 	hasten:function(c){
 		return c.owner.deck.length/10;
 	},
 	hatch:3,
 	heal:3,
 	heal20:8,
-	holylight:2,
+	holylight:3,
 	hope:2,
 	icebolt:10,
 	ignite:4,
@@ -198,19 +198,19 @@ var ActivesValues = {
 	steal:6,
 	steam:6,
 	stoneform:3,
-	storm2:4,
-	storm3:6,
+	storm2:6,
+	storm3:12,
 	swave:6,
 	tempering:3,
-	throwrock: 2,
+	throwrock:4,
 	tick:function(c){
 		return c instanceof etg.CardInstance ? 3 : c.maxhp - c.truehp();
 	},
 	unburrow:0,
 	upkeep: -.5,
 	upload:3,
-	vampire:function(c){
-		return (c instanceof etg.CardInstance?c.card.attack:truetrueatk(c))*.7;
+	vampire:function(c, ttatk){
+		return (c instanceof etg.CardInstance?c.card.attack:ttatk)*.7;
 	},
 	virusinfect:0,
 	virusplague:1,
@@ -250,17 +250,17 @@ var ActivesValues = {
 	}
 }
 
-function evalactive(c, active){
+function evalactive(c, active, extra){
 	var aval = ActivesValues[active.activename];
 	return !aval?0:
-		aval instanceof Function?aval(c):
+		aval instanceof Function?aval(c, extra):
 		aval instanceof Array?aval[c.card.upped?1:0]:aval;
 }
 
 function checkpassives(c){
 	var score = 0;
 	if (c.passives) {
-		if (c.passives.airborne) score += 1;
+		if (c.passives.airborne) score += 0.2;
 		if (c.passives.voodoo) score += 1;
 		if (c.passives.swarm) score += 1;
 		if (c.passives.stasis) score += 5;
@@ -273,32 +273,6 @@ function checkpassives(c){
 	return score;
 }
 
-function truetrueatk(c) {
-	var fsh = c.owner.foe.shield;
-	var tatk = c.trueatk(), fshactive = fsh && fsh.active.shield;
-	var momentum = atk<0 || c.status.momentum || c.status.psion;
-	var dr, atk;
-	if (momentum){
-		atk = tatk;
-	}else{
-		dr = fsh?fsh.truedr():0;
-		atk = Math.max(tatk-dr, 0);
-		if (fshactive == Actives.weight && c instanceof etg.Creature && c.truehp()>5){
-			atk = 0;
-		}
-	}
-	if (atk>0 && c.status.adrenaline) {
-		var attacks = etg.countAdrenaline(tatk);
-		while (c.status.adrenaline < attacks) {
-			c.status.adrenaline++;
-			atk += momentum?c.trueatk():Math.max(c.trueatk()-dr, 0);
-		}
-		c.status.adrenaline = 1;
-	}
-	// todo SoFr
-	return atk * (fshactive == Actives.evade100 ? 1 - fsh.status.charges / 6 : fshactive == Actives.evade50 ? .5 : fshactive == Actives.evade40 ? .6 : fshactive == Actives.chaos ? .75 : 1) * (((fsh && fsh.passives.reflect && c.status.psion) || c.owner.foe.sosa) ? -1 : 1);
-}
-
 function evalthing(c) {
 	if (!c) return 0;
 	var score = 0;
@@ -306,14 +280,14 @@ function evalthing(c) {
 	var delaymix = Math.max((c.status.frozen||0), (c.status.delayed||0));
 	var ttatk;
 	if (isWeapon || isCreature) {
-		ttatk = truetrueatk(c);
+		ttatk = c.estimateDamage();
 		score += ttatk*(delaymix?1-Math.min(delaymix/5, .6):1);
 	}else ttatk = 0;
 	if (!etg.isEmpty(c.active)) {
 		for (var key in c.active) {
 			if (key == "hit"){
 				if (!delaymix){
-					score += evalactive(c, c.active.hit)*(ttatk?1:c.status.immaterial?0:.3)*(c.status.adrenaline?2:1);
+					score += evalactive(c, c.active.hit, ttatk)*(ttatk?1:c.status.immaterial?0:.3)*(c.status.adrenaline?2:1);
 				}
 			}else if(key == "auto"){
 				if (!c.status.frozen){
@@ -324,23 +298,24 @@ function evalthing(c) {
 					score += evalactive(c, c.active.shield)*(c.owner.gpull == c?1:.2);
 				}
 			}else if (key == "cast"){
-				if (!delaymix){
-					score += evalactive(c, c.active.cast) - (c.usedactive?.02:0);
+				if (!delaymix && caneventuallyactive(c.castele, c.cast, c.owner)){
+					score += evalactive(c, c.active.cast, ttatk) - (c.usedactive?.02:0);
 				}
-			}else score += evalactive(c, c.active[key]);
+			}else if (key != "owndeath" || isCreature){
+				score += evalactive(c, c.active[key]);
+			}
 		}
-		score -= c.active.cast?c.cast/2:0;
 	}
 	score += checkpassives(c);
 	if (isCreature){
 		var hp = Math.max(c.truehp(), 0), poison = c.status.poison || 0;
 		if (poison > 0){
-			hp = Math.min(hp - poison, 0);
+			hp = Math.max(hp - poison, 0);
 			if (c.status.aflatoxin) score -= 2;
 		}else if (poison < 0){
-			hp += Math.max(-poison, c.maxhp-c.hp);
+			hp += Math.min(-poison, c.maxhp-c.hp);
 		}
-		score *= hp?(c.status.immaterial || c.status.burrowed ? 2 : Math.pow(Math.min(hp, 15), .3)):.2;
+		score *= hp?(c.status.immaterial || c.status.burrowed ? 1.5 : 1+Math.log(Math.min(hp, 33))/7):.2;
 	}else{
 		score *= c.status.immaterial?2:1.5;
 	}
