@@ -20,7 +20,7 @@ if (localStorage){
 })();
 var Cards, CardCodes, Targeting, game;
 (function(){
-var targetingMode, targetingModeCb, targetingText, discarding, user, renderer, endturnFunc, cancelFunc, foeDeck, player2summon, player2Cards, guestname, cardChosen, newCards;
+var targetingMode, targetingModeCb, targetingText, discarding, user, renderer, endturnFunc, cancelFunc, foeDeck, player2summon, player2Cards, guestname, cardChosen, newCards, muteset = {};
 var etgutil = require("./etgutil");
 var userutil = require("./userutil");
 var etg = require("./etg");
@@ -2679,6 +2679,7 @@ socket.on("foeleft", function(data) {
 	}
 });
 socket.on("chat", function(data) {
+	if (data.u in muteset) return;
 	var now = new Date(), h = now.getHours(), m = now.getMinutes(), s = now.getSeconds();
 	if (h < 10) h = "0"+h;
 	if (m < 10) m = "0"+m;
@@ -2688,8 +2689,7 @@ socket.on("chat", function(data) {
 	addChatMessage(data.mode == "guest" ? "<font color=black><i>" + msg + "</i></font><br>" : "<font color=" + color + ">" + msg + "</font><br>");
 	if (Notification && user && ~data.msg.indexOf(user.name) && !document.hasFocus()){
 		Notification.requestPermission();
-		var n = new Notification(data.u, {body: data.msg});
-		n.onclick = window.focus;
+		new Notification(data.u, {body: data.msg}).onclick = window.focus;
 	}
 });
 socket.on("mulligan", function(data) {
@@ -2748,7 +2748,11 @@ function maybeSendChat(e) {
 	if (chatinput.value) {
 		var msg = chatinput.value;
 		chatinput.value = "";
-		if (user){
+		if (msg.substr(0, 6) == "/mute "){
+			muteset[msg.substring(6)] = true;
+		}else if (msg.substr(0, 8) == "/unmute "){
+			delete muteset[msg.substring(8)];
+		}else if (user){
 			var checkPm = msg.split(" ", 2);
 			if (checkPm[0] == "/w") {
 				var match = msg.match(/^\/w"(?:[^"\\]|\\.)*"/);
