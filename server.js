@@ -9,6 +9,7 @@ var db = require("redis").createClient();
 var etgutil = require("./etgutil");
 var userutil = require("./userutil");
 var etg = require("./etg");
+var aiDecks = require("./Decks");
 require("./etg.server").loadcards(function(cards, codes, tgt){
 	global.Cards = cards;
 	global.CardCodes = codes;
@@ -51,6 +52,9 @@ function loginRespond(res, servuser, pass){
 					servuser.pool = user.pool = etgutil.addcard(user.pool, card.code);
 				}
 				servuser.ocard = user.ocard = user.oracle = card.code;
+				servuser.daily = user.daily = 0;
+				servuser.dailymage = user.dailymage = Math.floor(Math.random() * aiDecks.mage.length);
+				servuser.dailydg = user.dailydg = Math.floor(Math.random() * aiDecks.demigod.length);
 			}
 			res.writeHead("200");
 			res.end(JSON.stringify(user));
@@ -210,7 +214,10 @@ function useruser(servuser, cb){
 			ailosses: parseInt(servuser.ailosses) || 0,
 			pvpwins: parseInt(servuser.pvpwins) || 0,
 			pvplosses: parseInt(servuser.pvplosses) || 0,
-			quest: obj
+			quest: obj,
+			daily: parseInt(servuser.daily) || 0,
+			dailymage: parseInt(servuser.dailymage) || -1,
+			dailydg: parseInt(servuser.dailydg) || -1
 		});
 	});
 }
@@ -278,6 +285,7 @@ io.on("connection", function(socket) {
 	utilEvent("addloss");
 	utilEvent("addwin");
 	utilEvent("addcards");
+	utilEvent("donedaily");
 	userEvent("inituser", function(data, user) {
 		var starters = [
 			"015990g4sa014sd014t4014vi014vs0152o0152t0155u0155p0158q015ca015fi015f6015if015il015lo015lb015ou015s5025rq015v3015ut0161s018pi",
@@ -304,6 +312,9 @@ io.on("connection", function(socket) {
 		user.pvpwins = 0;
 		user.pvplosses = 0;
 		user.oracle = 0;
+		user.daily = 0;
+		user.dailymage = -1;
+		user.dailydg = -1;
 		db.hset("Q:"+user.name, "necromancer", 1, function(err, obj){
 			useruser(user, function(clientuser){
 				socket.emit("userdump", clientuser);

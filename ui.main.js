@@ -29,6 +29,7 @@ var Effect = require("./Effect");
 var Quest = require("./Quest");
 var evalGameState = require("./ai.eval");
 var ui = require("./uiutil");
+var aiDecks = require("./Decks");
 require("./etg.client").loadcards(function(cards, cardcodes, targeting) {
 	Cards = cards;
 	CardCodes = cardcodes;
@@ -654,82 +655,52 @@ function deckMorph(deck,MorphFrom,morphTo) {
 	return deckout;
 }
 
-function mkDemigod() {
-	var urdeck = getDeck();
-	if (urdeck.length < (user ? 31 : 11)) {
-		startEditor();
-		return;
-	}
-	if (user) {
-		if (user.gold < 20) {
-			chatArea.value = "Requires 20\u00A4";
+function mkDemigod(daily, extrafunc) {
+	return function() {
+		var urdeck = getDeck();
+		if (urdeck.length < (user ? 31 : 11)) {
+			startEditor();
 			return;
 		}
-		userExec("addgold", { g: -20 });
+		if (user && !daily) {
+			if (user.gold < 20) {
+				chatArea.value = "Requires 20\u00A4";
+				return;
+			}
+			userExec("addgold", { g: -20 });
+		}
+		var demigod = daily ? aiDecks.demigod[user.dailydg] : aiDecks.giveRandom("demigod");
+		var dgname = "Demigod\n" + demigod[0];
+		var deck = (!user && aideck.value) || demigod[1];
+		deck = (deck + " " + deck).split(" ");
+		initGame({ first: Math.random() < .5, deck: deck, urdeck: urdeck, seed: Math.random() * etgutil.MAX_INT, hp: 200, aimarkpower: 3, aidrawpower: 2, foename: dgname }, true);
+		game.cost = daily ? 0 : 20;
+		game.level = 3;
+		if (extrafunc) extrafunc(game);
 	}
-
-	var demigods = [
-		["Akan", "7ac 7ac 7ac 7ac 7ac 7ac 7ac 7ac 7ac 7ac 7ac 7ac 7bu 7bu 7bu 7bu 7bu 7am 7am 7am 7dm 7dm 7dn 7dn 7do 7do 7n0 7n6 7n6 7n6 7n6 7n3 7n3 7n3 7n3 7n3 7n3 7nb 7n9 7n9 7n9 8pr"],
-		["Anubis", "710 710 710 710 710 710 710 710 710 710 710 710 710 710 72i 72i 72i 72i 71l 71l 71l 71l 717 717 717 71b 71b 71b 711 711 7t7 7t7 7t7 7t7 7t7 7t7 7t9 7t9 7t9 7ti 7ti 7ti 7ti 7ta 7ta 8pt"],
-		["Atomsk", "7ne 7ne 7ne 7ne 7n9 7n9 7t4 7t4 7t4 7t4 7t4 7t4 7t4 7t4 7t4 7t4 7t4 7t4 7t4 7t4 7t4 7t9 7t9 7t9 7tb 7tb 7ta 7ta 7ta 7td 7td 7td 7td 7t5 7t5 8pr"],
-		["Gobannus", "7dg 7dg 7dg 7dg 7dg 7dg 7dg 7dg 7dg 7dg 7dg 7dg 7dg 7dg 7dg 7dg 7dg 7e0 7e0 7e0 7e0 7e0 7e0 7dv 7dv 7dv 7dv 7dv 7dv 7n2 7n2 7n2 7n2 7qb 7qb 7qb 7th 7th 7th 7th 7tb 7tb 7tb 7tb 7tb 7tb 7ta 7ta 8pt"],
-		["Halwn", "710 710 710 710 710 710 710 710 710 710 710 72i 72i 72i 72i 71m 71m 71m 718 718 718 718 718 718 719 719 719 719 71b 71b 71b 71j 71j 71j 71j 7aj 7aj 7aj 7aj 8pn"],
-		["Kenosis", "744 744 744 744 744 744 744 744 744 744 744 744 744 744 744 74f 74f 74f 74f 74f 74f 745 745 745 745 745 7k9 7k9 7k9 7k9 7k9 7k9 7jv 7jv 7jv 7jv 7jv 7k7 7k7 7k7 7k1 8pq"],
-		["Lycaon", "6ts 6ts 6ts 6ts 6ts 6ts 6ts 6ts 6ts 6ts 6ve 6ve 6ve 6ve 6ve 6ve 6u2 6u2 6u2 6u2 6u2 6u2 6u1 6u1 6u1 6u1 6u1 6u1 6ud 6ud 6ud 6ud 6u7 6u7 6u7 6u7 7th 7th 7tj 7tj 7tj 7ta 7ta 8pt"],
-		["Neysa", "7gk 7gk 7gk 7gk 7i6 7i6 7i6 7i6 7i6 7i6 7i6 7i6 7i6 7i6 7i6 7h6 7h6 7h6 7hb 7hb 7hb 7hb 7hb 7hb 7k6 7k6 7k6 7k6 7k5 7k5 7k5 7k5 7k5 7k5 7n2 7n2 7n2 7n2 7n2 8pq"],
-		["Nirrti", "718 718 718 718 718 718 71a 71a 71a 71a 71a 7n2 7n2 7n2 7n2 7q0 7q0 7q0 7q0 7q0 7q0 7q0 7q0 7q0 7q0 7q0 7q0 7q0 7q0 7q0 7q0 7q0 7q4 7q4 7q4 7qf 7qf 7qf 7q5 7q5 7q5 7q5 7q5 7q5 7qg 7qg 7qg 7qg 8pk"],
-		["Pele", "778 778 778 778 778 778 778 778 778 778 778 778 778 778 778 778 778 778 778 77g 77g 77g 77g 77g 77g 77q 77q 77h 77h 77h 77h 77h 77b 77b 77b 7q4 7q4 7q4 7ql 7ql 7ql 7ql 7ql 7q3 7q3 8ps"],
-		["Suwako", "7ac 7ac 7ac 7ac 7ac 7ac 7ac 7ac 7ac 7ac 7ac 7bu 7bu 7bu 7bu 7bu 7bu 7ae 7ae 7ae 7ae 7ae 7ae 7al 7am 7am 7am 7as 7as 7as 7as 80d 80d 80d 80d 80i 80i 80i 8pu"],
-		["Thetis", "7an 7an 7an 7an 7ap 7ap 7ap 7ap 7aj 7aj 7gk 7gk 7gk 7gk 7gk 7gk 7gk 7gk 7gk 7gk 7gk 7gk 7gk 7gk 7h4 7h4 7h4 7h4 7h4 7gq 7gq 7gq 7h1 7h1 7h1 7gr 7gr 7gr 7gu 7gu 7gu 7gu 7gu 7gu 8pn"],
-	];
-
-	var demigod = demigods[Math.floor(Math.random() * demigods.length)];
-	var dgname = "Demigod\n" + demigod[0];
-	var deck = (!user && aideck.value) || demigod[1];
-	deck = (deck + " " + deck).split(" ");
-	initGame({ first: Math.random() < .5, deck: deck, urdeck: urdeck, seed: Math.random() * etgutil.MAX_INT, hp: 200, aimarkpower: 3, aidrawpower: 2, foename: dgname }, true);
-	game.cost = 20;
-	game.level = 3;
 }
-function mkMage() {
-	var urdeck = getDeck();
-	if (urdeck.length < (user ? 31 : 11)) {
-		startEditor();
-		return;
-	}
-	if (user) {
-		if (user.gold < 5) {
-			chatArea.value = "Requires 5\u00A4";
+function mkMage(daily, extrafunc) {
+	return function() {
+		var urdeck = getDeck();
+		if (urdeck.length < (user ? 31 : 11)) {
+			startEditor();
 			return;
 		}
-		userExec("addgold", { g: -5 });
-	}
-	var mages = [
-		["The Wall", "5de 5de 5de 5de 5de 5de 5de 5de 5de 5de 5de 5de 5de 5de 5c5 5c2 5c2 5c2 5c2 5c8 5c8 5c8 5c8 5ci 5c3 5l8 5l8 5mq 5mq 5lo 5lo 5lm 5lm 5lm 5lm 5ln 5ln 5la 5la 5li 8pq"],
-		["The Horde", "5bs 5bs 5bs 5bs 5bs 5bs 5bs 5bs 5bs 5de 5de 5de 5de 5de 5de 5de 5de 5cb 5cb 5cb 5cb 5ce 5c6 5c6 5c6 5c6 5c9 5c9 5ca 5ca 5cr 5cr 5cr 5cr 8pn"],
-		["The Weaponsmith", "4t4 4t4 4t4 4t4 4tc 4tc 4td 4td 4td 4td 5c7 5c7 5c7 5c7 5c4 5gi 5gi 5gi 5gi 5gi 5gi 5gi 5gi 5gi 5gi 5gi 5gi 5gi 5gi 5ff 5ff 5ff 5ff 5fh 5fh 5fh 5fh 5f6 5f6 5f8 8pn"],
-		["The Swarm", "55q 55q 564 564 564 564 560 566 566 5t2 5t2 5t2 5t2 5t2 5t2 5t2 5t2 5t2 5t2 5t2 5t2 5t2 5t2 5rk 5rk 5rk 5rk 5rq 5rq 5rq 5rq 5rq 5rq 5rs 8pl"],
-		["The Mirror", "4sa 4sa 4sa 4sa 4sa 4sa 4sa 4sa 4sa 4sa 4sa 4sa 4sa 4sa 4sa 502 502 535 55v 599 599 599 5cc 5fc 5in 5lq 5lq 5os 5rl 5vb 5vb 623 623 623 623 8pu"],
-		["The Waves", "58o 58o 58o 58o 58o 58o 58o 58o 598 598 598 593 58s 5i4 5i4 5i4 5i4 5i4 5i4 5i4 5i4 5i4 5i4 5i4 5i4 5i6 5i6 5i6 5i6 5ib 5ic 5ig 5ig 5ig 5ig 8pm"],
-		["The Eater", "576 576 576 576 576 576 576 576 576 576 576 576 576 576 563 563 55p 55p 55r 55r 55r 55r 58t 58t 58t 58t 58q 58q 58v 591 591 591 8pm"],
-		["The Ashes", "5f0 5f0 5f0 5f0 5f0 5f0 5f0 5f0 5gi 5gi 5gi 5gi 5gi 5gi 5gi 5gi 5f4 5f4 5f4 5f4 5f6 5f6 5f6 5f6 5f7 5fb 5fb 5fb 5fb 5fg 5f8 5f8 5fc 5fc 5fc 5fc 5fe 8po"],
-		["The Gale", "5lb 5lb 5lb 5lb 5lf 5lf 5lf 5lf 5lh 5oc 5oc 5oc 5oc 5oc 5oc 5pu 5pu 5pu 5pu 5pu 5pu 5pu 5pu 5pu 5pu 5oe 5oe 5oe 5oe 5ol 5or 5or 5op 8pq"],
-		["The Clock", "5rg 5rg 5rg 5rg 5rg 5rg 5rg 5rg 5rg 5rg 5t2 5t2 5t2 5t2 5t2 5t2 5t2 5t2 5t2 5t2 5rk 5rk 5rk 5rk 5s1 5rl 5rl 5rl 5rl 5ro 5ru 5ru 5ru 5ru 5s0 5s0 5s0 5s0 5rm 5rm 8ps"],
-		["The Contagion", "52g 52g 52g 52g 52g 52g 542 542 542 542 542 542 52o 52o 52o 52o 52q 52u 52u 52u 52u 52p 52p 52r 52r 5un 5un 5un 5un 5uq 5uq 5uq 5uq 8pt"],
-		["The Uncertainty", "50u 50u 50u 50u 50u 50u 50u 50u 50u 50u 50u 50u 50u 50u 50u 50u 50u 4vi 4vi 4vi 4vi 4vk 4vk 4vk 4vk 4vl 4vs 4vs 4vs 4vs 4vt 501 501 8pi"],
-		["The Weight", "55k 55k 55k 55k 55k 55k 55k 55k 576 576 576 576 576 576 576 576 55t 55t 561 561 561 562 562 562 562 55p 55m 55m 55m 55m 55s 565 565 55o 55o 8pl"],
-		["The Ethereal", "61o 61o 61o 61o 61o 61o 61o 61o 63a 63a 63a 63a 63a 63a 63a 63a 61q 61q 61u 620 620 620 620 625 625 625 625 627 627 627 627 61t 61t 61t 61t 622 8pu"],
-		["The Vacuum", "5uk 5uk 5uk 5uk 5uk 5uk 606 606 606 606 606 606 5ur 5us 5us 5us 5us 5v3 5v3 5v3 5v3 5uq 5uq 5ut 5ut 5ut 5ut 5up 5up 5uo 8pt"],
-		["The Chromatic", "4sa 4sa 4sa 4sa 4sc 4sc 4sc 4sc 4vj 4vj 4vj 4vj 4vj 4vj 4vh 4vk 52i 532 55u 563 599 598 5cc 5fi 5iq 5il 5lp 5os 5ri 5un 627 8pi"],
-		["The Pyre", "5f0 5f0 5f0 5f0 5f0 5f0 5f0 5f0 5f0 5f0 5f1 5f1 5f1 5f1 5f3 5f3 5f3 5f3 5f9 5f9 5f9 5f9 5f9 5f9 5f4 5f4 5f4 5f4 5fa 5fa 5fa 5fa 5l9 5l9 5l9 5l9 8pm"],
-		["The Dead", "4vq 4vq 4vq 4vq 52g 52g 52g 52g 52g 52g 52g 52g 52v 52v 52v 52v 52v 52v 52k 52k 52n 52n 52n 52n 531 531 531 531 52p 52p 52r 52r 8pj"],
-	];
+		if (user && !daily) {
+			if (user.gold < 5) {
+				chatArea.value = "Requires 5\u00A4";
+				return;
+			}
+			userExec("addgold", { g: -5 });
+		}
 
-	var mage = mages[Math.floor(Math.random() * mages.length)];
-	var deck = ((!user && aideck.value) || mage[1]).split(" ");
-	initGame({ first: Math.random() < .5, deck: deck, urdeck: urdeck, seed: Math.random() * etgutil.MAX_INT, hp: 125, foename: mage[0] }, true);
-	game.cost = 5;
-	game.level = 1;
+		var mage = daily ? aiDecks.mage[user.dailymage] : aiDecks.giveRandom("mage");
+		var deck = ((!user && aideck.value) || mage[1]).split(" ");
+		initGame({ first: Math.random() < .5, deck: deck, urdeck: urdeck, seed: Math.random() * etgutil.MAX_INT, hp: 125, foename: mage[0] }, true);
+		game.cost = daily ? 0 : 5;
+		game.level = 1;
+		if (extrafunc) extrafunc(game);
+	}
 }
 function mkQuestAi(questname, stage, area) {
 	var quest = Quest[questname][stage];
@@ -752,14 +723,14 @@ function mkQuestAi(questname, stage, area) {
 	if (urdeck.length < (user ? 31 : 11)) {
 		return "ERROR: Your deck is invalid or missing! Please exit and create a valid deck in the deck editor.";
 	}
-	initGame({ first: Math.random() < .5, deck: deck, urdeck: urdeck, seed: Math.random() * etgutil.MAX_INT, hp: hp, aimarkpower: markpower, foename: foename, urhp : playerHPstart, aidrawpower:drawpower }, true);
+	initGame({ first: Math.random() < .5, deck: deck, urdeck: urdeck, seed: Math.random() * etgutil.MAX_INT, hp: hp, aimarkpower: markpower, foename: foename, urhp: playerHPstart, aidrawpower: drawpower }, true);
 	game.quest = [questname, stage];
 	game.wintext = quest.wintext || "";
 	game.autonext = quest.autonext || false;
 	game.area = area;
 	if ((user.quest[questname] <= stage || !(questname in user.quest))) game.cardreward = etgutil.encodedeck(quest.cardreward);
 }
-function mkAi(level) {
+function mkAi(level, daily, extrafunc) {
 	return function() {
 		var uprate = level == 0 ? 0 : level == 1 ? .1 : .3;
 		var gameprice = level == 0 ? 0 : level == 1 ? 5 : 10;
@@ -776,7 +747,7 @@ function mkAi(level) {
 			if (!user && aideck.value) {
 				deck = aideck.value.split(" ");
 			} else {
-				if (user) {
+				if (user && !daily) {
 					if (gameprice) {
 						if (user.gold < gameprice) {
 							chatArea.value = "Requires " + gameprice + "\u00A4";
@@ -868,12 +839,12 @@ function mkAi(level) {
 
 			var foename = typeName[level] + "\n" + randomNames[Math.floor(Math.random() * randomNames.length)];
 			initGame({ first: Math.random() < .5, deck: deck, urdeck: urdeck, seed: Math.random() * etgutil.MAX_INT, hp: level == 0 ? 100 : level == 1 ? 125 : 150, aimarkpower: level == 2 ? 2 : 1, foename: foename, aidrawpower: level == 2 ? 2 : 1 }, true);
-			game.cost = gameprice;
+			game.cost = daily ? 0 : gameprice;
 			game.level = level;
+			if (extrafunc) extrafunc(game);
 		}
 	}
 }
-
 // Asset Loading
 var nopic = PIXI.Texture.fromImage("");
 var goldtex, buttex;
@@ -1110,7 +1081,7 @@ function startMenu() {
 	var bai1 = makeButton(150, 100, "Mage", function() {
 		tinfo.setText("Mages have a few upgraded cards.\nCost: $5");
 	});
-	bai1.click = mkMage;
+	bai1.click = mkMage();
 	menuui.addChild(bai1);
 
 	var bai2 = makeButton(250, 100, "Champion", function() {
@@ -1122,7 +1093,7 @@ function startMenu() {
 	var bai3 = makeButton(350, 100, "Demigod", function() {
 		tinfo.setText("Demigods are extremely powerful. Come prepared for anything.\nCost: $20");
 	});
-	bai3.click = mkDemigod;
+	bai3.click = mkDemigod();
 	menuui.addChild(bai3);
 
 	var bquest = makeButton(50, 145, "Quests", function() {
@@ -1130,6 +1101,12 @@ function startMenu() {
 	});
 	bquest.click = startQuestWindow;
 	menuui.addChild(bquest);
+
+	var bcolosseum = makeButton(150, 145, "Colosseum", function() {
+		tinfo.setText("Try some daily challenges in the Colosseum!");
+	});
+	bcolosseum.click = startColosseum;
+	menuui.addChild(bcolosseum);
 
 	var bedit = makeButton(50, 300, "Editor", function() {
 		tinfo.setText("Here you can edit your deck, as well as submit an arena deck.");
@@ -1172,7 +1149,7 @@ function startMenu() {
 	}
 	menuui.addChild(bdelete);
 
-	var usertoggle = [bquest, bshop, bupgrade, blogout, bdelete, taiwinloss];
+	var usertoggle = [bquest, bcolosseum, bshop, bupgrade, blogout, bdelete, taiwinloss];
 	for (var i=0; i<2; i++){
 		var baia = makeButton(50, 200+i*50, "Arena AI", (function(cost){return function() {
 			tinfo.setText("In the arena you will face decks from other players.\nCost: $" + cost);
@@ -1603,7 +1580,74 @@ function startStore() {
 		tgold.setText("$" + user.gold);
 	});
 }
+function addToGame(data) {
+	for (key in data) {
+		if (key == "playerhp")
+			game.player1.hp = data[key];
+		else if (key == "playermaxhp")
+			game.player1.maxhp = data[key];
+		else
+			game[key] = data[key];
+	}
+}
+function mkDaily(type) {
+	if (type == 1) {
+		return function() {
+			var dataNext = { goldreward: 75, endurance: 2, cost: 0, daily: 1 , cardreward: ""};
+			mkAi(0)();
+			addToGame(dataNext);
+			game.dataNext = dataNext;
+		}
+	}
+	else if (type == 2) {
+		return function() {
+			var dataNext = { goldreward: 200, endurance: 2, cost: 0, daily: 2, cardreward: "" };
+			mkAi(2)();
+			addToGame(dataNext);
+			game.dataNext = dataNext;
+		}
+	}
+	else if (type == 3) {
+		return function() {
+			mkMage(true, type)();
+			game.addonreward = 30;
+			userExec("donedaily", { daily: type });
+		}
+	}
+	else if (type == 4) {
+		return function() {
+			mkDemigod(true, type)();
+			game.addonreward = 100;
+			userExec("donedaily", { daily: type });
+		}
+	}
+}
+function startColosseum(){
+		var coloui = new PIXI.DisplayObjectContainer();
+		coloui.interactive = true;
+		coloui.addChild(new PIXI.Sprite(backgrounds[0]));
+		var magename = aiDecks.mage[user.dailymage][0];
+		var dgname = aiDecks.demigod[user.dailydg][0];
+		var events = [{name:"Novice Endurance", desc:"Fight 3 Commoners in a row without healing in between. Can try until you win."},{name:"Expert Endurance", desc:"Fight 3 Champions in a row. Can try until you win"},{name:"Novice Duel", desc:"Fight " + magename +", Only one attempt allowed"},{name:"Expert Duel",desc:"Fight " + dgname + ". Only one attempt allowed"}];
 
+		for (var i = 1;i < 5;i++) {
+			var active = !(user.daily & (1 << i));
+			active = true;
+			if (active) {
+				var button = makeButton(50, 100 + 30 * i, "Fight!");
+				(function(_i) { button.click = mkDaily(_i) })(i);
+				coloui.addChild(button);
+			}
+			var text = makeText(130, 100 + 30 * i, active ? (events[i-1].name + ": " + events[i-1].desc) : "Not availible. Try again tomorrow.");
+			coloui.addChild(text);
+		}
+
+		var bexit = makeButton(8, 8, "Exit");
+		bexit.click = startMenu;
+		coloui.addChild(bexit);
+
+		refreshRenderer(coloui);
+}
 function startEditor(arena, acard, startempty) {
 	if (!Cards) return;
 	if (arena && (!user || arena.deck === undefined || acard === undefined)) arena = false;
@@ -1927,243 +1971,6 @@ function startMatch() {
 		spr.alpha = obj.status.immaterial || obj.status.burrowed ? .7 : 1;
 	}
 	var aiDelay = 0;
-	var animCb = function() {
-		var now;
-		if (game.phase == etg.PlayPhase && game.turn == game.player2 && game.ai && (now = Date.now()) >= aiDelay) {
-			aiDelay = now + 300;
-			var cmd = aiEvalFunc();
-			cmds[cmd[0]](cmd[1]);
-		}
-		var pos = realStage.getMousePosition();
-		var cardartcode, cardartx;
-		infobox.setTexture(nopic);
-		for (var i = 0;i < foeplays.children.length;i++) {
-			var foeplay = foeplays.children[i];
-			if (hitTest(foeplay, pos)) {
-				cardartcode = foeplay.card.code;
-			}
-		}
-		for (var j = 0;j < 2;j++) {
-			var pl = game.players[j];
-			if (j == 0 || game.player1.precognition) {
-				for (var i = 0;i < pl.hand.length;i++) {
-					if (hitTest(handsprite[j][i], pos)) {
-						cardartcode = pl.hand[i].card.code;
-					}
-				}
-			}
-			if (j == 0 || !(cloakgfx.visible)) {
-				for (var i = 0;i < 23;i++) {
-					var cr = pl.creatures[i];
-					if (cr && hitTest(creasprite[j][i], pos)) {
-						cardartcode = cr.card.code;
-						cardartx = creasprite[j][i].position.x;
-						setInfo(cr);
-					}
-				}
-				for (var i = 0;i < 16;i++) {
-					var pr = pl.permanents[i];
-					if (pr && hitTest(permsprite[j][i], pos)) {
-						cardartcode = pr.card.code;
-						cardartx = permsprite[j][i].position.x;
-						setInfo(pr);
-					}
-				}
-				if (pl.weapon && hitTest(weapsprite[j], pos)) {
-					cardartcode = pl.weapon.card.code;
-					cardartx = weapsprite[j].position.x;
-					setInfo(pl.weapon);
-				}
-				if (pl.shield && hitTest(shiesprite[j], pos)) {
-					cardartcode = pl.shield.card.code;
-					cardartx = shiesprite[j].position.x;
-					setInfo(pl.shield);
-				}
-			}
-		}
-		if (cardartcode) {
-			cardart.setTexture(getArt(cardartcode));
-			cardart.visible = true;
-			cardart.position.set(cardartx || 654, pos.y > 300 ? 44 : 300);
-		} else cardart.visible = false;
-		if (game.winner == game.player1 && user && !game.quest && game.ai && !game.cardreward) {
-			var winnable = [], cardwon;
-			for (var i = 0;i < foeDeck.length;i++) {
-				if (foeDeck[i].type != etg.PillarEnum && foeDeck[i].rarity < 4) {
-					winnable.push(foeDeck[i]);
-				}
-			}
-			if (winnable.length) {
-				cardwon = winnable[Math.floor(Math.random() * winnable.length)];
-				if (cardwon == 3 && Math.random() < .5)
-					cardwon = winnable[Math.floor(Math.random() * winnable.length)];
-			} else {
-				var elewin = foeDeck[Math.floor(Math.random() * foeDeck.length)];
-				cardwon = etg.PlayerRng.randomcard(elewin.upped, function(x) { return x.element == elewin.element && x.type != etg.PillarEnum && x.rarity <= 3; });
-			}
-			var goldwon;
-			if (game.level !== undefined) {
-				if (game.level < 2){
-					cardwon = cardwon.asUpped(false);
-				}
-				var basereward = [1, 6, 11, 31][game.level];
-				var hpfactor = [11, 7, 6, 2][game.level];
-				goldwon = Math.floor((basereward + Math.floor(game.player1.hp / hpfactor)) * (game.player1.hp == game.player1.maxhp ? 1.5 : 1));
-			}else goldwon = 0;
-			game.goldreward = goldwon + (game.cost || 0);
-			game.cardreward = "01" + cardwon.code;
-		}
-		if (game.phase != etg.EndPhase) {
-			if (game.turn == game.player1){
-				endturn.setText(game.phase == etg.PlayPhase ? "End Turn" : "Accept Hand");
-				cancel.setText(game.phase != etg.PlayPhase ? "Mulligan" : targetingMode || discarding || resigning ? "Cancel" : null);
-			}else cancel.visible = endturn.visible = false;
-		}else{
-			winnername.setText((game.winner == game.player1 ? "Won " : "Lost ") + game.ply);
-			endturn.setText("Continue");
-		}
-		maybeSetText(turntell, discarding ? "Discard" : targetingMode ? targetingText : game.turn == game.player1 ? "Your Turn" : "Their Turn");
-		for (var i = 0;i < foeplays.children.length;i++) {
-			maybeSetTexture(foeplays.children[i], getCardImage(foeplays.children[i].card.code));
-		}
-		foeplays.visible = !(cloakgfx.visible = game.player2.isCloaked());
-		fgfx.clear();
-		if (game.turn == game.player1 && !targetingMode && game.phase != etg.EndPhase) {
-			for (var i = 0;i < game.player1.hand.length;i++) {
-				var card = game.player1.hand[i].card;
-				if (game.player1.canspend(card.costele, card.cost)) {
-					fgfx.beginFill(elecols[etg.Light]);
-					fgfx.drawRect(handsprite[0][i].position.x + 100, handsprite[0][i].position.y, 20, 20);
-					fgfx.endFill();
-				}
-			}
-		}
-		fgfx.beginFill(0, 0);
-		fgfx.lineStyle(2, 0xffffff);
-		for (var j = 0;j < 2;j++) {
-			for (var i = 0;i < 23;i++) {
-				drawBorder(game.players[j].creatures[i], creasprite[j][i]);
-			}
-			for (var i = 0;i < 16;i++) {
-				drawBorder(game.players[j].permanents[i], permsprite[j][i]);
-			}
-			drawBorder(game.players[j].weapon, weapsprite[j]);
-			drawBorder(game.players[j].shield, shiesprite[j]);
-		}
-		if (targetingMode) {
-			fgfx.lineStyle(2, 0xff0000);
-			for (var j = 0;j < 2;j++) {
-				if (targetingMode(game.players[j])) {
-					var spr = hptext[j];
-					fgfx.drawRect(spr.position.x - spr.width / 2, spr.position.y - spr.height / 2, spr.width, spr.height);
-				}
-				for (var i = 0;i < game.players[j].hand.length;i++) {
-					if (targetingMode(game.players[j].hand[i])) {
-						var spr = handsprite[j][i];
-						fgfx.drawRect(spr.position.x, spr.position.y, spr.width, spr.height);
-					}
-				}
-			}
-		}
-		fgfx.lineStyle(0, 0, 0);
-		fgfx.endFill();
-		for (var j = 0;j < 2;j++) {
-			if (game.players[j].sosa) {
-				fgfx.beginFill(elecols[etg.Death], .5);
-				var spr = hptext[j];
-				fgfx.drawRect(spr.position.x - spr.width / 2, spr.position.y - spr.height / 2, spr.width, spr.height);
-				fgfx.endFill();
-			}
-			if (game.players[j].flatline) {
-				fgfx.beginFill(elecols[etg.Death], .3);
-				fgfx.drawRect(handsprite[j][0].position.x - 2, handsprite[j][0].position.y - 2, 124, 164);
-				fgfx.endFill();
-			}
-			if (game.players[j].silence) {
-				fgfx.beginFill(elecols[etg.Aether], .3);
-				fgfx.drawRect(handsprite[j][0].position.x - 2, handsprite[j][0].position.y - 2, 124, 164);
-				fgfx.endFill();
-			} else if (game.players[j].sanctuary) {
-				fgfx.beginFill(elecols[etg.Light], .3);
-				fgfx.drawRect(handsprite[j][0].position.x - 2, handsprite[j][0].position.y - 2, 124, 164);
-				fgfx.endFill();
-			}
-			for (var i = 0;i < 8;i++) {
-				maybeSetTexture(handsprite[j][i], getCardImage(game.players[j].hand[i] ? (j == 0 || game.player1.precognition ? game.players[j].hand[i].card.code : "0") : "1"));
-			}
-			for (var i = 0;i < 23;i++) {
-				var cr = game.players[j].creatures[i];
-				if (cr && !(j == 1 && cloakgfx.visible)) {
-					creasprite[j][i].setTexture(getCreatureImage(cr.card));
-					creasprite[j][i].visible = true;
-					var child = creasprite[j][i].getChildAt(0);
-					child.setTexture(getTextImage(cr.trueatk() + "|" + cr.truehp(), ui.mkFont(10, cr.card.upped ? "black" : "white"), maybeLighten(cr.card)));
-					var child2 = creasprite[j][i].getChildAt(1);
-					var activetext = cr.active.cast ? etg.casttext(cr.cast, cr.castele) + cr.active.cast.activename : (cr.active.hit ? cr.active.hit.activename : "");
-					child2.setTexture(getTextImage(activetext, ui.mkFont(8, cr.card.upped ? "black" : "white")));
-					drawStatus(cr, creasprite[j][i]);
-				} else creasprite[j][i].visible = false;
-			}
-			for (var i = 0;i < 16;i++) {
-				var pr = game.players[j].permanents[i];
-				if (pr && !(j == 1 && cloakgfx.visible && !pr.passives.cloak)) {
-					permsprite[j][i].setTexture(getPermanentImage(pr.card.code));
-					permsprite[j][i].visible = true;
-					permsprite[j][i].alpha = pr.status.immaterial ? .7 : 1;
-					var child = permsprite[j][i].getChildAt(0);
-					if (pr instanceof etg.Pillar) {
-						child.setTexture(getTextImage("1:" + (pr.pendstate ? pr.owner.mark : pr.card.element) + " x" + pr.status.charges, ui.mkFont(10, pr.card.upped ? "black" : "white"), maybeLighten(pr.card)));
-					}
-					else child.setTexture(getTextImage(pr.status.charges !== undefined ? " " + pr.status.charges : "", ui.mkFont(10, pr.card.upped ? "black" : "white"), maybeLighten(pr.card)));
-					var child2 = permsprite[j][i].getChildAt(1);
-					child2.setTexture(pr instanceof etg.Pillar ? nopic : getTextImage(pr.activetext().replace(" losecharge", ""), ui.mkFont(8, pr.card.upped ? "black" : "white")));
-				} else permsprite[j][i].visible = false;
-			}
-			var wp = game.players[j].weapon;
-			if (wp && !(j == 1 && cloakgfx.visible)) {
-				weapsprite[j].visible = true;
-				var child = weapsprite[j].getChildAt(0);
-				child.setTexture(getTextImage(wp.trueatk() + "", ui.mkFont(12, wp.card.upped ? "black" : "white"), maybeLighten(wp.card)));
-				child.visible = true;
-				var child = weapsprite[j].getChildAt(1);
-				child.setTexture(getTextImage(wp.activetext(), ui.mkFont(12, wp.card.upped ? "black" : "white")));
-				child.visible = true;
-				weapsprite[j].setTexture(getWeaponShieldImage(wp.card.code));
-				drawStatus(wp, weapsprite[j]);
-			} else weapsprite[j].visible = false;
-			var sh = game.players[j].shield;
-			if (sh && !(j == 1 && cloakgfx.visible)) {
-				shiesprite[j].visible = true;
-				var dr = sh.truedr();
-				var child = shiesprite[j].getChildAt(0);
-				child.setTexture(getTextImage(sh.status.charges ? "x" + sh.status.charges: "" + sh.truedr() + "", ui.mkFont(12, sh.card.upped ? "black" : "white"), maybeLighten(sh.card)));
-				child.visible = true;
-				var child = shiesprite[j].getChildAt(1);
-				child.setTexture(getTextImage((sh.active.shield ? " " + sh.active.shield.activename : "") + (sh.active.buff ? " " + sh.active.buff.activename : "") + (sh.active.cast ? etg.casttext(sh.cast, sh.castele) + sh.active.cast.activename : ""), ui.mkFont(12, sh.card.upped ? "black" : "white")));
-				child.visible = true;
-				shiesprite[j].alpha = sh.status.immaterial ? .7 : 1;
-				shiesprite[j].setTexture(getWeaponShieldImage(sh.card.code));
-			} else shiesprite[j].visible = false;
-			marksprite[j].setTexture(eicons[game.players[j].mark]);
-			if (game.players[j].markpower != 1){
-				maybeSetText(marktext[j], "x" + game.players[j].markpower);
-			}else marktext[j].visible = false;
-			for (var i = 1;i < 13;i++) {
-				maybeSetText(quantatext[j].getChildAt(i*2-2), game.players[j].quanta[i].toString());
-			}
-			maybeSetText(hptext[j], game.players[j].hp + "/" + game.players[j].maxhp);
-			if (hitTest(hptext[j], pos)){
-				setInfo(game.players[j]);
-			}
-			var poison = game.players[j].status.poison;
-			var poisoninfo = !poison ? "" : (poison > 0 ? poison + " 1:2" : -poison + " 1:7") + (game.players[j].neuro ? " 1:10" : "");
-			poisontext[j].setTexture(getTextImage(poisoninfo,16));
-			maybeSetText(decktext[j], game.players[j].deck.length + "cards");
-			maybeSetText(damagetext[j], game.expectedDamage[j] ? "Next HP loss: " + game.expectedDamage[j] : "");
-		}
-		damagetext[1].visible = !cloakgfx.visible;
-		Effect.next(cloakgfx.visible);
-	}
 	if (user) {
 		userExec("addloss", { pvp: !game.ai });
 	}
@@ -2214,7 +2021,23 @@ function startMatch() {
 				}
 				if (game.winner == game.player1 && game.quest && game.autonext) {
 					mkQuestAi(game.quest[0], game.quest[1] + 1, game.area);
-				}else{
+
+				}
+				else if (game.winner == game.player1 && game.daily && game.endurance !== undefined) {
+					if (game.endurance) {
+						var data = game.dataNext;
+						data.playerhp = game.player1.hp;
+						data.playermaxhp = game.player1.maxhp;
+						data.endurance--;
+						mkAi(game.level)();
+						addToGame(data);
+						game.dataNext = data;
+					}
+					else {
+						userExec("donedaily", { daily: game.daily });
+						victoryScreen();
+					}
+				}else {
 					victoryScreen();
 				}
 			}
@@ -2449,7 +2272,247 @@ function startMatch() {
 	cardart.position.set(654, 300);
 	cardart.anchor.set(.5, 0);
 	gameui.addChild(cardart);
-	refreshRenderer(gameui, animCb);
+	refreshRenderer(gameui, function() {
+		var now;
+		if (game.phase == etg.PlayPhase && game.turn == game.player2 && game.ai && (now = Date.now()) >= aiDelay) {
+			aiDelay = now + 300;
+			var cmd = aiEvalFunc();
+			cmds[cmd[0]](cmd[1]);
+		}
+		var pos = realStage.getMousePosition();
+		var cardartcode, cardartx;
+		infobox.setTexture(nopic);
+		for (var i = 0;i < foeplays.children.length;i++) {
+			var foeplay = foeplays.children[i];
+			if (hitTest(foeplay, pos)) {
+				cardartcode = foeplay.card.code;
+			}
+		}
+		for (var j = 0;j < 2;j++) {
+			var pl = game.players[j];
+			if (j == 0 || game.player1.precognition) {
+				for (var i = 0;i < pl.hand.length;i++) {
+					if (hitTest(handsprite[j][i], pos)) {
+						cardartcode = pl.hand[i].card.code;
+					}
+				}
+			}
+			if (j == 0 || !(cloakgfx.visible)) {
+				for (var i = 0;i < 23;i++) {
+					var cr = pl.creatures[i];
+					if (cr && hitTest(creasprite[j][i], pos)) {
+						cardartcode = cr.card.code;
+						cardartx = creasprite[j][i].position.x;
+						setInfo(cr);
+					}
+				}
+				for (var i = 0;i < 16;i++) {
+					var pr = pl.permanents[i];
+					if (pr && hitTest(permsprite[j][i], pos)) {
+						cardartcode = pr.card.code;
+						cardartx = permsprite[j][i].position.x;
+						setInfo(pr);
+					}
+				}
+				if (pl.weapon && hitTest(weapsprite[j], pos)) {
+					cardartcode = pl.weapon.card.code;
+					cardartx = weapsprite[j].position.x;
+					setInfo(pl.weapon);
+				}
+				if (pl.shield && hitTest(shiesprite[j], pos)) {
+					cardartcode = pl.shield.card.code;
+					cardartx = shiesprite[j].position.x;
+					setInfo(pl.shield);
+				}
+			}
+		}
+		if (cardartcode) {
+			cardart.setTexture(getArt(cardartcode));
+			cardart.visible = true;
+			cardart.position.set(cardartx || 654, pos.y > 300 ? 44 : 300);
+		} else cardart.visible = false;
+		if (game.winner == game.player1 && user && !game.quest && game.ai) {
+			if (game.cardreward === undefined) {
+				var winnable = [], cardwon;
+				for (var i = 0;i < foeDeck.length;i++) {
+					if (foeDeck[i].type != etg.PillarEnum && foeDeck[i].rarity < 4) {
+						winnable.push(foeDeck[i]);
+					}
+				}
+				if (winnable.length) {
+					cardwon = winnable[Math.floor(Math.random() * winnable.length)];
+					if (cardwon == 3 && Math.random() < .5)
+						cardwon = winnable[Math.floor(Math.random() * winnable.length)];
+				} else {
+					var elewin = foeDeck[Math.floor(Math.random() * foeDeck.length)];
+					cardwon = etg.PlayerRng.randomcard(elewin.upped, function(x) { return x.element == elewin.element && x.type != etg.PillarEnum && x.rarity <= 3; });
+				}
+				if (game.level !== undefined && game.level < 2) {
+					cardwon = cardwon.asUpped(false);
+				}
+				game.cardreward = "01" + cardwon.code;
+			}
+			if (!game.goldreward) {
+				var goldwon;
+				if (game.level !== undefined) {
+					var basereward = [1, 6, 11, 31][game.level];
+					var hpfactor = [11, 7, 6, 2][game.level];
+					goldwon = Math.floor((basereward + Math.floor(game.player1.hp / hpfactor)) * (game.player1.hp == game.player1.maxhp ? 1.5 : 1));
+				} else goldwon = 0;
+				game.goldreward = goldwon + (game.cost || 0) + game.addonreward || 0;
+			}
+		}
+		if (game.phase != etg.EndPhase) {
+			if (game.turn == game.player1){
+				endturn.setText(game.phase == etg.PlayPhase ? "End Turn" : "Accept Hand");
+				cancel.setText(game.phase != etg.PlayPhase ? "Mulligan" : targetingMode || discarding || resigning ? "Cancel" : null);
+			}else cancel.visible = endturn.visible = false;
+		}else{
+			winnername.setText((game.winner == game.player1 ? "Won " : "Lost ") + game.ply);
+			endturn.setText("Continue");
+		}
+		maybeSetText(turntell, discarding ? "Discard" : targetingMode ? targetingText : game.turn == game.player1 ? "Your Turn" : "Their Turn");
+		for (var i = 0;i < foeplays.children.length;i++) {
+			maybeSetTexture(foeplays.children[i], getCardImage(foeplays.children[i].card.code));
+		}
+		foeplays.visible = !(cloakgfx.visible = game.player2.isCloaked());
+		fgfx.clear();
+		if (game.turn == game.player1 && !targetingMode && game.phase != etg.EndPhase) {
+			for (var i = 0;i < game.player1.hand.length;i++) {
+				var card = game.player1.hand[i].card;
+				if (game.player1.canspend(card.costele, card.cost)) {
+					fgfx.beginFill(elecols[etg.Light]);
+					fgfx.drawRect(handsprite[0][i].position.x + 100, handsprite[0][i].position.y, 20, 20);
+					fgfx.endFill();
+				}
+			}
+		}
+		fgfx.beginFill(0, 0);
+		fgfx.lineStyle(2, 0xffffff);
+		for (var j = 0;j < 2;j++) {
+			for (var i = 0;i < 23;i++) {
+				drawBorder(game.players[j].creatures[i], creasprite[j][i]);
+			}
+			for (var i = 0;i < 16;i++) {
+				drawBorder(game.players[j].permanents[i], permsprite[j][i]);
+			}
+			drawBorder(game.players[j].weapon, weapsprite[j]);
+			drawBorder(game.players[j].shield, shiesprite[j]);
+		}
+		if (targetingMode) {
+			fgfx.lineStyle(2, 0xff0000);
+			for (var j = 0;j < 2;j++) {
+				if (targetingMode(game.players[j])) {
+					var spr = hptext[j];
+					fgfx.drawRect(spr.position.x - spr.width / 2, spr.position.y - spr.height / 2, spr.width, spr.height);
+				}
+				for (var i = 0;i < game.players[j].hand.length;i++) {
+					if (targetingMode(game.players[j].hand[i])) {
+						var spr = handsprite[j][i];
+						fgfx.drawRect(spr.position.x, spr.position.y, spr.width, spr.height);
+					}
+				}
+			}
+		}
+		fgfx.lineStyle(0, 0, 0);
+		fgfx.endFill();
+		for (var j = 0;j < 2;j++) {
+			if (game.players[j].sosa) {
+				fgfx.beginFill(elecols[etg.Death], .5);
+				var spr = hptext[j];
+				fgfx.drawRect(spr.position.x - spr.width / 2, spr.position.y - spr.height / 2, spr.width, spr.height);
+				fgfx.endFill();
+			}
+			if (game.players[j].flatline) {
+				fgfx.beginFill(elecols[etg.Death], .3);
+				fgfx.drawRect(handsprite[j][0].position.x - 2, handsprite[j][0].position.y - 2, 124, 164);
+				fgfx.endFill();
+			}
+			if (game.players[j].silence) {
+				fgfx.beginFill(elecols[etg.Aether], .3);
+				fgfx.drawRect(handsprite[j][0].position.x - 2, handsprite[j][0].position.y - 2, 124, 164);
+				fgfx.endFill();
+			} else if (game.players[j].sanctuary) {
+				fgfx.beginFill(elecols[etg.Light], .3);
+				fgfx.drawRect(handsprite[j][0].position.x - 2, handsprite[j][0].position.y - 2, 124, 164);
+				fgfx.endFill();
+			}
+			for (var i = 0;i < 8;i++) {
+				maybeSetTexture(handsprite[j][i], getCardImage(game.players[j].hand[i] ? (j == 0 || game.player1.precognition ? game.players[j].hand[i].card.code : "0") : "1"));
+			}
+			for (var i = 0;i < 23;i++) {
+				var cr = game.players[j].creatures[i];
+				if (cr && !(j == 1 && cloakgfx.visible)) {
+					creasprite[j][i].setTexture(getCreatureImage(cr.card));
+					creasprite[j][i].visible = true;
+					var child = creasprite[j][i].getChildAt(0);
+					child.setTexture(getTextImage(cr.trueatk() + "|" + cr.truehp(), ui.mkFont(10, cr.card.upped ? "black" : "white"), maybeLighten(cr.card)));
+					var child2 = creasprite[j][i].getChildAt(1);
+					var activetext = cr.active.cast ? etg.casttext(cr.cast, cr.castele) + cr.active.cast.activename : (cr.active.hit ? cr.active.hit.activename : "");
+					child2.setTexture(getTextImage(activetext, ui.mkFont(8, cr.card.upped ? "black" : "white")));
+					drawStatus(cr, creasprite[j][i]);
+				} else creasprite[j][i].visible = false;
+			}
+			for (var i = 0;i < 16;i++) {
+				var pr = game.players[j].permanents[i];
+				if (pr && !(j == 1 && cloakgfx.visible && !pr.passives.cloak)) {
+					permsprite[j][i].setTexture(getPermanentImage(pr.card.code));
+					permsprite[j][i].visible = true;
+					permsprite[j][i].alpha = pr.status.immaterial ? .7 : 1;
+					var child = permsprite[j][i].getChildAt(0);
+					if (pr instanceof etg.Pillar) {
+						child.setTexture(getTextImage("1:" + (pr.pendstate ? pr.owner.mark : pr.card.element) + " x" + pr.status.charges, ui.mkFont(10, pr.card.upped ? "black" : "white"), maybeLighten(pr.card)));
+					}
+					else child.setTexture(getTextImage(pr.status.charges !== undefined ? " " + pr.status.charges : "", ui.mkFont(10, pr.card.upped ? "black" : "white"), maybeLighten(pr.card)));
+					var child2 = permsprite[j][i].getChildAt(1);
+					child2.setTexture(pr instanceof etg.Pillar ? nopic : getTextImage(pr.activetext().replace(" losecharge", ""), ui.mkFont(8, pr.card.upped ? "black" : "white")));
+				} else permsprite[j][i].visible = false;
+			}
+			var wp = game.players[j].weapon;
+			if (wp && !(j == 1 && cloakgfx.visible)) {
+				weapsprite[j].visible = true;
+				var child = weapsprite[j].getChildAt(0);
+				child.setTexture(getTextImage(wp.trueatk() + "", ui.mkFont(12, wp.card.upped ? "black" : "white"), maybeLighten(wp.card)));
+				child.visible = true;
+				var child = weapsprite[j].getChildAt(1);
+				child.setTexture(getTextImage(wp.activetext(), ui.mkFont(12, wp.card.upped ? "black" : "white")));
+				child.visible = true;
+				weapsprite[j].setTexture(getWeaponShieldImage(wp.card.code));
+				drawStatus(wp, weapsprite[j]);
+			} else weapsprite[j].visible = false;
+			var sh = game.players[j].shield;
+			if (sh && !(j == 1 && cloakgfx.visible)) {
+				shiesprite[j].visible = true;
+				var dr = sh.truedr();
+				var child = shiesprite[j].getChildAt(0);
+				child.setTexture(getTextImage(sh.status.charges ? "x" + sh.status.charges: "" + sh.truedr() + "", ui.mkFont(12, sh.card.upped ? "black" : "white"), maybeLighten(sh.card)));
+				child.visible = true;
+				var child = shiesprite[j].getChildAt(1);
+				child.setTexture(getTextImage((sh.active.shield ? " " + sh.active.shield.activename : "") + (sh.active.buff ? " " + sh.active.buff.activename : "") + (sh.active.cast ? etg.casttext(sh.cast, sh.castele) + sh.active.cast.activename : ""), ui.mkFont(12, sh.card.upped ? "black" : "white")));
+				child.visible = true;
+				shiesprite[j].alpha = sh.status.immaterial ? .7 : 1;
+				shiesprite[j].setTexture(getWeaponShieldImage(sh.card.code));
+			} else shiesprite[j].visible = false;
+			marksprite[j].setTexture(eicons[game.players[j].mark]);
+			if (game.players[j].markpower != 1){
+				maybeSetText(marktext[j], "x" + game.players[j].markpower);
+			}else marktext[j].visible = false;
+			for (var i = 1;i < 13;i++) {
+				maybeSetText(quantatext[j].getChildAt(i*2-2), game.players[j].quanta[i].toString());
+			}
+			maybeSetText(hptext[j], game.players[j].hp + "/" + game.players[j].maxhp);
+			if (hitTest(hptext[j], pos)){
+				setInfo(game.players[j]);
+			}
+			var poison = game.players[j].status.poison;
+			var poisoninfo = !poison ? "" : (poison > 0 ? poison + " 1:2" : -poison + " 1:7") + (game.players[j].neuro ? " 1:10" : "");
+			poisontext[j].setTexture(getTextImage(poisoninfo,16));
+			maybeSetText(decktext[j], game.players[j].deck.length + "cards");
+			maybeSetText(damagetext[j], game.expectedDamage[j] ? "Next HP loss: " + game.expectedDamage[j] : "");
+		}
+		damagetext[1].visible = !cloakgfx.visible;
+		Effect.next(cloakgfx.visible);
+	});
 }
 
 function startArenaInfo(info) {

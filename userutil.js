@@ -51,3 +51,6 @@ exports.addwin = function(data, user) {
 exports.addcards = function(data, user) {
 	user.pool = etgutil.mergedecks(user.pool, data.c);
 }
+exports.donedaily = function(data, user) {
+	user.daily |= (1 << data.daily);
+}

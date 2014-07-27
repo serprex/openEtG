@@ -1,1 +1,1 @@
-browserify -r ./etg -r ./etg.client -r ./etgutil -r ./uiutil -r ./userutil -r ./Actives -r ./MersenneTwister -r ./Effect -r ./Quest -r ./ai.eval -o etgify.js
+browserify -r ./etg -r ./etg.client -r ./etgutil -r ./uiutil -r ./userutil -r ./Actives -r ./MersenneTwister -r ./Effect -r ./Quest -r ./ai.eval -r ./Decks -o etgify.js
