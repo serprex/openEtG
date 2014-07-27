@@ -483,7 +483,7 @@ Creature.prototype.estimateDamage = Weapon.prototype.estimateDamage = function()
 	} else {
 		if (fsh) dr = fsh.truedr();
 		atk = Math.max(tatk - dr, 0);
-		if (fshactive == Actives.weight && this instanceof Creature && this.truehp() > 5) {
+		if ((fshactive == Actives.weight || fshactive == Actives.wings) && fshactive(this.owner.foe.shield, this, atk)) {
 			atk = 0;
 		}
 	}
