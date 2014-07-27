@@ -22,6 +22,7 @@ var Cards, CardCodes, Targeting, game;
 (function(){
 var targetingMode, targetingModeCb, targetingText, discarding, user, renderer, endturnFunc, cancelFunc, foeDeck, player2summon, player2Cards, guestname, cardChosen, newCards;
 var etgutil = require("./etgutil");
+var userutil = require("./userutil");
 var etg = require("./etg");
 var Actives = require("./Actives");
 var Effect = require("./Effect");
@@ -67,6 +68,11 @@ function userEmit(x, data) {
 	data.u = user.name;
 	data.a = user.auth;
 	socket.emit(x, data);
+}
+function userExec(x, data){
+	if (!data) data = {};
+	userEmit(x, data);
+	userutil[x](data, user);
 }
 function tgtToBits(x) {
 	var bits;
@@ -619,8 +625,7 @@ function victoryScreen() {
 		var goldshown = (game.goldreward || 0) - (game.cost || 0);
 		tgold = makeText(340, 550, "Gold won: $" + goldshown);
 		victoryui.addChild(tgold);
-		user.gold += game.goldreward;
-		userEmit("addgold", { g: game.goldreward });
+		userExec("addgold", { g: game.goldreward });
 	}
 	if (game.cardreward && winner) {
 		var cardrewardlength = etgutil.decklength(game.cardreward);
@@ -661,8 +666,7 @@ function mkDemigod() {
 			chatArea.value = "Requires 20\u00A4";
 			return;
 		}
-		user.gold -= 20;
-		userEmit("addgold", { g: -20 });
+		userExec("addgold", { g: -20 });
 	}
 
 	var demigods = [
@@ -699,8 +703,7 @@ function mkMage() {
 			chatArea.value = "Requires 5\u00A4";
 			return;
 		}
-		user.gold -= 5;
-		userEmit("addgold", { g: -5 });
+		userExec("addgold", { g: -5 });
 	}
 	var mages = [
 		["The Wall", "5de 5de 5de 5de 5de 5de 5de 5de 5de 5de 5de 5de 5de 5de 5c5 5c2 5c2 5c2 5c2 5c8 5c8 5c8 5c8 5ci 5c3 5l8 5l8 5mq 5mq 5lo 5lo 5lm 5lm 5lm 5lm 5ln 5ln 5la 5la 5li 8pq"],
@@ -780,8 +783,7 @@ function mkAi(level) {
 							chatArea.value = "Requires " + gameprice + "\u00A4";
 							return;
 						}
-						user.gold -= gameprice;
-						userEmit("addgold", { g: -gameprice });
+						userExec("addgold", { g: -gameprice });
 					}
 				}
 				var cardcount = {};
@@ -1375,26 +1377,13 @@ function upgradestore() {
 			if (!isFreeCard(card)) {
 				var use = card.rarity < 5 ? 6 : 1;
 				if (cardpool[card.code] >= use) {
-					var bound = etgutil.count(user.pool, card.code) < use;
-					userEmit("upgrade", { card: card.code, bound: bound });
-					var newcard = card.asUpped(true).code;
-					if (bound){
-						var count = etgutil.countcard(user.accountbound, card.code), usepool = Math.max(use - count, 0);
-						user.accountbound = etgutil.addcard(user.accountbound, -use);
-						if (usepool) user.pool = etgutil.addcard(user.pool, -usepool);
-						user.accountbound = etgutil.addcard(user.accountbound, newcard);
-					}else{
-						user.pool = etgutil.addcard(user.pool, card.code, -use);
-						user.pool = etgutil.addcard(user.pool, newcard);
-					}
+					userExec("upgrade", { card: card.code });
 					adjustdeck();
 				}
 				else twarning.setText("You need at least " + use + " copies to be able to upgrade this card!");
 			}
 			else if (user.gold >= 50) {
-				userEmit("uppillar", { c: card.code });
-				user.gold -= 50;
-				user.pool = etgutil.addcard(user.pool, card.asUpped(true).code);
+				userExec("uppillar", { c: card.code });
 				adjustdeck();
 			}
 			else twarning.setText("You need at least 50 gold to be able to upgrade a pillar!");
@@ -1407,10 +1396,7 @@ function upgradestore() {
 			if (card.rarity <= 4) {
 				var codecount = etgutil.count(user.pool, card.code);
 				if (codecount) {
-					user.pool = etgutil.addcard(user.pool, card.code, -1);
-					var sellValue = cardValues[card.rarity] * (card.upped ? 5 : 1);
-					user.gold += sellValue
-					userEmit("sellcard", { card: card.code, gold: sellValue});
+					userExec("sellcard", { card: card.code });
 					adjustdeck();
 				}
 				else twarning.setText("This card is bound to your account; you cannot sell it.")
@@ -2180,9 +2166,7 @@ function startMatch() {
 		Effect.next(cloakgfx.visible);
 	}
 	if (user) {
-		userEmit("addloss", { pvp: !game.ai });
-		if (!game.ai) user.pvplosses++;
-		else user.ailosses++;
+		userExec("addloss", { pvp: !game.ai });
 	}
 	gameui = new PIXI.DisplayObjectContainer();
 	gameui.interactive = true;
@@ -2217,15 +2201,7 @@ function startMatch() {
 		}else if (game.winner) {
 			if (user) {
 				if (game.winner == game.player1) {
-					userEmit("addwin", { pvp: !game.ai });
-					if (game.ai) {
-						user.aiwins++;
-						user.ailosses--;
-					}
-					else {
-						user.pvpwins++;
-						user.pvplosses--;
-					}
+					userExec("addwin", { pvp: !game.ai });
 				}
 				if (game.arena) {
 					userEmit("modarena", { aname: game.arena, won: game.winner == game.player2, lv: game.cost == 5?0:1 });
