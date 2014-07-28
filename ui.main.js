@@ -2721,7 +2721,7 @@ socket.on("foearena", function(data) {
 	chatArea.value = data.name + ": " + deck.join(" ");
 	initGame({ first: data.seed < etgutil.MAX_INT/2, deck: deck, urdeck: getDeck(), seed: data.seed, hp: data.hp, cost: data.cost, foename: data.name, aidrawpower: data.draw, aimarkpower: data.mark }, true);
 	game.arena = data.name;
-	game.level = data.lv+1;
+	game.level = data.lv?3:1;
 	game.cost = 5+data.lv*5;
 	user.gold -= game.cost;
 });
