@@ -231,7 +231,7 @@ var ActivesValues = {
 	cold:7,
 	despair:5,
 	evade100:function(c){
-		return c.status?(c.status.charges == 0 && c.owner == game.turn?0:1):1;
+		return c.status?(c.status.charges == 0 && c.owner == c.owner.game.turn?0:1):1;
 	},
 	evade40:1,
 	evade50:1,
@@ -246,7 +246,7 @@ var ActivesValues = {
 	thorn:5,
 	weight:5,
 	wings:function(c){
-		return c.status?(c.status.charges == 0 && c.owner == game.turn?0:6):6;
+		return c.status?(c.status.charges == 0 && c.owner == c.owner.game.turn?0:6):6;
 	}
 }
 
