@@ -52,7 +52,7 @@ var ActivesValues = {
 	deadalive:2,
 	deja:4,
 	deployblobs: function(c) {
-		return 2+(c instanceof etg.CardInstance ? c.card.health : c.truehp());
+		return 2+(c instanceof etg.CardInstance ? Math.min(c.card.attack, c.card.health) : Math.min(c.trueatk(), c.truehp()));
 	},
 	destroy:8,
 	destroycard:1,

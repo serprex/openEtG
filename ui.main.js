@@ -730,104 +730,39 @@ function mkQuestAi(questname, stage, area) {
 }
 function mkAi(level, daily) {
 	return function() {
-		var uprate = level == 0 ? 0 : level == 1 ? .1 : .3;
-		var gameprice = level == 0 ? 0 : level == 1 ? 5 : 10;
-		function upCode(x) {
-			return CardCodes[x].asUpped(Math.random() < uprate).code;
-		}
-		if (Cards) {
+		if (Cards){
 			var urdeck = getDeck();
 			if (urdeck.length < (user ? 31 : 11)) {
 				startEditor();
 				return;
 			}
+			var gameprice = level == 0 ? 0 : level == 1 ? 5 : 10;
+			if (user && !daily && gameprice) {
+				if (user.gold < gameprice) {
+					chatArea.value = "Requires " + gameprice + "\u00A4";
+					return;
+				}
+				userExec("addgold", { g: -gameprice });
+			}
 			var deck;
 			if (!user && aideck.value) {
 				deck = aideck.value.split(" ");
 			} else {
-				if (user && !daily) {
-					if (gameprice) {
-						if (user.gold < gameprice) {
-							chatArea.value = "Requires " + gameprice + "\u00A4";
-							return;
-						}
-						userExec("addgold", { g: -gameprice });
-					}
-				}
-				var cardcount = {};
-				var eles = [Math.ceil(Math.random() * 12), Math.ceil(Math.random() * 12)], ecost = [];
-				var pillars = etg.filtercards(false, function(x) { return x.type == etg.PillarEnum && !x.rarity; });
-				for (var i = 0;i < 13;i++) {
-					ecost[i] = 0;
-				}
-				deck = [];
-				var anyshield = 0, anyweapon = 0;
-				for (var j = 0;j < 2;j++) {
-					for (var i = 0;i < (j == 0 ? 20 : 10) ;i++) {
-						var maxRarity = level == 0 ? 2 : (level == 1 ? 3 : 4);
-						var card = etg.PlayerRng.randomcard(Math.random() < uprate, function(x) { return x.element == eles[j] && x.type != etg.PillarEnum && x.rarity <= maxRarity && cardcount[x.code] != 6 && !(x.type == etg.ShieldEnum && anyshield == 3) && !(x.type == etg.WeaponEnum && anyweapon == 3); });
-						deck.push(card.code);
-						cardcount[card.code] = (cardcount[card.code] || 0) + 1;
-						if (!(((card.type == etg.WeaponEnum && !anyweapon) || (card.type == etg.ShieldEnum && !anyshield)) && cardcount[card.code])) {
-							ecost[card.costele] += card.cost;
-						}
-						if (card.cast) {
-							ecost[card.castele] += card.cast * 1.5;
-						}
-						if (card == Cards.Nova || card == Cards.SuperNova) {
-							for (var k = 1;k < 13;k++) {
-								ecost[k]--;
-							}
-						} else if (card.type == etg.ShieldEnum) anyshield++;
-						else if (card.type == etg.WeaponEnum) anyweapon++;
-					}
-				}
-				if (!anyshield) {
-					var card = CardCodes[deck[0]];
-					ecost[card.costele] -= card.cost;
-					deck[0] = Cards.Shield.asUpped(Math.random() < uprate).code;
-				}
-				if (!anyweapon) {
-					var card = CardCodes[deck[1]];
-					ecost[card.costele] -= card.cost;
-					deck[1] = (eles[1] == etg.Air || eles[1] == etg.Light ? Cards.ShortBow :
-                        eles[1] == etg.Gravity || eles[1] == etg.Earth ? Cards.Hammer :
-                        eles[1] == etg.Water || eles[1] == etg.Life ? Cards.Wand :
-                        eles[1] == etg.Darkness || eles[1] == etg.Death ? Cards.Dagger :
-						eles[1] == etg.Entropy || eles[1] == etg.Aether ? Cards.Disc :
-                        Cards.ShortSword).asUpped(Math.random() < uprate).code;
-				}
-				var pillarstart = deck.length, qpe = 0, qpemin = 99;
-				for (var i = 1;i < 13;i++) {
-					if (!ecost[i]) continue;
-					qpe++;
-					qpemin = Math.min(qpemin, ecost[i]);
-				}
-				if (qpe >= 4) {
-					for (var i = 0;i < qpemin * .8;i++) {
-						deck.push(upCode(Cards.QuantumPillar.code));
-						qpe++;
-					}
-				} else qpemin = 0;
-				for (var i = 1;i < 13;i++) {
-					if (!ecost[i]) continue;
-					for (var j = 0;j < Math.round((ecost[i] - qpemin) / 5) ;j++) {
-						deck.push(upCode(pillars[i * 2]));
-					}
-				}
-				deck.push(etg.TrueMarks[eles[1]]);
-				chatArea.value = deck.join(" ");
+				deck = require("./ai.deck")(level);
 			}
+			chatArea.value = deck.join(" ");
 
 			var randomNames = [
 				"Adrienne", "Audrie",
 				"Billie", "Brendon",
+				"Charles", "Caddy",
 				"Dane", "Digna",
-				"Emory",
-				"Garland",
+				"Emory", "Evan",
+				"Fern",
+				"Garland", "Gord",
 				"Margie", "Mariah", "Martina", "Monroe", "Murray",
-				"Page",
-				"Rocky", "Ronald",
+				"Page", "Pariah",
+				"Rocky", "Ronald", "Ren",
 				"Seth", "Sherman", "Stormy",
 				"Tammi",
 				"Yuriko"
