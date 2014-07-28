@@ -2022,7 +2022,6 @@ function startMatch() {
 				}
 				if (game.winner == game.player1 && game.quest && game.autonext) {
 					mkQuestAi(game.quest[0], game.quest[1] + 1, game.area);
-
 				}
 				else if (game.winner == game.player1 && game.daily && game.endurance !== undefined) {
 					if (game.endurance) {
@@ -2083,8 +2082,10 @@ function startMatch() {
 		if (resigning){
 			if (!game.ai) {
 				socket.emit("foeleft");
+			}else{
+				game.setWinner(game.player2);
+				endturnFunc();
 			}
-			startMenu();
 		}else{
 			resign.setText("Confirm");
 			resigning = true;
