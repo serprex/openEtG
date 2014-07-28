@@ -28,7 +28,7 @@ exports.demigod = [
 		["Lycaon", "6ts 6ts 6ts 6ts 6ts 6ts 6ts 6ts 6ts 6ts 6ve 6ve 6ve 6ve 6ve 6ve 6u2 6u2 6u2 6u2 6u2 6u2 6u1 6u1 6u1 6u1 6u1 6u1 6ud 6ud 6ud 6ud 6u7 6u7 6u7 6u7 7th 7th 7tj 7tj 7tj 7ta 7ta 8pt"],
 		["Neysa", "7gk 7gk 7gk 7gk 7i6 7i6 7i6 7i6 7i6 7i6 7i6 7i6 7i6 7i6 7i6 7h6 7h6 7h6 7hb 7hb 7hb 7hb 7hb 7hb 7k6 7k6 7k6 7k6 7k5 7k5 7k5 7k5 7k5 7k5 7n2 7n2 7n2 7n2 7n2 8pq"],
 		["Nirrti", "718 718 718 718 718 718 71a 71a 71a 71a 71a 7n2 7n2 7n2 7n2 7q0 7q0 7q0 7q0 7q0 7q0 7q0 7q0 7q0 7q0 7q0 7q0 7q0 7q0 7q0 7q0 7q0 7q4 7q4 7q4 7qf 7qf 7qf 7q5 7q5 7q5 7q5 7q5 7q5 7qg 7qg 7qg 7qg 8pk"],
-		["Nosferatu", "6qq 6qq 6qq 6qq 6qq 6qq 6qq 6qq 6qs 6qs 6qs 6qs 6qs 6qs 6u1 6u3 6u3 6u3 6u3 713 713 713 713 77o 7aq 7aq 7dm 7dm 7h7 7k2 7n8 7n8 7n8 7n8 7n8 7n8 7q5 7th 80g 80g 80g 8pr"],
+		["Nosferatu", "6qq 6qq 6qq 6qq 6qq 6qq 6qq 6qq 6qq 6qq 6qq 6qq 6u1 6u3 6u3 6u3 713 713 713 713 77o 77g 7aq 7aq 7dm 7dm 7h7 7k2 7n8 7n8 7n8 7n8 7n8 7q5 7th 80g 80g 80g 8pr"],
 		["Pele", "778 778 778 778 778 778 778 778 778 778 778 778 778 778 778 778 778 778 778 77g 77g 77g 77g 77g 77g 77q 77q 77h 77h 77h 77h 77h 77b 77b 77b 7q4 7q4 7q4 7ql 7ql 7ql 7ql 7ql 7q3 7q3 8ps"],
 		["Suwako", "7ac 7ac 7ac 7ac 7ac 7ac 7ac 7ac 7ac 7ac 7ac 7bu 7bu 7bu 7bu 7bu 7bu 7ae 7ae 7ae 7ae 7ae 7ae 7al 7am 7am 7am 7as 7as 7as 7as 80d 80d 80d 80d 80i 80i 80i 8pu"],
 		["Thetis", "7an 7an 7an 7an 7ap 7ap 7ap 7ap 7aj 7aj 7gk 7gk 7gk 7gk 7gk 7gk 7gk 7gk 7gk 7gk 7gk 7gk 7gk 7gk 7h4 7h4 7h4 7h4 7h4 7gq 7gq 7gq 7h1 7h1 7h1 7gr 7gr 7gr 7gu 7gu 7gu 7gu 7gu 7gu 8pn"],

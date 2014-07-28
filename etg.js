@@ -90,15 +90,15 @@ function Thing(card, owner){
 function Player(game){
 	this.game = game;
 	this.owner = this;
-	this.shield = null;
-	this.weapon = null;
+	this.shield = undefined;
+	this.weapon = undefined;
 	this.status = {poison:0};
 	this.neuro = false;
 	this.sosa = 0;
 	this.silence = false;
 	this.sanctuary = false;
 	this.precognition = false;
-	this.gpull = null;
+	this.gpull = undefined;
 	this.nova = 0;
 	this.maxhp = this.hp = 100;
 	this.hand = [];
@@ -108,19 +108,13 @@ function Player(game){
 	this.mark = 0;
 	this.quanta = [];
 	for(var i=1; i<13; i++)this.quanta[i]=0;
-	this.shardgolem = {
-		stat: 1,
-		passives: {},
-		status: {},
-		active: {cast: Actives.burrow},
-		cast: 1
-	};
+	this.shardgolem = undefined;
 }
 function Creature(card, owner){
 	if (card == Cards.ShardGolem){
 		this.card = card;
 		this.owner = owner;
-		var golem = owner.shardgolem;
+		var golem = owner.shardgolem || { stat: 1, cast: 0 };
 		this.atk = this.maxhp = this.hp = golem.stat;
 		this.cast = golem.cast;
 		this.castele = Earth;
@@ -303,7 +297,6 @@ Player.prototype.clone = function(game){
 		return x && x.clone(obj);
 	}
 	obj.status = clone(this.status);
-	obj.shardgolem = clone(this.shardgolem);
 	obj.shield = maybeClone(this.shield);
 	obj.weapon = maybeClone(this.weapon);
 	obj.creatures = this.creatures.map(maybeClone);
