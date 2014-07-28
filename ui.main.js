@@ -18,9 +18,9 @@ if (localStorage){
 	}
 }
 })();
-var Cards, CardCodes, Targeting, game;
+var Cards, CardCodes, Targeting;
 (function(){
-var discarding, user, renderer, endturnFunc, cancelFunc, foeDeck, player2summon, player2Cards, guestname, cardChosen, newCards, muteset = {};
+var game, discarding, user, renderer, endturnFunc, cancelFunc, foeDeck, player2summon, player2Cards, guestname, cardChosen, newCards, muteset = {};
 var etgutil = require("./etgutil");
 var userutil = require("./userutil");
 var etg = require("./etg");

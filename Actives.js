@@ -190,9 +190,9 @@ clear:function(c,t){
 	Effect.mkText("Clear", ui.tgtToPos(t));
 	t.status.adrenaline = 0;
 	t.status.poison = 0;
-	t.status.aflatoxin = false;
-	t.status.momentum = false;
-	t.status.psion = false;
+	delete t.status.aflatoxin;
+	delete t.status.momentum;
+	delete t.status.psion;
 	if (t.status.delayed > 0){
 		t.status.delayed--;
 	}
@@ -402,7 +402,7 @@ atk2hp:function(c,t){
 },
 evolve:function(c,t){
 	c.transform(Cards.Shrieker.asUpped(c.card.upped));
-	c.status.burrowed = false;
+	delete c.status.burrowed;
 },
 fickle:function(c,t){
 	if (t.owner != c.owner && t.owner.sanctuary){
@@ -733,8 +733,8 @@ livingweapon:function(c,t){
 lobotomize:function(c,t){
 	Effect.mkText("Lobotomize", ui.tgtToPos(t));
 	t.active = {};
-	t.status.momentum = false;
-	t.status.psion = false;
+	delete t.status.momentum;
+	delete t.status.psion;
 },
 losecharge:function(c,t){
 	if(--c.status.charges<0){
@@ -941,7 +941,7 @@ purify:function(c,t){
 		t.neuro = false;
 		t.sosa = 0;
 	}else{
-		t.status.aflatoxin = false;
+		delete t.status.aflatoxin;
 	}
 },
 queen:function(c,t){
@@ -1300,7 +1300,7 @@ quantagift:function(c,t){
 },
 web:function(c,t){
 	Effect.mkText("Web", ui.tgtToPos(t));
-	t.passives.airborne = false;
+	delete t.passives.airborne;
 },
 wisdom:function(c,t){
 	Effect.mkText("3|0", ui.tgtToPos(t));

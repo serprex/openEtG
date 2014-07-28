@@ -1,10 +1,10 @@
 var etg = require("./etg");
 var evalGameState = require("./eval");
 // dummy param until game is not a global
-module.exports = function(_game) {
+module.exports = function(game) {
 	var limit = 999;
 	var cmdct, currentEval = evalGameState(game), cdepth = 2;
-	function iterLoop(n, cmdct0) {
+	function iterLoop(game, n, cmdct0) {
 		var log = n ? console.log.bind(console) : function(){};
 		var casthash = {};
 		function iterCore(c, active) {
@@ -23,10 +23,9 @@ module.exports = function(_game) {
 				}
 				if ((!game.targetingMode || (t && game.targetingMode(t))) && limit-- > 0) {
 					var tbits = game.tgtToBits(t) ^ 8;
-					var gameBack = game;
-					game = game.clone();
-					game.bitsToTgt(cbits).useactive(game.bitsToTgt(tbits));
-					var v = evalGameState(game);
+					var gameClone = game.clone();
+					gameClone.bitsToTgt(cbits).useactive(game.bitsToTgt(tbits));
+					var v = evalGameState(gameClone);
 					if (v < currentEval || (v == currentEval && n > cdepth)) {
 						cmdct = cmdct0 || (cbits | tbits << 9);
 						currentEval = v;
@@ -34,12 +33,11 @@ module.exports = function(_game) {
 					if (n) {
 						var targetingModeBack = game.targetingMode, targetingModeCbBack = game.targetingModeCb;
 						delete game.targetingMode;
-						iterLoop(0, cbits | tbits << 9);
+						iterLoop(gameClone, 0, cbits | tbits << 9);
+						log("\t" + c + " " + (t || "-") + " " + v);
 						game.targetingMode = targetingModeBack;
 						game.targetingModeCb = targetingModeCbBack;
-						log("\t" + c + " " + (t || "-") + " " + v);
 					}
-					game = gameBack;
 				}
 			}
 			if (active && active.activename in Targeting) {
@@ -87,7 +85,7 @@ module.exports = function(_game) {
 			}
 		}
 	}
-	iterLoop(1);
+	iterLoop(game, 1);
 	console.log("Leftover iters: " + limit);
 	if (cmdct) {
 		return ["cast", cmdct];

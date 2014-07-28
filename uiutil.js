@@ -35,23 +35,23 @@ function permanentPos(j, i) {
 }
 function tgtToPos(t) {
 	if (t instanceof etg.Creature) {
-		return creaturePos(t.owner == game.player2, t.getIndex());
+		return creaturePos(t.owner == t.owner.game.player2, t.getIndex());
 	} else if (t instanceof etg.Weapon) {
 		var p = new PIXI.Point(666, 512);
-		if (t.owner == game.player2) reflectPos(p);
+		if (t.owner == t.owner.player2) reflectPos(p);
 		return p;
 	} else if (t instanceof etg.Shield) {
 		var p = new PIXI.Point(710, 532);
-		if (t.owner == game.player2) reflectPos(p);
+		if (t.owner == t.owner.game.player2) reflectPos(p);
 		return p;
 	} else if (t instanceof etg.Permanent) {
-		return permanentPos(t.owner == game.player2, t.getIndex());
+		return permanentPos(t.owner == t.owner.game.player2, t.getIndex());
 	} else if (t instanceof etg.Player) {
 		var p = new PIXI.Point(50, 560);
-		if (t == game.player2) reflectPos(p);
+		if (t == t.owner.game.player2) reflectPos(p);
 		return p;
 	} else if (t instanceof etg.CardInstance) {
-		return new PIXI.Point(t.owner == game.player2 ? 20 : 780, (t.owner == game.player2 ? 140 : 300) + 20 * t.owner.hand.indexOf(t));
+		return new PIXI.Point(t.owner == t.owner.game.player2 ? 20 : 780, (t.owner == t.owner.game.player2 ? 140 : 300) + 20 * t.owner.hand.indexOf(t));
 	} else console.log("Unknown target");
 }
 exports.mkFont = mkFont;
