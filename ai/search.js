@@ -1,6 +1,6 @@
 var etg = require("./etg");
 var evalGameState = require("./eval");
-// dummy param until game is not a global
+var Actives = require("./Actives");
 module.exports = function(game) {
 	var limit = 999;
 	var cmdct, currentEval = evalGameState(game), cdepth = 2;
@@ -24,19 +24,19 @@ module.exports = function(game) {
 				if ((!game.targetingMode || (t && game.targetingMode(t))) && limit-- > 0) {
 					var tbits = game.tgtToBits(t) ^ 8;
 					var gameClone = game.clone();
-					gameClone.bitsToTgt(cbits).useactive(game.bitsToTgt(tbits));
+					gameClone.bitsToTgt(cbits).useactive(gameClone.bitsToTgt(tbits));
 					var v = evalGameState(gameClone);
 					if (v < currentEval || (v == currentEval && n > cdepth)) {
 						cmdct = cmdct0 || (cbits | tbits << 9);
 						currentEval = v;
 					}
 					if (n) {
-						var targetingModeBack = game.targetingMode, targetingModeCbBack = game.targetingModeCb;
-						delete game.targetingMode;
+						var targetingModeBack = gameClone.targetingMode, targetingModeCbBack = gameClone.targetingModeCb;
+						delete gameClone.targetingMode;
 						iterLoop(gameClone, 0, cbits | tbits << 9);
 						log("\t" + c + " " + (t || "-") + " " + v);
-						game.targetingMode = targetingModeBack;
-						game.targetingModeCb = targetingModeCbBack;
+						gameClone.targetingMode = targetingModeBack;
+						gameClone.targetingModeCb = targetingModeCbBack;
 					}
 				}
 			}

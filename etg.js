@@ -1103,7 +1103,7 @@ CardInstance.prototype.canactive = function(){
 }
 CardInstance.prototype.useactive = function(target){
 	if (!this.canactive()){
-		console.log((this.owner==this.game.player1?"1":"2") + " cannot cast " + (this.card?this.card.name:"nil"));
+		console.log((this.owner==this.owner.game.player1?"1":"2") + " cannot cast " + (this.card?this.card.name:"nil"));
 		return;
 	}
 	var owner = this.owner, card = this.card;
