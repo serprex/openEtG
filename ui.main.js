@@ -1591,7 +1591,7 @@ function mkDaily(type) {
 	if (type == 1) {
 		return function() {
 			var dataNext = { goldreward: 75, endurance: 2, cost: 0, daily: 1 , cardreward: "", noheal: true};
-			mkAi(0)();
+			mkAi(0,type)();
 			addToGame(dataNext);
 			game.dataNext = dataNext;
 		}
@@ -1599,7 +1599,7 @@ function mkDaily(type) {
 	else if (type == 2) {
 		return function() {
 			var dataNext = { goldreward: 200, endurance: 2, cost: 0, daily: 2, cardreward: "" };
-			mkAi(2)();
+			mkAi(2,type)();
 			addToGame(dataNext);
 			game.dataNext = dataNext;
 		}
@@ -2032,7 +2032,7 @@ function startMatch() {
 							data["player1.maxhp"] = game.player1.maxhp;
 						}
 						data.endurance--;
-						mkAi(game.level)();
+						mkAi(game.level, game.daily)();
 						addToGame(data);
 						game.dataNext = data;
 					}
