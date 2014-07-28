@@ -2312,7 +2312,7 @@ function startArenaInfo(info) {
 	var stage = new PIXI.DisplayObjectContainer();
 	stage.interactive = true;
 	stage.addChild(new PIXI.Sprite(backgrounds[0]));
-	var winloss = makeText(200, 300, (info.win || 0) + " - " + (info.loss || 0) + "\nAge: " + info.day + "\nInitial HP: " + info.hp + "\nMark: " + info.mark + "\nDraw: " + info.draw);
+	var winloss = makeText(200, 300, (info.win || 0) + " - " + (info.loss || 0) + "\nAge: " + info.day + "\nCurrent HP: " + (info.hp-info.day*5) + "\nMark: " + info.mark + "\nDraw: " + info.draw);
 	stage.addChild(winloss);
 	var batch = new PIXI.SpriteBatch();
 	stage.addChild(batch);
