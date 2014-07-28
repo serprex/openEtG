@@ -20,14 +20,13 @@ if (localStorage){
 })();
 var Cards, CardCodes, Targeting, game;
 (function(){
-var targetingMode, targetingModeCb, targetingText, discarding, user, renderer, endturnFunc, cancelFunc, foeDeck, player2summon, player2Cards, guestname, cardChosen, newCards, muteset = {};
+var discarding, user, renderer, endturnFunc, cancelFunc, foeDeck, player2summon, player2Cards, guestname, cardChosen, newCards, muteset = {};
 var etgutil = require("./etgutil");
 var userutil = require("./userutil");
 var etg = require("./etg");
 var Actives = require("./Actives");
 var Effect = require("./Effect");
 var Quest = require("./Quest");
-var evalGameState = require("./ai.eval");
 var ui = require("./uiutil");
 var aiDecks = require("./Decks");
 require("./etg.client").loadcards(function(cards, cardcodes, targeting) {
@@ -36,16 +35,6 @@ require("./etg.client").loadcards(function(cards, cardcodes, targeting) {
 	Targeting = targeting;
 	console.log("Cards loaded");
 });
-function getTarget(src, active, cb) {
-	var targetingFilter = Targeting[active.activename];
-	if (targetingFilter) {
-		targetingMode = function(t) { return (t instanceof etg.Player || t instanceof etg.CardInstance || t.owner == game.turn || t.passives.cloak || !t.owner.isCloaked()) && targetingFilter(src, t); }
-		targetingModeCb = cb;
-		targetingText = active.activename;
-	} else {
-		cb();
-	}
-}
 function maybeSetText(obj, text) {
 	if (obj.text != text) obj.setText(text);
 }
@@ -74,38 +63,6 @@ function userExec(x, data){
 	if (!data) data = {};
 	userEmit(x, data);
 	userutil[x](data, user);
-}
-function tgtToBits(x) {
-	var bits;
-	if (x == undefined) {
-		return 0;
-	} else if (x instanceof etg.Player) {
-		bits = 1;
-	} else if (x instanceof etg.Weapon) {
-		bits = 17;
-	} else if (x instanceof etg.Shield) {
-		bits = 33;
-	} else {
-		bits = (x instanceof etg.Creature ? 2 : x instanceof etg.Permanent ? 4 : 5) | x.getIndex() << 4;
-	}
-	if (x.owner == game.player2) {
-		bits |= 8;
-	}
-	return bits;
-}
-function bitsToTgt(x) {
-	var tgtop = x & 7, player = game.players[x & 8 ? 0 : 1];
-	if (tgtop == 0) {
-		return undefined;
-	} else if (tgtop == 1) {
-		return player[["owner", "weapon", "shield"][x >> 4]];
-	} else if (tgtop == 2) {
-		return player.creatures[x >> 4];
-	} else if (tgtop == 4) {
-		return player.permanents[x >> 4];
-	} else if (tgtop == 5) {
-		return player.hand[x >> 4];
-	} else console.log("Unknown tgtop: " + tgtop + ", " + x);
 }
 function refreshRenderer(stage, animCb) {
 	if (realStage.children.length > 0){
@@ -463,9 +420,6 @@ function initGame(data, ai) {
 	if (data.foename) game.foename = data.foename;
 	if (ai) {
 		game.ai = true;
-		if (game.turn == game.player2) {
-			game.progressMulligan();
-		}
 	}
 	startMatch();
 }
@@ -479,110 +433,9 @@ function getDeck(limit) {
 function aiEvalFunc() {
 	var disableEffectsBack = Effect.disable;
 	Effect.disable = true;
-	var limit = 999;
-	var cmdct, currentEval = evalGameState(game), cdepth = 2;
-	function iterLoop(n, cmdct0) {
-		var log = n ? console.log.bind(console) : function(){};
-		var casthash = {};
-		function iterCore(c, active) {
-			if (c.hash){
-				var ch = c.hash();
-				if (ch in casthash) return;
-				else casthash[ch] = true;
-			}
-			var cbits = tgtToBits(c) ^ 8;
-			var tgthash = {};
-			function evalIter(t) {
-				if (t && t.hash){
-					var th = t.hash();
-					if (th in tgthash) return;
-					else tgthash[th] = true;
-				}
-				if ((!targetingMode || (t && targetingMode(t))) && limit-- > 0) {
-					var tbits = tgtToBits(t) ^ 8;
-					var gameBack = game;
-					game = game.clone();
-					bitsToTgt(cbits).useactive(bitsToTgt(tbits));
-					var v = evalGameState(game);
-					if (v < currentEval || (v == currentEval && n > cdepth)) {
-						cmdct = cmdct0 || (cbits | tbits << 9);
-						currentEval = v;
-					}
-					if (n) {
-						var targetingModeBack = targetingMode, targetingModeCbBack = targetingModeCb;
-						targetingMode = undefined;
-						iterLoop(0, cbits | tbits << 9);
-						targetingMode = targetingModeBack;
-						targetingModeCb = targetingModeCbBack;
-						log("\t" + c + " " + (t || "-") + " " + v);
-					}
-					game = gameBack;
-				}
-			}
-			if (active && active.activename in Targeting) {
-				log("in " + active.activename + " " + currentEval);
-				getTarget(c, active);
-				for (var j = 0;j < 2;j++) {
-					var pl = j == 0 ? c.owner : c.owner.foe;
-					evalIter(pl);
-					evalIter(pl.weapon);
-					evalIter(pl.shield);
-					pl.creatures.forEach(evalIter);
-					pl.permanents.forEach(evalIter);
-					pl.hand.forEach(evalIter);
-				}
-				log("out " + currentEval);
-				targetingMode = null;
-			}else{
-				evalIter();
-			}
-		}
-		var self = game.player2;
-		var wp = self.weapon, sh = self.shield;
-		if (wp && wp.canactive()) {
-			iterCore(wp, wp.active.cast);
-		}
-		if (sh && sh.canactive()) {
-			iterCore(sh, sh.active.cast);
-		}
-		for (var i = 0;i < 23;i++) {
-			var cr = self.creatures[i];
-			if (cr && cr.canactive()) {
-				iterCore(cr, cr.active.cast);
-			}
-		}
-		for (var i = 0;i < 16;i++) {
-			var pr = self.permanents[i];
-			if (pr && pr.canactive()) {
-				iterCore(pr, pr.active.cast);
-			}
-		}
-		for (var i = 0; i < self.hand.length; i++) {
-			var cardinst = self.hand[i];
-			if (cardinst.canactive()) {
-				iterCore(cardinst, cardinst.card.type == etg.SpellEnum && cardinst.card.active);
-			}
-		}
-	}
-	iterLoop(1);
-	console.log("Leftover iters: " + limit);
+	var cmd = require("./ai/search")(game);
 	Effect.disable = disableEffectsBack;
-	if (cmdct) {
-		return ["cast", cmdct];
-	} else if (game.player2.hand.length == 8) {
-		var mincardvalue = 999, worstcard = 0;
-		for (var i = 0;i < 8;i++) {
-			var cardinst = game.player2.hand[i];
-			var cardvalue = game.player2.quanta[cardinst.card.element] - cardinst.card.cost;
-			if (cardinst.card.active && cardinst.card.active.discard == Actives.obsession) { cardvalue -= 5; }
-			if (cardinst.card.active && cardinst.card.active.discard == Actives.hasten) { cardvalue += 3; }
-			if (cardvalue < mincardvalue) {
-				mincardvalue = cardvalue;
-				worstcard = i;
-			}
-		}
-		return ["endturn", worstcard];
-	} else return ["endturn"];
+	return cmd;
 }
 function listify(maybeArray) {
 	if (maybeArray instanceof Array) return maybeArray;
@@ -736,8 +589,8 @@ function mkAi(level, daily) {
 				startEditor();
 				return;
 			}
-			var gameprice = level == 0 ? 0 : level == 1 ? 5 : 10;
-			if (user && !daily && gameprice) {
+			var gameprice = daily || level == 0 ? 0 : level == 1 ? 5 : 10;
+			if (user && gameprice) {
 				if (user.gold < gameprice) {
 					chatArea.value = "Requires " + gameprice + "\u00A4";
 					return;
@@ -748,7 +601,7 @@ function mkAi(level, daily) {
 			if (!user && aideck.value) {
 				deck = aideck.value.split(" ");
 			} else {
-				deck = require("./ai.deck")(level);
+				deck = require("./ai/deck")(level);
 			}
 			chatArea.value = deck.join(" ");
 
@@ -772,7 +625,7 @@ function mkAi(level, daily) {
 
 			var foename = typeName[level] + "\n" + randomNames[Math.floor(Math.random() * randomNames.length)];
 			initGame({ first: Math.random() < .5, deck: deck, urdeck: urdeck, seed: Math.random() * etgutil.MAX_INT, hp: level == 0 ? 100 : level == 1 ? 125 : 150, aimarkpower: level == 2 ? 2 : 1, foename: foename, aidrawpower: level == 2 ? 2 : 1 }, true);
-			game.cost = daily ? 0 : gameprice;
+			game.cost = gameprice;
 			game.level = level;
 		}
 	}
@@ -1526,7 +1379,7 @@ function mkDaily(type) {
 	if (type == 1) {
 		return function() {
 			var dataNext = { goldreward: 75, endurance: 2, cost: 0, daily: 1 , cardreward: "", noheal: true};
-			mkAi(0,type)();
+			mkAi(0, type)();
 			addToGame(dataNext);
 			game.dataNext = dataNext;
 		}
@@ -1534,7 +1387,7 @@ function mkDaily(type) {
 	else if (type == 2) {
 		return function() {
 			var dataNext = { goldreward: 200, endurance: 2, cost: 0, daily: 2, cardreward: "" };
-			mkAi(2,type)();
+			mkAi(2, type)();
 			addToGame(dataNext);
 			game.dataNext = dataNext;
 		}
@@ -1881,8 +1734,8 @@ function startMatch() {
 	}
 	function drawBorder(obj, spr) {
 		if (obj) {
-			if (targetingMode) {
-				if (targetingMode(obj)) {
+			if (game.targetingMode) {
+				if (game.targetingMode(obj)) {
 					fgfx.lineStyle(2, 0xff0000);
 					fgfx.drawRect(spr.position.x - spr.width / 2, spr.position.y - spr.height / 2, spr.width, spr.height);
 					fgfx.lineStyle(2, 0xffffff);
@@ -1932,14 +1785,11 @@ function startMatch() {
 	foename.position.set(5, 75);
 	gameui.addChild(foename);
 	endturnFunc = endturn.click = function(e, discard) {
-		if (game.turn == game.player1 && (game.phase == etg.MulliganPhase1 || game.phase == etg.MulliganPhase2)){
+		if (game.turn == game.player1 && game.phase <= etg.MulliganPhase2){
 			if (!game.ai) {
 				socket.emit("mulligan", true);
 			}
 			game.progressMulligan();
-			if (game.phase == etg.MulliganPhase2 && game.ai) {
-				game.progressMulligan();
-			}
 		}else if (game.winner) {
 			if (user) {
 				if (game.winner == game.player1) {
@@ -1991,7 +1841,7 @@ function startMatch() {
 					socket.emit("endturn", discard);
 				}
 				game.player1.endturn(discard);
-				targetingMode = undefined;
+				delete game.targetingMode;
 				if (foeplays.children.length)
 					foeplays.removeChildren();
 			}
@@ -2002,11 +1852,11 @@ function startMatch() {
 			resign.setText("Resign");
 			resigning = false;
 		} else if (game.turn == game.player1) {
-			if ((game.phase == etg.MulliganPhase1 || game.phase == etg.MulliganPhase2) && game.player1.hand.length > 0) {
+			if (game.phase <= etg.MulliganPhase2 && game.player1.hand.length > 0) {
 				game.player1.drawhand(game.player1.hand.length - 1);
 				socket.emit("mulligan");
-			} else if (targetingMode) {
-				targetingMode = targetingModeCb = null;
+			} else if (game.targetingMode) {
+				delete game.targetingMode;
 			} else if (discarding) {
 				discarding = false;
 			}
@@ -2061,19 +1911,19 @@ function startMatch() {
 						if (cardinst) {
 							if (!_j && discarding) {
 								endturn.click(null, _i);
-							} else if (targetingMode) {
-								if (targetingMode(cardinst)) {
-									targetingMode = undefined;
-									targetingModeCb(cardinst);
+							} else if (game.targetingMode) {
+								if (game.targetingMode(cardinst)) {
+									delete targetingMode;
+									game.targetingModeCb(cardinst);
 								}
 							} else if (!_j && cardinst.canactive()) {
 								if (cardinst.card.type != etg.SpellEnum) {
 									console.log("summoning " + _i);
-									socket.emit("cast", tgtToBits(cardinst));
+									socket.emit("cast", game.tgtToBits(cardinst));
 									cardinst.useactive();
 								} else {
-									getTarget(cardinst, cardinst.card.active, function(tgt) {
-										socket.emit("cast", tgtToBits(cardinst) | tgtToBits(tgt) << 9);
+									game.getTarget(cardinst, cardinst.card.active, function(tgt) {
+										socket.emit("cast", game.tgtToBits(cardinst) | game.tgtToBits(tgt) << 9);
 										cardinst.useactive(tgt);
 									});
 								}
@@ -2115,13 +1965,13 @@ function startMatch() {
 					if (game.phase != etg.PlayPhase) return;
 					var inst = insts ? insts[i] : game.players[_j][i];
 					if (!inst) return;
-					if (targetingMode && targetingMode(inst)) {
-						targetingMode = undefined;
-						targetingModeCb(inst);
-					} else if (_j == 0 && !targetingMode && inst.canactive()) {
-						getTarget(inst, inst.active.cast, function(tgt) {
-							targetingMode = undefined;
-							socket.emit("cast", tgtToBits(inst) | tgtToBits(tgt) << 9);
+					if (game.targetingMode && game.targetingMode(inst)) {
+						delete game.targetingMode;
+						game.targetingModeCb(inst);
+					} else if (_j == 0 && !game.targetingMode && inst.canactive()) {
+						game.getTarget(inst, inst.active.cast, function(tgt) {
+							delete game.targetingMode;
+							socket.emit("cast", game.tgtToBits(inst) | game.tgtToBits(tgt) << 9);
 							inst.useactive(tgt);
 						});
 					}
@@ -2180,9 +2030,9 @@ function startMatch() {
 			}
 			hptext[j].click = function() {
 				if (game.phase != etg.PlayPhase) return;
-				if (targetingMode && targetingMode(game.players[_j])) {
-					targetingMode = undefined;
-					targetingModeCb(game.players[_j]);
+				if (game.targetingMode && game.targetingMode(game.players[_j])) {
+					delete game.targetingMode;
+					game.targetingModeCb(game.players[_j]);
 				}
 			}
 		})(j);
@@ -2213,10 +2063,14 @@ function startMatch() {
 	gameui.addChild(cardart);
 	refreshRenderer(gameui, function() {
 		var now;
-		if (game.phase == etg.PlayPhase && game.turn == game.player2 && game.ai && (now = Date.now()) >= aiDelay) {
+		if (game.turn == game.player2 && game.ai && (now = Date.now()) >= aiDelay) {
 			aiDelay = now + 300;
-			var cmd = aiEvalFunc();
-			cmds[cmd[0]](cmd[1]);
+			if (game.phase == etg.PlayPhase){
+				var cmd = aiEvalFunc();
+				cmds[cmd[0]](cmd[1]);
+			}else if (game.phase <= etg.MulliganPhase2){
+				require("./ai/mulligan")(game);
+			}
 		}
 		var pos = realStage.getMousePosition();
 		var cardartcode, cardartx;
@@ -2304,19 +2158,19 @@ function startMatch() {
 		if (game.phase != etg.EndPhase) {
 			if (game.turn == game.player1){
 				endturn.setText(game.phase == etg.PlayPhase ? "End Turn" : "Accept Hand");
-				cancel.setText(game.phase != etg.PlayPhase ? "Mulligan" : targetingMode || discarding || resigning ? "Cancel" : null);
+				cancel.setText(game.phase != etg.PlayPhase ? "Mulligan" : game.targetingMode || discarding || resigning ? "Cancel" : null);
 			}else cancel.visible = endturn.visible = false;
 		}else{
 			winnername.setText((game.winner == game.player1 ? "Won " : "Lost ") + game.ply);
 			endturn.setText("Continue");
 		}
-		maybeSetText(turntell, discarding ? "Discard" : targetingMode ? targetingText : game.turn == game.player1 ? "Your Turn" : "Their Turn");
+		maybeSetText(turntell, discarding ? "Discard" : game.targetingMode ? game.targetingText : game.turn == game.player1 ? "Your Turn" : "Their Turn");
 		for (var i = 0;i < foeplays.children.length;i++) {
 			maybeSetTexture(foeplays.children[i], getCardImage(foeplays.children[i].card.code));
 		}
 		foeplays.visible = !(cloakgfx.visible = game.player2.isCloaked());
 		fgfx.clear();
-		if (game.turn == game.player1 && !targetingMode && game.phase != etg.EndPhase) {
+		if (game.turn == game.player1 && !game.targetingMode && game.phase != etg.EndPhase) {
 			for (var i = 0;i < game.player1.hand.length;i++) {
 				var card = game.player1.hand[i].card;
 				if (game.player1.canspend(card.costele, card.cost)) {
@@ -2338,15 +2192,15 @@ function startMatch() {
 			drawBorder(game.players[j].weapon, weapsprite[j]);
 			drawBorder(game.players[j].shield, shiesprite[j]);
 		}
-		if (targetingMode) {
+		if (game.targetingMode) {
 			fgfx.lineStyle(2, 0xff0000);
 			for (var j = 0;j < 2;j++) {
-				if (targetingMode(game.players[j])) {
+				if (game.targetingMode(game.players[j])) {
 					var spr = hptext[j];
 					fgfx.drawRect(spr.position.x - spr.width / 2, spr.position.y - spr.height / 2, spr.width, spr.height);
 				}
 				for (var i = 0;i < game.players[j].hand.length;i++) {
-					if (targetingMode(game.players[j].hand[i])) {
+					if (game.targetingMode(game.players[j].hand[i])) {
 						var spr = handsprite[j][i];
 						fgfx.drawRect(spr.position.x, spr.position.y, spr.width, spr.height);
 					}
@@ -2636,7 +2490,7 @@ cmds.endturn = function(data) {
 	game.player2.endturn(data);
 }
 cmds.cast = function(bits) {
-	var c = bitsToTgt(bits & 511), t = bitsToTgt((bits >> 9) & 511);
+	var c = game.bitsToTgt(bits & 511), t = game.bitsToTgt((bits >> 9) & 511);
 	console.log("cast: " + c.card.name + " " + (t ? (t instanceof etg.Player ? t == game.player1 : t.card.name) : "-"));
 	if (c instanceof etg.CardInstance) {
 		player2summon(c);
@@ -2806,9 +2660,9 @@ document.addEventListener("keydown", function(e) {
 			cancelFunc();
 		} else if (e.keyCode == 83 || e.keyCode == 87) { // s/w
 			var p = game.players[e.keyCode == 83 ? 0 : 1];
-			if (targetingMode && targetingMode(p)) {
-				targetingMode = undefined;
-				targetingModeCb(p);
+			if (game.targetingMode && game.targetingMode(p)) {
+				delete game.targetingMode;
+				game.targetingModeCb(p);
 			}
 		} else return;
 	}

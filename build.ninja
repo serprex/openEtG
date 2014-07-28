@@ -1,4 +1,4 @@
 rule browserify
- command=browserify -r ./etg -r ./etg.client -r ./etgutil -r ./uiutil -r ./userutil -r ./Actives -r ./MersenneTwister -r ./Effect -r ./Quest -r ./ai.eval -r ./ai.deck -r ./Decks -o $out
-build etgify.js:browserify etg.js etg.client.js etgutil.js uiutil.js userutil.js Actives.js MersenneTwister.js Effect.js Quest.js ai.eval.js ai.deck.js Decks.js
+ command=browserify -r ./etg -r ./etg.client -r ./etgutil -r ./uiutil -r ./userutil -r ./Actives -r ./MersenneTwister -r ./Effect -r ./Quest -r ./ai/eval -r ./ai/deck -r ./ai/search -r ./ai/mulligan -r ./Decks -o $out
+build etgify.js:browserify etg.js etg.client.js etgutil.js uiutil.js userutil.js Actives.js MersenneTwister.js Effect.js Quest.js ai/eval.js ai/deck.js ai/search.js ai/mulligan.js Decks.js
 default etgify.js

@@ -10,7 +10,7 @@ How to setup on Windows:
 
 3	If you didn't install Python 3: download every sheet from https://docs.google.com/spreadsheets/d/1dfKGdHqqLAAHdnw2mKBwaYwDIFODjQIjlg8ZPyRFVmA as csv files
 	name the csv files to the name of the sheet minus DB (you name the creature sheet "creature", the shield sheet "shield", etc)
-	If you did install Python 3: Run updatedb.py
+	If you did install Python 3: Run updatedb.py (NB you can pass to it exactly which csv files to download)
 
 4	Hold Shift and right-click on your openEtG folder that you created in step 2, click Open command window here, type "npm install"
 
@@ -18,9 +18,8 @@ How to setup on Windows:
 
 6	Run "buildOpenEtg.bat" in your openEtG folder
 
-7	start up redis-server, and in the cmd window, type "node server.js"
+7	Start redis-server, and in the console, type "node server.js"
 
-8	open http://127.0.0.1:13602 in your web browser and it should work!
+8	Browse to http://127.0.0.1:13602 and it should work!
 
-Note that every time you have edited a file you need to run step 6 to update the game. Everytime the card DB is updated you need to run step 3 again.
-And every time you want to play the game you need to have node running
+Note that when you edit a module you need to run step 6 to update etgify, & when the card DB is updated you need to run step 3 again

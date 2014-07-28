@@ -235,6 +235,48 @@ Game.prototype.updateExpectedDamage = function(){
 		this.expectedDamage[1] = this.player1.expectedDamage();
 	}
 }
+Game.prototype.tgtToBits = function(x) {
+	var bits;
+	if (x == undefined) {
+		return 0;
+	} else if (x instanceof Player) {
+		bits = 1;
+	} else if (x instanceof Weapon) {
+		bits = 17;
+	} else if (x instanceof Shield) {
+		bits = 33;
+	} else {
+		bits = (x instanceof Creature ? 2 : x instanceof Permanent ? 4 : 5) | x.getIndex() << 4;
+	}
+	if (x.owner == this.player2) {
+		bits |= 8;
+	}
+	return bits;
+}
+Game.prototype.bitsToTgt = function(x) {
+	var tgtop = x & 7, player = this.players[x & 8 ? 0 : 1];
+	if (tgtop == 0) {
+		return undefined;
+	} else if (tgtop == 1) {
+		return player[["owner", "weapon", "shield"][x >> 4]];
+	} else if (tgtop == 2) {
+		return player.creatures[x >> 4];
+	} else if (tgtop == 4) {
+		return player.permanents[x >> 4];
+	} else if (tgtop == 5) {
+		return player.hand[x >> 4];
+	} else console.log("Unknown tgtop: " + tgtop + ", " + x);
+}
+Game.prototype.getTarget = function(src, active, cb) {
+	var targetingFilter = Targeting[active.activename];
+	if (targetingFilter) {
+		this.targetingMode = function(t) { return (t instanceof Player || t instanceof CardInstance || t.owner == this.turn || t.passives.cloak || !t.owner.isCloaked()) && targetingFilter(src, t); }
+		this.targetingModeCb = cb;
+		this.targetingText = active.activename;
+	} else {
+		cb();
+	}
+}
 Player.prototype.shuffle = function(array) {
 	var counter = array.length, temp, index;
 	while (counter--) {
