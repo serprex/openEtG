@@ -168,7 +168,7 @@ var ActivesValues = {
 	regenerate: 5,
 	regeneratespell: 5,
 	regrade:3,
-	reinforce:4,
+	reinforce:.5,
 	ren:5,
 	rewind:6,
 	ricochet:3,
@@ -241,7 +241,7 @@ var ActivesValues = {
 	slow:6,
 	solar:function(c){
 		var coq = c.owner.quanta[etg.Light];
-		return 6*coq/(6+coq);
+		return 5-4*coq/(4+coq);
 	},
 	thorn:5,
 	weight:5,
@@ -299,7 +299,7 @@ function evalthing(c) {
 				}
 			}else if (key == "cast"){
 				if (!delaymix && caneventuallyactive(c.castele, c.cast, c.owner)){
-					score += evalactive(c, c.active.cast, ttatk) - (c.usedactive?.02:0);
+					score += evalactive(c, c.active.cast, ttatk);
 				}
 			}else if (key != "owndeath" || isCreature){
 				score += evalactive(c, c.active[key]);
@@ -357,7 +357,7 @@ function evalcardinstance(cardInst) {
 		}
 		score += checkpassives(c);
 	}
-	score *= (cardInst.canactive() ? 0.6 : 0.5) * (!cardInst.card.cost || !cardInst.card.costele?1:(15+Math.min(cardInst.owner.quanta[cardInst.card.costele], 10))/30);
+	score *= (cardInst.canactive() ? 0.6 : 0.5) * (!cardInst.card.cost || !cardInst.card.costele?1:.9+Math.log(1+cardInst.owner.quanta[cardInst.card.costele])/50);
 	log("\t:: " + c.name + " worth " + score);
 	return score;
 }
