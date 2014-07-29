@@ -508,7 +508,7 @@ Player.prototype.spend = function(qtype, x) {
 	}
 	return true;
 }
-Creature.prototype.estimateDamage = Weapon.prototype.estimateDamage = function() {
+Creature.prototype.estimateDamage = Weapon.prototype.estimateDamage = function(freedomChance) {
 	var fsh = this.owner.foe.shield;
 	if ((fsh && fsh.passives.reflect && this.status.psion) || this.status.frozen || this.status.delayed){
 		return 0;
@@ -534,16 +534,41 @@ Creature.prototype.estimateDamage = Weapon.prototype.estimateDamage = function()
 		this.status.adrenaline = 1;
 	}
 	if (!momentum){
-		atk *= (fshactive == Actives.evade100 ? 0 : fshactive == Actives.evade50 ? .5 : fshactive == Actives.evade40 ? .6 : fshactive == Actives.chaos ? .75 : 1);
+		if (fsh){
+			atk *= (fshactive == Actives.evade100 ? 0 : fshactive == Actives.evade50 ? .5 : fshactive == Actives.evade40 ? .6 : fshactive == Actives.chaos ? .75 : 1);
+		}else if (freedomChance && this.passives.airborne){
+			atk = Math.ceil(trueatk * 1.5) * freedomChance;
+		}
 	}
 	if (this.owner.foe.sosa) atk *= -1;
 	return atk;
 }
 Player.prototype.expectedDamage = function() {
 	var totalDamage = 0;
-	for (var i = 0; i < 23; i++) {
-		if (this.creatures[i])
-			totalDamage += this.creatures[i].estimateDamage();
+	var stasisFlag = false, freedomChance = 0;
+	for(var i=0; i<16; i++){
+		var p;
+		if ((p=this.permanents[i])){
+			if (p.passives.stasis || p.passives.patience){
+				stasisFlag = true;
+			}else if (p.passives.freedom){
+				freedomChance++;
+			}
+		}
+		if ((p=this.foe.permanents[i])){
+			if (p.passives.stasis){
+				stasisFlag = true;
+			}
+		}
+	}
+	if (freedomChance){
+		freedomChance = (1-Math.pow(.7,freedomChance));
+	}
+	if (!stasisFlag){
+		for (var i = 0; i < 23; i++) {
+			if (this.creatures[i])
+				totalDamage += this.creatures[i].estimateDamage(freedomChance);
+		}
 	}
 	if (this.weapon) totalDamage += this.weapon.estimateDamage();
 	if (this.foe.status.poison) totalDamage += this.foe.status.poison;
