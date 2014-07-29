@@ -90,7 +90,7 @@ var ActivesValues = {
 	fractal:9,
 	freeze:3,
 	fungusrebirth:2,
-	gas:10,
+	gas:5,
 	give:1,
 	gpull:2,
 	gpullspell:3,

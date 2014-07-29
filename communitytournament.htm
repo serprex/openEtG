@@ -1,0 +1,68 @@
+<script src="etgify.js"></script>
+
+<input id="deckcode" type="text" placeholder="Deck" style="width:890px"/><br>
+<input id="legality" type="text" readonly style="width:400px" />
+<input id="test" type="submit" value="Test Deck" onclick="testDeck()" />
+<select id="rulesets">
+	<option value="powerless3">Powerless Three</option>
+</select>
+<script>
+	var deckcode = document.getElementById("deckcode");
+	var legality = document.getElementById("legality");
+	var rulesets = document.getElementById("rulesets");
+	var Cards, CardCodes, Targeting;
+	var etg = require("./etg");
+	require("./etg.client").loadcards(function(cards, cardCodes, targeting) {
+		Cards = cards;
+		CardCodes = cardCodes;
+		Targeting = targeting;
+	});
+	var verifiers = {
+		powerless3: function(deck) {
+			var elements = [], anyupped = false;
+			for (var i = 0;i < deck.length;i++) {
+				var card = deck[i];
+				if (!card.element)
+					return card.name + " is Other";
+				else if (card.rarity == 4)
+					return card.name + " is a Shard";
+				elements[card.element]=1;
+				if (card.upped) anyupped = true;
+			}
+			var elementCount = 0, ret = "";
+			for(var i=1; i<13; i++){
+				if (elements[i]){
+					elementCount++;
+					ret += " " + etg.eleNames[i];
+				}
+			}
+			ret = (elementCount == 2 ? "Duality" : "Quartz") + ret;
+			if (elementCount != 2 && elementCount != 4){
+				return "You're using " + elementCount + " elements";
+			}
+			if (elementCount == 4 && anyupped){
+				return "You're using upped cards in a Quartz deck";
+			}
+			return ret;
+		},
+	};
+	function testDeck() {
+		if (!Cards){
+			legality.value = "Card DB not yet downloaded";
+			return;
+		}
+		var code = deckcode.value.split(" ");
+		var deck = [];
+		var markele = 0;
+		for (var i = 0;i < code.length;i++) {
+			var maybeMark = ~etg.TrueMarks.indexOf(code[i]);
+			if (maybeMark) markele = maybeMark;
+			else if (CardCodes[code[i]]) deck.push(CardCodes[code[i]]);
+			else {
+				legality.value = "Not a real deck code. " + (code[i] || "???");
+				return;
+			}
+		}
+		legality.value = deck.length > 60 ? "Your deck is too large" : deck.length < 30 ? "Your deck is too small" : verifiers[rulesets.options[rulesets.selectedIndex].value](deck, markele);
+	}
+</script>
