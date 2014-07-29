@@ -36,14 +36,13 @@
 					ret += " " + etg.eleNames[i];
 				}
 			}
-			ret = (elementCount == 2 ? "Duality" : "Quartz") + ret;
-			if (elementCount != 2 && elementCount != 4){
+			if (elementCount > 4){
 				return "You're using " + elementCount + " elements";
 			}
-			if (elementCount == 4 && anyupped){
+			if (elementCount > 2 && anyupped){
 				return "You're using upped cards in a Quartz deck";
 			}
-			return ret;
+			return "Legal. You are using " + ret;
 		},
 	};
 	function testDeck() {
