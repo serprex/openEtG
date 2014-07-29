@@ -252,7 +252,7 @@ var ActivesValues = {
 
 function evalactive(c, active, extra){
 	var aval = ActivesValues[active.activename];
-	return !aval?0:
+	return aval === undefined?0:
 		aval instanceof Function?aval(c, extra):
 		aval instanceof Array?aval[c.card.upped?1:0]:aval;
 }
@@ -372,11 +372,11 @@ function caneventuallyactive(element, cost, pl){
 }
 
 module.exports = function(game) {
-	if (game.turn.foe.deck.length == 0){
-		return game.turn == game.player1?99999990:-99999990;
-	}
 	if (game.winner){
 		return game.winner==game.player1?99999999:-99999999;
+	}
+	if (game.turn.foe.deck.length == 0){
+		return game.turn == game.player1?99999990:-99999990;
 	}
 	var gamevalue = 0;
 	for (var j = 0; j < 2; j++) {
