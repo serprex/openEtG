@@ -86,13 +86,13 @@ var ActivesValues = {
 	fire:1,
 	firebolt:10,
 	flatline:1,
-	flyingweapon:5,
+	flyingweapon:7,
 	fractal:9,
 	freeze:3,
 	fungusrebirth:2,
 	gas:10,
 	give:1,
-	gpull:1,
+	gpull:2,
 	gpullspell:3,
 	gratitude:4,
 	grave:4,
@@ -252,7 +252,7 @@ var ActivesValues = {
 
 function evalactive(c, active, extra){
 	var aval = ActivesValues[active.activename];
-	return !aval?0:
+	return aval === undefined?0:
 		aval instanceof Function?aval(c, extra):
 		aval instanceof Array?aval[c.card.upped?1:0]:aval;
 }
@@ -372,11 +372,11 @@ function caneventuallyactive(element, cost, pl){
 }
 
 module.exports = function(game) {
-	if (game.turn.foe.deck.length == 0){
-		return game.turn == game.player1?99999990:-99999990;
-	}
 	if (game.winner){
 		return game.winner==game.player1?99999999:-99999999;
+	}
+	if (game.turn.foe.deck.length == 0){
+		return game.turn == game.player1?99999990:-99999990;
 	}
 	var gamevalue = 0;
 	for (var j = 0; j < 2; j++) {
@@ -406,7 +406,9 @@ module.exports = function(game) {
 		pscore += Math.sqrt(player.hp)*4;
 		if (player.isCloaked()) pscore += 4;
 		if (player.status.poison) pscore -= player.status.poison;
-		if (player.precognition) pscore += 1;
+		if (player.precognition) pscore += .5;
+		if (!player.weapon) pscore += 1;
+		if (!player.shield) pscore += 1;
 		if (player.silence) pscore -= player.hand.length+1;
 		if (player.flatline) pscore -= 1;
 		if (player.neuro) pscore -= 5;

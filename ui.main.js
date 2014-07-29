@@ -254,7 +254,7 @@ function initTrade(data) {
 	var btrade = makeButton(10, 40, "Trade");
 	var bconfirm = makeButton(10, 70, "Confirm");
 	var bconfirmed = new PIXI.Text("Confirmed!", { font: "16px Dosis" });
-	var bcancel = makeButton(10, 10, "Exit");
+	var bcancel = makeButton(10, 10, "Cancel");
 	var selectedCards = [];
 	var selectedCardsprites = [];
 	var player2Cardsprites = [];
@@ -479,21 +479,23 @@ function victoryScreen() {
 		game = undefined;
 	}
 	victoryui.addChild(bexit);
-	if (game.goldreward && winner) {
-		var goldshown = (game.goldreward || 0) - (game.cost || 0);
-		tgold = makeText(340, 550, "Gold won: $" + goldshown);
-		victoryui.addChild(tgold);
-		userExec("addgold", { g: game.goldreward });
-	}
-	if (game.cardreward && winner) {
-		var cardrewardlength = etgutil.decklength(game.cardreward);
-		etgutil.iterdeck(game.cardreward, function(code, i){
-			var cardArt = new PIXI.Sprite(getArt(code));
-			cardArt.anchor.x = .5;
-			cardArt.position.set(470-cardrewardlength*20+i*40, 170);
-			victoryui.addChild(cardArt);
-		});
-		userExec("addcards", { c: game.cardreward });
+	if (winner){
+		if (game.goldreward) {
+			var goldshown = (game.goldreward || 0) - (game.cost || 0);
+			tgold = makeText(340, 550, "Gold won: $" + goldshown);
+			victoryui.addChild(tgold);
+			userExec("addgold", { g: game.goldreward });
+		}
+		if (game.cardreward) {
+			var cardrewardlength = etgutil.decklength(game.cardreward);
+			etgutil.iterdeck(game.cardreward, function(code, i){
+				var cardArt = new PIXI.Sprite(getArt(code));
+				cardArt.anchor.x = .5;
+				cardArt.position.set(470-cardrewardlength*20+i*40, 170);
+				victoryui.addChild(cardArt);
+			});
+			userExec("addcards", { c: game.cardreward });
+		}
 	}
 
 	refreshRenderer(victoryui);
@@ -859,7 +861,7 @@ function startMenu() {
 	var tgold = makeText(750, 101, (user ? "$" + user.gold : "Sandbox"));
 	menuui.addChild(tgold);
 
-	var taiwinloss = makeText(750, 125, (user ? "AI w/l:\n" + user.aiwins + "/" + user.ailosses + "\nPVP w/l:\n" + user.pvpwins + "/" + user.pvplosses : ""));
+	var taiwinloss = makeText(750, 125, (user ? "AI w/l\n" + user.aiwins + "/" + user.ailosses + "\n\nPvP w/l\n" + user.pvpwins + "/" + user.pvplosses : ""));
 	menuui.addChild(taiwinloss);
 
 	var tinfo = makeText(50, 26, "")
@@ -1934,7 +1936,7 @@ function startMatch() {
 								endturn.click(null, _i);
 							} else if (game.targetingMode) {
 								if (game.targetingMode(cardinst)) {
-									delete targetingMode;
+									delete game.targetingMode;
 									game.targetingModeCb(cardinst);
 								}
 							} else if (!_j && cardinst.canactive()) {
@@ -2437,8 +2439,7 @@ function getTextImage(text, font, bgcolor, width) {
 	function pushChild(){
 		var w = 0;
 		for (var i = 0; i<arguments.length; i++){
-			var c = arguments[i];
-			w += c.width;
+			w += arguments[i].width;
 		}
 		if (width && x + w > width){
 			x = 0;
