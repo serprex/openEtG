@@ -468,8 +468,12 @@ function victoryScreen() {
 
 	var bexit = makeButton(412, 430, "Exit");
 	bexit.click = function() {
-		if (game.quest)
-			startQuestArea(game.area);
+		if (game.quest) {
+			if (winner && game.choicerewards)
+				startRewardWindow(game.choicerewards, game.rewardamount, true);
+			else
+				startQuestArea(game.area);
+		}
 		else
 			startMenu();
 		game = undefined;
@@ -581,7 +585,11 @@ function mkQuestAi(questname, stage, area) {
 	game.wintext = quest.wintext || "";
 	game.autonext = quest.autonext || false;
 	game.area = area;
-	if ((user.quest[questname] <= stage || !(questname in user.quest))) game.cardreward = etgutil.encodedeck(quest.cardreward);
+	if ((user.quest[questname] <= stage || !(questname in user.quest))) {
+		game.cardreward = etgutil.encodedeck(quest.cardreward);
+		game.choicerewards = quest.choicerewards;
+		game.rewardamount = quest.rewardamount;
+	}
 }
 function mkAi(level, daily) {
 	return function() {
@@ -1002,10 +1010,13 @@ function startMenu() {
 		}
 	});
 }
-function startRewardWindow(reward) {
+function startRewardWindow(reward, numberofcopies, nocode) {
+	if (!numberofcopies) numberofcopies = 1;
 	var rewardList;
-	if (reward == "mark") rewardList = etg.filtercards(false, function(x) { return x.rarity == 5 });
+	if (reward instanceof Array) rewardList = reward;
+	else if (reward == "mark") rewardList = etg.filtercards(false, function(x) { return x.rarity == 5 });
 	else if (reward == "shard") rewardList = etg.filtercards(false, function(x) { return x.rarity == 4 });
+	else if (reward == "rare") rewardList = etg.filtercards(false, function(x) { return x.rarity == 3 });
 	else rewardList = [];
 	var rewardui = new PIXI.DisplayObjectContainer();
 	rewardui.interactive = true;
@@ -1013,12 +1024,19 @@ function startRewardWindow(reward) {
 
 	var exitButton = makeButton(10, 10, "Exit");
 	exitButton.click = startMenu;
-	rewardui.addChild(exitButton);
+	if (!nocode) rewardui.addChild(exitButton);
 
 	var confirmButton = makeButton(10, 40, "Done");
 	confirmButton.click = function() {
-		if (chosenReward)
-			userEmit("codesubmit2", { code: foename.value, card: chosenReward });
+		if (chosenReward) {
+			if (nocode) {
+				userExec("addcards", { c: (numberofcopies > 9 ? "" : "0") + numberofcopies + chosenReward })
+				startMenu();
+			}
+			else {
+				userEmit("codesubmit2", { code: foename.value, card: chosenReward });
+			}
+		}
 	}
 
 	rewardui.addChild(confirmButton);
@@ -1068,7 +1086,7 @@ function startQuestWindow(){
 	var areainfo = {
 		forest: ["Spooky Forest", new PIXI.Polygon(555, 221, 456, 307, 519, 436, 520, 472, 631, 440, 652, 390, 653, 351, 666, 321, 619, 246)],
 		city: ["Capital City", new PIXI.Polygon(456,307, 519, 436, 520, 472,328,496,258,477,259,401)],
-		harbor: ["The Harbor", new PIXI.Polygon(245,262,258,477,205,448,179,397,180,350,161,313)],
+		provinggrounds: ["Proving Grounds", new PIXI.Polygon(245,262,258,477,205,448,179,397,180,350,161,313)],
 		ice: ["Icy Caves", new PIXI.Polygon(161,313,245,262,283,190,236,167,184,186,168,213,138,223,131,263)],
 		desert:["Lonely Desert", new PIXI.Polygon(245,262,283,190,326,202,466,196,511,219,555,221,456,307,259,401)]
 	};
@@ -1095,6 +1113,9 @@ function startQuestArea(area) {
 	startQuest("blacksummoner");
 	startQuest("icecave");
 	startQuest("inventor");
+	startQuest("pgdragon");
+	startQuest("pgrare");
+	startQuest("pgshard");
 	var questui = new PIXI.DisplayObjectContainer();
 	questui.interactive = true;
 	var bgquest = new PIXI.Sprite(backgrounds[3]);
