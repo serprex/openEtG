@@ -92,7 +92,7 @@ var ActivesValues = {
 	fungusrebirth:2,
 	gas:10,
 	give:1,
-	gpull:1,
+	gpull:2,
 	gpullspell:3,
 	gratitude:4,
 	grave:4,
