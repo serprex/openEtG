@@ -343,6 +343,9 @@ Player.prototype.clone = function(game){
 	obj.weapon = maybeClone(this.weapon);
 	obj.creatures = this.creatures.map(maybeClone);
 	obj.permanents = this.permanents.map(maybeClone);
+	if (this.gpull){
+		obj.gpull = obj.creatures[this.gpull.getIndex()];
+	}
 	obj.hand = this.hand.map(maybeClone);
 	obj.game = game;
 	obj.owner = obj;
