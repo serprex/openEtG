@@ -254,7 +254,7 @@ function initTrade(data) {
 	var btrade = makeButton(10, 40, "Trade");
 	var bconfirm = makeButton(10, 70, "Confirm");
 	var bconfirmed = new PIXI.Text("Confirmed!", { font: "16px Dosis" });
-	var bcancel = makeButton(10, 10, "Exit");
+	var bcancel = makeButton(10, 10, "Cancel");
 	var selectedCards = [];
 	var selectedCardsprites = [];
 	var player2Cardsprites = [];

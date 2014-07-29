@@ -86,7 +86,7 @@ var ActivesValues = {
 	fire:1,
 	firebolt:10,
 	flatline:1,
-	flyingweapon:5,
+	flyingweapon:7,
 	fractal:9,
 	freeze:3,
 	fungusrebirth:2,
@@ -406,7 +406,9 @@ module.exports = function(game) {
 		pscore += Math.sqrt(player.hp)*4;
 		if (player.isCloaked()) pscore += 4;
 		if (player.status.poison) pscore -= player.status.poison;
-		if (player.precognition) pscore += 1;
+		if (player.precognition) pscore += .5;
+		if (!player.weapon) pscore += 1;
+		if (!player.shield) pscore += 1;
 		if (player.silence) pscore -= player.hand.length+1;
 		if (player.flatline) pscore -= 1;
 		if (player.neuro) pscore -= 5;

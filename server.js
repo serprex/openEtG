@@ -210,14 +210,14 @@ function useruser(servuser, cb){
 			ocard: servuser.ocard,
 			freepacks: servuser.freepacks,
 			accountbound: servuser.accountbound,
-			aiwins: parseInt(servuser.aiwins) || 0,
-			ailosses: parseInt(servuser.ailosses) || 0,
-			pvpwins: parseInt(servuser.pvpwins) || 0,
-			pvplosses: parseInt(servuser.pvplosses) || 0,
+			aiwins: parseInt(servuser.aiwins || 0),
+			ailosses: parseInt(servuser.ailosses || 0),
+			pvpwins: parseInt(servuser.pvpwins || 0),
+			pvplosses: parseInt(servuser.pvplosses || 0),
 			quest: obj,
-			daily: parseInt(servuser.daily) || 0,
-			dailymage: parseInt(servuser.dailymage) || 0,
-			dailydg: parseInt(servuser.dailydg) || 0
+			daily: parseInt(servuser.daily || 0),
+			dailymage: parseInt(servuser.dailymage || 0),
+			dailydg: parseInt(servuser.dailydg || 0)
 		});
 	});
 }
