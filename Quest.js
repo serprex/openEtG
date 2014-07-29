@@ -1,10 +1,10 @@
 //Quest data
-exports.necromancer = {};
+exports.necromancer = [];
 exports.necromancer[0] = { deck: "52g 52g 52g 52g 52g 52g 52g 52g 52g 52g 52g 52m 52m 52m 52m 52m 52m 52m 52m 52m 52m 52m 52m 531 531 531 531 52n 52n 52n 52n 717 717 8pk", name: "Skeleton Horde", hp: 80, markpower: 2, wintext: "You defeated the horde, but you should find out where they came from" };
 exports.necromancer[1] = { deck: "5bs 5bs 5bs 5bs 5bs 5bs 5bs 5bs 5bs 5bs 5bs 5bs 5bs 5bu 5bu 5bu 5bu 5c1 5c1 5c1 5c1 5ca 5ca 8pp", name: "Forest Wildlife", hp: 60, wintext: "The creatures seemed very afraid of something, like there was something in the forest that did not belong there." };
 exports.necromancer[2] = { deck: "52g 52g 52g 52g 52g 52g 52g 52g 52g 52g 52g 52g 52g 52m 52m 52m 52m 52m 52m 531 531 531 531 531 52l 52l 52l 52t 52t 52t 52t 52t 535 535 535 535 717 717 717 717 8pk", name: "Evil Necromancer", hp: 120, markpower: 2, wintext: "You defeated the evil necromancer and stopped his undead from spreading through the land!" };
 
-exports.spirit = {};
+exports.spirit = [];
 exports.spirit[0] = {
 	deck: "606 606 606 606 606 606 606 606 606 606 606 606 5um 5um 5um 5um 5us 5us 5us 5us 5v3 5v3 5v3 5v3 5uu 5uu 5v2 5v2 5va 5va 8pi", name: "Evil Spirit", hp: 150, wintext: "You have defeated the evil spirit and stopped its dark influence from spreading through the land!\n\
 		... But a dark energy is still troubling this region... \n\
@@ -69,24 +69,28 @@ exports.spirit[4] = {
 		You hope it will be gone by the time you get there... but given your luck so far, you don't think it will.\n\
 		Storm or not, you didn't come this far just to turn back, so you continue your treck down the path."};
 
-exports.bombmaker = {};
+exports.bombmaker = [];
 exports.bombmaker[0] = { deck: "5t2 5t2 5t2 5t2 5t2 5t2 5t2 5t2 5t2 5t2 5t2 5t2 5t2 5t2 5t2 5s5 5s5 5s5 5s5 5s5 5s5 622 622 622 622 80d 80d 80d 80d 80d 80d 8pu", name: "Bomb Maker 1", autonext: true };
 exports.bombmaker[1] = { deck: "5rg 5rg 5rg 5rg 5rg 5rg 5rg 5rg 5rg 5rg 5rg 5rg 5rg 5rg 5rg 5rk 5rk 5rk 5rk 5ro 5ro 5ro 5ru 5ru 5ru 5ru 5ru 5ru 5v1 5v1 5v1 5v1 5v1 5v1 7ql 7ql 7ql 7ql 7ql 7ql 8pt", name: "Bomb Maker 2", autonext: true };
 exports.bombmaker[2] = { deck: "5f4 5f4 5f4 5f6 5f6 5f6 5f6 5f6 5f6 5f5 5f5 5f8 5f8 5oc 5oc 5oc 5oc 5oc 5oc 5oc 5oc 5oc 5oc 5oc 5oc 5oc 5oc 5om 5om 5om 5om 5om 5om 5p0 5p0 8po", name: "Bomb Maker 3", markpower: 3, drawpower: 2, cardreward: ["5om", "5om", "5om", "5om", "5s5", "5s5", "5s5", "7ql", "7ql"], wintext: "Congratulations! Here, take some of my bombs as the reward!" };
 
-exports.blacksummoner = {};
-exports.blacksummoner[0] = { deck: "7t5 7t5 7t5 7t5 7t5 7t5 7t5 7t5 7t5 7t5 7t5 7t5 7t5 7t5 7t5 8pt", name: "The Black Summoner", markpower: 12, cardreward: ["7t5", "7t5"], wintext: "You defeat the Dark Summoner that controlled the dragons. The dragons fly away, but two of them stays, looking at you.\nYou decide to let them join you!" }
+exports.blacksummoner = [{ deck: "7t5 7t5 7t5 7t5 7t5 7t5 7t5 7t5 7t5 7t5 7t5 7t5 7t5 7t5 7t5 8pt", name: "The Black Summoner", markpower: 12, cardreward: ["7t5", "7t5"], wintext: "You defeat the Dark Summoner that controlled the dragons. The dragons fly away, but two of them stays, looking at you.\nYou decide to let them join you!" }];
 
-exports.icecave = {};
+exports.icecave = [];
 exports.icecave[0] = { deck: "5i4 5i4 5i4 5i4 5i4 5i4 5i4 5i4 5i4 5i4 5i4 5i4 5i4 5i4 5i8 5i8 5i8 5i8 5i8 5i9 5i9 5id 5id 5id 8pp", name: "Snow Storm", hp: 75, wintext: "You get through the storm and finally reach the mysterious cave \nwhere the weapon is said to reside." };
 exports.icecave[1] = { deck: "5i4 5i4 5i4 5i4 5i4 5i4 5i4 5i4 5ik 5ik 5ik 5ik 5ik 5ik 5ia 5ia 5ia 5ib 5ib 5ib 5ic 5ic 5id 5id 5id 5id 8pp", name: "Cave Guardians??", hp: 75, wintext: "You defeat the creatures that were attacking, and can finally take the rare weapon \nthat was hiding in the cave; a Trident! But before you can grab it, you hear strange sounds behind you..." };
 exports.icecave[2] = { deck: "4sa 4sa 4sa 4sa 4sa 4sc 4sc 4sc 4sc 4sc 4sc 4sc 4sc 4sc 4sc 5i5 5i5 5im 5iq 5iq 5ic 5il 5il 5ii 5ii 5ie 5ie 5ig 5ig 5ig 8pp", name: "Cave Guardians", hp: 75, wintext: "After defeating the Guardians, you quickly get out of the cave, ready to head home as fast as you can..." };
 exports.icecave[3] = { deck: "5i4 5i4 5i4 5i4 5i4 5i4 5i4 5i4 5i4 5i4 5i4 5i4 5i4 5i4 5i4 5ib 5ib 5ib 5ih 5ih 5i9 5i9 5ig 5ig 7gt 7gt 7gt 7gt 8pp", name: "Ice Storm", hp: 75, wintext: "You finally get though the storm and reach the safety of the city. \nYou got the weapon you were looking for, and some other ice souvenirs as well.", cardreward: ["5i8", "5i8", "5ic"] };
 
-exports.inventor = {};
+exports.inventor = [];
 exports.inventor[0] = {deck: "55k 55k 55k 55k 55k 55k 55k 55k 55k 55k 55k 55k 55k 561 561 561 55m 55m 55m 55m 55m 55m 55s 55s 595 595 595 595 595 595 8pm", name: "Defense Catapults", hp:125, wintext: "You manage to get past the crazy inventor's defense system, and get closer to his big house." };
 exports.inventor[1] = {deck: "5f1 5f1 5f1 5f1 5f1 5f1 5ff 5ff 5ff 5ff 5f7 5f7 5f7 5i4 5i4 5i4 5i4 5i4 5i4 5i4 5ik 5ik 5ik 5ik 5ik 5ik 5ii 5ii 5ii 5ii 8po", name: "Armored Machines", hp:120, wintext: "Defeating the machines that were terrorizing the village, you head inside to face the inventor"};
-exports.inventor[2] = {deck: "5de 5de 5de 5de 5de 5de 5de 5de 5de 5de 5de 5de 5de 5c5 5c5 5c5 5c5 5c5 5c5 5fh 5fh 5fh 5fh 5fh 5fh 5f7 5f7 5f7 5f7 5f7 5f7 8po", name: "Crazy Inventor", hp:125, wintext: "Even with his inventions, you manage to defeat him. 'No, please, spare me, I will never hurt anyone again!' he cries. \nYou agree to let him go, but only if he leaves the area and never comes back. You see him walking away \nand can't help but thinking that you haven't seen the last of him... On your way out of \nthe house, you find some of his inventions and decide that they can be useful!", cardreward:["561", "561","561","5fh","5fh","5ii", "5ii"]};
+exports.inventor[2] = { deck: "5de 5de 5de 5de 5de 5de 5de 5de 5de 5de 5de 5de 5de 5c5 5c5 5c5 5c5 5c5 5c5 5fh 5fh 5fh 5fh 5fh 5fh 5f7 5f7 5f7 5f7 5f7 5f7 8po", name: "Crazy Inventor", hp: 125, wintext: "Even with his inventions, you manage to defeat him. 'No, please, spare me, I will never hurt anyone again!' he cries. \nYou agree to let him go, but only if he leaves the area and never comes back. You see him walking away \nand can't help but thinking that you haven't seen the last of him... On your way out of \nthe house, you find some of his inventions and decide that they can be useful!", cardreward: ["561", "561", "561", "5fh", "5fh", "5ii", "5ii"] };
+
+exports.pgdragon = [{ deck: "4sa 4sa 4sa 4sa 4sa 4sa 4sa 4sa 4sa 4sa 4sa 4sa 4sa 4sa 4sa 4sa 4vf 52h 55o 58r 5bt 5f2 5id 5la 5op 5rm 5ul 61t 61t 61t 61t 61t 61t 8pu", name: "Dragon Tamer", hp: 150, wintext: "You have proved your worth for the Dragon Tamer, and he gives you two of his dragons.", choicerewards: ["4vf", "52h", "55o", "58r", "5bt", "5f2", "5id", "5la", "5of", "5rm", "5ul", "61v"], rewardamount:2 }];
+exports.pgrare = [{ deck: "4sa 4sa 4sa 4sa 4sa 4sa 4sa 4sa 4sa 4sa 4vl 52q 536 55s 58v 5c5 5ff 5ff 5ff 5ff 5ff 5ff 5fh 5fh 5fh 5fh 5f7 5ic 5ir 5lh 5oi 5oi 5ol 5ro 5ur 61u 8po", name: "Master of Arms", hp: 150, wintext: "You have proved your worth for the Master of Arms, and he gives you one of his rare cards.", choicerewards: "rare" }];
+exports.pgshard = [{ deck: "4sa 4sa 4sa 4sa 4sa 4sa 4sa 4sa 4sa 4sa 4sa 4sa 50a 50a 53e 53e 56i 56i 59m 59m 59m 59m 59m 59m 5cq 5cq 5fu 5fu 5j2 5j2 5m6 5m6 5pa 5pa 5se 5se 5vi 5vi 62m 62m 8pm", name: "Gemcutter", hp: 150, wintext: "You have proved your worth for the Gemcutter and he gives you one of his shards.", choicerewards: "shard" }];
+
 //Menu info
 exports.necromancer.info = { pos: [[200, 200], [200, 250], [225, 300]], text: ["A horde of skeletons have been seen nearby, perhaps you should go investigate?", "They seemed to come from the forest, so you go inside.", "Deep inside the forest you find the necromancer responsible for filling the lands with undead!"] };
 exports.spirit.info = { pos: [[275, 350], [325, 375], [500, 200], [500, 250], [525, 275]], text:["You pursue the energy trail of the spirit to a dark cavern.\n\At first you think it has eluded you, but as you turn to leave, its dark shadowy form rises in front of you",
@@ -117,4 +121,7 @@ exports.inventor.info = {
 	"In front of the house some machines seems to stand guards. \nThese must be the machines that were attacking the village!",
 	"'All I wanted was to test the offensive capabilities of my machines. \nBut now when you are here, I can test this on you!' says the crazy inventor and laughs."]
 }
-exports.areas = { forest: ["necromancer", "spirit", "inventor"], city:["bombmaker"], desert:["blacksummoner"], ice:["icecave"] };
+exports.pgdragon.info = { pos: [[200, 200]], text: ["Fight the Dragon Tamer at the Proving Grounds!"] };
+exports.pgrare.info = { pos: [[250, 200]], text: ["Fight the Master of Arms at the Proving Grounds!"] };
+exports.pgshard.info = { pos: [[225, 250]], text: ["Fight the Gemcutter at the Proving Grounds!"] };
+exports.areas = { forest: ["necromancer", "spirit", "inventor"], city:["bombmaker"], desert:["blacksummoner"], ice:["icecave"], provinggrounds:["pgdragon","pgrare","pgshard"] };
