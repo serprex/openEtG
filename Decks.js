@@ -23,7 +23,7 @@ exports.demigod = [
 		["Anubis", "710 710 710 710 710 710 710 710 710 710 710 710 710 710 72i 72i 72i 72i 71l 71l 71l 71l 717 717 717 71b 71b 71b 711 711 7t7 7t7 7t7 7t7 7t7 7t7 7t9 7t9 7t9 7ti 7ti 7ti 7ti 7ta 7ta 8pt"],
 		["Atomsk", "7ne 7ne 7ne 7ne 7n9 7n9 7t4 7t4 7t4 7t4 7t4 7t4 7t4 7t4 7t4 7t4 7t4 7t4 7t4 7t4 7t4 7t9 7t9 7t9 7tb 7tb 7ta 7ta 7ta 7td 7td 7td 7td 7t5 7t5 8pr"],
 		["Gobannus", "7dg 7dg 7dg 7dg 7dg 7dg 7dg 7dg 7dg 7dg 7dg 7dg 7dg 7dg 7dg 7dg 7dg 7e0 7e0 7e0 7e0 7e0 7e0 7dv 7dv 7dv 7dv 7dv 7dv 7n2 7n2 7n2 7n2 7qb 7qb 7qb 7th 7th 7th 7th 7tb 7tb 7tb 7tb 7tb 7tb 7ta 7ta 8pt"],
-		["Halwn", "710 710 710 710 710 710 710 710 710 710 710 72i 72i 72i 72i 71m 71m 71m 718 718 718 718 718 718 719 719 719 719 71b 71b 71b 71j 71j 71j 71j 7aj 7aj 7aj 7aj 8pn"],
+		["Halwn", "710 710 710 710 710 710 710 710 710 710 710 72i 72i 72i 72i 718 718 718 718 718 718 719 719 719 719 71a 71a 71a 71n 71n 71n 71j 71j 71j 71j 7aj 7aj 7aj 7aj 8pn"],
 		["Kenosis", "744 744 744 744 744 744 744 744 744 744 744 744 744 744 744 74f 74f 74f 74f 74f 74f 745 745 745 745 745 7k9 7k9 7k9 7k9 7k9 7k9 7jv 7jv 7jv 7jv 7jv 7k7 7k7 7k7 7k1 8pq"],
 		["Lycaon", "6ts 6ts 6ts 6ts 6ts 6ts 6ts 6ts 6ts 6ts 6ve 6ve 6ve 6ve 6ve 6ve 6u2 6u2 6u2 6u2 6u2 6u2 6u1 6u1 6u1 6u1 6u1 6u1 6ud 6ud 6ud 6ud 6u7 6u7 6u7 6u7 7th 7th 7tj 7tj 7tj 7ta 7ta 8pt"],
 		["Neysa", "7gk 7gk 7gk 7gk 7i6 7i6 7i6 7i6 7i6 7i6 7i6 7i6 7i6 7i6 7i6 7h6 7h6 7h6 7hb 7hb 7hb 7hb 7hb 7hb 7k6 7k6 7k6 7k6 7k5 7k5 7k5 7k5 7k5 7k5 7n2 7n2 7n2 7n2 7n2 8pq"],

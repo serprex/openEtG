@@ -38,7 +38,7 @@ function tgtToPos(t) {
 		return creaturePos(t.owner == t.owner.game.player2, t.getIndex());
 	} else if (t instanceof etg.Weapon) {
 		var p = new PIXI.Point(666, 512);
-		if (t.owner == t.owner.player2) reflectPos(p);
+		if (t.owner == t.owner.game.player2) reflectPos(p);
 		return p;
 	} else if (t instanceof etg.Shield) {
 		var p = new PIXI.Point(710, 532);
