@@ -14,7 +14,7 @@ module.exports = function(game) {
 				else casthash[ch] = true;
 			}
 			var cbits = game.tgtToBits(c) ^ 8;
-			var tgthash = {};
+			var tgthash = {}, loglist = {};
 			function evalIter(t) {
 				if (t && t.hash){
 					var th = t.hash();
@@ -34,14 +34,14 @@ module.exports = function(game) {
 						var targetingModeBack = gameClone.targetingMode, targetingModeCbBack = gameClone.targetingModeCb;
 						delete gameClone.targetingMode;
 						iterLoop(gameClone, 0, cbits | tbits << 9);
-						log("\t" + c + " " + (t || "-") + " " + v);
+						loglist[(t || "-").toString()] = v;
 						gameClone.targetingMode = targetingModeBack;
 						gameClone.targetingModeCb = targetingModeCbBack;
 					}
 				}
 			}
 			if (active && active.activename in Targeting) {
-				log("in " + active.activename + " " + currentEval);
+				var preEval = currentEval;
 				game.getTarget(c, active);
 				for (var j = 0;j < 2;j++) {
 					var pl = j == 0 ? c.owner : c.owner.foe;
@@ -52,10 +52,11 @@ module.exports = function(game) {
 					pl.permanents.forEach(evalIter);
 					pl.hand.forEach(evalIter);
 				}
-				log("out " + currentEval);
+				log(currentEval, preEval, c.toString(), active.activename, loglist);
 				delete game.targetingMode;
 			}else{
 				evalIter();
+				log(currentEval, c.toString(), loglist);
 			}
 		}
 		var self = game.player2;
@@ -86,7 +87,6 @@ module.exports = function(game) {
 		}
 	}
 	iterLoop(game, 1);
-	console.log("Leftover iters: " + limit);
 	if (cmdct) {
 		return ["cast", cmdct];
 	} else if (game.player2.hand.length == 8) {

@@ -1,10 +1,33 @@
 "use strict";
 var etg = require("./etg");
 var Actives = require("./Actives");
-var disableLogging = true;
-function log(){
-	if (!disableLogging){
-		console.log.apply(console, arguments);
+var enableLogging = false, logbuff, logstack;
+function logStart(){
+	if (enableLogging){
+		logbuff = {};
+		logstack = [];
+	}
+}
+function logEnd(){
+	if (enableLogging){
+		console.log(logbuff);
+		logstack = logbuff = undefined;
+	}
+}
+function logNest(x){
+	if (enableLogging){
+		logstack.push(logbuff);
+		logbuff = logbuff[x] = {};
+	}
+}
+function logNestEnd(x){
+	if (enableLogging){
+		logbuff = logstack.pop();
+	}
+}
+function log(x, y){
+	if (enableLogging){
+		logbuff[x] = y;
 	}
 }
 var ActivesValues = {
@@ -206,13 +229,11 @@ var ActivesValues = {
 	tick:function(c){
 		return c instanceof etg.CardInstance ? 3 : c.maxhp - c.truehp();
 	},
-	unburrow:0,
 	upkeep: -.5,
 	upload:3,
 	vampire:function(c, ttatk){
 		return (c instanceof etg.CardInstance?c.card.attack:ttatk)*.7;
 	},
-	virusinfect:0,
 	virusplague:1,
 	void:5,
 	quantagift:3,
@@ -279,7 +300,17 @@ function evalthing(c) {
 	var isCreature = c instanceof etg.Creature, isWeapon = c instanceof etg.Weapon;
 	var adrenalinefactor = c.status.adrenaline ? etg.countAdrenaline(c.trueatk())/1.5 : 1;
 	var delaymix = Math.max((c.status.frozen||0), (c.status.delayed||0))/adrenalinefactor, delayfactor = delaymix?1-Math.min(delaymix/5, .6):1;
-	var ttatk;
+	var ttatk, hp, poison;
+	if (isCreature){
+		hp = Math.max(c.truehp(), 0);
+		poison = c.status.poison || 0;
+		if (poison > 0){
+			hp = Math.max(hp - poison*2, 0);
+			if (c.status.aflatoxin) score -= 2;
+		}else if (poison < 0){
+			hp += Math.min(-poison, c.maxhp-c.hp);
+		}
+	}
 	if (isWeapon || isCreature) {
 		ttatk = c.estimateDamage();
 		score += ttatk*delayfactor;
@@ -305,13 +336,6 @@ function evalthing(c) {
 	}
 	score += checkpassives(c);
 	if (isCreature){
-		var hp = Math.max(c.truehp(), 0), poison = c.status.poison || 0;
-		if (poison > 0){
-			hp = Math.max(hp - poison, 0);
-			if (c.status.aflatoxin) score -= 2;
-		}else if (poison < 0){
-			hp += Math.min(-poison, c.maxhp-c.hp);
-		}
 		score *= hp?(c.status.immaterial || c.status.burrowed ? 1.5 : 1+Math.log(Math.min(hp, 33))/7):.2;
 	}else{
 		score *= c.status.immaterial?2:1.5;
@@ -320,7 +344,7 @@ function evalthing(c) {
 		var delayed = Math.min(delaymix*(c.status.adrenaline?.5:1), 12);
 		score *= 1-(12*delayed/(12+delayed))/16;
 	}
-	log("\t" + c.card.name + " worth " + score);
+	log(c.card.name, score);
 	return score;
 }
 
@@ -355,7 +379,7 @@ function evalcardinstance(cardInst) {
 		score += checkpassives(c);
 	}
 	score *= (cardInst.canactive() ? 0.6 : 0.5) * (!cardInst.card.cost || !cardInst.card.costele?1:.9+Math.log(1+cardInst.owner.quanta[cardInst.card.costele])/50);
-	log("\t:: " + c.name + " worth " + score);
+	log("::" + c.name, score);
 	return score;
 }
 
@@ -369,6 +393,7 @@ function caneventuallyactive(element, cost, pl){
 }
 
 module.exports = function(game) {
+	logStart();
 	if (game.winner){
 		return game.winner==game.player1?99999999:-99999999;
 	}
@@ -377,18 +402,25 @@ module.exports = function(game) {
 	}
 	var gamevalue = 0;
 	for (var j = 0; j < 2; j++) {
+		logNest(j);
 		var pscore = 0, player = game.players[j];
 		pscore += evalthing(player.weapon);
 		pscore += evalthing(player.shield);
+		logNest("creas");
 		for (var i = 0; i < 23; i++) {
 			pscore += evalthing(player.creatures[i]);
 		}
+		logNestEnd();
+		logNest("perms");
 		for (var i = 0; i < 16; i++) {
 			pscore += evalthing(player.permanents[i]);
 		}
+		logNestEnd();
+		logNest("hand");
 		for (var i = 0; i < player.hand.length; i++) {
 			pscore += evalcardinstance(player.hand[i]);
 		}
+		logNestEnd();
 		// Remove this if logic is updated to call endturn
 		if (player != game.turn && player.hand.length < 8 && player.deck.length > 0){
 			var code = player.deck.pop();
@@ -409,9 +441,11 @@ module.exports = function(game) {
 		if (player.silence) pscore -= player.hand.length+1;
 		if (player.flatline) pscore -= 1;
 		if (player.neuro) pscore -= 5;
-		log("\tpscore" + j + ": " + pscore);
+		log("Eval", pscore);
+		logNestEnd();
 		gamevalue += pscore*(j == 0?1:-1);
 	}
-	log("Eval " + gamevalue);
+	log("Eval", gamevalue);
+	logEnd();
 	return gamevalue;
 }
