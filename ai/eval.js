@@ -144,7 +144,7 @@ var ActivesValues = {
 	livingweapon:2,
 	lobotomize:6,
 	luciferin:3,
-	lycanthropy:4,
+	lycanthropy:7,
 	metamorph: 2,
 	mimic: 3,
 	miracle:12,

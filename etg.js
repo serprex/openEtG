@@ -534,11 +534,10 @@ Creature.prototype.estimateDamage = Weapon.prototype.estimateDamage = function(f
 		this.status.adrenaline = 1;
 	}
 	if (!momentum){
-		if (fsh){
-			atk *= (fshactive == Actives.evade100 ? 0 : fshactive == Actives.evade50 ? .5 : fshactive == Actives.evade40 ? .6 : fshactive == Actives.chaos ? .75 : 1);
-		}else if (freedomChance && this.passives.airborne){
-			atk = Math.ceil(trueatk * 1.5) * freedomChance;
-		}
+		atk *= (fshactive == Actives.evade100 ? 0 : fshactive == Actives.evade50 ? .5 : fshactive == Actives.evade40 ? .6 : fshactive == Actives.chaos ? .75 : 1);
+	}
+	if (!fsh && freedomChance && this.passives.airborne){
+		atk = Math.ceil(atk * 1.5) * freedomChance;
 	}
 	if (this.owner.foe.sosa) atk *= -1;
 	return atk;
