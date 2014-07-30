@@ -861,7 +861,7 @@ function startMenu() {
 		"Quests are free to try, and you always face the same deck.\nKeep trying until\nyou collect your reward.",
 		"You can mulligan at the start of the game at will, but you draw one\nless card for each mulligan.",
 		"Your account name is case sensitive.",
-		"Arena tier 1 is unupped, while tier 2 is upped.\nAll decks in the tier have the same number of attribute points.",
+		"Arena tier 1 is unupgraded, while tier 2 is upgraded.\nAll decks in the tier have the same number of attribute points.",
 		"You can store 10 different decks in the editor",
 		"If you type '/who' in chat you will get a list of the users who are online.\n'/w username message' will send your message only to one user.",
 		"The first text bar under the game is the import/export bar and shows your current deck.\nThe second text bar shows messages from the game and sometimes the opponent's deck.",
