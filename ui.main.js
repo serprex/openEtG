@@ -2339,6 +2339,8 @@ function startArenaInfo(info) {
 	stage.addChild(winloss);
 	var batch = new PIXI.SpriteBatch();
 	stage.addChild(batch);
+	var infotext = makeText(300, 470, "You get " + (info.lv + 1) + " gold every time your arena deck wins.");
+	stage.addChild(infotext);
 	if (user.ocard){
 		var uocard = info.lv ? CardCodes[user.ocard].asUpped(true).code : user.ocard;
 		var bmake = makeButton(200, 440, "Create");
