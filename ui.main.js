@@ -844,6 +844,21 @@ function makeCardSelector(cardmouseover, cardclick){
 	return cardsel;
 }
 function startMenu() {
+	var helpTexts = [
+		"Each card in your booster pack has a 40% chance of being from the element you choose.",
+		"Your arena deck will give you 1 or 2 gold for every win, depending on its Tier.",
+		"Colosseum challenges resets every day.",
+		"Be sure to try the Proving Grounds Quests for some good cards.",
+		"Be sure to keep track of the rarity icons; Grey means Common, Green means Uncommon,\nBlue means Rare, Orange means Shard and Pink means Ultra Rare",
+		"The Library button will allow you to see every tradeable card of a user.",
+		"If you are a new user, be sure to get the free Bronze and Silver packs from the Shop.",
+		"Your starter deck, the cards from the free packs, and all non-Common Daily Cards are\naccount-bound and cannot be traded away or sold.",
+		"If your upgrade involves converting an account-bound card, the upgrade will also be account-bound.",
+		"Each day you log in will get a Daily Card. If you submit an Arena deck, the deck will always\ncontain 5 copies of tha card."
+	];
+	var tipText = helpTexts[Math.floor(Math.random() * helpTexts.length)];
+
+
 	var menuui = new PIXI.DisplayObjectContainer();
 	menuui.interactive = true;
 	var buttonList = [];
@@ -854,7 +869,7 @@ function startMenu() {
 	bglobby.interactive = true;
 	bglobby.hitArea = new PIXI.Rectangle(0, 0, 900, 670);
 	bglobby.mouseover = function() {
-		tinfo.setText("");
+		tinfo.setText(user ? "Tip: " + tipText : "");
 	}
 	menuui.addChild(bglobby);
 

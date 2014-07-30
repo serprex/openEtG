@@ -313,8 +313,8 @@ io.on("connection", function(socket) {
 		user.pvplosses = 0;
 		user.oracle = 0;
 		user.daily = 0;
-		user.dailymage = -1;
-		user.dailydg = -1;
+		user.dailymage = Math.floor(Math.random() * aiDecks.mage.length);
+		user.dailydg = Math.floor(Math.random() * aiDecks.demigod.length);
 		db.hset("Q:"+user.name, "necromancer", 1, function(err, obj){
 			useruser(user, function(clientuser){
 				socket.emit("userdump", clientuser);
