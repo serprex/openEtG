@@ -954,7 +954,7 @@ function startMenu() {
 			tinfo.setText("Check how your arena deck is doing.");
 		});
 		menuui.addChild(binfoa);
-		var btopa = makeButton(250, 200+i*50, "Arena T" + (i+1) + "0", function() {
+		var btopa = makeButton(250, 200+i*50, "Arena T" + (2-i) + "0", function() {
 			tinfo.setText("Here you can see who the top players in arena are right now.");
 		});
 		menuui.addChild(btopa);
