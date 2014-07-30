@@ -510,7 +510,7 @@ Player.prototype.spend = function(qtype, x) {
 }
 Creature.prototype.estimateDamage = Weapon.prototype.estimateDamage = function(freedomChance) {
 	var fsh = this.owner.foe.shield;
-	if ((fsh && fsh.passives.reflect && this.status.psion) || this.status.frozen || this.status.delayed){
+	if (this.status.frozen || this.status.delayed){
 		return 0;
 	}
 	var tatk = this.trueatk(), fshactive = fsh && fsh.active.shield;
