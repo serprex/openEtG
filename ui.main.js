@@ -858,7 +858,7 @@ function startMenu() {
 		"Bronze packs are best for Commons, silver packs for Uncommons, gold packs for Rares,\nand platinum packs for Shards.",
 		"You have infinite unupgraded pillars and pendulums.",
 		"Cards can be sold for around half as much gold as they cost to buy from a pack.",
-		"Quests are free to try, and you always face the same deck.\nKeep trying until\nyou collect your reward.",
+		"Quests are free to try, and you always face the same deck.\nKeep trying until you collect your reward.",
 		"You can mulligan at the start of the game at will, but you draw one\nless card for each mulligan.",
 		"Your account name is case sensitive.",
 		"Arena tier 1 is unupgraded, while tier 2 is upgraded.\nAll decks in the tier have the same number of attribute points.",
