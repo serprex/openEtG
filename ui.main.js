@@ -854,7 +854,7 @@ function startMenu() {
 		"If you are a new user, be sure to get the free Bronze and Silver packs from the Shop.",
 		"Your starter deck, the cards from the free packs, and all non-Common Daily Cards are\naccount-bound and cannot be traded away or sold.",
 		"If your upgrade involves converting an account-bound card, the upgrade will also be account-bound.",
-		"Each day you log in will get a Daily Card. If you submit an Arena deck, the deck will always\ncontain 5 copies of tha card.",
+		"Each day you log in will get a Daily Card. If you submit an Arena deck, the deck will always\ncontain 5 copies of that card.",
 		"Bronze packs are best for Commons, silver packs for Uncommons, gold packs for Rares,\nand platinum packs for Shards.",
 		"You have infinite unupgraded pillars and pendulums.",
 		"Cards can be sold for around half as much gold as they cost to buy from a pack.",
