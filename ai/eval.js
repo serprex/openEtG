@@ -220,10 +220,10 @@ var ActivesValues = {
 	wisdom:4,
 	yoink:4,
 	pillar:function(c){
-		return c instanceof etg.CardInstance?0:c.status.charges/4;
+		return c instanceof etg.CardInstance?.1:c.status.charges;
 	},
 	pend:function(c){
-		return c instanceof etg.CardInstance?0:c.status.charges/4;
+		return c instanceof etg.CardInstance?.1:c.status.charges;
 	},
 	blockwithcharge:function(c){
 		return c instanceof etg.CardInstance?c.card.status.charges:c.status.charges;
@@ -277,29 +277,26 @@ function evalthing(c) {
 	if (!c) return 0;
 	var score = 0;
 	var isCreature = c instanceof etg.Creature, isWeapon = c instanceof etg.Weapon;
-	var delaymix = Math.max((c.status.frozen||0), (c.status.delayed||0));
+	var adrenalinefactor = c.status.adrenaline ? etg.countAdrenaline(c.trueatk())/1.5 : 1;
+	var delaymix = Math.max((c.status.frozen||0), (c.status.delayed||0))/adrenalinefactor, delayfactor = delaymix?1-Math.min(delaymix/5, .6):1;
 	var ttatk;
 	if (isWeapon || isCreature) {
 		ttatk = c.estimateDamage();
-		score += ttatk*(delaymix?1-Math.min(delaymix/5, .6):1);
+		score += ttatk*delayfactor;
 	}else ttatk = 0;
 	if (!etg.isEmpty(c.active)) {
 		for (var key in c.active) {
 			if (key == "hit"){
-				if (!delaymix){
-					score += evalactive(c, c.active.hit, ttatk)*(ttatk?1:c.status.immaterial?0:.3)*(c.status.adrenaline?2:1);
-				}
+				score += evalactive(c, c.active.hit, ttatk)*(ttatk?1:c.status.immaterial?0:.3)*adrenalinefactor*delayfactor;
 			}else if(key == "auto"){
 				if (!c.status.frozen){
-					score += evalactive(c, c.active.auto)*(c.status.adrenaline?2:1);
+					score += evalactive(c, c.active.auto)*adrenalinefactor;
 				}
 			}else if(key == "shield" && isCreature){
-				if (!delaymix){
-					score += evalactive(c, c.active.shield)*(c.owner.gpull == c?1:.2);
-				}
+				score += evalactive(c, c.active.shield)*(c.owner.gpull == c?1:.2)*delayfactor;
 			}else if (key == "cast"){
-				if (!delaymix && caneventuallyactive(c.castele, c.cast, c.owner)){
-					score += evalactive(c, c.active.cast, ttatk);
+				if (caneventuallyactive(c.castele, c.cast, c.owner)){
+					score += evalactive(c, c.active.cast, ttatk) * delayfactor;
 				}
 			}else if (key != "owndeath" || isCreature){
 				score += evalactive(c, c.active[key]);
