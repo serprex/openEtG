@@ -37,5 +37,5 @@ require("./etg.client").loadcards(function(Cards, CardCodes, Targeting) {
 			str += "</tr></table><br>";
 		}else str += "<br><br>";
 	}
-	codecreds.innerHTML = str;
+	document.getElementById("codecreds").innerHTML = str;
 });
