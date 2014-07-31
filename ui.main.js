@@ -850,29 +850,29 @@ function startMenu() {
 		"Your arena deck will give you 1 or 2 gold for every win, depending on its tier.",
 		"Colosseum lets you compete in a number of daily events for extra prizes. The colosseum challenges reset daily.",
 		"Be sure to try the Proving Grounds Quests for some good cards.",
-		"Be sure to keep track of the rarity icons; Grey means Common, Green means Uncommon, Blue means Rare, Orange means Shard and Pink means Ultra Rare",
-		"The Library button will allow you to see every tradeable card of a user.",
-		"If you are a new user, be sure to get the free Bronze and Silver packs from the Shop.",
-		"Your starter deck, the cards from the free packs, and all non-Common Daily Cards are account-bound and cannot be traded away or sold.",
+		"Be sure to keep track of the rarity icons; Grey means Common, Green means Uncommon, Blue means Rare, Orange means Shard, & Pink means Ultra Rare",
+		"The Library button allows you to see all of a user's tradeable cards.",
+		"If you are a new user, be sure to get the free Bronze & Silver packs from the Shop.",
+		"Your starter deck, the cards from the free packs, & all non-Common Daily Cards are account-bound; they cannot be traded away or sold.",
 		"If your upgrade involves converting an account-bound card, the upgrade will also be account-bound.",
 		"Each day you log in will get a Daily Card. If you submit an Arena deck, the deck will always contain 5 copies of that card.",
-		"Bronze packs are best for Commons, silver packs for Uncommons, gold packs for Rares, and platinum packs for Shards.",
-		"You have infinite unupgraded pillars and pendulums.",
+		"Bronze packs are best for Commons, silver packs for Uncommons, gold packs for Rares, & platinum packs for Shards.",
+		"You have infinite unupgraded pillars & pendulums.",
 		"Cards can be sold for around half as much gold as they cost to buy from a pack.",
-		"Quests are free to try, and you always face the same deck. Keep trying until you collect your reward.",
+		"Quests are free to try, & you always face the same deck. Keep trying until you collect your reward.",
 		"You can mulligan at the start of the game at will, but you draw one less card for each mulligan.",
 		"Your account name is case sensitive.",
 		"Arena tier 1 is unupgraded, while tier 2 is upgraded. All decks in the tier have the same number of attribute points.",
 		"You can store 10 different decks in the editor",
 		"If you type '/who' in chat you will get a list of the users who are online. '/w username message' will send your message only to one user.",
-		"The first text bar under the game is the import/export bar and shows your current deck. The second text bar shows messages from the game and sometimes the opponent's deck.",
+		"The first text bar under the game is the import/export bar & shows your current deck. The second text bar shows messages from the game & sometimes the opponent's deck.",
 		"The AI Deck bar can be used to fight any deck of your choice, but only works in sandbox mode.",
-		"Remember that you can use the logout button to enter sandbox mode to review the card pool, check rarities and try out new decks",
-		"Commoner and Champion have random decks, while Mage and Demigod have premade decks. Commoner and Mage are unupped, Champion has some upped, and Demigod is fully upped.",
-		"Decks submitted to arena gain a point for each win, and lose a point for each loss. Rankings are shown in ArenaT10 and ArenaT20.",
-		"Decks submitted to arena lose 5 hp per day, down to a minimum of half of their original hp.",
+		"Remember that you can use the logout button to enter sandbox mode to review the card pool, check rarities & try out new decks",
+		"Commoner & Champion have random decks, while Mage & Demigod have premade decks. Commoner & Mage are unupped, Champion has some upped, & Demigod is fully upped.",
+		"Decks submitted to arena gain a point for each win, & lose a point for each loss. Rankings are shown in ArenaT10 & ArenaT20.",
+		"Decks submitted to arena lose hp exponentially per day, down to a minimum of a quarter of their original hp.",
 		"If you don't get what you want from the packs in the shop, ask people to trade in chat or on the OEtG forum.",
-		"Rarity doesn't necessarily relate to card strength. You can get a long ways with commons and uncommons."
+		"Rarity doesn't necessarily relate to card strength. You can go a long ways with commons & uncommons."
 	];
 	var tipNumber = Math.floor(Math.random()*helpTexts.length);
 
@@ -2375,7 +2375,7 @@ function startArenaInfo(info) {
 	var stage = new PIXI.DisplayObjectContainer();
 	stage.interactive = true;
 	stage.addChild(new PIXI.Sprite(backgrounds[0]));
-	var winloss = makeText(200, 300, (info.win || 0) + " - " + (info.loss || 0) + ": " + (info.rank+1) + "\nAge: " + info.day + "\nCurrent HP: " + (info.hp-info.day*5) + "\nMark: " + info.mark + "\nDraw: " + info.draw);
+	var winloss = makeText(200, 300, (info.win || 0) + " - " + (info.loss || 0) + ": " + (info.rank+1) + "\nAge: " + info.day + "\nCurrent HP: " + info.hp + "\nMark: " + info.mark + "\nDraw: " + info.draw);
 	stage.addChild(winloss);
 	var batch = new PIXI.SpriteBatch();
 	stage.addChild(batch);
