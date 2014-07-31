@@ -390,12 +390,9 @@ io.on("connection", function(socket) {
 	});
 	userEvent("modarena", function(data, user){
 		db.hincrby((data.lv?"B:":"A:")+data.aname, data.won?"win":"loss", 1);
-		db.zincrby("arena"+(data.lv?"1":""), data.won?1:-1, data.aname, function(err, newscore){
-			if (!err && newscore < -10){
-				db.zrem("arena"+(data.lv?"1":""), data.aname);
-			}
-		});
+		var arena = "arena"+(data.lv?"1":"");
 		if (data.won){
+			db.zincrby(arena, 1, data.aname);
 			if (data.aname in users){
 				users[data.aname].gold += data.lv+1;
 			}else{
@@ -405,6 +402,15 @@ io.on("connection", function(socket) {
 					}
 				});
 			}
+		}else{
+			db.zscore(arena, function(err, score){
+				if (score === undefined) return;
+				db.zincrby(arena, data.won?1:-1, data.aname, function(err, newscore){
+					if (!err && newscore < -10){
+						db.zrem("arena"+(data.lv?"1":""), data.aname);
+					}
+				});
+			});
 		}
 	});
 	userEvent("foearena", function(data, user){
