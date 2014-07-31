@@ -232,8 +232,8 @@ function genericChat(socket, data){
 	else io.emit("chat", data)
 }
 function getAgedHp(hp, age){
-	var age = Math.min(getDay()-adeck.day, 9), curhp = age > 1 ? adeck.hp - (1<<age-1) : adeck.hp;
-	return Math.max(curhp, Math.floor(adeck.hp/4));
+	var curhp = age > 1 ? hp - (1<<Math.min(age, 9)-1) : hp;
+	return Math.max(curhp, Math.floor(hp/4));
 }
 io.on("connection", function(socket) {
 	sockinfo[socket.id] = {};
