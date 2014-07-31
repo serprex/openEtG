@@ -198,7 +198,7 @@ require("./etg.client").loadcards(function(cards, cardcodes, targeting) {
 		Actives.parallel(player1, damsel);
 		equal(player1.creatures[1].card, Cards.Damselfly, "PU'd");
 		Actives.web(player1, damsel);
-		ok(!damsel.passives.airborne && player1.creatures[1].passives.airborne, "Web'd");
+		ok(!damsel.status.airborne && player1.creatures[1].status.airborne, "Web'd");
 	});
 	test("Phoenix", function() {
 		initTest();

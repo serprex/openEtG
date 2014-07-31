@@ -15,6 +15,7 @@ function Game(first, seed){
 	this.expectedDamage = [0, 0];
 	this.startTime = Date.now();
 }
+var statuscache = {};
 function Card(type, info){
 	this.type = type;
 	this.element = parseInt(info.Element);
@@ -49,20 +50,16 @@ function Card(type, info){
 			}
 		}
 	}
-	this.passives = {};
-	if (info.Passive){
-		var passives = info.Passive.split("+");
-		for(var i=0; i<passives.length; i++){
-			var passive = passives[i].split("=");
-			this.passives[passive[0]] = passive.length==1 || parseInt(passive[1]);
-		}
-	}
 	if (info.Status){
-		this.status = {};
-		var statuses = info.Status.split("+");
-		for(var i=0; i<statuses.length; i++){
-			var status = statuses[i].split("=");
-			this.status[status[0]] = status.length==1 || parseInt(status[1]);
+		if (info.Status in statuscache){
+			this.status = statuscache[info.Status];
+		}else{
+			this.status = {};
+			var statuses = info.Status.split("+");
+			for(var i=0; i<statuses.length; i++){
+				var status = statuses[i].split("=");
+				this.status[status[0]] = status.length==1 || parseInt(status[1]);
+			}
 		}
 	}
 	if (info.Text){
@@ -77,13 +74,15 @@ function Thing(card, owner){
 	this.card = card;
 	this.usedactive = true;
 	if (this.status){
-		for(var key in card.status){
+		for (var key in this.status){
+			if (key in passives) delete this.status[key];
+		}
+		for (var key in card.status){
 			this.status[key] = card.status[key];
 		}
 	}else{
 		this.status = clone(card.status)
 	}
-	this.passives = clone(card.passives);
 	this.active = clone(card.active);
 	delete this.active.discard;
 }
@@ -119,7 +118,6 @@ function Creature(card, owner){
 		this.cast = golem.cast;
 		this.castele = Earth;
 		this.active = clone(golem.active);
-		this.passives = clone(golem.passives);
 		this.status = clone(golem.status);
 		this.usedactive = true;
 	}else this.transform(card, owner);
@@ -157,6 +155,7 @@ Card.prototype.rarity = 0;
 Card.prototype.attack = 0;
 Card.prototype.health = 0;
 Card.prototype.upped = false;
+Card.prototype.status = {};
 Player.prototype.markpower = 1;
 var Other = 0;
 var Entropy = 1;
@@ -182,6 +181,7 @@ var MulliganPhase2 = 1;
 var PlayPhase = 2;
 var EndPhase = 3;
 var TrueMarks = ["8pi", "8pj", "8pk", "8pl", "8pm", "8pn", "8po", "8pp", "8pq", "8pr", "8ps", "8pt", "8pu"];
+var passives = { airborne: true, voodoo: true, swarm: true, ranged: true, additive: true, stackable: true, salvage: true, token: true, shard: true, poisonous: true, undead: true, };
 var PlayerRng = Object.create(Player.prototype);
 PlayerRng.rng = Math.random;
 PlayerRng.upto = function(x){ return Math.floor(Math.random()*x); }
@@ -270,7 +270,7 @@ Game.prototype.bitsToTgt = function(x) {
 Game.prototype.getTarget = function(src, active, cb) {
 	var targetingFilter = Targeting[active.activename];
 	if (targetingFilter) {
-		this.targetingMode = function(t) { return (t instanceof Player || t instanceof CardInstance || t.owner == this.turn || t.passives.cloak || !t.owner.isCloaked()) && targetingFilter(src, t); }
+		this.targetingMode = function(t) { return (t instanceof Player || t instanceof CardInstance || t.owner == this.turn || t.status.cloak || !t.owner.isCloaked()) && targetingFilter(src, t); }
 		this.targetingModeCb = cb;
 		this.targetingText = active.activename;
 	} else {
@@ -364,7 +364,6 @@ thingtypes.forEach(function(type){
 	var proto = type.prototype;
 	type.prototype.clone = function(owner){
 		var obj = Object.create(proto);
-		obj.passives = clone(this.passives);
 		obj.active = clone(this.active);
 		obj.status = clone(this.status);
 		obj.owner = owner;
@@ -393,7 +392,7 @@ function hashObj(obj){
 }
 Creature.prototype.hash = function(){
 	var hash = this.owner == this.owner.game.player1 ? 17 : 19;
-	hash ^= hashObj(this.passives) ^ hashObj(this.status) ^ (this.hp*17 + this.atk*31 - this.maxhp - this.usedactive * 3);
+	hash ^= hashObj(this.status) ^ (this.hp*17 + this.atk*31 - this.maxhp - this.usedactive * 3);
 	hash ^= parseInt(this.card.code, 32);
 	for (var key in this.active){
 		hash ^= hashString(key + ":" + this.active[key].activename);
@@ -417,13 +416,13 @@ Card.prototype.info = function(){
 	}else{
 		var dmgtype = "";
 		if (this.type == WeaponEnum){
-			if (this.passives && this.passives.ranged) dmgtype = " ranged";
+			if (this.status && this.status.ranged) dmgtype = " ranged";
 			if (this.status && this.status.psion) dmgtype += " spell";
 		}
 		var prefix = this.type == WeaponEnum?"Deal " + this.attack + dmgtype + " damage. ":
 			this.type == ShieldEnum?""+(this.health?"Reduce damage by "+this.health+" ":""):
 			this.type == CreatureEnum?this.attack+"|"+this.health+" ":"";
-		return prefix + (this.text || (this.type == SpellEnum ? activename(this.active) : Thing.prototype.activetext.call(this) + objinfo(this.status) + objinfo(this.passives)));
+		return prefix + (this.text || (this.type == SpellEnum ? activename(this.active) : Thing.prototype.activetext.call(this) + objinfo(this.status)));
 	}
 }
 Thing.prototype.toString = function(){ return this.card.name; }
@@ -446,7 +445,7 @@ Player.prototype.uptoceil = function(x){
 }
 Player.prototype.isCloaked = function(){
 	for(var i=0; i<16; i++){
-		if (this.permanents[i] && this.permanents[i].passives.cloak){
+		if (this.permanents[i] && this.permanents[i].status.cloak){
 			return true;
 		}
 	}
@@ -536,7 +535,7 @@ Creature.prototype.estimateDamage = Weapon.prototype.estimateDamage = function(f
 	if (!momentum){
 		atk *= (fshactive == Actives.evade100 ? 0 : fshactive == Actives.evade50 ? .5 : fshactive == Actives.evade40 ? .6 : fshactive == Actives.chaos ? .75 : 1);
 	}
-	if (!fsh && freedomChance && this.passives.airborne){
+	if (!fsh && freedomChance && this.status.airborne){
 		atk = Math.ceil(atk * 1.5) * freedomChance;
 	}
 	if (this.owner.foe.sosa) atk *= -1;
@@ -548,14 +547,14 @@ Player.prototype.expectedDamage = function() {
 	for(var i=0; i<16; i++){
 		var p;
 		if ((p=this.permanents[i])){
-			if (p.passives.stasis || p.passives.patience){
+			if (p.status.stasis || p.status.patience){
 				stasisFlag = true;
-			}else if (p.passives.freedom){
+			}else if (p.status.freedom){
 				freedomChance++;
 			}
 		}
 		if ((p=this.foe.permanents[i])){
-			if (p.passives.stasis){
+			if (p.status.stasis){
 				stasisFlag = true;
 			}
 		}
@@ -611,24 +610,24 @@ Player.prototype.endturn = function(discard) {
 				p.active.auto(p);
 			}
 			p.usedactive = false;
-			if (p.passives.stasis){
+			if (p.status.stasis){
 				stasisFlag = true;
-			}else if (p.passives.flooding && !floodingPaidFlag){
+			}else if (p.status.flooding && !floodingPaidFlag){
 				floodingPaidFlag = true;
 				floodingFlag = true;
 				if (!this.spend(Water, 1)){
 					delete this.permanents[i];
 				}
-			}else if (p.passives.patience){
+			}else if (p.status.patience){
 				patienceFlag = true;
-			}else if (p.passives.freedom){
+			}else if (p.status.freedom){
 				freedomChance++;
 			}
 		}
 		if ((p=this.foe.permanents[i])){
-			if (p.passives.stasis){
+			if (p.status.stasis){
 				stasisFlag = true;
-			}else if (p.passives.flooding){
+			}else if (p.status.flooding){
 				floodingFlag = true;
 			}
 		}
@@ -722,12 +721,12 @@ Player.prototype.drawhand = function(x) {
 Player.prototype.masscc = function(caster, func, massmass){
 	for(var i=0; i<16; i++){
 		var pr = this.permanents[i];
-		if (pr && pr.passives.cloak){
+		if (pr && pr.status.cloak){
 			Actives.destroy(this, pr);
 		}
 		if (massmass){
 			pr = this.foe.permanents[i];
-			if (pr && pr.passives.cloak){
+			if (pr && pr.status.cloak){
 				Actives.destroy(this, pr);
 			}
 		}
@@ -749,22 +748,19 @@ Creature.prototype.info = function(){
 	var info=this.trueatk()+"|"+this.truehp()+"/"+this.maxhp;
 	info += this.activetext();
 	if (this.owner.gpull == this)info += " gpull";
-	info += objinfo(this.status) + objinfo(this.passives);
-	return info;
+	return info + objinfo(this.status);
 }
 Permanent.prototype.info = function(){
 	var info = this.status.charges?"x"+this.status.charges:"";
-	info += this.activetext() + objinfo(this.status) + objinfo(this.passives);
-	return info;
+	return info + this.activetext() + objinfo(this.status);
 }
 Weapon.prototype.info = function(){
 	var info = this.trueatk().toString();
-	info += this.activetext() + objinfo(this.status) + objinfo(this.passives);
-	return info;
+	return info + this.activetext() + objinfo(this.status);
 }
 Shield.prototype.info = function(){
 	var info = this.truedr() + "DR" + this.activetext();
-	if (this.status.charges)info += " x"+this.status.charges + objinfo(this.status) + objinfo(this.passives);
+	if (this.status.charges)info += " x"+this.status.charges + objinfo(this.status);
 	return info;
 }
 Pillar.prototype.info = function(){
@@ -785,7 +781,7 @@ Creature.prototype.place = function(fromhand){
 	Thing.prototype.place.call(this, fromhand);
 }
 Permanent.prototype.place = function(fromhand){
-	if (this.passives.additive){
+	if (this.status.additive){
 		for(var i=0; i<16; i++){
 			if (this.owner.permanents[i] && this.owner.permanents[i].card == this.card){
 				this.owner.permanents[i].status.charges += this.status.charges;
@@ -802,7 +798,7 @@ Weapon.prototype.place = function(fromhand){
 	Thing.prototype.place.call(this, fromhand);
 }
 Shield.prototype.place = function(fromhand){
-	if (this.passives.additive && this.owner.shield && this.owner.shield.card.asUpped(this.card.upped) == this.card){
+	if (this.status.additive && this.owner.shield && this.owner.shield.card.asUpped(this.card.upped) == this.card){
 		this.owner.shield.status.charges += this.status.charges;
 		Thing.prototype.place.call(this, fromhand);
 		return;
@@ -849,7 +845,7 @@ Player.prototype.dmg = function(x, ignoresosa) {
 	}
 }
 Player.prototype.spelldmg = function(x) {
-	return (!this.shield || !this.shield.passives.reflect?this:this.foe).dmg(x);
+	return (!this.shield || !this.shield.status.reflect?this:this.foe).dmg(x);
 }
 CardInstance.prototype.getIndex = function() { return this.owner.hand.indexOf(this); }
 Creature.prototype.getIndex = function() { return this.owner.creatures.indexOf(this); }
@@ -863,7 +859,7 @@ Creature.prototype.addpoison = function(x) {
 	}else{
 		this.defstatus("poison", 0);
 		this.status.poison += x;
-		if (this.passives.voodoo){
+		if (this.status.voodoo){
 			this.owner.foe.addpoison(x);
 		}
 	}
@@ -879,7 +875,7 @@ Player.prototype.buffhp = Creature.prototype.buffhp = function(x){
 Weapon.prototype.delay = Creature.prototype.delay = function(x){
 	this.defstatus("delayed", 0);
 	this.status.delayed += x;
-	if (this.passives.voodoo)this.owner.foe.delay(x);
+	if (this.status.voodoo)this.owner.foe.delay(x);
 }
 Weapon.prototype.freeze = Creature.prototype.freeze = function(x){
 	if (this.card.isOf(Cards.Squid)){
@@ -887,7 +883,7 @@ Weapon.prototype.freeze = Creature.prototype.freeze = function(x){
 	}else{
 		this.defstatus("frozen", 0);
 		this.status.frozen = x;
-		if (this.passives.voodoo)this.owner.foe.freeze(x);
+		if (this.status.voodoo)this.owner.foe.freeze(x);
 	}
 }
 Creature.prototype.spelldmg = Creature.prototype.dmg = function(x, dontdie){
@@ -897,7 +893,7 @@ Creature.prototype.spelldmg = Creature.prototype.dmg = function(x, dontdie){
 	this.procactive("dmg", [dmg]);
 	if (this.truehp() <= 0){
 		if (!dontdie)this.die();
-	}else if (dmg>0 && this.passives.voodoo)this.owner.foe.dmg(x);
+	}else if (dmg>0 && this.status.voodoo)this.owner.foe.dmg(x);
 	return dmg;
 }
 Creature.prototype.remove = function(index) {
@@ -943,7 +939,7 @@ Creature.prototype.transform = Weapon.prototype.transform = function(card, owner
 Thing.prototype.evade = function(sender) { return false; }
 Creature.prototype.evade = function(sender) {
 	if (this.status.frozen)return false;
-	if (sender != this.owner && this.passives.airborne){
+	if (sender != this.owner && this.status.airborne){
 		var freedomChance = 0;
 		for(var i=0; i<16; i++){
 			if (this.owner.permanents[i] && this.owner.permanents[i].freedom){
@@ -954,7 +950,7 @@ Creature.prototype.evade = function(sender) {
 	}
 }
 Creature.prototype.calcEclipse = function(){
-	if (this.card.element != Darkness && this.card.element != Death && !this.passives.nocturnal){
+	if (this.card.element != Darkness && this.card.element != Death && !this.status.nocturnal){
 		return 0;
 	}
 	var players = this.owner.game.players;
@@ -1003,9 +999,9 @@ Creature.prototype.truehp = function(){
 	if (this.calcEclipse(this.owner.game) != 0){
 		hp++;
 	}
-	if (this.passives.swarm){
+	if (this.status.swarm){
 		for (var i=0; i<23; i++){
-			if (this.owner.creatures[i] && this.owner.creatures[i].passives.swarm){
+			if (this.owner.creatures[i] && this.owner.creatures[i].status.swarm){
 				hp++;
 			}
 		}
@@ -1058,12 +1054,12 @@ Weapon.prototype.attack = Creature.prototype.attack = function(stasis, freedomCh
 		var momentum = this.status.momentum;
 		if (!momentum && this.status.burrowed){
 			for (var i=0; i<16; i++){
-				if (this.owner.permanents[i] && this.owner.permanents[i].passives.tunnel){
+				if (this.owner.permanents[i] && this.owner.permanents[i].status.tunnel){
 					momentum = true;
 					break;
 				}
 			}
-		}else if (this.passives.airborne && freedomChance && this.owner.rng() < freedomChance){
+		}else if (this.status.airborne && freedomChance && this.owner.rng() < freedomChance){
 			if (!momentum && !target.shield && !target.gpull && !this.status.psion){
 				trueatk = Math.ceil(trueatk * 1.5);
 			}else{
@@ -1159,7 +1155,7 @@ function filtercards(upped, filter, cmp){
 	var keys = [];
 	for(var key in CardCodes) {
 		var card = CardCodes[key];
-		if (card.upped == upped && !card.passives.token && (!filter || filter(card))) {
+		if (card.upped == upped && !card.status.token && (!filter || filter(card))) {
 			keys.push(key);
 		}
 	}
@@ -1180,7 +1176,7 @@ function salvageScan(from, t){
 	if (t.owner.hand.length<8 && t.owner != from){
 		for (var i=0; i<23; i++){
 			var cr = t.owner.creatures[i];
-			if (cr && cr.passives.salvage && !cr.status.salvaged){
+			if (cr && cr.status.salvage && !cr.status.salvaged){
 				Effect.mkText("Salvage", ui.tgtToPos(cr));
 				cr.status.salvaged = true;
 				t.owner.hand.push(new CardInstance(t.card, t.owner));
@@ -1234,7 +1230,7 @@ var TargetFilters = {
 		return t.isMaterialInstance(Permanent);
 	},
 	permnonstack:function(c,t){
-		return t.isMaterialInstance(Permanent) && !t.passives.stackable;
+		return t.isMaterialInstance(Permanent) && !t.status.stackable;
 	},
 	crea:function(c, t){
 		return t.isMaterialInstance(Creature);
@@ -1258,10 +1254,10 @@ var TargetFilters = {
 		return t.isMaterialInstance(Creature) && t.truehp()<t.trueatk();
 	},
 	airbornecrea:function(c, t){
-		return t.isMaterialInstance(Creature) && t.passives.airborne;
+		return t.isMaterialInstance(Creature) && t.status.airborne;
 	},
 	groundcrea:function(c, t){
-		return t.isMaterialInstance(Creature) && !t.passives.airborne;
+		return t.isMaterialInstance(Creature) && !t.status.airborne;
 	},
 	wisdom:function(c, t){
 		return (t instanceof Creature || t instanceof Weapon) && !t.status.burrowed;
@@ -1277,6 +1273,7 @@ exports.Weapon = Weapon;
 exports.Shield = Shield;
 exports.Permanent = Permanent;
 exports.Creature = Creature;
+exports.passives = passives;
 exports.isEmpty = isEmpty;
 exports.salvageScan = salvageScan;
 exports.filtercards = filtercards;

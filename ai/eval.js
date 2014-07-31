@@ -280,16 +280,16 @@ function evalactive(c, active, extra){
 
 function checkpassives(c){
 	var score = 0;
-	if (c.passives) {
-		if (c.passives.airborne) score += 0.2;
-		if (c.passives.voodoo) score += 1;
-		if (c.passives.swarm) score += 1;
-		if (c.passives.stasis) score += 5;
-		if (c.passives.flooding) score += 3;
-		if (c.passives.patience) score -= 4;
-		if (c.passives.freedom) score += 6;
-		if (c.passives.tunneling) score += 2;
-		if (c.passives.reflect) score += 1;
+	if (c.status) {
+		if (c.status.airborne || c.status.ranged) score += 0.2;
+		if (c.status.voodoo) score += 1;
+		if (c.status.swarm) score += 1;
+		if (c.status.stasis) score += 5;
+		if (c.status.flooding) score += 3;
+		if (c.status.patience) score -= 4;
+		if (c.status.freedom) score += 6;
+		if (c.status.tunneling) score += 2;
+		if (c.status.reflect) score += 1;
 	}
 	return score;
 }
@@ -313,7 +313,7 @@ function evalthing(c) {
 	}
 	if (isWeapon || isCreature) {
 		ttatk = c.estimateDamage();
-		if (c.owner.foe.shield && c.owner.foe.shield.passives.reflect) ttatk *= -1;
+		if (c.owner.foe.shield && c.owner.foe.shield.status.reflect) ttatk *= -1;
 		score += ttatk*delayfactor;
 	}else ttatk = 0;
 	if (!etg.isEmpty(c.active)) {
@@ -431,7 +431,7 @@ module.exports = function(game) {
 			player.deck.push(code);
 		}
 		if (player.gpull) {
-			pscore += player.gpull.truehp()/4 + (player.gpull.passives.voodoo ? 10 : 0) - player.gpull.trueatk();
+			pscore += player.gpull.truehp()/4 + (player.gpull.status.voodoo ? 10 : 0) - player.gpull.trueatk();
 		}
 		pscore += Math.sqrt(player.hp)*4;
 		if (player.isCloaked()) pscore += 4;

@@ -1812,7 +1812,7 @@ function startMatch() {
 		spr.getChildAt(2).getChildAt(0).visible = obj.status.psion;
 		spr.getChildAt(2).getChildAt(1).visible = obj.status.aflatoxin;
 		spr.getChildAt(2).getChildAt(2).visible = obj.status.poison > 0;
-		spr.getChildAt(2).getChildAt(3).visible = obj.passives.airborne || obj.passives.ranged;
+		spr.getChildAt(2).getChildAt(3).visible = obj.status.airborne || obj.status.ranged;
 		spr.getChildAt(2).getChildAt(4).visible = obj.status.momentum;
 		spr.getChildAt(2).getChildAt(5).visible = obj.status.adrenaline;
 		spr.getChildAt(2).getChildAt(6).visible = obj.status.poison < 0;
@@ -2310,7 +2310,7 @@ function startMatch() {
 			}
 			for (var i = 0;i < 16;i++) {
 				var pr = game.players[j].permanents[i];
-				if (pr && !(j == 1 && cloakgfx.visible && !pr.passives.cloak)) {
+				if (pr && !(j == 1 && cloakgfx.visible && !pr.status.cloak)) {
 					permsprite[j][i].setTexture(getPermanentImage(pr.card.code));
 					permsprite[j][i].visible = true;
 					permsprite[j][i].alpha = pr.status.immaterial ? .7 : 1;

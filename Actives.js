@@ -2,7 +2,7 @@ var Effect = require("./Effect");
 var etg = require("./etg");
 var ui = require("./uiutil");
 function mutantactive(t){
-	t.active = {};
+	lobo(t);
 	var abilities = ["hatch","freeze","burrow","destroy","steal","dive","heal","paradox","lycanthropy","scavenger","infect","gpull","devour","mutation","growth","ablaze","poison","deja","endow","guard","mitosis"];
 	var index = t.owner.upto(abilities.length+2)-2;
 	if (index<0){
@@ -17,6 +17,12 @@ function mutantactive(t){
 		}
 	}
 }
+function lobo(t){
+	// TODO deal with combined actives
+	for (var key in t.active){
+		if (!(t.active[key].activename in etg.passives)) delete t.active[key];
+	}
+}
 var Actives = {
 ablaze:function(c,t){
 	Effect.mkText("2|0", ui.tgtToPos(c));
@@ -28,7 +34,8 @@ acceleration:function(c,t){
 	c.dmg(1, true);
 },
 accelerationspell:function(c,t){
-	t.active = {auto: Actives.acceleration};
+	lobo(t);
+	t.active.auto = Actives.acceleration;
 },
 accretion:function(c,t){
 	Actives.destroy(c, t);
@@ -79,7 +86,6 @@ animateweapon: function(c, t) {
 	cr.active = etg.clone(t.active);
 	cr.cast = t.cast;
 	cr.castele = t.castele;
-	cr.passives = etg.clone(t.passives);
 	cr.status = etg.clone(t.status);
 	cr.place();
 	t.owner.weapon = undefined;
@@ -153,7 +159,8 @@ burrow:function(c,t){
 	c.cast = 0;
 },
 butterfly:function(c,t){
-	t.active = {cast: Actives.destroy};
+	lobo(t);
+	t.active.cast = Actives.destroy;
 	t.cast = 3;
 	t.castele = etg.Entropy;
 },
@@ -205,7 +212,7 @@ corpseexplosion:function(c,t){
 	function dmg1(c,t){ t.dmg(1); }
 	t.die();
 	c.owner.foe.masscc(c, dmg1, !c.card.upped);
-	if (t.passives.poisonous){
+	if (t.status.poisonous){
 		c.owner.foe.addpoison(1);
 	}
 	if (t.status.poison){
@@ -254,7 +261,7 @@ destroy:function(c,t, dontsalvage, donttalk){
 	if (!donttalk){
 		Effect.mkText("Destroy", ui.tgtToPos(t));
 	}
-	if (t.passives.stackable){
+	if (t.status.stackable){
 		if(--t.status.charges<=0){
 			t.die();
 		}
@@ -272,7 +279,7 @@ devour:function(c,t){
 	Effect.mkText("1|1", ui.tgtToPos(c));
 	c.buffhp(1);
 	c.atk += 1;
-	if (t.passives.poisonous){
+	if (t.status.poisonous){
 		c.addpoison(1);
 	}
 	t.die();
@@ -323,7 +330,8 @@ drainlife:function(c,t){
 	c.owner.dmg(-t.spelldmg(2+Math.floor(c.owner.quanta[etg.Darkness]/5)));
 },
 draft:function(c,t){
-	if((t.passives.airborne = !t.passives.airborne)){
+	Effect.mkText("Draft", ui.tgtToPos(t));
+	if((t.status.airborne = !t.status.airborne)){
 		if (t.active.cast == Actives.burrow){
 			delete t.active.cast;
 		}
@@ -371,7 +379,7 @@ enchant:function(c,t){
 },
 endow:function(c,t){
 	Effect.mkText("Endow", ui.tgtToPos(t));
-	c.passives = etg.clone(t.passives);
+	c.status = etg.clone(t.status);
 	for (key in t.status) {
 		if (typeof t.status[key] == "boolean")
 			c.status[key] = c.status[key] || t.status[key]
@@ -449,9 +457,8 @@ flyingweapon: function(c, t) {
 	cr.active = etg.clone(t.active);
 	cr.cast = t.cast;
 	cr.castele = t.castele;
-	cr.passives = etg.clone(t.passives);
 	cr.status = etg.clone(t.status);
-	cr.passives.airborne = true;
+	cr.status.airborne = true;
 	cr.place();
 	t.owner.weapon = undefined;
 },
@@ -524,7 +531,7 @@ guard:function(c,t){
 	Effect.mkText("Guard", ui.tgtToPos(t));
 	c.delay(1);
 	t.delay(1);
-	if (!t.passives.airborne){
+	if (!t.status.airborne){
 		t.dmg(c.trueatk());
 	}
 },
@@ -550,7 +557,7 @@ heatmirror: function(c, t, fromhand) {
 	}
 },
 holylight:function(c,t){
-	t.dmg(!(t instanceof etg.Player) && (t.card.element == etg.Darkness || t.card.element == etg.Death || t.passives.nocturnal)?10:-10);
+	t.dmg(!(t instanceof etg.Player) && (t.card.element == etg.Darkness || t.card.element == etg.Death || t.status.nocturnal)?10:-10);
 },
 hope:function(c,t){
 	var dr=0;
@@ -646,7 +653,7 @@ integrity:function(c,t){
 	var stat=c.card.upped?1:0;
 	for(var i=c.owner.hand.length-1; i>=0; i--){
 		var card = c.owner.hand[i].card;
-		if (card.passives.shard){
+		if (card.status && card.status.shard){
 			if (card.upped){
 				stat++;
 			}
@@ -664,24 +671,21 @@ integrity:function(c,t){
 	}
 	var actives = {}, cost = shardCosts[active];
 	actives[cost < 0 ? activeType[~cost] : "cast"] = Actives[active];
-	var passives = {}, status = {};
+	var status = {};
 	if (shardTally[etg.Air]>0){
-		passives.airborne = true;
+		status.airborne = true;
 	}
 	if (shardTally[etg.Darkness]>0){
-		passives.voodoo = true;
+		status.voodoo = true;
 	}
 	if (shardTally[etg.Time]>0){
-		passives.swarm = true;
+		status.swarm = true;
 	}
 	if (shardTally[etg.Life]>0){
-		passives.poisonous = true;
-	}
-	if (shardTally[etg.Death]>0){
-		passives.undead = true;
+		status.poisonous = true;
 	}
 	if (shardTally[etg.Gravity]>0){
-		passives.salvage = true;
+		status.salvage = true;
 	}
 	if (shardTally[etg.Aether]>1){
 		status.immaterial = true;
@@ -694,7 +698,6 @@ integrity:function(c,t){
 	}
 	c.owner.shardgolem = {
 		stat: stat,
-		passives: passives,
 		status: status,
 		active: actives,
 		cast: cost
@@ -714,7 +717,8 @@ lightning:function(c,t){
 },
 liquid:function(c,t){
 	Effect.mkText("Liquid", ui.tgtToPos(t));
-	t.active = {hit: Actives.vampire};
+	lobo(t);
+	t.active.hit = Actives.vampire;
 	t.addpoison(1);
 },
 livingweapon:function(c,t){
@@ -724,7 +728,6 @@ livingweapon:function(c,t){
 		w.active = etg.clone(t.active);
 		w.castele = t.castele;
 		w.cast = t.cast;
-		w.passives = etg.clone(t.passives);
 		w.status = etg.clone(t.status);
 		t.owner.weapon = w;
 		t.remove();
@@ -732,7 +735,7 @@ livingweapon:function(c,t){
 },
 lobotomize:function(c,t){
 	Effect.mkText("Lobotomize", ui.tgtToPos(t));
-	t.active = {};
+	lobo(t);
 	delete t.status.momentum;
 	delete t.status.psion;
 },
@@ -754,7 +757,7 @@ lycanthropy:function(c,t){
 	c.buffhp(5);
 	c.atk += 5;
 	delete c.active.cast;
-	c.passives.nocturnal = true;
+	c.status.nocturnal = true;
 },
 martyr:function(c,t){
 	return c.maxhp-c.hp;
@@ -868,7 +871,8 @@ overdrive:function(c,t){
 	c.dmg(1, true);
 },
 overdrivespell:function(c,t){
-	t.active = {auto: Actives.overdrive};
+	lobo(t);
+	t.active.auto = Actives.overdrive;
 },
 pacify:function(c,t){
 	t.atk -= t.trueatk();
@@ -887,7 +891,7 @@ parallel:function(c,t){
 	Effect.mkText("Parallel", ui.tgtToPos(t));
 	var copy = t.clone(c.owner);
 	copy.place();
-	if (copy.passives.voodoo){
+	if (copy.status.voodoo){
 		c.owner.foe.dmg(copy.maxhp-copy.hp);
 		if (copy.status.poison){
 			c.owner.foe.addpoison(copy.status.poison);
@@ -980,9 +984,10 @@ regenerate:function(c,t){
 	c.owner.dmg(-5);
 },
 regeneratespell:function(c,t){
-	t.active = { auto: Actives.regenerate };
+	t.lobo();
+	t.active.auto = Actives.regenerate;
 	if (t instanceof etg.Permanent){
-		t.passives = {};
+		t.status = {};
 	}
 },
 regrade:function(c,t){
@@ -1075,7 +1080,7 @@ scramble:function(c,t){
 serendipity:function(c,t){
 	var cards = [], num = Math.min(8-c.owner.hand.length, 3), anyentro = false;
 	for(var i=num-1; i>=0; i--){
-		cards[i] = c.owner.randomcard(c.card.upped, function(x){return x.type != etg.PillarEnum && !~etg.NymphList.indexOf(x.code) && !x.passives.shard && (i>0 || anyentro || x.element == etg.Entropy)});
+		cards[i] = c.owner.randomcard(c.card.upped, function(x){return x.type != etg.PillarEnum && !~etg.NymphList.indexOf(x.code) && !(x.status && x.status.shard) && (i>0 || anyentro || x.element == etg.Entropy)});
 		anyentro |= cards[i].element == etg.Entropy;
 	}
 	for(var i=0; i<num; i++){
@@ -1119,7 +1124,8 @@ singularity:function(c,t){
 sinkhole:function(c,t){
 	Effect.mkText("Sinkhole", ui.tgtToPos(t));
 	t.status.burrowed = true;
-	t.active = {cast: Actives.unburrow};
+	lobo(t);
+	t.active.cast = Actives.unburrow;
 	t.cast = c.card.upped?1:0;
 	t.castele = etg.Earth;
 	t.usedactive = true;
@@ -1132,10 +1138,12 @@ siphon: function(c, t) {
 },
 siphonactive:function(c,t){
 	Effect.mkText("Siphon", ui.tgtToPos(t));
-	c.active = t.active;
+	for(var key in t.active){
+		if (!(t.active[key].activename in etg.passives)) c.active[key] = t.active[key];
+	}
 	c.cast = t.cast;
 	c.castele = t.castele;
-	t.active = {};
+	lobo(t.active);
 },
 siphonstrength:function(c,t){
 	Effect.mkText("+1|0", ui.tgtToPos(c));
@@ -1147,7 +1155,7 @@ skyblitz:function(c,t){
 	c.owner.quanta[etg.Air] = 0;
 	for(var i=0; i<23; i++){
 		var cr = c.owner.creatures[i];
-		if (cr && cr.passives.airborne){
+		if (cr && cr.status.airborne){
 			Effect.mkText("Dive", ui.tgtToPos(cr));
 			cr.defstatus("dive", 0);
 			cr.status.dive += cr.trueatk();
@@ -1183,7 +1191,7 @@ staff:function(c,t){
 	return c.owner.mark == etg.Life||c.owner.mark == etg.Water?1:0;
 },
 steal:function(c,t){
-	if (t.passives.stackable){
+	if (t.status.stackable){
 		Actives.destroy(c, t, true);
 		if (t instanceof etg.Shield){
 			if (c.owner.shield && c.owner.shield.card == t.card){
@@ -1300,7 +1308,7 @@ quantagift:function(c,t){
 },
 web:function(c,t){
 	Effect.mkText("Web", ui.tgtToPos(t));
-	delete t.passives.airborne;
+	delete t.status.airborne;
 },
 wisdom:function(c,t){
 	Effect.mkText("3|0", ui.tgtToPos(t));
@@ -1401,7 +1409,7 @@ weight:function(c,t){
 	return t instanceof etg.Creature && t.truehp()>5;
 },
 wings:function(c,t){
-	return !t.passives.airborne && !t.passives.ranged;
+	return !t.status.airborne && !t.status.ranged;
 },
 }
 for(var key in Actives){
