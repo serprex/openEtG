@@ -54,7 +54,7 @@ function Card(type, info){
 		if (info.Status in statuscache){
 			this.status = statuscache[info.Status];
 		}else{
-			this.status = {};
+			statuscache[info.Status] = this.status = {};
 			var statuses = info.Status.split("+");
 			for(var i=0; i<statuses.length; i++){
 				var status = statuses[i].split("=");
