@@ -664,8 +664,8 @@ Player.prototype.endturn = function(discard) {
 		if(this.shield.active.auto)this.shield.active.auto(this.shield);
 	}
 	if (this.weapon)this.weapon.attack();
-	if (this.sosa > 0){
-		this.sosa--;
+	if (this.foe.sosa > 0){
+		this.foe.sosa--;
 	}
 	this.nova = 0;
 	for (var i = this.foe.drawpower || 1; i > 0; i--) {

@@ -337,9 +337,9 @@ function evalthing(c) {
 	}
 	score += checkpassives(c);
 	if (isCreature){
-		score *= hp?(c.status.immaterial || c.status.burrowed ? 1.5 : 1+Math.log(Math.min(hp, 33))/7):.2;
+		score *= hp?(c.status.immaterial || c.status.burrowed ? 1.3 : 1+Math.log(Math.min(hp, 33))/7):.2;
 	}else{
-		score *= c.status.immaterial?2:1.5;
+		score *= c.status.immaterial?1.35:1.25;
 	}
 	if (delaymix){
 		var delayed = Math.min(delaymix*(c.status.adrenaline?.5:1), 12);

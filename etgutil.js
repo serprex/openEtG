@@ -78,13 +78,6 @@ exports.addcard = function(deck, card, x){
 	}
 	return x<=0?deck:deck + encodeCount(x) + card;
 }
-exports.countcard = function(deck, card){
-	if (!deck || !card) return -1;
-	for(var i=0; i<deck.length; i+=5){
-		if (card == deck.substr(i+2, 3)) return parseInt(deck.substr(i, 2), 32);
-	}
-	return -1;
-}
 exports.mergedecks = function(deck){
 	for (var i=1; i<arguments.length; i++){
 		var from = arguments[i];

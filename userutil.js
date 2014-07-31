@@ -13,11 +13,10 @@ exports.upgrade = function(data, user){
 	var use = card.rarity < 5 ? 6 : 1;
 	var poolCount = etgutil.count(user.pool, card.code);
 	if (poolCount < use){
-		var boundCount = etgutil.countcard(user.accountbound, card.code);
+		var boundCount = etgutil.count(user.accountbound, card.code);
 		if (poolCount + boundCount >= use){
-			usepool = Math.max(use - boundCount, 0);
 			user.accountbound = etgutil.addcard(user.accountbound, card.code, -use);
-			if (usepool) user.pool = etgutil.addcard(user.pool, card.code, -usepool);
+			if (boundCount < use) user.pool = etgutil.addcard(user.pool, card.code, boundCount-use);
 			user.accountbound = etgutil.addcard(user.accountbound, newcard);
 		}
 	}else{
