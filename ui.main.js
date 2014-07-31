@@ -135,7 +135,7 @@ function getArtImage(code, cb){
 	}else {
 		var loader = new PIXI.AssetLoader(["Cards/" + code + ".png"]);
 		loader.onComplete = function() {
-			return cb(artimagecache[code] = PIXI.Texture.fromImage("Cards/" + code + ".png"));
+			return cb(artimagecache[code] = PIXI.Texture.fromFrame("Cards/" + code + ".png"));
 		}
 		loader.load();
 		return cb(artimagecache[code]);
@@ -657,7 +657,8 @@ preLoader.onProgress = function() {
 }
 preLoader.onComplete = function() {
 	// Start loading assets we don't require to be loaded before starting
-	for (var i = 0;i < 4;i++) boosters.push(new PIXI.Texture(PIXI.BaseTexture.fromImage("assets/boosters.png"), new PIXI.Rectangle(i * 100, 0, 100, 150)));
+	var tex = PIXI.BaseTexture.fromImage("assets/boosters.png");
+	for (var i = 0;i < 4;i++) boosters.push(new PIXI.Texture(tex, new PIXI.Rectangle(i * 100, 0, 100, 150)));
 	// Load assets we preloaded
 	goldtex = PIXI.Texture.fromFrame("assets/gold.png");
 	buttex = PIXI.Texture.fromFrame("assets/button.png");
