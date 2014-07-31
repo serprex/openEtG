@@ -875,8 +875,6 @@ function startMenu() {
 	];
 	var tipNumber = Math.floor(Math.random()*helpTexts.length);
 
-
-
 	var menuui = new PIXI.DisplayObjectContainer();
 	menuui.interactive = true;
 	var buttonList = [];
