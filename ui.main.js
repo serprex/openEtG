@@ -727,7 +727,7 @@ function makeText(x, y, txt, vis) {
 	t.position.set(x, y);
 	t.setText = function(x, width){
 		if (x){
-			t.setTexture(getTextImage(x, { font: "14px Verdana", fill: "white", stroke: "black", strokeThickness: 2 },undefined,width));
+			t.setTexture(getTextImage(x, { font: "14px Verdana", fill: "white", stroke: "black", strokeThickness: 2 },"",width));
 			t.visible = true;
 		}else{
 			t.visible = false;
@@ -893,7 +893,7 @@ function startMenu() {
 	bnextTip.click = function() {
 		tipNumber++;
 		if (tipNumber >= helpTexts.length) tipNumber = 0;
-		tinfo.setText("Tip: " + helpTexts[tipNumber]);
+		tinfo.setText("Tip: " + helpTexts[tipNumber], 750);
 	}
 	menuui.addChild(bnextTip);
 
