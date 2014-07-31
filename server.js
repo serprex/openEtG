@@ -354,10 +354,13 @@ io.on("connection", function(socket) {
 	});
 	userEvent("arenainfo", function(data, user){
 		db.hgetall((data.lv?"B:":"A:") + data.u, function(err, obj){
-			if (!obj) obj = {deck:""};
-			else obj.day = getDay() - obj.day;
-			obj.lv = data.lv;
-			socket.emit("arenainfo", obj);
+			db.zrevrank("arena"+(data.lv?"1":""), data.u, function(err, rank){
+				if (!obj) obj = {deck:""};
+				else obj.day = getDay() - obj.day;
+				obj.lv = data.lv;
+				obj.rank = rank;
+				socket.emit("arenainfo", obj);
+			});
 		});
 	});
 	userEvent("arenatop", function(data, user){
