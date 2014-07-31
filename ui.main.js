@@ -457,7 +457,7 @@ function victoryScreen() {
 	var bgvictory = new PIXI.Sprite(backgrounds[0]);
 	victoryui.addChild(bgvictory);
 
-	victoryui.addChild(makeText(10, 290, "Plies: " + game.ply + "\nTime: " + ((Date.now()-game.startTime)/1000).toFixed(1) + " seconds"));
+	victoryui.addChild(makeText(10, 290, "Plies: " + game.ply + "\nTime: " + (game.time/1000).toFixed(1) + " seconds"));
 	if (winner){
 		var victoryText = game.quest ? game.wintext : "You won!";
 		var tinfo = makeText(450, game.cardreward ? 130 : 250, victoryText);

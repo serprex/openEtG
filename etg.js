@@ -13,7 +13,7 @@ function Game(first, seed){
 	this.players = [this.player1, this.player2];
 	this.turn = first?this.player1:this.player2;
 	this.expectedDamage = [0, 0];
-	this.startTime = Date.now();
+	this.time = Date.now();
 }
 var statuscache = {};
 function Card(type, info){
@@ -214,8 +214,9 @@ Game.prototype.clone = function(){
 }
 Game.prototype.setWinner = function(play){
 	if (!this.winner){
-		this.winner=play;
-		this.phase=EndPhase;
+		this.winner = play;
+		this.phase = EndPhase;
+		if (this.time) this.time = Date.now() - this.time;
 	}
 }
 Game.prototype.progressMulligan = function(){
