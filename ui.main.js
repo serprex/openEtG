@@ -862,7 +862,7 @@ function startMenu() {
 		"The AI Deck bar can be used to fight any deck of your choice, but only works in sandbox mode.",
 		"Remember that you can use the logout button to enter sandbox mode to review the card pool, check rarities & try out new decks",
 		"Commoner & Champion have random decks, while Mage & Demigod have premade decks. Commoner & Mage are unupped, Champion has some upped, & Demigod is fully upped.",
-		"Decks submitted to arena gain a point for each win, & lose a point for each loss. Rankings are shown in ArenaT10 & ArenaT20.",
+		"Decks submitted to arena gain a point for each win, & lose a point for each loss. Rankings are shown in Arena T20.",
 		"Decks submitted to arena lose hp exponentially per day, down to a minimum of a quarter of their original hp.",
 		"If you don't get what you want from the packs in the shop, ask people to trade in chat or on the OEtG forum.",
 		"Rarity doesn't necessarily relate to card strength. You can go a long ways with commons & uncommons."
@@ -987,7 +987,7 @@ function startMenu() {
 			tinfo.setText("Check how your arena deck is doing.");
 		});
 		menuui.addChild(binfoa);
-		var btopa = makeButton(250, 200+i*50, "Arena T" + (2-i) + "0", function() {
+		var btopa = makeButton(250, 200+i*50, "Arena T20", function() {
 			tinfo.setText("Here you can see who the top players in arena are right now.");
 		});
 		menuui.addChild(btopa);
