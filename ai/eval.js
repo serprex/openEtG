@@ -279,17 +279,17 @@ function evalactive(c, active, extra){
 }
 
 function checkpassives(c){
-	var score = 0;
-	if (c.status) {
-		if (c.status.airborne || c.status.ranged) score += 0.2;
-		if (c.status.voodoo) score += 1;
-		if (c.status.swarm) score += 1;
-		if (c.status.stasis) score += 5;
-		if (c.status.flooding) score += 3;
-		if (c.status.patience) score += 1 + c.owner.countcreatures() * 2;
-		if (c.status.freedom) score += 6;
-		if (c.status.tunneling) score += 2;
-		if (c.status.reflect) score += 1;
+	var score = 0, status = c instanceof CardInstance ? c.card.status : c.status;
+	if (status) {
+		if (status.airborne || c.status.ranged) score += 0.2;
+		if (status.voodoo) score += 1;
+		if (status.swarm) score += 1;
+		if (status.stasis) score += 5;
+		if (status.flooding) score += 3;
+		if (status.patience) score += 1 + c.owner.countcreatures() * 2;
+		if (status.freedom) score += 6;
+		if (status.tunneling) score += 2;
+		if (status.reflect) score += 1;
 	}
 	return score;
 }
@@ -377,7 +377,7 @@ function evalcardinstance(cardInst) {
 			score += c.health*c.health;
 			if (cardInst.owner.shield) score /= 2;
 		}
-		score += checkpassives(c);
+		score += checkpassives(cardInst);
 	}
 	score *= (cardInst.canactive() ? 0.6 : 0.5) * (!cardInst.card.cost || !cardInst.card.costele?1:.9+Math.log(1+cardInst.owner.quanta[cardInst.card.costele])/50);
 	log("::" + c.name, score);
