@@ -2124,13 +2124,14 @@ function startMatch() {
 					Effect.disable = true;
 					aiState = require("./ai/search")(game, aiState);
 					Effect.disable = false;
-					if (typeof cmd[0] === "string"){
+					if (aiState.length <= 2){
 						aiCommand = true;
 					}
 				}
 				if (aiCommand){
 					if (Date.now() >= aiDelay){
 						cmds[aiState[0]](aiState[1]);
+						aiState = undefined;
 						aiCommand = false;
 						aiDelay += 300;
 					}

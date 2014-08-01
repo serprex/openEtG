@@ -1235,6 +1235,15 @@ storm2:function(c,t){
 storm3:function(c,t){
 	t.masscc(c, Actives.snipe);
 },
+swarm:function(c,t){
+	var hp = 0;
+	for (var i=0; i<23; i++){
+		if (c.owner.creatures[i] && c.owner.creatures[i].active.hp == Actives.swarm){
+			hp++;
+		}
+	}
+	return hp;
+},
 swave:function(c,t){
 	if (t.status.frozen){
 		Effect.mkText("Death", ui.tgtToPos(t));
