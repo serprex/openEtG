@@ -372,7 +372,7 @@ io.on("connection", function(socket) {
 		});
 	});
 	userEvent("arenatop", function(data, user){
-		db.zrevrange("arena"+(data.lv?"1":""), 0, data.lv?9:19, "withscores", function(err, obj){
+		db.zrevrange("arena"+(data.lv?"1":""), 0, 19, "withscores", function(err, obj){
 			var t20 = [];
 			function getwinloss(i){
 				if (i == obj.length){
@@ -419,7 +419,7 @@ io.on("connection", function(socket) {
 			var cost = 5+data.lv*5;
 			if (user.gold < cost)return;
 			user.gold -= cost;
-			var idx = Math.floor(Math.random()*Math.min(len, data.lv?10:20));
+			var idx = Math.floor(Math.random()*Math.min(len, 20));
 			db.zrevrange("arena"+(data.lv?"1":""), idx, idx, function(err, aname){
 				console.log("deck: "+ aname + " " + idx);
 				db.hgetall((data.lv?"B:":"A:")+aname, function(err, adeck){
