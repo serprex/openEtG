@@ -279,7 +279,7 @@ function evalactive(c, active, extra){
 }
 
 function checkpassives(c){
-	var score = 0, status = c instanceof CardInstance ? c.card.status : c.status;
+	var score = 0, status = c instanceof etg.CardInstance ? c.card.status : c.status;
 	if (status) {
 		if (status.airborne || c.status.ranged) score += 0.2;
 		if (status.voodoo) score += 1;
