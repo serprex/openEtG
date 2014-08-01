@@ -985,7 +985,7 @@ regenerate:function(c,t){
 	c.owner.dmg(-5);
 },
 regeneratespell:function(c,t){
-	t.lobo();
+	lobo(t);
 	t.active.auto = Actives.regenerate;
 	if (t instanceof etg.Permanent){
 		t.status = {};
@@ -1144,7 +1144,7 @@ siphonactive:function(c,t){
 	}
 	c.cast = t.cast;
 	c.castele = t.castele;
-	lobo(t.active);
+	lobo(t);
 },
 siphonstrength:function(c,t){
 	Effect.mkText("+1|0", ui.tgtToPos(c));
@@ -1235,6 +1235,15 @@ storm2:function(c,t){
 },
 storm3:function(c,t){
 	t.masscc(c, Actives.snipe);
+},
+swarm:function(c,t){
+	var hp = 0;
+	for (var i=0; i<23; i++){
+		if (c.owner.creatures[i] && c.owner.creatures[i].active.hp == Actives.swarm){
+			hp++;
+		}
+	}
+	return hp;
 },
 swave:function(c,t){
 	if (t.status.frozen){

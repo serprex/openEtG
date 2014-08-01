@@ -135,7 +135,7 @@ function getArtImage(code, cb){
 	}else {
 		var loader = new PIXI.AssetLoader(["Cards/" + code + ".png"]);
 		loader.onComplete = function() {
-			return cb(artimagecache[code] = PIXI.Texture.fromImage("Cards/" + code + ".png"));
+			return cb(artimagecache[code] = PIXI.Texture.fromFrame("Cards/" + code + ".png"));
 		}
 		loader.load();
 		return cb(artimagecache[code]);
@@ -430,13 +430,6 @@ function getDeck(limit) {
 	}
 	return deck;
 }
-function aiEvalFunc() {
-	var disableEffectsBack = Effect.disable;
-	Effect.disable = true;
-	var cmd = require("./ai/search")(game);
-	Effect.disable = disableEffectsBack;
-	return cmd;
-}
 function listify(maybeArray) {
 	if (maybeArray instanceof Array) return maybeArray;
 	else return maybeArray.split();
@@ -457,7 +450,7 @@ function victoryScreen() {
 	var bgvictory = new PIXI.Sprite(backgrounds[0]);
 	victoryui.addChild(bgvictory);
 
-	victoryui.addChild(makeText(10, 290, "Plies: " + game.ply + "\nTime: " + ((Date.now()-game.startTime)/1000).toFixed(1) + " seconds"));
+	victoryui.addChild(makeText(10, 290, "Plies: " + game.ply + "\nTime: " + (game.time/1000).toFixed(1) + " seconds"));
 	if (winner){
 		var victoryText = game.quest ? game.wintext : "You won!";
 		var tinfo = makeText(450, game.cardreward ? 130 : 250, victoryText);
@@ -657,7 +650,8 @@ preLoader.onProgress = function() {
 }
 preLoader.onComplete = function() {
 	// Start loading assets we don't require to be loaded before starting
-	for (var i = 0;i < 4;i++) boosters.push(new PIXI.Texture(PIXI.BaseTexture.fromImage("assets/boosters.png"), new PIXI.Rectangle(i * 100, 0, 100, 150)));
+	var tex = PIXI.BaseTexture.fromImage("assets/boosters.png");
+	for (var i = 0;i < 4;i++) boosters.push(new PIXI.Texture(tex, new PIXI.Rectangle(i * 100, 0, 100, 150)));
 	// Load assets we preloaded
 	goldtex = PIXI.Texture.fromFrame("assets/gold.png");
 	buttex = PIXI.Texture.fromFrame("assets/button.png");
@@ -849,29 +843,29 @@ function startMenu() {
 		"Your arena deck will give you 1 or 2 gold for every win, depending on its tier.",
 		"Colosseum lets you compete in a number of daily events for extra prizes. The colosseum challenges reset daily.",
 		"Be sure to try the Proving Grounds Quests for some good cards.",
-		"Be sure to keep track of the rarity icons; Grey means Common, Green means Uncommon, Blue means Rare, Orange means Shard and Pink means Ultra Rare",
-		"The Library button will allow you to see every tradeable card of a user.",
-		"If you are a new user, be sure to get the free Bronze and Silver packs from the Shop.",
-		"Your starter deck, the cards from the free packs, and all non-Common Daily Cards are account-bound and cannot be traded away or sold.",
+		"Be sure to keep track of the rarity icons; Grey means Common, Green means Uncommon, Blue means Rare, Orange means Shard, & Pink means Ultra Rare",
+		"The Library button allows you to see all of a user's tradeable cards.",
+		"If you are a new user, be sure to get the free Bronze & Silver packs from the Shop.",
+		"Your starter deck, the cards from the free packs, & all non-Common Daily Cards are account-bound; they cannot be traded away or sold.",
 		"If your upgrade involves converting an account-bound card, the upgrade will also be account-bound.",
 		"Each day you log in will get a Daily Card. If you submit an Arena deck, the deck will always contain 5 copies of that card.",
-		"Bronze packs are best for Commons, silver packs for Uncommons, gold packs for Rares, and platinum packs for Shards.",
-		"You have infinite unupgraded pillars and pendulums.",
+		"Bronze packs are best for Commons, silver packs for Uncommons, gold packs for Rares, & platinum packs for Shards.",
+		"You have infinite unupgraded pillars & pendulums.",
 		"Cards can be sold for around half as much gold as they cost to buy from a pack.",
-		"Quests are free to try, and you always face the same deck. Keep trying until you collect your reward.",
+		"Quests are free to try, & you always face the same deck. Keep trying until you collect your reward.",
 		"You can mulligan at the start of the game at will, but you draw one less card for each mulligan.",
 		"Your account name is case sensitive.",
 		"Arena tier 1 is unupgraded, while tier 2 is upgraded. All decks in the tier have the same number of attribute points.",
 		"You can store 10 different decks in the editor",
 		"If you type '/who' in chat you will get a list of the users who are online. '/w username message' will send your message only to one user.",
-		"The first text bar under the game is the import/export bar and shows your current deck. The second text bar shows messages from the game and sometimes the opponent's deck.",
+		"The first text bar under the game is the import/export bar & shows your current deck. The second text bar shows messages from the game & sometimes the opponent's deck.",
 		"The AI Deck bar can be used to fight any deck of your choice, but only works in sandbox mode.",
-		"Remember that you can use the logout button to enter sandbox mode to review the card pool, check rarities and try out new decks",
-		"Commoner and Champion have random decks, while Mage and Demigod have premade decks. Commoner and Mage are unupped, Champion has some upped, and Demigod is fully upped.",
-		"Decks submitted to arena gain a point for each win, and lose a point for each loss. Rankings are shown in ArenaT10 and ArenaT20.",
-		"Decks submitted to arena lose 5 hp per day, down to a minimum of half of their original hp.",
+		"Remember that you can use the logout button to enter sandbox mode to review the card pool, check rarities & try out new decks",
+		"Commoner & Champion have random decks, while Mage & Demigod have premade decks. Commoner & Mage are unupped, Champion has some upped, & Demigod is fully upped.",
+		"Decks submitted to arena gain a point for each win, & lose a point for each loss. Rankings are shown in ArenaT10 & ArenaT20.",
+		"Decks submitted to arena lose hp exponentially per day, down to a minimum of a quarter of their original hp.",
 		"If you don't get what you want from the packs in the shop, ask people to trade in chat or on the OEtG forum.",
-		"Rarity doesn't necessarily relate to card strength. You can get a long ways with commons and uncommons."
+		"Rarity doesn't necessarily relate to card strength. You can go a long ways with commons & uncommons."
 	];
 	var tipNumber = Math.floor(Math.random()*helpTexts.length);
 
@@ -1821,7 +1815,7 @@ function startMatch() {
 		spr.getChildAt(2).getChildAt(9).visible = obj.status.frozen;
 		spr.alpha = obj.status.immaterial || obj.status.burrowed ? .7 : 1;
 	}
-	var aiDelay = 0;
+	var aiDelay = 0, aiState, aiCommand;
 	if (user) {
 		userExec("addloss", { pvp: !game.ai });
 	}
@@ -2124,12 +2118,24 @@ function startMatch() {
 	cardart.anchor.set(.5, 0);
 	gameui.addChild(cardart);
 	refreshRenderer(gameui, function() {
-		var now;
-		if (game.turn == game.player2 && game.ai && (now = Date.now()) >= aiDelay) {
-			aiDelay = now + 300;
+		if (game.turn == game.player2 && game.ai) {
 			if (game.phase == etg.PlayPhase){
-				var cmd = aiEvalFunc();
-				cmds[cmd[0]](cmd[1]);
+				if (!aiCommand){
+					Effect.disable = true;
+					aiState = require("./ai/search")(game, aiState);
+					Effect.disable = false;
+					if (aiState.length <= 2){
+						aiCommand = true;
+					}
+				}
+				if (aiCommand){
+					if (Date.now() >= aiDelay){
+						cmds[aiState[0]](aiState[1]);
+						aiState = undefined;
+						aiCommand = false;
+						aiDelay += 300;
+					}
+				}
 			}else if (game.phase <= etg.MulliganPhase2){
 				require("./ai/mulligan")(game);
 			}
@@ -2374,7 +2380,7 @@ function startArenaInfo(info) {
 	var stage = new PIXI.DisplayObjectContainer();
 	stage.interactive = true;
 	stage.addChild(new PIXI.Sprite(backgrounds[0]));
-	var winloss = makeText(200, 300, (info.win || 0) + " - " + (info.loss || 0) + "\nAge: " + info.day + "\nCurrent HP: " + (info.hp-info.day*5) + "\nMark: " + info.mark + "\nDraw: " + info.draw);
+	var winloss = makeText(200, 300, (info.win || 0) + " - " + (info.loss || 0) + ": " + (info.rank+1) + "\nAge: " + info.day + "\nHP: " + info.curhp + " / " + info.hp + "\nMark: " + info.mark + "\nDraw: " + info.draw);
 	stage.addChild(winloss);
 	var batch = new PIXI.SpriteBatch();
 	stage.addChild(batch);

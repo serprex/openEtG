@@ -231,6 +231,10 @@ function genericChat(socket, data){
 	}
 	else io.emit("chat", data)
 }
+function getAgedHp(hp, age){
+	var curhp = age > 1 ? hp - (1<<Math.min(age, 9)-1) : hp;
+	return Math.max(curhp, Math.floor(hp/4));
+}
 io.on("connection", function(socket) {
 	sockinfo[socket.id] = {};
 	socket.on("disconnect", dropsock);
@@ -354,10 +358,17 @@ io.on("connection", function(socket) {
 	});
 	userEvent("arenainfo", function(data, user){
 		db.hgetall((data.lv?"B:":"A:") + data.u, function(err, obj){
-			if (!obj) obj = {deck:""};
-			else obj.day = getDay() - obj.day;
-			obj.lv = data.lv;
-			socket.emit("arenainfo", obj);
+			if (!obj){
+				socket.emit("arenainfo", {deck:"", lv: data.lv});
+			}else{
+				db.zrevrank("arena"+(data.lv?"1":""), data.u, function(err, rank){
+					obj.day = getDay() - obj.day;
+					obj.curhp = getAgedHp(obj.hp, obj.day);
+					obj.lv = data.lv;
+					if (rank) obj.rank = rank;
+					socket.emit("arenainfo", obj);
+				});
+			}
 		});
 	});
 	userEvent("arenatop", function(data, user){
@@ -379,14 +390,26 @@ io.on("connection", function(socket) {
 	});
 	userEvent("modarena", function(data, user){
 		db.hincrby((data.lv?"B:":"A:")+data.aname, data.won?"win":"loss", 1);
-		db.zincrby("arena"+(data.lv?"1":""), data.won?1:-1, data.aname);
-		if (data.aname in users){
-			users[data.aname].gold += data.lv+1;
+		var arena = "arena"+(data.lv?"1":"");
+		if (data.won){
+			db.zincrby(arena, 1, data.aname);
+			if (data.aname in users){
+				users[data.aname].gold += data.lv+1;
+			}else{
+				db.exists("U:"+data.aname, function(err, exists){
+					if (exists){
+						db.hincrby("U:"+data.aname, "gold", data.lv+1);
+					}
+				});
+			}
 		}else{
-			db.exists("U:"+data.aname, function(err, exists){
-				if (exists){
-					db.hincrby("U:"+data.aname, "gold", data.lv+1);
-				}
+			db.zscore(arena, function(err, score){
+				if (score === "") return;
+				db.zincrby(arena, data.won?1:-1, data.aname, function(err, newscore){
+					if (!err && newscore < -15){
+						db.zrem("arena"+(data.lv?"1":""), data.aname);
+					}
+				});
 			});
 		}
 	});
@@ -402,10 +425,15 @@ io.on("connection", function(socket) {
 				db.hgetall((data.lv?"B:":"A:")+aname, function(err, adeck){
 					var seed = Math.random();
 					if (data.lv) adeck.card = CardCodes[adeck.card].asUpped(true).code;
-					if (adeck.hp) adeck.hp = adeck.hp ? parseInt(adeck.hp) : 200;
-					if (adeck.mark) adeck.mark = adeck.mark ? parseInt(adeck.mark) : 1;
-					if (adeck.draw) adeck.draw = adeck.draw ? parseInt(adeck.draw) : data.lv+1;
-					socket.emit("foearena", {seed: seed*etgutil.MAX_INT, name: aname, hp:Math.max(adeck.hp-(getDay()-adeck.day)*5, Math.floor(adeck.hp/2)), mark:adeck.mark, draw: adeck.draw, deck: adeck.deck + "05" + adeck.card, lv:data.lv});
+					adeck.hp = parseInt(adeck.hp || 200);
+					adeck.mark = parseInt(adeck.mark || 1);
+					adeck.draw = parseInt(adeck.draw || data.lv+1);
+					var curhp = getAgedHp(adeck.hp, getDay()-adeck.day);
+					socket.emit("foearena", {
+						seed: seed*etgutil.MAX_INT,
+						name: aname, hp: curhp,
+						mark: adeck.mark, draw: adeck.draw,
+						deck: adeck.deck + "05" + adeck.card, lv:data.lv});
 				});
 			});
 		});

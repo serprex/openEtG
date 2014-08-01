@@ -13,7 +13,7 @@ function Game(first, seed){
 	this.players = [this.player1, this.player2];
 	this.turn = first?this.player1:this.player2;
 	this.expectedDamage = [0, 0];
-	this.startTime = Date.now();
+	this.time = Date.now();
 }
 var statuscache = {};
 function Card(type, info){
@@ -181,7 +181,7 @@ var MulliganPhase2 = 1;
 var PlayPhase = 2;
 var EndPhase = 3;
 var TrueMarks = ["8pi", "8pj", "8pk", "8pl", "8pm", "8pn", "8po", "8pp", "8pq", "8pr", "8ps", "8pt", "8pu"];
-var passives = { airborne: true, voodoo: true, swarm: true, ranged: true, additive: true, stackable: true, salvage: true, token: true, shard: true, poisonous: true, undead: true, };
+var passives = { airborne: true, voodoo: true, swarm: true, ranged: true, additive: true, stackable: true, salvage: true, token: true, shard: true, poisonous: true, martyr: true, };
 var PlayerRng = Object.create(Player.prototype);
 PlayerRng.rng = Math.random;
 PlayerRng.upto = function(x){ return Math.floor(Math.random()*x); }
@@ -214,8 +214,9 @@ Game.prototype.clone = function(){
 }
 Game.prototype.setWinner = function(play){
 	if (!this.winner){
-		this.winner=play;
-		this.phase=EndPhase;
+		this.winner = play;
+		this.phase = EndPhase;
+		if (this.time) this.time = Date.now() - this.time;
 	}
 }
 Game.prototype.progressMulligan = function(){
@@ -999,13 +1000,7 @@ Creature.prototype.truehp = function(){
 	if (this.calcEclipse(this.owner.game) != 0){
 		hp++;
 	}
-	if (this.status.swarm){
-		for (var i=0; i<23; i++){
-			if (this.owner.creatures[i] && this.owner.creatures[i].status.swarm){
-				hp++;
-			}
-		}
-	}
+	if (this.active.hp) hp += this.active.hp(this);
 	return hp;
 }
 Permanent.prototype.getIndex = function() { return this.owner.permanents.indexOf(this); }

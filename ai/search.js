@@ -1,11 +1,10 @@
 var etg = require("./etg");
 var evalGameState = require("./eval");
 var Actives = require("./Actives");
-module.exports = function(game) {
-	var limit = 999;
-	var cmdct, currentEval = evalGameState(game), cdepth = 2;
-	function iterLoop(game, n, cmdct0) {
-		var casthash = {};
+module.exports = function(game, previous) {
+	if (previous === undefined) previous = [0, evalGameState(game), undefined, 2, {}, 999];
+	var limit = previous[5], cmdct = previous[2], currentEval = previous[1], cdepth = previous[3];
+	function iterLoop(game, n, cmdct0, casthash, nth) {
 		function iterCore(c, active) {
 			if (c.hash){
 				var ch = c.hash();
@@ -27,15 +26,13 @@ module.exports = function(game) {
 					var v = evalGameState(gameClone);
 					if (v < currentEval || (v == currentEval && n > cdepth)) {
 						cmdct = cmdct0 || (cbits | tbits << 9);
+						cdepth = n;
 						currentEval = v;
 					}
 					if (n) {
-						var targetingModeBack = gameClone.targetingMode, targetingModeCbBack = gameClone.targetingModeCb;
 						delete gameClone.targetingMode;
-						iterLoop(gameClone, 0, cbits | tbits << 9);
+						iterLoop(gameClone, 0, cbits | tbits << 9, {});
 						if (loglist) loglist[(t || "-").toString()] = v;
-						gameClone.targetingMode = targetingModeBack;
-						gameClone.targetingModeCb = targetingModeCbBack;
 					}
 				}
 			}
@@ -58,35 +55,51 @@ module.exports = function(game) {
 				if (loglist) console.log(currentEval, c.toString(), loglist);
 			}
 		}
-		var self = game.player2;
-		var wp = self.weapon, sh = self.shield;
+		var self = game.player2, wp = self.weapon, sh = self.shield;
 		if (wp && wp.canactive()) {
 			iterCore(wp, wp.active.cast);
+			if (n && !nth--){
+				return casthash;
+			}
 		}
 		if (sh && sh.canactive()) {
 			iterCore(sh, sh.active.cast);
-		}
-		for (var i = 0;i < 23;i++) {
-			var cr = self.creatures[i];
-			if (cr && cr.canactive()) {
-				iterCore(cr, cr.active.cast);
-			}
-		}
-		for (var i = 0;i < 16;i++) {
-			var pr = self.permanents[i];
-			if (pr && pr.canactive()) {
-				iterCore(pr, pr.active.cast);
+			if (n && !nth--){
+				return casthash;
 			}
 		}
 		for (var i = 0; i < self.hand.length; i++) {
 			var cardinst = self.hand[i];
 			if (cardinst.canactive()) {
 				iterCore(cardinst, cardinst.card.type == etg.SpellEnum && cardinst.card.active);
+				if (n && !nth--){
+					return casthash;
+				}
+			}
+		}
+		for (var i = 0;i < 16;i++) {
+			var pr = self.permanents[i];
+			if (pr && pr.canactive()) {
+				iterCore(pr, pr.active.cast);
+				if (n && !nth--){
+					return casthash;
+				}
+			}
+		}
+		for (var i = 0;i < 23;i++) {
+			var cr = self.creatures[i];
+			if (cr && cr.canactive()) {
+				iterCore(cr, cr.active.cast);
+				if (n && !nth--){
+					return casthash;
+				}
 			}
 		}
 	}
-	iterLoop(game, 1);
-	if (cmdct) {
+	var ret = iterLoop(game, 1, undefined, previous[4], previous[0]);
+	if (ret){
+		return [previous[0]+2, currentEval, cmdct, cdepth, ret, limit];
+	}else if (cmdct) {
 		return ["cast", cmdct];
 	} else if (game.player2.hand.length == 8) {
 		var mincardvalue = 999, worstcard = 0;
