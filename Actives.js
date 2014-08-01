@@ -379,12 +379,13 @@ enchant:function(c,t){
 },
 endow:function(c,t){
 	Effect.mkText("Endow", ui.tgtToPos(t));
-	c.status = etg.clone(t.status);
 	for (key in t.status) {
 		if (typeof t.status[key] == "boolean")
 			c.status[key] = c.status[key] || t.status[key]
 		else if (typeof t.status[key] == "number")
 			c.status[key] = t.status[key] + (c.status[key] ? c.status[key] : 0);
+		else
+			c.status[key] = t.status[key];
 	}
  	if (c.status.adrenaline > 1)
 		c.status.adrenaline = 1;
