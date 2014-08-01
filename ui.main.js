@@ -430,13 +430,6 @@ function getDeck(limit) {
 	}
 	return deck;
 }
-function aiEvalFunc() {
-	var disableEffectsBack = Effect.disable;
-	Effect.disable = true;
-	var cmd = require("./ai/search")(game);
-	Effect.disable = disableEffectsBack;
-	return cmd;
-}
 function listify(maybeArray) {
 	if (maybeArray instanceof Array) return maybeArray;
 	else return maybeArray.split();
@@ -1822,7 +1815,7 @@ function startMatch() {
 		spr.getChildAt(2).getChildAt(9).visible = obj.status.frozen;
 		spr.alpha = obj.status.immaterial || obj.status.burrowed ? .7 : 1;
 	}
-	var aiDelay = 0;
+	var aiDelay = 0, aiState, aiCommand;
 	if (user) {
 		userExec("addloss", { pvp: !game.ai });
 	}
@@ -2125,12 +2118,25 @@ function startMatch() {
 	cardart.anchor.set(.5, 0);
 	gameui.addChild(cardart);
 	refreshRenderer(gameui, function() {
-		var now;
-		if (game.turn == game.player2 && game.ai && (now = Date.now()) >= aiDelay) {
-			aiDelay = now + 300;
+		if (game.turn == game.player2 && game.ai) {
 			if (game.phase == etg.PlayPhase){
-				var cmd = aiEvalFunc();
-				cmds[cmd[0]](cmd[1]);
+				if (aiCommand){
+					if (Date.now() >= aiDelay){
+						cmds[aiCommand[0]](aiCommand[1]);
+						aiCommand = undefined;
+						aiDelay += 300;
+					}
+				}else{
+					Effect.disable = true;
+					var cmd = require("./ai/search")(game, aiState);
+					Effect.disable = false;
+					if (typeof cmd[0] === "string"){
+						aiCommand = cmd;
+						aiState = undefined;
+					}else{
+						aiState = cmd;
+					}
+				}
 			}else if (game.phase <= etg.MulliganPhase2){
 				require("./ai/mulligan")(game);
 			}
