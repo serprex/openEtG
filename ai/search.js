@@ -27,15 +27,13 @@ module.exports = function(game) {
 					var v = evalGameState(gameClone);
 					if (v < currentEval || (v == currentEval && n > cdepth)) {
 						cmdct = cmdct0 || (cbits | tbits << 9);
+						cdepth = n;
 						currentEval = v;
 					}
 					if (n) {
-						var targetingModeBack = gameClone.targetingMode, targetingModeCbBack = gameClone.targetingModeCb;
 						delete gameClone.targetingMode;
 						iterLoop(gameClone, 0, cbits | tbits << 9);
 						if (loglist) loglist[(t || "-").toString()] = v;
-						gameClone.targetingMode = targetingModeBack;
-						gameClone.targetingModeCb = targetingModeCbBack;
 					}
 				}
 			}
@@ -58,8 +56,7 @@ module.exports = function(game) {
 				if (loglist) console.log(currentEval, c.toString(), loglist);
 			}
 		}
-		var self = game.player2;
-		var wp = self.weapon, sh = self.shield;
+		var self = game.player2, wp = self.weapon, sh = self.shield;
 		if (wp && wp.canactive()) {
 			iterCore(wp, wp.active.cast);
 		}
