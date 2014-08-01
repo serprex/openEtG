@@ -2120,21 +2120,19 @@ function startMatch() {
 	refreshRenderer(gameui, function() {
 		if (game.turn == game.player2 && game.ai) {
 			if (game.phase == etg.PlayPhase){
-				if (aiCommand){
-					if (Date.now() >= aiDelay){
-						cmds[aiCommand[0]](aiCommand[1]);
-						aiCommand = undefined;
-						aiDelay += 300;
-					}
-				}else{
+				if (!aiCommand){
 					Effect.disable = true;
-					var cmd = require("./ai/search")(game, aiState);
+					aiState = require("./ai/search")(game, aiState);
 					Effect.disable = false;
 					if (typeof cmd[0] === "string"){
-						aiCommand = cmd;
-						aiState = undefined;
-					}else{
-						aiState = cmd;
+						aiCommand = true;
+					}
+				}
+				if (aiCommand){
+					if (Date.now() >= aiDelay){
+						cmds[aiState[0]](aiState[1]);
+						aiCommand = false;
+						aiDelay += 300;
 					}
 				}
 			}else if (game.phase <= etg.MulliganPhase2){
