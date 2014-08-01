@@ -2229,7 +2229,7 @@ function startMatch() {
 				cancel.setText(game.phase != etg.PlayPhase ? "Mulligan" : game.targetingMode || discarding || resigning ? "Cancel" : null);
 			}else cancel.visible = endturn.visible = false;
 		}else{
-			winnername.setText((game.winner == game.player1 ? "Won " : "Lost ") + game.ply);
+			winnername.setText(game.winner == game.player1 ? "Won" : "Lost");
 			endturn.setText("Continue");
 		}
 		maybeSetText(turntell, discarding ? "Discard" : game.targetingMode ? game.targetingText : game.turn == game.player1 ? "Your Turn" : "Their Turn");
