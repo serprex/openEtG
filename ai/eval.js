@@ -120,7 +120,8 @@ var ActivesValues = {
 	gratitude:4,
 	grave:4,
 	growth:5,
-	guard:4,
+	guard: 4,
+	halveatk: -1,
 	hasten:function(c){
 		return c.owner.deck.length/10;
 	},
@@ -237,7 +238,10 @@ var ActivesValues = {
 	virusplague:1,
 	void:5,
 	quantagift:3,
-	web:2,
+	web: 2,
+	wind:function(c){
+		return (c.status.storedAtk - 2) || 0;
+	},
 	wisdom:4,
 	yoink:4,
 	pillar:function(c){
