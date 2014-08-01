@@ -68,10 +68,10 @@ module.exports = function(game, previous) {
 				return casthash;
 			}
 		}
-		for (var i = 0;i < 23;i++) {
-			var cr = self.creatures[i];
-			if (cr && cr.canactive()) {
-				iterCore(cr, cr.active.cast);
+		for (var i = 0; i < self.hand.length; i++) {
+			var cardinst = self.hand[i];
+			if (cardinst.canactive()) {
+				iterCore(cardinst, cardinst.card.type == etg.SpellEnum && cardinst.card.active);
 				if (n && !nth--){
 					return casthash;
 				}
@@ -86,10 +86,10 @@ module.exports = function(game, previous) {
 				}
 			}
 		}
-		for (var i = 0; i < self.hand.length; i++) {
-			var cardinst = self.hand[i];
-			if (cardinst.canactive()) {
-				iterCore(cardinst, cardinst.card.type == etg.SpellEnum && cardinst.card.active);
+		for (var i = 0;i < 23;i++) {
+			var cr = self.creatures[i];
+			if (cr && cr.canactive()) {
+				iterCore(cr, cr.active.cast);
 				if (n && !nth--){
 					return casthash;
 				}
@@ -98,7 +98,7 @@ module.exports = function(game, previous) {
 	}
 	var ret = iterLoop(game, 1, undefined, previous[4], previous[0]);
 	if (ret){
-		return [previous[0]+2, currentEval, cmdct, cdepth, ret];
+		return [previous[0]+2, currentEval, cmdct, cdepth, ret, limit];
 	}else if (cmdct) {
 		return ["cast", cmdct];
 	} else if (game.player2.hand.length == 8) {
