@@ -121,7 +121,9 @@ var ActivesValues = {
 	grave:4,
 	growth:5,
 	guard: 4,
-	halveatk: c.trueatk() < 0 ? 1 : c.trueatk() > 0 ? -1 : 0,
+	halveatk:function(c){
+		return (c.trueatk() < 0)-(c.trueatk() > 0);
+	},
 	hasten:function(c){
 		return c.owner.deck.length/10;
 	},
