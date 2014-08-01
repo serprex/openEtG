@@ -1099,6 +1099,9 @@ Weapon.prototype.attack = Creature.prototype.attack = function(stasis, freedomCh
 	if (this.status.steamatk){
 		this.status.steamatk--;
 	}
+	if (this.active.postauto && !this.status.frozen && (!this.status.adrenaline || this.status.adrenaline < 3)) {
+		this.active.postauto(this);
+	}
 	delete this.status.dive;
 	if (isCreature && ~this.getIndex() && this.truehp() <= 0){
 		this.die();

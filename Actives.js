@@ -536,6 +536,14 @@ guard:function(c,t){
 		t.dmg(c.trueatk());
 	}
 },
+halveatk: function(c, t) {
+	t = t || c;
+	console.log("halveatk: " +t);
+	var storedatk = Math.ceil(t.atk / 2);
+	if (!t.status.storedAtk) t.status.storedAtk = 0;
+	t.status.storedAtk += storedatk;
+	t.atk -= storedatk;
+},
 hammer:function(c,t){
 	return c.owner.mark == etg.Gravity||c.owner.mark == etg.Earth?1:0;
 },
@@ -1319,6 +1327,11 @@ quantagift:function(c,t){
 web:function(c,t){
 	Effect.mkText("Web", ui.tgtToPos(t));
 	delete t.status.airborne;
+},
+wind:function(c,t){
+	if (!c.status.storedAtk) return;
+	c.atk += c.status.storedAtk;
+	delete c.status.storedAtk;
 },
 wisdom:function(c,t){
 	Effect.mkText("3|0", ui.tgtToPos(t));
