@@ -244,6 +244,13 @@ darkness:function(c,t){
 deadalive:function(c,t){
 	c.deatheffect(c.getIndex());
 },
+decrsteam:function(c){
+	c.defstatus("steamatk", 0);
+	if (c.status.steamatk > 0){
+		c.atk--;
+		c.status.steamatk--;
+	}
+},
 deja:function(c,t){
 	delete c.active.cast;
 	Actives.parallel(c, c);
@@ -1232,6 +1239,7 @@ steam:function(c,t){
 	Effect.mkText("5|0", ui.tgtToPos(c));
 	c.defstatus("steamatk", 0);
 	c.status.steamatk += 5;
+	c.atk += 5;
 },
 stoneform:function(c,t){
 	Effect.mkText("0|20", ui.tgtToPos(c));

@@ -181,7 +181,7 @@ var MulliganPhase2 = 1;
 var PlayPhase = 2;
 var EndPhase = 3;
 var TrueMarks = ["8pi", "8pj", "8pk", "8pl", "8pm", "8pn", "8po", "8pp", "8pq", "8pr", "8ps", "8pt", "8pu"];
-var passives = { airborne: true, voodoo: true, swarm: true, ranged: true, additive: true, stackable: true, salvage: true, token: true, shard: true, poisonous: true, martyr: true, };
+var passives = { airborne: true, voodoo: true, swarm: true, ranged: true, additive: true, stackable: true, salvage: true, token: true, shard: true, poisonous: true, martyr: true, decrsteam: true };
 var PlayerRng = Object.create(Player.prototype);
 PlayerRng.rng = Math.random;
 PlayerRng.upto = function(x){ return Math.floor(Math.random()*x); }
@@ -971,7 +971,6 @@ Creature.prototype.calcEclipse = function(){
 }
 Weapon.prototype.trueatk = Creature.prototype.trueatk = function(adrenaline, nobuff){
 	var dmg = this.atk;
-	if (this.status.steamatk)dmg += this.status.steamatk;
 	if (this.status.dive)dmg += this.status.dive;
 	if (this.active.buff && !nobuff)dmg += this.active.buff(this);
 	if (this instanceof Creature){
@@ -1095,9 +1094,6 @@ Weapon.prototype.attack = Creature.prototype.attack = function(stasis, freedomCh
 	}
 	if (this.status.delayed){
 		this.status.delayed--;
-	}
-	if (this.status.steamatk){
-		this.status.steamatk--;
 	}
 	if (this.active.postauto && !this.status.frozen && (!this.status.adrenaline || this.status.adrenaline < 3)) {
 		this.active.postauto(this);
