@@ -286,7 +286,7 @@ function checkpassives(c){
 		if (c.status.swarm) score += 1;
 		if (c.status.stasis) score += 5;
 		if (c.status.flooding) score += 3;
-		if (c.status.patience) score -= 4;
+		if (c.status.patience) score += 1 + c.owner.countcreatures() * 2;
 		if (c.status.freedom) score += 6;
 		if (c.status.tunneling) score += 2;
 		if (c.status.reflect) score += 1;
