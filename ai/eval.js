@@ -317,7 +317,7 @@ function evalthing(c) {
 	}
 	if (isWeapon || isCreature) {
 		ttatk = c.estimateDamage();
-		if (c.owner.foe.shield && c.owner.foe.shield.status.reflect) ttatk *= -1;
+		if (c.status.psion && c.owner.foe.shield && c.owner.foe.shield.status.reflect) ttatk *= -1;
 		score += ttatk*delayfactor;
 	}else ttatk = 0;
 	if (!etg.isEmpty(c.active)) {
