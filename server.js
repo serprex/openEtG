@@ -363,9 +363,9 @@ io.on("connection", function(socket) {
 			}else{
 				db.zrevrank("arena"+(data.lv?"1":""), data.u, function(err, rank){
 					obj.day = getDay() - obj.day;
-					obj.hp = getAgedHp(obj.hp, obj.day);
+					obj.curhp = getAgedHp(obj.hp, obj.day);
 					obj.lv = data.lv;
-					obj.rank = rank;
+					if (rank) obj.rank = rank;
 					socket.emit("arenainfo", obj);
 				});
 			}
@@ -404,9 +404,9 @@ io.on("connection", function(socket) {
 			}
 		}else{
 			db.zscore(arena, function(err, score){
-				if (score === undefined) return;
+				if (score === "") return;
 				db.zincrby(arena, data.won?1:-1, data.aname, function(err, newscore){
-					if (!err && newscore < -10){
+					if (!err && newscore < -15){
 						db.zrem("arena"+(data.lv?"1":""), data.aname);
 					}
 				});
