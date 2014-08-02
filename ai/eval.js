@@ -404,8 +404,12 @@ module.exports = function(game) {
 	if (game.winner){
 		return game.winner==game.player1?99999999:-99999999;
 	}
-	if (game.turn.foe.deck.length == 0){
+	if (game.turn.foe.deck.length == 0 && game.turn.foe.hand.length < 8){
 		return game.turn == game.player1?99999990:-99999990;
+	}
+	var expectedDamage = game.turn.expectedDamage();
+	if (expectedDamage > game.turn.foe.hp){
+		return Math.min(expectedDamage - game.turn.foe.hp, 500)*999;
 	}
 	var gamevalue = 0;
 	for (var j = 0; j < 2; j++) {

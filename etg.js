@@ -554,10 +554,8 @@ Player.prototype.expectedDamage = function() {
 				freedomChance++;
 			}
 		}
-		if ((p=this.foe.permanents[i])){
-			if (p.status.stasis){
-				stasisFlag = true;
-			}
+		if ((p=this.foe.permanents[i]) && p.status.stasis){
+			stasisFlag = true;
 		}
 	}
 	if (freedomChance){
