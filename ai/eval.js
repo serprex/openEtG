@@ -242,7 +242,7 @@ var ActivesValues = {
 	quantagift:3,
 	web: 2,
 	wind:function(c){
-		return (c.status.storedAtk - 2) || 0;
+		return c instanceof etg.CardInstance ? 0 : (c.status.storedAtk - 2) || 0;
 	},
 	wisdom:4,
 	yoink:4,
