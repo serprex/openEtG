@@ -394,18 +394,27 @@ io.on("connection", function(socket) {
 		if (data.won){
 			db.zincrby(arena, 1, data.aname);
 			if (data.aname in users){
-				users[data.aname].gold += data.lv+1;
+				users[data.aname].gold += 3;
 			}else{
 				db.exists("U:"+data.aname, function(err, exists){
 					if (exists){
-						db.hincrby("U:"+data.aname, "gold", data.lv+1);
+						db.hincrby("U:"+data.aname, "gold", 3);
 					}
 				});
 			}
 		}else{
 			db.zscore(arena, function(err, score){
 				if (score === "") return;
-				db.zincrby(arena, -1, data.aname, function(err, newscore){
+				db.zincrby(arena, -1, data.aname, function(err, newscore) {
+					if (data.aname in users) {
+						users[data.aname].gold += 1;
+					} else {
+						db.exists("U:" + data.aname, function(err, exists) {
+							if (exists) {
+								db.hincrby("U:" + data.aname, "gold", 1);
+							}
+						});
+					}
 					if (!err && newscore < -15){
 						db.hmget((data.lv?"B:":"A:")+data.aname, "win", "loss", function(err, wl){
 							if (wl[0] / (wl[0]+wl[1]+1) < .2){
