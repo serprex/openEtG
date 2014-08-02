@@ -834,7 +834,7 @@ neuro:function(c,t){
 	}
 },
 neuroify:function(c,t){
-	if (c.owner.foe.status.poison){
+	if (c.owner.foe.status.poison > 0){
 		c.owner.foe.neuro = true;
 	}
 },
