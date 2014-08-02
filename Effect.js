@@ -1,7 +1,12 @@
+var etg = require("./etg");
+var ui = require("./uiutil");
+function maybeTgtPos(pos){
+	return pos instanceof etg.Thing ? ui.tgtToPos(pos) : pos;
+}
 function Death(pos){
 	PIXI.Graphics.call(this);
 	this.step = 0;
-	this.position = pos;
+	this.position = maybeTgtPos(pos);
 }
 function Text(text, pos){
 	if (!pos){
@@ -10,14 +15,14 @@ function Text(text, pos){
 	}
 	PIXI.Sprite.call(this, getTextImage(text, 16));
 	this.step = 0;
-	this.position = pos;
+	this.position = maybeTgtPos(pos);
 	this.anchor.x = .5;
 }
 function SpriteFade(texture, pos) {
 	PIXI.Sprite.call(this, texture);
 	this.anchor.set(0.5, 0.5);
 	this.step = 0;
-	this.position = pos || new PIXI.Point(450, 300);
+	this.position = maybeTgtPos(pos) || new PIXI.Point(450, 300);
 }
 function nop(){}
 if (typeof PIXI === "undefined"){
@@ -77,10 +82,8 @@ var makemake = [Death, Text, SpriteFade];
 for(var i=0; i<makemake.length; i++){
 	var cons = makemake[i];
 	if (typeof PIXI === "undefined"){
-		exports[cons.name] = nop;
 		exports["mk" + cons.name] = nop;
 	}else{
-		exports[cons.name] = cons;
 		exports["mk" + cons.name] = make(cons);
 	}
 }

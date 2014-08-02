@@ -1024,7 +1024,7 @@ Thing.prototype.useactive = function(t) {
 	var castele = this.castele, cast = this.cast;
 	if (!t || !t.evade(this.owner)){
 		this.active.cast(this, t);
-	}else Effect.mkText("Evade", ui.tgtToPos(t));
+	}else Effect.mkText("Evade", t);
 	this.owner.spend(castele, cast);
 	this.owner.game.updateExpectedDamage();
 }
@@ -1171,7 +1171,7 @@ function salvageScan(from, t){
 		for (var i=0; i<23; i++){
 			var cr = t.owner.creatures[i];
 			if (cr && cr.status.salvage && !cr.status.salvaged){
-				Effect.mkText("Salvage", ui.tgtToPos(cr));
+				Effect.mkText("Salvage", cr);
 				cr.status.salvaged = true;
 				t.owner.hand.push(new CardInstance(t.card, t.owner));
 				return;

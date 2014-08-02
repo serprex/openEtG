@@ -981,7 +981,7 @@ function startMenu() {
 	for (var i=0; i<2; i++){
 		var baia = makeButton(50, 200+i*50, "Arena AI", (function(cost){return function() {
 			tinfo.setText("In the arena you will face decks from other players.\nCost: $" + cost);
-		}})(5+i*5));
+		}})(5+i*15));
 		menuui.addChild(baia);
 		var binfoa = makeButton(150, 200+i*50, "Arena Info", function() {
 			tinfo.setText("Check how your arena deck is doing.");
