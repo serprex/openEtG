@@ -122,7 +122,7 @@ var ActivesValues = {
 	growth:5,
 	guard: 4,
 	halveatk:function(c){
-		return (c.trueatk() < 0)-(c.trueatk() > 0);
+		return c instanceof etg.CardInstance ? -c.card.attack/4 : (c.trueatk() < 0)-(c.trueatk() > 0);
 	},
 	hasten:function(c){
 		return c.owner.deck.length/10;

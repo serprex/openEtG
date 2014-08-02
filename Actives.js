@@ -544,7 +544,6 @@ guard:function(c,t){
 },
 halveatk: function(c, t) {
 	t = t || c;
-	console.log("halveatk: " +t);
 	var storedatk = Math.ceil(t.atk / 2);
 	if (!t.status.storedAtk) t.status.storedAtk = 0;
 	t.status.storedAtk += storedatk;
