@@ -1259,6 +1259,7 @@ var TargetFilters = {
 };
 
 exports.Game = Game;
+exports.Thing = Thing;
 exports.Card = Card;
 exports.Player = Player;
 exports.CardInstance = CardInstance;
