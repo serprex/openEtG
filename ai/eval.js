@@ -122,7 +122,7 @@ var ActivesValues = {
 	growth:5,
 	guard: 4,
 	halveatk:function(c){
-		return (c.trueatk() < 0)-(c.trueatk() > 0);
+		return c instanceof etg.CardInstance ? -c.card.attack/4 : (c.trueatk() < 0)-(c.trueatk() > 0);
 	},
 	hasten:function(c){
 		return c.owner.deck.length/10;
@@ -242,7 +242,7 @@ var ActivesValues = {
 	quantagift:3,
 	web: 2,
 	wind:function(c){
-		return (c.status.storedAtk - 2) || 0;
+		return c instanceof etg.CardInstance ? 0 : (c.status.storedAtk - 2) || 0;
 	},
 	wisdom:4,
 	yoink:4,
@@ -404,8 +404,12 @@ module.exports = function(game) {
 	if (game.winner){
 		return game.winner==game.player1?99999999:-99999999;
 	}
-	if (game.turn.foe.deck.length == 0){
+	if (game.turn.foe.deck.length == 0 && game.turn.foe.hand.length < 8){
 		return game.turn == game.player1?99999990:-99999990;
+	}
+	var expectedDamage = game.turn.expectedDamage();
+	if (expectedDamage > game.turn.foe.hp){
+		return Math.min(expectedDamage - game.turn.foe.hp, 500)*999;
 	}
 	var gamevalue = 0;
 	for (var j = 0; j < 2; j++) {

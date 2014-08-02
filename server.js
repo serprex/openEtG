@@ -389,8 +389,8 @@ io.on("connection", function(socket) {
 		});
 	});
 	userEvent("modarena", function(data, user){
-		db.hincrby((data.lv?"B:":"A:")+data.aname, data.won?"win":"loss", 1);
 		var arena = "arena"+(data.lv?"1":"");
+		db.hincrby((data.lv?"B:":"A:")+data.aname, data.won?"win":"loss", 1);
 		if (data.won){
 			db.zincrby(arena, 1, data.aname);
 			if (data.aname in users){
@@ -405,9 +405,13 @@ io.on("connection", function(socket) {
 		}else{
 			db.zscore(arena, function(err, score){
 				if (score === "") return;
-				db.zincrby(arena, data.won?1:-1, data.aname, function(err, newscore){
+				db.zincrby(arena, -1, data.aname, function(err, newscore){
 					if (!err && newscore < -15){
-						db.zrem("arena"+(data.lv?"1":""), data.aname);
+						db.hmget((data.lv?"B:":"A:")+data.aname, "win", "loss", function(err, wl){
+							if (wl[0] / (wl[0]+wl[1]+1) < .2){
+								db.zrem("arena"+(data.lv?"1":""), data.aname);
+							}
+						});
 					}
 				});
 			});
@@ -416,7 +420,7 @@ io.on("connection", function(socket) {
 	userEvent("foearena", function(data, user){
 		db.zcard("arena"+(data.lv?"1":""), function(err, len){
 			if (!len)return;
-			var cost = 5+data.lv*5;
+			var cost = 5+data.lv*15;
 			if (user.gold < cost)return;
 			user.gold -= cost;
 			var idx = Math.floor(Math.random()*Math.min(len, 20));
