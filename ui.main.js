@@ -403,14 +403,14 @@ function initGame(data, ai) {
 	}
 	var idx, code, decks = [data.urdeck, data.deck];
 	for (var j = 0;j < 2;j++) {
-		if (game.players[j].drawpower > 1){
+		if (game.players(j).drawpower > 1){
 			decks[j] = decks[j].concat(decks[j]);
 		}
 		for (var i = 0;i < decks[j].length;i++) {
 			if (CardCodes[code = decks[j][i]]) {
-				game.players[j].deck.push(CardCodes[code]);
+				game.players(j).deck.push(CardCodes[code]);
 			} else if (~(idx = etg.TrueMarks.indexOf(code))) {
-				game.players[j].mark = idx;
+				game.players(j).mark = idx;
 			}
 		}
 	}
@@ -817,7 +817,7 @@ function makeCardSelector(cardmouseover, cardclick, maxedIndicator){
 				}, editorCardCmp);
 		}
 	}
-	cardsel.next = function(cardpool, cardminus, showall) {		
+	cardsel.next = function(cardpool, cardminus, showall) {
 		var needToMakeCols = poolcache != cardpool;
 		if (needToMakeCols || prevshowall != showall) {
 			prevshowall = showall;
@@ -1981,7 +1981,7 @@ function startMatch() {
 				(function(_i) {
 					handsprite[j][i].click = function() {
 						if (game.phase != etg.PlayPhase) return;
-						var cardinst = game.players[_j].hand[_i];
+						var cardinst = game.players(_j).hand[_i];
 						if (cardinst) {
 							if (!_j && discarding) {
 								endturn.click(null, _i);
@@ -2037,7 +2037,7 @@ function startMatch() {
 				spr.position = pos;
 				spr.click = function() {
 					if (game.phase != etg.PlayPhase) return;
-					var inst = insts ? insts[i] : game.players[_j][i];
+					var inst = insts ? insts[i] : game.players(_j)[i];
 					if (!inst) return;
 					if (game.targetingMode && game.targetingMode(inst)) {
 						delete game.targetingMode;
@@ -2053,13 +2053,13 @@ function startMatch() {
 				return spr;
 			}
 			for (var i = 0;i < 23;i++) {
-				creasprite[j][i] = makeInst(true, game.players[j].creatures, i, ui.creaturePos(j, i));
+				creasprite[j][i] = makeInst(true, game.players(j).creatures, i, ui.creaturePos(j, i));
 			}
 			for (var i = 0;i < 23;i++){
 				gameui.addChild(creasprite[j][j?22-i:i]);
 			}
 			for (var i = 0;i < 16;i++) {
-				permsprite[j][i] = makeInst(false, game.players[j].permanents, i, ui.permanentPos(j, i));
+				permsprite[j][i] = makeInst(false, game.players(j).permanents, i, ui.permanentPos(j, i));
 			}
 			for (var i = 0;i < 16;i++){
 				gameui.addChild(permsprite[j][j?15-i:i]);
@@ -2104,9 +2104,9 @@ function startMatch() {
 			}
 			hptext[j].click = function() {
 				if (game.phase != etg.PlayPhase) return;
-				if (game.targetingMode && game.targetingMode(game.players[_j])) {
+				if (game.targetingMode && game.targetingMode(game.players(_j))) {
 					delete game.targetingMode;
-					game.targetingModeCb(game.players[_j]);
+					game.targetingModeCb(game.players(_j));
 				}
 			}
 		})(j);
@@ -2168,7 +2168,7 @@ function startMatch() {
 			}
 		}
 		for (var j = 0;j < 2;j++) {
-			var pl = game.players[j];
+			var pl = game.players(j);
 			if (j == 0 || game.player1.precognition) {
 				for (var i = 0;i < pl.hand.length;i++) {
 					if (hitTest(handsprite[j][i], pos)) {
@@ -2269,24 +2269,25 @@ function startMatch() {
 		fgfx.beginFill(0, 0);
 		fgfx.lineStyle(2, 0xffffff);
 		for (var j = 0;j < 2;j++) {
+			var pl = game.players(j);
 			for (var i = 0;i < 23;i++) {
-				drawBorder(game.players[j].creatures[i], creasprite[j][i]);
+				drawBorder(pl.creatures[i], creasprite[j][i]);
 			}
 			for (var i = 0;i < 16;i++) {
-				drawBorder(game.players[j].permanents[i], permsprite[j][i]);
+				drawBorder(pl.permanents[i], permsprite[j][i]);
 			}
-			drawBorder(game.players[j].weapon, weapsprite[j]);
-			drawBorder(game.players[j].shield, shiesprite[j]);
+			drawBorder(pl.weapon, weapsprite[j]);
+			drawBorder(pl.shield, shiesprite[j]);
 		}
 		if (game.targetingMode) {
 			fgfx.lineStyle(2, 0xff0000);
 			for (var j = 0;j < 2;j++) {
-				if (game.targetingMode(game.players[j])) {
+				if (game.targetingMode(game.players(j))) {
 					var spr = hptext[j];
 					fgfx.drawRect(spr.position.x - spr.width / 2, spr.position.y - spr.height / 2, spr.width, spr.height);
 				}
-				for (var i = 0;i < game.players[j].hand.length;i++) {
-					if (game.targetingMode(game.players[j].hand[i])) {
+				for (var i = 0;i < game.players(j).hand.length;i++) {
+					if (game.targetingMode(game.players(j).hand[i])) {
 						var spr = handsprite[j][i];
 						fgfx.drawRect(spr.position.x, spr.position.y, spr.width, spr.height);
 					}
@@ -2296,31 +2297,32 @@ function startMatch() {
 		fgfx.lineStyle(0, 0, 0);
 		fgfx.endFill();
 		for (var j = 0;j < 2;j++) {
-			if (game.players[j].sosa) {
+			var pl = game.players(j);
+			if (pl.sosa) {
 				fgfx.beginFill(elecols[etg.Death], .5);
 				var spr = hptext[j];
 				fgfx.drawRect(spr.position.x - spr.width / 2, spr.position.y - spr.height / 2, spr.width, spr.height);
 				fgfx.endFill();
 			}
-			if (game.players[j].flatline) {
+			if (pl.flatline) {
 				fgfx.beginFill(elecols[etg.Death], .3);
 				fgfx.drawRect(handsprite[j][0].position.x - 2, handsprite[j][0].position.y - 2, 124, 164);
 				fgfx.endFill();
 			}
-			if (game.players[j].silence) {
+			if (pl.silence) {
 				fgfx.beginFill(elecols[etg.Aether], .3);
 				fgfx.drawRect(handsprite[j][0].position.x - 2, handsprite[j][0].position.y - 2, 124, 164);
 				fgfx.endFill();
-			} else if (game.players[j].sanctuary) {
+			} else if (pl.sanctuary) {
 				fgfx.beginFill(elecols[etg.Light], .3);
 				fgfx.drawRect(handsprite[j][0].position.x - 2, handsprite[j][0].position.y - 2, 124, 164);
 				fgfx.endFill();
 			}
 			for (var i = 0;i < 8;i++) {
-				maybeSetTexture(handsprite[j][i], getCardImage(game.players[j].hand[i] ? (j == 0 || game.player1.precognition ? game.players[j].hand[i].card.code : "0") : "1"));
+				maybeSetTexture(handsprite[j][i], getCardImage(pl.hand[i] ? (j == 0 || game.player1.precognition ? pl.hand[i].card.code : "0") : "1"));
 			}
 			for (var i = 0;i < 23;i++) {
-				var cr = game.players[j].creatures[i];
+				var cr = pl.creatures[i];
 				if (cr && !(j == 1 && cloakgfx.visible)) {
 					creasprite[j][i].setTexture(getCreatureImage(cr.card));
 					creasprite[j][i].visible = true;
@@ -2333,7 +2335,7 @@ function startMatch() {
 				} else creasprite[j][i].visible = false;
 			}
 			for (var i = 0;i < 16;i++) {
-				var pr = game.players[j].permanents[i];
+				var pr = pl.permanents[i];
 				if (pr && !(j == 1 && cloakgfx.visible && !pr.status.cloak)) {
 					permsprite[j][i].setTexture(getPermanentImage(pr.card.code));
 					permsprite[j][i].visible = true;
@@ -2347,7 +2349,7 @@ function startMatch() {
 					child2.setTexture(pr instanceof etg.Pillar ? nopic : getTextImage(pr.activetext().replace(" losecharge", ""), ui.mkFont(8, pr.card.upped ? "black" : "white")));
 				} else permsprite[j][i].visible = false;
 			}
-			var wp = game.players[j].weapon;
+			var wp = pl.weapon;
 			if (wp && !(j == 1 && cloakgfx.visible)) {
 				weapsprite[j].visible = true;
 				var child = weapsprite[j].getChildAt(0);
@@ -2359,7 +2361,7 @@ function startMatch() {
 				weapsprite[j].setTexture(getWeaponShieldImage(wp.card.code));
 				drawStatus(wp, weapsprite[j]);
 			} else weapsprite[j].visible = false;
-			var sh = game.players[j].shield;
+			var sh = pl.shield;
 			if (sh && !(j == 1 && cloakgfx.visible)) {
 				shiesprite[j].visible = true;
 				var dr = sh.truedr();
@@ -2372,21 +2374,21 @@ function startMatch() {
 				shiesprite[j].alpha = sh.status.immaterial ? .7 : 1;
 				shiesprite[j].setTexture(getWeaponShieldImage(sh.card.code));
 			} else shiesprite[j].visible = false;
-			marksprite[j].setTexture(eicons[game.players[j].mark]);
-			if (game.players[j].markpower != 1){
-				maybeSetText(marktext[j], "x" + game.players[j].markpower);
+			marksprite[j].setTexture(eicons[pl.mark]);
+			if (pl.markpower != 1){
+				maybeSetText(marktext[j], "x" + pl.markpower);
 			}else marktext[j].visible = false;
 			for (var i = 1;i < 13;i++) {
-				maybeSetText(quantatext[j].getChildAt(i*2-2), game.players[j].quanta[i].toString());
+				maybeSetText(quantatext[j].getChildAt(i*2-2), pl.quanta[i].toString());
 			}
-			maybeSetText(hptext[j], game.players[j].hp + "/" + game.players[j].maxhp);
+			maybeSetText(hptext[j], pl.hp + "/" + pl.maxhp);
 			if (hitTest(hptext[j], pos)){
-				setInfo(game.players[j]);
+				setInfo(pl);
 			}
-			var poison = game.players[j].status.poison;
-			var poisoninfo = !poison ? "" : (poison > 0 ? poison + " 1:2" : -poison + " 1:7") + (game.players[j].neuro ? " 1:10" : "");
+			var poison = pl.status.poison;
+			var poisoninfo = !poison ? "" : (poison > 0 ? poison + " 1:2" : -poison + " 1:7") + (pl.neuro ? " 1:10" : "");
 			poisontext[j].setTexture(getTextImage(poisoninfo,16));
-			maybeSetText(decktext[j], game.players[j].deck.length + "cards");
+			maybeSetText(decktext[j], pl.deck.length + "cards");
 			maybeSetText(damagetext[j], !cloakgfx.visible && game.expectedDamage[j] ? "Next HP loss: " + game.expectedDamage[j] : "");
 		}
 		Effect.next(cloakgfx.visible);
@@ -2747,7 +2749,7 @@ document.addEventListener("keydown", function(e) {
 		} else if (e.keyCode == 8) { // bsp
 			cancelFunc();
 		} else if (e.keyCode == 83 || e.keyCode == 87) { // s/w
-			var p = game.players[e.keyCode == 83 ? 0 : 1];
+			var p = game.players(e.keyCode == 83);
 			if (game.targetingMode && game.targetingMode(p)) {
 				delete game.targetingMode;
 				game.targetingModeCb(p);

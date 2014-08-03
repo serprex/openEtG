@@ -10,7 +10,6 @@ function Game(first, seed){
 	this.player2 = new Player(this);
 	this.player1.foe = this.player2;
 	this.player2.foe = this.player1;
-	this.players = [this.player1, this.player2];
 	this.turn = first?this.player1:this.player2;
 	this.expectedDamage = [0, 0];
 	this.time = Date.now();
@@ -208,9 +207,11 @@ Game.prototype.clone = function(){
 	obj.player2 = this.player2.clone(obj);
 	obj.player1.foe = obj.player2;
 	obj.player2.foe = obj.player1;
-	obj.players = [obj.player1, obj.player2];
 	obj.turn = this.turn == this.player1?obj.player1:obj.player2;
 	return obj;
+}
+Game.prototype.players = function(n){
+	return n ? this.player2 : this.player1;
 }
 Game.prototype.setWinner = function(play){
 	if (!this.winner){
@@ -255,7 +256,7 @@ Game.prototype.tgtToBits = function(x) {
 	return bits;
 }
 Game.prototype.bitsToTgt = function(x) {
-	var tgtop = x & 7, player = this.players[x & 8 ? 0 : 1];
+	var tgtop = x & 7, player = this.players(x & 8 ? 0 : 1);
 	if (tgtop == 0) {
 		return undefined;
 	} else if (tgtop == 1) {
@@ -952,14 +953,14 @@ Creature.prototype.calcEclipse = function(){
 	if (this.card.element != Darkness && this.card.element != Death && !this.status.nocturnal){
 		return 0;
 	}
-	var players = this.owner.game.players;
 	var bonus = 0;
 	for (var j=0; j<2; j++){
 		for (var i=0; i<16; i++){
-			if (players[j].permanents[i]){
-				if (players[j].permanents[i].card == Cards.Nightfall){
+			var pl = j == 0 ? c.owner : c.owner.foe;
+			if (pl.permanents[i]){
+				if (pl.permanents[i].card == Cards.Nightfall){
 					bonus = 1;
-				}else if (players[j].permanents[i].card == Cards.Eclipse){
+				}else if (pl.permanents[i].card == Cards.Eclipse){
 					return 2;
 				}
 			}
