@@ -233,8 +233,17 @@ Game.prototype.progressMulligan = function(){
 }
 Game.prototype.updateExpectedDamage = function(){
 	if (this.expectedDamage){
-		this.expectedDamage[0] = this.player2.expectedDamage();
-		this.expectedDamage[1] = this.player1.expectedDamage();
+		this.expectedDamage[0] = this.expectedDamage[1] = 0;
+		for(var i = 0; i<3; i++){
+			var gclone = this.clone();
+			gclone.rng.seed(gclone.rng.mt[0]^(i*997));
+			gclone.turn.endturn();
+			gclone.turn.endturn();
+			this.expectedDamage[0] += this.player1.hp - gclone.player1.hp;
+			this.expectedDamage[1] += this.player2.hp - gclone.player2.hp;
+		}
+		this.expectedDamage[0] = Math.round(this.expectedDamage[0]/3);
+		this.expectedDamage[1] = Math.round(this.expectedDamage[1]/3);
 	}
 }
 Game.prototype.tgtToBits = function(x) {
@@ -256,7 +265,7 @@ Game.prototype.tgtToBits = function(x) {
 	return bits;
 }
 Game.prototype.bitsToTgt = function(x) {
-	var tgtop = x & 7, player = this.players(x & 8);
+	var tgtop = x & 7, player = this.players(!(x & 8));
 	if (tgtop == 0) {
 		return undefined;
 	} else if (tgtop == 1) {
@@ -544,8 +553,7 @@ Creature.prototype.estimateDamage = Weapon.prototype.estimateDamage = function(f
 	return atk;
 }
 Player.prototype.expectedDamage = function() {
-	var totalDamage = 0;
-	var stasisFlag = false, freedomChance = 0;
+	var totalDamage = 0, stasisFlag = false, freedomChance = 0;
 	for(var i=0; i<16; i++){
 		var p;
 		if ((p=this.permanents[i])){
@@ -956,7 +964,7 @@ Creature.prototype.calcEclipse = function(){
 	var bonus = 0;
 	for (var j=0; j<2; j++){
 		for (var i=0; i<16; i++){
-			var pl = j == 0 ? c.owner : c.owner.foe;
+			var pl = j == 0 ? this.owner : this.owner.foe;
 			if (pl.permanents[i]){
 				if (pl.permanents[i].card == Cards.Nightfall){
 					bonus = 1;
