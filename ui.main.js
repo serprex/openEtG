@@ -758,7 +758,6 @@ function makeCardSelector(cardmouseover, cardclick, maxedIndicator){
 	if (maxedIndicator) {
 		var graphics = new PIXI.Graphics();
 		cardsel.addChild(graphics);
-
 	}
 	var elefilter = 0, rarefilter = 0;
 	var columns = [[],[],[],[],[],[]], columnspr = [[],[],[],[],[],[]];
@@ -835,7 +834,7 @@ function makeCardSelector(cardmouseover, cardclick, maxedIndicator){
 					if ((txt.visible = inf || code in cardpool || showall)) {
 						cardAmount = inf ? "-" : !(code in cardpool) ? 0 : (cardpool[code] - (code in cardminus ? cardminus[code] : 0))
 						maybeSetText(txt, cardAmount.toString());
-						if (maxedIndicator && cardAmount >= 6) {
+						if (maxedIndicator && card.type != etg.PillarEnum && cardAmount >= 6) {
 							graphics.beginFill(elecols[etg.Light]);
 							graphics.drawRect(spr.position.x + 100, spr.position.y, 20, 20);
 							graphics.endFill();
