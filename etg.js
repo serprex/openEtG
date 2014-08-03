@@ -256,7 +256,7 @@ Game.prototype.tgtToBits = function(x) {
 	return bits;
 }
 Game.prototype.bitsToTgt = function(x) {
-	var tgtop = x & 7, player = this.players(x & 8 ? 0 : 1);
+	var tgtop = x & 7, player = this.players(x & 8);
 	if (tgtop == 0) {
 		return undefined;
 	} else if (tgtop == 1) {
