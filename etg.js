@@ -233,6 +233,7 @@ Game.prototype.progressMulligan = function(){
 }
 Game.prototype.updateExpectedDamage = function(){
 	if (this.expectedDamage){
+		Effect.disable = true;
 		this.expectedDamage[0] = this.expectedDamage[1] = 0;
 		for(var i = 0; i<3; i++){
 			var gclone = this.clone();
@@ -244,6 +245,7 @@ Game.prototype.updateExpectedDamage = function(){
 		}
 		this.expectedDamage[0] = Math.round(this.expectedDamage[0]/3);
 		this.expectedDamage[1] = Math.round(this.expectedDamage[1]/3);
+		Effect.disable = false;
 	}
 }
 Game.prototype.tgtToBits = function(x) {
