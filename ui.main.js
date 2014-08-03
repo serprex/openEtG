@@ -751,10 +751,15 @@ function adjust(cardminus, code, x) {
 		cardminus[code] += x;
 	} else cardminus[code] = x;
 }
-function makeCardSelector(cardmouseover, cardclick){
+function makeCardSelector(cardmouseover, cardclick, maxedIndicator){
 	var poolcache;
 	var cardsel = new PIXI.DisplayObjectContainer();
 	cardsel.interactive = true;
+	if (maxedIndicator) {
+		var graphics = new PIXI.Graphics();
+		cardsel.addChild(graphics);
+
+	}
 	var elefilter = 0, rarefilter = 0;
 	var columns = [[],[],[],[],[],[]], columnspr = [[],[],[],[],[],[]];
 	for (var i = 0;i < 13;i++) {
@@ -818,6 +823,7 @@ function makeCardSelector(cardmouseover, cardclick){
 			poolcache = cardpool;
 			makeColumns();
 		}
+		if (maxedIndicator) graphics.clear();
 		for (var i = 0;i < 6;i++) {
 			for (var j = 0;j < columns[i].length;j++) {
 				var spr = columnspr[i][j], code = columns[i][j], card = CardCodes[code];
@@ -826,7 +832,13 @@ function makeCardSelector(cardmouseover, cardclick){
 				if (user) {
 					var txt = spr.getChildAt(0), card = CardCodes[code], inf = isFreeCard(card);
 					if ((txt.visible = inf || code in cardpool)) {
-						maybeSetText(txt, inf ? "-" : (cardpool[code] - (code in cardminus ? cardminus[code] : 0)).toString());
+						cardAmount = inf ? "-" : (cardpool[code] - (code in cardminus ? cardminus[code] : 0))
+						maybeSetText(txt, cardAmount.toString());
+						if (maxedIndicator && cardAmount >= 6) {
+							graphics.beginFill(elecols[etg.Life]);
+							graphics.drawRect(spr.position.x + 100, spr.position.y, 20, 20);
+							graphics.endFill();
+						}
 					}
 				}
 			}
@@ -1272,7 +1284,7 @@ function upgradestore() {
 			tinfo2.setText((card.rarity > 0 || card.upped) && card.rarity < 5 ?
 				"Sells for " + cardValues[card.rarity] * (card.upped ? 5 : 1) + " gold." : "");
 			twarning.setText("");
-		}
+		}, true
 	);
 	upgradeui.addChild(cardsel);
 	var cardpool, selectedCard;
@@ -1736,7 +1748,7 @@ function startEditor(arena, acard, startempty) {
 				}
 				editordeck.splice(i, 0, code);
 			}
-		}
+		}, !arena
 	);
 	editorui.addChild(cardsel);
 	var cardArt = new PIXI.Sprite(nopic);
