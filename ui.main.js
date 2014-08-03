@@ -2384,7 +2384,7 @@ function startArenaInfo(info) {
 	stage.addChild(winloss);
 	var batch = new PIXI.SpriteBatch();
 	stage.addChild(batch);
-	var infotext = makeText(300, 470, "You get 3 gold every time your arena deck wins, \nand 1 gold every time it loses.");
+	var infotext = makeText(300, 470, "You get 3 gold every time your arena deck wins,\nand 1 gold every time it loses.");
 	stage.addChild(infotext);
 	if (user.ocard){
 		var uocard = info.lv ? CardCodes[user.ocard].asUpped(true).code : user.ocard;
