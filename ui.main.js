@@ -752,7 +752,7 @@ function adjust(cardminus, code, x) {
 	} else cardminus[code] = x;
 }
 function makeCardSelector(cardmouseover, cardclick, maxedIndicator){
-	var poolcache;
+	var poolcache, prevshowall;
 	var cardsel = new PIXI.DisplayObjectContainer();
 	cardsel.interactive = true;
 	if (maxedIndicator) {
@@ -813,13 +813,14 @@ function makeCardSelector(cardmouseover, cardclick, maxedIndicator){
 			columns[i] = etg.filtercards(i > 2,
 				function(x) { return x.element == elefilter &&
 					((i % 3 == 0 && x.type == etg.CreatureEnum) || (i % 3 == 1 && x.type <= etg.PermanentEnum) || (i % 3 == 2 && x.type == etg.SpellEnum)) &&
-					(!user || x in poolcache || isFreeCard(x)) && (!rarefilter || rarefilter == x.rarity);
+					(!user || x in poolcache || isFreeCard(x) || prevshowall) && (!rarefilter || rarefilter == x.rarity);
 				}, editorCardCmp);
 		}
 	}
-	cardsel.next = function(cardpool, cardminus){
+	cardsel.next = function(cardpool, cardminus, showall) {		
 		var needToMakeCols = poolcache != cardpool;
-		if (needToMakeCols){
+		if (needToMakeCols || prevshowall != showall) {
+			prevshowall = showall;
 			poolcache = cardpool;
 			makeColumns();
 		}
@@ -831,8 +832,8 @@ function makeCardSelector(cardmouseover, cardclick, maxedIndicator){
 				spr.visible = true;
 				if (user) {
 					var txt = spr.getChildAt(0), card = CardCodes[code], inf = isFreeCard(card);
-					if ((txt.visible = inf || code in cardpool)) {
-						cardAmount = inf ? "-" : (cardpool[code] - (code in cardminus ? cardminus[code] : 0))
+					if ((txt.visible = inf || code in cardpool || showall)) {
+						cardAmount = inf ? "-" : !(code in cardpool) ? 0 : (cardpool[code] - (code in cardminus ? cardminus[code] : 0))
 						maybeSetText(txt, cardAmount.toString());
 						if (maxedIndicator && cardAmount >= 6) {
 							graphics.beginFill(elecols[etg.Light]);
@@ -1559,6 +1560,7 @@ function startEditor(arena, acard, startempty) {
 		etgutil.iterraw(user.pool, incrpool);
 		etgutil.iterraw(user.accountbound, incrpool);
 	}
+	var showAll = false;
 	chatArea.value = "Build a " + (arena?35:30) + "-60 card deck";
 	var editorui = new PIXI.DisplayObjectContainer();
 	editorui.interactive = true;
@@ -1684,6 +1686,10 @@ function startEditor(arena, acard, startempty) {
 				button.click = switchDeckCb(i);
 				editorui.addChild(button);
 			}
+
+			var bshowall = makeButton(5, 550, "Show All")
+			bshowall.click = function() { showAll = !showAll }
+			editorui.addChild(bshowall);
 		}
 	}
 	var editordecksprites = [];
@@ -1755,7 +1761,7 @@ function startEditor(arena, acard, startempty) {
 	cardArt.position.set(734, 8);
 	editorui.addChild(cardArt);
 	refreshRenderer(editorui, function() {
-		cardsel.next(cardpool, cardminus);
+		cardsel.next(cardpool, cardminus, showAll);
 		for (var i = 0;i < editordeck.length;i++) {
 			editordecksprites[i].visible = true;
 			editordecksprites[i].setTexture(getCardImage(editordeck[i]));
