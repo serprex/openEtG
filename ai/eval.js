@@ -414,7 +414,7 @@ module.exports = function(game) {
 	var gamevalue = 0;
 	for (var j = 0; j < 2; j++) {
 		logNest(j);
-		var pscore = 0, player = j == 0 ? game.turn : game.turn.foe;
+		var pscore = 0, player = game.players(j);
 		pscore += evalthing(player.weapon);
 		pscore += evalthing(player.shield);
 		logNest("creas");
