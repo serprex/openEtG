@@ -840,7 +840,7 @@ function makeCardSelector(cardmouseover, cardclick){
 function startMenu() {
 	var helpTexts = [
 		"Each card in your booster pack has a 40% chance of being from the chosen element.",
-		"Your arena deck will earn you 1 or 2 gold per win, depending on its tier.",
+		"Your arena deck will earn you 3 gold per win & 1 gold per loss.",
 		"Colosseum lets you compete in a number of daily events for extra prizes. The colosseum challenges reset daily.",
 		"Be sure to try the Proving Grounds Quests for some good cards.",
 		"Be sure to keep track of the rarity icons; Grey means Common, Green means Uncommon, Blue means Rare, Orange means Shard, & Pink means Ultra Rare",
@@ -2229,7 +2229,7 @@ function startMatch() {
 				cancel.setText(game.phase != etg.PlayPhase ? "Mulligan" : game.targetingMode || discarding || resigning ? "Cancel" : null);
 			}else cancel.visible = endturn.visible = false;
 		}else{
-			winnername.setText((game.winner == game.player1 ? "Won " : "Lost ") + game.ply);
+			winnername.setText(game.winner == game.player1 ? "Won" : "Lost");
 			endturn.setText("Continue");
 		}
 		maybeSetText(turntell, discarding ? "Discard" : game.targetingMode ? game.targetingText : game.turn == game.player1 ? "Your Turn" : "Their Turn");
@@ -2384,7 +2384,7 @@ function startArenaInfo(info) {
 	stage.addChild(winloss);
 	var batch = new PIXI.SpriteBatch();
 	stage.addChild(batch);
-	var infotext = makeText(300, 470, "You get " + (info.lv + 1) + " gold every time your arena deck wins.");
+	var infotext = makeText(300, 470, "You get 3 gold every time your arena deck wins, \nand 1 gold every time it loses.");
 	stage.addChild(infotext);
 	if (user.ocard){
 		var uocard = info.lv ? CardCodes[user.ocard].asUpped(true).code : user.ocard;
