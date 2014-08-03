@@ -835,7 +835,7 @@ function makeCardSelector(cardmouseover, cardclick, maxedIndicator){
 						cardAmount = inf ? "-" : (cardpool[code] - (code in cardminus ? cardminus[code] : 0))
 						maybeSetText(txt, cardAmount.toString());
 						if (maxedIndicator && cardAmount >= 6) {
-							graphics.beginFill(elecols[etg.Life]);
+							graphics.beginFill(elecols[etg.Light]);
 							graphics.drawRect(spr.position.x + 100, spr.position.y, 20, 20);
 							graphics.endFill();
 						}
