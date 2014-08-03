@@ -1304,7 +1304,7 @@ upkeep:function(c,t){
 	}
 },
 upload:function(c,t){
-	Effect.mkText(2 + "|" + 0, t);
+	Effect.mkText("2|0", t);
 	t.atk += c.dmg(2);
 },
 vampire:function(c,t, dmg){

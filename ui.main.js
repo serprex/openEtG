@@ -20,7 +20,7 @@ if (localStorage){
 })();
 var Cards, CardCodes, Targeting;
 (function(){
-var game, discarding, user, renderer, endturnFunc, cancelFunc, foeDeck, player2summon, player2Cards, guestname, cardChosen, newCards, muteset = {};
+var discarding, user, renderer, endturnFunc, cancelFunc, foeDeck, player2summon, player2Cards, guestname, cardChosen, newCards, muteset = {};
 var etgutil = require("./etgutil");
 var userutil = require("./userutil");
 var etg = require("./etg");
@@ -378,7 +378,7 @@ function initLibrary(pool){
 	});
 }
 function initGame(data, ai) {
-	game = new etg.Game(data.first, data.seed);
+	var game = new etg.Game(data.first, data.seed);
 	if (data.hp) {
 		game.player2.maxhp = game.player2.hp = data.hp;
 	}
@@ -421,7 +421,8 @@ function initGame(data, ai) {
 	if (ai) {
 		game.ai = true;
 	}
-	startMatch();
+	startMatch(game);
+	return game;
 }
 function getDeck(limit) {
 	var deck = user ? user.decks[user.selectedDeck] || [] : (deckimport.value || "").split(" ");
@@ -442,7 +443,7 @@ function count(haystack, needle){
 		else return c;
 	}
 }
-function victoryScreen() {
+function victoryScreen(game) {
 	var victoryui = new PIXI.DisplayObjectContainer();
 	victoryui.interactive = true;
 	var winner = game.winner == game.player1;
@@ -469,7 +470,6 @@ function victoryScreen() {
 		}
 		else
 			startMenu();
-		game = undefined;
 	}
 	victoryui.addChild(bexit);
 	if (winner){
@@ -507,49 +507,37 @@ function deckMorph(deck,MorphFrom,morphTo) {
 	return deckout;
 }
 
-function mkDemigod(daily) {
+function mkPremade(name, daily) {
 	return function() {
 		var urdeck = getDeck();
 		if (urdeck.length < (user ? 31 : 11)) {
 			startEditor();
 			return;
 		}
+		var cost = name == "mage" ? 5 : 20;
 		if (user && !daily) {
-			if (user.gold < 20) {
-				chatArea.value = "Requires 20\u00A4";
+			if (user.gold < cost) {
+				chatArea.value = "Requires " + cost + "\u00A4";
 				return;
 			}
-			userExec("addgold", { g: -20 });
+			userExec("addgold", { g: -cost });
 		}
-		var demigod = daily ? aiDecks.demigod[user.dailydg] : aiDecks.giveRandom("demigod");
-		var dgname = "Demigod\n" + demigod[0];
-		var deck = (!user && aideck.value) || demigod[1];
+		var foedata = daily ? aiDecks[name][name == "mage" ? user.dailymage : user.dailydg] : aiDecks.giveRandom(name);
+		var foename = name + "\n" + foedata[0];
+		var deck = (!user && aideck.value) || foedata[1];
 		deck = (deck + " " + deck).split(" ");
-		initGame({ first: Math.random() < .5, deck: deck, urdeck: urdeck, seed: Math.random() * etgutil.MAX_INT, hp: 200, aimarkpower: 3, aidrawpower: 2, foename: dgname }, true);
+		var gameData = { first: Math.random() < .5, deck: deck, urdeck: urdeck, seed: Math.random() * etgutil.MAX_INT, foename: foename };
+		if (name == "mage"){
+			gameData.hp = 125;
+		}else{
+			gameData.hp = 200;
+			gameData.aimarkpower = 3;
+			gameData.aidrawpower = 2;
+		}
+		var game = initGame(gameData, true);
 		game.cost = daily ? 0 : 20;
 		game.level = 3;
-	}
-}
-function mkMage(daily) {
-	return function() {
-		var urdeck = getDeck();
-		if (urdeck.length < (user ? 31 : 11)) {
-			startEditor();
-			return;
-		}
-		if (user && !daily) {
-			if (user.gold < 5) {
-				chatArea.value = "Requires 5\u00A4";
-				return;
-			}
-			userExec("addgold", { g: -5 });
-		}
-
-		var mage = daily ? aiDecks.mage[user.dailymage] : aiDecks.giveRandom("mage");
-		var deck = ((!user && aideck.value) || mage[1]).split(" ");
-		initGame({ first: Math.random() < .5, deck: deck, urdeck: urdeck, seed: Math.random() * etgutil.MAX_INT, hp: 125, foename: mage[0] }, true);
-		game.cost = daily ? 0 : 5;
-		game.level = 1;
+		return game;
 	}
 }
 function mkQuestAi(questname, stage, area) {
@@ -573,7 +561,7 @@ function mkQuestAi(questname, stage, area) {
 	if (urdeck.length < (user ? 31 : 11)) {
 		return "ERROR: Your deck is invalid or missing! Please exit and create a valid deck in the deck editor.";
 	}
-	initGame({ first: Math.random() < .5, deck: deck, urdeck: urdeck, seed: Math.random() * etgutil.MAX_INT, hp: hp, aimarkpower: markpower, foename: foename, urhp: playerHPstart, aidrawpower: drawpower }, true);
+	var game = initGame({ first: Math.random() < .5, deck: deck, urdeck: urdeck, seed: Math.random() * etgutil.MAX_INT, hp: hp, aimarkpower: markpower, foename: foename, urhp: playerHPstart, aidrawpower: drawpower }, true);
 	game.quest = [questname, stage];
 	game.wintext = quest.wintext || "";
 	game.autonext = quest.autonext || false;
@@ -627,9 +615,10 @@ function mkAi(level, daily) {
 			var typeName = ["Commoner", "Mage", "Champion"];
 
 			var foename = typeName[level] + "\n" + randomNames[Math.floor(Math.random() * randomNames.length)];
-			initGame({ first: Math.random() < .5, deck: deck, urdeck: urdeck, seed: Math.random() * etgutil.MAX_INT, hp: level == 0 ? 100 : level == 1 ? 125 : 150, aimarkpower: level == 2 ? 2 : 1, foename: foename, aidrawpower: level == 2 ? 2 : 1 }, true);
+			var game = initGame({ first: Math.random() < .5, deck: deck, urdeck: urdeck, seed: Math.random() * etgutil.MAX_INT, hp: level == 0 ? 100 : level == 1 ? 125 : 150, aimarkpower: level == 2 ? 2 : 1, foename: foename, aidrawpower: level == 2 ? 2 : 1 }, true);
 			game.cost = gameprice;
 			game.level = level;
+			return game;
 		}
 	}
 }
@@ -721,7 +710,7 @@ function makeText(x, y, txt, vis) {
 	t.position.set(x, y);
 	t.setText = function(x, width){
 		if (x){
-			t.setTexture(getTextImage(x, { font: "14px Verdana", fill: "white", stroke: "black", strokeThickness: 2 },"",width));
+			t.setTexture(getTextImage(x, { font: "14px Verdana", fill: "white", stroke: "black", strokeThickness: 2 }, "", width));
 			t.visible = true;
 		}else{
 			t.visible = false;
@@ -921,7 +910,7 @@ function startMenu() {
 	var bai1 = makeButton(150, 100, "Mage", function() {
 		tinfo.setText("Mages have a few upgraded cards.\nCost: $5");
 	});
-	bai1.click = mkMage();
+	bai1.click = mkPremade("mage");
 	menuui.addChild(bai1);
 
 	var bai2 = makeButton(250, 100, "Champion", function() {
@@ -933,7 +922,7 @@ function startMenu() {
 	var bai3 = makeButton(350, 100, "Demigod", function() {
 		tinfo.setText("Demigods are extremely powerful. Come prepared for anything.\nCost: $20");
 	});
-	bai3.click = mkDemigod();
+	bai3.click = mkPremade("demigod");
 	menuui.addChild(bai3);
 
 	var bquest = makeButton(50, 145, "Quests", function() {
@@ -1433,7 +1422,7 @@ function startStore() {
 		tgold.setText("$" + user.gold);
 	});
 }
-function addToGame(data) {
+function addToGame(game, data) {
 	for (key in data) {
 		if (key == "player1.hp")
 			game.player1.hp = data[key];
@@ -1444,33 +1433,20 @@ function addToGame(data) {
 	}
 }
 function mkDaily(type) {
-	if (type == 1) {
+	if (type < 3) {
 		return function() {
-			var dataNext = { goldreward: 75, endurance: 2, cost: 0, daily: 1 , cardreward: "", noheal: true};
-			mkAi(0, type)();
-			addToGame(dataNext);
+			var dataNext = type == 1 ?
+				{ goldreward: 75, endurance: 2, cost: 0, daily: 1 , cardreward: "", noheal: true} :
+				{ goldreward: 200, endurance: 2, cost: 0, daily: 2, cardreward: "" };
+			var game = mkAi(type == 1 ? 0 : 2, type)();
+			addToGame(game, dataNext);
 			game.dataNext = dataNext;
 		}
 	}
-	else if (type == 2) {
+	else {
 		return function() {
-			var dataNext = { goldreward: 200, endurance: 2, cost: 0, daily: 2, cardreward: "" };
-			mkAi(2, type)();
-			addToGame(dataNext);
-			game.dataNext = dataNext;
-		}
-	}
-	else if (type == 3) {
-		return function() {
-			mkMage(true, type)();
-			game.addonreward = 30;
-			userExec("donedaily", { daily: type });
-		}
-	}
-	else if (type == 4) {
-		return function() {
-			mkDemigod(true, type)();
-			game.addonreward = 100;
+			var game = mkPremade(type == 3 ? "mage" : "demigod", true)();
+			game.addonreward = type == 3 ? 30 : 100;
 			userExec("donedaily", { daily: type });
 		}
 	}
@@ -1484,7 +1460,7 @@ function startColosseum(){
 		var events = [
 			{ name: "Novice Endurance", desc: "Fight 3 Commoners in a row without healing in between. Can try until you win." },
 			{ name: "Expert Endurance", desc: "Fight 3 Champions in a row. Can try until you win" },
-			{ name: "Novice Duel", desc: "Fight " + magename + ", Only one attempt allowed" },
+			{ name: "Novice Duel", desc: "Fight " + magename + ". Only one attempt allowed" },
 			{ name: "Expert Duel", desc: "Fight " + dgname + ". Only one attempt allowed" }
 		];
 
@@ -1798,7 +1774,7 @@ function startElementSelect() {
 	refreshRenderer(stage);
 }
 
-function startMatch() {
+function startMatch(game) {
 	player2summon = function(cardinst) {
 		var sprite = new PIXI.Sprite(nopic);
 		sprite.position.set((foeplays.children.length % 9) * 100, Math.floor(foeplays.children.length / 9) * 20);
@@ -1837,6 +1813,7 @@ function startMatch() {
 		userExec("addloss", { pvp: !game.ai });
 	}
 	gameui = new PIXI.DisplayObjectContainer();
+	gameui.game = game;
 	gameui.interactive = true;
 	gameui.addChild(new PIXI.Sprite(backgrounds[4]));
 	var cloakgfx = new PIXI.Graphics();
@@ -1890,15 +1867,15 @@ function startMatch() {
 						}
 						data.endurance--;
 						mkAi(game.level, game.daily)();
-						addToGame(data);
+						addToGame(game, data);
 						game.dataNext = data;
 					}
 					else {
 						userExec("donedaily", { daily: game.daily });
-						victoryScreen();
+						victoryScreen(game);
 					}
 				}else {
-					victoryScreen();
+					victoryScreen(game);
 				}
 			}
 			else {
@@ -2576,9 +2553,11 @@ function getTextImage(text, font, bgcolor, width) {
 
 var cmds = {};
 cmds.endturn = function(data) {
-	game.player2.endturn(data);
+	if (gameui) gameui.game.player2.endturn(data);
 }
 cmds.cast = function(bits) {
+	if (!gameui) return;
+	var game = gameui.game;
 	var c = game.bitsToTgt(bits & 511), t = game.bitsToTgt((bits >> 9) & 511);
 	console.log("cast: " + c.card.name + " " + (t ? (t instanceof etg.Player ? t == game.player1 : t.card.name) : "-"));
 	if (c instanceof etg.CardInstance) {
@@ -2598,7 +2577,7 @@ socket.on("librarygive", initLibrary);
 socket.on("foearena", function(data) {
 	var deck = etgutil.decodedeck(data.deck);
 	chatArea.value = data.name + ": " + deck.join(" ");
-	initGame({ first: data.seed < etgutil.MAX_INT/2, deck: deck, urdeck: getDeck(), seed: data.seed, hp: data.hp, cost: data.cost, foename: data.name, aidrawpower: data.draw, aimarkpower: data.mark }, true);
+	var game = initGame({ first: data.seed < etgutil.MAX_INT/2, deck: deck, urdeck: getDeck(), seed: data.seed, hp: data.hp, cost: data.cost, foename: data.name, aidrawpower: data.draw, aimarkpower: data.mark }, true);
 	game.arena = data.name;
 	game.level = data.lv?3:1;
 	game.cost = 5+data.lv*15;
@@ -2618,8 +2597,8 @@ socket.on("passchange", function(data) {
 socket.on("endturn", cmds.endturn);
 socket.on("cast", cmds.cast);
 socket.on("foeleft", function(data) {
-	if (game && !game.ai) {
-		game.setWinner(game.player1);
+	if (gameui && !gameui.game.ai) {
+		gameui.game.setWinner(gameui.game.player1);
 	}
 });
 socket.on("chat", function(data) {
@@ -2637,6 +2616,8 @@ socket.on("chat", function(data) {
 	}
 });
 socket.on("mulligan", function(data) {
+	if (!gameui) return;
+	var game = gameui.game;
 	if (data === true) {
 		game.progressMulligan();
 	} else {
@@ -2748,7 +2729,7 @@ document.addEventListener("keydown", function(e) {
 		} else if (e.keyCode == 8) { // bsp
 			cancelFunc();
 		} else if (e.keyCode == 83 || e.keyCode == 87) { // s/w
-			var p = game.players(e.keyCode == 83);
+			var game = gameui.game, p = game.players(e.keyCode == 83);
 			if (game.targetingMode && game.targetingMode(p)) {
 				delete game.targetingMode;
 				game.targetingModeCb(p);
