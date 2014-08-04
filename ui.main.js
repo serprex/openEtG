@@ -2422,11 +2422,11 @@ function startMatch(game, foeDeck) {
 			fgfx.drawRect(hptext[j].x - 41, hptext[j].y + yOffset-1, 82, 16);
 			fgfx.endFill();
 			fgfx.beginFill(elecols[etg.Life]);
-			fgfx.drawRect(hptext[j].x - 40, hptext[j].y + yOffset, Math.floor(80 * (pl.hp/ pl.maxhp)), 14);
+			fgfx.drawRect(hptext[j].x - 40, hptext[j].y + yOffset, Math.floor(80 * (Math.max(pl.hp,0)/ pl.maxhp)), 14);
 			fgfx.endFill();
 			if (game.expectedDamage[j]) {
 				fgfx.beginFill(elecols[etg.Time]);
-				fgfx.drawRect(hptext[j].x - 40 + Math.max(Math.floor(80 * (pl.hp - game.expectedDamage[j]) / pl.maxhp),0), hptext[j].y + yOffset, Math.ceil(80*game.expectedDamage[j]/pl.maxhp), 14);
+				fgfx.drawRect(hptext[j].x - 40 + Math.max(Math.floor(80 * (pl.hp - game.expectedDamage[j]) / pl.maxhp),0), hptext[j].y + yOffset, Math.ceil(80*Math.min(game.expectedDamage[j],Math.max(pl.hp,0))/pl.maxhp), 14);
 				fgfx.endFill();
 			}
 			maybeSetText(hptext[j], pl.hp + "/" + pl.maxhp);
