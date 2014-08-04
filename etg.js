@@ -239,7 +239,7 @@ Game.prototype.updateExpectedDamage = function(){
 			var gclone = this.clone();
 			gclone.rng.seed(gclone.rng.mt[0]^(i*997));
 			gclone.turn.endturn();
-			gclone.turn.endturn();
+			if (!gclone.winner) gclone.turn.endturn();
 			this.expectedDamage[0] += this.player1.hp - gclone.player1.hp;
 			this.expectedDamage[1] += this.player2.hp - gclone.player2.hp;
 		}
