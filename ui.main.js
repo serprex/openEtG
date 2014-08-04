@@ -2417,6 +2417,18 @@ function startMatch(game, foeDeck) {
 			for (var i = 1;i < 13;i++) {
 				maybeSetText(quantatext[j].getChildAt(i*2-2), pl.quanta[i].toString());
 			}
+			var yOffset = j == 0 ? 12 : -28
+			fgfx.beginFill(0x000000);
+			fgfx.drawRect(hptext[j].x - 41, hptext[j].y + yOffset-1, 82, 16);
+			fgfx.endFill();
+			fgfx.beginFill(elecols[etg.Life]);
+			fgfx.drawRect(hptext[j].x - 40, hptext[j].y + yOffset, Math.floor(80 * (pl.hp/ pl.maxhp)), 14);
+			fgfx.endFill();
+			if (game.expectedDamage[j]) {
+				fgfx.beginFill(elecols[etg.Time]);
+				fgfx.drawRect(hptext[j].x - 40 + Math.max(Math.floor(80 * (pl.hp - game.expectedDamage[j]) / pl.maxhp),0), hptext[j].y + yOffset, Math.ceil(80*game.expectedDamage[j]/pl.maxhp), 14);
+				fgfx.endFill();
+			}
 			maybeSetText(hptext[j], pl.hp + "/" + pl.maxhp);
 			if (hitTest(hptext[j], pos)){
 				setInfo(pl);
