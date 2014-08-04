@@ -2425,8 +2425,8 @@ function startMatch(game, foeDeck) {
 			fgfx.drawRect(hptext[j].x - 40, hptext[j].y + yOffset, Math.floor(80 * (Math.max(pl.hp,0)/ pl.maxhp)), 14);
 			fgfx.endFill();
 			if (game.expectedDamage[j]) {
-				fgfx.beginFill(elecols[etg.Time]);
-				fgfx.drawRect(hptext[j].x - 40 + Math.max(Math.floor(80 * (pl.hp - game.expectedDamage[j]) / pl.maxhp),0), hptext[j].y + yOffset, Math.ceil(80*Math.min(game.expectedDamage[j],Math.max(pl.hp,0))/pl.maxhp), 14);
+				fgfx.beginFill(game.expectedDamage[j] > 0 ? elecols[etg.Time] : elecols[etg.Water]);
+				fgfx.drawRect(hptext[j].x -40  + Math.floor(80 * (Math.max(pl.hp, 0) / pl.maxhp)), hptext[j].y + yOffset, -Math.floor(80 * Math.min(game.expectedDamage[j], Math.max(pl.hp, 0)) / pl.maxhp), 14);
 				fgfx.endFill();
 			}
 			maybeSetText(hptext[j], pl.hp + "/" + pl.maxhp);
