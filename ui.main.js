@@ -542,7 +542,7 @@ function mkPremade(name, daily) {
 			}
 			userExec("addgold", { g: -cost });
 		}
-		var foedata = daily ? aiDecks[name][name == "mage" ? user.dailymage : user.dailydg] : aiDecks.giveRandom(name);
+		var foedata = daily ? aiDecks[name][user[name == "mage" ? "dailymage" : "dailydg"]] : aiDecks.giveRandom(name);
 		var foename = name + "\n" + foedata[0];
 		var deck = (!user && aideck.value) || foedata[1];
 		deck = (deck + " " + deck).split(" ");
@@ -1458,7 +1458,7 @@ function mkDaily(type) {
 			var dataNext = type == 1 ?
 				{ goldreward: 75, endurance: 2, cost: 0, daily: 1 , cardreward: "", noheal: true} :
 				{ goldreward: 200, endurance: 2, cost: 0, daily: 2, cardreward: "" };
-			var game = mkAi(type == 1 ? 0 : 2, type)();
+			var game = mkAi(type == 1 ? 0 : 2, true)();
 			addToGame(game, dataNext);
 			game.dataNext = dataNext;
 		}
@@ -1879,9 +1879,9 @@ function startMatch(game, foeDeck) {
 							data["player1.maxhp"] = game.player1.maxhp;
 						}
 						data.endurance--;
-						mkAi(game.level, game.daily)();
-						addToGame(game, data);
-						game.dataNext = data;
+						var newgame = mkAi(game.level, true)();
+						addToGame(newgame, data);
+						newgame.dataNext = data;
 					}
 					else {
 						userExec("donedaily", { daily: game.daily });
