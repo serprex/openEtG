@@ -1893,7 +1893,6 @@ function startMatch(game, foeDeck) {
 			}
 			else {
 				startMenu();
-				game = undefined;
 			}
 		} else if (game.turn == game.player1) {
 			if (discard == undefined && game.player1.hand.length == 8) {
@@ -1930,10 +1929,9 @@ function startMatch(game, foeDeck) {
 		if (resigning){
 			if (!game.ai) {
 				socket.emit("foeleft");
-			}else{
-				game.setWinner(game.player2);
-				endturn.click();
 			}
+			game.setWinner(game.player2);
+			endturn.click();
 		}else{
 			resign.setText("Confirm");
 			resigning = true;
