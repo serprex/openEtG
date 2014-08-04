@@ -555,8 +555,8 @@ function mkPremade(name, daily) {
 			gameData.aidrawpower = 2;
 		}
 		var game = initGame(gameData, true);
-		game.cost = daily ? 0 : 20;
-		game.level = 3;
+		game.cost = daily ? 0 : cost;
+		game.level = name == "mage" ? 1 : 3;
 		return game;
 	}
 }
