@@ -178,9 +178,12 @@ function dropsock(data){
 		if (info.foe){
 			info.foe.emit("foeleft");
 		}
-		if (info.trade && info.trade.foe){
-			info.trade.foe.emit("tradecanceled");
-			delete sockinfo[sockinfo[this.id].trade.foe.id].trade;
+		if (info.trade){
+			var foesock = usersock[info.trade.foe];
+			if (foesock){
+				foesock.emit("tradecanceled");
+				delete sockinfo[foesock.id].trade;
+			}
 		}
 		delete sockinfo[this.id];
 	}
@@ -268,7 +271,7 @@ io.on("connection", function(socket) {
 	}
 	function foeEcho(event){
 		socket.on(event, function(data){
-			var foe = sockinfo[this.id].trade ? sockinfo[this.id].trade.foe : sockinfo[this.id].foe;
+			var foe = sockinfo[this.id].trade ? usersock[sockinfo[this.id].trade.foe] : sockinfo[this.id].foe;
 			if (foe && foe.id in sockinfo){
 				foe.emit(event, data);
 			}
@@ -509,9 +512,12 @@ io.on("connection", function(socket) {
 		}
 	});
 	userEvent("canceltrade", function (data, user) {
-		sockinfo[this.id].trade.foe.emit("tradecanceled");
-		sockinfo[this.id].trade.foe.emit("chat", { mode:"info", msg: data.u + " have canceled the trade."})
-		delete sockinfo[sockinfo[this.id].trade.foe.id].trade;
+		var foesock = usersock[sockinfo[this.id].trade.foe];
+		if (foesock){
+			foesock.emit("tradecanceled");
+			foesock.emit("chat", { mode:"info", msg: data.u + " have canceled the trade."})
+			delete sockinfo[foesock.id].trade;
+		}
 		delete sockinfo[this.id].trade;
 	});
 	userEvent("confirmtrade", function (data, user) {
@@ -521,24 +527,23 @@ io.on("connection", function(socket) {
 		}
 		thistrade.tradecards = data.cards;
 		thistrade.oppcards = data.oppcards;
-		var thattrade = sockinfo[thistrade.foe.id] && sockinfo[thistrade.foe.id].trade;
-		if (!thattrade){
+		var thatsock = usersock[thistrade.foe];
+		var thattrade = thatsock && sockinfo[thatsock.id] && sockinfo[thatsock.id].trade;
+		var otherUser = users[thistrade.foe];
+		if (!thattrade || !otherUser){
 			socket.emit("tradecanceled");
+			delete sockinfo[this.id].trade;
 			return;
 		} else if (thattrade.accepted) {
-			var other = thistrade.foe, otherUser = users[thistrade.foename];
-			if (!otherUser){
-				return; // Cancel
-			}
 			var player1Cards = thistrade.tradecards, player2Cards = thattrade.tradecards;
 			user.pool = etgutil.removedecks(user.pool, player1Cards);
 			user.pool = etgutil.mergedecks(user.pool, player2Cards);
 			otherUser.pool = etgutil.removedecks(otherUser.pool, player2Cards);
 			otherUser.pool = etgutil.mergedecks(otherUser.pool, player1Cards);
 			this.emit("tradedone", { oldcards: player1Cards, newcards: player2Cards });
-			other.emit("tradedone", { oldcards: player2Cards, newcards: player1Cards });
+			thatsock.emit("tradedone", { oldcards: player2Cards, newcards: player1Cards });
 			delete sockinfo[this.id].trade;
-			delete sockinfo[other.id].trade;
+			delete sockinfo[thatsock.id].trade;
 		} else {
 			thistrade.accepted = true;
 		}
@@ -552,8 +557,8 @@ io.on("connection", function(socket) {
 		if (f in users) {
 			if (trades[f] == u) {
 				delete trades[f];
-				sockinfo[this.id].trade = {foe: usersock[f], foename: f };
-				sockinfo[usersock[f].id].trade = {foe: this, foename: u };
+				sockinfo[this.id].trade = {foe: f};
+				sockinfo[usersock[f].id].trade = {foe: u};
 				this.emit("tradegive", { first: false });
 				usersock[f].emit("tradegive", { first: true });
 			} else {
