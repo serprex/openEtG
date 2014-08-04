@@ -2417,7 +2417,7 @@ function startMatch(game, foeDeck) {
 			for (var i = 1;i < 13;i++) {
 				maybeSetText(quantatext[j].getChildAt(i*2-2), pl.quanta[i].toString());
 			}
-			var yOffset = j == 0 ? 12 : -28
+			var yOffset = j == 0 ? 28 : -44
 			fgfx.beginFill(0x000000);
 			fgfx.drawRect(hptext[j].x - 41, hptext[j].y + yOffset-1, 82, 16);
 			fgfx.endFill();
