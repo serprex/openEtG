@@ -1932,7 +1932,7 @@ function startMatch(game, foeDeck) {
 				socket.emit("foeleft");
 			}else{
 				game.setWinner(game.player2);
-				endturnFunc();
+				endturn.click();
 			}
 		}else{
 			resign.setText("Confirm");
