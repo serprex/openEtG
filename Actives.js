@@ -1238,6 +1238,7 @@ steam:function(c,t){
 	c.defstatus("steamatk", 0);
 	c.status.steamatk += 5;
 	c.atk += 5;
+	if (!c.hasactive("postauto", Actives.decrsteam)) c.addactive("postauto", Actives.decrsteam);
 },
 stoneform:function(c,t){
 	Effect.mkText("0|20", c);
