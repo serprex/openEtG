@@ -900,7 +900,7 @@ function startMenu() {
 	bglobby.interactive = true;
 	bglobby.hitArea = new PIXI.Rectangle(0, 0, 900, 670);
 	bglobby.mouseover = function() {
-		tinfo.setText("Tip: " + helpTexts[tipNumber], 750);
+		tinfo.setText(user ? "Tip: " + helpTexts[tipNumber] : "To register, just type desired username and password in the fields to the right and then click 'Login'", 750);
 	}
 	menuui.addChild(bglobby);
 
@@ -998,7 +998,7 @@ function startMenu() {
 	}
 	menuui.addChild(bdelete);
 
-	var usertoggle = [bquest, bcolosseum, bshop, bupgrade, blogout, bdelete, taiwinloss];
+	var usertoggle = [bquest, bcolosseum, bshop, bupgrade, blogout, bdelete, taiwinloss, bnextTip];
 	for (var i=0; i<2; i++){
 		var baia = makeButton(50, 200+i*50, "Arena AI", (function(cost){return function() {
 			tinfo.setText("In the arena you will face decks from other players.\nCost: $" + cost);
@@ -2425,7 +2425,7 @@ function startMatch(game, foeDeck) {
 			fgfx.drawRect(hptext[j].x - 40, hptext[j].y + yOffset, Math.floor(80 * (Math.max(pl.hp,0)/ pl.maxhp)), 14);
 			fgfx.endFill();
 			if (game.expectedDamage[j]) {
-				fgfx.beginFill(game.expectedDamage[j] > 0 ? elecols[etg.Time] : elecols[etg.Water]);
+				fgfx.beginFill(game.expectedDamage[j] > pl.hp ? elecols[etg.Fire] : game.expectedDamage[j] > 0 ? elecols[etg.Time] : [etg.Water]);
 				fgfx.drawRect(hptext[j].x -40  + Math.floor(80 * (Math.max(pl.hp, 0) / pl.maxhp)), hptext[j].y + yOffset, -Math.floor(80 * Math.min(game.expectedDamage[j], Math.max(pl.hp, 0)) / pl.maxhp), 14);
 				fgfx.endFill();
 			}
