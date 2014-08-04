@@ -141,8 +141,6 @@ function cardRedirect(req, res, next){
 }
 
 var users = {};
-var duels = {};
-var trades = {};
 var usersock = {};
 var rooms = {};
 var sockinfo = {};
@@ -172,7 +170,7 @@ process.on("exit", function(){
 	storeUsers();
 	db.quit();
 });
-function dropsock(data){
+function dropsock(){
 	var info = sockinfo[this.id];
 	if (info){
 		if (info.foe){
@@ -182,7 +180,10 @@ function dropsock(data){
 			var foesock = usersock[info.trade.foe];
 			if (foesock){
 				foesock.emit("tradecanceled");
-				delete sockinfo[foesock.id].trade;
+				var foesockinfo = sockinfo[foesock.id];
+				if (foesockinfo){
+					delete foesockinfo.trade;
+				}
 			}
 		}
 		delete sockinfo[this.id];
@@ -493,20 +494,21 @@ io.on("connection", function(socket) {
 		console.log(u + " requesting " + f);
 		sockinfo[this.id].deck = user.decks.split(",")[user.selectedDeck];
 		sockinfo[this.id].demigod = data.DGmode;
-		if (f in users){
-			if (duels[f] == u) {
-				delete duels[f];
+		var foesock = usersock[f];
+		if (foesock && f in users){
+			if (sockinfo[foesock.id].duel == u) {
+				delete sockinfo[foesock.id].duel;
 				var seed = Math.random() * etgutil.MAX_INT;
 				var first = seed < etgutil.MAX_INT / 2;
-				sockinfo[this.id].foe = usersock[f];
-				sockinfo[usersock[f].id].foe = this;
-				var deck0 = etgutil.decodedeck(sockinfo[usersock[f].id].deck), deck1 = etgutil.decodedeck(sockinfo[this.id].deck);
-				var DG = sockinfo[this.id].demigod, DGfoe = sockinfo[usersock[f].id].demigod;
+				sockinfo[this.id].foe = foesock;
+				sockinfo[foesock.id].foe = this;
+				var deck0 = etgutil.decodedeck(sockinfo[foesock.id].deck), deck1 = etgutil.decodedeck(sockinfo[this.id].deck);
+				var DG = sockinfo[this.id].demigod, DGfoe = sockinfo[foesock.id].demigod;
 				this.emit("pvpgive", { first: first, seed: seed, deck: deck0, urdeck: deck1, foename:f, demigod: DG, foedemigod: DGfoe});
-				usersock[f].emit("pvpgive", { first: !first, seed: seed, deck: deck1, urdeck: deck0, foename:u, demigod:DGfoe, foedemigod:DG});
+				foesock.emit("pvpgive", { first: !first, seed: seed, deck: deck1, urdeck: deck0, foename:u, demigod:DGfoe, foedemigod:DG});
 			} else {
-				duels[u] = f;
-				if (usersock[f]) usersock[f].emit("chat", { msg: u + " wants to duel with you!", mode: "info" });
+				sockinfo[this.id].duel = f;
+				foesock.emit("chat", { msg: u + " wants to duel with you!", mode: "info" });
 				this.emit("chat", { mode: "info", msg: "You have sent a PvP request to " + f + "!" });
 			}
 		}
@@ -554,16 +556,14 @@ io.on("connection", function(socket) {
 			return;
 		}
 		console.log(u + " requesting " + f);
-		if (f in users) {
-			if (trades[f] == u) {
-				delete trades[f];
-				sockinfo[this.id].trade = {foe: f};
-				sockinfo[usersock[f].id].trade = {foe: u};
+		var foesock = usersock[f];
+		if (foesock) {
+			sockinfo[this.id].trade = {foe: f};
+			if (sockinfo[foesock.id].trade.foe == u) {
 				this.emit("tradegive", { first: false });
-				usersock[f].emit("tradegive", { first: true });
+				foesock.emit("tradegive", { first: true });
 			} else {
-				trades[u] = f;
-				if (usersock[f]) usersock[f].emit("chat", { mode: "info", msg: u + " wants to trade with you!" });
+				foesock.emit("chat", { mode: "info", msg: u + " wants to trade with you!" });
 				this.emit("chat", { mode: "info", msg: "You have sent a trade request to " + f + "!" });
 			}
 		}
