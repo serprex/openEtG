@@ -173,8 +173,8 @@ process.on("exit", function(){
 	db.quit();
 });
 function dropsock(data){
-	if (this.id in sockinfo){
-		var info = sockinfo[this.id];
+	var info = sockinfo[this.id];
+	if (info){
 		if (info.foe){
 			info.foe.emit("foeleft");
 		}
@@ -268,7 +268,7 @@ io.on("connection", function(socket) {
 	}
 	function foeEcho(event){
 		socket.on(event, function(data){
-			var foe =  sockinfo[this.id].trade ? sockinfo[this.id].trade.foe : sockinfo[this.id].foe;
+			var foe = sockinfo[this.id].trade ? sockinfo[this.id].trade.foe : sockinfo[this.id].foe;
 			if (foe && foe.id in sockinfo){
 				foe.emit(event, data);
 			}
@@ -515,13 +515,17 @@ io.on("connection", function(socket) {
 		delete sockinfo[this.id].trade;
 	});
 	userEvent("confirmtrade", function (data, user) {
-		var u = data.u, thistrade = sockinfo[this.id].trade, thattrade = thistrade.foetrade;
+		var u = data.u, thistrade = sockinfo[this.id].trade;
 		if (!thistrade){
 			return;
 		}
 		thistrade.tradecards = data.cards;
 		thistrade.oppcards = data.oppcards;
-		if (thattrade.accepted) {
+		var thattrade = sockinfo[thistrade.foe.id] && sockinfo[thistrade.foe.id].trade;
+		if (!thattrade){
+			socket.emit("tradecanceled");
+			return;
+		} else if (thattrade.accepted) {
 			var other = thistrade.foe, otherUser = users[thistrade.foename];
 			if (!otherUser){
 				return; // Cancel
@@ -550,8 +554,6 @@ io.on("connection", function(socket) {
 				delete trades[f];
 				sockinfo[this.id].trade = {foe: usersock[f], foename: f };
 				sockinfo[usersock[f].id].trade = {foe: this, foename: u };
-				sockinfo[this.id].trade.foetrade = sockinfo[usersock[f].id].trade;
-				sockinfo[usersock[f].id].trade.foetrade = sockinfo[this.id].trade;
 				this.emit("tradegive", { first: false });
 				usersock[f].emit("tradegive", { first: true });
 			} else {
