@@ -354,7 +354,7 @@ function initTrade(data) {
 	for (var cmd in cmds){
 		socket.on(cmd, cmds[cmd]);
 	}
-	gameui.endnext = function() {
+	editorui.endnext = function() {
 		for (var cmd in cmds){
 			socket.removeListener(cmd, cmds[cmd]);
 		}

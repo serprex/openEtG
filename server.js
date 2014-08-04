@@ -154,6 +154,9 @@ function storeUsers(){
 }
 function clearInactiveUsers(){
 	for(var u in users){
+		if (!(u in usersock)){
+			delete users[u];
+		}
 		if (u in usersock && !usersock[u].connected){
 			dropsock.call(usersock[u]);
 			delete usersock[u];
@@ -245,12 +248,12 @@ io.on("connection", function(socket) {
 	socket.on("reconnect_failed", dropsock);
 	function userEvent(event, func){
 		socket.on(event, function(data){
-			if (!data){
+			var u;
+			if (!data || !(u = data.u)){
 				return;
 			}
-			var u=data.u;
-			if (!u){
-				return;
+			if (!(this.id in sockinfo)){
+				sockinfo[this.id] = {};
 			}
 			console.log(u+": "+event);
 			if (!(u in users)){
@@ -273,7 +276,7 @@ io.on("connection", function(socket) {
 	function foeEcho(event){
 		socket.on(event, function(data){
 			var foe = sockinfo[this.id].trade ? usersock[sockinfo[this.id].trade.foe] : sockinfo[this.id].foe;
-			if (foe && foe.id in sockinfo){
+			if (foe){
 				foe.emit(event, data);
 			}
 		});
@@ -495,7 +498,7 @@ io.on("connection", function(socket) {
 		sockinfo[this.id].deck = user.decks.split(",")[user.selectedDeck];
 		sockinfo[this.id].demigod = data.DGmode;
 		var foesock = usersock[f];
-		if (foesock && f in users){
+		if (foesock && foesock.id in sockinfo){
 			if (sockinfo[foesock.id].duel == u) {
 				delete sockinfo[foesock.id].duel;
 				var seed = Math.random() * etgutil.MAX_INT;
@@ -517,8 +520,10 @@ io.on("connection", function(socket) {
 		var foesock = usersock[sockinfo[this.id].trade.foe];
 		if (foesock){
 			foesock.emit("tradecanceled");
-			foesock.emit("chat", { mode:"info", msg: data.u + " have canceled the trade."})
-			delete sockinfo[foesock.id].trade;
+			foesock.emit("chat", { mode:"info", msg: data.u + " have canceled the trade."});
+			if (foesock.id in sockinfo){
+				delete sockinfo[foesock.id].trade;
+			}
 		}
 		delete sockinfo[this.id].trade;
 	});
@@ -557,9 +562,10 @@ io.on("connection", function(socket) {
 		}
 		console.log(u + " requesting " + f);
 		var foesock = usersock[f];
-		if (foesock) {
+		if (foesock && foesock.id in sockinfo) {
 			sockinfo[this.id].trade = {foe: f};
-			if (sockinfo[foesock.id].trade.foe == u) {
+			var foetrade = sockinfo[foesock.id].trade;
+			if (foetrade && foetrade.foe == u) {
 				this.emit("tradegive", { first: false });
 				foesock.emit("tradegive", { first: true });
 			} else {
