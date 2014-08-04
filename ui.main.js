@@ -20,7 +20,7 @@ if (localStorage){
 })();
 var Cards, CardCodes, Targeting;
 (function(){
-var discarding, user, renderer, foeDeck, player2Cards, guestname, cardChosen, newCards, muteset = {};
+var discarding, user, renderer, guestname, muteset = {};
 var etgutil = require("./etgutil");
 var userutil = require("./userutil");
 var etg = require("./etg");
@@ -247,7 +247,6 @@ function getWeaponShieldImage(code) {
 	}
 }
 function initTrade(data) {
-	cardChosen = false;
 	var editorui = new PIXI.DisplayObjectContainer();
 	editorui.interactive = true;
 	editorui.addChild(new PIXI.Sprite(backgrounds[0]));
@@ -256,10 +255,9 @@ function initTrade(data) {
 	var bconfirm = makeButton(10, 70, "Confirm");
 	var bconfirmed = new PIXI.Text("Confirmed!", { font: "16px Dosis" });
 	var bcancel = makeButton(10, 10, "Cancel");
-	var selectedCards = [];
-	var selectedCardsprites = [];
-	var player2Cardsprites = [];
-	player2Cards = [];
+	var cardChosen = false;
+	var selectedCards = [], selectedCardsprites = [];
+	var player2Cards = [], player2Cardsprites = [];
 	bcancel.click = function() {
 		userEmit("canceltrade");
 		startMenu();
@@ -340,6 +338,27 @@ function initTrade(data) {
 	var cardArt = new PIXI.Sprite(nopic);
 	cardArt.position.set(734, 8);
 	editorui.addChild(cardArt);
+	var cmds = {
+		cardchosen: function(data){
+			player2Cards = data.cards;
+		},
+		tradedone: function(data) {
+			user.pool = etgutil.mergedecks(user.pool, data.newcards);
+			user.pool = etgutil.removedecks(user.pool, data.oldcards);
+			startMenu();
+		},
+		tradecanceled: function(data) {
+			startMenu();
+		},
+	};
+	for (var cmd in cmds){
+		socket.on(cmd, cmds[cmd]);
+	}
+	gameui.endnext = function() {
+		for (var cmd in cmds){
+			socket.removeListener(cmd, cmds[cmd]);
+		}
+	}
 	refreshRenderer(editorui, function() {
 		cardsel.next(cardpool, cardminus);
 		for (var i = 0;i < player2Cards.length;i++) {
@@ -422,7 +441,7 @@ function initGame(data, ai) {
 	if (ai) {
 		game.ai = true;
 	}
-	startMatch(game);
+	startMatch(game, foeDeck);
 	return game;
 }
 function getDeck(limit) {
@@ -1775,7 +1794,7 @@ function startElementSelect() {
 	refreshRenderer(stage);
 }
 
-function startMatch(game) {
+function startMatch(game, foeDeck) {
 	function drawBorder(obj, spr) {
 		if (obj) {
 			if (game.targetingMode) {
@@ -2111,7 +2130,7 @@ function startMatch(game) {
 		} else if (e.keyCode == 8) { // bsp
 			cancel.click();
 		} else if (e.keyCode == 83 || e.keyCode == 87) { // s/w
-			var p = game.players(e.keyCode == 83);
+			var p = game.players(e.keyCode == 87);
 			if (game.targetingMode && game.targetingMode(p)) {
 				delete game.targetingMode;
 				game.targetingModeCb(p);
@@ -2635,17 +2654,6 @@ socket.on("chat", function(data) {
 		Notification.requestPermission();
 		new Notification(data.u, {body: data.msg}).onclick = window.focus;
 	}
-});
-socket.on("cardchosen", function(data) {
-	player2Cards = data.cards;
-});
-socket.on("tradedone", function(data) {
-	user.pool = etgutil.mergedecks(user.pool, data.newcards);
-	user.pool = etgutil.removedecks(user.pool, data.oldcards);
-	startMenu();
-});
-socket.on("tradecanceled", function(data) {
-	startMenu();
 });
 socket.on("codecard", function(data) {
 	startRewardWindow(data);
