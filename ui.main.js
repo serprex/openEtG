@@ -543,7 +543,7 @@ function mkPremade(name, daily) {
 			userExec("addgold", { g: -cost });
 		}
 		var foedata = daily ? aiDecks[name][user[name == "mage" ? "dailymage" : "dailydg"]] : aiDecks.giveRandom(name);
-		var foename = name + "\n" + foedata[0];
+		var foename = name[0].toUpperCase() + name.slice(1) + "\n" + foedata[0];
 		var deck = (!user && aideck.value) || foedata[1];
 		deck = (deck + " " + deck).split(" ");
 		var gameData = { first: Math.random() < .5, deck: deck, urdeck: urdeck, seed: Math.random() * etgutil.MAX_INT, foename: foename };
