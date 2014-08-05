@@ -2334,22 +2334,21 @@ function startMatch(game, foeDeck) {
 		for (var j = 0;j < 2;j++) {
 			var pl = game.players(j);
 			if (pl.sosa) {
-				fgfx.beginFill(elecols[etg.Death], .5);
 				var spr = hptext[j];
+				fgfx.beginFill(elecols[etg.Death], .5);
 				fgfx.drawRect(spr.position.x - spr.width / 2, spr.position.y - spr.height / 2, spr.width, spr.height);
 				fgfx.endFill();
 			}
-			if (pl.flatline) {
-				fgfx.beginFill(elecols[etg.Death], .3);
-				fgfx.drawRect(handsprite[j][0].position.x - 2, handsprite[j][0].position.y - 2, 124, 164);
-				fgfx.endFill();
+			var statuses = { flatline: etg.Death, silence: etg.Aether, sanctuary: etg.Light };
+			for(var status in statuses){
+				if (pl[status]) {
+					fgfx.beginFill(elecols[statuses[status]], .3);
+					fgfx.drawRect(handsprite[j][0].position.x - 2, handsprite[j][0].position.y - 2, 124, 164);
+					fgfx.endFill();
+				}
 			}
-			if (pl.silence) {
-				fgfx.beginFill(elecols[etg.Aether], .3);
-				fgfx.drawRect(handsprite[j][0].position.x - 2, handsprite[j][0].position.y - 2, 124, 164);
-				fgfx.endFill();
-			} else if (pl.sanctuary) {
-				fgfx.beginFill(elecols[etg.Light], .3);
+			if (pl.nova >= 3){
+				fgfx.beginFill(elecols[etg.Entropy], .3);
 				fgfx.drawRect(handsprite[j][0].position.x - 2, handsprite[j][0].position.y - 2, 124, 164);
 				fgfx.endFill();
 			}

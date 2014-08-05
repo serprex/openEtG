@@ -6,7 +6,7 @@ require("./etg.client").loadcards(function(Cards, CardCodes, Targeting) {
 		[["Drake_XIV", "http://elementscommunity.org/forum/profile/?u=107"],
 			["59b"]],
 		[["jarozaoz", "http://elementscommunity.org/forum/profile/?u=6364"],
-			["4t3", "4vn", "500", "532", "52s", "534", "55k", "568", "59c", "5ff", "5fk", "5fe", "5io", "5le", "5lf", "5ls", "5la", "5li", "5oq", "5op", "5rh", "5s4", "5v8", "62c"]],
+			["4t3", "4vn", "500", "532", "52s", "534", "55k", "568", "59c", "5c2", "5ff", "5fk", "5fe", "5io", "5le", "5lf", "5ls", "5la", "5li", "5oq", "5op", "5rh", "5s4", "5v8", "62c"]],
 		[["mega plini", "http://elementscommunity.org/forum/profile/?u=202"], ["5ig"]],
 		[["OdinVanguard", "http://elementscommunity.org/forum/profile/?u=232"],
 			["4se", "4sf", "4t4", "4td", "4vf", "4vk", "4vo", "52i", "52m", "52o", "52p", "530", "55t", "565", "594", "5c5", "5cr", "5cs", "5f4", "5f6", "5fg", "5fj", "5i8", "5lq", "5oi", "5on", "5or", "5ri", "5ru", "5s1", "5up",

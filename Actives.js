@@ -753,6 +753,12 @@ lobotomize:function(c,t){
 	delete t.status.momentum;
 	delete t.status.psion;
 },
+locket:function(c,t){
+	c.owner.spend(c.status.mode || c.owner.mark, -1);
+},
+locketshift:function(c,t){
+	c.status.mode = t instanceof etg.Player?t.mark:t.card.element;
+},
 losecharge:function(c,t){
 	if(--c.status.charges<0){
 		c.die();
@@ -1006,7 +1012,7 @@ regeneratespell:function(c,t){
 },
 regrade:function(c,t){
 	t.card = t.card.asUpped(!t.card.upped);
-	c.owner.spend(t.card.element, -2);
+	c.owner.spend(t.card.element, -1);
 },
 reinforce:function(c,t){
 	var atk = c.trueatk(), hp = c.truehp()
@@ -1152,6 +1158,7 @@ siphon: function(c, t) {
 },
 siphonactive:function(c,t){
 	Effect.mkText("Siphon", t);
+	lobo(c);
 	for(var key in t.active){
 		if (!(t.active[key].activename in etg.passives)) c.active[key] = t.active[key];
 	}
