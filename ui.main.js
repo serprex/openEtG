@@ -2417,17 +2417,19 @@ function startMatch(game, foeDeck) {
 			for (var i = 1;i < 13;i++) {
 				maybeSetText(quantatext[j].getChildAt(i*2-2), pl.quanta[i].toString());
 			}
-			var yOffset = j == 0 ? 28 : -44
+			var yOffset = j == 0 ? 28 : -44;
 			fgfx.beginFill(0x000000);
 			fgfx.drawRect(hptext[j].x - 41, hptext[j].y + yOffset-1, 82, 16);
 			fgfx.endFill();
-			fgfx.beginFill(elecols[etg.Life]);
-			fgfx.drawRect(hptext[j].x - 40, hptext[j].y + yOffset, Math.floor(80 * (Math.max(pl.hp,0)/ pl.maxhp)), 14);
-			fgfx.endFill();
-			if (game.expectedDamage[j]) {
-				fgfx.beginFill(game.expectedDamage[j] > pl.hp ? elecols[etg.Fire] : game.expectedDamage[j] > 0 ? elecols[etg.Time] : [etg.Water]);
-				fgfx.drawRect(hptext[j].x -40  + Math.floor(80 * (Math.max(pl.hp, 0) / pl.maxhp)), hptext[j].y + yOffset, -Math.floor(80 * Math.min(game.expectedDamage[j], Math.max(pl.hp, 0)) / pl.maxhp), 14);
+			if (pl.hp > 0){
+				fgfx.beginFill(elecols[etg.Life]);
+				fgfx.drawRect(hptext[j].x - 40, hptext[j].y + yOffset, 80 * (plhp / pl.maxhp)), 14);
 				fgfx.endFill();
+				if (game.expectedDamage[j]) {
+					fgfx.beginFill(game.expectedDamage[j] >= pl.hp ? elecols[etg.Fire] : game.expectedDamage[j] > 0 ? elecols[etg.Time] : elecols[etg.Water]);
+					fgfx.drawRect(hptext[j].x - 40 + 80 * pl.hp / pl.maxhp, hptext[j].y + yOffset, -80 * Math.min(game.expectedDamage[j], pl.hp) / pl.maxhp, 14);
+					fgfx.endFill();
+				}
 			}
 			maybeSetText(hptext[j], pl.hp + "/" + pl.maxhp);
 			if (hitTest(hptext[j], pos)){
