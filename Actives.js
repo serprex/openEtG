@@ -571,7 +571,7 @@ heatmirror: function(c, t, fromhand) {
 	}
 },
 holylight:function(c,t){
-	t.dmg(!(t instanceof etg.Player) && (t.card.element == etg.Darkness || t.card.element == etg.Death || t.status.nocturnal)?10:-10);
+	t.dmg(!(t instanceof etg.Player) && t.status.nocturnal?10:-10);
 },
 hope:function(c,t){
 	var dr=0;

@@ -960,7 +960,7 @@ Creature.prototype.evade = function(sender) {
 	}
 }
 Creature.prototype.calcEclipse = function(){
-	if (this.card.element != Darkness && this.card.element != Death && !this.status.nocturnal){
+	if (!this.status.nocturnal){
 		return 0;
 	}
 	var bonus = 0;
