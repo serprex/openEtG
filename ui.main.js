@@ -445,7 +445,7 @@ function initGame(data, ai) {
 	return game;
 }
 function getDeck(limit) {
-	var deck = user ? user.decks[user.selectedDeck] || [] : (deckimport.value || "").split(" ");
+	var deck = user ? etgutil.decodedeck(user.decks[user.selectedDeck]) : (deckimport.value || "").split(" ");
 	if (limit && deck.length > 60){
 		deck.length = 60;
 	}
@@ -647,7 +647,6 @@ var nopic = PIXI.Texture.fromImage("");
 var goldtex, buttex;
 var backgrounds = ["assets/bg_default.png", "assets/bg_lobby.png", "assets/bg_shop.png", "assets/bg_quest.png", "assets/bg_game.png", "assets/bg_questmap.png"];
 var questIcons = [], eicons = [], ricons = [], cardBacks = [], cardBorders = [], boosters = [], popups = [], sicons = [], ticons = [], sborders = [];
-var mapareas = {};
 var preLoader = new PIXI.AssetLoader(["assets/gold.png", "assets/button.png", "assets/questIcons.png", "assets/esheet.png", "assets/raritysheet.png", "assets/backsheet.png",
 	"assets/cardborders.png", "assets/popup_booster.png", "assets/statussheet.png", "assets/statusborders.png", "assets/typesheet.png"].concat(backgrounds));
 var loadingBarProgress = 0, loadingBarGraphic = new PIXI.Graphics();
@@ -1651,8 +1650,8 @@ function startEditor(arena, acard, startempty) {
 			editordeck.push(etg.TrueMarks[editormark]);
 			deckimport.value = editordeck.join(" ");
 			if (user) {
-				userEmit("setdeck", { d: etgutil.encodedeck(editordeck), number: user.selectedDeck });
-				user.decks[user.selectedDeck] = editordeck;
+				user.decks[user.selectedDeck] = etgutil.encodedeck(editordeck);
+				userEmit("setdeck", { d: user.decks[user.selectedDeck], number: user.selectedDeck });
 			}
 			startMenu();
 		}
@@ -1669,8 +1668,8 @@ function startEditor(arena, acard, startempty) {
 			function switchDeckCb(x){
 				return function() {
 					editordeck.push(etg.TrueMarks[editormark]);
-					userEmit("setdeck", { d: etgutil.encodedeck(editordeck), number: user.selectedDeck });
-					user.decks[user.selectedDeck] = editordeck;
+					user.decks[user.selectedDeck] = etgutil.encodedeck(editordeck);
+					userEmit("setdeck", { d: user.decks[user.selectedDeck], number: user.selectedDeck });
 					user.selectedDeck = x;
 					editordeck = getDeck(true);
 					processDeck();
@@ -2418,7 +2417,7 @@ function startMatch(game, foeDeck) {
 				maybeSetText(quantatext[j].getChildAt(i*2-2), pl.quanta[i].toString());
 			}
 			var yOffset = j == 0 ? 28 : -44;
-			fgfx.beginFill(0x000000);
+			fgfx.beginFill(0);
 			fgfx.drawRect(hptext[j].x - 41, hptext[j].y + yOffset-1, 82, 16);
 			fgfx.endFill();
 			if (pl.hp > 0){
@@ -2756,9 +2755,6 @@ function animate() {
 function requestAnimate() { requestAnimFrame(animate); }
 function prepuser(){
 	user.decks = user.decks.split(",");
-	for (var i = 0;i < user.decks.length;i++) {
-		user.decks[i] = user.decks[i] ? etgutil.decodedeck(user.decks[i]) : [];
-	}
 	deckimport.value = getDeck().join(" ");
 	user.pool = user.pool || "";
 	user.accountbound = user.accountbound || "";
