@@ -2,6 +2,7 @@ require("./etg.client").loadcards(function(Cards, CardCodes, Targeting) {
 	var credits = [
 		[["andretimpa", "http://andretimpa.deviantart.com"], ["Element Icons", "assets/esheet.png"], ["Rarity Icons", "assets/raritysheet.png"],
 			["4sa", "4si", "4sk", "4sl", "4sm", "4sn", "4so", "4sp", "4sq", "4ss", "4st", "4su", "4vr", "55s", "6ub"]],
+		[["artimies", "http://elementscommunity.org/forum/profile/?u=140"], ["593"]],
 		[["Drake_XIV", "http://elementscommunity.org/forum/profile/?u=107"],
 			["59b"]],
 		[["jarozaoz", "http://elementscommunity.org/forum/profile/?u=6364"],
