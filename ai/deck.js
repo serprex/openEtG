@@ -66,6 +66,6 @@ module.exports = function(level) {
 			deck.push(upCode(pillars[i * 2]));
 		}
 	}
-	deck.push(etg.TrueMarks[eles[1]]);
+	deck.push(etg.fromTrueMark(eles[1]));
 	return deck;
 }

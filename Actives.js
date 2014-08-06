@@ -571,7 +571,7 @@ heatmirror: function(c, t, fromhand) {
 	}
 },
 holylight:function(c,t){
-	t.dmg(!(t instanceof etg.Player) && (t.card.element == etg.Darkness || t.card.element == etg.Death || t.status.nocturnal)?10:-10);
+	t.dmg(!(t instanceof etg.Player) && t.status.nocturnal?10:-10);
 },
 hope:function(c,t){
 	var dr=0;
@@ -752,6 +752,12 @@ lobotomize:function(c,t){
 	lobo(t);
 	delete t.status.momentum;
 	delete t.status.psion;
+},
+locket:function(c,t){
+	c.owner.spend(c.status.mode || c.owner.mark, -1);
+},
+locketshift:function(c,t){
+	c.status.mode = t instanceof etg.Player?t.mark:t.card.element;
 },
 losecharge:function(c,t){
 	if(--c.status.charges<0){
@@ -1006,7 +1012,7 @@ regeneratespell:function(c,t){
 },
 regrade:function(c,t){
 	t.card = t.card.asUpped(!t.card.upped);
-	c.owner.spend(t.card.element, -2);
+	c.owner.spend(t.card.element, -1);
 },
 reinforce:function(c,t){
 	var atk = c.trueatk(), hp = c.truehp()
@@ -1092,13 +1098,15 @@ scramble:function(c,t){
 	}
 },
 serendipity:function(c,t){
-	var cards = [], num = Math.min(8-c.owner.hand.length, 3), anyentro = false;
-	for(var i=num-1; i>=0; i--){
-		cards[i] = c.owner.randomcard(c.card.upped, function(x){return x.type != etg.PillarEnum && !~etg.NymphList.indexOf(x.code) && !(x.status && x.status.shard) && (i>0 || anyentro || x.element == etg.Entropy)});
-		anyentro |= cards[i].element == etg.Entropy;
-	}
-	for(var i=0; i<num; i++){
-		new etg.CardInstance(cards[i], c.owner).place();
+	if (!t.sanctuary){
+		var cards = [], num = Math.min(8-t.hand.length, 3), anyentro = false;
+		for(var i=num-1; i>=0; i--){
+			cards[i] = t.randomcard(c.card.upped, function(x){return x.type != etg.PillarEnum && !~etg.NymphList.indexOf(x.code) && !(x.status && x.status.shard) && (i>0 || anyentro || x.element == etg.Entropy)});
+			anyentro |= cards[i].element == etg.Entropy;
+		}
+		for(var i=0; i<num; i++){
+			new etg.CardInstance(cards[i], t).place();
+		}
 	}
 },
 silence:function(c,t){
@@ -1152,6 +1160,7 @@ siphon: function(c, t) {
 },
 siphonactive:function(c,t){
 	Effect.mkText("Siphon", t);
+	lobo(c);
 	for(var key in t.active){
 		if (!(t.active[key].activename in etg.passives)) c.active[key] = t.active[key];
 	}

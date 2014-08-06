@@ -372,7 +372,7 @@ io.on("connection", function(socket) {
 					obj.day = getDay() - obj.day;
 					obj.curhp = getAgedHp(obj.hp, obj.day);
 					obj.lv = data.lv;
-					if (rank) obj.rank = rank;
+					if (rank != "") obj.rank = rank;
 					socket.emit("arenainfo", obj);
 				});
 			}

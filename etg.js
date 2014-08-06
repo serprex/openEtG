@@ -179,8 +179,7 @@ var MulliganPhase1 = 0;
 var MulliganPhase2 = 1;
 var PlayPhase = 2;
 var EndPhase = 3;
-var TrueMarks = ["8pi", "8pj", "8pk", "8pl", "8pm", "8pn", "8po", "8pp", "8pq", "8pr", "8ps", "8pt", "8pu"];
-var passives = { airborne: true, voodoo: true, swarm: true, ranged: true, additive: true, stackable: true, salvage: true, token: true, shard: true, poisonous: true, martyr: true, decrsteam: true };
+var passives = { airborne: true, nocturnal: true, voodoo: true, swarm: true, ranged: true, additive: true, stackable: true, salvage: true, token: true, shard: true, poisonous: true, martyr: true, decrsteam: true };
 var PlayerRng = Object.create(Player.prototype);
 PlayerRng.rng = Math.random;
 PlayerRng.upto = function(x){ return Math.floor(Math.random()*x); }
@@ -299,6 +298,13 @@ Player.prototype.shuffle = function(array) {
 		array[index] = temp;
 	}
 	return array;
+}
+function fromTrueMark(x){
+	var code = parseInt(x, 32)-9010;
+	return code >= 9010 && code <= 9022 ? code-9010 : -1;
+}
+function toTrueMark(n){
+	return (n+9010).toString(32);
 }
 function place(array, item){
 	for (var i=0; i<array.length; i++){
@@ -960,7 +966,7 @@ Creature.prototype.evade = function(sender) {
 	}
 }
 Creature.prototype.calcEclipse = function(){
-	if (this.card.element != Darkness && this.card.element != Death && !this.status.nocturnal){
+	if (!this.status.nocturnal){
 		return 0;
 	}
 	var bonus = 0;
@@ -1286,7 +1292,8 @@ exports.clone = clone;
 exports.casttext = casttext;
 exports.getTargetFilter = getTargetFilter;
 exports.NymphList = NymphList;
-exports.TrueMarks = TrueMarks;
+exports.fromTrueMark = fromTrueMark;
+exports.toTrueMark = toTrueMark;
 exports.PlayerRng = PlayerRng;
 exports.Other = 0;
 exports.Entropy = 1;
