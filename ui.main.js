@@ -20,7 +20,7 @@ if (localStorage){
 })();
 var Cards, CardCodes, Targeting;
 (function(){
-var discarding, user, renderer, guestname, muteset = {};
+var discarding, user, guestname, muteset = {};
 var etgutil = require("./etgutil");
 var userutil = require("./userutil");
 var etg = require("./etg");
@@ -74,7 +74,7 @@ function refreshRenderer(stage, animCb) {
 	realStage.next = animCb;
 }
 
-renderer = new PIXI.autoDetectRenderer(900, 600);
+var renderer = new PIXI.autoDetectRenderer(900, 600);
 leftpane.appendChild(renderer.view);
 var realStage = new PIXI.Stage(0x336699, true);
 realStage.click = chatArea.focus.bind(chatArea);
@@ -88,12 +88,12 @@ function maybeLighten(card){
 	return card.upped ? lighten(elecols[card.element]) : elecols[card.element];
 }
 function getBack(ele, upped) {
-	var offset = upped ? 13 : 0;
-	return cardBacks ? cardBacks[ele + offset] : nopic;
+	if (upped) ele += 13;
+	return cardBacks[ele];
 }
 function makeArt(card, art, oldrend) {
 	var rend = oldrend || new PIXI.RenderTexture(132, 256);
-	var template = new PIXI.Graphics();
+	var template = new PIXI.DisplayObjectContainer();
 	template.addChild(new PIXI.Sprite(getBack(card.element, card.upped)));
 	var rarity = new PIXI.Sprite(ricons[card.rarity]);
 	rarity.anchor.set(0, 1);
