@@ -67,7 +67,7 @@
 		var deck = [];
 		var markele;
 		for (var i = 0;i < code.length;i++) {
-			var maybeMark = ~etg.TrueMarks.indexOf(code[i]);
+		    var maybeMark = ~etg.fromTrueMark(code[i]);
 			if (maybeMark) markele = maybeMark;
 			else if (CardCodes[code[i]]) deck.push(CardCodes[code[i]]);
 			else {
