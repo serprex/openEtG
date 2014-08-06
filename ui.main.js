@@ -429,7 +429,7 @@ function initGame(data, ai) {
 		for (var i = 0;i < decks[j].length;i++) {
 			if (CardCodes[code = decks[j][i]]) {
 				game.players(j).deck.push(CardCodes[code]);
-			} else if (~(idx = etg.TrueMarks.indexOf(code))) {
+			} else if (~(idx = etg.fromTrueMark(code))) {
 				game.players(j).mark = idx;
 			}
 		}
@@ -1505,7 +1505,7 @@ function startEditor(arena, acard, startempty) {
 	function processDeck() {
 		for (var i = editordeck.length - 1;i >= 0;i--) {
 			if (!(editordeck[i] in CardCodes)) {
-				var index = etg.TrueMarks.indexOf(editordeck[i]);
+				var index = etg.fromTrueMark(editordeck[i]);
 				if (~index) {
 					editormark = index;
 				}
@@ -1579,7 +1579,7 @@ function startEditor(arena, acard, startempty) {
 				chatArea.value = "35 cards required before submission";
 				return;
 			}
-			editordeck.push(etg.TrueMarks[editormark]);
+			editordeck.push(etg.toTrueMark(editormark));
 			var data = { d: etgutil.encodedeck(editordeck.slice(5)), lv: arena.lv };
 			for(var k in arattr){
 				data[k] = arattr[k];
@@ -1646,7 +1646,7 @@ function startEditor(arena, acard, startempty) {
 		makeattrui(2, "draw");
 	}else{
 		bsave.click = function() {
-			editordeck.push(etg.TrueMarks[editormark]);
+			editordeck.push(etg.toTrueMark(editormark));
 			deckimport.value = editordeck.join(" ");
 			if (user) {
 				user.decks[user.selectedDeck] = etgutil.encodedeck(editordeck);
@@ -1666,7 +1666,7 @@ function startEditor(arena, acard, startempty) {
 		if (user){
 			function switchDeckCb(x){
 				return function() {
-					editordeck.push(etg.TrueMarks[editormark]);
+					editordeck.push(etg.toTrueMark(editormark));
 					user.decks[user.selectedDeck] = etgutil.encodedeck(editordeck);
 					userEmit("setdeck", { d: user.decks[user.selectedDeck], number: user.selectedDeck });
 					user.selectedDeck = x;
@@ -2479,7 +2479,7 @@ function startArenaInfo(info) {
 		var deck = etgutil.decodedeck("05" + info.card + info.deck), mark;
 		chatArea.value = deck.join(" ");
 		for (var i=0; i<deck.length; i++){
-			var ismark = etg.TrueMarks.indexOf(deck[i]);
+			var ismark = etg.fromTrueMark(deck[i]);
 			if (~ismark){
 				mark = ismark;
 				deck.splice(i--, 1);
