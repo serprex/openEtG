@@ -300,7 +300,7 @@ Player.prototype.shuffle = function(array) {
 	return array;
 }
 function fromTrueMark(x){
-	var code = parseInt(x, 32)-9010;
+	var code = parseInt(x, 32);
 	return code >= 9010 && code <= 9022 ? code-9010 : -1;
 }
 function toTrueMark(n){
