@@ -2,8 +2,6 @@
 var Cards, CardCodes, Targeting, game, player1, player2;
 var etg = require("./etg");
 var Actives = require("./Actives");
-var ui = require("./uiutil");
-var gameui = {addChild:function(){}};
 function initTest(){
 	game = new etg.Game(true, 5489);
 	game.player1.mark = game.player2.mark = etg.Entropy;
