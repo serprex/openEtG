@@ -12,7 +12,7 @@ module.exports = function(game, previous) {
 				if (ch in casthash) return;
 				else casthash[ch] = true;
 			}
-			var active = c instanceof etg.CardInstance ? c.card.type == etg.SpellEnum && cardinst.card.active : c.active.cast;
+			var active = c instanceof etg.CardInstance ? c.card.type == etg.SpellEnum && c.card.active : c.active.cast;
 			var cbits = game.tgtToBits(c) ^ 8, tgthash = {}, loglist = n ? {} : undefined;
 			function evalIter(t) {
 				if (t && t.hash){
