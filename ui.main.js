@@ -1064,7 +1064,7 @@ function startMenu() {
 }
 function startRewardWindow(reward, numberofcopies, nocode) {
 	if (!numberofcopies) numberofcopies = 1;
-	var rewordwords = {
+	var rewardwords = {
 		mark: [false, 5],
 		shard: [false, 4],
 		rare: [false, 3],
