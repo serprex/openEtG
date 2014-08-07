@@ -544,7 +544,7 @@ function mkPremade(name, daily) {
 		}
 		var foedata = daily ? aiDecks[name][user[name == "mage" ? "dailymage" : "dailydg"]] : aiDecks.giveRandom(name);
 		var foename = name[0].toUpperCase() + name.slice(1) + "\n" + foedata[0];
-		var deck = (!user && aideck.value.split(" ")) || etgutil.decodedeck(foedata[1]);
+		var deck = (!user && aideck.value) ? aideck.value.split(" ") : etgutil.decodedeck(foedata[1]);
 		var gameData = { first: Math.random() < .5, deck: deck, urdeck: urdeck, seed: Math.random() * etgutil.MAX_INT, foename: foename };
 		if (name == "mage"){
 			gameData.hp = 125;
