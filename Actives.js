@@ -166,7 +166,7 @@ butterfly:function(c,t){
 catapult:function(c,t){
 	Effect.mkText("Catapult", t);
 	t.die();
-	c.owner.foe.dmg(Math.ceil(t.truehp()*(t.frozen?150:100)/(t.truehp()+100)));
+	c.owner.foe.dmg(Math.ceil(t.truehp()*(t.status.frozen?150:100)/(t.truehp()+100)));
 	if (t.status.poison){
 		c.owner.foe.addpoison(t.status.poison);
 	}
@@ -920,7 +920,7 @@ parallel:function(c,t){
 			if (copy.status.delayed){
 				c.owner.foe.delay(copy.status.delayed);
 			}
-			if (copy.status.frozen>c.owner.foe.weapon.frozen){
+			if (copy.status.frozen>c.owner.foe.weapon.status.frozen){
 				c.owner.foe.freeze(copy.status.frozen);
 			}
 		}
@@ -985,6 +985,7 @@ rage:function(c,t){
 	Effect.mkText(dmg+"|-"+dmg, t);
 	t.atk += dmg;
 	t.dmg(dmg);
+	t.status.frozen = 0;
 },
 readiness:function(c,t){
 	Effect.mkText("Ready", t);
@@ -1285,6 +1286,7 @@ tempering:function(c,t){
 	var atk = c.card.upped?5:3;
 	Effect.mkText(atk+"|0", t);
 	t.atk += atk;
+	t.status.frozen = 0;
 },
 throwrock:function(c,t){
 	var dmg = c.card.upped?4:3;

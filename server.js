@@ -520,7 +520,7 @@ io.on("connection", function(socket) {
 		var foesock = usersock[sockinfo[this.id].trade.foe];
 		if (foesock){
 			foesock.emit("tradecanceled");
-			foesock.emit("chat", { mode:"info", msg: data.u + " have canceled the trade."});
+			foesock.emit("chat", { mode:"info", msg: data.u + " has canceled the trade."});
 			if (foesock.id in sockinfo){
 				delete sockinfo[foesock.id].trade;
 			}
