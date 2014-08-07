@@ -1069,6 +1069,7 @@ function startRewardWindow(reward, numberofcopies, nocode) {
 	else if (reward == "mark") rewardList = etg.filtercards(false, function(x) { return x.rarity == 5 });
 	else if (reward == "shard") rewardList = etg.filtercards(false, function(x) { return x.rarity == 4 });
 	else if (reward == "rare") rewardList = etg.filtercards(false, function(x) { return x.rarity == 3 });
+	else if (reward == "uppedrare") rewardList = etg.filtercards(true, function(x) { return x.rarity == 3});
 	else rewardList = [];
 	var rewardui = new PIXI.DisplayObjectContainer();
 	rewardui.interactive = true;
