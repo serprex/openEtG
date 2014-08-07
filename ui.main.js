@@ -1064,25 +1064,29 @@ function startMenu() {
 }
 function startRewardWindow(reward, numberofcopies, nocode) {
 	if (!numberofcopies) numberofcopies = 1;
-	var rewardList;
-	if (reward instanceof Array) rewardList = reward;
-	else if (reward == "mark") rewardList = etg.filtercards(false, function(x) { return x.rarity == 5 });
-	else if (reward == "shard") rewardList = etg.filtercards(false, function(x) { return x.rarity == 4 });
-	else if (reward == "rare") rewardList = etg.filtercards(false, function(x) { return x.rarity == 3 });
-	else if (reward == "uppedrare") rewardList = etg.filtercards(true, function(x) { return x.rarity == 3});
-	else rewardList = [];
+	var rewordwords = {
+		mark: [false, 5],
+		shard: [false, 4],
+		rare: [false, 3],
+		uppedrare: [true, 3],
+	}
+	var rewardList = reward instanceof Array ? reward :
+		reward in rewardwords ? etg.filtercards(rewardwords[reward][0], function(x) { return x.rarity == rewardwords[reward][1] }) :
+		[];
 	var rewardui = new PIXI.DisplayObjectContainer();
 	rewardui.interactive = true;
 	rewardui.addChild(new PIXI.Sprite(backgrounds[0]));
 
-	if (numberofcopies > 0) {
+	if (numberofcopies > 1) {
 		var infotext = makeText(20, 100, "You will get " + numberofcopies + " copies of the card you choose")
 		rewardui.addChild(infotext);
 	}
 
-	var exitButton = makeButton(10, 10, "Exit");
-	exitButton.click = startMenu;
-	if (!nocode) rewardui.addChild(exitButton);
+	if (!nocode){
+		var exitButton = makeButton(10, 10, "Exit");
+		exitButton.click = startMenu;
+		rewardui.addChild(exitButton);
+	}
 
 	var confirmButton = makeButton(10, 40, "Done");
 	confirmButton.click = function() {
@@ -1096,11 +1100,10 @@ function startRewardWindow(reward, numberofcopies, nocode) {
 			}
 		}
 	}
-
 	rewardui.addChild(confirmButton);
 
 	var chosenRewardImage = new PIXI.Sprite(nopic);
-	chosenRewardImage.position.set(450, 20)
+	chosenRewardImage.position.set(450, 20);
 	rewardui.addChild(chosenRewardImage);
 	var chosenReward = null;
 	for (var i = 0; i < rewardList.length; i++) {
@@ -1108,17 +1111,15 @@ function startRewardWindow(reward, numberofcopies, nocode) {
 		card.position.set(100 + Math.floor(i/12) * 130, 272 + (i%12) * 20);
 		(function(_i){
 			card.click = function(){
-				chosenReward = rewardList[_i]
+				chosenReward = rewardList[_i];
+				chosenRewardImage.setTexture(getArt(chosenReward));
 			}
 		})(i);
 		rewardui.addChild(card);
 		setInteractive(card);
 	}
 
-	refreshRenderer(rewardui, function() {
-		if (chosenReward)
-			chosenRewardImage.setTexture(getArt(chosenReward))
-	});
+	refreshRenderer(rewardui);
 }
 
 function startQuest(questname) {
@@ -1811,16 +1812,16 @@ function startMatch(game, foeDeck) {
 		}
 	}
 	function drawStatus(obj, spr) {
-		spr.getChildAt(2).getChildAt(0).visible = obj.status.psion;
-		spr.getChildAt(2).getChildAt(1).visible = obj.status.aflatoxin;
-		spr.getChildAt(2).getChildAt(2).visible = obj.status.poison > 0;
-		spr.getChildAt(2).getChildAt(3).visible = obj.status.airborne || obj.status.ranged;
-		spr.getChildAt(2).getChildAt(4).visible = obj.status.momentum;
-		spr.getChildAt(2).getChildAt(5).visible = obj.status.adrenaline;
-		spr.getChildAt(2).getChildAt(6).visible = obj.status.poison < 0;
-		spr.getChildAt(2).getChildAt(7).visible = obj.status.delayed;
-		spr.getChildAt(2).getChildAt(8).visible = obj == obj.owner.gpull;
-		spr.getChildAt(2).getChildAt(9).visible = obj.status.frozen;
+		spr.getChildAt(0).getChildAt(0).visible = obj.status.psion;
+		spr.getChildAt(0).getChildAt(1).visible = obj.status.aflatoxin;
+		spr.getChildAt(0).getChildAt(2).visible = obj.status.poison > 0;
+		spr.getChildAt(0).getChildAt(3).visible = obj.status.airborne || obj.status.ranged;
+		spr.getChildAt(0).getChildAt(4).visible = obj.status.momentum;
+		spr.getChildAt(0).getChildAt(5).visible = obj.status.adrenaline;
+		spr.getChildAt(0).getChildAt(6).visible = obj.status.poison < 0;
+		spr.getChildAt(0).getChildAt(7).visible = obj.status.delayed;
+		spr.getChildAt(0).getChildAt(8).visible = obj == obj.owner.gpull;
+		spr.getChildAt(0).getChildAt(9).visible = obj.status.frozen;
 		spr.alpha = obj.status.immaterial || obj.status.burrowed ? .7 : 1;
 	}
 	var aiDelay = 0, aiState, aiCommand;
@@ -1998,12 +1999,6 @@ function startMatch(game, foeDeck) {
 			function makeInst(makestatuses, insts, i, pos, scale){
 				if (scale === undefined) scale = 1;
 				var spr = new PIXI.Sprite(nopic);
-				var stattext = new PIXI.Sprite(nopic);
-				stattext.position.set(-32 * scale, -32 * scale);
-				spr.addChild(stattext);
-				var activetext = new PIXI.Sprite(nopic);
-				activetext.position.set(-32 * scale, -42 * scale);
-				spr.addChild(activetext);
 				if (makestatuses){
 					var statuses = new PIXI.SpriteBatch();
 					for (var k=0; k<7; k++){
@@ -2021,6 +2016,12 @@ function startMatch(game, foeDeck) {
 					}
 					spr.addChild(statuses);
 				}
+				var stattext = new PIXI.Sprite(nopic);
+				stattext.position.set(-32 * scale, -32 * scale);
+				spr.addChild(stattext);
+				var activetext = new PIXI.Sprite(nopic);
+				activetext.position.set(-32 * scale, -42 * scale);
+				spr.addChild(activetext);
 				spr.anchor.set(.5, .5);
 				spr.position = pos;
 				spr.click = function() {
@@ -2362,9 +2363,9 @@ function startMatch(game, foeDeck) {
 				if (cr && !(j == 1 && cloakgfx.visible)) {
 					creasprite[j][i].setTexture(getCreatureImage(cr.card));
 					creasprite[j][i].visible = true;
-					var child = creasprite[j][i].getChildAt(0);
+					var child = creasprite[j][i].getChildAt(1);
 					child.setTexture(getTextImage(cr.trueatk() + "|" + cr.truehp(), ui.mkFont(10, cr.card.upped ? "black" : "white"), maybeLighten(cr.card)));
-					var child2 = creasprite[j][i].getChildAt(1);
+					var child2 = creasprite[j][i].getChildAt(2);
 					var activetext = cr.active.cast ? etg.casttext(cr.cast, cr.castele) + cr.active.cast.activename : (cr.active.hit ? cr.active.hit.activename : "");
 					child2.setTexture(getTextImage(activetext, ui.mkFont(8, cr.card.upped ? "black" : "white")));
 					drawStatus(cr, creasprite[j][i]);
@@ -2388,10 +2389,10 @@ function startMatch(game, foeDeck) {
 			var wp = pl.weapon;
 			if (wp && !(j == 1 && cloakgfx.visible)) {
 				weapsprite[j].visible = true;
-				var child = weapsprite[j].getChildAt(0);
+				var child = weapsprite[j].getChildAt(1);
 				child.setTexture(getTextImage(wp.trueatk() + "", ui.mkFont(12, wp.card.upped ? "black" : "white"), maybeLighten(wp.card)));
 				child.visible = true;
-				var child = weapsprite[j].getChildAt(1);
+				var child = weapsprite[j].getChildAt(2);
 				child.setTexture(getTextImage(wp.activetext(), ui.mkFont(12, wp.card.upped ? "black" : "white")));
 				child.visible = true;
 				weapsprite[j].setTexture(getWeaponShieldImage(wp.card.code));
