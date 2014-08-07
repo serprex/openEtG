@@ -2381,7 +2381,7 @@ function startMatch(game, foeDeck) {
 					if (pr instanceof etg.Pillar) {
 						child.setTexture(getTextImage("1:" + (pr.pendstate ? pr.owner.mark : pr.card.element) + " x" + pr.status.charges, ui.mkFont(10, pr.card.upped ? "black" : "white"), maybeLighten(pr.card)));
 					}
-					else if (pr.active.auto.activename == "locket") {
+					else if (pr.active.auto && pr.active.auto.activename == "locket") {
 						child.setTexture(getTextImage("1:" + (pr.status.mode || pr.owner.mark),ui.mkFont(10, pr.card.upped ? "black" : "white"), maybeLighten(pr.card)));
 					}
 					else child.setTexture(getTextImage(pr.status.charges !== undefined ? " " + pr.status.charges : "", ui.mkFont(10, pr.card.upped ? "black" : "white"), maybeLighten(pr.card)));
