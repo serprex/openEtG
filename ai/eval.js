@@ -356,6 +356,7 @@ function evalthing(c) {
 }
 
 function evalcardinstance(cardInst) {
+	if (!cardInst) return 0;
 	var c = cardInst.card;
 	if (!caneventuallyactive(cardInst.card.costele, cardInst.card.cost, cardInst.owner)){
 		return cardInst.card.active && cardInst.card.active.discard == Actives.obsession ? -7 : -2;
