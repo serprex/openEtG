@@ -159,14 +159,12 @@ exports.areas = {
 };
 
 //Dependency functions
-function requireQuest(user, quest) {
-	var listofquests = quest.questdependencies;
-	for (var i = 0;i < listofquests.length;i++) {
-		var quest = user.quest[listofquests[i][0]]
-		if (!quest || quest < listofquests[i][1])
-			return false
-	}
-	return true;
+function requireQuest(user) {
+	var listofquests = this.questdependencies;
+	return this.questdependencies.every(function(dependency){
+		var progress = user.quest[dependency[0]];
+		return progress && progress >= dependency[1];
+	});
 }
 function notComplete() {
 	return false;

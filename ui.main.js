@@ -1169,7 +1169,7 @@ function startQuestWindow(){
 function startQuestArea(area) {
 	for (var i = 0;i < Quest.areas[area].length;i++) {
 		var quest = Quest[Quest.areas[area][i]][0];
-		if ((quest.dependency === undefined) || quest.dependency(user, quest))
+		if ((quest.dependency === undefined) || quest.dependency(user))
 			startQuest(Quest.areas[area][i]);
 	}
 	var questui = new PIXI.DisplayObjectContainer();
