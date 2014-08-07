@@ -445,6 +445,7 @@ Card.prototype.info = function(){
 	}
 }
 Thing.prototype.toString = function(){ return this.card.name; }
+CardInstance.prototype.toString = function() { return "::" + this.card.name; }
 Player.prototype.toString = function(){ return this == this.game.player1?"1":"2"; }
 Card.prototype.toString = function(){ return this.code; }
 Card.prototype.asUpped = function(upped){

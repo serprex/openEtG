@@ -64,7 +64,7 @@ var ActivesValues = {
 	},
 	bravery:3,
 	burrow:1,
-	butterfly:4,
+	butterfly:12,
 	catapult:6,
 	chimera:4,
 	clear:2,
@@ -351,7 +351,7 @@ function evalthing(c) {
 		var delayed = Math.min(delaymix*(c.status.adrenaline?.5:1), 12);
 		score *= 1-(12*delayed/(12+delayed))/16;
 	}
-	log(c.card.name, score);
+	log(c, score);
 	return score;
 }
 
@@ -369,13 +369,17 @@ function evalcardinstance(cardInst) {
 				score += evalactive(cardInst, c.active[key]);
 			}
 		}
+		score += checkpassives(cardInst);
 		if (c.type == etg.CreatureEnum){
 			score += c.attack;
-			var hp = Math.max(c.health, 0);
-			if (c.status && c.status.poison > 0){
-				score -= hp/c.status.poison;
+			var hp = Math.max(c.health, 0), poison = c.status.poison || 0;
+			if (poison > 0){
+				hp = Math.max(hp - poison*2, 0);
+				if (c.status.aflatoxin) score -= 2;
+			}else if (poison < 0){
+				hp += Math.min(-poison, c.maxhp-c.hp);
 			}
-			score *= hp?(c.status && (c.status.immaterial || c.status.burrowed) ? 2 : Math.pow(Math.min(hp, 15), .3)):.2;
+			score *= hp?(c.status.immaterial || c.status.burrowed ? 1.3 : 1+Math.log(Math.min(hp, 33))/7):.2;
 		}else if (c.type == etg.WeaponEnum){
 			score += c.attack;
 			if (cardInst.owner.weapon) score /= 2;
@@ -383,10 +387,9 @@ function evalcardinstance(cardInst) {
 			score += c.health*c.health;
 			if (cardInst.owner.shield) score /= 2;
 		}
-		score += checkpassives(cardInst);
 	}
 	score *= (cardInst.canactive() ? 0.6 : 0.5) * (!cardInst.card.cost || !cardInst.card.costele?1:.9+Math.log(1+cardInst.owner.quanta[cardInst.card.costele])/50);
-	log("::" + c.name, score);
+	log(c, score);
 	return score;
 }
 
