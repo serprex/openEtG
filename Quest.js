@@ -108,7 +108,7 @@ exports.timetemple = [{ deck: "5rg 5rg 5rg 5rg 5rg 5rg 5rg 5rg 5rg 5rg 5rg 5rg 5
 exports.watertemple = [{ deck: "5i4 5i4 5i4 5i4 5i4 5i4 5i4 5i4 5i4 5i4 5i4 5i4 5i4 5i4 5i4 5ie 5ie 5ie 5ie 5id 5id 5id 7go 7go 7go 7go 7go 7go 7go 7go 7go 7go 8pp", hp: 150, name: "Water Guardian", cardreward: ["7go", "7go", "7go"], wintext: "As you defeat the Guardian, he disappears. He leaves some of his magic power behind to you, as a reward.", dependency: requireQuest, questdependencies:[["elementalshrine", 1]] }];
 exports.chromatemple = [{
 	deck: "4vj 4vj 4vj 4vj 4vj 4vj 6qq 6qq 6qq 6qq 6qq 6qq 6u1 6u1 71a 71a 74a 74e 74e 77g 77g 7ah 7ah 7dm 7n0 7n0 7t9 7t9 80a 80a 8pi", name: "Chroma Guardian", hp: 200, drawpower: 2, choicerewards: "uppedrare", rewardamount: 2, wintext: "You have done it. You have completed the battle of the temples. A quest which took you all over the world. The chroma elemental looks at you, pleased. he knows how long it took to get here and he knows how hard it was to win. He is proud of you. As a reward, he offers you a choice of his finest possessions.",
-	dependency: requireQuest, questdependencies:[["athertemple", 1], ["airtemple", 1], ["darktemple", 1], ["deathtemple", 1], ["earthtemple", 1], ["entropytemple", 1], ["firetemple", 1], ["gravitytemple", 1], ["lifetemple", 1], ["lighttemple", 1], ["timetemple", 1], ["watertemple", 1]]
+	dependency: requireQuest, questdependencies:[["aethertemple", 1], ["airtemple", 1], ["darktemple", 1], ["deathtemple", 1], ["earthtemple", 1], ["entropytemple", 1], ["firetemple", 1], ["gravitytemple", 1], ["lifetemple", 1], ["lighttemple", 1], ["timetemple", 1], ["watertemple", 1]]
 }];
 
 
@@ -147,7 +147,7 @@ exports.inventor.info = {
 exports.pgdragon.info = { pos: [[200, 200]], text: ["Fight the Dragon Tamer at the Proving Grounds!"] };
 exports.pgrare.info = { pos: [[250, 200]], text: ["Fight the Master of Arms at the Proving Grounds!"] };
 exports.pgshard.info = { pos: [[225, 250]], text: ["Fight the Gemcutter at the Proving Grounds!"] };
-exports.elementalshrine.info = { pos: [[400,400]], text: ["'You walk up to the shrine. You don't know what to expect. Suddenly, you are attacked by a cloaked figure! Could it be the Shrine Guardian!?"] };
+exports.elementalshrine.info = { pos: [[400,400]], text: ["You walk up to the shrine. You don't know what to expect. Suddenly, you are attacked by a cloaked figure! Could it be the Shrine Guardian!?"] };
 exports.aethertemple.info = { pos: [[500,220]], text: ["As you approach the Aether Temple, you can feel the guardian waiting inside for you. This is it, another step on your quest to defeat the Temple Guardians."] }
 exports.airtemple.info = { pos: [[400,400]], text: ["As you approach the Air Temple, you can feel the guardian waiting inside for you. This is it, another step on your quest to defeat the Temple Guardians."] }
 exports.darktemple.info = { pos: [[200,400]], text: ["As you approach the Dark Temple, you can feel the guardian waiting inside for you. This is it, another step on your quest to defeat the Temple Guardians."] }
@@ -160,7 +160,7 @@ exports.lifetemple.info = { pos: [[550,420]], text: ["As you approach the Life T
 exports.lighttemple.info = { pos: [[200,200]], text: ["As you approach the Light Temple, you can feel the guardian waiting inside for you. This is it, another step on your quest to defeat the Temple Guardians."] }
 exports.timetemple.info = { pos: [[200,300]], text: ["As you approach the Time Temple, you can feel the guardian waiting inside for you. This is it, another step on your quest to defeat the Temple Guardians."] }
 exports.watertemple.info = { pos: [[200,200]], text: ["As you approach the Water Temple, you can feel the guardian waiting inside for you. This is it, another step on your quest to defeat the Temple Guardians."] }
-exports.chromatemple.info = { pos: [[400,340]], text: ["You walk up to the steps of the last temple. It was harsh getting here, but well worth it. This is it."] }
+exports.chromatemple.info = { pos: [[400,340]], text: ["You walk up to the steps of the last temple, the Chroma Temple. It was harsh getting here, but well worth it. This is it."] }
 exports.areas = { forest: ["necromancer", "spirit", "inventor", "lifetemple", "earthtemple", "darktemple"], city: ["bombmaker", "elementalshrine", "aethertemple", "entropytemple", "lighttemple"], desert: ["blacksummoner", "timetemple", "deathtemple", "firetemple", "chromatemple"], ice: ["icecave", "watertemple", "gravitytemple", "airtemple"], provinggrounds: ["pgdragon", "pgrare", "pgshard"] };
 
 //Dependency functions
