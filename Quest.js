@@ -6,30 +6,30 @@ exports.necromancer[2] = { deck: "52g 52g 52g 52g 52g 52g 52g 52g 52g 52g 52g 52
 
 exports.spirit = [];
 exports.spirit[0] = {
-	deck: "606 606 606 606 606 606 606 606 606 606 606 606 5um 5um 5um 5um 5us 5us 5us 5us 5v3 5v3 5v3 5v3 5uu 5uu 5v2 5v2 5va 5va 8pi", name: "Evil Spirit", hp: 150, wintext: "You have defeated the evil spirit and stopped its dark influence from spreading through the land!\n\
-		... But a dark energy is still troubling this region... \n\
-		You sense a cold, chill air coming from a portal looming darkly at the back of the cave."};
+	deck: "606 606 606 606 606 606 606 606 606 606 606 606 5um 5um 5um 5um 5us 5us 5us 5us 5v3 5v3 5v3 5v3 5uu 5uu 5v2 5v2 5va 5va 8pi", name: "Evil Spirit", hp: 150, wintext: "You have defeated the evil spirit and stopped its dark influence from spreading through the land!\
+		... But a dark energy is still troubling this region... \
+		You sense a cold, chill air coming from a portal looming darkly at the back of the cave.", dependency:notComplete};
 exports.spirit[1] = {
-	deck: "50u 50u 50u 50u 50u 50u 50u 50u 50u 50u 50u 50u 50u 50u 50u 50u 50u 50u 4vi 4vi 4vi 4vi 4vh 4vh 4vh 4vl 501 4vn 4vn 5ur 5uq 5uq 5ut 5ut 5ut 5up 5up 5up 5up 5v2 8pt", name: "Portal Guardian", hp: 175, wintext: "The portal guardian lies vanquished, but despite your best efforts you cannot close the portal from this side.\n\
-		Examining the guardian's remains you find an ancient tome which describes the portal before you and the lands beyond\n\
+	deck: "50u 50u 50u 50u 50u 50u 50u 50u 50u 50u 50u 50u 50u 50u 50u 50u 50u 50u 4vi 4vi 4vi 4vi 4vh 4vh 4vh 4vl 501 4vn 4vn 5ur 5uq 5uq 5ut 5ut 5ut 5up 5up 5up 5up 5v2 8pt", name: "Portal Guardian", hp: 175, wintext: "The portal guardian lies vanquished, but despite your best efforts you cannot close the portal from this side.\
+		Examining the guardian's remains you find an ancient tome which describes the portal before you and the lands beyond\
 		The incubus key lies in a large fortress at the center of the realm. You will have to venture forth."
 };
 exports.spirit[2] = {
-	deck: "4vq 4vq 4vq 4vq 4vk 4vk 4vk 4vv 4vv 4vo 542 542 542 542 542 542 542 542 542 542 52v 52v 52v 52v 52k 52k 52n 52n 52n 530 530 534 8pj", name: "Grim Maiden", hp: 175, wintext: "The maiden's swarm of skeletal minions seems endless but they are weak and fall easily.\n\
-		Her pet cats and vultures tear viciously at your allies, but you finally manage to push past them.\n\
-		The Grim Maiden is a truly powerful foe. Her magic wreaking havoc upon your allies.\n\
-		Just as you are about to land the final blow, she vanishes.\n\
-		You can hear her eerie voice echoing off of the wind, growing faint and distant.\n\
+	deck: "4vq 4vq 4vq 4vq 4vk 4vk 4vk 4vv 4vv 4vo 542 542 542 542 542 542 542 542 542 542 52v 52v 52v 52v 52k 52k 52n 52n 52n 530 530 534 8pj", name: "Grim Maiden", hp: 175, wintext: "The maiden's swarm of skeletal minions seems endless but they are weak and fall easily.\
+		Her pet cats and vultures tear viciously at your allies, but you finally manage to push past them.\
+		The Grim Maiden is a truly powerful foe. Her magic wreaking havoc upon your allies.\
+		Just as you are about to land the final blow, she vanishes.\
+		You can hear her eerie voice echoing off of the wind, growing faint and distant.\
 		'Turn back foolish mortal. This road will only lead to your doom. My sisters will not be so forgiving!'"
 };
 exports.spirit[3] = {
-	deck: "5og 5og 5on 5on 5on 5on 5on 5on 5ot 5ot 5ot 5ot 5ot 5ot 6rb 6rb 6rb 6rb 6rb 6rb 6rb 6rb 6rb 6rb 7n6 7n6 7n6 7n6 7n6 7n6 8po", name: "Swamp Gas", wintext: "You escape the deadly explosions, just barely... A massive storm is approaching. You will need shelter.\n\
-		A nearby abandoned mansion may be your only option. Warily you open the door. It creaks forebodingly.\n\
-		You are greated by dank and musty air, but it seems otherwise empty. You sit and wait out the storm.\n\
-		While waiting you could swear you hear footsteps in other rooms and voices talking.\n\
-		However, every search turns up nothing but empty ill kept rooms and dust.\n\
-		Just as you are about to leave, an evil laugh from behind you sends chills down your spine\n\
-		The shadows on the wall begin to move of their own accord. And all the doors slam shut with conviction.\n\
+	deck: "5og 5og 5on 5on 5on 5on 5on 5on 5ot 5ot 5ot 5ot 5ot 5ot 6rb 6rb 6rb 6rb 6rb 6rb 6rb 6rb 6rb 6rb 7n6 7n6 7n6 7n6 7n6 7n6 8po", name: "Swamp Gas", wintext: "You escape the deadly explosions, just barely... A massive storm is approaching. You will need shelter.\
+		A nearby abandoned mansion may be your only option. Warily you open the door. It creaks forebodingly.\
+		You are greated by dank and musty air, but it seems otherwise empty. You sit and wait out the storm.\
+		While waiting you could swear you hear footsteps in other rooms and voices talking.\
+		However, every search turns up nothing but empty ill kept rooms and dust.\
+		Just as you are about to leave, an evil laugh from behind you sends chills down your spine\
+		The shadows on the wall begin to move of their own accord. And all the doors slam shut with conviction.\
 		You turn to face your assailant, apparently a sister of the maiden you fell earlier."
 };
 exports.spirit[4] = {
@@ -56,17 +56,17 @@ exports.spirit[4] = {
 		 "7t6 7tf 7to 7t5 5v8 7t7 7t5 7tj 7t7 7to 5uv 7td 5ul 5v0 7t6 7tg 5ul 5v3 5ul 7td 5um 7t7 " +
 		 "7um 7um 7um 7um 7um 7um 7um 7um 7um 7um 7um 7um 7um 7um 7um 7um 7um 7um 7um 7um 7um 7um 7um 7um 7um 7um 7um " +
 		 "7um 7um 7um 7um 7um 7um 7um 7um 7um 7um 7um 7um 7um 7um 7um 7um 7um 7um 7um 7um 7um 7um 7um 7um 7um"
-	}, wintext: "As the maiden falls, your powers return to normal, and your allies settle back into their original forms.\n\
-		the shadows that gripped and drained your energies recede. Your strength returns to its former glory.\n\
-		You are still feeling tired from the fight, but the storm has passed, leaving an oddly purple sky.\n\
-		In light of recent events, you decide it is probably best to get out while you can, tired or not.\n\
-		Afterall whatever lies down the road has to be less painful than risking encountering another spirit.\n\
-		...right? ... You open the creaky door and head back out down the gravel path.\n\
-		as you take your first step you hear the maiden's silvery voice echoing from the house behind you.\n\
-		'It appears you may be as stong as my sister claims. Your soul shall make a most delectable morsel.\n\
-		'We shall meet again... Don't die before then. I'ld hate to lose my favorite toy.' She fades into the darkness.\n\
-		Off in the distance the storm has settled above the castle, the echos of ominous thunder growing fainter.\n\
-		You hope it will be gone by the time you get there... but given your luck so far, you don't think it will.\n\
+	}, wintext: "As the maiden falls, your powers return to normal, and your allies settle back into their original forms.\
+		the shadows that gripped and drained your energies recede. Your strength returns to its former glory.\
+		You are still feeling tired from the fight, but the storm has passed, leaving an oddly purple sky.\
+		In light of recent events, you decide it is probably best to get out while you can, tired or not.\
+		Afterall whatever lies down the road has to be less painful than risking encountering another spirit.\
+		...right? ... You open the creaky door and head back out down the gravel path.\
+		as you take your first step you hear the maiden's silvery voice echoing from the house behind you.\
+		'It appears you may be as stong as my sister claims. Your soul shall make a most delectable morsel.\
+		'We shall meet again... Don't die before then. I'ld hate to lose my favorite toy.' She fades into the darkness.\
+		Off in the distance the storm has settled above the castle, the echos of ominous thunder growing fainter.\
+		You hope it will be gone by the time you get there... but given your luck so far, you don't think it will.\
 		Storm or not, you didn't come this far just to turn back, so you continue your treck down the path."};
 
 exports.bombmaker = [];
@@ -74,54 +74,105 @@ exports.bombmaker[0] = { deck: "5t2 5t2 5t2 5t2 5t2 5t2 5t2 5t2 5t2 5t2 5t2 5t2 
 exports.bombmaker[1] = { deck: "5rg 5rg 5rg 5rg 5rg 5rg 5rg 5rg 5rg 5rg 5rg 5rg 5rg 5rg 5rg 5rk 5rk 5rk 5rk 5ro 5ro 5ro 5ru 5ru 5ru 5ru 5ru 5ru 5v1 5v1 5v1 5v1 5v1 5v1 7ql 7ql 7ql 7ql 7ql 7ql 8pt", name: "Bomb Maker 2", autonext: true };
 exports.bombmaker[2] = { deck: "5f4 5f4 5f4 5f6 5f6 5f6 5f6 5f6 5f6 5f5 5f5 5f8 5f8 5oc 5oc 5oc 5oc 5oc 5oc 5oc 5oc 5oc 5oc 5oc 5oc 5oc 5oc 5om 5om 5om 5om 5om 5om 5p0 5p0 8po", name: "Bomb Maker 3", markpower: 3, drawpower: 2, cardreward: ["5om", "5om", "5om", "5om", "5s5", "5s5", "5s5", "7ql", "7ql"], wintext: "Congratulations! Here, take some of my bombs as the reward!" };
 
-exports.blacksummoner = [{ deck: "7t5 7t5 7t5 7t5 7t5 7t5 7t5 7t5 7t5 7t5 7t5 7t5 7t5 7t5 7t5 8pt", name: "The Black Summoner", markpower: 12, cardreward: ["7t5", "7t5"], wintext: "You defeat the Dark Summoner that controlled the dragons. The dragons fly away, but two of them stays, looking at you.\nYou decide to let them join you!" }];
+exports.blacksummoner = [{ deck: "7t5 7t5 7t5 7t5 7t5 7t5 7t5 7t5 7t5 7t5 7t5 7t5 7t5 7t5 7t5 8pt", name: "The Black Summoner", markpower: 12, cardreward: ["7t5", "7t5"], wintext: "You defeat the Dark Summoner that controlled the dragons. The dragons fly away, but two of them stays, looking at you.You decide to let them join you!" }];
 
 exports.icecave = [];
-exports.icecave[0] = { deck: "5i4 5i4 5i4 5i4 5i4 5i4 5i4 5i4 5i4 5i4 5i4 5i4 5i4 5i4 5i8 5i8 5i8 5i8 5i8 5i9 5i9 5id 5id 5id 8pp", name: "Snow Storm", hp: 75, wintext: "You get through the storm and finally reach the mysterious cave \nwhere the weapon is said to reside." };
-exports.icecave[1] = { deck: "5i4 5i4 5i4 5i4 5i4 5i4 5i4 5i4 5ik 5ik 5ik 5ik 5ik 5ik 5ia 5ia 5ia 5ib 5ib 5ib 5ic 5ic 5id 5id 5id 5id 8pp", name: "Cave Guardians??", hp: 75, wintext: "You defeat the creatures that were attacking, and can finally take the rare weapon \nthat was hiding in the cave; a Trident! But before you can grab it, you hear strange sounds behind you..." };
+exports.icecave[0] = { deck: "5i4 5i4 5i4 5i4 5i4 5i4 5i4 5i4 5i4 5i4 5i4 5i4 5i4 5i4 5i8 5i8 5i8 5i8 5i8 5i9 5i9 5id 5id 5id 8pp", name: "Snow Storm", hp: 75, wintext: "You get through the storm and finally reach the mysterious cave where the weapon is said to reside." };
+exports.icecave[1] = { deck: "5i4 5i4 5i4 5i4 5i4 5i4 5i4 5i4 5ik 5ik 5ik 5ik 5ik 5ik 5ia 5ia 5ia 5ib 5ib 5ib 5ic 5ic 5id 5id 5id 5id 8pp", name: "Cave Guardians??", hp: 75, wintext: "You defeat the creatures that were attacking, and can finally take the rare weapon that was hiding in the cave; a Trident! But before you can grab it, you hear strange sounds behind you..." };
 exports.icecave[2] = { deck: "4sa 4sa 4sa 4sa 4sa 4sc 4sc 4sc 4sc 4sc 4sc 4sc 4sc 4sc 4sc 5i5 5i5 5im 5iq 5iq 5ic 5il 5il 5ii 5ii 5ie 5ie 5ig 5ig 5ig 8pp", name: "Cave Guardians", hp: 75, wintext: "After defeating the Guardians, you quickly get out of the cave, ready to head home as fast as you can..." };
-exports.icecave[3] = { deck: "5i4 5i4 5i4 5i4 5i4 5i4 5i4 5i4 5i4 5i4 5i4 5i4 5i4 5i4 5i4 5ib 5ib 5ib 5ih 5ih 5i9 5i9 5ig 5ig 7gt 7gt 7gt 7gt 8pp", name: "Ice Storm", hp: 75, wintext: "You finally get though the storm and reach the safety of the city. \nYou got the weapon you were looking for, and some other ice souvenirs as well.", cardreward: ["5i8", "5i8", "5ic"] };
+exports.icecave[3] = { deck: "5i4 5i4 5i4 5i4 5i4 5i4 5i4 5i4 5i4 5i4 5i4 5i4 5i4 5i4 5i4 5ib 5ib 5ib 5ih 5ih 5i9 5i9 5ig 5ig 7gt 7gt 7gt 7gt 8pp", name: "Ice Storm", hp: 75, wintext: "You finally get though the storm and reach the safety of the city. You got the weapon you were looking for, and some other ice souvenirs as well.", cardreward: ["5i8", "5i8", "5ic"] };
 
 exports.inventor = [];
 exports.inventor[0] = {deck: "55k 55k 55k 55k 55k 55k 55k 55k 55k 55k 55k 55k 55k 561 561 561 55m 55m 55m 55m 55m 55m 55s 55s 595 595 595 595 595 595 8pm", name: "Defense Catapults", hp:125, wintext: "You manage to get past the crazy inventor's defense system, and get closer to his big house." };
 exports.inventor[1] = {deck: "5f1 5f1 5f1 5f1 5f1 5f1 5ff 5ff 5ff 5ff 5f7 5f7 5f7 5i4 5i4 5i4 5i4 5i4 5i4 5i4 5ik 5ik 5ik 5ik 5ik 5ik 5ii 5ii 5ii 5ii 8po", name: "Armored Machines", hp:120, wintext: "Defeating the machines that were terrorizing the village, you head inside to face the inventor"};
-exports.inventor[2] = { deck: "5de 5de 5de 5de 5de 5de 5de 5de 5de 5de 5de 5de 5de 5c5 5c5 5c5 5c5 5c5 5c5 5fh 5fh 5fh 5fh 5fh 5fh 5f7 5f7 5f7 5f7 5f7 5f7 8po", name: "Crazy Inventor", hp: 125, wintext: "Even with his inventions, you manage to defeat him. 'No, please, spare me, I will never hurt anyone again!' he cries. \nYou agree to let him go, but only if he leaves the area and never comes back. You see him walking away \nand can't help but thinking that you haven't seen the last of him... On your way out of \nthe house, you find some of his inventions and decide that they can be useful!", cardreward: ["561", "561", "561", "5fh", "5fh", "5ii", "5ii"] };
+exports.inventor[2] = { deck: "5de 5de 5de 5de 5de 5de 5de 5de 5de 5de 5de 5de 5de 5c5 5c5 5c5 5c5 5c5 5c5 5fh 5fh 5fh 5fh 5fh 5fh 5f7 5f7 5f7 5f7 5f7 5f7 8po", name: "Crazy Inventor", hp: 125, wintext: "Even with his inventions, you manage to defeat him. 'No, please, spare me, I will never hurt anyone again!' he cries. You agree to let him go, but only if he leaves the area and never comes back. You see him walking away and can't help but thinking that you haven't seen the last of him... On your way out of the house, you find some of his inventions and decide that they can be useful!", cardreward: ["561", "561", "561", "5fh", "5fh", "5ii", "5ii"] };
 
+//Proving Grounds
 exports.pgdragon = [{ deck: "4sa 4sa 4sa 4sa 4sa 4sa 4sa 4sa 4sa 4sa 4sa 4sa 4sa 4sa 4sa 4sa 4vf 52h 55o 58r 5bt 5f2 5id 5la 5op 5rm 5ul 61t 61t 61t 61t 61t 61t 8pu", name: "Dragon Tamer", hp: 150, wintext: "You have proved your worth for the Dragon Tamer, and he gives you two of his dragons.", choicerewards: ["4vf", "52h", "55o", "58r", "5bt", "5f2", "5id", "5la", "5of", "5rm", "5ul", "61v"], rewardamount:2 }];
 exports.pgrare = [{ deck: "4sa 4sa 4sa 4sa 4sa 4sa 4sa 4sa 4sa 4sa 4vl 52q 536 55s 58v 5c5 5ff 5ff 5ff 5ff 5ff 5ff 5fh 5fh 5fh 5fh 5f7 5ic 5ir 5lh 5oi 5oi 5ol 5ro 5ur 61u 8po", name: "Master of Arms", hp: 150, wintext: "You have proved your worth for the Master of Arms, and he gives you one of his rare cards.", choicerewards: "rare" }];
 exports.pgshard = [{ deck: "4sa 4sa 4sa 4sa 4sa 4sa 4sa 4sa 4sa 4sa 4sa 4sa 50a 50a 53e 53e 56i 56i 59m 59m 59m 59m 59m 59m 5cq 5cq 5fu 5fu 5j2 5j2 5m6 5m6 5pa 5pa 5se 5se 5vi 5vi 62m 62m 8pm", name: "Gemcutter", hp: 150, wintext: "You have proved your worth for the Gemcutter and he gives you one of his shards.", choicerewards: "shard" }];
 
+//Elemental Temples
+exports.elementalshrine = [{ deck: "4sa 4sa 4sa 4sa 4sa 4sa 4sa 4sa 4sa 4sa 4sa 4sa 4vi 4vh 52m 52o 55t 55n 599 58p 5c8 5c7 5f3 5fb 5ia 5i6 5lp 5lr 5on 5ou 5ri 5rr 5v1 5ut 62a 61q 8pi", name: "Shrine Guardian", hp: 100, wintext: "The Shrine Guardian speaks to you: 'You have bested me, but I am only the beginning. Find the Temples and challenge their guardians, and they will reward you! If you defeat them all, you will get access to the Chroma Palace, where the strongest guardian reside.'"}];
+exports.aethertemple = [{ deck: "61o 61o 61o 61o 61o 61o 61o 61o 61o 61o 61o 61o 61o 61o 61o 61u 61u 61u 628 628 628 622 622 80a 80a 80a 80a 80a 80a 80a 80a 80a 80a 8pu", name: "Aether Guardian", hp: 150, cardreward: ["80a", "80a", "80a"], wintext: "As you defeat the Guardian, he disappears. He leaves some of his magic power behind to you, as a reward.", dependency: requireQuest, questdependencies:[["elementalshrine", 1]] }];
+exports.airtemple = [{ deck: "5oc 5oc 5oc 5oc 5oc 5oc 5oc 5oc 5oc 5oc 5oc 5oc 5oc 5oc 5oc 5ou 5ou 5ou 5or 5or 5or 5or 7n1 7n1 7n1 7n1 7n1 7n1 7n1 7n1 7n1 7n1 8pr", hp: 150, name: "Air Guardian", cardreward: ["7n1", "7n1", "7n1"], wintext: "As you defeat the Guardian, he disappears. He leaves some of his magic power behind to you, as a reward.", dependency: requireQuest, questdependencies:[["elementalshrine", 1]] }];
+exports.darktemple = [{ deck: "5uk 5uk 5uk 5uk 5uk 5uk 5uk 5uk 5uk 5uk 5uk 5uk 5uk 5uk 5uk 5uv 5uv 5uv 5ul 5ul 5ul 5ul 7tc 7tc 7tc 7tc 7tc 7tc 7tc 7tc 7tc 7tc 8pt", hp: 150, name: "Dark Guardian", cardreward: ["7tc", "7tc", "7tc"], wintext: "As you defeat the Guardian, he disappears. He leaves some of his magic power behind to you, as a reward.", dependency: requireQuest, questdependencies:[["elementalshrine", 1]] }];
+exports.deathtemple = [{ deck: "52g 52g 52g 52g 52g 52g 52g 52g 52g 52g 52g 52g 52g 537 537 537 535 535 535 718 718 718 718 718 718 718 718 718 718 8pk", hp: 150, name: "Death Guardian", cardreward: ["718", "718", "718"], wintext: "As you defeat the Guardian, he disappears. He leaves some of his magic power behind to you, as a reward.", dependency:requireQuest, questdependencies:[["elementalshrine",1]] }];
+exports.earthtemple = [{ deck: "58o 58o 58o 58o 58o 58o 58o 58o 58o 58u 58u 58u 58u 58u 58u 58r 58r 58r 58r 58r 58r 77l 77l 77l 77l 77l 77l 77l 77l 77l 77l 8pm", hp: 150, name: "Earth Guardian", cardreward: ["77l", "77l", "77l"], wintext: "As you defeat the Guardian, he disappears. He leaves some of his magic power behind to you, as a reward.", dependency: requireQuest, questdependencies:[["elementalshrine", 1]] }];
+exports.entropytemple = [{ deck: "4vc 4vc 4vc 4vc 4vc 4vc 4vc 4vc 4vc 4vc 4vc 4vc 4vc 4vc 4vc 4vd 4vd 4vd 4ve 4ve 4ve 4ve 6u2 6u2 6u2 6u2 6u2 6u2 6u2 6u2 6u2 6u2 8pj", hp: 150, name: "Entropy Guardian", cardreward: ["6u2", "6u2", "6u2"], wintext: "As you defeat the Guardian, he disappears. He leaves some of his magic power behind to you, as a reward.", dependency: requireQuest, questdependencies:[["elementalshrine", 1]] }]
+exports.firetemple = [{ deck: "5f0 5f0 5f0 5f0 5f0 5f0 5f0 5f0 5f0 5f0 5f0 5f0 5f0 5f0 5f3 5f3 5f3 5fc 5fc 5fc 5fc 7dk 7dk 7dk 7dk 7dk 7dk 7dk 7dk 7dk 7dk 8po", name: "Fire Guardian", cardreward: ["7dk", "7dk", "7dk"], hp: 150, wintext: "As you defeat the Guardian, he disappears. He leaves some of his magic power behind to you, as a reward.", dependency: requireQuest, questdependencies:[["elementalshrine", 1]] }];
+exports.gravitytemple = [{ deck: "55k 55k 55k 55k 55k 55k 55k 55k 55k 55k 55k 55k 55k 55l 55l 55l 55l 55s 55s 55s 74k 74k 74k 74k 74k 74k 74k 74k 74k 74k 8pl", hp: 150, name: "Gravity Guardian", cardreward: ["74k", "74k", "74k"], wintext: "As you defeat the Guardian, he disappears. He leaves some of his magic power behind to you, as a reward.", dependency:requireQuest, questdependencies:[["elementalshrine",1]] }];
+exports.lifetemple = [{ deck: "5bs 5bs 5bs 5bs 5bs 5bs 5bs 5bs 5bs 5bs 5bs 5bs 5bs 5bu 5bu 5bu 5bu 5bu 5bu 5c7 5c7 5c7 5c7 5c7 7ai 7ai 7ai 7ai 7ai 7ai 7ai 7ai 7ai 7ai 8pn", hp: 150, name: "Life Guardian", cardreward: ["5c7", "5c7", "5c7"], wintext: "As you defeat the Guardian, he disappears. He leaves some of his magic power behind to you, as a reward.", dependency:requireQuest, questdependencies:[["elementalshrine",1]]  }];
+exports.lighttemple = [{ deck: "5l8 5l8 5l8 5l8 5l8 5l8 5l8 5l8 5l8 5l8 5l8 5l8 5lo 5lo 5lo 5ln 5ln 5ln 5ln 7jv 7jv 7jv 7jv 7jv 7jv 7jv 7jv 7jv 7jv 8pq", hp: 150, name: "Light Guardian", cardreward: ["5l8", "5l8", "5l8"], wintext: "As you defeat the Guardian, he disappears. He leaves some of his magic power behind to you, as a reward.", dependency: requireQuest, questdependencies:[["elementalshrine", 1]] }];
+exports.timetemple = [{ deck: "5rg 5rg 5rg 5rg 5rg 5rg 5rg 5rg 5rg 5rg 5rg 5rg 5rg 5rg 5ru 5ru 5ru 5ru 5rm 5rm 5rm 7q4 7q4 7q4 7q4 7q4 7q4 7q4 7q4 7q4 7q4 8ps", hp: 150, name: "Time Guardian", cardreward: ["7q4", "7q4", "7q4"], wintext: "As you defeat the Guardian, he disappears. He leaves some of his magic power behind to you, as a reward.", dependency: requireQuest, questdependencies:[["elementalshrine", 1]] }];
+exports.watertemple = [{ deck: "5i4 5i4 5i4 5i4 5i4 5i4 5i4 5i4 5i4 5i4 5i4 5i4 5i4 5i4 5i4 5ie 5ie 5ie 5ie 5id 5id 5id 7go 7go 7go 7go 7go 7go 7go 7go 7go 7go 8pp", hp: 150, name: "Water Guardian", cardreward: ["7go", "7go", "7go"], wintext: "As you defeat the Guardian, he disappears. He leaves some of his magic power behind to you, as a reward.", dependency: requireQuest, questdependencies:[["elementalshrine", 1]] }];
+exports.chromatemple = [{
+	deck: "4vj 4vj 4vj 4vj 4vj 4vj 6qq 6qq 6qq 6qq 6qq 6qq 6u1 6u1 71a 71a 74a 74e 74e 77g 77g 7ah 7ah 7dm 7n0 7n0 7t9 7t9 80a 80a 8pi", name: "Chroma Guardian", hp: 200, drawpower: 2, choicerewards: "uppedrare", rewardamount: 2, wintext: "You have done it. You have completed the battle of the temples. A quest which took you all over the world. The chroma elemental looks at you, pleased. he knows how long it took to get here and he knows how hard it was to win. He is proud of you. As a reward, he offers you a choice of his finest possessions.",
+	dependency: requireQuest, questdependencies:[["athertemple", 1], ["airtemple", 1], ["darktemple", 1], ["deathtemple", 1], ["earthtemple", 1], ["entropytemple", 1], ["firetemple", 1], ["gravitytemple", 1], ["lifetemple", 1], ["lighttemple", 1], ["timetemple", 1], ["watertemple", 1]]
+}];
+
+
+
+
 //Menu info
 exports.necromancer.info = { pos: [[200, 200], [200, 250], [225, 300]], text: ["A horde of skeletons have been seen nearby, perhaps you should go investigate?", "They seemed to come from the forest, so you go inside.", "Deep inside the forest you find the necromancer responsible for filling the lands with undead!"] };
-exports.spirit.info = { pos: [[275, 350], [325, 375], [500, 200], [500, 250], [525, 275]], text:["You pursue the energy trail of the spirit to a dark cavern.\n\At first you think it has eluded you, but as you turn to leave, its dark shadowy form rises in front of you",
-	"You approach the portal and a large Elemental steps out of the shadows, purple energy swirling about it.\n\
-		'Only the worthy may pass'...You state that your only intention is to destroy the portal not pass through it.\n\
-		'only the incubus key can close this portal.' The guardian glowers at you darkly.\n\
+exports.spirit.info = { pos: [[275, 350], [325, 375], [500, 200], [500, 250], [525, 275]], text:["You pursue the energy trail of the spirit to a dark cavern.\At first you think it has eluded you, but as you turn to leave, its dark shadowy form rises in front of you",
+	"You approach the portal and a large Elemental steps out of the shadows, purple energy swirling about it.\
+		'Only the worthy may pass'...You state that your only intention is to destroy the portal not pass through it.\
+		'only the incubus key can close this portal.' The guardian glowers at you darkly.\
 		If you wish to find it you must first pass my test.' The guardian attacks!",
-	"You step through the portal and are wisked off to a shifting expanse of swampland. Purple lightning crackles above.\n\
-		Far off, in the distant center of the dark and brooding expanse, stands an ominous fortress.\n\
-		The gravel road before you winds its way toward it like a great serpent slithering its way through a desolate bog.\n\
+	"You step through the portal and are wisked off to a shifting expanse of swampland. Purple lightning crackles above.\
+		Far off, in the distant center of the dark and brooding expanse, stands an ominous fortress.\
+		The gravel road before you winds its way toward it like a great serpent slithering its way through a desolate bog.\
 		A lone maiden blocks your path. In a voice like claws upon glass she shrieks 'you do not belong here... DIE!' ",
-	"As you continue up the road, a foul stench assaults your nose... Then you hear a poping sound.\n\
-		To the side of the road a sign reads 'Danger, swamp gas is explosive. Travelers beware'\n\
+	"As you continue up the road, a foul stench assaults your nose... Then you hear a poping sound.\
+		To the side of the road a sign reads 'Danger, swamp gas is explosive. Travelers beware'\
 		You decide that NOW would be a good time to run!... But a flock of giant angry birds is in your way",
-	"You turn to face your attacker, but as you call on your powers, only darkness answers.\n\
-		Your allies come to your aid but their forms have all been twisted. The dark lady laughs mischeviously.\n\
-		'You must think yourself dreaming... Well this is the nightmare realm, and I am the one in control.\n\
+	"You turn to face your attacker, but as you call on your powers, only darkness answers.\
+		Your allies come to your aid but their forms have all been twisted. The dark lady laughs mischeviously.\
+		'You must think yourself dreaming... Well this is the nightmare realm, and I am the one in control.\
 		I think I will toy with you first... before I swallow your soul.' The shadows lunge toward you in a vicious attack."]};
-exports.bombmaker.info = {pos: [[600,400]], text:["A bomb maker have set up shop nearby. He have put up a sign promising a reward if you can beat him\n and his bombs three times in a row."]}
+exports.bombmaker.info = {pos: [[600,400]], text:["A bomb maker have set up shop nearby. He have put up a sign promising a reward if you can beat him and his bombs three times in a row."]}
 exports.blacksummoner.info = { pos: [[500, 420]], text: ["A swarm of dragons can be seen nearby. Maybe you could manage to tame one of them?"] }
-exports.icecave.info = { pos: [[300, 350], [260, 250], [220, 250], [200,350]], text: ["You heard a story about a rare weapon hidden in a cave up north. You decide to look for the weapon. \nOn the way there you are caught in the middle of a big snow storm.",
-	"You enter the cave, it is dark and icy. Suddenly you meet some creatures there, which promptly attacks you. \nYou seem to glimpse the rare weapon right behind them though...",
-	"You look behind you and see a range of different creatures, which you can swear were not here before. \n'We are the Guardians of this Cave, and we will not allow you to take our treasure!'",
+exports.icecave.info = { pos: [[300, 350], [260, 250], [220, 250], [200,350]], text: ["You heard a story about a rare weapon hidden in a cave up north. You decide to look for the weapon. On the way there you are caught in the middle of a big snow storm.",
+	"You enter the cave, it is dark and icy. Suddenly you meet some creatures there, which promptly attacks you. You seem to glimpse the rare weapon right behind them though...",
+	"You look behind you and see a range of different creatures, which you can swear were not here before. 'We are the Guardians of this Cave, and we will not allow you to take our treasure!'",
 	"The storm you got past while heading here is still raging, and it seems to have gotten a lot worse."]
 }
 exports.inventor.info = {
-	pos: [[500, 300], [510, 360], [505, 410]], text: ["You come across a small village that claims they are being regularly attacked by machines coming from a crazy inventor \nliving nearby. You decide to put a stop to this crazy man's evil endeavors. On your way there you suddenly \nsee a big Armagio landing in front of you. 'Catapults!' you think, and get ready to fight.",
-	"In front of the house some machines seems to stand guards. \nThese must be the machines that were attacking the village!",
-	"'All I wanted was to test the offensive capabilities of my machines. \nBut now when you are here, I can test this on you!' says the crazy inventor and laughs."]
+	pos: [[500, 300], [510, 360], [505, 410]], text: ["You come across a small village that claims they are being regularly attacked by machines coming from a crazy inventor living nearby. You decide to put a stop to this crazy man's evil endeavors. On your way there you suddenly see a big Armagio landing in front of you. 'Catapults!' you think, and get ready to fight.",
+	"In front of the house some machines seems to stand guards. These must be the machines that were attacking the village!",
+	"'All I wanted was to test the offensive capabilities of my machines. But now when you are here, I can test this on you!' says the crazy inventor and laughs."]
 }
 exports.pgdragon.info = { pos: [[200, 200]], text: ["Fight the Dragon Tamer at the Proving Grounds!"] };
 exports.pgrare.info = { pos: [[250, 200]], text: ["Fight the Master of Arms at the Proving Grounds!"] };
 exports.pgshard.info = { pos: [[225, 250]], text: ["Fight the Gemcutter at the Proving Grounds!"] };
-exports.areas = { forest: ["necromancer", "spirit", "inventor"], city:["bombmaker"], desert:["blacksummoner"], ice:["icecave"], provinggrounds:["pgdragon","pgrare","pgshard"] };
+exports.elementalshrine.info = { pos: [[400,400]], text: ["'You walk up to the shrine. You don't know what to expect. Suddenly, you are attacked by a cloaked figure! Could it be the Shrine Guardian!?"] };
+exports.aethertemple.info = { pos: [[500,220]], text: ["As you approach the Aether Temple, you can feel the guardian waiting inside for you. This is it, another step on your quest to defeat the Temple Guardians."] }
+exports.airtemple.info = { pos: [[400,400]], text: ["As you approach the Air Temple, you can feel the guardian waiting inside for you. This is it, another step on your quest to defeat the Temple Guardians."] }
+exports.darktemple.info = { pos: [[200,400]], text: ["As you approach the Dark Temple, you can feel the guardian waiting inside for you. This is it, another step on your quest to defeat the Temple Guardians."] }
+exports.deathtemple.info = { pos: [[400,200]], text: ["As you approach the Death Temple, you can feel the guardian waiting inside for you. This is it, another step on your quest to defeat the Temple Guardians."] }
+exports.earthtemple.info = { pos: [[300,420]], text: ["As you approach the Earth Temple, you can feel the guardian waiting inside for you. This is it, another step on your quest to defeat the Temple Guardians."] }
+exports.entropytemple.info = { pos: [[200,400]], text: ["As you approach the Entropy Temple, you can feel the guardian waiting inside for you. This is it, another step on your quest to defeat the Temple Guardians."] }
+exports.firetemple.info = { pos: [[360,400]], text: ["As you approach the Fire Temple, you can feel the guardian waiting inside for you. This is it, another step on your quest to defeat the Temple Guardians."] }
+exports.gravitytemple.info = { pos: [[600,250]], text: ["As you approach the Gravity Temple, you can feel the guardian waiting inside for you. This is it, another step on your quest to defeat the Temple Guardians."] }
+exports.lifetemple.info = { pos: [[550,420]], text: ["As you approach the Life Temple, you can feel the guardian waiting inside for you. This is it, another step on your quest to defeat the Temple Guardians."] }
+exports.lighttemple.info = { pos: [[200,200]], text: ["As you approach the Light Temple, you can feel the guardian waiting inside for you. This is it, another step on your quest to defeat the Temple Guardians."] }
+exports.timetemple.info = { pos: [[200,300]], text: ["As you approach the Time Temple, you can feel the guardian waiting inside for you. This is it, another step on your quest to defeat the Temple Guardians."] }
+exports.watertemple.info = { pos: [[200,200]], text: ["As you approach the Water Temple, you can feel the guardian waiting inside for you. This is it, another step on your quest to defeat the Temple Guardians."] }
+exports.chromatemple.info = { pos: [[400,340]], text: ["You walk up to the steps of the last temple. It was harsh getting here, but well worth it. This is it."] }
+exports.areas = { forest: ["necromancer", "spirit", "inventor", "lifetemple", "earthtemple", "darktemple"], city: ["bombmaker", "elementalshrine", "aethertemple", "entropytemple", "lighttemple"], desert: ["blacksummoner", "timetemple", "deathtemple", "firetemple", "chromatemple"], ice: ["icecave", "watertemple", "gravitytemple", "airtemple"], provinggrounds: ["pgdragon", "pgrare", "pgshard"] };
+
+//Dependency functions
+function requireQuest(user, quest) {
+	var listofquests = quest.questdependencies;
+	for (var i = 0;i < listofquests.length;i++) {
+		var quest = user.quest[listofquests[i][0]]
+		if (!quest || quest < listofquests[i][1])
+			return false
+	}
+	return true;
+}
+function notComplete() {
+	return false;
+}

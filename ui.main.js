@@ -474,7 +474,7 @@ function victoryScreen(game) {
 	victoryui.addChild(makeText(10, 290, "Plies: " + game.ply + "\nTime: " + (game.time/1000).toFixed(1) + " seconds"));
 	if (winner){
 		var victoryText = game.quest ? game.wintext : "You won!";
-		var tinfo = makeText(450, game.cardreward ? 130 : 250, victoryText);
+		var tinfo = makeText(450, game.cardreward ? 130 : 250, victoryText,true,500);
 		tinfo.anchor.x = 0.5;
 		tinfo.anchor.y = 1;
 		victoryui.addChild(tinfo);
@@ -723,7 +723,7 @@ function makeButton(x, y, img, mouseoverfunc) {
 	return b;
 }
 
-function makeText(x, y, txt, vis) {
+function makeText(x, y, txt, vis, width) {
 	var t = new PIXI.Sprite(nopic);
 	t.position.set(x, y);
 	t.setText = function(x, width){
@@ -734,7 +734,7 @@ function makeText(x, y, txt, vis) {
 			t.visible = false;
 		}
 	}
-	t.setText(txt);
+	t.setText(txt, width);
 	t.visible = vis === undefined || vis;
 	return t;
 }
@@ -1074,6 +1074,11 @@ function startRewardWindow(reward, numberofcopies, nocode) {
 	rewardui.interactive = true;
 	rewardui.addChild(new PIXI.Sprite(backgrounds[0]));
 
+	if (numberofcopies > 0) {
+		var infotext = makeText(20, 100, "You will get " + numberofcopies + " copies of the card you choose")
+		rewardui.addChild(infotext);
+	}
+
 	var exitButton = makeButton(10, 10, "Exit");
 	exitButton.click = startMenu;
 	if (!nocode) rewardui.addChild(exitButton);
@@ -1094,7 +1099,7 @@ function startRewardWindow(reward, numberofcopies, nocode) {
 	rewardui.addChild(confirmButton);
 
 	var chosenRewardImage = new PIXI.Sprite(nopic);
-	chosenRewardImage.position.set(250, 20)
+	chosenRewardImage.position.set(450, 20)
 	rewardui.addChild(chosenRewardImage);
 	var chosenReward = null;
 	for (var i = 0; i < rewardList.length; i++) {
@@ -1160,14 +1165,11 @@ function startQuestWindow(){
 	refreshRenderer(questui);
 }
 function startQuestArea(area) {
-	startQuest("necromancer");
-	startQuest("bombmaker");
-	startQuest("blacksummoner");
-	startQuest("icecave");
-	startQuest("inventor");
-	startQuest("pgdragon");
-	startQuest("pgrare");
-	startQuest("pgshard");
+	for (var i = 0;i < Quest.areas[area].length;i++) {
+		var quest = Quest[Quest.areas[area][i]][0];
+		if ((quest.dependency === undefined) || quest.dependency(user, quest))
+			startQuest(Quest.areas[area][i]);
+	}
 	var questui = new PIXI.DisplayObjectContainer();
 	questui.interactive = true;
 	var bgquest = new PIXI.Sprite(backgrounds[3]);
@@ -1182,7 +1184,7 @@ function startQuestArea(area) {
 	function makeQuestButton(quest, stage, text, pos) {
 		var button = makeButton(pos[0], pos[1], user.quest[quest] > stage ? questIcons[1] : questIcons[0]);
 		button.mouseover = function() {
-			tinfo.setText(text);
+			tinfo.setText(text,750);
 		}
 		button.click = function() {
 			errinfo.setText(mkQuestAi(quest, stage, area) || "");
