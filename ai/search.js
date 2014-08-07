@@ -33,7 +33,7 @@ module.exports = function(game, previous) {
 					if (n && v-currentEval < 24) {
 						delete gameClone.targetingMode;
 						iterLoop(gameClone, 0, cbits | tbits << 9, {});
-						if (loglist) loglist[t ? t.name : "-"] = v;
+						if (loglist) loglist[t ? t.card.name : "-"] = v;
 					}
 				}
 			}
@@ -49,11 +49,11 @@ module.exports = function(game, previous) {
 					pl.permanents.forEach(evalIter);
 					pl.hand.forEach(evalIter);
 				}
-				if (loglist) console.log(currentEval, preEval, c.name, active.activename, loglist);
+				if (loglist) console.log(currentEval, preEval, c.card.name, active.activename, loglist);
 				delete game.targetingMode;
 			}else{
 				evalIter();
-				if (loglist) console.log(currentEval, c.name, loglist);
+				if (loglist) console.log(currentEval, c.card.name, loglist);
 			}
 			return true;
 		}
