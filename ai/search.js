@@ -33,7 +33,7 @@ module.exports = function(game, previous) {
 					if (n && v-currentEval < 24) {
 						delete gameClone.targetingMode;
 						iterLoop(gameClone, 0, cbits | tbits << 9, {});
-						if (loglist) loglist[t ? t.card.name : "-"] = v;
+						if (loglist) loglist[t ? t : "-"] = v;
 					}
 				}
 			}

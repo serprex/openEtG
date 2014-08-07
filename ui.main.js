@@ -751,7 +751,7 @@ function isFreeCard(card) {
 }
 function editorCardCmp(x, y) {
 	var cx = CardCodes[x], cy = CardCodes[y];
-	return cx.upped - cy.upped || cx.element - cy.element || cx.cost - cy.cost || (cx.name > cy.name) - (cx.name < cy.name) || (x > y) - (x < y);
+	return cx.upped - cy.upped || cx.element - cy.element || cx.cost - cy.cost || (x > y) - (x < y);
 }
 function adjust(cardminus, code, x) {
 	if (code in cardminus) {
