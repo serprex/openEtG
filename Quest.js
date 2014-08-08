@@ -64,7 +64,7 @@ exports.spirit = [
 exports.bombmaker = [
 	{ deck: "046220f5t2065s50680d018pu", name: "Bomb Maker 1", autonext: true },
 	{ deck: "0f5rg045rk035ro065ru065v1067ql018pt", name: "Bomb Maker 2", autonext: true },
-	{ deck: "035f4065f6025f5025f80e5oc065om025p0018po", name: "Bomb Maker 3", markpower: 3, drawpower: 2, cardreward: "045om035s5027ql7ql", wintext: "Congratulations! Here, take some of my bombs as the reward!" },
+	{ deck: "035f4065f6025f5025f80e5oc065om025p0018po", name: "Bomb Maker 3", markpower: 3, drawpower: 2, cardreward: "045om035s5027ql", wintext: "Congratulations! Here, take some of my bombs as the reward!" },
 ];
 exports.blacksummoner = [{ deck: "0f7t5018pt", name: "The Black Summoner", markpower: 12, cardreward: "027t5", wintext: "You defeat the Dark Summoner that controlled the dragons. The dragons fly away, but two of them stays, looking at you. You decide to let them join you!" }];
 

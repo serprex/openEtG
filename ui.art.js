@@ -4,7 +4,7 @@ require("./etg.client").loadcards(function(Cards, CardCodes) {
 			["4sa", "4si", "4sk", "4sl", "4sm", "4sn", "4so", "4sp", "4sq", "4sr", "4ss", "4st", "4su", "4vr", "55s", "6ub"]],
 		[["artimies", "http://elementscommunity.org/forum/profile/?u=140"], ["593"]],
 		[["jarozaoz", "http://elementscommunity.org/forum/profile/?u=6364"],
-			["4t3", "4vn", "500", "532", "52s", "534", "55k", "568", "59c", "5c2", "5ff", "5fk", "5fe", "5io", "5le", "5lf", "5ls", "5la", "5li", "5lk", "5oq", "5op", "5rh", "5s0", "5s4", "5v8", "62c"]],
+			["4t3", "4vn", "500", "532", "52s", "534", "55k", "568", "59c", "5c2", "5ff", "5fk", "5fe", "5io", "5le", "5lf", "5ls", "5la", "5li", "5lk", "5oq", "5op", "5rh", "5rr", "5s0", "5s4", "5v8", "62c"]],
 		[["kae", "http://willowdream.carbonmade.com"], ["Status Icons", "assets/statussheet.png"], ["Status Borders", "assets/statusborders.png"],
 			["59b", "5fb", "5ib", "5il", "5iq", "5od", "5oe", "5ok", "5om", "5oo", "5os", "5p0", "5uo", "5v2", "7gr", "7h5"]],
 		[["mega plini", "http://elementscommunity.org/forum/profile/?u=202"], ["5ig"]],
