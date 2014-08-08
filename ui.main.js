@@ -2121,7 +2121,7 @@ function startMatch(game, foeDeck) {
 	gameui.addChild(foeplays);
 	var infobox = new PIXI.Sprite(nopic);
 	infobox.alpha = .7;
-	infobox.anchor.set(.5, .5);
+	infobox.anchor.set(.5, 1);
 	gameui.addChild(infobox);
 	var cardart = new PIXI.Sprite(nopic);
 	cardart.position.set(654, 300);
