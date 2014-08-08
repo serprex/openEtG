@@ -630,7 +630,7 @@ io.on("connection", function(socket) {
 			for (var i = 0;i < pack.amount;i++) {
 				var rarity = 1;
 				while (i >= pack.rare[rarity - 1]) rarity++;
-				var notFromElement = Math.random() > .4;
+				var notFromElement = Math.random() > .5;
 				newCards = etgutil.addcard(newCards, etg.PlayerRng.randomcard(false, function(x) { return (x.element == data.element) ^ notFromElement && x.type != etg.PillarEnum && x.rarity == rarity }).code);
 			}
 			if (bound) {
