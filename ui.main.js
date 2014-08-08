@@ -445,7 +445,9 @@ function initGame(data, ai) {
 	return game;
 }
 function getDeck(limit) {
-	var deck = user ? etgutil.decodedeck(user.decks[user.selectedDeck]) : (deckimport.value || "").split(" ");
+	var deck = user ? etgutil.decodedeck(user.decks[user.selectedDeck]) :
+		~deckimport.value.indexOf(" ") ? deckimport.value.split(" ") :
+		etgutil.decodedeck(deckimport.value);
 	if (limit && deck.length > 60){
 		deck.length = 60;
 	}
@@ -544,7 +546,7 @@ function mkPremade(name, daily) {
 		}
 		var foedata = daily ? aiDecks[name][user[name == "mage" ? "dailymage" : "dailydg"]] : aiDecks.giveRandom(name);
 		var foename = name[0].toUpperCase() + name.slice(1) + "\n" + foedata[0];
-		var deck = (!user && aideck.value) ? aideck.value.split(" ") : etgutil.decodedeck(foedata[1]);
+		var deck = etgutil.decodedeck((!user && aideck.value) || foedata[1]);
 		var gameData = { first: Math.random() < .5, deck: deck, urdeck: urdeck, seed: Math.random() * etgutil.MAX_INT, foename: foename };
 		if (name == "mage"){
 			gameData.hp = 125;
@@ -562,8 +564,8 @@ function mkPremade(name, daily) {
 function mkQuestAi(questname, stage, area) {
 	var quest = Quest[questname][stage];
 	if (!quest)
-		return;
-	var deck = quest.deck.split(" ");
+		return "Quest " + questname + ":" + stage + " does not exist.";
+	var deck = etgutil.decodedeck(quest.deck);
 	var foename = quest.name || "";
 	var markpower = quest.markpower || 1;
 	var drawpower = quest.drawpower || 1;
@@ -583,10 +585,10 @@ function mkQuestAi(questname, stage, area) {
 	var game = initGame({ first: Math.random() < .5, deck: deck, urdeck: urdeck, seed: Math.random() * etgutil.MAX_INT, hp: hp, aimarkpower: markpower, foename: foename, urhp: playerHPstart, aidrawpower: drawpower }, true);
 	game.quest = [questname, stage];
 	game.wintext = quest.wintext || "";
-	game.autonext = quest.autonext || false;
+	game.autonext = quest.autonext;
 	game.area = area;
 	if ((user.quest[questname] <= stage || !(questname in user.quest))) {
-		game.cardreward = etgutil.encodedeck(quest.cardreward);
+		game.cardreward = quest.cardreward;
 		game.choicerewards = quest.choicerewards;
 		game.rewardamount = quest.rewardamount;
 	}
@@ -609,11 +611,11 @@ function mkAi(level, daily) {
 			}
 			var deck;
 			if (!user && aideck.value) {
-				deck = aideck.value.split(" ");
+				deck = etgutil.decodedeck(aideck.value);
 			} else {
 				deck = require("./ai/deck")(level);
 			}
-			chatArea.value = deck.join(" ");
+			chatArea.value = etgutil.encodedeck(deck);
 
 			var randomNames = [
 				"Adrienne", "Audrie",
@@ -1651,16 +1653,17 @@ function startEditor(arena, acard, startempty) {
 	}else{
 		bsave.click = function() {
 			editordeck.push(etg.toTrueMark(editormark));
-			deckimport.value = editordeck.join(" ");
+			var dcode = deckimport.value = etgutil.encodedeck(editordeck);
 			if (user) {
-				user.decks[user.selectedDeck] = etgutil.encodedeck(editordeck);
-				userEmit("setdeck", { d: user.decks[user.selectedDeck], number: user.selectedDeck });
+				user.decks[user.selectedDeck] = dcode;
+				userEmit("setdeck", { d: dcode, number: user.selectedDeck });
 			}
 			startMenu();
 		}
 		var bimport = makeButton(8, 80, "Import");
 		bimport.click = function() {
-			editordeck = deckimport.value.split(" ");
+			var dvalue = deckimport.value;
+			editordeck = ~dvalue.indexOf(" ") ? dvalue.split(" ") : etgutil.decodedeck(dvalue);
 			if (editordeck.length > 60){
 				editordeck.length = 60;
 			}
@@ -2483,19 +2486,19 @@ function startArenaInfo(info) {
 			startEditor(info, info.card);
 		}
 		stage.addChild(bmod);
-		var deck = etgutil.decodedeck("05" + info.card + info.deck), mark;
-		chatArea.value = deck.join(" ");
-		for (var i=0; i<deck.length; i++){
-			var ismark = etg.fromTrueMark(deck[i]);
+		chatArea.value = "05" + info.card + info.deck;
+		var mark, i = 0;
+		etgutil.iterdeck(chatArea.value, function(code){
+			var ismark = etg.fromTrueMark(code);
 			if (~ismark){
 				mark = ismark;
-				deck.splice(i--, 1);
-				continue;
+				return;
 			}
-			var spr = new PIXI.Sprite(getCardImage(deck[i]));
+			var spr = new PIXI.Sprite(getCardImage(code));
 			spr.position.set(100 + Math.floor(i / 10) * 100, 32 + (i % 10) * 20);
 			batch.addChild(spr);
-		}
+			i++;
+		});
 		var spr = new PIXI.Sprite(eicons[mark || 0]);
 		spr.position.set(100, 234);
 		batch.addChild(spr);
@@ -2760,7 +2763,7 @@ function animate() {
 function requestAnimate() { requestAnimFrame(animate); }
 function prepuser(){
 	user.decks = user.decks.split(",");
-	deckimport.value = getDeck().join(" ");
+	deckimport.value = user.decks[user.selectedDeck];
 	user.pool = user.pool || "";
 	user.accountbound = user.accountbound || "";
 	if (!user.quest) {
