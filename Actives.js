@@ -97,6 +97,9 @@ appease:function(c,t){
 	Actives.devour(c, t);
 	c.status.appeased = true;
 },
+atk2hp:function(c,t){
+	t.maxhp = t.hp = t.trueatk();
+},
 axe:function(c,t){
 	return c.owner.mark == etg.Fire || c.owner.mark == etg.Time?1:0;
 },
@@ -110,6 +113,20 @@ bblood:function(c,t){
 	Effect.mkText("0|20", t);
 	t.buffhp(20);
 	t.delay(6);
+},
+beguile:function(c,t){
+	t.remove();
+	t.owner = t.owner.foe;
+	t.place();
+	if (c != t){
+		t.addactive("turnstart", Actives.beguilestop);
+	}
+},
+beguilestop:function(c,t){
+	if (t == c.owner){
+		Actives.beguile(c, c);
+		delete c.active.turnstart; // TODO implement t.rmactive
+	}
 },
 blackhole:function(c,t){
 	if (!t.sanctuary){
@@ -206,6 +223,9 @@ clear:function(c,t){
 		t.status.frozen--;
 	}
 	t.dmg(-1);
+	if (t.hasactive("turnstart", "beguilestop")){
+		Actives.beguilestop(t, t.owner);
+	}
 },
 corpseexplosion:function(c,t){
 	function dmg1(c,t){ t.dmg(1); }
@@ -411,9 +431,6 @@ epidemic:function(c,t){
 	if (t.status.poison){
 		c.owner.foe.addpoison(t.status.poison);
 	}
-},
-atk2hp:function(c,t){
-	t.maxhp = t.hp = t.trueatk();
 },
 evolve:function(c,t){
 	c.transform(Cards.Shrieker.asUpped(c.card.upped));

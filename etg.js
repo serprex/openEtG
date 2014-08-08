@@ -179,7 +179,7 @@ var MulliganPhase1 = 0;
 var MulliganPhase2 = 1;
 var PlayPhase = 2;
 var EndPhase = 3;
-var passives = { airborne: true, nocturnal: true, voodoo: true, swarm: true, ranged: true, additive: true, stackable: true, salvage: true, token: true, shard: true, poisonous: true, martyr: true, decrsteam: true };
+var passives = { airborne: true, nocturnal: true, voodoo: true, swarm: true, ranged: true, additive: true, stackable: true, salvage: true, token: true, shard: true, poisonous: true, martyr: true, decrsteam: true, beguilestop: true };
 var PlayerRng = Object.create(Player.prototype);
 PlayerRng.rng = Math.random;
 PlayerRng.upto = function(x){ return Math.floor(Math.random()*x); }
@@ -691,6 +691,7 @@ Player.prototype.endturn = function(discard) {
 	this.flatline = this.silence = false;
 	this.foe.precognition = this.foe.sanctuary = false;
 	this.game.turn = this.foe;
+	this.foe.procactive("turnstart");
 	this.game.updateExpectedDamage();
 }
 Thing.prototype.procactive = function(name, params) {
