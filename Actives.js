@@ -164,6 +164,10 @@ bravery:function(c,t){
 		}
 	}
 },
+brew:function(c,t){
+	Effect.mkText("Brew", c);
+	new etg.CardInstance(CardCodes[etg.AlchemyList[c.owner.uptoceil(12)*2+(c.card.upped?1:0)]], c.owner).place();
+},
 brokenmirror:function(c,t, fromhand){
 	if (fromhand && t instanceof etg.Creature && c.owner != t.owner){
 		new etg.Creature(Cards.Phantom.asUpped(c.card.upped), c.owner).place();
@@ -1231,6 +1235,9 @@ sskin:function(c,t){
 },
 staff:function(c,t){
 	return c.owner.mark == etg.Life||c.owner.mark == etg.Water?1:0;
+},
+static:function(c){
+	c.owner.foe.spelldmg(1);
 },
 steal:function(c,t){
 	if (t.status.stackable){

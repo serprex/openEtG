@@ -197,6 +197,19 @@ var NymphList = [undefined, undefined,
 	"5s4", "7qk",
 	"5v8", "7to",
 	"62c", "80s"];
+var AlchemyList = [undefined, undefined,
+	"4vn", "6u7",
+	"52s", "71c",
+	"55v", "74f",
+	"595", "77l",
+	"5c7", "7an",
+	"5fb", "7dr",
+	"5ig", "7h0",
+	"5lj", "7k3",
+	"5om", "7n6",
+	"5rr", "7qb",
+	"5uu", "7te",
+	"621", "80h"];
 Game.prototype.clone = function(){
 	var obj = Object.create(Game.prototype);
 	obj.rng = this.rng.clone();
@@ -1294,6 +1307,7 @@ exports.clone = clone;
 exports.casttext = casttext;
 exports.getTargetFilter = getTargetFilter;
 exports.NymphList = NymphList;
+exports.AlchemyList = AlchemyList;
 exports.fromTrueMark = fromTrueMark;
 exports.toTrueMark = toTrueMark;
 exports.PlayerRng = PlayerRng;

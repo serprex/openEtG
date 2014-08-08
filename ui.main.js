@@ -2196,7 +2196,7 @@ function startMatch(game, foeDeck) {
 					}
 				}
 			}else if (game.phase <= etg.MulliganPhase2){
-				require("./ai/mulligan")(game);
+				cmds.mulligan(require("./ai/mulligan")(game.player2));
 			}
 		}
 		var pos = realStage.getMousePosition();
