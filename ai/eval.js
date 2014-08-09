@@ -128,7 +128,7 @@ var ActivesValues = {
 		return c instanceof etg.CardInstance ? -c.card.attack/4 : (c.trueatk() < 0)-(c.trueatk() > 0);
 	},
 	hasten:function(c){
-		return c.owner.deck.length/10;
+		return c.owner.deck.length/4;
 	},
 	hatch:3,
 	heal:3,
@@ -413,6 +413,9 @@ module.exports = function(game) {
 	}
 	if (game.turn.foe.deck.length == 0 && game.turn.foe.hand.length < 8){
 		return game.turn == game.player1?99999990:-99999990;
+	}
+	if (game.turn.deck.length == 0 && game.turn.foe.hand.length < 8){
+		return game.turn == game.player1?-99999980:99999980;
 	}
 	var expectedDamage = game.turn.expectedDamage();
 	if (expectedDamage > game.turn.foe.hp){
