@@ -575,6 +575,12 @@ function mkPremade(name, daily) {
 			gameData.p2markpower = 3;
 			gameData.p2drawpower = 2;
 		}
+		if (!user) {
+			if (!checkIllegalNumbers([pvphp.value])) gameData.p1hp = pvphp.value;
+			if (!checkIllegalNumbers([pvpmark.value])) gameData.p1markpower = pvpmark.value;
+			if (!checkIllegalNumbers([pvpdraw.value])) gameData.p1drawpower = pvpdraw.value;
+			if (!checkIllegalNumbers([pvpdeck.value])) gameData.p1deckpower = pvpdeck.value;
+		}
 		var game = initGame(gameData, true);
 		game.cost = daily ? 0 : cost;
 		game.level = name == "mage" ? 1 : 3;
@@ -656,7 +662,14 @@ function mkAi(level, daily) {
 			var typeName = ["Commoner", "Mage", "Champion"];
 
 			var foename = typeName[level] + "\n" + randomNames[Math.floor(Math.random() * randomNames.length)];
-			var game = initGame({ first: Math.random() < .5, deck: deck, urdeck: urdeck, seed: Math.random() * etgutil.MAX_INT, p2hp: level == 0 ? 100 : level == 1 ? 125 : 150, p2markpower: level == 2 ? 2 : 1, foename: foename, p2drawpower: level == 2 ? 2 : 1 }, true);
+			var gameData = { first: Math.random() < .5, deck: deck, urdeck: urdeck, seed: Math.random() * etgutil.MAX_INT, p2hp: level == 0 ? 100 : level == 1 ? 125 : 150, p2markpower: level == 2 ? 2 : 1, foename: foename, p2drawpower: level == 2 ? 2 : 1 };
+			if (!user) {
+				if (!checkIllegalNumbers([pvphp.value])) gameData.p1hp = pvphp.value;
+				if (!checkIllegalNumbers([pvpmark.value])) gameData.p1markpower = pvpmark.value;
+				if (!checkIllegalNumbers([pvpdraw.value])) gameData.p1drawpower = pvpdraw.value;
+				if (!checkIllegalNumbers([pvpdeck.value])) gameData.p1deckpower = pvpdeck.value;
+			}
+			game = initGame(gameData, true);
 			game.cost = gameprice;
 			game.level = level;
 			return game;
@@ -2822,20 +2835,20 @@ function loginClick() {
 function changeClick() {
 	userEmit("passchange", { p: password.value });
 }
+function checkIllegalNumbers(values) {
+	for (var i = 0;i < values.length;i++) {
+		value = values[i];
+		if (value && (isNaN(value) || value < 0))
+			return true;
+	}
+	return false;
+}
 function challengeClick() {
 	if (Cards) {
 		var deck = getDeck();
 		if (deck.length < (user ? 31 : 11)){
 			startEditor();
 			return;
-		}
-		function checkIllegalNumbers(values) {
-			for (var i = 0;i < values.length;i++) {
-				vale = values[i];
-				if (value && (isNaN(value) || value < 0))
-					return true;
-			}
-			return false;
 		}
 		if (checkIllegalNumbers([pvphp.value, pvpdraw.value, pvpdeck.value, pvpmark.value])) {
 			return;
