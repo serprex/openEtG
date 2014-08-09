@@ -310,13 +310,14 @@ io.on("connection", function(socket) {
 			"034sa014sd014t4055f0015f3025f4015f6015fc0c5oc025od015og025os015oh015oe025ou015om025or015of018po",
 			"03627034sa024sd014t40c5rg025ri025rr015rl025ru015s0015rn015rm0561o0261q0261t018pu",
 			"034sa014sd014t40452g0152p0252t0a5uk035um025un015us025v3015uq035ut015up015vb015uo025uv015ul018pk",
-			"015020262002627034sa014sd014t4064vc024vp034vs0b61o0261q0361s0261t0161v018pj"
+			"015020262002627034sa014sd014t4064vc024vp034vs0b61o0261q0361s0261t0161v018pj",
+			"",
 		];
-		user.decks = starters[data.e] || starters[0];
+		user.decks = starters[data.e];
 		user.selectedDeck = 0;
 		user.pool = "";
 		user.accountbound = user.decks;
-		user.freepacks = "3,2,0,0";
+		user.freepacks = data.e == 13 ? "6,6,0,0" : "3,2,0,0";
 		user.aiwins = 0;
 		user.ailosses = 0;
 		user.pvpwins = 0;

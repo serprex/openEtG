@@ -30,10 +30,20 @@ var Quest = require("./Quest");
 var ui = require("./uiutil");
 var aiDecks = require("./Decks");
 require("./etg.client").loadcards(function(cards, cardcodes, targeting) {
+	console.log("Cards loaded");
 	Cards = cards;
 	CardCodes = cardcodes;
 	Targeting = targeting;
-	console.log("Cards loaded");
+	/* This stops when it hits a 404
+	var codes = [];
+	for (var code in CardCodes){
+		codes.push(code);
+	}
+	(function loadnext(art){
+		if (art && codes.length){
+			getArtImage(codes.pop(), loadnext);
+		}
+	})(1);*/
 });
 var socket = io(location.hostname + ":13602");
 function maybeSetText(obj, text) {
@@ -131,16 +141,14 @@ function makeArt(card, art, oldrend) {
 	return rend;
 }
 function getArtImage(code, cb){
-	if (artimagecache[code]){
-		return cb(artimagecache[code]);
-	}else {
-		var loader = new PIXI.AssetLoader(["Cards/" + code + ".png"]);
-		loader.onComplete = function() {
+	if (!(code in artimagecache)){
+		var loader = new PIXI.ImageLoader("Cards/" + code + ".png");
+		loader.addEventListener("loaded", function() {
 			return cb(artimagecache[code] = PIXI.Texture.fromFrame("Cards/" + code + ".png"));
-		}
+		});
 		loader.load();
-		return cb(artimagecache[code]);
 	}
+	return cb(artimagecache[code]);
 }
 function getArt(code) {
 	if (artcache[code]) return artcache[code];
@@ -1340,11 +1348,6 @@ function startStore() {
 		var freeinfo = makeText(300, 26, "");
 		storeui.addChild(freeinfo);
 	}
-	function updateFreeText(){
-		if (user.freepacks){
-			freeinfo.setText(user.freepacks[packrarity] ? "Free boosters of this type left: " + user.freepacks[packrarity] : "");
-		}
-	}
 
 	//get cards button
 	var bget = makeButton(750, 156, "Take Cards");
@@ -1377,7 +1380,6 @@ function startStore() {
 			userEmit("booster", { pack: packrarity, element:packele });
 			toggleB(bbronze, bsilver, bgold, bplatinum, bget, bbuy);
 			popbooster.visible = true;
-			updateFreeText();
 		} else {
 			tinfo2.setText("You can't afford that!");
 		}
@@ -1389,7 +1391,6 @@ function startStore() {
 		return function(){
 			packrarity = x;
 			tinfo2.setText(packdata[x].info);
-			updateFreeText();
 		}
 	}
 	var bbronze = makeButton(50, 280, boosters[0]);
@@ -1442,6 +1443,9 @@ function startStore() {
 				newCardsArt[i].setTexture(nopic);
 				newCardsArt[i].visible = false;
 			}
+		}
+		if (user.freepacks){
+			freeinfo.setText(user.freepacks[packrarity] ? "Free boosters of this type left: " + user.freepacks[packrarity] : "");
 		}
 		tgold.setText("$" + user.gold);
 	});
@@ -1779,7 +1783,7 @@ function startElementSelect() {
 	var eledesc = new PIXI.Text("", { font: "24px Dosis" });
 	eledesc.position.set(100, 250);
 	stage.addChild(eledesc);
-	for (var i = 0;i < 13;i++) {
+	for (var i = 0;i < 14;i++) {
 		elesel[i] = new PIXI.Sprite(eicons[i]);
 		elesel[i].position.set(100 + i * 32, 300);
 		(function(_i) {
