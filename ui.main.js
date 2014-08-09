@@ -1323,8 +1323,7 @@ function startStore() {
 		{cost: 65, info: "Gold Pack: 3 Commons, 4 Uncommons, 1 Rare"},
 		{cost: 100, info: "Platinum Pack: 4 Commons, 3 Uncommons, 1 Rare, 1 Shard"},
 	];
-	var packele = -1, packrarity = -1, newCardsArt = [];
-	newCards = []
+	var packele = -1, packrarity = -1;
 
 	var storeui = new PIXI.DisplayObjectContainer();
 	storeui.interactive = true;
@@ -1348,6 +1347,11 @@ function startStore() {
 		var freeinfo = makeText(300, 26, "");
 		storeui.addChild(freeinfo);
 	}
+	function updateFreeInfo(rarity){
+		if (freeinfo){
+			freeinfo.setText(user.freepacks[rarity] ? "Free boosters of this type left: " + user.freepacks[rarity] : "");
+		}
+	}
 
 	//get cards button
 	var bget = makeButton(750, 156, "Take Cards");
@@ -1355,7 +1359,6 @@ function startStore() {
 	bget.click = function () {
 		toggleB(bbronze, bsilver, bgold, bplatinum, bget, bbuy);
 		popbooster.visible = false;
-		newCards.length = 0;
 	}
 	storeui.addChild(bget);
 
@@ -1377,9 +1380,9 @@ function startStore() {
 		}
 		var pack = packdata[packrarity];
 		if (user.gold >= pack.cost || (user.freepacks && user.freepacks[packrarity] > 0)) {
-			userEmit("booster", { pack: packrarity, element:packele });
+			userEmit("booster", { pack: packrarity, element: packele });
 			toggleB(bbronze, bsilver, bgold, bplatinum, bget, bbuy);
-			popbooster.visible = true;
+			if (popbooster.children.length) popbooster.removeChildren();
 		} else {
 			tinfo2.setText("You can't afford that!");
 		}
@@ -1387,24 +1390,20 @@ function startStore() {
 	storeui.addChild(bbuy);
 
 	// The different pack types
-	function gradeSelect(x){
-		return function(){
-			packrarity = x;
-			tinfo2.setText(packdata[x].info);
+	function gradeSelect(n){
+		var b = makeButton(50+125*n, 280, boosters[n]);
+		b.click = function(){
+			packrarity = n;
+			tinfo2.setText(packdata[n].info);
+			updateFreeInfo(n);
 		}
+		storeui.addChild(b);
+		return b;
 	}
-	var bbronze = makeButton(50, 280, boosters[0]);
-	bbronze.click = gradeSelect(0);
-	storeui.addChild(bbronze);
-	var bsilver = makeButton(175, 280, boosters[1]);
-	bsilver.click = gradeSelect(1);
-	storeui.addChild(bsilver);
-	var bgold = makeButton(300, 280, boosters[2]);
-	bgold.click = gradeSelect(2);
-	storeui.addChild(bgold);
-	var bplatinum = makeButton(425, 280, boosters[3]);
-	bplatinum.click = gradeSelect(3);
-	storeui.addChild(bplatinum);
+	var bbronze = gradeSelect(0);
+	var bsilver = gradeSelect(1);
+	var bgold = gradeSelect(2);
+	var bplatinum = gradeSelect(3);
 
 	for (var i = 0;i < 14;i++) {
 		var elementbutton = makeButton(75 + Math.floor(i / 2)*64, 120 + (i % 2)*75, eicons[i]);
@@ -1423,32 +1422,39 @@ function startStore() {
 	popbooster.visible = false;
 	storeui.addChild(popbooster);
 
-	//draw cards that are pulled from a pack
-	for (var i = 0;i < 2;i++) {
-		for (var j = 0;j < 5;j++) {
-			var cardArt = new PIXI.Sprite(nopic);
-			cardArt.scale.set(0.85, 0.85);
-			cardArt.position.set(7 + (j * 125), 7 + (i * 225));
-			popbooster.addChild(cardArt);
-			newCardsArt.push(cardArt);
+	var cmds = {
+		boostergive: function(data) {
+			if (data.accountbound) {
+				user.accountbound = etgutil.mergedecks(user.accountbound, data.cards);
+				if (user.freepacks){
+					user.freepacks[data.packtype]--;
+					updateFreeInfo(packrarity);
+				}
+			}
+			else {
+				user.pool = etgutil.mergedecks(user.pool, data.cards);
+				user.gold -= data.cost;
+				tgold.setText("$" + user.gold);
+			}
+			etgutil.iterdeck(data.cards, function(code, i){
+				var x = i % 5, y = Math.floor(i/5);
+				var cardArt = new PIXI.Sprite(getArt(code));
+				cardArt.scale.set(0.85, 0.85);
+				cardArt.position.set(7 + (x * 125), 7 + (y * 225));
+				popbooster.addChild(cardArt);
+			});
+			popbooster.visible = true;
+		},
+	};
+	for (var cmd in cmds){
+		socket.on(cmd, cmds[cmd]);
+	}
+	storeui.endnext = function() {
+		for (var cmd in cmds){
+			socket.removeListener(cmd, cmds[cmd]);
 		}
 	}
-
-	refreshRenderer(storeui, function() {
-		for (var i = 0; i < newCardsArt.length; i++) {
-			if (newCards[i]){
-				newCardsArt[i].setTexture(getArt(newCards[i]));
-				newCardsArt[i].visible = true;
-			}else{
-				newCardsArt[i].setTexture(nopic);
-				newCardsArt[i].visible = false;
-			}
-		}
-		if (user.freepacks){
-			freeinfo.setText(user.freepacks[packrarity] ? "Free boosters of this type left: " + user.freepacks[packrarity] : "");
-		}
-		tgold.setText("$" + user.gold);
-	});
+	refreshRenderer(storeui);
 }
 function addToGame(game, data) {
 	for (key in data) {
@@ -2696,19 +2702,6 @@ socket.on("codedone", function(data) {
 	user.pool = etgutil.addcard(user.pool, data.card);
 	addChatMessage("<font color=red>Card Added!</font><br>");
 	startMenu();
-});
-socket.on("boostergive", function(data) {
-	newCards = etgutil.decodedeck(data.cards);
-	if (data.accountbound) {
-		user.accountbound = etgutil.mergedecks(user.accountbound, data.cards);
-		if (user.freepacks){
-			user.freepacks[data.packtype]--;
-		}
-	}
-	else {
-		user.pool = etgutil.mergedecks(user.pool, data.cards);
-		user.gold -= data.cost;
-	}
 });
 function maybeSendChat(e) {
 	e.cancelBubble = true;
