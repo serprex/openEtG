@@ -626,12 +626,13 @@ io.on("connection", function(socket) {
 		if (!pack) return;
 		var bound = freepacklist && freepacklist[data.pack] > 0;
 		if (bound || user.gold >= pack.cost) {
-			var newCards = "";
+			var newCards = "", rarity = 1;
 			for (var i = 0;i < pack.amount;i++) {
-				var rarity = 1;
-				while (i >= pack.rare[rarity - 1]) rarity++;
+				if (i == pack.rare[rarity-1]) rarity++;
 				var notFromElement = Math.random() > .5;
-				newCards = etgutil.addcard(newCards, etg.PlayerRng.randomcard(false, function(x) { return (x.element == data.element) ^ notFromElement && x.type != etg.PillarEnum && x.rarity == rarity }).code);
+				var card = etg.PlayerRng.randomcard(false, function(x) { return (x.element == data.element) ^ notFromElement && x.rarity == rarity });
+				if (!card) card = etg.PlayerRng.randomcard(false, function(x) { return x.rarity == rarity });
+				newCards = etgutil.addcard(newCards, card.code);
 			}
 			if (bound) {
 				freepacklist[data.pack]--;
