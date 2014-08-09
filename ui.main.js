@@ -672,7 +672,7 @@ preLoader.onComplete = function() {
 		backgrounds[i] = PIXI.Texture.fromFrame(backgrounds[i]);
 	}
 	var tex = PIXI.Texture.fromFrame("assets/esheet.png");
-	for (var i = 0;i < 13;i++) eicons.push(new PIXI.Texture(tex, new PIXI.Rectangle(i * 32, 0, 32, 32)));
+	for (var i = 0;i < 14;i++) eicons.push(new PIXI.Texture(tex, new PIXI.Rectangle(i * 32, 0, 32, 32)));
 	var tex = PIXI.Texture.fromFrame("assets/raritysheet.png");
 	for (var i = 0;i < 6;i++) ricons.push(new PIXI.Texture(tex, new PIXI.Rectangle(i * 25, 0, 25, 25)));
 	var tex = PIXI.Texture.fromFrame("assets/backsheet.png");
@@ -1405,7 +1405,7 @@ function startStore() {
 	bplatinum.click = gradeSelect(3);
 	storeui.addChild(bplatinum);
 
-	for (var i = 0;i < 13;i++) {
+	for (var i = 0;i < 14;i++) {
 		var elementbutton = makeButton(75 + Math.floor(i / 2)*64, 120 + (i % 2)*75, eicons[i]);
 		(function(_i) {
 			elementbutton.click = function() {
