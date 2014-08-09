@@ -620,7 +620,7 @@ immolate:function(c,t){
 	if (!t.hasactive("auto", "singularity")){
 		for(var i=1; i<13; i++)
 			c.owner.spend(i, -1);
-		c.owner.spend(etg.Fire, -7);
+		c.owner.spend(etg.Fire, c.card.upped?-7:-5);
 	}
 },
 improve:function(c,t){
@@ -789,9 +789,12 @@ losecharge:function(c,t){
 luciferin:function(c,t){
 	c.owner.dmg(-10);
 	c.owner.masscc(c, function(c,x){
-		if (etg.isEmpty(x.active)){
-			x.active.auto = Actives.light;
+		for (var key in x.active){
+			if (x.active[key] && key != "ownplay"){
+				return;
+			}
 		}
+		x.active.auto = Actives.light;
 	});
 },
 lycanthropy:function(c,t){
