@@ -63,6 +63,7 @@ var ActivesValues = {
 		return c.card.cost+(c.card.upped?1:0);
 	},
 	bravery:3,
+	brew:4,
 	burrow:1,
 	butterfly:12,
 	catapult:6,
@@ -115,7 +116,9 @@ var ActivesValues = {
 	fungusrebirth:2,
 	gas:5,
 	give:1,
-	gpull:2,
+	gpull:function(c){
+		return c instanceof etg.CardInstance || c != c.owner.gpull ? 2 : 0;
+	},
 	gpullspell:3,
 	gratitude:4,
 	grave:4,
@@ -322,32 +325,34 @@ function evalthing(c) {
 		if (c.status.psion && c.owner.foe.shield && c.owner.foe.shield.status.reflect) ttatk *= -1;
 		score += ttatk*delayfactor;
 	}else ttatk = 0;
-	if (!etg.isEmpty(c.active)) {
-		for (var key in c.active) {
-			if (key == "hit"){
-				score += evalactive(c, c.active.hit, ttatk)*(ttatk?1:c.status.immaterial?0:.3)*adrenalinefactor*delayfactor;
-			}else if(key == "auto"){
-				if (!c.status.frozen){
-					score += evalactive(c, c.active.auto)*adrenalinefactor;
-				}
-			}else if(key == "shield" && isCreature){
-				score += evalactive(c, c.active.shield)*(c.owner.gpull == c?1:.2)*delayfactor;
-			}else if (key == "cast"){
-				if (caneventuallyactive(c.castele, c.cast, c.owner)){
-					score += evalactive(c, c.active.cast, ttatk) * delayfactor;
-				}
-			}else if (key != "owndeath" || isCreature){
-				score += evalactive(c, c.active[key]);
+	for (var key in c.active) {
+		if (key == "hit"){
+			score += evalactive(c, c.active.hit, ttatk)*(ttatk?1:c.status.immaterial?0:.3)*adrenalinefactor*delayfactor;
+		}else if(key == "auto"){
+			if (!c.status.frozen){
+				score += evalactive(c, c.active.auto)*adrenalinefactor;
 			}
+		}else if (key == "cast"){
+			if (caneventuallyactive(c.castele, c.cast, c.owner)){
+				score += evalactive(c, c.active.cast, ttatk) * delayfactor;
+			}
+		}else if (key != (isCreature ? "shield" : "owndeath")){
+			score += evalactive(c, c.active[key]);
 		}
 	}
 	score += checkpassives(c);
 	if (isCreature){
-		score *= hp?(c.status.immaterial || c.status.burrowed ? 1.3 : 1+Math.log(Math.min(hp, 33))/7):.2;
+		if (c.owner.gpull == c){
+			score = (score + hp) * Math.log(hp)/4;
+			if (c.status.voodoo) score += hp;
+			if (c.active.shield && !delaymix){
+				score += evalactive(c, c.active.shield);
+			}
+		}else score *= hp?(c.status.immaterial || c.status.burrowed ? 1.3 : 1+Math.log(Math.min(hp, 33))/7):.2;
 	}else{
 		score *= c.status.immaterial?1.35:1.25;
 	}
-	if (delaymix){
+	if (delaymix){ // TODO this is redundant alongside delayfactor
 		var delayed = Math.min(delaymix*(c.status.adrenaline?.5:1), 12);
 		score *= 1-(12*delayed/(12+delayed))/16;
 	}
@@ -365,10 +370,8 @@ function evalcardinstance(cardInst) {
 	if (c.type == etg.SpellEnum){
 		score += evalactive(cardInst, c.active);
 	} else {
-		if (!etg.isEmpty(c.active)) {
-			for (var key in c.active) {
-				score += evalactive(cardInst, c.active[key]);
-			}
+		for (var key in c.active) {
+			score += evalactive(cardInst, c.active[key]);
 		}
 		score += checkpassives(cardInst);
 		if (c.type == etg.CreatureEnum){
@@ -443,9 +446,6 @@ module.exports = function(game) {
 			pscore += evalcardinstance(player.hand[player.hand.length-1]);
 			player.hand.pop();
 			player.deck.push(code);
-		}
-		if (player.gpull) {
-			pscore += player.gpull.truehp()/4 + (player.gpull.status.voodoo ? 10 : 0) - player.gpull.trueatk();
 		}
 		pscore += Math.sqrt(player.hp)*4;
 		if (player.isCloaked()) pscore += 4;

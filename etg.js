@@ -590,7 +590,7 @@ Player.prototype.expectedDamage = function() {
 		}
 	}
 	if (freedomChance){
-		freedomChance = (1-Math.pow(.7,freedomChance));
+		freedomChance = 1-Math.pow(.7,freedomChance);
 	}
 	if (!stasisFlag){
 		for (var i = 0; i < 23; i++) {
@@ -639,19 +639,21 @@ Player.prototype.endturn = function(discard) {
 			if(p.active.auto){
 				p.active.auto(p);
 			}
-			p.usedactive = false;
-			if (p.status.stasis){
-				stasisFlag = true;
-			}else if (p.status.flooding && !floodingPaidFlag){
-				floodingPaidFlag = true;
-				floodingFlag = true;
-				if (!this.spend(Water, 1)){
-					delete this.permanents[i];
+			if (~p.getIndex()){
+				p.usedactive = false;
+				if (p.status.stasis){
+					stasisFlag = true;
+				}else if (p.status.flooding && !floodingPaidFlag){
+					floodingPaidFlag = true;
+					floodingFlag = true;
+					if (!this.spend(Water, 1)){
+						delete this.permanents[i];
+					}
+				}else if (p.status.patience){
+					patienceFlag = true;
+				}else if (p.status.freedom){
+					freedomChance++;
 				}
-			}else if (p.status.patience){
-				patienceFlag = true;
-			}else if (p.status.freedom){
-				freedomChance++;
 			}
 		}
 		if ((p=this.foe.permanents[i])){

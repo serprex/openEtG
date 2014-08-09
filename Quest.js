@@ -64,7 +64,7 @@ exports.spirit = [
 exports.bombmaker = [
 	{ deck: "046220f5t2065s50680d018pu", name: "Bomb Maker 1", autonext: true },
 	{ deck: "0f5rg045rk035ro065ru065v1067ql018pt", name: "Bomb Maker 2", autonext: true },
-	{ deck: "035f4065f6025f5025f80e5oc065om025p0018po", name: "Bomb Maker 3", markpower: 3, drawpower: 2, cardreward: "045om035s5027ql7ql", wintext: "Congratulations! Here, take some of my bombs as the reward!" },
+	{ deck: "035f4065f6025f5025f80e5oc065om025p0018po", name: "Bomb Maker 3", markpower: 3, drawpower: 2, cardreward: "045om035s5027ql", wintext: "Congratulations! Here, take some of my bombs as the reward!" },
 ];
 exports.blacksummoner = [{ deck: "0f7t5018pt", name: "The Black Summoner", markpower: 12, cardreward: "027t5", wintext: "You defeat the Dark Summoner that controlled the dragons. The dragons fly away, but two of them stays, looking at you. You decide to let them join you!" }];
 
@@ -86,7 +86,7 @@ exports.pgshard = [{ deck: "0c4sa0250a0253e0256i0659m025cq025fu025j2025m6025pa02
 
 //Elemental Temples
 exports.elementalshrine = [{ deck: "015990c4sa014vi014vh0152m0152o0155t0155n0158p015c8015c7015f3015fb015ia015i6015lp015lr015on015ou015ri015rr015v1015ut0162a0161q018pi", name: "Shrine Guardian", hp: 100, wintext: "The Shrine Guardian speaks to you: 'You have bested me, but I am only the beginning. Find the Temples and challenge their guardians, and they will reward you! If you defeat them all, you will get access to the Chroma Palace, where the strongest guardian reside.'"}];
-exports.aethertemple = [{ deck: "02622036280f61o0361u0a80a018pu", name: "Aether Guardian", hp: 150, cardreward: "0380a", wintext: "As you defeat the Guardian, he disappears. He leaves some of his magic power behind to you, as a reward.", dependency: requireQuest, questdependencies:[["elementalshrine", 1]] }];
+exports.aethertemple = [{ deck: "02622036280f61o0361u0a80a018pu", hp: 150, name: "Aether Guardian", cardreward: "0380a", wintext: "As you defeat the Guardian, he disappears. He leaves some of his magic power behind to you, as a reward.", dependency: requireQuest, questdependencies:[["elementalshrine", 1]] }];
 exports.airtemple = [{ deck: "0f5oc035ou045or0a7n1018pr", hp: 150, name: "Air Guardian", cardreward: "037n1", wintext: "As you defeat the Guardian, he disappears. He leaves some of his magic power behind to you, as a reward.", dependency: requireQuest, questdependencies:[["elementalshrine", 1]] }];
 exports.darktemple = [{ deck: "0f5uk035uv045ul0a7tc018pt", hp: 150, name: "Dark Guardian", cardreward: "037tc", wintext: "As you defeat the Guardian, he disappears. He leaves some of his magic power behind to you, as a reward.", dependency: requireQuest, questdependencies:[["elementalshrine", 1]] }];
 exports.deathtemple = [{ deck: "03535035370a7180d52g018pk", hp: 150, name: "Death Guardian", cardreward: "03718", wintext: "As you defeat the Guardian, he disappears. He leaves some of his magic power behind to you, as a reward.", dependency:requireQuest, questdependencies:[["elementalshrine",1]] }];

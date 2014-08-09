@@ -1405,11 +1405,11 @@ function startStore() {
 	bplatinum.click = gradeSelect(3);
 	storeui.addChild(bplatinum);
 
-	for (var i = 0;i < 12;i++) {
-		var elementbutton = makeButton(75 + Math.floor(i / 2)*75, 120 + (i % 2)*75, eicons[i+1]);
+	for (var i = 0;i < 13;i++) {
+		var elementbutton = makeButton(75 + Math.floor(i / 2)*64, 120 + (i % 2)*75, eicons[i]);
 		(function(_i) {
 			elementbutton.click = function() {
-				packele = _i + 1;
+				packele = _i;
 				tinfo.setText("Selected Element: " + etg.eleNames[packele]);
 			}
 		})(i);
