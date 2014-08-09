@@ -2829,6 +2829,12 @@ function challengeClick() {
 			startEditor();
 			return;
 		}
+		function checkIllegalNumber(value) {
+			return (value && (isNaN(value) || pvp.value < 0))
+		}
+		if (checkIllegalNumber(pvphp.value) || checkIllegalNumber(pvpdraw.value) || checkIllegalNumber(pvpdeck.value) || checkIllegalNumber(pvpmark.value)) {
+			return;
+		}
 		if (user) {
 			userEmit("foewant", { f: foename.value, hp: pvphp.value, draw: pvpdraw.value, deck: pvpdeck.value, mark: pvpmark.value });
 		}else{
