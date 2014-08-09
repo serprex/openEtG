@@ -413,16 +413,16 @@ function initGame(data, ai) {
 	if (data.p2hp) {
 		game.player2.maxhp = game.player2.hp = data.p2hp;
 	}
-	if (data.p1markpower) {
+	if (data.p1markpower !== undefined) {
 		game.player1.markpower = data.p1markpower;
 	}
-	if (data.p2markpower) {
+	if (data.p2markpower !== undefined) {
 		game.player2.markpower = data.p2markpower;
 	}
-	if (data.p1drawpower > 1) {
+	if (data.p1drawpower !== undefined) {
 		game.player1.drawpower = data.p1drawpower;
 	}
-	if (data.p2drawpower > 1) {
+	if (data.p2drawpower !== undefined) {
 		game.player2.drawpower = data.p2drawpower;
 	}
 	if (data.p1deckpower) {
@@ -575,6 +575,12 @@ function mkPremade(name, daily) {
 			gameData.p2markpower = 3;
 			gameData.p2drawpower = 2;
 		}
+		if (!user) {
+			parseInput(gameData, "p1hp", pvphp.value);
+			parseInput(gameData, "p1drawpower", pvpdraw.value);
+			parseInput(gameData, "p1markpower", pvpmark.value);
+			parseInput(gameData, "p1deckpower", pvpdeck.value);
+		}
 		var game = initGame(gameData, true);
 		game.cost = daily ? 0 : cost;
 		game.level = name == "mage" ? 1 : 3;
@@ -656,7 +662,14 @@ function mkAi(level, daily) {
 			var typeName = ["Commoner", "Mage", "Champion"];
 
 			var foename = typeName[level] + "\n" + randomNames[Math.floor(Math.random() * randomNames.length)];
-			var game = initGame({ first: Math.random() < .5, deck: deck, urdeck: urdeck, seed: Math.random() * etgutil.MAX_INT, p2hp: level == 0 ? 100 : level == 1 ? 125 : 150, p2markpower: level == 2 ? 2 : 1, foename: foename, p2drawpower: level == 2 ? 2 : 1 }, true);
+			var gameData = { first: Math.random() < .5, deck: deck, urdeck: urdeck, seed: Math.random() * etgutil.MAX_INT, p2hp: level == 0 ? 100 : level == 1 ? 125 : 150, p2markpower: level == 2 ? 2 : 1, foename: foename, p2drawpower: level == 2 ? 2 : 1 };
+			if (!user) {
+				parseInput(gameData, "p1hp", pvphp.value);
+				parseInput(gameData, "p1drawpower", pvpdraw.value);
+				parseInput(gameData, "p1markpower", pvpmark.value);
+				parseInput(gameData, "p1deckpower", pvpdeck.value);
+			}
+			game = initGame(gameData, true);
 			game.cost = gameprice;
 			game.level = level;
 			return game;
@@ -2815,6 +2828,12 @@ function loginClick() {
 function changeClick() {
 	userEmit("passchange", { p: password.value });
 }
+function parseInput(data, key, value) {
+	value = parseInt(value);
+	console.log(key + ": " + value)
+	if (value === 0 || value > 0)
+		data[key] = value;
+}
 function challengeClick() {
 	if (Cards) {
 		var deck = getDeck();
@@ -2822,16 +2841,18 @@ function challengeClick() {
 			startEditor();
 			return;
 		}
-		function checkIllegalNumber(value) {
-			return (value && (isNaN(value) || pvp.value < 0))
-		}
-		if (checkIllegalNumber(pvphp.value) || checkIllegalNumber(pvpdraw.value) || checkIllegalNumber(pvpdeck.value) || checkIllegalNumber(pvpmark.value)) {
-			return;
-		}
+		gameData = {};
+		parseInput(gameData,"hp",pvphp.value);
+		parseInput(gameData,"draw",pvpdraw.value);
+		parseInput(gameData,"mark",pvpmark.value);
+		parseInput(gameData,"deck",pvpdeck.value);
 		if (user) {
-			userEmit("foewant", { f: foename.value, hp: pvphp.value, draw: pvpdraw.value, deck: pvpdeck.value, mark: pvpmark.value });
+			gameData.f = foename.value;
+			userEmit("foewant", gameData);
 		}else{
-			socket.emit("pvpwant", { deck: deck, room: foename.value, hp:pvphp.value, draw:pvpdraw.value, deck:pvpdeck.value, mark:pvpmark.value });
+			gameData.deck = deck;
+			gameData.room = foename.value;
+			socket.emit("pvpwant", gameData);
 		}
 	}
 }

@@ -699,7 +699,7 @@ Player.prototype.endturn = function(discard) {
 		this.foe.sosa--;
 	}
 	this.nova = 0;
-	for (var i = this.foe.drawpower || 1; i > 0; i--) {
+	for (var i = this.foe.drawpower !== undefined ? this.foe.drawpower : 1; i > 0; i--) {
 		this.foe.drawcard();
 	}
 

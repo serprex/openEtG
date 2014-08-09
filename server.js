@@ -672,6 +672,7 @@ io.on("connection", function(socket) {
 		var pendinggame=rooms[data.room];
 		console.log(this.id + ": " + (pendinggame?pendinggame.id:"-"));
 		sockinfo[this.id].deck = data.deck;
+		sockinfo[this.id].pvpstats = { hp: data.hp, markpower: data.mark, deckpower: data.deck, drawpower: data.draw };
 		if (this == pendinggame){
 			return;
 		}
@@ -680,9 +681,20 @@ io.on("connection", function(socket) {
 			var first = seed<etgutil.MAX_INT/2;
 			sockinfo[this.id].foe = pendinggame;
 			sockinfo[pendinggame.id].foe = this;
-			var deck0=sockinfo[pendinggame.id].deck, deck1=data.deck;
-			this.emit("pvpgive", {first:first, seed:seed, deck:deck0, urdeck:deck1});
-			pendinggame.emit("pvpgive", {first:!first, seed:seed, deck:deck1, urdeck:deck0});
+			var deck0 = sockinfo[pendinggame.id].deck, deck1 = data.deck;
+			var owndata = { first: first, seed: seed, deck: deck0, urdeck: deck1};
+			var foedata = { first: !first, seed: seed, deck: deck1, urdeck: deck0};
+			var stat = sockinfo[this.id].pvpstats, foestat = sockinfo[foesock.id].pvpstats;
+			for (var key in stat) {
+				owndata["p1" + key] = stat[key];
+				foedata["p2" + key] = stat[key];
+			}
+			for (var key in foestat) {
+				owndata["p2" + key] = foestat[key];
+				foedata["p1" + key] = foestat[key];
+			}
+			this.emit("pvpgive", owndata);
+			foesock.emit("pvpgive", foedata);
 			delete rooms[data.room];
 		}else{
 			rooms[data.room] = this;
