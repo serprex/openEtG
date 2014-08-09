@@ -1470,9 +1470,9 @@ function startStore() {
 }
 function addToGame(game, data) {
 	for (key in data) {
-		if (key == "player1.hp")
+		if (key == "p1hp")
 			game.player1.hp = data[key];
-		else if (key == "player1.maxhp")
+		else if (key == "p1maxhp")
 			game.player1.maxhp = data[key];
 		else
 			game[key] = data[key];
@@ -1902,8 +1902,8 @@ function startMatch(game, foeDeck) {
 					if (game.endurance) {
 						var data = game.dataNext;
 						if (game.noheal) {
-							data["player1.hp"] = game.player1.hp;
-							data["player1.maxhp"] = game.player1.maxhp;
+							data["p1hp"] = game.player1.hp;
+							data["p1maxhp"] = game.player1.maxhp;
 						}
 						data.endurance--;
 						var newgame = mkAi(game.level, true)();
