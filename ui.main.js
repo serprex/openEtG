@@ -2829,10 +2829,15 @@ function challengeClick() {
 			startEditor();
 			return;
 		}
-		function checkIllegalNumber(value) {
-			return (value && (isNaN(value) || pvp.value < 0))
+		function checkIllegalNumbers(values) {
+			for (var i = 0;i < values.length;i++) {
+				vale = values[i];
+				if (value && (isNaN(value) || value < 0))
+					return true;
+			}
+			return false;
 		}
-		if (checkIllegalNumber(pvphp.value) || checkIllegalNumber(pvpdraw.value) || checkIllegalNumber(pvpdeck.value) || checkIllegalNumber(pvpmark.value)) {
+		if (checkIllegalNumbers([pvphp.value, pvpdraw.value, pvpdeck.value, pvpmark.value])) {
 			return;
 		}
 		if (user) {
