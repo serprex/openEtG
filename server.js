@@ -496,7 +496,7 @@ io.on("connection", function(socket) {
 		}
 		console.log(u + " requesting " + f);
 		sockinfo[this.id].deck = user.decks.split(",")[user.selectedDeck];
-		sockinfo[this.id].demigod = data.DGmode;
+		sockinfo[this.id].pvpstats = { hp: data.hp, markpower: data.mark, deckpower: data.deck, drawpower: data.draw };
 		var foesock = usersock[f];
 		if (foesock && foesock.id in sockinfo){
 			if (sockinfo[foesock.id].duel == u) {
@@ -506,9 +506,19 @@ io.on("connection", function(socket) {
 				sockinfo[this.id].foe = foesock;
 				sockinfo[foesock.id].foe = this;
 				var deck0 = etgutil.decodedeck(sockinfo[foesock.id].deck), deck1 = etgutil.decodedeck(sockinfo[this.id].deck);
-				var DG = sockinfo[this.id].demigod, DGfoe = sockinfo[foesock.id].demigod;
-				this.emit("pvpgive", { first: first, seed: seed, deck: deck0, urdeck: deck1, foename:f, demigod: DG, foedemigod: DGfoe});
-				foesock.emit("pvpgive", { first: !first, seed: seed, deck: deck1, urdeck: deck0, foename:u, demigod:DGfoe, foedemigod:DG});
+				var owndata = { first: first, seed: seed, deck: deck0, urdeck: deck1, foename:f };
+				var foedata = { first: !first, seed: seed, deck: deck1, urdeck: deck0 ,foename:u};
+				var stat = sockinfo[this.id].pvpstats, foestat = sockinfo[foesock.id].pvpstats;
+				for (var key in stat) {
+					owndata["p1" + key] = stat[key];
+					foedata["p2" + key] = stat[key];
+				}
+				for (var key in foestat) {
+					owndata["p2" + key] = foestat[key];
+					foedata["p1" + key] = foestat[key];
+				}
+				this.emit("pvpgive", owndata);
+				foesock.emit("pvpgive", foedata);
 			} else {
 				sockinfo[this.id].duel = f;
 				foesock.emit("chat", { msg: u + " wants to duel with you!", mode: "info" });

@@ -407,31 +407,36 @@ function initLibrary(pool){
 }
 function initGame(data, ai) {
 	var game = new etg.Game(data.first, data.seed);
-	if (data.hp) {
-		game.player2.maxhp = game.player2.hp = data.hp;
+	if (data.p1hp) {
+		game.player1.maxhp = game.player1.hp = data.p1hp;
 	}
-	if (data.aimarkpower) {
-		game.player2.markpower = data.aimarkpower;
+	if (data.p2hp) {
+		game.player2.maxhp = game.player2.hp = data.p2hp;
 	}
-	if (data.urhp) {
-		game.player1.maxhp = game.player1.hp = data.urhp;
+	if (data.p1markpower) {
+		game.player1.markpower = data.p1markpower;
 	}
-	if (data.aidrawpower > 1) {
-	    game.player2.drawpower = data.aidrawpower;
+	if (data.p2markpower) {
+		game.player2.markpower = data.p2markpower;
 	}
-	if (data.demigod) {
-	    game.player1.maxhp = game.player1.hp = 200;
-	    game.player1.drawpower = 2;
-	    game.player1.markpower = 3;
+	if (data.p1drawpower > 1) {
+		game.player1.drawpower = data.p1drawpower;
 	}
-	if (data.foedemigod) {
-	    game.player2.maxhp = game.player2.hp = 200;
-	    game.player2.drawpower = 2;
-	    game.player2.markpower = 3;
+	if (data.p2drawpower > 1) {
+		game.player2.drawpower = data.p2drawpower;
+	}
+	if (data.p1deckpower) {
+		game.player1.deckpower = data.p1deckpower;
+	}
+	if (data.p2deckpower) {
+		game.player2.deckpower = data.p2deckpower;
 	}
 	var idx, code, decks = [data.urdeck, data.deck];
 	for (var j = 0;j < 2;j++) {
-		if (game.players(j).drawpower > 1){
+		if (game.players(j).deckpower) {
+			decks[j] = deckPower(decks[j], game.players(j).deckpower);
+		}
+		else if (game.players(j).drawpower > 1){
 			decks[j] = decks[j].concat(decks[j]);
 		}
 		for (var i = 0;i < decks[j].length;i++) {
@@ -451,6 +456,13 @@ function initGame(data, ai) {
 	}
 	startMatch(game, foeDeck);
 	return game;
+}
+function deckPower(deck, amount) {
+	res = [];
+	for (var i = 0;i < amount;i++) {
+		res = res.concat(deck);
+	}
+	return res;
 }
 function getDeck(limit) {
 	var deck = user ? etgutil.decodedeck(user.decks[user.selectedDeck]) :
@@ -557,11 +569,11 @@ function mkPremade(name, daily) {
 		var deck = etgutil.decodedeck((!user && aideck.value) || foedata[1]);
 		var gameData = { first: Math.random() < .5, deck: deck, urdeck: urdeck, seed: Math.random() * etgutil.MAX_INT, foename: foename };
 		if (name == "mage"){
-			gameData.hp = 125;
+			gameData.p2hp = 125;
 		}else{
-			gameData.hp = 200;
-			gameData.aimarkpower = 3;
-			gameData.aidrawpower = 2;
+			gameData.p2hp = 200;
+			gameData.p2markpower = 3;
+			gameData.p2drawpower = 2;
 		}
 		var game = initGame(gameData, true);
 		game.cost = daily ? 0 : cost;
@@ -590,7 +602,7 @@ function mkQuestAi(questname, stage, area) {
 	if (urdeck.length < (user ? 31 : 11)) {
 		return "ERROR: Your deck is invalid or missing! Please exit and create a valid deck in the deck editor.";
 	}
-	var game = initGame({ first: Math.random() < .5, deck: deck, urdeck: urdeck, seed: Math.random() * etgutil.MAX_INT, hp: hp, aimarkpower: markpower, foename: foename, urhp: playerHPstart, aidrawpower: drawpower }, true);
+	var game = initGame({ first: Math.random() < .5, deck: deck, urdeck: urdeck, seed: Math.random() * etgutil.MAX_INT, hp: hp, p2markpower: markpower, foename: foename, p1hp: playerHPstart, p2drawpower: drawpower }, true);
 	game.quest = [questname, stage];
 	game.wintext = quest.wintext || "";
 	game.autonext = quest.autonext;
@@ -644,7 +656,7 @@ function mkAi(level, daily) {
 			var typeName = ["Commoner", "Mage", "Champion"];
 
 			var foename = typeName[level] + "\n" + randomNames[Math.floor(Math.random() * randomNames.length)];
-			var game = initGame({ first: Math.random() < .5, deck: deck, urdeck: urdeck, seed: Math.random() * etgutil.MAX_INT, hp: level == 0 ? 100 : level == 1 ? 125 : 150, aimarkpower: level == 2 ? 2 : 1, foename: foename, aidrawpower: level == 2 ? 2 : 1 }, true);
+			var game = initGame({ first: Math.random() < .5, deck: deck, urdeck: urdeck, seed: Math.random() * etgutil.MAX_INT, p2hp: level == 0 ? 100 : level == 1 ? 125 : 150, p2markpower: level == 2 ? 2 : 1, foename: foename, p2drawpower: level == 2 ? 2 : 1 }, true);
 			game.cost = gameprice;
 			game.level = level;
 			return game;
@@ -2653,7 +2665,7 @@ socket.on("librarygive", initLibrary);
 socket.on("foearena", function(data) {
 	var deck = etgutil.decodedeck(data.deck);
 	chatArea.value = data.name + ": " + deck.join(" ");
-	var game = initGame({ first: data.seed < etgutil.MAX_INT/2, deck: deck, urdeck: getDeck(), seed: data.seed, hp: data.hp, cost: data.cost, foename: data.name, aidrawpower: data.draw, aimarkpower: data.mark }, true);
+	var game = initGame({ first: data.seed < etgutil.MAX_INT/2, deck: deck, urdeck: getDeck(), seed: data.seed, p2hp: data.hp, cost: data.cost, foename: data.name, p2drawpower: data.draw, p2markpower: data.mark }, true);
 	game.arena = data.name;
 	game.level = data.lv?3:1;
 	game.cost = 5+data.lv*15;
@@ -2810,10 +2822,16 @@ function challengeClick() {
 			startEditor();
 			return;
 		}
+		function checkIllegalNumber(value) {
+			return (value && (isNaN(value) || pvp.value < 0))
+		}
+		if (checkIllegalNumber(pvphp.value) || checkIllegalNumber(pvpdraw.value) || checkIllegalNumber(pvpdeck.value) || checkIllegalNumber(pvpmark.value)) {
+			return;
+		}
 		if (user) {
-			userEmit("foewant", { f: foename.value, DGmode:demigodmode.checked });
+			userEmit("foewant", { f: foename.value, hp: pvphp.value, draw: pvpdraw.value, deck: pvpdeck.value, mark: pvpmark.value });
 		}else{
-			socket.emit("pvpwant", { deck: deck, room: foename.value, DGmode: demigodmode.checked });
+			socket.emit("pvpwant", { deck: deck, room: foename.value, hp:pvphp.value, draw:pvpdraw.value, deck:pvpdeck.value, mark:pvpmark.value });
 		}
 	}
 }
