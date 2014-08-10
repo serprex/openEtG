@@ -1183,9 +1183,9 @@ function startQuestWindow(){
 		city: ["Capital City", new PIXI.Polygon(456,307, 519, 436, 520, 472,328,496,258,477,259,401)],
 		provinggrounds: ["Proving Grounds", new PIXI.Polygon(245,262,258,477,205,448,179,397,180,350,161,313)],
 		ice: ["Icy Caves", new PIXI.Polygon(161,313,245,262,283,190,236,167,184,186,168,213,138,223,131,263)],
-		desert:["Lonely Desert", new PIXI.Polygon(245,262,283,190,326,202,466,196,511,219,555,221,456,307,259,401)]
+		desert: ["Lonely Desert", new PIXI.Polygon(245,262,283,190,326,202,466,196,511,219,555,221,456,307,259,401)]
 	};
-	for (key in areainfo) {
+	for (var key in areainfo) {
 		var graphics = new PIXI.Graphics();
 		graphics.interactive = true;
 		graphics.buttonMode = true;
@@ -1203,11 +1203,6 @@ function startQuestWindow(){
 	refreshRenderer(questui);
 }
 function startQuestArea(area) {
-	for (var i = 0;i < Quest.areas[area].length;i++) {
-		var quest = Quest[Quest.areas[area][i]][0];
-		if ((quest.dependency === undefined) || quest.dependency(user))
-			startQuest(Quest.areas[area][i]);
-	}
 	var questui = new PIXI.DisplayObjectContainer();
 	questui.interactive = true;
 	var bgquest = new PIXI.Sprite(backgrounds[3]);
@@ -1219,26 +1214,31 @@ function startQuestArea(area) {
 	questui.addChild(bgquest);
 	var tinfo = makeText(50, 26, "");
 	var errinfo = makeText(50, 125, "");
-	function makeQuestButton(quest, stage, text, pos) {
-		var button = makeButton(pos[0], pos[1], user.quest[quest] > stage ? questIcons[1] : questIcons[0]);
+	function makeQuestButton(quest, stage) {
+		var pos = Quest[quest].info.pos[stage];
+		var button = makeButton(pos[0], pos[1], questIcons[user.quest[quest] > stage ? 1 : 0]);
 		button.mouseover = function() {
-			tinfo.setText(text,750);
+			tinfo.setText(Quest[quest].info.text[stage], 750);
 		}
 		button.click = function() {
 			errinfo.setText(mkQuestAi(quest, stage, area) || "");
 		}
 		return button;
 	}
-	for (var i = 0;i < Quest.areas[area].length;i++) {
-		var key = Quest.areas[area][i];
-		if ((user.quest[key] !== undefined) && Quest[key]) {
-			for (var j = 0;j <= user.quest[key];j++) {
-				if (Quest[key].info.pos[j]) {
-					questui.addChild(makeQuestButton(key, j, Quest[key].info.text[j], Quest[key].info.pos[j]));
+	Quest.areas[area].forEach(function(quest){
+		var stage0 = Quest[quest][0];
+		if (stage0.dependency === undefined || stage0.dependency(user))
+			startQuest(quest);
+	});
+	Quest.areas[area].forEach(function(quest){
+		if ((user.quest[quest] !== undefined) && Quest[quest]) {
+			for (var i = 0;i <= user.quest[quest];i++) {
+				if (Quest[quest].info.pos[i]) {
+					questui.addChild(makeQuestButton(quest, i));
 				}
 			}
 		}
-	}
+	});
 	var bexit = makeButton(750, 246, "Exit");
 	bexit.click = startQuestWindow;
 	questui.addChild(tinfo);
@@ -1483,7 +1483,7 @@ function startStore() {
 	refreshRenderer(storeui);
 }
 function addToGame(game, data) {
-	for (key in data) {
+	for (var key in data) {
 		if (key == "p1hp")
 			game.player1.hp = data[key];
 		else if (key == "p1maxhp")
@@ -2238,12 +2238,11 @@ function startMatch(game, foeDeck) {
 		var pos = realStage.getMousePosition();
 		var cardartcode, cardartx;
 		infobox.setTexture(nopic);
-		for (var i = 0;i < foeplays.children.length;i++) {
-			var foeplay = foeplays.children[i];
+		foeplays.children.forEach(function(foeplay){
 			if (hitTest(foeplay, pos)) {
 				cardartcode = foeplay.card.code;
 			}
-		}
+		});
 		for (var j = 0;j < 2;j++) {
 			var pl = game.players(j);
 			if (j == 0 || game.player1.precognition) {
@@ -2290,11 +2289,11 @@ function startMatch(game, foeDeck) {
 		if (game.winner == game.player1 && user && !game.quest && game.ai) {
 			if (game.cardreward === undefined) {
 				var winnable = [], cardwon;
-				for (var i = 0;i < foeDeck.length;i++) {
-					if (foeDeck[i].type != etg.PillarEnum && foeDeck[i].rarity < 4) {
-						winnable.push(foeDeck[i]);
+				foeDeck.forEach(function(card){
+					if (card.rarity > 0 && card.rarity < 4) {
+						winnable.push(card);
 					}
-				}
+				});
 				if (winnable.length) {
 					cardwon = winnable[Math.floor(Math.random() * winnable.length)];
 					if (cardwon == 3 && Math.random() < .5)
@@ -2328,9 +2327,9 @@ function startMatch(game, foeDeck) {
 			endturn.setText("Continue");
 		}
 		maybeSetText(turntell, discarding ? "Discard" : game.targetingMode ? game.targetingText : game.turn == game.player1 ? "Your Turn" : "Their Turn");
-		for (var i = 0;i < foeplays.children.length;i++) {
-			maybeSetTexture(foeplays.children[i], getCardImage(foeplays.children[i].card.code));
-		}
+		foeplays.children.forEach(function(foeplay){
+			maybeSetTexture(foeplay, getCardImage(foeplay.card.code));
+		});
 		foeplays.visible = !(cloakgfx.visible = game.player2.isCloaked());
 		fgfx.clear();
 		if (game.turn == game.player1 && !game.targetingMode && game.phase != etg.EndPhase) {
@@ -2614,8 +2613,7 @@ function getTextImage(text, font, bgcolor, width) {
 			doc.addChild(c);
 		}
 	}
-	for (var i = 0;i < pieces.length;i++) {
-		var piece = pieces[i];
+	pieces.forEach(function(piece){
 		if (piece == "\n"){
 			w = Math.max(w, x);
 			x = 0;
@@ -2646,18 +2644,17 @@ function getTextImage(text, font, bgcolor, width) {
 			if (!width || x + txt.width < width){
 				pushChild(txt);
 			}else{
-				var words = piece.split(" ");
-				for (var j = 0;j < words.length;j++) {
-					if (words[j]){
-						pushChild(new PIXI.Text(words[j], font));
+				piece.split(" ").forEach(function(word){
+					if (word){
+						pushChild(new PIXI.Text(word, font));
 						if (x){
 							x += 3;
 						}
 					}
-				}
+				});
 			}
 		}
-	}
+	});
 	var rtex = new PIXI.RenderTexture(width || Math.max(w, x), y+h);
 	if (bg){
 		bg.beginFill(bgcolor);
