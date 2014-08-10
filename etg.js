@@ -1,3 +1,4 @@
+"use strict";
 var MersenneTwister = require("./MersenneTwister");
 var Actives = require("./Actives");
 var Effect = require("./Effect");

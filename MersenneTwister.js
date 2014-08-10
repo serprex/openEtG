@@ -1,16 +1,10 @@
+"use strict";
 // Bastardized version of Raphael Pigulla's pure JavaScript MersenneTwister @ https://github.com/pigulla/mersennetwister
-
-var MAX_INT = 4294967296,
-	N = 624, M = 397,
-	UPPER_MASK = 0x80000000,
-	LOWER_MASK = 0x7fffffff,
-	MAG_01 = [0, 0x9908b0df];
-
+var MAX_INT = 4294967296, N = 624, M = 397, UPPER_MASK = 0x80000000, LOWER_MASK = 0x7fffffff, MAG_01 = [0, 0x9908b0df];
 function MersenneTwister(seed) {
 	this.mt = new Array(N);
 	this.seed(seed);
 };
-
 MersenneTwister.prototype.seed = function (seed) {
 	this.mt[0] = seed >>> 0;
 	for (this.mti = 1; this.mti < N; this.mti++) {
@@ -19,7 +13,6 @@ MersenneTwister.prototype.seed = function (seed) {
 			((((((s & 0xffff0000) >>> 16) * 1812433253) << 16) + (s & 0x0000ffff) * 1812433253) + this.mti) >>> 0;
 	}
 };
-
 MersenneTwister.prototype.int = function () {
 	var y;
 	if (this.mti >= N) {
@@ -44,35 +37,28 @@ MersenneTwister.prototype.int = function () {
 	y ^= (y >>> 18);
 	return y >>> 0;
 };
-
 MersenneTwister.prototype.int31 = function () {
 	return this.int() >>> 1;
 };
-
 MersenneTwister.prototype.real = function () {
 	return this.int() * (1.0 / (MAX_INT - 1));
 };
-
 MersenneTwister.prototype.realx = function () {
 	return (this.int() + 0.5) * (1.0 / MAX_INT);
 };
-
 MersenneTwister.prototype.rnd = function () {
 	return this.int() * (1.0 / MAX_INT);
 };
-
 MersenneTwister.prototype.rndHiRes = function () {
 	var a = this.int() >>> 5,
 		b = this.int() >>> 6;
 
 	return (a * 67108864.0 + b) * (1.0 / 9007199254740992.0);
 };
-
 MersenneTwister.prototype.clone = function () {
 	var obj = Object.create(MersenneTwister.prototype);
 	obj.mti = this.mti;
 	obj.mt = this.mt.slice();
 	return obj;
 };
-
 module.exports = MersenneTwister;

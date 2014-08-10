@@ -1,3 +1,4 @@
+"use strict";
 var Effect = require("./Effect");
 var etg = require("./etg");
 function mutantactive(t){

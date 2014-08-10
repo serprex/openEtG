@@ -1,3 +1,4 @@
+"use strict";
 var etgutil = require("./etgutil");
 exports.sellcard = function(data, user){
 	if (etgutil.count(user.pool, data.card)){

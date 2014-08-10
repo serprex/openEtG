@@ -1,3 +1,4 @@
+"use strict";
 require("./etg.client").loadcards(function(Cards, CardCodes) {
 	var credits = [
 		[["andretimpa", "http://andretimpa.deviantart.com"], ["Element Icons", "assets/esheet.png"], ["Rarity Icons", "assets/raritysheet.png"],

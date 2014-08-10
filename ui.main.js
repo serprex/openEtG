@@ -1,3 +1,4 @@
+"use strict";
 (function() {
 var htmlElements = ["leftpane", "chatArea", "chatinput", "deckimport", "aideck", "foename", "change", "login", "password", "challenge", "chatBox", "trade", "bottompane", "demigodmode", "username"];
 for (var i = 0;i < htmlElements.length;i++) {
@@ -29,6 +30,7 @@ var Effect = require("./Effect");
 var Quest = require("./Quest");
 var ui = require("./uiutil");
 var aiDecks = require("./Decks");
+var socket = io(location.hostname + ":13602");
 require("./etg.client").loadcards(function(cards, cardcodes, targeting) {
 	console.log("Cards loaded");
 	Cards = cards;
@@ -45,7 +47,6 @@ require("./etg.client").loadcards(function(cards, cardcodes, targeting) {
 		}
 	})(1);*/
 });
-var socket = io(location.hostname + ":13602");
 function maybeSetText(obj, text) {
 	if (obj.text != text) obj.setText(text);
 }
@@ -223,7 +224,7 @@ function getCreatureImage(code) {
 		});
 	}
 }
-getPermanentImage = getCreatureImage; // Different name in case a makeover happens
+var getPermanentImage = getCreatureImage; // Different name in case a makeover happens
 function getWeaponShieldImage(code) {
 	if (wsimgcache[code]) return wsimgcache[code];
 	else {
@@ -447,7 +448,7 @@ function initGame(data, ai) {
 			}
 		}
 	}
-	foeDeck = game.player2.deck.slice();
+	var foeDeck = game.player2.deck.slice();
 	game.turn.drawhand(7);
 	game.turn.foe.drawhand(7);
 	if (data.foename) game.foename = data.foename;
@@ -669,7 +670,7 @@ function mkAi(level, daily) {
 				parseInput(gameData, "p1markpower", pvpmark.value);
 				parseInput(gameData, "p1deckpower", pvpdeck.value);
 			}
-			game = initGame(gameData, true);
+			var game = initGame(gameData, true);
 			game.cost = gameprice;
 			game.level = level;
 			return game;
@@ -1343,10 +1344,10 @@ function upgradestore() {
 
 function startStore() {
 	var packdata = [
-		{cost: 15, info: "Bronze Pack: 9 Commons"},
-		{cost: 25, info: "Silver Pack: 3 Commons, 3 Uncommons"},
-		{cost: 65, info: "Gold Pack: 3 Commons, 4 Uncommons, 1 Rare"},
-		{cost: 100, info: "Platinum Pack: 4 Commons, 3 Uncommons, 1 Rare, 1 Shard"},
+		{cost: 15, type: "Bronze", info: "9 Commons"},
+		{cost: 25, type: "Silver", info: "3 Commons, 3 Uncommons"},
+		{cost: 65, type: "Gold", info: "3 Commons, 4 Uncommons, 1 Rare"},
+		{cost: 100, type: "Platinum", info: "4 Commons, 3 Uncommons, 1 Rare, 1 Shard"},
 	];
 	var packele = -1, packrarity = -1;
 
@@ -1369,12 +1370,12 @@ function startStore() {
 
     //free packs text
 	if (user.freepacks){
-		var freeinfo = makeText(300, 26, "");
+		var freeinfo = makeText(350, 26, "");
 		storeui.addChild(freeinfo);
 	}
 	function updateFreeInfo(rarity){
 		if (freeinfo){
-			freeinfo.setText(user.freepacks[rarity] ? "Free boosters of this type left: " + user.freepacks[rarity] : "");
+			freeinfo.setText(user.freepacks[rarity] ? "Free " + packdata[rarity].type + " packs left: " + user.freepacks[rarity] : "");
 		}
 	}
 
@@ -1419,7 +1420,7 @@ function startStore() {
 		var b = makeButton(50+125*n, 280, boosters[n]);
 		b.click = function(){
 			packrarity = n;
-			tinfo2.setText(packdata[n].info);
+			tinfo2.setText(packdata[n].type + " Pack: " + packdata[n].info);
 			updateFreeInfo(n);
 		}
 		storeui.addChild(b);
@@ -1578,19 +1579,19 @@ function startEditor(arena, acard, startempty) {
 			}
 		}
 	}
+	function incrpool(code, count){
+		if (code in CardCodes && (!arena || (!CardCodes[code].isOf(CardCodes[acard].asUpped(false))) && (arena.lv || !CardCodes[code].upped))){
+			if (code in cardpool) {
+				cardpool[code] += count;
+			} else {
+				cardpool[code] = count;
+			}
+		}
+	}
 	var cardminus, cardpool;
 	if (user){
 		cardminus = {};
 		cardpool = {};
-		function incrpool(code, count){
-			if (code in CardCodes && (!arena || (!CardCodes[code].isOf(CardCodes[acard].asUpped(false))) && (arena.lv || !CardCodes[code].upped))){
-				if (code in cardpool) {
-					cardpool[code] += count;
-				} else {
-					cardpool[code] = count;
-				}
-			}
-		}
 		etgutil.iterraw(user.pool, incrpool);
 		etgutil.iterraw(user.accountbound, incrpool);
 	}
@@ -1614,6 +1615,51 @@ function startEditor(arena, acard, startempty) {
 	}
 	editorui.addChild(bclear);
 	editorui.addChild(bsave);
+	function sumscore(){
+		var sum = 0;
+		for(var k in artable){
+			sum += arattr[k]*artable[k].cost;
+		}
+		return sum;
+	}
+	function makeattrui(y, name){
+		y = 128+y*20;
+		var data = artable[name];
+		var bt = new PIXI.Text(name, ui.mkFont(16, "black"));
+		bt.position.set(8, y);
+		var bm = makeButton(50, y, getTextImage("-", ui.mkFont(16, "black"), 0xFFFFFFFF));
+		var bv = new PIXI.Text(arattr[name], ui.mkFont(16, "black"));
+		bv.position.set(64, y);
+		var bp = makeButton(90, y, getTextImage("+", ui.mkFont(16, "black"), 0xFFFFFFFF));
+		function modattr(x){
+			arattr[name] += x;
+			if (arattr[name] >= (data.min || 0) && (!data.max || arattr[name] <= data.max)){
+				var sum = sumscore();
+				if (sum <= arpts){
+					bv.setText(arattr[name]);
+					curpts.setText((arpts-sum)/45);
+					return;
+				}
+			}
+			arattr[name] -= x;
+		}
+		bm.click = modattr.bind(null, -(data.incr || 1));
+		bp.click = modattr.bind(null, data.incr || 1)
+		editorui.addChild(bt);
+		editorui.addChild(bm);
+		editorui.addChild(bv);
+		editorui.addChild(bp);
+	}
+	function switchDeckCb(x){
+		return function() {
+			editordeck.push(etg.toTrueMark(editormark));
+			user.decks[user.selectedDeck] = etgutil.encodedeck(editordeck);
+			userEmit("setdeck", { d: user.decks[user.selectedDeck], number: user.selectedDeck });
+			user.selectedDeck = x;
+			editordeck = getDeck(true);
+			processDeck();
+		}
+	}
 	if (arena){
 		bsave.click = function() {
 			if (editordeck.length < 35) {
@@ -1644,44 +1690,9 @@ function startEditor(arena, acard, startempty) {
 			mark: { cost: 45 },
 			draw: { cost: 135 },
 		};
-		function sumscore(){
-			var sum = 0;
-			for(var k in artable){
-				sum += arattr[k]*artable[k].cost;
-			}
-			return sum;
-		}
 		var curpts = new PIXI.Text((arpts-sumscore())/45, ui.mkFont(16, "black"));
 		curpts.position.set(8, 100);
 		editorui.addChild(curpts);
-		function makeattrui(y, name){
-			y = 128+y*20;
-			var data = artable[name];
-			var bt = new PIXI.Text(name, ui.mkFont(16, "black"));
-			bt.position.set(8, y);
-			var bm = makeButton(50, y, getTextImage("-", ui.mkFont(16, "black"), 0xFFFFFFFF));
-			var bv = new PIXI.Text(arattr[name], ui.mkFont(16, "black"));
-			bv.position.set(64, y);
-			var bp = makeButton(90, y, getTextImage("+", ui.mkFont(16, "black"), 0xFFFFFFFF));
-			function modattr(x){
-				arattr[name] += x;
-				if (arattr[name] >= (data.min || 0) && (!data.max || arattr[name] <= data.max)){
-					var sum = sumscore();
-					if (sum <= arpts){
-						bv.setText(arattr[name]);
-						curpts.setText((arpts-sum)/45);
-						return;
-					}
-				}
-				arattr[name] -= x;
-			}
-			bm.click = modattr.bind(null, -(data.incr || 1));
-			bp.click = modattr.bind(null, data.incr || 1)
-			editorui.addChild(bt);
-			editorui.addChild(bm);
-			editorui.addChild(bv);
-			editorui.addChild(bp);
-		}
 		makeattrui(0, "hp");
 		makeattrui(1, "mark");
 		makeattrui(2, "draw");
@@ -1706,16 +1717,6 @@ function startEditor(arena, acard, startempty) {
 		}
 		editorui.addChild(bimport);
 		if (user){
-			function switchDeckCb(x){
-				return function() {
-					editordeck.push(etg.toTrueMark(editormark));
-					user.decks[user.selectedDeck] = etgutil.encodedeck(editordeck);
-					userEmit("setdeck", { d: user.decks[user.selectedDeck], number: user.selectedDeck });
-					user.selectedDeck = x;
-					editordeck = getDeck(true);
-					processDeck();
-				}
-			}
 			for (var i = 0;i < 10;i++) {
 				var button = makeButton(80 + i*72, 8, "Deck " + (i + 1));
 				button.click = switchDeckCb(i);
@@ -1915,8 +1916,8 @@ function startMatch(game, foeDeck) {
 					if (game.endurance) {
 						var data = game.dataNext;
 						if (game.noheal) {
-							data["p1hp"] = game.player1.hp;
-							data["p1maxhp"] = game.player1.maxhp;
+							data.p1hp = game.player1.hp;
+							data.p1maxhp = game.player1.maxhp;
 						}
 						data.endurance--;
 						var newgame = mkAi(game.level, true)();
@@ -2840,11 +2841,11 @@ function challengeClick() {
 			startEditor();
 			return;
 		}
-		gameData = {};
-		parseInput(gameData,"hp",pvphp.value);
-		parseInput(gameData,"draw",pvpdraw.value);
-		parseInput(gameData,"mark",pvpmark.value);
-		parseInput(gameData,"deck",pvpdeck.value);
+		var gameData = {};
+		parseInput(gameData, "hp", pvphp.value);
+		parseInput(gameData, "draw", pvpdraw.value);
+		parseInput(gameData, "mark", pvpmark.value);
+		parseInput(gameData, "deck", pvpdeck.value);
 		if (user) {
 			gameData.f = foename.value;
 			userEmit("foewant", gameData);

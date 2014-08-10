@@ -1,3 +1,4 @@
+"use strict";
 var etg = require("./etg");
 module.exports = function(pl){
 	if (pl.hand.length < 6)return true;

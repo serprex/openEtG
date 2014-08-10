@@ -1,3 +1,4 @@
+"use strict";
 var etg = require("./etg");
 var ui = require("./uiutil");
 function maybeTgtPos(pos){
@@ -25,6 +26,14 @@ function SpriteFade(texture, pos) {
 	this.position = maybeTgtPos(pos) || new PIXI.Point(450, 300);
 }
 function nop(){}
+function make(cons){
+	return function(){
+		if (exports.disable || !anims) return;
+		var effect = Object.create(cons.prototype);
+		var effectOverride = cons.apply(effect, arguments);
+		anims.addChild(effectOverride === undefined ? effect : effectOverride);
+	}
+}
 if (typeof PIXI === "undefined"){
 	exports.disable = true;
 	exports.register = exports.next = nop;
@@ -42,14 +51,6 @@ if (typeof PIXI === "undefined"){
 					anims.removeChild(child);
 				}
 			}
-		}
-	}
-	function make(cons){
-		return function(){
-			if (exports.disable || !anims) return;
-			var effect = Object.create(cons.prototype);
-			var effectOverride = cons.apply(effect, arguments);
-			anims.addChild(effectOverride === undefined ? effect : effectOverride);
 		}
 	}
 	Death.prototype = Object.create(PIXI.Graphics.prototype);
