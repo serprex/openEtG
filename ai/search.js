@@ -1,3 +1,4 @@
+"use strict";
 var etg = require("./etg");
 var evalGameState = require("./eval");
 var Actives = require("./Actives");

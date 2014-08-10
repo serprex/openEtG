@@ -1,3 +1,4 @@
+"use strict";
 var etg = require("./etg");
 exports.loadcards = function(cb){
 	var Cards = {}, CardCodes = {}, Targeting = {};

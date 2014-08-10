@@ -1,3 +1,4 @@
+"use strict";
 //Quest data
 exports.necromancer = [
 	{ deck: "04531027170b52g0c52m0452n018pk", name: "Skeleton Horde", hp: 80, markpower: 2, wintext: "You defeated the horde, but you should find out where they came from" },

@@ -1,3 +1,4 @@
+"use strict";
 var etg = require("./etg");
 if (typeof PIXI === "undefined"){
 	var PIXI = {};

@@ -1,3 +1,4 @@
+"use strict";
 var etg = require("./etg");
 module.exports = function(level) {
 	var uprate = level == 0 ? 0 : level == 1 ? .1 : .3;
