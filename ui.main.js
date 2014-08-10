@@ -518,7 +518,7 @@ function victoryScreen(game) {
 	if (winner){
 		if (game.goldreward) {
 			var goldshown = (game.goldreward || 0) - (game.cost || 0);
-			tgold = makeText(340, 550, "Gold won: $" + goldshown);
+			var tgold = makeText(340, 550, "Gold won: $" + goldshown);
 			victoryui.addChild(tgold);
 			userExec("addgold", { g: game.goldreward });
 		}
@@ -875,7 +875,7 @@ function makeCardSelector(cardmouseover, cardclick, maxedIndicator){
 				if (user) {
 					var txt = spr.getChildAt(0), card = CardCodes[code], inf = isFreeCard(card);
 					if ((txt.visible = inf || code in cardpool || showall)) {
-						cardAmount = inf ? "-" : !(code in cardpool) ? 0 : (cardpool[code] - (code in cardminus ? cardminus[code] : 0))
+						var cardAmount = inf ? "-" : !(code in cardpool) ? 0 : (cardpool[code] - (code in cardminus ? cardminus[code] : 0))
 						maybeSetText(txt, cardAmount.toString());
 						if (maxedIndicator && card.type != etg.PillarEnum && cardAmount >= 6) {
 							graphics.beginFill(elecols[etg.Light]);
