@@ -899,10 +899,12 @@ Creature.prototype.addpoison = function(x) {
 	}
 }
 Weapon.prototype.buffhp = function(){}
-Player.prototype.buffhp = Creature.prototype.buffhp = function(x){
-	this.maxhp += x;
-	if (this instanceof Player && this.maxhp>500){
-		this.maxhp = 500;
+Player.prototype.buffhp = Creature.prototype.buffhp = function(x) {
+	if (!(this instanceof Player) || this.maxhp <= 500) {
+		this.maxhp += x;
+		if (this instanceof Player && this.maxhp > 500) {
+			this.maxhp = 500;
+		}
 	}
 	this.dmg(-x);
 }
