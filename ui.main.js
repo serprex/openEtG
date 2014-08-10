@@ -2829,7 +2829,7 @@ function changeClick() {
 	userEmit("passchange", { p: password.value });
 }
 function parseInput(data, key, value) {
-	value = parseInt(value);
+	var value = parseInt(value);
 	console.log(key + ": " + value)
 	if (value === 0 || value > 0)
 		data[key] = value;
