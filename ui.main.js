@@ -2830,7 +2830,6 @@ function changeClick() {
 }
 function parseInput(data, key, value) {
 	var value = parseInt(value);
-	console.log(key + ": " + value)
 	if (value === 0 || value > 0)
 		data[key] = value;
 }
