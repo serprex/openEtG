@@ -1207,7 +1207,6 @@ function startQuestArea(area) {
 	questui.interactive = true;
 	var bgquest = new PIXI.Sprite(backgrounds[3]);
 	bgquest.interactive = true;
-	bgquest.hitArea = new PIXI.Rectangle(0, 0, 900, 670);
 	bgquest.mouseover = function() {
 		tinfo.setText("");
 	}
