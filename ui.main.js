@@ -459,7 +459,7 @@ function initGame(data, ai) {
 	return game;
 }
 function deckPower(deck, amount) {
-	res = [];
+	var res = [];
 	for (var i = 0;i < amount;i++) {
 		res = res.concat(deck);
 	}
