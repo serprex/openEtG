@@ -460,7 +460,7 @@ Card.prototype.info = function(){
 }
 Thing.prototype.toString = function(){ return this.card.name; }
 CardInstance.prototype.toString = function() { return "::" + this.card.name; }
-Player.prototype.toString = function(){ return this == this.game.player1?"1":"2"; }
+Player.prototype.toString = function(){ return this == this.game.player1?"p1":"p2"; }
 Card.prototype.toString = function(){ return this.code; }
 Card.prototype.asUpped = function(upped){
 	return this.upped == upped ? this : CardCodes[(this.upped?parseInt(this.code, 32)-2000:parseInt(this.code, 32)+2000).toString(32)];
@@ -1153,7 +1153,7 @@ CardInstance.prototype.canactive = function(){
 }
 CardInstance.prototype.useactive = function(target){
 	if (!this.canactive()){
-		console.log((this.owner==this.owner.game.player1?"1":"2") + " cannot cast " + (this.card?this.card.name:"nil"));
+		console.log((this.owner==this.owner.game.player1?"1":"2") + " cannot cast " + (this || "-"));
 		return;
 	}
 	var owner = this.owner, card = this.card;

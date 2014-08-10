@@ -89,9 +89,9 @@ function codeSmithLoop(res, iter, params){
 		res.writeHead("503");
 		res.end();
 	}else{
-		var code = [];
+		var code = new Array(8);
 		for (var i=0; i<8; i++){
-			code.push(33+Math.floor(Math.random()*94));
+			code[i] = 33+Math.floor(Math.random()*94);
 		}
 		code = String.fromCharCode.apply(String, code);
 		db.hexists("CodeHash", code, function(err, exists){

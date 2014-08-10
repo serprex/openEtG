@@ -56,6 +56,9 @@ function maybeSetTexture(obj, text) {
 		obj.setTexture(text);
 	} else obj.visible = false;
 }
+function setClick(obj, click){
+	obj.click = obj.tap = click;
+}
 function hitTest(obj, pos) {
 	var x = obj.position.x - obj.width * obj.anchor.x, y = obj.position.y - obj.height * obj.anchor.y;
 	return pos.x > x && pos.y > y && pos.x < x + obj.width && pos.y < y + obj.height;
@@ -267,11 +270,11 @@ function initTrade(data) {
 	var cardChosen = false;
 	var selectedCards = [], selectedCardsprites = [];
 	var player2Cards = [], player2Cardsprites = [];
-	bcancel.click = function() {
+	setClick(bcancel, function() {
 		userEmit("canceltrade");
 		startMenu();
-	}
-	btrade.click = function() {
+	});
+	setClick(btrade, function() {
 		if (selectedCards.length > 0) {
 			userEmit("cardchosen", { cards: selectedCards })
 			console.log("Card sent");
@@ -281,8 +284,8 @@ function initTrade(data) {
 		}
 		else
 			chatArea.value = "You have to choose at least a card!"
-	}
-	bconfirm.click = function() {
+	});
+	setClick(bconfirm, function() {
 		if (player2Cards.length > 0) {
 			console.log("Confirmed!");
 			userEmit("confirmtrade", { cards: etgutil.encodedeck(selectedCards), oppcards: etgutil.encodedeck(player2Cards) });
@@ -291,7 +294,7 @@ function initTrade(data) {
 		}
 		else
 			chatArea.value = "Wait for your friend to choose!"
-	}
+	});
 	bconfirmed.position.set(10, 110);
 	setInteractive(btrade);
 	editorui.addChild(btrade);
@@ -319,11 +322,11 @@ function initTrade(data) {
 		var sprite = new PIXI.Sprite(nopic);
 		sprite.position.set(100 + Math.floor(i / 10) * 100, 8 + (i % 10) * 20);
 		(function(_i) {
-			sprite.click = function() {
+			setClick(sprite, function() {
 				var card = CardCodes[selectedCards[_i]];
 				adjust(cardminus, selectedCards[_i], -1);
 				selectedCards.splice(_i, 1);
-			}
+			});
 			sprite.mouseover = function() {
 				cardArt.setTexture(getArt(selectedCards[_i]));
 			}
@@ -391,7 +394,7 @@ function initLibrary(pool){
 	editorui.interactive = true;
 	editorui.addChild(new PIXI.Sprite(backgrounds[0]));
 	var bexit = makeButton(10, 10, "Exit");
-	bexit.click = startMenu;
+	setClick(bexit, startMenu);
 	editorui.addChild(bexit);
 	var cardminus = {}, cardpool = etgutil.deck2pool(pool);
 	var cardsel = makeCardSelector(
@@ -459,7 +462,7 @@ function initGame(data, ai) {
 	return game;
 }
 function deckPower(deck, amount) {
-	var res = [];
+	res = [];
 	for (var i = 0;i < amount;i++) {
 		res = res.concat(deck);
 	}
@@ -504,7 +507,7 @@ function victoryScreen(game) {
 	}
 
 	var bexit = makeButton(412, 430, "Exit");
-	bexit.click = function() {
+	setClick(bexit, function() {
 		if (game.quest) {
 			if (winner && game.choicerewards)
 				startRewardWindow(game.choicerewards, game.rewardamount, true);
@@ -513,7 +516,7 @@ function victoryScreen(game) {
 		}
 		else
 			startMenu();
-	}
+	});
 	victoryui.addChild(bexit);
 	if (winner){
 		if (game.goldreward) {
@@ -808,10 +811,10 @@ function makeCardSelector(cardmouseover, cardclick, maxedIndicator){
 		var sprite = makeButton((i>6?40:4), 300 + (i%7) * 32 + (i>6?32:0), eicons[i]);
 		sprite.interactive = true;
 		(function(_i) {
-			sprite.click = function() {
+			setClick(sprite, function() {
 				elefilter = _i;
 				makeColumns();
-			}
+			});
 		})(i);
 		cardsel.addChild(sprite);
 	}
@@ -819,10 +822,10 @@ function makeCardSelector(cardmouseover, cardclick, maxedIndicator){
 		var sprite = makeButton(74, 338 + i * 32, ricons[i]);
 		sprite.interactive = true;
 		(function(_i) {
-			sprite.click = function() {
+			setClick(sprite, function() {
 				rarefilter = _i;
 				makeColumns();
-			}
+			});
 		})(i);
 		cardsel.addChild(sprite);
 	}
@@ -835,9 +838,9 @@ function makeCardSelector(cardmouseover, cardclick, maxedIndicator){
 			sprite.addChild(sprcount);
 			(function(_i, _j) {
 				if (cardclick){
-					sprite.click = function() {
+					setClick(sprite, function() {
 						cardclick(columns[_i][_j]);
-					}
+					});
 				}
 				if (cardmouseover){
 					sprite.mouseover = function(){
@@ -939,11 +942,11 @@ function startMenu() {
 	menuui.addChild(bglobby);
 
 	var bnextTip = makeButton(750, 50, "Next tip");
-	bnextTip.click = function() {
+	setClick(bnextTip, function() {
 		tipNumber++;
 		if (tipNumber >= helpTexts.length) tipNumber = 0;
 		tinfo.setText("Tip: " + helpTexts[tipNumber], 750);
-	}
+	});
 	menuui.addChild(bnextTip);
 
 	var tgold = makeText(750, 101, (user ? "$" + user.gold : "Sandbox"));
@@ -958,78 +961,78 @@ function startMenu() {
 	var bai0 = makeButton(50, 100, "Commoner", function() {
 		tinfo.setText("Commoners have no upgraded cards.\nCost: $0");
 	});
-	bai0.click = mkAi(0);
+	setClick(bai0, mkAi(0));
 	menuui.addChild(bai0);
 
 	var bai1 = makeButton(150, 100, "Mage", function() {
 		tinfo.setText("Mages have a few upgraded cards.\nCost: $5");
 	});
-	bai1.click = mkPremade("mage");
+	setClick(bai1, mkPremade("mage"));
 	menuui.addChild(bai1);
 
 	var bai2 = makeButton(250, 100, "Champion", function() {
 		tinfo.setText("Champions have some upgraded cards.\nCost: $10");
 	});
-	bai2.click = mkAi(2);
+	setClick(bai2, mkAi(2));
 	menuui.addChild(bai2);
 
 	var bai3 = makeButton(350, 100, "Demigod", function() {
 		tinfo.setText("Demigods are extremely powerful. Come prepared for anything.\nCost: $20");
 	});
-	bai3.click = mkPremade("demigod");
+	setClick(bai3, mkPremade("demigod"));
 	menuui.addChild(bai3);
 
 	var bquest = makeButton(50, 145, "Quests", function() {
 		tinfo.setText("Go on an adventure!");
 	});
-	bquest.click = startQuestWindow;
+	setClick(bquest, startQuestWindow);
 	menuui.addChild(bquest);
 
 	var bcolosseum = makeButton(150, 145, "Colosseum", function() {
 		tinfo.setText("Try some daily challenges in the Colosseum!");
 	});
-	bcolosseum.click = startColosseum;
+	setClick(bcolosseum, startColosseum);
 	menuui.addChild(bcolosseum);
 
 	var bedit = makeButton(50, 300, "Editor", function() {
 		tinfo.setText("Here you can edit your deck, as well as submit an arena deck.");
 	});
-	bedit.click = startEditor;
+	setClick(bedit, startEditor);
 	menuui.addChild(bedit);
 
 	var bshop = makeButton(150, 300, "Shop", function() {
 		tinfo.setText("Here you can buy booster packs which contains cards from the elements you choose.");
 	});
-	bshop.click = startStore;
+	setClick(bshop, startStore);
 	menuui.addChild(bshop);
 
 	var bupgrade = makeButton(250, 300, "Sell/Upgrade", function() {
 		tinfo.setText("Here you can upgrade or sell your cards.");
 	});
-	bupgrade.click = upgradestore;
+	setClick(bupgrade, upgradestore);
 	menuui.addChild(bupgrade);
 
 	var blogout = makeButton(750, 246, "Logout", function() {
 		tinfo.setText("Click here to log out.")
 	});
-	blogout.click = function() {
+	setClick(blogout, function() {
 		userEmit("logout");
 		logout();
-	}
+	});
 	menuui.addChild(blogout);
 
 	//delete account button
 	var bdelete = makeButton(750, 550, "Wipe Account", function() {
 		tinfo.setText("Click here to permanently remove your account.")
 	});
-	bdelete.click = function() {
+	setClick(bdelete, function() {
 		if (foename.value == user.name + "yesdelete") {
 			userEmit("delete");
 			logout();
 		} else {
 			chatArea.value = "Input '" + user.name + "yesdelete' into Challenge to delete your account";
 		}
-	}
+	});
 	menuui.addChild(bdelete);
 
 	var usertoggle = [bquest, bcolosseum, bshop, bupgrade, blogout, bdelete, taiwinloss, bnextTip];
@@ -1048,7 +1051,7 @@ function startMenu() {
 		menuui.addChild(btopa);
 		usertoggle.push(baia, binfoa, btopa);
 		(function(lvi){
-			baia.click = function() {
+			setClick(baia, function() {
 				if (Cards) {
 					if (getDeck().length < 31) {
 						startEditor();
@@ -1056,17 +1059,17 @@ function startMenu() {
 					}
 					userEmit("foearena", lvi);
 				}
-			}
-			binfoa.click = function() {
+			});
+			setClick(binfoa, function() {
 				if (Cards) {
 					userEmit("arenainfo", lvi);
 				}
-			}
-			btopa.click = function() {
+			});
+			setClick(btopa, function() {
 				if (Cards) {
 					userEmit("arenatop", lvi);
 				}
-			}
+			});
 		})({lv:i});
 	}
 
@@ -1120,12 +1123,12 @@ function startRewardWindow(reward, numberofcopies, nocode) {
 
 	if (!nocode){
 		var exitButton = makeButton(10, 10, "Exit");
-		exitButton.click = startMenu;
+		setClick(exitButton, startMenu);
 		rewardui.addChild(exitButton);
 	}
 
 	var confirmButton = makeButton(10, 40, "Done");
-	confirmButton.click = function() {
+	setClick(confirmButton, function() {
 		if (!reward || chosenReward) {
 			if (nocode) {
 				userExec("addcards", { c: (numberofcopies > 9 ? "" : "0") + numberofcopies + chosenReward })
@@ -1135,7 +1138,7 @@ function startRewardWindow(reward, numberofcopies, nocode) {
 				userEmit("codesubmit2", { code: foename.value, card: chosenReward });
 			}
 		}
-	}
+	});
 	rewardui.addChild(confirmButton);
 
 	var chosenRewardImage = new PIXI.Sprite(nopic);
@@ -1146,10 +1149,10 @@ function startRewardWindow(reward, numberofcopies, nocode) {
 		var card = new PIXI.Sprite(getCardImage(rewardList[i]));
 		card.position.set(100 + Math.floor(i/12) * 130, 272 + (i%12) * 20);
 		(function(_i){
-			card.click = function(){
+			setClick(card, function(){
 				chosenReward = rewardList[_i];
 				chosenRewardImage.setTexture(getArt(chosenReward));
-			}
+			});
 		})(i);
 		rewardui.addChild(card);
 		setInteractive(card);
@@ -1176,7 +1179,7 @@ function startQuestWindow(){
 	var tinfo = makeText(32, 32, "");
 	questui.addChild(tinfo);
 	var bexit = makeButton(750, 246, "Exit");
-	bexit.click = startMenu;
+	setClick(bexit, startMenu);
 	questui.addChild(bexit);
 	var areainfo = {
 		forest: ["Spooky Forest", new PIXI.Polygon(555, 221, 456, 307, 519, 436, 520, 472, 631, 440, 652, 390, 653, 351, 666, 321, 619, 246)],
@@ -1191,9 +1194,9 @@ function startQuestWindow(){
 		graphics.buttonMode = true;
 		(function (k) {
 			graphics.hitArea = areainfo[k][1];
-			graphics.click = function () {
+			setClick(graphics, function () {
 				if (k in Quest.areas) startQuestArea(k);
-			}
+			});
 			graphics.mouseover = function() {
 				tinfo.setText(areainfo[k][0]);
 			}
@@ -1219,9 +1222,9 @@ function startQuestArea(area) {
 		button.mouseover = function() {
 			tinfo.setText(Quest[quest].info.text[stage], 750);
 		}
-		button.click = function() {
+		setClick(button, function() {
 			errinfo.setText(mkQuestAi(quest, stage, area) || "");
-		}
+		});
 		return button;
 	}
 	Quest.areas[area].forEach(function(quest){
@@ -1239,7 +1242,7 @@ function startQuestArea(area) {
 		}
 	});
 	var bexit = makeButton(750, 246, "Exit");
-	bexit.click = startQuestWindow;
+	setClick(bexit, startQuestWindow);
 	questui.addChild(tinfo);
 	questui.addChild(errinfo);
 	questui.addChild(bexit);
@@ -1291,17 +1294,17 @@ function upgradestore() {
 	var goldcount = makeText(30, 100, "");
 	upgradeui.addChild(goldcount);
 	var bupgrade = makeButton(150, 80, "Upgrade");
-	bupgrade.click = function() {
+	setClick(bupgrade, function() {
 		upgradeCard(CardCodes[selectedCard]);
-	};
+	});
 	upgradeui.addChild(bupgrade);
 	var bsell = makeButton(150, 140, "Sell");
-	bsell.click = function() {
+	setClick(bsell, function() {
 		sellCard(CardCodes[selectedCard]);
-	};
+	});
 	upgradeui.addChild(bsell);
 	var bexit = makeButton(5, 50, "Exit");
-	bexit.click = startMenu;
+	setClick(bexit, startMenu);
 	upgradeui.addChild(bexit);
 	var tinfo = new PIXI.Text("", { font: "bold 16px Dosis" });
 	tinfo.position.set(150, 102);
@@ -1381,20 +1384,20 @@ function startStore() {
 	//get cards button
 	var bget = makeButton(750, 156, "Take Cards");
 	toggleB(bget);
-	bget.click = function () {
+	setClick(bget, function () {
 		toggleB(bbronze, bsilver, bgold, bplatinum, bget, bbuy);
 		popbooster.visible = false;
-	}
+	});
 	storeui.addChild(bget);
 
 	//exit button
 	var bexit = makeButton(750, 246, "Exit");
-	bexit.click = startMenu;
+	setClick(bexit, startMenu);
 	storeui.addChild(bexit);
 
 	//buy button
 	var bbuy = makeButton(750, 156, "Buy Pack");
-	bbuy.click = function() {
+	setClick(bbuy, function() {
 		if (packrarity == -1) {
 			tinfo2.setText("Select a pack first!");
 			return;
@@ -1411,17 +1414,17 @@ function startStore() {
 		} else {
 			tinfo2.setText("You can't afford that!");
 		}
-	}
+	});
 	storeui.addChild(bbuy);
 
 	// The different pack types
 	function gradeSelect(n){
 		var b = makeButton(50+125*n, 280, boosters[n]);
-		b.click = function(){
+		setClick(b, function(){
 			packrarity = n;
 			tinfo2.setText(packdata[n].type + " Pack: " + packdata[n].info);
 			updateFreeInfo(n);
-		}
+		});
 		storeui.addChild(b);
 		return b;
 	}
@@ -1433,10 +1436,10 @@ function startStore() {
 	for (var i = 0;i < 14;i++) {
 		var elementbutton = makeButton(75 + Math.floor(i / 2)*64, 120 + (i % 2)*75, eicons[i]);
 		(function(_i) {
-			elementbutton.click = function() {
+			setClick(elementbutton, function() {
 				packele = _i;
 				tinfo.setText("Selected Element: " + etg.eleNames[packele]);
-			}
+			});
 		})(i);
 		storeui.addChild(elementbutton);
 	}
@@ -1527,7 +1530,7 @@ function startColosseum(){
 			var active = !(user.daily & (1 << i));
 			if (active) {
 				var button = makeButton(50, 100 + 30 * i, "Fight!");
-				(function(_i) { button.click = mkDaily(_i) })(i);
+				(function(_i) { setClick(button, mkDaily(_i)) })(i);
 				coloui.addChild(button);
 			}
 			var text = makeText(130, 100 + 30 * i, active ? (events[i-1].name + ": " + events[i-1].desc) : "Not availible. Try again tomorrow.");
@@ -1535,7 +1538,7 @@ function startColosseum(){
 		}
 
 		var bexit = makeButton(8, 8, "Exit");
-		bexit.click = startMenu;
+		setClick(bexit, startMenu);
 		coloui.addChild(bexit);
 
 		refreshRenderer(coloui);
@@ -1606,12 +1609,12 @@ function startEditor(arena, acard, startempty) {
 	editorui.addChild(bg);
 	var bclear = makeButton(8, 32, "Clear");
 	var bsave = makeButton(8, 56, "Save & Exit");
-	bclear.click = function() {
+	setClick(bclear, function() {
 		if (user) {
 			cardminus = {};
 		}
 		editordeck.length = arena?5:0;
-	}
+	});
 	editorui.addChild(bclear);
 	editorui.addChild(bsave);
 	function sumscore(){
@@ -1642,8 +1645,8 @@ function startEditor(arena, acard, startempty) {
 			}
 			arattr[name] -= x;
 		}
-		bm.click = modattr.bind(null, -(data.incr || 1));
-		bp.click = modattr.bind(null, data.incr || 1)
+		setClick(bm, modattr.bind(null, -(data.incr || 1)));
+		setClick(bp, modattr.bind(null, data.incr || 1));
 		editorui.addChild(bt);
 		editorui.addChild(bm);
 		editorui.addChild(bv);
@@ -1660,7 +1663,7 @@ function startEditor(arena, acard, startempty) {
 		}
 	}
 	if (arena){
-		bsave.click = function() {
+		setClick(bsave, function() {
 			if (editordeck.length < 35) {
 				chatArea.value = "35 cards required before submission";
 				return;
@@ -1677,11 +1680,11 @@ function startEditor(arena, acard, startempty) {
 			editordeck.pop();
 			chatArea.value = "Arena deck submitted";
 			startMenu();
-		}
+		});
 		var bexit = makeButton(8, 80, "Exit");
-		bexit.click = function() {
+		setClick(bexit, function() {
 			startArenaInfo(arena);
-		}
+		});
 		editorui.addChild(bexit);
 		var arpts = arena.lv?515:470, arattr = {hp:parseInt(arena.hp || 200), mark:parseInt(arena.mark || 1), draw:parseInt(arena.draw || 1)};
 		var artable = {
@@ -1696,7 +1699,7 @@ function startEditor(arena, acard, startempty) {
 		makeattrui(1, "mark");
 		makeattrui(2, "draw");
 	}else{
-		bsave.click = function() {
+		setClick(bsave, function() {
 			editordeck.push(etg.toTrueMark(editormark));
 			var dcode = deckimport.value = etgutil.encodedeck(editordeck);
 			if (user) {
@@ -1704,26 +1707,26 @@ function startEditor(arena, acard, startempty) {
 				userEmit("setdeck", { d: dcode, number: user.selectedDeck });
 			}
 			startMenu();
-		}
+		});
 		var bimport = makeButton(8, 80, "Import");
-		bimport.click = function() {
+		setClick(bimport, function() {
 			var dvalue = deckimport.value;
 			editordeck = ~dvalue.indexOf(" ") ? dvalue.split(" ") : etgutil.decodedeck(dvalue);
 			if (editordeck.length > 60){
 				editordeck.length = 60;
 			}
 			processDeck();
-		}
+		});
 		editorui.addChild(bimport);
 		if (user){
 			for (var i = 0;i < 10;i++) {
 				var button = makeButton(80 + i*72, 8, "Deck " + (i + 1));
-				button.click = switchDeckCb(i);
+				setClick(button, switchDeckCb(i));
 				editorui.addChild(button);
 			}
 
-			var bshowall = makeButton(5, 550, "Show All")
-			bshowall.click = function() { showAll = !showAll }
+			var bshowall = makeButton(5, 550, "Show All");
+			setClick(bshowall, function() { showAll ^= true; });
 			editorui.addChild(bshowall);
 		}
 	}
@@ -1738,10 +1741,10 @@ function startEditor(arena, acard, startempty) {
 		var sprite = makeButton(200 + i * 32, 234, eicons[i]);
 		sprite.interactive = true;
 		(function(_i) {
-			sprite.click = function() {
+			setClick(sprite, function() {
 				editormark = _i;
 				editormarksprite.setTexture(eicons[_i]);
-			}
+			});
 		})(i);
 		editorui.addChild(sprite);
 	}
@@ -1749,7 +1752,7 @@ function startEditor(arena, acard, startempty) {
 		var sprite = new PIXI.Sprite(nopic);
 		sprite.position.set(100 + Math.floor(i / 10) * 100, 32 + (i % 10) * 20);
 		(function(_i) {
-			sprite.click = function() {
+			setClick(sprite, function() {
 				var card = CardCodes[editordeck[_i]];
 				if (!arena || card.asUpped(false).code != acard){
 					if (user && !isFreeCard(card)) {
@@ -1757,7 +1760,7 @@ function startEditor(arena, acard, startempty) {
 					}
 					editordeck.splice(_i, 1);
 				}
-			}
+			});
 			sprite.mouseover = function() {
 				cardArt.setTexture(getArt(editordeck[_i]));
 				cardArt.visible = true;
@@ -1821,12 +1824,12 @@ function startElementSelect() {
 			elesel[_i].mouseover = function() {
 				maybeSetText(eledesc, etg.eleNames[_i]);
 			}
-			elesel[_i].click = function() {
+			setClick(elesel[_i], function() {
 				var msg = { u: user.name, a: user.auth, e: _i };
 				user = undefined;
 				socket.emit("inituser", msg);
 				startMenu();
-			}
+			});
 		})(i);
 		elesel[i].interactive = true;
 		stage.addChild(elesel[i]);
@@ -1887,7 +1890,7 @@ function startMatch(game, foeDeck) {
 	var foename = new PIXI.Text(game.foename || "Unknown Opponent", { font: "bold 18px Dosis", align: "center" });
 	foename.position.set(5, 75);
 	gameui.addChild(foename);
-	endturn.click = function(e, discard) {
+	setClick(endturn, function(e, discard) {
 		if (game.turn == game.player1 && game.phase <= etg.MulliganPhase2){
 			if (!game.ai) {
 				socket.emit("mulligan", true);
@@ -1948,8 +1951,8 @@ function startMatch(game, foeDeck) {
 					foeplays.removeChildren();
 			}
 		}
-	}
-	cancel.click = function() {
+	});
+	setClick(cancel, function() {
 		if (resigning) {
 			resign.setText("Resign");
 			resigning = false;
@@ -1963,9 +1966,9 @@ function startMatch(game, foeDeck) {
 				discarding = false;
 			}
 		}
-	}
+	});
 	var resigning;
-	resign.click = function() {
+	setClick(resign, function() {
 		if (resigning){
 			if (!game.ai) {
 				socket.emit("foeleft");
@@ -1976,8 +1979,7 @@ function startMatch(game, foeDeck) {
 			resign.setText("Confirm");
 			resigning = true;
 		}
-	}
-
+	});
 	turntell.position.set(800, 570);
 	gameui.addChild(turntell);
 	function setInfo(obj) {
@@ -2006,7 +2008,7 @@ function startMatch(game, foeDeck) {
 				handsprite[j][i] = new PIXI.Sprite(nopic);
 				handsprite[j][i].position.set(j ? 20 : 780, (j ? 130 : 310) + 20 * i);
 				(function(_i) {
-					handsprite[j][i].click = function() {
+					setClick(handsprite[j][i], function() {
 						if (game.phase != etg.PlayPhase) return;
 						var cardinst = game.players(_j).hand[_i];
 						if (cardinst) {
@@ -2030,7 +2032,7 @@ function startMatch(game, foeDeck) {
 								}
 							}
 						}
-					}
+					});
 				})(i);
 				gameui.addChild(handsprite[j][i]);
 			}
@@ -2062,7 +2064,7 @@ function startMatch(game, foeDeck) {
 				spr.addChild(activetext);
 				spr.anchor.set(.5, .5);
 				spr.position = pos;
-				spr.click = function() {
+				setClick(spr, function() {
 					if (game.phase != etg.PlayPhase) return;
 					var inst = insts ? insts[i] : game.players(_j)[i];
 					if (!inst) return;
@@ -2076,7 +2078,7 @@ function startMatch(game, foeDeck) {
 							inst.useactive(tgt);
 						});
 					}
-				}
+				});
 				return spr;
 			}
 			for (var i = 0;i < 23;i++) {
@@ -2129,13 +2131,13 @@ function startMatch(game, foeDeck) {
 				quantatext[j].addChild(child = new PIXI.Sprite(eicons[k]));
 				child.position.set((k & 1) ? 0 : 54, Math.floor((k - 1) / 2) * 32);
 			}
-			hptext[j].click = function() {
+			setClick(hptext[j], function() {
 				if (game.phase != etg.PlayPhase) return;
 				if (game.targetingMode && game.targetingMode(game.players(_j))) {
 					delete game.targetingMode;
 					game.targetingModeCb(game.players(_j));
 				}
-			}
+			});
 		})(j);
 		setInteractive.apply(null, weapsprite);
 		setInteractive.apply(null, shiesprite);
@@ -2182,7 +2184,7 @@ function startMatch(game, foeDeck) {
 		},
 		cast: function(bits) {
 			var c = game.bitsToTgt(bits & 511), t = game.bitsToTgt((bits >> 9) & 511);
-			console.log("cast: " + c.card.name + " " + (t ? (t instanceof etg.Player ? t == game.player1 : t.card.name) : "-"));
+			console.log("cast: " + c + " " + (t || "-") + " " + bits);
 			if (c instanceof etg.CardInstance) {
 				var sprite = new PIXI.Sprite(nopic);
 				sprite.position.set((foeplays.children.length % 9) * 100, Math.floor(foeplays.children.length / 9) * 20);
@@ -2500,25 +2502,25 @@ function startArenaInfo(info) {
 	if (user.ocard){
 		var uocard = info.lv ? CardCodes[user.ocard].asUpped(true).code : user.ocard;
 		var bmake = makeButton(200, 440, "Create");
-		bmake.click = function(){
+		setClick(bmake, function(){
 			startEditor(info, uocard, true);
-		}
+		});
 		stage.addChild(bmake);
 		var ocard = new PIXI.Sprite(getArt(uocard));
 		ocard.position.set(734, 300);
 		batch.addChild(ocard);
 	}
 	var bret = makeButton(200, 500, "Exit");
-	bret.click = startMenu;
+	setClick(bret, startMenu);
 	stage.addChild(bret);
 	if (info.card){
 		if (info.lv){
 			info.card = CardCodes[info.card].asUpped(true).code;
 		}
 		var bmod = makeButton(200, 470, "Modify");
-		bmod.click = function(){
+		setClick(bmod, function(){
 			startEditor(info, info.card);
-		}
+		});
 		stage.addChild(bmod);
 		chatArea.value = "05" + info.card + info.deck;
 		var mark, i = 0;
@@ -2567,7 +2569,7 @@ function startArenaTop(info) {
 		stage.addChild(agetxt);
 	}
 	var bret = makeButton(8, 300, "Exit");
-	bret.click = startMenu;
+	setClick(bret, startMenu);
 	stage.addChild(bret);
 	refreshRenderer(stage);
 }

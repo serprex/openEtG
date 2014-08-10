@@ -4,8 +4,10 @@ require("./etg.client").loadcards(function(Cards, CardCodes) {
 		[["andretimpa", "http://andretimpa.deviantart.com"], ["Element Icons", "assets/esheet.png"], ["Rarity Icons", "assets/raritysheet.png"],
 			["4sa", "4si", "4sk", "4sl", "4sm", "4sn", "4so", "4sp", "4sq", "4sr", "4ss", "4st", "4su", "4vr", "55s", "6ub"]],
 		[["artimies", "http://elementscommunity.org/forum/profile/?u=140"], ["593"]],
+		[["Cryotube", "http://cryotube.deviantart.com"],
+			["566", "597", "5fe", "5lr"]],
 		[["jarozaoz", "http://elementscommunity.org/forum/profile/?u=6364"],
-			["4t3", "4vn", "532", "5fe", "5le", "5op"]],
+			["4t3", "4vn", "532", "5le", "5op"]],
 		[["kae", "http://willowdream.carbonmade.com"], ["Status Icons", "assets/statussheet.png"], ["Status Borders", "assets/statusborders.png"],
 			["4sg", "4tc", "59b", "5bs", "5c6", "5fb", "5ib", "5il", "5iq", "5lg", "5od", "5oe", "5ok", "5om", "5oo", "5os", "5p0", "5uo", "5v2", "6rs", "7gr", "7h5", "7k0"]],
 		[["mega plini", "http://elementscommunity.org/forum/profile/?u=202"], ["5ig"]],
@@ -20,7 +22,7 @@ require("./etg.client").loadcards(function(Cards, CardCodes) {
 			"5im", "5j2", "5jm", "5l9", "5lp", "5m6", "5mq", "5ou", "5pa", "5pu", "5rn", "5rq", "5se", "5t2", "5uq", "5uu", "5vi", "61p", "61q", "61v", "620", "627", "62m", "6u3", "77a", "77p", "7au", "7av", "7dj", "7e2", "7qa", "7ta", "809", "80a"]],
 		[["serprex", "http://fiction.wikia.com/wiki/User:Serprex"], ["622", "62a"]],
 		[["vrt", "http://vrt-designs.com"], ["Donation thread", "http://elementscommunity.org/forum/card-art/help-support-an-artist"],
-			["4vc", "4ve", "4vh", "52t", "55l", "55o", "55r", "560", "562", "563", "591", "5c1", "5c9", "5f2", "5fa", "5fc", "5i5", "5i7", "5ij", "5ll", "5oc", "5rk", "5rs", "5rt", "5uk", "5ul", "5um", "5ut", "5uv", "5v3", "61o", "61t", "624", "625", "626", "74a", "80g"]],
+			["4vc", "4ve", "4vh", "52t", "55l", "55o", "55r", "560", "562", "563", "591", "5c1", "5c9", "5f2", "5fa", "5fc", "5i5", "5i7", "5ij", "5ll", "5oc", "5of", "5rk", "5rs", "5rt", "5uk", "5ul", "5um", "5ut", "5uv", "5v3", "61o", "61t", "624", "625", "626", "74a", "80g"]],
 	];
 	var str = "<br>";
 	for(var i=0; i<credits.length; i++){
