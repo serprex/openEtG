@@ -1413,7 +1413,7 @@ blockwithcharge:function(c,t){
 	return true;
 },
 chaos:function(c,t){
-	randomchance = c.owner.rng();
+	var randomchance = c.owner.rng();
 	if (randomchance < .25) {
 		return true;
 	}
