@@ -1,22 +1,20 @@
 "use strict";
 (function() {
 var htmlElements = ["leftpane", "chatArea", "chatinput", "deckimport", "aideck", "foename", "change", "login", "password", "challenge", "chatBox", "trade", "bottompane", "demigodmode", "username"];
-for (var i = 0;i < htmlElements.length;i++) {
-	window[htmlElements[i]] = document.getElementById(htmlElements[i]);
-}
+htmlElements.forEach(function(name){
+	window[name] = document.getElementById(name);
+});
 if (localStorage){
 	var store = [username];
-	for (var i=0; i<store.length; i++){
-		(function(storei){
-			var field = storei.type == "checkbox" ? "checked" : "value";
-			if (localStorage[storei.id] !== undefined){
-				storei[field] = localStorage[storei.id];
-			}
-			storei.onchange = function(e){
-				localStorage[storei.id] = field == "checked" && !storei[field] ? "" : storei[field];
-			}
-		})(store[i]);
-	}
+	store.forEach(function(storei){
+		var field = storei.type == "checkbox" ? "checked" : "value";
+		if (localStorage[storei.id] !== undefined){
+			storei[field] = localStorage[storei.id];
+		}
+		storei.onchange = function(e){
+			localStorage[storei.id] = field == "checked" && !storei[field] ? "" : storei[field];
+		}
+	});
 }
 })();
 var Cards, CardCodes, Targeting;
@@ -277,7 +275,7 @@ function initTrade(data) {
 	});
 	setClick(btrade, function() {
 		if (selectedCards.length > 0) {
-			userEmit("cardchosen", { cards: selectedCards })
+			userEmit("cardchosen", { cards: etgutil.encodedeck(selectedCards) });
 			console.log("Card sent");
 			cardChosen = true;
 			editorui.removeChild(btrade);
@@ -353,7 +351,14 @@ function initTrade(data) {
 	editorui.addChild(cardArt);
 	var cmds = {
 		cardchosen: function(data){
-			player2Cards = data.cards;
+			player2Cards = etgutil.decodedeck(data.cards);
+			for (var i = 0;i < player2Cards.length;i++) {
+				player2Cardsprites[i].visible = true;
+				player2Cardsprites[i].setTexture(getCardImage(player2Cards[i]));
+			}
+			for (;i<30;i++)	{
+				player2Cardsprites[i].visible = false;
+			}
 		},
 		tradedone: function(data) {
 			user.pool = etgutil.mergedecks(user.pool, data.newcards);
@@ -374,13 +379,6 @@ function initTrade(data) {
 	}
 	refreshRenderer(editorui, function() {
 		cardsel.next(cardpool, cardminus);
-		for (var i = 0;i < player2Cards.length;i++) {
-			player2Cardsprites[i].visible = true;
-			player2Cardsprites[i].setTexture(getCardImage(player2Cards[i]));
-		}
-		for (;i<30;i++)	{
-			player2Cardsprites[i].visible = false;
-		}
 		for (var i = 0;i < selectedCards.length;i++) {
 			selectedCardsprites[i].visible = true;
 			selectedCardsprites[i].setTexture(getCardImage(selectedCards[i]));
@@ -1076,7 +1074,7 @@ function startMenu() {
 
 	refreshRenderer(menuui, function() {
 		if (user) {
-			tgold.setText("$" + user.gold)
+			tgold.setText("$" + user.gold);
 		}
 	});
 }
