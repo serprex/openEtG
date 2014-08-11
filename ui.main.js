@@ -92,7 +92,7 @@ function refreshRenderer(stage, animCb) {
 var renderer = new PIXI.autoDetectRenderer(900, 600);
 leftpane.appendChild(renderer.view);
 var realStage = new PIXI.Stage(0x336699, true);
-realStage.click = chatArea.focus.bind(chatArea);
+realStage.click = renderer.view.blur.bind(renderer.view);
 var caimgcache = {}, crimgcache = {}, wsimgcache = {}, artcache = {}, artimagecache = {}, tximgcache = {};
 var elecols = [0xa99683, 0xaa5999, 0x777777, 0x996633, 0x5f4930, 0x50a005, 0xcc6611, 0x205080, 0xa9a9a9, 0x337ddd, 0xccaa22, 0x333333, 0x77bbdd];
 
@@ -430,26 +430,22 @@ function initGame(data, ai) {
 	if (data.p2drawpower !== undefined) {
 		game.player2.drawpower = data.p2drawpower;
 	}
-	if (data.p1deckpower) {
-		game.player1.deckpower = data.p1deckpower;
-	}
-	if (data.p2deckpower) {
-		game.player2.deckpower = data.p2deckpower;
-	}
+	var deckpower = [data.p1deckpower || 1, data.p2deckpower || 1];
 	var idx, code, decks = [data.urdeck, data.deck];
 	for (var j = 0;j < 2;j++) {
-		if (game.players(j).deckpower) {
-			decks[j] = deckPower(decks[j], game.players(j).deckpower);
-		}
-		else if (game.players(j).drawpower > 1){
-			decks[j] = decks[j].concat(decks[j]);
-		}
+		var pl = game.players(j);
 		for (var i = 0;i < decks[j].length;i++) {
 			if (CardCodes[code = decks[j][i]]) {
-				game.players(j).deck.push(CardCodes[code]);
+				pl.deck.push(CardCodes[code]);
 			} else if (~(idx = etg.fromTrueMark(code))) {
-				game.players(j).mark = idx;
+				pl.mark = idx;
 			}
+		}
+		if (deckpower[j]) {
+			pl.deck = deckPower(pl.deck, deckpower[j]);
+		}
+		else if (pl.drawpower > 1){
+			pl.deck = deckPower(pl.deck, 2);
 		}
 	}
 	var foeDeck = game.player2.deck.slice();
@@ -463,8 +459,8 @@ function initGame(data, ai) {
 	return game;
 }
 function deckPower(deck, amount) {
-	var res = [];
-	for (var i = 0;i < amount;i++) {
+	var res = deck;
+	for (var i = 1;i < amount;i++) {
 		res = res.concat(deck);
 	}
 	return res;
@@ -881,33 +877,34 @@ function makeCardSelector(cardmouseover, cardclick, maxedIndicator){
 }
 function startMenu() {
 	var helpTexts = [
-		"Each card in your booster pack has a 40% chance of being from the chosen element.",
-		"Your arena deck will earn you 3 gold per win & 1 gold per loss.",
-		"Colosseum lets you compete in a number of daily events for extra prizes. The colosseum challenges reset daily.",
-		"Be sure to try the Proving Grounds Quests for some good cards.",
+		"Each card in your booster pack has a 40% chance of being from the chosen element",
+		"Your arena deck will earn you 3 gold per win & 1 gold per loss",
+		"Colosseum lets you compete in a number of daily events for extra prizes. The colosseum challenges reset daily",
+		"Be sure to try the Proving Grounds Quests for some good cards",
 		"Be sure to keep track of the rarity icons; Grey means Common, Green means Uncommon, Blue means Rare, Orange means Shard, & Pink means Ultra Rare",
-		"The Library button allows you to see all of a user's tradeable cards.",
-		"If you are a new user, be sure to get the free Bronze & Silver packs from the Shop.",
-		"Starter decks, cards from the free packs, & all non-Common Daily Cards are account-bound; they cannot be traded away or sold.",
-		"If you include account-bound cards in an upgrade, the upgrade will also be account-bound.",
-		"You'll receive a Daily Card upon logging in after midnight GMT0. If you submit an Arena deck, the deck will always contain 5 copies of that card.",
-		"No pack grade is cost efficient; commons in Bronze packs cost as much as commons in Silver packs.",
-		"Unupgraded pillars & pendulums are free.",
-		"Cards sell for around half as much as they cost to buy from a pack.",
-		"Quests are free to try, & you always face the same deck. Keep trying until you collect your reward.",
-		"You can mulligan at the start of the game to shuffled & redraw your hand with one less card.",
-		"Your account name is case sensitive.",
-		"Arena Tier 1 is unupgraded, while Tier 2 is upgraded. All decks in a tier have the same number of attribute points.",
+		"The Library button allows you to see all of a user's tradeable cards",
+		"If you are a new user, be sure to get the free Bronze & Silver packs from the Shop",
+		"Starter decks, cards from the free packs, & all non-Common Daily Cards are account-bound; they cannot be traded away or sold",
+		"If you include account-bound cards in an upgrade, the upgrade will also be account-bound",
+		"You'll receive a Daily Card upon logging in after midnight GMT0. If you submit an Arena deck, the deck will always contain 5 copies of that card",
+		"No pack grade is cost efficient; commons in Bronze packs cost as much as commons in Silver packs",
+		"Unupgraded pillars & pendulums are free",
+		"Cards sell for around half as much as they cost to buy from a pack",
+		"Quests are free to try, & you always face the same deck. Keep trying until you collect your reward",
+		"You can mulligan at the start of the game to shuffled & redraw your hand with one less card",
+		"Your account name is case sensitive",
+		"Arena Tier 1 is unupgraded, while Tier 2 is upgraded. All decks in a tier have the same number of attribute points",
 		"You can store 10 decks in the editor",
-		"If you type '/who' in chat you will get a list of the users who are online. '/w username message' will send your message only to one user.",
-		"The first text bar under the game is the import/export bar & shows your current deck. The bar below it shows game messages & sometimes the opponent's deck.",
-		"The AI Deck input can be used to fight any deck of your choice, but only in sandbox mode.",
+		"If you type '/who' in chat you will get a list of the users who are online. '/w username message' will send your message only to one user",
+		"The first text bar under the game is the import/export bar & shows your current deck. The bar below it shows game messages & sometimes the opponent's deck",
+		"The AI Deck input can be used to fight any deck of your choice, but only in sandbox mode",
 		"Remember that you can use the logout button to enter sandbox mode to review the card pool, check rarities & try out new decks",
-		"Commoner & Champion have random decks, while Mage & Demigod have premade decks. Commoner & Mage are unupped, Champion has some upped, & Demigod is fully upped.",
-		"Decks submitted to arena gain a point per win, & lose a point per loss. Rankings are shown in Arena T20.",
-		"Decks submitted to arena lose hp exponentially per day, down to a minimum of a quarter of their original hp.",
-		"If you don't get what you want from the packs in the shop, ask to trade in chat or the openEtG forum.",
-		"Rarity doesn't necessarily relate to card strength. You can go a long ways with commons & uncommons."
+		"Commoner & Champion have random decks, while Mage & Demigod have premade decks. Commoner & Mage are unupped, Champion has some upped, & Demigod is fully upped",
+		"Decks submitted to arena gain a point per win, & lose a point per loss. Rankings are shown in Arena T20",
+		"Decks submitted to arena lose hp exponentially per day, down to a minimum of a quarter of their original hp",
+		"If you don't get what you want from the packs in the shop, ask to trade in chat or the openEtG forum",
+		"Rarity doesn't necessarily relate to card strength. You can go a long ways with commons & uncommons",
+		"A ply is half a turn",
 	];
 	var tipNumber = Math.floor(Math.random()*helpTexts.length);
 
@@ -919,17 +916,15 @@ function startMenu() {
 	//lobby background
 	var bglobby = new PIXI.Sprite(backgrounds[1]);
 	bglobby.interactive = true;
-	bglobby.hitArea = new PIXI.Rectangle(0, 0, 900, 670);
 	bglobby.mouseover = function() {
-		tinfo.setText(user ? "Tip: " + helpTexts[tipNumber] : "To register, just type desired username and password in the fields to the right and then click 'Login'", 750);
+		tinfo.setText(user ? "Tip: " + helpTexts[tipNumber] + "." : "To register, just type desired username and password in the fields to the right and then click 'Login'.", 750);
 	}
 	menuui.addChild(bglobby);
 
 	var bnextTip = makeButton(750, 50, "Next tip");
 	setClick(bnextTip, function() {
-		tipNumber++;
-		if (tipNumber >= helpTexts.length) tipNumber = 0;
-		tinfo.setText("Tip: " + helpTexts[tipNumber], 750);
+		tipNumber = (tipNumber+1) % helpTexts.length;
+		tinfo.setText("Tip: " + helpTexts[tipNumber] + ".", 750);
 	});
 	menuui.addChild(bnextTip);
 
@@ -1115,7 +1110,7 @@ function startRewardWindow(reward, numberofcopies, nocode) {
 	setClick(confirmButton, function() {
 		if (!reward || chosenReward) {
 			if (nocode) {
-				userExec("addcards", { c: (numberofcopies > 9 ? "" : "0") + numberofcopies + chosenReward })
+				userExec("addcards", { c: etgutil.encodeCount(numberofcopies) + chosenReward })
 				startMenu();
 			}
 			else {

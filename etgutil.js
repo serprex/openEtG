@@ -2,6 +2,7 @@
 function encodeCount(count){
 	return count<0?"00":count>1023?"vv":(count<32?"0":"") + count.toString(32);
 }
+exports.encodeCount = encodeCount;
 exports.MAX_INT = 4294967296;
 exports.iterdeck = function(deck, func){
 	var len = 0;
