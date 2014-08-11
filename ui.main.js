@@ -430,7 +430,7 @@ function initGame(data, ai) {
 	if (data.p2drawpower !== undefined) {
 		game.player2.drawpower = data.p2drawpower;
 	}
-	var deckpower = [data.p1deckpower || 1, data.p2deckpower || 1];
+	var deckpower = [data.p1deckpower, data.p2deckpower];
 	var idx, code, decks = [data.urdeck, data.deck];
 	for (var j = 0;j < 2;j++) {
 		var pl = game.players(j);
@@ -877,7 +877,7 @@ function makeCardSelector(cardmouseover, cardclick, maxedIndicator){
 }
 function startMenu() {
 	var helpTexts = [
-		"Each card in your booster pack has a 40% chance of being from the chosen element",
+		"Each card in your booster pack has a 50% chance of being from the chosen element",
 		"Your arena deck will earn you 3 gold per win & 1 gold per loss",
 		"Colosseum lets you compete in a number of daily events for extra prizes. The colosseum challenges reset daily",
 		"Be sure to try the Proving Grounds Quests for some good cards",
