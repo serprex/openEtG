@@ -17,6 +17,7 @@ function Game(first, seed){
 }
 var statuscache = {};
 var activecache = {};
+var activecastcache = {};
 function Card(type, info){
 	this.type = type;
 	this.element = parseInt(info.Element);
@@ -37,18 +38,22 @@ function Card(type, info){
 			this.active = Actives[info.Active];
 		}else if (info.Active in activecache){
 			this.active = activecache[info.Active];
+			var castinfo = activecastcache[info.Active];
+			if (castinfo){
+				this.cast = castinfo[0];
+				this.castele = castinfo[1];
+			}
 		}else{
 			activecache[info.Active] = this.active = {};
 			var actives = info.Active.split("+");
 			for(var i=0; i<actives.length; i++){
-				if (actives[i] == ""){
-					continue;
-				}
 				var active = actives[i].split("=");
 				if (active.length == 1){
 					this.active.auto = Actives[active[0]];
 				}else{
-					this.active[this.readCost("cast", active[0])?"cast":active[0]] = Actives[active[1]];
+					var iscast = this.readCost("cast", active[0]);
+					this.active[iscast?"cast":active[0]] = Actives[active[1]];
+					if (iscast) activecastcache[info.Active] = [this.cast, this.castele];
 				}
 			}
 		}
