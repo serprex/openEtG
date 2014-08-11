@@ -540,19 +540,6 @@ function victoryScreen(game) {
 	refreshRenderer(victoryui);
 }
 
-function deckMorph(deck,MorphFrom,morphTo) {
-	var deckout =[];
-	for (var i =0; i < deck.length; i++) {
-		var morphMatchInd = MorphFrom.indexOf(deck[i]);
-		if (morphMatchInd > -1) {
-			deckout.push(morphTo[morphMatchInd]);
-		} else {
-			deckout.push(deck[i]);
-		}
-	}
-	return deckout;
-}
-
 function mkPremade(name, daily) {
 	return function() {
 		var urdeck = getDeck();
@@ -603,11 +590,7 @@ function mkQuestAi(questname, stage, area) {
 	var playerHPstart = quest.urhp || 100;
 	var urdeck = getDeck();
 	if (quest.morph) {
-		if (quest.morph.to.length != quest.morph.from.length) {
-			console.log("Warning: morphFrom is not the same length as morphTo. Aborting player deck morph for stage", stage);
-		} else {
-			urdeck = deckMorph(urdeck, quest.morph.from.split(" "), quest.morph.to.split(" "));
-		}
+		urdeck = urdeck.map(function(code){ return quest.morph[code] || code; });
 	}
 	if (urdeck.length < (user ? 31 : 11)) {
 		return "ERROR: Your deck is invalid or missing! Please exit and create a valid deck in the deck editor.";

@@ -27,28 +27,35 @@ exports.spirit = [
 		The shadows on the wall begin to move of their own accord. And all the doors slam shut with conviction.\
 		You turn to face your assailant, apparently a sister of the maiden you fell earlier."},
 	{ deck: "0b606015ur025us035up025uu025v2035vb015uo025uv015v8025ul018pi", name: "Spirit of the Dark Maiden",
-	morph: { from: "4t8 6ro 4vd 6tt 4ve 6tu 4vf 6tv 4vh 6u1 4vm 6u6 4vq 6ua 4vr 6ub 4vs 6uc 4vu 6ue 502 6ui 500 6ug 52h 711 " +
-			"52i 712 52j 713 52k 714 52m 716 52t 71d 52u 71e 534 71k 535 71l 55l 745 55m 746 55n 747 55o 748 55r 74b 55u " +
-			"74e 563 74j 565 74l 566 74m 567 74n 568 74o 56i 752 58p 779 58q 77a 58r 77b 58u 77e 590 77g 591 77h 596 77m " +
-			"597 77n 59c 77s 5bt 7ad 5bu 7ae 5bv 7af 5c0 7ag 5c1 7ah 5c8 7ao 5ca 7aq 5cb 7ar 5cc 7as 5ce 7au 5cf 7av 5cr " +
-			"7bb 5cs 7bc 5cg 7b0 5f1 7dh 5f2 7di 5f3 7dj 5fa 7dq 5fc 7ds 5fd 7dt 5fe 7du 5fh 7e1 5fk 7e4 5i5 7gl 5i6 7gm " +
-			"5ib 7gr 5id 7gt 5ie 7gu 5if 7gv 5ii 7h2 5il 7h5 5io 7h8 5l9 7jp 5la 7jq 5lb 7jr 5le 7ju 5ll 7k5 5ln 7k7 5lo " +
-			"7k8 5lr 7kb 5ls 7kc 5od 7mt 5oe 7mu 5of 7mv 5oj 7n3 5ok 7n4 5or 7nb 5os 7nc 5ot 7nd 5ou 7ne 5p0 7ng 5rh 7q1 " +
-			"5ri 7q2 5rm 7q6 5rn 7q7 5rq 7qa 5rs 7qc 5rt 7qd 5ru 7qe 5s5 7ql 5s4 7qk 5ul 7t5 5um 7t6 5un 7t7 5ut 7td 5uv " +
-			"7tf 5v0 7tg 5v3 7tj 5v8 7to 61p 809 61s 80c 61v 80f 620 80g 625 80l 626 80m 627 80n 62c 80s " +
-			"4sa 6qq 4sc 6qs 4vc 6ts 50u 6ve 52g 710 542 72i 55k 744 576 75m 58o 778 5aa 78q 5bs 7ac 5de 7bu 5f0 7dg 5gi " +
-			"7f2 5i4 7gk 5jm 7i6 5l8 7jo 5mq 7la 5oc 7ms 5pu 7oe 5rg 7q0 5t2 7ri 5uk 7t4 606 7um 61o 808 63a 81q",
-		to: "7tj 7t5 5uv 7td 7td 7tg 5uv 7to 5uv 5uv 7t7 5um 7to 5v3 7t5 5v3 7to 7tf 7tj 5ut 5ut 5v3 5v0 5v3 7t7 5v8 7tf " +
-			"7td 7t6 7t7 7t5 7t6 7tg 7tf 7tf 7t6 5ul 7tg 7t5 5v8 7t6 5v8 7td 5ul 5v3 5v3 5v3 5v0 5uv 5v3 7t7 7tj 7td 7to " +
-			"7t6 5ul 7tj 5ul 5um 7tg 5uv 7t7 7t5 7tg 7to 5v0 7to 7tg 7tf 5ul 5ut 5ul 7tj 5um 5v8 5ul 7tf 7tg 7tj 7tj 7t7 " +
-			"5v3 7tg 7t5 5um 5v3 5ul 7t6 7t6 7tj 7t6 7tf 5uv 5um 7t6 7tf 5un 5ul 5ul 7t7 7td 7td 7td 7t6 7t6 7t6 5uv 7t5 " +
-			"7tg 7td 7td 5ut 5um 5uv 7tf 7to 7tg 5v8 5um 5v0 7to 7t6 7td 5uv 7t6 5um 7tj 5un 7t7 7td 5um 5un 7to 5un 7tj " +
-			"5ut 7t7 5v3 5ul 5un 7t6 7t5 5v8 5un 7td 7t6 7td 7t6 5ul 5v3 5ul 7td 7tj 7tf 7t5 5v0 7to 7tg 5v3 5ul 7to 7tf " +
-			"7tj 5v0 7tf 7to 7td 5v3 7t6 5un 5v3 5um 7tf 7t6 5ut 7td 5v8 7t5 5v8 5v3 7td 5v8 7t7 7to 7t7 5ut 7td 7tj 7tj " +
-			"7t7 5uv 5v0 5uv 5un 7to 7tg 5un 7tf 7tj 5v0 5un 7tj 5v0 5v8 7t6 7to 5um 5um 7t6 7to 5um 7t6 5v8 5un 5ut 5v0 " +
-			"7t6 7tf 7to 7t5 5v8 7t7 7t5 7tj 7t7 7to 5uv 7td 5ul 5v0 7t6 7tg 5ul 5v3 5ul 7td 5um 7t7 " +
-			"7um 7um 7um 7um 7um 7um 7um 7um 7um 7um 7um 7um 7um 7um 7um 7um 7um 7um 7um 7um 7um 7um 7um 7um 7um 7um 7um " +
-			"7um 7um 7um 7um 7um 7um 7um 7um 7um 7um 7um 7um 7um 7um 7um 7um 7um 7um 7um 7um 7um 7um 7um 7um 7um"},
+	morph: {"500":"5v0","502":"5ut","534":"7t5","535":"7t6","542":"7um","563":"7t6","565":"7tj","566":"5um","567":"5uv",
+		"568":"7t5","576":"7um","590":"5v8","591":"7tf","596":"7tj","597":"7t7","606":"7um","620":"5ul","625":"7t6","626":"5ul",
+		"627":"5ul","710":"7um","711":"5v8","712":"7td","713":"7t7","714":"7t6","716":"7tf","744":"7um","745":"5ul","746":"5v3",
+		"747":"5v0","748":"5v3","752":"5v0","778":"7um","779":"7tg","808":"7um","809":"7tj","4t8":"7tj","6ro":"7t5","4vd":"5uv",
+		"6tt":"7td","4ve":"7td","6tu":"7tg","4vf":"5uv","6tv":"7to","4vh":"5uv","6u1":"5uv","4vm":"7t7","6u6":"5um","4vq":"7to",
+		"6ua":"5v3","4vr":"7t5","6ub":"5v3","4vs":"7to","6uc":"7tf","4vu":"7tj","6ue":"5ut","6ui":"5v3","6ug":"5v3","52h":"7t7",
+		"52i":"7tf","52j":"7t6","52k":"7t5","52m":"7tg","52t":"7tf","71d":"7t6","52u":"5ul","71e":"7tg","71k":"5v8","71l":"5v8",
+		"55l":"7td","55m":"5v3","55n":"5v3","55o":"5uv","55r":"7t7","74b":"7tj","55u":"7td","74e":"7to","74j":"5ul","74l":"5ul",
+		"74m":"7tg","74n":"7t7","74o":"7tg","56i":"7to","58p":"7to","58q":"7tf","77a":"5ul","58r":"5ut","77b":"5ul","58u":"7tj",
+		"77e":"5um","77g":"5ul","77h":"7tg","77m":"7tj","77n":"5v3","59c":"7tg","77s":"7t5","5bt":"5um","7ad":"5v3","5bu":"5ul",
+		"7ae":"7t6","5bv":"7t6","7af":"7tj","5c0":"7t6","7ag":"7tf","5c1":"5uv","7ah":"5um","5c8":"7t6","7ao":"7tf","5ca":"5un",
+		"7aq":"5ul","5cb":"5ul","7ar":"7t7","5cc":"7td","7as":"7td","5ce":"7td","7au":"7t6","5cf":"7t6","7av":"7t6","5cr":"5uv",
+		"7bb":"7t5","5cs":"7tg","7bc":"7td","5cg":"7td","7b0":"5ut","5f1":"5um","7dh":"5uv","5f2":"7tf","7di":"7to","5f3":"7tg",
+		"7dj":"5v8","5fa":"5um","7dq":"5v0","5fc":"7to","7ds":"7t6","5fd":"7td","7dt":"5uv","5fe":"7t6","7du":"5um","5fh":"7tj",
+		"7e1":"5un","5fk":"7t7","7e4":"7td","5i5":"5um","7gl":"5un","5i6":"7to","7gm":"5un","5ib":"7tj","7gr":"5ut","5id":"7t7",
+		"7gt":"5v3","5ie":"5ul","7gu":"5un","5if":"7t6","7gv":"7t5","5ii":"5v8","7h2":"5un","5il":"7td","7h5":"7t6","5io":"7td",
+		"7h8":"7t6","5l9":"5ul","7jp":"5v3","5la":"5ul","7jq":"7td","5lb":"7tj","7jr":"7tf","5le":"7t5","7ju":"5v0","5ll":"7to",
+		"7k5":"7tg","5ln":"5v3","7k7":"5ul","5lo":"7to","7k8":"7tf","5lr":"7tj","7kb":"5v0","5ls":"7tf","7kc":"7to","5od":"7td",
+		"7mt":"5v3","5oe":"7t6","7mu":"5un","5of":"5v3","7mv":"5um","5oj":"7tf","7n3":"7t6","5ok":"5ut","7n4":"7td","5or":"5v8",
+		"7nb":"7t5","5os":"5v8","7nc":"5v3","5ot":"7td","7nd":"5v8","5ou":"7t7","7ne":"7to","5p0":"7t7","7ng":"5ut","5rh":"7td",
+		"7q1":"7tj","5ri":"7tj","7q2":"7t7","5rm":"5uv","7q6":"5v0","5rn":"5uv","7q7":"5un","5rq":"7to","7qa":"7tg","5rs":"5un",
+		"7qc":"7tf","5rt":"7tj","7qd":"5v0","5ru":"5un","7qe":"7tj","5s5":"5v0","7ql":"5v8","5s4":"7t6","7qk":"7to","5ul":"5um",
+		"7t5":"5um","5um":"7t6","7t6":"7to","5un":"5um","7t7":"7t6","5ut":"5v8","7td":"5un","5uv":"5ut","7tf":"5v0","5v0":"7t6",
+		"7tg":"7tf","5v3":"7to","7tj":"7t5","5v8":"5v8","7to":"7t7","61p":"7t5","61s":"7t7","80c":"7to","61v":"5uv","80f":"7td",
+		"80g":"5v0","80l":"7tg","80m":"5v3","80n":"7td","62c":"5um","80s":"7t7","4sa":"7um","6qq":"7um","4sc":"7um","6qs":"7um",
+		"4vc":"7um","6ts":"7um","50u":"7um","6ve":"7um","52g":"7um","72i":"7um","55k":"7um","75m":"7um","58o":"7um","5aa":"7um",
+		"78q":"7um","5bs":"7um","7ac":"7um","5de":"7um","7bu":"7um","5f0":"7um","7dg":"7um","5gi":"7um","7f2":"7um","5i4":"7um",
+		"7gk":"7um","5jm":"7um","7i6":"7um","5l8":"7um","7jo":"7um","5mq":"7um","7la":"7um","5oc":"7um","7ms":"7um","5pu":"7um",
+		"7oe":"7um","5rg":"7um","7q0":"7um","5t2":"7um","7ri":"7um","5uk":"7um","7t4":"7um","7um":"7um","61o":"7um","63a":"7um","81q":"7um"},
 	wintext: "As the maiden falls, your powers return to normal, and your allies settle back into their original forms.\
 		the shadows that gripped and drained your energies recede. Your strength returns to its former glory.\
 		You are still feeling tired from the fight, but the storm has passed, leaving an oddly purple sky.\
