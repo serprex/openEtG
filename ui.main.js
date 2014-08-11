@@ -21,6 +21,7 @@ if (localStorage){
 })();
 var Cards, CardCodes, Targeting;
 (function(){
+PIXI.AUTO_PREVENT_DEFAULT = false;
 var discarding, user, guestname, muteset = {};
 var etgutil = require("./etgutil");
 var userutil = require("./userutil");
