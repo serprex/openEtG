@@ -1512,7 +1512,9 @@ function startColosseum(){
 			var text = makeText(130, 100 + 30 * i, active ? (events[i-1].name + ": " + events[i-1].desc) : "Not availible. Try again tomorrow.");
 			coloui.addChild(text);
 		}
-		coloui.addChild(makeText(130, 280, user.daily&1 ? "You failed one of your duels." : "Successfully completing all tasks will one day have perks."));
+		if ((user.daily&33) == 33){
+			coloui.addChild(makeText(130, 280, "You successfully completed all tasks. This may one day have perks."));
+		}
 
 		var bexit = makeButton(8, 8, "Exit");
 		setClick(bexit, startMenu);
@@ -1877,41 +1879,36 @@ function startMatch(game, foeDeck) {
 			game.progressMulligan();
 		}else if (game.winner) {
 			if (user) {
-				if (game.winner == game.player1) {
-					userExec("addwin", { pvp: !game.ai });
-				}
 				if (game.arena) {
 					userEmit("modarena", { aname: game.arena, won: game.winner == game.player2, lv: game.cost == 5?0:1 });
 				}
-				if (game.quest) {
-					if (game.winner == game.player1 && (user.quest[game.quest[0]] <= game.quest[1] || !(game.quest[0] in user.quest)) && !game.autonext) {
+				if (game.winner == game.player1) {
+					userExec("addwin", { pvp: !game.ai });
+					if (game.quest && (user.quest[game.quest[0]] <= game.quest[1] || !(game.quest[0] in user.quest)) && !game.autonext) {
 						userEmit("updatequest", { quest: game.quest[0], newstage: game.quest[1] + 1 });
 						user.quest[game.quest[0]] = game.quest[1] + 1;
 					}
-				}
-				if (game.winner == game.player1 && game.quest && game.autonext) {
-					mkQuestAi(game.quest[0], game.quest[1] + 1, game.area);
-				}
-				else if (game.winner == game.player1 && game.daily && game.endurance !== undefined) {
-					if (game.endurance) {
-						var data = game.dataNext;
-						if (game.noheal) {
-							data.p1hp = game.player1.hp;
-							data.p1maxhp = game.player1.maxhp;
+					if (game.quest && game.autonext) {
+						mkQuestAi(game.quest[0], game.quest[1] + 1, game.area);
+					}
+					else if (game.daily) {
+						if (game.endurance) {
+							var data = game.dataNext;
+							if (game.noheal) {
+								data.p1hp = game.player1.hp;
+								data.p1maxhp = game.player1.maxhp;
+							}
+							data.endurance--;
+							var newgame = mkAi(game.level, true)();
+							addToGame(newgame, data);
+							newgame.dataNext = data;
 						}
-						data.endurance--;
-						var newgame = mkAi(game.level, true)();
-						addToGame(newgame, data);
-						newgame.dataNext = data;
+						else {
+							userExec("donedaily", { daily: game.daily == 4 ? 5 : game.daily == 3 ? 0 : game.daily });
+							victoryScreen(game);
+						}
 					}
-					else {
-						userExec("donedaily", { daily: game.daily });
-						victoryScreen(game);
-					}
-				}else {
-					if (!game.cost && game.endurance === undefined){
-						userExec("donedaily", { daily: 0 });
-					}
+				}else{
 					victoryScreen(game);
 				}
 			}

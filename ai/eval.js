@@ -123,7 +123,7 @@ var ActivesValues = {
 	},
 	gpullspell:3,
 	gratitude:4,
-	grave:4,
+	grave:1,
 	growth:5,
 	guard: 4,
 	halveatk:function(c){
