@@ -1726,7 +1726,9 @@ function startEditor(arena, acard, startempty) {
 			}
 
 			var bshowall = makeButton(5, 550, "Show All");
-			setClick(bshowall, function() { showAll ^= true; });
+			setClick(bshowall, function() {
+				bshowall.setText((showAll ^= true) ? "Auto Hide" : "Show All");
+			});
 			editorui.addChild(bshowall);
 		}
 	}
