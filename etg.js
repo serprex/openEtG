@@ -16,6 +16,7 @@ function Game(first, seed){
 	this.time = Date.now();
 }
 var statuscache = {};
+var activecache = {};
 function Card(type, info){
 	this.type = type;
 	this.element = parseInt(info.Element);
@@ -34,8 +35,10 @@ function Card(type, info){
 	if (info.Active){
 		if (this.type == SpellEnum){
 			this.active = Actives[info.Active];
+		}else if (info.Active in activecache){
+			this.active = activecache[info.Active];
 		}else{
-			this.active = {};
+			activecache[info.Active] = this.active = {};
 			var actives = info.Active.split("+");
 			for(var i=0; i<actives.length; i++){
 				if (actives[i] == ""){
@@ -156,6 +159,7 @@ Card.prototype.attack = 0;
 Card.prototype.health = 0;
 Card.prototype.upped = false;
 Card.prototype.status = {};
+Card.prototype.active = {};
 Player.prototype.markpower = 1;
 var Other = 0;
 var Entropy = 1;
@@ -625,7 +629,7 @@ Player.prototype.endturn = function(discard) {
 		var cardinst = this.hand[discard];
 		var card = cardinst.card;
 		this.hand.splice(discard, 1);
-		if (card.active && card.active.discard){
+		if (card.active.discard){
 			card.active.discard(cardinst, this);
 		}
 	}

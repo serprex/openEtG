@@ -111,7 +111,9 @@ var ActivesValues = {
 	firebolt:10,
 	flatline:1,
 	flyingweapon:7,
-	fractal:9,
+	fractal:function(c){
+		return 10-c.owner.hand.length/2;
+	},
 	freeze:3,
 	fungusrebirth:2,
 	gas:5,
@@ -166,7 +168,9 @@ var ActivesValues = {
 	neurofy:function(c) {
 		return c.owner.foe.neuro?1:5;
 	},
-	nightmare:12,
+	nightmare:function(c){
+		return 12-c.owner.foe.hand.length/3;
+	},
 	nova:6,
 	nova2:6,
 	nymph:7,
@@ -363,8 +367,8 @@ function evalthing(c) {
 function evalcardinstance(cardInst) {
 	if (!cardInst) return 0;
 	var c = cardInst.card;
-	if (!caneventuallyactive(cardInst.card.costele, cardInst.card.cost, cardInst.owner)){
-		return cardInst.card.active && cardInst.card.active.discard == Actives.obsession ? -7 : -2;
+	if (!caneventuallyactive(c.costele, c.cost, cardInst.owner)){
+		return c.active.discard == Actives.obsession ? (c.upped?-7:-6) : 0;
 	}
 	var score = 0;
 	if (c.type == etg.SpellEnum){
