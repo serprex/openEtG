@@ -1502,17 +1502,17 @@ function startColosseum(){
 			{ name: "Novice Duel", desc: "Fight " + magename + ". Only one attempt allowed" },
 			{ name: "Expert Duel", desc: "Fight " + dgname + ". Only one attempt allowed" }
 		];
-
 		for (var i = 1;i < 5;i++) {
 			var active = !(user.daily & (1 << i));
 			if (active) {
 				var button = makeButton(50, 100 + 30 * i, "Fight!");
-				(function(_i) { setClick(button, mkDaily(_i)) })(i);
+				setClick(button, mkDaily(i));
 				coloui.addChild(button);
 			}
 			var text = makeText(130, 100 + 30 * i, active ? (events[i-1].name + ": " + events[i-1].desc) : "Not availible. Try again tomorrow.");
 			coloui.addChild(text);
 		}
+		coloui.addChild(makeText(130, 280, user.daily&1 ? "You failed one of your duels." : "Successfully completing all tasks will one day have perks."));
 
 		var bexit = makeButton(8, 8, "Exit");
 		setClick(bexit, startMenu);
@@ -1882,7 +1882,6 @@ function startMatch(game, foeDeck) {
 				}
 				if (game.arena) {
 					userEmit("modarena", { aname: game.arena, won: game.winner == game.player2, lv: game.cost == 5?0:1 });
-					delete game.arena;
 				}
 				if (game.quest) {
 					if (game.winner == game.player1 && (user.quest[game.quest[0]] <= game.quest[1] || !(game.quest[0] in user.quest)) && !game.autonext) {
@@ -1910,6 +1909,9 @@ function startMatch(game, foeDeck) {
 						victoryScreen(game);
 					}
 				}else {
+					if (!game.cost && game.endurance === undefined){
+						userExec("donedaily", { daily: 0 });
+					}
 					victoryScreen(game);
 				}
 			}
