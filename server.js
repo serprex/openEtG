@@ -414,13 +414,11 @@ io.on("connection", function(socket) {
 			db.zscore(arena, function(err, score){
 				if (score === "") return;
 				db.zincrby(arena, -1, data.aname, function(err, newscore) {
-					if (!err && newscore < -15){
-						db.hmget((data.lv?"B:":"A:")+data.aname, "win", "loss", function(err, wl){
-							if (wl[0] / (wl[0]+wl[1]+1) < .2){
-								db.zrem("arena"+(data.lv?"1":""), data.aname);
-							}
-						});
-					}
+					db.hget((data.lv?"B:":"A:")+data.aname, "day", function(err, day){
+						if (newscore < -15 || getDay()-day > 14){
+							db.zrem("arena"+(data.lv?"1":""), data.aname);
+						}
+					});
 				});
 			});
 		}

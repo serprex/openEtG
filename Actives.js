@@ -210,7 +210,8 @@ chimera:function(c,t){
 	chim.hp = hp;
 	chim.active = {};
 	chim.status.momentum = true;
-	c.owner.creatures = [chim];
+	c.owner.creatures[0] = chim;
+	c.owner.creatures.length = 1;
 	c.owner.creatures.length = 23;
 	c.owner.gpull = chim;
 },
