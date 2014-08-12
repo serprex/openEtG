@@ -217,8 +217,8 @@ chimera:function(c,t){
 },
 clear:function(c,t){
 	Effect.mkText("Clear", t);
-	t.status.adrenaline = 0;
-	t.status.poison = 0;
+	delete t.status.poison;
+	delete t.status.adrenaline;
 	delete t.status.aflatoxin;
 	delete t.status.momentum;
 	delete t.status.psion;
@@ -237,11 +237,9 @@ corpseexplosion:function(c,t){
 	function dmg1(c,t){ t.dmg(1); }
 	t.die();
 	c.owner.foe.masscc(c, dmg1, !c.card.upped);
-	if (t.status.poisonous){
-		c.owner.foe.addpoison(1);
-	}
-	if (t.status.poison){
-		c.owner.foe.addpoison(t.status.poison);
+	var poison = (t.status.poison || 0) + (t.status.poisonous ? 1 : 0);
+	if (poison){
+		c.owner.foe.addpoison(poison);
 	}
 },
 counter:function(c,t){
