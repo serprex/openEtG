@@ -194,7 +194,7 @@ var PlayerRng = Object.create(Player.prototype);
 PlayerRng.rng = Math.random;
 PlayerRng.upto = function(x){ return Math.floor(Math.random()*x); }
 PlayerRng.uptoceil = function(x){ return Math.ceil((1-Math.random())*x); }
-var NymphList = [undefined, undefined,
+exports.NymphList = [undefined, undefined,
 	"500", "6ug",
 	"534", "71k",
 	"568", "74o",
@@ -207,7 +207,7 @@ var NymphList = [undefined, undefined,
 	"5s4", "7qk",
 	"5v8", "7to",
 	"62c", "80s"];
-var AlchemyList = [undefined, undefined,
+exports.AlchemyList = [undefined, undefined,
 	"4vn", "6u7",
 	"52s", "71c",
 	"55v", "74f",
@@ -1320,8 +1320,6 @@ exports.countAdrenaline = countAdrenaline;
 exports.clone = clone;
 exports.casttext = casttext;
 exports.getTargetFilter = getTargetFilter;
-exports.NymphList = NymphList;
-exports.AlchemyList = AlchemyList;
 exports.fromTrueMark = fromTrueMark;
 exports.toTrueMark = toTrueMark;
 exports.PlayerRng = PlayerRng;

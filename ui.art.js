@@ -9,7 +9,7 @@ require("./etg.client").loadcards(function(Cards, CardCodes) {
 		[["jarozaoz", "http://elementscommunity.org/forum/profile/?u=6364"],
 			["4t3", "4vn", "532", "5le", "5op"]],
 		[["kae", "http://willowdream.carbonmade.com"], ["Status Icons", "assets/statussheet.png"], ["Status Borders", "assets/statusborders.png"],
-			["4sg", "4tc", "59b", "52q", "567", "5bs", "5c6", "5fb", "5ib", "5il", "5iq", "5lg", "5od", "5oe", "5ok", "5om", "5oo", "5os", "5p0", "5uo", "5v2", "62b", "6rs", "7gr", "7h5", "7k0"]],
+			["4sg", "4tc", "59b", "52q", "567", "5bs", "5c6", "5fb", "5ib", "5il", "5iq", "5lg", "5od", "5oe", "5ok", "5om", "5oo", "5os", "5p0", "5rg", "5uo", "5v2", "62b", "6rs", "7gr", "7h5", "7k0"]],
 		[["mega plini", "http://elementscommunity.org/forum/profile/?u=202"], ["5ig"]],
 		[["moomoose", "http://elementscommunity.org/forum/profile/?u=40"], ["5i6"]],
 		[["OdinVanguard", "http://elementscommunity.org/forum/profile/?u=232"],
@@ -25,22 +25,20 @@ require("./etg.client").loadcards(function(Cards, CardCodes) {
 			["4vc", "4ve", "4vh", "52t", "55l", "55o", "55r", "560", "562", "563", "591", "5c1", "5c9", "5f2", "5fa", "5fc", "5i5", "5i7", "5ij", "5ll", "5oc", "5of", "5rk", "5rs", "5rt", "5uk", "5ul", "5um", "5ut", "5uv", "5v3", "61o", "61t", "624", "625", "626", "74a", "80g"]],
 	];
 	var str = "<br>";
-	for(var i=0; i<credits.length; i++){
-		var credit = credits[i];
-		for(var j=0; j<credit.length-1; j++){
-			str += "<a href='"+credit[j][1]+"'>"+credit[j][0]+"</a>&emsp;";
+	credits.forEach(function(credit){
+		for(var i=0; i<credit.length-1; i++){
+			str += "<a href='"+credit[i][1]+"'>"+credit[i][0]+"</a>&emsp;";
 		}
 		var codes = credit[credit.length-1];
 		if (codes.length){
 			codes.sort();
 			str += "<table><tr>";
-			for(var j=0; j<codes.length; j++){
-				var code=codes[j];
+			codes.forEach(function(code, i){
 				str += "<td><a href='Cards/"+code+".png' onmouseover='document.getElementById(\"codeimg\").src=\"Cards/"+code+".png\"'>"+CardCodes[code].name+"</a></td>";
-				if ((j&7)==7)str += "</tr><tr>";
-			}
+				if ((i&7)==7)str += "</tr><tr>";
+			});
 			str += "</tr></table><br>";
 		}else str += "<br><br>";
-	}
+	});
 	document.getElementById("codecreds").innerHTML = str;
 });
