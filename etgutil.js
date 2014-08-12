@@ -4,6 +4,10 @@ function encodeCount(count){
 }
 exports.encodeCount = encodeCount;
 exports.MAX_INT = 4294967296;
+exports.asUpped = function(code, upped){
+	var intCode = parseInt(code, 32), isUpped = code > 6999;
+	return isUpped == upped ? code : (intCode+(isUpped?-2000:2000)).toString(32);
+}
 exports.iterdeck = function(deck, func){
 	var len = 0;
 	for(var i=0; i<deck.length; i+=5){

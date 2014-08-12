@@ -472,10 +472,10 @@ CardInstance.prototype.toString = function() { return "::" + this.card.name; }
 Player.prototype.toString = function(){ return this == this.game.player1?"p1":"p2"; }
 Card.prototype.toString = function(){ return this.code; }
 Card.prototype.asUpped = function(upped){
-	return this.upped == upped ? this : CardCodes[(this.upped?parseInt(this.code, 32)-2000:parseInt(this.code, 32)+2000).toString(32)];
+	return this.upped == upped ? this : CardCodes[(parseInt(this.code, 32)+(this.upped?-2000:2000)).toString(32)];
 }
 Card.prototype.isOf = function(card){
-	return card.code == (this.upped ? (parseInt(this.code, 32)-2000).toString(32) : this.code);
+	return card.code == this.asUpped(false).code;
 }
 Player.prototype.rng = function(){
 	return this.game.rng.real();

@@ -434,7 +434,7 @@ io.on("connection", function(socket) {
 				console.log("deck: "+ aname + " " + idx);
 				db.hgetall((data.lv?"B:":"A:")+aname, function(err, adeck){
 					var seed = Math.random();
-					if (data.lv) adeck.card = CardCodes[adeck.card].asUpped(true).code;
+					if (data.lv) adeck.card = etgutil.asUpped(adeck.card, true);
 					adeck.hp = parseInt(adeck.hp || 200);
 					adeck.mark = parseInt(adeck.mark || 1);
 					adeck.draw = parseInt(adeck.draw || data.lv+1);

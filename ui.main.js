@@ -1308,9 +1308,8 @@ function upgradestore() {
 		function(code){
 			var card = CardCodes[code];
 			selectedCardArt.setTexture(getArt(code));
-			cardArt.setTexture(getArt(card.asUpped(true).code));
+			cardArt.setTexture(getArt(etgutil.asUpped(code, true)));
 			selectedCard = code;
-			card.asUpped(true).code;
 			tinfo.setText(isFreeCard(card) ? "Costs 50 gold to upgrade" : card.rarity < 5 ? "Convert 6 of these into an upgraded version." : "Convert into an upgraded version.");
 			tinfo2.setText((card.rarity > 0 || card.upped) && card.rarity < 5 ?
 				"Sells for " + cardValues[card.rarity] * (card.upped ? 5 : 1) + " gold." : "");
@@ -1548,7 +1547,7 @@ function startEditor(arena, acard, startempty) {
 			for (var i = editordeck.length - 1;i >= 0;i--) {
 				var code = editordeck[i], card = CardCodes[code];
 				if (card.type != etg.PillarEnum) {
-					if ((cardminus[card.asUpped(false).code] || 0) + (cardminus[card.asUpped(true).code] || 0) == 6) {
+					if ((cardminus[etgutil.asUpped(code, false)] || 0) + (cardminus[etgutil.asUpped(code, true)] || 0) == 6) {
 						editordeck.splice(i, 1);
 						continue;
 					}
@@ -1740,10 +1739,10 @@ function startEditor(arena, acard, startempty) {
 		sprite.position.set(100 + Math.floor(i / 10) * 100, 32 + (i % 10) * 20);
 		(function(_i) {
 			setClick(sprite, function() {
-				var card = CardCodes[editordeck[_i]];
-				if (!arena || card.asUpped(false).code != acard){
+				var code = editordeck[_i], card = CardCodes[code];
+				if (!arena || etgutil.asUpped(code, false) != acard){
 					if (user && !isFreeCard(card)) {
-						adjust(cardminus, editordeck[_i], -1);
+						adjust(cardminus, code, -1);
 					}
 					editordeck.splice(_i, 1);
 				}
@@ -1768,7 +1767,7 @@ function startEditor(arena, acard, startempty) {
 				var card = CardCodes[code];
 				if (user && !isFreeCard(card)) {
 					if (!(code in cardpool) || (code in cardminus && cardminus[code] >= cardpool[code]) ||
-						(CardCodes[code].type != etg.PillarEnum && (cardminus[card.asUpped(false).code] || 0) + (cardminus[card.asUpped(true).code] || 0) >= 6)) {
+						(CardCodes[code].type != etg.PillarEnum && (cardminus[etgutil.asUpped(code, false)] || 0) + (cardminus[etgutil.asUpped(code, true)] || 0) >= 6)) {
 						return;
 					}
 					adjust(cardminus, code, 1);
@@ -2486,7 +2485,7 @@ function startArenaInfo(info) {
 	var infotext = makeText(300, 470, "You get 3 gold every time your arena deck wins,\nand 1 gold every time it loses.");
 	stage.addChild(infotext);
 	if (user.ocard){
-		var uocard = info.lv ? CardCodes[user.ocard].asUpped(true).code : user.ocard;
+		var uocard = etgutil.asUpped(user.ocard, info.lv == 1);
 		var bmake = makeButton(200, 440, "Create");
 		setClick(bmake, function(){
 			startEditor(info, uocard, true);
@@ -2501,7 +2500,7 @@ function startArenaInfo(info) {
 	stage.addChild(bret);
 	if (info.card){
 		if (info.lv){
-			info.card = CardCodes[info.card].asUpped(true).code;
+			info.card = etgutil.asUpped(info.card, true);
 		}
 		var bmod = makeButton(200, 470, "Modify");
 		setClick(bmod, function(){
