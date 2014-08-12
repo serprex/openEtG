@@ -1,19 +1,20 @@
 {
-	"name": "openEtG",
-	"description": "openEtG",
-	"readme": "readme.txt",
-	"repository": {
-		"type": "git",
-		"url": "https://github.com/serprex/openEtG.git"
-	},
-	"dependencies": {
-		"socket.io":"",
-		"connect":"",
-		"compression":"",
-		"serve-static":"",
-		"redis":""
-	},
-	"devDependencies": {
-		"qunitjs":""
-	}
+  "name": "openEtG",
+  "description": "openEtG",
+  "readme": "readme.txt",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/serprex/openEtG.git"
+  },
+  "dependencies": {
+    "socket.io": "",
+    "connect": "",
+    "compression": "",
+    "serve-static": "",
+    "redis": ""
+  },
+  "devDependencies": {
+    "qunitjs": "",
+    "urllib": "^0.5.17"
+  }
 }
