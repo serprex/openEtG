@@ -31,9 +31,10 @@ exports.loadcards = function(cb){
 					}
 					var nospacename = carddata[1].replace(/ |'/g,"");
 					if(cardcode in CardCodes){
-						console.log(cardcode + " duplicate");
+						console.log(cardcode + " duplicate " + carddata[1] + " " + CardCodes[cardcode].name);
+					}else{
+						Cards[nospacename in Cards?nospacename+"Up":nospacename] = CardCodes[cardcode] = new etg.Card(i, cardinfo);
 					}
-					Cards[nospacename in Cards?nospacename+"Up":nospacename] = CardCodes[cardcode] = new etg.Card(i, cardinfo);
 				}
 				maybeCallback();
 			}

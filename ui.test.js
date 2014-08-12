@@ -1,23 +1,24 @@
-"use strict"
-var Cards, CardCodes, Targeting, game, player1, player2;
-var etg = require("./etg");
-var Actives = require("./Actives");
-function gameTest(){
-	game = new etg.Game(true, 5489);
-	game.player1.mark = game.player2.mark = etg.Entropy;
-	player1 = game.player1;
-	player2 = game.player2;
-	test.apply(null, arguments);
-}
-function initHand(pl){
-	for(var i=1; i<arguments.length; i++){
-		pl.hand[i-1] = new etg.CardInstance(arguments[i], pl);
-	}
-}
+"use strict";
+var Cards, CardCodes, Targeting;
 require("./etg.client").loadcards(function(cards, cardcodes, targeting) {
+	var etg = require("./etg");
+	var Actives = require("./Actives");
 	Cards = cards;
 	CardCodes = cardcodes;
 	Targeting = targeting;
+	var game, player1, player2;
+	function initHand(pl){
+		for(var i=1; i<arguments.length; i++){
+			pl.hand[i-1] = new etg.CardInstance(arguments[i], pl);
+		}
+	}
+	function gameTest(){
+		game = new etg.Game(true, 5489);
+		game.player1.mark = game.player2.mark = etg.Entropy;
+		player1 = game.player1;
+		player2 = game.player2;
+		test.apply(null, arguments);
+	}
 	test("Upped Alignment", function() {
 		for(var key in CardCodes){
 			var card = CardCodes[key];
@@ -157,12 +158,12 @@ require("./etg.client").loadcards(function(cards, cardcodes, targeting) {
 	gameTest("Hope", function() {
 		player1.shield = new etg.Shield(Cards.Hope, player1);
 		new etg.Creature(Cards.Photon, player1).place();
-		for(var i=1; i<4; i++){
-			player1.creatures[i] = new etg.Creature(Cards.RayofLight, player1);
+		for(var i=0; i<3; i++){
+			new etg.Creature(Cards.RayofLight, player1).place();
 		}
 		player1.endturn();
 		equal(player1.shield.truedr(), 3, "DR");
-		equal(player1.quanta[etg.Light], 3, "RoL");
+		equal(player1.quanta[etg.Light], 4, "RoL");
 	});
 	gameTest("Lobotomize", function() {
 		var dev = new etg.Creature(Cards.Devourer, player1);

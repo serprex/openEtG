@@ -23,7 +23,11 @@ exports.loadcards = function(cb){
 				}
 			}
 			var nospacename = carddata[1].replace(/ |'/g,"");
-			Cards[nospacename in Cards?nospacename+"Up":nospacename] = CardCodes[cardcode] = new etg.Card(i, cardinfo);
+			if(cardcode in CardCodes){
+				console.log(cardcode + " duplicate " + carddata[1] + " " + CardCodes[cardcode].name);
+			}else{
+				Cards[nospacename in Cards?nospacename+"Up":nospacename] = CardCodes[cardcode] = new etg.Card(i, cardinfo);
+			}
 		}
 	}
 	var csv = fs.readFileSync(__dirname + "/active.csv").toString().split("\n");
