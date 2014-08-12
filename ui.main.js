@@ -1384,8 +1384,7 @@ function startStore() {
 		var pack = packdata[packrarity];
 		if (user.gold >= pack.cost || (user.freepacks && user.freepacks[packrarity] > 0)) {
 			userEmit("booster", { pack: packrarity, element: packele });
-			toggleB(bbronze, bsilver, bgold, bplatinum, bget, bbuy);
-			if (popbooster.children.length) popbooster.removeChildren();
+			toggleB(bbuy);
 		} else {
 			tinfo2.setText("You can't afford that!");
 		}
@@ -1439,6 +1438,8 @@ function startStore() {
 				user.gold -= data.cost;
 				tgold.setText("$" + user.gold);
 			}
+			toggleB(bbronze, bsilver, bgold, bplatinum, bget);
+			if (popbooster.children.length) popbooster.removeChildren();
 			etgutil.iterdeck(data.cards, function(code, i){
 				var x = i % 5, y = Math.floor(i/5);
 				var cardArt = new PIXI.Sprite(getArt(code));
