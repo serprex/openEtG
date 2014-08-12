@@ -1088,15 +1088,18 @@ function startRewardWindow(reward, numberofcopies, nocode) {
 		shard: 4,
 		rare: 3,
 		pillar: 0,
+	};
+	var rewardList;
+	if (typeof reward == "string") {
+		var upped = reward.substring(0, 5) == "upped";
+		var rarity = rewardwords[upped ? reward.substring(5) : reward];
+		rewardList = etg.filtercards(upped, function(x) { return x.rarity == rarity });
+	}else if (reward instanceof Array){
+		rewardList = reward;
+	}else{
+		console.log("Unknown reward", reward);
+		return;
 	}
-	var upped, rarity;
-	if (reward instanceof String) {
-		upped = reward.substring(0, 5) == "upped";
-		rarity = rewardwords[upped ? reward.substring(5) : reward];
-	}
-	var rewardList = reward instanceof Array ? reward :
-		rarity in rewardwords ? etg.filtercards(upped, function(x) { return x.rarity == rarity }) :
-		[];
 	var rewardui = new PIXI.DisplayObjectContainer();
 	rewardui.interactive = true;
 	rewardui.addChild(new PIXI.Sprite(backgrounds[0]));
@@ -1114,9 +1117,9 @@ function startRewardWindow(reward, numberofcopies, nocode) {
 
 	var confirmButton = makeButton(10, 40, "Done");
 	setClick(confirmButton, function() {
-		if (!rewardList || chosenReward) {
+		if (chosenReward) {
 			if (nocode) {
-				userExec("addcards", { c: etgutil.encodeCount(numberofcopies) + chosenReward })
+				userExec("addcards", { c: etgutil.encodeCount(numberofcopies) + chosenReward });
 				startMenu();
 			}
 			else {
