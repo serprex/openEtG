@@ -594,12 +594,14 @@ function mkQuestAi(questname, stage, area) {
 	game.quest = [questname, stage];
 	game.wintext = quest.wintext || "";
 	game.autonext = quest.autonext;
+	game.noheal = quest.noheal;
 	game.area = area;
 	if ((user.quest[questname] <= stage || !(questname in user.quest))) {
 		game.cardreward = quest.cardreward;
 		game.choicerewards = quest.choicerewards;
 		game.rewardamount = quest.rewardamount;
 	}
+	return game;
 }
 function mkAi(level, daily) {
 	return function() {
@@ -1869,6 +1871,12 @@ function startMatch(game, foeDeck) {
 	var foename = new PIXI.Text(game.foename || "Unknown Opponent", { font: "bold 18px Dosis", align: "center" });
 	foename.position.set(5, 75);
 	gameui.addChild(foename);
+	function addNoHealData(game) {
+		var data = game.dataNext || {};
+		data.p1hp = game.player1.hp;
+		data.p1maxhp = game.player1.maxhp;
+		return data;
+	}
 	setClick(endturn, function(e, discard) {
 		if (game.turn == game.player1 && game.phase <= etg.MulliganPhase2){
 			if (!game.ai) {
@@ -1887,15 +1895,13 @@ function startMatch(game, foeDeck) {
 						user.quest[game.quest[0]] = game.quest[1] + 1;
 					}
 					if (game.quest && game.autonext) {
-						mkQuestAi(game.quest[0], game.quest[1] + 1, game.area);
+						var data = game.noheal ? addNoHealData(game) : {};
+						var newgame = mkQuestAi(game.quest[0], game.quest[1] + 1, game.area);
+						addToGame(newgame, data);
 					}
 					else if (game.daily) {
 						if (game.endurance) {
-							var data = game.dataNext;
-							if (game.noheal) {
-								data.p1hp = game.player1.hp;
-								data.p1maxhp = game.player1.maxhp;
-							}
+							var data = addNoHealData(game);
 							data.endurance--;
 							var newgame = mkAi(game.level, true)();
 							addToGame(newgame, data);
