@@ -655,7 +655,7 @@ innovation:function(c,t){
 },
 integrity:function(c,t){
 	var activeType = ["auto", "hit", "buff", "death"];
-	var shardTally = [0, 0, 0,0 , 1, 0, 0, 0, 0, 0, 0, 0, 0];
+	var shardTally = [0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0];
 	var shardSkills = [
 		[],
 		["deadalive", "mutation", "paradox", "improve", "scramble", "antimatter"],
@@ -712,9 +712,6 @@ integrity:function(c,t){
 	}
 	if (shardTally[etg.Darkness]>0){
 		status.voodoo = true;
-	}
-	if (shardTally[etg.Time]>0){
-		status.swarm = true;
 	}
 	if (shardTally[etg.Life]>0){
 		status.poisonous = true;

@@ -2158,12 +2158,10 @@ function startMatch(game, foeDeck) {
 			endturn.click();
 		} else if (e.keyCode == 8) { // bsp
 			cancel.click();
+		} else if (e.keyCode >= 49 && e.keyCode <= 56) {
+			handsprite[0][e.keyCode-49].click();
 		} else if (e.keyCode == 83 || e.keyCode == 87) { // s/w
-			var p = game.players(e.keyCode == 87);
-			if (game.targetingMode && game.targetingMode(p)) {
-				delete game.targetingMode;
-				game.targetingModeCb(p);
-			}
+			hptext[e.keyCode == 87?1:0].click();
 		}
 	}
 	document.addEventListener("keydown", onkeydown);
