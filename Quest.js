@@ -3,7 +3,7 @@
 exports.necromancer = [
 	{ deck: "04531027170b52g0c52m0452n018pk", name: "Skeleton Horde", hp: 80, markpower: 2, wintext: "You defeated the horde, but you should find out where they came from" },
 	{ deck: "0d5bs045bu045c1025ca018pp", name: "Forest Wildlife", hp: 60, wintext: "The creatures seemed very afraid of something, like there was something in the forest that did not belong there." },
-	{ deck: "0553104535047170d52g0652m0352l0552t018pk", name: "Evil Necromancer", hp: 120, markpower: 2, wintext: "You defeated the evil necromancer and stopped his undead from spreading through the land!" },
+	{ deck: "0553104535047170d52g0652m0352l0552t018pk", name: "Evil Necromancer", hp: 120, markpower: 2, cardreward:"03531", wintext: "You defeated the evil necromancer and stopped his undead from spreading through the land!" },
 ];
 exports.spirit = [
 	{ deck: "0c606045um045us045v3025uu025v2025va018pi", name: "Evil Spirit", hp: 150, wintext: "You have defeated the evil spirit and stopped its dark influence from spreading through the land!\
@@ -92,7 +92,7 @@ exports.pgdragon = [{ deck: "0g4sa014vf0152h0155o0158r015bt015f2015id015la015op0
 exports.pgrare = [{ deck: "015360a4sa014vl0152q0155s0158v015c5065ff045fh015f7015ic015ir015lh025oi015ol015ro015ur0161u018po", name: "Master of Arms", hp: 150, wintext: "You have proved your worth for the Master of Arms, and he gives you one of his rare cards.", choicerewards: "rare" }];
 exports.pgshard = [{ deck: "0c4sa0250a0253e0256i0659m025cq025fu025j2025m6025pa025se025vi0262m018pm", name: "Gemcutter", hp: 150, wintext: "You have proved your worth for the Gemcutter and he gives you one of his shards.", choicerewards: "shard" }];
 exports.pgfarmer = [{ deck: "0a4sc044vs064vu0a5t2018pj", name: "Farmer", hp: 150, goldreward: 100, wintext: "You have proved your worth for the Farmer and he gives you 100 gold." }]
-exports.pggeomancer = [{ deck: "0154201576016060c4sc0150u015aa015de015gi015jm015mq015pu015t20163a067h0018pp", name: "Geomancer", hp: 150, choicerewards:"uppedpillar", rewardamount:2,wintext: "You have proved your worth for the Geomancer and he gives you 2 of his Towers." }]
+exports.pggeomancer = [{ deck: "0154201576016060c4sc0150u015aa015de015gi015jm015mq015pu015t20163a067h0018pp", name: "Geomancer", hp: 150, choicerewards:"uppedpillar", rewardamount:2 ,wintext: "You have proved your worth for the Geomancer and he gives you 2 of his Towers." }]
 
 //Elemental Temples
 exports.elementalshrine = [{ deck: "015990c4sa014vi014vh0152m0152o0155t0155n0158p015c8015c7015f3015fb015ia015i6015lp015lr015on015ou015ri015rr015v1015ut0162a0161q018pi", name: "Shrine Guardian", hp: 100, wintext: "The Shrine Guardian speaks to you: 'You have bested me, but I am only the beginning. Find the Temples and challenge their guardians, and they will reward you! If you defeat them all, you will get access to the Chroma Palace, where the strongest guardian reside.'"}];
