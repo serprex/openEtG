@@ -1905,10 +1905,8 @@ function startMatch(game, foeDeck) {
 							userExec("donedaily", { daily: game.daily == 4 ? 5 : game.daily == 3 ? 0 : game.daily });
 							victoryScreen(game);
 						}
-					}
-				}else{
-					victoryScreen(game);
-				}
+					}else victoryScreen(game);
+				}else victoryScreen(game);
 			}
 			else {
 				startMenu();
