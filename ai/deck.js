@@ -5,14 +5,13 @@ module.exports = function(level) {
 	function upCode(x) {
 		return CardCodes[x].asUpped(Math.random() < uprate).code;
 	}
-	var deck;
 	var cardcount = {};
 	var eles = [Math.ceil(Math.random() * 12), Math.ceil(Math.random() * 12)], ecost = [];
 	var pillars = etg.filtercards(false, function(x) { return x.type == etg.PillarEnum && !x.rarity; });
 	for (var i = 0;i < 13;i++) {
 		ecost[i] = 0;
 	}
-	deck = [];
+	var deck = [];
 	var anyshield = 0, anyweapon = 0;
 	for (var j = 0;j < 2;j++) {
 		for (var i = 0;i < (j == 0 ? 20 : 10) ;i++) {
@@ -62,9 +61,10 @@ module.exports = function(level) {
 		}
 	} else qpemin = 0;
 	for (var i = 1;i < 13;i++) {
-		if (!ecost[i]) continue;
-		for (var j = 0;j < Math.round((ecost[i] - qpemin) / 5) ;j++) {
-			deck.push(upCode(pillars[i * 2]));
+		if (ecost[i] > 0){
+			for (var j = 0;j < Math.round((ecost[i] - qpemin) / 5) ;j++) {
+				deck.push(upCode(pillars[i * 2]));
+			}
 		}
 	}
 	deck.push(etg.toTrueMark(eles[1]));

@@ -10,6 +10,7 @@ exports.sellcard = function(data, user){
 }
 exports.upgrade = function(data, user){
 	var card = CardCodes[data.card];
+	if (!card) return;
 	var newcard = card.asUpped(true).code;
 	var use = card.rarity < 5 ? 6 : 1;
 	var poolCount = etgutil.count(user.pool, card.code);
@@ -26,9 +27,10 @@ exports.upgrade = function(data, user){
 	}
 }
 exports.uppillar = function(data, user){
-	if (user.gold >= 50 && data.c && CardCodes[data.c].rarity === 0){
+	var card = CardCodes[data.c];
+	if (card && user.gold >= 50 && card.rarity === 0){
 		user.gold -= 50;
-		user.pool = etgutil.addcard(user.pool, CardCodes[data.c].asUpped(true).code);
+		user.pool = etgutil.addcard(user.pool, card.asUpped(true).code);
 	}
 }
 exports.addgold = function (data, user) {
