@@ -1089,12 +1089,13 @@ function startRewardWindow(reward, numberofcopies, nocode) {
 		rare: 3,
 		pillar: 0,
 	}
+	var upped, rarity;
 	if (reward instanceof String) {
-		var upped = reward.substring(0, 5) == "upped";
-		var rarity = rewardwords[upped ? reward.substring(5) : reward];
+		upped = reward.substring(0, 5) == "upped";
+		rarity = rewardwords[upped ? reward.substring(5) : reward];
 	}
 	var rewardList = reward instanceof Array ? reward :
-		reward in rewardwords ? etg.filtercards(upped, function(x) { return x.rarity == rarity }) :
+		rarity in rewardwords ? etg.filtercards(upped, function(x) { return x.rarity == rarity }) :
 		[];
 	var rewardui = new PIXI.DisplayObjectContainer();
 	rewardui.interactive = true;
