@@ -1122,18 +1122,16 @@ function startRewardWindow(reward, numberofcopies, nocode) {
 	chosenRewardImage.position.set(450, 20);
 	rewardui.addChild(chosenRewardImage);
 	var chosenReward = null;
-	for (var i = 0; i < rewardList.length; i++) {
-		var card = new PIXI.Sprite(getCardImage(rewardList[i]));
+	rewardList.forEach(function(reward, i){
+		var card = new PIXI.Sprite(getCardImage(reward));
 		card.position.set(100 + Math.floor(i/12) * 130, 272 + (i%12) * 20);
-		(function(_i){
-			setClick(card, function(){
-				chosenReward = rewardList[_i];
-				chosenRewardImage.setTexture(getArt(chosenReward));
-			});
-		})(i);
+		setClick(card, function(){
+			chosenReward = reward;
+			chosenRewardImage.setTexture(getArt(chosenReward));
+		});
 		rewardui.addChild(card);
 		setInteractive(card);
-	}
+	});
 
 	refreshRenderer(rewardui);
 }
@@ -1512,7 +1510,7 @@ function startColosseum(){
 			var text = makeText(130, 100 + 30 * i, active ? (events[i-1].name + ": " + events[i-1].desc) : "Not availible. Try again tomorrow.");
 			coloui.addChild(text);
 		}
-		if ((user.daily&33) == 33){
+		if (user.daily == 63){
 			coloui.addChild(makeText(130, 280, "You successfully completed all tasks. This may one day have perks."));
 		}
 
@@ -1794,7 +1792,7 @@ function startElementSelect() {
 	var stage = new PIXI.DisplayObjectContainer();
 	stage.interactive = true;
 	chatArea.value = "Select your starter element";
-	var elesel = [];
+	var elesel = new Array(14);
 	var eledesc = new PIXI.Text("", { font: "24px Dosis" });
 	eledesc.position.set(100, 250);
 	stage.addChild(eledesc);
