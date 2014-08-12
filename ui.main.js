@@ -1482,7 +1482,7 @@ function mkDaily(type) {
 	}
 	else {
 		return function() {
-			var game = mkPremade(type == 3 ? "mage" : "demigod", true)();
+			var game = mkPremade(type == 3 ? "mage" : "demigod", type)();
 			game.addonreward = type == 3 ? 30 : 100;
 			userExec("donedaily", { daily: type });
 		}
