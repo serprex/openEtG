@@ -1,4 +1,5 @@
-"use strict"
+#!/usr/bin/node
+"use strict";
 var qstring = require("querystring");
 var crypto = require("crypto");
 var connect = require("connect");

@@ -1,3 +1,4 @@
+#!/usr/bin/node
 "use strict";
 var fs = require("fs");
 var urllib = require("urllib");
