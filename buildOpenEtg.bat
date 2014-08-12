@@ -1,1 +1,1 @@
-node buildetgify.js etg.js etg.client.js etgutil.js uiutil.js userutil.js Actives.js MersenneTwister.js Effect.js Quest.js ai/eval.js ai/deck.js ai/search.js ai/mulligan.js Decks.js etgify.js
+browserify -r ./etg -r ./etg.client -r ./etgutil -r ./uiutil -r ./userutil -r ./Actives -r ./MersenneTwister -r ./Effect -r ./Quest -r ./ai/eval -r ./ai/deck -r ./ai/search -r ./ai/mulligan -r ./Decks -o etgify.js 
