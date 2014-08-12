@@ -590,7 +590,7 @@ function mkQuestAi(questname, stage, area) {
 	if (urdeck.length < (user ? 31 : 11)) {
 		return "ERROR: Your deck is invalid or missing! Please exit and create a valid deck in the deck editor.";
 	}
-	var game = initGame({ first: Math.random() < .5, deck: deck, urdeck: urdeck, seed: Math.random() * etgutil.MAX_INT, hp: hp, p2markpower: markpower, foename: foename, p1hp: playerHPstart, p2drawpower: drawpower }, true);
+	var game = initGame({ first: Math.random() < .5, deck: deck, urdeck: urdeck, seed: Math.random() * etgutil.MAX_INT, p2hp: hp, p2markpower: markpower, foename: foename, p1hp: playerHPstart, p2drawpower: drawpower }, true);
 	game.quest = [questname, stage];
 	game.wintext = quest.wintext || "";
 	game.autonext = quest.autonext;
