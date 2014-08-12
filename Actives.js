@@ -1399,7 +1399,8 @@ pillar:function(c,t){
 		c.owner.spend(c.card.element, -(c.card.element > 0 ? 1 : 3))
 },
 pend:function(c,t){
-    c.owner.spend(c.pendstate ? c.owner.mark : c.card.element, -c.status.charges * (c.card.element > 0 ? 1 : 3));
+	var ele = c.pendstate ? c.owner.mark : c.card.element;
+	c.owner.spend(ele, -c.status.charges * (ele > 0 ? 1 : 3));
 	c.pendstate ^= true;
 },
 blockwithcharge:function(c,t){
