@@ -23,8 +23,13 @@ dbgid.forEach(function(pair){
 				console.log("Failed to download " + pair[0], err.message);
 				return;
 			}
-			fs.writeFileSync(pair[0]+".csv", data);
-			console.log(pair[0]);
+			fs.writeFile(pair[0]+".csv", data, function(err){
+				if (err){
+					console.log("Failed to write " + pair[0], err.message);
+				}else{
+					console.log(pair[0]);
+				}
+			});
 		});
 	}
 });
