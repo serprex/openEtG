@@ -598,6 +598,7 @@ function mkQuestAi(questname, stage, area) {
 	game.area = area;
 	if ((user.quest[questname] <= stage || !(questname in user.quest))) {
 		game.cardreward = quest.cardreward;
+		game.goldreward = quest.goldreward;
 		game.choicerewards = quest.choicerewards;
 		game.rewardamount = quest.rewardamount;
 	}
@@ -1083,13 +1084,17 @@ function startMenu() {
 function startRewardWindow(reward, numberofcopies, nocode) {
 	if (!numberofcopies) numberofcopies = 1;
 	var rewardwords = {
-		mark: [false, 5],
-		shard: [false, 4],
-		rare: [false, 3],
-		uppedrare: [true, 3],
+		mark: 5,
+		shard: 4,
+		rare: 3,
+		pillar: 0,
+	}
+	if (reward instanceof String) {
+		var upped = reward.substring(0, 5) == "upped";
+		var rarity = rewardwords[upped ? reward.substring(5) : reward];
 	}
 	var rewardList = reward instanceof Array ? reward :
-		reward in rewardwords ? etg.filtercards(rewardwords[reward][0], function(x) { return x.rarity == rewardwords[reward][1] }) :
+		reward in rewardwords ? etg.filtercards(upped, function(x) { return x.rarity == rarity }) :
 		[];
 	var rewardui = new PIXI.DisplayObjectContainer();
 	rewardui.interactive = true;
@@ -1108,7 +1113,7 @@ function startRewardWindow(reward, numberofcopies, nocode) {
 
 	var confirmButton = makeButton(10, 40, "Done");
 	setClick(confirmButton, function() {
-		if (!reward || chosenReward) {
+		if (!rewardList || chosenReward) {
 			if (nocode) {
 				userExec("addcards", { c: etgutil.encodeCount(numberofcopies) + chosenReward })
 				startMenu();

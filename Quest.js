@@ -91,6 +91,8 @@ exports.inventor = [
 exports.pgdragon = [{ deck: "0g4sa014vf0152h0155o0158r015bt015f2015id015la015op015rm015ul0661t018pu", name: "Dragon Tamer", hp: 150, wintext: "You have proved your worth for the Dragon Tamer, and he gives you two of his dragons.", choicerewards: ["4vf", "52h", "55o", "58r", "5bt", "5f2", "5id", "5la", "5of", "5rm", "5ul", "61v"], rewardamount:2 }];
 exports.pgrare = [{ deck: "015360a4sa014vl0152q0155s0158v015c5065ff045fh015f7015ic015ir015lh025oi015ol015ro015ur0161u018po", name: "Master of Arms", hp: 150, wintext: "You have proved your worth for the Master of Arms, and he gives you one of his rare cards.", choicerewards: "rare" }];
 exports.pgshard = [{ deck: "0c4sa0250a0253e0256i0659m025cq025fu025j2025m6025pa025se025vi0262m018pm", name: "Gemcutter", hp: 150, wintext: "You have proved your worth for the Gemcutter and he gives you one of his shards.", choicerewards: "shard" }];
+exports.pgfarmer = [{ deck: "0a4sc044vs064vu0a5t2018pj", name: "Farmer", hp: 150, goldreward: 100, wintext: "You have proved your worth for the Farmer and he gives you 100 gold." }]
+exports.pggeomancer = [{ deck: "0154201576016060c4sc0150u015aa015de015gi015jm015mq015pu015t20163a067h0018pp", name: "Geomancer", hp: 150, choicereward:"uppedpillar", wintext: "You have proved your worth for the Geomancer and he gives you 2 of his Towers." }]
 
 //Elemental Temples
 exports.elementalshrine = [{ deck: "015990c4sa014vi014vh0152m0152o0155t0155n0158p015c8015c7015f3015fb015ia015i6015lp015lr015on015ou015ri015rr015v1015ut0162a0161q018pi", name: "Shrine Guardian", hp: 100, wintext: "The Shrine Guardian speaks to you: 'You have bested me, but I am only the beginning. Find the Temples and challenge their guardians, and they will reward you! If you defeat them all, you will get access to the Chroma Palace, where the strongest guardian reside.'"}];
@@ -144,6 +146,9 @@ exports.inventor.info = {
 exports.pgdragon.info = { pos: [[200, 200]], text: ["Fight the Dragon Tamer at the Proving Grounds!"] };
 exports.pgrare.info = { pos: [[250, 200]], text: ["Fight the Master of Arms at the Proving Grounds!"] };
 exports.pgshard.info = { pos: [[225, 250]], text: ["Fight the Gemcutter at the Proving Grounds!"] };
+exports.pgfarmer.info = { pos: [[175, 250]], text: ["Fight the Farmer at the Proving Grounds!"] };
+exports.pggeomancer.info = { pos: [[275, 250]], text: ["Fight the Geomancer at the Proving Grounds!"] };
+
 exports.elementalshrine.info = { pos: [[400,400]], text: ["You walk up to the shrine. You don't know what to expect. Suddenly, you are attacked by a cloaked figure! Could it be the Shrine Guardian!?"] };
 exports.aethertemple.info = { pos: [[500,220]], text: ["As you approach the Aether Temple, you can feel the guardian waiting inside for you. This is it, another step on your quest to defeat the Temple Guardians."] }
 exports.airtemple.info = { pos: [[400,400]], text: ["As you approach the Air Temple, you can feel the guardian waiting inside for you. This is it, another step on your quest to defeat the Temple Guardians."] }
@@ -163,7 +168,7 @@ exports.areas = {
 	city: ["bombmaker", "elementalshrine", "aethertemple", "entropytemple", "lighttemple"],
 	desert: ["blacksummoner", "timetemple", "deathtemple", "firetemple", "chromatemple"],
 	ice: ["icecave", "watertemple", "gravitytemple", "airtemple"],
-	provinggrounds: ["pgdragon", "pgrare", "pgshard"],
+	provinggrounds: ["pgdragon", "pgrare", "pgshard", "pgfarmer","pggeomancer"],
 };
 
 //Dependency functions
