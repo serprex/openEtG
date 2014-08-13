@@ -112,7 +112,7 @@ function makeArt(card, art, oldrend) {
 	rarity.anchor.set(0, 1);
 	rarity.position.set(5, 252);
 	template.addChild(rarity);
-	if (art) {
+	if (art && !card.shiny) {
 		var artspr = new PIXI.Sprite(art);
 		artspr.position.set(2, 20);
 		template.addChild(artspr);
@@ -767,7 +767,7 @@ function toggleB() {
 	}
 }
 function isFreeCard(card) {
-	return card.type == etg.PillarEnum && !card.upped && !card.rarity;
+	return card.type == etg.PillarEnum && !card.upped && !card.rarity && !card.shiny;
 }
 function editorCardCmp(x, y) {
 	var cx = CardCodes[x], cy = CardCodes[y];
@@ -779,7 +779,7 @@ function adjust(cardminus, code, x) {
 	} else cardminus[code] = x;
 }
 function makeCardSelector(cardmouseover, cardclick, maxedIndicator){
-	var poolcache, prevshowall;
+	var poolcache, prevshowall, prevshowshiny;
 	var cardsel = new PIXI.DisplayObjectContainer();
 	cardsel.interactive = true;
 	if (maxedIndicator) {
@@ -840,13 +840,14 @@ function makeCardSelector(cardmouseover, cardclick, maxedIndicator){
 				function(x) { return x.element == elefilter &&
 					((i % 3 == 0 && x.type == etg.CreatureEnum) || (i % 3 == 1 && x.type <= etg.PermanentEnum) || (i % 3 == 2 && x.type == etg.SpellEnum)) &&
 					(!user || x in poolcache || isFreeCard(x) || prevshowall) && (!rarefilter || rarefilter == x.rarity);
-				}, editorCardCmp);
+				}, editorCardCmp, prevshowshiny);
 		}
 	}
-	cardsel.next = function(cardpool, cardminus, showall) {
+	cardsel.next = function(cardpool, cardminus, showall, showshiny) {
 		var needToMakeCols = poolcache != cardpool;
-		if (needToMakeCols || prevshowall != showall) {
+		if (needToMakeCols || prevshowall != showall || prevshowshiny != showshiny) {
 			prevshowall = showall;
+			prevshowshiny = showshiny;
 			poolcache = cardpool;
 			makeColumns();
 		}
@@ -1237,22 +1238,19 @@ function startQuestArea(area) {
 
 function upgradestore() {
 	function upgradeCard(card) {
-		if (!card.upped) {
-			if (!isFreeCard(card)) {
-				var use = card.rarity < 5 ? 6 : 1;
-				if (cardpool[card.code] >= use) {
-					userExec("upgrade", { card: card.code });
-					adjustdeck();
-				}
-				else twarning.setText("You need at least " + use + " copies to be able to upgrade this card!");
-			}
-			else if (user.gold >= 50) {
-				userExec("uppillar", { c: card.code });
+		if (!isFreeCard(card)) {
+			var use = card.rarity < 5 ? 6 : card.shiny ? 2 : 1;
+			if (cardpool[card.code] >= use) {
+				userExec("upgrade", { card: card.code });
 				adjustdeck();
 			}
-			else twarning.setText("You need at least 50 gold to be able to upgrade a pillar!");
+			else twarning.setText("You need at least " + use + " copies to be able to upgrade this card!");
 		}
-		else twarning.setText("You can't upgrade an already upgraded card!");
+		else if (user.gold >= 50) {
+			userExec("uppillar", { c: card.code });
+			adjustdeck();
+		}
+		else twarning.setText("You need at least 50 gold to be able to upgrade a pillar!");
 	}
 	var cardValues = [5, 1, 3, 15, 20];
 	function sellCard(card) {
@@ -1312,7 +1310,7 @@ function upgradestore() {
 		function(code){
 			var card = CardCodes[code];
 			selectedCardArt.setTexture(getArt(code));
-			cardArt.setTexture(getArt(etgutil.asUpped(code, true)));
+			cardArt.setTexture(getArt(card.upped ? etgutil.asUpped(etgutil.asShiny(code, true), false) : etgutil.asUpped(code, true)));
 			selectedCard = code;
 			tinfo.setText(isFreeCard(card) ? "Costs 50 gold to upgrade" : card.rarity < 5 ? "Convert 6 of these into an upgraded version." : "Convert into an upgraded version.");
 			tinfo2.setText((card.rarity > 0 || card.upped) && card.rarity < 5 ?
@@ -1585,7 +1583,7 @@ function startEditor(arena, acard, startempty) {
 		etgutil.iterraw(user.pool, incrpool);
 		etgutil.iterraw(user.accountbound, incrpool);
 	}
-	var showAll = false;
+	var showAll = false, showShiny = false;
 	chatArea.value = "Build a " + (arena?35:30) + "-60 card deck";
 	var editorui = new PIXI.DisplayObjectContainer();
 	editorui.interactive = true;
@@ -1708,18 +1706,23 @@ function startEditor(arena, acard, startempty) {
 				setClick(button, switchDeckCb(i));
 				editorui.addChild(button);
 			}
-			var bshowall = makeButton(5, 535, "Show All");
+			var bshowall = makeButton(5, 530, "Show All");
 			setClick(bshowall, function() {
 				bshowall.setText((showAll ^= true) ? "Auto Hide" : "Show All");
 			});
 			editorui.addChild(bshowall);
 		}
 	}
-	var bconvert = makeButton(5, 560, "Convert Code");
+	var bconvert = makeButton(5, 554, "Convert Code");
 	setClick(bconvert, function() {
 		deckimport.value = editordeck.join(" ") + " " + etg.toTrueMark(editormark);
 	});
 	editorui.addChild(bconvert);
+	var bshiny = makeButton(5, 578, "Toggle Shiny");
+	setClick(bshiny, function() {
+		showShiny ^= true;
+	});
+	editorui.addChild(bshiny);
 	var editordecksprites = [];
 	var editordeck = arena ? (startempty ? [] : etgutil.decodedeck(arena.deck)) : getDeck(true);
 	var editormarksprite = new PIXI.Sprite(nopic);
@@ -1789,7 +1792,7 @@ function startEditor(arena, acard, startempty) {
 	cardArt.position.set(734, 8);
 	editorui.addChild(cardArt);
 	refreshRenderer(editorui, function() {
-		cardsel.next(cardpool, cardminus, showAll);
+		cardsel.next(cardpool, cardminus, showAll, showShiny);
 		for (var i = 0;i < editordeck.length;i++) {
 			editordecksprites[i].visible = true;
 			editordecksprites[i].setTexture(getCardImage(editordeck[i]));

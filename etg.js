@@ -367,11 +367,13 @@ Player.prototype.clone = function(game){
 		obj.gpull = obj.creatures[this.gpull.getIndex()];
 	}
 	obj.hand = this.hand.map(maybeClone);
+	obj.deck = this.deck.slice();
+	obj.quanta = this.quanta.slice();
 	obj.game = game;
 	obj.owner = obj;
 	for(var attr in this){
 		if (!(attr in obj) && this.hasOwnProperty(attr)){
-			obj[attr] =  this[attr] instanceof Array ? this[attr].slice() : this[attr];
+			obj[attr] = this[attr];
 		}
 	}
 	return obj;
@@ -382,13 +384,15 @@ CardInstance.prototype.clone = function(owner){
 var thingtypes = [Creature, Permanent, Weapon, Shield, Pillar];
 thingtypes.forEach(function(type){
 	var proto = type.prototype;
-	type.prototype.clone = function(owner){
+	proto.clone = function(owner){
 		var obj = Object.create(proto);
 		obj.active = clone(this.active);
 		obj.status = clone(this.status);
 		obj.owner = owner;
 		for(var attr in this){
-			if (!(attr in obj) && this.hasOwnProperty(attr))obj[attr] = this[attr];
+			if (!(attr in obj) && this.hasOwnProperty(attr)){
+				obj[attr] = this[attr];
+			}
 		}
 		return obj;
 	}
@@ -424,10 +428,10 @@ Creature.prototype.hash = function(){
 }
 Card.prototype.readCost = function(attr, cost){
 	var c=cost.split(":");
-	c = [parseInt(c[0]), (c.length==1?this.element:parseInt(c[1]))]
-	if (isNaN(c[0]))return;
-	this[attr]=c[0];
-	this[attr+"ele"]=c[1];
+	var cost = parseInt(c[0]);
+	if (isNaN(cost))return;
+	this[attr] = cost;
+	this[attr+"ele"] = c.length==1?this.element:parseInt(c[1]);
 	return true;
 }
 Card.prototype.info = function(){
@@ -452,8 +456,11 @@ Card.prototype.toString = function(){ return this.code; }
 Card.prototype.asUpped = function(upped){
 	return this.upped == upped ? this : CardCodes[etgutil.asUpped(this.code, upped)];
 }
+Card.prototype.asShiny = function(shiny){
+	return !this.shiny == !shiny ? this : CardCodes[etgutil.asShiny(this.code, shiny)];
+}
 Card.prototype.isOf = function(card){
-	return card.code == this.asUpped(false).code;
+	return card.code == etgutil.asShiny(etgutil.asUpped(this.code, false), false);
 }
 Player.prototype.rng = function(){
 	return this.game.rng.real();
@@ -803,8 +810,9 @@ Creature.prototype.place = function(fromhand){
 }
 Permanent.prototype.place = function(fromhand){
 	if (this.status.additive){
+		var dullcode = etgutil.asShiny(this.card.code, false);
 		for(var i=0; i<16; i++){
-			if (this.owner.permanents[i] && this.owner.permanents[i].card == this.card){
+			if (this.owner.permanents[i] && etgutil.asShiny(this.owner.permanents[i].card.code, false) == dullcode){
 				this.owner.permanents[i].status.charges += this.status.charges;
 				Thing.prototype.place.call(this.owner.permanents[i], fromhand);
 				return;
@@ -905,7 +913,7 @@ Weapon.prototype.freeze = Creature.prototype.freeze = function(x){
 		this.transform(Cards.ArcticSquid.asUpped(this.card.upped));
 	}else{
 		this.defstatus("frozen", 0);
-		this.status.frozen = x;
+		if (x > this.status.frozen) this.status.frozen = x;
 		if (this.status.voodoo)this.owner.foe.freeze(x);
 	}
 }
@@ -1167,11 +1175,11 @@ CardInstance.prototype.useactive = function(target){
 function countAdrenaline(x){
 	return 5-Math.floor(Math.sqrt(Math.abs(x)));
 }
-function filtercards(upped, filter, cmp){
+function filtercards(upped, filter, cmp, showshiny){
 	var keys = [];
 	for(var key in CardCodes) {
 		var card = CardCodes[key];
-		if (card.upped == upped && !card.status.token && (!filter || filter(card))) {
+		if (card.upped == upped && !card.shiny == !showshiny && !card.status.token && (!filter || filter(card))) {
 			keys.push(key);
 		}
 	}

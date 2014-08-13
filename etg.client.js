@@ -1,5 +1,6 @@
 "use strict";
 var etg = require("./etg");
+var etgutil = require("./etgutil");
 exports.loadcards = function(cb){
 	var Cards = {}, CardCodes = {}, Targeting = {};
 	var names = ["pillar", "weapon", "shield", "permanent", "spell", "creature"];
@@ -34,6 +35,8 @@ exports.loadcards = function(cb){
 						console.log(cardcode + " duplicate " + carddata[1] + " " + CardCodes[cardcode].name);
 					}else{
 						Cards[nospacename in Cards?nospacename+"Up":nospacename] = CardCodes[cardcode] = new etg.Card(i, cardinfo);
+						cardinfo.Code = etgutil.asShiny(cardcode, true);
+						(CardCodes[cardinfo.Code] = new etg.Card(i, cardinfo)).shiny = true;
 					}
 				}
 				maybeCallback();

@@ -942,7 +942,7 @@ parallel:function(c,t){
 			if (copy.status.delayed){
 				c.owner.foe.delay(copy.status.delayed);
 			}
-			if (copy.status.frozen>c.owner.foe.weapon.status.frozen){
+			if (copy.status.frozen){
 				c.owner.foe.freeze(copy.status.frozen);
 			}
 		}

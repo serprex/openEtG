@@ -2,6 +2,7 @@
 var Cards, CardCodes, Targeting;
 require("./etg.client").loadcards(function(cards, cardcodes, targeting) {
 	var etg = require("./etg");
+	var etgutil = require("./etgutil");
 	var Actives = require("./Actives");
 	Cards = cards;
 	CardCodes = cardcodes;
@@ -21,9 +22,8 @@ require("./etg.client").loadcards(function(cards, cardcodes, targeting) {
 	}
 	test("Upped Alignment", function() {
 		for(var key in CardCodes){
-			var card = CardCodes[key];
-			var un = card.asUpped(false), up=card.asUpped(true);
-			if (!un || !up){
+			var un = etgutil.asUpped(key, false), up = etgutil.asUpped(key, true);
+			if (!(un in CardCodes) || !(up in CardCodes)){
 				ok(false, key);
 			}
 		}

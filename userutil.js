@@ -11,8 +11,8 @@ exports.sellcard = function(data, user){
 exports.upgrade = function(data, user){
 	var card = CardCodes[data.card];
 	if (!card) return;
-	var newcard = card.asUpped(true).code;
-	var use = card.rarity < 5 ? 6 : 1;
+	var newcard = card.upped ? etgutil.asUpped(etgutil.asShiny(data.card, true), false) : etgutil.asUpped(data.card, true);
+	var use = card.rarity < 5 ? 6 : card.shiny ? 2 : 1;
 	var poolCount = etgutil.count(user.pool, card.code);
 	if (poolCount < use){
 		var boundCount = etgutil.count(user.accountbound, card.code);
