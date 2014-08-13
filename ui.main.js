@@ -104,6 +104,13 @@ function getBack(ele, upped) {
 	if (upped) ele += 13;
 	return cardBacks[ele];
 }
+var shinyFilter = new PIXI.ColorMatrixFilter();
+shinyFilter.matrix = [
+	0,1,0,0,
+	0,0,1,0,
+	1,0,0,0,
+	0,0,0,1,
+];
 function makeArt(card, art, oldrend) {
 	var rend = oldrend || new PIXI.RenderTexture(132, 256);
 	var template = new PIXI.DisplayObjectContainer();
@@ -115,16 +122,7 @@ function makeArt(card, art, oldrend) {
 	if (art) {
 		var artspr = new PIXI.Sprite(art);
 		artspr.position.set(2, 20);
-		if (card.shiny){
-			var filter = new PIXI.ColorMatrixFilter();
-			filter.matrix = [
-				0,1,0,0,
-				0,0,1,0,
-				1,0,0,0,
-				0,0,0,1,
-			];
-			artspr.filters = [filter];
-		}
+		if (card.shiny) artspr.filters = [shinyFilter];
 		template.addChild(artspr);
 	}
 	var typemark = new PIXI.Sprite(ticons[card.type]);
@@ -220,10 +218,11 @@ function getCreatureImage(code) {
 			graphics.drawRect(0, 9, 64, 64);
 			graphics.endFill();
 			if (art) {
-				art = new PIXI.Sprite(art);
-				art.scale.set(0.5, 0.5);
-				art.position.set(0, 9);
-				graphics.addChild(art);
+				var artspr = new PIXI.Sprite(art);
+				artspr.scale.set(0.5, 0.5);
+				artspr.position.set(0, 9);
+				if (card.shiny) artspr.filters = [shinyFilter];
+				graphics.addChild(artspr);
 			}
 			if (card) {
 				var text = new PIXI.Text(card.name, { font: "8px Dosis", fill: card.upped ? "black" : "white" });
@@ -251,10 +250,11 @@ function getWeaponShieldImage(code) {
 			graphics.drawRect(0, 11, 80, 80);
 			graphics.endFill();
 			if (art) {
-				art = new PIXI.Sprite(art);
-				art.scale.set(5/8, 5/8);
-				art.position.set(0, 11);
-				graphics.addChild(art);
+				var artspr = new PIXI.Sprite(art);
+				artspr.scale.set(5/8, 5/8);
+				artspr.position.set(0, 11);
+				if (card.shiny) artspr.filters = [shinyFilter];
+				graphics.addChild(artspr);
 			}
 			if (card) {
 				var text = new PIXI.Text(card.name, { font: "10px Dosis", fill: card.upped ? "black" : "white" });
