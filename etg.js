@@ -3,6 +3,7 @@ var MersenneTwister = require("./MersenneTwister");
 var Actives = require("./Actives");
 var Effect = require("./Effect");
 var ui = require("./uiutil");
+var etgutil = require("./etgutil");
 function Game(first, seed){
 	this.rng = new MersenneTwister(seed);
 	this.phase = MulliganPhase1;
@@ -23,7 +24,7 @@ function Card(type, info){
 	this.element = parseInt(info.Element);
 	this.name = info.Name;
 	this.code = info.Code;
-	if (parseInt(this.code, 32)>6999){
+	if (parseInt(this.code, 32) > 6999){
 		this.upped = true;
 	}
 	if (info.Attack){
@@ -189,37 +190,14 @@ var MulliganPhase1 = 0;
 var MulliganPhase2 = 1;
 var PlayPhase = 2;
 var EndPhase = 3;
-var passives = { airborne: true, nocturnal: true, voodoo: true, swarm: true, ranged: true, additive: true, stackable: true, salvage: true, token: true, shard: true, poisonous: true, martyr: true, decrsteam: true, beguilestop: true };
+var passives = { airborne: true, nocturnal: true, voodoo: true, swarm: true, ranged: true, additive: true, stackable: true, salvage: true, token: true, poisonous: true, martyr: true, decrsteam: true, beguilestop: true };
 var PlayerRng = Object.create(Player.prototype);
 PlayerRng.rng = Math.random;
 PlayerRng.upto = function(x){ return Math.floor(Math.random()*x); }
 PlayerRng.uptoceil = function(x){ return Math.ceil((1-Math.random())*x); }
-exports.NymphList = [undefined, undefined,
-	"500", "6ug",
-	"534", "71k",
-	"568", "74o",
-	"59c", "77s",
-	"5cg", "7b0",
-	"5fk", "7e4",
-	"5io", "7h8",
-	"5ls", "7kc",
-	"5p0", "7ng",
-	"5s4", "7qk",
-	"5v8", "7to",
-	"62c", "80s"];
-exports.AlchemyList = [undefined, undefined,
-	"4vn", "6u7",
-	"52s", "71c",
-	"55v", "74f",
-	"595", "77l",
-	"5c7", "7an",
-	"5fb", "7dr",
-	"5ig", "7h0",
-	"5lj", "7k3",
-	"5om", "7n6",
-	"5rr", "7qb",
-	"5uu", "7te",
-	"621", "80h"];
+exports.NymphList = [undefined, "500", "534", "568", "59c", "5cg", "5fk", "5io", "5ls", "5p0", "5s4", "5v8", "62c"];
+exports.AlchemyList = [undefined, "4vn", "52s", "55v", "595", "5c7", "5fb", "5ig", "5lj", "5om", "5rr", "5uu", "621"];
+exports.ShardList = [undefined, "50a", "53e", "56i", "59m", "5cq", "5fu", "5j2", "5m6", "5pa", "5se", "5vi", "62m"];
 Game.prototype.clone = function(){
 	var obj = Object.create(Game.prototype);
 	obj.rng = this.rng.clone();
@@ -472,7 +450,7 @@ CardInstance.prototype.toString = function() { return "::" + this.card.name; }
 Player.prototype.toString = function(){ return this == this.game.player1?"p1":"p2"; }
 Card.prototype.toString = function(){ return this.code; }
 Card.prototype.asUpped = function(upped){
-	return this.upped == upped ? this : CardCodes[(parseInt(this.code, 32)+(this.upped?-2000:2000)).toString(32)];
+	return this.upped == upped ? this : CardCodes[etgutil.asUpped(this.code, upped)];
 }
 Card.prototype.isOf = function(card){
 	return card.code == this.asUpped(false).code;

@@ -167,7 +167,7 @@ bravery:function(c,t){
 },
 brew:function(c,t){
 	Effect.mkText("Brew", c);
-	new etg.CardInstance(CardCodes[etg.AlchemyList[c.owner.uptoceil(12)*2+(c.card.upped?1:0)]], c.owner).place();
+	new etg.CardInstance(CardCodes[etg.AlchemyList[c.owner.uptoceil(12)]].asUpped(c.card.upped), c.owner).place();
 },
 brokenmirror:function(c,t, fromhand){
 	if (fromhand && t instanceof etg.Creature && c.owner != t.owner){
@@ -493,8 +493,8 @@ flyingweapon: function(c, t) {
 fractal:function(c,t){
 	Effect.mkText("Fractal", t);
 	c.owner.quanta[etg.Aether] = 0;
-	for(var i=c.owner.hand.length; i<8; i++){
-		c.owner.hand[i] = new etg.CardInstance(t.card, c.owner);
+	for(var i=0; i<6; i++){
+		new etg.CardInstance(t.card, c.owner).place();
 	}
 },
 freeze:function(c,t){
@@ -688,7 +688,7 @@ integrity:function(c,t){
 	var stat=c.card.upped?1:0;
 	for(var i=c.owner.hand.length-1; i>=0; i--){
 		var card = c.owner.hand[i].card;
-		if (card.status && card.status.shard){
+		if (etg.ShardList.some(function(x) { return card.isOf(CardCodes[x]); })){
 			if (card.upped){
 				stat++;
 			}
@@ -897,7 +897,7 @@ nymph:function(c,t){
 	Effect.mkText("Nymph", t);
 	var e = t.card.element || c.owner.uptoceil(12);
 	Actives.destroy(c, t, false, true);
-	new etg.Creature(CardCodes[etg.NymphList[e*2+(t.card.upped?1:0)]], t.owner).place();
+	new etg.Creature(CardCodes[etg.NymphList[e]].asUpped(t.card.upped), t.owner).place();
 },
 obsession:function(c,t){
 	t.dmg(c.card.upped?10:8);
@@ -1124,7 +1124,7 @@ serendipity:function(c,t){
 	if (!t.sanctuary){
 		var cards = [], num = Math.min(8-t.hand.length, 3), anyentro = false;
 		for(var i=num-1; i>=0; i--){
-			cards[i] = t.randomcard(c.card.upped, function(x){return x.type != etg.PillarEnum && !~etg.NymphList.indexOf(x.code) && !(x.status && x.status.shard) && (i>0 || anyentro || x.element == etg.Entropy)});
+			cards[i] = t.randomcard(c.card.upped, function(x){return x.type != etg.PillarEnum && x.rarity < 4 && (i>0 || anyentro || x.element == etg.Entropy)});
 			anyentro |= cards[i].element == etg.Entropy;
 		}
 		for(var i=0; i<num; i++){

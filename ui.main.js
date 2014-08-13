@@ -1642,8 +1642,7 @@ function startEditor(arena, acard, startempty) {
 	}
 	function switchDeckCb(x){
 		return function() {
-			editordeck.push(etg.toTrueMark(editormark));
-			user.decks[user.selectedDeck] = etgutil.encodedeck(editordeck);
+			user.decks[user.selectedDeck] = etgutil.encodedeck(editordeck) + "01" + etg.toTrueMark(editormark);
 			userEmit("setdeck", { d: user.decks[user.selectedDeck], number: user.selectedDeck });
 			user.selectedDeck = x;
 			editordeck = getDeck(true);
@@ -1656,8 +1655,7 @@ function startEditor(arena, acard, startempty) {
 				chatArea.value = "35 cards required before submission";
 				return;
 			}
-			editordeck.push(etg.toTrueMark(editormark));
-			var data = { d: etgutil.encodedeck(editordeck.slice(5)), lv: arena.lv };
+			var data = { d: etgutil.encodedeck(editordeck.slice(5)) + "01" + etg.toTrueMark(editormark), lv: arena.lv };
 			for(var k in arattr){
 				data[k] = arattr[k];
 			}
@@ -1665,7 +1663,6 @@ function startEditor(arena, acard, startempty) {
 				data.mod = true;
 			}
 			userEmit("setarena", data);
-			editordeck.pop();
 			chatArea.value = "Arena deck submitted";
 			startMenu();
 		});
@@ -1688,8 +1685,7 @@ function startEditor(arena, acard, startempty) {
 		makeattrui(2, "draw");
 	}else{
 		setClick(bsave, function() {
-			editordeck.push(etg.toTrueMark(editormark));
-			var dcode = deckimport.value = etgutil.encodedeck(editordeck);
+			var dcode = deckimport.value = etgutil.encodedeck(editordeck) + "01" + etg.toTrueMark(editormark);
 			if (user) {
 				user.decks[user.selectedDeck] = dcode;
 				userEmit("setdeck", { d: dcode, number: user.selectedDeck });
@@ -1712,14 +1708,18 @@ function startEditor(arena, acard, startempty) {
 				setClick(button, switchDeckCb(i));
 				editorui.addChild(button);
 			}
-
-			var bshowall = makeButton(5, 550, "Show All");
+			var bshowall = makeButton(5, 535, "Show All");
 			setClick(bshowall, function() {
 				bshowall.setText((showAll ^= true) ? "Auto Hide" : "Show All");
 			});
 			editorui.addChild(bshowall);
 		}
 	}
+	var bconvert = makeButton(5, 560, "Convert Code");
+	setClick(bconvert, function() {
+		deckimport.value = editordeck.join(" ") + " " + etg.toTrueMark(editormark);
+	});
+	editorui.addChild(bconvert);
 	var editordecksprites = [];
 	var editordeck = arena ? (startempty ? [] : etgutil.decodedeck(arena.deck)) : getDeck(true);
 	var editormarksprite = new PIXI.Sprite(nopic);
@@ -1882,8 +1882,10 @@ function startMatch(game, foeDeck) {
 	gameui.addChild(foename);
 	function addNoHealData(game) {
 		var data = game.dataNext || {};
-		data.p1hp = game.player1.hp;
-		data.p1maxhp = game.player1.maxhp;
+		if (game.noheal){
+			data.p1hp = game.player1.hp;
+			data.p1maxhp = game.player1.maxhp;
+		}
 		return data;
 	}
 	setClick(endturn, function(e, discard) {
@@ -1904,7 +1906,7 @@ function startMatch(game, foeDeck) {
 						user.quest[game.quest[0]] = game.quest[1] + 1;
 					}
 					if (game.quest && game.autonext) {
-						var data = game.noheal ? addNoHealData(game) : {};
+						var data = addNoHealData(game);
 						var newgame = mkQuestAi(game.quest[0], game.quest[1] + 1, game.area);
 						addToGame(newgame, data);
 					}
