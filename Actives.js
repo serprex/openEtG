@@ -126,7 +126,7 @@ beguile:function(c,t){
 beguilestop:function(c,t){
 	if (t == c.owner){
 		Actives.beguile(c, c);
-		delete c.active.turnstart; // TODO implement t.rmactive
+		c.rmactive("turnstart", "beguilestop");
 	}
 },
 blackhole:function(c,t){

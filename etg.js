@@ -1042,6 +1042,20 @@ Thing.prototype.isMaterialInstance = function(type) {
 Thing.prototype.addactive = function(type, active){
 	this.active[type] = combineactive(this.active[type], active);
 }
+Thing.prototype.rmactive = function(type, activename){
+	if (!this.active[type])return;
+	var actives = this.active[type].activename.split(" "), idx;
+	if (~(idx=actives.indexOf(activename))){
+		if (actives.length == 1){
+			delete this.active[type];
+		} else {
+			actives.splice(idx, 1);
+			this.active[type] = actives.reduce(function(previous, current){
+				return combineactive(previous, Actives[current]);
+			}, null);
+		}
+	}
+}
 Thing.prototype.hasactive = function(type, activename) {
 	if (!this.active[type])return false;
 	return ~this.active[type].activename.split(" ").indexOf(activename);
