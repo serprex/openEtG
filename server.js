@@ -296,6 +296,8 @@ io.on("connection", function(socket) {
 	utilEvent("sellcard");
 	utilEvent("upgrade");
 	utilEvent("uppillar");
+	utilEvent("polish");
+	utilEvent("shpillar");
 	utilEvent("addgold");
 	utilEvent("addloss");
 	utilEvent("addwin");

@@ -1249,18 +1249,37 @@ function startQuestArea(area) {
 function upgradestore() {
 	function upgradeCard(card) {
 		if (!isFreeCard(card)) {
-			var use = card.rarity < 5 ? 6 : card.shiny ? 2 : 1;
-			if (cardpool[card.code] >= use) {
-				userExec("upgrade", { card: card.code });
-				adjustdeck();
-			}
-			else twarning.setText("You need at least " + use + " copies to be able to upgrade this card!");
+			if (!card.upped){
+				var use = card.rarity < 5 ? 6 : 1;
+				if (cardpool[card.code] >= use) {
+					userExec("upgrade", { card: card.code });
+					adjustdeck();
+				}
+				else twarning.setText("You need at least " + use + " copies to be able to upgrade this card!");
+			}else twarning.setText("You cannot upgrade upgraded cards.");
 		}
 		else if (user.gold >= 50) {
 			userExec("uppillar", { c: card.code });
 			adjustdeck();
 		}
-		else twarning.setText("You need at least 50 gold to be able to upgrade a pillar!");
+		else twarning.setText("You need 50 gold to afford an upgraded pillar!");
+	}
+	function polishCard(card) {
+		if (!isFreeCard(card)) {
+			if (!card.shiny){
+				var use = card.rarity < 5 ? 6 : 2;
+				if (cardpool[card.code] >= use) {
+					userExec("polish", { card: card.code });
+					adjustdeck();
+				}
+				else twarning.setText("You need at least " + use + " copies to be able to polish this card!");
+			}else twarning.setText("You cannot polish shiny cards.");
+		}
+		else if (user.gold >= 50) {
+			userExec("shpillar", { c: card.code });
+			adjustdeck();
+		}
+		else twarning.setText("You need 50 gold to afford a shiny pillar!");
 	}
 	var cardValues = [5, 1, 3, 15, 20];
 	function sellCard(card) {
@@ -1287,27 +1306,40 @@ function upgradestore() {
 
 	var goldcount = makeText(30, 100, "");
 	upgradeui.addChild(goldcount);
-	var bupgrade = makeButton(150, 80, "Upgrade");
+	var bupgrade = makeButton(150, 50, "Upgrade");
 	setClick(bupgrade, function() {
 		upgradeCard(CardCodes[selectedCard]);
 	});
 	upgradeui.addChild(bupgrade);
+	var bpolish = makeButton(150, 95, "Polish");
+	setClick(bpolish, function() {
+		polishCard(CardCodes[selectedCard]);
+	});
+	upgradeui.addChild(bpolish);
 	var bsell = makeButton(150, 140, "Sell");
 	setClick(bsell, function() {
 		sellCard(CardCodes[selectedCard]);
 	});
 	upgradeui.addChild(bsell);
+	var bshiny = makeButton(5, 578, "Toggle Shiny");
+	setClick(bshiny, function() {
+		showShiny ^= true;
+	});
+	upgradeui.addChild(bshiny);
 	var bexit = makeButton(5, 50, "Exit");
 	setClick(bexit, startMenu);
 	upgradeui.addChild(bexit);
 	var tinfo = new PIXI.Text("", { font: "bold 16px Dosis" });
-	tinfo.position.set(150, 102);
+	tinfo.position.set(250, 50);
 	upgradeui.addChild(tinfo);
 	var tinfo2 = new PIXI.Text("", { font: "bold 16px Dosis" });
-	tinfo2.position.set(150, 162);
+	tinfo2.position.set(250, 140);
 	upgradeui.addChild(tinfo2);
+	var tinfo3 = new PIXI.Text("", { font: "bold 16px Dosis" });
+	tinfo3.position.set(250, 95);
+	upgradeui.addChild(tinfo3);
 	var twarning = new PIXI.Text("", { font: "bold 16px Dosis" });
-	twarning.position.set(100, 50);
+	twarning.position.set(100, 170);
 	upgradeui.addChild(twarning);
 	var cardArt = new PIXI.Sprite(nopic);
 	cardArt.position.set(734, 8);
@@ -1320,19 +1352,30 @@ function upgradestore() {
 		function(code){
 			var card = CardCodes[code];
 			selectedCardArt.setTexture(getArt(code));
-			cardArt.setTexture(getArt(card.upped ? etgutil.asUpped(etgutil.asShiny(code, true), false) : etgutil.asUpped(code, true)));
+			cardArt.setTexture(getArt(etgutil.asUpped(code, true)));
 			selectedCard = code;
-			tinfo.setText(isFreeCard(card) ? "Costs 50 gold to upgrade" : card.rarity < 5 ? "Convert 6 of these into an upgraded version." : "Convert into an upgraded version.");
+			if (card.upped){
+				bupgrade.visisble = tinfo.visible = false;
+			}else{
+				tinfo.setText(isFreeCard(card) ? "Costs 50 gold to upgrade" : card.rarity < 5 ? "Convert 6 into an upgraded version." : "Convert into an upgraded version.");
+				bupgrade.visisble = tinfo.visible = true;
+			}
+			if (card.shiny){
+				bpolish.visible = tinfo3.visible = false;
+			}else{
+				tinfo3.setText(isFreeCard(card) ? "Costs 50 gold to polish" : card.rarity < 5 ? "Convert 6 into a shiny version." : "Convert 2 into a shiny version.")
+				bpolish.visible = tinfo3.visible = true;
+			}
 			tinfo2.setText((card.rarity > 0 || card.upped) && card.rarity < 5 ?
 				"Sells for " + cardValues[card.rarity] * (card.upped ? 5 : 1) + " gold." : "");
 			twarning.setText("");
 		}, true
 	);
 	upgradeui.addChild(cardsel);
-	var cardpool, selectedCard;
+	var cardpool, selectedCard, cardminus = {}, showShiny;
 	adjustdeck();
 	refreshRenderer(upgradeui, function() {
-		cardsel.next(cardpool, {});
+		cardsel.next(cardpool, cardminus, false, showShiny);
 		goldcount.setText("$" + user.gold);
 	});
 }

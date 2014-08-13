@@ -8,29 +8,45 @@ exports.sellcard = function(data, user){
 		user.gold += sellValue;
 	}
 }
-exports.upgrade = function(data, user){
-	var card = CardCodes[data.card];
-	if (!card) return;
-	var newcard = card.upped ? etgutil.asUpped(etgutil.asShiny(data.card, true), false) : etgutil.asUpped(data.card, true);
-	var use = card.rarity < 5 ? 6 : card.shiny ? 2 : 1;
-	var poolCount = etgutil.count(user.pool, card.code);
+function transmute(user, oldcard, func, use){
+	var poolCount = etgutil.count(user.pool, oldcard);
+	var newcard = func(oldcard, true);
 	if (poolCount < use){
-		var boundCount = etgutil.count(user.accountbound, card.code);
+		var boundCount = etgutil.count(user.accountbound, oldcard);
 		if (poolCount + boundCount >= use){
-			user.accountbound = etgutil.addcard(user.accountbound, card.code, -use);
-			if (boundCount < use) user.pool = etgutil.addcard(user.pool, card.code, boundCount-use);
+			user.accountbound = etgutil.addcard(user.accountbound, oldcard, -use);
+			if (boundCount < use) user.pool = etgutil.addcard(user.pool, oldcard, boundCount-use);
 			user.accountbound = etgutil.addcard(user.accountbound, newcard);
 		}
 	}else{
-		user.pool = etgutil.addcard(user.pool, card.code, -use);
+		user.pool = etgutil.addcard(user.pool, oldcard, -use);
 		user.pool = etgutil.addcard(user.pool, newcard);
 	}
 }
+exports.upgrade = function(data, user){
+	var card = CardCodes[data.card];
+	if (!card || card.upped) return;
+	var use = card.rarity < 5 ? 6 : 1;
+	transmute(user, card.code, etgutil.asUpped, use);
+}
 exports.uppillar = function(data, user){
 	var card = CardCodes[data.c];
-	if (card && user.gold >= 50 && card.rarity === 0){
+	if (card && user.gold >= 50 && card.rarity === 0 && !card.shiny){
 		user.gold -= 50;
 		user.pool = etgutil.addcard(user.pool, card.asUpped(true).code);
+	}
+}
+exports.polish = function(data, user){
+	var card = CardCodes[data.card];
+	if (!card || card.shiny) return;
+	var use = card.rarity < 5 ? 6 : 2;
+	transmute(user, card.code, etgutil.asShiny, use);
+}
+exports.shpillar = function(data, user){
+	var card = CardCodes[data.c];
+	if (card && user.gold >= 50 && card.rarity === 0 && !card.shiny){
+		user.gold -= 50;
+		user.pool = etgutil.addcard(user.pool, card.asShiny(true).code);
 	}
 }
 exports.addgold = function (data, user) {
