@@ -1,10 +1,10 @@
 <script src="etgify.js"></script>
-
 <input id="deckcode" type="text" placeholder="Deck" style="width:890px"/><br>
 <input id="legality" type="text" readonly style="width:400px" />
 <input id="test" type="submit" value="Test Deck" onclick="testDeck()" />
 <select id="rulesets">
-    <option value="shoecobbler">The Shoecobblers Dilemma</option>
+	<option value="tamerandomness">Tame the Randomness</option>
+	<option value="shoecobbler">The Shoecobblers Dilemma</option>
 	<option value="powerless3">Powerless Three</option>
 </select>
 <script>
@@ -46,7 +46,7 @@
 			if (elementCount > 2 && anyupped){
 				return "You're using upped cards in a Quartz deck";
 			}
-            if (elementCount < 3 && disco) ret += ". This deck is only legal if you are Quartz." 
+            if (elementCount < 3 && disco) ret += ". This deck is only legal if you are Quartz"
 			return "Legal. You are using " + ret;
 		},
 		shoecobbler: function(deck) {
@@ -70,14 +70,31 @@
 		    var legs = 0;
 		    for (var i = 0;i < deck.length;i++) {
 		        var card = deck[i];
-		        if (~bannedCards.indexOf(card.code)) return card.name + " is banned.";
-		        if (card.rarity == 4) return "Shards are banned."
-		        if (card.upped) "Upgraded cards are banned."
-		        if (card.rarity == 5 && card.type != etg.PillarEnum) return "Nymphs are banned."
+		        if (~bannedCards.indexOf(card.code)) return card.name + " is banned";
+		        if (card.rarity == 4) return "Shards are banned";
+		        if (card.upped) "Upgraded cards are banned";
+		        if (card.rarity == 5 && card.type != etg.PillarEnum) return "Nymphs are banned";
 		        legs += addLegs(card.code);
 		    }
-		    if (legs != 30) return "You have " + legs + " legs. This is too " + (legs > 30 ? "many." : "few.");
-            return "Legal."
+		    if (legs != 30) return "You have " + legs + " legs. This is too " + (legs > 30 ? "many" : "few");
+            return "Legal"
+		},
+		tamerandomness: function(deck) {
+			var bannedCards = [Cards.Blackhole, Cards.AmberNymph, Cards.ShardofFocus, Cards.Earthquake, Cards.Trident, Cards.Miracle, Cards.ShardofDivinity];
+			var rngCards = [Cards.ChaosSeed, Cards.Mutation, Cards.Discord, Cards.FallenElf, Cards.Pandemonium, Cards.ShardofSerendipity, Cards.SkullShield, Cards.ThornCarapace,
+				Cards.IceBolt, Cards.IceShield, Cards.FogShield, Cards.FateEgg, Cards.DuskMantle, Cards.Mindgate];
+			var rngCount = 0, pillCount = 0;
+			for(var i=0; i<deck.length; i++){
+				var card = deck[i];
+				if (card.upped)return "Upgraded cards are banned";
+				if (~bannedCards.indexOf(card))return card.name + " is banned";
+				if (card.type == etg.PillarEnum && card.element)pillCount++;
+				if (~rngCards.indexOf(card))rngCount++;
+			}
+			if (pillCount > 5)return "Too many non-quantum pillars";
+			var rngNeeded = Math.round(deck.length*.4);
+			if (rngCount < rngNeeded)return "Too few random cards: " + rngCount + " / " + rngNeeded;
+			return "Legal"
 		}
 	};
 	function testDeck() {

@@ -688,7 +688,7 @@ integrity:function(c,t){
 	var stat=c.card.upped?1:0;
 	for(var i=c.owner.hand.length-1; i>=0; i--){
 		var card = c.owner.hand[i].card;
-		if (etg.ShardList.some(function(x) { return card.isOf(CardCodes[x]); })){
+		if (etg.ShardList.some(function(x) { return x && card.isOf(CardCodes[x]); })){
 			if (card.upped){
 				stat++;
 			}
