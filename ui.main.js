@@ -1532,6 +1532,15 @@ function startColosseum(){
 function startEditor(arena, acard, startempty) {
 	if (!Cards) return;
 	if (arena && (!user || arena.deck === undefined || acard === undefined)) arena = false;
+	function sumCardMinus(cardminus, code){
+		var sum = 0;
+		for (var i=0; i<2; i++){
+			for (var j=0; j<2; j++){
+				sum += cardminus[etgutil.asShiny(etgutil.asUpped(code, i==0), j==0)] || 0;
+			}
+		}
+		return sum;
+	}
 	function processDeck() {
 		for (var i = editordeck.length - 1;i >= 0;i--) {
 			if (!(editordeck[i] in CardCodes)) {
@@ -1549,7 +1558,7 @@ function startEditor(arena, acard, startempty) {
 			for (var i = editordeck.length - 1;i >= 0;i--) {
 				var code = editordeck[i], card = CardCodes[code];
 				if (card.type != etg.PillarEnum) {
-					if ((cardminus[etgutil.asUpped(code, false)] || 0) + (cardminus[etgutil.asUpped(code, true)] || 0) == 6) {
+					if (sumCardMinus(cardminus, code) == 6) {
 						editordeck.splice(i, 1);
 						continue;
 					}
@@ -1774,7 +1783,7 @@ function startEditor(arena, acard, startempty) {
 				var card = CardCodes[code];
 				if (user && !isFreeCard(card)) {
 					if (!(code in cardpool) || (code in cardminus && cardminus[code] >= cardpool[code]) ||
-						(CardCodes[code].type != etg.PillarEnum && (cardminus[etgutil.asUpped(code, false)] || 0) + (cardminus[etgutil.asUpped(code, true)] || 0) >= 6)) {
+						(CardCodes[code].type != etg.PillarEnum && sumCardMinus(cardminus, code) >= 6)) {
 						return;
 					}
 					adjust(cardminus, code, 1);

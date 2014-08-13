@@ -114,7 +114,11 @@ function codeSmith(req, res, next){
 			if (err){
 				if (err.code == "ENOENT"){
 					data = params.p;
-				}else throw err;
+				}else{
+					res.writeHead(200);
+					res.end(err.message);
+					return;
+				}
 			}
 			if (params.p == data){
 				codeSmithLoop(res, 0, params);
@@ -127,11 +131,11 @@ function codeSmith(req, res, next){
 }
 function cardRedirect(req, res, next){
 	if (req.url.match(/^\/Cards\/...\.png$/)){
-		var intCode = parseInt(req.url.substr(7, 3), 32);
-		if (intCode >= 7000){
+		var code = etgutil.asShiny(req.url.substr(7, 3), false);
+		if (code > "6qn"){
 			fs.exists(__dirname + req.url, function(exists){
 				if (!exists){
-					res.writeHead("302", {Location: "http://" + req.headers.host + "/Cards/" + (intCode-2000).toString(32) + ".png"});
+					res.writeHead("302", {Location: "http://" + req.headers.host + "/Cards/" + etgutil.asUpped(code, false) + ".png"});
 					res.end();
 				}else next();
 			});
