@@ -1,9 +1,10 @@
 "use strict";
 var etg = require("./etg");
+var etgutil = require("./etgutil");
 module.exports = function(level) {
 	var uprate = level == 0 ? 0 : level == 1 ? .1 : .3;
 	function upCode(x) {
-		return CardCodes[x].asUpped(Math.random() < uprate).code;
+		return etgutil.asUpped(x, Math.random() < uprate);
 	}
 	var cardcount = {};
 	var eles = [Math.ceil(Math.random() * 12), Math.ceil(Math.random() * 12)], ecost = [];

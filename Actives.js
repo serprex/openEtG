@@ -492,10 +492,10 @@ flyingweapon: function(c, t) {
 },
 fractal:function(c,t){
 	Effect.mkText("Fractal", t);
-	c.owner.quanta[etg.Aether] = 0;
-	for(var i=0; i<6; i++){
+	for(var i=6+Math.floor(c.owner.quanta[etg.Aether]/2); i>0; i--){
 		new etg.CardInstance(t.card, c.owner).place();
 	}
+	c.owner.quanta[etg.Aether] = 0;
 },
 freeze:function(c,t){
 	Effect.mkText("Freeze", t);
