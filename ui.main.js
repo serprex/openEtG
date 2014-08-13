@@ -112,9 +112,19 @@ function makeArt(card, art, oldrend) {
 	rarity.anchor.set(0, 1);
 	rarity.position.set(5, 252);
 	template.addChild(rarity);
-	if (art && !card.shiny) {
+	if (art) {
 		var artspr = new PIXI.Sprite(art);
 		artspr.position.set(2, 20);
+		if (card.shiny){
+			var filter = new PIXI.ColorMatrixFilter();
+			filter.matrix = [
+				0,1,0,0,
+				0,0,1,0,
+				1,0,0,0,
+				0,0,0,1,
+			];
+			artspr.filters = [filter];
+		}
 		template.addChild(artspr);
 	}
 	var typemark = new PIXI.Sprite(ticons[card.type]);

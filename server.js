@@ -131,11 +131,11 @@ function codeSmith(req, res, next){
 }
 function cardRedirect(req, res, next){
 	if (req.url.match(/^\/Cards\/...\.png$/)){
-		var code = etgutil.asShiny(req.url.substr(7, 3), false);
-		if (code > "6qn"){
+		var code = req.url.substr(7, 3);
+		if (code < "4s8" || code > "6qn"){
 			fs.exists(__dirname + req.url, function(exists){
 				if (!exists){
-					res.writeHead("302", {Location: "http://" + req.headers.host + "/Cards/" + etgutil.asUpped(code, false) + ".png"});
+					res.writeHead("302", {Location: "http://" + req.headers.host + "/Cards/" + etgutil.asShiny(etgutil.asUpped(code, false), false) + ".png"});
 					res.end();
 				}else next();
 			});
