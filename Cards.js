@@ -73,7 +73,7 @@ var TargetFilters = {
 		return t.isMaterialInstance(etg.Pillar);
 	},
 	weap:function(c, t){
-		return (t instanceof etg.Weapon || (t instanceof etg.Creature && t.card.type == WeaponEnum)) && !t.status.immaterial && !t.status.burrowed;
+		return (t instanceof etg.Weapon || (t instanceof etg.Creature && t.card.type == etg.WeaponEnum)) && !t.status.immaterial && !t.status.burrowed;
 	},
 	playerweap:function(c,t){
 		return t instanceof etg.Weapon && t == t.owner.weapon;
@@ -88,10 +88,10 @@ var TargetFilters = {
 		return t.isMaterialInstance(etg.Creature);
 	},
 	creaonly:function(c, t){
-		return t.isMaterialInstance(etg.Creature) && t.card.type == CreatureEnum;
+		return t.isMaterialInstance(etg.Creature) && t.card.type == etg.CreatureEnum;
 	},
 	creanonspell:function(c, t){
-		return t.isMaterialInstance(etg.Creature) && t.card.type != SpellEnum;
+		return t.isMaterialInstance(etg.Creature) && t.card.type != etg.SpellEnum;
 	},
 	play:function(c, t){
 		return t instanceof etg.Player;
