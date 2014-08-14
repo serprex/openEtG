@@ -834,7 +834,7 @@ function makeCardSelector(cardmouseover, cardclick, maxedIndicator){
 			columns[i] = etg.filtercards(i > 2,
 				function(x) { return x.element == elefilter &&
 					((i % 3 == 0 && x.type == etg.CreatureEnum) || (i % 3 == 1 && x.type <= etg.PermanentEnum) || (i % 3 == 2 && x.type == etg.SpellEnum)) &&
-					(!user || x in poolcache || isFreeCard(x) || prevshowall) && (!rarefilter || rarefilter == x.rarity);
+					(!poolcache || x in poolcache || isFreeCard(x) || prevshowall) && (!rarefilter || rarefilter == x.rarity);
 				}, editorCardCmp, prevshowshiny);
 		}
 	}
@@ -852,10 +852,10 @@ function makeCardSelector(cardmouseover, cardclick, maxedIndicator){
 				var spr = columnspr[i][j], code = columns[i][j], card = Cards.Codes[code];
 				spr.setTexture(getCardImage(code));
 				spr.visible = true;
-				if (user) {
+				if (cardpool) {
 					var txt = spr.getChildAt(0), card = Cards.Codes[code], inf = isFreeCard(card);
 					if ((txt.visible = inf || code in cardpool || showall)) {
-						var cardAmount = inf ? "-" : !(code in cardpool) ? 0 : (cardpool[code] - (code in cardminus ? cardminus[code] : 0))
+						var cardAmount = inf ? "-" : !(code in cardpool) ? 0 : (cardpool[code] - (cardminus && code in cardminus ? cardminus[code] : 0))
 						maybeSetText(txt, cardAmount.toString());
 						if (maxedIndicator && card.type != etg.PillarEnum && cardAmount >= 6) {
 							graphics.beginFill(elecols[etg.Light]);
@@ -1357,10 +1357,10 @@ function upgradestore() {
 		}, true
 	);
 	upgradeui.addChild(cardsel);
-	var cardpool, selectedCard, cardminus = {}, showShiny;
+	var cardpool, selectedCard, showShiny;
 	adjustdeck();
 	refreshRenderer(upgradeui, function() {
-		cardsel.next(cardpool, cardminus, false, showShiny);
+		cardsel.next(cardpool, undefined, false, showShiny);
 		goldcount.setText("$" + user.gold);
 	});
 }

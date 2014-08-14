@@ -1,5 +1,5 @@
 "use strict";
-exports.loadcards = function(){
+exports.loadcards = function(cb){
 	var Cards = require("./Cards");
 	if (Cards.loaded) cb(Cards);
 	var names = ["pillar", "weapon", "shield", "permanent", "spell", "creature"];
@@ -8,6 +8,7 @@ exports.loadcards = function(){
 		if (++count == names.length+1){
 			Cards.loaded = true;
 			console.log("Cards loaded");
+			if (cb) cb();
 		}
 	}
 	names.forEach(function(name, i){

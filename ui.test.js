@@ -1,8 +1,9 @@
 "use strict";
-require("./etg.client").loadcards(function(Cards) {
+require("./etg.client").loadcards(function() {
 	var etg = require("./etg");
 	var etgutil = require("./etgutil");
 	var Actives = require("./Actives");
+	var Cards = require("./Cards");
 	var game, player1, player2;
 	function initHand(pl){
 		for(var i=1; i<arguments.length; i++){

@@ -686,7 +686,7 @@ io.on("connection", function(socket) {
 			var deck0 = sockinfo[pendinggame.id].deck, deck1 = data.deck;
 			var owndata = { first: first, seed: seed, deck: deck0, urdeck: deck1};
 			var foedata = { first: !first, seed: seed, deck: deck1, urdeck: deck0};
-			var stat = sockinfo[this.id].pvpstats, foestat = sockinfo[foesock.id].pvpstats;
+			var stat = sockinfo[this.id].pvpstats, foestat = sockinfo[pendinggame.id].pvpstats;
 			for (var key in stat) {
 				owndata["p1" + key] = stat[key];
 				foedata["p2" + key] = stat[key];
@@ -696,7 +696,7 @@ io.on("connection", function(socket) {
 				foedata["p1" + key] = foestat[key];
 			}
 			this.emit("pvpgive", owndata);
-			foesock.emit("pvpgive", foedata);
+			pendinggame.emit("pvpgive", foedata);
 			delete rooms[data.room];
 		}else{
 			rooms[data.room] = this;
