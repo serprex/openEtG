@@ -1,12 +1,8 @@
 "use strict";
-var Cards, CardCodes, Targeting;
-require("./etg.client").loadcards(function(cards, cardcodes, targeting) {
+require("./etg.client").loadcards(function(Cards) {
 	var etg = require("./etg");
 	var etgutil = require("./etgutil");
 	var Actives = require("./Actives");
-	Cards = cards;
-	CardCodes = cardcodes;
-	Targeting = targeting;
 	var game, player1, player2;
 	function initHand(pl){
 		for(var i=1; i<arguments.length; i++){
@@ -21,9 +17,9 @@ require("./etg.client").loadcards(function(cards, cardcodes, targeting) {
 		test.apply(null, arguments);
 	}
 	test("Upped Alignment", function() {
-		for(var key in CardCodes){
+		for(var key in Cards.Codes){
 			var un = etgutil.asUpped(key, false), up = etgutil.asUpped(key, true);
-			if (!(un in CardCodes) || !(up in CardCodes)){
+			if (!(un in Cards.Codes) || !(up in Cards.Codes)){
 				ok(false, key);
 			}
 		}

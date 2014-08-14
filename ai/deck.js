@@ -1,7 +1,11 @@
 "use strict";
 var etg = require("./etg");
 var etgutil = require("./etgutil");
+var Cards = require("./Cards");
 module.exports = function(level) {
+	if (!Cards.loaded){
+		return;
+	}
 	var uprate = level == 0 ? 0 : level == 1 ? .1 : .3;
 	function upCode(x) {
 		return etgutil.asUpped(x, Math.random() < uprate);
@@ -35,12 +39,12 @@ module.exports = function(level) {
 		}
 	}
 	if (!anyshield) {
-		var card = CardCodes[deck[0]];
+		var card = Cards.Codes[deck[0]];
 		ecost[card.costele] -= card.cost;
 		deck[0] = Cards.Shield.asUpped(Math.random() < uprate).code;
 	}
 	if (!anyweapon) {
-		var card = CardCodes[deck[1]];
+		var card = Cards.Codes[deck[1]];
 		ecost[card.costele] -= card.cost;
 		deck[1] = (eles[1] == etg.Air || eles[1] == etg.Light ? Cards.ShortBow :
 			eles[1] == etg.Gravity || eles[1] == etg.Earth ? Cards.Hammer :

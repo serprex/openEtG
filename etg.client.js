@@ -1,45 +1,22 @@
 "use strict";
-var etg = require("./etg");
-var etgutil = require("./etgutil");
-exports.loadcards = function(cb){
-	var Cards = {}, CardCodes = {}, Targeting = {};
+exports.loadcards = function(){
+	var Cards = require("./Cards");
+	if (Cards.loaded) cb(Cards);
 	var names = ["pillar", "weapon", "shield", "permanent", "spell", "creature"];
 	var count = 0;
-	function maybeCallback(){
-		if (++count == names.length+1)cb(Cards, CardCodes, Targeting);
+	function maybeLoaded(){
+		if (++count == names.length+1){
+			Cards.loaded = true;
+			console.log("Cards loaded");
+		}
 	}
 	names.forEach(function(name, i){
 		var xhr = new XMLHttpRequest();
 		xhr.open("GET", name + ".csv", true);
 		xhr.onreadystatechange = function() {
 			if (this.readyState == 4 && this.status == 200){
-				var csv = this.responseText.split("\n");
-				var keys = csv[0].split(",");
-				for(var j=1; j<csv.length; j++){
-					var carddata = csv[j].split(",");
-					var cardcode = carddata[2];
-					var cardinfo = {};
-					for(var k=0; k<carddata.length; k++){
-						if (carddata[k].charAt(0) == '"'){
-							for (var kk=k+1; kk<carddata.length; kk++){
-								carddata[k] += "," + carddata[kk];
-							}
-							cardinfo[keys[k]] = carddata[k].substring(1, carddata[k].length-1).replace(/""/g, '"');
-							break;
-						}else{
-							cardinfo[keys[k]] = carddata[k];
-						}
-					}
-					var nospacename = carddata[1].replace(/ |'/g,"");
-					if(cardcode in CardCodes){
-						console.log(cardcode + " duplicate " + carddata[1] + " " + CardCodes[cardcode].name);
-					}else{
-						Cards[nospacename in Cards?nospacename+"Up":nospacename] = CardCodes[cardcode] = new etg.Card(i, cardinfo);
-						cardinfo.Code = etgutil.asShiny(cardcode, true);
-						(CardCodes[cardinfo.Code] = new etg.Card(i, cardinfo)).shiny = true;
-					}
-				}
-				maybeCallback();
+				Cards.parseCsv(i, this.responseText);
+				maybeLoaded();
 			}
 		}
 		xhr.send();
@@ -48,12 +25,8 @@ exports.loadcards = function(cb){
 	xhr.open("GET", "active.csv", true);
 	xhr.onreadystatechange = function() {
 		if (this.readyState == 4 && this.status == 200){
-			var csv = this.responseText.split("\n");
-			for (var i=0; i<csv.length; i++){
-				var keypair = csv[i].split(",");
-				Targeting[keypair[0]] = etg.getTargetFilter(keypair[1]);
-			}
-			maybeCallback();
+			Cards.parseTargeting(this.responseText);
+			maybeLoaded();
 		}
 	}
 	xhr.send();

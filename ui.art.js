@@ -1,5 +1,5 @@
 "use strict";
-require("./etg.client").loadcards(function(Cards, CardCodes) {
+require("./etg.client").loadcards(function(Cards) {
 	var credits = [
 		[["andretimpa", "http://andretimpa.deviantart.com"], ["Element Icons", "assets/esheet.png"], ["Rarity Icons", "assets/raritysheet.png"],
 			["4sa", "4si", "4sk", "4sl", "4sm", "4sn", "4so", "4sp", "4sq", "4sr", "4ss", "4st", "4su", "4vr", "55s", "6ub"]],
@@ -34,7 +34,7 @@ require("./etg.client").loadcards(function(Cards, CardCodes) {
 			codes.sort();
 			str += "<table><tr>";
 			codes.forEach(function(code, i){
-				str += "<td><a href='Cards/"+code+".png' onmouseover='document.getElementById(\"codeimg\").src=\"Cards/"+code+".png\"'>"+CardCodes[code].name+"</a></td>";
+				str += "<td><a href='Cards/"+code+".png' onmouseover='document.getElementById(\"codeimg\").src=\"Cards/"+code+".png\"'>"+Cards.Codes[code].name+"</a></td>";
 				if ((i&7)==7)str += "</tr><tr>";
 			});
 			str += "</tr></table><br>";

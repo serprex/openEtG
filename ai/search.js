@@ -2,6 +2,7 @@
 var etg = require("./etg");
 var evalGameState = require("./eval");
 var Actives = require("./Actives");
+var Cards = require("./Cards");
 module.exports = function(game, previous) {
 	if (previous === undefined) previous = [0, evalGameState(game), undefined, 2, {}, 999];
 	var limit = previous[5], cmdct = previous[2], currentEval = previous[1], cdepth = previous[3];
@@ -39,7 +40,7 @@ module.exports = function(game, previous) {
 				}
 			}
 			var preEval = currentEval;
-			if (active && active.activename in Targeting) {
+			if (active && active.activename in Cards.Targeting) {
 				game.getTarget(c, active);
 				for (var j = 0;j < 2;j++) {
 					var pl = j == 0 ? c.owner : c.owner.foe;

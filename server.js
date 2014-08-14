@@ -11,11 +11,8 @@ var etgutil = require("./etgutil");
 var userutil = require("./userutil");
 var etg = require("./etg");
 var aiDecks = require("./Decks");
-require("./etg.server").loadcards(function(cards, codes, tgt){
-	global.Cards = cards;
-	global.CardCodes = codes;
-	global.Targeting = tgt;
-});
+var Cards = require("./Cards");
+require("./etg.server").loadcards();
 
 function loginRespond(res, servuser, pass){
 	if(!servuser.name){
@@ -469,7 +466,7 @@ io.on("connection", function(socket) {
 				}
 			}else if (type.charAt(0) == "C"){
 				var c = type.substr(1);
-				if (c in CardCodes){
+				if (c in Cards.Codes){
 					user.pool = etgutil.addcard(user.pool, c);
 					socket.emit("codecode", c);
 					db.hdel("CodeHash", data.code);

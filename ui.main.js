@@ -17,8 +17,8 @@ if (localStorage){
 	});
 }
 })();
-var Cards, CardCodes, Targeting;
 (function(){
+require("./etg.client").loadcards();
 PIXI.AUTO_PREVENT_DEFAULT = false;
 var discarding, user, guestname, muteset = {};
 var etgutil = require("./etgutil");
@@ -29,23 +29,8 @@ var Effect = require("./Effect");
 var Quest = require("./Quest");
 var ui = require("./uiutil");
 var aiDecks = require("./Decks");
+var Cards = require("./Cards");
 var socket = io(location.hostname + ":13602");
-require("./etg.client").loadcards(function(cards, cardcodes, targeting) {
-	console.log("Cards loaded");
-	Cards = cards;
-	CardCodes = cardcodes;
-	Targeting = targeting;
-	/* This stops when it hits a 404
-	var codes = [];
-	for (var code in CardCodes){
-		codes.push(code);
-	}
-	(function loadnext(art){
-		if (art && codes.length){
-			getArtImage(codes.pop(), loadnext);
-		}
-	})(1);*/
-});
 function maybeSetText(obj, text) {
 	if (obj.text != text) obj.setText(text);
 }
@@ -165,14 +150,14 @@ function getArt(code) {
 	if (artcache[code]) return artcache[code];
 	else {
 		return getArtImage(code, function(art){
-			return artcache[code] = makeArt(CardCodes[code], art, artcache[code]);
+			return artcache[code] = makeArt(Cards.Codes[code], art, artcache[code]);
 		});
 	}
 }
 function getCardImage(code) {
 	if (caimgcache[code]) return caimgcache[code];
 	else {
-		var card = CardCodes[code];
+		var card = Cards.Codes[code];
 		var rend = new PIXI.RenderTexture(100, 20);
 		var graphics = new PIXI.Graphics();
 		graphics.lineStyle(2, 0x222222, 1);
@@ -208,7 +193,7 @@ function getCreatureImage(code) {
 	if (crimgcache[code]) return crimgcache[code];
 	else {
 		return getArtImage(code, function(art){
-			var card = CardCodes[code];
+			var card = Cards.Codes[code];
 			var rend = new PIXI.RenderTexture(64, 82);
 			var graphics = new PIXI.Graphics();
 			var border = new PIXI.Sprite(cardBorders[card.element + (card.upped ? 13 : 0)]);
@@ -240,7 +225,7 @@ function getWeaponShieldImage(code) {
 	if (wsimgcache[code]) return wsimgcache[code];
 	else {
 		return getArtImage(code, function(art){
-			var card = CardCodes[code];
+			var card = Cards.Codes[code];
 			var rend = new PIXI.RenderTexture(80, 102);
 			var graphics = new PIXI.Graphics();
 			var border = (new PIXI.Sprite(cardBorders[card.element + (card.upped ? 13 : 0)]));
@@ -315,7 +300,7 @@ function initTrade(data) {
 			cardArt.setTexture(getArt(code));
 		},
 		function(code){
-			var card = CardCodes[code];
+			var card = Cards.Codes[code];
 			if (selectedCards.length < 30 && !isFreeCard(card) && code in cardpool && !(code in cardminus && cardminus[code] >= cardpool[code])) {
 				adjust(cardminus, code, 1);
 				for (var i = 0;i < selectedCards.length;i++) {
@@ -332,7 +317,7 @@ function initTrade(data) {
 		sprite.position.set(100 + Math.floor(i / 10) * 100, 8 + (i % 10) * 20);
 		(function(_i) {
 			setClick(sprite, function() {
-				var card = CardCodes[selectedCards[_i]];
+				var card = Cards.Codes[selectedCards[_i]];
 				adjust(cardminus, selectedCards[_i], -1);
 				selectedCards.splice(_i, 1);
 			});
@@ -443,8 +428,8 @@ function initGame(data, ai) {
 	for (var j = 0;j < 2;j++) {
 		var pl = game.players(j);
 		for (var i = 0;i < decks[j].length;i++) {
-			if (CardCodes[code = decks[j][i]]) {
-				pl.deck.push(CardCodes[code]);
+			if (Cards.Codes[code = decks[j][i]]) {
+				pl.deck.push(Cards.Codes[code]);
 			} else if (~(idx = etg.fromTrueMark(code))) {
 				pl.mark = idx;
 			}
@@ -780,7 +765,7 @@ function isFreeCard(card) {
 	return card.type == etg.PillarEnum && !card.upped && !card.rarity && !card.shiny;
 }
 function editorCardCmp(x, y) {
-	var cx = CardCodes[x], cy = CardCodes[y];
+	var cx = Cards.Codes[x], cy = Cards.Codes[y];
 	return cx.upped - cy.upped || cx.element - cy.element || cx.cost - cy.cost || cx.type - cy.type || (x > y) - (x < y);
 }
 function adjust(cardminus, code, x) {
@@ -864,11 +849,11 @@ function makeCardSelector(cardmouseover, cardclick, maxedIndicator){
 		if (maxedIndicator) graphics.clear();
 		for (var i = 0;i < 6;i++) {
 			for (var j = 0;j < columns[i].length;j++) {
-				var spr = columnspr[i][j], code = columns[i][j], card = CardCodes[code];
+				var spr = columnspr[i][j], code = columns[i][j], card = Cards.Codes[code];
 				spr.setTexture(getCardImage(code));
 				spr.visible = true;
 				if (user) {
-					var txt = spr.getChildAt(0), card = CardCodes[code], inf = isFreeCard(card);
+					var txt = spr.getChildAt(0), card = Cards.Codes[code], inf = isFreeCard(card);
 					if ((txt.visible = inf || code in cardpool || showall)) {
 						var cardAmount = inf ? "-" : !(code in cardpool) ? 0 : (cardpool[code] - (code in cardminus ? cardminus[code] : 0))
 						maybeSetText(txt, cardAmount.toString());
@@ -1308,17 +1293,17 @@ function upgradestore() {
 	upgradeui.addChild(goldcount);
 	var bupgrade = makeButton(150, 50, "Upgrade");
 	setClick(bupgrade, function() {
-		upgradeCard(CardCodes[selectedCard]);
+		upgradeCard(Cards.Codes[selectedCard]);
 	});
 	upgradeui.addChild(bupgrade);
 	var bpolish = makeButton(150, 95, "Polish");
 	setClick(bpolish, function() {
-		polishCard(CardCodes[selectedCard]);
+		polishCard(Cards.Codes[selectedCard]);
 	});
 	upgradeui.addChild(bpolish);
 	var bsell = makeButton(150, 140, "Sell");
 	setClick(bsell, function() {
-		sellCard(CardCodes[selectedCard]);
+		sellCard(Cards.Codes[selectedCard]);
 	});
 	upgradeui.addChild(bsell);
 	var bshiny = makeButton(5, 578, "Toggle Shiny");
@@ -1350,7 +1335,7 @@ function upgradestore() {
 
 	var cardsel = makeCardSelector(null,
 		function(code){
-			var card = CardCodes[code];
+			var card = Cards.Codes[code];
 			selectedCardArt.setTexture(getArt(code));
 			cardArt.setTexture(getArt(etgutil.asUpped(code, true)));
 			selectedCard = code;
@@ -1583,7 +1568,7 @@ function startColosseum(){
 		refreshRenderer(coloui);
 }
 function startEditor(arena, acard, startempty) {
-	if (!Cards) return;
+	if (!Cards.loaded) return;
 	if (arena && (!user || arena.deck === undefined || acard === undefined)) arena = false;
 	function sumCardMinus(cardminus, code){
 		var sum = 0;
@@ -1596,7 +1581,7 @@ function startEditor(arena, acard, startempty) {
 	}
 	function processDeck() {
 		for (var i = editordeck.length - 1;i >= 0;i--) {
-			if (!(editordeck[i] in CardCodes)) {
+			if (!(editordeck[i] in Cards.Codes)) {
 				var index = etg.fromTrueMark(editordeck[i]);
 				if (~index) {
 					editormark = index;
@@ -1609,7 +1594,7 @@ function startEditor(arena, acard, startempty) {
 		if (user) {
 			cardminus = {};
 			for (var i = editordeck.length - 1;i >= 0;i--) {
-				var code = editordeck[i], card = CardCodes[code];
+				var code = editordeck[i], card = Cards.Codes[code];
 				if (card.type != etg.PillarEnum) {
 					if (sumCardMinus(cardminus, code) == 6) {
 						editordeck.splice(i, 1);
@@ -1630,7 +1615,7 @@ function startEditor(arena, acard, startempty) {
 		}
 	}
 	function incrpool(code, count){
-		if (code in CardCodes && (!arena || (!CardCodes[code].isOf(CardCodes[acard].asUpped(false))) && (arena.lv || !CardCodes[code].upped))){
+		if (code in Cards.Codes && (!arena || (!Cards.Codes[code].isOf(Cards.Codes[acard].asUpped(false))) && (arena.lv || !Cards.Codes[code].upped))){
 			if (code in cardpool) {
 				cardpool[code] += count;
 			} else {
@@ -1808,7 +1793,7 @@ function startEditor(arena, acard, startempty) {
 		sprite.position.set(100 + Math.floor(i / 10) * 100, 32 + (i % 10) * 20);
 		(function(_i) {
 			setClick(sprite, function() {
-				var code = editordeck[_i], card = CardCodes[code];
+				var code = editordeck[_i], card = Cards.Codes[code];
 				if (!arena || etgutil.asUpped(code, false) != acard){
 					if (user && !isFreeCard(card)) {
 						adjust(cardminus, code, -1);
@@ -1833,10 +1818,10 @@ function startEditor(arena, acard, startempty) {
 		},
 		function(code){
 			if (editordeck.length < 60) {
-				var card = CardCodes[code];
+				var card = Cards.Codes[code];
 				if (user && !isFreeCard(card)) {
 					if (!(code in cardpool) || (code in cardminus && cardminus[code] >= cardpool[code]) ||
-						(CardCodes[code].type != etg.PillarEnum && sumCardMinus(cardminus, code) >= 6)) {
+						(Cards.Codes[code].type != etg.PillarEnum && sumCardMinus(cardminus, code) >= 6)) {
 						return;
 					}
 					adjust(cardminus, code, 1);
@@ -2613,8 +2598,8 @@ function startArenaTop(info) {
 		var scoretxt = makeText(350, y, data[1]);
 		var winlosstxt = makeText(400, y, data[2] + "-" + data[3]);
 		var agetxt = makeText(460, y, data[4].toString());
-		if (data[5] in CardCodes){
-			var cardtxt = makeText(500, y, CardCodes[data[5]].name);
+		if (data[5] in Cards.Codes){
+			var cardtxt = makeText(500, y, Cards.Codes[data[5]].name);
 			stage.addChild(cardtxt);
 		}
 		stage.addChild(infotxt);
@@ -2774,7 +2759,7 @@ socket.on("codegold", function(data) {
 });
 socket.on("codecode", function(data) {
 	user.pool = etgutil.addcard(user.pool, data);
-	addChatMessage("<font color=red>" + CardCodes[data].name + " added!</font><br>");
+	addChatMessage("<font color=red>" + Cards.Codes[data].name + " added!</font><br>");
 });
 socket.on("codedone", function(data) {
 	user.pool = etgutil.addcard(user.pool, data.card);
@@ -2887,7 +2872,7 @@ function parseInput(data, key, value) {
 		data[key] = value;
 }
 function challengeClick() {
-	if (Cards) {
+	if (Cards.loaded) {
 		var deck = getDeck();
 		if (deck.length < (user ? 31 : 11)){
 			startEditor();
@@ -2909,15 +2894,15 @@ function challengeClick() {
 	}
 }
 function tradeClick() {
-	if (Cards)
+	if (Cards.loaded)
 		userEmit("tradewant", { f: foename.value });
 }
 function rewardClick() {
-	if (Cards)
+	if (Cards.loaded)
 		userEmit("codesubmit", { code: foename.value });
 }
 function libraryClick() {
-	if (Cards)
+	if (Cards.loaded)
 		socket.emit("librarywant", { f: foename.value });
 }
 var expofuncs = [maybeLogin, maybeChallenge, maybeSendChat, changeClick, challengeClick, tradeClick, rewardClick, libraryClick, loginClick, getTextImage];

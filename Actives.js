@@ -1,6 +1,7 @@
 "use strict";
 var Effect = require("./Effect");
 var etg = require("./etg");
+var Cards = require("./Cards");
 function mutantactive(t){
 	lobo(t);
 	var abilities = ["hatch","freeze","burrow","destroy","steal","dive","heal","paradox","lycanthropy","scavenger","infect","gpull","devour","mutation","growth","ablaze","poison","deja","endow","guard","mitosis"];
@@ -167,7 +168,7 @@ bravery:function(c,t){
 },
 brew:function(c,t){
 	Effect.mkText("Brew", c);
-	new etg.CardInstance(CardCodes[etg.AlchemyList[c.owner.uptoceil(12)]].asUpped(c.card.upped), c.owner).place();
+	new etg.CardInstance(Cards.Codes[etg.AlchemyList[c.owner.uptoceil(12)]].asUpped(c.card.upped), c.owner).place();
 },
 brokenmirror:function(c,t, fromhand){
 	if (fromhand && t instanceof etg.Creature && c.owner != t.owner){
@@ -688,7 +689,7 @@ integrity:function(c,t){
 	var stat=c.card.upped?1:0;
 	for(var i=c.owner.hand.length-1; i>=0; i--){
 		var card = c.owner.hand[i].card;
-		if (etg.ShardList.some(function(x) { return x && card.isOf(CardCodes[x]); })){
+		if (etg.ShardList.some(function(x) { return x && card.isOf(Cards.Codes[x]); })){
 			if (card.upped){
 				stat++;
 			}
@@ -897,7 +898,7 @@ nymph:function(c,t){
 	Effect.mkText("Nymph", t);
 	var e = t.card.element || c.owner.uptoceil(12);
 	Actives.destroy(c, t, false, true);
-	new etg.Creature(CardCodes[etg.NymphList[e]].asUpped(t.card.upped), t.owner).place();
+	new etg.Creature(Cards.Codes[etg.NymphList[e]].asUpped(t.card.upped), t.owner).place();
 },
 obsession:function(c,t){
 	t.dmg(c.card.upped?10:8);
@@ -1065,7 +1066,7 @@ rewind:function(c,t){
 	}
 },
 ricochet:function(c,t){
-	var tgting = Targeting[t.card.active.activename];
+	var tgting = Cards.Targeting[t.card.active.activename];
 	function tgttest(x){
 		if (x && x != t) {
 			if (tgting(t.owner, x)) tgts.push([x, t.owner]);

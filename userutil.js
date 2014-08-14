@@ -1,8 +1,9 @@
 "use strict";
 var etgutil = require("./etgutil");
+var Cards = require("./Cards");
 exports.sellcard = function(data, user){
 	if (etgutil.count(user.pool, data.card)){
-		var card = CardCodes[data.card];
+		var card = Cards.Codes[data.card];
 		var sellValue = [5, 1, 3, 15, 20][card.rarity] * (card.upped ? 5 : 1);
 		user.pool = etgutil.addcard(user.pool, data.card, -1);
 		user.gold += sellValue;
@@ -24,26 +25,26 @@ function transmute(user, oldcard, func, use){
 	}
 }
 exports.upgrade = function(data, user){
-	var card = CardCodes[data.card];
+	var card = Cards.Codes[data.card];
 	if (!card || card.upped) return;
 	var use = card.rarity < 5 ? 6 : 1;
 	transmute(user, card.code, etgutil.asUpped, use);
 }
 exports.uppillar = function(data, user){
-	var card = CardCodes[data.c];
+	var card = Cards.Codes[data.c];
 	if (card && user.gold >= 50 && card.rarity === 0 && !card.shiny){
 		user.gold -= 50;
 		user.pool = etgutil.addcard(user.pool, card.asUpped(true).code);
 	}
 }
 exports.polish = function(data, user){
-	var card = CardCodes[data.card];
+	var card = Cards.Codes[data.card];
 	if (!card || card.shiny) return;
 	var use = card.rarity < 5 ? 6 : 2;
 	transmute(user, card.code, etgutil.asShiny, use);
 }
 exports.shpillar = function(data, user){
-	var card = CardCodes[data.c];
+	var card = Cards.Codes[data.c];
 	if (card && user.gold >= 50 && card.rarity === 0 && !card.shiny){
 		user.gold -= 50;
 		user.pool = etgutil.addcard(user.pool, card.asShiny(true).code);

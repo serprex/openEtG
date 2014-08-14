@@ -1,43 +1,12 @@
 "use strict";
 var fs = require("fs");
-var etg = require("./etg");
-var etgutil = require("./etgutil");
-exports.loadcards = function(cb){
-	var Cards = {}, CardCodes = {}, Targeting = {};
+var Cards = require("./Cards");
+exports.loadcards = function(){
 	var names = ["pillar", "weapon", "shield", "permanent", "spell", "creature"];
 	for(var i=0; i<names.length; i++){
-		var csv = fs.readFileSync(__dirname + "/" + names[i] + ".csv").toString().split("\n");
-		var keys = csv[0].split(",");
-		for(var j=1; j<csv.length; j++){
-			var carddata = csv[j].split(",");
-			var cardcode = carddata[2];
-			var cardinfo = {};
-			for(var k=0; k<carddata.length; k++){
-				if (carddata[k].charAt(0) == '"'){
-					for (var kk=k+1; kk<carddata.length; kk++){
-						carddata[k] += "," + carddata[kk];
-					}
-					cardinfo[keys[k]] = carddata[k].substring(1, carddata[k].length-1).replace(/""/g, '"');
-					break;
-				}else{
-					cardinfo[keys[k]] = carddata[k];
-				}
-			}
-			var nospacename = carddata[1].replace(/ |'/g,"");
-			if(cardcode in CardCodes){
-				console.log(cardcode + " duplicate " + carddata[1] + " " + CardCodes[cardcode].name);
-			}else{
-				Cards[nospacename in Cards?nospacename+"Up":nospacename] = CardCodes[cardcode] = new etg.Card(i, cardinfo);
-				cardinfo.Code = etgutil.asShiny(cardcode, true);
-				(CardCodes[cardinfo.Code] = new etg.Card(i, cardinfo)).shiny = true;
-			}
-		}
+		Cards.parseCsv(i, fs.readFileSync(__dirname + "/" + names[i] + ".csv").toString());
 	}
-	var csv = fs.readFileSync(__dirname + "/active.csv").toString().split("\n");
-	for (var i=0; i<csv.length; i++){
-		var keypair = csv[i].split(",");
-		Targeting[keypair[0]] = etg.getTargetFilter(keypair[1]);
-	}
+	Cards.parseTargeting(fs.readFileSync(__dirname + "/active.csv").toString());
 	console.log("Cards loaded");
-	cb(Cards, CardCodes, Targeting);
+	Cards.loaded = true;
 }

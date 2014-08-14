@@ -4,6 +4,7 @@ var Actives = require("./Actives");
 var Effect = require("./Effect");
 var ui = require("./uiutil");
 var etgutil = require("./etgutil");
+var Cards = require("./Cards");
 function Game(first, seed){
 	this.rng = new MersenneTwister(seed);
 	this.phase = MulliganPhase1;
@@ -195,9 +196,6 @@ var PlayerRng = Object.create(Player.prototype);
 PlayerRng.rng = Math.random;
 PlayerRng.upto = function(x){ return Math.floor(Math.random()*x); }
 PlayerRng.uptoceil = function(x){ return Math.ceil((1-Math.random())*x); }
-exports.NymphList = [undefined, "500", "534", "568", "59c", "5cg", "5fk", "5io", "5ls", "5p0", "5s4", "5v8", "62c"];
-exports.AlchemyList = [undefined, "4vn", "52s", "55v", "595", "5c7", "5fb", "5ig", "5lj", "5om", "5rr", "5uu", "621"];
-exports.ShardList = [undefined, "50a", "53e", "56i", "59m", "5cq", "5fu", "5j2", "5m6", "5pa", "5se", "5vi", "62m"];
 Game.prototype.clone = function(){
 	var obj = Object.create(Game.prototype);
 	obj.rng = this.rng.clone();
@@ -281,7 +279,7 @@ Game.prototype.bitsToTgt = function(x) {
 	} else console.log("Unknown tgtop: " + tgtop + ", " + x);
 }
 Game.prototype.getTarget = function(src, active, cb) {
-	var targetingFilter = Targeting[active.activename];
+	var targetingFilter = Cards.Targeting[active.activename];
 	if (targetingFilter) {
 		this.targetingMode = function(t) { return (t instanceof Player || t instanceof CardInstance || t.owner == this.turn || t.status.cloak || !t.owner.isCloaked()) && targetingFilter(src, t); }
 		this.targetingModeCb = cb;
@@ -316,10 +314,8 @@ function place(array, item){
 }
 function clone(obj){
 	var result = {};
-	if (obj){
-		for(var key in obj){
-			result[key] = obj[key];
-		}
+	for(var key in obj){
+		result[key] = obj[key];
 	}
 	return result;
 }
@@ -454,10 +450,10 @@ CardInstance.prototype.toString = function() { return "::" + this.card.name; }
 Player.prototype.toString = function(){ return this == this.game.player1?"p1":"p2"; }
 Card.prototype.toString = function(){ return this.code; }
 Card.prototype.asUpped = function(upped){
-	return this.upped == upped ? this : CardCodes[etgutil.asUpped(this.code, upped)];
+	return this.upped == upped ? this : Cards.Codes[etgutil.asUpped(this.code, upped)];
 }
 Card.prototype.asShiny = function(shiny){
-	return !this.shiny == !shiny ? this : CardCodes[etgutil.asShiny(this.code, shiny)];
+	return !this.shiny == !shiny ? this : Cards.Codes[etgutil.asShiny(this.code, shiny)];
 }
 Card.prototype.isOf = function(card){
 	return card.code == etgutil.asShiny(etgutil.asUpped(this.code, false), false);
@@ -1189,20 +1185,28 @@ CardInstance.prototype.useactive = function(target){
 function countAdrenaline(x){
 	return 5-Math.floor(Math.sqrt(Math.abs(x)));
 }
+var filtercache = [];
 function filtercards(upped, filter, cmp, showshiny){
-	var keys = [];
-	for(var key in CardCodes) {
-		var card = CardCodes[key];
-		if (card.upped == upped && !card.shiny == !showshiny && !card.status.token && (!filter || filter(card))) {
-			keys.push(key);
+	if (!Cards.loaded) return;
+	var cacheidx = (upped?1:0)|(showshiny?2:0);
+	if (!(cacheidx in filtercache)){
+		filtercache[cacheidx] = [];
+		for (var key in Cards.Codes){
+			var card = Cards.Codes[key];
+			if (card.upped == upped && !card.shiny == !showshiny && !card.status.token){
+				filtercache[cacheidx].push(card);
+			}
 		}
+		filtercache[cacheidx].sort();
 	}
-	keys.sort(cmp);
+	var keys = filtercache[cacheidx];
+	if (filter) keys = keys.filter(filter);
+	if (cmp) keys.sort(cmp);
 	return keys;
 }
 Player.prototype.randomcard = function(upped, filter){
 	var keys = filtercards(upped, filter);
-	return CardCodes[keys[this.upto(keys.length)]];
+	return keys && keys.length && Cards.Codes[keys[this.upto(keys.length)]];
 }
 function activename(active){
 	return active?active.activename:"";
@@ -1223,84 +1227,6 @@ function salvageScan(from, t){
 		}
 	}
 }
-function getTargetFilter(str){
-	if (str in TargetFilters){
-		return TargetFilters[str];
-	}else{
-		var prefixes = str.split(":"), filters = prefixes.pop().split("+");
-		for(var i=0; i<prefixes.length; i++){
-			prefixes[i] = TargetFilters[prefixes[i]];
-		}
-		for(var i=0; i<filters.length; i++){
-			filters[i] = TargetFilters[filters[i]];
-		}
-		return TargetFilters[str] = function(c, t){
-			return prefixes.every(function(x){return x(c, t);}) && filters.some(function(x){return x(c, t);});
-		}
-	}
-}
-var TargetFilters = {
-	own:function(c, t){
-		return c.owner == t.owner;
-	},
-	foe:function(c, t){
-		return c.owner != t.owner
-	},
-	notself:function(c, t){
-		return c != t;
-	},
-	all:function(c, t){
-		return true;
-	},
-	card:function(c, t){
-		return c != t && t instanceof CardInstance;
-	},
-	pill:function(c, t){
-		return t.isMaterialInstance(Pillar);
-	},
-	weap:function(c, t){
-		return (t instanceof Weapon || (t instanceof Creature && t.card.type == WeaponEnum)) && !t.status.immaterial && !t.status.burrowed;
-	},
-	playerweap:function(c,t){
-		return t instanceof Weapon && t == t.owner.weapon;
-	},
-	perm:function(c, t){
-		return t.isMaterialInstance(Permanent);
-	},
-	permnonstack:function(c,t){
-		return t.isMaterialInstance(Permanent) && !t.status.stackable;
-	},
-	crea:function(c, t){
-		return t.isMaterialInstance(Creature);
-	},
-	creaonly:function(c, t){
-		return t.isMaterialInstance(Creature) && t.card.type == CreatureEnum;
-	},
-	creanonspell:function(c, t){
-		return t.isMaterialInstance(Creature) && t.card.type != SpellEnum;
-	},
-	play:function(c, t){
-		return t instanceof Player;
-	},
-	butterfly:function(c, t){
-		return (t instanceof Creature || t instanceof Permanent) && !t.status.immaterial && !t.status.burrowed && ((t.trueatk && t.trueatk()<3) || (t instanceof Creature && t.truehp()<3));
-	},
-	devour:function(c, t){
-		return t.isMaterialInstance(Creature) && t.truehp()<c.truehp();
-	},
-	paradox:function(c, t){
-		return t.isMaterialInstance(Creature) && t.truehp()<t.trueatk();
-	},
-	airbornecrea:function(c, t){
-		return t.isMaterialInstance(Creature) && t.status.airborne;
-	},
-	groundcrea:function(c, t){
-		return t.isMaterialInstance(Creature) && !t.status.airborne;
-	},
-	wisdom:function(c, t){
-		return (t instanceof Creature || t instanceof Weapon) && !t.status.burrowed;
-	}
-};
 
 exports.Game = Game;
 exports.Thing = Thing;
@@ -1319,7 +1245,6 @@ exports.filtercards = filtercards;
 exports.countAdrenaline = countAdrenaline;
 exports.clone = clone;
 exports.casttext = casttext;
-exports.getTargetFilter = getTargetFilter;
 exports.fromTrueMark = fromTrueMark;
 exports.toTrueMark = toTrueMark;
 exports.PlayerRng = PlayerRng;
@@ -1346,4 +1271,7 @@ exports.MulliganPhase1 = 0;
 exports.MulliganPhase2 = 1;
 exports.PlayPhase = 2;
 exports.EndPhase = 3;
+exports.NymphList = [undefined, "500", "534", "568", "59c", "5cg", "5fk", "5io", "5ls", "5p0", "5s4", "5v8", "62c"];
+exports.AlchemyList = [undefined, "4vn", "52s", "55v", "595", "5c7", "5fb", "5ig", "5lj", "5om", "5rr", "5uu", "621"];
+exports.ShardList = [undefined, "50a", "53e", "56i", "59m", "5cq", "5fu", "5j2", "5m6", "5pa", "5se", "5vi", "62m"];
 exports.eleNames = ["Chroma", "Entropy", "Death", "Gravity", "Earth", "Life", "Fire", "Water", "Light", "Air", "Time", "Darkness", "Aether", "Random"];
