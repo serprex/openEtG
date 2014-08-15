@@ -294,11 +294,11 @@ destroy:function(c,t, dontsalvage, donttalk){
 	}
 	if (t.status.stackable){
 		if(--t.status.charges<=0){
-			t.die();
+			t.remove();
 		}
-	}else t.die();
+	}else t.remove();
 	if (!dontsalvage){
-		etg.salvageScan(c.owner, t);
+		t.procactive("destroy");
 	}
 },
 destroycard:function(c,t){
@@ -391,9 +391,9 @@ earthquake:function(c,t){
 	if (t.status.charges>3){
 		t.status.charges -= 3;
 	}else{
-		t.die();
+		t.remove();
 	}
-	etg.salvageScan(c.owner, t);
+	t.procactive("destroy");
 },
 empathy:function(c,t){
 	var healsum = c.owner.countcreatures();
@@ -508,6 +508,11 @@ fungusrebirth:function(c,t){
 gaincharge2:function(c,t){
 	c.status.charges += 2;
 },
+gaincharge3other:function(c, t){
+	if (c != t){
+		c.status.charges += 3;
+	}
+},
 gainchargeowner:function(c,t){
 	if (c.owner == t){
 		c.status.charges++;
@@ -608,7 +613,7 @@ icebolt:function(c,t){
 	var bolts = Math.floor(c.owner.quanta[etg.Water]/5);
 	t.spelldmg(2+bolts);
 	if (c.owner.rng() < .35+bolts/20){
-		t.freeze(3);
+		t.freeze(c.card.upped?4:3);
 	}
 },
 ignite:function(c,t){
@@ -781,7 +786,7 @@ locketshift:function(c,t){
 },
 losecharge:function(c,t){
 	if(--c.status.charges<0){
-		c.die();
+		c.remove();
 	}
 },
 luciferin:function(c,t){
@@ -1099,6 +1104,14 @@ sadism:function(c, t, dmg){
 		c.owner.dmg(-dmg);
 	}
 },
+salvage:function(c, t){
+	if (!c.status.salvaged && !t.status.salvaged && c.owner.game.turn != c.owner){
+		Effect.mkText("Salvage", c);
+		c.status.salvaged = true;
+		t.status.salvaged = true;
+		c.owner.hand.push(new CardInstance(t.card, c.owner));
+	}
+},
 sanctuary:function(c,t){
 	c.owner.sanctuary = true;
 	Effect.mkText("+4", c);
@@ -1106,6 +1119,11 @@ sanctuary:function(c,t){
 },
 scarab:function(c,t){
 	new etg.Creature(Cards.Scarab.asUpped(c.card.upped), c.owner).place();
+},
+scatterhand:function(c,t){
+	if (!t.sanctuary){
+		t.drawhand(t.hand.length);
+	}
 },
 scavenger:function(c,t){
 	Effect.mkText("1|1", c);
@@ -1263,7 +1281,7 @@ steal:function(c,t){
 			new etg.Permanent(t.card, c.owner).place();
 		}
 	}else{
-		t.die();
+		t.remove();
 		t.owner = c.owner;
 		t.usedactive = true;
 		t.place();

@@ -508,7 +508,7 @@ function victoryScreen(game) {
 			startMenu();
 	});
 	victoryui.addChild(bexit);
-	if (winner){
+	if (winner && user){
 		if (game.goldreward) {
 			var goldshown = (game.goldreward || 0) - (game.cost || 0);
 			var tgold = makeText(340, 550, "Gold won: $" + goldshown);
@@ -580,7 +580,7 @@ function mkQuestAi(questname, stage, area) {
 	var playerHPstart = quest.urhp || 100;
 	var urdeck = getDeck();
 	if (quest.morph) {
-		urdeck = urdeck.map(function(code){ return quest.morph[code] || code; });
+		urdeck = urdeck.map(quest.morph.bind(quest));
 	}
 	if (urdeck.length < (user ? 31 : 11)) {
 		return "ERROR: Your deck is invalid or missing! Please exit and create a valid deck in the deck editor.";
@@ -1959,6 +1959,7 @@ function startMatch(game, foeDeck) {
 						var data = addNoHealData(game);
 						var newgame = mkQuestAi(game.quest[0], game.quest[1] + 1, game.area);
 						addToGame(newgame, data);
+						return
 					}
 					else if (game.daily) {
 						if (game.endurance) {
@@ -1967,17 +1968,15 @@ function startMatch(game, foeDeck) {
 							var newgame = mkAi(game.level, true)();
 							addToGame(newgame, data);
 							newgame.dataNext = data;
+							return;
 						}
 						else {
 							userExec("donedaily", { daily: game.daily == 4 ? 5 : game.daily == 3 ? 0 : game.daily });
-							victoryScreen(game);
 						}
-					}else victoryScreen(game);
-				}else victoryScreen(game);
+					}
+				}
 			}
-			else {
-				startMenu();
-			}
+			victoryScreen(game);
 		} else if (game.turn == game.player1) {
 			if (discard == undefined && game.player1.hand.length == 8) {
 				discarding = true;

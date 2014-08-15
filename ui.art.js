@@ -10,7 +10,7 @@ require("./etg.client").loadcards(function() {
 		[["jarozaoz", "http://elementscommunity.org/forum/profile/?u=6364"],
 			["4t3", "4vn", "532", "5le", "5op"]],
 		[["kae", "http://willowdream.carbonmade.com"], ["Status Icons", "assets/statussheet.png"], ["Status Borders", "assets/statusborders.png"],
-			["4sg", "4tc", "52l", "52q", "535", "536", "567", "59b", "5bs", "5c6", "5fb", "5ib", "5il", "5iq", "5lg", "5lj", "5od", "5oe", "5ok", "5om", "5oo", "5os", "5p0", "5rg", "5uo", "5v2", "62b", "6rs", "7ae", "7gr", "7h5", "7k0"]],
+			["4sg", "4tc", "52l", "52q", "535", "536", "567", "59b", "5bs", "5bu", "5c6", "5fb", "5ib", "5il", "5iq", "5lg", "5lj", "5od", "5oe", "5ok", "5om", "5oo", "5os", "5p0", "5rg", "5uo", "5v2", "62b", "6rs", "7ae", "7gr", "7h5", "7k0"]],
 		[["mega plini", "http://elementscommunity.org/forum/profile/?u=202"], ["5ig"]],
 		[["moomoose", "http://elementscommunity.org/forum/profile/?u=40"], ["5i6"]],
 		[["OdinVanguard", "http://elementscommunity.org/forum/profile/?u=232"],
@@ -23,7 +23,7 @@ require("./etg.client").loadcards(function() {
 			"5im", "5j2", "5jm", "5l9", "5lp", "5m6", "5mq", "5ou", "5pa", "5pu", "5rn", "5rq", "5se", "5t2", "5uq", "5uu", "5vi", "61p", "61q", "61v", "620", "627", "62m", "6u3", "77a", "77p", "7au", "7av", "7dj", "7e2", "7qa", "7ta", "809", "80a"]],
 		[["serprex", "http://fiction.wikia.com/wiki/User:Serprex"], ["622", "62a"]],
 		[["vrt", "http://vrt-designs.com"], ["Donation thread", "http://elementscommunity.org/forum/card-art/help-support-an-artist"],
-			["4vc", "4ve", "4vh", "52t", "55l", "55o", "55r", "560", "562", "563", "591", "5c1", "5c9", "5f2", "5fa", "5fc", "5i5", "5i7", "5ij", "5ll", "5oc", "5of", "5rk", "5rs", "5rt", "5uk", "5ul", "5um", "5ut", "5uv", "5v3", "61o", "61t", "624", "625", "626", "74a", "80g"]],
+			["4vc", "4ve", "4vh", "52t", "55l", "55o", "55r", "560", "562", "563", "591", "5c1", "5c9", "5f2", "5fa", "5fc", "5i5", "5i7", "5id", "5ij", "5ll", "5oc", "5of", "5rk", "5rs", "5rt", "5uk", "5ul", "5um", "5ut", "5uv", "5v3", "61o", "61t", "624", "625", "626", "74a", "80g"]],
 	];
 	var str = "<br>";
 	credits.forEach(function(credit){

@@ -1,4 +1,5 @@
 "use strict";
+var Cards = require("./Cards");
 //Quest data
 exports.necromancer = [
 	{ deck: "04531027170b52g0c52m0452n018pk", name: "Skeleton Horde", hp: 80, markpower: 2, wintext: "You defeated the horde, but you should find out where they came from" },
@@ -27,7 +28,10 @@ exports.spirit = [
 		The shadows on the wall begin to move of their own accord. And all the doors slam shut with conviction.\
 		You turn to face your assailant, apparently a sister of the maiden you fell earlier."},
 	{ deck: "0b606015ur025us035up025uu025v2035vb015uo025uv015v8025ul018pi", name: "Spirit of the Dark Maiden",
-	morph: {"500":"5v0","502":"5ut","534":"7t5","535":"7t6","542":"7um","563":"7t6","565":"7tj","566":"5um","567":"5uv",
+	morph: function(code){
+		return this.morphtable[code] || code;
+	},
+	morphtable: {"500":"5v0","502":"5ut","534":"7t5","535":"7t6","542":"7um","563":"7t6","565":"7tj","566":"5um","567":"5uv",
 		"568":"7t5","576":"7um","590":"5v8","591":"7tf","596":"7tj","597":"7t7","606":"7um","620":"5ul","625":"7t6","626":"5ul",
 		"627":"5ul","710":"7um","711":"5v8","712":"7td","713":"7t7","714":"7t6","716":"7tf","744":"7um","745":"5ul","746":"5v3",
 		"747":"5v0","748":"5v3","752":"5v0","778":"7um","779":"7tg","808":"7um","809":"7tj","4t8":"7tj","6ro":"7t5","4vd":"5uv",

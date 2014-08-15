@@ -931,6 +931,13 @@ Creature.prototype.remove = function(index) {
 	}
 	return index;
 }
+Permanent.prototype.remove = function(index){
+	if (index === undefined)index=this.getIndex();
+	if (~index){
+		delete this.owner.permanents[index];
+	}
+	return index;
+}
 CardInstance.prototype.remove = function(index) {
 	if (index === undefined)index=this.getIndex();
 	if (~index){
@@ -1029,7 +1036,12 @@ Creature.prototype.truehp = function(){
 	return hp;
 }
 Permanent.prototype.getIndex = function() { return this.owner.permanents.indexOf(this); }
-Permanent.prototype.die = function(){ delete this.owner.permanents[this.getIndex()]; }
+Permanent.prototype.die = function(){
+	var index = this.remove();
+	if (~index){
+		this.procactive("destroy");
+	}
+}
 Weapon.prototype.die = function() { delete this.owner.weapon; }
 Shield.prototype.die = function() { delete this.owner.shield; }
 Thing.prototype.isMaterialInstance = function(type) {
@@ -1214,19 +1226,6 @@ function activename(active){
 function casttext(cast, castele){
 	return cast == 0?"0":cast + ":" + castele;
 }
-function salvageScan(from, t){
-	if (t.owner.hand.length<8 && t.owner != from){
-		for (var i=0; i<23; i++){
-			var cr = t.owner.creatures[i];
-			if (cr && cr.status.salvage && !cr.status.salvaged){
-				Effect.mkText("Salvage", cr);
-				cr.status.salvaged = true;
-				t.owner.hand.push(new CardInstance(t.card, t.owner));
-				return;
-			}
-		}
-	}
-}
 
 exports.Game = Game;
 exports.Thing = Thing;
@@ -1240,7 +1239,6 @@ exports.Permanent = Permanent;
 exports.Creature = Creature;
 exports.passives = passives;
 exports.isEmpty = isEmpty;
-exports.salvageScan = salvageScan;
 exports.filtercards = filtercards;
 exports.countAdrenaline = countAdrenaline;
 exports.clone = clone;
