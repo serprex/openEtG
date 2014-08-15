@@ -2441,7 +2441,7 @@ function startMatch(game, foeDeck) {
 					creasprite[j][i].setTexture(getCreatureImage(cr.card));
 					creasprite[j][i].visible = true;
 					var child = creasprite[j][i].getChildAt(1);
-					child.setTexture(getTextImage(cr.trueatk() + "|" + cr.truehp(), ui.mkFont(10, cr.card.upped ? "black" : "white"), maybeLighten(cr.card)));
+					child.setTexture(getTextImage(cr.trueatk() + "|" + cr.truehp() + (cr.status.charges ? " x" + cr.status.charges : ""), ui.mkFont(10, cr.card.upped ? "black" : "white"), maybeLighten(cr.card)));
 					var child2 = creasprite[j][i].getChildAt(2);
 					var activetext = cr.active.cast ? etg.casttext(cr.cast, cr.castele) + cr.active.cast.activename : (cr.active.hit ? cr.active.hit.activename : "");
 					child2.setTexture(getTextImage(activetext, ui.mkFont(8, cr.card.upped ? "black" : "white")));
@@ -2470,7 +2470,7 @@ function startMatch(game, foeDeck) {
 			if (wp && !(j == 1 && cloakgfx.visible)) {
 				weapsprite[j].visible = true;
 				var child = weapsprite[j].getChildAt(1);
-				child.setTexture(getTextImage(wp.trueatk() + "", ui.mkFont(12, wp.card.upped ? "black" : "white"), maybeLighten(wp.card)));
+				child.setTexture(getTextImage(wp.trueatk() + (wp.status.charges ? " x" + wp.status.charges : ""), ui.mkFont(12, wp.card.upped ? "black" : "white"), maybeLighten(wp.card)));
 				child.visible = true;
 				var child = weapsprite[j].getChildAt(2);
 				child.setTexture(getTextImage(wp.activetext(), ui.mkFont(12, wp.card.upped ? "black" : "white")));

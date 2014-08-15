@@ -859,11 +859,11 @@ Player.prototype.dmg = function(x, ignoresosa) {
 	}
 	if (x<0){
 		var heal = Math.max(this.hp-this.maxhp, x);
-		this.hp = Math.min(this.maxhp, this.hp-x);
+		this.hp -= heal;
 		return sosa?-x:heal;
 	}else{
 		this.hp -= x;
-		if (this.hp <= 0 && !this.game.winner){
+		if (this.hp <= 0){
 			this.game.setWinner(this.foe);
 		}
 		return sosa?-x:x;
@@ -891,9 +891,9 @@ Creature.prototype.addpoison = function(x) {
 }
 Weapon.prototype.buffhp = function(){}
 Player.prototype.buffhp = Creature.prototype.buffhp = function(x) {
-	if (!(this instanceof Player) || this.maxhp <= 500) {
+	if (!(this instanceof Player) || this.maxhp < 500) {
 		this.maxhp += x;
-		if (this instanceof Player && this.maxhp > 500) {
+		if (this.maxhp > 500 && this instanceof Player) {
 			this.maxhp = 500;
 		}
 	}
@@ -908,9 +908,12 @@ Weapon.prototype.freeze = Creature.prototype.freeze = function(x){
 	if (this.card.isOf(Cards.Squid)){
 		this.transform(Cards.ArcticSquid.asUpped(this.card.upped));
 	}else{
-		this.defstatus("frozen", 0);
-		if (x > this.status.frozen) this.status.frozen = x;
-		if (this.status.voodoo)this.owner.foe.freeze(x);
+		if (!this.active.ownfreeze || this.active.ownfreeze(this)){
+			Effect.mkText("Freeze", this);
+			this.defstatus("frozen", 0);
+			if (x > this.status.frozen) this.status.frozen = x;
+			if (this.status.voodoo) this.owner.foe.freeze(x);
+		}
 	}
 }
 Creature.prototype.spelldmg = Creature.prototype.dmg = function(x, dontdie){
@@ -1037,13 +1040,20 @@ Creature.prototype.truehp = function(){
 }
 Permanent.prototype.getIndex = function() { return this.owner.permanents.indexOf(this); }
 Permanent.prototype.die = function(){
-	var index = this.remove();
-	if (~index){
+	if (~this.remove()){
 		this.procactive("destroy");
 	}
 }
-Weapon.prototype.die = function() { delete this.owner.weapon; }
-Shield.prototype.die = function() { delete this.owner.shield; }
+Weapon.prototype.remove = function() {
+	if (this.owner.weapon != this)return -1;
+	delete this.owner.weapon;
+	return 0;
+}
+Shield.prototype.remove = function() {
+	if (this.owner.shield != this)return -1;
+	delete this.owner.shield;
+	return 0;
+}
 Thing.prototype.isMaterialInstance = function(type) {
 	return this instanceof type && !this.status.immaterial && !this.status.burrowed;
 }

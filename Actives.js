@@ -4,13 +4,13 @@ var etg = require("./etg");
 var Cards = require("./Cards");
 function mutantactive(t){
 	lobo(t);
-	var abilities = ["hatch","freeze","burrow","destroy","steal","dive","heal","paradox","lycanthropy","scavenger","infect","gpull","devour","mutation","growth","ablaze","poison","deja","endow","guard","mitosis"];
+	var abilities = ["hatch","freeze","burrow","destroy","steal","dive","heal","paradox","lycanthropy","growth1","infect","gpull","devour","mutation","growth","ablaze","poison","deja","endow","guard","mitosis"];
 	var index = t.owner.upto(abilities.length+2)-2;
 	if (index<0){
 		t.status[["momentum","immaterial"][~index]] = true;
 	}else{
 		var active = Actives[abilities[index]];
-		if (active == Actives.scavenger){
+		if (active == Actives.growth1){
 			t.active.death = active;
 		}else{
 			t.active.cast = active;
@@ -499,7 +499,6 @@ fractal:function(c,t){
 	c.owner.quanta[etg.Aether] = 0;
 },
 freeze:function(c,t){
-	Effect.mkText("Freeze", t);
 	t.freeze(c.card.upped && c.card != Cards.PandemoniumUp ? 4 : 3);
 },
 fungusrebirth:function(c,t){
@@ -560,6 +559,11 @@ growth: function (c, t) {
     Effect.mkText("2|2", c)
 	c.buffhp(2);
 	c.atk += 2;
+},
+growth1:function(c,t){
+	Effect.mkText("1|1", c);
+	c.atk += 1;
+	c.buffhp(1);
 },
 guard:function(c,t){
 	Effect.mkText("Guard", t);
@@ -665,7 +669,7 @@ integrity:function(c,t){
 	var shardSkills = [
 		[],
 		["deadalive", "mutation", "paradox", "improve", "scramble", "antimatter"],
-		["infect", "scavenger", "poison", "poison", "aflatoxin", "poison2"],
+		["infect", "growth1", "poison", "poison", "aflatoxin", "poison2"],
 		["devour", "devour", "devour", "devour", "devour", "blackhole"],
 		["burrow", "stoneform", "guard", "guard", "bblood", "bblood"],
 		["growth", "adrenaline", "adrenaline", "adrenaline", "adrenaline", "mitosis"],
@@ -680,7 +684,7 @@ integrity:function(c,t){
 	var shardCosts = {
 		burrow:1, stoneform:1, guard:1, petrify:2,
 		deadalive:1, mutation: 2, paradox: 2, improve: 2, scramble: -2, antimatter: 4,
-		infection:1, scavenger: -4, poison: -2, aflatoxin: 2, poison2: -2,
+		infection:1, growth1: -4, poison: -2, aflatoxin: 2, poison2: -2,
 		devour: 3, blackhole: 4,
 		growth: 2, adrenaline: 2, mitosis: 4,
 		ablaze: 1, fiery: -3, destroy: 3, rage: 2,
@@ -1073,7 +1077,7 @@ rewind:function(c,t){
 ricochet:function(c,t){
 	var tgting = Cards.Targeting[t.card.active.activename];
 	function tgttest(x){
-		if (x && x != t) {
+		if (x) {
 			if (tgting(t.owner, x)) tgts.push([x, t.owner]);
 			if (tgting(t.owner.foe, x)) tgts.push([x, t.owner.foe]);
 		}
@@ -1082,12 +1086,9 @@ ricochet:function(c,t){
 		var tgts = [];
 		for(var i=0; i<2; i++){
 			var pl=i==0?c.owner:c.owner.foe;
-			for(var j=0; j<23; j++){
-				tgttest(pl.creatures[j]);
-			}
-			for(var j=0; j<16; j++){
-				tgttest(pl.permanents[j]);
-			}
+			pl.creatures.forEach(tgttest);
+			pl.permanents.forEach(tgttest);
+			pl.hand.forEach(tgttest);
 			tgttest(pl.shield);
 			tgttest(pl.weapon);
 		}
@@ -1109,7 +1110,7 @@ salvage:function(c, t){
 		Effect.mkText("Salvage", c);
 		c.status.salvaged = true;
 		t.status.salvaged = true;
-		c.owner.hand.push(new CardInstance(t.card, c.owner));
+		c.owner.hand.push(new etg.CardInstance(t.card, c.owner));
 	}
 },
 sanctuary:function(c,t){
@@ -1124,11 +1125,6 @@ scatterhand:function(c,t){
 	if (!t.sanctuary){
 		t.drawhand(t.hand.length);
 	}
-},
-scavenger:function(c,t){
-	Effect.mkText("1|1", c);
-	c.atk += 1;
-	c.buffhp(1);
 },
 scramble:function(c,t){
 	if (t instanceof etg.Player && !t.sanctuary){
@@ -1439,7 +1435,6 @@ chaos:function(c,t){
 },
 cold:function(c,t){
 	if (c.owner.rng()<.3){
-		Effect.mkText("Freeze", t);
 		t.freeze(3);
 	}
 },
