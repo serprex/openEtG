@@ -11,13 +11,9 @@
 	var deckcode = document.getElementById("deckcode");
 	var legality = document.getElementById("legality");
 	var rulesets = document.getElementById("rulesets");
-	var Cards, CardCodes, Targeting;
+	var Cards = require("./Cards");
 	var etg = require("./etg");
-	require("./etg.client").loadcards(function(cards, cardCodes, targeting) {
-		Cards = cards;
-		CardCodes = cardCodes;
-		Targeting = targeting;
-	});
+	require("./etg.client").loadcards();
 	var verifiers = {
 		powerless3: function(deck) {
 		    var elements = [], anyupped = false, disco = false;
@@ -98,7 +94,7 @@
 		}
 	};
 	function testDeck() {
-		if (!Cards){
+		if (!Cards.loaded){
 			legality.value = "Card DB not yet downloaded";
 			return;
 		}
@@ -108,7 +104,7 @@
 		for (var i = 0;i < code.length;i++) {
 		    var maybeMark = ~etg.fromTrueMark(code[i]);
 			if (maybeMark) markele = maybeMark;
-			else if (CardCodes[code[i]]) deck.push(CardCodes[code[i]]);
+			else if (Cards.Codes[code[i]]) deck.push(Cards.Codes[code[i]]);
 			else {
 				legality.value = "Not a real deck code. " + (code[i] || "???");
 				return;
