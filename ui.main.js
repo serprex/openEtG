@@ -1287,7 +1287,12 @@ function upgradestore() {
 	}
 	var upgradeui = new PIXI.DisplayObjectContainer();
 	upgradeui.interactive = true;
-	upgradeui.addChild(new PIXI.Sprite(backgrounds[0]));
+	var bg = new PIXI.Sprite(backgrounds[0]);
+	bg.mouseover = function() {
+		cardArt.setTexture(getArt(etgutil.asUpped(selectedCard, true)));
+	}
+	bg.interactive = true;
+	upgradeui.addChild(bg);
 
 	var goldcount = makeText(30, 100, "");
 	upgradeui.addChild(goldcount);
@@ -1296,7 +1301,9 @@ function upgradestore() {
 		upgradeCard(Cards.Codes[selectedCard]);
 	});
 	upgradeui.addChild(bupgrade);
-	var bpolish = makeButton(150, 95, "Polish");
+	var bpolish = makeButton(150, 95, "Polish", function() {
+		cardArt.setTexture(getArt(etgutil.asShiny(selectedCard, true)));
+	});
 	setClick(bpolish, function() {
 		polishCard(Cards.Codes[selectedCard]);
 	});
