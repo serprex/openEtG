@@ -2351,7 +2351,7 @@ function startMatch(game, foeDeck) {
 				if (game.level !== undefined && game.level < 2) {
 					cardwon = cardwon.asUpped(false);
 				}
-				game.cardreward = "01" + cardwon.code;
+				game.cardreward = "01" + etgutil.asShiny(cardwon.code, false);
 			}
 			if (!game.goldreward) {
 				var goldwon;
