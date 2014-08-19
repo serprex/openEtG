@@ -44,7 +44,7 @@ accretion:function(c,t){
 	if (c.truehp() > 45){
 		c.die();
 		if (c.owner.hand.length < 8){
-			new etg.CardInstance(Cards.BlackHole.asUpped(c.card.upped), c.owner).place();
+			new etg.CardInstance(Cards.BlackHole.asUpped(c.card.upped).asShiny(c.card.shiny), c.owner).place();
 		}
 	}
 },
@@ -64,7 +64,7 @@ aflatoxin:function(c,t){
 },
 aggroskele:function(c,t){
 	var dmg = 0;
-	new etg.Creature(Cards.Skeleton.asUpped(c.card.upped), c.owner).place();
+	new etg.Creature(Cards.Skeleton.asUpped(c.card.upped).asShiny(c.card.shiny), c.owner).place();
 	for (var i=0; i<23; i++){
 		if (c.owner.creatures[i] && c.owner.creatures[i].card.isOf(Cards.Skeleton)){
 			dmg += c.owner.creatures[i].trueatk();
@@ -78,8 +78,8 @@ air:function(c,t){
 	c.owner.spend(etg.Air, -1);
 },
 alphawolf: function (c, t) {
-	new etg.Creature(Cards.PackWolf.asUpped(c.card.upped), c.owner).place();
-	new etg.Creature(Cards.PackWolf.asUpped(c.card.upped), c.owner).place();
+	new etg.Creature(Cards.PackWolf.asUpped(c.card.upped).asShiny(c.card.shiny), c.owner).place();
+	new etg.Creature(Cards.PackWolf.asUpped(c.card.upped).asShiny(c.card.shiny), c.owner).place();
 },
 animateweapon: function(c, t) {
 	var cr = new etg.Creature(t.card, t.owner);
@@ -145,7 +145,7 @@ bless:function(c,t){
 },
 boneyard:function(c,t){
 	if (!t.card.isOf(Cards.Skeleton)){
-		new etg.Creature(Cards.Skeleton.asUpped(c.card.upped), c.owner).place();
+		new etg.Creature(Cards.Skeleton.asUpped(c.card.upped).asShiny(c.card.shiny), c.owner).place();
 	}
 },
 bow:function(c,t){
@@ -168,11 +168,11 @@ bravery:function(c,t){
 },
 brew:function(c,t){
 	Effect.mkText("Brew", c);
-	new etg.CardInstance(Cards.Codes[etg.AlchemyList[c.owner.uptoceil(12)]].asUpped(c.card.upped), c.owner).place();
+	new etg.CardInstance(Cards.Codes[etg.AlchemyList[c.owner.uptoceil(12)]].asUpped(c.card.upped).asShiny(c.card.shiny), c.owner).place();
 },
 brokenmirror:function(c,t, fromhand){
 	if (fromhand && t instanceof etg.Creature && c.owner != t.owner){
-		new etg.Creature(Cards.Phantom.asUpped(c.card.upped), c.owner).place();
+		new etg.Creature(Cards.Phantom.asUpped(c.card.upped).asShiny(c.card.shiny), c.owner).place();
 	}
 },
 burrow:function(c,t){
@@ -281,9 +281,9 @@ deja:function(c,t){
 },
 deployblobs:function(c,t){
 	if (c.trueatk()>1 && c.truehp()>1){
-		new etg.Creature(Cards.Blob.asUpped(c.card.upped), c.owner).place();
-		new etg.Creature(Cards.Blob.asUpped(c.card.upped), c.owner).place();
-		new etg.Creature(Cards.Blob.asUpped(c.card.upped), c.owner).place();
+		new etg.Creature(Cards.Blob.asUpped(c.card.upped).asShiny(c.card.shiny), c.owner).place();
+		new etg.Creature(Cards.Blob.asUpped(c.card.upped).asShiny(c.card.shiny), c.owner).place();
+		new etg.Creature(Cards.Blob.asUpped(c.card.upped).asShiny(c.card.shiny), c.owner).place();
 		c.atk -= 2;
 		c.dmg(2);
 	}
@@ -438,7 +438,7 @@ epidemic:function(c,t){
 	}
 },
 evolve:function(c,t){
-	c.transform(Cards.Shrieker.asUpped(c.card.upped));
+	c.transform(Cards.Shrieker.asUpped(c.card.upped).asShiny(c.card.shiny));
 	delete c.status.burrowed;
 },
 fickle:function(c,t){
@@ -502,7 +502,7 @@ freeze:function(c,t){
 	t.freeze(c.card.upped && c.card != Cards.PandemoniumUp ? 4 : 3);
 },
 fungusrebirth:function(c,t){
-	c.transform(Cards.Fungus.asUpped(c.card.upped));
+	c.transform(Cards.Fungus.asUpped(c.card.upped).asShiny(c.card.shiny));
 },
 gaincharge2:function(c,t){
 	c.status.charges += 2;
@@ -518,7 +518,7 @@ gainchargeowner:function(c,t){
 	}
 },
 gas:function(c,t){
-	new etg.Permanent(Cards.UnstableGas.asUpped(c.card.upped), c.owner).place();
+	new etg.Permanent(Cards.UnstableGas.asUpped(c.card.upped).asShiny(c.card.shiny), c.owner).place();
 },
 give:function(c,t){
 	c.owner.dmg(c.card.upped?-10:-5);
@@ -598,7 +598,7 @@ heal20:function(c,t){
 },
 heatmirror: function(c, t, fromhand) {
 	if (fromhand && t instanceof etg.Creature && c.owner != t.owner) {
-		new etg.Creature(Cards.Spark.asUpped(c.card.upped), c.owner).place();
+		new etg.Creature(Cards.Spark.asUpped(c.card.upped).asShiny(c.card.shiny), c.owner).place();
 	}
 },
 holylight:function(c,t){
@@ -747,7 +747,7 @@ integrity:function(c,t){
 	new etg.Creature(Cards.ShardGolem, c.owner).place();
 },
 layegg:function(c,t){
-	new etg.Creature(Cards.FateEgg.asUpped(c.card.upped), c.owner).place();
+	new etg.Creature(Cards.FateEgg.asUpped(c.card.upped).asShiny(c.card.shiny), c.owner).place();
 },
 light:function(c,t){
 	Effect.mkText("1:8", c);
@@ -960,7 +960,7 @@ parallel:function(c,t){
 },
 phoenix:function(c,t, index){
 	if (!c.owner.creatures[index]){
-		c.owner.creatures[index] = new etg.Creature(Cards.Ash.asUpped(c.card.upped), c.owner);
+		c.owner.creatures[index] = new etg.Creature(Cards.Ash.asUpped(c.card.upped).asShiny(c.card.shiny), c.owner);
 	}
 },
 photosynthesis:function(c,t){
@@ -1001,7 +1001,7 @@ purify:function(c,t){
 	}
 },
 queen:function(c,t){
-	new etg.Creature(Cards.Firefly.asUpped(c.card.upped), c.owner).place();
+	new etg.Creature(Cards.Firefly.asUpped(c.card.upped).asShiny(c.card.shiny), c.owner).place();
 },
 quint:function(c,t){
 	Effect.mkText("Immaterial", t);
@@ -1027,7 +1027,7 @@ readiness:function(c,t){
 	}
 },
 rebirth:function(c,t){
-	c.transform(Cards.Phoenix.asUpped(c.card.upped));
+	c.transform(Cards.Phoenix.asUpped(c.card.upped).asShiny(c.card.shiny));
 },
 regen:function(c,t){
 	c.owner.status.poison--;
@@ -1119,7 +1119,7 @@ sanctuary:function(c,t){
 	c.owner.dmg(-4);
 },
 scarab:function(c,t){
-	new etg.Creature(Cards.Scarab.asUpped(c.card.upped), c.owner).place();
+	new etg.Creature(Cards.Scarab.asUpped(c.card.upped).asShiny(c.card.shiny), c.owner).place();
 },
 scatterhand:function(c,t){
 	if (!t.sanctuary){
@@ -1242,8 +1242,8 @@ soulcatch:function(c,t){
 	c.owner.spend(etg.Death, -3);
 },
 spores:function(c,t, index){
-	new etg.Creature(Cards.Spore.asUpped(c.card.upped), c.owner).place();
-	new etg.Creature(Cards.Spore.asUpped(c.card.upped), c.owner).place();
+	new etg.Creature(Cards.Spore.asUpped(c.card.upped).asShiny(c.card.shiny), c.owner).place();
+	new etg.Creature(Cards.Spore.asUpped(c.card.upped).asShiny(c.card.shiny), c.owner).place();
 },
 sskin:function(c,t){
 	c.owner.buffhp(c.owner.quanta[etg.Earth]);
@@ -1332,7 +1332,7 @@ throwrock:function(c,t){
 	var dmg = c.card.upped?4:3;
 	Effect.mkText("-"+dmg, t);
 	t.spelldmg(dmg);
-	t.owner.deck.splice(c.owner.upto(t.owner.deck.length), 0, Cards.ThrowRock.asUpped(c.card.upped));
+	t.owner.deck.splice(c.owner.upto(t.owner.deck.length), 0, Cards.ThrowRock.asUpped(c.card.upped).asShiny(c.card.shiny));
 },
 tick:function(c,t){
 	c.dmg(c.trueatk() + (c.card.upped?2:1));
