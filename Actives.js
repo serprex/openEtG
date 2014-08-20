@@ -650,6 +650,22 @@ infect:function(c,t){
 infest:function(c,t){
 	new etg.Creature(Cards.MalignantCell, c.owner).place();
 },
+inflation:function(c,t){
+	function inflate(p){
+		if (p && p.isMaterial() && p.active.cast){
+			if (!p.cast)p.castele = 0;
+			p.cast++;
+		}
+	}
+	c.owner.creatures.forEach(inflate);
+	c.owner.foe.creatures.forEach(inflate);
+	c.owner.permanents.forEach(inflate);
+	c.owner.foe.permanents.forEach(inflate);
+	inflate(c.owner.weapon);
+	inflate(c.owner.shield);
+	inflate(c.owner.foe.weapon);
+	inflate(c.owner.foe.shield);
+},
 ink:function(c,t){
 	var p=new etg.Permanent(Cards.Cloak, c.owner);
 	p.status.charges = 1;

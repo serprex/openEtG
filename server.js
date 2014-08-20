@@ -129,13 +129,15 @@ function codeSmith(req, res, next){
 function cardRedirect(req, res, next){
 	if (req.url.match(/^\/Cards\/...\.png$/)){
 		var code = req.url.substr(7, 3);
-		fs.exists(__dirname + req.url, function(exists){
-			if (!exists){
-				res.writeHead("302", {Location: "http://" + req.headers.host + "/Cards/" + etgutil[code >= "g00"?"asShiny":"asUpped"](code, false) + ".png"});
-				res.end();
-			}else next();
-		});
-		return;
+		if (code >= "6qo"){
+			fs.exists(__dirname + req.url, function(exists){
+				if (!exists){
+					res.writeHead("302", {Location: "http://" + req.headers.host + "/Cards/" + etgutil[code >= "g00"?"asShiny":"asUpped"](code, false) + ".png"});
+					res.end();
+				}else next();
+			});
+			return;
+		}
 	}
 	next();
 }
