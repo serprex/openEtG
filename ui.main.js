@@ -1163,13 +1163,30 @@ function startQuestWindow(){
 	var bexit = makeButton(750, 246, "Exit");
 	setClick(bexit, startMenu);
 	questui.addChild(bexit);
-	var areainfo = {
-		forest: ["Spooky Forest", new PIXI.Polygon(555, 221, 456, 307, 519, 436, 520, 472, 631, 440, 652, 390, 653, 351, 666, 321, 619, 246)],
-		city: ["Capital City", new PIXI.Polygon(456,307, 519, 436, 520, 472,328,496,258,477,259,401)],
-		provinggrounds: ["Proving Grounds", new PIXI.Polygon(245,262,258,477,205,448,179,397,180,350,161,313)],
-		ice: ["Icy Caves", new PIXI.Polygon(161,313,245,262,283,190,236,167,184,186,168,213,138,223,131,263)],
-		desert: ["Lonely Desert", new PIXI.Polygon(245,262,283,190,326,202,466,196,511,219,555,221,456,307,259,401)]
+	var areapoints = {
+		forest: [555, 221, 456, 307, 519, 436, 520, 472, 631, 440, 652, 390, 653, 351, 666, 321, 619, 246],
+		city: [456, 307, 519, 436, 520, 472, 328, 496, 258, 477, 259, 401],
+		provinggrounds: [245, 262, 258, 477, 205, 448, 179, 397, 180, 350, 161, 313],
+		ice: [161, 313, 245, 262, 283, 190, 236, 167, 184, 186, 168, 213, 138, 223, 131, 263],
+		desert: [245, 262, 283, 190, 326, 202, 466, 196, 511, 219, 555, 221, 456, 307, 259, 401]
 	};
+	var areainfo = {
+		forest: ["Spooky Forest", new PIXI.Polygon(areapoints.forest)],
+		city: ["Capital City", new PIXI.Polygon(areapoints.city)],
+		provinggrounds: ["Proving Grounds", new PIXI.Polygon(areapoints.provinggrounds)],
+		ice: ["Icy Caves", new PIXI.Polygon(areapoints.ice)],
+		desert: ["Lonely Desert", new PIXI.Polygon(areapoints.desert)]
+	};
+	for (var area in areapoints) {
+		var points = areapoints[area];
+		var xtot = 0;
+		var ytot = 0;
+		for (var i = 0;i < points.length;i+=2) {
+			xtot += points[i];
+			ytot += points[i];
+		}
+		areainfo[area][2] = [xtot / (2 * i), ytot / (2 * i)];
+	}
 	for (var key in areainfo) {
 		var graphics = new PIXI.Graphics();
 		graphics.interactive = true;
