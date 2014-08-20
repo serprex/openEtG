@@ -1910,7 +1910,7 @@ function startMatch(game, foeDeck) {
 		spr.getChildAt(0).getChildAt(7).visible = obj.status.delayed;
 		spr.getChildAt(0).getChildAt(8).visible = obj == obj.owner.gpull;
 		spr.getChildAt(0).getChildAt(9).visible = obj.status.frozen;
-		spr.alpha = obj.status.immaterial || obj.status.burrowed ? .7 : 1;
+		spr.alpha = obj.isMaterial() ? 1 : .7;
 	}
 	var aiDelay = 0, aiState, aiCommand;
 	if (user) {
@@ -2460,7 +2460,7 @@ function startMatch(game, foeDeck) {
 				if (pr && !(j == 1 && cloakgfx.visible && !pr.status.cloak)) {
 					permsprite[j][i].setTexture(getPermanentImage(pr.card.code));
 					permsprite[j][i].visible = true;
-					permsprite[j][i].alpha = pr.status.immaterial ? .7 : 1;
+					permsprite[j][i].alpha = pr.isMaterial() ? 1 : .7;
 					var child = permsprite[j][i].getChildAt(0);
 					if (pr instanceof etg.Pillar) {
 						child.setTexture(getTextImage("1:" + (pr.pendstate ? pr.owner.mark : pr.card.element) + " x" + pr.status.charges, ui.mkFont(10, pr.card.upped ? "black" : "white"), maybeLighten(pr.card)));
@@ -2495,7 +2495,7 @@ function startMatch(game, foeDeck) {
 				var child = shiesprite[j].getChildAt(1);
 				child.setTexture(getTextImage((sh.active.shield ? " " + sh.active.shield.activename : "") + (sh.active.buff ? " " + sh.active.buff.activename : "") + (sh.active.cast ? etg.casttext(sh.cast, sh.castele) + sh.active.cast.activename : ""), ui.mkFont(12, sh.card.upped ? "black" : "white")));
 				child.visible = true;
-				shiesprite[j].alpha = sh.status.immaterial ? .7 : 1;
+				shiesprite[j].alpha = sh.isMaterial() ? 1 : .7;
 				shiesprite[j].setTexture(getWeaponShieldImage(sh.card.code));
 			} else shiesprite[j].visible = false;
 			marksprite[j].setTexture(eicons[pl.mark]);

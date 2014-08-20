@@ -665,10 +665,9 @@ Player.prototype.endturn = function(discard) {
 				var floodbuff = floodingFlag && i>4 && cr.card.element==Water;
 				cr.atk += floodbuff?5:cr.status.burrowed?4:2;
 				cr.buffhp(floodbuff?2:1);
-				cr.delay(1);
 			}
 			cr.attack(stasisFlag, freedomChance);
-			if (i>4 && floodingFlag && cr.card.element != Water && cr.card.element != Other && !cr.status.immaterial && !cr.status.burrowed && ~cr.getIndex()){
+			if (i>4 && floodingFlag && cr.card.element != Water && cr.card.element != Other && cr.isMaterial() && ~cr.getIndex()){
 				cr.die();
 			}
 		}
@@ -760,10 +759,10 @@ Player.prototype.masscc = function(caster, func, massmass){
 		crsfoe = this.foe.creatures.slice();
 	}
 	for(var i=0; i<23; i++){
-		if (crs[i] && !crs[i].status.immaterial && !crs[i].status.burrowed){
+		if (crs[i] && crs[i].isMaterial()){
 			func(caster, crs[i]);
 		}
-		if (crsfoe && crsfoe[i] && !crsfoe[i].status.immaterial && !crsfoe[i].status.burrowed){
+		if (crsfoe && crsfoe[i] && crsfoe[i].isMaterial()){
 			func(caster, crsfoe[i]);
 		}
 	}
@@ -1054,8 +1053,8 @@ Shield.prototype.remove = function() {
 	delete this.owner.shield;
 	return 0;
 }
-Thing.prototype.isMaterialInstance = function(type) {
-	return this instanceof type && !this.status.immaterial && !this.status.burrowed;
+Thing.prototype.isMaterial = function(type) {
+	return (!type || this instanceof type) && !this.status.immaterial && !this.status.burrowed;
 }
 Thing.prototype.addactive = function(type, active){
 	this.active[type] = combineactive(this.active[type], active);

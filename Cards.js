@@ -70,7 +70,7 @@ var TargetFilters = {
 		return c != t && t instanceof etg.CardInstance;
 	},
 	pill:function(c, t){
-		return t.isMaterialInstance(etg.Pillar);
+		return t.isMaterial(etg.Pillar);
 	},
 	weap:function(c, t){
 		return (t instanceof etg.Weapon || (t instanceof etg.Creature && t.card.type == etg.WeaponEnum)) && !t.status.immaterial && !t.status.burrowed;
@@ -79,19 +79,19 @@ var TargetFilters = {
 		return t instanceof etg.Weapon && t == t.owner.weapon;
 	},
 	perm:function(c, t){
-		return t.isMaterialInstance(etg.Permanent);
+		return t.isMaterial(etg.Permanent);
 	},
 	permnonstack:function(c,t){
-		return t.isMaterialInstance(etg.Permanent) && !t.status.stackable;
+		return t.isMaterial(etg.Permanent) && !t.status.stackable;
 	},
 	crea:function(c, t){
-		return t.isMaterialInstance(etg.Creature);
+		return t.isMaterial(etg.Creature);
 	},
 	creaonly:function(c, t){
-		return t.isMaterialInstance(etg.Creature) && t.card.type == etg.CreatureEnum;
+		return t.isMaterial(etg.Creature) && t.card.type == etg.CreatureEnum;
 	},
 	creanonspell:function(c, t){
-		return t.isMaterialInstance(etg.Creature) && t.card.type != etg.SpellEnum;
+		return t.isMaterial(etg.Creature) && t.card.type != etg.SpellEnum;
 	},
 	play:function(c, t){
 		return t instanceof etg.Player;
@@ -100,16 +100,16 @@ var TargetFilters = {
 		return (t instanceof etg.Creature || t instanceof etg.Permanent) && !t.status.immaterial && !t.status.burrowed && ((t.trueatk && t.trueatk()<3) || (t instanceof etg.Creature && t.truehp()<3));
 	},
 	devour:function(c, t){
-		return t.isMaterialInstance(etg.Creature) && t.truehp()<c.truehp();
+		return t.isMaterial(etg.Creature) && t.truehp()<c.truehp();
 	},
 	paradox:function(c, t){
-		return t.isMaterialInstance(etg.Creature) && t.truehp()<t.trueatk();
+		return t.isMaterial(etg.Creature) && t.truehp()<t.trueatk();
 	},
 	airbornecrea:function(c, t){
-		return t.isMaterialInstance(etg.Creature) && t.status.airborne;
+		return t.isMaterial(etg.Creature) && t.status.airborne;
 	},
 	groundcrea:function(c, t){
-		return t.isMaterialInstance(etg.Creature) && !t.status.airborne;
+		return t.isMaterial(etg.Creature) && !t.status.airborne;
 	},
 	wisdom:function(c, t){
 		return (t instanceof etg.Creature || t instanceof etg.Weapon) && !t.status.burrowed;
