@@ -1189,9 +1189,9 @@ function startQuestWindow(){
 		var ytot = 0;
 		for (var i = 0;i < points.length;i+=2) {
 			xtot += points[i];
-			ytot += points[i];
+			ytot += points[i+1];
 		}
-		areainfo[area][2] = [xtot / (2 * i), ytot / (2 * i)];
+		areainfo[area][2] = [xtot * 2/ points.length, ytot * 2/ points.length];
 	}
 	for (var key in areainfo) {
 		var graphics = new PIXI.Graphics();
@@ -1205,8 +1205,18 @@ function startQuestWindow(){
 			graphics.mouseover = function() {
 				tinfo.setText(areainfo[k][0]);
 			}
+			if (Quest.areas[k].some(function(quest) {
+			return !user.quest[quest] || user.quest[quest] < Quest[quest].length;
+			})) {
+				var icon = new PIXI.Sprite(eicons[13]);
+				icon.anchor.x = 0.5;
+				icon.anchor.y = 0.5;
+				icon.position.set(areainfo[k][2][0], areainfo[k][2][1]);
+				graphics.addChild(icon);
+			}
 		})(key);
 		questui.addChild(graphics);
+		
 	}
 	refreshRenderer(questui);
 }
