@@ -1206,7 +1206,7 @@ function startQuestWindow(){
 				tinfo.setText(areainfo[k][0]);
 			}
 			if (Quest.areas[k].some(function(quest) {
-			return !user.quest[quest] || user.quest[quest] < Quest[quest].length;
+			return (Quest[quest].dependency === undefined || Quest[quest].dependency(user)) && (!user.quest[quest] || user.quest[quest] < Quest[quest].length);
 			})) {
 				var icon = new PIXI.Sprite(eicons[13]);
 				icon.anchor.x = 0.5;
