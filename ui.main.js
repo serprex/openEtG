@@ -41,7 +41,7 @@ function maybeSetTexture(obj, text) {
 	} else obj.visible = false;
 }
 function setClick(obj, click){
-	obj.click = obj.tap = click;
+	obj.click = click;
 }
 function hitTest(obj, pos) {
 	var x = obj.position.x - obj.width * obj.anchor.x, y = obj.position.y - obj.height * obj.anchor.y;
