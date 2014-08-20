@@ -229,12 +229,19 @@ Game.prototype.progressMulligan = function(){
 	}
 	this.turn = this.turn.foe;
 }
+function removeSoPa(p){
+	if (p && p.card.isOf(Cards.ShardofPatience)){
+		delete p.status.patience;
+	}
+}
 Game.prototype.updateExpectedDamage = function(){
 	if (this.expectedDamage){
 		Effect.disable = true;
 		this.expectedDamage[0] = this.expectedDamage[1] = 0;
 		for(var i = 0; i<3; i++){
 			var gclone = this.clone();
+			gclone.player1.permanents.forEach(removeSoPa);
+			gclone.player2.permanents.forEach(removeSoPa);
 			gclone.rng.seed(gclone.rng.mt[0]^(i*997));
 			gclone.turn.endturn();
 			if (!gclone.winner) gclone.turn.endturn();
@@ -642,6 +649,7 @@ Player.prototype.endturn = function(discard) {
 					}
 				}else if (p.status.patience){
 					patienceFlag = true;
+					stasisFlag = true;
 				}else if (p.status.freedom){
 					freedomChance++;
 				}
