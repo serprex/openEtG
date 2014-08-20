@@ -537,15 +537,19 @@ function mkPremade(name, daily) {
 			startEditor();
 			return;
 		}
-		var cost = name == "mage" ? 5 : 20;
-		if (user && !daily) {
-			if (user.gold < cost) {
-				chatArea.value = "Requires " + cost + "\u00A4";
-				return;
+		var cost = daily !== undefined ? 0 : name == "mage" ? 5 : 20, foedata;
+		if (user) {
+			if (daily === undefined){
+				if (user.gold < cost) {
+					chatArea.value = "Requires " + cost + "\u00A4";
+					return;
+				}
+				userExec("addgold", { g: -cost });
+			}else{
+				foedata = aiDecks[name][user[name == "mage" ? "dailymage" : "dailydg"]];
 			}
-			userExec("addgold", { g: -cost });
 		}
-		var foedata = daily ? aiDecks[name][user[name == "mage" ? "dailymage" : "dailydg"]] : aiDecks.giveRandom(name);
+		if (!foedata) foedata = aiDecks.giveRandom(name);
 		var foename = name[0].toUpperCase() + name.slice(1) + "\n" + foedata[0];
 		var deck = etgutil.decodedeck((!user && aideck.value) || foedata[1]);
 		var gameData = { first: Math.random() < .5, deck: deck, urdeck: urdeck, seed: Math.random() * etgutil.MAX_INT, foename: foename };
@@ -563,8 +567,9 @@ function mkPremade(name, daily) {
 			parseInput(gameData, "p1deckpower", pvpdeck.value);
 		}
 		var game = initGame(gameData, true);
-		game.cost = daily ? 0 : cost;
+		game.cost = cost;
 		game.level = name == "mage" ? 1 : 3;
+		if (daily !== undefined) game.daily = daily;
 		return game;
 	}
 }
@@ -607,13 +612,13 @@ function mkAi(level, daily) {
 				startEditor();
 				return;
 			}
-			var gameprice = daily || level == 0 ? 0 : level == 1 ? 5 : 10;
-			if (user && gameprice) {
-				if (user.gold < gameprice) {
-					chatArea.value = "Requires " + gameprice + "\u00A4";
+			var cost = daily !== undefined || level == 0 ? 0 : level == 1 ? 5 : 10;
+			if (user && cost) {
+				if (user.gold < cost) {
+					chatArea.value = "Requires " + cost + "\u00A4";
 					return;
 				}
-				userExec("addgold", { g: -gameprice });
+				userExec("addgold", { g: -cost });
 			}
 			var deck;
 			if (!user && aideck.value) {
@@ -650,8 +655,9 @@ function mkAi(level, daily) {
 				parseInput(gameData, "p1deckpower", pvpdeck.value);
 			}
 			var game = initGame(gameData, true);
-			game.cost = gameprice;
+			game.cost = cost;
 			game.level = level;
+			if (daily !== undefined) game.daily = daily;
 			return game;
 		}
 	}
@@ -1527,9 +1533,9 @@ function mkDaily(type) {
 	if (type < 3) {
 		return function() {
 			var dataNext = type == 1 ?
-				{ goldreward: 75, endurance: 2, cost: 0, daily: 1 , cardreward: "", noheal: true} :
+				{ goldreward: 75, endurance: 2, cost: 0, daily: 1, cardreward: "", noheal: true} :
 				{ goldreward: 200, endurance: 2, cost: 0, daily: 2, cardreward: "" };
-			var game = mkAi(type == 1 ? 0 : 2, true)();
+			var game = mkAi(type == 1 ? 0 : 2, type)();
 			addToGame(game, dataNext);
 			game.dataNext = dataNext;
 		}
@@ -1966,7 +1972,7 @@ function startMatch(game, foeDeck) {
 						var data = addNoHealData(game);
 						var newgame = mkQuestAi(game.quest[0], game.quest[1] + 1, game.area);
 						addToGame(newgame, data);
-						return
+						return;
 					}
 					else if (game.daily) {
 						if (game.endurance) {
