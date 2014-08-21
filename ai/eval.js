@@ -237,7 +237,7 @@ var ActivesValues = {
 	tempering:3,
 	throwrock:4,
 	tick:function(c){
-		return c instanceof etg.CardInstance ? 3 : c.maxhp - c.truehp();
+		return c instanceof etg.CardInstance ? 1 : 1+(c.maxhp-c.truehp())/c.maxhp;
 	},
 	upkeep: -.5,
 	upload:3,
