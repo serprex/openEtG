@@ -1351,7 +1351,7 @@ throwrock:function(c,t){
 	t.owner.deck.splice(c.owner.upto(t.owner.deck.length), 0, Cards.ThrowRock.asUpped(c.card.upped).asShiny(c.card.shiny));
 },
 tick:function(c,t){
-	c.dmg(c.trueatk() + (c.card.upped?2:1));
+	c.dmg(c.card.upped?3:1);
 	if (c.hp <= 0) {
 		if (c.card.upped) c.owner.foe.masscc(c, function (c, x) { x.dmg(4) });
 		else c.owner.foe.spelldmg(15);
