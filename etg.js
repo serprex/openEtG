@@ -437,6 +437,9 @@ Card.prototype.readCost = function(attr, cost){
 	this[attr+"ele"] = c.length==1?this.element:parseInt(c[1]);
 	return true;
 }
+Card.prototype.as = function(card){
+	return card.asUpped(this.upped).asShiny(this.shiny);
+}
 Card.prototype.info = function(){
 	if (this.type == PillarEnum){
 		return "1:" + this.element + " " + activename(this.active.auto);
