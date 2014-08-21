@@ -260,7 +260,7 @@ var ActivesValues = {
 		return c instanceof etg.CardInstance?.1:c.status.charges;
 	},
 	blockwithcharge:function(c){
-		return c instanceof etg.CardInstance?c.card.status.charges:c.status.charges;
+		return 3*(c instanceof etg.CardInstance?c.card.status.charges:c.status.charges)/(1+c.owner.foe.countcreatures());
 	},
 	cold:7,
 	despair:5,
