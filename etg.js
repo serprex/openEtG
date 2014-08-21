@@ -1200,7 +1200,6 @@ CardInstance.prototype.useactive = function(target){
 	if (owner.neuro){
 		owner.addpoison(1);
 	}
-	owner.spend(card.costele, card.cost);
 	if (card.type <= PermanentEnum){
 		var cons = [Pillar, Weapon, Shield, Permanent][card.type];
 		new cons(card, owner).place(true);
@@ -1212,6 +1211,7 @@ CardInstance.prototype.useactive = function(target){
 	}else if (card.type == CreatureEnum){
 		new Creature(card, owner).place(true);
 	} else console.log("Unknown card type: " + card.type);
+	owner.spend(card.costele, card.cost);
 	owner.game.updateExpectedDamage();
 }
 function countAdrenaline(x){
