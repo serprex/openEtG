@@ -26,7 +26,7 @@ function lobo(t){
 }
 function adrenathrottle(f){
 	return function(c){
-		if ((c.status.adrenaline || 0)<3){
+		if (!c.status || (c.status.adrenaline || 0)<3){
 			return f.apply(null, arguments);
 		}
 	}
@@ -80,10 +80,10 @@ aggroskele:function(c,t){
 	Effect.mkText("-"+dmg, t);
 	t.dmg(dmg);
 },
-air:function(c,t){
+air:adrenathrottle(function(c,t){
 	Effect.mkText("1:9", c);
 	c.owner.spend(etg.Air, -1);
-},
+}),
 alphawolf: function (c, t) {
 	new etg.Creature(Cards.PackWolf.asUpped(c.card.upped).asShiny(c.card.shiny), c.owner).place();
 	new etg.Creature(Cards.PackWolf.asUpped(c.card.upped).asShiny(c.card.shiny), c.owner).place();
@@ -389,10 +389,10 @@ duality:function(c,t){
 		new etg.CardInstance(c.owner.foe.deck[c.owner.foe.deck.length-1], c.owner).place();
 	}
 },
-earth:function(c,t){
+earth:adrenathrottle(function(c,t){
 	Effect.mkText("1:4", c);
 	c.owner.spend(etg.Earth, -1);
-},
+}),
 earthquake:function(c,t){
 	Effect.mkText("Earthquake", t);
 	if (t.status.charges>3){
@@ -468,10 +468,10 @@ fickle:function(c,t){
 fiery:function(c,t){
 	return Math.floor(c.owner.quanta[etg.Fire]/5);
 },
-fire:function(c,t){
+fire:adrenathrottle(function(c,t){
 	Effect.mkText("1:6", c);
 	c.owner.spend(etg.Fire, -1);
-},
+}),
 firebolt:function(c,t){
 	t.spelldmg(3+Math.floor(c.owner.quanta[etg.Fire]/4));
 	if (t instanceof etg.Player){
@@ -772,10 +772,10 @@ integrity:function(c,t){
 layegg:function(c,t){
 	new etg.Creature(Cards.FateEgg.asUpped(c.card.upped).asShiny(c.card.shiny), c.owner).place();
 },
-light:function(c,t){
+light:adrenathrottle(function(c,t){
 	Effect.mkText("1:8", c);
 	c.owner.spend(etg.Light, -1);
-},
+}),
 lightning:function(c,t){
 	Effect.mkText("-5", t);
 	t.spelldmg(5);
