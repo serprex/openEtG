@@ -1108,7 +1108,7 @@ Weapon.prototype.attack = Creature.prototype.attack = function(stasis, freedomCh
 		this.dmg(this.status.poison, true);
 	}
 	var target = this.active.cast == Actives.appease && !this.status.appeased ? this.owner : this.owner.foe;
-	if (this.active.auto && !this.status.frozen && (!this.status.adrenaline || this.status.adrenaline<3)){
+	if (this.active.auto && !this.status.frozen){
 		this.active.auto(this);
 	}
 	this.usedactive = false;
@@ -1133,13 +1133,13 @@ Weapon.prototype.attack = Creature.prototype.attack = function(stasis, freedomCh
 			target.spelldmg(trueatk);
 		}else if (momentum || trueatk < 0){
 			target.dmg(trueatk);
-			if (this.active.hit && (!this.status.adrenaline || this.status.adrenaline < 3)){
+			if (this.active.hit){
 				this.active.hit(this, target, trueatk);
 			}
 		}else if (target.gpull){
 			var gpull = target.gpull;
 			var dmg = gpull.dmg(trueatk);
-			if (this.active.hit && (!this.status.adrenaline || this.status.adrenaline < 3)){
+			if (this.active.hit){
 				this.active.hit(this, gpull, dmg);
 			}
 			if (target.gpull == gpull && gpull.active.shield){
@@ -1151,7 +1151,7 @@ Weapon.prototype.attack = Creature.prototype.attack = function(stasis, freedomCh
 			if (!target.shield || !target.shield.active.shield || !target.shield.active.shield(target.shield, this, tryDmg)){
 				if (tryDmg > 0){
 					var dmg = target.dmg(tryDmg);
-					if (this.active.hit && (!this.status.adrenaline || this.status.adrenaline < 3)){
+					if (this.active.hit){
 						this.active.hit(this, target, dmg);
 					}
 				}
@@ -1164,7 +1164,7 @@ Weapon.prototype.attack = Creature.prototype.attack = function(stasis, freedomCh
 	if (this.status.delayed){
 		this.status.delayed--;
 	}
-	if (this.active.postauto && !this.status.frozen && (!this.status.adrenaline || this.status.adrenaline < 3)) {
+	if (this.active.postauto && !this.status.frozen) {
 		this.active.postauto(this);
 	}
 	delete this.status.dive;

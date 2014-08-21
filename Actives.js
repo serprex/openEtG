@@ -24,6 +24,13 @@ function lobo(t){
 		if (!(t.active[key].activename in etg.passives)) delete t.active[key];
 	}
 }
+function adrenathrottle(f){
+	return function(c){
+		if ((c.status.adrenaline || 0)<3){
+			return f.apply(null, arguments);
+		}
+	}
+}
 var Actives = {
 ablaze:function(c,t){
 	Effect.mkText("2|0", c);
@@ -834,7 +841,7 @@ metamorph:function(c,t){
 	c.owner.mark = t instanceof etg.Player?t.mark:t.card.element;
 	c.owner.spend(c.owner.mark, -2);
 },
-mimic: function (c, t) {
+mimic:function (c, t) {
 	if (c != t && t instanceof etg.Creature) {
 		c.transform(t.card);
 		c.addactive("play", Actives.mimic);
@@ -881,12 +888,12 @@ mutation:function(c,t){
 		t.transform(Cards.Abomination);
 	}
 },
-neuro:function(c,t){
+neuro:adrenathrottle(function(c,t){
 	t.addpoison(1);
 	if (t instanceof etg.Player){
 		t.neuro = true;
 	}
-},
+}),
 neuroify:function(c,t){
 	if (c.owner.foe.status.poison > 0){
 		c.owner.foe.neuro = true;
@@ -994,15 +1001,15 @@ platearmor:function(c,t){
 	Effect.mkText("0|"+buff, t);
 	t.buffhp(buff);
 },
-poison:function(c,t){
+poison:adrenathrottle(function(c,t){
 	(t || c.owner.foe).addpoison(1);
-},
-poison2:function(c,t){
+}),
+poison2:adrenathrottle(function(c,t){
 	(t || c.owner.foe).addpoison(2);
-},
-poison3:function(c,t){
+}),
+poison3:adrenathrottle(function(c,t){
 	(t || c.owner.foe).addpoison(3);
-},
+}),
 precognition:function(c,t){
 	c.owner.drawcard();
 	c.owner.precognition = true;
@@ -1206,12 +1213,12 @@ sinkhole:function(c,t){
 	t.castele = etg.Earth;
 	t.usedactive = true;
 },
-siphon: function(c, t) {
+siphon:adrenathrottle(function(c, t) {
 	if (!c.owner.foe.sanctuary && c.owner.foe.spend(etg.Other, 1)) {
 		Effect.mkText("1:11", c);
 		c.owner.spend(etg.Darkness, -1);
 	}
-},
+}),
 siphonactive:function(c,t){
 	Effect.mkText("Siphon", t);
 	lobo(c);
