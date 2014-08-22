@@ -1054,9 +1054,9 @@ readiness:function(c,t){
 rebirth:function(c,t){
 	c.transform(c.card.as(Cards.Phoenix));
 },
-regen:function(c,t){
+regen:adrenathrottle(function(c,t){
 	c.owner.status.poison--;
-},
+}),
 regenerate:function(c,t){
 	Effect.mkText("+5", c);
 	c.owner.dmg(-5);

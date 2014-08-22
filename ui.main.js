@@ -2556,8 +2556,7 @@ function startMatch(game, foeDeck) {
 			if (hitTest(hptext[j], pos)){
 				setInfo(pl);
 			}
-			var poison = pl.status.poison;
-			var poisoninfo = !poison ? "" : (poison > 0 ? poison + " 1:2" : -poison + " 1:7") + (pl.neuro ? " 1:10" : "");
+			var poison = pl.status.poison, poisoninfo = !poison ? "" : (poison > 0 ? poison + " 1:2" : -poison + " 1:7") + (pl.neuro ? " 1:10" : "");
 			poisontext[j].setTexture(getTextImage(poisoninfo,16));
 			maybeSetText(decktext[j], pl.deck.length + "cards");
 			maybeSetText(damagetext[j], !cloakgfx.visible && game.expectedDamage[j] ? "Next HP loss: " + game.expectedDamage[j] : "");
@@ -2718,7 +2717,7 @@ function getTextImage(text, font, bgcolor, width) {
 				spr.scale.set(size/32, size/32);
 				pushChild(new PIXI.Text(num, font), spr);
 			}
-		} else {
+		} else if (piece) {
 			var txt = new PIXI.Text(piece, font);
 			if (!width || x + txt.width < width){
 				pushChild(txt);
