@@ -1216,7 +1216,7 @@ function startQuestWindow(){
 			}
 		})(key);
 		questui.addChild(graphics);
-		
+
 	}
 	refreshRenderer(questui);
 }
