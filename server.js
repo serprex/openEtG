@@ -484,7 +484,7 @@ io.on("connection", function(socket) {
 				socket.emit("codereject", "Code does not exist");
 			}else if (type == "mark" || type == "shard"){
 				user.pool = etgutil.addcard(user.pool, data.card);
-				socket.emit("codedone", data);
+				socket.emit("codedone", data.card);
 				db.hdel("CodeHash", data.code);
 			}else{
 				socket.emit("codereject", "Unknown code type: " + type);

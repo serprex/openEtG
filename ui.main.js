@@ -1079,9 +1079,10 @@ function startRewardWindow(reward, numberofcopies, nocode) {
 	if (!numberofcopies) numberofcopies = 1;
 	var rewardwords = {
 		mark: -1,
-		shard: 4,
-		rare: 3,
 		pillar: 0,
+		rare: 3,
+		shard: 4,
+		nymph: 5,
 	};
 	var rewardList;
 	if (typeof reward == "string") {
@@ -1161,30 +1162,13 @@ function startQuestWindow(){
 	var bexit = makeButton(750, 246, "Exit");
 	setClick(bexit, startMenu);
 	questui.addChild(bexit);
-	var areapoints = {
-		forest: [555, 221, 456, 307, 519, 436, 520, 472, 631, 440, 652, 390, 653, 351, 666, 321, 619, 246],
-		city: [456, 307, 519, 436, 520, 472, 328, 496, 258, 477, 259, 401],
-		provinggrounds: [245, 262, 258, 477, 205, 448, 179, 397, 180, 350, 161, 313],
-		ice: [161, 313, 245, 262, 283, 190, 236, 167, 184, 186, 168, 213, 138, 223, 131, 263],
-		desert: [245, 262, 283, 190, 326, 202, 466, 196, 511, 219, 555, 221, 456, 307, 259, 401]
-	};
 	var areainfo = {
-		forest: ["Spooky Forest", new PIXI.Polygon(areapoints.forest)],
-		city: ["Capital City", new PIXI.Polygon(areapoints.city)],
-		provinggrounds: ["Proving Grounds", new PIXI.Polygon(areapoints.provinggrounds)],
-		ice: ["Icy Caves", new PIXI.Polygon(areapoints.ice)],
-		desert: ["Lonely Desert", new PIXI.Polygon(areapoints.desert)]
+		forest: ["Spooky Forest", new PIXI.Polygon(555, 221, 456, 307, 519, 436, 520, 472, 631, 440, 652, 390, 653, 351, 666, 321, 619, 246)],
+		city: ["Capital City", new PIXI.Polygon(456, 307, 519, 436, 520, 472, 328, 496, 258, 477, 259, 401)],
+		provinggrounds: ["Proving Grounds", new PIXI.Polygon(245, 262, 258, 477, 205, 448, 179, 397, 180, 350, 161, 313)],
+		ice: ["Icy Caves", new PIXI.Polygon(161, 313, 245, 262, 283, 190, 236, 167, 184, 186, 168, 213, 138, 223, 131, 263)],
+		desert: ["Lonely Desert", new PIXI.Polygon(245, 262, 283, 190, 326, 202, 466, 196, 511, 219, 555, 221, 456, 307, 259, 401)],
 	};
-	for (var area in areapoints) {
-		var points = areapoints[area];
-		var xtot = 0;
-		var ytot = 0;
-		for (var i = 0;i < points.length;i+=2) {
-			xtot += points[i];
-			ytot += points[i+1];
-		}
-		areainfo[area][2] = [xtot * 2/ points.length, ytot * 2/ points.length];
-	}
 	for (var key in areainfo) {
 		var graphics = new PIXI.Graphics();
 		graphics.interactive = true;
@@ -1200,10 +1184,16 @@ function startQuestWindow(){
 			if (Quest.areas[k].some(function(quest) {
 				return (Quest[quest][0].dependency === undefined || Quest[quest][0].dependency(user)) && ((user.quest[quest] || 0) < Quest[quest].length);
 			})) {
+				var points = areainfo[k][1].points;
+				var xtot = 0, ytot = 0;
+				for (var i = 0;i < points.length; i++) {
+					xtot += points[i].x;
+					ytot += points[i].y;
+				}
 				var icon = new PIXI.Sprite(eicons[13]);
 				icon.anchor.x = 0.5;
 				icon.anchor.y = 0.5;
-				icon.position.set(areainfo[k][2][0], areainfo[k][2][1]);
+				icon.position.set(xtot / points.length, ytot / points.length);
 				graphics.addChild(icon);
 			}
 		})(key);
@@ -1592,7 +1582,7 @@ function startColosseum(){
 		if (user.daily == 63){
 			var button = makeButton(50, 280, "Nymph!");
 			setClick(button, function(){
-
+				//rewardUI Nymphs
 			});
 			coloui.addChild(button);
 			coloui.addChild(makeText(130, 280, "You successfully completed all tasks."));
@@ -2799,8 +2789,8 @@ socket.on("codecode", function(data) {
 	addChatMessage("<font color=red>" + Cards.Codes[data].name + " added!</font><br>");
 });
 socket.on("codedone", function(data) {
-	user.pool = etgutil.addcard(user.pool, data.card);
-	addChatMessage("<font color=red>Card Added!</font><br>");
+	user.pool = etgutil.addcard(user.pool, data);
+	addChatMessage("<font color=red>" + Cards.Codes[data].name + " added!</font><br>");
 	startMenu();
 });
 function maybeSendChat(e) {
