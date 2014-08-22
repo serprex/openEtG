@@ -1959,6 +1959,8 @@ function startMatch(game, foeDeck) {
 	gameui.addChild(cancel);
 	gameui.addChild(resign);
 	var turntell = new PIXI.Text("", { font: "16px Dosis" });
+	turntell.position.set(800, 570);
+	gameui.addChild(turntell);
 	var foename = new PIXI.Text(game.foename || "Unknown Opponent", { font: "bold 18px Dosis", align: "center" });
 	foename.position.set(5, 75);
 	gameui.addChild(foename);
@@ -2052,8 +2054,6 @@ function startMatch(game, foeDeck) {
 			resigning = true;
 		}
 	});
-	turntell.position.set(800, 570);
-	gameui.addChild(turntell);
 	function setInfo(obj) {
 		if (obj.owner != game.player2 || !cloakgfx.visible || !obj.card || obj.card.isOf(Cards.Cloak)) {
 			infobox.setTexture(getTextImage(obj.info(), ui.mkFont(10, "white"), 0, (obj instanceof etg.Weapon || obj instanceof etg.Shield ? 92 : 76)));
@@ -2394,8 +2394,10 @@ function startMatch(game, foeDeck) {
 				cancel.setText(game.phase != etg.PlayPhase ? "Mulligan" : game.targetingMode || discarding || resigning ? "Cancel" : null);
 			}else cancel.visible = endturn.visible = false;
 		}else{
-			winnername.setText(game.winner == game.player1 ? "Won" : "Lost");
+			maybeSetText(winnername, game.winner == game.player1 ? "Won" : "Lost");
 			endturn.setText("Continue");
+			endturn.visible = true;
+			cancel.visible = false;
 		}
 		maybeSetText(turntell, discarding ? "Discard" : game.targetingMode ? game.targetingText : game.turn == game.player1 ? "Your Turn" : "Their Turn");
 		foeplays.children.forEach(function(foeplay){
