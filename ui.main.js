@@ -1170,21 +1170,30 @@ function startQuestWindow(){
 		desert: ["Lonely Desert", new PIXI.Polygon(245, 262, 283, 190, 326, 202, 466, 196, 511, 219, 555, 221, 456, 307, 259, 401)],
 	};
 	for (var key in areainfo) {
+		if (!(key in Quest.areas))continue;
 		var graphics = new PIXI.Graphics();
 		graphics.interactive = true;
 		graphics.buttonMode = true;
-		(function (k) {
-			graphics.hitArea = areainfo[k][1];
+		(function (ainfo, k) {
+			var points = ainfo[1].points;
+			graphics.hitArea = ainfo[1];
+			if (foename.value == "quest"){
+				graphics.lineStyle(4, 255);
+				graphics.moveTo(points[0].x, points[0].y);
+				for(var i=1; i<points.length; i++){
+					graphics.lineTo(points[i].x, points[i].y);
+				}
+				graphics.lineTo(points[0].x, points[0].y);
+			}
 			setClick(graphics, function () {
-				if (k in Quest.areas) startQuestArea(k);
+				startQuestArea(k);
 			});
 			graphics.mouseover = function() {
-				tinfo.setText(areainfo[k][0]);
+				tinfo.setText(ainfo[0]);
 			}
 			if (Quest.areas[k].some(function(quest) {
 				return (Quest[quest][0].dependency === undefined || Quest[quest][0].dependency(user)) && ((user.quest[quest] || 0) < Quest[quest].length);
 			})) {
-				var points = areainfo[k][1].points;
 				var xtot = 0, ytot = 0;
 				for (var i = 0;i < points.length; i++) {
 					xtot += points[i].x;
@@ -1196,9 +1205,8 @@ function startQuestWindow(){
 				icon.position.set(xtot / points.length, ytot / points.length);
 				graphics.addChild(icon);
 			}
-		})(key);
+		})(areainfo[key], key);
 		questui.addChild(graphics);
-
 	}
 	refreshRenderer(questui);
 }
