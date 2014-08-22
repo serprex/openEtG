@@ -2093,7 +2093,7 @@ function startMatch(game, foeDeck) {
 								}
 							} else if (!_j && cardinst.canactive()) {
 								if (cardinst.card.type != etg.SpellEnum) {
-									console.log("summoning " + _i);
+									console.log("summoning", _i);
 									socket.emit("cast", game.tgtToBits(cardinst));
 									cardinst.useactive();
 								} else {
@@ -2254,7 +2254,7 @@ function startMatch(game, foeDeck) {
 		},
 		cast: function(bits) {
 			var c = game.bitsToTgt(bits & 511), t = game.bitsToTgt((bits >> 9) & 511);
-			console.log("cast: " + c + " " + (t || "-") + " " + bits);
+			console.log("cast", c.toString(), (t || "-").toString(), bits);
 			if (c instanceof etg.CardInstance) {
 				var sprite = new PIXI.Sprite(nopic);
 				sprite.position.set((foeplays.children.length % 9) * 100, Math.floor(foeplays.children.length / 9) * 20);

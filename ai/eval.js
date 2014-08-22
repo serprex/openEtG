@@ -298,7 +298,7 @@ function checkpassives(c){
 		if (status.voodoo) score += 1;
 		if (status.swarm) score += 1;
 		if (status.stasis) score += 5;
-		if (status.flooding) score += 3;
+		if (status.flooding) score += c.owner.foe.countcreatures()-3;
 		if (status.patience) score += 1 + c.owner.countcreatures() * 2;
 		if (status.freedom) score += 6;
 		if (status.tunneling) score += 2;
@@ -309,11 +309,10 @@ function checkpassives(c){
 
 function evalthing(c) {
 	if (!c) return 0;
-	var score = 0;
+	var ttatk, hp, poison, score = 0;
 	var isCreature = c instanceof etg.Creature, isWeapon = c instanceof etg.Weapon;
 	var adrenalinefactor = c.status.adrenaline ? etg.countAdrenaline(c.trueatk())/1.5 : 1;
 	var delaymix = Math.max((c.status.frozen||0), (c.status.delayed||0))/adrenalinefactor, delayfactor = delaymix?1-Math.min(delaymix/5, .6):1;
-	var ttatk, hp, poison;
 	if (isCreature){
 		hp = Math.max(c.truehp(), 0);
 		poison = c.status.poison || 0;
