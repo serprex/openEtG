@@ -299,6 +299,7 @@ io.on("connection", function(socket) {
 	utilEvent("addloss");
 	utilEvent("addwin");
 	utilEvent("addcards");
+	utilEvent("addbound");
 	utilEvent("donedaily");
 	userEvent("inituser", function(data, user) {
 		var starters = [
@@ -645,13 +646,16 @@ io.on("connection", function(socket) {
 			for (var i = 0;i < pack.amount;i++) {
 				if (i == pack.rare[rarity-1]) rarity++;
 				var notFromElement = Math.random() > .5;
-				var card = undefined; // Explicit else randompack is all same card
-				/*if (data.pack == 4 && PlayerRng.rng()<0.125){
-					card = etg.NymphList[PlayerRng.uptoceil(12)];
-				}// Random nymph drop, to be properly released later*/
-				if (data.element < 13) card = etg.PlayerRng.randomcard(false, function(x) { return (x.element == data.element) ^ notFromElement && x.rarity == rarity });
-				if (!card) card = etg.PlayerRng.randomcard(false, function(x) { return x.rarity == rarity });
-				newCards = etgutil.addcard(newCards, card.code);
+				var code; // Explicit else randompack is all same card
+				if (data.pack == 3 && etg.PlayerRng.rng()<0.125){
+					code = etg.NymphList[etg.PlayerRng.uptoceil(12)];
+				}else{
+					var card = undefined;
+					if (data.element < 13) card = etg.PlayerRng.randomcard(false, function(x) { return (x.element == data.element) ^ notFromElement && x.rarity == rarity });
+					if (!card) card = etg.PlayerRng.randomcard(false, function(x) { return x.rarity == rarity });
+					code = card.code;
+				}
+				newCards = etgutil.addcard(newCards, code);
 			}
 			if (bound) {
 				freepacklist[data.pack]--;

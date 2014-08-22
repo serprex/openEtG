@@ -521,7 +521,7 @@ function victoryScreen(game) {
 				cardArt.position.set(470-cardrewardlength*20+i*40, 170);
 				victoryui.addChild(cardArt);
 			});
-			userExec("addcards", { c: game.cardreward });
+			userExec(game.quest?"addbound":"addcards", { c: game.cardreward });
 		}
 	}
 
@@ -741,7 +741,7 @@ function makeText(x, y, txt, vis, width) {
 	t.position.set(x, y);
 	t.setText = function(x, width){
 		if (x){
-			t.setTexture(getTextImage(x, { font: "14px Verdana", fill: "white", stroke: "black", strokeThickness: 2 }, "", width));
+			t.setTexture(getTextImage(x.toString(), { font: "14px Verdana", fill: "white", stroke: "black", strokeThickness: 2 }, "", width));
 			t.visible = true;
 		}else{
 			t.visible = false;
@@ -870,7 +870,7 @@ function makeCardSelector(cardmouseover, cardclick, maxedIndicator){
 	};
 	return cardsel;
 }
-function startMenu() {
+function startMenu(nymph) {
 	var helpTexts = [
 		"Each card in your booster pack has a 50% chance of being from the chosen element",
 		"Your arena deck will earn you 3 gold per win & 1 gold per loss",
@@ -1049,8 +1049,8 @@ function startMenu() {
 
 	if (!user) toggleB.apply(null, usertoggle);
 
-	if (user && user.oracle) {
-		var oracle = new PIXI.Sprite(getArt(user.oracle));
+	if (user && (user.oracle || typeof nymph === "string")) {
+		var oracle = new PIXI.Sprite(getArt(nymph || user.oracle));
 		oracle.position.set(450, 100);
 		menuui.addChild(oracle);
 		delete user.oracle;
@@ -1590,7 +1590,10 @@ function startColosseum(){
 		if (user.daily == 63){
 			var button = makeButton(50, 280, "Nymph!");
 			setClick(button, function(){
-				//rewardUI Nymphs
+				var nymph = etg.NymphList[etg.PlayerRng.uptoceil(12)];
+				userExec("addcards", {c: "01"+nymph});
+				userExec("donedaily", {daily: 6});
+				startMenu(nymph);
 			});
 			coloui.addChild(button);
 			coloui.addChild(makeText(130, 280, "You successfully completed all tasks."));
@@ -2555,7 +2558,7 @@ function startMatch(game, foeDeck) {
 				setInfo(pl);
 			}
 			var poison = pl.status.poison, poisoninfo = !poison ? "" : (poison > 0 ? poison + " 1:2" : -poison + " 1:7") + (pl.neuro ? " 1:10" : "");
-			poisontext[j].setTexture(getTextImage(poisoninfo,16));
+			poisontext[j].setTexture(getTextImage(poisoninfo, 16));
 			maybeSetText(decktext[j], pl.deck.length + "cards");
 			maybeSetText(damagetext[j], !cloakgfx.visible && game.expectedDamage[j] ? "Next HP loss: " + game.expectedDamage[j] : "");
 		}

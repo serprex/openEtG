@@ -72,6 +72,9 @@ exports.addwin = function(data, user) {
 exports.addcards = function(data, user) {
 	user.pool = etgutil.mergedecks(user.pool, data.c);
 }
+exports.addbound = function(data, user) {
+	user.accountbound = etgutil.mergedecks(user.accountbound, data.c);
+}
 exports.donedaily = function(data, user) {
 	user.daily |= (1 << data.daily);
 }
