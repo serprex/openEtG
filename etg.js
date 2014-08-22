@@ -200,7 +200,6 @@ Game.prototype.clone = function(){
 	var obj = Object.create(Game.prototype);
 	obj.rng = this.rng.clone();
 	obj.phase = this.phase;
-	obj.ply = this.ply;
 	obj.player1 = this.player1.clone(obj);
 	obj.player2 = this.player2.clone(obj);
 	obj.player1.foe = obj.player2;

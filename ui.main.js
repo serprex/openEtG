@@ -1259,7 +1259,7 @@ function upgradestore() {
 	function upgradeCard(card) {
 		if (!isFreeCard(card)) {
 			if (!card.upped){
-				var use = card.rarity < 5 ? 6 : 1;
+				var use = card.rarity < 5 || card.type != etg.PillarEnum ? 6 : 1;
 				if (cardpool[card.code] >= use) {
 					userExec("upgrade", { card: card.code });
 					adjustdeck();
@@ -1276,7 +1276,7 @@ function upgradestore() {
 	function polishCard(card) {
 		if (!isFreeCard(card)) {
 			if (!card.shiny){
-				var use = card.rarity < 5 ? 6 : 2;
+				var use = card.rarity < 5 || card.type != etg.PillarEnum ? 6 : 2;
 				if (cardpool[card.code] >= use) {
 					userExec("polish", { card: card.code });
 					adjustdeck();
@@ -1299,11 +1299,11 @@ function upgradestore() {
 					userExec("sellcard", { card: card.code });
 					adjustdeck();
 				}
-				else twarning.setText("This card is bound to your account; you cannot sell it.")
+				else twarning.setText("This card is bound to your account; you cannot sell it.");
 			}
-			else twarning.setText("You really don't want to sell that, trust me.")
+			else twarning.setText("You really don't want to sell that, trust me.");
 		}
-		else twarning.setText("You can't sell a pillar or pendulum, silly!")
+		else twarning.setText("You can't sell a pillar or pendulum, silly!");
 	}
 	function adjustdeck() {
 		cardpool = etgutil.deck2pool(user.pool);
@@ -1373,13 +1373,13 @@ function upgradestore() {
 			if (card.upped){
 				bupgrade.visisble = tinfo.visible = false;
 			}else{
-				tinfo.setText(isFreeCard(card) ? "Costs 50 gold to upgrade" : card.rarity < 5 ? "Convert 6 into an upgraded version." : "Convert into an upgraded version.");
+				tinfo.setText(isFreeCard(card) ? "Costs 50 gold to upgrade" : card.rarity < 5 || card.type != etg.PillarEnum ? "Convert 6 into an upgraded version." : "Convert into an upgraded version.");
 				bupgrade.visisble = tinfo.visible = true;
 			}
 			if (card.shiny){
 				bpolish.visible = tinfo3.visible = false;
 			}else{
-				tinfo3.setText(isFreeCard(card) ? "Costs 50 gold to polish" : card.rarity < 5 ? "Convert 6 into a shiny version." : "Convert 2 into a shiny version.")
+				tinfo3.setText(isFreeCard(card) ? "Costs 50 gold to polish" : card.rarity < 5 || card.type != etg.PillarEnum ? "Convert 6 into a shiny version." : "Convert 2 into a shiny version.")
 				bpolish.visible = tinfo3.visible = true;
 			}
 			tinfo2.setText((card.rarity > 0 || card.upped) && card.rarity < 5 ?
