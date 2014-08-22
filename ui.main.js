@@ -685,6 +685,7 @@ preLoader.onComplete = function() {
 	for (var i = 0;i < 14;i++) eicons.push(new PIXI.Texture(tex, new PIXI.Rectangle(i * 32, 0, 32, 32)));
 	var tex = PIXI.Texture.fromFrame("assets/raritysheet.png");
 	for (var i = 0;i < 6;i++) ricons.push(new PIXI.Texture(tex, new PIXI.Rectangle(i * 25, 0, 25, 25)));
+	ricons[-1] = ricons[5];
 	var tex = PIXI.Texture.fromFrame("assets/backsheet.png");
 	for (var i = 0;i < 26;i++) cardBacks.push(new PIXI.Texture(tex, new PIXI.Rectangle(i * 132, 0, 132, 256)));
 	var tex = PIXI.Texture.fromFrame("assets/cardborders.png");
@@ -1077,7 +1078,7 @@ function startMenu() {
 function startRewardWindow(reward, numberofcopies, nocode) {
 	if (!numberofcopies) numberofcopies = 1;
 	var rewardwords = {
-		mark: 5,
+		mark: -1,
 		shard: 4,
 		rare: 3,
 		pillar: 0,
@@ -1259,7 +1260,7 @@ function upgradestore() {
 	function upgradeCard(card) {
 		if (!isFreeCard(card)) {
 			if (!card.upped){
-				var use = card.rarity < 5 || card.type != etg.PillarEnum ? 6 : 1;
+				var use = card.rarity != -1 ? 6 : 1;
 				if (cardpool[card.code] >= use) {
 					userExec("upgrade", { card: card.code });
 					adjustdeck();
@@ -1276,7 +1277,7 @@ function upgradestore() {
 	function polishCard(card) {
 		if (!isFreeCard(card)) {
 			if (!card.shiny){
-				var use = card.rarity < 5 || card.type != etg.PillarEnum ? 6 : 2;
+				var use = card.rarity != -1 ? 6 : 2;
 				if (cardpool[card.code] >= use) {
 					userExec("polish", { card: card.code });
 					adjustdeck();
@@ -1293,7 +1294,7 @@ function upgradestore() {
 	var cardValues = [5, 1, 3, 15, 20];
 	function sellCard(card) {
 		if (card.rarity != 0 || card.upped) {
-			if (card.rarity <= 4) {
+			if (card.rarity <= 4 && card.rarity != 1) {
 				var codecount = etgutil.count(user.pool, card.code);
 				if (codecount) {
 					userExec("sellcard", { card: card.code });
@@ -1373,16 +1374,16 @@ function upgradestore() {
 			if (card.upped){
 				bupgrade.visisble = tinfo.visible = false;
 			}else{
-				tinfo.setText(isFreeCard(card) ? "Costs 50 gold to upgrade" : card.rarity < 5 || card.type != etg.PillarEnum ? "Convert 6 into an upgraded version." : "Convert into an upgraded version.");
+				tinfo.setText(isFreeCard(card) ? "Costs 50 gold to upgrade" : card.rarity != -1 ? "Convert 6 into an upgraded version." : "Convert into an upgraded version.");
 				bupgrade.visisble = tinfo.visible = true;
 			}
 			if (card.shiny){
 				bpolish.visible = tinfo3.visible = false;
 			}else{
-				tinfo3.setText(isFreeCard(card) ? "Costs 50 gold to polish" : card.rarity < 5 || card.type != etg.PillarEnum ? "Convert 6 into a shiny version." : "Convert 2 into a shiny version.")
+				tinfo3.setText(isFreeCard(card) ? "Costs 50 gold to polish" : card.rarity != -1 ? "Convert 6 into a shiny version." : "Convert 2 into a shiny version.")
 				bpolish.visible = tinfo3.visible = true;
 			}
-			tinfo2.setText((card.rarity > 0 || card.upped) && card.rarity < 5 ?
+			tinfo2.setText((card.rarity > 0 || card.upped) && card.rarity < 5 && card.rarity != -1 ?
 				"Sells for " + cardValues[card.rarity] * (card.upped ? 5 : 1) + " gold." : "");
 			twarning.setText("");
 		}, true
@@ -1589,7 +1590,12 @@ function startColosseum(){
 			coloui.addChild(text);
 		}
 		if (user.daily == 63){
-			coloui.addChild(makeText(130, 280, "You successfully completed all tasks. This may one day have perks."));
+			var button = makeButton(50, 280, "Nymph!");
+			setClick(button, function(){
+
+			});
+			coloui.addChild(button);
+			coloui.addChild(makeText(130, 280, "You successfully completed all tasks."));
 		}
 
 		var bexit = makeButton(8, 8, "Exit");

@@ -43,7 +43,7 @@ function loginRespond(res, servuser, pass){
 				servuser.oracle = day;
 				var card = etg.PlayerRng.randomcard(false,
 					(function (y) { return function (x) { return x.type != etg.PillarEnum && ((x.rarity != 5) ^ y); } })(Math.random() < .03));
-				if (card.rarity >= 2) {
+				if (card.rarity > 1) {
 					servuser.accountbound = user.accountbound = etgutil.addcard(user.accountbound, card.code);
 				}
 				else {
