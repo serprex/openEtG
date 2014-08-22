@@ -1088,7 +1088,7 @@ function startRewardWindow(reward, numberofcopies, nocode) {
 	if (typeof reward == "string") {
 		var upped = reward.substring(0, 5) == "upped";
 		var rarity = rewardwords[upped ? reward.substring(5) : reward];
-		rewardList = etg.filtercards(upped, function(x) { return x.rarity == rarity });
+		rewardList = etg.filtercards(upped, function(x) { return x.rarity == rarity }).map(function(card){ return card.code });
 	}else if (reward instanceof Array){
 		rewardList = reward;
 	}else{
