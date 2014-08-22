@@ -73,5 +73,5 @@ module.exports = function(level) {
 		}
 	}
 	deck.push(etg.toTrueMark(eles[1]));
-	return deck;
+	return etgutil.encodedeck(deck);
 }

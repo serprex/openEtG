@@ -424,16 +424,17 @@ function initGame(data, ai) {
 		game.player2.drawpower = data.p2drawpower;
 	}
 	var deckpower = [data.p1deckpower, data.p2deckpower];
-	var idx, code, decks = [data.urdeck, data.deck];
+	var decks = [data.urdeck, data.deck];
 	for (var j = 0;j < 2;j++) {
 		var pl = game.players(j);
-		for (var i = 0;i < decks[j].length;i++) {
-			if (Cards.Codes[code = decks[j][i]]) {
+		etgutil.iterdeck(decks[j], function(code){
+			var idx;
+			if (code in Cards.Codes) {
 				pl.deck.push(Cards.Codes[code]);
 			} else if (~(idx = etg.fromTrueMark(code))) {
 				pl.mark = idx;
 			}
-		}
+		});
 		if (deckpower[j]) {
 			pl.deck = deckPower(pl.deck, deckpower[j]);
 		}
@@ -459,12 +460,9 @@ function deckPower(deck, amount) {
 	return res;
 }
 function getDeck(limit) {
-	var deck = user ? etgutil.decodedeck(user.decks[user.selectedDeck]) :
-		~deckimport.value.indexOf(" ") ? deckimport.value.split(" ") :
-		etgutil.decodedeck(deckimport.value);
-	if (limit && deck.length > 60){
-		deck.length = 60;
-	}
+	var deck = user ? user.decks[user.selectedDeck] :
+		~deckimport.value.indexOf(" ") ? etgutil.encodedeck(deckimport.value.split(" ")) :
+		deckimport.value;
 	return deck;
 }
 function listify(maybeArray) {
@@ -533,7 +531,7 @@ function victoryScreen(game) {
 function mkPremade(name, daily) {
 	return function() {
 		var urdeck = getDeck();
-		if (urdeck.length < (user ? 31 : 11)) {
+		if (etgutil.decklength(urdeck) < (user ? 31 : 11)) {
 			startEditor();
 			return;
 		}
@@ -551,7 +549,7 @@ function mkPremade(name, daily) {
 		}
 		if (!foedata) foedata = aiDecks.giveRandom(name);
 		var foename = name[0].toUpperCase() + name.slice(1) + "\n" + foedata[0];
-		var deck = etgutil.decodedeck((!user && aideck.value) || foedata[1]);
+		var deck = (!user && aideck.value) || foedata[1];
 		var gameData = { first: Math.random() < .5, deck: deck, urdeck: urdeck, seed: Math.random() * etgutil.MAX_INT, foename: foename };
 		if (name == "mage"){
 			gameData.p2hp = 125;
@@ -577,20 +575,18 @@ function mkQuestAi(questname, stage, area) {
 	var quest = Quest[questname][stage];
 	if (!quest)
 		return "Quest " + questname + ":" + stage + " does not exist.";
-	var deck = etgutil.decodedeck(quest.deck);
-	var foename = quest.name || "";
 	var markpower = quest.markpower || 1;
 	var drawpower = quest.drawpower || 1;
 	var hp = quest.hp || 100;
 	var playerHPstart = quest.urhp || 100;
 	var urdeck = getDeck();
+	if (etgutil.decklength(urdeck) < (user ? 31 : 11)) {
+		return "ERROR: Your deck is invalid or missing! Please exit & create a valid deck in the deck editor.";
+	}
+	var game = initGame({ first: Math.random() < .5, deck: quest.deck, urdeck: urdeck, seed: Math.random() * etgutil.MAX_INT, p2hp: hp, p2markpower: markpower, foename: quest.name, p1hp: playerHPstart, p2drawpower: drawpower }, true);
 	if (quest.morph) {
-		urdeck = urdeck.map(quest.morph.bind(quest));
+		game.player1.deck = game.player1.deck.map(quest.morph.bind(quest));
 	}
-	if (urdeck.length < (user ? 31 : 11)) {
-		return "ERROR: Your deck is invalid or missing! Please exit and create a valid deck in the deck editor.";
-	}
-	var game = initGame({ first: Math.random() < .5, deck: deck, urdeck: urdeck, seed: Math.random() * etgutil.MAX_INT, p2hp: hp, p2markpower: markpower, foename: foename, p1hp: playerHPstart, p2drawpower: drawpower }, true);
 	game.quest = [questname, stage];
 	game.wintext = quest.wintext || "";
 	game.autonext = quest.autonext;
@@ -608,7 +604,7 @@ function mkAi(level, daily) {
 	return function() {
 		if (Cards){
 			var urdeck = getDeck();
-			if (urdeck.length < (user ? 31 : 11)) {
+			if (etgutil.decklength(urdeck) < (user ? 31 : 11)) {
 				startEditor();
 				return;
 			}
@@ -620,13 +616,8 @@ function mkAi(level, daily) {
 				}
 				userExec("addgold", { g: -cost });
 			}
-			var deck;
-			if (!user && aideck.value) {
-				deck = etgutil.decodedeck(aideck.value);
-			} else {
-				deck = require("./ai/deck")(level);
-			}
-			chatArea.value = etgutil.encodedeck(deck);
+			var deck = (!user && aideck.value) || require("./ai/deck")(level);
+			chatArea.value = deck;
 
 			var randomNames = [
 				"Adrienne", "Audrie",
@@ -887,21 +878,21 @@ function startMenu() {
 		"Be sure to keep track of the rarity icons; Grey means Common, Green means Uncommon, Blue means Rare, Orange means Shard, & Pink means Ultra Rare",
 		"The Library button allows you to see all of a user's tradeable cards",
 		"If you are a new user, be sure to get the free Bronze & Silver packs from the Shop",
-		"Starter decks, cards from the free packs, & all non-Common Daily Cards are account-bound; they cannot be traded away or sold",
+		"Starter decks, cards from the free packs, & all non-Common Daily Cards are account-bound; they cannot be traded or sold",
 		"If you include account-bound cards in an upgrade, the upgrade will also be account-bound",
 		"You'll receive a Daily Card upon logging in after midnight GMT0. If you submit an Arena deck, the deck will always contain 5 copies of that card",
 		"No pack grade is cost efficient; commons in Bronze packs cost as much as commons in Silver packs",
 		"Unupgraded pillars & pendulums are free",
 		"Cards sell for around half as much as they cost to buy from a pack",
 		"Quests are free to try, & you always face the same deck. Keep trying until you collect your reward",
-		"You can mulligan at the start of the game to shuffled & redraw your hand with one less card",
+		"You may mulligan at the start of the game to shuffle & redraw your hand with one less card",
 		"Your account name is case sensitive",
 		"Arena Tier 1 is unupgraded, while Tier 2 is upgraded. All decks in a tier have the same number of attribute points",
-		"You can store 10 decks in the editor",
+		"You may store 10 decks in the editor",
 		"If you type '/who' in chat you will get a list of the users who are online. '/w username message' will send your message only to one user",
 		"The first text bar under the game is the import/export bar & shows your current deck. The bar below it shows game messages & sometimes the opponent's deck",
-		"The AI Deck input can be used to fight any deck of your choice, but only in sandbox mode",
-		"Remember that you can use the logout button to enter sandbox mode to review the card pool, check rarities & try out new decks",
+		"The AI Deck input may be used to fight any deck of your choice, but only in sandbox mode",
+		"Remember that you may use the logout button to enter sandbox mode to review the card pool, check rarities & try out new decks",
 		"Commoner & Champion have random decks, while Mage & Demigod have premade decks. Commoner & Mage are unupped, Champion has some upped, & Demigod is fully upped",
 		"Decks submitted to arena gain a point per win, & lose a point per loss. Rankings are shown in Arena T20",
 		"Decks submitted to arena lose hp exponentially per day, down to a minimum of a quarter of their original hp",
@@ -920,7 +911,7 @@ function startMenu() {
 	var bglobby = new PIXI.Sprite(backgrounds[1]);
 	bglobby.interactive = true;
 	bglobby.mouseover = function() {
-		tinfo.setText(user ? "Tip: " + helpTexts[tipNumber] + "." : "To register, just type desired username and password in the fields to the right and then click 'Login'.", 750);
+		tinfo.setText(user ? "Tip: " + helpTexts[tipNumber] + "." : "To register, just type desired username & password in the fields to the right, then click 'Login'.", 750);
 	}
 	menuui.addChild(bglobby);
 
@@ -977,19 +968,19 @@ function startMenu() {
 	menuui.addChild(bcolosseum);
 
 	var bedit = makeButton(50, 300, "Editor", function() {
-		tinfo.setText("Here you can edit your deck, as well as submit an arena deck.");
+		tinfo.setText("Edit your deck, as well as submit an arena deck.");
 	});
 	setClick(bedit, startEditor);
 	menuui.addChild(bedit);
 
 	var bshop = makeButton(150, 300, "Shop", function() {
-		tinfo.setText("Here you can buy booster packs which contains cards from the elements you choose.");
+		tinfo.setText("Buy booster packs which contain cards from the elements you choose.");
 	});
 	setClick(bshop, startStore);
 	menuui.addChild(bshop);
 
 	var bupgrade = makeButton(250, 300, "Sell/Upgrade", function() {
-		tinfo.setText("Here you can upgrade or sell your cards.");
+		tinfo.setText("Upgrade or sell cards.");
 	});
 	setClick(bupgrade, upgradestore);
 	menuui.addChild(bupgrade);
@@ -1028,14 +1019,14 @@ function startMenu() {
 		});
 		menuui.addChild(binfoa);
 		var btopa = makeButton(250, 200+i*50, "Arena T20", function() {
-			tinfo.setText("Here you can see who the top players in arena are right now.");
+			tinfo.setText("See who the top players in arena are right now.");
 		});
 		menuui.addChild(btopa);
 		usertoggle.push(baia, binfoa, btopa);
 		(function(lvi){
 			setClick(baia, function() {
 				if (Cards) {
-					if (getDeck().length < 31) {
+					if (etgutil.decklength(getDeck()) < 31) {
 						startEditor();
 						return;
 					}
@@ -1582,8 +1573,8 @@ function startColosseum(){
 		var magename = aiDecks.mage[user.dailymage][0];
 		var dgname = aiDecks.demigod[user.dailydg][0];
 		var events = [
-			{ name: "Novice Endurance", desc: "Fight 3 Commoners in a row without healing in between. Can try until you win." },
-			{ name: "Expert Endurance", desc: "Fight 3 Champions in a row. Can try until you win" },
+			{ name: "Novice Endurance", desc: "Fight 3 Commoners in a row without healing in between. May try until you win." },
+			{ name: "Expert Endurance", desc: "Fight 3 Champions in a row. May try until you win" },
 			{ name: "Novice Duel", desc: "Fight " + magename + ". Only one attempt allowed" },
 			{ name: "Expert Duel", desc: "Fight " + dgname + ". Only one attempt allowed" }
 		];
@@ -1620,6 +1611,7 @@ function startEditor(arena, acard, startempty) {
 		return sum;
 	}
 	function processDeck() {
+		if (editordeck.length > 60) editordeck.length = 60;
 		for (var i = editordeck.length - 1;i >= 0;i--) {
 			if (!(editordeck[i] in Cards.Codes)) {
 				var index = etg.fromTrueMark(editordeck[i]);
@@ -1730,7 +1722,7 @@ function startEditor(arena, acard, startempty) {
 			user.decks[user.selectedDeck] = etgutil.encodedeck(editordeck) + "01" + etg.toTrueMark(editormark);
 			userEmit("setdeck", { d: user.decks[user.selectedDeck], number: user.selectedDeck });
 			user.selectedDeck = x;
-			editordeck = getDeck(true);
+			editordeck = etgutil.decodedeck(getDeck());
 			processDeck();
 		}
 	}
@@ -1811,7 +1803,7 @@ function startEditor(arena, acard, startempty) {
 	});
 	editorui.addChild(bshiny);
 	var editordecksprites = [];
-	var editordeck = arena ? (startempty ? [] : etgutil.decodedeck(arena.deck)) : getDeck(true);
+	var editordeck = arena ? (startempty ? [] : etgutil.decodedeck(arena.deck)) : etgutil.decodedeck(getDeck());
 	var editormarksprite = new PIXI.Sprite(nopic);
 	editormarksprite.position.set(100, 234);
 	editorui.addChild(editormarksprite);
@@ -2574,7 +2566,7 @@ function startArenaInfo(info) {
 	stage.addChild(winloss);
 	var batch = new PIXI.SpriteBatch();
 	stage.addChild(batch);
-	var infotext = makeText(300, 470, "You get 3 gold every time your arena deck wins,\nand 1 gold every time it loses.");
+	var infotext = makeText(300, 470, "You get 3 gold every time your arena deck wins,\n& 1 gold every time it loses.");
 	stage.addChild(infotext);
 	if (user.ocard){
 		var uocard = etgutil.asUpped(user.ocard, info.lv == 1);
@@ -2752,9 +2744,8 @@ socket.on("pvpgive", initGame);
 socket.on("tradegive", initTrade);
 socket.on("librarygive", initLibrary);
 socket.on("foearena", function(data) {
-	var deck = etgutil.decodedeck(data.deck);
-	chatArea.value = data.name + ": " + deck.join(" ");
-	var game = initGame({ first: data.seed < etgutil.MAX_INT/2, deck: deck, urdeck: getDeck(), seed: data.seed, p2hp: data.hp, cost: data.cost, foename: data.name, p2drawpower: data.draw, p2markpower: data.mark }, true);
+	chatArea.value = data.deck;
+	var game = initGame({ first: data.seed < etgutil.MAX_INT/2, deck: data.deck, urdeck: getDeck(), seed: data.seed, p2hp: data.hp, cost: data.cost, foename: data.name, p2drawpower: data.draw, p2markpower: data.mark }, true);
 	game.arena = data.name;
 	game.level = data.lv?3:1;
 	game.cost = 5+data.lv*15;
@@ -2912,7 +2903,7 @@ function parseInput(data, key, value) {
 function challengeClick() {
 	if (Cards.loaded) {
 		var deck = getDeck();
-		if (deck.length < (user ? 31 : 11)){
+		if (etgutil.decklength(deck) < (user ? 31 : 11)){
 			startEditor();
 			return;
 		}

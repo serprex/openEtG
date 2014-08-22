@@ -28,8 +28,8 @@ exports.spirit = [
 		The shadows on the wall begin to move of their own accord. And all the doors slam shut with conviction.\
 		You turn to face your assailant, apparently a sister of the maiden you fell earlier."},
 	{ deck: "0b606015ur025us035up025uu025v2035vb015uo025uv015v8025ul018pi", name: "Spirit of the Dark Maiden",
-	morph: function(code){
-		return this.morphtable[code] || code;
+	morph: function(card){
+		return Cards.Codes[this.morphtable[card.code] || card.code];
 	},
 	morphtable: {"500":"5v0","502":"5ut","534":"7t5","535":"7t6","542":"7um","563":"7t6","565":"7tj","566":"5um","567":"5uv",
 		"568":"7t5","576":"7um","590":"5v8","591":"7tf","596":"7tj","597":"7t7","606":"7um","620":"5ul","625":"7t6","626":"5ul",

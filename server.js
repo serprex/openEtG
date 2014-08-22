@@ -507,7 +507,7 @@ io.on("connection", function(socket) {
 				var first = seed < etgutil.MAX_INT / 2;
 				sockinfo[this.id].foe = foesock;
 				sockinfo[foesock.id].foe = this;
-				var deck0 = etgutil.decodedeck(sockinfo[foesock.id].deck), deck1 = etgutil.decodedeck(sockinfo[this.id].deck);
+				var deck0 = sockinfo[foesock.id].deck, deck1 = sockinfo[this.id].deck;
 				var owndata = { first: first, seed: seed, deck: deck0, urdeck: deck1, foename:f };
 				var foedata = { first: !first, seed: seed, deck: deck1, urdeck: deck0 ,foename:u};
 				var stat = sockinfo[this.id].pvpstats, foestat = sockinfo[foesock.id].pvpstats;
