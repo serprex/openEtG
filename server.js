@@ -647,7 +647,7 @@ io.on("connection", function(socket) {
 				if (i == pack.rare[rarity-1]) rarity++;
 				var notFromElement = Math.random() > .5;
 				var code; // Explicit else randompack is all same card
-				if (data.pack == 3 && etg.PlayerRng.rng()<0.125){
+				if (rarity == 4 && etg.PlayerRng.rng()<0.125){
 					code = etg.NymphList[etg.PlayerRng.uptoceil(12)];
 				}else{
 					var card = undefined;
