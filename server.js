@@ -416,11 +416,11 @@ io.on("connection", function(socket) {
 			db.zincrby(arena, 1, data.aname);
 		}else{
 			db.zscore(arena, function(err, score){
-				if (score === "") return;
+				if (score === null) return;
 				db.zincrby(arena, -1, data.aname, function(err, newscore) {
 					db.hget((data.lv?"B:":"A:")+data.aname, "day", function(err, day){
 						if (newscore < -15 || getDay()-day > 14){
-							db.zrem("arena"+(data.lv?"1":""), data.aname);
+							db.zrem(arena, data.aname);
 						}
 					});
 				});
