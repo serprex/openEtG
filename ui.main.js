@@ -1594,6 +1594,9 @@ function startColosseum(){
 function startEditor(arena, acard, startempty) {
 	if (!Cards.loaded) return;
 	if (arena && (!user || arena.deck === undefined || acard === undefined)) arena = false;
+	function updateField(){
+		deckimport.value = etgutil.encodedeck(editordeck) + "01" + etg.toTrueMark(editormark);
+	}
 	function sumCardMinus(cardminus, code){
 		var sum = 0;
 		for (var i=0; i<2; i++){
@@ -1638,6 +1641,7 @@ function startEditor(arena, acard, startempty) {
 				editordeck.unshift(acard, acard, acard, acard, acard);
 			}
 		}
+		updateField();
 	}
 	function incrpool(code, count){
 		if (code in Cards.Codes && (!arena || (!Cards.Codes[code].isOf(Cards.Codes[acard].asUpped(false))) && (arena.lv || !Cards.Codes[code].upped))){
@@ -1755,10 +1759,9 @@ function startEditor(arena, acard, startempty) {
 		makeattrui(2, "draw");
 	}else{
 		setClick(bsave, function() {
-			var dcode = deckimport.value = etgutil.encodedeck(editordeck) + "01" + etg.toTrueMark(editormark);
 			if (user) {
-				user.decks[user.selectedDeck] = dcode;
-				userEmit("setdeck", { d: dcode, number: user.selectedDeck });
+				user.decks[user.selectedDeck] = etgutil.encodedeck(editordeck) + "01" + etg.toTrueMark(editormark);
+				userEmit("setdeck", { d: user.decks[user.selectedDeck], number: user.selectedDeck });
 			}
 			startMenu();
 		});
@@ -1803,12 +1806,13 @@ function startEditor(arena, acard, startempty) {
 	var editormark = 0;
 	processDeck();
 	for (var i = 0;i < 13;i++) {
-		var sprite = makeButton(200 + i * 32, 234, eicons[i]);
+		var sprite = makeButton(482 + i * 32, 234, eicons[i]);
 		sprite.interactive = true;
 		(function(_i) {
 			setClick(sprite, function() {
 				editormark = _i;
 				editormarksprite.setTexture(eicons[_i]);
+				updateField();
 			});
 		})(i);
 		editorui.addChild(sprite);
@@ -1824,6 +1828,7 @@ function startEditor(arena, acard, startempty) {
 						adjust(cardminus, code, -1);
 					}
 					editordeck.splice(_i, 1);
+					updateField();
 				}
 			});
 			sprite.mouseover = function() {
@@ -1856,6 +1861,7 @@ function startEditor(arena, acard, startempty) {
 					if (cmp >= 0) break;
 				}
 				editordeck.splice(i, 0, code);
+				deckimport.value = etgutil.encodedeck(editordeck) + "01" + etg.toTrueMark(editormark);
 			}
 		}, !arena
 	);
@@ -1863,6 +1869,9 @@ function startEditor(arena, acard, startempty) {
 	var cardArt = new PIXI.Sprite(nopic);
 	cardArt.position.set(734, 8);
 	editorui.addChild(cardArt);
+	editorui.endnext = function() {
+		deckimport.style.display = "none";
+	}
 	refreshRenderer(editorui, function() {
 		cardsel.next(cardpool, cardminus, showAll, showShiny);
 		for (var i = 0;i < editordeck.length;i++) {
@@ -1873,6 +1882,7 @@ function startEditor(arena, acard, startempty) {
 			editordecksprites[i].visible = false;
 		}
 	});
+	deckimport.style.display = "inline";
 }
 function startElementSelect() {
 	var stage = new PIXI.DisplayObjectContainer();

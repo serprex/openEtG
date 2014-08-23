@@ -19,16 +19,24 @@
 			top:0px;
 			position:absolute;
 		}
-		#bottompane {
-			left:0px;
-			top:600px;
-			width:900px;
-			position:absolute;
-		}
 		#leftpane {
 			background-color:#336699;
 			width:900px;
 			height:600px;
+		}
+		#chatArea {
+			left:0px;
+			top:602px;
+			width:890px;
+			position:absolute;
+		}
+		#deckimport {
+			left:136px;
+			top:238px;
+			width:336px;
+			height:20px;
+			position:absolute;
+			display:none;
 		}
 	</style>
 	<script src="/socket.io/socket.io.js"></script>
@@ -53,10 +61,8 @@
 		<div id="chatBox" style="width:350px;height:400px;overflow-y:scroll;overflow-x:hidden;background-color:white;word-wrap:break-word"></div>
 		<textarea id="chatinput" placeholder="Chat" style="width:350px;height:40px;resize:none" onkeydown="maybeSendChat(event)"></textarea>
 	</div>
-	<div id="bottompane">
-		<input id="deckimport" type="text" placeholder="Deck" style="width:890px" />
-		<br><input id="chatArea" type="text" placeholder="Info" style="width:890px" readonly tabIndex="-1" />
-	</div>
+	<input id="chatArea" type="text" placeholder="Info" readonly tabIndex="-1" />
+	<input id="deckimport" type="text" placeholder="Deck" onclick="this.setSelectionRange(0, 333)" />
     <script src="ui.main.js"></script>
 </body>
 </html>
