@@ -601,7 +601,7 @@ function mkQuestAi(questname, stage, area) {
 }
 function mkAi(level, daily) {
 	return function() {
-		if (Cards){
+		if (Cards.loaded){
 			var urdeck = getDeck();
 			if (etgutil.decklength(urdeck) < (user ? 31 : 11)) {
 				startEditor();
@@ -1012,7 +1012,7 @@ function startMenu(nymph) {
 	for (var i=0; i<2; i++){
 		var baia = makeButton(50, 200+i*50, "Arena AI", (function(cost){return function() {
 			tinfo.setText("In the arena you will face decks from other players.\nCost: $" + cost);
-		}})(5+i*15));
+		}})(i?20:10));
 		menuui.addChild(baia);
 		var binfoa = makeButton(150, 200+i*50, "Arena Info", function() {
 			tinfo.setText("Check how your arena deck is doing.");
@@ -1025,7 +1025,7 @@ function startMenu(nymph) {
 		usertoggle.push(baia, binfoa, btopa);
 		(function(lvi){
 			setClick(baia, function() {
-				if (Cards) {
+				if (Cards.loaded) {
 					if (etgutil.decklength(getDeck()) < 31) {
 						startEditor();
 						return;
@@ -1034,12 +1034,12 @@ function startMenu(nymph) {
 				}
 			});
 			setClick(binfoa, function() {
-				if (Cards) {
+				if (Cards.loaded) {
 					userEmit("arenainfo", lvi);
 				}
 			});
 			setClick(btopa, function() {
-				if (Cards) {
+				if (Cards.loaded) {
 					userEmit("arenatop", lvi);
 				}
 			});
@@ -2742,8 +2742,8 @@ socket.on("foearena", function(data) {
 	chatArea.value = data.deck;
 	var game = initGame({ first: data.seed < etgutil.MAX_INT/2, deck: data.deck, urdeck: getDeck(), seed: data.seed, p2hp: data.hp, cost: data.cost, foename: data.name, p2drawpower: data.draw, p2markpower: data.mark }, true);
 	game.arena = data.name;
-	game.level = data.lv?3:1;
-	game.cost = 5+data.lv*15;
+	game.level = data.lv?3:2;
+	game.cost = data.lv?20:10;
 	user.gold -= game.cost;
 });
 socket.on("arenainfo", startArenaInfo);
