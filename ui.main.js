@@ -791,7 +791,7 @@ function makeCardSelector(cardmouseover, cardclick, maxedIndicator){
 		})(i);
 		cardsel.addChild(sprite);
 	}
-	for (var i = 0;i < 6; i++){
+	for (var i = 0;i < 5; i++){
 		var sprite = makeButton(74, 338 + i * 32, ricons[i]);
 		sprite.interactive = true;
 		(function(_i) {
@@ -831,7 +831,7 @@ function makeCardSelector(cardmouseover, cardclick, maxedIndicator){
 			columns[i] = etg.filtercards(i > 2,
 				function(x) { return x.element == elefilter &&
 					((i % 3 == 0 && x.type == etg.CreatureEnum) || (i % 3 == 1 && x.type <= etg.PermanentEnum) || (i % 3 == 2 && x.type == etg.SpellEnum)) &&
-					(!poolcache || x in poolcache || isFreeCard(x) || prevshowall) && (!rarefilter || rarefilter == x.rarity);
+					(!poolcache || x in poolcache || prevshowall || isFreeCard(x)) && (!rarefilter || rarefilter == Math.min(x.rarity, 4));
 				}, editorCardCmp, prevshowshiny);
 		}
 	}
@@ -1974,7 +1974,7 @@ function startMatch(game, foeDeck) {
 		}else if (game.winner) {
 			if (user) {
 				if (game.arena) {
-					userEmit("modarena", { aname: game.arena, won: game.winner == game.player2, lv: game.cost == 5?0:1 });
+					userEmit("modarena", { aname: game.arena, won: game.winner == game.player2, lv: game.cost == 10?0:1 });
 				}
 				if (game.winner == game.player1) {
 					userExec("addwin", { pvp: !game.ai });

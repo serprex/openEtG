@@ -290,9 +290,7 @@ Game.prototype.getTarget = function(src, active, cb) {
 		this.targetingMode = function(t) { return (t instanceof Player || t instanceof CardInstance || t.owner == this.turn || t.status.cloak || !t.owner.isCloaked()) && targetingFilter(src, t); }
 		this.targetingModeCb = cb;
 		this.targetingText = active.activename;
-	} else {
-		cb();
-	}
+	} else cb();
 }
 Player.prototype.shuffle = function(array) {
 	var counter = array.length, temp, index;
@@ -1095,6 +1093,7 @@ Thing.prototype.useactive = function(t) {
 	var castele = this.castele, cast = this.cast;
 	if (!t || !t.evade(this.owner)){
 		this.active.cast(this, t);
+		this.procactive("spell", [t]);
 	}else Effect.mkText("Evade", t);
 	this.owner.spend(castele, cast);
 	this.owner.game.updateExpectedDamage();

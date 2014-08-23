@@ -151,6 +151,14 @@ bless:function(c,t){
 	t.atk += 3;
 	t.buffhp(3);
 },
+bolsterintodeck:function(c,t){
+	for(var i=0; i<3; i++){
+		c.owner.deck.push(t.card);
+	}
+	if (!c.card.upped) {
+		c.owner.shuffle(c.owner.deck);
+	}
+},
 boneyard:function(c,t){
 	if (!t.card.isOf(Cards.Skeleton)){
 		new etg.Creature(c.card.as(Cards.Skeleton), c.owner).place();
@@ -652,6 +660,11 @@ improve:function(c,t){
 		t.castele = t.card.element;
 	}
 },
+inertia:function(c,t, tt){
+	if (tt && c.owner == tt.owner && c.owner != tt){
+		c.owner.spend(etg.Gravity, -2);
+	}
+},
 infect:function(c,t){
 	Effect.mkText("Infect", t);
 	t.addpoison(1);
@@ -1100,6 +1113,7 @@ rewind:function(c,t){
 	}
 },
 ricochet:function(c,t){
+	if (!(t instanceof etg.CardInstance) || t.card.active == Actives.bolsterintodeck)return;
 	var tgting = Cards.Targeting[t.card.active.activename];
 	function tgttest(x){
 		if (x) {

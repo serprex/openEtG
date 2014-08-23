@@ -190,6 +190,11 @@ function dropsock(){
 				}
 			}
 		}
+		for(var key in rooms){
+			if (rooms[key] == this){
+				delete rooms[key];
+			}
+		}
 		delete sockinfo[this.id];
 	}
 }
@@ -647,7 +652,7 @@ io.on("connection", function(socket) {
 				if (i == pack.rare[rarity-1]) rarity++;
 				var code, notFromElement = Math.random() > .5;
 				if (rarity == 4 && Math.random()<0.125){
-					code = etg.NymphList[etg.PlayerRng.uptoceil(12)];
+					code = etg.NymphList[notFromElement || data.element<1 || data.element>12 ? etg.PlayerRng.uptoceil(12) : data.element];
 				}else{
 					var card = undefined; // Explicit else randompack is all same card
 					if (data.element < 13) card = etg.PlayerRng.randomcard(false, function(x) { return (x.element == data.element) ^ notFromElement && x.rarity == rarity });
