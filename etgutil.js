@@ -90,8 +90,7 @@ exports.addcard = function(deck, card, x){
 }
 exports.mergedecks = function(deck){
 	for (var i=1; i<arguments.length; i++){
-		var from = arguments[i];
-		exports.iterraw(from, function(code, count){
+		exports.iterraw(arguments[i], function(code, count){
 			deck = exports.addcard(deck, code, count);
 		});
 	}
@@ -99,8 +98,7 @@ exports.mergedecks = function(deck){
 }
 exports.removedecks = function(deck){
 	for (var i=1; i<arguments.length; i++){
-		var from = arguments[i];
-		exports.iterraw(from, function(code, count){
+		exports.iterraw(arguments[i], function(code, count){
 			deck = exports.addcard(deck, code, -count);
 		});
 	}

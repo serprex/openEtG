@@ -1249,52 +1249,52 @@ function startQuestArea(area) {
 function upgradestore() {
 	function upgradeCard(card) {
 		if (!isFreeCard(card)) {
-			if (!card.upped){
-				var use = card.rarity != -1 ? 6 : 1;
-				if (cardpool[card.code] >= use) {
-					userExec("upgrade", { card: card.code });
-					adjustdeck();
-				}
-				else twarning.setText("You need at least " + use + " copies to be able to upgrade this card!");
-			}else twarning.setText("You cannot upgrade upgraded cards.");
+			if (card.upped) return "You cannot upgrade upgraded cards.";
+			var use = card.rarity != -1 ? 6 : 1;
+			if (cardpool[card.code] >= use) {
+				userExec("upgrade", { card: card.code });
+				adjustdeck();
+			}
+			else return "You need at least " + use + " copies to be able to upgrade this card!";
 		}
 		else if (user.gold >= 50) {
 			userExec("uppillar", { c: card.code });
 			adjustdeck();
 		}
-		else twarning.setText("You need 50 gold to afford an upgraded pillar!");
+		else return "You need 50 gold to afford an upgraded pillar!";
 	}
 	function polishCard(card) {
 		if (!isFreeCard(card)) {
-			if (!card.shiny){
-				var use = card.rarity != -1 ? 6 : 2;
-				if (cardpool[card.code] >= use) {
-					userExec("polish", { card: card.code });
-					adjustdeck();
-				}
-				else twarning.setText("You need at least " + use + " copies to be able to polish this card!");
-			}else twarning.setText("You cannot polish shiny cards.");
+			if (card.shiny) return "You cannot polish shiny cards.";
+			var use = card.rarity != -1 ? 6 : 2;
+			if (cardpool[card.code] >= use) {
+				userExec("polish", { card: card.code });
+				adjustdeck();
+			}
+			else return "You need at least " + use + " copies to be able to polish this card!";
 		}
 		else if (user.gold >= 50) {
 			userExec("shpillar", { c: card.code });
 			adjustdeck();
 		}
-		else twarning.setText("You need 50 gold to afford a shiny pillar!");
+		else return "You need 50 gold to afford a shiny pillar!";
 	}
 	var cardValues = [5, 1, 3, 15, 20];
 	function sellCard(card) {
-		if (card.rarity != 0 || card.upped) {
-			if (card.rarity <= 4 && card.rarity != 1) {
-				var codecount = etgutil.count(user.pool, card.code);
-				if (codecount) {
-					userExec("sellcard", { card: card.code });
-					adjustdeck();
-				}
-				else twarning.setText("This card is bound to your account; you cannot sell it.");
-			}
-			else twarning.setText("You really don't want to sell that, trust me.");
+		if (!card.rarity && !card.upped) return "You can't sell a pillar or pendulum, silly!";
+		if (card.rarity > 4 || card.rarity == -1) return "You really don't want to sell that, trust me.";
+		var codecount = etgutil.count(user.pool, card.code);
+		if (codecount) {
+			userExec("sellcard", { card: card.code });
+			adjustdeck();
 		}
-		else twarning.setText("You can't sell a pillar or pendulum, silly!");
+		else return "This card is bound to your account; you cannot sell it.";
+	}
+	function eventWrap(func){
+		return function(){
+			var error = func(Cards.Codes[selectedCard]);
+			if (error) twarning.setText(error);
+		}
 	}
 	function adjustdeck() {
 		cardpool = etgutil.deck2pool(user.pool);
@@ -1312,21 +1312,15 @@ function upgradestore() {
 	var goldcount = makeText(30, 100, "");
 	upgradeui.addChild(goldcount);
 	var bupgrade = makeButton(150, 50, "Upgrade");
-	setClick(bupgrade, function() {
-		upgradeCard(Cards.Codes[selectedCard]);
-	});
+	setClick(bupgrade, eventWrap(upgradeCard));
 	upgradeui.addChild(bupgrade);
 	var bpolish = makeButton(150, 95, "Polish", function() {
 		cardArt.setTexture(getArt(etgutil.asShiny(selectedCard, true)));
 	});
-	setClick(bpolish, function() {
-		polishCard(Cards.Codes[selectedCard]);
-	});
+	setClick(bpolish, eventWrap(polishCard));
 	upgradeui.addChild(bpolish);
 	var bsell = makeButton(150, 140, "Sell");
-	setClick(bsell, function() {
-		sellCard(Cards.Codes[selectedCard]);
-	});
+	setClick(bsell, eventWrap(sellCard));
 	upgradeui.addChild(bsell);
 	var bshiny = makeButton(5, 578, "Toggle Shiny");
 	setClick(bshiny, function() {

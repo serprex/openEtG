@@ -645,8 +645,7 @@ io.on("connection", function(socket) {
 			var newCards = "", rarity = 1;
 			for (var i = 0;i < pack.amount;i++) {
 				if (i == pack.rare[rarity-1]) rarity++;
-				var notFromElement = Math.random() > .5;
-				var code;
+				var code, notFromElement = Math.random() > .5;
 				if (rarity == 4 && Math.random()<0.125){
 					code = etg.NymphList[etg.PlayerRng.uptoceil(12)];
 				}else{
