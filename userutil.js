@@ -1,6 +1,13 @@
 "use strict";
 var etgutil = require("./etgutil");
 var Cards = require("./Cards");
+exports.rewardwords = {
+	mark: -1,
+	pillar: 0,
+	rare: 3,
+	shard: 4,
+	nymph: 5,
+};
 exports.sellcard = function(data, user){
 	if (etgutil.count(user.pool, data.card)){
 		var card = Cards.Codes[data.card];

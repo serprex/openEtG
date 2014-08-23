@@ -472,7 +472,7 @@ io.on("connection", function(socket) {
 					socket.emit("codecode", c);
 					db.hdel("CodeHash", data.code);
 				}else socket.emit("codereject", "Unknown card: " + type);
-			}else if (type == "mark" || type == "shard"){
+			}else if (type in userutil.rewardwords){
 				socket.emit("codecard", type);
 			}else{
 				socket.emit("codereject", "Unknown code type: " + type);
@@ -483,9 +483,9 @@ io.on("connection", function(socket) {
 		db.hget("CodeHash", data.code, function(err, type){
 			if (!type){
 				socket.emit("codereject", "Code does not exist");
-			}else if (type == "mark" || type == "shard"){
+			}else if (type in userutil.rewardwords){
 				var card = Cards.Codes[data.card];
-				if (card && (type == "mark" && card.rarity == -1) || (type == "shard" && card.rarity == 4)){
+				if (card && card.rarity == userutil.rewardwords[type]){
 					user.pool = etgutil.addcard(user.pool, data.card);
 					socket.emit("codedone", data.card);
 					db.hdel("CodeHash", data.code);

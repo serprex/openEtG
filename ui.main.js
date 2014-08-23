@@ -1077,17 +1077,10 @@ function startMenu(nymph) {
 }
 function startRewardWindow(reward, numberofcopies, nocode) {
 	if (!numberofcopies) numberofcopies = 1;
-	var rewardwords = {
-		mark: -1,
-		pillar: 0,
-		rare: 3,
-		shard: 4,
-		nymph: 5,
-	};
 	var rewardList;
 	if (typeof reward == "string") {
 		var upped = reward.substring(0, 5) == "upped";
-		var rarity = rewardwords[upped ? reward.substring(5) : reward];
+		var rarity = userutil.rewardwords[upped ? reward.substring(5) : reward];
 		rewardList = etg.filtercards(upped, function(x) { return x.rarity == rarity }).map(function(card){ return card.code });
 	}else if (reward instanceof Array){
 		rewardList = reward;
