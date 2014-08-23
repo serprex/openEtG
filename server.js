@@ -629,10 +629,7 @@ io.on("connection", function(socket) {
 		db.hset("Q:" + data.u, data.quest, data.newstage);
 	});
 	userEvent("booster", function(data, user) {
-		var freepacklist;
-		if (user.freepacks){
-			freepacklist = user.freepacks.split(",");
-		}
+		var freepacklist, bound;
 		var pack = [
 			{ amount: 9, cost: 15, rare: []},
 			{ amount: 6, cost: 25, rare: [3]},
@@ -640,17 +637,20 @@ io.on("connection", function(socket) {
 			{ amount: 9, cost: 100, rare: [4, 7, 8]},
 		][data.pack];
 		if (!pack) return;
-		var bound = freepacklist && freepacklist[data.pack] > 0;
+		if (user.freepacks){
+			freepacklist = user.freepacks.split(",");
+			if (freepacklist[data.pack] > 0) bound = true;
+		}
 		if (bound || user.gold >= pack.cost) {
 			var newCards = "", rarity = 1;
 			for (var i = 0;i < pack.amount;i++) {
 				if (i == pack.rare[rarity-1]) rarity++;
 				var notFromElement = Math.random() > .5;
-				var code; // Explicit else randompack is all same card
-				if (rarity == 4 && etg.PlayerRng.rng()<0.125){
+				var code;
+				if (rarity == 4 && Math.random()<0.125){
 					code = etg.NymphList[etg.PlayerRng.uptoceil(12)];
 				}else{
-					var card = undefined;
+					var card = undefined; // Explicit else randompack is all same card
 					if (data.element < 13) card = etg.PlayerRng.randomcard(false, function(x) { return (x.element == data.element) ^ notFromElement && x.rarity == rarity });
 					if (!card) card = etg.PlayerRng.randomcard(false, function(x) { return x.rarity == rarity });
 					code = card.code;

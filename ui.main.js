@@ -446,9 +446,7 @@ function initGame(data, ai) {
 	game.turn.drawhand(7);
 	game.turn.foe.drawhand(7);
 	if (data.foename) game.foename = data.foename;
-	if (ai) {
-		game.ai = true;
-	}
+	if (ai) game.ai = true;
 	startMatch(game, foeDeck);
 	return game;
 }
@@ -502,8 +500,9 @@ function victoryScreen(game) {
 			else
 				startQuestArea(game.area);
 		}
-		else
-			startMenu();
+		else if (game.daily !== undefined){
+			startColosseum();
+		}else startMenu();
 	});
 	victoryui.addChild(bexit);
 	if (winner && user){
