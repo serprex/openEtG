@@ -678,7 +678,7 @@ preLoader.onComplete = function() {
 	// Start loading assets we don't require to be loaded before starting
 	var tex = PIXI.BaseTexture.fromImage("assets/boosters.png");
 	for (var i = 0;i < 4;i++) boosters.push(new PIXI.Texture(tex, new PIXI.Rectangle(i * 100, 0, 100, 150)));
-	ui.loadSounds("cardClick", "buttonClick");
+	ui.loadSounds("cardClick", "buttonClick", "openingMusic");
 	// Load assets we preloaded
 	goldtex = PIXI.Texture.fromFrame("assets/gold.png");
 	buttex = PIXI.Texture.fromFrame("assets/button.png");
@@ -705,6 +705,7 @@ preLoader.onComplete = function() {
 	for (var i = 0;i < 3;i++) sborders.push(new PIXI.Texture(tex, new PIXI.Rectangle(64 * i, 0, 64, 81)));
 	var tex = PIXI.Texture.fromFrame("assets/typesheet.png");
 	for (var i = 0;i < 6;i++) ticons.push(new PIXI.Texture(tex, new PIXI.Rectangle(25 * i, 0, 25, 25)));
+	ui.playSound("openingMusic");
 	startMenu();
 }
 refreshRenderer(loadingBarGraphic);
@@ -2809,7 +2810,7 @@ socket.on("codedone", function(data) {
 	startMenu();
 });
 function soundChange() {
-	ui.soundEnabled = enableSound.checked;
+	ui.changeSound(enableSound.checked);
 }
 function maybeSendChat(e) {
 	e.cancelBubble = true;

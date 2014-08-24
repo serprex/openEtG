@@ -56,16 +56,25 @@ function tgtToPos(t) {
 	} else console.log("Unknown target");
 }
 var sounds = {};
+var soundEnabled = false;
 function loadSounds() {
 	for (var i = 0;i < arguments.length;i++) {
 		sounds[arguments[i]] = new Audio("sound/" + arguments[i] + ".ogg");
 	}
 }
-function playSound(sound) {
+function playSound(sound, dontreset) {
 	sound = sounds[sound];
-	if (exports.soundEnabled && sound) {
-		sound.currentTime = 0;
+	if (soundEnabled && sound) {
+		if (!dontreset && sound.duration) sound.currentTime = 0;
 		sound.play();
+	}
+}
+function changeSound(enabled) {
+	soundEnabled = enabled;
+	if (!soundEnabled) {
+		for (var sound in sounds) {
+			sounds[sound].pause();
+		}
 	}
 }
 exports.mkFont = mkFont;
@@ -75,4 +84,4 @@ exports.permanentPos = permanentPos;
 exports.tgtToPos = tgtToPos;
 exports.loadSounds = loadSounds;
 exports.playSound = playSound;
-exports.soundEnabled = false;
+exports.changeSound = changeSound;
