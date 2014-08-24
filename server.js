@@ -457,7 +457,7 @@ io.on("connection", function(socket) {
 	userEvent("foearena", function(data, user){
 		db.zcard("arena"+(data.lv?"1":""), function(err, len){
 			if (!len)return;
-			var cost = 5+data.lv*15;
+			var cost = 10+data.lv*10;
 			if (user.gold < cost)return;
 			user.gold -= cost;
 			var idx = Math.floor(Math.random()*Math.min(len, 20));
