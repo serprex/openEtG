@@ -7,11 +7,12 @@
     "url": "https://github.com/serprex/openEtG.git"
   },
   "dependencies": {
-    "socket.io": "",
-    "connect": "",
+    "canvas": "^1.1.6",
     "compression": "",
+    "connect": "",
+    "redis": "",
     "serve-static": "",
-    "redis": ""
+    "socket.io": ""
   },
   "devDependencies": {
     "qunitjs": "",

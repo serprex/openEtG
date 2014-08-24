@@ -1664,7 +1664,6 @@ function startEditor(arena, acard, startempty) {
 		etgutil.iterraw(user.accountbound, incrpool);
 	}
 	var showAll = false, showShiny = false;
-	chat("Build a " + (arena?35:30) + "-60 card deck");
 	var editorui = new PIXI.DisplayObjectContainer();
 	editorui.interactive = true;
 	var bg = new PIXI.Sprite(backgrounds[0]);
@@ -1988,7 +1987,7 @@ function startMatch(game, foeDeck) {
 		}else if (game.winner) {
 			if (user) {
 				if (game.arena) {
-					userEmit("modarena", { aname: game.arena, won: game.winner == game.player2, lv: game.cost == 10?0:1 });
+					userEmit("modarena", { aname: game.arena, won: game.winner == game.player2, lv: game.level == 2?0:1 });
 				}
 				if (game.winner == game.player1) {
 					userExec("addwin", { pvp: !game.ai });
@@ -2500,7 +2499,7 @@ function startMatch(game, foeDeck) {
 						child.setTexture(getTextImage("1:" + (pr.pendstate ? pr.owner.mark : pr.card.element) + " x" + pr.status.charges, ui.mkFont(10, pr.card.upped ? "black" : "white"), maybeLighten(pr.card)));
 					}
 					else if (pr.active.auto && pr.active.auto.activename == "locket") {
-						child.setTexture(getTextImage("1:" + (pr.status.mode || pr.owner.mark),ui.mkFont(10, pr.card.upped ? "black" : "white"), maybeLighten(pr.card)));
+						child.setTexture(getTextImage("1:" + (pr.status.mode || pr.owner.mark), ui.mkFont(10, pr.card.upped ? "black" : "white"), maybeLighten(pr.card)));
 					}
 					else child.setTexture(getTextImage(pr.status.charges !== undefined ? " " + pr.status.charges : "", ui.mkFont(10, pr.card.upped ? "black" : "white"), maybeLighten(pr.card)));
 					var child2 = permsprite[j][i].getChildAt(1);

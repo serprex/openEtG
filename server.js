@@ -4,7 +4,7 @@ var qstring = require("querystring");
 var crypto = require("crypto");
 var connect = require("connect");
 var fs = require("fs");
-var app = require("http").createServer(connect().use(require("compression")()).use(cardRedirect).use(require("serve-static")(__dirname)).use(loginAuth).use(codeSmith));
+var app = require("http").createServer(connect().use(require("compression")()).use(cardRedirect).use(deckRedirect).use(require("serve-static")(__dirname)).use(loginAuth).use(codeSmith));
 var io = require("socket.io")(app.listen(13602));
 var db = require("redis").createClient();
 var etgutil = require("./etgutil");
@@ -140,6 +140,28 @@ function cardRedirect(req, res, next){
 		}
 	}
 	next();
+}
+function deckRedirect(req, res, next){
+	if (req.url.match(/^\/deck\//)){
+		var deck = req.url.substr(6);
+		if (~deck.indexOf("%"))deck = etgutil.encodedeck(deck.split("%20"));
+		var Canvas = require("canvas"), Image = Canvas.Image;
+		var can = new Canvas(600, 160), ctx = can.getContext("2d");
+		etgutil.iterdeck(deck, function(code, i){
+			if (!(code in Cards.Codes))return;
+			ctx.font = "12px Arial";
+			ctx.fillText(Cards.Codes[code].name, Math.floor(i/10)*100, (i%10)*12);
+		});
+		can.toBuffer(function(err, buf){
+			if (err){
+				res.writeHead("503");
+				res.end();
+			}else{
+				res.writeHead("200", {"Content-Type": "image/png"});
+				res.end(buf, "binary");
+			}
+		});
+	}else next();
 }
 
 var users = {};

@@ -96,6 +96,9 @@ var TargetFilters = {
 	play:function(c, t){
 		return t instanceof etg.Player;
 	},
+	notplay:function(c, t){
+		return !(t instanceof etg.Player);
+	},
 	butterfly:function(c, t){
 		return (t instanceof etg.Creature || t instanceof etg.Permanent) && !t.status.immaterial && !t.status.burrowed && ((t.trueatk && t.trueatk()<3) || (t instanceof etg.Creature && t.truehp()<3));
 	},
