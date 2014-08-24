@@ -40,7 +40,7 @@
 <body>
 	<div id="leftpane"></div>
 	<div id="rightpane">
-        <a href="artcredit.htm" target="_blank">Art credits</a>&emsp;&emsp;<a href="http://github.com/Fippe94/openEtG" target="_blank">Git</a>&emsp;&emsp;<a href="http://oetg.boards.net" target="_blank">Forum</a><br><br>
+        <a href="artcredit.htm" target="_blank">Art credits</a>&emsp;&emsp;<a href="http://github.com/Fippe94/openEtG" target="_blank">Git</a>&emsp;&emsp;<a href="/forum" target="_blank">Forum</a><br><br>
 		<input id="username" type="text" placeholder="Username" onkeydown="maybeLogin(event)" tabindex=1 />
 		<input id="login" type="submit" value="Login" onclick="loginClick()" /><br>
 		<input id="password" type="password" placeholder="Insecure Password" onkeydown="maybeLogin(event)" tabindex=2 />
@@ -54,8 +54,8 @@
 		<input id="library" type="submit" value="Library" onclick="libraryClick()" /><br>
 		<input id="aideck" type="text" placeholder="AI Deck" onclick="this.setSelectionRange(0, 999)" /><br>
 		<input id="stats" type="checkbox" /><br>
-		<div id="chatBox" style="width:350px;height:400px;overflow-y:scroll;overflow-x:hidden;background-color:white;word-wrap:break-word"></div>
-		<textarea id="chatinput" placeholder="Chat" style="width:350px;height:40px;resize:none" onkeydown="maybeSendChat(event)"></textarea>
+		<div id="chatBox" style="width:350px;height:360px;overflow-y:scroll;overflow-x:hidden;background-color:white;word-wrap:break-word"></div>
+		<textarea id="chatinput" placeholder="Chat" style="width:350px;height:32px;resize:none" onkeydown="maybeSendChat(event)"></textarea>
 	</div>
 	<input id="deckimport" type="text" placeholder="Deck" onclick="this.setSelectionRange(0, 333)" />
     <script src="ui.main.js"></script>
