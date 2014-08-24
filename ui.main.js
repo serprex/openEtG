@@ -1269,6 +1269,7 @@ function upgradestore() {
 	function polishCard(card) {
 		if (!isFreeCard(card)) {
 			if (card.shiny) return "You cannot polish shiny cards.";
+			if (card.rarity == 5) return "You cannot polish Nymphs.";
 			var use = card.rarity != -1 ? 6 : 2;
 			if (cardpool[card.code] >= use) {
 				userExec("polish", { card: card.code });
@@ -1367,7 +1368,7 @@ function upgradestore() {
 			if (card.shiny){
 				bpolish.visible = tinfo3.visible = false;
 			}else{
-				tinfo3.setText(isFreeCard(card) ? "Costs 50 gold to polish" : card.rarity != -1 ? "Convert 6 into a shiny version." : "Convert 2 into a shiny version.")
+				tinfo3.setText(isFreeCard(card) ? "Costs 50 gold to polish" : card.rarity == 5 ? "This card cannot be polished." : card.rarity != -1 ? "Convert 6 into a shiny version." : "Convert 2 into a shiny version.")
 				bpolish.visible = tinfo3.visible = true;
 			}
 			tinfo2.setText((card.rarity > 0 || card.upped) && card.rarity < 5 && card.rarity != -1 ?
