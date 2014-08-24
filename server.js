@@ -49,7 +49,7 @@ function loginRespond(res, servuser, pass){
 				else {
 					servuser.pool = user.pool = etgutil.addcard(user.pool, card.code);
 				}
-				servuser.ocard = user.ocard = user.oracle = card.code;
+				servuser.ocard = user.ocard = user.oracle = card.asShiny(card.rarity == 5).code;
 				servuser.daily = user.daily = 0;
 				servuser.dailymage = user.dailymage = Math.floor(Math.random() * aiDecks.mage.length);
 				servuser.dailydg = user.dailydg = Math.floor(Math.random() * aiDecks.demigod.length);
