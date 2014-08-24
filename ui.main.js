@@ -678,7 +678,7 @@ preLoader.onComplete = function() {
 	// Start loading assets we don't require to be loaded before starting
 	var tex = PIXI.BaseTexture.fromImage("assets/boosters.png");
 	for (var i = 0;i < 4;i++) boosters.push(new PIXI.Texture(tex, new PIXI.Rectangle(i * 100, 0, 100, 150)));
-	ui.loadSounds("cardClick", "buttonClick", "openingMusic");
+	ui.loadSounds("cardClick", "buttonClick", "permPlay", "creaturePlay", "openingMusic");
 	// Load assets we preloaded
 	goldtex = PIXI.Texture.fromFrame("assets/gold.png");
 	buttex = PIXI.Texture.fromFrame("assets/button.png");
