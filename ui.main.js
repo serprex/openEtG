@@ -2803,8 +2803,7 @@ socket.on("codedone", function(data) {
 });
 function maybeSendChat(e) {
 	e.cancelBubble = true;
-	if (e.keyCode != 13) return;
-	if (chatinput.value) {
+	if (e.keyCode == 13 && chatinput.value) {
 		var msg = chatinput.value;
 		chatinput.value = "";
 		if (msg.substr(0, 6) == "/mute "){
