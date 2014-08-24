@@ -43,9 +43,8 @@ function maybeSetTexture(obj, text) {
 function setClick(obj, click, sound) {
 	sound = sound === undefined ? "buttonClick" : sound;
 	obj.click = function() {
-		console.log(sound);
 		ui.playSound(sound);
-		click();
+		click.apply(null, arguments);
 	}
 }
 function hitTest(obj, pos) {
