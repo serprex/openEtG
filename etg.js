@@ -1194,7 +1194,6 @@ CardInstance.prototype.useactive = function(target){
 		return;
 	}
 	var owner = this.owner, card = this.card;
-	if (owner == owner.game.player1) ui.playSound("cardClick");
 	this.remove();
 	if (owner.neuro){
 		owner.addpoison(1);
@@ -1202,6 +1201,7 @@ CardInstance.prototype.useactive = function(target){
 	if (card.type <= PermanentEnum){
 		var cons = [Pillar, Weapon, Shield, Permanent][card.type];
 		new cons(card, owner).place(true);
+		if (this.owner == this.owner.game.player1) ui.playSound("permPlay");
 	}else if (card.type == SpellEnum){
 		if (!target || !target.evade(owner)){
 			card.active(this, target);
@@ -1209,6 +1209,7 @@ CardInstance.prototype.useactive = function(target){
 		}
 	}else if (card.type == CreatureEnum){
 		new Creature(card, owner).place(true);
+		if (this.owner == this.owner.game.player1) ui.playSound("creaturePlay");
 	} else console.log("Unknown card type: " + card.type);
 	owner.spend(card.costele, card.cost);
 	owner.game.updateExpectedDamage();
