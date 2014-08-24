@@ -523,6 +523,10 @@ function victoryScreen(game) {
 		}
 	}
 
+	if (document.getElementById("stats").checked){
+		chat((game.level || 0) + " " + (game.foename || "?") + " " + (winner?"W":"L") + " " + game.ply + " " + game.time + " " + game.player1.hp + " " + game.player1.maxhp + " " + (game.goldreward || 0) + " " + (game.cardreward || "-"));
+	}
+
 	refreshRenderer(victoryui);
 }
 
