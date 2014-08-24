@@ -2,7 +2,7 @@
 require("./etg.client").loadcards(function() {
 	var Cards = require("./Cards");
 	var credits = [
-		[["andretimpa", "http://andretimpa.deviantart.com"], ["Element Icons", "assets/esheet.png"], ["Rarity Icons", "assets/raritysheet.png"],
+		[["andretimpa", "http://andretimpa.deviantart.com"], ["Element Icons", "assets/esheet.png"], ["Rarity Icons", "assets/raritysheet.png"], ["Opening Music", "sound/openingMusic.ogg"],
 			["4sa", "4si", "4sk", "4sl", "4sm", "4sn", "4so", "4sp", "4sq", "4sr", "4ss", "4st", "4su", "4vr", "55k", "55s", "6ub"]],
 		[["artimies", "http://elementscommunity.org/forum/profile/?u=140"], ["593"]],
 		[["Cryotube", "http://cryotube.deviantart.com"],
