@@ -1,6 +1,6 @@
 "use strict";
 (function() {
-var htmlElements = ["leftpane", "chatinput", "deckimport", "aideck", "foename", "change", "login", "password", "challenge", "chatBox", "trade", "bottompane", "demigodmode", "username", "stats"];
+var htmlElements = ["leftpane", "chatinput", "deckimport", "aideck", "foename", "change", "login", "password", "challenge", "chatBox", "trade", "bottompane", "demigodmode", "username", "stats","enableSounds"];
 htmlElements.forEach(function(name){
 	window[name] = document.getElementById(name);
 });
@@ -40,8 +40,12 @@ function maybeSetTexture(obj, text) {
 		obj.setTexture(text);
 	} else obj.visible = false;
 }
-function setClick(obj, click){
-	obj.click = click;
+function setClick(obj, click, sound){
+	sound = sound !== false ? sound || "buttonClick" : null;
+	obj.click = function() {
+		ui.playSound(sound);
+		click();
+	}
 }
 function hitTest(obj, pos) {
 	var x = obj.position.x - obj.width * obj.anchor.x, y = obj.position.y - obj.height * obj.anchor.y;
@@ -319,7 +323,7 @@ function initTrade(data) {
 				var card = Cards.Codes[selectedCards[_i]];
 				adjust(cardminus, selectedCards[_i], -1);
 				selectedCards.splice(_i, 1);
-			});
+			}, "cardClick");
 			sprite.mouseover = function() {
 				cardArt.setTexture(getArt(selectedCards[_i]));
 			}
@@ -658,6 +662,7 @@ function mkAi(level, daily) {
 // Asset Loading
 var nopic = PIXI.Texture.fromImage("");
 var goldtex, buttex;
+var sounds = {};
 var backgrounds = ["assets/bg_default.png", "assets/bg_lobby.png", "assets/bg_shop.png", "assets/bg_quest.png", "assets/bg_game.png", "assets/bg_questmap.png"];
 var questIcons = [], eicons = [], ricons = [], cardBacks = [], cardBorders = [], boosters = [], popups = [], sicons = [], ticons = [], sborders = [];
 var preLoader = new PIXI.AssetLoader(["assets/gold.png", "assets/button.png", "assets/questIcons.png", "assets/esheet.png", "assets/raritysheet.png", "assets/backsheet.png",
@@ -673,6 +678,7 @@ preLoader.onComplete = function() {
 	// Start loading assets we don't require to be loaded before starting
 	var tex = PIXI.BaseTexture.fromImage("assets/boosters.png");
 	for (var i = 0;i < 4;i++) boosters.push(new PIXI.Texture(tex, new PIXI.Rectangle(i * 100, 0, 100, 150)));
+	ui.loadSounds("cardClick", "buttonClick");
 	// Load assets we preloaded
 	goldtex = PIXI.Texture.fromFrame("assets/gold.png");
 	buttex = PIXI.Texture.fromFrame("assets/button.png");
@@ -816,7 +822,7 @@ function makeCardSelector(cardmouseover, cardclick, maxedIndicator){
 				if (cardclick){
 					setClick(sprite, function() {
 						cardclick(columns[_i][_j]);
-					});
+					}, "cardClick");
 				}
 				if (cardmouseover){
 					sprite.mouseover = function(){
@@ -1129,7 +1135,7 @@ function startRewardWindow(reward, numberofcopies, nocode) {
 		setClick(card, function(){
 			chosenReward = reward;
 			chosenRewardImage.setTexture(getArt(chosenReward));
-		});
+		}, "cardClick");
 		rewardui.addChild(card);
 		setInteractive(card);
 	});
@@ -1833,7 +1839,7 @@ function startEditor(arena, acard, startempty) {
 					editordeck.splice(_i, 1);
 					updateField();
 				}
-			});
+			}, "cardClick");
 			sprite.mouseover = function() {
 				cardArt.setTexture(getArt(editordeck[_i]));
 				cardArt.visible = true;
@@ -2090,6 +2096,7 @@ function startMatch(game, foeDeck) {
 						if (game.phase != etg.PlayPhase) return;
 						var cardinst = game.players(_j).hand[_i];
 						if (cardinst) {
+							ui.playSound("cardClick");
 							if (!_j && discarding) {
 								endturn.click(null, _i);
 							} else if (game.targetingMode) {
@@ -2110,7 +2117,7 @@ function startMatch(game, foeDeck) {
 								}
 							}
 						}
-					});
+					}, false);
 				})(i);
 				gameui.addChild(handsprite[j][i]);
 			}
@@ -2156,7 +2163,7 @@ function startMatch(game, foeDeck) {
 							inst.useactive(tgt);
 						});
 					}
-				});
+				}, false);
 				return spr;
 			}
 			for (var i = 0;i < 23;i++) {
@@ -2215,7 +2222,7 @@ function startMatch(game, foeDeck) {
 					delete game.targetingMode;
 					game.targetingModeCb(game.players(_j));
 				}
-			});
+			}, false);
 		})(j);
 		setInteractive.apply(null, weapsprite);
 		setInteractive.apply(null, shiesprite);
@@ -2801,6 +2808,9 @@ socket.on("codedone", function(data) {
 	chat(Cards.Codes[data].name + " added!");
 	startMenu();
 });
+function soundChange() {
+	ui.soundEnabled = enableSound.checked;
+}
 function maybeSendChat(e) {
 	e.cancelBubble = true;
 	if (e.keyCode != 13) return;
@@ -2940,7 +2950,7 @@ function libraryClick() {
 	if (Cards.loaded)
 		socket.emit("librarywant", { f: foename.value });
 }
-var expofuncs = [maybeLogin, maybeChallenge, maybeSendChat, changeClick, challengeClick, tradeClick, rewardClick, libraryClick, loginClick, getTextImage];
+var expofuncs = [maybeLogin, maybeChallenge, maybeSendChat, changeClick, challengeClick, tradeClick, rewardClick, libraryClick, loginClick, getTextImage, soundChange];
 for(var i=0; i<expofuncs.length; i++){
 	window[expofuncs[i].name] = expofuncs[i];
 }

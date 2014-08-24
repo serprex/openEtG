@@ -55,8 +55,24 @@ function tgtToPos(t) {
 		return new PIXI.Point(t.owner == t.owner.game.player2 ? 20 : 780, (t.owner == t.owner.game.player2 ? 140 : 300) + 20 * t.owner.hand.indexOf(t));
 	} else console.log("Unknown target");
 }
+var sounds = {};
+function loadSounds() {
+	for (var i = 0;i < arguments.length;i++) {
+		sounds[arguments[i]] = new Audio("sound/" + arguments[i] + ".mp3");
+	}
+}
+function playSound(sound) {
+	sound = sounds[sound];
+	if (exports.soundEnabled && sound) {
+		sound.currentTime = 0;
+		sound.play();
+	}
+}
 exports.mkFont = mkFont;
 exports.reflectPos = reflectPos;
 exports.creaturePos = creaturePos;
 exports.permanentPos = permanentPos;
 exports.tgtToPos = tgtToPos;
+exports.loadSounds = loadSounds;
+exports.playSound = playSound;
+exports.soundEnabled = false;
