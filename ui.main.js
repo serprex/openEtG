@@ -40,9 +40,10 @@ function maybeSetTexture(obj, text) {
 		obj.setTexture(text);
 	} else obj.visible = false;
 }
-function setClick(obj, click, sound){
-	sound = sound !== false ? sound || "buttonClick" : null;
+function setClick(obj, click, sound) {
+	sound = sound === undefined ? "buttonClick" : sound;
 	obj.click = function() {
+		console.log(sound);
 		ui.playSound(sound);
 		click();
 	}
@@ -2097,7 +2098,6 @@ function startMatch(game, foeDeck) {
 						if (game.phase != etg.PlayPhase) return;
 						var cardinst = game.players(_j).hand[_i];
 						if (cardinst) {
-							ui.playSound("cardClick");
 							if (!_j && discarding) {
 								endturn.click(null, _i);
 							} else if (game.targetingMode) {

@@ -1194,6 +1194,7 @@ CardInstance.prototype.useactive = function(target){
 		return;
 	}
 	var owner = this.owner, card = this.card;
+	if (owner == owner.game.player1) ui.playSound("cardClick");
 	this.remove();
 	if (owner.neuro){
 		owner.addpoison(1);
