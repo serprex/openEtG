@@ -146,11 +146,25 @@ function deckRedirect(req, res, next){
 		var deck = req.url.substr(6);
 		if (~deck.indexOf("%"))deck = etgutil.encodedeck(deck.split("%20"));
 		var Canvas = require("canvas"), Image = Canvas.Image;
-		var can = new Canvas(600, 160), ctx = can.getContext("2d");
+		var can = new Canvas(616, 160), ctx = can.getContext("2d");
+		var elecols = ["#a99683", "#aa5999", "#777777", "#996633", "#5f4930", "#50a005", "#cc6611", "#205080", "#a9a9a9", "#337ddd", "#ccaa22", "#333333", "#77bbdd"];
+		ctx.font = "11px Dosis";
+		ctx.textBaseline = "top";
 		etgutil.iterdeck(deck, function(code, i){
+			if (i > 70)return;
+			var ismark = etg.fromTrueMark(code);
+			if (~ismark){
+				ctx.fillStyle = elecols[ismark];
+				ctx.fillRect(0, 0, 16, 160);
+				return;
+			}
 			if (!(code in Cards.Codes))return;
-			ctx.font = "12px Arial";
-			ctx.fillText(Cards.Codes[code].name, Math.floor(i/10)*100, (i%10)*12);
+			var card = Cards.Codes[code];
+			var x = 16+Math.floor(i/10)*100, y = (i%10)*16;
+			ctx.fillStyle = elecols[card.element];
+			ctx.fillRect(x, y, 100, 16);
+			ctx.fillStyle = "#000000";
+			ctx.fillText(card.name, x, y);
 		});
 		can.toBuffer(function(err, buf){
 			if (err){
