@@ -48,7 +48,7 @@ exports.uppillar = function(data, user){
 }
 exports.polish = function(data, user){
 	var card = Cards.Codes[data.card];
-	if (!card || card.shiny) return;
+	if (!card || card.shiny || card.rarity == 5) return;
 	var use = card.rarity != -1 ? 6 : 2;
 	transmute(user, card.code, etgutil.asShiny, use);
 }
