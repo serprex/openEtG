@@ -58,7 +58,7 @@ function tgtToPos(t) {
 var sounds = {};
 function loadSounds() {
 	for (var i = 0;i < arguments.length;i++) {
-		sounds[arguments[i]] = new Audio("sound/" + arguments[i] + ".mp3");
+		sounds[arguments[i]] = new Audio("sound/" + arguments[i] + ".ogg");
 	}
 }
 function playSound(sound) {

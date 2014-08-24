@@ -1,19 +1,19 @@
 "use strict";
 (function() {
-var htmlElements = ["leftpane", "chatinput", "deckimport", "aideck", "foename", "change", "login", "password", "challenge", "chatBox", "trade", "bottompane", "demigodmode", "username", "stats","enableSounds"];
+var htmlElements = ["leftpane", "chatinput", "deckimport", "aideck", "foename", "change", "login", "password", "challenge", "chatBox", "trade", "bottompane", "demigodmode", "username", "stats","enableSound"];
 htmlElements.forEach(function(name){
 	window[name] = document.getElementById(name);
 });
 if (localStorage){
-	var store = [username, stats];
+	var store = [username, stats, enableSound];
 	store.forEach(function(storei){
 		var field = storei.type == "checkbox" ? "checked" : "value";
 		if (localStorage[storei.id] !== undefined){
 			storei[field] = localStorage[storei.id];
 		}
-		storei.onchange = function(e){
+		storei.addEventListener("change", function(e) {
 			localStorage[storei.id] = field == "checked" && !storei[field] ? "" : storei[field];
-		}
+		});
 	});
 }
 })();
@@ -2953,4 +2953,5 @@ var expofuncs = [maybeLogin, maybeChallenge, maybeSendChat, changeClick, challen
 for(var i=0; i<expofuncs.length; i++){
 	window[expofuncs[i].name] = expofuncs[i];
 }
+soundChange();
 })();
