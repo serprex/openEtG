@@ -1,6 +1,6 @@
 "use strict";
 (function() {
-var htmlElements = ["leftpane", "chatArea", "chatinput", "deckimport", "aideck", "foename", "change", "login", "password", "challenge", "chatBox", "trade", "bottompane", "demigodmode", "username"];
+var htmlElements = ["leftpane", "chatinput", "deckimport", "aideck", "foename", "change", "login", "password", "challenge", "chatBox", "trade", "bottompane", "demigodmode", "username"];
 htmlElements.forEach(function(name){
 	window[name] = document.getElementById(name);
 });
@@ -277,7 +277,7 @@ function initTrade(data) {
 			editorui.addChild(bconfirm);
 		}
 		else
-			chatArea.value = "You have to choose at least a card!"
+			chat("You have to choose at least a card!");
 	});
 	setClick(bconfirm, function() {
 		if (player2Cards.length > 0) {
@@ -286,8 +286,7 @@ function initTrade(data) {
 			editorui.removeChild(bconfirm);
 			editorui.addChild(bconfirmed);
 		}
-		else
-			chatArea.value = "Wait for your friend to choose!"
+		else chat("Wait for your friend to choose!");
 	});
 	bconfirmed.position.set(10, 110);
 	setInteractive(btrade);
@@ -538,7 +537,7 @@ function mkPremade(name, daily) {
 		if (user) {
 			if (daily === undefined){
 				if (user.gold < cost) {
-					chatArea.value = "Requires " + cost + "\u00A4";
+					chat("Requires " + cost + "\u00A4");
 					return;
 				}
 				userExec("addgold", { g: -cost });
@@ -610,13 +609,13 @@ function mkAi(level, daily) {
 			var cost = daily !== undefined || level == 0 ? 0 : level == 1 ? 5 : 10;
 			if (user && cost) {
 				if (user.gold < cost) {
-					chatArea.value = "Requires " + cost + "\u00A4";
+					chat("Requires " + cost + "\u00A4");
 					return;
 				}
 				userExec("addgold", { g: -cost });
 			}
 			var deck = (!user && aideck.value) || require("./ai/deck")(level);
-			chatArea.value = deck;
+			aideck.value = deck;
 
 			var randomNames = [
 				"Adrienne", "Audrie",
@@ -1003,7 +1002,7 @@ function startMenu(nymph) {
 			userEmit("delete");
 			logout();
 		} else {
-			chatArea.value = "Input '" + user.name + "yesdelete' into Challenge to delete your account";
+			chat("Input '" + user.name + "yesdelete' into Challenge to delete your account");
 		}
 	});
 	menuui.addChild(bdelete);
@@ -1660,7 +1659,7 @@ function startEditor(arena, acard, startempty) {
 		etgutil.iterraw(user.accountbound, incrpool);
 	}
 	var showAll = false, showShiny = false;
-	chatArea.value = "Build a " + (arena?35:30) + "-60 card deck";
+	chat("Build a " + (arena?35:30) + "-60 card deck");
 	var editorui = new PIXI.DisplayObjectContainer();
 	editorui.interactive = true;
 	var bg = new PIXI.Sprite(backgrounds[0]);
@@ -1726,7 +1725,7 @@ function startEditor(arena, acard, startempty) {
 	if (arena){
 		setClick(bsave, function() {
 			if (editordeck.length < 35) {
-				chatArea.value = "35 cards required before submission";
+				chat("35 cards required before submission");
 				return;
 			}
 			var data = { d: etgutil.encodedeck(editordeck.slice(5)) + "01" + etg.toTrueMark(editormark), lv: arena.lv };
@@ -1737,7 +1736,7 @@ function startEditor(arena, acard, startempty) {
 				data.mod = true;
 			}
 			userEmit("setarena", data);
-			chatArea.value = "Arena deck submitted";
+			chat("Arena deck submitted");
 			startMenu();
 		});
 		var bexit = makeButton(8, 80, "Exit");
@@ -1887,7 +1886,7 @@ function startEditor(arena, acard, startempty) {
 function startElementSelect() {
 	var stage = new PIXI.DisplayObjectContainer();
 	stage.interactive = true;
-	chatArea.value = "Select your starter element";
+	chat("Select your starter element");
 	var elesel = new Array(14);
 	var eledesc = new PIXI.Text("", { font: "24px Dosis" });
 	eledesc.position.set(100, 250);
@@ -2596,9 +2595,9 @@ function startArenaInfo(info) {
 			startEditor(info, info.card);
 		});
 		stage.addChild(bmod);
-		chatArea.value = "05" + info.card + info.deck;
+		aideck.value = "05" + info.card + info.deck;
 		var mark, i = 0;
-		etgutil.iterdeck(chatArea.value, function(code){
+		etgutil.iterdeck(aideck.value, function(code){
 			var ismark = etg.fromTrueMark(code);
 			if (~ismark){
 				mark = ismark;
@@ -2621,7 +2620,7 @@ function startArenaInfo(info) {
 
 function startArenaTop(info) {
 	if (!info) {
-		chatArea.value = "??";
+		chat("??");
 		return;
 	}
 	var stage = new PIXI.DisplayObjectContainer();
@@ -2740,16 +2739,16 @@ function getTextImage(text, font, bgcolor, width) {
 	return tximgcache[fontkey][text] = rtex;
 }
 
-function addChatMessage(message) {
+function chat(message, fontcolor) {
 	var scroll = chatBox.scrollTop == (chatBox.scrollHeight - chatBox.offsetHeight);
-	chatBox.innerHTML += message;
+	chatBox.innerHTML += "<font color=" + (fontcolor || "red") + ">" + message + "</font><br>";
 	if (scroll) chatBox.scrollTop = chatBox.scrollHeight;
 }
 socket.on("pvpgive", initGame);
 socket.on("tradegive", initTrade);
 socket.on("librarygive", initLibrary);
 socket.on("foearena", function(data) {
-	chatArea.value = data.deck;
+	aideck.value = data.deck;
 	var game = initGame({ first: data.seed < etgutil.MAX_INT/2, deck: data.deck, urdeck: getDeck(), seed: data.seed, p2hp: data.hp, cost: data.cost, foename: data.name, p2drawpower: data.draw, p2markpower: data.mark }, true);
 	game.arena = data.name;
 	game.level = data.lv?3:2;
@@ -2765,7 +2764,7 @@ socket.on("userdump", function(data) {
 });
 socket.on("passchange", function(data) {
 	user.auth = data;
-	chatArea.value = "Password updated";
+	chat("Password updated");
 });
 socket.on("chat", function(data) {
 	if (data.u in muteset) return;
@@ -2775,29 +2774,27 @@ socket.on("chat", function(data) {
 	if (s < 10) s = "0"+s;
 	var msg = h + ":" + m + ":" + s + " " + (data.u ? "<b>" + sanitizeHtml(data.u) + ":</b> " : "") + sanitizeHtml(data.msg);
 	var color = data.mode == "pm" ? "blue" : data.mode == "info" ? "red" : "black";
-	addChatMessage(data.mode == "guest" ? "<font color=black><i>" + msg + "</i></font><br>" : "<font color=" + color + ">" + msg + "</font><br>");
+	chat(data.mode == "guest" ? "<i>" + msg + "</i>" : msg, color);
 	if (Notification && user && ~data.msg.indexOf(user.name) && !document.hasFocus()){
 		Notification.requestPermission();
 		new Notification(data.u, {body: data.msg}).onclick = window.focus;
 	}
 });
-socket.on("codecard", function(data) {
-	startRewardWindow(data);
-});
+socket.on("codecard", startRewardWindow);
 socket.on("codereject", function(data) {
-	addChatMessage("<font color=red>" + data + "</font><br>");
+	chat(data);
 });
 socket.on("codegold", function(data) {
 	user.gold += data;
-	addChatMessage("<font color=red>" + data + " Gold added!</font><br>");
+	chat(data + " Gold added!");
 });
 socket.on("codecode", function(data) {
 	user.pool = etgutil.addcard(user.pool, data);
-	addChatMessage("<font color=red>" + Cards.Codes[data].name + " added!</font><br>");
+	chat(Cards.Codes[data].name + " added!");
 });
 socket.on("codedone", function(data) {
 	user.pool = etgutil.addcard(user.pool, data);
-	addChatMessage("<font color=red>" + Cards.Codes[data].name + " added!</font><br>");
+	chat(Cards.Codes[data].name + " added!");
 	startMenu();
 });
 function maybeSendChat(e) {
@@ -2880,7 +2877,7 @@ function loginClick() {
 				if (this.status == 200) {
 					user = JSON.parse(this.responseText);
 					if (!user) {
-						chatArea.value = "No user";
+						chat("No user");
 					} else if (!user.accountbound && !user.pool) {
 						startElementSelect();
 					} else {
@@ -2888,9 +2885,9 @@ function loginClick() {
 						startMenu();
 					}
 				} else if (this.status == 404) {
-					chatArea.value = "Incorrect password";
+					chat("Incorrect password");
 				} else if (this.status == 502) {
-					chatArea.value = "Error verifying password";
+					chat("Error verifying password");
 				}
 			}
 		}
