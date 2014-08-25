@@ -165,7 +165,8 @@ function deckRedirect(req, res, next){
 			ctx.fillStyle = elecols[card.element+(card.upped?13:0)];
 			ctx.fillRect(x, y, 100, 16);
 			ctx.fillStyle = "#000000";
-			ctx.fillText(card.name, x, y);
+			ctx.strokeRect(x, y, 100, 16);
+			ctx.fillText(card.name, x+2, y);
 		});
 		can.toBuffer(function(err, buf){
 			if (err){
