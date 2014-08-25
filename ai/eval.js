@@ -305,7 +305,7 @@ function estimateDamage(c, freedomChance, damageHash) {
 		}
 	}
 	if (atk > 0 && c.status.adrenaline) {
-		var attacks = countAdrenaline(tatk);
+		var attacks = etg.countAdrenaline(tatk);
 		while (c.status.adrenaline < attacks) {
 			c.status.adrenaline++;
 			atk += momentum ? c.trueatk() : Math.max(c.trueatk() - dr, 0);
