@@ -2048,7 +2048,7 @@ function startMatch(game, foeDeck) {
 					foeplays.removeChildren();
 			}
 		}
-	});
+	}, false);
 	setClick(cancel, function() {
 		if (resigning) {
 			resign.setText("Resign");
