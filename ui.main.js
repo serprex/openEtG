@@ -1157,7 +1157,7 @@ function startQuestWindow(){
 	questui.interactive = true;
 	var bgquest = new PIXI.Sprite(backgrounds[5]);
 	bgquest.mouseover = function(){
-		tinfo.setText("");
+		tinfo.setText("Welcome to Potatotal Island. The perfect island for adventuring!");
 	};
 	bgquest.interactive = true;
 	questui.addChild(bgquest);
