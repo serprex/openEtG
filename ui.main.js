@@ -1,11 +1,11 @@
 "use strict";
 (function() {
-var htmlElements = ["leftpane", "chatinput", "deckimport", "aideck", "foename", "change", "login", "password", "challenge", "chatBox", "trade", "bottompane", "demigodmode", "username", "stats","enableSound"];
+var htmlElements = ["leftpane", "chatinput", "deckimport", "aideck", "foename", "change", "login", "password", "challenge", "chatBox", "trade", "bottompane", "demigodmode", "username", "stats","enableSound", "hideright"];
 htmlElements.forEach(function(name){
 	window[name] = document.getElementById(name);
 });
 if (localStorage){
-	var store = [username, stats, enableSound];
+	var store = [username, stats, enableSound, hideright];
 	store.forEach(function(storei){
 		var field = storei.type == "checkbox" ? "checked" : "value";
 		if (localStorage[storei.id] !== undefined){
@@ -1056,8 +1056,7 @@ function startMenu(nymph) {
 	}
 
 	if (!user) toggleB.apply(null, usertoggle);
-
-	if (user && (user.oracle || typeof nymph === "string")) {
+	else if (user.oracle || typeof nymph === "string") {
 		var oracle = new PIXI.Sprite(getArt(nymph || user.oracle));
 		oracle.position.set(450, 100);
 		menuui.addChild(oracle);
@@ -1076,12 +1075,16 @@ function startMenu(nymph) {
 			menuui.removeChild(oracle);
 		}
 	}
+	menuui.endnext = function(){
+		hideright.style.display = "none";
+	}
 
 	refreshRenderer(menuui, function() {
 		if (user) {
 			tgold.setText("$" + user.gold);
 		}
 	});
+	hideright.style.display = "inline";
 }
 function startRewardWindow(reward, numberofcopies, nocode) {
 	if (!numberofcopies) numberofcopies = 1;
@@ -1890,6 +1893,7 @@ function startEditor(arena, acard, startempty) {
 	editorui.addChild(cardArt);
 	editorui.endnext = function() {
 		deckimport.style.display = "none";
+		hideright.style.display = "none";
 	}
 	refreshRenderer(editorui, function() {
 		cardsel.next(cardpool, cardminus, showAll, showShiny);
