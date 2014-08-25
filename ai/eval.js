@@ -322,7 +322,7 @@ function estimateDamage(c, freedomChance, damageHash) {
 	damageHash[c.hash()] = atk;
 	return atk;
 }
-function expectedDamage(pl, damageHash) {
+function calcExpectedDamage(pl, damageHash) {
 	var totalDamage = 0, stasisFlag = false, freedomChance = 0;
 	for(var i=0; i<16; i++){
 		var p;
@@ -487,11 +487,11 @@ module.exports = function(game) {
 		return game.turn == game.player1?-99999980:99999980;
 	}
 	var damageHash = {};
-	var expectedDamage = expectedDamage(game.turn, damageHash);
+	var expectedDamage = calcExpectedDamage(game.turn, damageHash);
 	if (expectedDamage > game.turn.foe.hp){
 		return Math.min(expectedDamage - game.turn.foe.hp, 500)*(game.turn == game.player1?999:-999);
 	}
-	expectedDamage(game.turn.foe, damageHash); // Call to fill damageHash
+	calcExpectedDamage(game.turn.foe, damageHash); // Call to fill damageHash
 	var gamevalue = 0;
 	for (var j = 0; j < 2; j++) {
 		logNest(j);
