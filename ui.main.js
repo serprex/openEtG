@@ -20,7 +20,7 @@ if (localStorage){
 (function(){
 require("./etg.client").loadcards();
 PIXI.AUTO_PREVENT_DEFAULT = false;
-var discarding, user, guestname, muteset = {};
+var discarding, user, guestname, muteset = {}, muteall;
 var etgutil = require("./etgutil");
 var userutil = require("./userutil");
 var etg = require("./etg");
@@ -2792,7 +2792,7 @@ socket.on("passchange", function(data) {
 	chat("Password updated");
 });
 socket.on("chat", function(data) {
-	if (data.u in muteset) return;
+	if (muteall || data.u in muteset) return;
 	var now = new Date(), h = now.getHours(), m = now.getMinutes(), s = now.getSeconds();
 	if (h < 10) h = "0"+h;
 	if (m < 10) m = "0"+m;
@@ -2830,9 +2830,15 @@ function maybeSendChat(e) {
 	if (e.keyCode == 13 && chatinput.value) {
 		var msg = chatinput.value;
 		chatinput.value = "";
-		if (msg.substr(0, 6) == "/mute "){
+		if (msg == "/clear"){
+			chatBox.innerHTML = "";
+		}else if (msg == "/mute"){
+			muteall = true;
+		}else if (msg == "/unmute"){
+			muteall = false;
+		}else if (msg.match(/^\/mute /)){
 			muteset[msg.substring(6)] = true;
-		}else if (msg.substr(0, 8) == "/unmute "){
+		}else if (msg.match(/^\/unmute /)){
 			delete muteset[msg.substring(8)];
 		}else if (user){
 			var checkPm = msg.split(" ", 2);
