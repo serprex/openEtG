@@ -284,6 +284,73 @@ var ActivesValues = {
 	}
 }
 
+function getDamage(c, damageHash){
+	return damageHash[c.hash()] || 0;
+}
+function estimateDamage(c, freedomChance, damageHash) {
+	var fsh = c.owner.foe.shield;
+	if (c.status.frozen || c.status.delayed){
+		return 0;
+	}
+	var tatk = c.trueatk(), fshactive = fsh && fsh.active.shield;
+	var momentum = atk < 0 || c.status.momentum || c.status.psion;
+	var dr = 0, atk;
+	if (momentum) {
+		atk = tatk;
+	} else {
+		if (fsh) dr = fsh.truedr();
+		atk = Math.max(tatk - dr, 0);
+		if ((fshactive == Actives.weight || fshactive == Actives.wings) && fshactive(c.owner.foe.shield, c, atk)) {
+			atk = 0;
+		}
+	}
+	if (atk > 0 && c.status.adrenaline) {
+		var attacks = countAdrenaline(tatk);
+		while (c.status.adrenaline < attacks) {
+			c.status.adrenaline++;
+			atk += momentum ? c.trueatk() : Math.max(c.trueatk() - dr, 0);
+		}
+		c.status.adrenaline = 1;
+	}
+	if (!momentum){
+		atk *= (fshactive == Actives.evade100 ? 0 : fshactive == Actives.evade50 ? .5 : fshactive == Actives.evade40 ? .6 : fshactive == Actives.chaos ? .75 : 1);
+	}
+	if (!fsh && freedomChance && c.status.airborne){
+		atk = Math.ceil(atk * 1.5) * freedomChance;
+	}
+	if (c.owner.foe.sosa) atk *= -1;
+	damageHash[c.hash()] = atk;
+	return atk;
+}
+function expectedDamage(pl, damageHash) {
+	var totalDamage = 0, stasisFlag = false, freedomChance = 0;
+	for(var i=0; i<16; i++){
+		var p;
+		if ((p=pl.permanents[i])){
+			if (p.status.stasis || p.status.patience){
+				stasisFlag = true;
+			}else if (p.status.freedom){
+				freedomChance++;
+			}
+		}
+		if ((p=pl.foe.permanents[i]) && p.status.stasis){
+			stasisFlag = true;
+		}
+	}
+	if (freedomChance){
+		freedomChance = 1-Math.pow(.7, freedomChance);
+	}
+	if (!stasisFlag){
+		for (var i = 0; i < 23; i++) {
+			if (pl.creatures[i])
+				totalDamage += estimateDamage(pl.creatures[i], freedomChance, damageHash);
+		}
+	}
+	if (pl.weapon) totalDamage += estimateDamage(pl.weapon, freedomChance, damageHash);
+	if (pl.foe.status.poison) totalDamage += pl.foe.status.poison;
+	return Math.round(totalDamage);
+}
+
 function evalactive(c, active, extra){
 	var aval = ActivesValues[active.activename];
 	return aval === undefined?0:
@@ -297,7 +364,6 @@ function checkpassives(c){
 		if (status.airborne || status.ranged) score += 0.2;
 		if (status.voodoo) score += 1;
 		if (status.swarm) score += 1;
-		if (status.stasis) score += 5;
 		if (status.flooding) score += c.owner.foe.countcreatures()-3;
 		if (status.patience) score += 1 + c.owner.countcreatures() * 2;
 		if (status.freedom) score += 6;
@@ -307,7 +373,7 @@ function checkpassives(c){
 	return score;
 }
 
-function evalthing(c) {
+function evalthing(c, damageHash) {
 	if (!c) return 0;
 	var ttatk, hp, poison, score = 0;
 	var isCreature = c instanceof etg.Creature, isWeapon = c instanceof etg.Weapon;
@@ -324,7 +390,7 @@ function evalthing(c) {
 		}
 	}
 	if (isWeapon || isCreature) {
-		ttatk = c.estimateDamage();
+		ttatk = getDamage(c, damageHash);
 		if (c.status.psion && c.owner.foe.shield && c.owner.foe.shield.status.reflect) ttatk *= -1;
 		score += ttatk*delayfactor;
 	}else ttatk = 0;
@@ -420,24 +486,26 @@ module.exports = function(game) {
 	if (game.turn.deck.length == 0 && game.turn.foe.hand.length < 8){
 		return game.turn == game.player1?-99999980:99999980;
 	}
-	var expectedDamage = game.turn.expectedDamage();
+	var damageHash = {};
+	var expectedDamage = expectedDamage(game.turn, damageHash);
 	if (expectedDamage > game.turn.foe.hp){
 		return Math.min(expectedDamage - game.turn.foe.hp, 500)*(game.turn == game.player1?999:-999);
 	}
+	expectedDamage(game.turn.foe, damageHash); // Call to fill damageHash
 	var gamevalue = 0;
 	for (var j = 0; j < 2; j++) {
 		logNest(j);
 		var pscore = 0, player = game.players(j);
-		pscore += evalthing(player.weapon);
-		pscore += evalthing(player.shield);
+		pscore += evalthing(player.weapon, damageHash);
+		pscore += evalthing(player.shield, damageHash);
 		logNest("creas");
 		for (var i = 0; i < 23; i++) {
-			pscore += evalthing(player.creatures[i]);
+			pscore += evalthing(player.creatures[i], damageHash);
 		}
 		logNestEnd();
 		logNest("perms");
 		for (var i = 0; i < 16; i++) {
-			pscore += evalthing(player.permanents[i]);
+			pscore += evalthing(player.permanents[i], damageHash);
 		}
 		logNestEnd();
 		logNest("hand");

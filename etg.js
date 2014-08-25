@@ -229,7 +229,7 @@ Game.prototype.progressMulligan = function(){
 	this.turn = this.turn.foe;
 }
 function removeSoPa(p){
-	if (p && p.card.isOf(Cards.ShardofPatience)){
+	if (p){
 		delete p.status.patience;
 	}
 }
@@ -537,68 +537,6 @@ Player.prototype.spend = function(qtype, x) {
 		}
 	}
 	return true;
-}
-Creature.prototype.estimateDamage = Weapon.prototype.estimateDamage = function(freedomChance) {
-	var fsh = this.owner.foe.shield;
-	if (this.status.frozen || this.status.delayed){
-		return 0;
-	}
-	var tatk = this.trueatk(), fshactive = fsh && fsh.active.shield;
-	var momentum = atk < 0 || this.status.momentum || this.status.psion;
-	var dr = 0, atk;
-	if (momentum) {
-		atk = tatk;
-	} else {
-		if (fsh) dr = fsh.truedr();
-		atk = Math.max(tatk - dr, 0);
-		if ((fshactive == Actives.weight || fshactive == Actives.wings) && fshactive(this.owner.foe.shield, this, atk)) {
-			atk = 0;
-		}
-	}
-	if (atk > 0 && this.status.adrenaline) {
-		var attacks = countAdrenaline(tatk);
-		while (this.status.adrenaline < attacks) {
-			this.status.adrenaline++;
-			atk += momentum ? this.trueatk() : Math.max(this.trueatk() - dr, 0);
-		}
-		this.status.adrenaline = 1;
-	}
-	if (!momentum){
-		atk *= (fshactive == Actives.evade100 ? 0 : fshactive == Actives.evade50 ? .5 : fshactive == Actives.evade40 ? .6 : fshactive == Actives.chaos ? .75 : 1);
-	}
-	if (!fsh && freedomChance && this.status.airborne){
-		atk = Math.ceil(atk * 1.5) * freedomChance;
-	}
-	if (this.owner.foe.sosa) atk *= -1;
-	return atk;
-}
-Player.prototype.expectedDamage = function() {
-	var totalDamage = 0, stasisFlag = false, freedomChance = 0;
-	for(var i=0; i<16; i++){
-		var p;
-		if ((p=this.permanents[i])){
-			if (p.status.stasis || p.status.patience){
-				stasisFlag = true;
-			}else if (p.status.freedom){
-				freedomChance++;
-			}
-		}
-		if ((p=this.foe.permanents[i]) && p.status.stasis){
-			stasisFlag = true;
-		}
-	}
-	if (freedomChance){
-		freedomChance = 1-Math.pow(.7,freedomChance);
-	}
-	if (!stasisFlag){
-		for (var i = 0; i < 23; i++) {
-			if (this.creatures[i])
-				totalDamage += this.creatures[i].estimateDamage(freedomChance);
-		}
-	}
-	if (this.weapon) totalDamage += this.weapon.estimateDamage();
-	if (this.foe.status.poison) totalDamage += this.foe.status.poison;
-	return Math.round(totalDamage);
 }
 Player.prototype.countcreatures = function() {
 	var res = 0;
