@@ -466,7 +466,7 @@ fickle:function(c,t){
 	for(var i=0; i<t.owner.deck.length; i++){
 		var card = t.owner.deck[i];
 		var cost = card.cost;
-		if (card.element && card.element == c.castele) cost += c.cast;
+		if (!card.element || card.element == c.castele) cost += c.cast;
 		if (t.owner.canspend(card.costele, cost)){
 			cards.push(i);
 		}
