@@ -880,7 +880,7 @@ function makeCardSelector(cardmouseover, cardclick, maxedIndicator){
 	return cardsel;
 }
 function startMenu(nymph) {
-	var helpTexts = [
+	var tipjar = [
 		"Each card in your booster pack has a 50% chance of being from the chosen element",
 		"Your arena deck will earn you 3 gold per win & 1 gold per loss",
 		"Colosseum lets you compete in a number of daily events for extra prizes. The colosseum challenges reset daily",
@@ -888,7 +888,7 @@ function startMenu(nymph) {
 		"Be sure to keep track of the rarity icons; Grey means Common, Green means Uncommon, Blue means Rare, Orange means Shard, & Pink means Ultra Rare",
 		"The Library button allows you to see all of a user's tradeable cards",
 		"If you are a new user, be sure to get the free Bronze & Silver packs from the Shop",
-		"Starter decks, cards from the free packs, & all non-Common Daily Cards are account-bound; they cannot be traded or sold",
+		"Starter decks, cards from free packs, & all non-Common Daily Cards are account-bound; they cannot be traded or sold",
 		"If you include account-bound cards in an upgrade, the upgrade will also be account-bound",
 		"You'll receive a Daily Card upon logging in after midnight GMT0. If you submit an Arena deck, the deck will always contain 5 copies of that card",
 		"No pack grade is cost efficient; commons in Bronze packs cost as much as commons in Silver packs",
@@ -909,8 +909,11 @@ function startMenu(nymph) {
 		"If you don't get what you want from the packs in the shop, ask to trade in chat or the openEtG forum",
 		"Rarity doesn't necessarily relate to card strength. You can go a long ways with commons & uncommons",
 		"A ply is half a turn",
+		"Mark cards are only obtainable through PvP events. A tournament deck verifier is at tournament.htm",
+		"After an AI battle you will win a random common, uncommon, or rare from your opponent's deck",
+		"An eigth of Platinum packs have Nymphs replaced with shards",
 	];
-	var tipNumber = Math.floor(Math.random()*helpTexts.length);
+	var tipNumber = Math.floor(Math.random()*tipjar.length);
 
 	var menuui = new PIXI.DisplayObjectContainer();
 	menuui.interactive = true;
@@ -921,14 +924,14 @@ function startMenu(nymph) {
 	var bglobby = new PIXI.Sprite(backgrounds[1]);
 	bglobby.interactive = true;
 	bglobby.mouseover = function() {
-		tinfo.setText(user ? "Tip: " + helpTexts[tipNumber] + "." : "To register, just type desired username & password in the fields to the right, then click 'Login'.", 750);
+		tinfo.setText(user ? "Tip: " + tipjar[tipNumber] + "." : "To register, just type desired username & password in the fields to the right, then click 'Login'.", 750);
 	}
 	menuui.addChild(bglobby);
 
 	var bnextTip = makeButton(750, 50, "Next tip");
 	setClick(bnextTip, function() {
-		tipNumber = (tipNumber+1) % helpTexts.length;
-		tinfo.setText("Tip: " + helpTexts[tipNumber] + ".", 750);
+		tipNumber = (tipNumber+1) % tipjar.length;
+		tinfo.setText("Tip: " + tipjar[tipNumber] + ".", 750);
 	});
 	menuui.addChild(bnextTip);
 

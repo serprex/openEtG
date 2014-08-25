@@ -144,7 +144,6 @@ function cardRedirect(req, res, next){
 function deckRedirect(req, res, next){
 	if (req.url.match(/^\/deck\//)){
 		var deck = req.url.substr(6);
-		if (~deck.indexOf("%"))deck = etgutil.encodedeck(deck.split("%20"));
 		var Canvas = require("canvas"), Image = Canvas.Image;
 		var can = new Canvas(616, 160), ctx = can.getContext("2d");
 		var elecols = ["#a99683", "#aa5999", "#777777", "#996633", "#5f4930", "#50a005", "#cc6611", "#205080", "#a9a9a9", "#337ddd", "#ccaa22", "#333333", "#77bbdd"];
