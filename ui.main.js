@@ -664,8 +664,8 @@ var nopic = PIXI.Texture.fromImage("");
 var goldtex, buttex;
 var sounds = {};
 var backgrounds = ["assets/bg_default.png", "assets/bg_lobby.png", "assets/bg_shop.png", "assets/bg_quest.png", "assets/bg_game.png", "assets/bg_questmap.png"];
-var questIcons = [], eicons = [], ricons = [], cardBacks = [], cardBorders = [], boosters = [], popups = [], sicons = [], ticons = [], sborders = [];
-var preLoader = new PIXI.AssetLoader(["assets/gold.png", "assets/button.png", "assets/questIcons.png", "assets/esheet.png", "assets/raritysheet.png", "assets/backsheet.png",
+var eicons = [], ricons = [], cardBacks = [], cardBorders = [], boosters = [], popups = [], sicons = [], ticons = [], sborders = [];
+var preLoader = new PIXI.AssetLoader(["assets/gold.png", "assets/button.png", "assets/esheet.png", "assets/raritysheet.png", "assets/backsheet.png",
 	"assets/cardborders.png", "assets/popup_booster.png", "assets/statussheet.png", "assets/statusborders.png", "assets/typesheet.png"].concat(backgrounds));
 var loadingBarProgress = 0, loadingBarGraphic = new PIXI.Graphics();
 preLoader.onProgress = function() {
@@ -682,10 +682,6 @@ preLoader.onComplete = function() {
 	// Load assets we preloaded
 	goldtex = PIXI.Texture.fromFrame("assets/gold.png");
 	buttex = PIXI.Texture.fromFrame("assets/button.png");
-	var tex = PIXI.Texture.fromFrame("assets/questIcons.png");
-	for (var i = 0;i < 2;i++) {
-		questIcons.push(new PIXI.Texture(tex, new PIXI.Rectangle(i * 32, 0, 32, 32)));
-	}
 	for (var i = 0;i < backgrounds.length;i++){
 		backgrounds[i] = PIXI.Texture.fromFrame(backgrounds[i]);
 	}
@@ -1215,6 +1211,16 @@ function startQuestWindow(){
 	}
 	refreshRenderer(questui);
 }
+var questIcons = (function makeQuestIcons(){
+	return [1, 0x4cff00].map(function(col){
+		var g = new PIXI.Graphics();
+		g.lineStyle(1, 0x88aa66);
+		g.beginFill(col);
+		g.drawCircle(0, 0, 16);
+		g.endFill();
+		return g.generateTexture();
+	});
+})();
 function startQuestArea(area) {
 	var questui = new PIXI.DisplayObjectContainer();
 	questui.interactive = true;
@@ -1896,6 +1902,7 @@ function startEditor(arena, acard, startempty) {
 		}
 	});
 	deckimport.style.display = "inline";
+	deckimport.focus();
 }
 function startElementSelect() {
 	var stage = new PIXI.DisplayObjectContainer();
