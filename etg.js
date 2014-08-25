@@ -414,6 +414,18 @@ function hashObj(obj){
 	}
 	return hash;
 }
+Weapon.prototype.hash = function(){
+	var hash = this.owner == this.owner.game.player1 ? 13 : 11;
+	hash ^= hashObj(this.status) ^ (this.atk*31 - this.usedactive * 3);
+	hash ^= parseInt(this.card.code, 32);
+	for (var key in this.active){
+		hash ^= hashString(key + "-" + this.active[key].activename);
+	}
+	if (this.active.cast){
+		hash ^= this.cast * 7 + this.castele * 23;
+	}
+	return hash & 0x7FFFFFFF;
+}
 Creature.prototype.hash = function(){
 	var hash = this.owner == this.owner.game.player1 ? 17 : 19;
 	hash ^= hashObj(this.status) ^ (this.hp*17 + this.atk*31 - this.maxhp - this.usedactive * 3);
