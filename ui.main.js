@@ -2567,7 +2567,7 @@ function startMatch(game, foeDeck) {
 				fgfx.beginFill(elecols[etg.Life]);
 				fgfx.drawRect(hptext[j].x - 40, hptext[j].y + yOffset, 80 * pl.hp / pl.maxhp, 14);
 				fgfx.endFill();
-				if (game.expectedDamage[j]) {
+				if (!cloakgfx.visible && game.expectedDamage[j]) {
 					fgfx.beginFill(elecols[game.expectedDamage[j] >= pl.hp ? etg.Fire : game.expectedDamage[j] > 0 ? etg.Time : etg.Water]);
 					fgfx.drawRect(hptext[j].x - 40 + 80 * pl.hp / pl.maxhp, hptext[j].y + yOffset, -80 * Math.min(game.expectedDamage[j], pl.hp) / pl.maxhp, 14);
 					fgfx.endFill();
