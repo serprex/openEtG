@@ -1823,12 +1823,12 @@ function startEditor(arena, acard, startempty) {
 	var editordecksprites = [];
 	var editordeck = arena ? (startempty ? [] : etgutil.decodedeck(arena.deck)) : etgutil.decodedeck(getDeck());
 	var editormarksprite = new PIXI.Sprite(nopic);
-	editormarksprite.position.set(100, 234);
+	editormarksprite.position.set(66, 200);
 	editorui.addChild(editormarksprite);
 	var editormark = 0;
 	processDeck();
 	for (var i = 0;i < 13;i++) {
-		var sprite = makeButton(482 + i * 32, 234, eicons[i]);
+		var sprite = makeButton(100 + i * 32, 234, eicons[i]);
 		sprite.interactive = true;
 		(function(_i) {
 			setClick(sprite, function() {
