@@ -51,7 +51,7 @@
 		<input id="login" type="submit" value="Login" onclick="loginClick()" /><br>
 		<input id="password" type="password" placeholder="Insecure Password" onkeydown="maybeLogin(event)" tabindex=2 />
 		<input id="change" type="submit" value="Change" onclick="changeClick()" /><br>
-		<input id="enableSound" type="checkbox" onchange="soundChange()" />Enable sounds<br>
+		<label><input id="enableSound" type="checkbox" onchange="soundChange()" />Enable sounds</label><br>
 		<input id="foename" type="text" placeholder="Challenge" onkeydown="maybeChallenge(event)" />
 		<input id="pvphp" type="text" placeholder="HP" style="width: 30px"/><input id="pvpmark" type="text" placeholder="Mark" style="width: 30px" /><input id="pvpdeck" type="text" placeholder="Deck" style="width: 30px" /><input id="pvpdraw" type="text" placeholder="Draw" style="width:30px" /><br>
 		<input id="challenge" type="submit" value="PvP" onclick="challengeClick()" />
@@ -59,7 +59,7 @@
 		<input id="reward" type="submit" value="Reward" onclick="rewardClick()" />
 		<input id="library" type="submit" value="Library" onclick="libraryClick()" /><br>
 		<input id="aideck" type="text" placeholder="AI Deck" onclick="this.setSelectionRange(0, 999)" /><br>
-		<input id="stats" type="checkbox" />Print stats<br>
+		<label><input id="stats" type="checkbox" />Print stats</label><br>
 		<div id="chatBox" style="width:350px;height:360px;overflow-y:scroll;overflow-x:hidden;background-color:white;word-wrap:break-word"></div>
 		<textarea id="chatinput" placeholder="Chat" style="width:350px;height:32px;resize:none" onkeydown="maybeSendChat(event)"></textarea>
 	</div>
