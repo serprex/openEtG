@@ -207,7 +207,7 @@ var ActivesValues = {
 	ricochet:3,
 	sanctuary:6,
 	scarab:4,
-	scavenger:4,
+	growth1:3,
 	scramble:function(c){
 		var a=0, fq=c.owner.foe.quanta;
 		for(var i=1; i<13; i++){
