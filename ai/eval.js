@@ -260,7 +260,7 @@ var ActivesValues = {
 		return c instanceof etg.CardInstance?.1:c.status.charges;
 	},
 	blockwithcharge:function(c){
-		return 3*(c instanceof etg.CardInstance?c.card.status.charges:c.status.charges)/(1+c.owner.foe.countcreatures());
+		return (c instanceof etg.CardInstance?c.card.status.charges:c.status.charges)/(1+c.owner.foe.countcreatures());
 	},
 	cold:7,
 	despair:5,
@@ -288,11 +288,10 @@ function getDamage(c, damageHash){
 	return damageHash[c.hash()] || 0;
 }
 function estimateDamage(c, freedomChance, wallCharges, damageHash) {
-	var fsh = c.owner.foe.shield;
-	if (c.status.frozen || c.status.delayed){
+	if (!c || c.status.frozen || c.status.delayed){
 		return 0;
 	}
-	var tatk = c.trueatk(), fshactive = fsh && fsh.active.shield;
+	var tatk = c.trueatk(), fh = c.owner.foe.shield, fshactive = fsh && fsh.active.shield;
 	var momentum = atk < 0 || c.status.momentum || c.status.psion;
 	var dr = 0, atk;
 	if (momentum) {
@@ -352,14 +351,13 @@ function calcExpectedDamage(pl, damageHash) {
 		wallCharges = [pl.shield.status.charges];
 	}
 	if (!stasisFlag){
-		for (var i = 0; i < 23; i++) {
-			if (pl.creatures[i])
-				totalDamage += estimateDamage(pl.creatures[i], freedomChance, wallCharges, damageHash);
-		}
+		pl.creatures.forEach(function(c){
+			totalDamage += estimateDamage(c, freedomChance, wallCharges, damageHash);
+		});
 	}
-	if (pl.weapon) totalDamage += estimateDamage(pl.weapon, freedomChance, wallCharges, damageHash);
+	totalDamage += estimateDamage(pl.weapon, freedomChance, wallCharges, damageHash);
 	if (pl.foe.status.poison) totalDamage += pl.foe.status.poison;
-	return Math.round(totalDamage);
+	return totalDamage;
 }
 
 function evalactive(c, active, extra){
@@ -497,7 +495,7 @@ module.exports = function(game) {
 	if (game.turn.deck.length == 0 && game.turn.foe.hand.length < 8){
 		return game.turn == game.player1?-99999980:99999980;
 	}
-	var damageHash = {};
+	var damageHash = [];
 	var expectedDamage = calcExpectedDamage(game.turn, damageHash);
 	if (expectedDamage > game.turn.foe.hp){
 		return Math.min(expectedDamage - game.turn.foe.hp, 500)*(game.turn == game.player1?999:-999);
