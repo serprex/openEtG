@@ -1548,12 +1548,10 @@ function startStore() {
 }
 function addToGame(game, data) {
 	for (var key in data) {
-		if (key == "p1hp")
-			game.player1.hp = data[key];
-		else if (key == "p1maxhp")
-			game.player1.maxhp = data[key];
-		else
-			game[key] = data[key];
+		var p1or2 = key.match(/^p(1|2)/);
+		if (p1or2){
+			game["player" + p1or2[1]][key.substr(2)] = data[key];
+		}else game[key] = data[key];
 	}
 }
 function mkDaily(type) {
