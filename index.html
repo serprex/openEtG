@@ -58,7 +58,8 @@
 		<input id="trade" type="submit" value="Trade" onclick="tradeClick()" />
 		<input id="reward" type="submit" value="Reward" onclick="rewardClick()" />
 		<input id="library" type="submit" value="Library" onclick="libraryClick()" /><br>
-		<input id="aideck" type="text" placeholder="AI Deck" onclick="this.setSelectionRange(0, 999)" /><br>
+		<input id="aideck" type="text" placeholder="AI Deck" onclick="this.setSelectionRange(0, 999)" />
+		<input id="aihp" type="text" placeholder="HP" style="width: 30px"/><input id="aimark" type="text" placeholder="Mark" style="width: 30px" /><input id="aideckpow" type="text" placeholder="Deck" style="width: 30px" /><input id="aidraw" type="text" placeholder="Draw" style="width:30px" /><input id="aivs" type="submit" value="vs" onclick="aiClick()" ><br>
 		<label><input id="stats" type="checkbox" />Print stats</label><br>
 		<div id="chatBox" style="width:350px;height:360px;overflow-y:scroll;overflow-x:hidden;background-color:white;word-wrap:break-word"></div>
 		<textarea id="chatinput" placeholder="Chat" style="width:350px;height:32px;resize:none" onkeydown="maybeSendChat(event)"></textarea>

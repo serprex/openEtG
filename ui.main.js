@@ -454,11 +454,13 @@ function initGame(data, ai) {
 	return game;
 }
 function deckPower(deck, amount) {
-	var res = deck;
-	for (var i = 1;i < amount;i++) {
-		res = res.concat(deck);
-	}
-	return res;
+	if (amount > 1){
+		var res = deck.slice();
+		for (var i = 1;i < amount;i++) {
+			Array.prototype.push.apply(res, deck);
+		}
+		return res;
+	}else return deck;
 }
 function getDeck(limit) {
 	var deck = user ? user.decks[user.selectedDeck] :
@@ -555,8 +557,7 @@ function mkPremade(name, daily) {
 		}
 		if (!foedata) foedata = aiDecks.giveRandom(name);
 		var foename = name[0].toUpperCase() + name.slice(1) + "\n" + foedata[0];
-		var deck = (!user && aideck.value) || foedata[1];
-		var gameData = { first: Math.random() < .5, deck: deck, urdeck: urdeck, seed: Math.random() * etgutil.MAX_INT, foename: foename };
+		var gameData = { first: Math.random() < .5, deck: foedata[1], urdeck: urdeck, seed: Math.random() * etgutil.MAX_INT, foename: foename };
 		if (name == "mage"){
 			gameData.p2hp = 125;
 		}else{
@@ -622,7 +623,7 @@ function mkAi(level, daily) {
 				}
 				userExec("addgold", { g: -cost });
 			}
-			var deck = (!user && aideck.value) || require("./ai/deck")(level);
+			var deck = require("./ai/deck")(level);
 			aideck.value = deck;
 
 			var randomNames = [
@@ -2971,7 +2972,19 @@ function libraryClick() {
 	if (Cards.loaded)
 		socket.emit("librarywant", { f: foename.value });
 }
-var expofuncs = [maybeLogin, maybeChallenge, maybeSendChat, changeClick, challengeClick, tradeClick, rewardClick, libraryClick, loginClick, getTextImage, soundChange];
+function aiClick(){
+	var gameData = { first: Math.random() < .5, deck: aideck.value, urdeck: getDeck(), seed: Math.random() * etgutil.MAX_INT, foename: "Custom" };
+	parseInput(gameData, "p1hp", pvphp.value);
+	parseInput(gameData, "p1drawpower", pvpdraw.value);
+	parseInput(gameData, "p1markpower", pvpmark.value);
+	parseInput(gameData, "p1deckpower", pvpdeck.value);
+	parseInput(gameData, "p2hp", aihp.value);
+	parseInput(gameData, "p2drawpower", aidraw.value);
+	parseInput(gameData, "p2markpower", aimark.value);
+	parseInput(gameData, "p2deckpower", aideckpow.value);
+	initGame(gameData, true);
+}
+var expofuncs = [maybeLogin, maybeChallenge, maybeSendChat, changeClick, challengeClick, tradeClick, rewardClick, libraryClick, loginClick, getTextImage, soundChange, aiClick];
 for(var i=0; i<expofuncs.length; i++){
 	window[expofuncs[i].name] = expofuncs[i];
 }
