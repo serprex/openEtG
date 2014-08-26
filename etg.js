@@ -1094,7 +1094,7 @@ Weapon.prototype.attack = Creature.prototype.attack = function(stasis, freedomCh
 				this.active.hit(this, gpull, dmg);
 			}
 			if (target.gpull == gpull && gpull.active.shield){
-				gpull.active.shield(gpull, isCreature?this:this.owner, dmg);
+				gpull.active.shield(gpull, this, dmg);
 			}
 		}else{
 			var truedr = target.shield ? target.shield.truedr() : 0;

@@ -1907,6 +1907,7 @@ function startEditor(arena, acard, startempty) {
 	});
 	deckimport.style.display = "inline";
 	deckimport.focus();
+	deckimport.setSelectionRange(0, 333);
 }
 function startElementSelect() {
 	var stage = new PIXI.DisplayObjectContainer();

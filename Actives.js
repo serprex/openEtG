@@ -558,13 +558,16 @@ give:function(c,t){
 	}
 },
 gpull:function(c,t){
-	Effect.mkText("Pull", c);
-	c.owner.gpull = c;
+	Actives.gpullspell(c, c);
 },
 gpullspell:function(c,t){
-	if (t instanceof etg.Player){
+	if (t instanceof etg.Creature){
+		t.owner.gpull = t;
+	}else{
+		t = t.owner;
 		delete t.gpull;
-	}else Actives.gpull(t);
+	}
+	Effect.mkText("Pull", t.owner);
 },
 gratitude:function(c,t){
 	Effect.mkText("+4", c);
