@@ -287,7 +287,7 @@ var ActivesValues = {
 function getDamage(c, damageHash){
 	return damageHash[c.hash()] || 0;
 }
-function estimateDamage(c, freedomChance, damageHash) {
+function estimateDamage(c, freedomChance, wallCharges, damageHash) {
 	var fsh = c.owner.foe.shield;
 	if (c.status.frozen || c.status.delayed){
 		return 0;
@@ -302,13 +302,21 @@ function estimateDamage(c, freedomChance, damageHash) {
 		atk = Math.max(tatk - dr, 0);
 		if ((fshactive == Actives.weight || fshactive == Actives.wings) && fshactive(c.owner.foe.shield, c, atk)) {
 			atk = 0;
+		}else if (wallCharges && wallCharges[0]){
+			wallCharges[0]--;
+			atk = 0;
 		}
 	}
-	if (atk > 0 && c.status.adrenaline) {
+	if (tatk > 0 && c.status.adrenaline) {
 		var attacks = etg.countAdrenaline(tatk);
+		if (wallCharges && !momentum) wallCharges[0] -= attacks-1;
 		while (c.status.adrenaline < attacks) {
 			c.status.adrenaline++;
-			atk += momentum ? c.trueatk() : Math.max(c.trueatk() - dr, 0);
+			if (momentum){
+				atk += c.trueatk()
+			}else if(wallCharges && wallCharges[0]){
+				wallCharges[0]--;
+			}else atk += Math.max(c.trueatk() - dr, 0);
 		}
 		c.status.adrenaline = 1;
 	}
@@ -323,7 +331,7 @@ function estimateDamage(c, freedomChance, damageHash) {
 	return atk;
 }
 function calcExpectedDamage(pl, damageHash) {
-	var totalDamage = 0, stasisFlag = false, freedomChance = 0;
+	var totalDamage = 0, stasisFlag = false, freedomChance = 0, wallCharges;
 	for(var i=0; i<16; i++){
 		var p;
 		if ((p=pl.permanents[i])){
@@ -340,13 +348,16 @@ function calcExpectedDamage(pl, damageHash) {
 	if (freedomChance){
 		freedomChance = 1-Math.pow(.7, freedomChance);
 	}
+	if (pl.shield && pl.shield.hasactive("shield", "blockwithcharge")){
+		wallCharges = [pl.shield.status.charges];
+	}
 	if (!stasisFlag){
 		for (var i = 0; i < 23; i++) {
 			if (pl.creatures[i])
-				totalDamage += estimateDamage(pl.creatures[i], freedomChance, damageHash);
+				totalDamage += estimateDamage(pl.creatures[i], freedomChance, wallCharges, damageHash);
 		}
 	}
-	if (pl.weapon) totalDamage += estimateDamage(pl.weapon, freedomChance, damageHash);
+	if (pl.weapon) totalDamage += estimateDamage(pl.weapon, freedomChance, wallCharges, damageHash);
 	if (pl.foe.status.poison) totalDamage += pl.foe.status.poison;
 	return Math.round(totalDamage);
 }
