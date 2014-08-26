@@ -2796,8 +2796,7 @@ socket.on("chat", function(data) {
 	if (m < 10) m = "0"+m;
 	if (s < 10) s = "0"+s;
 	var msg = h + ":" + m + ":" + s + " " + (data.u ? "<b>" + sanitizeHtml(data.u) + ":</b> " : "") + sanitizeHtml(data.msg);
-	var color = data.mode == "pm" ? "blue" : data.mode == "info" ? "red" : "black";
-	chat(data.mode == "guest" ? "<i>" + msg + "</i>" : msg, color);
+	chat(data.guest ? "<i>" + msg + "</i>" : msg, data.mode || "black");
 	if (Notification && user && ~data.msg.indexOf(user.name) && !document.hasFocus()){
 		Notification.requestPermission();
 		new Notification(data.u, {body: data.msg}).onclick = window.focus;

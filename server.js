@@ -277,8 +277,7 @@ function getDay(){
 }
 function genericChat(socket, data){
 	if (data.msg == "/who") {
-		var usersonline = activeUsers().join(", ");
-		socket.emit("chat", { mode: "info", msg: usersonline ? "Users online: " + usersonline + "." : "There are no users online :(" })
+		socket.emit("chat", { mode: "red", msg: activeUsers().join(", ") || "There are no users online :(" })
 	}
 	else io.emit("chat", data)
 }
@@ -570,8 +569,8 @@ io.on("connection", function(socket) {
 				foesock.emit("pvpgive", foedata);
 			} else {
 				sockinfo[this.id].duel = f;
-				foesock.emit("chat", { msg: u + " wants to duel with you!", mode: "info" });
-				this.emit("chat", { mode: "info", msg: "You have sent a PvP request to " + f + "!" });
+				foesock.emit("chat", { msg: u + " wants to duel with you!", mode: "red" });
+				this.emit("chat", { mode: "red", msg: "You have sent a PvP request to " + f + "!" });
 			}
 		}
 	});
@@ -579,7 +578,7 @@ io.on("connection", function(socket) {
 		var foesock = usersock[sockinfo[this.id].trade.foe];
 		if (foesock){
 			foesock.emit("tradecanceled");
-			foesock.emit("chat", { mode:"info", msg: data.u + " has canceled the trade."});
+			foesock.emit("chat", { mode: "red", msg: data.u + " has canceled the trade."});
 			if (foesock.id in sockinfo){
 				delete sockinfo[foesock.id].trade;
 			}
@@ -628,8 +627,8 @@ io.on("connection", function(socket) {
 				this.emit("tradegive", { first: false });
 				foesock.emit("tradegive", { first: true });
 			} else {
-				foesock.emit("chat", { mode: "info", msg: u + " wants to trade with you!" });
-				this.emit("chat", { mode: "info", msg: "You have sent a trade request to " + f + "!" });
+				foesock.emit("chat", { mode: "red", msg: u + " wants to trade with you!" });
+				this.emit("chat", { mode: "red", msg: "You have sent a trade request to " + f + "!" });
 			}
 		}
 	});
@@ -657,11 +656,11 @@ io.on("connection", function(socket) {
 		if (data.to) {
 			var to = data.to;
 			if (usersock[to]) {
-				usersock[to].emit("chat", { msg: data.msg, mode: "pm", u: data.u });
-				socket.emit("chat", { msg: data.msg, mode: "pm", u: "To " + to });
+				usersock[to].emit("chat", { msg: data.msg, mode: "blue", u: data.u });
+				socket.emit("chat", { msg: data.msg, mode: "blue", u: "To " + to });
 			}
 			else
-				socket.emit("chat", { mode: "info", msg: to ? to + " is not here right now." : "I need to know who to message..." });
+				socket.emit("chat", { mode: "red", msg: to + " is not here right now." });
 		}
 		else{
 			delete data.a;
@@ -718,7 +717,7 @@ io.on("connection", function(socket) {
 		}
 	});
 	socket.on("guestchat", function (data) {
-		data.mode = "guest";
+		data.guest = true;
 		data.u = "Guest" + (data.u ? "_" + data.u : "");
 		genericChat(socket, data);
 	});
