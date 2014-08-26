@@ -1,6 +1,6 @@
 "use strict";
 (function() {
-var htmlElements = ["leftpane", "chatinput", "deckimport", "aideck", "foename", "change", "login", "password", "challenge", "chatBox", "trade", "bottompane", "demigodmode", "username", "stats","enableSound", "hideright"];
+var htmlElements = ["leftpane", "chatinput", "deckimport", "aideck", "foename", "change", "login", "password", "challenge", "chatBox", "trade", "bottompane", "demigodmode", "username", "stats","enableSound", "hideright", "lblhideright"];
 htmlElements.forEach(function(name){
 	window[name] = document.getElementById(name);
 });
@@ -1076,7 +1076,7 @@ function startMenu(nymph) {
 		}
 	}
 	menuui.endnext = function(){
-		hideright.style.display = "none";
+		lblhideright.style.display = "none";
 	}
 
 	refreshRenderer(menuui, function() {
@@ -1084,7 +1084,7 @@ function startMenu(nymph) {
 			tgold.setText("$" + user.gold);
 		}
 	});
-	hideright.style.display = "inline";
+	lblhideright.style.display = "inline";
 }
 function startRewardWindow(reward, numberofcopies, nocode) {
 	if (!numberofcopies) numberofcopies = 1;
@@ -1893,7 +1893,6 @@ function startEditor(arena, acard, startempty) {
 	editorui.addChild(cardArt);
 	editorui.endnext = function() {
 		deckimport.style.display = "none";
-		hideright.style.display = "none";
 	}
 	refreshRenderer(editorui, function() {
 		cardsel.next(cardpool, cardminus, showAll, showShiny);
@@ -1912,28 +1911,25 @@ function startEditor(arena, acard, startempty) {
 function startElementSelect() {
 	var stage = new PIXI.DisplayObjectContainer();
 	stage.interactive = true;
-	chat("Select your starter element");
-	var elesel = new Array(14);
-	var eledesc = new PIXI.Text("", { font: "24px Dosis" });
-	eledesc.position.set(100, 250);
+	stage.addChild(new PIXI.Sprite(backgrounds[0]));
+	var eledesc = makeText(100, 250, "Select your starter element");
 	stage.addChild(eledesc);
-	for (var i = 0;i < 14;i++) {
+	var elesel = new Array(14);
+	etg.eleNames.forEach(function(name, i){
 		elesel[i] = new PIXI.Sprite(eicons[i]);
 		elesel[i].position.set(100 + i * 32, 300);
-		(function(_i) {
-			elesel[_i].mouseover = function() {
-				maybeSetText(eledesc, etg.eleNames[_i]);
-			}
-			setClick(elesel[_i], function() {
-				var msg = { u: user.name, a: user.auth, e: _i };
-				user = undefined;
-				socket.emit("inituser", msg);
-				startMenu();
-			});
-		})(i);
+		elesel[i].mouseover = function(){
+			this.setText(eledesc, name);
+		}
+		setClick(elesel[i], function() {
+			var msg = { u: user.name, a: user.auth, e: i };
+			user = undefined;
+			socket.emit("inituser", msg);
+			startMenu();
+		});
 		elesel[i].interactive = true;
 		stage.addChild(elesel[i]);
-	}
+	});
 	refreshRenderer(stage);
 }
 
@@ -2842,14 +2838,19 @@ function maybeSendChat(e) {
 		}else if (msg.match(/^\/unmute /)){
 			delete muteset[msg.substring(8)];
 		}else if (user){
-			var checkPm = msg.split(" ", 2);
-			if (checkPm[0] == "/w") {
-				var match = msg.match(/^\/w"(?:[^"\\]|\\.)*"/);
-				var to = (match && match[0]) || checkPm[1];
-				msg = msg.substring(3).replace(to, "");
-				chatinput.value = "/w " + to + " ";
+			var msgdata = {msg: msg};
+			if (msg.match(/\/w( |")/)) {
+				var match = msg.match(/^\/w"([^"]*)"/);
+				var to = (match && match[1]) || msg.substring(3, msg.indexOf(" ", 4));
+				if (!to){
+					e.preventDefault();
+					return;
+				}
+				chatinput.value = msg.substr(0, 4+to.length);
+				msgdata.msg = msg.substr(4+to.length);
+				msgdata.to = to;
 			}
-			userEmit("chat", { msg: msg, to: to ? to.replace(/"/g, "") : null });
+			userEmit("chat", msgdata);
 		}
 		else {
 			var name = username.value || guestname || (guestname = (10000 + Math.floor(Math.random() * 89999)) + "");

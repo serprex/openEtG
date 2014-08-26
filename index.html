@@ -32,7 +32,7 @@
 			position:absolute;
 			display:none;
 		}
-		#hideright {
+		#lblhideright {
 			left:50px;
 			top:500px;
 			position:absolute;
@@ -64,7 +64,7 @@
 		<textarea id="chatinput" placeholder="Chat" style="width:350px;height:32px;resize:none" onkeydown="maybeSendChat(event)"></textarea>
 	</div>
 	<input id="deckimport" type="text" placeholder="Deck" onclick="this.setSelectionRange(0, 333)" />
-	<input id="hideright" type="checkbox" onchange="document.getElementById('rightpane').style.display=this.checked?'none':'inline'" />
+	<label id="lblhideright"><input id="hideright" type="checkbox" onchange="document.getElementById('rightpane').style.display=this.checked?'none':'inline'" />Hide rightpane</label>
     <script src="ui.main.js"></script>
 </body>
 </html>
