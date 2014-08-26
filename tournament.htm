@@ -8,9 +8,6 @@
 	<option value="commoner">Commoner's Duel</option>
 </select>
 <script>
-	var deckcode = document.getElementById("deckcode");
-	var legality = document.getElementById("legality");
-	var rulesets = document.getElementById("rulesets");
 	var Cards = require("./Cards");
 	var etg = require("./etg");
 	require("./etg.client").loadcards();
@@ -55,6 +52,9 @@
 		}
 	};
 	function testDeck() {
+		var deckcode = document.getElementById("deckcode");
+		var legality = document.getElementById("legality");
+		var rulesets = document.getElementById("rulesets");
 		if (!Cards.loaded){
 			legality.value = "Card DB not yet downloaded";
 			return;
@@ -65,7 +65,7 @@
 		for (var i = 0;i < code.length;i++) {
 		    var maybeMark = ~etg.fromTrueMark(code[i]);
 			if (maybeMark) markele = maybeMark;
-			else if (Cards.Codes[code[i]]) deck.push(Cards.Codes[code[i]]);
+			else if (Cards.Codes[code[i]]) deck.push(Cards.Codes[etgutil.asShiny(code[i], false)]);
 			else {
 				legality.value = "Not a real deck code. " + (code[i] || "???");
 				return;
