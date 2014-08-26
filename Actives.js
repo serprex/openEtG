@@ -350,7 +350,7 @@ discping:function(c,t){
 	new etg.CardInstance(c.card, c.owner).place();
 },
 disfield:function(c,t, dmg){
-	if (!c.owner.spend(etg.Other, dmg)){
+	if (!c.owner.spend(etg.Chroma, dmg)){
 		for(var i=1; i<13; i++){
 			c.owner.quanta[i] = 0;
 		}
@@ -1170,8 +1170,8 @@ scatterhand:function(c,t){
 scramble:function(c,t){
 	if (t instanceof etg.Player && !t.sanctuary){
 		for (var i=0; i<9; i++){
-			if (t.spend(etg.Other, 1)){
-				t.spend(etg.Other, -1);
+			if (t.spend(etg.Chroma, 1)){
+				t.spend(etg.Chroma, -1);
 			}
 		}
 	}
@@ -1232,7 +1232,7 @@ sinkhole:function(c,t){
 	t.usedactive = true;
 },
 siphon:adrenathrottle(function(c, t) {
-	if (!c.owner.foe.sanctuary && c.owner.foe.spend(etg.Other, 1)) {
+	if (!c.owner.foe.sanctuary && c.owner.foe.spend(etg.Chroma, 1)) {
 		Effect.mkText("1:11", c);
 		c.owner.spend(etg.Darkness, -1);
 	}
@@ -1419,10 +1419,10 @@ void:function(c,t){
 	}
 },
 quantagift:function(c,t){
-	c.owner.spend(c.card.element, -2);
 	if (c.owner.mark != c.card.element){
+		c.owner.spend(c.card.element, -2);
 		c.owner.spend(c.owner.mark, -2);
-	}
+	}else c.owner.spend(c.card.element, -3);
 },
 web:function(c,t){
 	Effect.mkText("Web", t);

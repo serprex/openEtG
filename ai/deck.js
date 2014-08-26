@@ -16,12 +16,15 @@ module.exports = function(level) {
 	for (var i = 0;i < 13;i++) {
 		ecost[i] = 0;
 	}
-	var deck = [];
+	var deck = [], banned = [Cards.Give, Cards.GiveUp, Cards.Reinforce];
 	var anyshield = 0, anyweapon = 0;
-	for (var j = 0;j < 2;j++) {
-		for (var i = 0;i < (j == 0 ? 20 : 10) ;i++) {
+	eles.forEach(function(ele, j){
+		for (var i = 20-j*10; i>0; i--) {
 			var maxRarity = level == 0 ? 2 : (level == 1 ? 3 : 4);
-			var card = etg.PlayerRng.randomcard(Math.random() < uprate, function(x) { return x.element == eles[j] && x.type != etg.PillarEnum && x.rarity <= maxRarity && cardcount[x.code] != 6 && !(x.type == etg.ShieldEnum && anyshield == 3) && !(x.type == etg.WeaponEnum && anyweapon == 3); });
+			var card = etg.PlayerRng.randomcard(Math.random() < uprate, function(x) {
+				return x.element == ele && x.type != etg.PillarEnum && x.rarity <= maxRarity && cardcount[x.code] != 6 &&
+					!(x.type == etg.ShieldEnum && anyshield == 3) && !(x.type == etg.WeaponEnum && anyweapon == 3) && !~banned.indexOf(x);
+			});
 			deck.push(card.code);
 			cardcount[card.code] = (cardcount[card.code] || 0) + 1;
 			if (!(((card.type == etg.WeaponEnum && !anyweapon) || (card.type == etg.ShieldEnum && !anyshield)) && cardcount[card.code])) {
@@ -37,7 +40,7 @@ module.exports = function(level) {
 			} else if (card.type == etg.ShieldEnum) anyshield++;
 			else if (card.type == etg.WeaponEnum) anyweapon++;
 		}
-	}
+	});
 	if (!anyshield) {
 		var card = Cards.Codes[deck[0]];
 		ecost[card.costele] -= card.cost;

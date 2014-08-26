@@ -1,9 +1,9 @@
 "use strict";
+exports.MAX_INT = 4294967296;
 function encodeCount(count){
 	return count<=0?"00":count>=1023?"vv":(count<32?"0":"") + count.toString(32);
 }
 exports.encodeCount = encodeCount;
-exports.MAX_INT = 4294967296;
 exports.asUpped = function(code, upped){
 	var intCode = parseInt(code, 32), isUpped = (intCode&0x3FFF) > 6999;
 	return isUpped == upped ? code : (intCode+(isUpped?-2000:2000)).toString(32);

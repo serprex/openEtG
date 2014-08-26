@@ -168,7 +168,7 @@ Card.prototype.upped = false;
 Card.prototype.status = {};
 Card.prototype.active = {};
 Player.prototype.markpower = 1;
-var Other = 0;
+var Chroma = 0;
 var Entropy = 1;
 var Death = 2;
 var Gravity = 3;
@@ -523,7 +523,7 @@ Player.prototype.randomquanta = function() {
 }
 Player.prototype.canspend = function(qtype, x) {
 	if (x <= 0)return true;
-	if (qtype == Other){
+	if (qtype == Chroma){
 		for (var i=1; i<13; i++){
 			x -= this.quanta[i];
 			if (x <= 0){
@@ -537,7 +537,7 @@ Player.prototype.spend = function(qtype, x) {
 	if (x == 0)return true;
 	if (x<0 && this.flatline)return true;
 	if (!this.canspend(qtype, x))return false;
-	if (qtype == Other){
+	if (qtype == Chroma){
 		var b = x<0?-1:1;
 		for (var i=x*b; i>0; i--){
 			this.quanta[b==-1?this.uptoceil(12):this.randomquanta()] -= b;
@@ -625,7 +625,7 @@ Player.prototype.endturn = function(discard) {
 				cr.buffhp(floodbuff?2:1);
 			}
 			cr.attack(stasisFlag, freedomChance);
-			if (i>4 && floodingFlag && cr.card.element != Water && cr.card.element != Other && cr.isMaterial() && ~cr.getIndex()){
+			if (i>4 && floodingFlag && cr.card.element != Water && cr.card.element != Chroma && cr.isMaterial() && ~cr.getIndex()){
 				cr.die();
 			}
 		}
@@ -1216,7 +1216,7 @@ exports.casttext = casttext;
 exports.fromTrueMark = fromTrueMark;
 exports.toTrueMark = toTrueMark;
 exports.PlayerRng = PlayerRng;
-exports.Other = 0;
+exports.Chroma = 0;
 exports.Entropy = 1;
 exports.Death = 2;
 exports.Gravity = 3;
