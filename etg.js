@@ -699,23 +699,13 @@ Player.prototype.drawhand = function(x) {
 		}
 	}
 }
+function destroyCloak(pr){
+	if (pr && pr.status.cloak) pr.die();
+}
 Player.prototype.masscc = function(caster, func, massmass){
-	for(var i=0; i<16; i++){
-		var pr = this.permanents[i];
-		if (pr && pr.status.cloak){
-			Actives.destroy(this, pr);
-		}
-		if (massmass){
-			pr = this.foe.permanents[i];
-			if (pr && pr.status.cloak){
-				Actives.destroy(this, pr);
-			}
-		}
-	}
-	var crs = this.creatures.slice(), crsfoe;
-	if (massmass){
-		crsfoe = this.foe.creatures.slice();
-	}
+	this.permanents.forEach(destroyCloak);
+	if (massmass) this.foe.permanents.forEach(destroyCloak);
+	var crs = this.creatures.slice(), crsfoe = massmass && this.foe.creatures.slice();
 	for(var i=0; i<23; i++){
 		if (crs[i] && crs[i].isMaterial()){
 			func(caster, crs[i]);

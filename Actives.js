@@ -70,13 +70,11 @@ aflatoxin:function(c,t){
 	}
 },
 aggroskele:function(c,t){
-	var dmg = 0;
 	new etg.Creature(c.card.as(Cards.Skeleton), c.owner).place();
-	for (var i=0; i<23; i++){
-		if (c.owner.creatures[i] && c.owner.creatures[i].card.isOf(Cards.Skeleton)){
-			dmg += c.owner.creatures[i].trueatk();
-		}
-	}
+	var dmg = c.owner.creatures.reduce(function(dmg, cr){
+		return cr && cr.card.isOf(Cards.Skeleton) ?
+			dmg + c.owner.creatures[i].trueatk() : dmg;
+	}, 0);
 	Effect.mkText("-"+dmg, t);
 	t.dmg(dmg);
 },
@@ -215,16 +213,15 @@ catapult:function(c,t){
 },
 chimera:function(c,t){
 	var atk=0, hp=0;
-	for(var i=0; i<23; i++){
-		if (c.owner.creatures[i]){
-			atk += c.owner.creatures[i].trueatk();
-			hp += c.owner.creatures[i].truehp();
+	c.owner.creatures.forEach(function(cr){
+		if (cr){
+			atk += cr.trueatk();
+			hp += cr.truehp();
 		}
-	}
+	});
 	var chim = new etg.Creature(c.card, c.owner);
 	chim.atk = atk;
-	chim.maxhp = hp;
-	chim.hp = hp;
+	chim.maxhp = chim.hp = hp;
 	chim.active = {};
 	chim.status.momentum = true;
 	c.owner.creatures[0] = chim;
@@ -627,13 +624,9 @@ holylight:function(c,t){
 	t.dmg(!(t instanceof etg.Player) && t.status.nocturnal?10:-10);
 },
 hope:function(c,t){
-	var dr=0;
-	for(var i=0; i<23; i++){
-		if(c.owner.creatures[i] && c.owner.creatures[i].hasactive("auto", "light")){
-			dr++;
-		}
-	}
-	return dr;
+	return c.owner.creatures.reduce(function(dr, cr){
+		return cr && cr.hasactive("auto", "light") ? dr+1 : dr;
+	}, 0);
 },
 icebolt:function(c,t){
 	var bolts = Math.floor(c.owner.quanta[etg.Water]/5);
@@ -1258,14 +1251,13 @@ siphonstrength:function(c,t){
 },
 skyblitz:function(c,t){
 	c.owner.quanta[etg.Air] = 0;
-	for(var i=0; i<23; i++){
-		var cr = c.owner.creatures[i];
+	c.owner.creatures.forEach(function(cr){
 		if (cr && cr.status.airborne){
 			Effect.mkText("Dive", cr);
 			cr.defstatus("dive", 0);
 			cr.status.dive += cr.trueatk();
 		}
-	}
+	});
 },
 snipe:function(c,t){
 	Effect.mkText("-3", t);
@@ -1347,13 +1339,9 @@ storm3:function(c,t){
 	t.masscc(c, Actives.snipe);
 },
 swarm:function(c,t){
-	var hp = 0;
-	for (var i=0; i<23; i++){
-		if (c.owner.creatures[i] && c.owner.creatures[i].active.hp == Actives.swarm){
-			hp++;
-		}
-	}
-	return hp;
+	return c.owner.creatures.reduce(function(hp, cr){
+		return cr && cr.active.hp == Actives.swarm ? hp+1 : hp;
+	}, 0);
 },
 swave:function(c,t){
 	if (t.status.frozen){
@@ -1484,12 +1472,9 @@ cold:function(c,t){
 	}
 },
 despair:function(c,t){
-	var chance=0;
-	for(var i=0; i<23; i++){
-		if (c.owner.creatures[i] && (c.owner.creatures[i].hasactive("auto", "siphon") || c.owner.creatures[i].hasactive("auto", "darkness"))) {
-			chance++;
-		}
-	}
+	var chance = c.owner.creatures.reduce(function(change, cr){
+		return cr && (cr.hasactive("auto", "siphon") || cr.hasactive("auto", "darkness")) ? chance+1 : chance;
+	}, 0);
 	if (c.owner.rng() < 1.2-Math.pow(.95, chance)){
 		Effect.mkText("-1|-1", t);
 		t.atk--;

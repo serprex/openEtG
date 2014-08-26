@@ -291,7 +291,7 @@ function estimateDamage(c, freedomChance, wallCharges, damageHash) {
 	if (!c || c.status.frozen || c.status.delayed){
 		return 0;
 	}
-	var tatk = c.trueatk(), fh = c.owner.foe.shield, fshactive = fsh && fsh.active.shield;
+	var tatk = c.trueatk(), fsh = c.owner.foe.shield, fshactive = fsh && fsh.active.shield;
 	var momentum = atk < 0 || c.status.momentum || c.status.psion;
 	var dr = 0, atk;
 	if (momentum) {
