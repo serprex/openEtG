@@ -695,16 +695,10 @@ io.on("connection", function(socket) {
 			var newCards = "", rarity = 1;
 			for (var i = 0;i < pack.amount;i++) {
 				if (i == pack.rare[rarity-1]) rarity++;
-				var code, notFromElement = Math.random() > .5;
-				if (rarity == 4 && Math.random()<0.125){
-					code = etg.NymphList[notFromElement || data.element<1 || data.element>12 ? etg.PlayerRng.uptoceil(12) : data.element];
-				}else{
-					var card = undefined; // Explicit else randompack is all same card
-					if (data.element < 13) card = etg.PlayerRng.randomcard(false, function(x) { return (x.element == data.element) ^ notFromElement && x.rarity == rarity });
-					if (!card) card = etg.PlayerRng.randomcard(false, function(x) { return x.rarity == rarity });
-					code = card.code;
-				}
-				newCards = etgutil.addcard(newCards, code);
+				var notFromElement = Math.random() > .5, card = undefined, bumprarity = rarity+(Math.random() < (rarity == 4 ? 0.125 : 0.05));
+				if (data.element < 13) card = etg.PlayerRng.randomcard(false, function(x) { return (x.element == data.element) ^ notFromElement && x.rarity == bumprarity });
+				if (!card) card = etg.PlayerRng.randomcard(false, function(x) { return x.rarity == bumprarity });
+				newCards = etgutil.addcard(newCards, card.code);
 			}
 			if (bound) {
 				freepacklist[data.pack]--;

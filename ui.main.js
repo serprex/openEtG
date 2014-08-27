@@ -888,7 +888,6 @@ function startMenu(nymph) {
 		"Starter decks, cards from free packs, & all non-Common Daily Cards are account-bound; they cannot be traded or sold",
 		"If you include account-bound cards in an upgrade, the upgrade will also be account-bound",
 		"You'll receive a Daily Card upon logging in after midnight GMT0. If you submit an Arena deck, the deck will always contain 5 copies of that card",
-		"No pack grade is cost efficient; commons in Bronze packs cost as much as commons in Silver packs",
 		"Unupgraded pillars & pendulums are free",
 		"Cards sell for around half as much as they cost to buy from a pack",
 		"Quests are free to try, & you always face the same deck. Keep trying until you collect your reward",
