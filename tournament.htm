@@ -1,5 +1,6 @@
-<script src="etgify.js"></script>
-
+<!DOCTYPE html>
+<head><script src="etgify.js"></script></head>
+<body>
 <input id="deckcode" type="text" placeholder="Deck" style="width:890px"/><br>
 <input id="legality" type="text" readonly style="width:400px" />
 <input id="test" type="submit" value="Test Deck" onclick="testDeck()" />
@@ -74,3 +75,4 @@
 		legality.value = deck.length > 60 ? "Your deck is too large" : deck.length < 30 ? "Your deck is too small" : verifiers[rulesets.options[rulesets.selectedIndex].value](deck, markele);
 	}
 </script>
+</body>

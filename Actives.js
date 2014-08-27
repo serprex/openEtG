@@ -73,7 +73,7 @@ aggroskele:function(c,t){
 	new etg.Creature(c.card.as(Cards.Skeleton), c.owner).place();
 	var dmg = c.owner.creatures.reduce(function(dmg, cr){
 		return cr && cr.card.isOf(Cards.Skeleton) ?
-			dmg + c.owner.creatures[i].trueatk() : dmg;
+			dmg + cr.trueatk() : dmg;
 	}, 0);
 	Effect.mkText("-"+dmg, t);
 	t.dmg(dmg);
