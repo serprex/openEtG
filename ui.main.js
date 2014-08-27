@@ -1118,7 +1118,7 @@ function startRewardWindow(reward, numberofcopies, nocode) {
 	setClick(confirmButton, function() {
 		if (chosenReward) {
 			if (nocode) {
-				userExec("addcards", { c: etgutil.encodeCount(numberofcopies) + chosenReward });
+				userExec("addbound", { c: etgutil.encodeCount(numberofcopies) + chosenReward });
 				startMenu();
 			}
 			else {
