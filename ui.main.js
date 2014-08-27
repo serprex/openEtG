@@ -2847,9 +2847,9 @@ function maybeSendChat(e) {
 				msgdata.msg = msg.substr(4+to.length);
 				msgdata.to = to;
 			}
-			userEmit("chat", msgdata);
+			if (!msgdata.msg.match(/^\s*$/)) userEmit("chat", msgdata);
 		}
-		else {
+		else if (!msg.match(/^\s*$/)) {
 			var name = username.value || guestname || (guestname = (10000 + Math.floor(Math.random() * 89999)) + "");
 			socket.emit("guestchat", { msg: msg, u: name });
 		}
