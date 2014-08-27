@@ -248,6 +248,14 @@ function activeUsers() {
 }
 function prepuser(servuser){
 	servuser.gold = parseInt(servuser.gold || 0);
+	servuser.selectedDeck = parseInt(servuser.selectedDeck || 0);
+	servuser.aiwins = parseInt(servuser.aiwins || 0);
+	servuser.ailosses = parseInt(servuser.ailosses || 0);
+	servuser.pvpwins = parseInt(servuser.pvpwins || 0);
+	servuser.pvplosses = parseInt(servuser.pvplosses || 0);
+	servuser.daily = parseInt(servuser.daily || 0);
+	servuser.dailymage = parseInt(servuser.dailymage || 0);
+	servuser.dailydg = parseInt(servuser.dailydg || 0);
 }
 function useruser(servuser, cb){
 	db.hgetall("Q:" + servuser.name, function (err, obj) {
@@ -255,19 +263,19 @@ function useruser(servuser, cb){
 			auth: servuser.auth,
 			name: servuser.name,
 			decks: servuser.decks,
-			selectedDeck: servuser.selectedDeck || 0,
+			selectedDeck: servuser.selectedDeck,
 			pool: servuser.pool,
 			gold: servuser.gold,
 			ocard: servuser.ocard,
 			freepacks: servuser.freepacks,
 			accountbound: servuser.accountbound,
-			aiwins: parseInt(servuser.aiwins || 0),
-			ailosses: parseInt(servuser.ailosses || 0),
-			pvpwins: parseInt(servuser.pvpwins || 0),
-			pvplosses: parseInt(servuser.pvplosses || 0),
-			daily: parseInt(servuser.daily || 0),
-			dailymage: parseInt(servuser.dailymage || 0),
-			dailydg: parseInt(servuser.dailydg || 0),
+			aiwins: servuser.aiwins,
+			ailosses: servuser.ailosses,
+			pvpwins: servuser.pvpwins,
+			pvplosses: servuser.pvplosses,
+			daily: servuser.daily,
+			dailymage: servuser.dailymage,
+			dailydg: servuser.dailydg,
 			quest: obj,
 		});
 	});

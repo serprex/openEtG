@@ -63,18 +63,12 @@ exports.addgold = function (data, user) {
 	user.gold += data.g;
 }
 exports.addloss = function (data, user) {
-	if (data.pvp) user.pvplosses = (user.pvplosses ? parseInt(user.pvplosses) + 1 : 1);
-	else user.ailosses = (user.ailosses ? parseInt(user.ailosses) + 1 : 1);
+	user[data.pvp?"pvplosses":"ailosses"]++;
 }
 exports.addwin = function(data, user) {
-	if (data.pvp) {
-		user.pvpwins = user.pvpwins ? parseInt(user.pvpwins) + 1 : 1;
-		user.pvplosses = user.pvplosses ? parseInt(user.pvplosses) - 1 : 0;
-	}
-	else {
-		user.aiwins = user.aiwins ? parseInt(user.aiwins) + 1 : 1;
-		user.ailosses = user.ailosses ? parseInt(user.ailosses) - 1 : 0;
-	}
+	var prefix = data.pvp?"pvp":"ai";
+	user[prefix+"wins"]++;
+	user[prefix+"losses"]--;
 }
 exports.addcards = function(data, user) {
 	user.pool = etgutil.mergedecks(user.pool, data.c);
