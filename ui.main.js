@@ -2761,6 +2761,7 @@ function getTextImage(text, font, bgcolor, width) {
 
 function chat(message, fontcolor) {
 	var scroll = chatBox.scrollTop == (chatBox.scrollHeight - chatBox.offsetHeight);
+	message = message.replace(/\b(([01][0-9a-v]{4})+)\b/g, "<a href='deck/$1' target='_blank'>$1</a>");
 	chatBox.innerHTML += "<font color=" + (fontcolor || "red") + ">" + message + "</font><br>";
 	if (scroll) chatBox.scrollTop = chatBox.scrollHeight;
 }

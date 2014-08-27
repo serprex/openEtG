@@ -667,9 +667,6 @@ infect:function(c,t){
 	Effect.mkText("Infect", t);
 	t.addpoison(1);
 },
-infest:function(c,t){
-	new etg.Creature(Cards.MalignantCell, c.owner).place();
-},
 inflation:function(c,t){
 	function inflate(p){
 		if (p && p.isMaterial() && p.active.cast){

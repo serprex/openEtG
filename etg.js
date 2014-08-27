@@ -905,8 +905,8 @@ Creature.prototype.deatheffect = Weapon.prototype.deatheffect = function(index) 
 Creature.prototype.die = function() {
 	var index = this.remove();
 	if (~index){
-		if (this.status.aflatoxin){
-			this.owner.creatures[index] = new Creature(Cards.MalignantCell, this.owner);
+		if (this.status.aflatoxin & !this.card.isOf(Cards.MalignantCell)){
+			this.owner.creatures[index] = new Creature(this.card.as(Cards.MalignantCell), this.owner);
 		}
 		if (!(this.active.predeath && this.active.predeath(this))){
 			this.deatheffect(index);
