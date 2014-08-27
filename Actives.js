@@ -1218,6 +1218,15 @@ singularity:function(c,t){
 	}
 	c.dmg(c.trueatk(), true);
 },
+sing:function(c,t){
+	t.remove();
+	t.owner = t.owner.foe;
+	t.place();
+	t.attack();
+	t.remove();
+	t.owner = t.owner.foe;
+	t.place();
+},
 sinkhole:function(c,t){
 	Effect.mkText("Sinkhole", t);
 	t.status.burrowed = true;
