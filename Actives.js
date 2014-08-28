@@ -1219,9 +1219,12 @@ sing:function(c,t){
 	t.owner = t.owner.foe;
 	t.place();
 	t.attack();
-	t.remove();
-	t.owner = t.owner.foe;
-	t.place();
+	var idx = t.getIndex();
+	if (~idx){
+		t.remove(idx);
+		t.owner = t.owner.foe;
+		t.place();
+	}
 },
 sinkhole:function(c,t){
 	Effect.mkText("Sinkhole", t);
