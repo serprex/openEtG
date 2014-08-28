@@ -2865,8 +2865,7 @@ function unaryParseInt(x) {
 }
 function maybeLogin(e) {
 	e.cancelBubble = true;
-	if (e.keyCode != 13) return;
-	if (username.value) {
+	if (e.keyCode == 13) {
 		loginClick();
 	}
 }
@@ -2902,7 +2901,7 @@ function prepuser(){
 	if (!user.pvpwins) user.pvpwins = 0;
 }
 function loginClick() {
-	if (!user) {
+	if (!user && username.value) {
 		var xhr = new XMLHttpRequest();
 		xhr.open("POST", "auth?u=" + encodeURIComponent(username.value) + (password.value.length ? "&p=" + encodeURIComponent(password.value) : ""), true);
 		xhr.onreadystatechange = function() {

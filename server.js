@@ -247,15 +247,11 @@ function activeUsers() {
 	return activeusers;
 }
 function prepuser(servuser){
-	servuser.gold = parseInt(servuser.gold || 0);
-	servuser.selectedDeck = parseInt(servuser.selectedDeck || 0);
-	servuser.aiwins = parseInt(servuser.aiwins || 0);
-	servuser.ailosses = parseInt(servuser.ailosses || 0);
-	servuser.pvpwins = parseInt(servuser.pvpwins || 0);
-	servuser.pvplosses = parseInt(servuser.pvplosses || 0);
-	servuser.daily = parseInt(servuser.daily || 0);
-	servuser.dailymage = parseInt(servuser.dailymage || 0);
-	servuser.dailydg = parseInt(servuser.dailydg || 0);
+	var intFields = ["gold", "selectedDeck", "daily", "dailymage", "dailydg",
+		"aiwins", "ailosses", "pvpwins", "pvplosses"];
+	intFields.forEach(function(field){
+		servuser[field] = parseInt(servuser[field] || 0);
+	});
 }
 function useruser(servuser, cb){
 	db.hgetall("Q:" + servuser.name, function (err, obj) {
@@ -265,10 +261,10 @@ function useruser(servuser, cb){
 			decks: servuser.decks,
 			selectedDeck: servuser.selectedDeck,
 			pool: servuser.pool,
+			accountbound: servuser.accountbound,
 			gold: servuser.gold,
 			ocard: servuser.ocard,
 			freepacks: servuser.freepacks,
-			accountbound: servuser.accountbound,
 			aiwins: servuser.aiwins,
 			ailosses: servuser.ailosses,
 			pvpwins: servuser.pvpwins,
@@ -369,16 +365,10 @@ io.on("connection", function(socket) {
 			"",
 		];
 		user.decks = starters[data.e];
-		user.selectedDeck = 0;
+		user.oracle = 0;
 		user.pool = "";
 		user.accountbound = user.decks;
 		user.freepacks = data.e == 13 ? "6,6,0,0" : "3,2,0,0";
-		user.aiwins = 0;
-		user.ailosses = 0;
-		user.pvpwins = 0;
-		user.pvplosses = 0;
-		user.oracle = 0;
-		user.daily = 0;
 		user.dailymage = Math.floor(Math.random() * aiDecks.mage.length);
 		user.dailydg = Math.floor(Math.random() * aiDecks.demigod.length);
 		db.hset("Q:"+user.name, "necromancer", 1, function(err, obj){
