@@ -292,31 +292,24 @@ function estimateDamage(c, freedomChance, wallCharges, damageHash) {
 	if (!c || c.status.frozen || c.status.delayed){
 		return 0;
 	}
-	var tatk = c.trueatk(), fsh = c.owner.foe.shield, fshactive = fsh && fsh.active.shield;
-	var momentum = atk < 0 || c.status.momentum || c.status.psion;
-	var dr = 0, atk;
-	if (momentum) {
-		atk = tatk;
-	} else {
-		if (fsh) dr = fsh.truedr();
-		atk = Math.max(tatk - dr, 0);
-		if ((fshactive == Actives.weight || fshactive == Actives.wings) && fshactive(c.owner.foe.shield, c, atk)) {
-			atk = 0;
+	function estimateAttack(tatk){
+		if (momentum) {
+			return tatk;
+		} else if ((fshactive == Actives.weight || fshactive == Actives.wings) && fshactive(c.owner.foe.shield, c)) {
+			return 0;
 		}else if (wallCharges && wallCharges[0]){
 			wallCharges[0]--;
-			atk = 0;
-		}
+			return 0;
+		}else return Math.max(tatk - dr, 0);
 	}
-	if (tatk > 0 && c.status.adrenaline) {
+	var tatk = c.trueatk(), fsh = c.owner.foe.shield, fshactive = fsh && fsh.active.shield;
+	var momentum = !fsh || atk < 0 || c.status.momentum || c.status.psion;
+	var dr = momentum ? 0 : fsh.truedr(), atk = estimateAttack(tatk);
+	if (c.status.adrenaline) {
 		var attacks = etg.countAdrenaline(tatk);
-		if (wallCharges && !momentum) wallCharges[0] -= attacks-1;
 		while (c.status.adrenaline < attacks) {
 			c.status.adrenaline++;
-			if (momentum){
-				atk += c.trueatk()
-			}else if(wallCharges && wallCharges[0]){
-				wallCharges[0]--;
-			}else atk += Math.max(c.trueatk() - dr, 0);
+			atk += estimateAttack(c.trueatk());
 		}
 		c.status.adrenaline = 1;
 	}
