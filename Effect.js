@@ -14,7 +14,7 @@ function Text(text, pos){
 		console.log("Blank position " + text);
 		pos = new PIXI.Point(-99, -99);
 	}
-	PIXI.Sprite.call(this, getTextImage(text, 16));
+	PIXI.Sprite.call(this, ui.getTextImage(text, 16));
 	this.step = 0;
 	this.position = maybeTgtPos(pos);
 	this.anchor.x = .5;

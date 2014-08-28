@@ -684,7 +684,7 @@ Player.prototype.drawcard = function() {
 			this.hand[this.hand.length] = new CardInstance(this.deck.pop(), this);
 			this.procactive("draw");
 			if (this.deck.length == 0 && this.game.player1 == this)
-				Effect.mkSpriteFade(getTextImage("This was your last card!", ui.mkFont(32, "white"), 0));
+				Effect.mkSpriteFade(ui.getTextImage("Last card!", ui.mkFont(32, "white"), 0));
 		}else this.game.setWinner(this.foe);
 	}
 }

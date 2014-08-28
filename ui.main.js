@@ -80,7 +80,7 @@ var renderer = new PIXI.autoDetectRenderer(900, 600);
 leftpane.appendChild(renderer.view);
 var realStage = new PIXI.Stage(0x336699, true);
 realStage.click = renderer.view.blur.bind(renderer.view);
-var caimgcache = {}, crimgcache = {}, wsimgcache = {}, artcache = {}, artimagecache = {}, tximgcache = {};
+var caimgcache = {}, crimgcache = {}, wsimgcache = {}, artcache = {}, artimagecache = {};
 var elecols = [0xa99683, 0xaa5999, 0x777777, 0x996633, 0x5f4930, 0x50a005, 0xcc6611, 0x205080, 0xa9a9a9, 0x337ddd, 0xccaa22, 0x333333, 0x77bbdd];
 
 function lighten(c) {
@@ -91,7 +91,7 @@ function maybeLighten(card){
 }
 function getBack(ele, upped) {
 	if (upped) ele += 13;
-	return cardBacks[ele];
+	return gfx.cardBacks[ele];
 }
 var shinyFilter = new PIXI.ColorMatrixFilter();
 shinyFilter.matrix = [
@@ -104,7 +104,7 @@ function makeArt(card, art, oldrend) {
 	var rend = oldrend || new PIXI.RenderTexture(132, 256);
 	var template = new PIXI.DisplayObjectContainer();
 	template.addChild(new PIXI.Sprite(getBack(card.element, card.upped)));
-	var rarity = new PIXI.Sprite(ricons[card.rarity]);
+	var rarity = new PIXI.Sprite(gfx.ricons[card.rarity]);
 	rarity.anchor.set(0, 1);
 	rarity.position.set(5, 252);
 	template.addChild(rarity);
@@ -114,7 +114,7 @@ function makeArt(card, art, oldrend) {
 		if (card.shiny) artspr.filters = [shinyFilter];
 		template.addChild(artspr);
 	}
-	var typemark = new PIXI.Sprite(ticons[card.type]);
+	var typemark = new PIXI.Sprite(gfx.ticons[card.type]);
 	typemark.anchor.set(1, 1);
 	typemark.position.set(128, 252);
 	template.addChild(typemark);
@@ -127,14 +127,14 @@ function makeArt(card, art, oldrend) {
 		text.position.set(rend.width - 20, 4);
 		template.addChild(text);
 		if (card.costele) {
-			var eleicon = new PIXI.Sprite(eicons[card.costele]);
+			var eleicon = new PIXI.Sprite(gfx.eicons[card.costele]);
 			eleicon.position.set(rend.width - 1, 10);
 			eleicon.anchor.set(1, .5);
 			eleicon.scale.set(.5, .5);
 			template.addChild(eleicon);
 		}
 	}
-	var infospr = new PIXI.Sprite(getTextImage(card.info(), ui.mkFont(11, card.upped ? "black" : "white"), "", rend.width-4))
+	var infospr = new PIXI.Sprite(ui.getTextImage(card.info(), ui.mkFont(11, card.upped ? "black" : "white"), "", rend.width-4))
 	infospr.position.set(2, 150);
 	template.addChild(infospr);
 	rend.render(template, null, true);
@@ -177,7 +177,7 @@ function getCardImage(code) {
 				graphics.addChild(text);
 				clipwidth += text.width + 22;
 				if (card.costele) {
-					var eleicon = new PIXI.Sprite(eicons[card.costele]);
+					var eleicon = new PIXI.Sprite(gfx.eicons[card.costele]);
 					eleicon.position.set(rend.width - 1, 10);
 					eleicon.anchor.set(1, .5);
 					eleicon.scale.set(.5, .5);
@@ -200,7 +200,7 @@ function getCreatureImage(code) {
 			var card = Cards.Codes[code];
 			var rend = new PIXI.RenderTexture(64, 82);
 			var graphics = new PIXI.Graphics();
-			var border = new PIXI.Sprite(cardBorders[card.element + (card.upped ? 13 : 0)]);
+			var border = new PIXI.Sprite(gfx.cardBorders[card.element + (card.upped ? 13 : 0)]);
 			border.scale.set(0.5, 0.5);
 			graphics.addChild(border);
 			graphics.beginFill(card ? maybeLighten(card) : elecols[0]);
@@ -232,7 +232,7 @@ function getWeaponShieldImage(code) {
 			var card = Cards.Codes[code];
 			var rend = new PIXI.RenderTexture(80, 102);
 			var graphics = new PIXI.Graphics();
-			var border = (new PIXI.Sprite(cardBorders[card.element + (card.upped ? 13 : 0)]));
+			var border = (new PIXI.Sprite(gfx.cardBorders[card.element + (card.upped ? 13 : 0)]));
 			border.scale.set(5/8, 5/8);
 			graphics.addChild(border);
 			graphics.beginFill(card ? maybeLighten(card) : elecols[0]);
@@ -259,7 +259,7 @@ function getWeaponShieldImage(code) {
 function initTrade(data) {
 	var editorui = new PIXI.DisplayObjectContainer();
 	editorui.interactive = true;
-	editorui.addChild(new PIXI.Sprite(backgrounds[0]));
+	editorui.addChild(new PIXI.Sprite(gfx.backgrounds[0]));
 	var cardminus = {};
 	var btrade = makeButton(10, 40, "Trade");
 	var bconfirm = makeButton(10, 70, "Confirm");
@@ -316,7 +316,7 @@ function initTrade(data) {
 	);
 	editorui.addChild(cardsel);
 	for (var i = 0;i < 30;i++) {
-		var sprite = new PIXI.Sprite(nopic);
+		var sprite = new PIXI.Sprite(gfx.nopic);
 		sprite.position.set(100 + Math.floor(i / 10) * 100, 8 + (i % 10) * 20);
 		(function(_i) {
 			setClick(sprite, function() {
@@ -332,7 +332,7 @@ function initTrade(data) {
 		selectedCardsprites.push(sprite);
 	}
 	for (var i = 0;i < 30;i++) {
-		var sprite = new PIXI.Sprite(nopic);
+		var sprite = new PIXI.Sprite(gfx.nopic);
 		sprite.position.set(450 + Math.floor(i / 10) * 100, 8 + (i % 10) * 20);
 		(function(_i) {
 			sprite.mouseover = function() {
@@ -344,7 +344,7 @@ function initTrade(data) {
 	}
 	setInteractive.apply(null, selectedCardsprites);
 	setInteractive.apply(null, player2Cardsprites);
-	var cardArt = new PIXI.Sprite(nopic);
+	var cardArt = new PIXI.Sprite(gfx.nopic);
 	cardArt.position.set(734, 8);
 	editorui.addChild(cardArt);
 	var cmds = {
@@ -389,7 +389,7 @@ function initTrade(data) {
 function initLibrary(pool){
 	var editorui = new PIXI.DisplayObjectContainer();
 	editorui.interactive = true;
-	editorui.addChild(new PIXI.Sprite(backgrounds[0]));
+	editorui.addChild(new PIXI.Sprite(gfx.backgrounds[0]));
 	var bexit = makeButton(10, 10, "Exit");
 	setClick(bexit, startMenu);
 	editorui.addChild(bexit);
@@ -399,7 +399,7 @@ function initLibrary(pool){
 			cardArt.setTexture(getArt(code));
 		}, null);
 	editorui.addChild(cardsel);
-	var cardArt = new PIXI.Sprite(nopic);
+	var cardArt = new PIXI.Sprite(gfx.nopic);
 	cardArt.position.set(734, 8);
 	editorui.addChild(cardArt);
 	refreshRenderer(editorui, function(){
@@ -485,7 +485,7 @@ function victoryScreen(game) {
 	victoryui.interactive = true;
 	var winner = game.winner == game.player1;
 	//lobby background
-	var bgvictory = new PIXI.Sprite(backgrounds[0]);
+	var bgvictory = new PIXI.Sprite(gfx.backgrounds[0]);
 	victoryui.addChild(bgvictory);
 
 	victoryui.addChild(makeText(10, 290, "Plies: " + game.ply + "\nTime: " + (game.time/1000).toFixed(1) + " seconds"));
@@ -565,12 +565,7 @@ function mkPremade(name, daily) {
 			gameData.p2markpower = 3;
 			gameData.p2drawpower = 2;
 		}
-		if (!user) {
-			parseInput(gameData, "p1hp", pvphp.value);
-			parseInput(gameData, "p1drawpower", pvpdraw.value);
-			parseInput(gameData, "p1markpower", pvpmark.value);
-			parseInput(gameData, "p1deckpower", pvpdeck.value);
-		}
+		if (!user) parsepvpstats(gameData);
 		var game = initGame(gameData, true);
 		game.cost = cost;
 		game.level = name == "mage" ? 1 : 3;
@@ -646,12 +641,7 @@ function mkAi(level, daily) {
 
 			var foename = typeName[level] + "\n" + randomNames[etg.PlayerRng.upto(randomNames.length)];
 			var gameData = { first: Math.random() < .5, deck: deck, urdeck: urdeck, seed: Math.random() * etgutil.MAX_INT, p2hp: level == 0 ? 100 : level == 1 ? 125 : 150, p2markpower: level == 2 ? 2 : 1, foename: foename, p2drawpower: level == 2 ? 2 : 1 };
-			if (!user) {
-				parseInput(gameData, "p1hp", pvphp.value);
-				parseInput(gameData, "p1drawpower", pvpdraw.value);
-				parseInput(gameData, "p1markpower", pvpmark.value);
-				parseInput(gameData, "p1deckpower", pvpdeck.value);
-			}
+			if (!user) parsepvpstats(gameData);
 			var game = initGame(gameData, true);
 			game.cost = cost;
 			game.level = level;
@@ -660,58 +650,18 @@ function mkAi(level, daily) {
 		}
 	}
 }
-// Asset Loading
-var nopic = PIXI.Texture.fromImage("");
-var goldtex, buttex;
-var sounds = {};
-var backgrounds = ["assets/bg_default.png", "assets/bg_lobby.png", "assets/bg_shop.png", "assets/bg_quest.png", "assets/bg_game.png", "assets/bg_questmap.png"];
-var eicons = [], ricons = [], cardBacks = [], cardBorders = [], boosters = [], popups = [], sicons = [], ticons = [], sborders = [];
-var preLoader = new PIXI.AssetLoader(["assets/gold.png", "assets/button.png", "assets/esheet.png", "assets/raritysheet.png", "assets/backsheet.png",
-	"assets/cardborders.png", "assets/popup_booster.png", "assets/statussheet.png", "assets/statusborders.png", "assets/typesheet.png"].concat(backgrounds));
-var loadingBarProgress = 0, loadingBarGraphic = new PIXI.Graphics();
-preLoader.onProgress = function() {
-	loadingBarGraphic.clear();
-	loadingBarGraphic.beginFill(0xFFFFFF);
-	loadingBarGraphic.drawRect(0, 284, 900*(1-this.loadCount/this.assetURLs.length), 32);
-	loadingBarGraphic.endFill();
-}
-preLoader.onComplete = function() {
-	// Start loading assets we don't require to be loaded before starting
-	var tex = PIXI.BaseTexture.fromImage("assets/boosters.png");
-	for (var i = 0;i < 4;i++) boosters.push(new PIXI.Texture(tex, new PIXI.Rectangle(i * 100, 0, 100, 150)));
-	ui.loadSounds("cardClick", "buttonClick", "permPlay", "creaturePlay", "openingMusic");
-	// Load assets we preloaded
-	goldtex = PIXI.Texture.fromFrame("assets/gold.png");
-	buttex = PIXI.Texture.fromFrame("assets/button.png");
-	for (var i = 0;i < backgrounds.length;i++){
-		backgrounds[i] = PIXI.Texture.fromFrame(backgrounds[i]);
-	}
-	var tex = PIXI.Texture.fromFrame("assets/esheet.png");
-	for (var i = 0;i < 14;i++) eicons.push(new PIXI.Texture(tex, new PIXI.Rectangle(i * 32, 0, 32, 32)));
-	var tex = PIXI.Texture.fromFrame("assets/raritysheet.png");
-	for (var i = 0;i < 6;i++) ricons.push(new PIXI.Texture(tex, new PIXI.Rectangle(i * 25, 0, 25, 25)));
-	ricons[-1] = ricons[5];
-	var tex = PIXI.Texture.fromFrame("assets/backsheet.png");
-	for (var i = 0;i < 26;i++) cardBacks.push(new PIXI.Texture(tex, new PIXI.Rectangle(i * 132, 0, 132, 256)));
-	var tex = PIXI.Texture.fromFrame("assets/cardborders.png");
-	for (var i = 0;i < 26;i++) cardBorders.push(new PIXI.Texture(tex, new PIXI.Rectangle(i * 128, 0, 128, 162)));
-	popups.push(PIXI.Texture.fromFrame("assets/popup_booster.png"));
-	var tex = PIXI.Texture.fromFrame("assets/statussheet.png");
-	for (var i = 0;i < 7;i++) sicons.push(new PIXI.Texture(tex, new PIXI.Rectangle(13 * i, 0, 13, 13)));
-	var tex = PIXI.Texture.fromFrame("assets/statusborders.png");
-	for (var i = 0;i < 3;i++) sborders.push(new PIXI.Texture(tex, new PIXI.Rectangle(64 * i, 0, 64, 81)));
-	var tex = PIXI.Texture.fromFrame("assets/typesheet.png");
-	for (var i = 0;i < 6;i++) ticons.push(new PIXI.Texture(tex, new PIXI.Rectangle(25 * i, 0, 25, 25)));
+var gfx = require("./gfx");
+gfx.load(function(loadingScreen){
+	refreshRenderer(loadingScreen);
+	requestAnimate();
+}, function(){
 	ui.playSound("openingMusic");
 	startMenu();
-}
-refreshRenderer(loadingBarGraphic);
-preLoader.load();
-requestAnimate();
+});
 function makeButton(x, y, img, mouseoverfunc) {
 	var b;
 	if (typeof img == "string"){
-		b = new PIXI.Sprite(buttex);
+		b = new PIXI.Sprite(gfx.button);
 		var txt = new PIXI.Text(img, {font: "14px Dosis"});
 		txt.anchor.set(.5, .5);
 		txt.position.set(b.width/2, b.height/2);
@@ -743,11 +693,11 @@ function makeButton(x, y, img, mouseoverfunc) {
 }
 
 function makeText(x, y, txt, vis, width) {
-	var t = new PIXI.Sprite(nopic);
+	var t = new PIXI.Sprite(gfx.nopic);
 	t.position.set(x, y);
 	t.setText = function(x, width){
 		if (x){
-			t.setTexture(getTextImage(x.toString(), { font: "14px Verdana", fill: "white", stroke: "black", strokeThickness: 2 }, "", width));
+			t.setTexture(ui.getTextImage(x.toString(), { font: "14px Verdana", fill: "white", stroke: "black", strokeThickness: 2 }, "", width));
 			t.visible = true;
 		}else{
 			t.visible = false;
@@ -788,7 +738,7 @@ function makeCardSelector(cardmouseover, cardclick, maxedIndicator){
 	var elefilter = 0, rarefilter = 0;
 	var columns = [[],[],[],[],[],[]], columnspr = [[],[],[],[],[],[]];
 	for (var i = 0;i < 13;i++) {
-		var sprite = makeButton((!i || i&1?4:40), 316 + Math.floor((i-1)/2) * 32, eicons[i]);
+		var sprite = makeButton((!i || i&1?4:40), 316 + Math.floor((i-1)/2) * 32, gfx.eicons[i]);
 		sprite.interactive = true;
 		(function(_i) {
 			setClick(sprite, function() {
@@ -799,7 +749,7 @@ function makeCardSelector(cardmouseover, cardclick, maxedIndicator){
 		cardsel.addChild(sprite);
 	}
 	for (var i = 0;i < 5; i++){
-		var sprite = makeButton(74, 338 + i * 32, ricons[i]);
+		var sprite = makeButton(74, 338 + i * 32, gfx.ricons[i]);
 		sprite.interactive = true;
 		(function(_i) {
 			setClick(sprite, function() {
@@ -811,7 +761,7 @@ function makeCardSelector(cardmouseover, cardclick, maxedIndicator){
 	}
 	for (var i = 0;i < 6;i++) {
 		for (var j = 0;j < 15;j++) {
-			var sprite = new PIXI.Sprite(nopic);
+			var sprite = new PIXI.Sprite(gfx.nopic);
 			sprite.position.set(100 + i * 130, 272 + j * 20);
 			var sprcount = new PIXI.Text("", { font: "12px Dosis" });
 			sprcount.position.set(102, 4);
@@ -917,7 +867,7 @@ function startMenu(nymph) {
 	var mouseroverButton;
 	var clickedButton;
 	//lobby background
-	var bglobby = new PIXI.Sprite(backgrounds[1]);
+	var bglobby = new PIXI.Sprite(gfx.backgrounds[1]);
 	bglobby.interactive = true;
 	bglobby.mouseover = function() {
 		tinfo.setText(user ? "Tip: " + tipjar[tipNumber] + "." : "To register, just type desired username & password in the fields to the right, then click 'Login'.", 750);
@@ -1101,7 +1051,7 @@ function startRewardWindow(reward, numberofcopies, nocode) {
 	}
 	var rewardui = new PIXI.DisplayObjectContainer();
 	rewardui.interactive = true;
-	rewardui.addChild(new PIXI.Sprite(backgrounds[0]));
+	rewardui.addChild(new PIXI.Sprite(gfx.backgrounds[0]));
 
 	if (numberofcopies > 1) {
 		var infotext = makeText(20, 100, "You will get " + numberofcopies + " copies of the card you choose")
@@ -1128,7 +1078,7 @@ function startRewardWindow(reward, numberofcopies, nocode) {
 	});
 	rewardui.addChild(confirmButton);
 
-	var chosenRewardImage = new PIXI.Sprite(nopic);
+	var chosenRewardImage = new PIXI.Sprite(gfx.nopic);
 	chosenRewardImage.position.set(450, 20);
 	rewardui.addChild(chosenRewardImage);
 	var chosenReward = null;
@@ -1155,7 +1105,7 @@ function startQuest(questname) {
 function startQuestWindow(){
 	var questui = new PIXI.DisplayObjectContainer();
 	questui.interactive = true;
-	var bgquest = new PIXI.Sprite(backgrounds[5]);
+	var bgquest = new PIXI.Sprite(gfx.backgrounds[5]);
 	bgquest.mouseover = function(){
 		tinfo.setText("Welcome to Potatotal Island. The perfect island for adventuring!");
 	};
@@ -1203,7 +1153,7 @@ function startQuestWindow(){
 					xtot += points[i].x;
 					ytot += points[i].y;
 				}
-				var icon = new PIXI.Sprite(eicons[13]);
+				var icon = new PIXI.Sprite(gfx.eicons[13]);
 				icon.anchor.x = 0.5;
 				icon.anchor.y = 0.5;
 				icon.position.set(xtot / points.length, ytot / points.length);
@@ -1214,7 +1164,7 @@ function startQuestWindow(){
 	}
 	refreshRenderer(questui);
 }
-var questIcons = (function makeQuestIcons(){
+var questicons = (function makeQuesticons(){
 	return [1, 0x4cff00].map(function(col){
 		var g = new PIXI.Graphics();
 		g.lineStyle(1, 0x88aa66);
@@ -1227,7 +1177,7 @@ var questIcons = (function makeQuestIcons(){
 function startQuestArea(area) {
 	var questui = new PIXI.DisplayObjectContainer();
 	questui.interactive = true;
-	var bgquest = new PIXI.Sprite(backgrounds[3]);
+	var bgquest = new PIXI.Sprite(gfx.backgrounds[3]);
 	bgquest.interactive = true;
 	bgquest.mouseover = function() {
 		tinfo.setText("");
@@ -1237,7 +1187,7 @@ function startQuestArea(area) {
 	var errinfo = makeText(50, 125, "");
 	function makeQuestButton(quest, stage) {
 		var pos = Quest[quest].info.pos[stage];
-		var button = makeButton(pos[0], pos[1], questIcons[user.quest[quest] > stage ? 1 : 0]);
+		var button = makeButton(pos[0], pos[1], questicons[user.quest[quest] > stage ? 1 : 0]);
 		button.mouseover = function() {
 			tinfo.setText(Quest[quest].info.text[stage], 750);
 		}
@@ -1325,7 +1275,7 @@ function upgradestore() {
 	}
 	var upgradeui = new PIXI.DisplayObjectContainer();
 	upgradeui.interactive = true;
-	var bg = new PIXI.Sprite(backgrounds[0]);
+	var bg = new PIXI.Sprite(gfx.backgrounds[0]);
 	bg.mouseover = function() {
 		cardArt.setTexture(getArt(etgutil.asUpped(selectedCard, true)));
 	}
@@ -1365,10 +1315,10 @@ function upgradestore() {
 	var twarning = new PIXI.Text("", { font: "bold 16px Dosis" });
 	twarning.position.set(100, 170);
 	upgradeui.addChild(twarning);
-	var cardArt = new PIXI.Sprite(nopic);
+	var cardArt = new PIXI.Sprite(gfx.nopic);
 	cardArt.position.set(734, 8);
 	upgradeui.addChild(cardArt);
-	var selectedCardArt = new PIXI.Sprite(nopic);
+	var selectedCardArt = new PIXI.Sprite(gfx.nopic);
 	selectedCardArt.position.set(534, 8);
 	upgradeui.addChild(selectedCardArt);
 
@@ -1417,7 +1367,7 @@ function startStore() {
 	storeui.interactive = true;
 
 	//shop background
-	storeui.addChild(new PIXI.Sprite(backgrounds[2]));
+	storeui.addChild(new PIXI.Sprite(gfx.backgrounds[2]));
 
 	//gold text
 	var tgold = makeText(750, 101, "$" + user.gold);
@@ -1478,7 +1428,7 @@ function startStore() {
 
 	// The different pack types
 	function gradeSelect(n){
-		var b = makeButton(50+125*n, 280, boosters[n]);
+		var b = makeButton(50+125*n, 280, gfx.boosters[n]);
 		setClick(b, function(){
 			packrarity = n;
 			tinfo2.setText(packdata[n].type + " Pack: " + packdata[n].info);
@@ -1493,7 +1443,7 @@ function startStore() {
 	var bplatinum = gradeSelect(3);
 
 	for (var i = 0;i < 14;i++) {
-		var elementbutton = makeButton(75 + Math.floor(i / 2)*64, 120 + (i % 2)*75, eicons[i]);
+		var elementbutton = makeButton(75 + Math.floor(i / 2)*64, 120 + (i % 2)*75, gfx.eicons[i]);
 		(function(_i) {
 			setClick(elementbutton, function() {
 				packele = _i;
@@ -1504,7 +1454,7 @@ function startStore() {
 	}
 
 	//booster popup
-	var popbooster = new PIXI.Sprite(popups[0]);
+	var popbooster = new PIXI.Sprite(gfx.popups[0]);
 	popbooster.position.set(43, 93);
 	popbooster.visible = false;
 	storeui.addChild(popbooster);
@@ -1575,7 +1525,7 @@ function mkDaily(type) {
 function startColosseum(){
 		var coloui = new PIXI.DisplayObjectContainer();
 		coloui.interactive = true;
-		coloui.addChild(new PIXI.Sprite(backgrounds[0]));
+		coloui.addChild(new PIXI.Sprite(gfx.backgrounds[0]));
 		var magename = aiDecks.mage[user.dailymage][0];
 		var dgname = aiDecks.demigod[user.dailydg][0];
 		var events = [
@@ -1638,7 +1588,7 @@ function startEditor(arena, acard, startempty) {
 				editordeck.splice(i, 1);
 			}
 		}
-		editormarksprite.setTexture(eicons[editormark]);
+		editormarksprite.setTexture(gfx.eicons[editormark]);
 		editordeck.sort(editorCardCmp);
 		if (user) {
 			cardminus = {};
@@ -1683,7 +1633,7 @@ function startEditor(arena, acard, startempty) {
 	var showAll = false, showShiny = false;
 	var editorui = new PIXI.DisplayObjectContainer();
 	editorui.interactive = true;
-	var bg = new PIXI.Sprite(backgrounds[0]);
+	var bg = new PIXI.Sprite(gfx.backgrounds[0]);
 	bg.mouseover = function() {
 		cardArt.visible = false;
 	}
@@ -1711,10 +1661,10 @@ function startEditor(arena, acard, startempty) {
 		var data = artable[name];
 		var bt = new PIXI.Text(name, ui.mkFont(16, "black"));
 		bt.position.set(8, y);
-		var bm = makeButton(50, y, getTextImage("-", ui.mkFont(16, "black"), 0xFFFFFFFF));
+		var bm = makeButton(50, y, ui.getTextImage("-", ui.mkFont(16, "black"), 0xFFFFFFFF));
 		var bv = new PIXI.Text(arattr[name], ui.mkFont(16, "black"));
 		bv.position.set(64, y);
-		var bp = makeButton(90, y, getTextImage("+", ui.mkFont(16, "black"), 0xFFFFFFFF));
+		var bp = makeButton(90, y, ui.getTextImage("+", ui.mkFont(16, "black"), 0xFFFFFFFF));
 		function modattr(x){
 			arattr[name] += x;
 			if (arattr[name] >= (data.min || 0) && (!data.max || arattr[name] <= data.max)){
@@ -1820,25 +1770,25 @@ function startEditor(arena, acard, startempty) {
 	editorui.addChild(bshiny);
 	var editordecksprites = [];
 	var editordeck = arena ? (startempty ? [] : etgutil.decodedeck(arena.deck)) : etgutil.decodedeck(getDeck());
-	var editormarksprite = new PIXI.Sprite(nopic);
+	var editormarksprite = new PIXI.Sprite(gfx.nopic);
 	editormarksprite.position.set(66, 200);
 	editorui.addChild(editormarksprite);
 	var editormark = 0;
 	processDeck();
 	for (var i = 0;i < 13;i++) {
-		var sprite = makeButton(100 + i * 32, 234, eicons[i]);
+		var sprite = makeButton(100 + i * 32, 234, gfx.eicons[i]);
 		sprite.interactive = true;
 		(function(_i) {
 			setClick(sprite, function() {
 				editormark = _i;
-				editormarksprite.setTexture(eicons[_i]);
+				editormarksprite.setTexture(gfx.eicons[_i]);
 				updateField();
 			});
 		})(i);
 		editorui.addChild(sprite);
 	}
 	for (var i = 0;i < 60;i++) {
-		var sprite = new PIXI.Sprite(nopic);
+		var sprite = new PIXI.Sprite(gfx.nopic);
 		sprite.position.set(100 + Math.floor(i / 10) * 100, 32 + (i % 10) * 20);
 		(function(_i) {
 			setClick(sprite, function() {
@@ -1886,7 +1836,7 @@ function startEditor(arena, acard, startempty) {
 		}, !arena
 	);
 	editorui.addChild(cardsel);
-	var cardArt = new PIXI.Sprite(nopic);
+	var cardArt = new PIXI.Sprite(gfx.nopic);
 	cardArt.position.set(734, 8);
 	editorui.addChild(cardArt);
 	editorui.endnext = function() {
@@ -1909,12 +1859,12 @@ function startEditor(arena, acard, startempty) {
 function startElementSelect() {
 	var stage = new PIXI.DisplayObjectContainer();
 	stage.interactive = true;
-	stage.addChild(new PIXI.Sprite(backgrounds[0]));
+	stage.addChild(new PIXI.Sprite(gfx.backgrounds[0]));
 	var eledesc = makeText(100, 250, "Select your starter element");
 	stage.addChild(eledesc);
 	var elesel = new Array(14);
 	etg.eleNames.forEach(function(name, i){
-		elesel[i] = new PIXI.Sprite(eicons[i]);
+		elesel[i] = new PIXI.Sprite(gfx.eicons[i]);
 		elesel[i].position.set(100 + i * 32, 300);
 		elesel[i].mouseover = function(){
 			this.setText(eledesc, name);
@@ -1965,7 +1915,7 @@ function startMatch(game, foeDeck) {
 	}
 	var gameui = new PIXI.DisplayObjectContainer();
 	gameui.interactive = true;
-	gameui.addChild(new PIXI.Sprite(backgrounds[4]));
+	gameui.addChild(new PIXI.Sprite(gfx.backgrounds[4]));
 	var cloakgfx = new PIXI.Graphics();
 	cloakgfx.beginFill(0);
 	cloakgfx.drawRect(130, 20, 660, 280);
@@ -2078,7 +2028,7 @@ function startMatch(game, foeDeck) {
 	});
 	function setInfo(obj) {
 		if (obj.owner != game.player2 || !cloakgfx.visible || !obj.card || obj.card.isOf(Cards.Cloak)) {
-			infobox.setTexture(getTextImage(obj.info(), ui.mkFont(10, "white"), 0, (obj instanceof etg.Weapon || obj instanceof etg.Shield ? 92 : 76)));
+			infobox.setTexture(ui.getTextImage(obj.info(), ui.mkFont(10, "white"), 0, (obj instanceof etg.Weapon || obj instanceof etg.Shield ? 92 : 76)));
 			var mousePosition = realStage.getMousePosition();
 			infobox.position.set(mousePosition.x, mousePosition.y);
 			infobox.visible = true;
@@ -2087,19 +2037,19 @@ function startMatch(game, foeDeck) {
 	var handsprite = [new Array(8), new Array(8)];
 	var creasprite = [new Array(23), new Array(23)];
 	var permsprite = [new Array(16), new Array(16)];
-	var weapsprite = [new PIXI.Sprite(nopic), new PIXI.Sprite(nopic)];
-	var shiesprite = [new PIXI.Sprite(nopic), new PIXI.Sprite(nopic)];
-	var marksprite = [new PIXI.Sprite(nopic), new PIXI.Sprite(nopic)];
+	var weapsprite = [new PIXI.Sprite(gfx.nopic), new PIXI.Sprite(gfx.nopic)];
+	var shiesprite = [new PIXI.Sprite(gfx.nopic), new PIXI.Sprite(gfx.nopic)];
+	var marksprite = [new PIXI.Sprite(gfx.nopic), new PIXI.Sprite(gfx.nopic)];
 	var marktext = [new PIXI.Text("", { font: "18px Dosis" }), new PIXI.Text("", { font: "18px Dosis" })];
 	var quantatext = [new PIXI.DisplayObjectContainer(), new PIXI.DisplayObjectContainer()];
 	var hptext = [new PIXI.Text("", { font: "18px Dosis" }), new PIXI.Text("", { font: "18px Dosis" })];
 	var damagetext = [new PIXI.Text("", { font: "14px Dosis" }), new PIXI.Text("", { font: "14px Dosis" })];
-	var poisontext = [new PIXI.Sprite(nopic), new PIXI.Sprite(nopic)];
+	var poisontext = [new PIXI.Sprite(gfx.nopic), new PIXI.Sprite(gfx.nopic)];
 	var decktext = [new PIXI.Text("", { font: "16px Dosis" }), new PIXI.Text("", { font: "16px Dosis" })];
 	for (var j = 0;j < 2;j++) {
 		(function(_j) {
 			for (var i = 0;i < 8;i++) {
-				handsprite[j][i] = new PIXI.Sprite(nopic);
+				handsprite[j][i] = new PIXI.Sprite(gfx.nopic);
 				handsprite[j][i].position.set(j ? 20 : 780, (j ? 130 : 310) + 20 * i);
 				(function(_i) {
 					setClick(handsprite[j][i], function() {
@@ -2132,28 +2082,28 @@ function startMatch(game, foeDeck) {
 			}
 			function makeInst(makestatuses, insts, i, pos, scale){
 				if (scale === undefined) scale = 1;
-				var spr = new PIXI.Sprite(nopic);
+				var spr = new PIXI.Sprite(gfx.nopic);
 				if (makestatuses){
 					var statuses = new PIXI.SpriteBatch();
 					for (var k=0; k<7; k++){
-						var icon = new PIXI.Sprite(sicons[k]);
+						var icon = new PIXI.Sprite(gfx.sicons[k]);
 						icon.alpha = .6;
 						icon.anchor.y = 1;
 						icon.position.set(-34 * scale + [4, 1, 1, 0, 3, 2, 1][k] * 8, 30 * scale);
 						statuses.addChild(icon);
 					}
 					for (var k=0; k<3; k++){
-						var icon = new PIXI.Sprite(sborders[k]);
+						var icon = new PIXI.Sprite(gfx.sborders[k]);
 						icon.position.set(-32 * scale, -40 * scale);
 						icon.scale.set(scale, scale);
 						statuses.addChild(icon);
 					}
 					spr.addChild(statuses);
 				}
-				var stattext = new PIXI.Sprite(nopic);
+				var stattext = new PIXI.Sprite(gfx.nopic);
 				stattext.position.set(-32 * scale, -32 * scale);
 				spr.addChild(stattext);
-				var activetext = new PIXI.Sprite(nopic);
+				var activetext = new PIXI.Sprite(gfx.nopic);
 				activetext.position.set(-32 * scale, -42 * scale);
 				spr.addChild(activetext);
 				spr.anchor.set(.5, .5);
@@ -2222,7 +2172,7 @@ function startMatch(game, foeDeck) {
 			for (var k = 1;k < 13;k++) {
 				quantatext[j].addChild(child = new PIXI.Text("", { font: "16px Dosis" }));
 				child.position.set((k & 1) ? 32 : 86, Math.floor((k - 1) / 2) * 32 + 8);
-				quantatext[j].addChild(child = new PIXI.Sprite(eicons[k]));
+				quantatext[j].addChild(child = new PIXI.Sprite(gfx.eicons[k]));
 				child.position.set((k & 1) ? 0 : 54, Math.floor((k - 1) / 2) * 32);
 			}
 			setClick(hptext[j], function() {
@@ -2250,11 +2200,11 @@ function startMatch(game, foeDeck) {
 	Effect.register(anims);
 	var foeplays = new PIXI.SpriteBatch();
 	gameui.addChild(foeplays);
-	var infobox = new PIXI.Sprite(nopic);
+	var infobox = new PIXI.Sprite(gfx.nopic);
 	infobox.alpha = .7;
 	infobox.anchor.set(.5, 1);
 	gameui.addChild(infobox);
-	var cardart = new PIXI.Sprite(nopic);
+	var cardart = new PIXI.Sprite(gfx.nopic);
 	cardart.position.set(654, 300);
 	cardart.anchor.set(.5, 0);
 	gameui.addChild(cardart);
@@ -2278,7 +2228,7 @@ function startMatch(game, foeDeck) {
 			var c = game.bitsToTgt(bits & 511), t = game.bitsToTgt((bits >> 9) & 511);
 			console.log("cast", c.toString(), (t || "-").toString(), bits);
 			if (c instanceof etg.CardInstance) {
-				var sprite = new PIXI.Sprite(nopic);
+				var sprite = new PIXI.Sprite(gfx.nopic);
 				sprite.position.set((foeplays.children.length % 9) * 100, Math.floor(foeplays.children.length / 9) * 20);
 				sprite.card = c.card;
 				foeplays.addChild(sprite);
@@ -2330,7 +2280,7 @@ function startMatch(game, foeDeck) {
 		}
 		var pos = realStage.getMousePosition();
 		var cardartcode, cardartx;
-		infobox.setTexture(nopic);
+		infobox.setTexture(gfx.nopic);
 		foeplays.children.forEach(function(foeplay){
 			if (hitTest(foeplay, pos)) {
 				cardartcode = foeplay.card.code;
@@ -2492,10 +2442,10 @@ function startMatch(game, foeDeck) {
 					creasprite[j][i].setTexture(getCreatureImage(cr.card));
 					creasprite[j][i].visible = true;
 					var child = creasprite[j][i].getChildAt(1);
-					child.setTexture(getTextImage(cr.trueatk() + "|" + cr.truehp() + (cr.status.charges ? " x" + cr.status.charges : ""), ui.mkFont(10, cr.card.upped ? "black" : "white"), maybeLighten(cr.card)));
+					child.setTexture(ui.getTextImage(cr.trueatk() + "|" + cr.truehp() + (cr.status.charges ? " x" + cr.status.charges : ""), ui.mkFont(10, cr.card.upped ? "black" : "white"), maybeLighten(cr.card)));
 					var child2 = creasprite[j][i].getChildAt(2);
 					var activetext = cr.active.cast ? etg.casttext(cr.cast, cr.castele) + cr.active.cast.activename : (cr.active.hit ? cr.active.hit.activename : "");
-					child2.setTexture(getTextImage(activetext, ui.mkFont(8, cr.card.upped ? "black" : "white")));
+					child2.setTexture(ui.getTextImage(activetext, ui.mkFont(8, cr.card.upped ? "black" : "white")));
 					drawStatus(cr, creasprite[j][i]);
 				} else creasprite[j][i].visible = false;
 			}
@@ -2507,24 +2457,24 @@ function startMatch(game, foeDeck) {
 					permsprite[j][i].alpha = pr.isMaterial() ? 1 : .7;
 					var child = permsprite[j][i].getChildAt(0);
 					if (pr instanceof etg.Pillar) {
-						child.setTexture(getTextImage("1:" + (pr.pendstate ? pr.owner.mark : pr.card.element) + " x" + pr.status.charges, ui.mkFont(10, pr.card.upped ? "black" : "white"), maybeLighten(pr.card)));
+						child.setTexture(ui.getTextImage("1:" + (pr.pendstate ? pr.owner.mark : pr.card.element) + " x" + pr.status.charges, ui.mkFont(10, pr.card.upped ? "black" : "white"), maybeLighten(pr.card)));
 					}
 					else if (pr.active.auto && pr.active.auto.activename == "locket") {
-						child.setTexture(getTextImage("1:" + (pr.status.mode || pr.owner.mark), ui.mkFont(10, pr.card.upped ? "black" : "white"), maybeLighten(pr.card)));
+						child.setTexture(ui.getTextImage("1:" + (pr.status.mode || pr.owner.mark), ui.mkFont(10, pr.card.upped ? "black" : "white"), maybeLighten(pr.card)));
 					}
-					else child.setTexture(getTextImage(pr.status.charges !== undefined ? " " + pr.status.charges : "", ui.mkFont(10, pr.card.upped ? "black" : "white"), maybeLighten(pr.card)));
+					else child.setTexture(ui.getTextImage(pr.status.charges !== undefined ? " " + pr.status.charges : "", ui.mkFont(10, pr.card.upped ? "black" : "white"), maybeLighten(pr.card)));
 					var child2 = permsprite[j][i].getChildAt(1);
-					child2.setTexture(pr instanceof etg.Pillar ? nopic : getTextImage(pr.activetext().replace(" losecharge", ""), ui.mkFont(8, pr.card.upped ? "black" : "white")));
+					child2.setTexture(pr instanceof etg.Pillar ? gfx.nopic : ui.getTextImage(pr.activetext().replace(" losecharge", ""), ui.mkFont(8, pr.card.upped ? "black" : "white")));
 				} else permsprite[j][i].visible = false;
 			}
 			var wp = pl.weapon;
 			if (wp && !(j == 1 && cloakgfx.visible)) {
 				weapsprite[j].visible = true;
 				var child = weapsprite[j].getChildAt(1);
-				child.setTexture(getTextImage(wp.trueatk() + (wp.status.charges ? " x" + wp.status.charges : ""), ui.mkFont(12, wp.card.upped ? "black" : "white"), maybeLighten(wp.card)));
+				child.setTexture(ui.getTextImage(wp.trueatk() + (wp.status.charges ? " x" + wp.status.charges : ""), ui.mkFont(12, wp.card.upped ? "black" : "white"), maybeLighten(wp.card)));
 				child.visible = true;
 				var child = weapsprite[j].getChildAt(2);
-				child.setTexture(getTextImage(wp.activetext(), ui.mkFont(12, wp.card.upped ? "black" : "white")));
+				child.setTexture(ui.getTextImage(wp.activetext(), ui.mkFont(12, wp.card.upped ? "black" : "white")));
 				child.visible = true;
 				weapsprite[j].setTexture(getWeaponShieldImage(wp.card.code));
 				drawStatus(wp, weapsprite[j]);
@@ -2534,15 +2484,15 @@ function startMatch(game, foeDeck) {
 				shiesprite[j].visible = true;
 				var dr = sh.truedr();
 				var child = shiesprite[j].getChildAt(0);
-				child.setTexture(getTextImage(sh.status.charges ? "x" + sh.status.charges: "" + sh.truedr() + "", ui.mkFont(12, sh.card.upped ? "black" : "white"), maybeLighten(sh.card)));
+				child.setTexture(ui.getTextImage(sh.status.charges ? "x" + sh.status.charges: "" + sh.truedr() + "", ui.mkFont(12, sh.card.upped ? "black" : "white"), maybeLighten(sh.card)));
 				child.visible = true;
 				var child = shiesprite[j].getChildAt(1);
-				child.setTexture(getTextImage((sh.active.shield ? " " + sh.active.shield.activename : "") + (sh.active.buff ? " " + sh.active.buff.activename : "") + (sh.active.cast ? etg.casttext(sh.cast, sh.castele) + sh.active.cast.activename : ""), ui.mkFont(12, sh.card.upped ? "black" : "white")));
+				child.setTexture(ui.getTextImage((sh.active.shield ? " " + sh.active.shield.activename : "") + (sh.active.buff ? " " + sh.active.buff.activename : "") + (sh.active.cast ? etg.casttext(sh.cast, sh.castele) + sh.active.cast.activename : ""), ui.mkFont(12, sh.card.upped ? "black" : "white")));
 				child.visible = true;
 				shiesprite[j].alpha = sh.isMaterial() ? 1 : .7;
 				shiesprite[j].setTexture(getWeaponShieldImage(sh.card.code));
 			} else shiesprite[j].visible = false;
-			marksprite[j].setTexture(eicons[pl.mark]);
+			marksprite[j].setTexture(gfx.eicons[pl.mark]);
 			if (pl.markpower != 1){
 				maybeSetText(marktext[j], "x" + pl.markpower);
 			}else marktext[j].visible = false;
@@ -2568,7 +2518,7 @@ function startMatch(game, foeDeck) {
 				setInfo(pl);
 			}
 			var poison = pl.status.poison, poisoninfo = !poison ? "" : (poison > 0 ? poison + " 1:2" : -poison + " 1:7") + (pl.neuro ? " 1:10" : "");
-			poisontext[j].setTexture(getTextImage(poisoninfo, 16));
+			poisontext[j].setTexture(ui.getTextImage(poisoninfo, 16));
 			maybeSetText(decktext[j], pl.deck.length + "cards");
 			maybeSetText(damagetext[j], !cloakgfx.visible && game.expectedDamage[j] ? "Next HP loss: " + game.expectedDamage[j] : "");
 		}
@@ -2580,7 +2530,7 @@ function startArenaInfo(info) {
 	if (!info) return;
 	var stage = new PIXI.DisplayObjectContainer();
 	stage.interactive = true;
-	stage.addChild(new PIXI.Sprite(backgrounds[0]));
+	stage.addChild(new PIXI.Sprite(gfx.backgrounds[0]));
 	var winloss = makeText(200, 300, (info.win || 0) + " - " + (info.loss || 0) + ": " + (info.rank+1) + "\nAge: " + info.day + "\nHP: " + info.curhp + " / " + info.hp + "\nMark: " + info.mark + "\nDraw: " + info.draw);
 	stage.addChild(winloss);
 	var batch = new PIXI.SpriteBatch();
@@ -2623,7 +2573,7 @@ function startArenaInfo(info) {
 			batch.addChild(spr);
 			i++;
 		});
-		var spr = new PIXI.Sprite(eicons[mark || 0]);
+		var spr = new PIXI.Sprite(gfx.eicons[mark || 0]);
 		spr.position.set(100, 234);
 		batch.addChild(spr);
 		var acard = new PIXI.Sprite(getArt(info.card));
@@ -2640,7 +2590,7 @@ function startArenaTop(info) {
 	}
 	var stage = new PIXI.DisplayObjectContainer();
 	stage.interactive = true;
-	stage.addChild(new PIXI.Sprite(backgrounds[0]));
+	stage.addChild(new PIXI.Sprite(gfx.backgrounds[0]));
 	for (var i = 0;i < info.length; i++) {
 		var data = info[i], y = 50 + i * 24;
 		var infotxt = makeText(120, y, (i+1) + "  " + data[0]);
@@ -2660,98 +2610,6 @@ function startArenaTop(info) {
 	setClick(bret, startMenu);
 	stage.addChild(bret);
 	refreshRenderer(stage);
-}
-
-function getTextImage(text, font, bgcolor, width) {
-	if (!text) return nopic;
-	if (bgcolor === undefined) bgcolor = "";
-	var size;
-	if (typeof font == "number"){
-		size = font;
-		font = ui.mkFont(font);
-	}else size = parseInt(font.font);
-	var fontkey = JSON.stringify(font) + bgcolor + "w" + width;
-	if (!(fontkey in tximgcache)) {
-		tximgcache[fontkey] = {};
-	}
-	if (text in tximgcache[fontkey]) {
-		return tximgcache[fontkey][text];
-	}
-	var doc = new PIXI.DisplayObjectContainer();
-	if (bgcolor !== ""){
-		var bg = new PIXI.Graphics();
-		doc.addChild(bg);
-	}
-	var pieces = text.replace(/\|/g, " | ").split(/(\d\d?:\d\d?|\$|\n)/);
-	var x = 0, y = 0, h = Math.max(size, new PIXI.Text("j", font).height), w = 0;
-	function pushChild(){
-		var w = 0;
-		if (x > 0){
-			for (var i = 0; i<arguments.length; i++){
-				w += arguments[i].width;
-			}
-		}
-		if (width && x + w > width){
-			x = 0;
-			y += h;
-		}
-		for (var i = 0; i<arguments.length; i++){
-			var c = arguments[i];
-			c.position.set(x, y);
-			x += c.width;
-			doc.addChild(c);
-		}
-	}
-	pieces.forEach(function(piece){
-		if (piece == "\n"){
-			w = Math.max(w, x);
-			x = 0;
-			y += h;
-		}else if (piece == "$"){
-			var spr = new PIXI.Sprite(goldtex);
-			spr.scale.set(size/16, size/16);
-			pushChild(spr);
-		}else if (/^\d\d?:\d\d?$/.test(piece)) {
-			var parse = piece.split(":");
-			var num = parseInt(parse[0]);
-			var icon = eicons[parseInt(parse[1])];
-			if (num < 4) {
-				var icons = [];
-				for (var j = 0;j < num;j++) {
-					var spr = new PIXI.Sprite(icon);
-					spr.scale.set(size/32, size/32);
-					icons.push(spr);
-				}
-				pushChild.apply(null, icons);
-			}else{
-				var spr = new PIXI.Sprite(icon);
-				spr.scale.set(size/32, size/32);
-				pushChild(new PIXI.Text(num, font), spr);
-			}
-		} else if (piece) {
-			var txt = new PIXI.Text(piece, font);
-			if (!width || x + txt.width < width){
-				pushChild(txt);
-			}else{
-				piece.split(" ").forEach(function(word){
-					if (word){
-						pushChild(new PIXI.Text(word, font));
-						if (x){
-							x += 3;
-						}
-					}
-				});
-			}
-		}
-	});
-	var rtex = new PIXI.RenderTexture(width || Math.max(w, x), y+h);
-	if (bg){
-		bg.beginFill(bgcolor);
-		bg.drawRect(0, 0, rtex.width, rtex.height);
-		bg.endFill();
-	}
-	rtex.render(doc);
-	return tximgcache[fontkey][text] = rtex;
 }
 
 function chat(message, fontcolor) {
@@ -2929,6 +2787,18 @@ function parseInput(data, key, value) {
 	if (value === 0 || value > 0)
 		data[key] = value;
 }
+function parsepvpstats(data){
+	parseInput(data, "hp", pvphp.value);
+	parseInput(data, "draw", pvpdraw.value);
+	parseInput(data, "mark", pvpmark.value);
+	parseInput(data, "deck", pvpdeck.value);
+}
+function parseaistats(data){
+	parseInput(data, "p2hp", aihp.value);
+	parseInput(data, "p2drawpower", aidraw.value);
+	parseInput(data, "p2markpower", aimark.value);
+	parseInput(data, "p2deckpower", aideckpow.value);
+}
 function challengeClick() {
 	if (Cards.loaded) {
 		var deck = getDeck();
@@ -2937,10 +2807,7 @@ function challengeClick() {
 			return;
 		}
 		var gameData = {};
-		parseInput(gameData, "hp", pvphp.value);
-		parseInput(gameData, "draw", pvpdraw.value);
-		parseInput(gameData, "mark", pvpmark.value);
-		parseInput(gameData, "deck", pvpdeck.value);
+		parsepvpstats(gameData);
 		if (user) {
 			gameData.f = foename.value;
 			userEmit("foewant", gameData);
@@ -2965,14 +2832,8 @@ function libraryClick() {
 }
 function aiClick(){
 	var gameData = { first: Math.random() < .5, deck: aideck.value, urdeck: getDeck(), seed: Math.random() * etgutil.MAX_INT, foename: "Custom" };
-	parseInput(gameData, "p1hp", pvphp.value);
-	parseInput(gameData, "p1drawpower", pvpdraw.value);
-	parseInput(gameData, "p1markpower", pvpmark.value);
-	parseInput(gameData, "p1deckpower", pvpdeck.value);
-	parseInput(gameData, "p2hp", aihp.value);
-	parseInput(gameData, "p2drawpower", aidraw.value);
-	parseInput(gameData, "p2markpower", aimark.value);
-	parseInput(gameData, "p2deckpower", aideckpow.value);
+	parsepvpstats(gameData);
+	parseaistats(gameData);
 	initGame(gameData, true);
 }
 (function(callbacks){
@@ -2995,6 +2856,5 @@ function aiClick(){
 	enableSound: {change: soundChange},
 	aivs: {click: aiClick},
 });
-window.getTextImage = getTextImage;
 soundChange();
 })();
