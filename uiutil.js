@@ -59,7 +59,7 @@ function tgtToPos(t) {
 }
 var tximgcache = {};
 function getTextImage(text, font, bgcolor, width) {
-	if (!text) return gfx.nopic;
+	if (!gfx.loaded || !text) return gfx.nopic;
 	if (bgcolor === undefined) bgcolor = "";
 	var size;
 	if (typeof font == "number"){

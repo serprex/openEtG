@@ -259,7 +259,7 @@ function getWeaponShieldImage(code) {
 function initTrade(data) {
 	var editorui = new PIXI.DisplayObjectContainer();
 	editorui.interactive = true;
-	editorui.addChild(new PIXI.Sprite(gfx.backgrounds[0]));
+	editorui.addChild(new PIXI.Sprite(gfx.bg_default));
 	var cardminus = {};
 	var btrade = makeButton(10, 40, "Trade");
 	var bconfirm = makeButton(10, 70, "Confirm");
@@ -389,7 +389,7 @@ function initTrade(data) {
 function initLibrary(pool){
 	var editorui = new PIXI.DisplayObjectContainer();
 	editorui.interactive = true;
-	editorui.addChild(new PIXI.Sprite(gfx.backgrounds[0]));
+	editorui.addChild(new PIXI.Sprite(gfx.bg_default));
 	var bexit = makeButton(10, 10, "Exit");
 	setClick(bexit, startMenu);
 	editorui.addChild(bexit);
@@ -485,7 +485,7 @@ function victoryScreen(game) {
 	victoryui.interactive = true;
 	var winner = game.winner == game.player1;
 	//lobby background
-	var bgvictory = new PIXI.Sprite(gfx.backgrounds[0]);
+	var bgvictory = new PIXI.Sprite(gfx.bg_default);
 	victoryui.addChild(bgvictory);
 
 	victoryui.addChild(makeText(10, 290, "Plies: " + game.ply + "\nTime: " + (game.time/1000).toFixed(1) + " seconds"));
@@ -866,8 +866,7 @@ function startMenu(nymph) {
 	var buttonList = [];
 	var mouseroverButton;
 	var clickedButton;
-	//lobby background
-	var bglobby = new PIXI.Sprite(gfx.backgrounds[1]);
+	var bglobby = new PIXI.Sprite(gfx.bg_lobby);
 	bglobby.interactive = true;
 	bglobby.mouseover = function() {
 		tinfo.setText(user ? "Tip: " + tipjar[tipNumber] + "." : "To register, just type desired username & password in the fields to the right, then click 'Login'.", 750);
@@ -1051,7 +1050,7 @@ function startRewardWindow(reward, numberofcopies, nocode) {
 	}
 	var rewardui = new PIXI.DisplayObjectContainer();
 	rewardui.interactive = true;
-	rewardui.addChild(new PIXI.Sprite(gfx.backgrounds[0]));
+	rewardui.addChild(new PIXI.Sprite(gfx.bg_default));
 
 	if (numberofcopies > 1) {
 		var infotext = makeText(20, 100, "You will get " + numberofcopies + " copies of the card you choose")
@@ -1105,7 +1104,7 @@ function startQuest(questname) {
 function startQuestWindow(){
 	var questui = new PIXI.DisplayObjectContainer();
 	questui.interactive = true;
-	var bgquest = new PIXI.Sprite(gfx.backgrounds[5]);
+	var bgquest = new PIXI.Sprite(gfx.bg_questmap);
 	bgquest.mouseover = function(){
 		tinfo.setText("Welcome to Potatotal Island. The perfect island for adventuring!");
 	};
@@ -1177,7 +1176,7 @@ var questicons = (function makeQuesticons(){
 function startQuestArea(area) {
 	var questui = new PIXI.DisplayObjectContainer();
 	questui.interactive = true;
-	var bgquest = new PIXI.Sprite(gfx.backgrounds[3]);
+	var bgquest = new PIXI.Sprite(gfx.bg_quest);
 	bgquest.interactive = true;
 	bgquest.mouseover = function() {
 		tinfo.setText("");
@@ -1275,7 +1274,7 @@ function upgradestore() {
 	}
 	var upgradeui = new PIXI.DisplayObjectContainer();
 	upgradeui.interactive = true;
-	var bg = new PIXI.Sprite(gfx.backgrounds[0]);
+	var bg = new PIXI.Sprite(gfx.bg_default);
 	bg.mouseover = function() {
 		cardArt.setTexture(getArt(etgutil.asUpped(selectedCard, true)));
 	}
@@ -1367,7 +1366,7 @@ function startStore() {
 	storeui.interactive = true;
 
 	//shop background
-	storeui.addChild(new PIXI.Sprite(gfx.backgrounds[2]));
+	storeui.addChild(new PIXI.Sprite(gfx.bg_shop));
 
 	//gold text
 	var tgold = makeText(750, 101, "$" + user.gold);
@@ -1454,7 +1453,7 @@ function startStore() {
 	}
 
 	//booster popup
-	var popbooster = new PIXI.Sprite(gfx.popups[0]);
+	var popbooster = new PIXI.Sprite(gfx.popup_booster);
 	popbooster.position.set(43, 93);
 	popbooster.visible = false;
 	storeui.addChild(popbooster);
@@ -1525,7 +1524,7 @@ function mkDaily(type) {
 function startColosseum(){
 		var coloui = new PIXI.DisplayObjectContainer();
 		coloui.interactive = true;
-		coloui.addChild(new PIXI.Sprite(gfx.backgrounds[0]));
+		coloui.addChild(new PIXI.Sprite(gfx.bg_default));
 		var magename = aiDecks.mage[user.dailymage][0];
 		var dgname = aiDecks.demigod[user.dailydg][0];
 		var events = [
@@ -1633,7 +1632,7 @@ function startEditor(arena, acard, startempty) {
 	var showAll = false, showShiny = false;
 	var editorui = new PIXI.DisplayObjectContainer();
 	editorui.interactive = true;
-	var bg = new PIXI.Sprite(gfx.backgrounds[0]);
+	var bg = new PIXI.Sprite(gfx.bg_default);
 	bg.mouseover = function() {
 		cardArt.visible = false;
 	}
@@ -1859,7 +1858,7 @@ function startEditor(arena, acard, startempty) {
 function startElementSelect() {
 	var stage = new PIXI.DisplayObjectContainer();
 	stage.interactive = true;
-	stage.addChild(new PIXI.Sprite(gfx.backgrounds[0]));
+	stage.addChild(new PIXI.Sprite(gfx.bg_default));
 	var eledesc = makeText(100, 250, "Select your starter element");
 	stage.addChild(eledesc);
 	var elesel = new Array(14);
@@ -1915,7 +1914,7 @@ function startMatch(game, foeDeck) {
 	}
 	var gameui = new PIXI.DisplayObjectContainer();
 	gameui.interactive = true;
-	gameui.addChild(new PIXI.Sprite(gfx.backgrounds[4]));
+	gameui.addChild(new PIXI.Sprite(gfx.bg_game));
 	var cloakgfx = new PIXI.Graphics();
 	cloakgfx.beginFill(0);
 	cloakgfx.drawRect(130, 20, 660, 280);
@@ -2530,7 +2529,7 @@ function startArenaInfo(info) {
 	if (!info) return;
 	var stage = new PIXI.DisplayObjectContainer();
 	stage.interactive = true;
-	stage.addChild(new PIXI.Sprite(gfx.backgrounds[0]));
+	stage.addChild(new PIXI.Sprite(gfx.bg_default));
 	var winloss = makeText(200, 300, (info.win || 0) + " - " + (info.loss || 0) + ": " + (info.rank+1) + "\nAge: " + info.day + "\nHP: " + info.curhp + " / " + info.hp + "\nMark: " + info.mark + "\nDraw: " + info.draw);
 	stage.addChild(winloss);
 	var batch = new PIXI.SpriteBatch();
@@ -2590,7 +2589,7 @@ function startArenaTop(info) {
 	}
 	var stage = new PIXI.DisplayObjectContainer();
 	stage.interactive = true;
-	stage.addChild(new PIXI.Sprite(gfx.backgrounds[0]));
+	stage.addChild(new PIXI.Sprite(gfx.bg_default));
 	for (var i = 0;i < info.length; i++) {
 		var data = info[i], y = 50 + i * 24;
 		var infotxt = makeText(120, y, (i+1) + "  " + data[0]);
