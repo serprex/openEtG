@@ -239,6 +239,7 @@ var ActivesValues = {
 	tick:function(c){
 		return c instanceof etg.CardInstance ? 1 : 1+(c.maxhp-c.truehp())/c.maxhp;
 	},
+	trick:4,
 	upkeep: -.5,
 	upload:3,
 	vampire:function(c, ttatk){

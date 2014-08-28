@@ -1380,24 +1380,16 @@ tick:function(c,t){
 	}
 },
 trick:function(c,t){
-	var creaids = [];
-	t.creatures.forEach(function(crea, i){
-		if (crea && crea.isMaterial()){
-			creaids.push(i);
+	var cards = [];
+	t.owner.deck.forEach(function(card, i){
+		if (card.type == etg.CreatureEnum && card != t.card){
+			cards.push(i);
 		}
 	});
-	if (creaids.length > 0){
-		var creaid = creaids[t.owner.upto(creaids.length)], creacard = t.creatures[creaid].card, cards = [];
-		t.deck.forEach(function(card, i){
-			if (card.type == etg.CreatureEnum && card != creacard){
-				cards.push(i);
-			}
-		});
-		if (cards.length > 0){
-			var pick = cards[t.owner.upto(cards.length)];
-			t.owner.creatures[creaid] = new etg.Creature(t.owner.deck[pick], t.owner);
-			t.owner.deck[pick] = creacard;
-		}
+	if (cards.length > 0){
+		var pick = cards[t.owner.upto(cards.length)];
+		t.owner.creatures[t.getIndex()] = new etg.Creature(t.owner.deck[pick], t.owner);
+		t.owner.deck[pick] = t.card;
 	}
 },
 unappease:function(c,t){
