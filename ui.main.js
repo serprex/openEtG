@@ -644,7 +644,7 @@ function mkAi(level, daily) {
 
 			var typeName = ["Commoner", "Mage", "Champion"];
 
-			var foename = typeName[level] + "\n" + randomNames[Math.floor(Math.random() * randomNames.length)];
+			var foename = typeName[level] + "\n" + randomNames[etg.PlayerRng.upto(randomNames.length)];
 			var gameData = { first: Math.random() < .5, deck: deck, urdeck: urdeck, seed: Math.random() * etgutil.MAX_INT, p2hp: level == 0 ? 100 : level == 1 ? 125 : 150, p2markpower: level == 2 ? 2 : 1, foename: foename, p2drawpower: level == 2 ? 2 : 1 };
 			if (!user) {
 				parseInput(gameData, "p1hp", pvphp.value);
@@ -909,7 +909,7 @@ function startMenu(nymph) {
 		"After an AI battle you will win a random common, uncommon, or rare from your opponent's deck",
 		"An eigth of Platinum packs have Nymphs replaced with shards",
 	];
-	var tipNumber = Math.floor(Math.random()*tipjar.length);
+	var tipNumber = etg.PlayerRng.upto(tipjar.length);
 
 	var menuui = new PIXI.DisplayObjectContainer();
 	menuui.interactive = true;
@@ -2381,16 +2381,11 @@ function startMatch(game, foeDeck) {
 		} else cardart.visible = false;
 		if (game.winner == game.player1 && user && !game.quest && game.ai) {
 			if (game.cardreward === undefined) {
-				var winnable = [], cardwon;
-				foeDeck.forEach(function(card){
-					if (card.rarity > 0 && card.rarity < 4) {
-						winnable.push(card);
-					}
-				});
+				var winnable = foeDeck.filter(function(card){ return card.rarity > 0 && card.rarity < 4; }), cardwon;
 				if (winnable.length) {
-					cardwon = winnable[Math.floor(Math.random() * winnable.length)];
+					cardwon = winnable[etg.PlayerRng.upto(winnable.length)];
 					if (cardwon == 3 && Math.random() < .5)
-						cardwon = winnable[Math.floor(Math.random() * winnable.length)];
+						cardwon = winnable[etg.PlayerRng.upto(winnable.length)];
 				} else {
 					var elewin = foeDeck[Math.floor(Math.random() * foeDeck.length)];
 					cardwon = etg.PlayerRng.randomcard(elewin.upped, function(x) { return x.element == elewin.element && x.type != etg.PillarEnum && x.rarity <= 3; });

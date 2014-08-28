@@ -460,18 +460,17 @@ fickle:function(c,t){
 		return;
 	}
 	var cards = [];
-	for(var i=0; i<t.owner.deck.length; i++){
-		var card = t.owner.deck[i];
+	t.owner.deck.forEach(function(card, i){
 		var cost = card.cost;
 		if (!card.element || card.element == c.castele) cost += c.cast;
 		if (t.owner.canspend(card.costele, cost)){
 			cards.push(i);
 		}
-	}
+	});
 	if (cards.length > 0){
-		var pick = t.owner.upto(cards.length);
-		t.owner.hand[t.getIndex()] = new etg.CardInstance(t.owner.deck[cards[pick]], t.owner);
-		t.owner.deck[cards[pick]] = t.card;
+		var pick = cards[t.owner.upto(cards.length)];
+		t.owner.hand[t.getIndex()] = new etg.CardInstance(t.owner.deck[pick], t.owner);
+		t.owner.deck[pick] = t.card;
 	}
 },
 fiery:function(c,t){
@@ -1378,6 +1377,27 @@ tick:function(c,t){
 	if (c.hp <= 0) {
 		if (c.card.upped) c.owner.foe.masscc(c, function (c, x) { x.dmg(4) });
 		else c.owner.foe.spelldmg(15);
+	}
+},
+trick:function(c,t){
+	var creaids = [];
+	t.creatures.forEach(function(crea, i){
+		if (crea && crea.isMaterial()){
+			creaids.push(i);
+		}
+	});
+	if (creaids.length > 0){
+		var creaid = creaids[t.owner.upto(creaids.length)], creacard = t.creatures[creaid].card, cards = [];
+		t.deck.forEach(function(card, i){
+			if (card.type == etg.CreatureEnum && card != creacard){
+				cards.push(i);
+			}
+		});
+		if (cards.length > 0){
+			var pick = cards[t.owner.upto(cards.length)];
+			t.owner.creatures[creaid] = new etg.Creature(t.owner.deck[pick], t.owner);
+			t.owner.deck[pick] = creacard;
+		}
 	}
 },
 unappease:function(c,t){
