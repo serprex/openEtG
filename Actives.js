@@ -1388,8 +1388,9 @@ trick:function(c,t){
 	});
 	if (cards.length > 0){
 		var pick = cards[t.owner.upto(cards.length)];
-		t.owner.creatures[t.getIndex()] = new etg.Creature(t.owner.deck[pick], t.owner);
+		var cr = t.owner.creatures[t.getIndex()] = new etg.Creature(t.owner.deck[pick], t.owner);
 		t.owner.deck[pick] = t.card;
+		cr.procactive("play");
 	}
 },
 unappease:function(c,t){
