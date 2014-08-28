@@ -2975,9 +2975,26 @@ function aiClick(){
 	parseInput(gameData, "p2deckpower", aideckpow.value);
 	initGame(gameData, true);
 }
-var expofuncs = [maybeLogin, maybeChallenge, maybeSendChat, changeClick, challengeClick, tradeClick, rewardClick, libraryClick, loginClick, getTextImage, soundChange, aiClick];
-for(var i=0; i<expofuncs.length; i++){
-	window[expofuncs[i].name] = expofuncs[i];
-}
+(function(callbacks){
+	for(var id in callbacks){
+		for(var event in callbacks[id]){
+			document.getElementById(id).addEventListener(event, callbacks[id][event]);
+		}
+	}
+})({
+	change: {click: changeClick},
+	login: {click: loginClick},
+	username: {keydown: maybeLogin},
+	password: {keydown: maybeLogin},
+	foename: {keydown: maybeChallenge},
+	challenge: {click: challengeClick},
+	trade: {click: tradeClick},
+	reward: {click: rewardClick},
+	library: {click: libraryClick},
+	chatinput: {keydown: maybeSendChat},
+	enableSound: {change: soundChange},
+	aivs: {click: aiClick},
+});
+window.getTextImage = getTextImage;
 soundChange();
 })();
