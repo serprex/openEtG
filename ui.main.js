@@ -1039,11 +1039,7 @@ function startMenu(nymph) {
 		lblhideright.style.display = "none";
 	}
 
-	refreshRenderer(menuui, function() {
-		if (user) {
-			tgold.setText("$" + user.gold);
-		}
-	});
+	refreshRenderer(menuui);
 	lblhideright.style.display = "inline";
 }
 function startRewardWindow(reward, numberofcopies, nocode) {
@@ -1270,6 +1266,7 @@ function upgradestore() {
 		if (codecount) {
 			userExec("sellcard", { card: card.code });
 			adjustdeck();
+			goldcount.setText("$" + user.gold);
 		}
 		else return "This card is bound to your account; you cannot sell it.";
 	}
@@ -1292,7 +1289,7 @@ function upgradestore() {
 	bg.interactive = true;
 	upgradeui.addChild(bg);
 
-	var goldcount = makeText(30, 100, "");
+	var goldcount = makeText(30, 100, "$" + user.gold);
 	upgradeui.addChild(goldcount);
 	var bupgrade = makeButton(150, 50, "Upgrade");
 	setClick(bupgrade, eventWrap(upgradeCard));
@@ -1360,7 +1357,6 @@ function upgradestore() {
 	adjustdeck();
 	refreshRenderer(upgradeui, function() {
 		cardsel.next(cardpool, undefined, false, showShiny);
-		goldcount.setText("$" + user.gold);
 	});
 }
 
