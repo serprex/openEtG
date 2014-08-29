@@ -688,9 +688,9 @@ function makeButton(x, y, img, mouseoverfunc) {
 				this.visible = true;
 			}else this.visible = false;
 		}
-	}else{
+	}else if (img instanceof PIXI.Texture){
 		b = new PIXI.Sprite(img);
-	}
+	}else b = img;
 	b.interactive = true;
 	b.buttonMode = true;
 	b.position.set(x, y);
@@ -1181,14 +1181,6 @@ function startQuestWindow(){
 	}
 	refreshRenderer(questui);
 }
-var questicons = [1, 0x4cff00].map(function(col){
-	var g = new PIXI.Graphics();
-	g.lineStyle(1, 0x88aa66);
-	g.beginFill(col);
-	g.drawCircle(0, 0, 16);
-	g.endFill();
-	return g.generateTexture();
-});
 function startQuestArea(area) {
 	var questui = new PIXI.DisplayObjectContainer();
 	questui.interactive = true;
@@ -1202,7 +1194,13 @@ function startQuestArea(area) {
 	var errinfo = makeText(50, 125, "");
 	function makeQuestButton(quest, stage) {
 		var pos = Quest[quest].info.pos[stage];
-		var button = makeButton(pos[0], pos[1], questicons[user.quest[quest] > stage ? 1 : 0]);
+		var circle = new PIXI.Graphics();
+		circle.lineStyle(2, 0x88aa66);
+		circle.beginFill(user.quest[quest] > stage ? 0x4cff00 : 1);
+		circle.drawCircle(0, 0, 16);
+		circle.endFill();
+		circle.hitArea = new PIXI.Circle(0, 0, 16);
+		var button = makeButton(pos[0], pos[1], circle);
 		button.mouseover = function() {
 			tinfo.setText(Quest[quest].info.text[stage], 750);
 		}
