@@ -1170,16 +1170,14 @@ function startQuestWindow(){
 	}
 	refreshRenderer(questui);
 }
-var questicons = (function makeQuesticons(){
-	return [1, 0x4cff00].map(function(col){
-		var g = new PIXI.Graphics();
-		g.lineStyle(1, 0x88aa66);
-		g.beginFill(col);
-		g.drawCircle(0, 0, 16);
-		g.endFill();
-		return g.generateTexture();
-	});
-})();
+var questicons = [1, 0x4cff00].map(function(col){
+	var g = new PIXI.Graphics();
+	g.lineStyle(1, 0x88aa66);
+	g.beginFill(col);
+	g.drawCircle(0, 0, 16);
+	g.endFill();
+	return g.generateTexture();
+});
 function startQuestArea(area) {
 	var questui = new PIXI.DisplayObjectContainer();
 	questui.interactive = true;
@@ -1368,6 +1366,7 @@ function startStore() {
 		{cost: 25, type: "Silver", info: "3 Commons, 3 Uncommons"},
 		{cost: 65, type: "Gold", info: "3 Commons, 4 Uncommons, 1 Rare"},
 		{cost: 100, type: "Platinum", info: "4 Commons, 3 Uncommons, 1 Rare, 1 Shard"},
+		{cost: 250, type: "Nymph", info: "1 Nymph"},
 	];
 	var packele = -1, packrarity = -1;
 
@@ -1403,7 +1402,7 @@ function startStore() {
 	var bget = makeButton(750, 156, "Take Cards");
 	toggleB(bget);
 	setClick(bget, function () {
-		toggleB(bbronze, bsilver, bgold, bplatinum, bget, bbuy);
+		toggleB(bbronze, bsilver, bgold, bplatinum, bnymph, bget, bbuy);
 		popbooster.visible = false;
 	});
 	storeui.addChild(bget);
@@ -1434,9 +1433,28 @@ function startStore() {
 	});
 	storeui.addChild(bbuy);
 
+	var boostergfx = [0xcd7d32, 0xc0c0c0, 0xffd700, 0xe4e4e4, 0x6699BB].map(function(color, i){
+		var pack = packdata[i];
+		var g = new PIXI.Graphics();
+		g.lineStyle(3);
+		g.beginFill(color);
+		g.drawRoundedRect(0, 0, 100, 150, 6);
+		g.endFill();
+		var name = new PIXI.Text(pack.type, {font: "18px Verdana"});
+		name.anchor.set(.5, .5);
+		name.position.set(50, 75);
+		g.addChild(name);
+		var price = new PIXI.Sprite(ui.getTextImage("$"+pack.cost, {font: "12px Verdana"}));
+		price.anchor.set(0, 1);
+		price.position.set(4, 146);
+		g.addChild(price);
+		var rend = new PIXI.RenderTexture(100, 150);
+		rend.render(g);
+		return rend;
+	});
 	// The different pack types
 	function gradeSelect(n){
-		var b = makeButton(50+125*n, 280, gfx.boosters[n]);
+		var b = makeButton(50+125*n, 280, boostergfx[n]);
 		setClick(b, function(){
 			packrarity = n;
 			tinfo2.setText(packdata[n].type + " Pack: " + packdata[n].info);
@@ -1449,6 +1467,7 @@ function startStore() {
 	var bsilver = gradeSelect(1);
 	var bgold = gradeSelect(2);
 	var bplatinum = gradeSelect(3);
+	var bnymph = gradeSelect(4);
 
 	for (var i = 0;i < 14;i++) {
 		var elementbutton = makeButton(75 + Math.floor(i / 2)*64, 120 + (i % 2)*75, gfx.eicons[i]);
@@ -1481,7 +1500,7 @@ function startStore() {
 				user.gold -= data.cost;
 				tgold.setText("$" + user.gold);
 			}
-			toggleB(bbronze, bsilver, bgold, bplatinum, bget);
+			toggleB(bbronze, bsilver, bgold, bplatinum, bnymph, bget);
 			if (popbooster.children.length) popbooster.removeChildren();
 			etgutil.iterdeck(data.cards, function(code, i){
 				var x = i % 5, y = Math.floor(i/5);

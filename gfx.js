@@ -14,13 +14,10 @@ function load(preload, postload){
 	}
 	preLoader.onComplete = function() {
 		require("./uiutil").loadSounds("cardClick", "buttonClick", "permPlay", "creaturePlay", "openingMusic");
-		var names = ["eicons", "ricons", "cardBacks", "cardBorders", "boosters", "popups", "sicons", "ticons", "sborders"];
+		var names = ["eicons", "ricons", "cardBacks", "cardBorders", "popups", "sicons", "ticons", "sborders"];
 		names.forEach(function(name){
 			exports[name] = [];
 		});
-		// Start loading assets we don't require to be loaded before starting
-		var tex = PIXI.BaseTexture.fromImage("assets/boosters.png");
-		for (var i = 0;i < 4;i++) exports.boosters.push(new PIXI.Texture(tex, new PIXI.Rectangle(i * 100, 0, 100, 150)));
 		// Load assets we preloaded
 		singles.forEach(function(single){
 			exports[single.substring(7, single.length-4)] = PIXI.Texture.fromFrame(single);
