@@ -675,6 +675,7 @@ io.on("connection", function(socket) {
 			{ amount: 6, cost: 25, rare: [3]},
 			{ amount: 8, cost: 65, rare: [3, 7]},
 			{ amount: 9, cost: 100, rare: [4, 7, 8]},
+			{ amount: 1, cost: 250, rare: [0, 0, 0, 0]},
 		][data.pack];
 		if (!pack) return;
 		if (user.freepacks){
@@ -684,8 +685,8 @@ io.on("connection", function(socket) {
 		if (bound || user.gold >= pack.cost) {
 			var newCards = "", rarity = 1;
 			for (var i = 0;i < pack.amount;i++) {
-				if (i == pack.rare[rarity-1]) rarity++;
-				var notFromElement = Math.random() > .5, card = undefined, bumprarity = rarity+(Math.random() < (rarity == 4 ? 0.125 : (.45/pack.amount)));
+				while (i == pack.rare[rarity-1]) rarity++;
+				var notFromElement = Math.random() > .5, card = undefined, bumprarity = rarity+(rarity < 5 && Math.random() < (.45/pack.amount));
 				if (data.element < 13) card = etg.PlayerRng.randomcard(false, function(x) { return (x.element == data.element) ^ notFromElement && x.rarity == bumprarity });
 				if (!card) card = etg.PlayerRng.randomcard(false, function(x) { return x.rarity == bumprarity });
 				newCards = etgutil.addcard(newCards, card.code);
