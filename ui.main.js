@@ -2626,6 +2626,14 @@ function chat(message, fontcolor) {
 	chatBox.innerHTML += "<font color=" + (fontcolor || "red") + ">" + message + "</font><br>";
 	if (scroll) chatBox.scrollTop = chatBox.scrollHeight;
 }
+socket.on("challenge", function(data) {
+	console.log("test");
+	var message = data.pvp ? " challenges you to a duel!" : " wants to trade with you!";
+	var span = document.createElement("SPAN");
+	span.addEventListener("click", (data.pvp ? challengeClick : tradeClick).bind(null, data.f));
+	span.innerHTML = "<font color=blue>" + data.f + message + "</font><br>";
+	chatBox.appendChild(span);
+});
 socket.on("pvpgive", initGame);
 socket.on("tradegive", initTrade);
 socket.on("librarygive", initLibrary);
@@ -2807,7 +2815,7 @@ function parseaistats(data){
 	parseInput(data, "p2markpower", aimark.value);
 	parseInput(data, "p2deckpower", aideckpow.value);
 }
-function challengeClick() {
+function challengeClick(foe) {
 	if (Cards.loaded) {
 		var deck = getDeck();
 		if (etgutil.decklength(deck) < (user ? 31 : 11)){
@@ -2817,7 +2825,7 @@ function challengeClick() {
 		var gameData = {};
 		parsepvpstats(gameData);
 		if (user) {
-			gameData.f = foename.value;
+			gameData.f = typeof foe === "string" ? foe : foename.value;
 			userEmit("foewant", gameData);
 		}else{
 			gameData.deck = deck;
@@ -2826,9 +2834,9 @@ function challengeClick() {
 		}
 	}
 }
-function tradeClick() {
+function tradeClick(foe) {
 	if (Cards.loaded)
-		userEmit("tradewant", { f: foename.value });
+		userEmit("tradewant", { f: typeof foe === "string" ? foe : foename.value });
 }
 function rewardClick() {
 	if (Cards.loaded)
