@@ -112,7 +112,7 @@ var ActivesValues = {
 	flatline:1,
 	flyingweapon:7,
 	fractal:function(c){
-		return 10-c.owner.hand.length/2;
+		return 9-c.owner.hand.length;
 	},
 	freeze:3,
 	fungusrebirth:2,
@@ -247,7 +247,7 @@ var ActivesValues = {
 	},
 	virusplague:1,
 	void:5,
-	quantagift:3,
+	quantagift:2,
 	web: 2,
 	wind:function(c){
 		return c instanceof etg.CardInstance || !c.status.storedAtk ? 0 : c.status.storedAtk/2 - 2;
@@ -464,7 +464,7 @@ function evalcardinstance(cardInst) {
 			if (cardInst.owner.shield) score /= 2;
 		}
 	}
-	score *= (cardInst.canactive() ? 0.6 : 0.5) * (!cardInst.card.cost || !cardInst.card.costele?1:.9+Math.log(1+cardInst.owner.quanta[cardInst.card.costele])/50);
+	score *= !cardInst.card.cost ? .8 : (cardInst.canactive() ? .6 : .5) * (!cardInst.card.costele?1:.9+Math.log(1+cardInst.owner.quanta[cardInst.card.costele])/50);
 	log(c, score);
 	return score;
 }

@@ -1237,6 +1237,7 @@ function upgradestore() {
 		}
 		else if (user.gold >= 50) {
 			userExec("uppillar", { c: card.code });
+			goldcount.setText("$" + user.gold);
 			adjustdeck();
 		}
 		else return "You need 50 gold to afford an upgraded pillar!";
@@ -1254,6 +1255,7 @@ function upgradestore() {
 		}
 		else if (user.gold >= 50) {
 			userExec("shpillar", { c: card.code });
+			goldcount.setText("$" + user.gold);
 			adjustdeck();
 		}
 		else return "You need 50 gold to afford a shiny pillar!";

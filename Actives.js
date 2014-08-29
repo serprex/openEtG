@@ -1215,16 +1215,7 @@ singularity:function(c,t){
 	c.dmg(c.trueatk(), true);
 },
 sing:function(c,t){
-	t.remove();
-	t.owner = t.owner.foe;
-	t.place();
-	t.attack();
-	var idx = t.getIndex();
-	if (~idx){
-		t.remove(idx);
-		t.owner = t.owner.foe;
-		t.place();
-	}
+	t.attack(false, 0, t.owner);
 },
 sinkhole:function(c,t){
 	Effect.mkText("Sinkhole", t);

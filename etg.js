@@ -1043,12 +1043,12 @@ Player.prototype.defstatus = Thing.prototype.defstatus = function(key, def){
 		this.status[key] = def;
 	}
 }
-Weapon.prototype.attack = Creature.prototype.attack = function(stasis, freedomChance){
+Weapon.prototype.attack = Creature.prototype.attack = function(stasis, freedomChance, target){
 	var isCreature = this instanceof Creature;
 	if (isCreature){
 		this.dmg(this.status.poison, true);
 	}
-	var target = this.active.cast == Actives.appease && !this.status.appeased ? this.owner : this.owner.foe;
+	if (target === undefined) target = this.active.cast == Actives.appease && !this.status.appeased ? this.owner : this.owner.foe;
 	if (this.active.auto && !this.status.frozen){
 		this.active.auto(this);
 	}

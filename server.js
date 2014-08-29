@@ -685,7 +685,7 @@ io.on("connection", function(socket) {
 			var newCards = "", rarity = 1;
 			for (var i = 0;i < pack.amount;i++) {
 				if (i == pack.rare[rarity-1]) rarity++;
-				var notFromElement = Math.random() > .5, card = undefined, bumprarity = rarity+(Math.random() < (rarity == 4 ? 0.125 : 0.05));
+				var notFromElement = Math.random() > .5, card = undefined, bumprarity = rarity+(Math.random() < (rarity == 4 ? 0.125 : (.45/pack.amount)));
 				if (data.element < 13) card = etg.PlayerRng.randomcard(false, function(x) { return (x.element == data.element) ^ notFromElement && x.rarity == bumprarity });
 				if (!card) card = etg.PlayerRng.randomcard(false, function(x) { return x.rarity == bumprarity });
 				newCards = etgutil.addcard(newCards, card.code);
