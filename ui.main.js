@@ -256,6 +256,17 @@ function getWeaponShieldImage(code) {
 		});
 	}
 }
+function mkBgRect(){
+	var g = new PIXI.Graphics();
+	g.lineStyle(2, 0x121212);
+	g.beginFill(0x243648);
+	for(var i=0; i<arguments.length; i+=4){
+		g.drawRect(arguments[i], arguments[i+1], arguments[i+2], arguments[i+3], 6);
+	}
+	g.endFill();
+	return g;
+}
+
 function initTrade() {
 	var editorui = new PIXI.DisplayObjectContainer();
 	editorui.interactive = true;
@@ -1362,11 +1373,11 @@ function upgradestore() {
 
 function startStore() {
 	var packdata = [
-		{cost: 15, type: "Bronze", info: "9 Commons"},
-		{cost: 25, type: "Silver", info: "3 Commons, 3 Uncommons"},
-		{cost: 65, type: "Gold", info: "3 Commons, 4 Uncommons, 1 Rare"},
-		{cost: 100, type: "Platinum", info: "4 Commons, 3 Uncommons, 1 Rare, 1 Shard"},
-		{cost: 250, type: "Nymph", info: "1 Nymph"},
+		{cost: 15, type: "Bronze", info: "9 Commons", color: 0xcd7d32},
+		{cost: 25, type: "Silver", info: "3 Commons, 3 Uncommons", color: 0xc0c0c0},
+		{cost: 65, type: "Gold", info: "3 Commons, 4 Uncommons, 1 Rare", color: 0xffd700},
+		{cost: 100, type: "Platinum", info: "4 Commons, 3 Uncommons, 1 Rare, 1 Shard", color: 0xe4e4e4},
+		{cost: 250, type: "Nymph", info: "1 Nymph", color: 0x6699bb},
 	];
 	var packele = -1, packrarity = -1;
 
@@ -1374,8 +1385,13 @@ function startStore() {
 	storeui.interactive = true;
 
 	//shop background
-	storeui.addChild(new PIXI.Sprite(gfx.bg_shop));
-
+	storeui.addChild(new PIXI.Sprite(gfx.bg_default));
+	storeui.addChild(mkBgRect(
+		40, 20, 790, 55,
+		40, 92, 492, 168,
+		40, 270, 620, 168,
+		740, 90, 85, 185
+	));
 	//gold text
 	var tgold = makeText(750, 101, "$" + user.gold);
 	storeui.addChild(tgold);
@@ -1433,11 +1449,10 @@ function startStore() {
 	});
 	storeui.addChild(bbuy);
 
-	var boostergfx = [0xcd7d32, 0xc0c0c0, 0xffd700, 0xe4e4e4, 0x6699BB].map(function(color, i){
-		var pack = packdata[i];
+	var boostergfx = packdata.map(function(pack){
 		var g = new PIXI.Graphics();
 		g.lineStyle(3);
-		g.beginFill(color);
+		g.beginFill(pack.color);
 		g.drawRoundedRect(0, 0, 100, 150, 6);
 		g.endFill();
 		var name = new PIXI.Text(pack.type, {font: "18px Verdana"});
@@ -1481,8 +1496,8 @@ function startStore() {
 	}
 
 	//booster popup
-	var popbooster = new PIXI.Sprite(gfx.popup_booster);
-	popbooster.position.set(43, 93);
+	var popbooster = mkBgRect(0, 0, 627, 457);
+	popbooster.position.set(40, 90);
 	popbooster.visible = false;
 	storeui.addChild(popbooster);
 
