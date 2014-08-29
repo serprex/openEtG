@@ -567,7 +567,7 @@ io.on("connection", function(socket) {
 				foesock.emit("pvpgive", foedata);
 			} else {
 				sockinfo[this.id].duel = f;
-				foesock.emit("chat", { msg: u + " wants to duel with you!", mode: "red" });
+				foesock.emit("challenge", { f:u, pvp:true  });
 				this.emit("chat", { mode: "red", msg: "You have sent a PvP request to " + f + "!" });
 			}
 		}
@@ -625,7 +625,7 @@ io.on("connection", function(socket) {
 				this.emit("tradegive");
 				foesock.emit("tradegive");
 			} else {
-				foesock.emit("chat", { mode: "red", msg: u + " wants to trade with you!" });
+				foesock.emit("challenge", {f:u, pvp:false});
 				this.emit("chat", { mode: "red", msg: "You have sent a trade request to " + f + "!" });
 			}
 		}
