@@ -256,7 +256,7 @@ function getWeaponShieldImage(code) {
 		});
 	}
 }
-function initTrade(data) {
+function initTrade() {
 	var editorui = new PIXI.DisplayObjectContainer();
 	editorui.interactive = true;
 	editorui.addChild(new PIXI.Sprite(gfx.bg_default));
@@ -297,6 +297,15 @@ function initTrade(data) {
 	editorui.addChild(btrade);
 	editorui.addChild(bcancel);
 
+	function updateSelectedCards(){
+		for (var i = 0;i < selectedCards.length;i++) {
+			selectedCardsprites[i].visible = true;
+			selectedCardsprites[i].setTexture(getCardImage(selectedCards[i]));
+		}
+		for (;i<30;i++) {
+			selectedCardsprites[i].visible = false;
+		}
+	}
 	var cardpool = etgutil.deck2pool(user.pool);
 	var cardsel = makeCardSelector(
 		function(code){
@@ -311,6 +320,7 @@ function initTrade(data) {
 					if (cmp >= 0) break;
 				}
 				selectedCards.splice(i, 0, code);
+				updateSelectedCards();
 			}
 		}
 	);
@@ -323,6 +333,7 @@ function initTrade(data) {
 				var card = Cards.Codes[selectedCards[_i]];
 				adjust(cardminus, selectedCards[_i], -1);
 				selectedCards.splice(_i, 1);
+				updateSelectedCards();
 			}, "cardClick");
 			sprite.mouseover = function() {
 				cardArt.setTexture(getArt(selectedCards[_i]));
@@ -377,13 +388,6 @@ function initTrade(data) {
 	}
 	refreshRenderer(editorui, function() {
 		cardsel.next(cardpool, cardminus);
-		for (var i = 0;i < selectedCards.length;i++) {
-			selectedCardsprites[i].visible = true;
-			selectedCardsprites[i].setTexture(getCardImage(selectedCards[i]));
-		}
-		for (;i<30;i++) {
-			selectedCardsprites[i].visible = false;
-		}
 	});
 }
 function initLibrary(pool){
@@ -795,7 +799,7 @@ function makeCardSelector(cardmouseover, cardclick, maxedIndicator){
 		renderColumns();
 	}
 	function renderColumns(){
-		cardminus.rendered = true;
+		if (cardminus) cardminus.rendered = true;
 		if (maxedIndicator) graphics.clear();
 		for (var i = 0;i < 6; i++){
 			for (var j = 0;j < columns[i].length;j++) {
@@ -821,7 +825,7 @@ function makeCardSelector(cardmouseover, cardclick, maxedIndicator){
 		}
 	}
 	cardsel.next = function(newcardpool, newcardminus, newshowall, newshowshiny) {
-		if (newcardpool != cardpool || newshowall != showall || newshowshiny != showshiny) {
+		if (newcardpool != cardpool || newcardminus != cardminus || newshowall != showall || newshowshiny != showshiny) {
 			showall = newshowall;
 			showshiny = newshowshiny;
 			cardminus = newcardminus;

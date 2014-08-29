@@ -622,8 +622,8 @@ io.on("connection", function(socket) {
 			sockinfo[this.id].trade = {foe: f};
 			var foetrade = sockinfo[foesock.id].trade;
 			if (foetrade && foetrade.foe == u) {
-				this.emit("tradegive", { first: false });
-				foesock.emit("tradegive", { first: true });
+				this.emit("tradegive");
+				foesock.emit("tradegive");
 			} else {
 				foesock.emit("chat", { mode: "red", msg: u + " wants to trade with you!" });
 				this.emit("chat", { mode: "red", msg: "You have sent a trade request to " + f + "!" });
