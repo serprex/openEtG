@@ -726,9 +726,10 @@ function adjust(cardminus, code, x) {
 	if (code in cardminus) {
 		cardminus[code] += x;
 	} else cardminus[code] = x;
+	delete cardminus.rendered;
 }
 function makeCardSelector(cardmouseover, cardclick, maxedIndicator){
-	var poolcache, prevshowall, prevshowshiny;
+	var cardpool, cardminus, showall, showshiny;
 	var cardsel = new PIXI.DisplayObjectContainer();
 	cardsel.interactive = true;
 	if (maxedIndicator) {
@@ -788,20 +789,15 @@ function makeCardSelector(cardmouseover, cardclick, maxedIndicator){
 			columns[i] = etg.filtercards(i > 2,
 				function(x) { return x.element == elefilter &&
 					((i % 3 == 0 && x.type == etg.CreatureEnum) || (i % 3 == 1 && x.type <= etg.PermanentEnum) || (i % 3 == 2 && x.type == etg.SpellEnum)) &&
-					(!poolcache || x in poolcache || prevshowall || isFreeCard(x)) && (!rarefilter || rarefilter == Math.min(x.rarity, 4));
-				}, editorCardCmp, prevshowshiny);
+					(!cardpool || x in cardpool || showall || isFreeCard(x)) && (!rarefilter || rarefilter == Math.min(x.rarity, 4));
+				}, editorCardCmp, showshiny);
 		}
+		renderColumns();
 	}
-	cardsel.next = function(cardpool, cardminus, showall, showshiny) {
-		var needToMakeCols = poolcache != cardpool;
-		if (needToMakeCols || prevshowall != showall || prevshowshiny != showshiny) {
-			prevshowall = showall;
-			prevshowshiny = showshiny;
-			poolcache = cardpool;
-			makeColumns();
-		}
+	function renderColumns(){
+		cardminus.rendered = true;
 		if (maxedIndicator) graphics.clear();
-		for (var i = 0;i < 6;i++) {
+		for (var i = 0;i < 6; i++){
 			for (var j = 0;j < columns[i].length;j++) {
 				var spr = columnspr[i][j], code = columns[i][j], card = Cards.Codes[code];
 				spr.setTexture(getCardImage(code));
@@ -822,6 +818,17 @@ function makeCardSelector(cardmouseover, cardclick, maxedIndicator){
 			for (;j < 15;j++) {
 				columnspr[i][j].visible = false;
 			}
+		}
+	}
+	cardsel.next = function(newcardpool, newcardminus, newshowall, newshowshiny) {
+		if (newcardpool != cardpool || newshowall != showall || newshowshiny != showshiny) {
+			showall = newshowall;
+			showshiny = newshowshiny;
+			cardminus = newcardminus;
+			cardpool = newcardpool;
+			makeColumns();
+		}else if (cardminus && !cardminus.rendered){
+			renderColumns();
 		}
 	};
 	return cardsel;
@@ -2459,7 +2466,7 @@ function startMatch(game, foeDeck) {
 						child.setTexture(ui.getTextImage("1:" + (pr.pendstate ? pr.owner.mark : pr.card.element) + " x" + pr.status.charges, ui.mkFont(10, pr.card.upped ? "black" : "white"), maybeLighten(pr.card)));
 					}
 					else if (pr.active.auto && pr.active.auto.activename == "locket") {
-						child.setTexture(ui.getTextImage("1:" + (pr.status.mode || pr.owner.mark), ui.mkFont(10, pr.card.upped ? "black" : "white"), maybeLighten(pr.card)));
+						child.setTexture(ui.getTextImage("1:" + (pr.status.mode === undefined ? pr.owner.mark : pr.status.mode), ui.mkFont(10, pr.card.upped ? "black" : "white"), maybeLighten(pr.card)));
 					}
 					else child.setTexture(ui.getTextImage(pr.status.charges !== undefined ? " " + pr.status.charges : "", ui.mkFont(10, pr.card.upped ? "black" : "white"), maybeLighten(pr.card)));
 					var child2 = permsprite[j][i].getChildAt(1);
