@@ -1,11 +1,11 @@
 "use strict";
 (function() {
-var htmlElements = ["leftpane", "chatinput", "deckimport", "aideck", "foename", "change", "login", "password", "challenge", "chatBox", "trade", "bottompane", "demigodmode", "username", "stats","enableSound", "hideright", "lblhideright", "wantpvp", "lblwantpvp"];
+var htmlElements = ["leftpane", "chatinput", "deckimport", "aideck", "foename", "change", "login", "password", "challenge", "chatBox", "trade", "bottompane", "demigodmode", "username", "stats","enableSound", "hideright", "lblhideright", "wantpvp", "lblwantpvp", "offline", "lbloffline"];
 htmlElements.forEach(function(name){
 	window[name] = document.getElementById(name);
 });
 if (localStorage){
-	var store = [username, stats, enableSound, enableMusic, hideright, wantpvp];
+	var store = [username, stats, enableSound, enableMusic, hideright, wantpvp, offline];
 	store.forEach(function(storei){
 		var field = storei.type == "checkbox" ? "checked" : "value";
 		if (localStorage[storei.id] !== undefined){
@@ -895,12 +895,15 @@ function startMenu(nymph) {
 	var buttonList = [];
 	var mouseroverButton;
 	var clickedButton;
-	var bglobby = new PIXI.Sprite(gfx.bg_lobby);
+	var bglobby = new PIXI.Sprite(gfx.bg_default);
 	bglobby.interactive = true;
 	bglobby.mouseover = function() {
 		tinfo.setText(user ? "Tip: " + tipjar[tipNumber] + "." : "To register, just type desired username & password in the fields to the right, then click 'Login'.", 750);
 	}
 	menuui.addChild(bglobby);
+	var menusquares = new PIXI.Sprite(gfx.bg_lobby);
+	menusquares.position.set(40, 16);
+	menuui.addChild(menusquares);
 
 	var bnextTip = makeButton(750, 50, "Next tip");
 	setClick(bnextTip, function() {
@@ -1058,11 +1061,11 @@ function startMenu(nymph) {
 		tradegive: initTrade,
 	};
 	menuui.endnext = function(){
-		lblwantpvp.style.display = lblhideright.style.display = "none";
+		lbloffline.style.display = lblwantpvp.style.display = lblhideright.style.display = "none";
 	}
 
 	refreshRenderer(menuui);
-	lblwantpvp.style.display = lblhideright.style.display = "inline";
+	lbloffline.style.display = lblwantpvp.style.display = lblhideright.style.display = "inline";
 }
 function startRewardWindow(reward, numberofcopies, nocode) {
 	if (!numberofcopies) numberofcopies = 1;
@@ -1970,7 +1973,10 @@ function startMatch(game, foeDeck) {
 	}
 	var gameui = new PIXI.DisplayObjectContainer();
 	gameui.interactive = true;
-	gameui.addChild(new PIXI.Sprite(gfx.bg_game));
+	gameui.addChild(new PIXI.Sprite(gfx.bg_default));
+	var redlines = new PIXI.Sprite(gfx.bg_game);
+	redlines.position.y = 12;
+	gameui.addChild(redlines);
 	var cloakgfx = new PIXI.Graphics();
 	cloakgfx.beginFill(0);
 	cloakgfx.drawRect(130, 20, 660, 280);
@@ -2406,7 +2412,7 @@ function startMatch(game, foeDeck) {
 			}else if (game.targetingMode){
 				turntext = game.targetingText;
 			}else{
-				turntext = game.turn == game.player1 ? "Your Turn" : "Their Their";
+				turntext = game.turn == game.player1 ? "Your Turn" : "Their Turn";
 				if (game.phase < 2) turntext += "\n" + (game.phase ? "Second" : "First");
 			}
 			maybeSetText(turntell, turntext);
@@ -2895,7 +2901,10 @@ function aiClick(){
 	parseaistats(gameData);
 	initGame(gameData, true);
 }
-function wantpvpChange(e){
+function offlineChange(){
+	socket.emit("showoffline", offline.checked);
+}
+function wantpvpChange(){
 	socket.emit("wantingpvp", wantpvp.checked);
 }
 (function(callbacks){
@@ -2918,7 +2927,9 @@ function wantpvpChange(e){
 	enableSound: {change: soundChange},
 	enableMusic: {change: musicChange},
 	aivs: {click: aiClick},
-	wantpvp: {change: wantpvpChange}
+	offline: {change: offlineChange},
+	wantpvp: {change: wantpvpChange},
 });
+offlineChange();
 wantpvpChange();
 })();
