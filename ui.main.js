@@ -69,11 +69,22 @@ function userExec(x, data){
 }
 function refreshRenderer(stage, animCb) {
 	if (realStage.children.length > 0){
-		if (realStage.children[0].endnext) realStage.children[0].endnext();
+		var oldstage = realStage.children[0];
+		if (oldstage.cmds){
+			for (var cmd in oldstage.cmds){
+				socket.removeListener(cmd, oldstage.cmds[cmd]);
+			}
+		}
+		if (oldstage.endnext) oldstage.endnext();
 		realStage.removeChildren();
 	}
 	realStage.addChild(stage);
 	realStage.next = animCb;
+	if (stage.cmds){
+		for (var cmd in stage.cmds){
+			socket.on(cmd, stage.cmds[cmd]);
+		}
+	}
 }
 
 var renderer = new PIXI.autoDetectRenderer(900, 600);
@@ -369,7 +380,7 @@ function initTrade() {
 	var cardArt = new PIXI.Sprite(gfx.nopic);
 	cardArt.position.set(734, 8);
 	editorui.addChild(cardArt);
-	var cmds = {
+	editorui.cmds = {
 		cardchosen: function(data){
 			player2Cards = etgutil.decodedeck(data.cards);
 			for (var i = 0;i < player2Cards.length;i++) {
@@ -389,14 +400,6 @@ function initTrade() {
 			startMenu();
 		},
 	};
-	for (var cmd in cmds){
-		socket.on(cmd, cmds[cmd]);
-	}
-	editorui.endnext = function() {
-		for (var cmd in cmds){
-			socket.removeListener(cmd, cmds[cmd]);
-		}
-	}
 	refreshRenderer(editorui, function() {
 		cardsel.next(cardpool, cardminus);
 	});
@@ -1048,6 +1051,10 @@ function startMenu(nymph) {
 			menuui.removeChild(oracle);
 		}
 	}
+	menuui.cmds = {
+		pvpgive: initGame,
+		tradegive: initTrade,
+	};
 	menuui.endnext = function(){
 		lblwantpvp.style.display = lblhideright.style.display = "none";
 	}
@@ -1501,7 +1508,7 @@ function startStore() {
 	popbooster.visible = false;
 	storeui.addChild(popbooster);
 
-	var cmds = {
+	storeui.cmds = {
 		boostergive: function(data) {
 			if (data.accountbound) {
 				user.accountbound = etgutil.mergedecks(user.accountbound, data.cards);
@@ -1527,14 +1534,6 @@ function startStore() {
 			popbooster.visible = true;
 		},
 	};
-	for (var cmd in cmds){
-		socket.on(cmd, cmds[cmd]);
-	}
-	storeui.endnext = function() {
-		for (var cmd in cmds){
-			socket.removeListener(cmd, cmds[cmd]);
-		}
-	}
 	refreshRenderer(storeui);
 }
 function addToGame(game, data) {
@@ -1881,6 +1880,10 @@ function startEditor(arena, acard, startempty) {
 	var cardArt = new PIXI.Sprite(gfx.nopic);
 	cardArt.position.set(734, 8);
 	editorui.addChild(cardArt);
+	editorui.cmds = {
+		pvpgive: initGame,
+		tradegive: initTrade,
+	};
 	editorui.endnext = function() {
 		deckimport.style.display = "none";
 	}
@@ -2262,7 +2265,7 @@ function startMatch(game, foeDeck) {
 		}
 	}
 	document.addEventListener("keydown", onkeydown);
-	var cmds = {
+	gameui.cmds = {
 		endturn: function(data) {
 			game.player2.endturn(data);
 		},
@@ -2288,14 +2291,8 @@ function startMatch(game, foeDeck) {
 			}
 		},
 	};
-	for (var cmd in cmds){
-		socket.on(cmd, cmds[cmd]);
-	}
 	gameui.endnext = function() {
 		document.removeEventListener("keydown", onkeydown);
-		for (var cmd in cmds){
-			socket.removeListener(cmd, cmds[cmd]);
-		}
 	}
 	refreshRenderer(gameui, function() {
 		if (game.turn == game.player2 && game.ai) {
@@ -2310,14 +2307,14 @@ function startMatch(game, foeDeck) {
 				}
 				if (aiCommand){
 					if (Date.now() >= aiDelay){
-						cmds[aiState[0]](aiState[1]);
+						gameui.cmds[aiState[0]](aiState[1]);
 						aiState = undefined;
 						aiCommand = false;
 						aiDelay += 300;
 					}
 				}
 			}else if (game.phase <= etg.MulliganPhase2){
-				cmds.mulligan(require("./ai/mulligan")(game.player2));
+				gameui.cmds.mulligan(require("./ai/mulligan")(game.player2));
 			}
 		}
 		var pos = realStage.getMousePosition();
@@ -2667,8 +2664,6 @@ socket.on("challenge", function(data) {
 	span.innerHTML = "<font color=blue>" + data.f + message + "</font><br>";
 	chatBox.appendChild(span);
 });
-socket.on("pvpgive", initGame);
-socket.on("tradegive", initTrade);
 socket.on("librarygive", initLibrary);
 socket.on("foearena", function(data) {
 	aideck.value = data.deck;
