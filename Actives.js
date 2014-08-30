@@ -368,8 +368,10 @@ dive:function(c,t){
 	c.status.dive = c.trueatk();
 },
 divinity:function(c,t){
-	c.owner.maxhp += 8;
-	c.owner.buffhp(16);
+	if (c.owner.maxhp < 500){
+		c.owner.maxhp = Math.max(c.owner.maxhp + 24, 500);
+	}
+	c.owner.dmg(-16);
 },
 drainlife:function(c,t){
 	c.owner.dmg(-t.spelldmg(2+Math.floor(c.owner.quanta[etg.Darkness]/5)));

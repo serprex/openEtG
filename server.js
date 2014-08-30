@@ -241,6 +241,7 @@ function activeUsers() {
 	for (var username in usersock) {
 		var sock = usersock[username];
 		if (sock && sock.connected){
+			if (sock.id in sockinfo && sockinfo[sock.id].wantingpvp) username += "\xb6";
 			activeusers.push(username);
 		}
 	}
@@ -754,5 +755,8 @@ io.on("connection", function(socket) {
 				socket.emit("librarygive", pool);
 			});
 		}
+	});
+	socket.on("wantingpvp", function(want){
+		sockinfo[this.id].wantingpvp = want;
 	});
 });

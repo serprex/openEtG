@@ -13,7 +13,9 @@ function load(preload, postload){
 		loadingBarGraphic.endFill();
 	}
 	preLoader.onComplete = function() {
-		require("./uiutil").loadSounds("cardClick", "buttonClick", "permPlay", "creaturePlay", "openingMusic");
+		var ui = require("./uiutil");
+		ui.loadSounds("cardClick", "buttonClick", "permPlay", "creaturePlay");
+		ui.loadMusics("openingMusic");
 		var names = ["eicons", "ricons", "cardBacks", "cardBorders", "popups", "sicons", "ticons", "sborders"];
 		names.forEach(function(name){
 			exports[name] = [];

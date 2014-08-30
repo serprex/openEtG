@@ -1,11 +1,11 @@
 "use strict";
 (function() {
-var htmlElements = ["leftpane", "chatinput", "deckimport", "aideck", "foename", "change", "login", "password", "challenge", "chatBox", "trade", "bottompane", "demigodmode", "username", "stats","enableSound", "hideright", "lblhideright"];
+var htmlElements = ["leftpane", "chatinput", "deckimport", "aideck", "foename", "change", "login", "password", "challenge", "chatBox", "trade", "bottompane", "demigodmode", "username", "stats","enableSound", "hideright", "lblhideright", "wantpvp", "lblwantpvp"];
 htmlElements.forEach(function(name){
 	window[name] = document.getElementById(name);
 });
 if (localStorage){
-	var store = [username, stats, enableSound, hideright];
+	var store = [username, stats, enableSound, enableMusic, hideright, wantpvp];
 	store.forEach(function(storei){
 		var field = storei.type == "checkbox" ? "checked" : "value";
 		if (localStorage[storei.id] !== undefined){
@@ -665,12 +665,14 @@ function mkAi(level, daily) {
 		}
 	}
 }
+soundChange();
+musicChange();
 var gfx = require("./gfx");
 gfx.load(function(loadingScreen){
 	refreshRenderer(loadingScreen);
 	requestAnimate();
 }, function(){
-	ui.playSound("openingMusic");
+	ui.playMusic("openingMusic");
 	startMenu();
 });
 function makeButton(x, y, img, mouseoverfunc) {
@@ -1047,11 +1049,11 @@ function startMenu(nymph) {
 		}
 	}
 	menuui.endnext = function(){
-		lblhideright.style.display = "none";
+		lblwantpvp.style.display = lblhideright.style.display = "none";
 	}
 
 	refreshRenderer(menuui);
-	lblhideright.style.display = "inline";
+	lblwantpvp.style.display = lblhideright.style.display = "inline";
 }
 function startRewardWindow(reward, numberofcopies, nocode) {
 	if (!numberofcopies) numberofcopies = 1;
@@ -2717,8 +2719,11 @@ socket.on("codedone", function(data) {
 	chat(Cards.Codes[data].name + " added!");
 	startMenu();
 });
-function soundChange() {
+function soundChange(event) {
 	ui.changeSound(enableSound.checked);
+}
+function musicChange(event) {
+	ui.changeMusic(enableMusic.checked);
 }
 function maybeSendChat(e) {
 	e.cancelBubble = true;
@@ -2883,6 +2888,9 @@ function aiClick(){
 	parseaistats(gameData);
 	initGame(gameData, true);
 }
+function wantpvpChange(e){
+	socket.emit("wantingpvp", wantpvp.checked);
+}
 (function(callbacks){
 	for(var id in callbacks){
 		for(var event in callbacks[id]){
@@ -2901,7 +2909,9 @@ function aiClick(){
 	library: {click: libraryClick},
 	chatinput: {keydown: maybeSendChat},
 	enableSound: {change: soundChange},
+	enableMusic: {change: musicChange},
 	aivs: {click: aiClick},
+	wantpvp: {change: wantpvpChange}
 });
-soundChange();
+wantpvpChange();
 })();

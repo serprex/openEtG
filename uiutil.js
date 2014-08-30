@@ -149,18 +149,30 @@ function getTextImage(text, font, bgcolor, width) {
 	rtex.render(doc);
 	return tximgcache[fontkey][text] = rtex;
 }
-var sounds = {};
-var soundEnabled = false;
+var sounds = {}, musics = {};
+var soundEnabled = false, musicEnabled = false;
 function loadSounds() {
 	for (var i = 0;i < arguments.length;i++) {
 		sounds[arguments[i]] = new Audio("sound/" + arguments[i] + ".ogg");
 	}
 }
-function playSound(sound, dontreset) {
-	sound = sounds[sound];
+function loadMusics() {
+	for (var i = 0;i < arguments.length;i++) {
+		musics[arguments[i]] = new Audio("sound/" + arguments[i] + ".ogg");
+	}
+}
+function playSound(name, dontreset) {
+	var sound = sounds[name];
 	if (soundEnabled && sound) {
 		if (!dontreset && sound.duration) sound.currentTime = 0;
 		sound.play();
+	}
+}
+function playMusic(name) {
+	var music = musics[name];
+	if (musicEnabled && music){
+		if (music.duration) music.currentTime = 0;
+		music.play();
 	}
 }
 function changeSound(enabled) {
@@ -171,6 +183,14 @@ function changeSound(enabled) {
 		}
 	}
 }
+function changeMusic(enabled) {
+	musicEnabled = enabled;
+	if (!musicEnabled) {
+		for (var music in musics) {
+			musics[music].pause();
+		}
+	}
+}
 exports.mkFont = mkFont;
 exports.reflectPos = reflectPos;
 exports.creaturePos = creaturePos;
@@ -178,5 +198,8 @@ exports.permanentPos = permanentPos;
 exports.tgtToPos = tgtToPos;
 if (typeof PIXI !== "undefined") exports.getTextImage = getTextImage;
 exports.loadSounds = loadSounds;
+exports.loadMusics = loadMusics;
 exports.playSound = playSound;
+exports.playMusic = playMusic;
 exports.changeSound = changeSound;
+exports.changeMusic = changeMusic;
