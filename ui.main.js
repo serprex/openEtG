@@ -873,6 +873,8 @@ function startMenu(nymph) {
 		"Arena Tier 1 is unupgraded, while Tier 2 is upgraded. All decks in a tier have the same number of attribute points",
 		"You may store 10 decks in the editor",
 		"If you type '/who' in chat you will get a list of the users who are online. '/w username message' will send your message only to one user",
+		"Chat commands: /who, /mute, /unmute, /clear, /w",
+		"Keyboard shortcuts: space ends turn, backspace cancels, w targets opponent, s targets yourself, 1 through 8 cast cards in hand",
 		"The first text bar under the game is the import/export bar & shows your current deck. The bar below it shows game messages & sometimes the opponent's deck",
 		"The AI Deck input may be used to fight any deck of your choice, but only in sandbox mode",
 		"Remember that you may use the logout button to enter sandbox mode to review the card pool, check rarities & try out new decks",
@@ -884,7 +886,7 @@ function startMenu(nymph) {
 		"A ply is half a turn",
 		"Mark cards are only obtainable through PvP events. A tournament deck verifier is at tournament.htm",
 		"After an AI battle you will win a random common, uncommon, or rare from your opponent's deck",
-		"An eigth of Platinum packs have Nymphs replaced with shards",
+		"Cards in packs have a (45/packsize)% chance to increment rarity",
 	];
 	var tipNumber = etg.PlayerRng.upto(tipjar.length);
 
@@ -917,13 +919,13 @@ function startMenu(nymph) {
 	menuui.addChild(tinfo);
 
 	var bai0 = makeButton(50, 100, "Commoner", function() {
-		tinfo.setText("Commoners have no upgraded cards.\nCost: $0");
+		tinfo.setText("Commoners have no upgraded cards & mostly common cards.\nCost: $0");
 	});
 	setClick(bai0, mkAi(0));
 	menuui.addChild(bai0);
 
 	var bai1 = makeButton(150, 100, "Mage", function() {
-		tinfo.setText("Mages have a few upgraded cards.\nCost: $5");
+		tinfo.setText("Mages have preconstructed decks with a couple rares.\nCost: $5");
 	});
 	setClick(bai1, mkPremade("mage"));
 	menuui.addChild(bai1);
