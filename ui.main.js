@@ -912,11 +912,8 @@ function startMenu(nymph) {
 	});
 	menuui.addChild(bnextTip);
 
-	var tgold = makeText(750, 101, (user ? "$" + user.gold : "Sandbox"));
-	menuui.addChild(tgold);
-
-	var taiwinloss = makeText(750, 125, (user ? "AI w/l\n" + user.aiwins + "/" + user.ailosses + "\n\nPvP w/l\n" + user.pvpwins + "/" + user.pvplosses : ""));
-	menuui.addChild(taiwinloss);
+	var tstats = makeText(750, 101, (user ? "$" + user.gold + "\nAI w/l\n" + user.aiwins + "/" + user.ailosses + "\n\nPvP w/l\n" + user.pvpwins + "/" + user.pvplosses : "Sandbox"));
+	menuui.addChild(tstats);
 
 	var tinfo = makeText(50, 26, "")
 	menuui.addChild(tinfo);
@@ -998,7 +995,7 @@ function startMenu(nymph) {
 	});
 	menuui.addChild(bdelete);
 
-	var usertoggle = [bquest, bcolosseum, bshop, bupgrade, blogout, bdelete, taiwinloss, bnextTip];
+	var usertoggle = [bquest, bcolosseum, bshop, bupgrade, blogout, bdelete, bnextTip];
 	for (var i=0; i<2; i++){
 		var baia = makeButton(50, 200+i*50, "Arena AI", (function(cost){return function() {
 			tinfo.setText("In the arena you will face decks from other players.\nCost: $" + cost);
@@ -1049,8 +1046,7 @@ function startMenu(nymph) {
 
 		toggleB.apply(null, usertoggle);
 
-		tgold.setText("Sandbox");
-		tgold.position.set(755, 101);
+		tstats.setText("Sandbox");
 
 		if (oracle) {
 			menuui.removeChild(oracle);
