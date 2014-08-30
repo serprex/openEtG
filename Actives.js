@@ -369,7 +369,7 @@ dive:function(c,t){
 },
 divinity:function(c,t){
 	if (c.owner.maxhp < 500){
-		c.owner.maxhp = Math.max(c.owner.maxhp + 24, 500);
+		c.owner.maxhp = Math.min(c.owner.maxhp + 24, 500);
 	}
 	c.owner.dmg(-16);
 },

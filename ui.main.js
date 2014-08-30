@@ -1966,19 +1966,16 @@ function startMatch(game, foeDeck) {
 	cloakgfx.drawRect(130, 20, 660, 280);
 	cloakgfx.endFill();
 	gameui.addChild(cloakgfx);
-	var winnername = new PIXI.Text("", { font: "16px Dosis" });
-	winnername.position.set(800, 500);
-	gameui.addChild(winnername);
-	var endturn = makeButton(800, 540, "Accept Hand");
-	var cancel = makeButton(800, 500, "Mulligan");
+	var endturn = makeButton(800, 520, "Accept Hand");
+	var cancel = makeButton(800, 490, "Mulligan");
 	var resign = makeButton(8, 24, "Resign");
 	gameui.addChild(endturn);
 	gameui.addChild(cancel);
 	gameui.addChild(resign);
 	var turntell = new PIXI.Text("", { font: "16px Dosis" });
-	turntell.position.set(800, 570);
+	turntell.position.set(800, 550);
 	gameui.addChild(turntell);
-	var foename = new PIXI.Text(game.foename || "Unknown Opponent", { font: "bold 18px Dosis", align: "center" });
+	var foename = new PIXI.Text(game.foename || "-", { font: "bold 18px Dosis", align: "center" });
 	foename.position.set(5, 75);
 	gameui.addChild(foename);
 	function addNoHealData(game) {
@@ -2264,7 +2261,6 @@ function startMatch(game, foeDeck) {
 			hptext[e.keyCode == 87?1:0].click();
 		}
 	}
-	document.addEventListener("keydown", onkeydown);
 	gameui.cmds = {
 		endturn: function(data) {
 			game.player2.endturn(data);
@@ -2291,6 +2287,7 @@ function startMatch(game, foeDeck) {
 			}
 		},
 	};
+	document.addEventListener("keydown", onkeydown);
 	gameui.endnext = function() {
 		document.removeEventListener("keydown", onkeydown);
 	}
@@ -2395,17 +2392,25 @@ function startMatch(game, foeDeck) {
 			}
 		}
 		if (game.phase != etg.EndPhase) {
+			var turntext;
+			if (discarding){
+				turntext = "Discard";
+			}else if (game.targetingMode){
+				turntext = game.targetingText;
+			}else{
+				turntext = game.turn == game.player1 ? "Your Turn" : "Their Their";
+				if (game.phase < 2) turntext += "\n" + (game.phase ? "Second" : "First");
+			}
+			maybeSetText(turntell, turntext);
 			if (game.turn == game.player1){
 				endturn.setText(game.phase == etg.PlayPhase ? "End Turn" : "Accept Hand");
 				cancel.setText(game.phase != etg.PlayPhase ? "Mulligan" : game.targetingMode || discarding || resigning ? "Cancel" : null);
 			}else cancel.visible = endturn.visible = false;
 		}else{
-			maybeSetText(winnername, game.winner == game.player1 ? "Won" : "Lost");
+			maybeSetText(turntell, (game.turn == game.player1 ? "Your" : "Their") + " Turn\n" + (game.winner == game.player1?"Won":"Lost"));
 			endturn.setText("Continue");
-			endturn.visible = true;
 			cancel.visible = false;
 		}
-		maybeSetText(turntell, discarding ? "Discard" : game.targetingMode ? game.targetingText : game.turn == game.player1 ? "Your Turn" : "Their Turn");
 		foeplays.children.forEach(function(foeplay){
 			maybeSetTexture(foeplay, getCardImage(foeplay.card.code));
 		});
