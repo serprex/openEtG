@@ -1133,12 +1133,16 @@ function startQuest(questname) {
 function startQuestWindow(){
 	var questui = new PIXI.DisplayObjectContainer();
 	questui.interactive = true;
-	var bgquest = new PIXI.Sprite(gfx.bg_questmap);
+	var bgquest = new PIXI.Sprite(gfx.bg_default);
 	bgquest.mouseover = function(){
 		tinfo.setText("Welcome to Potatotal Island. The perfect island for adventuring!");
 	};
 	bgquest.interactive = true;
 	questui.addChild(bgquest);
+	questui.addChild(mkBgRect(9, 9, 880, 111));
+	var questmap = new PIXI.Sprite(gfx.bg_questmap);
+	questmap.position.set(124, 162);
+	questui.addChild(questmap);
 	var tinfo = makeText(32, 32, "");
 	questui.addChild(tinfo);
 	var bexit = makeButton(750, 246, "Exit");
@@ -1195,12 +1199,16 @@ function startQuestWindow(){
 function startQuestArea(area) {
 	var questui = new PIXI.DisplayObjectContainer();
 	questui.interactive = true;
-	var bgquest = new PIXI.Sprite(gfx.bg_quest);
-	bgquest.interactive = true;
-	bgquest.mouseover = function() {
+	var bgquest = new PIXI.Sprite(gfx.bg_default);
+	bgquest.mouseover = function(){
 		tinfo.setText("");
-	}
+	};
+	bgquest.interactive = true;
 	questui.addChild(bgquest);
+	questui.addChild(mkBgRect(9, 9, 880, 111));
+	var questmap = new PIXI.Sprite(gfx.bg_quest);
+	questmap.position.set(124, 162);
+	questui.addChild(questmap);
 	var tinfo = makeText(50, 26, "");
 	var errinfo = makeText(50, 125, "");
 	function makeQuestButton(quest, stage) {
