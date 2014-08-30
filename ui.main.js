@@ -2528,7 +2528,6 @@ function startMatch(game, foeDeck) {
 			var sh = pl.shield;
 			if (sh && !(j == 1 && cloakgfx.visible)) {
 				shiesprite[j].visible = true;
-				var dr = sh.truedr();
 				var child = shiesprite[j].getChildAt(0);
 				child.setTexture(ui.getTextImage(sh.status.charges ? "x" + sh.status.charges: "" + sh.truedr() + "", ui.mkFont(12, sh.card.upped ? "black" : "white"), maybeLighten(sh.card)));
 				child.visible = true;
