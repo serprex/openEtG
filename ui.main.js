@@ -90,7 +90,7 @@ function refreshRenderer(stage, animCb) {
 var renderer = new PIXI.autoDetectRenderer(900, 600);
 leftpane.appendChild(renderer.view);
 var realStage = new PIXI.Stage(0x336699, true);
-renderer.view.addEventListener("click", renderer.view.blur.bind(renderer.view));
+renderer.view.addEventListener("click", renderer.view.blur);
 var caimgcache = {}, crimgcache = {}, wsimgcache = {}, artcache = {}, artimagecache = {};
 var elecols = [0xa99683, 0xaa5999, 0x777777, 0x996633, 0x5f4930, 0x50a005, 0xcc6611, 0x205080, 0xa9a9a9, 0x337ddd, 0xccaa22, 0x333333, 0x77bbdd];
 
@@ -1325,9 +1325,10 @@ function upgradestore() {
 	}
 	var upgradeui = mkView();
 	upgradeui.mouseover = function() {
-		cardArt.setTexture(getArt(etgutil.asUpped(selectedCard, true)));
+		if (selectedCard){
+			cardArt.setTexture(getArt(etgutil.asUpped(selectedCard, true)));
+		}
 	}
-	upgradeui.addChild(bg);
 
 	var goldcount = makeText(30, 100, "$" + user.gold);
 	upgradeui.addChild(goldcount);
