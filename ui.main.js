@@ -2742,7 +2742,7 @@ function maybeSendChat(e) {
 			delete muteset[msg.substring(8)];
 		}else if (user){
 			var msgdata = {msg: msg};
-			if (msg.match(/\/w( |")/)) {
+			if (msg.match(/^\/w( |")/)) {
 				var match = msg.match(/^\/w"([^"]*)"/);
 				var to = (match && match[1]) || msg.substring(3, msg.indexOf(" ", 4));
 				if (!to){
