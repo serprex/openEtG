@@ -1169,11 +1169,10 @@ function startQuest(questname) {
 }
 function startQuestWindow(){
 	var questui = mkView();
-	bgquest.mouseover = function(){
+	questui.mouseover = function(){
 		tinfo.setText("Welcome to Potatotal Island. The perfect island for adventuring!");
 	};
-	bgquest.interactive = true;
-	questui.addChild(bgquest);
+	questui.interactive = true;
 	questui.addChild(mkBgRect(9, 9, 880, 111));
 	var questmap = new PIXI.Sprite(gfx.bg_questmap);
 	questmap.position.set(124, 162);
