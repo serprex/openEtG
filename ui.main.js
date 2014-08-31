@@ -68,15 +68,15 @@ function userExec(x, data){
 	userutil[x](data, user);
 }
 function refreshRenderer(stage, animCb) {
-	if (realStage.children.length > 0){
-		var oldstage = realStage.children[0];
+	if (realStage.children.length > 1){
+		var oldstage = realStage.children[1];
 		if (oldstage.cmds){
 			for (var cmd in oldstage.cmds){
 				socket.removeListener(cmd, oldstage.cmds[cmd]);
 			}
 		}
 		if (oldstage.endnext) oldstage.endnext();
-		realStage.removeChildren();
+		realStage.removeChildAt(1);
 	}
 	realStage.addChild(stage);
 	realStage.next = animCb;
@@ -90,7 +90,7 @@ function refreshRenderer(stage, animCb) {
 var renderer = new PIXI.autoDetectRenderer(900, 600);
 leftpane.appendChild(renderer.view);
 var realStage = new PIXI.Stage(0x336699, true);
-realStage.click = renderer.view.blur.bind(renderer.view);
+renderer.view.addEventListener("click", renderer.view.blur.bind(renderer.view));
 var caimgcache = {}, crimgcache = {}, wsimgcache = {}, artcache = {}, artimagecache = {};
 var elecols = [0xa99683, 0xaa5999, 0x777777, 0x996633, 0x5f4930, 0x50a005, 0xcc6611, 0x205080, 0xa9a9a9, 0x337ddd, 0xccaa22, 0x333333, 0x77bbdd];
 
@@ -288,11 +288,15 @@ function mkBgRect(){
 	}
 	return g;
 }
+function mkView(){
+	var view = new PIXI.DisplayObjectContainer();
+	view.interactive = true;
+	view.hitArea = realStage.hitArea;
+	return view;
+}
 
 function initTrade() {
-	var editorui = new PIXI.DisplayObjectContainer();
-	editorui.interactive = true;
-	editorui.addChild(new PIXI.Sprite(gfx.bg_default));
+	var editorui = mkView();
 	var cardminus = {};
 	var btrade = makeButton(10, 40, "Trade");
 	var bconfirm = makeButton(10, 70, "Confirm");
@@ -416,9 +420,7 @@ function initTrade() {
 	});
 }
 function initLibrary(pool){
-	var editorui = new PIXI.DisplayObjectContainer();
-	editorui.interactive = true;
-	editorui.addChild(new PIXI.Sprite(gfx.bg_default));
+	var editorui = mkView();
 	var bexit = makeButton(10, 10, "Exit");
 	setClick(bexit, startMenu);
 	editorui.addChild(bexit);
@@ -510,12 +512,8 @@ function count(haystack, needle){
 	}
 }
 function victoryScreen(game) {
-	var victoryui = new PIXI.DisplayObjectContainer();
-	victoryui.interactive = true;
+	var victoryui = mkView();
 	var winner = game.winner == game.player1;
-	//lobby background
-	var bgvictory = new PIXI.Sprite(gfx.bg_default);
-	victoryui.addChild(bgvictory);
 
 	victoryui.addChild(makeText(10, 290, "Plies: " + game.ply + "\nTime: " + (game.time/1000).toFixed(1) + " seconds"));
 	if (winner){
@@ -683,10 +681,12 @@ soundChange();
 musicChange();
 var gfx = require("./gfx");
 gfx.load(function(loadingScreen){
-	refreshRenderer(loadingScreen);
+	realStage.addChild(loadingScreen);
 	requestAnimate();
 }, function(){
 	ui.playMusic("openingMusic");
+	realStage.removeChildren();
+	realStage.addChild(new PIXI.Sprite(gfx.bg_default));
 	startMenu();
 });
 function makeButton(x, y, img, mouseoverfunc) {
@@ -761,8 +761,7 @@ function adjust(cardminus, code, x) {
 }
 function makeCardSelector(cardmouseover, cardclick, maxedIndicator){
 	var cardpool, cardminus, showall, showshiny;
-	var cardsel = new PIXI.DisplayObjectContainer();
-	cardsel.interactive = true;
+	var cardsel = mkView();
 	if (maxedIndicator) {
 		var graphics = new PIXI.Graphics();
 		cardsel.addChild(graphics);
@@ -901,17 +900,13 @@ function startMenu(nymph) {
 	];
 	var tipNumber = etg.PlayerRng.upto(tipjar.length);
 
-	var menuui = new PIXI.DisplayObjectContainer();
-	menuui.interactive = true;
+	var menuui = mkView();
 	var buttonList = [];
 	var mouseroverButton;
 	var clickedButton;
-	var bglobby = new PIXI.Sprite(gfx.bg_default);
-	bglobby.interactive = true;
-	bglobby.mouseover = function() {
+	menuui.mouseover = function() {
 		tinfo.setText(user ? "Tip: " + tipjar[tipNumber] + "." : "To register, just type desired username & password in the fields to the right, then click 'Login'.", 750);
 	}
-	menuui.addChild(bglobby);
 	menuui.addChild(mkBgRect(
 		40, 16, 790, 60,
 		40, 92, 392, 80,
@@ -1103,9 +1098,7 @@ function startRewardWindow(reward, numberofcopies, nocode) {
 		console.log("Unknown reward", reward);
 		return;
 	}
-	var rewardui = new PIXI.DisplayObjectContainer();
-	rewardui.interactive = true;
-	rewardui.addChild(new PIXI.Sprite(gfx.bg_default));
+	var rewardui = mkView();
 
 	if (numberofcopies > 1) {
 		var infotext = makeText(20, 100, "You will get " + numberofcopies + " copies of the card you choose")
@@ -1157,9 +1150,7 @@ function startQuest(questname) {
 	}
 }
 function startQuestWindow(){
-	var questui = new PIXI.DisplayObjectContainer();
-	questui.interactive = true;
-	var bgquest = new PIXI.Sprite(gfx.bg_default);
+	var questui = mkView();
 	bgquest.mouseover = function(){
 		tinfo.setText("Welcome to Potatotal Island. The perfect island for adventuring!");
 	};
@@ -1223,9 +1214,7 @@ function startQuestWindow(){
 	refreshRenderer(questui);
 }
 function startQuestArea(area) {
-	var questui = new PIXI.DisplayObjectContainer();
-	questui.interactive = true;
-	var bgquest = new PIXI.Sprite(gfx.bg_default);
+	var questui = mkView();
 	bgquest.mouseover = function(){
 		tinfo.setText("");
 	};
@@ -1334,13 +1323,10 @@ function upgradestore() {
 		cardpool = etgutil.deck2pool(user.pool);
 		cardpool = etgutil.deck2pool(user.accountbound, cardpool);
 	}
-	var upgradeui = new PIXI.DisplayObjectContainer();
-	upgradeui.interactive = true;
-	var bg = new PIXI.Sprite(gfx.bg_default);
-	bg.mouseover = function() {
+	var upgradeui = mkView();
+	upgradeui.mouseover = function() {
 		cardArt.setTexture(getArt(etgutil.asUpped(selectedCard, true)));
 	}
-	bg.interactive = true;
 	upgradeui.addChild(bg);
 
 	var goldcount = makeText(30, 100, "$" + user.gold);
@@ -1424,11 +1410,9 @@ function startStore() {
 	];
 	var packele = -1, packrarity = -1;
 
-	var storeui = new PIXI.DisplayObjectContainer();
-	storeui.interactive = true;
+	var storeui = mkView();
 
 	//shop background
-	storeui.addChild(new PIXI.Sprite(gfx.bg_default));
 	storeui.addChild(mkBgRect(
 		40, 16, 790, 60,
 		40, 92, 492, 168,
@@ -1600,44 +1584,42 @@ function mkDaily(type) {
 	}
 }
 function startColosseum(){
-		var coloui = new PIXI.DisplayObjectContainer();
-		coloui.interactive = true;
-		coloui.addChild(new PIXI.Sprite(gfx.bg_default));
-		var magename = aiDecks.mage[user.dailymage][0];
-		var dgname = aiDecks.demigod[user.dailydg][0];
-		var events = [
-			{ name: "Novice Endurance", desc: "Fight 3 Commoners in a row without healing in between. May try until you win." },
-			{ name: "Expert Endurance", desc: "Fight 3 Champions in a row. May try until you win" },
-			{ name: "Novice Duel", desc: "Fight " + magename + ". Only one attempt allowed" },
-			{ name: "Expert Duel", desc: "Fight " + dgname + ". Only one attempt allowed" }
-		];
-		for (var i = 1;i < 5;i++) {
-			var active = !(user.daily & (1 << i));
-			if (active) {
-				var button = makeButton(50, 100 + 30 * i, "Fight!");
-				setClick(button, mkDaily(i));
-				coloui.addChild(button);
-			}
-			var text = makeText(130, 100 + 30 * i, active ? (events[i-1].name + ": " + events[i-1].desc) : "Not available. Try again tomorrow.");
-			coloui.addChild(text);
-		}
-		if (user.daily == 63){
-			var button = makeButton(50, 280, "Nymph!");
-			setClick(button, function(){
-				var nymph = etg.NymphList[etg.PlayerRng.uptoceil(12)];
-				userExec("addcards", {c: "01"+nymph});
-				userExec("donedaily", {daily: 6});
-				startMenu(nymph);
-			});
+	var coloui = mkView();
+	var magename = aiDecks.mage[user.dailymage][0];
+	var dgname = aiDecks.demigod[user.dailydg][0];
+	var events = [
+		{ name: "Novice Endurance", desc: "Fight 3 Commoners in a row without healing in between. May try until you win." },
+		{ name: "Expert Endurance", desc: "Fight 3 Champions in a row. May try until you win" },
+		{ name: "Novice Duel", desc: "Fight " + magename + ". Only one attempt allowed" },
+		{ name: "Expert Duel", desc: "Fight " + dgname + ". Only one attempt allowed" }
+	];
+	for (var i = 1;i < 5;i++) {
+		var active = !(user.daily & (1 << i));
+		if (active) {
+			var button = makeButton(50, 100 + 30 * i, "Fight!");
+			setClick(button, mkDaily(i));
 			coloui.addChild(button);
-			coloui.addChild(makeText(130, 280, "You successfully completed all tasks."));
 		}
+		var text = makeText(130, 100 + 30 * i, active ? (events[i-1].name + ": " + events[i-1].desc) : "Not available. Try again tomorrow.");
+		coloui.addChild(text);
+	}
+	if (user.daily == 63){
+		var button = makeButton(50, 280, "Nymph!");
+		setClick(button, function(){
+			var nymph = etg.NymphList[etg.PlayerRng.uptoceil(12)];
+			userExec("addcards", {c: "01"+nymph});
+			userExec("donedaily", {daily: 6});
+			startMenu(nymph);
+		});
+		coloui.addChild(button);
+		coloui.addChild(makeText(130, 280, "You successfully completed all tasks."));
+	}
 
-		var bexit = makeButton(8, 8, "Exit");
-		setClick(bexit, startMenu);
-		coloui.addChild(bexit);
+	var bexit = makeButton(8, 8, "Exit");
+	setClick(bexit, startMenu);
+	coloui.addChild(bexit);
 
-		refreshRenderer(coloui);
+	refreshRenderer(coloui);
 }
 function startEditor(arena, acard, startempty) {
 	if (!Cards.loaded) return;
@@ -1708,14 +1690,10 @@ function startEditor(arena, acard, startempty) {
 		etgutil.iterraw(user.accountbound, incrpool);
 	}
 	var showAll = false, showShiny = false;
-	var editorui = new PIXI.DisplayObjectContainer();
-	editorui.interactive = true;
-	var bg = new PIXI.Sprite(gfx.bg_default);
-	bg.mouseover = function() {
+	var editorui = mkView();
+	editorui.mouseover = function() {
 		cardArt.visible = false;
 	}
-	bg.interactive = true;
-	editorui.addChild(bg);
 	var bclear = makeButton(8, 32, "Clear");
 	var bsave = makeButton(8, 56, "Save & Exit");
 	setClick(bclear, function() {
@@ -1938,9 +1916,7 @@ function startEditor(arena, acard, startempty) {
 	deckimport.setSelectionRange(0, 333);
 }
 function startElementSelect() {
-	var stage = new PIXI.DisplayObjectContainer();
-	stage.interactive = true;
-	stage.addChild(new PIXI.Sprite(gfx.bg_default));
+	var stage = mkView();
 	var eledesc = makeText(100, 250, "Select your starter element");
 	stage.addChild(eledesc);
 	var elesel = new Array(14);
@@ -1994,9 +1970,7 @@ function startMatch(game, foeDeck) {
 	if (user) {
 		userExec("addloss", { pvp: !game.ai });
 	}
-	var gameui = new PIXI.DisplayObjectContainer();
-	gameui.interactive = true;
-	gameui.addChild(new PIXI.Sprite(gfx.bg_default));
+	var gameui = mkView();
 	var redlines = new PIXI.Sprite(gfx.bg_game);
 	redlines.position.y = 12;
 	gameui.addChild(redlines);
@@ -2608,9 +2582,7 @@ function startMatch(game, foeDeck) {
 
 function startArenaInfo(info) {
 	if (!info) return;
-	var stage = new PIXI.DisplayObjectContainer();
-	stage.interactive = true;
-	stage.addChild(new PIXI.Sprite(gfx.bg_default));
+	var stage = mkView();
 	var winloss = makeText(200, 300, (info.win || 0) + " - " + (info.loss || 0) + ": " + (info.rank+1) + "\nAge: " + info.day + "\nHP: " + info.curhp + " / " + info.hp + "\nMark: " + info.mark + "\nDraw: " + info.draw);
 	stage.addChild(winloss);
 	var batch = new PIXI.SpriteBatch();
@@ -2668,9 +2640,7 @@ function startArenaTop(info) {
 		chat("??");
 		return;
 	}
-	var stage = new PIXI.DisplayObjectContainer();
-	stage.interactive = true;
-	stage.addChild(new PIXI.Sprite(gfx.bg_default));
+	var stage = mkView();
 	for (var i = 0;i < info.length; i++) {
 		var data = info[i], y = 50 + i * 24;
 		var infotxt = makeText(120, y, (i+1) + "  " + data[0]);
