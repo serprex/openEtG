@@ -1070,12 +1070,10 @@ function startMenu(nymph) {
 	}
 
 	function logout() {
+		lbloffline.style.display = lblwantpvp.style.display = "none";
 		user = undefined;
-
 		toggleB.apply(null, usertoggle);
-
 		tstats.setText("Sandbox");
-
 		if (oracle) {
 			menuui.removeChild(oracle);
 		}
@@ -1089,7 +1087,8 @@ function startMenu(nymph) {
 	}
 
 	refreshRenderer(menuui);
-	lbloffline.style.display = lblwantpvp.style.display = lblhideright.style.display = "inline";
+	if (user) lbloffline.style.display = lblwantpvp.style.display = "inline";
+	lblhideright.style.display = "inline";
 }
 function startRewardWindow(reward, numberofcopies, nocode) {
 	if (!numberofcopies) numberofcopies = 1;
