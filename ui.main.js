@@ -1591,7 +1591,7 @@ function startColosseum(){
 				setClick(button, mkDaily(i));
 				coloui.addChild(button);
 			}
-			var text = makeText(130, 100 + 30 * i, active ? (events[i-1].name + ": " + events[i-1].desc) : "Not availible. Try again tomorrow.");
+			var text = makeText(130, 100 + 30 * i, active ? (events[i-1].name + ": " + events[i-1].desc) : "Not available. Try again tomorrow.");
 			coloui.addChild(text);
 		}
 		if (user.daily == 63){
@@ -1921,7 +1921,7 @@ function startElementSelect() {
 		elesel[i] = new PIXI.Sprite(gfx.eicons[i]);
 		elesel[i].position.set(100 + i * 32, 300);
 		elesel[i].mouseover = function(){
-			this.setText(eledesc, name);
+			eledesc.setText(name);
 		}
 		setClick(elesel[i], function() {
 			var msg = { u: user.name, a: user.auth, e: i };
