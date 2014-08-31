@@ -303,20 +303,17 @@ function initTrade() {
 	var bconfirmed = new PIXI.Text("Confirmed!", { font: "16px Dosis" });
 	var bcancel = makeButton(10, 10, "Cancel");
 	var cardChosen = false;
-	var ownDeck = new DeckDisplay(30,
+	function setCardArt(code){
+		cardArt.setTexture(getArt(code));
+		cardArt.visible = true;
+	}
+	var ownDeck = new DeckDisplay(30, setCardArt,
 		function(i) {
 			adjust(cardminus, ownDeck.deck[i], -1);
 			ownDeck.rmCard(i);
-		},
-		function(code) {
-			cardArt.setTexture(getArt(code));
 		}
 	);
-	var foeDeck = new DeckDisplay(30, undefined,
-		function(code) {
-			cardArt.setTexture(getArt(code));
-		}
-	);
+	var foeDeck = new DeckDisplay(30, setCardArt);
 	foeDeck.position.x = 350;
 	stage.addChild(ownDeck);
 	stage.addChild(foeDeck);
@@ -349,10 +346,7 @@ function initTrade() {
 	stage.addChild(bcancel);
 
 	var cardpool = etgutil.deck2pool(user.pool);
-	var cardsel = makeCardSelector(
-		function(code){
-			cardArt.setTexture(getArt(code));
-		},
+	var cardsel = makeCardSelector(setCardArt,
 		function(code){
 			var card = Cards.Codes[code];
 			if (ownDeck.deck.length < 30 && !isFreeCard(card) && code in cardpool && !(code in cardminus && cardminus[code] >= cardpool[code])) {
@@ -375,12 +369,11 @@ function initTrade() {
 			user.pool = etgutil.removedecks(user.pool, data.oldcards);
 			startMenu();
 		},
-		tradecanceled: function(data) {
-			startMenu();
-		},
+		tradecanceled: startMenu,
 	};
 	refreshRenderer(stage, function() {
 		var mpos = realStage.getMousePosition();
+		cardArt.visible = false;
 		cardsel.next(cardpool, cardminus, undefined, mpos);
 		foeDeck.next(mpos);
 		ownDeck.next(mpos);
