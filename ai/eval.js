@@ -155,7 +155,9 @@ var ActivesValues = {
 	lycanthropy:4,
 	metamorph: 2,
 	mimic: 3,
-	miracle:12,
+	miracle:function(c){
+		return c.owner.maxhp/8;
+	},
 	mitosis:function(c){
 		return c.card.cost;
 	},
@@ -494,8 +496,8 @@ module.exports = function(game) {
 	if (expectedDamage > game.turn.foe.hp){
 		return Math.min(expectedDamage - game.turn.foe.hp, 500)*(game.turn == game.player1?999:-999);
 	}
-	calcExpectedDamage(game.turn.foe, damageHash); // Call to fill damageHash
-	var gamevalue = 0;
+	expectedDamage = calcExpectedDamage(game.turn.foe, damageHash); // Call to fill damageHash
+	var gamevalue = expectedDamage > game.turn.hp ? 999 : 0;
 	for (var j = 0; j < 2; j++) {
 		logNest(j);
 		var pscore = 0, player = game.players(j);
