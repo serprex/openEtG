@@ -1430,10 +1430,10 @@ function startStore() {
 	//shop background
 	storeui.addChild(new PIXI.Sprite(gfx.bg_default));
 	storeui.addChild(mkBgRect(
-		40, 20, 790, 55,
+		40, 16, 790, 60,
 		40, 92, 492, 168,
 		40, 270, 620, 168,
-		740, 90, 85, 185
+		740, 90, 90, 184
 	));
 	//gold text
 	var tgold = makeText(750, 101, "$" + user.gold);
