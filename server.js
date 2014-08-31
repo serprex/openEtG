@@ -215,9 +215,6 @@ process.on("exit", function(){
 function dropsock(){
 	var info = sockinfo[this.id];
 	if (info){
-		if (info.foe){
-			info.foe.emit("foeleft");
-		}
 		if (info.trade){
 			var foesock = usersock[info.trade.foe];
 			if (foesock){

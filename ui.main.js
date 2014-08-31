@@ -296,53 +296,58 @@ function mkView(){
 }
 
 function initTrade() {
-	var editorui = mkView();
+	var stage = mkView();
 	var cardminus = {};
 	var btrade = makeButton(10, 40, "Trade");
 	var bconfirm = makeButton(10, 70, "Confirm");
 	var bconfirmed = new PIXI.Text("Confirmed!", { font: "16px Dosis" });
 	var bcancel = makeButton(10, 10, "Cancel");
 	var cardChosen = false;
-	var selectedCards = [], selectedCardsprites = [];
-	var player2Cards = [], player2Cardsprites = [];
+	var ownDeck = new DeckDisplay(30,
+		function(i) {
+			adjust(cardminus, ownDeck.deck[i], -1);
+			ownDeck.rmCard(i);
+		},
+		function(code) {
+			cardArt.setTexture(getArt(code));
+		}
+	);
+	var foeDeck = new DeckDisplay(30, undefined,
+		function(code) {
+			cardArt.setTexture(getArt(code));
+		}
+	);
+	foeDeck.position.x = 350;
+	stage.addChild(ownDeck);
+	stage.addChild(foeDeck);
 	setClick(bcancel, function() {
 		userEmit("canceltrade");
 		startMenu();
 	});
 	setClick(btrade, function() {
-		if (selectedCards.length > 0) {
-			userEmit("cardchosen", { cards: etgutil.encodedeck(selectedCards) });
+		if (ownDeck.deck.length > 0) {
+			socket.emit("cardchosen", etgutil.encodedeck(ownDeck.deck));
 			console.log("Card sent");
 			cardChosen = true;
-			editorui.removeChild(btrade);
-			editorui.addChild(bconfirm);
+			stage.removeChild(btrade);
+			stage.addChild(bconfirm);
 		}
-		else
-			chat("You have to choose at least a card!");
+		else chat("You have to choose at least a card!");
 	});
 	setClick(bconfirm, function() {
-		if (player2Cards.length > 0) {
+		if (foeDeck.deck.length > 0) {
 			console.log("Confirmed!");
-			userEmit("confirmtrade", { cards: etgutil.encodedeck(selectedCards), oppcards: etgutil.encodedeck(player2Cards) });
-			editorui.removeChild(bconfirm);
-			editorui.addChild(bconfirmed);
+			userEmit("confirmtrade", { cards: etgutil.encodedeck(ownDeck.deck), oppcards: etgutil.encodedeck(foeDeck.deck) });
+			stage.removeChild(bconfirm);
+			stage.addChild(bconfirmed);
 		}
 		else chat("Wait for your friend to choose!");
 	});
 	bconfirmed.position.set(10, 110);
 	setInteractive(btrade);
-	editorui.addChild(btrade);
-	editorui.addChild(bcancel);
+	stage.addChild(btrade);
+	stage.addChild(bcancel);
 
-	function updateSelectedCards(){
-		for (var i = 0;i < selectedCards.length;i++) {
-			selectedCardsprites[i].visible = true;
-			selectedCardsprites[i].setTexture(getCardImage(selectedCards[i]));
-		}
-		for (;i<30;i++) {
-			selectedCardsprites[i].visible = false;
-		}
-	}
 	var cardpool = etgutil.deck2pool(user.pool);
 	var cardsel = makeCardSelector(
 		function(code){
@@ -350,61 +355,20 @@ function initTrade() {
 		},
 		function(code){
 			var card = Cards.Codes[code];
-			if (selectedCards.length < 30 && !isFreeCard(card) && code in cardpool && !(code in cardminus && cardminus[code] >= cardpool[code])) {
+			if (ownDeck.deck.length < 30 && !isFreeCard(card) && code in cardpool && !(code in cardminus && cardminus[code] >= cardpool[code])) {
 				adjust(cardminus, code, 1);
-				for (var i = 0;i < selectedCards.length;i++) {
-					var cmp = editorCardCmp(selectedCards[i], code);
-					if (cmp >= 0) break;
-				}
-				selectedCards.splice(i, 0, code);
-				updateSelectedCards();
+				ownDeck.addCard(code);
 			}
 		}
 	);
-	editorui.addChild(cardsel);
-	for (var i = 0;i < 30;i++) {
-		var sprite = new PIXI.Sprite(gfx.nopic);
-		sprite.position.set(100 + Math.floor(i / 10) * 100, 8 + (i % 10) * 20);
-		(function(_i) {
-			setClick(sprite, function() {
-				var card = Cards.Codes[selectedCards[_i]];
-				adjust(cardminus, selectedCards[_i], -1);
-				selectedCards.splice(_i, 1);
-				updateSelectedCards();
-			}, "cardClick");
-			sprite.mouseover = function() {
-				cardArt.setTexture(getArt(selectedCards[_i]));
-			}
-		})(i);
-		editorui.addChild(sprite);
-		selectedCardsprites.push(sprite);
-	}
-	for (var i = 0;i < 30;i++) {
-		var sprite = new PIXI.Sprite(gfx.nopic);
-		sprite.position.set(450 + Math.floor(i / 10) * 100, 8 + (i % 10) * 20);
-		(function(_i) {
-			sprite.mouseover = function() {
-				cardArt.setTexture(getArt(player2Cards[_i]));
-			}
-		})(i);
-		editorui.addChild(sprite);
-		player2Cardsprites.push(sprite);
-	}
-	setInteractive.apply(null, selectedCardsprites);
-	setInteractive.apply(null, player2Cardsprites);
+	stage.addChild(cardsel);
 	var cardArt = new PIXI.Sprite(gfx.nopic);
 	cardArt.position.set(734, 8);
-	editorui.addChild(cardArt);
-	editorui.cmds = {
-		cardchosen: function(data){
-			player2Cards = etgutil.decodedeck(data.cards);
-			for (var i = 0;i < player2Cards.length;i++) {
-				player2Cardsprites[i].visible = true;
-				player2Cardsprites[i].setTexture(getCardImage(player2Cards[i]));
-			}
-			for (;i<30;i++)	{
-				player2Cardsprites[i].visible = false;
-			}
+	stage.addChild(cardArt);
+	stage.cmds = {
+		cardchosen: function(cards){
+			foeDeck.deck = etgutil.decodedeck(cards);
+			foeDeck.renderDeck(0);
 		},
 		tradedone: function(data) {
 			user.pool = etgutil.mergedecks(user.pool, data.newcards);
@@ -415,26 +379,29 @@ function initTrade() {
 			startMenu();
 		},
 	};
-	refreshRenderer(editorui, function() {
-		cardsel.next(cardpool, cardminus);
+	refreshRenderer(stage, function() {
+		var mpos = realStage.getMousePosition();
+		cardsel.next(cardpool, cardminus, undefined, mpos);
+		foeDeck.next(mpos);
+		ownDeck.next(mpos);
 	});
 }
 function initLibrary(pool){
-	var editorui = mkView();
+	var stage = mkView();
 	var bexit = makeButton(10, 10, "Exit");
 	setClick(bexit, startMenu);
-	editorui.addChild(bexit);
-	var cardminus = {}, cardpool = etgutil.deck2pool(pool);
+	stage.addChild(bexit);
+	var cardpool = etgutil.deck2pool(pool);
 	var cardsel = makeCardSelector(
 		function(code){
 			cardArt.setTexture(getArt(code));
 		}, null);
-	editorui.addChild(cardsel);
+	stage.addChild(cardsel);
 	var cardArt = new PIXI.Sprite(gfx.nopic);
 	cardArt.position.set(734, 8);
-	editorui.addChild(cardArt);
-	refreshRenderer(editorui, function(){
-		cardsel.next(cardpool, cardminus);
+	stage.addChild(cardArt);
+	refreshRenderer(stage, function(){
+		cardsel.next(cardpool);
 	});
 }
 function initGame(data, ai) {
@@ -759,13 +726,67 @@ function adjust(cardminus, code, x) {
 	} else cardminus[code] = x;
 	delete cardminus.rendered;
 }
+function DeckDisplay(decksize, cardmouseover, cardclick, deck){
+	PIXI.DisplayObjectContainer.call(this);
+	this.deck = deck || [];
+	this.decksize = decksize;
+	this.cardmouseover = cardmouseover;
+	for (var i = 0;i < decksize;i++) {
+		var sprite = new PIXI.Sprite(gfx.nopic);
+		sprite.position.set(100 + Math.floor(i / 10) * 100, 32 + (i % 10) * 20);
+		if (cardclick){
+			setClick(sprite, cardclick.bind(this, i), "cardClick");
+		}
+		sprite.interactive = true;
+		this.addChild(sprite);
+	}
+}
+DeckDisplay.prototype = Object.create(PIXI.DisplayObjectContainer.prototype);
+DeckDisplay.prototype.renderDeck = function(i){
+	for (;i < this.deck.length;i++) {
+		this.children[i].setTexture(getCardImage(this.deck[i]));
+		this.children[i].visible = true;
+	}
+	for (;i < this.decksize;i++) {
+		this.children[i].visible = false;
+	}
+}
+DeckDisplay.prototype.addCard = function(code, i){
+	if (i === undefined) i = 0;
+	for (;i < this.deck.length;i++) {
+		if (editorCardCmp(this.deck[i], code) >= 0) break;
+	}
+	this.deck.splice(i, 0, code);
+	this.renderDeck(i);
+}
+DeckDisplay.prototype.rmCard = function(index){
+	this.deck.splice(index, 1);
+	this.renderDeck(index);
+}
+DeckDisplay.prototype.next = function(mpos){
+	if (this.cardmouseover){
+		if (mpos === undefined) mpos = realStage.getMousePosition();
+		for (var i = 0;i < this.deck.length;i++) {
+			if (hitTest(this.children[i], mpos)){
+				this.cardmouseover(this.deck[i]);
+			}
+		}
+	}
+}
 function makeCardSelector(cardmouseover, cardclick, maxedIndicator){
 	var cardpool, cardminus, showall, showshiny;
-	var cardsel = mkView();
+	var cardsel = new PIXI.DisplayObjectContainer();
+	cardsel.interactive = true;
 	if (maxedIndicator) {
 		var graphics = new PIXI.Graphics();
 		cardsel.addChild(graphics);
 	}
+	var bshiny = makeButton(5, 578, "Toggle Shiny");
+	setClick(bshiny, function() {
+		showshiny ^= true;
+		makeColumns();
+	});
+	cardsel.addChild(bshiny);
 	var elefilter = 0, rarefilter = 0;
 	var columns = [[],[],[],[],[],[]], columnspr = [[],[],[],[],[],[]];
 	for (var i = 0;i < 13;i++) {
@@ -800,13 +821,8 @@ function makeCardSelector(cardmouseover, cardclick, maxedIndicator){
 			(function(_i, _j) {
 				if (cardclick){
 					setClick(sprite, function() {
-						cardclick(columns[_i][_j]);
+						cardclick(columns[_i][_j].code);
 					}, "cardClick");
-				}
-				if (cardmouseover){
-					sprite.mouseover = function(){
-						cardmouseover(columns[_i][_j]);
-					}
 				}
 			})(i, j);
 			sprite.interactive = true;
@@ -829,7 +845,7 @@ function makeCardSelector(cardmouseover, cardclick, maxedIndicator){
 		if (maxedIndicator) graphics.clear();
 		for (var i = 0;i < 6; i++){
 			for (var j = 0;j < columns[i].length;j++) {
-				var spr = columnspr[i][j], code = columns[i][j], card = Cards.Codes[code];
+				var spr = columnspr[i][j], code = columns[i][j].code, card = Cards.Codes[code];
 				spr.setTexture(getCardImage(code));
 				spr.visible = true;
 				if (cardpool) {
@@ -850,15 +866,24 @@ function makeCardSelector(cardmouseover, cardclick, maxedIndicator){
 			}
 		}
 	}
-	cardsel.next = function(newcardpool, newcardminus, newshowall, newshowshiny) {
-		if (newcardpool != cardpool || newcardminus != cardminus || newshowall != showall || newshowshiny != showshiny) {
+	cardsel.next = function(newcardpool, newcardminus, newshowall, mpos) {
+		if (newcardpool != cardpool || newcardminus != cardminus || newshowall != showall) {
 			showall = newshowall;
-			showshiny = newshowshiny;
 			cardminus = newcardminus;
 			cardpool = newcardpool;
 			makeColumns();
 		}else if (cardminus && !cardminus.rendered){
 			renderColumns();
+		}
+		if (cardmouseover){
+			if (mpos === undefined) mpos = realStage.getMousePosition();
+			for (var i=0; i<6; i++){
+				for(var j=0; j<columns[i].length; j++){
+					if (hitTest(columnspr[i][j], mpos)){
+						cardmouseover(columns[i][j]);
+					}
+				}
+			}
 		}
 	};
 	return cardsel;
@@ -1343,11 +1368,6 @@ function upgradestore() {
 	var bsell = makeButton(150, 140, "Sell");
 	setClick(bsell, eventWrap(sellCard));
 	upgradeui.addChild(bsell);
-	var bshiny = makeButton(5, 578, "Toggle Shiny");
-	setClick(bshiny, function() {
-		showShiny ^= true;
-	});
-	upgradeui.addChild(bshiny);
 	var bexit = makeButton(5, 50, "Exit");
 	setClick(bexit, startMenu);
 	upgradeui.addChild(bexit);
@@ -1394,10 +1414,10 @@ function upgradestore() {
 		}, true
 	);
 	upgradeui.addChild(cardsel);
-	var cardpool, selectedCard, showShiny;
+	var cardpool, selectedCard;
 	adjustdeck();
 	refreshRenderer(upgradeui, function() {
-		cardsel.next(cardpool, undefined, false, showShiny);
+		cardsel.next(cardpool, undefined, false);
 	});
 }
 
@@ -1625,8 +1645,8 @@ function startColosseum(){
 function startEditor(arena, acard, startempty) {
 	if (!Cards.loaded) return;
 	if (arena && (!user || arena.deck === undefined || acard === undefined)) arena = false;
-	function updateField(){
-		deckimport.value = etgutil.encodedeck(editordeck) + "01" + etg.toTrueMark(editormark);
+	function updateField(renderdeck){
+		deckimport.value = etgutil.encodedeck(decksprite.deck) + "01" + etg.toTrueMark(editormark);
 	}
 	function sumCardMinus(cardminus, code){
 		var sum = 0;
@@ -1638,25 +1658,25 @@ function startEditor(arena, acard, startempty) {
 		return sum;
 	}
 	function processDeck() {
-		if (editordeck.length > 60) editordeck.length = 60;
-		for (var i = editordeck.length - 1;i >= 0;i--) {
-			if (!(editordeck[i] in Cards.Codes)) {
-				var index = etg.fromTrueMark(editordeck[i]);
+		for (var i = decksprite.deck.length - 1;i >= 0;i--) {
+			if (!(decksprite.deck[i] in Cards.Codes)) {
+				var index = etg.fromTrueMark(decksprite.deck[i]);
 				if (~index) {
 					editormark = index;
 				}
-				editordeck.splice(i, 1);
+				decksprite.deck.splice(i, 1);
 			}
 		}
 		editormarksprite.setTexture(gfx.eicons[editormark]);
-		editordeck.sort(editorCardCmp);
+		if (decksprite.deck.length > 60) decksprite.deck.length = 60;
+		decksprite.deck.sort(editorCardCmp);
 		if (user) {
 			cardminus = {};
-			for (var i = editordeck.length - 1;i >= 0;i--) {
-				var code = editordeck[i], card = Cards.Codes[code];
+			for (var i = decksprite.deck.length - 1;i >= 0;i--) {
+				var code = decksprite.deck[i], card = Cards.Codes[code];
 				if (card.type != etg.PillarEnum) {
 					if (sumCardMinus(cardminus, code) == 6) {
-						editordeck.splice(i, 1);
+						decksprite.deck.splice(i, 1);
 						continue;
 					}
 				}
@@ -1664,15 +1684,20 @@ function startEditor(arena, acard, startempty) {
 					if ((cardminus[code] || 0) < (cardpool[code] || 0)) {
 						adjust(cardminus, code, 1);
 					} else {
-						editordeck.splice(i, 1);
+						decksprite.deck.splice(i, 1);
 					}
 				}
 			}
 			if (arena){
-				editordeck.unshift(acard, acard, acard, acard, acard);
+				decksprite.deck.unshift(acard, acard, acard, acard, acard);
 			}
 		}
 		updateField();
+		decksprite.renderDeck(0);
+	}
+	function setCardArt(code){
+		cardArt.setTexture(getArt(code));
+		cardArt.visible = true;
 	}
 	function incrpool(code, count){
 		if (code in Cards.Codes && (!arena || (!Cards.Codes[code].isOf(Cards.Codes[acard].asUpped(false))) && (arena.lv || !Cards.Codes[code].upped))){
@@ -1690,7 +1715,7 @@ function startEditor(arena, acard, startempty) {
 		etgutil.iterraw(user.pool, incrpool);
 		etgutil.iterraw(user.accountbound, incrpool);
 	}
-	var showAll = false, showShiny = false;
+	var showAll = false;
 	var editorui = mkView();
 	editorui.mouseover = function() {
 		cardArt.visible = false;
@@ -1701,7 +1726,8 @@ function startEditor(arena, acard, startempty) {
 		if (user) {
 			cardminus = {};
 		}
-		editordeck.length = arena?5:0;
+		decksprite.deck.length = arena?5:0;
+		decksprite.renderDeck(decksprite.deck.length);
 	});
 	editorui.addChild(bclear);
 	editorui.addChild(bsave);
@@ -1742,20 +1768,20 @@ function startEditor(arena, acard, startempty) {
 	}
 	function switchDeckCb(x){
 		return function() {
-			user.decks[user.selectedDeck] = etgutil.encodedeck(editordeck) + "01" + etg.toTrueMark(editormark);
+			user.decks[user.selectedDeck] = etgutil.encodedeck(decksprite.deck) + "01" + etg.toTrueMark(editormark);
 			userEmit("setdeck", { d: user.decks[user.selectedDeck], number: user.selectedDeck });
 			user.selectedDeck = x;
-			editordeck = etgutil.decodedeck(getDeck());
+			decksprite.deck = etgutil.decodedeck(getDeck());
 			processDeck();
 		}
 	}
 	if (arena){
 		setClick(bsave, function() {
-			if (editordeck.length < 35) {
+			if (decksprite.deck.length < 35) {
 				chat("35 cards required before submission");
 				return;
 			}
-			var data = { d: etgutil.encodedeck(editordeck.slice(5)) + "01" + etg.toTrueMark(editormark), lv: arena.lv };
+			var data = { d: etgutil.encodedeck(decksprite.deck.slice(5)) + "01" + etg.toTrueMark(editormark), lv: arena.lv };
 			for(var k in arattr){
 				data[k] = arattr[k];
 			}
@@ -1786,7 +1812,7 @@ function startEditor(arena, acard, startempty) {
 	}else{
 		setClick(bsave, function() {
 			if (user) {
-				user.decks[user.selectedDeck] = etgutil.encodedeck(editordeck) + "01" + etg.toTrueMark(editormark);
+				user.decks[user.selectedDeck] = etgutil.encodedeck(decksprite.deck) + "01" + etg.toTrueMark(editormark);
 				userEmit("setdeck", { d: user.decks[user.selectedDeck], number: user.selectedDeck });
 			}
 			startMenu();
@@ -1794,10 +1820,7 @@ function startEditor(arena, acard, startempty) {
 		var bimport = makeButton(8, 80, "Import");
 		setClick(bimport, function() {
 			var dvalue = deckimport.value;
-			editordeck = ~dvalue.indexOf(" ") ? dvalue.split(" ") : etgutil.decodedeck(dvalue);
-			if (editordeck.length > 60){
-				editordeck.length = 60;
-			}
+			decksprite.deck = ~dvalue.indexOf(" ") ? dvalue.split(" ") : etgutil.decodedeck(dvalue);
 			processDeck();
 		});
 		editorui.addChild(bimport);
@@ -1816,21 +1839,13 @@ function startEditor(arena, acard, startempty) {
 	}
 	var bconvert = makeButton(5, 554, "Convert Code");
 	setClick(bconvert, function() {
-		deckimport.value = editordeck.join(" ") + " " + etg.toTrueMark(editormark);
+		deckimport.value = decksprite.deck.join(" ") + " " + etg.toTrueMark(editormark);
 	});
 	editorui.addChild(bconvert);
-	var bshiny = makeButton(5, 578, "Toggle Shiny");
-	setClick(bshiny, function() {
-		showShiny ^= true;
-	});
-	editorui.addChild(bshiny);
-	var editordecksprites = [];
-	var editordeck = arena ? (startempty ? [] : etgutil.decodedeck(arena.deck)) : etgutil.decodedeck(getDeck());
 	var editormarksprite = new PIXI.Sprite(gfx.nopic);
 	editormarksprite.position.set(66, 200);
 	editorui.addChild(editormarksprite);
 	var editormark = 0;
-	processDeck();
 	for (var i = 0;i < 13;i++) {
 		var sprite = makeButton(100 + i * 32, 234, gfx.eicons[i]);
 		sprite.interactive = true;
@@ -1843,37 +1858,22 @@ function startEditor(arena, acard, startempty) {
 		})(i);
 		editorui.addChild(sprite);
 	}
-	for (var i = 0;i < 60;i++) {
-		var sprite = new PIXI.Sprite(gfx.nopic);
-		sprite.position.set(100 + Math.floor(i / 10) * 100, 32 + (i % 10) * 20);
-		(function(_i) {
-			setClick(sprite, function() {
-				var code = editordeck[_i], card = Cards.Codes[code];
-				if (!arena || etgutil.asUpped(code, false) != acard){
-					if (user && !isFreeCard(card)) {
-						adjust(cardminus, code, -1);
-					}
-					editordeck.splice(_i, 1);
-					updateField();
+	var decksprite = new DeckDisplay(60, setCardArt,
+		function(i){
+			var code = decksprite.deck[i], card = Cards.Codes[code];
+			if (!arena || etgutil.asUpped(code, false) != acard){
+				if (user && !isFreeCard(card)) {
+					adjust(cardminus, code, -1);
 				}
-			}, "cardClick");
-			sprite.mouseover = function() {
-				cardArt.setTexture(getArt(editordeck[_i]));
-				cardArt.visible = true;
+				decksprite.rmCard(i);
+				updateField();
 			}
-		})(i);
-		sprite.interactive = true;
-		editorui.addChild(sprite);
-		editordecksprites.push(sprite);
-	}
-	setInteractive.apply(null, editordecksprites);
-	var cardsel = makeCardSelector(
+		}, arena ? (startempty ? [] : etgutil.decodedeck(arena.deck)) : etgutil.decodedeck(getDeck())
+	);
+	editorui.addChild(decksprite);
+	var cardsel = makeCardSelector(setCardArt,
 		function(code){
-			cardArt.setTexture(getArt(code));
-			cardArt.visible = true;
-		},
-		function(code){
-			if (editordeck.length < 60) {
+			if (decksprite.deck.length < 60) {
 				var card = Cards.Codes[code];
 				if (user && !isFreeCard(card)) {
 					if (!(code in cardpool) || (code in cardminus && cardminus[code] >= cardpool[code]) ||
@@ -1882,12 +1882,8 @@ function startEditor(arena, acard, startempty) {
 					}
 					adjust(cardminus, code, 1);
 				}
-				for (var i = arena?5:0;i < editordeck.length;i++) {
-					var cmp = editorCardCmp(editordeck[i], code);
-					if (cmp >= 0) break;
-				}
-				editordeck.splice(i, 0, code);
-				deckimport.value = etgutil.encodedeck(editordeck) + "01" + etg.toTrueMark(editormark);
+				decksprite.addCard(code, arena?5:0);
+				updateField();
 			}
 		}, !arena
 	);
@@ -1903,18 +1899,15 @@ function startEditor(arena, acard, startempty) {
 		deckimport.style.display = "none";
 	}
 	refreshRenderer(editorui, function() {
-		cardsel.next(cardpool, cardminus, showAll, showShiny);
-		for (var i = 0;i < editordeck.length;i++) {
-			editordecksprites[i].visible = true;
-			editordecksprites[i].setTexture(getCardImage(editordeck[i]));
-		}
-		for (;i < 60;i++) {
-			editordecksprites[i].visible = false;
-		}
+		cardArt.visible = false;
+		var mpos = realStage.getMousePosition();
+		cardsel.next(cardpool, cardminus, showAll, mpos);
+		decksprite.next(mpos);
 	});
 	deckimport.style.display = "inline";
 	deckimport.focus();
 	deckimport.setSelectionRange(0, 333);
+	processDeck();
 }
 function startElementSelect() {
 	var stage = mkView();
