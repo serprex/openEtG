@@ -269,12 +269,23 @@ function getWeaponShieldImage(code) {
 }
 function mkBgRect(){
 	var g = new PIXI.Graphics();
-	g.lineStyle(2, 0x121212);
-	g.beginFill(0x243648);
+	g.beginFill(0x0d2e4a);
 	for(var i=0; i<arguments.length; i+=4){
 		g.drawRect(arguments[i], arguments[i+1], arguments[i+2], arguments[i+3], 6);
 	}
 	g.endFill();
+	g.lineStyle(2, 0x121212);
+	for(var i=0; i<arguments.length; i+=4){
+		g.moveTo(arguments[i], arguments[i+1]);
+		g.lineTo(arguments[i], arguments[i+1]+arguments[i+3]);
+		g.lineTo(arguments[i]+arguments[i+2], arguments[i+1]+arguments[i+3]);
+	}
+	g.lineStyle(2, 0x969696);
+	for(var i=0; i<arguments.length; i+=4){
+		g.moveTo(arguments[i], arguments[i+1]);
+		g.lineTo(arguments[i]+arguments[i+2], arguments[i+1]);
+		g.lineTo(arguments[i]+arguments[i+2], arguments[i+1]+arguments[i+3]);
+	}
 	return g;
 }
 
@@ -901,9 +912,26 @@ function startMenu(nymph) {
 		tinfo.setText(user ? "Tip: " + tipjar[tipNumber] + "." : "To register, just type desired username & password in the fields to the right, then click 'Login'.", 750);
 	}
 	menuui.addChild(bglobby);
-	var menusquares = new PIXI.Sprite(gfx.bg_lobby);
-	menusquares.position.set(40, 16);
-	menuui.addChild(menusquares);
+	menuui.addChild(mkBgRect(
+		40, 16, 790, 60,
+		40, 92, 392, 80,
+		40, 192, 392, 80,
+		40, 292, 392, 80,
+		740, 90, 90, 184,
+		740, 540, 90, 38
+	));
+	["AI BATTLE", "THE ARENA", "DECK MANAGEMENT"].forEach(function(text, i){
+		var sectionText = new PIXI.Text(text, {font: "56px Dosis", fill: "#0c4262"});
+		sectionText.position.set(236, 144+i*100);
+		sectionText.anchor.set(.5, .5);
+		if (sectionText.width > 350) sectionText.width = 350;
+		menuui.addChild(sectionText);
+	});
+	for (var i=1; i<=2; i++){
+		var tierText = new PIXI.Text("Tier " + i, {font: "24px Dosis"});
+		tierText.position.set(362, 166+i*38);
+		menuui.addChild(tierText);
+	}
 
 	var bnextTip = makeButton(750, 50, "Next tip");
 	setClick(bnextTip, function() {
@@ -997,15 +1025,15 @@ function startMenu(nymph) {
 
 	var usertoggle = [bquest, bcolosseum, bshop, bupgrade, blogout, bdelete, bnextTip];
 	for (var i=0; i<2; i++){
-		var baia = makeButton(50, 200+i*50, "Arena AI", (function(cost){return function() {
+		var baia = makeButton(50, 200+i*45, "Arena AI", (function(cost){return function() {
 			tinfo.setText("In the arena you will face decks from other players.\nCost: $" + cost);
 		}})(i?20:10));
 		menuui.addChild(baia);
-		var binfoa = makeButton(150, 200+i*50, "Arena Info", function() {
+		var binfoa = makeButton(150, 200+i*45, "Arena Info", function() {
 			tinfo.setText("Check how your arena deck is doing.");
 		});
 		menuui.addChild(binfoa);
-		var btopa = makeButton(250, 200+i*50, "Arena T20", function() {
+		var btopa = makeButton(250, 200+i*45, "Arena T20", function() {
 			tinfo.setText("See who the top players in arena are right now.");
 		});
 		menuui.addChild(btopa);

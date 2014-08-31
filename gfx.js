@@ -1,7 +1,7 @@
 "use strict";
 exports.loaded = false;
 function load(preload, postload){
-	var singles = ["assets/gold.png", "assets/button.png", "assets/bg_default.png", "assets/bg_lobby.png",
+	var singles = ["assets/gold.png", "assets/button.png", "assets/bg_default.png",
 		"assets/bg_quest.png", "assets/bg_game.png", "assets/bg_questmap.png"];
 	var preLoader = new PIXI.AssetLoader(["assets/esheet.png", "assets/raritysheet.png", "assets/backsheet.png",
 		"assets/cardborders.png", "assets/statussheet.png", "assets/statusborders.png", "assets/typesheet.png"].concat(singles));
