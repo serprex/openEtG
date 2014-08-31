@@ -7,6 +7,7 @@ require("./etg.client").loadcards(function() {
 		[["artimies", "http://elementscommunity.org/forum/profile/?u=140"], ["593"]],
 		[["Cryotube", "http://cryotube.deviantart.com"],
 			["566", "597", "5fe", "5lr"]],
+		[["Hawanja", "http://hawanja.deviantart.com"], ["4vs"]],
 		[["jarozaoz", "http://elementscommunity.org/forum/profile/?u=6364"],
 			["4t3", "4vn", "532", "5le", "5op"]],
 		[["kae", "http://willowdream.carbonmade.com"], ["Status Icons", "assets/statussheet.png"], ["Status Borders", "assets/statusborders.png"],
@@ -37,7 +38,7 @@ require("./etg.client").loadcards(function() {
 			codes.sort();
 			str += "<table><tr>";
 			codes.forEach(function(code, i){
-				str += "<td><a href='Cards/"+code+".png' onmouseover='document.getElementById(\"codeimg\").src=\"Cards/"+code+".png\"'>"+Cards.Codes[code].name+"</a></td>";
+				str += "<td><a href='Cards/"+code+".png' onmouseover='document.getElementById(\"codeimg\").src=this.href'>"+Cards.Codes[code].name+"</a></td>";
 				if ((i&7)==7)str += "</tr><tr>";
 			});
 			str += "</tr></table><br>";
