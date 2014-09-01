@@ -5,7 +5,7 @@ function load(preload, postload){
 		"assets/bg_quest.png", "assets/bg_game.png", "assets/bg_questmap.png"];
 	var preLoader = new PIXI.AssetLoader(["assets/esheet.png", "assets/raritysheet.png", "assets/backsheet.png",
 		"assets/cardborders.png", "assets/statussheet.png", "assets/statusborders.png", "assets/typesheet.png"].concat(singles));
-	var loadingBarProgress = 0, loadingBarGraphic = new PIXI.Graphics();
+	var loadingBarGraphic = new PIXI.Graphics();
 	preLoader.onProgress = function(e) {
 		loadingBarGraphic.clear();
 		loadingBarGraphic.beginFill(0xFFFFFF);
@@ -16,7 +16,7 @@ function load(preload, postload){
 		var ui = require("./uiutil");
 		ui.loadSounds("cardClick", "buttonClick", "permPlay", "creaturePlay");
 		ui.loadMusics("openingMusic");
-		var names = ["eicons", "ricons", "cardBacks", "cardBorders", "popups", "sicons", "ticons", "sborders"];
+		var names = ["eicons", "ricons", "cardBacks", "cardBorders", "sicons", "ticons", "sborders"];
 		names.forEach(function(name){
 			exports[name] = [];
 		});

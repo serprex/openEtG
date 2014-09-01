@@ -1222,11 +1222,9 @@ function startQuestWindow(){
 }
 function startQuestArea(area) {
 	var questui = mkView();
-	bgquest.mouseover = function(){
+	questui.mouseover = function(){
 		tinfo.setText("");
 	};
-	bgquest.interactive = true;
-	questui.addChild(bgquest);
 	questui.addChild(mkBgRect(9, 9, 880, 111));
 	var questmap = new PIXI.Sprite(gfx.bg_quest);
 	questmap.position.set(124, 162);
