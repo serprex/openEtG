@@ -914,16 +914,16 @@ function startMenu(nymph) {
 	var mouseroverButton;
 	var clickedButton;
 	menuui.mouseover = function() {
-		tinfo.setText(user ? "Tip: " + tipjar[tipNumber] + "." : "To register, just type desired username & password in the fields to the right, then click 'Login'.", 750);
+		tinfo.setText(user ? "Tip: " + tipjar[tipNumber] + "." : "To register, just type desired username & password in the fields to the right, then click 'Login'.", 800);
 	}
 	menuui.addChild(mkBgRect(
-		40, 16, 790, 60,
+		40, 16, 820, 60,
 		40, 92, 392, 80,
 		40, 192, 392, 80,
 		40, 292, 392, 80,
 		40, 392, 392, 80,
-		740, 90, 90, 184,
-		740, 540, 90, 38
+		770, 90, 90, 184,
+		770, 540, 90, 38
 	));
 	["AI BATTLE", "ARENA", "DECK MANAGEMENT", "OPTIONS"].forEach(function(text, i){
 		var sectionText = new PIXI.Text(text, {font: "56px Dosis", fill: "#0c4262"});
@@ -938,14 +938,14 @@ function startMenu(nymph) {
 		menuui.addChild(tierText);
 	}
 
-	var bnextTip = makeButton(750, 50, "Next tip");
+	var bnextTip = makeButton(777, 50, "Next tip");
 	setClick(bnextTip, function() {
 		tipNumber = (tipNumber+1) % tipjar.length;
-		tinfo.setText("Tip: " + tipjar[tipNumber] + ".", 750);
+		tinfo.setText("Tip: " + tipjar[tipNumber] + ".", 800);
 	});
 	menuui.addChild(bnextTip);
 
-	var tstats = makeText(750, 101, (user ? "$" + user.gold + "\nAI w/l\n" + user.aiwins + "/" + user.ailosses + "\n\nPvP w/l\n" + user.pvpwins + "/" + user.pvplosses : "Sandbox"));
+	var tstats = makeText(775, 101, (user ? "$" + user.gold + "\nAI w/l\n" + user.aiwins + "/" + user.ailosses + "\n\nPvP w/l\n" + user.pvpwins + "/" + user.pvplosses : "Sandbox"));
 	menuui.addChild(tstats);
 
 	var tinfo = makeText(50, 26, "")
@@ -1005,7 +1005,7 @@ function startMenu(nymph) {
 	setClick(bupgrade, upgradestore);
 	menuui.addChild(bupgrade);
 
-	var blogout = makeButton(750, 246, "Logout", function() {
+	var blogout = makeButton(777, 246, "Logout", function() {
 		tinfo.setText("Click here to log out.")
 	});
 	setClick(blogout, function() {
@@ -1015,7 +1015,7 @@ function startMenu(nymph) {
 	menuui.addChild(blogout);
 
 	//delete account button
-	var bdelete = makeButton(750, 550, "Wipe Account", function() {
+	var bdelete = makeButton(777, 550, "Wipe Account", function() {
 		tinfo.setText("Click here to permanently remove your account.")
 	});
 	setClick(bdelete, function() {
