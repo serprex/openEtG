@@ -79,7 +79,7 @@ function refreshRenderer(stage, animCb, dontrender) {
 	}
 	realStage.addChild(stage);
 	realStage.next = animCb;
-	if (!dontrender) renderer.render(realStage);
+	// if (!dontrender) renderer.render(realStage);
 }
 
 var renderer = new PIXI.autoDetectRenderer(900, 600);
@@ -1340,7 +1340,7 @@ function upgradestore() {
 		if (selectedCard) cardArt.setTexture(getArt(etgutil.asShiny(selectedCard, true)));
 	},
 	function() {
-		if (selectedCard) cardArt.setTexture(getArt(selectedCard));
+		if (selectedCard) cardArt.setTexture(getArt(etgutil.asUpped(selectedCard, true)));
 	});
 	setClick(bpolish, eventWrap(polishCard));
 	upgradeui.addChild(bpolish);
@@ -1687,12 +1687,12 @@ function startEditor(arena, acard, startempty) {
 			}
 		}
 	}
-	function saveDeck(){
+	function saveDeck(force){
 		var dcode = etgutil.encodedeck(decksprite.deck) + "01" + etg.toTrueMark(editormark);
 		if (user.decks[user.selectedDeck] != dcode){
 			user.decks[user.selectedDeck] = dcode;
-			userEmit("setdeck", { d: user.decks[user.selectedDeck], number: user.selectedDeck });
-		}
+			userEmit("setdeck", { d: dcode, number: user.selectedDeck });
+		}else if (force) userEmit("setdeck", { number: user.selectedDeck });
 	}
 	var cardminus, cardpool;
 	if (user){
@@ -1796,7 +1796,7 @@ function startEditor(arena, acard, startempty) {
 		makeattrui(2, "draw");
 	}else{
 		setClick(bsave, function() {
-			if (user) saveDeck();
+			if (user) saveDeck(true);
 			startMenu();
 		});
 		var bimport = makeButton(8, 80, "Import");

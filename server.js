@@ -397,9 +397,11 @@ io.on("connection", function(socket) {
 		delete usersock[u];
 	});
 	userEvent("setdeck", function(data, user) {
-		var decks = user.decks ? user.decks.split(",") : [];
-		decks[data.number] = data.d;
-		user.decks = decks.join(",");
+		if (data.d !== undefined) {
+			var decks = (user.decks || "").split(",");
+			decks[data.number] = data.d;
+			user.decks = decks.join(",");
+		}
 		user.selectedDeck = data.number;
 	});
 	userEvent("setarena", function(data, user){
