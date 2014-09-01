@@ -1,6 +1,6 @@
 "use strict";
 (function() {
-var htmlElements = ["leftpane", "chatinput", "deckimport", "aideck", "foename", "change", "login", "password", "challenge", "chatBox", "trade", "bottompane", "demigodmode", "username", "stats","enableSound", "hideright", "lblhideright", "wantpvp", "lblwantpvp", "offline", "lbloffline"];
+var htmlElements = ["leftpane", "chatinput", "deckimport", "aideck", "foename", "change", "login", "password", "challenge", "chatBox", "trade", "bottompane", "demigodmode", "username", "stats","enableSound", "hideright", "lblhideright", "wantpvp", "lblwantpvp", "offline", "lbloffline", "options"];
 htmlElements.forEach(function(name){
 	window[name] = document.getElementById(name);
 });
@@ -72,13 +72,15 @@ function refreshRenderer(stage, animCb) {
 		if (oldstage.endnext) oldstage.endnext();
 		realStage.removeChildAt(1);
 	}
-	realStage.addChild(stage);
-	realStage.next = animCb;
 	if (stage.cmds){
 		for (var cmd in stage.cmds){
 			socket.on(cmd, stage.cmds[cmd]);
 		}
 	}
+	realStage.addChild(stage);
+	realStage.next = animCb;
+	realStage.next = animCb;
+	renderer.render(realStage);
 }
 
 var renderer = new PIXI.autoDetectRenderer(900, 600);
@@ -920,10 +922,11 @@ function startMenu(nymph) {
 		40, 92, 392, 80,
 		40, 192, 392, 80,
 		40, 292, 392, 80,
+		40, 392, 392, 80,
 		740, 90, 90, 184,
 		740, 540, 90, 38
 	));
-	["AI BATTLE", "THE ARENA", "DECK MANAGEMENT"].forEach(function(text, i){
+	["AI BATTLE", "ARENA", "DECK MANAGEMENT", "OPTIONS"].forEach(function(text, i){
 		var sectionText = new PIXI.Text(text, {font: "56px Dosis", fill: "#0c4262"});
 		sectionText.position.set(236, 144+i*100);
 		sectionText.anchor.set(.5, .5);
@@ -1086,12 +1089,11 @@ function startMenu(nymph) {
 		tradegive: initTrade,
 	};
 	menuui.endnext = function(){
-		lbloffline.style.display = lblwantpvp.style.display = lblhideright.style.display = "none";
+		options.style.display = "none";
 	}
 
 	refreshRenderer(menuui);
-	if (user) lbloffline.style.display = lblwantpvp.style.display = "inline";
-	lblhideright.style.display = "inline";
+	options.style.display = "inline";
 }
 function startRewardWindow(reward, numberofcopies, nocode) {
 	if (!numberofcopies) numberofcopies = 1;
@@ -2780,6 +2782,7 @@ function prepuser(){
 	if (!user.aiwins) user.aiwins = 0;
 	if (!user.pvplosses) user.pvplosses = 0;
 	if (!user.pvpwins) user.pvpwins = 0;
+	lbloffline.style.display = lblwantpvp.style.display = "inline";
 }
 function loginClick() {
 	if (!user && username.value) {
