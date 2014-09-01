@@ -349,8 +349,8 @@ function calcExpectedDamage(pl, damageHash) {
 	if (freedomChance){
 		freedomChance = 1-Math.pow(.7, freedomChance);
 	}
-	if (pl.shield && pl.shield.hasactive("shield", "blockwithcharge")){
-		wallCharges = [pl.shield.status.charges];
+	if (pl.foe.shield && pl.foe.shield.hasactive("shield", "blockwithcharge")){
+		wallCharges = [pl.foe.shield.status.charges];
 	}
 	if (!stasisFlag){
 		pl.creatures.forEach(function(c){
