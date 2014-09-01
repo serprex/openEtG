@@ -649,7 +649,7 @@ gfx.load(function(loadingScreen){
 	realStage.addChild(new PIXI.Sprite(gfx.bg_default));
 	startMenu();
 });
-function makeButton(x, y, img, mouseoverfunc) {
+function makeButton(x, y, img, mouseoverfunc, mouseoutfunc) {
 	var b;
 	if (typeof img == "string"){
 		b = new PIXI.Sprite(gfx.button);
@@ -678,6 +678,7 @@ function makeButton(x, y, img, mouseoverfunc) {
 		b.tint = 0xAAAAAA;
 	}
 	b.mouseout = function() {
+		if (mouseoutfunc) mouseoutfunc();
 		b.tint = 0xFFFFFF;
 	}
 	return b;
@@ -1341,11 +1342,6 @@ function upgradestore() {
 		cardpool = etgutil.deck2pool(user.accountbound, cardpool);
 	}
 	var upgradeui = mkView();
-	upgradeui.mouseover = function() {
-		if (selectedCard){
-			cardArt.setTexture(getArt(etgutil.asUpped(selectedCard, true)));
-		}
-	}
 
 	var goldcount = makeText(30, 100, "$" + user.gold);
 	upgradeui.addChild(goldcount);
@@ -1353,7 +1349,10 @@ function upgradestore() {
 	setClick(bupgrade, eventWrap(upgradeCard));
 	upgradeui.addChild(bupgrade);
 	var bpolish = makeButton(150, 95, "Polish", function() {
-		cardArt.setTexture(getArt(etgutil.asShiny(selectedCard, true)));
+		if (selectedCard) cardArt.setTexture(getArt(etgutil.asShiny(selectedCard, true)));
+	},
+	function() {
+		if (selectedCard) cardArt.setTexture(getArt(selectedCard));
 	});
 	setClick(bpolish, eventWrap(polishCard));
 	upgradeui.addChild(bpolish);
