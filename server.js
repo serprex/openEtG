@@ -151,22 +151,27 @@ function deckRedirect(req, res, next){
 			"#d4cac1", "#d4accc", "#bbbbbb", "#ccb299", "#afa497", "#a7cf82", "#e5b288", "#8fa7bf", "#d4d4d4", "#99beee", "#e5d490", "#999999", "#bbddee"];
 		ctx.font = "11px Dosis";
 		ctx.textBaseline = "top";
-		etgutil.iterdeck(deck, function(code, i){
-			if (i > 70)return;
-			var ismark = etg.fromTrueMark(code);
-			if (~ismark){
-				ctx.fillStyle = elecols[ismark];
-				ctx.fillRect(0, 0, 16, 160);
+		var x=16, y=0;
+		etgutil.iterdeck(deck, function(code){
+			if (!(code in Cards.Codes)){
+				var ismark = etg.fromTrueMark(code);
+				if (~ismark){
+					ctx.fillStyle = elecols[ismark];
+					ctx.fillRect(0, 0, 16, 160);
+				}
 				return;
 			}
-			if (!(code in Cards.Codes))return;
 			var card = Cards.Codes[code];
-			var x = 16+Math.floor(i/10)*100, y = (i%10)*16;
 			ctx.fillStyle = elecols[card.element+(card.upped?13:0)];
 			ctx.fillRect(x, y, 100, 16);
 			ctx.fillStyle = "#000000";
 			ctx.strokeRect(x, y, 100, 16);
 			ctx.fillText(card.name, x+2, y);
+			y += 16;
+			if (y == 160){
+				y=0;
+				x+=100;
+			}
 		});
 		can.toBuffer(function(err, buf){
 			if (err){

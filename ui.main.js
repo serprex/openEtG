@@ -20,7 +20,7 @@ if (localStorage){
 (function(){
 require("./etg.client").loadcards();
 PIXI.AUTO_PREVENT_DEFAULT = false;
-var discarding, user, guestname, muteset = {}, muteall;
+var user, guestname, muteset = {}, muteall;
 var etgutil = require("./etgutil");
 var userutil = require("./userutil");
 var etg = require("./etg");
@@ -33,12 +33,6 @@ var Cards = require("./Cards");
 var socket = io(location.hostname + ":13602");
 function maybeSetText(obj, text) {
 	if (obj.text != text) obj.setText(text);
-}
-function maybeSetTexture(obj, text) {
-	if (text) {
-		obj.visible = true;
-		obj.setTexture(text);
-	} else obj.visible = false;
 }
 function setClick(obj, click, sound) {
 	sound = sound === undefined ? "buttonClick" : sound;
@@ -93,16 +87,11 @@ var realStage = new PIXI.Stage(0x336699, true);
 renderer.view.addEventListener("click", renderer.view.blur);
 var caimgcache = {}, crimgcache = {}, wsimgcache = {}, artcache = {}, artimagecache = {};
 var elecols = [0xa99683, 0xaa5999, 0x777777, 0x996633, 0x5f4930, 0x50a005, 0xcc6611, 0x205080, 0xa9a9a9, 0x337ddd, 0xccaa22, 0x333333, 0x77bbdd];
-
 function lighten(c) {
 	return ((c & 255) + 255 >> 1) | (((c >> 8) & 255) + 255 >> 1 << 8) | (((c >> 16) & 255) + 255 >> 1 << 16);
 }
 function maybeLighten(card){
 	return card.upped ? lighten(elecols[card.element]) : elecols[card.element];
-}
-function getBack(ele, upped) {
-	if (upped) ele += 13;
-	return gfx.cardBacks[ele];
 }
 var shinyFilter = new PIXI.ColorMatrixFilter();
 shinyFilter.matrix = [
@@ -114,7 +103,7 @@ shinyFilter.matrix = [
 function makeArt(card, art, oldrend) {
 	var rend = oldrend || new PIXI.RenderTexture(132, 256);
 	var template = new PIXI.DisplayObjectContainer();
-	template.addChild(new PIXI.Sprite(getBack(card.element, card.upped)));
+	template.addChild(new PIXI.Sprite(gfx.cardBacks[card.element+(card.upped?13:0)]));
 	var rarity = new PIXI.Sprite(gfx.ricons[card.rarity]);
 	rarity.anchor.set(0, 1);
 	rarity.position.set(5, 252);
@@ -1951,7 +1940,7 @@ function startMatch(game, foeDeck) {
 		spr.getChildAt(0).getChildAt(9).visible = obj.status.frozen;
 		spr.alpha = obj.isMaterial() ? 1 : .7;
 	}
-	var aiDelay = 0, aiState, aiCommand;
+	var discarding, aiDelay = 0, aiState, aiCommand;
 	if (user) {
 		userExec("addloss", { pvp: !game.ai });
 	}
@@ -2048,9 +2037,7 @@ function startMatch(game, foeDeck) {
 				socket.emit("mulligan");
 			} else if (game.targetingMode) {
 				delete game.targetingMode;
-			} else if (discarding) {
-				discarding = false;
-			}
+			} else discarding = false;
 		}
 	});
 	var resigning;
@@ -2408,7 +2395,7 @@ function startMatch(game, foeDeck) {
 			cancel.visible = false;
 		}
 		foeplays.children.forEach(function(foeplay){
-			maybeSetTexture(foeplay, foeplay.card instanceof etg.Card ? getCardImage(foeplay.card.code) : ui.getTextImage(foeplay.card, 12));
+			foeplay.setTexture(foeplay.card instanceof etg.Card ? getCardImage(foeplay.card.code) : ui.getTextImage(foeplay.card, 12));
 		});
 		foeplays.visible = !(cloakgfx.visible = game.player2.isCloaked());
 		fgfx.clear();
@@ -2474,7 +2461,7 @@ function startMatch(game, foeDeck) {
 				fgfx.endFill();
 			}
 			for (var i = 0;i < 8;i++) {
-				maybeSetTexture(handsprite[j][i], getCardImage(pl.hand[i] ? (j == 0 || game.player1.precognition ? pl.hand[i].card.code : "0") : "1"));
+				handsprite[j][i].setTexture(getCardImage(pl.hand[i] ? (j == 0 || game.player1.precognition ? pl.hand[i].card.code : "0") : "1"));
 			}
 			for (var i = 0;i < 23;i++) {
 				var cr = pl.creatures[i];
