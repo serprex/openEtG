@@ -922,10 +922,11 @@ function startMenu(nymph) {
 		40, 192, 392, 80,
 		40, 292, 392, 80,
 		40, 392, 392, 80,
+		40, 492, 392, 80,
 		770, 90, 90, 184,
 		770, 540, 90, 38
 	));
-	["AI BATTLE", "ARENA", "DECK MANAGEMENT", "OPTIONS"].forEach(function(text, i){
+	["AI BATTLE", "ARENA", "DECK MANAGEMENT", "OPTIONS", "PvP"].forEach(function(text, i){
 		var sectionText = new PIXI.Text(text, {font: "56px Dosis", fill: "#0c4262"});
 		sectionText.position.set(236, 144+i*100);
 		sectionText.anchor.set(.5, .5);
@@ -1873,10 +1874,6 @@ function startEditor(arena, acard, startempty) {
 	var cardArt = new PIXI.Sprite(gfx.nopic);
 	cardArt.position.set(734, 8);
 	editorui.addChild(cardArt);
-	editorui.cmds = {
-		pvpgive: initGame,
-		tradegive: initTrade,
-	};
 	editorui.endnext = function() {
 		deckimport.style.display = "none";
 	}
