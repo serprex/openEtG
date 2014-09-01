@@ -27,7 +27,13 @@ function logNestEnd(x){
 }
 function log(x, y){
 	if (enableLogging){
-		logbuff[x] = y;
+		if (!(x in logbuff)){
+			logbuff[x] = y;
+		}else if (logbuff[x] instanceof Array){
+			logbuff[x].push(y);
+		}else{
+			logbuff[x] = [logbuff[x], y];
+		}
 	}
 }
 var ActivesValues = {
