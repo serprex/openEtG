@@ -1687,6 +1687,13 @@ function startEditor(arena, acard, startempty) {
 			}
 		}
 	}
+	function saveDeck(){
+		var dcode = etgutil.encodedeck(decksprite.deck) + "01" + etg.toTrueMark(editormark);
+		if (user.decks[user.selectedDeck] != dcode){
+			user.decks[user.selectedDeck] = dcode;
+			userEmit("setdeck", { d: user.decks[user.selectedDeck], number: user.selectedDeck });
+		}
+	}
 	var cardminus, cardpool;
 	if (user){
 		cardminus = {};
@@ -1747,8 +1754,7 @@ function startEditor(arena, acard, startempty) {
 	}
 	function switchDeckCb(x){
 		return function() {
-			user.decks[user.selectedDeck] = etgutil.encodedeck(decksprite.deck) + "01" + etg.toTrueMark(editormark);
-			userEmit("setdeck", { d: user.decks[user.selectedDeck], number: user.selectedDeck });
+			saveDeck();
 			user.selectedDeck = x;
 			decksprite.deck = etgutil.decodedeck(getDeck());
 			processDeck();
@@ -1790,10 +1796,7 @@ function startEditor(arena, acard, startempty) {
 		makeattrui(2, "draw");
 	}else{
 		setClick(bsave, function() {
-			if (user) {
-				user.decks[user.selectedDeck] = etgutil.encodedeck(decksprite.deck) + "01" + etg.toTrueMark(editormark);
-				userEmit("setdeck", { d: user.decks[user.selectedDeck], number: user.selectedDeck });
-			}
+			if (user) saveDeck();
 			startMenu();
 		});
 		var bimport = makeButton(8, 80, "Import");
@@ -2597,7 +2600,7 @@ function startArenaInfo(info) {
 			i++;
 		});
 		var spr = new PIXI.Sprite(gfx.eicons[mark || 0]);
-		spr.position.set(100, 234);
+		spr.position.set(66, 200);
 		batch.addChild(spr);
 		var acard = new PIXI.Sprite(getArt(info.card));
 		acard.position.set(734, 8);
