@@ -325,7 +325,7 @@ function estimateDamage(c, freedomChance, wallCharges, damageHash) {
 		atk *= (fshactive == Actives.evade100 ? 0 : fshactive == Actives.evade50 ? .5 : fshactive == Actives.evade40 ? .6 : fshactive == Actives.chaos ? .75 : 1);
 	}
 	if (!fsh && freedomChance && c.status.airborne){
-		atk = Math.ceil(atk * 1.5) * freedomChance;
+		atk += Math.ceil(atk/2) * freedomChance;
 	}
 	if (c.owner.foe.sosa) atk *= -1;
 	damageHash[c.hash()] = atk;
@@ -479,11 +479,9 @@ function evalcardinstance(cardInst) {
 
 function caneventuallyactive(element, cost, pl){
 	if (!cost || !element || pl.quanta[element] || pl.mark == element) return true;
-	for (var i = 0; i < 16; i++) {
-		if (pl.permanents[i] && pl.permanents[i].type == etg.PillarEnum && (!pl.permanents[i].element || pl.permanents[i].element == element))
-			return true;
-	}
-	return false;
+	return pl.permanents.some(function(pr){
+		return pr && pr.card.type == etg.PillarEnum && (!pr.card.element || pr.card.element == element);
+	});
 }
 
 module.exports = function(game) {
@@ -491,19 +489,19 @@ module.exports = function(game) {
 	if (game.winner){
 		return game.winner==game.player1?99999999:-99999999;
 	}
-	if (game.turn.foe.deck.length == 0 && game.turn.foe.hand.length < 8){
-		return game.turn == game.player1?99999990:-99999990;
-	}
-	if (game.turn.deck.length == 0 && game.turn.foe.hand.length < 8){
-		return game.turn == game.player1?-99999980:99999980;
+	if (game.player1.deck.length == 0 && game.player1.hand.length < 8){
+		return -99999990;
 	}
 	var damageHash = [];
-	var expectedDamage = calcExpectedDamage(game.turn, damageHash);
-	if (expectedDamage > game.turn.foe.hp){
-		return Math.min(expectedDamage - game.turn.foe.hp, 500)*(game.turn == game.player1?999:-999);
+	var expectedDamage = calcExpectedDamage(game.player2, damageHash);
+	if (expectedDamage > game.player1.hp){
+		return Math.min(expectedDamage - game.player1.hp, 500)*-999;
 	}
-	expectedDamage = calcExpectedDamage(game.turn.foe, damageHash); // Call to fill damageHash
-	var gamevalue = expectedDamage > game.turn.hp ? 999 : 0;
+	if (game.player2.deck.length == 0){
+		return 99999980;
+	}
+	expectedDamage = calcExpectedDamage(game.player1, damageHash); // Call to fill damageHash
+	var gamevalue = expectedDamage > game.player2.hp ? 999 : 0;
 	for (var j = 0; j < 2; j++) {
 		logNest(j);
 		var pscore = 0, player = game.players(j);
@@ -543,7 +541,7 @@ module.exports = function(game) {
 		if (player.neuro) pscore -= 5;
 		log("Eval", pscore);
 		logNestEnd();
-		gamevalue += pscore*(j == 0?1:-1);
+		gamevalue += pscore*(j?-1:1);
 	}
 	log("Eval", gamevalue);
 	logEnd();
