@@ -61,7 +61,7 @@ function userExec(x, data){
 	userEmit(x, data);
 	userutil[x](data, user);
 }
-function refreshRenderer(stage, animCb) {
+function refreshRenderer(stage, animCb, dontrender) {
 	if (realStage.children.length > 1){
 		var oldstage = realStage.children[1];
 		if (oldstage.cmds){
@@ -79,8 +79,7 @@ function refreshRenderer(stage, animCb) {
 	}
 	realStage.addChild(stage);
 	realStage.next = animCb;
-	realStage.next = animCb;
-	renderer.render(realStage);
+	if (!dontrender) renderer.render(realStage);
 }
 
 var renderer = new PIXI.autoDetectRenderer(900, 600);
@@ -2549,7 +2548,7 @@ function startMatch(game, foeDeck) {
 			maybeSetText(damagetext[j], !cloakgfx.visible && game.expectedDamage[j] ? "Next HP loss: " + game.expectedDamage[j] : "");
 		}
 		Effect.next(cloakgfx.visible);
-	});
+	}, true);
 }
 
 function startArenaInfo(info) {

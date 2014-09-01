@@ -234,22 +234,24 @@ function removeSoPa(p){
 	}
 }
 Game.prototype.updateExpectedDamage = function(){
-	if (this.expectedDamage && !this.winner){
-		Effect.disable = true;
+	if (this.expectedDamage){
 		this.expectedDamage[0] = this.expectedDamage[1] = 0;
-		for(var i = 0; i<3; i++){
-			var gclone = this.clone();
-			gclone.player1.permanents.forEach(removeSoPa);
-			gclone.player2.permanents.forEach(removeSoPa);
-			gclone.rng.seed(gclone.rng.mt[0]^(i*997));
-			gclone.turn.endturn();
-			if (!gclone.winner) gclone.turn.endturn();
-			this.expectedDamage[0] += this.player1.hp - gclone.player1.hp;
-			this.expectedDamage[1] += this.player2.hp - gclone.player2.hp;
+		if (!this.winner){
+			Effect.disable = true;
+			for(var i = 0; i<3; i++){
+				var gclone = this.clone();
+				gclone.player1.permanents.forEach(removeSoPa);
+				gclone.player2.permanents.forEach(removeSoPa);
+				gclone.rng.seed(gclone.rng.mt[0]^(i*997));
+				gclone.turn.endturn();
+				if (!gclone.winner) gclone.turn.endturn();
+				this.expectedDamage[0] += this.player1.hp - gclone.player1.hp;
+				this.expectedDamage[1] += this.player2.hp - gclone.player2.hp;
+			}
+			Effect.disable = false;
+			this.expectedDamage[0] = Math.round(this.expectedDamage[0]/3);
+			this.expectedDamage[1] = Math.round(this.expectedDamage[1]/3);
 		}
-		this.expectedDamage[0] = Math.round(this.expectedDamage[0]/3);
-		this.expectedDamage[1] = Math.round(this.expectedDamage[1]/3);
-		Effect.disable = false;
 	}
 }
 Game.prototype.tgtToBits = function(x) {
