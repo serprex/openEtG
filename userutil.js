@@ -11,7 +11,7 @@ exports.rewardwords = {
 exports.sellcard = function(data, user){
 	if (etgutil.count(user.pool, data.card)){
 		var card = Cards.Codes[data.card];
-		var sellValue = [5, 1, 3, 15, 20, 125][card.rarity] * (card.upped ? 5 : 1);
+		var sellValue = [5, 1, 3, 15, 20, 125][card.rarity] * (card.upped ? 5 : 1) * (card.shiny ? 5 : 1);
 		if (sellValue){
 			user.pool = etgutil.addcard(user.pool, data.card, -1);
 			user.gold += sellValue;
