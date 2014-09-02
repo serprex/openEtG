@@ -1778,7 +1778,7 @@ function startEditor(arena, acard, startempty) {
 			chat("Arena deck submitted");
 			startMenu();
 		});
-		var bexit = makeButton(8, 80, "Exit");
+		var bexit = makeButton(8, 96, "Exit");
 		setClick(bexit, function() {
 			startArenaInfo(arena);
 		});
