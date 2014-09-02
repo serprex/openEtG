@@ -2865,7 +2865,7 @@ function aiClick() {
 		startEditor();
 		return;
 	}
-	var gameData = { first: Math.random() < .5, deck: aideck.value, urdeck: getDeck(), seed: Math.random() * etgutil.MAX_INT, foename: "Custom" };
+	var gameData = { first: Math.random() < .5, deck: aideck.value, urdeck: deck, seed: Math.random() * etgutil.MAX_INT, foename: "Custom" };
 	parsepvpstats(gameData);
 	parseaistats(gameData);
 	initGame(gameData, true);
