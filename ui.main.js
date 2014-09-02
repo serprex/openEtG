@@ -1708,7 +1708,7 @@ function startEditor(arena, acard, startempty) {
 	var showAll = false;
 	var editorui = mkView();
 	var bclear = makeButton(8, 32, "Clear");
-	var bsave = makeButton(8, 56, "Save & Exit");
+	var bsave = makeButton(8, 64, "Save & Exit");
 	setClick(bclear, function() {
 		if (user) {
 			cardminus = {};
@@ -1778,7 +1778,7 @@ function startEditor(arena, acard, startempty) {
 			chat("Arena deck submitted");
 			startMenu();
 		});
-		var bexit = makeButton(8, 80, "Exit");
+		var bexit = makeButton(8, 96, "Exit");
 		setClick(bexit, function() {
 			startArenaInfo(arena);
 		});
@@ -1800,7 +1800,7 @@ function startEditor(arena, acard, startempty) {
 			if (user) saveDeck(true);
 			startMenu();
 		});
-		var bimport = makeButton(8, 80, "Import");
+		var bimport = makeButton(8, 96, "Import");
 		setClick(bimport, function() {
 			var dvalue = deckimport.value;
 			decksprite.deck = ~dvalue.indexOf(" ") ? dvalue.split(" ") : etgutil.decodedeck(dvalue);
