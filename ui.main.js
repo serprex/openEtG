@@ -2817,10 +2817,10 @@ function parseInput(data, key, value) {
 		data[key] = value;
 }
 function parsepvpstats(data){
-	parseInput(data, "hp", pvphp.value);
-	parseInput(data, "draw", pvpdraw.value);
-	parseInput(data, "mark", pvpmark.value);
-	parseInput(data, "deck", pvpdeck.value);
+	parseInput(data, "p1hp", pvphp.value);
+	parseInput(data, "p1drawpower", pvpdraw.value);
+	parseInput(data, "p1markpower", pvpmark.value);
+	parseInput(data, "p1deckpower", pvpdeck.value);
 }
 function parseaistats(data){
 	parseInput(data, "p2hp", aihp.value);
@@ -2859,7 +2859,12 @@ function libraryClick() {
 	if (Cards.loaded)
 		socket.emit("librarywant", { f: foename.value });
 }
-function aiClick(){
+function aiClick() {
+	var deck = getDeck();
+	if (etgutil.decklength(deck) < (user ? 31 : 11)) {
+		startEditor();
+		return;
+	}
 	var gameData = { first: Math.random() < .5, deck: aideck.value, urdeck: getDeck(), seed: Math.random() * etgutil.MAX_INT, foename: "Custom" };
 	parsepvpstats(gameData);
 	parseaistats(gameData);

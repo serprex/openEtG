@@ -292,6 +292,21 @@ var ActivesValues = {
 		return c.status?(c.status.charges == 0 && c.owner == c.owner.game.turn?0:6):6;
 	}
 }
+var statusValues = {
+	airborne: 0.2,
+	ranged: 0.2,
+	voodoo: 1,
+	swarm: 1,
+	flooding: function(c) {
+		return c.owner.foe.countcreatures() - 3;
+	},
+	patience: function(c) {
+		return 1 + c.owner.countcreatures() * 2;
+	},
+	freedom: 6,
+	tunneling: 2,
+	reflect: 1
+}
 
 function getDamage(c, damageHash){
 	return damageHash[c.hash()] || 0;
@@ -369,17 +384,21 @@ function evalactive(c, active, extra){
 		aval instanceof Array?aval[c.card.upped?1:0]:aval;
 }
 
-function checkpassives(c){
-	var score = 0, status = c instanceof etg.CardInstance ? c.card.status : c.status;
-	if (status) {
-		if (status.airborne || status.ranged) score += 0.2;
-		if (status.voodoo) score += 1;
-		if (status.swarm) score += 1;
-		if (status.flooding) score += c.owner.foe.countcreatures()-3;
-		if (status.patience) score += 1 + c.owner.countcreatures() * 2;
-		if (status.freedom) score += 6;
-		if (status.tunneling) score += 2;
-		if (status.reflect) score += 1;
+function checkpassives(c) {
+	var score = 0, statuses = c instanceof etg.CardInstance ? c.card.status : c.status;
+	for (status in statuses)
+	{
+		if (uniqueStatuses[status] && !(c instanceof etg.CardInstance)) {
+			if (!~uniquesActive.indexOf(status)) {
+				uniquesActive.push(status);
+			}
+			else {
+				continue;
+			}
+		}
+		var sval = statusValues[status];
+		score += sval === undefined ? 0 :
+			sval instanceof Function ? sval(c) : sval;
 	}
 	return score;
 }
@@ -484,6 +503,9 @@ function caneventuallyactive(element, cost, pl){
 	});
 }
 
+var uniqueStatuses = {flooding:"all", nightfall:"all", tunnel:"self", patience:"self"};
+var uniquesActive = [];
+
 module.exports = function(game) {
 	logStart();
 	if (game.winner){
@@ -502,7 +524,11 @@ module.exports = function(game) {
 	}
 	expectedDamage = calcExpectedDamage(game.player1, damageHash); // Call to fill damageHash
 	var gamevalue = expectedDamage > game.player2.hp ? 999 : 0;
-	for (var j = 0; j < 2; j++) {
+	for (var j = 0;j < 2;j++) {
+		for (var i = 0; i < uniquesActive.length; i++) {
+			if (uniqueStatuses[uniquesActive[i]] == "self")
+				uniquesActive[i] = undefined;
+		}
 		logNest(j);
 		var pscore = 0, player = game.players(j);
 		pscore += evalthing(player.weapon, damageHash);
