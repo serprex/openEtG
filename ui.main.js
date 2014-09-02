@@ -715,17 +715,26 @@ function DeckDisplay(decksize, cardmouseover, cardclick, deck){
 	this.deck = deck || [];
 	this.decksize = decksize;
 	this.cardmouseover = cardmouseover;
+	this.cardclick = cardclick;
+	this.hitArea = new PIXI.Rectangle(100, 32, Math.floor(decksize/10)*100, 200);
+	this.interactive = true;
 	for (var i = 0;i < decksize;i++) {
 		var sprite = new PIXI.Sprite(gfx.nopic);
 		sprite.position.set(100 + Math.floor(i / 10) * 100, 32 + (i % 10) * 20);
-		if (cardclick){
-			setClick(sprite, cardclick.bind(this, i), "cardClick");
-		}
-		sprite.interactive = true;
 		this.addChild(sprite);
 	}
 }
 DeckDisplay.prototype = Object.create(PIXI.DisplayObjectContainer.prototype);
+DeckDisplay.prototype.pos2idx = function(mpos){
+	return Math.floor((mpos.x-100-this.position.x)/100)*10+(Math.floor((mpos.y-32-this.position.y)/20)%10);
+}
+DeckDisplay.prototype.click = function(e){
+	var index = this.pos2idx(e.global);
+	if (index >= 0 && index < this.deck.length){
+		ui.playSound("cardClick");
+		this.cardclick(index);
+	}
+}
 DeckDisplay.prototype.renderDeck = function(i){
 	for (;i < this.deck.length;i++) {
 		this.children[i].setTexture(getCardImage(this.deck[i]));
@@ -749,11 +758,11 @@ DeckDisplay.prototype.rmCard = function(index){
 }
 DeckDisplay.prototype.next = function(mpos){
 	if (this.cardmouseover){
-		if (mpos === undefined) mpos = realStage.getMousePosition();
-		for (var i = 0;i < this.deck.length;i++) {
-			if (hitTest(this.children[i], mpos)){
-				this.cardmouseover(this.deck[i]);
-			}
+		if (mpos === undefined) mpos = this.stage.getMousePosition();
+		if (!this.hitArea.contains(mpos.x, mpos.y)) return;
+		var index = this.pos2idx(mpos);
+		if (index >= 0 && index < this.deck.length){
+			this.cardmouseover(this.deck[index]);
 		}
 	}
 }
@@ -765,6 +774,8 @@ function CardSelector(cardmouseover, cardclick, maxedIndicator){
 	this.showshiny = undefined;
 	this.interactive = true;
 	this.cardmouseover = cardmouseover;
+	this.cardclick = cardclick;
+	this.hitArea = new PIXI.Rectangle(100, 272, 800, 328);
 	if (maxedIndicator) this.addChild(this.maxedIndicator = new PIXI.Graphics());
 	var bshiny = makeButton(5, 578, "Toggle Shiny");
 	var self = this;
@@ -805,20 +816,19 @@ function CardSelector(cardmouseover, cardclick, maxedIndicator){
 			var sprcount = new PIXI.Text("", { font: "12px Dosis" });
 			sprcount.position.set(102, 4);
 			sprite.addChild(sprcount);
-			if (cardclick){
-				(function(_i, _j) {
-					setClick(sprite, function() {
-						cardclick(self.columns[_i][_j].code);
-					}, "cardClick");
-				})(i, j);
-			}
-			sprite.interactive = true;
 			this.addChild(sprite);
 			this.columnspr[i].push(sprite);
 		}
 	}
 }
 CardSelector.prototype = Object.create(PIXI.DisplayObjectContainer.prototype);
+CardSelector.prototype.click = function(e){
+	var col = this.columns[Math.floor((e.global.x-100)/130)], card;
+	if (col && (card = col[Math.floor((e.global.y-272)/20)])){
+		ui.playSound("cardClick");
+		this.cardclick(card.code);
+	}
+}
 CardSelector.prototype.next = function(newcardpool, newcardminus, newshowall, mpos) {
 	if (newcardpool != this.cardpool || newcardminus != this.cardminus || newshowall != this.showall) {
 		this.showall = newshowall;
@@ -829,13 +839,11 @@ CardSelector.prototype.next = function(newcardpool, newcardminus, newshowall, mp
 		this.renderColumns();
 	}
 	if (this.cardmouseover){
-		if (mpos === undefined) mpos = realStage.getMousePosition();
-		for (var i=0; i<6; i++){
-			for(var j=0; j<this.columns[i].length; j++){
-				if (hitTest(this.columnspr[i][j], mpos)){
-					this.cardmouseover(this.columns[i][j]);
-				}
-			}
+		if (mpos === undefined) mpos = this.stage.getMousePosition();
+		if (!this.hitArea.contains(mpos.x, mpos.y)) return;
+		var col = this.columns[Math.floor((mpos.x-100)/130)], card;
+		if (col && (card = col[Math.floor((mpos.y-272)/20)])){
+			this.cardmouseover(card.code);
 		}
 	}
 }
