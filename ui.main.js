@@ -92,10 +92,8 @@ function refreshRenderer(stage, animCb, dontrender) {
 	// if (!dontrender) renderer.render(realStage);
 }
 
-var renderer = new PIXI.autoDetectRenderer(900, 600);
-leftpane.appendChild(renderer.view);
+var renderer = new PIXI.autoDetectRenderer(900, 600, leftpane);
 var realStage = new PIXI.Stage(0x336699, true);
-renderer.view.addEventListener("click", renderer.view.blur);
 var caimgcache = {}, crimgcache = {}, wsimgcache = {}, artcache = {}, artimagecache = {};
 var elecols = [0xa99683, 0xaa5999, 0x777777, 0x996633, 0x5f4930, 0x50a005, 0xcc6611, 0x205080, 0xa9a9a9, 0x337ddd, 0xccaa22, 0x333333, 0x77bbdd];
 function lighten(c) {
@@ -2883,6 +2881,7 @@ function wantpvpChange(){
 		}
 	}
 })({
+	leftpane: {click: leftpane.blur},
 	change: {click: changeClick},
 	login: {click: loginClick},
 	username: {keydown: maybeLogin},
