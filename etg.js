@@ -961,8 +961,8 @@ Weapon.prototype.trueatk = Creature.prototype.trueatk = function(adrenaline, nob
 		dmg += this.calcEclipse();
 	}
 	if (this.status.burrowed)dmg = Math.ceil(dmg/2);
-	var y=adrenaline || this.status.adrenaline;
-	if (!y || y<2)return dmg;
+	var y=adrenaline || this.status.adrenaline || 0;
+	if (y<2)return dmg;
 	var attackCoefficient = 4-countAdrenaline(dmg);
 	for(var i=1; i<y; i++){
 		dmg -= Math.ceil(attackCoefficient*dmg*i/3);

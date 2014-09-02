@@ -31,6 +31,16 @@ var ui = require("./uiutil");
 var aiDecks = require("./Decks");
 var Cards = require("./Cards");
 var socket = io(location.hostname + ":13602");
+function MenuText(x, y, txt, wrapwidth) {
+	PIXI.Sprite.call(this, gfx.nopic);
+	this.position.set(x, y);
+	this.wrapwidth = wrapwidth;
+	this.setText(txt);
+}
+MenuText.prototype = Object.create(PIXI.Sprite.prototype);
+MenuText.prototype.setText = function(x){
+	this.setTexture(ui.getTextImage(x.toString(), { font: "14px Verdana", fill: "white", stroke: "black", strokeThickness: 2 }, "", this.wrapwidth));
+}
 function maybeSetText(obj, text) {
 	if (obj.text != text) obj.setText(text);
 }
@@ -465,10 +475,10 @@ function victoryScreen(game) {
 	var victoryui = mkView();
 	var winner = game.winner == game.player1;
 
-	victoryui.addChild(makeText(10, 290, "Plies: " + game.ply + "\nTime: " + (game.time/1000).toFixed(1) + " seconds"));
+	victoryui.addChild(new MenuText(10, 290, "Plies: " + game.ply + "\nTime: " + (game.time/1000).toFixed(1) + " seconds"));
 	if (winner){
 		var victoryText = game.quest ? game.wintext : "You won!";
-		var tinfo = makeText(450, game.cardreward ? 130 : 250, victoryText,true,500);
+		var tinfo = new MenuText(450, game.cardreward ? 130 : 250, victoryText, 500);
 		tinfo.anchor.x = 0.5;
 		tinfo.anchor.y = 1;
 		victoryui.addChild(tinfo);
@@ -490,7 +500,7 @@ function victoryScreen(game) {
 	if (winner && user){
 		if (game.goldreward) {
 			var goldshown = (game.goldreward || 0) - (game.cost || 0);
-			var tgold = makeText(340, 550, "Gold won: $" + goldshown);
+			var tgold = new MenuText(340, 550, "Gold won: $" + goldshown);
 			victoryui.addChild(tgold);
 			userExec("addgold", { g: game.goldreward });
 		}
@@ -672,22 +682,6 @@ function makeButton(x, y, img, mouseoverfunc, mouseoutfunc) {
 		b.tint = 0xFFFFFF;
 	}
 	return b;
-}
-
-function makeText(x, y, txt, vis, width) {
-	var t = new PIXI.Sprite(gfx.nopic);
-	t.position.set(x, y);
-	t.setText = function(x, width){
-		if (x){
-			t.setTexture(ui.getTextImage(x.toString(), { font: "14px Verdana", fill: "white", stroke: "black", strokeThickness: 2 }, "", width));
-			t.visible = true;
-		}else{
-			t.visible = false;
-		}
-	}
-	t.setText(txt, width);
-	t.visible = vis === undefined || vis;
-	return t;
 }
 
 function toggleB() {
@@ -923,7 +917,7 @@ function startMenu(nymph) {
 
 	var menuui = mkView();
 	menuui.mouseover = function() {
-		tinfo.setText(user ? "Tip: " + tipjar[tipNumber] + "." : "To register, just type desired username & password in the fields to the right, then click 'Login'.", 800);
+		tinfo.setText(user ? "Tip: " + tipjar[tipNumber] + "." : "To register, just type desired username & password in the fields to the right, then click 'Login'.");
 	};
 	menuui.addChild(mkBgRect(
 		40, 16, 820, 60,
@@ -951,14 +945,14 @@ function startMenu(nymph) {
 	var bnextTip = makeButton(777, 50, "Next tip");
 	setClick(bnextTip, function() {
 		tipNumber = (tipNumber+1) % tipjar.length;
-		tinfo.setText("Tip: " + tipjar[tipNumber] + ".", 800);
+		tinfo.setText("Tip: " + tipjar[tipNumber] + ".");
 	});
 	menuui.addChild(bnextTip);
 
-	var tstats = makeText(775, 101, (user ? "$" + user.gold + "\nAI w/l\n" + user.aiwins + "/" + user.ailosses + "\n\nPvP w/l\n" + user.pvpwins + "/" + user.pvplosses : "Sandbox"));
+	var tstats = new MenuText(775, 101, (user ? "$" + user.gold + "\nAI w/l\n" + user.aiwins + "/" + user.ailosses + "\n\nPvP w/l\n" + user.pvpwins + "/" + user.pvplosses : "Sandbox"));
 	menuui.addChild(tstats);
 
-	var tinfo = makeText(50, 26, "")
+	var tinfo = new MenuText(50, 26, "", 800);
 	menuui.addChild(tinfo);
 
 	var bai0 = makeButton(50, 100, "Commoner", function() {
@@ -1120,7 +1114,7 @@ function startRewardWindow(reward, numberofcopies, nocode) {
 	var rewardui = mkView();
 
 	if (numberofcopies > 1) {
-		var infotext = makeText(20, 100, "You will get " + numberofcopies + " copies of the card you choose")
+		var infotext = new MenuText(20, 100, "You will get " + numberofcopies + " copies of the card you choose")
 		rewardui.addChild(infotext);
 	}
 
@@ -1178,7 +1172,7 @@ function startQuestWindow(){
 	var questmap = new PIXI.Sprite(gfx.bg_questmap);
 	questmap.position.set(124, 162);
 	questui.addChild(questmap);
-	var tinfo = makeText(32, 32, "");
+	var tinfo = new MenuText(32, 32, "");
 	questui.addChild(tinfo);
 	var bexit = makeButton(750, 246, "Exit");
 	setClick(bexit, startMenu);
@@ -1240,8 +1234,8 @@ function startQuestArea(area) {
 	var questmap = new PIXI.Sprite(gfx.bg_quest);
 	questmap.position.set(124, 162);
 	questui.addChild(questmap);
-	var tinfo = makeText(50, 26, "");
-	var errinfo = makeText(50, 125, "");
+	var tinfo = new MenuText(50, 26, "", 850);
+	var errinfo = new MenuText(50, 125, "", 850);
 	function makeQuestButton(quest, stage) {
 		var pos = Quest[quest].info.pos[stage];
 		var circle = new PIXI.Graphics();
@@ -1252,7 +1246,7 @@ function startQuestArea(area) {
 		circle.hitArea = new PIXI.Circle(0, 0, 16);
 		var button = makeButton(pos[0], pos[1], circle);
 		button.mouseover = function() {
-			tinfo.setText(Quest[quest].info.text[stage], 750);
+			tinfo.setText(Quest[quest].info.text[stage]);
 		}
 		setClick(button, function() {
 			errinfo.setText(mkQuestAi(quest, stage, area) || "");
@@ -1341,7 +1335,7 @@ function upgradestore() {
 	}
 	var upgradeui = mkView();
 
-	var goldcount = makeText(30, 100, "$" + user.gold);
+	var goldcount = new MenuText(30, 100, "$" + user.gold);
 	upgradeui.addChild(goldcount);
 	var bupgrade = makeButton(150, 50, "Upgrade");
 	setClick(bupgrade, eventWrap(upgradeCard));
@@ -1430,19 +1424,19 @@ function startStore() {
 		740, 90, 90, 184
 	));
 	//gold text
-	var tgold = makeText(750, 101, "$" + user.gold);
+	var tgold = new MenuText(750, 101, "$" + user.gold);
 	storeui.addChild(tgold);
 
 	//info text
-	var tinfo = makeText(50, 26, "Select from which element you want.");
+	var tinfo = new MenuText(50, 26, "Select from which element you want.");
 	storeui.addChild(tinfo);
 
-	var tinfo2 = makeText(50, 51, "Select which type of booster you want.");
+	var tinfo2 = new MenuText(50, 51, "Select which type of booster you want.");
 	storeui.addChild(tinfo2);
 
     //free packs text
 	if (user.freepacks){
-		var freeinfo = makeText(350, 26, "");
+		var freeinfo = new MenuText(350, 26, "");
 		storeui.addChild(freeinfo);
 	}
 	function updateFreeInfo(rarity){
@@ -1610,7 +1604,7 @@ function startColosseum(){
 			setClick(button, mkDaily(i));
 			coloui.addChild(button);
 		}
-		var text = makeText(130, 100 + 30 * i, active ? (events[i-1].name + ": " + events[i-1].desc) : "Not available. Try again tomorrow.");
+		var text = new MenuText(130, 100 + 30 * i, active ? (events[i-1].name + ": " + events[i-1].desc) : "Not available. Try again tomorrow.");
 		coloui.addChild(text);
 	}
 	if (user.daily == 63){
@@ -1622,7 +1616,7 @@ function startColosseum(){
 			startMenu(nymph);
 		});
 		coloui.addChild(button);
-		coloui.addChild(makeText(130, 280, "You successfully completed all tasks."));
+		coloui.addChild(new MenuText(130, 280, "You successfully completed all tasks."));
 	}
 
 	var bexit = makeButton(8, 8, "Exit");
@@ -1896,7 +1890,7 @@ function startEditor(arena, acard, startempty) {
 }
 function startElementSelect() {
 	var stage = mkView();
-	var eledesc = makeText(100, 250, "Select your starter element");
+	var eledesc = new MenuText(100, 250, "Select your starter element");
 	stage.addChild(eledesc);
 	var elesel = new Array(14);
 	etg.eleNames.forEach(function(name, i){
@@ -2559,11 +2553,11 @@ function startMatch(game, foeDeck) {
 function startArenaInfo(info) {
 	if (!info) return;
 	var stage = mkView();
-	var winloss = makeText(200, 300, (info.win || 0) + " - " + (info.loss || 0) + ": " + (info.rank+1) + "\nAge: " + info.day + "\nHP: " + info.curhp + " / " + info.hp + "\nMark: " + info.mark + "\nDraw: " + info.draw);
+	var winloss = new MenuText(200, 300, (info.win || 0) + " - " + (info.loss || 0) + ": " + (info.rank+1) + "\nAge: " + info.day + "\nHP: " + info.curhp + " / " + info.hp + "\nMark: " + info.mark + "\nDraw: " + info.draw);
 	stage.addChild(winloss);
 	var batch = new PIXI.SpriteBatch();
 	stage.addChild(batch);
-	var infotext = makeText(300, 470, "You get 3 gold every time your arena deck wins,\n& 1 gold every time it loses.");
+	var infotext = new MenuText(300, 470, "You get 3 gold every time your arena deck wins,\n& 1 gold every time it loses.");
 	stage.addChild(infotext);
 	if (user.ocard){
 		var uocard = etgutil.asUpped(user.ocard, info.lv == 1);
@@ -2619,12 +2613,12 @@ function startArenaTop(info) {
 	var stage = mkView();
 	for (var i = 0;i < info.length; i++) {
 		var data = info[i], y = 50 + i * 24;
-		var infotxt = makeText(120, y, (i+1) + "  " + data[0]);
-		var scoretxt = makeText(350, y, data[1]);
-		var winlosstxt = makeText(400, y, data[2] + "-" + data[3]);
-		var agetxt = makeText(460, y, data[4].toString());
+		var infotxt = new MenuText(120, y, (i+1) + "  " + data[0]);
+		var scoretxt = new MenuText(350, y, data[1]);
+		var winlosstxt = new MenuText(400, y, data[2] + "-" + data[3]);
+		var agetxt = new MenuText(460, y, data[4].toString());
 		if (data[5] in Cards.Codes){
-			var cardtxt = makeText(500, y, Cards.Codes[data[5]].name);
+			var cardtxt = new MenuText(500, y, Cards.Codes[data[5]].name);
 			stage.addChild(cardtxt);
 		}
 		stage.addChild(infotxt);
