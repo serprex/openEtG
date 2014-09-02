@@ -46,6 +46,7 @@ function load(preload, postload){
 	preLoader.load();
 }
 if (typeof PIXI !== "undefined"){
-	exports.nopic = PIXI.Texture.fromImage("");
+	exports.nopic = new PIXI.Texture(new PIXI.BaseTexture());
+	exports.nopic.width = exports.nopic.height = 0;
 	exports.load = load;
 }
