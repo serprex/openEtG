@@ -383,8 +383,7 @@ Player.prototype.clone = function(game){
 CardInstance.prototype.clone = function(owner){
 	return new CardInstance(this.card, owner);
 }
-var thingtypes = [Creature, Permanent, Weapon, Shield, Pillar];
-thingtypes.forEach(function(type){
+;[Creature, Permanent, Weapon, Shield, Pillar].forEach(function(type){
 	var proto = type.prototype;
 	proto.clone = function(owner){
 		var obj = Object.create(proto);

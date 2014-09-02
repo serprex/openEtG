@@ -910,12 +910,9 @@ function startMenu(nymph) {
 	var tipNumber = etg.PlayerRng.upto(tipjar.length);
 
 	var menuui = mkView();
-	var buttonList = [];
-	var mouseroverButton;
-	var clickedButton;
 	menuui.mouseover = function() {
 		tinfo.setText(user ? "Tip: " + tipjar[tipNumber] + "." : "To register, just type desired username & password in the fields to the right, then click 'Login'.", 800);
-	}
+	};
 	menuui.addChild(mkBgRect(
 		40, 16, 820, 60,
 		40, 92, 392, 80,
@@ -934,7 +931,7 @@ function startMenu(nymph) {
 		menuui.addChild(sectionText);
 	});
 	for (var i=1; i<=2; i++){
-		var tierText = new PIXI.Text("Tier " + i, {font: "24px Dosis"});
+		var tierText = new PIXI.Text("Tier " + i, {font: "24px Dosis", fill: "#0c4262"});
 		tierText.position.set(362, 166+i*38);
 		menuui.addChild(tierText);
 	}
@@ -1704,9 +1701,6 @@ function startEditor(arena, acard, startempty) {
 	}
 	var showAll = false;
 	var editorui = mkView();
-	editorui.mouseover = function() {
-		cardArt.visible = false;
-	}
 	var bclear = makeButton(8, 32, "Clear");
 	var bsave = makeButton(8, 56, "Save & Exit");
 	setClick(bclear, function() {
@@ -1939,7 +1933,7 @@ function startMatch(game, foeDeck) {
 		spr.getChildAt(0).getChildAt(9).visible = obj.status.frozen;
 		spr.alpha = obj.isMaterial() ? 1 : .7;
 	}
-	var discarding, aiDelay = 0, aiState, aiCommand;
+	var resigning, discarding, aiDelay = 0, aiState, aiCommand;
 	if (user) {
 		userExec("addloss", { pvp: !game.ai });
 	}
@@ -1985,17 +1979,17 @@ function startMatch(game, foeDeck) {
 				}
 				if (game.winner == game.player1) {
 					userExec("addwin", { pvp: !game.ai });
-					if (game.quest && (user.quest[game.quest[0]] <= game.quest[1] || !(game.quest[0] in user.quest)) && !game.autonext) {
-						userEmit("updatequest", { quest: game.quest[0], newstage: game.quest[1] + 1 });
-						user.quest[game.quest[0]] = game.quest[1] + 1;
-					}
-					if (game.quest && game.autonext) {
-						var data = addNoHealData(game);
-						var newgame = mkQuestAi(game.quest[0], game.quest[1] + 1, game.area);
-						addToGame(newgame, data);
-						return;
-					}
-					else if (game.daily) {
+					if (game.quest){
+						if (game.autonext) {
+							var data = addNoHealData(game);
+							var newgame = mkQuestAi(game.quest[0], game.quest[1] + 1, game.area);
+							addToGame(newgame, data);
+							return;
+						}else if (user.quest[game.quest[0]] <= game.quest[1] || !(game.quest[0] in user.quest)) {
+							userEmit("updatequest", { quest: game.quest[0], newstage: game.quest[1] + 1 });
+							user.quest[game.quest[0]] = game.quest[1] + 1;
+						}
+					}else if (game.daily){
 						if (game.endurance) {
 							var data = addNoHealData(game);
 							data.endurance--;
@@ -2039,7 +2033,6 @@ function startMatch(game, foeDeck) {
 			} else discarding = false;
 		}
 	});
-	var resigning;
 	setClick(resign, function() {
 		if (resigning){
 			if (!game.ai) {
