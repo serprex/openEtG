@@ -1317,10 +1317,10 @@ function upgradestore() {
 		}
 		else return "You need 50 gold to afford a shiny pillar!";
 	}
-	var cardValues = [5, 1, 3, 15, 20];
+	var cardValues = [5, 1, 3, 15, 20, 125];
 	function sellCard(card) {
 		if (!card.rarity && !card.upped) return "You can't sell a pillar or pendulum, silly!";
-		if (card.rarity > 4 || card.rarity == -1) return "You really don't want to sell that, trust me.";
+		if (card.rarity == -1) return "You really don't want to sell that, trust me.";
 		var codecount = etgutil.count(user.pool, card.code);
 		if (codecount) {
 			userExec("sellcard", { card: card.code });
@@ -1397,7 +1397,7 @@ function upgradestore() {
 				tinfo3.setText(isFreeCard(card) ? "Costs 50 gold to polish" : card.rarity == 5 ? "This card cannot be polished." : card.rarity != -1 ? "Convert 6 into a shiny version." : "Convert 2 into a shiny version.")
 				bpolish.visible = tinfo3.visible = true;
 			}
-			tinfo2.setText((card.rarity > 0 || card.upped) && card.rarity < 5 && card.rarity != -1 ?
+			tinfo2.setText((card.rarity > 0 || card.upped) && card.rarity != -1 ?
 				"Sells for " + cardValues[card.rarity] * (card.upped ? 5 : 1) + " gold." : "");
 			twarning.setText("");
 		}, true
