@@ -336,7 +336,7 @@ function initTrade() {
 	stage.addChild(bcancel);
 
 	var cardpool = etgutil.deck2pool(user.pool);
-	var cardsel = makeCardSelector(setCardArt,
+	var cardsel = new CardSelector(setCardArt,
 		function(code){
 			var card = Cards.Codes[code];
 			if (ownDeck.deck.length < 30 && !isFreeCard(card) && code in cardpool && !(code in cardminus && cardminus[code] >= cardpool[code])) {
@@ -375,7 +375,7 @@ function initLibrary(pool){
 	setClick(bexit, startMenu);
 	stage.addChild(bexit);
 	var cardpool = etgutil.deck2pool(pool);
-	var cardsel = makeCardSelector(
+	var cardsel = new CardSelector(
 		function(code){
 			cardArt.setTexture(getArt(code));
 		}, null);
@@ -757,43 +757,46 @@ DeckDisplay.prototype.next = function(mpos){
 		}
 	}
 }
-function makeCardSelector(cardmouseover, cardclick, maxedIndicator){
-	var cardpool, cardminus, showall, showshiny;
-	var cardsel = new PIXI.DisplayObjectContainer();
-	cardsel.interactive = true;
-	if (maxedIndicator) {
-		var graphics = new PIXI.Graphics();
-		cardsel.addChild(graphics);
-	}
+function CardSelector(cardmouseover, cardclick, maxedIndicator){
+	PIXI.DisplayObjectContainer.call(this);
+	this.cardpool = undefined;
+	this.cardminus = undefined;
+	this.showall = undefined;
+	this.showshiny = undefined;
+	this.interactive = true;
+	this.cardmouseover = cardmouseover;
+	if (maxedIndicator) this.addChild(this.maxedIndicator = new PIXI.Graphics());
 	var bshiny = makeButton(5, 578, "Toggle Shiny");
+	var self = this;
 	setClick(bshiny, function() {
-		showshiny ^= true;
-		makeColumns();
+		self.showshiny ^= true;
+		self.makeColumns();
 	});
-	cardsel.addChild(bshiny);
-	var elefilter = 0, rarefilter = 0;
-	var columns = [[],[],[],[],[],[]], columnspr = [[],[],[],[],[],[]];
+	this.addChild(bshiny);
+	this.elefilter = this.rarefilter = 0;
+	this.columns = [[],[],[],[],[],[]];
+	this.columnspr = [[],[],[],[],[],[]];
 	for (var i = 0;i < 13;i++) {
 		var sprite = makeButton((!i || i&1?4:40), 316 + Math.floor((i-1)/2) * 32, gfx.eicons[i]);
 		sprite.interactive = true;
 		(function(_i) {
 			setClick(sprite, function() {
-				elefilter = _i;
-				makeColumns();
+				self.elefilter = _i;
+				self.makeColumns();
 			});
 		})(i);
-		cardsel.addChild(sprite);
+		this.addChild(sprite);
 	}
 	for (var i = 0;i < 5; i++){
 		var sprite = makeButton(74, 338 + i * 32, gfx.ricons[i]);
 		sprite.interactive = true;
 		(function(_i) {
 			setClick(sprite, function() {
-				rarefilter = _i;
-				makeColumns();
+				self.rarefilter = _i;
+				self.makeColumns();
 			});
 		})(i);
-		cardsel.addChild(sprite);
+		this.addChild(sprite);
 	}
 	for (var i = 0;i < 6;i++) {
 		for (var j = 0;j < 15;j++) {
@@ -802,75 +805,76 @@ function makeCardSelector(cardmouseover, cardclick, maxedIndicator){
 			var sprcount = new PIXI.Text("", { font: "12px Dosis" });
 			sprcount.position.set(102, 4);
 			sprite.addChild(sprcount);
-			(function(_i, _j) {
-				if (cardclick){
+			if (cardclick){
+				(function(_i, _j) {
 					setClick(sprite, function() {
-						cardclick(columns[_i][_j].code);
+						cardclick(self.columns[_i][_j].code);
 					}, "cardClick");
-				}
-			})(i, j);
+				})(i, j);
+			}
 			sprite.interactive = true;
-			cardsel.addChild(sprite);
-			columnspr[i].push(sprite);
+			this.addChild(sprite);
+			this.columnspr[i].push(sprite);
 		}
 	}
-	function makeColumns(){
-		for (var i = 0;i < 6;i++) {
-			columns[i] = etg.filtercards(i > 2,
-				function(x) { return x.element == elefilter &&
-					((i % 3 == 0 && x.type == etg.CreatureEnum) || (i % 3 == 1 && x.type <= etg.PermanentEnum) || (i % 3 == 2 && x.type == etg.SpellEnum)) &&
-					(!cardpool || x in cardpool || showall || isFreeCard(x)) && (!rarefilter || rarefilter == Math.min(x.rarity, 4));
-				}, editorCardCmp, showshiny);
-		}
-		renderColumns();
+}
+CardSelector.prototype = Object.create(PIXI.DisplayObjectContainer.prototype);
+CardSelector.prototype.next = function(newcardpool, newcardminus, newshowall, mpos) {
+	if (newcardpool != this.cardpool || newcardminus != this.cardminus || newshowall != this.showall) {
+		this.showall = newshowall;
+		this.cardminus = newcardminus;
+		this.cardpool = newcardpool;
+		this.makeColumns();
+	}else if (this.cardminus && !this.cardminus.rendered){
+		this.renderColumns();
 	}
-	function renderColumns(){
-		if (cardminus) cardminus.rendered = true;
-		if (maxedIndicator) graphics.clear();
-		for (var i = 0;i < 6; i++){
-			for (var j = 0;j < columns[i].length;j++) {
-				var spr = columnspr[i][j], code = columns[i][j].code, card = Cards.Codes[code];
-				spr.setTexture(getCardImage(code));
-				spr.visible = true;
-				if (cardpool) {
-					var txt = spr.getChildAt(0), card = Cards.Codes[code], inf = isFreeCard(card);
-					if ((txt.visible = inf || code in cardpool || showall)) {
-						var cardAmount = inf ? "-" : !(code in cardpool) ? 0 : (cardpool[code] - (cardminus && code in cardminus ? cardminus[code] : 0))
-						maybeSetText(txt, cardAmount.toString());
-						if (maxedIndicator && card.type != etg.PillarEnum && cardAmount >= 6) {
-							graphics.beginFill(elecols[etg.Light]);
-							graphics.drawRect(spr.position.x + 100, spr.position.y, 20, 20);
-							graphics.endFill();
-						}
-					}
-				}
-			}
-			for (;j < 15;j++) {
-				columnspr[i][j].visible = false;
-			}
-		}
-	}
-	cardsel.next = function(newcardpool, newcardminus, newshowall, mpos) {
-		if (newcardpool != cardpool || newcardminus != cardminus || newshowall != showall) {
-			showall = newshowall;
-			cardminus = newcardminus;
-			cardpool = newcardpool;
-			makeColumns();
-		}else if (cardminus && !cardminus.rendered){
-			renderColumns();
-		}
-		if (cardmouseover){
-			if (mpos === undefined) mpos = realStage.getMousePosition();
-			for (var i=0; i<6; i++){
-				for(var j=0; j<columns[i].length; j++){
-					if (hitTest(columnspr[i][j], mpos)){
-						cardmouseover(columns[i][j]);
-					}
+	if (this.cardmouseover){
+		if (mpos === undefined) mpos = realStage.getMousePosition();
+		for (var i=0; i<6; i++){
+			for(var j=0; j<this.columns[i].length; j++){
+				if (hitTest(this.columnspr[i][j], mpos)){
+					this.cardmouseover(this.columns[i][j]);
 				}
 			}
 		}
-	};
-	return cardsel;
+	}
+}
+CardSelector.prototype.makeColumns = function(){
+	var self = this;
+	for (var i = 0;i < 6;i++) {
+		this.columns[i] = etg.filtercards(i > 2,
+			function(x) { return x.element == self.elefilter &&
+				((i % 3 == 0 && x.type == etg.CreatureEnum) || (i % 3 == 1 && x.type <= etg.PermanentEnum) || (i % 3 == 2 && x.type == etg.SpellEnum)) &&
+				(!self.cardpool || x in self.cardpool || self.showall || isFreeCard(x)) && (!self.rarefilter || self.rarefilter == Math.min(x.rarity, 4));
+			}, editorCardCmp, this.showshiny);
+	}
+	this.renderColumns();
+}
+CardSelector.prototype.renderColumns = function(){
+	if (this.cardminus) this.cardminus.rendered = true;
+	if (this.maxedIndicator) this.maxedIndicator.clear();
+	for (var i = 0;i < 6; i++){
+		for (var j = 0;j < this.columns[i].length;j++) {
+			var spr = this.columnspr[i][j], code = this.columns[i][j].code;
+			spr.setTexture(getCardImage(code));
+			spr.visible = true;
+			if (this.cardpool) {
+				var txt = spr.getChildAt(0), card = Cards.Codes[code], inf = isFreeCard(card);
+				if ((txt.visible = inf || code in this.cardpool || this.showall)) {
+					var cardAmount = inf ? "-" : !(code in this.cardpool) ? 0 : (this.cardpool[code] - (this.cardminus && code in this.cardminus ? this.cardminus[code] : 0))
+					maybeSetText(txt, cardAmount.toString());
+					if (this.maxedIndicator && card.type != etg.PillarEnum && cardAmount >= 6) {
+						this.maxedIndicator.beginFill(elecols[etg.Light]);
+						this.maxedIndicator.drawRect(spr.position.x + 100, spr.position.y, 20, 20);
+						this.maxedIndicator.endFill();
+					}
+				}
+			}
+		}
+		for (;j < 15;j++) {
+			this.columnspr[i][j].visible = false;
+		}
+	}
 }
 function startMenu(nymph) {
 	var tipjar = [
@@ -1367,7 +1371,7 @@ function upgradestore() {
 	selectedCardArt.position.set(534, 8);
 	upgradeui.addChild(selectedCardArt);
 
-	var cardsel = makeCardSelector(null,
+	var cardsel = new CardSelector(null,
 		function(code){
 			var card = Cards.Codes[code];
 			selectedCardArt.setTexture(getArt(code));
@@ -1848,7 +1852,7 @@ function startEditor(arena, acard, startempty) {
 		}, arena ? (startempty ? [] : etgutil.decodedeck(arena.deck)) : etgutil.decodedeck(getDeck())
 	);
 	editorui.addChild(decksprite);
-	var cardsel = makeCardSelector(setCardArt,
+	var cardsel = new CardSelector(setCardArt,
 		function(code){
 			if (decksprite.deck.length < 60) {
 				var card = Cards.Codes[code];
