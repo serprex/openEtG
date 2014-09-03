@@ -926,7 +926,7 @@ Creature.prototype.evade = function(sender) {
 	if (sender != this.owner && this.status.airborne){
 		var freedomChance = 0;
 		for(var i=0; i<16; i++){
-			if (this.owner.permanents[i] && this.owner.permanents[i].freedom){
+			if (this.owner.permanents[i] && this.owner.permanents[i].status.freedom){
 				freedomChance++;
 			}
 		}
@@ -1141,7 +1141,7 @@ CardInstance.prototype.useactive = function(target){
 	if (card.type <= PermanentEnum){
 		var cons = [Pillar, Weapon, Shield, Permanent][card.type];
 		new cons(card, owner).place(true);
-		if (this.owner == this.owner.game.player1) ui.playSound("permPlay");
+		if (owner == owner.game.player1) ui.playSound("permPlay");
 	}else if (card.type == SpellEnum){
 		if (!target || !target.evade(owner)){
 			card.active(this, target);
@@ -1149,7 +1149,7 @@ CardInstance.prototype.useactive = function(target){
 		}
 	}else if (card.type == CreatureEnum){
 		new Creature(card, owner).place(true);
-		if (this.owner == this.owner.game.player1) ui.playSound("creaturePlay");
+		if (owner == owner.game.player1) ui.playSound("creaturePlay");
 	} else console.log("Unknown card type: " + card.type);
 	owner.spend(card.costele, card.cost);
 	owner.game.updateExpectedDamage();

@@ -3,6 +3,7 @@
 var qstring = require("querystring");
 var crypto = require("crypto");
 var fs = require("fs");
+var db = require("redis").createClient();
 var app = require("connect")().
 	use(require("compression")()).
 	use(require("serve-static")(__dirname)).
@@ -11,7 +12,6 @@ var app = require("connect")().
 	use("/auth", loginAuth).
 	use("/code", codeSmith);
 var io = require("socket.io")(app.listen(13602));
-var db = require("redis").createClient();
 var etgutil = require("./etgutil");
 var userutil = require("./userutil");
 var etg = require("./etg");
