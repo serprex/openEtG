@@ -764,7 +764,7 @@ Permanent.prototype.place = function(fromhand){
 		}
 	}
 	place(this.owner.permanents, this);
-	Thing.prototype.place.call(this);
+	Thing.prototype.place.call(this, fromhand);
 }
 Weapon.prototype.place = function(fromhand){
 	this.owner.weapon = this;
@@ -773,10 +773,9 @@ Weapon.prototype.place = function(fromhand){
 Shield.prototype.place = function(fromhand){
 	if (this.status.additive && this.owner.shield && this.owner.shield.card.asUpped(this.card.upped) == this.card){
 		this.owner.shield.status.charges += this.status.charges;
-		Thing.prototype.place.call(this, fromhand);
-		return;
+	}else{
+		this.owner.shield = this;
 	}
-	this.owner.shield = this;
 	Thing.prototype.place.call(this, fromhand);
 }
 CardInstance.prototype.place = function(){
