@@ -929,8 +929,8 @@ function startMenu(nymph) {
 	));
 	["AI BATTLE", "ARENA", "DECK MANAGEMENT", "OPTIONS", "PvP"].forEach(function(text, i){
 		var sectionText = new PIXI.Text(text, {font: "56px Dosis", fill: "#0c4262"});
-		sectionText.position.set(236, 144+i*100);
-		sectionText.anchor.set(.5, .5);
+		sectionText.position.set(236, 108+i*100);
+		sectionText.anchor.x = .5;
 		if (sectionText.width > 350) sectionText.width = 350;
 		menuui.addChild(sectionText);
 	});
