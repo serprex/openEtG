@@ -1788,7 +1788,7 @@ function startEditor(arena, acard, startempty) {
 			draw: { cost: 135 },
 		};
 		var curpts = new PIXI.Text((arpts-sumscore())/45, ui.mkFont(16, "black"));
-		curpts.position.set(8, 100);
+		curpts.position.set(8, 188);
 		editorui.addChild(curpts);
 		makeattrui(0, "hp");
 		makeattrui(1, "mark");
