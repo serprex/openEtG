@@ -226,11 +226,18 @@ function dropsock(){
 		if (info.trade){
 			var foesock = usersock[info.trade.foe];
 			if (foesock){
-				foesock.emit("tradecanceled");
 				var foesockinfo = sockinfo[foesock.id];
-				if (foesockinfo){
+				if (foesockinfo && foesockinfo.trade && usersock[foesockinfo.trade.foe] == this){
+					foesock.emit("tradecanceled");
 					delete foesockinfo.trade;
 				}
+			}
+		}
+		if (info.foe){
+			var foeinfo = sockinfo[info.foe.id];
+			if (foeinfo && foeinfo.foe == this){
+				info.foe.emit("foeleft");
+				delete foeinfo.foe;
 			}
 		}
 		for(var key in rooms){
@@ -722,7 +729,7 @@ io.on("connection", function(socket) {
 	});
 	socket.on("guestchat", function (data) {
 		data.guest = true;
-		data.u = "Guest" + (data.u ? "_" + data.u : "");
+		data.u = "Guest_" + data.u;
 		genericChat(socket, data);
 	});
 	socket.on("pvpwant", function(data) {
