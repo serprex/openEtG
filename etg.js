@@ -191,7 +191,7 @@ var MulliganPhase1 = 0;
 var MulliganPhase2 = 1;
 var PlayPhase = 2;
 var EndPhase = 3;
-var passives = { airborne: true, nocturnal: true, voodoo: true, swarm: true, ranged: true, additive: true, stackable: true, salvage: true, token: true, poisonous: true, martyr: true, decrsteam: true, beguilestop: true, bounce: true };
+var passives = { airborne: true, nocturnal: true, voodoo: true, swarm: true, ranged: true, additive: true, stackable: true, salvage: true, token: true, poisonous: true, martyr: true, decrsteam: true, beguilestop: true, bounce: true, dshieldoff: true, salvageoff: true };
 var PlayerRng = Object.create(Player.prototype);
 PlayerRng.rng = Math.random;
 PlayerRng.upto = function(x){ return Math.floor(Math.random()*x); }
@@ -488,12 +488,9 @@ Player.prototype.uptoceil = function(x){
 	return Math.ceil((1-this.game.rng.rnd())*x);
 }
 Player.prototype.isCloaked = function(){
-	for(var i=0; i<16; i++){
-		if (this.permanents[i] && this.permanents[i].status.cloak){
-			return true;
-		}
-	}
-	return false;
+	return this.permanents.some(function(pr){
+		return pr && pr.status.cloak;
+	});
 }
 Player.prototype.info = function(){
 	var info = this.hp + "/" + this.maxhp + " " + this.deck.length + "cards";
@@ -535,8 +532,7 @@ Player.prototype.canspend = function(qtype, x) {
 	}else return this.quanta[qtype] >= x;
 }
 Player.prototype.spend = function(qtype, x) {
-	if (x == 0)return true;
-	if (x<0 && this.flatline)return true;
+	if (x == 0 || (x<0 && this.flatline))return true;
 	if (!this.canspend(qtype, x))return false;
 	if (qtype == Chroma){
 		var b = x<0?-1:1;
@@ -617,9 +613,8 @@ Player.prototype.endturn = function(discard) {
 	if (freedomChance){
 		freedomChance = (1-Math.pow(.7,freedomChance));
 	}
-	var cr, crs = this.creatures.slice();
-	for (var i=0; i<23; i++){
-		if ((cr = crs[i])){
+	this.creatures.slice().forEach(function(cr){
+		if (cr){
 			if (patienceFlag){
 				var floodbuff = floodingFlag && i>4 && cr.card.element==Water;
 				cr.atk += floodbuff?5:cr.status.burrowed?4:2;
@@ -630,15 +625,7 @@ Player.prototype.endturn = function(discard) {
 				cr.die();
 			}
 		}
-		if ((cr = this.foe.creatures[i])){
-			if (cr.status.salvaged){
-				delete cr.status.salvaged;
-			}
-			if (cr.active.cast == Actives.dshield){
-				delete cr.status.immaterial;
-			}
-		}
-	}
+	});
 	if (this.shield){
 		this.shield.usedactive = false;
 		if(this.shield.active.auto)this.shield.active.auto(this.shield);
@@ -727,8 +714,7 @@ Permanent.prototype.info = function(){
 	return info + this.activetext() + objinfo(this.status);
 }
 Weapon.prototype.info = function(){
-	var info = this.trueatk().toString();
-	return info + this.activetext() + objinfo(this.status);
+	return this.trueatk() + this.activetext() + objinfo(this.status);
 }
 Shield.prototype.info = function(){
 	var info = this.truedr() + "DR" + this.activetext();
