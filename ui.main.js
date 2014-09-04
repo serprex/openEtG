@@ -2641,6 +2641,7 @@ function chat(message, fontcolor) {
 socket.on("challenge", function(data) {
 	var message = data.pvp ? " challenges you to a duel!" : " wants to trade with you!";
 	var span = document.createElement("span");
+	span.style.cursor = "pointer";
 	span.addEventListener("click", (data.pvp ? challengeClick : tradeClick).bind(null, data.f));
 	span.innerHTML = "<font color=blue>" + data.f + message + "</font>";
 	chatBox.appendChild(span);
