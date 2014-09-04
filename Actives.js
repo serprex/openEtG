@@ -1499,7 +1499,7 @@ cold:function(c,t){
 	}
 },
 despair:function(c,t){
-	var chance = c.owner.creatures.reduce(function(change, cr){
+	var chance = c.owner.creatures.reduce(function(chance, cr){
 		return cr && (cr.hasactive("auto", "siphon") || cr.hasactive("auto", "darkness")) ? chance+1 : chance;
 	}, 0);
 	if (c.owner.rng() < 1.2-Math.pow(.95, chance)){

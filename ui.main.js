@@ -879,7 +879,7 @@ CardSelector.prototype.renderColumns = function(){
 function startMenu(nymph) {
 	var tipjar = [
 		"Each card in your booster pack has a 50% chance of being from the chosen element",
-		"Your arena deck will earn you 3 gold per win & 1 gold per loss",
+		"Your arena deck will earn you $3 per win & $1 per loss",
 		"Colosseum lets you compete in a number of daily events for extra prizes. The colosseum challenges reset daily",
 		"Be sure to try the Proving Grounds Quests for some good cards",
 		"Be sure to keep track of the rarity icons; Grey means Common, Green means Uncommon, Blue means Rare, Orange means Shard, & Pink means Ultra Rare",
@@ -1289,7 +1289,7 @@ function upgradestore() {
 			goldcount.setText("$" + user.gold);
 			adjustdeck();
 		}
-		else return "You need 50 gold to afford an upgraded pillar!";
+		else return "You need $50 to afford an upgraded pillar!";
 	}
 	function polishCard(card) {
 		if (!isFreeCard(card)) {
@@ -1307,7 +1307,7 @@ function upgradestore() {
 			goldcount.setText("$" + user.gold);
 			adjustdeck();
 		}
-		else return "You need 50 gold to afford a shiny pillar!";
+		else return "You need $50 to afford a shiny pillar!";
 	}
 	var cardValues = [5, 1, 3, 15, 20, 125];
 	function sellCard(card) {
@@ -1380,13 +1380,13 @@ function upgradestore() {
 			if (card.upped){
 				bupgrade.visisble = tinfo.visible = false;
 			}else{
-				tinfo.setText(isFreeCard(card) ? "Costs 50 gold to upgrade" : card.rarity != -1 ? "Convert 6 into an upgraded version." : "Convert into an upgraded version.");
+				tinfo.setText(isFreeCard(card) ? "Costs $50 to upgrade" : card.rarity != -1 ? "Convert 6 into an upgraded version." : "Convert into an upgraded version.");
 				bupgrade.visisble = tinfo.visible = true;
 			}
 			if (card.shiny){
 				bpolish.visible = tinfo3.visible = false;
 			}else{
-				tinfo3.setText(isFreeCard(card) ? "Costs 50 gold to polish" : card.rarity == 5 ? "This card cannot be polished." : card.rarity != -1 ? "Convert 6 into a shiny version." : "Convert 2 into a shiny version.")
+				tinfo3.setText(isFreeCard(card) ? "Costs $50 to polish" : card.rarity == 5 ? "This card cannot be polished." : card.rarity != -1 ? "Convert 6 into a shiny version." : "Convert 2 into a shiny version.")
 				bpolish.visible = tinfo3.visible = true;
 			}
 			tinfo2.setText((card.rarity > 0 || card.upped) && card.rarity != -1 ?
@@ -2555,7 +2555,7 @@ function startArenaInfo(info) {
 	stage.addChild(winloss);
 	var batch = new PIXI.SpriteBatch();
 	stage.addChild(batch);
-	var infotext = new MenuText(300, 470, "You get 3 gold every time your arena deck wins,\n& 1 gold every time it loses.");
+	var infotext = new MenuText(300, 470, "You get $3 every time your arena deck wins,\n& $1 every time it loses.");
 	stage.addChild(infotext);
 	if (user.ocard){
 		var uocard = etgutil.asUpped(user.ocard, info.lv == 1);
@@ -2682,7 +2682,7 @@ socket.on("codereject", function(data) {
 });
 socket.on("codegold", function(data) {
 	user.gold += data;
-	chat(data + " Gold added!");
+	chat(data + "\u00A4 added!");
 });
 socket.on("codecode", function(data) {
 	user.pool = etgutil.addcard(user.pool, data);
