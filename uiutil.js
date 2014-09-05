@@ -152,25 +152,35 @@ function getTextImage(text, font, bgcolor, width) {
 var sounds = {}, musics = {};
 var soundEnabled = false, musicEnabled = false;
 function loadSounds() {
-	for (var i = 0;i < arguments.length;i++) {
-		sounds[arguments[i]] = new Audio("sound/" + arguments[i] + ".ogg");
+	if (soundEnabled){
+		for (var i = 0;i < arguments.length;i++) {
+			sounds[arguments[i]] = new Audio("sound/" + arguments[i] + ".ogg");
+		}
 	}
 }
 function loadMusics() {
-	for (var i = 0;i < arguments.length;i++) {
-		musics[arguments[i]] = new Audio("sound/" + arguments[i] + ".ogg");
+	if (musicEnabled){
+		for (var i = 0;i < arguments.length;i++) {
+			musics[arguments[i]] = new Audio("sound/" + arguments[i] + ".ogg");
+		}
 	}
 }
 function playSound(name, dontreset) {
 	var sound = sounds[name];
-	if (soundEnabled && sound) {
+	if (soundEnabled) {
+		if (!sound){
+			sound = sounds[name] = new Audio("sound/" + name + ".ogg");
+		}
 		if (!dontreset && sound.duration) sound.currentTime = 0;
 		sound.play();
 	}
 }
 function playMusic(name) {
 	var music = musics[name];
-	if (musicEnabled && music){
+	if (musicEnabled){
+		if (!music){
+			music = musics[name] = new Audio("sound/" + name + ".ogg");
+		}
 		if (music.duration) music.currentTime = 0;
 		music.play();
 	}

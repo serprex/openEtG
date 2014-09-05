@@ -15,7 +15,6 @@ function load(preload, postload){
 	preLoader.onComplete = function() {
 		var ui = require("./uiutil");
 		ui.loadSounds("cardClick", "buttonClick", "permPlay", "creaturePlay");
-		ui.loadMusics("openingMusic");
 		var names = ["eicons", "ricons", "cardBacks", "cardBorders", "sicons", "ticons", "sborders"];
 		names.forEach(function(name){
 			exports[name] = [];

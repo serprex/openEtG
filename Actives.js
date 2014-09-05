@@ -392,6 +392,13 @@ dryspell:function(c,t){
 },
 dshield:function(c,t){
 	c.status.immaterial = true;
+	c.addactive("turnstart", Actives.dshieldoff);
+},
+dshieldoff:function(c,t){
+	if (c.owner == t){
+		delete c.status.immaterial;
+		c.rmactive("turnstart", "dshieldoff");
+	}
 },
 duality:function(c,t){
 	if (c.owner.foe.deck.length > 0 && c.owner.hand.length < 8){
@@ -1141,12 +1148,17 @@ sadism:function(c, t, dmg){
 	}
 },
 salvage:function(c, t){
-	if (!c.status.salvaged && !t.status.salvaged && c.owner.game.turn != c.owner){
+	if (c.owner == t.owner && !c.status.salvaged && !t.status.salvaged && c.owner.game.turn != c.owner){
 		Effect.mkText("Salvage", c);
 		c.status.salvaged = true;
 		t.status.salvaged = true;
 		c.owner.hand.push(new etg.CardInstance(t.card, c.owner));
+		c.addactive("turnstart", Actives.salvageoff);
 	}
+},
+salvageoff:function(c, t){
+	delete c.status.salvaged;
+	c.rmactive("turnstart", "salvageoff");
 },
 sanctuary:function(c,t){
 	c.owner.sanctuary = true;
@@ -1426,9 +1438,9 @@ void:function(c,t){
 },
 quantagift:function(c,t){
 	if (c.owner.mark != c.card.element){
-		c.owner.spend(c.card.element, -2);
+		c.owner.spend(c.card.element, -3);
 		c.owner.spend(c.owner.mark, -2);
-	}else c.owner.spend(c.card.element, -3);
+	}else c.owner.spend(c.card.element, -4);
 },
 web:function(c,t){
 	Effect.mkText("Web", t);
@@ -1487,7 +1499,7 @@ cold:function(c,t){
 	}
 },
 despair:function(c,t){
-	var chance = c.owner.creatures.reduce(function(change, cr){
+	var chance = c.owner.creatures.reduce(function(chance, cr){
 		return cr && (cr.hasactive("auto", "siphon") || cr.hasactive("auto", "darkness")) ? chance+1 : chance;
 	}, 0);
 	if (c.owner.rng() < 1.2-Math.pow(.95, chance)){

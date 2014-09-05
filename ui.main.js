@@ -92,10 +92,8 @@ function refreshRenderer(stage, animCb, dontrender) {
 	// if (!dontrender) renderer.render(realStage);
 }
 
-var renderer = new PIXI.autoDetectRenderer(900, 600);
-leftpane.appendChild(renderer.view);
+var renderer = new PIXI.autoDetectRenderer(900, 600, leftpane);
 var realStage = new PIXI.Stage(0x336699, true);
-renderer.view.addEventListener("click", renderer.view.blur);
 var caimgcache = {}, crimgcache = {}, wsimgcache = {}, artcache = {}, artimagecache = {};
 var elecols = [0xa99683, 0xaa5999, 0x777777, 0x996633, 0x5f4930, 0x50a005, 0xcc6611, 0x205080, 0xa9a9a9, 0x337ddd, 0xccaa22, 0x333333, 0x77bbdd];
 function lighten(c) {
@@ -881,7 +879,7 @@ CardSelector.prototype.renderColumns = function(){
 function startMenu(nymph) {
 	var tipjar = [
 		"Each card in your booster pack has a 50% chance of being from the chosen element",
-		"Your arena deck will earn you 3 gold per win & 1 gold per loss",
+		"Your arena deck will earn you $3 per win & $1 per loss",
 		"Colosseum lets you compete in a number of daily events for extra prizes. The colosseum challenges reset daily",
 		"Be sure to try the Proving Grounds Quests for some good cards",
 		"Be sure to keep track of the rarity icons; Grey means Common, Green means Uncommon, Blue means Rare, Orange means Shard, & Pink means Ultra Rare",
@@ -931,8 +929,8 @@ function startMenu(nymph) {
 	));
 	["AI BATTLE", "ARENA", "DECK MANAGEMENT", "OPTIONS", "PvP"].forEach(function(text, i){
 		var sectionText = new PIXI.Text(text, {font: "56px Dosis", fill: "#0c4262"});
-		sectionText.position.set(236, 144+i*100);
-		sectionText.anchor.set(.5, .5);
+		sectionText.position.set(236, 108+i*100);
+		sectionText.anchor.x = .5;
 		if (sectionText.width > 350) sectionText.width = 350;
 		menuui.addChild(sectionText);
 	});
@@ -1291,7 +1289,7 @@ function upgradestore() {
 			goldcount.setText("$" + user.gold);
 			adjustdeck();
 		}
-		else return "You need 50 gold to afford an upgraded pillar!";
+		else return "You need $50 to afford an upgraded pillar!";
 	}
 	function polishCard(card) {
 		if (!isFreeCard(card)) {
@@ -1309,7 +1307,7 @@ function upgradestore() {
 			goldcount.setText("$" + user.gold);
 			adjustdeck();
 		}
-		else return "You need 50 gold to afford a shiny pillar!";
+		else return "You need $50 to afford a shiny pillar!";
 	}
 	var cardValues = [5, 1, 3, 15, 20, 125];
 	function sellCard(card) {
@@ -1382,13 +1380,13 @@ function upgradestore() {
 			if (card.upped){
 				bupgrade.visisble = tinfo.visible = false;
 			}else{
-				tinfo.setText(isFreeCard(card) ? "Costs 50 gold to upgrade" : card.rarity != -1 ? "Convert 6 into an upgraded version." : "Convert into an upgraded version.");
+				tinfo.setText(isFreeCard(card) ? "Costs $50 to upgrade" : card.rarity != -1 ? "Convert 6 into an upgraded version." : "Convert into an upgraded version.");
 				bupgrade.visisble = tinfo.visible = true;
 			}
 			if (card.shiny){
 				bpolish.visible = tinfo3.visible = false;
 			}else{
-				tinfo3.setText(isFreeCard(card) ? "Costs 50 gold to polish" : card.rarity == 5 ? "This card cannot be polished." : card.rarity != -1 ? "Convert 6 into a shiny version." : "Convert 2 into a shiny version.")
+				tinfo3.setText(isFreeCard(card) ? "Costs $50 to polish" : card.rarity == 5 ? "This card cannot be polished." : card.rarity != -1 ? "Convert 6 into a shiny version." : "Convert 2 into a shiny version.")
 				bpolish.visible = tinfo3.visible = true;
 			}
 			tinfo2.setText((card.rarity > 0 || card.upped) && card.rarity != -1 ?
@@ -1790,7 +1788,7 @@ function startEditor(arena, acard, startempty) {
 			draw: { cost: 135 },
 		};
 		var curpts = new PIXI.Text((arpts-sumscore())/45, ui.mkFont(16, "black"));
-		curpts.position.set(8, 100);
+		curpts.position.set(8, 188);
 		editorui.addChild(curpts);
 		makeattrui(0, "hp");
 		makeattrui(1, "mark");
@@ -2062,8 +2060,8 @@ function startMatch(game, foeDeck) {
 	var handsprite = [new Array(8), new Array(8)];
 	var creasprite = [new Array(23), new Array(23)];
 	var permsprite = [new Array(16), new Array(16)];
-	var weapsprite = [new PIXI.Sprite(gfx.nopic), new PIXI.Sprite(gfx.nopic)];
 	var shiesprite = [new PIXI.Sprite(gfx.nopic), new PIXI.Sprite(gfx.nopic)];
+	var weapsprite = [new PIXI.Sprite(gfx.nopic), new PIXI.Sprite(gfx.nopic)];
 	var marksprite = [new PIXI.Sprite(gfx.nopic), new PIXI.Sprite(gfx.nopic)];
 	var marktext = [new PIXI.Text("", { font: "18px Dosis" }), new PIXI.Text("", { font: "18px Dosis" })];
 	var quantatext = [new PIXI.DisplayObjectContainer(), new PIXI.DisplayObjectContainer()];
@@ -2167,8 +2165,8 @@ function startMatch(game, foeDeck) {
 			setInteractive.apply(null, permsprite[j]);
 			marksprite[j].anchor.set(.5, .5);
 			marksprite[j].position.set(740, 470);
-			gameui.addChild(weapsprite[j] = makeInst(true, null, "weapon", new PIXI.Point(666, 512), 5/4));
 			gameui.addChild(shiesprite[j] = makeInst(false, null, "shield", new PIXI.Point(710, 532), 5/4));
+			gameui.addChild(weapsprite[j] = makeInst(true, null, "weapon", new PIXI.Point(666, 512), 5/4));
 			if (j) {
 				ui.reflectPos(weapsprite[j]);
 				ui.reflectPos(shiesprite[j]);
@@ -2557,7 +2555,7 @@ function startArenaInfo(info) {
 	stage.addChild(winloss);
 	var batch = new PIXI.SpriteBatch();
 	stage.addChild(batch);
-	var infotext = new MenuText(300, 470, "You get 3 gold every time your arena deck wins,\n& 1 gold every time it loses.");
+	var infotext = new MenuText(300, 470, "You get $3 every time your arena deck wins,\n& $1 every time it loses.");
 	stage.addChild(infotext);
 	if (user.ocard){
 		var uocard = etgutil.asUpped(user.ocard, info.lv == 1);
@@ -2686,7 +2684,7 @@ socket.on("codereject", function(data) {
 });
 socket.on("codegold", function(data) {
 	user.gold += data;
-	chat(data + " Gold added!");
+	chat(data + "\u00A4 added!");
 });
 socket.on("codecode", function(data) {
 	user.pool = etgutil.addcard(user.pool, data);
@@ -2867,7 +2865,7 @@ function aiClick() {
 		startEditor();
 		return;
 	}
-	var gameData = { first: Math.random() < .5, deck: aideck.value, urdeck: getDeck(), seed: Math.random() * etgutil.MAX_INT, foename: "Custom" };
+	var gameData = { first: Math.random() < .5, deck: aideck.value, urdeck: deck, seed: Math.random() * etgutil.MAX_INT, foename: "Custom" };
 	parsepvpstats(gameData);
 	parseaistats(gameData);
 	initGame(gameData, true);
@@ -2885,6 +2883,7 @@ function wantpvpChange(){
 		}
 	}
 })({
+	leftpane: {click: leftpane.blur},
 	change: {click: changeClick},
 	login: {click: loginClick},
 	username: {keydown: maybeLogin},
