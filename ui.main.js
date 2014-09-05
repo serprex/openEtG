@@ -2642,7 +2642,9 @@ socket.on("challenge", function(data) {
 	span.style.cursor = "pointer";
 	span.addEventListener("click", (data.pvp ? challengeClick : tradeClick).bind(null, data.f));
 	span.innerHTML = "<font color=blue>" + data.f + message + "</font>";
+	var scroll = chatBox.scrollTop == (chatBox.scrollHeight - chatBox.offsetHeight);
 	chatBox.appendChild(span);
+	if (scroll) chatBox.scrollTop = chatBox.scrollHeight;
 	chat("");
 });
 socket.on("librarygive", initLibrary);

@@ -561,7 +561,7 @@ io.on("connection", function(socket) {
 		}
 		console.log(u + " requesting " + f);
 		sockinfo[this.id].deck = user.decks.split(",")[user.selectedDeck];
-		sockinfo[this.id].pvpstats = { hp: data.hp, markpower: data.mark, deckpower: data.deck, drawpower: data.draw };
+		sockinfo[this.id].pvpstats = { hp: data.p1hp, markpower: data.p1markpower, deckpower: data.p1deckpower, drawpower: data.p1drawpower };
 		var foesock = usersock[f];
 		if (foesock && foesock.id in sockinfo){
 			if (sockinfo[foesock.id].duel == u) {
