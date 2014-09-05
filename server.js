@@ -48,13 +48,14 @@ function loginRespond(res, servuser, pass){
 				servuser.oracle = day;
 				var card = etg.PlayerRng.randomcard(false,
 					(function (y) { return function (x) { return x.type != etg.PillarEnum && ((x.rarity != 5) ^ y); } })(Math.random() < .03));
+				card = card.asShiny(card.rarity == 5);
 				if (card.rarity > 1) {
 					servuser.accountbound = user.accountbound = etgutil.addcard(user.accountbound, card.code);
 				}
 				else {
 					servuser.pool = user.pool = etgutil.addcard(user.pool, card.code);
 				}
-				servuser.ocard = user.ocard = user.oracle = card.asShiny(card.rarity == 5).code;
+				servuser.ocard = user.ocard = user.oracle = card.code;
 				servuser.daily = user.daily = 0;
 				servuser.dailymage = user.dailymage = Math.floor(Math.random() * aiDecks.mage.length);
 				servuser.dailydg = user.dailydg = Math.floor(Math.random() * aiDecks.demigod.length);
