@@ -415,6 +415,30 @@ function hashObj(obj){
 	}
 	return hash;
 }
+Creature.prototype.hash = function(){
+	var hash = this.owner == this.owner.game.player1 ? 17 : 19;
+	hash ^= hashObj(this.status) ^ (this.hp*17 + this.atk*31 - this.maxhp - this.usedactive * 3);
+	hash ^= parseInt(this.card.code, 32);
+	for (var key in this.active){
+		hash ^= hashString(key + ":" + this.active[key].activename);
+	}
+	if (this.active.cast){
+		hash ^= this.cast * 7 + this.castele * 23;
+	}
+	return hash & 0x7FFFFFFF;
+}
+Permanent.prototype.hash = function(){
+	var hash = this.owner == this.owner.game.player1 ? 5351 : 5077;
+	hash ^= hashObj(this.status) ^ (this.usedactive * 3);
+	hash ^= parseInt(this.card.code, 32);
+	for (var key in this.active){
+		hash ^= hashString(key + "=" + this.active[key].activename);
+	}
+	if (this.active.cast){
+		hash ^= this.cast * 7 + this.castele * 23;
+	}
+	return hash & 0x7FFFFFFF;
+}
 Weapon.prototype.hash = function(){
 	var hash = this.owner == this.owner.game.player1 ? 13 : 11;
 	hash ^= hashObj(this.status) ^ (this.atk*31 - this.usedactive * 3);
@@ -427,15 +451,24 @@ Weapon.prototype.hash = function(){
 	}
 	return hash & 0x7FFFFFFF;
 }
-Creature.prototype.hash = function(){
-	var hash = this.owner == this.owner.game.player1 ? 17 : 19;
-	hash ^= hashObj(this.status) ^ (this.hp*17 + this.atk*31 - this.maxhp - this.usedactive * 3);
+Shield.prototype.hash = function(){
+	var hash = this.owner == this.owner.game.player1 ? 5009 : 4259;
+	hash ^= hashObj(this.status) ^ (this.dr*31 - this.usedactive * 3);
 	hash ^= parseInt(this.card.code, 32);
 	for (var key in this.active){
-		hash ^= hashString(key + ":" + this.active[key].activename);
+		hash ^= hashString(key + "~" + this.active[key].activename);
 	}
 	if (this.active.cast){
 		hash ^= this.cast * 7 + this.castele * 23;
+	}
+	return hash & 0x7FFFFFFF;
+}
+Pillar.prototype.hash = function(){
+	var hash = this.owner == this.owner.game.player1 ? 3917 : 2789;
+	hash ^= hashObj(this.status) ^ (this.pendstate*31);
+	hash ^= parseInt(this.card.code, 32);
+	for (var key in this.active){
+		hash ^= hashString(key + "_" + this.active[key].activename);
 	}
 	return hash & 0x7FFFFFFF;
 }
