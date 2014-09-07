@@ -567,10 +567,9 @@ Player.prototype.endturn = function(discard) {
 	this.game.ply++;
 	if (discard != undefined){
 		var cardinst = this.hand[discard];
-		var card = cardinst.card;
 		this.hand.splice(discard, 1);
-		if (card.active.discard){
-			card.active.discard(cardinst, this);
+		if (cardinst.card.active.discard){
+			cardinst.card.active.discard(cardinst, this);
 		}
 	}
 	this.spend(this.mark, this.markpower * (this.mark > 0 ? -1 : -3));
