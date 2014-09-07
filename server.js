@@ -140,7 +140,7 @@ function cardRedirect(req, res, next){
 	}else next();
 }
 function deckRedirect(req, res, next){
-	var deck = req.url.substr(1);
+	var deck = req.url.substr(1).replace(".png", "");
 	fs.readFile(__dirname + "/deckcache/" + deck, function(err, data){
 		if (!err){
 			res.writeHead("200", {"Content-Type": "image/png"});
@@ -182,7 +182,7 @@ function deckRedirect(req, res, next){
 				}else{
 					res.writeHead("200", {"Content-Type": "image/png"});
 					res.end(buf, "binary");
-					fs.writeFile(__dirname + "/deckcache/" + deck, buf, {encoding: "binary"});
+					if (deck) fs.writeFile(__dirname + "/deckcache/" + deck, buf, {encoding: "binary"});
 				}
 			});
 		}
@@ -592,15 +592,17 @@ io.on("connection", function(socket) {
 		}
 	});
 	userEvent("canceltrade", function (data, user) {
-		var foesock = usersock[sockinfo[this.id].trade.foe];
-		if (foesock){
-			foesock.emit("tradecanceled");
-			foesock.emit("chat", { mode: "red", msg: data.u + " has canceled the trade."});
-			if (foesock.id in sockinfo){
-				delete sockinfo[foesock.id].trade;
+		if (sockinfo[this.id].trade){
+			var foesock = usersock[sockinfo[this.id].trade.foe];
+			if (foesock){
+				foesock.emit("tradecanceled");
+				foesock.emit("chat", { mode: "red", msg: data.u + " has canceled the trade."});
+				if (foesock.id in sockinfo){
+					delete sockinfo[foesock.id].trade;
+				}
 			}
+			delete sockinfo[this.id].trade;
 		}
-		delete sockinfo[this.id].trade;
 	});
 	userEvent("confirmtrade", function (data, user) {
 		var u = data.u, thistrade = sockinfo[this.id].trade;

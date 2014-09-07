@@ -1053,16 +1053,19 @@ function startMenu(nymph) {
 						return;
 					}
 					userEmit("foearena", lvi);
+					baia.visible = false;
 				}
 			});
 			setClick(binfoa, function() {
 				if (Cards.loaded) {
 					userEmit("arenainfo", lvi);
+					binfoa.visible = false;
 				}
 			});
 			setClick(btopa, function() {
 				if (Cards.loaded) {
 					userEmit("arenatop", lvi);
+					btopa.visible = false;
 				}
 			});
 		})({lv:i});
