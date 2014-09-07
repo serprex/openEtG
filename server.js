@@ -201,7 +201,9 @@ function storeUsers(){
 		}
 	}
 }
-function clearInactiveUsers(){
+setInterval(function(){
+	storeUsers();
+	// Clear inactive users
 	for(var u in users){
 		if (!(u in usersock)){
 			delete users[u];
@@ -211,10 +213,6 @@ function clearInactiveUsers(){
 			delete users[u];
 		}
 	}
-}
-setInterval(function(){
-	storeUsers();
-	clearInactiveUsers();
 }, 300000);
 process.on("SIGTERM", process.exit).on("SIGINT", process.exit);
 process.on("exit", function(){

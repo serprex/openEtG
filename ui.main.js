@@ -48,7 +48,7 @@ function setClick(obj, click, sound) {
 	sound = sound === undefined ? "buttonClick" : sound;
 	obj.click = function() {
 		ui.playSound(sound);
-		click.apply(null, arguments);
+		click.apply(this, arguments);
 	}
 }
 function hitTest(obj, pos) {
@@ -1053,19 +1053,19 @@ function startMenu(nymph) {
 						return;
 					}
 					userEmit("foearena", lvi);
-					baia.visible = false;
+					this.visible = false;
 				}
 			});
 			setClick(binfoa, function() {
 				if (Cards.loaded) {
 					userEmit("arenainfo", lvi);
-					binfoa.visible = false;
+					this.visible = false;
 				}
 			});
 			setClick(btopa, function() {
 				if (Cards.loaded) {
 					userEmit("arenatop", lvi);
-					btopa.visible = false;
+					this.visible = false;
 				}
 			});
 		})({lv:i});
@@ -2643,6 +2643,9 @@ function chat(message, fontcolor) {
 	span.innerHTML = "<font color=" + (fontcolor || "red") + ">" + message + "</font><br>";
 	addChatSpan(span);
 }
+;["connect", "error", "disconnect", "reconnect", "reconnecting", "reconnect_attempt", "reconnect_error", "reconnect_failed"].forEach(function(event){
+	socket.on(event, chat.bind(null, event, "red"));
+});
 socket.on("challenge", function(data) {
 	var message = data.pvp ? " challenges you to a duel!" : " wants to trade with you!";
 	var span = document.createElement("span");
