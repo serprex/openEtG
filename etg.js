@@ -645,7 +645,7 @@ Player.prototype.endturn = function(discard) {
 	if (freedomChance){
 		freedomChance = (1-Math.pow(.7,freedomChance));
 	}
-	this.creatures.slice().forEach(function(cr){
+	this.creatures.slice().forEach(function(cr, i){
 		if (cr){
 			if (patienceFlag){
 				var floodbuff = floodingFlag && i>4 && cr.card.element==Water;
@@ -653,7 +653,7 @@ Player.prototype.endturn = function(discard) {
 				cr.buffhp(floodbuff?2:1);
 			}
 			cr.attack(stasisFlag, freedomChance);
-			if (i>4 && floodingFlag && cr.card.element != Water && cr.card.element != Chroma && cr.isMaterial() && ~cr.getIndex()){
+			if (floodingFlag && cr.card.element != Water && cr.card.element != Chroma && cr.isMaterial() && cr.getIndex() > 4){
 				cr.die();
 			}
 		}
