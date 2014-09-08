@@ -485,10 +485,10 @@ function evalcardinstance(cardInst) {
 			score *= hp?(c.status.immaterial || c.status.burrowed ? 1.3 : 1+Math.log(Math.min(hp, 33))/7):.2;
 		}else if (c.type == etg.WeaponEnum){
 			score += c.attack;
-			if (cardInst.owner.weapon || c.owner.hand.some(function(cinst){ return cinst.card.type == etg.WeaponEnum })) score /= 2;
+			if (cardInst.owner.weapon || cardInst.owner.hand.some(function(cinst){ return cinst.card.type == etg.WeaponEnum })) score /= 2;
 		}else if (c.type == etg.ShieldEnum){
 			score += c.health*c.health;
-			if (cardInst.owner.shield || c.owner.hand.some(function(cinst){ return cinst.card.type == etg.ShieldEnum })) score /= 2;
+			if (cardInst.owner.shield || cardInst.owner.hand.some(function(cinst){ return cinst.card.type == etg.ShieldEnum })) score /= 2;
 		}
 	}
 	score *= !cardInst.card.cost ? .8 : (cardInst.canactive() ? .6 : .5) * (!cardInst.card.costele?1:.9+Math.log(1+cardInst.owner.quanta[cardInst.card.costele])/50);

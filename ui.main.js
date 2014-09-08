@@ -62,9 +62,15 @@ function setInteractive() {
 }
 function userEmit(x, data) {
 	if (!data) data = {};
+	data.x = x;
 	data.u = user.name;
 	data.a = user.auth;
-	socket.emit(x, data);
+	socket.send(JSON.stringify(data));
+}
+function sockEmit(x, data){
+	if (!data) data = {};
+	data.x = x;
+	socket.send(JSON.stringify(data));
 }
 function userExec(x, data){
 	if (!data) data = {};
@@ -321,7 +327,7 @@ function initTrade() {
 	});
 	setClick(btrade, function() {
 		if (ownDeck.deck.length > 0) {
-			socket.emit("cardchosen", etgutil.encodedeck(ownDeck.deck));
+			sockEmit("cardchosen", {c: etgutil.encodedeck(ownDeck.deck)});
 			console.log("Card sent");
 			cardChosen = true;
 			stage.removeChild(btrade);
@@ -1900,7 +1906,7 @@ function startElementSelect() {
 		setClick(elesel[i], function() {
 			var msg = { u: user.name, a: user.auth, e: i };
 			user = undefined;
-			socket.emit("inituser", msg);
+			sockEmit("inituser", msg);
 			startMenu();
 		});
 		elesel[i].interactive = true;
@@ -1973,7 +1979,7 @@ function startMatch(game, foeDeck) {
 	setClick(endturn, function(e, discard) {
 		if (game.turn == game.player1 && game.phase <= etg.MulliganPhase2){
 			if (!game.ai) {
-				socket.emit("mulligan", true);
+				sockEmit("mulligan", {draw: true});
 			}
 			game.progressMulligan();
 		}else if (game.winner) {
@@ -2015,7 +2021,7 @@ function startMatch(game, foeDeck) {
 			} else {
 				discarding = false;
 				if (!game.ai) {
-					socket.emit("endturn", discard);
+					sockEmit("endturn", {disc: discard});
 				}
 				game.player1.endturn(discard);
 				delete game.targetingMode;
@@ -2031,7 +2037,7 @@ function startMatch(game, foeDeck) {
 		} else if (game.turn == game.player1) {
 			if (game.phase <= etg.MulliganPhase2 && game.player1.hand.length > 0) {
 				game.player1.drawhand(game.player1.hand.length - 1);
-				socket.emit("mulligan");
+				sockEmit("mulligan");
 			} else if (game.targetingMode) {
 				delete game.targetingMode;
 			} else discarding = false;
@@ -2040,7 +2046,7 @@ function startMatch(game, foeDeck) {
 	setClick(resign, function() {
 		if (resigning){
 			if (!game.ai) {
-				socket.emit("foeleft");
+				sockEmit("foeleft");
 			}
 			game.setWinner(game.player2);
 			endturn.click();
@@ -2089,11 +2095,11 @@ function startMatch(game, foeDeck) {
 							} else if (!_j && cardinst.canactive()) {
 								if (cardinst.card.type != etg.SpellEnum) {
 									console.log("summoning", _i);
-									socket.emit("cast", game.tgtToBits(cardinst));
+									sockEmit("cast", game.tgtToBits(cardinst));
 									cardinst.useactive();
 								} else {
 									game.getTarget(cardinst, cardinst.card.active, function(tgt) {
-										socket.emit("cast", game.tgtToBits(cardinst) | game.tgtToBits(tgt) << 9);
+										sockEmit("cast", game.tgtToBits(cardinst) | game.tgtToBits(tgt) << 9);
 										cardinst.useactive(tgt);
 									});
 								}
@@ -2141,7 +2147,7 @@ function startMatch(game, foeDeck) {
 					} else if (_j == 0 && !game.targetingMode && inst.canactive()) {
 						game.getTarget(inst, inst.active.cast, function(tgt) {
 							delete game.targetingMode;
-							socket.emit("cast", game.tgtToBits(inst) | game.tgtToBits(tgt) << 9);
+							sockEmit("cast", game.tgtToBits(inst) | game.tgtToBits(tgt) << 9);
 							inst.useactive(tgt);
 						});
 					}
@@ -2747,7 +2753,7 @@ function maybeSendChat(e) {
 		}
 		else if (!msg.match(/^\s*$/)) {
 			var name = username.value || guestname || (guestname = (10000 + Math.floor(Math.random() * 89999)) + "");
-			socket.emit("guestchat", { msg: msg, u: name });
+			sockEmit("guestchat", { msg: msg, u: name });
 		}
 		e.preventDefault();
 	}
@@ -2857,7 +2863,7 @@ function challengeClick(foe) {
 		}else{
 			gameData.deck = deck;
 			gameData.room = foename.value;
-			socket.emit("pvpwant", gameData);
+			sockEmit("pvpwant", gameData);
 		}
 	}
 }
@@ -2871,7 +2877,7 @@ function rewardClick() {
 }
 function libraryClick() {
 	if (Cards.loaded)
-		socket.emit("librarywant", { f: foename.value });
+		sockEmit("librarywant", { f: foename.value });
 }
 function aiClick() {
 	var deck = getDeck(), aideckcode = aideck.value;
@@ -2885,10 +2891,10 @@ function aiClick() {
 	initGame(gameData, true);
 }
 function offlineChange(){
-	socket.emit("showoffline", offline.checked);
+	sockEmit("showoffline", offline.checked);
 }
 function wantpvpChange(){
-	socket.emit("wantingpvp", wantpvp.checked);
+	sockEmit("wantingpvp", wantpvp.checked);
 }
 (function(callbacks){
 	for(var id in callbacks){
