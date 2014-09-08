@@ -2874,12 +2874,12 @@ function libraryClick() {
 		socket.emit("librarywant", { f: foename.value });
 }
 function aiClick() {
-	var deck = getDeck();
-	if (etgutil.decklength(deck) < (user ? 31 : 11)) {
+	var deck = getDeck(), aideckcode = aideck.value;
+	if (etgutil.decklength(deck) < 11 || etgutil.decklength(aideckcode) < 11) {
 		startEditor();
 		return;
 	}
-	var gameData = { first: Math.random() < .5, deck: aideck.value, urdeck: deck, seed: Math.random() * etgutil.MAX_INT, foename: "Custom" };
+	var gameData = { first: Math.random() < .5, deck: aideckcode, urdeck: deck, seed: Math.random() * etgutil.MAX_INT, foename: "Custom" };
 	parsepvpstats(gameData);
 	parseaistats(gameData);
 	initGame(gameData, true);
