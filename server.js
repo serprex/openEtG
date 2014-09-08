@@ -467,6 +467,10 @@ userEvent("foearena", function(data, user){
 		user.gold -= cost;
 		var idx = Math.floor(Math.random()*Math.min(len, 20));
 		db.zrevrange("arena"+(data.lv?"1":""), idx, idx, function(err, aname){
+			if (!aname || !aname.length){
+				console.log("No arena " + idx);
+				return;
+			}
 			console.log("deck: "+ aname + " " + idx);
 			db.hgetall((data.lv?"B:":"A:")+aname, function(err, adeck){
 				var seed = Math.random();
@@ -756,11 +760,11 @@ sockEvent("librarywant", function(data){
 		});
 	}
 });
-sockEvent("showoffline", function(show){
-	sockinfo[this.id].showoffline = show;
+sockEvent("showoffline", function(data){
+	sockinfo[this.id].showoffline = data.hide;
 });
-sockEvent("wantingpvp", function(want){
-	sockinfo[this.id].wantingpvp = want;
+sockEvent("wantingpvp", function(data){
+	sockinfo[this.id].wantingpvp = data.want;
 });
 io.on("connection", function(socket) {
 	sockinfo[socket.id] = {};

@@ -364,8 +364,8 @@ function initTrade() {
 	cardArt.position.set(734, 8);
 	stage.addChild(cardArt);
 	stage.cmds = {
-		cardchosen: function(cards){
-			foeDeck.deck = etgutil.decodedeck(cards);
+		cardchosen: function(data){
+			foeDeck.deck = etgutil.decodedeck(data.c);
 			foeDeck.renderDeck(0);
 		},
 		tradedone: function(data) {
@@ -521,7 +521,7 @@ function victoryScreen(game) {
 	}
 
 	if (stats.checked){
-		chat((game.level || 0) + " " + (game.foename || "?") + " " + (winner?"W":"L") + " " + game.ply + " " + game.time + " " + game.player1.hp + " " + game.player1.maxhp + " " + (game.goldreward || 0) + " " + (game.cardreward || "-"));
+		chat((game.level || 0) + "," + (game.foename || "?").replace(/,/g, " ") + "," + (winner ? "W" : "L") + "," + game.ply + "," + game.time + "," + game.player1.hp + "," + game.player1.maxhp + "," + ((game.goldreward || 0) - (game.cost || 0)) + "," + (game.cardreward || "-"), null, true);
 	}
 
 	refreshRenderer(victoryui);
@@ -2095,11 +2095,11 @@ function startMatch(game, foeDeck) {
 							} else if (!_j && cardinst.canactive()) {
 								if (cardinst.card.type != etg.SpellEnum) {
 									console.log("summoning", _i);
-									sockEmit("cast", game.tgtToBits(cardinst));
+									sockEmit("cast", {bits: game.tgtToBits(cardinst)});
 									cardinst.useactive();
 								} else {
 									game.getTarget(cardinst, cardinst.card.active, function(tgt) {
-										sockEmit("cast", game.tgtToBits(cardinst) | game.tgtToBits(tgt) << 9);
+										sockEmit("cast", {bits: game.tgtToBits(cardinst) | game.tgtToBits(tgt) << 9});
 										cardinst.useactive(tgt);
 									});
 								}
@@ -2147,7 +2147,7 @@ function startMatch(game, foeDeck) {
 					} else if (_j == 0 && !game.targetingMode && inst.canactive()) {
 						game.getTarget(inst, inst.active.cast, function(tgt) {
 							delete game.targetingMode;
-							sockEmit("cast", game.tgtToBits(inst) | game.tgtToBits(tgt) << 9);
+							sockEmit("cast", {bits: game.tgtToBits(inst) | game.tgtToBits(tgt) << 9});
 							inst.useactive(tgt);
 						});
 					}
@@ -2255,10 +2255,10 @@ function startMatch(game, foeDeck) {
 	}
 	gameui.cmds = {
 		endturn: function(data) {
-			game.player2.endturn(data);
+			game.player2.endturn(data.disc);
 		},
-		cast: function(bits) {
-			var c = game.bitsToTgt(bits & 511), t = game.bitsToTgt((bits >> 9) & 511);
+		cast: function(data) {
+			var bits = data.bits, c = game.bitsToTgt(bits & 511), t = game.bitsToTgt((bits >> 9) & 511);
 			console.log("cast", c.toString(), (t || "-").toString(), bits);
 			var sprite = new PIXI.Sprite(gfx.nopic);
 			sprite.position.set((foeplays.children.length % 9) * 100, Math.floor(foeplays.children.length / 9) * 20);
@@ -2270,7 +2270,7 @@ function startMatch(game, foeDeck) {
 			if (!game.ai) game.setWinner(game.player1);
 		},
 		mulligan: function(data){
-			if (data === true) {
+			if (data.draw === true) {
 				game.progressMulligan();
 			} else {
 				game.player2.drawhand(game.player2.hand.length - 1);
@@ -2647,10 +2647,10 @@ function addChatSpan(span) {
 	chatBox.appendChild(span);
 	if (scroll) chatBox.scrollTop = chatBox.scrollHeight;
 }
-function chat(message, fontcolor) {
+function chat(message, fontcolor, nodecklink) {
 	var span = document.createElement("span");
 	span.style.color = fontcolor || "red";
-	message = message.replace(/\b(([01][0-9a-v]{4})+)\b/g, "<a href='deck/$1' target='_blank'>$1</a>");
+	if (!nodecklink) message = message.replace(/\b(([01][0-9a-v]{4})+)\b/g, "<a href='deck/$1' target='_blank'>$1</a>");
 	span.innerHTML = message;
 	addChatSpan(span);
 }
@@ -2891,10 +2891,10 @@ function aiClick() {
 	initGame(gameData, true);
 }
 function offlineChange(){
-	sockEmit("showoffline", offline.checked);
+	sockEmit("showoffline", {hide: offline.checked});
 }
 function wantpvpChange(){
-	sockEmit("wantingpvp", wantpvp.checked);
+	sockEmit("wantingpvp", {want: wantpvp.checked});
 }
 (function(callbacks){
 	for(var id in callbacks){
