@@ -515,7 +515,7 @@ function victoryScreen(game) {
 	}
 
 	if (stats.checked){
-		chat((game.level || 0) + "," + (game.foename || "?").replace(",", " ") + "," + (winner ? "W" : "L") + "," + game.ply + "," + game.time + "," + game.player1.hp + "," + game.player1.maxhp + "," + ((game.goldreward || 0) - (game.cost || 0)) + "," + (game.cardreward || "-"), null, true);
+		chat((game.level || 0) + "," + (game.foename || "?").replace(/,/g, " ") + "," + (winner ? "W" : "L") + "," + game.ply + "," + game.time + "," + game.player1.hp + "," + game.player1.maxhp + "," + ((game.goldreward || 0) - (game.cost || 0)) + "," + (game.cardreward || "-"), null, true);
 	}
 
 	refreshRenderer(victoryui);
