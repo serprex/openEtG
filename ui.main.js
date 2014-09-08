@@ -2165,12 +2165,17 @@ function startMatch(game, foeDeck) {
 			setInteractive.apply(null, permsprite[j]);
 			marksprite[j].anchor.set(.5, .5);
 			marksprite[j].position.set(740, 470);
-			gameui.addChild(shiesprite[j] = makeInst(false, null, "shield", new PIXI.Point(710, 532), 5/4));
-			gameui.addChild(weapsprite[j] = makeInst(true, null, "weapon", new PIXI.Point(666, 512), 5/4));
-			if (j) {
+			weapsprite[j] = makeInst(true, null, "weapon", new PIXI.Point(666, 512), 5/4);
+			shiesprite[j] = makeInst(false, null, "shield", new PIXI.Point(710, 532), 5/4);
+			if (j){
+				gameui.addChild(shiesprite[j]);
+				gameui.addChild(weapsprite[j]);
 				ui.reflectPos(weapsprite[j]);
 				ui.reflectPos(shiesprite[j]);
 				ui.reflectPos(marksprite[j]);
+			}else{
+				gameui.addChild(weapsprite[j]);
+				gameui.addChild(shiesprite[j]);
 			}
 			gameui.addChild(marksprite[j]);
 			marktext[j].anchor.set(.5, .5);
