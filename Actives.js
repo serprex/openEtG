@@ -87,16 +87,6 @@ alphawolf: function (c, t) {
 	new etg.Creature(pwolf, c.owner).place();
 	new etg.Creature(pwolf, c.owner).place();
 },
-animateweapon: function(c, t) {
-	var cr = new etg.Creature(t.card, t.owner);
-	cr.atk = t.atk;
-	cr.active = etg.clone(t.active);
-	cr.cast = t.cast;
-	cr.castele = t.castele;
-	cr.status = etg.clone(t.status);
-	cr.place();
-	t.owner.weapon = undefined;
-},
 antimatter:function(c,t){
 	Effect.mkText("Antimatter", t);
 	t.atk -= t.trueatk(0, true)*2;
