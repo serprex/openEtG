@@ -515,7 +515,7 @@ function victoryScreen(game) {
 	}
 
 	if (stats.checked){
-		chat((game.level || 0) + "," + (game.foename.replace(",", " ") || "?") + "," + (winner ? "W" : "L") + "," + game.ply + "," + game.time + "," + game.player1.hp + "," + game.player1.maxhp + "," + (game.goldreward || 0) - (game.cost || 0) + "," + (game.cardreward || "-"), null, true);
+		chat((game.level || 0) + "," + (game.foename || "?").replace(",", " ") + "," + (winner ? "W" : "L") + "," + game.ply + "," + game.time + "," + game.player1.hp + "," + game.player1.maxhp + "," + ((game.goldreward || 0) - (game.cost || 0)) + "," + (game.cardreward || "-"), null, true);
 	}
 
 	refreshRenderer(victoryui);
@@ -2644,7 +2644,7 @@ function addChatSpan(span) {
 function chat(message, fontcolor, nodecklink) {
 	var span = document.createElement("span");
 	span.style.color = fontcolor || "red";
-	message = message.replace(/\b(([01][0-9a-v]{4})+)\b/g, "<a href='deck/$1' target='_blank'>$1</a>");
+	if (!nodecklink) message = message.replace(/\b(([01][0-9a-v]{4})+)\b/g, "<a href='deck/$1' target='_blank'>$1</a>");
 	span.innerHTML = message;
 	addChatSpan(span);
 }
