@@ -536,14 +536,8 @@ gas:function(c,t){
 },
 give:function(c,t){
 	c.owner.dmg(c.card.upped?-10:-5);
-	if (t instanceof etg.Creature){
-		if (t.hasactive("auto", "singularity")){
-			t.die();
-		}else{
-			t.remove();
-			t.owner = c.owner.foe;
-			t.place();
-		}
+	if (t.hasactive("auto", "singularity")){
+		t.die();
 	}else if (t instanceof etg.Permanent){
 		Actives.steal(c.owner.foe, t);
 	}else{
