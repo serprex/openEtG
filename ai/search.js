@@ -4,13 +4,33 @@ var evalGameState = require("./eval");
 var Actives = require("./Actives");
 var Cards = require("./Cards");
 module.exports = function(game, previous) {
+	var worstcard, currentEval;
 	if (previous === undefined){
+		if (game.player2.hand.length < 8){
+			currentEval = evalGameState(game);
+		}else{
+			currentEval = 2147483647;
+			for (var i=0; i<game.player2.hand.length; i++){
+				var gclone = game.clone();
+				var cardinst = gclone.player2.hand[i];
+				gclone.player2.hand.splice(i, 1);
+				if (cardinst.card.active.discard){
+					cardinst.card.active.discard(cardinst, gclone.player2);
+				}
+				var discvalue = evalGameState(gclone);
+				if (discvalue < currentEval){
+					currentEval = discvalue;
+					worstcard = i;
+				}
+			}
+		}
 		var lethal = require("./lethal")(game);
 		return lethal[0] < 0 ?
-			(game.winner ? ["endturn"] : ["cast",  lethal[1]]):
-			[0, evalGameState(game), undefined, 2, [], 999];
+			(!game.winner ? ["cast",  lethal[1]] : worstcard === undefined ? ["endturn", worstcard] : ["endturn"]):
+			[0, currentEval, undefined, 2, [], 999, worstcard];
 	}
-	var limit = previous[5], cmdct = previous[2], currentEval = previous[1], cdepth = previous[3];
+	var limit = previous[5], cmdct = previous[2], cdepth = previous[3];
+	currentEval = previous[1];
 	function iterLoop(game, n, cmdct0, casthash, nth) {
 		function iterCore(c) {
 			if (!c || !c.canactive()) return;
@@ -89,21 +109,10 @@ module.exports = function(game, previous) {
 	}
 	var ret = iterLoop(game, 1, undefined, previous[4], previous[0]);
 	if (ret){
-		return [previous[0]+2, currentEval, cmdct, cdepth, ret, limit];
+		return [previous[0]+2, currentEval, cmdct, cdepth, ret, limit, previous[6]];
 	}else if (cmdct) {
 		return ["cast", cmdct];
 	} else if (game.player2.hand.length == 8) {
-		var mincardvalue = 999, worstcard = 0;
-		for (var i = 0;i < 8;i++) {
-			var cardinst = game.player2.hand[i];
-			var cardvalue = game.player2.quanta[cardinst.card.element] - cardinst.card.cost;
-			if (cardinst.card.active && cardinst.card.active.discard == Actives.obsession) { cardvalue -= 5; }
-			if (cardinst.card.active && cardinst.card.active.discard == Actives.hasten) { cardvalue += 3; }
-			if (cardvalue < mincardvalue) {
-				mincardvalue = cardvalue;
-				worstcard = i;
-			}
-		}
 		return ["endturn", worstcard];
 	} else return ["endturn"];
 }

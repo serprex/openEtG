@@ -48,7 +48,7 @@ function setClick(obj, click, sound) {
 	sound = sound === undefined ? "buttonClick" : sound;
 	obj.click = function() {
 		ui.playSound(sound);
-		click.apply(null, arguments);
+		click.apply(this, arguments);
 	}
 }
 function hitTest(obj, pos) {
@@ -1053,16 +1053,19 @@ function startMenu(nymph) {
 						return;
 					}
 					userEmit("foearena", lvi);
+					this.visible = false;
 				}
 			});
 			setClick(binfoa, function() {
 				if (Cards.loaded) {
 					userEmit("arenainfo", lvi);
+					this.visible = false;
 				}
 			});
 			setClick(btopa, function() {
 				if (Cards.loaded) {
 					userEmit("arenatop", lvi);
+					this.visible = false;
 				}
 			});
 		})({lv:i});
@@ -1352,17 +1355,14 @@ function upgradestore() {
 	var bexit = makeButton(5, 50, "Exit");
 	setClick(bexit, startMenu);
 	upgradeui.addChild(bexit);
-	var tinfo = new PIXI.Text("", { font: "bold 16px Dosis" });
-	tinfo.position.set(250, 50);
+	var tinfo = new MenuText(250, 50, "");
 	upgradeui.addChild(tinfo);
-	var tinfo2 = new PIXI.Text("", { font: "bold 16px Dosis" });
-	tinfo2.position.set(250, 140);
+	var tinfo2 = new MenuText(250, 140, "");
 	upgradeui.addChild(tinfo2);
-	var tinfo3 = new PIXI.Text("", { font: "bold 16px Dosis" });
+	var tinfo3 = new MenuText(250, 95, "");
 	tinfo3.position.set(250, 95);
 	upgradeui.addChild(tinfo3);
-	var twarning = new PIXI.Text("", { font: "bold 16px Dosis" });
-	twarning.position.set(100, 170);
+	var twarning = new MenuText(100, 170, "");
 	upgradeui.addChild(twarning);
 	var cardArt = new PIXI.Sprite(gfx.nopic);
 	cardArt.position.set(734, 8);
@@ -2165,12 +2165,17 @@ function startMatch(game, foeDeck) {
 			setInteractive.apply(null, permsprite[j]);
 			marksprite[j].anchor.set(.5, .5);
 			marksprite[j].position.set(740, 470);
-			gameui.addChild(shiesprite[j] = makeInst(false, null, "shield", new PIXI.Point(710, 532), 5/4));
-			gameui.addChild(weapsprite[j] = makeInst(true, null, "weapon", new PIXI.Point(666, 512), 5/4));
-			if (j) {
+			weapsprite[j] = makeInst(true, null, "weapon", new PIXI.Point(666, 512), 5/4);
+			shiesprite[j] = makeInst(false, null, "shield", new PIXI.Point(710, 532), 5/4);
+			if (j){
+				gameui.addChild(shiesprite[j]);
+				gameui.addChild(weapsprite[j]);
 				ui.reflectPos(weapsprite[j]);
 				ui.reflectPos(shiesprite[j]);
 				ui.reflectPos(marksprite[j]);
+			}else{
+				gameui.addChild(weapsprite[j]);
+				gameui.addChild(shiesprite[j]);
 			}
 			gameui.addChild(marksprite[j]);
 			marktext[j].anchor.set(.5, .5);
@@ -2363,9 +2368,9 @@ function startMatch(game, foeDeck) {
 			if (!game.goldreward) {
 				var goldwon;
 				if (game.level !== undefined) {
-					var basereward = [1, 6, 11, 31][game.level];
-					var hpfactor = [11, 7, 6, 2][game.level];
-					goldwon = Math.floor((basereward + Math.floor(game.player1.hp / hpfactor)) * (game.player1.hp == game.player1.maxhp ? 1.5 : 1));
+					var basereward = [2, 8, 15, 44][game.level];
+					var hpfactor = [7, 4.5, 4, 1.3][game.level];
+					goldwon = basereward + Math.floor(game.player1.hp / hpfactor);
 				} else goldwon = 0;
 				game.goldreward = goldwon + (game.cost || 0) + (game.addonreward || 0);
 			}
@@ -2631,24 +2636,27 @@ function startArenaTop(info) {
 }
 
 function addChatSpan(span) {
+	span.appendChild(document.createElement("br"));
 	var scroll = chatBox.scrollTop == (chatBox.scrollHeight - chatBox.offsetHeight);
 	chatBox.appendChild(span);
 	if (scroll) chatBox.scrollTop = chatBox.scrollHeight;
-
 }
-
 function chat(message, fontcolor, nodecklink) {
 	var span = document.createElement("span");
-	if (!nodecklink) message = message.replace(/\b(([01][0-9a-v]{4})+)\b/g, "<a href='deck/$1' target='_blank'>$1</a>");
-	span.innerHTML = "<font color=" + (fontcolor || "red") + ">" + message + "</font><br>";
+	span.style.color = fontcolor || "red";
+	message = message.replace(/\b(([01][0-9a-v]{4})+)\b/g, "<a href='deck/$1' target='_blank'>$1</a>");
+	span.innerHTML = message;
 	addChatSpan(span);
 }
+;["connect", "error", "disconnect", "reconnect", "reconnecting", "reconnect_attempt", "reconnect_error", "reconnect_failed"].forEach(function(event){
+	socket.on(event, chat.bind(null, event, "red"));
+});
 socket.on("challenge", function(data) {
-	var message = data.pvp ? " challenges you to a duel!" : " wants to trade with you!";
 	var span = document.createElement("span");
 	span.style.cursor = "pointer";
+	span.style.color = "blue";
 	span.addEventListener("click", (data.pvp ? challengeClick : tradeClick).bind(null, data.f));
-	span.innerHTML = "<font color=blue>" + data.f + message + "</font><br>";
+	span.innerHTML = data.f + (data.pvp ? " challenges you to a duel!" : " wants to trade with you!");
 	addChatSpan(span);
 });
 socket.on("librarygive", initLibrary);
@@ -2866,12 +2874,12 @@ function libraryClick() {
 		socket.emit("librarywant", { f: foename.value });
 }
 function aiClick() {
-	var deck = getDeck();
-	if (etgutil.decklength(deck) < (user ? 31 : 11)) {
+	var deck = getDeck(), aideckcode = aideck.value;
+	if (etgutil.decklength(deck) < 11 || etgutil.decklength(aideckcode) < 11) {
 		startEditor();
 		return;
 	}
-	var gameData = { first: Math.random() < .5, deck: aideck.value, urdeck: deck, seed: Math.random() * etgutil.MAX_INT, foename: "Custom" };
+	var gameData = { first: Math.random() < .5, deck: aideckcode, urdeck: deck, seed: Math.random() * etgutil.MAX_INT, foename: "Custom" };
 	parsepvpstats(gameData);
 	parseaistats(gameData);
 	initGame(gameData, true);
