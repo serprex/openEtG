@@ -269,7 +269,7 @@ var ActivesValues = {
 		return c instanceof etg.CardInstance?.1:c.status.charges;
 	},
 	blockwithcharge:function(c){
-		return (c instanceof etg.CardInstance?c.card.status.charges:c.status.charges)/(1+c.owner.foe.countcreatures());
+		return (c instanceof etg.CardInstance?c.card.status.charges:c.status.charges)/(1+c.owner.foe.countcreatures()*2);
 	},
 	cold:7,
 	despair:5,
@@ -320,7 +320,7 @@ function estimateDamage(c, freedomChance, wallCharges, damageHash) {
 			return tatk;
 		} else if ((fshactive == Actives.weight || fshactive == Actives.wings) && fshactive(c.owner.foe.shield, c)) {
 			return 0;
-		}else if (wallCharges && wallCharges[0]){
+		}else if (wallCharges[0]){
 			wallCharges[0]--;
 			return 0;
 		}else return Math.max(tatk - dr, 0);
@@ -346,8 +346,8 @@ function estimateDamage(c, freedomChance, wallCharges, damageHash) {
 	damageHash[c.hash()] = atk;
 	return atk;
 }
-function calcExpectedDamage(pl, damageHash) {
-	var totalDamage = 0, stasisFlag = false, freedomChance = 0, wallCharges;
+function calcExpectedDamage(pl, damageHash, wallCharges) {
+	var totalDamage = 0, stasisFlag = false, freedomChance = 0;
 	for(var i=0; i<16; i++){
 		var p;
 		if ((p=pl.permanents[i])){
@@ -365,7 +365,7 @@ function calcExpectedDamage(pl, damageHash) {
 		freedomChance = 1-Math.pow(.7, freedomChance);
 	}
 	if (pl.foe.shield && pl.foe.shield.hasactive("shield", "blockwithcharge")){
-		wallCharges = [pl.foe.shield.status.charges];
+		wallCharges[0] = pl.foe.shield.status.charges;
 	}
 	if (!stasisFlag){
 		pl.creatures.forEach(function(c){
@@ -485,10 +485,10 @@ function evalcardinstance(cardInst) {
 			score *= hp?(c.status.immaterial || c.status.burrowed ? 1.3 : 1+Math.log(Math.min(hp, 33))/7):.2;
 		}else if (c.type == etg.WeaponEnum){
 			score += c.attack;
-			if (cardInst.owner.weapon) score /= 2;
+			if (cardInst.owner.weapon || c.owner.hand.some(function(cinst){ return cinst.card.type == etg.WeaponEnum })) score /= 2;
 		}else if (c.type == etg.ShieldEnum){
 			score += c.health*c.health;
-			if (cardInst.owner.shield) score /= 2;
+			if (cardInst.owner.shield || c.owner.hand.some(function(cinst){ return cinst.card.type == etg.ShieldEnum })) score /= 2;
 		}
 	}
 	score *= !cardInst.card.cost ? .8 : (cardInst.canactive() ? .6 : .5) * (!cardInst.card.costele?1:.9+Math.log(1+cardInst.owner.quanta[cardInst.card.costele])/50);
@@ -514,15 +514,15 @@ module.exports = function(game) {
 	if (game.player1.deck.length == 0 && game.player1.hand.length < 8){
 		return -99999990;
 	}
-	var damageHash = [];
-	var expectedDamage = calcExpectedDamage(game.player2, damageHash);
+	var damageHash = [], wallCharges = [[0],[0]];
+	var expectedDamage = calcExpectedDamage(game.player2, damageHash, wallCharges[1]);
 	if (expectedDamage > game.player1.hp){
 		return Math.min(expectedDamage - game.player1.hp, 500)*-999;
 	}
 	if (game.player2.deck.length == 0){
 		return 99999980;
 	}
-	expectedDamage = calcExpectedDamage(game.player1, damageHash); // Call to fill damageHash
+	expectedDamage = calcExpectedDamage(game.player1, damageHash, wallCharges[0]); // Call to fill damageHash
 	var gamevalue = expectedDamage > game.player2.hp ? 999 : 0;
 	for (var j = 0;j < 2;j++) {
 		for (var i = 0; i < uniquesActive.length; i++) {
@@ -530,7 +530,7 @@ module.exports = function(game) {
 				uniquesActive[i] = undefined;
 		}
 		logNest(j);
-		var pscore = 0, player = game.players(j);
+		var pscore = wallCharges[j][0], player = game.players(j);
 		pscore += evalthing(player.weapon, damageHash);
 		pscore += evalthing(player.shield, damageHash);
 		logNest("creas");
