@@ -80,18 +80,8 @@ function userExec(x, data){
 function refreshRenderer(stage, animCb, dontrender) {
 	if (realStage.children.length > 1){
 		var oldstage = realStage.children[1];
-		if (oldstage.cmds){
-			for (var cmd in oldstage.cmds){
-				socket.removeListener(cmd, oldstage.cmds[cmd]);
-			}
-		}
 		if (oldstage.endnext) oldstage.endnext();
 		realStage.removeChildAt(1);
-	}
-	if (stage.cmds){
-		for (var cmd in stage.cmds){
-			socket.on(cmd, stage.cmds[cmd]);
-		}
 	}
 	realStage.addChild(stage);
 	realStage.next = animCb;
@@ -383,12 +373,12 @@ function initTrade() {
 		ownDeck.next(mpos);
 	});
 }
-function initLibrary(pool){
+function initLibrary(data){
 	var stage = mkView();
 	var bexit = makeButton(10, 10, "Exit");
 	setClick(bexit, startMenu);
 	stage.addChild(bexit);
-	var cardpool = etgutil.deck2pool(pool);
+	var cardpool = etgutil.deck2pool(data.pool);
 	var cardsel = new CardSelector(
 		function(code){
 			cardArt.setTexture(getArt(code));
@@ -1107,6 +1097,7 @@ function startMenu(nymph) {
 }
 function startRewardWindow(reward, numberofcopies, nocode) {
 	if (!numberofcopies) numberofcopies = 1;
+	if (reward.type !== undefined) reward = reward.type;
 	var rewardList;
 	if (typeof reward == "string") {
 		var upped = reward.substring(0, 5) == "upped";
@@ -2657,7 +2648,18 @@ function chat(message, fontcolor, nodecklink) {
 ;["connect", "error", "disconnect", "reconnect", "reconnecting", "reconnect_attempt", "reconnect_error", "reconnect_failed"].forEach(function(event){
 	socket.on(event, chat.bind(null, event, "red"));
 });
-socket.on("challenge", function(data) {
+socket.on("message", function(data){
+	data = JSON.parse(data);
+	var func = sockEvents[data.x] || (realStage.children.length > 1 && realStage.children[1].cmds && (func = realStage.children[1].cmds[data.x]));
+	if (func){
+		func.call(socket, data);
+	}
+});
+var sockEvents = {};
+function sockEvent(event, func){
+	sockEvents[event] = func;
+}
+sockEvent("challenge", function(data) {
 	var span = document.createElement("span");
 	span.style.cursor = "pointer";
 	span.style.color = "blue";
@@ -2665,8 +2667,8 @@ socket.on("challenge", function(data) {
 	span.innerHTML = data.f + (data.pvp ? " challenges you to a duel!" : " wants to trade with you!");
 	addChatSpan(span);
 });
-socket.on("librarygive", initLibrary);
-socket.on("foearena", function(data) {
+sockEvent("librarygive", initLibrary);
+sockEvent("foearena", function(data) {
 	aideck.value = data.deck;
 	var game = initGame({ first: data.seed < etgutil.MAX_INT/2, deck: data.deck, urdeck: getDeck(), seed: data.seed, p2hp: data.hp, cost: data.cost, foename: data.name, p2drawpower: data.draw, p2markpower: data.mark }, true);
 	game.arena = data.name;
@@ -2674,18 +2676,19 @@ socket.on("foearena", function(data) {
 	game.cost = data.lv?20:10;
 	user.gold -= game.cost;
 });
-socket.on("arenainfo", startArenaInfo);
-socket.on("arenatop", startArenaTop);
-socket.on("userdump", function(data) {
+sockEvent("arenainfo", startArenaInfo);
+sockEvent("arenatop", startArenaTop);
+sockEvent("userdump", function(data) {
+	delete data.x;
 	user = data;
 	prepuser();
 	startMenu();
 });
-socket.on("passchange", function(data) {
-	user.auth = data;
+sockEvent("passchange", function(data) {
+	user.auth = data.auth;
 	chat("Password updated");
 });
-socket.on("chat", function(data) {
+sockEvent("chat", function(data) {
 	if (muteall || data.u in muteset) return;
 	var now = new Date(), h = now.getHours(), m = now.getMinutes(), s = now.getSeconds();
 	if (h < 10) h = "0"+h;
@@ -2698,21 +2701,21 @@ socket.on("chat", function(data) {
 		new Notification(data.u, {body: data.msg}).onclick = window.focus;
 	}
 });
-socket.on("codecard", startRewardWindow);
-socket.on("codereject", function(data) {
-	chat(data);
+sockEvent("codecard", startRewardWindow);
+sockEvent("codereject", function(data) {
+	chat(data.msg);
 });
-socket.on("codegold", function(data) {
-	user.gold += data;
-	chat(data + "\u00A4 added!");
+sockEvent("codegold", function(data) {
+	user.gold += data.g;
+	chat(data.g + "\u00A4 added!");
 });
-socket.on("codecode", function(data) {
+sockEvent("codecode", function(data) {
 	user.pool = etgutil.addcard(user.pool, data);
 	chat(Cards.Codes[data].name + " added!");
 });
-socket.on("codedone", function(data) {
-	user.pool = etgutil.addcard(user.pool, data);
-	chat(Cards.Codes[data].name + " added!");
+sockEvent("codedone", function(data) {
+	user.pool = etgutil.addcard(user.pool, data.card);
+	chat(Cards.Codes[data.card].name + " added!");
 	startMenu();
 });
 function soundChange(event) {

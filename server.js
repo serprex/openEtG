@@ -227,7 +227,7 @@ function dropsock(){
 			if (foesock){
 				var foesockinfo = sockinfo[foesock.id];
 				if (foesockinfo && foesockinfo.trade && usersock[foesockinfo.trade.foe] == this){
-					foesock.emit("tradecanceled");
+					sockEmit(foesock, "tradecanceled");
 					delete foesockinfo.trade;
 				}
 			}
@@ -235,7 +235,7 @@ function dropsock(){
 		if (info.foe){
 			var foeinfo = sockinfo[info.foe.id];
 			if (foeinfo && foeinfo.foe == this){
-				info.foe.emit("foeleft");
+				sockEmit(info.foe, "foeleft");
 				delete foeinfo.foe;
 			}
 		}
@@ -296,13 +296,21 @@ function getDay(){
 }
 function genericChat(socket, data){
 	if (data.msg == "/who") {
-		socket.emit("chat", { mode: "red", msg: activeUsers().join(", ") || "There are no users online :(" })
+		sockEmit(socket, "chat", { mode: "red", msg: activeUsers().join(", ") || "There are no users online :(" })
 	}
-	else io.emit("chat", data)
+	else{
+		data.x = "chat";
+		io.send(JSON.stringify(data));
+	}
 }
 function getAgedHp(hp, age){
 	var curhp = age > 1 ? hp - (1<<Math.min(age, 9)-1) : hp;
 	return Math.max(curhp, Math.floor(hp/4));
+}
+function sockEmit(socket, event, data){
+	if (!data) data = {};
+	data.x = event;
+	socket.send(JSON.stringify(data));
 }
 var userEvents = {}, sockEvents = {};
 function userEvent(name, func){
@@ -318,7 +326,7 @@ function foeEcho(event){
 	sockEvent(event, function(data){
 		var foe = sockinfo[this.id].trade ? usersock[sockinfo[this.id].trade.foe] : sockinfo[this.id].foe;
 		if (foe){
-			foe.emit(event, data);
+			foe.send(data);
 		}
 	});
 }
@@ -360,7 +368,7 @@ userEvent("inituser", function(data, user) {
 	var socket = this;
 	db.hset("Q:"+user.name, "necromancer", 1, function(err, obj){
 		useruser(user, function(clientuser){
-			socket.emit("userdump", clientuser);
+			sockEmit(socksocket, "userdump", clientuser);
 		});
 	});
 });
@@ -401,14 +409,14 @@ userEvent("arenainfo", function(data, user){
 	var socket = this;
 	db.hgetall((data.lv?"B:":"A:") + data.u, function(err, obj){
 		if (!obj){
-			socket.emit("arenainfo", {deck:"", lv: data.lv});
+			sockEmit(socket, "arenainfo", {deck:"", lv: data.lv});
 		}else{
 			db.zrevrank("arena"+(data.lv?"1":""), data.u, function(err, rank){
 				obj.day = getDay() - obj.day;
 				obj.curhp = getAgedHp(obj.hp, obj.day);
 				obj.lv = data.lv;
 				if (rank !== null)obj.rank = rank;
-				socket.emit("arenainfo", obj);
+				sockEmit(socket, "arenainfo", obj);
 			});
 		}
 	});
@@ -419,7 +427,7 @@ userEvent("arenatop", function(data, user){
 		var t20 = [];
 		function getwinloss(i){
 			if (i == obj.length){
-				socket.emit("arenatop", t20);
+				sockEmit(socket, "arenatop", t20);
 			}else{
 				db.hmget((data.lv?"B:":"A:") + obj[i], "win", "loss", "day", "card", function(err, wl){
 					wl[2] = getDay()-wl[2];
@@ -479,7 +487,7 @@ userEvent("foearena", function(data, user){
 				adeck.mark = parseInt(adeck.mark || 1);
 				adeck.draw = parseInt(adeck.draw || data.lv+1);
 				var curhp = getAgedHp(adeck.hp, getDay()-adeck.day);
-				socket.emit("foearena", {
+				sockEmit(socket, "foearena", {
 					seed: seed*etgutil.MAX_INT,
 					name: aname, hp: curhp,
 					mark: adeck.mark, draw: adeck.draw,
@@ -492,27 +500,27 @@ userEvent("codesubmit", function(data, user){
 	var socket = this;
 	db.hget("CodeHash", data.code, function(err, type){
 		if (!type){
-			socket.emit("codereject", "Code does not exist");
+			sockEmit(socket, "codereject", {msg: "Code does not exist"});
 		}else if (type.charAt(0) == "G"){
 			var g = parseInt(type.substr(1));
 			if (isNaN(g)){
-				socket.emit("codereject", "Invalid gold code type: " + type);
+				sockEmit(socket, "codereject", {msg: "Invalid gold code type: " + type});
 			}else{
 				user.gold += g;
-				socket.emit("codegold", g);
+				sockEmit(socket, "codegold", {g: g});
 				db.hdel("CodeHash", data.code);
 			}
 		}else if (type.charAt(0) == "C"){
 			var c = type.substr(1);
 			if (c in Cards.Codes){
 				user.pool = etgutil.addcard(user.pool, c);
-				socket.emit("codecode", c);
+				sockEmit(socket, "codecode", {card: c});
 				db.hdel("CodeHash", data.code);
-			}else socket.emit("codereject", "Unknown card: " + type);
+			}else sockEmit(socket, "codereject", {msg: "Unknown card: " + type});
 		}else if (type in userutil.rewardwords){
-			socket.emit("codecard", type);
+			sockEmit(socket, "codecard", {type: type});
 		}else{
-			socket.emit("codereject", "Unknown code type: " + type);
+			sockEmit(socket, "codereject", {msg: "Unknown code type: " + type});
 		}
 	});
 });
@@ -520,16 +528,16 @@ userEvent("codesubmit2", function(data, user){
 	var socket = this;
 	db.hget("CodeHash", data.code, function(err, type){
 		if (!type){
-			socket.emit("codereject", "Code does not exist");
+			sockEmit(socket, "codereject", {msg: "Code does not exist"});
 		}else if (type in userutil.rewardwords){
 			var card = Cards.Codes[data.card];
 			if (card && card.rarity == userutil.rewardwords[type]){
 				user.pool = etgutil.addcard(user.pool, data.card);
-				socket.emit("codedone", data.card);
+				sockEmit(socket, "codedone", {card: data.card});
 				db.hdel("CodeHash", data.code);
 			}
 		}else{
-			socket.emit("codereject", "Unknown code type: " + type);
+			sockEmit(socket, "codereject", {msg: "Unknown code type: " + type});
 		}
 	});
 });
@@ -561,12 +569,12 @@ userEvent("foewant", function(data, user){
 				owndata["p2" + key] = foestat[key];
 				foedata["p1" + key] = foestat[key];
 			}
-			this.emit("pvpgive", owndata);
-			foesock.emit("pvpgive", foedata);
+			sockEmit(socket, "pvpgive", owndata);
+			sockEmit(foesock, "pvpgive", foedata);
 		} else {
 			sockinfo[this.id].duel = f;
-			foesock.emit("challenge", { f:u, pvp:true  });
-			this.emit("chat", { mode: "red", msg: "You have sent a PvP request to " + f + "!" });
+			sockEmit(foesock, "challenge", { f:u, pvp:true });
+			sockEmit(this, "chat", { mode: "red", msg: "You have sent a PvP request to " + f + "!" });
 		}
 	}
 });
@@ -574,8 +582,8 @@ userEvent("canceltrade", function (data, user) {
 	if (sockinfo[this.id].trade){
 		var foesock = usersock[sockinfo[this.id].trade.foe];
 		if (foesock){
-			foesock.emit("tradecanceled");
-			foesock.emit("chat", { mode: "red", msg: data.u + " has canceled the trade."});
+			sockEmit(foesock, "tradecanceled");
+			sockEmit(foesock, "chat", { mode: "red", msg: data.u + " has canceled the trade."});
 			if (foesock.id in sockinfo){
 				delete sockinfo[foesock.id].trade;
 			}
@@ -594,7 +602,7 @@ userEvent("confirmtrade", function (data, user) {
 	var thattrade = thatsock && sockinfo[thatsock.id] && sockinfo[thatsock.id].trade;
 	var otherUser = users[thistrade.foe];
 	if (!thattrade || !otherUser){
-		this.emit("tradecanceled");
+		sockEmit(this, "tradecanceled");
 		delete sockinfo[this.id].trade;
 		return;
 	} else if (thattrade.accepted) {
@@ -603,8 +611,8 @@ userEvent("confirmtrade", function (data, user) {
 		user.pool = etgutil.mergedecks(user.pool, player2Cards);
 		otherUser.pool = etgutil.removedecks(otherUser.pool, player2Cards);
 		otherUser.pool = etgutil.mergedecks(otherUser.pool, player1Cards);
-		this.emit("tradedone", { oldcards: player1Cards, newcards: player2Cards });
-		thatsock.emit("tradedone", { oldcards: player2Cards, newcards: player1Cards });
+		sockEmit(this, "tradedone", { oldcards: player1Cards, newcards: player2Cards });
+		sockEmit(thatsock, "tradedone", { oldcards: player2Cards, newcards: player1Cards });
 		delete sockinfo[this.id].trade;
 		delete sockinfo[thatsock.id].trade;
 	} else {
@@ -622,11 +630,11 @@ userEvent("tradewant", function (data) {
 		sockinfo[this.id].trade = {foe: f};
 		var foetrade = sockinfo[foesock.id].trade;
 		if (foetrade && foetrade.foe == u) {
-			this.emit("tradegive");
-			foesock.emit("tradegive");
+			sockEmit(this, "tradegive");
+			sockEmit(foesock, "tradegive");
 		} else {
-			foesock.emit("challenge", {f:u, pvp:false});
-			this.emit("chat", { mode: "red", msg: "You have sent a trade request to " + f + "!" });
+			sockEmit(foesock, "challenge", {f:u, pvp:false});
+			sockEmit(this, "chat", { mode: "red", msg: "You have sent a trade request to " + f + "!" });
 		}
 	}
 });
@@ -640,13 +648,13 @@ userEvent("passchange", function(data, user){
 		delete user.salt;
 		delete user.iter;
 		user.auth = user.name;
-		this.emit("passchange", user.name);
+		sockEmit(this, "passchange", {auth: user.name});
 	}else{
 		var socket = this;
 		crypto.pbkdf2(pass, user.salt, parseInt(user.iter), 64, function(err, key){
 			if (!err){
 				user.auth = key.toString("base64");
-				socket.emit("passchange", user.auth);
+				sockEmit(this, "passchange", {auth: user.auth});
 			}
 		});
 	}
@@ -655,10 +663,10 @@ userEvent("chat", function (data) {
 	if (data.to) {
 		var to = data.to;
 		if (usersock[to]) {
-			usersock[to].emit("chat", { msg: data.msg, mode: "blue", u: data.u });
-			this.emit("chat", { msg: data.msg, mode: "blue", u: "To " + to });
+			sockEmit(usersock[to], "chat", { msg: data.msg, mode: "blue", u: data.u });
+			sockEmit(this, "chat", { msg: data.msg, mode: "blue", u: "To " + to });
 		}
-		else this.emit("chat", { mode: "red", msg: to + " is not here right now." });
+		else sockEmit(this, "chat", { mode: "red", msg: to + " is not here right now." });
 	}
 	else{
 		delete data.a;
@@ -706,7 +714,7 @@ userEvent("booster", function(data, user) {
 			user.gold -= pack.cost;
 			user.pool = etgutil.mergedecks(user.pool, newCards);
 		}
-		this.emit("boostergive", { cards: newCards, accountbound: bound, cost:pack.cost, packtype:data.pack });
+		sockEmit(this, "boostergive", { cards: newCards, accountbound: bound, cost:pack.cost, packtype:data.pack });
 	}
 });
 foeEcho("endturn");
@@ -744,8 +752,8 @@ sockEvent("pvpwant", function(data) {
 			owndata["p2" + key] = foestat[key];
 			foedata["p1" + key] = foestat[key];
 		}
-		this.emit("pvpgive", owndata);
-		pendinggame.emit("pvpgive", foedata);
+		sockEmit(this, "pvpgive", owndata);
+		sockEmit(pendinggame, "pvpgive", foedata);
 		delete rooms[data.room];
 	}else{
 		rooms[data.room] = this;
@@ -753,10 +761,10 @@ sockEvent("pvpwant", function(data) {
 });
 sockEvent("librarywant", function(data){
 	if (data.f in users){
-		socket.emit("librarygive", users[data.f].pool);
+		sockEmit(socket, "librarygive", {pool: users[data.f].pool});
 	}else{
 		db.hget("U:"+data.f, "pool", function(err, pool){
-			socket.emit("librarygive", pool);
+			sockEmit(socket, "librarygive", {pool: pool});
 		});
 	}
 });
