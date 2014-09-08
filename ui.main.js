@@ -2636,27 +2636,27 @@ function startArenaTop(info) {
 }
 
 function addChatSpan(span) {
+	span.appendChild(document.createElement("br"));
 	var scroll = chatBox.scrollTop == (chatBox.scrollHeight - chatBox.offsetHeight);
 	chatBox.appendChild(span);
 	if (scroll) chatBox.scrollTop = chatBox.scrollHeight;
-
 }
-
 function chat(message, fontcolor) {
 	var span = document.createElement("span");
+	span.style.color = fontcolor || "red";
 	message = message.replace(/\b(([01][0-9a-v]{4})+)\b/g, "<a href='deck/$1' target='_blank'>$1</a>");
-	span.innerHTML = "<font color=" + (fontcolor || "red") + ">" + message + "</font><br>";
+	span.innerHTML = message;
 	addChatSpan(span);
 }
 ;["connect", "error", "disconnect", "reconnect", "reconnecting", "reconnect_attempt", "reconnect_error", "reconnect_failed"].forEach(function(event){
 	socket.on(event, chat.bind(null, event, "red"));
 });
 socket.on("challenge", function(data) {
-	var message = data.pvp ? " challenges you to a duel!" : " wants to trade with you!";
 	var span = document.createElement("span");
 	span.style.cursor = "pointer";
+	span.style.color = "blue";
 	span.addEventListener("click", (data.pvp ? challengeClick : tradeClick).bind(null, data.f));
-	span.innerHTML = "<font color=blue>" + data.f + message + "</font><br>";
+	span.innerHTML = data.f + (data.pvp ? " challenges you to a duel!" : " wants to trade with you!");
 	addChatSpan(span);
 });
 socket.on("librarygive", initLibrary);
