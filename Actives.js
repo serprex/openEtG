@@ -536,7 +536,7 @@ gas:function(c,t){
 },
 give:function(c,t){
 	c.owner.dmg(c.card.upped?-10:-5);
-	if (t.hasactive("auto", "singularity")){
+	if (!(t instanceof etg.CardInstance) && t.hasactive("auto", "singularity")){
 		t.die();
 	}else if (t instanceof etg.Permanent){
 		Actives.steal(c.owner.foe, t);
