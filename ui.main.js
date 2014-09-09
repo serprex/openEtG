@@ -2639,11 +2639,10 @@ function addChatSpan(span) {
 	chatBox.appendChild(span);
 	if (scroll) chatBox.scrollTop = chatBox.scrollHeight;
 }
-function chat(message, fontcolor, nodecklink) {
+function chat(msg, fontcolor, nodecklink) {
 	var span = document.createElement("span");
-	span.style.color = fontcolor || "red";
-	if (!nodecklink) message = message.replace(/\b(([01][0-9a-v]{4})+)\b/g, "<a href='deck/$1' target='_blank'>$1</a>");
-	span.innerHTML = message;
+	if (fontcolor) span.style.color = fontcolor;
+	span.appendChild(document.createTextNode(msg));
 	addChatSpan(span);
 }
 ;["connect", "error", "disconnect", "reconnect", "reconnecting", "reconnect_attempt", "reconnect_error", "reconnect_failed"].forEach(function(event){
@@ -2665,7 +2664,7 @@ sockEvent("challenge", function(data) {
 	span.style.cursor = "pointer";
 	span.style.color = "blue";
 	span.addEventListener("click", (data.pvp ? challengeClick : tradeClick).bind(null, data.f));
-	span.innerHTML = data.f + (data.pvp ? " challenges you to a duel!" : " wants to trade with you!");
+	span.appendChild(document.createTextNode(data.f + (data.pvp ? " challenges you to a duel!" : " wants to trade with you!")));
 	addChatSpan(span);
 });
 sockEvent("librarygive", initLibrary);
@@ -2690,17 +2689,37 @@ sockEvent("passchange", function(data) {
 	chat("Password updated");
 });
 sockEvent("chat", function(data) {
-	if (muteall || data.u in muteset) return;
-	var now = new Date(), h = now.getHours(), m = now.getMinutes(), s = now.getSeconds();
-	if (h < 10) h = "0"+h;
-	if (m < 10) m = "0"+m;
-	if (s < 10) s = "0"+s;
-	var msg = h + ":" + m + ":" + s + " " + (data.u ? "<b>" + sanitizeHtml(data.u) + ":</b> " : "") + sanitizeHtml(data.msg);
-	chat(data.guest ? "<i>" + msg + "</i>" : msg, data.mode || "black");
+	if (muteall || data.u in muteset || !data.msg) return;
 	if (Notification && user && ~data.msg.indexOf(user.name) && !document.hasFocus()){
 		Notification.requestPermission();
 		new Notification(data.u, {body: data.msg}).onclick = window.focus;
 	}
+	var now = new Date(), h = now.getHours(), m = now.getMinutes(), s = now.getSeconds();
+	if (h < 10) h = "0"+h;
+	if (m < 10) m = "0"+m;
+	if (s < 10) s = "0"+s;
+	var span = document.createElement("span");
+	if (data.mode != "red") span.style.color = data.mode || "black";
+	if (data.guest) span.style.fontStyle = "italic";
+	span.appendChild(document.createTextNode(h + ":" + m + ":" + s + " "));
+	if (data.u){
+		var belly = document.createElement("b");
+		belly.appendChild(document.createTextNode(data.u + ": "));
+		span.appendChild(belly);
+	}
+	var decklink=/\b(([01][0-9a-v]{4})+)\b/g, reres, lastindex = 0;
+	while (reres = decklink.exec(data.msg)){
+		var prefix = reres.index;
+		if (prefix != lastindex) span.appendChild(document.createTextNode(data.msg.substring(lastindex, prefix-lastindex)));
+		var link = document.createElement("a");
+		link.href = "deck/" + reres[0];
+		link.target = "_blank";
+		link.appendChild(document.createTextNode(reres[0]));
+		span.appendChild(link);
+		lastindex = decklink.lastIndex;
+	}
+	if (lastindex != data.msg.length) span.appendChild(document.createTextNode(data.msg.substring(lastindex)));
+	addChatSpan(span);
 });
 sockEvent("codecard", startRewardWindow);
 sockEvent("codereject", function(data) {
@@ -2731,7 +2750,7 @@ function maybeSendChat(e) {
 		var msg = chatinput.value;
 		chatinput.value = "";
 		if (msg == "/clear"){
-			chatBox.innerHTML = "";
+			while (chatBox.firstChild) chatBox.firstChild.remove();
 		}else if (msg == "/mute"){
 			muteall = true;
 		}else if (msg == "/unmute"){
@@ -2761,9 +2780,6 @@ function maybeSendChat(e) {
 		}
 		e.preventDefault();
 	}
-}
-function sanitizeHtml(x) {
-	return x.replace(/</g, "&lt;").replace(/>/g, "&gt;");
 }
 function unaryParseInt(x) {
 	return parseInt(x, 10);
