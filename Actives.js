@@ -935,7 +935,7 @@ nymph:function(c,t){
 	new etg.Creature(t.card.as(Cards.Codes[etg.NymphList[e]]), t.owner).place();
 },
 obsession:function(c,t){
-	t.dmg(c.card.upped?10:8);
+	c.owner.dmg(c.card.upped?10:8);
 },
 ouija:function(c,t){
 	if(!c.owner.foe.sanctuary && c.owner.foe.hand.length<8){

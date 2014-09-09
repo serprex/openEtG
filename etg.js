@@ -602,7 +602,7 @@ Player.prototype.endturn = function(discard) {
 		var cardinst = this.hand[discard];
 		this.hand.splice(discard, 1);
 		if (cardinst.card.active.discard){
-			cardinst.card.active.discard(cardinst, this);
+			cardinst.card.active.discard(cardinst);
 		}
 	}
 	this.spend(this.mark, this.markpower * (this.mark > 0 ? -1 : -3));

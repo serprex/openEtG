@@ -4,8 +4,9 @@ var evalGameState = require("./eval");
 var Actives = require("./Actives");
 var Cards = require("./Cards");
 module.exports = function(game, previous) {
-	var worstcard, currentEval;
+	var currentEval;
 	if (previous === undefined){
+		var worstcard;
 		if (game.player2.hand.length < 8){
 			currentEval = evalGameState(game);
 		}else{
@@ -15,7 +16,7 @@ module.exports = function(game, previous) {
 				var cardinst = gclone.player2.hand[i];
 				gclone.player2.hand.splice(i, 1);
 				if (cardinst.card.active.discard){
-					cardinst.card.active.discard(cardinst, gclone.player2);
+					cardinst.card.active.discard(cardinst);
 				}
 				var discvalue = evalGameState(gclone);
 				if (discvalue < currentEval){
@@ -113,6 +114,6 @@ module.exports = function(game, previous) {
 	}else if (cmdct) {
 		return ["cast", cmdct];
 	} else if (game.player2.hand.length == 8) {
-		return ["endturn", worstcard];
+		return ["endturn", previous[6]];
 	} else return ["endturn"];
 }
