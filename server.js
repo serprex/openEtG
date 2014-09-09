@@ -764,6 +764,7 @@ sockEvent("librarywant", function(data){
 	if (data.f in users){
 		sockEmit(socket, "librarygive", {pool: users[data.f].pool});
 	}else{
+		var socket = this;
 		db.hget("U:"+data.f, "pool", function(err, pool){
 			sockEmit(socket, "librarygive", {pool: pool});
 		});
