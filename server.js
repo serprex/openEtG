@@ -312,7 +312,7 @@ function sockEmit(socket, event, data){
 	data.x = event;
 	socket.send(JSON.stringify(data));
 }
-var userEvents = {}, sockEvents = {};
+var userEvents = {}, sockEvents = {}, echoEvents = { endturn: true, cast: true, foeleft: true, mulligan: true, cardchosen: true };
 function userEvent(name, func){
 	userEvents[name] = func;
 }
@@ -323,12 +323,7 @@ function utilEvent(event){
 	userEvent(event, userutil[event]);
 }
 function foeEcho(event){
-	sockEvent(event, function(data){
-		var foe = sockinfo[this.id].trade ? usersock[sockinfo[this.id].trade.foe] : sockinfo[this.id].foe;
-		if (foe){
-			foe.send(data);
-		}
-	});
+	echoEvents[event] = true;
 }
 utilEvent("sellcard");
 utilEvent("upgrade");
@@ -570,7 +565,7 @@ userEvent("foewant", function(data, user){
 				owndata["p2" + key] = foestat[key];
 				foedata["p1" + key] = foestat[key];
 			}
-			sockEmit(socket, "pvpgive", owndata);
+			sockEmit(this, "pvpgive", owndata);
 			sockEmit(foesock, "pvpgive", foedata);
 		} else {
 			sockinfo[this.id].duel = f;
@@ -718,11 +713,6 @@ userEvent("booster", function(data, user) {
 		sockEmit(this, "boostergive", { cards: newCards, accountbound: bound, cost:pack.cost, packtype:data.pack });
 	}
 });
-foeEcho("endturn");
-foeEcho("cast");
-foeEcho("foeleft");
-foeEcho("mulligan");
-foeEcho("cardchosen");
 sockEvent("guestchat", function (data) {
 	data.guest = true;
 	data.u = "Guest_" + data.u;
@@ -780,8 +770,15 @@ io.on("connection", function(socket) {
 	sockinfo[socket.id] = {};
 	socket.on("disconnect", dropsock);
 	socket.on("reconnect_failed", dropsock);
-	socket.on("message", function(data){
-		data = JSON.parse(data);
+	socket.on("message", function(rawdata){
+		var data = JSON.parse(rawdata);
+		if (data.x in echoEvents){
+			var foe = sockinfo[this.id].trade ? usersock[sockinfo[this.id].trade.foe] : sockinfo[this.id].foe;
+			if (foe){
+				foe.send(rawdata);
+			}
+			return;
+		}
 		var func = userEvents[data.x];
 		if (func){
 			var u;
