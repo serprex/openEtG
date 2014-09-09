@@ -40,10 +40,11 @@ require("./etg.client").loadcards(function() {
 			a.appendChild(document.createTextNode(text));
 			td.appendChild(a);
 			tr.appendChild(td);
-			if ((x++&7)==7){
+			if (++x == 9){
 				table.appendChild(tr);
 				tr = document.createElement("tr");
 				tr.appendChild(document.createElement("td"));
+				x = 1;
 			}
 		}
 		for(var i=0; i<credit.length-1; i++){
