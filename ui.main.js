@@ -2012,7 +2012,7 @@ function startMatch(game, foeDeck) {
 			} else {
 				discarding = false;
 				if (!game.ai) {
-					sockEmit("endturn", {disc: discard});
+					sockEmit("endturn", {bits: discard});
 				}
 				game.player1.endturn(discard);
 				delete game.targetingMode;
@@ -2246,7 +2246,7 @@ function startMatch(game, foeDeck) {
 	}
 	gameui.cmds = {
 		endturn: function(data) {
-			game.player2.endturn(data.disc);
+			game.player2.endturn(data.bits);
 		},
 		cast: function(data) {
 			var bits = data.bits, c = game.bitsToTgt(bits & 511), t = game.bitsToTgt((bits >> 9) & 511);
@@ -2285,14 +2285,14 @@ function startMatch(game, foeDeck) {
 				}
 				if (aiCommand){
 					if (Date.now() >= aiDelay){
-						gameui.cmds[aiState[0]](aiState[1]);
+						gameui.cmds[aiState[0]]({bits: aiState[1]});
 						aiState = undefined;
 						aiCommand = false;
 						aiDelay += 300;
 					}
 				}
 			}else if (game.phase <= etg.MulliganPhase2){
-				gameui.cmds.mulligan(require("./ai/mulligan")(game.player2));
+				gameui.cmds.mulligan({draw: require("./ai/mulligan")(game.player2)});
 			}
 		}
 		var pos = realStage.getMousePosition();
