@@ -515,14 +515,14 @@ module.exports = function(game) {
 		return -99999990;
 	}
 	var damageHash = [], wallCharges = [[0],[0]];
-	var expectedDamage = calcExpectedDamage(game.player2, damageHash, wallCharges[1]);
+	var expectedDamage = calcExpectedDamage(game.player2, damageHash, wallCharges[0]);
 	if (expectedDamage > game.player1.hp){
 		return Math.min(expectedDamage - game.player1.hp, 500)*-999;
 	}
 	if (game.player2.deck.length == 0){
 		return 99999980;
 	}
-	expectedDamage = calcExpectedDamage(game.player1, damageHash, wallCharges[0]); // Call to fill damageHash
+	expectedDamage = calcExpectedDamage(game.player1, damageHash, wallCharges[1]); // Call to fill damageHash
 	var gamevalue = expectedDamage > game.player2.hp ? 999 : 0;
 	for (var j = 0;j < 2;j++) {
 		for (var i = 0; i < uniquesActive.length; i++) {
