@@ -1839,7 +1839,7 @@ function startEditor(arena, acard, startempty) {
 	var decksprite = new DeckDisplay(60, setCardArt,
 		function(i){
 			var code = decksprite.deck[i], card = Cards.Codes[code];
-			if (!arena || etgutil.asUpped(code, false) != acard){
+			if (!arena || code != acard){
 				if (user && !isFreeCard(card)) {
 					adjust(cardminus, code, -1);
 				}
@@ -2606,6 +2606,7 @@ function startArenaInfo(info) {
 }
 
 function startArenaTop(info) {
+	info = info.top;
 	if (!info) {
 		chat("??");
 		return;

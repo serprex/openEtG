@@ -427,7 +427,7 @@ userEvent("arenatop", function(data, user){
 		var t20 = [];
 		function getwinloss(i){
 			if (i == obj.length){
-				sockEmit(socket, "arenatop", t20);
+				sockEmit(socket, "arenatop", {top: t20});
 			}else{
 				db.hmget((data.lv?"B:":"A:") + obj[i], "win", "loss", "day", "card", function(err, wl){
 					wl[2] = getDay()-wl[2];
