@@ -479,6 +479,7 @@ userEvent("foearena", function(data, user){
 				console.log("No arena " + idx);
 				return;
 			}
+			aname = aname[0];
 			console.log("deck: "+ aname + " " + idx);
 			db.hgetall((data.lv?"B:":"A:")+aname, function(err, adeck){
 				var seed = Math.random();
