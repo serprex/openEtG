@@ -28,21 +28,26 @@ require("./etg.client").loadcards(function() {
 			["4sb", "4vc", "4ve", "4vh", "52t", "55l", "55o", "55r", "560", "562", "563", "591", "5c0", "5c1", "5c9", "5f1", "5f2", "5fa", "5fc", "5i5", "5i7", "5id", "5ij", "5ll", "5oc", "5of", "5rk", "5rs", "5rt", "5uk", "5ul", "5um", "5ut", "5uv", "5v3", "61o", "61t", "624", "625", "626", "74a", "80g"]],
 		[["freeSFX", "http://www.freesfx.co.uk"],[]]
 	];
-	var str = "<br>";
+	var str = "<br><table>";
 	credits.forEach(function(credit){
+		str += "<tr>"
+		var x = 0;
+		function incx(){
+			if ((x++&7)==7)str += "</tr><tr><td></td>";
+		}
 		for(var i=0; i<credit.length-1; i++){
-			str += "<a href='"+credit[i][1]+"'>"+credit[i][0]+"</a>&emsp;";
+			str += "<td><a href='"+credit[i][1]+"'>"+credit[i][0]+"</a></td>";
+			incx();
 		}
 		var codes = credit[credit.length-1];
 		if (codes.length){
 			codes.sort();
-			str += "<table><tr>";
 			codes.forEach(function(code, i){
 				str += "<td><a href='Cards/"+code+".png' onmouseover='document.getElementById(\"codeimg\").src=this.href'>"+Cards.Codes[code].name+"</a></td>";
-				if ((i&7)==7)str += "</tr><tr>";
+				incx();
 			});
-			str += "</tr></table><br>";
-		}else str += "<br><br>";
+			str += "</tr><tr><td>&nbsp;</td></tr>";
+		}
 	});
-	document.getElementById("codecreds").innerHTML = str;
+	document.getElementById("codecreds").innerHTML = str + "</table>";
 });
