@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<head><script src="etgify.js"></script></head>
+<head><script src="etgify.js"></script><script src="tournament/tournify.js"></script></head>
 <body>
 <input id="deckcode" type="text" placeholder="Deck" style="width:890px"/><br>
 <input id="legality" type="text" readonly style="width:400px" />
@@ -11,47 +11,8 @@
 <script>
 	var Cards = require("./Cards");
 	var etg = require("./etg");
+	var etgutil = require("./etgutil")
 	require("./etg.client").loadcards();
-	var verifiers = {
-		commoner: function(deck) {
-			for (var i = 0;i < deck.length;i++) {
-				var card = deck[i];
-				if (card.rarity > 1)
-					return card.name + " is too high in rarity";
-				if (card.upped) return "Your deck contains at least one upgraded card";
-			}
-			return "Legal";
-		},
-		dodrio: function(deck) {
-			var bannedCards = ["4vj", "4vl", "55v", "593", "5f9", "5ik", "5ig", "5io"];
-			var elementList = [];
-			var eleCount, rareElement;
-			for (var i = 0;i < deck.length;i++) {
-				var card = deck[i];
-				if (card.upped) return "Your deck contains at least one upgraded card";
-				if (~bannedCards.indexOf(card.code)) return card.name + " is banned";
-				var ele = card.element;
-				if (ele) {
-					if (!elementList[ele]) {
-						elementList[ele] = 0;
-						eleCount++;
-					}
-					elementList[ele]++;
-					if (eleCount > 3)
-						return "Your deck contains too many elements";
-				}
-				if (card.rarity >= 3) {
-					if (!rareElement) rareElement = card.element;
-					else if (rareElement != card.element) return "Your deck contains rare cards from more than one element";
-				}
-			}
-			for (var i = 0;i < elementList.length;i++) {
-				if (elementList[i] && elementList[i] < 6) return "You have too few " + etg.eleNames[i] + " cards";
-			}
-			if (eleCount < 3) return "Your deck contains too few elements (only " + eleCount + ")";
-			return "Legal";
-		}
-	};
 	function testDeck() {
 		var deckcode = document.getElementById("deckcode");
 		var legality = document.getElementById("legality");
@@ -60,7 +21,7 @@
 			legality.value = "Card DB not yet downloaded";
 			return;
 		}
-		var code = deckcode.value.split(" ");
+		var code = ~deckcode.value.indexOf(" ") ? deckcode.value.split(" ") : etgutil.decodedeck(deckcode.value);
 		var deck = [];
 		var markele;
 		for (var i = 0;i < code.length;i++) {
@@ -72,7 +33,8 @@
 				return;
 			}
 		}
-		legality.value = deck.length > 60 ? "Your deck is too large" : deck.length < 30 ? "Your deck is too small" : verifiers[rulesets.options[rulesets.selectedIndex].value](deck, markele);
+		legality.value = deck.length > 60 ? "Your deck is too large" : deck.length < 30 ? "Your deck is too small" :
+			require("./tournament/"+rulesets.options[rulesets.selectedIndex].value)(deck, markele);
 	}
 </script>
 </body>

@@ -21,7 +21,7 @@ require("./etg.client").loadcards(function() {
 			["52g", "58o", "5bv", "5f0", "5i4", "5ie", "5l8", "5lb", "5oj"]],
 		[["Ravizant", "http://elementscommunity.org/forum/profile/?u=8037"], ["Element Icons", "assets/esheet.png"], ["Card Backgrounds", "assets/backsheet.png"],
 			["4sc", "4vi", "4vj", "4vq", "4vt", "4vu", "50a", "50u", "52k", "53e", "542", "55q", "55v", "564", "56i", "576", "58q", "599", "59m", "5c3", "5cb", "5ce", "5cf", "5cg", "5cq", "5de", "5f3", "5fd", "5fi", "5fu", "5gi", "5ia",
-			"5im", "5j2", "5jm", "5l9", "5lp", "5m6", "5mq", "5ou", "5pa", "5pu", "5rn", "5rq", "5se", "5t2", "5uq", "5uu", "5vi", "61p", "61q", "61v", "620", "627", "62m", "6u3", "77a", "77p", "7au", "7av", "7dj", "7e2", "7qa", "7ta", "809", "80a"]],
+			"5ih", "5im", "5ip", "5j2", "5jm", "5l9", "5lp", "5m6", "5mq", "5ou", "5pa", "5pu", "5rn", "5rq", "5se", "5t2", "5uq", "5uu", "5vi", "61p", "61q", "61v", "620", "627", "62m", "6u3", "77a", "77p", "7au", "7av", "7dj", "7e2", "7qa", "7ta", "809", "80a"]],
 		[["serprex", "http://fiction.wikia.com/wiki/User:Serprex"], ["5rl", "5ro", "5rp", "5s0", "5va", "622", "62a"]],
 		[["Thalas", "http://elementscommunity.org/forum/profile/?u=103"], ["5i9", "5if", "7dl"]],
 		[["vrt", "http://vrt-designs.com"], ["Donation thread", "http://elementscommunity.org/forum/card-art/help-support-an-artist"],
