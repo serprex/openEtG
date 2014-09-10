@@ -2645,7 +2645,7 @@ function chat(msg, fontcolor, nodecklink) {
 	span.appendChild(document.createTextNode(msg));
 	addChatSpan(span);
 }
-socket.on("opne", function(){ chat("Connected") });
+socket.on("open", function(){ chat("Connected") });
 socket.on("close", function(){
 	chat("Reconnecting in 100ms");
 	setTimeout(function(){socket.open()}, 100);

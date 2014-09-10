@@ -553,16 +553,17 @@ var userEvents = {
 		}
 	},
 	canceltrade:function (data, user) {
-		if (sockinfo[this.id].trade){
-			var foesock = usersock[sockinfo[this.id].trade.foe];
+		var info = sockinfo[this.id];
+		if (info.trade){
+			var foesock = usersock[info.trade.foe];
 			if (foesock){
 				sockEmit(foesock, "tradecanceled");
 				sockEmit(foesock, "chat", { mode: "red", msg: data.u + " has canceled the trade."});
 				if (foesock.id in sockinfo){
-					delete sockinfo[foesock.id].trade;
+					delete info.trade;
 				}
 			}
-			delete sockinfo[this.id].trade;
+			delete info.trade;
 		}
 	},
 	confirmtrade:function (data, user) {
@@ -751,10 +752,11 @@ var sockEvents = {
 	},
 };
 io.on("connection", function(socket) {
-	sockinfo[socket.id] = {};
-	socket.on("disconnect", dropsock);
-	socket.on("reconnect_failed", dropsock);
+	socket.on("close", dropsock);
 	socket.on("message", function(rawdata){
+		if (!(this.id in sockinfo)){
+			sockinfo[this.id] = {};
+		}
 		var data = JSON.parse(rawdata);
 		if (data.x in echoEvents){
 			var foe = sockinfo[this.id].trade ? usersock[sockinfo[this.id].trade.foe] : sockinfo[this.id].foe;
