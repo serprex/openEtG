@@ -2690,7 +2690,7 @@ sockEvent("passchange", function(data) {
 });
 sockEvent("chat", function(data) {
 	if (muteall || data.u in muteset || !data.msg) return;
-	if (Notification && user && ~data.msg.indexOf(user.name) && !document.hasFocus()){
+	if (typeof Notification !== "undefined" && user && ~data.msg.indexOf(user.name) && !document.hasFocus()){
 		Notification.requestPermission();
 		new Notification(data.u, {body: data.msg}).onclick = window.focus;
 	}
@@ -2709,8 +2709,7 @@ sockEvent("chat", function(data) {
 	}
 	var decklink=/\b(([01][0-9a-v]{4})+)\b/g, reres, lastindex = 0;
 	while (reres = decklink.exec(data.msg)){
-		var prefix = reres.index;
-		if (prefix != lastindex) span.appendChild(document.createTextNode(data.msg.substring(lastindex, prefix-lastindex)));
+		if (reres.index != lastindex) span.appendChild(document.createTextNode(data.msg.substring(lastindex, reres.index-lastindex)));
 		var link = document.createElement("a");
 		link.href = "deck/" + reres[0];
 		link.target = "_blank";

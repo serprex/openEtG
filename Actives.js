@@ -1012,6 +1012,9 @@ poison2:adrenathrottle(function(c,t){
 poison3:adrenathrottle(function(c,t){
 	(t || c.owner.foe).addpoison(3);
 }),
+poisonany:function(c,t){
+	t.addpoison(c.card.upped?3:2);
+},
 precognition:function(c,t){
 	c.owner.drawcard();
 	c.owner.precognition = true;
