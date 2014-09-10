@@ -338,7 +338,7 @@ var userEvents = {
 		var socket = this;
 		db.hset("Q:"+user.name, "necromancer", 1, function(err, obj){
 			useruser(user, function(clientuser){
-				sockEmit(socksocket, "userdump", clientuser);
+				sockEmit(socket, "userdump", clientuser);
 			});
 		});
 	},
@@ -732,7 +732,7 @@ var sockEvents = {
 	},
 	librarywant:function(data){
 		if (data.f in users){
-			sockEmit(socket, "librarygive", {pool: users[data.f].pool});
+			sockEmit(this, "librarygive", {pool: users[data.f].pool});
 		}else{
 			var socket = this;
 			db.hget("U:"+data.f, "pool", function(err, pool){
