@@ -189,10 +189,7 @@ function deckRedirect(req, res, next){
 	});
 }
 
-var users = {};
-var usersock = {};
-var rooms = {};
-var sockinfo = {};
+var users = {}, usersock = {}, rooms = {}, sockinfo = {};
 function storeUsers(){
 	for(var u in users){
 		var user = users[u];
@@ -312,251 +309,412 @@ function sockEmit(socket, event, data){
 	data.x = event;
 	socket.send(JSON.stringify(data));
 }
-var userEvents = {}, sockEvents = {}, echoEvents = { endturn: true, cast: true, foeleft: true, mulligan: true, cardchosen: true };
-function userEvent(name, func){
-	userEvents[name] = func;
-}
-function sockEvent(name, func){
-	sockEvents[name] = func;
-}
-function utilEvent(event){
-	userEvent(event, userutil[event]);
-}
-function foeEcho(event){
-	echoEvents[event] = true;
-}
-utilEvent("sellcard");
-utilEvent("upgrade");
-utilEvent("uppillar");
-utilEvent("polish");
-utilEvent("shpillar");
-utilEvent("addgold");
-utilEvent("addloss");
-utilEvent("addwin");
-utilEvent("addcards");
-utilEvent("addbound");
-utilEvent("donedaily");
-userEvent("inituser", function(data, user) {
-	var starters = [
-		"015990g4sa014sd014t4014vi014vs0152o0152t0155u0155p0158q015ca015fi015f6015if015il015lo015lb015ou015s5025rq015v3015ut0161s018pi",
-		"01502034sa014t3014sd0b4vc024vi014vj014vh014vv014vp034vs024vd014ve014vf055uk015us015v3015uq015up015uv018pt",
-		"0153102532034sa014sd014t40c52g0252i0252j0252k0252n0152p0152t0152r0152h045bs025cb025cr018pn",
-		"0156203564025650159502599034sa014sd014t50b55k0155q0255t0255r0255l0155o0458o0158t0258q018pm",
-		"03590015910159403599034sa014sd014t40b58o0258u0158p0258q0158s0158r045rg025ri025rr015rn018ps",
-		"034sa014sd014td0c5bs015bu025c1015cb025c0015c8025c7015c6015cr015c3015bt045i4015ia015i6025il025ie018ps",
-		"034sa014sd024t40b5f0025f1025f3015f4025fh025fi025fa015f5025fc015f2045l8025lp025lr018pq",
-		"02565034sa024sd014td0455k0255t0155r0c5i4025i8035i6025ip025ie015i9025ig015id018pl",
-		"034sa014sd014tb0b5l8025lo025lp035lb015ld025lm015ln025ll015la045oc025on025os015oe015or018pr",
-		"034sa014sd014t4055f0015f3025f4015f6015fc0c5oc025od015og025os015oh015oe025ou015om025or015of018po",
-		"03627034sa024sd014t40c5rg025ri025rr015rl025ru015s0015rn015rm0561o0261q0261t018pu",
-		"034sa014sd014t40452g0152p0252t0a5uk035um025un015us025v3015uq035ut015up015vb015uo025uv015ul018pk",
-		"015020262002627034sa014sd014t4064vc024vp034vs0b61o0261q0361s0261t0161v018pj",
-		"",
-	];
-	user.decks = starters[data.e];
-	user.oracle = 0;
-	user.pool = "";
-	user.accountbound = user.decks;
-	user.freepacks = data.e == 13 ? "6,6,0,0" : "3,2,0,0";
-	user.dailymage = Math.floor(Math.random() * aiDecks.mage.length);
-	user.dailydg = Math.floor(Math.random() * aiDecks.demigod.length);
-	var socket = this;
-	db.hset("Q:"+user.name, "necromancer", 1, function(err, obj){
-		useruser(user, function(clientuser){
-			sockEmit(socksocket, "userdump", clientuser);
-		});
-	});
-});
-userEvent("logout", function(data, user) {
-	var u=data.u;
-	db.hmset("U:"+u, user);
-	delete users[u];
-	delete usersock[u];
-});
-userEvent("delete", function(data, user) {
-	var u = data.u;
-	db.del("U:" + u);
-	db.del("Q:" + u);
-	delete users[u];
-	delete usersock[u];
-});
-userEvent("setdeck", function(data, user) {
-	if (data.d !== undefined) {
-		var decks = (user.decks || "").split(",");
-		decks[data.number] = data.d;
-		user.decks = decks.join(",");
-	}
-	user.selectedDeck = data.number;
-});
-userEvent("setarena", function(data, user){
-	if (!user.ocard || !data.d){
-		return;
-	}
-	var au=(data.lv?"B:":"A:") + data.u;
-	if (data.mod){
-		db.hmset(au, {deck: data.d, hp: data.hp, draw: data.draw, mark: data.mark});
-	}else{
-		db.hmset(au, {day: getDay(), deck: data.d, card: user.ocard, win:0, loss:0, hp: data.hp, draw: data.draw, mark: data.mark});
-		db.zadd("arena"+(data.lv?"1":""), 0, data.u);
-	}
-});
-userEvent("arenainfo", function(data, user){
-	var socket = this;
-	db.hgetall((data.lv?"B:":"A:") + data.u, function(err, obj){
-		if (!obj){
-			sockEmit(socket, "arenainfo", {deck:"", lv: data.lv});
-		}else{
-			db.zrevrank("arena"+(data.lv?"1":""), data.u, function(err, rank){
-				obj.day = getDay() - obj.day;
-				obj.curhp = getAgedHp(obj.hp, obj.day);
-				obj.lv = data.lv;
-				if (rank !== null)obj.rank = rank;
-				sockEmit(socket, "arenainfo", obj);
+var echoEvents = { endturn: true, cast: true, foeleft: true, mulligan: true, cardchosen: true };
+var userEvents = {
+	inituser:function(data, user) {
+		var starters = [
+			"015990g4sa014sd014t4014vi014vs0152o0152t0155u0155p0158q015ca015fi015f6015if015il015lo015lb015ou015s5025rq015v3015ut0161s018pi",
+			"01502034sa014t3014sd0b4vc024vi014vj014vh014vv014vp034vs024vd014ve014vf055uk015us015v3015uq015up015uv018pt",
+			"0153102532034sa014sd014t40c52g0252i0252j0252k0252n0152p0152t0152r0152h045bs025cb025cr018pn",
+			"0156203564025650159502599034sa014sd014t50b55k0155q0255t0255r0255l0155o0458o0158t0258q018pm",
+			"03590015910159403599034sa014sd014t40b58o0258u0158p0258q0158s0158r045rg025ri025rr015rn018ps",
+			"034sa014sd014td0c5bs015bu025c1015cb025c0015c8025c7015c6015cr015c3015bt045i4015ia015i6025il025ie018ps",
+			"034sa014sd024t40b5f0025f1025f3015f4025fh025fi025fa015f5025fc015f2045l8025lp025lr018pq",
+			"02565034sa024sd014td0455k0255t0155r0c5i4025i8035i6025ip025ie015i9025ig015id018pl",
+			"034sa014sd014tb0b5l8025lo025lp035lb015ld025lm015ln025ll015la045oc025on025os015oe015or018pr",
+			"034sa014sd014t4055f0015f3025f4015f6015fc0c5oc025od015og025os015oh015oe025ou015om025or015of018po",
+			"03627034sa024sd014t40c5rg025ri025rr015rl025ru015s0015rn015rm0561o0261q0261t018pu",
+			"034sa014sd014t40452g0152p0252t0a5uk035um025un015us025v3015uq035ut015up015vb015uo025uv015ul018pk",
+			"015020262002627034sa014sd014t4064vc024vp034vs0b61o0261q0361s0261t0161v018pj",
+			"",
+		];
+		user.decks = starters[data.e];
+		user.oracle = 0;
+		user.pool = "";
+		user.accountbound = user.decks;
+		user.freepacks = data.e == 13 ? "6,6,0,0" : "3,2,0,0";
+		user.dailymage = Math.floor(Math.random() * aiDecks.mage.length);
+		user.dailydg = Math.floor(Math.random() * aiDecks.demigod.length);
+		var socket = this;
+		db.hset("Q:"+user.name, "necromancer", 1, function(err, obj){
+			useruser(user, function(clientuser){
+				sockEmit(socksocket, "userdump", clientuser);
 			});
+		});
+	},
+	logout:function(data, user) {
+		var u=data.u;
+		db.hmset("U:"+u, user);
+		delete users[u];
+		delete usersock[u];
+	},
+	delete:function(data, user) {
+		var u = data.u;
+		db.del("U:" + u);
+		db.del("Q:" + u);
+		delete users[u];
+		delete usersock[u];
+	},
+	setdeck:function(data, user) {
+		if (data.d !== undefined) {
+			var decks = (user.decks || "").split(",");
+			decks[data.number] = data.d;
+			user.decks = decks.join(",");
 		}
-	});
-});
-userEvent("arenatop", function(data, user){
-	var socket = this;
-	db.zrevrange("arena"+(data.lv?"1":""), 0, 19, "withscores", function(err, obj){
-		var t20 = [];
-		function getwinloss(i){
-			if (i == obj.length){
-				sockEmit(socket, "arenatop", {top: t20});
+		user.selectedDeck = data.number;
+	},
+	setarena:function(data, user){
+		if (!user.ocard || !data.d){
+			return;
+		}
+		var au=(data.lv?"B:":"A:") + data.u;
+		if (data.mod){
+			db.hmset(au, {deck: data.d, hp: data.hp, draw: data.draw, mark: data.mark});
+		}else{
+			db.hmset(au, {day: getDay(), deck: data.d, card: user.ocard, win:0, loss:0, hp: data.hp, draw: data.draw, mark: data.mark});
+			db.zadd("arena"+(data.lv?"1":""), 0, data.u);
+		}
+	},
+	arenainfo:function(data, user){
+		var socket = this;
+		db.hgetall((data.lv?"B:":"A:") + data.u, function(err, obj){
+			if (!obj){
+				sockEmit(socket, "arenainfo", {deck:"", lv: data.lv});
 			}else{
-				db.hmget((data.lv?"B:":"A:") + obj[i], "win", "loss", "day", "card", function(err, wl){
-					wl[2] = getDay()-wl[2];
-					t20.push([obj[i], obj[i+1]].concat(wl));
-					getwinloss(i+2);
+				db.zrevrank("arena"+(data.lv?"1":""), data.u, function(err, rank){
+					obj.day = getDay() - obj.day;
+					obj.curhp = getAgedHp(obj.hp, obj.day);
+					obj.lv = data.lv;
+					if (rank !== null)obj.rank = rank;
+					sockEmit(socket, "arenainfo", obj);
 				});
 			}
-		}
-		getwinloss(0);
-	});
-});
-userEvent("modarena", function(data, user){
-	var arena = "arena"+(data.lv?"1":"");
-	db.hincrby((data.lv?"B:":"A:")+data.aname, data.won?"win":"loss", 1);
-	if (data.aname in users){
-		users[data.aname].gold += data.won?3:1;
-	}else{
-		db.exists("U:"+data.aname, function(err, exists){
-			if (exists){
-				db.hincrby("U:"+data.aname, "gold", data.won?3:1);
-			}
 		});
-	}
-	if (data.won){
-		db.zincrby(arena, 1, data.aname);
-	}else{
-		db.zscore(arena, function(err, score){
-			if (score === null) return;
-			db.zincrby(arena, -1, data.aname, function(err, newscore) {
-				db.hget((data.lv?"B:":"A:")+data.aname, "day", function(err, day){
-					if (newscore < -15 || getDay()-day > 14){
-						db.zrem(arena, data.aname);
-					}
+	},
+	arenatop:function(data, user){
+		var socket = this;
+		db.zrevrange("arena"+(data.lv?"1":""), 0, 19, "withscores", function(err, obj){
+			var t20 = [];
+			function getwinloss(i){
+				if (i == obj.length){
+					sockEmit(socket, "arenatop", {top: t20});
+				}else{
+					db.hmget((data.lv?"B:":"A:") + obj[i], "win", "loss", "day", "card", function(err, wl){
+						wl[2] = getDay()-wl[2];
+						t20.push([obj[i], obj[i+1]].concat(wl));
+						getwinloss(i+2);
+					});
+				}
+			}
+			getwinloss(0);
+		});
+	},
+	modarena:function(data, user){
+		var arena = "arena"+(data.lv?"1":"");
+		db.hincrby((data.lv?"B:":"A:")+data.aname, data.won?"win":"loss", 1);
+		if (data.aname in users){
+			users[data.aname].gold += data.won?3:1;
+		}else{
+			db.exists("U:"+data.aname, function(err, exists){
+				if (exists){
+					db.hincrby("U:"+data.aname, "gold", data.won?3:1);
+				}
+			});
+		}
+		if (data.won){
+			db.zincrby(arena, 1, data.aname);
+		}else{
+			db.zscore(arena, function(err, score){
+				if (score === null) return;
+				db.zincrby(arena, -1, data.aname, function(err, newscore) {
+					db.hget((data.lv?"B:":"A:")+data.aname, "day", function(err, day){
+						if (newscore < -15 || getDay()-day > 14){
+							db.zrem(arena, data.aname);
+						}
+					});
+				});
+			});
+		}
+	},
+	foearena:function(data, user){
+		var socket = this;
+		db.zcard("arena"+(data.lv?"1":""), function(err, len){
+			if (!len)return;
+			var cost = 10+data.lv*10;
+			if (user.gold < cost)return;
+			user.gold -= cost;
+			var idx = Math.floor(Math.random()*Math.min(len, 20));
+			db.zrevrange("arena"+(data.lv?"1":""), idx, idx, function(err, aname){
+				if (!aname || !aname.length){
+					console.log("No arena " + idx);
+					return;
+				}
+				aname = aname[0];
+				console.log("deck: "+ aname + " " + idx);
+				db.hgetall((data.lv?"B:":"A:")+aname, function(err, adeck){
+					var seed = Math.random();
+					if (data.lv) adeck.card = etgutil.asUpped(adeck.card, true);
+					adeck.hp = parseInt(adeck.hp || 200);
+					adeck.mark = parseInt(adeck.mark || 1);
+					adeck.draw = parseInt(adeck.draw || data.lv+1);
+					var curhp = getAgedHp(adeck.hp, getDay()-adeck.day);
+					sockEmit(socket, "foearena", {
+						seed: seed*etgutil.MAX_INT,
+						name: aname, hp: curhp,
+						mark: adeck.mark, draw: adeck.draw,
+						deck: adeck.deck + "05" + adeck.card, lv:data.lv});
 				});
 			});
 		});
-	}
-});
-userEvent("foearena", function(data, user){
-	var socket = this;
-	db.zcard("arena"+(data.lv?"1":""), function(err, len){
-		if (!len)return;
-		var cost = 10+data.lv*10;
-		if (user.gold < cost)return;
-		user.gold -= cost;
-		var idx = Math.floor(Math.random()*Math.min(len, 20));
-		db.zrevrange("arena"+(data.lv?"1":""), idx, idx, function(err, aname){
-			if (!aname || !aname.length){
-				console.log("No arena " + idx);
-				return;
-			}
-			aname = aname[0];
-			console.log("deck: "+ aname + " " + idx);
-			db.hgetall((data.lv?"B:":"A:")+aname, function(err, adeck){
-				var seed = Math.random();
-				if (data.lv) adeck.card = etgutil.asUpped(adeck.card, true);
-				adeck.hp = parseInt(adeck.hp || 200);
-				adeck.mark = parseInt(adeck.mark || 1);
-				adeck.draw = parseInt(adeck.draw || data.lv+1);
-				var curhp = getAgedHp(adeck.hp, getDay()-adeck.day);
-				sockEmit(socket, "foearena", {
-					seed: seed*etgutil.MAX_INT,
-					name: aname, hp: curhp,
-					mark: adeck.mark, draw: adeck.draw,
-					deck: adeck.deck + "05" + adeck.card, lv:data.lv});
-			});
-		});
-	});
-});
-userEvent("codesubmit", function(data, user){
-	var socket = this;
-	db.hget("CodeHash", data.code, function(err, type){
-		if (!type){
-			sockEmit(socket, "codereject", {msg: "Code does not exist"});
-		}else if (type.charAt(0) == "G"){
-			var g = parseInt(type.substr(1));
-			if (isNaN(g)){
-				sockEmit(socket, "codereject", {msg: "Invalid gold code type: " + type});
+	},
+	codesubmit:function(data, user){
+		var socket = this;
+		db.hget("CodeHash", data.code, function(err, type){
+			if (!type){
+				sockEmit(socket, "codereject", {msg: "Code does not exist"});
+			}else if (type.charAt(0) == "G"){
+				var g = parseInt(type.substr(1));
+				if (isNaN(g)){
+					sockEmit(socket, "codereject", {msg: "Invalid gold code type: " + type});
+				}else{
+					user.gold += g;
+					sockEmit(socket, "codegold", {g: g});
+					db.hdel("CodeHash", data.code);
+				}
+			}else if (type.charAt(0) == "C"){
+				var c = type.substr(1);
+				if (c in Cards.Codes){
+					user.pool = etgutil.addcard(user.pool, c);
+					sockEmit(socket, "codecode", {card: c});
+					db.hdel("CodeHash", data.code);
+				}else sockEmit(socket, "codereject", {msg: "Unknown card: " + type});
+			}else if (type in userutil.rewardwords){
+				sockEmit(socket, "codecard", {type: type});
 			}else{
-				user.gold += g;
-				sockEmit(socket, "codegold", {g: g});
-				db.hdel("CodeHash", data.code);
+				sockEmit(socket, "codereject", {msg: "Unknown code type: " + type});
 			}
-		}else if (type.charAt(0) == "C"){
-			var c = type.substr(1);
-			if (c in Cards.Codes){
-				user.pool = etgutil.addcard(user.pool, c);
-				sockEmit(socket, "codecode", {card: c});
-				db.hdel("CodeHash", data.code);
-			}else sockEmit(socket, "codereject", {msg: "Unknown card: " + type});
-		}else if (type in userutil.rewardwords){
-			sockEmit(socket, "codecard", {type: type});
-		}else{
-			sockEmit(socket, "codereject", {msg: "Unknown code type: " + type});
-		}
-	});
-});
-userEvent("codesubmit2", function(data, user){
-	var socket = this;
-	db.hget("CodeHash", data.code, function(err, type){
-		if (!type){
-			sockEmit(socket, "codereject", {msg: "Code does not exist"});
-		}else if (type in userutil.rewardwords){
-			var card = Cards.Codes[data.card];
-			if (card && card.rarity == userutil.rewardwords[type]){
-				user.pool = etgutil.addcard(user.pool, data.card);
-				sockEmit(socket, "codedone", {card: data.card});
-				db.hdel("CodeHash", data.code);
+		});
+	},
+	codesubmit2:function(data, user){
+		var socket = this;
+		db.hget("CodeHash", data.code, function(err, type){
+			if (!type){
+				sockEmit(socket, "codereject", {msg: "Code does not exist"});
+			}else if (type in userutil.rewardwords){
+				var card = Cards.Codes[data.card];
+				if (card && card.rarity == userutil.rewardwords[type]){
+					user.pool = etgutil.addcard(user.pool, data.card);
+					sockEmit(socket, "codedone", {card: data.card});
+					db.hdel("CodeHash", data.code);
+				}
+			}else{
+				sockEmit(socket, "codereject", {msg: "Unknown code type: " + type});
 			}
-		}else{
-			sockEmit(socket, "codereject", {msg: "Unknown code type: " + type});
+		});
+	},
+	foewant:function(data, user){
+		var u=data.u, f=data.f;
+		if (u == f){
+			return;
 		}
-	});
+		console.log(u + " requesting " + f);
+		sockinfo[this.id].deck = user.decks.split(",")[user.selectedDeck];
+		sockinfo[this.id].pvpstats = { hp: data.p1hp, markpower: data.p1markpower, deckpower: data.p1deckpower, drawpower: data.p1drawpower };
+		var foesock = usersock[f];
+		if (foesock && foesock.id in sockinfo){
+			if (sockinfo[foesock.id].duel == u) {
+				delete sockinfo[foesock.id].duel;
+				var seed = Math.random() * etgutil.MAX_INT;
+				var first = seed < etgutil.MAX_INT / 2;
+				sockinfo[this.id].foe = foesock;
+				sockinfo[foesock.id].foe = this;
+				var deck0 = sockinfo[foesock.id].deck, deck1 = sockinfo[this.id].deck;
+				var owndata = { first: first, seed: seed, deck: deck0, urdeck: deck1, foename:f };
+				var foedata = { first: !first, seed: seed, deck: deck1, urdeck: deck0 ,foename:u};
+				var stat = sockinfo[this.id].pvpstats, foestat = sockinfo[foesock.id].pvpstats;
+				for (var key in stat) {
+					owndata["p1" + key] = stat[key];
+					foedata["p2" + key] = stat[key];
+				}
+				for (var key in foestat) {
+					owndata["p2" + key] = foestat[key];
+					foedata["p1" + key] = foestat[key];
+				}
+				sockEmit(this, "pvpgive", owndata);
+				sockEmit(foesock, "pvpgive", foedata);
+			} else {
+				sockinfo[this.id].duel = f;
+				sockEmit(foesock, "challenge", { f:u, pvp:true });
+				sockEmit(this, "chat", { mode: "red", msg: "You have sent a PvP request to " + f + "!" });
+			}
+		}
+	},
+	canceltrade:function (data, user) {
+		if (sockinfo[this.id].trade){
+			var foesock = usersock[sockinfo[this.id].trade.foe];
+			if (foesock){
+				sockEmit(foesock, "tradecanceled");
+				sockEmit(foesock, "chat", { mode: "red", msg: data.u + " has canceled the trade."});
+				if (foesock.id in sockinfo){
+					delete sockinfo[foesock.id].trade;
+				}
+			}
+			delete sockinfo[this.id].trade;
+		}
+	},
+	confirmtrade:function (data, user) {
+		var u = data.u, thistrade = sockinfo[this.id].trade;
+		if (!thistrade){
+			return;
+		}
+		thistrade.tradecards = data.cards;
+		thistrade.oppcards = data.oppcards;
+		var thatsock = usersock[thistrade.foe];
+		var thattrade = thatsock && sockinfo[thatsock.id] && sockinfo[thatsock.id].trade;
+		var otherUser = users[thistrade.foe];
+		if (!thattrade || !otherUser){
+			sockEmit(this, "tradecanceled");
+			delete sockinfo[this.id].trade;
+			return;
+		} else if (thattrade.accepted) {
+			var player1Cards = thistrade.tradecards, player2Cards = thattrade.tradecards;
+			user.pool = etgutil.removedecks(user.pool, player1Cards);
+			user.pool = etgutil.mergedecks(user.pool, player2Cards);
+			otherUser.pool = etgutil.removedecks(otherUser.pool, player2Cards);
+			otherUser.pool = etgutil.mergedecks(otherUser.pool, player1Cards);
+			sockEmit(this, "tradedone", { oldcards: player1Cards, newcards: player2Cards });
+			sockEmit(thatsock, "tradedone", { oldcards: player2Cards, newcards: player1Cards });
+			delete sockinfo[this.id].trade;
+			delete sockinfo[thatsock.id].trade;
+		} else {
+			thistrade.accepted = true;
+		}
+	},
+	tradewant:function (data) {
+		var u = data.u, f = data.f;
+		if (u == f) {
+			return;
+		}
+		console.log(u + " requesting " + f);
+		var foesock = usersock[f];
+		if (foesock && foesock.id in sockinfo) {
+			sockinfo[this.id].trade = {foe: f};
+			var foetrade = sockinfo[foesock.id].trade;
+			if (foetrade && foetrade.foe == u) {
+				sockEmit(this, "tradegive");
+				sockEmit(foesock, "tradegive");
+			} else {
+				sockEmit(foesock, "challenge", {f:u, pvp:false});
+				sockEmit(this, "chat", { mode: "red", msg: "You have sent a trade request to " + f + "!" });
+			}
+		}
+	},
+	passchange:function(data, user){
+		var pass = data.p || "";
+		if (!pass.length){
+			var hkey = "U:"+user.name;
+			db.hdel(hkey, "salt");
+			db.hdel(hkey, "iter");
+			db.hset(hkey, "auth", user.name);
+			delete user.salt;
+			delete user.iter;
+			user.auth = user.name;
+			sockEmit(this, "passchange", {auth: user.name});
+		}else{
+			var socket = this;
+			crypto.pbkdf2(pass, user.salt, parseInt(user.iter), 64, function(err, key){
+				if (!err){
+					user.auth = key.toString("base64");
+					sockEmit(this, "passchange", {auth: user.auth});
+				}
+			});
+		}
+	},
+	chat:function (data) {
+		if (data.to) {
+			var to = data.to;
+			if (usersock[to]) {
+				sockEmit(usersock[to], "chat", { msg: data.msg, mode: "blue", u: data.u });
+				sockEmit(this, "chat", { msg: data.msg, mode: "blue", u: "To " + to });
+			}
+			else sockEmit(this, "chat", { mode: "red", msg: to + " is not here right now." });
+		}
+		else{
+			delete data.a;
+			genericChat(this, data);
+		}
+	},
+	updatequest:function (data, user) {
+		db.hset("Q:" + data.u, data.quest, data.newstage);
+	},
+	booster:function(data, user) {
+		var freepacklist, bound;
+		var pack = [
+			{ amount: 9, cost: 15, rare: []},
+			{ amount: 6, cost: 25, rare: [3]},
+			{ amount: 8, cost: 65, rare: [3, 7]},
+			{ amount: 9, cost: 100, rare: [4, 7, 8]},
+			{ amount: 1, cost: 250, rare: [0, 0, 0, 0]},
+		][data.pack];
+		if (!pack) return;
+		if (user.freepacks){
+			freepacklist = user.freepacks.split(",");
+			if (freepacklist[data.pack] > 0) bound = true;
+		}
+		if (bound || user.gold >= pack.cost) {
+			var newCards = "", rarity = 1;
+			for (var i = 0;i < pack.amount;i++) {
+				while (i == pack.rare[rarity-1]) rarity++;
+				var notFromElement = Math.random() > .5, card = undefined, bumprarity = rarity+(rarity < 5 && Math.random() < (.45/pack.amount));
+				if (data.element < 13) card = etg.PlayerRng.randomcard(false, function(x) { return (x.element == data.element) ^ notFromElement && x.rarity == bumprarity });
+				if (!card) card = etg.PlayerRng.randomcard(false, function(x) { return x.rarity == bumprarity });
+				newCards = etgutil.addcard(newCards, card.code);
+			}
+			if (bound) {
+				freepacklist[data.pack]--;
+				user.accountbound = etgutil.mergedecks(user.accountbound, newCards);
+				if (freepacklist.every(function(x){return x == 0})) {
+					db.hdel("U:" + user.name, "freepacks");
+					delete user.freepacks;
+				}
+				else{
+					user.freepacks = freepacklist.join(",");
+				}
+			}
+			else {
+				user.gold -= pack.cost;
+				user.pool = etgutil.mergedecks(user.pool, newCards);
+			}
+			sockEmit(this, "boostergive", { cards: newCards, accountbound: bound, cost:pack.cost, packtype:data.pack });
+		}
+	},
+};
+["sellcard", "upgrade", "uppillar", "polish", "shpillar", "addgold", "addloss", "addwin", "addcards", "addbound", "donedaily"].forEach(function(event){
+	userEvents[event] = userutil[event];
 });
-userEvent("foewant", function(data, user){
-	var u=data.u, f=data.f;
-	if (u == f){
-		return;
-	}
-	console.log(u + " requesting " + f);
-	sockinfo[this.id].deck = user.decks.split(",")[user.selectedDeck];
-	sockinfo[this.id].pvpstats = { hp: data.p1hp, markpower: data.p1markpower, deckpower: data.p1deckpower, drawpower: data.p1drawpower };
-	var foesock = usersock[f];
-	if (foesock && foesock.id in sockinfo){
-		if (sockinfo[foesock.id].duel == u) {
-			delete sockinfo[foesock.id].duel;
-			var seed = Math.random() * etgutil.MAX_INT;
-			var first = seed < etgutil.MAX_INT / 2;
-			sockinfo[this.id].foe = foesock;
-			sockinfo[foesock.id].foe = this;
-			var deck0 = sockinfo[foesock.id].deck, deck1 = sockinfo[this.id].deck;
-			var owndata = { first: first, seed: seed, deck: deck0, urdeck: deck1, foename:f };
-			var foedata = { first: !first, seed: seed, deck: deck1, urdeck: deck0 ,foename:u};
-			var stat = sockinfo[this.id].pvpstats, foestat = sockinfo[foesock.id].pvpstats;
+var sockEvents = {
+	guestchat:function (data) {
+		data.guest = true;
+		data.u = "Guest_" + data.u;
+		genericChat(this, data);
+	},
+	pvpwant:function(data) {
+		var pendinggame=rooms[data.room];
+		console.log(this.id + ": " + (pendinggame?pendinggame.id:"-"));
+		sockinfo[this.id].deck = data.deck;
+		sockinfo[this.id].pvpstats = { hp: data.hp, markpower: data.mark, deckpower: data.deck, drawpower: data.draw };
+		if (this == pendinggame){
+			return;
+		}
+		if (pendinggame && pendinggame.id in sockinfo){
+			var seed = Math.random()*etgutil.MAX_INT;
+			var first = seed<etgutil.MAX_INT/2;
+			sockinfo[this.id].foe = pendinggame;
+			sockinfo[pendinggame.id].foe = this;
+			var deck0 = sockinfo[pendinggame.id].deck, deck1 = data.deck;
+			var owndata = { first: first, seed: seed, deck: deck0, urdeck: deck1};
+			var foedata = { first: !first, seed: seed, deck: deck1, urdeck: deck0};
+			var stat = sockinfo[this.id].pvpstats, foestat = sockinfo[pendinggame.id].pvpstats;
 			for (var key in stat) {
 				owndata["p1" + key] = stat[key];
 				foedata["p2" + key] = stat[key];
@@ -566,206 +724,29 @@ userEvent("foewant", function(data, user){
 				foedata["p1" + key] = foestat[key];
 			}
 			sockEmit(this, "pvpgive", owndata);
-			sockEmit(foesock, "pvpgive", foedata);
-		} else {
-			sockinfo[this.id].duel = f;
-			sockEmit(foesock, "challenge", { f:u, pvp:true });
-			sockEmit(this, "chat", { mode: "red", msg: "You have sent a PvP request to " + f + "!" });
+			sockEmit(pendinggame, "pvpgive", foedata);
+			delete rooms[data.room];
+		}else{
+			rooms[data.room] = this;
 		}
-	}
-});
-userEvent("canceltrade", function (data, user) {
-	if (sockinfo[this.id].trade){
-		var foesock = usersock[sockinfo[this.id].trade.foe];
-		if (foesock){
-			sockEmit(foesock, "tradecanceled");
-			sockEmit(foesock, "chat", { mode: "red", msg: data.u + " has canceled the trade."});
-			if (foesock.id in sockinfo){
-				delete sockinfo[foesock.id].trade;
-			}
+	},
+	librarywant:function(data){
+		if (data.f in users){
+			sockEmit(socket, "librarygive", {pool: users[data.f].pool});
+		}else{
+			var socket = this;
+			db.hget("U:"+data.f, "pool", function(err, pool){
+				sockEmit(socket, "librarygive", {pool: pool});
+			});
 		}
-		delete sockinfo[this.id].trade;
-	}
-});
-userEvent("confirmtrade", function (data, user) {
-	var u = data.u, thistrade = sockinfo[this.id].trade;
-	if (!thistrade){
-		return;
-	}
-	thistrade.tradecards = data.cards;
-	thistrade.oppcards = data.oppcards;
-	var thatsock = usersock[thistrade.foe];
-	var thattrade = thatsock && sockinfo[thatsock.id] && sockinfo[thatsock.id].trade;
-	var otherUser = users[thistrade.foe];
-	if (!thattrade || !otherUser){
-		sockEmit(this, "tradecanceled");
-		delete sockinfo[this.id].trade;
-		return;
-	} else if (thattrade.accepted) {
-		var player1Cards = thistrade.tradecards, player2Cards = thattrade.tradecards;
-		user.pool = etgutil.removedecks(user.pool, player1Cards);
-		user.pool = etgutil.mergedecks(user.pool, player2Cards);
-		otherUser.pool = etgutil.removedecks(otherUser.pool, player2Cards);
-		otherUser.pool = etgutil.mergedecks(otherUser.pool, player1Cards);
-		sockEmit(this, "tradedone", { oldcards: player1Cards, newcards: player2Cards });
-		sockEmit(thatsock, "tradedone", { oldcards: player2Cards, newcards: player1Cards });
-		delete sockinfo[this.id].trade;
-		delete sockinfo[thatsock.id].trade;
-	} else {
-		thistrade.accepted = true;
-	}
-});
-userEvent("tradewant", function (data) {
-	var u = data.u, f = data.f;
-	if (u == f) {
-		return;
-	}
-	console.log(u + " requesting " + f);
-	var foesock = usersock[f];
-	if (foesock && foesock.id in sockinfo) {
-		sockinfo[this.id].trade = {foe: f};
-		var foetrade = sockinfo[foesock.id].trade;
-		if (foetrade && foetrade.foe == u) {
-			sockEmit(this, "tradegive");
-			sockEmit(foesock, "tradegive");
-		} else {
-			sockEmit(foesock, "challenge", {f:u, pvp:false});
-			sockEmit(this, "chat", { mode: "red", msg: "You have sent a trade request to " + f + "!" });
-		}
-	}
-});
-userEvent("passchange", function(data, user){
-	var pass = data.p || "";
-	if (!pass.length){
-		var hkey = "U:"+user.name;
-		db.hdel(hkey, "salt");
-		db.hdel(hkey, "iter");
-		db.hset(hkey, "auth", user.name);
-		delete user.salt;
-		delete user.iter;
-		user.auth = user.name;
-		sockEmit(this, "passchange", {auth: user.name});
-	}else{
-		var socket = this;
-		crypto.pbkdf2(pass, user.salt, parseInt(user.iter), 64, function(err, key){
-			if (!err){
-				user.auth = key.toString("base64");
-				sockEmit(this, "passchange", {auth: user.auth});
-			}
-		});
-	}
-});
-userEvent("chat", function (data) {
-	if (data.to) {
-		var to = data.to;
-		if (usersock[to]) {
-			sockEmit(usersock[to], "chat", { msg: data.msg, mode: "blue", u: data.u });
-			sockEmit(this, "chat", { msg: data.msg, mode: "blue", u: "To " + to });
-		}
-		else sockEmit(this, "chat", { mode: "red", msg: to + " is not here right now." });
-	}
-	else{
-		delete data.a;
-		genericChat(this, data);
-	}
-});
-userEvent("updatequest", function (data, user) {
-	db.hset("Q:" + data.u, data.quest, data.newstage);
-});
-userEvent("booster", function(data, user) {
-	var freepacklist, bound;
-	var pack = [
-		{ amount: 9, cost: 15, rare: []},
-		{ amount: 6, cost: 25, rare: [3]},
-		{ amount: 8, cost: 65, rare: [3, 7]},
-		{ amount: 9, cost: 100, rare: [4, 7, 8]},
-		{ amount: 1, cost: 250, rare: [0, 0, 0, 0]},
-	][data.pack];
-	if (!pack) return;
-	if (user.freepacks){
-		freepacklist = user.freepacks.split(",");
-		if (freepacklist[data.pack] > 0) bound = true;
-	}
-	if (bound || user.gold >= pack.cost) {
-		var newCards = "", rarity = 1;
-		for (var i = 0;i < pack.amount;i++) {
-			while (i == pack.rare[rarity-1]) rarity++;
-			var notFromElement = Math.random() > .5, card = undefined, bumprarity = rarity+(rarity < 5 && Math.random() < (.45/pack.amount));
-			if (data.element < 13) card = etg.PlayerRng.randomcard(false, function(x) { return (x.element == data.element) ^ notFromElement && x.rarity == bumprarity });
-			if (!card) card = etg.PlayerRng.randomcard(false, function(x) { return x.rarity == bumprarity });
-			newCards = etgutil.addcard(newCards, card.code);
-		}
-		if (bound) {
-			freepacklist[data.pack]--;
-			user.accountbound = etgutil.mergedecks(user.accountbound, newCards);
-			if (freepacklist.every(function(x){return x == 0})) {
-				db.hdel("U:" + user.name, "freepacks");
-				delete user.freepacks;
-			}
-			else{
-				user.freepacks = freepacklist.join(",");
-			}
-		}
-		else {
-			user.gold -= pack.cost;
-			user.pool = etgutil.mergedecks(user.pool, newCards);
-		}
-		sockEmit(this, "boostergive", { cards: newCards, accountbound: bound, cost:pack.cost, packtype:data.pack });
-	}
-});
-sockEvent("guestchat", function (data) {
-	data.guest = true;
-	data.u = "Guest_" + data.u;
-	genericChat(this, data);
-});
-sockEvent("pvpwant", function(data) {
-	var pendinggame=rooms[data.room];
-	console.log(this.id + ": " + (pendinggame?pendinggame.id:"-"));
-	sockinfo[this.id].deck = data.deck;
-	sockinfo[this.id].pvpstats = { hp: data.hp, markpower: data.mark, deckpower: data.deck, drawpower: data.draw };
-	if (this == pendinggame){
-		return;
-	}
-	if (pendinggame && pendinggame.id in sockinfo){
-		var seed = Math.random()*etgutil.MAX_INT;
-		var first = seed<etgutil.MAX_INT/2;
-		sockinfo[this.id].foe = pendinggame;
-		sockinfo[pendinggame.id].foe = this;
-		var deck0 = sockinfo[pendinggame.id].deck, deck1 = data.deck;
-		var owndata = { first: first, seed: seed, deck: deck0, urdeck: deck1};
-		var foedata = { first: !first, seed: seed, deck: deck1, urdeck: deck0};
-		var stat = sockinfo[this.id].pvpstats, foestat = sockinfo[pendinggame.id].pvpstats;
-		for (var key in stat) {
-			owndata["p1" + key] = stat[key];
-			foedata["p2" + key] = stat[key];
-		}
-		for (var key in foestat) {
-			owndata["p2" + key] = foestat[key];
-			foedata["p1" + key] = foestat[key];
-		}
-		sockEmit(this, "pvpgive", owndata);
-		sockEmit(pendinggame, "pvpgive", foedata);
-		delete rooms[data.room];
-	}else{
-		rooms[data.room] = this;
-	}
-});
-sockEvent("librarywant", function(data){
-	if (data.f in users){
-		sockEmit(socket, "librarygive", {pool: users[data.f].pool});
-	}else{
-		var socket = this;
-		db.hget("U:"+data.f, "pool", function(err, pool){
-			sockEmit(socket, "librarygive", {pool: pool});
-		});
-	}
-});
-sockEvent("showoffline", function(data){
-	sockinfo[this.id].showoffline = data.hide;
-});
-sockEvent("wantingpvp", function(data){
-	sockinfo[this.id].wantingpvp = data.want;
-});
+	},
+	showoffline:function(data){
+		sockinfo[this.id].showoffline = data.hide;
+	},
+	wantingpvp:function(data){
+		sockinfo[this.id].wantingpvp = data.want;
+	},
+};
 io.on("connection", function(socket) {
 	sockinfo[socket.id] = {};
 	socket.on("disconnect", dropsock);

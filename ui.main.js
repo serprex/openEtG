@@ -2655,88 +2655,86 @@ socket.on("message", function(data){
 		func.call(socket, data);
 	}
 });
-var sockEvents = {};
-function sockEvent(event, func){
-	sockEvents[event] = func;
+var sockEvents = {
+	challenge:function(data) {
+		var span = document.createElement("span");
+		span.style.cursor = "pointer";
+		span.style.color = "blue";
+		span.addEventListener("click", (data.pvp ? challengeClick : tradeClick).bind(null, data.f));
+		span.appendChild(document.createTextNode(data.f + (data.pvp ? " challenges you to a duel!" : " wants to trade with you!")));
+		addChatSpan(span);
+	},
+	librarygive: initLibrary,
+	foearena:function(data) {
+		aideck.value = data.deck;
+		var game = initGame({ first: data.seed < etgutil.MAX_INT/2, deck: data.deck, urdeck: getDeck(), seed: data.seed, p2hp: data.hp, cost: data.cost, foename: data.name, p2drawpower: data.draw, p2markpower: data.mark }, true);
+		game.arena = data.name;
+		game.level = data.lv?3:2;
+		game.cost = data.lv?20:10;
+		user.gold -= game.cost;
+	},
+	arenainfo: startArenaInfo,
+	arenatop: startArenaTop,
+	userdump:function(data) {
+		delete data.x;
+		user = data;
+		prepuser();
+		startMenu();
+	},
+	passchange:function(data) {
+		user.auth = data.auth;
+		chat("Password updated");
+	},
+	chat:function(data) {
+		if (muteall || data.u in muteset || !data.msg) return;
+		if (typeof Notification !== "undefined" && user && ~data.msg.indexOf(user.name) && !document.hasFocus()){
+			Notification.requestPermission();
+			new Notification(data.u, {body: data.msg}).onclick = window.focus;
+		}
+		var now = new Date(), h = now.getHours(), m = now.getMinutes(), s = now.getSeconds();
+		if (h < 10) h = "0"+h;
+		if (m < 10) m = "0"+m;
+		if (s < 10) s = "0"+s;
+		var span = document.createElement("span");
+		if (data.mode != "red") span.style.color = data.mode || "black";
+		if (data.guest) span.style.fontStyle = "italic";
+		span.appendChild(document.createTextNode(h + ":" + m + ":" + s + " "));
+		if (data.u){
+			var belly = document.createElement("b");
+			belly.appendChild(document.createTextNode(data.u + ": "));
+			span.appendChild(belly);
+		}
+		var decklink=/\b(([01][0-9a-v]{4})+)\b/g, reres, lastindex = 0;
+		while (reres = decklink.exec(data.msg)){
+			if (reres.index != lastindex) span.appendChild(document.createTextNode(data.msg.substring(lastindex, reres.index-lastindex)));
+			var link = document.createElement("a");
+			link.href = "deck/" + reres[0];
+			link.target = "_blank";
+			link.appendChild(document.createTextNode(reres[0]));
+			span.appendChild(link);
+			lastindex = decklink.lastIndex;
+		}
+		if (lastindex != data.msg.length) span.appendChild(document.createTextNode(data.msg.substring(lastindex)));
+		addChatSpan(span);
+	},
+	codecard: startRewardWindow,
+	codereject:function(data) {
+		chat(data.msg);
+	},
+	codegold:function(data) {
+		user.gold += data.g;
+		chat(data.g + "\u00A4 added!");
+	},
+	codecode:function(data) {
+		user.pool = etgutil.addcard(user.pool, data);
+		chat(Cards.Codes[data].name + " added!");
+	},
+	codedone:function(data) {
+		user.pool = etgutil.addcard(user.pool, data.card);
+		chat(Cards.Codes[data.card].name + " added!");
+		startMenu();
+	},
 }
-sockEvent("challenge", function(data) {
-	var span = document.createElement("span");
-	span.style.cursor = "pointer";
-	span.style.color = "blue";
-	span.addEventListener("click", (data.pvp ? challengeClick : tradeClick).bind(null, data.f));
-	span.appendChild(document.createTextNode(data.f + (data.pvp ? " challenges you to a duel!" : " wants to trade with you!")));
-	addChatSpan(span);
-});
-sockEvent("librarygive", initLibrary);
-sockEvent("foearena", function(data) {
-	aideck.value = data.deck;
-	var game = initGame({ first: data.seed < etgutil.MAX_INT/2, deck: data.deck, urdeck: getDeck(), seed: data.seed, p2hp: data.hp, cost: data.cost, foename: data.name, p2drawpower: data.draw, p2markpower: data.mark }, true);
-	game.arena = data.name;
-	game.level = data.lv?3:2;
-	game.cost = data.lv?20:10;
-	user.gold -= game.cost;
-});
-sockEvent("arenainfo", startArenaInfo);
-sockEvent("arenatop", startArenaTop);
-sockEvent("userdump", function(data) {
-	delete data.x;
-	user = data;
-	prepuser();
-	startMenu();
-});
-sockEvent("passchange", function(data) {
-	user.auth = data.auth;
-	chat("Password updated");
-});
-sockEvent("chat", function(data) {
-	if (muteall || data.u in muteset || !data.msg) return;
-	if (typeof Notification !== "undefined" && user && ~data.msg.indexOf(user.name) && !document.hasFocus()){
-		Notification.requestPermission();
-		new Notification(data.u, {body: data.msg}).onclick = window.focus;
-	}
-	var now = new Date(), h = now.getHours(), m = now.getMinutes(), s = now.getSeconds();
-	if (h < 10) h = "0"+h;
-	if (m < 10) m = "0"+m;
-	if (s < 10) s = "0"+s;
-	var span = document.createElement("span");
-	if (data.mode != "red") span.style.color = data.mode || "black";
-	if (data.guest) span.style.fontStyle = "italic";
-	span.appendChild(document.createTextNode(h + ":" + m + ":" + s + " "));
-	if (data.u){
-		var belly = document.createElement("b");
-		belly.appendChild(document.createTextNode(data.u + ": "));
-		span.appendChild(belly);
-	}
-	var decklink=/\b(([01][0-9a-v]{4})+)\b/g, reres, lastindex = 0;
-	while (reres = decklink.exec(data.msg)){
-		if (reres.index != lastindex) span.appendChild(document.createTextNode(data.msg.substring(lastindex, reres.index-lastindex)));
-		var link = document.createElement("a");
-		link.href = "deck/" + reres[0];
-		link.target = "_blank";
-		link.appendChild(document.createTextNode(reres[0]));
-		span.appendChild(link);
-		lastindex = decklink.lastIndex;
-	}
-	if (lastindex != data.msg.length) span.appendChild(document.createTextNode(data.msg.substring(lastindex)));
-	addChatSpan(span);
-});
-sockEvent("codecard", startRewardWindow);
-sockEvent("codereject", function(data) {
-	chat(data.msg);
-});
-sockEvent("codegold", function(data) {
-	user.gold += data.g;
-	chat(data.g + "\u00A4 added!");
-});
-sockEvent("codecode", function(data) {
-	user.pool = etgutil.addcard(user.pool, data);
-	chat(Cards.Codes[data].name + " added!");
-});
-sockEvent("codedone", function(data) {
-	user.pool = etgutil.addcard(user.pool, data.card);
-	chat(Cards.Codes[data.card].name + " added!");
-	startMenu();
-});
 function soundChange(event) {
 	ui.changeSound(enableSound.checked);
 }
