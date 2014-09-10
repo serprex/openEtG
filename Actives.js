@@ -103,9 +103,7 @@ axe:function(c,t){
 },
 axedraw:function(c,t){
 	c.defstatus("dive", 0);
-	if (c.status.dive < 4){
-		c.status.dive++;
-	}
+	c.status.dive++;
 },
 bblood:function(c,t){
 	Effect.mkText("0|20", t);

@@ -2046,9 +2046,26 @@ function startMatch(game, foeDeck) {
 			resigning = true;
 		}
 	});
+	var activeInfo = {
+		firebolt:function(){
+			return 3+Math.floor(c.owner.quanta[etg.Fire]/4);
+		},
+		drainlife:function(){
+			return 2+Math.floor(c.owner.quanta[etg.Darkness]/5);
+		},
+		icebolt:function(){
+			var bolts = Math.floor(c.owner.quanta[etg.Water]/5);
+			return (2+bolts) + " " + (35+bolts*5) + "%";
+		},
+		catapult:function(t){
+			return Math.ceil(t.truehp()*(t.status.frozen?150:100)/(t.truehp()+100));
+		},
+	};
 	function setInfo(obj) {
-		if (obj.owner != game.player2 || !cloakgfx.visible || !obj.card || obj.card.isOf(Cards.Cloak)) {
-			infobox.setTexture(ui.getTextImage(obj.info(), ui.mkFont(10, "white"), 0, (obj instanceof etg.Weapon || obj instanceof etg.Shield ? 92 : 76)));
+		if (!cloakgfx.visible || obj.owner != game.player2 || !obj.card || obj.card.isOf(Cards.Cloak)) {
+			var info = obj.info(), actinfo = game.targetingMode && game.targetingMode(obj) && activeInfo[game.targetingText];
+			if (actinfo) info += "\nDmg " + actinfo(obj);
+			infobox.setTexture(ui.getTextImage(info, ui.mkFont(10, "white"), 0, (obj instanceof etg.Weapon || obj instanceof etg.Shield ? 92 : 76)));
 			var mousePosition = realStage.getMousePosition();
 			infobox.position.set(mousePosition.x, mousePosition.y);
 			infobox.visible = true;
