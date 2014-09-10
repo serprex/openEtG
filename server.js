@@ -11,7 +11,7 @@ var app = require("connect")().
 	use("/deck", deckRedirect).
 	use("/auth", loginAuth).
 	use("/code", codeSmith);
-var io = require("socket.io")(app.listen(13602));
+var io = require("engine.io")(app.listen(13602));
 var etgutil = require("./etgutil");
 var userutil = require("./userutil");
 var etg = require("./etg");
@@ -297,7 +297,10 @@ function genericChat(socket, data){
 	}
 	else{
 		data.x = "chat";
-		io.send(JSON.stringify(data));
+		var msg = JSON.stringify(data);
+		for (var id in io.clients){
+			io.clients[id].send(msg);
+		}
 	}
 }
 function getAgedHp(hp, age){

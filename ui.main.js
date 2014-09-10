@@ -30,7 +30,7 @@ var Quest = require("./Quest");
 var ui = require("./uiutil");
 var aiDecks = require("./Decks");
 var Cards = require("./Cards");
-var socket = io(location.hostname + ":13602");
+var socket = eio(location.hostname + ":13602");
 function MenuText(x, y, txt, wrapwidth) {
 	PIXI.Sprite.call(this, gfx.nopic);
 	this.position.set(x, y);
@@ -2645,8 +2645,10 @@ function chat(msg, fontcolor, nodecklink) {
 	span.appendChild(document.createTextNode(msg));
 	addChatSpan(span);
 }
-;["connect", "error", "disconnect", "reconnect", "reconnecting", "reconnect_attempt", "reconnect_error", "reconnect_failed"].forEach(function(event){
-	socket.on(event, chat.bind(null, event, "red"));
+socket.on("opne", function(){ chat("Connected") });
+socket.on("close", function(){
+	chat("Reconnecting in 100ms");
+	setTimeout(function(){socket.open()}, 100);
 });
 socket.on("message", function(data){
 	data = JSON.parse(data);

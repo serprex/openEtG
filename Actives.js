@@ -1009,6 +1009,9 @@ poison:adrenathrottle(function(c,t){
 poison2:adrenathrottle(function(c,t){
 	(t || c.owner.foe).addpoison(2);
 }),
+poison3:adrenathrottle(function(c,t){
+	(t || c.owner.foe).addpoison(3);
+}),
 poisonfoe:function(c,t){
 	c.owner.foe.addpoison(1);
 },
