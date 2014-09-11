@@ -204,7 +204,7 @@ setInterval(function(){
 	for(var u in users){
 		if (!(u in usersock)){
 			delete users[u];
-		}else if (!usersock[u].connected){
+		}else if (usersock[u].readyState == "closed"){
 			dropsock.call(usersock[u]);
 			delete usersock[u];
 			delete users[u];
@@ -248,7 +248,7 @@ function activeUsers() {
 	var activeusers = [];
 	for (var username in usersock) {
 		var sock = usersock[username];
-		if (sock && sock.connected){
+		if (sock && sock.readyState == "open"){
 			if (sock.id in sockinfo){
 				if (sockinfo[sock.id].showoffline) continue;
 				if (sockinfo[sock.id].wantingpvp) username += "\xb6";

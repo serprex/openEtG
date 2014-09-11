@@ -95,7 +95,7 @@ var ActivesValues = {
 	disfield:8,
 	disshield:7,
 	dive:function(c, ttatk){
-		return c instanceof etg.CardInstance?c.card.attack:ttatk-c.cast-(c.status.dive||0);
+		return c instanceof etg.CardInstance?c.card.attack:ttatk-(c.status.dive||0)/1.5;
 	},
 	divinity:3,
 	drainlife:10,
@@ -212,7 +212,7 @@ var ActivesValues = {
 	reinforce:.5,
 	ren:5,
 	rewind:6,
-	ricochet:3,
+	ricochet:2,
 	sanctuary:6,
 	scarab:4,
 	growth1:3,
