@@ -145,6 +145,12 @@ bolsterintodeck:function(c,t){
 		c.owner.shuffle(c.owner.deck);
 	}
 },
+bolsterpillar:function(c,t){
+	var pillars = etg.filtercards(c.card.upped, function(x) { return x.type == etg.PillarEnum && !x.rarity; });
+	c.owner.deck.splice(c.owner.upto(c.owner.deck.length), 0, pillars[c.owner.mark*2]);
+	var foe = c.owner.foe;
+	foe.deck.splice(foe.upto(foe.deck.length), 0, pillars[foe.mark*2]);
+},
 boneyard:function(c,t){
 	if (!t.card.isOf(Cards.Skeleton)){
 		new etg.Creature(c.card.as(Cards.Skeleton), c.owner).place();
@@ -1058,6 +1064,14 @@ readiness:function(c,t){
 rebirth:function(c,t){
 	c.transform(c.card.as(Cards.Phoenix));
 },
+reducemaxhp:adrenathrottle(function(c,t, dmg){
+	if (t instanceof etg.Player){
+		t.maxhp = Math.max(t.maxhp-dmg, 1);
+		if (t.hp > t.maxhp){
+			t.hp = t.maxhp;
+		}
+	}
+}),
 regen:adrenathrottle(function(c,t){
 	c.owner.status.poison--;
 }),

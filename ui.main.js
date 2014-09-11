@@ -2656,7 +2656,7 @@ function addChatSpan(span) {
 	chatBox.appendChild(span);
 	if (scroll) chatBox.scrollTop = chatBox.scrollHeight;
 }
-function chat(msg, fontcolor, nodecklink) {
+function chat(msg, fontcolor) {
 	var span = document.createElement("span");
 	if (fontcolor) span.style.color = fontcolor;
 	span.appendChild(document.createTextNode(msg));
