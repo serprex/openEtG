@@ -1026,6 +1026,15 @@ precognition:function(c,t){
 	c.owner.drawcard();
 	c.owner.precognition = true;
 },
+protectall:function(c,t){
+	function protect(p){
+		if (p && p.isMaterial()){
+			p.status.protect = true;
+		}
+	}
+	c.owner.creatures.forEach(protect);
+	c.owner.permanents.forEach(protect);
+},
 purify:function(c,t){
 	t.status.poison = t.status.poison?Math.min(t.status.poison-2,-2):-2;
 	if (t instanceof etg.Player){

@@ -938,17 +938,27 @@ Creature.prototype.transform = Weapon.prototype.transform = function(card, owner
 	this.castele = card.castele;
 	Thing.call(this, card, owner || this.owner);
 }
-Thing.prototype.evade = function(sender) { return false; }
+Thing.prototype.evade = function(sender) {
+	if (this.status && sender != this.owner && this.status.protect){
+		delete this.status.protect;
+		Effect.mkText("Evade", t);
+		return true;
+	}
+	return false;
+}
 Creature.prototype.evade = function(sender) {
-	if (this.status.frozen)return false;
-	if (sender != this.owner && this.status.airborne){
+	if (Thing.prototype.evade.apply(this, arguments)) return true;
+	if (sender != this.owner && this.status.airborne && !this.status.frozen){
 		var freedomChance = 0;
 		for(var i=0; i<16; i++){
 			if (this.owner.permanents[i] && this.owner.permanents[i].status.freedom){
 				freedomChance++;
 			}
 		}
-		return freedomChance && this.owner.rng() > Math.pow(.8, freedomChance);
+		if (freedomChance && this.owner.rng() > Math.pow(.8, freedomChance)){
+			Effect.mkText("Evade", t);
+			return true;
+		}
 	}
 }
 Creature.prototype.calcEclipse = function(){
@@ -1052,7 +1062,7 @@ Thing.prototype.useactive = function(t) {
 	if (!t || !t.evade(this.owner)){
 		this.active.cast(this, t);
 		this.procactive("spell", [t]);
-	}else Effect.mkText("Evade", t);
+	}
 	this.owner.spend(castele, cast);
 	this.owner.game.updateExpectedDamage();
 }
