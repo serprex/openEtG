@@ -2269,7 +2269,7 @@ function startMatch(game, foeDeck) {
 			var bits = data.bits, c = game.bitsToTgt(bits & 511), t = game.bitsToTgt((bits >> 9) & 511);
 			console.log("cast", c.toString(), (t || "-").toString(), bits);
 			var sprite = new PIXI.Sprite(gfx.nopic);
-			sprite.position.set((foeplays.children.length % 9) * 100, Math.floor(foeplays.children.length / 9) * 20);
+			sprite.position.set((foeplays.children.length % 8) * 100, Math.floor(foeplays.children.length / 8) * 20);
 			sprite.card = c instanceof etg.CardInstance ? c.card : c.active.cast.activename;
 			foeplays.addChild(sprite);
 			c.useactive(t);
