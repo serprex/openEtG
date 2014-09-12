@@ -763,6 +763,14 @@ Thing.prototype.activetext = function(){
 	}
 	return info;
 }
+Thing.prototype.activetext1 = function(){
+	if (this.active.cast) return casttext(this.cast, this.castele) + this.active.cast.activename;
+	var order = ["hit", "death", "owndeath", "buff", "destroy", "play", "spell", "dmg", "shield"];
+	for(var i=0; i<order.length; i++){
+		if (this.active[order[i]]) return order[i] + " " + this.active[order[i]].activename;
+	}
+	return this.active.auto ? this.active.auto.activename : "";
+}
 Thing.prototype.place = function(fromhand){
 	this.procactive("play", [fromhand]);
 }

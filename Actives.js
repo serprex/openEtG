@@ -871,10 +871,11 @@ momentum:function(c,t){
 	t.status.momentum = true;
 },
 mutant: function (c, t) {
-	if (mutantactive(c)){
-		c.cast = c.owner.uptoceil(2);
-		c.castele = c.owner.upto(13);
+	if (!mutantactive(c)){
+		c.active.cast = Actives.web;
 	}
+	c.cast = c.owner.uptoceil(2);
+	c.castele = c.owner.upto(13);
 },
 mutation:function(c,t){
 	var rnd = c.owner.rng();
