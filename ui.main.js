@@ -2486,7 +2486,12 @@ function startMatch(game, foeDeck) {
 					var child = creasprite[j][i].getChildAt(1);
 					child.setTexture(ui.getTextImage(cr.trueatk() + "|" + cr.truehp() + (cr.status.charges ? " x" + cr.status.charges : ""), ui.mkFont(10, cr.card.upped ? "black" : "white"), maybeLighten(cr.card)));
 					var child2 = creasprite[j][i].getChildAt(2);
-					var activetext = cr.active.cast ? etg.casttext(cr.cast, cr.castele) + cr.active.cast.activename : (cr.active.hit ? cr.active.hit.activename : "");
+					var activetext =
+						cr.active.cast ? etg.casttext(cr.cast, cr.castele) + cr.active.cast.activename :
+						cr.active.hit ? "hit " + cr.active.hit.activename :
+						cr.active.death ? "death " + cr.active.death.activename :
+						cr.active.owndeath ? "owndeath " + cr.active.owndeath.activename :
+						cr.active.auto ? cr.active.auto.activename : "";
 					child2.setTexture(ui.getTextImage(activetext, ui.mkFont(8, cr.card.upped ? "black" : "white")));
 					drawStatus(cr, creasprite[j][i]);
 				} else creasprite[j][i].visible = false;
