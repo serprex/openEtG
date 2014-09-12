@@ -2763,7 +2763,8 @@ function musicChange(event) {
 }
 function maybeSendChat(e) {
 	e.cancelBubble = true;
-	if (e.keyCode == 13 && chatinput.value) {
+	if (e.keyCode == 13) {
+		e.preventDefault();
 		var msg = chatinput.value;
 		chatinput.value = "";
 		if (msg == "/clear"){
@@ -2781,10 +2782,7 @@ function maybeSendChat(e) {
 			if (msg.match(/^\/w( |")/)) {
 				var match = msg.match(/^\/w"([^"]*)"/);
 				var to = (match && match[1]) || msg.substring(3, msg.indexOf(" ", 4));
-				if (!to){
-					e.preventDefault();
-					return;
-				}
+				if (!to) return;
 				chatinput.value = msg.substr(0, 4+to.length);
 				msgdata.msg = msg.substr(4+to.length);
 				msgdata.to = to;
@@ -2795,7 +2793,6 @@ function maybeSendChat(e) {
 			var name = username.value || guestname || (guestname = (10000 + Math.floor(Math.random() * 89999)) + "");
 			sockEmit("guestchat", { msg: msg, u: name });
 		}
-		e.preventDefault();
 	}
 }
 function unaryParseInt(x) {
