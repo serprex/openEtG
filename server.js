@@ -29,7 +29,7 @@ function loginRespond(res, servuser, pass){
 	}
 	function postHash(err, key){
 		if (err){
-			res.writeHead("503");
+			res.writeHead(503);
 			res.end();
 			return;
 		}
@@ -38,7 +38,7 @@ function loginRespond(res, servuser, pass){
 			servuser.auth = key;
 		}else if (servuser.auth != key){
 			console.log("Failed login "+servuser.name);
-			res.writeHead("404");
+			res.writeHead(404);
 			res.end();
 			return;
 		}
@@ -60,7 +60,7 @@ function loginRespond(res, servuser, pass){
 				servuser.dailymage = user.dailymage = Math.floor(Math.random() * aiDecks.mage.length);
 				servuser.dailydg = user.dailydg = Math.floor(Math.random() * aiDecks.demigod.length);
 			}
-			res.writeHead("200");
+			res.writeHead(200, {"Content-Type": "application/json"});
 			res.end(JSON.stringify(user));
 		});
 	}
@@ -73,7 +73,7 @@ function loginAuth(req, res, next){
 	var params = qstring.parse(paramstring);
 	var name = (params.u || "").trim();
 	if (!name.length){
-		res.writeHead("404");
+		res.writeHead(404);
 		res.end();
 		return;
 	}else if (name in users){
@@ -88,7 +88,7 @@ function loginAuth(req, res, next){
 }
 function codeSmithLoop(res, iter, params){
 	if (iter == 1000){
-		res.writeHead("503");
+		res.writeHead(503);
 		res.end();
 	}else{
 		var code = new Array(8);
@@ -101,7 +101,7 @@ function codeSmithLoop(res, iter, params){
 				codeSmithLoop(res, iter+1, params);
 			}else{
 				db.hset("CodeHash", code, params.t)
-				res.writeHead("200");
+				res.writeHead(200);
 				res.end(code);
 			}
 		});
@@ -123,7 +123,7 @@ function codeSmith(req, res, next){
 		if (params.p == data){
 			codeSmithLoop(res, 0, params);
 		}else{
-			res.writeHead("404");
+			res.writeHead(404);
 			res.end();
 		}
 	});
@@ -133,7 +133,7 @@ function cardRedirect(req, res, next){
 	if (code >= "6qo"){
 		fs.exists(__dirname + req.url, function(exists){
 			if (!exists){
-				res.writeHead("302", {Location: "http://" + req.headers.host + "/Cards/" + etgutil[code >= "g00"?"asShiny":"asUpped"](code, false) + ".png"});
+				res.writeHead(302, {Location: "http://" + req.headers.host + "/Cards/" + etgutil[code >= "g00"?"asShiny":"asUpped"](code, false) + ".png"});
 				res.end();
 			}else next();
 		});
@@ -143,7 +143,7 @@ function deckRedirect(req, res, next){
 	var deck = req.url.substr(1).replace(".png", "");
 	fs.readFile(__dirname + "/deckcache/" + deck, function(err, data){
 		if (!err){
-			res.writeHead("200", {"Content-Type": "image/png"});
+			res.writeHead(200, {"Content-Type": "image/png"});
 			res.end(data, "binary");
 		}else{
 			var Canvas = require("canvas"), Image = Canvas.Image;
@@ -177,10 +177,10 @@ function deckRedirect(req, res, next){
 			});
 			can.toBuffer(function(err, buf){
 				if (err){
-					res.writeHead("503");
+					res.writeHead(503);
 					res.end();
 				}else{
-					res.writeHead("200", {"Content-Type": "image/png"});
+					res.writeHead(200, {"Content-Type": "image/png"});
 					res.end(buf, "binary");
 					if (deck) fs.writeFile(__dirname + "/deckcache/" + deck, buf, {encoding: "binary"});
 				}

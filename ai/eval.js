@@ -121,7 +121,7 @@ var ActivesValues = {
 		return 9-c.owner.hand.length;
 	},
 	freeze:3,
-	fungusrebirth:2,
+	fungusrebirth:1,
 	gas:5,
 	give:1,
 	gpull:function(c){
