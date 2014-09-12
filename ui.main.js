@@ -493,7 +493,7 @@ function victoryScreen(game) {
 	victoryui.addChild(bexit);
 	if (winner && user){
 		if (game.goldreward) {
-			var goldshown = (game.goldreward || 0) - (game.cost || 0);
+			var goldshown = game.goldreward - (game.cost || 0);
 			var tgold = new MenuText(340, 550, "Gold won: $" + goldshown);
 			victoryui.addChild(tgold);
 			userExec("addgold", { g: game.goldreward });
@@ -511,7 +511,7 @@ function victoryScreen(game) {
 	}
 
 	if (stats.checked){
-		chat((game.level || 0) + "," + (game.foename || "?").replace(/,/g, " ") + "," + (winner ? "W" : "L") + "," + game.ply + "," + game.time + "," + game.player1.hp + "," + game.player1.maxhp + "," + ((game.goldreward || 0) - (game.cost || 0)) + "," + (game.cardreward || "-"), null, true);
+		chat([game.level || 0, (game.foename || "?").replace(/,/g, " "), winner ? "W" : "L", game.ply, game.time, game.player1.hp, game.player1.maxhp, (game.goldreward || 0) - (game.cost || 0), game.cardreward || "-"].join());
 	}
 
 	refreshRenderer(victoryui);
