@@ -560,7 +560,7 @@ var userEvents = {
 				sockEmit(foesock, "tradecanceled");
 				sockEmit(foesock, "chat", { mode: "red", msg: data.u + " has canceled the trade."});
 				if (foesock.id in sockinfo){
-					delete info.trade;
+					delete sockinfo[foesock.id].trade;
 				}
 			}
 			delete info.trade;
@@ -582,6 +582,13 @@ var userEvents = {
 			return;
 		} else if (thattrade.accepted) {
 			var player1Cards = thistrade.tradecards, player2Cards = thattrade.tradecards;
+			if (player1Cards != thattrade.oppcards || player2Cards != thistrade.oppcards){
+				sockEmit(this, "tradecanceled");
+				sockEmit(this, "chat", { mode: "red", msg: "Trade disagreement."});
+				sockEmit(thatsock, "tradecanceled");
+				sockEmit(thatsock, "chat", { mode: "red", msg: "Trade disagreement."});
+				return;
+			}
 			user.pool = etgutil.removedecks(user.pool, player1Cards);
 			user.pool = etgutil.mergedecks(user.pool, player2Cards);
 			otherUser.pool = etgutil.removedecks(otherUser.pool, player2Cards);

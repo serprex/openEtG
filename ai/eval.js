@@ -350,7 +350,7 @@ function calcExpectedDamage(pl, damageHash, wallCharges) {
 	var totalDamage = 0, stasisFlag = false, freedomChance = 0;
 	for(var i=0; i<16; i++){
 		var p;
-		if ((p=pl.permanents[i])){
+		if ((p=pl.permanents[i]) && (p.status.charges !== 0)){
 			if (p.status.stasis || p.status.patience){
 				stasisFlag = true;
 			}else if (p.status.freedom){

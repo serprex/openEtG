@@ -2723,15 +2723,16 @@ var sockEvents = {
 			belly.appendChild(document.createTextNode(data.u + ": "));
 			span.appendChild(belly);
 		}
-		var decklink=/\b(([01][0-9a-v]{4})+)\b/g, reres, lastindex = 0;
+		var decklink = /\b(([01][0-9a-v]{4})+)\b/g, reres, lastindex = 0;
 		while (reres = decklink.exec(data.msg)){
-			if (reres.index != lastindex) span.appendChild(document.createTextNode(data.msg.substring(lastindex, reres.index-lastindex)));
+			console.log(data.msg, reres[0], lastindex, reres.index, data.msg.substring(lastindex, reres.index-lastindex));
+			if (reres.index != lastindex) span.appendChild(document.createTextNode(data.msg.substring(lastindex, reres.index)));
 			var link = document.createElement("a");
 			link.href = "deck/" + reres[0];
 			link.target = "_blank";
 			link.appendChild(document.createTextNode(reres[0]));
 			span.appendChild(link);
-			lastindex = decklink.lastIndex;
+			lastindex = reres.index + reres[0].length;
 		}
 		if (lastindex != data.msg.length) span.appendChild(document.createTextNode(data.msg.substring(lastindex)));
 		addChatSpan(span);

@@ -145,12 +145,6 @@ bolsterintodeck:function(c,t){
 		c.owner.shuffle(c.owner.deck);
 	}
 },
-bolsterpillar:function(c,t){
-	var pillars = etg.filtercards(c.card.upped, function(x) { return x.type == etg.PillarEnum && !x.rarity; });
-	c.owner.deck.splice(c.owner.upto(c.owner.deck.length), 0, pillars[c.owner.mark*2]);
-	var foe = c.owner.foe;
-	foe.deck.splice(foe.upto(foe.deck.length), 0, pillars[foe.mark*2]);
-},
 boneyard:function(c,t){
 	if (!t.card.isOf(Cards.Skeleton)){
 		new etg.Creature(c.card.as(Cards.Skeleton), c.owner).place();
@@ -957,6 +951,10 @@ overdrivespell:function(c,t){
 },
 pacify:function(c,t){
 	t.atk -= t.trueatk();
+},
+paleomagnetism:function(c,t){
+	var pillars = etg.filtercards(c.card.upped, function(x) { return x.type == etg.PillarEnum && !x.rarity; });
+	new etg.Pillar(pillars[c.owner.mark*2], c.owner).place();
 },
 pandemonium:function(c,t){
 	c.owner.foe.masscc(c, Actives.cseed, true);
