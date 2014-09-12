@@ -767,8 +767,9 @@ Thing.prototype.place = function(fromhand){
 	this.procactive("play", [fromhand]);
 }
 Creature.prototype.place = function(fromhand){
-	place(this.owner.creatures, this);
-	Thing.prototype.place.call(this, fromhand);
+	if (place(this.owner.creatures, this)){
+		Thing.prototype.place.call(this, fromhand);
+	}
 }
 Permanent.prototype.place = function(fromhand){
 	if (this.status.additive){
@@ -781,8 +782,9 @@ Permanent.prototype.place = function(fromhand){
 			}
 		}
 	}
-	place(this.owner.permanents, this);
-	Thing.prototype.place.call(this, fromhand);
+	if (place(this.owner.permanents, this)){
+		Thing.prototype.place.call(this, fromhand);
+	}
 }
 Weapon.prototype.place = function(fromhand){
 	this.owner.weapon = this;

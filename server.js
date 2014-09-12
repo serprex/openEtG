@@ -636,7 +636,7 @@ var userEvents = {
 			crypto.pbkdf2(pass, user.salt, parseInt(user.iter), 64, function(err, key){
 				if (!err){
 					user.auth = key.toString("base64");
-					sockEmit(this, "passchange", {auth: user.auth});
+					sockEmit(socket, "passchange", {auth: user.auth});
 				}
 			});
 		}
