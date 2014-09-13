@@ -260,14 +260,25 @@ cseed:function(c,t){
 		Actives[["drainlife", "firebolt", "freeze", "gpullspell", "icebolt", "infect", "lightning", "lobotomize", "parallel", "rewind", "snipe", "swave"][c.owner.upto(12)]](c, t);
 	}
 },
-dagger:function(c,t){
+dagger:function(c){
 	return (c.owner.mark == etg.Darkness||c.owner.mark == etg.Death) + c.owner.isCloaked();
 },
-darkness:function(c,t){
+darkness:function(c){
 	c.owner.spend(etg.Darkness, -1);
 },
-deadalive:function(c,t){
+deadalive:function(c){
 	c.deatheffect(c.getIndex());
+},
+deathwish:function(c,t, tgt, active){
+	if (tgt.owner != c.owner || !(tgt instanceof etg.Creature) || !Cards.Targeting[active.activename](t, c)) return;
+	if (!tgt.hasactive("spell", "deathwish")) return c;
+	var totaldw = 0;
+	c.owner.creatures.forEach(function(cr){
+		if (cr && cr.hasactive("spell", "deathwish"))totaldw++;
+	});
+	if (c.owner.rng() < 1/totaldw){
+		return c;
+	}
 },
 decrsteam:function(c){
 	c.defstatus("steamatk", 0);
@@ -554,7 +565,7 @@ gpullspell:function(c,t){
 		t = t.owner;
 		delete t.gpull;
 	}
-	Effect.mkText("Pull", t.owner);
+	Effect.mkText("Pull", t);
 },
 gratitude:function(c,t){
 	Effect.mkText("+4", c);
@@ -591,13 +602,6 @@ halveatk: function(c, t) {
 },
 hammer:function(c,t){
 	return c.owner.mark == etg.Gravity||c.owner.mark == etg.Earth?1:0;
-},
-handspasm:function(c){
-	c.owner.dmg(-c.owner.hand.length);
-	c.owner.hand.length = 0;
-	for(var i=0; i<8; i++){
-		new etg.CardInstance(t.randomcard(c.card.upped, function(x){return x.type != etg.PillarEnum && x.rarity < 4}), t).place();
-	}
 },
 hasten:function(c,t){
 	c.owner.drawcard();
@@ -1188,7 +1192,7 @@ scarab:function(c,t){
 },
 scatterhand:function(c,t){
 	if (!t.sanctuary){
-		t.drawhand(t.hand.length);
+		t.drawhand(t.hand.length + (c.owner == t));
 	}
 },
 scramble:function(c,t){
@@ -1202,14 +1206,12 @@ scramble:function(c,t){
 },
 serendipity:function(c,t){
 	if (!t.sanctuary){
-		var cards = [], num = Math.min(8-t.hand.length, 3), anyentro = false;
+		var num = Math.min(8-t.hand.length, 3), anyentro = false;
 		for(var i=num-1; i>=0; i--){
-			cards[i] = t.randomcard(c.card.upped, function(x){return x.type != etg.PillarEnum && x.rarity < 4 && (i>0 || anyentro || x.element == etg.Entropy)});
-			anyentro |= cards[i].element == etg.Entropy;
-		}
-		cards.forEach(function(card){
+			var card = t.randomcard(c.card.upped, function(x){return x.type != etg.PillarEnum && x.rarity < 4 && (i>0 || anyentro || x.element == etg.Entropy)});
+			anyentro |= card.element == etg.Entropy;
 			new etg.CardInstance(card, t).place();
-		});
+		}
 	}
 },
 silence:function(c,t){

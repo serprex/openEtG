@@ -2727,6 +2727,7 @@ var sockEvents = {
 		}
 		var decklink = /\b(([01][0-9a-v]{4})+)\b/g, reres, lastindex = 0;
 		while (reres = decklink.exec(data.msg)){
+			console.log(data.msg, reres[0], lastindex, reres.index, data.msg.substring(lastindex, reres.index-lastindex));
 			if (reres.index != lastindex) span.appendChild(document.createTextNode(data.msg.substring(lastindex, reres.index)));
 			var link = document.createElement("a");
 			link.href = "deck/" + reres[0];

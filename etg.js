@@ -658,11 +658,13 @@ Player.prototype.endturn = function(discard) {
 	this.game.updateExpectedDamage();
 }
 Thing.prototype.procactive = function(name, params) {
+	var ret;
 	function proc(c){
 		var a;
 		if (c && (a = c.active[name])){
 			params[0] = c;
-			a.apply(null, params);
+			var r = a.apply(null, params);
+			if (r !== undefined) ret = r;
 		}
 	}
 	if (params === undefined) params = [this, this];
@@ -677,6 +679,7 @@ Thing.prototype.procactive = function(name, params) {
 		proc(pl.shield);
 		proc(pl.weapon);
 	}
+	return ret;
 }
 Player.prototype.drawcard = function() {
 	if (this.hand.length<8){
@@ -745,7 +748,7 @@ Thing.prototype.activetext = function(){
 }
 Thing.prototype.activetext1 = function(){
 	if (this.active.cast) return casttext(this.cast, this.castele) + this.active.cast.activename;
-	var order = ["hit", "death", "owndeath", "buff", "destroy", "play", "spell", "dmg", "shield"];
+	var order = ["hit", "death", "owndeath", "buff", "destroy", "draw", "play", "spell", "dmg", "shield"];
 	for(var i=0; i<order.length; i++){
 		if (this.active[order[i]]) return order[i] + " " + this.active[order[i]].activename;
 	}
@@ -1050,8 +1053,10 @@ Thing.prototype.useactive = function(t) {
 	this.usedactive = true;
 	var castele = this.castele, cast = this.cast;
 	if (!t || !t.evade(this.owner)){
+		var newt = this.procactive("prespell", [t, this.active.cast]);
+		if (newt) t = newt;
 		this.active.cast(this, t);
-		this.procactive("spell", [t]);
+		this.procactive("spell", [t, this.active.cast]);
 	}
 	this.owner.spend(castele, cast);
 	this.owner.game.updateExpectedDamage();
@@ -1162,8 +1167,10 @@ CardInstance.prototype.useactive = function(target){
 		if (owner == owner.game.player1) ui.playSound("permPlay");
 	}else if (card.type == SpellEnum){
 		if (!target || !target.evade(owner)){
+			var newt = this.procactive("prespell", [target, card.active]);
+			if (newt) target = newt;
 			card.active(this, target);
-			this.procactive("spell", [target]);
+			this.procactive("spell", [target, card.active]);
 		}
 	}else if (card.type == CreatureEnum){
 		new Creature(card, owner).place(true);
