@@ -120,7 +120,7 @@ function Player(game){
 	this.shardgolem = undefined;
 }
 function Creature(card, owner){
-	if (card == Cards.ShardGolem){
+	if (card.isOf(Cards.ShardGolem)){
 		this.card = card;
 		this.owner = owner;
 		var golem = owner.shardgolem || { stat: 1, cast: 0 };

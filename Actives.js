@@ -592,6 +592,13 @@ halveatk: function(c, t) {
 hammer:function(c,t){
 	return c.owner.mark == etg.Gravity||c.owner.mark == etg.Earth?1:0;
 },
+handspasm:function(c){
+	c.owner.dmg(-c.owner.hand.length);
+	c.owner.hand.length = 0;
+	for(var i=0; i<8; i++){
+		new etg.CardInstance(t.randomcard(c.card.upped, function(x){return x.type != etg.PillarEnum && x.rarity < 4}), t).place();
+	}
+},
 hasten:function(c,t){
 	c.owner.drawcard();
 },
@@ -1160,6 +1167,7 @@ sadism:function(c, t, dmg){
 salvage:function(c, t){
 	if (c.owner == t.owner && !c.status.salvaged && !t.status.salvaged && c.owner.game.turn != c.owner){
 		Effect.mkText("Salvage", c);
+		Actives.growth1(c);
 		c.status.salvaged = true;
 		t.status.salvaged = true;
 		c.owner.hand.push(new etg.CardInstance(t.card, c.owner));
@@ -1199,9 +1207,9 @@ serendipity:function(c,t){
 			cards[i] = t.randomcard(c.card.upped, function(x){return x.type != etg.PillarEnum && x.rarity < 4 && (i>0 || anyentro || x.element == etg.Entropy)});
 			anyentro |= cards[i].element == etg.Entropy;
 		}
-		for(var i=0; i<num; i++){
-			new etg.CardInstance(cards[i], t).place();
-		}
+		cards.forEach(function(card){
+			new etg.CardInstance(card, t).place();
+		});
 	}
 },
 silence:function(c,t){
