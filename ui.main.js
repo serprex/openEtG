@@ -32,20 +32,22 @@ var aiDecks = require("./Decks");
 var Cards = require("./Cards");
 var socket = eio(location.hostname + ":13602");
 function MenuText(x, y, txt, wrapwidth) {
-	PIXI.Sprite.call(this, gfx.nopic);
-	this.position.set(x, y);
 	this.wrapwidth = wrapwidth;
-	this.setText(txt);
+	PIXI.Sprite.call(this, this.textText(txt));
+	this.position.set(x, y);
 }
 MenuText.prototype = Object.create(PIXI.Sprite.prototype);
+MenuText.prototype.textText = function(x){
+	return ui.getTextImage(x.toString(), { font: "14px Verdana", fill: "white", stroke: "black", strokeThickness: 2 }, "", this.wrapwidth);
+}
 MenuText.prototype.setText = function(x){
-	this.setTexture(ui.getTextImage(x.toString(), { font: "14px Verdana", fill: "white", stroke: "black", strokeThickness: 2 }, "", this.wrapwidth));
+	this.setTexture(this.textText(x));
 }
 function maybeSetText(obj, text) {
 	if (obj.text != text) obj.setText(text);
 }
 function setClick(obj, click, sound) {
-	sound = sound === undefined ? "buttonClick" : sound;
+	if (sound === undefined) sound = "buttonClick";
 	obj.click = function() {
 		ui.playSound(sound);
 		click.apply(this, arguments);
@@ -499,11 +501,11 @@ function victoryScreen(game) {
 			userExec("addgold", { g: game.goldreward });
 		}
 		if (game.cardreward) {
-			var cardrewardlength = etgutil.decklength(game.cardreward);
+			var x0 = 470-etgutil.decklength(game.cardreward)*20;
 			etgutil.iterdeck(game.cardreward, function(code, i){
 				var cardArt = new PIXI.Sprite(getArt(code));
 				cardArt.anchor.x = .5;
-				cardArt.position.set(470-cardrewardlength*20+i*40, 170);
+				cardArt.position.set(x0+i*40, 170);
 				victoryui.addChild(cardArt);
 			});
 			userExec(game.quest?"addbound":"addcards", { c: game.cardreward });
@@ -2121,7 +2123,7 @@ function startMatch(game, foeDeck) {
 				if (scale === undefined) scale = 1;
 				var spr = new PIXI.Sprite(gfx.nopic);
 				if (makestatuses){
-					var statuses = new PIXI.SpriteBatch();
+					var statuses = new PIXI.DisplayObjectContainer();
 					for (var k=0; k<7; k++){
 						var icon = new PIXI.Sprite(gfx.sicons[k]);
 						icon.alpha = .6;
@@ -2240,7 +2242,7 @@ function startMatch(game, foeDeck) {
 	var anims = new PIXI.DisplayObjectContainer();
 	gameui.addChild(anims);
 	Effect.register(anims);
-	var foeplays = new PIXI.SpriteBatch();
+	var foeplays = new PIXI.DisplayObjectContainer();
 	gameui.addChild(foeplays);
 	var infobox = new PIXI.Sprite(gfx.nopic);
 	infobox.alpha = .7;
@@ -2572,7 +2574,7 @@ function startArenaInfo(info) {
 	var stage = mkView();
 	var winloss = new MenuText(200, 300, (info.win || 0) + " - " + (info.loss || 0) + ": " + (info.rank+1) + "\nAge: " + info.day + "\nHP: " + info.curhp + " / " + info.hp + "\nMark: " + info.mark + "\nDraw: " + info.draw);
 	stage.addChild(winloss);
-	var batch = new PIXI.SpriteBatch();
+	var batch = new PIXI.DisplayObjectContainer();
 	stage.addChild(batch);
 	var infotext = new MenuText(300, 470, "You get $3 every time your arena deck wins,\n& $1 every time it loses.");
 	stage.addChild(infotext);
