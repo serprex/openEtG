@@ -205,7 +205,6 @@ setInterval(function(){
 		if (!(u in usersock)){
 			delete users[u];
 		}else if (usersock[u].readyState == "closed"){
-			dropsock.call(usersock[u]);
 			delete usersock[u];
 			delete users[u];
 		}
@@ -216,34 +215,6 @@ process.on("exit", function(){
 	storeUsers();
 	db.quit();
 });
-function dropsock(){
-	var info = sockinfo[this.id];
-	if (info){
-		if (info.trade){
-			var foesock = usersock[info.trade.foe];
-			if (foesock){
-				var foesockinfo = sockinfo[foesock.id];
-				if (foesockinfo && foesockinfo.trade && usersock[foesockinfo.trade.foe] == this){
-					sockEmit(foesock, "tradecanceled");
-					delete foesockinfo.trade;
-				}
-			}
-		}
-		if (info.foe){
-			var foeinfo = sockinfo[info.foe.id];
-			if (foeinfo && foeinfo.foe == this){
-				sockEmit(info.foe, "foeleft");
-				delete foeinfo.foe;
-			}
-		}
-		for(var key in rooms){
-			if (rooms[key] == this){
-				delete rooms[key];
-			}
-		}
-		delete sockinfo[this.id];
-	}
-}
 function activeUsers() {
 	var activeusers = [];
 	for (var username in usersock) {
@@ -759,7 +730,34 @@ var sockEvents = {
 	},
 };
 io.on("connection", function(socket) {
-	socket.on("close", dropsock);
+	socket.on("close", function(){
+		for(var key in rooms){
+			if (rooms[key] == this){
+				delete rooms[key];
+			}
+		}
+		var info = sockinfo[this.id];
+		if (info){
+			if (info.trade){
+				var foesock = usersock[info.trade.foe];
+				if (foesock){
+					var foeinfo = sockinfo[foesock.id];
+					if (foeinfo && foeinfo.trade && usersock[foeinfo.trade.foe] == this){
+						sockEmit(foesock, "tradecanceled");
+						delete foeinfo.trade;
+					}
+				}
+			}
+			if (info.foe){
+				var foeinfo = sockinfo[info.foe.id];
+				if (foeinfo && foeinfo.foe == this){
+					sockEmit(info.foe, "foeleft");
+					delete foeinfo.foe;
+				}
+			}
+			delete sockinfo[this.id];
+		}
+	});
 	socket.on("message", function(rawdata){
 		if (!(this.id in sockinfo)){
 			sockinfo[this.id] = {};
