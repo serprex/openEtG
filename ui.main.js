@@ -682,9 +682,9 @@ function makeButton(x, y, img, mouseoverfunc, mouseoutfunc) {
 
 function toggleB() {
 	for (var i = 0;i < arguments.length;i++) {
-		arguments[i].visible = !arguments[i].visible;
-		arguments[i].interactive = !arguments[i].interactive;
-		arguments[i].buttonMode = !arguments[i].buttonMode;
+		arguments[i].visible ^= true;
+		arguments[i].interactive ^= true;
+		arguments[i].buttonMode ^= true;
 	}
 }
 function isFreeCard(card) {
@@ -1051,19 +1051,19 @@ function startMenu(nymph) {
 						return;
 					}
 					userEmit("foearena", lvi);
-					this.visible = false;
+					menuui.removeChild(this);
 				}
 			});
 			setClick(binfoa, function() {
 				if (Cards.loaded) {
 					userEmit("arenainfo", lvi);
-					this.visible = false;
+					menuui.removeChild(this);
 				}
 			});
 			setClick(btopa, function() {
 				if (Cards.loaded) {
 					userEmit("arenatop", lvi);
-					this.visible = false;
+					menuui.removeChild(this);
 				}
 			});
 		})({lv:i});
@@ -1446,7 +1446,8 @@ function startStore() {
 	var bget = makeButton(750, 156, "Take Cards");
 	toggleB(bget);
 	setClick(bget, function () {
-		toggleB(bbronze, bsilver, bgold, bplatinum, bnymph, bget, bbuy);
+		toggleB(bget, bbuy);
+		toggleB.apply(null, buttons);
 		popbooster.visible = false;
 	});
 	storeui.addChild(bget);
@@ -1481,7 +1482,7 @@ function startStore() {
 		var g = new PIXI.Graphics();
 		g.lineStyle(3);
 		g.beginFill(pack.color);
-		g.drawRoundedRect(0, 0, 100, 150, 6);
+		g.drawRoundedRect(3, 3, 94, 144, 6);
 		g.endFill();
 		var name = new PIXI.Text(pack.type, {font: "18px Verdana"});
 		name.anchor.set(.5, .5);
@@ -1489,7 +1490,7 @@ function startStore() {
 		g.addChild(name);
 		var price = new PIXI.Sprite(ui.getTextImage("$"+pack.cost, {font: "12px Verdana"}));
 		price.anchor.set(0, 1);
-		price.position.set(4, 146);
+		price.position.set(7, 146);
 		g.addChild(price);
 		var rend = new PIXI.RenderTexture(100, 150);
 		rend.render(g);
@@ -1506,11 +1507,10 @@ function startStore() {
 		storeui.addChild(b);
 		return b;
 	}
-	var bbronze = gradeSelect(0);
-	var bsilver = gradeSelect(1);
-	var bgold = gradeSelect(2);
-	var bplatinum = gradeSelect(3);
-	var bnymph = gradeSelect(4);
+	var buttons = [];
+	for(var i=0; i<5; i++){
+		buttons[i] = gradeSelect(i);
+	}
 
 	for (var i = 0;i < 14;i++) {
 		var elementbutton = makeButton(75 + Math.floor(i / 2)*64, 120 + (i % 2)*75, gfx.eicons[i]);
@@ -1543,7 +1543,8 @@ function startStore() {
 				user.gold -= data.cost;
 				tgold.setText("$" + user.gold);
 			}
-			toggleB(bbronze, bsilver, bgold, bplatinum, bnymph, bget);
+			toggleB(bget);
+			toggleB.apply(null, buttons);
 			if (popbooster.children.length) popbooster.removeChildren();
 			etgutil.iterdeck(data.cards, function(code, i){
 				var x = i % 5, y = Math.floor(i/5);
