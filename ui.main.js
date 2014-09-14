@@ -620,7 +620,7 @@ function mkAi(level, daily) {
 			if (!user) parsepvpstats(gameData);
 			else gameData.cost = cost;
 			gameData.level = level;
-			if (daily !== undefined) game.daily = daily;
+			if (daily !== undefined) gameData.daily = daily;
 			return initGame(gameData, true);
 		}
 	}

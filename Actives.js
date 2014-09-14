@@ -332,7 +332,7 @@ die:function(c,t){
 	c.die();
 },
 disarm:function(c,t){
-	if (t instanceof etg.Player && t.weapon && t.hand.length < 8){
+	if (t instanceof etg.Player && t.weapon && t.weapon.isMaterial() && t.hand.length < 8){
 		new etg.CardInstance(t.weapon.card, t).place();
 		t.weapon = undefined;
 	}
