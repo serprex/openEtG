@@ -494,6 +494,7 @@ function victoryScreen(game) {
 	});
 	victoryui.addChild(bexit);
 	if (winner && user){
+		userExec("addwin", { pvp: !game.ai });
 		if (game.goldreward) {
 			var goldshown = game.goldreward - (game.cost || 0);
 			var tgold = new MenuText(340, 550, "Gold won: $" + goldshown);
@@ -516,6 +517,14 @@ function victoryScreen(game) {
 		chat([game.level || 0, (game.foename || "?").replace(/,/g, " "), winner ? "W" : "L", game.ply, game.time, game.player1.hp, game.player1.maxhp, (game.goldreward || 0) - (game.cost || 0), game.cardreward || "-"].join());
 	}
 
+	function onkeydown(e){
+		if (e.keyCode == 32) bexit.click();
+	}
+	document.addEventListener("keydown", onkeydown);
+	victoryui.endnext = function() {
+		document.removeEventListener("keydown", onkeydown);
+	}
+
 	refreshRenderer(victoryui);
 }
 
@@ -533,7 +542,6 @@ function mkPremade(name, daily) {
 					chat("Requires " + cost + "\u00A4");
 					return;
 				}
-				userExec("addgold", { g: -cost });
 			}else{
 				foedata = aiDecks[name][user[name == "mage" ? "dailymage" : "dailydg"]];
 			}
@@ -599,7 +607,6 @@ function mkAi(level, daily) {
 					chat("Requires " + cost + "\u00A4");
 					return;
 				}
-				userExec("addgold", { g: -cost });
 			}
 			var deck = require("./ai/deck")(level);
 			aideck.value = deck;
@@ -645,24 +652,24 @@ gfx.load(function(loadingScreen){
 	realStage.addChild(new PIXI.Sprite(gfx.bg_default));
 	startMenu();
 });
-function makeButton(x, y, img, mouseoverfunc, mouseoutfunc) {
-	var b;
-	if (typeof img == "string"){
-		b = new PIXI.Sprite(gfx.button);
-		var txt = new PIXI.Text(img, {font: "14px Dosis"});
-		txt.anchor.set(.5, .5);
-		txt.position.set(b.width/2, b.height/2);
-		if (txt.width>b.width-6) txt.width=b.width-6;
-		b.addChild(txt);
-		b.setText = function(x){
-			if (x){
-				maybeSetText(txt, x.toString());
-				this.visible = true;
-			}else this.visible = false;
-		}
-	}else if (img instanceof PIXI.Texture){
-		b = new PIXI.Sprite(img);
-	}else b = img;
+function MenuButton(text){
+	PIXI.Sprite.call(this, gfx.button);
+	this.txt = new PIXI.Text(text, {font: "14px Dosis"});
+	this.txt.anchor.x = .5;
+	this.txt.position.set(this.width/2, 3);
+	if (this.txt.width > this.width-6) this.txt.width = this.width-6;
+	this.addChild(this.txt);
+}
+MenuButton.prototype = Object.create(PIXI.Sprite.prototype);
+MenuButton.prototype.setText = function(x){
+	if (x){
+		maybeSetText(this.txt, x);
+		this.visible = true;
+	}else this.visible = false;
+}
+function makeButton(x, y, b, mouseoverfunc, mouseoutfunc) {
+	if (typeof b == "string") b = new MenuButton(b);
+	else if (b instanceof PIXI.Texture) b = new PIXI.Sprite(b);
 	b.interactive = true;
 	b.buttonMode = true;
 	b.position.set(x, y);
@@ -1480,6 +1487,7 @@ function startStore() {
 
 	var buttons = packdata.map(function(pack, n){
 		var g = new PIXI.Graphics();
+		g.hitArea = new PIXI.Rectangle(0, 0, 100, 150);
 		g.lineStyle(3);
 		g.beginFill(pack.color);
 		g.drawRoundedRect(3, 3, 94, 144, 6);
@@ -1492,16 +1500,13 @@ function startStore() {
 		price.anchor.set(0, 1);
 		price.position.set(7, 146);
 		g.addChild(price);
-		var rend = new PIXI.RenderTexture(100, 150);
-		rend.render(g);
-		var b = makeButton(50+125*n, 280, rend);
-		setClick(b, function(){
+		setClick(g, function(){
 			packrarity = n;
 			tinfo2.setText(pack.type + " Pack: " + pack.info);
 			updateFreeInfo(n);
 		});
-		storeui.addChild(b);
-		return b;
+		storeui.addChild(g);
+		return makeButton(50+125*n, 280, g);
 	});
 
 	for (var i = 0;i < 14;i++) {
@@ -1932,6 +1937,9 @@ function startMatch(game, foeDeck) {
 	var resigning, discarding, aiDelay = 0, aiState, aiCommand;
 	if (user) {
 		userExec("addloss", { pvp: !game.ai });
+		if (game.cost){
+			userExec("addgold", { g: -game.cost });
+		}
 	}
 	var gameui = mkView();
 	var redlines = new PIXI.Sprite(gfx.bg_game);
@@ -1974,7 +1982,6 @@ function startMatch(game, foeDeck) {
 					userEmit("modarena", { aname: game.arena, won: game.winner == game.player2, lv: game.level == 2?0:1 });
 				}
 				if (game.winner == game.player1) {
-					userExec("addwin", { pvp: !game.ai });
 					if (game.quest){
 						if (game.autonext) {
 							var data = addNoHealData(game);
@@ -2685,7 +2692,6 @@ var sockEvents = {
 		game.arena = data.name;
 		game.level = data.lv?3:2;
 		game.cost = data.lv?20:10;
-		user.gold -= game.cost;
 	},
 	arenainfo: startArenaInfo,
 	arenatop: startArenaTop,
