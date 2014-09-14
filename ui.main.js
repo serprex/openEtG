@@ -1478,7 +1478,7 @@ function startStore() {
 	});
 	storeui.addChild(bbuy);
 
-	var boostergfx = packdata.map(function(pack){
+	var buttons = packdata.map(function(pack, n){
 		var g = new PIXI.Graphics();
 		g.lineStyle(3);
 		g.beginFill(pack.color);
@@ -1494,23 +1494,15 @@ function startStore() {
 		g.addChild(price);
 		var rend = new PIXI.RenderTexture(100, 150);
 		rend.render(g);
-		return rend;
-	});
-	// The different pack types
-	function gradeSelect(n){
-		var b = makeButton(50+125*n, 280, boostergfx[n]);
+		var b = makeButton(50+125*n, 280, rend);
 		setClick(b, function(){
 			packrarity = n;
-			tinfo2.setText(packdata[n].type + " Pack: " + packdata[n].info);
+			tinfo2.setText(pack.type + " Pack: " + pack.info);
 			updateFreeInfo(n);
 		});
 		storeui.addChild(b);
 		return b;
-	}
-	var buttons = [];
-	for(var i=0; i<5; i++){
-		buttons[i] = gradeSelect(i);
-	}
+	});
 
 	for (var i = 0;i < 14;i++) {
 		var elementbutton = makeButton(75 + Math.floor(i / 2)*64, 120 + (i % 2)*75, gfx.eicons[i]);
