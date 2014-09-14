@@ -320,7 +320,7 @@ function initTrade() {
 	setClick(btrade, function() {
 		if (ownDeck.deck.length > 0) {
 			sockEmit("cardchosen", {c: etgutil.encodedeck(ownDeck.deck)});
-			console.log("Card sent");
+			console.log("Trade sent", ownDeck.deck);
 			cardChosen = true;
 			stage.removeChild(btrade);
 			stage.addChild(bconfirm);
@@ -329,7 +329,7 @@ function initTrade() {
 	});
 	setClick(bconfirm, function() {
 		if (foeDeck.deck.length > 0) {
-			console.log("Confirmed!");
+			console.log("Confirmed!", ownDeck.deck, foeDeck.deck);
 			userEmit("confirmtrade", { cards: etgutil.encodedeck(ownDeck.deck), oppcards: etgutil.encodedeck(foeDeck.deck) });
 			stage.removeChild(bconfirm);
 			stage.addChild(bconfirmed);
@@ -395,24 +395,9 @@ function initLibrary(data){
 }
 function initGame(data, ai) {
 	var game = new etg.Game(data.first, data.seed);
-	if (data.p1hp) {
-		game.player1.maxhp = game.player1.hp = data.p1hp;
-	}
-	if (data.p2hp) {
-		game.player2.maxhp = game.player2.hp = data.p2hp;
-	}
-	if (data.p1markpower !== undefined) {
-		game.player1.markpower = data.p1markpower;
-	}
-	if (data.p2markpower !== undefined) {
-		game.player2.markpower = data.p2markpower;
-	}
-	if (data.p1drawpower !== undefined) {
-		game.player1.drawpower = data.p1drawpower;
-	}
-	if (data.p2drawpower !== undefined) {
-		game.player2.drawpower = data.p2drawpower;
-	}
+	addToGame(game, data);
+	game.player1.maxhp = game.player1.hp;
+	game.player2.maxhp = game.player2.hp;
 	var deckpower = [data.p1deckpower, data.p2deckpower];
 	var decks = [data.urdeck, data.deck];
 	for (var j = 0;j < 2;j++) {
@@ -497,7 +482,7 @@ function victoryScreen(game) {
 		userExec("addwin", { pvp: !game.ai });
 		if (game.goldreward) {
 			var goldshown = game.goldreward - (game.cost || 0);
-			var tgold = new MenuText(340, 550, "Gold won: $" + goldshown);
+			var tgold = new MenuText(340, 550, "Won $" + goldshown);
 			victoryui.addChild(tgold);
 			userExec("addgold", { g: game.goldreward });
 		}
@@ -557,11 +542,12 @@ function mkPremade(name, daily) {
 			gameData.p2drawpower = 2;
 		}
 		if (!user) parsepvpstats(gameData);
-		var game = initGame(gameData, true);
-		game.cost = cost;
-		game.level = name == "mage" ? 1 : 3;
-		if (daily !== undefined) game.daily = daily;
-		return game;
+		else{
+			gameData.cost = cost;
+		}
+		gameData.level = name == "mage" ? 1 : 3;
+		if (daily !== undefined) gameData.daily = daily;
+		return initGame(gameData, true);
 	}
 }
 function mkQuestAi(questname, stage, area) {
@@ -632,11 +618,10 @@ function mkAi(level, daily) {
 			var foename = typeName[level] + "\n" + randomNames[etg.PlayerRng.upto(randomNames.length)];
 			var gameData = { first: Math.random() < .5, deck: deck, urdeck: urdeck, seed: Math.random() * etgutil.MAX_INT, p2hp: level == 0 ? 100 : level == 1 ? 125 : 150, p2markpower: level == 2 ? 2 : 1, foename: foename, p2drawpower: level == 2 ? 2 : 1 };
 			if (!user) parsepvpstats(gameData);
-			var game = initGame(gameData, true);
-			game.cost = cost;
-			game.level = level;
+			else gameData.cost = cost;
+			gameData.level = level;
 			if (daily !== undefined) game.daily = daily;
-			return game;
+			return initGame(gameData, true);
 		}
 	}
 }
@@ -1555,12 +1540,15 @@ function startStore() {
 	};
 	refreshRenderer(storeui);
 }
+var blacklist = {first: true, seed: true, p1deckpower: true, p2deckpower: true, deck: true, urdeck: true };
 function addToGame(game, data) {
 	for (var key in data) {
-		var p1or2 = key.match(/^p(1|2)/);
-		if (p1or2){
-			game["player" + p1or2[1]][key.substr(2)] = data[key];
-		}else game[key] = data[key];
+		if (!blacklist[key]){
+			var p1or2 = key.match(/^p(1|2)/);
+			if (p1or2){
+				game["player" + p1or2[1]][key.substr(2)] = data[key];
+			}else game[key] = data[key];
+		}
 	}
 }
 function mkDaily(type) {
@@ -2688,10 +2676,10 @@ var sockEvents = {
 	librarygive: initLibrary,
 	foearena:function(data) {
 		aideck.value = data.deck;
-		var game = initGame({ first: data.seed < etgutil.MAX_INT/2, deck: data.deck, urdeck: getDeck(), seed: data.seed, p2hp: data.hp, cost: data.cost, foename: data.name, p2drawpower: data.draw, p2markpower: data.mark }, true);
-		game.arena = data.name;
-		game.level = data.lv?3:2;
+		var game = initGame({ first: data.seed < etgutil.MAX_INT/2, deck: data.deck, urdeck: getDeck(), seed: data.seed,
+			p2hp: data.hp, foename: data.name, p2drawpower: data.draw, p2markpower: data.mark, arena: data.name, level: data.lv?3:2 }, true);
 		game.cost = data.lv?20:10;
+		user.gold -= data.lv?20:10;
 	},
 	arenainfo: startArenaInfo,
 	arenatop: startArenaTop,
@@ -2726,7 +2714,6 @@ var sockEvents = {
 		}
 		var decklink = /\b(([01][0-9a-v]{4})+)\b/g, reres, lastindex = 0;
 		while (reres = decklink.exec(data.msg)){
-			console.log(data.msg, reres[0], lastindex, reres.index, data.msg.substring(lastindex, reres.index-lastindex));
 			if (reres.index != lastindex) span.appendChild(document.createTextNode(data.msg.substring(lastindex, reres.index)));
 			var link = document.createElement("a");
 			link.href = "deck/" + reres[0];
