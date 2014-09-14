@@ -1537,7 +1537,7 @@ function startStore() {
 			}
 			else {
 				user.pool = etgutil.mergedecks(user.pool, data.cards);
-				user.gold -= data.cost;
+				user.gold -= packdata[data.packtype].cost;
 				tgold.setText("$" + user.gold);
 			}
 			toggleB(bget);
@@ -2866,21 +2866,21 @@ function loginClick() {
 function changeClick() {
 	userEmit("passchange", { p: password.value });
 }
-function parseInput(data, key, value) {
+function parseInput(data, key, value, limit) {
 	var value = parseInt(value);
 	if (value === 0 || value > 0)
-		data[key] = value;
+		data[key] = Math.min(value, limit || Infinity);
 }
 function parsepvpstats(data){
 	parseInput(data, "p1hp", pvphp.value);
-	parseInput(data, "p1drawpower", pvpdraw.value);
-	parseInput(data, "p1markpower", pvpmark.value);
+	parseInput(data, "p1drawpower", pvpdraw.value, 8);
+	parseInput(data, "p1markpower", pvpmark.value, 1188);
 	parseInput(data, "p1deckpower", pvpdeck.value);
 }
 function parseaistats(data){
 	parseInput(data, "p2hp", aihp.value);
-	parseInput(data, "p2drawpower", aidraw.value);
-	parseInput(data, "p2markpower", aimark.value);
+	parseInput(data, "p2drawpower", aidraw.value, 8);
+	parseInput(data, "p2markpower", aimark.value, 1188);
 	parseInput(data, "p2deckpower", aideckpow.value);
 }
 function challengeClick(foe) {

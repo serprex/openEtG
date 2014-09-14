@@ -43,7 +43,7 @@ exports.uppillar = function(data, user){
 	var card = Cards.Codes[data.c];
 	if (card && user.gold >= 50 && card.rarity === 0 && !card.shiny){
 		user.gold -= 50;
-		user.pool = etgutil.addcard(user.pool, card.asUpped(true).code);
+		user.pool = etgutil.addcard(user.pool, etgutil.asUpped(data.c, true));
 	}
 }
 exports.polish = function(data, user){
@@ -56,7 +56,7 @@ exports.shpillar = function(data, user){
 	var card = Cards.Codes[data.c];
 	if (card && user.gold >= 50 && card.rarity === 0 && !card.shiny){
 		user.gold -= 50;
-		user.pool = etgutil.addcard(user.pool, card.asShiny(true).code);
+		user.pool = etgutil.addcard(user.pool, etgutil.asShiny(data.c, true));
 	}
 }
 exports.addgold = function (data, user) {
