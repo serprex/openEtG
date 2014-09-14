@@ -270,7 +270,7 @@ deadalive:function(c){
 	c.deatheffect(c.getIndex());
 },
 deathwish:function(c,t, tgt, active){
-	if (!tgt || tgt.owner != c.owner || !(tgt instanceof etg.Creature) || !Cards.Targeting[active.activename](t, c)) return;
+	if (!tgt || c.status.frozen || c.status.delayed || tgt.owner != c.owner || !(tgt instanceof etg.Creature) || !Cards.Targeting[active.activename](t, c)) return;
 	if (!tgt.hasactive("spell", "deathwish")) return c;
 	var totaldw = 0;
 	c.owner.creatures.forEach(function(cr){
