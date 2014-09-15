@@ -1,4 +1,7 @@
 var fs = require("fs");
+var etgutil = require("./etgutil");
+var Cards = require("./Cards");
+var etg = require("./etg");
 function deckRedirect(req, res, next){
 	var deck = req.url.substr(1).replace(".png", "");
 	fs.readFile(__dirname + "/deckcache/" + deck, function(err, data){

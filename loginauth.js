@@ -3,6 +3,7 @@ var crypto = require("crypto");
 var etg = require("./etg");
 var etgutil = require("./etgutil");
 var sutil = require("./etg.server");
+var aiDecks = require("./Decks");
 module.exports = function(db, users){
 	function loginRespond(res, servuser, pass){
 		if(!servuser.name){
