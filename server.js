@@ -428,6 +428,10 @@ var userEvents = {
 	},
 	booster:function(data, user) {
 		var freepacklist, bound;
+		var newCardList = [
+			Cards.Inertia, Cards.PhaseGolem, Cards.QuantumLocket, Cards.ClockworkGolem, Cards.Disc, Cards.BattleAxe, Cards.Pacify,
+			Cards.Georesonator, Cards.AtlantisProtection, Cards.Reinforce, Cards.Pixie, Cards.Lodestone, Cards.JunkWall, Cards.StaticField,
+			Cards.ShankofVoid, Cards.ScatteringWind, Cards.Firebrand, Cards.PrismaticGladius];
 		var pack = [
 			{ amount: 9, cost: 15, rare: []},
 			{ amount: 6, cost: 25, rare: [3]},
@@ -451,7 +455,8 @@ var userEvents = {
 			for (var i = 0;i < pack.amount;i++) {
 				while (i == pack.rare[rarity-1]) rarity++;
 				var notFromElement = Math.random() > .5, card = undefined, bumprarity = rarity+(rarity < 5 && Math.random() < bumprate);
-				if (data.element < 13) card = etg.PlayerRng.randomcard(false, function(x) { return (x.element == data.element) ^ notFromElement && x.rarity == bumprarity });
+				if (data.element < 13) card = etg.PlayerRng.randomcard(false, function(x) { return (x.element == data.element) ^ notFromElement && x.rarity == bumprarity});
+				if (data.element == 14) card = etg.PlayerRng.randomcard(false, function(x){ return notFromElement ^ ~newCardList.indexOf(x) && x.rarity == bumprarity});
 				if (!card) card = etg.PlayerRng.randomcard(false, function(x) { return x.rarity == bumprarity });
 				newCards = etgutil.addcard(newCards, card.code);
 			}

@@ -24,7 +24,7 @@ function load(preload, postload){
 			exports[single.substring(7, single.length-4)] = PIXI.Texture.fromFrame(single);
 		});
 		var tex = PIXI.Texture.fromFrame("assets/esheet.png");
-		for (var i = 0;i < 14;i++) exports.eicons.push(new PIXI.Texture(tex, new PIXI.Rectangle(i * 32, 0, 32, 32)));
+		for (var i = 0;i < 15;i++) exports.eicons.push(new PIXI.Texture(tex, new PIXI.Rectangle(i * 32, 0, 32, 32)));
 		var tex = PIXI.Texture.fromFrame("assets/raritysheet.png");
 		for (var i = 0;i < 6;i++) exports.ricons.push(new PIXI.Texture(tex, new PIXI.Rectangle(i * 25, 0, 25, 25)));
 		exports.ricons[-1] = exports.ricons[5];

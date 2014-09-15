@@ -1408,7 +1408,7 @@ function startStore() {
 	//shop background
 	storeui.addChild(mkBgRect(
 		40, 16, 820, 60,
-		40, 92, 492, 168,
+		40, 92, 530, 168,
 		40, 270, 620, 168,
 		770, 90, 90, 184
 	));
@@ -1496,8 +1496,8 @@ function startStore() {
 		return makeButton(50+125*n, 280, g);
 	});
 
-	for (var i = 0;i < 14;i++) {
-		var elementbutton = makeButton(75 + Math.floor(i / 2)*64, 120 + (i % 2)*75, gfx.eicons[i]);
+	for (var i = 0;i < 15;i++) {
+		var elementbutton = makeButton(75 + Math.floor(i / 2)*64, 120 + (i == 14 ? 37 : (i % 2)*75), gfx.eicons[i]);
 		(function(_i) {
 			setClick(elementbutton, function() {
 				packele = _i;
