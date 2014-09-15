@@ -1,6 +1,6 @@
 "use strict";
 (function() {
-var htmlElements = ["leftpane", "chatinput", "deckimport", "aideck", "foename", "change", "login", "password", "challenge", "chatBox", "trade", "bottompane", "demigodmode", "username", "stats","enableSound", "hideright", "lblhideright", "wantpvp", "lblwantpvp", "offline", "lbloffline", "options"];
+var htmlElements = ["leftpane", "chatinput", "deckimport", "aideck", "foename", "change", "login", "password", "challenge", "chatBox", "trade", "bottompane", "demigodmode", "username", "stats","enableSound", "hideright", "lblhideright", "wantpvp", "lblwantpvp", "offline", "lbloffline", "options", "packmulti"];
 htmlElements.forEach(function(name){
 	window[name] = document.getElementById(name);
 });
@@ -1461,8 +1461,10 @@ function startStore() {
 			return;
 		}
 		var pack = packdata[packrarity];
-		if (user.gold >= pack.cost || (user.freepacks && user.freepacks[packrarity] > 0)) {
-			userEmit("booster", { pack: packrarity, element: packele });
+		var boostdata = { pack: packrarity, element: packele };
+		if (packmulti.value) parseInput(boostdata, "bulk", packmulti.value, 99);
+		if (user.gold >= pack.cost * (boostdata.bulk || 1) || (user.freepacks && user.freepacks[packrarity] > 0)) {
+			userEmit("booster", boostdata);
 			toggleB(bbuy);
 		} else {
 			tinfo2.setText("You can't afford that!");
@@ -1525,19 +1527,28 @@ function startStore() {
 				user.gold -= packdata[data.packtype].cost;
 				tgold.setText("$" + user.gold);
 			}
-			toggleB(bget);
-			toggleB.apply(null, buttons);
-			if (popbooster.children.length) popbooster.removeChildren();
-			etgutil.iterdeck(data.cards, function(code, i){
-				var x = i % 5, y = Math.floor(i/5);
-				var cardArt = new PIXI.Sprite(getArt(code));
-				cardArt.scale.set(0.85, 0.85);
-				cardArt.position.set(7 + (x * 125), 7 + (y * 225));
-				popbooster.addChild(cardArt);
-			});
-			popbooster.visible = true;
+			if (etgutil.decklength(data.cards) < 11){
+				toggleB(bget);
+				toggleB.apply(null, buttons);
+				if (popbooster.children.length) popbooster.removeChildren();
+				etgutil.iterdeck(data.cards, function(code, i){
+					var x = i % 5, y = Math.floor(i/5);
+					var cardArt = new PIXI.Sprite(getArt(code));
+					cardArt.scale.set(0.85, 0.85);
+					cardArt.position.set(7 + (x * 125), 7 + (y * 225));
+					popbooster.addChild(cardArt);
+				});
+				popbooster.visible = true;
+			}else{
+				chat(data.cards);
+				toggleB(bbuy);
+			}
 		},
 	};
+	packmulti.style.display = "inline";
+	storeui.endnext = function(){
+		packmulti.style.display = "none";
+	}
 	refreshRenderer(storeui);
 }
 var blacklist = {first: true, seed: true, p1deckpower: true, p2deckpower: true, deck: true, urdeck: true };

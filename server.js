@@ -639,15 +639,21 @@ var userEvents = {
 			{ amount: 1, cost: 250, rare: [0, 0, 0, 0]},
 		][data.pack];
 		if (!pack) return;
+		var bumprate = .45/pack.amount;
 		if (user.freepacks){
 			freepacklist = user.freepacks.split(",");
 			if (freepacklist[data.pack] > 0) bound = true;
+		}
+		if (!bound && data.bulk){
+			pack.amount *= data.bulk;
+			pack.cost *= data.bulk;
+			for(var i=0; i<pack.rare.length; i++) pack.rare[i] *= data.bulk;
 		}
 		if (bound || user.gold >= pack.cost) {
 			var newCards = "", rarity = 1;
 			for (var i = 0;i < pack.amount;i++) {
 				while (i == pack.rare[rarity-1]) rarity++;
-				var notFromElement = Math.random() > .5, card = undefined, bumprarity = rarity+(rarity < 5 && Math.random() < (.45/pack.amount));
+				var notFromElement = Math.random() > .5, card = undefined, bumprarity = rarity+(rarity < 5 && Math.random() < bumprate);
 				if (data.element < 13) card = etg.PlayerRng.randomcard(false, function(x) { return (x.element == data.element) ^ notFromElement && x.rarity == bumprarity });
 				if (!card) card = etg.PlayerRng.randomcard(false, function(x) { return x.rarity == bumprarity });
 				newCards = etgutil.addcard(newCards, card.code);
@@ -667,7 +673,7 @@ var userEvents = {
 				user.gold -= pack.cost;
 				user.pool = etgutil.mergedecks(user.pool, newCards);
 			}
-			sockEmit(this, "boostergive", { cards: newCards, accountbound: bound, cost:pack.cost, packtype:data.pack });
+			sockEmit(this, "boostergive", { cards: newCards, accountbound: bound, packtype: data.pack });
 		}
 	},
 };
