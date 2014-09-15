@@ -2562,8 +2562,6 @@ function startArenaInfo(info) {
 	var stage = mkView();
 	var winloss = new MenuText(200, 300, (info.win || 0) + " - " + (info.loss || 0) + ": " + (info.rank+1) + "\nAge: " + info.day + "\nHP: " + info.curhp + " / " + info.hp + "\nMark: " + info.mark + "\nDraw: " + info.draw);
 	stage.addChild(winloss);
-	var batch = new PIXI.DisplayObjectContainer();
-	stage.addChild(batch);
 	var infotext = new MenuText(300, 470, "You get $3 every time your arena deck wins,\n& $1 every time it loses.");
 	stage.addChild(infotext);
 	if (user.ocard){
@@ -2575,7 +2573,7 @@ function startArenaInfo(info) {
 		stage.addChild(bmake);
 		var ocard = new PIXI.Sprite(getArt(uocard));
 		ocard.position.set(734, 300);
-		batch.addChild(ocard);
+		stage.addChild(ocard);
 	}
 	var bret = makeButton(200, 500, "Exit");
 	setClick(bret, startMenu);
@@ -2599,15 +2597,15 @@ function startArenaInfo(info) {
 			}
 			var spr = new PIXI.Sprite(getCardImage(code));
 			spr.position.set(100 + Math.floor(i / 10) * 100, 32 + (i % 10) * 20);
-			batch.addChild(spr);
+			stage.addChild(spr);
 			i++;
 		});
 		var spr = new PIXI.Sprite(gfx.eicons[mark || 0]);
 		spr.position.set(66, 200);
-		batch.addChild(spr);
+		stage.addChild(spr);
 		var acard = new PIXI.Sprite(getArt(info.card));
 		acard.position.set(734, 8);
-		batch.addChild(acard);
+		stage.addChild(acard);
 	}
 	refreshRenderer(stage);
 }

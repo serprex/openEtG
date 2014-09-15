@@ -934,7 +934,7 @@ Creature.prototype.transform = Weapon.prototype.transform = function(card, owner
 Thing.prototype.evade = function(sender) {
 	if (this.status && sender != this.owner && this.status.protect){
 		delete this.status.protect;
-		Effect.mkText("Evade", t);
+		Effect.mkText("Evade", this);
 		return true;
 	}
 	return false;
@@ -949,7 +949,7 @@ Creature.prototype.evade = function(sender) {
 			}
 		}
 		if (freedomChance && this.owner.rng() > Math.pow(.8, freedomChance)){
-			Effect.mkText("Evade", t);
+			Effect.mkText("Evade", this);
 			return true;
 		}
 	}
