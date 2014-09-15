@@ -66,12 +66,9 @@ function getTextImage(text, font, bgcolor, width) {
 		size = font;
 		font = mkFont(font);
 	}else size = parseInt(font.font);
-	var fontkey = JSON.stringify(font) + bgcolor + "w" + width;
-	if (!(fontkey in tximgcache)) {
-		tximgcache[fontkey] = {};
-	}
-	if (text in tximgcache[fontkey]) {
-		return tximgcache[fontkey][text];
+	var key = JSON.stringify(arguments);
+	if (key in tximgcache) {
+		return tximgcache[key];
 	}
 	var doc = new PIXI.DisplayObjectContainer();
 	if (bgcolor !== ""){
@@ -147,7 +144,7 @@ function getTextImage(text, font, bgcolor, width) {
 		bg.endFill();
 	}
 	rtex.render(doc);
-	return tximgcache[fontkey][text] = rtex;
+	return tximgcache[key] = rtex;
 }
 var sounds = {}, musics = {};
 var soundEnabled = false, musicEnabled = false;
