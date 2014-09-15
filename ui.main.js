@@ -1462,7 +1462,7 @@ function startStore() {
 		}
 		var pack = packdata[packrarity];
 		var boostdata = { pack: packrarity, element: packele };
-		if (packmulti.value) parseInput(boostdata, "bulk", packmulti.value, 99);
+		parseInput(boostdata, "bulk", packmulti.value, 99);
 		if (user.gold >= pack.cost * (boostdata.bulk || 1) || (user.freepacks && user.freepacks[packrarity] > 0)) {
 			userEmit("booster", boostdata);
 			toggleB(bbuy);
@@ -1524,7 +1524,9 @@ function startStore() {
 			}
 			else {
 				user.pool = etgutil.mergedecks(user.pool, data.cards);
-				user.gold -= packdata[data.packtype].cost;
+				var bdata = {};
+				parseInput(bdata, "bulk", packmulti.value, 99);
+				user.gold -= packdata[data.packtype].cost * (bdata.bulk || 1);
 				tgold.setText("$" + user.gold);
 			}
 			if (etgutil.decklength(data.cards) < 11){
