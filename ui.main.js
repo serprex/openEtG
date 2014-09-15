@@ -1407,13 +1407,13 @@ function startStore() {
 
 	//shop background
 	storeui.addChild(mkBgRect(
-		40, 16, 790, 60,
+		40, 16, 820, 60,
 		40, 92, 492, 168,
 		40, 270, 620, 168,
-		740, 90, 90, 184
+		770, 90, 90, 184
 	));
 	//gold text
-	var tgold = new MenuText(750, 101, "$" + user.gold);
+	var tgold = new MenuText(775, 101, "$" + user.gold);
 	storeui.addChild(tgold);
 
 	//info text
@@ -1435,7 +1435,7 @@ function startStore() {
 	}
 
 	//get cards button
-	var bget = makeButton(750, 156, "Take Cards");
+	var bget = makeButton(775, 156, "Take Cards");
 	toggleB(bget);
 	setClick(bget, function () {
 		toggleB(bget, bbuy);
@@ -1445,12 +1445,12 @@ function startStore() {
 	storeui.addChild(bget);
 
 	//exit button
-	var bexit = makeButton(750, 246, "Exit");
+	var bexit = makeButton(775, 246, "Exit");
 	setClick(bexit, startMenu);
 	storeui.addChild(bexit);
 
 	//buy button
-	var bbuy = makeButton(750, 156, "Buy Pack");
+	var bbuy = makeButton(775, 156, "Buy Pack");
 	setClick(bbuy, function() {
 		if (packrarity == -1) {
 			tinfo2.setText("Select a pack first!");

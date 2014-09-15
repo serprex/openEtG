@@ -1,5 +1,6 @@
 #!/usr/bin/node
 "use strict";
+var users = {}, usersock = {}, rooms = {}, sockinfo = {};
 var qstring = require("querystring");
 var crypto = require("crypto");
 var fs = require("fs");
@@ -7,189 +8,18 @@ var db = require("redis").createClient();
 var app = require("connect")().
 	use(require("compression")()).
 	use(require("serve-static")(__dirname)).
-	use("/Cards", cardRedirect).
-	use("/deck", deckRedirect).
-	use("/auth", loginAuth).
-	use("/code", codeSmith);
+	use("/Cards", require("./cardredirect")()).
+	use("/deck", require("./deckredirect")()).
+	use("/auth", require("./loginauth")(db, users)).
+	use("/code", require("./codesmith")(db));
 var io = require("engine.io")(app.listen(13602));
 var etgutil = require("./etgutil");
 var userutil = require("./userutil");
 var etg = require("./etg");
 var aiDecks = require("./Decks");
 var Cards = require("./Cards");
-require("./etg.server").loadcards();
-
-function loginRespond(res, servuser, pass){
-	if(!servuser.name){
-		servuser.name = servuser.auth;
-	}
-	if(!servuser.salt){
-		servuser.salt = crypto.pseudoRandomBytes(16).toString("base64");
-		servuser.iter = 100000;
-	}
-	function postHash(err, key){
-		if (err){
-			res.writeHead(503);
-			res.end();
-			return;
-		}
-		key = key.toString("base64");
-		if (!servuser.auth){
-			servuser.auth = key;
-		}else if (servuser.auth != key){
-			console.log("Failed login "+servuser.name);
-			res.writeHead(404);
-			res.end();
-			return;
-		}
-		useruser(servuser, function(user){
-			var day = getDay();
-			if (servuser.oracle < day){
-				servuser.oracle = day;
-				var card = etg.PlayerRng.randomcard(false,
-					(function (y) { return function (x) { return x.type != etg.PillarEnum && ((x.rarity != 5) ^ y); } })(Math.random() < .03));
-				card = card.asShiny(card.rarity == 5);
-				if (card.rarity > 1) {
-					servuser.accountbound = user.accountbound = etgutil.addcard(user.accountbound, card.code);
-				}
-				else {
-					servuser.pool = user.pool = etgutil.addcard(user.pool, card.code);
-				}
-				servuser.ocard = user.ocard = user.oracle = card.code;
-				servuser.daily = user.daily = 0;
-				servuser.dailymage = user.dailymage = Math.floor(Math.random() * aiDecks.mage.length);
-				servuser.dailydg = user.dailydg = Math.floor(Math.random() * aiDecks.demigod.length);
-			}
-			res.writeHead(200, {"Content-Type": "application/json"});
-			res.end(JSON.stringify(user));
-		});
-	}
-	if (pass && pass.length){
-		crypto.pbkdf2(pass, servuser.salt, parseInt(servuser.iter), 64, postHash);
-	}else postHash(null, servuser.name);
-}
-function loginAuth(req, res, next){
-	var paramstring = req.url.substring(2);
-	var params = qstring.parse(paramstring);
-	var name = (params.u || "").trim();
-	if (!name.length){
-		res.writeHead(404);
-		res.end();
-		return;
-	}else if (name in users){
-		loginRespond(res, users[name], params.p);
-	}else{
-		db.hgetall("U:"+name, function (err, obj){
-			users[name] = obj || {name: name};
-			prepuser(users[name]);
-			loginRespond(res, users[name], params.p);
-		});
-	}
-}
-function codeSmithLoop(res, iter, params){
-	if (iter == 1000){
-		res.writeHead(503);
-		res.end();
-	}else{
-		var code = new Array(8);
-		for (var i=0; i<8; i++){
-			code[i] = 33+Math.floor(Math.random()*94);
-		}
-		code = String.fromCharCode.apply(String, code);
-		db.hexists("CodeHash", code, function(err, exists){
-			if (exists){
-				codeSmithLoop(res, iter+1, params);
-			}else{
-				db.hset("CodeHash", code, params.t)
-				res.writeHead(200);
-				res.end(code);
-			}
-		});
-	}
-}
-function codeSmith(req, res, next){
-	var paramstring = req.url.substring(2);
-	var params = qstring.parse(paramstring);
-	fs.readFile(__dirname + "/.codepsw", function(err, data) {
-		if (err){
-			if (err.code == "ENOENT"){
-				data = params.p;
-			}else{
-				res.writeHead(200);
-				res.end(err.message);
-				return;
-			}
-		}
-		if (params.p == data){
-			codeSmithLoop(res, 0, params);
-		}else{
-			res.writeHead(404);
-			res.end();
-		}
-	});
-}
-function cardRedirect(req, res, next){
-	var code = req.url.substr(1, 3);
-	if (code >= "6qo"){
-		fs.exists(__dirname + req.url, function(exists){
-			if (!exists){
-				res.writeHead(302, {Location: "http://" + req.headers.host + "/Cards/" + etgutil[code >= "g00"?"asShiny":"asUpped"](code, false) + ".png"});
-				res.end();
-			}else next();
-		});
-	}else next();
-}
-function deckRedirect(req, res, next){
-	var deck = req.url.substr(1).replace(".png", "");
-	fs.readFile(__dirname + "/deckcache/" + deck, function(err, data){
-		if (!err){
-			res.writeHead(200, {"Content-Type": "image/png"});
-			res.end(data, "binary");
-		}else{
-			var Canvas = require("canvas"), Image = Canvas.Image;
-			var can = new Canvas(616, 160), ctx = can.getContext("2d");
-			var elecols = [
-				"#a99683", "#aa5999", "#777777", "#996633", "#5f4930", "#50a005", "#cc6611", "#205080", "#a9a9a9", "#337ddd", "#ccaa22", "#333333", "#77bbdd",
-				"#d4cac1", "#d4accc", "#bbbbbb", "#ccb299", "#afa497", "#a7cf82", "#e5b288", "#8fa7bf", "#d4d4d4", "#99beee", "#e5d490", "#999999", "#bbddee"];
-			ctx.font = "11px Dosis";
-			ctx.textBaseline = "top";
-			var x=16, y=0;
-			etgutil.iterdeck(deck, function(code){
-				if (!(code in Cards.Codes)){
-					var ismark = etg.fromTrueMark(code);
-					if (~ismark){
-						ctx.fillStyle = elecols[ismark];
-						ctx.fillRect(0, 0, 16, 160);
-					}
-					return;
-				}
-				var card = Cards.Codes[code];
-				ctx.fillStyle = elecols[card.element+(card.upped?13:0)];
-				ctx.fillRect(x, y, 100, 16);
-				ctx.fillStyle = "#000000";
-				ctx.strokeRect(x, y, 100, 16);
-				ctx.fillText(card.name, x+2, y);
-				y += 16;
-				if (y == 160){
-					y=0;
-					x+=100;
-				}
-			});
-			can.toBuffer(function(err, buf){
-				if (err){
-					res.writeHead(503);
-					res.end();
-				}else{
-					res.writeHead(200, {"Content-Type": "image/png"});
-					res.end(buf, "binary");
-					if (deck) fs.writeFile(__dirname + "/deckcache/" + deck, buf, {encoding: "binary"});
-				}
-			});
-		}
-	});
-}
-
-var users = {}, usersock = {}, rooms = {}, sockinfo = {};
+var sutil = require("./etg.server");
+sutil.loadcards();
 function storeUsers(){
 	for(var u in users){
 		var user = users[u];
@@ -228,39 +58,6 @@ function activeUsers() {
 		}
 	}
 	return activeusers;
-}
-function prepuser(servuser){
-	var intFields = ["gold", "selectedDeck", "daily", "dailymage", "dailydg",
-		"aiwins", "ailosses", "pvpwins", "pvplosses"];
-	intFields.forEach(function(field){
-		servuser[field] = parseInt(servuser[field] || 0);
-	});
-}
-function useruser(servuser, cb){
-	db.hgetall("Q:" + servuser.name, function (err, obj) {
-		cb({
-			auth: servuser.auth,
-			name: servuser.name,
-			decks: servuser.decks,
-			selectedDeck: servuser.selectedDeck,
-			pool: servuser.pool,
-			accountbound: servuser.accountbound,
-			gold: servuser.gold,
-			ocard: servuser.ocard,
-			freepacks: servuser.freepacks,
-			aiwins: servuser.aiwins,
-			ailosses: servuser.ailosses,
-			pvpwins: servuser.pvpwins,
-			pvplosses: servuser.pvplosses,
-			daily: servuser.daily,
-			dailymage: servuser.dailymage,
-			dailydg: servuser.dailydg,
-			quest: obj,
-		});
-	});
-}
-function getDay(){
-	return Math.floor(Date.now()/86400000);
 }
 function genericChat(socket, data){
 	if (data.msg == "/who") {
@@ -311,7 +108,7 @@ var userEvents = {
 		user.dailydg = Math.floor(Math.random() * aiDecks.demigod.length);
 		var socket = this;
 		db.hset("Q:"+user.name, "necromancer", 1, function(err, obj){
-			useruser(user, function(clientuser){
+			sutil.useruser(db, user, function(clientuser){
 				sockEmit(socket, "userdump", clientuser);
 			});
 		});
@@ -345,7 +142,7 @@ var userEvents = {
 		if (data.mod){
 			db.hmset(au, {deck: data.d, hp: data.hp, draw: data.draw, mark: data.mark});
 		}else{
-			db.hmset(au, {day: getDay(), deck: data.d, card: user.ocard, win:0, loss:0, hp: data.hp, draw: data.draw, mark: data.mark});
+			db.hmset(au, {day: sutil.getDay(), deck: data.d, card: user.ocard, win:0, loss:0, hp: data.hp, draw: data.draw, mark: data.mark});
 			db.zadd("arena"+(data.lv?"1":""), 0, data.u);
 		}
 	},
@@ -356,7 +153,7 @@ var userEvents = {
 				sockEmit(socket, "arenainfo", {deck:"", lv: data.lv});
 			}else{
 				db.zrevrank("arena"+(data.lv?"1":""), data.u, function(err, rank){
-					obj.day = getDay() - obj.day;
+					obj.day = sutil.getDay() - obj.day;
 					obj.curhp = getAgedHp(obj.hp, obj.day);
 					obj.lv = data.lv;
 					if (rank !== null)obj.rank = rank;
@@ -374,7 +171,7 @@ var userEvents = {
 					sockEmit(socket, "arenatop", {top: t20});
 				}else{
 					db.hmget((data.lv?"B:":"A:") + obj[i], "win", "loss", "day", "card", function(err, wl){
-						wl[2] = getDay()-wl[2];
+						wl[2] = sutil.getDay()-wl[2];
 						t20.push([obj[i], obj[i+1]].concat(wl));
 						getwinloss(i+2);
 					});
@@ -402,7 +199,7 @@ var userEvents = {
 				if (score === null) return;
 				db.zincrby(arena, -1, data.aname, function(err, newscore) {
 					db.hget((data.lv?"B:":"A:")+data.aname, "day", function(err, day){
-						if (newscore < -15 || getDay()-day > 14){
+						if (newscore < -15 || sutil.getDay()-day > 14){
 							db.zrem(arena, data.aname);
 						}
 					});
@@ -431,7 +228,7 @@ var userEvents = {
 					adeck.hp = parseInt(adeck.hp || 200);
 					adeck.mark = parseInt(adeck.mark || 1);
 					adeck.draw = parseInt(adeck.draw || data.lv+1);
-					var curhp = getAgedHp(adeck.hp, getDay()-adeck.day);
+					var curhp = getAgedHp(adeck.hp, sutil.getDay()-adeck.day);
 					sockEmit(socket, "foearena", {
 						seed: seed*etgutil.MAX_INT,
 						name: aname, hp: curhp,
@@ -787,7 +584,7 @@ io.on("connection", function(socket) {
 				if (data.x == "logout") return;
 				db.hgetall("U:"+u, function(err, obj){
 					if (obj){
-						prepuser(obj);
+						sutil.prepuser(obj);
 						users[u] = obj;
 						if (data.a == obj.auth) {
 							usersock[u] = socket;
