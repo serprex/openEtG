@@ -782,11 +782,9 @@ io.on("connection", function(socket) {
 			if (!data || !(u = data.u)){
 				return;
 			}
-			if (!(this.id in sockinfo)){
-				sockinfo[this.id] = {};
-			}
 			console.log(u+": "+data.x);
 			if (!(u in users)){
+				if (data.x == "logout") return;
 				db.hgetall("U:"+u, function(err, obj){
 					if (obj){
 						prepuser(obj);
