@@ -1042,8 +1042,10 @@ function startMenu(nymph) {
 						startEditor();
 						return;
 					}
-					userEmit("foearena", lvi);
-					menuui.removeChild(this);
+					if (user.gold > (i ? 20 : 10)) {
+						userEmit("foearena", lvi);
+						menuui.removeChild(this);
+					}
 				}
 			});
 			setClick(binfoa, function() {
