@@ -1992,7 +1992,7 @@ function startMatch(game, foeDeck) {
 		}else if (game.winner) {
 			if (user) {
 				if (game.arena) {
-					userEmit("modarena", { aname: game.arena, won: game.winner == game.player2, lv: game.level == 2?0:1 });
+					userEmit("modarena", { aname: game.arena, won: game.winner == game.player2, lv: game.level-4 });
 				}
 				if (game.winner == game.player1) {
 					if (game.quest){
