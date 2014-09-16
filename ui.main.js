@@ -1589,9 +1589,9 @@ function startColosseum(){
 	var dgname = aiDecks.demigod[user.dailydg][0];
 	var events = [
 		{ name: "Novice Endurance", desc: "Fight 3 Commoners in a row without healing in between. May try until you win." },
-		{ name: "Expert Endurance", desc: "Fight 3 Champions in a row. May try until you win" },
-		{ name: "Novice Duel", desc: "Fight " + magename + ". Only one attempt allowed" },
-		{ name: "Expert Duel", desc: "Fight " + dgname + ". Only one attempt allowed" }
+		{ name: "Expert Endurance", desc: "Fight 3 Champions in a row. May try until you win." },
+		{ name: "Novice Duel", desc: "Fight " + magename + ". Only one attempt allowed." },
+		{ name: "Expert Duel", desc: "Fight " + dgname + ". Only one attempt allowed." }
 	];
 	for (var i = 1;i < 5;i++) {
 		var active = !(user.daily & (1 << i));
@@ -1600,7 +1600,7 @@ function startColosseum(){
 			setClick(button, mkDaily(i));
 			coloui.addChild(button);
 		}
-		var text = new MenuText(130, 100 + 30 * i, active ? (events[i-1].name + ": " + events[i-1].desc) : "Not available. Try again tomorrow.");
+		var text = new MenuText(130, 100 + 30 * i, active ? (events[i-1].name + ": " + events[i-1].desc) : i > 2 ? (user.daily&(i==3?1:32) ? "You defeated this already today." : "You failed this today. Better luck tomorrow!") : "Completed.");
 		coloui.addChild(text);
 	}
 	if (user.daily == 63){
@@ -2918,7 +2918,7 @@ function aiClick() {
 		startEditor();
 		return;
 	}
-	var gameData = { first: Math.random() < .5, deck: aideckcode, urdeck: deck, seed: Math.random() * etgutil.MAX_INT, foename: "Custom" };
+	var gameData = { first: Math.random() < .5, deck: aideckcode, urdeck: deck, seed: Math.random() * etgutil.MAX_INT, foename: "Custom", cardreward: "" };
 	parsepvpstats(gameData);
 	parseaistats(gameData);
 	initGame(gameData, true);
