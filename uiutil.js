@@ -146,7 +146,7 @@ function getTextImage(text, font, bgcolor, width) {
 	rtex.render(doc);
 	return tximgcache[key] = rtex;
 }
-var sounds = {}, musics = {};
+var sounds = {}, musics = {}, currentMusic;
 var soundEnabled = false, musicEnabled = false;
 function loadSounds() {
 	if (soundEnabled){
@@ -163,8 +163,8 @@ function loadMusics() {
 	}
 }
 function playSound(name, dontreset) {
-	var sound = sounds[name];
 	if (soundEnabled) {
+		var sound = sounds[name];
 		if (!sound){
 			sound = sounds[name] = new Audio("sound/" + name + ".ogg");
 		}
@@ -173,12 +173,16 @@ function playSound(name, dontreset) {
 	}
 }
 function playMusic(name) {
-	var music = musics[name];
+	if (name == currentMusic) return;
+	var music;
+	if (musicEnabled && (music = musics[currentMusic])) music.pause();
+	currentMusic = name;
 	if (musicEnabled){
+		music = musics[name];
 		if (!music){
 			music = musics[name] = new Audio("sound/" + name + ".ogg");
+			music.loop = true;
 		}
-		if (music.duration) music.currentTime = 0;
 		music.play();
 	}
 }
@@ -193,9 +197,12 @@ function changeSound(enabled) {
 function changeMusic(enabled) {
 	musicEnabled = enabled;
 	if (!musicEnabled) {
-		for (var music in musics) {
-			musics[music].pause();
-		}
+		var music = musics[currentMusic];
+		if (music) music.pause();
+	}else{
+		var name = currentMusic;
+		currentMusic = null;
+		playMusic(name);
 	}
 }
 exports.mkFont = mkFont;
