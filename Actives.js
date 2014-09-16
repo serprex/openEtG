@@ -1364,6 +1364,7 @@ stoneform:function(c,t){
 	Effect.mkText("0|20", c);
 	c.buffhp(20);
 	delete c.active.cast;
+	c.status.golem = true;
 },
 storm2:function(c,t){
 	t.masscc(c, function(c,x){x.dmg(2)});

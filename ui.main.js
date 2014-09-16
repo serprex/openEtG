@@ -859,7 +859,7 @@ CardSelector.prototype.renderColumns = function(){
 			spr.setTexture(getCardImage(code));
 			spr.visible = true;
 			if (this.cardpool) {
-				var txt = spr.getChildAt(0), card = Cards.Codes[code], inf = isFreeCard(card);
+				var txt = spr.children[0], card = Cards.Codes[code], inf = isFreeCard(card);
 				if ((txt.visible = inf || code in this.cardpool || this.showall)) {
 					var cardAmount = inf ? "-" : !(code in this.cardpool) ? 0 : (this.cardpool[code] - (this.cardminus && code in this.cardminus ? this.cardminus[code] : 0))
 					maybeSetText(txt, cardAmount.toString());
@@ -1935,16 +1935,17 @@ function startMatch(game, foeDeck) {
 		}
 	}
 	function drawStatus(obj, spr) {
-		spr.getChildAt(0).getChildAt(0).visible = obj.status.psion;
-		spr.getChildAt(0).getChildAt(1).visible = obj.status.aflatoxin;
-		spr.getChildAt(0).getChildAt(2).visible = obj.status.poison > 0;
-		spr.getChildAt(0).getChildAt(3).visible = obj.status.airborne || obj.status.ranged;
-		spr.getChildAt(0).getChildAt(4).visible = obj.status.momentum;
-		spr.getChildAt(0).getChildAt(5).visible = obj.status.adrenaline;
-		spr.getChildAt(0).getChildAt(6).visible = obj.status.poison < 0;
-		spr.getChildAt(0).getChildAt(7).visible = obj.status.delayed;
-		spr.getChildAt(0).getChildAt(8).visible = obj == obj.owner.gpull;
-		spr.getChildAt(0).getChildAt(9).visible = obj.status.frozen;
+		var statuses = spr.children[0];
+		statuses.children[0].visible = obj.status.psion;
+		statuses.children[1].visible = obj.status.aflatoxin;
+		statuses.children[2].visible = !obj.status.aflatoxin && obj.status.poison > 0;
+		statuses.children[3].visible = obj.status.airborne || obj.status.ranged;
+		statuses.children[4].visible = obj.status.momentum;
+		statuses.children[5].visible = obj.status.adrenaline;
+		statuses.children[6].visible = obj.status.poison < 0;
+		statuses.children[7].visible = obj.status.delayed;
+		statuses.children[8].visible = obj == obj.owner.gpull;
+		statuses.children[9].visible = obj.status.frozen;
 		spr.alpha = obj.isMaterial() ? 1 : .7;
 	}
 	var resigning, discarding, aiDelay = 0, aiState, aiCommand;
@@ -2498,9 +2499,9 @@ function startMatch(game, foeDeck) {
 				if (cr && !(j == 1 && cloakgfx.visible)) {
 					creasprite[j][i].setTexture(getCreatureImage(cr.card));
 					creasprite[j][i].visible = true;
-					var child = creasprite[j][i].getChildAt(1);
+					var child = creasprite[j][i].children[1];
 					child.setTexture(ui.getTextImage(cr.trueatk() + "|" + cr.truehp() + (cr.status.charges ? " x" + cr.status.charges : ""), ui.mkFont(10, cr.card.upped ? "black" : "white"), maybeLighten(cr.card)));
-					var child2 = creasprite[j][i].getChildAt(2);
+					var child2 = creasprite[j][i].children[2];
 					var activetext = cr.activetext1();
 					child2.setTexture(ui.getTextImage(activetext, ui.mkFont(8, cr.card.upped ? "black" : "white")));
 					drawStatus(cr, creasprite[j][i]);
@@ -2512,7 +2513,7 @@ function startMatch(game, foeDeck) {
 					permsprite[j][i].setTexture(getPermanentImage(pr.card.code));
 					permsprite[j][i].visible = true;
 					permsprite[j][i].alpha = pr.isMaterial() ? 1 : .7;
-					var child = permsprite[j][i].getChildAt(0);
+					var child = permsprite[j][i].children[0];
 					if (pr instanceof etg.Pillar) {
 						child.setTexture(ui.getTextImage("1:" + (pr.pendstate ? pr.owner.mark : pr.card.element) + " x" + pr.status.charges, ui.mkFont(10, pr.card.upped ? "black" : "white"), maybeLighten(pr.card)));
 					}
@@ -2520,17 +2521,17 @@ function startMatch(game, foeDeck) {
 						child.setTexture(ui.getTextImage("1:" + (pr.status.mode === undefined ? pr.owner.mark : pr.status.mode), ui.mkFont(10, pr.card.upped ? "black" : "white"), maybeLighten(pr.card)));
 					}
 					else child.setTexture(ui.getTextImage(pr.status.charges !== undefined ? " " + pr.status.charges : "", ui.mkFont(10, pr.card.upped ? "black" : "white"), maybeLighten(pr.card)));
-					var child2 = permsprite[j][i].getChildAt(1);
+					var child2 = permsprite[j][i].children[1];
 					child2.setTexture(pr instanceof etg.Pillar ? gfx.nopic : ui.getTextImage(pr.activetext1(), ui.mkFont(8, pr.card.upped ? "black" : "white")));
 				} else permsprite[j][i].visible = false;
 			}
 			var wp = pl.weapon;
 			if (wp && !(j == 1 && cloakgfx.visible)) {
 				weapsprite[j].visible = true;
-				var child = weapsprite[j].getChildAt(1);
+				var child = weapsprite[j].children[1];
 				child.setTexture(ui.getTextImage(wp.trueatk() + (wp.status.charges ? " x" + wp.status.charges : ""), ui.mkFont(12, wp.card.upped ? "black" : "white"), maybeLighten(wp.card)));
 				child.visible = true;
-				var child = weapsprite[j].getChildAt(2);
+				var child = weapsprite[j].children[2];
 				child.setTexture(ui.getTextImage(wp.activetext1(), ui.mkFont(12, wp.card.upped ? "black" : "white")));
 				child.visible = true;
 				weapsprite[j].setTexture(getWeaponShieldImage(wp.card.code));
@@ -2539,10 +2540,10 @@ function startMatch(game, foeDeck) {
 			var sh = pl.shield;
 			if (sh && !(j == 1 && cloakgfx.visible)) {
 				shiesprite[j].visible = true;
-				var child = shiesprite[j].getChildAt(0);
+				var child = shiesprite[j].children[0];
 				child.setTexture(ui.getTextImage(sh.status.charges ? "x" + sh.status.charges: "" + sh.truedr() + "", ui.mkFont(12, sh.card.upped ? "black" : "white"), maybeLighten(sh.card)));
 				child.visible = true;
-				var child = shiesprite[j].getChildAt(1);
+				var child = shiesprite[j].children[1];
 				child.setTexture(ui.getTextImage(sh.activetext1(), ui.mkFont(12, sh.card.upped ? "black" : "white")));
 				child.visible = true;
 				shiesprite[j].alpha = sh.isMaterial() ? 1 : .7;
@@ -2553,7 +2554,7 @@ function startMatch(game, foeDeck) {
 				maybeSetText(marktext[j], "x" + pl.markpower);
 			}else marktext[j].visible = false;
 			for (var i = 1;i < 13;i++) {
-				maybeSetText(quantatext[j].getChildAt(i*2-2), pl.quanta[i].toString());
+				maybeSetText(quantatext[j].children[i*2-2], pl.quanta[i].toString());
 			}
 			var yOffset = j == 0 ? 28 : -44;
 			fgfx.beginFill(0);
