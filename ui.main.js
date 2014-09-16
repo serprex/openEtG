@@ -504,6 +504,16 @@ function victoryScreen(game) {
 
 	function onkeydown(e){
 		if (e.keyCode == 32) bexit.click();
+		else if (e.keyCode == 87 && !game.quest && game.daily === undefined){
+			switch(game.level){
+			case 0:mkAi(0)();break;
+			case 1:mkPremade("mage")();break;
+			case 2:mkAi(2)();break;
+			case 3:mkPremade("demigod")();break;
+			case 4:userEmit("foearena", {lv:0});break;
+			case 5:userEmit("foearena", {lv:1});break;
+			}
+		}
 	}
 	document.addEventListener("keydown", onkeydown);
 	victoryui.endnext = function() {
@@ -2385,8 +2395,8 @@ function startMatch(game, foeDeck) {
 			if (!game.goldreward) {
 				var goldwon;
 				if (game.level !== undefined) {
-					var basereward = [2, 8, 15, 44][game.level];
-					var hpfactor = [7, 4.5, 4, 1.3][game.level];
+					var basereward = [1, 8, 15, 44, 15, 44][game.level];
+					var hpfactor = [7, 4.5, 4, 1.3, 4, 1.3][game.level];
 					goldwon = basereward + Math.floor(game.player1.hp / hpfactor);
 				} else goldwon = 0;
 				game.goldreward = goldwon + (game.cost || 0) + (game.addonreward || 0);
@@ -2688,7 +2698,7 @@ var sockEvents = {
 	foearena:function(data) {
 		aideck.value = data.deck;
 		var game = initGame({ first: data.seed < etgutil.MAX_INT/2, deck: data.deck, urdeck: getDeck(), seed: data.seed,
-			p2hp: data.hp, foename: data.name, p2drawpower: data.draw, p2markpower: data.mark, arena: data.name, level: data.lv?3:2 }, true);
+			p2hp: data.hp, foename: data.name, p2drawpower: data.draw, p2markpower: data.mark, arena: data.name, level: 4+data.lv }, true);
 		game.cost = data.lv?20:10;
 		user.gold -= data.lv?20:10;
 	},
