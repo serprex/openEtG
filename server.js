@@ -211,10 +211,10 @@ var userEvents = {
 		var socket = this;
 		db.zcard("arena"+(data.lv?"1":""), function(err, len){
 			if (!len)return;
-			var cost = 10+data.lv*10;
+			var cost = userutil.arenaCost(data.lv);
 			if (user.gold < cost)return;
 			user.gold -= cost;
-			var idx = Math.floor(Math.random()*Math.min(len, 20));
+			var idx = etg.PlayerRng.upto(Math.min(len, 20));
 			db.zrevrange("arena"+(data.lv?"1":""), idx, idx, function(err, aname){
 				if (!aname || !aname.length){
 					console.log("No arena " + idx);

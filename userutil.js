@@ -8,6 +8,9 @@ exports.rewardwords = {
 	shard: 4,
 	nymph: 5,
 };
+exports.arenaCost = function(lv){
+	return lv ? 20 : 10;
+}
 exports.sellcard = function(data, user){
 	if (etgutil.count(user.pool, data.card)){
 		var card = Cards.Codes[data.card];

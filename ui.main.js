@@ -1033,7 +1033,7 @@ function startMenu(nymph) {
 	for (var i=0; i<2; i++){
 		var baia = makeButton(50, 200+i*45, "Arena AI", (function(cost){return function() {
 			tinfo.setText("In the arena you will face decks from other players.\nCost: $" + cost);
-		}})(i?20:10));
+		}})(userutil.arenaCost(i)));
 		menuui.addChild(baia);
 		var binfoa = makeButton(150, 200+i*45, "Arena Info", function() {
 			tinfo.setText("Check how your arena deck is doing.");
@@ -1051,10 +1051,13 @@ function startMenu(nymph) {
 						startEditor();
 						return;
 					}
-					if (user.gold > (i ? 20 : 10)) {
-						userEmit("foearena", lvi);
-						menuui.removeChild(this);
+					var cost = userutil.arenaCost(i);
+					if (user.gold < cost) {
+						chat("Requires " + cost + "\u00A4");
+						return;
 					}
+					userEmit("foearena", lvi);
+					menuui.removeChild(this);
 				}
 			});
 			setClick(binfoa, function() {
@@ -2701,8 +2704,8 @@ var sockEvents = {
 		aideck.value = data.deck;
 		var game = initGame({ first: data.seed < etgutil.MAX_INT/2, deck: data.deck, urdeck: getDeck(), seed: data.seed,
 			p2hp: data.hp, foename: data.name, p2drawpower: data.draw, p2markpower: data.mark, arena: data.name, level: 4+data.lv }, true);
-		game.cost = data.lv?20:10;
-		user.gold -= data.lv?20:10;
+		game.cost = userutil.arenaCost(data.lv);
+		user.gold -= game.cost;
 	},
 	arenainfo: startArenaInfo,
 	arenatop: startArenaTop,
