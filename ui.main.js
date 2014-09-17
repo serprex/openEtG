@@ -1903,8 +1903,8 @@ function startElementSelect() {
 	var eledesc = new MenuText(100, 250, "Select your starter element");
 	stage.addChild(eledesc);
 	var elesel = new Array(14);
-	etg.eleNames.forEach(function(name, i) {
-		if (i > 13) return;
+	for (var i = 0;i < 14;i++) {
+		var name = etg.eleNames[i]
 		elesel[i] = new PIXI.Sprite(gfx.eicons[i]);
 		elesel[i].position.set(100 + i * 32, 300);
 		elesel[i].mouseover = function(){
@@ -1918,7 +1918,7 @@ function startElementSelect() {
 		});
 		elesel[i].interactive = true;
 		stage.addChild(elesel[i]);
-	});
+	}
 	refreshRenderer(stage);
 }
 
