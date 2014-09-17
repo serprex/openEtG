@@ -1051,7 +1051,7 @@ function startMenu(nymph) {
 						startEditor();
 						return;
 					}
-					var cost = userutil.arenaCost(i);
+					var cost = userutil.arenaCost(lvi.i);
 					if (user.gold < cost) {
 						chat("Requires " + cost + "\u00A4");
 						return;
