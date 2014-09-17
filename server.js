@@ -107,10 +107,8 @@ var userEvents = {
 		user.dailymage = Math.floor(Math.random() * aiDecks.mage.length);
 		user.dailydg = Math.floor(Math.random() * aiDecks.demigod.length);
 		var socket = this;
-		db.hset("Q:"+user.name, "necromancer", 1, function(err, obj){
-			sutil.useruser(db, user, function(clientuser){
-				sockEmit(socket, "userdump", clientuser);
-			});
+		sutil.useruser(db, user, function(clientuser){
+			sockEmit(socket, "userdump", clientuser);
 		});
 	},
 	logout:function(data, user) {
