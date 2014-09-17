@@ -875,6 +875,13 @@ CardSelector.prototype.renderColumns = function(){
 		}
 	}
 }
+function addMouseOverBg(view, func) {
+	var bg = new PIXI.Graphics();
+	bg.hitArea = new PIXI.Rectangle(0, 0, 900, 600);
+	bg.mouseover = func;
+	bg.interactive = true;
+	view.addChild(bg);
+}
 function startMenu(nymph) {
 	var tipjar = [
 		"Each card in your booster pack has a 50% chance of being from the chosen element",
@@ -913,9 +920,9 @@ function startMenu(nymph) {
 	var tipNumber = etg.PlayerRng.upto(tipjar.length);
 
 	var menuui = mkView();
-	menuui.mouseover = function() {
+	addMouseOverBg(menuui, function() {
 		tinfo.setText(user ? "Tip: " + tipjar[tipNumber] + "." : "To register, just type desired username & password in the fields to the right, then click 'Login'.");
-	};
+	});
 	menuui.addChild(mkBgRect(
 		40, 16, 820, 60,
 		40, 92, 392, 80,
@@ -1169,11 +1176,10 @@ function startQuest(questname) {
 	}
 }
 function startQuestWindow(){
-	var questui = mkView();
-	questui.mouseover = function(){
+	var questui = mkView();	
+	addMouseOverBg(questui, function() {
 		tinfo.setText("Welcome to Potatotal Island. The perfect island for adventuring!");
-	};
-	questui.interactive = true;
+	});
 	questui.addChild(mkBgRect(9, 9, 880, 111));
 	var questmap = new PIXI.Sprite(gfx.bg_questmap);
 	questmap.position.set(124, 162);
@@ -1233,9 +1239,9 @@ function startQuestWindow(){
 }
 function startQuestArea(area) {
 	var questui = mkView();
-	questui.mouseover = function(){
+	addMouseOverBg(questui, function() {
 		tinfo.setText("");
-	};
+	});
 	questui.addChild(mkBgRect(9, 9, 880, 111));
 	var questmap = new PIXI.Sprite(gfx.bg_quest);
 	questmap.position.set(124, 162);
