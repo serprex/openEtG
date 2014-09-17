@@ -38,7 +38,7 @@ function MenuText(x, y, txt, wrapwidth) {
 }
 MenuText.prototype = Object.create(PIXI.Sprite.prototype);
 MenuText.prototype.textText = function(x){
-	return ui.getTextImage(x.toString(), { font: "14px Verdana", fill: "white", stroke: "black", strokeThickness: 2 }, "", this.wrapwidth);
+	return ui.getTextImage(x.toString(), {font: "14px Verdana", fill: "white", stroke: "black", strokeThickness: 2}, "", this.wrapwidth);
 }
 MenuText.prototype.setText = function(x){
 	this.setTexture(this.textText(x));
@@ -141,7 +141,7 @@ function makeArt(card, art, oldrend) {
 			template.addChild(eleicon);
 		}
 	}
-	var infospr = new PIXI.Sprite(ui.getTextImage(card.info(), ui.mkFont(11, card.upped ? "black" : "white"), "", rend.width-4))
+	var infospr = new PIXI.Sprite(ui.getTextImage(card.info(), ui.mkFont(11, card.upped ? "black" : "white"), "", rend.width-4));
 	infospr.position.set(2, 150);
 	template.addChild(infospr);
 	rend.render(template, null, true);
@@ -434,11 +434,10 @@ function deckPower(deck, amount) {
 		return res;
 	}else return deck;
 }
-function getDeck(limit) {
-	var deck = user ? user.decks[user.selectedDeck] :
-		~deckimport.value.indexOf(" ") ? etgutil.encodedeck(deckimport.value.split(" ")) :
-		deckimport.value;
-	return deck;
+function getDeck() {
+	if (user) return user.decks[user.selectedDeck];
+	var deck = deckimport.value.trim();
+	return ~deck.indexOf(" ") ? etgutil.encodedeck(deck.split(" ")) : deck;
 }
 function listify(maybeArray) {
 	if (maybeArray instanceof Array) return maybeArray;
@@ -504,6 +503,16 @@ function victoryScreen(game) {
 
 	function onkeydown(e){
 		if (e.keyCode == 32) bexit.click();
+		else if (e.keyCode == 87 && !game.quest && game.daily === undefined){
+			switch(game.level){
+			case 0:mkAi(0)();break;
+			case 1:mkPremade("mage")();break;
+			case 2:mkAi(2)();break;
+			case 3:mkPremade("demigod")();break;
+			case 4:userEmit("foearena", {lv:0});break;
+			case 5:userEmit("foearena", {lv:1});break;
+			}
+		}
 	}
 	document.addEventListener("keydown", onkeydown);
 	victoryui.endnext = function() {
@@ -849,7 +858,7 @@ CardSelector.prototype.renderColumns = function(){
 			spr.setTexture(getCardImage(code));
 			spr.visible = true;
 			if (this.cardpool) {
-				var txt = spr.getChildAt(0), card = Cards.Codes[code], inf = isFreeCard(card);
+				var txt = spr.children[0], card = Cards.Codes[code], inf = isFreeCard(card);
 				if ((txt.visible = inf || code in this.cardpool || this.showall)) {
 					var cardAmount = inf ? "-" : !(code in this.cardpool) ? 0 : (this.cardpool[code] - (this.cardminus && code in this.cardminus ? this.cardminus[code] : 0))
 					maybeSetText(txt, cardAmount.toString());
@@ -1024,7 +1033,7 @@ function startMenu(nymph) {
 	for (var i=0; i<2; i++){
 		var baia = makeButton(50, 200+i*45, "Arena AI", (function(cost){return function() {
 			tinfo.setText("In the arena you will face decks from other players.\nCost: $" + cost);
-		}})(i?20:10));
+		}})(userutil.arenaCost(i)));
 		menuui.addChild(baia);
 		var binfoa = makeButton(150, 200+i*45, "Arena Info", function() {
 			tinfo.setText("Check how your arena deck is doing.");
@@ -1042,10 +1051,13 @@ function startMenu(nymph) {
 						startEditor();
 						return;
 					}
-					if (user.gold > (i ? 20 : 10)) {
-						userEmit("foearena", lvi);
-						menuui.removeChild(this);
+					var cost = userutil.arenaCost(i);
+					if (user.gold < cost) {
+						chat("Requires " + cost + "\u00A4");
+						return;
 					}
+					userEmit("foearena", lvi);
+					menuui.removeChild(this);
 				}
 			});
 			setClick(binfoa, function() {
@@ -1800,7 +1812,7 @@ function startEditor(arena, acard, startempty) {
 		});
 		var bimport = makeButton(8, 96, "Import");
 		setClick(bimport, function() {
-			var dvalue = deckimport.value;
+			var dvalue = deckimport.value.trim();
 			decksprite.deck = ~dvalue.indexOf(" ") ? dvalue.split(" ") : etgutil.decodedeck(dvalue);
 			processDeck();
 		});
@@ -1926,16 +1938,17 @@ function startMatch(game, foeDeck) {
 		}
 	}
 	function drawStatus(obj, spr) {
-		spr.getChildAt(0).getChildAt(0).visible = obj.status.psion;
-		spr.getChildAt(0).getChildAt(1).visible = obj.status.aflatoxin;
-		spr.getChildAt(0).getChildAt(2).visible = obj.status.poison > 0;
-		spr.getChildAt(0).getChildAt(3).visible = obj.status.airborne || obj.status.ranged;
-		spr.getChildAt(0).getChildAt(4).visible = obj.status.momentum;
-		spr.getChildAt(0).getChildAt(5).visible = obj.status.adrenaline;
-		spr.getChildAt(0).getChildAt(6).visible = obj.status.poison < 0;
-		spr.getChildAt(0).getChildAt(7).visible = obj.status.delayed;
-		spr.getChildAt(0).getChildAt(8).visible = obj == obj.owner.gpull;
-		spr.getChildAt(0).getChildAt(9).visible = obj.status.frozen;
+		var statuses = spr.children[0];
+		statuses.children[0].visible = obj.status.psion;
+		statuses.children[1].visible = obj.status.aflatoxin;
+		statuses.children[2].visible = !obj.status.aflatoxin && obj.status.poison > 0;
+		statuses.children[3].visible = obj.status.airborne || obj.status.ranged;
+		statuses.children[4].visible = obj.status.momentum;
+		statuses.children[5].visible = obj.status.adrenaline;
+		statuses.children[6].visible = obj.status.poison < 0;
+		statuses.children[7].visible = obj.status.delayed;
+		statuses.children[8].visible = obj == obj.owner.gpull;
+		statuses.children[9].visible = obj.status.frozen;
 		spr.alpha = obj.isMaterial() ? 1 : .7;
 	}
 	var resigning, discarding, aiDelay = 0, aiState, aiCommand;
@@ -1983,7 +1996,7 @@ function startMatch(game, foeDeck) {
 		}else if (game.winner) {
 			if (user) {
 				if (game.arena) {
-					userEmit("modarena", { aname: game.arena, won: game.winner == game.player2, lv: game.level == 2?0:1 });
+					userEmit("modarena", { aname: game.arena, won: game.winner == game.player2, lv: game.level-4 });
 				}
 				if (game.winner == game.player1) {
 					if (game.quest){
@@ -2388,8 +2401,8 @@ function startMatch(game, foeDeck) {
 			if (!game.goldreward) {
 				var goldwon;
 				if (game.level !== undefined) {
-					var basereward = [2, 8, 15, 44][game.level];
-					var hpfactor = [7, 4.5, 4, 1.3][game.level];
+					var basereward = [1, 8, 15, 44, 15, 44][game.level];
+					var hpfactor = [7, 4.5, 4, 1.3, 4, 1.3][game.level];
 					goldwon = basereward + Math.floor(game.player1.hp / hpfactor);
 				} else goldwon = 0;
 				game.goldreward = goldwon + (game.cost || 0) + (game.addonreward || 0);
@@ -2489,9 +2502,9 @@ function startMatch(game, foeDeck) {
 				if (cr && !(j == 1 && cloakgfx.visible)) {
 					creasprite[j][i].setTexture(getCreatureImage(cr.card));
 					creasprite[j][i].visible = true;
-					var child = creasprite[j][i].getChildAt(1);
+					var child = creasprite[j][i].children[1];
 					child.setTexture(ui.getTextImage(cr.trueatk() + "|" + cr.truehp() + (cr.status.charges ? " x" + cr.status.charges : ""), ui.mkFont(10, cr.card.upped ? "black" : "white"), maybeLighten(cr.card)));
-					var child2 = creasprite[j][i].getChildAt(2);
+					var child2 = creasprite[j][i].children[2];
 					var activetext = cr.activetext1();
 					child2.setTexture(ui.getTextImage(activetext, ui.mkFont(8, cr.card.upped ? "black" : "white")));
 					drawStatus(cr, creasprite[j][i]);
@@ -2503,7 +2516,7 @@ function startMatch(game, foeDeck) {
 					permsprite[j][i].setTexture(getPermanentImage(pr.card.code));
 					permsprite[j][i].visible = true;
 					permsprite[j][i].alpha = pr.isMaterial() ? 1 : .7;
-					var child = permsprite[j][i].getChildAt(0);
+					var child = permsprite[j][i].children[0];
 					if (pr instanceof etg.Pillar) {
 						child.setTexture(ui.getTextImage("1:" + (pr.pendstate ? pr.owner.mark : pr.card.element) + " x" + pr.status.charges, ui.mkFont(10, pr.card.upped ? "black" : "white"), maybeLighten(pr.card)));
 					}
@@ -2511,17 +2524,17 @@ function startMatch(game, foeDeck) {
 						child.setTexture(ui.getTextImage("1:" + (pr.status.mode === undefined ? pr.owner.mark : pr.status.mode), ui.mkFont(10, pr.card.upped ? "black" : "white"), maybeLighten(pr.card)));
 					}
 					else child.setTexture(ui.getTextImage(pr.status.charges !== undefined ? " " + pr.status.charges : "", ui.mkFont(10, pr.card.upped ? "black" : "white"), maybeLighten(pr.card)));
-					var child2 = permsprite[j][i].getChildAt(1);
+					var child2 = permsprite[j][i].children[1];
 					child2.setTexture(pr instanceof etg.Pillar ? gfx.nopic : ui.getTextImage(pr.activetext1(), ui.mkFont(8, pr.card.upped ? "black" : "white")));
 				} else permsprite[j][i].visible = false;
 			}
 			var wp = pl.weapon;
 			if (wp && !(j == 1 && cloakgfx.visible)) {
 				weapsprite[j].visible = true;
-				var child = weapsprite[j].getChildAt(1);
+				var child = weapsprite[j].children[1];
 				child.setTexture(ui.getTextImage(wp.trueatk() + (wp.status.charges ? " x" + wp.status.charges : ""), ui.mkFont(12, wp.card.upped ? "black" : "white"), maybeLighten(wp.card)));
 				child.visible = true;
-				var child = weapsprite[j].getChildAt(2);
+				var child = weapsprite[j].children[2];
 				child.setTexture(ui.getTextImage(wp.activetext1(), ui.mkFont(12, wp.card.upped ? "black" : "white")));
 				child.visible = true;
 				weapsprite[j].setTexture(getWeaponShieldImage(wp.card.code));
@@ -2530,10 +2543,10 @@ function startMatch(game, foeDeck) {
 			var sh = pl.shield;
 			if (sh && !(j == 1 && cloakgfx.visible)) {
 				shiesprite[j].visible = true;
-				var child = shiesprite[j].getChildAt(0);
+				var child = shiesprite[j].children[0];
 				child.setTexture(ui.getTextImage(sh.status.charges ? "x" + sh.status.charges: "" + sh.truedr() + "", ui.mkFont(12, sh.card.upped ? "black" : "white"), maybeLighten(sh.card)));
 				child.visible = true;
-				var child = shiesprite[j].getChildAt(1);
+				var child = shiesprite[j].children[1];
 				child.setTexture(ui.getTextImage(sh.activetext1(), ui.mkFont(12, sh.card.upped ? "black" : "white")));
 				child.visible = true;
 				shiesprite[j].alpha = sh.isMaterial() ? 1 : .7;
@@ -2544,7 +2557,7 @@ function startMatch(game, foeDeck) {
 				maybeSetText(marktext[j], "x" + pl.markpower);
 			}else marktext[j].visible = false;
 			for (var i = 1;i < 13;i++) {
-				maybeSetText(quantatext[j].getChildAt(i*2-2), pl.quanta[i].toString());
+				maybeSetText(quantatext[j].children[i*2-2], pl.quanta[i].toString());
 			}
 			var yOffset = j == 0 ? 28 : -44;
 			fgfx.beginFill(0);
@@ -2691,9 +2704,9 @@ var sockEvents = {
 	foearena:function(data) {
 		aideck.value = data.deck;
 		var game = initGame({ first: data.seed < etgutil.MAX_INT/2, deck: data.deck, urdeck: getDeck(), seed: data.seed,
-			p2hp: data.hp, foename: data.name, p2drawpower: data.draw, p2markpower: data.mark, arena: data.name, level: data.lv?3:2 }, true);
-		game.cost = data.lv?20:10;
-		user.gold -= data.lv?20:10;
+			p2hp: data.hp, foename: data.name, p2drawpower: data.draw, p2markpower: data.mark, arena: data.name, level: 4+data.lv }, true);
+		game.cost = userutil.arenaCost(data.lv);
+		user.gold -= game.cost;
 	},
 	arenainfo: startArenaInfo,
 	arenatop: startArenaTop,

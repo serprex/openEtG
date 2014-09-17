@@ -45,7 +45,7 @@ function deckRedirect(req, res, next){
 				}else{
 					res.writeHead(200, {"Content-Type": "image/png"});
 					res.end(buf, "binary");
-					if (deck) fs.writeFile(__dirname + "/deckcache/" + deck, buf, {encoding: "binary"});
+					fs.writeFile(__dirname + "/deckcache/" + deck, buf, {encoding: "binary"}, function(){});
 				}
 			});
 		}
