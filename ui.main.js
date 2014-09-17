@@ -38,7 +38,7 @@ function MenuText(x, y, txt, wrapwidth) {
 }
 MenuText.prototype = Object.create(PIXI.Sprite.prototype);
 MenuText.prototype.textText = function(x){
-	return ui.getTextImage(x.toString(), { font: "14px Verdana", fill: "white", stroke: "black", strokeThickness: 2 }, "", this.wrapwidth);
+	return ui.getTextImage(x.toString(), {font: "14px Verdana", fill: "white", stroke: "black", strokeThickness: 2}, "", this.wrapwidth);
 }
 MenuText.prototype.setText = function(x){
 	this.setTexture(this.textText(x));
@@ -141,7 +141,7 @@ function makeArt(card, art, oldrend) {
 			template.addChild(eleicon);
 		}
 	}
-	var infospr = new PIXI.Sprite(ui.getTextImage(card.info(), ui.mkFont(11, card.upped ? "black" : "white"), "", rend.width-4))
+	var infospr = new PIXI.Sprite(ui.getTextImage(card.info(), ui.mkFont(11, card.upped ? "black" : "white"), "", rend.width-4));
 	infospr.position.set(2, 150);
 	template.addChild(infospr);
 	rend.render(template, null, true);
@@ -434,11 +434,10 @@ function deckPower(deck, amount) {
 		return res;
 	}else return deck;
 }
-function getDeck(limit) {
-	var deck = user ? user.decks[user.selectedDeck] :
-		~deckimport.value.indexOf(" ") ? etgutil.encodedeck(deckimport.value.split(" ")) :
-		deckimport.value;
-	return deck;
+function getDeck() {
+	if (user) return user.decks[user.selectedDeck];
+	var deck = deckimport.value.trim();
+	return ~deck.indexOf(" ") ? etgutil.encodedeck(deck.split(" ")) : deck;
 }
 function listify(maybeArray) {
 	if (maybeArray instanceof Array) return maybeArray;
@@ -1810,7 +1809,7 @@ function startEditor(arena, acard, startempty) {
 		});
 		var bimport = makeButton(8, 96, "Import");
 		setClick(bimport, function() {
-			var dvalue = deckimport.value;
+			var dvalue = deckimport.value.trim();
 			decksprite.deck = ~dvalue.indexOf(" ") ? dvalue.split(" ") : etgutil.decodedeck(dvalue);
 			processDeck();
 		});
