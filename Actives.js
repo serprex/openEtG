@@ -179,6 +179,7 @@ brokenmirror:function(c,t, fromhand){
 },
 burrow:function(c,t){
 	c.status.burrowed = true;
+	delete c.status.airborne;
 	c.active.cast = Actives.unburrow;
 	c.cast = 0;
 },
@@ -1205,14 +1206,12 @@ scramble:function(c,t){
 		}
 	}
 },
-serendipity:function(c,t){
-	if (!t.sanctuary){
-		var num = Math.min(8-t.hand.length, 3), anyentro = false;
-		for(var i=num-1; i>=0; i--){
-			var card = t.randomcard(c.card.upped, function(x){return x.type != etg.PillarEnum && x.rarity < 4 && (i>0 || anyentro || x.element == etg.Entropy)});
-			anyentro |= card.element == etg.Entropy;
-			new etg.CardInstance(card, t).place();
-		}
+serendipity:function(c){
+	var num = Math.min(8-c.owner.hand.length, 3), anyentro = false;
+	for(var i=num-1; i>=0; i--){
+		var card = c.owner.randomcard(c.card.upped, function(x){return x.type != etg.PillarEnum && x.rarity < 4 && (i>0 || anyentro || x.element == etg.Entropy)});
+		anyentro |= card.element == etg.Entropy;
+		new etg.CardInstance(card, c.owner).place();
 	}
 },
 silence:function(c,t){
@@ -1255,6 +1254,7 @@ sing:function(c,t){
 sinkhole:function(c,t){
 	Effect.mkText("Sinkhole", t);
 	t.status.burrowed = true;
+	delete t.status.airborne;
 	lobo(t);
 	t.active.cast = Actives.unburrow;
 	t.cast = c.card.upped?1:0;
