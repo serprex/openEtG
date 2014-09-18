@@ -1562,7 +1562,11 @@ function startStore() {
 				});
 				popbooster.visible = true;
 			}else{
-				chat(data.cards);
+				var link = document.createElement("a");
+				link.href = "http://etg.dek.im/deck/" + data.cards;
+				link.target = "_blank";
+				link.appendChild(document.createTextNode(data.cards));
+				addChatSpan(link);
 				toggleB(bbuy);
 			}
 		},
