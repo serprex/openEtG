@@ -1176,7 +1176,7 @@ function startQuest(questname) {
 	}
 }
 function startQuestWindow(){
-	var questui = mkView();	
+	var questui = mkView();
 	addMouseOverBg(questui, function() {
 		tinfo.setText("Welcome to Potatotal Island. The perfect island for adventuring!");
 	});
@@ -2087,7 +2087,7 @@ function startMatch(game, foeDeck) {
 		},
 	};
 	function setInfo(obj) {
-		if (!cloakgfx.visible || obj.owner != game.player2 || !obj.card || obj.card.isOf(Cards.Cloak)) {
+		if (!cloakgfx.visible || obj.owner != game.player2 || obj.status.cloak) {
 			var info = obj.info(), actinfo = game.targetingMode && game.targetingMode(obj) && activeInfo[game.targetingText];
 			if (actinfo) info += "\nDmg " + actinfo(obj);
 			infobox.setTexture(ui.getTextImage(info, ui.mkFont(10, "white"), 0, (obj instanceof etg.Weapon || obj instanceof etg.Shield ? 92 : 76)));
@@ -2340,11 +2340,13 @@ function startMatch(game, foeDeck) {
 		var pos = realStage.getMousePosition();
 		var cardartcode, cardartx;
 		infobox.setTexture(gfx.nopic);
-		foeplays.children.forEach(function(foeplay){
-			if (foeplay.card instanceof etg.Card && hitTest(foeplay, pos)) {
-				cardartcode = foeplay.card.code;
-			}
-		});
+		if (!cloakgfx.visible){
+			foeplays.children.forEach(function(foeplay){
+				if (foeplay.card instanceof etg.Card && hitTest(foeplay, pos)) {
+					cardartcode = foeplay.card.code;
+				}
+			});
+		}
 		for (var j = 0;j < 2;j++) {
 			var pl = game.players(j);
 			if (j == 0 || game.player1.precognition) {
@@ -2354,21 +2356,21 @@ function startMatch(game, foeDeck) {
 					}
 				}
 			}
-			if (j == 0 || !(cloakgfx.visible)) {
+			for (var i = 0;i < 16;i++) {
+				var pr = pl.permanents[i];
+				if (pr && (j == 0 || !cloakgfx.visible || pr.status.cloak) && hitTest(permsprite[j][i], pos)) {
+					cardartcode = pr.card.code;
+					cardartx = permsprite[j][i].position.x;
+					setInfo(pr);
+				}
+			}
+			if (j == 0 || !cloakgfx.visible) {
 				for (var i = 0;i < 23;i++) {
 					var cr = pl.creatures[i];
 					if (cr && hitTest(creasprite[j][i], pos)) {
 						cardartcode = cr.card.code;
 						cardartx = creasprite[j][i].position.x;
 						setInfo(cr);
-					}
-				}
-				for (var i = 0;i < 16;i++) {
-					var pr = pl.permanents[i];
-					if (pr && hitTest(permsprite[j][i], pos)) {
-						cardartcode = pr.card.code;
-						cardartx = permsprite[j][i].position.x;
-						setInfo(pr);
 					}
 				}
 				if (pl.weapon && hitTest(weapsprite[j], pos)) {

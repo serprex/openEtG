@@ -188,6 +188,7 @@ var ActivesValues = {
 	},
 	overdrivespell:5,
 	pacify:5,
+	paleomagnetism:4,
 	pandemonium:3,
 	pandemonium2:4,
 	paradox:5,

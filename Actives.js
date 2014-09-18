@@ -760,9 +760,6 @@ integrity:function(c,t){
 	if (shardTally[etg.Life]>0){
 		status.poisonous = true;
 	}
-	if (shardTally[etg.Gravity]>0){
-		status.salvage = true;
-	}
 	if (shardTally[etg.Aether]>1){
 		status.immaterial = true;
 	}
@@ -966,7 +963,7 @@ pacify:function(c,t){
 },
 paleomagnetism:function(c,t){
 	var pillars = etg.filtercards(c.card.upped, function(x) { return x.type == etg.PillarEnum && !x.rarity; });
-	new etg.Pillar(pillars[c.owner.mark*2], c.owner).place();
+	new etg.Pillar(pillars[(c.owner.rng()<.5?0:c.owner.mark*2)], c.owner).place();
 },
 pandemonium:function(c,t){
 	c.owner.foe.masscc(c, Actives.cseed, true);
