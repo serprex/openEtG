@@ -855,6 +855,10 @@ mimic:function (c, t) {
 		c.addactive("play", Actives.mimic);
 	}
 },
+midas:function(c,t){
+	Actives.destroy(c, t);
+	new etg.Permanent(c.card.as(Cards.GoldenRelic), t.owner).place();
+},
 miracle:function(c,t){
 	c.owner.quanta[etg.Light] = 0;
 	if (c.owner.sosa){
@@ -1439,6 +1443,10 @@ upload:function(c,t){
 },
 vampire:function(c,t, dmg){
 	c.owner.dmg(-dmg);
+},
+vend:function(c){
+	c.owner.drawcard();
+	c.die();
 },
 virusinfect:function(c,t){
 	Actives.infect(c, t);

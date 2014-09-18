@@ -428,7 +428,7 @@ var userEvents = {
 		var freepacklist, bound;
 		var newCardList = [
 			Cards.Inertia, Cards.PhaseGolem, Cards.QuantumLocket, Cards.ClockworkGolem, Cards.Disc, Cards.BattleAxe, Cards.Pacify,
-			Cards.Lemming, Cards.Georesonator, Cards.AtlantissProtection, Cards.Reinforce, Cards.Pixie, Cards.Lodestone, Cards.JunkWall,
+			Cards.Lemming, Cards.Georesonator, Cards.AtlantissProtection, Cards.Reinforce, Cards.Pixie, Cards.MidassTouch,
 			Cards.ShankofVoid, Cards.ScatteringWind, Cards.Firebrand, Cards.PrismaticGladius];
 		var pack = [
 			{ amount: 9, cost: 15, rare: []},
