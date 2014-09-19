@@ -660,6 +660,7 @@ Player.prototype.endturn = function(discard) {
 Thing.prototype.procactive = function(name, params) {
 	var ret;
 	function proc(c){
+		if (ret === true) return true;
 		var a;
 		if (c && (a = c.active[name])){
 			params[0] = c;
@@ -931,29 +932,6 @@ Creature.prototype.transform = Weapon.prototype.transform = function(card, owner
 	this.castele = card.castele;
 	Thing.call(this, card, owner || this.owner);
 }
-Thing.prototype.evade = function(sender) {
-	if (this.status && sender != this.owner && this.status.protect){
-		delete this.status.protect;
-		Effect.mkText("Evade", this);
-		return true;
-	}
-	return false;
-}
-Creature.prototype.evade = function(sender) {
-	if (Thing.prototype.evade.apply(this, arguments)) return true;
-	if (sender != this.owner && this.status.airborne && !this.status.frozen){
-		var freedomChance = 0;
-		for(var i=0; i<16; i++){
-			if (this.owner.permanents[i] && this.owner.permanents[i].status.freedom){
-				freedomChance++;
-			}
-		}
-		if (freedomChance && this.owner.rng() > Math.pow(.8, freedomChance)){
-			Effect.mkText("Evade", this);
-			return true;
-		}
-	}
-}
 Creature.prototype.calcEclipse = function(){
 	if (!this.status.nocturnal){
 		return 0;
@@ -1052,12 +1030,12 @@ Thing.prototype.canactive = function() {
 Thing.prototype.useactive = function(t) {
 	this.usedactive = true;
 	var castele = this.castele, cast = this.cast;
-	if (!t || !t.evade(this.owner)){
-		var newt = this.procactive("prespell", [t, this.active.cast]);
+	var newt = this.procactive("prespell", [t, this.active.cast]);
+	if (newt !== true){
 		if (newt) t = newt;
 		this.active.cast(this, t);
 		this.procactive("spell", [t, this.active.cast]);
-	}
+	}else Effect.mkText("Evade", t);
 	this.owner.spend(castele, cast);
 	this.owner.game.updateExpectedDamage();
 }
@@ -1166,12 +1144,12 @@ CardInstance.prototype.useactive = function(target){
 		new cons(card, owner).place(true);
 		if (owner == owner.game.player1) ui.playSound("permPlay");
 	}else if (card.type == SpellEnum){
-		if (!target || !target.evade(owner)){
-			var newt = this.procactive("prespell", [target, card.active]);
+		var newt = this.procactive("prespell", [target, card.active]);
+		if (newt !== true){
 			if (newt) target = newt;
 			card.active(this, target);
 			this.procactive("spell", [target, card.active]);
-		}
+		}else Effect.mkText("Evade", target);
 	}else if (card.type == CreatureEnum){
 		new Creature(card, owner).place(true);
 		if (owner == owner.game.player1) ui.playSound("creaturePlay");

@@ -522,6 +522,11 @@ fractal:function(c,t){
 	}
 	c.owner.quanta[etg.Aether] = 0;
 },
+freeevade:function(c,t, tgt){
+	if (tgt.owner != t.owner && tgt.status.airborne && !tgt.status.frozen && c.owner.rng() > .8){
+		return true;
+	}
+},
 freeze:function(c,t){
 	t.freeze(c.card.upped && c.card != Cards.PandemoniumUp ? 4 : 3);
 },
@@ -1041,11 +1046,17 @@ precognition:function(c,t){
 protectall:function(c,t){
 	function protect(p){
 		if (p && p.isMaterial()){
-			p.status.protect = true;
+			p.addactive("prespell", Actives.protectonce);
 		}
 	}
 	c.owner.creatures.forEach(protect);
 	c.owner.permanents.forEach(protect);
+},
+protectonce:function(c,t, tgt){
+	if (c === tgt){
+		c.rmactive("prespell", "protectonce");
+		return true;
+	}
 },
 purify:function(c,t){
 	t.status.poison = t.status.poison?Math.min(t.status.poison-2,-2):-2;
@@ -1160,7 +1171,11 @@ ricochet:function(c,t){
 		if (tgts.length > 0){
 			var tgt = tgts[c.owner.upto(tgts.length)], town = t.owner;
 			t.owner = tgt[1];
-			t.card.active(t, tgt[0]); // NB bypasses SoFr
+			var newt = t.procactive("prespell", [tgt[0], t.card.active]);
+			if (newt !== true){
+				if (newt) tgt[0] = newt;
+				t.card.active(t, tgt[0]);
+			}else Effect.mkText("Evade", tgt[0]);
 			t.owner = town;
 		}
 	}
