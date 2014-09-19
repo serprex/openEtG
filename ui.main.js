@@ -876,7 +876,7 @@ CardSelector.prototype.renderColumns = function(){
 	}
 }
 function addMouseOverBg(view, func) {
-	var bg = new PIXI.Graphics();
+	var bg = new PIXI.DisplayObjectContainer();
 	bg.hitArea = new PIXI.Rectangle(0, 0, 900, 600);
 	bg.mouseover = func;
 	bg.interactive = true;
