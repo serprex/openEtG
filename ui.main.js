@@ -2690,7 +2690,11 @@ function chat(msg, fontcolor) {
 	span.appendChild(document.createTextNode(msg));
 	addChatSpan(span);
 }
-socket.on("open", function(){ chat("Connected") });
+socket.on("open", function(){
+	chat("Connected");
+	offlineChange();
+	wantpvpChange();
+});
 socket.on("close", function(){
 	chat("Reconnecting in 100ms");
 	setTimeout(function(){socket.open()}, 100);
@@ -2980,6 +2984,4 @@ function wantpvpChange(){
 	offline: {change: offlineChange},
 	wantpvp: {change: wantpvpChange},
 });
-offlineChange();
-wantpvpChange();
 })();
