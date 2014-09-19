@@ -1171,11 +1171,7 @@ ricochet:function(c,t){
 		if (tgts.length > 0){
 			var tgt = tgts[c.owner.upto(tgts.length)], town = t.owner;
 			t.owner = tgt[1];
-			var newt = t.procactive("prespell", [tgt[0], t.card.active]);
-			if (newt !== true){
-				if (newt) tgt[0] = newt;
-				t.card.active(t, tgt[0]);
-			}else Effect.mkText("Evade", tgt[0]);
+			t.castSpell(tgt[0], t.card.active, true);
 			t.owner = town;
 		}
 	}

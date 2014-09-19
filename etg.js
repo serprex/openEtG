@@ -1027,16 +1027,18 @@ Thing.prototype.hasactive = function(type, activename) {
 Thing.prototype.canactive = function() {
 	return this.owner.game.turn == this.owner && this.active.cast && !this.usedactive && !this.status.delayed && !this.status.frozen && this.owner.canspend(this.castele, this.cast);
 }
-Thing.prototype.useactive = function(t) {
-	this.usedactive = true;
-	var castele = this.castele, cast = this.cast;
-	var newt = this.procactive("prespell", [t, this.active.cast]);
+Thing.prototype.castSpell = function(t, active, nospell){
+	var newt = this.procactive("prespell", [t, active]);
 	if (newt !== true){
 		if (newt) t = newt;
-		this.active.cast(this, t);
-		this.procactive("spell", [t, this.active.cast]);
+		active(this, t);
+		if (!nospell) this.procactive("spell", [t, active]);
 	}else Effect.mkText("Evade", t);
-	this.owner.spend(castele, cast);
+}
+Thing.prototype.useactive = function(t) {
+	this.usedactive = true;
+	this.castSpell(t, this.active.cast);
+	this.owner.spend(this.castele, this.cast);
 	this.owner.game.updateExpectedDamage();
 }
 Player.prototype.defstatus = Thing.prototype.defstatus = function(key, def){
@@ -1144,12 +1146,7 @@ CardInstance.prototype.useactive = function(target){
 		new cons(card, owner).place(true);
 		if (owner == owner.game.player1) ui.playSound("permPlay");
 	}else if (card.type == SpellEnum){
-		var newt = this.procactive("prespell", [target, card.active]);
-		if (newt !== true){
-			if (newt) target = newt;
-			card.active(this, target);
-			this.procactive("spell", [target, card.active]);
-		}else Effect.mkText("Evade", target);
+		this.castSpell(target, card.active);
 	}else if (card.type == CreatureEnum){
 		new Creature(card, owner).place(true);
 		if (owner == owner.game.player1) ui.playSound("creaturePlay");
