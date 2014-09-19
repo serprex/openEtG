@@ -1037,8 +1037,9 @@ Thing.prototype.castSpell = function(t, active, nospell){
 }
 Thing.prototype.useactive = function(t) {
 	this.usedactive = true;
+	var castele = this.castele, cast = this.cast;
 	this.castSpell(t, this.active.cast);
-	this.owner.spend(this.castele, this.cast);
+	this.owner.spend(castele, cast);
 	this.owner.game.updateExpectedDamage();
 }
 Player.prototype.defstatus = Thing.prototype.defstatus = function(key, def){
