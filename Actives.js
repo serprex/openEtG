@@ -523,7 +523,7 @@ fractal:function(c,t){
 	c.owner.quanta[etg.Aether] = 0;
 },
 freeevade:function(c,t, tgt){
-	if (tgt.owner != t.owner && tgt instanceof etg.Creature && tgt.status.airborne && !tgt.status.frozen && c.owner.rng() > .8){
+	if (tgt instanceof etg.Creature && tgt.owner != t.owner && tgt.status.airborne && !tgt.status.frozen && c.owner.rng() > .8){
 		return true;
 	}
 },
