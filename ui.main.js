@@ -2791,6 +2791,13 @@ function soundChange(event) {
 function musicChange(event) {
 	ui.changeMusic(enableMusic.checked);
 }
+function chatmute(){
+	var muted = [];
+	for(var name in muteset){
+		muted.push(name);
+	}
+	chat((muteall?"You have chat muted. ":"") + "Muted: " + muted.join(", "));
+}
 function maybeSendChat(e) {
 	e.cancelBubble = true;
 	if (e.keyCode == 13) {
@@ -2801,12 +2808,16 @@ function maybeSendChat(e) {
 			while (chatBox.firstChild) chatBox.firstChild.remove();
 		}else if (msg == "/mute"){
 			muteall = true;
+			chatmute();
 		}else if (msg == "/unmute"){
 			muteall = false;
+			chatmute();
 		}else if (msg.match(/^\/mute /)){
 			muteset[msg.substring(6)] = true;
+			chatmute();
 		}else if (msg.match(/^\/unmute /)){
 			delete muteset[msg.substring(8)];
+			chatmute();
 		}else if (user){
 			var msgdata = {msg: msg};
 			if (msg.match(/^\/w( |")/)) {
