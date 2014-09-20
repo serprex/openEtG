@@ -370,7 +370,7 @@ function initTrade() {
 	refreshRenderer(stage, function() {
 		var mpos = realStage.getMousePosition();
 		cardArt.visible = false;
-		cardsel.next(cardpool, cardminus, undefined, mpos);
+		cardsel.next(cardpool, cardminus, mpos);
 		foeDeck.next(mpos);
 		ownDeck.next(mpos);
 	});
@@ -758,10 +758,11 @@ DeckDisplay.prototype.next = function(mpos){
 	}
 }
 function CardSelector(cardmouseover, cardclick, maxedIndicator){
+	var self = this;
 	PIXI.DisplayObjectContainer.call(this);
 	this.cardpool = undefined;
 	this.cardminus = undefined;
-	this.showall = undefined;
+	this.showall = false;
 	this.showshiny = undefined;
 	this.interactive = true;
 	this.cardmouseover = cardmouseover;
@@ -769,12 +770,17 @@ function CardSelector(cardmouseover, cardclick, maxedIndicator){
 	this.hitArea = new PIXI.Rectangle(100, 272, 800, 328);
 	if (maxedIndicator) this.addChild(this.maxedIndicator = new PIXI.Graphics());
 	var bshiny = makeButton(5, 578, "Toggle Shiny");
-	var self = this;
 	setClick(bshiny, function() {
 		self.showshiny ^= true;
 		self.makeColumns();
 	});
 	this.addChild(bshiny);
+	var bshowall = makeButton(5, 530, "Show All");
+	setClick(bshowall, function() {
+		bshowall.setText((self.showall ^= true) ? "Auto Hide" : "Show All");
+		self.makeColumns();
+	});
+	this.addChild(bshowall);
 	this.elefilter = this.rarefilter = 0;
 	this.columns = [[],[],[],[],[],[]];
 	this.columnspr = [[],[],[],[],[],[]];
@@ -814,15 +820,15 @@ function CardSelector(cardmouseover, cardclick, maxedIndicator){
 }
 CardSelector.prototype = Object.create(PIXI.DisplayObjectContainer.prototype);
 CardSelector.prototype.click = function(e){
+	if (!this.cardclick) return;
 	var col = this.columns[Math.floor((e.global.x-100)/130)], card;
 	if (col && (card = col[Math.floor((e.global.y-272)/20)])){
 		ui.playSound("cardClick");
 		this.cardclick(card.code);
 	}
 }
-CardSelector.prototype.next = function(newcardpool, newcardminus, newshowall, mpos) {
-	if (newcardpool != this.cardpool || newcardminus != this.cardminus || newshowall != this.showall) {
-		this.showall = newshowall;
+CardSelector.prototype.next = function(newcardpool, newcardminus, mpos) {
+	if (newcardpool != this.cardpool || newcardminus != this.cardminus) {
 		this.cardminus = newcardminus;
 		this.cardpool = newcardpool;
 		this.makeColumns();
@@ -1409,7 +1415,7 @@ function upgradestore() {
 	var cardpool, selectedCard;
 	adjustdeck();
 	refreshRenderer(upgradeui, function() {
-		cardsel.next(cardpool, undefined, false);
+		cardsel.next(cardpool);
 	});
 }
 
@@ -1725,7 +1731,6 @@ function startEditor(arena, acard, startempty) {
 		etgutil.iterraw(user.pool, incrpool);
 		etgutil.iterraw(user.accountbound, incrpool);
 	}
-	var showAll = false;
 	var editorui = mkView();
 	var bclear = makeButton(8, 32, "Clear");
 	var bsave = makeButton(8, 64, "Save & Exit");
@@ -1833,11 +1838,6 @@ function startEditor(arena, acard, startempty) {
 				setClick(button, switchDeckCb(i));
 				editorui.addChild(button);
 			}
-			var bshowall = makeButton(5, 530, "Show All");
-			setClick(bshowall, function() {
-				bshowall.setText((showAll ^= true) ? "Auto Hide" : "Show All");
-			});
-			editorui.addChild(bshowall);
 		}
 	}
 	var bconvert = makeButton(5, 554, "Convert Code");
@@ -1900,7 +1900,7 @@ function startEditor(arena, acard, startempty) {
 	refreshRenderer(editorui, function() {
 		cardArt.visible = false;
 		var mpos = realStage.getMousePosition();
-		cardsel.next(cardpool, cardminus, showAll, mpos);
+		cardsel.next(cardpool, cardminus, mpos);
 		decksprite.next(mpos);
 	});
 	deckimport.style.display = "inline";
