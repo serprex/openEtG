@@ -2088,6 +2088,18 @@ function startMatch(game, foeDeck) {
 		catapult:function(t){
 			return Math.ceil(t.truehp()*(t.status.frozen?150:100)/(t.truehp()+100));
 		},
+		adrenaline:function(t){
+			var atks = [], adreback = t.status.adrenaline;
+			t.status.adrenaline = 1;
+			var attacks = etg.countAdrenaline(t.trueatk());
+			while (t.status.adrenaline < attacks) {
+				t.status.adrenaline++;
+				atks.push(t.trueatk());
+			}
+			if (!adreback) delete t.status.adrenaline;
+			else t.status.adrenaline = adreback;
+			return "extra: " + atks.join(", ");
+		},
 	};
 	function setInfo(obj) {
 		if (!cloakgfx.visible || obj.owner != game.player2 || obj.status.cloak) {
