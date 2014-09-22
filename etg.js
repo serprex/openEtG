@@ -305,14 +305,12 @@ function clone(obj){
 	}
 	return result;
 }
-function objinfo(obj){
-	var info = "";
+function objinfo(obj, info){
+	if (!info) info = [];
 	for (var key in obj){
-		var val = obj[key]
-		if (val===true)info += " " + key;
-		else if (val){
-			info += " " + val + key;
-		}
+		var val = obj[key];
+		if (val===true) info.push(key);
+		else if (val) info.push(val + key);
 	}
 	return info;
 }
@@ -472,10 +470,10 @@ Card.prototype.info = function(){
 			if (this.status && this.status.ranged) dmgtype = " ranged";
 			if (this.status && this.status.psion) dmgtype += " spell";
 		}
-		var prefix = this.type == WeaponEnum?"Deal " + this.attack + dmgtype + " damage. ":
-			this.type == ShieldEnum?""+(this.health?"Reduce damage by "+this.health+" ":""):
-			this.type == CreatureEnum?this.attack+"|"+this.health+" ":"";
-		return prefix + (this.text || (this.type == SpellEnum ? activename(this.active) : Thing.prototype.activetext.call(this) + objinfo(this.status)));
+		var prefix = this.type == WeaponEnum?"Deal " + this.attack + dmgtype + " damage\n":
+			this.type == ShieldEnum?""+(this.health?"Reduce damage by "+this.health+"\n":""):
+			this.type == CreatureEnum?this.attack+"|"+this.health+"\n":"";
+		return prefix + (this.text || (this.type == SpellEnum ? activename(this.active) : objinfo(this.status, Thing.prototype.activetext.call(this)).join("\n")));
 	}
 }
 Thing.prototype.toString = function(){ return this.card.name; }
@@ -506,16 +504,16 @@ Player.prototype.isCloaked = function(){
 	});
 }
 Player.prototype.info = function(){
-	var info = this.hp + "/" + this.maxhp + " " + this.deck.length + "cards";
-	if (this.nova)info += " " + this.nova + "nova";
-	info += objinfo(this.status);
-	if (this.neuro)info += " neuro";
-	if (this.sosa)info += " " + this.sosa + "sosa";
-	if (this.silence)info += " silence";
-	if (this.sanctuary)info += " sanctuary";
-	if (this.precognition)info += " precognition";
-	if (this.gpull)info += " gpull";
-	return info;
+	var info = [this.hp + "/" + this.maxhp + " " + this.deck.length + "cards"];
+	objinfo(this.status, info);
+	if (this.nova)info.push(this.nova + "nova");
+	if (this.neuro)info.push("neuro");
+	if (this.sosa)info.push(this.sosa + "sosa");
+	if (this.silence)info.push("silence");
+	if (this.sanctuary)info.push("sanctuary");
+	if (this.precognition)info.push("precognition");
+	if (this.gpull)info.push("gpull");
+	return info.join("\n");
 }
 Player.prototype.randomquanta = function() {
 	var nonzero = 0;
@@ -720,30 +718,29 @@ Player.prototype.masscc = function(caster, func, massmass){
 	}
 }
 Creature.prototype.info = function(){
-	var info=this.trueatk()+"|"+this.truehp()+"/"+this.maxhp;
-	info += this.activetext();
-	if (this.owner.gpull == this)info += " gpull";
-	return info + objinfo(this.status);
+	var info = [this.trueatk()+"|"+this.truehp()+"/"+this.maxhp];
+	this.activetext(info);
+	if (this.owner.gpull == this) info.push("gpull");
+	objinfo(this.status, info);
+	return info.join("\n");
 }
 Permanent.prototype.info = function(){
-	var info = this.status.charges?"x"+this.status.charges:"";
-	return info + this.activetext() + objinfo(this.status);
+	return objinfo(this.status, this.activetext()).join("\n");
 }
 Weapon.prototype.info = function(){
-	return this.trueatk() + this.activetext() + objinfo(this.status);
+	var info = [this.trueatk()];
+	return objinfo(this.status, this.activetext(info)).join("\n");
 }
 Shield.prototype.info = function(){
-	var info = this.truedr() + "DR" + this.activetext();
-	if (this.status.charges)info += " x"+this.status.charges + objinfo(this.status);
-	return info;
+	return objinfo(this.status, this.activetext([this.truedr() + "DR"])).join("\n");
 }
 Pillar.prototype.info = function(){
-	return this.status.charges + " 1:" + (this.pendstate?this.owner.mark:this.card.element) + (this.status.immaterial?" immaterial":"");
+	return this.status.charges + " 1:" + (this.pendstate?this.owner.mark:this.card.element) + (this.status.immaterial?"\nimmaterial":"");
 }
-Thing.prototype.activetext = function(){
-	var info = "";
+Thing.prototype.activetext = function(info){
+	if (!info) info = [];
 	for(var key in this.active){
-		if (this.active[key])info += (key != "auto"?" " + (key == "cast"?casttext(this.cast, this.castele):key):"") + " " + activename(this.active[key]);
+		if (this.active[key])info.push((key != "auto"?(key == "cast"?casttext(this.cast, this.castele):key) + " ":"") + activename(this.active[key]));
 	}
 	return info;
 }

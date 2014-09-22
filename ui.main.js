@@ -2105,7 +2105,7 @@ function startMatch(game, foeDeck) {
 		if (!cloakgfx.visible || obj.owner != game.player2 || obj.status.cloak) {
 			var info = obj.info(), actinfo = game.targetingMode && game.targetingMode(obj) && activeInfo[game.targetingText];
 			if (actinfo) info += "\nDmg " + actinfo(obj);
-			infobox.setTexture(ui.getTextImage(info, ui.mkFont(10, "white"), 0, (obj instanceof etg.Weapon || obj instanceof etg.Shield ? 92 : 76)));
+			infobox.setTexture(ui.getTextImage(info, ui.mkFont(10, "white"), 0));
 			var mousePosition = realStage.getMousePosition();
 			infobox.position.set(mousePosition.x, mousePosition.y);
 			infobox.visible = true;
