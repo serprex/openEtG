@@ -862,7 +862,7 @@ mimic:function (c, t) {
 	}
 },
 midas:function(c,t){
-	Actives.destroy(c, t);
+	Actives.destroy(c, t, true);
 	new etg.Permanent(c.card.as(Cards.GoldenRelic), t.owner).place();
 },
 miracle:function(c,t){

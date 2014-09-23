@@ -30,7 +30,7 @@ var Quest = require("./Quest");
 var ui = require("./uiutil");
 var aiDecks = require("./Decks");
 var Cards = require("./Cards");
-var socket = eio(location.hostname + ":13602");
+var socket = eio({hostname: location.hostname, port: 13602});
 function MenuText(x, y, txt, wrapwidth) {
 	this.wrapwidth = wrapwidth;
 	PIXI.Sprite.call(this, this.textText(txt));
