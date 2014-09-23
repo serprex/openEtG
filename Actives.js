@@ -464,6 +464,11 @@ evolve:function(c,t){
 	c.transform(c.card.as(Cards.Shrieker));
 	delete c.status.burrowed;
 },
+feed:function(c,t){
+	t.addpoison(1);
+	Actives.growth(c);
+	delete c.status.immaterial;
+},
 fickle:function(c,t){
 	if (t.owner != c.owner && t.owner.sanctuary){
 		return;
@@ -1223,6 +1228,13 @@ serendipity:function(c){
 		var card = c.owner.randomcard(c.card.upped, function(x){return x.type != etg.PillarEnum && x.rarity < 4 && (i>0 || anyentro || x.element == etg.Entropy)});
 		anyentro |= card.element == etg.Entropy;
 		new etg.CardInstance(card, c.owner).place();
+	}
+},
+shtriga:function(c,t){
+	if (c.owner == t){
+		c.status.immaterial = true;
+		c.atk--;
+		c.dmg(1);
 	}
 },
 silence:function(c,t){
