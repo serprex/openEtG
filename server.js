@@ -522,11 +522,11 @@ var sockEvents = {
 	},
 	librarywant:function(data){
 		if (data.f in users){
-			sockEmit(this, "librarygive", {pool: users[data.f].pool});
+			sockEmit(this, "librarygive", {pool: users[data.f].pool, gold:users[data.f].gold});
 		}else{
 			var socket = this;
-			db.hget("U:"+data.f, "pool", function(err, pool){
-				sockEmit(socket, "librarygive", {pool: pool});
+			db.hmget("U:"+data.f, "pool", "gold", function(err, info){
+				if (info) sockEmit(socket, "librarygive", {pool:info[0], gold:parseInt(info[1])});
 			});
 		}
 	},

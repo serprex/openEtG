@@ -660,11 +660,11 @@ immolate:function(c,t){
 },
 improve:function(c,t){
 	Effect.mkText("Improve", t);
-	t.transform(c.owner.randomcard(false, function(x){return x.type == etg.CreatureEnum}));
-	t.buffhp(c.owner.upto(5));
-	t.atk += c.owner.upto(5);
+	t.transform(t.owner.randomcard(false, function(x){return x.type == etg.CreatureEnum}));
+	t.buffhp(t.owner.upto(5));
+	t.atk += t.owner.upto(5);
 	if(mutantactive(t)){
-		t.cast = c.owner.uptoceil(2);
+		t.cast = t.owner.uptoceil(2);
 		t.castele = t.card.element;
 	}
 },
