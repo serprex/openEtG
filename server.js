@@ -453,7 +453,7 @@ var userEvents = {
 				if (data.element == 14){
 					var newCardList = [
 						Cards.Shtriga, Cards.Shadow, Cards.Inertia, Cards.PhaseGolem, Cards.QuantumLocket, Cards.ClockworkGolem, Cards.Pacify,
-						Cards.Lemming, Cards.Georesonator, Cards.AtlantissProtection, Cards.Reinforce, Cards.Pixie, Cards.MidassTouch,
+						Cards.Lemming, Cards.Georesonator, Cards.AtlantissProtection, Cards.Siren, Cards.Reinforce, Cards.Pixie, Cards.MidassTouch,
 						Cards.ShankofVoid, Cards.ScatteringWind, Cards.Firebrand, Cards.PrismaticGladius];
 					card = etg.PlayerRng.randomcard(false, function(x){ return notFromElement ^ ~newCardList.indexOf(x) && x.rarity == bumprarity});
 				}
