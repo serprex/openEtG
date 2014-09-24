@@ -11,7 +11,7 @@ require("./etg.client").loadcards(function() {
 		}
 	}
 	function gameTest(){
-		game = new etg.Game(true, 5489);
+		game = new etg.Game(5489);
 		game.player1.mark = game.player2.mark = etg.Entropy;
 		player1 = game.player1;
 		player2 = game.player2;

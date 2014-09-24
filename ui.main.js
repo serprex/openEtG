@@ -1,18 +1,17 @@
 "use strict";
 (function() {
-var htmlElements = ["leftpane", "chatinput", "deckimport", "aideck", "foename", "change", "login", "password", "challenge", "chatBox", "trade", "bottompane", "demigodmode", "username", "stats","enableSound", "hideright", "lblhideright", "wantpvp", "lblwantpvp", "offline", "lbloffline", "options", "packmulti"];
+var htmlElements = ["leftpane", "chatinput", "deckimport", "aideck", "foename", "change", "login", "password", "challenge", "chatBox", "trade", "bottompane", "demigodmode", "username", "stats","enableSound", "hideright", "lblhideright", "wantpvp", "lblwantpvp", "offline", "lbloffline", "mainmenu", "packmulti"];
 htmlElements.forEach(function(name){
 	window[name] = document.getElementById(name);
 });
 if (localStorage){
-	var store = [username, stats, enableSound, enableMusic, hideright, wantpvp, offline];
-	store.forEach(function(storei){
+	[username, stats, enableSound, enableMusic, hideright, wantpvp, offline].forEach(function(storei){
 		var field = storei.type == "checkbox" ? "checked" : "value";
 		if (localStorage[storei.id] !== undefined){
 			storei[field] = localStorage[storei.id];
 		}
-		storei.addEventListener("change", function(e) {
-			localStorage[storei.id] = field == "checked" && !storei[field] ? "" : storei[field];
+		storei.addEventListener("change", function() {
+			localStorage[this.id] = field == "checked" && !this[field] ? "" : this[field];
 		});
 	});
 }
@@ -82,11 +81,13 @@ function userExec(x, data){
 function refreshRenderer(stage, animCb, dontrender) {
 	if (realStage.children.length > 1){
 		var oldstage = realStage.children[1];
+		if (oldstage.dom) oldstage.dom.style.display = "none";
 		if (oldstage.endnext) oldstage.endnext();
 		realStage.removeChildAt(1);
 	}
 	realStage.addChild(stage);
 	realStage.next = animCb;
+	if (stage.dom) stage.dom.style.display = "inline";
 	// if (!dontrender) renderer.render(realStage);
 }
 
@@ -409,7 +410,7 @@ function initLibrary(data){
 	});
 }
 function initGame(data, ai) {
-	var game = new etg.Game(data.first, data.seed);
+	var game = new etg.Game(data.seed);
 	addToGame(game, data);
 	game.player1.maxhp = game.player1.hp;
 	game.player2.maxhp = game.player2.hp;
@@ -557,7 +558,7 @@ function mkPremade(name, daily) {
 		}
 		if (!foedata) foedata = aiDecks.giveRandom(name);
 		var foename = name[0].toUpperCase() + name.slice(1) + "\n" + foedata[0];
-		var gameData = { first: Math.random() < .5, deck: foedata[1], urdeck: urdeck, seed: Math.random() * etgutil.MAX_INT, foename: foename };
+		var gameData = { deck: foedata[1], urdeck: urdeck, seed: Math.random() * etgutil.MAX_INT, foename: foename };
 		if (name == "mage"){
 			gameData.p2hp = 125;
 		}else{
@@ -586,7 +587,7 @@ function mkQuestAi(questname, stage, area) {
 	if (etgutil.decklength(urdeck) < (user ? 31 : 11)) {
 		return "ERROR: Your deck is invalid or missing! Please exit & create a valid deck in the deck editor.";
 	}
-	var game = initGame({ first: Math.random() < .5, deck: quest.deck, urdeck: urdeck, seed: Math.random() * etgutil.MAX_INT, p2hp: hp, p2markpower: markpower, foename: quest.name, p1hp: playerHPstart, p2drawpower: drawpower }, true);
+	var game = initGame({ deck: quest.deck, urdeck: urdeck, seed: Math.random() * etgutil.MAX_INT, p2hp: hp, p2markpower: markpower, foename: quest.name, p1hp: playerHPstart, p2drawpower: drawpower }, true);
 	if (quest.morph) {
 		game.player1.deck = game.player1.deck.map(quest.morph.bind(quest));
 	}
@@ -640,7 +641,7 @@ function mkAi(level, daily) {
 			var typeName = ["Commoner", "Mage", "Champion"];
 
 			var foename = typeName[level] + "\n" + randomNames[etg.PlayerRng.upto(randomNames.length)];
-			var gameData = { first: Math.random() < .5, deck: deck, urdeck: urdeck, seed: Math.random() * etgutil.MAX_INT, p2hp: level == 0 ? 100 : level == 1 ? 125 : 150, p2markpower: level == 2 ? 2 : 1, foename: foename, p2drawpower: level == 2 ? 2 : 1 };
+			var gameData = { deck: deck, urdeck: urdeck, seed: Math.random() * etgutil.MAX_INT, p2hp: level == 0 ? 100 : level == 1 ? 125 : 150, p2markpower: level == 2 ? 2 : 1, foename: foename, p2drawpower: level == 2 ? 2 : 1 };
 			if (!user) parsepvpstats(gameData);
 			else gameData.cost = cost;
 			gameData.level = level;
@@ -1126,7 +1127,7 @@ function startMenu(nymph) {
 		librarygive: initLibrary,
 		foearena:function(data) {
 			aideck.value = data.deck;
-			var game = initGame({ first: data.seed < etgutil.MAX_INT/2, deck: data.deck, urdeck: getDeck(), seed: data.seed,
+			var game = initGame({ deck: data.deck, urdeck: getDeck(), seed: data.seed,
 				p2hp: data.hp, foename: data.name, p2drawpower: data.draw, p2markpower: data.mark, arena: data.name, level: 4+data.lv }, true);
 			game.cost = userutil.arenaCost(data.lv);
 			user.gold -= game.cost;
@@ -1134,12 +1135,9 @@ function startMenu(nymph) {
 		arenainfo: startArenaInfo,
 		arenatop: startArenaTop,
 	};
-	menuui.endnext = function(){
-		options.style.display = "none";
-	}
+	menuui.dom = mainmenu;
 
 	refreshRenderer(menuui);
-	options.style.display = "inline";
 }
 function startRewardWindow(reward, numberofcopies, nocode) {
 	if (!numberofcopies) numberofcopies = 1;
@@ -1602,13 +1600,10 @@ function startStore() {
 			}
 		},
 	};
-	packmulti.style.display = "inline";
-	storeui.endnext = function(){
-		packmulti.style.display = "none";
-	}
+	storeui.dom = packmulti;
 	refreshRenderer(storeui);
 }
-var blacklist = {first: true, seed: true, p1deckpower: true, p2deckpower: true, deck: true, urdeck: true };
+var blacklist = { seed: true, p1deckpower: true, p2deckpower: true, deck: true, urdeck: true };
 function addToGame(game, data) {
 	for (var key in data) {
 		if (!blacklist[key]){
@@ -1919,16 +1914,13 @@ function startEditor(arena, acard, startempty) {
 	var cardArt = new PIXI.Sprite(gfx.nopic);
 	cardArt.position.set(734, 8);
 	editorui.addChild(cardArt);
-	editorui.endnext = function() {
-		deckimport.style.display = "none";
-	}
+	editorui.dom = deckimport;
 	refreshRenderer(editorui, function() {
 		cardArt.visible = false;
 		var mpos = realStage.getMousePosition();
 		cardsel.next(cardpool, cardminus, mpos);
 		decksprite.next(mpos);
 	});
-	deckimport.style.display = "inline";
 	deckimport.focus();
 	deckimport.setSelectionRange(0, 333);
 	processDeck();
@@ -2987,7 +2979,7 @@ function aiClick() {
 		startEditor();
 		return;
 	}
-	var gameData = { first: Math.random() < .5, deck: aideckcode, urdeck: deck, seed: Math.random() * etgutil.MAX_INT, foename: "Custom", cardreward: "" };
+	var gameData = { deck: aideckcode, urdeck: deck, seed: Math.random() * etgutil.MAX_INT, foename: "Custom", cardreward: "" };
 	parsepvpstats(gameData);
 	parseaistats(gameData);
 	initGame(gameData, true);

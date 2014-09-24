@@ -4,35 +4,35 @@
 	<link href="http://fonts.googleapis.com/css?family=Dosis" rel="stylesheet" type="text/css">
 	<link href="favicon.png" rel="shortcut icon">
 	<style>
-		body {
+		body{
 			background-color:black;
 			color:white;
 			margin:0;
 			font-family:Dosis;
 		}
-		a {
+		a{
 			color:#6699FF;
 			text-decoration:none;
 		}
-		input[type="button"] {
+		input[type="button"]{
 			background:url("assets/button.png");
 			border:0;
 			width:71px;
 			height:21px;
 			font-family:Dosis 14px;
 		}
-		input[type="button"]:hover {
-			background:linear-gradient(rgba(0,0,0,.3),rgba(0,0,0,.3)), url("assets/button.png");
+		input[type="button"]:hover{
+			background:linear-gradient(rgba(0,0,0,.3),rgba(0,0,0,.3)),url("assets/button.png");
 		}
-		input[type="button"]:hover:active {
-			background:linear-gradient(rgba(0,0,0,.6),rgba(0,0,0,.6)), url("assets/button.png");
+		input[type="button"]:hover:active{
+			background:linear-gradient(rgba(0,0,0,.6),rgba(0,0,0,.6)),url("assets/button.png");
 		}
-		#rightpane {
+		#rightpane{
 			left:900px;
 			top:0px;
 			position:absolute;
 		}
-		#deckimport {
+		#deckimport{
 			left:520px;
 			top:238px;
 			width:190px;
@@ -40,45 +40,45 @@
 			position:absolute;
 			display:none;
 		}
-		#options { display:none; }
-		#lblhideright {
+		#mainmenu{ display:none; }
+		#lblhideright{
 			left:50px;
 			top:400px;
 			position:absolute;
 		}
-		#lblwantpvp {
+		#lblwantpvp{
 			left:175px;
 			top:400px;
 			position:absolute;
 			display:none;
 		}
-		#lbloffline {
+		#lbloffline{
 			left:300px;
 			top:400px;
 			position:absolute;
 			display:none;
 		}
-		#lblsound {
+		#lblsound{
 			left:50px;
 			top:445px;
 			position:absolute;
 		}
-		#lblmusic {
+		#lblmusic{
 			left:175px;
 			top:445px;
 			position:absolute;
 		}
-		#lblstats {
+		#lblstats{
 			left:300px;
 			top:445px;
 			position:absolute;
 		}
-		#pvpinputs {
+		#pvpinputs{
 			left:50px;
 			top:500px;
 			position:absolute;
 		}
-		#chatBox {
+		#chatBox{
 			width:350px;
 			height:400px;
 			overflow-y:scroll;
@@ -87,21 +87,21 @@
 			background-color:white;
 			word-wrap:break-word
 		}
-		#chatinput {
+		#chatinput{
 			width:350px;
 			height:40px;
 			resize:none;
 			font-family:Dosis;
 			font-size:14px;
 		}
-		#packmulti {
+		#packmulti{
 			width:64px;
 			left:777px;
 			top:184px;
 			position:absolute;
 			display:none;
 		}
-		.numput {
+		.numput{
 			width:32px;
 		}
 	</style>
@@ -122,7 +122,7 @@
 	</div>
 	<input id="deckimport" type="text" placeholder="Deck" onclick="this.setSelectionRange(0, 333)">
 	<input id="packmulti" type="text" placeholder="Bulk">
-	<div id="options">
+	<div id="mainmenu">
 		<label id="lblwantpvp"><input id="wantpvp" type="checkbox">Seeking PvP</label>
 		<label id="lbloffline"><input id="offline" type="checkbox">Appear Offline</label>
 		<label id="lblhideright"><input id="hideright" type="checkbox" onchange="document.getElementById('rightpane').style.display=this.checked?'none':'inline'">Hide Rightpane</label>
