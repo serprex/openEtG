@@ -1670,7 +1670,7 @@ function startColosseum(){
 		coloui.addChild(new MenuText(130, 280, "You successfully completed all tasks."));
 	}
 
-	var bexit = makeButton(8, 8, "Exit");
+	var bexit = makeButton(50, 50, "Exit");
 	setClick(bexit, startMenu);
 	coloui.addChild(bexit);
 

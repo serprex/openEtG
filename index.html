@@ -14,6 +14,19 @@
 			color:#6699FF;
 			text-decoration:none;
 		}
+		input[type="button"] {
+			background:url("assets/button.png");
+			border:0;
+			width:71px;
+			height:21px;
+			font-family:Dosis 14px;
+		}
+		input[type="button"]:hover {
+			background:linear-gradient(rgba(0,0,0,.3),rgba(0,0,0,.3)), url("assets/button.png");
+		}
+		input[type="button"]:hover:active {
+			background:linear-gradient(rgba(0,0,0,.6),rgba(0,0,0,.6)), url("assets/button.png");
+		}
 		#rightpane {
 			left:900px;
 			top:0px;
@@ -100,10 +113,10 @@
 	<canvas id="leftpane" width=900 height=600></canvas>
 	<div id="rightpane">
         <a href="artcredit.htm" target="_blank">Art credits</a>&emsp;&emsp;<a href="http://github.com/Fippe94/openEtG" target="_blank">Git</a>&emsp;&emsp;<a href="/forum" target="_blank">Forum</a><br><br>
-		<input id="username" type="text" placeholder="Username" tabindex=1> <input id="login" type="submit" value="Login"><br>
-		<input id="password" type="password" placeholder="Insecure Password" tabindex=2> <input id="change" type="submit" value="Change"><br><br>
+		<input id="username" type="text" placeholder="Username" tabindex=1> <input id="login" type="button" value="Login"><br>
+		<input id="password" type="password" placeholder="Insecure Password" tabindex=2> <input id="change" type="button" value="Change"><br><br>
 		<input id="aideck" type="text" placeholder="AI Deck" onclick="this.setSelectionRange(0, 999)">
-		<input id="aihp" type="text" placeholder="HP" class="numput"><input id="aimark" type="text" placeholder="Mark" class="numput"><input id="aideckpow" type="text" placeholder="Deck" class="numput"><input id="aidraw" type="text" placeholder="Draw" class="numput"><input id="aivs" type="submit" value="vs"><br>
+		<input id="aihp" type="text" placeholder="HP" class="numput"><input id="aimark" type="text" placeholder="Mark" class="numput"><input id="aideckpow" type="text" placeholder="Deck" class="numput"><input id="aidraw" type="text" placeholder="Draw" class="numput"><input id="aivs" type="button" value="vs"><br>
 		<div id="chatBox"></div>
 		<textarea id="chatinput" placeholder="Chat"></textarea>
 	</div>
@@ -119,10 +132,10 @@
 		<div id="pvpinputs">
 			<input id="foename" type="text" placeholder="Challenge">
 			<input id="pvphp" type="text" placeholder="HP" class="numput"><input id="pvpmark" type="text" placeholder="Mark" class="numput"><input id="pvpdeck" type="text" placeholder="Deck" class="numput"><input id="pvpdraw" type="text" placeholder="Draw" class="numput"><br><br>
-			<input id="challenge" type="submit" value="PvP">
-			<input id="trade" type="submit" value="Trade">
-			<input id="reward" type="submit" value="Reward">
-			<input id="library" type="submit" value="Library">
+			<input id="challenge" type="button" value="PvP">
+			<input id="trade" type="button" value="Trade">
+			<input id="reward" type="button" value="Reward">
+			<input id="library" type="button" value="Library">
 		</div>
 	</div>
     <script src="ui.main.js"></script>
