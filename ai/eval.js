@@ -327,7 +327,7 @@ function estimateDamage(c, freedomChance, wallCharges, damageHash) {
 		}else return Math.max(tatk - dr, 0);
 	}
 	var tatk = c.trueatk(), fsh = c.owner.foe.shield, fshactive = fsh && fsh.active.shield;
-	var momentum = !fsh || atk < 0 || c.status.momentum || c.status.psion;
+	var momentum = !fsh || atk <= 0 || c.status.momentum || c.status.psion;
 	var dr = momentum ? 0 : fsh.truedr(), atk = estimateAttack(tatk);
 	if (c.status.adrenaline) {
 		var attacks = etg.countAdrenaline(tatk);

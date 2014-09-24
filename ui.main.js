@@ -898,7 +898,7 @@ CardSelector.prototype.renderColumns = function(){
 }
 function addMouseOverBg(view, func) {
 	var bg = new PIXI.DisplayObjectContainer();
-	bg.hitArea = new PIXI.Rectangle(0, 0, 900, 600);
+	bg.hitArea = view.hitArea;
 	bg.mouseover = func;
 	bg.interactive = true;
 	view.addChild(bg);
@@ -2101,13 +2101,13 @@ function startMatch(game, foeDeck) {
 	});
 	var activeInfo = {
 		firebolt:function(){
-			return 3+Math.floor(c.owner.quanta[etg.Fire]/4);
+			return 3+Math.floor(game.player1.quanta[etg.Fire]/4);
 		},
 		drainlife:function(){
-			return 2+Math.floor(c.owner.quanta[etg.Darkness]/5);
+			return 2+Math.floor(game.player1.quanta[etg.Darkness]/5);
 		},
 		icebolt:function(){
-			var bolts = Math.floor(c.owner.quanta[etg.Water]/5);
+			var bolts = Math.floor(game.player1.quanta[etg.Water]/5);
 			return (2+bolts) + " " + (35+bolts*5) + "%";
 		},
 		catapult:function(t){
