@@ -5,7 +5,7 @@ var Effect = require("./Effect");
 var ui = require("./uiutil");
 var etgutil = require("./etgutil");
 var Cards = require("./Cards");
-function Game(seed){
+function Game(seed, flip){
 	this.rng = new MersenneTwister(seed);
 	this.phase = MulliganPhase1;
 	this.ply = 0;
@@ -13,7 +13,7 @@ function Game(seed){
 	this.player2 = new Player(this);
 	this.player1.foe = this.player2;
 	this.player2.foe = this.player1;
-	this.turn = seed < etgutil.MAX_INT/2?this.player1:this.player2;
+	this.turn = (seed < etgutil.MAX_INT/2) === !flip ? this.player1 : this.player2;
 	this.expectedDamage = [0, 0];
 	this.time = Date.now();
 }

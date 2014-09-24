@@ -298,7 +298,7 @@ var userEvents = {
 				sockinfo[foesock.id].foe = this;
 				var deck0 = sockinfo[foesock.id].deck, deck1 = sockinfo[this.id].deck;
 				var owndata = { seed: seed, deck: deck0, urdeck: deck1, foename:f };
-				var foedata = { seed: seed, deck: deck1, urdeck: deck0 ,foename:u};
+				var foedata = { flip: true, seed: seed, deck: deck1, urdeck: deck0 ,foename:u };
 				var stat = sockinfo[this.id].pvpstats, foestat = sockinfo[foesock.id].pvpstats;
 				for (var key in stat) {
 					owndata["p1" + key] = stat[key];
@@ -501,7 +501,7 @@ var sockEvents = {
 			sockinfo[pendinggame.id].foe = this;
 			var deck0 = sockinfo[pendinggame.id].deck, deck1 = data.deck;
 			var owndata = { seed: seed, deck: deck0, urdeck: deck1};
-			var foedata = { seed: seed, deck: deck1, urdeck: deck0};
+			var foedata = { flip: true, seed: seed, deck: deck1, urdeck: deck0};
 			var stat = sockinfo[this.id].pvpstats, foestat = sockinfo[pendinggame.id].pvpstats;
 			for (var key in stat) {
 				owndata["p1" + key] = stat[key];

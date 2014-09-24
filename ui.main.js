@@ -320,7 +320,7 @@ function initLibrary(data){
 	});
 }
 function initGame(data, ai) {
-	var game = new etg.Game(data.seed);
+	var game = new etg.Game(data.seed, data.flip);
 	addToGame(game, data);
 	game.player1.maxhp = game.player1.hp;
 	game.player2.maxhp = game.player2.hp;
@@ -1052,7 +1052,7 @@ function startStore() {
 	storeui.dom = packmulti;
 	px.refreshRenderer(storeui);
 }
-var blacklist = { seed: true, p1deckpower: true, p2deckpower: true, deck: true, urdeck: true };
+var blacklist = { flip: true, seed: true, p1deckpower: true, p2deckpower: true, deck: true, urdeck: true };
 function addToGame(game, data) {
 	for (var key in data) {
 		if (!blacklist[key]){
