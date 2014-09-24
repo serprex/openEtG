@@ -1200,7 +1200,11 @@ function activename(active){
 function casttext(cast, castele){
 	return cast == 0?"0":cast + ":" + castele;
 }
-
+function cardCmp(x, y){
+	var cx = Cards.Codes[x], cy = Cards.Codes[y];
+	return cx.upped - cy.upped || cx.element - cy.element || cx.cost - cy.cost || cx.type - cy.type || (x > y) - (x < y);
+}
+exports.cardCmp = cardCmp;
 exports.Game = Game;
 exports.Thing = Thing;
 exports.Card = Card;

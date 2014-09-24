@@ -565,10 +565,12 @@ io.on("connection", function(socket) {
 		}
 	});
 	socket.on("message", function(rawdata){
+		var data = JSON.parse(rawdata);
+		if (!data) return;
 		if (!(this.id in sockinfo)){
 			sockinfo[this.id] = {};
 		}
-		var data = JSON.parse(rawdata);
+		console.log(data.u, data.x);
 		if (data.x in echoEvents){
 			var foe = sockinfo[this.id].trade ? usersock[sockinfo[this.id].trade.foe] : sockinfo[this.id].foe;
 			if (foe){
@@ -582,7 +584,6 @@ io.on("connection", function(socket) {
 			if (!data || !(u = data.u)){
 				return;
 			}
-			console.log(u+": "+data.x);
 			if (!(u in users)){
 				if (data.x == "logout") return;
 				db.hgetall("U:"+u, function(err, obj){

@@ -30,15 +30,10 @@ var ui = require("./uiutil");
 var aiDecks = require("./Decks");
 var Cards = require("./Cards");
 var px = require("./px");
+px.getCardImage = getCardImage;
+px.isFreeCard = isFreeCard;
 var sock = require("./Sock");
 var caimgcache = {}, crimgcache = {}, wsimgcache = {}, artcache = {}, artimagecache = {};
-var elecols = [0xa99683, 0xaa5999, 0x777777, 0x996633, 0x5f4930, 0x50a005, 0xcc6611, 0x205080, 0xa9a9a9, 0x337ddd, 0xccaa22, 0x333333, 0x77bbdd];
-function lighten(c) {
-	return ((c & 255) + 255 >> 1) | (((c >> 8) & 255) + 255 >> 1 << 8) | (((c >> 16) & 255) + 255 >> 1 << 16);
-}
-function maybeLighten(card){
-	return card.upped ? lighten(elecols[card.element]) : elecols[card.element];
-}
 var shinyFilter = new PIXI.ColorMatrixFilter();
 shinyFilter.matrix = [
 	0,1,0,0,
@@ -111,7 +106,7 @@ function getCardImage(code) {
 		var rend = new PIXI.RenderTexture(100, 20);
 		var graphics = new PIXI.Graphics();
 		graphics.lineStyle(1, card && card.shiny ? 0xdaa520 : 0x222222);
-		graphics.beginFill(card ? maybeLighten(card) : code == "0" ? 0x887766 : 0x111111);
+		graphics.beginFill(card ? ui.maybeLighten(card) : code == "0" ? 0x887766 : 0x111111);
 		graphics.drawRect(0, 0, 99, 19);
 		graphics.endFill();
 		if (card) {
@@ -149,7 +144,7 @@ function getCreatureImage(code) {
 			var border = new PIXI.Sprite(gfx.cardBorders[card.element + (card.upped ? 13 : 0)]);
 			border.scale.set(0.5, 0.5);
 			graphics.addChild(border);
-			graphics.beginFill(card ? maybeLighten(card) : elecols[0]);
+			graphics.beginFill(card ? ui.maybeLighten(card) : ui.elecols[0]);
 			graphics.drawRect(0, 9, 64, 64);
 			graphics.endFill();
 			if (art) {
@@ -181,7 +176,7 @@ function getWeaponShieldImage(code) {
 			var border = (new PIXI.Sprite(gfx.cardBorders[card.element + (card.upped ? 13 : 0)]));
 			border.scale.set(5/8, 5/8);
 			graphics.addChild(border);
-			graphics.beginFill(card ? maybeLighten(card) : elecols[0]);
+			graphics.beginFill(card ? ui.maybeLighten(card) : ui.elecols[0]);
 			graphics.drawRect(0, 11, 80, 80);
 			graphics.endFill();
 			if (art) {
@@ -287,7 +282,7 @@ function initTrade() {
 	});
 }
 function initLibrary(data){
-	var stage = mkView();
+	var stage = px.mkView();
 	var bexit = px.mkButton(10, 10, "Exit");
 	px.setClick(bexit, startMenu);
 	stage.addChild(bexit);
@@ -378,7 +373,7 @@ function count(haystack, needle){
 	}
 }
 function victoryScreen(game) {
-	var victoryui = mkView();
+	var victoryui = px.mkView();
 	var winner = game.winner == game.player1;
 
 	victoryui.addChild(new px.MenuText(10, 290, "Plies: " + game.ply + "\nTime: " + (game.time/1000).toFixed(1) + " seconds"));
@@ -572,15 +567,11 @@ gfx.load(function(loadingScreen){
 	startMenu();
 });
 function startMenu(nymph){
-	require("./MainMenu").start(nymph, mkAi(0), mkAi(2), mkPremade("mage"), mkPremade("demigod"), startQuestWindow, startColosseum, startEditor, startStore, initGame, initTrade, initLibrary, startArenaInfo, startArenaTop, upgradestore);
+	require("./MainMenu").start(nymph, mkAi(0), mkAi(2), mkPremade("mage"), mkPremade("demigod"), startQuestWindow, startColosseum, startEditor, startStore, initGame, initTrade, initLibrary, startArenaInfo, startArenaTop, upgradestore, getDeck);
 }
 
 function isFreeCard(card) {
 	return card.type == etg.PillarEnum && !card.upped && !card.rarity && !card.shiny;
-}
-function editorCardCmp(x, y) {
-	var cx = Cards.Codes[x], cy = Cards.Codes[y];
-	return cx.upped - cy.upped || cx.element - cy.element || cx.cost - cy.cost || cx.type - cy.type || (x > y) - (x < y);
 }
 function adjust(cardminus, code, x) {
 	if (code in cardminus) {
@@ -658,7 +649,7 @@ function startQuestWindow(){
 	px.addMouseOverBg(questui, function() {
 		tinfo.setText("Welcome to Potatotal Island. The perfect island for adventuring!");
 	});
-	questui.addChild(mkBgRect(9, 9, 880, 111));
+	questui.addChild(px.mkBgRect(9, 9, 880, 111));
 	var questmap = new PIXI.Sprite(gfx.bg_questmap);
 	questmap.position.set(124, 162);
 	questui.addChild(questmap);
@@ -720,7 +711,7 @@ function startQuestArea(area) {
 	px.addMouseOverBg(questui, function() {
 		tinfo.setText("");
 	});
-	questui.addChild(mkBgRect(9, 9, 880, 111));
+	questui.addChild(px.mkBgRect(9, 9, 880, 111));
 	var questmap = new PIXI.Sprite(gfx.bg_quest);
 	questmap.position.set(124, 162);
 	questui.addChild(questmap);
@@ -904,7 +895,7 @@ function startStore() {
 	var storeui = px.mkView();
 
 	//shop background
-	storeui.addChild(mkBgRect(
+	storeui.addChild(px.mkBgRect(
 		40, 16, 820, 60,
 		40, 92, 530, 168,
 		40, 270, 620, 168,
@@ -961,7 +952,7 @@ function startStore() {
 		var pack = packdata[packrarity];
 		var boostdata = { pack: packrarity, element: packele };
 		parseInput(boostdata, "bulk", packmulti.value, 99);
-		if (user.gold >= pack.cost * (boostdata.bulk || 1) || (sock.user.freepacks && sock.user.freepacks[packrarity] > 0)) {
+		if (sock.user.gold >= pack.cost * (boostdata.bulk || 1) || (sock.user.freepacks && sock.user.freepacks[packrarity] > 0)) {
 			sock.userEmit("booster", boostdata);
 			px.toggleB(bbuy);
 		} else {
@@ -1006,7 +997,7 @@ function startStore() {
 	}
 
 	//booster popup
-	var popbooster = mkBgRect(0, 0, 627, 457);
+	var popbooster = px.mkBgRect(0, 0, 627, 457);
 	popbooster.position.set(40, 90);
 	popbooster.visible = false;
 	storeui.addChild(popbooster);
@@ -1147,7 +1138,7 @@ function startEditor(arena, acard, startempty) {
 		}
 		editormarksprite.setTexture(gfx.eicons[editormark]);
 		if (decksprite.deck.length > 60) decksprite.deck.length = 60;
-		decksprite.deck.sort(editorCardCmp);
+		decksprite.deck.sort(etg.cardCmp);
 		if (sock.user) {
 			cardminus = {};
 			for (var i = decksprite.deck.length - 1;i >= 0;i--) {
@@ -1388,7 +1379,7 @@ function startElementSelect() {
 		px.setClick(ele, function() {
 			var msg = { u: sock.user.name, a: sock.user.auth, e: i };
 			sock.user = undefined;
-			sock.emit("initsock.user", msg);
+			sock.emit("inituser", msg);
 			startMenu();
 		});
 		ele.interactive = true;
@@ -1926,7 +1917,7 @@ function startMatch(game, foeDeck) {
 			for (var i = 0;i < game.player1.hand.length;i++) {
 				var card = game.player1.hand[i].card;
 				if (game.player1.canspend(card.costele, card.cost)) {
-					fgfx.beginFill(elecols[etg.Light]);
+					fgfx.beginFill(ui.elecols[etg.Light]);
 					fgfx.drawRect(handsprite[0][i].position.x + 100, handsprite[0][i].position.y, 20, 20);
 					fgfx.endFill();
 				}
@@ -1966,20 +1957,20 @@ function startMatch(game, foeDeck) {
 			var pl = game.players(j);
 			if (pl.sosa) {
 				var spr = hptext[j];
-				fgfx.beginFill(elecols[etg.Death], .5);
+				fgfx.beginFill(ui.elecols[etg.Death], .5);
 				fgfx.drawRect(spr.position.x - spr.width / 2, spr.position.y - spr.height / 2, spr.width, spr.height);
 				fgfx.endFill();
 			}
 			var statuses = { flatline: etg.Death, silence: etg.Aether, sanctuary: etg.Light };
 			for(var status in statuses){
 				if (pl[status]) {
-					fgfx.beginFill(elecols[statuses[status]], .3);
+					fgfx.beginFill(ui.elecols[statuses[status]], .3);
 					fgfx.drawRect(handsprite[j][0].position.x - 2, handsprite[j][0].position.y - 2, 124, 164);
 					fgfx.endFill();
 				}
 			}
 			if (pl.nova >= 3){
-				fgfx.beginFill(elecols[etg.Entropy], .3);
+				fgfx.beginFill(ui.elecols[etg.Entropy], .3);
 				fgfx.drawRect(handsprite[j][0].position.x - 2, handsprite[j][0].position.y - 2, 124, 164);
 				fgfx.endFill();
 			}
@@ -1992,7 +1983,7 @@ function startMatch(game, foeDeck) {
 					creasprite[j][i].setTexture(getCreatureImage(cr.card));
 					creasprite[j][i].visible = true;
 					var child = creasprite[j][i].children[1];
-					child.setTexture(ui.getTextImage(cr.trueatk() + "|" + cr.truehp() + (cr.status.charges ? " x" + cr.status.charges : ""), ui.mkFont(10, cr.card.upped ? "black" : "white"), maybeLighten(cr.card)));
+					child.setTexture(ui.getTextImage(cr.trueatk() + "|" + cr.truehp() + (cr.status.charges ? " x" + cr.status.charges : ""), ui.mkFont(10, cr.card.upped ? "black" : "white"), ui.maybeLighten(cr.card)));
 					var child2 = creasprite[j][i].children[2];
 					var activetext = cr.activetext1();
 					child2.setTexture(ui.getTextImage(activetext, ui.mkFont(8, cr.card.upped ? "black" : "white")));
@@ -2007,12 +1998,12 @@ function startMatch(game, foeDeck) {
 					permsprite[j][i].alpha = pr.isMaterial() ? 1 : .7;
 					var child = permsprite[j][i].children[0];
 					if (pr instanceof etg.Pillar) {
-						child.setTexture(ui.getTextImage("1:" + (pr.pendstate ? pr.owner.mark : pr.card.element) + " x" + pr.status.charges, ui.mkFont(10, pr.card.upped ? "black" : "white"), maybeLighten(pr.card)));
+						child.setTexture(ui.getTextImage("1:" + (pr.pendstate ? pr.owner.mark : pr.card.element) + " x" + pr.status.charges, ui.mkFont(10, pr.card.upped ? "black" : "white"), ui.maybeLighten(pr.card)));
 					}
 					else if (pr.active.auto && pr.active.auto.activename == "locket") {
-						child.setTexture(ui.getTextImage("1:" + (pr.status.mode === undefined ? pr.owner.mark : pr.status.mode), ui.mkFont(10, pr.card.upped ? "black" : "white"), maybeLighten(pr.card)));
+						child.setTexture(ui.getTextImage("1:" + (pr.status.mode === undefined ? pr.owner.mark : pr.status.mode), ui.mkFont(10, pr.card.upped ? "black" : "white"), ui.maybeLighten(pr.card)));
 					}
-					else child.setTexture(ui.getTextImage(pr.status.charges !== undefined ? " " + pr.status.charges : "", ui.mkFont(10, pr.card.upped ? "black" : "white"), maybeLighten(pr.card)));
+					else child.setTexture(ui.getTextImage(pr.status.charges !== undefined ? " " + pr.status.charges : "", ui.mkFont(10, pr.card.upped ? "black" : "white"), ui.maybeLighten(pr.card)));
 					var child2 = permsprite[j][i].children[1];
 					child2.setTexture(pr instanceof etg.Pillar ? gfx.nopic : ui.getTextImage(pr.activetext1(), ui.mkFont(8, pr.card.upped ? "black" : "white")));
 				} else permsprite[j][i].visible = false;
@@ -2021,7 +2012,7 @@ function startMatch(game, foeDeck) {
 			if (wp && !(j == 1 && cloakgfx.visible)) {
 				weapsprite[j].visible = true;
 				var child = weapsprite[j].children[1];
-				child.setTexture(ui.getTextImage(wp.trueatk() + (wp.status.charges ? " x" + wp.status.charges : ""), ui.mkFont(12, wp.card.upped ? "black" : "white"), maybeLighten(wp.card)));
+				child.setTexture(ui.getTextImage(wp.trueatk() + (wp.status.charges ? " x" + wp.status.charges : ""), ui.mkFont(12, wp.card.upped ? "black" : "white"), ui.maybeLighten(wp.card)));
 				child.visible = true;
 				var child = weapsprite[j].children[2];
 				child.setTexture(ui.getTextImage(wp.activetext1(), ui.mkFont(12, wp.card.upped ? "black" : "white")));
@@ -2033,7 +2024,7 @@ function startMatch(game, foeDeck) {
 			if (sh && !(j == 1 && cloakgfx.visible)) {
 				shiesprite[j].visible = true;
 				var child = shiesprite[j].children[0];
-				child.setTexture(ui.getTextImage(sh.status.charges ? "x" + sh.status.charges: "" + sh.truedr() + "", ui.mkFont(12, sh.card.upped ? "black" : "white"), maybeLighten(sh.card)));
+				child.setTexture(ui.getTextImage(sh.status.charges ? "x" + sh.status.charges: "" + sh.truedr() + "", ui.mkFont(12, sh.card.upped ? "black" : "white"), ui.maybeLighten(sh.card)));
 				child.visible = true;
 				var child = shiesprite[j].children[1];
 				child.setTexture(ui.getTextImage(sh.activetext1(), ui.mkFont(12, sh.card.upped ? "black" : "white")));
@@ -2053,11 +2044,11 @@ function startMatch(game, foeDeck) {
 			fgfx.drawRect(hptext[j].x - 41, hptext[j].y + yOffset-1, 82, 16);
 			fgfx.endFill();
 			if (pl.hp > 0){
-				fgfx.beginFill(elecols[etg.Life]);
+				fgfx.beginFill(ui.elecols[etg.Life]);
 				fgfx.drawRect(hptext[j].x - 40, hptext[j].y + yOffset, 80 * pl.hp / pl.maxhp, 14);
 				fgfx.endFill();
 				if (!cloakgfx.visible && game.expectedDamage[j]) {
-					fgfx.beginFill(elecols[game.expectedDamage[j] >= pl.hp ? etg.Fire : game.expectedDamage[j] > 0 ? etg.Time : etg.Water]);
+					fgfx.beginFill(ui.elecols[game.expectedDamage[j] >= pl.hp ? etg.Fire : game.expectedDamage[j] > 0 ? etg.Time : etg.Water]);
 					fgfx.drawRect(hptext[j].x - 40 + 80 * pl.hp / pl.maxhp, hptext[j].y + yOffset, -80 * Math.min(game.expectedDamage[j], pl.hp) / pl.maxhp, 14);
 					fgfx.endFill();
 				}

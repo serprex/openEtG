@@ -4,7 +4,7 @@ var etgutil = require("./etgutil");
 var sock = require("./Sock");
 var px = require("./px");
 var userutil = require("./userutil");
-exports.start = function(nymph, ai0, ai2, mage, demigod, startQuestWindow, startColosseum, startEditor, startStore, initGame, initTrade, initLibrary, startArenaInfo, startArenaTop, upgradestore) {
+exports.start = function(nymph, ai0, ai2, mage, demigod, startQuestWindow, startColosseum, startEditor, startStore, initGame, initTrade, initLibrary, startArenaInfo, startArenaTop, upgradestore, getDeck) {
 	var mainmenu = document.getElementById("mainmenu");
 	var tipjar = [
 		"Each card in your booster pack has a 50% chance of being from the chosen element",

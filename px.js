@@ -1,5 +1,7 @@
 var gfx = require("./gfx");
 var ui = require("./uiutil");
+var etg = require("./etg");
+var Cards = require("./Cards");
 var renderer = new PIXI.autoDetectRenderer(900, 600, leftpane);
 var realStage = new PIXI.Stage(0x336699, true);
 exports.realStage = realStage;
@@ -157,7 +159,7 @@ DeckDisplay.prototype.click = function(e){
 }
 DeckDisplay.prototype.renderDeck = function(i){
 	for (;i < this.deck.length;i++) {
-		this.children[i].setTexture(getCardImage(this.deck[i]));
+		this.children[i].setTexture(exports.getCardImage(this.deck[i]));
 		this.children[i].visible = true;
 	}
 	for (;i < this.decksize;i++) {
@@ -167,7 +169,7 @@ DeckDisplay.prototype.renderDeck = function(i){
 DeckDisplay.prototype.addCard = function(code, i){
 	if (i === undefined) i = 0;
 	for (;i < this.deck.length;i++) {
-		if (editorCardCmp(this.deck[i], code) >= 0) break;
+		if (etg.cardCmp(this.deck[i], code) >= 0) break;
 	}
 	this.deck.splice(i, 0, code);
 	this.renderDeck(i);
@@ -198,14 +200,14 @@ function CardSelector(cardmouseover, cardclick, maxedIndicator){
 	this.cardclick = cardclick;
 	this.hitArea = new PIXI.Rectangle(100, 272, 800, 328);
 	if (maxedIndicator) this.addChild(this.maxedIndicator = new PIXI.Graphics());
-	var bshiny = makeButton(5, 578, "Toggle Shiny");
-	setClick(bshiny, function() {
+	var bshiny = exports.mkButton(5, 578, "Toggle Shiny");
+	exports.setClick(bshiny, function() {
 		self.showshiny ^= true;
 		self.makeColumns();
 	});
 	this.addChild(bshiny);
-	var bshowall = makeButton(5, 530, "Show All");
-	setClick(bshowall, function() {
+	var bshowall = exports.mkButton(5, 530, "Show All");
+	exports.setClick(bshowall, function() {
 		bshowall.setText((self.showall ^= true) ? "Auto Hide" : "Show All");
 		self.makeColumns();
 	});
@@ -214,10 +216,10 @@ function CardSelector(cardmouseover, cardclick, maxedIndicator){
 	this.columns = [[],[],[],[],[],[]];
 	this.columnspr = [[],[],[],[],[],[]];
 	for (var i = 0;i < 13;i++) {
-		var sprite = makeButton((!i || i&1?4:40), 316 + Math.floor((i-1)/2) * 32, gfx.eicons[i]);
+		var sprite = exports.mkButton((!i || i&1?4:40), 316 + Math.floor((i-1)/2) * 32, gfx.eicons[i]);
 		sprite.interactive = true;
 		(function(_i) {
-			setClick(sprite, function() {
+			exports.setClick(sprite, function() {
 				self.elefilter = _i;
 				self.makeColumns();
 			});
@@ -225,10 +227,10 @@ function CardSelector(cardmouseover, cardclick, maxedIndicator){
 		this.addChild(sprite);
 	}
 	for (var i = 0;i < 5; i++){
-		var sprite = makeButton(74, 338 + i * 32, gfx.ricons[i]);
+		var sprite = exports.mkButton(74, 338 + i * 32, gfx.ricons[i]);
 		sprite.interactive = true;
 		(function(_i) {
-			setClick(sprite, function() {
+			exports.setClick(sprite, function() {
 				self.rarefilter = _i;
 				self.makeColumns();
 			});
@@ -279,8 +281,8 @@ CardSelector.prototype.makeColumns = function(){
 		this.columns[i] = etg.filtercards(i > 2,
 			function(x) { return x.element == self.elefilter &&
 				((i % 3 == 0 && x.type == etg.CreatureEnum) || (i % 3 == 1 && x.type <= etg.PermanentEnum) || (i % 3 == 2 && x.type == etg.SpellEnum)) &&
-				(!self.cardpool || x in self.cardpool || self.showall || isFreeCard(x)) && (!self.rarefilter || self.rarefilter == Math.min(x.rarity, 4));
-			}, editorCardCmp, this.showshiny);
+				(!self.cardpool || x in self.cardpool || self.showall || exports.isFreeCard(x)) && (!self.rarefilter || self.rarefilter == Math.min(x.rarity, 4));
+			}, etg.cardCmp, this.showshiny);
 	}
 	this.renderColumns();
 }
@@ -290,15 +292,15 @@ CardSelector.prototype.renderColumns = function(){
 	for (var i = 0;i < 6; i++){
 		for (var j = 0;j < this.columns[i].length;j++) {
 			var spr = this.columnspr[i][j], code = this.columns[i][j].code;
-			spr.setTexture(getCardImage(code));
+			spr.setTexture(exports.getCardImage(code));
 			spr.visible = true;
 			if (this.cardpool) {
-				var txt = spr.children[0], card = Cards.Codes[code], inf = isFreeCard(card);
+				var txt = spr.children[0], card = Cards.Codes[code], inf = exports.isFreeCard(card);
 				if ((txt.visible = inf || code in this.cardpool || this.showall)) {
 					var cardAmount = inf ? "-" : !(code in this.cardpool) ? 0 : (this.cardpool[code] - (this.cardminus && code in this.cardminus ? this.cardminus[code] : 0))
-					maybeSetText(txt, cardAmount.toString());
+					exports.maybeSetText(txt, cardAmount.toString());
 					if (this.maxedIndicator && card.type != etg.PillarEnum && cardAmount >= 6) {
-						this.maxedIndicator.beginFill(elecols[etg.Light]);
+						this.maxedIndicator.beginFill(ui.elecols[etg.Light]);
 						this.maxedIndicator.drawRect(spr.position.x + 100, spr.position.y, 20, 20);
 						this.maxedIndicator.endFill();
 					}
