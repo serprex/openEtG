@@ -1,6 +1,6 @@
 "use strict";
 (function() {
-var htmlElements = ["leftpane", "chatinput", "deckimport", "aideck", "foename", "change", "login", "password", "challenge", "chatBox", "trade", "bottompane", "demigodmode", "username", "stats","enableSound", "hideright", "lblhideright", "wantpvp", "lblwantpvp", "offline", "lbloffline", "mainmenu", "packmulti"];
+var htmlElements = ["leftpane", "chatinput", "deckimport", "aideck", "foename", "change", "login", "password", "challenge", "chatBox", "trade", "bottompane", "demigodmode", "username", "stats","enableSound", "hideright", "lblhideright", "wantpvp", "lblwantpvp", "offline", "lbloffline", "packmulti"];
 htmlElements.forEach(function(name){
 	window[name] = document.getElementById(name);
 });
@@ -29,70 +29,8 @@ var Quest = require("./Quest");
 var ui = require("./uiutil");
 var aiDecks = require("./Decks");
 var Cards = require("./Cards");
-var socket = eio({hostname: location.hostname, port: 13602});
-function MenuText(x, y, txt, wrapwidth) {
-	this.wrapwidth = wrapwidth;
-	PIXI.Sprite.call(this, this.textText(txt));
-	this.position.set(x, y);
-}
-MenuText.prototype = Object.create(PIXI.Sprite.prototype);
-MenuText.prototype.textText = function(x){
-	return ui.getTextImage(x.toString(), {font: "14px Verdana", fill: "white", stroke: "black", strokeThickness: 2}, "", this.wrapwidth);
-}
-MenuText.prototype.setText = function(x){
-	this.setTexture(this.textText(x));
-}
-function maybeSetText(obj, text) {
-	if (obj.text != text) obj.setText(text);
-}
-function setClick(obj, click, sound) {
-	if (sound === undefined) sound = "buttonClick";
-	obj.click = function() {
-		ui.playSound(sound);
-		click.apply(this, arguments);
-	}
-}
-function hitTest(obj, pos) {
-	var x = obj.position.x - obj.width * obj.anchor.x, y = obj.position.y - obj.height * obj.anchor.y;
-	return pos.x > x && pos.y > y && pos.x < x + obj.width && pos.y < y + obj.height;
-}
-function setInteractive() {
-	for (var i = 0;i < arguments.length;i++) {
-		arguments[i].interactive = true;
-	}
-}
-function userEmit(x, data) {
-	if (!data) data = {};
-	data.x = x;
-	data.u = user.name;
-	data.a = user.auth;
-	socket.send(JSON.stringify(data));
-}
-function sockEmit(x, data){
-	if (!data) data = {};
-	data.x = x;
-	socket.send(JSON.stringify(data));
-}
-function userExec(x, data){
-	if (!data) data = {};
-	userEmit(x, data);
-	userutil[x](data, user);
-}
-function refreshRenderer(stage, animCb, dontrender) {
-	if (realStage.children.length > 1){
-		var oldstage = realStage.children[1];
-		if (oldstage.dom) oldstage.dom.style.display = "none";
-		if (oldstage.endnext) oldstage.endnext();
-		realStage.removeChildAt(1);
-	}
-	realStage.addChild(stage);
-	realStage.next = animCb;
-	if (stage.dom) stage.dom.style.display = "inline";
-	// if (!dontrender) renderer.render(realStage);
-}
-
-var renderer = new PIXI.autoDetectRenderer(900, 600, leftpane);
-var realStage = new PIXI.Stage(0x336699, true);
+var px = require("./px");
+var sock = require("./Sock");
 var caimgcache = {}, crimgcache = {}, wsimgcache = {}, artcache = {}, artimagecache = {};
 var elecols = [0xa99683, 0xaa5999, 0x777777, 0x996633, 0x5f4930, 0x50a005, 0xcc6611, 0x205080, 0xa9a9a9, 0x337ddd, 0xccaa22, 0x333333, 0x77bbdd];
 function lighten(c) {
@@ -264,63 +202,35 @@ function getWeaponShieldImage(code) {
 		});
 	}
 }
-function mkBgRect(){
-	var g = new PIXI.Graphics();
-	g.beginFill(0x0d2e4a);
-	for(var i=0; i<arguments.length; i+=4){
-		g.drawRect(arguments[i], arguments[i+1], arguments[i+2], arguments[i+3], 6);
-	}
-	g.endFill();
-	g.lineStyle(2, 0x121212);
-	for(var i=0; i<arguments.length; i+=4){
-		g.moveTo(arguments[i], arguments[i+1]);
-		g.lineTo(arguments[i], arguments[i+1]+arguments[i+3]);
-		g.lineTo(arguments[i]+arguments[i+2], arguments[i+1]+arguments[i+3]);
-	}
-	g.lineStyle(2, 0x969696);
-	for(var i=0; i<arguments.length; i+=4){
-		g.moveTo(arguments[i], arguments[i+1]);
-		g.lineTo(arguments[i]+arguments[i+2], arguments[i+1]);
-		g.lineTo(arguments[i]+arguments[i+2], arguments[i+1]+arguments[i+3]);
-	}
-	return g;
-}
-function mkView(){
-	var view = new PIXI.DisplayObjectContainer();
-	view.interactive = true;
-	view.hitArea = realStage.hitArea;
-	return view;
-}
-
 function initTrade() {
-	var stage = mkView();
+	var stage = px.mkView();
 	var cardminus = {};
-	var btrade = makeButton(10, 40, "Trade");
-	var bconfirm = makeButton(10, 70, "Confirm");
+	var btrade = px.mkButton(10, 40, "Trade");
+	var bconfirm = px.mkButton(10, 70, "Confirm");
 	var bconfirmed = new PIXI.Text("Confirmed!", { font: "16px Dosis" });
-	var bcancel = makeButton(10, 10, "Cancel");
+	var bcancel = px.mkButton(10, 10, "Cancel");
 	var cardChosen = false;
 	function setCardArt(code){
 		cardArt.setTexture(getArt(code));
 		cardArt.visible = true;
 	}
-	var ownDeck = new DeckDisplay(30, setCardArt,
+	var ownDeck = new px.DeckDisplay(30, setCardArt,
 		function(i) {
 			adjust(cardminus, ownDeck.deck[i], -1);
 			ownDeck.rmCard(i);
 		}
 	);
-	var foeDeck = new DeckDisplay(30, setCardArt);
+	var foeDeck = new px.DeckDisplay(30, setCardArt);
 	foeDeck.position.x = 350;
 	stage.addChild(ownDeck);
 	stage.addChild(foeDeck);
-	setClick(bcancel, function() {
-		userEmit("canceltrade");
+	px.setClick(bcancel, function() {
+		sock.userEmit("canceltrade");
 		startMenu();
 	});
-	setClick(btrade, function() {
+	px.setClick(btrade, function() {
 		if (ownDeck.deck.length > 0) {
-			sockEmit("cardchosen", {c: etgutil.encodedeck(ownDeck.deck)});
+			sock.emit("cardchosen", {c: etgutil.encodedeck(ownDeck.deck)});
 			console.log("Trade sent", ownDeck.deck);
 			cardChosen = true;
 			stage.removeChild(btrade);
@@ -328,22 +238,22 @@ function initTrade() {
 		}
 		else chat("You have to choose at least a card!");
 	});
-	setClick(bconfirm, function() {
+	px.setClick(bconfirm, function() {
 		if (foeDeck.deck.length > 0) {
 			console.log("Confirmed!", ownDeck.deck, foeDeck.deck);
-			userEmit("confirmtrade", { cards: etgutil.encodedeck(ownDeck.deck), oppcards: etgutil.encodedeck(foeDeck.deck) });
+			sock.userEmit("confirmtrade", { cards: etgutil.encodedeck(ownDeck.deck), oppcards: etgutil.encodedeck(foeDeck.deck) });
 			stage.removeChild(bconfirm);
 			stage.addChild(bconfirmed);
 		}
 		else chat("Wait for your friend to choose!");
 	});
 	bconfirmed.position.set(10, 110);
-	setInteractive(btrade);
+	px.setInteractive(btrade);
 	stage.addChild(btrade);
 	stage.addChild(bcancel);
 
-	var cardpool = etgutil.deck2pool(user.pool);
-	var cardsel = new CardSelector(setCardArt,
+	var cardpool = etgutil.deck2pool(sock.user.pool);
+	var cardsel = new px.CardSelector(setCardArt,
 		function(code){
 			var card = Cards.Codes[code];
 			if (ownDeck.deck.length < 30 && !isFreeCard(card) && code in cardpool && !(code in cardminus && cardminus[code] >= cardpool[code])) {
@@ -362,14 +272,14 @@ function initTrade() {
 			foeDeck.renderDeck(0);
 		},
 		tradedone: function(data) {
-			user.pool = etgutil.mergedecks(user.pool, data.newcards);
-			user.pool = etgutil.removedecks(user.pool, data.oldcards);
+			sock.user.pool = etgutil.mergedecks(sock.user.pool, data.newcards);
+			sock.user.pool = etgutil.removedecks(sock.user.pool, data.oldcards);
 			startMenu();
 		},
 		tradecanceled: startMenu,
 	};
-	refreshRenderer(stage, function() {
-		var mpos = realStage.getMousePosition();
+	px.refreshRenderer(stage, function() {
+		var mpos = px.getMousePosition();
 		cardArt.visible = false;
 		cardsel.next(cardpool, cardminus, mpos);
 		foeDeck.next(mpos);
@@ -378,11 +288,11 @@ function initTrade() {
 }
 function initLibrary(data){
 	var stage = mkView();
-	var bexit = makeButton(10, 10, "Exit");
-	setClick(bexit, startMenu);
+	var bexit = px.mkButton(10, 10, "Exit");
+	px.setClick(bexit, startMenu);
 	stage.addChild(bexit);
 	var cardpool = etgutil.deck2pool(data.pool);
-	var cardsel = new CardSelector(function(code){
+	var cardsel = new px.CardSelector(function(code){
 		cardArt.setTexture(getArt(code));
 	});
 	stage.addChild(cardsel);
@@ -404,8 +314,8 @@ function initLibrary(data){
 			}
 		}
 	}
-	stage.addChild(new MenuText(100, 16, "Cumulative wealth: " + Math.round(wealth)));
-	refreshRenderer(stage, function(){
+	stage.addChild(new px.MenuText(100, 16, "Cumulative wealth: " + Math.round(wealth)));
+	px.refreshRenderer(stage, function(){
 		cardsel.next(cardpool);
 	});
 }
@@ -451,7 +361,7 @@ function deckPower(deck, amount) {
 	}else return deck;
 }
 function getDeck() {
-	if (user) return user.decks[user.selectedDeck];
+	if (sock.user) return sock.user.decks[sock.user.selectedDeck];
 	var deck = deckimport.value.trim();
 	return ~deck.indexOf(" ") ? etgutil.encodedeck(deck.split(" ")) : deck;
 }
@@ -471,17 +381,17 @@ function victoryScreen(game) {
 	var victoryui = mkView();
 	var winner = game.winner == game.player1;
 
-	victoryui.addChild(new MenuText(10, 290, "Plies: " + game.ply + "\nTime: " + (game.time/1000).toFixed(1) + " seconds"));
+	victoryui.addChild(new px.MenuText(10, 290, "Plies: " + game.ply + "\nTime: " + (game.time/1000).toFixed(1) + " seconds"));
 	if (winner){
 		var victoryText = game.quest ? game.wintext : "You won!";
-		var tinfo = new MenuText(450, game.cardreward ? 130 : 250, victoryText, 500);
+		var tinfo = new px.MenuText(450, game.cardreward ? 130 : 250, victoryText, 500);
 		tinfo.anchor.x = 0.5;
 		tinfo.anchor.y = 1;
 		victoryui.addChild(tinfo);
 	}
 
-	var bexit = makeButton(412, 430, "Exit");
-	setClick(bexit, function() {
+	var bexit = px.mkButton(412, 430, "Exit");
+	px.setClick(bexit, function() {
 		if (game.quest) {
 			if (winner && game.choicerewards)
 				startRewardWindow(game.choicerewards, game.rewardamount, true);
@@ -493,13 +403,13 @@ function victoryScreen(game) {
 		}else startMenu();
 	});
 	victoryui.addChild(bexit);
-	if (winner && user){
-		userExec("addwin", { pvp: !game.ai });
+	if (winner && sock.user){
+		sock.userExec("addwin", { pvp: !game.ai });
 		if (game.goldreward) {
 			var goldshown = game.goldreward - (game.cost || 0);
-			var tgold = new MenuText(340, 550, "Won $" + goldshown);
+			var tgold = new px.MenuText(340, 550, "Won $" + goldshown);
 			victoryui.addChild(tgold);
-			userExec("addgold", { g: game.goldreward });
+			sock.userExec("addgold", { g: game.goldreward });
 		}
 		if (game.cardreward) {
 			var x0 = 470-etgutil.decklength(game.cardreward)*20;
@@ -509,7 +419,7 @@ function victoryScreen(game) {
 				cardArt.position.set(x0+i*40, 170);
 				victoryui.addChild(cardArt);
 			});
-			userExec(game.quest?"addbound":"addcards", { c: game.cardreward });
+			sock.userExec(game.quest?"addbound":"addcards", { c: game.cardreward });
 		}
 	}
 
@@ -525,8 +435,8 @@ function victoryScreen(game) {
 			case 1:mkPremade("mage")();break;
 			case 2:mkAi(2)();break;
 			case 3:mkPremade("demigod")();break;
-			case 4:userEmit("foearena", {lv:0});break;
-			case 5:userEmit("foearena", {lv:1});break;
+			case 4:sock.userEmit("foearena", {lv:0});break;
+			case 5:sock.userEmit("foearena", {lv:1});break;
 			}
 		}
 	}
@@ -535,25 +445,25 @@ function victoryScreen(game) {
 		document.removeEventListener("keydown", onkeydown);
 	}
 
-	refreshRenderer(victoryui);
+	px.refreshRenderer(victoryui);
 }
 
 function mkPremade(name, daily) {
 	return function() {
 		var urdeck = getDeck();
-		if (etgutil.decklength(urdeck) < (user ? 31 : 11)) {
+		if (etgutil.decklength(urdeck) < (sock.user ? 31 : 11)) {
 			startEditor();
 			return;
 		}
 		var cost = daily !== undefined ? 0 : name == "mage" ? 5 : 20, foedata;
-		if (user) {
+		if (sock.user) {
 			if (daily === undefined){
-				if (user.gold < cost) {
+				if (sock.user.gold < cost) {
 					chat("Requires " + cost + "\u00A4");
 					return;
 				}
 			}else{
-				foedata = aiDecks[name][user[name == "mage" ? "dailymage" : "dailydg"]];
+				foedata = aiDecks[name][sock.user[name == "mage" ? "dailymage" : "dailydg"]];
 			}
 		}
 		if (!foedata) foedata = aiDecks.giveRandom(name);
@@ -566,7 +476,7 @@ function mkPremade(name, daily) {
 			gameData.p2markpower = 3;
 			gameData.p2drawpower = 2;
 		}
-		if (!user) parsepvpstats(gameData);
+		if (!sock.user) parsepvpstats(gameData);
 		else{
 			gameData.cost = cost;
 		}
@@ -584,7 +494,7 @@ function mkQuestAi(questname, stage, area) {
 	var hp = quest.hp || 100;
 	var playerHPstart = quest.urhp || 100;
 	var urdeck = getDeck();
-	if (etgutil.decklength(urdeck) < (user ? 31 : 11)) {
+	if (etgutil.decklength(urdeck) < (sock.user ? 31 : 11)) {
 		return "ERROR: Your deck is invalid or missing! Please exit & create a valid deck in the deck editor.";
 	}
 	var game = initGame({ deck: quest.deck, urdeck: urdeck, seed: Math.random() * etgutil.MAX_INT, p2hp: hp, p2markpower: markpower, foename: quest.name, p1hp: playerHPstart, p2drawpower: drawpower }, true);
@@ -596,7 +506,7 @@ function mkQuestAi(questname, stage, area) {
 	game.autonext = quest.autonext;
 	game.noheal = quest.noheal;
 	game.area = area;
-	if ((user.quest[questname] <= stage || !(questname in user.quest))) {
+	if ((sock.user.quest[questname] <= stage || !(questname in sock.user.quest))) {
 		game.cardreward = quest.cardreward;
 		game.goldreward = quest.goldreward;
 		game.choicerewards = quest.choicerewards;
@@ -608,13 +518,13 @@ function mkAi(level, daily) {
 	return function() {
 		if (Cards.loaded){
 			var urdeck = getDeck();
-			if (etgutil.decklength(urdeck) < (user ? 31 : 11)) {
+			if (etgutil.decklength(urdeck) < (sock.user ? 31 : 11)) {
 				startEditor();
 				return;
 			}
 			var cost = daily !== undefined || level == 0 ? 0 : level == 1 ? 5 : 10;
-			if (user && cost) {
-				if (user.gold < cost) {
+			if (sock.user && cost) {
+				if (sock.user.gold < cost) {
 					chat("Requires " + cost + "\u00A4");
 					return;
 				}
@@ -637,12 +547,11 @@ function mkAi(level, daily) {
 				"Tammi",
 				"Yuriko"
 			];
-
 			var typeName = ["Commoner", "Mage", "Champion"];
 
 			var foename = typeName[level] + "\n" + randomNames[etg.PlayerRng.upto(randomNames.length)];
 			var gameData = { deck: deck, urdeck: urdeck, seed: Math.random() * etgutil.MAX_INT, p2hp: level == 0 ? 100 : level == 1 ? 125 : 150, p2markpower: level == 2 ? 2 : 1, foename: foename, p2drawpower: level == 2 ? 2 : 1 };
-			if (!user) parsepvpstats(gameData);
+			if (!sock.user) parsepvpstats(gameData);
 			else gameData.cost = cost;
 			gameData.level = level;
 			if (daily !== undefined) gameData.daily = daily;
@@ -654,56 +563,18 @@ soundChange();
 musicChange();
 var gfx = require("./gfx");
 gfx.load(function(loadingScreen){
-	realStage.addChild(loadingScreen);
+	px.realStage.addChild(loadingScreen);
 	requestAnimate();
 }, function(){
 	ui.playMusic("openingMusic");
-	realStage.removeChildren();
-	realStage.addChild(new PIXI.Sprite(gfx.bg_default));
+	px.realStage.removeChildren();
+	px.realStage.addChild(new PIXI.Sprite(gfx.bg_default));
 	startMenu();
 });
-function MenuButton(text){
-	PIXI.Sprite.call(this, gfx.button);
-	this.txt = new PIXI.Text(text, {font: "14px Dosis"});
-	this.txt.anchor.x = .5;
-	this.txt.position.set(this.width/2, 3);
-	if (this.txt.width > this.width-6) this.txt.width = this.width-6;
-	this.addChild(this.txt);
-}
-MenuButton.prototype = Object.create(PIXI.Sprite.prototype);
-MenuButton.prototype.setText = function(x){
-	if (x){
-		maybeSetText(this.txt, x);
-		this.visible = true;
-	}else this.visible = false;
-}
-function makeButton(x, y, b, mouseoverfunc, mouseoutfunc) {
-	if (typeof b == "string") b = new MenuButton(b);
-	else if (b instanceof PIXI.Texture) b = new PIXI.Sprite(b);
-	b.interactive = true;
-	b.buttonMode = true;
-	b.position.set(x, y);
-	b.mousedown = function() {
-		b.tint = 0x666666;
-	}
-	b.mouseover = b.mouseup = function() {
-		if (mouseoverfunc) mouseoverfunc();
-		b.tint = 0xAAAAAA;
-	}
-	b.mouseout = function() {
-		if (mouseoutfunc) mouseoutfunc();
-		b.tint = 0xFFFFFF;
-	}
-	return b;
+function startMenu(nymph){
+	require("./MainMenu").start(nymph, mkAi(0), mkAi(2), mkPremade("mage"), mkPremade("demigod"), startQuestWindow, startColosseum, startEditor, startStore, initGame, initTrade, initLibrary, startArenaInfo, startArenaTop, upgradestore);
 }
 
-function toggleB() {
-	for (var i = 0;i < arguments.length;i++) {
-		arguments[i].visible ^= true;
-		arguments[i].interactive ^= true;
-		arguments[i].buttonMode ^= true;
-	}
-}
 function isFreeCard(card) {
 	return card.type == etg.PillarEnum && !card.upped && !card.rarity && !card.shiny;
 }
@@ -716,428 +587,6 @@ function adjust(cardminus, code, x) {
 		cardminus[code] += x;
 	} else cardminus[code] = x;
 	delete cardminus.rendered;
-}
-function DeckDisplay(decksize, cardmouseover, cardclick, deck){
-	PIXI.DisplayObjectContainer.call(this);
-	this.deck = deck || [];
-	this.decksize = decksize;
-	this.cardmouseover = cardmouseover;
-	this.cardclick = cardclick;
-	this.hitArea = new PIXI.Rectangle(100, 32, Math.floor(decksize/10)*100, 200);
-	this.interactive = true;
-	for (var i = 0;i < decksize;i++) {
-		var sprite = new PIXI.Sprite(gfx.nopic);
-		sprite.position.set(100 + Math.floor(i / 10) * 100, 32 + (i % 10) * 20);
-		this.addChild(sprite);
-	}
-}
-DeckDisplay.prototype = Object.create(PIXI.DisplayObjectContainer.prototype);
-DeckDisplay.prototype.pos2idx = function(mpos){
-	return Math.floor((mpos.x-100-this.position.x)/100)*10+(Math.floor((mpos.y-32-this.position.y)/20)%10);
-}
-DeckDisplay.prototype.click = function(e){
-	var index = this.pos2idx(e.global);
-	if (index >= 0 && index < this.deck.length){
-		ui.playSound("cardClick");
-		this.cardclick(index);
-	}
-}
-DeckDisplay.prototype.renderDeck = function(i){
-	for (;i < this.deck.length;i++) {
-		this.children[i].setTexture(getCardImage(this.deck[i]));
-		this.children[i].visible = true;
-	}
-	for (;i < this.decksize;i++) {
-		this.children[i].visible = false;
-	}
-}
-DeckDisplay.prototype.addCard = function(code, i){
-	if (i === undefined) i = 0;
-	for (;i < this.deck.length;i++) {
-		if (editorCardCmp(this.deck[i], code) >= 0) break;
-	}
-	this.deck.splice(i, 0, code);
-	this.renderDeck(i);
-}
-DeckDisplay.prototype.rmCard = function(index){
-	this.deck.splice(index, 1);
-	this.renderDeck(index);
-}
-DeckDisplay.prototype.next = function(mpos){
-	if (this.cardmouseover){
-		if (mpos === undefined) mpos = this.stage.getMousePosition();
-		if (!this.hitArea.contains(mpos.x, mpos.y)) return;
-		var index = this.pos2idx(mpos);
-		if (index >= 0 && index < this.deck.length){
-			this.cardmouseover(this.deck[index]);
-		}
-	}
-}
-function CardSelector(cardmouseover, cardclick, maxedIndicator){
-	var self = this;
-	PIXI.DisplayObjectContainer.call(this);
-	this.cardpool = undefined;
-	this.cardminus = undefined;
-	this.showall = false;
-	this.showshiny = undefined;
-	this.interactive = true;
-	this.cardmouseover = cardmouseover;
-	this.cardclick = cardclick;
-	this.hitArea = new PIXI.Rectangle(100, 272, 800, 328);
-	if (maxedIndicator) this.addChild(this.maxedIndicator = new PIXI.Graphics());
-	var bshiny = makeButton(5, 578, "Toggle Shiny");
-	setClick(bshiny, function() {
-		self.showshiny ^= true;
-		self.makeColumns();
-	});
-	this.addChild(bshiny);
-	var bshowall = makeButton(5, 530, "Show All");
-	setClick(bshowall, function() {
-		bshowall.setText((self.showall ^= true) ? "Auto Hide" : "Show All");
-		self.makeColumns();
-	});
-	this.addChild(bshowall);
-	this.elefilter = this.rarefilter = 0;
-	this.columns = [[],[],[],[],[],[]];
-	this.columnspr = [[],[],[],[],[],[]];
-	for (var i = 0;i < 13;i++) {
-		var sprite = makeButton((!i || i&1?4:40), 316 + Math.floor((i-1)/2) * 32, gfx.eicons[i]);
-		sprite.interactive = true;
-		(function(_i) {
-			setClick(sprite, function() {
-				self.elefilter = _i;
-				self.makeColumns();
-			});
-		})(i);
-		this.addChild(sprite);
-	}
-	for (var i = 0;i < 5; i++){
-		var sprite = makeButton(74, 338 + i * 32, gfx.ricons[i]);
-		sprite.interactive = true;
-		(function(_i) {
-			setClick(sprite, function() {
-				self.rarefilter = _i;
-				self.makeColumns();
-			});
-		})(i);
-		this.addChild(sprite);
-	}
-	for (var i = 0;i < 6;i++) {
-		for (var j = 0;j < 15;j++) {
-			var sprite = new PIXI.Sprite(gfx.nopic);
-			sprite.position.set(100 + i * 130, 272 + j * 20);
-			var sprcount = new PIXI.Text("", { font: "12px Dosis" });
-			sprcount.position.set(102, 4);
-			sprite.addChild(sprcount);
-			this.addChild(sprite);
-			this.columnspr[i].push(sprite);
-		}
-	}
-}
-CardSelector.prototype = Object.create(PIXI.DisplayObjectContainer.prototype);
-CardSelector.prototype.click = function(e){
-	if (!this.cardclick) return;
-	var col = this.columns[Math.floor((e.global.x-100)/130)], card;
-	if (col && (card = col[Math.floor((e.global.y-272)/20)])){
-		ui.playSound("cardClick");
-		this.cardclick(card.code);
-	}
-}
-CardSelector.prototype.next = function(newcardpool, newcardminus, mpos) {
-	if (newcardpool != this.cardpool || newcardminus != this.cardminus) {
-		this.cardminus = newcardminus;
-		this.cardpool = newcardpool;
-		this.makeColumns();
-	}else if (this.cardminus && !this.cardminus.rendered){
-		this.renderColumns();
-	}
-	if (this.cardmouseover){
-		if (mpos === undefined) mpos = this.stage.getMousePosition();
-		if (!this.hitArea.contains(mpos.x, mpos.y)) return;
-		var col = this.columns[Math.floor((mpos.x-100)/130)], card;
-		if (col && (card = col[Math.floor((mpos.y-272)/20)])){
-			this.cardmouseover(card.code);
-		}
-	}
-}
-CardSelector.prototype.makeColumns = function(){
-	var self = this;
-	for (var i = 0;i < 6;i++) {
-		this.columns[i] = etg.filtercards(i > 2,
-			function(x) { return x.element == self.elefilter &&
-				((i % 3 == 0 && x.type == etg.CreatureEnum) || (i % 3 == 1 && x.type <= etg.PermanentEnum) || (i % 3 == 2 && x.type == etg.SpellEnum)) &&
-				(!self.cardpool || x in self.cardpool || self.showall || isFreeCard(x)) && (!self.rarefilter || self.rarefilter == Math.min(x.rarity, 4));
-			}, editorCardCmp, this.showshiny);
-	}
-	this.renderColumns();
-}
-CardSelector.prototype.renderColumns = function(){
-	if (this.cardminus) this.cardminus.rendered = true;
-	if (this.maxedIndicator) this.maxedIndicator.clear();
-	for (var i = 0;i < 6; i++){
-		for (var j = 0;j < this.columns[i].length;j++) {
-			var spr = this.columnspr[i][j], code = this.columns[i][j].code;
-			spr.setTexture(getCardImage(code));
-			spr.visible = true;
-			if (this.cardpool) {
-				var txt = spr.children[0], card = Cards.Codes[code], inf = isFreeCard(card);
-				if ((txt.visible = inf || code in this.cardpool || this.showall)) {
-					var cardAmount = inf ? "-" : !(code in this.cardpool) ? 0 : (this.cardpool[code] - (this.cardminus && code in this.cardminus ? this.cardminus[code] : 0))
-					maybeSetText(txt, cardAmount.toString());
-					if (this.maxedIndicator && card.type != etg.PillarEnum && cardAmount >= 6) {
-						this.maxedIndicator.beginFill(elecols[etg.Light]);
-						this.maxedIndicator.drawRect(spr.position.x + 100, spr.position.y, 20, 20);
-						this.maxedIndicator.endFill();
-					}
-				}
-			}
-		}
-		for (;j < 15;j++) {
-			this.columnspr[i][j].visible = false;
-		}
-	}
-}
-function addMouseOverBg(view, func) {
-	var bg = new PIXI.DisplayObjectContainer();
-	bg.hitArea = view.hitArea;
-	bg.mouseover = func;
-	bg.interactive = true;
-	view.addChild(bg);
-}
-function startMenu(nymph) {
-	var tipjar = [
-		"Each card in your booster pack has a 50% chance of being from the chosen element",
-		"Your arena deck will earn you $3 per win & $1 per loss",
-		"Colosseum lets you compete in a number of daily events for extra prizes. The colosseum challenges reset daily",
-		"Be sure to try the Proving Grounds Quests for some good cards",
-		"Be sure to keep track of the rarity icons; Grey means Common, Green means Uncommon, Blue means Rare, Orange means Shard, & Pink means Ultra Rare",
-		"The Library button allows you to see all of a user's tradeable cards",
-		"If you are a new user, be sure to get the free Bronze & Silver packs from the Shop",
-		"Starter decks, cards from free packs, & all non-Common Daily Cards are account-bound; they cannot be traded or sold",
-		"If you include account-bound cards in an upgrade, the upgrade will also be account-bound",
-		"You'll receive a Daily Card upon logging in after midnight GMT0. If you submit an Arena deck, the deck will always contain 5 copies of that card",
-		"Unupgraded pillars & pendulums are free",
-		"Cards sell for around half as much as they cost to buy from a pack",
-		"Quests are free to try, & you always face the same deck. Keep trying until you collect your reward",
-		"You may mulligan at the start of the game to shuffle & redraw your hand with one less card",
-		"Your account name is case sensitive",
-		"Arena Tier 1 is unupgraded, while Tier 2 is upgraded. All decks in a tier have the same number of attribute points",
-		"You may store 10 decks in the editor",
-		"If you type '/who' in chat you will get a list of the users who are online. '/w username message' will send your message only to one user",
-		"Chat commands: /who, /mute, /unmute, /clear, /w",
-		"Keyboard shortcuts: space ends turn, backspace cancels, w targets opponent, s targets yourself, 1 through 8 cast cards in hand",
-		"The first text bar under the game is the import/export bar & shows your current deck. The bar below it shows game messages & sometimes the opponent's deck",
-		"The AI Deck input may be used to fight any deck of your choice, but only in sandbox mode",
-		"Remember that you may use the logout button to enter sandbox mode to review the card pool, check rarities & try out new decks",
-		"Commoner & Champion have random decks, while Mage & Demigod have premade decks. Commoner & Mage are unupped, Champion has some upped, & Demigod is fully upped",
-		"Decks submitted to arena gain a point per win, & lose a point per loss. Rankings are shown in Arena T20",
-		"Decks submitted to arena lose hp exponentially per day, down to a minimum of a quarter of their original hp",
-		"If you don't get what you want from the packs in the shop, ask to trade in chat or the openEtG forum",
-		"Rarity doesn't necessarily relate to card strength. You can go a long ways with commons & uncommons",
-		"A ply is half a turn",
-		"Mark cards are only obtainable through PvP events. A tournament deck verifier is at tournament.htm",
-		"After an AI battle you will win a random common, uncommon, or rare from your opponent's deck",
-		"Cards in packs have a (45/packsize)% chance to increment rarity",
-	];
-	var tipNumber = etg.PlayerRng.upto(tipjar.length);
-
-	var menuui = mkView();
-	addMouseOverBg(menuui, function() {
-		tinfo.setText(user ? "Tip: " + tipjar[tipNumber] + "." : "To register, just type desired username & password in the fields to the right, then click 'Login'.");
-	});
-	menuui.addChild(mkBgRect(
-		40, 16, 820, 60,
-		40, 92, 392, 80,
-		40, 192, 392, 80,
-		40, 292, 392, 80,
-		40, 392, 392, 80,
-		40, 492, 392, 80,
-		770, 90, 90, 184,
-		770, 540, 90, 38
-	));
-	["AI BATTLE", "ARENA", "DECK MANAGEMENT", "OPTIONS", "PvP"].forEach(function(text, i){
-		var sectionText = new PIXI.Text(text, {font: "56px Dosis", fill: "#0c4262"});
-		sectionText.position.set(236, 108+i*100);
-		sectionText.anchor.x = .5;
-		if (sectionText.width > 350) sectionText.width = 350;
-		menuui.addChild(sectionText);
-	});
-	for (var i=1; i<=2; i++){
-		var tierText = new PIXI.Text("Tier " + i, {font: "24px Dosis", fill: "#0c4262"});
-		tierText.position.set(362, 166+i*38);
-		menuui.addChild(tierText);
-	}
-
-	var bnextTip = makeButton(777, 50, "Next tip");
-	setClick(bnextTip, function() {
-		tipNumber = (tipNumber+1) % tipjar.length;
-		tinfo.setText("Tip: " + tipjar[tipNumber] + ".");
-	});
-	menuui.addChild(bnextTip);
-
-	var tstats = new MenuText(775, 101, (user ? "$" + user.gold + "\nAI w/l\n" + user.aiwins + "/" + user.ailosses + "\n\nPvP w/l\n" + user.pvpwins + "/" + user.pvplosses : "Sandbox"));
-	menuui.addChild(tstats);
-
-	var tinfo = new MenuText(50, 26, "", 800);
-	menuui.addChild(tinfo);
-
-	var bai0 = makeButton(50, 100, "Commoner", function() {
-		tinfo.setText("Commoners have no upgraded cards & mostly common cards.\nCost: $0");
-	});
-	setClick(bai0, mkAi(0));
-	menuui.addChild(bai0);
-
-	var bai1 = makeButton(150, 100, "Mage", function() {
-		tinfo.setText("Mages have preconstructed decks with a couple rares.\nCost: $5");
-	});
-	setClick(bai1, mkPremade("mage"));
-	menuui.addChild(bai1);
-
-	var bai2 = makeButton(250, 100, "Champion", function() {
-		tinfo.setText("Champions have some upgraded cards.\nCost: $10");
-	});
-	setClick(bai2, mkAi(2));
-	menuui.addChild(bai2);
-
-	var bai3 = makeButton(350, 100, "Demigod", function() {
-		tinfo.setText("Demigods are extremely powerful. Come prepared for anything.\nCost: $20");
-	});
-	setClick(bai3, mkPremade("demigod"));
-	menuui.addChild(bai3);
-
-	var bquest = makeButton(50, 145, "Quests", function() {
-		tinfo.setText("Go on an adventure!");
-	});
-	setClick(bquest, startQuestWindow);
-	menuui.addChild(bquest);
-
-	var bcolosseum = makeButton(150, 145, "Colosseum", function() {
-		tinfo.setText("Try some daily challenges in the Colosseum!");
-	});
-	setClick(bcolosseum, startColosseum);
-	menuui.addChild(bcolosseum);
-
-	var bedit = makeButton(50, 300, "Editor", function() {
-		tinfo.setText("Edit your deck, as well as submit an arena deck.");
-	});
-	setClick(bedit, startEditor);
-	menuui.addChild(bedit);
-
-	var bshop = makeButton(150, 300, "Shop", function() {
-		tinfo.setText("Buy booster packs which contain cards from the elements you choose.");
-	});
-	setClick(bshop, startStore);
-	menuui.addChild(bshop);
-
-	var bupgrade = makeButton(250, 300, "Sell/Upgrade", function() {
-		tinfo.setText("Upgrade or sell cards.");
-	});
-	setClick(bupgrade, upgradestore);
-	menuui.addChild(bupgrade);
-
-	var blogout = makeButton(777, 246, "Logout", function() {
-		tinfo.setText("Click here to log out.")
-	});
-	setClick(blogout, function() {
-		userEmit("logout");
-		logout();
-	});
-	menuui.addChild(blogout);
-
-	//delete account button
-	var bdelete = makeButton(777, 550, "Wipe Account", function() {
-		tinfo.setText("Click here to permanently remove your account.")
-	});
-	setClick(bdelete, function() {
-		if (foename.value == user.name + "yesdelete") {
-			userEmit("delete");
-			logout();
-		} else {
-			chat("Input '" + user.name + "yesdelete' into Challenge to delete your account");
-		}
-	});
-	menuui.addChild(bdelete);
-
-	var usertoggle = [bquest, bcolosseum, bshop, bupgrade, blogout, bdelete, bnextTip];
-	for (var i=0; i<2; i++){
-		var baia = makeButton(50, 200+i*45, "Arena AI", (function(cost){return function() {
-			tinfo.setText("In the arena you will face decks from other players.\nCost: $" + cost);
-		}})(userutil.arenaCost(i)));
-		menuui.addChild(baia);
-		var binfoa = makeButton(150, 200+i*45, "Arena Info", function() {
-			tinfo.setText("Check how your arena deck is doing.");
-		});
-		menuui.addChild(binfoa);
-		var btopa = makeButton(250, 200+i*45, "Arena T20", function() {
-			tinfo.setText("See who the top players in arena are right now.");
-		});
-		menuui.addChild(btopa);
-		usertoggle.push(baia, binfoa, btopa);
-		(function(lvi){
-			setClick(baia, function() {
-				if (Cards.loaded) {
-					if (etgutil.decklength(getDeck()) < 31) {
-						startEditor();
-						return;
-					}
-					var cost = userutil.arenaCost(lvi.i);
-					if (user.gold < cost) {
-						chat("Requires " + cost + "\u00A4");
-						return;
-					}
-					userEmit("foearena", lvi);
-					menuui.removeChild(this);
-				}
-			});
-			setClick(binfoa, function() {
-				if (Cards.loaded) {
-					userEmit("arenainfo", lvi);
-					menuui.removeChild(this);
-				}
-			});
-			setClick(btopa, function() {
-				if (Cards.loaded) {
-					userEmit("arenatop", lvi);
-					menuui.removeChild(this);
-				}
-			});
-		})({lv:i});
-	}
-
-	if (!user) toggleB.apply(null, usertoggle);
-	else if (user.oracle || typeof nymph === "string") {
-		var oracle = new PIXI.Sprite(getArt(nymph || user.oracle));
-		oracle.position.set(450, 100);
-		menuui.addChild(oracle);
-		delete user.oracle;
-	}
-
-	function logout() {
-		lbloffline.style.display = lblwantpvp.style.display = "none";
-		user = undefined;
-		toggleB.apply(null, usertoggle);
-		tstats.setText("Sandbox");
-		if (oracle) {
-			menuui.removeChild(oracle);
-		}
-	}
-	menuui.cmds = {
-		pvpgive: initGame,
-		tradegive: initTrade,
-		librarygive: initLibrary,
-		foearena:function(data) {
-			aideck.value = data.deck;
-			var game = initGame({ deck: data.deck, urdeck: getDeck(), seed: data.seed,
-				p2hp: data.hp, foename: data.name, p2drawpower: data.draw, p2markpower: data.mark, arena: data.name, level: 4+data.lv }, true);
-			game.cost = userutil.arenaCost(data.lv);
-			user.gold -= game.cost;
-		},
-		arenainfo: startArenaInfo,
-		arenatop: startArenaTop,
-	};
-	menuui.dom = mainmenu;
-
-	refreshRenderer(menuui);
 }
 function startRewardWindow(reward, numberofcopies, nocode) {
 	if (!numberofcopies) numberofcopies = 1;
@@ -1156,25 +605,25 @@ function startRewardWindow(reward, numberofcopies, nocode) {
 	var rewardui = mkView();
 
 	if (numberofcopies > 1) {
-		var infotext = new MenuText(20, 100, "You will get " + numberofcopies + " copies of the card you choose")
+		var infotext = new px.MenuText(20, 100, "You will get " + numberofcopies + " copies of the card you choose")
 		rewardui.addChild(infotext);
 	}
 
 	if (!nocode){
-		var exitButton = makeButton(10, 10, "Exit");
-		setClick(exitButton, startMenu);
+		var exitButton = px.mkButton(10, 10, "Exit");
+		px.setClick(exitButton, startMenu);
 		rewardui.addChild(exitButton);
 	}
 
-	var confirmButton = makeButton(10, 40, "Done");
-	setClick(confirmButton, function() {
+	var confirmButton = px.mkButton(10, 40, "Done");
+	px.setClick(confirmButton, function() {
 		if (chosenReward) {
 			if (nocode) {
-				userExec("addbound", { c: etgutil.encodeCount(numberofcopies) + chosenReward });
+				sock.userExec("addbound", { c: etgutil.encodeCount(numberofcopies) + chosenReward });
 				startMenu();
 			}
 			else {
-				userEmit("codesubmit2", { code: foename.value, card: chosenReward });
+				sock.userEmit("codesubmit2", { code: foename.value, card: chosenReward });
 			}
 		}
 	});
@@ -1187,36 +636,36 @@ function startRewardWindow(reward, numberofcopies, nocode) {
 	rewardList.forEach(function(reward, i){
 		var card = new PIXI.Sprite(getCardImage(reward));
 		card.position.set(100 + Math.floor(i/12) * 130, 272 + (i%12) * 20);
-		setClick(card, function(){
+		px.setClick(card, function(){
 			chosenReward = reward;
 			chosenRewardImage.setTexture(getArt(chosenReward));
 		}, "cardClick");
 		rewardui.addChild(card);
-		setInteractive(card);
+		px.setInteractive(card);
 	});
 
-	refreshRenderer(rewardui);
+	px.refreshRenderer(rewardui);
 }
 
 function startQuest(questname) {
-	if (!user.quest[questname] && user.quest[questname] != 0) {
-		user.quest[questname] = 0;
-		userEmit("updatequest", { quest: questname, newstage: 0 });
+	if (!sock.user.quest[questname] && sock.user.quest[questname] != 0) {
+		sock.user.quest[questname] = 0;
+		sock.userEmit("updatequest", { quest: questname, newstage: 0 });
 	}
 }
 function startQuestWindow(){
 	var questui = mkView();
-	addMouseOverBg(questui, function() {
+	px.addMouseOverBg(questui, function() {
 		tinfo.setText("Welcome to Potatotal Island. The perfect island for adventuring!");
 	});
 	questui.addChild(mkBgRect(9, 9, 880, 111));
 	var questmap = new PIXI.Sprite(gfx.bg_questmap);
 	questmap.position.set(124, 162);
 	questui.addChild(questmap);
-	var tinfo = new MenuText(32, 32, "");
+	var tinfo = new px.MenuText(32, 32, "");
 	questui.addChild(tinfo);
-	var bexit = makeButton(750, 246, "Exit");
-	setClick(bexit, startMenu);
+	var bexit = px.mkButton(750, 246, "Exit");
+	px.setClick(bexit, startMenu);
 	questui.addChild(bexit);
 	var areainfo = {
 		forest: ["Spooky Forest", new PIXI.Polygon(555, 221, 456, 307, 519, 436, 520, 472, 631, 440, 652, 390, 653, 351, 666, 321, 619, 246)],
@@ -1241,14 +690,14 @@ function startQuestWindow(){
 				}
 				graphics.lineTo(points[0].x, points[0].y);
 			}
-			setClick(graphics, function () {
+			px.setClick(graphics, function () {
 				startQuestArea(k);
 			});
 			graphics.mouseover = function() {
 				tinfo.setText(ainfo[0]);
 			}
 			if (Quest.areas[k].some(function(quest) {
-				return (Quest[quest][0].dependency === undefined || Quest[quest][0].dependency(user)) && ((user.quest[quest] || 0) < Quest[quest].length);
+				return (Quest[quest][0].dependency === undefined || Quest[quest][0].dependency(sock.user)) && ((sock.user.quest[quest] || 0) < Quest[quest].length);
 			})) {
 				var xtot = 0, ytot = 0;
 				for (var i = 0;i < points.length; i++) {
@@ -1264,56 +713,56 @@ function startQuestWindow(){
 		})(areainfo[key], key);
 		questui.addChild(graphics);
 	}
-	refreshRenderer(questui);
+	px.refreshRenderer(questui);
 }
 function startQuestArea(area) {
-	var questui = mkView();
-	addMouseOverBg(questui, function() {
+	var questui = px.mkView();
+	px.addMouseOverBg(questui, function() {
 		tinfo.setText("");
 	});
 	questui.addChild(mkBgRect(9, 9, 880, 111));
 	var questmap = new PIXI.Sprite(gfx.bg_quest);
 	questmap.position.set(124, 162);
 	questui.addChild(questmap);
-	var tinfo = new MenuText(50, 26, "", 850);
-	var errinfo = new MenuText(50, 125, "", 850);
+	var tinfo = new px.MenuText(50, 26, "", 850);
+	var errinfo = new px.MenuText(50, 125, "", 850);
 	function makeQuestButton(quest, stage) {
 		var pos = Quest[quest].info.pos[stage];
 		var circle = new PIXI.Graphics();
 		circle.lineStyle(2, 0x88aa66);
-		circle.beginFill(user.quest[quest] > stage ? 0x4cff00 : 1);
+		circle.beginFill(sock.user.quest[quest] > stage ? 0x4cff00 : 1);
 		circle.drawCircle(0, 0, 16);
 		circle.endFill();
 		circle.hitArea = new PIXI.Circle(0, 0, 16);
-		var button = makeButton(pos[0], pos[1], circle);
+		var button = px.mkButton(pos[0], pos[1], circle);
 		button.mouseover = function() {
 			tinfo.setText(Quest[quest].info.text[stage]);
 		}
-		setClick(button, function() {
+		px.setClick(button, function() {
 			errinfo.setText(mkQuestAi(quest, stage, area) || "");
 		});
 		return button;
 	}
 	Quest.areas[area].forEach(function(quest){
 		var stage0 = Quest[quest][0];
-		if (stage0.dependency === undefined || stage0.dependency(user))
+		if (stage0.dependency === undefined || stage0.dependency(sock.user))
 			startQuest(quest);
 	});
 	Quest.areas[area].forEach(function(quest){
-		if ((user.quest[quest] !== undefined) && Quest[quest]) {
-			for (var i = 0;i <= user.quest[quest];i++) {
+		if ((sock.user.quest[quest] !== undefined) && Quest[quest]) {
+			for (var i = 0;i <= sock.user.quest[quest];i++) {
 				if (Quest[quest].info.pos[i]) {
 					questui.addChild(makeQuestButton(quest, i));
 				}
 			}
 		}
 	});
-	var bexit = makeButton(750, 246, "Exit");
-	setClick(bexit, startQuestWindow);
+	var bexit = px.mkButton(750, 246, "Exit");
+	px.setClick(bexit, startQuestWindow);
 	questui.addChild(tinfo);
 	questui.addChild(errinfo);
 	questui.addChild(bexit);
-	refreshRenderer(questui);
+	px.refreshRenderer(questui);
 }
 
 function upgradestore() {
@@ -1322,14 +771,14 @@ function upgradestore() {
 			if (card.upped) return "You cannot upgrade upgraded cards.";
 			var use = card.rarity != -1 ? 6 : 1;
 			if (cardpool[card.code] >= use) {
-				userExec("upgrade", { card: card.code });
+				sock.userExec("upgrade", { card: card.code });
 				adjustdeck();
 			}
 			else return "You need at least " + use + " copies to be able to upgrade this card!";
 		}
-		else if (user.gold >= 50) {
-			userExec("uppillar", { c: card.code });
-			goldcount.setText("$" + user.gold);
+		else if (sock.user.gold >= 50) {
+			sock.userExec("uppillar", { c: card.code });
+			goldcount.setText("$" + sock.user.gold);
 			adjustdeck();
 		}
 		else return "You need $50 to afford an upgraded pillar!";
@@ -1340,14 +789,14 @@ function upgradestore() {
 			if (card.rarity == 5) return "You cannot polish Nymphs.";
 			var use = card.rarity != -1 ? 6 : 2;
 			if (cardpool[card.code] >= use) {
-				userExec("polish", { card: card.code });
+				sock.userExec("polish", { card: card.code });
 				adjustdeck();
 			}
 			else return "You need at least " + use + " copies to be able to polish this card!";
 		}
-		else if (user.gold >= 50) {
-			userExec("shpillar", { c: card.code });
-			goldcount.setText("$" + user.gold);
+		else if (sock.user.gold >= 50) {
+			sock.userExec("shpillar", { c: card.code });
+			goldcount.setText("$" + sock.user.gold);
 			adjustdeck();
 		}
 		else return "You need $50 to afford a shiny pillar!";
@@ -1356,11 +805,11 @@ function upgradestore() {
 	function sellCard(card) {
 		if (!card.rarity && !card.upped) return "You can't sell a pillar or pendulum, silly!";
 		if (card.rarity == -1) return "You really don't want to sell that, trust me.";
-		var codecount = etgutil.count(user.pool, card.code);
+		var codecount = etgutil.count(sock.user.pool, card.code);
 		if (codecount) {
-			userExec("sellcard", { card: card.code });
+			sock.userExec("sellcard", { card: card.code });
 			adjustdeck();
-			goldcount.setText("$" + user.gold);
+			goldcount.setText("$" + sock.user.gold);
 		}
 		else return "This card is bound to your account; you cannot sell it.";
 	}
@@ -1371,38 +820,38 @@ function upgradestore() {
 		}
 	}
 	function adjustdeck() {
-		cardpool = etgutil.deck2pool(user.pool);
-		cardpool = etgutil.deck2pool(user.accountbound, cardpool);
+		cardpool = etgutil.deck2pool(sock.user.pool);
+		cardpool = etgutil.deck2pool(sock.user.accountbound, cardpool);
 	}
-	var upgradeui = mkView();
+	var upgradeui = px.mkView();
 
-	var goldcount = new MenuText(30, 100, "$" + user.gold);
+	var goldcount = new px.MenuText(30, 100, "$" + sock.user.gold);
 	upgradeui.addChild(goldcount);
-	var bupgrade = makeButton(150, 50, "Upgrade");
-	setClick(bupgrade, eventWrap(upgradeCard));
+	var bupgrade = px.mkButton(150, 50, "Upgrade");
+	px.setClick(bupgrade, eventWrap(upgradeCard));
 	upgradeui.addChild(bupgrade);
-	var bpolish = makeButton(150, 95, "Polish", function() {
+	var bpolish = px.mkButton(150, 95, "Polish", function() {
 		if (selectedCard) cardArt.setTexture(getArt(etgutil.asShiny(selectedCard, true)));
 	},
 	function() {
 		if (selectedCard) cardArt.setTexture(getArt(etgutil.asUpped(selectedCard, true)));
 	});
-	setClick(bpolish, eventWrap(polishCard));
+	px.setClick(bpolish, eventWrap(polishCard));
 	upgradeui.addChild(bpolish);
-	var bsell = makeButton(150, 140, "Sell");
-	setClick(bsell, eventWrap(sellCard));
+	var bsell = px.mkButton(150, 140, "Sell");
+	px.setClick(bsell, eventWrap(sellCard));
 	upgradeui.addChild(bsell);
-	var bexit = makeButton(5, 50, "Exit");
-	setClick(bexit, startMenu);
+	var bexit = px.mkButton(5, 50, "Exit");
+	px.setClick(bexit, startMenu);
 	upgradeui.addChild(bexit);
-	var tinfo = new MenuText(250, 50, "");
+	var tinfo = new px.MenuText(250, 50, "");
 	upgradeui.addChild(tinfo);
-	var tinfo2 = new MenuText(250, 140, "");
+	var tinfo2 = new px.MenuText(250, 140, "");
 	upgradeui.addChild(tinfo2);
-	var tinfo3 = new MenuText(250, 95, "");
+	var tinfo3 = new px.MenuText(250, 95, "");
 	tinfo3.position.set(250, 95);
 	upgradeui.addChild(tinfo3);
-	var twarning = new MenuText(100, 170, "");
+	var twarning = new px.MenuText(100, 170, "");
 	upgradeui.addChild(twarning);
 	var cardArt = new PIXI.Sprite(gfx.nopic);
 	cardArt.position.set(734, 8);
@@ -1411,7 +860,7 @@ function upgradestore() {
 	selectedCardArt.position.set(534, 8);
 	upgradeui.addChild(selectedCardArt);
 
-	var cardsel = new CardSelector(null,
+	var cardsel = new px.CardSelector(null,
 		function(code){
 			var card = Cards.Codes[code];
 			selectedCardArt.setTexture(getArt(code));
@@ -1437,7 +886,7 @@ function upgradestore() {
 	upgradeui.addChild(cardsel);
 	var cardpool, selectedCard;
 	adjustdeck();
-	refreshRenderer(upgradeui, function() {
+	px.refreshRenderer(upgradeui, function() {
 		cardsel.next(cardpool);
 	});
 }
@@ -1452,7 +901,7 @@ function startStore() {
 	];
 	var packele = -1, packrarity = -1;
 
-	var storeui = mkView();
+	var storeui = px.mkView();
 
 	//shop background
 	storeui.addChild(mkBgRect(
@@ -1462,45 +911,45 @@ function startStore() {
 		770, 90, 90, 184
 	));
 	//gold text
-	var tgold = new MenuText(775, 101, "$" + user.gold);
+	var tgold = new px.MenuText(775, 101, "$" + sock.user.gold);
 	storeui.addChild(tgold);
 
 	//info text
-	var tinfo = new MenuText(50, 26, "Select from which element you want.");
+	var tinfo = new px.MenuText(50, 26, "Select from which element you want.");
 	storeui.addChild(tinfo);
 
-	var tinfo2 = new MenuText(50, 51, "Select which type of booster you want.");
+	var tinfo2 = new px.MenuText(50, 51, "Select which type of booster you want.");
 	storeui.addChild(tinfo2);
 
     //free packs text
-	if (user.freepacks){
-		var freeinfo = new MenuText(350, 26, "");
+	if (sock.user.freepacks){
+		var freeinfo = new px.MenuText(350, 26, "");
 		storeui.addChild(freeinfo);
 	}
 	function updateFreeInfo(rarity){
 		if (freeinfo){
-			freeinfo.setText(user.freepacks[rarity] ? "Free " + packdata[rarity].type + " packs left: " + user.freepacks[rarity] : "");
+			freeinfo.setText(sock.user.freepacks[rarity] ? "Free " + packdata[rarity].type + " packs left: " + sock.user.freepacks[rarity] : "");
 		}
 	}
 
 	//get cards button
-	var bget = makeButton(775, 156, "Take Cards");
-	toggleB(bget);
-	setClick(bget, function () {
-		toggleB(bget, bbuy);
-		toggleB.apply(null, buttons);
+	var bget = px.mkButton(775, 156, "Take Cards");
+	px.toggleB(bget);
+	px.setClick(bget, function () {
+		px.toggleB(bget, bbuy);
+		px.toggleB.apply(null, buttons);
 		popbooster.visible = false;
 	});
 	storeui.addChild(bget);
 
 	//exit button
-	var bexit = makeButton(775, 246, "Exit");
-	setClick(bexit, startMenu);
+	var bexit = px.mkButton(775, 246, "Exit");
+	px.setClick(bexit, startMenu);
 	storeui.addChild(bexit);
 
 	//buy button
-	var bbuy = makeButton(775, 156, "Buy Pack");
-	setClick(bbuy, function() {
+	var bbuy = px.mkButton(775, 156, "Buy Pack");
+	px.setClick(bbuy, function() {
 		if (packrarity == -1) {
 			tinfo2.setText("Select a pack first!");
 			return;
@@ -1512,9 +961,9 @@ function startStore() {
 		var pack = packdata[packrarity];
 		var boostdata = { pack: packrarity, element: packele };
 		parseInput(boostdata, "bulk", packmulti.value, 99);
-		if (user.gold >= pack.cost * (boostdata.bulk || 1) || (user.freepacks && user.freepacks[packrarity] > 0)) {
-			userEmit("booster", boostdata);
-			toggleB(bbuy);
+		if (user.gold >= pack.cost * (boostdata.bulk || 1) || (sock.user.freepacks && sock.user.freepacks[packrarity] > 0)) {
+			sock.userEmit("booster", boostdata);
+			px.toggleB(bbuy);
 		} else {
 			tinfo2.setText("You can't afford that!");
 		}
@@ -1536,19 +985,19 @@ function startStore() {
 		price.anchor.set(0, 1);
 		price.position.set(7, 146);
 		g.addChild(price);
-		setClick(g, function(){
+		px.setClick(g, function(){
 			packrarity = n;
 			tinfo2.setText(pack.type + " Pack: " + pack.info);
 			updateFreeInfo(n);
 		});
 		storeui.addChild(g);
-		return makeButton(50+125*n, 280, g);
+		return px.mkButton(50+125*n, 280, g);
 	});
 
 	for (var i = 0;i < 15;i++) {
-		var elementbutton = makeButton(75 + Math.floor(i / 2)*64, 120 + (i == 14 ? 37 : (i % 2)*75), gfx.eicons[i]);
+		var elementbutton = px.mkButton(75 + Math.floor(i / 2)*64, 120 + (i == 14 ? 37 : (i % 2)*75), gfx.eicons[i]);
 		(function(_i) {
-			setClick(elementbutton, function() {
+			px.setClick(elementbutton, function() {
 				packele = _i;
 				tinfo.setText("Selected Element: " + etg.eleNames[packele]);
 			});
@@ -1565,22 +1014,22 @@ function startStore() {
 	storeui.cmds = {
 		boostergive: function(data) {
 			if (data.accountbound) {
-				user.accountbound = etgutil.mergedecks(user.accountbound, data.cards);
-				if (user.freepacks){
-					user.freepacks[data.packtype]--;
+				sock.user.accountbound = etgutil.mergedecks(sock.user.accountbound, data.cards);
+				if (sock.user.freepacks){
+					sock.user.freepacks[data.packtype]--;
 					updateFreeInfo(packrarity);
 				}
 			}
 			else {
-				user.pool = etgutil.mergedecks(user.pool, data.cards);
+				sock.user.pool = etgutil.mergedecks(sock.user.pool, data.cards);
 				var bdata = {};
 				parseInput(bdata, "bulk", packmulti.value, 99);
-				user.gold -= packdata[data.packtype].cost * (bdata.bulk || 1);
-				tgold.setText("$" + user.gold);
+				sock.user.gold -= packdata[data.packtype].cost * (bdata.bulk || 1);
+				tgold.setText("$" + sock.user.gold);
 			}
 			if (etgutil.decklength(data.cards) < 11){
-				toggleB(bget);
-				toggleB.apply(null, buttons);
+				px.toggleB(bget);
+				px.toggleB.apply(null, buttons);
 				if (popbooster.children.length) popbooster.removeChildren();
 				etgutil.iterdeck(data.cards, function(code, i){
 					var x = i % 5, y = Math.floor(i/5);
@@ -1596,12 +1045,12 @@ function startStore() {
 				link.target = "_blank";
 				link.appendChild(document.createTextNode(data.cards));
 				addChatSpan(link);
-				toggleB(bbuy);
+				px.toggleB(bbuy);
 			}
 		},
 	};
 	storeui.dom = packmulti;
-	refreshRenderer(storeui);
+	px.refreshRenderer(storeui);
 }
 var blacklist = { seed: true, p1deckpower: true, p2deckpower: true, deck: true, urdeck: true };
 function addToGame(game, data) {
@@ -1629,14 +1078,14 @@ function mkDaily(type) {
 		return function() {
 			var game = mkPremade(type == 3 ? "mage" : "demigod", type)();
 			game.addonreward = type == 3 ? 30 : 100;
-			userExec("donedaily", { daily: type });
+			sock.userExec("donedaily", { daily: type });
 		}
 	}
 }
 function startColosseum(){
-	var coloui = mkView();
-	var magename = aiDecks.mage[user.dailymage][0];
-	var dgname = aiDecks.demigod[user.dailydg][0];
+	var coloui = px.mkView();
+	var magename = aiDecks.mage[sock.user.dailymage][0];
+	var dgname = aiDecks.demigod[sock.user.dailydg][0];
 	var events = [
 		{ name: "Novice Endurance", desc: "Fight 3 Commoners in a row without healing in between. May try until you win." },
 		{ name: "Expert Endurance", desc: "Fight 3 Champions in a row. May try until you win." },
@@ -1644,36 +1093,36 @@ function startColosseum(){
 		{ name: "Expert Duel", desc: "Fight " + dgname + ". Only one attempt allowed." }
 	];
 	for (var i = 1;i < 5;i++) {
-		var active = !(user.daily & (1 << i));
+		var active = !(sock.user.daily & (1 << i));
 		if (active) {
-			var button = makeButton(50, 100 + 30 * i, "Fight!");
-			setClick(button, mkDaily(i));
+			var button = px.mkButton(50, 100 + 30 * i, "Fight!");
+			px.setClick(button, mkDaily(i));
 			coloui.addChild(button);
 		}
-		var text = new MenuText(130, 100 + 30 * i, active ? (events[i-1].name + ": " + events[i-1].desc) : i > 2 ? (user.daily&(i==3?1:32) ? "You defeated this already today." : "You failed this today. Better luck tomorrow!") : "Completed.");
+		var text = new px.MenuText(130, 100 + 30 * i, active ? (events[i-1].name + ": " + events[i-1].desc) : i > 2 ? (sock.user.daily&(i==3?1:32) ? "You defeated this already today." : "You failed this today. Better luck tomorrow!") : "Completed.");
 		coloui.addChild(text);
 	}
-	if (user.daily == 63){
-		var button = makeButton(50, 280, "Nymph!");
-		setClick(button, function(){
+	if (sock.user.daily == 63){
+		var button = px.mkButton(50, 280, "Nymph!");
+		px.setClick(button, function(){
 			var nymph = etg.NymphList[etg.PlayerRng.uptoceil(12)];
-			userExec("addcards", {c: "01"+nymph});
-			userExec("donedaily", {daily: 6});
+			sock.userExec("addcards", {c: "01"+nymph});
+			sock.userExec("donedaily", {daily: 6});
 			startMenu(nymph);
 		});
 		coloui.addChild(button);
-		coloui.addChild(new MenuText(130, 280, "You successfully completed all tasks."));
+		coloui.addChild(new px.MenuText(130, 280, "You successfully completed all tasks."));
 	}
 
-	var bexit = makeButton(50, 50, "Exit");
-	setClick(bexit, startMenu);
+	var bexit = px.mkButton(50, 50, "Exit");
+	px.setClick(bexit, startMenu);
 	coloui.addChild(bexit);
 
-	refreshRenderer(coloui);
+	px.refreshRenderer(coloui);
 }
 function startEditor(arena, acard, startempty) {
 	if (!Cards.loaded) return;
-	if (arena && (!user || arena.deck === undefined || acard === undefined)) arena = false;
+	if (arena && (!sock.user || arena.deck === undefined || acard === undefined)) arena = false;
 	function updateField(renderdeck){
 		deckimport.value = etgutil.encodedeck(decksprite.deck) + "01" + etg.toTrueMark(editormark);
 	}
@@ -1699,7 +1148,7 @@ function startEditor(arena, acard, startempty) {
 		editormarksprite.setTexture(gfx.eicons[editormark]);
 		if (decksprite.deck.length > 60) decksprite.deck.length = 60;
 		decksprite.deck.sort(editorCardCmp);
-		if (user) {
+		if (sock.user) {
 			cardminus = {};
 			for (var i = decksprite.deck.length - 1;i >= 0;i--) {
 				var code = decksprite.deck[i], card = Cards.Codes[code];
@@ -1739,23 +1188,23 @@ function startEditor(arena, acard, startempty) {
 	}
 	function saveDeck(force){
 		var dcode = etgutil.encodedeck(decksprite.deck) + "01" + etg.toTrueMark(editormark);
-		if (user.decks[user.selectedDeck] != dcode){
-			user.decks[user.selectedDeck] = dcode;
-			userEmit("setdeck", { d: dcode, number: user.selectedDeck });
-		}else if (force) userEmit("setdeck", { number: user.selectedDeck });
+		if (sock.user.decks[sock.user.selectedDeck] != dcode){
+			sock.user.decks[sock.user.selectedDeck] = dcode;
+			sock.userEmit("setdeck", { d: dcode, number: sock.user.selectedDeck });
+		}else if (force) sock.userEmit("setdeck", { number: sock.user.selectedDeck });
 	}
 	var cardminus, cardpool;
-	if (user){
+	if (sock.user){
 		cardminus = {};
 		cardpool = {};
-		etgutil.iterraw(user.pool, incrpool);
-		etgutil.iterraw(user.accountbound, incrpool);
+		etgutil.iterraw(sock.user.pool, incrpool);
+		etgutil.iterraw(sock.user.accountbound, incrpool);
 	}
-	var editorui = mkView();
-	var bclear = makeButton(8, 32, "Clear");
-	var bsave = makeButton(8, 64, "Save & Exit");
-	setClick(bclear, function() {
-		if (user) {
+	var editorui = px.mkView();
+	var bclear = px.mkButton(8, 32, "Clear");
+	var bsave = px.mkButton(8, 64, "Save & Exit");
+	px.setClick(bclear, function() {
+		if (sock.user) {
 			cardminus = {};
 		}
 		decksprite.deck.length = arena?5:0;
@@ -1775,10 +1224,10 @@ function startEditor(arena, acard, startempty) {
 		var data = artable[name];
 		var bt = new PIXI.Text(name, ui.mkFont(16, "black"));
 		bt.position.set(8, y);
-		var bm = makeButton(50, y, ui.getTextImage("-", ui.mkFont(16, "black"), 0xFFFFFFFF));
+		var bm = px.mkButton(50, y, ui.getTextImage("-", ui.mkFont(16, "black"), 0xFFFFFFFF));
 		var bv = new PIXI.Text(arattr[name], ui.mkFont(16, "black"));
 		bv.position.set(64, y);
-		var bp = makeButton(90, y, ui.getTextImage("+", ui.mkFont(16, "black"), 0xFFFFFFFF));
+		var bp = px.mkButton(90, y, ui.getTextImage("+", ui.mkFont(16, "black"), 0xFFFFFFFF));
 		function modattr(x){
 			arattr[name] += x;
 			if (arattr[name] >= (data.min || 0) && (!data.max || arattr[name] <= data.max)){
@@ -1791,8 +1240,8 @@ function startEditor(arena, acard, startempty) {
 			}
 			arattr[name] -= x;
 		}
-		setClick(bm, modattr.bind(null, -(data.incr || 1)));
-		setClick(bp, modattr.bind(null, data.incr || 1));
+		px.setClick(bm, modattr.bind(null, -(data.incr || 1)));
+		px.setClick(bp, modattr.bind(null, data.incr || 1));
 		editorui.addChild(bt);
 		editorui.addChild(bm);
 		editorui.addChild(bv);
@@ -1801,13 +1250,13 @@ function startEditor(arena, acard, startempty) {
 	function switchDeckCb(x){
 		return function() {
 			saveDeck();
-			user.selectedDeck = x;
+			sock.user.selectedDeck = x;
 			decksprite.deck = etgutil.decodedeck(getDeck());
 			processDeck();
 		}
 	}
 	if (arena){
-		setClick(bsave, function() {
+		px.setClick(bsave, function() {
 			if (decksprite.deck.length < 35) {
 				chat("35 cards required before submission");
 				return;
@@ -1819,12 +1268,12 @@ function startEditor(arena, acard, startempty) {
 			if (!startempty){
 				data.mod = true;
 			}
-			userEmit("setarena", data);
+			sock.userEmit("setarena", data);
 			chat("Arena deck submitted");
 			startMenu();
 		});
-		var bexit = makeButton(8, 96, "Exit");
-		setClick(bexit, function() {
+		var bexit = px.mkButton(8, 96, "Exit");
+		px.setClick(bexit, function() {
 			startArenaInfo(arena);
 		});
 		editorui.addChild(bexit);
@@ -1841,27 +1290,27 @@ function startEditor(arena, acard, startempty) {
 		makeattrui(1, "mark");
 		makeattrui(2, "draw");
 	}else{
-		setClick(bsave, function() {
-			if (user) saveDeck(true);
+		px.setClick(bsave, function() {
+			if (sock.user) saveDeck(true);
 			startMenu();
 		});
-		var bimport = makeButton(8, 96, "Import");
-		setClick(bimport, function() {
+		var bimport = px.mkButton(8, 96, "Import");
+		px.setClick(bimport, function() {
 			var dvalue = deckimport.value.trim();
 			decksprite.deck = ~dvalue.indexOf(" ") ? dvalue.split(" ") : etgutil.decodedeck(dvalue);
 			processDeck();
 		});
 		editorui.addChild(bimport);
-		if (user){
+		if (sock.user){
 			for (var i = 0;i < 10;i++) {
-				var button = makeButton(80 + i*72, 8, "Deck " + (i + 1));
-				setClick(button, switchDeckCb(i));
+				var button = px.mkButton(80 + i*72, 8, "Deck " + (i + 1));
+				px.setClick(button, switchDeckCb(i));
 				editorui.addChild(button);
 			}
 		}
 	}
-	var bconvert = makeButton(5, 554, "Convert Code");
-	setClick(bconvert, function() {
+	var bconvert = px.mkButton(5, 554, "Convert Code");
+	px.setClick(bconvert, function() {
 		deckimport.value = decksprite.deck.join(" ") + " " + etg.toTrueMark(editormark);
 	});
 	editorui.addChild(bconvert);
@@ -1870,10 +1319,10 @@ function startEditor(arena, acard, startempty) {
 	editorui.addChild(editormarksprite);
 	var editormark = 0;
 	for (var i = 0;i < 13;i++) {
-		var sprite = makeButton(100 + i * 32, 234, gfx.eicons[i]);
+		var sprite = px.mkButton(100 + i * 32, 234, gfx.eicons[i]);
 		sprite.interactive = true;
 		(function(_i) {
-			setClick(sprite, function() {
+			px.setClick(sprite, function() {
 				editormark = _i;
 				editormarksprite.setTexture(gfx.eicons[_i]);
 				updateField();
@@ -1881,11 +1330,11 @@ function startEditor(arena, acard, startempty) {
 		})(i);
 		editorui.addChild(sprite);
 	}
-	var decksprite = new DeckDisplay(60, setCardArt,
+	var decksprite = new px.DeckDisplay(60, setCardArt,
 		function(i){
 			var code = decksprite.deck[i], card = Cards.Codes[code];
 			if (!arena || code != acard){
-				if (user && !isFreeCard(card)) {
+				if (sock.user && !isFreeCard(card)) {
 					adjust(cardminus, code, -1);
 				}
 				decksprite.rmCard(i);
@@ -1894,11 +1343,11 @@ function startEditor(arena, acard, startempty) {
 		}, arena ? (startempty ? [] : etgutil.decodedeck(arena.deck)) : etgutil.decodedeck(getDeck())
 	);
 	editorui.addChild(decksprite);
-	var cardsel = new CardSelector(setCardArt,
+	var cardsel = new px.CardSelector(setCardArt,
 		function(code){
 			if (decksprite.deck.length < 60) {
 				var card = Cards.Codes[code];
-				if (user && !isFreeCard(card)) {
+				if (sock.user && !isFreeCard(card)) {
 					if (!(code in cardpool) || (code in cardminus && cardminus[code] >= cardpool[code]) ||
 						(card.type != etg.PillarEnum && sumCardMinus(cardminus, code) >= 6)) {
 						return;
@@ -1915,9 +1364,9 @@ function startEditor(arena, acard, startempty) {
 	cardArt.position.set(734, 8);
 	editorui.addChild(cardArt);
 	editorui.dom = deckimport;
-	refreshRenderer(editorui, function() {
+	px.refreshRenderer(editorui, function() {
 		cardArt.visible = false;
-		var mpos = realStage.getMousePosition();
+		var mpos = px.getMousePos();
 		cardsel.next(cardpool, cardminus, mpos);
 		decksprite.next(mpos);
 	});
@@ -1926,8 +1375,8 @@ function startEditor(arena, acard, startempty) {
 	processDeck();
 }
 function startElementSelect() {
-	var stage = mkView();
-	var eledesc = new MenuText(100, 250, "Select your starter element");
+	var stage = px.mkView();
+	var eledesc = new px.MenuText(100, 250, "Select your starter element");
 	stage.addChild(eledesc);
 	etg.eleNames.forEach(function(name, i){
 		if (i > 13) return;
@@ -1936,16 +1385,16 @@ function startElementSelect() {
 		ele.mouseover = function(){
 			eledesc.setText(name);
 		}
-		setClick(ele, function() {
-			var msg = { u: user.name, a: user.auth, e: i };
-			user = undefined;
-			sockEmit("inituser", msg);
+		px.setClick(ele, function() {
+			var msg = { u: sock.user.name, a: sock.user.auth, e: i };
+			sock.user = undefined;
+			sock.emit("initsock.user", msg);
 			startMenu();
 		});
 		ele.interactive = true;
 		stage.addChild(ele);
 	});
-	refreshRenderer(stage);
+	px.refreshRenderer(stage);
 }
 
 function startMatch(game, foeDeck) {
@@ -1978,13 +1427,13 @@ function startMatch(game, foeDeck) {
 		spr.alpha = obj.isMaterial() ? 1 : .7;
 	}
 	var resigning, discarding, aiDelay = 0, aiState, aiCommand;
-	if (user) {
-		userExec("addloss", { pvp: !game.ai });
+	if (sock.user) {
+		sock.userExec("addloss", { pvp: !game.ai });
 		if (game.cost){
-			userExec("addgold", { g: -game.cost });
+			sock.userExec("addgold", { g: -game.cost });
 		}
 	}
-	var gameui = mkView();
+	var gameui = px.mkView();
 	var redlines = new PIXI.Sprite(gfx.bg_game);
 	redlines.position.y = 12;
 	gameui.addChild(redlines);
@@ -1993,9 +1442,9 @@ function startMatch(game, foeDeck) {
 	cloakgfx.drawRect(130, 20, 660, 280);
 	cloakgfx.endFill();
 	gameui.addChild(cloakgfx);
-	var endturn = makeButton(800, 520, "Accept Hand");
-	var cancel = makeButton(800, 490, "Mulligan");
-	var resign = makeButton(8, 24, "Resign");
+	var endturn = px.mkButton(800, 520, "Accept Hand");
+	var cancel = px.mkButton(800, 490, "Mulligan");
+	var resign = px.mkButton(8, 24, "Resign");
 	gameui.addChild(endturn);
 	gameui.addChild(cancel);
 	gameui.addChild(resign);
@@ -2013,16 +1462,16 @@ function startMatch(game, foeDeck) {
 		}
 		return data;
 	}
-	setClick(endturn, function(e, discard) {
+	px.setClick(endturn, function(e, discard) {
 		if (game.turn == game.player1 && game.phase <= etg.MulliganPhase2){
 			if (!game.ai) {
-				sockEmit("mulligan", {draw: true});
+				sock.emit("mulligan", {draw: true});
 			}
 			game.progressMulligan();
 		}else if (game.winner) {
-			if (user) {
+			if (sock.user) {
 				if (game.arena) {
-					userEmit("modarena", { aname: game.arena, won: game.winner == game.player2, lv: game.level-4 });
+					sock.userEmit("modarena", { aname: game.arena, won: game.winner == game.player2, lv: game.level-4 });
 				}
 				if (game.winner == game.player1) {
 					if (game.quest){
@@ -2031,9 +1480,9 @@ function startMatch(game, foeDeck) {
 							var newgame = mkQuestAi(game.quest[0], game.quest[1] + 1, game.area);
 							addToGame(newgame, data);
 							return;
-						}else if (user.quest[game.quest[0]] <= game.quest[1] || !(game.quest[0] in user.quest)) {
-							userEmit("updatequest", { quest: game.quest[0], newstage: game.quest[1] + 1 });
-							user.quest[game.quest[0]] = game.quest[1] + 1;
+						}else if (sock.user.quest[game.quest[0]] <= game.quest[1] || !(game.quest[0] in sock.user.quest)) {
+							sock.userEmit("updatequest", { quest: game.quest[0], newstage: game.quest[1] + 1 });
+							sock.user.quest[game.quest[0]] = game.quest[1] + 1;
 						}
 					}else if (game.daily){
 						if (game.endurance) {
@@ -2045,7 +1494,7 @@ function startMatch(game, foeDeck) {
 							return;
 						}
 						else {
-							userExec("donedaily", { daily: game.daily == 4 ? 5 : game.daily == 3 ? 0 : game.daily });
+							sock.userExec("donedaily", { daily: game.daily == 4 ? 5 : game.daily == 3 ? 0 : game.daily });
 						}
 					}
 				}
@@ -2057,7 +1506,7 @@ function startMatch(game, foeDeck) {
 			} else {
 				discarding = false;
 				if (!game.ai) {
-					sockEmit("endturn", {bits: discard});
+					sock.emit("endturn", {bits: discard});
 				}
 				game.player1.endturn(discard);
 				delete game.targetingMode;
@@ -2066,23 +1515,23 @@ function startMatch(game, foeDeck) {
 			}
 		}
 	}, false);
-	setClick(cancel, function() {
+	px.setClick(cancel, function() {
 		if (resigning) {
 			resign.setText("Resign");
 			resigning = false;
 		} else if (game.turn == game.player1) {
 			if (game.phase <= etg.MulliganPhase2 && game.player1.hand.length > 0) {
 				game.player1.drawhand(game.player1.hand.length - 1);
-				sockEmit("mulligan");
+				sock.emit("mulligan");
 			} else if (game.targetingMode) {
 				delete game.targetingMode;
 			} else discarding = false;
 		}
 	});
-	setClick(resign, function() {
+	px.setClick(resign, function() {
 		if (resigning){
 			if (!game.ai) {
-				sockEmit("foeleft");
+				sock.emit("foeleft");
 			}
 			game.setWinner(game.player2);
 			endturn.click();
@@ -2123,7 +1572,7 @@ function startMatch(game, foeDeck) {
 			var info = obj.info(), actinfo = game.targetingMode && game.targetingMode(obj) && activeInfo[game.targetingText];
 			if (actinfo) info += "\nDmg " + actinfo(obj);
 			infobox.setTexture(ui.getTextImage(info, ui.mkFont(10, "white"), 0));
-			var mousePosition = realStage.getMousePosition();
+			var mousePosition = px.getMousePos();
 			infobox.position.set(mousePosition.x, mousePosition.y);
 			infobox.visible = true;
 		}
@@ -2146,7 +1595,7 @@ function startMatch(game, foeDeck) {
 				handsprite[j][i] = new PIXI.Sprite(gfx.nopic);
 				handsprite[j][i].position.set(j ? 20 : 780, (j ? 130 : 310) + 20 * i);
 				(function(_i) {
-					setClick(handsprite[j][i], function() {
+					px.setClick(handsprite[j][i], function() {
 						if (game.phase != etg.PlayPhase) return;
 						var cardinst = game.players(_j).hand[_i];
 						if (cardinst) {
@@ -2160,11 +1609,11 @@ function startMatch(game, foeDeck) {
 							} else if (!_j && cardinst.canactive()) {
 								if (cardinst.card.type != etg.SpellEnum) {
 									console.log("summoning", _i);
-									sockEmit("cast", {bits: game.tgtToBits(cardinst)});
+									sock.emit("cast", {bits: game.tgtToBits(cardinst)});
 									cardinst.useactive();
 								} else {
 									game.getTarget(cardinst, cardinst.card.active, function(tgt) {
-										sockEmit("cast", {bits: game.tgtToBits(cardinst) | game.tgtToBits(tgt) << 9});
+										sock.emit("cast", {bits: game.tgtToBits(cardinst) | game.tgtToBits(tgt) << 9});
 										cardinst.useactive(tgt);
 									});
 								}
@@ -2202,7 +1651,7 @@ function startMatch(game, foeDeck) {
 				spr.addChild(activetext);
 				spr.anchor.set(.5, .5);
 				spr.position = pos;
-				setClick(spr, function() {
+				px.setClick(spr, function() {
 					if (game.phase != etg.PlayPhase) return;
 					var inst = insts ? insts[i] : game.players(_j)[i];
 					if (!inst) return;
@@ -2212,7 +1661,7 @@ function startMatch(game, foeDeck) {
 					} else if (_j == 0 && !game.targetingMode && inst.canactive()) {
 						game.getTarget(inst, inst.active.cast, function(tgt) {
 							delete game.targetingMode;
-							sockEmit("cast", {bits: game.tgtToBits(inst) | game.tgtToBits(tgt) << 9});
+							sock.emit("cast", {bits: game.tgtToBits(inst) | game.tgtToBits(tgt) << 9});
 							inst.useactive(tgt);
 						});
 					}
@@ -2231,9 +1680,9 @@ function startMatch(game, foeDeck) {
 			for (var i = 0;i < 16;i++){
 				gameui.addChild(permsprite[j][j?15-i:i]);
 			}
-			setInteractive.apply(null, handsprite[j]);
-			setInteractive.apply(null, creasprite[j]);
-			setInteractive.apply(null, permsprite[j]);
+			px.setInteractive.apply(null, handsprite[j]);
+			px.setInteractive.apply(null, creasprite[j]);
+			px.setInteractive.apply(null, permsprite[j]);
 			marksprite[j].anchor.set(.5, .5);
 			marksprite[j].position.set(740, 470);
 			weapsprite[j] = makeInst(true, null, "weapon", new PIXI.Point(666, 512), 5/4);
@@ -2274,7 +1723,7 @@ function startMatch(game, foeDeck) {
 				quantatext[j].addChild(child = new PIXI.Sprite(gfx.eicons[k]));
 				child.position.set((k & 1) ? 0 : 54, Math.floor((k - 1) / 2) * 32);
 			}
-			setClick(hptext[j], function() {
+			px.setClick(hptext[j], function() {
 				if (game.phase != etg.PlayPhase) return;
 				if (game.targetingMode && game.targetingMode(game.players(_j))) {
 					delete game.targetingMode;
@@ -2282,9 +1731,9 @@ function startMatch(game, foeDeck) {
 				}
 			}, false);
 		})(j);
-		setInteractive.apply(null, weapsprite);
-		setInteractive.apply(null, shiesprite);
-		setInteractive.apply(null, hptext);
+		px.setInteractive.apply(null, weapsprite);
+		px.setInteractive.apply(null, shiesprite);
+		px.setInteractive.apply(null, hptext);
 		gameui.addChild(marktext[j]);
 		gameui.addChild(quantatext[j]);
 		gameui.addChild(hptext[j]);
@@ -2346,7 +1795,7 @@ function startMatch(game, foeDeck) {
 	gameui.endnext = function() {
 		document.removeEventListener("keydown", onkeydown);
 	}
-	refreshRenderer(gameui, function() {
+	px.refreshRenderer(gameui, function() {
 		if (game.turn == game.player2 && game.ai) {
 			if (game.phase == etg.PlayPhase){
 				if (!aiCommand){
@@ -2369,12 +1818,12 @@ function startMatch(game, foeDeck) {
 				gameui.cmds.mulligan({draw: require("./ai/mulligan")(game.player2)});
 			}
 		}
-		var pos = realStage.getMousePosition();
+		var pos = px.getMousePos();
 		var cardartcode, cardartx;
 		infobox.setTexture(gfx.nopic);
 		if (!cloakgfx.visible){
 			foeplays.children.forEach(function(foeplay){
-				if (foeplay.card instanceof etg.Card && hitTest(foeplay, pos)) {
+				if (foeplay.card instanceof etg.Card && px.hitTest(foeplay, pos)) {
 					cardartcode = foeplay.card.code;
 				}
 			});
@@ -2383,14 +1832,14 @@ function startMatch(game, foeDeck) {
 			var pl = game.players(j);
 			if (j == 0 || game.player1.precognition) {
 				for (var i = 0;i < pl.hand.length;i++) {
-					if (hitTest(handsprite[j][i], pos)) {
+					if (px.hitTest(handsprite[j][i], pos)) {
 						cardartcode = pl.hand[i].card.code;
 					}
 				}
 			}
 			for (var i = 0;i < 16;i++) {
 				var pr = pl.permanents[i];
-				if (pr && (j == 0 || !cloakgfx.visible || pr.status.cloak) && hitTest(permsprite[j][i], pos)) {
+				if (pr && (j == 0 || !cloakgfx.visible || pr.status.cloak) && px.hitTest(permsprite[j][i], pos)) {
 					cardartcode = pr.card.code;
 					cardartx = permsprite[j][i].position.x;
 					setInfo(pr);
@@ -2399,18 +1848,18 @@ function startMatch(game, foeDeck) {
 			if (j == 0 || !cloakgfx.visible) {
 				for (var i = 0;i < 23;i++) {
 					var cr = pl.creatures[i];
-					if (cr && hitTest(creasprite[j][i], pos)) {
+					if (cr && px.hitTest(creasprite[j][i], pos)) {
 						cardartcode = cr.card.code;
 						cardartx = creasprite[j][i].position.x;
 						setInfo(cr);
 					}
 				}
-				if (pl.weapon && hitTest(weapsprite[j], pos)) {
+				if (pl.weapon && px.hitTest(weapsprite[j], pos)) {
 					cardartcode = pl.weapon.card.code;
 					cardartx = weapsprite[j].position.x;
 					setInfo(pl.weapon);
 				}
-				if (pl.shield && hitTest(shiesprite[j], pos)) {
+				if (pl.shield && px.hitTest(shiesprite[j], pos)) {
 					cardartcode = pl.shield.card.code;
 					cardartx = shiesprite[j].position.x;
 					setInfo(pl.shield);
@@ -2422,7 +1871,7 @@ function startMatch(game, foeDeck) {
 			cardart.visible = true;
 			cardart.position.set(cardartx || 654, pos.y > 300 ? 44 : 300);
 		} else cardart.visible = false;
-		if (game.winner == game.player1 && user && !game.quest && game.ai) {
+		if (game.winner == game.player1 && sock.user && !game.quest && game.ai) {
 			if (game.cardreward === undefined) {
 				var winnable = foeDeck.filter(function(card){ return card.rarity > 0 && card.rarity < 4; }), cardwon;
 				if (winnable.length) {
@@ -2458,13 +1907,13 @@ function startMatch(game, foeDeck) {
 				turntext = game.turn == game.player1 ? "Your Turn" : "Their Turn";
 				if (game.phase < 2) turntext += "\n" + (game.phase ? "Second" : "First");
 			}
-			maybeSetText(turntell, turntext);
+			px.maybeSetText(turntell, turntext);
 			if (game.turn == game.player1){
 				endturn.setText(game.phase == etg.PlayPhase ? "End Turn" : "Accept Hand");
 				cancel.setText(game.phase != etg.PlayPhase ? "Mulligan" : game.targetingMode || discarding || resigning ? "Cancel" : null);
 			}else cancel.visible = endturn.visible = false;
 		}else{
-			maybeSetText(turntell, (game.turn == game.player1 ? "Your" : "Their") + " Turn\n" + (game.winner == game.player1?"Won":"Lost"));
+			px.maybeSetText(turntell, (game.turn == game.player1 ? "Your" : "Their") + " Turn\n" + (game.winner == game.player1?"Won":"Lost"));
 			endturn.setText("Continue");
 			cancel.visible = false;
 		}
@@ -2594,10 +2043,10 @@ function startMatch(game, foeDeck) {
 			} else shiesprite[j].visible = false;
 			marksprite[j].setTexture(gfx.eicons[pl.mark]);
 			if (pl.markpower != 1){
-				maybeSetText(marktext[j], "x" + pl.markpower);
+				px.maybeSetText(marktext[j], "x" + pl.markpower);
 			}else marktext[j].visible = false;
 			for (var i = 1;i < 13;i++) {
-				maybeSetText(quantatext[j].children[i*2-2], pl.quanta[i].toString());
+				px.maybeSetText(quantatext[j].children[i*2-2], pl.quanta[i].toString());
 			}
 			var yOffset = j == 0 ? 28 : -44;
 			fgfx.beginFill(0);
@@ -2613,14 +2062,14 @@ function startMatch(game, foeDeck) {
 					fgfx.endFill();
 				}
 			}
-			maybeSetText(hptext[j], pl.hp + "/" + pl.maxhp);
-			if (hitTest(hptext[j], pos)){
+			px.maybeSetText(hptext[j], pl.hp + "/" + pl.maxhp);
+			if (px.hitTest(hptext[j], pos)){
 				setInfo(pl);
 			}
 			var poison = pl.status.poison, poisoninfo = !poison ? "" : (poison > 0 ? poison + " 1:2" : -poison + " 1:7") + (pl.neuro ? " 1:10" : "");
 			poisontext[j].setTexture(ui.getTextImage(poisoninfo, 16));
-			maybeSetText(decktext[j], pl.deck.length + "cards");
-			maybeSetText(damagetext[j], !cloakgfx.visible && game.expectedDamage[j] ? "Next HP loss: " + game.expectedDamage[j] : "");
+			px.maybeSetText(decktext[j], pl.deck.length + "cards");
+			px.maybeSetText(damagetext[j], !cloakgfx.visible && game.expectedDamage[j] ? "Next HP loss: " + game.expectedDamage[j] : "");
 		}
 		Effect.next(cloakgfx.visible);
 	}, true);
@@ -2628,15 +2077,15 @@ function startMatch(game, foeDeck) {
 
 function startArenaInfo(info) {
 	if (!info) return;
-	var stage = mkView();
-	var winloss = new MenuText(200, 300, (info.win || 0) + " - " + (info.loss || 0) + ": " + (info.rank+1) + "\nAge: " + info.day + "\nHP: " + info.curhp + " / " + info.hp + "\nMark: " + info.mark + "\nDraw: " + info.draw);
+	var stage = px.mkView();
+	var winloss = new px.MenuText(200, 300, (info.win || 0) + " - " + (info.loss || 0) + ": " + (info.rank+1) + "\nAge: " + info.day + "\nHP: " + info.curhp + " / " + info.hp + "\nMark: " + info.mark + "\nDraw: " + info.draw);
 	stage.addChild(winloss);
-	var infotext = new MenuText(300, 470, "You get $3 every time your arena deck wins,\n& $1 every time it loses.");
+	var infotext = new px.MenuText(300, 470, "You get $3 every time your arena deck wins,\n& $1 every time it loses.");
 	stage.addChild(infotext);
-	if (user.ocard){
-		var uocard = etgutil.asUpped(user.ocard, info.lv == 1);
-		var bmake = makeButton(200, 440, "Create");
-		setClick(bmake, function(){
+	if (sock.user.ocard){
+		var uocard = etgutil.asUpped(sock.user.ocard, info.lv == 1);
+		var bmake = px.mkButton(200, 440, "Create");
+		px.setClick(bmake, function(){
 			startEditor(info, uocard, true);
 		});
 		stage.addChild(bmake);
@@ -2644,15 +2093,15 @@ function startArenaInfo(info) {
 		ocard.position.set(734, 300);
 		stage.addChild(ocard);
 	}
-	var bret = makeButton(200, 500, "Exit");
-	setClick(bret, startMenu);
+	var bret = px.mkButton(200, 500, "Exit");
+	px.setClick(bret, startMenu);
 	stage.addChild(bret);
 	if (info.card){
 		if (info.lv){
 			info.card = etgutil.asUpped(info.card, true);
 		}
-		var bmod = makeButton(200, 470, "Modify");
-		setClick(bmod, function(){
+		var bmod = px.mkButton(200, 470, "Modify");
+		px.setClick(bmod, function(){
 			startEditor(info, info.card);
 		});
 		stage.addChild(bmod);
@@ -2676,7 +2125,7 @@ function startArenaInfo(info) {
 		acard.position.set(734, 8);
 		stage.addChild(acard);
 	}
-	refreshRenderer(stage);
+	px.refreshRenderer(stage);
 }
 
 function startArenaTop(info) {
@@ -2685,15 +2134,15 @@ function startArenaTop(info) {
 		chat("??");
 		return;
 	}
-	var stage = mkView();
+	var stage = px.mkView();
 	for (var i = 0;i < info.length; i++) {
 		var data = info[i], y = 50 + i * 24;
-		var infotxt = new MenuText(120, y, (i+1) + "  " + data[0]);
-		var scoretxt = new MenuText(350, y, data[1]);
-		var winlosstxt = new MenuText(400, y, data[2] + "-" + data[3]);
-		var agetxt = new MenuText(460, y, data[4].toString());
+		var infotxt = new px.MenuText(120, y, (i+1) + "  " + data[0]);
+		var scoretxt = new px.MenuText(350, y, data[1]);
+		var winlosstxt = new px.MenuText(400, y, data[2] + "-" + data[3]);
+		var agetxt = new px.MenuText(460, y, data[4].toString());
 		if (data[5] in Cards.Codes){
-			var cardtxt = new MenuText(500, y, Cards.Codes[data[5]].name);
+			var cardtxt = new px.MenuText(500, y, Cards.Codes[data[5]].name);
 			stage.addChild(cardtxt);
 		}
 		stage.addChild(infotxt);
@@ -2701,10 +2150,10 @@ function startArenaTop(info) {
 		stage.addChild(winlosstxt);
 		stage.addChild(agetxt);
 	}
-	var bret = makeButton(8, 300, "Exit");
-	setClick(bret, startMenu);
+	var bret = px.mkButton(8, 300, "Exit");
+	px.setClick(bret, startMenu);
 	stage.addChild(bret);
-	refreshRenderer(stage);
+	px.refreshRenderer(stage);
 }
 
 function addChatSpan(span) {
@@ -2719,20 +2168,20 @@ function chat(msg, fontcolor) {
 	span.appendChild(document.createTextNode(msg));
 	addChatSpan(span);
 }
-socket.on("open", function(){
+sock.et.on("open", function(){
 	chat("Connected");
 	offlineChange();
 	wantpvpChange();
 });
-socket.on("close", function(){
+sock.et.on("close", function(){
 	chat("Reconnecting in 100ms");
-	setTimeout(function(){socket.open()}, 100);
+	setTimeout(function(){sock.et.open()}, 100);
 });
-socket.on("message", function(data){
+sock.et.on("message", function(data){
 	data = JSON.parse(data);
-	var func = sockEvents[data.x] || (realStage.children.length > 1 && realStage.children[1].cmds && (func = realStage.children[1].cmds[data.x]));
+	var func = sockEvents[data.x] || (px.realStage.children.length > 1 && px.realStage.children[1].cmds && (func = px.realStage.children[1].cmds[data.x]));
 	if (func){
-		func.call(socket, data);
+		func.call(sock.et, data);
 	}
 });
 var sockEvents = {
@@ -2746,17 +2195,17 @@ var sockEvents = {
 	},
 	userdump:function(data) {
 		delete data.x;
-		user = data;
-		prepuser();
+		sock.user = data;
+		prepsock.user();
 		startMenu();
 	},
 	passchange:function(data) {
-		user.auth = data.auth;
+		sock.user.auth = data.auth;
 		chat("Password updated");
 	},
 	chat:function(data) {
 		if (muteall || data.u in muteset || !data.msg) return;
-		if (typeof Notification !== "undefined" && user && ~data.msg.indexOf(user.name) && !document.hasFocus()){
+		if (typeof Notification !== "undefined" && sock.user && ~data.msg.indexOf(sock.user.name) && !document.hasFocus()){
 			Notification.requestPermission();
 			new Notification(data.u, {body: data.msg}).onclick = window.focus;
 		}
@@ -2791,15 +2240,15 @@ var sockEvents = {
 		chat(data.msg);
 	},
 	codegold:function(data) {
-		user.gold += data.g;
+		sock.user.gold += data.g;
 		chat(data.g + "\u00A4 added!");
 	},
 	codecode:function(data) {
-		user.pool = etgutil.addcard(user.pool, data);
+		sock.user.pool = etgutil.addcard(sock.user.pool, data);
 		chat(Cards.Codes[data].name + " added!");
 	},
 	codedone:function(data) {
-		user.pool = etgutil.addcard(user.pool, data.card);
+		sock.user.pool = etgutil.addcard(sock.user.pool, data.card);
 		chat(Cards.Codes[data.card].name + " added!");
 		startMenu();
 	},
@@ -2837,7 +2286,7 @@ function maybeSendChat(e) {
 		}else if (msg.match(/^\/unmute /)){
 			delete muteset[msg.substring(8)];
 			chatmute();
-		}else if (user){
+		}else if (sock.user){
 			var msgdata = {msg: msg};
 			if (msg.match(/^\/w( |")/)) {
 				var match = msg.match(/^\/w"([^"]*)"/);
@@ -2847,11 +2296,11 @@ function maybeSendChat(e) {
 				msgdata.msg = msg.substr(4+to.length);
 				msgdata.to = to;
 			}
-			if (!msgdata.msg.match(/^\s*$/)) userEmit("chat", msgdata);
+			if (!msgdata.msg.match(/^\s*$/)) sock.userEmit("chat", msgdata);
 		}
 		else if (!msg.match(/^\s*$/)) {
 			var name = username.value || guestname || (guestname = (10000 + Math.floor(Math.random() * 89999)) + "");
-			sockEmit("guestchat", { msg: msg, u: name });
+			sock.emit("guestchat", { msg: msg, u: name });
 		}
 	}
 }
@@ -2873,40 +2322,37 @@ function maybeChallenge(e) {
 }
 function animate() {
 	setTimeout(requestAnimate, 40);
-	if (realStage.next) {
-		realStage.next();
-	}
-	renderer.render(realStage);
+	px.next();
 }
 function requestAnimate() { requestAnimFrame(animate); }
 function prepuser(){
-	user.decks = user.decks.split(",");
-	deckimport.value = user.decks[user.selectedDeck];
-	user.pool = user.pool || "";
-	user.accountbound = user.accountbound || "";
-	if (!user.quest) {
-		user.quest = {};
+	sock.user.decks = sock.user.decks.split(",");
+	deckimport.value = sock.user.decks[sock.user.selectedDeck];
+	sock.user.pool = sock.user.pool || "";
+	sock.user.accountbound = sock.user.accountbound || "";
+	if (!sock.user.quest) {
+		sock.user.quest = {};
 	}
-	if (user.freepacks) {
-		user.freepacks = user.freepacks.split(",").map(unaryParseInt);
+	if (sock.user.freepacks) {
+		sock.user.freepacks = sock.user.freepacks.split(",").map(unaryParseInt);
 	}
-	if (!user.ailosses) user.ailosses = 0;
-	if (!user.aiwins) user.aiwins = 0;
-	if (!user.pvplosses) user.pvplosses = 0;
-	if (!user.pvpwins) user.pvpwins = 0;
+	if (!sock.user.ailosses) sock.user.ailosses = 0;
+	if (!sock.user.aiwins) sock.user.aiwins = 0;
+	if (!sock.user.pvplosses) sock.user.pvplosses = 0;
+	if (!sock.user.pvpwins) sock.user.pvpwins = 0;
 	lbloffline.style.display = lblwantpvp.style.display = "inline";
 }
 function loginClick() {
-	if (!user && username.value) {
+	if (!sock.user && username.value) {
 		var xhr = new XMLHttpRequest();
 		xhr.open("POST", "auth?u=" + encodeURIComponent(username.value) + (password.value.length ? "&p=" + encodeURIComponent(password.value) : ""), true);
 		xhr.onreadystatechange = function() {
 			if (this.readyState == 4) {
 				if (this.status == 200) {
-					user = JSON.parse(this.responseText);
-					if (!user) {
+					sock.user = JSON.parse(this.responseText);
+					if (!sock.user) {
 						chat("No user");
-					} else if (!user.accountbound && !user.pool) {
+					} else if (!sock.user.accountbound && !sock.user.pool) {
 						startElementSelect();
 					} else {
 						prepuser();
@@ -2923,7 +2369,7 @@ function loginClick() {
 	}
 }
 function changeClick() {
-	userEmit("passchange", { p: password.value });
+	sock.userEmit("passchange", { p: password.value });
 }
 function parseInput(data, key, value, limit) {
 	var value = parseInt(value);
@@ -2945,33 +2391,33 @@ function parseaistats(data){
 function challengeClick(foe) {
 	if (Cards.loaded) {
 		var deck = getDeck();
-		if (etgutil.decklength(deck) < (user ? 31 : 11)){
+		if (etgutil.decklength(deck) < (sock.user ? 31 : 11)){
 			startEditor();
 			return;
 		}
 		var gameData = {};
 		parsepvpstats(gameData);
-		if (user) {
+		if (sock.user) {
 			gameData.f = typeof foe === "string" ? foe : foename.value;
-			userEmit("foewant", gameData);
+			sock.userEmit("foewant", gameData);
 		}else{
 			gameData.deck = deck;
 			gameData.room = foename.value;
-			sockEmit("pvpwant", gameData);
+			sock.emit("pvpwant", gameData);
 		}
 	}
 }
 function tradeClick(foe) {
 	if (Cards.loaded)
-		userEmit("tradewant", { f: typeof foe === "string" ? foe : foename.value });
+		sock.userEmit("tradewant", { f: typeof foe === "string" ? foe : foename.value });
 }
 function rewardClick() {
 	if (Cards.loaded)
-		userEmit("codesubmit", { code: foename.value });
+		sock.userEmit("codesubmit", { code: foename.value });
 }
 function libraryClick() {
 	if (Cards.loaded)
-		sockEmit("librarywant", { f: foename.value });
+		sock.emit("librarywant", { f: foename.value });
 }
 function aiClick() {
 	var deck = getDeck(), aideckcode = aideck.value;
@@ -2985,10 +2431,10 @@ function aiClick() {
 	initGame(gameData, true);
 }
 function offlineChange(){
-	sockEmit("showoffline", {hide: offline.checked});
+	sock.emit("showoffline", {hide: offline.checked});
 }
 function wantpvpChange(){
-	sockEmit("wantingpvp", {want: wantpvp.checked});
+	sock.emit("wantingpvp", {want: wantpvp.checked});
 }
 (function(callbacks){
 	for(var id in callbacks){
