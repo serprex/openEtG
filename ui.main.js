@@ -171,9 +171,9 @@ function getCardImage(code) {
 		var card = Cards.Codes[code];
 		var rend = new PIXI.RenderTexture(100, 20);
 		var graphics = new PIXI.Graphics();
-		graphics.lineStyle(2, 0x222222, 1);
+		graphics.lineStyle(1, card && card.shiny ? 0xdaa520 : 0x222222);
 		graphics.beginFill(card ? maybeLighten(card) : code == "0" ? 0x887766 : 0x111111);
-		graphics.drawRect(0, 0, 100, 20);
+		graphics.drawRect(0, 0, 99, 19);
 		graphics.endFill();
 		if (card) {
 			var clipwidth = 2;
@@ -381,10 +381,9 @@ function initLibrary(data){
 	setClick(bexit, startMenu);
 	stage.addChild(bexit);
 	var cardpool = etgutil.deck2pool(data.pool);
-	var cardsel = new CardSelector(
-		function(code){
-			cardArt.setTexture(getArt(code));
-		}, null);
+	var cardsel = new CardSelector(function(code){
+		cardArt.setTexture(getArt(code));
+	});
 	stage.addChild(cardsel);
 	var cardArt = new PIXI.Sprite(gfx.nopic);
 	cardArt.position.set(734, 8);
@@ -1108,6 +1107,16 @@ function startMenu(nymph) {
 	menuui.cmds = {
 		pvpgive: initGame,
 		tradegive: initTrade,
+		librarygive: initLibrary,
+		foearena:function(data) {
+			aideck.value = data.deck;
+			var game = initGame({ first: data.seed < etgutil.MAX_INT/2, deck: data.deck, urdeck: getDeck(), seed: data.seed,
+				p2hp: data.hp, foename: data.name, p2drawpower: data.draw, p2markpower: data.mark, arena: data.name, level: 4+data.lv }, true);
+			game.cost = userutil.arenaCost(data.lv);
+			user.gold -= game.cost;
+		},
+		arenainfo: startArenaInfo,
+		arenatop: startArenaTop,
 	};
 	menuui.endnext = function(){
 		options.style.display = "none";
@@ -1709,7 +1718,7 @@ function startEditor(arena, acard, startempty) {
 		cardArt.visible = true;
 	}
 	function incrpool(code, count){
-		if (code in Cards.Codes && (!arena || (!Cards.Codes[code].isOf(Cards.Codes[acard].asUpped(false))) && (arena.lv || !Cards.Codes[code].upped))){
+		if (code in Cards.Codes && (!arena || (!Cards.Codes[code].isOf(Cards.Codes[acard].asUpped(false).asShiny(false))) && (arena.lv || !Cards.Codes[code].upped))){
 			if (code in cardpool) {
 				cardpool[code] += count;
 			} else {
@@ -1880,7 +1889,7 @@ function startEditor(arena, acard, startempty) {
 				var card = Cards.Codes[code];
 				if (user && !isFreeCard(card)) {
 					if (!(code in cardpool) || (code in cardminus && cardminus[code] >= cardpool[code]) ||
-						(Cards.Codes[code].type != etg.PillarEnum && sumCardMinus(cardminus, code) >= 6)) {
+						(card.type != etg.PillarEnum && sumCardMinus(cardminus, code) >= 6)) {
 						return;
 					}
 					adjust(cardminus, code, 1);
@@ -2727,16 +2736,6 @@ var sockEvents = {
 		span.appendChild(document.createTextNode(data.f + (data.pvp ? " challenges you to a duel!" : " wants to trade with you!")));
 		addChatSpan(span);
 	},
-	librarygive: initLibrary,
-	foearena:function(data) {
-		aideck.value = data.deck;
-		var game = initGame({ first: data.seed < etgutil.MAX_INT/2, deck: data.deck, urdeck: getDeck(), seed: data.seed,
-			p2hp: data.hp, foename: data.name, p2drawpower: data.draw, p2markpower: data.mark, arena: data.name, level: 4+data.lv }, true);
-		game.cost = userutil.arenaCost(data.lv);
-		user.gold -= game.cost;
-	},
-	arenainfo: startArenaInfo,
-	arenatop: startArenaTop,
 	userdump:function(data) {
 		delete data.x;
 		user = data;
