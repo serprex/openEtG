@@ -9,7 +9,6 @@ exports.parseCsv = function(type, file){
 	var keys = csv[0].split(",");
 	for(var j=1; j<csv.length; j++){
 		var carddata = csv[j].split(",");
-		var cardcode = carddata[2];
 		var cardinfo = {};
 		for(var k=0; k<carddata.length; k++){
 			if (carddata[k].charAt(0) == '"'){
@@ -22,6 +21,7 @@ exports.parseCsv = function(type, file){
 				cardinfo[keys[k]] = carddata[k];
 			}
 		}
+		var cardcode = cardinfo.Code;
 		if (cardcode in exports.Codes){
 			console.log(cardcode + " duplicate " + carddata[1] + " " + exports.Codes[cardcode].name);
 		}else{

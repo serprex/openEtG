@@ -130,7 +130,6 @@ var ActivesValues = {
 	gpullspell:3,
 	gratitude:4,
 	grave:1,
-	growth:5,
 	guard: 4,
 	halveatk:function(c){
 		return c instanceof etg.CardInstance ? -c.card.attack/4 : (c.trueatk() < 0)-(c.trueatk() > 0);
@@ -197,9 +196,9 @@ var ActivesValues = {
 	photosynthesis:2,
 	plague:5,
 	platearmor:1,
-	poison:2,
-	poison2:3,
-	poison3:4,
+	"poison 1":2,
+	"poison 2":3,
+	"poison 3":4,
 	precognition:1,
 	purify:4,
 	queen:7,
@@ -216,7 +215,8 @@ var ActivesValues = {
 	ricochet:2,
 	sanctuary:6,
 	scarab:4,
-	growth1:3,
+	"growth 1":3,
+	"growth 2":5,
 	scramble:function(c){
 		var a=0, fq=c.owner.foe.quanta;
 		for(var i=1; i<13; i++){

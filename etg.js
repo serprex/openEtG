@@ -20,6 +20,19 @@ function Game(first, seed){
 var statuscache = {};
 var activecache = {};
 var activecastcache = {};
+function parseActive(name){
+	if (name in Actives){
+		return Actives[name];
+	}else{
+		var spidx = name.indexOf(" ");
+		if (~spidx){
+			Actives[name] = Actives[name.substring(0, spidx)](name.substring(spidx+1));
+			Actives[name].activename = name;
+			return Actives[name];
+		}
+	}
+	console.log("Unknown active", name);
+}
 function Card(type, info){
 	this.type = type;
 	this.element = parseInt(info.Element);
@@ -34,10 +47,12 @@ function Card(type, info){
 	if (info.Health){
 		this.health = parseInt(info.Health);
 	}
-	this.readCost("cost", info.Cost||"0");
+	if (info.Cost){
+		this.readCost("cost", info.Cost);
+	}
 	if (info.Active){
 		if (this.type == SpellEnum){
-			this.active = Actives[info.Active];
+			this.active = parseActive(info.Active);
 		}else if (info.Active in activecache){
 			this.active = activecache[info.Active];
 			var castinfo = activecastcache[info.Active];
@@ -51,10 +66,10 @@ function Card(type, info){
 			for(var i=0; i<actives.length; i++){
 				var active = actives[i].split("=");
 				if (active.length == 1){
-					this.active.auto = Actives[active[0]];
+					this.active.auto = parseActive(active[0]);
 				}else{
 					var iscast = this.readCost("cast", active[0]);
-					this.active[iscast?"cast":active[0]] = Actives[active[1]];
+					this.active[iscast?"cast":active[0]] = parseActive(active[1]);
 					if (iscast) activecastcache[info.Active] = [this.cast, this.castele];
 				}
 			}
@@ -164,6 +179,7 @@ CardInstance.prototype = Object.create(Thing.prototype);
 Card.prototype.rarity = 0;
 Card.prototype.attack = 0;
 Card.prototype.health = 0;
+Card.prototype.cost = 0;
 Card.prototype.upped = false;
 Card.prototype.status = {};
 Card.prototype.active = {};

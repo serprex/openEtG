@@ -4,13 +4,13 @@ var etg = require("./etg");
 var Cards = require("./Cards");
 function mutantactive(t){
 	lobo(t);
-	var abilities = ["hatch","freeze","burrow","destroy","steal","dive","heal","paradox","lycanthropy","growth1","infect","gpull","devour","mutation","growth","ablaze","poison","deja","endow","guard","mitosis"];
+	var abilities = ["hatch","freeze","burrow","destroy","steal","dive","heal","paradox","lycanthropy","growth 1","infect","gpull","devour","mutation","growth","ablaze","poison","deja","endow","guard","mitosis"];
 	var index = t.owner.upto(abilities.length+2)-2;
 	if (index<0){
 		t.status[["momentum","immaterial"][~index]] = true;
 	}else{
 		var active = Actives[abilities[index]];
-		if (active == Actives.growth1){
+		if (abilities[index] == "growth 1"){
 			t.active.death = active;
 		}else{
 			t.active.cast = active;
@@ -82,7 +82,7 @@ air:function(c,t){
 	Effect.mkText("1:9", c);
 	c.owner.spend(etg.Air, -1);
 },
-alphawolf: function (c, t) {
+alphawolf:function(c,t){
 	var pwolf = c.card.as(Cards.PackWolf);
 	new etg.Creature(pwolf, c.owner).place();
 	new etg.Creature(pwolf, c.owner).place();
@@ -466,7 +466,7 @@ evolve:function(c,t){
 },
 feed:function(c,t){
 	t.addpoison(1);
-	Actives.growth(c);
+	Actives["growth 2"](c);
 	delete c.status.immaterial;
 },
 fickle:function(c,t){
@@ -586,15 +586,13 @@ grave:function(c,t){
 	delete c.status.burrowed;
 	c.transform(t.card);
 },
-growth: function (c, t) {
-    Effect.mkText("2|2", c)
-	c.buffhp(2);
-	c.atk += 2;
-},
-growth1:function(c,t){
-	Effect.mkText("1|1", c);
-	c.atk += 1;
-	c.buffhp(1);
+growth:function(x){
+	var n = parseInt(x);
+	return function(c,t) {
+		Effect.mkText(n+"|"+n, c)
+		c.buffhp(n);
+		c.atk += n;
+	}
 },
 guard:function(c,t){
 	Effect.mkText("Guard", t);
@@ -714,10 +712,10 @@ integrity:function(c,t){
 	var shardSkills = [
 		[],
 		["deadalive", "mutation", "paradox", "improve", "scramble", "antimatter"],
-		["infect", "growth1", "poison", "poison", "aflatoxin", "poison2"],
+		["infect", "growth 1", "poison", "poison", "aflatoxin", "poison 2"],
 		["devour", "devour", "devour", "devour", "devour", "blackhole"],
 		["burrow", "stoneform", "guard", "guard", "bblood", "bblood"],
-		["growth", "adrenaline", "adrenaline", "adrenaline", "adrenaline", "mitosis"],
+		["growth 2", "adrenaline", "adrenaline", "adrenaline", "adrenaline", "mitosis"],
 		["ablaze", "ablaze", "fiery", "destroy", "destroy", "rage"],
 		["steam", "steam", "freeze", "freeze", "nymph", "nymph"],
 		["heal", "endow", "endow", "luciferin", "luciferin", "luciferin"],
@@ -729,9 +727,9 @@ integrity:function(c,t){
 	var shardCosts = {
 		burrow:1, stoneform:1, guard:1, bblood:2,
 		deadalive:1, mutation: 2, paradox: 2, improve: 2, scramble: -2, antimatter: 4,
-		infection:1, growth1: -4, poison: -2, aflatoxin: 2, poison2: -2,
+		infect:1, "growth 1": -4, "poison 1": -2, aflatoxin: 2, "poison 2": -2,
 		devour: 3, blackhole: 4,
-		growth: 2, adrenaline: 2, mitosis: 4,
+		"growth 2": 2, adrenaline: 2, mitosis: 4,
 		ablaze: 1, fiery: -3, destroy: 3, rage: 2,
 		steam: 2, freeze: 2, nymph: 4,
 		heal: 1, endow: 2, luciferin: 4,
@@ -860,7 +858,7 @@ metamorph:function(c,t){
 	c.owner.mark = t instanceof etg.Player?t.mark:t.card.element;
 	c.owner.spend(c.owner.mark, -2);
 },
-mimic:function (c, t) {
+mimic:function(c,t){
 	if (c != t && t instanceof etg.Creature) {
 		c.transform(t.card);
 		c.addactive("play", Actives.mimic);
@@ -893,7 +891,7 @@ momentum:function(c,t){
 	t.buffhp(1);
 	t.status.momentum = true;
 },
-mutant: function (c, t) {
+mutant:function(c,t){
 	if (!mutantactive(c)){
 		c.active.cast = Actives.web;
 	}
@@ -1029,15 +1027,12 @@ platearmor:function(c,t){
 	Effect.mkText("0|"+buff, t);
 	t.buffhp(buff);
 },
-poison:adrenathrottle(function(c,t){
-	(t || c.owner.foe).addpoison(1);
-}),
-poison2:adrenathrottle(function(c,t){
-	(t || c.owner.foe).addpoison(2);
-}),
-poison3:adrenathrottle(function(c,t){
-	(t || c.owner.foe).addpoison(3);
-}),
+poison:function(x){
+	var n = parseInt(x);
+	return adrenathrottle(function(c,t){
+		(t || c.owner.foe).addpoison(n);
+	});
+},
 poisonfoe:function(c,t){
 	c.owner.foe.addpoison(1);
 },
@@ -1140,7 +1135,7 @@ ren:function(c,t){
 		t.addactive("predeath", Actives.bounce);
 	}
 },
-reveal: function (c, t) {
+reveal:function(c,t){
 	c.owner.precognition = true;
 },
 rewind:function(c,t){
@@ -1189,7 +1184,7 @@ sadism:function(c, t, dmg){
 salvage:function(c, t){
 	if (c.owner == t.owner && !c.status.salvaged && !t.status.salvaged && c.owner.game.turn != c.owner){
 		Effect.mkText("Salvage", c);
-		Actives.growth1(c);
+		Actives["growth 1"](c);
 		c.status.salvaged = true;
 		t.status.salvaged = true;
 		c.owner.hand.push(new etg.CardInstance(t.card, c.owner));
@@ -1428,7 +1423,7 @@ throwrock:function(c,t){
 tick:function(c,t){
 	c.dmg(c.card.upped?3:1);
 	if (c.hp <= 0) {
-		if (c.card.upped) c.owner.foe.masscc(c, function (c, x) { x.dmg(4) });
+		if (c.card.upped) c.owner.foe.masscc(c, function(c,x){ x.dmg(4) });
 		else c.owner.foe.spelldmg(15);
 	}
 },
@@ -1598,8 +1593,8 @@ weight:function(c,t){
 wings:function(c,t){
 	return !t.status.airborne && !t.status.ranged;
 },
-}
+};
 for(var key in Actives){
 	Actives[key].activename = key;
 }
-module.exports = Actives
+module.exports = Actives;
