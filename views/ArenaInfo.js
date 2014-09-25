@@ -15,7 +15,7 @@ module.exports = function(info) {
 		var uocard = etgutil.asUpped(sock.user.ocard, info.lv == 1);
 		var bmake = px.mkButton(200, 440, "Create");
 		px.setClick(bmake, function(){
-			startEditor(info, uocard, true);
+			require("./Editor")(info, uocard, true);
 		});
 		stage.addChild(bmake);
 		var ocard = new PIXI.Sprite(gfx.getArt(uocard));

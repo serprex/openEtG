@@ -202,6 +202,19 @@ function getWeaponShieldImage(code) {
 		});
 	}
 }
+exports.preloadCardArt = function(art){
+	(function loadArt(i){
+		if (i == art.length) return;
+		var code = art.substr(i, 3);
+		var img = new Image();
+		img.onload = function(){
+			this.onload = undefined;
+			artimagecache[code] = new PIXI.Texture(new PIXI.BaseTexture(this));
+			loadArt(i+3);
+		}
+		img.src = "Cards/" + code + ".png";
+	})(0);
+}
 if (typeof PIXI !== "undefined"){
 	exports.nopic = new PIXI.Texture(new PIXI.BaseTexture());
 	exports.nopic.width = exports.nopic.height = 0;

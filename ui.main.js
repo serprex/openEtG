@@ -1,13 +1,12 @@
 "use strict";
 PIXI.AUTO_PREVENT_DEFAULT = false;
-require("./etg.client").loadcards();
 (function(){
-var htmlElements = ["leftpane", "chatinput", "deckimport", "aideck", "foename", "change", "login", "password", "challenge", "chatBox", "trade", "bottompane", "demigodmode", "username", "stats","enableSound", "hideright", "lblhideright", "wantpvp", "lblwantpvp", "offline", "lbloffline", "packmulti"];
+var htmlElements = ["leftpane", "chatinput", "deckimport", "aideck", "foename", "change", "login", "password", "challenge", "chatBox", "trade", "bottompane", "demigodmode", "username", "stats","enableSound", "hideright", "lblhideright", "wantpvp", "lblwantpvp", "offline", "lbloffline", "lblpreart", "preart", "packmulti"];
 htmlElements.forEach(function(name){
 	window[name] = document.getElementById(name);
 });
 if (localStorage){
-	[username, stats, enableSound, enableMusic, hideright, wantpvp, offline].forEach(function(storei){
+	[username, stats, enableSound, enableMusic, hideright, wantpvp, offline, preart].forEach(function(storei){
 		var field = storei.type == "checkbox" ? "checked" : "value";
 		if (localStorage[storei.id] !== undefined){
 			storei[field] = localStorage[storei.id];
@@ -28,29 +27,6 @@ var chat = require("./chat");
 var Cards = require("./Cards");
 var etgutil = require("./etgutil");
 var startMenu = require("./views/MainMenu");
-soundChange();
-musicChange();
-gfx.load(function(loadingScreen){
-	px.realStage.addChild(loadingScreen);
-	requestAnimate();
-}, function(){
-	ui.playMusic("openingMusic");
-	px.realStage.removeChildren();
-	px.realStage.addChild(new PIXI.Sprite(gfx.bg_default));
-	startMenu();
-});
-sock.et.on("open", function(){
-	chat("Connected");
-	offlineChange();
-	wantpvpChange();
-});
-sock.et.on("message", function(data){
-	data = JSON.parse(data);
-	var func = sockEvents[data.x] || (px.realStage.children.length > 1 && px.realStage.children[1].cmds && (func = px.realStage.children[1].cmds[data.x]));
-	if (func){
-		func.call(sock.et, data);
-	}
-});
 var sockEvents = {
 	challenge:function(data) {
 		var span = document.createElement("span");
@@ -119,7 +95,36 @@ var sockEvents = {
 		chat(Cards.Codes[data.card].name + " added!");
 		startMenu();
 	},
-}
+	cardart:function(data) {
+		if (preart.checked) gfx.preloadCardArt(data.art);
+	},
+};
+sock.et.on("open", function(){
+	chat("Connected");
+	offlineChange();
+	wantpvpChange();
+});
+sock.et.on("message", function(data){
+	data = JSON.parse(data);
+	var func = sockEvents[data.x] || (px.realStage.children.length > 1 && px.realStage.children[1].cmds && (func = px.realStage.children[1].cmds[data.x]));
+	if (func){
+		func.call(sock.et, data);
+	}
+});
+require("./etg.client").loadcards(function(){
+	if (preart.checked) sock.emit("cardart");
+});
+soundChange();
+musicChange();
+gfx.load(function(loadingScreen){
+	px.realStage.addChild(loadingScreen);
+	requestAnimate();
+}, function(){
+	ui.playMusic("openingMusic");
+	px.realStage.removeChildren();
+	px.realStage.addChild(new PIXI.Sprite(gfx.bg_default));
+	startMenu();
+});
 function soundChange(event) {
 	ui.changeSound(enableSound.checked);
 }

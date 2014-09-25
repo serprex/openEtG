@@ -528,6 +528,14 @@ var sockEvents = {
 			});
 		}
 	},
+	cardart:function(){
+		var socket = this;
+		fs.readdir(__dirname + "/Cards", function(err, files){
+			if (files){
+				sockEmit(socket, "cardart", {art: files.join("").replace(/\.png/g, "")});
+			}
+		});
+	},
 	showoffline:function(data){
 		sockinfo[this.id].showoffline = data.hide;
 	},
