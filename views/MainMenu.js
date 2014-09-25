@@ -177,7 +177,7 @@ module.exports = function(nymph) {
 			tinfo.setText("See who the top players in arena are right now.");
 		});
 		menuui.addChild(btopa);
-		usertoggle.push(baia, binfoa, btopa);
+		usertoggle.push(baia, binfoa);
 		(function(lvi){
 			px.setClick(baia, function() {
 				if (Cards.loaded) {
@@ -202,7 +202,7 @@ module.exports = function(nymph) {
 			});
 			px.setClick(btopa, function() {
 				if (Cards.loaded) {
-					sock.userEmit("arenatop", lvi);
+					sock.emit("arenatop", lvi);
 					menuui.removeChild(this);
 				}
 			});

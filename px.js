@@ -3,7 +3,7 @@ var gfx = require("./gfx");
 var ui = require("./uiutil");
 var etg = require("./etg");
 var Cards = require("./Cards");
-var renderer = new PIXI.autoDetectRenderer(900, 600, leftpane);
+var renderer = new PIXI.autoDetectRenderer(900, 600, leftpane), domview;
 var realStage = new PIXI.Stage(0x336699, true);
 exports.realStage = realStage;
 exports.refreshRenderer = function(stage, animCb, dontrender) {
@@ -13,16 +13,32 @@ exports.refreshRenderer = function(stage, animCb, dontrender) {
 		if (oldstage.endnext) oldstage.endnext();
 		realStage.removeChildAt(1);
 	}
-	realStage.addChild(stage);
-	realStage.next = animCb;
-	if (stage.dom) stage.dom.style.display = "inline";
-	// if (!dontrender) renderer.render(realStage);
+	if (stage instanceof PIXI.DisplayObject){
+		if (domview){
+			renderer.view.style.display = "inline";
+			document.body.removeChild(domview);
+			domview = undefined;
+		}
+		realStage.addChild(stage);
+		realStage.next = animCb;
+		if (stage.dom) stage.dom.style.display = "inline";
+		// if (!dontrender) renderer.render(realStage);
+	}else{
+		renderer.view.style.display = "none";
+		document.body.appendChild(domview = stage);
+		domview.style.width = "900px";
+		domview.style.height = "600px";
+		domview.style.position = "absolute";
+		domview.style.background = "url('assets/bg_default.png')";
+	}
 }
 exports.next = function(){
-	if (realStage.next) {
-		realStage.next();
+	if (!domview){
+		if (realStage.next) {
+			realStage.next();
+		}
+		renderer.render(realStage);
 	}
-	renderer.render(realStage);
 }
 exports.getMousePos = function(){
 	return realStage.getMousePosition();

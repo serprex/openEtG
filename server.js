@@ -160,24 +160,6 @@ var userEvents = {
 			}
 		});
 	},
-	arenatop:function(data, user){
-		var socket = this;
-		db.zrevrange("arena"+(data.lv?"1":""), 0, 19, "withscores", function(err, obj){
-			var t20 = [];
-			function getwinloss(i){
-				if (i == obj.length){
-					sockEmit(socket, "arenatop", {top: t20});
-				}else{
-					db.hmget((data.lv?"B:":"A:") + obj[i], "win", "loss", "day", "card", function(err, wl){
-						wl[2] = sutil.getDay()-wl[2];
-						t20.push([obj[i], obj[i+1]].concat(wl));
-						getwinloss(i+2);
-					});
-				}
-			}
-			getwinloss(0);
-		});
-	},
 	modarena:function(data, user){
 		var arena = "arena"+(data.lv?"1":"");
 		db.hincrby((data.lv?"B:":"A:")+data.aname, data.won?"win":"loss", 1);
@@ -527,6 +509,24 @@ var sockEvents = {
 				if (info) sockEmit(socket, "librarygive", {pool:info[0], gold:parseInt(info[1])});
 			});
 		}
+	},
+	arenatop:function(data, user){
+		var socket = this;
+		db.zrevrange("arena"+(data.lv?"1":""), 0, 19, "withscores", function(err, obj){
+			var t20 = [];
+			function getwinloss(i){
+				if (i == obj.length){
+					sockEmit(socket, "arenatop", {top: t20});
+				}else{
+					db.hmget((data.lv?"B:":"A:") + obj[i], "win", "loss", "day", "card", function(err, wl){
+						wl[2] = sutil.getDay()-wl[2];
+						t20.push([obj[i], obj[i+1]].concat(wl));
+						getwinloss(i+2);
+					});
+				}
+			}
+			getwinloss(0);
+		});
 	},
 	cardart:function(){
 		var socket = this;
