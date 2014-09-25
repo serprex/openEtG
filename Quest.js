@@ -1,5 +1,7 @@
 "use strict";
+var sock = require("./sock");
 var Cards = require("./Cards");
+var etgutil = require("./etgutil");
 //Quest data
 exports.necromancer = [
 	{ deck: "04531027170b52g0c52m0452n018pk", name: "Skeleton Horde", hp: 80, markpower: 2, wintext: "You defeated the horde, but you should find out where they came from" },
@@ -176,6 +178,35 @@ exports.areas = {
 	ice: ["icecave", "watertemple", "gravitytemple", "airtemple"],
 	provinggrounds: ["pgdragon", "pgrare", "pgshard", "pgfarmer","pggeomancer", "pgnymph"],
 };
+exports.mkQuestAi = function(questname, stage, area) {
+	var quest = exports[questname][stage];
+	if (!quest)
+		return "Quest " + questname + ":" + stage + " does not exist.";
+	var markpower = quest.markpower || 1;
+	var drawpower = quest.drawpower || 1;
+	var hp = quest.hp || 100;
+	var playerHPstart = quest.urhp || 100;
+	var urdeck = sock.getDeck();
+	if (etgutil.decklength(urdeck) < (sock.user ? 31 : 11)) {
+		return "ERROR: Your deck is invalid or missing! Please exit & create a valid deck in the deck editor.";
+	}
+	var game = require("./views/Match")({ deck: quest.deck, urdeck: urdeck, seed: Math.random() * etgutil.MAX_INT, p2hp: hp, p2markpower: markpower, foename: quest.name, p1hp: playerHPstart, p2drawpower: drawpower }, true);
+	if (quest.morph) {
+		game.player1.deck = game.player1.deck.map(quest.morph.bind(quest));
+	}
+	game.quest = [questname, stage];
+	game.wintext = quest.wintext || "";
+	game.autonext = quest.autonext;
+	game.noheal = quest.noheal;
+	game.area = area;
+	if ((sock.user.quest[questname] <= stage || !(questname in sock.user.quest))) {
+		game.cardreward = quest.cardreward;
+		game.goldreward = quest.goldreward;
+		game.choicerewards = quest.choicerewards;
+		game.rewardamount = quest.rewardamount;
+	}
+	return game;
+}
 
 //Dependency functions
 function requireQuest(user) {

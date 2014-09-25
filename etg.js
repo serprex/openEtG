@@ -224,6 +224,17 @@ Game.prototype.progressMulligan = function(){
 	}
 	this.turn = this.turn.foe;
 }
+var blacklist = { flip: true, seed: true, p1deckpower: true, p2deckpower: true, deck: true, urdeck: true };
+Game.prototype.addData = function(data) {
+	for (var key in data) {
+		if (!(key in blacklist)){
+			var p1or2 = key.match(/^p(1|2)/);
+			if (p1or2){
+				this["player" + p1or2[1]][key.substr(2)] = data[key];
+			}else this[key] = data[key];
+		}
+	}
+}
 function removeSoPa(p){
 	if (p){
 		delete p.status.patience;
@@ -476,6 +487,9 @@ Card.prototype.readCost = function(attr, cost){
 }
 Card.prototype.as = function(card){
 	return card.asUpped(this.upped).asShiny(this.shiny);
+}
+Card.prototype.isFree = function() {
+	return this.type == PillarEnum && !this.upped && !this.rarity && !this.shiny;
 }
 Card.prototype.info = function(){
 	if (this.type == PillarEnum){

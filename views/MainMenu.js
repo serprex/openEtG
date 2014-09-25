@@ -1,10 +1,15 @@
-var etg = require("./etg");
-var Cards = require("./Cards");
-var etgutil = require("./etgutil");
-var sock = require("./Sock");
+"use strict";
 var px = require("./px");
+var etg = require("./etg");
+var gfx = require("./gfx");
+var chat = require("./chat");
+var sock = require("./sock");
+var Cards = require("./Cards");
+var aiDecks = require("./Decks");
+var etgutil = require("./etgutil");
 var userutil = require("./userutil");
-exports.start = function(nymph, ai0, ai2, mage, demigod, startQuestWindow, startColosseum, startEditor, startStore, initGame, initTrade, initLibrary, startArenaInfo, startArenaTop, upgradestore, getDeck) {
+var startMatch = require("./Match");
+module.exports = function(nymph) {
 	var mainmenu = document.getElementById("mainmenu");
 	var tipjar = [
 		"Each card in your booster pack has a 50% chance of being from the chosen element",
@@ -85,55 +90,55 @@ exports.start = function(nymph, ai0, ai2, mage, demigod, startQuestWindow, start
 	var bai0 = px.mkButton(50, 100, "Commoner", function() {
 		tinfo.setText("Commoners have no upgraded cards & mostly common cards.\nCost: $0");
 	});
-	px.setClick(bai0, ai0);
+	px.setClick(bai0, aiDecks.mkAi(0));
 	menuui.addChild(bai0);
 
 	var bai1 = px.mkButton(150, 100, "Mage", function() {
 		tinfo.setText("Mages have preconstructed decks with a couple rares.\nCost: $5");
 	});
-	px.setClick(bai1, mage);
+	px.setClick(bai1, aiDecks.mkPremade("mage"));
 	menuui.addChild(bai1);
 
 	var bai2 = px.mkButton(250, 100, "Champion", function() {
 		tinfo.setText("Champions have some upgraded cards.\nCost: $10");
 	});
-	px.setClick(bai2, ai2);
+	px.setClick(bai2, aiDecks.mkAi(2));
 	menuui.addChild(bai2);
 
 	var bai3 = px.mkButton(350, 100, "Demigod", function() {
 		tinfo.setText("Demigods are extremely powerful. Come prepared for anything.\nCost: $20");
 	});
-	px.setClick(bai3, demigod);
+	px.setClick(bai3, aiDecks.mkPremade("demigod"));
 	menuui.addChild(bai3);
 
 	var bquest = px.mkButton(50, 145, "Quests", function() {
 		tinfo.setText("Go on an adventure!");
 	});
-	px.setClick(bquest, startQuestWindow);
+	px.setClick(bquest, require("./QuestMain"));
 	menuui.addChild(bquest);
 
 	var bcolosseum = px.mkButton(150, 145, "Colosseum", function() {
 		tinfo.setText("Try some daily challenges in the Colosseum!");
 	});
-	px.setClick(bcolosseum, startColosseum);
+	px.setClick(bcolosseum, require("./Colosseum"));
 	menuui.addChild(bcolosseum);
 
 	var bedit = px.mkButton(50, 300, "Editor", function() {
 		tinfo.setText("Edit your deck, as well as submit an arena deck.");
 	});
-	px.setClick(bedit, startEditor);
+	px.setClick(bedit, require("./Editor"));
 	menuui.addChild(bedit);
 
 	var bshop = px.mkButton(150, 300, "Shop", function() {
 		tinfo.setText("Buy booster packs which contain cards from the elements you choose.");
 	});
-	px.setClick(bshop, startStore);
+	px.setClick(bshop, require("./Shop"));
 	menuui.addChild(bshop);
 
 	var bupgrade = px.mkButton(250, 300, "Sell/Upgrade", function() {
 		tinfo.setText("Upgrade or sell cards.");
 	});
-	px.setClick(bupgrade, upgradestore);
+	px.setClick(bupgrade, require("./Upgrade"));
 	menuui.addChild(bupgrade);
 
 	var blogout = px.mkButton(777, 246, "Logout", function() {
@@ -177,7 +182,7 @@ exports.start = function(nymph, ai0, ai2, mage, demigod, startQuestWindow, start
 		(function(lvi){
 			px.setClick(baia, function() {
 				if (Cards.loaded) {
-					if (etgutil.decklength(getDeck()) < 31) {
+					if (etgutil.decklength(sock.getDeck()) < 31) {
 						startEditor();
 						return;
 					}
@@ -207,7 +212,7 @@ exports.start = function(nymph, ai0, ai2, mage, demigod, startQuestWindow, start
 
 	if (!sock.user) px.toggleB.apply(null, usertoggle);
 	else if (sock.user.oracle || typeof nymph === "string") {
-		var oracle = new PIXI.Sprite(getArt(nymph || sock.user.oracle));
+		var oracle = new PIXI.Sprite(gfx.getArt(nymph || sock.user.oracle));
 		oracle.position.set(450, 100);
 		menuui.addChild(oracle);
 		delete sock.user.oracle;
@@ -223,18 +228,18 @@ exports.start = function(nymph, ai0, ai2, mage, demigod, startQuestWindow, start
 		}
 	}
 	menuui.cmds = {
-		pvpgive: initGame,
-		tradegive: initTrade,
-		librarygive: initLibrary,
+		pvpgive: startMatch,
+		tradegive: require("./Trade"),
+		librarygive: require("./Library"),
 		foearena:function(data) {
 			aideck.value = data.deck;
-			var game = initGame({ deck: data.deck, urdeck: getDeck(), seed: data.seed,
+			var game = startMatch({ deck: data.deck, urdeck: sock.getDeck(), seed: data.seed,
 				p2hp: data.hp, foename: data.name, p2drawpower: data.draw, p2markpower: data.mark, arena: data.name, level: 4+data.lv }, true);
 			game.cost = userutil.arenaCost(data.lv);
 			sock.user.gold -= game.cost;
 		},
-		arenainfo: startArenaInfo,
-		arenatop: startArenaTop,
+		arenainfo: require("./ArenaInfo"),
+		arenatop: require("./ArenaTop"),
 	};
 	menuui.dom = mainmenu;
 

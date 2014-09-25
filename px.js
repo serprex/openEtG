@@ -1,3 +1,4 @@
+"use strict";
 var gfx = require("./gfx");
 var ui = require("./uiutil");
 var etg = require("./etg");
@@ -105,6 +106,12 @@ exports.mkButton = function(x, y, b, mouseoverfunc, mouseoutfunc) {
 	}
 	return b;
 }
+exports.adjust = function adjust(cardminus, code, x) {
+	if (code in cardminus) {
+		cardminus[code] += x;
+	} else cardminus[code] = x;
+	delete cardminus.rendered;
+}
 function MenuText(x, y, txt, wrapwidth) {
 	this.wrapwidth = wrapwidth;
 	PIXI.Sprite.call(this, this.textText(txt));
@@ -159,7 +166,7 @@ DeckDisplay.prototype.click = function(e){
 }
 DeckDisplay.prototype.renderDeck = function(i){
 	for (;i < this.deck.length;i++) {
-		this.children[i].setTexture(exports.getCardImage(this.deck[i]));
+		this.children[i].setTexture(gfx.getCardImage(this.deck[i]));
 		this.children[i].visible = true;
 	}
 	for (;i < this.decksize;i++) {
@@ -281,7 +288,7 @@ CardSelector.prototype.makeColumns = function(){
 		this.columns[i] = etg.filtercards(i > 2,
 			function(x) { return x.element == self.elefilter &&
 				((i % 3 == 0 && x.type == etg.CreatureEnum) || (i % 3 == 1 && x.type <= etg.PermanentEnum) || (i % 3 == 2 && x.type == etg.SpellEnum)) &&
-				(!self.cardpool || x in self.cardpool || self.showall || exports.isFreeCard(x)) && (!self.rarefilter || self.rarefilter == Math.min(x.rarity, 4));
+				(!self.cardpool || x in self.cardpool || self.showall || x.isFree()) && (!self.rarefilter || self.rarefilter == Math.min(x.rarity, 4));
 			}, etg.cardCmp, this.showshiny);
 	}
 	this.renderColumns();
@@ -292,10 +299,10 @@ CardSelector.prototype.renderColumns = function(){
 	for (var i = 0;i < 6; i++){
 		for (var j = 0;j < this.columns[i].length;j++) {
 			var spr = this.columnspr[i][j], code = this.columns[i][j].code;
-			spr.setTexture(exports.getCardImage(code));
+			spr.setTexture(gfx.getCardImage(code));
 			spr.visible = true;
 			if (this.cardpool) {
-				var txt = spr.children[0], card = Cards.Codes[code], inf = exports.isFreeCard(card);
+				var txt = spr.children[0], card = Cards.Codes[code], inf = card.isFree();
 				if ((txt.visible = inf || code in this.cardpool || this.showall)) {
 					var cardAmount = inf ? "-" : !(code in this.cardpool) ? 0 : (this.cardpool[code] - (this.cardminus && code in this.cardminus ? this.cardminus[code] : 0))
 					exports.maybeSetText(txt, cardAmount.toString());

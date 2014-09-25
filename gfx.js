@@ -1,4 +1,6 @@
 "use strict";
+var ui = require("./uiutil");
+var Cards = require("./Cards");
 exports.loaded = false;
 function load(preload, postload){
 	var singles = ["assets/gold.png", "assets/button.png", "assets/bg_default.png",
@@ -44,8 +46,175 @@ function load(preload, postload){
 	preload(loadingBarGraphic);
 	preLoader.load();
 }
+var caimgcache = {}, crimgcache = {}, wsimgcache = {}, artcache = {}, artimagecache = {};
+var shinyFilter = new PIXI.ColorMatrixFilter();
+shinyFilter.matrix = [
+	0,1,0,0,
+	0,0,1,0,
+	1,0,0,0,
+	0,0,0,1,
+];
+function makeArt(card, art, oldrend) {
+	var rend = oldrend || new PIXI.RenderTexture(132, 256);
+	var template = new PIXI.DisplayObjectContainer();
+	template.addChild(new PIXI.Sprite(exports.cardBacks[card.element+(card.upped?13:0)]));
+	var rarity = new PIXI.Sprite(exports.ricons[card.rarity]);
+	rarity.anchor.set(0, 1);
+	rarity.position.set(5, 252);
+	template.addChild(rarity);
+	if (art) {
+		var artspr = new PIXI.Sprite(art);
+		artspr.position.set(2, 20);
+		if (card.shiny) artspr.filters = [shinyFilter];
+		template.addChild(artspr);
+	}
+	var typemark = new PIXI.Sprite(exports.ticons[card.type]);
+	typemark.anchor.set(1, 1);
+	typemark.position.set(128, 252);
+	template.addChild(typemark);
+	var nametag = new PIXI.Text(card.name, { font: "12px Dosis", fill: card.upped ? "black" : "white" });
+	nametag.position.set(2, 4);
+	template.addChild(nametag);
+	if (card.cost) {
+		var text = new PIXI.Text(card.cost, { font: "12px Dosis", fill: card.upped ? "black" : "white" });
+		text.anchor.x = 1;
+		text.position.set(rend.width - 20, 4);
+		template.addChild(text);
+		if (card.costele) {
+			var eleicon = new PIXI.Sprite(exports.eicons[card.costele]);
+			eleicon.position.set(rend.width - 1, 10);
+			eleicon.anchor.set(1, .5);
+			eleicon.scale.set(.5, .5);
+			template.addChild(eleicon);
+		}
+	}
+	var infospr = new PIXI.Sprite(ui.getTextImage(card.info(), ui.mkFont(11, card.upped ? "black" : "white"), "", rend.width-4));
+	infospr.position.set(2, 150);
+	template.addChild(infospr);
+	rend.render(template, null, true);
+	return rend;
+}
+function getArtImage(code, cb){
+	if (!(code in artimagecache)){
+		var loader = new PIXI.ImageLoader("Cards/" + code + ".png");
+		loader.addEventListener("loaded", function() {
+			return cb(artimagecache[code] = PIXI.Texture.fromFrame("Cards/" + code + ".png"));
+		});
+		loader.load();
+	}
+	return cb(artimagecache[code]);
+}
+function getArt(code) {
+	if (artcache[code]) return artcache[code];
+	else {
+		return getArtImage(code, function(art){
+			return artcache[code] = makeArt(Cards.Codes[code], art, artcache[code]);
+		});
+	}
+}
+function getCardImage(code) {
+	if (caimgcache[code]) return caimgcache[code];
+	else {
+		var card = Cards.Codes[code];
+		var rend = new PIXI.RenderTexture(100, 20);
+		var graphics = new PIXI.Graphics();
+		graphics.lineStyle(1, card && card.shiny ? 0xdaa520 : 0x222222);
+		graphics.beginFill(card ? ui.maybeLighten(card) : code == "0" ? 0x887766 : 0x111111);
+		graphics.drawRect(0, 0, 99, 19);
+		graphics.endFill();
+		if (card) {
+			var clipwidth = 2;
+			if (card.cost) {
+				var text = new PIXI.Text(card.cost, { font: "11px Dosis", fill: card.upped ? "black" : "white" });
+				text.anchor.x = 1;
+				text.position.set(rend.width - 20, 5);
+				graphics.addChild(text);
+				clipwidth += text.width + 22;
+				if (card.costele) {
+					var eleicon = new PIXI.Sprite(exports.eicons[card.costele]);
+					eleicon.position.set(rend.width - 1, 10);
+					eleicon.anchor.set(1, .5);
+					eleicon.scale.set(.5, .5);
+					graphics.addChild(eleicon);
+				}
+			}
+			var text, loopi = 0;
+			do text = new PIXI.Text(card.name.substring(0, card.name.length - (loopi++)), { font: "11px Dosis", fill: card.upped ? "black" : "white" }); while (text.width > rend.width - clipwidth);
+			text.position.set(2, 5);
+			graphics.addChild(text);
+		}
+		rend.render(graphics);
+		return caimgcache[code] = rend;
+	}
+}
+function getCreatureImage(code) {
+	if (crimgcache[code]) return crimgcache[code];
+	else {
+		return getArtImage(code, function(art){
+			var card = Cards.Codes[code];
+			var rend = new PIXI.RenderTexture(64, 82);
+			var graphics = new PIXI.Graphics();
+			var border = new PIXI.Sprite(exports.cardBorders[card.element + (card.upped ? 13 : 0)]);
+			border.scale.set(0.5, 0.5);
+			graphics.addChild(border);
+			graphics.beginFill(card ? ui.maybeLighten(card) : ui.elecols[0]);
+			graphics.drawRect(0, 9, 64, 64);
+			graphics.endFill();
+			if (art) {
+				var artspr = new PIXI.Sprite(art);
+				artspr.scale.set(0.5, 0.5);
+				artspr.position.set(0, 9);
+				if (card.shiny) artspr.filters = [shinyFilter];
+				graphics.addChild(artspr);
+			}
+			if (card) {
+				var text = new PIXI.Text(card.name, { font: "8px Dosis", fill: card.upped ? "black" : "white" });
+				text.anchor.x = 0.5;
+				text.position.set(33, 72);
+				graphics.addChild(text);
+			}
+			rend.render(graphics);
+			return crimgcache[code] = rend;
+		});
+	}
+}
+function getWeaponShieldImage(code) {
+	if (wsimgcache[code]) return wsimgcache[code];
+	else {
+		return getArtImage(code, function(art){
+			var card = Cards.Codes[code];
+			var rend = new PIXI.RenderTexture(80, 102);
+			var graphics = new PIXI.Graphics();
+			var border = (new PIXI.Sprite(exports.cardBorders[card.element + (card.upped ? 13 : 0)]));
+			border.scale.set(5/8, 5/8);
+			graphics.addChild(border);
+			graphics.beginFill(card ? ui.maybeLighten(card) : ui.elecols[0]);
+			graphics.drawRect(0, 11, 80, 80);
+			graphics.endFill();
+			if (art) {
+				var artspr = new PIXI.Sprite(art);
+				artspr.scale.set(5/8, 5/8);
+				artspr.position.set(0, 11);
+				if (card.shiny) artspr.filters = [shinyFilter];
+				graphics.addChild(artspr);
+			}
+			if (card) {
+				var text = new PIXI.Text(card.name, { font: "10px Dosis", fill: card.upped ? "black" : "white" });
+				text.anchor.x = 0.5;
+				text.position.set(40, 91);
+				graphics.addChild(text);
+			}
+			rend.render(graphics);
+			return wsimgcache[code] = rend;
+		});
+	}
+}
 if (typeof PIXI !== "undefined"){
 	exports.nopic = new PIXI.Texture(new PIXI.BaseTexture());
 	exports.nopic.width = exports.nopic.height = 0;
 	exports.load = load;
+	exports.getPermanentImage = exports.getCreatureImage = getCreatureImage;
+	exports.getArt = getArt;
+	exports.getCardImage = getCardImage;
+	exports.getWeaponShieldImage = getWeaponShieldImage;
 }

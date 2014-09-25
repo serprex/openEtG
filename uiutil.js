@@ -212,6 +212,23 @@ function changeMusic(enabled) {
 		playMusic(name);
 	}
 }
+function parseInput(data, key, value, limit) {
+	var value = parseInt(value);
+	if (value === 0 || value > 0)
+		data[key] = Math.min(value, limit || Infinity);
+}
+function parsepvpstats(data){
+	parseInput(data, "p1hp", pvphp.value);
+	parseInput(data, "p1drawpower", pvpdraw.value, 8);
+	parseInput(data, "p1markpower", pvpmark.value, 1188);
+	parseInput(data, "p1deckpower", pvpdeck.value);
+}
+function parseaistats(data){
+	parseInput(data, "p2hp", aihp.value);
+	parseInput(data, "p2drawpower", aidraw.value, 8);
+	parseInput(data, "p2markpower", aimark.value, 1188);
+	parseInput(data, "p2deckpower", aideckpow.value);
+}
 exports.mkFont = mkFont;
 exports.reflectPos = reflectPos;
 exports.creaturePos = creaturePos;
@@ -224,3 +241,6 @@ exports.playSound = playSound;
 exports.playMusic = playMusic;
 exports.changeSound = changeSound;
 exports.changeMusic = changeMusic;
+exports.parseInput = parseInput;
+exports.parsepvpstats = parsepvpstats;
+exports.parseaistats = parseaistats;
