@@ -2,6 +2,7 @@ var etg = require("./etg");
 var ui = require("./uiutil");
 var sock = require("./sock");
 var Cards = require("./Cards");
+var aiDecks = require("./Decks");
 var etgutil = require("./etgutil");
 exports.mkPremade = function(name, daily) {
 	return function() {
@@ -18,10 +19,10 @@ exports.mkPremade = function(name, daily) {
 					return;
 				}
 			}else{
-				foedata = exports[name][sock.user[name == "mage" ? "dailymage" : "dailydg"]];
+				foedata = aiDecks[name][sock.user[name == "mage" ? "dailymage" : "dailydg"]];
 			}
 		}
-		if (!foedata) foedata = exports.giveRandom(name);
+		if (!foedata) foedata = aiDecks.giveRandom(name);
 		var foename = name[0].toUpperCase() + name.slice(1) + "\n" + foedata[0];
 		var gameData = { deck: foedata[1], urdeck: urdeck, seed: Math.random() * etgutil.MAX_INT, foename: foename };
 		if (name == "mage"){
