@@ -30,7 +30,7 @@ exports.getMousePos = function(){
 exports.setClick = function(obj, click, sound) {
 	if (sound === undefined) sound = "buttonClick";
 	obj.click = function() {
-		ui.playSound(sound);
+		if (typeof sound === "string") ui.playSound(sound);
 		click.apply(this, arguments);
 	}
 }
