@@ -3,10 +3,10 @@ var px = require("./px");
 var etg = require("./etg");
 var gfx = require("./gfx");
 var ui = require("./uiutil");
+var mkAi = require("./mkAi");
 var sock = require("./sock");
 var Cards = require("./Cards");
 var Effect = require("./Effect");
-var aiDecks = require("./Decks");
 var etgutil = require("./etgutil");
 function startMatch(game, foeDeck) {
 	function drawBorder(obj, spr) {
@@ -97,7 +97,7 @@ function startMatch(game, foeDeck) {
 						if (game.endurance) {
 							var data = addNoHealData(game);
 							data.endurance--;
-							var newgame = aiDecks.mkAi(game.level, true)();
+							var newgame = mkAi.mkAi(game.level, true)();
 							newgame.addData(data);
 							newgame.dataNext = data;
 							return;

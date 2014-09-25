@@ -4,11 +4,10 @@ var etg = require("./etg");
 var gfx = require("./gfx");
 var chat = require("./chat");
 var sock = require("./sock");
+var mkAi = require("./mkAi");
 var Cards = require("./Cards");
-var aiDecks = require("./Decks");
 var etgutil = require("./etgutil");
 var userutil = require("./userutil");
-var startMatch = require("./Match");
 module.exports = function(nymph) {
 	var mainmenu = document.getElementById("mainmenu");
 	var tipjar = [
@@ -90,25 +89,25 @@ module.exports = function(nymph) {
 	var bai0 = px.mkButton(50, 100, "Commoner", function() {
 		tinfo.setText("Commoners have no upgraded cards & mostly common cards.\nCost: $0");
 	});
-	px.setClick(bai0, aiDecks.mkAi(0));
+	px.setClick(bai0, mkAi.mkAi(0));
 	menuui.addChild(bai0);
 
 	var bai1 = px.mkButton(150, 100, "Mage", function() {
 		tinfo.setText("Mages have preconstructed decks with a couple rares.\nCost: $5");
 	});
-	px.setClick(bai1, aiDecks.mkPremade("mage"));
+	px.setClick(bai1, mkAi.mkPremade("mage"));
 	menuui.addChild(bai1);
 
 	var bai2 = px.mkButton(250, 100, "Champion", function() {
 		tinfo.setText("Champions have some upgraded cards.\nCost: $10");
 	});
-	px.setClick(bai2, aiDecks.mkAi(2));
+	px.setClick(bai2, mkAi.mkAi(2));
 	menuui.addChild(bai2);
 
 	var bai3 = px.mkButton(350, 100, "Demigod", function() {
 		tinfo.setText("Demigods are extremely powerful. Come prepared for anything.\nCost: $20");
 	});
-	px.setClick(bai3, aiDecks.mkPremade("demigod"));
+	px.setClick(bai3, mkAi.mkPremade("demigod"));
 	menuui.addChild(bai3);
 
 	var bquest = px.mkButton(50, 145, "Quests", function() {
@@ -228,12 +227,12 @@ module.exports = function(nymph) {
 		}
 	}
 	menuui.cmds = {
-		pvpgive: startMatch,
+		pvpgive: require("./Match"),
 		tradegive: require("./Trade"),
 		librarygive: require("./Library"),
 		foearena:function(data) {
 			aideck.value = data.deck;
-			var game = startMatch({ deck: data.deck, urdeck: sock.getDeck(), seed: data.seed,
+			var game = require("./Match")({ deck: data.deck, urdeck: sock.getDeck(), seed: data.seed,
 				p2hp: data.hp, foename: data.name, p2drawpower: data.draw, p2markpower: data.mark, arena: data.name, level: 4+data.lv }, true);
 			game.cost = userutil.arenaCost(data.lv);
 			sock.user.gold -= game.cost;

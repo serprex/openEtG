@@ -7,7 +7,6 @@ var chat = require("./chat");
 var sock = require("./sock");
 var Cards = require("./Cards");
 var etgutil = require("./etgutil");
-var startMenu = require("./MainMenu");
 module.exports = function(arena, acard, startempty) {
 	if (!Cards.loaded) return;
 	if (arena && (!sock.user || arena.deck === undefined || acard === undefined)) arena = false;
@@ -262,3 +261,4 @@ module.exports = function(arena, acard, startempty) {
 	deckimport.setSelectionRange(0, 333);
 	processDeck();
 }
+var startMenu = require("./MainMenu");

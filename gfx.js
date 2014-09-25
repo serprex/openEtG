@@ -47,13 +47,6 @@ function load(preload, postload){
 	preLoader.load();
 }
 var caimgcache = {}, crimgcache = {}, wsimgcache = {}, artcache = {}, artimagecache = {};
-var shinyFilter = new PIXI.ColorMatrixFilter();
-shinyFilter.matrix = [
-	0,1,0,0,
-	0,0,1,0,
-	1,0,0,0,
-	0,0,0,1,
-];
 function makeArt(card, art, oldrend) {
 	var rend = oldrend || new PIXI.RenderTexture(132, 256);
 	var template = new PIXI.DisplayObjectContainer();
@@ -217,4 +210,11 @@ if (typeof PIXI !== "undefined"){
 	exports.getArt = getArt;
 	exports.getCardImage = getCardImage;
 	exports.getWeaponShieldImage = getWeaponShieldImage;
+	var shinyFilter = new PIXI.ColorMatrixFilter();
+	shinyFilter.matrix = [
+		0,1,0,0,
+		0,0,1,0,
+		1,0,0,0,
+		0,0,0,1,
+	];
 }

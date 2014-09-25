@@ -2,6 +2,7 @@
 var px = require("./px");
 var sock = require("./sock");
 var aiDecks = require("./Decks");
+var mkAi = require("./mkAi");
 var startMenu = require("./MainMenu");
 function mkDaily(type) {
 	if (type < 3) {
@@ -9,14 +10,14 @@ function mkDaily(type) {
 			var dataNext = type == 1 ?
 				{ goldreward: 75, endurance: 2, cost: 0, daily: 1, cardreward: "", noheal: true} :
 				{ goldreward: 200, endurance: 2, cost: 0, daily: 2, cardreward: "" };
-			var game = aiDecks.mkAi(type == 1 ? 0 : 2, type)();
+			var game = mkAi.mkAi(type == 1 ? 0 : 2, type)();
 			game.addData(dataNext);
 			game.dataNext = dataNext;
 		}
 	}
 	else {
 		return function() {
-			var game = aiDecks.mkPremade(type == 3 ? "mage" : "demigod", type)();
+			var game = mkAi.mkPremade(type == 3 ? "mage" : "demigod", type)();
 			game.addonreward = type == 3 ? 30 : 100;
 			sock.userExec("donedaily", { daily: type });
 		}

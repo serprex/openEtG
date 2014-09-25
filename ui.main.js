@@ -242,7 +242,7 @@ function challengeClick(foe) {
 	if (Cards.loaded) {
 		var deck = sock.getDeck();
 		if (etgutil.decklength(deck) < (sock.user ? 31 : 11)){
-			startEditor();
+			require("./views/Editor")();
 			return;
 		}
 		var gameData = {};
@@ -272,7 +272,7 @@ function libraryClick() {
 function aiClick() {
 	var deck = sock.getDeck(), aideckcode = aideck.value;
 	if (etgutil.decklength(deck) < 11 || etgutil.decklength(aideckcode) < 11) {
-		startEditor();
+		require("./views/Editor")();
 		return;
 	}
 	var gameData = { deck: aideckcode, urdeck: deck, seed: Math.random() * etgutil.MAX_INT, foename: "Custom", cardreward: "" };

@@ -4,7 +4,7 @@ var gfx = require("./gfx");
 var chat = require("./chat");
 var sock = require("./sock");
 var etgutil = require("./etgutil");
-var aiDecks = require("./Decks");
+var mkAi = require("./mkAi");
 module.exports = function(game) {
 	var victoryui = px.mkView();
 	var winner = game.winner == game.player1;
@@ -59,10 +59,10 @@ module.exports = function(game) {
 		if (e.keyCode == 32) bexit.click();
 		else if (e.keyCode == 87 && !game.quest && game.daily === undefined){
 			switch(game.level){
-			case 0:aiDecks.mkAi(0)();break;
-			case 1:aiDecks.mkPremade("mage")();break;
-			case 2:aiDecks.mkAi(2)();break;
-			case 3:aiDecks.mkPremade("demigod")();break;
+			case 0:mkAi.mkAi(0)();break;
+			case 1:mkAi.mkPremade("mage")();break;
+			case 2:mkAi.mkAi(2)();break;
+			case 3:mkAi.mkPremade("demigod")();break;
 			case 4:sock.userEmit("foearena", {lv:0});break;
 			case 5:sock.userEmit("foearena", {lv:1});break;
 			}
