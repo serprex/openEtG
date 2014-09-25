@@ -1,6 +1,7 @@
 "use strict";
 var ui = require("./uiutil");
 var Cards = require("./Cards");
+var etgutil = require("./etgutil");
 exports.loaded = false;
 function load(preload, postload){
 	var singles = ["assets/gold.png", "assets/button.png", "assets/bg_default.png",
@@ -89,9 +90,17 @@ function makeArt(card, art, oldrend) {
 }
 function getArtImage(code, cb){
 	if (!(code in artimagecache)){
-		var loader = new PIXI.ImageLoader("Cards/" + code + ".png");
+		var redcode = code;
+		if (artpool){
+			while (!(redcode in artpool) && redcode >= "6qo"){
+				redcode = etgutil[code >= "g00"?"asShiny":"asUpped"](code, false);
+			}
+			if (!(redcode in artpool)) return cb(artimagecache[code] = undefined);
+			else if (redcode in artimagecache) return cb(artimagecache[code] = artimagecache[redcode]);
+		}
+		var loader = new PIXI.ImageLoader("Cards/" + redcode + ".png");
 		loader.addEventListener("loaded", function() {
-			return cb(artimagecache[code] = PIXI.Texture.fromFrame("Cards/" + code + ".png"));
+			return cb(artimagecache[code] = PIXI.Texture.fromFrame("Cards/" + redcode + ".png"));
 		});
 		loader.load();
 	}
@@ -202,7 +211,13 @@ function getWeaponShieldImage(code) {
 		});
 	}
 }
+var artpool;
 exports.preloadCardArt = function(art){
+	var pool = {};
+	for(var i=0; i<art.length; i+=3){
+		pool[art.substr(i, 3)] = true;
+	}
+	artpool = pool;
 	(function loadArt(i){
 		if (i == art.length) return;
 		var code = art.substr(i, 3);
