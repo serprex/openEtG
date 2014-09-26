@@ -16,7 +16,7 @@ require("./etg.client").loadcards(function() {
 		[["mega plini", "http://elementscommunity.org/forum/profile/?u=202"], ["5ig"]],
 		[["moomoose", "http://elementscommunity.org/forum/profile/?u=40"], ["5i6"]],
 		[["OdinVanguard", "http://elementscommunity.org/forum/profile/?u=232"],
-			["4se", "4sf", "4t4", "4t5", "4td", "4vf", "4vk", "4vo", "52i", "52m", "52o", "52p", "52s", "530", "55t", "565", "594", "5c5", "5cr", "5cs", "5f4", "5f6", "5fg", "5fj", "5i8", "5ii", "5lq", "5lu", "5oi", "5on", "5or", "5ri", "5ru", "5s1", "5s6", "5up",
+			["4se", "4sf", "4t4", "4t5", "4td", "4vf", "4vk", "4vo", "52i", "52m", "52o", "52p", "52s", "530", "538", "55t", "565", "594", "5c5", "5cr", "5cs", "5f4", "5f6", "5fg", "5fj", "5i8", "5ii", "5lq", "5lu", "5oi", "5on", "5or", "5ri", "5ru", "5s1", "5s6", "5up",
 			"5ur", "5us", "5v0", "5v1", "5vc", "61u", "623", "628", "629", "62d", "716"]],
 		[["pepokish", "http://theowlettenest.com"],
 			["52g", "58o", "5bv", "5f0", "5i4", "5ie", "5l8", "5lb", "5oj"]],

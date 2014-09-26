@@ -677,7 +677,7 @@ function startMatch(game, foeDeck) {
 			px.maybeSetText(damagetext[j], !cloakgfx.visible && game.expectedDamage[j] ? "Next HP loss: " + game.expectedDamage[j] : "");
 		}
 		Effect.next(cloakgfx.visible);
-	}, true);
+	});
 }
 function deckPower(deck, amount) {
 	if (amount > 1){

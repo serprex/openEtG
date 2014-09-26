@@ -3,8 +3,8 @@ var gfx = require("./gfx");
 var ui = require("./uiutil");
 var etg = require("./etg");
 var Cards = require("./Cards");
-var renderer = new PIXI.autoDetectRenderer(900, 600, leftpane), domview;
-var realStage = new PIXI.Stage(0x336699, true);
+var renderer = new PIXI.autoDetectRenderer(900, 600, leftpane, true), domview;
+var realStage = new PIXI.Stage(0, true);
 exports.realStage = realStage;
 exports.refreshRenderer = function(stage, animCb, dontrender) {
 	if (realStage.children.length > 1){
@@ -22,14 +22,12 @@ exports.refreshRenderer = function(stage, animCb, dontrender) {
 		realStage.addChild(stage);
 		realStage.next = animCb;
 		if (stage.dom) stage.dom.style.display = "inline";
-		// if (!dontrender) renderer.render(realStage);
 	}else{
-		renderer.view.style.display = "none";
+		stage.style.width = "900px";
+		stage.style.height = "600px";
+		stage.style.position = "absolute";
 		document.body.appendChild(domview = stage);
-		domview.style.width = "900px";
-		domview.style.height = "600px";
-		domview.style.position = "absolute";
-		domview.style.background = "url('assets/bg_default.png')";
+		renderer.view.style.display = "none";
 	}
 }
 exports.next = function(){
