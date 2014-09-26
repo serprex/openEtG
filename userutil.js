@@ -80,5 +80,8 @@ exports.addbound = function(data, user) {
 	user.accountbound = etgutil.mergedecks(user.accountbound, data.c);
 }
 exports.donedaily = function(data, user) {
+	if (data.daily == 6 && !(user.daily&64)){
+		user.pool = etgutil.addcard(user.pool, data.c);
+	}
 	user.daily |= (1 << data.daily);
 }

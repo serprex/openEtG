@@ -46,9 +46,9 @@ module.exports = function(){
 	if (sock.user.daily == 63){
 		var button = px.mkButton(50, 280, "Nymph!");
 		px.setClick(button, function(){
+			var etg = require("./etg");
 			var nymph = etg.NymphList[etg.PlayerRng.uptoceil(12)];
-			sock.userExec("addcards", {c: "01"+nymph});
-			sock.userExec("donedaily", {daily: 6});
+			sock.userExec("donedaily", {daily: 6, c: nymph});
 			startMenu(nymph);
 		});
 		coloui.addChild(button);
