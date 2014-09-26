@@ -14,31 +14,45 @@ exports.refreshRenderer = function(stage, animCb, dontrender) {
 	}
 	if (stage instanceof PIXI.DisplayObject) stage = {view: stage};
 	stage.next = animCb;
-	if (stage.div instanceof Array){
-		var div = document.createElement("div");
-		div.style.width = "900px";
-		div.style.height = "600px";
-		div.style.position = "absolute";
-		stage.div.forEach(function(info){
-			var ele;
-			if (typeof info[2] === "string"){
-				ele = document.createElement("span");
-				ele.appendChild(document.createTextNode(info[2]));
-			}else ele = info[2];
-			ele.style.left = info[0] + "px";
-			ele.style.top = info[1] + "px";
-			ele.style.position = "absolute";
-			div.appendChild(ele);
-		});
-		stage.div = div;
+	if (stage.div){
+		for(var id in stage.div){
+			var div = document.createElement("div");
+			div.id = id;
+			div.style.width = "0px";
+			div.style.height = "0px";
+			div.style.position = "absolute";
+			stage.div[id].forEach(function(info){
+				var ele;
+				if (typeof info[2] === "string"){
+					ele = document.createElement("span");
+					ele.style.whiteSpace = "nowrap";
+					ele.appendChild(document.createTextNode(info[2]));
+				}else if (info[2] instanceof Array){
+					ele = document.createElement("input");
+					ele.type = "button";
+					ele.value = info[2][0];
+					if (info[2][1]) ele.addEventListener("click", info[2][1]);
+					if (info[2][2]) ele.addEventListener("mouseover", info[2][2]);
+				}else ele = info[2];
+				ele.style.left = info[0] + "px";
+				ele.style.top = info[1] + "px";
+				ele.style.position = "absolute";
+				div.appendChild(ele);
+			});
+			stage.div[id] = div;
+		}
 	}
 	if (curStage.dom != stage.dom && curStage.dom) curStage.dom.style.display = "none";
 	if (stage.dom) stage.dom.style.display = "inline";
 	if (stage.div){
-		document.body.appendChild(stage.div);
+		for(var id in stage.div){
+			document.body.appendChild(stage.div[id]);
+		}
 	}
 	if (curStage.div){
-		document.body.removeChild(curStage.div);
+		for(var id in curStage.div){
+			document.body.removeChild(curStage.div[id]);
+		}
 	}
 	if (stage.view){
 		renderer.view.style.display = "inline";
@@ -85,18 +99,17 @@ exports.toggleB = function() {
 		arguments[i].buttonMode ^= true;
 	}
 }
-exports.mkView = function(){
+exports.mkView = function(mouseover){
 	var view = new PIXI.DisplayObjectContainer();
 	view.interactive = true;
-	view.hitArea = realStage.hitArea;
+	if (mouseover){
+		var bg = new PIXI.DisplayObjectContainer();
+		bg.hitArea = realStage.hitArea;
+		bg.mouseover = mouseover;
+		bg.interactive = true;
+		view.addChild(bg);
+	}
 	return view;
-}
-exports.addMouseOverBg = function(view, func) {
-	var bg = new PIXI.DisplayObjectContainer();
-	bg.hitArea = view.hitArea;
-	bg.mouseover = func;
-	bg.interactive = true;
-	view.addChild(bg);
 }
 exports.mkBgRect = function(){
 	var g = new PIXI.Graphics();

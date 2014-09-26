@@ -8,22 +8,17 @@ module.exports = function(info) {
 		chat("??");
 		return;
 	}
-	var stage = [];
+	var stage = [[8, 300, ["Exit", require("./MainMenu")]]];
 	for (var i = 0;i < info.length; i++) {
 		var data = info[i], y = 50 + i * 24;
-		stage.push([120, y, (i+1) + "  " + data[0]]);
-		stage.push([120, y, (i+1) + "  " + data[0]]);
-		stage.push([350, y, data[1]]);
-		stage.push([410, y, data[2] + "-" + data[3]]);
-		stage.push([500, y, data[4].toString()]);
+		stage.push([120, y, (i+1) + "  " + data[0]],
+			[120, y, (i+1) + "  " + data[0]],
+			[350, y, data[1]],
+			[410, y, data[2] + "-" + data[3]],
+			[500, y, data[4].toString()]);
 		if (data[5] in Cards.Codes){
 			stage.push([600, y, Cards.Codes[data[5]].name]);
 		}
 	}
-	var bret = document.createElement("input");
-	bret.type = "button";
-	bret.value = "Exit";
-	bret.addEventListener("click", require("./MainMenu"));
-	stage.push([8, 300, bret]);
-	px.refreshRenderer({div: stage});
+	px.refreshRenderer({div: {top20: stage}});
 }

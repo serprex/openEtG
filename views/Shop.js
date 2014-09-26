@@ -163,5 +163,6 @@ module.exports = function() {
 			}
 		},
 	};
+	packmulti.value = "";
 	px.refreshRenderer({view: storeui, dom: packmulti});
 }

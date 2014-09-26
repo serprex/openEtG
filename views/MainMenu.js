@@ -46,8 +46,7 @@ module.exports = function(nymph) {
 	];
 	var tipNumber = etg.PlayerRng.upto(tipjar.length);
 
-	var menuui = px.mkView();
-	px.addMouseOverBg(menuui, function() {
+	var menuui = px.mkView(function() {
 		tinfo.setText(sock.user ? "Tip: " + tipjar[tipNumber] + "." : "To register, just type desired username & password in the fields to the right, then click 'Login'.");
 	});
 	menuui.addChild(px.mkBgRect(
@@ -73,12 +72,10 @@ module.exports = function(nymph) {
 		menuui.addChild(tierText);
 	}
 
-	var bnextTip = px.mkButton(777, 50, "Next tip");
-	px.setClick(bnextTip, function() {
+	var buttons = [], utons = [[777, 50, ["Next tip", function() {
 		tipNumber = (tipNumber+1) % tipjar.length;
 		tinfo.setText("Tip: " + tipjar[tipNumber] + ".");
-	});
-	menuui.addChild(bnextTip);
+	}]]];
 
 	var tstats = new px.MenuText(775, 101, (sock.user ? "$" + sock.user.gold + "\nAI w/l\n" + sock.user.aiwins + "/" + sock.user.ailosses + "\n\nPvP w/l\n" + sock.user.pvpwins + "/" + sock.user.pvplosses : "Sandbox"));
 	menuui.addChild(tstats);
@@ -86,100 +83,26 @@ module.exports = function(nymph) {
 	var tinfo = new px.MenuText(50, 26, "", 800);
 	menuui.addChild(tinfo);
 
-	var bai0 = px.mkButton(50, 100, "Commoner", function() {
-		tinfo.setText("Commoners have no upgraded cards & mostly common cards.\nCost: $0");
-	});
-	px.setClick(bai0, mkAi.mkAi(0));
-	menuui.addChild(bai0);
-
-	var bai1 = px.mkButton(150, 100, "Mage", function() {
-		tinfo.setText("Mages have preconstructed decks with a couple rares.\nCost: $5");
-	});
-	px.setClick(bai1, mkAi.mkPremade("mage"));
-	menuui.addChild(bai1);
-
-	var bai2 = px.mkButton(250, 100, "Champion", function() {
-		tinfo.setText("Champions have some upgraded cards.\nCost: $10");
-	});
-	px.setClick(bai2, mkAi.mkAi(2));
-	menuui.addChild(bai2);
-
-	var bai3 = px.mkButton(350, 100, "Demigod", function() {
-		tinfo.setText("Demigods are extremely powerful. Come prepared for anything.\nCost: $20");
-	});
-	px.setClick(bai3, mkAi.mkPremade("demigod"));
-	menuui.addChild(bai3);
-
-	var bquest = px.mkButton(50, 145, "Quests", function() {
-		tinfo.setText("Go on an adventure!");
-	});
-	px.setClick(bquest, require("./QuestMain"));
-	menuui.addChild(bquest);
-
-	var bcolosseum = px.mkButton(150, 145, "Colosseum", function() {
-		tinfo.setText("Try some daily challenges in the Colosseum!");
-	});
-	px.setClick(bcolosseum, require("./Colosseum"));
-	menuui.addChild(bcolosseum);
-
-	var bedit = px.mkButton(50, 300, "Editor", function() {
-		tinfo.setText("Edit your deck, as well as submit an arena deck.");
-	});
-	px.setClick(bedit, require("./Editor"));
-	menuui.addChild(bedit);
-
-	var bshop = px.mkButton(150, 300, "Shop", function() {
-		tinfo.setText("Buy booster packs which contain cards from the elements you choose.");
-	});
-	px.setClick(bshop, require("./Shop"));
-	menuui.addChild(bshop);
-
-	var bupgrade = px.mkButton(250, 300, "Sell/Upgrade", function() {
-		tinfo.setText("Upgrade or sell cards.");
-	});
-	px.setClick(bupgrade, require("./Upgrade"));
-	menuui.addChild(bupgrade);
-
-	var blogout = px.mkButton(777, 246, "Logout", function() {
-		tinfo.setText("Click here to log out.")
-	});
-	px.setClick(blogout, function() {
-		sock.userEmit("logout");
-		logout();
-	});
-	menuui.addChild(blogout);
-
-	//delete account button
-	var bdelete = px.mkButton(777, 550, "Wipe Account", function() {
-		tinfo.setText("Click here to permanently remove your account.")
-	});
-	px.setClick(bdelete, function() {
-		if (foename.value == sock.user.name + "yesdelete") {
-			sock.userEmit("delete");
-			logout();
-		} else {
-			chat("Input '" + sock.user.name + "yesdelete' into Challenge to delete your account");
-		}
-	});
-	menuui.addChild(bdelete);
-
-	var usertoggle = [bquest, bcolosseum, bshop, bupgrade, blogout, bdelete, bnextTip];
+	buttons.push(
+		[50, 100, ["Commoner", mkAi.mkAi(0), function() {
+			tinfo.setText("Commoners have no upgraded cards & mostly common cards.\nCost: $0");
+		}]],
+		[150, 100, ["Mage", mkAi.mkPremade("mage"), function() {
+			tinfo.setText("Mages have preconstructed decks with a couple rares.\nCost: $5");
+		}]],
+		[250, 100, ["Champion", mkAi.mkAi(2), function() {
+			tinfo.setText("Champions have some upgraded cards.\nCost: $10");
+		}]],
+		[350, 100, ["Demigod", mkAi.mkPremade("demigod"), function() {
+			tinfo.setText("Demigods are extremely powerful. Come prepared for anything.\nCost: $20");
+		}]],
+		[50, 300, ["Editor", require("./Editor"), function() {
+			tinfo.setText("Edit your deck, as well as submit an arena deck.");
+		}]]
+	);
 	for (var i=0; i<2; i++){
-		var baia = px.mkButton(50, 200+i*45, "Arena AI", (function(cost){return function() {
-			tinfo.setText("In the arena you will face decks from other players.\nCost: $" + cost);
-		}})(userutil.arenaCost(i)));
-		menuui.addChild(baia);
-		var binfoa = px.mkButton(150, 200+i*45, "Arena Info", function() {
-			tinfo.setText("Check how your arena deck is doing.");
-		});
-		menuui.addChild(binfoa);
-		var btopa = px.mkButton(250, 200+i*45, "Arena T20", function() {
-			tinfo.setText("See who the top players in arena are right now.");
-		});
-		menuui.addChild(btopa);
-		usertoggle.push(baia, binfoa);
 		(function(lvi){
-			px.setClick(baia, function() {
+			function arenaAi() {
 				if (Cards.loaded) {
 					if (etgutil.decklength(sock.getDeck()) < 31) {
 						startEditor();
@@ -193,34 +116,48 @@ module.exports = function(nymph) {
 					sock.userEmit("foearena", lvi);
 					menuui.removeChild(this);
 				}
-			});
-			px.setClick(binfoa, function() {
+			}
+			function arenaInfo() {
 				if (Cards.loaded) {
 					sock.userEmit("arenainfo", lvi);
 					menuui.removeChild(this);
 				}
-			});
-			px.setClick(btopa, function() {
+			}
+			function arenaTop() {
 				if (Cards.loaded) {
 					sock.emit("arenatop", lvi);
 					menuui.removeChild(this);
 				}
-			});
+			}
+			var y = 200+i*45;
+			utons.push(
+				[50, y, ["Arena AI", arenaAi, function() {
+					tinfo.setText("In the arena you will face decks from other players.\nCost: $" + userutil.arenaCost(lvi.lv));
+				}]],
+				[150, y, ["Arena Info", arenaInfo, function() {
+					tinfo.setText("Check how your arena deck is doing.");
+				}]]
+			);
+			buttons.push(
+				[250, y, ["Arena T20", arenaTop, function() {
+					tinfo.setText("See who the top players in arena are right now.");
+				}]]
+			);
 		})({lv:i});
 	}
 
-	if (!sock.user) px.toggleB.apply(null, usertoggle);
-	else if (sock.user.oracle || typeof nymph === "string") {
+	if ((sock.user && sock.user.oracle) || typeof nymph === "string") {
 		var oracle = new PIXI.Sprite(gfx.getArt(nymph || sock.user.oracle));
 		oracle.position.set(450, 100);
 		menuui.addChild(oracle);
 		delete sock.user.oracle;
 	}
 
-	function logout() {
+	function logout(cmd) {
+		sock.userEmit(cmd);
 		lbloffline.style.display = lblwantpvp.style.display = "none";
 		sock.user = undefined;
-		px.toggleB.apply(null, usertoggle);
+		document.getElementById("usermenu").style.display = "none";
 		tstats.setText("Sandbox");
 		if (oracle) {
 			menuui.removeChild(oracle);
@@ -240,5 +177,38 @@ module.exports = function(nymph) {
 		arenainfo: require("./ArenaInfo"),
 		arenatop: require("./ArenaTop"),
 	};
-	px.refreshRenderer({view: menuui, dom: mainmenu});
+	var div = {normmenu: buttons};
+	if (sock.user){
+		utons.push(
+			[50, 145, ["Quests", require("./QuestMain"), function() {
+				tinfo.setText("Go on an adventure!");
+			}]],
+			[150, 145, ["Colosseum", require("./Colosseum"), function() {
+				tinfo.setText("Try some daily challenges in the Colosseum!");
+			}]],
+			[150, 300, ["Shop", require("./Shop"), function() {
+				tinfo.setText("Buy booster packs which contain cards from the elements you choose.");
+			}]],
+			[250, 300, ["Sell/Upgrade", require("./Upgrade"), function() {
+				tinfo.setText("Upgrade or sell cards.");
+			}]],
+			[777, 246, ["Logout", logout.bind(null, "logout"), function() {
+				tinfo.setText("Click here to log out.")
+			}]],
+			[777, 550, ["Wipe Account",
+				function() {
+					if (foename.value == sock.user.name + "yesdelete") {
+						logout("delete");
+					} else {
+						chat("Input '" + sock.user.name + "yesdelete' into Challenge to delete your account");
+					}
+				},
+				function() {
+					tinfo.setText("Click here to permanently remove your account.");
+				}
+			]]
+		);
+		div.usermenu = utons;
+	}
+	px.refreshRenderer({view: menuui, div: div, dom: mainmenu});
 }

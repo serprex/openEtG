@@ -9,8 +9,7 @@ function startQuest(questname) {
 	}
 }
 module.exports = function(area) {
-	var questui = px.mkView();
-	px.addMouseOverBg(questui, function() {
+	var questui = px.mkView(function() {
 		tinfo.setText("");
 	});
 	questui.addChild(px.mkBgRect(9, 9, 880, 111));

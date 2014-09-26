@@ -4,8 +4,7 @@ var gfx = require("./gfx");
 var sock = require("./sock");
 var Quest = require("./Quest");
 module.exports = function(){
-	var questui = px.mkView();
-	px.addMouseOverBg(questui, function() {
+	var questui = px.mkView(function() {
 		tinfo.setText("Welcome to Potatotal Island. The perfect island for adventuring!");
 	});
 	questui.addChild(px.mkBgRect(9, 9, 880, 111));
