@@ -108,25 +108,25 @@ module.exports = function(nymph) {
 						startEditor();
 						return;
 					}
-					var cost = userutil.arenaCost(lvi.i);
+					var cost = userutil.arenaCost(lvi.lv);
 					if (sock.user.gold < cost) {
 						chat("Requires " + cost + "\u00A4");
 						return;
 					}
 					sock.userEmit("foearena", lvi);
-					menuui.removeChild(this);
+					this.style.display = "none";
 				}
 			}
 			function arenaInfo() {
 				if (Cards.loaded) {
 					sock.userEmit("arenainfo", lvi);
-					menuui.removeChild(this);
+					this.style.display = "none";
 				}
 			}
 			function arenaTop() {
 				if (Cards.loaded) {
 					sock.emit("arenatop", lvi);
-					menuui.removeChild(this);
+					this.style.display = "none";
 				}
 			}
 			var y = 200+i*45;

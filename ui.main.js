@@ -26,6 +26,7 @@ var sock = require("./sock");
 var chat = require("./chat");
 var Cards = require("./Cards");
 var etgutil = require("./etgutil");
+var userutil = require("./userutil");
 var startMenu = require("./views/MainMenu");
 var sockEvents = {
 	challenge:function(data) {
@@ -100,7 +101,7 @@ var sockEvents = {
 	},
 	foearena:function(data) {
 		aideck.value = data.deck;
-		var game = require("./Match")({ deck: data.deck, urdeck: sock.getDeck(), seed: data.seed,
+		var game = require("./views/Match")({ deck: data.deck, urdeck: sock.getDeck(), seed: data.seed,
 			p2hp: data.hp, foename: data.name, p2drawpower: data.draw, p2markpower: data.mark, arena: data.name, level: 4+data.lv }, true);
 		game.cost = userutil.arenaCost(data.lv);
 		sock.user.gold -= game.cost;
