@@ -3,38 +3,56 @@ var gfx = require("./gfx");
 var ui = require("./uiutil");
 var etg = require("./etg");
 var Cards = require("./Cards");
-var renderer = new PIXI.autoDetectRenderer(900, 600, leftpane, true), domview;
-var realStage = new PIXI.Stage(0, true);
+var renderer = new PIXI.autoDetectRenderer(900, 600, leftpane, true);
+var realStage = new PIXI.Stage(0, true), curStage = {};
 exports.realStage = realStage;
 exports.refreshRenderer = function(stage, animCb, dontrender) {
 	if (realStage.children.length > 1){
 		var oldstage = realStage.children[1];
-		if (oldstage.dom) oldstage.dom.style.display = "none";
 		if (oldstage.endnext) oldstage.endnext();
 		realStage.removeChildAt(1);
 	}
-	if (stage instanceof PIXI.DisplayObject){
-		if (domview){
-			renderer.view.style.display = "inline";
-			document.body.removeChild(domview);
-			domview = undefined;
-		}
-		realStage.addChild(stage);
-		realStage.next = animCb;
-		if (stage.dom) stage.dom.style.display = "inline";
-	}else{
-		stage.style.width = "900px";
-		stage.style.height = "600px";
-		stage.style.position = "absolute";
-		document.body.appendChild(domview = stage);
+	if (stage instanceof PIXI.DisplayObject) stage = {view: stage};
+	stage.next = animCb;
+	if (stage.div instanceof Array){
+		var div = document.createElement("div");
+		div.style.width = "900px";
+		div.style.height = "600px";
+		div.style.position = "absolute";
+		stage.div.forEach(function(info){
+			var ele;
+			if (typeof info[2] === "string"){
+				ele = document.createElement("span");
+				ele.appendChild(document.createTextNode(info[2]));
+			}else ele = info[2];
+			ele.style.left = info[0] + "px";
+			ele.style.top = info[1] + "px";
+			ele.style.position = "absolute";
+			div.appendChild(ele);
+		});
+		stage.div = div;
+	}
+	if (curStage.dom != stage.dom && curStage.dom) curStage.dom.style.display = "none";
+	if (stage.dom) stage.dom.style.display = "inline";
+	if (stage.div){
+		document.body.appendChild(stage.div);
+	}
+	if (curStage.div){
+		document.body.removeChild(curStage.div);
+	}
+	if (stage.view){
+		renderer.view.style.display = "inline";
+		realStage.addChild(stage.view);
+	} else {
 		renderer.view.style.display = "none";
 	}
+	curStage = stage;
 }
 exports.next = function(){
-	if (!domview){
-		if (realStage.next) {
-			realStage.next();
-		}
+	if (curStage.next){
+		curStage.next();
+	}
+	if (curStage.view){
 		renderer.render(realStage);
 	}
 }

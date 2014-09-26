@@ -163,6 +163,5 @@ module.exports = function() {
 			}
 		},
 	};
-	storeui.dom = packmulti;
-	px.refreshRenderer(storeui);
+	px.refreshRenderer({view: storeui, dom: packmulti});
 }

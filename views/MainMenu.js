@@ -240,7 +240,5 @@ module.exports = function(nymph) {
 		arenainfo: require("./ArenaInfo"),
 		arenatop: require("./ArenaTop"),
 	};
-	menuui.dom = mainmenu;
-
-	px.refreshRenderer(menuui);
+	px.refreshRenderer({view: menuui, dom: mainmenu});
 }

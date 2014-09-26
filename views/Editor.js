@@ -250,8 +250,7 @@ module.exports = function(arena, acard, startempty) {
 	var cardArt = new PIXI.Sprite(gfx.nopic);
 	cardArt.position.set(734, 8);
 	editorui.addChild(cardArt);
-	editorui.dom = deckimport;
-	px.refreshRenderer(editorui, function() {
+	px.refreshRenderer({view: editorui, dom: deckimport}, function() {
 		cardArt.visible = false;
 		var mpos = px.getMousePos();
 		cardsel.next(cardpool, cardminus, mpos);
