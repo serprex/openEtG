@@ -98,6 +98,13 @@ var sockEvents = {
 	cardart:function(data) {
 		if (preart.checked) gfx.preloadCardArt(data.art);
 	},
+	foearena:function(data) {
+		aideck.value = data.deck;
+		var game = require("./Match")({ deck: data.deck, urdeck: sock.getDeck(), seed: data.seed,
+			p2hp: data.hp, foename: data.name, p2drawpower: data.draw, p2markpower: data.mark, arena: data.name, level: 4+data.lv }, true);
+		game.cost = userutil.arenaCost(data.lv);
+		sock.user.gold -= game.cost;
+	},
 };
 sock.et.on("open", function(){
 	chat("Connected");
