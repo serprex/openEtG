@@ -155,7 +155,7 @@ module.exports = function() {
 				popbooster.visible = true;
 			}else{
 				var link = document.createElement("a");
-				link.href = "http://etg.dek.im/deck/" + data.cards;
+				link.href = "deck/" + data.cards;
 				link.target = "_blank";
 				link.appendChild(document.createTextNode(data.cards));
 				chat.addSpan(link);
@@ -163,6 +163,8 @@ module.exports = function() {
 			}
 		},
 	};
-	packmulti.value = "";
-	px.refreshRenderer({view: storeui, dom: packmulti});
+	var packmulti = document.createElement("input");
+	packmulti.style.width = "64px";
+	packmulti.placeholder = "Bulk";
+	px.refreshRenderer({view: storeui, div: {packmulti: [[777, 184, packmulti]]}});
 }

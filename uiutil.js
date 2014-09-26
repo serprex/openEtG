@@ -1,6 +1,7 @@
 "use strict";
 var etg = require("./etg");
 var gfx = require("./gfx");
+var options = require("./options");
 exports.elecols = [0xa99683, 0xaa5999, 0x777777, 0x996633, 0x5f4930, 0x50a005, 0xcc6611, 0x205080, 0xa9a9a9, 0x337ddd, 0xccaa22, 0x333333, 0x77bbdd];
 function lighten(c) {
 	return ((c & 255) + 255 >> 1) | (((c >> 8) & 255) + 255 >> 1 << 8) | (((c >> 16) & 255) + 255 >> 1 << 16);
@@ -218,10 +219,10 @@ function parseInput(data, key, value, limit) {
 		data[key] = Math.min(value, limit || Infinity);
 }
 function parsepvpstats(data){
-	parseInput(data, "p1hp", pvphp.value);
-	parseInput(data, "p1drawpower", pvpdraw.value, 8);
-	parseInput(data, "p1markpower", pvpmark.value, 1188);
-	parseInput(data, "p1deckpower", pvpdeck.value);
+	parseInput(data, "p1hp", options.pvphp);
+	parseInput(data, "p1drawpower", options.pvpdraw, 8);
+	parseInput(data, "p1markpower", options.pvpmark, 1188);
+	parseInput(data, "p1deckpower", options.pvpdeck);
 }
 function parseaistats(data){
 	parseInput(data, "p2hp", aihp.value);

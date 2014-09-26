@@ -1,9 +1,16 @@
+var chat = require("./chat");
 var etgutil = require("./etgutil");
+var options = require("./options");
 var userutil = require("./userutil");
 var socket = eio({hostname: location.hostname, port: 13602});
 socket.on("close", function(){
 	require("./chat")("Reconnecting in 99ms");
 	setTimeout(socket.open.bind(socket), 99);
+});
+socket.on("open", function(){
+	chat("Connected");
+	if (options.offline) exports.emit("showoffline", {hide: options.offline});
+	if (options.wantpvp) exports.emit("wantingpvp", {want: options.wantpvp});
 });
 exports.et = socket;
 exports.user = undefined;

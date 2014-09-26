@@ -1,11 +1,28 @@
 "use strict";
 var gfx = require("./gfx");
-var ui = require("./uiutil");
 var etg = require("./etg");
+var ui = require("./uiutil");
 var Cards = require("./Cards");
 var renderer = new PIXI.autoDetectRenderer(900, 600, leftpane, true);
 var realStage = new PIXI.Stage(0, true), curStage = {};
 exports.realStage = realStage;
+function animate() {
+	setTimeout(requestAnimate, 40);
+	exports.next();
+}
+function requestAnimate() { requestAnimFrame(animate); }
+exports.load = function(){
+	gfx.load(function(loadingScreen){
+		realStage.addChild(loadingScreen);
+		curStage = {view: loadingScreen};
+		requestAnimate();
+	}, function(){
+		ui.playMusic("openingMusic");
+		realStage.removeChildren();
+		realStage.addChild(new PIXI.Sprite(gfx.bg_default));
+		require("./views/MainMenu")();
+	});
+}
 exports.refreshRenderer = function(stage, animCb, dontrender) {
 	if (realStage.children.length > 1){
 		var oldstage = realStage.children[1];
@@ -18,14 +35,10 @@ exports.refreshRenderer = function(stage, animCb, dontrender) {
 		for(var id in stage.div){
 			var div = document.createElement("div");
 			div.id = id;
-			div.style.width = "0px";
-			div.style.height = "0px";
-			div.style.position = "absolute";
 			stage.div[id].forEach(function(info){
 				var ele;
 				if (typeof info[2] === "string"){
 					ele = document.createElement("span");
-					ele.style.whiteSpace = "nowrap";
 					ele.appendChild(document.createTextNode(info[2]));
 				}else if (info[2] instanceof Array){
 					ele = document.createElement("input");

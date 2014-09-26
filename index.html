@@ -41,49 +41,6 @@
 			position:absolute;
 			display:none;
 		}
-		#mainmenu{ display:none; }
-		#lblhideright{
-			left:50px;
-			top:400px;
-			position:absolute;
-		}
-		#lblwantpvp{
-			left:175px;
-			top:400px;
-			position:absolute;
-			display:none;
-		}
-		#lbloffline{
-			left:300px;
-			top:400px;
-			position:absolute;
-			display:none;
-		}
-		#lblsound{
-			left:50px;
-			top:445px;
-			position:absolute;
-		}
-		#lblmusic{
-			left:175px;
-			top:445px;
-			position:absolute;
-		}
-		#lblstats{
-			left:300px;
-			top:445px;
-			position:absolute;
-		}
-		#lblpreart{
-			left:425px;
-			top:445px;
-			position:absolute;
-		}
-		#pvpinputs{
-			left:50px;
-			top:500px;
-			position:absolute;
-		}
 		#chatBox{
 			width:350px;
 			height:400px;
@@ -99,13 +56,6 @@
 			resize:none;
 			font-family:Dosis;
 			font-size:14px;
-		}
-		#packmulti{
-			width:64px;
-			left:777px;
-			top:184px;
-			position:absolute;
-			display:none;
 		}
 		.numput{
 			width:32px;
@@ -128,24 +78,6 @@
 		<textarea id="chatinput" placeholder="Chat"></textarea>
 	</div>
 	<input id="deckimport" type="text" placeholder="Deck" onclick="this.setSelectionRange(0, 333)">
-	<input id="packmulti" type="text" placeholder="Bulk">
-	<div id="mainmenu">
-		<label id="lblwantpvp"><input id="wantpvp" type="checkbox">Seeking PvP</label>
-		<label id="lbloffline"><input id="offline" type="checkbox">Appear Offline</label>
-		<label id="lblhideright"><input id="hideright" type="checkbox" onchange="document.getElementById('rightpane').style.display=this.checked?'none':'inline'">Hide Rightpane</label>
-		<label id="lblsound"><input id="enableSound" type="checkbox">Enable sounds</label>
-		<label id="lblmusic"><input id="enableMusic" type="checkbox">Enable music</label>
-		<label id="lblstats"><input id="stats" type="checkbox">Print stats</label>
-		<label id="lblpreart"><input id="preart" type="checkbox">Preload art</label>
-		<div id="pvpinputs">
-			<input id="foename" type="text" placeholder="Challenge">
-			<input id="pvphp" type="text" placeholder="HP" class="numput"><input id="pvpmark" type="text" placeholder="Mark" class="numput"><input id="pvpdeck" type="text" placeholder="Deck" class="numput"><input id="pvpdraw" type="text" placeholder="Draw" class="numput"><br><br>
-			<input id="challenge" type="button" value="PvP">
-			<input id="trade" type="button" value="Trade">
-			<input id="reward" type="button" value="Reward">
-			<input id="library" type="button" value="Library">
-		</div>
-	</div>
     <script src="ui.main.js"></script>
 </body>
 </html>

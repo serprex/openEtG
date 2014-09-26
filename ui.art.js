@@ -65,5 +65,6 @@ require("./etg.client").loadcards(function() {
 			table.appendChild(tr);
 		}
 	});
-	document.getElementById("codecreds").appendChild(table);
+	document.body.insertBefore(table, document.getElementById("codeimg"));
+	document.body.insertBefore(document.createElement("br"), table);
 });

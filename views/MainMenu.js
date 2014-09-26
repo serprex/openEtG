@@ -2,11 +2,13 @@
 var px = require("./px");
 var etg = require("./etg");
 var gfx = require("./gfx");
+var ui = require("./uiutil");
 var chat = require("./chat");
 var sock = require("./sock");
 var mkAi = require("./mkAi");
 var Cards = require("./Cards");
 var etgutil = require("./etgutil");
+var options = require("./options");
 var userutil = require("./userutil");
 module.exports = function(nymph) {
 	var mainmenu = document.getElementById("mainmenu");
@@ -155,7 +157,6 @@ module.exports = function(nymph) {
 
 	function logout(cmd) {
 		sock.userEmit(cmd);
-		lbloffline.style.display = lblwantpvp.style.display = "none";
 		sock.user = undefined;
 		document.getElementById("usermenu").style.display = "none";
 		tstats.setText("Sandbox");
@@ -170,6 +171,101 @@ module.exports = function(nymph) {
 		arenainfo: require("./ArenaInfo"),
 		arenatop: require("./ArenaTop"),
 	};
+	function challengeClick(foe) {
+		if (Cards.loaded) {
+			var deck = sock.getDeck();
+			if (etgutil.decklength(deck) < (sock.user ? 31 : 11)){
+				require("./views/Editor")();
+				return;
+			}
+			var gameData = {};
+			ui.parsepvpstats(gameData);
+			if (sock.user) {
+				gameData.f = typeof foe === "string" ? foe : foename.value;
+				sock.userEmit("foewant", gameData);
+			}else{
+				gameData.deck = deck;
+				gameData.room = foename.value;
+				sock.emit("pvpwant", gameData);
+			}
+		}
+	}
+	function maybeChallenge(e) {
+		e.cancelBubble = true;
+		if (e.keyCode != 13) return;
+		if (foename.value) {
+			challengeClick();
+		}
+	}
+	function tradeClick(foe) {
+		if (Cards.loaded)
+			sock.userEmit("tradewant", { f: typeof foe === "string" ? foe : foename.value });
+	}
+	function rewardClick() {
+		if (Cards.loaded)
+			sock.userEmit("codesubmit", { code: foename.value });
+	}
+	function libraryClick() {
+		if (Cards.loaded)
+			sock.emit("librarywant", { f: foename.value });
+	}
+	function offlineChange(){
+		sock.emit("showoffline", {hide: options.offline});
+	}
+	function wantpvpChange(){
+		sock.emit("wantingpvp", {want: options.wantpvp});
+	}
+	function soundChange(event) {
+		ui.changeSound(options.enableSound);
+	}
+	function musicChange(event) {
+		ui.changeMusic(options.enableMusic);
+	}
+	function makeCheck(text, change, opt, persist){
+		var lbl = document.createElement("label"), box = document.createElement("input");
+		box.type = "checkbox";
+		if (opt) options.register(opt, box, persist);
+		if (change) box.addEventListener("change", change);
+		lbl.appendChild(box);
+		lbl.appendChild(document.createTextNode(text));
+		return lbl;
+	}
+	function makeInput(placeholder, keydown){
+		var input = document.createElement("input");
+		input.placeholder = placeholder;
+		if (keydown) input.addEventListener("keydown", keydown);
+		else input.className = "numput";
+		return input;
+	}
+	var foename = makeInput("Challenge", maybeChallenge);
+	var pvphp = makeInput("HP"), pvpmark = makeInput("Mark"), pvpdeck = makeInput("Deck"), pvpdraw = makeInput("Draw");
+	var printstats = makeCheck("Print stats", null, "stats"), preloadart = makeCheck("Preload Art", null, "preart");
+	var enableMusic = makeCheck("Enable music", musicChange, "enableMusic"), enableSound = makeCheck("Enable sound", soundChange, "enableSound");
+	var wantpvp = makeCheck("Seeking PvP", wantpvpChange, "wantpvp"), offline = makeCheck("Appear Offline", offlineChange, "offline");
+	options.register("pvphp", pvphp, true);
+	options.register("pvpmark", pvpmark, true);
+	options.register("pvpdeck", pvpdeck, true);
+	options.register("pvpdraw", pvpdraw, true);
+	soundChange();
+	musicChange();
+	buttons.push(
+		[50, 400, makeCheck("Hide Rightpane", function(){document.getElementById('rightpane').style.display=this.checked?'none':'inline'})],
+		[175, 400, wantpvp],
+		[300, 400, offline],
+		[50, 445, enableSound],
+		[175, 445, enableMusic],
+		[300, 445, printstats],
+		[425, 445, preloadart],
+		[50, 500, foename],
+		[200, 500, pvphp],
+		[235, 500, pvpmark],
+		[270, 500, pvpdraw],
+		[305, 500, pvpdeck],
+		[50, 545, ["PvP", challengeClick]],
+		[140, 545, ["Trade", tradeClick]],
+		[230, 545, ["Reward", rewardClick]],
+		[320, 545, ["Library", libraryClick]]
+	);
 	var div = {normmenu: buttons};
 	if (sock.user){
 		utons.push(
@@ -203,5 +299,5 @@ module.exports = function(nymph) {
 		);
 		div.usermenu = utons;
 	}
-	px.refreshRenderer({view: menuui, div: div, dom: mainmenu});
+	px.refreshRenderer({view: menuui, div: div});
 }

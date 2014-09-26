@@ -2,9 +2,10 @@
 var px = require("./px");
 var gfx = require("./gfx");
 var chat = require("./chat");
+var mkAi = require("./mkAi");
 var sock = require("./sock");
 var etgutil = require("./etgutil");
-var mkAi = require("./mkAi");
+var options = require("./options");
 module.exports = function(game) {
 	var victoryui = px.mkView();
 	var winner = game.winner == game.player1;
@@ -50,11 +51,9 @@ module.exports = function(game) {
 			sock.userExec(game.quest?"addbound":"addcards", { c: game.cardreward });
 		}
 	}
-
-	if (stats.checked){
+	if (options.stats){
 		chat([game.level || 0, (game.foename || "?").replace(/,/g, " "), winner ? "W" : "L", game.ply, game.time, game.player1.hp, game.player1.maxhp, (game.goldreward || 0) - (game.cost || 0), game.cardreward || "-"].join());
 	}
-
 	function onkeydown(e){
 		if (e.keyCode == 32) bexit.click();
 		else if (e.keyCode == 87 && !game.quest && game.daily === undefined){
