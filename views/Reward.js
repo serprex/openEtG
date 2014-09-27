@@ -4,9 +4,10 @@ var etg = require("./etg");
 var gfx = require("./gfx");
 var chat = require("./chat");
 var sock = require("./sock");
+var etgutil = require("./etgutil");
+var userutil = require("./userutil");
 module.exports = function(reward, numberofcopies, code) {
 	if (!numberofcopies) numberofcopies = 1;
-	if (reward.type !== undefined) reward = reward.type;
 	var rewardList, chosenReward;
 	if (typeof reward == "string") {
 		var upped = reward.substring(0, 5) == "upped";
@@ -49,7 +50,7 @@ module.exports = function(reward, numberofcopies, code) {
 	chosenRewardImage.position.set(450, 20);
 	rewardui.addChild(chosenRewardImage);
 	rewardList.forEach(function(reward, i){
-		var card = new PIXI.Sprite(getCardImage(reward));
+		var card = new PIXI.Sprite(gfx.getCardImage(reward));
 		card.position.set(100 + Math.floor(i/12) * 130, 272 + (i%12) * 20);
 		px.setClick(card, function(){
 			chosenReward = reward;
