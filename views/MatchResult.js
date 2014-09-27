@@ -23,7 +23,7 @@ module.exports = function(game) {
 	px.setClick(bexit, function() {
 		if (game.quest) {
 			if (winner && game.choicerewards)
-				require("./Reward")(game.choicerewards, game.rewardamount, true);
+				require("./Reward")(game.choicerewards, game.rewardamount);
 			else
 				require("./QuestArea")(game.area);
 		}

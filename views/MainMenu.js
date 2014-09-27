@@ -170,12 +170,26 @@ module.exports = function(nymph) {
 		librarygive: require("./Library"),
 		arenainfo: require("./ArenaInfo"),
 		arenatop: require("./ArenaTop"),
+		codecard:function(data){
+			require("./Reward")(data.type, data.num, foename.value);
+		},
+		codereject:function(data) {
+			chat(data.msg);
+		},
+		codegold:function(data) {
+			sock.user.gold += data.g;
+			chat(data.g + "\u00A4 added!");
+		},
+		codecode:function(data) {
+			sock.user.pool = etgutil.addcard(sock.user.pool, data);
+			chat(Cards.Codes[data].name + " added!");
+		},
 	};
 	function challengeClick(foe) {
 		if (Cards.loaded) {
 			var deck = sock.getDeck();
 			if (etgutil.decklength(deck) < (sock.user ? 31 : 11)){
-				require("./views/Editor")();
+				require("./Editor")();
 				return;
 			}
 			var gameData = {};

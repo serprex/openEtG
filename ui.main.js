@@ -1,7 +1,7 @@
 "use strict";
 PIXI.AUTO_PREVENT_DEFAULT = false;
 (function(){
-	var htmlElements = ["leftpane", "chatinput", "aideck", "foename", "password", "chatBox"];
+	var htmlElements = ["leftpane", "chatinput", "aideck", "foename", "chatBox"];
 	htmlElements.forEach(function(name){
 		window[name] = document.getElementById(name);
 	});
@@ -68,23 +68,6 @@ PIXI.AUTO_PREVENT_DEFAULT = false;
 			}
 			if (lastindex != data.msg.length) span.appendChild(document.createTextNode(data.msg.substring(lastindex)));
 			chat.addSpan(span);
-		},
-		codecard: require("./views/Reward"),
-		codereject:function(data) {
-			chat(data.msg);
-		},
-		codegold:function(data) {
-			sock.user.gold += data.g;
-			chat(data.g + "\u00A4 added!");
-		},
-		codecode:function(data) {
-			sock.user.pool = etgutil.addcard(sock.user.pool, data);
-			chat(Cards.Codes[data].name + " added!");
-		},
-		codedone:function(data) {
-			sock.user.pool = etgutil.addcard(sock.user.pool, data.card);
-			chat(Cards.Codes[data.card].name + " added!");
-			startMenu();
 		},
 		cardart:function(data) {
 			gfx.preloadCardArt(data.art);
@@ -180,8 +163,9 @@ PIXI.AUTO_PREVENT_DEFAULT = false;
 	}
 	function loginClick() {
 		if (!sock.user && options.username) {
+			var password = document.getElementById("password").value;
 			var xhr = new XMLHttpRequest();
-			xhr.open("POST", "auth?u=" + encodeURIComponent(options.username) + (password.value.length ? "&p=" + encodeURIComponent(password.value) : ""), true);
+			xhr.open("POST", "auth?u=" + encodeURIComponent(options.username) + (password.length ? "&p=" + encodeURIComponent(password) : ""), true);
 			xhr.onreadystatechange = function() {
 				if (this.readyState == 4) {
 					if (this.status == 200) {

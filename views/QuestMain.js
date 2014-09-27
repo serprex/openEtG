@@ -31,7 +31,7 @@ module.exports = function(){
 		(function (ainfo, k) {
 			var points = ainfo[1].points;
 			graphics.hitArea = ainfo[1];
-			if (foename.value == "quest"){
+			if (aideck.value == "quest"){
 				graphics.lineStyle(4, 255);
 				graphics.moveTo(points[0].x, points[0].y);
 				for(var i=1; i<points.length; i++){

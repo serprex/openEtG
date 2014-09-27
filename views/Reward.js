@@ -2,8 +2,9 @@
 var px = require("./px");
 var etg = require("./etg");
 var gfx = require("./gfx");
+var chat = require("./chat");
 var sock = require("./sock");
-function startRewardWindow(reward, numberofcopies, nocode) {
+module.exports = function(reward, numberofcopies, code) {
 	if (!numberofcopies) numberofcopies = 1;
 	if (reward.type !== undefined) reward = reward.type;
 	var rewardList, chosenReward;
@@ -24,7 +25,7 @@ function startRewardWindow(reward, numberofcopies, nocode) {
 		rewardui.addChild(infotext);
 	}
 
-	if (!nocode){
+	if (code){
 		var exitButton = px.mkButton(10, 10, "Exit");
 		px.setClick(exitButton, startMenu);
 		rewardui.addChild(exitButton);
@@ -33,12 +34,12 @@ function startRewardWindow(reward, numberofcopies, nocode) {
 	var confirmButton = px.mkButton(10, 40, "Done");
 	px.setClick(confirmButton, function() {
 		if (chosenReward) {
-			if (nocode) {
+			if (code === undefined) {
 				sock.userExec("addbound", { c: etgutil.encodeCount(numberofcopies) + chosenReward });
 				require("./MainMenu")();
 			}
 			else {
-				sock.userEmit("codesubmit2", { code: foename.value, card: chosenReward });
+				sock.userEmit("codesubmit2", { code: code, card: chosenReward });
 			}
 		}
 	});
@@ -57,6 +58,14 @@ function startRewardWindow(reward, numberofcopies, nocode) {
 		rewardui.addChild(card);
 		px.setInteractive(card);
 	});
+
+	rewardui.cmds = {
+		codedone:function(data) {
+			sock.user.pool = etgutil.addcard(sock.user.pool, data.card);
+			chat(Cards.Codes[data.card].name + " added!");
+			require("./MainMenu")();
+		},
+	}
 
 	px.refreshRenderer(rewardui);
 }
