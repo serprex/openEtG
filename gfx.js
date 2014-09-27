@@ -93,7 +93,7 @@ function getArtImage(code, cb){
 		var redcode = code;
 		if (artpool){
 			while (!(redcode in artpool) && redcode >= "6qo"){
-				redcode = etgutil[code >= "g00"?"asShiny":"asUpped"](code, false);
+				redcode = etgutil[redcode >= "g00"?"asShiny":"asUpped"](redcode, false);
 			}
 			if (!(redcode in artpool)) return cb(artimagecache[code] = undefined);
 			else if (redcode in artimagecache) return cb(artimagecache[code] = artimagecache[redcode]);
