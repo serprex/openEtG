@@ -1,6 +1,8 @@
 #!/usr/bin/node
 "use strict";
 var users = {}, usersock = {}, rooms = {}, sockinfo = {};
+var sutil = require("./etg.server");
+sutil.loadcards();
 var qstring = require("querystring");
 var crypto = require("crypto");
 var fs = require("fs");
@@ -18,8 +20,6 @@ var userutil = require("./userutil");
 var etg = require("./etg");
 var aiDecks = require("./Decks");
 var Cards = require("./Cards");
-var sutil = require("./etg.server");
-sutil.loadcards();
 function storeUsers(){
 	for(var u in users){
 		var user = users[u];
