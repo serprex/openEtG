@@ -184,6 +184,14 @@ module.exports = function(nymph) {
 			sock.user.pool = etgutil.addcard(sock.user.pool, data);
 			chat(Cards.Codes[data].name + " added!");
 		},
+		challenge:function(data) {
+			var span = document.createElement("span");
+			span.style.cursor = "pointer";
+			span.style.color = "blue";
+			span.addEventListener("click", (data.pvp ? challengeClick : tradeClick).bind(null, data.f));
+			span.appendChild(document.createTextNode(data.f + (data.pvp ? " challenges you to a duel!" : " wants to trade with you!")));
+			chat.addSpan(span);
+		},
 	};
 	function challengeClick(foe) {
 		if (Cards.loaded) {

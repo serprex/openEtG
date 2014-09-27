@@ -1,6 +1,6 @@
 "use strict";
-var etgutil = require("./etgutil");
 var Cards = require("./Cards");
+var etgutil = require("./etgutil");
 exports.rewardwords = {
 	mark: -1,
 	pillar: 0,

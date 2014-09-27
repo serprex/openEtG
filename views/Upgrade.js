@@ -54,7 +54,7 @@ module.exports = function() {
 	}
 	function eventWrap(func){
 		return function(){
-			var error = func(Cards.Codes[selectedCard]);
+			var error = selectedCard ? func(Cards.Codes[selectedCard]) : "Pick a card, any card.";
 			if (error) twarning.setText(error);
 		}
 	}

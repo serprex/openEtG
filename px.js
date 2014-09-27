@@ -217,7 +217,7 @@ DeckDisplay.prototype.click = function(e){
 	var index = this.pos2idx(e.global);
 	if (index >= 0 && index < this.deck.length){
 		ui.playSound("cardClick");
-		this.cardclick(index);
+		if (this.cardclick) this.cardclick(index);
 	}
 }
 DeckDisplay.prototype.renderDeck = function(i){
@@ -244,7 +244,7 @@ DeckDisplay.prototype.rmCard = function(index){
 DeckDisplay.prototype.next = function(mpos){
 	if (this.cardmouseover){
 		if (mpos === undefined) mpos = this.stage.getMousePosition();
-		if (!this.hitArea.contains(mpos.x, mpos.y)) return;
+		if (!this.hitArea.contains(mpos.x-this.position.x, mpos.y-this.position.y)) return;
 		var index = this.pos2idx(mpos);
 		if (index >= 0 && index < this.deck.length){
 			this.cardmouseover(this.deck[index]);

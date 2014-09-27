@@ -19,14 +19,6 @@ PIXI.AUTO_PREVENT_DEFAULT = false;
 	var startMenu = require("./views/MainMenu");
 	options.register("username", document.getElementById("username"));
 	var sockEvents = {
-		challenge:function(data) {
-			var span = document.createElement("span");
-			span.style.cursor = "pointer";
-			span.style.color = "blue";
-			span.addEventListener("click", (data.pvp ? challengeClick : tradeClick).bind(null, data.f));
-			span.appendChild(document.createTextNode(data.f + (data.pvp ? " challenges you to a duel!" : " wants to trade with you!")));
-			chat.addSpan(span);
-		},
 		userdump:function(data) {
 			delete data.x;
 			sock.user = data;

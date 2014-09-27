@@ -24,7 +24,6 @@ function mkDaily(type) {
 	}
 }
 module.exports = function(){
-	var coloui = px.mkView();
 	var magename = aiDecks.mage[sock.user.dailymage][0];
 	var dgname = aiDecks.demigod[sock.user.dailydg][0];
 	var events = [
@@ -33,31 +32,21 @@ module.exports = function(){
 		{ name: "Novice Duel", desc: "Fight " + magename + ". Only one attempt allowed." },
 		{ name: "Expert Duel", desc: "Fight " + dgname + ". Only one attempt allowed." }
 	];
+	var div = [[50, 50, ["Exit", startMenu]]];
 	for (var i = 1;i < 5;i++) {
 		var active = !(sock.user.daily & (1 << i));
 		if (active) {
-			var button = px.mkButton(50, 100 + 30 * i, "Fight!");
-			px.setClick(button, mkDaily(i));
-			coloui.addChild(button);
+			div.push([50, 100 + 30 * i, ["Fight!", mkDaily(i)]]);
 		}
-		var text = new px.MenuText(130, 100 + 30 * i, active ? (events[i-1].name + ": " + events[i-1].desc) : i > 2 ? (sock.user.daily&(i==3?1:32) ? "You defeated this already today." : "You failed this today. Better luck tomorrow!") : "Completed.");
-		coloui.addChild(text);
+		div.push([130, 100 + 30 * i, active ? (events[i-1].name + ": " + events[i-1].desc) : i > 2 ? (sock.user.daily&(i==3?1:32) ? "You defeated this already today." : "You failed this today. Better luck tomorrow!") : "Completed."]);
 	}
 	if (sock.user.daily == 63){
-		var button = px.mkButton(50, 280, "Nymph!");
-		px.setClick(button, function(){
+		div.push([50, 280, ["Nymph!", function(){
 			var etg = require("./etg");
 			var nymph = etg.NymphList[etg.PlayerRng.uptoceil(12)];
 			sock.userExec("donedaily", {daily: 6, c: nymph});
 			startMenu(nymph);
-		});
-		coloui.addChild(button);
-		coloui.addChild(new px.MenuText(130, 280, "You successfully completed all tasks."));
+		}]], [130, 280, "You successfully completed all tasks."]);
 	}
-
-	var bexit = px.mkButton(50, 50, "Exit");
-	px.setClick(bexit, startMenu);
-	coloui.addChild(bexit);
-
-	px.refreshRenderer(coloui);
+	px.refreshRenderer({div: {colo: div}});
 }
