@@ -4,7 +4,7 @@ var etg = require("./etg");
 var Cards = require("./Cards");
 function mutantactive(t){
 	lobo(t);
-	var abilities = ["hatch","freeze","burrow","destroy","steal","dive","heal","paradox","lycanthropy","growth 1","infect","gpull","devour","mutation","growth","ablaze","poison","deja","endow","guard","mitosis"];
+	var abilities = ["hatch","freeze","burrow","destroy","steal","dive","heal","paradox","lycanthropy","growth 1","infect","gpull","devour","mutation","growth 2","ablaze","poison","deja","endow","guard","mitosis"];
 	var index = t.owner.upto(abilities.length+2)-2;
 	if (index<0){
 		t.status[["momentum","immaterial"][~index]] = true;

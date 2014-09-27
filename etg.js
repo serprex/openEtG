@@ -938,19 +938,16 @@ CardInstance.prototype.die = function(idx){
 	}
 }
 Creature.prototype.deatheffect = Weapon.prototype.deatheffect = function(index) {
-	if (this.active.death){
-		this.active.death(this, this, index);
-	}
 	this.procactive("death", [index]);
 	if (index>=0) Effect.mkDeath(ui.creaturePos(this.owner == this.owner.game.player1?0:1, index));
 }
 Creature.prototype.die = function() {
 	var index = this.remove();
 	if (~index){
-		if (this.status.aflatoxin & !this.card.isOf(Cards.MalignantCell)){
-			this.owner.creatures[index] = new Creature(this.card.as(Cards.MalignantCell), this.owner);
-		}
 		if (!(this.active.predeath && this.active.predeath(this))){
+			if (this.status.aflatoxin & !this.card.isOf(Cards.MalignantCell)){
+				this.owner.creatures[index] = new Creature(this.card.as(Cards.MalignantCell), this.owner);
+			}
 			this.deatheffect(index);
 		}
 	}
