@@ -170,7 +170,7 @@ var ActivesValues = {
 	momentum:2,
 	mutation:4,
 	neuro:function(c) {
-		return c.owner.foe.neuro?evalactive(c, "poison")+.1:6;
+		return c.owner.foe.neuro?evalactive(c, "poison 1")+.1:6;
 	},
 	neurofy:function(c) {
 		return c.owner.foe.neuro?1:5;
@@ -204,7 +204,7 @@ var ActivesValues = {
 	queen:7,
 	quint:6,
 	rage:[5, 6],
-	readiness: 4,
+	readiness: 3,
 	rebirth:[5, 2],
 	regenerate: 5,
 	regeneratespell: 5,
@@ -483,7 +483,7 @@ function evalcardinstance(cardInst) {
 			}else if (poison < 0){
 				hp += Math.min(-poison, c.maxhp-c.hp);
 			}
-			score *= hp?(c.status.immaterial || c.status.burrowed ? 1.3 : 1+Math.log(Math.min(hp, 33))/7):.2;
+			score *= hp?(c.status.immaterial || c.status.burrowed ? 1.3 : 1+Math.log(Math.min(hp, 33))/7):.5;
 		}else if (c.type == etg.WeaponEnum){
 			score += c.attack;
 			if (cardInst.owner.weapon || cardInst.owner.hand.some(function(cinst){ return cinst.card.type == etg.WeaponEnum })) score /= 2;
@@ -498,7 +498,7 @@ function evalcardinstance(cardInst) {
 }
 
 function caneventuallyactive(element, cost, pl){
-	if (!cost || !element || pl.quanta[element] || pl.mark == element) return true;
+	if (!cost || !element || pl.quanta[element] || !pl.mark || pl.mark == element) return true;
 	return pl.permanents.some(function(pr){
 		return pr && pr.card.type == etg.PillarEnum && (!pr.card.element || pr.card.element == element);
 	});

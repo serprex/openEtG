@@ -317,7 +317,7 @@ destroy:function(c,t, dontsalvage, donttalk){
 },
 destroycard:function(c,t){
 	if (!t.owner.sanctuary){
-		t.remove();
+		t.die();
 	}
 },
 devour:function(c,t){
@@ -700,7 +700,7 @@ ink:function(c,t){
 },
 innovation:function(c,t){
 	if (!t.owner.sanctuary){
-		t.remove();
+		t.die();
 		for(var i=0; i<3; i++){
 			t.owner.drawcard();
 		}
