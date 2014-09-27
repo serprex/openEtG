@@ -33,6 +33,6 @@ exports.userExec = function(x, data){
 }
 exports.getDeck = function() {
 	if (exports.user) return exports.user.decks[exports.user.selectedDeck];
-	var deck = document.getElementById("deckimport").value.trim();
+	var deck = (options.deck || "").trim();
 	return ~deck.indexOf(" ") ? etgutil.encodedeck(deck.split(" ")) : deck;
 }

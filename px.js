@@ -55,8 +55,6 @@ exports.refreshRenderer = function(stage, animCb, dontrender) {
 			stage.div[id] = div;
 		}
 	}
-	if (curStage.dom != stage.dom && curStage.dom) curStage.dom.style.display = "none";
-	if (stage.dom) stage.dom.style.display = "inline";
 	if (stage.div){
 		for(var id in stage.div){
 			document.body.appendChild(stage.div[id]);

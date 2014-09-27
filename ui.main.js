@@ -1,7 +1,7 @@
 "use strict";
 PIXI.AUTO_PREVENT_DEFAULT = false;
 (function(){
-	var htmlElements = ["leftpane", "chatinput", "deckimport", "aideck", "foename", "password", "chatBox"];
+	var htmlElements = ["leftpane", "chatinput", "aideck", "foename", "password", "chatBox"];
 	htmlElements.forEach(function(name){
 		window[name] = document.getElementById(name);
 	});
@@ -165,7 +165,6 @@ PIXI.AUTO_PREVENT_DEFAULT = false;
 	}
 	function prepuser(){
 		sock.user.decks = sock.user.decks.split(",");
-		deckimport.value = sock.user.decks[sock.user.selectedDeck];
 		sock.user.pool = sock.user.pool || "";
 		sock.user.accountbound = sock.user.accountbound || "";
 		if (!sock.user.quest) {

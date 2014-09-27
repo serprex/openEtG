@@ -7,11 +7,12 @@ var chat = require("./chat");
 var sock = require("./sock");
 var Cards = require("./Cards");
 var etgutil = require("./etgutil");
+var options = require("./options");
 module.exports = function(arena, acard, startempty) {
 	if (!Cards.loaded) return;
 	if (arena && (!sock.user || arena.deck === undefined || acard === undefined)) arena = false;
 	function updateField(renderdeck){
-		deckimport.value = etgutil.encodedeck(decksprite.deck) + "01" + etg.toTrueMark(editormark);
+		options.deck = deckimport.value = etgutil.encodedeck(decksprite.deck) + "01" + etg.toTrueMark(editormark);
 	}
 	function sumCardMinus(cardminus, code){
 		var sum = 0;
@@ -183,7 +184,7 @@ module.exports = function(arena, acard, startempty) {
 		});
 		var bimport = px.mkButton(8, 96, "Import");
 		px.setClick(bimport, function() {
-			var dvalue = deckimport.value.trim();
+			var dvalue = options.deck.trim();
 			decksprite.deck = ~dvalue.indexOf(" ") ? dvalue.split(" ") : etgutil.decodedeck(dvalue);
 			processDeck();
 		});
@@ -250,7 +251,13 @@ module.exports = function(arena, acard, startempty) {
 	var cardArt = new PIXI.Sprite(gfx.nopic);
 	cardArt.position.set(734, 8);
 	editorui.addChild(cardArt);
-	px.refreshRenderer({view: editorui, dom: deckimport}, function() {
+	var deckimport = document.createElement("input");
+	deckimport.style.width = "190px";
+	deckimport.style.height = "20px";
+	deckimport.placeholder="Deck";
+	deckimport.addEventListener("click", function(){this.setSelectionRange(0, 333)});
+	options.register("deck", deckimport);
+	px.refreshRenderer({view: editorui, div: {deckimport: [[520, 238, deckimport]]}}, function() {
 		cardArt.visible = false;
 		var mpos = px.getMousePos();
 		cardsel.next(cardpool, cardminus, mpos);
