@@ -135,6 +135,7 @@ PIXI.AUTO_PREVENT_DEFAULT = false;
 	function maybeLogin(e) {
 		e.cancelBubble = true;
 		if (e.keyCode == 13) {
+			this.blur();
 			loginClick();
 		}
 	}
