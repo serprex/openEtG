@@ -358,14 +358,14 @@ function startMatch(game, foeDeck) {
 	Effect.register(anims);
 	var foeplays = new PIXI.DisplayObjectContainer();
 	gameui.addChild(foeplays);
-	var infobox = new PIXI.Sprite(gfx.nopic);
-	infobox.alpha = .7;
-	infobox.anchor.set(.5, 1);
-	gameui.addChild(infobox);
 	var cardart = new PIXI.Sprite(gfx.nopic);
 	cardart.position.set(654, 300);
 	cardart.anchor.set(.5, 0);
 	gameui.addChild(cardart);
+	var infobox = new PIXI.Sprite(gfx.nopic);
+	infobox.alpha = .7;
+	infobox.anchor.set(.5, 1);
+	gameui.addChild(infobox);
 	function onkeydown(e) {
 		if (e.keyCode == 32) { // spc
 			endturn.click();

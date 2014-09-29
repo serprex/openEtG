@@ -4,7 +4,7 @@ var etg = require("./etg");
 var Cards = require("./Cards");
 function mutantactive(t){
 	lobo(t);
-	var abilities = ["hatch","freeze","burrow","destroy","steal","dive","heal","paradox","lycanthropy","growth 1","infect","gpull","devour","mutation","growth 2","ablaze","poison","deja","endow","guard","mitosis"];
+	var abilities = ["hatch","freeze","burrow","destroy","steal","dive","heal","paradox","lycanthropy","growth 1","infect","gpull","devour","mutation","growth 2","ablaze","poison 1","deja","endow","guard","mitosis"];
 	var index = t.owner.upto(abilities.length+2)-2;
 	if (index<0){
 		t.status[["momentum","immaterial"][~index]] = true;
@@ -712,7 +712,7 @@ integrity:function(c,t){
 	var shardSkills = [
 		[],
 		["deadalive", "mutation", "paradox", "improve", "scramble", "antimatter"],
-		["infect", "growth 1", "poison", "poison", "aflatoxin", "poison 2"],
+		["infect", "growth 1", "poison 1", "poison 1", "aflatoxin", "poison 2"],
 		["devour", "devour", "devour", "devour", "devour", "blackhole"],
 		["burrow", "stoneform", "guard", "guard", "bblood", "bblood"],
 		["growth 2", "adrenaline", "adrenaline", "adrenaline", "adrenaline", "mitosis"],
