@@ -191,12 +191,14 @@ function startMatch(game, foeDeck) {
 	var marktext = [new PIXI.Text("", { font: "18px Dosis" }), new PIXI.Text("", { font: "18px Dosis" })];
 	var quantatext = [new PIXI.DisplayObjectContainer(), new PIXI.DisplayObjectContainer()];
 	var hptext = [new PIXI.Text("", { font: "18px Dosis" }), new PIXI.Text("", { font: "18px Dosis" })];
-	var hptext_overlay = [new PIXI.Text("", { font: "18px Dosis" }), new PIXI.Text("", { font: "18px Dosis" })];
+	var player_overlay = [new PIXI.Sprite(gfx.nopic), new PIXI.Sprite(gfx.nopic)];
 	var damagetext = [new PIXI.Text("", { font: "14px Dosis" }), new PIXI.Text("", { font: "14px Dosis" })];
 	var poisontext = [new PIXI.Sprite(gfx.nopic), new PIXI.Sprite(gfx.nopic)];
 	var decktext = [new PIXI.Text("", { font: "16px Dosis" }), new PIXI.Text("", { font: "16px Dosis" })];
 	for (var j = 0;j < 2;j++) {
 		(function(_j) {
+			player_overlay[j].width = 90;
+			player_overlay[j].height = 85;
 			for (var i = 0;i < 8;i++) {
 				handsprite[j][i] = new PIXI.Sprite(gfx.nopic);
 				handsprite[j][i].position.set(j ? 20 : 780, (j ? 130 : 310) + 20 * i);
@@ -306,21 +308,21 @@ function startMatch(game, foeDeck) {
 			gameui.addChild(marksprite[j]);
 			marktext[j].anchor.set(.5, .5);
 			hptext[j].anchor.set(.5, .5);
-			hptext_overlay[j].anchor.set(.5, .5);
+			player_overlay[j].anchor.set(.5, .5);
 			poisontext[j].anchor.set(.5, .5);
 			decktext[j].anchor.set(.5, .5);
 			damagetext[j].anchor.set(.5, .5);
 			marktext[j].position.set(768,470);
 			quantatext[j].position.set(j ? 792 : 0, j ? 100 : 308);
 			hptext[j].position.set(50, 550);
-			hptext_overlay[j].position.set(50, 555);
+			player_overlay[j].position.set(50, 555);
 			poisontext[j].position.set(50, 570);
 			decktext[j].position.set(50, 530);
 			damagetext[j].position.set(50, 510);
 			if (j) {
 				ui.reflectPos(marktext[j]);
 				ui.reflectPos(hptext[j]);
-				ui.reflectPos(hptext_overlay[j]);
+				ui.reflectPos(player_overlay[j]);
 				ui.reflectPos(poisontext[j]);
 				ui.reflectPos(decktext[j]);
 				ui.reflectPos(damagetext[j]);
@@ -332,7 +334,7 @@ function startMatch(game, foeDeck) {
 				quantatext[j].addChild(child = new PIXI.Sprite(gfx.eicons[k]));
 				child.position.set((k & 1) ? 0 : 54, Math.floor((k - 1) / 2) * 32);
 			}
-			px.setClick(hptext_overlay[j], function() {
+			px.setClick(player_overlay[j], function() {
 				if (game.phase != etg.PlayPhase) return;
 				if (game.targetingMode && game.targetingMode(game.players(_j))) {
 					delete game.targetingMode;
@@ -342,11 +344,11 @@ function startMatch(game, foeDeck) {
 		})(j);
 		px.setInteractive.apply(null, weapsprite);
 		px.setInteractive.apply(null, shiesprite);
-		px.setInteractive.apply(null, hptext_overlay);
+		px.setInteractive.apply(null, player_overlay);
 		gameui.addChild(marktext[j]);
 		gameui.addChild(quantatext[j]);
 		gameui.addChild(hptext[j]);
-		gameui.addChild(hptext_overlay[j]);
+		gameui.addChild(player_overlay[j]);
 		gameui.addChild(poisontext[j]);
 		gameui.addChild(decktext[j]);
 		gameui.addChild(damagetext[j]);
@@ -374,7 +376,7 @@ function startMatch(game, foeDeck) {
 		} else if (e.keyCode >= 49 && e.keyCode <= 56) {
 			handsprite[0][e.keyCode-49].click();
 		} else if (e.keyCode == 83 || e.keyCode == 87) { // s/w
-			hptext_overlay[e.keyCode == 87?1:0].click();
+			player_overlay[e.keyCode == 87?1:0].click();
 		}
 	}
 	gameui.cmds = {
@@ -559,7 +561,7 @@ function startMatch(game, foeDeck) {
 			fgfx.lineStyle(2, 0xff0000);
 			for (var j = 0;j < 2;j++) {
 				if (game.targetingMode(game.players(j))) {
-					var spr = hptext_overlay[j];
+					var spr = player_overlay[j];
 					fgfx.drawRect(spr.position.x - spr.width / 2, spr.position.y - spr.height / 2, spr.width, spr.height);
 				}
 				for (var i = 0;i < game.players(j).hand.length;i++) {
@@ -575,7 +577,7 @@ function startMatch(game, foeDeck) {
 		for (var j = 0;j < 2;j++) {
 			var pl = game.players(j);
 			if (pl.sosa) {
-				var spr = hptext_overlay[j];
+				var spr = player_overlay[j];
 				fgfx.beginFill(ui.elecols[etg.Death], .5);
 				fgfx.drawRect(spr.position.x - spr.width / 2, spr.position.y - spr.height / 2, spr.width, spr.height);
 				fgfx.endFill();
@@ -673,9 +675,7 @@ function startMatch(game, foeDeck) {
 				}
 			}
 			px.maybeSetText(hptext[j], pl.hp + "/" + pl.maxhp);
-			hptext_overlay[j].width = 90;
-			hptext_overlay[j].height = 85;
-			if (px.hitTest(hptext_overlay[j], pos)){
+			if (px.hitTest(player_overlay[j], pos)){
 				setInfo(pl);
 			}
 			var poison = pl.status.poison, poisoninfo = !poison ? "" : (poison > 0 ? poison + " 1:2" : -poison + " 1:7") + (pl.neuro ? " 1:10" : "");
