@@ -76,7 +76,7 @@ function getAgedHp(hp, age){
 	return Math.max(curhp, Math.floor(hp/4));
 }
 function wilson(up, total) {
-	// from npm's wilson-scoring
+	// from npm's wilson-score
 	var z = 2.326348
 	if (total <= 0 || total < up) return 0
 	var phat = up/total, z2 = z*z;

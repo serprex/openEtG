@@ -254,7 +254,7 @@ module.exports = function(arena, acard, startempty) {
 	var deckimport = document.createElement("input");
 	deckimport.style.width = "190px";
 	deckimport.style.height = "20px";
-	deckimport.placeholder="Deck";
+	deckimport.placeholder = "Deck";
 	deckimport.addEventListener("click", function(){this.setSelectionRange(0, 333)});
 	options.register("deck", deckimport);
 	px.refreshRenderer({view: editorui, div: {deckimport: [[520, 238, deckimport]]}}, function() {
