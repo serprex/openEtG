@@ -466,7 +466,7 @@ evolve:function(c,t){
 },
 feed:function(c,t){
 	t.addpoison(1);
-	Actives["growth 2"](c);
+	etg.parseActive("growth 3")(c);
 	delete c.status.immaterial;
 },
 fickle:function(c,t){

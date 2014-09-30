@@ -12,8 +12,7 @@ module.exports = function(info) {
 	for (var i = 0;i < info.length; i++) {
 		var data = info[i], y = 50 + i * 24;
 		stage.push([120, y, (i+1) + "  " + data[0]],
-			[120, y, (i+1) + "  " + data[0]],
-			[350, y, data[1]],
+			[350, y, data[1].toString()],
 			[410, y, data[2] + "-" + data[3]],
 			[500, y, data[4].toString()]);
 		if (data[5] in Cards.Codes){

@@ -75,6 +75,13 @@ function getAgedHp(hp, age){
 	var curhp = age > 1 ? hp - (1<<Math.min(age, 9)-1) : hp;
 	return Math.max(curhp, Math.floor(hp/4));
 }
+function wilson(up, total) {
+	// from npm's wilson-scoring
+	var z = 2.326348
+	if (total <= 0 || total < up) return 0
+	var phat = up/total, z2 = z*z;
+	return (phat + z2/(2*total) - z*Math.sqrt((phat*(1 - phat) + z2/(4*total))/total))/(1 + z2/total)
+}
 function sockEmit(socket, event, data){
 	if (!data) data = {};
 	data.x = event;
@@ -141,7 +148,7 @@ var userEvents = {
 			db.hmset(au, {deck: data.d, hp: data.hp, draw: data.draw, mark: data.mark});
 		}else{
 			db.hmset(au, {day: sutil.getDay(), deck: data.d, card: user.ocard, win:0, loss:0, hp: data.hp, draw: data.draw, mark: data.mark});
-			db.zadd("arena"+(data.lv?"1":""), 0, data.u);
+			db.zadd("arena"+(data.lv?"1":""), 100, data.u);
 		}
 	},
 	arenainfo:function(data, user){
@@ -161,8 +168,6 @@ var userEvents = {
 		});
 	},
 	modarena:function(data, user){
-		var arena = "arena"+(data.lv?"1":"");
-		db.hincrby((data.lv?"B:":"A:")+data.aname, data.won?"win":"loss", 1);
 		if (data.aname in users){
 			users[data.aname].gold += data.won?3:1;
 		}else{
@@ -172,20 +177,21 @@ var userEvents = {
 				}
 			});
 		}
-		if (data.won){
-			db.zincrby(arena, 1, data.aname);
-		}else{
-			db.zscore(arena, function(err, score){
-				if (score === null) return;
-				db.zincrby(arena, -1, data.aname, function(err, newscore) {
-					db.hget((data.lv?"B:":"A:")+data.aname, "day", function(err, day){
-						if (newscore < -15 || sutil.getDay()-day > 14){
-							db.zrem(arena, data.aname);
-						}
-					});
+		var arena = "arena"+(data.lv?"1":""), akey = (data.lv?"B:":"A:")+data.aname;
+		db.zscore(arena, function(err, score){
+			if (score === null) return;
+			db.hincrby(akey, data.won?"win":"loss", 1, function(err){
+				db.hmget(akey, "win", "loss", "day", function(err, wld){
+					if (err || !wld) return;
+					for(var i=0; i<3; i++) wld[i] = parseInt(wld[i]);
+					if (!err && !data.won && (wld[0]-wld[1] < -15 || sutil.getDay()-wld[2] > 14)){
+						db.zrem(arena, data.aname);
+					}else{
+						db.zadd(arena, wilson(wld[0]+1, wld[0]+wld[1]+1)*1000, data.aname);
+					}
 				});
 			});
-		}
+		});
 	},
 	foearena:function(data, user){
 		var socket = this;
@@ -520,7 +526,7 @@ var sockEvents = {
 				}else{
 					db.hmget((data.lv?"B:":"A:") + obj[i], "win", "loss", "day", "card", function(err, wl){
 						wl[2] = sutil.getDay()-wl[2];
-						t20.push([obj[i], obj[i+1]].concat(wl));
+						t20.push([obj[i], Math.floor(obj[i+1])].concat(wl));
 						getwinloss(i+2);
 					});
 				}

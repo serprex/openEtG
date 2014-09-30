@@ -1238,6 +1238,7 @@ exports.casttext = casttext;
 exports.fromTrueMark = fromTrueMark;
 exports.toTrueMark = toTrueMark;
 exports.PlayerRng = PlayerRng;
+exports.parseActive = parseActive;
 exports.Chroma = 0;
 exports.Entropy = 1;
 exports.Death = 2;
