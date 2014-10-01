@@ -1,5 +1,5 @@
 var fs = require("fs");
-var etgutil = require("./etgutil");
+var etgutil = require("../etgutil");
 function cardRedirect(req, res, next){
 	var code = req.url.substr(1, 3);
 	if (code >= "6qo"){

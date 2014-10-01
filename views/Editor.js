@@ -76,7 +76,16 @@ module.exports = function(arena, acard, startempty) {
 	}
 	function saveDeck(force){
 		var dcode = etgutil.encodedeck(decksprite.deck) + "01" + etg.toTrueMark(editormark);
-		if (sock.user.decks[sock.user.selectedDeck] != dcode){
+		var olddeck = sock.getDeck();
+		if (typeof sock.user.selectedDeck === "string"){
+			if (decksprite.deck.length == 0){
+				sock.userEmit("rmdeck", {name: sock.user.selectedDeck});
+				delete sock.user.decknames[sock.user.selectedDeck];
+			}else if (olddeck != dcode){
+				sock.user.decknames[sock.user.selectedDeck] = dcode;
+				sock.userEmit("setdeck", { d: dcode, name: sock.user.selectedDeck });
+			}else if (force) sock.userEmit("setdeck", {name: sock.user.selectedDeck });
+		}else if (olddeck != dcode){
 			sock.user.decks[sock.user.selectedDeck] = dcode;
 			sock.userEmit("setdeck", { d: dcode, number: sock.user.selectedDeck });
 		}else if (force) sock.userEmit("setdeck", { number: sock.user.selectedDeck });
@@ -138,8 +147,7 @@ module.exports = function(arena, acard, startempty) {
 	function switchDeckCb(x){
 		return function() {
 			saveDeck();
-			buttons[sock.user.selectedDeck].visible = true;
-			buttons[x].visible = false;
+			for (var i=0; i<10; i++) buttons[i].visible = i != x;
 			sock.user.selectedDeck = x;
 			decksprite.deck = etgutil.decodedeck(sock.getDeck());
 			processDeck();
@@ -195,12 +203,12 @@ module.exports = function(arena, acard, startempty) {
 		if (sock.user){
 			buttons = [];
 			for (var i = 0;i < 10;i++) {
-				var button = px.mkButton(80 + i*72, 8, "Deck " + (i + 1));
+				var button = px.mkButton(100 + i*72, 8, "Deck " + (i + 1));
 				px.setClick(button, switchDeckCb(i));
 				editorui.addChild(button);
 				buttons.push(button);
 			}
-			buttons[sock.user.selectedDeck].visible = false;
+			if (typeof sock.user.selectedDeck === "number") buttons[sock.user.selectedDeck].visible = false;
 		}
 	}
 	var bconvert = px.mkButton(5, 554, "Convert Code");
@@ -257,13 +265,36 @@ module.exports = function(arena, acard, startempty) {
 	var cardArt = new PIXI.Sprite(gfx.nopic);
 	cardArt.position.set(734, 8);
 	editorui.addChild(cardArt);
+	var dom = [];
+	if (sock.user){
+		var deckname = document.createElement("input");
+		deckname.style.width = "80px";
+		deckname.placeholder = "Name";
+		if (typeof sock.user.selectedDeck === "string") deckname.value = sock.user.selectedDeck;
+		deckname.addEventListener("keydown", function(e){
+			if (e.keyCode == 13){
+				saveDeck();
+				sock.user.selectedDeck = this.value;
+				decksprite.deck = etgutil.decodedeck(sock.getDeck());
+				processDeck();
+			}
+		});
+		dom.push([4, 4, deckname]);
+	}
 	var deckimport = document.createElement("input");
 	deckimport.style.width = "190px";
 	deckimport.style.height = "20px";
 	deckimport.placeholder = "Deck";
 	deckimport.addEventListener("click", function(){this.setSelectionRange(0, 333)});
+	deckimport.addEventListener("keydown", function(e){
+		if (e.keyCode == 13){
+			this.blur();
+			bimport.click();
+		}
+	});
 	options.register("deck", deckimport);
-	px.refreshRenderer({view: editorui, div: {deckimport: [[520, 238, deckimport]]}}, function() {
+	dom.push([520, 238, deckimport]);
+	px.refreshRenderer({view: editorui, div: {editdiv: dom}}, function() {
 		cardArt.visible = false;
 		var mpos = px.getMousePos();
 		cardsel.next(cardpool, cardminus, mpos);

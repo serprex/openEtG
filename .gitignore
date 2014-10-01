@@ -1,7 +1,8 @@
-__pycache__/*
 node_modules/*
-googleinfo.txt
-pushserver.sh
+deckcache/*
+Cards/*
+favicon.png
+Dosis.ttf
 etgify.js
 tournify.js
 .ninja_log
@@ -9,3 +10,4 @@ tournify.js
 dump.rdb
 *.csv
 *.gz
+*.sh

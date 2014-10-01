@@ -32,7 +32,7 @@ exports.userExec = function(x, data){
 	userutil[x](data, exports.user);
 }
 exports.getDeck = function() {
-	if (exports.user) return exports.user.decks[exports.user.selectedDeck];
+	if (exports.user) return (typeof exports.user.selectedDeck === "string" ? exports.user.decknames : exports.user.decks)[exports.user.selectedDeck] || "";
 	var deck = (options.deck || "").trim();
 	return ~deck.indexOf(" ") ? etgutil.encodedeck(deck.split(" ")) : deck;
 }

@@ -1,7 +1,7 @@
 #!/usr/bin/node
 "use strict";
 var users = {}, usersock = {}, rooms = {}, sockinfo = {};
-var sutil = require("./etg.server");
+var sutil = require("./srv/sutil");
 sutil.loadcards();
 var qstring = require("querystring");
 var crypto = require("crypto");
@@ -10,10 +10,10 @@ var db = require("redis").createClient();
 var app = require("connect")().
 	use(require("compression")()).
 	use(require("serve-static")(__dirname)).
-	use("/Cards", require("./cardredirect")()).
-	use("/deck", require("./deckredirect")()).
-	use("/auth", require("./loginauth")(db, users)).
-	use("/code", require("./codesmith")(db));
+	use("/Cards", require("./srv/cardredirect")()).
+	use("/deck", require("./srv/deckredirect")()).
+	use("/auth", require("./srv/loginauth")(db, users)).
+	use("/code", require("./srv/codesmith")(db));
 var io = require("engine.io")(app.listen(13602));
 var etgutil = require("./etgutil");
 var userutil = require("./userutil");
@@ -77,10 +77,10 @@ function getAgedHp(hp, age){
 }
 function wilson(up, total) {
 	// from npm's wilson-score
-	var z = 2.326348
-	if (total <= 0 || total < up) return 0
+	var z = 2.326348;
+	if (total <= 0 || total < up) return 0;
 	var phat = up/total, z2 = z*z;
-	return (phat + z2/(2*total) - z*Math.sqrt((phat*(1 - phat) + z2/(4*total))/total))/(1 + z2/total)
+	return (phat + z2/(2*total) - z*Math.sqrt((phat*(1 - phat) + z2/(4*total))/total))/(1 + z2/total);
 }
 function sockEmit(socket, event, data){
 	if (!data) data = {};
@@ -133,11 +133,18 @@ var userEvents = {
 	},
 	setdeck:function(data, user) {
 		if (data.d !== undefined) {
-			var decks = (user.decks || "").split(",");
-			decks[data.number] = data.d;
-			user.decks = decks.join(",");
+			if (data.name){
+				db.hset("D:"+user.name, data.name, data.d);
+			}else{
+				var decks = (user.decks || "").split(",");
+				decks[data.number] = data.d;
+				user.decks = decks.join(",");
+			}
 		}
-		user.selectedDeck = data.number;
+		user.selectedDeck = data.name || data.number;
+	},
+	rmdeck:function(data, user){
+		db.hdel("D:"+user.name, data.name);
 	},
 	setarena:function(data, user){
 		if (!user.ocard || !data.d){
@@ -275,34 +282,42 @@ var userEvents = {
 			return;
 		}
 		console.log(u + " requesting " + f);
-		sockinfo[this.id].deck = user.decks.split(",")[user.selectedDeck];
-		sockinfo[this.id].pvpstats = { hp: data.p1hp, markpower: data.p1markpower, deckpower: data.p1deckpower, drawpower: data.p1drawpower };
-		var foesock = usersock[f];
-		if (foesock && foesock.id in sockinfo){
-			if (sockinfo[foesock.id].duel == u) {
-				delete sockinfo[foesock.id].duel;
-				var seed = Math.random() * etgutil.MAX_INT;
-				sockinfo[this.id].foe = foesock;
-				sockinfo[foesock.id].foe = this;
-				var deck0 = sockinfo[foesock.id].deck, deck1 = sockinfo[this.id].deck;
-				var owndata = { seed: seed, deck: deck0, urdeck: deck1, foename:f };
-				var foedata = { flip: true, seed: seed, deck: deck1, urdeck: deck0 ,foename:u };
-				var stat = sockinfo[this.id].pvpstats, foestat = sockinfo[foesock.id].pvpstats;
-				for (var key in stat) {
-					owndata["p1" + key] = stat[key];
-					foedata["p2" + key] = stat[key];
+		function foelogic(err, deck){
+			if (!deck) return;
+			sockinfo[this.id].deck = deck;
+			sockinfo[this.id].pvpstats = { hp: data.p1hp, markpower: data.p1markpower, deckpower: data.p1deckpower, drawpower: data.p1drawpower };
+			var foesock = usersock[f];
+			if (foesock && foesock.id in sockinfo){
+				if (sockinfo[foesock.id].duel == u) {
+					delete sockinfo[foesock.id].duel;
+					var seed = Math.random() * etgutil.MAX_INT;
+					sockinfo[this.id].foe = foesock;
+					sockinfo[foesock.id].foe = this;
+					var deck0 = sockinfo[foesock.id].deck, deck1 = sockinfo[this.id].deck;
+					var owndata = { seed: seed, deck: deck0, urdeck: deck1, foename:f };
+					var foedata = { flip: true, seed: seed, deck: deck1, urdeck: deck0 ,foename:u };
+					var stat = sockinfo[this.id].pvpstats, foestat = sockinfo[foesock.id].pvpstats;
+					for (var key in stat) {
+						owndata["p1" + key] = stat[key];
+						foedata["p2" + key] = stat[key];
+					}
+					for (var key in foestat) {
+						owndata["p2" + key] = foestat[key];
+						foedata["p1" + key] = foestat[key];
+					}
+					sockEmit(this, "pvpgive", owndata);
+					sockEmit(foesock, "pvpgive", foedata);
+				} else {
+					sockinfo[this.id].duel = f;
+					sockEmit(foesock, "challenge", { f:u, pvp:true });
+					sockEmit(this, "chat", { mode: "red", msg: "You have sent a PvP request to " + f + "!" });
 				}
-				for (var key in foestat) {
-					owndata["p2" + key] = foestat[key];
-					foedata["p1" + key] = foestat[key];
-				}
-				sockEmit(this, "pvpgive", owndata);
-				sockEmit(foesock, "pvpgive", foedata);
-			} else {
-				sockinfo[this.id].duel = f;
-				sockEmit(foesock, "challenge", { f:u, pvp:true });
-				sockEmit(this, "chat", { mode: "red", msg: "You have sent a PvP request to " + f + "!" });
 			}
+		}
+		if (typeof user.selectedDeck === "string"){
+			db.hget("D:"+u, "decknames", user.selectedDeck, foelogic);
+		}else{
+			foelogic(null, user.decks.split(",")[user.selectedDeck]);
 		}
 	},
 	canceltrade:function (data, user) {

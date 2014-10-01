@@ -99,6 +99,10 @@ PIXI.AUTO_PREVENT_DEFAULT = false;
 			chatinput.value = "";
 			if (msg == "/clear"){
 				while (chatBox.firstChild) chatBox.firstChild.remove();
+			}else if (msg == "/decks" && sock.user){
+				for(var name in sock.user.decknames){
+					chat(name + " " + sock.user.decknames[name]);
+				}
 			}else if (msg == "/mute"){
 				muteall = true;
 				chatmute();
@@ -140,11 +144,14 @@ PIXI.AUTO_PREVENT_DEFAULT = false;
 		}
 	}
 	function prepuser(){
-		sock.user.decks = sock.user.decks.split(",");
 		sock.user.pool = sock.user.pool || "";
 		sock.user.accountbound = sock.user.accountbound || "";
+		sock.user.decks = sock.user.decks.split(",");
 		if (!sock.user.quest) {
 			sock.user.quest = {};
+		}
+		if (!sock.user.decknames) {
+			sock.user.decknames = {};
 		}
 		if (sock.user.freepacks) {
 			sock.user.freepacks = sock.user.freepacks.split(",").map(unaryParseInt);

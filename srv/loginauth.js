@@ -1,9 +1,9 @@
 var qstring = require("querystring");
 var crypto = require("crypto");
-var etg = require("./etg");
-var etgutil = require("./etgutil");
-var sutil = require("./etg.server");
-var aiDecks = require("./Decks");
+var sutil = require("./sutil");
+var etg = require("../etg");
+var aiDecks = require("../Decks");
+var etgutil = require("../etgutil");
 module.exports = function(db, users){
 	function loginRespond(res, servuser, pass){
 		if(!servuser.name){
