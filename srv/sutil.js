@@ -11,7 +11,9 @@ exports.loadcards = function(){
 	Cards.loaded = true;
 }
 exports.prepuser = function(servuser){
-	["gold", "selectedDeck", "daily", "dailymage", "dailydg", "aiwins", "ailosses", "pvpwins", "pvplosses"].forEach(function(field){
+	if (!servuser.selectedDeck) servuser.selectedDeck = 0;
+	else if (servuser.selectedDeck.match(/^\d$/)) servuser.selectedDeck = parseInt(servuser.selectedDeck);
+	["gold", "daily", "dailymage", "dailydg", "aiwins", "ailosses", "pvpwins", "pvplosses"].forEach(function(field){
 		servuser[field] = parseInt(servuser[field] || 0);
 	});
 }

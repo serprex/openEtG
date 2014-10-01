@@ -31,7 +31,7 @@ module.exports = function(nymph) {
 		"Arena Tier 1 is unupgraded, while Tier 2 is upgraded. All decks in a tier have the same number of attribute points",
 		"You may store 10 decks in the editor",
 		"If you type '/who' in chat you will get a list of the users who are online. '/w username message' will send your message only to one user",
-		"Chat commands: /who, /mute, /unmute, /clear, /w",
+		"Chat commands: /who, /mute, /unmute, /clear, /w, /decks",
 		"Keyboard shortcuts: space ends turn, backspace cancels, w targets opponent, s targets yourself, 1 through 8 cast cards in hand",
 		"The first text bar under the game is the import/export bar & shows your current deck. The bar below it shows game messages & sometimes the opponent's deck",
 		"The AI Deck input may be used to fight any deck of your choice, but only in sandbox mode",
