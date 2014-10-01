@@ -138,11 +138,14 @@ module.exports = function(arena, acard, startempty) {
 	function switchDeckCb(x){
 		return function() {
 			saveDeck();
+			buttons[sock.user.selectedDeck].visible = true;
+			buttons[x].visible = false;
 			sock.user.selectedDeck = x;
 			decksprite.deck = etgutil.decodedeck(sock.getDeck());
 			processDeck();
 		}
 	}
+	var buttons;
 	if (arena){
 		px.setClick(bsave, function() {
 			if (decksprite.deck.length < 35) {
@@ -190,11 +193,14 @@ module.exports = function(arena, acard, startempty) {
 		});
 		editorui.addChild(bimport);
 		if (sock.user){
+			buttons = [];
 			for (var i = 0;i < 10;i++) {
 				var button = px.mkButton(80 + i*72, 8, "Deck " + (i + 1));
 				px.setClick(button, switchDeckCb(i));
 				editorui.addChild(button);
+				buttons.push(button);
 			}
+			buttons[sock.user.selectedDeck].visible = false;
 		}
 	}
 	var bconvert = px.mkButton(5, 554, "Convert Code");
