@@ -268,12 +268,14 @@ module.exports = function(arena, acard, startempty) {
 	var dom = [];
 	if (sock.user){
 		var deckname = document.createElement("input");
+		deckname.id = "deckname";
 		deckname.style.width = "80px";
 		deckname.placeholder = "Name";
 		if (typeof sock.user.selectedDeck === "string") deckname.value = sock.user.selectedDeck;
 		deckname.addEventListener("keydown", function(e){
 			if (e.keyCode == 13){
 				saveDeck();
+				for (var i=0; i<10; i++) buttons[i].visible = true;
 				sock.user.selectedDeck = this.value;
 				decksprite.deck = etgutil.decodedeck(sock.getDeck());
 				processDeck();
@@ -282,6 +284,7 @@ module.exports = function(arena, acard, startempty) {
 		dom.push([4, 4, deckname]);
 	}
 	var deckimport = document.createElement("input");
+	deckimport.id = "deckimport";
 	deckimport.style.width = "190px";
 	deckimport.style.height = "20px";
 	deckimport.placeholder = "Deck";

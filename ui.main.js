@@ -95,13 +95,38 @@ PIXI.AUTO_PREVENT_DEFAULT = false;
 		e.cancelBubble = true;
 		if (e.keyCode == 13) {
 			e.preventDefault();
-			var msg = chatinput.value;
+			var msg = chatinput.value.trim();
 			chatinput.value = "";
 			if (msg == "/clear"){
 				while (chatBox.firstChild) chatBox.firstChild.remove();
-			}else if (msg == "/decks" && sock.user){
+			}else if (msg.match(/^\/decks/) && sock.user){
+				var prefix = msg.length > 6 && msg.substring(6).replace(/ {2,}/g, " ").trim().split(" ");
 				for(var name in sock.user.decknames){
-					chat(name + " " + sock.user.decknames[name]);
+					if (prefix && !prefix.some(function(x){return name.indexOf(x)==0;})) continue;
+					var span = document.createElement("span");
+					span.appendChild(document.createTextNode(name));
+					(function(name){
+						span.addEventListener("click", function(e){
+							if (e.target != this) return;
+							var deckname = document.getElementById("deckname"), deckimport = document.getElementById("deckimport");
+							if (deckname && deckimport){
+								deckname.value = name;
+								deckimport.value = sock.user.decknames[name];
+								deckname.dispatchEvent(new Event("change"));
+								deckimport.dispatchEvent(new Event("change"));
+								var e = new Event("keydown");
+								e.keyCode = 13;
+								deckname.dispatchEvent(e);
+								deckimport.dispatchEvent(e);
+							}
+						});
+					})(name);
+					var link = document.createElement("a");
+					link.href = "deck/" + sock.user.decknames[name];
+					link.target = "_blank";
+					link.appendChild(document.createTextNode(sock.user.decknames[name]));
+					span.appendChild(link);
+					chat.addSpan(span);
 				}
 			}else if (msg == "/mute"){
 				muteall = true;
