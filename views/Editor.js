@@ -203,6 +203,7 @@ module.exports = function(arena, acard, startempty) {
 		if (sock.user) {
 			var bsave = px.mkButton(8, 128, "Save");
 			px.setClick(bsave, function() {
+				for (var i = 0;i < 10;i++) buttons[i].visible = true;
 				sock.user.selectedDeck = deckname.value;
 				saveDeck();
 			})
@@ -210,7 +211,7 @@ module.exports = function(arena, acard, startempty) {
 			var bload = px.mkButton(8, 160, "Load");
 			px.setClick(bload, function() {
 				for (var i = 0;i < 10;i++) buttons[i].visible = true;
-				sock.user.selectedDeck = this.value;
+				sock.user.selectedDeck = deckname.value;
 				decksprite.deck = etgutil.decodedeck(sock.getDeck());
 				processDeck();
 			})
@@ -284,7 +285,6 @@ module.exports = function(arena, acard, startempty) {
 			if (typeof sock.user.selectedDeck === "string") deckname.value = sock.user.selectedDeck;
 			deckname.addEventListener("keydown", function(e){
 				if (e.keyCode == 13){
-					saveDeck();
 					for (var i=0; i<10; i++) buttons[i].visible = true;
 					sock.user.selectedDeck = this.value;
 					decksprite.deck = etgutil.decodedeck(sock.getDeck());
