@@ -99,7 +99,7 @@ module.exports = function(arena, acard, startempty) {
 	}
 	var editorui = px.mkView();
 	var bclear = px.mkButton(8, 32, "Clear");
-	var bsave = px.mkButton(8, 64, "Save & Exit");
+	var bexit = px.mkButton(8, 64, "Save & Exit");
 	px.setClick(bclear, function() {
 		if (sock.user) {
 			cardminus = {};
@@ -108,7 +108,7 @@ module.exports = function(arena, acard, startempty) {
 		decksprite.renderDeck(decksprite.deck.length);
 	});
 	editorui.addChild(bclear);
-	editorui.addChild(bsave);
+	editorui.addChild(bexit);
 	function sumscore(){
 		var sum = 0;
 		for(var k in artable){
@@ -155,7 +155,7 @@ module.exports = function(arena, acard, startempty) {
 	}
 	var buttons;
 	if (arena){
-		px.setClick(bsave, function() {
+		px.setClick(bexit, function() {
 			if (decksprite.deck.length < 35) {
 				chat("35 cards required before submission");
 				return;
@@ -189,7 +189,7 @@ module.exports = function(arena, acard, startempty) {
 		makeattrui(1, "mark");
 		makeattrui(2, "draw");
 	}else{
-		px.setClick(bsave, function() {
+		px.setClick(bexit, function() {
 			if (sock.user) saveDeck(true);
 			startMenu();
 		});
@@ -200,7 +200,21 @@ module.exports = function(arena, acard, startempty) {
 			processDeck();
 		});
 		editorui.addChild(bimport);
-		if (sock.user){
+		if (sock.user) {
+			var bsave = px.mkButton(8, 128, "Save");
+			px.setClick(bsave, function() {
+				sock.user.selectedDeck = deckname.value;
+				saveDeck();
+			})
+			editorui.addChild(bsave);
+			var bload = px.mkButton(8, 160, "Load");
+			px.setClick(bload, function() {
+				for (var i = 0;i < 10;i++) buttons[i].visible = true;
+				sock.user.selectedDeck = this.value;
+				decksprite.deck = etgutil.decodedeck(sock.getDeck());
+				processDeck();
+			})
+			editorui.addChild(bload);
 			buttons = [];
 			for (var i = 0;i < 10;i++) {
 				var button = px.mkButton(100 + i*72, 8, "Deck " + (i + 1));
