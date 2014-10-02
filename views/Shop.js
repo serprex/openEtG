@@ -56,11 +56,6 @@ module.exports = function() {
 	});
 	storeui.addChild(bget);
 
-	//exit button
-	var bexit = px.mkButton(775, 246, "Exit");
-	px.setClick(bexit, require("./MainMenu"));
-	storeui.addChild(bexit);
-
 	//buy button
 	var bbuy = px.mkButton(775, 156, "Buy Pack");
 	px.setClick(bbuy, function() {
@@ -166,5 +161,5 @@ module.exports = function() {
 	var packmulti = document.createElement("input");
 	packmulti.style.width = "64px";
 	packmulti.placeholder = "Bulk";
-	px.refreshRenderer({view: storeui, div: {packmulti: [[777, 184, packmulti]]}});
+	px.refreshRenderer({view: storeui, div: {packmulti: [[777, 184, packmulti], [775, 246, ["Exit", require("./MainMenu")]]]}});
 }
