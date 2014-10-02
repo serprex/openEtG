@@ -155,7 +155,7 @@ var userEvents = {
 			db.hmset(au, {deck: data.d, hp: data.hp, draw: data.draw, mark: data.mark});
 		}else{
 			db.hmset(au, {day: sutil.getDay(), deck: data.d, card: user.ocard, win:0, loss:0, hp: data.hp, draw: data.draw, mark: data.mark});
-			db.zadd("arena"+(data.lv?"1":""), 100, data.u);
+			db.zadd("arena"+(data.lv?"1":""), 200, data.u);
 		}
 	},
 	arenainfo:function(data, user){
@@ -191,7 +191,7 @@ var userEvents = {
 				db.hmget(akey, "win", "loss", "day", function(err, wld){
 					if (err || !wld) return;
 					for(var i=0; i<3; i++) wld[i] = parseInt(wld[i]);
-					if (!err && !data.won && (wld[0]-wld[1] < -15 || sutil.getDay()-wld[2] > 14)){
+					if (!err && !data.won && (score < 15 || wld[0]-wld[1] < -15 || sutil.getDay()-wld[2] > 14)){
 						db.zrem(arena, data.aname);
 					}else{
 						db.zadd(arena, wilson(wld[0]+1, wld[0]+wld[1]+1)*1000, data.aname);

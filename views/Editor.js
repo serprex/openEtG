@@ -12,7 +12,7 @@ module.exports = function(arena, acard, startempty) {
 	if (!Cards.loaded) return;
 	if (arena && (!sock.user || arena.deck === undefined || acard === undefined)) arena = false;
 	function updateField(renderdeck){
-		options.deck = deckimport.value = etgutil.encodedeck(decksprite.deck) + "01" + etg.toTrueMark(editormark);
+		if (deckimport) options.deck = deckimport.value = etgutil.encodedeck(decksprite.deck) + "01" + etg.toTrueMark(editormark);
 	}
 	function sumCardMinus(cardminus, code){
 		var sum = 0;
@@ -211,11 +211,6 @@ module.exports = function(arena, acard, startempty) {
 			if (typeof sock.user.selectedDeck === "number") buttons[sock.user.selectedDeck].visible = false;
 		}
 	}
-	var bconvert = px.mkButton(5, 554, "Convert Code");
-	px.setClick(bconvert, function() {
-		deckimport.value = decksprite.deck.join(" ") + " " + etg.toTrueMark(editormark);
-	});
-	editorui.addChild(bconvert);
 	var editormarksprite = new PIXI.Sprite(gfx.nopic);
 	editormarksprite.position.set(66, 200);
 	editorui.addChild(editormarksprite);
@@ -266,45 +261,53 @@ module.exports = function(arena, acard, startempty) {
 	cardArt.position.set(734, 8);
 	editorui.addChild(cardArt);
 	var dom = [];
-	if (sock.user){
-		var deckname = document.createElement("input");
-		deckname.id = "deckname";
-		deckname.style.width = "80px";
-		deckname.placeholder = "Name";
-		if (typeof sock.user.selectedDeck === "string") deckname.value = sock.user.selectedDeck;
-		deckname.addEventListener("keydown", function(e){
+	if (!arena){
+		if (sock.user){
+			var deckname = document.createElement("input");
+			deckname.id = "deckname";
+			deckname.style.width = "80px";
+			deckname.placeholder = "Name";
+			if (typeof sock.user.selectedDeck === "string") deckname.value = sock.user.selectedDeck;
+			deckname.addEventListener("keydown", function(e){
+				if (e.keyCode == 13){
+					saveDeck();
+					for (var i=0; i<10; i++) buttons[i].visible = true;
+					sock.user.selectedDeck = this.value;
+					decksprite.deck = etgutil.decodedeck(sock.getDeck());
+					processDeck();
+				}
+			});
+			dom.push([4, 4, deckname]);
+		}
+		var deckimport = document.createElement("input");
+		deckimport.id = "deckimport";
+		deckimport.style.width = "190px";
+		deckimport.style.height = "20px";
+		deckimport.placeholder = "Deck";
+		deckimport.addEventListener("click", function(){this.setSelectionRange(0, 333)});
+		deckimport.addEventListener("keydown", function(e){
 			if (e.keyCode == 13){
-				saveDeck();
-				for (var i=0; i<10; i++) buttons[i].visible = true;
-				sock.user.selectedDeck = this.value;
-				decksprite.deck = etgutil.decodedeck(sock.getDeck());
-				processDeck();
+				this.blur();
+				bimport.click();
 			}
 		});
-		dom.push([4, 4, deckname]);
+		options.register("deck", deckimport);
+		dom.push([520, 238, deckimport],
+			[5, 554, ["Convert Code", function(){
+				deckimport.value = decksprite.deck.join(" ") + " " + etg.toTrueMark(editormark);
+			}]]
+		);
 	}
-	var deckimport = document.createElement("input");
-	deckimport.id = "deckimport";
-	deckimport.style.width = "190px";
-	deckimport.style.height = "20px";
-	deckimport.placeholder = "Deck";
-	deckimport.addEventListener("click", function(){this.setSelectionRange(0, 333)});
-	deckimport.addEventListener("keydown", function(e){
-		if (e.keyCode == 13){
-			this.blur();
-			bimport.click();
-		}
-	});
-	options.register("deck", deckimport);
-	dom.push([520, 238, deckimport]);
 	px.refreshRenderer({view: editorui, div: {editdiv: dom}}, function() {
 		cardArt.visible = false;
 		var mpos = px.getMousePos();
 		cardsel.next(cardpool, cardminus, mpos);
 		decksprite.next(mpos);
 	});
-	deckimport.focus();
-	deckimport.setSelectionRange(0, 333);
+	if (!arena){
+		deckimport.focus();
+		deckimport.setSelectionRange(0, 333);
+	}
 	processDeck();
 }
 var startMenu = require("./MainMenu");

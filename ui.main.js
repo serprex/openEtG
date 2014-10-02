@@ -9,6 +9,7 @@ PIXI.AUTO_PREVENT_DEFAULT = false;
 (function(){
 	var guestname, muteset = {}, muteall;
 	var px = require("./px");
+	var etg = require("./etg");
 	var gfx = require("./gfx");
 	var ui = require("./uiutil");
 	var chat = require("./chat");
@@ -101,33 +102,34 @@ PIXI.AUTO_PREVENT_DEFAULT = false;
 				while (chatBox.firstChild) chatBox.firstChild.remove();
 			}else if (msg.match(/^\/decks/) && sock.user){
 				var prefix = msg.length > 6 && msg.substring(6).replace(/ {2,}/g, " ").trim().split(" ");
-				for(var name in sock.user.decknames){
-					if (prefix && !prefix.some(function(x){return name.indexOf(x)==0;})) continue;
+				var names = Object.keys(sock.user.decknames);
+				if (prefix) names = names.filter(function(name){return prefix.some(function(x){return name.indexOf(x)==0;})});
+				names.sort();
+				names.forEach(function(name){
+					var deck = sock.user.decknames[name];
 					var span = document.createElement("span");
 					span.appendChild(document.createTextNode(name));
-					(function(name){
-						span.addEventListener("click", function(e){
-							if (e.target != this) return;
-							var deckname = document.getElementById("deckname"), deckimport = document.getElementById("deckimport");
-							if (deckname && deckimport){
-								deckname.value = name;
-								deckimport.value = sock.user.decknames[name];
-								deckname.dispatchEvent(new Event("change"));
-								deckimport.dispatchEvent(new Event("change"));
-								var e = new Event("keydown");
-								e.keyCode = 13;
-								deckname.dispatchEvent(e);
-								deckimport.dispatchEvent(e);
-							}
-						});
-					})(name);
+					span.addEventListener("click", function(e){
+						if (e.target != this) return;
+						var deckname = document.getElementById("deckname"), deckimport = document.getElementById("deckimport");
+						if (deckname && deckimport){
+							deckname.value = name;
+							deckimport.value = deck;
+							deckname.dispatchEvent(new Event("change"));
+							deckimport.dispatchEvent(new Event("change"));
+							var e = new Event("keydown");
+							e.keyCode = 13;
+							deckname.dispatchEvent(e);
+							deckimport.dispatchEvent(e);
+						}
+					});
 					var link = document.createElement("a");
-					link.href = "deck/" + sock.user.decknames[name];
+					link.href = "deck/" + deck;
 					link.target = "_blank";
-					link.appendChild(document.createTextNode(sock.user.decknames[name]));
+					link.appendChild(document.createTextNode(etg.eleNames[etg.fromTrueMark(deck.substring(deck.length-3))]));
 					span.appendChild(link);
 					chat.addSpan(span);
-				}
+				});
 			}else if (msg == "/mute"){
 				muteall = true;
 				chatmute();
