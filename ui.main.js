@@ -1,11 +1,6 @@
 "use strict";
 PIXI.AUTO_PREVENT_DEFAULT = false;
-(function(){
-	var htmlElements = ["leftpane", "chatinput", "aideck", "foename", "chatBox"];
-	htmlElements.forEach(function(name){
-		window[name] = document.getElementById(name);
-	});
-})();
+window.aideck = document.getElementById("aideck");
 (function(){
 	var guestname, muteset = {}, muteall;
 	var px = require("./px");
@@ -96,9 +91,10 @@ PIXI.AUTO_PREVENT_DEFAULT = false;
 		e.cancelBubble = true;
 		if (e.keyCode == 13) {
 			e.preventDefault();
-			var msg = chatinput.value.trim();
+			var chatinput = document.getElementById("chatinput"), msg = chatinput.value.trim();
 			chatinput.value = "";
 			if (msg == "/clear"){
+				var chatBox = document.getElementById("chatBox");
 				while (chatBox.firstChild) chatBox.firstChild.remove();
 			}else if (msg == "/who"){
 				sock.emit("who");
@@ -240,7 +236,7 @@ PIXI.AUTO_PREVENT_DEFAULT = false;
 			}
 		}
 	})({
-		leftpane: {click: leftpane.blur},
+		leftpane: {click: function(){this.blur()}},
 		change: {click: changeClick},
 		login: {click: loginClick},
 		username: {keydown: maybeLogin},

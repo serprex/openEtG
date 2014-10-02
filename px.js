@@ -3,12 +3,17 @@ var gfx = require("./gfx");
 var etg = require("./etg");
 var ui = require("./uiutil");
 var Cards = require("./Cards");
-var renderer = new PIXI.autoDetectRenderer(900, 600, leftpane, true);
+var renderer = new PIXI.autoDetectRenderer(900, 600, document.getElementById("leftpane"), true);
 var realStage = new PIXI.Stage(0, true), curStage = {};
 exports.realStage = realStage;
 function animate() {
 	setTimeout(requestAnimate, 40);
-	exports.next();
+	if (curStage.next){
+		curStage.next();
+	}
+	if (curStage.view){
+		renderer.render(realStage);
+	}
 }
 function requestAnimate() { requestAnimFrame(animate); }
 exports.load = function(){
@@ -23,14 +28,13 @@ exports.load = function(){
 		require("./views/MainMenu")();
 	});
 }
-exports.refreshRenderer = function(stage, animCb, dontrender) {
+exports.refreshRenderer = function(stage) {
 	if (realStage.children.length > 1){
 		var oldstage = realStage.children[1];
 		if (oldstage.endnext) oldstage.endnext();
 		realStage.removeChildAt(1);
 	}
 	if (stage instanceof PIXI.DisplayObject) stage = {view: stage};
-	stage.next = animCb;
 	if (stage.div){
 		for(var id in stage.div){
 			var div = document.createElement("div");
@@ -53,11 +57,7 @@ exports.refreshRenderer = function(stage, animCb, dontrender) {
 				div.appendChild(ele);
 			});
 			stage.div[id] = div;
-		}
-	}
-	if (stage.div){
-		for(var id in stage.div){
-			document.body.appendChild(stage.div[id]);
+			document.body.appendChild(div);
 		}
 	}
 	if (curStage.div){
@@ -72,14 +72,6 @@ exports.refreshRenderer = function(stage, animCb, dontrender) {
 		renderer.view.style.display = "none";
 	}
 	curStage = stage;
-}
-exports.next = function(){
-	if (curStage.next){
-		curStage.next();
-	}
-	if (curStage.view){
-		renderer.render(realStage);
-	}
 }
 exports.getMousePos = function(){
 	return realStage.getMousePosition();

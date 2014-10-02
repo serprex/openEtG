@@ -298,12 +298,12 @@ module.exports = function(arena, acard, startempty) {
 			}]]
 		);
 	}
-	px.refreshRenderer({view: editorui, div: {editdiv: dom}}, function() {
+	px.refreshRenderer({view: editorui, div: {editdiv: dom}, next:function() {
 		cardArt.visible = false;
 		var mpos = px.getMousePos();
 		cardsel.next(cardpool, cardminus, mpos);
 		decksprite.next(mpos);
-	});
+	}});
 	if (!arena){
 		deckimport.focus();
 		deckimport.setSelectionRange(0, 333);

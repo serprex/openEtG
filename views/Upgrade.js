@@ -125,7 +125,7 @@ module.exports = function() {
 	upgradeui.addChild(cardsel);
 	var cardpool, selectedCard;
 	adjustdeck();
-	px.refreshRenderer(upgradeui, function() {
+	px.refreshRenderer({view: upgradeui, next:function() {
 		cardsel.next(cardpool);
-	});
+	}});
 }

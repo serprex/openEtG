@@ -1,3 +1,4 @@
+var chatBox = document.getElementById("chatBox");
 function addSpan(span) {
 	span.appendChild(document.createElement("br"));
 	var scroll = chatBox.scrollTop == (chatBox.scrollHeight - chatBox.offsetHeight);

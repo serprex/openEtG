@@ -82,11 +82,11 @@ module.exports = function() {
 		},
 		tradecanceled: startMenu,
 	};
-	px.refreshRenderer(stage, function() {
+	px.refreshRenderer({view: stage, next:function() {
 		var mpos = px.getMousePos();
 		cardArt.visible = false;
 		cardsel.next(cardpool, cardminus, mpos);
 		foeDeck.next(mpos);
 		ownDeck.next(mpos);
-	});
+	}});
 }

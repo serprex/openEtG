@@ -225,10 +225,10 @@ function parsepvpstats(data){
 	parseInput(data, "p1deckpower", options.pvpdeck);
 }
 function parseaistats(data){
-	parseInput(data, "p2hp", aihp.value);
-	parseInput(data, "p2drawpower", aidraw.value, 8);
-	parseInput(data, "p2markpower", aimark.value, 1188);
-	parseInput(data, "p2deckpower", aideckpow.value);
+	parseInput(data, "p2hp", document.getElementById("aihp").value);
+	parseInput(data, "p2drawpower", document.getElementById("aidraw").value, 8);
+	parseInput(data, "p2markpower", document.getElementById("aimark").value, 1188);
+	parseInput(data, "p2deckpower", document.getElementById("aideckpow").value);
 }
 exports.mkFont = mkFont;
 exports.reflectPos = reflectPos;

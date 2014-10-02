@@ -32,7 +32,7 @@ module.exports = function(data){
 		}
 	}
 	stage.addChild(new px.MenuText(100, 16, "Cumulative wealth: " + Math.round(wealth)));
-	px.refreshRenderer(stage, function(){
+	px.refreshRenderer({view:stage, next:function(){
 		cardsel.next(cardpool);
-	});
+	}});
 }
