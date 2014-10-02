@@ -60,15 +60,10 @@ function activeUsers() {
 	return activeusers;
 }
 function genericChat(socket, data){
-	if (data.msg == "/who") {
-		sockEmit(socket, "chat", { mode: "red", msg: activeUsers().join(", ") || "There are no users online :(" })
-	}
-	else{
-		data.x = "chat";
-		var msg = JSON.stringify(data);
-		for (var id in io.clients){
-			io.clients[id].send(msg);
-		}
+	data.x = "chat";
+	var msg = JSON.stringify(data);
+	for (var id in io.clients){
+		io.clients[id].send(msg);
 	}
 }
 function getAgedHp(hp, age){
@@ -562,6 +557,9 @@ var sockEvents = {
 	},
 	wantingpvp:function(data){
 		sockinfo[this.id].wantingpvp = data.want;
+	},
+	who:function(data){
+		sockEmit(this, "chat", { mode: "red", msg: activeUsers().join(", ") || "There are no users online :(" });
 	},
 };
 io.on("connection", function(socket) {

@@ -100,6 +100,8 @@ PIXI.AUTO_PREVENT_DEFAULT = false;
 			chatinput.value = "";
 			if (msg == "/clear"){
 				while (chatBox.firstChild) chatBox.firstChild.remove();
+			}else if (msg == "/who"){
+				sock.emit("who");
 			}else if (msg.match(/^\/decks/) && sock.user){
 				var prefix = msg.length > 6 && msg.substring(6).replace(/ {2,}/g, " ").trim().split(" ");
 				var names = Object.keys(sock.user.decknames);
@@ -142,22 +144,24 @@ PIXI.AUTO_PREVENT_DEFAULT = false;
 			}else if (msg.match(/^\/unmute /)){
 				delete muteset[msg.substring(8)];
 				chatmute();
-			}else if (sock.user){
-				var msgdata = {msg: msg};
-				if (msg.match(/^\/w( |")/)) {
-					var match = msg.match(/^\/w"([^"]*)"/);
-					var to = (match && match[1]) || msg.substring(3, msg.indexOf(" ", 4));
-					if (!to) return;
-					chatinput.value = msg.substr(0, 4+to.length);
-					msgdata.msg = msg.substr(4+to.length);
-					msgdata.to = to;
+			}else if (!msg.match(/^\/[^/]/)) {
+				msg = msg.replace(/^\/\//, "/");
+				if (sock.user){
+					var msgdata = {msg: msg};
+					if (msg.match(/^\/w( |")/)) {
+						var match = msg.match(/^\/w"([^"]*)"/);
+						var to = (match && match[1]) || msg.substring(3, msg.indexOf(" ", 4));
+						if (!to) return;
+						chatinput.value = msg.substr(0, 4+to.length);
+						msgdata.msg = msg.substr(4+to.length);
+						msgdata.to = to;
+					}
+					if (!msgdata.msg.match(/^\s*$/)) sock.userEmit("chat", msgdata);
+				}else{
+					var name = options.username || guestname || (guestname = (10000 + Math.floor(Math.random() * 89999)) + "");
+					sock.emit("guestchat", { msg: msg, u: name });
 				}
-				if (!msgdata.msg.match(/^\s*$/)) sock.userEmit("chat", msgdata);
-			}
-			else if (!msg.match(/^\s*$/)) {
-				var name = options.username || guestname || (guestname = (10000 + Math.floor(Math.random() * 89999)) + "");
-				sock.emit("guestchat", { msg: msg, u: name });
-			}
+			}else chat("Not a command: " + msg);
 		}
 	}
 	function unaryParseInt(x) {
