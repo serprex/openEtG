@@ -272,26 +272,26 @@ var userEvents = {
 		});
 	},
 	foewant:function(data, user){
-		var u=data.u, f=data.f;
+		var u=data.u, f=data.f, socket = this;
 		if (u == f){
 			return;
 		}
 		console.log(u + " requesting " + f);
 		function foelogic(err, deck){
 			if (!deck) return;
-			sockinfo[this.id].deck = deck;
-			sockinfo[this.id].pvpstats = { hp: data.p1hp, markpower: data.p1markpower, deckpower: data.p1deckpower, drawpower: data.p1drawpower };
+			sockinfo[socket.id].deck = deck;
+			sockinfo[socket.id].pvpstats = { hp: data.p1hp, markpower: data.p1markpower, deckpower: data.p1deckpower, drawpower: data.p1drawpower };
 			var foesock = usersock[f];
 			if (foesock && foesock.id in sockinfo){
 				if (sockinfo[foesock.id].duel == u) {
 					delete sockinfo[foesock.id].duel;
 					var seed = Math.random() * etgutil.MAX_INT;
-					sockinfo[this.id].foe = foesock;
-					sockinfo[foesock.id].foe = this;
-					var deck0 = sockinfo[foesock.id].deck, deck1 = sockinfo[this.id].deck;
+					sockinfo[socket.id].foe = foesock;
+					sockinfo[foesock.id].foe = socket;
+					var deck0 = sockinfo[foesock.id].deck, deck1 = sockinfo[socket.id].deck;
 					var owndata = { seed: seed, deck: deck0, urdeck: deck1, foename:f };
 					var foedata = { flip: true, seed: seed, deck: deck1, urdeck: deck0 ,foename:u };
-					var stat = sockinfo[this.id].pvpstats, foestat = sockinfo[foesock.id].pvpstats;
+					var stat = sockinfo[socket.id].pvpstats, foestat = sockinfo[foesock.id].pvpstats;
 					for (var key in stat) {
 						owndata["p1" + key] = stat[key];
 						foedata["p2" + key] = stat[key];
@@ -300,12 +300,12 @@ var userEvents = {
 						owndata["p2" + key] = foestat[key];
 						foedata["p1" + key] = foestat[key];
 					}
-					sockEmit(this, "pvpgive", owndata);
+					sockEmit(socket, "pvpgive", owndata);
 					sockEmit(foesock, "pvpgive", foedata);
 				} else {
-					sockinfo[this.id].duel = f;
+					sockinfo[socket.id].duel = f;
 					sockEmit(foesock, "challenge", { f:u, pvp:true });
-					sockEmit(this, "chat", { mode: "red", msg: "You have sent a PvP request to " + f + "!" });
+					sockEmit(socket, "chat", { mode: "red", msg: "You have sent a PvP request to " + f + "!" });
 				}
 			}
 		}

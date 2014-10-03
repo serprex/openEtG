@@ -3,27 +3,28 @@ var etg = require("./etg");
 var evalGameState = require("./eval");
 var Actives = require("./Actives");
 var Cards = require("./Cards");
+function getWorstCard(game){
+	var worstcard = 0, curEval = 2147483647;
+	for (var i=0; i<8; i++){
+		var gclone = game.clone();
+		gclone.player2.hand[i].die();
+		var discvalue = evalGameState(gclone);
+		if (discvalue < curEval){
+			curEval = discvalue;
+			worstcard = i;
+		}
+	}
+	return [worstcard, curEval];
+}
 module.exports = function(game, previous) {
-	var currentEval;
+	var currentEval, worstcard;
 	if (previous === undefined){
-		var worstcard;
 		if (game.player2.hand.length < 8){
 			currentEval = evalGameState(game);
 		}else{
-			currentEval = 2147483647;
-			for (var i=0; i<game.player2.hand.length; i++){
-				var gclone = game.clone();
-				var cardinst = gclone.player2.hand[i];
-				gclone.player2.hand.splice(i, 1);
-				if (cardinst.card.active.discard){
-					cardinst.card.active.discard(cardinst);
-				}
-				var discvalue = evalGameState(gclone);
-				if (discvalue < currentEval){
-					currentEval = discvalue;
-					worstcard = i;
-				}
-			}
+			var worst_eval = getWorstCard(game);
+			worstcard = worst_eval[0];
+			currentEval = worst_eval[1];
 		}
 		var lethal = require("./lethal")(game);
 		return lethal[0] < 0 ?
@@ -32,6 +33,7 @@ module.exports = function(game, previous) {
 	}
 	var limit = previous[5], cmdct = previous[2], cdepth = previous[3];
 	currentEval = previous[1];
+	worstcard = previous[6];
 	function iterLoop(game, n, cmdct0, casthash, nth) {
 		function iterCore(c) {
 			if (!c || !c.canactive()) return;
@@ -52,9 +54,17 @@ module.exports = function(game, previous) {
 					var tbits = game.tgtToBits(t) ^ 8;
 					var gameClone = game.clone();
 					gameClone.bitsToTgt(cbits).useactive(gameClone.bitsToTgt(tbits));
-					var v = evalGameState(gameClone);
+					var v, wc;
+					if (gameClone.player2.hand.length < 8){
+						v = evalGameState(gameClone);
+					}else{
+						var worst_eval = getWorstCard(gameClone);
+						wc = worst_eval[0];
+						v = worst_eval[1];
+					}
 					if (v < currentEval || (v == currentEval && n > cdepth)) {
 						cmdct = cmdct0 || (cbits | tbits << 9);
+						worstcard = wc;
 						cdepth = n;
 						currentEval = v;
 					}
@@ -110,10 +120,10 @@ module.exports = function(game, previous) {
 	}
 	var ret = iterLoop(game, 1, undefined, previous[4], previous[0]);
 	if (ret){
-		return [previous[0]+2, currentEval, cmdct, cdepth, ret, limit, previous[6]];
+		return [previous[0]+2, currentEval, cmdct, cdepth, ret, limit, worstcard];
 	}else if (cmdct) {
 		return ["cast", cmdct];
 	} else if (game.player2.hand.length == 8) {
-		return ["endturn", previous[6]];
+		return ["endturn", worstcard];
 	} else return ["endturn"];
 }
