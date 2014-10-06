@@ -975,8 +975,10 @@ pacify:function(c,t){
 	t.atk -= t.trueatk();
 },
 paleomagnetism:function(c,t){
-	var pillars = etg.filtercards(c.card.upped, function(x) { return x.type == etg.PillarEnum && !x.rarity; });
-	new etg.Pillar(pillars[(c.owner.rng()<.5?0:c.owner.mark*2)], c.owner).place();
+	if (c.owner == t){
+		var pillars = etg.filtercards(c.card.upped, function(x) { return x.type == etg.PillarEnum && !x.rarity; });
+		new etg.Pillar(pillars[(c.owner.rng()<.5?0:c.owner.mark*2)], c.owner).place();
+	}
 },
 pandemonium:function(c,t){
 	c.owner.foe.masscc(c, Actives.cseed, true);
