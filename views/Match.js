@@ -502,9 +502,8 @@ function startMatch(game, foeDeck) {
 			if (!game.goldreward) {
 				var goldwon;
 				if (game.level !== undefined) {
-					var basereward = [1, 8, 15, 44, 15, 44][game.level];
-					var hpfactor = [7, 4.5, 4, 1.3, 4, 1.3][game.level];
-					goldwon = basereward + Math.floor(game.player1.hp / hpfactor);
+					var reward = [15, 30, 70, 200, 60, 120][game.level];
+					goldwon = Math.floor(reward / 3 + game.player1.hp * reward / 150);
 				} else goldwon = 0;
 				game.goldreward = goldwon + (game.cost || 0) + (game.addonreward || 0);
 			}
