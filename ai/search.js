@@ -4,8 +4,11 @@ var evalGameState = require("./eval");
 var Actives = require("./Actives");
 var Cards = require("./Cards");
 function getWorstCard(game){
-	var worstcard = 0, curEval = 2147483647;
+	var worstcard = 0, curEval = 2147483647, hash = {};
 	for (var i=0; i<8; i++){
+		var code = game.player2.hand[i].card.code;
+		if (code in hash) continue;
+		hash[code] = true;
 		var gclone = game.clone();
 		gclone.player2.hand[i].die();
 		var discvalue = evalGameState(gclone);
