@@ -150,6 +150,7 @@ module.exports = function(arena, acard, startempty) {
 			for (var i=0; i<10; i++) buttons[i].visible = i != x;
 			sock.user.selectedDeck = x;
 			decksprite.deck = etgutil.decodedeck(sock.getDeck());
+			deckname.value = "";
 			processDeck();
 		}
 	}
@@ -284,11 +285,9 @@ module.exports = function(arena, acard, startempty) {
 			deckname.placeholder = "Name";
 			if (typeof sock.user.selectedDeck === "string") deckname.value = sock.user.selectedDeck;
 			deckname.addEventListener("keydown", function(e){
-				if (e.keyCode == 13){
-					for (var i=0; i<10; i++) buttons[i].visible = true;
-					sock.user.selectedDeck = this.value;
-					decksprite.deck = etgutil.decodedeck(sock.getDeck());
-					processDeck();
+				if (e.keyCode == 13) {
+					saveDeck();
+					bload.click();
 				}
 			});
 			dom.push([4, 4, deckname]);
