@@ -99,7 +99,7 @@ module.exports = function(arena, acard, startempty) {
 	}
 	var editorui = px.mkView();
 	var bclear = px.mkButton(8, 32, "Clear");
-	var bexit = px.mkButton(8, 64, "Save & Exit");
+	var bexit = px.mkButton(8, 58, "Save & Exit");
 	px.setClick(bclear, function() {
 		if (sock.user) {
 			cardminus = {};
@@ -172,7 +172,7 @@ module.exports = function(arena, acard, startempty) {
 			chat("Arena deck submitted");
 			startMenu();
 		});
-		var bexit = px.mkButton(8, 96, "Exit");
+		var bexit = px.mkButton(8, 84, "Exit");
 		px.setClick(bexit, function() {
 			require("./ArenaInfo")(arena);
 		});
@@ -194,7 +194,7 @@ module.exports = function(arena, acard, startempty) {
 			if (sock.user) saveDeck(true);
 			startMenu();
 		});
-		var bimport = px.mkButton(8, 96, "Import");
+		var bimport = px.mkButton(8, 84, "Import");
 		px.setClick(bimport, function() {
 			var dvalue = options.deck.trim();
 			decksprite.deck = ~dvalue.indexOf(" ") ? dvalue.split(" ") : etgutil.decodedeck(dvalue);
@@ -202,24 +202,34 @@ module.exports = function(arena, acard, startempty) {
 		});
 		editorui.addChild(bimport);
 		if (sock.user) {
-			var bsave = px.mkButton(8, 128, "Save");
+			var bsave = px.mkButton(8, 110, "Save");
 			px.setClick(bsave, function() {
 				for (var i = 0;i < 10;i++) buttons[i].visible = true;
 				sock.user.selectedDeck = deckname.value;
 				saveDeck();
 			})
 			editorui.addChild(bsave);
-			var bload = px.mkButton(8, 160, "Load");
+			var bload = px.mkButton(8, 136, "Load");
 			px.setClick(bload, function() {
+				saveDeck();
 				for (var i = 0;i < 10;i++) buttons[i].visible = true;
 				sock.user.selectedDeck = deckname.value;
 				decksprite.deck = etgutil.decodedeck(sock.getDeck());
 				processDeck();
 			})
 			editorui.addChild(bload);
+			var bexitnosave = px.mkButton(8, 162, "Exit");
+			px.setClick(bexitnosave, function() {
+				startMenu();
+			})
+			editorui.addChild(bexitnosave);
+			var tname = new px.MenuText(100, 8, "");
+			editorui.addChild(tname);
 			buttons = [];
 			for (var i = 0;i < 10;i++) {
-				var button = px.mkButton(100 + i*72, 8, "Deck " + (i + 1));
+				var button = px.mkButton(300 + i * 36, 8, "" +(i + 1));
+				button.width /= 2;
+				button.children[0].scale.x = 2
 				px.setClick(button, switchDeckCb(i));
 				editorui.addChild(button);
 				buttons.push(button);
@@ -286,7 +296,6 @@ module.exports = function(arena, acard, startempty) {
 			if (typeof sock.user.selectedDeck === "string") deckname.value = sock.user.selectedDeck;
 			deckname.addEventListener("keydown", function(e){
 				if (e.keyCode == 13) {
-					saveDeck();
 					bload.click();
 				}
 			});
@@ -316,6 +325,7 @@ module.exports = function(arena, acard, startempty) {
 		var mpos = px.getMousePos();
 		cardsel.next(cardpool, cardminus, mpos);
 		decksprite.next(mpos);
+		if (sock.user && !arena) tname.setText(typeof sock.user.selectedDeck === "number" ? ("Deck " + (sock.user.selectedDeck + 1)) : sock.user.selectedDeck);
 	}});
 	if (!arena){
 		deckimport.focus();
