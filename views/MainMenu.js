@@ -61,7 +61,7 @@ module.exports = function(nymph) {
 		770, 90, 90, 184,
 		770, 540, 90, 38
 	));
-	["AI BATTLE", "ARENA", "DECK MANAGEMENT", "OPTIONS", "PvP"].forEach(function(text, i){
+	["AI BATTLE", "ARENA", "CARDS", "OPTIONS", "PvP"].forEach(function(text, i){
 		var sectionText = new PIXI.Text(text, {font: "56px Dosis", fill: "#0c4262"});
 		sectionText.position.set(236, 108+i*100);
 		sectionText.anchor.x = .5;
@@ -85,6 +85,10 @@ module.exports = function(nymph) {
 	var tinfo = new px.MenuText(50, 26, "", 800);
 	menuui.addChild(tinfo);
 
+	function wealthTop(){
+		sock.emit("wealthtop");
+		this.style.display = "none";
+	}
 	buttons.push(
 		[50, 100, ["Commoner", mkAi.mkAi(0), function() {
 			tinfo.setText("Commoners have no upgraded cards & mostly common cards.\nCost: $0");
@@ -100,6 +104,9 @@ module.exports = function(nymph) {
 		}]],
 		[50, 300, ["Editor", require("./Editor"), function() {
 			tinfo.setText("Edit your deck, as well as submit an arena deck.");
+		}]],
+		[250, 300, ["Wealth T20", wealthTop, function() {
+			tinfo.setText("See who's collected the most wealth.");
 		}]]
 	);
 	for (var i=0; i<2; i++){
@@ -126,10 +133,8 @@ module.exports = function(nymph) {
 				}
 			}
 			function arenaTop() {
-				if (Cards.loaded) {
-					sock.emit("arenatop", lvi);
-					this.style.display = "none";
-				}
+				sock.emit("arenatop", lvi);
+				this.style.display = "none";
 			}
 			var y = 200+i*45;
 			utons.push(
@@ -170,6 +175,7 @@ module.exports = function(nymph) {
 		librarygive: require("./Library"),
 		arenainfo: require("./ArenaInfo"),
 		arenatop: require("./ArenaTop"),
+		wealthtop: require("./WealthTop"),
 		codecard:function(data){
 			require("./Reward")(data.type, data.num, foename.value);
 		},
@@ -300,7 +306,7 @@ module.exports = function(nymph) {
 			[150, 300, ["Shop", require("./Shop"), function() {
 				tinfo.setText("Buy booster packs which contain cards from the elements you choose.");
 			}]],
-			[250, 300, ["Sell/Upgrade", require("./Upgrade"), function() {
+			[150, 345, ["Sell/Upgrade", require("./Upgrade"), function() {
 				tinfo.setText("Upgrade or sell cards.");
 			}]],
 			[777, 246, ["Logout", logout.bind(null, "logout"), function() {

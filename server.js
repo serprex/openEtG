@@ -526,9 +526,10 @@ var sockEvents = {
 			});
 		}
 	},
-	arenatop:function(data, user){
+	arenatop:function(data){
 		var socket = this;
 		db.zrevrange("arena"+(data.lv?"1":""), 0, 19, "withscores", function(err, obj){
+			if (err) return;
 			var t20 = [];
 			function getwinloss(i){
 				if (i == obj.length){
@@ -542,6 +543,12 @@ var sockEvents = {
 				}
 			}
 			getwinloss(0);
+		});
+	},
+	wealthtop:function(data){
+		var socket = this;
+		db.zrevrange("wealth", 0, 19, "withscores", function(err, obj){
+			if (!err) sockEmit(socket, "wealthtop", {top: obj});
 		});
 	},
 	cardart:function(){

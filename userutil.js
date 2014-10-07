@@ -11,6 +11,23 @@ exports.rewardwords = {
 exports.arenaCost = function(lv){
 	return lv ? 20 : 10;
 }
+exports.calcWealth = function(wealth, cardpool){
+	for(var code in cardpool){
+		var card = Cards.Codes[code], num = cardpool[code];
+		if (card){
+			if (card.rarity == 0){
+				if (card.upped && card.shiny) wealth += 300 * num;
+				else if (card.upped || card.shiny) wealth += 50 * num;
+			}else if (card.rarity > 0){
+				var worth = [1.66, 6.66, 33.33, 40, 250][card.rarity-1];
+				if (card.upped) worth *= 6;
+				if (card.shiny) worth *= 6;
+				wealth += worth * num;
+			}
+		}
+	}
+	return wealth;
+}
 exports.sellcard = function(data, user){
 	if (etgutil.count(user.pool, data.card)){
 		var card = Cards.Codes[data.card];

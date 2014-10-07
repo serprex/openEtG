@@ -4,6 +4,7 @@ var sutil = require("./sutil");
 var etg = require("../etg");
 var aiDecks = require("../Decks");
 var etgutil = require("../etgutil");
+var userutil = require("../userutil");
 module.exports = function(db, users){
 	function loginRespond(res, servuser, pass){
 		if(!servuser.name){
@@ -45,6 +46,7 @@ module.exports = function(db, users){
 					servuser.daily = user.daily = 0;
 					servuser.dailymage = user.dailymage = Math.floor(Math.random() * aiDecks.mage.length);
 					servuser.dailydg = user.dailydg = Math.floor(Math.random() * aiDecks.demigod.length);
+					db.zadd("wealth", userutil.calcWealth(user.gold, etgutil.deck2pool(user.pool)), user.name);
 				}
 				res.writeHead(200, {"Content-Type": "application/json"});
 				res.end(JSON.stringify(user));
