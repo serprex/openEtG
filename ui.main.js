@@ -140,7 +140,7 @@ window.aideck = document.getElementById("aideck");
 			}else if (msg.match(/^\/unmute /)){
 				delete muteset[msg.substring(8)];
 				chatmute();
-			}else if (!msg.match(/^\/[^/]/)) {
+			}else if (!msg.match(/^\/[^/]/) || (sock.user && msg.match(/^\/w( |")/))) {
 				msg = msg.replace(/^\/\//, "/");
 				if (sock.user){
 					var msgdata = {msg: msg};
