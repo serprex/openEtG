@@ -58,8 +58,8 @@ require("./etg.client").loadcards(function() {
 			codes.forEach(function(code, i){
 				incx(Cards.Codes[code].name, "Cards/"+code+".png");
 			});
-			table.appendChild(tr);
 		}
+		table.appendChild(tr);
 	});
 	document.body.insertBefore(table, document.getElementById("codeimg"));
 });
