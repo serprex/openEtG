@@ -105,7 +105,7 @@ module.exports = function(nymph) {
 		[50, 300, ["Editor", require("./Editor"), function() {
 			tinfo.setText("Edit your deck, as well as submit an arena deck.");
 		}]],
-		[250, 300, ["Wealth T20", wealthTop, function() {
+		[250, 300, ["Wealth T50", wealthTop, function() {
 			tinfo.setText("See who's collected the most wealth.");
 		}]]
 	);

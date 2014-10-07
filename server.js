@@ -547,7 +547,7 @@ var sockEvents = {
 	},
 	wealthtop:function(data){
 		var socket = this;
-		db.zrevrange("wealth", 0, 19, "withscores", function(err, obj){
+		db.zrevrange("wealth", 0, 49, "withscores", function(err, obj){
 			if (!err) sockEmit(socket, "wealthtop", {top: obj});
 		});
 	},

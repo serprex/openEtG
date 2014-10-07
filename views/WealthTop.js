@@ -9,9 +9,9 @@ module.exports = function(info) {
 	}
 	var stage = [[8, 300, ["Exit", require("./MainMenu")]]];
 	for (var i = 0;i < info.length; i+=2) {
-		var y = 50 + i * 12;
-		stage.push([120, y, ((i/2)+1) + "  " + info[i]],
-			[350, y, Math.round(info[i+1]).toString()]);
+		var y = 15 + (i % 50) * 11;
+		stage.push([120 + 350 * Math.floor(i/50), y, ((i/2)+1) + "  " + info[i]],
+			[350 + 350 * Math.floor(i / 50), y, Math.round(info[i + 1]).toString()]);
 	}
-	px.refreshRenderer({div: {top20: stage}});
+	px.refreshRenderer({div: {top50: stage}});
 }
