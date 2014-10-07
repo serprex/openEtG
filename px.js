@@ -43,7 +43,33 @@ exports.refreshRenderer = function(stage) {
 				var ele;
 				if (typeof info[2] === "string"){
 					ele = document.createElement("span");
-					ele.appendChild(document.createTextNode(info[2]));
+					var pieces = info[2].replace(/\|/g, " | ").split(/(\d\d?:\d\d?|\$|\n)/);
+					pieces.forEach(function(piece){
+						if (piece == "\n") {
+							ele.appendChild(document.createElement("br"));
+						}else if (piece == "$") {
+							var sp = document.createElement("span");
+							sp.className = "coin";
+							ele.appendChild(sp);
+						}else if (/^\d\d?:\d\d?$/.test(piece)) {
+							var parse = piece.split(":");
+							var num = parseInt(parse[0]);
+							if (num < 4) {
+								for (var j = 0;j < num;j++) {
+									var sp = document.createElement("span");
+									sp.className = "eicon e"+parse[1];
+									ele.appendChild(sp);
+								}
+							}else{
+								ele.appendChild(document.createTextElement(parse[0]));
+								var sp = document.createElement("span");
+								sp.className = "eicon e"+parse[1];
+								ele.appendChild(sp);
+							}
+						} else if (piece) {
+							ele.appendChild(document.createTextNode(piece));
+						}
+					});
 				}else if (info[2] instanceof Array){
 					ele = document.createElement("input");
 					ele.type = "button";

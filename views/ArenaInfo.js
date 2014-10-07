@@ -7,36 +7,31 @@ var etgutil = require("./etgutil");
 module.exports = function(info) {
 	if (!info) return;
 	var stage = px.mkView();
-	var winloss = new px.MenuText(200, 300, (info.win || 0) + " - " + (info.loss || 0) + ": " + (info.rank+1) + "\nAge: " + info.day + "\nHP: " + info.curhp + " / " + info.hp + "\nMark: " + info.mark + "\nDraw: " + info.draw);
-	stage.addChild(winloss);
-	var infotext = new px.MenuText(300, 470, "You get $3 every time your arena deck wins,\n& $1 every time it loses.");
-	stage.addChild(infotext);
+	var dom = [[200, 300, (info.win || 0) + " - " + (info.loss || 0) + ": " + (info.rank+1) +
+		"\nAge: " + info.day + "\nHP: " + info.curhp + " / " + info.hp +
+		"\nMark: " + info.mark +
+		"\nDraw: " + info.draw],
+		[300, 470, "You get $3 every time your arena deck wins,\n& $1 every time it loses."],
+		[200, 500, ["Exit", require("./MainMenu")]],
+	];
 	if (sock.user.ocard){
 		var uocard = etgutil.asUpped(sock.user.ocard, info.lv == 1);
-		var bmake = px.mkButton(200, 440, "Create");
-		px.setClick(bmake, function(){
+		dom.push([200, 440, ["Create", function(){
 			require("./Editor")(info, uocard, true);
-		});
-		stage.addChild(bmake);
+		}]]);
 		var ocard = new PIXI.Sprite(gfx.getArt(uocard));
 		ocard.position.set(734, 300);
 		stage.addChild(ocard);
 	}
-	var bret = px.mkButton(200, 500, "Exit");
-	px.setClick(bret, require("./MainMenu"));
-	stage.addChild(bret);
 	if (info.card){
 		if (info.lv){
 			info.card = etgutil.asUpped(info.card, true);
 		}
-		var bmod = px.mkButton(200, 470, "Modify");
-		px.setClick(bmod, function(){
+		var mark, i = 0, adeck = "05" + info.card + info.deck;
+		dom.push([200, 470, ["Modify", function(){
 			require("./Editor")(info, info.card);
-		});
-		stage.addChild(bmod);
-		aideck.value = "05" + info.card + info.deck;
-		var mark, i = 0;
-		etgutil.iterdeck(aideck.value, function(code){
+		}]], [100, 230, "05" + info.card + info.deck]);
+		etgutil.iterdeck(adeck, function(code){
 			var ismark = etg.fromTrueMark(code);
 			if (~ismark){
 				mark = ismark;
@@ -54,5 +49,5 @@ module.exports = function(info) {
 		acard.position.set(734, 8);
 		stage.addChild(acard);
 	}
-	px.refreshRenderer(stage);
+	px.refreshRenderer({view: stage, div: {ainfo: dom}});
 }
