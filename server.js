@@ -310,7 +310,7 @@ var userEvents = {
 			}
 		}
 		if (typeof user.selectedDeck === "string"){
-			db.hget("D:"+u, "decknames", user.selectedDeck, foelogic);
+			db.hget("D:"+u, user.selectedDeck, foelogic);
 		}else{
 			foelogic(null, user.decks.split(",")[user.selectedDeck]);
 		}
