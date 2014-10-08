@@ -114,7 +114,7 @@ module.exports = function(nymph) {
 			function arenaAi() {
 				if (Cards.loaded) {
 					if (etgutil.decklength(sock.getDeck()) < 31) {
-						startEditor();
+						require("./Editor")();
 						return;
 					}
 					var cost = userutil.arenaCost(lvi.lv);
