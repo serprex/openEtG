@@ -1055,7 +1055,7 @@ Thing.prototype.canactive = function() {
 	return this.owner.game.turn == this.owner && this.active.cast && !this.usedactive && !this.status.delayed && !this.status.frozen && this.owner.canspend(this.castele, this.cast);
 }
 Thing.prototype.castSpell = function(t, active, nospell){
-	var newt = this.procactive("prespell", [t, active]);
+	var newt = this.procactive("prespell", [{tgt: t, active: active}]);
 	if (newt !== true){
 		if (newt) t = newt;
 		active(this, t);

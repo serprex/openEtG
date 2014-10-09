@@ -270,15 +270,16 @@ darkness:function(c){
 deadalive:function(c){
 	c.deatheffect(c.getIndex());
 },
-deathwish:function(c,t, tgt, active){
+deathwish:function(c,t, data){
+	var tgt = data.tgt, active = data.active;
 	if (!tgt || c.status.frozen || c.status.delayed || c.owner == t.owner || tgt.owner != c.owner || !(tgt instanceof etg.Creature) || !Cards.Targeting[active.activename](t, c)) return;
-	if (!tgt.hasactive("spell", "deathwish")) return c;
+	if (!tgt.hasactive("spell", "deathwish")) return data.tgt = c;
 	var totaldw = 0;
 	c.owner.creatures.forEach(function(cr){
 		if (cr && cr.hasactive("spell", "deathwish"))totaldw++;
 	});
 	if (c.owner.rng() < 1/totaldw){
-		return c;
+		return data.tgt = c;
 	}
 },
 decrsteam:function(c){
@@ -527,7 +528,8 @@ fractal:function(c,t){
 	}
 	c.owner.quanta[etg.Aether] = 0;
 },
-freeevade:function(c,t, tgt){
+freeevade:function(c,t, data){
+	var tgt = data.tgt;
 	if (tgt instanceof etg.Creature && tgt.owner == c.owner && tgt.owner != t.owner && tgt.status.airborne && !tgt.status.frozen && c.owner.rng() > .8){
 		return true;
 	}
@@ -1035,12 +1037,6 @@ poison:function(x){
 		(t || c.owner.foe).addpoison(n);
 	});
 },
-poisonfoe:function(c,t){
-	c.owner.foe.addpoison(1);
-},
-poisonany:function(c,t){
-	t.addpoison(c.card.upped?3:2);
-},
 precognition:function(c,t){
 	c.owner.drawcard();
 	c.owner.precognition = true;
@@ -1054,8 +1050,8 @@ protectall:function(c,t){
 	c.owner.creatures.forEach(protect);
 	c.owner.permanents.forEach(protect);
 },
-protectonce:function(c,t, tgt){
-	if (c === tgt){
+protectonce:function(c,t, data){
+	if (c === data.tgt){
 		c.rmactive("prespell", "protectonce");
 		return true;
 	}

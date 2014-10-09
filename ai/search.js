@@ -19,6 +19,33 @@ function getWorstCard(game){
 	}
 	return [worstcard, curEval];
 }
+var afilter = {
+	web:function(c,t){
+		return t.status.airborne;
+	},
+	freeze:function(c,t){
+		return t.status.frozen < 3;
+	},
+	pacify:function(c,t){
+		return t.trueatk() != 0;
+	},
+	readiness:function(c,t){
+		return t.active.cast && t.cast;
+	},
+	lobotomize:function(c,t){
+		if (!t.status.momentum && !t.status.psion) {
+			for (var key in x.active){
+				if (x.active[key] && key != "ownplay"){
+					return false;
+				}
+			}
+		}
+		return true;
+	},
+};
+function skipActive(active, c, t){
+	return !(active in afilter) || t.hasactive("prespell", "protectonce") || afilter(c, t);
+}
 module.exports = function(game, previous) {
 	var currentEval, worstcard;
 	if (previous === undefined){
@@ -41,8 +68,7 @@ module.exports = function(game, previous) {
 	function iterLoop(game, n, cmdct0, casthash) {
 		function incnth(tgt){
 			nth++;
-			if (!iterCore(tgt)) return false;
-			return Date.now() > tend;
+			return iterCore(tgt) && Date.now() > tend;
 		}
 		function iterCore(c) {
 			if (!c || !c.canactive()) return;
@@ -57,7 +83,7 @@ module.exports = function(game, previous) {
 					if (th in tgthash) return;
 					else tgthash[th] = true;
 				}
-				if ((!game.targetingMode || (t && game.targetingMode(t))) && limit-- > 0) {
+				if ((!game.targetingMode || (t && game.targetingMode(t))) && skipActive(active, c, t) && limit-- > 0) {
 					var tbits = game.tgtToBits(t) ^ 8;
 					var gameClone = game.clone();
 					gameClone.bitsToTgt(cbits).useactive(gameClone.bitsToTgt(tbits));
