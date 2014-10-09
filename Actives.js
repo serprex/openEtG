@@ -1037,6 +1037,9 @@ poison:function(x){
 		(t || c.owner.foe).addpoison(n);
 	});
 },
+poisonfoe:function(c){
+	c.owner.foe.addpoison(1);
+},
 precognition:function(c,t){
 	c.owner.drawcard();
 	c.owner.precognition = true;

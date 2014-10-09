@@ -503,7 +503,7 @@ function startMatch(game, foeDeck) {
 				var goldwon;
 				if (game.level !== undefined) {
 					var reward = [15, 30, 70, 200, 60, 120][game.level];
-					goldwon = Math.floor(reward / 3 + game.player1.hp * reward / 150);
+					goldwon = Math.floor(reward * (50 + game.player1.hp) / 150);
 				} else goldwon = 0;
 				game.goldreward = goldwon + (game.cost || 0) + (game.addonreward || 0);
 			}
