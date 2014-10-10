@@ -740,12 +740,12 @@ integrity:function(c,t){
 		siphon: -1, vampire: -2, liquid: 2, steal: 3,
 		lobotomize: 2, quint: 2,
 	};
-	var stat=c.card.upped?1:0;
+	var stat=c.card.upped?.5:0;
 	for(var i=c.owner.hand.length-1; i>=0; i--){
 		var card = c.owner.hand[i].card;
 		if (etg.ShardList.some(function(x) { return x && card.isOf(Cards.Codes[x]); })){
 			if (card.upped){
-				stat++;
+				stat += .5;
 			}
 			shardTally[card.element]++;
 			c.owner.hand.splice(i, 1);
@@ -771,7 +771,7 @@ integrity:function(c,t){
 	if (shardTally[etg.Life]>0){
 		status.poisonous = true;
 	}
-	if (shardTally[etg.Aether]>1){
+	if (shardTally[etg.Aether]>2){
 		status.immaterial = true;
 	}
 	if (shardTally[etg.Gravity]>1){
@@ -781,7 +781,7 @@ integrity:function(c,t){
 		status.adrenaline = 1;
 	}
 	c.owner.shardgolem = {
-		stat: stat,
+		stat: Math.floor(stat),
 		status: status,
 		active: actives,
 		cast: cost
