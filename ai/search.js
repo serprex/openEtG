@@ -36,9 +36,10 @@ var afilter = {
 		if (!t.status.momentum && !t.status.psion) {
 			for (var key in x.active){
 				if (x.active[key] && key != "ownplay"){
-					return false;
+					return true;
 				}
 			}
+			return false;
 		}
 		return true;
 	},
