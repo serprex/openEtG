@@ -4,6 +4,7 @@ var etg = require("./etg");
 var gfx = require("./gfx");
 var chat = require("./chat");
 var sock = require("./sock");
+var Cards = require("./Cards");
 var etgutil = require("./etgutil");
 var userutil = require("./userutil");
 module.exports = function(reward, numberofcopies, code) {
@@ -28,7 +29,7 @@ module.exports = function(reward, numberofcopies, code) {
 
 	if (code){
 		var exitButton = px.mkButton(10, 10, "Exit");
-		px.setClick(exitButton, startMenu);
+		px.setClick(exitButton, require("./MainMenu"));
 		rewardui.addChild(exitButton);
 	}
 
