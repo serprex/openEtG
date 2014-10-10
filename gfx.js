@@ -149,67 +149,45 @@ function getCardImage(code) {
 		return caimgcache[code] = rend;
 	}
 }
+function getInstImage(code, scale, cache){
+	return cache[code] || getArtImage(code, function(art) {
+		var card = Cards.Codes[code];
+		var rend = new PIXI.RenderTexture(128 * scale, 164 * scale);
+		var border = new PIXI.Sprite(exports.cardBorders[card.element + (card.upped ? 13 : 0)]);
+		border.scale.set(scale, scale);
+		var graphics = new PIXI.Graphics();
+		border.addChild(graphics);
+		graphics.beginFill(ui.maybeLighten(card));
+		graphics.drawRect(0, 16, 128, 128);
+		graphics.endFill();
+		if (card.shiny){
+			graphics.lineStyle(2, 0xdaa520);
+			graphics.moveTo(0, 14);
+			graphics.lineTo(128, 14);
+			graphics.moveTo(0, 147);
+			graphics.lineTo(128, 147);
+		}
+		if (art) {
+			var artspr = new PIXI.Sprite(art);
+			artspr.position.set(0, 16);
+			if (card.shiny) artspr.filters = [shinyFilter];
+			border.addChild(artspr);
+		}
+		var text = new PIXI.Text(card.name, { font: "16px Dosis", fill: card.upped ? "black" : "white" });
+		text.anchor.x = .5;
+		text.position.set(64, 144);
+		border.addChild(text);
+		var doc = new PIXI.DisplayObjectContainer();
+		doc.addChild(border);
+		rend.render(doc);
+		return cache[code] = rend;
+	});
+}
 function getCreatureImage(code) {
-	if (crimgcache[code]) return crimgcache[code];
-	else {
-		return getArtImage(code, function(art){
-			var card = Cards.Codes[code];
-			var rend = new PIXI.RenderTexture(64, 82);
-			var graphics = new PIXI.Graphics();
-			var border = new PIXI.Sprite(exports.cardBorders[card.element + (card.upped ? 13 : 0)]);
-			border.scale.set(0.5, 0.5);
-			graphics.addChild(border);
-			graphics.beginFill(card ? ui.maybeLighten(card) : ui.elecols[0]);
-			graphics.drawRect(0, 9, 64, 64);
-			graphics.endFill();
-			if (art) {
-				var artspr = new PIXI.Sprite(art);
-				artspr.scale.set(0.5, 0.5);
-				artspr.position.set(0, 9);
-				if (card.shiny) artspr.filters = [shinyFilter];
-				graphics.addChild(artspr);
-			}
-			if (card) {
-				var text = new PIXI.Text(card.name, { font: "8px Dosis", fill: card.upped ? "black" : "white" });
-				text.anchor.x = 0.5;
-				text.position.set(33, 72);
-				graphics.addChild(text);
-			}
-			rend.render(graphics);
-			return crimgcache[code] = rend;
-		});
-	}
+	return getInstImage(code, .5, crimgcache);
 }
 function getWeaponShieldImage(code) {
-	if (wsimgcache[code]) return wsimgcache[code];
-	else {
-		return getArtImage(code, function(art){
-			var card = Cards.Codes[code];
-			var rend = new PIXI.RenderTexture(80, 102);
-			var graphics = new PIXI.Graphics();
-			var border = (new PIXI.Sprite(exports.cardBorders[card.element + (card.upped ? 13 : 0)]));
-			border.scale.set(5/8, 5/8);
-			graphics.addChild(border);
-			graphics.beginFill(card ? ui.maybeLighten(card) : ui.elecols[0]);
-			graphics.drawRect(0, 11, 80, 80);
-			graphics.endFill();
-			if (art) {
-				var artspr = new PIXI.Sprite(art);
-				artspr.scale.set(5/8, 5/8);
-				artspr.position.set(0, 11);
-				if (card.shiny) artspr.filters = [shinyFilter];
-				graphics.addChild(artspr);
-			}
-			if (card) {
-				var text = new PIXI.Text(card.name, { font: "10px Dosis", fill: card.upped ? "black" : "white" });
-				text.anchor.x = 0.5;
-				text.position.set(40, 91);
-				graphics.addChild(text);
-			}
-			rend.render(graphics);
-			return wsimgcache[code] = rend;
-		});
-	}
+	return getInstImage(code, 5/8, wsimgcache);
 }
 var artpool;
 exports.preloadCardArt = function(art){
