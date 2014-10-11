@@ -44,7 +44,7 @@ var afilter = {
 		return true;
 	},
 };
-function skipActive(active, c, t){
+function searchActive(active, c, t){
 	return !(active in afilter) || t.hasactive("prespell", "protectonce") || afilter(c, t);
 }
 module.exports = function(game, previous) {
@@ -60,7 +60,7 @@ module.exports = function(game, previous) {
 		var lethal = require("./lethal")(game);
 		return lethal[0] < 0 ?
 			(!game.winner ? ["cast",  lethal[1]] : worstcard === undefined ? ["endturn", worstcard] : ["endturn"]):
-			[0, currentEval, undefined, 2, [], 999, worstcard];
+			[0, currentEval, undefined, 2, [], 99, worstcard];
 	}
 	var limit = previous[5], cmdct = previous[2], cdepth = previous[3], nth = previous[0];
 	currentEval = previous[1];
@@ -84,7 +84,7 @@ module.exports = function(game, previous) {
 					if (th in tgthash) return;
 					else tgthash[th] = true;
 				}
-				if ((!game.targetingMode || (t && game.targetingMode(t))) && skipActive(active, c, t) && limit-- > 0) {
+				if ((!game.targetingMode || (t && game.targetingMode(t))) && searchActive(active, c, t) && (n || limit-- > 0)) {
 					var tbits = game.tgtToBits(t) ^ 8;
 					var gameClone = game.clone();
 					gameClone.bitsToTgt(cbits).useactive(gameClone.bitsToTgt(tbits));

@@ -19,7 +19,7 @@ function startMatch(game, foeDeck) {
 				}
 			} else if (obj.canactive() && !(obj.owner == game.player2 && game.player2.isCloaked())) {
 				fgfx.lineStyle(2, obj.card.element == 8 ? 0x000000 : 0xffffff);
-				fgfx.drawRect(spr.position.x - spr.width / 2, spr.position.y - spr.height / 2, spr.width, (obj instanceof etg.Weapon || obj instanceof etg.Shield ? 12 : 10));
+				fgfx.drawRect(spr.position.x - spr.width / 2, spr.position.y - spr.height / 2 - 1, spr.width, (obj instanceof etg.Weapon || obj instanceof etg.Shield ? 12 : 10));
 			}
 		}
 	}
@@ -252,7 +252,7 @@ function startMatch(game, foeDeck) {
 					spr.addChild(statuses);
 				}
 				var stattext = new PIXI.Sprite(gfx.nopic);
-				stattext.position.set(-32 * scale, -32 * scale);
+				stattext.position.set(-32 * scale, -33 * scale);
 				spr.addChild(stattext);
 				var activetext = new PIXI.Sprite(gfx.nopic);
 				activetext.position.set(-32 * scale, -42 * scale);
