@@ -230,11 +230,11 @@ var userEvents = {
 		var socket = this;
 		db.hget("CodeHash", data.code, function(err, type){
 			if (!type){
-				sockEmit(socket, "codereject", {msg: "Code does not exist"});
+				sockEmit(socket, "chat", { mode: "red", msg: "Code does not exist"});
 			}else if (type.charAt(0) == "G"){
 				var g = parseInt(type.substr(1));
 				if (isNaN(g)){
-					sockEmit(socket, "codereject", {msg: "Invalid gold code type: " + type});
+					sockEmit(socket, "chat", { mode: "red", msg: "Invalid gold code type: " + type});
 				}else{
 					user.gold += g;
 					sockEmit(socket, "codegold", {g: g});
@@ -246,11 +246,11 @@ var userEvents = {
 					user.pool = etgutil.addcard(user.pool, c);
 					sockEmit(socket, "codecode", {card: c});
 					db.hdel("CodeHash", data.code);
-				}else sockEmit(socket, "codereject", {msg: "Unknown card: " + type});
+				}else sockEmit(socket, "chat", { mode: "red", msg: "Unknown card: " + type});
 			}else if (type in userutil.rewardwords){
 				sockEmit(socket, "codecard", {type: type});
 			}else{
-				sockEmit(socket, "codereject", {msg: "Unknown code type: " + type});
+				sockEmit(socket, "chat", { mode: "red", msg: "Unknown code type: " + type});
 			}
 		});
 	},
@@ -258,7 +258,7 @@ var userEvents = {
 		var socket = this;
 		db.hget("CodeHash", data.code, function(err, type){
 			if (!type){
-				sockEmit(socket, "codereject", {msg: "Code does not exist"});
+				sockEmit(socket, "chat", { mode: "red", msg: "Code does not exist"});
 			}else if (type in userutil.rewardwords){
 				var card = Cards.Codes[data.card];
 				if (card && card.rarity == userutil.rewardwords[type]){
@@ -267,7 +267,7 @@ var userEvents = {
 					db.hdel("CodeHash", data.code);
 				}
 			}else{
-				sockEmit(socket, "codereject", {msg: "Unknown code type: " + type});
+				sockEmit(socket, "chat", { mode: "red", msg: "Unknown code type: " + type});
 			}
 		});
 	},

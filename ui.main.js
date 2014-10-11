@@ -203,7 +203,7 @@ window.aideck = document.getElementById("aideck");
 							require("./views/ElementSelect")();
 						} else {
 							prepuser();
-							startMenu();
+							if (gfx.loaded) startMenu();
 						}
 					} else if (this.status == 404) {
 						chat("Incorrect password");

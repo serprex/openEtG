@@ -175,9 +175,6 @@ module.exports = function(nymph) {
 		codecard:function(data){
 			require("./Reward")(data.type, data.num, foename.value);
 		},
-		codereject:function(data) {
-			chat(data.msg);
-		},
 		codegold:function(data) {
 			sock.user.gold += data.g;
 			chat(data.g + "\u00A4 added!");
@@ -263,6 +260,7 @@ module.exports = function(nymph) {
 	var printstats = makeCheck("Print stats", null, "stats"), preloadart = makeCheck("Preload Art", null, "preart");
 	var enableMusic = makeCheck("Enable music", musicChange, "enableMusic"), enableSound = makeCheck("Enable sound", soundChange, "enableSound");
 	var wantpvp = makeCheck("Seeking PvP", wantpvpChange, "wantpvp"), offline = makeCheck("Appear Offline", offlineChange, "offline");
+	options.register("foename", foename, true);
 	options.register("pvphp", pvphp, true);
 	options.register("pvpmark", pvpmark, true);
 	options.register("pvpdeck", pvpdeck, true);
