@@ -447,9 +447,9 @@ var userEvents = {
 				if (data.element < 13) card = etg.PlayerRng.randomcard(false, function(x) { return (x.element == data.element) ^ notFromElement && x.rarity == bumprarity});
 				if (data.element == 14){
 					var newCardList = [
-						Cards.Shadow, Cards.Inertia, Cards.PhaseGolem, Cards.QuantumLocket, Cards.ClockworkGolem, Cards.Pacify, Cards.BattleAxe, Cards.Disc,
+						Cards.Envenom, Cards.JetStream, Cards.Salamander, Cards.Shadow, Cards.Inertia, Cards.PhaseGolem, Cards.QuantumLocket, Cards.ClockworkGolem,
 						Cards.Shtriga, Cards.MidassTouch, Cards.Lemming, Cards.Georesonator, Cards.AtlantissProtection, Cards.Siren, Cards.Reinforce, Cards.Pixie,
-						Cards.ShankofVoid, Cards.ScatteringWind, Cards.Firebrand, Cards.PrismaticGladius];
+						Cards.Boomstick, Cards.ShankofVoid, Cards.ScatteringWind, Cards.Firebrand];
 					card = etg.PlayerRng.randomcard(false, function(x){ return notFromElement ^ ~newCardList.indexOf(x) && x.rarity == bumprarity});
 				}
 				if (!card) card = etg.PlayerRng.randomcard(false, function(x) { return x.rarity == bumprarity });

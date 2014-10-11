@@ -111,6 +111,9 @@ var TargetFilters = {
 	airbornecrea:function(c, t){
 		return t.isMaterial(etg.Creature) && t.status.airborne;
 	},
+	golem:function(c, t){
+		return t.isMaterial(etg.Creature) && t.status.golem;
+	},
 	groundcrea:function(c, t){
 		return t.isMaterial(etg.Creature) && !t.status.airborne;
 	},

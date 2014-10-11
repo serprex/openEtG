@@ -456,6 +456,11 @@ endow:function(c,t){
 	}
 	c.buffhp(2);
 },
+envenom:function(c,t){
+	if (!t.hasactive("hit", "poison 1")){
+		t.addactive("hit", etg.parseActive("poison 1"));
+	}
+},
 epidemic:function(c,t){
 	if (t.status.poison){
 		c.owner.foe.addpoison(t.status.poison);
@@ -567,6 +572,9 @@ give:function(c,t){
 		t.owner = c.owner.foe;
 		t.place();
 	}
+},
+golemhit:function(c,t){
+	t.attack(false, 0);
 },
 gpull:function(c,t){
 	Actives.gpullspell(c, c);
@@ -787,6 +795,10 @@ integrity:function(c,t){
 		cast: cost
 	};
 	new etg.Creature(Cards.ShardGolem, c.owner).place();
+},
+jetstream:function(c,t){
+	t.dmg(1);
+	t.atk += 3;
 },
 layegg:function(c,t){
 	new etg.Creature(c.card.as(Cards.FateEgg), c.owner).place();
@@ -1038,7 +1050,7 @@ poison:function(x){
 	});
 },
 poisonfoe:function(c){
-	c.owner.foe.addpoison(1);
+	if (c.owner.rng() < .7) c.owner.foe.addpoison(1);
 },
 precognition:function(c,t){
 	c.owner.drawcard();
