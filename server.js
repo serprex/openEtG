@@ -305,7 +305,6 @@ var userEvents = {
 				} else {
 					sockinfo[socket.id].duel = f;
 					sockEmit(foesock, "challenge", { f:u, pvp:true });
-					sockEmit(socket, "chat", { mode: "red", msg: "You have sent a PvP request to " + f + "!" });
 				}
 			}
 		}
@@ -378,8 +377,7 @@ var userEvents = {
 				sockEmit(this, "tradegive");
 				sockEmit(foesock, "tradegive");
 			} else {
-				sockEmit(foesock, "challenge", {f:u, pvp:false});
-				sockEmit(this, "chat", { mode: "red", msg: "You have sent a trade request to " + f + "!" });
+				sockEmit(foesock, "challenge", {f:u});
 			}
 		}
 	},
@@ -567,6 +565,10 @@ var sockEvents = {
 	},
 	who:function(data){
 		sockEmit(this, "chat", { mode: "red", msg: activeUsers().join(", ") || "There are no users online :(" });
+	},
+	challrecv:function(data){
+		var foesock = usersock[data.f];
+		sockEmit(foesock, "chat", { mode: "red", msg: "You have sent a " + (data.pvp ? "PvP" : "trade") + " request to " + data.f + "!" });
 	},
 };
 io.on("connection", function(socket) {

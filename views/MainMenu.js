@@ -190,6 +190,7 @@ module.exports = function(nymph) {
 			span.addEventListener("click", (data.pvp ? challengeClick : tradeClick).bind(null, data.f));
 			span.appendChild(document.createTextNode(data.f + (data.pvp ? " challenges you to a duel!" : " wants to trade with you!")));
 			chat.addSpan(span);
+			sock.emit("challrecv", {f: data.f, pvp: data.pvp});
 		},
 	};
 	function challengeClick(foe) {

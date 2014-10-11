@@ -26,7 +26,7 @@ window.aideck = document.getElementById("aideck");
 			chat("Password updated");
 		},
 		chat:function(data) {
-			if (muteall || data.u in muteset || !data.msg) return;
+			if (muteall || data.u in muteset) return;
 			if (typeof Notification !== "undefined" && sock.user && ~data.msg.indexOf(sock.user.name) && !document.hasFocus()){
 				Notification.requestPermission();
 				new Notification(data.u, {body: data.msg}).onclick = window.focus;
@@ -237,6 +237,7 @@ window.aideck = document.getElementById("aideck");
 		}
 	})({
 		leftpane: {click: function(){this.blur()}},
+		aideck: {click: function(){this.setSelectionRange(0, 999)}},
 		change: {click: changeClick},
 		login: {click: loginClick},
 		username: {keydown: maybeLogin},
