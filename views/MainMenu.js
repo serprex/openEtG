@@ -112,25 +112,21 @@ module.exports = function(nymph) {
 	for (var i=0; i<2; i++){
 		(function(lvi){
 			function arenaAi() {
-				if (Cards.loaded) {
-					if (etgutil.decklength(sock.getDeck()) < 31) {
-						require("./Editor")();
-						return;
-					}
-					var cost = userutil.arenaCost(lvi.lv);
-					if (sock.user.gold < cost) {
-						chat("Requires " + cost + "\u00A4");
-						return;
-					}
-					sock.userEmit("foearena", lvi);
-					this.style.display = "none";
+				if (etgutil.decklength(sock.getDeck()) < 31) {
+					require("./Editor")();
+					return;
 				}
+				var cost = userutil.arenaCost(lvi.lv);
+				if (sock.user.gold < cost) {
+					chat("Requires " + cost + "\u00A4");
+					return;
+				}
+				sock.userEmit("foearena", lvi);
+				this.style.display = "none";
 			}
 			function arenaInfo() {
-				if (Cards.loaded) {
-					sock.userEmit("arenainfo", lvi);
-					this.style.display = "none";
-				}
+				sock.userEmit("arenainfo", lvi);
+				this.style.display = "none";
 			}
 			function arenaTop() {
 				sock.emit("arenatop", lvi);
@@ -200,22 +196,20 @@ module.exports = function(nymph) {
 		},
 	};
 	function challengeClick(foe) {
-		if (Cards.loaded) {
-			var deck = sock.getDeck();
-			if (etgutil.decklength(deck) < (sock.user ? 31 : 11)){
-				require("./Editor")();
-				return;
-			}
-			var gameData = {};
-			ui.parsepvpstats(gameData);
-			if (sock.user) {
-				gameData.f = typeof foe === "string" ? foe : foename.value;
-				sock.userEmit("foewant", gameData);
-			}else{
-				gameData.deck = deck;
-				gameData.room = foename.value;
-				sock.emit("pvpwant", gameData);
-			}
+		var deck = sock.getDeck();
+		if (etgutil.decklength(deck) < (sock.user ? 31 : 11)){
+			require("./Editor")();
+			return;
+		}
+		var gameData = {};
+		ui.parsepvpstats(gameData);
+		if (sock.user) {
+			gameData.f = typeof foe === "string" ? foe : foename.value;
+			sock.userEmit("foewant", gameData);
+		}else{
+			gameData.deck = deck;
+			gameData.room = foename.value;
+			sock.emit("pvpwant", gameData);
 		}
 	}
 	function maybeChallenge(e) {
@@ -226,16 +220,15 @@ module.exports = function(nymph) {
 		}
 	}
 	function tradeClick(foe) {
-		if (Cards.loaded)
-			sock.userEmit("tradewant", { f: typeof foe === "string" ? foe : foename.value });
+		sock.userEmit("tradewant", { f: typeof foe === "string" ? foe : foename.value });
 	}
 	function rewardClick() {
-		if (Cards.loaded)
-			sock.userEmit("codesubmit", { code: foename.value });
+		sock.userEmit("codesubmit", { code: foename.value });
 	}
 	function libraryClick() {
-		if (Cards.loaded)
-			sock.emit("librarywant", { f: foename.value });
+		var name = foename.value;
+		if (!name && sock.user) name = sock.user.name;
+		if (name) sock.emit("librarywant", { f: name });
 	}
 	function offlineChange(){
 		sock.emit("showoffline", {hide: options.offline});
