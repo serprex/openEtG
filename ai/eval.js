@@ -132,7 +132,7 @@ var ActivesValues = {
 		for(var i=0; i<23; i++){
 			var cr = c.owner.creatures[i];
 			if (cr && cr.status.golem && !cr.status.delayed && !cr.status.frozen){
-				var atk = getDamage(cr);
+				var atk = cr.trueatk();
 				if (atk > dmg) dmg = atk;
 			}
 		}
