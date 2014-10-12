@@ -34,8 +34,8 @@ var afilter = {
 	},
 	lobotomize:function(c,t){
 		if (!t.status.momentum && !t.status.psion) {
-			for (var key in x.active){
-				if (x.active[key] && key != "ownplay"){
+			for (var key in t.active){
+				if (t.active[key] && key != "ownplay"){
 					return true;
 				}
 			}
@@ -45,7 +45,8 @@ var afilter = {
 	},
 };
 function searchActive(active, c, t){
-	return !(active in afilter) || t.hasactive("prespell", "protectonce") || afilter(c, t);
+	var func = afilter[active.activename];
+	return !func || t.hasactive("prespell", "protectonce") || func(c, t);
 }
 module.exports = function(game, previous) {
 	var currentEval, worstcard;
@@ -77,7 +78,7 @@ module.exports = function(game, previous) {
 			if (ch in casthash) return;
 			else casthash[ch] = true;
 			var active = c instanceof etg.CardInstance ? c.card.type == etg.SpellEnum && c.card.active : c.active.cast;
-			var cbits = game.tgtToBits(c) ^ 8, tgthash = [], loglist = n ? {} : undefined;
+			var cbits = game.tgtToBits(c) ^ 8, tgthash = [], loglist = n && {};
 			function evalIter(t) {
 				if (t && t.hash){
 					var th = t.hash();
