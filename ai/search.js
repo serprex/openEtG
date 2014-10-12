@@ -85,7 +85,7 @@ module.exports = function(game, previous) {
 					if (th in tgthash) return;
 					else tgthash[th] = true;
 				}
-				if ((!game.targetingMode || (t && game.targetingMode(t))) && searchActive(active, c, t) && (n || limit-- > 0)) {
+				if ((!game.targetingMode || (t && game.targetingMode(t))) && searchActive(active, c, t) && (n || --limit > 0)) {
 					var tbits = game.tgtToBits(t) ^ 8;
 					var gameClone = game.clone();
 					gameClone.bitsToTgt(cbits).useactive(gameClone.bitsToTgt(tbits));

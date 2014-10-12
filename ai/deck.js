@@ -1,7 +1,7 @@
 "use strict";
 var etg = require("./etg");
-var etgutil = require("./etgutil");
 var Cards = require("./Cards");
+var etgutil = require("./etgutil");
 module.exports = function(level) {
 	if (!Cards.loaded){
 		return;
@@ -70,7 +70,7 @@ module.exports = function(level) {
 	} else qpemin = 0;
 	for (var i = 1;i < 13;i++) {
 		if (ecost[i] > 0){
-			for (var j = 0;j < Math.round((ecost[i] - qpemin) / 5) ;j++) {
+			for (var j = 0;j < Math.round((ecost[i] - qpemin) / 5); j++) {
 				deck.push(upCode(pillars[i * 2]));
 			}
 		}

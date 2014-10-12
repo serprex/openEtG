@@ -769,7 +769,7 @@ integrity:function(c,t){
 	}
 	var actives = {}, cost = shardCosts[active];
 	actives[cost < 0 ? activeType[~cost] : "cast"] = Actives[active];
-	var status = {};
+	var status = {golem: true};
 	if (shardTally[etg.Air]>0){
 		status.airborne = true;
 	}

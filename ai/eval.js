@@ -80,6 +80,7 @@ var ActivesValues = {
 	cpower:4,
 	darkness:1,
 	deadalive:2,
+	deathwish:1,
 	deja:4,
 	deployblobs: function(c) {
 		return 2+(c instanceof etg.CardInstance ? Math.min(c.card.attack, c.card.health) : Math.min(c.trueatk(), c.truehp()));
@@ -110,8 +111,10 @@ var ActivesValues = {
 	},
 	enchant:6,
 	endow:4,
+	envenom:1,
 	epidemic:4,
 	evolve:2,
+	feed:6,
 	fickle:3,
 	fire:1,
 	firebolt:10,
@@ -124,13 +127,26 @@ var ActivesValues = {
 	fungusrebirth:1,
 	gas:5,
 	give:1,
+	golemhit:function(c){
+		var dmg = 0;
+		for(var i=0; i<23; i++){
+			var cr = c.owner.creatures[i];
+			if (cr && cr.status.golem && !cr.status.delayed && !cr.status.frozen){
+				var atk = getDamage(cr);
+				if (atk > dmg) dmg = atk;
+			}
+		}
+		return dmg;
+	},
 	gpull:function(c){
 		return c instanceof etg.CardInstance || c != c.owner.gpull ? 2 : 0;
 	},
 	gpullspell:3,
 	gratitude:4,
 	grave:1,
-	guard: 4,
+	"growth 1":3,
+	"growth 2":5,
+	guard:4,
 	halveatk:function(c){
 		return c instanceof etg.CardInstance ? -c.card.attack/4 : (c.trueatk() < 0)-(c.trueatk() > 0);
 	},
@@ -150,6 +166,7 @@ var ActivesValues = {
 	ink:3,
 	innovation:3,
 	integrity:4,
+	jetstream:2.5,
 	layegg:5,
 	light:1,
 	lightning:7,
@@ -159,6 +176,7 @@ var ActivesValues = {
 	luciferin:3,
 	lycanthropy:4,
 	metamorph: 2,
+	midas: 6,
 	mimic: 3,
 	miracle:function(c){
 		return c.owner.maxhp/8;
@@ -187,7 +205,7 @@ var ActivesValues = {
 	},
 	overdrivespell:5,
 	pacify:5,
-	paleomagnetism:4,
+	paleomagnetism:6,
 	pandemonium:3,
 	pandemonium2:4,
 	paradox:5,
@@ -196,16 +214,22 @@ var ActivesValues = {
 	photosynthesis:2,
 	plague:5,
 	platearmor:1,
+	poisonfoe:1.4,
 	"poison 1":2,
 	"poison 2":3,
 	"poison 3":4,
 	precognition:1,
+	protectonce:2,
+	protectall:3,
 	purify:4,
 	queen:7,
 	quint:6,
 	rage:[5, 6],
 	readiness: 3,
 	rebirth:[5, 2],
+	reducemaxhp: function(c, ttatk){
+		return ttatk*5/3;
+	},
 	regenerate: 5,
 	regeneratespell: 5,
 	regrade:3,
@@ -215,8 +239,6 @@ var ActivesValues = {
 	ricochet:2,
 	sanctuary:6,
 	scarab:4,
-	"growth 1":3,
-	"growth 2":5,
 	scramble:function(c){
 		var a=0, fq=c.owner.foe.quanta;
 		for(var i=1; i<13; i++){
