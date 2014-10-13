@@ -457,9 +457,7 @@ endow:function(c,t){
 	c.buffhp(2);
 },
 envenom:function(c,t){
-	if (!t.hasactive("hit", "poison 1")){
-		t.addactive("hit", etg.parseActive("poison 1"));
-	}
+	t.addactive("hit", etg.parseActive("poison 1"));
 },
 epidemic:function(c,t){
 	if (t.status.poison){
