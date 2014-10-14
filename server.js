@@ -1,4 +1,5 @@
 #!/usr/bin/node
+process.chdir(__dirname);
 "use strict";
 var users = {}, usersock = {}, rooms = {}, sockinfo = {};
 var sutil = require("./srv/sutil");

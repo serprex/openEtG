@@ -4,7 +4,7 @@ How to setup on Windows:
 	node.js @ http://nodejs.org
 	redis @ https://github.com/MSOpenTech/redis/tree/2.8/bin/release
 	tortoisegit @ http://code.google.com/p/tortoisegit
-	git for windows @ http://msysgit.github.io
+	git @ http://git-scm.com/download/win
 
 2	Right click where you want the files to be and click Git Clone to create an openetg folder somewhere, use the URL: https://github.com/Fippe94/openEtG.git
 

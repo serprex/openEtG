@@ -25,7 +25,7 @@ module.exports = function(db){
 	return function(req, res, next){
 		var paramstring = req.url.substring(2);
 		var params = qstring.parse(paramstring);
-		fs.readFile(__dirname + "/.codepsw", function(err, data) {
+		fs.readFile(".codepsw", function(err, data) {
 			if (err){
 				if (err.code == "ENOENT"){
 					data = params.p;

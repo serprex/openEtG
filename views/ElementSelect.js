@@ -23,5 +23,9 @@ module.exports = function() {
 		ele.interactive = true;
 		stage.addChild(ele);
 	});
-	px.refreshRenderer(stage);
+	px.refreshRenderer({view: stage, seldom: [[100, 400, ["Exit", function(){
+		sock.userEmit("delete");
+		sock.user = undefined;
+		require("./MainMenu")();
+	}]]]});
 }

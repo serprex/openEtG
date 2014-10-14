@@ -225,6 +225,7 @@ var ActivesValues = {
 	purify:4,
 	queen:7,
 	quint:6,
+	quinttog:7,
 	rage:[5, 6],
 	readiness: 3,
 	rebirth:[5, 2],

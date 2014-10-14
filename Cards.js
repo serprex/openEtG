@@ -119,5 +119,8 @@ var TargetFilters = {
 	},
 	wisdom:function(c, t){
 		return (t instanceof etg.Creature || t instanceof etg.Weapon) && !t.status.burrowed;
-	}
+	},
+	quinttog:function(c, t){
+		return t instanceof etg.Creature && !t.status.burrowed;
+	},
 };

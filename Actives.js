@@ -878,7 +878,9 @@ mimic:function(c,t){
 },
 midas:function(c,t){
 	Actives.destroy(c, t, true);
-	new etg.Permanent(c.card.as(Cards.GoldenRelic), t.owner).place();
+	var relic = new etg.Permanent(c.card.as(Cards.GoldenRelic), t.owner);
+	relic.usedactive = false;
+	relic.place();
 },
 miracle:function(c,t){
 	c.owner.quanta[etg.Light] = 0;
@@ -1085,6 +1087,12 @@ quint:function(c,t){
 	Effect.mkText("Immaterial", t);
 	t.status.immaterial = true;
 	t.status.frozen = 0;
+},
+quinttog:function(c,t){
+	if (t.status.immaterial){
+		Effect.mkText("Materialize", t);
+		delete t.status.immaterial;
+	}else Actives.quint(c,t);
 },
 randomdr: function(c, t) {
 	if (c==t)
