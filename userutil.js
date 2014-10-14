@@ -19,7 +19,7 @@ exports.calcWealth = function(wealth, cardpool){
 				if (card.upped && card.shiny) wealth += 300 * num;
 				else if (card.upped || card.shiny) wealth += 50 * num;
 			}else if (card.rarity > 0){
-				var worth = [1.66, 6.66, 33.33, 40, 250][card.rarity-1];
+				var worth = [1.375, 5, 30, 35, 250][card.rarity-1];
 				if (card.upped) worth *= 6;
 				if (card.shiny) worth *= 6;
 				wealth += worth * num;

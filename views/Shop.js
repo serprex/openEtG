@@ -7,9 +7,9 @@ var sock = require("./sock");
 var etgutil = require("./etgutil");
 module.exports = function() {
 	var packdata = [
-		{cost: 15, type: "Bronze", info: "9 Commons", color: 0xcd7d32},
+		{cost: 15, type: "Bronze", info: "10 Commons", color: 0xcd7d32},
 		{cost: 25, type: "Silver", info: "3 Commons, 3 Uncommons", color: 0xc0c0c0},
-		{cost: 65, type: "Gold", info: "3 Commons, 4 Uncommons, 1 Rare", color: 0xffd700},
+		{cost: 60, type: "Gold", info: "3 Commons, 4 Uncommons, 1 Rare", color: 0xffd700},
 		{cost: 100, type: "Platinum", info: "4 Commons, 3 Uncommons, 1 Rare, 1 Shard", color: 0xe4e4e4},
 		{cost: 250, type: "Nymph", info: "1 Nymph", color: 0x6699bb},
 	];
