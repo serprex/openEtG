@@ -35,7 +35,7 @@ function parseActive(name){
 }
 function Card(type, info){
 	this.type = type;
-	this.element = parseInt(info.Element);
+	this.element = parseInt(info.E);
 	this.name = info.Name;
 	this.code = info.Code;
 	if ((parseInt(this.code, 32)&0x3FFF) > 6999){

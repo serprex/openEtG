@@ -317,7 +317,7 @@ module.exports = function(nymph) {
 				}
 			]]
 		);
-		div.usermenu = utons;
+		stage.usermenu = utons;
 	}
 	px.refreshRenderer(stage);
 }
