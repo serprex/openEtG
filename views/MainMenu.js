@@ -286,7 +286,7 @@ module.exports = function(nymph) {
 		[230, 545, ["Reward", rewardClick]],
 		[320, 545, ["Library", libraryClick]]
 	);
-	var div = {normmenu: buttons};
+	var stage = {view: menuui, normmenu: buttons};
 	if (sock.user){
 		utons.push(
 			[50, 145, ["Quests", require("./QuestMain"), function() {
@@ -319,5 +319,5 @@ module.exports = function(nymph) {
 		);
 		div.usermenu = utons;
 	}
-	px.refreshRenderer({view: menuui, div: div});
+	px.refreshRenderer(stage);
 }

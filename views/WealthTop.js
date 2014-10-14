@@ -13,5 +13,5 @@ module.exports = function(info) {
 		stage.push([120 + 350 * Math.floor(i/50), y, ((i/2)+1) + "  " + info[i]],
 			[350 + 350 * Math.floor(i / 50), y, Math.round(info[i + 1]).toString()]);
 	}
-	px.refreshRenderer({div: {top50: stage}});
+	px.refreshRenderer({top50: stage});
 }

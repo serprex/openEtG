@@ -19,5 +19,5 @@ module.exports = function(info) {
 			stage.push([600, y, Cards.Codes[data[5]].name]);
 		}
 	}
-	px.refreshRenderer({div: {top20: stage}});
+	px.refreshRenderer({top20: stage});
 }

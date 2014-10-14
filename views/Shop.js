@@ -161,5 +161,5 @@ module.exports = function() {
 	var packmulti = document.createElement("input");
 	packmulti.style.width = "64px";
 	packmulti.placeholder = "Bulk";
-	px.refreshRenderer({view: storeui, div: {packmulti: [[777, 184, packmulti], [775, 246, ["Exit", require("./MainMenu")]]]}});
+	px.refreshRenderer({view: storeui, packmulti: [[777, 184, packmulti], [775, 246, ["Exit", require("./MainMenu")]]]});
 }

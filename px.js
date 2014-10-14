@@ -28,6 +28,7 @@ exports.load = function(){
 		require("./views/MainMenu")();
 	});
 }
+var special = /view|endnext|cmds|next/;
 exports.refreshRenderer = function(stage) {
 	if (realStage.children.length > 1){
 		var oldstage = realStage.children[1];
@@ -35,11 +36,11 @@ exports.refreshRenderer = function(stage) {
 		realStage.removeChildAt(1);
 	}
 	if (stage instanceof PIXI.DisplayObject) stage = {view: stage};
-	if (stage.div){
-		for(var id in stage.div){
+	for (var key in stage){
+		if (!key.match(special)){
 			var div = document.createElement("div");
-			div.id = id;
-			stage.div[id].forEach(function(info){
+			div.id = key;
+			stage[key].forEach(function(info){
 				var ele;
 				if (typeof info[2] === "string"){
 					ele = document.createElement("span");
@@ -82,13 +83,13 @@ exports.refreshRenderer = function(stage) {
 				ele.style.position = "absolute";
 				div.appendChild(ele);
 			});
-			stage.div[id] = div;
+			stage[key] = div;
 			document.body.appendChild(div);
 		}
 	}
-	if (curStage.div){
-		for(var id in curStage.div){
-			document.body.removeChild(curStage.div[id]);
+	for(var key in curStage){
+		if (!key.match(special)){
+			document.body.removeChild(curStage[key]);
 		}
 	}
 	if (stage.view){

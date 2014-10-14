@@ -118,7 +118,7 @@ module.exports = function() {
 				bpolish.visible = tinfo3.visible = true;
 			}
 			tinfo2.setText((card.rarity > 0 || card.upped) && card.rarity != -1 ?
-				"Sells for " + cardValues[card.rarity] * (card.upped ? 5 : 1) * (card.shiny ? 5 : 1) + " gold." : "");
+				"Sells for $" + cardValues[card.rarity] * (card.upped ? 5 : 1) * (card.shiny ? 5 : 1) : "");
 			twarning.setText("");
 		}, true
 	);

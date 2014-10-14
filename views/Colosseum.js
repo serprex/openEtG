@@ -48,5 +48,5 @@ module.exports = function(){
 			startMenu(nymph);
 		}]], [130, 280, "You successfully completed all tasks."]);
 	}
-	px.refreshRenderer({div: {colo: div}});
+	px.refreshRenderer({colo: div});
 }

@@ -320,7 +320,7 @@ module.exports = function(arena, acard, startempty) {
 			}]]
 		);
 	}
-	px.refreshRenderer({view: editorui, div: {editdiv: dom}, next:function() {
+	px.refreshRenderer({view: editorui, editdiv: dom, next:function() {
 		cardArt.visible = false;
 		var mpos = px.getMousePos();
 		cardsel.next(cardpool, cardminus, mpos);
