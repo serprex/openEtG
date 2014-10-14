@@ -1492,10 +1492,10 @@ void:function(c,t){
 	}
 },
 quantagift:function(c,t){
-	if (c.owner.mark != c.card.element){
-		c.owner.spend(c.card.element, -3);
-		c.owner.spend(c.owner.mark, -2);
-	}else c.owner.spend(c.card.element, -4);
+	if (c.owner.mark != etg.Water){
+		c.owner.spend(etg.Water, -3);
+		c.owner.spend(c.owner.mark, c.owner.mark ? -2 : -6);
+	}else c.owner.spend(etg.Water, -4);
 },
 web:function(c,t){
 	Effect.mkText("Web", t);
