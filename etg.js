@@ -97,7 +97,6 @@ function Card(type, info){
 function Thing(card, owner){
 	this.owner = owner;
 	this.card = card;
-	this.usedactive = true;
 	if (this.status){
 		for (var key in this.status){
 			if (key in passives) delete this.status[key];
@@ -134,6 +133,7 @@ function Player(game){
 	this.shardgolem = undefined;
 }
 function Creature(card, owner){
+	this.usedactive = true;
 	if (card.isOf(Cards.ShardGolem)){
 		this.card = card;
 		this.owner = owner;
@@ -143,10 +143,10 @@ function Creature(card, owner){
 		this.castele = Earth;
 		this.active = clone(golem.active);
 		this.status = clone(golem.status);
-		this.usedactive = true;
 	}else this.transform(card, owner);
 }
 function Permanent(card, owner){
+	this.usedactive = true;
 	this.cast = card.cast;
 	this.castele = card.castele;
 	Thing.apply(this, arguments);
@@ -958,6 +958,12 @@ Creature.prototype.transform = Weapon.prototype.transform = function(card, owner
 	this.cast = card.cast;
 	this.castele = card.castele;
 	Thing.call(this, card, owner || this.owner);
+	if (this.status.mutant){
+		var buff = this.owner.upto(25);
+		this.buffhp(Math.floor(buff/5));
+		this.atk += buff%5;
+		this.mutantactive();
+	}
 }
 Creature.prototype.calcEclipse = function(){
 	if (!this.status.nocturnal){
@@ -977,6 +983,30 @@ Creature.prototype.calcEclipse = function(){
 		}
 	}
 	return bonus;
+}
+Thing.prototype.lobo = function(){
+	// TODO deal with combined actives
+	for (var key in this.active){
+		if (!(this.active[key].activename in passives)) delete this.active[key];
+	}
+}
+Thing.prototype.mutantactive = function(){
+	this.lobo();
+	var abilities = ["hatch","freeze","burrow","destroy","steal","dive","heal","paradox","lycanthropy","growth 1","infect","gpull","devour","mutation","growth 2","ablaze","poison 1","deja","endow","guard","mitosis"];
+	var index = this.owner.upto(abilities.length+2)-2;
+	if (index<0){
+		this.status[["momentum","immaterial"][~index]] = true;
+	}else{
+		var active = Actives[abilities[index]];
+		if (abilities[index] == "growth 1"){
+			this.addactive("death", active);
+		}else{
+			this.active.cast = active;
+			this.cast = this.owner.uptoceil(2);
+			this.castele = this.card.element;
+			return true;
+		}
+	}
 }
 Weapon.prototype.trueatk = Creature.prototype.trueatk = function(adrenaline, nobuff){
 	var dmg = this.atk;

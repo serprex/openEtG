@@ -2,28 +2,6 @@
 var Effect = require("./Effect");
 var etg = require("./etg");
 var Cards = require("./Cards");
-function mutantactive(t){
-	lobo(t);
-	var abilities = ["hatch","freeze","burrow","destroy","steal","dive","heal","paradox","lycanthropy","growth 1","infect","gpull","devour","mutation","growth 2","ablaze","poison 1","deja","endow","guard","mitosis"];
-	var index = t.owner.upto(abilities.length+2)-2;
-	if (index<0){
-		t.status[["momentum","immaterial"][~index]] = true;
-	}else{
-		var active = Actives[abilities[index]];
-		if (abilities[index] == "growth 1"){
-			t.active.death = active;
-		}else{
-			t.active.cast = active;
-			return true;
-		}
-	}
-}
-function lobo(t){
-	// TODO deal with combined actives
-	for (var key in t.active){
-		if (!(t.active[key].activename in etg.passives)) delete t.active[key];
-	}
-}
 function adrenathrottle(f){
 	return function(c){
 		if (!c.status || (c.status.adrenaline || 0)<3){
@@ -42,7 +20,7 @@ acceleration:function(c,t){
 	c.dmg(1, true);
 },
 accelerationspell:function(c,t){
-	lobo(t);
+	t.lobo();
 	t.active.auto = Actives.acceleration;
 },
 accretion:function(c,t){
@@ -184,7 +162,7 @@ burrow:function(c,t){
 	c.cast = 0;
 },
 butterfly:function(c,t){
-	lobo(t);
+	t.lobo();
 	t.active.cast = Actives.destroy;
 	t.cast = 3;
 	t.castele = etg.Entropy;
@@ -251,8 +229,9 @@ counter:function(c,t){
 	}
 },
 cpower:function(c,t){
-	t.buffhp(c.owner.uptoceil(5));
-	t.atk += c.owner.uptoceil(5);
+	var buff = owner.upto(25);
+	t.buffhp(Math.floor(buff/5)+1);
+	t.atk += buff%5+1;
 },
 cseed:function(c,t){
 	if (t.card.isOf(Cards.Elf)){
@@ -668,13 +647,8 @@ immolate:function(c,t){
 },
 improve:function(c,t){
 	Effect.mkText("Improve", t);
+	t.status.mutant = true;
 	t.transform(t.owner.randomcard(false, function(x){return x.type == etg.CreatureEnum}));
-	t.buffhp(t.owner.upto(5));
-	t.atk += t.owner.upto(5);
-	if(mutantactive(t)){
-		t.cast = t.owner.uptoceil(2);
-		t.castele = t.card.element;
-	}
 },
 inertia:function(c,t, tt){
 	if (tt && c.owner == tt.owner && c.owner != tt){
@@ -811,7 +785,7 @@ lightning:function(c,t){
 },
 liquid:function(c,t){
 	Effect.mkText("Liquid", t);
-	lobo(t);
+	t.lobo();
 	t.active.hit = Actives.vampire;
 	t.addpoison(1);
 },
@@ -829,7 +803,7 @@ livingweapon:function(c,t){
 },
 lobotomize:function(c,t){
 	Effect.mkText("Lobotomize", t);
-	lobo(t);
+	t.lobo();
 	delete t.status.momentum;
 	delete t.status.psion;
 },
@@ -906,10 +880,9 @@ momentum:function(c,t){
 	t.status.momentum = true;
 },
 mutant:function(c,t){
-	if (!mutantactive(c)){
+	if (!c.mutantactive()){
 		c.active.cast = Actives.web;
 	}
-	c.cast = c.owner.uptoceil(2);
 	c.castele = c.owner.upto(13);
 },
 mutation:function(c,t){
@@ -982,7 +955,7 @@ overdrive:function(c,t){
 	c.dmg(1, true);
 },
 overdrivespell:function(c,t){
-	lobo(t);
+	t.lobo();
 	t.active.auto = Actives.overdrive;
 },
 pacify:function(c,t){
@@ -1008,6 +981,12 @@ parallel:function(c,t){
 	Effect.mkText("Parallel", t);
 	var copy = t.clone(c.owner);
 	copy.place();
+	if (copy.status.mutant){
+		var buff = c.owner.upto(25);
+		copy.buffhp(Math.floor(buff/5));
+		copy.atk += buff%5;
+		copy.mutantactive();
+	}
 	if (copy.status.voodoo){
 		c.owner.foe.dmg(copy.maxhp-copy.hp);
 		if (copy.status.poison){
@@ -1131,7 +1110,7 @@ regenerate:function(c,t){
 	c.owner.dmg(-5);
 },
 regeneratespell:function(c,t){
-	lobo(t);
+	t.lobo();
 	t.active.auto = Actives.regenerate;
 	if (t instanceof etg.Permanent){
 		t.status = {};
@@ -1292,7 +1271,7 @@ sinkhole:function(c,t){
 	Effect.mkText("Sinkhole", t);
 	t.status.burrowed = true;
 	delete t.status.airborne;
-	lobo(t);
+	t.lobo();
 	t.active.cast = Actives.unburrow;
 	t.cast = c.card.upped?1:0;
 	t.castele = etg.Earth;
@@ -1306,13 +1285,13 @@ siphon:adrenathrottle(function(c, t) {
 }),
 siphonactive:function(c,t){
 	Effect.mkText("Siphon", t);
-	lobo(c);
+	c.lobo();
 	for(var key in t.active){
 		if (!(t.active[key].activename in etg.passives)) c.active[key] = t.active[key];
 	}
 	c.cast = t.cast;
 	c.castele = t.castele;
-	lobo(t);
+	t.lobo();
 },
 siphonstrength:function(c,t){
 	Effect.mkText("+1|0", c);
