@@ -25,7 +25,7 @@ function deckRedirect(req, res, next){
 				var card = Cards.Codes[code];
 				ret += "<rect x='"+x+"' y='"+y+"' width='100' height='16' fill='"+elecols[card.element+(card.upped?13:0)]+"' stroke-width='.5' stroke='black'/>";
 				var textColor = card.upped ? "" : " fill='white'";
-				ret += "<text x='" + (x+2) + "' y='" + (y+13) + "'" + textColor + ">" + card.name + "</text>";
+				ret += "<text font-size='12px' x='" + (x+2) + "' y='" + (y+13) + "'" + textColor + ">" + card.name + "</text>";
 				y += 16;
 				if (y == 160){
 					y=0;
