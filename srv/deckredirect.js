@@ -9,7 +9,7 @@ function deckRedirect(req, res, next){
 			res.writeHead(200, {"Content-Type": "image/svg+xml"});
 			res.end(data);
 		}else{
-			var ret = "<svg xmlns='http://www.w3.org/2000/svg' width='616' height='160'>";
+			var ret = "<svg xmlns='http://www.w3.org/2000/svg'>";
 			var elecols = [
 				"#a99683", "#aa5999", "#777777", "#996633", "#5f4930", "#50a005", "#cc6611", "#205080", "#a9a9a9", "#337ddd", "#ccaa22", "#333333", "#77bbdd",
 				"#d4cac1", "#d4accc", "#bbbbbb", "#ccb299", "#afa497", "#a7cf82", "#e5b288", "#8fa7bf", "#d4d4d4", "#99beee", "#e5d490", "#999999", "#bbddee"];
