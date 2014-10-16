@@ -447,6 +447,7 @@ function evalthing(c) {
 	if (isWeapon || isCreature) {
 		ttatk = getDamage(c);
 		if (c.status.psion && c.owner.foe.shield && c.owner.foe.shield.status.reflect) ttatk *= -1;
+		score += c.trueatk()/20;
 		score += ttatk*delayfactor;
 	}else ttatk = 0;
 	for (var key in c.active) {
