@@ -2,6 +2,11 @@ var etg = require("../etg");
 var etgutil = require("../etgutil");
 var mt = require("../MersenneTwister");
 function speed(req, res, next){
+	if (req.url == "/"){
+		res.writeHead("302", {Location: "http://" + req.headers.host + "/speed/" + Math.random() });
+		res.end();
+		return;
+	}
 	var hash = 0, str = req.url.substr(1);
 	for (var i=0; i<str.length; i++){
 		hash = hash*31 + str.charCodeAt(i) & 0x7FFFFFFF;
@@ -13,7 +18,7 @@ function speed(req, res, next){
 		var ele;
 		do ele = prng.uptoceil(12); while (eles[ele]);
 		eles[ele] = true;
-		for(var j=0; j<8; j++){
+		for(var j=0; j<7; j++){
 			var card = prng.randomcard(false, function(x){return x.element == ele && x.type && cards.indexOf(x.code) == -1});
 			cards.push(card.code);
 		}
