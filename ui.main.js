@@ -13,6 +13,14 @@ window.aideck = document.getElementById("aideck");
 	var options = require("./options");
 	var userutil = require("./userutil");
 	var startMenu = require("./views/MainMenu");
+	var lastError = 0;
+	window.onerror = function(){
+		var now = Date.now();
+		if (lastError+999<now){
+			chat(Array.slice(arguments).join(", "));
+			lastError = now;
+		}
+	}
 	options.register("username", document.getElementById("username"));
 	var sockEvents = {
 		userdump:function(data) {

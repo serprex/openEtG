@@ -229,7 +229,7 @@ counter:function(c,t){
 	}
 },
 cpower:function(c,t){
-	var buff = owner.upto(25);
+	var buff = t.owner.upto(25);
 	t.buffhp(Math.floor(buff/5)+1);
 	t.atk += buff%5+1;
 },

@@ -12,6 +12,7 @@ var app = require("connect")().
 	use(require("compression")()).
 	use(require("serve-static")(__dirname)).
 	use("/Cards", require("./srv/cardredirect")()).
+	use("/speed", require("./srv/speed")()).
 	use("/deck", require("./srv/deckredirect")()).
 	use("/auth", require("./srv/loginauth")(db, users)).
 	use("/code", require("./srv/codesmith")(db));
