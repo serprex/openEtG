@@ -83,7 +83,7 @@ var ActivesValues = {
 	deathwish:1,
 	deja:4,
 	deployblobs: function(c) {
-		return 2+(c instanceof etg.CardInstance ? Math.min(c.card.attack, c.card.health) : Math.min(c.trueatk(), c.truehp()));
+		return 2+(c instanceof etg.CardInstance ? Math.min(c.card.attack, c.card.health) : Math.min(c.trueatk(), c.truehp()))/4;
 	},
 	destroy:8,
 	destroycard:1,
@@ -123,7 +123,7 @@ var ActivesValues = {
 	fractal:function(c){
 		return 9-c.owner.hand.length;
 	},
-	freeze:3,
+	freeze:[3,3.5],
 	fungusrebirth:1,
 	gas:5,
 	give:1,
@@ -206,11 +206,11 @@ var ActivesValues = {
 	},
 	overdrivespell:5,
 	pacify:5,
-	paleomagnetism:6,
+	paleomagnetism:[6,7],
 	pandemonium:3,
 	pandemonium2:4,
 	paradox:5,
-	parallell:7,
+	parallel:8,
 	phoenix:3,
 	photosynthesis:2,
 	plague:5,
@@ -221,7 +221,7 @@ var ActivesValues = {
 	"poison 3":4,
 	precognition:1,
 	protectonce:2,
-	protectall:3,
+	protectall:4,
 	purify:4,
 	queen:7,
 	quint:6,
@@ -280,7 +280,7 @@ var ActivesValues = {
 	},
 	virusplague:1,
 	void:5,
-	quantagift:2,
+	quantagift:6,
 	web: 2,
 	wind:function(c){
 		return c instanceof etg.CardInstance || !c.status.storedAtk ? 0 : c.status.storedAtk/2 - 2;
@@ -315,7 +315,7 @@ var ActivesValues = {
 	weight:5,
 	wings:function(c){
 		return c.status?(c.status.charges == 0 && c.owner == c.owner.game.turn?0:6):6;
-	}
+	},
 }
 var statusValues = {
 	airborne: 0.2,

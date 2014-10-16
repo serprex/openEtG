@@ -125,6 +125,7 @@ var userEvents = {
 		var u = data.u;
 		db.del("U:" + u);
 		db.del("Q:" + u);
+		db.del("D:" + u);
 		delete users[u];
 		delete usersock[u];
 	},
