@@ -3,7 +3,7 @@ var etgutil = require("../etgutil");
 var mt = require("../MersenneTwister");
 function speed(req, res, next){
 	if (req.url == "/"){
-		res.writeHead("302", {Location: "http://" + req.headers.host + "/speed/" + Math.random() });
+		res.writeHead("302", {Location: "http://" + req.headers.host + "/speed/" + Math.random()*etgutil.MAX_INT });
 		res.end();
 		return;
 	}
