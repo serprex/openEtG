@@ -523,11 +523,8 @@ fungusrebirth:function(c,t){
 	c.transform(c.card.as(Cards.Fungus));
 },
 gaincharge2:function(c,t){
-	c.status.charges += 2;
-},
-gaincharge3other:function(c, t){
 	if (c != t){
-		c.status.charges += 3;
+		c.status.charges += 2;
 	}
 },
 gainchargeowner:function(c,t){
