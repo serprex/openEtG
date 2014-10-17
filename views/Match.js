@@ -487,9 +487,9 @@ function startMatch(game, foeDeck) {
 			if (game.cardreward === undefined) {
 				var winnable = foeDeck.filter(function(card){ return card.rarity > 0 && card.rarity < 4; }), cardwon;
 				if (winnable.length) {
-					cardwon = winnable[etg.PlayerRng.upto(winnable.length)];
+					cardwon = etg.PlayerRng.choose(winnable);
 					if (cardwon == 3 && Math.random() < .5)
-						cardwon = winnable[etg.PlayerRng.upto(winnable.length)];
+						cardwon = etg.PlayerRng.choose(winnable);
 				} else {
 					var elewin = foeDeck[Math.floor(Math.random() * foeDeck.length)];
 					cardwon = etg.PlayerRng.randomcard(elewin.upped, function(x) { return x.element == elewin.element && x.type != etg.PillarEnum && x.rarity <= 3; });

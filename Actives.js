@@ -465,7 +465,7 @@ fickle:function(c,t){
 		}
 	});
 	if (cards.length > 0){
-		var pick = cards[t.owner.upto(cards.length)];
+		var pick = t.owner.choose(cards);
 		t.owner.hand[t.getIndex()] = new etg.CardInstance(t.owner.deck[pick], t.owner);
 		t.owner.deck[pick] = t.card;
 	}
@@ -1167,7 +1167,7 @@ ricochet:function(c,t){
 			tgttest(pl.weapon);
 		}
 		if (tgts.length > 0){
-			var tgt = tgts[c.owner.upto(tgts.length)], town = t.owner;
+			var tgt = c.owner.choose(tgts), town = t.owner;
 			t.owner = tgt[1];
 			t.castSpell(tgt[0], t.card.active, true);
 			t.owner = town;
@@ -1433,7 +1433,7 @@ trick:function(c,t){
 		}
 	});
 	if (cards.length > 0){
-		var pick = cards[t.owner.upto(cards.length)];
+		var pick = t.owner.choose(cards);
 		var cr = t.owner.creatures[t.getIndex()] = new etg.Creature(t.owner.deck[pick], t.owner);
 		t.owner.deck[pick] = t.card;
 		cr.procactive("play");

@@ -527,6 +527,9 @@ Player.prototype.upto = function(x){
 Player.prototype.uptoceil = function(x){
 	return Math.ceil((1-this.game.rng.rnd())*x);
 }
+Player.prototype.choose = function(x){
+	return x[this.upto(x.length)];
+}
 Player.prototype.isCloaked = function(){
 	return this.permanents.some(function(pr){
 		return pr && pr.status.cloak;
@@ -1236,7 +1239,7 @@ function filtercards(upped, filter, cmp, showshiny){
 }
 Player.prototype.randomcard = function(upped, filter){
 	var keys = filtercards(upped, filter);
-	return keys && keys.length && Cards.Codes[keys[this.upto(keys.length)]];
+	return keys && keys.length && Cards.Codes[this.choose(keys)];
 }
 function activename(active){
 	return active?active.activename:"";
