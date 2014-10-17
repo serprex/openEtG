@@ -471,9 +471,21 @@ var userEvents = {
 	userEvents[event] = userutil[event];
 });
 var sockEvents = {
-	guestchat:function (data) {
+	guestchat:function(data) {
 		data.guest = true;
 		data.u = "Guest_" + data.u;
+		genericChat(this, data);
+	},
+	roll:function(data){
+		var A = Math.min(data.A || 1, 99), X = data.X || etgutil.MAX_INT;
+		delete data.A;
+		delete data.X;
+		var sum = 0;
+		for(var i=0; i<A; i++){
+			sum += etg.PlayerRng.upto(X);
+		}
+		data.msg = A + "d" + X + " " + sum;
+		data.mode = "#006000";
 		genericChat(this, data);
 	},
 	pvpwant:function(data) {

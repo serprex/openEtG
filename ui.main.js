@@ -54,7 +54,7 @@ window.aideck = document.getElementById("aideck");
 			}
 			var decklink = /\b(([01][0-9a-v]{4})+)\b/g, reres, lastindex = 0;
 			while (reres = decklink.exec(data.msg)){
-				if (reres.index != lastindex) span.appendChild(document.createTextNode(data.msg.substring(lastindex, reres.index)));
+				if (reres.index != lastindex) span.appendChild(document.createTextNode(data.msg.slice(lastindex, reres.index)));
 				var link = document.createElement("a");
 				link.href = "deck/" + reres[0];
 				link.target = "_blank";
@@ -62,7 +62,7 @@ window.aideck = document.getElementById("aideck");
 				span.appendChild(link);
 				lastindex = reres.index + reres[0].length;
 			}
-			if (lastindex != data.msg.length) span.appendChild(document.createTextNode(data.msg.substring(lastindex)));
+			if (lastindex != data.msg.length) span.appendChild(document.createTextNode(data.msg.slice(lastindex)));
 			chat.addSpan(span);
 		},
 		cardart:function(data) {
@@ -106,8 +106,18 @@ window.aideck = document.getElementById("aideck");
 				while (chatBox.firstChild) chatBox.firstChild.remove();
 			}else if (msg == "/who"){
 				sock.emit("who");
+			}else if (msg.match(/^\/roll( |$)\d*d?\d*$/)){
+				var data = {u:sock.user ? sock.user.name : ""}
+				var ndn = msg.slice(6).split("d");
+				if (!ndn[1]){
+					data.X = parseInt(ndn[0] || etgutil.MAX_INT);
+				}else{
+					data.A = parseInt(ndn[0]);
+					data.X = parseInt(ndn[1]);
+				}
+				sock.emit("roll", data);
 			}else if (msg.match(/^\/decks/) && sock.user){
-				var prefix = msg.length > 6 && msg.substring(6).replace(/ {2,}/g, " ").trim().split(" ");
+				var prefix = msg.length > 6 && msg.slice(6).replace(/ {2,}/g, " ").trim().split(" ");
 				var names = Object.keys(sock.user.decknames);
 				if (prefix) names = names.filter(function(name){return prefix.some(function(x){return name.indexOf(x)==0;})});
 				names.sort();
@@ -132,7 +142,7 @@ window.aideck = document.getElementById("aideck");
 					var link = document.createElement("a");
 					link.href = "deck/" + deck;
 					link.target = "_blank";
-					link.appendChild(document.createTextNode(etg.eleNames[etg.fromTrueMark(deck.substring(deck.length-3))]));
+					link.appendChild(document.createTextNode(etg.eleNames[etg.fromTrueMark(deck.slice(deck.length-3))]));
 					span.appendChild(link);
 					chat.addSpan(span);
 				});
@@ -143,24 +153,24 @@ window.aideck = document.getElementById("aideck");
 				muteall = false;
 				chatmute();
 			}else if (msg.match(/^\/mute /)){
-				muteset[msg.substring(6)] = true;
+				muteset[msg.slice(6)] = true;
 				chatmute();
 			}else if (msg.match(/^\/unmute /)){
-				delete muteset[msg.substring(8)];
+				delete muteset[msg.slice(8)];
 				chatmute();
 			}else if (!msg.match(/^\/[^/]/) || (sock.user && msg.match(/^\/w( |")/))) {
 				msg = msg.replace(/^\/\//, "/");
 				if (sock.user){
-					var msgdata = {msg: msg};
+					var data = {msg: msg};
 					if (msg.match(/^\/w( |")/)) {
 						var match = msg.match(/^\/w"([^"]*)"/);
-						var to = (match && match[1]) || msg.substring(3, msg.indexOf(" ", 4));
+						var to = (match && match[1]) || msg.slice(3, msg.indexOf(" ", 4));
 						if (!to) return;
-						chatinput.value = msg.substr(0, 4+to.length);
-						msgdata.msg = msg.substr(4+to.length);
-						msgdata.to = to;
+						chatinput.value = msg.slice(0, 4+to.length);
+						data.msg = msg.slice(4+to.length);
+						data.to = to;
 					}
-					if (!msgdata.msg.match(/^\s*$/)) sock.userEmit("chat", msgdata);
+					if (!data.msg.match(/^\s*$/)) sock.userEmit("chat", data);
 				}else{
 					var name = options.username || guestname || (guestname = (10000 + Math.floor(Math.random() * 89999)) + "");
 					sock.emit("guestchat", { msg: msg, u: name });
