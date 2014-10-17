@@ -189,9 +189,9 @@ require("./etg.client").loadcards(function() {
 		equal(player1.creatures[0].card, Cards.Ash, "Ash");
 	});
 	gameTest("Purify", function() {
-		Actives.poison3(player1);
+		Actives["poison 3"](player1);
 		equal(player2.status.poison, 3, "3");
-		Actives.poison3(player1, player2);
+		Actives["poison 3"](player1, player2);
 		equal(player2.status.poison, 6, "6");
 		Actives.purify(player1, player2);
 		equal(player2.status.poison, -2, "-2");
