@@ -77,15 +77,26 @@ module.exports = function(arena, acard, startempty) {
 	function saveDeck(force){
 		var dcode = etgutil.encodedeck(decksprite.deck) + "01" + etg.toTrueMark(editormark);
 		var olddeck = sock.getDeck();
-		if (typeof sock.user.selectedDeck === "string"){
-			if (decksprite.deck.length == 0){
-				sock.userEmit("rmdeck", {name: sock.user.selectedDeck});
-				delete sock.user.decknames[sock.user.selectedDeck];
-			}else if (olddeck != dcode){
-				sock.user.decknames[sock.user.selectedDeck] = dcode;
-				sock.userEmit("setdeck", { d: dcode, name: sock.user.selectedDeck });
-			}else if (force) sock.userEmit("setdeck", {name: sock.user.selectedDeck });
-		}else if (force) sock.userEmit("setdeck", { number: sock.user.selectedDeck });
+		if (decksprite.deck.length == 0){
+			sock.userEmit("rmdeck", {name: sock.user.selectedDeck});
+			delete sock.user.decknames[sock.user.selectedDeck];
+		}else if (olddeck != dcode){
+			sock.user.decknames[sock.user.selectedDeck] = dcode;
+			sock.userEmit("setdeck", { d: dcode, name: sock.user.selectedDeck });
+		}else if (force) sock.userEmit("setdeck", {name: sock.user.selectedDeck });
+	}
+	function loadDeck(x){
+		saveDeck();
+		deckname.value = sock.user.selectedDeck = x;
+		tname.setText(x);
+		for (var i = 0;i < 10;i++) buttons[i].visible = sock.user.selectedDeck !== i.toString();
+		decksprite.deck = etgutil.decodedeck(sock.getDeck());
+		processDeck();
+	}
+	function importDeck(){
+		var dvalue = options.deck.trim();
+		decksprite.deck = ~dvalue.indexOf(" ") ? dvalue.split(" ") : etgutil.decodedeck(dvalue);
+		processDeck();
 	}
 	var cardminus, cardpool;
 	if (sock.user){
@@ -138,12 +149,7 @@ module.exports = function(arena, acard, startempty) {
 	}
 	function switchDeckCb(x){
 		return function() {
-			saveDeck();
-			for (var i=0; i<10; i++) buttons[i].visible = i != x;
-			sock.user.selectedDeck = x.toString();
-			decksprite.deck = etgutil.decodedeck(sock.getDeck());
-			deckname.value = "";
-			processDeck();
+			loadDeck(x.toString());
 		}
 	}
 	var buttons;
@@ -182,22 +188,15 @@ module.exports = function(arena, acard, startempty) {
 		dom.push([8, 58, ["Save & Exit", function() {
 			if (sock.user) saveDeck(true);
 			startMenu();
-		}]], [8, 84, ["Import", function() {
-			var dvalue = options.deck.trim();
-			decksprite.deck = ~dvalue.indexOf(" ") ? dvalue.split(" ") : etgutil.decodedeck(dvalue);
-			processDeck();
-		}]]);
+		}]], [8, 84, ["Import", importDeck]]);
 		if (sock.user) {
 			dom.push([8, 110, ["Save", function() {
 				for (var i = 0;i < 10;i++) buttons[i].visible = true;
 				sock.user.selectedDeck = deckname.value;
+				tname.setText(sock.user.selectedDeck);
 				saveDeck();
 			}]], [8, 136, ["Load", function() {
-				saveDeck();
-				for (var i = 0;i < 10;i++) buttons[i].visible = true;
-				sock.user.selectedDeck = deckname.value;
-				decksprite.deck = etgutil.decodedeck(sock.getDeck());
-				processDeck();
+				loadDeck(deckname.value);
 			}]], [8, 162, ["Exit", function() {
 				startMenu();
 			}]])
@@ -273,7 +272,7 @@ module.exports = function(arena, acard, startempty) {
 			deckname.value = sock.user.selectedDeck;
 			deckname.addEventListener("keydown", function(e){
 				if (e.keyCode == 13) {
-					bload.click();
+					loadDeck(this.value);
 				}
 			});
 			deckname.addEventListener("click", function(e){
@@ -290,7 +289,7 @@ module.exports = function(arena, acard, startempty) {
 		deckimport.addEventListener("keydown", function(e){
 			if (e.keyCode == 13){
 				this.blur();
-				bimport.click();
+				importDeck();
 			}
 		});
 		options.register("deck", deckimport);
@@ -305,7 +304,6 @@ module.exports = function(arena, acard, startempty) {
 		var mpos = px.getMousePos();
 		cardsel.next(cardpool, cardminus, mpos);
 		decksprite.next(mpos);
-		if (sock.user && !arena) tname.setText(sock.user.selectedDeck);
 	}});
 	if (!arena){
 		deckimport.focus();
