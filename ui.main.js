@@ -124,7 +124,7 @@ window.aideck = document.getElementById("aideck");
 				names.forEach(function(name){
 					var deck = sock.user.decknames[name];
 					var span = document.createElement("span");
-					span.appendChild(document.createTextNode(name));
+					span.appendChild(document.createTextNode(name+" "));
 					span.addEventListener("click", function(e){
 						if (e.target != this) return;
 						var deckname = document.getElementById("deckname"), deckimport = document.getElementById("deckimport");
@@ -142,7 +142,7 @@ window.aideck = document.getElementById("aideck");
 					var link = document.createElement("a");
 					link.href = "deck/" + deck;
 					link.target = "_blank";
-					link.appendChild(document.createTextNode(etg.eleNames[etg.fromTrueMark(deck.slice(deck.length-3))]));
+					link.className = "eicon e"+etg.fromTrueMark(deck.slice(deck.length-3));
 					span.appendChild(link);
 					chat.addSpan(span);
 				});
