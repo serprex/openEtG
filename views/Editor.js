@@ -94,18 +94,13 @@ module.exports = function(arena, acard, startempty) {
 		etgutil.iterraw(sock.user.pool, incrpool);
 		etgutil.iterraw(sock.user.accountbound, incrpool);
 	}
-	var editorui = px.mkView();
-	var bclear = px.mkButton(8, 32, "Clear");
-	var bexit = px.mkButton(8, 58, "Save & Exit");
-	px.setClick(bclear, function() {
+	var editorui = px.mkView(), dom = [[8, 32, ["Clear", function(){
 		if (sock.user) {
 			cardminus = {};
 		}
 		decksprite.deck.length = arena?5:0;
 		decksprite.renderDeck(decksprite.deck.length);
-	});
-	editorui.addChild(bclear);
-	editorui.addChild(bexit);
+	}]]];
 	function sumscore(){
 		var sum = 0;
 		for(var k in artable){
@@ -153,7 +148,7 @@ module.exports = function(arena, acard, startempty) {
 	}
 	var buttons;
 	if (arena){
-		px.setClick(bexit, function() {
+		dom.push([8, 58, ["Save & Exit", function() {
 			if (decksprite.deck.length < 35) {
 				chat("35 cards required before submission");
 				return;
@@ -168,12 +163,9 @@ module.exports = function(arena, acard, startempty) {
 			sock.userEmit("setarena", data);
 			chat("Arena deck submitted");
 			startMenu();
-		});
-		var bexit = px.mkButton(8, 84, "Exit");
-		px.setClick(bexit, function() {
+		}]], [8, 84, ["Exit", function() {
 			require("./ArenaInfo")(arena);
-		});
-		editorui.addChild(bexit);
+		}]]);
 		var arpts = arena.lv?515:470, arattr = {hp:parseInt(arena.hp || 200), mark:parseInt(arena.mark || 1), draw:parseInt(arena.draw || 1)};
 		var artable = {
 			hp: { min: 65, max: 200, incr: 45, cost: 1 },
@@ -187,39 +179,28 @@ module.exports = function(arena, acard, startempty) {
 		makeattrui(1, "mark");
 		makeattrui(2, "draw");
 	}else{
-		px.setClick(bexit, function() {
+		dom.push([8, 58, ["Save & Exit", function() {
 			if (sock.user) saveDeck(true);
 			startMenu();
-		});
-		var bimport = px.mkButton(8, 84, "Import");
-		px.setClick(bimport, function() {
+		}]], [8, 84, ["Import", function() {
 			var dvalue = options.deck.trim();
 			decksprite.deck = ~dvalue.indexOf(" ") ? dvalue.split(" ") : etgutil.decodedeck(dvalue);
 			processDeck();
-		});
-		editorui.addChild(bimport);
+		}]]);
 		if (sock.user) {
-			var bsave = px.mkButton(8, 110, "Save");
-			px.setClick(bsave, function() {
+			dom.push([8, 110, ["Save", function() {
 				for (var i = 0;i < 10;i++) buttons[i].visible = true;
 				sock.user.selectedDeck = deckname.value;
 				saveDeck();
-			})
-			editorui.addChild(bsave);
-			var bload = px.mkButton(8, 136, "Load");
-			px.setClick(bload, function() {
+			}]], [8, 136, ["Load", function() {
 				saveDeck();
 				for (var i = 0;i < 10;i++) buttons[i].visible = true;
 				sock.user.selectedDeck = deckname.value;
 				decksprite.deck = etgutil.decodedeck(sock.getDeck());
 				processDeck();
-			})
-			editorui.addChild(bload);
-			var bexitnosave = px.mkButton(8, 162, "Exit");
-			px.setClick(bexitnosave, function() {
+			}]], [8, 162, ["Exit", function() {
 				startMenu();
-			})
-			editorui.addChild(bexitnosave);
+			}]])
 			var tname = new px.MenuText(100, 8, "");
 			editorui.addChild(tname);
 			buttons = [];
@@ -231,7 +212,7 @@ module.exports = function(arena, acard, startempty) {
 				editorui.addChild(button);
 				buttons.push(button);
 			}
-			if (sock.user.selectedDeck.match(/$\d^/)) buttons[parseInt(sock.user.selectedDeck)].visible = false;
+			if (sock.user.selectedDeck.match(/^\d$/)) buttons[parseInt(sock.user.selectedDeck)].visible = false;
 		}
 	}
 	var editormarksprite = new PIXI.Sprite(gfx.nopic);
@@ -283,7 +264,6 @@ module.exports = function(arena, acard, startempty) {
 	var cardArt = new PIXI.Sprite(gfx.nopic);
 	cardArt.position.set(734, 8);
 	editorui.addChild(cardArt);
-	var dom = [];
 	if (!arena){
 		if (sock.user){
 			var deckname = document.createElement("input");
@@ -320,7 +300,7 @@ module.exports = function(arena, acard, startempty) {
 			}]]
 		);
 	}
-	px.refreshRenderer({view: editorui, editdiv: dom, next:function() {
+	px.refreshRenderer({view:editorui, editdiv:dom, next:function() {
 		cardArt.visible = false;
 		var mpos = px.getMousePos();
 		cardsel.next(cardpool, cardminus, mpos);

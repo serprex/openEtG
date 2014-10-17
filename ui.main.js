@@ -17,7 +17,7 @@ window.aideck = document.getElementById("aideck");
 	window.onerror = function(){
 		var now = Date.now();
 		if (lastError+999<now){
-			chat(Array.slice(arguments).join(", "));
+			chat(Array.apply(null, arguments).join(", "));
 			lastError = now;
 		}
 	}
