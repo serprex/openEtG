@@ -89,7 +89,7 @@ module.exports = function(arena, acard, startempty) {
 		saveDeck();
 		deckname.value = sock.user.selectedDeck = x;
 		tname.setText(x);
-		for (var i = 0;i < 10;i++) buttons[i].visible = sock.user.selectedDeck !== i.toString();
+		for (var i = 0;i < 10;i++) buttons[i].style.display = sock.user.selectedDeck !== i.toString() ? "inline" : "none";
 		decksprite.deck = etgutil.decodedeck(sock.getDeck());
 		processDeck();
 	}
@@ -191,8 +191,8 @@ module.exports = function(arena, acard, startempty) {
 		}]], [8, 84, ["Import", importDeck]]);
 		if (sock.user) {
 			dom.push([8, 110, ["Save", function() {
-				for (var i = 0;i < 10;i++) buttons[i].visible = true;
 				sock.user.selectedDeck = deckname.value;
+				for (var i = 0;i < 10;i++) buttons[i].style.display = sock.user.selectedDeck == i ? "inline" : "none";
 				tname.setText(sock.user.selectedDeck);
 				saveDeck();
 			}]], [8, 136, ["Load", function() {
@@ -204,14 +204,16 @@ module.exports = function(arena, acard, startempty) {
 			editorui.addChild(tname);
 			buttons = [];
 			for (var i = 0;i < 10;i++) {
-				var button = px.mkButton(300 + i * 36, 8, i.toString());
-				button.width /= 2;
-				button.children[0].scale.x = 2
-				px.setClick(button, switchDeckCb(i));
-				editorui.addChild(button);
-				buttons.push(button);
+				var b = document.createElement("input");
+				b.type = "button";
+				b.style.width = "32px";
+				b.value = i.toString();
+				b.style.backgroundSize = "100% 100%";
+				b.addEventListener("click", switchDeckCb(i));
+				dom.push([300 + i*36, 8, b]);
+				buttons.push(b);
 			}
-			if (sock.user.selectedDeck.match(/^\d$/)) buttons[parseInt(sock.user.selectedDeck)].visible = false;
+			if (sock.user.selectedDeck.match(/^\d$/)) buttons[sock.user.selectedDeck].style.display = "none";
 		}
 	}
 	var editormarksprite = new PIXI.Sprite(gfx.nopic);
