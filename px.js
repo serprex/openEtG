@@ -29,6 +29,52 @@ exports.load = function(){
 	});
 }
 var special = /view|endnext|cmds|next/;
+function parseDom(info){
+	var ele;
+	if (typeof info[2] === "string"){
+		ele = document.createElement("span");
+		var pieces = info[2].replace(/\|/g, " | ").split(/(\d\d?:\d\d?|\$|\n)/);
+		pieces.forEach(function(piece){
+			if (piece == "\n") {
+				ele.appendChild(document.createElement("br"));
+			}else if (piece == "$") {
+				var sp = document.createElement("span");
+				sp.className = "coin";
+				ele.appendChild(sp);
+			}else if (/^\d\d?:\d\d?$/.test(piece)) {
+				var parse = piece.split(":");
+				var num = parseInt(parse[0]);
+				if (num < 4) {
+					for (var j = 0;j < num;j++) {
+						var sp = document.createElement("span");
+						sp.className = "eicon e"+parse[1];
+						ele.appendChild(sp);
+					}
+				}else{
+					ele.appendChild(document.createTextElement(parse[0]));
+					var sp = document.createElement("span");
+					sp.className = "eicon e"+parse[1];
+					ele.appendChild(sp);
+				}
+			} else if (piece) {
+				ele.appendChild(document.createTextNode(piece));
+			}
+		});
+	}else if (info[2] instanceof Array){
+		ele = document.createElement("input");
+		ele.type = "button";
+		ele.value = info[2][0];
+		if (info[2][1]) ele.addEventListener("click", info[2][1]);
+		if (info[2][2]) ele.addEventListener("mouseover", info[2][2]);
+	}else ele = info[2];
+	ele.style.left = info[0] + "px";
+	ele.style.top = info[1] + "px";
+	ele.style.position = "absolute";
+	return ele;
+}
+exports.setDomVis = function(id, vis){
+	document.getElementById(id).style.display = vis ? "inline" : "none";
+}
 exports.refreshRenderer = function(stage) {
 	if (realStage.children.length > 1){
 		var oldstage = realStage.children[1];
@@ -38,51 +84,14 @@ exports.refreshRenderer = function(stage) {
 	if (stage instanceof PIXI.DisplayObject) stage = {view: stage};
 	for (var key in stage){
 		if (!key.match(special)){
-			var div = document.createElement("div");
+			var dom = stage[key], div;
+			if (dom[0] instanceof Array){
+				div = document.createElement("div");
+				stage[key].forEach(function(info){
+					div.appendChild(parseDom(info));
+				});
+			}else div = parseDom(dom);
 			div.id = key;
-			stage[key].forEach(function(info){
-				var ele;
-				if (typeof info[2] === "string"){
-					ele = document.createElement("span");
-					var pieces = info[2].replace(/\|/g, " | ").split(/(\d\d?:\d\d?|\$|\n)/);
-					pieces.forEach(function(piece){
-						if (piece == "\n") {
-							ele.appendChild(document.createElement("br"));
-						}else if (piece == "$") {
-							var sp = document.createElement("span");
-							sp.className = "coin";
-							ele.appendChild(sp);
-						}else if (/^\d\d?:\d\d?$/.test(piece)) {
-							var parse = piece.split(":");
-							var num = parseInt(parse[0]);
-							if (num < 4) {
-								for (var j = 0;j < num;j++) {
-									var sp = document.createElement("span");
-									sp.className = "eicon e"+parse[1];
-									ele.appendChild(sp);
-								}
-							}else{
-								ele.appendChild(document.createTextElement(parse[0]));
-								var sp = document.createElement("span");
-								sp.className = "eicon e"+parse[1];
-								ele.appendChild(sp);
-							}
-						} else if (piece) {
-							ele.appendChild(document.createTextNode(piece));
-						}
-					});
-				}else if (info[2] instanceof Array){
-					ele = document.createElement("input");
-					ele.type = "button";
-					ele.value = info[2][0];
-					if (info[2][1]) ele.addEventListener("click", info[2][1]);
-					if (info[2][2]) ele.addEventListener("mouseover", info[2][2]);
-				}else ele = info[2];
-				ele.style.left = info[0] + "px";
-				ele.style.top = info[1] + "px";
-				ele.style.position = "absolute";
-				div.appendChild(ele);
-			});
 			stage[key] = div;
 			document.body.appendChild(div);
 		}

@@ -177,13 +177,13 @@ var ActivesValues = {
 	luciferin:3,
 	lycanthropy:4,
 	metamorph: 2,
-	midas: 6,
-	mimic: 3,
+	midas:6,
+	mimic:3,
 	miracle:function(c){
 		return c.owner.maxhp/8;
 	},
 	mitosis:function(c){
-		return c.card.cost;
+		return 4+c.card.cost;
 	},
 	mitosisspell:6,
 	momentum:2,

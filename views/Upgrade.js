@@ -62,27 +62,21 @@ module.exports = function() {
 		cardpool = etgutil.deck2pool(sock.user.pool);
 		cardpool = etgutil.deck2pool(sock.user.accountbound, cardpool);
 	}
-	var upgradeui = px.mkView();
+	var upgradeui = px.mkView(function(){
+		if (selectedCard) cardArt.setTexture(gfx.getArt(etgutil.asUpped(selectedCard, true)));
+	});
+	var stage = {view:upgradeui,
+		bexit:[5, 50, ["Exit", require("./MainMenu")]],
+		bupgrade:[150, 50, ["Upgrade", eventWrap(upgradeCard)]],
+		bpolish:[150, 95, ["Polish", eventWrap(polishCard), function() { if (selectedCard) cardArt.setTexture(gfx.getArt(etgutil.asShiny(selectedCard, true))) }]],
+		bsell:[150, 140, ["Sell", eventWrap(sellCard)]],
+		next:function(){
+			cardsel.next(cardpool);
+		}
+	};
 
 	var goldcount = new px.MenuText(30, 100, "$" + sock.user.gold);
 	upgradeui.addChild(goldcount);
-	var bupgrade = px.mkButton(150, 50, "Upgrade");
-	px.setClick(bupgrade, eventWrap(upgradeCard));
-	upgradeui.addChild(bupgrade);
-	var bpolish = px.mkButton(150, 95, "Polish", function() {
-		if (selectedCard) cardArt.setTexture(gfx.getArt(etgutil.asShiny(selectedCard, true)));
-	},
-	function() {
-		if (selectedCard) cardArt.setTexture(gfx.getArt(etgutil.asUpped(selectedCard, true)));
-	});
-	px.setClick(bpolish, eventWrap(polishCard));
-	upgradeui.addChild(bpolish);
-	var bsell = px.mkButton(150, 140, "Sell");
-	px.setClick(bsell, eventWrap(sellCard));
-	upgradeui.addChild(bsell);
-	var bexit = px.mkButton(5, 50, "Exit");
-	px.setClick(bexit, require("./MainMenu"));
-	upgradeui.addChild(bexit);
 	var tinfo = new px.MenuText(250, 50, "");
 	upgradeui.addChild(tinfo);
 	var tinfo2 = new px.MenuText(250, 140, "");
@@ -106,18 +100,19 @@ module.exports = function() {
 			cardArt.setTexture(gfx.getArt(etgutil.asUpped(code, true)));
 			selectedCard = code;
 			if (card.upped){
-				bupgrade.visisble = tinfo.visible = false;
+				px.setDomVis("bupgrade", tinfo.visible = false);
 			}else{
 				tinfo.setText(card.isFree() ? "Costs $50 to upgrade" : card.rarity != -1 ? "Convert 6 into an upgraded version." : "Convert into an upgraded version.");
-				bupgrade.visisble = tinfo.visible = true;
+				px.setDomVis("bupgrade", tinfo.visible = true);
 			}
 			if (card.shiny){
-				bpolish.visible = tinfo3.visible = false;
+				px.setDomVis("bpolish", tinfo3.visible = false);
 			}else{
 				tinfo3.setText(card.isFree() ? "Costs $50 to polish" : card.rarity == 5 ? "This card cannot be polished." : card.rarity != -1 ? "Convert 6 into a shiny version." : "Convert 2 into a shiny version.")
-				bpolish.visible = tinfo3.visible = true;
+				px.setDomVis("bpolish", tinfo3.visible = true);
 			}
-			tinfo2.setText((card.rarity > 0 || card.upped) && card.rarity != -1 ?
+			px.setDomVis("bsell", ~card.rarity && !card.isFree());
+			tinfo2.setText(~card.rarity && !card.isFree() ?
 				"Sells for $" + cardValues[card.rarity] * (card.upped ? 5 : 1) * (card.shiny ? 5 : 1) : "");
 			twarning.setText("");
 		}, true
@@ -125,7 +120,8 @@ module.exports = function() {
 	upgradeui.addChild(cardsel);
 	var cardpool, selectedCard;
 	adjustdeck();
-	px.refreshRenderer({view: upgradeui, next:function() {
-		cardsel.next(cardpool);
-	}});
+	px.refreshRenderer(stage);
+	px.setDomVis("bupgrade", false);
+	px.setDomVis("bpolish", false);
+	px.setDomVis("bsell", false);
 }
