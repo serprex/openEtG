@@ -85,9 +85,6 @@ module.exports = function(arena, acard, startempty) {
 				sock.user.decknames[sock.user.selectedDeck] = dcode;
 				sock.userEmit("setdeck", { d: dcode, name: sock.user.selectedDeck });
 			}else if (force) sock.userEmit("setdeck", {name: sock.user.selectedDeck });
-		}else if (olddeck != dcode){
-			sock.user.decks[sock.user.selectedDeck] = dcode;
-			sock.userEmit("setdeck", { d: dcode, number: sock.user.selectedDeck });
 		}else if (force) sock.userEmit("setdeck", { number: sock.user.selectedDeck });
 	}
 	var cardminus, cardpool;
@@ -148,7 +145,7 @@ module.exports = function(arena, acard, startempty) {
 		return function() {
 			saveDeck();
 			for (var i=0; i<10; i++) buttons[i].visible = i != x;
-			sock.user.selectedDeck = x;
+			sock.user.selectedDeck = x.toString();
 			decksprite.deck = etgutil.decodedeck(sock.getDeck());
 			deckname.value = "";
 			processDeck();
@@ -227,14 +224,14 @@ module.exports = function(arena, acard, startempty) {
 			editorui.addChild(tname);
 			buttons = [];
 			for (var i = 0;i < 10;i++) {
-				var button = px.mkButton(300 + i * 36, 8, "" +(i + 1));
+				var button = px.mkButton(300 + i * 36, 8, i.toString());
 				button.width /= 2;
 				button.children[0].scale.x = 2
 				px.setClick(button, switchDeckCb(i));
 				editorui.addChild(button);
 				buttons.push(button);
 			}
-			if (typeof sock.user.selectedDeck === "number") buttons[sock.user.selectedDeck].visible = false;
+			if (sock.user.selectedDeck.match(/$\d^/)) buttons[parseInt(sock.user.selectedDeck)].visible = false;
 		}
 	}
 	var editormarksprite = new PIXI.Sprite(gfx.nopic);
@@ -293,7 +290,7 @@ module.exports = function(arena, acard, startempty) {
 			deckname.id = "deckname";
 			deckname.style.width = "80px";
 			deckname.placeholder = "Name";
-			if (typeof sock.user.selectedDeck === "string") deckname.value = sock.user.selectedDeck;
+			deckname.value = sock.user.selectedDeck;
 			deckname.addEventListener("keydown", function(e){
 				if (e.keyCode == 13) {
 					bload.click();
@@ -328,7 +325,7 @@ module.exports = function(arena, acard, startempty) {
 		var mpos = px.getMousePos();
 		cardsel.next(cardpool, cardminus, mpos);
 		decksprite.next(mpos);
-		if (sock.user && !arena) tname.setText(typeof sock.user.selectedDeck === "number" ? ("Deck " + (sock.user.selectedDeck + 1)) : sock.user.selectedDeck);
+		if (sock.user && !arena) tname.setText(sock.user.selectedDeck);
 	}});
 	if (!arena){
 		deckimport.focus();

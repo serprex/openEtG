@@ -11,8 +11,7 @@ exports.loadcards = function(){
 	Cards.loaded = true;
 }
 exports.prepuser = function(servuser){
-	if (!servuser.selectedDeck) servuser.selectedDeck = 0;
-	else if (servuser.selectedDeck.match(/^\d$/)) servuser.selectedDeck = parseInt(servuser.selectedDeck);
+	if (servuser.selectedDeck == null) servuser.selectedDeck = "0";
 	["gold", "daily", "dailymage", "dailydg", "aiwins", "ailosses", "pvpwins", "pvplosses"].forEach(function(field){
 		servuser[field] = parseInt(servuser[field] || 0);
 	});
@@ -23,7 +22,6 @@ exports.useruser = function(db, servuser, cb){
 			cb({
 				auth: servuser.auth,
 				name: servuser.name,
-				decks: servuser.decks,
 				decknames: decks,
 				selectedDeck: servuser.selectedDeck,
 				pool: servuser.pool,

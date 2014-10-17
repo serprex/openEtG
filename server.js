@@ -103,16 +103,17 @@ var userEvents = {
 			"015020262002627034sa014sd014t4064vc024vp034vs0b61o0261q0361s0261t0161v018pj",
 			"",
 		];
-		user.decks = starters[data.e];
+		user.accountbound = starters[data.e];
 		user.oracle = 0;
 		user.pool = "";
-		user.accountbound = user.decks;
 		user.freepacks = data.e == 13 ? "6,6,0,0" : "3,2,0,0";
 		user.dailymage = Math.floor(Math.random() * aiDecks.mage.length);
 		user.dailydg = Math.floor(Math.random() * aiDecks.demigod.length);
 		var socket = this;
-		sutil.useruser(db, user, function(clientuser){
-			sockEmit(socket, "userdump", clientuser);
+		db.hset("D:"+data.u, "0", starters[data.e], function(err){
+			sutil.useruser(db, user, function(clientuser){
+				sockEmit(socket, "userdump", clientuser);
+			});
 		});
 	},
 	logout:function(data, user) {
@@ -131,13 +132,7 @@ var userEvents = {
 	},
 	setdeck:function(data, user) {
 		if (data.d !== undefined) {
-			if (data.name){
-				db.hset("D:"+user.name, data.name, data.d);
-			}else{
-				var decks = (user.decks || "").split(",");
-				decks[data.number] = data.d;
-				user.decks = decks.join(",");
-			}
+			db.hset("D:"+user.name, data.name, data.d);
 		}
 		user.selectedDeck = data.name || data.number;
 	},
@@ -280,7 +275,7 @@ var userEvents = {
 			return;
 		}
 		console.log(u + " requesting " + f);
-		function foelogic(err, deck){
+		db.hget("D:"+u, user.selectedDeck, function(err, deck){
 			if (!deck) return;
 			sockinfo[socket.id].deck = deck;
 			sockinfo[socket.id].pvpstats = { hp: data.p1hp, markpower: data.p1markpower, deckpower: data.p1deckpower, drawpower: data.p1drawpower };
@@ -310,12 +305,7 @@ var userEvents = {
 					sockEmit(foesock, "challenge", { f:u, pvp:true });
 				}
 			}
-		}
-		if (typeof user.selectedDeck === "string"){
-			db.hget("D:"+u, user.selectedDeck, foelogic);
-		}else{
-			foelogic(null, user.decks.split(",")[user.selectedDeck]);
-		}
+		});
 	},
 	canceltrade:function (data, user) {
 		var info = sockinfo[this.id];

@@ -181,7 +181,6 @@ window.aideck = document.getElementById("aideck");
 	function prepuser(){
 		sock.user.pool = sock.user.pool || "";
 		sock.user.accountbound = sock.user.accountbound || "";
-		sock.user.decks = sock.user.decks.split(",");
 		if (!sock.user.quest) {
 			sock.user.quest = {};
 		}
