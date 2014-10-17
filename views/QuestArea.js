@@ -49,10 +49,7 @@ module.exports = function(area) {
 			}
 		}
 	});
-	var bexit = px.mkButton(750, 246, "Exit");
-	px.setClick(bexit, require("./QuestMain"));
 	questui.addChild(tinfo);
 	questui.addChild(errinfo);
-	questui.addChild(bexit);
-	px.refreshRenderer(questui);
+	px.refreshRenderer({view:questui, qdom:[750, 246, ["Exit", require("./QuestMain")]]});
 }

@@ -13,9 +13,6 @@ module.exports = function(){
 	questui.addChild(questmap);
 	var tinfo = new px.MenuText(32, 32, "");
 	questui.addChild(tinfo);
-	var bexit = px.mkButton(750, 246, "Exit");
-	px.setClick(bexit, require("./MainMenu"));
-	questui.addChild(bexit);
 	var areainfo = {
 		forest: ["Spooky Forest", new PIXI.Polygon(555, 221, 456, 307, 519, 436, 520, 472, 631, 440, 652, 390, 653, 351, 666, 321, 619, 246)],
 		city: ["Capital City", new PIXI.Polygon(456, 307, 519, 436, 520, 472, 328, 496, 258, 477, 259, 401)],
@@ -62,5 +59,5 @@ module.exports = function(){
 		})(areainfo[key], key);
 		questui.addChild(graphics);
 	}
-	px.refreshRenderer(questui);
+	px.refreshRenderer({view:questui, qdom:[750, 246, ["Exit", require("./MainMenu")]]});
 }

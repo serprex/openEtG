@@ -299,6 +299,9 @@ module.exports = function(arena, acard, startempty) {
 					bload.click();
 				}
 			});
+			deckname.addEventListener("click", function(e){
+				this.setSelectionRange(0, 99);
+			});
 			dom.push([4, 4, deckname]);
 		}
 		var deckimport = document.createElement("input");
