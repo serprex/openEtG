@@ -12,7 +12,10 @@ module.exports = function(arena, acard, startempty) {
 	if (!Cards.loaded) return;
 	if (arena && (!sock.user || arena.deck === undefined || acard === undefined)) arena = false;
 	function updateField(renderdeck){
-		if (deckimport) options.deck = deckimport.value = etgutil.encodedeck(decksprite.deck) + "01" + etg.toTrueMark(editormark);
+		if (deckimport){
+			deckimport.value = etgutil.encodedeck(decksprite.deck) + "01" + etg.toTrueMark(editormark);
+			deckimport.dispatchEvent(new Event("change"));
+		}
 	}
 	function sumCardMinus(cardminus, code){
 		var sum = 0;
