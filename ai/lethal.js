@@ -30,7 +30,7 @@ module.exports = function(game) {
 				}
 			}
 			var preEval = currentEval;
-			if (active && active.activename in Cards.Targeting) {
+			if (active && active.activename[0] in Cards.Targeting) {
 				game.getTarget(c, active);
 				if (c.owner.shield && c.owner.shield.status.reflective) evalIter(c.owner);
 				evalIter(c.owner.foe);

@@ -7,6 +7,7 @@ var mkAi = require("./mkAi");
 var sock = require("./sock");
 var Cards = require("./Cards");
 var Effect = require("./Effect");
+var Actives = require("./Actives");
 var etgutil = require("./etgutil");
 function startMatch(game, foeDeck) {
 	function drawBorder(obj, spr) {
@@ -388,7 +389,7 @@ function startMatch(game, foeDeck) {
 			console.log("cast", c.toString(), (t || "-").toString(), bits);
 			var sprite = new PIXI.Sprite(gfx.nopic);
 			sprite.position.set((foeplays.children.length % 8) * 100, Math.floor(foeplays.children.length / 8) * 20);
-			sprite.card = c instanceof etg.CardInstance ? c.card : c.active.cast.activename;
+			sprite.card = c instanceof etg.CardInstance ? c.card : c.active.cast.activename.join(" ");
 			foeplays.addChild(sprite);
 			c.useactive(t);
 		},
@@ -620,7 +621,7 @@ function startMatch(game, foeDeck) {
 					if (pr instanceof etg.Pillar) {
 						child.setTexture(ui.getTextImage("1:" + (pr.pendstate ? pr.owner.mark : pr.card.element) + " x" + pr.status.charges, ui.mkFont(10, pr.card.upped ? "black" : "white"), ui.maybeLighten(pr.card)));
 					}
-					else if (pr.active.auto && pr.active.auto.activename == "locket") {
+					else if (pr.active.auto && pr.active.auto == Actives.locket) {
 						child.setTexture(ui.getTextImage("1:" + (pr.status.mode === undefined ? pr.owner.mark : pr.status.mode), ui.mkFont(10, pr.card.upped ? "black" : "white"), ui.maybeLighten(pr.card)));
 					}
 					else child.setTexture(ui.getTextImage(pr.status.charges !== undefined ? " " + pr.status.charges : "", ui.mkFont(10, pr.card.upped ? "black" : "white"), ui.maybeLighten(pr.card)));

@@ -251,7 +251,7 @@ deadalive:function(c){
 },
 deathwish:function(c,t, data){
 	var tgt = data.tgt, active = data.active;
-	if (!tgt || c.status.frozen || c.status.delayed || c.owner == t.owner || tgt.owner != c.owner || !(tgt instanceof etg.Creature) || !Cards.Targeting[active.activename](t, c)) return;
+	if (!tgt || c.status.frozen || c.status.delayed || c.owner == t.owner || tgt.owner != c.owner || !(tgt instanceof etg.Creature) || !Cards.Targeting[active.activename[0]](t, c)) return;
 	if (!tgt.hasactive("spell", "deathwish")) return data.tgt = c;
 	var totaldw = 0;
 	c.owner.creatures.forEach(function(cr){
@@ -426,7 +426,7 @@ endow:function(c,t){
 	c.active = etg.clone(t.active);
 	c.cast = t.cast;
 	c.castele = t.castele;
-	if (c.active.cast && c.active.cast.activename == "endow") {
+	if (c.active.cast && c.active.cast == Actives.endow) {
 		delete c.active.cast;
 	}
 	c.atk += t.trueatk();
@@ -1146,7 +1146,7 @@ rewind:function(c,t){
 },
 ricochet:function(c,t){
 	if (!(t instanceof etg.CardInstance) || t.card.active == Actives.bolsterintodeck)return;
-	var tgting = Cards.Targeting[t.card.active.activename];
+	var tgting = Cards.Targeting[t.card.active.activename[0]];
 	function tgttest(x){
 		if (x) {
 			if (tgting(t.owner, x)) tgts.push([x, t.owner]);
@@ -1283,8 +1283,9 @@ siphon:adrenathrottle(function(c, t) {
 siphonactive:function(c,t){
 	Effect.mkText("Siphon", t);
 	c.lobo();
+	//TODO handle multiple actives
 	for(var key in t.active){
-		if (!(t.active[key].activename in etg.passives)) c.active[key] = t.active[key];
+		if (!(t.active[key].activename[0] in etg.passives)) c.active[key] = t.active[key];
 	}
 	c.cast = t.cast;
 	c.castele = t.castele;
@@ -1590,6 +1591,6 @@ wings:function(c,t){
 },
 };
 for(var key in Actives){
-	Actives[key].activename = key;
+	Actives[key].activename = [key];
 }
 module.exports = Actives;

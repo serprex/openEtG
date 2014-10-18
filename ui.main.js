@@ -236,6 +236,7 @@ window.aideck = document.getElementById("aideck");
 		sock.userEmit("passchange", { p: password.value });
 	}
 	function aiClick() {
+		this.blur();
 		var deck = sock.getDeck(), aideckcode = aideck.value;
 		if (etgutil.decklength(deck) < 11 || etgutil.decklength(aideckcode) < 11) {
 			require("./views/Editor")();

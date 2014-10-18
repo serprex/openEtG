@@ -27,7 +27,7 @@ function parseActive(name){
 		var spidx = name.indexOf(" ");
 		if (~spidx){
 			Actives[name] = Actives[name.substring(0, spidx)](name.substring(spidx+1));
-			Actives[name].activename = name;
+			Actives[name].activename = [name];
 			return Actives[name];
 		}
 	}
@@ -293,11 +293,11 @@ Game.prototype.bitsToTgt = function(x) {
 	} else console.log("Unknown tgtop: " + tgtop + ", " + x);
 }
 Game.prototype.getTarget = function(src, active, cb) {
-	var targetingFilter = Cards.Targeting[active.activename];
+	var targetingFilter = Cards.Targeting[active.activename[0]];
 	if (targetingFilter) {
 		this.targetingMode = function(t) { return (t instanceof Player || t instanceof CardInstance || t.owner == this.turn || t.status.cloak || !t.owner.isCloaked()) && targetingFilter(src, t); }
 		this.targetingModeCb = cb;
-		this.targetingText = active.activename;
+		this.targetingText = active.activename[0];
 	} else cb();
 }
 Player.prototype.shuffle = function(array) {
@@ -347,7 +347,7 @@ function combineactive(a1, a2){
 	var combine = function(){
 		return (a1.apply(null, arguments) || 0) + (a2.apply(null, arguments) || 0);
 	}
-	combine.activename = a1.activename + " " + a2.activename;
+	combine.activename = a1.activename.concat(a2.activename);
 	return combine;
 }
 function isEmpty(obj){
@@ -424,7 +424,7 @@ Creature.prototype.hash = function(){
 	hash ^= hashObj(this.status) ^ (this.hp*17 + this.atk*31 - this.maxhp - this.usedactive * 3);
 	hash ^= parseInt(this.card.code, 32);
 	for (var key in this.active){
-		hash ^= hashString(key + ":" + this.active[key].activename);
+		hash ^= hashString(key + ":" + this.active[key].activename.join(" "));
 	}
 	if (this.active.cast){
 		hash ^= this.cast * 7 + this.castele * 23;
@@ -436,7 +436,7 @@ Permanent.prototype.hash = function(){
 	hash ^= hashObj(this.status) ^ (this.usedactive * 3);
 	hash ^= parseInt(this.card.code, 32);
 	for (var key in this.active){
-		hash ^= hashString(key + "=" + this.active[key].activename);
+		hash ^= hashString(key + "=" + this.active[key].activename.join(" "));
 	}
 	if (this.active.cast){
 		hash ^= this.cast * 7 + this.castele * 23;
@@ -448,7 +448,7 @@ Weapon.prototype.hash = function(){
 	hash ^= hashObj(this.status) ^ (this.atk*31 - this.usedactive * 3);
 	hash ^= parseInt(this.card.code, 32);
 	for (var key in this.active){
-		hash ^= hashString(key + "-" + this.active[key].activename);
+		hash ^= hashString(key + "-" + this.active[key].activename.join(" "));
 	}
 	if (this.active.cast){
 		hash ^= this.cast * 7 + this.castele * 23;
@@ -460,7 +460,7 @@ Shield.prototype.hash = function(){
 	hash ^= hashObj(this.status) ^ (this.dr*31 - this.usedactive * 3);
 	hash ^= parseInt(this.card.code, 32);
 	for (var key in this.active){
-		hash ^= hashString(key + "~" + this.active[key].activename);
+		hash ^= hashString(key + "~" + this.active[key].activename.join(" "));
 	}
 	if (this.active.cast){
 		hash ^= this.cast * 7 + this.castele * 23;
@@ -472,7 +472,7 @@ Pillar.prototype.hash = function(){
 	hash ^= hashObj(this.status) ^ (this.pendstate*31);
 	hash ^= parseInt(this.card.code, 32);
 	for (var key in this.active){
-		hash ^= hashString(key + "_" + this.active[key].activename);
+		hash ^= hashString(key + "_" + this.active[key].activename.join(" "));
 	}
 	return hash & 0x7FFFFFFF;
 }
@@ -773,12 +773,12 @@ Thing.prototype.activetext = function(info){
 	return info;
 }
 Thing.prototype.activetext1 = function(){
-	if (this.active.cast) return casttext(this.cast, this.castele) + this.active.cast.activename;
+	if (this.active.cast) return casttext(this.cast, this.castele) + this.active.cast.activename[0];
 	var order = ["hit", "death", "owndeath", "buff", "destroy", "draw", "play", "spell", "dmg", "shield"];
 	for(var i=0; i<order.length; i++){
-		if (this.active[order[i]]) return order[i] + " " + this.active[order[i]].activename;
+		if (this.active[order[i]]) return order[i] + " " + this.active[order[i]].activename.join(" ");
 	}
-	return this.active.auto ? this.active.auto.activename : "";
+	return this.active.auto ? this.active.auto.activename.join(" ") : "";
 }
 Thing.prototype.place = function(fromhand){
 	this.procactive("play", [fromhand]);
@@ -990,7 +990,7 @@ Creature.prototype.calcEclipse = function(){
 Thing.prototype.lobo = function(){
 	// TODO deal with combined actives
 	for (var key in this.active){
-		if (!(this.active[key].activename in passives)) delete this.active[key];
+		if (!(this.active[key].activename[0] in passives)) delete this.active[key];
 	}
 }
 Thing.prototype.mutantactive = function(){
@@ -1068,7 +1068,7 @@ Thing.prototype.addactive = function(type, active){
 }
 Thing.prototype.rmactive = function(type, activename){
 	if (!this.active[type])return;
-	var actives = this.active[type].activename.split(" "), idx;
+	var actives = this.active[type].activename, idx;
 	if (~(idx=actives.indexOf(activename))){
 		if (actives.length == 1){
 			delete this.active[type];
@@ -1082,7 +1082,7 @@ Thing.prototype.rmactive = function(type, activename){
 }
 Thing.prototype.hasactive = function(type, activename) {
 	if (!this.active[type])return false;
-	return ~this.active[type].activename.split(" ").indexOf(activename);
+	return ~this.active[type].activename.indexOf(activename);
 }
 Thing.prototype.canactive = function() {
 	return this.owner.game.turn == this.owner && this.active.cast && !this.usedactive && !this.status.delayed && !this.status.frozen && this.owner.canspend(this.castele, this.cast);
@@ -1242,7 +1242,7 @@ Player.prototype.randomcard = function(upped, filter){
 	return keys && keys.length && Cards.Codes[this.choose(keys)];
 }
 function activename(active){
-	return active?active.activename:"";
+	return active?active.activename.join(" "):"";
 }
 function casttext(cast, castele){
 	return cast == 0?"0":cast + ":" + castele;

@@ -45,7 +45,8 @@ var afilter = {
 	},
 };
 function searchActive(active, c, t){
-	var func = afilter[active.activename];
+	if(!t) return true;
+	var func = afilter[active.activename[0]];
 	return !func || t.hasactive("prespell", "protectonce") || func(c, t);
 }
 module.exports = function(game, previous) {
@@ -111,7 +112,7 @@ module.exports = function(game, previous) {
 				}
 			}
 			var preEval = currentEval;
-			if (active && active.activename in Cards.Targeting) {
+			if (active && active.activename[0] in Cards.Targeting) {
 				game.getTarget(c, active);
 				for (var j = 0;j < 2;j++) {
 					var pl = j == 0 ? c.owner : c.owner.foe;
@@ -123,7 +124,7 @@ module.exports = function(game, previous) {
 					pl.hand.forEach(evalIter);
 				}
 				delete game.targetingMode;
-				if (loglist) console.log(currentEval, preEval, c.toString(), active.activename, loglist);
+				if (loglist) console.log(currentEval, preEval, c.toString(), active.activename[0], loglist);
 			}else{
 				evalIter();
 				if (loglist) console.log(currentEval, preEval, c.toString(), loglist);

@@ -403,10 +403,14 @@ function calcExpectedDamage(pl, wallCharges) {
 }
 
 function evalactive(c, active, extra){
-	var aval = ActivesValues[active.activename];
-	return aval === undefined?0:
-		aval instanceof Function?aval(c, extra):
-		aval instanceof Array?aval[c.card.upped?1:0]:aval;
+	var sum = 0;
+	for(var i=0; i<active.activename.length; i++){
+		var aval = ActivesValues[active.activename[i]];
+		sum += aval === undefined?0:
+			aval instanceof Function?aval(c, extra):
+			aval instanceof Array?aval[c.card.upped?1:0]:aval;
+	}
+	return sum;
 }
 
 function checkpassives(c) {
