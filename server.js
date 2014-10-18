@@ -230,7 +230,7 @@ var userEvents = {
 			if (!type){
 				sockEmit(socket, "chat", { mode: "red", msg: "Code does not exist"});
 			}else if (type.charAt(0) == "G"){
-				var g = parseInt(type.substr(1));
+				var g = parseInt(type.slice(1));
 				if (isNaN(g)){
 					sockEmit(socket, "chat", { mode: "red", msg: "Invalid gold code type: " + type});
 				}else{
@@ -239,7 +239,7 @@ var userEvents = {
 					db.hdel("CodeHash", data.code);
 				}
 			}else if (type.charAt(0) == "C"){
-				var c = type.substr(1);
+				var c = type.slice(1);
 				if (c in Cards.Codes){
 					user.pool = etgutil.addcard(user.pool, c);
 					sockEmit(socket, "codecode", {card: c});

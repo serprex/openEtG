@@ -26,7 +26,7 @@ function parseActive(name){
 	}else{
 		var spidx = name.indexOf(" ");
 		if (~spidx){
-			Actives[name] = Actives[name.substring(0, spidx)](name.substring(spidx+1));
+			Actives[name] = Actives[name.slice(0, spidx)](name.slice(spidx+1));
 			Actives[name].activename = [name];
 			return Actives[name];
 		}
@@ -229,7 +229,7 @@ Game.prototype.addData = function(data) {
 		if (!(key in blacklist)){
 			var p1or2 = key.match(/^p(1|2)/);
 			if (p1or2){
-				this["player" + p1or2[1]][key.substr(2)] = data[key];
+				this["player" + p1or2[1]][key.slice(2)] = data[key];
 			}else this[key] = data[key];
 		}
 	}

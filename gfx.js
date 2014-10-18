@@ -19,7 +19,7 @@ function load(preload, postload){
 		var ui = require("./uiutil");
 		ui.loadSounds("cardClick", "buttonClick", "permPlay", "creaturePlay");
 		singles.forEach(function(single){
-			exports[single.substring(7, single.length-4)] = PIXI.Texture.fromFrame(single);
+			exports[single.slice(7, single.length-4)] = PIXI.Texture.fromFrame(single);
 		});
 		var names = {
 			eicons: {name: "esheet", w: 32},
@@ -135,8 +135,8 @@ function getCardImage(code) {
 					graphics.addChild(eleicon);
 				}
 			}
-			var text, loopi = 0;
-			do text = new PIXI.Text(card.name.substring(0, card.name.length - (loopi++)), { font: "11px Dosis", fill: card.upped ? "black" : "white" }); while (text.width > rend.width - clipwidth);
+			var text, loopi = 1;
+			do text = new PIXI.Text(--loopi?card.name.slice(0, loopi):card.name, { font: "11px Dosis", fill: card.upped ? "black" : "white" }); while (text.width > rend.width - clipwidth);
 			text.position.set(2, 5);
 			graphics.addChild(text);
 		}

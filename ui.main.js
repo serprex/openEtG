@@ -142,7 +142,7 @@ window.aideck = document.getElementById("aideck");
 					var link = document.createElement("a");
 					link.href = "deck/" + deck;
 					link.target = "_blank";
-					link.className = "eicon e"+etg.fromTrueMark(deck.slice(deck.length-3));
+					link.className = "eicon e"+etg.fromTrueMark(deck.slice(-3));
 					span.appendChild(link);
 					chat.addSpan(span);
 				});

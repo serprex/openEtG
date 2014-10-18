@@ -23,7 +23,7 @@ module.exports = function(db){
 		}
 	}
 	return function(req, res, next){
-		var paramstring = req.url.substring(2);
+		var paramstring = req.url.slice(2);
 		var params = qstring.parse(paramstring);
 		fs.readFile(".codepsw", function(err, data) {
 			if (err){

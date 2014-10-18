@@ -57,7 +57,7 @@ module.exports = function(db, users){
 		}else postHash(null, servuser.name);
 	}
 	function loginAuth(req, res, next){
-		var paramstring = req.url.substring(2);
+		var paramstring = req.url.slice(2);
 		var params = qstring.parse(paramstring);
 		var name = (params.u || "").trim();
 		if (!name.length){

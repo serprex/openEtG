@@ -15,7 +15,7 @@ exports.parseCsv = function(type, file){
 				for (var kk=k+1; kk<carddata.length; kk++){
 					carddata[k] += "," + carddata[kk];
 				}
-				cardinfo[keys[k]] = carddata[k].substring(1, carddata[k].length-1).replace(/""/g, '"');
+				cardinfo[keys[k]] = carddata[k].slice(1, carddata[k].length-1).replace(/""/g, '"');
 				break;
 			}else{
 				cardinfo[keys[k]] = carddata[k];

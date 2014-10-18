@@ -7,7 +7,7 @@ function speed(req, res, next){
 		res.end();
 		return;
 	}
-	var hash = 0, str = req.url.substr(1);
+	var hash = 0, str = req.url.slice(1);
 	for (var i=0; i<str.length; i++){
 		hash = hash*31 + str.charCodeAt(i) & 0x7FFFFFFF;
 	}
