@@ -124,6 +124,11 @@ window.aideck = document.getElementById("aideck");
 				names.forEach(function(name){
 					var deck = sock.user.decknames[name];
 					var span = document.createElement("span");
+					var link = document.createElement("a");
+					link.href = "deck/" + deck;
+					link.target = "_blank";
+					link.className = "eicon e"+etg.fromTrueMark(deck.slice(-3));
+					span.appendChild(link);
 					span.appendChild(document.createTextNode(name+" "));
 					span.addEventListener("click", function(e){
 						if (e.target != this) return;
@@ -139,11 +144,6 @@ window.aideck = document.getElementById("aideck");
 							deckimport.dispatchEvent(e);
 						}
 					});
-					var link = document.createElement("a");
-					link.href = "deck/" + deck;
-					link.target = "_blank";
-					link.className = "eicon e"+etg.fromTrueMark(deck.slice(-3));
-					span.appendChild(link);
 					chat.addSpan(span);
 				});
 			}else if (msg == "/mute"){

@@ -17,9 +17,17 @@ module.exports = function(data){
 	var cardArt = new PIXI.Sprite(gfx.nopic);
 	cardArt.position.set(734, 8);
 	stage.addChild(cardArt);
+	var progress = 0, progressmax = 0;
+	for(var code in Cards.Codes){
+		var card = Cards.Codes[code];
+		if (!card.upped && !card.shiny && card.type){
+			progressmax += 42;
+			progress += Math.min((cardpool[code] || 0) + (cardpool[etgutil.asUpped(code, true)] || 0)*6, 42);
+		}
+	}
 	var wealth = userutil.calcWealth(data.gold, cardpool);
-	stage.addChild(new px.MenuText(100, 16, "Cumulative wealth: " + Math.round(wealth)));
-	px.refreshRenderer({view:stage, next:function(){
+	var dom = [[100, 16, "Cumulative wealth: " + Math.round(wealth) + "\nZE Progress: " + progress + " / " + progressmax]];
+	px.refreshRenderer({view:stage, stext: dom, next:function(){
 		cardsel.next(cardpool);
 	}});
 }
