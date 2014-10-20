@@ -52,7 +52,7 @@ module.exports = function(game) {
 		}
 	}
 	if (options.stats){
-		chat([game.level || 0, (game.foename || "?").replace(/,/g, " "), winner ? "W" : "L", game.ply, game.time, game.player1.hp, game.player1.maxhp, (game.goldreward || 0) - (game.cost || 0), game.cardreward || "-"].join());
+		chat([game.level || -1, (game.foename || "?").replace(/,/g, " "), winner ? "W" : "L", game.ply, game.time, game.player1.hp, game.player1.maxhp, (game.goldreward || 0) - (game.cost || 0), game.cardreward || "-"].join());
 	}
 	function onkeydown(e){
 		if (e.keyCode == 32) bexit.click();

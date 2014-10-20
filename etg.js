@@ -974,14 +974,11 @@ Creature.prototype.calcEclipse = function(){
 	}
 	var bonus = 0;
 	for (var j=0; j<2; j++){
+		var pl = j == 0 ? this.owner : this.owner.foe;
 		for (var i=0; i<16; i++){
-			var pl = j == 0 ? this.owner : this.owner.foe;
-			if (pl.permanents[i]){
-				if (pl.permanents[i].card == Cards.Nightfall){
-					bonus = 1;
-				}else if (pl.permanents[i].card == Cards.Eclipse){
-					return 2;
-				}
+			if (pl.permanents[i] && pl.permanents[i].status.nightfall){
+				if (pl.permanents[i].card.upped) return 2;
+				else bonus = 1;
 			}
 		}
 	}

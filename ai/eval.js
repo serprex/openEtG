@@ -189,7 +189,7 @@ var ActivesValues = {
 	momentum:2,
 	mutation:4,
 	neuro:function(c) {
-		return c.owner.foe.neuro?evalactive(c, "poison 1")+.1:6;
+		return c.owner.foe.neuro?evalactive(c, etg.parseActive("poison 1"))+.1:6;
 	},
 	neurofy:function(c) {
 		return c.owner.foe.neuro?1:5;
@@ -529,7 +529,7 @@ function evalcardinstance(cardInst) {
 function caneventuallyactive(element, cost, pl){
 	if (!cost || !element || pl.quanta[element] || !pl.mark || pl.mark == element) return true;
 	return pl.permanents.some(function(pr){
-		return pr && pr.card.type == etg.PillarEnum && (!pr.card.element || pr.card.element == element);
+		return pr && ((pr.card.type == etg.PillarEnum && (!pr.card.element || pr.card.element == element)) || (pr.active == Actives.locket && pr.status.mode == element));
 	});
 }
 
