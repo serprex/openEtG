@@ -562,7 +562,7 @@ module.exports = function(game) {
 				uniquesActive[i] = undefined;
 		}
 		logNest(j);
-		var pscore = wallCharges[j][0], player = game.players(j);
+		var pscore = wallCharges[j][0]*4, player = game.players(j);
 		pscore += evalthing(player.weapon);
 		pscore += evalthing(player.shield);
 		logNest("creas");

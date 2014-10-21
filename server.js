@@ -482,7 +482,7 @@ var sockEvents = {
 		delete data.X;
 		var sum = 0;
 		for(var i=0; i<A; i++){
-			sum += etg.PlayerRng.upto(X);
+			sum += etg.PlayerRng.uptoceil(X);
 		}
 		data.msg = A + "d" + X + " " + sum;
 		data.mode = "#006000";
