@@ -16,7 +16,7 @@
   },
   "devDependencies": {
     "qunitjs": "^1.15.0",
-    "urllib": "^0.5.17"
+    "urllib": "^2.0.1"
   },
   "scripts": {
     "test": "npm start;firefox 127.0.0.1:13602/test.htm"
