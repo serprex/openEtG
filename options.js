@@ -6,15 +6,18 @@ if (typeof localStorage !== "undefined"){
 }
 exports.register = function(opt, ele, nopersist){
 	var field = ele.type == "checkbox" ? "checked" : "value";
-	if (!nopersist || typeof localStorage !== "undefined"){
-		if (localStorage[opt] !== undefined){
-			ele[field] = exports[opt] = localStorage[opt];
-		}
+	if (exports[opt]) ele[field] = exports[opt];
+	if (!nopersist && typeof localStorage !== "undefined"){
 		ele.addEventListener("change", function() {
-			exports[opt] = localStorage[opt] = field == "checked" && !this[field] ? "" : this[field];
+			if (this[field]){
+				exports[opt] = localStorage[opt] = this[field];
+			}else{
+				delete localStorage[opt];
+				delete exports[opt];
+			}
 		});
 	}else{
-		if (exports[opt]) ele[field] = exports[opt];
+		if (typeof localStorage !== "undefined") delete localStorage[opt];
 		ele.addEventListener("change", function() {
 			exports[opt] = field == "checked" && !this[field] ? "" : this[field];
 		});
