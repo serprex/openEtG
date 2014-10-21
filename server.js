@@ -573,7 +573,10 @@ var sockEvents = {
 	},
 	challrecv:function(data){
 		var foesock = usersock[data.f];
-		sockEmit(foesock, "chat", { mode: "red", msg: "You have sent a " + (data.pvp ? "PvP" : "trade") + " request to " + data.f + "!" });
+		if (foesock && foesock.id in sockinfo){
+			var info = sockinfo[foesock.id], foename = data.pvp ? info.duel : info.trade ? info.trade.foe : "";
+			sockEmit(foesock, "chat", { mode: "red", msg: "You have sent a " + (data.pvp ? "PvP" : "trade") + " request to " + foename + "!" });
+		}
 	},
 };
 io.on("connection", function(socket) {
