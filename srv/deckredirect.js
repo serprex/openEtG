@@ -6,7 +6,7 @@ function eleChar(card){
 	return String.fromCharCode(97+card.element+(card.upped?13:0));
 }
 function deckRedirect(req, res, next){
-	var deck = req.url.slice(1).replace(".png", "");
+	var deck = req.url.slice(1).replace(/\.png$/, "");
 	fs.readFile("deckcache/" + deck, function(err, data){
 		function addClass(cls, style){
 			if (!(cls in classes)){

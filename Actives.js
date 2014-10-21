@@ -1529,7 +1529,7 @@ chaos:function(c,t){
 	if (randomchance < .25) {
 		return true;
 	}
-	else if (t instanceof etg.Creature && randomchance < .5) {
+	else if (randomchance < .5 && t instanceof etg.Creature) {
 		Actives.cseed(c, t);
 	}
 },
@@ -1542,7 +1542,7 @@ despair:function(c,t){
 	var chance = c.owner.creatures.reduce(function(chance, cr){
 		return cr && (cr.hasactive("auto", "siphon") || cr.hasactive("auto", "darkness")) ? chance+1 : chance;
 	}, 0);
-	if (c.owner.rng() < 1.2-Math.pow(.95, chance)){
+	if (c.owner.rng() < 1.4-Math.pow(.95, chance)){
 		Effect.mkText("-1|-1", t);
 		t.atk--;
 		t.dmg(1);
@@ -1558,6 +1558,7 @@ evade50:function(c,t){
 	return c.owner.rng() < .5;
 },
 firewall:function(c,t){
+	Effect.mkText("-1", t);
 	t.dmg(1);
 },
 skull:function(c,t){
