@@ -619,7 +619,7 @@ function startMatch(game, foeDeck) {
 					permsprite[j][i].alpha = pr.isMaterial() ? 1 : .7;
 					var child = permsprite[j][i].children[0];
 					if (pr instanceof etg.Pillar) {
-						child.setTexture(ui.getTextImage("1:" + (pr.pendstate ? pr.owner.mark : pr.card.element) + " x" + pr.status.charges, ui.mkFont(10, pr.card.upped ? "black" : "white"), ui.maybeLighten(pr.card)));
+						child.setTexture(ui.getTextImage("1:" + (pr.status.pendstate ? pr.owner.mark : pr.card.element) + " x" + pr.status.charges, ui.mkFont(10, pr.card.upped ? "black" : "white"), ui.maybeLighten(pr.card)));
 					}
 					else if (pr.active.auto && pr.active.auto == Actives.locket) {
 						child.setTexture(ui.getTextImage("1:" + (pr.status.mode === undefined ? pr.owner.mark : pr.status.mode), ui.mkFont(10, pr.card.upped ? "black" : "white"), ui.maybeLighten(pr.card)));

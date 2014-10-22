@@ -160,8 +160,6 @@ function Shield(card, owner){
 	Permanent.apply(this, arguments);
 }
 function Pillar(card, owner){
-	this.status = {charges: 1};
-	this.pendstate = false;
 	Thing.apply(this, arguments);
 }
 function CardInstance(card, owner){
@@ -469,7 +467,7 @@ Shield.prototype.hash = function(){
 }
 Pillar.prototype.hash = function(){
 	var hash = this.owner == this.owner.game.player1 ? 3917 : 2789;
-	hash ^= hashObj(this.status) ^ (this.pendstate*31);
+	hash ^= hashObj(this.status);
 	hash ^= parseInt(this.card.code, 32);
 	for (var key in this.active){
 		hash ^= hashString(key + "_" + this.active[key].activename.join(" "));
@@ -763,7 +761,7 @@ Shield.prototype.info = function(){
 	return objinfo(this.status, this.activetext([this.truedr() + "DR"])).join("\n");
 }
 Pillar.prototype.info = function(){
-	return this.status.charges + " 1:" + (this.pendstate?this.owner.mark:this.card.element) + (this.status.immaterial?"\nimmaterial":"");
+	return this.status.charges + " 1:" + (this.status.pendstate?this.owner.mark:this.card.element) + (this.status.immaterial?"\nimmaterial":"");
 }
 Thing.prototype.activetext = function(info){
 	if (!info) info = [];
