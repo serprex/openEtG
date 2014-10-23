@@ -497,9 +497,8 @@ Card.prototype.info = function(){
 			if (this.status && this.status.ranged) dmgtype = " ranged";
 			if (this.status && this.status.psion) dmgtype += " spell";
 		}
-		var prefix = this.type == WeaponEnum?"Deal " + this.attack + dmgtype + " damage\n":
-			this.type == ShieldEnum?""+(this.health?"Reduce damage by "+this.health+"\n":""):
-			this.type == CreatureEnum?this.attack+"|"+this.health+"\n":"";
+		var prefix = this.type == ShieldEnum?(this.health?"Reduce damage by "+this.health+"\n":""):
+			this.type == CreatureEnum || this.type == WeaponEnum ?this.attack+"|"+this.health+"\n":"";
 		return prefix + (this.text || (this.type == SpellEnum ? activename(this.active) : objinfo(this.status, Thing.prototype.activetext.call(this)).join("\n")));
 	}
 }
