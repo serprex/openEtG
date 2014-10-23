@@ -4,7 +4,6 @@ var Cards = require("./Cards");
 var etgutil = require("./etgutil");
 exports.loaded = false;
 function load(preload, postload){
-	exports.bg_default = new PIXI.Texture(new PIXI.BaseTexture(document.getElementById("bgimg")));
 	var singles = ["assets/gold.png", "assets/button.png", "assets/bg_quest.png", "assets/bg_game.png", "assets/bg_questmap.png"];
 	var preLoader = new PIXI.AssetLoader(["assets/esheet.png", "assets/raritysheet.png", "assets/backsheet.png",
 		"assets/cardborders.png", "assets/statussheet.png", "assets/statusborders.png", "assets/typesheet.png"].concat(singles));
@@ -19,7 +18,7 @@ function load(preload, postload){
 		var ui = require("./uiutil");
 		ui.loadSounds("cardClick", "buttonClick", "permPlay", "creaturePlay");
 		singles.forEach(function(single){
-			exports[single.slice(7, single.length-4)] = PIXI.Texture.fromFrame(single);
+			exports[single.slice(7, -4)] = PIXI.Texture.fromFrame(single);
 		});
 		var names = {
 			eicons: {name: "esheet", w: 32},

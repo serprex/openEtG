@@ -24,7 +24,7 @@ exports.load = function(){
 	}, function(){
 		ui.playMusic("openingMusic");
 		realStage.removeChildren();
-		realStage.addChild(new PIXI.Sprite(gfx.bg_default));
+		realStage.addChild(new PIXI.Sprite(new PIXI.Texture(new PIXI.BaseTexture(document.getElementById("bgimg")))));
 		require("./views/MainMenu")();
 	});
 }
