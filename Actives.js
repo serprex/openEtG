@@ -74,7 +74,7 @@ appease:function(c,t){
 	c.status.appeased = true;
 },
 atk2hp:function(c,t){
-	t.maxhp = t.hp = t.trueatk();
+	t.buffhp(t.trueatk()-t.hp);
 },
 axe:function(c,t){
 	return c.owner.mark == etg.Fire || c.owner.mark == etg.Time?1:0;
