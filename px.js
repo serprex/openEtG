@@ -4,7 +4,7 @@ var etg = require("./etg");
 var ui = require("./uiutil");
 var Cards = require("./Cards");
 var renderer = new PIXI.autoDetectRenderer(900, 600, {view:document.getElementById("leftpane"), transparent:true});
-var realStage = new PIXI.Stage(0, true), curStage = {};
+var realStage = new PIXI.Stage(), curStage = {};
 exports.realStage = realStage;
 function animate() {
 	setTimeout(requestAnimate, 40);
