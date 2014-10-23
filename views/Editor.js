@@ -195,7 +195,7 @@ module.exports = function(arena, acard, startempty) {
 		if (sock.user) {
 			dom.push([8, 110, ["Save", function() {
 				sock.user.selectedDeck = deckname.value;
-				for (var i = 0;i < 10;i++) buttons[i].style.display = sock.user.selectedDeck == i ? "inline" : "none";
+				for (var i = 0;i < 10;i++) buttons[i].style.display = sock.user.selectedDeck == i ? "none": "inline";
 				tname.setText(sock.user.selectedDeck);
 				saveDeck();
 			}]], [8, 136, ["Load", function() {
