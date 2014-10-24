@@ -8,6 +8,7 @@ tournify.js
 .ninja_log
 .ninja_deps
 dump.rdb
+pixi.*
 *.csv
 *.gz
 *.sh

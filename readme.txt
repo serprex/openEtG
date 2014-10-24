@@ -14,10 +14,12 @@ How to setup on Windows:
 
 5	Run "node updatedb.js" (NB it takes csv files as parameters if you don't want to download every single one)
 
-6	Run "buildOpenEtg.bat" in your openEtG folder
+6	Download pixi.dev.js from https://github.com/GoodBoyDigital/pixi.js/tree/master/bin
 
-7	Start redis-server, and in the console, run "node server.js"
+7	Run "buildOpenEtg.bat" in your openEtG folder
 
-8	Browse to http://127.0.0.1:13602 and it should work!
+8	Start redis-server, and in the console, run "node server.js"
+
+9	Browse to http://127.0.0.1:13602 and it should work!
 
 NB when you edit a module you need to run step 6 to update etgify, & when the card DB is updated you need to run step 5
