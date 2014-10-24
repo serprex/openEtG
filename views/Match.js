@@ -186,8 +186,8 @@ function startMatch(game, foeDeck) {
 	var handsprite = [new Array(8), new Array(8)];
 	var creasprite = [new Array(23), new Array(23)];
 	var permsprite = [new Array(16), new Array(16)];
-	var shiesprite = [new PIXI.Sprite(gfx.nopic), new PIXI.Sprite(gfx.nopic)];
-	var weapsprite = [new PIXI.Sprite(gfx.nopic), new PIXI.Sprite(gfx.nopic)];
+	var shiesprite = new Array(2);
+	var weapsprite = new Array(2);
 	var marksprite = [new PIXI.Sprite(gfx.nopic), new PIXI.Sprite(gfx.nopic)];
 	var marktext = [new PIXI.Text("", { font: "18px Dosis" }), new PIXI.Text("", { font: "18px Dosis" })];
 	var quantatext = [new PIXI.DisplayObjectContainer(), new PIXI.DisplayObjectContainer()];
@@ -343,9 +343,6 @@ function startMatch(game, foeDeck) {
 				}
 			}, false);
 		})(j);
-		px.setInteractive.apply(null, weapsprite);
-		px.setInteractive.apply(null, shiesprite);
-		px.setInteractive.apply(null, player_overlay);
 		gameui.addChild(marktext[j]);
 		gameui.addChild(quantatext[j]);
 		gameui.addChild(hptext[j]);
@@ -354,6 +351,9 @@ function startMatch(game, foeDeck) {
 		gameui.addChild(decktext[j]);
 		gameui.addChild(damagetext[j]);
 	}
+	px.setInteractive.apply(null, weapsprite);
+	px.setInteractive.apply(null, shiesprite);
+	px.setInteractive.apply(null, player_overlay);
 	var fgfx = new PIXI.Graphics();
 	gameui.addChild(fgfx);
 	var anims = new PIXI.DisplayObjectContainer();

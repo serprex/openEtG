@@ -146,7 +146,7 @@ function getCardImage(code) {
 function getInstImage(code, scale, cache){
 	return cache[code] || getArtImage(code, function(art) {
 		var card = Cards.Codes[code];
-		var rend = new PIXI.RenderTexture(128 * scale, 164 * scale);
+		var rend = new PIXI.RenderTexture(Math.ceil(128 * scale), Math.ceil(164 * scale));
 		var border = new PIXI.Sprite(exports.cardBorders[card.element + (card.upped ? 13 : 0)]);
 		var graphics = new PIXI.Graphics();
 		border.addChild(graphics);
