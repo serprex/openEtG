@@ -92,7 +92,7 @@ module.exports = function() {
 		g.addChild(name);
 		var price = new PIXI.Sprite(ui.getTextImage("$"+pack.cost, {font: "12px Verdana"}));
 		price.anchor.set(0, 1);
-		price.position.set(7, 146);
+		price.position.set(7, 144);
 		g.addChild(price);
 		px.setClick(g, function(){
 			packrarity = n;
