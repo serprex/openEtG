@@ -879,6 +879,7 @@ momentum:function(c,t){
 mutant:function(c,t){
 	if (!c.mutantactive()){
 		c.active.cast = Actives.web;
+		c.cast = c.owner.uptoceil(2);
 	}
 	c.castele = c.owner.upto(13);
 },
