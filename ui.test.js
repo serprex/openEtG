@@ -1,5 +1,5 @@
 "use strict";
-require("./etg.client").loadcards(function() {
+require("./httpcards")(function() {
 	var etg = require("./etg");
 	var etgutil = require("./etgutil");
 	var Actives = require("./Actives");

@@ -1,5 +1,5 @@
 "use strict";
-exports.loadcards = function(cb){
+module.exports = function(cb){
 	var Cards = require("./Cards");
 	if (Cards.loaded) cb(Cards);
 	var names = ["pillar", "weapon", "shield", "permanent", "spell", "creature"];

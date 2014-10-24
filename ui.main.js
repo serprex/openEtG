@@ -84,7 +84,7 @@ window.aideck = document.getElementById("aideck");
 			func.call(sock.et, data);
 		}
 	});
-	require("./etg.client").loadcards(function(){
+	require("./httpcards")(function(){
 		if (options.preart) sock.emit("cardart");
 	});
 	px.load();

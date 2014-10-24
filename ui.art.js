@@ -1,5 +1,5 @@
 "use strict";
-require("./etg.client").loadcards(function() {
+require("./httpcards")(function() {
 	var Cards = require("./Cards");
 	var credits = [
 		[["andretimpa", "http://andretimpa.deviantart.com"], ["Element Icons", "assets/esheet.png"], ["Rarity Icons", "assets/raritysheet.png"], ["Opening Music", "sound/openingMusic.ogg"],
