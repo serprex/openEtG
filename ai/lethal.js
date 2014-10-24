@@ -23,7 +23,6 @@ module.exports = function(game) {
 						cmdct = cmdct0 || (cbits | tbits << 9);
 						currentEval = v;
 						if (!gameClone.winner){
-							delete gameClone.targetingMode;
 							iterLoop(gameClone, cmdct);
 						}
 					}

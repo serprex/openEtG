@@ -1049,7 +1049,7 @@ protectonce:function(c,t, data){
 	}
 },
 purify:function(c,t){
-	t.status.poison = t.status.poison?Math.min(t.status.poison-2,-2):-2;
+	t.status.poison = t.status.poison < 0?t.status.poison-2:-2;
 	if (t instanceof etg.Player){
 		t.neuro = false;
 		t.sosa = 0;

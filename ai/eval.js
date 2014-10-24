@@ -222,7 +222,7 @@ var ActivesValues = {
 	precognition:1,
 	protectonce:2,
 	protectall:4,
-	purify:4,
+	purify:2,
 	queen:7,
 	quint:6,
 	quinttog:7,

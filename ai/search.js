@@ -24,7 +24,7 @@ var afilter = {
 		return t.status.airborne;
 	},
 	freeze:function(c,t){
-		return t.status.frozen < 3;
+		return t.status.frozen === undefined || t.status.frozen < 3;
 	},
 	pacify:function(c,t){
 		return t.trueatk() != 0;
@@ -45,7 +45,6 @@ var afilter = {
 	},
 };
 function searchActive(active, c, t){
-	if(!t) return true;
 	var func = afilter[active.activename[0]];
 	return !func || t.hasactive("prespell", "protectonce") || func(c, t);
 }
@@ -86,7 +85,7 @@ module.exports = function(game, previous) {
 					if (th in tgthash) return;
 					else tgthash[th] = true;
 				}
-				if ((!game.targetingMode || (t && game.targetingMode(t))) && searchActive(active, c, t) && (n || --limit > 0)) {
+				if ((!game.targetingMode || (t && game.targetingMode(t) && searchActive(active, c, t))) && (n || --limit > 0)) {
 					var tbits = game.tgtToBits(t) ^ 8;
 					var gameClone = game.clone();
 					gameClone.bitsToTgt(cbits).useactive(gameClone.bitsToTgt(tbits));
@@ -105,7 +104,6 @@ module.exports = function(game, previous) {
 						currentEval = v;
 					}
 					if (n && v-currentEval < 24) {
-						delete gameClone.targetingMode;
 						iterLoop(gameClone, 0, cbits | tbits << 9, []);
 						if (loglist) loglist[t || "-"] = currentEval;
 					}
