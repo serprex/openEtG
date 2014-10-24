@@ -148,7 +148,6 @@ function getInstImage(code, scale, cache){
 		var card = Cards.Codes[code];
 		var rend = new PIXI.RenderTexture(128 * scale, 164 * scale);
 		var border = new PIXI.Sprite(exports.cardBorders[card.element + (card.upped ? 13 : 0)]);
-		border.scale.set(scale, scale);
 		var graphics = new PIXI.Graphics();
 		border.addChild(graphics);
 		graphics.beginFill(ui.maybeLighten(card));
@@ -171,9 +170,9 @@ function getInstImage(code, scale, cache){
 		text.anchor.x = .5;
 		text.position.set(64, 144);
 		border.addChild(text);
-		var doc = new PIXI.DisplayObjectContainer();
-		doc.addChild(border);
-		rend.render(doc);
+		var mtx = new PIXI.Matrix();
+		mtx.scale(scale, scale);
+		rend.render(border, mtx);
 		return cache[code] = rend;
 	});
 }
