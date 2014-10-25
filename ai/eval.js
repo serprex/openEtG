@@ -230,7 +230,7 @@ var ActivesValues = {
 	readiness: 3,
 	rebirth:[5, 2],
 	reducemaxhp: function(c, ttatk){
-		return ttatk*5/3;
+		return (c instanceof etg.Creature ? ttatk : c.card.attack)*5/3;
 	},
 	regenerate: 5,
 	regeneratespell: 5,
