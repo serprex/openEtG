@@ -89,6 +89,7 @@ module.exports = function(arena, acard, startempty) {
 		}else if (force) sock.userEmit("setdeck", {name: sock.user.selectedDeck });
 	}
 	function loadDeck(x){
+		if (!x) return;
 		saveDeck();
 		deckname.value = sock.user.selectedDeck = x;
 		tname.setText(x);
@@ -194,10 +195,12 @@ module.exports = function(arena, acard, startempty) {
 		}]], [8, 84, ["Import", importDeck]]);
 		if (sock.user) {
 			dom.push([8, 110, ["Save", function() {
-				sock.user.selectedDeck = deckname.value;
-				for (var i = 0;i < 10;i++) buttons[i].style.display = sock.user.selectedDeck == i ? "none": "inline";
-				tname.setText(sock.user.selectedDeck);
-				saveDeck();
+				if (deckname.value){
+					sock.user.selectedDeck = deckname.value;
+					for (var i = 0;i < 10;i++) buttons[i].style.display = sock.user.selectedDeck == i ? "none": "inline";
+					tname.setText(sock.user.selectedDeck);
+					saveDeck();
+				}
 			}]], [8, 136, ["Load", function() {
 				loadDeck(deckname.value);
 			}]], [8, 162, ["Exit", function() {
