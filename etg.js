@@ -343,7 +343,8 @@ function combineactive(a1, a2){
 		return a2;
 	}
 	var combine = function(){
-		return (a1.apply(null, arguments) || 0) + (a2.apply(null, arguments) || 0);
+		var v1 = a1.apply(null, arguments), v2 = a2.apply(null, arguments);
+		return v1 === undefined ? v2 : v2 === undefined ? v1 : v1 === true || v2 === true ? true : v1+v2;
 	}
 	combine.activename = a1.activename.concat(a2.activename);
 	return combine;
