@@ -12,7 +12,10 @@ module.exports = function() {
 	var btrade = px.mkButton(10, 40, "Trade");
 	var bconfirm = px.mkButton(10, 70, "Confirm");
 	var bconfirmed = new PIXI.Text("Confirmed!", { font: "16px Dosis" });
-	var bcancel = px.mkButton(10, 10, "Cancel");
+	var bcancel = [10, 10, ["Cancel", function() {
+		sock.userEmit("canceltrade");
+		startMenu();
+	}]];
 	var cardChosen = false;
 	function setCardArt(code){
 		cardArt.setTexture(gfx.getArt(code));
@@ -28,10 +31,6 @@ module.exports = function() {
 	foeDeck.position.x = 350;
 	stage.addChild(ownDeck);
 	stage.addChild(foeDeck);
-	px.setClick(bcancel, function() {
-		sock.userEmit("canceltrade");
-		startMenu();
-	});
 	px.setClick(btrade, function() {
 		if (ownDeck.deck.length > 0) {
 			sock.emit("cardchosen", {c: etgutil.encodedeck(ownDeck.deck)});
@@ -54,7 +53,6 @@ module.exports = function() {
 	bconfirmed.position.set(10, 110);
 	px.setInteractive(btrade);
 	stage.addChild(btrade);
-	stage.addChild(bcancel);
 
 	var cardpool = etgutil.deck2pool(sock.user.pool);
 	var cardsel = new px.CardSelector(setCardArt,
@@ -82,7 +80,7 @@ module.exports = function() {
 		},
 		tradecanceled: startMenu,
 	};
-	px.refreshRenderer({view: stage, next:function() {
+	px.refreshRenderer({view: stage, texit:bcancel, next:function() {
 		var mpos = px.getMousePos();
 		cardArt.visible = false;
 		cardsel.next(cardpool, cardminus, mpos);
