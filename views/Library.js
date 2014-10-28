@@ -20,7 +20,7 @@ module.exports = function(data){
 	var progress = 0, progressmax = 0;
 	for(var code in Cards.Codes){
 		var card = Cards.Codes[code];
-		if (!card.upped && !card.shiny && card.type){
+		if (!card.upped && !card.shiny && card.type && !card.status.token){
 			progressmax += 42;
 			progress += Math.min((cardpool[code] || 0) + (cardpool[etgutil.asUpped(code, true)] || 0)*6, 42);
 		}
