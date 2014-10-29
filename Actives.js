@@ -1444,7 +1444,7 @@ trick:function(c,t){
 turngolem:function(c,t){
 	var golem = new etg.Creature(c.card.as(Cards.GolemAttacker), c.owner);
 	golem.atk = Math.floor(c.status.storedpower / 3 || 0);
-	golem.maxhp = golem.hp = c.status.storedpower / 3 || 0;
+	golem.maxhp = golem.hp = c.status.storedpower || 0;
 	golem.place();
 	c.owner.shield = undefined;
 },
