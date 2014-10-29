@@ -1221,6 +1221,9 @@ serendipity:function(c){
 		new etg.CardInstance(card, c.owner).place();
 	}
 },
+shadow:function(c,t){
+	new etg.Creature(c.card.as(Cards.Shadow), c.owner).place();
+},
 shtriga:function(c,t){
 	if (c.owner == t){
 		c.status.immaterial = true;
@@ -1438,6 +1441,13 @@ trick:function(c,t){
 		cr.procactive("play");
 	}
 },
+turngolem:function(c,t){
+	var golem = new etg.Creature(c.card.as(Cards.GolemAttacker), c.owner);
+	golem.atk = Math.floor(c.status.storedpower / 3 || 0);
+	golem.maxhp = golem.hp = c.status.storedpower / 3 || 0;
+	golem.place();
+	c.owner.shield = undefined;
+},
 unappease:function(c,t){
 	delete c.status.appeased;
 },
@@ -1518,6 +1528,13 @@ pend:function(c,t){
 	var ele = c.status.pendstate ? c.owner.mark : c.card.element;
 	c.owner.spend(ele, -c.status.charges * (ele > 0 ? 1 : 3));
 	c.status.pendstate = !c.status.pendstate;
+},
+absorbdmg:function(c,t){
+	if (!c.status.storedpower) c.status.storedpower = 0;
+	c.status.storedpower++;
+},
+absorber:function(c,t){
+	c.owner.spend(etg.Fire, -3);
 },
 blockwithcharge:function(c,t){
 	if (--c.status.charges <= 0){
