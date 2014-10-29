@@ -391,7 +391,7 @@ CardSelector.prototype.renderColumns = function(){
 					var cardAmount = inf ? "-" : !(code in this.cardpool) ? 0 : (this.cardpool[code] - (this.cardminus && code in this.cardminus ? this.cardminus[code] : 0))
 					exports.maybeSetText(txt, cardAmount.toString());
 					if (this.maxedIndicator && card.type != etg.PillarEnum && cardAmount >= 6) {
-						this.maxedIndicator.beginFill(ui.elecols[etg.Light]);
+						this.maxedIndicator.beginFill(ui.elecols[cardAmount >= 12 ? etg.Chroma : etg.Light]);
 						this.maxedIndicator.drawRect(spr.position.x + 100, spr.position.y, 20, 20);
 						this.maxedIndicator.endFill();
 					}
