@@ -1537,7 +1537,7 @@ absorbdmg:function(c,t){
 	c.status.storedpower++;
 },
 absorber:function(c,t){
-	c.owner.spend(etg.Fire, -3);
+	c.owner.spend(etg.Fire, -3-(c.card.upped));
 },
 blockwithcharge:function(c,t){
 	if (--c.status.charges <= 0){
