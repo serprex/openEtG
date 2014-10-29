@@ -41,7 +41,7 @@ exports.spirit = [
 		...right? ... You open the creaky door and head back out down the gravel path.\
 		as you take your first step you hear the maiden's silvery voice echoing from the house behind you.\
 		'It appears you may be as stong as my sister claims. Your soul shall make a most delectable morsel.\
-		'We shall meet again... Don't die before then. I'ld hate to lose my favorite toy.' She fades into the darkness.\
+		'We shall meet again... Don't die before then. I'd hate to lose my favorite toy.' She fades into the darkness.\
 		Off in the distance the storm has settled above the castle, the echos of ominous thunder growing fainter.\
 		You hope it will be gone by the time you get there... but given your luck so far, you don't think it will.\
 		Storm or not, you didn't come this far just to turn back, so you continue your treck down the path."},
