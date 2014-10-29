@@ -248,7 +248,9 @@ var ActivesValues = {
 		}
 		return a;
 	},
-	serendepity:4,
+	serendepity: 4,
+	shadow: 5,
+	shtriga:6,
 	silence:1,
 	singularity:-20,
 	sinkhole:3,
@@ -272,7 +274,10 @@ var ActivesValues = {
 	tick:function(c){
 		return c instanceof etg.CardInstance ? 1 : 1+(c.maxhp-c.truehp())/c.maxhp;
 	},
-	trick:4,
+	trick: 4,
+	turngolem:function(c){
+		return c instanceof etg.CardInstance || !c.status.storedpower ? 0 : c.status.storedpower/3;
+	},
 	upkeep: -.5,
 	upload:3,
 	vampire:function(c, ttatk){
@@ -293,6 +298,7 @@ var ActivesValues = {
 	pend:function(c){
 		return c instanceof etg.CardInstance?.1:c.status.charges;
 	},
+	absorber:5,
 	blockwithcharge:function(c){
 		return (c instanceof etg.CardInstance?c.card.status.charges:c.status.charges)/(1+c.owner.foe.countcreatures()*2);
 	},
