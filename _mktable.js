@@ -1,3 +1,4 @@
+#!/usr/bin/node
 "use strict";
 var fs = require("fs");
 require("./srv/sutil").loadcards();
