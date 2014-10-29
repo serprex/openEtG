@@ -645,7 +645,7 @@ function startMatch(game, foeDeck) {
 			if (sh && !(j == 1 && cloakgfx.visible)) {
 				shiesprite[j].visible = true;
 				var child = shiesprite[j].children[0];
-				child.setTexture(ui.getTextImage(sh.status.charges ? "x" + sh.status.charges: "" + sh.truedr() + "", ui.mkFont(12, sh.card.upped ? "black" : "white"), ui.maybeLighten(sh.card)));
+				child.setTexture(ui.getTextImage(sh.status.charges ? "x" + sh.status.charges: sh.truedr().toString(), ui.mkFont(12, sh.card.upped ? "black" : "white"), ui.maybeLighten(sh.card)));
 				child.visible = true;
 				var child = shiesprite[j].children[1];
 				child.setTexture(ui.getTextImage(sh.activetext1(), ui.mkFont(12, sh.card.upped ? "black" : "white")));
