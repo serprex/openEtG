@@ -745,6 +745,9 @@ integrity:function(c,t){
 	if (shardTally[etg.Darkness]>0){
 		status.voodoo = true;
 	}
+	if (shardTally[etg.Darkness]>0 || shardTally[etg.Death]>0){
+		status.nocturnal = true;
+	}
 	if (shardTally[etg.Life]>0){
 		status.poisonous = true;
 	}
