@@ -13,7 +13,7 @@ module.exports = function(game) {
 			}
 			var active = c instanceof etg.CardInstance ? c.card.type == etg.SpellEnum && c.card.active : c.active.cast;
 			var cbits = game.tgtToBits(c) ^ 8;
-			function evalIter(t, cmdct0) {
+			function evalIter(t) {
 				if ((!game.targetingMode || (t && game.targetingMode(t))) && limit-- > 0) {
 					var tbits = game.tgtToBits(t) ^ 8;
 					var gameClone = game.clone();

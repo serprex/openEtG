@@ -116,12 +116,7 @@ bless:function(c,t){
 	t.buffhp(3);
 },
 bolsterintodeck:function(c,t){
-	for(var i=0; i<3; i++){
-		c.owner.deck.push(t.card);
-	}
-	if (!c.card.upped) {
-		c.owner.shuffle(c.owner.deck);
-	}
+	c.owner.deck.push(t.card, t.card, t.card);
 },
 boneyard:function(c,t){
 	if (!t.card.isOf(Cards.Skeleton)){
