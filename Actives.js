@@ -98,8 +98,8 @@ beguile:function(c,t){
 },
 beguilestop:function(c,t){
 	if (t == c.owner){
-		Actives.beguile(c, c);
 		c.rmactive("turnstart", "beguilestop");
+		Actives.beguile(c, c);
 	}
 },
 blackhole:function(c,t){

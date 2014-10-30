@@ -1068,9 +1068,8 @@ Thing.prototype.rmactive = function(type, activename){
 		if (actives.length == 1){
 			delete this.active[type];
 		} else {
-			actives.splice(idx, 1);
-			this.active[type] = actives.reduce(function(previous, current){
-				return combineactive(previous, Actives[current]);
+			this.active[type] = actives.reduce(function(previous, current, i){
+				return i == idx ? previous : combineactive(previous, Actives[current]);
 			}, null);
 		}
 	}
