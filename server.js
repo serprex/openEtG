@@ -86,6 +86,7 @@ function sockEmit(socket, event, data){
 }
 var echoEvents = { endturn: true, cast: true, foeleft: true, mulligan: true, cardchosen: true };
 var userEvents = {
+	usernop:function(){},
 	inituser:function(data, user) {
 		var starters = [
 			"015990g4sa014sd014t4014vi014vs0152o0152t0155u0155p0158q015ca015fi015f6015if015il015lo015lb015ou015s5025rq015v3015ut0161s018pi",

@@ -220,6 +220,7 @@ window.aideck = document.getElementById("aideck");
 							require("./views/ElementSelect")();
 						} else {
 							prepuser();
+							sock.userEmit("usernop");
 							if (gfx.loaded) startMenu();
 						}
 					} else if (this.status == 404) {
