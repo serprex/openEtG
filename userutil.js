@@ -8,7 +8,7 @@ exports.rewardwords = {
 	shard: 4,
 	nymph: 5,
 };
-exports.sellValues = [5, 1, 3, 15, 20, 250];
+exports.sellValues = [5, 1, 3, 15, 20, 240];
 exports.arenaCost = function(lv){
 	return lv ? 20 : 10;
 }
