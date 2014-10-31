@@ -811,7 +811,7 @@ locketshift:function(c,t){
 },
 losecharge:function(c,t){
 	if(--c.status.charges<0){
-		c.remove();
+		c[c instanceof etg.Creature?"die":"remove"]();
 	}
 },
 luciferin:function(c,t){
