@@ -185,7 +185,7 @@ var userEvents = {
 				db.hmget(akey, "win", "loss", "day", function(err, wld){
 					if (err || !wld) return;
 					for(var i=0; i<3; i++) wld[i] = parseInt(wld[i]);
-					if (!err && !data.won && (score < 15 || wld[0]-wld[1] < -15 || sutil.getDay()-wld[2] > 14)){
+					if (!data.won && (score < 15 || wld[0]-wld[1] < -15 || sutil.getDay()-wld[2] > 14)){
 						db.zrem(arena, data.aname);
 					}else{
 						db.zadd(arena, wilson(wld[0]+1, wld[0]+wld[1]+1)*1000, data.aname);
@@ -437,17 +437,23 @@ var userEvents = {
 			var newCards = "", rarity = 1;
 			for (var i = 0;i < pack.amount;i++) {
 				while (i == pack.rare[rarity-1]) rarity++;
-				var notFromElement = Math.random() > .5, card = undefined, bumprarity = rarity+(rarity < 5 && Math.random() < bumprate);
-				if (data.element < 13) card = etg.PlayerRng.randomcard(false, function(x) { return (x.element == data.element) ^ notFromElement && x.rarity == bumprarity});
-				if (data.element == 14){
-					var newCardList = [
-						Cards.Envenom, Cards.JetStream, Cards.Salamander, Cards.Shadow, Cards.Inertia, Cards.PhaseGolem, Cards.QuantumLocket, Cards.ClockworkGolem,
-						Cards.JackOLantern,Cards.ThermalRecoil,Cards.GolemDefender,Cards.Shtriga, Cards.MidassTouch, Cards.Lemming, Cards.Georesonator, Cards.AtlantissProtection,
-						Cards.Boomstick, Cards.ShankofVoid, Cards.ScatteringWind, Cards.Firebrand];
-					card = etg.PlayerRng.randomcard(false, function(x){ return notFromElement ^ ~newCardList.indexOf(x) && x.rarity == bumprarity});
+				var cardcode;
+				if (rarity == 5){
+					cardcode = etg.NymphList[data.element > 0 && data.element < 13 ? data.element : etg.PlayerRng.uptoceil(12)];
+				}else{
+					var notFromElement = Math.random() > .5, bumprarity = rarity+(Math.random() < bumprate), card = undefined;
+					if (data.element < 13) card = etg.PlayerRng.randomcard(false, function(x) { return (x.element == data.element) ^ notFromElement && x.rarity == bumprarity});
+					if (data.element == 14){
+						var newCardList = [
+							Cards.Envenom, Cards.JetStream, Cards.Salamander, Cards.Shadow, Cards.Inertia, Cards.PhaseGolem, Cards.QuantumLocket, Cards.ClockworkGolem,
+							Cards.JackOLantern,Cards.ThermalRecoil,Cards.GolemDefender,Cards.Shtriga, Cards.MidassTouch, Cards.Lemming, Cards.Georesonator, Cards.AtlantissProtection,
+							Cards.Boomstick, Cards.ShankofVoid, Cards.ScatteringWind, Cards.Firebrand];
+						card = etg.PlayerRng.randomcard(false, function(x){ return notFromElement ^ ~newCardList.indexOf(x) && x.rarity == bumprarity});
+					}
+					if (!card) card = etg.PlayerRng.randomcard(false, function(x) { return x.rarity == bumprarity });
+					cardcode = card.code
 				}
-				if (!card) card = etg.PlayerRng.randomcard(false, function(x) { return x.rarity == bumprarity });
-				newCards = etgutil.addcard(newCards, card.code);
+				newCards = etgutil.addcard(newCards, cardcode);
 			}
 			if (bound) {
 				freepacklist[data.pack]--;

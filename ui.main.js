@@ -37,7 +37,7 @@ window.aideck = document.getElementById("aideck");
 			if (muteall || data.u in muteset) return;
 			if (typeof Notification !== "undefined" && sock.user && ~data.msg.indexOf(sock.user.name) && !document.hasFocus()){
 				Notification.requestPermission();
-				new Notification(data.u, {body: data.msg}).onclick = window.focus;
+				new Notification(data.u, {body: data.msg});
 			}
 			var now = new Date(), h = now.getHours(), m = now.getMinutes(), s = now.getSeconds();
 			if (h < 10) h = "0"+h;

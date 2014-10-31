@@ -4,6 +4,7 @@ var gfx = require("./gfx");
 var sock = require("./sock");
 var Cards = require("./Cards");
 var etgutil = require("./etgutil");
+var userutil = require("./userutil");
 module.exports = function() {
 	function upgradeCard(card) {
 		if (!card.isFree()) {
@@ -25,7 +26,7 @@ module.exports = function() {
 	function polishCard(card) {
 		if (!card.isFree()) {
 			if (card.shiny) return "You cannot polish shiny cards.";
-			if (card.rarity == 5) return "You cannot polish Nymphs.";
+			if (card.rarity == 5) return "You cannot polish unupped Nymphs.";
 			var use = card.rarity != -1 ? 6 : 2;
 			if (cardpool[card.code] >= use) {
 				sock.userExec("polish", { card: card.code });
@@ -40,7 +41,6 @@ module.exports = function() {
 		}
 		else return "You need $50 to afford a shiny pillar!";
 	}
-	var cardValues = [5, 1, 3, 15, 20, 125];
 	function sellCard(card) {
 		if (!card.rarity && !card.upped) return "You can't sell a pillar or pendulum, silly!";
 		if (card.rarity == -1) return "You really don't want to sell that, trust me.";
@@ -105,7 +105,7 @@ module.exports = function() {
 				tinfo.setText(card.isFree() ? "Costs $50 to upgrade" : card.rarity != -1 ? "Convert 6 into an upgraded version." : "Convert into an upgraded version.");
 				px.setDomVis("bupgrade", tinfo.visible = true);
 			}
-			if (card.shiny){
+			if (card.shiny || card.rarity == 5){
 				px.setDomVis("bpolish", tinfo3.visible = false);
 			}else{
 				tinfo3.setText(card.isFree() ? "Costs $50 to polish" : card.rarity == 5 ? "This card cannot be polished." : card.rarity != -1 ? "Convert 6 into a shiny version." : "Convert 2 into a shiny version.")
@@ -113,7 +113,7 @@ module.exports = function() {
 			}
 			px.setDomVis("bsell", ~card.rarity && !card.isFree());
 			tinfo2.setText(~card.rarity && !card.isFree() ?
-				"Sells for $" + cardValues[card.rarity] * (card.upped ? 5 : 1) * (card.shiny ? 5 : 1) : "");
+				"Sells for $" + userutil.sellValues[card.rarity] * (card.upped ? 5 : 1) * (card.shiny ? 5 : 1) : "");
 			twarning.setText("");
 		}, true
 	);

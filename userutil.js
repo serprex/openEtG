@@ -8,6 +8,7 @@ exports.rewardwords = {
 	shard: 4,
 	nymph: 5,
 };
+exports.sellValues = [5, 1, 3, 15, 20, 250];
 exports.arenaCost = function(lv){
 	return lv ? 20 : 10;
 }
@@ -31,7 +32,7 @@ exports.calcWealth = function(wealth, cardpool){
 exports.sellcard = function(data, user){
 	if (etgutil.count(user.pool, data.card)){
 		var card = Cards.Codes[data.card];
-		var sellValue = [5, 1, 3, 15, 20, 125][card.rarity] * (card.upped ? 5 : 1) * (card.shiny ? 5 : 1);
+		var sellValue = exports.sellValues[card.rarity] * (card.upped ? 5 : 1) * (card.shiny ? 5 : 1);
 		if (sellValue){
 			user.pool = etgutil.addcard(user.pool, data.card, -1);
 			user.gold += sellValue;
