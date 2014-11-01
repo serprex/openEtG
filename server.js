@@ -528,11 +528,12 @@ var sockEvents = {
 	},
 	librarywant:function(data){
 		if (data.f in users){
-			sockEmit(this, "librarygive", {pool: users[data.f].pool, gold:users[data.f].gold});
+			var u = users[data.f];
+			sockEmit(this, "librarygive", {pool:u.pool, bound:u.accountbound, gold:u.gold});
 		}else{
 			var socket = this;
-			db.hmget("U:"+data.f, "pool", "gold", function(err, info){
-				if (info) sockEmit(socket, "librarygive", {pool:info[0], gold:parseInt(info[1])});
+			db.hmget("U:"+data.f, "pool", "accountbound", "gold", function(err, info){
+				if (info) sockEmit(socket, "librarygive", {pool:info[0], bound:info[1], gold:parseInt(info[2])});
 			});
 		}
 	},

@@ -5,11 +5,12 @@ var Cards = require("./Cards");
 var etgutil = require("./etgutil");
 var userutil = require("./userutil");
 module.exports = function(data){
-	var stage = px.mkView();
+	var stage = px.mkView(), showbound = false;
 	var bexit = px.mkButton(10, 10, "Exit");
 	px.setClick(bexit, require("./MainMenu"));
 	stage.addChild(bexit);
 	var cardpool = etgutil.deck2pool(data.pool);
+	var boundpool = etgutil.deck2pool(data.bound);
 	var cardsel = new px.CardSelector(function(code){
 		cardArt.setTexture(gfx.getArt(code));
 	});
@@ -22,12 +23,17 @@ module.exports = function(data){
 		var card = Cards.Codes[code];
 		if (!card.upped && !card.shiny && card.type && !card.status.token){
 			progressmax += 42;
-			progress += Math.min((cardpool[code] || 0) + (cardpool[etgutil.asUpped(code, true)] || 0)*6, 42);
+			var upcode = etgutil.asUpped(code, true);
+			progress += Math.min((cardpool[code] || 0) + (boundpool[code] || 0) + ((cardpool[upcode] || 0) + (boundpool[upcode] || 0))*6, 42);
 		}
 	}
 	var wealth = userutil.calcWealth(data.gold, cardpool);
-	var dom = [[100, 16, "Cumulative wealth: " + Math.round(wealth) + "\nZE Progress: " + progress + " / " + progressmax]];
+	var dom = [[100, 16, "Cumulative wealth: " + Math.round(wealth) + "\nZE Progress: " + progress + " / " + progressmax],
+		[5, 554, ["Toggle Bound", function(){
+			showbound ^= true;
+		}]]
+	];
 	px.refreshRenderer({view:stage, stext: dom, next:function(){
-		cardsel.next(cardpool);
+		cardsel.next(showbound ? boundpool : cardpool);
 	}});
 }

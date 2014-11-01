@@ -1172,18 +1172,20 @@ Weapon.prototype.attack = Creature.prototype.attack = function(stasis, freedomCh
 	if (this.status.delayed){
 		this.status.delayed--;
 	}
-	if (this.active.postauto && !this.status.frozen) {
-		this.active.postauto(this);
-	}
 	delete this.status.dive;
 	if (isCreature && ~this.getIndex() && this.truehp() <= 0){
 		this.die();
-	}else if (this.status.adrenaline && (!isCreature || ~this.getIndex())){
-		if(this.status.adrenaline < countAdrenaline(this.trueatk(0))){
-			this.status.adrenaline++;
-			this.attack(stasis, freedomChance);
-		}else{
-			this.status.adrenaline = 1;
+	}else if (!isCreature || ~this.getIndex()){
+		if (this.active.postauto && !this.status.frozen) {
+			this.active.postauto(this);
+		}
+		if(this.status.adrenaline){
+			if(this.status.adrenaline < countAdrenaline(this.trueatk(0))){
+				this.status.adrenaline++;
+				this.attack(stasis, freedomChance);
+			}else{
+				this.status.adrenaline = 1;
+			}
 		}
 	}
 }
