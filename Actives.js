@@ -487,7 +487,10 @@ flatline:function(c,t){
 		c.owner.foe.flatline = true;
 	}
 },
-flyingweapon: function(c, t) {
+flyself:function(c,t){
+	Actives[c instanceof etg.Weapon ? "flyingweapon" : "livingweapon"](c, c);
+},
+flyingweapon:function(c,t){
 	var cr = new etg.Creature(t.card, t.owner);
 	cr.atk = t.atk;
 	cr.active = etg.clone(t.active);

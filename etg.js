@@ -589,20 +589,14 @@ Player.prototype.spend = function(qtype, x) {
 	return true;
 }
 Player.prototype.countcreatures = function() {
-	var res = 0;
-	for (var i = 0;i < this.creatures.length;i++) {
-		if (this.creatures[i])
-			res++;
-	}
-	return res;
+	return this.creatures.reduce(function(count, cr){
+		return count+!!cr;
+	}, 0);
 }
 Player.prototype.countpermanents = function() {
-	var res = 0;
-	for (var i = 0;i < this.permanents.length;i++) {
-		if (this.permanents[i])
-			res++;
-	}
-	return res;
+	return this.permanents.reduce(function(count, pr){
+		return count+!!pr;
+	}, 0);
 }
 Player.prototype.endturn = function(discard) {
 	this.game.ply++;
@@ -966,21 +960,39 @@ Creature.prototype.transform = Weapon.prototype.transform = function(card, owner
 		this.mutantactive();
 	}
 }
-Creature.prototype.calcEclipse = function(){
-	if (!this.status.nocturnal){
-		return 0;
-	}
-	var bonus = 0;
+Creature.prototype.calcCore = function(prefix, filterstat){
+	if (!prefix(this)) return 0;
 	for (var j=0; j<2; j++){
 		var pl = j == 0 ? this.owner : this.owner.foe;
+		if (pl.permanents.some(function(pr){return pr.status[filterstat]})) return 1;
+	}
+	return 0;
+}
+Creature.prototype.calcCore2 = function(prefix, filterstat){
+	if (!prefix(this)) return 0;
+	var bonus = 0;
+	for (var j=0; j<2; j++){
+		var pl = j == 0 ? this.owner : this.owner.foe, pr;
 		for (var i=0; i<16; i++){
-			if (pl.permanents[i] && pl.permanents[i].status.nightfall){
-				if (pl.permanents[i].card.upped) return 2;
+			if ((pr = pl.permanents[i]) && pr.status[filterstat]){
+				if (pr.card.upped) return 2;
 				else bonus = 1;
 			}
 		}
 	}
 	return bonus;
+}
+function isEclipseCandidate(c){
+	return c.status.nocturnal;
+}
+function isWhetCandidate(c){
+	return c.status.golem || c.card.type == WeaponEnum || c instanceof Weapon;
+}
+Creature.prototype.calcBonusAtk = function(){
+	return this.calcCore2(isEclipseCandidate, "nightfall") + this.calcCore(isWhetCandidate, "whetstone");
+}
+Creature.prototype.calcBonusHp = function(){
+	return this.calcCore(isEclipseCandidate, "nightfall") + this.calcCore2(isWhetCandidate, "whetstone");
 }
 Thing.prototype.lobo = function(){
 	// TODO deal with combined actives
@@ -1011,7 +1023,7 @@ Weapon.prototype.trueatk = Creature.prototype.trueatk = function(adrenaline, nob
 	if (this.status.dive)dmg += this.status.dive;
 	if (this.active.buff && !nobuff)dmg += this.active.buff(this);
 	if (this instanceof Creature){
-		dmg += this.calcEclipse();
+		dmg += this.calcBonusAtk();
 	}
 	if (this.status.burrowed)dmg = Math.ceil(dmg/2);
 	var y=adrenaline || this.status.adrenaline || 0;
@@ -1032,10 +1044,7 @@ Shield.prototype.truedr = function(){
 Player.prototype.truehp = function(){ return this.hp; }
 Weapon.prototype.truehp = function(){ return this.card.health; }
 Creature.prototype.truehp = function(){
-	var hp = this.hp;
-	if (this.calcEclipse(this.owner.game) != 0){
-		hp++;
-	}
+	var hp = this.hp + this.calcBonusHp(this.owner.game);
 	if (this.active.hp) hp += this.active.hp(this);
 	return hp;
 }
@@ -1170,7 +1179,7 @@ Weapon.prototype.attack = Creature.prototype.attack = function(stasis, freedomCh
 	if (isCreature && ~this.getIndex() && this.truehp() <= 0){
 		this.die();
 	}else if (this.status.adrenaline && (!isCreature || ~this.getIndex())){
-		if(this.status.adrenaline < countAdrenaline(this.trueatk(1))){
+		if(this.status.adrenaline < countAdrenaline(this.trueatk(0))){
 			this.status.adrenaline++;
 			this.attack(stasis, freedomChance);
 		}else{
