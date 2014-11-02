@@ -265,7 +265,7 @@ var ActivesValues = {
 	sskin:5,
 	steal:6,
 	steam:6,
-	stoneform:3,
+	stoneform:1,
 	storm2:6,
 	storm3:12,
 	swave:6,
