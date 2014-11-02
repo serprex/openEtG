@@ -30,11 +30,7 @@ module.exports = function(){
 			graphics.hitArea = ainfo[1];
 			if (aideck.value == "quest"){
 				graphics.lineStyle(4, 255);
-				graphics.moveTo(points[0].x, points[0].y);
-				for(var i=1; i<points.length; i++){
-					graphics.lineTo(points[i].x, points[i].y);
-				}
-				graphics.lineTo(points[0].x, points[0].y);
+				graphics.drawShape(ainfo[1]);
 			}
 			px.setClick(graphics, function () {
 				require("./QuestArea")(k);
@@ -46,14 +42,14 @@ module.exports = function(){
 				return (Quest[quest][0].dependency === undefined || Quest[quest][0].dependency(sock.user)) && ((sock.user.quest[quest] || 0) < Quest[quest].length);
 			})) {
 				var xtot = 0, ytot = 0;
-				for (var i = 0;i < points.length; i++) {
-					xtot += points[i].x;
-					ytot += points[i].y;
+				for (var i = 0;i < points.length; i+=2) {
+					xtot += points[i];
+					ytot += points[i+1];
 				}
 				var icon = new PIXI.Sprite(gfx.eicons[13]);
 				icon.anchor.x = 0.5;
 				icon.anchor.y = 0.5;
-				icon.position.set(xtot / points.length, ytot / points.length);
+				icon.position.set((xtot*2) / points.length, (ytot*2) / points.length);
 				graphics.addChild(icon);
 			}
 		})(areainfo[key], key);
