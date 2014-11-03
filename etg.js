@@ -1122,15 +1122,9 @@ Weapon.prototype.attack = Creature.prototype.attack = function(stasis, freedomCh
 	this.usedactive = false;
 	var trueatk;
 	if (!(stasis || this.status.frozen || this.status.delayed) && (trueatk = this.trueatk()) != 0){
-		var momentum = this.status.momentum;
-		if (!momentum && this.status.burrowed){
-			for (var i=0; i<16; i++){
-				if (this.owner.permanents[i] && this.owner.permanents[i].status.tunnel){
-					momentum = true;
-					break;
-				}
-			}
-		}else if (this.status.airborne && freedomChance && this.owner.rng() < freedomChance){
+		var momentum = this.status.momentum ||
+			(this.status.burrowed && this.owner.permanents.some(function(pr){ return pr && pr.status.tunnel }));
+		if (this.status.airborne && freedomChance && this.owner.rng() < freedomChance){
 			if (!momentum && !target.shield && !target.gpull && !this.status.psion){
 				trueatk = Math.ceil(trueatk * 1.5);
 			}else{
