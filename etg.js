@@ -960,7 +960,7 @@ Creature.prototype.transform = Weapon.prototype.transform = function(card, owner
 		this.mutantactive();
 	}
 }
-Creature.prototype.calcCore = function(prefix, filterstat){
+Weapon.prototype.calcCore = Creature.prototype.calcCore = function(prefix, filterstat){
 	if (!prefix(this)) return 0;
 	for (var j=0; j<2; j++){
 		var pl = j == 0 ? this.owner : this.owner.foe;
@@ -968,7 +968,7 @@ Creature.prototype.calcCore = function(prefix, filterstat){
 	}
 	return 0;
 }
-Creature.prototype.calcCore2 = function(prefix, filterstat){
+Weapon.prototype.calcCore2 = Creature.prototype.calcCore2 = function(prefix, filterstat){
 	if (!prefix(this)) return 0;
 	var bonus = 0;
 	for (var j=0; j<2; j++){
@@ -983,12 +983,12 @@ Creature.prototype.calcCore2 = function(prefix, filterstat){
 	return bonus;
 }
 function isEclipseCandidate(c){
-	return c.status.nocturnal;
+	return c.status.nocturnal && c instanceof Creature;
 }
 function isWhetCandidate(c){
-	return c.status.golem || c.card.type == WeaponEnum || c instanceof Weapon;
+	return c.status.golem || c.card.type == WeaponEnum;
 }
-Creature.prototype.calcBonusAtk = function(){
+Weapon.prototype.calcBonusAtk = Creature.prototype.calcBonusAtk = function(){
 	return this.calcCore2(isEclipseCandidate, "nightfall") + this.calcCore(isWhetCandidate, "whetstone");
 }
 Creature.prototype.calcBonusHp = function(){
@@ -1022,9 +1022,7 @@ Weapon.prototype.trueatk = Creature.prototype.trueatk = function(adrenaline, nob
 	var dmg = this.atk;
 	if (this.status.dive)dmg += this.status.dive;
 	if (this.active.buff && !nobuff)dmg += this.active.buff(this);
-	if (this instanceof Creature){
-		dmg += this.calcBonusAtk();
-	}
+	dmg += this.calcBonusAtk();
 	if (this.status.burrowed)dmg = Math.ceil(dmg/2);
 	var y=adrenaline || this.status.adrenaline || 0;
 	if (y<2)return dmg;

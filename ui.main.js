@@ -172,8 +172,8 @@ window.aideck = document.getElementById("aideck");
 					}
 					if (!data.msg.match(/^\s*$/)) sock.userEmit("chat", data);
 				}else{
-					var name = options.username || guestname || (guestname = (10000 + Math.floor(Math.random() * 89999)) + "");
-					sock.emit("guestchat", { msg: msg, u: name });
+					var name = options.username || guestname || (guestname = (10000 + etg.PlayerRng.upto(89999) + "");
+					if (!msg.match(/^\s*$/)) sock.emit("guestchat", { msg: msg, u: name });
 				}
 			}else chat("Not a command: " + msg);
 		}
