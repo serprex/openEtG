@@ -38,7 +38,7 @@ module.exports = function(info) {
 				return;
 			}
 			var spr = new PIXI.Sprite(gfx.getCardImage(code));
-			spr.position.set(100 + Math.floor(i / 10) * 100, 32 + (i % 10) * 20);
+			spr.position.set(100 + Math.floor(i / 10) * 99, 32 + (i % 10) * 19);
 			stage.addChild(spr);
 			i++;
 		});

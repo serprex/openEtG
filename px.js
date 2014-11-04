@@ -229,17 +229,17 @@ function DeckDisplay(decksize, cardmouseover, cardclick, deck){
 	this.decksize = decksize;
 	this.cardmouseover = cardmouseover;
 	this.cardclick = cardclick;
-	this.hitArea = new PIXI.Rectangle(100, 32, Math.floor(decksize/10)*100, 200);
+	this.hitArea = new PIXI.Rectangle(100, 32, Math.floor(decksize/10)*99, 200);
 	this.interactive = true;
 	for (var i = 0;i < decksize;i++) {
 		var sprite = new PIXI.Sprite(gfx.nopic);
-		sprite.position.set(100 + Math.floor(i / 10) * 100, 32 + (i % 10) * 20);
+		sprite.position.set(100 + Math.floor(i / 10) * 99, 32 + (i % 10) * 19);
 		this.addChild(sprite);
 	}
 }
 DeckDisplay.prototype = Object.create(PIXI.DisplayObjectContainer.prototype);
 DeckDisplay.prototype.pos2idx = function(mpos){
-	return Math.floor((mpos.x-100-this.position.x)/100)*10+(Math.floor((mpos.y-32-this.position.y)/20)%10);
+	return Math.floor((mpos.x-100-this.position.x)/99)*10+(Math.floor((mpos.y-32-this.position.y)/19)%10);
 }
 DeckDisplay.prototype.click = function(e){
 	var index = this.pos2idx(e.global);
@@ -319,7 +319,6 @@ function CardSelector(cardmouseover, cardclick, maxedIndicator){
 	}
 	for (var i = 0;i < 5; i++){
 		var sprite = exports.mkButton(74, 338 + i * 32, gfx.ricons[i]);
-		sprite.interactive = true;
 		(function(_i) {
 			exports.setClick(sprite, function() {
 				self.rarefilter = _i;
@@ -331,7 +330,7 @@ function CardSelector(cardmouseover, cardclick, maxedIndicator){
 	for (var i = 0;i < 6;i++) {
 		for (var j = 0;j < 15;j++) {
 			var sprite = new PIXI.Sprite(gfx.nopic);
-			sprite.position.set(100 + i * 130, 272 + j * 20);
+			sprite.position.set(100 + i * 133, 272 + j * 19);
 			var sprcount = new PIXI.Text("", { font: "12px Dosis" });
 			sprcount.position.set(102, 4);
 			sprite.addChild(sprcount);
@@ -343,8 +342,8 @@ function CardSelector(cardmouseover, cardclick, maxedIndicator){
 CardSelector.prototype = Object.create(PIXI.DisplayObjectContainer.prototype);
 CardSelector.prototype.click = function(e){
 	if (!this.cardclick) return;
-	var col = this.columns[Math.floor((e.global.x-100)/130)], card;
-	if (col && (card = col[Math.floor((e.global.y-272)/20)])){
+	var col = this.columns[Math.floor((e.global.x-100)/133)], card;
+	if (col && (card = col[Math.floor((e.global.y-272)/19)])){
 		ui.playSound("cardClick");
 		this.cardclick(card.code);
 	}
@@ -360,8 +359,8 @@ CardSelector.prototype.next = function(newcardpool, newcardminus, mpos) {
 	if (this.cardmouseover){
 		if (mpos === undefined) mpos = this.stage.getMousePosition();
 		if (!this.hitArea.contains(mpos.x, mpos.y)) return;
-		var col = this.columns[Math.floor((mpos.x-100)/130)], card;
-		if (col && (card = col[Math.floor((mpos.y-272)/20)])){
+		var col = this.columns[Math.floor((mpos.x-100)/133)], card;
+		if (col && (card = col[Math.floor((mpos.y-272)/19)])){
 			this.cardmouseover(card.code);
 		}
 	}

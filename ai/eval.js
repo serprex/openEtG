@@ -206,7 +206,7 @@ var ActivesValues = {
 	},
 	overdrivespell:5,
 	pacify:5,
-	paleomagnetism:[6,7],
+	paleomagnetism:[4,5],
 	pandemonium:3,
 	pandemonium2:4,
 	paradox:5,
@@ -402,7 +402,7 @@ function calcExpectedDamage(pl, wallCharges) {
 	if (!stasisFlag){
 		pl.creatures.forEach(function(c){
 			var dmg = estimateDamage(c, freedomChance, wallCharges);
-			if (dmg && !(c.status.psion && pl.foe.shield.status.reflective)){
+			if (dmg && !(c.status.psion && pl.foe.shield && pl.foe.shield.status.reflective)){
 				totalDamage += dmg;
 			}
 		});

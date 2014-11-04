@@ -1,6 +1,7 @@
 "use strict";
 var etg = require("./etg");
 var Cards = require("./Cards");
+var Actives = require("./Actives");
 var etgutil = require("./etgutil");
 module.exports = function(level) {
 	if (!Cards.loaded){
@@ -8,10 +9,10 @@ module.exports = function(level) {
 	}
 	var uprate = level == 0 ? 0 : level == 1 ? .1 : .3;
 	function upCode(x) {
-		return etgutil.asUpped(x, Math.random() < uprate);
+		return uprate ? etgutil.asUpped(x, Math.random() < uprate) : x;
 	}
 	var cardcount = {};
-	var eles = [Math.ceil(Math.random() * 12), Math.ceil(Math.random() * 12)], ecost = [];
+	var eles = [Math.ceil(Math.random() * 12), Math.ceil(Math.random() * 12)], ecost = new Array(13);
 	var pillars = etg.filtercards(false, function(x) { return x.type == etg.PillarEnum && !x.rarity; });
 	for (var i = 0;i < 13;i++) {
 		ecost[i] = 0;
@@ -37,24 +38,33 @@ module.exports = function(level) {
 				for (var k = 1;k < 13;k++) {
 					ecost[k]--;
 				}
-			} else if (card.type == etg.ShieldEnum) anyshield++;
+			}else if (card.isOf(Cards.GiftOfOceanus)){
+				ecost[etg.Water] -= 3;
+				ecost[eles[1]] -= 2;
+			}else if (card.type == etg.CreatureEnum){
+				var auto = card.active.auto;
+				if (auto == Actives.light) ecost[etg.Light]--;
+				else if (auto == Actives.fire) ecost[etg.Fire]--;
+				else if (auto == Actives.air) ecost[etg.Air]--;
+				else if (auto == Actives.earth) ecost[etg.Earth]--;
+			}else if (card.type == etg.ShieldEnum) anyshield++;
 			else if (card.type == etg.WeaponEnum) anyweapon++;
 		}
 	});
 	if (!anyshield) {
 		var card = Cards.Codes[deck[0]];
 		ecost[card.costele] -= card.cost;
-		deck[0] = Cards.Shield.asUpped(Math.random() < uprate).code;
+		deck[0] = upCode(Cards.Shield.code);
 	}
 	if (!anyweapon) {
 		var card = Cards.Codes[deck[1]];
 		ecost[card.costele] -= card.cost;
-		deck[1] = (eles[1] == etg.Air || eles[1] == etg.Light ? Cards.ShortBow :
+		deck[1] = upCode((eles[1] == etg.Air || eles[1] == etg.Light ? Cards.ShortBow :
 			eles[1] == etg.Gravity || eles[1] == etg.Earth ? Cards.Hammer :
 			eles[1] == etg.Water || eles[1] == etg.Life ? Cards.Wand :
 			eles[1] == etg.Darkness || eles[1] == etg.Death ? Cards.Dagger :
 			eles[1] == etg.Entropy || eles[1] == etg.Aether ? Cards.Disc :
-			Cards.ShortSword).asUpped(Math.random() < uprate).code;
+			Cards.ShortSword).code);
 	}
 	var pillarstart = deck.length, qpe = 0, qpemin = 99;
 	for (var i = 1;i < 13;i++) {
