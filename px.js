@@ -330,7 +330,7 @@ function CardSelector(cardmouseover, cardclick, maxedIndicator){
 	for (var i = 0;i < 6;i++) {
 		for (var j = 0;j < 15;j++) {
 			var sprite = new PIXI.Sprite(gfx.nopic);
-			sprite.position.set(100 + i * 130, 272 + j * 19);
+			sprite.position.set(100 + i * 133, 272 + j * 19);
 			var sprcount = new PIXI.Text("", { font: "12px Dosis" });
 			sprcount.position.set(102, 4);
 			sprite.addChild(sprcount);
@@ -342,7 +342,7 @@ function CardSelector(cardmouseover, cardclick, maxedIndicator){
 CardSelector.prototype = Object.create(PIXI.DisplayObjectContainer.prototype);
 CardSelector.prototype.click = function(e){
 	if (!this.cardclick) return;
-	var col = this.columns[Math.floor((e.global.x-100)/130)], card;
+	var col = this.columns[Math.floor((e.global.x-100)/133)], card;
 	if (col && (card = col[Math.floor((e.global.y-272)/19)])){
 		ui.playSound("cardClick");
 		this.cardclick(card.code);
@@ -359,7 +359,7 @@ CardSelector.prototype.next = function(newcardpool, newcardminus, mpos) {
 	if (this.cardmouseover){
 		if (mpos === undefined) mpos = this.stage.getMousePosition();
 		if (!this.hitArea.contains(mpos.x, mpos.y)) return;
-		var col = this.columns[Math.floor((mpos.x-100)/130)], card;
+		var col = this.columns[Math.floor((mpos.x-100)/133)], card;
 		if (col && (card = col[Math.floor((mpos.y-272)/19)])){
 			this.cardmouseover(card.code);
 		}
