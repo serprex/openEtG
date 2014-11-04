@@ -1444,8 +1444,8 @@ trick:function(c,t){
 },
 turngolem:function(c,t){
 	var golem = new etg.Creature(c.card.as(Cards.GolemAttacker), c.owner);
-	golem.atk = Math.floor((c.status.charges || 0) / 3);
-	golem.maxhp = golem.hp = c.status.charges || 0;
+	golem.atk = Math.floor((c.status.storedpower || 0) / 3);
+	golem.maxhp = golem.hp = c.status.storedpower || 0;
 	golem.place();
 	c.owner.shield = undefined;
 },
@@ -1530,9 +1530,9 @@ pend:function(c,t){
 	c.owner.spend(ele, -c.status.charges * (ele > 0 ? 1 : 3));
 	c.status.pendstate = !c.status.pendstate;
 },
-absorbdmg: function(c, t) {
-	c.defstatus("charges", 0);
-	c.status.charges++;
+absorbdmg:function(c,t, dmg){
+	c.defstatus("storedpower", 0);
+	c.status.storedpower++;
 },
 absorber:function(c,t){
 	c.owner.spend(etg.Fire, -3);
