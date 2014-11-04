@@ -38,7 +38,7 @@ module.exports = function(level) {
 				for (var k = 1;k < 13;k++) {
 					ecost[k]--;
 				}
-			}else if (card.isOf(Cards.GiftOfOceanus)){
+			}else if (card.isOf(Cards.GiftofOceanus)){
 				ecost[etg.Water] -= 3;
 				ecost[eles[1]] -= 2;
 			}else if (card.type == etg.CreatureEnum){
