@@ -328,14 +328,14 @@ var statusValues = {
 	ranged: 0.2,
 	voodoo: 1,
 	swarm: 1,
+	tunnel: 3,
 	flooding: function(c) {
 		return c.owner.foe.countcreatures() - 3;
 	},
 	patience: function(c) {
 		return 1 + c.owner.countcreatures() * 2;
 	},
-	freedom: 6,
-	tunneling: 2,
+	freedom: 5,
 	reflect: 1
 }
 

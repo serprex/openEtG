@@ -53,7 +53,13 @@ module.exports = function(arena, acard, startempty) {
 					if ((cardminus[code] || 0) < (cardpool[code] || 0)) {
 						px.adjust(cardminus, code, 1);
 					} else {
-						decksprite.deck.splice(i, 1);
+						code = etgutil.asShiny(code, !card.shiny);
+						if ((cardminus[code] || 0) < (cardpool[code] || 0)) {
+							decksprite.deck[i] = code;
+							px.adjust(cardminus, code, 1);
+						} else {
+							decksprite.deck.splice(i, 1);
+						}
 					}
 				}
 			}
@@ -265,7 +271,7 @@ module.exports = function(arena, acard, startempty) {
 				decksprite.addCard(code, arena?5:0);
 				updateField();
 			}
-		}, !arena
+		}, !arena, true
 	);
 	editorui.addChild(cardsel);
 	var cardArt = new PIXI.Sprite(gfx.nopic);
