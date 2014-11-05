@@ -271,7 +271,7 @@ module.exports = function(arena, acard, startempty) {
 				decksprite.addCard(code, arena?5:0);
 				updateField();
 			}
-		}, !arena, true
+		}, !arena, !!cardpool
 	);
 	editorui.addChild(cardsel);
 	var cardArt = new PIXI.Sprite(gfx.nopic);
