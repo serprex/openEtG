@@ -396,10 +396,9 @@ CardSelector.prototype.renderColumns = function(){
 				var txt = spr.children[0], card = Cards.Codes[code], inf = card.isFree();
 				if ((txt.visible = inf || code in this.cardpool || this.showall)) {
 					var cardAmount = inf ? "-" : code in this.cardpool ? this.cardpool[code] - ((this.cardminus && this.cardminus[code]) || 0) : 0;
-					var shinyAmount = 0;
 					if (this.filterboth && !this.showshiny && typeof cardAmount === "number"){
 						var scode = etgutil.asShiny(code, true);
-						shinyAmount = scode in this.cardpool ? this.cardpool[scode] - ((this.cardminus && this.cardminus[scode]) || 0) : 0;
+						var shinyAmount = scode in this.cardpool ? this.cardpool[scode] - ((this.cardminus && this.cardminus[scode]) || 0) : 0;
 					}
 					exports.maybeSetText(txt, cardAmount.toString() + (shinyAmount ? "/"+shinyAmount.toString():""));
 					if (this.maxedIndicator && card.type != etg.PillarEnum && cardAmount >= 6) {
