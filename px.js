@@ -347,7 +347,7 @@ CardSelector.prototype.click = function(e){
 	if (col && (card = col[Math.floor((e.global.y-272)/19)])){
 		ui.playSound("cardClick");
 		var code = card.code;
-		if (this.filterboth){
+		if (this.filterboth && !this.showshiny){
 			var scode = card.asShiny(true).code;
 			if (scode in this.cardpool && this.cardpool[scode] > ((this.cardminus && this.cardminus[scode]) || 0)){
 				code = scode;
@@ -393,12 +393,12 @@ CardSelector.prototype.renderColumns = function(){
 			spr.setTexture(gfx.getCardImage(code));
 			spr.visible = true;
 			if (this.cardpool) {
-				var txt = spr.children[0], card = Cards.Codes[code], inf = card.isFree();
+				var txt = spr.children[0], card = Cards.Codes[code], inf = card.isFree() && !(this.filterboth && !this.showshiny && this.cardpool[etgutil.asShiny(code, true)]);
 				if ((txt.visible = inf || code in this.cardpool || this.showall)) {
-					var cardAmount = inf ? "-" : code in this.cardpool ? this.cardpool[code] - ((this.cardminus && this.cardminus[code]) || 0) : 0;
-					if (this.filterboth && !this.showshiny && typeof cardAmount === "number"){
+					var cardAmount = inf ? "-" : code in this.cardpool ? this.cardpool[code] - ((this.cardminus && this.cardminus[code]) || 0) : 0, shinyAmount = 0;
+					if (!inf){
 						var scode = etgutil.asShiny(code, true);
-						var shinyAmount = scode in this.cardpool ? this.cardpool[scode] - ((this.cardminus && this.cardminus[scode]) || 0) : 0;
+						shinyAmount = scode in this.cardpool ? this.cardpool[scode] - ((this.cardminus && this.cardminus[scode]) || 0) : 0;
 					}
 					exports.maybeSetText(txt, cardAmount + (shinyAmount ? "/"+shinyAmount:""));
 					if (this.maxedIndicator && card.type != etg.PillarEnum && cardAmount >= 6) {
