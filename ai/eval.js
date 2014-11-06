@@ -329,6 +329,9 @@ var statusValues = {
 	voodoo: 1,
 	swarm: 1,
 	tunnel: 3,
+	cloak: function(c) {
+		return c.status?(c.status.charges == 0 && c.owner == c.owner.game.turn?0:4):0;
+	},
 	flooding: function(c) {
 		return c.owner.foe.countcreatures() - 3;
 	},
@@ -543,7 +546,7 @@ function caneventuallyactive(element, cost, pl){
 	});
 }
 
-var uniqueStatuses = {flooding:"all", nightfall:"all", tunnel:"self", patience:"self"};
+var uniqueStatuses = {flooding:"all", nightfall:"all", tunnel:"self", patience:"self", cloak:"self"};
 var uniquesActive, damageHash;
 
 module.exports = function(game) {
@@ -599,7 +602,6 @@ module.exports = function(game) {
 			player.deck.push(code);
 		}
 		pscore += Math.sqrt(player.hp)*4;
-		if (player.isCloaked()) pscore += 4;
 		if (player.status.poison) pscore -= player.status.poison;
 		if (player.precognition) pscore += .5;
 		if (!player.weapon) pscore += 1;
