@@ -184,7 +184,7 @@ Player.prototype.markpower = 1;
 var Chroma = 0, Entropy = 1, Death = 2, Gravity = 3, Earth = 4, Life = 5, Fire = 6, Water = 7, Light = 8, Air = 9, Time = 10, Darkness = 11, Aether = 12;
 var PillarEnum = 0, WeaponEnum = 1, ShieldEnum = 2, PermanentEnum = 3, SpellEnum = 4, CreatureEnum = 5;
 var MulliganPhase1 = 0, MulliganPhase2 = 1, PlayPhase = 2, EndPhase = 3;
-var passives = { airborne: true, nocturnal: true, voodoo: true, swarm: true, ranged: true, additive: true, stackable: true, salvage: true, token: true, poisonous: true, martyr: true, decrsteam: true, beguilestop: true, bounce: true, dshieldoff: true, salvageoff: true, golem: true, obsession: true };
+var passives = { airborne: true, aquatic: true, nocturnal: true, voodoo: true, swarm: true, ranged: true, additive: true, stackable: true, salvage: true, token: true, poisonous: true, martyr: true, decrsteam: true, beguilestop: true, bounce: true, dshieldoff: true, salvageoff: true, golem: true, obsession: true };
 var PlayerRng = Object.create(Player.prototype);
 PlayerRng.rng = Math.random;
 PlayerRng.upto = function(x){ return Math.floor(Math.random()*x); }
@@ -646,12 +646,12 @@ Player.prototype.endturn = function(discard) {
 	this.creatures.slice().forEach(function(cr, i){
 		if (cr){
 			if (patienceFlag){
-				var floodbuff = floodingFlag && i>4 && cr.card.element==Water;
+				var floodbuff = floodingFlag && i>4;
 				cr.atk += floodbuff?5:cr.status.burrowed?4:2;
 				cr.buffhp(floodbuff?2:1);
 			}
 			cr.attack(stasisFlag, freedomChance);
-			if (floodingFlag && cr.card.element != Water && cr.card.element != Chroma && cr.isMaterial() && cr.getIndex() > 4){
+			if (floodingFlag && !cr.status.aquatic && cr.isMaterial() && cr.getIndex() > 4){
 				cr.die();
 			}
 		}
