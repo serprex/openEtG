@@ -12,14 +12,12 @@ module.exports = function() {
 			var use = card.rarity != -1 ? 6 : 1;
 			if (cardpool[card.code] >= use) {
 				sock.userExec("upgrade", { card: card.code });
-				adjustdeck();
 			}
 			else return "You need at least " + use + " copies to be able to upgrade this card!";
 		}
 		else if (sock.user.gold >= 50) {
 			sock.userExec("uppillar", { c: card.code });
 			goldcount.setText("$" + sock.user.gold);
-			adjustdeck();
 		}
 		else return "You need $50 to afford an upgraded pillar!";
 	}
@@ -27,7 +25,6 @@ module.exports = function() {
 		if (card.rarity) {
 			if (!card.upped) return "You cannot unupgrade unupgraded cards.";
 			sock.userExec("unupgrade", { card: card.code });
-			adjustdeck();
 		}
 		else return "You cannot unupgrade pillars; sell it instead."
 	}
@@ -38,14 +35,12 @@ module.exports = function() {
 			var use = card.rarity != -1 ? 6 : 2;
 			if (cardpool[card.code] >= use) {
 				sock.userExec("polish", { card: card.code });
-				adjustdeck();
 			}
 			else return "You need at least " + use + " copies to be able to polish this card!";
 		}
 		else if (sock.user.gold >= 50) {
 			sock.userExec("shpillar", { c: card.code });
 			goldcount.setText("$" + sock.user.gold);
-			adjustdeck();
 		}
 		else return "You need $50 to afford a shiny pillar!";
 	}
@@ -54,7 +49,6 @@ module.exports = function() {
 			if (!card.shiny) return "You cannot unpolish non-shiny cards.";
 			if (!card.rarity == 5) return "You cannot unpolish Nymphs.";
 			sock.userExec("unpolish", { card: card.code });
-			adjustdeck();
 		}
 		else return "You cannot unpolish pillars; sell them instead.";
 	}
@@ -64,7 +58,6 @@ module.exports = function() {
 		var codecount = etgutil.count(sock.user.pool, card.code);
 		if (codecount) {
 			sock.userExec("sellcard", { card: card.code });
-			adjustdeck();
 			goldcount.setText("$" + sock.user.gold);
 		}
 		else return "This card is bound to your account; you cannot sell it.";
@@ -73,7 +66,12 @@ module.exports = function() {
 		return function(){
 			var error = selectedCard ? func(Cards.Codes[selectedCard]) : "Pick a card, any card.";
 			if (error) twarning.setText(error);
+			else adjustdeck();
 		}
+	}
+	function autoCards(){
+		sock.userExec("upshall");
+		adjustdeck();
 	}
 	function adjustdeck() {
 		cardpool = etgutil.deck2pool(sock.user.pool);
@@ -89,12 +87,13 @@ module.exports = function() {
 		bunupgrade:[150, 50, ["Unupgrade", eventWrap(unupgradeCard)]],
 		bunpolish:[150, 95, ["Unpolish", eventWrap(unpolishCard), function() { if (selectedCard) cardArt.setTexture(gfx.getArt(etgutil.asShiny(selectedCard, false))) }]],
 		bsell:[150, 140, ["Sell", eventWrap(sellCard)]],
+		bauto:[5, 140, ["Autoconvert", autoCards]],
 		next:function(){
 			cardsel.next(cardpool);
 		}
 	};
 
-	var goldcount = new px.MenuText(30, 100, "$" + sock.user.gold);
+	var goldcount = new px.MenuText(5, 240, "$" + sock.user.gold);
 	upgradeui.addChild(goldcount);
 	var tinfo = new px.MenuText(250, 50, "");
 	upgradeui.addChild(tinfo);

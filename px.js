@@ -393,8 +393,8 @@ CardSelector.prototype.renderColumns = function(){
 			spr.setTexture(gfx.getCardImage(code));
 			spr.visible = true;
 			if (this.cardpool) {
-				var txt = spr.children[0], card = Cards.Codes[code], inf = card.isFree(), scode = etgutil.asShiny(code, true);
-				var cardAmount = inf ? "-" : code in this.cardpool ? this.cardpool[code] - ((this.cardminus && this.cardminus[code]) || 0) : 0, shinyAmount = 0;
+				var txt = spr.children[0], card = Cards.Codes[code], scode = etgutil.asShiny(code, true);
+				var cardAmount = card.isFree() ? "-" : code in this.cardpool ? this.cardpool[code] - ((this.cardminus && this.cardminus[code]) || 0) : 0, shinyAmount = 0;
 				if (this.filterboth && !this.showshiny) {
 					var scode = etgutil.asShiny(code, true);
 					shinyAmount = scode in this.cardpool ? this.cardpool[scode] - ((this.cardminus && this.cardminus[scode]) || 0) : 0;

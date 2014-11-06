@@ -103,7 +103,29 @@ exports.shpillar = function(data, user){
 		user.pool = etgutil.addcard(user.pool, etgutil.asShiny(data.c, true));
 	}
 }
-exports.addgold = function (data, user) {
+exports.upshall = function(data, user) {
+	var pool = etgutil.deck2pool(user.pool);
+	for(var code in pool){
+		var card = Cards.Codes[code];
+		if (!card || pool[code] < 12 || (card.upped && card.shiny)) continue;
+		for(var i=0; i<2; i++){
+			var upcode = etgutil[i == 0 ? "asUpped" : "asShiny"](code, true);
+			if (upcode != code){
+				if (!(upcode in pool)) pool[upcode] = 0;
+				while (pool[upcode] < 6 && pool[code] >= 12){
+					pool[upcode]++;
+					pool[code] -= 6;
+				}
+			}
+		}
+	}
+	var newpool = "";
+	for(var code in pool){
+		if (pool[code]) newpool = etgutil.addcard(newpool, code, pool[code]);
+	}
+	user.pool = newpool;
+}
+exports.addgold = function(data, user) {
 	user.gold += data.g;
 }
 exports.addloss = function (data, user) {
