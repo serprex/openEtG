@@ -23,10 +23,18 @@ module.exports = function() {
 		}
 		else return "You need $50 to afford an upgraded pillar!";
 	}
+	function unupgradeCard(card) {
+		if (card.rarity) {
+			if (!card.upped) return "You cannot unupgrade unupgraded cards.";
+			sock.userExec("unupgrade", { card: card.code });
+			adjustdeck();
+		}
+		else return "You cannot unupgrade pillars; sell it instead."
+	}
 	function polishCard(card) {
 		if (!card.isFree()) {
 			if (card.shiny) return "You cannot polish shiny cards.";
-			if (card.rarity == 5) return "You cannot polish unupped Nymphs.";
+			if (card.rarity == 5) return "You cannot polish Nymphs.";
 			var use = card.rarity != -1 ? 6 : 2;
 			if (cardpool[card.code] >= use) {
 				sock.userExec("polish", { card: card.code });
@@ -40,6 +48,15 @@ module.exports = function() {
 			adjustdeck();
 		}
 		else return "You need $50 to afford a shiny pillar!";
+	}
+	function unpolishCard(card) {
+		if (card.rarity) {
+			if (!card.shiny) return "You cannot unpolish non-shiny cards.";
+			if (!card.rarity == 5) return "You cannot unpolish Nymphs.";
+			sock.userExec("unpolish", { card: card.code });
+			adjustdeck();
+		}
+		else return "You cannot unpolish pillars; sell them instead.";
 	}
 	function sellCard(card) {
 		if (!card.rarity && !card.upped) return "You can't sell a pillar or pendulum, silly!";
@@ -66,9 +83,11 @@ module.exports = function() {
 		if (selectedCard) cardArt.setTexture(gfx.getArt(etgutil.asUpped(selectedCard, true)));
 	});
 	var stage = {view:upgradeui,
-		bexit:[5, 50, ["Exit", require("./MainMenu")]],
-		bupgrade:[150, 50, ["Upgrade", eventWrap(upgradeCard)]],
-		bpolish:[150, 95, ["Polish", eventWrap(polishCard), function() { if (selectedCard) cardArt.setTexture(gfx.getArt(etgutil.asShiny(selectedCard, true))) }]],
+		bexit: [5, 50, ["Exit", require("./MainMenu")]],
+		bupgrade: [150, 50, ["Upgrade", eventWrap(upgradeCard)]],
+		bpolish: [150, 95, ["Polish", eventWrap(polishCard), function() { if (selectedCard) cardArt.setTexture(gfx.getArt(etgutil.asShiny(selectedCard, true))) }]],
+		bunupgrade:[150, 50, ["Unupgrade", eventWrap(unupgradeCard)]],
+		bunpolish:[150, 95, ["Unpolish", eventWrap(unpolishCard), function() { if (selectedCard) cardArt.setTexture(gfx.getArt(etgutil.asShiny(selectedCard, false))) }]],
 		bsell:[150, 140, ["Sell", eventWrap(sellCard)]],
 		next:function(){
 			cardsel.next(cardpool);
@@ -99,21 +118,32 @@ module.exports = function() {
 			selectedCardArt.setTexture(gfx.getArt(code));
 			cardArt.setTexture(gfx.getArt(etgutil.asUpped(code, true)));
 			selectedCard = code;
-			if (card.upped){
-				px.setDomVis("bupgrade", tinfo.visible = false);
+			if (card.upped) {
+				px.setDomVis("bupgrade", false);
+				px.setDomVis("bunupgrade", true);
+				tinfo.setText(card.isFree() ? "" : card.rarity != -1 ? "Convert into an 6 unupgraded copies." : "Convert into an unupgraded version.");
 			}else{
 				tinfo.setText(card.isFree() ? "Costs $50 to upgrade" : card.rarity != -1 ? "Convert 6 into an upgraded version." : "Convert into an upgraded version.");
-				px.setDomVis("bupgrade", tinfo.visible = true);
+				px.setDomVis("bupgrade", true);
+				px.setDomVis("bunupgrade", false);
 			}
-			if (card.shiny || card.rarity == 5){
-				px.setDomVis("bpolish", tinfo3.visible = false);
+			if (card.rarity == 5) {
+				px.setDomVis("bpolish", false);
+				px.setDomVis("bunpolish", false);
+				tinfo3.setText("This card cannot be " + (card.shiny ? "un" : "") + "polished.")
+			}
+			else if (card.shiny){
+				px.setDomVis("bpolish", false);
+				px.setDomVis("bunpolish", true);
+				tinfo3.setText(card.isFree() ? "" : card.rarity != -1 ? "Convert into 6 non-shiny copies." : "Convert into 2 non-shiny copies.")
 			}else{
 				tinfo3.setText(card.isFree() ? "Costs $50 to polish" : card.rarity == 5 ? "This card cannot be polished." : card.rarity != -1 ? "Convert 6 into a shiny version." : "Convert 2 into a shiny version.")
-				px.setDomVis("bpolish", tinfo3.visible = true);
+				px.setDomVis("bpolish", true);
+				px.setDomVis("bunpolish", false);
 			}
 			px.setDomVis("bsell", ~card.rarity && !card.isFree());
 			tinfo2.setText(~card.rarity && !card.isFree() ?
-				"Sells for $" + userutil.sellValues[card.rarity] * (card.upped ? 5 : 1) * (card.shiny ? 5 : 1) : "");
+				"Sells for $" + userutil.sellValues[card.rarity] * (card.upped ? 6 : 1) * (card.shiny ? 6 : 1) : "");
 			twarning.setText("");
 		}, true
 	);
@@ -124,4 +154,6 @@ module.exports = function() {
 	px.setDomVis("bupgrade", false);
 	px.setDomVis("bpolish", false);
 	px.setDomVis("bsell", false);
+	px.setDomVis("bunupgrade", false);
+	px.setDomVis("bunpolish", false);
 }

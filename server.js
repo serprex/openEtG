@@ -474,7 +474,7 @@ var userEvents = {
 		}
 	},
 };
-["sellcard", "upgrade", "uppillar", "polish", "shpillar", "addgold", "addloss", "addwin", "addcards", "addbound", "donedaily"].forEach(function(event){
+["sellcard", "upgrade", "uppillar", "polish", "shpillar", "addgold", "addloss", "addwin", "addcards", "addbound", "donedaily","unpolish","unupgrade"].forEach(function(event){
 	userEvents[event] = userutil[event];
 });
 var sockEvents = {
