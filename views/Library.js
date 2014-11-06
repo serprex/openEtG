@@ -27,7 +27,7 @@ module.exports = function(data){
 			progress += Math.min((cardpool[code] || 0) + (boundpool[code] || 0) + ((cardpool[upcode] || 0) + (boundpool[upcode] || 0))*6, 42);
 		}
 	}
-	var wealth = userutil.calcWealth(data.gold, cardpool);
+	var wealth = data.gold + userutil.calcWealth(cardpool);
 	var dom = [[100, 16, "Cumulative wealth: " + Math.round(wealth) + "\nZE Progress: " + progress + " / " + progressmax],
 		[5, 554, ["Toggle Bound", function(){
 			showbound ^= true;

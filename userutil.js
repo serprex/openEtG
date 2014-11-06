@@ -8,23 +8,20 @@ exports.rewardwords = {
 	shard: 4,
 	nymph: 5,
 };
+exports.cardValues = [25/3, 1.375, 5, 30, 35, 250];
 exports.sellValues = [5, 1, 3, 15, 20, 240];
 exports.arenaCost = function(lv){
 	return lv ? 20 : 10;
 }
-exports.calcWealth = function(wealth, cardpool){
+exports.calcWealth = function(cardpool){
+	var wealth = 0;
 	for(var code in cardpool){
 		var card = Cards.Codes[code], num = cardpool[code];
-		if (card){
-			if (card.rarity == 0){
-				if (card.upped && card.shiny) wealth += 300 * num;
-				else if (card.upped || card.shiny) wealth += 50 * num;
-			}else if (card.rarity > 0){
-				var worth = [1.375, 5, 30, 35, 250][card.rarity-1];
-				if (card.upped) worth *= 6;
-				if (card.shiny) worth *= 6;
-				wealth += worth * num;
-			}
+		if (card && (card.rarity || card.upped || card.shiny)){
+			var worth = exports.cardValues[card.rarity];
+			if (card.upped) worth *= 6;
+			if (card.shiny) worth *= 6;
+			wealth += worth * num;
 		}
 	}
 	return wealth;
