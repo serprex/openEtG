@@ -394,18 +394,16 @@ CardSelector.prototype.renderColumns = function(){
 			spr.visible = true;
 			if (this.cardpool) {
 				var txt = spr.children[0], card = Cards.Codes[code], inf = card.isFree(), scode = etgutil.asShiny(code, true);
-				if ((txt.visible = inf || code in this.cardpool || scode in this.cardpool || this.showall)) {
-					var cardAmount = inf ? "-" : code in this.cardpool ? this.cardpool[code] - ((this.cardminus && this.cardminus[code]) || 0) : 0, shinyAmount = 0;
-					if (this.filterboth && !this.showshiny) {
-						var scode = etgutil.asShiny(code, true);
-						shinyAmount = scode in this.cardpool ? this.cardpool[scode] - ((this.cardminus && this.cardminus[scode]) || 0) : 0;
-					}
-					exports.maybeSetText(txt, cardAmount + (shinyAmount ? "/"+shinyAmount:""));
-					if (this.maxedIndicator && card.type != etg.PillarEnum && cardAmount >= 6) {
-						this.maxedIndicator.beginFill(ui.elecols[cardAmount >= 12 ? etg.Chroma : etg.Light]);
-						this.maxedIndicator.drawRect(spr.position.x + 100, spr.position.y, 33, 20);
-						this.maxedIndicator.endFill();
-					}
+				var cardAmount = inf ? "-" : code in this.cardpool ? this.cardpool[code] - ((this.cardminus && this.cardminus[code]) || 0) : 0, shinyAmount = 0;
+				if (this.filterboth && !this.showshiny) {
+					var scode = etgutil.asShiny(code, true);
+					shinyAmount = scode in this.cardpool ? this.cardpool[scode] - ((this.cardminus && this.cardminus[scode]) || 0) : 0;
+				}
+				exports.maybeSetText(txt, cardAmount + (shinyAmount ? "/"+shinyAmount:""));
+				if (this.maxedIndicator && card.type != etg.PillarEnum && cardAmount >= 6) {
+					this.maxedIndicator.beginFill(ui.elecols[cardAmount >= 12 ? etg.Chroma : etg.Light]);
+					this.maxedIndicator.drawRect(spr.position.x + 100, spr.position.y, 33, 20);
+					this.maxedIndicator.endFill();
 				}
 			}
 		}
