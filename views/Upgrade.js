@@ -22,7 +22,7 @@ module.exports = function() {
 		else return "You need $50 to afford an upgraded pillar!";
 	}
 	function unupgradeCard(card) {
-		if (card.rarity) {
+		if (card.rarity || (card.shiny && card.upped)) {
 			if (!card.upped) return "You cannot unupgrade unupgraded cards.";
 			sock.userExec("unupgrade", { card: card.code });
 		}
@@ -45,7 +45,7 @@ module.exports = function() {
 		else return "You need $50 to afford a shiny pillar!";
 	}
 	function unpolishCard(card) {
-		if (card.rarity) {
+		if (card.rarity || (card.shiny && card.upped)) {
 			if (!card.shiny) return "You cannot unpolish non-shiny cards.";
 			if (!card.rarity == 5) return "You cannot unpolish Nymphs.";
 			sock.userExec("unpolish", { card: card.code });

@@ -1,4 +1,5 @@
 "use strict";
+var etg = require("./etg");
 var Cards = require("./Cards");
 var etgutil = require("./etgutil");
 exports.rewardwords = {
@@ -107,7 +108,7 @@ exports.upshall = function(data, user) {
 	var pool = etgutil.deck2pool(user.pool);
 	for(var code in pool){
 		var card = Cards.Codes[code];
-		if (!card || pool[code] < 12 || (card.upped && card.shiny)) continue;
+		if (!card || pool[code] < 12 || card.type == etg.PillarEnum || (card.upped && card.shiny)) continue;
 		for(var i=0; i<2; i++){
 			var upcode = etgutil[i == 0 ? "asUpped" : "asShiny"](code, true);
 			if (upcode != code){
