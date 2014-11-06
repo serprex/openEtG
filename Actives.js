@@ -922,7 +922,7 @@ nova:function(c,t){
 	}
 	c.owner.nova += 2;
 	if (c.owner.nova >= 6){
-		new etg.Creature(Cards.Singularity, c.owner).place();
+		new etg.Creature(c.card.as(Cards.Singularity), c.owner).place();
 	}
 },
 nova2:function(c,t){
@@ -931,7 +931,7 @@ nova2:function(c,t){
 	}
 	c.owner.nova += 3;
 	if (c.owner.nova >= 6){
-		new etg.Creature(Cards.SingularityUp, c.owner).place();
+		new etg.Creature(c.card.as(Cards.SingularityUp), c.owner).place();
 	}
 },
 nymph:function(c,t){
@@ -963,7 +963,7 @@ pacify:function(c,t){
 paleomagnetism:function(c,t){
 	if (c.owner == t){
 		var pillars = etg.filtercards(c.card.upped, function(x) { return x.type == etg.PillarEnum && !x.rarity; });
-		new etg.Pillar(pillars[(c.owner.rng()<.5?0:c.owner.mark*2)], c.owner).place();
+		new etg.Pillar(c.card.as(pillars[(c.owner.rng()<.5?0:c.owner.mark*2)]), c.owner).place();
 	}
 },
 pandemonium:function(c,t){
@@ -1219,7 +1219,7 @@ serendipity:function(c){
 	for(var i=num-1; i>=0; i--){
 		var card = c.owner.randomcard(c.card.upped, function(x){return x.type != etg.PillarEnum && x.rarity < 4 && (i>0 || anyentro || x.element == etg.Entropy)});
 		anyentro |= card.element == etg.Entropy;
-		new etg.CardInstance(card, c.owner).place();
+		new etg.CardInstance(c.card.as(card), c.owner).place();
 	}
 },
 shadow:function(c,t){
@@ -1262,7 +1262,7 @@ singularity:function(c,t){
 	}else if (r > .2){
 		Actives.parallel(c, c);
 	}else if (r > .1){
-		c.owner.weapon = new etg.Weapon(Cards.Dagger, c.owner);
+		c.owner.weapon = new etg.Weapon(Cards.Dagger.asShiny(c.card.shiny), c.owner);
 	}
 	c.dmg(c.trueatk(), true);
 },
