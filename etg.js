@@ -800,7 +800,7 @@ Weapon.prototype.place = function(fromhand){
 	Thing.prototype.place.call(this, fromhand);
 }
 Shield.prototype.place = function(fromhand){
-	if (this.status.additive && this.owner.shield && this.owner.shield.card.asUpped(this.card.upped) == this.card){
+	if (this.status.additive && this.owner.shield && this.card.as(this.owner.shield.card) == this.card){
 		this.owner.shield.status.charges += this.status.charges;
 	}else{
 		this.owner.shield = this;
