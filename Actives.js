@@ -40,6 +40,10 @@ adrenaline:function(c,t){
 	Effect.mkText("Adrenaline", t);
 	t.status.adrenaline = 1;
 },
+aether:function(c,t){
+	Effect.mkText("1:12", c);
+	c.owner.spend(etg.Aether, -1);
+},
 aflatoxin:function(c,t){
 	Effect.mkText("Aflatoxin", t);
 	t.addpoison(2);
