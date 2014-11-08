@@ -1478,6 +1478,17 @@ vend:function(c){
 	c.owner.drawcard();
 	c.die();
 },
+vindicate:function(c,t){
+	if (!t.status.vindicated){
+		t.status.vindicated = true;
+		t.addactive("turnstart", Actives.unvindicate)
+		t.attack(false, 0);
+	}
+},
+unvindicate:function(c,t){
+	delete c.status.vindicated;
+	t.rmactive("turnstart", "unvindicate");
+},
 virusinfect:function(c,t){
 	Actives.infect(c, t);
 	c.die();
