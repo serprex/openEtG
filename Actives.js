@@ -1566,7 +1566,7 @@ chaos:function(c,t){
 		if (t instanceof etg.Creature){
 			Actives.cseed(c, t);
 		}
-	}else return randomchance < .5;
+	}else return c.card.upped && randomchance < .5;
 },
 cold:function(c,t){
 	if (c.owner.rng()<.3){
