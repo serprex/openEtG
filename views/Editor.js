@@ -54,7 +54,10 @@ module.exports = function(arena, acard, startempty) {
 						px.adjust(cardminus, code, 1);
 					} else {
 						code = etgutil.asShiny(code, !card.shiny);
-						if ((cardminus[code] || 0) < (cardpool[code] || 0)) {
+						card = Cards.Codes[code];
+						if (card.isFree()){
+							decksprite.deck[i] = code;
+						}else if ((cardminus[code] || 0) < (cardpool[code] || 0)) {
 							decksprite.deck[i] = code;
 							px.adjust(cardminus, code, 1);
 						} else {
