@@ -1479,15 +1479,17 @@ vend:function(c){
 	c.die();
 },
 vindicate:function(c,t){
-	if (!t.status.vindicated){
-		t.status.vindicated = true;
+	if (!c.status.vindicated && !t.status.vindicated){
+		c.status.vindicated = t.status.vindicated = true;
 		t.addactive("turnstart", Actives.unvindicate)
 		t.attack(false, 0);
 	}
 },
 unvindicate:function(c,t){
 	delete c.status.vindicated;
-	t.rmactive("turnstart", "unvindicate");
+	if (c instanceof etg.Creature || c instanceof etg.Weapon){
+		c.rmactive("turnstart", "unvindicate");
+	}
 },
 virusinfect:function(c,t){
 	Actives.infect(c, t);
@@ -1560,12 +1562,11 @@ blockwithcharge:function(c,t){
 },
 chaos:function(c,t){
 	var randomchance = c.owner.rng();
-	if (randomchance < .25) {
-		return true;
-	}
-	else if (randomchance < .5 && t instanceof etg.Creature) {
-		Actives.cseed(c, t);
-	}
+	if (randomchance < .3) {
+		if (t instanceof etg.Creature){
+			Actives.cseed(c, t);
+		}
+	}else return randomchance < .5;
 },
 cold:function(c,t){
 	if (c.owner.rng()<.3){
