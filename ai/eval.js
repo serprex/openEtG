@@ -292,6 +292,7 @@ var ActivesValues = {
 	},
 	wisdom:4,
 	yoink:4,
+	vindicate:3,
 	pillar:function(c){
 		return c instanceof etg.CardInstance?.1:c.status.charges;
 	},
@@ -310,7 +311,7 @@ var ActivesValues = {
 	evade40:1,
 	evade50:1,
 	firewall:7,
-	chaos:9,
+	chaos:[8, 9],
 	skull:5,
 	slow:6,
 	solar:function(c){
@@ -372,7 +373,7 @@ function estimateDamage(c, freedomChance, wallCharges) {
 		c.status.adrenaline = 1;
 	}
 	if (!momentum){
-		atk *= (fshactive == Actives.evade100 ? 0 : fshactive == Actives.evade50 ? .5 : fshactive == Actives.evade40 ? .6 : fshactive == Actives.chaos ? .75 : 1);
+		atk *= (fshactive == Actives.evade100 ? 0 : fshactive == Actives.evade50 ? .5 : fshactive == Actives.evade40 ? .6 : fshactive == Actives.chaos && fsh.card.upped ? .8 : 1);
 	}
 	if (!fsh && freedomChance && c.status.airborne){
 		atk += Math.ceil(atk/2) * freedomChance;
