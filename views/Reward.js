@@ -48,11 +48,11 @@ module.exports = function(reward, numberofcopies, code) {
 	rewardui.addChild(confirmButton);
 
 	var chosenRewardImage = new PIXI.Sprite(gfx.nopic);
-	chosenRewardImage.position.set(450, 20);
+	chosenRewardImage.position.set(233, 10);
 	rewardui.addChild(chosenRewardImage);
 	rewardList.forEach(function(reward, i){
 		var card = new PIXI.Sprite(gfx.getCardImage(reward));
-		card.position.set(100 + Math.floor(i/12) * 130, 272 + (i%12) * 20);
+		card.position.set(100 + Math.floor(i/12) * 133, 272 + (i%12) * 19);
 		px.setClick(card, function(){
 			chosenReward = reward;
 			chosenRewardImage.setTexture(gfx.getArt(chosenReward));

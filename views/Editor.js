@@ -215,7 +215,7 @@ module.exports = function(arena, acard, startempty) {
 			}]], [8, 162, ["Exit", function() {
 				startMenu();
 			}]])
-			var tname = new px.MenuText(100, 8, "");
+			var tname = new px.MenuText(100, 8, sock.user.selectedDeck);
 			editorui.addChild(tname);
 			buttons = [];
 			for (var i = 0;i < 10;i++) {
