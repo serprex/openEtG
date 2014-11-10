@@ -69,7 +69,7 @@ function startMatch(game, foeDeck) {
 	function addNoHealData(game) {
 		var data = game.dataNext || {};
 		if (game.noheal){
-			data.p1hp = Math.min(game.player1.hp, 1);
+			data.p1hp = Math.max(game.player1.hp, 1);
 			data.p1maxhp = game.player1.maxhp;
 		}
 		return data;
