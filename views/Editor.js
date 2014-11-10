@@ -310,11 +310,7 @@ module.exports = function(arena, acard, startempty) {
 			}
 		});
 		options.register("deck", deckimport);
-		dom.push([520, 238, deckimport],
-			[5, 554, ["Convert Code", function(){
-				deckimport.value = decksprite.deck.join(" ") + " " + etg.toTrueMark(editormark);
-			}]]
-		);
+		dom.push([520, 238, deckimport]);
 	}
 	px.refreshRenderer({view:editorui, editdiv:dom, next:function() {
 		cardArt.visible = false;
