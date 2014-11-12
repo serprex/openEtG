@@ -25,17 +25,17 @@ function startMatch(game, foeDeck) {
 		}
 	}
 	function drawStatus(obj, spr) {
-		var statuses = spr.children[0];
-		statuses.children[0].visible = obj.status.psion;
-		statuses.children[1].visible = obj.status.aflatoxin;
-		statuses.children[2].visible = !obj.status.aflatoxin && obj.status.poison > 0;
-		statuses.children[3].visible = obj.status.airborne || obj.status.ranged;
-		statuses.children[4].visible = obj.status.momentum;
-		statuses.children[5].visible = obj.status.adrenaline;
-		statuses.children[6].visible = obj.status.poison < 0;
-		statuses.children[7].visible = obj.status.delayed;
-		statuses.children[8].visible = obj == obj.owner.gpull;
-		statuses.children[9].visible = obj.status.frozen;
+		var statuses = spr.children[0].children;
+		statuses[0].visible = obj.status.psion;
+		statuses[1].visible = obj.status.aflatoxin;
+		statuses[2].visible = !obj.status.aflatoxin && obj.status.poison > 0;
+		statuses[3].visible = obj.status.airborne || obj.status.ranged;
+		statuses[4].visible = obj.status.momentum;
+		statuses[5].visible = obj.status.adrenaline;
+		statuses[6].visible = obj.status.poison < 0;
+		statuses[7].visible = obj.status.delayed;
+		statuses[8].visible = obj == obj.owner.gpull;
+		statuses[9].visible = obj.status.frozen;
 		spr.alpha = obj.isMaterial() ? 1 : .7;
 	}
 	var resigning, discarding, aiDelay = 0, aiState, aiCommand;
@@ -236,7 +236,7 @@ function startMatch(game, foeDeck) {
 				if (scale === undefined) scale = 1;
 				var spr = new PIXI.Sprite(gfx.nopic);
 				if (makestatuses){
-					var statuses = new PIXI.DisplayObjectContainer();
+					var statuses = new PIXI.SpriteBatch();
 					for (var k=0; k<7; k++){
 						var icon = new PIXI.Sprite(gfx.sicons[k]);
 						icon.alpha = .6;
