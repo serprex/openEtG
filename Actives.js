@@ -1478,8 +1478,17 @@ vend:function(c){
 	c.owner.drawcard();
 	c.die();
 },
+vengeance:function(c,t){
+	if (c.owner == t.owner && c.owner == c.owner.game.turn.foe){
+		c.owner.creatures.forEach(function(cr){
+			if (cr && cr != t){
+				cr.attack();
+			}
+		});
+	}
+},
 vindicate:function(c,t){
-	if (!c.status.vindicated && !t.status.vindicated){
+	if (c.owner == t.owner && !c.status.vindicated && !t.status.vindicated){
 		c.status.vindicated = t.status.vindicated = true;
 		t.addactive("turnstart", Actives.unvindicate)
 		t.attack(false, 0);
