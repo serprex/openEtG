@@ -11,7 +11,7 @@ module.exports = function(game) {
 	var victoryui = px.mkView();
 	var winner = game.winner == game.player1;
 
-	victoryui.addChild(new px.MenuText(10, 290, game.ply + " plies\n" + (game.time/1000).toFixed(1) + " seconds\n"+(game.level !== undefined ? (sock.user["streak"+game.level] || 0) + " win streak" : "")));
+	victoryui.addChild(new px.MenuText(10, 290, game.ply + " plies\n" + (game.time/1000).toFixed(1) + " seconds\n"+(sock.user && game.level !== undefined ? (sock.user["streak"+game.level] || 0) + " win streak" : "")));
 	if (winner){
 		var victoryText = game.quest ? game.wintext : "You won!";
 		var tinfo = new px.MenuText(450, game.cardreward ? 130 : 250, victoryText, 500);
@@ -63,7 +63,7 @@ module.exports = function(game) {
 			(game.goldreward || 0) - (game.cost || 0),
 			game.cardreward || "-",
 			userutil.calcWealth(etgutil.deck2pool(game.cardreward)),
-			game.level === undefined ? -1 : sock.user["streak"+game.level],
+			!sock.user || game.level === undefined ? -1 : sock.user["streak"+game.level],
 			game.level === undefined ? 0 : [.05, .05, .075, .1, .075, .1][game.level]].join());
 	}
 	function onkeydown(e){

@@ -675,12 +675,12 @@ Player.prototype.endturn = function(discard) {
 	this.game.updateExpectedDamage();
 }
 Thing.prototype.procactive = function(name, param) {
-	var ret;
+	var ret, self = this;
 	function proc(c){
 		if (ret === true) return true;
 		var a;
 		if (c && (a = c.active[name])){
-			var r = a.call(null, c, this, param);
+			var r = a.call(null, c, self, param);
 			if (r !== undefined) ret = r;
 		}
 	}
