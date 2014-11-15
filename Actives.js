@@ -1435,7 +1435,7 @@ tick:function(c,t){
 trick:function(c,t){
 	var cards = [];
 	t.owner.deck.forEach(function(card, i){
-		if (card.type == etg.CreatureEnum && card != t.card){
+		if (card.type == etg.CreatureEnum && card.asShiny(false) != t.card.asShiny(false)){
 			cards.push(i);
 		}
 	});
@@ -1516,9 +1516,9 @@ void:function(c,t){
 },
 quantagift:function(c,t){
 	if (c.owner.mark != etg.Water){
-		c.owner.spend(etg.Water, -3);
+		c.owner.spend(etg.Water, -2);
 		c.owner.spend(c.owner.mark, c.owner.mark ? -2 : -6);
-	}else c.owner.spend(etg.Water, -4);
+	}else c.owner.spend(etg.Water, -3);
 },
 web:function(c,t){
 	Effect.mkText("Web", t);
