@@ -6,6 +6,7 @@ var mkAi = require("./mkAi");
 var sock = require("./sock");
 var etgutil = require("./etgutil");
 var options = require("./options");
+var userutil = require("./userutil");
 module.exports = function(game) {
 	var victoryui = px.mkView();
 	var winner = game.winner == game.player1;
@@ -52,7 +53,18 @@ module.exports = function(game) {
 		}
 	}
 	if (options.stats){
-		chat([game.level === undefined ? -1 : game.level, (game.foename || "?").replace(/,/g, " "), winner ? "W" : "L", game.ply, game.time, game.player1.hp, game.player1.maxhp, (game.goldreward || 0) - (game.cost || 0), game.cardreward || "-"].join());
+		chat([game.level === undefined ? -1 : game.level,
+			(game.foename || "?").replace(/,/g, " "),
+			winner ? "W" : "L",
+			game.ply,
+			game.time,
+			game.player1.hp,
+			game.player1.maxhp,
+			(game.goldreward || 0) - (game.cost || 0),
+			game.cardreward || "-",
+			userutil.calcWealth(etgutil.deck2pool(game.cardreward)),
+			game.level === undefined ? -1 : sock.user["streak"+game.level],
+			game.level === undefined ? 0 : [.05, .05, .075, .1, .075, .1][game.level]].join());
 	}
 	function onkeydown(e){
 		if (e.keyCode == 32) bexit.click();

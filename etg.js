@@ -668,27 +668,24 @@ Player.prototype.endturn = function(discard) {
 	this.flatline = this.silence = false;
 	this.foe.precognition = this.foe.sanctuary = false;
 	for (var i = this.foe.drawpower !== undefined ? this.foe.drawpower : 1; i > 0; i--) {
-		this.foe.drawcard();
+		this.foe.drawcard(true);
 	}
 	this.game.turn = this.foe;
 	this.foe.procactive("turnstart");
 	this.game.updateExpectedDamage();
 }
-Thing.prototype.procactive = function(name, params) {
+Thing.prototype.procactive = function(name, param) {
 	var ret;
 	function proc(c){
 		if (ret === true) return true;
 		var a;
 		if (c && (a = c.active[name])){
-			params[0] = c;
-			var r = a.apply(null, params);
+			var r = a.call(null, c, this, param);
 			if (r !== undefined) ret = r;
 		}
 	}
-	if (params === undefined) params = [this, this];
-	else params.unshift(this, this);
 	if (this.active && this.active["own" + name]){
-		this.active["own" + name].apply(null, params);
+		this.active["own" + name].call(null, this, this, param);
 	}
 	for(var i=0; i<2; i++){
 		var pl = i==0?this.owner:this.owner.foe;
@@ -699,13 +696,14 @@ Thing.prototype.procactive = function(name, params) {
 	}
 	return ret;
 }
-Player.prototype.drawcard = function() {
+Player.prototype.drawcard = function(drawstep) {
 	if (this.hand.length<8){
 		if (this.deck.length>0){
-			this.hand[this.hand.length] = new CardInstance(this.deck.pop(), this);
-			this.procactive("draw");
-			if (this.deck.length == 0 && this.game.player1 == this)
-				Effect.mkSpriteFade(ui.getTextImage("Last card!", ui.mkFont(32, "white"), 0));
+			if (~new CardInstance(this.deck.pop(), this).place()){
+				this.procactive("draw", drawstep);
+				if (this.deck.length == 0 && this.game.player1 == this)
+					Effect.mkSpriteFade(ui.getTextImage("Last card!", ui.mkFont(32, "white"), 0));
+			}
 		}else this.game.setWinner(this.foe);
 	}
 }
@@ -772,7 +770,7 @@ Thing.prototype.activetext1 = function(){
 	return this.active.auto ? this.active.auto.activename.join(" ") : "";
 }
 Thing.prototype.place = function(fromhand){
-	this.procactive("play", [fromhand]);
+	this.procactive("play", fromhand);
 }
 Creature.prototype.place = function(fromhand){
 	if (place(this.owner.creatures, this)){
@@ -807,9 +805,7 @@ Shield.prototype.place = function(fromhand){
 	Thing.prototype.place.call(this, fromhand);
 }
 CardInstance.prototype.place = function(){
-	if (this.owner.hand.length < 8){
-		this.owner.hand.push(this);
-	}
+	return this.owner.hand.length < 8 ? this.owner.hand.push(this) : -1;
 }
 Player.prototype.delay = function(x) {
 	if (this.weapon)this.weapon.delay(x);
@@ -895,7 +891,7 @@ Creature.prototype.spelldmg = Creature.prototype.dmg = function(x, dontdie){
 	if (!x)return 0;
 	var dmg = x<0 ? Math.max(this.hp-this.maxhp, x) : Math.min(this.truehp(), x);
 	this.hp -= dmg;
-	this.procactive("dmg", [dmg]);
+	this.procactive("dmg", dmg);
 	if (this.truehp() <= 0){
 		if (!dontdie)this.die();
 	}else if (dmg>0 && this.status.voodoo)this.owner.foe.dmg(x);
@@ -932,7 +928,7 @@ CardInstance.prototype.die = function(idx){
 	}
 }
 Creature.prototype.deatheffect = Weapon.prototype.deatheffect = function(index) {
-	this.procactive("death", [index]);
+	this.procactive("death", index);
 	if (index>=0) Effect.mkDeath(ui.creaturePos(this.owner == this.owner.game.player1?0:1, index));
 }
 Creature.prototype.die = function() {
@@ -1088,11 +1084,11 @@ Thing.prototype.canactive = function() {
 	return this.owner.game.turn == this.owner && this.active.cast && !this.usedactive && !this.status.delayed && !this.status.frozen && this.owner.canspend(this.castele, this.cast);
 }
 Thing.prototype.castSpell = function(t, active, nospell){
-	var newt = this.procactive("prespell", [{tgt: t, active: active}]);
+	var newt = this.procactive("prespell", {tgt: t, active: active});
 	if (newt !== true){
 		if (newt) t = newt;
 		active(this, t);
-		if (!nospell) this.procactive("spell", [t, active]);
+		if (!nospell) this.procactive("spell", t);
 	}else Effect.mkText("Evade", t);
 }
 Thing.prototype.useactive = function(t) {

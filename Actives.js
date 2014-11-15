@@ -529,8 +529,8 @@ gaincharge2:function(c,t){
 		c.status.charges += 2;
 	}
 },
-gainchargeowner:function(c,t){
-	if (c.owner == t){
+gaintimecharge:function(c,t, drawstep){
+	if (!drawstep && c.owner == t){
 		c.status.charges++;
 	}
 },
