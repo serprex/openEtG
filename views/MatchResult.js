@@ -10,7 +10,7 @@ module.exports = function(game) {
 	var victoryui = px.mkView();
 	var winner = game.winner == game.player1;
 
-	victoryui.addChild(new px.MenuText(10, 290, "Plies: " + game.ply + "\nTime: " + (game.time/1000).toFixed(1) + " seconds"));
+	victoryui.addChild(new px.MenuText(10, 290, game.ply + " plies\n" + (game.time/1000).toFixed(1) + " seconds\n"+(game.level !== undefined ? (sock.user["streak"+game.level] || 0) + " win streak" : "")));
 	if (winner){
 		var victoryText = game.quest ? game.wintext : "You won!";
 		var tinfo = new px.MenuText(450, game.cardreward ? 130 : 250, victoryText, 500);

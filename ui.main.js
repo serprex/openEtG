@@ -26,7 +26,7 @@ window.aideck = document.getElementById("aideck");
 		userdump:function(data) {
 			delete data.x;
 			sock.user = data;
-			prepuser();
+			sock.prepuser();
 			startMenu();
 		},
 		passchange:function(data) {
@@ -178,32 +178,12 @@ window.aideck = document.getElementById("aideck");
 			}else chat("Not a command: " + msg);
 		}
 	}
-	function unaryParseInt(x) {
-		return parseInt(x, 10);
-	}
 	function maybeLogin(e) {
 		e.cancelBubble = true;
 		if (e.keyCode == 13) {
 			this.blur();
 			loginClick();
 		}
-	}
-	function prepuser(){
-		sock.user.pool = sock.user.pool || "";
-		sock.user.accountbound = sock.user.accountbound || "";
-		if (!sock.user.quest) {
-			sock.user.quest = {};
-		}
-		if (!sock.user.decknames) {
-			sock.user.decknames = {};
-		}
-		if (sock.user.freepacks) {
-			sock.user.freepacks = sock.user.freepacks.split(",").map(unaryParseInt);
-		}
-		if (!sock.user.ailosses) sock.user.ailosses = 0;
-		if (!sock.user.aiwins) sock.user.aiwins = 0;
-		if (!sock.user.pvplosses) sock.user.pvplosses = 0;
-		if (!sock.user.pvpwins) sock.user.pvpwins = 0;
 	}
 	function loginClick() {
 		if (!sock.user && options.username) {
@@ -219,7 +199,7 @@ window.aideck = document.getElementById("aideck");
 						} else if (!sock.user.accountbound && !sock.user.pool) {
 							require("./views/ElementSelect")();
 						} else {
-							prepuser();
+							sock.prepuser();
 							sock.userEmit("usernop");
 							if (gfx.loaded) startMenu();
 						}

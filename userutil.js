@@ -17,12 +17,12 @@ exports.arenaCost = function(lv){
 exports.calcWealth = function(cardpool){
 	var wealth = 0;
 	for(var code in cardpool){
-		var card = Cards.Codes[code], num = cardpool[code];
-		if (card && (card.rarity || card.upped || card.shiny)){
+		var card = Cards.Codes[code];
+		if (card && card.rarity != -1 && (card.rarity || card.upped || card.shiny)){
 			var worth = exports.cardValues[card.rarity];
 			if (card.upped) worth *= 6;
 			if (card.shiny) worth *= 6;
-			wealth += worth * num;
+			wealth += worth * cardpool[code];
 		}
 	}
 	return wealth;

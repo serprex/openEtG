@@ -107,6 +107,8 @@ function startMatch(game, foeDeck) {
 							sock.userExec("donedaily", { daily: game.daily == 4 ? 5 : game.daily == 3 ? 0 : game.daily });
 						}
 					}
+				}else if (!game.endurance && game.level !== undefined){
+					sock.user["streak"+game.level] = 0;
 				}
 			}
 			require("./MatchResult")(game);
@@ -503,8 +505,10 @@ function startMatch(game, foeDeck) {
 			if (!game.goldreward) {
 				var goldwon;
 				if (game.level !== undefined) {
-					var reward = [15, 30, 70, 200, 60, 120][game.level];
-					goldwon = Math.floor(reward * (50 + game.player1.hp) / 150);
+					var streak = "streak" + game.level;
+					sock.user[streak] = (sock.user[streak] || 0)+1;
+					var reward = [15, 30, 70, 200, 60, 120][game.level] /* * Math.min(1+[.05, .075, .1, .075, .1][game.level]*game.winstreak, 1.5)*/;
+					goldwon = Math.floor(reward * (200 + game.player1.hp) / 300);
 				} else goldwon = 0;
 				game.goldreward = goldwon + (game.cost || 0) + (game.addonreward || 0);
 			}

@@ -665,12 +665,11 @@ Player.prototype.endturn = function(discard) {
 		this.foe.sosa--;
 	}
 	this.nova = 0;
+	this.flatline = this.silence = false;
+	this.foe.precognition = this.foe.sanctuary = false;
 	for (var i = this.foe.drawpower !== undefined ? this.foe.drawpower : 1; i > 0; i--) {
 		this.foe.drawcard();
 	}
-
-	this.flatline = this.silence = false;
-	this.foe.precognition = this.foe.sanctuary = false;
 	this.game.turn = this.foe;
 	this.foe.procactive("turnstart");
 	this.game.updateExpectedDamage();
