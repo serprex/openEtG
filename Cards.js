@@ -3,6 +3,7 @@ exports.loaded = false;
 exports.Targeting = {};
 exports.Codes = {};
 var etg = require("./etg");
+var Actives = require("./Actives");
 var etgutil = require("./etgutil");
 exports.parseCsv = function(type, file){
 	var csv = file.split("\n");
@@ -98,6 +99,9 @@ var TargetFilters = {
 	},
 	notplay:function(c, t){
 		return !(t instanceof etg.Player);
+	},
+	sing:function(c, t){
+		return t.isMaterial(etg.Creature) && t.active.cast != Actives.sing;
 	},
 	butterfly:function(c, t){
 		return (t instanceof etg.Creature || t instanceof etg.Permanent) && !t.status.immaterial && !t.status.burrowed && ((t.trueatk && t.trueatk()<3) || (t instanceof etg.Creature && t.truehp()<3));

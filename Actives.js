@@ -691,7 +691,6 @@ integrity:function(c,t){
 	var activeType = ["auto", "hit", "buff", "death"];
 	var shardTally = [0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0];
 	var shardSkills = [
-		[],
 		["deadalive", "mutation", "paradox", "improve", "scramble", "antimatter"],
 		["infect", "growth 1", "poison 1", "poison 1", "aflatoxin", "poison 2"],
 		["devour", "devour", "devour", "devour", "devour", "blackhole"],
@@ -730,16 +729,19 @@ integrity:function(c,t){
 			c.owner.hand.splice(i, 1);
 		}
 	}
-	var active = "burrow", num=0;
+	var num=0, shlist;
 	for(var i=1; i<13; i++){
 		stat += shardTally[i]*2;
 		if (shardTally[i]>num){
 			num = shardTally[i];
-			active = shardSkills[i][num-1];
+			shlist = [i]
+		}else if (num != 0 && shardTally[i] == num){
+			shlist.push(i);
 		}
 	}
+	var active = shardSkills[c.owner.choose(shlist)-1][num-1];
 	var actives = {}, cost = shardCosts[active];
-	actives[cost < 0 ? activeType[~cost] : "cast"] = Actives[active];
+	actives[cost < 0 ? activeType[~cost] : "cast"] = etg.parseActive(active);
 	var status = {golem: true};
 	if (shardTally[etg.Air]>0){
 		status.airborne = true;
