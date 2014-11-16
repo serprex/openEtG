@@ -1048,9 +1048,11 @@ protectall:function(c,t){
 	}
 	c.owner.creatures.forEach(protect);
 	c.owner.permanents.forEach(protect);
+	protect(c.owner.weapon);
+	protect(c.owner.shield);
 },
 protectonce:function(c,t, data){
-	if (c === data.tgt){
+	if (c === data.tgt && c.owner != t.owner){
 		c.rmactive("prespell", "protectonce");
 		return true;
 	}
