@@ -24,8 +24,7 @@ exports.mkPremade = function(name, daily) {
 			}
 		}
 		if (!foedata) foedata = aiDecks.giveRandom(name);
-		var foename = name[0].toUpperCase() + name.slice(1) + "\n" + foedata[0];
-		var gameData = { deck: foedata[1], urdeck: urdeck, seed: Math.random() * etgutil.MAX_INT, foename: foename };
+		var gameData = { deck: foedata[1], urdeck: urdeck, seed: Math.random() * etgutil.MAX_INT, foename: foedata[0] };
 		if (name == "mage"){
 			gameData.p2hp = 125;
 		}else{
@@ -73,10 +72,8 @@ exports.mkAi = function(level, daily) {
 				"Tammi",
 				"Yuriko"
 			];
-			var typeName = ["Commoner", "Mage", "Champion"];
 
-			var foename = typeName[level] + "\n" + etg.PlayerRng.choose(randomNames);
-			var gameData = { deck: deck, urdeck: urdeck, seed: Math.random() * etgutil.MAX_INT, p2hp: level == 0 ? 100 : level == 1 ? 125 : 150, p2markpower: level == 2 ? 2 : 1, foename: foename, p2drawpower: level == 2 ? 2 : 1 };
+			var gameData = { deck: deck, urdeck: urdeck, seed: Math.random() * etgutil.MAX_INT, p2hp: level == 0 ? 100 : level == 1 ? 125 : 150, p2markpower: level == 2 ? 2 : 1, foename: etg.PlayerRng.choose(randomNames), p2drawpower: level == 2 ? 2 : 1 };
 			if (!sock.user) ui.parsepvpstats(gameData);
 			else gameData.cost = cost;
 			gameData.level = level;

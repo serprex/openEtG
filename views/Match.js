@@ -63,7 +63,7 @@ function startMatch(game, foeDeck) {
 	var turntell = new PIXI.Text("", { font: "16px Dosis" });
 	turntell.position.set(800, 550);
 	gameui.addChild(turntell);
-	var foename = new PIXI.Text(game.foename || "-", { font: "bold 18px Dosis", align: "center" });
+	var foename = new PIXI.Text((game.level === undefined ? "" : ["Commoner", "Mage", "Champion", "Demigod", "Arena1", "Arena2"][game.level] + "\n") + (game.foename || "-"), { font: "bold 18px Dosis", align: "center" });
 	foename.position.set(5, 75);
 	gameui.addChild(foename);
 	function addNoHealData(game) {
