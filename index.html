@@ -4,6 +4,9 @@
 	<link href="http://fonts.googleapis.com/css?family=Dosis" rel="stylesheet" type="text/css">
 	<link href="favicon.png" rel="shortcut icon">
 	<style>
+		*{
+			box-sizing:border-box;
+		}
 		body{
 			background-color:black;
 			color:white;
@@ -24,6 +27,8 @@
 		}
 		input[type="button"]:hover{background:linear-gradient(rgba(0,0,0,.3),rgba(0,0,0,.3)),url(assets/button.png)}
 		input[type="button"]:hover:active{background:linear-gradient(rgba(0,0,0,.6),rgba(0,0,0,.6)),url(assets/button.png)}
+		input[type="text"]{width:150px}
+		input[type="password"]{width:150px}
 		#rightpane{
 			left:900px;
 			top:0px;
@@ -49,7 +54,7 @@
 			font-family:Dosis;
 			font-size:14px;
 		}
-		.numput{width:32px}
+		.numput{width:32px!important}
 		.coin{
 			background:url(assets/gold.png);
 			display:inline-block;
