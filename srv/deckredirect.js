@@ -48,9 +48,20 @@ function deckRedirect(req, res, next){
 				}
 			});
 			if (mark !== undefined){
+				function contrast(hexcolor) {
+				    var r = parseInt( hexcolor.substr( 1, 2 ), 16 );
+				    var g = parseInt( hexcolor.substr( 3, 2 ), 16 );
+				    var b = parseInt( hexcolor.substr( 5, 2 ), 16 );
+				    var yiq = ( ( r * 299 ) + ( g * 587 ) + ( b * 114 ) ) / 1000;
+				    return ( yiq >= 128 ) ? 'black' : 'white';
+				}
+				
 				var cls = String.fromCharCode(97+mark);
-				ret += "<rect class='"+cls+"' width='16' height='160'/><text x='5' y='-4' transform='rotate(90)'>"+etg.eleNames[mark]+"</text>";
-				addClass(cls, "fill:"+elecols[mark]);
+				var markColor = elecols[mark];
+				var textColor = contrast(markColor);
+				
+				ret += "<rect class='"+cls+"' width='16' height='160'/><text x='5' y='-4' transform='rotate(90)' fill='"+textColor+"'>"+etg.eleNames[mark]+"</text>";
+				addClass(cls, "fill:"+markColor);
 			}
 			ret = "<svg xmlns='http://www.w3.org/2000/svg' height='160'"+" width='"+(y?x+100:x)+"'><style type='text/css'><![CDATA[text{font-size:12px}"+classString()+"]]></style>" + ret + "</svg>";
 			res.writeHead(200, {"Content-Type": "image/svg+xml"});
