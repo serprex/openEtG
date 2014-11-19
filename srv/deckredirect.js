@@ -48,17 +48,9 @@ function deckRedirect(req, res, next){
 				}
 			});
 			if (mark !== undefined){
-				function contrast(hexcolor) {
-				    var r = parseInt( hexcolor.substr( 1, 2 ), 16 );
-				    var g = parseInt( hexcolor.substr( 3, 2 ), 16 );
-				    var b = parseInt( hexcolor.substr( 5, 2 ), 16 );
-				    var yiq = ( ( r * 299 ) + ( g * 587 ) + ( b * 114 ) ) / 1000;
-				    return ( yiq >= 128 ) ? 'black' : 'white';
-				}
-				
 				var cls = String.fromCharCode(97+mark);
 				var markColor = elecols[mark];
-				var textColor = contrast(markColor);
+				var textColor = (mark === 0 || mark === 8 || mark === 10 || mark === 12) ? 'black' : 'white';
 				
 				ret += "<rect class='"+cls+"' width='16' height='160'/><text x='5' y='-4' transform='rotate(90)' fill='"+textColor+"'>"+etg.eleNames[mark]+"</text>";
 				addClass(cls, "fill:"+markColor);
