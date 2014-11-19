@@ -49,7 +49,7 @@ function deckRedirect(req, res, next){
 			});
 			if (mark !== undefined){
 				var cls = String.fromCharCode(97+mark);
-				ret += "<rect class='"+cls+"' width='16' height='160'/><text x='5' y='-4' transform='rotate(90)'>"+etg.eleNames[mark]+"</text>";
+				ret += "<rect class='"+cls+"' width='16' height='160'/><text x='5' y='-4' transform='rotate(90)'"+(~[0,8,10,12].indexOf(mark)?"":" fill='white'")+">"+etg.eleNames[mark]+"</text>";
 				addClass(cls, "fill:"+elecols[mark]);
 			}
 			ret = "<svg xmlns='http://www.w3.org/2000/svg' height='160'"+" width='"+(y?x+100:x)+"'><style type='text/css'><![CDATA[text{font-size:12px}"+classString()+"]]></style>" + ret + "</svg>";
