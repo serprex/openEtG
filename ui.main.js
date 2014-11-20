@@ -55,6 +55,18 @@ window.aideck = document.getElementById("aideck");
 			var decklink = /\b(([01][0-9a-v]{4})+)\b/g, reres, lastindex = 0;
 			while (reres = decklink.exec(data.msg)){
 				if (reres.index != lastindex) span.appendChild(document.createTextNode(data.msg.slice(lastindex, reres.index)));
+				var notlink = false;
+				for(var i=2; i<reres[0].length; i+=5){
+					var code = reres[0].substr(i, 3);
+					if (!(code in Cards.Codes) && etg.fromTrueMark(code) == -1){
+						notlink = true;
+						break;
+					}
+				}
+				if (notlink){
+					lastindex = reres.index;
+					continue;
+				}
 				var link = document.createElement("a");
 				link.href = "deck/" + reres[0];
 				link.target = "_blank";
