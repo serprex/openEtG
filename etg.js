@@ -1013,10 +1013,10 @@ Thing.prototype.mutantactive = function(){
 		}
 	}
 }
-Weapon.prototype.trueatk = Creature.prototype.trueatk = function(adrenaline, nobuff){
+Weapon.prototype.trueatk = Creature.prototype.trueatk = function(adrenaline){
 	var dmg = this.atk;
 	if (this.status.dive)dmg += this.status.dive;
-	if (this.active.buff && !nobuff)dmg += this.active.buff(this);
+	if (this.active.buff)dmg += this.active.buff(this);
 	dmg += this.calcBonusAtk();
 	if (this.status.burrowed)dmg = Math.ceil(dmg/2);
 	var y=adrenaline || this.status.adrenaline || 0;

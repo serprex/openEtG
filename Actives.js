@@ -71,7 +71,7 @@ alphawolf:function(c,t){
 },
 antimatter:function(c,t){
 	Effect.mkText("Antimatter", t);
-	t.atk -= t.trueatk(0, true)*2;
+	t.atk -= t.trueatk()*2;
 },
 appease:function(c,t){
 	Actives.devour(c, t);
