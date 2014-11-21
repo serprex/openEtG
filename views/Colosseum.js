@@ -11,15 +11,19 @@ function mkDaily(type) {
 				{ goldreward: 150, endurance: 2, cost: 0, daily: 1, cardreward: "", noheal: true} :
 				{ goldreward: 500, endurance: 2, cost: 0, daily: 2, cardreward: "" };
 			var game = mkAi.mkAi(type == 1 ? 0 : 2, type)();
-			game.addData(dataNext);
-			game.dataNext = dataNext;
+			if (game){
+				game.addData(dataNext);
+				game.dataNext = dataNext;
+			}
 		}
 	}
 	else {
 		return function() {
 			var game = mkAi.mkPremade(type == 3 ? "mage" : "demigod", type)();
-			game.addonreward = type == 3 ? 50 : 100;
-			sock.userExec("donedaily", { daily: type });
+			if (game){
+				game.addonreward = type == 3 ? 50 : 100;
+				sock.userExec("donedaily", { daily: type });
+			}
 		}
 	}
 }
