@@ -27,7 +27,7 @@ require("./httpcards")(function() {
 		[["serprex", "http://fiction.wikia.com/wiki/User:Serprex"], ["58t", "lrl", "5ro", "5rp", "5s0", "5va", "622", "62a"]],
 		[["Thalas", "http://elementscommunity.org/forum/profile/?u=103"], ["5i9", "5if", "7dl"]],
 		[["vrt", "http://vrt-designs.com"], ["Donation thread", "http://elementscommunity.org/forum/card-art/help-support-an-artist"],
-			["4sb", "4vc", "4ve", "4vh", "52t", "55l", "55o", "55r", "560", "562", "563", "591", "5c0", "5c1", "5c9", "5f1", "5f2", "5fa", "5fc", "5i5", "5i7", "5id", "5ij", "5ll", "5oc", "5of", "5rk", "5rs", "5rt", "5uk", "5ul", "5um", "5ut", "5uv", "5v3", "61o", "61t", "624", "625", "626", "74a", "80g"]],
+			["4sb", "4vc", "4ve", "4vh", "52t", "55l", "55o", "55r", "560", "562", "563", "591", "5c0", "5c1", "5c9", "5f1", "5f2", "5fa", "5fc", "5i5", "5i7", "5id", "5ij", "5ll", "5oc", "5of", "5rk", "5rs", "5rt", "5uk", "5ul", "5um", "5ut", "5uv", "5v3", "61o", "61t", "624", "625", "626", "74a", "80g", "590"]],
 		[["NASA", "http://nasa.gov"], ["5p2"]],
 		[["freeSFX", "http://www.freesfx.co.uk"],[]]
 	];
