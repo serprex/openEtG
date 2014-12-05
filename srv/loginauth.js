@@ -6,7 +6,7 @@ var aiDecks = require("../Decks");
 var etgutil = require("../etgutil");
 var userutil = require("../userutil");
 module.exports = function(db, users){
-	function loginRespond(res, servuser, pass){
+	function loginRespond(res, servuser, pass, authkey){
 		if(!servuser.name){
 			servuser.name = servuser.auth;
 		}
@@ -52,25 +52,26 @@ module.exports = function(db, users){
 				res.end(JSON.stringify(user));
 			});
 		}
-		if (pass && pass.length){
+		if (authkey){
+			postHash(null, authkey);
+		}else if (pass){
 			crypto.pbkdf2(pass, servuser.salt, parseInt(servuser.iter), 64, postHash);
 		}else postHash(null, servuser.name);
 	}
 	function loginAuth(req, res, next){
-		var paramstring = req.url.slice(2);
-		var params = qstring.parse(paramstring);
+		var params = qstring.parse(req.url.slice(2));
 		var name = (params.u || "").trim();
 		if (!name.length){
 			res.writeHead(404);
 			res.end();
 			return;
 		}else if (name in users){
-			loginRespond(res, users[name], params.p);
+			loginRespond(res, users[name], params.p, params.a);
 		}else{
 			db.hgetall("U:"+name, function (err, obj){
 				users[name] = obj || {name: name};
 				sutil.prepuser(users[name]);
-				loginRespond(res, users[name], params.p);
+				loginRespond(res, users[name], params.p, params.a);
 			});
 		}
 	}

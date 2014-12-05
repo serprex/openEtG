@@ -17,9 +17,8 @@ exports.register = function(opt, ele, nopersist){
 			}
 		});
 	}else{
-		if (typeof localStorage !== "undefined") delete localStorage[opt];
 		ele.addEventListener("change", function() {
-			exports[opt] = field == "checked" && !this[field] ? "" : this[field];
+			exports[opt] = field == "checked" && !this.checked ? "" : this[field];
 		});
 	}
 }

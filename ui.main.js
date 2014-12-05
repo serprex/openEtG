@@ -22,6 +22,7 @@ window.aideck = document.getElementById("aideck");
 		}
 	}
 	options.register("username", document.getElementById("username"));
+	options.register("remember", document.getElementById("remember"));
 	var sockEvents = {
 		userdump:function(data) {
 			delete data.x;
@@ -100,6 +101,9 @@ window.aideck = document.getElementById("aideck");
 		if (options.preart) sock.emit("cardart");
 	});
 	px.load();
+	if (options.remember && typeof localStorage !== "undefined"){
+		loginClick(localStorage.auth);
+	}
 	function chatmute(){
 		var muted = [];
 		for(var name in muteset){
@@ -197,27 +201,35 @@ window.aideck = document.getElementById("aideck");
 			loginClick();
 		}
 	}
-	function loginClick() {
+	function loginClick(auth) {
 		if (!sock.user && options.username) {
-			var password = document.getElementById("password").value;
+			if (typeof auth !== "string"){
+				var password = document.getElementById("password").value;
+				auth = password.length ? "&p=" + encodeURIComponent(password) : "";
+			}else auth = "&a=" + encodeURIComponent(auth);
 			var xhr = new XMLHttpRequest();
-			xhr.open("POST", "auth?u=" + encodeURIComponent(options.username) + (password.length ? "&p=" + encodeURIComponent(password) : ""), true);
+			xhr.open("POST", "auth?u=" + encodeURIComponent(options.username) + auth, true);
 			xhr.onreadystatechange = function() {
 				if (this.readyState == 4) {
 					if (this.status == 200) {
 						sock.user = JSON.parse(this.responseText);
 						if (!sock.user) {
 							chat("No user");
-						} else if (!sock.user.accountbound && !sock.user.pool) {
-							require("./views/ElementSelect")();
 						} else {
-							sock.prepuser();
-							sock.userEmit("usernop");
-							if (gfx.loaded) startMenu();
+							if (!sock.user.accountbound && !sock.user.pool) {
+								require("./views/ElementSelect")();
+							} else {
+								sock.prepuser();
+								sock.userEmit("usernop");
+								if (gfx.loaded) startMenu();
+							}
+							if (options.remember && typeof localStorage !== "undefined"){
+								localStorage.auth = sock.user.auth;
+							}
 						}
 					} else if (this.status == 404) {
 						chat("Incorrect password");
-					} else if (this.status == 502) {
+					} else {
 						chat("Error verifying password");
 					}
 				}
@@ -255,5 +267,11 @@ window.aideck = document.getElementById("aideck");
 		password: {keydown: maybeLogin},
 		chatinput: {keydown: maybeSendChat},
 		aivs: {click: aiClick},
+		remember: {change: function(){
+			if (typeof localStorage !== "undefined"){
+				if (!this.checked) delete localStorage.auth;
+				else if (sock.user) localStorage.auth = sock.user.auth;
+			}
+		}}
 	});
 })();
