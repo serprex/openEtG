@@ -179,7 +179,7 @@ var userEvents = {
 			});
 		}
 		var arena = "arena"+(data.lv?"1":""), akey = (data.lv?"B:":"A:")+data.aname;
-		db.zscore(arena, function(err, score){
+		db.zscore(arena, data.aname, function(err, score){
 			if (score === null) return;
 			db.hincrby(akey, data.won?"win":"loss", 1, function(err){
 				db.hmget(akey, "win", "loss", "day", function(err, wld){
