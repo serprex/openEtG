@@ -5,6 +5,7 @@ How to setup on Windows:
 	redis @ https://github.com/MSOpenTech/redis/tree/2.8/bin/release
 	tortoisegit @ http://code.google.com/p/tortoisegit
 	git @ http://git-scm.com/download/win
+	ninja @ https://github.com/martine/ninja/releases
 
 2	Right click where you want the files to be and click Git Clone to create an openetg folder somewhere, use the URL: https://github.com/Fippe94/openEtG.git
 
@@ -16,7 +17,7 @@ How to setup on Windows:
 
 6	Download pixi.dev.js from https://github.com/GoodBoyDigital/pixi.js/tree/master/bin
 
-7	Run "buildOpenEtg.bat" in your openEtG folder
+7	ninja.exe should be in openEtG's folder. Run ninja.exe to build etgify.js
 
 8	Start redis-server, and in the console, run "node server.js"
 

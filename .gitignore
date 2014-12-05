@@ -10,5 +10,6 @@ tournify.js
 dump.rdb
 pixi.*
 *.csv
+*.exe
 *.gz
 *.sh
