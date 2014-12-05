@@ -531,7 +531,10 @@ gaincharge2:function(c,t){
 },
 gaintimecharge:function(c,t, drawstep){
 	if (!drawstep && c.owner == t){
-		c.status.charges++;
+		c.defstatus("chargecap", 0);
+		if (c.status.chargecap++ < 3){
+			c.status.charges++;
+		}
 	}
 },
 gas:function(c,t){
@@ -1139,6 +1142,9 @@ ren:function(c,t){
 		Effect.mkText("Ren", t);
 		t.addactive("predeath", Actives.bounce);
 	}
+},
+resetcap:function(c,t){
+	c.status.chargecap = 0;
 },
 reveal:function(c,t){
 	c.owner.precognition = true;

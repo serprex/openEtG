@@ -506,7 +506,7 @@ function startMatch(game, foeDeck) {
 				var goldwon;
 				if (game.level !== undefined) {
 					var streak = "streak" + game.level;
-					var reward = [15, 30, 70, 200, 60, 120][game.level] * Math.min(1+[.05, .05, .075, .1, .075, .1][game.level]*(sock.user[streak]||0), 1.5);
+					var reward = [15, 30, 70, 200, 60, 120][game.level] * Math.min(1+[.05, .05, .075, .1, .075, .1][game.level]*(sock.user[streak]||0), 2);
 					sock.user[streak] = (sock.user[streak] || 0)+1;
 					goldwon = Math.floor(reward * (200 + game.player1.hp) / 300);
 				} else goldwon = 0;

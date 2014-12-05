@@ -65,7 +65,7 @@ module.exports = function(game) {
 			game.cardreward || "-",
 			userutil.calcWealth(etgutil.deck2pool(game.cardreward)),
 			!sock.user || game.level === undefined ? -1 : sock.user["streak"+game.level],
-			!sock.user || game.level === undefined ? 0 : Math.min([.05, .05, .075, .1, .075, .1][game.level]*Math.max(sock.user["streak"+game.level]-1, 0), .5).toFixed(3).replace(/.?0+$/, "")].join());
+			!sock.user || game.level === undefined ? 0 : Math.min([.05, .05, .075, .1, .075, .1][game.level]*Math.max(sock.user["streak"+game.level]-1, 0), 1).toFixed(3).replace(/.?0+$/, "")].join());
 	}
 	function onkeydown(e){
 		if (e.keyCode == 32) bexit.click();
