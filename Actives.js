@@ -532,7 +532,8 @@ gaincharge2:function(c,t){
 gaintimecharge:function(c,t, drawstep){
 	if (!drawstep && c.owner == t){
 		c.defstatus("chargecap", 0);
-		if (c.status.chargecap++ < 3){
+		if (c.status.chargecap < 4){
+			c.status.chargecap++;
 			c.status.charges++;
 		}
 	}
