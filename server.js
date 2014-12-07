@@ -376,8 +376,7 @@ var userEvents = {
 		}
 	},
 	passchange:function(data, user){
-		var pass = data.p || "";
-		if (!pass.length){
+		if (!data.p){
 			var hkey = "U:"+user.name;
 			db.hdel(hkey, "salt");
 			db.hdel(hkey, "iter");
@@ -388,7 +387,11 @@ var userEvents = {
 			sockEmit(this, "passchange", {auth: user.name});
 		}else{
 			var socket = this;
-			crypto.pbkdf2(pass, user.salt, parseInt(user.iter), 64, function(err, key){
+			if(!user.salt){
+				user.salt = crypto.pseudoRandomBytes(16).toString("base64");
+				user.iter = 100000;
+			}
+			crypto.pbkdf2(data.p, user.salt, parseInt(user.iter), 64, function(err, key){
 				if (!err){
 					user.auth = key.toString("base64");
 					sockEmit(socket, "passchange", {auth: user.auth});

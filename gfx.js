@@ -53,7 +53,7 @@ function makeArt(card, art, oldrend) {
 	if (art) {
 		var artspr = new PIXI.Sprite(art);
 		artspr.position.set(2, 20);
-		if (card.shiny) artspr.filters = [shinyFilter];
+		//if (card.shiny) artspr.filters = [shinyFilter];
 		template.addChild(artspr);
 	}
 	var typemark = new PIXI.Sprite(exports.ticons[card.type]);
@@ -163,7 +163,7 @@ function getInstImage(code, scale, cache){
 		if (art) {
 			var artspr = new PIXI.Sprite(art);
 			artspr.position.set(0, 16);
-			if (card.shiny) artspr.filters = [shinyFilter];
+			//if (card.shiny) artspr.filters = [shinyFilter];
 			border.addChild(artspr);
 		}
 		var text = new PIXI.Text(card.name, { font: "16px Dosis", fill: card.upped ? "black" : "white" });
