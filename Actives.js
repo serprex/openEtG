@@ -1,7 +1,4 @@
 "use strict";
-var Effect = require("./Effect");
-var etg = require("./etg");
-var Cards = require("./Cards");
 function adrenathrottle(f){
 	return function(c){
 		if (!c.status || (c.status.adrenaline || 0)<3){
@@ -1650,3 +1647,6 @@ for(var key in Actives){
 	Actives[key].activename = [key];
 }
 module.exports = Actives;
+var Effect = require("./Effect");
+var etg = require("./etg");
+var Cards = require("./Cards");
