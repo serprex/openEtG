@@ -113,7 +113,7 @@ module.exports = function(nymph) {
 		[350, 100, ["Demigod", mkAi.mkPremade("demigod"), function() {
 			tinfo.setText("Demigods are extremely powerful. Come prepared for anything." + costText(3));
 		}]],
-		[50, 300, ["Editor", require("./Editor"), function() {
+		[50, 300, ["Deck", require("./Editor"), function() {
 			tinfo.setText("Edit your deck, as well as submit an arena deck.");
 		}]],
 		[250, 300, ["Wealth T50", wealthTop, function() {
