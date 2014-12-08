@@ -12,6 +12,17 @@ var options = require("./options");
 var userutil = require("./userutil");
 module.exports = function(nymph) {
 	var mainmenu = document.getElementById("mainmenu");
+	var aicostpay = [
+		[0, 15],
+		[5, 30],
+		[10, 70],
+		[20, 200],
+		[userutil.arenaCost(0), 60],
+		[userutil.arenaCost(1), 120],
+	];
+	function costText(lv){
+		return !sock.user ? "" : "\nCost: " + aicostpay[lv][0] + "$. Base reward: " + aicostpay[lv][1] + "$";
+	}
 	var tipjar = [
 		"Each card in your booster pack has a 50% chance of being from the chosen element",
 		"Your arena deck will earn you $3 per win & $1 per loss",
@@ -91,16 +102,16 @@ module.exports = function(nymph) {
 	}
 	buttons.push(
 		[50, 100, ["Commoner", mkAi.mkAi(0), function() {
-			tinfo.setText("Commoners have no upgraded cards & mostly common cards.\nCost: $0");
+			tinfo.setText("Commoners have no upgraded cards & mostly common cards." + costText(0));
 		}]],
 		[150, 100, ["Mage", mkAi.mkPremade("mage"), function() {
-			tinfo.setText("Mages have preconstructed decks with a couple rares.\nCost: $5");
+			tinfo.setText("Mages have preconstructed decks with a couple rares." + costText(1));
 		}]],
 		[250, 100, ["Champion", mkAi.mkAi(2), function() {
-			tinfo.setText("Champions have some upgraded cards.\nCost: $10");
+			tinfo.setText("Champions have some upgraded cards." + costText(2));
 		}]],
 		[350, 100, ["Demigod", mkAi.mkPremade("demigod"), function() {
-			tinfo.setText("Demigods are extremely powerful. Come prepared for anything.\nCost: $20");
+			tinfo.setText("Demigods are extremely powerful. Come prepared for anything." + costText(3));
 		}]],
 		[50, 300, ["Editor", require("./Editor"), function() {
 			tinfo.setText("Edit your deck, as well as submit an arena deck.");
@@ -135,7 +146,7 @@ module.exports = function(nymph) {
 			var y = 200+i*45;
 			utons.push(
 				[50, y, ["Arena AI", arenaAi, function() {
-					tinfo.setText("In the arena you will face decks from other players.\nCost: $" + userutil.arenaCost(lvi.lv));
+					tinfo.setText("In the arena you will face decks from other players." + costText(5+lvi.lv));
 				}]],
 				[150, y, ["Arena Info", arenaInfo, function() {
 					tinfo.setText("Check how your arena deck is doing.");
