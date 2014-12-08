@@ -146,7 +146,7 @@ module.exports = function(nymph) {
 			var y = 200+i*45;
 			utons.push(
 				[50, y, ["Arena AI", arenaAi, function() {
-					tinfo.setText("In the arena you will face decks from other players." + costText(5+lvi.lv));
+					tinfo.setText("In the arena you will face decks from other players." + costText(4+lvi.lv));
 				}]],
 				[150, y, ["Arena Info", arenaInfo, function() {
 					tinfo.setText("Check how your arena deck is doing.");
@@ -267,7 +267,7 @@ module.exports = function(nymph) {
 		else input.className = "numput";
 		return input;
 	}
-	var foename = makeInput("Challenge", maybeChallenge);
+	var foename = makeInput("Challenge/Trade", maybeChallenge);
 	var pvphp = makeInput("HP"), pvpmark = makeInput("Mark"), pvpdeck = makeInput("Deck"), pvpdraw = makeInput("Draw");
 	var printstats = makeCheck("Print stats", null, "stats"), preloadart = makeCheck("Preload Art", null, "preart");
 	var enableMusic = makeCheck("Enable music", musicChange, "enableMusic"), enableSound = makeCheck("Enable sound", soundChange, "enableSound");
