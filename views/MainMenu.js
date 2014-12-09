@@ -114,7 +114,7 @@ module.exports = function(nymph) {
 			tinfo.setText("Demigods are extremely powerful. Come prepared for anything." + costText(3));
 		}]],
 		[50, 300, ["Deck", require("./Editor"), function() {
-			tinfo.setText("Edit your deck, as well as submit an arena deck.");
+			tinfo.setText("Edit & manage your decks.");
 		}]],
 		[250, 300, ["Wealth T50", wealthTop, function() {
 			tinfo.setText("See who's collected the most wealth.");
