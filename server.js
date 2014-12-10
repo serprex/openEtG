@@ -201,8 +201,8 @@ var userEvents = {
 			var cost = userutil.arenaCost(data.lv);
 			if (user.gold < cost)return;
 			user.gold -= cost;
-			var idx = etg.PlayerRng.upto(Math.min(len, 20));
-			db.zrevrange("arena"+(data.lv?"1":""), idx, idx, function(err, aname){
+			var idx = etg.PlayerRng.upto(len);
+			db.zrange("arena"+(data.lv?"1":""), idx, idx, function(err, aname){
 				if (!aname || !aname.length){
 					console.log("No arena " + idx);
 					return;
@@ -246,7 +246,7 @@ var userEvents = {
 					sockEmit(socket, "codecode", {card: c});
 					db.hdel("CodeHash", data.code);
 				}else sockEmit(socket, "chat", { mode: "red", msg: "Unknown card: " + type});
-			}else if (type in userutil.rewardwords){
+			}else if (type.replace(/^!/, "") in userutil.rewardwords){
 				sockEmit(socket, "codecard", {type: type});
 			}else{
 				sockEmit(socket, "chat", { mode: "red", msg: "Unknown code type: " + type});
@@ -258,9 +258,9 @@ var userEvents = {
 		db.hget("CodeHash", data.code, function(err, type){
 			if (!type){
 				sockEmit(socket, "chat", { mode: "red", msg: "Code does not exist"});
-			}else if (type in userutil.rewardwords){
+			}else if (type.replace(/^!/, "") in userutil.rewardwords){
 				var card = Cards.Codes[data.card];
-				if (card && card.rarity == userutil.rewardwords[type]){
+				if (card && card.rarity == userutil.rewardwords[type] && card.shiny == (type.charAt(0) == "!")){
 					user.pool = etgutil.addcard(user.pool, data.card);
 					sockEmit(socket, "codedone", {card: data.card});
 					db.hdel("CodeHash", data.code);
