@@ -45,7 +45,7 @@ module.exports = function(reward, numberofcopies, code) {
 			else {
 				sock.userEmit("codesubmit2", { code: code, card: chosenReward });
 			}
-		}
+		}else chat("Choose a reward");
 	});
 	rewardui.addChild(confirmButton);
 

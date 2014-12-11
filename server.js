@@ -260,7 +260,7 @@ var userEvents = {
 				sockEmit(socket, "chat", { mode: "red", msg: "Code does not exist"});
 			}else if (type.replace(/^!/, "") in userutil.rewardwords){
 				var card = Cards.Codes[data.card];
-				if (card && card.rarity == userutil.rewardwords[type] && card.shiny == (type.charAt(0) == "!")){
+				if (card && card.rarity == userutil.rewardwords[type.replace(/^!/, "")] && card.shiny ^ (type.charAt(0) != "!")){
 					user.pool = etgutil.addcard(user.pool, data.card);
 					sockEmit(socket, "codedone", {card: data.card});
 					db.hdel("CodeHash", data.code);
