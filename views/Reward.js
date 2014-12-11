@@ -16,7 +16,7 @@ module.exports = function(reward, numberofcopies, code) {
 		var upped = reward.slice(0, 5) == "upped";
 		var rarity = userutil.rewardwords[upped ? reward.slice(5) : reward];
 		rewardList = etg.filtercards(upped, function(x) { return x.rarity == rarity }).map(function(card){ return card.code });
-		if (shiny) rewardList = rewardList.map(function(x) { return x.shiny });
+		if (shiny) rewardList = rewardList.map(function(x) { return x.asShiny(true) });
 	}else if (reward instanceof Array){
 		rewardList = reward;
 	}else{

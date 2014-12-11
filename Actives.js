@@ -1102,14 +1102,14 @@ readiness:function(c,t){
 rebirth:function(c,t){
 	c.transform(c.card.as(Cards.Phoenix));
 },
-reducemaxhp:adrenathrottle(function(c,t, dmg){
+reducemaxhp:function(c,t, dmg){
 	if (t instanceof etg.Player){
 		t.maxhp = Math.max(t.maxhp-dmg, 1);
 		if (t.hp > t.maxhp){
 			t.hp = t.maxhp;
 		}
 	}
-}),
+},
 regen:adrenathrottle(function(c,t){
 	c.owner.status.poison--;
 }),
@@ -1437,7 +1437,7 @@ tick:function(c,t){
 	c.dmg(c.card.upped?3:1);
 	if (c.hp <= 0) {
 		if (c.card.upped) c.owner.foe.masscc(c, function(c,x){ x.dmg(4) });
-		else c.owner.foe.spelldmg(15);
+		else c.owner.foe.spelldmg(18);
 	}
 },
 trick:function(c,t){
