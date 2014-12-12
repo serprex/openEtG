@@ -24,6 +24,7 @@ window.aideck = document.getElementById("aideck");
 	options.register("username", document.getElementById("username"));
 	options.register("remember", document.getElementById("remember"));
 	var sockEvents = {
+		clear:clearChat,
 		userdump:function(data) {
 			delete data.x;
 			sock.user = data;
@@ -33,6 +34,10 @@ window.aideck = document.getElementById("aideck");
 		passchange:function(data) {
 			sock.user.auth = data.auth;
 			chat("Password updated");
+		},
+		mute:function(data) {
+			muteset[data.m] = true;
+			chat(data.m + " has been muted");
 		},
 		chat:function(data) {
 			if (muteall || data.u in muteset) return;
@@ -111,6 +116,10 @@ window.aideck = document.getElementById("aideck");
 		}
 		chat((muteall?"You have chat muted. ":"") + "Muted: " + muted.join(", "));
 	}
+	function clearChat(){
+		var chatBox = document.getElementById("chatBox");
+		while (chatBox.firstChild) chatBox.firstChild.remove();
+	}
 	function maybeSendChat(e) {
 		e.cancelBubble = true;
 		if (e.keyCode == 13) {
@@ -118,8 +127,7 @@ window.aideck = document.getElementById("aideck");
 			var chatinput = document.getElementById("chatinput"), msg = chatinput.value.trim();
 			chatinput.value = "";
 			if (msg == "/clear"){
-				var chatBox = document.getElementById("chatBox");
-				while (chatBox.firstChild) chatBox.firstChild.remove();
+				clearChat();
 			}else if (msg == "/who"){
 				sock.emit("who");
 			}else if (msg.match(/^\/roll( |$)\d*d?\d*$/)){
@@ -174,6 +182,11 @@ window.aideck = document.getElementById("aideck");
 			}else if (msg.match(/^\/unmute /)){
 				delete muteset[msg.slice(8)];
 				chatmute();
+			}else if (msg == "/mod" || msg == "/modclear"){
+				sock.userEmit(msg.slice(1));
+			}else if (msg.match(/^\/mod(guest|mute|add|rm) /)){
+				var sp = msg.indexOf(" ");
+				sock.userEmit(msg.slice(1, sp), {m: msg.slice(sp+1)})
 			}else if (!msg.match(/^\/[^/]/) || (sock.user && msg.match(/^\/w( |")/))) {
 				msg = msg.replace(/^\/\//, "/");
 				if (sock.user){

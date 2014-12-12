@@ -84,9 +84,49 @@ function sockEmit(socket, event, data){
 	data.x = event;
 	socket.send(JSON.stringify(data));
 }
+function modf(func){
+	return function(data, user){
+		var socket = this;
+		db.sismember("Mods", data.u, function(err, ismem){
+			if (ismem){
+				func.call(socket, data, user);
+			}else{
+				sockEmit(socket, "chat", { mode: "red", msg: "You are not a mod" });
+			}
+		});
+	}
+}
 var echoEvents = { endturn: true, cast: true, foeleft: true, mulligan: true, cardchosen: true };
+var guestban = false;
 var userEvents = {
 	usernop:function(){},
+	mod:function(data, user){
+		var socket = this;
+		db.smembers("Mods", function(err, mods){
+			sockEmit(socket, "chat", { mode: "red", msg: mods.join() });
+		});
+	},
+	modadd:modf(function(data, user){
+		db.sadd("Mods", data.m);
+	}),
+	modrm:modf(function(data, user){
+		db.srem("Mods", data.m);
+	}),
+	modguest:modf(function(data, user){
+		guestban = data.m == "off";
+	}),
+	modmute:modf(function(data, user){
+		var msg = JSON.stringify({x:"mute", m:data.m});
+		for (var id in io.clients){
+			io.clients[id].send(msg);
+		}
+	}),
+	modclear:modf(function(data, user){
+		var msg = JSON.stringify({x:"clear"});
+		for (var id in io.clients){
+			io.clients[id].send(msg);
+		}
+	}),
 	inituser:function(data, user) {
 		var starters = [
 			"015990g4sa014sd014t4014vi014vs0152o0152t0155u0155p0158q015ca015fi015f6015if015il015lo015lb015ou015s5025rq015v3015ut0161s018pi",
@@ -482,6 +522,7 @@ var userEvents = {
 });
 var sockEvents = {
 	guestchat:function(data) {
+		if (guestban) return;
 		data.guest = true;
 		data.u = "Guest_" + data.u;
 		genericChat(this, data);
