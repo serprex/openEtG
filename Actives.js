@@ -1617,17 +1617,17 @@ pend:function(c,t){
 	c.status.pendstate = !c.status.pendstate;
 },
 pillmat:function(c,t){
-	for(var i=0; i<2*c.status.charges; i++){
+	for(var i=0; i<2*(c==t || c.status.charges); i++){
 		c.owner.spend(c.owner.choose([etg.Earth, etg.Fire, etg.Water, etg.Air]), -1);
 	}
 },
 pillspi:function(c,t){
-	for(var i=0; i<2*c.status.charges; i++){
+	for(var i=0; i<2*(c==t || c.status.charges); i++){
 		c.owner.spend(c.owner.choose([etg.Death, etg.Life, etg.Light, etg.Darkness]), -1);
 	}
 },
 pillcar:function(c,t){
-	for(var i=0; i<2*c.status.charges; i++){
+	for(var i=0; i<2*(c==t || c.status.charges); i++){
 		c.owner.spend(c.owner.choose([etg.Entropy, etg.Gravity, etg.Time, etg.Aether]), -1);
 	}
 

@@ -213,6 +213,7 @@ module.exports = function(arena, acard, startempty) {
 			}]], [8, 136, ["Load", function() {
 				loadDeck(deckname.value);
 			}]], [8, 162, ["Exit", function() {
+				if (sock.user) sock.userEmit("setdeck", {name: sock.user.selectedDeck });
 				startMenu();
 			}]])
 			var tname = new px.MenuText(100, 8, sock.user.selectedDeck);

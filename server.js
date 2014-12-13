@@ -169,7 +169,7 @@ var userEvents = {
 		if (data.d !== undefined) {
 			db.hset("D:"+user.name, data.name, data.d);
 		}
-		user.selectedDeck = data.name || data.number;
+		user.selectedDeck = data.name;
 	},
 	rmdeck:function(data, user){
 		db.hdel("D:"+user.name, data.name);
