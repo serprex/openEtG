@@ -1000,8 +1000,7 @@ pacify:function(c,t){
 },
 paleomagnetism:function(c,t){
 	if (c.owner == t){
-		var pillars = etg.filtercards(c.card.upped, function(x) { return x.type == etg.PillarEnum && !x.rarity; });
-		new etg.Pillar(pillars[(c.owner.rng()<.5?0:c.owner.mark*2)].asShiny(c.card.shiny), c.owner).place();
+		new etg.Pillar(c.card.as(Cards.Codes[etg.PillarList[c.owner.rng()<.5?0:c.owner.mark]]), c.owner).place();
 	}
 },
 pandemonium:function(c,t){

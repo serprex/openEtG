@@ -13,7 +13,6 @@ module.exports = function(level) {
 	}
 	var cardcount = {};
 	var eles = [Math.ceil(Math.random() * 12), Math.ceil(Math.random() * 12)], ecost = new Array(13);
-	var pillars = etg.filtercards(false, function(x) { return x.type == etg.PillarEnum && !x.rarity; });
 	for (var i = 0;i < 13;i++) {
 		ecost[i] = 0;
 	}
@@ -81,7 +80,7 @@ module.exports = function(level) {
 	for (var i = 1;i < 13;i++) {
 		if (ecost[i] > 0){
 			for (var j = 0;j < Math.round((ecost[i] - qpemin) / 5); j++) {
-				deck.push(upCode(pillars[i * 2]));
+				deck.push(upCode(etg.PillarList[i]));
 			}
 		}
 	}
