@@ -1617,6 +1617,22 @@ pend:function(c,t){
 	c.owner.spend(ele, -c.status.charges * (ele > 0 ? 1 : 3));
 	c.status.pendstate = !c.status.pendstate;
 },
+pillmat:function(c,t){
+	for(var i=0; i<2*c.status.charges; i++){
+		c.owner.spend(c.owner.choose([etg.Earth, etg.Fire, etg.Water, etg.Air]), -1);
+	}
+},
+pillspi:function(c,t){
+	for(var i=0; i<2*c.status.charges; i++){
+		c.owner.spend(c.owner.choose([etg.Death, etg.Life, etg.Light, etg.Darkness]), -1);
+	}
+},
+pillcar:function(c,t){
+	for(var i=0; i<2*c.status.charges; i++){
+		c.owner.spend(c.owner.choose([etg.Entropy, etg.Gravity, etg.Time, etg.Aether]), -1);
+	}
+
+},
 absorbdmg:function(c,t, dmg){
 	c.defstatus("storedpower", 0);
 	c.status.storedpower++;
