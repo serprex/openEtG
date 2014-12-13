@@ -1089,7 +1089,7 @@ Thing.prototype.castSpell = function(t, active, nospell){
 		if (newt) t = newt;
 		active(this, t);
 		if (!nospell) this.procactive("spell", t);
-	}else Effect.mkText("Evade", t);
+	}else if (t) Effect.mkText("Evade", t);
 }
 Thing.prototype.useactive = function(t) {
 	this.usedactive = true;

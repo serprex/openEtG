@@ -100,12 +100,6 @@ var echoEvents = { endturn: true, cast: true, foeleft: true, mulligan: true, car
 var guestban = false;
 var userEvents = {
 	usernop:function(){},
-	mod:function(data, user){
-		var socket = this;
-		db.smembers("Mods", function(err, mods){
-			sockEmit(socket, "chat", { mode: "red", msg: mods.join() });
-		});
-	},
 	modadd:modf(function(data, user){
 		db.sadd("Mods", data.m);
 	}),
@@ -488,9 +482,9 @@ var userEvents = {
 					if (data.element < 13) card = etg.PlayerRng.randomcard(false, function(x) { return (x.element == data.element) ^ notFromElement && x.rarity == bumprarity});
 					if (data.element == 14){
 						var newCardList = [
-							Cards.Envenom, Cards.JetStream, Cards.Salamander, Cards.Shadow, Cards.Inertia, Cards.PhaseGolem, Cards.QuantumLocket, Cards.ClockworkGolem,
-							Cards.WritofVengeance, Cards.WritofVindication, Cards.JackOLantern,Cards.ThermalRecoil,Cards.GolemDefender,Cards.Shtriga, Cards.MidassTouch, Cards.Lemming,
-							Cards.Fluxor, Cards.Boomstick, Cards.ShankofVoid, Cards.ScatteringWind];
+							Cards.NullMantis,Cards.Goon,Cards.Envenom,Cards.JetStream,Cards.Salamander,Cards.Shadow,Cards.Inertia,Cards.PhaseGolem,
+							Cards.Tornado,Cards.Minotaur,Cards.WritofVengeance,Cards.WritofVindication,Cards.JackOLantern,Cards.ThermalRecoil,Cards.GolemDefender,Cards.Shtriga,
+							Cards.Fluxor,Cards.Boomstick,Cards.ShankofVoid,Cards.ScatteringWind];
 						card = etg.PlayerRng.randomcard(false, function(x){ return notFromElement ^ ~newCardList.indexOf(x) && x.rarity == bumprarity});
 					}
 					if (!card) card = etg.PlayerRng.randomcard(false, function(x) { return x.rarity == bumprarity });
@@ -538,6 +532,12 @@ var sockEvents = {
 		data.msg = A + "d" + X + " " + sum;
 		data.mode = "#006000";
 		genericChat(this, data);
+	},
+	mod:function(data){
+		var socket = this;
+		db.smembers("Mods", function(err, mods){
+			sockEmit(socket, "chat", { mode: "red", msg: mods.join() });
+		});
 	},
 	pvpwant:function(data) {
 		var pendinggame=rooms[data.room];

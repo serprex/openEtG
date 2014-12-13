@@ -182,9 +182,11 @@ window.aideck = document.getElementById("aideck");
 			}else if (msg.match(/^\/unmute /)){
 				delete muteset[msg.slice(8)];
 				chatmute();
-			}else if (msg == "/mod" || msg == "/modclear"){
-				sock.userEmit(msg.slice(1));
-			}else if (msg.match(/^\/mod(guest|mute|add|rm) /)){
+			}else if (msg == "/mod"){
+				sock.emit("mod");
+			}else if (sock.user && msg == "/modclear"){
+				sock.userEmit("modclear");
+			}else if (sock.user && msg.match(/^\/mod(guest|mute|add|rm) /)){
 				var sp = msg.indexOf(" ");
 				sock.userEmit(msg.slice(1, sp), {m: msg.slice(sp+1)})
 			}else if (!msg.match(/^\/[^/]/) || (sock.user && msg.match(/^\/w( |")/))) {

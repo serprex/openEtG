@@ -354,6 +354,7 @@ drainlife:function(c,t){
 },
 draft:function(c,t){
 	Effect.mkText("Draft", t);
+	c.owner.spend(etg.Air, -2);
 	if((t.status.airborne = !t.status.airborne)){
 		if (t.active.cast == Actives.burrow){
 			delete t.active.cast;
@@ -819,6 +820,18 @@ locket: function(c, t) {
 locketshift:function(c,t){
 	c.status.mode = t instanceof etg.Player?t.mark:t.card.element;
 },
+loot:function(c,t){
+	if (c.owner == t.owner && !c.status.salvaged && !t.status.salvaged && c.owner.foe.permanents.length > 0){
+		Effect.mkText("Looted", c);
+		var foe = c.owner.foe, perms = foe.permanents.filter(function(x){return x && x.isMaterial()});
+		if (foe.weapon && foe.weapon.isMaterial()) perms.push(foe.weapon);
+		if (foe.shield && foe.shield.isMaterial()) perms.push(foe.shield);
+		Actives.steal(c, foe.choose(perms));
+		c.status.salvaged = true;
+		t.status.salvaged = true;
+		c.addactive("turnstart", Actives.salvageoff);
+	}
+},
 losecharge:function(c,t){
 	if(--c.status.charges<0){
 		c[c instanceof etg.Creature?"die":"remove"]();
@@ -941,6 +954,24 @@ nova2:function(c,t){
 		new etg.Creature(Cards.SingularityUp.asShiny(c.card.shiny), c.owner).place();
 	}
 },
+nullspell:function(c,t){
+	if (!c.hasactive("prespell", "eatspell")){
+		c.addactive("prespell", Actives.eatspell);
+		c.addactive("turnstart", Actives.noeatspell);
+	}
+},
+eatspell:function(c,t){
+	if (t instanceof etg.CardInstance){
+		Actives["growth 1"](c);
+		c.rmactive("prespell", "eatspell");
+		return true;
+	}
+},
+noeatspell:function(c,t){
+	if (t == c.owner){
+		c.rmactive("prespell", "eatspell");
+	}
+},
 nymph:function(c,t){
 	Effect.mkText("Nymph", t);
 	var e = t.card.element || c.owner.uptoceil(12);
@@ -1041,6 +1072,9 @@ precognition:function(c,t){
 	c.owner.drawcard();
 	c.owner.precognition = true;
 },
+predator:function(c,t){
+	return c.owner.foe.hand.length > 4 ? c.atk : 0;
+},
 protectall:function(c,t){
 	function protect(p){
 		if (p && p.isMaterial()){
@@ -1081,7 +1115,7 @@ quinttog:function(c,t){
 		delete t.status.immaterial;
 	}else Actives.quint(c,t);
 },
-randomdr: function(c, t) {
+randomdr:function(c, t){
 	if (c==t)
 		c.dr = c.owner.upto(c.card.upped?4:3);
 },
@@ -1440,6 +1474,25 @@ tick:function(c,t){
 		else c.owner.foe.spelldmg(18);
 	}
 },
+tornado:function(c,t){
+	var pl = c.owner.foe;
+	for(var i=0; i<3; i++){
+		if (i == 2){
+			if (c.card.upped) return;
+			else pl = c.owner;
+		}
+		var perms = pl.permanents.filter(function(x){return x && x.isMaterial()});
+		if (pl.weapon && pl.weapon.isMaterial()) perms.push(pl.weapon);
+		if (pl.shield && pl.shield.isMaterial()) perms.push(pl.shield);
+		if (perms.length){
+			var pr = pl.choose(perms);
+			var newpl = pl.upto(2) ? pl : pl.foe;
+			newpl.deck.splice(newpl.upto(newpl.deck.length), 0, pr.card);
+			Effect.mkText("Shuffled", pr);
+			Actives.destroy(c, pr, true, true);
+		}
+	}
+},
 trick:function(c,t){
 	var cards = [];
 	t.owner.deck.forEach(function(card, i){
@@ -1608,6 +1661,9 @@ evade40:function(c,t){
 },
 evade50:function(c,t){
 	return c.owner.rng() < .5;
+},
+evadespell:function(c,t){
+	if (t instanceof etg.CardInstance) return true;
 },
 firewall:function(c,t){
 	Effect.mkText("-1", t);
