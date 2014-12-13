@@ -491,7 +491,7 @@ Card.prototype.isFree = function() {
 }
 Card.prototype.info = function(){
 	if (this.type == PillarEnum){
-		return "1:" + this.element + " " + activename(this.active.auto) + (this.text ? " " + this.text : "");
+		return this.text || "1:" + this.element + " " + activename(this.active.auto);
 	}else{
 		var dmgtype = "";
 		if (this.type == WeaponEnum){

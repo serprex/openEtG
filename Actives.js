@@ -1677,8 +1677,8 @@ evade40:function(c,t){
 evade50:function(c,t){
 	return c.owner.rng() < .5;
 },
-evadespell:function(c,t){
-	if (t instanceof etg.CardInstance) return true;
+evadespell:function(c,t, data){
+	if (t instanceof etg.CardInstance && data.tgt == c) return true;
 },
 firewall:function(c,t){
 	Effect.mkText("-1", t);
