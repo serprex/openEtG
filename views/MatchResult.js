@@ -12,7 +12,7 @@ module.exports = function(game) {
 	var winner = game.winner == game.player1;
 
 	victoryui.addChild(new px.MenuText(10, 290, game.ply + " plies\n" + (game.time / 1000).toFixed(1) + " seconds\n" + (winner && sock.user && game.level !== undefined ? (sock.user["streak" + game.level] || 0) + " win streak\n+" +
-		Math.min([5, 5, 7.5, 10, 7.5, 10][game.level] * Math.max(sock.user["streak" + game.level] - 1, 0), 50) + "% streak bonus" : "")));
+		Math.min([5, 5, 7.5, 10, 7.5, 10][game.level] * Math.max(sock.user["streak" + game.level] - 1, 0), 100) + "% streak bonus" : "")));
 	if (winner){
 		var victoryText = game.quest ? game.wintext : "You won!";
 		var tinfo = new px.MenuText(450, game.cardreward ? 130 : 250, victoryText, 500);
@@ -65,7 +65,7 @@ module.exports = function(game) {
 			game.cardreward || "-",
 			userutil.calcWealth(etgutil.deck2pool(game.cardreward)),
 			!sock.user || game.level === undefined ? -1 : sock.user["streak"+game.level],
-			!sock.user || game.level === undefined ? 0 : Math.min([.05, .05, .075, .1, .075, .1][game.level]*Math.max(sock.user["streak"+game.level]-1, 0), 1).toFixed(3).replace(/.?0+$/, "")].join());
+			!sock.user || game.level === undefined ? 0 : Math.min([.05, .05, .075, .1, .075, .1][game.level]*Math.max(sock.user["streak"+game.level]-1, 0), 1).toFixed(3).replace(/\.?0+$/, "")].join());
 	}
 	function onkeydown(e){
 		if (e.keyCode == 32) bexit.click();
