@@ -40,7 +40,7 @@ window.aideck = document.getElementById("aideck");
 			chat(data.m + " has been muted");
 		},
 		chat:function(data) {
-			if (muteall || data.u in muteset) return;
+			if ((muteall && !data.mode) || data.u in muteset) return;
 			if (typeof Notification !== "undefined" && sock.user && ~data.msg.indexOf(sock.user.name) && !document.hasFocus()){
 				Notification.requestPermission();
 				new Notification(data.u, {body: data.msg});
