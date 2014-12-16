@@ -319,7 +319,7 @@ disc:function(c,t){
 },
 discping:function(c,t){
 	t.dmg(1);
-	c.die();
+	c.remove();
 	new etg.CardInstance(c.card, c.owner).place();
 },
 disfield:function(c,t, dmg){
@@ -826,10 +826,12 @@ loot:function(c,t){
 		var foe = c.owner.foe, perms = foe.permanents.filter(function(x){return x && x.isMaterial()});
 		if (foe.weapon && foe.weapon.isMaterial()) perms.push(foe.weapon);
 		if (foe.shield && foe.shield.isMaterial()) perms.push(foe.shield);
-		Actives.steal(c, foe.choose(perms));
-		c.status.salvaged = true;
-		t.status.salvaged = true;
-		c.addactive("turnstart", Actives.salvageoff);
+		if (perms.length){
+			Actives.steal(c, foe.choose(perms));
+			c.status.salvaged = true;
+			t.status.salvaged = true;
+			c.addactive("turnstart", Actives.salvageoff);
+		}
 	}
 },
 losecharge:function(c,t){
@@ -974,7 +976,11 @@ noeatspell:function(c,t){
 },
 nymph:function(c,t){
 	Effect.mkText("Nymph", t);
-	var e = t.card.element || c.owner.uptoceil(12);
+	var e = t.card.element || (
+		t.active.auto == Actives.pillmat ? c.owner.choose([etg.Earth, etg.Fire, etg.Water, etg.Air]) :
+		t.active.auto == Actives.pillspi ? c.owner.choose([etg.Death, etg.Life, etg.Light, etg.Darkness]) :
+		t.active.auto == Actives.pillcar ? c.owner.choose([etg.Entropy, etg.Gravity, etg.Time, etg.Aether]) :
+		c.owner.uptoceil(12));
 	Actives.destroy(c, t, false, true);
 	new etg.Creature(t.card.as(Cards.Codes[etg.NymphList[e]]), t.owner).place();
 },
