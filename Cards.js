@@ -85,6 +85,9 @@ var TargetFilters = {
 	permnonstack:function(c,t){
 		return t.isMaterial(etg.Permanent) && !t.status.stackable;
 	},
+	stack:function(c,t){
+		return t.isMaterial(etg.Permanent) && t.status.stackable;
+	},
 	crea:function(c, t){
 		return t.isMaterial(etg.Creature);
 	},
