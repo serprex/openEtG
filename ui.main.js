@@ -52,10 +52,10 @@ window.aideck = document.getElementById("aideck");
 			var span = document.createElement("span");
 			if (data.mode != "red") span.style.color = data.mode || "black";
 			if (data.guest) span.style.fontStyle = "italic";
-			span.appendChild(document.createTextNode(h + ":" + m + ":" + s + " "));
+			span.appendChild(document.createTextNode(h + " " + m + " " + s + " "));
 			if (data.u){
 				var belly = document.createElement("b");
-				belly.appendChild(document.createTextNode(data.u + ": "));
+				belly.appendChild(document.createTextNode(data.u + " "));
 				span.appendChild(belly);
 			}
 			var decklink = /\b(([01][0-9a-v]{4})+)\b/g, reres, lastindex = 0;
