@@ -10,20 +10,21 @@ var userutil = require("./userutil");
 module.exports = function(game) {
 	var winner = game.winner == game.player1;
 	var victoryui = px.mkView();
+	function exitFunc(){
+		if (game.quest) {
+			if (winner && game.choicerewards)
+				require("./Reward")(game.choicerewards, game.rewardamount);
+			else
+				require("./QuestArea")(game.area);
+		}
+		else if (game.daily !== undefined){
+			require("./Colosseum")();
+		}else require("./MainMenu")();
+	}
 	var dom = [
 		[10, 290, game.ply + " plies\n" + (game.time / 1000).toFixed(1) + " seconds\n" + (winner && sock.user && game.level !== undefined ? (sock.user["streak" + game.level] || 0) + " win streak\n+" +
 			Math.min([5, 5, 7.5, 10, 7.5, 10][game.level] * Math.max(sock.user["streak" + game.level] - 1, 0), 100) + "% streak bonus" : "")],
-		[412, 430, ["Exit", function() {
-			if (game.quest) {
-				if (winner && game.choicerewards)
-					require("./Reward")(game.choicerewards, game.rewardamount);
-				else
-					require("./QuestArea")(game.area);
-			}
-			else if (game.daily !== undefined){
-				require("./Colosseum")();
-			}else require("./MainMenu")();
-		}]]
+		[412, 430, ["Exit", exitFunc]]
 	];
 
 	if (winner){
@@ -64,7 +65,7 @@ module.exports = function(game) {
 			!sock.user || game.level === undefined ? 0 : Math.min([.05, .05, .075, .1, .075, .1][game.level]*Math.max(sock.user["streak"+game.level]-1, 0), 1).toFixed(3).replace(/\.?0+$/, "")].join());
 	}
 	function onkeydown(e){
-		if (e.keyCode == 32) bexit.click();
+		if (e.keyCode == 32) exitFunc();
 		else if (e.keyCode == 87 && !game.quest && game.daily === undefined){
 			switch(game.level){
 			case 0:mkAi.mkAi(0)();break;
