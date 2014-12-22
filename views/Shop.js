@@ -16,29 +16,27 @@ module.exports = function() {
 	var packele = -1, packrarity = -1;
 
 	var storeui = px.mkView();
+	var dom = [[775, 246, ["Exit", require("./MainMenu")]]];
 
-	//shop background
 	storeui.addChild(px.mkBgRect(
 		40, 16, 820, 60,
 		40, 92, 530, 168,
 		40, 270, 620, 168,
 		770, 90, 90, 184
 	));
-	//gold text
-	var tgold = new px.MenuText(775, 101, "$" + sock.user.gold);
-	storeui.addChild(tgold);
 
-	//info text
-	var tinfo = new px.MenuText(50, 26, "Select from which element you want.");
-	storeui.addChild(tinfo);
+	var tgold = px.domText(sock.user.gold + "$");
+	var tinfo = px.domText("Select from which element you want.");
+	var tinfo2 = px.domText("Select which type of booster you want.");
+	dom.push(
+		[775, 101, tgold],
+		[50, 26, tinfo],
+		[50, 51, tinfo2]
+	);
 
-	var tinfo2 = new px.MenuText(50, 51, "Select which type of booster you want.");
-	storeui.addChild(tinfo2);
-
-    //free packs text
 	if (sock.user.freepacks){
-		var freeinfo = new px.MenuText(350, 26, "");
-		storeui.addChild(freeinfo);
+		var freeinfo = px.domText("");
+		dom.push([350, 26, freeinfo]);
 	}
 	function updateFreeInfo(rarity){
 		if (freeinfo){
@@ -46,7 +44,6 @@ module.exports = function() {
 		}
 	}
 
-	//get cards button
 	var bget = px.mkButton(775, 156, "Take Cards");
 	px.toggleB(bget);
 	px.setClick(bget, function () {
@@ -56,7 +53,6 @@ module.exports = function() {
 	});
 	storeui.addChild(bget);
 
-	//buy button
 	var bbuy = px.mkButton(775, 156, "Buy Pack");
 	px.setClick(bbuy, function() {
 		if (packrarity == -1) {
@@ -86,14 +82,18 @@ module.exports = function() {
 		g.beginFill(pack.color);
 		g.drawRoundedRect(3, 3, 94, 144, 6);
 		g.endFill();
-		var name = new PIXI.Text(pack.type, {font: "18px Verdana"});
+		var name = new PIXI.Text(pack.type, {font: "18px Dosis"});
 		name.anchor.set(.5, .5);
 		name.position.set(50, 75);
 		g.addChild(name);
-		var price = new PIXI.Sprite(ui.getTextImage("$"+pack.cost, {font: "12px Verdana"}));
+		var price = new PIXI.Text(pack.cost, {font: "12px Dosis"});
 		price.anchor.set(0, 1);
 		price.position.set(7, 144);
 		g.addChild(price);
+		var gold = new PIXI.Sprite(gfx.gold);
+		gold.anchor.set(0, 1);
+		gold.position.set(8 + price.width, 144);
+		g.addChild(gold);
 		px.setClick(g, function(){
 			packrarity = n;
 			tinfo2.setText(pack.type + " Pack: " + pack.info);
@@ -108,7 +108,7 @@ module.exports = function() {
 		(function(_i) {
 			px.setClick(elementbutton, function() {
 				packele = _i;
-				tinfo.setText("Selected Element: " + etg.eleNames[packele]);
+				tinfo.setText("Selected Element: " + (packele>12 ? etg.eleNames[packele] : "1:" + packele));
 			});
 		})(i);
 		storeui.addChild(elementbutton);
@@ -134,7 +134,7 @@ module.exports = function() {
 				var bdata = {};
 				ui.parseInput(bdata, "bulk", packmulti.value, 99);
 				sock.user.gold -= packdata[data.packtype].cost * (bdata.bulk || 1);
-				tgold.setText("$" + sock.user.gold);
+				tgold.setText(sock.user.gold + "$");
 			}
 			if (etgutil.decklength(data.cards) < 11){
 				px.toggleB(bget);
@@ -161,5 +161,6 @@ module.exports = function() {
 	var packmulti = document.createElement("input");
 	packmulti.style.width = "64px";
 	packmulti.placeholder = "Bulk";
-	px.refreshRenderer({view: storeui, packmulti: [[777, 184, packmulti], [775, 246, ["Exit", require("./MainMenu")]]]});
+	dom.push([777, 184, packmulti]);
+	px.refreshRenderer({view: storeui, domsho: dom});
 }

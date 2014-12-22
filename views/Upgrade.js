@@ -17,9 +17,9 @@ module.exports = function() {
 		}
 		else if (sock.user.gold >= 50) {
 			sock.userExec("uppillar", { c: card.code });
-			goldcount.setText("$" + sock.user.gold);
+			goldcount.setText(sock.user.gold + "$");
 		}
-		else return "You need $50 to afford an upgraded pillar!";
+		else return "You need 50$ to afford an upgraded pillar!";
 	}
 	function unupgradeCard(card) {
 		if (card.rarity || (card.shiny && card.upped)) {
@@ -40,9 +40,9 @@ module.exports = function() {
 		}
 		else if (sock.user.gold >= 50) {
 			sock.userExec("shpillar", { c: card.code });
-			goldcount.setText("$" + sock.user.gold);
+			goldcount.setText(sock.user.gold + "$");
 		}
-		else return "You need $50 to afford a shiny pillar!";
+		else return "You need 50$ to afford a shiny pillar!";
 	}
 	function unpolishCard(card) {
 		if (card.rarity || (card.shiny && card.upped)) {
@@ -58,7 +58,7 @@ module.exports = function() {
 		var codecount = etgutil.count(sock.user.pool, card.code);
 		if (codecount) {
 			sock.userExec("sellcard", { card: card.code });
-			goldcount.setText("$" + sock.user.gold);
+			goldcount.setText(sock.user.gold + "$");
 		}
 		else return "This card is bound to your account; you cannot sell it.";
 	}
@@ -93,17 +93,19 @@ module.exports = function() {
 		}
 	};
 
-	var goldcount = new px.MenuText(5, 240, "$" + sock.user.gold);
-	upgradeui.addChild(goldcount);
-	var tinfo = new px.MenuText(250, 50, "");
-	upgradeui.addChild(tinfo);
-	var tinfo2 = new px.MenuText(250, 140, "");
-	upgradeui.addChild(tinfo2);
-	var tinfo3 = new px.MenuText(250, 95, "");
-	tinfo3.position.set(250, 95);
-	upgradeui.addChild(tinfo3);
-	var twarning = new px.MenuText(100, 170, "");
-	upgradeui.addChild(twarning);
+	var goldcount = px.domText(sock.user.gold + "$");
+	var tinfo = px.domText("");
+	var tinfo2 = px.domText("");
+	var tinfo3 = px.domText("");
+	var twarning = px.domText("");
+	stage.domtext = [
+		[5, 240, goldcount],
+		[250, 50, tinfo],
+		[250, 140, tinfo2],
+		[250, 95, tinfo3],
+		[100, 170, twarning],
+	];
+
 	var cardArt = new PIXI.Sprite(gfx.nopic);
 	cardArt.position.set(734, 8);
 	upgradeui.addChild(cardArt);
@@ -122,7 +124,7 @@ module.exports = function() {
 				px.setDomVis("bunupgrade", true);
 				tinfo.setText(card.isFree() ? "" : card.rarity != -1 ? "Convert into an 6 unupgraded copies." : "Convert into an unupgraded version.");
 			}else{
-				tinfo.setText(card.isFree() ? "Costs $50 to upgrade" : card.rarity != -1 ? "Convert 6 into an upgraded version." : "Convert into an upgraded version.");
+				tinfo.setText(card.isFree() ? "Costs 50$ to upgrade" : card.rarity != -1 ? "Convert 6 into an upgraded version." : "Convert into an upgraded version.");
 				px.setDomVis("bupgrade", true);
 				px.setDomVis("bunupgrade", false);
 			}
@@ -136,13 +138,13 @@ module.exports = function() {
 				px.setDomVis("bunpolish", true);
 				tinfo3.setText(card.isFree() ? "" : card.rarity != -1 ? "Convert into 6 non-shiny copies." : "Convert into 2 non-shiny copies.")
 			}else{
-				tinfo3.setText(card.isFree() ? "Costs $50 to polish" : card.rarity == 5 ? "This card cannot be polished." : card.rarity != -1 ? "Convert 6 into a shiny version." : "Convert 2 into a shiny version.")
+				tinfo3.setText(card.isFree() ? "Costs 50$ to polish" : card.rarity == 5 ? "This card cannot be polished." : card.rarity != -1 ? "Convert 6 into a shiny version." : "Convert 2 into a shiny version.")
 				px.setDomVis("bpolish", true);
 				px.setDomVis("bunpolish", false);
 			}
 			px.setDomVis("bsell", ~card.rarity && !card.isFree());
 			tinfo2.setText(~card.rarity && !card.isFree() ?
-				"Sells for $" + userutil.sellValues[card.rarity] * (card.upped ? 6 : 1) * (card.shiny ? 6 : 1) : "");
+				"Sells for " + userutil.sellValues[card.rarity] * (card.upped ? 6 : 1) * (card.shiny ? 6 : 1) + "$" : "");
 			twarning.setText("");
 		}, true
 	);

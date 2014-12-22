@@ -5,7 +5,7 @@ var gfx = require("./gfx");
 var sock = require("./sock");
 module.exports = function() {
 	var stage = px.mkView();
-	var eledesc = new px.MenuText(100, 250, "Select your starter element");
+	var eledesc = px.DomText(100, 250, "Select your starter element");
 	stage.addChild(eledesc);
 	etg.eleNames.forEach(function(name, i){
 		if (i > 13) return;
@@ -23,9 +23,12 @@ module.exports = function() {
 		ele.interactive = true;
 		stage.addChild(ele);
 	});
-	px.refreshRenderer({view: stage, seldom: [[100, 400, ["Exit", function(){
-		sock.userEmit("delete");
-		sock.user = undefined;
-		require("./MainMenu")();
-	}]]]});
+	px.refreshRenderer({view: stage, seldom: [
+		[100, 250, eledesc],
+		[100, 400, ["Exit", function(){
+			sock.userEmit("delete");
+			sock.user = undefined;
+			require("./MainMenu")();
+		}]
+	]]});
 }

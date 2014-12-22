@@ -30,37 +30,47 @@ exports.load = function(){
 	});
 }
 var special = /view|endnext|cmds|next/;
-function parseDom(info){
-	var ele;
-	if (typeof info[2] === "string"){
-		ele = document.createElement("span");
-		var pieces = info[2].replace(/\|/g, " | ").split(/(\d\d?:\d\d?|\$|\n)/);
-		pieces.forEach(function(piece){
-			if (piece == "\n") {
-				ele.appendChild(document.createElement("br"));
-			}else if (piece == "$") {
-				var sp = document.createElement("span");
-				sp.className = "coin";
-				ele.appendChild(sp);
-			}else if (/^\d\d?:\d\d?$/.test(piece)) {
-				var parse = piece.split(":");
-				var num = parseInt(parse[0]);
-				if (num < 4) {
-					for (var j = 0;j < num;j++) {
-						var sp = document.createElement("span");
-						sp.className = "eicon e"+parse[1];
-						ele.appendChild(sp);
-					}
-				}else{
-					ele.appendChild(document.createTextElement(parse[0]));
+function monkeyDomSetText(text){
+	while (this.firstChild) this.firstChild.remove();
+	var ele = this;
+	var pieces = text.replace(/\|/g, " | ").split(/(\d\d?:\d\d?|\$|\n)/);
+	pieces.forEach(function(piece){
+		if (piece == "\n") {
+			ele.appendChild(document.createElement("br"));
+		}else if (piece == "$") {
+			var sp = document.createElement("span");
+			sp.className = "coin";
+			ele.appendChild(sp);
+		}else if (/^\d\d?:\d\d?$/.test(piece)) {
+			var parse = piece.split(":");
+			var num = parseInt(parse[0]);
+			if (num < 4) {
+				for (var j = 0;j < num;j++) {
 					var sp = document.createElement("span");
 					sp.className = "eicon e"+parse[1];
 					ele.appendChild(sp);
 				}
-			} else if (piece) {
-				ele.appendChild(document.createTextNode(piece));
+			}else{
+				ele.appendChild(document.createTextElement(parse[0]));
+				var sp = document.createElement("span");
+				sp.className = "eicon e"+parse[1];
+				ele.appendChild(sp);
 			}
-		});
+		} else if (piece) {
+			ele.appendChild(document.createTextNode(piece));
+		}
+	});
+}
+exports.domText = function(text){
+	var ele = document.createElement("span");
+	ele.setText = monkeyDomSetText;
+	ele.setText(text);
+	return ele;
+}
+function parseDom(info){
+	var ele;
+	if (typeof info[2] === "string"){
+		ele = exports.domText(info[2]);
 	}else if (info[2] instanceof Array){
 		ele = document.createElement("input");
 		ele.type = "button";
@@ -196,18 +206,6 @@ exports.adjust = function adjust(cardminus, code, x) {
 		cardminus[code] += x;
 	} else cardminus[code] = x;
 	delete cardminus.rendered;
-}
-function MenuText(x, y, txt, wrapwidth) {
-	this.wrapwidth = wrapwidth;
-	PIXI.Sprite.call(this, this.textText(txt));
-	this.position.set(x, y);
-}
-MenuText.prototype = Object.create(PIXI.Sprite.prototype);
-MenuText.prototype.textText = function(x){
-	return ui.getTextImage(x.toString(), {font: "14px Verdana", fill: "white", stroke: "black", strokeThickness: 2}, "", this.wrapwidth);
-}
-MenuText.prototype.setText = function(x){
-	this.setTexture(this.textText(x));
 }
 function MenuButton(text){
 	PIXI.Sprite.call(this, gfx.button);
@@ -412,7 +410,6 @@ CardSelector.prototype.renderColumns = function(){
 		}
 	}
 }
-exports.MenuText = MenuText;
 exports.MenuButton = MenuButton;
 exports.DeckDisplay = DeckDisplay;
 exports.CardSelector = CardSelector;

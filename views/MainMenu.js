@@ -90,17 +90,18 @@ module.exports = function(nymph) {
 		tinfo.setText("Tip: " + tipjar[tipNumber] + ".");
 	}]]];
 
-	var tstats = new px.MenuText(775, 101, (sock.user ? "$" + sock.user.gold + "\nAI w/l\n" + sock.user.aiwins + "/" + sock.user.ailosses + "\n\nPvP w/l\n" + sock.user.pvpwins + "/" + sock.user.pvplosses : "Sandbox"));
-	menuui.addChild(tstats);
+	var tstats = px.domText(sock.user ? sock.user.gold + "$\nAI w/l\n" + sock.user.aiwins + "/" + sock.user.ailosses + "\n\nPvP w/l\n" + sock.user.pvpwins + "/" + sock.user.pvplosses : "Sandbox");
 
-	var tinfo = new px.MenuText(50, 26, "", 800);
-	menuui.addChild(tinfo);
+	var tinfo = px.domText("");
+	tinfo.style.maxWidth = "800px";
 
 	function wealthTop(){
 		sock.emit("wealthtop");
 		this.style.display = "none";
 	}
 	buttons.push(
+		[50, 26, tinfo],
+		[775, 101, tstats],
 		[50, 100, ["Commoner", mkAi.mkAi(0), function() {
 			tinfo.setText("Commoners have no upgraded cards & mostly common cards." + costText(0));
 		}]],

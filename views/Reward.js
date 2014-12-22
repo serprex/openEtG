@@ -22,21 +22,16 @@ module.exports = function(reward, numberofcopies, code) {
 		console.log("Unknown reward", reward);
 		return;
 	}
-	var rewardui = px.mkView();
+	var rewardui = px.mkView(), dom = [];
 
 	if (numberofcopies > 1) {
-		var infotext = new px.MenuText(20, 100, "You will get " + numberofcopies + " copies of the card you choose")
-		rewardui.addChild(infotext);
+		dom.push([20, 100, "You will get " + numberofcopies + " copies of the card you choose"]);
 	}
-
 	if (code){
-		var exitButton = px.mkButton(10, 10, "Exit");
-		px.setClick(exitButton, require("./MainMenu"));
-		rewardui.addChild(exitButton);
+		dom.push([10, 10, ["Exit", require("./MainMenu")]]);
 	}
 
-	var confirmButton = px.mkButton(10, 40, "Done");
-	px.setClick(confirmButton, function() {
+	dom.push([10, 40, ["Done", function() {
 		if (chosenReward) {
 			if (code === undefined) {
 				sock.userExec("addbound", { c: etgutil.encodeCount(numberofcopies) + chosenReward });
@@ -46,8 +41,7 @@ module.exports = function(reward, numberofcopies, code) {
 				sock.userEmit("codesubmit2", { code: code, card: chosenReward });
 			}
 		}else chat("Choose a reward");
-	});
-	rewardui.addChild(confirmButton);
+	}]]);
 
 	var chosenRewardImage = new PIXI.Sprite(gfx.nopic);
 	chosenRewardImage.position.set(233, 10);
@@ -71,5 +65,5 @@ module.exports = function(reward, numberofcopies, code) {
 		},
 	}
 
-	px.refreshRenderer(rewardui);
+	px.refreshRenderer({view: rewardui, domward: dom});
 }

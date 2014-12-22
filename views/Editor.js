@@ -203,7 +203,9 @@ module.exports = function(arena, acard, startempty) {
 			startMenu();
 		}]], [8, 84, ["Import", importDeck]]);
 		if (sock.user) {
-			dom.push([8, 110, ["Save", function() {
+			var tname = px.domText(sock.user.selectedDeck);
+			dom.push([100, 8, tname],
+			[8, 110, ["Save", function() {
 				if (deckname.value){
 					sock.user.selectedDeck = deckname.value;
 					for (var i = 0;i < 10;i++) buttons[i].style.display = sock.user.selectedDeck == i ? "none": "inline";
@@ -216,8 +218,6 @@ module.exports = function(arena, acard, startempty) {
 				if (sock.user) sock.userEmit("setdeck", {name: sock.user.selectedDeck });
 				startMenu();
 			}]])
-			var tname = new px.MenuText(100, 8, sock.user.selectedDeck);
-			editorui.addChild(tname);
 			buttons = [];
 			for (var i = 0;i < 10;i++) {
 				var b = document.createElement("input");

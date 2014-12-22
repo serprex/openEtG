@@ -16,8 +16,9 @@ module.exports = function(area) {
 	var questmap = new PIXI.Sprite(gfx.bg_quest);
 	questmap.position.set(124, 162);
 	questui.addChild(questmap);
-	var tinfo = new px.MenuText(50, 26, "", 850);
-	var errinfo = new px.MenuText(50, 125, "", 850);
+	var tinfo = px.domText("");
+	var errinfo = px.domText("");
+	tinfo.style.maxWidth = errinfo.style.maxWidth = 850;
 	function makeQuestButton(quest, stage) {
 		var pos = Quest[quest].info.pos[stage];
 		var circle = new PIXI.Graphics();
@@ -49,7 +50,9 @@ module.exports = function(area) {
 			}
 		}
 	});
-	questui.addChild(tinfo);
-	questui.addChild(errinfo);
-	px.refreshRenderer({view:questui, qdom:[750, 246, ["Exit", require("./QuestMain")]]});
+	px.refreshRenderer({view:questui, qdom:[
+		[50, 26, tinfo],
+		[50, 125, errinfo],
+		[750, 246, ["Exit", require("./QuestMain")]]
+	]});
 }
