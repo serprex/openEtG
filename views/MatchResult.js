@@ -29,14 +29,18 @@ module.exports = function(game) {
 
 	if (winner){
 		var tinfo = px.domText(game.quest ? game.wintext : "You won!", 500);
-		tinfo.textAlign = "center";
-		dom.push([450, game.cardreward ? 130 : 250, tinfo]);
+		tinfo.style.textAlign = "center";
+		tinfo.style.width = "900px";
+		dom.push([0, game.cardreward ? 130 : 250, tinfo]);
 	}
 
 	if (winner && sock.user){
 		sock.userExec("addwin", { pvp: !game.ai });
 		if (game.goldreward) {
-			dom.push([340, 550, (game.goldreward - (game.cost || 0)) + "$"]);
+			var goldwon = px.domText((game.goldreward - (game.cost || 0)) + "$");
+			goldwon.style.textAlign = "center";
+			goldwon.style.width = "900px";
+			dom.push([0, 550, goldwon]);
 			sock.userExec("addgold", { g: game.goldreward });
 		}
 		if (game.cardreward) {
