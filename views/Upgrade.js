@@ -119,7 +119,7 @@ module.exports = function() {
 	selectedCardArt.position.set(534, 8);
 	upgradeui.addChild(selectedCardArt);
 
-	var cardsel = new px.CardSelector(null,
+	var cardsel = new px.CardSelector(stage.domtext, null,
 		function(code){
 			var card = Cards.Codes[code];
 			selectedCardArt.setTexture(gfx.getArt(code));

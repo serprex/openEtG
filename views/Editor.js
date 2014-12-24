@@ -261,7 +261,7 @@ module.exports = function(arena, acard, startempty) {
 		}, arena ? (startempty ? [] : etgutil.decodedeck(arena.deck)) : etgutil.decodedeck(sock.getDeck())
 	);
 	editorui.addChild(decksprite);
-	var cardsel = new px.CardSelector(setCardArt,
+	var cardsel = new px.CardSelector(dom, setCardArt,
 		function(code){
 			if (decksprite.deck.length < 60) {
 				var card = Cards.Codes[code];

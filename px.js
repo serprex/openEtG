@@ -62,7 +62,7 @@ function monkeyDomSetText(text){
 	});
 }
 function monkeyButtonSetText(text){
-	if (x){
+	if (text){
 		this.value = text;
 		this.style.display = "inline";
 	}else this.style.display = "none";
@@ -70,10 +70,11 @@ function monkeyButtonSetText(text){
 exports.domButton = function(text, click, mouseover){
 	var ele = document.createElement("input");
 	ele.type = "button";
-	ele.value = text;
 	ele.setText = monkeyButtonSetText;
+	ele.setText(text);
 	if (click) ele.addEventListener("click", click);
 	if (mouseover) ele.addEventListener("mouseover", mouseover);
+	return ele;
 }
 exports.domText = function(text){
 	var ele = document.createElement("span");
@@ -288,7 +289,7 @@ DeckDisplay.prototype.next = function(mpos){
 		}
 	}
 }
-function CardSelector(cardmouseover, cardclick, maxedIndicator, filterboth){
+function CardSelector(dom, cardmouseover, cardclick, maxedIndicator, filterboth){
 	var self = this;
 	PIXI.DisplayObjectContainer.call(this);
 	this.cardpool = undefined;
@@ -301,18 +302,15 @@ function CardSelector(cardmouseover, cardclick, maxedIndicator, filterboth){
 	this.filterboth = filterboth;
 	this.hitArea = new PIXI.Rectangle(100, 272, 800, 328);
 	if (maxedIndicator) this.addChild(this.maxedIndicator = new PIXI.Graphics());
-	var bshiny = exports.mkButton(5, 578, "Toggle Shiny");
-	exports.setClick(bshiny, function() {
+	var bshiny = exports.domButton("Toggle Shiny", function() {
 		self.showshiny ^= true;
 		self.makeColumns();
 	});
-	this.addChild(bshiny);
-	var bshowall = exports.mkButton(5, 530, "Show All");
-	exports.setClick(bshowall, function() {
-		bshowall.setText((self.showall ^= true) ? "Auto Hide" : "Show All");
+	var bshowall = exports.domButton("Show All", function() {
+		this.value = (self.showall ^= true) ? "Auto Hide" : "Show All";
 		self.makeColumns();
 	});
-	this.addChild(bshowall);
+	dom.push([5, 578, bshiny], [5, 530, bshowall]);
 	this.elefilter = this.rarefilter = 0;
 	this.columns = [[],[],[],[],[],[]];
 	this.columnspr = [[],[],[],[],[],[]];

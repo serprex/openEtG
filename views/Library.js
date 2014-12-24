@@ -8,10 +8,6 @@ module.exports = function(data){
 	var stage = px.mkView(), showbound = false;
 	var cardpool = etgutil.deck2pool(data.pool);
 	var boundpool = etgutil.deck2pool(data.bound);
-	var cardsel = new px.CardSelector(function(code){
-		cardArt.setTexture(gfx.getArt(code));
-	});
-	stage.addChild(cardsel);
 	var cardArt = new PIXI.Sprite(gfx.nopic);
 	cardArt.position.set(734, 8);
 	stage.addChild(cardArt);
@@ -31,6 +27,10 @@ module.exports = function(data){
 		}]],
 		[10, 10, ["Exit", require("./MainMenu")]],
 	];
+	var cardsel = new px.CardSelector(dom, function(code){
+		cardArt.setTexture(gfx.getArt(code));
+	});
+	stage.addChild(cardsel);
 	px.refreshRenderer({view:stage, stext: dom, next:function(){
 		cardsel.next(showbound ? boundpool : cardpool);
 	}});

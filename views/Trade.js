@@ -10,18 +10,8 @@ var startMenu = require("./MainMenu");
 module.exports = function() {
 	var view = px.mkView();
 	var cardminus = {};
-	var btrade = px.mkButton(10, 40, "Trade");
-	var bconfirm = px.mkButton(10, 70, "Confirm");
-	var bconfirmed = new PIXI.Text("Confirmed!", { font: "16px Dosis" });
-	bconfirmed.position.set(10, 110);
-	var ownVal = px.domText("");
-	var foeVal = px.domText("");
-	var dom = [[10, 10, ["Cancel", function() {
-		sock.userEmit("canceltrade");
-		startMenu();
-	}]],
-		[100, 235, ownVal],
-		[350, 235, foeVal]];
+	var btrade = px.domButton(10, 40, "Trade");
+	var ownVal = px.domText(""), foeVal = px.domText("");
 	var cardChosen = false;
 	function setCardArt(code){
 		cardArt.setTexture(gfx.getArt(code));
@@ -39,28 +29,37 @@ module.exports = function() {
 	view.addChild(ownDeck);
 	view.addChild(foeDeck);
 	px.setClick(btrade, function() {
-		if (ownDeck.deck.length > 0) {
-			sock.emit("cardchosen", {c: etgutil.encodedeck(ownDeck.deck)});
-			console.log("Offered", ownDeck.deck);
-			cardChosen = true;
-			view.removeChild(btrade);
-			view.addChild(bconfirm);
+		if (!cardChosen){
+			if (ownDeck.deck.length > 0) {
+				sock.emit("cardchosen", {c: etgutil.encodedeck(ownDeck.deck)});
+				console.log("Offered", ownDeck.deck);
+				cardChosen = true;
+				btrade.value = "Confirm";
+				btrade.style.top = "60px";
+			}
+			else chat("You have to choose at least a card!");
+		}else{ // confirm
+			if (foeDeck.deck.length > 0) {
+				console.log("Confirmed", ownDeck.deck, foeDeck.deck);
+				sock.userEmit("confirmtrade", { cards: etgutil.encodedeck(ownDeck.deck), oppcards: etgutil.encodedeck(foeDeck.deck) });
+				btrade.style.display = "none";
+				var confirmed = new PIXI.Text("Confirmed!", { font: "16px Dosis" });
+				confirmed.position.set(10, 110);
+				view.addChild(confirmed);
+			}
+			else chat("Wait for your friend to choose!");
 		}
-		else chat("You have to choose at least a card!");
 	});
-	px.setClick(bconfirm, function() {
-		if (foeDeck.deck.length > 0) {
-			console.log("Confirmed", ownDeck.deck, foeDeck.deck);
-			sock.userEmit("confirmtrade", { cards: etgutil.encodedeck(ownDeck.deck), oppcards: etgutil.encodedeck(foeDeck.deck) });
-			view.removeChild(bconfirm);
-			view.addChild(bconfirmed);
-		}
-		else chat("Wait for your friend to choose!");
-	});
-	view.addChild(btrade);
+	var dom = [[10, 10, ["Cancel", function() {
+		sock.userEmit("canceltrade");
+		startMenu();
+	}]],
+		[100, 235, ownVal],
+		[350, 235, foeVal],
+		[10, 40, btrade]];
 
 	var cardpool = etgutil.deck2pool(sock.user.pool);
-	var cardsel = new px.CardSelector(setCardArt,
+	var cardsel = new px.CardSelector(dom, setCardArt,
 		function(code){
 			var card = Cards.Codes[code];
 			if (ownDeck.deck.length < 30 && !card.isFree() && code in cardpool && !(code in cardminus && cardminus[code] >= cardpool[code])) {
