@@ -36,6 +36,9 @@ function log(x, y){
 		}
 	}
 }
+function pillarval(c){
+	return c instanceof etg.CardInstance?.1:c.status.charges;
+}
 var ActivesValues = {
 	ablaze:3,
 	accelerationspell:5,
@@ -176,6 +179,7 @@ var ActivesValues = {
 	liquid:5,
 	livingweapon:2,
 	lobotomize:6,
+	loot:2,
 	luciferin:3,
 	lycanthropy:4,
 	metamorph: 2,
@@ -201,6 +205,7 @@ var ActivesValues = {
 	},
 	nova:6,
 	nova2:6,
+	nullspell:4,
 	nymph:7,
 	ouija:3,
 	overdrive:function(c){
@@ -222,6 +227,9 @@ var ActivesValues = {
 	"poison 2":3,
 	"poison 3":4,
 	precognition:1,
+	predator:function(c){
+		return Math.max(c.owner.foe.hand.length-6, 1;
+	},
 	protectonce:2,
 	protectall:4,
 	purify:2,
@@ -241,6 +249,8 @@ var ActivesValues = {
 	ren:5,
 	rewind:6,
 	ricochet:2,
+	sadism:5,
+	salvage:2,
 	sanctuary:6,
 	scarab:4,
 	scramble:function(c){
@@ -276,7 +286,8 @@ var ActivesValues = {
 	tick:function(c){
 		return c instanceof etg.CardInstance ? 1 : 1+(c.maxhp-c.truehp())/c.maxhp;
 	},
-	trick: 4,
+	tornado:9,
+	trick:4,
 	turngolem:function(c){
 		return c instanceof etg.CardInstance || !c.status.storedpower ? 0 : c.status.storedpower/3;
 	},
@@ -294,13 +305,13 @@ var ActivesValues = {
 	},
 	wisdom:4,
 	yoink:4,
+	vengeance:2,
 	vindicate:3,
-	pillar:function(c){
-		return c instanceof etg.CardInstance?.1:c.status.charges;
-	},
-	pend:function(c){
-		return c instanceof etg.CardInstance?.1:c.status.charges;
-	},
+	pillar:pillarval,
+	pend:pillarval,
+	pillmat:pillarval,
+	pillspi:pillarval,
+	pillcar:pillarval,
 	absorber:5,
 	blockwithcharge:function(c){
 		return (c instanceof etg.CardInstance?c.card.status.charges:c.status.charges)/(1+c.owner.foe.countcreatures()*2);
