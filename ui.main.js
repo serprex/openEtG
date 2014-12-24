@@ -52,7 +52,7 @@ window.aideck = document.getElementById("aideck");
 			var span = document.createElement("span");
 			if (data.mode != "red") span.style.color = data.mode || "black";
 			if (data.guest) span.style.fontStyle = "italic";
-			span.appendChild(document.createTextNode(h + " " + m + " " + s + " "));
+			span.appendChild(document.createTextNode(h + ":" + m + ":" + s + " "));
 			if (data.u){
 				var belly = document.createElement("b");
 				belly.appendChild(document.createTextNode(data.u + " "));

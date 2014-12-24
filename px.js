@@ -61,6 +61,20 @@ function monkeyDomSetText(text){
 		}
 	});
 }
+function monkeyButtonSetText(text){
+	if (x){
+		this.value = text;
+		this.style.display = "inline";
+	}else this.style.display = "none";
+}
+exports.domButton = function(text, click, mouseover){
+	var ele = document.createElement("input");
+	ele.type = "button";
+	ele.value = text;
+	ele.setText = monkeyButtonSetText;
+	if (click) ele.addEventListener("click", click);
+	if (mouseover) ele.addEventListener("mouseover", mouseover);
+}
 exports.domText = function(text){
 	var ele = document.createElement("span");
 	ele.setText = monkeyDomSetText;
@@ -72,11 +86,7 @@ function parseDom(info){
 	if (typeof info[2] === "string"){
 		ele = exports.domText(info[2]);
 	}else if (info[2] instanceof Array){
-		ele = document.createElement("input");
-		ele.type = "button";
-		ele.value = info[2][0];
-		if (info[2][1]) ele.addEventListener("click", info[2][1]);
-		if (info[2][2]) ele.addEventListener("mouseover", info[2][2]);
+		ele = exports.domButton.apply(null, info[2]);
 	}else ele = info[2];
 	ele.style.left = info[0] + "px";
 	ele.style.top = info[1] + "px";

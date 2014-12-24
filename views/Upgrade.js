@@ -53,14 +53,20 @@ module.exports = function() {
 		else return "You cannot unpolish pillars; sell them instead.";
 	}
 	function sellCard(card) {
-		if (!card.rarity && !card.upped) return "You can't sell a pillar or pendulum, silly!";
 		if (card.rarity == -1) return "You really don't want to sell that, trust me.";
-		var codecount = etgutil.count(sock.user.pool, card.code);
-		if (codecount) {
-			sock.userExec("sellcard", { card: card.code });
-			goldcount.setText(sock.user.gold + "$");
+		else if (card.isFree()){
+			if (sock.user.gold >= 300){
+				sock.userExec("upshpillar", {c: card.code});
+				goldcount.setText(sock.user.gold + "$");
+			}else return "You need 300$ to afford a shiny upgraded pillar!";
+		}else{
+			var codecount = etgutil.count(sock.user.pool, card.code);
+			if (codecount) {
+				sock.userExec("sellcard", { card: card.code });
+				goldcount.setText(sock.user.gold + "$");
+			}
+			else return "This card is bound to your account; you cannot sell it.";
 		}
-		else return "This card is bound to your account; you cannot sell it.";
 	}
 	function eventWrap(func){
 		return function(){
@@ -124,7 +130,7 @@ module.exports = function() {
 				px.setDomVis("bunupgrade", true);
 				tinfo.setText(card.isFree() ? "" : card.rarity != -1 ? "Convert into an 6 unupgraded copies." : "Convert into an unupgraded version.");
 			}else{
-				tinfo.setText(card.isFree() ? "Costs 50$ to upgrade" : card.rarity != -1 ? "Convert 6 into an upgraded version." : "Convert into an upgraded version.");
+				tinfo.setText(card.isFree() ? "50$ to upgrade" : card.rarity != -1 ? "Convert 6 into an upgraded version." : "Convert into an upgraded version.");
 				px.setDomVis("bupgrade", true);
 				px.setDomVis("bunupgrade", false);
 			}
@@ -138,13 +144,14 @@ module.exports = function() {
 				px.setDomVis("bunpolish", true);
 				tinfo3.setText(card.isFree() ? "" : card.rarity != -1 ? "Convert into 6 non-shiny copies." : "Convert into 2 non-shiny copies.")
 			}else{
-				tinfo3.setText(card.isFree() ? "Costs 50$ to polish" : card.rarity == 5 ? "This card cannot be polished." : card.rarity != -1 ? "Convert 6 into a shiny version." : "Convert 2 into a shiny version.")
+				tinfo3.setText(card.isFree() ? "50$ to polish" : card.rarity == 5 ? "This card cannot be polished." : card.rarity != -1 ? "Convert 6 into a shiny version." : "Convert 2 into a shiny version.")
 				px.setDomVis("bpolish", true);
 				px.setDomVis("bunpolish", false);
 			}
-			px.setDomVis("bsell", ~card.rarity && !card.isFree());
-			tinfo2.setText(~card.rarity && !card.isFree() ?
-				"Sells for " + userutil.sellValues[card.rarity] * (card.upped ? 6 : 1) * (card.shiny ? 6 : 1) + "$" : "");
+			px.setDomVis("bsell", ~card.rarity);
+			document.getElementById("bsell").value = card.isFree() ? "Polgrade" : "Sell";
+			tinfo2.setText(card.rarity == -1 ? "" : card.isFree() ? "300$ to shine & polish" :
+				"Sell for " + userutil.sellValues[card.rarity] * (card.upped ? 6 : 1) * (card.shiny ? 6 : 1) + "$");
 			twarning.setText("");
 		}, true
 	);

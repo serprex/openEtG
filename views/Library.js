@@ -6,9 +6,6 @@ var etgutil = require("./etgutil");
 var userutil = require("./userutil");
 module.exports = function(data){
 	var stage = px.mkView(), showbound = false;
-	var bexit = px.mkButton(10, 10, "Exit");
-	px.setClick(bexit, require("./MainMenu"));
-	stage.addChild(bexit);
 	var cardpool = etgutil.deck2pool(data.pool);
 	var boundpool = etgutil.deck2pool(data.bound);
 	var cardsel = new px.CardSelector(function(code){
@@ -31,7 +28,8 @@ module.exports = function(data){
 	var dom = [[100, 16, "Cumulative wealth: " + Math.round(wealth) + "\nZE Progress: " + progress + " / " + progressmax],
 		[5, 554, ["Toggle Bound", function(){
 			showbound ^= true;
-		}]]
+		}]],
+		[10, 10, ["Exit", require("./MainMenu")]],
 	];
 	px.refreshRenderer({view:stage, stext: dom, next:function(){
 		cardsel.next(showbound ? boundpool : cardpool);

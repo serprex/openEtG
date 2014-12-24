@@ -69,39 +69,46 @@ function untransmute(user, oldcard, func, use) {
 exports.upgrade = function(data, user) {
 	var card = Cards.Codes[data.card];
 	if (!card || card.upped) return;
-	var use = card.rarity != -1 ? 6 : 1;
+	var use = ~card.rarity ? 6 : 1;
 	transmute(user, card.code, etgutil.asUpped, use);
 }
 exports.unupgrade = function(data, user) {
 	var card = Cards.Codes[data.card];
 	if (!card || !card.upped) return;
-	var use = card.rarity != -1 ? 6 : 1;
+	var use = ~card.rarity ? 6 : 1;
 	untransmute(user, card.code, etgutil.asUpped, use);
-}
-exports.uppillar = function(data, user){
-	var card = Cards.Codes[data.c];
-	if (card && user.gold >= 50 && card.rarity === 0 && !card.shiny){
-		user.gold -= 50;
-		user.pool = etgutil.addcard(user.pool, etgutil.asUpped(data.c, true));
-	}
 }
 exports.polish = function(data, user) {
 	var card = Cards.Codes[data.card];
 	if (!card || card.shiny || card.rarity == 5) return;
-	var use = card.rarity != -1 ? 6 : 2;
+	var use = ~card.rarity ? 6 : 2;
 	transmute(user, card.code, etgutil.asShiny, use);
 }
 exports.unpolish = function(data, user) {
 	var card = Cards.Codes[data.card];
 	if (!card || !card.shiny || card.rarity == 5) return;
-	var use = card.rarity != -1 ? 6 : 2;
+	var use = ~card.rarity ? 6 : 2;
 	untransmute(user, card.code, etgutil.asShiny, use);
+}
+exports.uppillar = function(data, user){
+	var card = Cards.Codes[data.c];
+	if (card && user.gold >= 50 && card.isFree()){
+		user.gold -= 50;
+		user.pool = etgutil.addcard(user.pool, etgutil.asUpped(data.c, true));
+	}
 }
 exports.shpillar = function(data, user){
 	var card = Cards.Codes[data.c];
-	if (card && user.gold >= 50 && card.rarity === 0 && !card.shiny){
+	if (card && user.gold >= 50 && card.isFree()){
 		user.gold -= 50;
 		user.pool = etgutil.addcard(user.pool, etgutil.asShiny(data.c, true));
+	}
+}
+exports.upshpillar = function(data, user){
+	var card = Cards.Codes[data.c];
+	if (card && user.gold >= 300 && card.isFree()){
+		user.gold -= 300;
+		user.pool = etgutil.addcard(user.pool, etgutil.asUpped(etgutil.asShiny(data.c, true), true));
 	}
 }
 exports.upshall = function(data, user) {
