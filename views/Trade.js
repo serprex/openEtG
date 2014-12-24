@@ -10,25 +10,7 @@ var startMenu = require("./MainMenu");
 module.exports = function() {
 	var view = px.mkView();
 	var cardminus = {};
-	var btrade = px.domButton(10, 40, "Trade");
-	var ownVal = px.domText(""), foeVal = px.domText("");
-	var cardChosen = false;
-	function setCardArt(code){
-		cardArt.setTexture(gfx.getArt(code));
-		cardArt.visible = true;
-	}
-	var ownDeck = new px.DeckDisplay(30, setCardArt,
-		function(i) {
-			px.adjust(cardminus, ownDeck.deck[i], -1);
-			ownDeck.rmCard(i);
-			ownVal.setText(userutil.calcWealth(cardminus) + "");
-		}
-	);
-	var foeDeck = new px.DeckDisplay(30, setCardArt);
-	foeDeck.position.x = 450;
-	view.addChild(ownDeck);
-	view.addChild(foeDeck);
-	px.setClick(btrade, function() {
+	var btrade = px.domButton("Trade", function() {
 		if (!cardChosen){
 			if (ownDeck.deck.length > 0) {
 				sock.emit("cardchosen", {c: etgutil.encodedeck(ownDeck.deck)});
@@ -50,6 +32,23 @@ module.exports = function() {
 			else chat("Wait for your friend to choose!");
 		}
 	});
+	var ownVal = px.domText(""), foeVal = px.domText("");
+	var cardChosen = false;
+	function setCardArt(code){
+		cardArt.setTexture(gfx.getArt(code));
+		cardArt.visible = true;
+	}
+	var ownDeck = new px.DeckDisplay(30, setCardArt,
+		function(i) {
+			px.adjust(cardminus, ownDeck.deck[i], -1);
+			ownDeck.rmCard(i);
+			ownVal.setText(userutil.calcWealth(cardminus) + "");
+		}
+	);
+	var foeDeck = new px.DeckDisplay(30, setCardArt);
+	foeDeck.position.x = 450;
+	view.addChild(ownDeck);
+	view.addChild(foeDeck);
 	var dom = [[10, 10, ["Cancel", function() {
 		sock.userEmit("canceltrade");
 		startMenu();
