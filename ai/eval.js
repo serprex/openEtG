@@ -228,7 +228,7 @@ var ActivesValues = {
 	"poison 3":4,
 	precognition:1,
 	predator:function(c){
-		return Math.max(c.owner.foe.hand.length-6, 1;
+		return Math.max(c.owner.foe.hand.length-6, 1);
 	},
 	protectonce:2,
 	protectall:4,

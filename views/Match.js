@@ -136,7 +136,7 @@ function startMatch(game, foeDeck) {
 			}
 		}
 	}
-	endturn.addEventListener("click", endClick.bind(null));
+	endturn.addEventListener("click", endClick.bind(null, undefined));
 	function cancelClick(){
 		if (resigning) {
 			resign.value = "Resign";
@@ -530,11 +530,11 @@ function startMatch(game, foeDeck) {
 			if (game.turn == game.player1){
 				endturn.setText(game.phase == etg.PlayPhase ? "End Turn" : "Accept Hand");
 				cancel.setText(game.phase != etg.PlayPhase ? "Mulligan" : game.targetingMode || discarding || resigning ? "Cancel" : null);
-			}else cancel.visible = endturn.visible = false;
+			}else cancel.style.display = endturn.style.display = "none";
 		}else{
 			px.maybeSetText(turntell, (game.turn == game.player1 ? "Your" : "Their") + " Turn\n" + (game.winner == game.player1?"Won":"Lost"));
 			endturn.setText("Continue");
-			cancel.visible = false;
+			cancel.style.display = "none";
 		}
 		foeplays.children.forEach(function(foeplay){
 			foeplay.setTexture(foeplay.card instanceof etg.Card ? gfx.getCardImage(foeplay.card.code) : ui.getTextImage(foeplay.card, 12));
