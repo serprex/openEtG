@@ -40,7 +40,6 @@ module.exports = function(nymph) {
 		"You may mulligan at the start of the game to shuffle & redraw your hand with one less card",
 		"Your account name is case sensitive",
 		"Arena Tier 1 is unupgraded, while Tier 2 is upgraded. All decks in a tier have the same number of attribute points",
-		"You may store 10 decks in the editor",
 		"If you type '/who' in chat you will get a list of the users who are online. '/w username message' will send your message only to one user",
 		"Chat commands: /who, /mute, /unmute, /clear, /w, /decks",
 		"Keyboard shortcuts: space ends turn, backspace cancels, w targets opponent, s targets yourself, 1 through 8 cast cards in hand",
@@ -48,7 +47,6 @@ module.exports = function(nymph) {
 		"The AI Deck input may be used to fight any deck of your choice, but only in sandbox mode",
 		"Remember that you may use the logout button to enter sandbox mode to review the card pool, check rarities & try out new decks",
 		"Commoner & Champion have random decks, while Mage & Demigod have premade decks. Commoner & Mage are unupped, Champion has some upped, & Demigod is fully upped",
-		"Decks submitted to arena gain a point per win, & lose a point per loss. Rankings are shown in Arena T20",
 		"Decks submitted to arena lose hp exponentially per day, down to a minimum of a quarter of their original hp",
 		"If you don't get what you want from the packs in the shop, ask to trade in chat or the openEtG forum",
 		"Rarity doesn't necessarily relate to card strength. You can go a long ways with commons & uncommons",
@@ -56,6 +54,7 @@ module.exports = function(nymph) {
 		"Mark cards are only obtainable through PvP events. A tournament deck verifier is at tournament.htm",
 		"After an AI battle you will win a random common, uncommon, or rare from your opponent's deck",
 		"Cards in packs have a (45/packsize)% chance to increment rarity",
+		"At Wealth T50 you can see which players has the highest wealth. Your wealth is a combination of your current gold and the value of all your cards."
 	];
 	var tipNumber = etg.PlayerRng.upto(tipjar.length);
 
