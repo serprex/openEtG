@@ -5,6 +5,17 @@ var ui = require("./uiutil");
 var chat = require("./chat");
 var sock = require("./sock");
 var etgutil = require("./etgutil");
+function toggleB() {
+	for (var i = 0;i < arguments.length;i++) {
+		if (arguments[i].style){
+			arguments.style.display = arguments[i].style.display == "none" ? "inline" : "none";
+		}else{
+			arguments[i].visible ^= true;
+			arguments[i].interactive ^= true;
+			arguments[i].buttonMode ^= true;
+		}
+	}
+}
 module.exports = function() {
 	var packdata = [
 		{cost: 15, type: "Bronze", info: "10 Commons", color: 0xcd7d32},
@@ -16,7 +27,6 @@ module.exports = function() {
 	var packele = -1, packrarity = -1;
 
 	var storeui = px.mkView();
-	var dom = [[775, 246, ["Exit", require("./MainMenu")]]];
 
 	storeui.addChild(px.mkBgRect(
 		40, 16, 820, 60,
@@ -28,11 +38,12 @@ module.exports = function() {
 	var tgold = px.domText(sock.user.gold + "$");
 	var tinfo = px.domText("Select from which element you want.");
 	var tinfo2 = px.domText("Select which type of booster you want.");
-	dom.push(
+	var dom = [
+		[775, 246, ["Exit", require("./MainMenu")]],
 		[775, 101, tgold],
 		[50, 26, tinfo],
 		[50, 51, tinfo2]
-	);
+	];
 
 	if (sock.user.freepacks){
 		var freeinfo = px.domText("");
@@ -44,17 +55,15 @@ module.exports = function() {
 		}
 	}
 
-	var bget = px.mkButton(775, 156, "Take Cards");
-	px.toggleB(bget);
-	px.setClick(bget, function () {
-		px.toggleB(bget, bbuy);
-		px.toggleB.apply(null, buttons);
+	var bget = px.domButton("Take Cards", function () {
+		bget.style.display = "none";
+		bbuy.style.display = "inline";
+		toggleB.apply(null, buttons);
 		popbooster.visible = false;
 	});
-	storeui.addChild(bget);
+	bget.style.display = "none";
 
-	var bbuy = px.mkButton(775, 156, "Buy Pack");
-	px.setClick(bbuy, function() {
+	function buyPack() {
 		if (packrarity == -1) {
 			tinfo2.setText("Select a pack first!");
 			return;
@@ -68,12 +77,13 @@ module.exports = function() {
 		ui.parseInput(boostdata, "bulk", packmulti.value, 99);
 		if (sock.user.gold >= pack.cost * (boostdata.bulk || 1) || (sock.user.freepacks && sock.user.freepacks[packrarity] > 0)) {
 			sock.userEmit("booster", boostdata);
-			px.toggleB(bbuy);
+			bbuy.style.display = "none";
 		} else {
 			tinfo2.setText("You can't afford that!");
 		}
-	});
-	storeui.addChild(bbuy);
+	}
+	var bbuy = px.domButton("Buy Pack", buyPack);
+	dom.push([775, 156, bget], [775, 156, bbuy]);
 
 	var buttons = packdata.map(function(pack, n){
 		var g = new PIXI.Graphics();
@@ -137,8 +147,8 @@ module.exports = function() {
 				tgold.setText(sock.user.gold + "$");
 			}
 			if (etgutil.decklength(data.cards) < 11){
-				px.toggleB(bget);
-				px.toggleB.apply(null, buttons);
+				bget.style.display = "inline";
+				toggleB.apply(null, buttons);
 				if (popbooster.children.length) popbooster.removeChildren();
 				etgutil.iterdeck(data.cards, function(code, i){
 					var x = i % 5, y = Math.floor(i/5);
@@ -149,18 +159,23 @@ module.exports = function() {
 				});
 				popbooster.visible = true;
 			}else{
+				bbuy.style.display = "inline";
 				var link = document.createElement("a");
 				link.href = "deck/" + data.cards;
 				link.target = "_blank";
 				link.appendChild(document.createTextNode(data.cards));
 				chat.addSpan(link);
-				px.toggleB(bbuy);
 			}
 		},
 	};
 	var packmulti = document.createElement("input");
 	packmulti.style.width = "64px";
 	packmulti.placeholder = "Bulk";
+	packmulti.addEventListener("keydown", function(e){
+		if (e.keyCode == 13){
+			buyPack();
+		}
+	});
 	dom.push([777, 184, packmulti]);
 	px.refreshRenderer({view: storeui, domsho: dom});
 }

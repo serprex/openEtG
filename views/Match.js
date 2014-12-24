@@ -54,12 +54,23 @@ function startMatch(game, foeDeck) {
 	cloakgfx.drawRect(130, 20, 660, 280);
 	cloakgfx.endFill();
 	gameui.addChild(cloakgfx);
-	var endturn = px.mkButton(800, 520, "Accept Hand");
-	var cancel = px.mkButton(800, 490, "Mulligan");
-	var resign = px.mkButton(8, 24, "Resign");
-	gameui.addChild(endturn);
-	gameui.addChild(cancel);
-	gameui.addChild(resign);
+	var endturn = px.domButton("Accept Hand");
+	var cancel = px.domButton("Mulligan");
+	var resign = px.domButton("Resign", function() {
+		if (resigning){
+			if (!game.ai) sock.emit("foeleft");
+			game.setWinner(game.player2);
+			endClick();
+		}else{
+			resign.value = "Confirm";
+			resigning = true;
+		}
+	});
+	var dom = [
+		[800, 520, endturn],
+		[800, 490, cancel],
+		[8, 24, resign],
+	];
 	var turntell = new PIXI.Text("", { font: "16px Dosis" });
 	turntell.position.set(800, 550);
 	gameui.addChild(turntell);
@@ -74,7 +85,7 @@ function startMatch(game, foeDeck) {
 		}
 		return data;
 	}
-	px.setClick(endturn, function(e, discard) {
+	function endClick(discard) {
 		if (game.turn == game.player1 && game.phase <= etg.MulliganPhase2){
 			if (!game.ai) sock.emit("mulligan", {draw: true});
 			game.progressMulligan();
@@ -124,10 +135,11 @@ function startMatch(game, foeDeck) {
 					foeplays.removeChildren();
 			}
 		}
-	}, false);
-	px.setClick(cancel, function() {
+	}
+	endturn.addEventListener("click", endClick.bind(null));
+	function cancelClick(){
 		if (resigning) {
-			resign.setText("Resign");
+			resign.value = "Resign";
 			resigning = false;
 		} else if (game.turn == game.player1) {
 			if (game.phase <= etg.MulliganPhase2 && game.player1.hand.length > 0) {
@@ -137,17 +149,8 @@ function startMatch(game, foeDeck) {
 				delete game.targetingMode;
 			} else discarding = false;
 		}
-	});
-	px.setClick(resign, function() {
-		if (resigning){
-			if (!game.ai) sock.emit("foeleft");
-			game.setWinner(game.player2);
-			endturn.click();
-		}else{
-			resign.setText("Confirm");
-			resigning = true;
-		}
-	});
+	}
+	cancel.addEventListener("click", cancelClick);
 	var activeInfo = {
 		firebolt:function(){
 			return 3+Math.floor(game.player1.quanta[etg.Fire]/4);
@@ -211,7 +214,7 @@ function startMatch(game, foeDeck) {
 						var cardinst = game.players(_j).hand[_i];
 						if (cardinst) {
 							if (!_j && discarding) {
-								endturn.click(null, _i);
+								endClick(_i);
 							} else if (game.targetingMode) {
 								if (game.targetingMode(cardinst)) {
 									delete game.targetingMode;
@@ -373,9 +376,9 @@ function startMatch(game, foeDeck) {
 	gameui.addChild(infobox);
 	function onkeydown(e) {
 		if (e.keyCode == 32) { // spc
-			endturn.click();
+			endClick();
 		} else if (e.keyCode == 8) { // bsp
-			cancel.click();
+			cancelClick();
 		} else if (e.keyCode >= 49 && e.keyCode <= 56) {
 			handsprite[0][e.keyCode-49].click();
 		} else if (e.keyCode == 83 || e.keyCode == 87) { // s/w
@@ -410,7 +413,7 @@ function startMatch(game, foeDeck) {
 	gameui.endnext = function() {
 		document.removeEventListener("keydown", onkeydown);
 	}
-	px.refreshRenderer({view:gameui, next:function() {
+	px.refreshRenderer({view:gameui, gamedom:dom, next:function() {
 		if (game.turn == game.player2 && game.ai) {
 			if (game.phase == etg.PlayPhase){
 				if (!aiCommand){

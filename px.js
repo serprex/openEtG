@@ -153,13 +153,6 @@ exports.setInteractive = function() {
 		arguments[i].interactive = true;
 	}
 }
-exports.toggleB = function() {
-	for (var i = 0;i < arguments.length;i++) {
-		arguments[i].visible ^= true;
-		arguments[i].interactive ^= true;
-		arguments[i].buttonMode ^= true;
-	}
-}
 exports.mkView = function(mouseover){
 	var view = new PIXI.DisplayObjectContainer();
 	view.interactive = true;
@@ -194,8 +187,7 @@ exports.mkBgRect = function(){
 	return g;
 }
 exports.mkButton = function(x, y, b, mouseoverfunc, mouseoutfunc) {
-	if (typeof b == "string") b = new MenuButton(b);
-	else if (b instanceof PIXI.Texture) b = new PIXI.Sprite(b);
+	if (b instanceof PIXI.Texture) b = new PIXI.Sprite(b);
 	b.interactive = true;
 	b.buttonMode = true;
 	b.position.set(x, y);
@@ -217,21 +209,6 @@ exports.adjust = function adjust(cardminus, code, x) {
 		cardminus[code] += x;
 	} else cardminus[code] = x;
 	delete cardminus.rendered;
-}
-function MenuButton(text){
-	PIXI.Sprite.call(this, gfx.button);
-	this.txt = new PIXI.Text(text, {font: "14px Dosis"});
-	this.txt.anchor.x = .5;
-	this.txt.position.set(this.width/2, 3);
-	if (this.txt.width > this.width-6) this.txt.width = this.width-6;
-	this.addChild(this.txt);
-}
-MenuButton.prototype = Object.create(PIXI.Sprite.prototype);
-MenuButton.prototype.setText = function(x){
-	if (x){
-		exports.maybeSetText(this.txt, x);
-		this.visible = true;
-	}else this.visible = false;
 }
 function DeckDisplay(decksize, cardmouseover, cardclick, deck){
 	PIXI.DisplayObjectContainer.call(this);
@@ -418,6 +395,5 @@ CardSelector.prototype.renderColumns = function(){
 		}
 	}
 }
-exports.MenuButton = MenuButton;
 exports.DeckDisplay = DeckDisplay;
 exports.CardSelector = CardSelector;
