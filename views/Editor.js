@@ -1,13 +1,13 @@
 "use strict";
-var px = require("./px");
-var etg = require("./etg");
-var gfx = require("./gfx");
-var ui = require("./uiutil");
-var chat = require("./chat");
-var sock = require("./sock");
-var Cards = require("./Cards");
-var etgutil = require("./etgutil");
-var options = require("./options");
+var px = require("../px");
+var etg = require("../etg");
+var gfx = require("../gfx");
+var ui = require("../uiutil");
+var chat = require("../chat");
+var sock = require("../sock");
+var Cards = require("../Cards");
+var etgutil = require("../etgutil");
+var options = require("../options");
 module.exports = function(arena, acard, startempty) {
 	if (!Cards.loaded) return;
 	if (arena && (!sock.user || arena.deck === undefined || acard === undefined)) arena = false;

@@ -1,14 +1,14 @@
 "use strict";
-var px = require("./px");
-var etg = require("./etg");
-var gfx = require("./gfx");
-var ui = require("./uiutil");
-var mkAi = require("./mkAi");
-var sock = require("./sock");
-var Cards = require("./Cards");
-var Effect = require("./Effect");
-var Actives = require("./Actives");
-var etgutil = require("./etgutil");
+var px = require("../px");
+var etg = require("../etg");
+var gfx = require("../gfx");
+var ui = require("../uiutil");
+var mkAi = require("../mkAi");
+var sock = require("../sock");
+var Cards = require("../Cards");
+var Effect = require("../Effect");
+var Actives = require("../Actives");
+var etgutil = require("../etgutil");
 function startMatch(game, foeDeck) {
 	function drawBorder(obj, spr) {
 		if (obj) {
@@ -98,7 +98,7 @@ function startMatch(game, foeDeck) {
 					if (game.quest){
 						if (game.autonext) {
 							var data = addNoHealData(game);
-							var newgame = require("./Quest").mkQuestAi(game.quest[0], game.quest[1] + 1, game.area);
+							var newgame = require("../Quest").mkQuestAi(game.quest[0], game.quest[1] + 1, game.area);
 							newgame.addData(data);
 							return;
 						}else if (sock.user.quest[game.quest[0]] <= game.quest[1] || !(game.quest[0] in sock.user.quest)) {
@@ -418,7 +418,7 @@ function startMatch(game, foeDeck) {
 			if (game.phase == etg.PlayPhase){
 				if (!aiCommand){
 					Effect.disable = true;
-					aiState = require("./ai/search")(game, aiState);
+					aiState = require("../ai/search")(game, aiState);
 					Effect.disable = false;
 					if (aiState.length <= 2){
 						aiCommand = true;
@@ -433,7 +433,7 @@ function startMatch(game, foeDeck) {
 					}
 				}
 			}else if (game.phase <= etg.MulliganPhase2){
-				gameui.cmds.mulligan({draw: require("./ai/mulligan")(game.player2)});
+				gameui.cmds.mulligan({draw: require("../ai/mulligan")(game.player2)});
 			}
 		}
 		var pos = px.getMousePos();

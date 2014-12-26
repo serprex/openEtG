@@ -1,6 +1,6 @@
 "use strict";
-var px = require("./px");
-var chat = require("./chat");
+var px = require("../px");
+var chat = require("../chat");
 module.exports = function(info) {
 	info = info.top;
 	if (!info) {

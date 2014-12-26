@@ -1,8 +1,8 @@
 "use strict";
-var etg = require("./etg");
-var Cards = require("./Cards");
-var Actives = require("./Actives");
-var etgutil = require("./etgutil");
+var etg = require("../etg");
+var Cards = require("../Cards");
+var Actives = require("../Actives");
+var etgutil = require("../etgutil");
 module.exports = function(level) {
 	if (!Cards.loaded){
 		return;

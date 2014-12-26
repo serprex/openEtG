@@ -1,12 +1,12 @@
 "use strict";
-var px = require("./px");
-var etg = require("./etg");
-var gfx = require("./gfx");
-var chat = require("./chat");
-var sock = require("./sock");
-var Cards = require("./Cards");
-var etgutil = require("./etgutil");
-var userutil = require("./userutil");
+var px = require("../px");
+var etg = require("../etg");
+var gfx = require("../gfx");
+var chat = require("../chat");
+var sock = require("../sock");
+var Cards = require("../Cards");
+var etgutil = require("../etgutil");
+var userutil = require("../userutil");
 module.exports = function(reward, numberofcopies, code) {
 	if (!numberofcopies) numberofcopies = 1;
 	var rewardList, chosenReward;

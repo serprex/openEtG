@@ -1,6 +1,6 @@
 "use strict";
-var etg = require("./etg");
-var Actives = require("./Actives");
+var etg = require("../etg");
+var Actives = require("../Actives");
 var enableLogging = false, logbuff, logstack;
 function logStart(){
 	if (enableLogging){

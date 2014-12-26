@@ -1,6 +1,6 @@
 "use strict";
-var etg = require("./etg");
-var Cards = require("./Cards");
+var etg = require("../etg");
+var Cards = require("../Cards");
 module.exports = function(pl){
 	if (pl.hand.length < 6)return true;
 	var hasQuanta = pl.hand.some(function(c){

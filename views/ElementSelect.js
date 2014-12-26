@@ -1,8 +1,8 @@
 "use strict";
-var px = require("./px");
-var etg = require("./etg");
-var gfx = require("./gfx");
-var sock = require("./sock");
+var px = require("../px");
+var etg = require("../etg");
+var gfx = require("../gfx");
+var sock = require("../sock");
 module.exports = function() {
 	var stage = px.mkView();
 	var eledesc = px.domText("Select your starter element");

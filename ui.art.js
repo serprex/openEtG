@@ -24,7 +24,7 @@ require("./httpcards")(function() {
 		[["pepokish", "http://theowlettenest.com"],
 			["52g", "58o", "5bv", "5f0", "5i4", "5ie", "5l8", "5lb", "5oj"]],
 		[["Ravizant", "http://elementscommunity.org/forum/profile/?u=8037"], ["Element Icons", "assets/esheet.png"], ["Card Backgrounds", "assets/backsheet.png"],
-			["4sc", "4tb", "4vp", "4vi", "4vj", "4vm", "4vq", "4vt", "4vu", "4vv", "500", "503", "50a", "50u", "52h", "52j", "52k", "52r", "52u", "52v", "531", "533", "534", "537", "53e", "542", "55n", "55q",
+			["4sc", "4tb", "4vp", "4vi", "4vj", "4vm", "4vq", "4vt", "4vu", "4vv", "500", "503", "50a", "50u", "52h", "52j", "52k", "52n", "52r", "52u", "52v", "531", "533", "534", "537", "53e", "542", "55n", "55q",
 			"55v", "564", "568", "56i", "576", "58p", "58q", "58r", "58u", "58v", "595", "599", "59a", "59f", "59g", "59h", "59i", "59m", "5bt", "5c3", "5c8", "5ca", "5cb", "5cc", "5cd", "5ce", "5cf", "5cg",
 			"5ch", "5ci", "5cq", "5de", "5f3", "5f8", "5f9", "5fd", "5fi", "5fu", "5gi", "5ia", "5ih", "5ik", "5im", "5in", "5ip", "5is", "5j2", "5jm", "5l9", "5la", "5lc", "5lh", "5lp", "5m6", "5mq", "5oh",
 			"5ou", "5p1", "5p3", "5pa", "5pu", "5rm", "5rn", "5rq", "5se", "5t2", "5uq", "5uu", "5vd", "5vi", "61p", "61q", "61v", "620", "627", "62c", "62m", "6rr", "6u3", "77a", "77p", "7au", "7av", "7dj", "7e2", "7jq", "7k1", "7qa", "7ta", "809", "80a"]],

@@ -1,9 +1,9 @@
 "use strict";
-var px = require("./px");
-var etg = require("./etg");
-var gfx = require("./gfx");
-var sock = require("./sock");
-var etgutil = require("./etgutil");
+var px = require("../px");
+var etg = require("../etg");
+var gfx = require("../gfx");
+var sock = require("../sock");
+var etgutil = require("../etgutil");
 module.exports = function(info) {
 	if (!info) return;
 	var stage = px.mkView();

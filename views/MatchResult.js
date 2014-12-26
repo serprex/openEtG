@@ -1,12 +1,12 @@
 "use strict";
-var px = require("./px");
-var gfx = require("./gfx");
-var chat = require("./chat");
-var mkAi = require("./mkAi");
-var sock = require("./sock");
-var etgutil = require("./etgutil");
-var options = require("./options");
-var userutil = require("./userutil");
+var px = require("../px");
+var gfx = require("../gfx");
+var chat = require("../chat");
+var mkAi = require("../mkAi");
+var sock = require("../sock");
+var etgutil = require("../etgutil");
+var options = require("../options");
+var userutil = require("../userutil");
 module.exports = function(game) {
 	var winner = game.winner == game.player1;
 	var victoryui = px.mkView();

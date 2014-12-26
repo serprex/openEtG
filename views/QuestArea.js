@@ -1,7 +1,7 @@
-var px = require("./px");
-var gfx = require("./gfx");
-var sock = require("./sock");
-var Quest = require("./Quest");
+var px = require("../px");
+var gfx = require("../gfx");
+var sock = require("../sock");
+var Quest = require("../Quest");
 function startQuest(questname) {
 	if (!sock.user.quest[questname] && sock.user.quest[questname] != 0) {
 		sock.user.quest[questname] = 0;

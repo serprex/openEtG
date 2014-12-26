@@ -15,6 +15,7 @@
     "serve-static": "^1.7.1"
   },
   "devDependencies": {
+    "browserify": "^8.0.1",
     "qunitjs": "^1.15.0",
     "urllib": "^2.0.1"
   },

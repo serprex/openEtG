@@ -1,8 +1,8 @@
 "use strict";
-var px = require("./px");
-var sock = require("./sock");
-var aiDecks = require("./Decks");
-var mkAi = require("./mkAi");
+var px = require("../px");
+var sock = require("../sock");
+var aiDecks = require("../Decks");
+var mkAi = require("../mkAi");
 var startMenu = require("./MainMenu");
 function mkDaily(type) {
 	if (type < 3) {
@@ -46,7 +46,7 @@ module.exports = function(){
 	}
 	if (sock.user.daily == 63){
 		div.push([50, 280, ["Nymph!", function(){
-			var etg = require("./etg");
+			var etg = require("../etg");
 			var nymph = etg.NymphList[etg.PlayerRng.uptoceil(12)];
 			sock.userExec("donedaily", {daily: 6, c: nymph});
 			startMenu(nymph);

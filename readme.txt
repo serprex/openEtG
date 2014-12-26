@@ -11,16 +11,14 @@ How to setup on Windows:
 
 3	Hold Shift and right-click on your openEtG folder that you created in step 2, click Open command window here, run "npm install"
 
-4	Run "npm install -g browserify"
+4	Run "node updatedb.js" (NB it takes csv files as parameters if you don't want to download every single one)
 
-5	Run "node updatedb.js" (NB it takes csv files as parameters if you don't want to download every single one)
+5	Download pixi.dev.js from https://github.com/GoodBoyDigital/pixi.js/tree/master/bin
 
-6	Download pixi.dev.js from https://github.com/GoodBoyDigital/pixi.js/tree/master/bin
+6	ninja.exe should be in openEtG's folder. Run ninja.exe to build etgify.js
 
-7	ninja.exe should be in openEtG's folder. Run ninja.exe to build etgify.js
+7	Start redis-server and, in console, run "node server.js"
 
-8	Start redis-server, and in the console, run "node server.js"
-
-9	Browse to http://127.0.0.1:13602 and it should work!
+8	Browse to http://127.0.0.1:13602 and it should work!
 
 NB when you edit a module you need to run step 6 to update etgify, & when the card DB is updated you need to run step 5

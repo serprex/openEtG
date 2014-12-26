@@ -1,7 +1,7 @@
 "use strict";
-var px = require("./px");
-var chat = require("./chat");
-var Cards = require("./Cards");
+var px = require("../px");
+var chat = require("../chat");
+var Cards = require("../Cards");
 module.exports = function(info) {
 	info = info.top;
 	if (!info) {

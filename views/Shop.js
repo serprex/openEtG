@@ -1,10 +1,10 @@
-var px = require("./px");
-var etg = require("./etg");
-var gfx = require("./gfx");
-var ui = require("./uiutil");
-var chat = require("./chat");
-var sock = require("./sock");
-var etgutil = require("./etgutil");
+var px = require("../px");
+var etg = require("../etg");
+var gfx = require("../gfx");
+var ui = require("../uiutil");
+var chat = require("../chat");
+var sock = require("../sock");
+var etgutil = require("../etgutil");
 function toggleB() {
 	for (var i = 0;i < arguments.length;i++) {
 		if (arguments[i].style){
