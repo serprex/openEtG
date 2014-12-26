@@ -2,7 +2,7 @@ var chat = require("./chat");
 var etgutil = require("./etgutil");
 var options = require("./options");
 var userutil = require("./userutil");
-var socket = require("engine.io-client")({hostname: location.hostname, port: 13602});
+var socket = eio({hostname: location.hostname, port: 13602});
 socket.on("close", function(){
 	require("./chat")("Reconnecting in 99ms");
 	setTimeout(socket.open.bind(socket), 99);
