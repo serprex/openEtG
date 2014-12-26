@@ -5,8 +5,7 @@ var gfx = require("./gfx");
 var sock = require("./sock");
 module.exports = function() {
 	var stage = px.mkView();
-	var eledesc = px.DomText(100, 250, "Select your starter element");
-	stage.addChild(eledesc);
+	var eledesc = px.domText("Select your starter element");
 	etg.eleNames.forEach(function(name, i){
 		if (i > 13) return;
 		var ele = new PIXI.Sprite(gfx.eicons[i]);
