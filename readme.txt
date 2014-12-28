@@ -9,9 +9,9 @@ How to setup on Windows:
 
 2	Right click where you want the files to be and click Git Clone to create an openetg folder somewhere, use the URL: https://github.com/Fippe94/openEtG.git
 
-3	Hold Shift and right-click on your openEtG folder that you created in step 2, click Open command window here, run "npm install"
+3	Hold Shift and right-click on your openEtG folder that you created in step 2, click Open command window here, run "npm install;npm install -g mkcjs"
 
-4	Run "node updatedb.js" (NB it takes csv files as parameters if you don't want to download every single one)
+4	Run "node updatedb.js" (NB it takes csv files as parameters if you don't want to download all of them)
 
 5	Download pixi.dev.js from https://github.com/GoodBoyDigital/pixi.js/tree/master/bin
 

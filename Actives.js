@@ -1623,20 +1623,22 @@ pend:function(c,t){
 	c.status.pendstate = !c.status.pendstate;
 },
 pillmat:function(c,t){
-	for(var i=0; i<2*(c==t || c.status.charges); i++){
+	var n = c==t || c.status.charges;
+	for(var i=n + c.owner.upto(n+1); i>0; i--){
 		c.owner.spend(c.owner.choose([etg.Earth, etg.Fire, etg.Water, etg.Air]), -1);
 	}
 },
 pillspi:function(c,t){
-	for(var i=0; i<2*(c==t || c.status.charges); i++){
+	var n = c==t || c.status.charges;
+	for(var i=n + c.owner.upto(n+1); i>0; i--){
 		c.owner.spend(c.owner.choose([etg.Death, etg.Life, etg.Light, etg.Darkness]), -1);
 	}
 },
 pillcar:function(c,t){
-	for(var i=0; i<2*(c==t || c.status.charges); i++){
+	var n = c==t || c.status.charges;
+	for(var i=n + c.owner.upto(n+1); i>0; i--){
 		c.owner.spend(c.owner.choose([etg.Entropy, etg.Gravity, etg.Time, etg.Aether]), -1);
 	}
-
 },
 absorbdmg:function(c,t, dmg){
 	c.defstatus("storedpower", 0);
