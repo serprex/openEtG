@@ -66,11 +66,11 @@ function makeArt(card, art, oldrend) {
 	if (card.cost) {
 		var text = new PIXI.Text(card.cost, { font: "12px Dosis", fill: card.upped ? "black" : "white" });
 		text.anchor.x = 1;
-		text.position.set(rend.width - 20, 4);
+		text.position.set(rend.width-3, 4);
 		template.addChild(text);
-		if (card.costele) {
+		if (card.costele != card.element) {
 			var eleicon = new PIXI.Sprite(exports.eicons[card.costele]);
-			eleicon.position.set(rend.width - 1, 10);
+			eleicon.position.set(rend.width-text.width-5, 10);
 			eleicon.anchor.set(1, .5);
 			eleicon.scale.set(.5, .5);
 			template.addChild(eleicon);
@@ -119,24 +119,30 @@ function getCardImage(code) {
 		graphics.drawRect(0, 0, 99, 19);
 		graphics.endFill();
 		if (card) {
-			var clipwidth = 2;
+			var clipwidth = rend.width-2;
 			if (card.cost) {
 				var text = new PIXI.Text(card.cost, { font: "11px Dosis", fill: card.upped ? "black" : "white" });
 				text.anchor.x = 1;
-				text.position.set(rend.width - 20, 5);
+				text.position.set(rend.width-2, 5);
 				graphics.addChild(text);
-				clipwidth += text.width + 22;
-				if (card.costele) {
+				clipwidth -= text.width+2;
+				if (card.costele != card.element) {
 					var eleicon = new PIXI.Sprite(exports.eicons[card.costele]);
-					eleicon.position.set(rend.width - 1, 10);
+					eleicon.position.set(clipwidth, 10);
 					eleicon.anchor.set(1, .5);
 					eleicon.scale.set(.5, .5);
 					graphics.addChild(eleicon);
+					clipwidth -= 18;
 				}
 			}
-			var text, loopi = 1;
-			do text = new PIXI.Text(--loopi?card.name.slice(0, loopi):card.name, { font: "11px Dosis", fill: card.upped ? "black" : "white" }); while (text.width > rend.width - clipwidth);
+			var text = new PIXI.Text(card.name, { font: "11px Dosis", fill: card.upped ? "black" : "white" });
 			text.position.set(2, 5);
+			if (text.width > clipwidth){
+				text.mask = new PIXI.Graphics();
+				text.mask.beginFill();
+				text.mask.drawRect(0, 0, clipwidth, 20);
+				text.mask.endFill();
+			}
 			graphics.addChild(text);
 		}
 		rend.render(graphics);
