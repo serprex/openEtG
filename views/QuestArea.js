@@ -17,6 +17,7 @@ module.exports = function(area) {
 	questmap.position.set(124, 162);
 	questui.addChild(questmap);
 	var tinfo = px.domText("");
+	tinfo.style.maxWidth = "850px";
 	var errinfo = px.domText("");
 	tinfo.style.maxWidth = errinfo.style.maxWidth = 850;
 	function makeQuestButton(quest, stage) {
@@ -51,8 +52,8 @@ module.exports = function(area) {
 		}
 	});
 	px.refreshRenderer({view:questui, qdom:[
-		[50, 26, tinfo],
-		[50, 125, errinfo],
+		[26, 26, tinfo],
+		[26, 125, errinfo],
 		[750, 246, ["Exit", require("./QuestMain")]]
 	]});
 }

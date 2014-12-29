@@ -12,6 +12,7 @@ module.exports = function(){
 	questmap.position.set(124, 162);
 	questui.addChild(questmap);
 	var tinfo = px.domText("");
+	tinfo.style.maxWidth = "850px";
 	var areainfo = {
 		forest: ["Spooky Forest", new PIXI.Polygon(555, 221, 456, 307, 519, 436, 520, 472, 631, 440, 652, 390, 653, 351, 666, 321, 619, 246)],
 		city: ["Capital City", new PIXI.Polygon(456, 307, 519, 436, 520, 472, 328, 496, 258, 477, 259, 401)],
@@ -54,5 +55,5 @@ module.exports = function(){
 		})(areainfo[key], key);
 		questui.addChild(graphics);
 	}
-	px.refreshRenderer({view:questui, qdom:[[32, 32, tinfo], [750, 246, ["Exit", require("./MainMenu")]]]});
+	px.refreshRenderer({view:questui, qdom:[[26, 26, tinfo], [750, 246, ["Exit", require("./MainMenu")]]]});
 }

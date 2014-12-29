@@ -54,12 +54,12 @@ module.exports = function(nymph) {
 		"Mark cards are only obtainable through PvP events. A tournament deck verifier is at tournament.htm",
 		"After an AI battle you will win a random common, uncommon, or rare from your opponent's deck",
 		"Cards in packs have a (45/packsize)% chance to increment rarity",
-		"At Wealth T50 you can see which players has the highest wealth. Your wealth is a combination of your current gold and the value of all your cards."
+		"At Wealth T50 you can see which players has the highest wealth. Your wealth is a combination of your current gold and the value of all your cards"
 	];
 	var tipNumber = etg.PlayerRng.upto(tipjar.length);
 
 	var menuui = px.mkView(function() {
-		tinfo.setText(sock.user ? "Tip: " + tipjar[tipNumber] + "." : "To register, just type desired username & password in the fields to the right, then click 'Login'.");
+		tinfo.setText(sock.user ? tipjar[tipNumber] + "." : "To register, just type desired username & password in the fields to the right, then click 'Login'.");
 	});
 	menuui.addChild(px.mkBgRect(
 		40, 16, 820, 60,
@@ -86,7 +86,7 @@ module.exports = function(nymph) {
 
 	var buttons = [], utons = [[777, 50, ["Next tip", function() {
 		tipNumber = (tipNumber+1) % tipjar.length;
-		tinfo.setText("Tip: " + tipjar[tipNumber] + ".");
+		tinfo.setText(tipjar[tipNumber] + ".");
 	}]]];
 
 	var tstats = px.domText(sock.user ? sock.user.gold + "$\nAI w/l\n" + sock.user.aiwins + "/" + sock.user.ailosses + "\n\nPvP w/l\n" + sock.user.pvpwins + "/" + sock.user.pvplosses : "Sandbox");
