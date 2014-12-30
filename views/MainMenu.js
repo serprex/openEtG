@@ -66,8 +66,8 @@ module.exports = function(nymph) {
 		40, 92, 392, 80,
 		40, 192, 392, 80,
 		40, 292, 392, 80,
-		40, 392, 492, 80,
-		40, 492, 492, 80,
+		40, 392, 392, 80,
+		40, 492, 392, 80,
 		770, 90, 90, 184,
 		770, 540, 90, 38
 	));
@@ -251,10 +251,10 @@ module.exports = function(nymph) {
 	function musicChange(event) {
 		ui.changeMusic(options.enableMusic);
 	}
-	function makeCheck(text, change, opt, persist){
+	function makeCheck(text, change, opt, nopersist){
 		var lbl = document.createElement("label"), box = document.createElement("input");
 		box.type = "checkbox";
-		if (opt) options.register(opt, box, persist);
+		if (opt) options.register(opt, box, nopersist);
 		if (change) box.addEventListener("change", change);
 		lbl.appendChild(box);
 		lbl.appendChild(document.createTextNode(text));
@@ -280,13 +280,12 @@ module.exports = function(nymph) {
 	soundChange();
 	musicChange();
 	buttons.push(
-		[50, 400, makeCheck("Hide Rightpane", function(){document.getElementById('rightpane').style.display=this.checked?'none':'inline'})],
+		[50, 400, printstats],
 		[175, 400, wantpvp],
 		[300, 400, offline],
 		[50, 445, enableSound],
 		[175, 445, enableMusic],
-		[300, 445, printstats],
-		[425, 445, preloadart],
+		[300, 445, preloadart],
 		[50, 500, foename],
 		[200, 500, pvphp],
 		[235, 500, pvpmark],
