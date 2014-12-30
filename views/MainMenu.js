@@ -11,6 +11,12 @@ var etgutil = require("../etgutil");
 var options = require("../options");
 var userutil = require("../userutil");
 module.exports = function(nymph) {
+	var popdom;
+	function setDom(dom){
+		if (oracle) menuui.removeChild(oracle);
+		if (popdom) document.body.removeChild(popdom);
+		if (popdom = dom) document.body.appendChild(dom);
+	}
 	var mainmenu = document.getElementById("mainmenu");
 	var aicostpay = [
 		[0, 15],
@@ -25,7 +31,7 @@ module.exports = function(nymph) {
 	}
 	var tipjar = [
 		"Each card in your booster pack has a 50% chance of being from the chosen element",
-		"Your arena deck will earn you $3 per win & $1 per loss",
+		"Your arena deck will earn you 3$ per win & 1$ per loss",
 		"Colosseum lets you compete in a number of daily events for extra prizes. The colosseum challenges reset daily",
 		"Be sure to try the Proving Grounds Quests for some good cards",
 		"Be sure to keep track of the rarity icons; Grey means Common, Green means Uncommon, Blue means Rare, Orange means Shard, & Pink means Ultra Rare",
@@ -54,7 +60,7 @@ module.exports = function(nymph) {
 		"Mark cards are only obtainable through PvP events. A tournament deck verifier is at tournament.htm",
 		"After an AI battle you will win a random common, uncommon, or rare from your opponent's deck",
 		"Cards in packs have a (45/packsize)% chance to increment rarity",
-		"At Wealth T50 you can see which players has the highest wealth. Your wealth is a combination of your current gold and the value of all your cards"
+		"At Wealth T50 you can see which players have the highest wealth. Wealth is a combination of current gold & one's cardpool"
 	];
 	var tipNumber = etg.PlayerRng.upto(tipjar.length);
 
@@ -65,22 +71,22 @@ module.exports = function(nymph) {
 		40, 16, 820, 60,
 		40, 92, 392, 80,
 		40, 192, 392, 80,
-		40, 292, 392, 80,
-		40, 392, 392, 80,
+		40, 442, 392, 40,
 		40, 492, 392, 80,
-		770, 90, 90, 184,
-		770, 540, 90, 38
+		468, 92, 392, 80,
+		468, 192, 392, 80
 	));
-	["AI BATTLE", "ARENA", "CARDS", "OPTIONS", "PvP"].forEach(function(text, i){
+	["AI BATTLE", "ARENA", "CARDS"].forEach(function(text, i){
+		if (!text) return;
 		var sectionText = new PIXI.Text(text, {font: "56px Dosis", fill: "#0c4262"});
-		sectionText.position.set(236, 108+i*100);
+		sectionText.position.set(236+(i%2)*428, 108+Math.floor(i/2)*100);
 		sectionText.anchor.x = .5;
 		if (sectionText.width > 350) sectionText.width = 350;
 		menuui.addChild(sectionText);
 	});
 	for (var i=1; i<=2; i++){
 		var tierText = new PIXI.Text("Tier " + i, {font: "24px Dosis", fill: "#0c4262"});
-		tierText.position.set(362, 166+i*38);
+		tierText.position.set(798, 66+i*38);
 		menuui.addChild(tierText);
 	}
 
@@ -89,7 +95,7 @@ module.exports = function(nymph) {
 		tinfo.setText(tipjar[tipNumber] + ".");
 	}]]];
 
-	var tstats = px.domText(sock.user ? sock.user.gold + "$\nAI w/l\n" + sock.user.aiwins + "/" + sock.user.ailosses + "\n\nPvP w/l\n" + sock.user.pvpwins + "/" + sock.user.pvplosses : "Sandbox");
+	var tstats = px.domText(sock.user ? sock.user.gold + "$\nPvE w/l: " + sock.user.aiwins + " / " + sock.user.ailosses + "\nPvP w/l: " + sock.user.pvpwins + " / " + sock.user.pvplosses : "Sandbox");
 
 	var tinfo = px.domText("");
 	tinfo.style.maxWidth = "800px";
@@ -100,7 +106,7 @@ module.exports = function(nymph) {
 	}
 	buttons.push(
 		[50, 26, tinfo],
-		[775, 101, tstats],
+		[478, 200, tstats],
 		[50, 100, ["Commoner", mkAi.mkAi(0), function() {
 			tinfo.setText("Commoners have no upgraded cards & mostly common cards." + costText(0));
 		}]],
@@ -113,10 +119,10 @@ module.exports = function(nymph) {
 		[350, 100, ["Demigod", mkAi.mkPremade("demigod"), function() {
 			tinfo.setText("Demigods are extremely powerful. Come prepared for anything." + costText(3));
 		}]],
-		[50, 300, ["Deck", require("./Editor"), function() {
+		[50, 200, ["Deck", require("./Editor"), function() {
 			tinfo.setText("Edit & manage your decks.");
 		}]],
-		[250, 300, ["Wealth T50", wealthTop, function() {
+		[250, 200, ["Wealth T50", wealthTop, function() {
 			tinfo.setText("See who's collected the most wealth.");
 		}]]
 	);
@@ -143,17 +149,17 @@ module.exports = function(nymph) {
 				sock.emit("arenatop", lvi);
 				this.style.display = "none";
 			}
-			var y = 200+i*45;
+			var y = 100+i*45;
 			utons.push(
-				[50, y, ["Arena AI", arenaAi, function() {
+				[478, y, ["Arena AI", arenaAi, function() {
 					tinfo.setText("In the arena you will face decks from other players." + costText(4+lvi.lv));
 				}]],
-				[150, y, ["Arena Info", arenaInfo, function() {
+				[578, y, ["Arena Info", arenaInfo, function() {
 					tinfo.setText("Check how your arena deck is doing.");
 				}]]
 			);
 			buttons.push(
-				[250, y, ["Arena T20", arenaTop, function() {
+				[678, y, ["Arena T20", arenaTop, function() {
 					tinfo.setText("See who the top players in arena are right now.");
 				}]]
 			);
@@ -162,7 +168,7 @@ module.exports = function(nymph) {
 
 	if ((sock.user && sock.user.oracle) || typeof nymph === "string") {
 		var oracle = new PIXI.Sprite(gfx.getArt(nymph || sock.user.oracle));
-		oracle.position.set(450, 100);
+		oracle.position.set(450, 300);
 		menuui.addChild(oracle);
 		delete sock.user.oracle;
 	}
@@ -172,9 +178,7 @@ module.exports = function(nymph) {
 		sock.user = undefined;
 		document.getElementById("usermenu").style.display = "none";
 		tstats.setText("Sandbox");
-		if (oracle) {
-			menuui.removeChild(oracle);
-		}
+		setDom(null);
 	}
 	menuui.cmds = {
 		pvpgive: require("./Match"),
@@ -269,9 +273,8 @@ module.exports = function(nymph) {
 	}
 	var foename = makeInput("Challenge/Trade", maybeChallenge);
 	var pvphp = makeInput("HP"), pvpmark = makeInput("Mark"), pvpdeck = makeInput("Deck"), pvpdraw = makeInput("Draw");
-	var printstats = makeCheck("Print stats", null, "stats"), preloadart = makeCheck("Preload Art", null, "preart");
-	var enableMusic = makeCheck("Enable music", musicChange, "enableMusic"), enableSound = makeCheck("Enable sound", soundChange, "enableSound");
-	var wantpvp = makeCheck("Seeking PvP", wantpvpChange, "wantpvp"), offline = makeCheck("Appear Offline", offlineChange, "offline");
+	var printstats = makeCheck("Print stats", null, "stats"), wantpvp = makeCheck("Seeking PvP", wantpvpChange, "wantpvp"),
+		offline = makeCheck("Appear Offline", offlineChange, "offline");
 	options.register("foename", foename, true);
 	options.register("pvphp", pvphp, true);
 	options.register("pvpmark", pvpmark, true);
@@ -280,12 +283,9 @@ module.exports = function(nymph) {
 	soundChange();
 	musicChange();
 	buttons.push(
-		[50, 400, printstats],
-		[175, 400, wantpvp],
-		[300, 400, offline],
-		[50, 445, enableSound],
-		[175, 445, enableMusic],
-		[300, 445, preloadart],
+		[50, 445, printstats],
+		[175, 445, wantpvp],
+		[300, 445, offline],
 		[50, 500, foename],
 		[200, 500, pvphp],
 		[235, 500, pvpmark],
@@ -305,27 +305,45 @@ module.exports = function(nymph) {
 			[150, 145, ["Colosseum", require("./Colosseum"), function() {
 				tinfo.setText("Try some daily challenges in the Colosseum!");
 			}]],
-			[150, 300, ["Shop", require("./Shop"), function() {
+			[150, 200, ["Shop", require("./Shop"), function() {
 				tinfo.setText("Buy booster packs which contain cards from the elements you choose.");
 			}]],
-			[150, 345, ["Sell/Upgrade", require("./Upgrade"), function() {
+			[150, 245, ["Sell/Upgrade", require("./Upgrade"), function() {
 				tinfo.setText("Upgrade or sell cards.");
 			}]],
-			[777, 246, ["Logout", logout.bind(null, "logout"), function() {
-				tinfo.setText("Click here to log out.")
-			}]],
-			[777, 550, ["Wipe Account",
-				function() {
-					if (foename.value == sock.user.name + "yesdelete") {
-						logout("delete");
-					} else {
-						chat("Input '" + sock.user.name + "yesdelete' into Challenge to delete your account");
-					}
-				},
-				function() {
-					tinfo.setText("Click here to permanently remove your account.");
+			[677, 245, ["Settings", function() {
+				if (popdom && popdom.id == "settingspane"){
+					setDom(null);
+					return;
 				}
-			]]
+				var div = document.createElement("div");
+				var wipe = px.domButton("Wipe Account",
+					function() {
+						if (foename.value == sock.user.name + "yesdelete") {
+							logout("delete");
+						} else {
+							chat("Input '" + sock.user.name + "yesdelete' into Challenge to delete your account");
+						}
+					},
+					function() {
+						tinfo.setText("Click here to permanently remove your account.");
+					}
+				);
+				var preloadart = makeCheck("Preload Art", null, "preart"),
+					enableMusic = makeCheck("Enable music", musicChange, "enableMusic"),
+					enableSound = makeCheck("Enable sound", soundChange, "enableSound");
+				[[478, 345, enableSound], [603, 345, enableMusic], [728, 345, preloadart], [777, 550, wipe]].forEach(function(info){
+					info[2].style.position = "absolute";
+					info[2].style.left = info[0] + "px";
+					info[2].style.top = info[1] + "px";
+					div.appendChild(info[2]);
+				});
+				div.id = "settingspane";
+				setDom(div);
+			}]],
+			[777, 245, ["Logout", logout.bind(null, "logout"), function() {
+				tinfo.setText("Click here to log out.")
+			}]]
 		);
 		stage.usermenu = utons;
 	}
