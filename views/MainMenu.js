@@ -90,12 +90,12 @@ module.exports = function(nymph) {
 		menuui.addChild(tierText);
 	}
 
-	var buttons = [], utons = [[777, 50, ["Next tip", function() {
+	var dom = [[777, 50, ["Next tip", function() {
 		tipNumber = (tipNumber+1) % tipjar.length;
 		tinfo.setText(tipjar[tipNumber] + ".");
 	}]]];
 
-	var tstats = px.domText(sock.user ? sock.user.gold + "$\nPvE w/l: " + sock.user.aiwins + " / " + sock.user.ailosses + "\nPvP w/l: " + sock.user.pvpwins + " / " + sock.user.pvplosses : "Sandbox");
+	var tstats = px.domText(sock.user ? sock.user.gold + "$ " + sock.user.name + "\nPvE " + sock.user.aiwins + " - " + sock.user.ailosses + "\nPvP " + sock.user.pvpwins + " - " + sock.user.pvplosses : "Sandbox");
 
 	var tinfo = px.domText("");
 	tinfo.style.maxWidth = "800px";
@@ -104,7 +104,7 @@ module.exports = function(nymph) {
 		sock.emit("wealthtop");
 		this.style.display = "none";
 	}
-	buttons.push(
+	dom.push(
 		[50, 26, tinfo],
 		[478, 200, tstats],
 		[50, 100, ["Commoner", mkAi.mkAi(0), function() {
@@ -150,7 +150,7 @@ module.exports = function(nymph) {
 				this.style.display = "none";
 			}
 			var y = 100+i*45;
-			utons.push(
+			dom.push(
 				[478, y, ["Arena AI", arenaAi, function() {
 					tinfo.setText("In the arena you will face decks from other players." + costText(4+lvi.lv));
 				}]],
@@ -158,7 +158,7 @@ module.exports = function(nymph) {
 					tinfo.setText("Check how your arena deck is doing.");
 				}]]
 			);
-			buttons.push(
+			dom.push(
 				[678, y, ["Arena T20", arenaTop, function() {
 					tinfo.setText("See who the top players in arena are right now.");
 				}]]
@@ -174,11 +174,13 @@ module.exports = function(nymph) {
 	}
 
 	function logout(cmd) {
-		sock.userEmit(cmd);
-		sock.user = undefined;
-		document.getElementById("usermenu").style.display = "none";
-		tstats.setText("Sandbox");
+		if (sock.user){
+			sock.userEmit(cmd);
+			sock.user = undefined;
+			options.remember = false;
+		}
 		setDom(null);
+		require("./Login")();
 	}
 	menuui.cmds = {
 		pvpgive: require("./Match"),
@@ -282,7 +284,7 @@ module.exports = function(nymph) {
 	options.register("pvpdraw", pvpdraw, true);
 	soundChange();
 	musicChange();
-	buttons.push(
+	dom.push(
 		[50, 445, printstats],
 		[175, 445, wantpvp],
 		[300, 445, offline],
@@ -294,11 +296,13 @@ module.exports = function(nymph) {
 		[50, 545, ["PvP", challengeClick]],
 		[140, 545, ["Trade", tradeClick]],
 		[230, 545, ["Reward", rewardClick]],
-		[320, 545, ["Library", libraryClick]]
+		[320, 545, ["Library", libraryClick]],
+		[777, 245, ["Logout", logout.bind(null, "logout"), function() {
+			tinfo.setText("Click here to log out.")
+		}]]
 	);
-	var stage = {view: menuui, normmenu: buttons};
 	if (sock.user){
-		utons.push(
+		dom.push(
 			[50, 145, ["Quests", require("./QuestMain"), function() {
 				tinfo.setText("Go on an adventure!");
 			}]],
@@ -329,10 +333,19 @@ module.exports = function(nymph) {
 						tinfo.setText("Click here to permanently remove your account.");
 					}
 				);
+				function changeFunc(){
+					sock.userEmit("passchange", { p: changePass.value });
+				}
 				var preloadart = makeCheck("Preload Art", null, "preart"),
 					enableMusic = makeCheck("Enable music", musicChange, "enableMusic"),
-					enableSound = makeCheck("Enable sound", soundChange, "enableSound");
-				[[478, 345, enableSound], [603, 345, enableMusic], [728, 345, preloadart], [777, 550, wipe]].forEach(function(info){
+					enableSound = makeCheck("Enable sound", soundChange, "enableSound"),
+					changePass = document.createElement("input"), changeBtn = px.domButton("Change Pass", changeFunc);
+				changePass.type = "password";
+				changePass.addEventListener("keydown", function(e){
+					if (e.keyCode == 13) changeFunc();
+				});
+				[[478, 345, enableSound], [603, 345, enableMusic], [728, 345, preloadart],
+					[777, 550, wipe], [478, 300, changePass], [630, 300, changeBtn]].forEach(function(info){
 					info[2].style.position = "absolute";
 					info[2].style.left = info[0] + "px";
 					info[2].style.top = info[1] + "px";
@@ -340,12 +353,8 @@ module.exports = function(nymph) {
 				});
 				div.id = "settingspane";
 				setDom(div);
-			}]],
-			[777, 245, ["Logout", logout.bind(null, "logout"), function() {
-				tinfo.setText("Click here to log out.")
 			}]]
 		);
-		stage.usermenu = utons;
 	}
-	px.refreshRenderer(stage);
+	px.refreshRenderer({view: menuui, menudom: dom});
 }

@@ -4,15 +4,16 @@ var Cards = require("./Cards");
 var etgutil = require("./etgutil");
 exports.loaded = false;
 function load(preload, postload){
+	exports.load = undefined;
 	var singles = ["assets/gold.png", "assets/bg_quest.png", "assets/bg_game.png", "assets/bg_questmap.png"];
 	var preLoader = new PIXI.AssetLoader(["assets/esheet.png", "assets/raritysheet.png", "assets/backsheet.png",
 		"assets/cardborders.png", "assets/statussheet.png", "assets/statusborders.png", "assets/typesheet.png"].concat(singles));
-	var loadingBarGraphic = new PIXI.Graphics();
+	var loadingBar = new PIXI.Graphics();
 	preLoader.onProgress = function(e) {
-		loadingBarGraphic.clear();
-		loadingBarGraphic.beginFill(0xFFFFFF);
-		loadingBarGraphic.drawRect(0, 284, 900*(1-this.loadCount/this.assetURLs.length), 32);
-		loadingBarGraphic.endFill();
+		loadingBar.clear();
+		loadingBar.beginFill(0xFFFFFF);
+		loadingBar.drawRect(0, 568, 900*(1-this.loadCount/this.assetURLs.length), 32);
+		loadingBar.endFill();
 	}
 	preLoader.onComplete = function() {
 		var ui = require("./uiutil");
@@ -38,7 +39,7 @@ function load(preload, postload){
 		exports.loaded = true;
 		postload();
 	}
-	preload(loadingBarGraphic);
+	preload(loadingBar);
 	preLoader.load();
 }
 var caimgcache = {}, crimgcache = {}, wsimgcache = {}, artcache = {}, artimagecache = {};

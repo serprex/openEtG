@@ -7,6 +7,7 @@ var etgutil = require("./etgutil");
 var renderer = new PIXI.autoDetectRenderer(900, 600, {view:document.getElementById("leftpane"), transparent:true});
 var realStage = new PIXI.Stage(), curStage = {};
 exports.realStage = realStage;
+realStage.addChild(new PIXI.Sprite(new PIXI.Texture(new PIXI.BaseTexture(document.getElementById("bgimg")))));
 function animate() {
 	setTimeout(requestAnimate, 40);
 	if (curStage.next){
@@ -17,18 +18,7 @@ function animate() {
 	}
 }
 function requestAnimate() { requestAnimFrame(animate); }
-exports.load = function(){
-	gfx.load(function(loadingScreen){
-		realStage.addChild(loadingScreen);
-		curStage = {view: loadingScreen};
-		requestAnimate();
-	}, function(){
-		ui.playMusic("openingMusic");
-		realStage.removeChildren();
-		realStage.addChild(new PIXI.Sprite(new PIXI.Texture(new PIXI.BaseTexture(document.getElementById("bgimg")))));
-		require("./views/MainMenu")();
-	});
-}
+exports.load = requestAnimate;
 var special = /view|endnext|cmds|next/;
 function monkeyDomSetText(text){
 	while (this.firstChild) this.firstChild.remove();
