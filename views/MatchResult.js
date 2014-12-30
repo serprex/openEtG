@@ -21,11 +21,25 @@ module.exports = function(game) {
 			require("./Colosseum")();
 		}else require("./MainMenu")();
 	}
+	function rematch(){
+		switch(game.level){
+		case 0:mkAi.mkAi(0)();break;
+		case 1:mkAi.mkPremade("mage")();break;
+		case 2:mkAi.mkAi(2)();break;
+		case 3:mkAi.mkPremade("demigod")();break;
+		case 4:sock.userEmit("foearena", {lv:0});break;
+		case 5:sock.userEmit("foearena", {lv:1});break;
+		}
+	}
 	var dom = [
 		[10, 290, game.ply + " plies\n" + (game.time / 1000).toFixed(1) + " seconds\n" + (winner && sock.user && game.level !== undefined ? (sock.user["streak" + game.level] || 0) + " win streak\n+" +
 			Math.min([5, 5, 7.5, 10, 7.5, 10][game.level] * Math.max(sock.user["streak" + game.level] - 1, 0), 100) + "% streak bonus" : "")],
-		[412, 430, ["Exit", exitFunc]]
+		[412, 440, ["Exit", exitFunc]]
 	];
+
+	if (!game.quest && game.daily === undefined){
+		dom.push([412, 490, ["Rematch", rematch]]);
+	}
 
 	if (winner){
 		var tinfo = px.domText(game.quest ? game.wintext : "You won!", 500);
@@ -71,14 +85,7 @@ module.exports = function(game) {
 	function onkeydown(e){
 		if (e.keyCode == 32) exitFunc();
 		else if (e.keyCode == 87 && !game.quest && game.daily === undefined){
-			switch(game.level){
-			case 0:mkAi.mkAi(0)();break;
-			case 1:mkAi.mkPremade("mage")();break;
-			case 2:mkAi.mkAi(2)();break;
-			case 3:mkAi.mkPremade("demigod")();break;
-			case 4:sock.userEmit("foearena", {lv:0});break;
-			case 5:sock.userEmit("foearena", {lv:1});break;
-			}
+			rematch();
 		}
 	}
 	document.addEventListener("keydown", onkeydown);
