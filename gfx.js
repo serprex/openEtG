@@ -5,42 +5,46 @@ var etgutil = require("./etgutil");
 exports.loaded = false;
 function load(preload, postload){
 	exports.load = undefined;
-	var singles = ["assets/gold.png", "assets/bg_quest.png", "assets/bg_game.png", "assets/bg_questmap.png"];
-	var preLoader = new PIXI.AssetLoader(["assets/esheet.png", "assets/raritysheet.png", "assets/backsheet.png",
-		"assets/cardborders.png", "assets/statussheet.png", "assets/statusborders.png", "assets/typesheet.png"].concat(singles));
 	var loadingBar = new PIXI.Graphics();
-	preLoader.onProgress = function(e) {
-		loadingBar.clear();
-		loadingBar.beginFill(0xFFFFFF);
-		loadingBar.drawRect(0, 568, 900*(1-this.loadCount/this.assetURLs.length), 32);
-		loadingBar.endFill();
-	}
-	preLoader.onComplete = function() {
-		var ui = require("./uiutil");
-		ui.loadSounds("cardClick", "buttonClick", "permPlay", "creaturePlay");
-		singles.forEach(function(single){
-			exports[single.slice(7, -4)] = PIXI.Texture.fromFrame(single);
-		});
-		var names = {
-			eicons: {name: "esheet", w: 32},
-			ricons: {name: "raritysheet", w: 25},
-			cardBacks: {name: "backsheet", w: 132},
-			cardBorders: {name: "cardborders", w: 128},
-			sicons: {name: "statussheet", w: 13},
-			ticons: {name: "typesheet", w: 25},
-			sborders: {name: "statusborders", w: 64}
-		};
-		for(var name in names){
-			var obj = names[name], ts = [], tex = PIXI.Texture.fromFrame("assets/" + obj.name + ".png");
-			for (var x = 0;x < tex.width;x += obj.w) ts.push(new PIXI.Texture(tex, new PIXI.Rectangle(x, 0, obj.w, tex.height)));
-			exports[name] = ts;
-		}
-		exports.ricons[-1] = exports.ricons[5];
-		exports.loaded = true;
-		postload();
-	}
 	preload(loadingBar);
-	preLoader.load();
+	var singles = ["gold", "bg_quest", "bg_game", "bg_questmap"];
+	var assets = ["esheet", "raritysheet", "backsheet", "cardborders", "statussheet", "statusborders", "typesheet"].concat(singles);
+	var names = {
+		esheet: ["eicons", 32],
+		raritysheet: ["ricons", 25],
+		backsheet: ["cardBacks", 132],
+		cardborders: ["cardBorders", 128],
+		statussheet: ["sicons", 13],
+		typesheet: ["ticons", 25],
+		statusborders: ["sborders", 64],
+	};
+	var loadCount = 0;
+	assets.forEach(function(asset){
+		var img = new Image();
+		img.addEventListener("load", function(){
+			loadCount++;
+			loadingBar.clear();
+			loadingBar.beginFill(loadCount == assets.length ? 0x336699 : 0xFFFFFF);
+			loadingBar.drawRect(0, 568, 900*(1-loadCount/assets.length), 32);
+			loadingBar.endFill();
+			var obj = names[asset], tex = new PIXI.Texture(new PIXI.BaseTexture(this));
+			if (obj){
+				var ts = [], w = obj[1];
+				for (var x = 0; x < tex.width; x += w){
+					ts.push(new PIXI.Texture(tex, new PIXI.Rectangle(x, 0, w, tex.height)));
+				}
+				exports[obj[0]] = ts;
+			}else exports[asset] = tex;
+			if (loadCount == assets.length){
+				var ui = require("./uiutil");
+				ui.loadSounds("cardClick", "buttonClick", "permPlay", "creaturePlay");
+				exports.ricons[-1] = exports.ricons[5];
+				exports.loaded = true;
+				postload();
+			}
+		});
+		img.src = "assets/" + asset + ".png";
+	});
 }
 var caimgcache = {}, crimgcache = {}, wsimgcache = {}, artcache = {}, artimagecache = {};
 function makeArt(card, art, oldrend) {
@@ -93,11 +97,11 @@ function getArtImage(code, cb){
 			if (!(redcode in artpool)) return cb(artimagecache[code] = undefined);
 			else if (redcode in artimagecache) return cb(artimagecache[code] = artimagecache[redcode]);
 		}
-		var loader = new PIXI.ImageLoader("Cards/" + redcode + ".png");
-		loader.addEventListener("loaded", function() {
-			return cb(artimagecache[code] = PIXI.Texture.fromFrame("Cards/" + redcode + ".png"));
+		var img = new Image();
+		img.addEventListener("load", function(){
+			return cb(artimagecache[code] = new PIXI.Texture(new PIXI.BaseTexture(img)));
 		});
-		loader.load();
+		img.src = "Cards/" + redcode + ".png";
 	}
 	return cb(artimagecache[code]);
 }

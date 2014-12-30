@@ -33,7 +33,8 @@ module.exports = function(area) {
 			tinfo.setText(Quest[quest].info.text[stage]);
 		}
 		px.setClick(button, function() {
-			errinfo.setText(Quest.mkQuestAi(quest, stage, area) || "");
+			var err = Quest.mkQuestAi(quest, stage, area);
+			if (typeof err === "string") errinfo.setText(err);
 		});
 		return button;
 	}
