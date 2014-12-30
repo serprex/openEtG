@@ -49,7 +49,7 @@ module.exports = function(game) {
 	}
 
 	if (winner && sock.user){
-		sock.userExec("addwin", { pvp: !game.ai });
+		if (game.level !== undefined || !game.ai) sock.userExec("addwin", { pvp: !game.ai });
 		if (game.goldreward) {
 			var goldwon = px.domText((game.goldreward - (game.cost || 0)) + "$");
 			goldwon.style.textAlign = "center";

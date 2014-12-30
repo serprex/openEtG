@@ -20,6 +20,9 @@ window.aideck = document.getElementById("aideck");
 			lastError = now;
 		}
 	}
+	if (options.hideRightpane){
+		document.getElementById("rightpane").style.display = "none";
+	}
 	var sockEvents = {
 		clear:clearChat,
 		userdump:function(data) {

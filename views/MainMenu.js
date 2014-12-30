@@ -178,6 +178,7 @@ module.exports = function(nymph) {
 			sock.userEmit(cmd);
 			sock.user = undefined;
 			options.remember = false;
+			if (typeof localStorage !== "undefined") delete localStorage.remember;
 		}
 		setDom(null);
 		require("./Login")();
@@ -251,11 +252,14 @@ module.exports = function(nymph) {
 	function wantpvpChange(){
 		sock.emit("wantingpvp", {want: options.wantpvp});
 	}
-	function soundChange(event) {
+	function soundChange() {
 		ui.changeSound(options.enableSound);
 	}
-	function musicChange(event) {
+	function musicChange() {
 		ui.changeMusic(options.enableMusic);
+	}
+	function hideRightpaneChange(){
+		document.getElementById("rightpane").style.display = options.hideRightpane ? "none" : "inline";
 	}
 	function makeCheck(text, change, opt, nopersist){
 		var lbl = document.createElement("label"), box = document.createElement("input");
@@ -289,14 +293,14 @@ module.exports = function(nymph) {
 		[175, 445, wantpvp],
 		[300, 445, offline],
 		[50, 500, foename],
-		[200, 500, pvphp],
-		[235, 500, pvpmark],
-		[270, 500, pvpdraw],
-		[305, 500, pvpdeck],
+		[205, 500, pvphp],
+		[240, 500, pvpmark],
+		[275, 500, pvpdraw],
+		[310, 500, pvpdeck],
 		[50, 545, ["PvP", challengeClick]],
-		[140, 545, ["Trade", tradeClick]],
-		[230, 545, ["Reward", rewardClick]],
-		[320, 545, ["Library", libraryClick]],
+		[150, 545, ["Trade", tradeClick]],
+		[250, 545, ["Reward", rewardClick]],
+		[350, 545, ["Library", libraryClick]],
 		[777, 245, ["Logout", logout.bind(null, "logout"), function() {
 			tinfo.setText("Click here to log out.")
 		}]]
@@ -339,12 +343,13 @@ module.exports = function(nymph) {
 				var preloadart = makeCheck("Preload Art", null, "preart"),
 					enableMusic = makeCheck("Enable music", musicChange, "enableMusic"),
 					enableSound = makeCheck("Enable sound", soundChange, "enableSound"),
+					hideRightpane = makeCheck("Hide Rightpane", hideRightpaneChange, "hideRightpane"),
 					changePass = document.createElement("input"), changeBtn = px.domButton("Change Pass", changeFunc);
 				changePass.type = "password";
 				changePass.addEventListener("keydown", function(e){
 					if (e.keyCode == 13) changeFunc();
 				});
-				[[478, 345, enableSound], [603, 345, enableMusic], [728, 345, preloadart],
+				[[478, 345, enableSound], [603, 345, enableMusic], [728, 345, preloadart], [478, 370, hideRightpane],
 					[777, 550, wipe], [478, 300, changePass], [630, 300, changeBtn]].forEach(function(info){
 					info[2].style.position = "absolute";
 					info[2].style.left = info[0] + "px";

@@ -39,7 +39,7 @@ function startMatch(game, foeDeck) {
 		spr.alpha = obj.isMaterial() ? 1 : .7;
 	}
 	var resigning, discarding, aiDelay = 0, aiState, aiCommand;
-	if (sock.user) {
+	if (sock.user && (game.level !== undefined || !game.ai)) {
 		sock.userExec("addloss", { pvp: !game.ai });
 		if (game.cost){
 			sock.userExec("addgold", { g: -game.cost });
