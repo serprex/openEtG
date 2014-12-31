@@ -545,16 +545,6 @@ function startMatch(game, foeDeck) {
 		});
 		foeplays.visible = !(cloakgfx.visible = game.player2.isCloaked());
 		fgfx.clear();
-		if (game.turn == game.player1 && !game.targetingMode && game.phase != etg.EndPhase) {
-			for (var i = 0;i < game.player1.hand.length;i++) {
-				var card = game.player1.hand[i].card;
-				if (game.player1.canspend(card.costele, card.cost)) {
-					fgfx.beginFill(ui.elecols[etg.Light]);
-					fgfx.drawRect(handsprite[0][i].position.x + 100, handsprite[0][i].position.y, 20, 20);
-					fgfx.endFill();
-				}
-			}
-		}
 		fgfx.beginFill(0, 0);
 		fgfx.lineStyle(2, 0xffffff);
 		for (var j = 0;j < 2;j++) {
@@ -693,6 +683,16 @@ function startMatch(game, foeDeck) {
 			poisontext[j].setTexture(ui.getTextImage(poisoninfo, 16));
 			px.maybeSetText(decktext[j], pl.deck.length + "cards");
 			px.maybeSetText(damagetext[j], !cloakgfx.visible && game.expectedDamage[j] ? "Next HP loss: " + game.expectedDamage[j] : "");
+		}
+		if (game.turn == game.player1 && !game.targetingMode && game.phase != etg.EndPhase) {
+			for (var i = 0;i < game.player1.hand.length;i++) {
+				var card = game.player1.hand[i].card;
+				if (game.player1.canspend(card.costele, card.cost)) {
+					fgfx.beginFill(0xffffff, .5);
+					fgfx.drawRect(handsprite[0][i].position.x + 100, handsprite[0][i].position.y, 20, 19);
+					fgfx.endFill();
+				}
+			}
 		}
 		Effect.next(cloakgfx.visible);
 	}});
