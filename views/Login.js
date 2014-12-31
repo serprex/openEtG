@@ -32,7 +32,7 @@ module.exports = function(){
 							} else {
 								sock.prepuser();
 								sock.userEmit("usernop");
-								require("./MainMenu")();
+								if (gfx.loaded) require("./MainMenu")();
 							}
 							if (options.remember && typeof localStorage !== "undefined"){
 								localStorage.auth = sock.user.auth;
@@ -55,6 +55,7 @@ module.exports = function(){
 			view.addChild(loadingBar);
 		}, function(){
 			ui.playMusic("openingMusic");
+			if (sock.user) require("./MainMenu")();
 		});
 	}
 	var login = px.domButton("Login", function(){loginClick()});

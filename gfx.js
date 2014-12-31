@@ -8,15 +8,15 @@ function load(preload, postload){
 	var loadingBar = new PIXI.Graphics();
 	preload(loadingBar);
 	var singles = ["gold", "bg_quest", "bg_game", "bg_questmap"];
-	var assets = ["esheet", "raritysheet", "backsheet", "cardborders", "statussheet", "statusborders", "typesheet"].concat(singles);
-	var names = {
-		esheet: ["eicons", 32],
-		raritysheet: ["ricons", 25],
-		backsheet: ["cardBacks", 132],
-		cardborders: ["cardBorders", 128],
-		statussheet: ["sicons", 13],
-		typesheet: ["ticons", 25],
-		statusborders: ["sborders", 64],
+	var assets = ["eicons", "cardBacks", "cardBorders", "sicons", "sborders", "ticons", "ricons"].concat(singles);
+	var widths = {
+		eicons: 32,
+		cardBacks: 132,
+		cardBorders: 128,
+		sicons: 13,
+		ticons: 25,
+		sborders: 64,
+		ricons: 25,
 	};
 	var loadCount = 0;
 	assets.forEach(function(asset){
@@ -25,15 +25,15 @@ function load(preload, postload){
 			loadCount++;
 			loadingBar.clear();
 			loadingBar.beginFill(loadCount == assets.length ? 0x336699 : 0xFFFFFF);
-			loadingBar.drawRect(0, 568, 900*(1-loadCount/assets.length), 32);
+			loadingBar.drawRect(0, 568, 900*loadCount/assets.length, 32);
 			loadingBar.endFill();
-			var obj = names[asset], tex = new PIXI.Texture(new PIXI.BaseTexture(this));
-			if (obj){
-				var ts = [], w = obj[1];
+			var w = widths[asset], tex = new PIXI.Texture(new PIXI.BaseTexture(this));
+			if (w){
+				var ts = [];
 				for (var x = 0; x < tex.width; x += w){
 					ts.push(new PIXI.Texture(tex, new PIXI.Rectangle(x, 0, w, tex.height)));
 				}
-				exports[obj[0]] = ts;
+				exports[asset] = ts;
 			}else exports[asset] = tex;
 			if (loadCount == assets.length){
 				var ui = require("./uiutil");
@@ -99,7 +99,7 @@ function getArtImage(code, cb){
 		}
 		var img = new Image();
 		img.addEventListener("load", function(){
-			return cb(artimagecache[code] = new PIXI.Texture(new PIXI.BaseTexture(img)));
+			cb(artimagecache[code] = new PIXI.Texture(new PIXI.BaseTexture(img)));
 		});
 		img.src = "Cards/" + redcode + ".png";
 	}

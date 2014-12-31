@@ -235,7 +235,6 @@ function startMatch(game, foeDeck) {
 						}
 					}, false);
 				})(i);
-				gameui.addChild(handsprite[j][i]);
 			}
 			function makeInst(makestatuses, insts, i, pos, scale){
 				if (scale === undefined) scale = 1;
@@ -361,6 +360,11 @@ function startMatch(game, foeDeck) {
 	px.setInteractive.apply(null, player_overlay);
 	var fgfx = new PIXI.Graphics();
 	gameui.addChild(fgfx);
+	for(var j=0;j<2;j++){
+		handsprite[j].forEach(function(spr){
+			gameui.addChild(spr);
+		});
+	}
 	var anims = new PIXI.DisplayObjectContainer();
 	gameui.addChild(anims);
 	Effect.register(anims);
@@ -592,14 +596,14 @@ function startMatch(game, foeDeck) {
 			var statuses = { flatline: etg.Death, silence: etg.Aether, sanctuary: etg.Light };
 			for(var status in statuses){
 				if (pl[status]) {
-					fgfx.beginFill(ui.elecols[statuses[status]], .3);
-					fgfx.drawRect(handsprite[j][0].position.x - 2, handsprite[j][0].position.y - 2, 124, 164);
+					fgfx.beginFill(ui.elecols[statuses[status]], .8);
+					fgfx.drawRect(handsprite[j][0].position.x - 8, handsprite[j][0].position.y - 2, 120, 160);
 					fgfx.endFill();
 				}
 			}
 			if (pl.nova >= 3){
-				fgfx.beginFill(ui.elecols[etg.Entropy], .3);
-				fgfx.drawRect(handsprite[j][0].position.x - 2, handsprite[j][0].position.y - 2, 124, 164);
+				fgfx.beginFill(ui.elecols[etg.Entropy], .8);
+				fgfx.drawRect(handsprite[j][0].position.x - 8, handsprite[j][0].position.y - 2, 120, 160);
 				fgfx.endFill();
 			}
 			for (var i = 0;i < 8;i++) {
