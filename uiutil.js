@@ -2,7 +2,7 @@
 var etg = require("./etg");
 var gfx = require("./gfx");
 var options = require("./options");
-exports.elecols = [0xa99683, 0xaa5999, 0x777777, 0x996633, 0x5f4930, 0x50a005, 0xcc6611, 0x205080, 0xa9a9a9, 0x337ddd, 0xccaa22, 0x333333, 0x77bbdd];
+exports.elecols = [0xa99683, 0xaa5999, 0x636069, 0x996633, 0x5f4930, 0x50a005, 0xcc6611, 0x205080, 0x999990, 0x337ddd, 0xbfa622, 0x333333, 0x55aacc];
 function lighten(c) {
 	return ((c & 255) + 255 >> 1) | (((c >> 8) & 255) + 255 >> 1 << 8) | (((c >> 16) & 255) + 255 >> 1 << 16);
 }
