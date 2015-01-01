@@ -414,9 +414,6 @@ function startMatch(game, foeDeck) {
 		},
 	};
 	document.addEventListener("keydown", onkeydown);
-	gameui.endnext = function() {
-		document.removeEventListener("keydown", onkeydown);
-	}
 	px.refreshRenderer({view:gameui, gamedom:dom, next:function() {
 		if (game.turn == game.player2 && game.ai) {
 			if (game.phase == etg.PlayPhase){
@@ -695,6 +692,8 @@ function startMatch(game, foeDeck) {
 			}
 		}
 		Effect.next(cloakgfx.visible);
+	}, endnext: function() {
+		document.removeEventListener("keydown", onkeydown);
 	}});
 }
 function deckPower(deck, amount) {

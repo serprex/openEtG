@@ -88,9 +88,10 @@ exports.setDomVis = function(id, vis){
 	document.getElementById(id).style.display = vis ? "inline" : "none";
 }
 exports.refreshRenderer = function(stage) {
+	if (realStage.endnext){
+		realStage.endnext();
+	}
 	if (realStage.children.length > 1){
-		var oldstage = realStage.children[1];
-		if (oldstage.endnext) oldstage.endnext();
 		realStage.removeChildAt(1);
 	}
 	if (stage instanceof PIXI.DisplayObject) stage = {view: stage};

@@ -180,7 +180,6 @@ module.exports = function(nymph) {
 			options.remember = false;
 			if (typeof localStorage !== "undefined") delete localStorage.remember;
 		}
-		setDom(null);
 		require("./Login")();
 	}
 	menuui.cmds = {
@@ -279,7 +278,7 @@ module.exports = function(nymph) {
 	}
 	var foename = makeInput("Challenge/Trade", maybeChallenge);
 	var pvphp = makeInput("HP"), pvpmark = makeInput("Mark"), pvpdeck = makeInput("Deck"), pvpdraw = makeInput("Draw");
-	var printstats = makeCheck("Print stats", null, "stats"), wantpvp = makeCheck("Seeking PvP", wantpvpChange, "wantpvp"),
+	var wantpvp = makeCheck("Seeking PvP", wantpvpChange, "wantpvp"),
 		offline = makeCheck("Appear Offline", offlineChange, "offline");
 	options.register("foename", foename, true);
 	options.register("pvphp", pvphp, true);
@@ -289,7 +288,6 @@ module.exports = function(nymph) {
 	soundChange();
 	musicChange();
 	dom.push(
-		[50, 445, printstats],
 		[175, 445, wantpvp],
 		[300, 445, offline],
 		[50, 500, foename],
@@ -344,13 +342,14 @@ module.exports = function(nymph) {
 					enableMusic = makeCheck("Enable music", musicChange, "enableMusic"),
 					enableSound = makeCheck("Enable sound", soundChange, "enableSound"),
 					hideRightpane = makeCheck("Hide Rightpane", hideRightpaneChange, "hideRightpane"),
+					printstats = makeCheck("Print stats", null, "stats"),
 					changePass = document.createElement("input"), changeBtn = px.domButton("Change Pass", changeFunc);
 				changePass.type = "password";
 				changePass.addEventListener("keydown", function(e){
 					if (e.keyCode == 13) changeFunc();
 				});
 				[[478, 345, enableSound], [603, 345, enableMusic], [728, 345, preloadart], [478, 370, hideRightpane],
-					[777, 550, wipe], [478, 300, changePass], [630, 300, changeBtn]].forEach(function(info){
+					[603, 370, printstats], [777, 550, wipe], [478, 300, changePass], [630, 300, changeBtn]].forEach(function(info){
 					info[2].style.position = "absolute";
 					info[2].style.left = info[0] + "px";
 					info[2].style.top = info[1] + "px";
@@ -361,5 +360,7 @@ module.exports = function(nymph) {
 			}]]
 		);
 	}
-	px.refreshRenderer({view: menuui, menudom: dom});
+	px.refreshRenderer({view: menuui, menudom: dom, endnext: function(){
+		setDom(null);
+	}});
 }

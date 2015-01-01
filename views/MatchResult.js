@@ -89,9 +89,8 @@ module.exports = function(game) {
 		}
 	}
 	document.addEventListener("keydown", onkeydown);
-	victoryui.endnext = function() {
-		document.removeEventListener("keydown", onkeydown);
-	}
 
-	px.refreshRenderer({view:victoryui, domvic:dom});
+	px.refreshRenderer({view:victoryui, domvic:dom, endnext: function() {
+		document.removeEventListener("keydown", onkeydown);
+	}});
 }
