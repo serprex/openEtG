@@ -88,8 +88,8 @@ exports.setDomVis = function(id, vis){
 	document.getElementById(id).style.display = vis ? "inline" : "none";
 }
 exports.refreshRenderer = function(stage) {
-	if (realStage.endnext){
-		realStage.endnext();
+	if (curStage.endnext){
+		curStage.endnext();
 	}
 	if (realStage.children.length > 1){
 		realStage.removeChildAt(1);

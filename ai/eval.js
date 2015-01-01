@@ -227,8 +227,8 @@ var ActivesValues = {
 	"poison 2":3,
 	"poison 3":4,
 	precognition:1,
-	predator:function(c){
-		return Math.max(c.owner.foe.hand.length-6, 1);
+	predator:function(c, tatk){
+		return c.owner.foe.hand.length > 4 ? tatk + Math.max(c.owner.foe.hand.length-6, 1) : 1;
 	},
 	protectonce:2,
 	protectall:4,
@@ -486,7 +486,7 @@ function evalthing(c) {
 			score += evalactive(c, c.active.hit, ttatk)*(ttatk?1:c.status.immaterial?0:.3)*adrenalinefactor*delayfactor;
 		}else if(key == "auto"){
 			if (!c.status.frozen){
-				score += evalactive(c, c.active.auto)*adrenalinefactor;
+				score += evalactive(c, c.active.auto, ttatk)*adrenalinefactor;
 			}
 		}else if (key == "cast"){
 			if (caneventuallyactive(c.castele, c.cast, c.owner)){

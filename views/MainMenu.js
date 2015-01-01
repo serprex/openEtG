@@ -71,7 +71,6 @@ module.exports = function(nymph) {
 		40, 16, 820, 60,
 		40, 92, 392, 80,
 		40, 192, 392, 80,
-		40, 442, 392, 40,
 		40, 492, 392, 80,
 		468, 92, 392, 80,
 		468, 192, 392, 80
@@ -245,12 +244,6 @@ module.exports = function(nymph) {
 		if (!name && sock.user) name = sock.user.name;
 		if (name) sock.emit("librarywant", { f: name });
 	}
-	function offlineChange(){
-		sock.emit("showoffline", {hide: options.offline});
-	}
-	function wantpvpChange(){
-		sock.emit("wantingpvp", {want: options.wantpvp});
-	}
 	function soundChange() {
 		ui.changeSound(options.enableSound);
 	}
@@ -278,8 +271,6 @@ module.exports = function(nymph) {
 	}
 	var foename = makeInput("Challenge/Trade", maybeChallenge);
 	var pvphp = makeInput("HP"), pvpmark = makeInput("Mark"), pvpdeck = makeInput("Deck"), pvpdraw = makeInput("Draw");
-	var wantpvp = makeCheck("Seeking PvP", wantpvpChange, "wantpvp"),
-		offline = makeCheck("Appear Offline", offlineChange, "offline");
 	options.register("foename", foename, true);
 	options.register("pvphp", pvphp, true);
 	options.register("pvpmark", pvpmark, true);
@@ -288,8 +279,6 @@ module.exports = function(nymph) {
 	soundChange();
 	musicChange();
 	dom.push(
-		[175, 445, wantpvp],
-		[300, 445, offline],
 		[50, 500, foename],
 		[205, 500, pvphp],
 		[240, 500, pvpmark],

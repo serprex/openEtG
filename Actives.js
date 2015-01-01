@@ -1078,7 +1078,15 @@ precognition:function(c,t){
 	c.owner.precognition = true;
 },
 predator:function(c,t){
-	return c.owner.foe.hand.length > 4 ? c.atk : 0;
+	if (c.owner.foe.hand.length > 4 && !c.status.predator){
+		c.status.predator = true;
+		c.addactive("turnstart", Actives.predatoroff);
+		c.attack(false, 0);
+	}
+},
+predatoroff:function(c,t){
+	delete c.status.predator;
+	c.rmactive("turnstart", "predatoroff");
 },
 protectall:function(c,t){
 	function protect(p){

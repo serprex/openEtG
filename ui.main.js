@@ -219,6 +219,14 @@ window.aideck = document.getElementById("aideck");
 		ui.parseaistats(gameData);
 		require("./views/Match")(gameData, true);
 	}
+	function offlineChange(){
+		sock.emit("showoffline", {hide: options.offline});
+	}
+	function wantpvpChange(){
+		sock.emit("wantingpvp", {want: options.wantpvp});
+	}
+	options.register("wantpvp", document.getElementById("wantpvp"));
+	options.register("offline", document.getElementById("offline"));
 	(function(callbacks){
 		for(var id in callbacks){
 			for(var event in callbacks[id]){
@@ -227,8 +235,10 @@ window.aideck = document.getElementById("aideck");
 		}
 	})({
 		leftpane: {click: function(){this.blur()}},
-		aideck: {click: function(){this.setSelectionRange(0, 999)}},
 		chatinput: {keydown: maybeSendChat},
+		offline: {change: offlineChange},
+		wantpvp: {change: wantpvpChange},
+		aideck: {click: function(){this.setSelectionRange(0, 999)}},
 		aivs: {click: aiClick},
 	});
 })();
