@@ -201,6 +201,8 @@ function startMatch(game, foeDeck) {
 	var damagetext = [new PIXI.Text("", { font: "14px Dosis" }), new PIXI.Text("", { font: "14px Dosis" })];
 	var poisontext = [new PIXI.Sprite(gfx.nopic), new PIXI.Sprite(gfx.nopic)];
 	var decktext = [new PIXI.Text("", { font: "16px Dosis" }), new PIXI.Text("", { font: "16px Dosis" })];
+	var bgfx = new PIXI.Graphics();
+	gameui.addChild(bgfx);
 	for (var j = 0;j < 2;j++) {
 		(function(_j) {
 			player_overlay[j].width = 90;
@@ -208,6 +210,7 @@ function startMatch(game, foeDeck) {
 			for (var i = 0;i < 8;i++) {
 				handsprite[j][i] = new PIXI.Sprite(gfx.nopic);
 				handsprite[j][i].position.set(j ? 20 : 780, (j ? 130 : 310) + 19 * i);
+				gameui.addChild(handsprite[j][i]);
 				(function(_i) {
 					px.setClick(handsprite[j][i], function() {
 						if (game.phase != etg.PlayPhase) return;
@@ -360,11 +363,6 @@ function startMatch(game, foeDeck) {
 	px.setInteractive.apply(null, player_overlay);
 	var fgfx = new PIXI.Graphics();
 	gameui.addChild(fgfx);
-	for(var j=0;j<2;j++){
-		handsprite[j].forEach(function(spr){
-			gameui.addChild(spr);
-		});
-	}
 	var anims = new PIXI.DisplayObjectContainer();
 	gameui.addChild(anims);
 	Effect.register(anims);
@@ -572,6 +570,17 @@ function startMatch(game, foeDeck) {
 		}
 		fgfx.lineStyle(0, 0, 0);
 		fgfx.endFill();
+		if (game.turn == game.player1 && !game.targetingMode && game.phase != etg.EndPhase) {
+			for (var i = 0;i < game.player1.hand.length;i++) {
+				var card = game.player1.hand[i].card;
+				if (game.player1.canspend(card.costele, card.cost)) {
+					fgfx.beginFill(0xffffff, .5);
+					fgfx.drawRect(handsprite[0][i].position.x + 100, handsprite[0][i].position.y, 20, 19);
+					fgfx.endFill();
+				}
+			}
+		}
+		bgfx.clear();
 		for (var j = 0;j < 2;j++) {
 			var pl = game.players(j);
 			if (pl.sosa) {
@@ -583,15 +592,15 @@ function startMatch(game, foeDeck) {
 			var statuses = { flatline: etg.Death, silence: etg.Aether, sanctuary: etg.Light };
 			for(var status in statuses){
 				if (pl[status]) {
-					fgfx.beginFill(ui.elecols[statuses[status]], .8);
-					fgfx.drawRect(handsprite[j][0].position.x - 8, handsprite[j][0].position.y - 2, 120, 160);
-					fgfx.endFill();
+					bgfx.beginFill(ui.elecols[statuses[status]], .8);
+					bgfx.drawRect(handsprite[j][0].position.x - 8, handsprite[j][0].position.y - 2, 120, 160);
+					bgfx.endFill();
 				}
 			}
 			if (pl.nova >= 3){
-				fgfx.beginFill(ui.elecols[etg.Entropy], .8);
-				fgfx.drawRect(handsprite[j][0].position.x - 8, handsprite[j][0].position.y - 2, 120, 160);
-				fgfx.endFill();
+				bgfx.beginFill(ui.elecols[etg.Entropy], .8);
+				bgfx.drawRect(handsprite[j][0].position.x - 8, handsprite[j][0].position.y - 2, 120, 160);
+				bgfx.endFill();
 			}
 			for (var i = 0;i < 8;i++) {
 				handsprite[j][i].setTexture(gfx.getCardImage(pl.hand[i] ? (j == 0 || game.player1.precognition ? pl.hand[i].card.code : "0") : "1"));
@@ -680,16 +689,6 @@ function startMatch(game, foeDeck) {
 			poisontext[j].setTexture(ui.getTextImage(poisoninfo, 16));
 			px.maybeSetText(decktext[j], pl.deck.length + "cards");
 			px.maybeSetText(damagetext[j], !cloakgfx.visible && game.expectedDamage[j] ? "Next HP loss: " + game.expectedDamage[j] : "");
-		}
-		if (game.turn == game.player1 && !game.targetingMode && game.phase != etg.EndPhase) {
-			for (var i = 0;i < game.player1.hand.length;i++) {
-				var card = game.player1.hand[i].card;
-				if (game.player1.canspend(card.costele, card.cost)) {
-					fgfx.beginFill(0xffffff, .5);
-					fgfx.drawRect(handsprite[0][i].position.x + 100, handsprite[0][i].position.y, 20, 19);
-					fgfx.endFill();
-				}
-			}
 		}
 		Effect.next(cloakgfx.visible);
 	}, endnext: function() {

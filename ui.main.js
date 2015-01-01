@@ -220,13 +220,17 @@ window.aideck = document.getElementById("aideck");
 		require("./views/Match")(gameData, true);
 	}
 	function offlineChange(){
-		sock.emit("showoffline", {hide: options.offline});
+		sock.emit("chatus", {hide: !!options.offline});
+	}
+	function afkChange(){
+		sock.emit("chatus", {afk: !!options.afk});
 	}
 	function wantpvpChange(){
-		sock.emit("wantingpvp", {want: options.wantpvp});
+		sock.emit("chatus", {want: !!options.wantpvp});
 	}
 	options.register("wantpvp", document.getElementById("wantpvp"));
 	options.register("offline", document.getElementById("offline"));
+	options.register("afk", document.getElementById("afk"));
 	(function(callbacks){
 		for(var id in callbacks){
 			for(var event in callbacks[id]){
@@ -237,6 +241,7 @@ window.aideck = document.getElementById("aideck");
 		leftpane: {click: function(){this.blur()}},
 		chatinput: {keydown: maybeSendChat},
 		offline: {change: offlineChange},
+		afk: {change: afkChange},
 		wantpvp: {change: wantpvpChange},
 		aideck: {click: function(){this.setSelectionRange(0, 999)}},
 		aivs: {click: aiClick},

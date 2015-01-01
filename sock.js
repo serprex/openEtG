@@ -8,9 +8,8 @@ socket.on("close", function(){
 	setTimeout(socket.open.bind(socket), 99);
 });
 socket.on("open", function(){
+	if (options.offline || options.wantpvp || options.afk) exports.emit("chatus", {hide: !!options.offline, wantpvp: !!options.wantpvp, afk: !!options.afk});
 	chat("Connected");
-	if (options.offline) exports.emit("showoffline", {hide: options.offline});
-	if (options.wantpvp) exports.emit("wantingpvp", {want: options.wantpvp});
 });
 exports.et = socket;
 exports.user = undefined;
