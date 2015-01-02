@@ -87,7 +87,6 @@ window.aideck = document.getElementById("aideck");
 			gfx.preloadCardArt(data.art);
 		},
 		foearena:function(data) {
-			aideck.value = data.deck;
 			var game = require("./views/Match")({ deck: data.deck, urdeck: sock.getDeck(), seed: data.seed,
 				p2hp: data.hp, foename: data.name, p2drawpower: data.draw, p2markpower: data.mark, arena: data.name, level: 4+data.lv }, true);
 			game.cost = userutil.arenaCost(data.lv);

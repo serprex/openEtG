@@ -219,7 +219,7 @@ var userEvents = {
 				db.hmget(akey, "win", "loss", "day", function(err, wld){
 					if (err || !wld) return;
 					for(var i=0; i<3; i++) wld[i] = parseInt(wld[i]);
-					if (!data.won && (score < 15 || wld[0]-wld[1] < -15 || sutil.getDay()-wld[2] > 14)){
+					if (!data.won && (wld[0] == 0 && wld[1] == 5 || wld[1]-wld[0] > 15 || sutil.getDay()-wld[2] > 14)){
 						db.zrem(arena, data.aname);
 					}else{
 						db.zadd(arena, wilson(wld[0]+1, wld[0]+wld[1]+1)*1000, data.aname);
