@@ -53,8 +53,9 @@ function activeUsers() {
 		var sock = usersock[username];
 		if (sock && sock.readyState == "open"){
 			if (sock.id in sockinfo){
-				if (sockinfo[sock.id].showoffline) continue;
-				if (sockinfo[sock.id].wantingpvp) username += "\xb6";
+				if (sockinfo[sock.id].offline) continue;
+				if (sockinfo[sock.id].afk) username += " (afk)";
+				else if (sockinfo[sock.id].wantpvp) username += "\xb6";
 			}
 			activeusers.push(username);
 		}
@@ -615,9 +616,9 @@ var sockEvents = {
 		});
 	},
 	chatus:function(data){
-		if (data.hide !== undefined) sockinfo[this.id].showoffline = data.hide;
-		if (data.want !== undefined) sockinfo[this.id].wantingpvp = data.want;
-		if (data.afk !== undefined) sockinfo[this.id].showafk = data.afk;
+		if (data.hide !== undefined) sockinfo[this.id].offline = data.hide;
+		if (data.want !== undefined) sockinfo[this.id].wantpvp = data.want;
+		if (data.afk !== undefined) sockinfo[this.id].afk = data.afk;
 	},
 	who:function(data){
 		sockEmit(this, "chat", { mode: "red", msg: activeUsers().join(", ") || "There are no users online :(" });
