@@ -1013,6 +1013,12 @@ Thing.prototype.mutantactive = function(){
 		}
 	}
 }
+var adrtbl = [
+	[0, 0, 0, 0],
+	[1, 1, 1], [2, 2, 2], [3, 3, 3],
+	[3, 2], [4, 2], [4, 2], [5, 3], [6, 3],
+	[3], [4], [4], [4], [5], [5], [5]
+];
 Weapon.prototype.trueatk = Creature.prototype.trueatk = function(adrenaline){
 	var dmg = this.atk;
 	if (this.status.dive)dmg += this.status.dive;
@@ -1021,11 +1027,8 @@ Weapon.prototype.trueatk = Creature.prototype.trueatk = function(adrenaline){
 	if (this.status.burrowed)dmg = Math.ceil(dmg/2);
 	var y=adrenaline || this.status.adrenaline || 0;
 	if (y<2)return dmg;
-	var attackCoefficient = 4-countAdrenaline(dmg);
-	for(var i=1; i<y; i++){
-		dmg -= Math.ceil(attackCoefficient*dmg*i/3);
-	}
-	return dmg;
+	var row = adrtbl[dmg];
+	return row ? row[y-2] || 0 : 0;
 }
 Shield.prototype.truedr = function(){
 	var dr = this.dr;
@@ -1208,7 +1211,8 @@ CardInstance.prototype.useactive = function(target){
 	owner.game.updateExpectedDamage();
 }
 function countAdrenaline(x){
-	return 5-Math.floor(Math.sqrt(Math.abs(x)));
+	var atks = adrtbl[Math.abs(x)];
+	return atks?atks.length+1:1;
 }
 var filtercache = [];
 function filtercards(upped, filter, cmp, showshiny){
@@ -1287,6 +1291,7 @@ exports.MulliganPhase1 = 0;
 exports.MulliganPhase2 = 1;
 exports.PlayPhase = 2;
 exports.EndPhase = 3;
+exports.AdrenaTable = adrtbl;
 exports.PillarList = ["4sa", "4vc", "52g", "55k", "58o", "5bs", "5f0", "5i4", "5l8", "5oc", "5rg", "5uk", "61o"];
 exports.NymphList = [undefined, "500", "534", "568", "59c", "5cg", "5fk", "5io", "5ls", "5p0", "5s4", "5v8", "62c"];
 exports.AlchemyList = [undefined, "4vn", "52s", "55v", "595", "5c7", "5fb", "5ig", "5lj", "5om", "5rr", "5uu", "621"];

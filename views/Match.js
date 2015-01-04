@@ -166,16 +166,8 @@ function startMatch(game, foeDeck) {
 			return Math.ceil(t.truehp()*(t.status.frozen?150:100)/(t.truehp()+100));
 		},
 		adrenaline:function(t){
-			var atks = [], adreback = t.status.adrenaline;
-			t.status.adrenaline = 1;
-			var attacks = etg.countAdrenaline(t.trueatk());
-			while (t.status.adrenaline < attacks) {
-				t.status.adrenaline++;
-				atks.push(t.trueatk());
-			}
-			if (!adreback) delete t.status.adrenaline;
-			else t.status.adrenaline = adreback;
-			return "extra: " + atks.join(", ");
+			var tatk = Math.abs(t.trueatk());
+			return "extra: " + (tatk > 15 ? 0 : etg.AdrenaTable[tatk].join(", "));
 		},
 	};
 	function setInfo(obj) {
