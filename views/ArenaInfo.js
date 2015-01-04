@@ -28,6 +28,17 @@ module.exports = function(info) {
 			info.card = etgutil.asUpped(info.card, true);
 		}
 		var mark, i = 0, adeck = "05" + info.card + info.deck;
+		etgutil.iterdeck(adeck, function(code){
+			var ismark = etg.fromTrueMark(code);
+			if (~ismark){
+				mark = ismark;
+				return;
+			}
+			var spr = new PIXI.Sprite(gfx.getCardImage(code));
+			spr.position.set(100 + Math.floor(i / 10) * 99, 32 + (i % 10) * 19);
+			stage.addChild(spr);
+			i++;
+		});
 		dom.push([300, 330, ["Modify", function(){
 				require("./Editor")(info, info.card);
 			}]], [300, 360, ["Test", function(){
@@ -40,21 +51,7 @@ module.exports = function(info) {
 				var gameData = { deck: aideckcode, urdeck: deck, seed: Math.random() * etgutil.MAX_INT, foename: "Test", cardreward: "",
 					p2hp:info.curhp, p2markpower:info.mark, p2drawpower:info.draw };
 				require("./Match")(gameData, true);
-			}]], [100, 230, "05" + info.card + info.deck]);
-		etgutil.iterdeck(adeck, function(code){
-			var ismark = etg.fromTrueMark(code);
-			if (~ismark){
-				mark = ismark;
-				return;
-			}
-			var spr = new PIXI.Sprite(gfx.getCardImage(code));
-			spr.position.set(100 + Math.floor(i / 10) * 99, 32 + (i % 10) * 19);
-			stage.addChild(spr);
-			i++;
-		});
-		var spr = new PIXI.Sprite(gfx.eicons[mark || 0]);
-		spr.position.set(66, 200);
-		stage.addChild(spr);
+			}]], [100, 230, "1:" + mark + " " + adeck]);
 		var acard = new PIXI.Sprite(gfx.getArt(info.card));
 		acard.position.set(734, 8);
 		stage.addChild(acard);

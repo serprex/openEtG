@@ -29,7 +29,7 @@ window.aideck = document.getElementById("aideck");
 			delete data.x;
 			sock.user = data;
 			sock.prepuser();
-			startMenu();
+			require("./views/MainMenu")();
 		},
 		passchange:function(data) {
 			sock.user.auth = data.auth;
@@ -45,14 +45,13 @@ window.aideck = document.getElementById("aideck");
 				Notification.requestPermission();
 				new Notification(data.u, {body: data.msg});
 			}
-			var now = new Date(), h = now.getHours(), m = now.getMinutes(), s = now.getSeconds();
+			var now = new Date(), h = now.getHours(), m = now.getMinutes();
 			if (h < 10) h = "0"+h;
 			if (m < 10) m = "0"+m;
-			if (s < 10) s = "0"+s;
 			var span = document.createElement("span");
 			if (data.mode != "red") span.style.color = data.mode || "black";
 			if (data.guest) span.style.fontStyle = "italic";
-			span.appendChild(document.createTextNode(h + ":" + m + ":" + s + " "));
+			span.appendChild(document.createTextNode(h + m + " "));
 			if (data.u){
 				var belly = document.createElement("b");
 				belly.appendChild(document.createTextNode(data.u + " "));
