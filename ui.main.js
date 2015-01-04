@@ -45,13 +45,12 @@ window.aideck = document.getElementById("aideck");
 				Notification.requestPermission();
 				new Notification(data.u, {body: data.msg});
 			}
-			var now = new Date(), h = now.getHours(), m = now.getMinutes();
-			if (h < 10) h = "0"+h;
-			if (m < 10) m = "0"+m;
+			var now = new Date(), h = now.getHours(), m = now.getMinutes(),
+				hs = h < 10 ? "0"+h : h.toString(), ms = m < 10 ? "0"+m : m.toString();
 			var span = document.createElement("span");
 			if (data.mode != "red") span.style.color = data.mode || "black";
 			if (data.guest) span.style.fontStyle = "italic";
-			span.appendChild(document.createTextNode(h + m + " "));
+			span.appendChild(document.createTextNode(hs + ms + " "));
 			if (data.u){
 				var belly = document.createElement("b");
 				belly.appendChild(document.createTextNode(data.u + " "));
