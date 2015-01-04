@@ -228,7 +228,7 @@ var ActivesValues = {
 	"poison 3":4,
 	precognition:1,
 	predator:function(c, tatk){
-		return c.owner.foe.hand.length > 4 ? tatk + Math.max(c.owner.foe.hand.length-6, 1) : 1;
+		return !(c instanceof etg.CardInstance) && c.owner.foe.hand.length > 4 ? tatk + Math.max(c.owner.foe.hand.length-6, 1) : 1;
 	},
 	protectonce:2,
 	protectall:4,
@@ -464,7 +464,11 @@ function evalthing(c) {
 	var ttatk, hp, poison, score = 0;
 	var isCreature = c instanceof etg.Creature, isWeapon = c instanceof etg.Weapon;
 	var adrenalinefactor = c.status.adrenaline ? etg.countAdrenaline(c.trueatk())/1.5 : 1;
-	var delaymix = Math.max((c.status.frozen||0), (c.status.delayed||0))/adrenalinefactor, delayfactor = delaymix?1-Math.min(delaymix/5, .6):1;
+	if (isWeapon || isCreature){
+		var delaymix = Math.max((c.status.frozen||0), (c.status.delayed||0))/adrenalinefactor, delayfactor = delaymix?1-Math.min(delaymix/5, .6):1;
+	}else{
+		var delaymix = 0, delayfactor = 1;
+	}
 	if (isCreature){
 		hp = Math.max(c.truehp(), 0);
 		poison = c.status.poison || 0;
