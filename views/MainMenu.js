@@ -148,14 +148,16 @@ module.exports = function(nymph) {
 				this.style.display = "none";
 			}
 			var y = 100+i*45;
-			dom.push(
-				[478, y, ["Arena AI", arenaAi, function() {
-					tinfo.setText("In the arena you will face decks from other players." + costText(4+lvi.lv));
-				}]],
-				[578, y, ["Arena Info", arenaInfo, function() {
-					tinfo.setText("Check how your arena deck is doing.");
-				}]]
-			);
+			if (sock.user){
+				dom.push(
+					[478, y, ["Arena AI", arenaAi, function() {
+						tinfo.setText("In the arena you will face decks from other players." + costText(4+lvi.lv));
+					}]],
+					[578, y, ["Arena Info", arenaInfo, function() {
+						tinfo.setText("Check how your arena deck is doing.");
+					}]]
+				);
+			}
 			dom.push(
 				[678, y, ["Arena T20", arenaTop, function() {
 					tinfo.setText("See who the top players in arena are right now.");
