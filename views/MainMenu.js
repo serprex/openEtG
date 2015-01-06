@@ -89,11 +89,6 @@ module.exports = function(nymph) {
 		menuui.addChild(tierText);
 	}
 
-	var dom = [[777, 50, ["Next tip", function() {
-		tipNumber = (tipNumber+1) % tipjar.length;
-		tinfo.setText(tipjar[tipNumber] + ".");
-	}]]];
-
 	var tstats = px.domText(sock.user ? sock.user.gold + "$ " + sock.user.name + "\nPvE " + sock.user.aiwins + " - " + sock.user.ailosses + "\nPvP " + sock.user.pvpwins + " - " + sock.user.pvplosses : "Sandbox");
 
 	var tinfo = px.domText("");
@@ -103,7 +98,7 @@ module.exports = function(nymph) {
 		sock.emit("wealthtop");
 		this.style.display = "none";
 	}
-	dom.push(
+	var dom = [
 		[50, 26, tinfo],
 		[478, 200, tstats],
 		[50, 100, ["Commoner", mkAi.mkAi(0), function() {
@@ -123,8 +118,12 @@ module.exports = function(nymph) {
 		}]],
 		[250, 200, ["Wealth T50", wealthTop, function() {
 			tinfo.setText("See who's collected the most wealth.");
+		}]],
+		[777, 50, ["Next tip", function() {
+			tipNumber = (tipNumber+1) % tipjar.length;
+			tinfo.setText(tipjar[tipNumber] + ".");
 		}]]
-	);
+	];
 	for (var i=0; i<2; i++){
 		(function(lvi){
 			function arenaAi() {
