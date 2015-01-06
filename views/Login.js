@@ -48,11 +48,14 @@ module.exports = function(){
 			xhr.send();
 		}
 	}
-	var view;
+	var loadingBar;
 	if (gfx.load){
-		view = px.mkView();
-		gfx.load(function(loadingBar){
-			view.addChild(loadingBar);
+		loadingBar = document.createElement("span");
+		loadingBar.style.backgroundColor = "#FFFFFF";
+		loadingBar.style.height = "32px";
+		gfx.load(function(progress){
+			if (progress == 1) loadingBar.style.backgroundColor = "#336699";
+			loadingBar.style.width = (progress*900) + "px";
 		}, function(){
 			ui.playMusic("openingMusic");
 			if (sock.user) require("./MainMenu")();
@@ -82,13 +85,19 @@ module.exports = function(){
 	if (options.remember && typeof localStorage !== "undefined"){
 		loginClick(localStorage.auth);
 	}
+	var tutlink = document.createElement("a");
+	tutlink.href = "forum/?topic=267"
+	tutlink.target = "_blank";
+	tutlink.appendChild(document.createTextNode("Tutorial"));
 	var dom = [
 		[100, 200, username],
 		[100, 230, password],
 		[260, 200, remember],
 		[300, 200, login],
+		[100, 300, tutlink],
 		[400, 200, ["Sandbox", require("./MainMenu")]],
 	];
-	px.refreshRenderer({logdom:dom, view:view});
+	if (loadingBar) dom.push([0, 568, loadingBar]);
+	px.refreshRenderer({logdom:dom});
 	username.focus();
 }

@@ -3,10 +3,8 @@ var ui = require("./uiutil");
 var Cards = require("./Cards");
 var etgutil = require("./etgutil");
 exports.loaded = false;
-function load(preload, postload){
+function load(progress, postload){
 	exports.load = undefined;
-	var loadingBar = new PIXI.Graphics();
-	preload(loadingBar);
 	var singles = ["gold", "bg_quest", "bg_game", "bg_questmap"];
 	var assets = ["eicons", "cardBacks", "cardBorders", "sicons", "sborders", "ticons", "ricons"].concat(singles);
 	var widths = {
@@ -23,10 +21,7 @@ function load(preload, postload){
 		var img = new Image();
 		img.addEventListener("load", function(){
 			loadCount++;
-			loadingBar.clear();
-			loadingBar.beginFill(loadCount == assets.length ? 0x336699 : 0xFFFFFF);
-			loadingBar.drawRect(0, 568, 900*loadCount/assets.length, 32);
-			loadingBar.endFill();
+			progress(loadCount/assets.length);
 			var w = widths[asset], tex = new PIXI.Texture(new PIXI.BaseTexture(this));
 			if (w){
 				var ts = [];

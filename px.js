@@ -17,7 +17,7 @@ function animate() {
 		renderer.render(realStage);
 	}
 }
-function requestAnimate() { requestAnimFrame(animate); }
+function requestAnimate() { requestAnimationFrame(animate); }
 exports.load = requestAnimate;
 var special = /view|endnext|cmds|next/;
 function monkeyDomSetText(text){
