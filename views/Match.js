@@ -66,17 +66,18 @@ function startMatch(game, foeDeck) {
 			resigning = true;
 		}
 	});
+	var turntell = new px.domText("");
+	turntell.style.pointerEvents = "none";
+	var foename = px.domText((game.level === undefined ? "" : ["Commoner", "Mage", "Champion", "Demigod", "Arena1", "Arena2"][game.level] + "\n") + (game.foename || "-"));
+	foename.style.textAlign = "center";
+	foename.style.width = "100px";
 	var dom = [
 		[800, 520, endturn],
 		[800, 490, cancel],
 		[8, 24, resign],
+		[800, 550, turntell],
+		[0, 75, foename],
 	];
-	var turntell = new PIXI.Text("", { font: "16px Dosis" });
-	turntell.position.set(800, 550);
-	gameui.addChild(turntell);
-	var foename = new PIXI.Text((game.level === undefined ? "" : ["Commoner", "Mage", "Champion", "Demigod", "Arena1", "Arena2"][game.level] + "\n") + (game.foename || "-"), { font: "bold 18px Dosis", align: "center" });
-	foename.position.set(5, 75);
-	gameui.addChild(foename);
 	function addNoHealData(game) {
 		var data = game.dataNext || {};
 		if (game.noheal){
@@ -188,17 +189,18 @@ function startMatch(game, foeDeck) {
 	var marksprite = [new PIXI.Sprite(gfx.nopic), new PIXI.Sprite(gfx.nopic)];
 	var marktext = [new PIXI.Text("", { font: "18px Dosis" }), new PIXI.Text("", { font: "18px Dosis" })];
 	var quantatext = [new PIXI.DisplayObjectContainer(), new PIXI.DisplayObjectContainer()];
-	var hptext = [new PIXI.Text("", { font: "18px Dosis" }), new PIXI.Text("", { font: "18px Dosis" })];
+	var hptext = [new px.domText(""), new px.domText("")];
+	var hpxy = [];
 	var player_overlay = [new PIXI.Sprite(gfx.nopic), new PIXI.Sprite(gfx.nopic)];
-	var damagetext = [new PIXI.Text("", { font: "14px Dosis" }), new PIXI.Text("", { font: "14px Dosis" })];
-	var poisontext = [new PIXI.Sprite(gfx.nopic), new PIXI.Sprite(gfx.nopic)];
-	var decktext = [new PIXI.Text("", { font: "16px Dosis" }), new PIXI.Text("", { font: "16px Dosis" })];
 	var bgfx = new PIXI.Graphics();
 	gameui.addChild(bgfx);
 	for (var j = 0;j < 2;j++) {
+		hptext[j].style.textAlign = "center"
+		hptext[j].style.width = "100px";
+		hptext[j].style.pointerEvents = "none";
+		player_overlay[j].width = 95;
+		player_overlay[j].height = 80;
 		(function(_j) {
-			player_overlay[j].width = 90;
-			player_overlay[j].height = 85;
 			for (var i = 0;i < 8;i++) {
 				handsprite[j][i] = new PIXI.Sprite(gfx.nopic);
 				handsprite[j][i].position.set(j ? 20 : 780, (j ? 130 : 310) + 19 * i);
@@ -307,25 +309,16 @@ function startMatch(game, foeDeck) {
 			}
 			gameui.addChild(marksprite[j]);
 			marktext[j].anchor.set(.5, .5);
-			hptext[j].anchor.set(.5, .5);
 			player_overlay[j].anchor.set(.5, .5);
-			poisontext[j].anchor.set(.5, .5);
-			decktext[j].anchor.set(.5, .5);
-			damagetext[j].anchor.set(.5, .5);
 			marktext[j].position.set(768,470);
 			quantatext[j].position.set(j ? 792 : 0, j ? 100 : 308);
-			hptext[j].position.set(50, 550);
 			player_overlay[j].position.set(50, 555);
-			poisontext[j].position.set(50, 570);
-			decktext[j].position.set(50, 530);
-			damagetext[j].position.set(50, 510);
+			hpxy.push(new PIXI.Point(50, 550));
 			if (j) {
 				ui.reflectPos(marktext[j]);
-				ui.reflectPos(hptext[j]);
+				ui.reflectPos(hpxy[j]);
 				ui.reflectPos(player_overlay[j]);
-				ui.reflectPos(poisontext[j]);
-				ui.reflectPos(decktext[j]);
-				ui.reflectPos(damagetext[j]);
+				player_overlay[j].y += 15;
 			}
 			var child;
 			for (var k = 1;k < 13;k++) {
@@ -344,11 +337,8 @@ function startMatch(game, foeDeck) {
 		})(j);
 		gameui.addChild(marktext[j]);
 		gameui.addChild(quantatext[j]);
-		gameui.addChild(hptext[j]);
+		dom.push([hpxy[j].x-50, hpxy[j].y-(j?40:45), hptext[j]]);
 		gameui.addChild(player_overlay[j]);
-		gameui.addChild(poisontext[j]);
-		gameui.addChild(decktext[j]);
-		gameui.addChild(damagetext[j]);
 	}
 	px.setInteractive.apply(null, weapsprite);
 	px.setInteractive.apply(null, shiesprite);
@@ -517,13 +507,13 @@ function startMatch(game, foeDeck) {
 				turntext = game.turn == game.player1 ? "Your Turn" : "Their Turn";
 				if (game.phase < 2) turntext += "\n" + (game.phase ? "Second" : "First");
 			}
-			px.maybeSetText(turntell, turntext);
+			turntell.setText(turntext);
 			if (game.turn == game.player1){
 				endturn.setText(game.phase == etg.PlayPhase ? "End Turn" : "Accept Hand");
 				cancel.setText(game.phase != etg.PlayPhase ? "Mulligan" : game.targetingMode || discarding || resigning ? "Cancel" : null);
 			}else cancel.style.display = endturn.style.display = "none";
 		}else{
-			px.maybeSetText(turntell, (game.turn == game.player1 ? "Your" : "Their") + " Turn\n" + (game.winner == game.player1?"Won":"Lost"));
+			turntell.setText((game.turn == game.player1 ? "Your" : "Their") + " Turn\n" + (game.winner == game.player1?"Won":"Lost"));
 			endturn.setText("Continue");
 			cancel.style.display = "none";
 		}
@@ -659,28 +649,27 @@ function startMatch(game, foeDeck) {
 			for (var i = 1;i < 13;i++) {
 				px.maybeSetText(quantatext[j].children[i*2-2], pl.quanta[i].toString());
 			}
-			var yOffset = j == 0 ? 28 : -44;
 			fgfx.beginFill(0);
-			fgfx.drawRect(hptext[j].x - 41, hptext[j].y + yOffset-1, 82, 16);
+			fgfx.drawRect(player_overlay[j].x - 41, player_overlay[j].y - 25, 82, 16);
 			fgfx.endFill();
 			if (pl.hp > 0){
 				fgfx.beginFill(ui.elecols[etg.Life]);
-				fgfx.drawRect(hptext[j].x - 40, hptext[j].y + yOffset, 80 * pl.hp / pl.maxhp, 14);
+				fgfx.drawRect(player_overlay[j].x - 40, player_overlay[j].y - 24, 80 * pl.hp / pl.maxhp, 14);
 				fgfx.endFill();
 				if (!cloakgfx.visible && game.expectedDamage[j]) {
 					fgfx.beginFill(ui.elecols[game.expectedDamage[j] >= pl.hp ? etg.Fire : game.expectedDamage[j] > 0 ? etg.Time : etg.Water]);
-					fgfx.drawRect(hptext[j].x - 40 + 80 * pl.hp / pl.maxhp, hptext[j].y + yOffset, -80 * Math.min(game.expectedDamage[j], pl.hp) / pl.maxhp, 14);
+					fgfx.drawRect(player_overlay[j].x - 40 + 80 * pl.hp / pl.maxhp, player_overlay[j].y - 24, -80 * Math.min(game.expectedDamage[j], pl.hp) / pl.maxhp, 14);
 					fgfx.endFill();
 				}
 			}
-			px.maybeSetText(hptext[j], pl.hp + "/" + pl.maxhp);
 			if (px.hitTest(player_overlay[j], pos)){
 				setInfo(pl);
+				hptext[j].style.display = "none";
+			}else{
+				hptext[j].style.display = "inline";
+				var poison = pl.status.poison, poisoninfo = !poison ? "" : (poison > 0 ? poison + " 1:2" : -poison + " 1:7") + (pl.neuro ? " 1:10" : "");
+				hptext[j].setText(poisoninfo + "\n" + pl.hp + "/" + pl.maxhp + "\n" + pl.deck.length + "cards" + (!cloakgfx.visible && game.expectedDamage[j] ? "\nNext HP loss: " + game.expectedDamage[j] : ""));
 			}
-			var poison = pl.status.poison, poisoninfo = !poison ? "" : (poison > 0 ? poison + " 1:2" : -poison + " 1:7") + (pl.neuro ? " 1:10" : "");
-			poisontext[j].setTexture(ui.getTextImage(poisoninfo, 16));
-			px.maybeSetText(decktext[j], pl.deck.length + "cards");
-			px.maybeSetText(damagetext[j], !cloakgfx.visible && game.expectedDamage[j] ? "Next HP loss: " + game.expectedDamage[j] : "");
 		}
 		Effect.next(cloakgfx.visible);
 	}, endnext: function() {

@@ -331,7 +331,7 @@ module.exports = function(nymph) {
 			[150, 200, ["Shop", require("./Shop"), function() {
 				tinfo.setText("Buy booster packs which contain cards from the elements you choose.");
 			}]],
-			[150, 245, ["Sell/Upgrade", require("./Upgrade"), function() {
+			[150, 245, ["Upgrade", require("./Upgrade"), function() {
 				tinfo.setText("Upgrade or sell cards.");
 			}]],
 			[677, 245, ["Settings", function() {

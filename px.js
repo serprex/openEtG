@@ -21,6 +21,8 @@ function requestAnimate() { requestAnimationFrame(animate); }
 exports.load = requestAnimate;
 var special = /view|endnext|cmds|next/;
 function monkeyDomSetText(text){
+	if (this.textcache == text) return;
+	this.textcache = text;
 	while (this.firstChild) this.firstChild.remove();
 	var ele = this;
 	var pieces = text.replace(/\|/g, " | ").split(/(\d\d?:\d\d?|\$|\n)/);
