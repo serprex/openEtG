@@ -270,16 +270,43 @@ module.exports = function(nymph) {
 		else input.className = "numput";
 		return input;
 	}
-	var foename = makeInput("Challenge/Trade", maybeChallenge);
-	var pvphp = makeInput("HP"), pvpmark = makeInput("Mark"), pvpdeck = makeInput("Deck"), pvpdraw = makeInput("Draw");
+	var foename = makeInput("Challenge/Trade", maybeChallenge), pvphp = makeInput("HP"), pvpmark = makeInput("Mark"), pvpdeck = makeInput("Deck"), pvpdraw = makeInput("Draw");
+	var aideck = makeInput("AI Deck", maybeCustomAi), aihp = makeInput("HP"), aimark = makeInput("Mark"), aideckpower = makeInput("Deck"), aidraw = makeInput("Draw");
+	aideck.addEventListener("click", function(){this.setSelectionRange(0, 999)}),
 	options.register("foename", foename, true);
 	options.register("pvphp", pvphp, true);
 	options.register("pvpmark", pvpmark, true);
 	options.register("pvpdeck", pvpdeck, true);
 	options.register("pvpdraw", pvpdraw, true);
+	options.register("aideck", aideck, true);
+	options.register("aihp", aihp, true);
+	options.register("aimark", aimark, true);
+	options.register("aideckpower", aideckpower, true);
+	options.register("aidraw", aidraw, true);
+	function maybeCustomAi(e){
+		if (e.keyCode == 13) aiClick.call(this);
+	}
+	function aiClick() {
+		this.blur();
+		var deck = sock.getDeck();
+		if (etgutil.decklength(deck) < 11 || etgutil.decklength(options.aideck) < 11) {
+			require("./Editor")();
+			return;
+		}
+		var gameData = { deck: options.aideck, urdeck: deck, seed: Math.random() * etgutil.MAX_INT, foename: "Custom", cardreward: "" };
+		ui.parsepvpstats(gameData);
+		ui.parseaistats(gameData);
+		require("./Match")(gameData, true);
+	}
 	soundChange();
 	musicChange();
 	dom.push(
+		[50, 445, aideck],
+		[205, 445, aihp],
+		[240, 445, aimark],
+		[275, 445, aideckpower],
+		[310, 445, aidraw],
+		[350, 445, ["Custom", aiClick]],
 		[50, 500, foename],
 		[205, 500, pvphp],
 		[240, 500, pvpmark],

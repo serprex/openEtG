@@ -5,6 +5,7 @@ var sock = require("./sock");
 var Cards = require("./Cards");
 var aiDecks = require("./Decks");
 var etgutil = require("./etgutil");
+var options = require("./options");
 exports.mkPremade = function(name, daily) {
 	return function() {
 		var urdeck = sock.getDeck();
@@ -55,7 +56,7 @@ exports.mkAi = function(level, daily) {
 				}
 			}
 			var deck = require("./ai/deck")(level);
-			aideck.value = deck;
+			options.aideck = deck;
 
 			var randomNames = [
 				"Adrienne", "Audrie",

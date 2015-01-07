@@ -581,7 +581,7 @@ function startMatch(game, foeDeck) {
 				fgfx.drawRect(spr.position.x - spr.width / 2, spr.position.y - spr.height / 2, spr.width, spr.height);
 				fgfx.endFill();
 			}
-			var statuses = { flatline: etg.Death, silence: etg.Aether, sanctuary: etg.Light };
+			var statuses = { flatline: etg.Darkness, silence: etg.Aether, sanctuary: etg.Light };
 			for(var status in statuses){
 				if (pl[status]) {
 					bgfx.beginFill(ui.elecols[statuses[status]], .8);

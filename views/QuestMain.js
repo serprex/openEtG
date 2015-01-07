@@ -3,6 +3,7 @@ var px = require("../px");
 var gfx = require("../gfx");
 var sock = require("../sock");
 var Quest = require("../Quest");
+var options = require("../options");
 module.exports = function(){
 	var questui = px.mkView(function() {
 		tinfo.setText("Welcome to Potatotal Island. The perfect island for adventuring!");
@@ -28,7 +29,7 @@ module.exports = function(){
 		(function (ainfo, k) {
 			var points = ainfo[1].points;
 			graphics.hitArea = ainfo[1];
-			if (aideck.value == "quest"){
+			if (options.aideck == "quest"){
 				graphics.lineStyle(4, 255);
 				graphics.drawShape(ainfo[1]);
 			}

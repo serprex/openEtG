@@ -1,6 +1,5 @@
 "use strict";
 PIXI.AUTO_PREVENT_DEFAULT = false;
-window.aideck = document.getElementById("aideck");
 (function(){
 	var guestname, muteset = {}, muteall;
 	var px = require("./px");
@@ -204,18 +203,6 @@ window.aideck = document.getElementById("aideck");
 			}else chat("Not a command: " + msg);
 		}
 	}
-	function aiClick() {
-		this.blur();
-		var deck = sock.getDeck(), aideckcode = aideck.value;
-		if (etgutil.decklength(deck) < 11 || etgutil.decklength(aideckcode) < 11) {
-			require("./views/Editor")();
-			return;
-		}
-		var gameData = { deck: aideckcode, urdeck: deck, seed: Math.random() * etgutil.MAX_INT, foename: "Custom", cardreward: "" };
-		ui.parsepvpstats(gameData);
-		ui.parseaistats(gameData);
-		require("./views/Match")(gameData, true);
-	}
 	function offlineChange(){
 		sock.emit("chatus", {hide: !!options.offline});
 	}
@@ -240,7 +227,5 @@ window.aideck = document.getElementById("aideck");
 		offline: {change: offlineChange},
 		afk: {change: afkChange},
 		wantpvp: {change: wantpvpChange},
-		aideck: {click: function(){this.setSelectionRange(0, 999)}},
-		aivs: {click: aiClick},
 	});
 })();
