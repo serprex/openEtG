@@ -287,6 +287,7 @@ module.exports = function(nymph) {
 		if (e.keyCode == 13) aiClick.call(this);
 	}
 	function aiClick() {
+		if (!options.aideck) return;
 		this.blur();
 		var deck = sock.getDeck();
 		if (etgutil.decklength(deck) < 11 || etgutil.decklength(options.aideck) < 11) {
