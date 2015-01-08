@@ -821,7 +821,7 @@ locketshift:function(c,t){
 	c.status.mode = t instanceof etg.Player?t.mark:t.card.element;
 },
 loot:function(c,t){
-	if (c.owner == t.owner && !c.status.salvaged && !t.status.salvaged && c.owner.foe.permanents.length > 0){
+	if (c.owner == t.owner && !c.status.salvaged && c.owner.foe.permanents.length > 0){
 		Effect.mkText("Looted", c);
 		var foe = c.owner.foe, perms = foe.permanents.filter(function(x){return x && x.isMaterial()});
 		if (foe.weapon && foe.weapon.isMaterial()) perms.push(foe.weapon);
@@ -829,8 +829,8 @@ loot:function(c,t){
 		if (perms.length){
 			Actives.steal(c, foe.choose(perms));
 			c.status.salvaged = true;
-			t.status.salvaged = true;
 			c.addactive("turnstart", Actives.salvageoff);
+			return true;
 		}
 	}
 },
@@ -981,7 +981,7 @@ nymph:function(c,t){
 		t.active.auto == Actives.pillspi ? c.owner.choose([etg.Death, etg.Life, etg.Light, etg.Darkness]) :
 		t.active.auto == Actives.pillcar ? c.owner.choose([etg.Entropy, etg.Gravity, etg.Time, etg.Aether]) :
 		c.owner.uptoceil(12));
-	Actives.destroy(c, t, false, true);
+	Actives.destroy(c, t, true, true);
 	new etg.Creature(t.card.as(Cards.Codes[etg.NymphList[e]]), t.owner).place();
 },
 obsession:function(c,t){
@@ -1238,13 +1238,13 @@ sadism:function(c, t, dmg){
 	}
 },
 salvage:function(c, t){
-	if (c.owner == t.owner && !c.status.salvaged && !t.status.salvaged && c.owner.game.turn != c.owner){
+	if (c.owner == t.owner && !c.status.salvaged && c.owner.game.turn != c.owner){
 		Effect.mkText("Salvage", c);
 		Actives["growth 1"](c);
 		c.status.salvaged = true;
-		t.status.salvaged = true;
 		c.owner.hand.push(new etg.CardInstance(t.card, c.owner));
 		c.addactive("turnstart", Actives.salvageoff);
+		return true;
 	}
 },
 salvageoff:function(c, t){
@@ -1562,17 +1562,14 @@ vengeance:function(c,t){
 	}
 },
 vindicate:function(c,t){
-	if (c.owner == t.owner && !c.status.vindicated && !t.status.vindicated){
-		c.status.vindicated = t.status.vindicated = true;
-		t.addactive("turnstart", Actives.unvindicate)
+	if (c.owner == t.owner && !c.status.vindicated){
+		c.status.vindicated = true;
 		t.attack(false, 0);
+		return true;
 	}
 },
 unvindicate:function(c,t){
 	delete c.status.vindicated;
-	if (c instanceof etg.Creature || c instanceof etg.Weapon){
-		c.rmactive("turnstart", "unvindicate");
-	}
 },
 virusinfect:function(c,t){
 	Actives.infect(c, t);
