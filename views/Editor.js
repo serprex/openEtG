@@ -168,7 +168,7 @@ module.exports = function(arena, acard, startempty) {
 	var buttons;
 	if (arena){
 		dom.push([8, 58, ["Save & Exit", function() {
-			if (decksprite.deck.length < 35) {
+			if (decksprite.deck.length < 35 || sumscore()>arpts) {
 				chat("35 cards required before submission");
 				return;
 			}
@@ -185,7 +185,7 @@ module.exports = function(arena, acard, startempty) {
 		}]], [8, 84, ["Exit", function() {
 			require("./ArenaInfo")(arena);
 		}]]);
-		var arpts = arena.lv?515:470, arattr = {hp:parseInt(arena.hp || 200), mark:parseInt(arena.mark || 1), draw:parseInt(arena.draw || 1)};
+		var arpts = arena.lv?515:425, arattr = {hp:parseInt(arena.hp || 200), mark:parseInt(arena.mark || 2), draw:parseInt(arena.draw || 1)};
 		var artable = {
 			hp: { min: 65, max: 200, incr: 45, cost: 1 },
 			mark: { cost: 45 },
