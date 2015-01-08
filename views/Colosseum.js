@@ -8,8 +8,8 @@ function mkDaily(type) {
 	if (type < 3) {
 		return function() {
 			var dataNext = type == 1 ?
-				{ goldreward: 150, endurance: 2, cost: 0, daily: 1, cardreward: "", noheal: true} :
-				{ goldreward: 500, endurance: 2, cost: 0, daily: 2, cardreward: "" };
+				{ goldreward: 200, endurance: 2, cost: 0, daily: 1, cardreward: "", noheal: true} :
+				{ goldreward: 750, endurance: 2, cost: 0, daily: 2, cardreward: "" };
 			var game = mkAi.mkAi(type == 1 ? 0 : 2, type)();
 			if (game){
 				game.addData(dataNext);
@@ -21,7 +21,7 @@ function mkDaily(type) {
 		return function() {
 			var game = mkAi.mkPremade(type == 3 ? "mage" : "demigod", type)();
 			if (game){
-				game.addonreward = type == 3 ? 50 : 100;
+				game.addonreward = type == 3 ? 90 : 200;
 				sock.userExec("donedaily", { daily: type });
 			}
 		}
