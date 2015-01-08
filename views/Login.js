@@ -90,6 +90,7 @@ module.exports = function(){
 	tutlink.target = "_blank";
 	tutlink.appendChild(document.createTextNode("Tutorial"));
 	var dom = [
+		[96, 196, px.domBox(400, 124)],
 		[100, 200, username],
 		[100, 230, password],
 		[260, 200, remember],

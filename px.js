@@ -59,6 +59,13 @@ function monkeyButtonSetText(text){
 		this.style.display = "inline";
 	}else this.style.display = "none";
 }
+exports.domBox = function(w, h){
+	var span = document.createElement("span");
+	span.style.width = w + "px";
+	span.style.height = h + "px";
+	span.className = "bgbox";
+	return span;
+}
 exports.domButton = function(text, click, mouseover){
 	var ele = document.createElement("input");
 	ele.type = "button";
