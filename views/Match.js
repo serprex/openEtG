@@ -567,7 +567,7 @@ function startMatch(game, foeDeck) {
 			var pl = game.players(j);
 			if (pl.sosa) {
 				var spr = player_overlay[j];
-				fgfx.beginFill(ui.elecols[etg.Death], .5);
+				fgfx.beginFill(ui.elecols[etg.Darkness], .6);
 				fgfx.drawRect(spr.position.x - spr.width / 2, spr.position.y - spr.height / 2, spr.width, spr.height);
 				fgfx.endFill();
 			}

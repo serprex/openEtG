@@ -71,6 +71,7 @@ module.exports = function(nymph) {
 		40, 16, 820, 60,
 		40, 92, 392, 80,
 		40, 192, 392, 80,
+		40, 437, 392, 40,
 		40, 492, 392, 80,
 		468, 92, 392, 80,
 		468, 192, 392, 80
@@ -340,7 +341,10 @@ module.exports = function(nymph) {
 					setDom(null);
 					return;
 				}
-				var div = document.createElement("div");
+				var div = px.domBox(392, 280);
+				div.style.position = "absolute";
+				div.style.left = "468px";
+				div.style.top = "292px";
 				var wipe = px.domButton("Wipe Account",
 					function() {
 						if (foename.value == sock.user.name + "yesdelete") {
@@ -366,8 +370,8 @@ module.exports = function(nymph) {
 				changePass.addEventListener("keydown", function(e){
 					if (e.keyCode == 13) changeFunc();
 				});
-				[[478, 345, enableSound], [603, 345, enableMusic], [728, 345, preloadart], [478, 370, hideRightpane],
-					[603, 370, printstats], [777, 550, wipe], [478, 300, changePass], [630, 300, changeBtn]].forEach(function(info){
+				[[8, 53, enableSound], [135, 53, enableMusic], [260, 53, preloadart], [8, 88, hideRightpane],
+					[135, 88, printstats], [309, 250, wipe], [8, 8, changePass], [162, 8, changeBtn]].forEach(function(info){
 					info[2].style.position = "absolute";
 					info[2].style.left = info[0] + "px";
 					info[2].style.top = info[1] + "px";
