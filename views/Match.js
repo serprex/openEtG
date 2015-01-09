@@ -668,7 +668,7 @@ function startMatch(game, foeDeck) {
 			}else{
 				hptext[j].style.display = "inline";
 				var poison = pl.status.poison, poisoninfo = !poison ? "" : (poison > 0 ? poison + " 1:2" : -poison + " 1:7") + (pl.neuro ? " 1:10" : "");
-				hptext[j].setText(poisoninfo + "\n" + pl.hp + "/" + pl.maxhp + "\n" + pl.deck.length + "cards" + (!cloakgfx.visible && game.expectedDamage[j] ? "\nNext HP loss: " + game.expectedDamage[j] : ""));
+				hptext[j].setText(poisoninfo + "\n" + pl.hp + "/" + pl.maxhp + "\n" + pl.deck.length + "cards" + (!cloakgfx.visible && game.expectedDamage[j] ? "\nDmg: " + game.expectedDamage[j] : ""));
 			}
 		}
 		Effect.next(cloakgfx.visible);
