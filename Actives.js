@@ -500,6 +500,7 @@ flyingweapon:function(c,t){
 	cr.castele = t.castele;
 	cr.status = etg.clone(t.status);
 	cr.status.airborne = true;
+	cr.usedactive = t.usedactive;
 	cr.place();
 	t.owner.weapon = undefined;
 },
