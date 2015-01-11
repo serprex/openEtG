@@ -2,6 +2,7 @@
 var ui = require("./uiutil");
 var Cards = require("./Cards");
 var etgutil = require("./etgutil");
+var options = require("./options");
 exports.loaded = false;
 function load(progress, postload){
 	exports.load = undefined;
@@ -68,7 +69,7 @@ function makeArt(card, art, oldrend) {
 		text.anchor.x = 1;
 		text.position.set(rend.width-3, 4);
 		template.addChild(text);
-		if (card.costele != card.element) {
+		if (card.element && ((card.costele == card.element) ^ !!options.hideCostIcon)) {
 			var eleicon = new PIXI.Sprite(exports.eicons[card.costele]);
 			eleicon.position.set(rend.width-text.width-5, 10);
 			eleicon.anchor.set(1, .5);
@@ -126,7 +127,7 @@ function getCardImage(code) {
 				text.position.set(rend.width-2, 5);
 				graphics.addChild(text);
 				clipwidth -= text.width+2;
-				if (card.costele != card.element) {
+				if (card.element && ((card.costele == card.element) ^ !!options.hideCostIcon)) {
 					var eleicon = new PIXI.Sprite(exports.eicons[card.costele]);
 					eleicon.position.set(clipwidth, 10);
 					eleicon.anchor.set(1, .5);
@@ -189,6 +190,10 @@ function getWeaponShieldImage(code) {
 	return getInstImage(code, 5/8, wsimgcache);
 }
 var artpool;
+exports.clearCaches = function() {
+	caimgcache = {};
+	artcache = {};
+}
 exports.preloadCardArt = function(art){
 	var pool = {};
 	for(var i=0; i<art.length; i+=3){

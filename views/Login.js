@@ -64,9 +64,12 @@ module.exports = function(){
 	var login = px.domButton("Login", function(){loginClick()});
 	var username = document.createElement("input");
 	var password = document.createElement("input");
-	var remember = document.createElement("input");
+	var rememberCheck = document.createElement("input");
+	var remember = document.createElement("label");
 	password.type = "password";
-	remember.type = "checkbox";
+	rememberCheck.type = "checkbox";
+	remember.appendChild(rememberCheck);
+	remember.appendChild(document.createTextNode("Remember me"));
 	username.placeholder = "Username";
 	password.placeholder = "Insecure Password";
 	username.tabIndex = "1";
@@ -75,8 +78,8 @@ module.exports = function(){
 		ele.addEventListener("keydown", maybeLogin);
 	});
 	options.register("username", username);
-	options.register("remember", remember);
-	remember.addEventListener("change", function(){
+	options.register("remember", rememberCheck);
+	rememberCheck.addEventListener("change", function() {
 		if (typeof localStorage !== "undefined"){
 			if (!this.checked) delete localStorage.auth;
 			else if (sock.user) localStorage.auth = sock.user.auth;
@@ -93,7 +96,7 @@ module.exports = function(){
 		[96, 196, px.domBox(400, 124)],
 		[100, 200, username],
 		[100, 230, password],
-		[260, 200, remember],
+		[260, 230, remember],
 		[300, 200, login],
 		[100, 300, tutlink],
 		[400, 200, ["Sandbox", require("./MainMenu")]],
