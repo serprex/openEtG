@@ -197,7 +197,8 @@ Game.prototype.clone = function(){
 	obj.player2 = this.player2.clone(obj);
 	obj.player1.foe = obj.player2;
 	obj.player2.foe = obj.player1;
-	obj.turn = this.turn == this.player1?obj.player1:obj.player2;
+	obj.turn = this.turn == this.player1 ? obj.player1 : obj.player2;
+	obj.isClone = true;
 	return obj;
 }
 Game.prototype.players = function(n){
@@ -1200,15 +1201,18 @@ CardInstance.prototype.useactive = function(target){
 	if (card.type <= PermanentEnum){
 		var cons = [Pillar, Weapon, Shield, Permanent][card.type];
 		new cons(card, owner).place(true);
-		if (owner == owner.game.player1) ui.playSound("permPlay");
+		owner.game.playSound("permPlay");
 	}else if (card.type == SpellEnum){
 		this.castSpell(target, card.active);
 	}else if (card.type == CreatureEnum){
 		new Creature(card, owner).place(true);
-		if (owner == owner.game.player1) ui.playSound("creaturePlay");
+		owner.game.playSound("creaturePlay");
 	} else console.log("Unknown card type: " + card.type);
 	owner.spend(card.costele, card.cost);
 	owner.game.updateExpectedDamage();
+}
+Game.prototype.playSound = function(sound) {
+	if (!this.isClone) ui.playSound(sound);
 }
 function countAdrenaline(x){
 	var atks = adrtbl[Math.abs(x)];
