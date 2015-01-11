@@ -67,16 +67,14 @@ exports.domBox = function(w, h){
 	return span;
 }
 exports.domButton = function(text, click, mouseover, sound) {
-	if (sound === undefined) sound = "buttonClick";
 	var ele = document.createElement("input");
 	ele.type = "button";
 	ele.setText = monkeyButtonSetText;
 	ele.setText(text);
-	if (typeof sound === "string"){
-		var play = function() {
-			ui.playSound(sound);
-		}
-		ele.addEventListener("click", play);
+	if (sound !== false){
+		ele.addEventListener("click", function() {
+			ui.playSound(sound || "buttonClick");
+		});
 	}
 	if (click) ele.addEventListener("click", click);
 	if (mouseover) ele.addEventListener("mouseover", mouseover);

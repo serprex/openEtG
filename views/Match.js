@@ -38,46 +38,6 @@ function startMatch(game, foeDeck) {
 		statuses[9].visible = obj.status.frozen;
 		spr.alpha = obj.isMaterial() ? 1 : .7;
 	}
-	var resigning, discarding, aiDelay = 0, aiState, aiCommand;
-	if (sock.user && (game.level !== undefined || !game.ai)) {
-		sock.userExec("addloss", { pvp: !game.ai });
-		if (game.cost){
-			sock.userExec("addgold", { g: -game.cost });
-		}
-	}
-	var gameui = px.mkView();
-	var redlines = new PIXI.Sprite(gfx.bg_game);
-	redlines.position.y = 12;
-	gameui.addChild(redlines);
-	var cloakgfx = new PIXI.Graphics();
-	cloakgfx.beginFill(0);
-	cloakgfx.drawRect(130, 20, 660, 280);
-	cloakgfx.endFill();
-	gameui.addChild(cloakgfx);
-	var endturn = px.domButton("Accept Hand");
-	var cancel = px.domButton("Mulligan");
-	var resign = px.domButton("Resign", function() {
-		if (resigning){
-			if (!game.ai) sock.emit("foeleft");
-			game.setWinner(game.player2);
-			endClick();
-		}else{
-			resign.value = "Confirm";
-			resigning = true;
-		}
-	});
-	var turntell = new px.domText("");
-	turntell.style.pointerEvents = "none";
-	var foename = px.domText((game.level === undefined ? "" : ["Commoner", "Mage", "Champion", "Demigod", "Arena1", "Arena2"][game.level] + "\n") + (game.foename || "-"));
-	foename.style.textAlign = "center";
-	foename.style.width = "100px";
-	var dom = [
-		[800, 520, endturn],
-		[800, 490, cancel],
-		[8, 24, resign],
-		[800, 550, turntell],
-		[0, 75, foename],
-	];
 	function addNoHealData(game) {
 		var data = game.dataNext || {};
 		if (game.noheal){
@@ -137,7 +97,6 @@ function startMatch(game, foeDeck) {
 			}
 		}
 	}
-	endturn.addEventListener("click", endClick.bind(null, undefined));
 	function cancelClick(){
 		if (resigning) {
 			resign.value = "Resign";
@@ -151,7 +110,46 @@ function startMatch(game, foeDeck) {
 			} else discarding = false;
 		}
 	}
-	cancel.addEventListener("click", cancelClick);
+	var resigning, discarding, aiDelay = 0, aiState, aiCommand;
+	if (sock.user && (game.level !== undefined || !game.ai)) {
+		sock.userExec("addloss", { pvp: !game.ai });
+		if (game.cost){
+			sock.userExec("addgold", { g: -game.cost });
+		}
+	}
+	var gameui = px.mkView();
+	var redlines = new PIXI.Sprite(gfx.bg_game);
+	redlines.position.y = 12;
+	gameui.addChild(redlines);
+	var cloakgfx = new PIXI.Graphics();
+	cloakgfx.beginFill(0);
+	cloakgfx.drawRect(130, 20, 660, 280);
+	cloakgfx.endFill();
+	gameui.addChild(cloakgfx);
+	var endturn = px.domButton("Accept Hand", endClick.bind(null, undefined));
+	var cancel = px.domButton("Mulligan", cancelClick);
+	var resign = px.domButton("Resign", function() {
+		if (resigning){
+			if (!game.ai) sock.emit("foeleft");
+			game.setWinner(game.player2);
+			endClick();
+		}else{
+			resign.value = "Confirm";
+			resigning = true;
+		}
+	});
+	var turntell = new px.domText("");
+	turntell.style.pointerEvents = "none";
+	var foename = px.domText((game.level === undefined ? "" : ["Commoner", "Mage", "Champion", "Demigod", "Arena1", "Arena2"][game.level] + "\n") + (game.foename || "-"));
+	foename.style.textAlign = "center";
+	foename.style.width = "100px";
+	var dom = [
+		[800, 520, endturn],
+		[800, 490, cancel],
+		[8, 24, resign],
+		[800, 550, turntell],
+		[0, 75, foename],
+	];
 	var activeInfo = {
 		firebolt:function(){
 			return 3+Math.floor(game.player1.quanta[etg.Fire]/4);
