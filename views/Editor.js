@@ -86,6 +86,34 @@ module.exports = function(arena, acard, startempty) {
 			}
 		}
 	}
+	var saveToQuick = false;
+	function quickDeck(number) {
+		return function() {
+			if (saveToQuick) {
+				saveButton();
+				sock.userEmit("changequickdeck", { number: number, name: tname.textcache });
+				sock.user.quickdecks[number] = tname.textcache;
+				fixQuickButtons(number);
+				saveToQuick = false;
+			}
+			else {
+				loadDeck(sock.user.quickdecks[number], number);
+			}
+		}
+	}
+	function saveTo() {
+		saveToQuick = true;
+	}
+	function fixQuickButtons(forceNumber){
+		for (var i = 0;i < 10;i++) {
+			if (forceNumber !== undefined ? i == forceNumber : sock.user.selectedDeck == sock.user.quickdecks[i]) { buttons[i].style.display = "none"; break; }
+			else buttons[i].style.display = "inline";
+		}
+		i++;
+		for (;i < 10;i++) {
+			buttons[i].style.display = "inline";
+		}
+	}
 	function saveDeck(force){
 		var dcode = etgutil.encodedeck(decksprite.deck) + "01" + etg.toTrueMark(editormark);
 		var olddeck = sock.getDeck();
@@ -97,12 +125,12 @@ module.exports = function(arena, acard, startempty) {
 			sock.userEmit("setdeck", { d: dcode, name: sock.user.selectedDeck });
 		}else if (force) sock.userEmit("setdeck", {name: sock.user.selectedDeck });
 	}
-	function loadDeck(x){
+	function loadDeck(x, forceNumber){
 		if (!x) return;
 		saveDeck();
 		deckname.value = sock.user.selectedDeck = x;
 		tname.setText(x);
-		for (var i = 0;i < 10;i++) buttons[i].style.display = sock.user.selectedDeck !== i.toString() ? "inline" : "none";
+		fixQuickButtons(forceNumber);
 		decksprite.deck = etgutil.decodedeck(sock.getDeck());
 		processDeck();
 	}
@@ -165,6 +193,14 @@ module.exports = function(arena, acard, startempty) {
 			loadDeck(x.toString());
 		}
 	}
+	function saveButton() {
+		if (deckname.value) {
+			sock.user.selectedDeck = deckname.value;
+			fixQuickButtons();
+			tname.setText(sock.user.selectedDeck);
+			saveDeck();
+		}
+	}
 	var buttons;
 	if (arena){
 		dom.push([8, 58, ["Save & Exit", function() {
@@ -205,19 +241,13 @@ module.exports = function(arena, acard, startempty) {
 		if (sock.user) {
 			var tname = px.domText(sock.user.selectedDeck);
 			dom.push([100, 8, tname],
-			[8, 110, ["Save", function() {
-				if (deckname.value){
-					sock.user.selectedDeck = deckname.value;
-					for (var i = 0;i < 10;i++) buttons[i].style.display = sock.user.selectedDeck == i ? "none": "inline";
-					tname.setText(sock.user.selectedDeck);
-					saveDeck();
-				}
-			}]], [8, 136, ["Load", function() {
+			[8, 110, ["Save", saveButton
+			]], [8, 136, ["Load", function() {
 				loadDeck(deckname.value);
 			}]], [8, 162, ["Exit", function() {
-				if (sock.user) sock.userEmit("setdeck", {name: sock.user.selectedDeck });
+				if (sock.user) sock.userEmit("setdeck", { name: sock.user.selectedDeck });
 				startMenu();
-			}]])
+			}]], [220, 8, ["Save to #", saveTo]]);
 			buttons = [];
 			for (var i = 0;i < 10;i++) {
 				var b = document.createElement("input");
@@ -225,11 +255,11 @@ module.exports = function(arena, acard, startempty) {
 				b.style.width = "32px";
 				b.value = i.toString();
 				b.style.backgroundSize = "100% 100%";
-				b.addEventListener("click", switchDeckCb(i));
+				b.addEventListener("click", quickDeck(i));
 				dom.push([300 + i*36, 8, b]);
 				buttons.push(b);
 			}
-			if (sock.user.selectedDeck.match(/^\d$/)) buttons[sock.user.selectedDeck].style.display = "none";
+			fixQuickButtons();
 		}
 	}
 	var editormarksprite = new PIXI.Sprite(gfx.nopic);
