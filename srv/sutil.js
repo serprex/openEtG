@@ -19,24 +19,27 @@ exports.prepuser = function(servuser){
 exports.useruser = function(db, servuser, cb){
 	db.hgetall("Q:" + servuser.name, function(err, quest) {
 		db.hgetall("D:" + servuser.name, function(err, decks) {
-			cb({
-				auth: servuser.auth,
-				name: servuser.name,
-				decknames: decks,
-				selectedDeck: servuser.selectedDeck,
-				pool: servuser.pool,
-				accountbound: servuser.accountbound,
-				gold: servuser.gold,
-				ocard: servuser.ocard,
-				freepacks: servuser.freepacks,
-				aiwins: servuser.aiwins,
-				ailosses: servuser.ailosses,
-				pvpwins: servuser.pvpwins,
-				pvplosses: servuser.pvplosses,
-				daily: servuser.daily,
-				dailymage: servuser.dailymage,
-				dailydg: servuser.dailydg,
-				quest: quest,
+			db.lrange("N:" + servuser.name, 0, 9, function(err, quickdecks) {
+				cb({
+					auth: servuser.auth,
+					name: servuser.name,
+					decknames: decks,
+					selectedDeck: servuser.selectedDeck,
+					pool: servuser.pool,
+					accountbound: servuser.accountbound,
+					gold: servuser.gold,
+					ocard: servuser.ocard,
+					freepacks: servuser.freepacks,
+					aiwins: servuser.aiwins,
+					ailosses: servuser.ailosses,
+					pvpwins: servuser.pvpwins,
+					pvplosses: servuser.pvplosses,
+					daily: servuser.daily,
+					dailymage: servuser.dailymage,
+					dailydg: servuser.dailydg,
+					quest: quest,
+					quickdecks: quickdecks,
+				});			
 			});
 		});
 	});

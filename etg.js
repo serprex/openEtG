@@ -1197,12 +1197,12 @@ CardInstance.prototype.useactive = function(target){
 	if (card.type <= PermanentEnum){
 		var cons = [Pillar, Weapon, Shield, Permanent][card.type];
 		new cons(card, owner).place(true);
-		if (!Effect.disable) ui.playSound("permPlay");
+		ui.playSound("permPlay");
 	}else if (card.type == SpellEnum){
 		this.castSpell(target, card.active);
 	}else if (card.type == CreatureEnum){
 		new Creature(card, owner).place(true);
-		if (!Effect.disable) ui.playSound("creaturePlay");
+		ui.playSound("creaturePlay");
 	} else console.log("Unknown card type: " + card.type);
 	owner.spend(card.costele, card.cost);
 	owner.game.updateExpectedDamage();

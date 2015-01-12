@@ -2,6 +2,7 @@
 var etg = require("./etg");
 var gfx = require("./gfx");
 var options = require("./options");
+var Effect = require("./Effect");
 exports.elecols = [0xa99683, 0xaa5999, 0x636069, 0x996633, 0x5f4930, 0x50a005, 0xcc6611, 0x205080, 0x999990, 0x337ddd, 0xbfa622, 0x333333, 0x55aacc];
 function lighten(c) {
 	return ((c & 255) + 255 >> 1) | (((c >> 8) & 255) + 255 >> 1 << 8) | (((c >> 16) & 255) + 255 >> 1 << 16);
@@ -171,7 +172,7 @@ function loadMusics() {
 	}
 }
 function playSound(name, dontreset) {
-	if (soundEnabled) {
+	if (soundEnabled && !Effect.disable) {
 		var sound = sounds[name];
 		if (!sound){
 			sound = sounds[name] = new Audio("sound/" + name + ".ogg");
@@ -181,7 +182,7 @@ function playSound(name, dontreset) {
 	}
 }
 function playMusic(name) {
-	if (name == currentMusic) return;
+	if (name == currentMusic || Effect.disable) return;
 	var music;
 	if (musicEnabled && (music = musics[currentMusic])) music.pause();
 	currentMusic = name;
