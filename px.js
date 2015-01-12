@@ -73,7 +73,7 @@ exports.domButton = function(text, click, mouseover, sound) {
 	ele.setText(text);
 	ele.addEventListener("click", function() {
 		if (sound !== false) ui.playSound(sound || "buttonClick");
-		if (click) click();
+		if (click) click.call(this);
 	});
 	if (mouseover) ele.addEventListener("mouseover", mouseover);
 	return ele;

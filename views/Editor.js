@@ -106,12 +106,7 @@ module.exports = function(arena, acard, startempty) {
 	}
 	function fixQuickButtons(forceNumber){
 		for (var i = 0;i < 10;i++) {
-			if (forceNumber !== undefined ? i == forceNumber : sock.user.selectedDeck == sock.user.quickdecks[i]) { buttons[i].style.display = "none"; break; }
-			else buttons[i].style.display = "inline";
-		}
-		i++;
-		for (;i < 10;i++) {
-			buttons[i].style.display = "inline";
+			buttons[i].style.display = (forceNumber !== undefined ? i == forceNumber : sock.user.selectedDeck == sock.user.quickdecks[i]) ? "none" : "inline";
 		}
 	}
 	function saveDeck(force){
