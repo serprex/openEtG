@@ -514,7 +514,7 @@ fractal:function(c,t){
 freeevade:function(c,t, data){
 	var tgt = data.tgt;
 	if (tgt instanceof etg.Creature && tgt.owner == c.owner && tgt.owner != t.owner && tgt.status.airborne && !tgt.status.frozen && c.owner.rng() > .8){
-		return true;
+		data.tgt = true;
 	}
 },
 freeze:function(c,t){
@@ -1045,9 +1045,9 @@ parallel:function(c,t){
 		}
 	}
 },
-phoenix:function(c,t, index){
-	if (!c.owner.creatures[index]){
-		c.owner.creatures[index] = new etg.Creature(c.card.as(Cards.Ash), c.owner);
+phoenix:function(c,t, data){
+	if (!c.owner.creatures[data.index]){
+		c.owner.creatures[data.index] = new etg.Creature(c.card.as(Cards.Ash), c.owner);
 	}
 },
 photosynthesis:function(c,t){
@@ -1103,7 +1103,7 @@ protectall:function(c,t){
 protectonce:function(c,t, data){
 	if (c === data.tgt && c.owner != t.owner){
 		c.rmactive("prespell", "protectonce");
-		return true;
+		data.tgt = true;
 	}
 },
 purify:function(c,t){
@@ -1390,7 +1390,7 @@ soulcatch:function(c,t){
 	Effect.mkText("Soul", c);
 	c.owner.spend(etg.Death, -3);
 },
-spores:function(c,t, index){
+spores:function(c,t){
 	var spore = c.card.as(Cards.Spore);
 	new etg.Creature(spore, c.owner).place();
 	new etg.Creature(spore, c.owner).place();
@@ -1562,11 +1562,11 @@ vengeance:function(c,t){
 		});
 	}
 },
-vindicate:function(c,t){
-	if (c.owner == t.owner && !c.status.vindicated){
+vindicate:function(c,t, data){
+	if (c.owner == t.owner && !c.status.vindicated && !data.vindicated){
 		c.status.vindicated = true;
+		data.vindicated = true;
 		t.attack(false, 0);
-		return true;
 	}
 },
 unvindicate:function(c,t){
@@ -1692,7 +1692,7 @@ evade50:function(c,t){
 	return c.owner.rng() < .5;
 },
 evadespell:function(c,t, data){
-	if (t instanceof etg.CardInstance && data.tgt == c) return true;
+	if (t instanceof etg.CardInstance && data.tgt == c) data.tgt = true;
 },
 firewall:function(c,t){
 	Effect.mkText("-1", t);

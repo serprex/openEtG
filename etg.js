@@ -675,13 +675,10 @@ Player.prototype.endturn = function(discard) {
 	this.game.updateExpectedDamage();
 }
 Thing.prototype.procactive = function(name, param) {
-	var ret, self = this;
 	function proc(c){
-		if (ret === true) return true;
 		var a;
 		if (c && (a = c.active[name])){
-			var r = a.call(null, c, self, param);
-			if (r !== undefined) ret = r;
+			a.call(null, c, this, param);
 		}
 	}
 	if (this.active && this.active["own" + name]){
@@ -689,12 +686,11 @@ Thing.prototype.procactive = function(name, param) {
 	}
 	for(var i=0; i<2; i++){
 		var pl = i==0?this.owner:this.owner.foe;
-		pl.creatures.forEach(proc);
-		pl.permanents.forEach(proc);
-		proc(pl.shield);
-		proc(pl.weapon);
+		pl.creatures.forEach(proc, this);
+		pl.permanents.forEach(proc, this);
+		proc.call(this, pl.shield);
+		proc.call(this, pl.weapon);
 	}
-	return ret;
 }
 Player.prototype.drawcard = function(drawstep) {
 	if (this.hand.length<8){
@@ -928,7 +924,8 @@ CardInstance.prototype.die = function(idx){
 	}
 }
 Creature.prototype.deatheffect = Weapon.prototype.deatheffect = function(index) {
-	this.procactive("death", index);
+	var data = {index:index}
+	this.procactive("death", data);
 	if (index>=0) Effect.mkDeath(ui.creaturePos(this.owner == this.owner.game.player1?0:1, index));
 }
 Creature.prototype.die = function() {
@@ -1087,11 +1084,11 @@ Thing.prototype.canactive = function() {
 	return this.owner.game.turn == this.owner && this.active.cast && !this.usedactive && !this.status.delayed && !this.status.frozen && this.owner.canspend(this.castele, this.cast);
 }
 Thing.prototype.castSpell = function(t, active, nospell){
-	var newt = this.procactive("prespell", {tgt: t, active: active});
-	if (newt !== true){
-		if (newt) t = newt;
-		active(this, t);
-		if (!nospell) this.procactive("spell", t);
+	var data = {tgt: t, active: active};
+	this.procactive("prespell", data);
+	if (data.tgt !== true){
+		active(this, data.tgt);
+		if (!nospell) this.procactive("spell", data.tgt);
 	}else if (t) Effect.mkText("Evade", t);
 }
 Thing.prototype.useactive = function(t) {

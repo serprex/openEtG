@@ -61,7 +61,7 @@ module.exports = function(){
 			if (sock.user) require("./MainMenu")();
 		});
 	}
-	var login = px.domButton("Login", function(){loginClick()});
+	var login = px.domButton("Login", loginClick);
 	var username = document.createElement("input");
 	var password = document.createElement("input");
 	var remember = document.createElement("input");

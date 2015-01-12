@@ -71,12 +71,10 @@ exports.domButton = function(text, click, mouseover, sound) {
 	ele.type = "button";
 	ele.setText = monkeyButtonSetText;
 	ele.setText(text);
-	if (sound !== false){
-		ele.addEventListener("click", function() {
-			ui.playSound(sound || "buttonClick");
-		});
-	}
-	if (click) ele.addEventListener("click", click);
+	ele.addEventListener("click", function() {
+		if (sound !== false) ui.playSound(sound || "buttonClick");
+		if (click) click();
+	});
 	if (mouseover) ele.addEventListener("mouseover", mouseover);
 	return ele;
 }
