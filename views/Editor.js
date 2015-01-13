@@ -87,6 +87,7 @@ module.exports = function(arena, acard, startempty) {
 		}
 	}
 	var saveToQuick = false;
+	var selectBg = "linear-gradient(to bottom,#424748,#8999ff)";
 	function quickDeck(number) {
 		return function() {
 			if (saveToQuick) {
@@ -95,6 +96,7 @@ module.exports = function(arena, acard, startempty) {
 				sock.user.quickdecks[number] = tname.textcache;
 				fixQuickButtons(number);
 				saveToQuick = false;
+				quickNum.style.background = "linear-gradient(to bottom,#ddeef0,#8999a9)";
 			}
 			else {
 				loadDeck(sock.user.quickdecks[number], number);
@@ -102,11 +104,13 @@ module.exports = function(arena, acard, startempty) {
 		}
 	}
 	function saveTo() {
-		saveToQuick = true;
+		saveToQuick ^= true;
+		this.style.background = saveToQuick ? selectBg : "linear-gradient(to bottom,#ddeef0,#8999a9)";
+
 	}
-	function fixQuickButtons(forceNumber){
+	function fixQuickButtons(){
 		for (var i = 0;i < 10;i++) {
-			buttons[i].style.display = (forceNumber !== undefined ? i == forceNumber : sock.user.selectedDeck == sock.user.quickdecks[i]) ? "none" : "inline";
+			buttons[i].style.background = (sock.user.selectedDeck == sock.user.quickdecks[i]) ? selectBg : "linear-gradient(to bottom,#ddeef0,#8999a9)";
 		}
 	}
 	function saveDeck(force){
@@ -228,7 +232,8 @@ module.exports = function(arena, acard, startempty) {
 		makeattrui(0, "hp");
 		makeattrui(1, "mark");
 		makeattrui(2, "draw");
-	}else{
+	} else {
+		var quickNum = px.domButton("Save to #", saveTo);
 		dom.push([8, 58, ["Save & Exit", function() {
 			if (sock.user) saveDeck(true);
 			startMenu();
@@ -242,8 +247,8 @@ module.exports = function(arena, acard, startempty) {
 			}]], [8, 162, ["Exit", function() {
 				if (sock.user) sock.userEmit("setdeck", { name: sock.user.selectedDeck });
 				startMenu();
-			}]], [220, 8, ["Save to #", saveTo]]);
-			buttons = [];
+			}]], [220, 8, quickNum]);
+			buttons = new Array(10);
 			for (var i = 0;i < 10;i++) {
 				var b = document.createElement("input");
 				b.type = "button";
@@ -252,7 +257,7 @@ module.exports = function(arena, acard, startempty) {
 				b.style.backgroundSize = "100% 100%";
 				b.addEventListener("click", quickDeck(i));
 				dom.push([300 + i*36, 8, b]);
-				buttons.push(b);
+				buttons[i] = b;
 			}
 			fixQuickButtons();
 		}
