@@ -1554,7 +1554,7 @@ vend:function(c){
 	c.die();
 },
 vengeance:function(c,t){
-	if (c.owner == t.owner && c.owner == c.owner.game.turn.foe){
+	if (c.owner == t.owner && c.owner == c.owner.game.turn.foe && c.owner.foe.hp > 0){
 		c.owner.creatures.forEach(function(cr){
 			if (cr && cr != t){
 				cr.attack();
