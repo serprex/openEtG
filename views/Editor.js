@@ -96,7 +96,7 @@ module.exports = function(arena, acard, startempty) {
 				sock.user.quickdecks[number] = tname.textcache;
 				fixQuickButtons(number);
 				saveToQuick = false;
-				quickNum.style.background = "linear-gradient(to bottom,#ddeef0,#8999a9)";
+				quickNum.className = quickNum.className.replace(/(?:^|\s)selectedbutton(?!\S)/g, '')
 			}
 			else {
 				loadDeck(sock.user.quickdecks[number], number);
@@ -105,12 +105,14 @@ module.exports = function(arena, acard, startempty) {
 	}
 	function saveTo() {
 		saveToQuick ^= true;
-		this.style.background = saveToQuick ? selectBg : "linear-gradient(to bottom,#ddeef0,#8999a9)";
+		if (saveToQuick) this.className += " selectedbutton"
+		else this.className = this.className.replace(/(?:^|\s)selectedbutton(?!\S)/g, '')
 
 	}
 	function fixQuickButtons(){
 		for (var i = 0;i < 10;i++) {
-			buttons[i].style.background = (sock.user.selectedDeck == sock.user.quickdecks[i]) ? selectBg : "linear-gradient(to bottom,#ddeef0,#8999a9)";
+			if (sock.user.selectedDeck == sock.user.quickdecks[i]) buttons[i].className += " selectedbutton";
+			else buttons[i].className = buttons[i].className.replace(/(?:^|\s)selectedbutton(?!\S)/g, '')
 		}
 	}
 	function saveDeck(force){
