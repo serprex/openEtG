@@ -142,7 +142,7 @@ function startMatch(game, foeDeck) {
 	turntell.style.pointerEvents = "none";
 	var foename = px.domText((game.level === undefined ? "" : ["Commoner", "Mage", "Champion", "Demigod", "Arena1", "Arena2"][game.level] + "\n") + (game.foename || "-"));
 	foename.style.textAlign = "center";
-	foename.style.width = "100px";
+	foename.style.width = "140px";
 	var dom = [
 		[800, 520, endturn],
 		[800, 490, cancel],
