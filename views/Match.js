@@ -403,13 +403,12 @@ function startMatch(game, foeDeck) {
 						aiCommand = true;
 					}
 				}
-				if (aiCommand){
-					if (Date.now() >= aiDelay){
-						gameui.cmds[aiState[0]]({bits: aiState[1]});
-						aiState = undefined;
-						aiCommand = false;
-						aiDelay += 300;
-					}
+				var now;
+				if (aiCommand && (now = Date.now()) > aiDelay){
+					gameui.cmds[aiState[0]]({bits: aiState[1]});
+					aiState = undefined;
+					aiCommand = false;
+					aiDelay = now + (game.turn == game.player1 ? 2000 : 200);
 				}
 			}else if (game.phase <= etg.MulliganPhase2){
 				gameui.cmds.mulligan({draw: require("../ai/mulligan")(game.player2)});
