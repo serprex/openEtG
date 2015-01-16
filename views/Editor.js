@@ -255,7 +255,7 @@ module.exports = function(arena, acard, startempty) {
 				var b = document.createElement("input");
 				b.type = "button";
 				b.style.width = "32px";
-				b.value = i.toString();
+				b.value = (i+1).toString();
 				b.style.backgroundSize = "100% 100%";
 				b.addEventListener("click", quickDeck(i));
 				dom.push([300 + i*36, 8, b]);
