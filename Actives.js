@@ -174,6 +174,16 @@ catapult:function(c,t){
 		c.owner.foe.freeze(3);
 	}
 },
+catlife:function(c,t, data){
+	if (!c.owner.creatures[data.index] && c.status.lives > 0){
+		c.status.lives--;
+		Effect.mkText(c.status.lives + " lives");
+		var cl = c.clone(c.owner);
+		cl.hp = cl.maxhp = c.card.health;
+		cl.atk = c.card.attack;
+		c.owner.creatures[data.index] = cl;
+	}
+},
 chimera:function(c,t){
 	var atk=0, hp=0;
 	c.owner.creatures.forEach(function(cr){
@@ -572,8 +582,10 @@ gratitude:function(c,t){
 	c.owner.dmg(-4);
 },
 grave:function(c,t){
-	delete c.status.burrowed;
-	c.transform(t.card);
+	if (!t.card.isOf(Cards.Singularity)){
+		delete c.status.burrowed;
+		c.transform(t.card);
+	}
 },
 growth:function(x){
 	var n = parseInt(x);
@@ -609,7 +621,7 @@ hatch:function(c,t){
 	c.transform(c.owner.randomcard(c.card.upped, function(x){return x.type == etg.CreatureEnum}));
 },
 heal:function(c,t){
-	t.dmg(-5);
+	t.dmg(-10);
 },
 heal20:function(c,t){
 	t.dmg(-20);
@@ -1064,6 +1076,9 @@ platearmor:function(c,t){
 	var buff = c.card.upped?6:4;
 	Effect.mkText("0|"+buff, t);
 	t.buffhp(buff);
+},
+play:function(c,t){
+	new etg.Creature(c.card, c.owner).place(true);
 },
 poison:function(x){
 	var n = parseInt(x);
@@ -1573,13 +1588,16 @@ vindicate:function(c,t, data){
 unvindicate:function(c,t){
 	delete c.status.vindicated;
 },
+virtue:function(c,t,blocked){
+	c.owner.buffhp(blocked);
+},
 virusinfect:function(c,t){
-	Actives.infect(c, t);
 	c.die();
+	Actives.infect(c, t);
 },
 virusplague:function(c,t){
-	Actives.plague(c, t);
 	c.die();
+	Actives.plague(c, t);
 },
 void:function(c,t){
 	c.owner.foe.maxhp = Math.max(c.owner.foe.maxhp-3, 1);

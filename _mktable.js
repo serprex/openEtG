@@ -15,7 +15,7 @@ var i=0, recent = [];
 while(!scode[i++].match(/^\s+var newCardList = \[$/) && i<scode.length);
 if (i < scode.length){
 	for(var j=0; j<3; j++){
-		recent[j] = scode[i+j].replace(/^\s+|Cards\.|\]|;|,/g, "");
+		recent[j] = scode[i+j].replace(/^\s+|Cards\.|\]|;|,$/g, "");
 	}
 }
 write("[right][table]");
