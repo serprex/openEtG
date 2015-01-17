@@ -809,14 +809,16 @@ liquid:function(c,t){
 },
 livingweapon:function(c,t){
 	if (c.owner == t.owner || !t.owner.weapon){
+		t.remove();
 		var w = new etg.Weapon(t.card, t.owner);
 		w.atk = t.atk;
 		w.active = etg.clone(t.active);
 		w.castele = t.castele;
 		w.cast = t.cast;
+		w.usedactive = t.usedactive;
 		w.status = etg.clone(t.status);
-		t.owner.weapon = w;
-		t.remove();
+		w.place();
+		w.owner.dmg(-t.truehp());
 	}
 },
 lobotomize:function(c,t){
