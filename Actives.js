@@ -319,9 +319,8 @@ die:function(c,t){
 	c.die();
 },
 disarm:function(c,t){
-	if (t instanceof etg.Player && t.weapon && t.weapon.isMaterial() && t.hand.length < 8){
-		new etg.CardInstance(t.weapon.card, t).place();
-		t.weapon = undefined;
+	if (t instanceof etg.Player && t.weapon && t.weapon.isMaterial()){
+		Actives.unsummon(c, t.weapon);
 	}
 },
 disc:function(c,t){
@@ -1317,6 +1316,10 @@ silence:function(c,t){
 	}
 },
 singularity:function(c,t){
+	if (c.trueatk() > 0){
+		Actives.antimatter(c, c);
+		return;
+	}
 	var r = c.owner.rng();
 	if (r > .9){
 		c.status.adrenaline = 1;
@@ -1329,8 +1332,9 @@ singularity:function(c,t){
 	}else if (r > .5){
 		Actives.blackhole(c.owner.foe, c.owner);
 	}else if (r > .4){
-		c.atk -= c.owner.uptoceil(5);
-		c.buffhp(c.owner.uptoceil(5));
+		var buff = c.owner.upto(25);
+		c.buffhp(Math.floor(buff/5)+1);
+		c.atk -= buff%5+1;
 	}else if (r > .3){
 		Actives.nova(c.owner.foe);
 		c.owner.foe.nova = 0;
@@ -1339,7 +1343,6 @@ singularity:function(c,t){
 	}else if (r > .1){
 		c.owner.weapon = new etg.Weapon(Cards.Dagger.asShiny(c.card.shiny), c.owner);
 	}
-	c.dmg(c.trueatk(), true);
 },
 sing:function(c,t){
 	t.attack(false, 0, t.owner);
@@ -1550,6 +1553,12 @@ unburrow:function(c,t){
 	c.status.burrowed = false;
 	c.active.cast = Actives.burrow;
 	c.cast = 1;
+},
+unsummon:function(c,t){
+	if (t.owner.hand.length < 8){
+		new etg.CardInstance(t.card, t.owner).place();
+		t.remove();
+	}
 },
 upkeep:function(c,t){
 	if (!c.owner.spend(c.card.element, 1)){
