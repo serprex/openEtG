@@ -115,17 +115,24 @@ exports.upshall = function(data, user) {
 	var pool = etgutil.deck2pool(user.pool);
 	for(var code in pool){
 		var card = Cards.Codes[code];
-		if (!card || pool[code] < 12 || card.rarity == 5 || card.rarity < 1 || (card.upped && card.shiny)) continue;
-		for(var i=0; i<2; i++){
-			var upcode = etgutil[i == 0 ? "asUpped" : "asShiny"](code, true);
-			if (upcode != code){
-				if (!(upcode in pool)) pool[upcode] = 0;
-				while (pool[upcode] < 6 && pool[code] >= 12){
-					pool[upcode]++;
-					pool[code] -= 6;
-				}
-			}
+		if (!card || card.rarity == 5 || card.rarity < 1) continue;
+		var dcode = etgutil.asShiny(etgutil.asUpped(card.code, false), false);
+		if (code == dcode) continue;
+		if (!(dcode in pool)) pool[dcode] = 0;
+		pool[dcode] += pool[code]*(card.upped && card.shiny?36:6);
+		pool[code] = 0;
+	}
+	for(var code in pool){
+		var card = Cards.Codes[code];
+		if (!card || card.rarity == 5 || card.rarity < 1 || card.upped || card.shiny) continue;
+		var base = 6, pc = 0;
+		for(var i=1; i<4; i++){
+			var upcode = etgutil.asShiny(etgutil.asUpped(code, i&1), i&2);
+			pool[upcode] = Math.max(Math.min(Math.floor((pool[code]-base)/(i==3?36:6)), 6), 0);
+			pc += pool[upcode]*(i==3?36:6);
+			base += 36;
 		}
+		pool[code] -= pc;
 	}
 	var newpool = "";
 	for(var code in pool){
