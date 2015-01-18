@@ -67,28 +67,6 @@ module.exports = function(nymph) {
 	var menuui = px.mkView(function() {
 		tinfo.setText(sock.user ? tipjar[tipNumber] + "." : "To register, just type desired username & password in the fields to the right, then click 'Login'.");
 	});
-	menuui.addChild(px.mkBgRect(
-		40, 16, 820, 60,
-		40, 92, 392, 80,
-		40, 192, 392, 80,
-		40, 437, 392, 40,
-		40, 492, 392, 80,
-		468, 92, 392, 80,
-		468, 192, 392, 80
-	));
-	["AI BATTLE", "ARENA", "CARDS"].forEach(function(text, i){
-		if (!text) return;
-		var sectionText = new PIXI.Text(text, {font: "56px Dosis", fill: "#0c4262"});
-		sectionText.position.set(236+(i%2)*428, 108+Math.floor(i/2)*100);
-		sectionText.anchor.x = .5;
-		if (sectionText.width > 350) sectionText.width = 350;
-		menuui.addChild(sectionText);
-	});
-	for (var i=1; i<=2; i++){
-		var tierText = new PIXI.Text("Tier " + i, {font: "24px Dosis", fill: "#0c4262"});
-		tierText.position.set(798, 66+i*38);
-		menuui.addChild(tierText);
-	}
 
 	var tstats = px.domText(sock.user ? sock.user.gold + "$ " + sock.user.name + "\nPvE " + sock.user.aiwins + " - " + sock.user.ailosses + "\nPvP " + sock.user.pvpwins + " - " + sock.user.pvplosses : "Sandbox");
 
@@ -99,7 +77,39 @@ module.exports = function(nymph) {
 		sock.emit("wealthtop");
 		this.style.display = "none";
 	}
+	function blueText(text){
+		var text = px.domText(text);
+		text.style.font = "56px Dosis";
+		text.style.color = "#0c4262";
+		text.style.textAlign = "center";
+		text.style.verticalAlign = "middle";
+		text.style.width = "392px";
+		text.style.height = "80px";
+		text.style.pointerEvents = "none";
+		return text;
+	}
+	function tierText(text){
+		var text = px.domText(text);
+		text.style.font = "24px Dosis";
+		text.style.color = "#0c4262";
+		text.style.verticalAlign = "middle";
+		text.style.height = "80px";
+		text.style.pointerEvents = "none";
+		return text;
+	}
 	var dom = [
+		[40, 16, px.domBox(820, 60)],
+		[40, 92, px.domBox(392, 80)],
+		[40, 192, px.domBox(392, 80)],
+		[40, 437, px.domBox(392, 40)],
+		[40, 492, px.domBox(392, 80)],
+		[468, 92, px.domBox(392, 80)],
+		[468, 192, px.domBox(392, 80)],
+		[40, 92, blueText("AI BATTLE")],
+		[468, 92, blueText("ARENA")],
+		[40, 192, blueText("CARDS")],
+		[798, 96, tierText("Tier 1")],
+		[798, 134, tierText("Tier 2")],
 		[50, 26, tinfo],
 		[478, 200, tstats],
 		[50, 100, ["Commoner", mkAi.mkAi(0), function() {

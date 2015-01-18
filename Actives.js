@@ -872,7 +872,7 @@ lycanthropy:function(c,t){
 	c.status.nocturnal = true;
 },
 martyr:function(c,t){
-	return c.maxhp-c.hp;
+	return c instanceof etg.Weapon ? 0 : c.maxhp-c.hp;
 },
 metamorph:function(c,t){
 	c.owner.mark = t instanceof etg.Player?t.mark:t.card.element;
