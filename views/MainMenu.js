@@ -11,13 +11,15 @@ var etgutil = require("../etgutil");
 var options = require("../options");
 var userutil = require("../userutil");
 module.exports = function(nymph) {
-	var popdom;
+	var popdom, stage = {endnext: function(){
+		setDom(null);
+		if (!menuui) document.getElementById("bgimg").removeEventListener("mousemove", resetTip);
+	}};
 	function setDom(dom){
 		if (oracle) menuui.removeChild(oracle);
 		if (popdom) document.body.removeChild(popdom);
 		if (popdom = dom) document.body.appendChild(dom);
 	}
-	var mainmenu = document.getElementById("mainmenu");
 	var aicostpay = [
 		[0, 15],
 		[5, 30],
@@ -64,13 +66,10 @@ module.exports = function(nymph) {
 	];
 	var tipNumber = etg.PlayerRng.upto(tipjar.length);
 
-	var menuui = px.mkView(function() {
+	function resetTip() {
 		tinfo.setText(sock.user ? tipjar[tipNumber] + "." : "To register, just type desired username & password in the fields to the right, then click 'Login'.");
-	});
-
-	var tstats = px.domText(sock.user ? sock.user.gold + "$ " + sock.user.name + "\nPvE " + sock.user.aiwins + " - " + sock.user.ailosses + "\nPvP " + sock.user.pvpwins + " - " + sock.user.pvplosses : "Sandbox");
-
-	var tinfo = px.domText("");
+	}
+	var menuui, tinfo = px.domText(""), tstats = px.domText(sock.user ? sock.user.gold + "$ " + sock.user.name + "\nPvE " + sock.user.aiwins + " - " + sock.user.ailosses + "\nPvP " + sock.user.pvpwins + " - " + sock.user.pvplosses : "Sandbox");
 	tinfo.style.maxWidth = "800px";
 
 	function wealthTop(){
@@ -135,6 +134,7 @@ module.exports = function(nymph) {
 			tinfo.setText(tipjar[tipNumber] + ".");
 		}]]
 	];
+	stage.menudom = dom;
 	for (var i=0; i<2; i++){
 		(function(lvi){
 			function arenaAi() {
@@ -180,8 +180,11 @@ module.exports = function(nymph) {
 	if ((sock.user && sock.user.oracle) || typeof nymph === "string") {
 		var oracle = new PIXI.Sprite(gfx.getArt(nymph || sock.user.oracle));
 		oracle.position.set(450, 300);
+		stage.view = menuui = px.mkView(resetTip);
 		menuui.addChild(oracle);
 		delete sock.user.oracle;
+	}else{
+		document.getElementById("bgimg").addEventListener("mousemove", resetTip);
 	}
 
 	function logout(cmd) {
@@ -193,7 +196,7 @@ module.exports = function(nymph) {
 		}
 		require("./Login")();
 	}
-	menuui.cmds = {
+	stage.cmds = {
 		pvpgive: require("./Match"),
 		tradegive: require("./Trade"),
 		librarygive: require("./Library"),
@@ -393,7 +396,5 @@ module.exports = function(nymph) {
 			}]]
 		);
 	}
-	px.refreshRenderer({view: menuui, menudom: dom, endnext: function(){
-		setDom(null);
-	}});
+	px.refreshRenderer(stage);
 }

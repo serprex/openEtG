@@ -130,7 +130,7 @@ module.exports = function() {
 	popbooster.visible = false;
 	storeui.addChild(popbooster);
 
-	storeui.cmds = {
+	var cmds = {
 		boostergive: function(data) {
 			if (data.accountbound) {
 				sock.user.accountbound = etgutil.mergedecks(sock.user.accountbound, data.cards);
@@ -177,5 +177,5 @@ module.exports = function() {
 		}
 	});
 	dom.push([777, 184, packmulti]);
-	px.refreshRenderer({view: storeui, domsho: dom});
+	px.refreshRenderer({view: storeui, domsho: dom, cmds:cmds});
 }

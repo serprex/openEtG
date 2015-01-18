@@ -93,7 +93,7 @@ PIXI.AUTO_PREVENT_DEFAULT = false;
 	var sock = require("./sock");
 	sock.et.on("message", function(data){
 		data = JSON.parse(data);
-		var func = sockEvents[data.x] || (px.realStage.children.length > 1 && px.realStage.children[1].cmds && (func = px.realStage.children[1].cmds[data.x]));
+		var func = sockEvents[data.x] || px.getCmd(data.x);
 		if (func){
 			func.call(sock.et, data);
 		}

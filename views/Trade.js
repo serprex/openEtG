@@ -72,7 +72,7 @@ module.exports = function() {
 	var cardArt = new PIXI.Sprite(gfx.nopic);
 	cardArt.position.set(734, 8);
 	view.addChild(cardArt);
-	view.cmds = {
+	var cmds = {
 		cardchosen: function(data){
 			foeDeck.deck = etgutil.decodedeck(data.c);
 			foeDeck.renderDeck(0);
@@ -85,7 +85,7 @@ module.exports = function() {
 		},
 		tradecanceled: startMenu,
 	};
-	px.refreshRenderer({view: view, tdom:dom, next:function() {
+	px.refreshRenderer({view: view, tdom:dom, cmds:cmds, next:function() {
 		var mpos = px.getMousePos();
 		cardArt.visible = false;
 		cardsel.next(cardpool, cardminus, mpos);

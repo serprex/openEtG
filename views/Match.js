@@ -367,7 +367,7 @@ function startMatch(game, foeDeck) {
 			player_overlay[e.keyCode == 87?1:0].click();
 		}
 	}
-	gameui.cmds = {
+	var cmds = {
 		endturn: function(data) {
 			game.player2.endturn(data.bits);
 		},
@@ -405,13 +405,13 @@ function startMatch(game, foeDeck) {
 				}
 				var now;
 				if (aiCommand && (now = Date.now()) > aiDelay){
-					gameui.cmds[aiState[0]]({bits: aiState[1]});
+					cmds[aiState[0]]({bits: aiState[1]});
 					aiState = undefined;
 					aiCommand = false;
 					aiDelay = now + (game.turn == game.player1 ? 2000 : 200);
 				}
 			}else if (game.phase <= etg.MulliganPhase2){
-				gameui.cmds.mulligan({draw: require("../ai/mulligan")(game.player2)});
+				cmds.mulligan({draw: require("../ai/mulligan")(game.player2)});
 			}
 		}
 		var pos = px.getMousePos();
@@ -671,7 +671,7 @@ function startMatch(game, foeDeck) {
 		Effect.next(cloakgfx.visible);
 	}, endnext: function() {
 		document.removeEventListener("keydown", onkeydown);
-	}});
+	}, cmds:cmds});
 }
 function deckPower(deck, amount) {
 	if (amount > 1){

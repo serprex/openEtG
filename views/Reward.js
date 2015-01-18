@@ -57,7 +57,7 @@ module.exports = function(reward, numberofcopies, code) {
 		px.setInteractive(card);
 	});
 
-	rewardui.cmds = {
+	var cmds = {
 		codedone:function(data) {
 			sock.user.pool = etgutil.addcard(sock.user.pool, data.card);
 			chat(Cards.Codes[data.card].name + " added!");
@@ -65,5 +65,5 @@ module.exports = function(reward, numberofcopies, code) {
 		},
 	}
 
-	px.refreshRenderer({view: rewardui, domward: dom});
+	px.refreshRenderer({view: rewardui, domward: dom, cmds:cmds});
 }
