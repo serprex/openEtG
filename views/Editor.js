@@ -241,6 +241,8 @@ module.exports = function(arena, acard, startempty) {
 			startMenu();
 		}]], [8, 84, ["Import", importDeck]]);
 		if (sock.user) {
+			var tutorialbutton = px.mkButton(800, 8, gfx.eicons[13]);
+			editorui.addChild(tutorialbutton);
 			var tname = px.domText(sock.user.selectedDeck);
 			dom.push([100, 8, tname],
 			[8, 110, ["Save", saveButton
@@ -345,6 +347,37 @@ module.exports = function(arena, acard, startempty) {
 		options.register("deck", deckimport);
 		dom.push([520, 238, deckimport]);
 	}
+	var tutspan;
+	px.setClick(tutorialbutton, function() {
+		if (tutspan) {
+			document.body.removeChild(tutspan);
+			tutspan = null;
+			return;
+		}
+		//100, 272, 800, 328
+		var span = document.createElement("span");
+		[[100, 32, 624, 198, "This is where the deck you are building shows up. Use the buttons to the left to save and load your deck: " +
+		"\nClear: Erase this deck \nSave & Exit: Save the current deck and return to the main menu \nImport: Import a deck code from the import box \nSave: Save the current deck to the name in the name box in the top left" +
+		"\nLoad: Load the deck wih the name you have typed in the name box in the top left \nSave to #: Save the current deck and name to one of the quickdeck buttons. \nTip: Use one of the quickdeck buttons as a \"New Deck\" button, and then save any decks you make there to a proper name"],
+		[298, 6, 426, 24, "Clicking a quickdeck button will instantly load the deck saved there"],
+		[100, 232, 418, 38, "Choose a mark. You will gain 1 quantum per turn of that element. Mark of Chroma gives 3 random quanta."]].forEach(function(info) {
+			var div = px.domBox(info[2], info[3], true);
+			div.style.position = "absolute";
+			div.style.left = info[0] + "px";
+			div.style.top = info[1] + "px";
+			var text = px.domText(info[4]);
+			text.style.color = "#000000";
+			text.style.position = "absolute";
+			text.style.left = 5 + "px";
+			text.style.top = "50%";
+			text.style.transform = "translateY(-50%)";
+			div.appendChild(text);
+			span.appendChild(div);
+		});
+		//40, 270, 620, 168,
+		tutspan = span;
+		document.body.appendChild(span);
+	});
 	px.refreshRenderer({view:editorui, editdiv:dom, next:function() {
 		cardArt.visible = false;
 		var mpos = px.getMousePos();

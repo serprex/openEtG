@@ -61,11 +61,11 @@ function monkeyButtonSetText(text){
 		this.style.display = "inline";
 	}else this.style.display = "none";
 }
-exports.domBox = function(w, h){
+exports.domBox = function(w, h, tutorial){
 	var span = document.createElement("span");
 	span.style.width = w + "px";
 	span.style.height = h + "px";
-	span.className = "bgbox";
+	span.className = tutorial ? "tutorialbox" : "bgbox";
 	return span;
 }
 exports.domButton = function(text, click, mouseover, sound) {
