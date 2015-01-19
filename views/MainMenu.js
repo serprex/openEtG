@@ -355,6 +355,7 @@ module.exports = function(nymph) {
 					return;
 				}
 				var div = px.domBox(392, 280);
+				div.style.pointerEvents = "auto";
 				div.style.position = "absolute";
 				div.style.left = "468px";
 				div.style.top = "292px";

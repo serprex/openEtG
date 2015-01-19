@@ -1078,9 +1078,6 @@ platearmor:function(c,t){
 	Effect.mkText("0|"+buff, t);
 	t.buffhp(buff);
 },
-play:function(c,t){
-	new etg.Creature(c.card, c.owner).place(true);
-},
 poison:function(x){
 	var n = parseInt(x);
 	return adrenathrottle(function(c,t){
