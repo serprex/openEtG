@@ -121,6 +121,7 @@ function Player(game){
 	this.sanctuary = false;
 	this.precognition = false;
 	this.gpull = undefined;
+	this.epoch = 0;
 	this.nova = 0;
 	this.maxhp = this.hp = 100;
 	this.hand = [];
@@ -917,11 +918,7 @@ CardInstance.prototype.remove = function(index) {
 }
 CardInstance.prototype.die = function(idx){
 	var idx = this.remove(idx);
-	if (~idx){
-		if (this.card.active.discard){
-			this.card.active.discard(this);
-		}
-	}
+	if (~idx) this.procactive("discard");
 }
 Creature.prototype.deatheffect = Weapon.prototype.deatheffect = function(index) {
 	var data = {index:index}
@@ -1206,6 +1203,7 @@ CardInstance.prototype.useactive = function(target){
 		ui.playSound("creaturePlay");
 	} else console.log("Unknown card type: " + card.type);
 	owner.spend(card.costele, card.cost);
+	this.procactive("cardplay");
 	owner.game.updateExpectedDamage();
 }
 function countAdrenaline(x){

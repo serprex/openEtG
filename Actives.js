@@ -1,7 +1,8 @@
 "use strict";
+var ui = require("./uiutil");
 function adrenathrottle(f){
 	return function(c){
-		if (!c.status || (c.status.adrenaline || 0)<3){
+		if (!c.status || (c.status.adrenaline || 0)<3 || (c instanceof etg.Creature && c.owner.weapon && c.owner.weapon.card.isOf(Cards.ScorpionClaws))){
 			return f.apply(null, arguments);
 		}
 	}
@@ -274,6 +275,10 @@ decrsteam:function(c){
 		c.status.steamatk--;
 	}
 },
+deckblast:function(c,t){
+	t.spelldmg(c.owner.deck.length);
+	c.owner.deck.length = 0;
+},
 deja:function(c,t){
 	delete c.active.cast;
 	Actives.parallel(c, c);
@@ -370,6 +375,9 @@ draft:function(c,t){
 		}
 	}
 },
+drawcopy:function(c,t){
+	new etg.CardInstance(t.card, c.owner).place();
+},
 dryspell:function(c,t){
 	function dryeffect(c,t){
 		c.spend(etg.Water, -t.dmg(1));
@@ -449,6 +457,12 @@ epidemic:function(c,t){
 		c.owner.foe.addpoison(t.status.poison);
 	}
 },
+epoch:function(c,t){
+	if (++c.status.epoch > 1) Actives.silence(c, t.owner);
+},
+epochreset:function(c,t){
+	c.status.epoch = 0;
+},
 evolve:function(c,t){
 	c.transform(c.card.as(Cards.Shrieker));
 	delete c.status.burrowed;
@@ -512,6 +526,51 @@ flyingweapon:function(c,t){
 	cr.usedactive = t.usedactive;
 	cr.place();
 	t.owner.weapon = undefined;
+},
+foedraw:function(c,t){
+	if (c.owner.hand.length < 8){
+		if (!c.owner.foe.deck.length) c.owner.game.setWinner(c.owner);
+		else{
+			c.owner.deck.push(c.owner.foe.deck.pop());
+			c.owner.drawcard();
+		}
+	}
+},
+forceplay:function(c,t){
+	var card = t.card;
+	t.remove();
+	if (t.owner.neuro){
+		t.owner.addpoison(1);
+	}
+	function tgttest(x){
+		if (x && tgting(t.owner, x)) {
+			tgts.push(x);
+		}
+	}
+	if (card.type <= etg.PermanentEnum){
+		var cons = [etg.Pillar, etg.Weapon, etg.Shield, etg.Permanent][card.type];
+		new cons(card, t.owner).place(true);
+		ui.playSound("permPlay");
+	}else if (card.type == etg.SpellEnum){
+		var tgting = Cards.Targeting[t.card.active.activename[0]];
+		if (tgting){
+			var tgts = [];
+			for(var i=0; i<2; i++){
+				var pl=i==0?c.owner:c.owner.foe;
+				pl.creatures.forEach(tgttest);
+				pl.permanents.forEach(tgttest);
+				pl.hand.forEach(tgttest);
+				tgttest(pl.shield);
+				tgttest(pl.weapon);
+			}
+			if (tgts.length > 0){
+				t.castSpell(c.owner.choose(tgts), t.card.active);
+			}
+		}else t.castSpell(target, card.active);
+	}else if (card.type == etg.CreatureEnum){
+		new etg.Creature(card, t.owner).place(true);
+		ui.playSound("creaturePlay");
+	}
 },
 fractal:function(c,t){
 	Effect.mkText("Fractal", t);
@@ -1018,6 +1077,13 @@ overdrivespell:function(c,t){
 pacify:function(c,t){
 	t.atk -= t.trueatk();
 },
+pairproduce:function(c,t){
+	function callauto(p){
+		if (p && p instanceof etg.Pillar && p.active.auto) p.active.auto(p);
+	}
+	c.owner.permanents.forEach(callauto);
+	if (!c.owner.foe.sanctuary) c.owner.foe.permanents.forEach(callauto);
+},
 paleomagnetism:function(c,t){
 	if (c.owner == t){
 		new etg.Pillar(c.card.as(Cards.Codes[etg.PillarList[c.owner.rng()<.5?0:c.owner.mark]]), c.owner).place();
@@ -1086,6 +1152,18 @@ poison:function(x){
 },
 poisonfoe:function(c){
 	if (c.owner.rng() < .7) c.owner.foe.addpoison(1);
+},
+powerdrain:function(c,t){
+	var ti = [];
+	for(var i=0; i<23; i++){
+		if (c.owner.creatures[i]) ti.push(i);
+	}
+	if (!ti.length)return;
+	var tgt = c.owner.creatures[c.owner.choose(ti)], halfatk = Math.ceil(t.trueatk()/2), halfhp = Math.ceil(t.truehp()/2);
+	t.atk -= halfatk;
+	t.buffhp(-halfhp);
+	tgt.atk += halfatk;
+	tgt.buffhp(halfhp);
 },
 precognition:function(c,t){
 	c.owner.drawcard();
@@ -1269,6 +1347,12 @@ sanctuary:function(c,t){
 	c.owner.sanctuary = true;
 	Effect.mkText("+4", c);
 	c.owner.dmg(-4);
+},
+sanctify:function(c,t){
+	c.owner.sanctuary = true;
+},
+unsanctify:function(c,t){
+	c.owner.foe.sanctuary = false;
 },
 scarab:function(c,t){
 	new etg.Creature(c.card.as(Cards.Scarab), c.owner).place();

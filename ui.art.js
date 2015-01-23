@@ -7,6 +7,7 @@ require("./httpcards")(function() {
 		[["artimies", "http://elementscommunity.org/forum/profile/?u=140"], ["593"]],
 		[["Cryotube", "http://cryotube.deviantart.com"],
 			["566", "597", "5fe", "5lr"]],
+		[["Dawn_to_Dusk", "?"], ["505", "5s9", "5sa", "62f"]],
 		[["Hawanja", "http://hawanja.deviantart.com"], ["4vs"]],
 		[["jarozaoz", "http://elementscommunity.org/forum/profile/?u=6364"],
 			["4t3", "4vn", "532", "5le", "5op"]],
