@@ -344,7 +344,7 @@ CardSelector.prototype.click = function(e){
 	}
 }
 CardSelector.prototype.next = function(newcardpool, newcardminus, mpos) {
-	if (newcardpool != this.cardpool || newcardminus != this.cardminus) {
+	if (newcardpool !== this.cardpool || newcardminus !== this.cardminus) {
 		this.cardminus = newcardminus;
 		this.cardpool = newcardpool;
 		this.makeColumns();

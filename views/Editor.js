@@ -87,19 +87,18 @@ module.exports = function(arena, acard, startempty) {
 		}
 	}
 	var saveToQuick = false;
-	var selectBg = "linear-gradient(to bottom,#424748,#8999ff)";
 	function quickDeck(number) {
 		return function() {
 			if (saveToQuick) {
 				saveButton();
 				sock.userEmit("changequickdeck", { number: number, name: tname.textcache });
 				sock.user.quickdecks[number] = tname.textcache;
-				fixQuickButtons(number);
+				fixQuickButtons();
 				saveToQuick = false;
 				quickNum.className = quickNum.className.replace(/(?:^|\s)selectedbutton(?!\S)/g, '')
 			}
 			else {
-				loadDeck(sock.user.quickdecks[number], number);
+				loadDeck(sock.user.quickdecks[number]);
 			}
 		}
 	}
@@ -126,12 +125,12 @@ module.exports = function(arena, acard, startempty) {
 			sock.userEmit("setdeck", { d: dcode, name: sock.user.selectedDeck });
 		}else if (force) sock.userEmit("setdeck", {name: sock.user.selectedDeck });
 	}
-	function loadDeck(x, forceNumber){
+	function loadDeck(x){
 		if (!x) return;
 		saveDeck();
 		deckname.value = sock.user.selectedDeck = x;
 		tname.setText(x);
-		fixQuickButtons(forceNumber);
+		fixQuickButtons();
 		decksprite.deck = etgutil.decodedeck(sock.getDeck());
 		processDeck();
 	}
@@ -146,7 +145,7 @@ module.exports = function(arena, acard, startempty) {
 		cardpool = {};
 		etgutil.iterraw(sock.user.pool, incrpool);
 		etgutil.iterraw(sock.user.accountbound, incrpool);
-	}
+	}else cardpool = null;
 	var editorui = px.mkView(), dom = [[8, 32, ["Clear", function(){
 		if (sock.user) {
 			cardminus = {};

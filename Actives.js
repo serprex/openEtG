@@ -1161,7 +1161,7 @@ powerdrain:function(c,t){
 		if (c.owner.creatures[i]) ti.push(i);
 	}
 	if (!ti.length)return;
-	var tgt = c.owner.creatures[c.owner.choose(ti)], halfatk = Math.ceil(t.trueatk()/2), halfhp = Math.ceil(t.truehp()/2);
+	var tgt = c.owner.creatures[c.owner.choose(ti)], halfatk = Math.floor(t.trueatk()/2), halfhp = Math.floor(t.truehp()/2);
 	t.atk -= halfatk;
 	t.buffhp(-halfhp);
 	tgt.atk += halfatk;
