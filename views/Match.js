@@ -701,9 +701,11 @@ module.exports = function(data, ai) {
 		});
 		if (deckpower[j]) {
 			pl.deck = deckPower(pl.deck, deckpower[j]);
+			pl.deckpower = deckpower[j];
 		}
 		else if (pl.drawpower > 1){
 			pl.deck = deckPower(pl.deck, 2);
+			pl.deckpower = 2;
 		}
 	}
 	var foeDeck = game.player2.deck.slice();

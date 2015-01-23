@@ -121,9 +121,9 @@ function Player(game){
 	this.sanctuary = false;
 	this.precognition = false;
 	this.gpull = undefined;
-	this.epoch = 0;
 	this.nova = 0;
 	this.maxhp = this.hp = 100;
+	this.deckpower = 1;
 	this.hand = [];
 	this.deck = [];
 	this.creatures = new Array(23);

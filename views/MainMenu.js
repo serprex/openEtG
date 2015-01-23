@@ -211,8 +211,8 @@ module.exports = function(nymph) {
 			chat(data.g + "\u00A4 added!");
 		},
 		codecode:function(data) {
-			sock.user.pool = etgutil.addcard(sock.user.pool, data);
-			chat(Cards.Codes[data].name + " added!");
+			sock.user.pool = etgutil.addcard(sock.user.pool, data.card);
+			chat(Cards.Codes[data.card].name + " added!");
 		},
 		challenge:function(data) {
 			var span = document.createElement("span");

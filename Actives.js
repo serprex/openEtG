@@ -276,7 +276,7 @@ decrsteam:function(c){
 	}
 },
 deckblast:function(c,t){
-	t.spelldmg(c.owner.deck.length);
+	t.spelldmg(Math.ceil(c.owner.deck.length/c.owner.deckpower));
 	c.owner.deck.length = 0;
 },
 deja:function(c,t){
@@ -538,6 +538,7 @@ foedraw:function(c,t){
 },
 forceplay:function(c,t){
 	var card = t.card;
+	if (!t.owner.canspend(card.castele, card.cast)) return;
 	t.remove();
 	if (t.owner.neuro){
 		t.owner.addpoison(1);
@@ -571,6 +572,7 @@ forceplay:function(c,t){
 		new etg.Creature(card, t.owner).place(true);
 		ui.playSound("creaturePlay");
 	}
+	t.owner.spend(card.castele, card.cast);
 },
 fractal:function(c,t){
 	Effect.mkText("Fractal", t);
