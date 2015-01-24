@@ -7,17 +7,18 @@ function maybeMake(e){
 		xhr.onreadystatechange = function() {
 			if (this.readyState == 4) {
 				if (this.status == 200) {
-					passwd.value = this.responseText;
+					code.value = this.responseText;
 				} else if (this.status == 404) {
-					chatArea.value = "Incorrect password";
+					code.value = "Incorrect password";
 				} else if (this.status == 502) {
-					chatArea.value = "Error verifying password";
-				}
+					code.value = "Error verifying password";
+				} else code.value = this.status;
 			}
 		}
 		xhr.send();
 	}
 }
 </script>
-<input id="passwd" type="text" placeholder="Code" onkeydown="maybeMake(event)" /><br>
-<input id="codetype" type="text" placeholder="Type" onkeydown="maybeMake(event)" />
+<input id="passwd" type="text" placeholder="Password" onkeydown="maybeMake(event)" /><br>
+<input id="codetype" type="text" placeholder="Type" onkeydown="maybeMake(event)" /><br>
+<input id="code" type="text" placeholder="Code" readonly />
