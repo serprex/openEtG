@@ -29,7 +29,7 @@ exports.parseCsv = function(type, file){
 			var nospacename = carddata[1].replace(/ |'/g, "");
 			exports[nospacename in exports?nospacename+"Up":nospacename] = exports.Codes[cardcode] = new etg.Card(type, cardinfo);
 			cardinfo.Code = etgutil.asShiny(cardcode, true);
-			(exports.Codes[cardinfo.Code] = new etg.Card(type, cardinfo)).shiny = true;
+			exports.Codes[cardinfo.Code] = new etg.Card(type, cardinfo);
 		}
 	}
 }

@@ -376,7 +376,7 @@ draft:function(c,t){
 	}
 },
 drawcopy:function(c,t){
-	new etg.CardInstance(t.card, c.owner).place();
+	if (c.owner != t.owner) new etg.CardInstance(t.card, c.owner).place();
 },
 dryspell:function(c,t){
 	function dryeffect(c,t){
@@ -553,7 +553,7 @@ forceplay:function(c,t){
 		new cons(card, t.owner).place(true);
 		ui.playSound("permPlay");
 	}else if (card.type == etg.SpellEnum){
-		var tgting = Cards.Targeting[t.card.active.activename[0]];
+		var tgting = Cards.Targeting[t.active.activename[0]];
 		if (tgting){
 			var tgts = [];
 			for(var i=0; i<2; i++){
@@ -565,7 +565,7 @@ forceplay:function(c,t){
 				tgttest(pl.weapon);
 			}
 			if (tgts.length > 0){
-				t.castSpell(c.owner.choose(tgts), t.card.active);
+				t.castSpell(c.owner.choose(tgts), t.active);
 			}
 		}else t.castSpell(target, card.active);
 	}else if (card.type == etg.CreatureEnum){
@@ -1261,7 +1261,7 @@ regenerate:function(c,t){
 regeneratespell:function(c,t){
 	t.lobo();
 	t.active.auto = Actives.regenerate;
-	if (t instanceof etg.Permanent){
+	if (t instanceof etg.Permanent && !(t instanceof etg.Weapon)){
 		t.status = {};
 	}
 },
@@ -1300,8 +1300,8 @@ rewind:function(c,t){
 	}
 },
 ricochet:function(c,t){
-	if (!(t instanceof etg.CardInstance) || t.card.active == Actives.bolsterintodeck)return;
-	var tgting = Cards.Targeting[t.card.active.activename[0]];
+	if (!(t instanceof etg.CardInstance) || t.active == Actives.bolsterintodeck || t.active == Actives.deckblast)return;
+	var tgting = Cards.Targeting[t.active.activename[0]];
 	function tgttest(x){
 		if (x) {
 			if (tgting(t.owner, x)) tgts.push([x, t.owner]);
@@ -1321,7 +1321,7 @@ ricochet:function(c,t){
 		if (tgts.length > 0){
 			var tgt = c.owner.choose(tgts), town = t.owner;
 			t.owner = tgt[1];
-			t.castSpell(tgt[0], t.card.active, true);
+			t.castSpell(tgt[0], t.active, true);
 			t.owner = town;
 		}
 	}

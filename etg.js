@@ -93,6 +93,9 @@ function Card(type, info){
 	if (info.Rarity){
 		this.rarity = parseInt(info.Rarity);
 	}
+	Object.freeze(this.status);
+	if (this.type != SpellEnum) Object.freeze(this.active);
+	Object.freeze(this);
 }
 function Thing(card, owner){
 	this.owner = owner;
@@ -174,6 +177,9 @@ Weapon.prototype = Object.create(Permanent.prototype);
 Shield.prototype = Object.create(Permanent.prototype);
 Pillar.prototype = Object.create(Permanent.prototype);
 CardInstance.prototype = Object.create(Thing.prototype);
+Object.defineProperty(CardInstance.prototype, "active", { get: function() { return this.card.active; }});
+Object.defineProperty(CardInstance.prototype, "status", { get: function() { return this.card.status; }});
+Object.defineProperty(Card.prototype, "shiny", { get: function() { return this.code > "fvv"; }});
 Card.prototype.rarity = 0;
 Card.prototype.attack = 0;
 Card.prototype.health = 0;

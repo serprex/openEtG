@@ -441,7 +441,7 @@ function evalactive(c, active, extra){
 }
 
 function checkpassives(c) {
-	var score = 0, statuses = c instanceof etg.CardInstance ? c.card.status : c.status;
+	var score = 0, statuses = c.status;
 	for (var status in statuses)
 	{
 		if (uniqueStatuses[status] && !(c instanceof etg.CardInstance)) {
