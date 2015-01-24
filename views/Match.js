@@ -148,7 +148,7 @@ function startMatch(game, foeDeck) {
 		[800, 490, cancel],
 		[8, 24, resign],
 		[800, 550, turntell],
-		[0, 75, foename],
+		[0, 64, foename],
 	];
 	var activeInfo = {
 		firebolt:function(){
@@ -189,19 +189,21 @@ function startMatch(game, foeDeck) {
 	var quantatext = [new PIXI.DisplayObjectContainer(), new PIXI.DisplayObjectContainer()];
 	var hptext = [new px.domText(""), new px.domText("")];
 	var hpxy = [];
-	var player_overlay = [new PIXI.Sprite(gfx.nopic), new PIXI.Sprite(gfx.nopic)];
-	var bgfx = new PIXI.Graphics();
-	gameui.addChild(bgfx);
+	var playerOverlay = [new PIXI.Sprite(gfx.nopic), new PIXI.Sprite(gfx.nopic)];
+	var handOverlay = [new PIXI.Sprite(gfx.nopic), new PIXI.Sprite(gfx.nopic)];
+	var sabbathOverlay = [new PIXI.Sprite(gfx.sabbath), new PIXI.Sprite(gfx.sabbath)];
 	for (var j = 0;j < 2;j++) {
 		hptext[j].style.textAlign = "center"
 		hptext[j].style.width = "100px";
 		hptext[j].style.pointerEvents = "none";
-		player_overlay[j].width = 95;
-		player_overlay[j].height = 80;
+		playerOverlay[j].width = 95;
+		playerOverlay[j].height = 80;
 		(function(_j) {
+			handOverlay[j].position.set(j ? 9 : 774, j ? 99 : 300);
+			sabbathOverlay[j].position.set(j ? 792 : 0, j ? 80 : 288);
 			for (var i = 0;i < 8;i++) {
 				handsprite[j][i] = new PIXI.Sprite(gfx.nopic);
-				handsprite[j][i].position.set(j ? 20 : 780, (j ? 130 : 310) + 19 * i);
+				handsprite[j][i].position.set(j ? 15 : 780, (j ? 130 : 330) + 19 * i);
 				gameui.addChild(handsprite[j][i]);
 				(function(_i) {
 					px.setClick(handsprite[j][i], function() {
@@ -307,16 +309,16 @@ function startMatch(game, foeDeck) {
 			}
 			gameui.addChild(marksprite[j]);
 			marktext[j].anchor.set(.5, .5);
-			player_overlay[j].anchor.set(.5, .5);
+			playerOverlay[j].anchor.set(.5, .5);
 			marktext[j].position.set(768,470);
 			quantatext[j].position.set(j ? 792 : 0, j ? 100 : 308);
-			player_overlay[j].position.set(50, 555);
+			playerOverlay[j].position.set(50, 555);
 			hpxy.push(new PIXI.Point(50, 550));
 			if (j) {
 				ui.reflectPos(marktext[j]);
 				ui.reflectPos(hpxy[j]);
-				ui.reflectPos(player_overlay[j]);
-				player_overlay[j].y += 15;
+				ui.reflectPos(playerOverlay[j]);
+				playerOverlay[j].y += 15;
 			}
 			var child;
 			for (var k = 1;k < 13;k++) {
@@ -325,7 +327,7 @@ function startMatch(game, foeDeck) {
 				quantatext[j].addChild(child = new PIXI.Sprite(gfx.eicons[k]));
 				child.position.set((k & 1) ? 0 : 54, Math.floor((k - 1) / 2) * 32);
 			}
-			px.setClick(player_overlay[j], function() {
+			px.setClick(playerOverlay[j], function() {
 				if (game.phase != etg.PlayPhase) return;
 				if (game.targetingMode && game.targetingMode(game.players(_j))) {
 					delete game.targetingMode;
@@ -336,11 +338,13 @@ function startMatch(game, foeDeck) {
 		gameui.addChild(marktext[j]);
 		gameui.addChild(quantatext[j]);
 		dom.push([hpxy[j].x-50, hpxy[j].y-(j?40:45), hptext[j]]);
-		gameui.addChild(player_overlay[j]);
+		gameui.addChild(handOverlay[j]);
+		gameui.addChild(sabbathOverlay[j]);
+		gameui.addChild(playerOverlay[j]);
 	}
 	px.setInteractive.apply(null, weapsprite);
 	px.setInteractive.apply(null, shiesprite);
-	px.setInteractive.apply(null, player_overlay);
+	px.setInteractive.apply(null, playerOverlay);
 	var fgfx = new PIXI.Graphics();
 	gameui.addChild(fgfx);
 	var anims = new PIXI.DisplayObjectContainer();
@@ -364,7 +368,7 @@ function startMatch(game, foeDeck) {
 		} else if (e.keyCode >= 49 && e.keyCode <= 56) {
 			handsprite[0][e.keyCode-49].click();
 		} else if (e.keyCode == 83 || e.keyCode == 87) { // s/w
-			player_overlay[e.keyCode == 87?1:0].click();
+			playerOverlay[e.keyCode == 87?1:0].click();
 		}
 	}
 	var cmds = {
@@ -375,7 +379,7 @@ function startMatch(game, foeDeck) {
 			var bits = data.bits, c = game.bitsToTgt(bits & 511), t = game.bitsToTgt((bits >> 9) & 511);
 			console.log("cast", c.toString(), (t || "-").toString(), bits);
 			var sprite = new PIXI.Sprite(gfx.nopic);
-			sprite.position.set((foeplays.children.length % 8) * 100, Math.floor(foeplays.children.length / 8) * 20);
+			sprite.position.set((foeplays.children.length&7) * 99, (foeplays.children.length>>3) * 19);
 			sprite.card = c instanceof etg.CardInstance ? c.card : c.active.cast.activename.join(" ");
 			foeplays.addChild(sprite);
 			c.useactive(t);
@@ -536,7 +540,7 @@ function startMatch(game, foeDeck) {
 			fgfx.lineStyle(2, 0xff0000);
 			for (var j = 0;j < 2;j++) {
 				if (game.targetingMode(game.players(j))) {
-					var spr = player_overlay[j];
+					var spr = playerOverlay[j];
 					fgfx.drawRect(spr.position.x - spr.width / 2, spr.position.y - spr.height / 2, spr.width, spr.height);
 				}
 				for (var i = 0;i < game.players(j).hand.length;i++) {
@@ -559,28 +563,18 @@ function startMatch(game, foeDeck) {
 				}
 			}
 		}
-		bgfx.clear();
 		for (var j = 0;j < 2;j++) {
 			var pl = game.players(j);
 			if (pl.sosa) {
-				var spr = player_overlay[j];
+				var spr = playerOverlay[j];
 				fgfx.beginFill(ui.elecols[etg.Darkness], .6);
 				fgfx.drawRect(spr.position.x - spr.width / 2, spr.position.y - spr.height / 2, spr.width, spr.height);
 				fgfx.endFill();
 			}
-			var statuses = { flatline: etg.Darkness, silence: etg.Aether, sanctuary: etg.Light };
-			for(var status in statuses){
-				if (pl[status]) {
-					bgfx.beginFill(ui.elecols[statuses[status]], .8);
-					bgfx.drawRect(handsprite[j][0].position.x - 8, handsprite[j][0].position.y - 2, 120, 160);
-					bgfx.endFill();
-				}
-			}
-			if (pl.nova >= 3){
-				bgfx.beginFill(ui.elecols[etg.Entropy], .8);
-				bgfx.drawRect(handsprite[j][0].position.x - 8, handsprite[j][0].position.y - 2, 120, 160);
-				bgfx.endFill();
-			}
+			sabbathOverlay[j].visible = pl.flatline;
+			handOverlay[j].setTexture(pl.silence? gfx.hborders[0] :
+				pl.sanctuary ? gfx.hborders[1] :
+				pl.nova >= 3 ? gfx.hborders[2] : gfx.nopic);
 			for (var i = 0;i < 8;i++) {
 				handsprite[j][i].setTexture(gfx.getCardImage(pl.hand[i] ? (j == 0 || game.player1.precognition ? pl.hand[i].card.code : "0") : "1"));
 			}
@@ -647,19 +641,19 @@ function startMatch(game, foeDeck) {
 				px.maybeSetText(quantatext[j].children[i*2-2], pl.quanta[i].toString());
 			}
 			fgfx.beginFill(0);
-			fgfx.drawRect(player_overlay[j].x - 41, player_overlay[j].y - 25, 82, 16);
+			fgfx.drawRect(playerOverlay[j].x - 41, playerOverlay[j].y - 25, 82, 16);
 			fgfx.endFill();
 			if (pl.hp > 0){
 				fgfx.beginFill(ui.elecols[etg.Life]);
-				fgfx.drawRect(player_overlay[j].x - 40, player_overlay[j].y - 24, 80 * pl.hp / pl.maxhp, 14);
+				fgfx.drawRect(playerOverlay[j].x - 40, playerOverlay[j].y - 24, 80 * pl.hp / pl.maxhp, 14);
 				fgfx.endFill();
 				if (!cloakgfx.visible && game.expectedDamage[j]) {
 					fgfx.beginFill(ui.elecols[game.expectedDamage[j] >= pl.hp ? etg.Fire : game.expectedDamage[j] > 0 ? etg.Time : etg.Water]);
-					fgfx.drawRect(player_overlay[j].x - 40 + 80 * pl.hp / pl.maxhp, player_overlay[j].y - 24, -80 * Math.min(game.expectedDamage[j], pl.hp) / pl.maxhp, 14);
+					fgfx.drawRect(playerOverlay[j].x - 40 + 80 * pl.hp / pl.maxhp, playerOverlay[j].y - 24, -80 * Math.min(game.expectedDamage[j], pl.hp) / pl.maxhp, 14);
 					fgfx.endFill();
 				}
 			}
-			if (px.hitTest(player_overlay[j], pos)){
+			if (px.hitTest(playerOverlay[j], pos)){
 				setInfo(pl);
 				hptext[j].style.display = "none";
 			}else{

@@ -284,19 +284,19 @@ module.exports = function(nymph) {
 		else input.className = "numput";
 		return input;
 	}
-	var foename = makeInput("Challenge/Trade", maybeChallenge), pvphp = makeInput("HP"), pvpmark = makeInput("Mark"), pvpdeck = makeInput("Deck"), pvpdraw = makeInput("Draw");
-	var aideck = makeInput("AI Deck", maybeCustomAi), aihp = makeInput("HP"), aimark = makeInput("Mark"), aideckpower = makeInput("Deck"), aidraw = makeInput("Draw");
+	var foename = makeInput("Challenge/Trade", maybeChallenge), pvphp = makeInput("HP"), pvpmark = makeInput("Mark"), pvpdraw = makeInput("Draw"), pvpdeck = makeInput("Deck");
+	var aideck = makeInput("AI Deck", maybeCustomAi), aihp = makeInput("HP"), aimark = makeInput("Mark"), aidraw = makeInput("Draw"), aideckpower = makeInput("Deck");
 	aideck.addEventListener("click", function(){this.setSelectionRange(0, 999)}),
 	options.register("foename", foename, true);
 	options.register("pvphp", pvphp, true);
 	options.register("pvpmark", pvpmark, true);
-	options.register("pvpdeck", pvpdeck, true);
 	options.register("pvpdraw", pvpdraw, true);
+	options.register("pvpdeck", pvpdeck, true);
 	options.register("aideck", aideck, true);
 	options.register("aihp", aihp, true);
 	options.register("aimark", aimark, true);
-	options.register("aideckpower", aideckpower, true);
 	options.register("aidraw", aidraw, true);
+	options.register("aideckpower", aideckpower, true);
 	function maybeCustomAi(e){
 		if (e.keyCode == 13) aiClick.call(this);
 	}
@@ -319,8 +319,8 @@ module.exports = function(nymph) {
 		[50, 445, aideck],
 		[205, 445, aihp],
 		[240, 445, aimark],
-		[275, 445, aideckpower],
-		[310, 445, aidraw],
+		[275, 445, aidraw],
+		[310, 445, aideckpower],
 		[350, 445, ["Custom", aiClick]],
 		[50, 500, foename],
 		[205, 500, pvphp],

@@ -1061,7 +1061,7 @@ Shield.prototype.remove = function() {
 	return 0;
 }
 Thing.prototype.isMaterial = function(type) {
-	return (type ? this instanceof type : this.status) && !this.status.immaterial && !this.status.burrowed;
+	return (type ? this instanceof type : !(this instanceof CardInstance) && !(this instanceof Player)) && !this.status.immaterial && !this.status.burrowed;
 }
 Thing.prototype.addactive = function(type, active){
 	this.active[type] = combineactive(this.active[type], active);
