@@ -380,7 +380,7 @@ function startMatch(game, foeDeck) {
 			console.log("cast", c.toString(), (t || "-").toString(), bits);
 			var sprite = new PIXI.Sprite(gfx.nopic);
 			sprite.position.set((foeplays.children.length&7) * 99, (foeplays.children.length>>3) * 19);
-			sprite.card = c instanceof etg.CardInstance ? c.card : c.active.cast.activename.join(" ");
+			sprite.card = c instanceof etg.CardInstance ? c.card : c.active.cast.activename[0];
 			foeplays.addChild(sprite);
 			c.useactive(t);
 		},

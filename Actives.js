@@ -538,7 +538,7 @@ foedraw:function(c,t){
 },
 forceplay:function(c,t){
 	var card = t.card;
-	if (!t.owner.canspend(card.castele, card.cast)) return;
+	if (!t.owner.canspend(card.costele, card.cost)) return;
 	t.remove();
 	if (t.owner.neuro){
 		t.owner.addpoison(1);
@@ -553,7 +553,7 @@ forceplay:function(c,t){
 		new cons(card, t.owner).place(true);
 		ui.playSound("permPlay");
 	}else if (card.type == etg.SpellEnum){
-		var tgting = Cards.Targeting[t.active.activename[0]];
+		var tgting = Cards.Targeting[card.active.activename[0]];
 		if (tgting){
 			var tgts = [];
 			for(var i=0; i<2; i++){
@@ -565,9 +565,9 @@ forceplay:function(c,t){
 				tgttest(pl.weapon);
 			}
 			if (tgts.length > 0){
-				t.castSpell(c.owner.choose(tgts), t.active);
+				t.castSpell(c.owner.choose(tgts), card.active);
 			}
-		}else t.castSpell(target, card.active);
+		}else t.castSpell(undefined, card.active);
 	}else if (card.type == etg.CreatureEnum){
 		new etg.Creature(card, t.owner).place(true);
 		ui.playSound("creaturePlay");
