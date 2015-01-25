@@ -537,6 +537,7 @@ foedraw:function(c,t){
 	}
 },
 forceplay:function(c,t){
+	if (t.owner.sanctuary) return;
 	var card = t.card;
 	if (!t.owner.canspend(card.costele, card.cost)) return;
 	t.remove();
