@@ -6,7 +6,7 @@ var options = require("./options");
 exports.loaded = false;
 function load(progress, postload){
 	exports.load = undefined;
-	var singles = ["gold", "bg_quest", "bg_game", "bg_questmap", "sabbath"];
+	var singles = ["gold", "bg_quest", "bg_game", "bg_questmap", "protection", "sabbath", "sacrifice"];
 	var assets = ["eicons", "cardBacks", "cardBorders", "sicons", "sborders", "hborders", "ticons", "ricons"].concat(singles);
 	var widths = {
 		eicons: 32,

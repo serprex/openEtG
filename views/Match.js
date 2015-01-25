@@ -36,6 +36,7 @@ function startMatch(game, foeDeck) {
 		statuses[7].visible = obj.status.delayed;
 		statuses[8].visible = obj == obj.owner.gpull;
 		statuses[9].visible = obj.status.frozen;
+		statuses[10].visible = obj.hasactive("prespell", "protectonce");
 		spr.alpha = obj.isMaterial() ? 1 : .7;
 	}
 	function addNoHealData(game) {
@@ -192,15 +193,19 @@ function startMatch(game, foeDeck) {
 	var playerOverlay = [new PIXI.Sprite(gfx.nopic), new PIXI.Sprite(gfx.nopic)];
 	var handOverlay = [new PIXI.Sprite(gfx.nopic), new PIXI.Sprite(gfx.nopic)];
 	var sabbathOverlay = [new PIXI.Sprite(gfx.sabbath), new PIXI.Sprite(gfx.sabbath)];
+	var sacrificeOverlay = [new PIXI.Sprite(gfx.sacrifice), new PIXI.Sprite(gfx.sacrifice)];
 	for (var j = 0;j < 2;j++) {
-		hptext[j].style.textAlign = "center"
+		hptext[j].style.textAlign = "center";
 		hptext[j].style.width = "100px";
 		hptext[j].style.pointerEvents = "none";
+		hptext[j].style.fontSize = "12px";
+		hptext[j].style.lineHeight = "1.1";
 		playerOverlay[j].width = 95;
 		playerOverlay[j].height = 80;
+		handOverlay[j].position.set(j ? 9 : 774, j ? 99 : 300);
+		sabbathOverlay[j].position.set(j ? 792 : 0, j ? 80 : 288);
+		sacrificeOverlay[j].position.set(j ? 800 : 0, j ? 7 : 502);
 		(function(_j) {
-			handOverlay[j].position.set(j ? 9 : 774, j ? 99 : 300);
-			sabbathOverlay[j].position.set(j ? 792 : 0, j ? 80 : 288);
 			for (var i = 0;i < 8;i++) {
 				handsprite[j][i] = new PIXI.Sprite(gfx.nopic);
 				handsprite[j][i].position.set(j ? 15 : 780, (j ? 130 : 330) + 19 * i);
@@ -233,26 +238,28 @@ function startMatch(game, foeDeck) {
 					}, false);
 				})(i);
 			}
-			function makeInst(makestatuses, insts, i, pos, scale){
+			function makeInst(insts, i, pos, scale){
 				if (scale === undefined) scale = 1;
 				var spr = new PIXI.Sprite(gfx.nopic);
-				if (makestatuses){
-					var statuses = new PIXI.SpriteBatch();
-					for (var k=0; k<7; k++){
-						var icon = new PIXI.Sprite(gfx.sicons[k]);
-						icon.alpha = .6;
-						icon.anchor.y = 1;
-						icon.position.set(-34 * scale + [4, 1, 1, 0, 3, 2, 1][k] * 8, 30 * scale);
-						statuses.addChild(icon);
-					}
-					for (var k=0; k<3; k++){
-						var icon = new PIXI.Sprite(gfx.sborders[k]);
-						icon.position.set(-32 * scale, -40 * scale);
-						icon.scale.set(scale, scale);
-						statuses.addChild(icon);
-					}
-					spr.addChild(statuses);
+				var statuses = new PIXI.SpriteBatch();
+				for (var k=0; k<7; k++){
+					var icon = new PIXI.Sprite(gfx.sicons[k]);
+					icon.alpha = .6;
+					icon.anchor.y = 1;
+					icon.position.set(-34 * scale + [4, 1, 1, 0, 3, 2, 1][k] * 8, 30 * scale);
+					statuses.addChild(icon);
 				}
+				for (var k=0; k<3; k++){
+					var icon = new PIXI.Sprite(gfx.sborders[k]);
+					icon.position.set(-32 * scale, -40 * scale);
+					icon.scale.set(scale, scale);
+					statuses.addChild(icon);
+				}
+				var bubble = new PIXI.Sprite(gfx.protection);
+				bubble.position.set(-40 * scale, -40 * scale);
+				bubble.scale.set(scale, scale);
+				statuses.addChild(bubble);
+				spr.addChild(statuses);
 				var stattext = new PIXI.Sprite(gfx.nopic);
 				stattext.position.set(-32 * scale, -33 * scale);
 				spr.addChild(stattext);
@@ -279,13 +286,13 @@ function startMatch(game, foeDeck) {
 				return spr;
 			}
 			for (var i = 0;i < 23;i++) {
-				creasprite[j][i] = makeInst(true, game.players(j).creatures, i, ui.creaturePos(j, i));
+				creasprite[j][i] = makeInst(game.players(j).creatures, i, ui.creaturePos(j, i));
 			}
 			for (var i = 0;i < 23;i++){
 				gameui.addChild(creasprite[j][j?22-i:i]);
 			}
 			for (var i = 0;i < 16;i++) {
-				permsprite[j][i] = makeInst(false, game.players(j).permanents, i, ui.permanentPos(j, i));
+				permsprite[j][i] = makeInst(game.players(j).permanents, i, ui.permanentPos(j, i));
 			}
 			for (var i = 0;i < 16;i++){
 				gameui.addChild(permsprite[j][j?15-i:i]);
@@ -295,8 +302,8 @@ function startMatch(game, foeDeck) {
 			px.setInteractive.apply(null, permsprite[j]);
 			marksprite[j].anchor.set(.5, .5);
 			marksprite[j].position.set(740, 470);
-			weapsprite[j] = makeInst(true, null, "weapon", new PIXI.Point(666, 512), 5/4);
-			shiesprite[j] = makeInst(false, null, "shield", new PIXI.Point(710, 532), 5/4);
+			weapsprite[j] = makeInst(null, "weapon", new PIXI.Point(666, 512), 5/4);
+			shiesprite[j] = makeInst(null, "shield", new PIXI.Point(710, 532), 5/4);
 			if (j){
 				gameui.addChild(shiesprite[j]);
 				gameui.addChild(weapsprite[j]);
@@ -310,8 +317,8 @@ function startMatch(game, foeDeck) {
 			gameui.addChild(marksprite[j]);
 			marktext[j].anchor.set(.5, .5);
 			playerOverlay[j].anchor.set(.5, .5);
-			marktext[j].position.set(768,470);
-			quantatext[j].position.set(j ? 792 : 0, j ? 100 : 308);
+			marktext[j].position.set(768, 470);
+			quantatext[j].position.set(j ? 792 : 0, j ? 106 : 308);
 			playerOverlay[j].position.set(50, 555);
 			hpxy.push(new PIXI.Point(50, 550));
 			if (j) {
@@ -337,9 +344,10 @@ function startMatch(game, foeDeck) {
 		})(j);
 		gameui.addChild(marktext[j]);
 		gameui.addChild(quantatext[j]);
-		dom.push([hpxy[j].x-50, hpxy[j].y-(j?40:45), hptext[j]]);
+		dom.push([hpxy[j].x-50, playerOverlay[j].y - 24, hptext[j]]);
 		gameui.addChild(handOverlay[j]);
 		gameui.addChild(sabbathOverlay[j]);
+		gameui.addChild(sacrificeOverlay[j]);
 		gameui.addChild(playerOverlay[j]);
 	}
 	px.setInteractive.apply(null, weapsprite);
@@ -565,12 +573,7 @@ function startMatch(game, foeDeck) {
 		}
 		for (var j = 0;j < 2;j++) {
 			var pl = game.players(j);
-			if (pl.sosa) {
-				var spr = playerOverlay[j];
-				fgfx.beginFill(ui.elecols[etg.Darkness], .6);
-				fgfx.drawRect(spr.position.x - spr.width / 2, spr.position.y - spr.height / 2, spr.width, spr.height);
-				fgfx.endFill();
-			}
+			sacrificeOverlay[j].visible = pl.sosa;
 			sabbathOverlay[j].visible = pl.flatline;
 			handOverlay[j].setTexture(pl.silence? gfx.hborders[0] :
 				pl.sanctuary ? gfx.hborders[1] :
@@ -596,8 +599,7 @@ function startMatch(game, foeDeck) {
 				if (pr && !(j == 1 && cloakgfx.visible && !pr.status.cloak)) {
 					permsprite[j][i].setTexture(gfx.getPermanentImage(pr.card.code));
 					permsprite[j][i].visible = true;
-					permsprite[j][i].alpha = pr.isMaterial() ? 1 : .7;
-					var child = permsprite[j][i].children[0];
+					var child = permsprite[j][i].children[1];
 					if (pr instanceof etg.Pillar) {
 						child.setTexture(ui.getTextImage("1:" + (pr.status.pendstate ? pr.owner.mark : pr.card.element) + " x" + pr.status.charges, ui.mkFont(10, pr.card.upped ? "black" : "white"), ui.maybeLighten(pr.card)));
 					}
@@ -605,8 +607,9 @@ function startMatch(game, foeDeck) {
 						child.setTexture(ui.getTextImage("1:" + (pr.status.mode === undefined ? pr.owner.mark : pr.status.mode), ui.mkFont(10, pr.card.upped ? "black" : "white"), ui.maybeLighten(pr.card)));
 					}
 					else child.setTexture(ui.getTextImage(pr.status.charges !== undefined ? " " + pr.status.charges : "", ui.mkFont(10, pr.card.upped ? "black" : "white"), ui.maybeLighten(pr.card)));
-					var child2 = permsprite[j][i].children[1];
+					var child2 = permsprite[j][i].children[2];
 					child2.setTexture(pr instanceof etg.Pillar ? gfx.nopic : ui.getTextImage(pr.activetext1(), ui.mkFont(8, pr.card.upped ? "black" : "white")));
+					drawStatus(pr, permsprite[j][i]);
 				} else permsprite[j][i].visible = false;
 			}
 			var wp = pl.weapon;
@@ -624,14 +627,14 @@ function startMatch(game, foeDeck) {
 			var sh = pl.shield;
 			if (sh && !(j == 1 && cloakgfx.visible)) {
 				shiesprite[j].visible = true;
-				var child = shiesprite[j].children[0];
+				var child = shiesprite[j].children[1];
 				child.setTexture(ui.getTextImage(sh.status.charges ? "x" + sh.status.charges: sh.truedr().toString(), ui.mkFont(12, sh.card.upped ? "black" : "white"), ui.maybeLighten(sh.card)));
 				child.visible = true;
-				var child = shiesprite[j].children[1];
+				var child = shiesprite[j].children[2];
 				child.setTexture(ui.getTextImage(sh.activetext1(), ui.mkFont(12, sh.card.upped ? "black" : "white")));
 				child.visible = true;
-				shiesprite[j].alpha = sh.isMaterial() ? 1 : .7;
 				shiesprite[j].setTexture(gfx.getWeaponShieldImage(sh.card.code));
+				drawStatus(sh, shiesprite[j]);
 			} else shiesprite[j].visible = false;
 			marksprite[j].setTexture(gfx.eicons[pl.mark]);
 			if (pl.markpower != 1){
@@ -658,8 +661,8 @@ function startMatch(game, foeDeck) {
 				hptext[j].style.display = "none";
 			}else{
 				hptext[j].style.display = "inline";
-				var poison = pl.status.poison, poisoninfo = !poison ? "" : (poison > 0 ? poison + " 1:2" : -poison + " 1:7") + (pl.neuro ? " 1:10" : "");
-				hptext[j].setText(poisoninfo + "\n" + pl.hp + "/" + pl.maxhp + "\n" + pl.deck.length + "cards" + (!cloakgfx.visible && game.expectedDamage[j] ? "\nDmg: " + game.expectedDamage[j] : ""));
+				var poison = pl.status.poison, poisoninfo = (poison > 0 ? poison + " 1:2" : poison < 0 ? -poison + " 1:7" : "") + (pl.neuro ? " 1:10" : "");
+				hptext[j].setText(pl.hp + "/" + pl.maxhp + "\n" + pl.deck.length + "cards" + (!cloakgfx.visible && game.expectedDamage[j] ? "\nDmg: " + game.expectedDamage[j] : "") + (poisoninfo ? "\n" + poisoninfo : ""));
 			}
 		}
 		Effect.next(cloakgfx.visible);
