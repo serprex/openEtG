@@ -85,6 +85,9 @@ var ActivesValues = {
 	darkness:1,
 	deadalive:2,
 	deathwish:1,
+	deckblast:function(c){
+		return c.owner.deck.length/2;
+	},
 	deja:4,
 	deployblobs: function(c) {
 		return 2+(c instanceof etg.CardInstance ? Math.min(c.card.attack, c.card.health) : Math.min(c.trueatk(), c.truehp()))/4;
@@ -94,6 +97,7 @@ var ActivesValues = {
 	devour:function(c){
 		return 2+(c instanceof etg.CardInstance?c.card.health:c.truehp());
 	},
+	drawcopy:1,
 	disarm:function(c){
 		return !c.owner.foe.weapon ? .1 : c.owner.foe.hand.length == 8 ? .5 : c.owner.foe.weapon.card.cost;
 	},
@@ -117,6 +121,7 @@ var ActivesValues = {
 	endow:4,
 	envenom:1,
 	epidemic:4,
+	epoch:2,
 	evolve:2,
 	feed:6,
 	fickle:3,
@@ -124,6 +129,8 @@ var ActivesValues = {
 	firebolt:10,
 	flatline:1,
 	flyingweapon:7,
+	foedraw:8,
+	forceplay:2,
 	fractal:function(c){
 		return 9-c.owner.hand.length;
 	},
@@ -213,6 +220,7 @@ var ActivesValues = {
 	},
 	overdrivespell:5,
 	pacify:5,
+	pairproduce:2,
 	paleomagnetism:[4,5],
 	pandemonium:3,
 	pandemonium2:4,
@@ -226,6 +234,7 @@ var ActivesValues = {
 	"poison 1":2,
 	"poison 2":3,
 	"poison 3":4,
+	powerdrain:6,
 	precognition:1,
 	predator:function(c, tatk){
 		return !(c instanceof etg.CardInstance) && c.owner.foe.hand.length > 4 ? tatk + Math.max(c.owner.foe.hand.length-6, 1) : 1;
