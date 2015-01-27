@@ -73,6 +73,7 @@ function Card(type, info){
 					if (iscast) activecastcache[info.Active] = [this.cast, this.castele];
 				}
 			}
+			Object.freeze(this.active);
 		}
 	}
 	if (info.Status){
@@ -85,6 +86,7 @@ function Card(type, info){
 				var status = statuses[i].split("=");
 				this.status[status[0]] = status.length==1 || parseInt(status[1]);
 			}
+			Object.freeze(this.status);
 		}
 	}
 	if (info.Text){
@@ -93,8 +95,6 @@ function Card(type, info){
 	if (info.Rarity){
 		this.rarity = parseInt(info.Rarity);
 	}
-	Object.freeze(this.status);
-	if (this.type != SpellEnum) Object.freeze(this.active);
 	Object.freeze(this);
 }
 function Thing(card, owner){

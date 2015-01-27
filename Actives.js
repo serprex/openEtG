@@ -559,6 +559,7 @@ forceplay:function(c,t){
 			var tgts = [];
 			for(var i=0; i<2; i++){
 				var pl=i==0?c.owner:c.owner.foe;
+				tgttest(pl);
 				pl.creatures.forEach(tgttest);
 				pl.permanents.forEach(tgttest);
 				pl.hand.forEach(tgttest);
