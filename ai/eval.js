@@ -1,5 +1,6 @@
 "use strict";
 var etg = require("../etg");
+var Cards = require("../Cards");
 var Actives = require("../Actives");
 var enableLogging = false, logbuff, logstack;
 function logStart(){
@@ -468,11 +469,12 @@ function checkpassives(c) {
 	return score;
 }
 
+var throttled = Object.freeze({"poison 1":true, "poison 2":true, "poison 3":true, neuro:true, regen:true, siphon:true});
 function evalthing(c) {
 	if (!c) return 0;
 	var ttatk, hp, poison, score = 0;
 	var isCreature = c instanceof etg.Creature, isWeapon = c instanceof etg.Weapon;
-	var adrenalinefactor = c.status.adrenaline ? etg.countAdrenaline(c.trueatk())/1.5 : 1;
+	var adrenalinefactor = c.status.adrenaline ? etg.countAdrenaline(c.trueatk()) : 1;
 	if (isWeapon || isCreature){
 		var delaymix = Math.max((c.status.frozen||0), (c.status.delayed||0))/adrenalinefactor, delayfactor = delaymix?1-Math.min(delaymix/5, .6):1;
 	}else{
@@ -494,12 +496,14 @@ function evalthing(c) {
 		score += c.trueatk()/20;
 		score += ttatk*delayfactor;
 	}else ttatk = 0;
+	var throttlefactor = adrenalinefactor < 3 || (c.owner.weapon && c.owner.weapon.card.isOf(Cards.ScorpionClaws)) ? adrenalinefactor : 2;
 	for (var key in c.active) {
+		var adrfactor = key in throttled ? throttlefactor : key == "disarm" ? 1 : adrenalinefactor;
 		if (key == "hit"){
-			score += evalactive(c, c.active.hit, ttatk)*(ttatk?1:c.status.immaterial?0:.3)*adrenalinefactor*delayfactor;
+			score += evalactive(c, c.active.hit, ttatk)*(ttatk?1:c.status.immaterial?0:.3)*adrfactor*delayfactor;
 		}else if(key == "auto"){
 			if (!c.status.frozen){
-				score += evalactive(c, c.active.auto, ttatk)*adrenalinefactor;
+				score += evalactive(c, c.active.auto, ttatk)*adrfactor;
 			}
 		}else if (key == "cast"){
 			if (caneventuallyactive(c.castele, c.cast, c.owner)){

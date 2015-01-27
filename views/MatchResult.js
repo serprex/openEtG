@@ -1,6 +1,7 @@
 "use strict";
 var px = require("../px");
 var gfx = require("../gfx");
+var ui = require("../uiutil");
 var chat = require("../chat");
 var mkAi = require("../mkAi");
 var sock = require("../sock");
@@ -29,6 +30,13 @@ module.exports = function(game) {
 		case 3:mkAi.mkPremade("demigod")();break;
 		case 4:sock.userEmit("foearena", {lv:0});break;
 		case 5:sock.userEmit("foearena", {lv:1});break;
+		default:
+			if (game.foename == "Custom"){
+				var gameData = { deck: options.aideck, urdeck: sock.getDeck(), seed: Math.random() * etgutil.MAX_INT, foename: "Custom", cardreward: "" };
+				ui.parsepvpstats(gameData);
+				ui.parseaistats(gameData);
+				require("./Match")(gameData, true);
+			}
 		}
 	}
 	var dom = [
