@@ -2,7 +2,7 @@
 var ui = require("./uiutil");
 function adrenathrottle(f){
 	return function(c){
-		if ((c.status.adrenaline || 0)<3 || (c instanceof etg.Creature && c.owner.weapon && c.owner.weapon.card.isOf(Cards.ScorpionClaws))){
+		if ((c.status.adrenaline || 0)<3 || (c instanceof etg.Creature && c.owner.weapon && c.owner.weapon.status.nothrottle)){
 			return f.apply(null, arguments);
 		}
 	}

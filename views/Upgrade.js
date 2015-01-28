@@ -150,7 +150,7 @@ module.exports = function() {
 			}
 			px.setDomVis("bsell", ~card.rarity);
 			document.getElementById("bsell").value = card.isFree() ? "Polgrade" : "Sell";
-			tinfo2.setText(card.rarity == -1 ? "" : card.isFree() ? "300$ to shine & polish" :
+			tinfo2.setText(card.rarity == -1 ? "" : card.isFree() ? "300$ to upgrade & polish" :
 				"Sell for " + userutil.sellValues[card.rarity] * (card.upped ? 6 : 1) * (card.shiny ? 6 : 1) + "$");
 			twarning.setText("");
 		}, true

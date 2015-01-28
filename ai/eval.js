@@ -1,6 +1,5 @@
 "use strict";
 var etg = require("../etg");
-var Cards = require("../Cards");
 var Actives = require("../Actives");
 var enableLogging = false, logbuff, logstack;
 function logStart(){
@@ -496,7 +495,7 @@ function evalthing(c) {
 		score += c.trueatk()/20;
 		score += ttatk*delayfactor;
 	}else ttatk = 0;
-	var throttlefactor = adrenalinefactor < 3 || (c.owner.weapon && c.owner.weapon.card.isOf(Cards.ScorpionClaws)) ? adrenalinefactor : 2;
+	var throttlefactor = adrenalinefactor < 3 || (isCreature && c.owner.weapon && c.owner.weapon.status.nothrottle) ? adrenalinefactor : 2;
 	for (var key in c.active) {
 		var adrfactor = key in throttled ? throttlefactor : key == "disarm" ? 1 : adrenalinefactor;
 		if (key == "hit"){
