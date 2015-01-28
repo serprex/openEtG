@@ -384,7 +384,7 @@ function estimateDamage(c, freedomChance, wallCharges) {
 		}else return Math.max(tatk - dr, 0);
 	}
 	var tatk = c.trueatk(), fsh = c.owner.foe.shield, fshactive = fsh && fsh.active.shield;
-	var momentum = !fsh || atk <= 0 || c.status.momentum || c.status.psion ||
+	var momentum = !fsh || tatk <= 0 || c.status.momentum || c.status.psion ||
 		(c.status.burrowed && c.owner.permanents.some(function(pr){ return pr && pr.status.tunnel }));
 	var dr = momentum ? 0 : fsh.truedr(), atk = estimateAttack(tatk);
 	if (c.status.adrenaline) {

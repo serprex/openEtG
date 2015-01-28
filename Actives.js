@@ -1082,11 +1082,9 @@ pacify:function(c,t){
 	t.atk -= t.trueatk();
 },
 pairproduce:function(c,t){
-	function callauto(p){
+	c.owner.permanents.forEach(function(p){
 		if (p && p instanceof etg.Pillar && p.active.auto) p.active.auto(p);
-	}
-	c.owner.permanents.forEach(callauto);
-	if (!c.owner.foe.sanctuary) c.owner.foe.permanents.forEach(callauto);
+	});
 },
 paleomagnetism:function(c,t){
 	if (c.owner == t){
