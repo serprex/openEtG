@@ -276,7 +276,7 @@ decrsteam:function(c){
 	}
 },
 deckblast:function(c,t){
-	t.spelldmg(Math.ceil(c.owner.deck.length/c.owner.deckpower));
+	c.owner.foe.spelldmg(Math.ceil(c.owner.deck.length/c.owner.deckpower));
 	c.owner.deck.length = 0;
 },
 deja:function(c,t){
@@ -1300,7 +1300,7 @@ rewind:function(c,t){
 	}
 },
 ricochet:function(c,t){
-	if (!(t instanceof etg.CardInstance) || t.active == Actives.bolsterintodeck || t.active == Actives.deckblast)return;
+	if (!(t instanceof etg.CardInstance) || t.active == Actives.bolsterintodeck)return;
 	var tgting = Cards.Targeting[t.active.activename[0]];
 	function tgttest(x){
 		if (x) {
