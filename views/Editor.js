@@ -36,7 +36,7 @@ module.exports = function(arena, acard, startempty) {
 				decksprite.deck.splice(i, 1);
 			}
 		}
-		editormarksprite.setTexture(gfx.eicons[editormark]);
+		editormarksprite.texture = gfx.eicons[editormark];
 		if (decksprite.deck.length > 60) decksprite.deck.length = 60;
 		decksprite.deck.sort(etg.cardCmp);
 		if (sock.user) {
@@ -74,7 +74,7 @@ module.exports = function(arena, acard, startempty) {
 		decksprite.renderDeck(0);
 	}
 	function setCardArt(code){
-		cardArt.setTexture(gfx.getArt(code));
+		cardArt.texture = gfx.getArt(code);
 		cardArt.visible = true;
 	}
 	function incrpool(code, count){
@@ -163,10 +163,10 @@ module.exports = function(arena, acard, startempty) {
 	function makeattrui(y, name){
 		y = 128+y*20;
 		var data = artable[name];
-		var bt = new PIXI.Text(name, ui.mkFont(16, "black"));
+		var bt = new PIXI.text.Text(name, ui.mkFont(16, "black"));
 		bt.position.set(8, y);
 		var bm = px.mkButton(50, y, ui.getTextImage("-", ui.mkFont(16, "black"), 0xFFFFFFFF));
-		var bv = new PIXI.Text(arattr[name], ui.mkFont(16, "black"));
+		var bv = new PIXI.text.Text(arattr[name], ui.mkFont(16, "black"));
 		bv.position.set(64, y);
 		var bp = px.mkButton(90, y, ui.getTextImage("+", ui.mkFont(16, "black"), 0xFFFFFFFF));
 		function modattr(x){
@@ -227,7 +227,7 @@ module.exports = function(arena, acard, startempty) {
 			mark: { cost: 45 },
 			draw: { cost: 135 },
 		};
-		var curpts = new PIXI.Text((arpts-sumscore())/45, ui.mkFont(16, "black"));
+		var curpts = new PIXI.text.Text((arpts-sumscore())/45, ui.mkFont(16, "black"));
 		curpts.position.set(8, 188);
 		editorui.addChild(curpts);
 		makeattrui(0, "hp");
@@ -268,11 +268,10 @@ module.exports = function(arena, acard, startempty) {
 	var editormark = 0;
 	for (var i = 0;i < 13;i++) {
 		var sprite = px.mkButton(100 + i * 32, 234, gfx.eicons[i]);
-		sprite.interactive = true;
 		(function(_i) {
 			px.setClick(sprite, function() {
 				editormark = _i;
-				editormarksprite.setTexture(gfx.eicons[_i]);
+				editormarksprite.texture = gfx.eicons[_i];
 				updateField();
 			});
 		})(i);
@@ -345,9 +344,8 @@ module.exports = function(arena, acard, startempty) {
 	}
 	px.refreshRenderer({view:editorui, editdiv:dom, next:function() {
 		cardArt.visible = false;
-		var mpos = px.getMousePos();
-		cardsel.next(cardpool, cardminus, mpos);
-		decksprite.next(mpos);
+		cardsel.next(cardpool, cardminus);
+		decksprite.next();
 	}});
 	if (!arena){
 		deckimport.focus();

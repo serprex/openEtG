@@ -28,7 +28,7 @@ module.exports = function(data){
 		[10, 10, ["Exit", require("./MainMenu")]],
 	];
 	var cardsel = new px.CardSelector(dom, function(code){
-		cardArt.setTexture(gfx.getArt(code));
+		cardArt.texture = gfx.getArt(code);
 	});
 	stage.addChild(cardsel);
 	px.refreshRenderer({view:stage, stext: dom, next:function(){

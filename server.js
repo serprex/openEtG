@@ -146,7 +146,7 @@ var userEvents = {
 		user.dailymage = Math.floor(Math.random() * aiDecks.mage.length);
 		user.dailydg = Math.floor(Math.random() * aiDecks.demigod.length);
 		var socket = this;
-		db.lpush("N:"+data.u,9,8,7,6,5,4,3,2,1,0);
+		db.rpush("N:"+data.u,1,2,3,4,5,6,7,8,9,10);
 		db.hset("D:"+data.u, "0", starters[data.e], function(err){
 			sutil.useruser(db, user, function(clientuser){
 				sockEmit(socket, "userdump", clientuser);
@@ -169,7 +169,11 @@ var userEvents = {
 		delete usersock[u];
 	},
 	changequickdeck:function(data,user){
-		db.lset("N:"+user.name, data.number, data.name);
+		db.lset("N:"+user.name, data.number, data.name, function(err, res){
+			if (err){
+				db.rpush("N:"+data.u,1,2,3,4,5,6,7,8,9,10);
+			}
+		});
 	},
 	setdeck:function(data, user) {
 		if (data.d !== undefined) {

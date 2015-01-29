@@ -87,16 +87,16 @@ module.exports = function() {
 
 	var buttons = packdata.map(function(pack, n){
 		var g = new PIXI.Graphics();
-		g.hitArea = new PIXI.Rectangle(0, 0, 100, 150);
+		g.hitArea = new PIXI.math.Rectangle(0, 0, 100, 150);
 		g.lineStyle(3);
 		g.beginFill(pack.color);
 		g.drawRoundedRect(3, 3, 94, 144, 6);
 		g.endFill();
-		var name = new PIXI.Text(pack.type, {font: "18px Dosis"});
+		var name = new PIXI.text.Text(pack.type, {font: "18px Dosis"});
 		name.anchor.set(.5, .5);
 		name.position.set(50, 75);
 		g.addChild(name);
-		var price = new PIXI.Text(pack.cost, {font: "12px Dosis"});
+		var price = new PIXI.text.Text(pack.cost, {font: "12px Dosis"});
 		price.anchor.set(0, 1);
 		price.position.set(7, 144);
 		g.addChild(price);

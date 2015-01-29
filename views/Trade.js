@@ -25,7 +25,7 @@ module.exports = function() {
 				console.log("Confirmed", ownDeck.deck, foeDeck.deck);
 				sock.userEmit("confirmtrade", { cards: etgutil.encodedeck(ownDeck.deck), oppcards: etgutil.encodedeck(foeDeck.deck) });
 				btrade.style.display = "none";
-				var confirmed = new PIXI.Text("Confirmed!", { font: "16px Dosis" });
+				var confirmed = new PIXI.text.Text("Confirmed!", { font: "16px Dosis" });
 				confirmed.position.set(10, 110);
 				view.addChild(confirmed);
 			}
@@ -35,7 +35,7 @@ module.exports = function() {
 	var ownVal = px.domText(""), foeVal = px.domText("");
 	var cardChosen = false;
 	function setCardArt(code){
-		cardArt.setTexture(gfx.getArt(code));
+		cardArt.texture = gfx.getArt(code);
 		cardArt.visible = true;
 	}
 	var ownDeck = new px.DeckDisplay(30, setCardArt,
@@ -86,10 +86,9 @@ module.exports = function() {
 		tradecanceled: startMenu,
 	};
 	px.refreshRenderer({view: view, tdom:dom, cmds:cmds, next:function() {
-		var mpos = px.getMousePos();
 		cardArt.visible = false;
-		cardsel.next(cardpool, cardminus, mpos);
-		foeDeck.next(mpos);
-		ownDeck.next(mpos);
+		cardsel.next(cardpool, cardminus);
+		foeDeck.next();
+		ownDeck.next();
 	}});
 }

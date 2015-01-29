@@ -174,9 +174,8 @@ function startMatch(game, foeDeck) {
 		if (!cloakgfx.visible || obj.owner != game.player2 || obj.status.cloak) {
 			var info = obj.info(), actinfo = game.targetingMode && game.targetingMode(obj) && activeInfo[game.targetingText];
 			if (actinfo) info += "\nDmg " + actinfo(obj);
-			infobox.setTexture(ui.getTextImage(info, ui.mkFont(10, "white"), 0));
-			var mousePosition = px.getMousePos();
-			infobox.position.set(mousePosition.x, mousePosition.y);
+			infobox.texture = ui.getTextImage(info, ui.mkFont(10, "white"), 0);
+			infobox.position.set(px.mouse.x, px.mouse.y);
 			infobox.visible = true;
 		}
 	}
@@ -186,7 +185,7 @@ function startMatch(game, foeDeck) {
 	var shiesprite = new Array(2);
 	var weapsprite = new Array(2);
 	var marksprite = [new PIXI.Sprite(gfx.nopic), new PIXI.Sprite(gfx.nopic)];
-	var marktext = [new PIXI.Text("", { font: "18px Dosis" }), new PIXI.Text("", { font: "18px Dosis" })];
+	var marktext = [new PIXI.text.Text("", { font: "18px Dosis" }), new PIXI.text.Text("", { font: "18px Dosis" })];
 	var quantatext = [new PIXI.DisplayObjectContainer(), new PIXI.DisplayObjectContainer()];
 	var hptext = [new px.domText(""), new px.domText("")];
 	var hpxy = [];
@@ -241,7 +240,7 @@ function startMatch(game, foeDeck) {
 			function makeInst(insts, i, pos, scale){
 				if (scale === undefined) scale = 1;
 				var spr = new PIXI.Sprite(gfx.nopic);
-				var statuses = new PIXI.SpriteBatch();
+				var statuses = new PIXI.Container();
 				for (var k=0; k<7; k++){
 					var icon = new PIXI.Sprite(gfx.sicons[k]);
 					icon.alpha = .6;
@@ -302,8 +301,8 @@ function startMatch(game, foeDeck) {
 			px.setInteractive.apply(null, permsprite[j]);
 			marksprite[j].anchor.set(.5, .5);
 			marksprite[j].position.set(740, 470);
-			weapsprite[j] = makeInst(null, "weapon", new PIXI.Point(666, 512), 5/4);
-			shiesprite[j] = makeInst(null, "shield", new PIXI.Point(710, 532), 5/4);
+			weapsprite[j] = makeInst(null, "weapon", new PIXI.math.Point(666, 512), 5/4);
+			shiesprite[j] = makeInst(null, "shield", new PIXI.math.Point(710, 532), 5/4);
 			if (j){
 				gameui.addChild(shiesprite[j]);
 				gameui.addChild(weapsprite[j]);
@@ -320,7 +319,7 @@ function startMatch(game, foeDeck) {
 			marktext[j].position.set(768, 470);
 			quantatext[j].position.set(j ? 792 : 0, j ? 106 : 308);
 			playerOverlay[j].position.set(50, 555);
-			hpxy.push(new PIXI.Point(50, 550));
+			hpxy.push(new PIXI.math.Point(50, 550));
 			if (j) {
 				ui.reflectPos(marktext[j]);
 				ui.reflectPos(hpxy[j]);
@@ -329,7 +328,7 @@ function startMatch(game, foeDeck) {
 			}
 			var child;
 			for (var k = 1;k < 13;k++) {
-				quantatext[j].addChild(child = new PIXI.Text("", { font: "16px Dosis" }));
+				quantatext[j].addChild(child = new PIXI.text.Text("", { font: "16px Dosis" }));
 				child.position.set((k & 1) ? 32 : 86, Math.floor((k - 1) / 2) * 32 + 8);
 				quantatext[j].addChild(child = new PIXI.Sprite(gfx.eicons[k]));
 				child.position.set((k & 1) ? 0 : 54, Math.floor((k - 1) / 2) * 32);
@@ -426,12 +425,11 @@ function startMatch(game, foeDeck) {
 				cmds.mulligan({draw: require("../ai/mulligan")(game.player2)});
 			}
 		}
-		var pos = px.getMousePos();
 		var cardartcode, cardartx;
-		infobox.setTexture(gfx.nopic);
+		infobox.texture = gfx.nopic;
 		if (!cloakgfx.visible){
 			foeplays.children.forEach(function(foeplay){
-				if (foeplay.card instanceof etg.Card && px.hitTest(foeplay, pos)) {
+				if (foeplay.card instanceof etg.Card && px.hitTest(foeplay, px.mouse)) {
 					cardartcode = foeplay.card.code;
 				}
 			});
@@ -440,14 +438,14 @@ function startMatch(game, foeDeck) {
 			var pl = game.players(j);
 			if (j == 0 || game.player1.precognition) {
 				for (var i = 0;i < pl.hand.length;i++) {
-					if (px.hitTest(handsprite[j][i], pos)) {
+					if (px.hitTest(handsprite[j][i], px.mouse)) {
 						cardartcode = pl.hand[i].card.code;
 					}
 				}
 			}
 			for (var i = 0;i < 16;i++) {
 				var pr = pl.permanents[i];
-				if (pr && (j == 0 || !cloakgfx.visible || pr.status.cloak) && px.hitTest(permsprite[j][i], pos)) {
+				if (pr && (j == 0 || !cloakgfx.visible || pr.status.cloak) && px.hitTest(permsprite[j][i], px.mouse)) {
 					cardartcode = pr.card.code;
 					cardartx = permsprite[j][i].position.x;
 					setInfo(pr);
@@ -456,18 +454,18 @@ function startMatch(game, foeDeck) {
 			if (j == 0 || !cloakgfx.visible) {
 				for (var i = 0;i < 23;i++) {
 					var cr = pl.creatures[i];
-					if (cr && px.hitTest(creasprite[j][i], pos)) {
+					if (cr && px.hitTest(creasprite[j][i], px.mouse)) {
 						cardartcode = cr.card.code;
 						cardartx = creasprite[j][i].position.x;
 						setInfo(cr);
 					}
 				}
-				if (pl.weapon && px.hitTest(weapsprite[j], pos)) {
+				if (pl.weapon && px.hitTest(weapsprite[j], px.mouse)) {
 					cardartcode = pl.weapon.card.code;
 					cardartx = weapsprite[j].position.x;
 					setInfo(pl.weapon);
 				}
-				if (pl.shield && px.hitTest(shiesprite[j], pos)) {
+				if (pl.shield && px.hitTest(shiesprite[j], px.mouse)) {
 					cardartcode = pl.shield.card.code;
 					cardartx = shiesprite[j].position.x;
 					setInfo(pl.shield);
@@ -475,9 +473,9 @@ function startMatch(game, foeDeck) {
 			}
 		}
 		if (cardartcode) {
-			cardart.setTexture(gfx.getArt(cardartcode));
+			cardart.texture = gfx.getArt(cardartcode);
 			cardart.visible = true;
-			cardart.position.set(cardartx || 654, pos.y > 300 ? 44 : 300);
+			cardart.position.set(cardartx || 654, px.mouse.y > 300 ? 44 : 300);
 		} else cardart.visible = false;
 		if (game.winner == game.player1 && sock.user && !game.quest && game.ai) {
 			if (game.cardreward === undefined) {
@@ -527,7 +525,7 @@ function startMatch(game, foeDeck) {
 			cancel.style.display = "none";
 		}
 		foeplays.children.forEach(function(foeplay){
-			foeplay.setTexture(foeplay.card instanceof etg.Card ? gfx.getCardImage(foeplay.card.code) : ui.getTextImage(foeplay.card, 12));
+			foeplay.texture = foeplay.card instanceof etg.Card ? gfx.getCardImage(foeplay.card.code) : ui.getTextImage(foeplay.card, 12);
 		});
 		foeplays.visible = !(cloakgfx.visible = game.player2.isCloaked());
 		fgfx.clear();
@@ -575,40 +573,40 @@ function startMatch(game, foeDeck) {
 			var pl = game.players(j);
 			sacrificeOverlay[j].visible = pl.sosa;
 			sabbathOverlay[j].visible = pl.flatline;
-			handOverlay[j].setTexture(pl.silence? gfx.hborders[0] :
+			handOverlay[j].texture = (pl.silence? gfx.hborders[0] :
 				pl.sanctuary ? gfx.hborders[1] :
 				pl.nova >= 3 ? gfx.hborders[2] : gfx.nopic);
 			for (var i = 0;i < 8;i++) {
-				handsprite[j][i].setTexture(gfx.getCardImage(pl.hand[i] ? (j == 0 || game.player1.precognition ? pl.hand[i].card.code : "0") : "1"));
+				handsprite[j][i].texture = gfx.getCardImage(pl.hand[i] ? (j == 0 || game.player1.precognition ? pl.hand[i].card.code : "0") : "1");
 			}
 			for (var i = 0;i < 23;i++) {
 				var cr = pl.creatures[i];
 				if (cr && !(j == 1 && cloakgfx.visible)) {
-					creasprite[j][i].setTexture(gfx.getCreatureImage(cr.card));
+					creasprite[j][i].texture = gfx.getCreatureImage(cr.card);
 					creasprite[j][i].visible = true;
 					var child = creasprite[j][i].children[1];
-					child.setTexture(ui.getTextImage(cr.trueatk() + "|" + cr.truehp() + (cr.status.charges ? " x" + cr.status.charges : ""), ui.mkFont(10, cr.card.upped ? "black" : "white"), ui.maybeLighten(cr.card)));
+					child.texture = ui.getTextImage(cr.trueatk() + "|" + cr.truehp() + (cr.status.charges ? " x" + cr.status.charges : ""), ui.mkFont(10, cr.card.upped ? "black" : "white"), ui.maybeLighten(cr.card));
 					var child2 = creasprite[j][i].children[2];
 					var activetext = cr.activetext1();
-					child2.setTexture(ui.getTextImage(activetext, ui.mkFont(8, cr.card.upped ? "black" : "white")));
+					child2.texture = ui.getTextImage(activetext, ui.mkFont(8, cr.card.upped ? "black" : "white"));
 					drawStatus(cr, creasprite[j][i]);
 				} else creasprite[j][i].visible = false;
 			}
 			for (var i = 0;i < 16;i++) {
 				var pr = pl.permanents[i];
 				if (pr && !(j == 1 && cloakgfx.visible && !pr.status.cloak)) {
-					permsprite[j][i].setTexture(gfx.getPermanentImage(pr.card.code));
+					permsprite[j][i].texture = gfx.getPermanentImage(pr.card.code);
 					permsprite[j][i].visible = true;
 					var child = permsprite[j][i].children[1];
 					if (pr instanceof etg.Pillar) {
-						child.setTexture(ui.getTextImage("1:" + (pr.status.pendstate ? pr.owner.mark : pr.card.element) + " x" + pr.status.charges, ui.mkFont(10, pr.card.upped ? "black" : "white"), ui.maybeLighten(pr.card)));
+						child.texture = ui.getTextImage("1:" + (pr.status.pendstate ? pr.owner.mark : pr.card.element) + " x" + pr.status.charges, ui.mkFont(10, pr.card.upped ? "black" : "white"), ui.maybeLighten(pr.card));
 					}
 					else if (pr.active.auto && pr.active.auto == Actives.locket) {
-						child.setTexture(ui.getTextImage("1:" + (pr.status.mode === undefined ? pr.owner.mark : pr.status.mode), ui.mkFont(10, pr.card.upped ? "black" : "white"), ui.maybeLighten(pr.card)));
+						child.texture = ui.getTextImage("1:" + (pr.status.mode === undefined ? pr.owner.mark : pr.status.mode), ui.mkFont(10, pr.card.upped ? "black" : "white"), ui.maybeLighten(pr.card));
 					}
-					else child.setTexture(ui.getTextImage(pr.status.charges !== undefined ? " " + pr.status.charges : "", ui.mkFont(10, pr.card.upped ? "black" : "white"), ui.maybeLighten(pr.card)));
+					else child.texture = ui.getTextImage(pr.status.charges !== undefined ? " " + pr.status.charges : "", ui.mkFont(10, pr.card.upped ? "black" : "white"), ui.maybeLighten(pr.card));
 					var child2 = permsprite[j][i].children[2];
-					child2.setTexture(pr instanceof etg.Pillar ? gfx.nopic : ui.getTextImage(pr.activetext1(), ui.mkFont(8, pr.card.upped ? "black" : "white")));
+					child2.texture = pr instanceof etg.Pillar ? gfx.nopic : ui.getTextImage(pr.activetext1(), ui.mkFont(8, pr.card.upped ? "black" : "white"));
 					drawStatus(pr, permsprite[j][i]);
 				} else permsprite[j][i].visible = false;
 			}
@@ -616,27 +614,27 @@ function startMatch(game, foeDeck) {
 			if (wp && !(j == 1 && cloakgfx.visible)) {
 				weapsprite[j].visible = true;
 				var child = weapsprite[j].children[1];
-				child.setTexture(ui.getTextImage(wp.trueatk() + (wp.status.charges ? " x" + wp.status.charges : ""), ui.mkFont(12, wp.card.upped ? "black" : "white"), ui.maybeLighten(wp.card)));
+				child.texture = ui.getTextImage(wp.trueatk() + (wp.status.charges ? " x" + wp.status.charges : ""), ui.mkFont(12, wp.card.upped ? "black" : "white"), ui.maybeLighten(wp.card));
 				child.visible = true;
 				var child = weapsprite[j].children[2];
-				child.setTexture(ui.getTextImage(wp.activetext1(), ui.mkFont(12, wp.card.upped ? "black" : "white")));
+				child.texture = ui.getTextImage(wp.activetext1(), ui.mkFont(12, wp.card.upped ? "black" : "white"));
 				child.visible = true;
-				weapsprite[j].setTexture(gfx.getWeaponShieldImage(wp.card.code));
+				weapsprite[j].texture = gfx.getWeaponShieldImage(wp.card.code);
 				drawStatus(wp, weapsprite[j]);
 			} else weapsprite[j].visible = false;
 			var sh = pl.shield;
 			if (sh && !(j == 1 && cloakgfx.visible)) {
 				shiesprite[j].visible = true;
 				var child = shiesprite[j].children[1];
-				child.setTexture(ui.getTextImage(sh.status.charges ? "x" + sh.status.charges: sh.truedr().toString(), ui.mkFont(12, sh.card.upped ? "black" : "white"), ui.maybeLighten(sh.card)));
+				child.texture = ui.getTextImage(sh.status.charges ? "x" + sh.status.charges: sh.truedr().toString(), ui.mkFont(12, sh.card.upped ? "black" : "white"), ui.maybeLighten(sh.card));
 				child.visible = true;
 				var child = shiesprite[j].children[2];
-				child.setTexture(ui.getTextImage(sh.activetext1(), ui.mkFont(12, sh.card.upped ? "black" : "white")));
+				child.texture = ui.getTextImage(sh.activetext1(), ui.mkFont(12, sh.card.upped ? "black" : "white"));
 				child.visible = true;
-				shiesprite[j].setTexture(gfx.getWeaponShieldImage(sh.card.code));
+				shiesprite[j].texture = gfx.getWeaponShieldImage(sh.card.code);
 				drawStatus(sh, shiesprite[j]);
 			} else shiesprite[j].visible = false;
-			marksprite[j].setTexture(gfx.eicons[pl.mark]);
+			marksprite[j].texture = gfx.eicons[pl.mark];
 			if (pl.markpower != 1){
 				px.maybeSetText(marktext[j], "x" + pl.markpower);
 			}else marktext[j].visible = false;
@@ -656,7 +654,7 @@ function startMatch(game, foeDeck) {
 					fgfx.endFill();
 				}
 			}
-			if (px.hitTest(playerOverlay[j], pos)){
+			if (px.hitTest(playerOverlay[j], px.mouse)){
 				setInfo(pl);
 				hptext[j].style.display = "none";
 			}else{

@@ -12,7 +12,7 @@ function Death(pos){
 function Text(text, pos){
 	if (!pos){
 		console.log("Blank position " + text);
-		pos = new PIXI.Point(-99, -99);
+		pos = new PIXI.math.Point(-99, -99);
 	}
 	PIXI.Sprite.call(this, ui.getTextImage(text, 16));
 	this.step = 0;
@@ -23,7 +23,7 @@ function SpriteFade(texture, pos) {
 	PIXI.Sprite.call(this, texture);
 	this.anchor.set(0.5, 0.5);
 	this.step = 0;
-	this.position = maybeTgtPos(pos) || new PIXI.Point(450, 300);
+	this.position = maybeTgtPos(pos) || new PIXI.math.Point(450, 300);
 }
 function nop(){}
 function make(cons){
@@ -47,7 +47,7 @@ if (typeof PIXI === "undefined"){
 		if (anims){
 			for (var i = anims.children.length - 1;i >= 0;i--) {
 				var child = anims.children[i];
-				if ((p2cloaked && new PIXI.Rectangle(130, 20, 660, 280).contains(child.position.x, child.position.y)) || child.next()){
+				if ((p2cloaked && new PIXI.math.Rectangle(130, 20, 660, 280).contains(child.position.x, child.position.y)) || child.next()){
 					anims.removeChild(child);
 				}
 			}

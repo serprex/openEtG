@@ -51,7 +51,7 @@ module.exports = function(reward, numberofcopies, code) {
 		card.position.set(100 + Math.floor(i/12) * 133, 272 + (i%12) * 19);
 		px.setClick(card, function(){
 			chosenReward = reward;
-			chosenRewardImage.setTexture(gfx.getArt(chosenReward));
+			chosenRewardImage.texture = gfx.getArt(chosenReward);
 		}, "cardClick");
 		rewardui.addChild(card);
 		px.setInteractive(card);

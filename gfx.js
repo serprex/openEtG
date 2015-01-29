@@ -28,7 +28,7 @@ function load(progress, postload){
 			if (w){
 				var ts = [];
 				for (var x = 0; x < tex.width; x += w){
-					ts.push(new PIXI.Texture(tex, new PIXI.Rectangle(x, 0, w, tex.height)));
+					ts.push(new PIXI.Texture(tex, new PIXI.math.Rectangle(x, 0, w, tex.height)));
 				}
 				exports[asset] = ts;
 			}else exports[asset] = tex;
@@ -45,7 +45,7 @@ function load(progress, postload){
 }
 var caimgcache = {}, crimgcache = {}, wsimgcache = {}, artcache = {}, artimagecache = {};
 function makeArt(card, art, oldrend) {
-	var rend = oldrend || new PIXI.RenderTexture(132, 256);
+	var rend = oldrend || require("./px").mkRenderTexture(132, 256);
 	var template = new PIXI.DisplayObjectContainer();
 	template.addChild(new PIXI.Sprite(exports.cardBacks[card.element+(card.upped?13:0)]));
 	var rarity = new PIXI.Sprite(exports.ricons[card.rarity]);
@@ -62,11 +62,11 @@ function makeArt(card, art, oldrend) {
 	typemark.anchor.set(1, 1);
 	typemark.position.set(128, 252);
 	template.addChild(typemark);
-	var nametag = new PIXI.Text(card.name, { font: "12px Dosis", fill: card.upped ? "black" : "white" });
+	var nametag = new PIXI.text.Text(card.name, { font: "12px Dosis", fill: card.upped ? "black" : "white" });
 	nametag.position.set(2, 4);
 	template.addChild(nametag);
 	if (card.cost) {
-		var text = new PIXI.Text(card.cost, { font: "12px Dosis", fill: card.upped ? "black" : "white" });
+		var text = new PIXI.text.Text(card.cost, { font: "12px Dosis", fill: card.upped ? "black" : "white" });
 		text.anchor.x = 1;
 		text.position.set(rend.width-3, 4);
 		template.addChild(text);
@@ -114,7 +114,7 @@ function getCardImage(code) {
 	if (caimgcache[code]) return caimgcache[code];
 	else {
 		var card = Cards.Codes[code];
-		var rend = new PIXI.RenderTexture(100, 20);
+		var rend = require("./px").mkRenderTexture(100, 20);
 		var graphics = new PIXI.Graphics();
 		graphics.lineStyle(1, card && card.shiny ? 0xdaa520 : 0x222222);
 		graphics.beginFill(card ? ui.maybeLighten(card) : code == "0" ? 0x887766 : 0x111111);
@@ -123,7 +123,7 @@ function getCardImage(code) {
 		if (card) {
 			var clipwidth = rend.width-2;
 			if (card.cost) {
-				var text = new PIXI.Text(card.cost, { font: "11px Dosis", fill: card.upped ? "black" : "white" });
+				var text = new PIXI.text.Text(card.cost, { font: "11px Dosis", fill: card.upped ? "black" : "white" });
 				text.anchor.x = 1;
 				text.position.set(rend.width-2, 5);
 				graphics.addChild(text);
@@ -137,7 +137,7 @@ function getCardImage(code) {
 					clipwidth -= 18;
 				}
 			}
-			var text = new PIXI.Text(card.name, { font: "11px Dosis", fill: card.upped ? "black" : "white" });
+			var text = new PIXI.text.Text(card.name, { font: "11px Dosis", fill: card.upped ? "black" : "white" });
 			text.position.set(2, 5);
 			if (text.width > clipwidth){
 				text.mask = new PIXI.Graphics();
@@ -154,7 +154,7 @@ function getCardImage(code) {
 function getInstImage(code, scale, cache){
 	return cache[code] || getArtImage(code, function(art) {
 		var card = Cards.Codes[code];
-		var rend = new PIXI.RenderTexture(Math.ceil(128 * scale), Math.ceil(164 * scale));
+		var rend = require("./px").mkRenderTexture(Math.ceil(128 * scale), Math.ceil(164 * scale));
 		var border = new PIXI.Sprite(exports.cardBorders[card.element + (card.upped ? 13 : 0)]);
 		var graphics = new PIXI.Graphics();
 		border.addChild(graphics);
@@ -174,11 +174,11 @@ function getInstImage(code, scale, cache){
 			if (card.shiny) artspr.filters = [shinyFilter];
 			border.addChild(artspr);
 		}
-		var text = new PIXI.Text(card.name, { font: "16px Dosis", fill: card.upped ? "black" : "white" });
+		var text = new PIXI.text.Text(card.name, { font: "16px Dosis", fill: card.upped ? "black" : "white" });
 		text.anchor.x = .5;
 		text.position.set(64, 144);
 		border.addChild(text);
-		var mtx = new PIXI.Matrix();
+		var mtx = new PIXI.math.Matrix();
 		mtx.scale(scale, scale);
 		rend.render(border, mtx);
 		return cache[code] = rend;
@@ -221,7 +221,7 @@ if (typeof PIXI !== "undefined"){
 	exports.getArt = getArt;
 	exports.getCardImage = getCardImage;
 	exports.getWeaponShieldImage = getWeaponShieldImage;
-	var shinyFilter = new PIXI.ColorMatrixFilter();
+	var shinyFilter = new PIXI.filters.ColorMatrixFilter();
 	shinyFilter.matrix = [
 		0,1,0,0,
 		0,0,1,0,

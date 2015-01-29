@@ -18,7 +18,7 @@ var Point;
 if (typeof PIXI === "undefined"){
 	Point = fakepoint;
 	Point.prototype.set = Point;
-}else Point = PIXI.Point;
+}else Point = PIXI.math.Point;
 function mkFont(font, color){
 	if (typeof font == "number"){
 		font += "px Dosis";
@@ -85,7 +85,7 @@ function getTextImage(text, font, bgcolor, width) {
 		doc.addChild(bg);
 	}
 	var pieces = text.replace(/\|/g, " | ").split(/(\d\d?:\d\d?|\$|\n)/);
-	var x = 0, y = 0, h = Math.max(size, new PIXI.Text("j", font).height-3), w = 0;
+	var x = 0, y = 0, h = Math.max(size, new PIXI.text.Text("j", font).height-3), w = 0;
 	function pushChild(){
 		var w = 0;
 		if (x > 0){
@@ -128,16 +128,16 @@ function getTextImage(text, font, bgcolor, width) {
 			}else{
 				var spr = new PIXI.Sprite(icon);
 				spr.scale.set(size/32, size/32);
-				pushChild(new PIXI.Text(num, font), spr);
+				pushChild(new PIXI.text.Text(num, font), spr);
 			}
 		} else if (piece) {
-			var txt = new PIXI.Text(piece, font);
+			var txt = new PIXI.text.Text(piece, font);
 			if (!width || x + txt.width < width){
 				pushChild(txt);
 			}else{
 				piece.split(" ").forEach(function(word){
 					if (word){
-						pushChild(new PIXI.Text(word, font));
+						pushChild(new PIXI.text.Text(word, font));
 						if (x){
 							x += 3;
 						}
@@ -146,7 +146,7 @@ function getTextImage(text, font, bgcolor, width) {
 			}
 		}
 	});
-	var rtex = new PIXI.RenderTexture(width || Math.max(w, x), y+h);
+	var rtex = require("./px").mkRenderTexture(width || Math.max(w, x), y+h);
 	if (bg){
 		bg.beginFill(bgcolor);
 		bg.drawRect(0, 0, rtex.width, rtex.height);

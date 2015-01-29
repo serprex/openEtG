@@ -5,8 +5,16 @@ var ui = require("./uiutil");
 var Cards = require("./Cards");
 var etgutil = require("./etgutil");
 var renderer = new PIXI.autoDetectRenderer(900, 600, {view:document.getElementById("leftpane"), transparent:true});
-var realStage = new PIXI.Stage(), curStage = {};
+var iman = null;
+exports.mouse = {x:0, y:0};
+renderer.view.addEventListener("mousemove", function(e){
+	exports.mouse.x = e.clientX;
+	exports.mouse.y = e.clientY;
+});
+var realStage = new PIXI.Container(), curStage = {};
+var interman = new PIXI.interaction.InteractionManager(realStage, renderer);
 realStage.addChild(new PIXI.Sprite(new PIXI.Texture(new PIXI.BaseTexture(document.getElementById("bgimg")))));
+realStage.interactive = true;
 function animate() {
 	setTimeout(requestAnimate, 40);
 	if (curStage.next){
@@ -18,6 +26,9 @@ function animate() {
 }
 function requestAnimate() { requestAnimationFrame(animate); }
 exports.load = requestAnimate;
+exports.mkRenderTexture = function(width, height){
+	return new PIXI.RenderTexture(renderer, width, height);
+}
 var special = /view|endnext|cmds|next/;
 exports.getCmd = function(cmd){
 	return curStage.cmds ? curStage.cmds[cmd] : null;
@@ -135,9 +146,6 @@ exports.refreshRenderer = function(stage) {
 	}
 	curStage = stage;
 }
-exports.getMousePos = function(){
-	return realStage.getMousePosition();
-}
 exports.setClick = function(obj, click, sound) {
 	if (sound === undefined) sound = "buttonClick";
 	obj.click = function() {
@@ -158,10 +166,10 @@ exports.setInteractive = function() {
 	}
 }
 exports.mkView = function(mouseover){
-	var view = new PIXI.DisplayObjectContainer();
+	var view = new PIXI.Container();
 	view.interactive = true;
 	if (mouseover){
-		var bg = new PIXI.DisplayObjectContainer();
+		var bg = new PIXI.Container();
 		bg.hitArea = realStage.hitArea;
 		bg.mouseover = mouseover;
 		bg.interactive = true;
@@ -215,12 +223,12 @@ exports.adjust = function adjust(cardminus, code, x) {
 	delete cardminus.rendered;
 }
 function DeckDisplay(decksize, cardmouseover, cardclick, deck){
-	PIXI.DisplayObjectContainer.call(this);
+	PIXI.Container.call(this);
 	this.deck = deck || [];
 	this.decksize = decksize;
 	this.cardmouseover = cardmouseover;
 	this.cardclick = cardclick;
-	this.hitArea = new PIXI.Rectangle(100, 32, Math.floor(decksize/10)*99, 200);
+	this.hitArea = new PIXI.math.Rectangle(100, 32, Math.floor(decksize/10)*99, 200);
 	this.interactive = true;
 	for (var i = 0;i < decksize;i++) {
 		var sprite = new PIXI.Sprite(gfx.nopic);
@@ -228,12 +236,12 @@ function DeckDisplay(decksize, cardmouseover, cardclick, deck){
 		this.addChild(sprite);
 	}
 }
-DeckDisplay.prototype = Object.create(PIXI.DisplayObjectContainer.prototype);
-DeckDisplay.prototype.pos2idx = function(mpos){
-	return Math.floor((mpos.x-100-this.position.x)/99)*10+(Math.floor((mpos.y-32-this.position.y)/19)%10);
+DeckDisplay.prototype = Object.create(PIXI.Container.prototype);
+DeckDisplay.prototype.pos2idx = function(){
+	return Math.floor((exports.mouse.x-100-this.position.x)/99)*10+(Math.floor((exports.mouse.y-32-this.position.y)/19)%10);
 }
 DeckDisplay.prototype.click = function(e){
-	var index = this.pos2idx(e.global);
+	var index = this.pos2idx();
 	if (index >= 0 && index < this.deck.length){
 		ui.playSound("cardClick");
 		if (this.cardclick) this.cardclick(index);
@@ -241,7 +249,7 @@ DeckDisplay.prototype.click = function(e){
 }
 DeckDisplay.prototype.renderDeck = function(i){
 	for (;i < this.deck.length;i++) {
-		this.children[i].setTexture(gfx.getCardImage(this.deck[i]));
+		this.children[i].texture = gfx.getCardImage(this.deck[i]);
 		this.children[i].visible = true;
 	}
 	for (;i < this.decksize;i++) {
@@ -260,11 +268,10 @@ DeckDisplay.prototype.rmCard = function(index){
 	this.deck.splice(index, 1);
 	this.renderDeck(index);
 }
-DeckDisplay.prototype.next = function(mpos){
+DeckDisplay.prototype.next = function(){
 	if (this.cardmouseover){
-		if (mpos === undefined) mpos = this.stage.getMousePosition();
-		if (!this.hitArea.contains(mpos.x-this.position.x, mpos.y-this.position.y)) return;
-		var index = this.pos2idx(mpos);
+		if (!this.hitArea.contains(exports.mouse.x-this.position.x, exports.mouse.y-this.position.y)) return;
+		var index = this.pos2idx();
 		if (index >= 0 && index < this.deck.length){
 			this.cardmouseover(this.deck[index]);
 		}
@@ -272,7 +279,7 @@ DeckDisplay.prototype.next = function(mpos){
 }
 function CardSelector(dom, cardmouseover, cardclick, maxedIndicator, filterboth){
 	var self = this;
-	PIXI.DisplayObjectContainer.call(this);
+	PIXI.Container.call(this);
 	this.cardpool = undefined;
 	this.cardminus = undefined;
 	this.showall = false;
@@ -281,7 +288,7 @@ function CardSelector(dom, cardmouseover, cardclick, maxedIndicator, filterboth)
 	this.cardmouseover = cardmouseover;
 	this.cardclick = cardclick;
 	this.filterboth = filterboth;
-	this.hitArea = new PIXI.Rectangle(100, 272, 800, 328);
+	this.hitArea = new PIXI.math.Rectangle(100, 272, 800, 328);
 	if (maxedIndicator) this.addChild(this.maxedIndicator = new PIXI.Graphics());
 	var bshiny = exports.domButton("Toggle Shiny", function() {
 		self.showshiny ^= true;
@@ -319,7 +326,7 @@ function CardSelector(dom, cardmouseover, cardclick, maxedIndicator, filterboth)
 		for (var j = 0;j < 15;j++) {
 			var sprite = new PIXI.Sprite(gfx.nopic);
 			sprite.position.set(100 + i * 133, 272 + j * 19);
-			var sprcount = new PIXI.Text("", { font: "12px Dosis" });
+			var sprcount = new PIXI.text.Text("", { font: "12px Dosis" });
 			sprcount.position.set(102, 4);
 			sprite.addChild(sprcount);
 			this.addChild(sprite);
@@ -327,7 +334,7 @@ function CardSelector(dom, cardmouseover, cardclick, maxedIndicator, filterboth)
 		}
 	}
 }
-CardSelector.prototype = Object.create(PIXI.DisplayObjectContainer.prototype);
+CardSelector.prototype = Object.create(PIXI.Container.prototype);
 CardSelector.prototype.click = function(e){
 	if (!this.cardclick) return;
 	var col = this.columns[Math.floor((e.global.x-100)/133)], card;
@@ -343,7 +350,7 @@ CardSelector.prototype.click = function(e){
 		this.cardclick(code);
 	}
 }
-CardSelector.prototype.next = function(newcardpool, newcardminus, mpos) {
+CardSelector.prototype.next = function(newcardpool, newcardminus) {
 	if (newcardpool !== this.cardpool || newcardminus !== this.cardminus) {
 		this.cardminus = newcardminus;
 		this.cardpool = newcardpool;
@@ -352,10 +359,9 @@ CardSelector.prototype.next = function(newcardpool, newcardminus, mpos) {
 		this.renderColumns();
 	}
 	if (this.cardmouseover){
-		if (mpos === undefined) mpos = this.stage.getMousePosition();
-		if (!this.hitArea.contains(mpos.x, mpos.y)) return;
-		var col = this.columns[Math.floor((mpos.x-100)/133)], card;
-		if (col && (card = col[Math.floor((mpos.y-272)/19)])){
+		if (!this.hitArea.contains(exports.mouse.x, exports.mouse.y)) return;
+		var col = this.columns[Math.floor((exports.mouse.x-100)/133)], card;
+		if (col && (card = col[Math.floor((exports.mouse.y-272)/19)])){
 			this.cardmouseover(card.code);
 		}
 	}
@@ -377,7 +383,7 @@ CardSelector.prototype.renderColumns = function(){
 	for (var i = 0;i < 6; i++){
 		for (var j = 0;j < this.columns[i].length;j++) {
 			var spr = this.columnspr[i][j], code = this.columns[i][j].code;
-			spr.setTexture(gfx.getCardImage(code));
+			spr.texture = gfx.getCardImage(code);
 			spr.visible = true;
 			if (this.cardpool) {
 				var txt = spr.children[0], card = Cards.Codes[code], scode = etgutil.asShiny(code, true);

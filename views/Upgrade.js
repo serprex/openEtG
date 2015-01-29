@@ -84,14 +84,14 @@ module.exports = function() {
 		cardpool = etgutil.deck2pool(sock.user.accountbound, cardpool);
 	}
 	var upgradeui = px.mkView(function(){
-		if (selectedCard) cardArt.setTexture(gfx.getArt(etgutil.asUpped(selectedCard, true)));
+		if (selectedCard) cardArt.texture = gfx.getArt(etgutil.asUpped(selectedCard, true));
 	});
 	var stage = {view:upgradeui,
 		bexit: [5, 50, ["Exit", require("./MainMenu")]],
 		bupgrade: [150, 50, ["Upgrade", eventWrap(upgradeCard)]],
-		bpolish: [150, 95, ["Polish", eventWrap(polishCard), function() { if (selectedCard) cardArt.setTexture(gfx.getArt(etgutil.asShiny(selectedCard, true))) }]],
+		bpolish: [150, 95, ["Polish", eventWrap(polishCard), function() { if (selectedCard) cardArt.texture = gfx.getArt(etgutil.asShiny(selectedCard, true)) }]],
 		bunupgrade:[150, 50, ["Unupgrade", eventWrap(unupgradeCard)]],
-		bunpolish:[150, 95, ["Unpolish", eventWrap(unpolishCard), function() { if (selectedCard) cardArt.setTexture(gfx.getArt(etgutil.asShiny(selectedCard, false))) }]],
+		bunpolish:[150, 95, ["Unpolish", eventWrap(unpolishCard), function() { if (selectedCard) cardArt.texture = gfx.getArt(etgutil.asShiny(selectedCard, false)) }]],
 		bsell:[150, 140, ["Sell", eventWrap(sellCard)]],
 		bauto:[5, 140, ["Autoconvert", autoCards]],
 		next:function(){
@@ -122,8 +122,8 @@ module.exports = function() {
 	var cardsel = new px.CardSelector(stage.domtext, null,
 		function(code){
 			var card = Cards.Codes[code];
-			selectedCardArt.setTexture(gfx.getArt(code));
-			cardArt.setTexture(gfx.getArt(etgutil.asUpped(code, true)));
+			selectedCardArt.texture = gfx.getArt(code);
+			cardArt.texture = gfx.getArt(etgutil.asUpped(code, true));
 			selectedCard = code;
 			if (card.upped) {
 				px.setDomVis("bupgrade", false);

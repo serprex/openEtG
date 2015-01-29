@@ -1,5 +1,4 @@
 "use strict";
-PIXI.AUTO_PREVENT_DEFAULT = false;
 (function(){
 	var guestname, muteset = {}, muteall;
 	var px = require("./px");

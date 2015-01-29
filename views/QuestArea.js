@@ -27,7 +27,7 @@ module.exports = function(area) {
 		circle.beginFill(sock.user.quest[quest] > stage ? 0x4cff00 : 1);
 		circle.drawCircle(0, 0, 16);
 		circle.endFill();
-		circle.hitArea = new PIXI.Circle(0, 0, 16);
+		circle.hitArea = new PIXI.math.Circle(0, 0, 16);
 		var button = px.mkButton(pos[0], pos[1], circle);
 		button.mouseover = function() {
 			tinfo.setText(Quest[quest].info.text[stage]);
