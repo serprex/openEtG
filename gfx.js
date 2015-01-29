@@ -140,10 +140,7 @@ function getCardImage(code) {
 			var text = new PIXI.text.Text(card.name, { font: "11px Dosis", fill: card.upped ? "black" : "white" });
 			text.position.set(2, 5);
 			if (text.width > clipwidth){
-				text.mask = new PIXI.Graphics();
-				text.mask.beginFill();
-				text.mask.drawRect(0, 0, clipwidth, 20);
-				text.mask.endFill();
+				text.width = clipwidth;
 			}
 			graphics.addChild(text);
 		}
