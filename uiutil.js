@@ -79,7 +79,7 @@ function getTextImage(text, font, bgcolor, width) {
 	if (key in tximgcache) {
 		return tximgcache[key];
 	}
-	var doc = new PIXI.DisplayObjectContainer();
+	var doc = new PIXI.Container();
 	if (bgcolor !== ""){
 		var bg = new PIXI.Graphics();
 		doc.addChild(bg);

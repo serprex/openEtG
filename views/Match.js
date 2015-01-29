@@ -186,7 +186,7 @@ function startMatch(game, foeDeck) {
 	var weapsprite = new Array(2);
 	var marksprite = [new PIXI.Sprite(gfx.nopic), new PIXI.Sprite(gfx.nopic)];
 	var marktext = [new PIXI.text.Text("", { font: "18px Dosis" }), new PIXI.text.Text("", { font: "18px Dosis" })];
-	var quantatext = [new PIXI.DisplayObjectContainer(), new PIXI.DisplayObjectContainer()];
+	var quantatext = [new PIXI.Container(), new PIXI.Container()];
 	var hptext = [new px.domText(""), new px.domText("")];
 	var hpxy = [];
 	var playerOverlay = [new PIXI.Sprite(gfx.nopic), new PIXI.Sprite(gfx.nopic)];
@@ -354,10 +354,10 @@ function startMatch(game, foeDeck) {
 	px.setInteractive.apply(null, playerOverlay);
 	var fgfx = new PIXI.Graphics();
 	gameui.addChild(fgfx);
-	var anims = new PIXI.DisplayObjectContainer();
+	var anims = new PIXI.Container();
 	gameui.addChild(anims);
 	Effect.register(anims);
-	var foeplays = new PIXI.DisplayObjectContainer();
+	var foeplays = new PIXI.Container();
 	gameui.addChild(foeplays);
 	var cardart = new PIXI.Sprite(gfx.nopic);
 	cardart.position.set(654, 300);
@@ -636,10 +636,10 @@ function startMatch(game, foeDeck) {
 			} else shiesprite[j].visible = false;
 			marksprite[j].texture = gfx.eicons[pl.mark];
 			if (pl.markpower != 1){
-				px.maybeSetText(marktext[j], "x" + pl.markpower);
+				marktext[j].text = "x" + pl.markpower;
 			}else marktext[j].visible = false;
 			for (var i = 1;i < 13;i++) {
-				px.maybeSetText(quantatext[j].children[i*2-2], pl.quanta[i].toString());
+				quantatext[j].children[i*2-2].text = pl.quanta[i];
 			}
 			fgfx.beginFill(0);
 			fgfx.drawRect(playerOverlay[j].x - 41, playerOverlay[j].y - 25, 82, 16);

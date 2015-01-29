@@ -153,9 +153,6 @@ exports.setClick = function(obj, click, sound) {
 		click.apply(this, arguments);
 	}
 }
-exports.maybeSetText = function(obj, text) {
-	if (obj.text != text) obj.setText(text);
-}
 exports.hitTest = function(obj, pos) {
 	var x = obj.position.x - obj.width * obj.anchor.x, y = obj.position.y - obj.height * obj.anchor.y;
 	return pos.x > x && pos.y > y && pos.x < x + obj.width && pos.y < y + obj.height;
@@ -392,7 +389,7 @@ CardSelector.prototype.renderColumns = function(){
 					var scode = etgutil.asShiny(code, true);
 					shinyAmount = scode in this.cardpool ? this.cardpool[scode] - ((this.cardminus && this.cardminus[scode]) || 0) : 0;
 				}
-				exports.maybeSetText(txt, cardAmount + (shinyAmount ? "/"+shinyAmount:""));
+				txt.text = cardAmount + (shinyAmount ? "/"+shinyAmount:"");
 				if (this.maxedIndicator && card.type != etg.PillarEnum && cardAmount >= 6) {
 					this.maxedIndicator.beginFill(ui.elecols[cardAmount >= 12 ? etg.Chroma : etg.Light]);
 					this.maxedIndicator.drawRect(spr.position.x + 100, spr.position.y, 33, 20);

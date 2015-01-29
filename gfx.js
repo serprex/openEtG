@@ -46,7 +46,7 @@ function load(progress, postload){
 var caimgcache = {}, crimgcache = {}, wsimgcache = {}, artcache = {}, artimagecache = {};
 function makeArt(card, art, oldrend) {
 	var rend = oldrend || require("./px").mkRenderTexture(132, 256);
-	var template = new PIXI.DisplayObjectContainer();
+	var template = new PIXI.Container();
 	template.addChild(new PIXI.Sprite(exports.cardBacks[card.element+(card.upped?13:0)]));
 	var rarity = new PIXI.Sprite(exports.ricons[card.rarity]);
 	rarity.anchor.set(0, 1);
