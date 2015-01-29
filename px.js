@@ -5,7 +5,6 @@ var ui = require("./uiutil");
 var Cards = require("./Cards");
 var etgutil = require("./etgutil");
 var renderer = new PIXI.autoDetectRenderer(900, 600, {view:document.getElementById("leftpane"), transparent:true});
-var iman = null;
 exports.mouse = {x:0, y:0};
 renderer.view.addEventListener("mousemove", function(e){
 	exports.mouse.x = e.clientX;
