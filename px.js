@@ -12,6 +12,7 @@ renderer.view.addEventListener("mousemove", function(e){
 });
 var realStage = new PIXI.Container(), curStage = {};
 var interman = new PIXI.interaction.InteractionManager(realStage, renderer);
+interman.autoPreventDefault = false;
 realStage.addChild(new PIXI.Sprite(new PIXI.Texture(new PIXI.BaseTexture(document.getElementById("bgimg")))));
 realStage.interactive = true;
 function animate() {
