@@ -174,8 +174,8 @@ module.exports = function(arena, acard, startempty) {
 			if (arattr[name] >= (data.min || 0) && (!data.max || arattr[name] <= data.max)){
 				var sum = sumscore();
 				if (sum <= arpts){
-					bv.setText(arattr[name]);
-					curpts.setText((arpts-sum)/45);
+					bv.text = arattr[name];
+					curpts.text = (arpts-sum)/45;
 					return;
 				}
 			}
