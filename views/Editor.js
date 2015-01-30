@@ -129,7 +129,7 @@ module.exports = function(arena, acard, startempty) {
 		if (!x) return;
 		saveDeck();
 		deckname.value = sock.user.selectedDeck = x;
-		tname.setText(x);
+		tname.text = x;
 		fixQuickButtons();
 		decksprite.deck = etgutil.decodedeck(sock.getDeck());
 		processDeck();
@@ -163,11 +163,10 @@ module.exports = function(arena, acard, startempty) {
 	function makeattrui(y, name){
 		y = 128+y*20;
 		var data = artable[name];
-		var bt = new PIXI.text.Text(name, ui.mkFont(16, "black"));
-		bt.position.set(8, y);
+		dom.push([8, y, name]);
 		var bm = px.mkButton(50, y, ui.getTextImage("-", ui.mkFont(16, "black"), 0xFFFFFFFF));
-		var bv = new PIXI.text.Text(arattr[name], ui.mkFont(16, "black"));
-		bv.position.set(64, y);
+		var bv = px.domText(arattr[name]);
+		dom.push([62, y, bv]);
 		var bp = px.mkButton(90, y, ui.getTextImage("+", ui.mkFont(16, "black"), 0xFFFFFFFF));
 		function modattr(x){
 			arattr[name] += x;
@@ -183,9 +182,7 @@ module.exports = function(arena, acard, startempty) {
 		}
 		px.setClick(bm, modattr.bind(null, -(data.incr || 1)));
 		px.setClick(bp, modattr.bind(null, data.incr || 1));
-		editorui.addChild(bt);
 		editorui.addChild(bm);
-		editorui.addChild(bv);
 		editorui.addChild(bp);
 	}
 	function switchDeckCb(x){
@@ -197,7 +194,7 @@ module.exports = function(arena, acard, startempty) {
 		if (deckname.value) {
 			sock.user.selectedDeck = deckname.value;
 			fixQuickButtons();
-			tname.setText(sock.user.selectedDeck);
+			tname.text = sock.user.selectedDeck;
 			saveDeck();
 		}
 	}
@@ -227,9 +224,8 @@ module.exports = function(arena, acard, startempty) {
 			mark: { cost: 45 },
 			draw: { cost: 135 },
 		};
-		var curpts = new PIXI.text.Text((arpts-sumscore())/45, ui.mkFont(16, "black"));
-		curpts.position.set(8, 188);
-		editorui.addChild(curpts);
+		var curpts = new px.domText((arpts-sumscore())/45);
+		dom.push([8, 188, curpts])
 		makeattrui(0, "hp");
 		makeattrui(1, "mark");
 		makeattrui(2, "draw");

@@ -20,6 +20,11 @@ module.exports = function(nymph) {
 		if (popdom) document.body.removeChild(popdom);
 		if (popdom = dom) document.body.appendChild(dom);
 	}
+	function mkSetTip(text){
+		return function(){
+			tinfo.text = text;
+		}
+	}
 	var aicostpay = [
 		[0, 15],
 		[5, 30],
@@ -67,7 +72,7 @@ module.exports = function(nymph) {
 	var tipNumber = etg.PlayerRng.upto(tipjar.length);
 
 	function resetTip() {
-		tinfo.setText(sock.user ? tipjar[tipNumber] + "." : "To register, just type desired username & password in the fields to the right, then click 'Login'.");
+		tinfo.text = sock.user ? tipjar[tipNumber] + "." : "To register, just type desired username & password in the fields to the right, then click 'Login'.";
 	}
 	var menuui, tinfo = px.domText(""), tstats = px.domText(sock.user ? sock.user.gold + "$ " + sock.user.name + "\nPvE " + sock.user.aiwins + " - " + sock.user.ailosses + "\nPvP " + sock.user.pvpwins + " - " + sock.user.pvplosses : "Sandbox");
 	tinfo.style.maxWidth = "800px";
@@ -111,27 +116,15 @@ module.exports = function(nymph) {
 		[798, 134, tierText("Tier 2")],
 		[50, 26, tinfo],
 		[478, 200, tstats],
-		[50, 100, ["Commoner", mkAi.mkAi(0), function() {
-			tinfo.setText("Commoners have no upgraded cards & mostly common cards." + costText(0));
-		}]],
-		[150, 100, ["Mage", mkAi.mkPremade("mage"), function() {
-			tinfo.setText("Mages have preconstructed decks with a couple rares." + costText(1));
-		}]],
-		[250, 100, ["Champion", mkAi.mkAi(2), function() {
-			tinfo.setText("Champions have some upgraded cards." + costText(2));
-		}]],
-		[350, 100, ["Demigod", mkAi.mkPremade("demigod"), function() {
-			tinfo.setText("Demigods are extremely powerful. Come prepared for anything." + costText(3));
-		}]],
-		[50, 200, ["Deck", require("./Editor"), function() {
-			tinfo.setText("Edit & manage your decks.");
-		}]],
-		[250, 200, ["Wealth T50", wealthTop, function() {
-			tinfo.setText("See who's collected the most wealth.");
-		}]],
+		[50, 100, ["Commoner", mkAi.mkAi(0), mkSetTip("Commoners have no upgraded cards & mostly common cards." + costText(0))]],
+		[150, 100, ["Mage", mkAi.mkPremade("mage"), mkSetTip("Mages have preconstructed decks with a couple rares." + costText(1))]],
+		[250, 100, ["Champion", mkAi.mkAi(2), mkSetTip("Champions have some upgraded cards." + costText(2))]],
+		[350, 100, ["Demigod", mkAi.mkPremade("demigod"), mkSetTip("Demigods are extremely powerful. Come prepared for anything." + costText(3))]],
+		[50, 200, ["Deck", require("./Editor"), mkSetTip("Edit & manage your decks.")]],
+		[250, 200, ["Wealth T50", wealthTop, mkSetTip("See who's collected the most wealth.")]],
 		[777, 50, ["Next tip", function() {
 			tipNumber = (tipNumber+1) % tipjar.length;
-			tinfo.setText(tipjar[tipNumber] + ".");
+			tinfo.text = tipjar[tipNumber] + ".";
 		}]]
 	];
 	stage.menudom = dom;
@@ -161,18 +154,12 @@ module.exports = function(nymph) {
 			var y = 100+i*45;
 			if (sock.user){
 				dom.push(
-					[478, y, ["Arena AI", arenaAi, function() {
-						tinfo.setText("In the arena you will face decks from other players." + costText(4+lvi.lv));
-					}]],
-					[578, y, ["Arena Info", arenaInfo, function() {
-						tinfo.setText("Check how your arena deck is doing.");
-					}]]
+					[478, y, ["Arena AI", arenaAi, mkSetTip("In the arena you will face decks from other players." + costText(4+lvi.lv))]],
+					[578, y, ["Arena Info", arenaInfo, mkSetTip("Check how your arena deck is doing.")]]
 				);
 			}
 			dom.push(
-				[678, y, ["Arena T20", arenaTop, function() {
-					tinfo.setText("See who the top players in arena are right now.");
-				}]]
+				[678, y, ["Arena T20", arenaTop, mkSetTip("See who the top players in arena are right now.")]]
 			);
 		})({lv:i});
 	}
@@ -331,24 +318,14 @@ module.exports = function(nymph) {
 		[150, 545, ["Trade", tradeClick]],
 		[250, 545, ["Reward", rewardClick]],
 		[350, 545, ["Library", libraryClick]],
-		[777, 245, ["Logout", logout.bind(null, "logout"), function() {
-			tinfo.setText("Click here to log out.")
-		}]]
+		[777, 245, ["Logout", logout.bind(null, "logout"), mkSetTip("Click here to log out.")]]
 	);
 	if (sock.user){
 		dom.push(
-			[50, 145, ["Quests", require("./QuestMain"), function() {
-				tinfo.setText("Go on an adventure!");
-			}]],
-			[150, 145, ["Colosseum", require("./Colosseum"), function() {
-				tinfo.setText("Try some daily challenges in the Colosseum!");
-			}]],
-			[150, 200, ["Shop", require("./Shop"), function() {
-				tinfo.setText("Buy booster packs which contain cards from the elements you choose.");
-			}]],
-			[150, 245, ["Upgrade", require("./Upgrade"), function() {
-				tinfo.setText("Upgrade or sell cards.");
-			}]],
+			[50, 145, ["Quests", require("./QuestMain"), mkSetTip("Go on an adventure!")]],
+			[150, 145, ["Colosseum", require("./Colosseum"), mkSetTip("Try some daily challenges in the Colosseum!")]],
+			[150, 200, ["Shop", require("./Shop"), mkSetTip("Buy booster packs which contain cards from the elements you choose.")]],
+			[150, 245, ["Upgrade", require("./Upgrade"), mkSetTip("Upgrade or sell cards.")]],
 			[677, 245, ["Settings", function() {
 				if (popdom && popdom.id == "settingspane"){
 					setDom(null);
@@ -367,9 +344,7 @@ module.exports = function(nymph) {
 							chat("Input '" + sock.user.name + "yesdelete' into Challenge to delete your account");
 						}
 					},
-					function() {
-						tinfo.setText("Click here to permanently remove your account.");
-					}
+					mkSetTip("Click here to permanently remove your account.")
 				);
 				function changeFunc(){
 					sock.userEmit("passchange", { p: changePass.value });

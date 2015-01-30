@@ -42,7 +42,7 @@ module.exports = function() {
 		function(i) {
 			px.adjust(cardminus, ownDeck.deck[i], -1);
 			ownDeck.rmCard(i);
-			ownVal.setText(userutil.calcWealth(cardminus) + "");
+			ownVal.text = userutil.calcWealth(cardminus) + "";
 		}
 	);
 	var foeDeck = new px.DeckDisplay(30, setCardArt);
@@ -64,7 +64,7 @@ module.exports = function() {
 			if (ownDeck.deck.length < 30 && !card.isFree() && code in cardpool && !(code in cardminus && cardminus[code] >= cardpool[code])) {
 				px.adjust(cardminus, code, 1);
 				ownDeck.addCard(code);
-				ownVal.setText(userutil.calcWealth(cardminus) + "");
+				ownVal.text = userutil.calcWealth(cardminus) + "";
 			}
 		}
 	);
@@ -76,7 +76,7 @@ module.exports = function() {
 		cardchosen: function(data){
 			foeDeck.deck = etgutil.decodedeck(data.c);
 			foeDeck.renderDeck(0);
-			foeVal.setText(userutil.calcWealth(etgutil.deck2pool(data.c)) + "");
+			foeVal.text = userutil.calcWealth(etgutil.deck2pool(data.c)) + "";
 		},
 		tradedone: function(data) {
 			sock.user.pool = etgutil.mergedecks(sock.user.pool, data.newcards);

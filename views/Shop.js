@@ -51,7 +51,7 @@ module.exports = function() {
 	}
 	function updateFreeInfo(rarity){
 		if (freeinfo){
-			freeinfo.setText(sock.user.freepacks[rarity] ? "Free " + packdata[rarity].type + " packs left: " + sock.user.freepacks[rarity] : "");
+			freeinfo.text = sock.user.freepacks[rarity] ? "Free " + packdata[rarity].type + " packs left: " + sock.user.freepacks[rarity] : "";
 		}
 	}
 
@@ -65,11 +65,11 @@ module.exports = function() {
 
 	function buyPack() {
 		if (packrarity == -1) {
-			tinfo2.setText("Select a pack first!");
+			tinfo2.text = "Select a pack first!";
 			return;
 		}
 		if (packele == -1) {
-			tinfo.setText("Select an element first!");
+			tinfo.text = "Select an element first!";
 			return;
 		}
 		var pack = packdata[packrarity];
@@ -79,7 +79,7 @@ module.exports = function() {
 			sock.userEmit("booster", boostdata);
 			bbuy.style.display = "none";
 		} else {
-			tinfo2.setText("You can't afford that!");
+			tinfo2.text = "You can't afford that!";
 		}
 	}
 	var bbuy = px.domButton("Buy Pack", buyPack);
@@ -106,7 +106,7 @@ module.exports = function() {
 		g.addChild(gold);
 		px.setClick(g, function(){
 			packrarity = n;
-			tinfo2.setText(pack.type + " Pack: " + pack.info);
+			tinfo2.text = pack.type + " Pack: " + pack.info;
 			updateFreeInfo(n);
 		});
 		storeui.addChild(g);
@@ -118,7 +118,7 @@ module.exports = function() {
 		(function(_i) {
 			px.setClick(elementbutton, function() {
 				packele = _i;
-				tinfo.setText("Selected Element: " + (packele>12 ? etg.eleNames[packele] : "1:" + packele));
+				tinfo.text = "Selected Element: " + (packele>12 ? etg.eleNames[packele] : "1:" + packele);
 			});
 		})(i);
 		storeui.addChild(elementbutton);
@@ -144,7 +144,7 @@ module.exports = function() {
 				var bdata = {};
 				ui.parseInput(bdata, "bulk", packmulti.value, 99);
 				sock.user.gold -= packdata[data.packtype].cost * (bdata.bulk || 1);
-				tgold.setText(sock.user.gold + "$");
+				tgold.text = sock.user.gold + "$";
 			}
 			if (etgutil.decklength(data.cards) < 11){
 				bget.style.display = "inline";

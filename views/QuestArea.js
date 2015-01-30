@@ -10,7 +10,7 @@ function startQuest(questname) {
 }
 module.exports = function(area) {
 	var questui = px.mkView(function() {
-		tinfo.setText("");
+		tinfo.text = "";
 	});
 	questui.addChild(px.mkBgRect(9, 9, 880, 111));
 	var questmap = new PIXI.Sprite(gfx.bg_quest);
@@ -30,11 +30,11 @@ module.exports = function(area) {
 		circle.hitArea = new PIXI.math.Circle(0, 0, 16);
 		var button = px.mkButton(pos[0], pos[1], circle);
 		button.mouseover = function() {
-			tinfo.setText(Quest[quest].info.text[stage]);
+			tinfo.text = Quest[quest].info.text[stage];
 		}
 		px.setClick(button, function() {
 			var err = Quest.mkQuestAi(quest, stage, area);
-			if (typeof err === "string") errinfo.setText(err);
+			if (typeof err === "string") errinfo.text = err;
 		});
 		return button;
 	}

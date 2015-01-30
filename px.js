@@ -33,45 +33,6 @@ var special = /view|endnext|cmds|next/;
 exports.getCmd = function(cmd){
 	return curStage.cmds ? curStage.cmds[cmd] : null;
 }
-function monkeyDomSetText(text){
-	if (this.textcache == text) return;
-	this.textcache = text;
-	while (this.firstChild) this.firstChild.remove();
-	var ele = this;
-	var pieces = text.replace(/\|/g, " | ").split(/(\d\d?:\d\d?|\$|\n)/);
-	pieces.forEach(function(piece){
-		if (piece == "\n") {
-			ele.appendChild(document.createElement("br"));
-		}else if (piece == "$") {
-			var sp = document.createElement("span");
-			sp.className = "coin";
-			ele.appendChild(sp);
-		}else if (/^\d\d?:\d\d?$/.test(piece)) {
-			var parse = piece.split(":");
-			var num = parseInt(parse[0]);
-			if (num < 4) {
-				for (var j = 0;j < num;j++) {
-					var sp = document.createElement("span");
-					sp.className = "eicon e"+parse[1];
-					ele.appendChild(sp);
-				}
-			}else{
-				ele.appendChild(document.createTextElement(parse[0]));
-				var sp = document.createElement("span");
-				sp.className = "eicon e"+parse[1];
-				ele.appendChild(sp);
-			}
-		} else if (piece) {
-			ele.appendChild(document.createTextNode(piece));
-		}
-	});
-}
-function monkeyButtonSetText(text){
-	if (text){
-		this.value = text;
-		this.style.display = "inline";
-	}else this.style.display = "none";
-}
 exports.domBox = function(w, h){
 	var span = document.createElement("span");
 	span.style.width = w + "px";
@@ -82,8 +43,18 @@ exports.domBox = function(w, h){
 exports.domButton = function(text, click, mouseover, sound) {
 	var ele = document.createElement("input");
 	ele.type = "button";
-	ele.setText = monkeyButtonSetText;
-	ele.setText(text);
+	Object.defineProperty(ele, "text", {
+		get:function(){
+			return this.value;
+		},
+		set:function(){
+			if (text){
+				this.value = text;
+				this.style.display = "inline";
+			}else this.style.display = "none";
+		}
+	});
+	ele.text = text;
 	ele.addEventListener("click", function() {
 		if (sound !== false) ui.playSound(sound || "buttonClick");
 		if (click) click.call(this);
@@ -93,8 +64,46 @@ exports.domButton = function(text, click, mouseover, sound) {
 }
 exports.domText = function(text){
 	var ele = document.createElement("span");
-	ele.setText = monkeyDomSetText;
-	ele.setText(text);
+	Object.defineProperty(ele, "text", {
+		get:function(){
+			return this.textcache;
+		},
+		set:function(text){
+			text = text.toString();
+			if (this.textcache == text) return;
+			this.textcache = text;
+			while (this.firstChild) this.firstChild.remove();
+			var ele = this;
+			var pieces = text.replace(/\|/g, " | ").split(/(\d\d?:\d\d?|\$|\n)/);
+			pieces.forEach(function(piece){
+				if (piece == "\n") {
+					ele.appendChild(document.createElement("br"));
+				}else if (piece == "$") {
+					var sp = document.createElement("span");
+					sp.className = "coin";
+					ele.appendChild(sp);
+				}else if (/^\d\d?:\d\d?$/.test(piece)) {
+					var parse = piece.split(":");
+					var num = parseInt(parse[0]);
+					if (num < 4) {
+						for (var j = 0;j < num;j++) {
+							var sp = document.createElement("span");
+							sp.className = "eicon e"+parse[1];
+							ele.appendChild(sp);
+						}
+					}else{
+						ele.appendChild(document.createTextElement(parse[0]));
+						var sp = document.createElement("span");
+						sp.className = "eicon e"+parse[1];
+						ele.appendChild(sp);
+					}
+				} else if (piece) {
+					ele.appendChild(document.createTextNode(piece));
+				}
+			});
+		}
+	});
+	ele.text = text;
 	return ele;
 }
 function parseDom(info){

@@ -11,7 +11,7 @@ module.exports = function() {
 		var ele = new PIXI.Sprite(gfx.eicons[i]);
 		ele.position.set(100 + i * 32, 300);
 		ele.mouseover = function(){
-			eledesc.setText(name);
+			eledesc.text = name;
 		}
 		px.setClick(ele, function() {
 			var msg = { u: sock.user.name, a: sock.user.auth, e: i };

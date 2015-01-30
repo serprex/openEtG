@@ -514,14 +514,14 @@ function startMatch(game, foeDeck) {
 				turntext = game.turn == game.player1 ? "Your Turn" : "Their Turn";
 				if (game.phase < 2) turntext += "\n" + (game.phase ? "Second" : "First");
 			}
-			turntell.setText(turntext);
+			turntell.text = turntext;
 			if (game.turn == game.player1){
-				endturn.setText(game.phase == etg.PlayPhase ? "End Turn" : "Accept Hand");
-				cancel.setText(game.phase != etg.PlayPhase ? "Mulligan" : game.targetingMode || discarding || resigning ? "Cancel" : null);
+				endturn.text = game.phase == etg.PlayPhase ? "End Turn" : "Accept Hand";
+				cancel.text = game.phase != etg.PlayPhase ? "Mulligan" : game.targetingMode || discarding || resigning ? "Cancel" : "";
 			}else cancel.style.display = endturn.style.display = "none";
 		}else{
-			turntell.setText((game.turn == game.player1 ? "Your" : "Their") + " Turn\n" + (game.winner == game.player1?"Won":"Lost"));
-			endturn.setText("Continue");
+			turntell.text = (game.turn == game.player1 ? "Your" : "Their") + " Turn\n" + (game.winner == game.player1?"Won":"Lost");
+			endturn.text = "Continue";
 			cancel.style.display = "none";
 		}
 		foeplays.children.forEach(function(foeplay){
@@ -660,7 +660,7 @@ function startMatch(game, foeDeck) {
 			}else{
 				hptext[j].style.display = "inline";
 				var poison = pl.status.poison, poisoninfo = (poison > 0 ? poison + " 1:2" : poison < 0 ? -poison + " 1:7" : "") + (pl.neuro ? " 1:10" : "");
-				hptext[j].setText(pl.hp + "/" + pl.maxhp + "\n" + pl.deck.length + "cards" + (!cloakgfx.visible && game.expectedDamage[j] ? "\nDmg: " + game.expectedDamage[j] : "") + (poisoninfo ? "\n" + poisoninfo : ""));
+				hptext[j].text = pl.hp + "/" + pl.maxhp + "\n" + pl.deck.length + "cards" + (!cloakgfx.visible && game.expectedDamage[j] ? "\nDmg: " + game.expectedDamage[j] : "") + (poisoninfo ? "\n" + poisoninfo : "");
 			}
 		}
 		Effect.next(cloakgfx.visible);
