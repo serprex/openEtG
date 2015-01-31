@@ -6,7 +6,7 @@ var sock = require("../sock");
 var etgutil = require("../etgutil");
 module.exports = function(info) {
 	if (!info) return;
-	var stage = px.mkView();
+	var stage = new PIXI.Container();
 	var dom = [[150, 300, (info.win || 0) + " - " + (info.loss || 0) + ": " + (info.rank+1) +
 		"\nAge: " + info.day + "\nHP: " + info.curhp + " / " + info.hp +
 		"\nMark: " + info.mark +

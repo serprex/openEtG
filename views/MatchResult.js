@@ -9,8 +9,7 @@ var etgutil = require("../etgutil");
 var options = require("../options");
 var userutil = require("../userutil");
 module.exports = function(game) {
-	var winner = game.winner == game.player1;
-	var victoryui = px.mkView();
+	var winner = game.winner == game.player1, stage;
 	function exitFunc(){
 		if (game.quest) {
 			if (winner && game.choicerewards)
@@ -67,11 +66,12 @@ module.exports = function(game) {
 		}
 		if (game.cardreward) {
 			var x0 = 470-etgutil.decklength(game.cardreward)*20;
+			stage = new PIXI.Container();
 			etgutil.iterdeck(game.cardreward, function(code, i){
 				var cardArt = new PIXI.Sprite(gfx.getArt(code));
 				cardArt.anchor.x = .5;
 				cardArt.position.set(x0+i*40, 170);
-				victoryui.addChild(cardArt);
+				stage.addChild(cardArt);
 			});
 			sock.userExec(game.quest?"addbound":"addcards", { c: game.cardreward });
 		}
@@ -98,7 +98,7 @@ module.exports = function(game) {
 	}
 	document.addEventListener("keydown", onkeydown);
 
-	px.refreshRenderer({view:victoryui, domvic:dom, endnext: function() {
+	px.refreshRenderer({view:stage, domvic:dom, endnext: function() {
 		document.removeEventListener("keydown", onkeydown);
 	}});
 }
