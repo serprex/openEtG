@@ -160,8 +160,12 @@ exports.refreshRenderer = function(stage) {
 		}
 	}
 	if (stage.view){
-		renderer.view.style.display = "inline";
 		realStage.addChild(stage.view);
+		if (stage.next){
+			stage.next();
+		}
+		renderer.render(realStage);
+		renderer.view.style.display = "inline";
 	} else {
 		renderer.view.style.display = "none";
 	}
