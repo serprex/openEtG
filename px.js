@@ -47,7 +47,7 @@ exports.domButton = function(text, click, mouseover, sound) {
 		get:function(){
 			return this.value;
 		},
-		set:function(){
+		set:function(text){
 			if (text){
 				this.value = text;
 				this.style.display = "inline";
@@ -60,6 +60,18 @@ exports.domButton = function(text, click, mouseover, sound) {
 		if (click) click.call(this);
 	});
 	if (mouseover) ele.addEventListener("mouseover", mouseover);
+	return ele;
+}
+function setFilter(style, brightness){
+	return function(){
+		style.WebkitFilter = style.filter = "brightness("+brightness+")";
+	}
+}
+exports.domEButton = function(e, click, ch){
+	if (!ch) ch = "E";
+	var ele = document.createElement("span");
+	ele.className = "imgb "+ch+"icon "+ch+e;
+	ele.addEventListener("click", click);
 	return ele;
 }
 exports.domText = function(text){
@@ -309,24 +321,22 @@ function CardSelector(dom, cardmouseover, cardclick, maxedIndicator, filterboth)
 	this.columns = [[],[],[],[],[],[]];
 	this.columnspr = [[],[],[],[],[],[]];
 	for (var i = 0;i < 13;i++) {
-		var sprite = exports.mkButton((!i || i&1?4:40), 316 + Math.floor((i-1)/2) * 32, gfx.eicons[i]);
-		(function(_i) {
-			exports.setClick(sprite, function() {
-				self.elefilter = _i;
-				self.makeColumns();
-			});
+		(function(_i){
+			dom.push([(!i || i&1?4:40), 316 + Math.floor((i-1)/2) * 32,
+				exports.domEButton(i, function() {
+					self.elefilter = _i;
+					self.makeColumns();
+				})]
+			);
 		})(i);
-		this.addChild(sprite);
 	}
 	for (var i = 0;i < 5; i++){
-		var sprite = exports.mkButton(74, 338 + i * 32, gfx.ricons[i]);
 		(function(_i) {
-			exports.setClick(sprite, function() {
+			dom.push([74, 338 + i * 32, exports.domEButton(i, function() {
 				self.rarefilter = _i;
 				self.makeColumns();
-			});
+			}, "r")]);
 		})(i);
-		this.addChild(sprite);
 	}
 	for (var i = 0;i < 6;i++) {
 		for (var j = 0;j < 15;j++) {

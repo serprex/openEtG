@@ -1087,9 +1087,8 @@ pairproduce:function(c,t){
 	});
 },
 paleomagnetism:function(c,t){
-	if (c.owner == t){
-		new etg.Pillar(c.card.as(Cards.Codes[etg.PillarList[c.owner.rng()<.5?0:c.owner.mark]]), c.owner).place();
-	}
+	var e = c.owner.upto(52);
+	new etg.Pillar(c.card.as(Cards.Codes[e >= 26 ? etg.PillarList[c.owner.mark] : e >= 13 ? etg.PendList[e-13] : etg.PillarList[e]]), c.owner).place();
 },
 pandemonium:function(c,t){
 	c.owner.foe.masscc(c, Actives.cseed, true);
@@ -1266,7 +1265,11 @@ regeneratespell:function(c,t){
 	}
 },
 regrade:function(c,t){
-	t.card = t.card.asUpped(!t.card.upped);
+	if (t instanceof etg.Creature){
+		t.transform(t.card.asUpped(!t.card.upped));
+	}else{
+		t.card = t.card.asUpped(!t.card.upped);
+	}
 	c.owner.spend(t.card.element, -1);
 },
 reinforce:function(c,t){

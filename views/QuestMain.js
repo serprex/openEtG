@@ -6,7 +6,7 @@ var Quest = require("../Quest");
 var options = require("../options");
 module.exports = function(){
 	var questui = px.mkView(function() {
-		tinfo.setText("Welcome to Potatotal Island. The perfect island for adventuring!");
+		tinfo.text = "Welcome to Potatotal Island. The perfect island for adventuring!";
 	});
 	questui.addChild(px.mkBgRect(9, 9, 880, 111));
 	var questmap = new PIXI.Sprite(gfx.bg_questmap);
@@ -37,7 +37,7 @@ module.exports = function(){
 				require("./QuestArea")(k);
 			});
 			graphics.mouseover = function() {
-				tinfo.setText(ainfo[0]);
+				tinfo.text = ainfo[0];
 			}
 			if (Quest.areas[k].some(function(quest) {
 				return (Quest[quest][0].dependency === undefined || Quest[quest][0].dependency(sock.user)) && ((sock.user.quest[quest] || 0) < Quest[quest].length);

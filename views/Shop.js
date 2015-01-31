@@ -5,16 +5,10 @@ var ui = require("../uiutil");
 var chat = require("../chat");
 var sock = require("../sock");
 var etgutil = require("../etgutil");
-function toggleB() {
-	for (var i = 0;i < arguments.length;i++) {
-		if (arguments[i].style){
-			arguments.style.display = arguments[i].style.display == "none" ? "inline" : "none";
-		}else{
-			arguments[i].visible ^= true;
-			arguments[i].interactive ^= true;
-			arguments[i].buttonMode ^= true;
-		}
-	}
+function setVis(eles, vis) {
+	eles.forEach(function(x){
+		x.style.display = vis ? "inline" : "none";
+	});
 }
 module.exports = function() {
 	var packdata = [
@@ -44,6 +38,7 @@ module.exports = function() {
 		[50, 26, tinfo],
 		[50, 51, tinfo2]
 	];
+	var hidedom = [tinfo, tinfo2];
 
 	if (sock.user.freepacks){
 		var freeinfo = px.domText("");
@@ -58,8 +53,8 @@ module.exports = function() {
 	var bget = px.domButton("Take Cards", function () {
 		bget.style.display = "none";
 		bbuy.style.display = "inline";
-		toggleB.apply(null, buttons);
 		popbooster.visible = false;
+		setVis(hidedom, true);
 	});
 	bget.style.display = "none";
 
@@ -98,7 +93,7 @@ module.exports = function() {
 		g.addChild(name);
 		var price = new PIXI.text.Text(pack.cost, {font: "12px Dosis"});
 		price.anchor.set(0, 1);
-		price.position.set(7, 144);
+		price.position.set(7, 148);
 		g.addChild(price);
 		var gold = new PIXI.Sprite(gfx.gold);
 		gold.anchor.set(0, 1);
@@ -114,19 +109,19 @@ module.exports = function() {
 	});
 
 	for (var i = 0;i < 15;i++) {
-		var elementbutton = px.mkButton(75 + Math.floor(i / 2)*64, 120 + (i == 14 ? 37 : (i % 2)*75), gfx.eicons[i]);
 		(function(_i) {
-			px.setClick(elementbutton, function() {
+			var b = px.domEButton(i, function() {
 				packele = _i;
 				tinfo.text = "Selected Element: " + (packele>12 ? etg.eleNames[packele] : "1:" + packele);
 			});
+			hidedom.push(b);
+			dom.push([75 + Math.floor(i / 2)*64, 120 + (i == 14 ? 37 : (i % 2)*75), b]);
 		})(i);
-		storeui.addChild(elementbutton);
 	}
 
 	//booster popup
-	var popbooster = px.mkBgRect(0, 0, 627, 457);
-	popbooster.position.set(40, 90);
+	var popbooster = px.mkBgRect(0, 0, 710, 568);
+	popbooster.position.set(40, 16);
 	popbooster.visible = false;
 	storeui.addChild(popbooster);
 
@@ -148,16 +143,15 @@ module.exports = function() {
 			}
 			if (etgutil.decklength(data.cards) < 11){
 				bget.style.display = "inline";
-				toggleB.apply(null, buttons);
 				if (popbooster.children.length) popbooster.removeChildren();
 				etgutil.iterdeck(data.cards, function(code, i){
 					var x = i % 5, y = Math.floor(i/5);
 					var cardArt = new PIXI.Sprite(gfx.getArt(code));
-					cardArt.scale.set(0.85, 0.85);
-					cardArt.position.set(7 + (x * 125), 7 + (y * 225));
+					cardArt.position.set(7 + (x * 140), y?298:14);
 					popbooster.addChild(cardArt);
 				});
 				popbooster.visible = true;
+				setVis(hidedom, false);
 			}else{
 				bbuy.style.display = "inline";
 				var link = document.createElement("a");
@@ -177,5 +171,5 @@ module.exports = function() {
 		}
 	});
 	dom.push([777, 184, packmulti]);
-	px.refreshRenderer({view: storeui, domsho: dom, cmds:cmds});
+	px.refreshRenderer({view: storeui, domshop: dom, cmds:cmds});
 }

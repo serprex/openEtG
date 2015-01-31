@@ -263,15 +263,15 @@ module.exports = function(arena, acard, startempty) {
 	editorui.addChild(editormarksprite);
 	var editormark = 0;
 	for (var i = 0;i < 13;i++) {
-		var sprite = px.mkButton(100 + i * 32, 234, gfx.eicons[i]);
 		(function(_i) {
-			px.setClick(sprite, function() {
-				editormark = _i;
-				editormarksprite.texture = gfx.eicons[_i];
-				updateField();
-			});
+			dom.push([100 + i * 32, 234,
+				px.domEButton(i, function() {
+					editormark = _i;
+					editormarksprite.texture = gfx.eicons[_i];
+					updateField();
+				})
+			]);
 		})(i);
-		editorui.addChild(sprite);
 	}
 	var decksprite = new px.DeckDisplay(60, setCardArt,
 		function(i){
