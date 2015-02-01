@@ -1087,8 +1087,8 @@ pairproduce:function(c,t){
 	});
 },
 paleomagnetism:function(c,t){
-	var e = c.owner.upto(52);
-	new etg.Pillar(c.card.as(Cards.Codes[e >= 26 ? etg.PillarList[c.owner.mark] : e >= 13 ? etg.PendList[e-13] : etg.PillarList[e]]), c.owner).place();
+	var e = c.owner.upto(58);
+	new etg.Pillar(c.card.as(Cards.Codes[e >= 29 ? etg.PillarList[c.owner.mark] : e >= 26 ? ["4te", "4tf", "4tg"][e-26] : e >= 13 ? etg.PendList[e-13] : etg.PillarList[e]]), c.owner).place();
 },
 pandemonium:function(c,t){
 	c.owner.foe.masscc(c, Actives.cseed, true);
