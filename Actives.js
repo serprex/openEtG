@@ -1243,12 +1243,9 @@ rebirth:function(c,t){
 	c.transform(c.card.as(Cards.Phoenix));
 },
 reducemaxhp:function(c,t, dmg){
-	if (t instanceof etg.Player){
-		t.maxhp = Math.max(t.maxhp-dmg, 1);
-		if (t.hp > t.maxhp){
-			t.hp = t.maxhp;
-		}
-	}
+	t.maxhp = Math.max(t.maxhp-dmg, 1);
+	if (t.maxhp > 500 && t instanceof etg.Player) t.maxhp = 500;
+	if (t.hp > t.maxhp) t.dmg(t.hp-t.maxhp);
 },
 regen:adrenathrottle(function(c,t){
 	c.owner.status.poison--;

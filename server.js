@@ -494,7 +494,7 @@ var userEvents = {
 						var newCardList = [
 							Cards.DreamCatcher,Cards.Unsummon,Cards.BlackCat,Cards.NullMantis,Cards.Goon,Cards.Envenom,Cards.JetStream,Cards.Salamander,
 							Cards.Osmosis,Cards.SharkofVoid,Cards.Tornado,Cards.Minotaur,Cards.WritofVengeance,Cards.WritofVindication,Cards.JackOLantern,Cards.ThermalRecoil,
-							Cards["52Pickup"],Cards.Alicorn,Cards.ScorpionClaws,Cards.Stormspike,Cards.EpochStaff,Cards.PsycheMetal,Cards.Byakko];
+							Cards["52Pickup"],Cards.Alicorn,Cards.ScorpionClaws,Cards.Stormspike,Cards.Epoch,Cards.PsycheMetal,Cards.Byakko];
 						card = etg.PlayerRng.randomcard(false, function(x){ return notFromElement ^ ~newCardList.indexOf(x) && x.rarity == bumprarity});
 					}
 					if (!card) card = etg.PlayerRng.randomcard(false, function(x) { return x.rarity == bumprarity });
