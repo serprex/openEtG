@@ -12,15 +12,13 @@ function setVis(eles, vis) {
 }
 module.exports = function() {
 	var packdata = [
-		{cost: 15, type: "Bronze", info: "10 Commons", color: 0xcd7d32},
-		{cost: 25, type: "Silver", info: "3 Commons, 3 Uncommons", color: 0xc0c0c0},
-		{cost: 60, type: "Gold", info: "3 Commons, 4 Uncommons, 1 Rare", color: 0xffd700},
-		{cost: 100, type: "Platinum", info: "4 Commons, 3 Uncommons, 1 Rare, 1 Shard", color: 0xe4e4e4},
-		{cost: 250, type: "Nymph", info: "1 Nymph", color: 0x6699bb},
+		{cost: 15, type: "Bronze", info: "10 Commons", color: "#cd7d32"},
+		{cost: 25, type: "Silver", info: "3 Commons, 3 Uncommons", color: "#c0c0c0"},
+		{cost: 60, type: "Gold", info: "3 Commons, 4 Uncommons, 1 Rare", color: "#ffd700"},
+		{cost: 100, type: "Platinum", info: "4 Commons, 3 Uncommons, 1 Rare, 1 Shard", color: "#e4e4e4"},
+		{cost: 250, type: "Nymph", info: "1 Nymph", color: "#6699bb"},
 	];
-	var packele = -1, packrarity = -1;
-
-	var storeui = px.mkView();
+	var packele = -1, packrarity = -1, storeui = new PIXI.Container();
 
 	storeui.addChild(px.mkBgRect(
 		40, 16, 820, 60,
@@ -80,37 +78,38 @@ module.exports = function() {
 	var bbuy = px.domButton("Buy Pack", buyPack);
 	dom.push([775, 156, bget], [775, 156, bbuy]);
 
-	var buttons = packdata.map(function(pack, n){
-		var g = new PIXI.Graphics();
-		g.interactive = true;
-		g.hitArea = new PIXI.math.Rectangle(0, 0, 100, 150);
-		g.lineStyle(3);
-		g.beginFill(pack.color);
-		g.drawRoundedRect(3, 3, 94, 144, 6);
-		g.endFill();
-		var name = new PIXI.text.Text(pack.type, {font: "18px Dosis"});
-		name.anchor.set(.5, .5);
-		name.position.set(50, 75);
-		g.addChild(name);
-		var price = new PIXI.text.Text(pack.cost, {font: "12px Dosis"});
-		price.anchor.set(0, 1);
-		price.position.set(7, 148);
-		g.addChild(price);
-		var gold = new PIXI.Sprite(gfx.gold);
-		gold.anchor.set(0, 1);
-		gold.position.set(8 + price.width, 144);
-		g.addChild(gold);
-		px.setClick(g, function(){
+	packdata.forEach(function(pack, n){
+		var g = document.createElement("div");
+		g.className = "imgb";
+		g.style.borderRadius = "6px";
+		g.style.borderWidth = "3px";
+		g.style.borderStyle = "solid";
+		g.style.borderColor = "black";
+		g.style.width = "100px";
+		g.style.height = "150px";
+		g.style.background = pack.color;
+		var name = px.domText(pack.type);
+		name.style.position = "absolute";
+		name.style.fontSize = "18px";
+		name.style.color = "black";
+		name.style.top = "50%";
+		name.style.textAlign = "center";
+		name.style.transform = "translateY(-50%)"
+		name.style.width = "100px";
+		g.appendChild(name);
+		var price = px.domText(pack.cost + "$");
+		price.style.position = "absolute";
+		price.style.color = "black";
+		price.style.left = "7px";
+		price.style.top = "122px";
+		g.appendChild(price);
+		g.addEventListener("click", function(){
 			packrarity = n;
 			tinfo2.text = pack.type + " Pack: " + pack.info;
 			updateFreeInfo(n);
 		});
-		g.mousedown = function() { g.tint = 0x666666; }
-		g.mouseover = g.mouseup = function() { g.tint = 0xAAAAAA; }
-		g.mouseout = function() { g.tint = 0xFFFFFF; }
-		g.position.set(50+125*n, 280);
-		storeui.addChild(g);
-		return g;
+		dom.push([50+125*n, 280, g]);
+		hidedom.push(g);
 	});
 
 	for (var i = 0;i < 15;i++) {
