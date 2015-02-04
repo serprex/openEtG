@@ -174,9 +174,10 @@ function startMatch(game, foeDeck) {
 		if (!cloakgfx.visible || obj.owner != game.player2 || obj.status.cloak) {
 			var info = obj.info(), actinfo = game.targetingMode && game.targetingMode(obj) && activeInfo[game.targetingText];
 			if (actinfo) info += "\nDmg " + actinfo(obj);
-			infobox.texture = ui.getTextImage(info, ui.mkFont(10, "white"), 0);
-			infobox.position.set(px.mouse.x, px.mouse.y);
-			infobox.visible = true;
+			infobox.text = info;
+			infobox.style.left = px.mouse.x + "px";
+			infobox.style.top = px.mouse.y + "px";
+			infobox.style.display = "inline";
 		}
 	}
 	var handsprite = [new Array(8), new Array(8)];
@@ -363,10 +364,14 @@ function startMatch(game, foeDeck) {
 	cardart.position.set(654, 300);
 	cardart.anchor.set(.5, 0);
 	gameui.addChild(cardart);
-	var infobox = new PIXI.Sprite(gfx.nopic);
-	infobox.alpha = .7;
-	infobox.anchor.set(.5, 1);
-	gameui.addChild(infobox);
+	var infobox = px.domText("");
+	infobox.style.display = "none";
+	infobox.style.opacity = ".7";
+	infobox.style.backgroundColor = "black";
+	infobox.style.fontSize = "10px";
+	infobox.style.transform = "translate(-50%,-100%)";
+	infobox.style.pointerEvents = "none";
+	dom.push([0, 0, infobox]);
 	function onkeydown(e) {
 		if (e.keyCode == 32) { // spc
 			endClick();
@@ -426,7 +431,7 @@ function startMatch(game, foeDeck) {
 			}
 		}
 		var cardartcode, cardartx;
-		infobox.texture = gfx.nopic;
+		infobox.style.display = "none";
 		if (!cloakgfx.visible){
 			foeplays.children.forEach(function(foeplay){
 				if (foeplay.card instanceof etg.Card && px.hitTest(foeplay, px.mouse)) {
@@ -656,9 +661,7 @@ function startMatch(game, foeDeck) {
 			}
 			if (px.hitTest(playerOverlay[j], px.mouse)){
 				setInfo(pl);
-				hptext[j].style.display = "none";
 			}else{
-				hptext[j].style.display = "inline";
 				var poison = pl.status.poison, poisoninfo = (poison > 0 ? poison + " 1:2" : poison < 0 ? -poison + " 1:7" : "") + (pl.neuro ? " 1:10" : "");
 				hptext[j].text = pl.hp + "/" + pl.maxhp + "\n" + pl.deck.length + "cards" + (!cloakgfx.visible && game.expectedDamage[j] ? "\nDmg: " + game.expectedDamage[j] : "") + (poisoninfo ? "\n" + poisoninfo : "");
 			}
