@@ -25,13 +25,13 @@ module.exports = function() {
 				console.log("Confirmed", ownDeck.deck, foeDeck.deck);
 				sock.userEmit("confirmtrade", { cards: etgutil.encodedeck(ownDeck.deck), oppcards: etgutil.encodedeck(foeDeck.deck) });
 				btrade.style.display = "none";
-				var confirmed = new PIXI.text.Text("Confirmed!", { font: "16px Dosis" });
-				confirmed.position.set(10, 110);
-				view.addChild(confirmed);
+				tconfirm.style.display = "inline";
 			}
 			else chat("Wait for your friend to choose!");
 		}
 	});
+	var tconfirm = px.domText("Confirmed!");
+	tconfirm.style.display = "none";
 	var ownVal = px.domText(""), foeVal = px.domText("");
 	var cardChosen = false;
 	function setCardArt(code){
@@ -55,7 +55,7 @@ module.exports = function() {
 	}]],
 		[100, 235, ownVal],
 		[350, 235, foeVal],
-		[10, 40, btrade]];
+		[10, 40, btrade], [10, 60, tconfirm]];
 
 	var cardpool = etgutil.deck2pool(sock.user.pool);
 	var cardsel = new px.CardSelector(dom, setCardArt,
