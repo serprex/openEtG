@@ -62,11 +62,11 @@ function makeArt(card, art, oldrend) {
 	typemark.anchor.set(1, 1);
 	typemark.position.set(128, 252);
 	template.addChild(typemark);
-	var nametag = new PIXI.text.Text(card.name, { font: "12px Dosis", fill: card.upped ? "black" : "white" });
+	var nametag = new PIXI.Text(card.name, { font: "12px Dosis", fill: card.upped ? "black" : "white" });
 	nametag.position.set(2, 4);
 	template.addChild(nametag);
 	if (card.cost) {
-		var text = new PIXI.text.Text(card.cost, { font: "12px Dosis", fill: card.upped ? "black" : "white" });
+		var text = new PIXI.Text(card.cost, { font: "12px Dosis", fill: card.upped ? "black" : "white" });
 		text.anchor.x = 1;
 		text.position.set(rend.width-3, 4);
 		template.addChild(text);
@@ -123,7 +123,7 @@ function getCardImage(code) {
 		if (card) {
 			var clipwidth = rend.width-2;
 			if (card.cost) {
-				var text = new PIXI.text.Text(card.cost, { font: "11px Dosis", fill: card.upped ? "black" : "white" });
+				var text = new PIXI.Text(card.cost, { font: "11px Dosis", fill: card.upped ? "black" : "white" });
 				text.anchor.x = 1;
 				text.position.set(rend.width-2, 5);
 				graphics.addChild(text);
@@ -137,7 +137,7 @@ function getCardImage(code) {
 					clipwidth -= 18;
 				}
 			}
-			var text = new PIXI.text.Text(card.name, { font: "11px Dosis", fill: card.upped ? "black" : "white" });
+			var text = new PIXI.Text(card.name, { font: "11px Dosis", fill: card.upped ? "black" : "white" });
 			text.position.set(2, 5);
 			if (text.width > clipwidth){
 				text.width = clipwidth;
@@ -171,7 +171,7 @@ function getInstImage(code, scale, cache){
 			if (card.shiny) artspr.filters = [shinyFilter];
 			border.addChild(artspr);
 		}
-		var text = new PIXI.text.Text(card.name, { font: "16px Dosis", fill: card.upped ? "black" : "white" });
+		var text = new PIXI.Text(card.name, { font: "16px Dosis", fill: card.upped ? "black" : "white" });
 		text.anchor.x = .5;
 		text.position.set(64, 144);
 		border.addChild(text);
@@ -218,11 +218,10 @@ if (typeof PIXI !== "undefined"){
 	exports.getArt = getArt;
 	exports.getCardImage = getCardImage;
 	exports.getWeaponShieldImage = getWeaponShieldImage;
-	var shinyFilter = new PIXI.filters.ColorMatrixFilter();
-	shinyFilter.matrix = [
+	var shinyFilter = new (require("./ColorMatrixFilter"))([
 		0,1,0,0,
 		0,0,1,0,
 		1,0,0,0,
 		0,0,0,1,
-	];
+	]);
 }

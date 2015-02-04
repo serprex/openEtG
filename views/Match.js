@@ -185,7 +185,7 @@ function startMatch(game, foeDeck) {
 	var shiesprite = new Array(2);
 	var weapsprite = new Array(2);
 	var marksprite = [new PIXI.Sprite(gfx.nopic), new PIXI.Sprite(gfx.nopic)];
-	var marktext = [new PIXI.text.Text("", { font: "18px Dosis" }), new PIXI.text.Text("", { font: "18px Dosis" })];
+	var marktext = [new PIXI.Text("", { font: "18px Dosis" }), new PIXI.Text("", { font: "18px Dosis" })];
 	var quantatext = [new PIXI.Container(), new PIXI.Container()];
 	var hptext = [new px.domText(""), new px.domText("")];
 	var hpxy = [];
@@ -328,7 +328,7 @@ function startMatch(game, foeDeck) {
 			}
 			var child;
 			for (var k = 1;k < 13;k++) {
-				quantatext[j].addChild(child = new PIXI.text.Text("", { font: "16px Dosis" }));
+				quantatext[j].addChild(child = new PIXI.Text("", { font: "16px Dosis" }));
 				child.position.set((k & 1) ? 32 : 86, Math.floor((k - 1) / 2) * 32 + 8);
 				quantatext[j].addChild(child = new PIXI.Sprite(gfx.eicons[k]));
 				child.position.set((k & 1) ? 0 : 54, Math.floor((k - 1) / 2) * 32);

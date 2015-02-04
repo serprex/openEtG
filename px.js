@@ -5,16 +5,9 @@ var ui = require("./uiutil");
 var Cards = require("./Cards");
 var etgutil = require("./etgutil");
 var renderer = new PIXI.autoDetectRenderer(900, 600, {view:document.getElementById("leftpane"), transparent:true, clearBeforeRender:false});
-exports.mouse = {x:0, y:0};
-renderer.view.addEventListener("mousemove", function(e){
-	exports.mouse.x = e.clientX;
-	exports.mouse.y = e.clientY;
-});
-var realStage = new PIXI.Container(), curStage = {};
-var interman = new PIXI.interaction.InteractionManager(realStage, renderer);
-interman.autoPreventDefault = false;
-realStage.addChild(new PIXI.Sprite(new PIXI.Texture(new PIXI.BaseTexture(document.getElementById("bgimg")))));
-realStage.interactive = true;
+var realStage = new PIXI.Sprite(new PIXI.Texture(new PIXI.BaseTexture(document.getElementById("bgimg")))), curStage = {};
+var interman = new (require("./InteractionManager"))(realStage, renderer);
+exports.mouse = interman.mouse;
 function animate() {
 	setTimeout(requestAnimate, 40);
 	if (curStage.next){
@@ -137,8 +130,8 @@ exports.refreshRenderer = function(stage) {
 	if (curStage.endnext){
 		curStage.endnext();
 	}
-	if (realStage.children.length > 1){
-		realStage.removeChildAt(1);
+	if (realStage.children.length){
+		realStage.removeChildren();
 	}
 	for (var key in stage){
 		if (!key.match(special)){
@@ -328,7 +321,7 @@ function CardSelector(dom, cardmouseover, cardclick, maxedIndicator, filterboth)
 		for (var j = 0;j < 15;j++) {
 			var sprite = new PIXI.Sprite(gfx.nopic);
 			sprite.position.set(100 + i * 133, 272 + j * 19);
-			var sprcount = new PIXI.text.Text("", { font: "12px Dosis" });
+			var sprcount = new PIXI.Text("", { font: "12px Dosis" });
 			sprcount.position.set(102, 4);
 			sprite.addChild(sprcount);
 			this.addChild(sprite);
