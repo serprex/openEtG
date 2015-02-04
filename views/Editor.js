@@ -161,13 +161,6 @@ module.exports = function(arena, acard, startempty) {
 		return sum;
 	}
 	function makeattrui(y, name){
-		y = 128+y*20;
-		var data = artable[name];
-		dom.push([8, y, name]);
-		var bm = px.mkButton(50, y, ui.getTextImage("-", ui.mkFont(16, "black"), 0xFFFFFFFF));
-		var bv = px.domText(arattr[name]);
-		dom.push([62, y, bv]);
-		var bp = px.mkButton(90, y, ui.getTextImage("+", ui.mkFont(16, "black"), 0xFFFFFFFF));
 		function modattr(x){
 			arattr[name] += x;
 			if (arattr[name] >= (data.min || 0) && (!data.max || arattr[name] <= data.max)){
@@ -180,10 +173,13 @@ module.exports = function(arena, acard, startempty) {
 			}
 			arattr[name] -= x;
 		}
-		px.setClick(bm, modattr.bind(null, -(data.incr || 1)));
-		px.setClick(bp, modattr.bind(null, data.incr || 1));
-		editorui.addChild(bm);
-		editorui.addChild(bp);
+		y = 128+y*20;
+		var data = artable[name];
+		var bv = px.domText(arattr[name]);
+		var bm = px.domButton("-", modattr.bind(null, -(data.incr || 1)));
+		var bp = px.domButton("+", modattr.bind(null, data.incr || 1));
+		bm.style.width = bp.style.width = "14px";
+		dom.push([4, y, name], [38, y, bm], [56, y, bv], [82, y, bp]);
 	}
 	function switchDeckCb(x){
 		return function() {
@@ -225,7 +221,7 @@ module.exports = function(arena, acard, startempty) {
 			draw: { cost: 135 },
 		};
 		var curpts = new px.domText((arpts-sumscore())/45);
-		dom.push([8, 188, curpts])
+		dom.push([4, 188, curpts])
 		makeattrui(0, "hp");
 		makeattrui(1, "mark");
 		makeattrui(2, "draw");
@@ -247,11 +243,8 @@ module.exports = function(arena, acard, startempty) {
 			}]], [220, 8, quickNum]);
 			buttons = new Array(10);
 			for (var i = 0;i < 10;i++) {
-				var b = document.createElement("input");
-				b.type = "button";
+				var b = px.domButton(i+1, quickDeck(i));
 				b.style.width = "32px";
-				b.value = (i+1).toString();
-				b.addEventListener("click", quickDeck(i));
 				dom.push([300 + i*36, 8, b]);
 				buttons[i] = b;
 			}

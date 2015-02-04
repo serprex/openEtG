@@ -82,6 +82,7 @@ module.exports = function() {
 
 	var buttons = packdata.map(function(pack, n){
 		var g = new PIXI.Graphics();
+		g.interactive = true;
 		g.hitArea = new PIXI.math.Rectangle(0, 0, 100, 150);
 		g.lineStyle(3);
 		g.beginFill(pack.color);
@@ -104,8 +105,12 @@ module.exports = function() {
 			tinfo2.text = pack.type + " Pack: " + pack.info;
 			updateFreeInfo(n);
 		});
+		g.mousedown = function() { g.tint = 0x666666; }
+		g.mouseover = g.mouseup = function() { g.tint = 0xAAAAAA; }
+		g.mouseout = function() { g.tint = 0xFFFFFF; }
+		g.position.set(50+125*n, 280);
 		storeui.addChild(g);
-		return px.mkButton(50+125*n, 280, g);
+		return g;
 	});
 
 	for (var i = 0;i < 15;i++) {

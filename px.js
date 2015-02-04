@@ -220,24 +220,6 @@ exports.mkBgRect = function(){
 	}
 	return g;
 }
-exports.mkButton = function(x, y, b, mouseoverfunc, mouseoutfunc) {
-	if (b instanceof PIXI.Texture) b = new PIXI.Sprite(b);
-	b.interactive = true;
-	b.buttonMode = true;
-	b.position.set(x, y);
-	b.mousedown = function() {
-		b.tint = 0x666666;
-	}
-	b.mouseover = b.mouseup = function() {
-		if (mouseoverfunc) mouseoverfunc();
-		b.tint = 0xAAAAAA;
-	}
-	b.mouseout = function() {
-		if (mouseoutfunc) mouseoutfunc();
-		b.tint = 0xFFFFFF;
-	}
-	return b;
-}
 exports.adjust = function adjust(cardminus, code, x) {
 	if (code in cardminus) {
 		cardminus[code] += x;
