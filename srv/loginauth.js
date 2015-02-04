@@ -1,3 +1,4 @@
+"use strict";
 var qstring = require("querystring");
 var crypto = require("crypto");
 var sutil = require("./sutil");
