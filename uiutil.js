@@ -84,7 +84,7 @@ function getTextImage(text, font, bgcolor, width) {
 		var bg = new PIXI.Graphics();
 		doc.addChild(bg);
 	}
-	var pieces = text.replace(/\|/g, " | ").split(/(\d\d?:\d\d?|\$|\n)/);
+	var pieces = text.replace(/\|/g, " | ").split(/(\d\d?:\d\d?|\n)/);
 	var x = 0, y = 0, h = Math.max(size, new PIXI.Text("j", font).height-3), w = 0;
 	function pushChild(){
 		var w = 0;
@@ -109,10 +109,6 @@ function getTextImage(text, font, bgcolor, width) {
 			w = Math.max(w, x);
 			x = 0;
 			y += h;
-		}else if (piece == "$"){
-			var spr = new PIXI.Sprite(gfx.gold);
-			spr.scale.set(size/16, size/16);
-			pushChild(spr);
 		}else if (/^\d\d?:\d\d?$/.test(piece)) {
 			var parse = piece.split(":");
 			var num = parseInt(parse[0]);
