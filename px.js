@@ -97,7 +97,7 @@ exports.domText = function(text){
 							ele.appendChild(sp);
 						}
 					}else{
-						ele.appendChild(document.createTextElement(parse[0]));
+						ele.appendChild(document.createTextNode(parse[0]));
 						var sp = document.createElement("span");
 						sp.className = "eicon e"+parse[1];
 						ele.appendChild(sp);
