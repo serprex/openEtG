@@ -321,9 +321,12 @@ function CardSelector(dom, cardmouseover, cardclick, maxedIndicator, filterboth)
 		for (var j = 0;j < 15;j++) {
 			var sprite = new PIXI.Sprite(gfx.nopic);
 			sprite.position.set(100 + i * 133, 272 + j * 19);
-			var sprcount = new PIXI.Text("", { font: "12px Dosis" });
-			sprcount.position.set(102, 4);
-			sprite.addChild(sprcount);
+			var sprcount = exports.domText("");
+			sprcount.style.fontSize = "12px";
+			sprcount.style.pointerEvents = "none";
+			sprcount.style.color = "black";
+			dom.push([sprite.position.x + 102, sprite.position.y + 2, sprcount]);
+			sprite.countText = sprcount;
 			this.addChild(sprite);
 			this.columnspr[i].push(sprite);
 		}
@@ -381,13 +384,13 @@ CardSelector.prototype.renderColumns = function(){
 			spr.texture = gfx.getCardImage(code);
 			spr.visible = true;
 			if (this.cardpool) {
-				var txt = spr.children[0], card = Cards.Codes[code], scode = etgutil.asShiny(code, true);
+				var card = Cards.Codes[code], scode = etgutil.asShiny(code, true);
 				var cardAmount = card.isFree() ? "-" : code in this.cardpool ? this.cardpool[code] - ((this.cardminus && this.cardminus[code]) || 0) : 0, shinyAmount = 0;
 				if (this.filterboth && !this.showshiny) {
 					var scode = etgutil.asShiny(code, true);
 					shinyAmount = scode in this.cardpool ? this.cardpool[scode] - ((this.cardminus && this.cardminus[scode]) || 0) : 0;
 				}
-				txt.text = cardAmount + (shinyAmount ? "/"+shinyAmount:"");
+				spr.countText.text = cardAmount + (shinyAmount ? "/"+shinyAmount:"");
 				if (this.maxedIndicator && card.type != etg.PillarEnum && cardAmount >= 6) {
 					this.maxedIndicator.beginFill(ui.elecols[cardAmount >= 12 ? etg.Chroma : etg.Light]);
 					this.maxedIndicator.drawRect(spr.position.x + 100, spr.position.y, 33, 20);
@@ -397,6 +400,7 @@ CardSelector.prototype.renderColumns = function(){
 		}
 		for (;j < 15;j++) {
 			this.columnspr[i][j].visible = false;
+			this.columnspr[i][j].countText.text = "";
 		}
 	}
 }

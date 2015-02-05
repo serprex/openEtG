@@ -12,7 +12,6 @@ module.exports = function(area) {
 	var questui = px.mkView(function() {
 		tinfo.text = "";
 	});
-	questui.addChild(px.mkBgRect(9, 9, 880, 111));
 	var questmap = new PIXI.Sprite(gfx.bg_quest);
 	questmap.position.set(124, 162);
 	questui.addChild(questmap);
@@ -21,6 +20,7 @@ module.exports = function(area) {
 	var errinfo = px.domText("");
 	tinfo.style.maxWidth = errinfo.style.maxWidth = 850;
 	var dom = [
+		[9, 9, px.domBox(880, 111)],
 		[26, 26, tinfo],
 		[26, 125, errinfo],
 		[750, 246, ["Exit", require("./QuestMain")]]

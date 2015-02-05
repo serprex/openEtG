@@ -36,7 +36,7 @@ module.exports = function(arena, acard, startempty) {
 				decksprite.deck.splice(i, 1);
 			}
 		}
-		editormarksprite.texture = gfx.eicons[editormark];
+		marksprite.className = "Eicon E"+editormark;
 		if (decksprite.deck.length > 60) decksprite.deck.length = 60;
 		decksprite.deck.sort(etg.cardCmp);
 		if (sock.user) {
@@ -251,16 +251,15 @@ module.exports = function(arena, acard, startempty) {
 			fixQuickButtons();
 		}
 	}
-	var editormarksprite = new PIXI.Sprite(gfx.nopic);
-	editormarksprite.position.set(66, 200);
-	editorui.addChild(editormarksprite);
+	var marksprite = document.createElement("span");
+	dom.push([66, 200, marksprite]);
 	var editormark = 0;
 	for (var i = 0;i < 13;i++) {
 		(function(_i) {
 			dom.push([100 + i * 32, 234,
 				px.domEButton(i, function() {
 					editormark = _i;
-					editormarksprite.texture = gfx.eicons[_i];
+					marksprite.className = "Eicon E"+_i;
 					updateField();
 				})
 			]);

@@ -185,11 +185,10 @@ function startMatch(game, foeDeck) {
 	var permsprite = [new Array(16), new Array(16)];
 	var shiesprite = new Array(2);
 	var weapsprite = new Array(2);
-	var marksprite = [new PIXI.Sprite(gfx.nopic), new PIXI.Sprite(gfx.nopic)];
-	var marktext = [new PIXI.Text("", { font: "18px Dosis" }), new PIXI.Text("", { font: "18px Dosis" })];
-	var quantatext = [new PIXI.Container(), new PIXI.Container()];
-	var hptext = [new px.domText(""), new px.domText("")];
-	var hpxy = [];
+	var marksprite = [document.createElement("span"), document.createElement("span")], markspritexy = [];
+	var marktext = [px.domText(""), px.domText("")], marktextxy = [];
+	var quantatext = [[], []], quantaxy = [[], []];
+	var hptext = [new px.domText(""), new px.domText("")], hpxy = [];
 	var playerOverlay = [new PIXI.Sprite(gfx.nopic), new PIXI.Sprite(gfx.nopic)];
 	var handOverlay = [new PIXI.Sprite(gfx.nopic), new PIXI.Sprite(gfx.nopic)];
 	var sabbathOverlay = [new PIXI.Sprite(gfx.sabbath), new PIXI.Sprite(gfx.sabbath)];
@@ -200,6 +199,9 @@ function startMatch(game, foeDeck) {
 		hptext[j].style.pointerEvents = "none";
 		hptext[j].style.fontSize = "12px";
 		hptext[j].style.lineHeight = "1.1";
+		marktext[j].style.pointerEvents = "none";
+		marktext[j].style.fontSize = "18";
+		marktext[j].style.transform = "translate(-50%,-50%)";
 		playerOverlay[j].width = 95;
 		playerOverlay[j].height = 80;
 		handOverlay[j].position.set(j ? 9 : 774, j ? 99 : 300);
@@ -300,8 +302,8 @@ function startMatch(game, foeDeck) {
 			px.setInteractive.apply(null, handsprite[j]);
 			px.setInteractive.apply(null, creasprite[j]);
 			px.setInteractive.apply(null, permsprite[j]);
-			marksprite[j].anchor.set(.5, .5);
-			marksprite[j].position.set(740, 470);
+			markspritexy[j] = new PIXI.math.Point(740, 470);
+			marksprite[j].style.transform = "translate(-50%,-50%)";
 			weapsprite[j] = makeInst(null, "weapon", new PIXI.math.Point(666, 512), 5/4);
 			shiesprite[j] = makeInst(null, "shield", new PIXI.math.Point(710, 532), 5/4);
 			if (j){
@@ -309,30 +311,31 @@ function startMatch(game, foeDeck) {
 				gameui.addChild(weapsprite[j]);
 				ui.reflectPos(weapsprite[j]);
 				ui.reflectPos(shiesprite[j]);
-				ui.reflectPos(marksprite[j]);
+				ui.reflectPos(markspritexy[j]);
 			}else{
 				gameui.addChild(weapsprite[j]);
 				gameui.addChild(shiesprite[j]);
 			}
-			gameui.addChild(marksprite[j]);
-			marktext[j].anchor.set(.5, .5);
 			playerOverlay[j].anchor.set(.5, .5);
-			marktext[j].position.set(768, 470);
-			quantatext[j].position.set(j ? 792 : 0, j ? 106 : 308);
+			marktextxy[j] = new PIXI.math.Point(768, 470);
 			playerOverlay[j].position.set(50, 555);
-			hpxy.push(new PIXI.math.Point(50, 550));
+			hpxy[j] = new PIXI.math.Point(50, 550);
 			if (j) {
-				ui.reflectPos(marktext[j]);
+				ui.reflectPos(marktextxy[j]);
 				ui.reflectPos(hpxy[j]);
 				ui.reflectPos(playerOverlay[j]);
 				playerOverlay[j].y += 15;
 			}
-			var child;
+			var child, quantaxy = [j ? 792 : 0, j ? 106 : 308];
 			for (var k = 1;k < 13;k++) {
-				quantatext[j].addChild(child = new PIXI.Text("", { font: "16px Dosis" }));
-				child.position.set((k & 1) ? 32 : 86, Math.floor((k - 1) / 2) * 32 + 8);
-				quantatext[j].addChild(child = new PIXI.Sprite(gfx.eicons[k]));
-				child.position.set((k & 1) ? 0 : 54, Math.floor((k - 1) / 2) * 32);
+				quantatext[j][k-1] = px.domText("0");
+				quantatext[j][k-1].style.fontSize = "18px";
+				quantatext[j][k-1].style.pointerEvents = "none";
+				dom.push([quantaxy[0] + ((k & 1) ? 32 : 86), quantaxy[1] + Math.floor((k - 1) / 2) * 32 + 4,
+					quantatext[j][k-1]]);
+				var quantaicon = document.createElement("span");
+				quantaicon.className = "Eicon E"+k;
+				dom.push([quantaxy[0] + ((k & 1) ? 0 : 54), quantaxy[1] + Math.floor((k - 1) / 2) * 32, quantaicon]);
 			}
 			px.setClick(playerOverlay[j], function() {
 				if (game.phase != etg.PlayPhase) return;
@@ -342,8 +345,8 @@ function startMatch(game, foeDeck) {
 				}
 			}, false);
 		})(j);
-		gameui.addChild(marktext[j]);
-		gameui.addChild(quantatext[j]);
+		dom.push([markspritexy[j].x, markspritexy[j].y, marksprite[j]]);
+		dom.push([marktextxy[j].x, marktextxy[j].y, marktext[j]]);
 		dom.push([hpxy[j].x-50, playerOverlay[j].y - 24, hptext[j]]);
 		gameui.addChild(handOverlay[j]);
 		gameui.addChild(sabbathOverlay[j]);
@@ -361,7 +364,6 @@ function startMatch(game, foeDeck) {
 	var foeplays = new PIXI.Container();
 	gameui.addChild(foeplays);
 	var cardart = new PIXI.Sprite(gfx.nopic);
-	cardart.position.set(654, 300);
 	cardart.anchor.set(.5, 0);
 	gameui.addChild(cardart);
 	var infobox = px.domText("");
@@ -481,7 +483,14 @@ function startMatch(game, foeDeck) {
 			cardart.texture = gfx.getArt(cardartcode);
 			cardart.visible = true;
 			cardart.position.set(cardartx || 654, px.mouse.y > 300 ? 44 : 300);
-		} else cardart.visible = false;
+			marktext[0].style.display = marksprite[0].style.display = cardartx >= 670 && cardartx <= 760 ? "none" : "inline";
+			marktext[1].style.display = marksprite[1].style.display = cardartx >= 140 && cardartx <= 230 ? "none" : "inline";
+		} else {
+			cardart.visible = false;
+			for(var j=0; j<2; j++){
+				marksprite[j].style.display = marktext[j].style.display = "inline";
+			}
+		}
 		if (game.winner == game.player1 && sock.user && !game.quest && game.ai) {
 			if (game.cardreward === undefined) {
 				var winnable = foeDeck.filter(function(card){ return card.rarity > 0 && card.rarity < 4; }), cardwon;
@@ -639,12 +648,10 @@ function startMatch(game, foeDeck) {
 				shiesprite[j].texture = gfx.getWeaponShieldImage(sh.card.code);
 				drawStatus(sh, shiesprite[j]);
 			} else shiesprite[j].visible = false;
-			marksprite[j].texture = gfx.eicons[pl.mark];
-			if (pl.markpower != 1){
-				marktext[j].text = "x" + pl.markpower;
-			}else marktext[j].visible = false;
+			marksprite[j].className = "Eicon E"+pl.mark;
+			marktext[j].text = pl.markpower != 1 ? "x" + pl.markpower : "";
 			for (var i = 1;i < 13;i++) {
-				quantatext[j].children[i*2-2].text = pl.quanta[i];
+				quantatext[j][i-1].text = pl.quanta[i];
 			}
 			fgfx.beginFill(0);
 			fgfx.drawRect(playerOverlay[j].x - 41, playerOverlay[j].y - 25, 82, 16);

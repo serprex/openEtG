@@ -8,12 +8,12 @@ module.exports = function(){
 	var questui = px.mkView(function() {
 		tinfo.text = "Welcome to Potatotal Island. The perfect island for adventuring!";
 	});
-	questui.addChild(px.mkBgRect(9, 9, 880, 111));
 	var questmap = new PIXI.Sprite(gfx.bg_questmap);
 	questmap.position.set(124, 162);
 	questui.addChild(questmap);
 	var tinfo = px.domText("");
 	tinfo.style.maxWidth = "850px";
+	var dom = [[9, 9, px.domBox(880, 111)], [26, 26, tinfo], [750, 246, ["Exit", require("./MainMenu")]]];
 	var areainfo = {
 		forest: ["Spooky Forest", new PIXI.math.Polygon(555, 221, 456, 307, 519, 436, 520, 472, 631, 440, 652, 390, 653, 351, 666, 321, 619, 246)],
 		city: ["Capital City", new PIXI.math.Polygon(456, 307, 519, 436, 520, 472, 328, 496, 258, 477, 259, 401)],
@@ -47,14 +47,14 @@ module.exports = function(){
 					xtot += points[i];
 					ytot += points[i+1];
 				}
-				var icon = new PIXI.Sprite(gfx.eicons[13]);
-				icon.anchor.x = 0.5;
-				icon.anchor.y = 0.5;
-				icon.position.set((xtot*2) / points.length, (ytot*2) / points.length);
-				graphics.addChild(icon);
+				var icon = document.createElement("span");
+				icon.className = "Eicon E13";
+				icon.style.transform = "translate(-50%,-50%)";
+				icon.style.pointerEvents = "none";
+				dom.push([(xtot*2) / points.length, (ytot*2) / points.length, icon]);
 			}
 		})(areainfo[key], key);
 		questui.addChild(graphics);
 	}
-	px.refreshRenderer({view:questui, qdom:[[26, 26, tinfo], [750, 246, ["Exit", require("./MainMenu")]]]});
+	px.refreshRenderer({view:questui, qdom:dom});
 }
