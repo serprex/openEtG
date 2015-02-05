@@ -191,7 +191,7 @@ function startMatch(game, foeDeck) {
 	var hptext = [new px.domText(""), new px.domText("")], hpxy = [];
 	var playerOverlay = [new PIXI.Sprite(gfx.nopic), new PIXI.Sprite(gfx.nopic)];
 	var handOverlay = [new PIXI.Sprite(gfx.nopic), new PIXI.Sprite(gfx.nopic)];
-	var sabbathOverlay = [new PIXI.Sprite(gfx.sabbath), new PIXI.Sprite(gfx.sabbath)];
+	var sabbathOverlay = [document.createElement("span"), document.createElement("span")];
 	var sacrificeOverlay = [new PIXI.Sprite(gfx.sacrifice), new PIXI.Sprite(gfx.sacrifice)];
 	for (var j = 0;j < 2;j++) {
 		hptext[j].style.textAlign = "center";
@@ -204,8 +204,9 @@ function startMatch(game, foeDeck) {
 		marktext[j].style.transform = "translate(-50%,-50%)";
 		playerOverlay[j].width = 95;
 		playerOverlay[j].height = 80;
+		sabbathOverlay[j].className = "sabbath";
+		sabbathOverlay[j].style.display = "none";
 		handOverlay[j].position.set(j ? 9 : 774, j ? 99 : 300);
-		sabbathOverlay[j].position.set(j ? 792 : 0, j ? 80 : 288);
 		sacrificeOverlay[j].position.set(j ? 800 : 0, j ? 7 : 502);
 		(function(_j) {
 			for (var i = 0;i < 8;i++) {
@@ -328,8 +329,8 @@ function startMatch(game, foeDeck) {
 			}
 			var child, quantaxy = [j ? 792 : 0, j ? 106 : 308];
 			for (var k = 1;k < 13;k++) {
-				quantatext[j][k-1] = px.domText("0");
-				quantatext[j][k-1].style.fontSize = "18px";
+				quantatext[j][k-1] = px.domText("");
+				quantatext[j][k-1].style.fontSize = "16px";
 				quantatext[j][k-1].style.pointerEvents = "none";
 				dom.push([quantaxy[0] + ((k & 1) ? 32 : 86), quantaxy[1] + Math.floor((k - 1) / 2) * 32 + 4,
 					quantatext[j][k-1]]);
@@ -345,11 +346,11 @@ function startMatch(game, foeDeck) {
 				}
 			}, false);
 		})(j);
-		dom.push([markspritexy[j].x, markspritexy[j].y, marksprite[j]]);
-		dom.push([marktextxy[j].x, marktextxy[j].y, marktext[j]]);
-		dom.push([hpxy[j].x-50, playerOverlay[j].y - 24, hptext[j]]);
+		dom.push([markspritexy[j].x, markspritexy[j].y, marksprite[j]],
+			[marktextxy[j].x, marktextxy[j].y, marktext[j]],
+			[hpxy[j].x-50, playerOverlay[j].y - 24, hptext[j]],
+			[j ? 792 : 0, j ? 80 : 288, sabbathOverlay[j]]);
 		gameui.addChild(handOverlay[j]);
-		gameui.addChild(sabbathOverlay[j]);
 		gameui.addChild(sacrificeOverlay[j]);
 		gameui.addChild(playerOverlay[j]);
 	}
@@ -586,7 +587,7 @@ function startMatch(game, foeDeck) {
 		for (var j = 0;j < 2;j++) {
 			var pl = game.players(j);
 			sacrificeOverlay[j].visible = pl.sosa;
-			sabbathOverlay[j].visible = pl.flatline;
+			sabbathOverlay[j].style.display = pl.flatline ? "inline-block" : "none";
 			handOverlay[j].texture = (pl.silence? gfx.hborders[0] :
 				pl.sanctuary ? gfx.hborders[1] :
 				pl.nova >= 3 ? gfx.hborders[2] : gfx.nopic);
@@ -651,7 +652,7 @@ function startMatch(game, foeDeck) {
 			marksprite[j].className = "Eicon E"+pl.mark;
 			marktext[j].text = pl.markpower != 1 ? "x" + pl.markpower : "";
 			for (var i = 1;i < 13;i++) {
-				quantatext[j][i-1].text = pl.quanta[i];
+				quantatext[j][i-1].text = pl.quanta[i] || "";
 			}
 			fgfx.beginFill(0);
 			fgfx.drawRect(playerOverlay[j].x - 41, playerOverlay[j].y - 25, 82, 16);
