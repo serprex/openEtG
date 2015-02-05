@@ -25,7 +25,6 @@ module.exports = function(){
 		if (!(key in Quest.areas))continue;
 		var graphics = new PIXI.Graphics();
 		graphics.interactive = true;
-		graphics.buttonMode = true;
 		(function (ainfo, k) {
 			var points = ainfo[1].points;
 			graphics.hitArea = ainfo[1];

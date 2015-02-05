@@ -24,9 +24,7 @@ module.exports = InteractionManager;
 InteractionManager.prototype.visitChildren = function (visitFunc, displayObject)
 {
 	var children = (displayObject || this.stage).children;
-	var length = children.length;
-
-	for (var i = length - 1; i >= 0; i--)
+	for (var i = children.length - 1; i >= 0; i--)
 	{
 		var child = children[i];
 		if (child.children.length > 0 && child.interactiveChildren !== false)
@@ -187,19 +185,17 @@ InteractionManager.prototype.onMouseUp = function (event)
 	this.down = null;
 };
 
-InteractionManager.prototype.hitTest = function (item, global)
+InteractionManager.prototype.hitTest = function (item, xy)
 {
 	if (!item.worldVisible)
 	{
 		return false;
 	}
 
-	// map the global point to local space.
-	item.worldTransform.applyInverse(global,  this._tempPoint);
+	// map the global point to local space
+	item.worldTransform.applyInverse(xy,  this._tempPoint);
 
-	var x = this._tempPoint.x,
-		y = this._tempPoint.y,
-		i;
+	var x = this._tempPoint.x, y = this._tempPoint.y;
 
 	//a sprite or display object with a hit area defined
 	if (item.hitArea && item.hitArea.contains)
@@ -210,45 +206,19 @@ InteractionManager.prototype.hitTest = function (item, global)
 	else if (item instanceof PIXI.Sprite)
 	{
 		var width = item.texture.frame.width;
-		var height = item.texture.frame.height;
 		var x1 = -width * item.anchor.x;
-		var y1;
-
 		if (x > x1 && x < x1 + width)
 		{
-			y1 = -height * item.anchor.y;
-
+			var height = item.texture.frame.height;
+			var y1 = -height * item.anchor.y;
 			if (y > y1 && y < y1 + height)
 			{
-				// set the target property if a hit is true!
-				return true;
-			}
-		}
-	}
-	else if (item instanceof PIXI.Graphics)
-	{
-		var graphicsData = item.graphicsData;
-		for (i = 0; i < graphicsData.length; i++)
-		{
-			var data = graphicsData[i];
-			// only deal with fills..
-			if (data.fill && data.shape && data.shape.contains(x, y))
-			{
 				return true;
 			}
 		}
 	}
 
-	var length = item.children.length;
-
-	for (i = 0; i < length; i++)
-	{
-		var tempItem = item.children[i];
-		var hit = this.hitTest(tempItem, global);
-		if (hit)
-		{
-			return true;
-		}
-	}
-	return false;
+	return item.children.some(function(child){
+		return this.hitTest(child, xy);
+	}, this);
 };
