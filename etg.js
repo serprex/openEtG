@@ -890,7 +890,11 @@ Weapon.prototype.freeze = Creature.prototype.freeze = function(x){
 		}
 	}
 }
-Creature.prototype.spelldmg = Creature.prototype.dmg = function(x, dontdie){
+Creature.prototype.spelldmg = function(x, dontdie){
+	if (this.active.spelldmg && this.active.spelldmg(this, undefined, x)) return 0;
+	return this.dmg(x, dontdie);
+}
+Creature.prototype.dmg = function(x, dontdie){
 	if (!x)return 0;
 	var dmg = x<0 ? Math.max(this.hp-this.maxhp, x) : Math.min(this.truehp(), x);
 	this.hp -= dmg;
@@ -1146,9 +1150,9 @@ Weapon.prototype.attack = Creature.prototype.attack = function(stasis, freedomCh
 			}
 		}else{
 			var truedr = target.shield ? target.shield.truedr() : 0;
-			var tryDmg = Math.max(trueatk - truedr, 0);
-			if (!target.shield || !target.shield.active.shield || !target.shield.active.shield(target.shield, this, tryDmg)){
-				if (truedr > 0 && this.active.blocked) this.active.blocked(this, target.shield, truedr);
+			var tryDmg = Math.max(trueatk - truedr, 0), blocked = Math.max(Math.min(truedr, trueatk), 0);
+			if (!target.shield || !target.shield.active.shield || !target.shield.active.shield(target.shield, this, tryDmg, blocked)){
+				if (truedr > 0 && this.active.blocked) this.active.blocked(this, target.shield, blocked);
 				if (tryDmg > 0){
 					var dmg = target.dmg(tryDmg);
 					if (this.active.hit){

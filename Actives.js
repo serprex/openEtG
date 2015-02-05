@@ -222,9 +222,8 @@ clear:function(c,t){
 	}
 },
 corpseexplosion:function(c,t){
-	function dmg1(c,t){ t.dmg(1); }
 	t.die();
-	c.owner.foe.masscc(c, dmg1, !c.card.upped);
+	c.owner.foe.masscc(c, function(c,t){ t.spelldmg(1) }, !c.card.upped);
 	var poison = (t.status.poison || 0) + (t.status.poisonous ? 1 : 0);
 	if (poison){
 		c.owner.foe.addpoison(poison);
@@ -380,7 +379,7 @@ drawcopy:function(c,t){
 },
 dryspell:function(c,t){
 	function dryeffect(c,t){
-		c.spend(etg.Water, -t.dmg(1));
+		c.spend(etg.Water, -t.spelldmg(1));
 	}
 	c.owner.foe.masscc(c.owner, dryeffect, true);
 },
@@ -694,7 +693,7 @@ heatmirror: function(c, t, fromhand) {
 	}
 },
 holylight:function(c,t){
-	t.dmg(!(t instanceof etg.Player) && t.status.nocturnal?10:-10);
+	t.spelldmg(t.status.nocturnal?10:-10);
 },
 hope:function(c,t){
 	return c.owner.creatures.reduce(function(dr, cr){
@@ -711,7 +710,7 @@ icebolt:function(c,t){
 ignite:function(c,t){
 	c.die();
 	c.owner.foe.spelldmg(20);
-	c.owner.foe.masscc(c, function(c,x){x.dmg(1)}, true);
+	c.owner.foe.masscc(c, function(c,x){x.spelldmg(1)}, true);
 },
 immolate:function(c,t){
 	t.die();
@@ -1062,7 +1061,7 @@ nymph:function(c,t){
 	new etg.Creature(t.card.as(Cards.Codes[etg.NymphList[e]]), t.owner).place();
 },
 obsession:function(c,t){
-	c.owner.dmg(c.card.upped?10:8);
+	c.owner.spelldmg(c.card.upped?10:8);
 },
 ouija:function(c,t){
 	if(!c.owner.foe.sanctuary && c.owner.foe.hand.length<8){
@@ -1185,6 +1184,7 @@ protectall:function(c,t){
 	function protect(p){
 		if (p && p.isMaterial()){
 			p.addactive("prespell", Actives.protectonce);
+			p.addactive("spelldmg", Actives.protectoncedmg);
 		}
 	}
 	c.owner.creatures.forEach(protect);
@@ -1195,8 +1195,14 @@ protectall:function(c,t){
 protectonce:function(c,t, data){
 	if (c === data.tgt && c.owner != t.owner){
 		c.rmactive("prespell", "protectonce");
+		c.rmactive("spelldmg", "protectoncedmg");
 		data.tgt = true;
 	}
+},
+protectoncedmg:function(c,t){
+	c.rmactive("prespell", "protectonce");
+	c.rmactive("spelldmg", "protectoncedmg");
+	return true;
 },
 purify:function(c,t){
 	t.status.poison = t.status.poison < 0?t.status.poison-2:-2;
@@ -1229,7 +1235,7 @@ rage:function(c,t){
 	var dmg = c.card.upped?6:5;
 	Effect.mkText(dmg+"|-"+dmg, t);
 	t.atk += dmg;
-	t.dmg(dmg);
+	t.spelldmg(dmg);
 	t.status.frozen = 0;
 },
 readiness:function(c,t){
@@ -1549,11 +1555,11 @@ stoneform:function(c,t){
 	delete c.active.cast;
 	c.status.golem = true;
 },
-storm2:function(c,t){
-	t.masscc(c, function(c,x){x.dmg(2)});
-},
-storm3:function(c,t){
-	t.masscc(c, Actives.snipe);
+storm:function(x){
+	var n = parseInt(x);
+	return function(c,t){
+		t.masscc(c, function(c,x){x.spelldmg(n)});
+	}
 },
 swarm:function(c,t){
 	return c.owner.creatures.reduce(function(hp, cr){
@@ -1759,9 +1765,8 @@ pillcar:function(c,t){
 		c.owner.spend(c.owner.choose([etg.Entropy, etg.Gravity, etg.Time, etg.Aether]), -1);
 	}
 },
-absorbdmg:function(c,t, dmg){
-	c.defstatus("storedpower", 0);
-	c.status.storedpower++;
+absorbdmg:function(c,t, dmg, blocked){
+	c.status.storedpower = (c.status.storedpower || 0) + blocked;
 },
 absorber:function(c,t){
 	c.owner.spend(etg.Fire, -3);
