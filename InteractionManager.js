@@ -6,7 +6,6 @@ function InteractionManager(stage, renderer)
 	this.down = null;
 	this.mouse = new PIXI.math.Point();
 	this.interactionDOMElement = null;
-	this.eventsAdded = false;
 	this.lastmove = 0;
 	this.onMouseMove = this.onMouseMove.bind(this);
 	this.onMouseDown = this.onMouseDown.bind(this);
@@ -68,8 +67,6 @@ InteractionManager.prototype.addEvents = function ()
 	this.interactionDOMElement.addEventListener('mouseout',	 this.onMouseOut,   true);
 
 	window.addEventListener('mouseup', this.onMouseUp, true);
-
-	this.eventsAdded = true;
 };
 
 InteractionManager.prototype.removeEvents = function ()
@@ -86,8 +83,6 @@ InteractionManager.prototype.removeEvents = function ()
 	this.interactionDOMElement = null;
 
 	window.removeEventListener('mouseup',  this.onMouseUp, true);
-
-	this.eventsAdded = false;
 };
 
 InteractionManager.prototype.onMouseMove = function (event)
