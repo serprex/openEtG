@@ -332,8 +332,8 @@ function CardSelector(dom, cardmouseover, cardclick, maxedIndicator, filterboth)
 CardSelector.prototype = Object.create(PIXI.Container.prototype);
 CardSelector.prototype.click = function(e){
 	if (!this.cardclick) return;
-	var col = this.columns[Math.floor((e.global.x-100)/133)], card;
-	if (col && (card = col[Math.floor((e.global.y-272)/19)])){
+	var col = this.columns[Math.floor((e.x-100)/133)], card;
+	if (col && (card = col[Math.floor((e.y-272)/19)])){
 		ui.playSound("cardClick");
 		var code = card.code;
 		if (this.filterboth && !this.showshiny){
