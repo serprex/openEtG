@@ -7,6 +7,7 @@ function InteractionManager(stage, renderer)
 	this.mouse = new PIXI.math.Point();
 	this.interactionDOMElement = null;
 	this.eventsAdded = false;
+	this.lastmove = 0;
 	this.onMouseMove = this.onMouseMove.bind(this);
 	this.onMouseDown = this.onMouseDown.bind(this);
 	this.onMouseOut = this.onMouseOut.bind(this);
@@ -91,10 +92,10 @@ InteractionManager.prototype.removeEvents = function ()
 
 InteractionManager.prototype.onMouseMove = function (event)
 {
-	var rect = this.interactionDOMElement.getBoundingClientRect();
-
-	this.mouse.x = (event.clientX - rect.left) * (this.interactionDOMElement.width / rect.width);
-	this.mouse.y = (event.clientY - rect.top) * ( this.interactionDOMElement.height / rect.height);
+	var now = Date.now();
+	if (now - this.lastmove < 16) return;
+	this.lastmove = now;
+	this.mouse.set(event.clientX, event.clientY);
 
 	var over = null;
 	this.visitChildren(function(item){
