@@ -27,7 +27,7 @@ InteractionManager.prototype.visitChildren = function (visitFunc, displayObject)
 	for (var i = children.length - 1; i >= 0; i--)
 	{
 		var child = children[i];
-		if (child.children.length > 0 && child.interactiveChildren !== false)
+		if (child.children.length > 0)
 		{
 			var ret = this.visitChildren(visitFunc, child);
 			if (ret)
@@ -60,8 +60,8 @@ InteractionManager.prototype.addEvents = function ()
 		return;
 	}
 
-	this.interactionDOMElement.addEventListener('mousemove',	this.onMouseMove,  true);
-	this.interactionDOMElement.addEventListener('mousedown',	this.onMouseDown,  true);
+	this.interactionDOMElement.addEventListener('mousemove', this.onMouseMove,  true);
+	this.interactionDOMElement.addEventListener('mousedown', this.onMouseDown,  true);
 	this.interactionDOMElement.addEventListener('mouseout',	 this.onMouseOut,   true);
 
 	window.addEventListener('mouseup', this.onMouseUp, true);

@@ -6,6 +6,7 @@ var Cards = require("./Cards");
 var etgutil = require("./etgutil");
 var renderer = new PIXI.autoDetectRenderer(900, 600, {view:document.getElementById("leftpane"), transparent:true, clearBeforeRender:false});
 var realStage = new PIXI.Sprite(new PIXI.Texture(new PIXI.BaseTexture(document.getElementById("bgimg")))), curStage = {};
+realStage.interactive = true;
 var interman = new (require("./InteractionManager"))(realStage, renderer);
 exports.mouse = interman.mouse;
 function animate() {
