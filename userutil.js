@@ -16,13 +16,17 @@ exports.arenaCost = function(lv){
 }
 exports.calcWealth = function(cardpool){
 	var wealth = 0;
-	for(var code in cardpool){
+	function wealthIter(code, count){
 		var card = Cards.Codes[code];
 		if (card && card.rarity != -1 && (card.rarity || card.upped || card.shiny)){
-			var worth = exports.cardValues[card.rarity];
-			if (card.upped) worth *= 6;
-			if (card.shiny) worth *= 6;
-			wealth += worth * cardpool[code];
+			wealth += exports.cardValues[card.rarity] * (card.upped?6:1) * (card.shiny?6:1) * count;
+		}
+	}
+	if (typeof cardpool === "string"){
+		etgutil.iterraw(cardpool, wealthIter);
+	}else{
+		for(var code in cardpool){
+			wealthIter(code, cardpool[code]);
 		}
 	}
 	return wealth;
