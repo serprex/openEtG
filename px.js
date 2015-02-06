@@ -185,11 +185,8 @@ exports.mkView = function(mouseover){
 	var view = new PIXI.Container();
 	view.interactive = true;
 	if (mouseover){
-		var bg = new PIXI.Container();
-		bg.hitArea = realStage.hitArea;
-		bg.mouseover = mouseover;
-		bg.interactive = true;
-		view.addChild(bg);
+		view.hitArea = new PIXI.math.Rectangle(0, 0, 600, 900);
+		view.mouseover = mouseover;
 	}
 	return view;
 }
