@@ -484,7 +484,7 @@ function startMatch(game, foeDeck) {
 			cardart.texture = gfx.getArt(cardartcode);
 			cardart.visible = true;
 			cardart.position.set(cardartx || 654, px.mouse.y > 300 ? 44 : 300);
-			if (px.mouse.y > 300) marktext[0].style.display = marksprite[0].style.display = cardartx >= 670 && cardartx <= 760 ? "none" : "inline";
+			if (px.mouse.y < 300) marktext[0].style.display = marksprite[0].style.display = cardartx >= 670 && cardartx <= 760 ? "none" : "inline";
 			else marktext[1].style.display = marksprite[1].style.display = cardartx >= 140 && cardartx <= 230 ? "none" : "inline";
 		} else {
 			cardart.visible = false;
