@@ -88,7 +88,10 @@ InteractionManager.prototype.onMouseMove = function (event)
 	var now = Date.now();
 	if (now - this.lastmove < 16) return;
 	this.lastmove = now;
-	this.mouse.set(event.clientX, event.clientY);
+	var rect = this.interactionDOMElement.getBoundingClientRect();
+	this.mouse.set(
+		(event.clientX - rect.left) * (this.interactionDOMElement.width / rect.width),
+		(event.clientY - rect.top) * (this.interactionDOMElement.height / rect.height));
 
 	var over = null;
 	this.visitChildren(function(item){
