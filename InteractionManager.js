@@ -23,27 +23,19 @@ module.exports = InteractionManager;
 
 InteractionManager.prototype.visitChildren = function (visitFunc, displayObject)
 {
-	var children = (displayObject || this.stage).children;
+	if (!displayObject) displayObject = this.stage;
+	if (!displayObject.interactive) return;
+	var children = displayObject.children;
 	for (var i = children.length - 1; i >= 0; i--)
 	{
 		var child = children[i];
-		if (child.children.length > 0)
+		var ret = this.visitChildren(visitFunc, child);
+		if (ret)
 		{
-			var ret = this.visitChildren(visitFunc, child);
-			if (ret)
-			{
-				return ret;
-			}
-		}
-		if (child.interactive)
-		{
-			var vret = visitFunc.call(this, child);
-			if (vret)
-			{
-				return vret;
-			}
+			return ret;
 		}
 	}
+	return visitFunc.call(this, displayObject);
 };
 
 InteractionManager.prototype.setTargetElement = function (element)
