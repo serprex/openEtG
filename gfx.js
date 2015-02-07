@@ -51,7 +51,7 @@ function Text(text, fontsize, color){
 	ctx.font = font;
 	ctx.fillStyle = color || "black";
 	ctx.fillText(text, 0, fontsize);
-	return PIXI.Texture.fromCanvas(canvas);
+	return new PIXI.Texture(new PIXI.BaseTexture(canvas));
 }
 var caimgcache = {}, crimgcache = {}, wsimgcache = {}, artcache = {}, artimagecache = {};
 function makeArt(card, art, oldrend) {
