@@ -48,11 +48,12 @@ process.on("exit", function(){
 	db.quit();
 });
 function activeUsers() {
-	var activeusers = [];
+	var activeusers = [], userCount = 0;
 	for (var username in usersock) {
 		var sock = usersock[username];
 		if (sock && sock.readyState == "open"){
 			if (sock.id in sockinfo){
+				userCount++;
 				if (sockinfo[sock.id].offline) continue;
 				if (sockinfo[sock.id].afk) username += " (afk)";
 				else if (sockinfo[sock.id].wantpvp) username += "\xb6";
@@ -60,6 +61,7 @@ function activeUsers() {
 			activeusers.push(username);
 		}
 	}
+	activeusers.push(io.clientsCount - userCount);
 	return activeusers;
 }
 function genericChat(socket, data){
@@ -630,7 +632,7 @@ var sockEvents = {
 		if (data.afk !== undefined) sockinfo[this.id].afk = data.afk;
 	},
 	who:function(data){
-		sockEmit(this, "chat", { mode: "red", msg: activeUsers().join(", ") || "There are no users online :(" });
+		sockEmit(this, "chat", { mode: "red", msg: activeUsers().join(", ") });
 	},
 	challrecv:function(data){
 		var foesock = usersock[data.f];
