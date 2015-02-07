@@ -74,7 +74,7 @@ function getTextImage(text, size, color, bgcolor, width) {
 		doc.addChild(bg);
 	}
 	var pieces = text.replace(/\|/g, " | ").split(/(\d\d?:\d\d?|\n)/);
-	var x = 0, y = 0, h = size, w = 0;
+	var x = 0, y = 0, h = Math.floor(size*1.4), w = 0;
 	function pushChild(){
 		var w = 0;
 		if (x > 0){
