@@ -46,7 +46,7 @@ function load(progress, postload){
 function Text(text, fontsize, color){
 	var canvas = document.createElement("canvas"), ctx = canvas.getContext("2d");
 	var font = ctx.font = fontsize + "px Dosis";
-	canvas.width = ctx.measureText(text).width;
+	canvas.width = ctx.measureText(text).width+1;
 	canvas.height = fontsize*1.4;
 	ctx.font = font;
 	ctx.fillStyle = color || "black";
