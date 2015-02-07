@@ -705,7 +705,7 @@ Player.prototype.drawcard = function(drawstep) {
 			if (~new CardInstance(this.deck.pop(), this).place()){
 				this.procactive("draw", drawstep);
 				if (this.deck.length == 0 && this.game.player1 == this)
-					Effect.mkSpriteFade(ui.getTextImage("Last card!", ui.mkFont(32, "white"), 0));
+					Effect.mkSpriteFade(ui.getTextImage("Last card!", 32, "white", 0));
 			}
 		}else this.game.setWinner(this.foe);
 	}
