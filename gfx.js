@@ -62,13 +62,13 @@ function makeArt(card, art, oldrend) {
 	typemark.anchor.set(1, 1);
 	typemark.position.set(128, 252);
 	template.addChild(typemark);
-	var nametag = new PIXI.Text(card.name, { font: "12px Dosis", fill: card.upped ? "black" : "white" });
-	nametag.position.set(2, 4);
+	var nametag = new PIXI.Sprite(Text(card.name, 12, card.upped ? "black" : "white"));
+	nametag.position.set(2, 2);
 	template.addChild(nametag);
 	if (card.cost) {
-		var text = new PIXI.Text(card.cost, { font: "12px Dosis", fill: card.upped ? "black" : "white" });
+		var text = new PIXI.Sprite(Text(card.cost, 12, card.upped ? "black" : "white"));
 		text.anchor.x = 1;
-		text.position.set(rend.width-3, 4);
+		text.position.set(rend.width-3, 2);
 		template.addChild(text);
 		if (card.element && ((card.costele == card.element) ^ !!options.hideCostIcon)) {
 			var eleicon = new PIXI.Sprite(exports.eicons[card.costele]);
@@ -78,7 +78,7 @@ function makeArt(card, art, oldrend) {
 			template.addChild(eleicon);
 		}
 	}
-	var infospr = new PIXI.Sprite(ui.getTextImage(card.info(), ui.mkFont(11, card.upped ? "black" : "white"), "", rend.width-4));
+	var infospr = new PIXI.Sprite(ui.getTextImage(card.info(), 11, card.upped ? "black" : "white", "", rend.width-4));
 	infospr.position.set(2, 150);
 	template.addChild(infospr);
 	rend.render(template, null, true);
@@ -123,9 +123,9 @@ function getCardImage(code) {
 		if (card) {
 			var clipwidth = rend.width-2;
 			if (card.cost) {
-				var text = new PIXI.Text(card.cost, { font: "11px Dosis", fill: card.upped ? "black" : "white" });
+				var text = new PIXI.Sprite(Text(card.cost, 11, card.upped ? "black" : "white"));
 				text.anchor.x = 1;
-				text.position.set(rend.width-2, 5);
+				text.position.set(rend.width-2, 3);
 				graphics.addChild(text);
 				clipwidth -= text.width+2;
 				if (card.element && ((card.costele == card.element) ^ !!options.hideCostIcon)) {
@@ -137,8 +137,8 @@ function getCardImage(code) {
 					clipwidth -= 18;
 				}
 			}
-			var text = new PIXI.Text(card.name, { font: "11px Dosis", fill: card.upped ? "black" : "white" });
-			text.position.set(2, 5);
+			var text = new PIXI.Sprite(Text(card.name, 11, card.upped ? "black" : "white"));
+			text.position.set(2, 3);
 			if (text.width > clipwidth){
 				text.width = clipwidth;
 			}
@@ -171,9 +171,9 @@ function getInstImage(code, scale, cache){
 			if (card.shiny) artspr.filters = [shinyFilter];
 			border.addChild(artspr);
 		}
-		var text = new PIXI.Text(card.name, { font: "16px Dosis", fill: card.upped ? "black" : "white" });
+		var text = new PIXI.Sprite(Text(card.name, 16, card.upped ? "black" : "white"));
 		text.anchor.x = .5;
-		text.position.set(64, 144);
+		text.position.set(64, 142);
 		border.addChild(text);
 		var mtx = new PIXI.math.Matrix();
 		mtx.scale(scale, scale);
@@ -210,6 +210,16 @@ exports.preloadCardArt = function(art){
 		img.src = "Cards/" + code + ".png";
 	})(0);
 }
+function Text(text, fontsize, color){
+	var canvas = document.createElement("canvas"), ctx = canvas.getContext("2d");
+	var font = ctx.font = fontsize + "px Dosis";
+	canvas.width = ctx.measureText(text).width;
+	canvas.height = fontsize*1.4;
+	ctx.font = font;
+	ctx.fillStyle = color || "black";
+	ctx.fillText(text, 0, fontsize);
+	return PIXI.Texture.fromCanvas(canvas);
+}
 if (typeof PIXI !== "undefined"){
 	exports.nopic = PIXI.Texture.emptyTexture;
 	exports.nopic.width = exports.nopic.height = 0;
@@ -218,6 +228,8 @@ if (typeof PIXI !== "undefined"){
 	exports.getArt = getArt;
 	exports.getCardImage = getCardImage;
 	exports.getWeaponShieldImage = getWeaponShieldImage;
+	exports.Text = Text;
+	var Text = require("./Text");
 	var shinyFilter = new (require("./ColorMatrixFilter"))([
 		0,1,0,0,
 		0,0,1,0,

@@ -19,12 +19,6 @@ if (typeof PIXI === "undefined"){
 	Point = fakepoint;
 	Point.prototype.set = Point;
 }else Point = PIXI.math.Point;
-function mkFont(font, color){
-	if (typeof font == "number"){
-		font += "px Dosis";
-	}
-	return {font: font, fill: color || "black"};
-}
 function reflectPos(obj) {
 	var pos = obj instanceof Point ? obj : obj.position;
 	pos.set(900 - pos.x, 600 - pos.y);
@@ -67,14 +61,9 @@ function tgtToPos(t) {
 	} else console.log("Unknown target");
 }
 var tximgcache = {};
-function getTextImage(text, font, bgcolor, width) {
+function getTextImage(text, size, color, bgcolor, width) {
 	if (!gfx.loaded || !text) return gfx.nopic;
 	if (bgcolor === undefined) bgcolor = "";
-	var size;
-	if (typeof font == "number"){
-		size = font;
-		font = mkFont(font);
-	}else size = parseInt(font.font);
 	var key = JSON.stringify(arguments);
 	if (key in tximgcache) {
 		return tximgcache[key];
@@ -85,7 +74,7 @@ function getTextImage(text, font, bgcolor, width) {
 		doc.addChild(bg);
 	}
 	var pieces = text.replace(/\|/g, " | ").split(/(\d\d?:\d\d?|\n)/);
-	var x = 0, y = 0, h = Math.max(size, new PIXI.Text("j", font).height-3), w = 0;
+	var x = 0, y = 0, h = size, w = 0;
 	function pushChild(){
 		var w = 0;
 		if (x > 0){
@@ -124,16 +113,16 @@ function getTextImage(text, font, bgcolor, width) {
 			}else{
 				var spr = new PIXI.Sprite(icon);
 				spr.scale.set(size/32, size/32);
-				pushChild(new PIXI.Text(num, font), spr);
+				pushChild(new PIXI.Sprite(gfx.Text(num, size, color)), spr);
 			}
 		} else if (piece) {
-			var txt = new PIXI.Text(piece, font);
+			var txt = new PIXI.Sprite(gfx.Text(piece, size, color));
 			if (!width || x + txt.width < width){
 				pushChild(txt);
 			}else{
 				piece.split(" ").forEach(function(word){
 					if (word){
-						pushChild(new PIXI.Text(word, font));
+						pushChild(new PIXI.Sprite(gfx.Text(word, size, color)));
 						if (x){
 							x += 3;
 						}
@@ -227,7 +216,6 @@ function parseaistats(data){
 	parseInput(data, "p2markpower", options.aimark, 1188);
 	parseInput(data, "p2deckpower", options.aideckpower);
 }
-exports.mkFont = mkFont;
 exports.reflectPos = reflectPos;
 exports.creaturePos = creaturePos;
 exports.permanentPos = permanentPos;
