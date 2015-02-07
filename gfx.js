@@ -43,6 +43,16 @@ function load(progress, postload){
 		img.src = "assets/" + asset + ".png";
 	});
 }
+function Text(text, fontsize, color){
+	var canvas = document.createElement("canvas"), ctx = canvas.getContext("2d");
+	var font = ctx.font = fontsize + "px Dosis";
+	canvas.width = ctx.measureText(text).width;
+	canvas.height = fontsize*1.4;
+	ctx.font = font;
+	ctx.fillStyle = color || "black";
+	ctx.fillText(text, 0, fontsize);
+	return PIXI.Texture.fromCanvas(canvas);
+}
 var caimgcache = {}, crimgcache = {}, wsimgcache = {}, artcache = {}, artimagecache = {};
 function makeArt(card, art, oldrend) {
 	var rend = oldrend || require("./px").mkRenderTexture(132, 256);
@@ -210,16 +220,6 @@ exports.preloadCardArt = function(art){
 		img.src = "Cards/" + code + ".png";
 	})(0);
 }
-function Text(text, fontsize, color){
-	var canvas = document.createElement("canvas"), ctx = canvas.getContext("2d");
-	var font = ctx.font = fontsize + "px Dosis";
-	canvas.width = ctx.measureText(text).width;
-	canvas.height = fontsize*1.4;
-	ctx.font = font;
-	ctx.fillStyle = color || "black";
-	ctx.fillText(text, 0, fontsize);
-	return PIXI.Texture.fromCanvas(canvas);
-}
 if (typeof PIXI !== "undefined"){
 	exports.nopic = PIXI.Texture.emptyTexture;
 	exports.nopic.width = exports.nopic.height = 0;
@@ -229,7 +229,6 @@ if (typeof PIXI !== "undefined"){
 	exports.getCardImage = getCardImage;
 	exports.getWeaponShieldImage = getWeaponShieldImage;
 	exports.Text = Text;
-	var Text = require("./Text");
 	var shinyFilter = new (require("./ColorMatrixFilter"))([
 		0,1,0,0,
 		0,0,1,0,
