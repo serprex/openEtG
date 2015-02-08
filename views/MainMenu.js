@@ -83,7 +83,7 @@ module.exports = function(nymph) {
 	}
 	function blueText(text){
 		var text = px.domText(text);
-		text.style.font = "56px Dosis";
+		text.style.fontSize = "56px";
 		text.style.color = "#0c4262";
 		text.style.textAlign = "center";
 		text.style.verticalAlign = "middle";
@@ -94,7 +94,7 @@ module.exports = function(nymph) {
 	}
 	function tierText(text){
 		var text = px.domText(text);
-		text.style.font = "24px Dosis";
+		text.style.fontSize = "24px";
 		text.style.color = "#0c4262";
 		text.style.verticalAlign = "middle";
 		text.style.height = "80px";
