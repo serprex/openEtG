@@ -5,10 +5,8 @@ var ui = require("./uiutil");
 var Cards = require("./Cards");
 var etgutil = require("./etgutil");
 var renderer = new PIXI.autoDetectRenderer(900, 600, {view:document.getElementById("leftpane"), transparent:true});
-var realStage = new PIXI.Container(), curStage = {};
-realStage.hitArea = new PIXI.math.Rectangle(0, 0, 900, 600);
-realStage.interactive = true;
-var interman = new (require("./InteractionManager"))(realStage, renderer);
+var noStage = {}, curStage = noStage;
+var interman = new (require("./InteractionManager"))(noStage, renderer);
 exports.mouse = interman.mouse;
 function animate() {
 	setTimeout(requestAnimate, 40);
@@ -16,7 +14,7 @@ function animate() {
 		curStage.next();
 	}
 	if (curStage.view){
-		renderer.render(realStage);
+		renderer.render(curStage.view);
 	}
 }
 function requestAnimate() { requestAnimationFrame(animate); }
@@ -132,9 +130,6 @@ exports.refreshRenderer = function(stage) {
 	if (curStage.endnext){
 		curStage.endnext();
 	}
-	if (realStage.children.length){
-		realStage.removeChildren();
-	}
 	for (var key in stage){
 		if (!key.match(special)){
 			var dom = stage[key], div;
@@ -155,13 +150,14 @@ exports.refreshRenderer = function(stage) {
 		}
 	}
 	if (stage.view){
-		realStage.addChild(stage.view);
 		if (stage.next){
 			stage.next();
 		}
-		renderer.render(realStage);
+		renderer.render(stage.view);
 		renderer.view.style.display = "inline";
+		interman.stage = stage.view;
 	} else {
+		interman.stage = noStage;
 		renderer.view.style.display = "none";
 	}
 	curStage = stage;
