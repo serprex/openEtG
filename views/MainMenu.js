@@ -13,10 +13,10 @@ var userutil = require("../userutil");
 module.exports = function(nymph) {
 	var popdom, stage = {endnext: function(){
 		setDom(null);
-		if (!menuui) document.removeEventListener("mousemove", resetTip);
+		document.removeEventListener("mousemove", resetTip);
 	}};
 	function setDom(dom){
-		if (oracle) menuui.removeChild(oracle);
+		if (oracle) oracle.visible = false;
 		if (popdom) document.body.removeChild(popdom);
 		if (popdom = dom) document.body.appendChild(dom);
 	}
@@ -72,9 +72,9 @@ module.exports = function(nymph) {
 	var tipNumber = etg.PlayerRng.upto(tipjar.length);
 
 	function resetTip(event) {
-		if (event.target.tagName == "HTML") tinfo.text = sock.user ? tipjar[tipNumber] + "." : "To register, just type desired username & password in the fields to the right, then click 'Login'.";
+		if (event.target.tagName == "CANVAS" || event.target.tagName == "HTML") tinfo.text = sock.user ? tipjar[tipNumber] + "." : "To register, just type desired username & password in the fields to the right, then click 'Login'.";
 	}
-	var menuui, tinfo = px.domText(""), tstats = px.domText(sock.user ? sock.user.gold + "$ " + sock.user.name + "\nPvE " + sock.user.aiwins + " - " + sock.user.ailosses + "\nPvP " + sock.user.pvpwins + " - " + sock.user.pvplosses : "Sandbox");
+	var tinfo = px.domText(""), tstats = px.domText(sock.user ? sock.user.gold + "$ " + sock.user.name + "\nPvE " + sock.user.aiwins + " - " + sock.user.ailosses + "\nPvP " + sock.user.pvpwins + " - " + sock.user.pvplosses : "Sandbox");
 	tinfo.style.maxWidth = "800px";
 
 	function wealthTop(){
@@ -167,12 +167,10 @@ module.exports = function(nymph) {
 	if ((sock.user && sock.user.oracle) || typeof nymph === "string") {
 		var oracle = new PIXI.Sprite(gfx.getArt(nymph || sock.user.oracle));
 		oracle.position.set(450, 300);
-		stage.view = menuui = px.mkView(resetTip);
-		menuui.addChild(oracle);
+		stage.view = oracle;
 		delete sock.user.oracle;
-	}else{
-		document.addEventListener("mousemove", resetTip);
 	}
+	document.addEventListener("mousemove", resetTip);
 
 	function logout(cmd) {
 		if (sock.user){

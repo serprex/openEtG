@@ -125,12 +125,12 @@ function startMatch(game, foeDeck) {
 		459, 103, 754,
 		590, 103, 754,
 	], redver = [
-		144, 12, 302,
-		275, 12, 144,
-		796, 12, 301,
 		103, 301, 590,
+		144, 12, 301,
+		275, 12, 144,
 		624, 459, 590,
 		754, 301, 590,
+		796, 12, 301,
 	], gameui = new PIXI.Graphics();
 	gameui.interactive = true;
 	for(var j=0; j<4; j++){
