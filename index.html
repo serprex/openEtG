@@ -4,9 +4,7 @@
 	<link href="http://fonts.googleapis.com/css?family=Dosis" rel="stylesheet" type="text/css">
 	<link href="favicon.png" rel="shortcut icon">
 	<style>
-		*{
-			box-sizing:border-box;
-		}
+		*{box-sizing:border-box}
 		body{
 			background-color:black;
 			color:white;
@@ -17,7 +15,7 @@
 			color:#6699FF;
 			text-decoration:none;
 		}
-		tr, td{ padding:0; }
+		tr,td{padding:0}
 		input[type="button"]{
 			background:linear-gradient(to bottom,#ddeef0,#8999a9);
 			border-radius:4px;
@@ -28,15 +26,11 @@
 			cursor:pointer;
 		}
 		input[type="button"]:hover{background:linear-gradient(to bottom,#ccdde0,#586776)}
-		input[type="button"]:hover:active{background:linear-gradient(to bottom,#aabbc0,#485766);}
+		input[type="button"]:hover:active{background:linear-gradient(to bottom,#aabbc0,#485766)}
 		input[type="text"],input[type="password"],input:not([type]){width:150px}
 		#rightpane{
 			left:900px;
 			top:0px;
-			position:absolute;
-		}
-		#leftpane{
-			-webkit-user-select:none;
 			position:absolute;
 		}
 		#chatBox{
@@ -55,9 +49,12 @@
 			font-family:Dosis;
 			font-size:14px;
 		}
-		.selectedbutton {
-			background: linear-gradient(to bottom,#424748,#8999ff) !important;
+		.unselectable{
+			position:absolute;
+			-moz-user-select:none;
+			-webkit-user-select:none;
 		}
+		.selectedbutton{background:linear-gradient(to bottom,#424748,#8999ff)!important}
 		.bgbox{
 			background-color:#0d2e4a;
 			border-style:solid;
@@ -150,8 +147,8 @@
 		<div id="chatBox"></div>
 		<textarea id="chatinput" placeholder="Chat"></textarea>
 	</div>
-	<img id="bgimg" width=900 height=600 src="assets/bg_default.png" style="position:absolute;-webkit-user-select:none;">
-	<canvas id="leftpane" width=900 height=600></canvas>
+	<img id="bgimg" class="unselectable" width=900 height=600 src="assets/bg_default.png">
+	<canvas id="leftpane" class="unselectable" width=900 height=600></canvas>
 	<script src="ui.main.js"></script>
 </body>
 </html>

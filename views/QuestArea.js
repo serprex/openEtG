@@ -28,11 +28,9 @@ module.exports = function(area) {
 	function mkQuestButton(quest, stage) {
 		var circle = document.createElement("span");
 		circle.className = "imgb";
-		circle.style.borderStyle = "solid";
-		circle.style.borderWidth = "2px";
-		circle.style.borderColor = "#88aa66";
+		circle.style.border = "2px solid #88aa66";
 		circle.style.borderRadius = "50%";
-		circle.style.background = sock.user.quest[quest] > stage ? "#4cff00" : "black";
+		circle.style.backgroundColor = sock.user.quest[quest] > stage ? "#4cff00" : "black";
 		circle.style.display = "inline-block";
 		circle.style.width = circle.style.height = "32px";
 		circle.addEventListener("mouseover", function() {
