@@ -575,14 +575,14 @@ function startMatch(game, foeDeck) {
 		fgfx.lineStyle(0, 0, 0);
 		fgfx.endFill();
 		if (game.turn == game.player1 && !game.targetingMode && game.phase != etg.EndPhase) {
+			fgfx.beginFill(0xffffff, .7);
 			for (var i = 0;i < game.player1.hand.length;i++) {
 				var card = game.player1.hand[i].card;
 				if (game.player1.canspend(card.costele, card.cost)) {
-					fgfx.beginFill(0xffffff, .5);
 					fgfx.drawRect(handsprite[0][i].position.x + 100, handsprite[0][i].position.y, 20, 19);
-					fgfx.endFill();
 				}
 			}
+			fgfx.endFill();
 		}
 		for (var j = 0;j < 2;j++) {
 			var pl = game.players(j);
