@@ -538,6 +538,7 @@ foedraw:function(c,t){
 forceplay:function(c,t){
 	if (t.owner.sanctuary) return;
 	var card = t.card;
+	Effect.mkSpriteFade(gfx.getCardImage(t.card), t);
 	if (!t.owner.canspend(card.costele, card.cost)) return;
 	t.remove();
 	if (t.owner.neuro){
