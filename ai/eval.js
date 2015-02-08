@@ -39,7 +39,7 @@ function log(x, y){
 function pillarval(c){
 	return c instanceof etg.CardInstance?.1:c.status.charges;
 }
-var ActivesValues = {
+var ActivesValues = Object.freeze({
 	ablaze:3,
 	accelerationspell:5,
 	acceleration:function(c){
@@ -119,7 +119,7 @@ var ActivesValues = {
 	},
 	enchant:6,
 	endow:4,
-	envenom:1,
+	envenom:3,
 	epidemic:4,
 	epoch:2,
 	evolve:2,
@@ -290,7 +290,7 @@ var ActivesValues = {
 	"storm 2":6,
 	"storm 3":12,
 	swave:6,
-	tempering:3,
+	tempering:[2,3],
 	throwrock:4,
 	tick:function(c){
 		return c instanceof etg.CardInstance ? 1 : 1+(c.maxhp-c.truehp())/c.maxhp;
@@ -345,8 +345,8 @@ var ActivesValues = {
 	wings:function(c){
 		return c.status?(c.status.charges == 0 && c.owner == c.owner.game.turn?0:6):6;
 	},
-}
-var statusValues = {
+});
+var statusValues = Object.freeze({
 	airborne: 0.2,
 	ranged: 0.2,
 	voodoo: 1,
@@ -363,7 +363,7 @@ var statusValues = {
 	},
 	freedom: 5,
 	reflect: 1
-}
+})
 
 function getDamage(c){
 	return damageHash[c.hash()] || 0;

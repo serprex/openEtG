@@ -118,10 +118,32 @@ function startMatch(game, foeDeck) {
 			sock.userExec("addgold", { g: -game.cost });
 		}
 	}
-	var gameui = px.mkView();
-	var redlines = new PIXI.Sprite(gfx.bg_game);
-	redlines.position.y = 12;
-	gameui.addChild(redlines);
+	var redhor = [
+		12, 0, 900,
+		144, 145, 796,
+		301, 103, 796,
+		459, 103, 754,
+		590, 103, 754,
+	], redver = [
+		144, 12, 302,
+		275, 12, 144,
+		796, 12, 301,
+		103, 301, 590,
+		624, 459, 590,
+		754, 301, 590,
+	], gameui = new PIXI.Graphics();
+	gameui.interactive = true;
+	for(var j=0; j<4; j++){
+		gameui.lineStyle(1, [0x121212, 0x6a2e0d, 0x8a3e1d, 0x969696][j]);
+		for (var i=0; i<redhor.length; i+=3){
+			gameui.moveTo(redhor[i+1], redhor[i]-j);
+			gameui.lineTo(redhor[i+2], redhor[i]-j);
+		}
+		for (var i=0; i<redver.length; i+=3){
+			gameui.moveTo(redver[i]+j, redver[i+1]);
+			gameui.lineTo(redver[i]+j, redver[i+2]);
+		}
+	}
 	var cloakgfx = new PIXI.Graphics();
 	cloakgfx.beginFill(0);
 	cloakgfx.drawRect(130, 20, 660, 280);
@@ -306,7 +328,7 @@ function startMatch(game, foeDeck) {
 			markspritexy[j] = new PIXI.math.Point(740, 470);
 			marksprite[j].style.transform = "translate(-50%,-50%)";
 			weapsprite[j] = makeInst(null, "weapon", new PIXI.math.Point(666, 512), 5/4);
-			shiesprite[j] = makeInst(null, "shield", new PIXI.math.Point(710, 532), 5/4);
+			shiesprite[j] = makeInst(null, "shield", new PIXI.math.Point(710, 536), 5/4);
 			if (j){
 				gameui.addChild(shiesprite[j]);
 				gameui.addChild(weapsprite[j]);
