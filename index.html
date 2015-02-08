@@ -7,6 +7,8 @@
 		*{box-sizing:border-box}
 		body{
 			background-color:black;
+			background-image:url(assets/bg_default.png);
+			background-repeat:no-repeat;
 			color:white;
 			margin:0;
 			font-family:Dosis;
@@ -28,6 +30,11 @@
 		input[type="button"]:hover{background:linear-gradient(to bottom,#ccdde0,#586776)}
 		input[type="button"]:hover:active{background:linear-gradient(to bottom,#aabbc0,#485766)}
 		input[type="text"],input[type="password"],input:not([type]){width:150px}
+		#leftpane{
+			position:absolute;
+			-moz-user-select:none;
+			-webkit-user-select:none;
+		}
 		#rightpane{
 			left:900px;
 			top:0px;
@@ -35,7 +42,7 @@
 		}
 		#chatBox{
 			width:350px;
-			height:460px;
+			height:496px;
 			overflow-y:scroll;
 			overflow-x:hidden;
 			color:red;
@@ -48,11 +55,6 @@
 			resize:none;
 			font-family:Dosis;
 			font-size:14px;
-		}
-		.unselectable{
-			position:absolute;
-			-moz-user-select:none;
-			-webkit-user-select:none;
 		}
 		.selectedbutton{background:linear-gradient(to bottom,#424748,#8999ff)!important}
 		.bgbox{
@@ -142,13 +144,11 @@
 <body>
 	<div id="rightpane">
 		<a href="artcredit.htm" target="_blank">Art credits</a>&emsp;&emsp;<a href="/forum" target="_blank">Forum</a><br><br>
-		<label><input id="offline" type="checkbox">Appear Offline</label> <label><input id="afk" type="checkbox">Afk</label><br>
-		<label><input id="wantpvp" type="checkbox">Seeking PvP</label>
+		<label><input id="offline" type="checkbox">Appear Offline</label> <label><input id="afk" type="checkbox">Afk</label> <label><input id="wantpvp" type="checkbox">Seeking PvP</label>
 		<div id="chatBox"></div>
 		<textarea id="chatinput" placeholder="Chat"></textarea>
 	</div>
-	<img id="bgimg" class="unselectable" width=900 height=600 src="assets/bg_default.png">
-	<canvas id="leftpane" class="unselectable" width=900 height=600></canvas>
+	<canvas id="leftpane" width=900 height=600></canvas>
 	<script src="ui.main.js"></script>
 </body>
 </html>

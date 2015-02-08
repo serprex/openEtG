@@ -13,7 +13,7 @@ var userutil = require("../userutil");
 module.exports = function(nymph) {
 	var popdom, stage = {endnext: function(){
 		setDom(null);
-		if (!menuui) document.getElementById("bgimg").removeEventListener("mousemove", resetTip);
+		if (!menuui) document.removeEventListener("mousemove", resetTip);
 	}};
 	function setDom(dom){
 		if (oracle) menuui.removeChild(oracle);
@@ -71,8 +71,8 @@ module.exports = function(nymph) {
 	];
 	var tipNumber = etg.PlayerRng.upto(tipjar.length);
 
-	function resetTip() {
-		tinfo.text = sock.user ? tipjar[tipNumber] + "." : "To register, just type desired username & password in the fields to the right, then click 'Login'.";
+	function resetTip(event) {
+		if (event.target.tagName == "HTML") tinfo.text = sock.user ? tipjar[tipNumber] + "." : "To register, just type desired username & password in the fields to the right, then click 'Login'.";
 	}
 	var menuui, tinfo = px.domText(""), tstats = px.domText(sock.user ? sock.user.gold + "$ " + sock.user.name + "\nPvE " + sock.user.aiwins + " - " + sock.user.ailosses + "\nPvP " + sock.user.pvpwins + " - " + sock.user.pvplosses : "Sandbox");
 	tinfo.style.maxWidth = "800px";
@@ -171,7 +171,7 @@ module.exports = function(nymph) {
 		menuui.addChild(oracle);
 		delete sock.user.oracle;
 	}else{
-		document.getElementById("bgimg").addEventListener("mousemove", resetTip);
+		document.addEventListener("mousemove", resetTip);
 	}
 
 	function logout(cmd) {
@@ -373,4 +373,5 @@ module.exports = function(nymph) {
 		);
 	}
 	px.refreshRenderer(stage);
+	resetTip({target:{tagName:"HTML"}});
 }
