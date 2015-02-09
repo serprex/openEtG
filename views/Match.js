@@ -132,6 +132,7 @@ function startMatch(game, foeDeck) {
 		754, 301, 590,
 		796, 12, 301,
 	], gameui = new PIXI.Graphics();
+	gameui.hitArea = new PIXI.math.Rectangle(0, 0, 900, 600);
 	gameui.interactive = true;
 	for(var j=0; j<4; j++){
 		gameui.lineStyle(1, [0x121212, 0x6a2e0d, 0x8a3e1d, 0x969696][j]);
