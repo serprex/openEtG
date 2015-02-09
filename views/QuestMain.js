@@ -30,7 +30,9 @@ module.exports = function(){
 			graphics.hitArea = ainfo[1];
 			if (options.aideck == "quest"){
 				graphics.lineStyle(4, 255);
-				graphics.drawShape(ainfo[1]);
+				graphics.moveTo(points[0], points[1]);
+				for(var i=2; i<points.length; i++) graphics.lineTo(points[i], points[i+1]);
+				graphics.lineTo(points[0], points[1]);
 			}
 			px.setClick(graphics, function () {
 				require("./QuestArea")(k);

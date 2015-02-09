@@ -6,7 +6,6 @@ function InteractionManager(stage, renderer)
 	this.down = null;
 	this.mouse = new PIXI.math.Point();
 	this.interactionDOMElement = null;
-	this.lastmove = 0;
 	this.onMouseMove = this.onMouseMove.bind(this);
 	this.onMouseDown = this.onMouseDown.bind(this);
 	this.onMouseOut = this.onMouseOut.bind(this);
@@ -21,15 +20,13 @@ function InteractionManager(stage, renderer)
 InteractionManager.prototype.constructor = InteractionManager;
 module.exports = InteractionManager;
 
-InteractionManager.prototype.visitChildren = function (visitFunc, displayObject)
+InteractionManager.prototype.visitChildren = function (displayObject, visitFunc)
 {
-	if (!displayObject) displayObject = this.stage;
-	if (!displayObject.interactive) return;
+	if (!displayObject.interactive || !this.hitTest(displayObject)) return;
 	var children = displayObject.children;
 	for (var i = children.length - 1; i >= 0; i--)
 	{
-		var child = children[i];
-		var ret = this.visitChildren(visitFunc, child);
+		var ret = this.visitChildren(children[i], visitFunc);
 		if (ret)
 		{
 			return ret;
@@ -68,7 +65,7 @@ InteractionManager.prototype.removeEvents = function ()
 
 	this.interactionDOMElement.removeEventListener('mousemove', this.onMouseMove, true);
 	this.interactionDOMElement.removeEventListener('mousedown', this.onMouseDown, true);
-	this.interactionDOMElement.removeEventListener('mouseout',  this.onMouseOut, true);
+	this.interactionDOMElement.removeEventListener('mouseout',  this.onMouseOut,  true);
 
 	this.interactionDOMElement = null;
 
@@ -77,21 +74,18 @@ InteractionManager.prototype.removeEvents = function ()
 
 InteractionManager.prototype.onMouseMove = function (event)
 {
-	var now = Date.now();
-	if (now - this.lastmove < 16) return;
-	this.lastmove = now;
 	var rect = this.interactionDOMElement.getBoundingClientRect();
 	this.mouse.set(
 		(event.clientX - rect.left) * (this.interactionDOMElement.width / rect.width),
 		(event.clientY - rect.top) * (this.interactionDOMElement.height / rect.height));
 
 	var over = null;
-	this.visitChildren(function(item){
+	this.visitChildren(this.stage, function(item){
 		if (item.mousemove)
 		{
 			item.mousemove();
 		}
-		if (!over && (item.mouseover || item.mouseout) && this.hitTest(item, this.mouse))
+		if (!over && (item.mouseover || item.mouseout))
 		{
 			over = item;
 		}
@@ -117,21 +111,16 @@ InteractionManager.prototype.onMouseDown = function (event)
 	var clickFunction = isRightButton ? 'rightclick' : 'click';
 	var upOutsideFunction = isRightButton ? 'rightupoutside' : 'mouseupoutside';
 
-	this.visitChildren(function(item){
+	this.visitChildren(this.stage, function(item){
 		if (item[downFunction] || item[clickFunction] || item[upOutsideFunction])
 		{
-			var hit = this.hitTest(item, this.mouse);
-
-			if (hit)
+			//call the function!
+			if (item[downFunction])
 			{
-				//call the function!
-				if (item[downFunction])
-				{
-					item[downFunction]();
-				}
-				this.down = item;
-				return true;
+				item[downFunction]();
 			}
+			this.down = item;
+			return true;
 		}
 	});
 };
@@ -156,17 +145,14 @@ InteractionManager.prototype.onMouseUp = function (event)
 	var clickFunction = isRightButton ? 'rightclick' : 'click';
 	var upOutsideFunction = isRightButton ? 'rightupoutside' : 'mouseupoutside';
 
-	var up = this.visitChildren(function(item){
+	var up = this.visitChildren(this.stage, function(item){
 		if (item[upFunction] || item[clickFunction] || item[upOutsideFunction])
 		{
-			if (this.hitTest(item, this.mouse))
+			if (item[upFunction])
 			{
-				if (item[upFunction])
-				{
-					item[upFunction]();
-				}
-				return item;
+				item[upFunction]();
 			}
+			return item;
 		}
 	});
 	if (this.down)
@@ -182,10 +168,8 @@ InteractionManager.prototype.onMouseUp = function (event)
 
 InteractionManager.prototype.hitTest = function (item, xy)
 {
-	if (!item.worldVisible)
-	{
-		return false;
-	}
+	if (!item.worldVisible) return false;
+	if (!xy) xy = this.mouse;
 
 	// map the global point to local space
 	item.worldTransform.applyInverse(xy,  this._tempPoint);

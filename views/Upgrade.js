@@ -94,9 +94,6 @@ module.exports = function() {
 		bunpolish:[150, 95, ["Unpolish", eventWrap(unpolishCard), function() { if (selectedCard) cardArt.texture = gfx.getArt(etgutil.asShiny(selectedCard, false)) }]],
 		bsell:[150, 140, ["Sell", eventWrap(sellCard)]],
 		bauto:[5, 140, ["Autoconvert", autoCards]],
-		next:function(){
-			cardsel.next(cardpool);
-		}
 	};
 
 	var goldcount = px.domText(sock.user.gold + "$");
@@ -155,6 +152,7 @@ module.exports = function() {
 			twarning.text = "";
 		}, true
 	);
+	cardsel.cardpool = cardpool;
 	upgradeui.addChild(cardsel);
 	var cardpool, selectedCard;
 	adjustdeck();

@@ -146,7 +146,7 @@ module.exports = function(arena, acard, startempty) {
 		etgutil.iterraw(sock.user.pool, incrpool);
 		etgutil.iterraw(sock.user.accountbound, incrpool);
 	}else cardpool = null;
-	var editorui = px.mkView(), dom = [[8, 32, ["Clear", function(){
+	var editorui = px.mkView(function(){cardArt.visible = false}), dom = [[8, 32, ["Clear", function(){
 		if (sock.user) {
 			cardminus = {};
 		}
@@ -294,6 +294,8 @@ module.exports = function(arena, acard, startempty) {
 			}
 		}, !arena, !!cardpool
 	);
+	cardsel.cardpool = cardpool;
+	cardsel.cardminus = cardminus;
 	editorui.addChild(cardsel);
 	var cardArt = new PIXI.Sprite(gfx.nopic);
 	cardArt.position.set(734, 8);
@@ -330,10 +332,9 @@ module.exports = function(arena, acard, startempty) {
 		options.register("deck", deckimport);
 		dom.push([520, 238, deckimport]);
 	}
-	px.refreshRenderer({view:editorui, editdiv:dom, next:function() {
-		cardArt.visible = false;
-		cardsel.next(cardpool, cardminus);
-	}});
+	function resetCardArt(){cardArt.visible=false}
+	document.addEventListener("mousemove", resetCardArt, true);
+	px.refreshRenderer({view:editorui, editdiv:dom, endnext:function(){document.removeEventListener("mousemove", resetCardArt, true)}});
 	if (!arena){
 		deckimport.focus();
 		deckimport.setSelectionRange(0, 333);

@@ -147,7 +147,6 @@ function startMatch(game, foeDeck) {
 	var cloakgfx = new PIXI.Graphics();
 	cloakgfx.beginFill(0);
 	cloakgfx.drawRect(130, 20, 660, 280);
-	cloakgfx.endFill();
 	gameui.addChild(cloakgfx);
 	var endturn = px.domButton("Accept Hand", endClick.bind(null, undefined));
 	var cancel = px.domButton("Mulligan", cancelClick);
@@ -595,7 +594,6 @@ function startMatch(game, foeDeck) {
 			}
 		}
 		fgfx.lineStyle(0, 0, 0);
-		fgfx.endFill();
 		if (game.turn == game.player1 && !game.targetingMode && game.phase != etg.EndPhase) {
 			fgfx.beginFill(0xffffff, .7);
 			for (var i = 0;i < game.player1.hand.length;i++) {
@@ -604,7 +602,6 @@ function startMatch(game, foeDeck) {
 					fgfx.drawRect(handsprite[0][i].position.x + 100, handsprite[0][i].position.y, 20, 19);
 				}
 			}
-			fgfx.endFill();
 		}
 		for (var j = 0;j < 2;j++) {
 			var pl = game.players(j);
@@ -678,15 +675,12 @@ function startMatch(game, foeDeck) {
 			}
 			fgfx.beginFill(0);
 			fgfx.drawRect(playerOverlay[j].x - 41, playerOverlay[j].y - 25, 82, 16);
-			fgfx.endFill();
 			if (pl.hp > 0){
 				fgfx.beginFill(ui.elecols[etg.Life]);
 				fgfx.drawRect(playerOverlay[j].x - 40, playerOverlay[j].y - 24, 80 * pl.hp / pl.maxhp, 14);
-				fgfx.endFill();
 				if (!cloakgfx.visible && game.expectedDamage[j]) {
 					fgfx.beginFill(ui.elecols[game.expectedDamage[j] >= pl.hp ? etg.Fire : game.expectedDamage[j] > 0 ? etg.Time : etg.Water]);
 					fgfx.drawRect(playerOverlay[j].x - 40 + 80 * pl.hp / pl.maxhp, playerOverlay[j].y - 24, -80 * Math.min(game.expectedDamage[j], pl.hp) / pl.maxhp, 14);
-					fgfx.endFill();
 				}
 			}
 			if (px.hitTest(playerOverlay[j], px.mouse)){

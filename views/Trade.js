@@ -53,8 +53,7 @@ module.exports = function() {
 		sock.userEmit("canceltrade");
 		startMenu();
 	}]],
-		[100, 235, ownVal],
-		[350, 235, foeVal],
+		[100, 235, ownVal], [350, 235, foeVal],
 		[10, 40, btrade], [10, 60, tconfirm]];
 
 	var cardpool = etgutil.deck2pool(sock.user.pool);
@@ -68,6 +67,8 @@ module.exports = function() {
 			}
 		}
 	);
+	cardsel.cardpool = cardpool;
+	cardsel.cardminus = cardminus;
 	view.addChild(cardsel);
 	var cardArt = new PIXI.Sprite(gfx.nopic);
 	cardArt.position.set(734, 8);
@@ -85,8 +86,5 @@ module.exports = function() {
 		},
 		tradecanceled: startMenu,
 	};
-	px.refreshRenderer({view: view, tdom:dom, cmds:cmds, next:function() {
-		cardArt.visible = false;
-		cardsel.next(cardpool, cardminus);
-	}});
+	px.refreshRenderer({view: view, tdom:dom, cmds:cmds});
 }

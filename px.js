@@ -1,4 +1,13 @@
 "use strict";
+var lastmove = 0;
+document.addEventListener("mousemove", function(e){
+	var now = Date.now();
+	if (now - this.lastmove < 16){
+		e.stopPropagation();
+		return;
+	}
+	this.lastmove = now;
+});
 var gfx = require("./gfx");
 var etg = require("./etg");
 var ui = require("./uiutil");
@@ -258,7 +267,6 @@ DeckDisplay.prototype.rmCard = function(index){
 }
 DeckDisplay.prototype.mousemove = function(){
 	if (this.cardmouseover){
-		if (!this.hitArea.contains(exports.mouse.x-this.position.x, exports.mouse.y-this.position.y)) return;
 		var index = this.pos2idx();
 		if (index >= 0 && index < this.deck.length){
 			this.cardmouseover(this.deck[index]);
@@ -268,8 +276,8 @@ DeckDisplay.prototype.mousemove = function(){
 function CardSelector(dom, cardmouseover, cardclick, maxedIndicator, filterboth){
 	var self = this;
 	PIXI.Container.call(this);
-	this.cardpool = undefined;
-	this.cardminus = undefined;
+	this._cardpool = this.cardpool = undefined;
+	this._cardminus = this.cardminus = undefined;
 	this.showall = false;
 	this.showshiny = undefined;
 	this.interactive = true;
@@ -339,21 +347,26 @@ CardSelector.prototype.click = function(){
 		this.cardclick(code);
 	}
 }
-CardSelector.prototype.next = function(newcardpool, newcardminus) {
-	if (newcardpool !== this.cardpool || newcardminus !== this.cardminus) {
-		this.cardminus = newcardminus;
-		this.cardpool = newcardpool;
-		this.makeColumns();
-	}else if (this.cardminus && !this.cardminus.rendered){
-		this.renderColumns();
-	}
+CardSelector.prototype.mousemove = function(){
 	if (this.cardmouseover){
-		if (!this.hitArea.contains(exports.mouse.x, exports.mouse.y)) return;
 		var col = this.columns[Math.floor((exports.mouse.x-100)/133)], card;
 		if (col && (card = col[Math.floor((exports.mouse.y-272)/19)])){
 			this.cardmouseover(card.code);
 		}
 	}
+}
+CardSelector.prototype._renderWebGL = function() {
+	if (this.cardpool !== this._cardpool || this.cardminus !== this._cardminus) {
+		this._cardminus = this.cardminus;
+		this._cardpool = this.cardpool;
+		this.makeColumns();
+	}else if (this.cardminus && !this.cardminus.rendered){
+		this.renderColumns();
+	}
+}
+CardSelector.prototype.renderCanvas = function() {
+	this._renderWebGL();
+	PIXI.Container.prototype.renderCanvas.apply(this, arguments);
 }
 CardSelector.prototype.makeColumns = function(){
 	var self = this;
@@ -385,7 +398,6 @@ CardSelector.prototype.renderColumns = function(){
 				if (this.maxedIndicator && card.type != etg.PillarEnum && cardAmount >= 6) {
 					this.maxedIndicator.beginFill(ui.elecols[cardAmount >= 12 ? etg.Chroma : etg.Light]);
 					this.maxedIndicator.drawRect(spr.position.x + 100, spr.position.y, 33, 20);
-					this.maxedIndicator.endFill();
 				}
 			}
 		}

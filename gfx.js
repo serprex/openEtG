@@ -129,7 +129,6 @@ function getCardImage(code) {
 		graphics.lineStyle(1, card && card.shiny ? 0xdaa520 : 0x222222);
 		graphics.beginFill(card ? ui.maybeLighten(card) : code == "0" ? 0x887766 : 0x111111);
 		graphics.drawRect(0, 0, 99, 19);
-		graphics.endFill();
 		if (card) {
 			var clipwidth = rend.width-2;
 			if (card.cost) {
@@ -167,7 +166,6 @@ function getInstImage(code, scale, cache){
 		border.addChild(graphics);
 		graphics.beginFill(ui.maybeLighten(card));
 		graphics.drawRect(0, 16, 128, 128);
-		graphics.endFill();
 		if (card.shiny){
 			graphics.lineStyle(2, 0xdaa520);
 			graphics.moveTo(0, 14);

@@ -26,15 +26,14 @@ module.exports = function(data){
 	var wealth = data.gold + userutil.calcWealth(cardpool);
 	var dom = [[100, 16, "Cumulative wealth: " + Math.round(wealth) + "\nZE Progress: " + progress + " / " + progressmax + "\nSZE Progress: " + shinyprogress + " / " + progressmax],
 		[5, 554, ["Toggle Bound", function(){
-			showbound ^= true;
+			cardsel.cardpool = (showbound ^= true) ? boundpool : cardpool;
 		}]],
 		[10, 10, ["Exit", require("./MainMenu")]],
 	];
 	var cardsel = new px.CardSelector(dom, function(code){
 		cardArt.texture = gfx.getArt(code);
 	}, null, null, true);
+	cardsel.cardpool = cardpool;
 	stage.addChild(cardsel);
-	px.refreshRenderer({view:stage, stext: dom, next:function(){
-		cardsel.next(showbound ? boundpool : cardpool);
-	}});
+	px.refreshRenderer({view:stage, stext: dom});
 }

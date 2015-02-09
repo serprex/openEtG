@@ -63,7 +63,6 @@ if (typeof PIXI === "undefined"){
 		this.clear();
 		this.beginFill(0, 1-this.step/15);
 		this.drawRect(-30, -30, 60, 60);
-		this.endFill();
 	}
 	Text.prototype.next = function(){
 		if (++this.step==20){

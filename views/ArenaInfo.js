@@ -44,7 +44,7 @@ module.exports = function(info) {
 			}]], [300, 360, ["Test", function(){
 				var deck = sock.getDeck(), aideckcode = "05" + info.card + info.deck;
 				if (etgutil.decklength(deck) < 11 || etgutil.decklength(aideckcode) < 11) {
-					require("./views/Editor")();
+					require("./Editor")();
 					return;
 				}
 				require("../uiutil").parsepvpstats(gameData);

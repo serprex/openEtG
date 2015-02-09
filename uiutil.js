@@ -135,7 +135,6 @@ function getTextImage(text, size, color, bgcolor, width) {
 	if (bg){
 		bg.beginFill(bgcolor);
 		bg.drawRect(0, 0, rtex.width, rtex.height);
-		bg.endFill();
 	}
 	rtex.render(doc);
 	return tximgcache[key] = rtex;
