@@ -14,7 +14,7 @@ function Text(text, pos){
 		console.log("Blank position " + text);
 		pos = new PIXI.math.Point(-99, -99);
 	}
-	PIXI.Sprite.call(this, ui.getTextImage(text, 16));
+	PIXI.Sprite.call(this, ui.getTextImage(text, 16, "white"));
 	this.step = 0;
 	this.position = maybeTgtPos(pos);
 	this.anchor.x = .5;
@@ -57,26 +57,26 @@ if (typeof PIXI === "undefined"){
 	Text.prototype = Object.create(PIXI.Sprite.prototype);
 	SpriteFade.prototype = Object.create(PIXI.Sprite.prototype);
 	Death.prototype.next = function(){
-		if (++this.step==10){
+		if (++this.step==15){
 			return true;
 		}
 		this.clear();
-		this.beginFill(0, 1-this.step/10);
+		this.beginFill(0, 1-this.step/15);
 		this.drawRect(-30, -30, 60, 60);
 		this.endFill();
 	}
 	Text.prototype.next = function(){
-		if (++this.step==15){
+		if (++this.step==20){
 			return true;
 		}
-		this.position.y -= 3;
-		this.alpha = 1-((1<<this.step)/225);
+		this.position.y -= 2;
+		this.alpha = 1-Math.sqrt(this.step)/5;
 	}
 	SpriteFade.prototype.next = function() {
-		if (++this.step == 80) {
+		if (++this.step == 100) {
 			return true;
 		}
-		if (this.step > 40) this.alpha = 1 - ((this.step-40) / 40);
+		if (this.step > 50) this.alpha = 1 - ((this.step-50) / 50);
 	}
 }
 var makemake = [Death, Text, SpriteFade];

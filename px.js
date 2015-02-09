@@ -9,20 +9,16 @@ var noStage = {}, curStage = noStage;
 var interman = new (require("./InteractionManager"))(noStage, renderer);
 exports.mouse = interman.mouse;
 function animate() {
-	setTimeout(requestAnimate, 40);
-	if (curStage.next){
-		curStage.next();
-	}
 	if (curStage.view){
 		renderer.render(curStage.view);
+		setTimeout(requestAnimate, 20);
 	}
 }
 function requestAnimate() { requestAnimationFrame(animate); }
-exports.load = requestAnimate;
 exports.mkRenderTexture = function(width, height){
 	return new PIXI.RenderTexture(renderer, width, height);
 }
-var special = /view|endnext|cmds|next/;
+var special = /view|endnext|cmds|next|nextID/;
 exports.getCmd = function(cmd){
 	return curStage.cmds ? curStage.cmds[cmd] : null;
 }
@@ -149,7 +145,10 @@ exports.refreshRenderer = function(stage) {
 			document.body.removeChild(curStage[key]);
 		}
 	}
+	if (curStage.nextID) clearInterval(curStage.nextID);
+	if (stage.next) stage.nextID = setInterval(stage.next, 30);
 	if (stage.view){
+		if (!curStage.view) requestAnimate();
 		if (stage.next){
 			stage.next();
 		}

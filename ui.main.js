@@ -100,7 +100,6 @@
 	require("./httpcards")(function(){
 		if (options.preart) sock.emit("cardart");
 	});
-	px.load();
 	require("./views/Login")();
 	function chatmute(){
 		var muted = [];
