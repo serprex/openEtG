@@ -88,7 +88,5 @@ module.exports = function() {
 	px.refreshRenderer({view: view, tdom:dom, cmds:cmds, next:function() {
 		cardArt.visible = false;
 		cardsel.next(cardpool, cardminus);
-		foeDeck.next();
-		ownDeck.next();
 	}});
 }

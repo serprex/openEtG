@@ -168,10 +168,7 @@ exports.setClick = function(obj, click, sound) {
 		click.apply(this, arguments);
 	}
 }
-exports.hitTest = function(obj, pos) {
-	var x = obj.position.x - obj.width * obj.anchor.x, y = obj.position.y - obj.height * obj.anchor.y;
-	return pos.x > x && pos.y > y && pos.x < x + obj.width && pos.y < y + obj.height;
-}
+exports.hitTest = interman.hitTest.bind(interman);
 exports.setInteractive = function() {
 	for (var i = 0;i < arguments.length;i++) {
 		arguments[i].interactive = true;
@@ -231,7 +228,7 @@ DeckDisplay.prototype = Object.create(PIXI.Container.prototype);
 DeckDisplay.prototype.pos2idx = function(){
 	return Math.floor((exports.mouse.x-100-this.position.x)/99)*10+(Math.floor((exports.mouse.y-32-this.position.y)/19)%10);
 }
-DeckDisplay.prototype.click = function(e){
+DeckDisplay.prototype.click = function(){
 	var index = this.pos2idx();
 	if (index >= 0 && index < this.deck.length){
 		ui.playSound("cardClick");
@@ -259,7 +256,7 @@ DeckDisplay.prototype.rmCard = function(index){
 	this.deck.splice(index, 1);
 	this.renderDeck(index);
 }
-DeckDisplay.prototype.next = function(){
+DeckDisplay.prototype.mousemove = function(){
 	if (this.cardmouseover){
 		if (!this.hitArea.contains(exports.mouse.x-this.position.x, exports.mouse.y-this.position.y)) return;
 		var index = this.pos2idx();
@@ -327,10 +324,10 @@ function CardSelector(dom, cardmouseover, cardclick, maxedIndicator, filterboth)
 	}
 }
 CardSelector.prototype = Object.create(PIXI.Container.prototype);
-CardSelector.prototype.click = function(e){
+CardSelector.prototype.click = function(){
 	if (!this.cardclick) return;
-	var col = this.columns[Math.floor((e.x-100)/133)], card;
-	if (col && (card = col[Math.floor((e.y-272)/19)])){
+	var col = this.columns[Math.floor((exports.mouse.x-100)/133)], card;
+	if (col && (card = col[Math.floor((exports.mouse.y-272)/19)])){
 		ui.playSound("cardClick");
 		var code = card.code;
 		if (this.filterboth && !this.showshiny){

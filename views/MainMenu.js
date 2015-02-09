@@ -370,6 +370,6 @@ module.exports = function(nymph) {
 			}]]
 		);
 	}
-	px.refreshRenderer(stage);
 	resetTip({target:{tagName:"HTML"}});
+	px.refreshRenderer(stage);
 }

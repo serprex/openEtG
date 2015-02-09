@@ -333,7 +333,6 @@ module.exports = function(arena, acard, startempty) {
 	px.refreshRenderer({view:editorui, editdiv:dom, next:function() {
 		cardArt.visible = false;
 		cardsel.next(cardpool, cardminus);
-		decksprite.next();
 	}});
 	if (!arena){
 		deckimport.focus();

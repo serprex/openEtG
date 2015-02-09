@@ -89,7 +89,7 @@ InteractionManager.prototype.onMouseMove = function (event)
 	this.visitChildren(function(item){
 		if (item.mousemove)
 		{
-			item.mousemove(this.mouse);
+			item.mousemove();
 		}
 		if (!over && (item.mouseover || item.mouseout) && this.hitTest(item, this.mouse))
 		{
@@ -100,12 +100,12 @@ InteractionManager.prototype.onMouseMove = function (event)
 	{
 		if (this.over && this.over.mouseout)
 		{
-			this.over.mouseout(this.mouse);
+			this.over.mouseout();
 		}
 		this.over = over;
 		if (this.over && this.over.mouseover)
 		{
-			this.over.mouseover(this.mouse);
+			this.over.mouseover();
 		}
 	}
 };
@@ -127,7 +127,7 @@ InteractionManager.prototype.onMouseDown = function (event)
 				//call the function!
 				if (item[downFunction])
 				{
-					item[downFunction](this.mouse);
+					item[downFunction]();
 				}
 				this.down = item;
 				return true;
@@ -142,7 +142,7 @@ InteractionManager.prototype.onMouseOut = function (event)
 	{
 		if (this.over.mouseout)
 		{
-			this.over.mouseout(this.mouse);
+			this.over.mouseout();
 		}
 		this.over = null;
 	}
@@ -163,7 +163,7 @@ InteractionManager.prototype.onMouseUp = function (event)
 			{
 				if (item[upFunction])
 				{
-					item[upFunction](this.mouse);
+					item[upFunction]();
 				}
 				return item;
 			}
@@ -174,7 +174,7 @@ InteractionManager.prototype.onMouseUp = function (event)
 		var ev = up === this.down ? clickFunction : upOutsideFunction;
 		if (this.down[ev])
 		{
-			this.down[ev](this.mouse);
+			this.down[ev]();
 		}
 	}
 	this.down = null;
