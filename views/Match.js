@@ -222,7 +222,7 @@ function startMatch(game, foeDeck) {
 		hptext[j].style.fontSize = "12px";
 		hptext[j].style.lineHeight = "1.1";
 		marktext[j].style.pointerEvents = "none";
-		marktext[j].style.fontSize = "18";
+		marktext[j].style.fontSize = "18px";
 		marktext[j].style.transform = "translate(-50%,-50%)";
 		playerOverlay[j].width = 95;
 		playerOverlay[j].height = 80;
