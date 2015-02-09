@@ -187,7 +187,7 @@ exports.mkView = function(mouseover){
 	var view = new PIXI.Container();
 	view.interactive = true;
 	if (mouseover){
-		view.hitArea = new PIXI.math.Rectangle(0, 0, 600, 900);
+		view.hitArea = new PIXI.math.Rectangle(0, 0, 900, 600);
 		view.mouseover = mouseover;
 	}
 	return view;
