@@ -1,7 +1,7 @@
 var chatBox = document.getElementById("chatBox");
 function addSpan(span) {
 	span.appendChild(document.createElement("br"));
-	var scroll = Math.abs(chatBox.scrollTop - (chatBox.scrollHeight - chatBox.offsetHeight)) < .125;
+	var scroll = Math.abs(chatBox.scrollTop - (chatBox.scrollHeight - chatBox.offsetHeight)) < 2;
 	chatBox.appendChild(span);
 	if (scroll) chatBox.scrollTop = chatBox.scrollHeight;
 }
