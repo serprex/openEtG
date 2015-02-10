@@ -81,8 +81,9 @@ module.exports = function() {
 	}
 	function adjustdeck() {
 		cardpool = etgutil.deck2pool(sock.user.pool);
-		cardpool = etgutil.deck2pool(sock.user.accountbound, cardpool);
+		cardsel.cardpool = cardpool = etgutil.deck2pool(sock.user.accountbound, cardpool);
 	}
+	var cardpool, selectedCard;
 	var upgradeui = px.mkView(function(){
 		if (selectedCard) cardArt.texture = gfx.getArt(etgutil.asUpped(selectedCard, true));
 	});
@@ -152,9 +153,8 @@ module.exports = function() {
 			twarning.text = "";
 		}, true
 	);
-	cardsel.cardpool = cardpool;
 	upgradeui.addChild(cardsel);
-	var cardpool, selectedCard;
+	cardsel.cardminus = {};
 	adjustdeck();
 	px.refreshRenderer(stage);
 	px.setDomVis("bupgrade", false);

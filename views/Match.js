@@ -692,7 +692,7 @@ function startMatch(game, foeDeck) {
 			}
 		}
 		Effect.next(cloakgfx.visible);
-	}, endnext: function() {
+	}, endnext:function() {
 		document.removeEventListener("keydown", onkeydown);
 	}, cmds:cmds});
 }
