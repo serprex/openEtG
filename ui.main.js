@@ -94,7 +94,7 @@
 		data = JSON.parse(data);
 		var func = sockEvents[data.x] || px.getCmd(data.x);
 		if (func){
-			func.call(sock.et, data);
+			func.call(this, data);
 		}
 	});
 	require("./httpcards")(function(){

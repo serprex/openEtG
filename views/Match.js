@@ -84,7 +84,7 @@ function startMatch(game, foeDeck) {
 					sock.user["streak"+game.level] = 0;
 				}
 			}
-			require("./MatchResult")(game);
+			require("./Result")(game);
 		} else if (game.turn == game.player1) {
 			if (discard == undefined && game.player1.hand.length == 8) {
 				discarding = true;
