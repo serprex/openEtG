@@ -574,7 +574,7 @@ forceplay:function(c,t){
 		new etg.Creature(card, t.owner).place(true);
 		ui.playSound("creaturePlay");
 	}
-	t.owner.spend(card.castele, card.cast);
+	t.owner.spend(card.costele, card.cost);
 },
 fractal:function(c,t){
 	Effect.mkText("Fractal", t);
