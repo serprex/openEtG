@@ -39,6 +39,9 @@ function permanentPos(j, i) {
 	}
 	return p;
 }
+function cardPos(j, i) {
+	return new Point(j ? 15 : 780, (j ? 130 : 330) + 19 * i);
+}
 function tgtToPos(t) {
 	if (t instanceof etg.Creature) {
 		return creaturePos(t.owner == t.owner.game.player2, t.getIndex());
@@ -57,7 +60,7 @@ function tgtToPos(t) {
 		if (t == t.owner.game.player2) reflectPos(p);
 		return p;
 	} else if (t instanceof etg.CardInstance) {
-		return new Point(t.owner == t.owner.game.player2 ? 20 : 780, (t.owner == t.owner.game.player2 ? 140 : 300) + 20 * t.owner.hand.indexOf(t));
+		return cardPos(t.owner == t.owner.game.player2, t.owner.hand.indexOf(t));
 	} else console.log("Unknown target");
 }
 var tximgcache = {};
@@ -218,6 +221,7 @@ function parseaistats(data){
 exports.reflectPos = reflectPos;
 exports.creaturePos = creaturePos;
 exports.permanentPos = permanentPos;
+exports.cardPos = cardPos;
 exports.tgtToPos = tgtToPos;
 if (typeof PIXI !== "undefined") exports.getTextImage = getTextImage;
 exports.loadSounds = loadSounds;

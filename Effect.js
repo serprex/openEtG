@@ -19,9 +19,10 @@ function Text(text, pos){
 	this.position = maybeTgtPos(pos);
 	this.anchor.x = .5;
 }
-function SpriteFade(texture, pos) {
+function SpriteFade(texture, pos, anchor) {
 	PIXI.Sprite.call(this, texture);
-	this.anchor.set(0.5, 0.5);
+	if (!anchor) this.anchor.set(0.5, 0.5);
+	else this.anchor.set(anchor.x, anchor.y);
 	this.step = 0;
 	this.position = maybeTgtPos(pos) || new PIXI.math.Point(450, 300);
 }

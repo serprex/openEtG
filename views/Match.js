@@ -233,7 +233,7 @@ function startMatch(game, foeDeck) {
 		(function(_j) {
 			for (var i = 0;i < 8;i++) {
 				handsprite[j][i] = new PIXI.Sprite(gfx.nopic);
-				handsprite[j][i].position.set(j ? 15 : 780, (j ? 130 : 330) + 19 * i);
+				handsprite[j][i].position = ui.cardPos(j, i);
 				gameui.addChild(handsprite[j][i]);
 				(function(_i) {
 					px.setClick(handsprite[j][i], function() {
