@@ -536,9 +536,9 @@ foedraw:function(c,t){
 	}
 },
 forceplay:function(c,t){
-	if (t.owner.sanctuary) return;
 	var card = t.card;
 	Effect.mkSpriteFade(require("./gfx").getCardImage(t.card), t, {x:t.owner == t.owner.game.player2 ? -1 : 1, y:0});
+	if (t.owner.sanctuary) return;
 	if (!t.owner.canspend(card.costele, card.cost)) return;
 	t.remove();
 	if (t.owner.neuro){
