@@ -252,6 +252,7 @@ module.exports = function(nymph) {
 	}
 	function hideRightpaneChange(){
 		document.getElementById("rightpane").style.display = options.hideRightpane ? "none" : "inline";
+		sock.emit("chatus", {hide: !!options.offline || !!options.hideRightpane});
 	}
 	function makeCheck(text, change, opt, nopersist){
 		var lbl = document.createElement("label"), box = document.createElement("input");

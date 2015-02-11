@@ -202,7 +202,7 @@
 		}
 	}
 	function offlineChange(){
-		sock.emit("chatus", {hide: !!options.offline});
+		sock.emit("chatus", {hide: !!options.offline || !!options.hideRightpane});
 	}
 	function afkChange(){
 		sock.emit("chatus", {afk: !!options.afk});
