@@ -285,7 +285,7 @@ function CardSelector(dom, cardmouseover, cardclick, maxedIndicator, filterboth)
 	this.cardclick = cardclick;
 	this.filterboth = filterboth;
 	this.hitArea = new PIXI.math.Rectangle(100, 272, 800, 328);
-	if (maxedIndicator) this.addChild(this.maxedIndicator = new PIXI.Graphics());
+	this.maxedIndicator = maxedIndicator;
 	var bshiny = exports.domButton("Toggle Shiny", function() {
 		self.showshiny ^= true;
 		self.makeColumns();
@@ -324,7 +324,7 @@ function CardSelector(dom, cardmouseover, cardclick, maxedIndicator, filterboth)
 			sprcount.style.fontSize = "12px";
 			sprcount.style.pointerEvents = "none";
 			sprcount.style.color = "black";
-			dom.push([sprite.position.x + 102, sprite.position.y + 2, sprcount]);
+			dom.push([sprite.position.x + 100, sprite.position.y, sprcount]);
 			sprite.countText = sprcount;
 			this.addChild(sprite);
 			this.columnspr[i].push(sprite);
@@ -381,7 +381,6 @@ CardSelector.prototype.makeColumns = function(){
 }
 CardSelector.prototype.renderColumns = function(){
 	if (this.cardminus) this.cardminus.rendered = true;
-	if (this.maxedIndicator) this.maxedIndicator.clear();
 	for (var i = 0;i < 6; i++){
 		for (var j = 0;j < this.columns[i].length;j++) {
 			var spr = this.columnspr[i][j], code = this.columns[i][j].code;
@@ -396,14 +395,16 @@ CardSelector.prototype.renderColumns = function(){
 				}
 				spr.countText.text = cardAmount + (shinyAmount ? "/"+shinyAmount:"");
 				if (this.maxedIndicator && card.type != etg.PillarEnum && cardAmount >= 6) {
-					this.maxedIndicator.beginFill(ui.elecols[cardAmount >= 12 ? etg.Chroma : etg.Light]);
-					this.maxedIndicator.drawRect(spr.position.x + 100, spr.position.y, 33, 20);
-				}
+					spr.countText.style.backgroundColor = "#" + ui.elecols[cardAmount >= 12 ? etg.Chroma : etg.Light].toString(16);
+					spr.countText.style.width = "33px";
+					spr.countText.style.height = "20px";
+				}else spr.countText.style.backgroundColor = "transparent";
+				spr.countText.style.display = "inline";
 			}
 		}
 		for (;j < 15;j++) {
 			this.columnspr[i][j].visible = false;
-			this.columnspr[i][j].countText.text = "";
+			this.columnspr[i][j].countText.style.display = "none";
 		}
 	}
 }
