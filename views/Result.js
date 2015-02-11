@@ -1,6 +1,7 @@
 "use strict";
 var px = require("../px");
 var gfx = require("../gfx");
+var ui = require("../uiutil");
 var chat = require("../chat");
 var mkAi = require("../mkAi");
 var sock = require("../sock");
@@ -8,8 +9,7 @@ var etgutil = require("../etgutil");
 var options = require("../options");
 var userutil = require("../userutil");
 module.exports = function(game) {
-	var winner = game.winner == game.player1;
-	var victoryui = px.mkView();
+	var winner = game.winner == game.player1, stage;
 	function exitFunc(){
 		if (game.quest) {
 			if (winner && game.choicerewards)
@@ -29,6 +29,13 @@ module.exports = function(game) {
 		case 3:mkAi.mkPremade("demigod")();break;
 		case 4:sock.userEmit("foearena", {lv:0});break;
 		case 5:sock.userEmit("foearena", {lv:1});break;
+		default:
+			if (game.foename == "Custom"){
+				var gameData = { deck: options.aideck, urdeck: sock.getDeck(), seed: Math.random() * etgutil.MAX_INT, foename: "Custom", cardreward: "" };
+				ui.parsepvpstats(gameData);
+				ui.parseaistats(gameData);
+				require("./Match")(gameData, true);
+			}
 		}
 	}
 	var dom = [
@@ -42,10 +49,10 @@ module.exports = function(game) {
 	}
 
 	if (winner){
-		var tinfo = px.domText(game.quest ? game.wintext : "You won!", 500);
+		var tinfo = px.domText(game.quest ? game.wintext : "You won!");
 		tinfo.style.textAlign = "center";
 		tinfo.style.width = "900px";
-		dom.push([0, game.cardreward ? 130 : 250, tinfo]);
+		dom.push([0, game.cardreward ? 100 : 250, tinfo]);
 	}
 
 	if (winner && sock.user){
@@ -59,11 +66,12 @@ module.exports = function(game) {
 		}
 		if (game.cardreward) {
 			var x0 = 470-etgutil.decklength(game.cardreward)*20;
+			stage = new PIXI.Container();
 			etgutil.iterdeck(game.cardreward, function(code, i){
 				var cardArt = new PIXI.Sprite(gfx.getArt(code));
 				cardArt.anchor.x = .5;
 				cardArt.position.set(x0+i*40, 170);
-				victoryui.addChild(cardArt);
+				stage.addChild(cardArt);
 			});
 			sock.userExec(game.quest?"addbound":"addcards", { c: game.cardreward });
 		}
@@ -90,7 +98,7 @@ module.exports = function(game) {
 	}
 	document.addEventListener("keydown", onkeydown);
 
-	px.refreshRenderer({view:victoryui, domvic:dom, endnext: function() {
+	px.refreshRenderer({view:stage, domvic:dom, endnext: function() {
 		document.removeEventListener("keydown", onkeydown);
 	}});
 }

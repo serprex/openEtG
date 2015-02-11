@@ -13,7 +13,7 @@ How to setup on Windows:
 
 4	Run "node updatedb.js" (NB it takes csv files as parameters if you don't want to download all of them)
 
-5	Download pixi.dev.js from https://github.com/GoodBoyDigital/pixi.js/tree/master/bin
+5	Build pixi.js from https://github.com/serprex/pixi.js/tree/oetg
 
 6	ninja.exe should be in openEtG's folder. Run ninja.exe to build etgify.js
 

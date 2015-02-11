@@ -25,24 +25,24 @@ module.exports = function() {
 				console.log("Confirmed", ownDeck.deck, foeDeck.deck);
 				sock.userEmit("confirmtrade", { cards: etgutil.encodedeck(ownDeck.deck), oppcards: etgutil.encodedeck(foeDeck.deck) });
 				btrade.style.display = "none";
-				var confirmed = new PIXI.Text("Confirmed!", { font: "16px Dosis" });
-				confirmed.position.set(10, 110);
-				view.addChild(confirmed);
+				tconfirm.style.display = "inline";
 			}
 			else chat("Wait for your friend to choose!");
 		}
 	});
+	var tconfirm = px.domText("Confirmed!");
+	tconfirm.style.display = "none";
 	var ownVal = px.domText(""), foeVal = px.domText("");
 	var cardChosen = false;
 	function setCardArt(code){
-		cardArt.setTexture(gfx.getArt(code));
+		cardArt.texture = gfx.getArt(code);
 		cardArt.visible = true;
 	}
 	var ownDeck = new px.DeckDisplay(30, setCardArt,
 		function(i) {
 			px.adjust(cardminus, ownDeck.deck[i], -1);
 			ownDeck.rmCard(i);
-			ownVal.setText(userutil.calcWealth(cardminus) + "");
+			ownVal.text = userutil.calcWealth(cardminus);
 		}
 	);
 	var foeDeck = new px.DeckDisplay(30, setCardArt);
@@ -53,9 +53,8 @@ module.exports = function() {
 		sock.userEmit("canceltrade");
 		startMenu();
 	}]],
-		[100, 235, ownVal],
-		[350, 235, foeVal],
-		[10, 40, btrade]];
+		[100, 235, ownVal], [350, 235, foeVal],
+		[10, 40, btrade], [10, 60, tconfirm]];
 
 	var cardpool = etgutil.deck2pool(sock.user.pool);
 	var cardsel = new px.CardSelector(dom, setCardArt,
@@ -64,10 +63,12 @@ module.exports = function() {
 			if (ownDeck.deck.length < 30 && !card.isFree() && code in cardpool && !(code in cardminus && cardminus[code] >= cardpool[code])) {
 				px.adjust(cardminus, code, 1);
 				ownDeck.addCard(code);
-				ownVal.setText(userutil.calcWealth(cardminus) + "");
+				ownVal.text = userutil.calcWealth(cardminus);
 			}
 		}
 	);
+	cardsel.cardpool = cardpool;
+	cardsel.cardminus = cardminus;
 	view.addChild(cardsel);
 	var cardArt = new PIXI.Sprite(gfx.nopic);
 	cardArt.position.set(734, 8);
@@ -76,7 +77,7 @@ module.exports = function() {
 		cardchosen: function(data){
 			foeDeck.deck = etgutil.decodedeck(data.c);
 			foeDeck.renderDeck(0);
-			foeVal.setText(userutil.calcWealth(etgutil.deck2pool(data.c)) + "");
+			foeVal.text = userutil.calcWealth(data.c);
 		},
 		tradedone: function(data) {
 			sock.user.pool = etgutil.mergedecks(sock.user.pool, data.newcards);
@@ -85,11 +86,5 @@ module.exports = function() {
 		},
 		tradecanceled: startMenu,
 	};
-	px.refreshRenderer({view: view, tdom:dom, cmds:cmds, next:function() {
-		var mpos = px.getMousePos();
-		cardArt.visible = false;
-		cardsel.next(cardpool, cardminus, mpos);
-		foeDeck.next(mpos);
-		ownDeck.next(mpos);
-	}});
+	px.refreshRenderer({view: view, tdom:dom, cmds:cmds});
 }

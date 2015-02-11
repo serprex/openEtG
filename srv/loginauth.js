@@ -1,3 +1,4 @@
+"use strict";
 var qstring = require("querystring");
 var crypto = require("crypto");
 var sutil = require("./sutil");
@@ -46,8 +47,8 @@ module.exports = function(db, users){
 					servuser.daily = user.daily = 0;
 					servuser.dailymage = user.dailymage = Math.floor(Math.random() * aiDecks.mage.length);
 					servuser.dailydg = user.dailydg = Math.floor(Math.random() * aiDecks.demigod.length);
-					if (user.name != "test") db.zadd("wealth", user.gold + userutil.calcWealth(etgutil.deck2pool(user.pool)), user.name);
 				}
+				if (user.name != "test") db.zadd("wealth", user.gold + userutil.calcWealth(user.pool), user.name);
 				res.writeHead(200, {"Content-Type": "application/json"});
 				res.end(JSON.stringify(user));
 			});

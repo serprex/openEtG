@@ -48,11 +48,12 @@ process.on("exit", function(){
 	db.quit();
 });
 function activeUsers() {
-	var activeusers = [];
+	var activeusers = [], userCount = 0;
 	for (var username in usersock) {
 		var sock = usersock[username];
 		if (sock && sock.readyState == "open"){
 			if (sock.id in sockinfo){
+				userCount++;
 				if (sockinfo[sock.id].offline) continue;
 				if (sockinfo[sock.id].afk) username += " (afk)";
 				else if (sockinfo[sock.id].wantpvp) username += "\xb6";
@@ -60,6 +61,7 @@ function activeUsers() {
 			activeusers.push(username);
 		}
 	}
+	activeusers.push(io.clientsCount - userCount);
 	return activeusers;
 }
 function genericChat(socket, data){
@@ -146,7 +148,7 @@ var userEvents = {
 		user.dailymage = Math.floor(Math.random() * aiDecks.mage.length);
 		user.dailydg = Math.floor(Math.random() * aiDecks.demigod.length);
 		var socket = this;
-		db.lpush("N:"+data.u,9,8,7,6,5,4,3,2,1,0);
+		db.rpush("N:"+data.u,1,2,3,4,5,6,7,8,9,10);
 		db.hset("D:"+data.u, "0", starters[data.e], function(err){
 			sutil.useruser(db, user, function(clientuser){
 				sockEmit(socket, "userdump", clientuser);
@@ -169,7 +171,11 @@ var userEvents = {
 		delete usersock[u];
 	},
 	changequickdeck:function(data,user){
-		db.lset("N:"+user.name, data.number, data.name);
+		db.lset("N:"+user.name, data.number, data.name, function(err, res){
+			if (err){
+				db.rpush("N:"+data.u,1,2,3,4,5,6,7,8,9,10);
+			}
+		});
 	},
 	setdeck:function(data, user) {
 		if (data.d !== undefined) {
@@ -488,9 +494,9 @@ var userEvents = {
 					if (data.element < 13) card = etg.PlayerRng.randomcard(false, function(x) { return (x.element == data.element) ^ notFromElement && x.rarity == bumprarity});
 					if (data.element == 14){
 						var newCardList = [
-							Cards.Unsummon,Cards.BlackCat,Cards.NullMantis,Cards.Goon,Cards.Envenom,Cards.JetStream,Cards.Salamander,Cards.Shadow,
-							Cards.SharkofVoid,Cards.Tornado,Cards.Minotaur,Cards.WritofVengeance,Cards.WritofVindication,Cards.JackOLantern,Cards.ThermalRecoil,Cards.GolemDefender,
-							Cards.Byakko,Cards.Fluxor,Cards.Boomstick,Cards.ShankofVoid];
+							Cards.DreamCatcher,Cards.Unsummon,Cards.BlackCat,Cards.NullMantis,Cards.Goon,Cards.Envenom,Cards.JetStream,Cards.Salamander,
+							Cards.Osmosis,Cards.SharkofVoid,Cards.Tornado,Cards.Minotaur,Cards.WritofVengeance,Cards.WritofVindication,Cards.JackOLantern,Cards.ThermalRecoil,
+							Cards["52Pickup"],Cards.Alicorn,Cards.ScorpionClaws,Cards.Stormspike,Cards.Epoch,Cards.PsycheMetal,Cards.Byakko];
 						card = etg.PlayerRng.randomcard(false, function(x){ return notFromElement ^ ~newCardList.indexOf(x) && x.rarity == bumprarity});
 					}
 					if (!card) card = etg.PlayerRng.randomcard(false, function(x) { return x.rarity == bumprarity });
@@ -594,7 +600,7 @@ var sockEvents = {
 			var t20 = [];
 			function getwinloss(i){
 				if (i == obj.length){
-					sockEmit(socket, "arenatop", {top: t20});
+					sockEmit(socket, "arenatop", {top: t20, lv:data.lv});
 				}else{
 					db.hmget((data.lv?"B:":"A:") + obj[i], "win", "loss", "day", "card", function(err, wl){
 						wl[2] = sutil.getDay()-wl[2];
@@ -626,7 +632,7 @@ var sockEvents = {
 		if (data.afk !== undefined) sockinfo[this.id].afk = data.afk;
 	},
 	who:function(data){
-		sockEmit(this, "chat", { mode: "red", msg: activeUsers().join(", ") || "There are no users online :(" });
+		sockEmit(this, "chat", { mode: "red", msg: activeUsers().join(", ") });
 	},
 	challrecv:function(data){
 		var foesock = usersock[data.f];

@@ -36,11 +36,11 @@ module.exports = function(arena, acard, startempty) {
 				decksprite.deck.splice(i, 1);
 			}
 		}
-		editormarksprite.setTexture(gfx.eicons[editormark]);
+		marksprite.className = "Eicon E"+editormark;
 		if (decksprite.deck.length > 60) decksprite.deck.length = 60;
 		decksprite.deck.sort(etg.cardCmp);
 		if (sock.user) {
-			cardminus = {};
+			cardsel.cardminus = cardminus = {};
 			for (var i = decksprite.deck.length - 1;i >= 0;i--) {
 				var code = decksprite.deck[i], card = Cards.Codes[code];
 				if (card.type != etg.PillarEnum) {
@@ -74,7 +74,7 @@ module.exports = function(arena, acard, startempty) {
 		decksprite.renderDeck(0);
 	}
 	function setCardArt(code){
-		cardArt.setTexture(gfx.getArt(code));
+		cardArt.texture = gfx.getArt(code);
 		cardArt.visible = true;
 	}
 	function incrpool(code, count){
@@ -87,19 +87,18 @@ module.exports = function(arena, acard, startempty) {
 		}
 	}
 	var saveToQuick = false;
-	var selectBg = "linear-gradient(to bottom,#424748,#8999ff)";
 	function quickDeck(number) {
 		return function() {
 			if (saveToQuick) {
 				saveButton();
 				sock.userEmit("changequickdeck", { number: number, name: tname.textcache });
 				sock.user.quickdecks[number] = tname.textcache;
-				fixQuickButtons(number);
+				fixQuickButtons();
 				saveToQuick = false;
 				quickNum.className = quickNum.className.replace(/(?:^|\s)selectedbutton(?!\S)/g, '')
 			}
 			else {
-				loadDeck(sock.user.quickdecks[number], number);
+				loadDeck(sock.user.quickdecks[number]);
 			}
 		}
 	}
@@ -126,12 +125,12 @@ module.exports = function(arena, acard, startempty) {
 			sock.userEmit("setdeck", { d: dcode, name: sock.user.selectedDeck });
 		}else if (force) sock.userEmit("setdeck", {name: sock.user.selectedDeck });
 	}
-	function loadDeck(x, forceNumber){
+	function loadDeck(x){
 		if (!x) return;
 		saveDeck();
 		deckname.value = sock.user.selectedDeck = x;
-		tname.setText(x);
-		fixQuickButtons(forceNumber);
+		tname.text = x;
+		fixQuickButtons();
 		decksprite.deck = etgutil.decodedeck(sock.getDeck());
 		processDeck();
 	}
@@ -146,10 +145,10 @@ module.exports = function(arena, acard, startempty) {
 		cardpool = {};
 		etgutil.iterraw(sock.user.pool, incrpool);
 		etgutil.iterraw(sock.user.accountbound, incrpool);
-	}
-	var editorui = px.mkView(), dom = [[8, 32, ["Clear", function(){
+	}else cardpool = null;
+	var editorui = px.mkView(function(){cardArt.visible = false}), dom = [[8, 32, ["Clear", function(){
 		if (sock.user) {
-			cardminus = {};
+			cardsel.cardminus = cardminus = {};
 		}
 		decksprite.deck.length = arena?5:0;
 		decksprite.renderDeck(decksprite.deck.length);
@@ -162,32 +161,25 @@ module.exports = function(arena, acard, startempty) {
 		return sum;
 	}
 	function makeattrui(y, name){
-		y = 128+y*20;
-		var data = artable[name];
-		var bt = new PIXI.Text(name, ui.mkFont(16, "black"));
-		bt.position.set(8, y);
-		var bm = px.mkButton(50, y, ui.getTextImage("-", ui.mkFont(16, "black"), 0xFFFFFFFF));
-		var bv = new PIXI.Text(arattr[name], ui.mkFont(16, "black"));
-		bv.position.set(64, y);
-		var bp = px.mkButton(90, y, ui.getTextImage("+", ui.mkFont(16, "black"), 0xFFFFFFFF));
 		function modattr(x){
 			arattr[name] += x;
 			if (arattr[name] >= (data.min || 0) && (!data.max || arattr[name] <= data.max)){
 				var sum = sumscore();
 				if (sum <= arpts){
-					bv.setText(arattr[name]);
-					curpts.setText((arpts-sum)/45);
+					bv.text = arattr[name];
+					curpts.text = (arpts-sum)/45;
 					return;
 				}
 			}
 			arattr[name] -= x;
 		}
-		px.setClick(bm, modattr.bind(null, -(data.incr || 1)));
-		px.setClick(bp, modattr.bind(null, data.incr || 1));
-		editorui.addChild(bt);
-		editorui.addChild(bm);
-		editorui.addChild(bv);
-		editorui.addChild(bp);
+		y = 128+y*20;
+		var data = artable[name];
+		var bv = px.domText(arattr[name]);
+		var bm = px.domButton("-", modattr.bind(null, -(data.incr || 1)));
+		var bp = px.domButton("+", modattr.bind(null, data.incr || 1));
+		bm.style.width = bp.style.width = "14px";
+		dom.push([4, y, name], [38, y, bm], [56, y, bv], [82, y, bp]);
 	}
 	function switchDeckCb(x){
 		return function() {
@@ -198,7 +190,7 @@ module.exports = function(arena, acard, startempty) {
 		if (deckname.value) {
 			sock.user.selectedDeck = deckname.value;
 			fixQuickButtons();
-			tname.setText(sock.user.selectedDeck);
+			tname.text = sock.user.selectedDeck;
 			saveDeck();
 		}
 	}
@@ -228,9 +220,8 @@ module.exports = function(arena, acard, startempty) {
 			mark: { cost: 45 },
 			draw: { cost: 135 },
 		};
-		var curpts = new PIXI.Text((arpts-sumscore())/45, ui.mkFont(16, "black"));
-		curpts.position.set(8, 188);
-		editorui.addChild(curpts);
+		var curpts = new px.domText((arpts-sumscore())/45);
+		dom.push([4, 188, curpts])
 		makeattrui(0, "hp");
 		makeattrui(1, "mark");
 		makeattrui(2, "draw");
@@ -254,33 +245,27 @@ module.exports = function(arena, acard, startempty) {
 			}]], [220, 8, quickNum]);
 			buttons = new Array(10);
 			for (var i = 0;i < 10;i++) {
-				var b = document.createElement("input");
-				b.type = "button";
+				var b = px.domButton(i+1, quickDeck(i));
 				b.style.width = "32px";
-				b.value = (i+1).toString();
-				b.style.backgroundSize = "100% 100%";
-				b.addEventListener("click", quickDeck(i));
 				dom.push([300 + i*36, 8, b]);
 				buttons[i] = b;
 			}
 			fixQuickButtons();
 		}
 	}
-	var editormarksprite = new PIXI.Sprite(gfx.nopic);
-	editormarksprite.position.set(66, 200);
-	editorui.addChild(editormarksprite);
+	var marksprite = document.createElement("span");
+	dom.push([66, 200, marksprite]);
 	var editormark = 0;
 	for (var i = 0;i < 13;i++) {
-		var sprite = px.mkButton(100 + i * 32, 234, gfx.eicons[i]);
-		sprite.interactive = true;
 		(function(_i) {
-			px.setClick(sprite, function() {
+			dom.push([100 + i * 32, 234,
+				px.domEButton(i, function() {
 				editormark = _i;
-				editormarksprite.setTexture(gfx.eicons[_i]);
+					marksprite.className = "Eicon E"+_i;
 				updateField();
-			});
+				})
+			]);
 		})(i);
-		editorui.addChild(sprite);
 	}
 	var decksprite = new px.DeckDisplay(60, setCardArt,
 		function(i){
@@ -311,6 +296,8 @@ module.exports = function(arena, acard, startempty) {
 			}
 		}, !arena, !!cardpool
 	);
+	cardsel.cardpool = cardpool;
+	cardsel.cardminus = cardminus;
 	editorui.addChild(cardsel);
 	var cardArt = new PIXI.Sprite(gfx.nopic);
 	cardArt.position.set(734, 8);
@@ -347,6 +334,9 @@ module.exports = function(arena, acard, startempty) {
 		options.register("deck", deckimport);
 		dom.push([520, 238, deckimport]);
 	}
+function resetCardArt(){cardArt.visible=false}
+	document.addEventListener("mousemove", resetCardArt, true);
+	px.refreshRenderer({view:editorui, editdiv:dom, endnext:function(){document.removeEventListener("mousemove", resetCardArt, true)}});
 	var tutspan;
 	px.setClick(tutorialbutton, function() {
 		if (tutspan) {
@@ -384,6 +374,7 @@ module.exports = function(arena, acard, startempty) {
 		cardsel.next(cardpool, cardminus, mpos);
 		decksprite.next(mpos);
 	}});
+
 	if (!arena){
 		deckimport.focus();
 		deckimport.setSelectionRange(0, 333);

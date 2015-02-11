@@ -17,7 +17,7 @@ module.exports = function() {
 		}
 		else if (sock.user.gold >= 50) {
 			sock.userExec("uppillar", { c: card.code });
-			goldcount.setText(sock.user.gold + "$");
+			goldcount.text = sock.user.gold + "$";
 		}
 		else return "You need 50$ to afford an upgraded pillar!";
 	}
@@ -40,7 +40,7 @@ module.exports = function() {
 		}
 		else if (sock.user.gold >= 50) {
 			sock.userExec("shpillar", { c: card.code });
-			goldcount.setText(sock.user.gold + "$");
+			goldcount.text = sock.user.gold + "$";
 		}
 		else return "You need 50$ to afford a shiny pillar!";
 	}
@@ -57,13 +57,13 @@ module.exports = function() {
 		else if (card.isFree()){
 			if (sock.user.gold >= 300){
 				sock.userExec("upshpillar", {c: card.code});
-				goldcount.setText(sock.user.gold + "$");
+				goldcount.text = sock.user.gold + "$";
 			}else return "You need 300$ to afford a shiny upgraded pillar!";
 		}else{
 			var codecount = etgutil.count(sock.user.pool, card.code);
 			if (codecount) {
 				sock.userExec("sellcard", { card: card.code });
-				goldcount.setText(sock.user.gold + "$");
+				goldcount.text = sock.user.gold + "$";
 			}
 			else return "This card is bound to your account; you cannot sell it.";
 		}
@@ -71,7 +71,7 @@ module.exports = function() {
 	function eventWrap(func){
 		return function(){
 			var error = selectedCard ? func(Cards.Codes[selectedCard]) : "Pick a card, any card.";
-			if (error) twarning.setText(error);
+			if (error) twarning.text = error;
 			else adjustdeck();
 		}
 	}
@@ -81,22 +81,20 @@ module.exports = function() {
 	}
 	function adjustdeck() {
 		cardpool = etgutil.deck2pool(sock.user.pool);
-		cardpool = etgutil.deck2pool(sock.user.accountbound, cardpool);
+		cardsel.cardpool = cardpool = etgutil.deck2pool(sock.user.accountbound, cardpool);
 	}
+	var cardpool, selectedCard;
 	var upgradeui = px.mkView(function(){
-		if (selectedCard) cardArt.setTexture(gfx.getArt(etgutil.asUpped(selectedCard, true)));
+		if (selectedCard) cardArt.texture = gfx.getArt(etgutil.asUpped(selectedCard, true));
 	});
 	var stage = {view:upgradeui,
 		bexit: [5, 50, ["Exit", require("./MainMenu")]],
 		bupgrade: [150, 50, ["Upgrade", eventWrap(upgradeCard)]],
-		bpolish: [150, 95, ["Polish", eventWrap(polishCard), function() { if (selectedCard) cardArt.setTexture(gfx.getArt(etgutil.asShiny(selectedCard, true))) }]],
+		bpolish: [150, 95, ["Polish", eventWrap(polishCard), function() { if (selectedCard) cardArt.texture = gfx.getArt(etgutil.asShiny(selectedCard, true)) }]],
 		bunupgrade:[150, 50, ["Unupgrade", eventWrap(unupgradeCard)]],
-		bunpolish:[150, 95, ["Unpolish", eventWrap(unpolishCard), function() { if (selectedCard) cardArt.setTexture(gfx.getArt(etgutil.asShiny(selectedCard, false))) }]],
+		bunpolish:[150, 95, ["Unpolish", eventWrap(unpolishCard), function() { if (selectedCard) cardArt.texture = gfx.getArt(etgutil.asShiny(selectedCard, false)) }]],
 		bsell:[150, 140, ["Sell", eventWrap(sellCard)]],
 		bauto:[5, 140, ["Autoconvert", autoCards]],
-		next:function(){
-			cardsel.next(cardpool);
-		}
 	};
 
 	var goldcount = px.domText(sock.user.gold + "$");
@@ -122,41 +120,41 @@ module.exports = function() {
 	var cardsel = new px.CardSelector(stage.domtext, null,
 		function(code){
 			var card = Cards.Codes[code];
-			selectedCardArt.setTexture(gfx.getArt(code));
-			cardArt.setTexture(gfx.getArt(etgutil.asUpped(code, true)));
+			selectedCardArt.texture = gfx.getArt(code);
+			cardArt.texture = gfx.getArt(etgutil.asUpped(code, true));
 			selectedCard = code;
 			if (card.upped) {
 				px.setDomVis("bupgrade", false);
 				px.setDomVis("bunupgrade", true);
-				tinfo.setText(card.isFree() ? "" : card.rarity != -1 ? "Convert into an 6 unupgraded copies." : "Convert into an unupgraded version.");
+				tinfo.text = card.isFree() ? "" : card.rarity != -1 ? "Convert into an 6 unupgraded copies." : "Convert into an unupgraded version.";
 			}else{
-				tinfo.setText(card.isFree() ? "50$ to upgrade" : card.rarity != -1 ? "Convert 6 into an upgraded version." : "Convert into an upgraded version.");
+				tinfo.text = card.isFree() ? "50$ to upgrade" : card.rarity != -1 ? "Convert 6 into an upgraded version." : "Convert into an upgraded version.";
 				px.setDomVis("bupgrade", true);
 				px.setDomVis("bunupgrade", false);
 			}
 			if (card.rarity == 5) {
 				px.setDomVis("bpolish", false);
 				px.setDomVis("bunpolish", false);
-				tinfo3.setText("This card cannot be " + (card.shiny ? "un" : "") + "polished.")
+				tinfo3.text = "This card cannot be " + (card.shiny ? "un" : "") + "polished.";
 			}
 			else if (card.shiny){
 				px.setDomVis("bpolish", false);
 				px.setDomVis("bunpolish", true);
-				tinfo3.setText(card.isFree() ? "" : card.rarity != -1 ? "Convert into 6 non-shiny copies." : "Convert into 2 non-shiny copies.")
+				tinfo3.text = card.isFree() ? "" : card.rarity != -1 ? "Convert into 6 non-shiny copies." : "Convert into 2 non-shiny copies.";
 			}else{
-				tinfo3.setText(card.isFree() ? "50$ to polish" : card.rarity == 5 ? "This card cannot be polished." : card.rarity != -1 ? "Convert 6 into a shiny version." : "Convert 2 into a shiny version.")
+				tinfo3.text = card.isFree() ? "50$ to polish" : card.rarity == 5 ? "This card cannot be polished." : card.rarity != -1 ? "Convert 6 into a shiny version." : "Convert 2 into a shiny version.";
 				px.setDomVis("bpolish", true);
 				px.setDomVis("bunpolish", false);
 			}
 			px.setDomVis("bsell", ~card.rarity);
 			document.getElementById("bsell").value = card.isFree() ? "Polgrade" : "Sell";
-			tinfo2.setText(card.rarity == -1 ? "" : card.isFree() ? "300$ to shine & polish" :
-				"Sell for " + userutil.sellValues[card.rarity] * (card.upped ? 6 : 1) * (card.shiny ? 6 : 1) + "$");
-			twarning.setText("");
+			tinfo2.text = card.rarity == -1 ? "" : card.isFree() ? "300$ to upgrade & polish" :
+				"Sell for " + userutil.sellValues[card.rarity] * (card.upped ? 6 : 1) * (card.shiny ? 6 : 1) + "$";
+			twarning.text = "";
 		}, true
 	);
 	upgradeui.addChild(cardsel);
-	var cardpool, selectedCard;
+	cardsel.cardminus = {};
 	adjustdeck();
 	px.refreshRenderer(stage);
 	px.setDomVis("bupgrade", false);

@@ -73,6 +73,7 @@ function Card(type, info){
 					if (iscast) activecastcache[info.Active] = [this.cast, this.castele];
 				}
 			}
+			Object.freeze(this.active);
 		}
 	}
 	if (info.Status){
@@ -85,6 +86,7 @@ function Card(type, info){
 				var status = statuses[i].split("=");
 				this.status[status[0]] = status.length==1 || parseInt(status[1]);
 			}
+			Object.freeze(this.status);
 		}
 	}
 	if (info.Text){
@@ -93,6 +95,7 @@ function Card(type, info){
 	if (info.Rarity){
 		this.rarity = parseInt(info.Rarity);
 	}
+	Object.freeze(this);
 }
 function Thing(card, owner){
 	this.owner = owner;
@@ -123,6 +126,7 @@ function Player(game){
 	this.gpull = undefined;
 	this.nova = 0;
 	this.maxhp = this.hp = 100;
+	this.deckpower = 1;
 	this.hand = [];
 	this.deck = [];
 	this.creatures = new Array(23);
@@ -173,6 +177,9 @@ Weapon.prototype = Object.create(Permanent.prototype);
 Shield.prototype = Object.create(Permanent.prototype);
 Pillar.prototype = Object.create(Permanent.prototype);
 CardInstance.prototype = Object.create(Thing.prototype);
+Object.defineProperty(CardInstance.prototype, "active", { get: function() { return this.card.active; }});
+Object.defineProperty(CardInstance.prototype, "status", { get: function() { return this.card.status; }});
+Object.defineProperty(Card.prototype, "shiny", { get: function() { return this.code > "fvv"; }});
 Card.prototype.rarity = 0;
 Card.prototype.attack = 0;
 Card.prototype.health = 0;
@@ -184,7 +191,7 @@ Player.prototype.markpower = 1;
 var Chroma = 0, Entropy = 1, Death = 2, Gravity = 3, Earth = 4, Life = 5, Fire = 6, Water = 7, Light = 8, Air = 9, Time = 10, Darkness = 11, Aether = 12;
 var PillarEnum = 0, WeaponEnum = 1, ShieldEnum = 2, PermanentEnum = 3, SpellEnum = 4, CreatureEnum = 5;
 var MulliganPhase1 = 0, MulliganPhase2 = 1, PlayPhase = 2, EndPhase = 3;
-var passives = { airborne: true, aquatic: true, nocturnal: true, voodoo: true, swarm: true, ranged: true, additive: true, stackable: true, salvage: true, token: true, poisonous: true, martyr: true, decrsteam: true, beguilestop: true, bounce: true, dshieldoff: true, salvageoff: true, golem: true, obsession: true, virtue: true };
+var passives = Object.freeze({ airborne: true, aquatic: true, nocturnal: true, voodoo: true, swarm: true, ranged: true, additive: true, stackable: true, salvage: true, token: true, poisonous: true, martyr: true, decrsteam: true, beguilestop: true, bounce: true, dshieldoff: true, salvageoff: true, golem: true, obsession: true, virtue: true });
 var PlayerRng = Object.create(Player.prototype);
 PlayerRng.rng = Math.random;
 PlayerRng.upto = function(x){ return Math.floor(Math.random()*x); }
@@ -698,7 +705,7 @@ Player.prototype.drawcard = function(drawstep) {
 			if (~new CardInstance(this.deck.pop(), this).place()){
 				this.procactive("draw", drawstep);
 				if (this.deck.length == 0 && this.game.player1 == this)
-					Effect.mkSpriteFade(ui.getTextImage("Last card!", ui.mkFont(32, "white"), 0));
+					Effect.mkSpriteFade(ui.getTextImage("Last card!", 32, "white", 0));
 			}
 		}else this.game.setWinner(this.foe);
 	}
@@ -883,7 +890,11 @@ Weapon.prototype.freeze = Creature.prototype.freeze = function(x){
 		}
 	}
 }
-Creature.prototype.spelldmg = Creature.prototype.dmg = function(x, dontdie){
+Creature.prototype.spelldmg = function(x, dontdie){
+	if (this.active.spelldmg && this.active.spelldmg(this, undefined, x)) return 0;
+	return this.dmg(x, dontdie);
+}
+Creature.prototype.dmg = function(x, dontdie){
 	if (!x)return 0;
 	var dmg = x<0 ? Math.max(this.hp-this.maxhp, x) : Math.min(this.truehp(), x);
 	this.hp -= dmg;
@@ -917,11 +928,7 @@ CardInstance.prototype.remove = function(index) {
 }
 CardInstance.prototype.die = function(idx){
 	var idx = this.remove(idx);
-	if (~idx){
-		if (this.card.active.discard){
-			this.card.active.discard(this);
-		}
-	}
+	if (~idx) this.procactive("discard");
 }
 Creature.prototype.deatheffect = Weapon.prototype.deatheffect = function(index) {
 	var data = {index:index}
@@ -1010,12 +1017,13 @@ Thing.prototype.mutantactive = function(){
 		}
 	}
 }
-var adrtbl = [
+var adrtbl = Object.freeze([
 	[0, 0, 0, 0],
 	[1, 1, 1], [2, 2, 2], [3, 3, 3],
 	[3, 2], [4, 2], [4, 2], [5, 3], [6, 3],
 	[3], [4], [4], [4], [5], [5], [5]
-];
+]);
+adrtbl.forEach(Object.freeze);
 Weapon.prototype.trueatk = Creature.prototype.trueatk = function(adrenaline){
 	var dmg = this.atk;
 	if (this.status.dive)dmg += this.status.dive;
@@ -1058,7 +1066,7 @@ Shield.prototype.remove = function() {
 	return 0;
 }
 Thing.prototype.isMaterial = function(type) {
-	return (type ? this instanceof type : this.status) && !this.status.immaterial && !this.status.burrowed;
+	return (type ? this instanceof type : !(this instanceof CardInstance) && !(this instanceof Player)) && !this.status.immaterial && !this.status.burrowed;
 }
 Thing.prototype.addactive = function(type, active){
 	this.active[type] = combineactive(this.active[type], active);
@@ -1142,9 +1150,9 @@ Weapon.prototype.attack = Creature.prototype.attack = function(stasis, freedomCh
 			}
 		}else{
 			var truedr = target.shield ? target.shield.truedr() : 0;
-			var tryDmg = Math.max(trueatk - truedr, 0);
-			if (!target.shield || !target.shield.active.shield || !target.shield.active.shield(target.shield, this, tryDmg)){
-				if (truedr > 0 && this.active.blocked) this.active.blocked(this, target.shield, truedr);
+			var tryDmg = Math.max(trueatk - truedr, 0), blocked = Math.max(Math.min(truedr, trueatk), 0);
+			if (!target.shield || !target.shield.active.shield || !target.shield.active.shield(target.shield, this, tryDmg, blocked)){
+				if (truedr > 0 && this.active.blocked) this.active.blocked(this, target.shield, blocked);
 				if (tryDmg > 0){
 					var dmg = target.dmg(tryDmg);
 					if (this.active.hit){
@@ -1206,6 +1214,7 @@ CardInstance.prototype.useactive = function(target){
 		ui.playSound("creaturePlay");
 	} else console.log("Unknown card type: " + card.type);
 	owner.spend(card.costele, card.cost);
+	this.procactive("cardplay");
 	owner.game.updateExpectedDamage();
 }
 function countAdrenaline(x){
@@ -1290,8 +1299,9 @@ exports.MulliganPhase2 = 1;
 exports.PlayPhase = 2;
 exports.EndPhase = 3;
 exports.AdrenaTable = adrtbl;
-exports.PillarList = ["4sa", "4vc", "52g", "55k", "58o", "5bs", "5f0", "5i4", "5l8", "5oc", "5rg", "5uk", "61o"];
-exports.NymphList = [undefined, "500", "534", "568", "59c", "5cg", "5fk", "5io", "5ls", "5p0", "5s4", "5v8", "62c"];
-exports.AlchemyList = [undefined, "4vn", "52s", "55v", "595", "5c7", "5fb", "5ig", "5lj", "5om", "5rr", "5uu", "621"];
-exports.ShardList = [undefined, "50a", "53e", "56i", "59m", "5cq", "5fu", "5j2", "5m6", "5pa", "5se", "5vi", "62m"];
-exports.eleNames = ["Chroma", "Entropy", "Death", "Gravity", "Earth", "Life", "Fire", "Water", "Light", "Air", "Time", "Darkness", "Aether", "Random", "Recently Released"];
+exports.PillarList = Object.freeze(["4sa", "4vc", "52g", "55k", "58o", "5bs", "5f0", "5i4", "5l8", "5oc", "5rg", "5uk", "61o"]);
+exports.PendList = Object.freeze(["4sc", "50u", "542", "576", "5aa", "5de", "5gi", "5jm", "5mq", "5pu", "5t2", "606", "63a"]);
+exports.NymphList = Object.freeze([undefined, "500", "534", "568", "59c", "5cg", "5fk", "5io", "5ls", "5p0", "5s4", "5v8", "62c"]);
+exports.AlchemyList = Object.freeze([undefined, "4vn", "52s", "55v", "595", "5c7", "5fb", "5ig", "5lj", "5om", "5rr", "5uu", "621"]);
+exports.ShardList = Object.freeze([undefined, "50a", "53e", "56i", "59m", "5cq", "5fu", "5j2", "5m6", "5pa", "5se", "5vi", "62m"]);
+exports.eleNames = Object.freeze(["Chroma", "Entropy", "Death", "Gravity", "Earth", "Life", "Fire", "Water", "Light", "Air", "Time", "Darkness", "Aether", "Random", "Recently Released"]);

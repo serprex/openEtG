@@ -1,3 +1,4 @@
+"use strict";
 var etg = require("../etg");
 var etgutil = require("../etgutil");
 var mt = require("../MersenneTwister");

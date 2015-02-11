@@ -12,18 +12,19 @@ function Death(pos){
 function Text(text, pos){
 	if (!pos){
 		console.log("Blank position " + text);
-		pos = new PIXI.Point(-99, -99);
+		pos = new PIXI.math.Point(-99, -99);
 	}
-	PIXI.Sprite.call(this, ui.getTextImage(text, 16));
+	PIXI.Sprite.call(this, ui.getTextImage(text, 16, "white"));
 	this.step = 0;
 	this.position = maybeTgtPos(pos);
 	this.anchor.x = .5;
 }
-function SpriteFade(texture, pos) {
+function SpriteFade(texture, pos, anchor) {
 	PIXI.Sprite.call(this, texture);
-	this.anchor.set(0.5, 0.5);
+	if (!anchor) this.anchor.set(0.5, 0.5);
+	else this.anchor.set(anchor.x, anchor.y);
 	this.step = 0;
-	this.position = maybeTgtPos(pos) || new PIXI.Point(450, 300);
+	this.position = maybeTgtPos(pos) || new PIXI.math.Point(450, 300);
 }
 function nop(){}
 function make(cons){
@@ -47,7 +48,7 @@ if (typeof PIXI === "undefined"){
 		if (anims){
 			for (var i = anims.children.length - 1;i >= 0;i--) {
 				var child = anims.children[i];
-				if ((p2cloaked && new PIXI.Rectangle(130, 20, 660, 280).contains(child.position.x, child.position.y)) || child.next()){
+				if ((p2cloaked && new PIXI.math.Rectangle(130, 20, 660, 280).contains(child.position.x, child.position.y)) || child.next()){
 					anims.removeChild(child);
 				}
 			}
@@ -57,26 +58,25 @@ if (typeof PIXI === "undefined"){
 	Text.prototype = Object.create(PIXI.Sprite.prototype);
 	SpriteFade.prototype = Object.create(PIXI.Sprite.prototype);
 	Death.prototype.next = function(){
-		if (++this.step==10){
-			return true;
-		}
-		this.clear();
-		this.beginFill(0, 1-this.step/10);
-		this.drawRect(-30, -30, 60, 60);
-		this.endFill();
-	}
-	Text.prototype.next = function(){
 		if (++this.step==15){
 			return true;
 		}
-		this.position.y -= 3;
-		this.alpha = 1-((1<<this.step)/225);
+		this.clear();
+		this.beginFill(0, 1-this.step/15);
+		this.drawRect(-30, -30, 60, 60);
 	}
-	SpriteFade.prototype.next = function() {
-		if (++this.step == 80) {
+	Text.prototype.next = function(){
+		if (++this.step==20){
 			return true;
 		}
-		if (this.step > 40) this.alpha = 1 - ((this.step-40) / 40);
+		this.position.y -= 2;
+		this.alpha = 1-Math.sqrt(this.step)/5;
+	}
+	SpriteFade.prototype.next = function() {
+		if (++this.step == 100) {
+			return true;
+		}
+		if (this.step > 50) this.alpha = 1 - ((this.step-50) / 50);
 	}
 }
 var makemake = [Death, Text, SpriteFade];

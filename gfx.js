@@ -6,8 +6,8 @@ var options = require("./options");
 exports.loaded = false;
 function load(progress, postload){
 	exports.load = undefined;
-	var singles = ["gold", "bg_quest", "bg_game", "bg_questmap"];
-	var assets = ["eicons", "cardBacks", "cardBorders", "sicons", "sborders", "ticons", "ricons"].concat(singles);
+	var singles = ["bg_quest", "bg_questmap", "protection", "sacrifice"];
+	var assets = ["eicons", "cardBacks", "cardBorders", "sicons", "sborders", "hborders", "ticons", "ricons"].concat(singles);
 	var widths = {
 		eicons: 32,
 		cardBacks: 132,
@@ -15,6 +15,7 @@ function load(progress, postload){
 		sicons: 13,
 		ticons: 25,
 		sborders: 64,
+		hborders: 112,
 		ricons: 25,
 	};
 	var loadCount = 0;
@@ -27,7 +28,7 @@ function load(progress, postload){
 			if (w){
 				var ts = [];
 				for (var x = 0; x < tex.width; x += w){
-					ts.push(new PIXI.Texture(tex, new PIXI.Rectangle(x, 0, w, tex.height)));
+					ts.push(new PIXI.Texture(tex, new PIXI.math.Rectangle(x, 0, w, tex.height)));
 				}
 				exports[asset] = ts;
 			}else exports[asset] = tex;
@@ -42,10 +43,20 @@ function load(progress, postload){
 		img.src = "assets/" + asset + ".png";
 	});
 }
+function Text(text, fontsize, color){
+	var canvas = document.createElement("canvas"), ctx = canvas.getContext("2d");
+	var font = ctx.font = fontsize + "px Dosis";
+	canvas.width = ctx.measureText(text).width+1;
+	canvas.height = fontsize*1.4;
+	ctx.font = font;
+	ctx.fillStyle = color || "black";
+	ctx.fillText(text, 0, fontsize);
+	return new PIXI.Texture(new PIXI.BaseTexture(canvas));
+}
 var caimgcache = {}, crimgcache = {}, wsimgcache = {}, artcache = {}, artimagecache = {};
 function makeArt(card, art, oldrend) {
-	var rend = oldrend || new PIXI.RenderTexture(132, 256);
-	var template = new PIXI.DisplayObjectContainer();
+	var rend = oldrend || require("./px").mkRenderTexture(132, 256);
+	var template = new PIXI.Container();
 	template.addChild(new PIXI.Sprite(exports.cardBacks[card.element+(card.upped?13:0)]));
 	var rarity = new PIXI.Sprite(exports.ricons[card.rarity]);
 	rarity.anchor.set(0, 1);
@@ -61,13 +72,13 @@ function makeArt(card, art, oldrend) {
 	typemark.anchor.set(1, 1);
 	typemark.position.set(128, 252);
 	template.addChild(typemark);
-	var nametag = new PIXI.Text(card.name, { font: "12px Dosis", fill: card.upped ? "black" : "white" });
-	nametag.position.set(2, 4);
+	var nametag = new PIXI.Sprite(Text(card.name, 12, card.upped ? "black" : "white"));
+	nametag.position.set(2, 2);
 	template.addChild(nametag);
 	if (card.cost) {
-		var text = new PIXI.Text(card.cost, { font: "12px Dosis", fill: card.upped ? "black" : "white" });
+		var text = new PIXI.Sprite(Text(card.cost, 12, card.upped ? "black" : "white"));
 		text.anchor.x = 1;
-		text.position.set(rend.width-3, 4);
+		text.position.set(rend.width-3, 2);
 		template.addChild(text);
 		if (card.element && ((card.costele == card.element) ^ !!options.hideCostIcon)) {
 			var eleicon = new PIXI.Sprite(exports.eicons[card.costele]);
@@ -77,7 +88,7 @@ function makeArt(card, art, oldrend) {
 			template.addChild(eleicon);
 		}
 	}
-	var infospr = new PIXI.Sprite(ui.getTextImage(card.info(), ui.mkFont(11, card.upped ? "black" : "white"), "", rend.width-4));
+	var infospr = new PIXI.Sprite(ui.getTextImage(card.info(), 11, card.upped ? "black" : "white", "", rend.width-4));
 	infospr.position.set(2, 150);
 	template.addChild(infospr);
 	rend.render(template, null, true);
@@ -113,18 +124,17 @@ function getCardImage(code) {
 	if (caimgcache[code]) return caimgcache[code];
 	else {
 		var card = Cards.Codes[code];
-		var rend = new PIXI.RenderTexture(100, 20);
+		var rend = require("./px").mkRenderTexture(100, 20);
 		var graphics = new PIXI.Graphics();
 		graphics.lineStyle(1, card && card.shiny ? 0xdaa520 : 0x222222);
 		graphics.beginFill(card ? ui.maybeLighten(card) : code == "0" ? 0x887766 : 0x111111);
 		graphics.drawRect(0, 0, 99, 19);
-		graphics.endFill();
 		if (card) {
 			var clipwidth = rend.width-2;
 			if (card.cost) {
-				var text = new PIXI.Text(card.cost, { font: "11px Dosis", fill: card.upped ? "black" : "white" });
+				var text = new PIXI.Sprite(Text(card.cost, 11, card.upped ? "black" : "white"));
 				text.anchor.x = 1;
-				text.position.set(rend.width-2, 5);
+				text.position.set(rend.width-2, 3);
 				graphics.addChild(text);
 				clipwidth -= text.width+2;
 				if (card.element && ((card.costele == card.element) ^ !!options.hideCostIcon)) {
@@ -136,13 +146,10 @@ function getCardImage(code) {
 					clipwidth -= 18;
 				}
 			}
-			var text = new PIXI.Text(card.name, { font: "11px Dosis", fill: card.upped ? "black" : "white" });
-			text.position.set(2, 5);
+			var text = new PIXI.Sprite(Text(card.name, 11, card.upped ? "black" : "white"));
+			text.position.set(2, 3);
 			if (text.width > clipwidth){
-				text.mask = new PIXI.Graphics();
-				text.mask.beginFill();
-				text.mask.drawRect(0, 0, clipwidth, 20);
-				text.mask.endFill();
+				text.width = clipwidth;
 			}
 			graphics.addChild(text);
 		}
@@ -153,13 +160,12 @@ function getCardImage(code) {
 function getInstImage(code, scale, cache){
 	return cache[code] || getArtImage(code, function(art) {
 		var card = Cards.Codes[code];
-		var rend = new PIXI.RenderTexture(Math.ceil(128 * scale), Math.ceil(164 * scale));
+		var rend = require("./px").mkRenderTexture(Math.ceil(128 * scale), Math.ceil(164 * scale));
 		var border = new PIXI.Sprite(exports.cardBorders[card.element + (card.upped ? 13 : 0)]);
 		var graphics = new PIXI.Graphics();
 		border.addChild(graphics);
 		graphics.beginFill(ui.maybeLighten(card));
 		graphics.drawRect(0, 16, 128, 128);
-		graphics.endFill();
 		if (card.shiny){
 			graphics.lineStyle(2, 0xdaa520);
 			graphics.moveTo(0, 14);
@@ -173,11 +179,11 @@ function getInstImage(code, scale, cache){
 			if (card.shiny) artspr.filters = [shinyFilter];
 			border.addChild(artspr);
 		}
-		var text = new PIXI.Text(card.name, { font: "16px Dosis", fill: card.upped ? "black" : "white" });
+		var text = new PIXI.Sprite(Text(card.name, 16, card.upped ? "black" : "white"));
 		text.anchor.x = .5;
-		text.position.set(64, 144);
+		text.position.set(64, 142);
 		border.addChild(text);
-		var mtx = new PIXI.Matrix();
+		var mtx = new PIXI.math.Matrix();
 		mtx.scale(scale, scale);
 		rend.render(border, mtx);
 		return cache[code] = rend;
@@ -220,11 +226,11 @@ if (typeof PIXI !== "undefined"){
 	exports.getArt = getArt;
 	exports.getCardImage = getCardImage;
 	exports.getWeaponShieldImage = getWeaponShieldImage;
-	var shinyFilter = new PIXI.ColorMatrixFilter();
-	shinyFilter.matrix = [
+	exports.Text = Text;
+	var shinyFilter = new (require("./ColorMatrixFilter"))([
 		0,1,0,0,
 		0,0,1,0,
 		1,0,0,0,
 		0,0,0,1,
-	];
+	]);
 }

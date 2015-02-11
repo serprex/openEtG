@@ -1,78 +1,58 @@
 "use strict";
+var lastmove = 0;
+document.addEventListener("mousemove", function(e){
+	var now = Date.now();
+	if (now - this.lastmove < 16){
+		e.stopPropagation();
+		return;
+	}
+	this.lastmove = now;
+});
 var gfx = require("./gfx");
 var etg = require("./etg");
 var ui = require("./uiutil");
 var Cards = require("./Cards");
 var etgutil = require("./etgutil");
 var renderer = new PIXI.autoDetectRenderer(900, 600, {view:document.getElementById("leftpane"), transparent:true});
-var realStage = new PIXI.Stage(), curStage = {};
-realStage.addChild(new PIXI.Sprite(new PIXI.Texture(new PIXI.BaseTexture(document.getElementById("bgimg")))));
+var noStage = {}, curStage = noStage;
+var interman = new (require("./InteractionManager"))(noStage, renderer);
+exports.mouse = interman.mouse;
 function animate() {
-	setTimeout(requestAnimate, 40);
-	if (curStage.next){
-		curStage.next();
-	}
 	if (curStage.view){
-		renderer.render(realStage);
+		renderer.render(curStage.view);
+		setTimeout(requestAnimate, 20);
 	}
 }
 function requestAnimate() { requestAnimationFrame(animate); }
-exports.load = requestAnimate;
-var special = /view|endnext|cmds|next/;
+exports.mkRenderTexture = function(width, height){
+	return new PIXI.RenderTexture(renderer, width, height);
+}
+var special = /view|endnext|cmds|next|nextID/;
 exports.getCmd = function(cmd){
 	return curStage.cmds ? curStage.cmds[cmd] : null;
 }
-function monkeyDomSetText(text){
-	if (this.textcache == text) return;
-	this.textcache = text;
-	while (this.firstChild) this.firstChild.remove();
-	var ele = this;
-	var pieces = text.replace(/\|/g, " | ").split(/(\d\d?:\d\d?|\$|\n)/);
-	pieces.forEach(function(piece){
-		if (piece == "\n") {
-			ele.appendChild(document.createElement("br"));
-		}else if (piece == "$") {
-			var sp = document.createElement("span");
-			sp.className = "coin";
-			ele.appendChild(sp);
-		}else if (/^\d\d?:\d\d?$/.test(piece)) {
-			var parse = piece.split(":");
-			var num = parseInt(parse[0]);
-			if (num < 4) {
-				for (var j = 0;j < num;j++) {
-					var sp = document.createElement("span");
-					sp.className = "eicon e"+parse[1];
-					ele.appendChild(sp);
-				}
-			}else{
-				ele.appendChild(document.createTextElement(parse[0]));
-				var sp = document.createElement("span");
-				sp.className = "eicon e"+parse[1];
-				ele.appendChild(sp);
-			}
-		} else if (piece) {
-			ele.appendChild(document.createTextNode(piece));
-		}
-	});
-}
-function monkeyButtonSetText(text){
-	if (text){
-		this.value = text;
-		this.style.display = "inline";
-	}else this.style.display = "none";
-}
-exports.domBox = function(w, h, tutorial){
+exports.domBox = function(w, h){
 	var span = document.createElement("span");
 	span.style.width = w + "px";
 	span.style.height = h + "px";
-	span.className = tutorial ? "tutorialbox" : "bgbox";
+	span.className = "bgbox";
 	return span;
 }
 exports.domButton = function(text, click, mouseover, sound) {
 	var ele = document.createElement("input");
 	ele.type = "button";
-	ele.setText = monkeyButtonSetText;
-	ele.setText(text);
+	Object.defineProperty(ele, "text", {
+		get:function(){
+			return this.value;
+		},
+		set:function(text){
+			if (text){
+				this.value = text;
+				this.style.display = "inline";
+			}else this.style.display = "none";
+		}
+	});
+	ele.text = text;
 	ele.addEventListener("click", function() {
 		if (sound !== false) ui.playSound(sound || "buttonClick");
 		if (click) click.call(this);
@@ -80,10 +60,60 @@ exports.domButton = function(text, click, mouseover, sound) {
 	if (mouseover) ele.addEventListener("mouseover", mouseover);
 	return ele;
 }
+function setFilter(style, brightness){
+	return function(){
+		style.WebkitFilter = style.filter = "brightness("+brightness+")";
+	}
+}
+exports.domEButton = function(e, click, ch){
+	if (!ch) ch = "E";
+	var ele = document.createElement("span");
+	ele.className = "imgb "+ch+"icon "+ch+e;
+	ele.addEventListener("click", click);
+	return ele;
+}
 exports.domText = function(text){
 	var ele = document.createElement("span");
-	ele.setText = monkeyDomSetText;
-	ele.setText(text);
+	Object.defineProperty(ele, "text", {
+		get:function(){
+			return this.textcache;
+		},
+		set:function(text){
+			text = text.toString();
+			if (this.textcache == text) return;
+			this.textcache = text;
+			while (this.firstChild) this.firstChild.remove();
+			var ele = this;
+			var pieces = text.replace(/\|/g, " | ").split(/(\d\d?:\d\d?|\$|\n)/);
+			pieces.forEach(function(piece){
+				if (piece == "\n") {
+					ele.appendChild(document.createElement("br"));
+				}else if (piece == "$") {
+					var sp = document.createElement("span");
+					sp.className = "coin";
+					ele.appendChild(sp);
+				}else if (/^\d\d?:\d\d?$/.test(piece)) {
+					var parse = piece.split(":");
+					var num = parseInt(parse[0]);
+					if (num < 4) {
+						for (var j = 0;j < num;j++) {
+							var sp = document.createElement("span");
+							sp.className = "eicon e"+parse[1];
+							ele.appendChild(sp);
+						}
+					}else{
+						ele.appendChild(document.createTextNode(parse[0]));
+						var sp = document.createElement("span");
+						sp.className = "eicon e"+parse[1];
+						ele.appendChild(sp);
+					}
+				} else if (piece) {
+					ele.appendChild(document.createTextNode(piece));
+				}
+			});
+		}
+	});
+	ele.text = text;
 	return ele;
 }
 function parseDom(info){
@@ -105,9 +135,6 @@ exports.refreshRenderer = function(stage) {
 	if (curStage.endnext){
 		curStage.endnext();
 	}
-	if (realStage.children.length > 1){
-		realStage.removeChildAt(1);
-	}
 	for (var key in stage){
 		if (!key.match(special)){
 			var dom = stage[key], div;
@@ -127,16 +154,21 @@ exports.refreshRenderer = function(stage) {
 			document.body.removeChild(curStage[key]);
 		}
 	}
+	if (curStage.nextID) clearInterval(curStage.nextID);
+	if (stage.next) stage.nextID = setInterval(stage.next, 30);
 	if (stage.view){
+		if (!curStage.view) requestAnimate();
+		if (stage.next){
+			stage.next();
+		}
+		renderer.render(stage.view);
 		renderer.view.style.display = "inline";
-		realStage.addChild(stage.view);
+		interman.stage = stage.view;
 	} else {
+		interman.stage = noStage;
 		renderer.view.style.display = "none";
 	}
 	curStage = stage;
-}
-exports.getMousePos = function(){
-	return realStage.getMousePosition();
 }
 exports.setClick = function(obj, click, sound) {
 	if (sound === undefined) sound = "buttonClick";
@@ -145,27 +177,18 @@ exports.setClick = function(obj, click, sound) {
 		click.apply(this, arguments);
 	}
 }
-exports.maybeSetText = function(obj, text) {
-	if (obj.text != text) obj.setText(text);
-}
-exports.hitTest = function(obj, pos) {
-	var x = obj.position.x - obj.width * obj.anchor.x, y = obj.position.y - obj.height * obj.anchor.y;
-	return pos.x > x && pos.y > y && pos.x < x + obj.width && pos.y < y + obj.height;
-}
+exports.hitTest = interman.hitTest.bind(interman);
 exports.setInteractive = function() {
 	for (var i = 0;i < arguments.length;i++) {
 		arguments[i].interactive = true;
 	}
 }
 exports.mkView = function(mouseover){
-	var view = new PIXI.DisplayObjectContainer();
+	var view = new PIXI.Container();
 	view.interactive = true;
 	if (mouseover){
-		var bg = new PIXI.DisplayObjectContainer();
-		bg.hitArea = realStage.hitArea;
-		bg.mouseover = mouseover;
-		bg.interactive = true;
-		view.addChild(bg);
+		view.hitArea = new PIXI.math.Rectangle(0, 0, 900, 600);
+		view.mouseover = mouseover;
 	}
 	return view;
 }
@@ -190,24 +213,6 @@ exports.mkBgRect = function(){
 	}
 	return g;
 }
-exports.mkButton = function(x, y, b, mouseoverfunc, mouseoutfunc) {
-	if (b instanceof PIXI.Texture) b = new PIXI.Sprite(b);
-	b.interactive = true;
-	b.buttonMode = true;
-	b.position.set(x, y);
-	b.mousedown = function() {
-		b.tint = 0x666666;
-	}
-	b.mouseover = b.mouseup = function() {
-		if (mouseoverfunc) mouseoverfunc();
-		b.tint = 0xAAAAAA;
-	}
-	b.mouseout = function() {
-		if (mouseoutfunc) mouseoutfunc();
-		b.tint = 0xFFFFFF;
-	}
-	return b;
-}
 exports.adjust = function adjust(cardminus, code, x) {
 	if (code in cardminus) {
 		cardminus[code] += x;
@@ -215,12 +220,12 @@ exports.adjust = function adjust(cardminus, code, x) {
 	delete cardminus.rendered;
 }
 function DeckDisplay(decksize, cardmouseover, cardclick, deck){
-	PIXI.DisplayObjectContainer.call(this);
+	PIXI.Container.call(this);
 	this.deck = deck || [];
 	this.decksize = decksize;
 	this.cardmouseover = cardmouseover;
 	this.cardclick = cardclick;
-	this.hitArea = new PIXI.Rectangle(100, 32, Math.floor(decksize/10)*99, 200);
+	this.hitArea = new PIXI.math.Rectangle(100, 32, Math.floor(decksize/10)*99, 200);
 	this.interactive = true;
 	for (var i = 0;i < decksize;i++) {
 		var sprite = new PIXI.Sprite(gfx.nopic);
@@ -228,12 +233,12 @@ function DeckDisplay(decksize, cardmouseover, cardclick, deck){
 		this.addChild(sprite);
 	}
 }
-DeckDisplay.prototype = Object.create(PIXI.DisplayObjectContainer.prototype);
-DeckDisplay.prototype.pos2idx = function(mpos){
-	return Math.floor((mpos.x-100-this.position.x)/99)*10+(Math.floor((mpos.y-32-this.position.y)/19)%10);
+DeckDisplay.prototype = Object.create(PIXI.Container.prototype);
+DeckDisplay.prototype.pos2idx = function(){
+	return Math.floor((exports.mouse.x-100-this.position.x)/99)*10+(Math.floor((exports.mouse.y-32-this.position.y)/19)%10);
 }
-DeckDisplay.prototype.click = function(e){
-	var index = this.pos2idx(e.global);
+DeckDisplay.prototype.click = function(){
+	var index = this.pos2idx();
 	if (index >= 0 && index < this.deck.length){
 		ui.playSound("cardClick");
 		if (this.cardclick) this.cardclick(index);
@@ -241,7 +246,7 @@ DeckDisplay.prototype.click = function(e){
 }
 DeckDisplay.prototype.renderDeck = function(i){
 	for (;i < this.deck.length;i++) {
-		this.children[i].setTexture(gfx.getCardImage(this.deck[i]));
+		this.children[i].texture = gfx.getCardImage(this.deck[i]);
 		this.children[i].visible = true;
 	}
 	for (;i < this.decksize;i++) {
@@ -260,11 +265,9 @@ DeckDisplay.prototype.rmCard = function(index){
 	this.deck.splice(index, 1);
 	this.renderDeck(index);
 }
-DeckDisplay.prototype.next = function(mpos){
+DeckDisplay.prototype.mousemove = function(){
 	if (this.cardmouseover){
-		if (mpos === undefined) mpos = this.stage.getMousePosition();
-		if (!this.hitArea.contains(mpos.x-this.position.x, mpos.y-this.position.y)) return;
-		var index = this.pos2idx(mpos);
+		var index = this.pos2idx();
 		if (index >= 0 && index < this.deck.length){
 			this.cardmouseover(this.deck[index]);
 		}
@@ -272,17 +275,17 @@ DeckDisplay.prototype.next = function(mpos){
 }
 function CardSelector(dom, cardmouseover, cardclick, maxedIndicator, filterboth){
 	var self = this;
-	PIXI.DisplayObjectContainer.call(this);
-	this.cardpool = undefined;
-	this.cardminus = undefined;
+	PIXI.Container.call(this);
+	this._cardpool = this.cardpool = undefined;
+	this._cardminus = this.cardminus = undefined;
 	this.showall = false;
 	this.showshiny = undefined;
 	this.interactive = true;
 	this.cardmouseover = cardmouseover;
 	this.cardclick = cardclick;
 	this.filterboth = filterboth;
-	this.hitArea = new PIXI.Rectangle(100, 272, 800, 328);
-	if (maxedIndicator) this.addChild(this.maxedIndicator = new PIXI.Graphics());
+	this.hitArea = new PIXI.math.Rectangle(100, 272, 800, 328);
+	this.maxedIndicator = maxedIndicator;
 	var bshiny = exports.domButton("Toggle Shiny", function() {
 		self.showshiny ^= true;
 		self.makeColumns();
@@ -296,42 +299,43 @@ function CardSelector(dom, cardmouseover, cardclick, maxedIndicator, filterboth)
 	this.columns = [[],[],[],[],[],[]];
 	this.columnspr = [[],[],[],[],[],[]];
 	for (var i = 0;i < 13;i++) {
-		var sprite = exports.mkButton((!i || i&1?4:40), 316 + Math.floor((i-1)/2) * 32, gfx.eicons[i]);
-		(function(_i) {
-			exports.setClick(sprite, function() {
-				self.elefilter = _i;
-				self.makeColumns();
-			});
+		(function(_i){
+			dom.push([(!i || i&1?4:40), 316 + Math.floor((i-1)/2) * 32,
+				exports.domEButton(i, function() {
+					self.elefilter = _i;
+					self.makeColumns();
+				})]
+			);
 		})(i);
-		this.addChild(sprite);
 	}
 	for (var i = 0;i < 5; i++){
-		var sprite = exports.mkButton(74, 338 + i * 32, gfx.ricons[i]);
 		(function(_i) {
-			exports.setClick(sprite, function() {
+			dom.push([74, 338 + i * 32, exports.domEButton(i, function() {
 				self.rarefilter = _i;
 				self.makeColumns();
-			});
+			}, "r")]);
 		})(i);
-		this.addChild(sprite);
 	}
 	for (var i = 0;i < 6;i++) {
 		for (var j = 0;j < 15;j++) {
 			var sprite = new PIXI.Sprite(gfx.nopic);
 			sprite.position.set(100 + i * 133, 272 + j * 19);
-			var sprcount = new PIXI.Text("", { font: "12px Dosis" });
-			sprcount.position.set(102, 4);
-			sprite.addChild(sprcount);
+			var sprcount = exports.domText("");
+			sprcount.style.fontSize = "12px";
+			sprcount.style.pointerEvents = "none";
+			sprcount.style.color = "black";
+			dom.push([sprite.position.x + 100, sprite.position.y, sprcount]);
+			sprite.countText = sprcount;
 			this.addChild(sprite);
 			this.columnspr[i].push(sprite);
 		}
 	}
 }
-CardSelector.prototype = Object.create(PIXI.DisplayObjectContainer.prototype);
-CardSelector.prototype.click = function(e){
+CardSelector.prototype = Object.create(PIXI.Container.prototype);
+CardSelector.prototype.click = function(){
 	if (!this.cardclick) return;
-	var col = this.columns[Math.floor((e.global.x-100)/133)], card;
-	if (col && (card = col[Math.floor((e.global.y-272)/19)])){
+	var col = this.columns[Math.floor((exports.mouse.x-100)/133)], card;
+	if (col && (card = col[Math.floor((exports.mouse.y-272)/19)])){
 		ui.playSound("cardClick");
 		var code = card.code;
 		if (this.filterboth && !this.showshiny){
@@ -343,22 +347,26 @@ CardSelector.prototype.click = function(e){
 		this.cardclick(code);
 	}
 }
-CardSelector.prototype.next = function(newcardpool, newcardminus, mpos) {
-	if (newcardpool != this.cardpool || newcardminus != this.cardminus) {
-		this.cardminus = newcardminus;
-		this.cardpool = newcardpool;
+CardSelector.prototype.mousemove = function(){
+	if (this.cardmouseover){
+		var col = this.columns[Math.floor((exports.mouse.x-100)/133)], card;
+		if (col && (card = col[Math.floor((exports.mouse.y-272)/19)])){
+			this.cardmouseover(card.code);
+		}
+	}
+}
+CardSelector.prototype._renderWebGL = function() {
+	if (this.cardpool !== this._cardpool || this.cardminus !== this._cardminus) {
+		this._cardminus = this.cardminus;
+		this._cardpool = this.cardpool;
 		this.makeColumns();
 	}else if (this.cardminus && !this.cardminus.rendered){
 		this.renderColumns();
 	}
-	if (this.cardmouseover){
-		if (mpos === undefined) mpos = this.stage.getMousePosition();
-		if (!this.hitArea.contains(mpos.x, mpos.y)) return;
-		var col = this.columns[Math.floor((mpos.x-100)/133)], card;
-		if (col && (card = col[Math.floor((mpos.y-272)/19)])){
-			this.cardmouseover(card.code);
-		}
-	}
+}
+CardSelector.prototype.renderCanvas = function() {
+	this._renderWebGL();
+	PIXI.Container.prototype.renderCanvas.apply(this, arguments);
 }
 CardSelector.prototype.makeColumns = function(){
 	var self = this;
@@ -373,29 +381,30 @@ CardSelector.prototype.makeColumns = function(){
 }
 CardSelector.prototype.renderColumns = function(){
 	if (this.cardminus) this.cardminus.rendered = true;
-	if (this.maxedIndicator) this.maxedIndicator.clear();
 	for (var i = 0;i < 6; i++){
 		for (var j = 0;j < this.columns[i].length;j++) {
 			var spr = this.columnspr[i][j], code = this.columns[i][j].code;
-			spr.setTexture(gfx.getCardImage(code));
+			spr.texture = gfx.getCardImage(code);
 			spr.visible = true;
 			if (this.cardpool) {
-				var txt = spr.children[0], card = Cards.Codes[code], scode = etgutil.asShiny(code, true);
+				var card = Cards.Codes[code], scode = etgutil.asShiny(code, true);
 				var cardAmount = card.isFree() ? "-" : code in this.cardpool ? this.cardpool[code] - ((this.cardminus && this.cardminus[code]) || 0) : 0, shinyAmount = 0;
 				if (this.filterboth && !this.showshiny) {
 					var scode = etgutil.asShiny(code, true);
 					shinyAmount = scode in this.cardpool ? this.cardpool[scode] - ((this.cardminus && this.cardminus[scode]) || 0) : 0;
 				}
-				exports.maybeSetText(txt, cardAmount + (shinyAmount ? "/"+shinyAmount:""));
+				spr.countText.text = cardAmount + (shinyAmount ? "/"+shinyAmount:"");
 				if (this.maxedIndicator && card.type != etg.PillarEnum && cardAmount >= 6) {
-					this.maxedIndicator.beginFill(ui.elecols[cardAmount >= 12 ? etg.Chroma : etg.Light]);
-					this.maxedIndicator.drawRect(spr.position.x + 100, spr.position.y, 33, 20);
-					this.maxedIndicator.endFill();
-				}
+					spr.countText.style.backgroundColor = "#" + ui.elecols[cardAmount >= 12 ? etg.Chroma : etg.Light].toString(16);
+					spr.countText.style.width = "33px";
+					spr.countText.style.height = "20px";
+				}else spr.countText.style.backgroundColor = "transparent";
+				spr.countText.style.display = "inline";
 			}
 		}
 		for (;j < 15;j++) {
 			this.columnspr[i][j].visible = false;
+			this.columnspr[i][j].countText.style.display = "none";
 		}
 	}
 }

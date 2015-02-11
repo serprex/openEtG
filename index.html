@@ -4,43 +4,45 @@
 	<link href="http://fonts.googleapis.com/css?family=Dosis" rel="stylesheet" type="text/css">
 	<link href="favicon.png" rel="shortcut icon">
 	<style>
-		*{
-			box-sizing:border-box;
-		}
+		*{box-sizing:border-box}
 		body{
 			background-color:black;
+			background-image:url(assets/bg_default.png);
+			background-repeat:no-repeat;
 			color:white;
 			margin:0;
-			font-family:Dosis;
+			font:16px Dosis;
 		}
 		a{
 			color:#6699FF;
 			text-decoration:none;
 		}
+		tr,td{padding:0}
 		input[type="button"]{
 			background:linear-gradient(to bottom,#ddeef0,#8999a9);
 			border-radius:4px;
 			border:solid black 1px;
 			width:72px;
 			height:20px;
-			font-family:Dosis 14px;
+			font:14px Dosis;
 			cursor:pointer;
 		}
 		input[type="button"]:hover{background:linear-gradient(to bottom,#ccdde0,#586776)}
-		input[type="button"]:hover:active{background:linear-gradient(to bottom,#aabbc0,#485766);}
+		input[type="button"]:hover:active{background:linear-gradient(to bottom,#aabbc0,#485766)}
 		input[type="text"],input[type="password"],input:not([type]){width:150px}
+		#leftpane{
+			position:absolute;
+			-moz-user-select:none;
+			-webkit-user-select:none;
+		}
 		#rightpane{
 			left:900px;
 			top:0px;
 			position:absolute;
 		}
-		#leftpane{
-			-webkit-user-select:none;
-			position:absolute;
-		}
 		#chatBox{
 			width:350px;
-			height:460px;
+			height:496px;
 			overflow-y:scroll;
 			overflow-x:hidden;
 			color:red;
@@ -51,12 +53,9 @@
 			width:350px;
 			height:40px;
 			resize:none;
-			font-family:Dosis;
-			font-size:14px;
+			font:14px Dosis;
 		}
-		.selectedbutton {
-			background: linear-gradient(to bottom,#424748,#8999ff) !important;
-		}
+		.selectedbutton{background:linear-gradient(to bottom,#424748,#8999ff)!important}
 		.bgbox{
 			background-color:#0d2e4a;
 			border-style:solid;
@@ -74,6 +73,16 @@
 			border: solid black 2px;
 		}
 		.numput{width:32px!important}
+		.imgb:hover{
+			-webkit-filter:brightness(0.6);
+			filter:brightness(0.6);
+			cursor:pointer;
+		}
+		.imgb:active{
+			-webkit-filter:brightness(0.4);
+			filter:brightness(0.4);
+			cursor:pointer;
+		}
 		.coin{
 			background:url(assets/gold.png);
 			display:inline-block;
@@ -87,33 +96,63 @@
 			width:16px;
 			height:16px;
 		}
-		.e0{background-position:0 0}
+		.Eicon{
+			background:url(assets/eicons.png);
+			display:inline-block;
+			width:32px;
+			height:32px;
+		}
+		.ricon{
+			background:url(assets/ricons.png);
+			display:inline-block;
+			width:25px;
+			height:25px;
+		}
+		.r0,.e0,.E0{background-position:0 0}
 		.e1{background-position:-16px 0}
-		.e2{background-position:-32px 0}
+		.e2,.E1{background-position:-32px 0}
 		.e3{background-position:-48px 0}
-		.e4{background-position:-64px 0}
+		.e4,.E2{background-position:-64px 0}
 		.e5{background-position:-80px 0}
-		.e6{background-position:-96px 0}
+		.e6,.E3{background-position:-96px 0}
 		.e7{background-position:-112px 0}
-		.e8{background-position:-128px 0}
+		.e8,.E4{background-position:-128px 0}
 		.e9{background-position:-144px 0}
-		.e10{background-position:-160px 0}
+		.e10,.E5{background-position:-160px 0}
 		.e11{background-position:-176px 0}
-		.e12{background-position:-192px 0}
+		.e12,.E6{background-position:-192px 0}
+		.E7{background-position:-224px 0}
+		.E8{background-position:-256px 0}
+		.E9{background-position:-288px 0}
+		.E10{background-position:-320px 0}
+		.E11{background-position:-352px 0}
+		.E12{background-position:-384px 0}
+		.E13{background-position:-416px 0}
+		.E14{background-position:-448px 0}
+		.r1{background-position:-25px 0}
+		.r2{background-position:-50px 0}
+		.r3{background-position:-75px 0}
+		.r4{background-position:-100px 0}
+		.r5{background-position:-125px 0}
+		.sabbath{
+			background:url(assets/sabbath.png);
+			display:inline-block;
+			height:228px;
+			width:103px;
+			pointer-events:none;
+		}
 	</style>
-	<script src="pixi.dev.js"></script>
+	<script src="pixi.min.js"></script>
 	<script src="node_modules/engine.io-client/engine.io.js"></script>
 	<script src="etgify.js"></script>
 </head>
 <body>
 	<div id="rightpane">
 		<a href="artcredit.htm" target="_blank">Art credits</a>&emsp;&emsp;<a href="/forum" target="_blank">Forum</a><br><br>
-		<label><input id="offline" type="checkbox">Appear Offline</label> <label><input id="afk" type="checkbox">Afk</label><br>
-		<label><input id="wantpvp" type="checkbox">Seeking PvP</label>
+		<label><input id="offline" type="checkbox">Appear Offline</label> <label><input id="afk" type="checkbox">Afk</label> <label><input id="wantpvp" type="checkbox">Seeking PvP</label>
 		<div id="chatBox"></div>
 		<textarea id="chatinput" placeholder="Chat"></textarea>
 	</div>
-	<img id="bgimg" width=900 height=600 src="assets/bg_default.png" style="position:absolute;-webkit-user-select:none;">
 	<canvas id="leftpane" width=900 height=600></canvas>
 	<script src="ui.main.js"></script>
 </body>

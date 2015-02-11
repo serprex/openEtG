@@ -1,5 +1,4 @@
 "use strict";
-PIXI.AUTO_PREVENT_DEFAULT = false;
 (function(){
 	var guestname, muteset = {}, muteall;
 	var px = require("./px");
@@ -95,13 +94,12 @@ PIXI.AUTO_PREVENT_DEFAULT = false;
 		data = JSON.parse(data);
 		var func = sockEvents[data.x] || px.getCmd(data.x);
 		if (func){
-			func.call(sock.et, data);
+			func.call(this, data);
 		}
 	});
 	require("./httpcards")(function(){
 		if (options.preart) sock.emit("cardart");
 	});
-	px.load();
 	require("./views/Login")();
 	function chatmute(){
 		var muted = [];

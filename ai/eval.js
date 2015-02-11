@@ -39,7 +39,7 @@ function log(x, y){
 function pillarval(c){
 	return c instanceof etg.CardInstance?.1:c.status.charges;
 }
-var ActivesValues = {
+var ActivesValues = Object.freeze({
 	ablaze:3,
 	accelerationspell:5,
 	acceleration:function(c){
@@ -85,6 +85,9 @@ var ActivesValues = {
 	darkness:1,
 	deadalive:2,
 	deathwish:1,
+	deckblast:function(c){
+		return c.owner.deck.length/2;
+	},
 	deja:4,
 	deployblobs: function(c) {
 		return 2+(c instanceof etg.CardInstance ? Math.min(c.card.attack, c.card.health) : Math.min(c.trueatk(), c.truehp()))/4;
@@ -94,6 +97,7 @@ var ActivesValues = {
 	devour:function(c){
 		return 2+(c instanceof etg.CardInstance?c.card.health:c.truehp());
 	},
+	drawcopy:1,
 	disarm:function(c){
 		return !c.owner.foe.weapon ? .1 : c.owner.foe.hand.length == 8 ? .5 : c.owner.foe.weapon.card.cost;
 	},
@@ -115,8 +119,9 @@ var ActivesValues = {
 	},
 	enchant:6,
 	endow:4,
-	envenom:1,
+	envenom:3,
 	epidemic:4,
+	epoch:2,
 	evolve:2,
 	feed:6,
 	fickle:3,
@@ -124,6 +129,8 @@ var ActivesValues = {
 	firebolt:10,
 	flatline:1,
 	flyingweapon:7,
+	foedraw:8,
+	forceplay:2,
 	fractal:function(c){
 		return 9-c.owner.hand.length;
 	},
@@ -213,6 +220,7 @@ var ActivesValues = {
 	},
 	overdrivespell:5,
 	pacify:5,
+	pairproduce:2,
 	paleomagnetism:[4,5],
 	pandemonium:3,
 	pandemonium2:4,
@@ -226,6 +234,7 @@ var ActivesValues = {
 	"poison 1":2,
 	"poison 2":3,
 	"poison 3":4,
+	powerdrain:6,
 	precognition:1,
 	predator:function(c, tatk){
 		return !(c instanceof etg.CardInstance) && c.owner.foe.hand.length > 4 ? tatk + Math.max(c.owner.foe.hand.length-6, 1) : 1;
@@ -278,10 +287,10 @@ var ActivesValues = {
 	steal:6,
 	steam:6,
 	stoneform:1,
-	storm2:6,
-	storm3:12,
+	"storm 2":6,
+	"storm 3":12,
 	swave:6,
-	tempering:3,
+	tempering:[2,3],
 	throwrock:4,
 	tick:function(c){
 		return c instanceof etg.CardInstance ? 1 : 1+(c.maxhp-c.truehp())/c.maxhp;
@@ -336,8 +345,8 @@ var ActivesValues = {
 	wings:function(c){
 		return c.status?(c.status.charges == 0 && c.owner == c.owner.game.turn?0:6):6;
 	},
-}
-var statusValues = {
+});
+var statusValues = Object.freeze({
 	airborne: 0.2,
 	ranged: 0.2,
 	voodoo: 1,
@@ -354,7 +363,7 @@ var statusValues = {
 	},
 	freedom: 5,
 	reflect: 1
-}
+})
 
 function getDamage(c){
 	return damageHash[c.hash()] || 0;
@@ -374,7 +383,7 @@ function estimateDamage(c, freedomChance, wallCharges) {
 		}else return Math.max(tatk - dr, 0);
 	}
 	var tatk = c.trueatk(), fsh = c.owner.foe.shield, fshactive = fsh && fsh.active.shield;
-	var momentum = !fsh || atk <= 0 || c.status.momentum || c.status.psion ||
+	var momentum = !fsh || tatk <= 0 || c.status.momentum || c.status.psion ||
 		(c.status.burrowed && c.owner.permanents.some(function(pr){ return pr && pr.status.tunnel }));
 	var dr = momentum ? 0 : fsh.truedr(), atk = estimateAttack(tatk);
 	if (c.status.adrenaline) {
@@ -441,7 +450,7 @@ function evalactive(c, active, extra){
 }
 
 function checkpassives(c) {
-	var score = 0, statuses = c instanceof etg.CardInstance ? c.card.status : c.status;
+	var score = 0, statuses = c.status;
 	for (var status in statuses)
 	{
 		if (uniqueStatuses[status] && !(c instanceof etg.CardInstance)) {
@@ -459,11 +468,12 @@ function checkpassives(c) {
 	return score;
 }
 
+var throttled = Object.freeze({"poison 1":true, "poison 2":true, "poison 3":true, neuro:true, regen:true, siphon:true});
 function evalthing(c) {
 	if (!c) return 0;
 	var ttatk, hp, poison, score = 0;
 	var isCreature = c instanceof etg.Creature, isWeapon = c instanceof etg.Weapon;
-	var adrenalinefactor = c.status.adrenaline ? etg.countAdrenaline(c.trueatk())/1.5 : 1;
+	var adrenalinefactor = c.status.adrenaline ? etg.countAdrenaline(c.trueatk()) : 1;
 	if (isWeapon || isCreature){
 		var delaymix = Math.max((c.status.frozen||0), (c.status.delayed||0))/adrenalinefactor, delayfactor = delaymix?1-Math.min(delaymix/5, .6):1;
 	}else{
@@ -485,12 +495,14 @@ function evalthing(c) {
 		score += c.trueatk()/20;
 		score += ttatk*delayfactor;
 	}else ttatk = 0;
+	var throttlefactor = adrenalinefactor < 3 || (isCreature && c.owner.weapon && c.owner.weapon.status.nothrottle) ? adrenalinefactor : 2;
 	for (var key in c.active) {
+		var adrfactor = key in throttled ? throttlefactor : key == "disarm" ? 1 : adrenalinefactor;
 		if (key == "hit"){
-			score += evalactive(c, c.active.hit, ttatk)*(ttatk?1:c.status.immaterial?0:.3)*adrenalinefactor*delayfactor;
+			score += evalactive(c, c.active.hit, ttatk)*(ttatk?1:c.status.immaterial?0:.3)*adrfactor*delayfactor;
 		}else if(key == "auto"){
 			if (!c.status.frozen){
-				score += evalactive(c, c.active.auto, ttatk)*adrenalinefactor;
+				score += evalactive(c, c.active.auto, ttatk)*adrfactor;
 			}
 		}else if (key == "cast"){
 			if (caneventuallyactive(c.castele, c.cast, c.owner)){

@@ -18,13 +18,7 @@ var Point;
 if (typeof PIXI === "undefined"){
 	Point = fakepoint;
 	Point.prototype.set = Point;
-}else Point = PIXI.Point;
-function mkFont(font, color){
-	if (typeof font == "number"){
-		font += "px Dosis";
-	}
-	return {font: font, fill: color || "black"};
-}
+}else Point = PIXI.math.Point;
 function reflectPos(obj) {
 	var pos = obj instanceof Point ? obj : obj.position;
 	pos.set(900 - pos.x, 600 - pos.y);
@@ -45,6 +39,9 @@ function permanentPos(j, i) {
 	}
 	return p;
 }
+function cardPos(j, i) {
+	return new Point(j ? 15 : 780, (j ? 130 : 330) + 19 * i);
+}
 function tgtToPos(t) {
 	if (t instanceof etg.Creature) {
 		return creaturePos(t.owner == t.owner.game.player2, t.getIndex());
@@ -63,29 +60,24 @@ function tgtToPos(t) {
 		if (t == t.owner.game.player2) reflectPos(p);
 		return p;
 	} else if (t instanceof etg.CardInstance) {
-		return new Point(t.owner == t.owner.game.player2 ? 20 : 780, (t.owner == t.owner.game.player2 ? 140 : 300) + 20 * t.owner.hand.indexOf(t));
+		return cardPos(t.owner == t.owner.game.player2, t.owner.hand.indexOf(t));
 	} else console.log("Unknown target");
 }
 var tximgcache = {};
-function getTextImage(text, font, bgcolor, width) {
+function getTextImage(text, size, color, bgcolor, width) {
 	if (!gfx.loaded || !text) return gfx.nopic;
 	if (bgcolor === undefined) bgcolor = "";
-	var size;
-	if (typeof font == "number"){
-		size = font;
-		font = mkFont(font);
-	}else size = parseInt(font.font);
 	var key = JSON.stringify(arguments);
 	if (key in tximgcache) {
 		return tximgcache[key];
 	}
-	var doc = new PIXI.DisplayObjectContainer();
+	var doc = new PIXI.Container();
 	if (bgcolor !== ""){
 		var bg = new PIXI.Graphics();
 		doc.addChild(bg);
 	}
-	var pieces = text.replace(/\|/g, " | ").split(/(\d\d?:\d\d?|\$|\n)/);
-	var x = 0, y = 0, h = Math.max(size, new PIXI.Text("j", font).height-3), w = 0;
+	var pieces = text.replace(/\|/g, " | ").split(/(\d\d?:\d\d?|\n)/);
+	var x = 0, y = 0, h = Math.floor(size*1.4), w = 0;
 	function pushChild(){
 		var w = 0;
 		if (x > 0){
@@ -109,10 +101,6 @@ function getTextImage(text, font, bgcolor, width) {
 			w = Math.max(w, x);
 			x = 0;
 			y += h;
-		}else if (piece == "$"){
-			var spr = new PIXI.Sprite(gfx.gold);
-			spr.scale.set(size/16, size/16);
-			pushChild(spr);
 		}else if (/^\d\d?:\d\d?$/.test(piece)) {
 			var parse = piece.split(":");
 			var num = parseInt(parse[0]);
@@ -128,16 +116,16 @@ function getTextImage(text, font, bgcolor, width) {
 			}else{
 				var spr = new PIXI.Sprite(icon);
 				spr.scale.set(size/32, size/32);
-				pushChild(new PIXI.Text(num, font), spr);
+				pushChild(new PIXI.Sprite(gfx.Text(num, size, color)), spr);
 			}
 		} else if (piece) {
-			var txt = new PIXI.Text(piece, font);
+			var txt = new PIXI.Sprite(gfx.Text(piece, size, color));
 			if (!width || x + txt.width < width){
 				pushChild(txt);
 			}else{
 				piece.split(" ").forEach(function(word){
 					if (word){
-						pushChild(new PIXI.Text(word, font));
+						pushChild(new PIXI.Sprite(gfx.Text(word, size, color)));
 						if (x){
 							x += 3;
 						}
@@ -146,11 +134,10 @@ function getTextImage(text, font, bgcolor, width) {
 			}
 		}
 	});
-	var rtex = new PIXI.RenderTexture(width || Math.max(w, x), y+h);
+	var rtex = require("./px").mkRenderTexture(width || Math.max(w, x), y+h);
 	if (bg){
 		bg.beginFill(bgcolor);
 		bg.drawRect(0, 0, rtex.width, rtex.height);
-		bg.endFill();
 	}
 	rtex.render(doc);
 	return tximgcache[key] = rtex;
@@ -231,10 +218,10 @@ function parseaistats(data){
 	parseInput(data, "p2markpower", options.aimark, 1188);
 	parseInput(data, "p2deckpower", options.aideckpower);
 }
-exports.mkFont = mkFont;
 exports.reflectPos = reflectPos;
 exports.creaturePos = creaturePos;
 exports.permanentPos = permanentPos;
+exports.cardPos = cardPos;
 exports.tgtToPos = tgtToPos;
 if (typeof PIXI !== "undefined") exports.getTextImage = getTextImage;
 exports.loadSounds = loadSounds;

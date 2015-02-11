@@ -1,3 +1,4 @@
+"use strict";
 var qstring = require("querystring");
 var fs = require("fs");
 module.exports = function(db){
