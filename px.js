@@ -31,11 +31,11 @@ var special = /view|endnext|cmds|next|nextID/;
 exports.getCmd = function(cmd){
 	return curStage.cmds ? curStage.cmds[cmd] : null;
 }
-exports.domBox = function(w, h){
+exports.domBox = function(w, h, cName){
 	var span = document.createElement("span");
 	span.style.width = w + "px";
 	span.style.height = h + "px";
-	span.className = "bgbox";
+	span.className = cName || "bgbox";
 	return span;
 }
 exports.domButton = function(text, click, mouseover, sound) {

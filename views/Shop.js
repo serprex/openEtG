@@ -122,8 +122,7 @@ module.exports = function() {
 	}
 
 	var tutspan;
-	var tutorialbutton = px.mkButton(20, 500, gfx.eicons[13]);
-	px.setClick(tutorialbutton, function() {
+	var tutorialbutton = px.domEButton(13, function() {
 		if (tutspan) {
 			document.body.removeChild(tutspan);
 			tutspan = null;
@@ -134,7 +133,7 @@ module.exports = function() {
 			"\nRandom pack means the cards is completely random instead, \nand Recently Released means it has a 50% chance of being a recently added card."],
 		[45, 275, 610, 158, "2 ) Select the type of pack you want. \nYou will see the amount of cards and rarity of each pack in the upper box."],
 		[590, 97, 260, 158, "3) Buy the pack you selected! \nIf you want to buy many packs at once, type in the Bulk box how many you want. \nIn chat you will see a link to a deck code with the cards you got."]].forEach(function(info) {
-			var div = px.domBox(info[2], info[3], true);
+			var div = px.domBox(info[2], info[3], "tutorialbox");
 			div.style.position = "absolute";
 			div.style.left = info[0] + "px";
 			div.style.top = info[1] + "px";
@@ -151,7 +150,7 @@ module.exports = function() {
 		tutspan = span;
 		document.body.appendChild(span);
 	});
-	storeui.addChild(tutorialbutton);
+	dom.push([20, 500, tutorialbutton]);
 
 	//booster popup
 	var popbooster = px.mkBgRect(0, 0, 710, 568);
@@ -205,5 +204,5 @@ module.exports = function() {
 		}
 	});
 	dom.push([777, 184, packmulti]);
-	px.refreshRenderer({view: storeui, domshop: dom, cmds:cmds});
+	px.refreshRenderer({ view: storeui, domshop: dom, cmds: cmds, endnext: function() { if (tutspan) document.body.removeChild(tutspan) }});
 }
