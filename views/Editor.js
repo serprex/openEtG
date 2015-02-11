@@ -205,12 +205,12 @@ module.exports = function(arena, acard, startempty) {
 		var span = document.createElement("span");
 		[[100, 32, 624, 198, "This is where the deck you are building shows up. Use the buttons to the left to save and load your deck: " +
 		"\nClear: Erase this deck \nSave & Exit: Save the current deck and return to the main menu \nImport: Import a deck code from the import box \nSave: Save the current deck to the name in the name box in the top left" +
-		"\nLoad: Load the deck wih the name you have typed in the name box in the top left \nSave to #: Save the current deck and name to one of the quickload slots. \nTip: Use one of the quickdeck buttons as a \"New Deck\" button, and then save any decks you make there to a proper name"],
+		"\nLoad: Load the deck wih the name you have typed in the name box in the top left \nSave to #: Save the current deck and name to one of the quickload slots \nTip: Use one of the quickdeck buttons as a \"New Deck\" button, and then save any decks you make there to a proper name"],
 		[298, 6, 426, 24, "Clicking a quickload slot will instantly load the deck saved there"],
 		[100, 232, 418, 38, "Choose a mark. You will gain 1 quantum per turn of that element. Mark of Chroma gives 3 random quanta."],
 		[520, 234, 320, 24, "The import box shows the deck code of the deck"],
-		[2, 350, 250, 100, "Click the element buttons to show cards of that element.\nThe rarity filters will only show cards of that rarity, except pillar filter which will show all cards", ],
-		[300, 350, 320, 48, "Clicking a card will add it to your deck. A number after a / shows how many shiny cards you have"],
+		[2, 350, 250, 100, "Click the element buttons to show cards of that element.\nThe rarity filters will only show cards of that rarity, except pillar filter which will show all cards.", ],
+		[300, 350, 320, 48, "Clicking a card will add it to your deck. A number after a / shows how many shiny cards you have."],
 		[80, 530, 310, 22, ": Shows all cards, including those you don't own"],
 		[80, 575, 160, 22, ": Don't show shiny cards"]].forEach(function(info) {
 			var div = px.domBox(info[2], info[3], "tutorialbox");
