@@ -52,7 +52,7 @@ module.exports = function(game) {
 		var tinfo = px.domText(game.quest ? game.wintext : "You won!");
 		tinfo.style.textAlign = "center";
 		tinfo.style.width = "900px";
-		dom.push([0, game.cardreward ? 130 : 250, tinfo]);
+		dom.push([0, game.cardreward ? 100 : 250, tinfo]);
 	}
 
 	if (winner && sock.user){
