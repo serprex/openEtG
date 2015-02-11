@@ -61,7 +61,8 @@ function activeUsers() {
 			activeusers.push(username);
 		}
 	}
-	activeusers.push(io.clientsCount - userCount + " other connections");
+	var otherCount = io.clientsCount - userCount;
+	if (otherCount > 0)activeusers.push(otherCount + " other connection" + (otherCount > 1 ? "s" : ""));
 	return activeusers;
 }
 function genericChat(socket, data){
