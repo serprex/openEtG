@@ -74,7 +74,7 @@ exports.mkAi = function(level, daily) {
 				"Yuriko"
 			];
 
-			var gameData = { deck: deck, urdeck: urdeck, seed: Math.random() * etgutil.MAX_INT, p2hp: level == 0 ? 100 : level == 1 ? 125 : 150, p2markpower: level == 2 ? 2 : 1, foename: etg.PlayerRng.choose(randomNames), p2drawpower: level == 2 ? 2 : 1 };
+			var gameData = { deck: deck, urdeck: urdeck, seed: Math.random() * etgutil.MAX_INT, p2hp: level == 0 ? 100 : level == 1 ? 125 : 150, p2markpower: level > 1 ? 2 : 1, foename: etg.PlayerRng.choose(randomNames), p2drawpower: level == 2 ? 2 : 1 };
 			if (!sock.user) ui.parsepvpstats(gameData);
 			else gameData.cost = cost;
 			gameData.level = level;

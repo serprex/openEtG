@@ -12,10 +12,11 @@ module.exports = function(level) {
 		return uprate ? etgutil.asUpped(x, Math.random() < uprate) : x;
 	}
 	var cardcount = {};
-	var eles = [Math.ceil(Math.random() * 12), Math.ceil(Math.random() * 12)], ecost = new Array(13);
+	var eles = [etg.PlayerRng.uptoceil(12), etg.PlayerRng.uptoceil(12)], ecost = new Array(13);
 	for (var i = 0;i < 13;i++) {
 		ecost[i] = 0;
 	}
+	ecost[eles[1]] -= 5 * (level > 1 ? 2 : 1);
 	var deck = [], banned = [Cards.Give, Cards.GiveUp, Cards.Reinforce];
 	var anyshield = 0, anyweapon = 0;
 	eles.forEach(function(ele, j){
