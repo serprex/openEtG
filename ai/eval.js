@@ -1,5 +1,6 @@
 "use strict";
 var etg = require("../etg");
+var Cards = require("../Cards");
 var Actives = require("../Actives");
 var enableLogging = false, logbuff, logstack;
 function logStart(){
@@ -37,7 +38,7 @@ function log(x, y){
 	}
 }
 function pillarval(c){
-	return c instanceof etg.CardInstance?.1:c.status.charges;
+	return c instanceof etg.CardInstance?.1:Math.sqrt(c.status.charges);
 }
 var ActivesValues = Object.freeze({
 	ablaze:3,
@@ -208,7 +209,11 @@ var ActivesValues = Object.freeze({
 		return c.owner.foe.neuro?1:5;
 	},
 	nightmare:function(c){
-		return 12-c.owner.foe.hand.length/3;
+		var val = 13-c.owner.foe.hand.length/2;
+		c.owner.hand.forEach(function(card){
+			if (card.isOf(Cards.Nightmare)) val--;
+		});
+		return val;
 	},
 	nova:6,
 	nova2:6,
