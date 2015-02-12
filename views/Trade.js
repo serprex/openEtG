@@ -86,5 +86,5 @@ module.exports = function() {
 		},
 		tradecanceled: startMenu,
 	};
-	px.refreshRenderer({view: view, tdom:dom, cmds:cmds});
+	px.view({view: view, tdom:dom, cmds:cmds});
 }

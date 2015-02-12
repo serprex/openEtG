@@ -32,5 +32,5 @@ module.exports = function(info) {
 		td[4].appendChild(document.createTextNode(info[i+50]));
 		td[5].appendChild(document.createTextNode(Math.round(info[i + 51]).toString()));
 	}
-	px.refreshRenderer({top50: [[8, 300, ["Exit", require("./MainMenu")]], [120, 10, tbl]]});
+	px.view({top50: [[8, 300, ["Exit", require("./MainMenu")]], [120, 10, tbl]]});
 }

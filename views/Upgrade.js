@@ -156,7 +156,7 @@ module.exports = function() {
 	upgradeui.addChild(cardsel);
 	cardsel.cardminus = {};
 	adjustdeck();
-	px.refreshRenderer(stage);
+	px.view(stage);
 	px.setDomVis("bupgrade", false);
 	px.setDomVis("bpolish", false);
 	px.setDomVis("bsell", false);

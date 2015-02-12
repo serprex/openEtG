@@ -27,7 +27,7 @@ function requestAnimate() { requestAnimationFrame(animate); }
 exports.mkRenderTexture = function(width, height){
 	return new PIXI.RenderTexture(renderer, width, height);
 }
-var special = /view|endnext|cmds|next|nextID/;
+var special = /view|endnext|cmds/;
 exports.getCmd = function(cmd){
 	return curStage.cmds ? curStage.cmds[cmd] : null;
 }
@@ -130,7 +130,7 @@ function parseDom(info){
 exports.setDomVis = function(id, vis){
 	document.getElementById(id).style.display = vis ? "inline" : "none";
 }
-exports.refreshRenderer = function(stage) {
+exports.view = function(stage) {
 	if (curStage.endnext){
 		curStage.endnext();
 	}
@@ -153,13 +153,8 @@ exports.refreshRenderer = function(stage) {
 			document.body.removeChild(curStage[key]);
 		}
 	}
-	if (curStage.nextID) clearInterval(curStage.nextID);
-	if (stage.next) stage.nextID = setInterval(stage.next, 30);
 	if (stage.view){
 		if (!curStage.view) requestAnimate();
-		if (stage.next){
-			stage.next();
-		}
 		renderer.render(stage.view);
 		renderer.view.style.display = "inline";
 		interman.stage = stage.view;

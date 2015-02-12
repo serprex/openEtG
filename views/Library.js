@@ -35,5 +35,5 @@ module.exports = function(data){
 	}, null, null, true);
 	cardsel.cardpool = cardpool;
 	stage.addChild(cardsel);
-	px.refreshRenderer({view:stage, stext: dom});
+	px.view({view:stage, stext: dom});
 }

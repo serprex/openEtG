@@ -56,5 +56,5 @@ module.exports = function(info) {
 		acard.position.set(734, 8);
 		stage.addChild(acard);
 	}
-	px.refreshRenderer({view: stage, ainfo: dom});
+	px.view({view: stage, ainfo: dom});
 }

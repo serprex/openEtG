@@ -30,5 +30,5 @@ module.exports = function(data) {
 			td[4].appendChild(document.createTextNode(Cards.Codes[data[5]].asUpped(lv).name));
 		}
 	}
-	px.refreshRenderer({top20: [[8, 300, ["Exit", require("./MainMenu")]], [120, 50, tbl]]});
+	px.view({top20: [[8, 300, ["Exit", require("./MainMenu")]], [120, 50, tbl]]});
 }

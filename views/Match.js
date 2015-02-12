@@ -433,7 +433,7 @@ function startMatch(game, foeDeck) {
 		},
 	};
 	document.addEventListener("keydown", onkeydown);
-	px.refreshRenderer({view:gameui, gamedom:dom, next:function() {
+	function gameStep(){
 		if (game.turn == game.player2 && game.ai) {
 			if (game.phase == etg.PlayPhase){
 				if (!aiCommand){
@@ -692,8 +692,12 @@ function startMatch(game, foeDeck) {
 			}
 		}
 		Effect.next(cloakgfx.visible);
-	}, endnext:function() {
+	}
+	gameStep();
+	var gameInterval = startInterval(gameStep, 30);
+	px.view({view:gameui, gamedom:dom, endnext:function() {
 		document.removeEventListener("keydown", onkeydown);
+		clearInterval(gameInterval);
 	}, cmds:cmds});
 }
 function deckPower(deck, amount) {

@@ -98,7 +98,7 @@ module.exports = function(game) {
 	}
 	document.addEventListener("keydown", onkeydown);
 
-	px.refreshRenderer({view:stage, domvic:dom, endnext: function() {
+	px.view({view:stage, domvic:dom, endnext: function() {
 		document.removeEventListener("keydown", onkeydown);
 	}});
 }

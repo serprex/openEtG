@@ -372,5 +372,5 @@ module.exports = function(nymph) {
 		);
 	}
 	resetTip({target:{tagName:"HTML"}});
-	px.refreshRenderer(stage);
+	px.view(stage);
 }

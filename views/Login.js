@@ -102,6 +102,6 @@ module.exports = function(){
 		[400, 200, ["Sandbox", require("./MainMenu")]],
 	];
 	if (loadingBar) dom.push([0, 568, loadingBar]);
-	px.refreshRenderer({logdom:dom});
+	px.view({logdom:dom});
 	username.focus();
 }

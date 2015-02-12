@@ -57,5 +57,5 @@ module.exports = function(area) {
 			}
 		}
 	});
-	px.refreshRenderer({view:questui, qdom:dom});
+	px.view({view:questui, qdom:dom});
 }

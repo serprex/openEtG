@@ -65,5 +65,5 @@ module.exports = function(reward, numberofcopies, code) {
 		},
 	}
 
-	px.refreshRenderer({view: rewardui, domward: dom, cmds:cmds});
+	px.view({view: rewardui, domward: dom, cmds:cmds});
 }

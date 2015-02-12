@@ -4,6 +4,7 @@ var gfx = require("../gfx");
 var ui = require("../uiutil");
 var chat = require("../chat");
 var sock = require("../sock");
+var tutor = require("../tutor");
 var etgutil = require("../etgutil");
 function setVis(eles, vis) {
 	eles.forEach(function(x){
@@ -121,32 +122,6 @@ module.exports = function() {
 		})(i);
 	}
 
-	var tutspan;
-	var tutorialbutton = px.domEButton(13, function() {
-		if (tutspan) {
-			document.body.removeChild(tutspan);
-			tutspan = null;
-			return;
-		}
-		var span = document.createElement("span");
-		[[45, 97, 520, 158, "1) Select the element of the pack you want to buy.\nEach card in the pack has a 50% chance of being the element you choose. " +
-			"\nRandom pack means the cards is completely random instead,\nand Recently Released means it has a 50% chance of being a recently added card."],
-		[45, 275, 610, 158, "2) Select the type of pack you want.\nYou will see the amount of cards and rarity of each pack in the upper box."],
-		[590, 97, 260, 158, "3) Buy the pack you selected!\nIf you want to buy many packs at once, type in the Bulk box how many you want.\nIn chat you will see a link to a deck code with the cards you got."]].forEach(function(info) {
-			var text = px.domText(info[4]);
-			text.className = "tutorialbox";
-			text.style.position = "absolute";
-			text.style.left = info[0] + "px";
-			text.style.top = info[1] + "px";
-			text.style.width = info[2] + "px";
-			text.style.height = info[3] + "px";
-			span.appendChild(text);
-		});
-		tutspan = span;
-		document.body.appendChild(span);
-	});
-	dom.push([8, 500, tutorialbutton]);
-
 	//booster popup
 	var popbooster = px.mkBgRect(0, 0, 710, 568);
 	popbooster.position.set(40, 16);
@@ -199,5 +174,5 @@ module.exports = function() {
 		}
 	});
 	dom.push([777, 184, packmulti]);
-	px.refreshRenderer({ view: storeui, domshop: dom, cmds: cmds, endnext: function() { if (tutspan) document.body.removeChild(tutspan) }});
+	px.view(tutor(tutor.Shop, 8, 500, { view: storeui, domshop: dom, cmds: cmds }));
 }

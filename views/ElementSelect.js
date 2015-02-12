@@ -26,5 +26,5 @@ module.exports = function() {
 		});
 		dom.push([100 + i * 32, 300, b]);
 	});
-	px.refreshRenderer({seldom: dom});
+	px.view({seldom: dom});
 }
