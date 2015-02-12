@@ -1,13 +1,12 @@
 var px = require("./px");
 var tutor = module.exports = function(tutdata, x, y, stage){
-	var tutspan;
 	stage.tutor = [x, y, px.domEButton(13, function() {
-		if (tutspan) {
-			tutspan.remove();
-			tutspan = null;
+		if (stage.tutspan) {
+			stage.tutspan.remove();
+			delete stage.tutspan;
 			return;
 		}
-		tutspan = document.createElement("span");
+		stage.tutspan = document.createElement("span");
 		tutdata.forEach(function(info) {
 			var text = px.domText(info[4]);
 			text.className = "tutorialbox";
@@ -16,18 +15,10 @@ var tutor = module.exports = function(tutdata, x, y, stage){
 			text.style.top = info[1] + "px";
 			text.style.width = info[2] + "px";
 			text.style.height = info[3] + "px";
-			tutspan.appendChild(text);
+			stage.tutspan.appendChild(text);
 		});
-		document.body.appendChild(tutspan);
+		document.body.appendChild(stage.tutspan);
 	})];
-	var oldendnext = stage.endnext;
-	stage.endnext = function(){
-		if (oldendnext) oldendnext();
-		if (tutspan){
-			tutspan.remove();
-			tutspan = null;
-		}
-	}
 	return stage;
 }
 tutor.Editor = [[100, 32, 624, 198, "This is where the deck you are building shows up. Use the buttons to the left to save and load your deck: " +
