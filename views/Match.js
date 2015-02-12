@@ -694,7 +694,7 @@ function startMatch(game, foeDeck) {
 		Effect.next(cloakgfx.visible);
 	}
 	gameStep();
-	var gameInterval = startInterval(gameStep, 30);
+	var gameInterval = setInterval(gameStep, 30);
 	px.view({view:gameui, gamedom:dom, endnext:function() {
 		document.removeEventListener("keydown", onkeydown);
 		clearInterval(gameInterval);
