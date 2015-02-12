@@ -113,12 +113,9 @@ function getArtImage(code, cb){
 	return cb(artimagecache[code]);
 }
 function getArt(code) {
-	if (artcache[code]) return artcache[code];
-	else {
-		return getArtImage(code, function(art){
-			return artcache[code] = makeArt(Cards.Codes[code], art, artcache[code]);
-		});
-	}
+	return artcache[code] || getArtImage(code, function(art){
+		return artcache[code] = makeArt(Cards.Codes[code], art, artcache[code]);
+	});
 }
 function getCardImage(code) {
 	if (caimgcache[code]) return caimgcache[code];
