@@ -31,11 +31,11 @@ var special = /view|endnext|cmds|next|nextID/;
 exports.getCmd = function(cmd){
 	return curStage.cmds ? curStage.cmds[cmd] : null;
 }
-exports.domBox = function(w, h, cName){
+exports.domBox = function(w, h){
 	var span = document.createElement("span");
 	span.style.width = w + "px";
 	span.style.height = h + "px";
-	span.className = cName || "bgbox";
+	span.className = "bgbox";
 	return span;
 }
 exports.domButton = function(text, click, mouseover, sound) {
@@ -83,15 +83,14 @@ exports.domText = function(text){
 			if (this.textcache == text) return;
 			this.textcache = text;
 			while (this.firstChild) this.firstChild.remove();
-			var ele = this;
 			var pieces = text.replace(/\|/g, " | ").split(/(\d\d?:\d\d?|\$|\n)/);
 			pieces.forEach(function(piece){
 				if (piece == "\n") {
-					ele.appendChild(document.createElement("br"));
+					this.appendChild(document.createElement("br"));
 				}else if (piece == "$") {
 					var sp = document.createElement("span");
 					sp.className = "coin";
-					ele.appendChild(sp);
+					this.appendChild(sp);
 				}else if (/^\d\d?:\d\d?$/.test(piece)) {
 					var parse = piece.split(":");
 					var num = parseInt(parse[0]);
@@ -99,18 +98,18 @@ exports.domText = function(text){
 						for (var j = 0;j < num;j++) {
 							var sp = document.createElement("span");
 							sp.className = "eicon e"+parse[1];
-							ele.appendChild(sp);
+							this.appendChild(sp);
 						}
 					}else{
-						ele.appendChild(document.createTextNode(parse[0]));
+						this.appendChild(document.createTextNode(parse[0]));
 						var sp = document.createElement("span");
 						sp.className = "eicon e"+parse[1];
-						ele.appendChild(sp);
+						this.appendChild(sp);
 					}
 				} else if (piece) {
-					ele.appendChild(document.createTextNode(piece));
+					this.appendChild(document.createTextNode(piece));
 				}
-			});
+			}, this);
 		}
 	});
 	ele.text = text;

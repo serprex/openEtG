@@ -129,28 +129,23 @@ module.exports = function() {
 			return;
 		}
 		var span = document.createElement("span");
-		[[45, 97, 520, 158, "1 ) Select the element of the pack you want to buy. \nEach card in the pack has a 50% chance of being the element you choose. " +
-			"\nRandom pack means the cards is completely random instead, \nand Recently Released means it has a 50% chance of being a recently added card."],
-		[45, 275, 610, 158, "2 ) Select the type of pack you want. \nYou will see the amount of cards and rarity of each pack in the upper box."],
-		[590, 97, 260, 158, "3) Buy the pack you selected! \nIf you want to buy many packs at once, type in the Bulk box how many you want. \nIn chat you will see a link to a deck code with the cards you got."]].forEach(function(info) {
-			var div = px.domBox(info[2], info[3], "tutorialbox");
-			div.style.position = "absolute";
-			div.style.left = info[0] + "px";
-			div.style.top = info[1] + "px";
+		[[45, 97, 520, 158, "1) Select the element of the pack you want to buy.\nEach card in the pack has a 50% chance of being the element you choose. " +
+			"\nRandom pack means the cards is completely random instead,\nand Recently Released means it has a 50% chance of being a recently added card."],
+		[45, 275, 610, 158, "2) Select the type of pack you want.\nYou will see the amount of cards and rarity of each pack in the upper box."],
+		[590, 97, 260, 158, "3) Buy the pack you selected!\nIf you want to buy many packs at once, type in the Bulk box how many you want.\nIn chat you will see a link to a deck code with the cards you got."]].forEach(function(info) {
 			var text = px.domText(info[4]);
-			text.style.color = "#000000";
+			text.className = "tutorialbox";
 			text.style.position = "absolute";
-			text.style.left = 5 + "px";
-			text.style.top = "50%";
-			text.style.transform = "translateY(-50%)";
-			div.appendChild(text);
-			span.appendChild(div);
+			text.style.left = info[0] + "px";
+			text.style.top = info[1] + "px";
+			text.style.width = info[2] + "px";
+			text.style.height = info[3] + "px";
+			span.appendChild(text);
 		});
-		//40, 270, 620, 168,
 		tutspan = span;
 		document.body.appendChild(span);
 	});
-	dom.push([20, 500, tutorialbutton]);
+	dom.push([8, 500, tutorialbutton]);
 
 	//booster popup
 	var popbooster = px.mkBgRect(0, 0, 710, 568);

@@ -62,7 +62,7 @@ function activeUsers() {
 		}
 	}
 	var otherCount = io.clientsCount - userCount;
-	if (otherCount > 0)activeusers.push(otherCount + " other connection" + (otherCount > 1 ? "s" : ""));
+	activeusers.push(otherCount + " other connection" + (otherCount == 1 ? "" : "s"));
 	return activeusers;
 }
 function genericChat(socket, data){
@@ -76,7 +76,7 @@ function getAgedHp(hp, age){
 	var curhp = age > 1 ? hp - (1<<Math.min(age, 9)-1) : hp;
 	return Math.max(curhp, Math.floor(hp/4));
 }
-function wilson(up, total) { 
+function wilson(up, total) {
 	// from npm's wilson-score
 	var z = 2.326348;
 	if (total <= 0 || total < up) return 0;
