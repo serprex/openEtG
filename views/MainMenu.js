@@ -348,19 +348,23 @@ module.exports = function(nymph) {
 				function changeFunc(){
 					sock.userEmit("passchange", { p: changePass.value });
 				}
-				var preloadart = makeCheck("Preload Art", null, "preart"),
-					enableMusic = makeCheck("Enable music", musicChange, "enableMusic"),
+				var changePass = document.createElement("input"), changeBtn = px.domButton("Change Pass", changeFunc),
 					enableSound = makeCheck("Enable sound", soundChange, "enableSound"),
-					hideRightpane = makeCheck("Hide Rightpane", hideRightpaneChange, "hideRightpane"),
+					enableMusic = makeCheck("Enable music", musicChange, "enableMusic"),
+					preloadart = makeCheck("Preload art", null, "preart"),
+					hideRightpane = makeCheck("Hide rightpane", hideRightpaneChange, "hideRightpane"),
 					printstats = makeCheck("Print stats", null, "stats"),
-					changePass = document.createElement("input"), changeBtn = px.domButton("Change Pass", changeFunc),
-					hideCostIcon = makeCheck("Hide cost icon", gfx.clearCaches, "hideCostIcon");
+					hideCostIcon = makeCheck("Hide cost icon", gfx.clearCaches, "hideCostIcon"),
+					disableTut = makeCheck("Disable tutorial", null, "disableTut");
 				changePass.type = "password";
 				changePass.addEventListener("keydown", function(e){
 					if (e.keyCode == 13) changeFunc();
 				});
-				[[8, 53, enableSound], [135, 53, enableMusic], [260, 53, preloadart], [8, 88, hideRightpane],
-					[135, 88, printstats], [309, 250, wipe], [8, 8, changePass], [162, 8, changeBtn], [260, 88, hideCostIcon]].forEach(function(info) {
+				[[8, 8, changePass], [162, 8, changeBtn],
+					[8, 53, enableSound], [135, 53, enableMusic], [260, 53, preloadart],
+					[8, 88, hideRightpane], [135, 88, printstats], [260, 88, hideCostIcon],
+					[8, 123, disableTut],
+					[309, 250, wipe]].forEach(function(info) {
 					info[2].style.position = "absolute";
 					info[2].style.left = info[0] + "px";
 					info[2].style.top = info[1] + "px";

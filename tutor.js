@@ -1,5 +1,7 @@
 var px = require("./px");
+var options = require("./options");
 var tutor = module.exports = function(tutdata, x, y, stage){
+	if (options.disableTut) return stage;
 	stage.tutor = [x, y, px.domEButton(13, function() {
 		if (stage.tutspan) {
 			stage.tutspan.remove();
