@@ -1,3 +1,4 @@
+var px = require("./px");
 var tutor = module.exports = function(tutdata, x, y, stage){
 	var tutspan;
 	stage.tutor = [x, y, px.domEButton(13, function() {
