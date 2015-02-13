@@ -167,8 +167,7 @@ var ActivesValues = Object.freeze({
 		return c.owner.deck.length/4;
 	},
 	hatch:3,
-	heal:3,
-	heal20:8,
+	heal:8,
 	heatmirror:2,
 	holylight:3,
 	hope:2,
@@ -190,6 +189,7 @@ var ActivesValues = Object.freeze({
 	loot:2,
 	luciferin:3,
 	lycanthropy:4,
+	mend:3,
 	metamorph: 2,
 	midas:6,
 	mimic:3,

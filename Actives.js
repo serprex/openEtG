@@ -681,9 +681,6 @@ hatch:function(c,t){
 	c.transform(c.owner.randomcard(c.card.upped, function(x){return x.type == etg.CreatureEnum}));
 },
 heal:function(c,t){
-	t.dmg(-10);
-},
-heal20:function(c,t){
 	t.dmg(-20);
 },
 heatmirror: function(c, t, fromhand) {
@@ -934,6 +931,9 @@ lycanthropy:function(c,t){
 },
 martyr:function(c,t){
 	return c instanceof etg.Weapon ? 0 : c.maxhp-c.hp;
+},
+mend:function(c,t){
+	t.dmg(-10);
 },
 metamorph:function(c,t){
 	c.owner.mark = t instanceof etg.Player?t.mark:t.card.element;
