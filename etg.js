@@ -1052,7 +1052,7 @@ Creature.prototype.truehp = function(){
 Permanent.prototype.getIndex = function() { return this.owner.permanents.indexOf(this); }
 Permanent.prototype.die = function(){
 	if (~this.remove()){
-		this.procactive("destroy");
+		this.procactive("destroy", {});
 	}
 }
 Weapon.prototype.remove = function() {

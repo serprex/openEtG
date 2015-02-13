@@ -1336,14 +1336,14 @@ sadism:function(c, t, dmg){
 		c.owner.dmg(-dmg);
 	}
 },
-salvage:function(c, t){
-	if (c.owner == t.owner && !c.status.salvaged && c.owner.game.turn != c.owner){
+salvage:function(c, t, data){
+	if (!data.salvaged && !c.status.salvaged && c.owner.game.turn != c.owner){
 		Effect.mkText("Salvage", c);
 		Actives["growth 1"](c);
 		c.status.salvaged = true;
+		data.salvaged = true;
 		c.owner.hand.push(new etg.CardInstance(t.card, c.owner));
 		c.addactive("turnstart", Actives.salvageoff);
-		return true;
 	}
 },
 salvageoff:function(c, t){
