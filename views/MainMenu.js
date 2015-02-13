@@ -346,7 +346,11 @@ module.exports = function(nymph) {
 					mkSetTip("Click here to permanently remove your account.")
 				);
 				function changeFunc(){
-					sock.userEmit("passchange", { p: changePass.value });
+					if (this.value == "Change Pass") this.value = "Confirm";
+					else {
+						this.value = "Change Pass";
+						sock.userEmit("passchange", { p: changePass.value });
+					}
 				}
 				var changePass = document.createElement("input"), changeBtn = px.domButton("Change Pass", changeFunc),
 					enableSound = makeCheck("Enable sound", soundChange, "enableSound"),
