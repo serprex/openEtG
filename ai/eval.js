@@ -210,8 +210,8 @@ var ActivesValues = Object.freeze({
 	},
 	nightmare:function(c){
 		var val = 13-c.owner.foe.hand.length/2;
-		c.owner.hand.forEach(function(card){
-			if (card.isOf(Cards.Nightmare)) val--;
+		c.owner.hand.forEach(function(inst){
+			if (inst.card.isOf(Cards.Nightmare)) val--;
 		});
 		return val;
 	},
