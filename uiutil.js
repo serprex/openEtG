@@ -204,7 +204,7 @@ function changeMusic(enabled) {
 function parseInput(data, key, value, limit) {
 	var value = parseInt(value);
 	if (value === 0 || value > 0)
-		data[key] = Math.min(value, limit || Infinity);
+		data[key] = limit ? Math.min(value, limit) : value;
 }
 function parsepvpstats(data){
 	parseInput(data, "p1hp", options.pvphp);

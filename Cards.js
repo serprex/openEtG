@@ -26,8 +26,8 @@ exports.parseCsv = function(type, file){
 		if (cardcode in exports.Codes){
 			console.log(cardcode + " duplicate " + carddata[1] + " " + exports.Codes[cardcode].name);
 		}else{
-			var nospacename = carddata[1].replace(/ |'/g, "");
-			exports[nospacename in exports?nospacename+"Up":nospacename] = exports.Codes[cardcode] = new etg.Card(type, cardinfo);
+			exports.Codes[cardcode] = new etg.Card(type, cardinfo);
+			if (cardcode < "6qo") exports[carddata[1].replace(/\W/g, "")] = exports.Codes[cardcode];
 			cardinfo.Code = etgutil.asShiny(cardcode, true);
 			exports.Codes[cardinfo.Code] = new etg.Card(type, cardinfo);
 		}

@@ -590,7 +590,7 @@ freeevade:function(c,t, data){
 	}
 },
 freeze:function(c,t){
-	t.freeze(c.card.upped && c.card != Cards.PandemoniumUp ? 4 : 3);
+	t.freeze(c.card.upped ? 4 : 3);
 },
 fungusrebirth:function(c,t){
 	c.transform(c.card.as(Cards.Fungus));
@@ -1030,7 +1030,7 @@ nova2:function(c,t){
 	}
 	c.owner.nova += 3;
 	if (c.owner.nova >= 6){
-		new etg.Creature(Cards.SingularityUp.asShiny(c.card.shiny), c.owner).place();
+		new etg.Creature(Cards.Singularity.asUpped(true).asShiny(c.card.shiny), c.owner).place();
 	}
 },
 nullspell:function(c,t){
