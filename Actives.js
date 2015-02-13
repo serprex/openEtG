@@ -283,14 +283,12 @@ deja:function(c,t){
 	Actives.parallel(c, c);
 },
 deployblobs:function(c,t){
-	if (c.trueatk()>1 && c.truehp()>1){
-		var blob = c.card.as(Cards.Blob);
-		for(var i=0; i<3; i++){
-			new etg.Creature(blob, c.owner).place();
-		}
-		c.atk -= 2;
-		c.dmg(2);
+	var blob = c.card.as(Cards.Blob);
+	for(var i=0; i<3; i++){
+		new etg.Creature(blob, c.owner).place();
 	}
+	c.atk -= 2;
+	c.dmg(2);
 },
 destroy:function(c,t, dontsalvage, donttalk){
 	if (!donttalk){
