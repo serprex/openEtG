@@ -17,14 +17,14 @@ module.exports = function(level) {
 		ecost[i] = 0;
 	}
 	ecost[eles[1]] -= 5 * (level > 1 ? 2 : 1);
-	var deck = [], banned = [Cards.Give, Cards.GiveUp, Cards.Reinforce];
+	var deck = [];
 	var anyshield = 0, anyweapon = 0;
 	eles.forEach(function(ele, j){
 		for (var i = 20-j*10; i>0; i--) {
 			var maxRarity = level == 0 ? 2 : (level == 1 ? 3 : 4);
 			var card = etg.PlayerRng.randomcard(Math.random() < uprate, function(x) {
 				return x.element == ele && x.type != etg.PillarEnum && x.rarity <= maxRarity && cardcount[x.code] != 6 &&
-					!(x.type == etg.ShieldEnum && anyshield == 3) && !(x.type == etg.WeaponEnum && anyweapon == 3) && !~banned.indexOf(x);
+					!(x.type == etg.ShieldEnum && anyshield == 3) && !(x.type == etg.WeaponEnum && anyweapon == 3) && !x.isOf(Cards.Give);
 			});
 			deck.push(card.code);
 			cardcount[card.code] = (cardcount[card.code] || 0) + 1;
