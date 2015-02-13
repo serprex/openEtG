@@ -39,8 +39,11 @@ module.exports = function(level) {
 					ecost[k]--;
 				}
 			}else if (card.isOf(Cards.GiftofOceanus)){
-				ecost[etg.Water] -= 3;
-				ecost[eles[1]] -= 2;
+				if (eles[1] == etg.Water) ecost[etg.Water] -= 3;
+				else{
+					ecost[etg.Water] -= 2;
+					ecost[eles[1]] -= 2;
+				}
 			}else if (card.type == etg.CreatureEnum){
 				var auto = card.active.auto;
 				if (auto == Actives.light) ecost[etg.Light]--;
