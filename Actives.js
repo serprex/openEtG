@@ -300,7 +300,7 @@ destroy:function(c,t, dontsalvage, donttalk){
 		}
 	}else t.remove();
 	if (!dontsalvage){
-		t.procactive("destroy");
+		t.procactive("destroy", {});
 	}
 },
 destroycard:function(c,t){
@@ -407,7 +407,7 @@ earthquake:function(c,t){
 	}else{
 		t.remove();
 	}
-	t.procactive("destroy");
+	t.procactive("destroy", {});
 },
 empathy:function(c,t){
 	var healsum = c.owner.countcreatures();

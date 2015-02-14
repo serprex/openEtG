@@ -1,9 +1,9 @@
 "use strict";
 require("./httpcards")(function() {
 	var etg = require("./etg");
+	var Cards = require("./Cards");
 	var etgutil = require("./etgutil");
 	var Actives = require("./Actives");
-	var Cards = require("./Cards");
 	var game, player1, player2;
 	function initHand(pl){
 		for(var i=1; i<arguments.length; i++){
@@ -29,7 +29,7 @@ require("./httpcards")(function() {
 	gameTest("Adrenaline", function() {
 		(player1.creatures[0] = new etg.Creature(Cards.Devourer, player1)).status.adrenaline = 1;
 		(player1.creatures[1] = new etg.Creature(Cards.HornedFrog, player1)).status.adrenaline = 1;
-		(player1.creatures[2] = new etg.Creature(Cards.RubyDragon, player1)).status.adrenaline = 1;
+		(player1.creatures[2] = new etg.Creature(Cards.CrimsonDragon.asUpped(true), player1)).status.adrenaline = 1;
 		player2.quanta[etg.Life]=3;
 		player1.endturn();
 		equal(player2.hp, 68, "dmg");
@@ -46,9 +46,9 @@ require("./httpcards")(function() {
 		player1.quanta[etg.Death] = 10;
 		initHand(player1, Cards.BoneWall);
 		player1.hand[0].useactive();
-		new etg.Creature(Cards.RubyDragon, player2).place();
-		new etg.Creature(Cards.RubyDragon, player2).place();
-		new etg.Creature(Cards.RubyDragon, player2).place();
+		new etg.Creature(Cards.CrimsonDragon, player2).place();
+		new etg.Creature(Cards.CrimsonDragon, player2).place();
+		new etg.Creature(Cards.CrimsonDragon, player2).place();
 		player1.endturn();
 		player2.endturn();
 		ok(player1.shield, "BW exists");
@@ -129,25 +129,25 @@ require("./httpcards")(function() {
 		player1.deck = [Cards.Ash, Cards.Ash, Cards.Ash];
 		player2.deck = [Cards.Ash, Cards.Ash, Cards.Ash];
 		for(var i=0; i<2; i++)
-			new etg.Creature(Cards.Vampire, player1).place();
+			new etg.Creature(Cards.MinorVampire.asUpped(true), player1).place();
 		player1.hp = 50;
 		player1.endturn();
 		player2.endturn();
 		equal(player2.hp, 92, "Noclipse dmg'd");
 		equal(player1.hp, 58, "Noclipse vamp'd");
-		player1.permanents[0] = new etg.Permanent(Cards.Eclipse, player1);
+		player1.permanents[0] = new etg.Permanent(Cards.Nightfall.asUpped(true), player1);
 		player1.endturn();
 		equal(player2.hp, 80, "Eclipse dmg'd");
 		equal(player1.hp, 70, "Eclipse vamp'd");
 		equal(player1.creatures[0].truehp(), 4, "hp buff'd");
 	});
 	gameTest("Gpull", function() {
-		new etg.Creature(Cards.MassiveDragon, player2).place();
+		new etg.Creature(Cards.ColossalDragon, player2).place();
 		player2.gpull = player2.creatures[0];
 		new etg.Creature(Cards.Scorpion, player1).place();
-		player2.deck = [Cards.MassiveDragon];
+		player2.deck = [Cards.ColossalDragon];
 		player1.endturn();
-		equal(player2.gpull.hp, 29, "dmg redirected");
+		equal(player2.gpull.hp, 24, "dmg redirected");
 		equal(player2.gpull.status.poison, 1, "psn redirected");
 		player2.gpull.die();
 		ok(!player2.gpull, "gpull death poof");
@@ -156,7 +156,7 @@ require("./httpcards")(function() {
 		player1.shield = new etg.Shield(Cards.Hope, player1);
 		new etg.Creature(Cards.Photon, player1).place();
 		for(var i=0; i<3; i++){
-			new etg.Creature(Cards.RayofLight, player1).place();
+			new etg.Creature(Cards.Photon.asUpped(true), player1).place();
 		}
 		player1.endturn();
 		equal(player1.shield.truedr(), 3, "DR");
@@ -175,10 +175,10 @@ require("./httpcards")(function() {
 		equal(player1.hand.length, 7, "Discarded");
 	});
 	gameTest("Parallel", function() {
-		var damsel = new etg.Creature(Cards.Damselfly, player1);
+		var damsel = new etg.Creature(Cards.Dragonfly, player1);
 		damsel.place();
 		Actives.parallel(player1, damsel);
-		equal(player1.creatures[1].card, Cards.Damselfly, "PU'd");
+		equal(player1.creatures[1].card, Cards.Dragonfly, "PU'd");
 		Actives.web(player1, damsel);
 		ok(!damsel.status.airborne && player1.creatures[1].status.airborne, "Web'd");
 	});
@@ -201,10 +201,10 @@ require("./httpcards")(function() {
 	gameTest("Reflect", function() {
 		Actives.lightning(player1, player2);
 		ok(player1.hp == 100 && player2.hp == 95, "Plain spell");
-		player2.shield = new etg.Shield(Cards.MirrorShield, player2);
+		player2.shield = new etg.Shield(Cards.ReflectiveShield, player2);
 		Actives.lightning(player1, player2);
 		ok(player1.hp == 95 && player2.hp == 95, "Reflected spell");
-		player1.shield = new etg.Shield(Cards.MirrorShield, player1);
+		player1.shield = new etg.Shield(Cards.ReflectiveShield, player1);
 		Actives.lightning(player1, player2);
 		ok(player1.hp == 90 && player2.hp == 95, "Unreflected reflected spell");
 	});
