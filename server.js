@@ -126,33 +126,22 @@ var userEvents = {
 		}
 	}),
 	inituser:function(data, user) {
-		var starters = [
-			"015990g4sa014sd014t4014vi014vs0152o0152t0155u0155p0158q015ca015fi015f6015if015il015lo015lb015ou015s5025rq015v3015ut0161s018pi",
-			"01502034sa014t3014sd0b4vc024vi014vj014vh014vv014vp034vs024vd014ve014vf055uk015us015v3015uq015up015uv018pt",
-			"0153102532034sa014sd014t40c52g0252i0252j0252k0252n0152p0152t0152r0152h045bs025cb025cr018pn",
-			"0156203564025650159502599034sa014sd014t50b55k0155q0255t0255r0255l0155o0458o0158t0258q018pm",
-			"03590015910159403599034sa014sd014t40b58o0258u0158p0258q0158s0158r045rg025ri025rr015rn018ps",
-			"034sa014sd014td0c5bs015bu025c1015cb025c0015c8025c7015c6015cr015c3015bt045i4015ia015i6025il025ie018ps",
-			"034sa014sd024t40b5f0025f1025f3015f4025fh025fi025fa015f5025fc015f2045l8025lp025lr018pq",
-			"02565034sa024sd014td0455k0255t0155r0c5i4025i8035i6025ip025ie015i9025ig015id018pl",
-			"034sa014sd014tb0b5l8025lo025lp035lb015ld025lm015ln025ll015la045oc025on025os015oe015or018pr",
-			"034sa014sd014t4055f0015f3025f4015f6015fc0c5oc025od015og025os015oh015oe025ou015om025or015of018po",
-			"03627034sa024sd014t40c5rg025ri025rr015rl025ru015s0015rn015rm0561o0261q0261t018pu",
-			"034sa014sd014t40452g0152p0252t0a5uk035um025un015us025v3015uq035ut015up015vb015uo025uv015ul018pk",
-			"015020262002627034sa014sd014t4064vc024vp034vs0b61o0261q0361s0261t0161v018pj",
-			"",
-		];
-		user.accountbound = starters[data.e];
+		var starters = require("./srv/starter");
+		if (data.e < 1 || data.e > 13) return;
+		var sid = (data.e-1)*6;
+		user.accountbound = starters[sid];
 		user.oracle = 0;
 		user.pool = "";
-		user.freepacks = data.e == 13 ? "6,6,0,0" : "3,2,0,0";
+		user.freepacks = starters[sid+4] + "," + starters[sid+5] + ",1";
 		user.dailymage = Math.floor(Math.random() * aiDecks.mage.length);
 		user.dailydg = Math.floor(Math.random() * aiDecks.demigod.length);
+		user.selectedDeck = "1";
 		var socket = this;
-		db.rpush("N:"+data.u,1,2,3,4,5,6,7,8,9,10);
-		db.hset("D:"+data.u, "0", starters[data.e], function(err){
-			sutil.useruser(db, user, function(clientuser){
-				sockEmit(socket, "userdump", clientuser);
+		db.rpush("N:"+data.u,1,2,3,4,5,6,7,8,9,10, function(err){
+			db.hmset("D:"+data.u, "1", starters[sid+1], "2", starters[sid+2], "3", starters[sid+3], function(err){
+				sutil.useruser(db, user, function(clientuser){
+					sockEmit(socket, "userdump", clientuser);
+				});
 			});
 		});
 	},

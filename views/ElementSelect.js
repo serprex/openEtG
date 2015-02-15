@@ -14,15 +14,15 @@ module.exports = function() {
 		}]]
 	];
 	etg.eleNames.forEach(function(name, i){
-		if (i > 13) return;
-		var b = px.domEButton(i, function() {
-			var msg = { u: sock.user.name, a: sock.user.auth, e: i };
+		if (i < 1 || i > 14) return;
+		var b = px.domEButton(i < 13 ? i : i == 13 ? 14 : 13, function() {
+			var msg = { u: sock.user.name, a: sock.user.auth, e: i ==14 ? etg.PlayerRng.uptoceil(12) : i };
 			sock.user = undefined;
 			sock.emit("inituser", msg);
 			require("./MainMenu")();
 		});
 		b.addEventListener("mouseover", function(){
-			eledesc.text = name;
+			eledesc.text = i < 13 ? name : i == 13 ? "Build your own" : "Random";
 		});
 		dom.push([100 + i * 32, 300, b]);
 	});
