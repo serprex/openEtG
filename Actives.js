@@ -243,7 +243,7 @@ cseed:function(c,t){
 	if (t.card.isOf(Cards.Elf)){
 		t.transform(t.card.as(Cards.FallenElf));
 	}else{
-		Actives[["drainlife", "firebolt", "freeze", "gpullspell", "icebolt", "infect", "lightning", "lobotomize", "parallel", "rewind", "snipe", "swave"][c.owner.upto(12)]](c, t);
+		Actives[c.owner.choose(["drainlife", "firebolt", "freeze", "gpullspell", "icebolt", "infect", "lightning", "lobotomize", "parallel", "rewind", "snipe", "swave"])](c, t);
 	}
 },
 dagger:function(c){
@@ -698,10 +698,10 @@ hope:function(c,t){
 },
 icebolt:function(c,t){
 	var bolts = Math.floor(c.owner.quanta[etg.Water]/5);
-	t.spelldmg(2+bolts);
 	if (c.owner.rng() < .35+bolts/20){
 		t.freeze(c.card.upped?4:3);
 	}
+	t.spelldmg(2+bolts);
 },
 ignite:function(c,t){
 	c.die();
