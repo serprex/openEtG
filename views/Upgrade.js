@@ -10,7 +10,7 @@ module.exports = function() {
 		if (!card.isFree()) {
 			if (card.upped) return "You cannot upgrade upgraded cards.";
 			var use = card.rarity != -1 ? 6 : 1;
-			if (cardpool[card.code] >= use) {
+			if (cardsel.cardpool[card.code] >= use) {
 				sock.userExec("upgrade", { card: card.code });
 			}
 			else return "You need at least " + use + " copies to be able to upgrade this card!";
@@ -33,7 +33,7 @@ module.exports = function() {
 			if (card.shiny) return "You cannot polish shiny cards.";
 			if (card.rarity == 5) return "You cannot polish Nymphs.";
 			var use = card.rarity != -1 ? 6 : 2;
-			if (cardpool[card.code] >= use) {
+			if (cardsel.cardpool[card.code] >= use) {
 				sock.userExec("polish", { card: card.code });
 			}
 			else return "You need at least " + use + " copies to be able to polish this card!";
@@ -80,10 +80,9 @@ module.exports = function() {
 		adjustdeck();
 	}
 	function adjustdeck() {
-		cardpool = etgutil.deck2pool(sock.user.pool);
-		cardsel.cardpool = cardpool = etgutil.deck2pool(sock.user.accountbound, cardpool);
+		cardsel.cardpool = etgutil.deck2pool(sock.user.accountbound, etgutil.deck2pool(sock.user.pool));
 	}
-	var cardpool, selectedCard;
+	var selectedCard;
 	var upgradeui = px.mkView(function(){
 		if (selectedCard) cardArt.texture = gfx.getArt(etgutil.asUpped(selectedCard, true));
 	});

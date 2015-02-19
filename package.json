@@ -12,11 +12,11 @@
     "engine.io": "^1.5.1",
     "engine.io-client": "^1.5.1",
     "redis": "^0.12.1",
-    "serve-static": "^1.8.1"
+    "serve-static": "^1.9.0"
   },
   "devDependencies": {
     "qunitjs": "^1.17.1",
-    "urllib": "^2.2.2"
+    "urllib": "^2.3.0"
   },
   "scripts": {
     "test": "npm start;firefox 127.0.0.1:13602/test.htm"
