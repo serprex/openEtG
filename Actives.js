@@ -760,34 +760,33 @@ innovation:function(c,t){
 	}
 },
 integrity:function(c,t){
-	var activeType = ["auto", "hit", "buff", "death"];
 	var shardTally = [0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0];
 	var shardSkills = [
-		["deadalive", "mutation", "paradox", "improve", "scramble", "antimatter"],
-		["infect", "growth 1", "poison 1", "poison 1", "aflatoxin", "poison 2"],
+		["deadalive", "mutation", "paradox", "improve", "improve", "antimatter"],
+		["infect", "infect", "infect", "infect", "aflatoxin", "aflatoxin"],
 		["devour", "devour", "devour", "devour", "devour", "blackhole"],
 		["burrow", "stoneform", "guard", "guard", "bblood", "bblood"],
 		["growth 2", "adrenaline", "adrenaline", "adrenaline", "adrenaline", "mitosis"],
-		["ablaze", "ablaze", "fiery", "destroy", "destroy", "rage"],
+		["ablaze", "ablaze", "tempering", "destroy", "destroy", "rage"],
 		["steam", "steam", "freeze", "freeze", "nymph", "nymph"],
 		["heal", "endow", "endow", "luciferin", "luciferin", "luciferin"],
 		["queen", "queen", "snipe", "dive", "gas", "gas"],
-		["scarab", "scarab", "deja", "neuro", "precognition", "precognition"],
-		["siphon", "vampire", "vampire", "liquid", "liquid", "steal"],
+		["scarab", "scarab", "deja", "deja", "precognition", "precognition"],
+		["siphonstrength", "siphonstrength", "yoink", "liquid", "liquid", "steal"],
 		["lobotomize", "lobotomize", "lobotomize", "quint", "quint", "quint"],
 	];
 	var shardCosts = {
 		burrow:1, stoneform:1, guard:1, bblood:2,
-		deadalive:1, mutation: 2, paradox: 2, improve: 2, scramble: -2, antimatter: 4,
-		infect:1, "growth 1": -4, "poison 1": -2, aflatoxin: 2, "poison 2": -2,
+		deadalive:1, mutation: 2, paradox: 2, improve: 2, antimatter: 4,
+		infect:1, aflatoxin: 2,
 		devour: 3, blackhole: 4,
 		"growth 2": 2, adrenaline: 2, mitosis: 4,
-		ablaze: 1, fiery: -3, destroy: 3, rage: 2,
+		ablaze: 1, tempering: 1, destroy: 3, rage: 2,
 		steam: 2, freeze: 2, nymph: 4,
-		heal: 1, endow: 2, luciferin: 4,
+		mend: 1, endow: 2, luciferin: 4,
 		queen: 2, snipe: 2, dive: 2, gas: 2,
-		scarab: 2, deja: 4, neuro: -2, precognition: 2,
-		siphon: -1, vampire: -2, liquid: 2, steal: 3,
+		scarab: 2, deja: 4, precognition: 2,
+		siphonstrength: 2, yoink: 2, liquid: 2, steal: 3,
 		lobotomize: 2, quint: 2,
 	};
 	var stat=c.card.upped?.5:0;
@@ -812,20 +811,42 @@ integrity:function(c,t){
 		}
 	}
 	var active = shardSkills[c.owner.choose(shlist)-1][num-1];
-	var actives = {}, cost = shardCosts[active];
-	actives[cost < 0 ? activeType[~cost] : "cast"] = etg.parseActive(active);
-	var status = {golem: true};
+	var actives = {cast:etg.parseActive(active)}, status = {golem: true};
+	c.owner.shardgolem = {
+		stat: Math.floor(stat),
+		status: status,
+		active: actives,
+		cast: shardCosts[active]
+	};
+	function addActive(event, active){
+		etg.Thing.prototype.addactive.call(c.owner.shardgolem, event, active);
+	}
+	if (shardTally[etg.Entropy]>2){
+		addActive("hit", Actives.Scramble);
+	}
 	if (shardTally[etg.Air]>0){
 		status.airborne = true;
 	}
+	if (shardTally[etg.Death] > 0){
+		addActive("death", Actives["growth 1"]);
+		addActive("hit", etg.parseActive("poison " + shardTally[etg.Death]);
+	}
 	if (shardTally[etg.Darkness]>0){
 		status.voodoo = true;
+		addActive("auto", "siphon");
+		if (shardTally[etg.Darkness]>1){
+			addActive("hit", Actives.vampire);
+			if (shardTally[etg.Darkness]>2){
+				addActive("hit", Actives.reducemaxhp);
+			}
+		}
 	}
 	if (shardTally[etg.Darkness]>0 || shardTally[etg.Death]>0){
 		status.nocturnal = true;
 	}
 	if (shardTally[etg.Life]>0){
 		status.poisonous = true;
+		status.adrenaline = 1;
 	}
 	if (shardTally[etg.Aether]>2){
 		status.immaterial = true;
@@ -833,15 +854,12 @@ integrity:function(c,t){
 	if (shardTally[etg.Gravity]>1){
 		status.momentum = true;
 	}
-	if (shardTally[etg.Life]>0){
-		status.adrenaline = 1;
+	if (shardTally[etg.Fire]>0){
+		addActive("buff", Actives.fiery);
 	}
-	c.owner.shardgolem = {
-		stat: Math.floor(stat),
-		status: status,
-		active: actives,
-		cast: cost
-	};
+	if (shardTally[etg.Time]>1){
+		addActive("hit", Actives.neuro);
+	}
 	new etg.Creature(Cards.ShardGolem, c.owner).place();
 },
 jetstream:function(c,t){

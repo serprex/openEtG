@@ -12,7 +12,7 @@
     "engine.io": "^1.5.1",
     "engine.io-client": "^1.5.1",
     "redis": "^0.12.1",
-    "serve-static": "^1.9.0"
+    "serve-static": "^1.9.1"
   },
   "devDependencies": {
     "qunitjs": "^1.17.1",
