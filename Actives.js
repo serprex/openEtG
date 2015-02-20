@@ -689,7 +689,7 @@ heatmirror: function(c, t, fromhand) {
 	}
 },
 holylight:function(c,t){
-	t.spelldmg(t.status.nocturnal?13:-13);
+	t.spelldmg(t.status.nocturnal?10:-10);
 },
 hope:function(c,t){
 	return c.owner.creatures.reduce(function(dr, cr){
@@ -1650,6 +1650,11 @@ tick:function(c,t){
 		if (c.card.upped) c.owner.foe.masscc(c, function(c,x){ x.dmg(4) });
 		else c.owner.foe.spelldmg(18);
 	}
+},
+tidalhealing:function(c,t){
+	c.owner.masscc(c, function(c, t){
+		if (!t.hasactive("auto", "regen")) t.addactive("auto", Actives.regen);
+	});
 },
 tornado:function(c,t){
 	var pl = c.owner.foe;
