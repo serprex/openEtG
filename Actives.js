@@ -810,7 +810,7 @@ integrity:function(c,t){
 			shlist.push(i);
 		}
 	}
-	var active = shardSkills[c.owner.choose(shlist)-1][num-1];
+	var active = shardSkills[c.owner.choose(shlist)-1][Math.min(num-1,5)];
 	c.owner.shardgolem = {
 		stat: Math.floor(stat),
 		status: {golem: true},
