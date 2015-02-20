@@ -848,6 +848,9 @@ integrity:function(c,t){
 	}
 	if (shardTally[etg.Water]>0){
 		addStatus("aquatic")
+		if (shardTally[etg.Water]>2){
+			addActive("hit", Actives.regen);
+		}
 	}
 	if (shardTally[etg.Light]>0){
 		addActive("auto", Actives.light);
