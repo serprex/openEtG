@@ -781,7 +781,7 @@ integrity:function(c,t){
 		infect:1, aflatoxin: 2,
 		devour: 3, blackhole: 4,
 		"growth 2": 2, adrenaline: 2, mitosis: 4,
-		ablaze: 1, tempering: 1, destroy: 3, rage: 2,
+		ablaze: 1, tempering: (c.card.upped?2:1), destroy: 3, rage: 2,
 		steam: 2, freeze: 2, nymph: 4,
 		mend: 1, endow: 2, luciferin: 4,
 		queen: 2, snipe: 2, dive: 2, gas: 2,
@@ -897,7 +897,7 @@ integrity:function(c,t){
 	if (shardTally[etg.Aether]>2){
 		addStatus("immaterial");
 	}
-	new etg.Creature(Cards.ShardGolem, c.owner).place();
+	new etg.Creature(c.card.as(Cards.ShardGolem), c.owner).place();
 },
 jetstream:function(c,t){
 	t.dmg(1);
