@@ -879,7 +879,7 @@ integrity:function(c,t){
 	if (shardTally[etg.Darkness]>0){
 		addStatus("voodoo");
 		if (shardTally[etg.Darkness]>1){
-			addActive("auto", "siphon");
+			addActive("auto", Actives.siphon);
 			if (shardTally[etg.Darkness]>2){
 				addActive("hit", Actives.vampire);
 				if (shardTally[etg.Darkness]>3){
