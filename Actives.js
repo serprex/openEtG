@@ -878,11 +878,19 @@ integrity:function(c,t){
 	}
 	if (shardTally[etg.Darkness]>0){
 		addStatus("voodoo");
-		addActive("auto", "siphon");
 		if (shardTally[etg.Darkness]>1){
-			addActive("hit", Actives.vampire);
+			addActive("auto", "siphon");
 			if (shardTally[etg.Darkness]>2){
-				addActive("hit", Actives.reducemaxhp);
+				addActive("hit", Actives.vampire);
+				if (shardTally[etg.Darkness]>3){
+					addActive("hit", Actives.reducemaxhp);
+					if (shardTally[etg.Darkness]>4){
+						addActive("destroy", Actives.loot);
+						if (shardTally[etg.Darkness]>5){
+							addActive("owndeath", Actives.catlife);
+						}
+					}
+				}
 			}
 		}
 	}
