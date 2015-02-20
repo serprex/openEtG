@@ -769,7 +769,7 @@ integrity:function(c,t){
 		["growth 2", "adrenaline", "adrenaline", "adrenaline", "adrenaline", "mitosis"],
 		["ablaze", "ablaze", "tempering", "destroy", "destroy", "rage"],
 		["steam", "steam", "freeze", "freeze", "nymph", "nymph"],
-		["heal", "endow", "endow", "luciferin", "luciferin", "luciferin"],
+		["mend", "endow", "endow", "luciferin", "luciferin", "luciferin"],
 		["queen", "queen", "snipe", "dive", "gas", "gas"],
 		["scarab", "scarab", "deja", "deja", "precognition", "precognition"],
 		["siphonstrength", "siphonstrength", "yoink", "liquid", "liquid", "steal"],
