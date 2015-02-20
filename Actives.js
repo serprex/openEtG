@@ -832,7 +832,7 @@ integrity:function(c,t){
 	}
 	if (shardTally[etg.Death] > 0){
 		addActive("death", Actives["growth 1"]);
-		addActive("hit", etg.parseActive("poison " + shardTally[etg.Death]);
+		addActive("hit", etg.parseActive("poison " + shardTally[etg.Death]));
 	}
 	if (shardTally[etg.Life]>0){
 		status.poisonous = true;
