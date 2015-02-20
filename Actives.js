@@ -811,53 +811,70 @@ integrity:function(c,t){
 		}
 	}
 	var active = shardSkills[c.owner.choose(shlist)-1][num-1];
-	var actives = {cast:etg.parseActive(active)}, status = {golem: true};
 	c.owner.shardgolem = {
 		stat: Math.floor(stat),
-		status: status,
-		active: actives,
+		status: {golem: true},
+		active: {cast:etg.parseActive(active)},
 		cast: shardCosts[active]
 	};
 	function addActive(event, active){
 		etg.Thing.prototype.addactive.call(c.owner.shardgolem, event, active);
 	}
+	function addStatus(status, val){
+		c.owner.shardgolem[status] = val === undefined || val;
+	}
 	if (shardTally[etg.Darkness]>0 || shardTally[etg.Death]>0){
-		status.nocturnal = true;
+		addStatus("nocturnal");
 	}
 	if (shardTally[etg.Entropy]>2){
 		addActive("hit", Actives.Scramble);
 	}
 	if (shardTally[etg.Gravity]>1){
-		status.momentum = true;
+		addStatus("momentum");
 	}
 	if (shardTally[etg.Death] > 0){
 		addActive("death", Actives["growth 1"]);
 		addActive("hit", etg.parseActive("poison " + shardTally[etg.Death]));
 	}
 	if (shardTally[etg.Life]>0){
-		status.poisonous = true;
-		status.adrenaline = 1;
+		addStatus("poisonous");
+		addStatus("adrenaline", 1);
+		if (shardTally[etg.Life]>2){
+			addActive("auto", Actives.regenerate);
+		}
 	}
 	if (shardTally[etg.Fire]>0){
 		addActive("buff", Actives.fiery);
 	}
+	if (shardTally[etg.Water]>0){
+		addStatus("aquatic")
+	}
 	if (shardTally[etg.Light]>0){
 		addActive("auto", Actives.light);
 		if (shardTally[etg.Light]>1){
-			addActive("buff", Actives.martyr);
+			addActive("blocked", Actives.virtue);
 			if (shardTally[etg.Light]>2){
-				addActive("hit", Actives.disarm);
+				addActive("buff", Actives.martyr);
+				if (shardTally[etg.Light]>3){
+					addActive("ownfreeze", etg.parseActive("growth 2"));
+					if (shardTally[etg.Light]>4){
+						addActive("hit", Actives.disarm);
+						if (shardTally[etg.Light]>5){
+							addActive("auto", Actives.sanctuary);
+						}
+					}
+				}
 			}
 		}
 	}
 	if (shardTally[etg.Air]>0){
-		status.airborne = true;
+		addStatus("airborne");
 	}
 	if (shardTally[etg.Time]>1){
 		addActive("hit", Actives.neuro);
 	}
 	if (shardTally[etg.Darkness]>0){
-		status.voodoo = true;
+		addStatus("voodoo");
 		addActive("auto", "siphon");
 		if (shardTally[etg.Darkness]>1){
 			addActive("hit", Actives.vampire);
@@ -867,7 +884,7 @@ integrity:function(c,t){
 		}
 	}
 	if (shardTally[etg.Aether]>2){
-		status.immaterial = true;
+		addStatus("immaterial");
 	}
 	new etg.Creature(Cards.ShardGolem, c.owner).place();
 },
