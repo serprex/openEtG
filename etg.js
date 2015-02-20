@@ -499,14 +499,14 @@ Card.prototype.info = function(){
 	if (this.type == PillarEnum){
 		return this.text || "1:" + this.element + " " + activename(this.active.auto);
 	}else{
-		var dmgtype = "";
-		if (this.type == WeaponEnum){
-			if (this.status && this.status.ranged) dmgtype = " ranged";
-			if (this.status && this.status.psion) dmgtype += " spell";
+		var text = "";
+		if (this.type == ShieldEnum && this.health) text = "Reduce damage by "+this.health+"\n";
+		if (this.type == CreatureEnum || this.type == WeaponEnum){
+			text = this.attack+"|"+this.health+"\n";
+			var statuses = objinfo(this.status).join(" ");
+			if (statuses) text += statuses + "\n";
 		}
-		var prefix = this.type == ShieldEnum?(this.health?"Reduce damage by "+this.health+"\n":""):
-			this.type == CreatureEnum || this.type == WeaponEnum ?this.attack+"|"+this.health+"\n":"";
-		return prefix + (this.text || (this.type == SpellEnum ? activename(this.active) : objinfo(this.status, Thing.prototype.activetext.call(this)).join("\n")));
+		return text + (this.text || Thing.prototype.activetext.call(this).join("\n"));
 	}
 }
 Thing.prototype.toString = function(){ return this.card.name; }
@@ -1000,7 +1000,7 @@ Thing.prototype.lobo = function(){
 }
 Thing.prototype.mutantactive = function(){
 	this.lobo();
-	var abilities = ["hatch","freeze","burrow","destroy","steal","dive","heal","paradox","lycanthropy","growth 1","infect","gpull","devour","mutation","growth 2","ablaze","poison 1","deja","endow","guard","mitosis"];
+	var abilities = ["hatch","freeze","burrow","destroy","steal","dive","mend","paradox","lycanthropy","growth 1","infect","gpull","devour","mutation","growth 2","ablaze","poison 1","deja","endow","guard","mitosis"];
 	var index = this.owner.upto(abilities.length+2)-2;
 	if (index<0){
 		this.status[["momentum","immaterial"][~index]] = true;
