@@ -22,7 +22,7 @@
     "test": "npm start;firefox 127.0.0.1:13602/test.htm"
   },
   "optionalDependencies": {
-    "hiredis": "^0.1.17"
+    "hiredis": "^0.2.0"
   },
   "license": "MIT"
 }
