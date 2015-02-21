@@ -760,8 +760,8 @@ innovation:function(c,t){
 	}
 },
 integrity:function(c,t){
-	var shardTally = [0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0];
-	var shardSkills = [
+	var tally = [0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0];
+	var shardActives = [
 		["deadalive", "mutation", "paradox", "improve", "improve", "antimatter"],
 		["infect", "infect", "infect", "infect", "aflatoxin", "aflatoxin"],
 		["devour", "devour", "devour", "devour", "devour", "blackhole"],
@@ -777,17 +777,17 @@ integrity:function(c,t){
 	];
 	var shardCosts = {
 		burrow:1, stoneform:1, guard:1, bblood:2,
-		deadalive:1, mutation: 2, paradox: 2, improve: 2, antimatter: 4,
-		infect:1, aflatoxin: 2,
-		devour: 3, blackhole: 4,
-		"growth 2": 2, adrenaline: 2, mitosis: 4,
-		ablaze: 1, tempering: (c.card.upped?2:1), destroy: 3, rage: 2,
-		steam: 2, freeze: 2, nymph: 4,
-		mend: 1, endow: 2, luciferin: 4,
-		queen: 2, snipe: 2, dive: 2, gas: 2,
-		scarab: 2, deja: 4, precognition: 2,
-		siphonstrength: 2, yoink: 2, liquid: 2, steal: 3,
-		lobotomize: 2, quint: 2,
+		deadalive:1, mutation:2, paradox:2, improve:2, antimatter:4,
+		infect:1, aflatoxin:2,
+		devour:3, blackhole:4,
+		"growth 2":2, adrenaline:2, mitosis:4,
+		ablaze:1, tempering:(c.card.upped?2:1), destroy:3, rage:2,
+		steam:2, freeze:2, nymph:4,
+		mend:1, endow:2, luciferin:4,
+		queen:2, snipe:2, dive:2, gas:2,
+		scarab:2, deja:4, precognition:2,
+		siphonstrength:2, yoink:2, liquid:2, steal:3,
+		lobotomize:2, quint:2,
 	};
 	var stat=c.card.upped?.5:0;
 	for(var i=c.owner.hand.length-1; i>=0; i--){
@@ -796,21 +796,22 @@ integrity:function(c,t){
 			if (card.upped){
 				stat += .5;
 			}
-			shardTally[card.element]++;
+			tally[card.element]++;
 			c.owner.hand.splice(i, 1);
 		}
 	}
-	var num=0, shlist;
+	var num=0, shlist=[];
 	for(var i=1; i<13; i++){
-		stat += shardTally[i]*2;
-		if (shardTally[i]>num){
-			num = shardTally[i];
-			shlist = [i]
-		}else if (num != 0 && shardTally[i] == num){
+		stat += tally[i]*2;
+		if (tally[i]>num){
+			num = tally[i];
+			shlist.length = 0;
+			shlist[0] = i;
+		}else if (num != 0 && tally[i] == num){
 			shlist.push(i);
 		}
 	}
-	var active = shardSkills[c.owner.choose(shlist)-1][Math.min(num-1,5)];
+	var active = shardActives[c.owner.choose(shlist)-1][Math.min(num-1,5)];
 	c.owner.shardgolem = {
 		stat: Math.floor(stat),
 		status: {golem: true},
@@ -823,79 +824,31 @@ integrity:function(c,t){
 	function addStatus(status, val){
 		c.owner.shardgolem[status] = val === undefined || val;
 	}
-	if (shardTally[etg.Darkness]>0 || shardTally[etg.Death]>0){
-		addStatus("nocturnal");
-	}
-	if (shardTally[etg.Entropy]>2){
-		addActive("hit", Actives.Scramble);
-	}
-	if (shardTally[etg.Gravity]>1){
-		addStatus("momentum");
-	}
-	if (shardTally[etg.Death] > 0){
-		addActive("death", Actives["growth 1"]);
-		addActive("hit", etg.parseActive("poison " + shardTally[etg.Death]));
-	}
-	if (shardTally[etg.Life]>0){
-		addStatus("poisonous");
-		addStatus("adrenaline", 1);
-		if (shardTally[etg.Life]>2){
-			addActive("auto", Actives.regenerate);
-		}
-	}
-	if (shardTally[etg.Fire]>0){
-		addActive("buff", Actives.fiery);
-	}
-	if (shardTally[etg.Water]>0){
-		addStatus("aquatic")
-		if (shardTally[etg.Water]>2){
-			addActive("hit", Actives.regen);
-		}
-	}
-	if (shardTally[etg.Light]>0){
-		addActive("auto", Actives.light);
-		if (shardTally[etg.Light]>1){
-			addActive("blocked", Actives.virtue);
-			if (shardTally[etg.Light]>2){
-				addActive("buff", Actives.martyr);
-				if (shardTally[etg.Light]>3){
-					addActive("ownfreeze", etg.parseActive("growth 2"));
-					if (shardTally[etg.Light]>4){
-						addActive("hit", Actives.disarm);
-						if (shardTally[etg.Light]>5){
-							addActive("auto", Actives.sanctuary);
-						}
-					}
+	[	[[2, "hit", "scramble"]],
+		[[0, "death", "growth 1"], [0, "", "nocturnal"]],
+		[[1, "", "momentum"]],
+		[],
+		[[0, "", "poisonous"], [0, "", "adrenaline", 1], [2, "auto", "regenerate"]],
+		[[0, "buff", "fiery"]],
+		[[0, "", "aquatic"], [2, "hit", "regen"]],
+		[[0, "auto", "light"], [1, "blocked", "virtue"], [2, "buff", "martyr"], [3, "ownfreeze", "growth 2"], [4, "hit", "disarm"], [5, "auto", "sanctuary"]],
+		[[0, "", "airborne"]],
+		[[1, "hit", "neuro"]],
+		[[0, "", "nocturnal"], [0, "", "voodoo"], [1, "auto", "siphon"], [2, "hit", "vampire"], [3, "hit", "reducemaxhp"], [4, "destroy", "loot"], [5, "owndeath", "catlife"]],
+		[[2, "", "immaterial"]],
+	].forEach(function(slist, i){
+		slist.forEach(function(data){
+			if (tally[i+1]>data[0]){
+				if (!data[1]){
+					addStatus(data[2], data[3]);
+				}else{
+					addActive(data[1], etg.parseActive(data[2]));
 				}
 			}
-		}
-	}
-	if (shardTally[etg.Air]>0){
-		addStatus("airborne");
-	}
-	if (shardTally[etg.Time]>1){
-		addActive("hit", Actives.neuro);
-	}
-	if (shardTally[etg.Darkness]>0){
-		addStatus("voodoo");
-		if (shardTally[etg.Darkness]>1){
-			addActive("auto", Actives.siphon);
-			if (shardTally[etg.Darkness]>2){
-				addActive("hit", Actives.vampire);
-				if (shardTally[etg.Darkness]>3){
-					addActive("hit", Actives.reducemaxhp);
-					if (shardTally[etg.Darkness]>4){
-						addActive("destroy", Actives.loot);
-						if (shardTally[etg.Darkness]>5){
-							addActive("owndeath", Actives.catlife);
-						}
-					}
-				}
-			}
-		}
-	}
-	if (shardTally[etg.Aether]>2){
-		addStatus("immaterial");
+		});
+	});
+	if (tally[etg.Death] > 0){
+		addActive("hit", etg.parseActive("poison " + tally[etg.Death]));
 	}
 	new etg.Creature(c.card.as(Cards.ShardGolem), c.owner).place();
 },
