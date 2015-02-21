@@ -13,22 +13,18 @@ module.exports = function(cb){
 	}
 	names.forEach(function(name, i){
 		var xhr = new XMLHttpRequest();
+		xhr.addEventListener("load", function(){
+			Cards.parseCsv(i, this.responseText);
+			maybeLoaded();
+		});
 		xhr.open("GET", name + ".csv", true);
-		xhr.onreadystatechange = function() {
-			if (this.readyState == 4 && this.status == 200){
-				Cards.parseCsv(i, this.responseText);
-				maybeLoaded();
-			}
-		}
 		xhr.send();
 	});
 	var xhr = new XMLHttpRequest();
+	xhr.addEventListener("load", function(){
+		Cards.parseTargeting(this.responseText);
+		maybeLoaded();
+	});
 	xhr.open("GET", "active.csv", true);
-	xhr.onreadystatechange = function() {
-		if (this.readyState == 4 && this.status == 200){
-			Cards.parseTargeting(this.responseText);
-			maybeLoaded();
-		}
-	}
 	xhr.send();
 }
