@@ -1,6 +1,7 @@
 node_modules/*
 deckcache/*
 Cards/*
+vanilla/*
 favicon.png
 Dosis.ttf
 etgify.js
