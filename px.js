@@ -38,7 +38,7 @@ exports.domBox = function(w, h){
 	span.className = "bgbox";
 	return span;
 }
-exports.domButton = function(text, click, mouseover, sound) {
+exports.domButton = function(text, click, mouseover) {
 	var ele = document.createElement("input");
 	ele.type = "button";
 	Object.defineProperty(ele, "text", {
@@ -54,22 +54,20 @@ exports.domButton = function(text, click, mouseover, sound) {
 	});
 	ele.text = text;
 	ele.addEventListener("click", function() {
-		if (sound !== false) ui.playSound(sound || "buttonClick");
+		ui.playSound("buttonClick");
 		if (click) click.call(this);
 	});
 	if (mouseover) ele.addEventListener("mouseover", mouseover);
 	return ele;
 }
-function setFilter(style, brightness){
-	return function(){
-		style.WebkitFilter = style.filter = "brightness("+brightness+")";
-	}
-}
 exports.domEButton = function(e, click, ch){
 	if (!ch) ch = "E";
 	var ele = document.createElement("span");
 	ele.className = "imgb "+ch+"icon "+ch+e;
-	ele.addEventListener("click", click);
+	ele.addEventListener("click", function(){
+		ui.playSound("buttonClick");
+		if (click) click.call(this);
+	});
 	return ele;
 }
 exports.domText = function(text){
