@@ -2,9 +2,10 @@
 "use strict";
 var fs = require("fs");
 var urllib = require("urllib");
-function download(gid, cb){
+function download(gid, writeStream, cb){
 	urllib.request("https://docs.google.com/spreadsheets/d/1dfKGdHqqLAAHdnw2mKBwaYwDIFODjQIjlg8ZPyRFVmA/export?format=csv&id=1dfKGdHqqLAAHdnw2mKBwaYwDIFODjQIjlg8ZPyRFVmA&gid="+gid, {
-		headers: { "GData-Version": "3.0" }
+		headers: { "GData-Version": "3.0" },
+		writeStream: writeStream
 	}, cb);
 }
 var dbgid = [
@@ -18,18 +19,11 @@ var dbgid = [
 ];
 dbgid.forEach(function(pair){
 	if (process.argv.length == 2 || process.argv.some(function(x) { return x.indexOf(pair[0]) == 0; })){
-		download(pair[1], function(err, data, res){
+		download(pair[1], fs.createWriteStream(pair[0]+".csv"), function(err, data, res){
 			if (err){
 				console.log("Failed to download " + pair[0], err.message);
 				return;
 			}
-			fs.writeFile(pair[0]+".csv", data, function(err){
-				if (err){
-					console.log("Failed to write " + pair[0], err.message);
-				}else{
-					console.log(pair[0]);
-				}
-			});
 		});
 	}
 });
