@@ -117,6 +117,7 @@ exports.upshpillar = function(data, user){
 }
 exports.upshall = function(data, user) {
 	var pool = etgutil.deck2pool(user.pool);
+	var bound = etgutil.deck2pool(user.accountbound);
 	for(var code in pool){
 		var card = Cards.Codes[code];
 		if (!card || card.rarity == 5 || card.rarity < 1) continue;
@@ -125,6 +126,12 @@ exports.upshall = function(data, user) {
 		if (!(dcode in pool)) pool[dcode] = 0;
 		pool[dcode] += pool[code]*(card.upped && card.shiny?36:6);
 		pool[code] = 0;
+	}
+	for(var code in bound){
+		if (!(code in pool)) continue;
+		var card = Cards.Codes[code];
+		if (!card || card.rarity == 5 || card.rarity < 1 || card.upped || card.shiny) continue;
+		pool[code] += Math.min(bound[code], 6);
 	}
 	for(var code in pool){
 		var card = Cards.Codes[code];
@@ -137,6 +144,12 @@ exports.upshall = function(data, user) {
 			base += 36;
 		}
 		pool[code] -= pc;
+	}
+	for(var code in bound){
+		if (!(code in pool)) continue;
+		var card = Cards.Codes[code];
+		if (!card || card.rarity == 5 || card.rarity < 1 || card.upped || card.shiny) continue;
+		pool[code] -= Math.min(bound[code], 6);
 	}
 	var newpool = "";
 	for(var code in pool){
