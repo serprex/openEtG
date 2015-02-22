@@ -74,14 +74,10 @@ function Card(type, info){
 			activecache[info.Active] = this.active = {};
 			iterSplit(info.Active, "+", function(active){
 				var eqidx = active.indexOf("=");
-				if (~eqidx){
-					var a0 = active.substr(0, eqidx);
-					var iscast = this.readCost("cast", a0);
-					this.active[iscast?"cast":a0] = parseActive(active.substr(eqidx+1));
-					if (iscast) activecastcache[info.Active] = [this.cast, this.castele];
-				}else{
-					this.active.auto = parseActive(active);
-				}
+				var a0 = ~eqidx ? active.substr(0, eqidx) : "auto";
+				var iscast = this.readCost("cast", a0);
+				Thing.prototype.addactive.call(this, iscast?"cast":a0, parseActive(active.substr(eqidx+1)));
+				if (iscast) activecastcache[info.Active] = [this.cast, this.castele];
 			}, this);
 			Object.freeze(this.active);
 		}

@@ -46,15 +46,16 @@ var data = {
 	destroy:"Destroy target permanent",
 	destroycard:"Discard target card",
 	devour:"Kill smaller target creature & gain 1|1",
-	duality:"Generate a copy of foe's next draw",
 	die:"Sacrifice",
 	disarm:"Return foe's weapon to their hand on hit",
 	divinity:"Add 24 to maximum health & heal 16",
 	dive:"Double strength until next attack. Does not stack",
 	draft:"Target airborne creature loses airborne status, or vice versa. Produce 2:9",
 	drainlife:"Drains 2 life from target. Drain additional life per 5:11 owned",
+	drawcopy:"When foe discards a card, generate a copy",
 	dryspell:"Deal 1 damage to all creatures. Gain 1:7 per damage dealt. Removes cloak",
 	dshield:"Become immaterial until next turn",
+	duality:"Generate a copy of foe's next draw",
 	earth:"Produce 1:4",
 	earthquake:"Destroy up to 3 stacked permanents",
 	empathy:"Heal owner per creature owned per turn. Upkeep per 8 creatures",
@@ -152,7 +153,7 @@ var data = {
 	nightmare:"Fill foe's hand with copies of target creature's card. Drain 2 life per added card",
 	nova:"Produce 1 quanta of each element. Increment singularity danger by 2. Summon singularity if danger exceeds 5",
 	nova2:"Produce 2 quanta of each element. Increment singularity danger by 3. Summon singularity if danger exceeds 5",
-	nullspell:"Cancel enxt spell until next turn, gaining 1|1",
+	nullspell:"Cancel next spell until next turn, gaining 1|1",
 	nymph:"Turn target pillar into a Nymph of same element",
 	obsession:["spell damage owner 8 on discard", "spell damage owner 10 on discard"],
 	ouija:"When a creature dies, generate Ouija Essence in foe's hand",
@@ -203,13 +204,15 @@ var data = {
 	ren:"Target creature will return to owner's hand instead of dying",
 	rewind:"Remove target creature to top of owner's deck",
 	reveal:{
-		ownplay:"Reveal foe's hand on play",
-		turnstart:"Reveal foe's hand at start of turn",
+		ownplay:"Reveal foe's hand",
 	},
 	ricochet:"Targeting spells affect an additional random non player target. Caster randomised",
 	sadism:["Creatures heal their owner when damaged", "Own creatures heal their owner when damaged"],
 	salvage:"Restore permanents destroyed by foe to hand once per turn. Gain 1|1 if so",
-	sanctuary:"Heal owner 4 per turn. Protection during foe's turn from hand & quanta control",
+	sanctify:"Protection during foe's turn from hand & quanta control",
+	unsanctify:{
+		ownplay:"Prevent foe's sanctification",
+	},
 	scarab:"Summon a Scarab",
 	scatterhand:"Target player shuffles their hand, & draws however many cards previously had",
 	scramble:{
@@ -229,7 +232,7 @@ var data = {
 	siphonactive:"Steal target creature's skills",
 	siphonstrength:"Absorb 1|0 from target creature",
 	skyblitz:"Dive all own airborne creatures. Consumes remaining 1:9",
-	snipe:"Deal 3 damage to target",
+	snipe:"Deal 3 damage to target creature",
 	sosa:["Sacrifice 48% of maximum health & consume all non 1:2 to invert damage for 2 turns",
 		"Sacrifice 40% of maximum health & consume all non 1:2 to invert damage for 2 turns"],
 	soulcatch:"When a creature dies, produce 3:2",
@@ -270,24 +273,23 @@ var data = {
 [["dagger", "1:2/1:11. Increment damage if cloaked"], ["hammer", "1:3/1:4"], ["bow", "1:8/1:9"], ["staff", "1:5/1:7"], ["disc", "1:1/1:12"], ["axe", "1:6/1:10"]].forEach(function(x){
 	data[x[0]] = "Increment damage if mark is "+x[1];
 });
-function processEntry(c, entry){
+function processEntry(c, event, entry){
 	return typeof entry === "string" ? entry :
 		entry instanceof Array ? entry[c.upped?1:0] :
-		entry(c);
+		entry instanceof Function ? entry(c) :
+		event in entry ? processEntry(c, event, entry[event]) : "";
 }
 module.exports = function(c, event){
 	if (c.type == etg.SpellEnum){
 		var entry = data[c.active.activename[0]];
-		if (entry.cast) entry = entry.cast;
-		return processEntry(c, entry);
+		return processEntry(c, "cast", entry);
 	}else{
 		var ret = [];
 		for(var key in c.active){
 			c.active[key].activename.forEach(function(name){
 				var entry = data[name];
 				if (!entry) return;
-				if (entry[key]) entry = entry[key];
-				ret.push((key == "cast"?etg.casttext(c.cast, c.castele):"") + processEntry(c, entry));
+				ret.push((key == "cast"?etg.casttext(c.cast, c.castele):"") + processEntry(c, key, entry));
 			});
 		}
 		return ret.join("\n");
