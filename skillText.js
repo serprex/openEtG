@@ -2,6 +2,7 @@
 var etg = require("./etg");
 var data = {
 	ablaze:"Gain 2|0",
+	abomination:"Amiable to mutation",
 	accelerationspell:"Replaces target creature's skills with \"Acceleration: gain +2|-1 per turn\"",
 	accretion:"Destroy target permanent & gain 0|15. Return to owner's hand as a Blackhole if health exceeds 45",
 	adrenaline:"Target creature attacks multiple times per turn. Weaker creatures gain more attacks",
@@ -60,6 +61,7 @@ var data = {
 	duality:"Generate a copy of foe's next draw",
 	earth:"Produce 1:4",
 	earthquake:"Destroy up to 3 stacked permanents",
+	elf:"Become Fallen if target of Chaos Seed",
 	empathy:"Heal owner per creature owned per turn. Upkeep per 8 creatures",
 	enchant:"Target permanent becomes immaterial",
 	envenom:"Target weapon gains \"Venom: apply poison on hit\"",
@@ -148,6 +150,7 @@ var data = {
 	mitosis:"Summon a daughter creature",
 	mitosisspell:"Non-weapon creature gains 0|1 & active \"Mitosis: Summon a daughter creature\" costing target's card's cost",
 	momentum:"Target ignores shield effects & gains 1|1",
+	mummy:"Become a Pharaoh if target of Reverse Time",
 	mutation:"Mutate target creature into an abomination, or maybe something more. Slight chance of death",
 	mutant:"Enter play with mutant abilities",
 	neuro:"Apply poison on hit, also inflicting neurotoxin. Neurotoxin applies poison per card played by victim. Throttled",
@@ -237,6 +240,7 @@ var data = {
 	siphon:"Siphon 1:0 from foe as 1:11. Throttled",
 	siphonactive:"Steal target creature's skills",
 	siphonstrength:"Absorb 1|0 from target creature",
+	skeleton:"Become a random creature if target of Reverse Time",
 	skyblitz:"Dive all own airborne creatures. Consumes remaining 1:9",
 	snipe:"Deal 3 damage to target creature",
 	sosa:["Sacrifice 48% of maximum health & consume all non 1:2 to invert damage for 2 turns",

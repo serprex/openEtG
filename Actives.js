@@ -12,6 +12,12 @@ ablaze:function(c,t){
 	Effect.mkText("2|0", c);
 	c.atk += 2;
 },
+abomination:function(c,t,data){
+	if (data.active == Actives.mutation){
+		Actives.improve(c);
+		data.tgt = true;
+	}
+},
 acceleration:function(c,t){
 	Effect.mkText("2|-1", c);
 	c.atk += 2;
@@ -243,11 +249,7 @@ cpower:function(c,t){
 	t.atk += buff%5+1;
 },
 cseed:function(c,t){
-	if (t.card.isOf(Cards.Elf)){
-		t.transform(t.card.as(Cards.FallenElf));
-	}else{
-		Actives[c.owner.choose(["drainlife", "firebolt", "freeze", "gpullspell", "icebolt", "infect", "lightning", "lobotomize", "parallel", "rewind", "snipe", "swave"])](c, t);
-	}
+	Actives[c.owner.choose(["drainlife", "firebolt", "freeze", "gpullspell", "icebolt", "infect", "lightning", "lobotomize", "parallel", "rewind", "snipe", "swave"])](c, t);
 },
 dagger:function(c){
 	return (c.owner.mark == etg.Darkness||c.owner.mark == etg.Death) + c.owner.isCloaked();
@@ -411,6 +413,12 @@ earthquake:function(c,t){
 		t.remove();
 	}
 	t.procactive("destroy", {});
+},
+elf:function(c,t,data){
+	if (data.active == Actives.cseed){
+		t.transform(t.card.as(Cards.FallenElf));
+		data.tgt = true;
+	}
 },
 empathy:function(c,t){
 	var healsum = c.owner.countcreatures();
@@ -985,6 +993,12 @@ momentum:function(c,t){
 	t.buffhp(1);
 	t.status.momentum = true;
 },
+mummy:function(c,t,data){
+	if (data.active == Actives.rewind){
+		t.transform(t.card.as(Cards.Pharaoh));
+		data.tgt = true;
+	}
+},
 mutant:function(c,t){
 	if (!c.mutantactive()){
 		c.active.cast = Actives.web;
@@ -1305,15 +1319,9 @@ reveal:function(c,t){
 	c.owner.precognition = true;
 },
 rewind:function(c,t){
-	if (t.card.isOf(Cards.Skeleton)){
-		Actives.hatch(t);
-	}else if (t.card.isOf(Cards.Mummy)){
-		t.transform(t.card.as(Cards.Pharaoh));
-	}else{
-		Effect.mkText("Rewind", t);
-		t.remove();
-		t.owner.deck.push(t.card);
-	}
+	Effect.mkText("Rewind", t);
+	t.remove();
+	t.owner.deck.push(t.card);
 },
 ricochet:function(c,t){
 	if (!(t instanceof etg.CardInstance) || t.active == Actives.bolsterintodeck)return;
@@ -1480,6 +1488,12 @@ siphonstrength:function(c,t){
 	Effect.mkText("-1|0", t);
 	t.atk--;
 	c.atk++;
+},
+skeleton:function(c,t,data){
+	if (data.active == Actives.rewind){
+		Actives.hatch(c);
+		data.tgt = true;
+	}
 },
 skyblitz:function(c,t){
 	c.owner.quanta[etg.Air] = 0;
