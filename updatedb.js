@@ -22,8 +22,7 @@ dbgid.forEach(function(pair){
 		download(pair[1], fs.createWriteStream(pair[0]+".csv"), function(err, data, res){
 			if (err){
 				console.log("Failed to download " + pair[0], err.message);
-				return;
-			}
+			}else console.log(pair[0]);
 		});
 	}
 });

@@ -48,6 +48,7 @@ var data = {
 	devour:"Kill smaller target creature & gain 1|1",
 	die:"Sacrifice",
 	disarm:"Return foe's weapon to their hand on hit",
+	discping:"Deal 1 damage to target creature & return to hand",
 	divinity:"Add 24 to maximum health & heal 16",
 	dive:"Double strength until next attack. Does not stack",
 	draft:"Target airborne creature loses airborne status, or vice versa. Produce 2:9",
@@ -167,7 +168,11 @@ var data = {
 	parallel:"Duplicate target creature",
 	phoenix:["Become an Ash on death", "Become a Minor Ash on death"],
 	photosynthesis:"Convert 1:8 to 2:5. May activate multiple times",
-	discping:"Deal 1 damage to target creature & return to hand",
+	pillar:{
+		auto:function(c){return "Produce "+(c.element?1:3)+":"+c.element},
+		ownplay:function(c){return "Produce "+(c.element?1:3)+":"+c.element+" on play"}
+	},
+	pend:function(c){return "Oscilliate between producing "+(c.element?1:3)+":"+c.element + " & quanta of mark"},
 	plague:"Poison target player's creatures. Removes cloak",
 	platearmor:["Target gains 0|4", "Target gains 0|6"],
 	"poison 1":{
@@ -272,6 +277,12 @@ var data = {
 };
 [["dagger", "1:2/1:11. Increment damage if cloaked"], ["hammer", "1:3/1:4"], ["bow", "1:8/1:9"], ["staff", "1:5/1:7"], ["disc", "1:1/1:12"], ["axe", "1:6/1:10"]].forEach(function(x){
 	data[x[0]] = "Increment damage if mark is "+x[1];
+});
+[["pillmat", "1:4 1:6 1:7 1:9"], ["pillspi", "1:2 1:5 1:8 1:11"], ["pillcar", "1:1 1:3 1:10 1:12"]].forEach(function(x){
+	data[x[0]] = {
+		auto:"Produce 1 or 2 " + x[1],
+		ownplay:"Produce 1 or 2 " + x[1] + " on play"
+	};
 });
 function processEntry(c, event, entry){
 	return typeof entry === "string" ? entry :

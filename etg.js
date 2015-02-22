@@ -501,9 +501,7 @@ Card.prototype.isFree = function() {
 	return this.type == PillarEnum && !this.upped && !this.rarity && !this.shiny;
 }
 Card.prototype.info = function(){
-	if (this.type == PillarEnum){
-		return this.text || "1:" + this.element + " " + activename(this.active.auto);
-	}else if (this.type == SpellEnum){
+	if (this.type == SpellEnum){
 		return skillText(this);
 	}else{
 		var text = [];
