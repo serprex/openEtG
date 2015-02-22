@@ -13,7 +13,7 @@ ablaze:function(c,t){
 	c.atk += 2;
 },
 abomination:function(c,t,data){
-	if (data.active == Actives.mutation){
+	if (data.tgt == c && data.active == Actives.mutation){
 		Actives.improve(c);
 		data.tgt = true;
 	}
@@ -415,7 +415,7 @@ earthquake:function(c,t){
 	t.procactive("destroy", {});
 },
 elf:function(c,t,data){
-	if (data.active == Actives.cseed){
+	if (data.tgt == c && data.active == Actives.cseed){
 		t.transform(t.card.as(Cards.FallenElf));
 		data.tgt = true;
 	}
@@ -994,7 +994,7 @@ momentum:function(c,t){
 	t.status.momentum = true;
 },
 mummy:function(c,t,data){
-	if (data.active == Actives.rewind){
+	if (data.tgt == c && data.active == Actives.rewind){
 		t.transform(t.card.as(Cards.Pharaoh));
 		data.tgt = true;
 	}
@@ -1011,11 +1011,11 @@ mutation:function(c,t){
 	if (rnd<.1){
 		Effect.mkText("Death", t);
 		t.die();
-	}else if (rnd<(t.card.isOf(Cards.Abomination)?.9:.5)){
+	}else if (rnd<.5){
 		Actives.improve(c, t);
 	}else{
 		Effect.mkText("Abomination", t);
-		t.transform(Cards.Abomination);
+		t.transform(Cards.Abomination.asShiny(t.card.shiny));
 	}
 },
 neuro:adrenathrottle(function(c,t){
@@ -1490,7 +1490,7 @@ siphonstrength:function(c,t){
 	c.atk++;
 },
 skeleton:function(c,t,data){
-	if (data.active == Actives.rewind){
+	if (data.tgt == c && data.active == Actives.rewind){
 		Actives.hatch(c);
 		data.tgt = true;
 	}
