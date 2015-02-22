@@ -5,6 +5,7 @@ var Effect = require("./Effect");
 var ui = require("./uiutil");
 var etgutil = require("./etgutil");
 var Cards = require("./Cards");
+var skillText = require("./skillText");
 function Game(seed, flip){
 	this.rng = new MersenneTwister(seed);
 	this.phase = MulliganPhase1;
@@ -506,6 +507,8 @@ Card.prototype.isFree = function() {
 Card.prototype.info = function(){
 	if (this.type == PillarEnum){
 		return this.text || "1:" + this.element + " " + activename(this.active.auto);
+	}else if (this.type == SpellEnum){
+		return skillText(this);
 	}else{
 		var text = this.type == ShieldEnum && this.health ? "Reduce damage by "+this.health+"\n" :
 			this.type == CreatureEnum || this.type == WeaponEnum ? this.attack+"|"+this.health+"\n" : "";
