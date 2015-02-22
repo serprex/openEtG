@@ -321,7 +321,7 @@ die:function(c,t){
 	c.die();
 },
 disarm:function(c,t){
-	if (t instanceof etg.Player && t.weapon && t.weapon.isMaterial()){
+	if (t instanceof etg.Player && t.weapon){
 		Actives.unsummon(c, t.weapon);
 	}
 },
@@ -722,7 +722,7 @@ improve:function(c,t){
 	t.transform(t.owner.randomcard(false, function(x){return x.type == etg.CreatureEnum}));
 },
 inertia:function(c,t, tt){
-	if (tt && c.owner == tt.owner && c.owner != tt){
+	if (tt && c.owner == tt.owner){
 		c.owner.spend(etg.Gravity, -2);
 	}
 },

@@ -510,13 +510,17 @@ Card.prototype.info = function(){
 	}else if (this.type == SpellEnum){
 		return skillText(this);
 	}else{
-		var text = this.type == ShieldEnum && this.health ? "Reduce damage by "+this.health+"\n" :
-			this.type == CreatureEnum || this.type == WeaponEnum ? this.attack+"|"+this.health+"\n" : "";
+		var text = [];
+		if (this.type == ShieldEnum && this.health) text.push("Reduce damage by "+this.health)
+		else if (this.type == CreatureEnum || this.type == WeaponEnum) text.push(this.attack+"|"+this.health);
 		if (this.type != PermanentEnum){
 			var statuses = objinfo(this.status).join(" ");
-			if (statuses) text += statuses + "\n";
+			if (statuses) text.push(statuses);
 		}
-		return text + (this.text || Thing.prototype.activetext.call(this).join("\n"));
+		var skills = skillText(this);
+		if (skills) text.push(skills);
+		if (this.text) text.push(this.text);
+		return text.join("\n");
 	}
 }
 Thing.prototype.toString = function(){ return this.card.name; }
@@ -768,9 +772,7 @@ Pillar.prototype.info = function(){
 }
 Thing.prototype.activetext = function(info){
 	if (!info) info = [];
-	for(var key in this.active){
-		if (this.active[key])info.push((key != "auto"?(key == "cast"?casttext(this.cast, this.castele):key) + " ":"") + activename(this.active[key]));
-	}
+	info.push(skillText(this));
 	return info;
 }
 Thing.prototype.activetext1 = function(){
