@@ -38,7 +38,7 @@ function iterSplit(src, str, func, thisObj){
 	var i=0;
 	while(true){
 		var j=src.indexOf(str, i);
-		func.call(thisObj, src.substring(i, (~j?j:src.length)));
+		func.call(thisObj, src.slice(i, (~j?j:src.length)));
 		if (j == -1) return;
 		i=j+str.length;
 	}
@@ -766,7 +766,8 @@ Pillar.prototype.info = function(){
 }
 Thing.prototype.activetext = function(info){
 	if (!info) info = [];
-	info.push(skillText(this));
+	var skill = skillText(this);
+	if (skill) info.push(skill);
 	return info;
 }
 Thing.prototype.activetext1 = function(){
