@@ -33,6 +33,15 @@ function parseActive(name){
 	}
 	console.log("Unknown active", name);
 }
+function iterSplit(src, str, func, thisObj){
+	var i=0;
+	while(true){
+		var j=src.indexOf(str, i);
+		func.call(thisObj, src.substring(i, (~j?j:src.length)));
+		if (j == -1) return;
+		i=j+str.length;
+	}
+}
 function Card(type, info){
 	this.type = type;
 	this.element = parseInt(info.E);
@@ -62,17 +71,17 @@ function Card(type, info){
 			}
 		}else{
 			activecache[info.Active] = this.active = {};
-			var actives = info.Active.split("+");
-			for(var i=0; i<actives.length; i++){
-				var active = actives[i].split("=");
-				if (active.length == 1){
-					this.active.auto = parseActive(active[0]);
-				}else{
-					var iscast = this.readCost("cast", active[0]);
-					this.active[iscast?"cast":active[0]] = parseActive(active[1]);
+			iterSplit(info.Active, "+", function(active){
+				var eqidx = active.indexOf("=");
+				if (~eqidx){
+					var a0 = active.substr(0, eqidx);
+					var iscast = this.readCost("cast", a0);
+					this.active[iscast?"cast":a0] = parseActive(active.substr(eqidx+1));
 					if (iscast) activecastcache[info.Active] = [this.cast, this.castele];
+				}else{
+					this.active.auto = parseActive(active);
 				}
-			}
+			}, this);
 			Object.freeze(this.active);
 		}
 	}
@@ -81,11 +90,10 @@ function Card(type, info){
 			this.status = statuscache[info.Status];
 		}else{
 			statuscache[info.Status] = this.status = {};
-			var statuses = info.Status.split("+");
-			for(var i=0; i<statuses.length; i++){
-				var status = statuses[i].split("=");
-				this.status[status[0]] = status.length==1 || parseInt(status[1]);
-			}
+			iterSplit(info.Status, "+", function(status){
+				var eqidx = status.indexOf("=");
+				this.status[~eqidx?status.substr(0,eqidx):status] = eqidx == -1 || parseInt(status.substr(eqidx+1));
+			}, this);
 			Object.freeze(this.status);
 		}
 	}
@@ -481,12 +489,12 @@ Pillar.prototype.hash = function(){
 	}
 	return hash & 0x7FFFFFFF;
 }
-Card.prototype.readCost = function(attr, cost){
-	var c=cost.split(":");
-	var cost = parseInt(c[0]);
+Card.prototype.readCost = function(attr, coststr){
+	var cidx = coststr.indexOf(":");
+	var cost = parseInt(~cidx?coststr.substr(0,cidx):coststr);
 	if (isNaN(cost))return;
 	this[attr] = cost;
-	this[attr+"ele"] = c.length==1?this.element:parseInt(c[1]);
+	this[attr+"ele"] = ~cidx?parseInt(coststr.substr(cidx+1)):this.element;
 	return true;
 }
 Card.prototype.as = function(card){
@@ -499,10 +507,9 @@ Card.prototype.info = function(){
 	if (this.type == PillarEnum){
 		return this.text || "1:" + this.element + " " + activename(this.active.auto);
 	}else{
-		var text = "";
-		if (this.type == ShieldEnum && this.health) text = "Reduce damage by "+this.health+"\n";
-		if (this.type == CreatureEnum || this.type == WeaponEnum){
-			text = this.attack+"|"+this.health+"\n";
+		var text = this.type == ShieldEnum && this.health ? "Reduce damage by "+this.health+"\n" :
+			this.type == CreatureEnum || this.type == WeaponEnum ? this.attack+"|"+this.health+"\n" : "";
+		if (this.type != PermanentEnum){
 			var statuses = objinfo(this.status).join(" ");
 			if (statuses) text += statuses + "\n";
 		}
@@ -1266,6 +1273,7 @@ exports.Permanent = Permanent;
 exports.Creature = Creature;
 exports.passives = passives;
 exports.isEmpty = isEmpty;
+exports.iterSplit = iterSplit;
 exports.filtercards = filtercards;
 exports.countAdrenaline = countAdrenaline;
 exports.clone = clone;

@@ -123,7 +123,7 @@ function getTextImage(text, size, color, bgcolor, width) {
 			if (!width || x + txt.width < width){
 				pushChild(txt);
 			}else{
-				piece.split(" ").forEach(function(word){
+				etg.iterSplit(piece, " ", function(word){
 					if (word){
 						pushChild(new PIXI.Sprite(gfx.Text(word, size, color)));
 						if (x){

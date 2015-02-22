@@ -46,7 +46,7 @@ exports.prepuser = function(){
 		user.decknames = {};
 	}
 	if (user.freepacks) {
-		user.freepacks = user.freepacks.split(",").map(function unaryParseInt(x) {return parseInt(x, 10)});
+		user.freepacks = user.freepacks.split(",").map(function(x){return parseInt(x, 10)});
 	}
 	if (!user.ailosses) user.ailosses = 0;
 	if (!user.aiwins) user.aiwins = 0;

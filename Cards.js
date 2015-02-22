@@ -6,38 +6,39 @@ var etg = require("./etg");
 var Actives = require("./Actives");
 var etgutil = require("./etgutil");
 exports.parseCsv = function(type, file){
-	var csv = file.split("\n");
-	var keys = csv[0].split(",");
-	for(var j=1; j<csv.length; j++){
-		var carddata = csv[j].split(",");
-		var cardinfo = {};
-		for(var k=0; k<carddata.length; k++){
-			if (carddata[k].charAt(0) == '"'){
-				for (var kk=k+1; kk<carddata.length; kk++){
-					carddata[k] += "," + carddata[kk];
+	var keys;
+	etg.iterSplit(file, "\n", function(line){
+		if (!keys){
+			keys = line.split(",")
+		}else{
+			var carddata = line.split(","), cardinfo = {};
+			for(var k=0; k<carddata.length; k++){
+				if (carddata[k].charAt(0) == '"'){
+					for (var kk=k+1; kk<carddata.length; kk++){
+						carddata[k] += "," + carddata[kk];
+					}
+					cardinfo[keys[k]] = carddata[k].slice(1, carddata[k].length-1).replace(/""/g, '"');
+					break;
+				}else{
+					cardinfo[keys[k]] = carddata[k];
 				}
-				cardinfo[keys[k]] = carddata[k].slice(1, carddata[k].length-1).replace(/""/g, '"');
-				break;
+			}
+			var cardcode = cardinfo.Code;
+			if (cardcode in exports.Codes){
+				console.log(cardcode + " duplicate " + carddata[1] + " " + exports.Codes[cardcode].name);
 			}else{
-				cardinfo[keys[k]] = carddata[k];
+				exports.Codes[cardcode] = new etg.Card(type, cardinfo);
+				if (cardcode < "6qo") exports[carddata[1].replace(/\W/g, "")] = exports.Codes[cardcode];
+				cardinfo.Code = etgutil.asShiny(cardcode, true);
+				exports.Codes[cardinfo.Code] = new etg.Card(type, cardinfo);
 			}
 		}
-		var cardcode = cardinfo.Code;
-		if (cardcode in exports.Codes){
-			console.log(cardcode + " duplicate " + carddata[1] + " " + exports.Codes[cardcode].name);
-		}else{
-			exports.Codes[cardcode] = new etg.Card(type, cardinfo);
-			if (cardcode < "6qo") exports[carddata[1].replace(/\W/g, "")] = exports.Codes[cardcode];
-			cardinfo.Code = etgutil.asShiny(cardcode, true);
-			exports.Codes[cardinfo.Code] = new etg.Card(type, cardinfo);
-		}
-	}
+	});
 }
 exports.parseTargeting = function(file){
-	var csv = file.split("\n");
-	csv.forEach(function(line){
-		var keypair = line.split(",");
-		exports.Targeting[keypair[0]] = getTargetFilter(keypair[1]);
+	etg.iterSplit(file, "\n", function(line){
+		var cidx = line.indexOf(",");
+		exports.Targeting[line.substr(0, cidx)] = getTargetFilter(line.substr(cidx+1));
 	});
 }
 function getTargetFilter(str){
