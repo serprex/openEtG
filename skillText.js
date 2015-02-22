@@ -15,6 +15,7 @@ var data = {
 	atk2hp:"Target's largeness becomes equal to its strength",
 	axedraw:"Increment damage per draw. Reset on attack",
 	bblood:"Target creature gains 0|20 & is delayed 6 turns",
+	becomearctic:"Become Arctic if frozen",
 	beguile:"Steal target creature until next turn",
 	blackhole:"Absorb 3 quanta per element from target player. Heal 1 life per absorbed quantum",
 	bless:"Target gains 3|3",

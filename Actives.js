@@ -90,6 +90,9 @@ bblood:function(c,t){
 	t.buffhp(20);
 	t.delay(6);
 },
+becomearctic:function(c,t){
+	this.transform(this.card.as(Cards.ArcticSquid));
+},
 beguile:function(c,t){
 	t.remove();
 	t.owner = t.owner.foe;
