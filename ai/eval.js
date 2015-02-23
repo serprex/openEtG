@@ -165,7 +165,7 @@ var ActivesValues = Object.freeze({
 		return c instanceof etg.CardInstance ? -c.card.attack/4 : ((atk = c.trueatk()) < 0)-(atk > 0);
 	},
 	hasten:function(c){
-		return c.owner.deck.length/4;
+		return Math.min(c.owner.deck.length/4, 10);
 	},
 	hatch:3,
 	heal:8,
@@ -210,9 +210,9 @@ var ActivesValues = Object.freeze({
 		return c.owner.foe.neuro?1:5;
 	},
 	nightmare:function(c){
-		var val = 13-c.owner.foe.hand.length/2;
+		var val = 24-c.owner.foe.hand.length;
 		c.owner.hand.forEach(function(inst){
-			if (inst.card.isOf(Cards.Nightmare)) val--;
+			if (inst.card.isOf(Cards.Nightmare)) val /= 2;
 		});
 		return val;
 	},
@@ -637,6 +637,7 @@ module.exports = function(game) {
 			player.hand.pop();
 			player.deck.push(code);
 		}
+		pscore += Math.min(8-player.hand.length, player.drawpower)*3;
 		pscore += Math.sqrt(player.hp)*4;
 		if (player.status.poison) pscore -= player.status.poison;
 		if (player.precognition) pscore += .5;

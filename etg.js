@@ -132,6 +132,7 @@ function Player(game){
 	this.nova = 0;
 	this.maxhp = this.hp = 100;
 	this.deckpower = 1;
+	this.drawpower = 1;
 	this.hand = [];
 	this.deck = [];
 	this.creatures = new Array(23);
@@ -681,7 +682,7 @@ Player.prototype.endturn = function(discard) {
 	this.nova = 0;
 	this.flatline = this.silence = false;
 	this.foe.precognition = this.foe.sanctuary = false;
-	for (var i = this.foe.drawpower !== undefined ? this.foe.drawpower : 1; i > 0; i--) {
+	for (var i = this.foe.drawpower; i > 0; i--) {
 		this.foe.drawcard(true);
 	}
 	this.game.turn = this.foe;
