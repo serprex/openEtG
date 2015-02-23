@@ -81,8 +81,13 @@ exports.domText = function(text){
 			if (this.textcache == text) return;
 			this.textcache = text;
 			while (this.firstChild) this.firstChild.remove();
-			var pieces = text.replace(/\|/g, " | ").split(/(\d\d?:\d\d?|\$|\n)/);
-			pieces.forEach(function(piece){
+			text = text.replace(/\|/g, " | ");
+			var sep = /\d\d?:\d\d?|\$|\n/g, reres, lastindex = 0;
+			while (reres = sep.exec(text)){
+				var piece = reres[0];
+				if (reres.index != lastindex){
+					this.appendChild(document.createTextNode(text.slice(lastindex, reres.index)));
+				}
 				if (piece == "\n") {
 					this.appendChild(document.createElement("br"));
 				}else if (piece == "$") {
@@ -104,10 +109,12 @@ exports.domText = function(text){
 						sp.className = "eicon e"+parse[1];
 						this.appendChild(sp);
 					}
-				} else if (piece) {
-					this.appendChild(document.createTextNode(piece));
 				}
-			}, this);
+				lastindex = reres.index + piece.length;
+			}
+			if (lastindex != text.length){
+				this.appendChild(document.createTextNode(text.slice(lastindex)));
+			}
 		}
 	});
 	ele.text = text;
@@ -313,9 +320,6 @@ function CardSelector(dom, cardmouseover, cardclick, maxedIndicator, filterboth)
 			var sprite = new PIXI.Sprite(gfx.nopic);
 			sprite.position.set(100 + i * 133, 272 + j * 19);
 			var sprcount = exports.domText("");
-			sprcount.style.fontSize = "12px";
-			sprcount.style.pointerEvents = "none";
-			sprcount.style.color = "black";
 			dom.push([sprite.position.x + 100, sprite.position.y, sprcount]);
 			sprite.countText = sprcount;
 			this.addChild(sprite);
@@ -386,11 +390,7 @@ CardSelector.prototype.renderColumns = function(){
 					shinyAmount = scode in this.cardpool ? this.cardpool[scode] - ((this.cardminus && this.cardminus[scode]) || 0) : 0;
 				}
 				spr.countText.text = cardAmount + (shinyAmount ? "/"+shinyAmount:"");
-				if (this.maxedIndicator && card.type != etg.PillarEnum && cardAmount >= 6) {
-					spr.countText.style.backgroundColor = "#" + ui.elecols[cardAmount >= 12 ? etg.Chroma : etg.Light].toString(16);
-					spr.countText.style.width = "33px";
-					spr.countText.style.height = "20px";
-				}else spr.countText.style.backgroundColor = "transparent";
+				spr.countText.className = "selectortext"+(this.maxedIndicator && card.type != etg.PillarEnum && cardAmount >= 6 ?" "+(cardAmount >= 12 ? "beigeback" : "lightback"):"");
 				spr.countText.style.display = "inline";
 			}
 		}

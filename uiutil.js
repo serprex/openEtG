@@ -95,8 +95,6 @@ function getTextImage(text, size, color, bgcolor, width) {
 			doc.addChild(c);
 		}
 	}
-	text = text.replace(/\|/g, " | ");
-	var decklink = /\d\d?:\d\d?|\n/g, reres, lastindex = 0;
 	function pushText(text){
 		var txt = new PIXI.Sprite(gfx.Text(text, size, color));
 		if (!width || x + txt.width < width){
@@ -112,7 +110,9 @@ function getTextImage(text, size, color, bgcolor, width) {
 			});
 		}
 	}
-	while (reres = decklink.exec(text)){
+	text = text.replace(/\|/g, " | ");
+	var sep = /\d\d?:\d\d?|\n/g, reres, lastindex = 0;
+	while (reres = sep.exec(text)){
 		var piece = reres[0];
 		if (reres.index != lastindex){
 			pushText(text.slice(lastindex, reres.index));

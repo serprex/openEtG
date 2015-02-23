@@ -80,23 +80,17 @@ module.exports = function(arena, acard, startempty) {
 	}
 	function incrpool(code, count){
 		if (code in Cards.Codes && (!arena || (!Cards.Codes[code].isOf(Cards.Codes[acard].asUpped(false).asShiny(false))) && (arena.lv || !Cards.Codes[code].upped))){
-			if (code in cardpool) {
-				cardpool[code] += count;
-			} else {
-				cardpool[code] = count;
-			}
+			cardpool[code] = (cardpool[code] || 0) + count;
 		}
 	}
-	var saveToQuick = false;
 	function quickDeck(number) {
 		return function() {
-			if (saveToQuick) {
+			if (quickNum.classList.contains("selectedbutton")) {
 				saveButton();
 				sock.userEmit("changequickdeck", { number: number, name: tname.textcache });
 				sock.user.quickdecks[number] = tname.textcache;
 				fixQuickButtons();
-				saveToQuick = false;
-				quickNum.className = quickNum.className.replace(/(?:^|\s)selectedbutton(?!\S)/g, '')
+				quickNum.classList.remove("selectedbutton");
 			}
 			else {
 				loadDeck(sock.user.quickdecks[number]);
@@ -104,15 +98,11 @@ module.exports = function(arena, acard, startempty) {
 		}
 	}
 	function saveTo() {
-		saveToQuick ^= true;
-		if (saveToQuick) this.className += " selectedbutton"
-		else this.className = this.className.replace(/(?:^|\s)selectedbutton(?!\S)/g, '')
-
+		this.classList.toggle("selectedbutton");
 	}
 	function fixQuickButtons(){
 		for (var i = 0;i < 10;i++) {
-			if (sock.user.selectedDeck == sock.user.quickdecks[i]) buttons[i].className += " selectedbutton";
-			else buttons[i].className = buttons[i].className.replace(/(?:^|\s)selectedbutton(?!\S)/g, '')
+			buttons[i].classList[sock.user.selectedDeck == sock.user.quickdecks[i]?"add":"remove"]("selectedbutton");
 		}
 	}
 	function saveDeck(force){
@@ -259,9 +249,9 @@ module.exports = function(arena, acard, startempty) {
 		(function(_i) {
 			dom.push([100 + i * 32, 234,
 				px.domEButton(i, function() {
-				editormark = _i;
+					editormark = _i;
 					marksprite.className = "Eicon E"+_i;
-				updateField();
+					updateField();
 				})
 			]);
 		})(i);
