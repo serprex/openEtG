@@ -15,7 +15,7 @@ ablaze:function(c,t){
 abomination:function(c,t,data){
 	if (data.tgt == c && data.active == Actives.mutation){
 		Actives.improve(c);
-		data.tgt = true;
+		data.evade = true;
 	}
 },
 acceleration:function(c,t){
@@ -417,7 +417,7 @@ earthquake:function(c,t){
 elf:function(c,t,data){
 	if (data.tgt == c && data.active == Actives.cseed){
 		t.transform(t.card.as(Cards.FallenElf));
-		data.tgt = true;
+		data.evade = true;
 	}
 },
 empathy:function(c,t){
@@ -595,7 +595,7 @@ fractal:function(c,t){
 freeevade:function(c,t, data){
 	var tgt = data.tgt;
 	if (tgt instanceof etg.Creature && tgt.owner == c.owner && tgt.owner != t.owner && tgt.status.airborne && !tgt.status.frozen && c.owner.rng() > .8){
-		data.tgt = true;
+		data.evade = true;
 	}
 },
 freeze:function(c,t){
@@ -996,7 +996,7 @@ momentum:function(c,t){
 mummy:function(c,t,data){
 	if (data.tgt == c && data.active == Actives.rewind){
 		t.transform(t.card.as(Cards.Pharaoh));
-		data.tgt = true;
+		data.evade = true;
 	}
 },
 mutant:function(c,t){
@@ -1220,7 +1220,7 @@ protectonce:function(c,t, data){
 	if (c === data.tgt && c.owner != t.owner){
 		c.rmactive("prespell", "protectonce");
 		c.rmactive("spelldmg", "protectoncedmg");
-		data.tgt = true;
+		data.evade = true;
 	}
 },
 protectoncedmg:function(c,t){
@@ -1492,7 +1492,7 @@ siphonstrength:function(c,t){
 skeleton:function(c,t,data){
 	if (data.tgt == c && data.active == Actives.rewind){
 		Actives.hatch(c);
-		data.tgt = true;
+		data.evade = true;
 	}
 },
 skyblitz:function(c,t){
@@ -1839,7 +1839,7 @@ evade50:function(c,t){
 	return c.owner.rng() < .5;
 },
 evadespell:function(c,t, data){
-	if (t instanceof etg.CardInstance && data.tgt == c) data.tgt = true;
+	if (t instanceof etg.CardInstance && data.tgt == c) data.evade = true;
 },
 firewall:function(c,t){
 	Effect.mkText("-1", t);

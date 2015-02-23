@@ -1100,10 +1100,12 @@ Thing.prototype.canactive = function() {
 Thing.prototype.castSpell = function(t, active, nospell){
 	var data = {tgt: t, active: active};
 	this.procactive("prespell", data);
-	if (data.tgt !== true){
+	if (data.evade){
+		if (t) Effect.mkText("Evade", t);
+	}else{
 		active(this, data.tgt);
 		if (!nospell) this.procactive("spell", data.tgt);
-	}else if (t) Effect.mkText("Evade", t);
+	}
 }
 Thing.prototype.useactive = function(t) {
 	this.usedactive = true;
