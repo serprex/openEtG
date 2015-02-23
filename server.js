@@ -16,7 +16,7 @@ var app = require("connect")().
 	use("/deck", require("./srv/deckredirect")()).
 	use("/auth", require("./srv/loginauth")(db, users)).
 	use("/code", require("./srv/codesmith")(db));
-var io = require("engine.io")(app.listen(13602));
+var wss = new (require("ws").Server)({server:app.listen(13602)});
 var etgutil = require("./etgutil");
 var userutil = require("./userutil");
 var etg = require("./etg");
@@ -61,16 +61,16 @@ function activeUsers() {
 			activeusers.push(username);
 		}
 	}
-	var otherCount = io.clientsCount - userCount;
+	var otherCount = wss.clients.length - userCount;
 	activeusers.push(otherCount + " other connection" + (otherCount == 1 ? "" : "s"));
 	return activeusers;
 }
 function genericChat(socket, data){
 	data.x = "chat";
 	var msg = JSON.stringify(data);
-	for (var id in io.clients){
-		io.clients[id].send(msg);
-	}
+	wss.clients.forEach(function(sock){
+		sock.send(msg);
+	});
 }
 function getAgedHp(hp, age){
 	var curhp = age > 1 ? hp - (1<<Math.min(age, 9)-1) : hp;
@@ -115,15 +115,15 @@ var userEvents = {
 	}),
 	modmute:modf(function(data, user){
 		var msg = JSON.stringify({x:"mute", m:data.m});
-		for (var id in io.clients){
-			io.clients[id].send(msg);
-		}
+		wss.clients.forEach(function(sock){
+			sock.send(msg);
+		});
 	}),
 	modclear:modf(function(data, user){
 		var msg = JSON.stringify({x:"clear"});
-		for (var id in io.clients){
-			io.clients[id].send(msg);
-		}
+		wss.clients.forEach(function(sock){
+			sock.send(msg);
+		});
 	}),
 	inituser:function(data, user) {
 		var starters = require("./srv/starter");
@@ -632,7 +632,7 @@ var sockEvents = {
 		}
 	},
 };
-io.on("connection", function(socket) {
+wss.on("connection", function(socket) {
 	socket.on("close", function(){
 		for(var key in rooms){
 			if (rooms[key] == this){

@@ -2,15 +2,21 @@ var chat = require("./chat");
 var etgutil = require("./etgutil");
 var options = require("./options");
 var userutil = require("./userutil");
-var socket = eio({hostname: location.hostname, port: 13602});
-socket.on("close", function(){
-	require("./chat")("Reconnecting in 99ms");
-	setTimeout(socket.open.bind(socket), 99);
-});
-socket.on("open", function(){
+var socket = new WebSocket("ws://"+location.hostname+":13602");
+socket.onopen = function(){
 	if (options.offline || options.wantpvp || options.afk) exports.emit("chatus", {hide: !!options.offline, wantpvp: !!options.wantpvp, afk: !!options.afk});
 	chat("Connected");
-});
+}
+socket.onclose = function reconnect(){
+	require("./chat")("Reconnecting in 99ms");
+	setTimeout(function(){
+		var oldsock = socket;
+		socket = new WebSocket("ws://"+location.hostname+":13602");
+		socket.onopen = oldsock.onopen;
+		socket.onclose = oldsock.onclose;
+		socket.onmessage = oldsock.onmessage;
+	}, 99);
+}
 exports.et = socket;
 exports.user = undefined;
 exports.userEmit = function(x, data) {

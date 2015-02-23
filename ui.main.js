@@ -90,13 +90,13 @@
 		},
 	};
 	var sock = require("./sock");
-	sock.et.on("message", function(data){
-		data = JSON.parse(data);
+	sock.et.onmessage = function(msg){
+		var data = JSON.parse(msg.data);
 		var func = sockEvents[data.x] || px.getCmd(data.x);
 		if (func){
 			func.call(this, data);
 		}
-	});
+	}
 	require("./httpcards")(function(){
 		if (options.preart) sock.emit("cardart");
 	});
