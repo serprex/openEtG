@@ -1807,26 +1807,30 @@ blockwithcharge:function(c,t){
 	return true;
 },
 chaos:function(c,t){
-	var randomchance = c.owner.rng();
-	if (randomchance < .3) {
-		if (t instanceof etg.Creature){
-			Actives.cseed(c, t);
-		}
-	}else return c.card.upped && randomchance < .5;
+	if (!t.status.ranged){
+		var randomchance = c.owner.rng();
+		if (randomchance < .3) {
+			if (t instanceof etg.Creature){
+				Actives.cseed(c, t);
+			}
+		}else return c.card.upped && randomchance < .5;
+	}
 },
 cold:function(c,t){
-	if (c.owner.rng()<.3){
+	if (!t.status.ranged && c.owner.rng()<.3){
 		t.freeze(3);
 	}
 },
 despair:function(c,t){
-	var chance = c.owner.creatures.reduce(function(chance, cr){
-		return cr && (cr.hasactive("auto", "siphon") || cr.hasactive("auto", "darkness")) ? chance+1 : chance;
-	}, 0);
-	if (c.owner.rng() < 1.4-Math.pow(.95, chance)){
-		Effect.mkText("-1|-1", t);
-		t.atk--;
-		t.dmg(1);
+	if (!t.status.ranged){
+		var chance = c.owner.creatures.reduce(function(chance, cr){
+			return cr && (cr.hasactive("auto", "siphon") || cr.hasactive("auto", "darkness")) ? chance+1 : chance;
+		}, 0);
+		if (c.owner.rng() < 1.4-Math.pow(.95, chance)){
+			Effect.mkText("-1|-1", t);
+			t.atk--;
+			t.dmg(1);
+		}
 	}
 },
 evade100:function(c,t){
@@ -1842,8 +1846,10 @@ evadespell:function(c,t, data){
 	if (t instanceof etg.CardInstance && data.tgt == c) data.evade = true;
 },
 firewall:function(c,t){
-	Effect.mkText("-1", t);
-	t.dmg(1);
+	if (!t.status.ranged){
+		Effect.mkText("-1", t);
+		t.dmg(1);
+	}
 },
 skull:function(c,t){
 	if (t instanceof etg.Creature && !t.card.isOf(Cards.Skeleton)) {
@@ -1858,13 +1864,13 @@ skull:function(c,t){
 	}
 },
 slow:function(c,t){
-	t.delay(2);
+	if (!t.status.ranged) t.delay(2);
 },
 solar:function(c,t){
 	c.owner.spend(etg.Light, -1);
 },
 thorn:function(c,t){
-	if (c.owner.rng() < .75){
+	if (!t.status.ranged && c.owner.rng() < .75){
 		t.addpoison(1);
 	}
 },

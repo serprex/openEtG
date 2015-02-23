@@ -870,7 +870,7 @@ Creature.prototype.addpoison = function(x) {
 		}
 	}
 }
-Weapon.prototype.buffhp = function(){ return this.owner.buffhp.apply(this.owner, arguments) }
+Weapon.prototype.buffhp = function(){}
 Player.prototype.buffhp = Creature.prototype.buffhp = function(x) {
 	if (!(this instanceof Player) || this.maxhp < 500) {
 		this.maxhp += x;
