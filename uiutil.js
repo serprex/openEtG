@@ -104,7 +104,7 @@ function getTextImage(text, size, color, bgcolor, width) {
 				block.push(word);
 				if (width && x + ctx.measureText(block.join(" ")).width >= width){
 					block.pop();
-					textxy.push([block.join(" "), x, y+size]);
+					textxy.push(block.join(" "), x, y+size);
 					block.length = 1;
 					block[0] = word;
 					x = 0;
@@ -114,7 +114,7 @@ function getTextImage(text, size, color, bgcolor, width) {
 		});
 		if (block.length){
 			var blocktext = block.join(" ");
-			textxy.push([blocktext, x, y+size]);
+			textxy.push(blocktext, x, y+size);
 			x += ctx.measureText(blocktext).width;
 			if (x >= width){
 				x = 0;
@@ -163,7 +163,7 @@ function getTextImage(text, size, color, bgcolor, width) {
 	canvas.height = rtex.height;
 	ctx.font = font;
 	ctx.fillStyle = color || "black";
-	textxy.forEach(function(x){ctx.fillText(x[0],x[1],x[2])});
+	for(var i=0; i<textxy.length; i+=3) ctx.fillText(textxy[i], textxy[i+1], textxy[i+2]);
 	doc.addChild(new PIXI.Sprite(new PIXI.Texture(new PIXI.BaseTexture(canvas))));
 	rtex.render(doc);
 	return tximgcache[key] = rtex;
