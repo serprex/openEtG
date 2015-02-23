@@ -358,7 +358,7 @@ module.exports = function(nymph) {
 					preloadart = makeCheck("Preload art", null, "preart"),
 					hideRightpane = makeCheck("Hide rightpane", hideRightpaneChange, "hideRightpane"),
 					printstats = makeCheck("Print stats", null, "stats"),
-					hideCostIcon = makeCheck("Hide cost icon", gfx.clearCaches, "hideCostIcon"),
+					hideCostIcon = makeCheck("Hide cost icon", gfx.refreshCaches, "hideCostIcon"),
 					disableTut = makeCheck("Disable tutorial", null, "disableTut");
 				changePass.type = "password";
 				changePass.addEventListener("keydown", function(e){

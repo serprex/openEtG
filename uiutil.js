@@ -63,7 +63,7 @@ function tgtToPos(t) {
 		return cardPos(t.owner == t.owner.game.player2, t.owner.hand.indexOf(t));
 	} else console.log("Unknown target");
 }
-var tximgcache = typeof WeakMap == "undefined" ? {} : new WeakMap();
+var tximgcache = {};
 function getTextImage(text, size, color, bgcolor, width) {
 	if (!gfx.loaded || !text) return gfx.nopic;
 	if (bgcolor === undefined) bgcolor = "";

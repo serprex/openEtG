@@ -216,7 +216,7 @@ var ActivesValues = Object.freeze({
 		});
 		return val;
 	},
-	nova:6,
+	nova:4,
 	nova2:6,
 	nullspell:4,
 	nymph:7,
@@ -313,8 +313,8 @@ var ActivesValues = Object.freeze({
 	},
 	virusplague:1,
 	void:5,
-	quantagift:6,
-	web: 2,
+	quantagift:4,
+	web:1,
 	wind:function(c){
 		return c instanceof etg.CardInstance || !c.status.storedAtk ? 0 : c.status.storedAtk/2 - 2;
 	},

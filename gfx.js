@@ -193,9 +193,16 @@ function getWeaponShieldImage(code) {
 	return getInstImage(code, 5/8, wsimgcache);
 }
 var artpool;
-exports.clearCaches = function() {
-	caimgcache = {};
-	artcache = {};
+exports.refreshCaches = function() {
+	for(var code in caimgcache){
+		caimgcache[code].destroy(true);
+		delete caimgcache[code];
+	}
+	for(var code in artcache){
+		getArtImage(code, function(art){
+			return artcache[code] = makeArt(Cards.Codes[code], art, artcache[code]);
+		});
+	}
 }
 exports.preloadCardArt = function(art){
 	var pool = {};
