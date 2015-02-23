@@ -115,6 +115,7 @@ var ActivesValues = Object.freeze({
 	duality:4,
 	earth:1,
 	earthquake:5,
+	eatspell:3,
 	empathy:function(c){
 		return c.owner.countcreatures();
 	},
