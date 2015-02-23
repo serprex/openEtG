@@ -148,7 +148,8 @@ function getTextImage(text, size, color, bgcolor, width) {
 			}else{
 				var spr = new PIXI.Sprite(icon);
 				spr.scale.set(size/32, size/32);
-				pushChild(new PIXI.Sprite(gfx.Text(num, size, color)), spr);
+				pushText(num.toString());
+				pushChild(spr);
 			}
 		}
 		lastindex = reres.index + piece.length;
