@@ -95,19 +95,31 @@ function getTextImage(text, size, color, bgcolor, width) {
 			doc.addChild(c);
 		}
 	}
+	var canvas = document.createElement("canvas"), ctx = canvas.getContext("2d");
+	var textxy = [], font = ctx.font = size + "px Dosis";
 	function pushText(text){
-		var txt = new PIXI.Sprite(gfx.Text(text, size, color));
-		if (!width || x + txt.width < width){
-			pushChild(txt);
-		}else{
-			etg.iterSplit(text, " ", function(word){
-				if (word){
-					pushChild(new PIXI.Sprite(gfx.Text(word, size, color)));
-					if (x){
-						x += 3;
-					}
+		var block = [];
+		etg.iterSplit(text, " ", function(word){
+			if (word){
+				block.push(word);
+				if (width && x + ctx.measureText(block.join(" ")).width >= width){
+					block.pop();
+					textxy.push([block.join(" "), x, y+size]);
+					block.length = 1;
+					block[0] = word;
+					x = 0;
+					y += h;
 				}
-			});
+			}
+		});
+		if (block.length){
+			var blocktext = block.join(" ");
+			textxy.push([blocktext, x, y+size]);
+			x += ctx.measureText(blocktext).width;
+			if (x >= width){
+				x = 0;
+				y += h;
+			}
 		}
 	}
 	text = text.replace(/\|/g, " | ");
@@ -147,6 +159,12 @@ function getTextImage(text, size, color, bgcolor, width) {
 		bg.beginFill(bgcolor);
 		bg.drawRect(0, 0, rtex.width, rtex.height);
 	}
+	canvas.width = rtex.width;
+	canvas.height = rtex.height;
+	ctx.font = font;
+	ctx.fillStyle = color || "black";
+	textxy.forEach(function(x){ctx.fillText(x[0],x[1],x[2])});
+	doc.addChild(new PIXI.Sprite(new PIXI.Texture(new PIXI.BaseTexture(canvas))));
 	rtex.render(doc);
 	return tximgcache[key] = rtex;
 }

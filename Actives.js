@@ -1217,7 +1217,7 @@ protectall:function(c,t){
 	protect(c.owner.shield);
 },
 protectonce:function(c,t, data){
-	if (c === data.tgt && c.owner != t.owner){
+	if (data.tgt == c && c.owner != t.owner){
 		c.rmactive("prespell", "protectonce");
 		c.rmactive("spelldmg", "protectoncedmg");
 		data.evade = true;
