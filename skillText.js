@@ -276,7 +276,7 @@ var data = {
 	throwrock:["Deal 3 spell damage to target creature, then shuffle Throw Rock into target's deck",
 		"Deal 4 spell damage to target creature, then shuffle Throw Rock into target's deck"],
 	tick:["Takes 1 damage. If damage results in death, deal 18 damage to foe", "Takes 3 damage. If damage results in death, deal 4 damage to all foe's creatures"],
-	tidalhealing:"Own aquatic creatures without Regen gain Regen",
+	tidalhealing:"Own aquatic creatures gain \"Apply 1 purify to owner on hit. Throttled\" without",
 	tornado:["Randomly reshuffle 2 of foe's permanents & one of own into either deck",
 		"Randomly reshuffle 2 of foe's permanents into either deck"],
 	trick:"Swap target creature with a different creature from deck",

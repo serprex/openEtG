@@ -1623,7 +1623,7 @@ tick:function(c,t){
 },
 tidalhealing:function(c,t){
 	c.owner.masscc(c, function(c, t){
-		if (!t.hasactive("auto", "regen")) t.addactive("auto", Actives.regen);
+		if (!t.hasactive("hit", "regen")) t.addactive("hit", Actives.regen);
 	});
 },
 tornado:function(c,t){
