@@ -14,7 +14,6 @@ var app = require("connect")().
 	use("/Cards", require("./srv/cardredirect")()).
 	use("/speed", require("./srv/speed")()).
 	use("/deck", require("./srv/deckredirect")()).
-	use("/auth", require("./srv/loginauth")(db, users)).
 	use("/code", require("./srv/codesmith")(db));
 var wss = new (require("ws").Server)({server:app.listen(13602)});
 var etgutil = require("./etgutil");
@@ -36,7 +35,7 @@ setInterval(function(){
 	for(var u in users){
 		if (!(u in usersock)){
 			delete users[u];
-		}else if (usersock[u].readyState == "closed"){
+		}else if (usersock[u].readyState == 3){
 			delete usersock[u];
 			delete users[u];
 		}
@@ -51,7 +50,7 @@ function activeUsers() {
 	var activeusers = [], userCount = 0;
 	for (var username in usersock) {
 		var sock = usersock[username];
-		if (sock && sock.readyState == "open"){
+		if (sock && sock.readyState == 1){
 			if (sock.id in sockinfo){
 				userCount++;
 				if (sockinfo[sock.id].offline) continue;
@@ -103,7 +102,6 @@ function modf(func){
 var echoEvents = { endturn: true, cast: true, foeleft: true, mulligan: true, cardchosen: true };
 var guestban = false;
 var userEvents = {
-	usernop:function(){},
 	modadd:modf(function(data, user){
 		db.sadd("Mods", data.m);
 	}),
@@ -120,7 +118,7 @@ var userEvents = {
 		});
 	}),
 	modclear:modf(function(data, user){
-		var msg = JSON.stringify({x:"clear"});
+		var msg = '{"x":"clear"}';
 		wss.clients.forEach(function(sock){
 			sock.send(msg);
 		});
@@ -517,6 +515,7 @@ var userEvents = {
 	userEvents[event] = userutil[event];
 });
 var sockEvents = {
+	login:require("./srv/loginauth")(db, users, sockEmit, usersock),
 	guestchat:function(data) {
 		if (guestban) return;
 		data.guest = true;
@@ -543,7 +542,6 @@ var sockEvents = {
 	},
 	pvpwant:function(data) {
 		var pendinggame=rooms[data.room];
-		console.log(this.id + ": " + (pendinggame?pendinggame.id:"-"));
 		sockinfo[this.id].deck = data.deck;
 		sockinfo[this.id].pvpstats = { hp: data.hp, markpower: data.mark, deckpower: data.deck, drawpower: data.draw };
 		if (this == pendinggame){

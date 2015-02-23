@@ -6,8 +6,8 @@ var etg = require("../etg");
 var aiDecks = require("../Decks");
 var etgutil = require("../etgutil");
 var userutil = require("../userutil");
-module.exports = function(db, users){
-	function loginRespond(res, servuser, pass, authkey){
+module.exports = function(db, users, sockEmit, usersock){
+	function loginRespond(socket, servuser, pass, authkey){
 		if(!servuser.name){
 			servuser.name = servuser.auth;
 		}
@@ -17,17 +17,14 @@ module.exports = function(db, users){
 		}
 		function postHash(err, key){
 			if (err){
-				res.writeHead(503);
-				res.end();
+				sockEmit(socket, "login", {err:err.message});
 				return;
 			}
 			key = key.toString("base64");
 			if (!servuser.auth){
 				servuser.auth = key;
 			}else if (servuser.auth != key){
-				console.log("Failed login "+servuser.name);
-				res.writeHead(404);
-				res.end();
+				sockEmit(socket, "login", {err:"Incorrect password"});
 				return;
 			}
 			sutil.useruser(db, servuser, function(user){
@@ -49,8 +46,8 @@ module.exports = function(db, users){
 					servuser.dailydg = user.dailydg = Math.floor(Math.random() * aiDecks.demigod.length);
 				}
 				if (user.name != "test") db.zadd("wealth", user.gold + userutil.calcWealth(user.pool), user.name);
-				res.writeHead(200, {"Content-Type": "application/json"});
-				res.end(JSON.stringify(user));
+				usersock[user.name] = socket;
+				sockEmit(socket, "login", user);
 			});
 		}
 		if (authkey){
@@ -59,20 +56,19 @@ module.exports = function(db, users){
 			crypto.pbkdf2(pass, servuser.salt, parseInt(servuser.iter), 64, postHash);
 		}else postHash(null, servuser.name);
 	}
-	function loginAuth(req, res, next){
-		var params = qstring.parse(req.url.slice(2));
-		var name = (params.u || "").trim();
+	function loginAuth(data){
+		var name = (data.u || "").trim();
 		if (!name.length){
-			res.writeHead(404);
-			res.end();
+			sockEmit(this, "login", {err:"No name"});
 			return;
 		}else if (name in users){
-			loginRespond(res, users[name], params.p, params.a);
+			loginRespond(this, users[name], data.p, data.a);
 		}else{
+			var socket = this;
 			db.hgetall("U:"+name, function (err, obj){
 				users[name] = obj || {name: name};
 				sutil.prepuser(users[name]);
-				loginRespond(res, users[name], params.p, params.a);
+				loginRespond(socket, users[name], data.p, data.a);
 			});
 		}
 	}

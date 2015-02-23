@@ -14,38 +14,11 @@ module.exports = function(){
 	}
 	function loginClick(auth) {
 		if (!sock.user && options.username) {
+			var data = {u:options.username}
 			if (typeof auth !== "string"){
-				var pass = password.value;
-				auth = pass.length ? "&p=" + encodeURIComponent(pass) : "";
-			}else auth = "&a=" + encodeURIComponent(auth);
-			var xhr = new XMLHttpRequest();
-			xhr.open("POST", "auth?u=" + encodeURIComponent(options.username) + auth, true);
-			xhr.onreadystatechange = function() {
-				if (this.readyState == 4) {
-					if (this.status == 200) {
-						sock.user = JSON.parse(this.responseText);
-						if (!sock.user) {
-							chat("No user");
-						} else {
-							if (!sock.user.accountbound && !sock.user.pool) {
-								require("./ElementSelect")();
-							} else {
-								sock.prepuser();
-								sock.userEmit("usernop");
-								if (gfx.loaded) require("./MainMenu")();
-							}
-							if (options.remember && typeof localStorage !== "undefined"){
-								localStorage.auth = sock.user.auth;
-							}
-						}
-					} else if (this.status == 404) {
-						chat("Incorrect password");
-					} else {
-						chat("Error verifying password");
-					}
-				}
-			}
-			xhr.send();
+				if (password.value) data.p = password.value;
+			}else data.a = auth;
+			sock.emit("login", data);
 		}
 	}
 	var loadingBar;
@@ -102,6 +75,27 @@ module.exports = function(){
 		[400, 200, ["Sandbox", require("./MainMenu")]],
 	];
 	if (loadingBar) dom.push([0, 568, loadingBar]);
-	px.view({logdom:dom});
+	px.view({
+		logdom:dom,
+		cmds:{
+			login:function(data){
+				if (!data.err){
+					delete data.x;
+					sock.user = data;
+					if (!sock.user.accountbound && !sock.user.pool) {
+						require("./ElementSelect")();
+					} else {
+						sock.prepuser();
+						if (gfx.loaded) require("./MainMenu")();
+					}
+					if (options.remember && typeof localStorage !== "undefined"){
+						localStorage.auth = sock.user.auth;
+					}
+				} else {
+					chat(data.err);
+				}
+			}
+		}
+	});
 	username.focus();
 }
