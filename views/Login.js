@@ -59,7 +59,10 @@ module.exports = function(){
 		}
 	});
 	if (options.remember && typeof localStorage !== "undefined"){
-		loginClick(localStorage.auth);
+		sock.et.addEventListener("open", function handler(){
+			loginClick(localStorage.auth);
+			this.removeEventListener("open", handler);
+		});
 	}
 	var tutlink = document.createElement("a");
 	tutlink.href = "forum/?topic=267"
