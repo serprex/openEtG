@@ -1807,14 +1807,12 @@ blockwithcharge:function(c,t){
 	return true;
 },
 chaos:function(c,t){
-	if (!t.status.ranged){
-		var randomchance = c.owner.rng();
-		if (randomchance < .3) {
-			if (t instanceof etg.Creature){
-				Actives.cseed(c, t);
-			}
-		}else return c.card.upped && randomchance < .5;
-	}
+	var randomchance = c.owner.rng();
+	if (randomchance < .3) {
+		if (!t.status.ranged && t instanceof etg.Creature){
+			Actives.cseed(c, t);
+		}
+	}else return c.card.upped && randomchance < .5;
 },
 cold:function(c,t){
 	if (!t.status.ranged && c.owner.rng()<.3){

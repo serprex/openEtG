@@ -8,7 +8,7 @@ socket.onopen = function(){
 	chat("Connected");
 }
 socket.onclose = function reconnect(){
-	require("./chat")("Reconnecting in 99ms");
+	chat("Reconnecting in 99ms");
 	setTimeout(function(){
 		var oldsock = socket;
 		socket = new WebSocket("ws://"+location.hostname+":13602");
