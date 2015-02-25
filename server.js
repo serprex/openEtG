@@ -1,7 +1,7 @@
 #!/usr/bin/node
 process.chdir(__dirname);
 "use strict";
-var users = {}, usersock = {}, rooms = {}, sockinfo = {};
+var users = {}, usersock = {}, rooms = {};
 var sutil = require("./srv/sutil");
 sutil.loadcards();
 var qstring = require("querystring");
@@ -15,7 +15,7 @@ var app = require("connect")().
 	use("/speed", require("./srv/speed")()).
 	use("/deck", require("./srv/deckredirect")()).
 	use("/code", require("./srv/codesmith")(db));
-var wss = new (require("ws").Server)({server:app.listen(13602)});
+var wss = new (require("ws/lib/WebSocketServer"))({server:app.listen(13602)});
 var etgutil = require("./etgutil");
 var userutil = require("./userutil");
 var etg = require("./etg");
@@ -51,12 +51,10 @@ function activeUsers() {
 	for (var username in usersock) {
 		var sock = usersock[username];
 		if (sock && sock.readyState == 1){
-			if (sock.id in sockinfo){
-				userCount++;
-				if (sockinfo[sock.id].offline) continue;
-				if (sockinfo[sock.id].afk) username += " (afk)";
-				else if (sockinfo[sock.id].wantpvp) username += "\xb6";
-			}
+			userCount++;
+			if (sock.meta.offline) continue;
+			if (sock.meta.afk) username += " (afk)";
+			else if (sock.meta.wantpvp) username += "\xb6";
 			activeusers.push(username);
 		}
 	}
@@ -312,19 +310,19 @@ var userEvents = {
 		console.log(u + " requesting " + f);
 		db.hget("D:"+u, user.selectedDeck, function(err, deck){
 			if (!deck) return;
-			sockinfo[socket.id].deck = deck;
-			sockinfo[socket.id].pvpstats = { hp: data.p1hp, markpower: data.p1markpower, deckpower: data.p1deckpower, drawpower: data.p1drawpower };
+			sock.meta.deck = deck;
+			sock.meta.pvpstats = { hp: data.p1hp, markpower: data.p1markpower, deckpower: data.p1deckpower, drawpower: data.p1drawpower };
 			var foesock = usersock[f];
-			if (foesock && foesock.id in sockinfo){
-				if (sockinfo[foesock.id].duel == u) {
-					delete sockinfo[foesock.id].duel;
+			if (foesock && foesock.readyState == 1){
+				if (foesock.meta.duel == u) {
+					delete foesock.meta.duel;
 					var seed = Math.random() * etgutil.MAX_INT;
-					sockinfo[socket.id].foe = foesock;
-					sockinfo[foesock.id].foe = socket;
-					var deck0 = sockinfo[foesock.id].deck, deck1 = sockinfo[socket.id].deck;
+					socket.meta.foe = foesock;
+					foesock.meta.foe = socket;
+					var deck0 = foesock.meta.deck, deck1 = socket.meta.deck;
 					var owndata = { seed: seed, deck: deck0, urdeck: deck1, foename:f };
 					var foedata = { flip: true, seed: seed, deck: deck1, urdeck: deck0 ,foename:u };
-					var stat = sockinfo[socket.id].pvpstats, foestat = sockinfo[foesock.id].pvpstats;
+					var stat = socket.meta.pvpstats, foestat = foesock.meta.pvpstats;
 					for (var key in stat) {
 						owndata["p1" + key] = stat[key];
 						foedata["p2" + key] = stat[key];
@@ -336,39 +334,37 @@ var userEvents = {
 					sockEmit(socket, "pvpgive", owndata);
 					sockEmit(foesock, "pvpgive", foedata);
 				} else {
-					sockinfo[socket.id].duel = f;
+					socket.meta.duel = f;
 					sockEmit(foesock, "challenge", { f:u, pvp:true });
 				}
 			}
 		});
 	},
 	canceltrade:function (data, user) {
-		var info = sockinfo[this.id];
+		var info = this.meta;
 		if (info.trade){
 			var foesock = usersock[info.trade.foe];
 			if (foesock){
 				sockEmit(foesock, "tradecanceled");
 				sockEmit(foesock, "chat", { mode: "red", msg: data.u + " has canceled the trade."});
-				if (foesock.id in sockinfo){
-					delete sockinfo[foesock.id].trade;
-				}
+				delete foesock.meta.trade;
 			}
 			delete info.trade;
 		}
 	},
 	confirmtrade:function (data, user) {
-		var u = data.u, thistrade = sockinfo[this.id].trade;
+		var u = data.u, thistrade = this.meta.trade;
 		if (!thistrade){
 			return;
 		}
 		thistrade.tradecards = data.cards;
 		thistrade.oppcards = data.oppcards;
 		var thatsock = usersock[thistrade.foe];
-		var thattrade = thatsock && sockinfo[thatsock.id] && sockinfo[thatsock.id].trade;
+		var thattrade = thatsock && thatsock.meta.trade;
 		var otherUser = users[thistrade.foe];
 		if (!thattrade || !otherUser){
 			sockEmit(this, "tradecanceled");
-			delete sockinfo[this.id].trade;
+			delete this.meta.trade;
 			return;
 		} else if (thattrade.accepted) {
 			var player1Cards = thistrade.tradecards, player2Cards = thattrade.tradecards;
@@ -385,8 +381,8 @@ var userEvents = {
 			otherUser.pool = etgutil.mergedecks(otherUser.pool, player1Cards);
 			sockEmit(this, "tradedone", { oldcards: player1Cards, newcards: player2Cards });
 			sockEmit(thatsock, "tradedone", { oldcards: player2Cards, newcards: player1Cards });
-			delete sockinfo[this.id].trade;
-			delete sockinfo[thatsock.id].trade;
+			delete this.meta.trade;
+			delete thatsock.meta.trade;
 		} else {
 			thistrade.accepted = true;
 		}
@@ -398,9 +394,9 @@ var userEvents = {
 		}
 		console.log(u + " requesting " + f);
 		var foesock = usersock[f];
-		if (foesock && foesock.id in sockinfo) {
-			sockinfo[this.id].trade = {foe: f};
-			var foetrade = sockinfo[foesock.id].trade;
+		if (foesock && foesock.readyState == 1) {
+			this.meta.trade = {foe: f};
+			var foetrade = foesock.meta.trade;
 			if (foetrade && foetrade.foe == u) {
 				sockEmit(this, "tradegive");
 				sockEmit(foesock, "tradegive");
@@ -542,19 +538,19 @@ var sockEvents = {
 	},
 	pvpwant:function(data) {
 		var pendinggame=rooms[data.room];
-		sockinfo[this.id].deck = data.deck;
-		sockinfo[this.id].pvpstats = { hp: data.hp, markpower: data.mark, deckpower: data.deck, drawpower: data.draw };
+		this.meta.deck = data.deck;
+		this.meta.pvpstats = { hp: data.hp, markpower: data.mark, deckpower: data.deck, drawpower: data.draw };
 		if (this == pendinggame){
 			return;
 		}
-		if (pendinggame && pendinggame.id in sockinfo){
+		if (pendinggame && pendinggame.readyState == 1){
 			var seed = Math.random()*etgutil.MAX_INT;
-			sockinfo[this.id].foe = pendinggame;
-			sockinfo[pendinggame.id].foe = this;
-			var deck0 = sockinfo[pendinggame.id].deck, deck1 = data.deck;
+			this.meta.foe = pendinggame;
+			pendinggame.meta.foe = this;
+			var deck0 = pendinggame.meta.deck, deck1 = data.deck;
 			var owndata = { seed: seed, deck: deck0, urdeck: deck1};
 			var foedata = { flip: true, seed: seed, deck: deck1, urdeck: deck0};
-			var stat = sockinfo[this.id].pvpstats, foestat = sockinfo[pendinggame.id].pvpstats;
+			var stat = this.meta.pvpstats, foestat = pendinggame.meta.pvpstats;
 			for (var key in stat) {
 				owndata["p1" + key] = stat[key];
 				foedata["p2" + key] = stat[key];
@@ -615,34 +611,35 @@ var sockEvents = {
 		});
 	},
 	chatus:function(data){
-		if (data.hide !== undefined) sockinfo[this.id].offline = data.hide;
-		if (data.want !== undefined) sockinfo[this.id].wantpvp = data.want;
-		if (data.afk !== undefined) sockinfo[this.id].afk = data.afk;
+		if (data.hide !== undefined) this.meta.offline = data.hide;
+		if (data.want !== undefined) this.meta.wantpvp = data.want;
+		if (data.afk !== undefined) this.meta.afk = data.afk;
 	},
 	who:function(data){
 		sockEmit(this, "chat", { mode: "red", msg: activeUsers().join(", ") });
 	},
 	challrecv:function(data){
 		var foesock = usersock[data.f];
-		if (foesock && foesock.id in sockinfo){
-			var info = sockinfo[foesock.id], foename = data.pvp ? info.duel : info.trade ? info.trade.foe : "";
+		if (foesock && foesock.readyState == 1){
+			var info = foesock.meta, foename = data.pvp ? info.duel : info.trade ? info.trade.foe : "";
 			sockEmit(foesock, "chat", { mode: "red", msg: "You have sent a " + (data.pvp ? "PvP" : "trade") + " request to " + foename + "!" });
 		}
 	},
 };
 wss.on("connection", function(socket) {
+	socket.meta = {};
 	socket.on("close", function(){
 		for(var key in rooms){
 			if (rooms[key] == this){
 				delete rooms[key];
 			}
 		}
-		var info = sockinfo[this.id];
+		var info = this.meta;
 		if (info){
 			if (info.trade){
 				var foesock = usersock[info.trade.foe];
 				if (foesock){
-					var foeinfo = sockinfo[foesock.id];
+					var foeinfo = foesock.meta;
 					if (foeinfo && foeinfo.trade && usersock[foeinfo.trade.foe] == this){
 						sockEmit(foesock, "tradecanceled");
 						delete foeinfo.trade;
@@ -650,24 +647,20 @@ wss.on("connection", function(socket) {
 				}
 			}
 			if (info.foe){
-				var foeinfo = sockinfo[info.foe.id];
+				var foeinfo = info.foe.meta;
 				if (foeinfo && foeinfo.foe == this){
 					sockEmit(info.foe, "foeleft");
 					delete foeinfo.foe;
 				}
 			}
-			delete sockinfo[this.id];
 		}
 	});
 	socket.on("message", function(rawdata){
 		var data = JSON.parse(rawdata);
 		if (!data) return;
-		if (!(this.id in sockinfo)){
-			sockinfo[this.id] = {};
-		}
 		console.log(data.u, data.x);
 		if (data.x in echoEvents){
-			var foe = sockinfo[this.id].trade ? usersock[sockinfo[this.id].trade.foe] : sockinfo[this.id].foe;
+			var foe = this.meta.trade ? usersock[this.meta.trade.foe] : this.meta.foe;
 			if (foe){
 				foe.send(rawdata);
 			}
