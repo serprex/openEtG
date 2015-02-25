@@ -14,7 +14,7 @@ ablaze:function(c,t){
 },
 abomination:function(c,t,data){
 	if (data.tgt == c && data.active == Actives.mutation){
-		Actives.improve(c);
+		Actives.improve(c, c);
 		data.evade = true;
 	}
 },
@@ -97,7 +97,7 @@ bblood:function(c,t){
 	t.delay(6);
 },
 becomearctic:function(c,t){
-	this.transform(this.card.as(Cards.ArcticSquid));
+	c.transform(c.card.as(Cards.ArcticSquid));
 },
 beguile:function(c,t){
 	t.remove();
@@ -416,7 +416,7 @@ earthquake:function(c,t){
 },
 elf:function(c,t,data){
 	if (data.tgt == c && data.active == Actives.cseed){
-		t.transform(t.card.as(Cards.FallenElf));
+		c.transform(c.card.as(Cards.FallenElf));
 		data.evade = true;
 	}
 },
@@ -995,7 +995,7 @@ momentum:function(c,t){
 },
 mummy:function(c,t,data){
 	if (data.tgt == c && data.active == Actives.rewind){
-		t.transform(t.card.as(Cards.Pharaoh));
+		c.transform(c.card.as(Cards.Pharaoh));
 		data.evade = true;
 	}
 },
