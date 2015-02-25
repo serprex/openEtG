@@ -432,7 +432,7 @@ var userEvents = {
 	chat:function (data) {
 		if (data.to) {
 			var to = data.to;
-			if (usersock[to]) {
+			if (usersock[to] && usersock[to].readyState == 1) {
 				sockEmit(usersock[to], "chat", { msg: data.msg, mode: "blue", u: data.u });
 				sockEmit(this, "chat", { msg: data.msg, mode: "blue", u: "To " + to });
 			}
@@ -638,7 +638,7 @@ wss.on("connection", function(socket) {
 		if (info){
 			if (info.trade){
 				var foesock = usersock[info.trade.foe];
-				if (foesock){
+				if (foesock && usersock[to].readyState == 1){
 					var foeinfo = foesock.meta;
 					if (foeinfo && foeinfo.trade && usersock[foeinfo.trade.foe] == this){
 						sockEmit(foesock, "tradecanceled");
@@ -661,7 +661,7 @@ wss.on("connection", function(socket) {
 		console.log(data.u, data.x);
 		if (data.x in echoEvents){
 			var foe = this.meta.trade ? usersock[this.meta.trade.foe] : this.meta.foe;
-			if (foe){
+			if (foe && foe.readyState == 1){
 				foe.send(rawdata);
 			}
 			return;
