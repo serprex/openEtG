@@ -912,16 +912,14 @@ locketshift:function(c,t){
 	c.status.mode = t instanceof etg.Player?t.mark:t.card.element;
 },
 loot:function(c,t){
-	if (c.owner == t.owner && !c.status.salvaged && c.owner.foe.permanents.length > 0){
-		Effect.mkText("Looted", c);
+	if (c.owner == t.owner && !c.hasactive("turnstart", "salvageoff")){
 		var foe = c.owner.foe, perms = foe.permanents.filter(function(x){return x && x.isMaterial()});
 		if (foe.weapon && foe.weapon.isMaterial()) perms.push(foe.weapon);
 		if (foe.shield && foe.shield.isMaterial()) perms.push(foe.shield);
 		if (perms.length){
+			Effect.mkText("Looted", c);
 			Actives.steal(c, foe.choose(perms));
-			c.status.salvaged = true;
 			c.addactive("turnstart", Actives.salvageoff);
-			return true;
 		}
 	}
 },
@@ -1194,14 +1192,12 @@ precognition:function(c,t){
 	c.owner.precognition = true;
 },
 predator:function(c,t){
-	if (c.owner.foe.hand.length > 4 && !c.status.predator){
-		c.status.predator = true;
+	if (c.owner.foe.hand.length > 4 && !c.hasactive("turnstart", "predatoroff")){
 		c.addactive("turnstart", Actives.predatoroff);
 		c.attack(false, 0);
 	}
 },
 predatoroff:function(c,t){
-	delete c.status.predator;
 	c.rmactive("turnstart", "predatoroff");
 },
 protectall:function(c,t){
@@ -1356,23 +1352,16 @@ sadism:function(c, t, dmg){
 	}
 },
 salvage:function(c, t, data){
-	if (!data.salvaged && !c.status.salvaged && c.owner.game.turn != c.owner){
+	if (!data.salvaged && !c.hasactive("turnstart", "salvageoff") && c.owner.game.turn != c.owner){
 		Effect.mkText("Salvage", c);
 		Actives["growth 1"](c);
-		c.status.salvaged = true;
 		data.salvaged = true;
 		c.owner.hand.push(new etg.CardInstance(t.card, c.owner));
 		c.addactive("turnstart", Actives.salvageoff);
 	}
 },
 salvageoff:function(c, t){
-	delete c.status.salvaged;
 	c.rmactive("turnstart", "salvageoff");
-},
-sanctuary:function(c,t){
-	c.owner.sanctuary = true;
-	Effect.mkText("+4", c);
-	c.owner.dmg(-4);
 },
 sanctify:function(c,t){
 	c.owner.sanctuary = true;
