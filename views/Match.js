@@ -396,6 +396,7 @@ function startMatch(game, foeDeck) {
 	infobox.style.fontSize = "10px";
 	infobox.style.transform = "translate(-50%,-100%)";
 	infobox.style.pointerEvents = "none";
+	infobox.style.maxWidth = "196px";
 	dom.push([0, 0, infobox]);
 	function onkeydown(e) {
 		if (e.keyCode == 32) { // spc

@@ -66,16 +66,14 @@ function tgtToPos(t) {
 var tximgcache = {};
 function getTextImage(text, size, color, bgcolor, width) {
 	if (!gfx.loaded || !text) return gfx.nopic;
-	var key = JSON.stringify(arguments);
+	var key = JSON.stringify(arguments), doc;
 	if (key in tximgcache) {
 		return tximgcache[key];
 	}
-	if (bgcolor === undefined) bgcolor = "";
-	var doc = new PIXI.Container();
-	if (bgcolor !== ""){
-		var bg = new PIXI.Graphics();
-		doc.addChild(bg);
-	}
+	if (bgcolor){
+		doc = new PIXI.Graphics();
+		doc.beginFill(bgcolor);
+	}else doc = new PIXI.Container();
 	var x = 0, y = 0, h = Math.floor(size*1.4), w = 0;
 	function pushChild(){
 		var w = 0;
@@ -161,9 +159,8 @@ function getTextImage(text, size, color, bgcolor, width) {
 	}
 	if (lastindex != text.length) pushText(text.slice(lastindex));
 	var rtex = require("./px").mkRenderTexture(width || Math.max(w, x), y+h);
-	if (bg){
-		bg.beginFill(bgcolor);
-		bg.drawRect(0, 0, rtex.width, rtex.height);
+	if (doc instanceof PIXI.Graphics){
+		doc.drawRect(0, 0, rtex.width, rtex.height);
 	}
 	canvas.width = rtex.width;
 	canvas.height = rtex.height;
