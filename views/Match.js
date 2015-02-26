@@ -460,7 +460,7 @@ function startMatch(game, foeDeck) {
 		infobox.style.display = "none";
 		if (!cloakgfx.visible){
 			foeplays.children.forEach(function(foeplay){
-				if (foeplay.card instanceof etg.Card && px.hitTest(foeplay, px.mouse)) {
+				if (foeplay.card instanceof etg.Card && px.hitTest(foeplay)) {
 					cardartcode = foeplay.card.code;
 				}
 			});
@@ -469,14 +469,14 @@ function startMatch(game, foeDeck) {
 			var pl = game.players(j);
 			if (j == 0 || game.player1.precognition) {
 				for (var i = 0;i < pl.hand.length;i++) {
-					if (px.hitTest(handsprite[j][i], px.mouse)) {
+					if (px.hitTest(handsprite[j][i])) {
 						cardartcode = pl.hand[i].card.code;
 					}
 				}
 			}
 			for (var i = 0;i < 16;i++) {
 				var pr = pl.permanents[i];
-				if (pr && (j == 0 || !cloakgfx.visible || pr.status.cloak) && px.hitTest(permsprite[j][i], px.mouse)) {
+				if (pr && (j == 0 || !cloakgfx.visible || pr.status.cloak) && px.hitTest(permsprite[j][i])) {
 					cardartcode = pr.card.code;
 					cardartx = permsprite[j][i].position.x;
 					setInfo(pr);
@@ -485,18 +485,18 @@ function startMatch(game, foeDeck) {
 			if (j == 0 || !cloakgfx.visible) {
 				for (var i = 0;i < 23;i++) {
 					var cr = pl.creatures[i];
-					if (cr && px.hitTest(creasprite[j][i], px.mouse)) {
+					if (cr && px.hitTest(creasprite[j][i])) {
 						cardartcode = cr.card.code;
 						cardartx = creasprite[j][i].position.x;
 						setInfo(cr);
 					}
 				}
-				if (pl.weapon && px.hitTest(weapsprite[j], px.mouse)) {
+				if (pl.weapon && px.hitTest(weapsprite[j])) {
 					cardartcode = pl.weapon.card.code;
 					cardartx = weapsprite[j].position.x;
 					setInfo(pl.weapon);
 				}
-				if (pl.shield && px.hitTest(shiesprite[j], px.mouse)) {
+				if (pl.shield && px.hitTest(shiesprite[j])) {
 					cardartcode = pl.shield.card.code;
 					cardartx = shiesprite[j].position.x;
 					setInfo(pl.shield);
@@ -685,7 +685,7 @@ function startMatch(game, foeDeck) {
 					fgfx.drawRect(playerOverlay[j].x - 40 + 80 * pl.hp / pl.maxhp, playerOverlay[j].y - 24, -80 * Math.min(game.expectedDamage[j], pl.hp) / pl.maxhp, 14);
 				}
 			}
-			if (px.hitTest(playerOverlay[j], px.mouse)){
+			if (px.hitTest(playerOverlay[j])){
 				setInfo(pl);
 			}else{
 				var poison = pl.status.poison, poisoninfo = (poison > 0 ? poison + " 1:2" : poison < 0 ? -poison + " 1:7" : "") + (pl.neuro ? " 1:10" : "");
