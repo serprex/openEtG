@@ -66,11 +66,11 @@ function tgtToPos(t) {
 var tximgcache = {};
 function getTextImage(text, size, color, bgcolor, width) {
 	if (!gfx.loaded || !text) return gfx.nopic;
-	if (bgcolor === undefined) bgcolor = "";
 	var key = JSON.stringify(arguments);
 	if (key in tximgcache) {
 		return tximgcache[key];
 	}
+	if (bgcolor === undefined) bgcolor = "";
 	var doc = new PIXI.Container();
 	if (bgcolor !== ""){
 		var bg = new PIXI.Graphics();
@@ -98,28 +98,33 @@ function getTextImage(text, size, color, bgcolor, width) {
 	var canvas = document.createElement("canvas"), ctx = canvas.getContext("2d");
 	var textxy = [], font = ctx.font = size + "px Dosis";
 	function pushText(text){
-		var block = [];
+		var w = ctx.measureText(text).width;
+		if (!width || x + w <= width){
+			textxy.push(text, x, y+size);
+			x += w + 3;
+			return;
+		}
+		var idx = 0, endidx = 0, oldblock = "";
 		etg.iterSplit(text, " ", function(word){
-			if (word){
-				block.push(word);
-				if (width && x + ctx.measureText(block.join(" ")).width >= width){
-					block.pop();
-					textxy.push(block.join(" "), x, y+size);
-					block.length = 1;
-					block[0] = word;
-					x = 0;
-					y += h;
-				}
-			}
-		});
-		if (block.length){
-			var blocktext = block.join(" ");
-			textxy.push(blocktext, x, y+size);
-			x += ctx.measureText(blocktext).width;
-			if (x >= width){
+			var nextendidx = endidx + word.length + 1;
+			var newblock = text.slice(idx, nextendidx-1);
+			if (width && x + ctx.measureText(newblock).width >= width){
+				textxy.push(oldblock, x, y+size);
+				newblock = word;
+				idx = endidx;
 				x = 0;
 				y += h;
 			}
+			oldblock = newblock;
+			endidx = nextendidx;
+		});
+		if (idx != text.length){
+			textxy.push(oldblock, x, y+size);
+			x += ctx.measureText(oldblock).width;
+			if (width && x >= width){
+				x = 0;
+				y += h;
+			}else x += 3;
 		}
 	}
 	text = text.replace(/\|/g, " | ");
