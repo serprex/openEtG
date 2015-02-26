@@ -317,18 +317,44 @@ var data = {
 		ownplay:"Produce 1 or 2 " + x[1] + " on play"
 	};
 });
+function auraText(tgts, bufftext, upbufftext){
+	return function(c){
+		return tgts + " gain " + (c.upped?bufftext:upbufftext) + " while " + c.name + " in play. Unique";
+	}
+}
+var statusData = {
+	cloak:"Cloaks own field",
+	flooding:"Non aquatic creatures past first five creature slots die on turn end. Consumes 1:7. Unique",
+	nightfall:auraText("Nocturnal creatures", "1|1", "2|1"),
+	nothrottle:"Throttling does not apply to any of own creatures while equipped",
+	patience:"Each turn delay own creatures. They gain 2|1. 4|1 if burrowed. 5|2 if flooded. Unique",
+	stasis:"Prevent creatures attacking at end of turn",
+	tunnel:"Burrowed creatures bypass shields",
+	voodoo:"Repeat to foe negative status effects & non lethal damage",
+	whetstone:auraText("Weapons & golems", "1|1", "1|2"),
+};
 function processEntry(c, event, entry){
 	return typeof entry === "string" ? entry :
-		entry instanceof Array ? entry[c.upped?1:0] :
-		entry instanceof Function ? entry(c) :
-		event in entry ? processEntry(c, event, entry[event]) : "";
+		entry instanceof Array ? entry[asCard(c).upped?1:0] :
+		entry instanceof Function ? entry(asCard(c)) :
+		event in entry ? processEntry(c, event, entry[event]) : "!!";
+}
+function asCard(c){
+	return c instanceof etg.Card?c:c.card;
 }
 module.exports = function(c, event){
-	if (c.type == etg.SpellEnum){
+	if (c instanceof etg.Card && c.type == etg.SpellEnum){
 		var entry = data[c.active.activename[0]];
 		return processEntry(c, "cast", entry);
 	}else{
-		var ret = [];
+		var ret = [], stext = [];
+		for(var key in c.status){
+			if (!c.status[key]) continue;
+			var entry = statusData[key];
+			if (!entry) stext.push(c.status[key]===true?key:c.status[key]+key);
+			else ret.push(processEntry(c, "", entry));
+		}
+		if (stext.length) ret.unshift(stext.join(" "));
 		for(var key in c.active){
 			c.active[key].activename.forEach(function(name){
 				var entry = data[name];

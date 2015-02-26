@@ -94,9 +94,6 @@ function Card(type, info){
 			Object.freeze(this.status);
 		}
 	}
-	if (info.Text){
-		this.text = info.Text;
-	}
 	if (info.Rarity){
 		this.rarity = parseInt(info.Rarity);
 	}
@@ -341,15 +338,6 @@ function clone(obj){
 	}
 	return result;
 }
-function objinfo(obj, info){
-	if (!info) info = [];
-	for (var key in obj){
-		var val = obj[key];
-		if (val===true) info.push(key);
-		else if (val) info.push(val + key);
-	}
-	return info;
-}
 function combineactive(a1, a2){
 	if (!a1){
 		return a2;
@@ -508,13 +496,8 @@ Card.prototype.info = function(){
 		var text = [];
 		if (this.type == ShieldEnum && this.health) text.push("Reduce damage by "+this.health)
 		else if (this.type == CreatureEnum || this.type == WeaponEnum) text.push(this.attack+"|"+this.health);
-		if (this.type != PermanentEnum){
-			var statuses = objinfo(this.status).join(" ");
-			if (statuses) text.push(statuses);
-		}
 		var skills = skillText(this);
 		if (skills) text.push(skills);
-		if (this.text) text.push(this.text);
 		return text.join("\n");
 	}
 }
@@ -548,15 +531,19 @@ Player.prototype.isCloaked = function(){
 		return pr && pr.status.cloak;
 	});
 }
+function plinfocore(info, key, val){
+	if (val===true) info.push(key);
+	else if (val) info.push(val + key);
+}
 Player.prototype.info = function(){
 	var info = [this.hp + "/" + this.maxhp + " " + this.deck.length + "cards"];
-	objinfo(this.status, info);
-	if (this.nova)info.push(this.nova + "nova");
-	if (this.neuro)info.push("neuro");
-	if (this.sosa)info.push(this.sosa + "sosa");
-	if (this.silence)info.push("silence");
-	if (this.sanctuary)info.push("sanctuary");
-	if (this.precognition)info.push("precognition");
+	for (var key in this.status){
+		var val = this.status[key];
+		plinfocore(this, key, val);
+	}
+	["nova", "neuro", "sosa", "silence", "sanctuary", "precognition"].forEach(function(key){
+		plinfocore(info, key, this[key]);
+	}, this);
 	if (this.gpull)info.push("gpull");
 	return info.join("\n");
 }
@@ -745,33 +732,28 @@ Player.prototype.masscc = function(caster, func, massmass){
 		}
 	}
 }
-Creature.prototype.info = function(){
-	var info = [this.trueatk()+"|"+this.truehp()+"/"+this.maxhp];
-	this.activetext(info);
-	if (this.owner.gpull == this) info.push("gpull");
-	objinfo(this.status, info);
-	return info.join("\n");
+function infocore(c, info){
+	var stext = skillText(c);
+	return stext ? info + "\n" + stext : info;
 }
-Permanent.prototype.info = function(){
-	return objinfo(this.status, this.activetext()).join("\n");
+Creature.prototype.info = function(){
+	var info = this.trueatk()+"|"+this.truehp()+"/"+this.maxhp;
+	if (this.owner.gpull == this) info += "\ngpull";
+	return infocore(this, info);
 }
 Weapon.prototype.info = function(){
-	var info = [this.trueatk()];
-	return objinfo(this.status, this.activetext(info)).join("\n");
+	return infocore(this, this.trueatk().toString());
 }
 Shield.prototype.info = function(){
-	return objinfo(this.status, this.activetext([this.truedr() + "DR"])).join("\n");
+	return infocore(this, this.truedr() + "DR");
 }
 Pillar.prototype.info = function(){
-	return this.status.charges + " 1:" + (this.status.pendstate?this.owner.mark:this.card.element) + (this.status.immaterial?"\nimmaterial":"");
+	return infocore(this, this.status.charges + " 1:" + (this.status.pendstate?this.owner.mark:this.card.element));
 }
-Thing.prototype.activetext = function(info){
-	if (!info) info = [];
-	var skill = skillText(this);
-	if (skill) info.push(skill);
-	return info;
+Thing.prototype.info = function(){
+	return skillText(this);
 }
-Thing.prototype.activetext1 = function(){
+Thing.prototype.activetext = function(){
 	if (this.active.cast) return casttext(this.cast, this.castele) + this.active.cast.activename[0];
 	var order = ["hit", "death", "owndeath", "buff", "destroy", "draw", "play", "spell", "dmg", "shield", "postauto"];
 	for(var i=0; i<order.length; i++){
