@@ -310,8 +310,8 @@ var userEvents = {
 		console.log(u + " requesting " + f);
 		db.hget("D:"+u, user.selectedDeck, function(err, deck){
 			if (!deck) return;
-			sock.meta.deck = deck;
-			sock.meta.pvpstats = { hp: data.p1hp, markpower: data.p1markpower, deckpower: data.p1deckpower, drawpower: data.p1drawpower };
+			socket.meta.deck = deck;
+			socket.meta.pvpstats = { hp: data.p1hp, markpower: data.p1markpower, deckpower: data.p1deckpower, drawpower: data.p1drawpower };
 			var foesock = usersock[f];
 			if (foesock && foesock.readyState == 1){
 				if (foesock.meta.duel == u) {
