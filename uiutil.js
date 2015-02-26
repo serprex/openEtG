@@ -165,8 +165,10 @@ function getTextImage(text, size, color, bgcolor, width) {
 	ctx.font = font;
 	ctx.fillStyle = color || "black";
 	for(var i=0; i<textxy.length; i+=3) ctx.fillText(textxy[i], textxy[i+1], textxy[i+2]);
-	doc.addChild(new PIXI.Sprite(new PIXI.Texture(new PIXI.BaseTexture(canvas))));
+	var txtbtx = new PIXI.BaseTexture(canvas);
+	doc.addChild(new PIXI.Sprite(new PIXI.Texture(txtbtx)));
 	rtex.render(doc);
+	txtbtx.destroy();
 	return tximgcache[key] = rtex;
 }
 var sounds = {}, musics = {}, currentMusic;

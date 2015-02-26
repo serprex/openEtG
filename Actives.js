@@ -1060,11 +1060,11 @@ nullspell:function(c,t){
 		c.addactive("turnstart", Actives.noeatspell);
 	}
 },
-eatspell:function(c,t){
+eatspell:function(c,t, data){
 	if (t instanceof etg.CardInstance){
 		Actives["growth 1"](c);
 		c.rmactive("prespell", "eatspell");
-		return true;
+		data.evade = true;
 	}
 },
 noeatspell:function(c,t){
