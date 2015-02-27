@@ -58,9 +58,13 @@ function makeArt(card, art, oldrend) {
 	var rend = oldrend || require("./px").mkRenderTexture(132, 256);
 	var template = new PIXI.Container();
 	template.addChild(new PIXI.Sprite(exports.cardBacks[card.element+(card.upped?13:0)]));
+	var typemark = new PIXI.Sprite(exports.ticons[card.type]);
+	typemark.anchor.set(1, 1);
+	typemark.position.set(128, 252);
+	template.addChild(typemark);
 	var rarity = new PIXI.Sprite(exports.ricons[card.rarity]);
-	rarity.anchor.set(0, 1);
-	rarity.position.set(5, 252);
+	rarity.anchor.set(1, 1);
+	rarity.position.set(104, 252);
 	template.addChild(rarity);
 	if (art) {
 		var artspr = new PIXI.Sprite(art);
@@ -68,10 +72,6 @@ function makeArt(card, art, oldrend) {
 		if (card.shiny) artspr.filters = [shinyFilter];
 		template.addChild(artspr);
 	}
-	var typemark = new PIXI.Sprite(exports.ticons[card.type]);
-	typemark.anchor.set(1, 1);
-	typemark.position.set(128, 252);
-	template.addChild(typemark);
 	var nametag = new PIXI.Sprite(Text(card.name, 12, card.upped ? "black" : "white"));
 	nametag.position.set(2, 2);
 	template.addChild(nametag);
