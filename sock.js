@@ -4,19 +4,21 @@ var options = require("./options");
 var userutil = require("./userutil");
 var socket = new WebSocket("ws://"+location.hostname+":13602");
 var buffer = [];
-var attempts = 0;
+var attempts = 0, attemptTimeout = 0;
 socket.onopen = function(){
 	attempts = 0;
+	if (attemptTimeout) clearTimeout(attemptTimeout);
 	if (options.offline || options.wantpvp || options.afk) exports.emit("chatus", {hide: !!options.offline, wantpvp: !!options.wantpvp, afk: !!options.afk});
-	while (buffer.length) this.send(buffer.pop());
+	buffer.forEach(this.send, this);
+	buffer.length = 0;
 	chat("Connected");
 }
 socket.onclose = function reconnect(){
 	attempts = Math.min(attempts+1, 8);
-	var timeout = 99+99*attempts*Math.random();
-	setTimeout(function(){
+	var timeout = 99+Math.floor(99*Math.random())*attempts;
+	attemptTimeout = setTimeout(function(){
 		var oldsock = socket;
-		socket = new WebSocket("ws://"+location.hostname+":13602");
+		exports.et = socket = new WebSocket("ws://"+location.hostname+":13602");
 		socket.onopen = oldsock.onopen;
 		socket.onclose = oldsock.onclose;
 		socket.onmessage = oldsock.onmessage;
