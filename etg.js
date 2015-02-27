@@ -538,13 +538,12 @@ function plinfocore(info, key, val){
 Player.prototype.info = function(){
 	var info = [this.hp + "/" + this.maxhp + " " + this.deck.length + "cards"];
 	for (var key in this.status){
-		var val = this.status[key];
-		plinfocore(this, key, val);
+		plinfocore(info, key, this.status[key]);
 	}
 	["nova", "neuro", "sosa", "silence", "sanctuary", "precognition"].forEach(function(key){
 		plinfocore(info, key, this[key]);
 	}, this);
-	if (this.gpull)info.push("gpull");
+	if (this.gpull) info.push("gpull");
 	return info.join("\n");
 }
 Player.prototype.randomquanta = function() {
