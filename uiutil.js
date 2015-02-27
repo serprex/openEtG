@@ -66,31 +66,24 @@ function tgtToPos(t) {
 var tximgcache = {};
 function getTextImage(text, size, color, bgcolor, width) {
 	if (!gfx.loaded || !text) return gfx.nopic;
-	var key = JSON.stringify(arguments), doc;
+	var key = JSON.stringify(arguments);
 	if (key in tximgcache) {
 		return tximgcache[key];
 	}
-	if (bgcolor){
-		doc = new PIXI.Graphics();
-		doc.beginFill(bgcolor);
-	}else doc = new PIXI.Container();
 	var x = 0, y = 0, h = Math.floor(size*1.4), w = 0;
-	function pushChild(){
+	function pushChild(texture, num){
+		if (num === undefined) num = 1;
 		var w = 0;
 		if (x > 0){
-			for (var i = 0; i<arguments.length; i++){
-				w += arguments[i].width;
-			}
+			w += size;
 		}
 		if (width && x + w > width){
 			x = 0;
 			y += h;
 		}
-		for (var i = 0; i<arguments.length; i++){
-			var c = arguments[i];
-			c.position.set(x, y);
-			x += c.width;
-			doc.addChild(c);
+		for (var i = 0; i<num; i++){
+			textxy.push(texture, x, y);
+			x += size;
 		}
 	}
 	var canvas = document.createElement("canvas"), ctx = canvas.getContext("2d");
@@ -141,37 +134,29 @@ function getTextImage(text, size, color, bgcolor, width) {
 			var num = parseInt(parse[0]);
 			var icon = gfx.eicons[parseInt(parse[1])];
 			if (num < 4) {
-				var icons = [];
-				for (var j = 0;j < num;j++) {
-					var spr = new PIXI.Sprite(icon);
-					spr.scale.set(size/32, size/32);
-					icons.push(spr);
-				}
-				pushChild.apply(null, icons);
+				pushChild(icon, num);
 			}else{
-				var spr = new PIXI.Sprite(icon);
-				spr.scale.set(size/32, size/32);
 				pushText(num.toString());
-				pushChild(spr);
+				pushChild(icon);
 			}
 		}
 		lastindex = reres.index + piece.length;
 	}
 	if (lastindex != text.length) pushText(text.slice(lastindex));
-	var rtex = require("./px").mkRenderTexture(width || Math.max(w, x), y+h);
-	if (doc instanceof PIXI.Graphics){
-		doc.drawRect(0, 0, rtex.width, rtex.height);
+	canvas.width = width || Math.max(w, x);
+	canvas.height = y+h;
+	if (bgcolor){
+		ctx.fillStyle = PIXI.utils.hex2string(bgcolor);
+		ctx.fillRect(0, 0, canvas.width, canvas.height);
 	}
-	canvas.width = rtex.width;
-	canvas.height = rtex.height;
 	ctx.font = font;
 	ctx.fillStyle = color || "black";
-	for(var i=0; i<textxy.length; i+=3) ctx.fillText(textxy[i], textxy[i+1], textxy[i+2]);
-	var txtbtx = new PIXI.BaseTexture(canvas);
-	doc.addChild(new PIXI.Sprite(new PIXI.Texture(txtbtx)));
-	rtex.render(doc);
-	txtbtx.destroy();
-	return tximgcache[key] = rtex;
+	for(var i=0; i<textxy.length; i+=3){
+		var c = textxy[i];
+		if (typeof c === "string") ctx.fillText(c, textxy[i+1], textxy[i+2]);
+		else ctx.drawImage(c.baseTexture.source, c.crop.x, c.crop.y, c.crop.width, c.crop.height, textxy[i+1], textxy[i+2], size, size);
+	}
+	return tximgcache[key] = new PIXI.Texture(new PIXI.BaseTexture(canvas));
 }
 var sounds = {}, musics = {}, currentMusic;
 var soundEnabled = false, musicEnabled = false;
