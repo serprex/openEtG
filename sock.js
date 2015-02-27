@@ -3,33 +3,43 @@ var etgutil = require("./etgutil");
 var options = require("./options");
 var userutil = require("./userutil");
 var socket = new WebSocket("ws://"+location.hostname+":13602");
+var buffer = [];
+var attempts = 0;
 socket.onopen = function(){
+	attempts = 0;
 	if (options.offline || options.wantpvp || options.afk) exports.emit("chatus", {hide: !!options.offline, wantpvp: !!options.wantpvp, afk: !!options.afk});
+	while (buffer.length) this.send(buffer.pop());
 	chat("Connected");
 }
 socket.onclose = function reconnect(){
-	chat("Reconnecting in 99ms");
+	attempts = Math.min(attempts+1, 8);
+	var timeout = 99+99*attempts*Math.random();
 	setTimeout(function(){
 		var oldsock = socket;
 		socket = new WebSocket("ws://"+location.hostname+":13602");
 		socket.onopen = oldsock.onopen;
 		socket.onclose = oldsock.onclose;
 		socket.onmessage = oldsock.onmessage;
-	}, 99);
+	}, timeout);
+	chat("Reconnecting in "+ timeout +"ms");
 }
 exports.et = socket;
 exports.user = undefined;
 exports.userEmit = function(x, data) {
 	if (!data) data = {};
-	data.x = x;
 	data.u = exports.user.name;
 	data.a = exports.user.auth;
-	socket.send(JSON.stringify(data));
+	exports.emit(x, data);
 }
 exports.emit = function(x, data){
 	if (!data) data = {};
 	data.x = x;
-	socket.send(JSON.stringify(data));
+	var msg = JSON.stringify(data);
+	if (socket && socket.readyState == 1){
+		socket.send(msg);
+	}else{
+		buffer.push(msg);
+	}
 }
 exports.userExec = function(x, data){
 	if (!data) data = {};
