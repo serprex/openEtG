@@ -224,7 +224,7 @@ function DeckDisplay(decksize, cardmouseover, cardclick, deck){
 	this.decksize = decksize;
 	this.cardmouseover = cardmouseover;
 	this.cardclick = cardclick;
-	this.hitArea = new PIXI.math.Rectangle(100, 32, Math.floor(decksize/10)*99, 200);
+	this.hitArea = new PIXI.math.Rectangle(100, 32, Math.floor(decksize/10)*99, 190);
 	this.interactive = true;
 	for (var i = 0;i < decksize;i++) {
 		var sprite = new PIXI.Sprite(gfx.nopic);
