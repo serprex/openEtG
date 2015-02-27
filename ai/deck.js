@@ -36,7 +36,7 @@ module.exports = function(level) {
 			}
 			if (card.isOf(Cards.Nova)) {
 				for (var k = 1;k < 13;k++) {
-					ecost[k]--;
+					ecost[k] -= card.upped?2:1;
 				}
 			}else if (card.isOf(Cards.GiftofOceanus)){
 				if (eles[1] == etg.Water) ecost[etg.Water] -= 3;
@@ -44,12 +44,14 @@ module.exports = function(level) {
 					ecost[etg.Water] -= 2;
 					ecost[eles[1]] -= 2;
 				}
+			}else if (card.isOf(Cards.Georesonator)){
+				ecost[ele[1]] -= 8;
 			}else if (card.type == etg.CreatureEnum){
 				var auto = card.active.auto;
-				if (auto == Actives.light) ecost[etg.Light]--;
-				else if (auto == Actives.fire) ecost[etg.Fire]--;
-				else if (auto == Actives.air) ecost[etg.Air]--;
-				else if (auto == Actives.earth) ecost[etg.Earth]--;
+				if (auto == Actives.light) ecost[etg.Light] -= 2;
+				else if (auto == Actives.fire) ecost[etg.Fire] -= 2;
+				else if (auto == Actives.air) ecost[etg.Air] -= 2;
+				else if (auto == Actives.earth) ecost[etg.Earth] -= 2;
 			}else if (card.type == etg.ShieldEnum) anyshield++;
 			else if (card.type == etg.WeaponEnum) anyweapon++;
 		}
