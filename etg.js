@@ -841,9 +841,7 @@ Player.prototype.addpoison = function(x) {
 	this.status.poison += x;
 }
 Creature.prototype.addpoison = function(x) {
-	if (this.card.isOf(Cards.Cell)){
-		this.transform(Cards.MalignantCell);
-	}else{
+	if (!this.active.ownpoison || this.active.ownpoison(this)){
 		this.defstatus("poison", 0);
 		this.status.poison += x;
 		if (this.status.voodoo){
@@ -867,15 +865,11 @@ Weapon.prototype.delay = Creature.prototype.delay = function(x){
 	if (this.status.voodoo)this.owner.foe.delay(x);
 }
 Weapon.prototype.freeze = Creature.prototype.freeze = function(x){
-	if (this.card.isOf(Cards.Squid)){
-		this.transform(Cards.ArcticSquid.asUpped(this.card.upped));
-	}else{
-		if (!this.active.ownfreeze || this.active.ownfreeze(this)){
-			Effect.mkText("Freeze", this);
-			this.defstatus("frozen", 0);
-			if (x > this.status.frozen) this.status.frozen = x;
-			if (this.status.voodoo) this.owner.foe.freeze(x);
-		}
+	if (!this.active.ownfreeze || this.active.ownfreeze(this)){
+		Effect.mkText("Freeze", this);
+		this.defstatus("frozen", 0);
+		if (x > this.status.frozen) this.status.frozen = x;
+		if (this.status.voodoo) this.owner.foe.freeze(x);
 	}
 }
 Creature.prototype.spelldmg = function(x, dontdie){

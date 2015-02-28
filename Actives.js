@@ -194,6 +194,9 @@ catlife:function(c,t, data){
 		c.owner.creatures[data.index] = cl;
 	}
 },
+cell:function(c,t){
+	c.transform(c.card.as(Cards.MalignantCell));
+},
 chimera:function(c,t){
 	var atk=0, hp=0;
 	c.owner.creatures.forEach(function(cr){

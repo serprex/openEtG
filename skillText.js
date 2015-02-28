@@ -34,6 +34,7 @@ var data = {
 	butterfly:"Target something smaller than, or weaker than, 3. Replace target's skills with \"3:1 Destroy: destroy target permanent\"",
 	catapult:"Sacrifice target creature to deal 100HP/(100+HP) damage foe. Frozen creatures increase damage by 50%. Poisoned creatures transfer poison",
 	catlife:"On death, regenerate with 1 fewer life",
+	cell:"Become Malignant if poisoned",
 	chaos:function(c){return (c.upped?"20% chance to evade. ":"")+"Non-ranged attacking creatures have a 30% chance to have a random effect cast on them"},
 	chimera:"Combine all your creatures to form a Chimera with momentum & gravity pull",
 	clear:"Remove statuses from target creature, reduce delays by 1, & heal 1",
