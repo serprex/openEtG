@@ -75,9 +75,7 @@ function getAgedHp(hp, age){
 }
 function wilson(up, total) {
 	// from npm's wilson-score
-	var z = 2.326348;
-	if (total <= 0 || total < up) return 0;
-	var phat = up/total, z2 = z*z;
+	var z = 2.326348, z2 = z*z, phat = up/total;
 	return (phat + z2/(2*total) - z*Math.sqrt((phat*(1 - phat) + z2/(4*total))/total))/(1 + z2/total);
 }
 function sockEmit(socket, event, data){
@@ -133,13 +131,14 @@ var userEvents = {
 		user.dailydg = Math.floor(Math.random() * aiDecks.demigod.length);
 		user.selectedDeck = "1";
 		var socket = this;
-		db.rpush("N:"+data.u,1,2,3,4,5,6,7,8,9,10, function(err){
-			db.hmset("D:"+data.u, "1", starters[sid+1], "2", starters[sid+2], "3", starters[sid+3], function(err){
-				sutil.useruser(db, user, function(clientuser){
-					sockEmit(socket, "userdump", clientuser);
-				});
+		var task = sutil.mkTask(function(){
+			sutil.useruser(db, user, function(clientuser){
+				sockEmit(socket, "userdump", clientuser);
 			});
 		});
+		db.rpush("N:"+data.u,1,2,3,4,5,6,7,8,9,10, task("N"));
+		db.hmset("D:"+data.u, "1", starters[sid+1], "2", starters[sid+2], "3", starters[sid+3], task("D"));
+		task();
 	},
 	logout:function(data, user) {
 		var u=data.u;
@@ -213,17 +212,20 @@ var userEvents = {
 		var arena = "arena"+(data.lv?"1":""), akey = (data.lv?"B:":"A:")+data.aname;
 		db.zscore(arena, data.aname, function(err, score){
 			if (score === null) return;
-			db.hincrby(akey, data.won?"win":"loss", 1, function(err){
-				db.hmget(akey, "win", "loss", "day", function(err, wld){
-					if (err || !wld) return;
-					for(var i=0; i<3; i++) wld[i] = parseInt(wld[i]);
-					if (!data.won && (wld[0] == 0 && wld[1] == 5 || wld[1]-wld[0] > 15 || sutil.getDay()-wld[2] > 14)){
-						db.zrem(arena, data.aname);
-					}else{
-						db.zadd(arena, wilson(wld[0]+1, wld[0]+wld[1]+1)*1000, data.aname);
-					}
-				});
+			var task = sutil.mkTask(function(wld){
+				if (wld.err) return;
+				var won = parseInt(data.won?wld.incr:wld.mget[0]),
+					loss = parseInt(data.won?wld.mget[0]:wld.incr),
+					day = parseInt(wld.mget[1]);
+				if (!data.won && (won == 0 && loss == 5 || loss-won > 15 || sutil.getDay()-day > 14)){
+					db.zrem(arena, data.aname);
+				}else{
+					db.zadd(arena, wilson(won+1, won+loss+1)*1000, data.aname);
+				}
 			});
+			db.hincrby(akey, data.won?"win":"loss", 1, task("incr"));
+			db.hmget(akey, data.won?"loss":"win", "day", task("mget"));
+			task();
 		});
 	},
 	foearena:function(data, user){
