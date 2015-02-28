@@ -7,16 +7,21 @@ var buffer = [];
 var attempts = 0, attemptTimeout = 0;
 socket.onopen = function(){
 	attempts = 0;
-	if (attemptTimeout) clearTimeout(attemptTimeout);
+	if (attemptTimeout){
+		clearTimeout(attemptTimeout);
+		attemptTimeout = 0;
+	}
 	if (options.offline || options.wantpvp || options.afk) exports.emit("chatus", {hide: !!options.offline, wantpvp: !!options.wantpvp, afk: !!options.afk});
 	buffer.forEach(this.send, this);
 	buffer.length = 0;
 	chat("Connected");
 }
 socket.onclose = function reconnect(){
-	attempts = Math.min(attempts+1, 8);
+	if (attemptTimeout) return;
+	if (attempts < 8) attempts++;
 	var timeout = 99+Math.floor(99*Math.random())*attempts;
 	attemptTimeout = setTimeout(function(){
+		attemptTimeout = 0;
 		var oldsock = socket;
 		exports.et = socket = new WebSocket("ws://"+location.hostname+":13602");
 		socket.onopen = oldsock.onopen;
