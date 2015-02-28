@@ -1073,8 +1073,7 @@ Thing.prototype.rmactive = function(type, activename){
 	}
 }
 Thing.prototype.hasactive = function(type, activename) {
-	if (!this.active[type])return false;
-	return ~this.active[type].activename.indexOf(activename);
+	return (type in this.active) && ~this.active[type].activename.indexOf(activename);
 }
 Thing.prototype.canactive = function() {
 	return this.owner.game.turn == this.owner && this.active.cast && !this.usedactive && !this.status.delayed && !this.status.frozen && this.owner.canspend(this.castele, this.cast);

@@ -102,10 +102,10 @@ var data = {
 		"Freeze target for 4 turns. Being frozen disables attacking & per turn skills"],
 	fungusrebirth:["Become a Fungus", "Become a Toxic Fungus"],
 	gaincharge2:{
-		death:"Gain 2 charges per death",
-		destroy:"Gain 2 charges per other destruction",
+		death:"Gain 2 stacks per death",
+		destroy:"Gain 2 stacks per other destruction",
 	},
-	gaintimecharge:"Gain a charge per own non-drawstep draw, up to 4 per turn",
+	gaintimecharge:"Gain a stack per own non-drawstep draw, up to 4 per turn",
 	gas:"Summon an Unstable Gas",
 	grave:"Whenever a creature dies, become an unburrowed of its kind",
 	give:function(c){return "Give own target to foe. Heal self "+(c.upped?10:5)},
@@ -153,7 +153,10 @@ var data = {
 	locket:"Produce quanta of mark",
 	locketshift:"Now produces quanta of target's element",
 	loot:"Steal a random permanent from foe when own permanent is destroyed",
-	losecharge:"Decrement charge per turn",
+	losecharge:function(c, inst){
+		var charges = c.status.charges;
+		return "Lasts " + charges + " turn" + (charges == 1?"":"s");
+	},
 	luciferin:"All your creatures without skills produce 1:8. Heal self 10",
 	lycanthropy:"Gain 5|5 & become nocturnal",
 	martyr:"Increment strength per missing health",
@@ -324,10 +327,12 @@ function auraText(tgts, bufftext, upbufftext){
 }
 var statusData = {
 	cloak:"Cloaks own field",
+	charges:function(c){return etg.Thing.prototype.hasactive.call(c, "auto", "losecharge")?"":"Enter with " + c.status.charges + (c.status.stackable?" stacks":" charges")},
 	flooding:"Non aquatic creatures past first five creature slots die on turn end. Consumes 1:7. Unique",
 	nightfall:auraText("Nocturnal creatures", "1|1", "2|1"),
 	nothrottle:"Throttling does not apply to any of own creatures while equipped",
 	patience:"Each turn delay own creatures. They gain 2|1. 4|1 if burrowed. 5|2 if flooded. Unique",
+	stackable:"",
 	stasis:"Prevent creatures attacking at end of turn",
 	tunnel:"Burrowed creatures bypass shields",
 	voodoo:"Repeat to foe negative status effects & non lethal damage",
@@ -336,11 +341,15 @@ var statusData = {
 function processEntry(c, event, entry){
 	return typeof entry === "string" ? entry :
 		entry instanceof Array ? entry[asCard(c).upped?1:0] :
-		entry instanceof Function ? entry(asCard(c)) :
+		entry instanceof Function ? entry(asCard(c), c) :
 		event in entry ? processEntry(c, event, entry[event]) : "!!";
 }
 function asCard(c){
 	return c instanceof etg.Card?c:c.card;
+}
+function pushEntry(list, c, event, entry){
+	var x = processEntry(c, event, entry);
+	if (x) list.push(x);
 }
 module.exports = function(c, event){
 	if (c instanceof etg.Card && c.type == etg.SpellEnum){
@@ -351,15 +360,16 @@ module.exports = function(c, event){
 		for(var key in c.status){
 			if (!c.status[key]) continue;
 			var entry = statusData[key];
-			if (!entry) stext.push(c.status[key]===true?key:c.status[key]+key);
-			else ret.push(processEntry(c, "", entry));
+			if (entry === undefined) stext.push(c.status[key]===true?key:c.status[key]+key);
+			else pushEntry(ret, c, "", entry);
 		}
 		if (stext.length) ret.unshift(stext.join(" "));
 		for(var key in c.active){
 			c.active[key].activename.forEach(function(name){
 				var entry = data[name];
-				if (!entry) return;
-				ret.push((key == "cast"?etg.casttext(c.cast, c.castele):"") + processEntry(c, key, entry));
+				if (entry === undefined) return;
+				pushEntry(ret, c, key, entry);
+				if (key == "cast") ret[ret.length-1] = etg.casttext(c.cast, c.castele) + ret[ret.length-1];
 			});
 		}
 		return ret.join("\n");
