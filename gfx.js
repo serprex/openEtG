@@ -91,7 +91,7 @@ function makeArt(card, art, oldrend) {
 	var infospr = new PIXI.Sprite(ui.getTextImage(card.info(), 11, card.upped ? "black" : "white", "", rend.width-4));
 	infospr.position.set(2, 150);
 	template.addChild(infospr);
-	rend.render(template, null, true);
+	rend.render(template);
 	return rend;
 }
 function getArtImage(code, cb){
