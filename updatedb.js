@@ -1,7 +1,6 @@
 #!/usr/bin/node
 "use strict";
-var fs = require("fs");
-var urllib = require("urllib");
+var fs = require("fs"), urllib = require("urllib");
 function download(gid, writeStream, cb){
 	urllib.request("https://docs.google.com/spreadsheets/d/1dfKGdHqqLAAHdnw2mKBwaYwDIFODjQIjlg8ZPyRFVmA/export?format=csv&id=1dfKGdHqqLAAHdnw2mKBwaYwDIFODjQIjlg8ZPyRFVmA&gid="+gid, {
 		headers: { "GData-Version": "3.0" },

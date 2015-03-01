@@ -1,7 +1,7 @@
 node_modules/*
 deckcache/*
 Cards/*
-vanilla/*
+vanilla/
 atlas.js
 atlas.css
 atlas.png
