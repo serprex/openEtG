@@ -1,0 +1,10 @@
+.ico{
+background:url("{{{prefix}}}{{{spritesheetName}}}.png");
+}
+{{#files}}
+.{{{cssName}}}{
+width:{{width}}px;
+height:{{height}}px;
+background-position:-{{x}}px -{{y}}px;
+}
+{{/files}}

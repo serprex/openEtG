@@ -49,7 +49,7 @@ module.exports = function(){
 					ytot += points[i+1];
 				}
 				var icon = document.createElement("span");
-				icon.className = "Eicon E13";
+				icon.className = "ico e13";
 				icon.style.transform = "translate(-50%,-50%)";
 				icon.style.pointerEvents = "none";
 				dom.push([(xtot*2) / points.length, (ytot*2) / points.length, icon]);

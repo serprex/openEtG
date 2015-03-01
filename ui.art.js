@@ -2,7 +2,7 @@
 require("./httpcards")(function() {
 	var Cards = require("./Cards");
 	var credits = [
-		[["andretimpa", "http://andretimpa.deviantart.com"], ["Element Icons", "assets/eicons.png"], ["Rarity Icons", "assets/ricons.png"], ["Opening Music", "sound/openingMusic.ogg"],
+		[["andretimpa", "http://andretimpa.deviantart.com"], ["Element Icons", "assets/atlas.png"], ["Rarity Icons", "assets/atlas.png"], ["Opening Music", "sound/openingMusic.ogg"],
 			["4sa", "4si", "4sj", "4sk", "4sl", "4sm", "4sn", "4so", "4sp", "4sq", "4sr", "4ss", "4st", "4su", "4te", "4vr", "55k", "55p", "55s", "5ic", "5m0", "5m3", "5ol", "5rl", "5vj", "61r", "61s", "621", "6ub"]],
 		[["artimies", "http://elementscommunity.org/forum/profile/?u=140"], ["593"]],
 		[["Cryotube", "http://cryotube.deviantart.com"],
@@ -11,7 +11,7 @@ require("./httpcards")(function() {
 		[["Hawanja", "http://hawanja.deviantart.com"], ["4vs"]],
 		[["jarozaoz", "http://elementscommunity.org/forum/profile/?u=6364"],
 			["4t3", "4vn", "532", "5le", "5op"]],
-		[["kae", "http://willowdream.carbonmade.com"], ["DeviantArt", "http://willowdream.deviantart.com"], ["Status Icons", "assets/sicons.png"], ["Status Borders", "assets/sborders.png"], ["Hand Borders", "assets/hborders.png"], ["Sabbath Overlay", "assets/sabbath.png"], ["Sacrifice Overlay", "assets/sacrifice.png"], ["Bubble", "assets/protection.png"],
+		[["kae", "http://willowdream.carbonmade.com"], ["DeviantArt", "http://willowdream.deviantart.com"], ["Status Icons", "assets/atlas.png"], ["Status Borders", "assets/atlas.png"], ["Hand Borders", "assets/atlas.png"], ["Sabbath Overlay", "assets/sabbath.png"], ["Sacrifice Overlay", "assets/atlas.png"], ["Bubble", "assets/atlas.png"],
 			["4sd", "4sg", "4tc", "501", "52l", "52q", "535", "536", "55u", "567", "56b", "56d", "58s", "598", "59b", "59c", "59d", "59e", "5bs", "5bu", "5c2", "5c4", "5c6", "5c7", "5f5", "5fb", "5fk", "5fl", "5fm",
 			"5fo", "5ib", "5il", "5io", "5iq", "5ld", "5lg", "5lj", "5ls", "5lt", "5m1", "5m3", "5od", "5oe", "5og", "5ok", "5om", "5oo", "5oq", "5os", "5ov", "5p0", "5rg", "5rj", "5rr", "5s4", "5s8", "5uo", "5v2", "5v8",
 			"5vf", "5vj", "62b", "62e", "6rs", "7ae", "7ak", "77c", "7gr", "7h5", "7k0"]],
@@ -24,7 +24,7 @@ require("./httpcards")(function() {
 			"5v1", "5vc", "5ve", "61u", "623", "628", "629", "62d", "716", "7e7"]],
 		[["pepokish", "http://theowlettenest.com"],
 			["52g", "58o", "5bv", "5f0", "5i4", "5ie", "5l8", "5lb", "5oj"]],
-		[["Ravizant", "http://elementscommunity.org/forum/profile/?u=8037"], ["Element Icons", "assets/eicons.png"], ["Card Backgrounds", "assets/cardBacks.png"],
+		[["Ravizant", "http://elementscommunity.org/forum/profile/?u=8037"], ["Element Icons", "assets/atlas.png"], ["Card Backgrounds", "assets/cardBacks.png"],
 			["4sc", "4tb", "4vp", "4vi", "4vj", "4vm", "4vq", "4vt", "4vu", "4vv", "500", "503", "50a", "50u", "52h", "52j", "52k", "52n", "52r", "52u", "52v", "531", "533", "534", "537", "53e", "542", "55n", "55q",
 			"55v", "564", "568", "56i", "576", "58p", "58q", "58r", "58u", "58v", "595", "599", "59a", "59f", "59g", "59h", "59i", "59m", "5bt", "5c3", "5c8", "5ca", "5cb", "5cc", "5cd", "5ce", "5cf", "5cg",
 			"5ch", "5ci", "5cq", "5de", "5f3", "5f8", "5f9", "5fd", "5fi", "5fu", "5gi", "5ia", "5ih", "5ik", "5im", "5in", "5ip", "5is", "5j2", "5jm", "5l9", "5la", "5lc", "5lf", "5lh", "5li", "5lk", "5ln", "5lo", "5lp", "5m6", "5mq", "5oh",

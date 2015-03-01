@@ -132,7 +132,7 @@ function getTextImage(text, size, color, bgcolor, width) {
 		}else{
 			var parse = piece.split(":");
 			var num = parseInt(parse[0]);
-			var icon = gfx.eicons[parseInt(parse[1])];
+			var icon = gfx.e[parseInt(parse[1])];
 			if (num < 4) {
 				pushChild(icon, num);
 			}else{

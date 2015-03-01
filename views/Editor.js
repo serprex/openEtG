@@ -37,7 +37,7 @@ module.exports = function(arena, acard, startempty) {
 				decksprite.deck.splice(i, 1);
 			}
 		}
-		marksprite.className = "Eicon E"+editormark;
+		marksprite.className = "ico e"+editormark;
 		if (decksprite.deck.length > 60) decksprite.deck.length = 60;
 		decksprite.deck.sort(etg.cardCmp);
 		if (sock.user) {
@@ -250,7 +250,7 @@ module.exports = function(arena, acard, startempty) {
 			dom.push([100 + i * 32, 234,
 				px.domEButton(i, function() {
 					editormark = _i;
-					marksprite.className = "Eicon E"+_i;
+					marksprite.className = "ico e"+_i;
 					updateField();
 				})
 			]);

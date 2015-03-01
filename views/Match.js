@@ -268,14 +268,14 @@ function startMatch(game, foeDeck) {
 				var spr = new PIXI.Sprite(gfx.nopic);
 				var statuses = new PIXI.Container();
 				for (var k=0; k<7; k++){
-					var icon = new PIXI.Sprite(gfx.sicons[k]);
+					var icon = new PIXI.Sprite(gfx.s[k]);
 					icon.alpha = .6;
 					icon.anchor.y = 1;
 					icon.position.set(-34 * scale + [4, 1, 1, 0, 3, 2, 1][k] * 8, 30 * scale);
 					statuses.addChild(icon);
 				}
 				for (var k=0; k<3; k++){
-					var icon = new PIXI.Sprite(gfx.sborders[k]);
+					var icon = new PIXI.Sprite(gfx.sborder[k]);
 					icon.position.set(-32 * scale, -40 * scale);
 					icon.scale.set(scale, scale);
 					statuses.addChild(icon);
@@ -357,7 +357,7 @@ function startMatch(game, foeDeck) {
 				dom.push([quantaxy[0] + ((k & 1) ? 32 : 86), quantaxy[1] + Math.floor((k - 1) / 2) * 32 + 4,
 					quantatext[j][k-1]]);
 				var quantaicon = document.createElement("span");
-				quantaicon.className = "Eicon E"+k;
+				quantaicon.className = "ico e"+k;
 				dom.push([quantaxy[0] + ((k & 1) ? 0 : 54), quantaxy[1] + Math.floor((k - 1) / 2) * 32, quantaicon]);
 			}
 			px.setClick(playerOverlay[j], function() {
@@ -609,9 +609,9 @@ function startMatch(game, foeDeck) {
 			var pl = game.players(j);
 			sacrificeOverlay[j].visible = pl.sosa;
 			sabbathOverlay[j].style.display = pl.flatline ? "inline-block" : "none";
-			handOverlay[j].texture = (pl.silence? gfx.hborders[0] :
-				pl.sanctuary ? gfx.hborders[1] :
-				pl.nova >= 3 ? gfx.hborders[2] : gfx.nopic);
+			handOverlay[j].texture = (pl.silence? gfx.hborder[0] :
+				pl.sanctuary ? gfx.hborder[1] :
+				pl.nova >= 3 ? gfx.hborder[2] : gfx.nopic);
 			for (var i = 0;i < 8;i++) {
 				handsprite[j][i].texture = gfx.getCardImage(pl.hand[i] ? (j == 0 || game.player1.precognition ? pl.hand[i].card.code : "0") : "1");
 			}
@@ -670,7 +670,7 @@ function startMatch(game, foeDeck) {
 				shiesprite[j].texture = gfx.getWeaponShieldImage(sh.card.code);
 				drawStatus(sh, shiesprite[j]);
 			} else shiesprite[j].visible = false;
-			marksprite[j].className = "Eicon E"+pl.mark;
+			marksprite[j].className = "ico e"+pl.mark;
 			marktext[j].text = pl.markpower != 1 ? "x" + pl.markpower : "";
 			for (var i = 1;i < 13;i++) {
 				quantatext[j][i-1].text = pl.quanta[i] || "";

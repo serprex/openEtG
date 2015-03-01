@@ -6,17 +6,10 @@ var options = require("./options");
 exports.loaded = false;
 function load(progress, postload){
 	exports.load = undefined;
-	var singles = ["bg_quest", "bg_questmap", "atlas"];
-	var assets = ["cardBacks", "cardBorders"].concat(singles);
+	var assets = ["bg_quest", "bg_questmap", "atlas", "cardBacks", "cardBorders"];
 	var widths = {
-		eicons: 32,
 		cardBacks: 132,
 		cardBorders: 128,
-		sicons: 13,
-		ticons: 25,
-		sborders: 64,
-		hborders: 112,
-		ricons: 25,
 	};
 	function process(asset, tex, base){
 		var w = widths[asset];
@@ -26,7 +19,14 @@ function load(progress, postload){
 				ts.push(new PIXI.Texture(tex, new PIXI.math.Rectangle(base?base.x+x:x, base?base.y:0, w, base?base.h:tex.height)));
 			}
 			exports[asset] = ts;
-		}else exports[asset] = new PIXI.Texture(tex, base?new PIXI.math.Rectangle(base.x, base.y, base.w, base.h):null);
+		}else{
+			var id = asset.match(/\d+$/), tex = new PIXI.Texture(tex, base?new PIXI.math.Rectangle(base.x, base.y, base.w, base.h):null);
+			if (id){
+				asset = asset.slice(0, -id[0].length);
+				if (!(asset in exports)) exports[asset] = [];
+				exports[asset][id[0]] = tex;
+			}else exports[asset] = tex;
+		}
 	}
 	var loadCount = 0;
 	assets.forEach(function(asset){
@@ -45,7 +45,7 @@ function load(progress, postload){
 			if (loadCount == assets.length){
 				var ui = require("./uiutil");
 				ui.loadSounds("cardClick", "buttonClick", "permPlay", "creaturePlay");
-				exports.ricons[-1] = exports.ricons[5];
+				exports.r[-1] = exports.r[5];
 				exports.loaded = true;
 				postload();
 			}
@@ -68,11 +68,11 @@ function makeArt(card, art, oldrend) {
 	var rend = oldrend || require("./px").mkRenderTexture(132, 256);
 	var template = new PIXI.Container();
 	template.addChild(new PIXI.Sprite(exports.cardBacks[card.element+(card.upped?13:0)]));
-	var typemark = new PIXI.Sprite(exports.ticons[card.type]);
+	var typemark = new PIXI.Sprite(exports.t[card.type]);
 	typemark.anchor.set(1, 1);
 	typemark.position.set(128, 252);
 	template.addChild(typemark);
-	var rarity = new PIXI.Sprite(exports.ricons[card.rarity]);
+	var rarity = new PIXI.Sprite(exports.r[card.rarity]);
 	rarity.anchor.set(1, 1);
 	rarity.position.set(104, 252);
 	template.addChild(rarity);
@@ -91,7 +91,7 @@ function makeArt(card, art, oldrend) {
 		text.position.set(rend.width-3, 2);
 		template.addChild(text);
 		if (card.element && ((card.costele == card.element) ^ !!options.hideCostIcon)) {
-			var eleicon = new PIXI.Sprite(exports.eicons[card.costele]);
+			var eleicon = new PIXI.Sprite(exports.e[card.costele]);
 			eleicon.position.set(rend.width-text.width-5, 10);
 			eleicon.anchor.set(1, .5);
 			eleicon.scale.set(.5, .5);
@@ -145,7 +145,7 @@ function getCardImage(code) {
 				graphics.addChild(text);
 				clipwidth -= text.width+2;
 				if (card.element && ((card.costele == card.element) ^ !!options.hideCostIcon)) {
-					var eleicon = new PIXI.Sprite(exports.eicons[card.costele]);
+					var eleicon = new PIXI.Sprite(exports.e[card.costele]);
 					eleicon.position.set(clipwidth, 10);
 					eleicon.anchor.set(1, .5);
 					eleicon.scale.set(.5, .5);
