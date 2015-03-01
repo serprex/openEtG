@@ -133,7 +133,7 @@ var data = {
 	hope:"Increment damage reduction per own 1:8 producing creature",
 	icebolt:"Deal 2 damage to target. Increment damage per 5:7 owned. May freeze target",
 	ignite:"Deal 20 spell damage to foe & 1 damage to all creatures",
-	immolate:"Sacrifice a creature to produce 6:6 & 1 quanta of each other element",
+	immolate:function(c){return "Sacrifice a creature to produce "+(c.upped?7:5)+":6 & 1 quanta of each other element"},
 	improve:"Mutate target creature",
 	inertia:"When own is targeted, produce 2:3",
 	infect:"Poison target creature",
