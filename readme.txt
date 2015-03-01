@@ -9,11 +9,13 @@ How to setup on Windows:
 
 2	Right click where you want the files to be and click Git Clone to create an openetg folder somewhere, use the URL: https://github.com/Fippe94/openEtG.git
 
-3	Hold Shift and right-click on your openEtG folder that you created in step 2, click Open command window here, run "npm install;npm install -g mkcjs"
+3	Hold Shift and right-click on your openEtG folder that you created in step 2, click Open command window here, run "npm install;npm install -g mkcjs;npm install -g optipng-bin"
 
 4	Run "node updatedb.js" (NB it takes csv files as parameters if you don't want to download all of them)
 
 5	Build pixi.js from https://github.com/serprex/pixi.js/tree/oetg
+
+6	Build spritesheet-js from https://github.com/serprex/spritesheet-js
 
 6	ninja.exe should be in openEtG's folder. Run ninja.exe to build etgify.js
 

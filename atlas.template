@@ -1,0 +1,4 @@
+module.exports={
+{{#files}}{{{name}}}:{x:{{x}},y:{{y}},w:{{width}},h:{{height}}}{{^isLast}},{{/isLast}}
+{{/files}}
+}

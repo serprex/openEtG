@@ -6,8 +6,8 @@ var options = require("./options");
 exports.loaded = false;
 function load(progress, postload){
 	exports.load = undefined;
-	var singles = ["bg_quest", "bg_questmap", "protection", "sacrifice"];
-	var assets = ["eicons", "cardBacks", "cardBorders", "sicons", "sborders", "hborders", "ticons", "ricons"].concat(singles);
+	var singles = ["bg_quest", "bg_questmap", "atlas"];
+	var assets = ["cardBacks", "cardBorders"].concat(singles);
 	var widths = {
 		eicons: 32,
 		cardBacks: 132,
@@ -18,20 +18,30 @@ function load(progress, postload){
 		hborders: 112,
 		ricons: 25,
 	};
+	function process(asset, tex, base){
+		var w = widths[asset];
+		if (w){
+			var ts = [];
+			for (var x = 0; x < (base?base.w:tex.width); x += w){
+				ts.push(new PIXI.Texture(tex, new PIXI.math.Rectangle(base?base.x+x:x, base?base.y:0, w, base?base.h:tex.height)));
+			}
+			exports[asset] = ts;
+		}else exports[asset] = new PIXI.Texture(tex, base?new PIXI.math.Rectangle(base.x, base.y, base.w, base.h):null);
+	}
 	var loadCount = 0;
 	assets.forEach(function(asset){
 		var img = new Image();
 		img.addEventListener("load", function(){
 			loadCount++;
 			progress(loadCount/assets.length);
-			var w = widths[asset], tex = new PIXI.Texture(new PIXI.BaseTexture(this));
-			if (w){
-				var ts = [];
-				for (var x = 0; x < tex.width; x += w){
-					ts.push(new PIXI.Texture(tex, new PIXI.math.Rectangle(x, 0, w, tex.height)));
+			var w = widths[asset], tex = new PIXI.BaseTexture(this);
+			if (asset == "atlas"){
+				var atlas = require("./assets/atlas");
+				for(var key in atlas){
+					var data = atlas[key];
+					process(key, tex, data);
 				}
-				exports[asset] = ts;
-			}else exports[asset] = tex;
+			}else process(asset, tex);
 			if (loadCount == assets.length){
 				var ui = require("./uiutil");
 				ui.loadSounds("cardClick", "buttonClick", "permPlay", "creaturePlay");
@@ -157,8 +167,12 @@ function getCardImage(code) {
 function getInstImage(code, scale, cache){
 	return cache[code] || getArtImage(code, function(art) {
 		var card = Cards.Codes[code];
-		var rend = require("./px").mkRenderTexture(Math.ceil(128 * scale), Math.ceil(164 * scale));
-		var border = new PIXI.Sprite(exports.cardBorders[card.element + (card.upped ? 13 : 0)]);
+		var rend = cache[code] || require("./px").mkRenderTexture(Math.ceil(128 * scale), Math.ceil(164 * scale));
+		var btex = exports.cardBorders[card.element + (card.upped ? 13 : 0)];
+		var border = new PIXI.Sprite(btex), border2 = new PIXI.Sprite(btex);
+		border2.position.y = 164;
+		border2.scale.y = -1;
+		border.addChild(border2);
 		var graphics = new PIXI.Graphics();
 		border.addChild(graphics);
 		graphics.beginFill(ui.maybeLighten(card));

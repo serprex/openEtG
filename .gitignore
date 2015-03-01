@@ -2,6 +2,8 @@ node_modules/*
 deckcache/*
 Cards/*
 vanilla/*
+atlas.js
+atlas.png
 favicon.png
 Dosis.ttf
 etgify.js
