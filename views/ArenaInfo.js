@@ -39,6 +39,8 @@ module.exports = function(info) {
 			stage.addChild(spr);
 			i++;
 		});
+		var marksprite = document.createElement("span");
+		marksprite.className = "ico e"+mark;
 		dom.push([300, 330, ["Modify", function(){
 				require("./Editor")(info, info.card);
 			}]], [300, 360, ["Test", function(){
@@ -51,7 +53,7 @@ module.exports = function(info) {
 				var gameData = { deck: aideckcode, urdeck: deck, seed: Math.random() * etgutil.MAX_INT, foename: "Test", cardreward: "",
 					p2hp:info.curhp, p2markpower:info.mark, p2drawpower:info.draw };
 				require("./Match")(gameData, true);
-			}]], [100, 230, "1:" + mark + " " + adeck]);
+			}]], [66, 200, marksprite], [100, 230, adeck]);
 		var acard = new PIXI.Sprite(gfx.getArt(info.card));
 		acard.position.set(734, 8);
 		stage.addChild(acard);
