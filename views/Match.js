@@ -609,9 +609,9 @@ function startMatch(game, foeDeck) {
 			var pl = game.players(j);
 			sacrificeOverlay[j].visible = pl.sosa;
 			sabbathOverlay[j].style.display = pl.flatline ? "inline-block" : "none";
-			handOverlay[j].texture = (pl.silence? gfx.hborder[0] :
-				pl.sanctuary ? gfx.hborder[1] :
-				pl.nova >= 3 ? gfx.hborder[2] : gfx.nopic);
+			handOverlay[j].texture = (pl.silence? gfx.silence :
+				pl.sanctuary ? gfx.sanctuary :
+				pl.nova >= 3 ? gfx.singularity : gfx.nopic);
 			for (var i = 0;i < 8;i++) {
 				handsprite[j][i].texture = gfx.getCardImage(pl.hand[i] ? (j == 0 || game.player1.precognition ? pl.hand[i].card.code : "0") : "1");
 			}
