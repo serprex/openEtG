@@ -328,7 +328,7 @@ function auraText(tgts, bufftext, upbufftext){
 }
 var statusData = {
 	cloak:"Cloaks own field",
-	charges:function(c){return etg.Thing.prototype.hasactive.call(c, "auto", "losecharge")?"":"Enter with " + c.status.charges + (c.status.stackable?" stack":" charge") + (c.status.charges==1?"":"s")},
+	charges:function(c){return etg.Thing.prototype.hasactive.call(c, "auto", "losecharge") || c.status.charges == 1?"":"Enter with " + c.status.charges + (c.status.stackable?" stacks":" charges")},
 	flooding:"Non aquatic creatures past first five creature slots die on turn end. Consumes 1:7. Unique",
 	freedom:"",
 	nightfall:auraText("Nocturnal creatures", "1|1", "2|1"),
