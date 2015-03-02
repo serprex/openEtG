@@ -92,7 +92,7 @@ exports.domText = function(text){
 					this.appendChild(document.createElement("br"));
 				}else if (piece == "$") {
 					var sp = document.createElement("span");
-					sp.className = "coin";
+					sp.className = "ico gold";
 					this.appendChild(sp);
 				}else if (/^\d\d?:\d\d?$/.test(piece)) {
 					var parse = piece.split(":");
