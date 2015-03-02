@@ -73,10 +73,8 @@ function getTextImage(text, size, color, bgcolor, width) {
 	var x = 0, y = 0, h = Math.floor(size*1.4), w = 0;
 	function pushChild(texture, num){
 		if (num === undefined) num = 1;
-		var w = 0;
-		if (x > 0){
-			w += size;
-		}
+		setMode(2);
+		var w = size * num;
 		if (width && x + w > width){
 			x = 0;
 			y += h;
@@ -87,12 +85,21 @@ function getTextImage(text, size, color, bgcolor, width) {
 		}
 	}
 	var canvas = document.createElement("canvas"), ctx = canvas.getContext("2d");
-	var textxy = [], font = ctx.font = size + "px Dosis";
+	var textxy = [], font = ctx.font = size + "px Dosis", mode = 0;
+	function setMode(m){
+		if (mode != m){
+			if (x) x += 3;
+			mode = m;
+		}
+	}
 	function pushText(text){
+		text = text.trim();
+		if (!text) return;
+		setMode(1);
 		var w = ctx.measureText(text).width;
 		if (!width || x + w <= width){
 			textxy.push(text, x, y+size);
-			x += w + 3;
+			x += w;
 			return;
 		}
 		var idx = 0, endidx = 0, oldblock = "";
@@ -115,7 +122,7 @@ function getTextImage(text, size, color, bgcolor, width) {
 			if (width && x >= width){
 				x = 0;
 				y += h;
-			}else x += 3;
+			}
 		}
 	}
 	text = text.replace(/\|/g, " | ");

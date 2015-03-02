@@ -24,7 +24,7 @@ var data = {
 	beguilestop:"Return to original owner at start of next turn",
 	blackhole:"Absorb 3 quanta per element from target player. Heal 1 per absorbed quantum",
 	bless:"Target gains 3|3",
-	blockwithcharge:"Block attack per charge",
+	blockwithcharge:"Block attack per stack",
 	bolsterintodeck:"Push 3 copies of target creature onto own deck. Cannot ricochet",
 	boneyard:["When a creature dies, summon a 1|1 Skeleton", "When a creature dies, summon a 2|2 Skeleton"],
 	bounce:"Return to owner's hand instead of dying",
@@ -138,7 +138,7 @@ var data = {
 	inertia:"When own is targeted, produce 2:3",
 	infect:"Poison target creature",
 	inflation:"Increase cost of all actives by 1",
-	ink:"Summon a Cloak with 1 charge",
+	ink:"Summon a Cloak which lasts 1 turn",
 	innovation:"Discard target card, owner draws three cards",
 	integrity:"Combine all shards in hand to form a Shard Golem",
 	jetstream:"Target airborne creature gains 3|-1",
@@ -312,7 +312,7 @@ var data = {
 	wisdom:"Target gains 3|0. May target immaterial, granting psionic",
 	yoink:"Steal target card",
 };
-[["dagger", "1:2/1:11. Increment damage if cloaked"], ["hammer", "1:3/1:4"], ["bow", "1:8/1:9"], ["staff", "1:5/1:7"], ["disc", "1:1/1:12"], ["axe", "1:6/1:10"]].forEach(function(x){
+[["dagger", "1:2 1:11. Increment damage if cloaked"], ["hammer", "1:3 1:4"], ["bow", "1:8 1:9"], ["staff", "1:5 1:7"], ["disc", "1:1 1:12"], ["axe", "1:6 1:10"]].forEach(function(x){
 	data[x[0]] = "Increment damage if mark is "+x[1];
 });
 [["pillmat", "1:4 1:6 1:7 1:9"], ["pillspi", "1:2 1:5 1:8 1:11"], ["pillcar", "1:1 1:3 1:10 1:12"]].forEach(function(x){
@@ -328,8 +328,9 @@ function auraText(tgts, bufftext, upbufftext){
 }
 var statusData = {
 	cloak:"Cloaks own field",
-	charges:function(c){return etg.Thing.prototype.hasactive.call(c, "auto", "losecharge")?"":"Enter with " + c.status.charges + (c.status.stackable?" stacks":" charges")},
+	charges:function(c){return etg.Thing.prototype.hasactive.call(c, "auto", "losecharge")?"":"Enter with " + c.status.charges + (c.status.stackable?" stack":" charge") + (c.status.charges==1?"":"s")},
 	flooding:"Non aquatic creatures past first five creature slots die on turn end. Consumes 1:7. Unique",
+	freedom:"",
 	nightfall:auraText("Nocturnal creatures", "1|1", "2|1"),
 	nothrottle:"Throttling does not apply to any of own creatures while equipped",
 	patience:"Each turn delay own creatures. They gain 2|1. 4|1 if burrowed. 5|2 if flooded. Unique",
@@ -370,7 +371,7 @@ module.exports = function(c, event){
 				var entry = data[name];
 				if (entry === undefined) return;
 				pushEntry(ret, c, key, entry);
-				if (key == "cast") ret[ret.length-1] = etg.casttext(c.cast, c.castele) + ret[ret.length-1];
+				if (key == "cast") ret[ret.length-1] = etg.casttext(c.cast, c.castele) + " " + ret[ret.length-1];
 			});
 		}
 		return ret.join("\n");
