@@ -6,27 +6,14 @@ var options = require("./options");
 exports.loaded = false;
 function load(progress, postload){
 	exports.load = undefined;
-	var assets = ["bg_quest", "bg_questmap", "atlas", "cardBacks", "cardBorders"];
-	var widths = {
-		cardBacks: 132,
-		cardBorders: 128,
-	};
+	var assets = ["cardBacks", "atlas", "bg_quest", "bg_questmap"];
 	function process(asset, tex, base){
-		var w = widths[asset];
-		if (w){
-			var ts = [];
-			for (var x = 0; x < (base?base.w:tex.width); x += w){
-				ts.push(new PIXI.Texture(tex, new PIXI.math.Rectangle(base?base.x+x:x, base?base.y:0, w, base?base.h:tex.height)));
-			}
-			exports[asset] = ts;
-		}else{
-			var id = asset.match(/\d+$/), tex = new PIXI.Texture(tex, base?new PIXI.math.Rectangle(base.x, base.y, base.w, base.h):null);
-			if (id){
-				asset = asset.slice(0, -id[0].length);
-				if (!(asset in exports)) exports[asset] = [];
-				exports[asset][id[0]] = tex;
-			}else exports[asset] = tex;
-		}
+		var id = asset.match(/\d+$/), tex = new PIXI.Texture(tex, base?new PIXI.math.Rectangle(base.x, base.y, base.w, base.h):null);
+		if (id){
+			asset = asset.slice(0, -id[0].length);
+			if (!(asset in exports)) exports[asset] = [];
+			exports[asset][id[0]] = tex;
+		}else exports[asset] = tex;
 	}
 	var loadCount = 0;
 	assets.forEach(function(asset){
@@ -34,8 +21,16 @@ function load(progress, postload){
 		img.addEventListener("load", function(){
 			loadCount++;
 			progress(loadCount/assets.length);
-			var w = widths[asset], tex = new PIXI.BaseTexture(this);
-			if (asset == "atlas"){
+			var tex = new PIXI.BaseTexture(this);
+			if (asset == "cardBacks"){
+				var ts = [], bs = [];
+				for (var x = 0; x < tex.width; x += 132){
+					ts.push(new PIXI.Texture(tex, new PIXI.math.Rectangle(x, 0, 132, tex.height)));
+					bs.push(new PIXI.Texture(tex, new PIXI.math.Rectangle(x, 0, 132, 17)));
+				}
+				exports.cardBacks = ts;
+				exports.cardBorders = bs;
+			}else if (asset == "atlas"){
 				var atlas = require("./assets/atlas");
 				for(var key in atlas){
 					var data = atlas[key];
@@ -170,6 +165,7 @@ function getInstImage(code, scale, cache){
 		var rend = cache[code] || require("./px").mkRenderTexture(Math.ceil(128 * scale), Math.ceil(162 * scale));
 		var btex = exports.cardBorders[card.element + (card.upped ? 13 : 0)];
 		var border = new PIXI.Sprite(btex), border2 = new PIXI.Sprite(btex);
+		border.scale.x = border2.scale.x = 128/132;
 		border2.position.y = 162;
 		border2.scale.y = -1;
 		border.addChild(border2);
