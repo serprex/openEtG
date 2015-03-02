@@ -343,7 +343,7 @@ function processEntry(c, event, entry){
 	return typeof entry === "string" ? entry :
 		entry instanceof Array ? entry[asCard(c).upped?1:0] :
 		entry instanceof Function ? entry(asCard(c), c) :
-		event in entry ? processEntry(c, event, entry[event]) : "!!";
+		event in entry ? processEntry(c, event, entry[event]) : "";
 }
 function asCard(c){
 	return c instanceof etg.Card?c:c.card;
