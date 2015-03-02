@@ -1,7 +1,7 @@
 rule mkcjs
  command=mkcjs $out $in
 rule ssheet
- command=spritesheet-js $in -cf atlas.template -cf atlascss.template --extension=js --extension=css -n assets/atlas
+ command=spritesheet-js $in -cf atlas.template --extension=js -n assets/atlas
 rule optipng
  command=optipng $out
 rule mkatlascss
