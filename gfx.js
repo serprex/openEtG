@@ -74,7 +74,7 @@ function makeArt(card, art, oldrend) {
 	if (art) {
 		var artspr = new PIXI.Sprite(art);
 		artspr.position.set(2, 20);
-		if (card.shiny) artspr.filters = [shinyFilter];
+		if (card.shiny && rend.renderer.gl) artspr.shader = shinyFilter.getShader(rend.renderer);
 		template.addChild(artspr);
 	}
 	var nametag = new PIXI.Sprite(Text(card.name, 12, card.upped ? "black" : "white"));
@@ -183,7 +183,7 @@ function getInstImage(code, scale, cache){
 		if (art) {
 			var artspr = new PIXI.Sprite(art);
 			artspr.position.set(0, 16);
-			if (card.shiny) artspr.filters = [shinyFilter];
+			if (card.shiny && rend.renderer.gl) artspr.shader = shinyFilter.getShader(rend.renderer);
 			border.addChild(artspr);
 		}
 		var text = new PIXI.Sprite(Text(card.name, 16, card.upped ? "black" : "white"));
@@ -241,10 +241,5 @@ if (typeof PIXI !== "undefined"){
 	exports.getCardImage = getCardImage;
 	exports.getWeaponShieldImage = getWeaponShieldImage;
 	exports.Text = Text;
-	var shinyFilter = new (require("./ColorMatrixFilter"))([
-		0,1,0,0,
-		0,0,1,0,
-		1,0,0,0,
-		0,0,0,1,
-	]);
+	var shinyFilter = new (require("./ColorMatrixFilter"))();
 }
