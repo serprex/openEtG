@@ -8,7 +8,7 @@ function load(progress, postload){
 	exports.load = undefined;
 	var assets = ["cardBacks", "atlas", "bg_quest", "bg_questmap"];
 	function process(asset, tex, base){
-		var id = asset.match(/\d+$/), tex = new PIXI.Texture(tex, base?new PIXI.math.Rectangle(base.x, base.y, base.w, base.h):null);
+		var id = asset.match(/\d+$/), tex = new PIXI.Texture(tex, base?new PIXI.math.Rectangle(base[0], base[1], base[2], base[3]):null);
 		if (id){
 			asset = asset.slice(0, -id[0].length);
 			if (!(asset in exports)) exports[asset] = [];
@@ -33,8 +33,7 @@ function load(progress, postload){
 			}else if (asset == "atlas"){
 				var atlas = require("./assets/atlas");
 				for(var key in atlas){
-					var data = atlas[key];
-					process(key, tex, data);
+					process(key, tex, atlas[key]);
 				}
 			}else process(asset, tex);
 			if (loadCount == assets.length){

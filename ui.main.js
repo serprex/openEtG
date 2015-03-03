@@ -143,9 +143,7 @@
 					var link = document.createElement("a");
 					link.href = "deck/" + deck;
 					link.target = "_blank";
-					link.className = "ico e"+etg.fromTrueMark(deck.slice(-3));
-					link.style.width = "16px";
-					link.style.height = "16px";
+					link.className = "ico ce"+etg.fromTrueMark(deck.slice(-3));
 					span.appendChild(link);
 					span.appendChild(document.createTextNode(name+" "));
 					span.addEventListener("click", function(e){

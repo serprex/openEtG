@@ -100,17 +100,13 @@ exports.domText = function(text){
 					if (num < 4) {
 						for (var j = 0;j < num;j++) {
 							var sp = document.createElement("span");
-							sp.className = "ico e"+parse[1];
-							sp.style.width="16px";
-							sp.style.height="16px";
+							sp.className = "ico ce"+parse[1];
 							this.appendChild(sp);
 						}
 					}else{
 						this.appendChild(document.createTextNode(parse[0]));
 						var sp = document.createElement("span");
-						sp.className = "ico e"+parse[1];
-						sp.style.width="16px";
-						sp.style.height="16px";
+						sp.className = "ico ce"+parse[1];
 						this.appendChild(sp);
 					}
 				}
