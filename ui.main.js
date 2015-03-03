@@ -22,7 +22,7 @@
 		document.getElementById("rightpane").style.display = "none";
 	}
 	var sockEvents = {
-		clear:clearChat,
+		clear:chat.clear,
 		userdump:function(data) {
 			delete data.x;
 			sock.user = data;
@@ -108,10 +108,6 @@
 		}
 		chat((muteall?"You have chat muted. ":"") + "Muted: " + muted.join(", "));
 	}
-	function clearChat(){
-		var chatBox = document.getElementById("chatBox");
-		while (chatBox.firstChild) chatBox.firstChild.remove();
-	}
 	function maybeSendChat(e) {
 		e.cancelBubble = true;
 		if (e.keyCode == 13) {
@@ -119,7 +115,7 @@
 			var chatinput = document.getElementById("chatinput"), msg = chatinput.value.trim();
 			chatinput.value = "";
 			if (msg == "/clear"){
-				clearChat();
+				chat.clear();
 			}else if (msg == "/who"){
 				sock.emit("who");
 			}else if (msg.match(/^\/roll( |$)\d*d?\d*$/)){

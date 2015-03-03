@@ -137,7 +137,7 @@ module.exports = function(nymph) {
 				}
 				var cost = userutil.arenaCost(lvi.lv);
 				if (sock.user.gold < cost) {
-					chat("Requires " + cost + "\u00A4");
+					chat("Requires " + cost + "$");
 					return;
 				}
 				sock.userEmit("foearena", lvi);
@@ -193,7 +193,7 @@ module.exports = function(nymph) {
 		},
 		codegold:function(data) {
 			sock.user.gold += data.g;
-			chat(data.g + "\u00A4 added!");
+			chat(data.g + "$ added!");
 		},
 		codecode:function(data) {
 			sock.user.pool = etgutil.addcard(sock.user.pool, data.card);

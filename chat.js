@@ -13,3 +13,6 @@ function chat(msg, fontcolor) {
 }
 module.exports = chat;
 chat.addSpan = addSpan;
+chat.clear = function(){
+	while (chatBox.firstChild) chatBox.firstChild.remove();
+}
