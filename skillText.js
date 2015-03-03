@@ -72,7 +72,7 @@ var data = {
 	dshield:"Become immaterial until next turn",
 	duality:"Generate a copy of foe's next draw",
 	earth:"Produce 1:4",
-	earthquake:"Destroy up to 3 stacked permanents",
+	earthquake:"Destroy up to 3 stacks from target permanent",
 	eatspell:"Absorb next spell, gaining 1|1",
 	elf:"Become Fallen if target of Chaos Seed",
 	empathy:"Heal owner per creature owned per turn. Upkeep per 8 creatures",
@@ -158,7 +158,7 @@ var data = {
 		var charges = c.status.charges;
 		return "Lasts " + charges + " turn" + (charges == 1?"":"s");
 	},
-	luciferin:"All your creatures without skills produce 1:8. Heal self 10",
+	luciferin:"All your creatures without skills produce 1:8. Heal owner 10",
 	lycanthropy:"Gain 5|5 & become nocturnal",
 	martyr:"Increment strength per missing health",
 	mend:"Heal target creature 10",
