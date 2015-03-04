@@ -11,24 +11,16 @@ exports.parseCsv = function(type, file){
 		if (!keys){
 			keys = line.split(",")
 		}else{
-			var carddata = line.split(","), cardinfo = {};
-			for(var k=0; k<carddata.length; k++){
-				if (carddata[k].charAt(0) == '"'){
-					for (var kk=k+1; kk<carddata.length; kk++){
-						carddata[k] += "," + carddata[kk];
-					}
-					cardinfo[keys[k]] = carddata[k].slice(1, carddata[k].length-1).replace(/""/g, '"');
-					break;
-				}else{
-					cardinfo[keys[k]] = carddata[k];
-				}
-			}
+			var cardinfo = {}, nth = 0;
+			etg.iterSplit(line, ",", function(value){
+				cardinfo[keys[nth++]] = value;
+			});
 			var cardcode = cardinfo.Code;
 			if (cardcode in exports.Codes){
-				console.log(cardcode + " duplicate " + carddata[1] + " " + exports.Codes[cardcode].name);
+				console.log(cardcode + " duplicate " + cardinfo.Name + " " + exports.Codes[cardcode].name);
 			}else{
 				exports.Codes[cardcode] = new etg.Card(type, cardinfo);
-				if (cardcode < "6qo") exports[carddata[1].replace(/\W/g, "")] = exports.Codes[cardcode];
+				if (cardcode < "6qo") exports[cardinfo.Name.replace(/\W/g, "")] = exports.Codes[cardcode];
 				cardinfo.Code = etgutil.asShiny(cardcode, true);
 				exports.Codes[cardinfo.Code] = new etg.Card(type, cardinfo);
 			}
