@@ -334,7 +334,7 @@ var statusData = {
 	nightfall:auraText("Nocturnal creatures", "1|1", "2|1"),
 	nothrottle:"Throttling does not apply to any of own creatures while equipped",
 	patience:"Each turn delay own creatures. They gain 2|1. 4|1 if burrowed. 5|2 if flooded. Unique",
-	poison:function(c){return "Enter with " + c.status.poison + " poison"},
+	poison:function(c,inst){return c==inst?"Enter with " + c.status.poison + " poison":inst.status.poison + " poison"},
 	stackable:"",
 	stasis:"Prevent creatures attacking at end of turn",
 	tunnel:"Burrowed creatures bypass shields",

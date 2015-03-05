@@ -1615,7 +1615,7 @@ tick:function(c,t){
 },
 tidalhealing:function(c,t){
 	c.owner.masscc(c, function(c, t){
-		if (!t.hasactive("hit", "regen")) t.addactive("hit", Actives.regen);
+		if (t.status.aquatic && !t.hasactive("hit", "regen")) t.addactive("hit", Actives.regen);
 	});
 },
 tornado:function(c,t){
