@@ -288,7 +288,7 @@ var data = {
 	throwrock:["Deal 3 spell damage to target creature, then shuffle Throw Rock into target's deck",
 		"Deal 4 spell damage to target creature, then shuffle Throw Rock into target's deck"],
 	tick:["Takes 1 damage. If damage results in death, deal 18 damage to foe", "Takes 3 damage. If damage results in death, deal 4 damage to all foe's creatures"],
-	tidalhealing:"Own aquatic creatures gain \"Apply 1 purify to owner on hit. Throttled\" without",
+	tidalhealing:"Own aquatic creatures gain \"Apply 1 purify to owner on hit. Throttled\". Does not stack",
 	tornado:["Randomly reshuffle 2 of foe's permanents & one of own into either deck",
 		"Randomly reshuffle 2 of foe's permanents into either deck"],
 	trick:"Swap target creature with a different creature from deck",
@@ -299,8 +299,8 @@ var data = {
 	upload:"Target gains 2|0 & Byt gains 0|-2",
 	vampire:"Heal owner per damage dealt",
 	vend:"Sacrifice & draw",
-	vengeance:"When ally creature dies during foe's turn, expend a stack & ally creatures attack. 108 stacks",
-	vindicate:"When ally creature dies, it attacks again. Only proc once per death & ply",
+	vengeance:"When ally creature dies during foe's turn, expend a stack & ally creatures attack",
+	vindicate:"When ally creature dies, it attacks again. Unready",
 	virtue:"Increment owner's maximum health by damge blocked when attacking",
 	virusinfect:"Sacrifice self & poison target creature",
 	virusplague:"Sacrifice self & poison target player's creatures",
@@ -323,7 +323,7 @@ var data = {
 });
 function auraText(tgts, bufftext, upbufftext){
 	return function(c){
-		return tgts + " gain " + (c.upped?bufftext:upbufftext) + " while " + c.name + " in play. Unique";
+		return tgts + " gain " + (c.upped?upbufftext:bufftext) + " while " + c.name + " in play. Unique";
 	}
 }
 var statusData = {
