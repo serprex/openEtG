@@ -193,7 +193,7 @@ module.exports = function(nymph) {
 		},
 		codegold:function(data) {
 			sock.user.gold += data.g;
-			chat(data.g + "$ added!");
+			chat.addSpan(px.domText(data.g + "$ added!\n"));
 		},
 		codecode:function(data) {
 			sock.user.pool = etgutil.addcard(sock.user.pool, data.card);

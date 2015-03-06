@@ -64,6 +64,9 @@ function activeUsers() {
 }
 function genericChat(socket, data){
 	data.x = "chat";
+	broadcast(data);
+}
+function broadcast(data){
 	var msg = JSON.stringify(data);
 	wss.clients.forEach(function(sock){
 		sock.send(msg);
@@ -108,16 +111,10 @@ var userEvents = {
 		guestban = data.m == "off";
 	}),
 	modmute:modf(function(data, user){
-		var msg = JSON.stringify({x:"mute", m:data.m});
-		wss.clients.forEach(function(sock){
-			sock.send(msg);
-		});
+		broadcast({x:"mute", m:data.m});
 	}),
 	modclear:modf(function(data, user){
-		var msg = '{"x":"clear"}';
-		wss.clients.forEach(function(sock){
-			sock.send(msg);
-		});
+		broadcast({x:"clear"});
 	}),
 	inituser:function(data, user) {
 		var starters = require("./srv/starter");
@@ -441,7 +438,6 @@ var userEvents = {
 			else sockEmit(this, "chat", { mode: "red", msg: to + " is not here right now." });
 		}
 		else{
-			delete data.a;
 			genericChat(this, data);
 		}
 	},
@@ -522,15 +518,12 @@ var sockEvents = {
 	},
 	roll:function(data){
 		var A = Math.min(data.A || 1, 99), X = data.X || etgutil.MAX_INT;
-		delete data.A;
-		delete data.X;
 		var sum = 0;
 		for(var i=0; i<A; i++){
 			sum += etg.PlayerRng.uptoceil(X);
 		}
-		data.msg = A + "d" + X + " " + sum;
-		data.mode = "#006000";
-		genericChat(this, data);
+		data.sum = sum;
+		broadcast(data);
 	},
 	mod:function(data){
 		var socket = this;
@@ -670,23 +663,21 @@ wss.on("connection", function(socket) {
 		}
 		var func = userEvents[data.x];
 		if (func){
-			var u;
-			if (!data || !(u = data.u)){
-				return;
-			}
+			var u = data.u, auth = data.a;
+			delete data.a;
 			if (!(u in users)){
 				if (data.x == "logout") return;
 				db.hgetall("U:"+u, function(err, obj){
 					if (obj){
 						sutil.prepuser(obj);
 						users[u] = obj;
-						if (data.a == obj.auth) {
+						if (auth == obj.auth) {
 							usersock[u] = socket;
 							func.call(socket, data, obj);
 						}
 					}
 				});
-			} else if (data.a == users[u].auth) {
+			} else if (auth == users[u].auth) {
 				usersock[u] = socket;
 				func.call(socket, data, users[u]);
 			}

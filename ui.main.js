@@ -37,8 +37,24 @@
 			muteset[data.m] = true;
 			chat(data.m + " has been muted");
 		},
+		roll:function(data) {
+			var span = document.createElement("span");
+			span.style.color = "#006000";
+			if (data.u){
+				var b = document.createElement("b");
+				b.appendChild(document.createTextNode(data.u + " "));
+				span.appendChild(b);
+			}
+			span.appendChild(document.createTextNode((data.A||1) + "d" + data.X + " "));
+			var a = document.createElement("a");
+			a.target = "_blank";
+			a.href = "speed/" + data.sum;
+			a.appendChild(document.createTextNode(data.sum));
+			span.appendChild(a);
+			chat.addSpan(span);
+		},
 		chat:function(data) {
-			if ((muteall && !data.mode) || data.u in muteset) return;
+			if (muteall && !data.mode) return;
 			if (typeof Notification !== "undefined" && sock.user && ~data.msg.indexOf(sock.user.name) && !document.hasFocus()){
 				Notification.requestPermission();
 				new Notification(data.u, {body: data.msg});
@@ -92,10 +108,9 @@
 	var sock = require("./sock");
 	sock.et.onmessage = function(msg){
 		var data = JSON.parse(msg.data);
+		if (data.u && data.u in muteset) return;
 		var func = sockEvents[data.x] || px.getCmd(data.x);
-		if (func){
-			func.call(this, data);
-		}
+		if (func) func.call(this, data);
 	}
 	require("./httpcards")(function(){
 		if (options.preart) sock.emit("cardart");
