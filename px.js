@@ -289,11 +289,11 @@ function CardSelector(dom, cardmouseover, cardclick, maxedIndicator, filterboth)
 		self.showshiny ^= true;
 		self.makeColumns();
 	});
-	var bshowall = exports.domButton("Show All", function() {
+	this.bshowall = exports.domButton("Show All", function() {
 		this.value = (self.showall ^= true) ? "Auto Hide" : "Show All";
 		self.makeColumns();
 	});
-	dom.push([5, 578, bshiny], [5, 530, bshowall]);
+	dom.push([5, 578, bshiny], [5, 530, this.bshowall]);
 	this.elefilter = this.rarefilter = 0;
 	this.columns = [[],[],[],[],[],[]];
 	this.columnspr = [[],[],[],[],[],[]];
@@ -365,6 +365,7 @@ CardSelector.prototype.renderCanvas = function() {
 	PIXI.Container.prototype.renderCanvas.apply(this, arguments);
 }
 CardSelector.prototype.makeColumns = function(){
+	this.bshowall.style.display = this.cardpool?"inline":"none";
 	var self = this;
 	for (var i = 0;i < 6;i++) {
 		this.columns[i] = etg.filtercards(i > 2,
