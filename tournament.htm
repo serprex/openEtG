@@ -9,10 +9,10 @@
 	<option value="commoner">Commoner's Duel</option>
 </select>
 <script>
-	var Cards = require("./Cards");
 	var etg = require("./etg");
+	var Cards = require("./Cards");
 	var etgutil = require("./etgutil")
-	require("./etg.client").loadcards();
+	require("./httpcards")();
 	function testDeck() {
 		var deckcode = document.getElementById("deckcode");
 		var legality = document.getElementById("legality");
