@@ -76,6 +76,9 @@ function makeArt(card, art, oldrend) {
 		if (card.shiny && rend.renderer.gl) artspr.shader = shinyFilter.getShader(rend.renderer);
 		template.addChild(artspr);
 	}
+	if (card.shiny){
+		template.addChild(new PIXI.Sprite(exports.shinyborder));
+	}
 	var nametag = new PIXI.Sprite(Text(card.name, 12, card.upped ? "black" : "white"));
 	nametag.position.set(2, 2);
 	template.addChild(nametag);
