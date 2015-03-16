@@ -166,9 +166,6 @@ function Shield(card, owner){
 	this.dr = card.health;
 	Permanent.apply(this, arguments);
 }
-function Pillar(card, owner){
-	Thing.apply(this, arguments);
-}
 function CardInstance(card, owner){
 	this.owner = owner;
 	this.card = card;
@@ -178,7 +175,6 @@ Creature.prototype = Object.create(Thing.prototype);
 Permanent.prototype = Object.create(Thing.prototype);
 Weapon.prototype = Object.create(Permanent.prototype);
 Shield.prototype = Object.create(Permanent.prototype);
-Pillar.prototype = Object.create(Permanent.prototype);
 CardInstance.prototype = Object.create(Thing.prototype);
 Object.defineProperty(CardInstance.prototype, "active", { get: function() { return this.card.active; }});
 Object.defineProperty(CardInstance.prototype, "status", { get: function() { return this.card.status; }});
@@ -386,7 +382,7 @@ Player.prototype.clone = function(game){
 CardInstance.prototype.clone = function(owner){
 	return new CardInstance(this.card, owner);
 }
-;[Creature, Permanent, Weapon, Shield, Pillar].forEach(function(type){
+;[Creature, Permanent, Weapon, Shield].forEach(function(type){
 	var proto = type.prototype;
 	proto.clone = function(owner){
 		var obj = Object.create(proto);
@@ -463,15 +459,6 @@ Shield.prototype.hash = function(){
 	}
 	if (this.active.cast){
 		hash ^= this.cast * 7 + this.castele * 23;
-	}
-	return hash & 0x7FFFFFFF;
-}
-Pillar.prototype.hash = function(){
-	var hash = this.owner == this.owner.game.player1 ? 3917 : 2789;
-	hash ^= hashObj(this.status);
-	hash ^= parseInt(this.card.code, 32);
-	for (var key in this.active){
-		hash ^= hashString(key + "_" + this.active[key].activename.join(" "));
 	}
 	return hash & 0x7FFFFFFF;
 }
@@ -745,9 +732,6 @@ Weapon.prototype.info = function(){
 }
 Shield.prototype.info = function(){
 	return infocore(this, this.truedr() + "DR");
-}
-Pillar.prototype.info = function(){
-	return infocore(this, this.status.charges + " 1:" + (this.status.pendstate?this.owner.mark:this.card.element));
 }
 Thing.prototype.info = function(){
 	return skillText(this);
@@ -1187,7 +1171,7 @@ CardInstance.prototype.useactive = function(target){
 		owner.addpoison(1);
 	}
 	if (card.type <= PermanentEnum){
-		var cons = [Pillar, Weapon, Shield, Permanent][card.type];
+		var cons = [Permanent, Weapon, Shield, Permanent][card.type];
 		new cons(card, owner).place(true);
 		ui.playSound("permPlay");
 	}else if (card.type == SpellEnum){
@@ -1243,7 +1227,6 @@ exports.Thing = Thing;
 exports.Card = Card;
 exports.Player = Player;
 exports.CardInstance = CardInstance;
-exports.Pillar = Pillar;
 exports.Weapon = Weapon;
 exports.Shield = Shield;
 exports.Permanent = Permanent;

@@ -562,7 +562,7 @@ forceplay:function(c,t){
 		}
 	}
 	if (card.type <= etg.PermanentEnum){
-		var cons = [etg.Pillar, etg.Weapon, etg.Shield, etg.Permanent][card.type];
+		var cons = [etg.Permanent, etg.Weapon, etg.Shield, etg.Permanent][card.type];
 		new cons(card, t.owner).place(true);
 		ui.playSound("permPlay");
 	}else if (card.type == etg.SpellEnum){
@@ -1546,8 +1546,6 @@ steal:function(c,t){
 				c.owner.weapon = new etg.Weapon(t.card, c.owner);
 				c.owner.weapon.status.charges = 1;
 			}
-		}else if (t instanceof etg.Pillar){
-			new etg.Pillar(t.card, c.owner).place();
 		}else{
 			new etg.Permanent(t.card, c.owner).place();
 		}
