@@ -118,7 +118,7 @@ require("./httpcards")(function() {
 		}
 		equal(player1.hand.length, 3, "handlength");
 		var pillars = player1.permanents[0];
-		ok(pillars instanceof etg.Pillar, "ispillar");
+		ok(pillars.card.type == etg.PillarEnum, "ispillar");
 		equal(pillars.status.charges, 5, "5 charges");
 		Actives.earthquake(player2, pillars);
 		equal(pillars.status.charges, 2, "2 charges");

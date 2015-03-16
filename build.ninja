@@ -3,7 +3,7 @@ rule mkcjs
 rule ssheet
  command=spritesheet-js $in --customFormat atlas.template --extension=js -n assets/atlas
 rule optipng
- command=optipng $out
+ command=optipng -o2 -strip all $out
 rule mkatlascss
  command=./mkatlascss.js
 build etgify.js:mkcjs etg.js assets/atlas.js skillText.js tutor.js InteractionManager.js ColorMatrixFilter.js httpcards.js etgutil.js uiutil.js userutil.js options.js Actives.js MersenneTwister.js Effect.js Quest.js ai/eval.js ai/deck.js ai/search.js ai/lethal.js ai/mulligan.js Decks.js mkAi.js Cards.js gfx.js chat.js px.js sock.js views/Login.js views/MainMenu.js views/ElementSelect.js views/Match.js views/Shop.js views/Upgrade.js views/Colosseum.js views/Editor.js views/Shop.js views/Trade.js views/Library.js views/ArenaInfo.js views/ArenaTop.js views/Reward.js views/Result.js views/QuestMain.js views/QuestArea.js views/WealthTop.js

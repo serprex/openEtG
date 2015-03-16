@@ -562,7 +562,7 @@ forceplay:function(c,t){
 		}
 	}
 	if (card.type <= etg.PermanentEnum){
-		var cons = [etg.Pillar, etg.Weapon, etg.Shield, etg.Permanent][card.type];
+		var cons = [etg.Permanent, etg.Weapon, etg.Shield, etg.Permanent][card.type];
 		new cons(card, t.owner).place(true);
 		ui.playSound("permPlay");
 	}else if (card.type == etg.SpellEnum){
@@ -1107,12 +1107,12 @@ pacify:function(c,t){
 },
 pairproduce:function(c,t){
 	c.owner.permanents.forEach(function(p){
-		if (p && p instanceof etg.Pillar && p.active.auto) p.active.auto(p);
+		if (p && p.card.type == etg.PillarEnum && p.active.auto) p.active.auto(p);
 	});
 },
 paleomagnetism:function(c,t){
 	var e = c.owner.upto(58);
-	new etg.Pillar(c.card.as(Cards.Codes[e >= 29 ? etg.PillarList[c.owner.mark] : e >= 26 ? ["4te", "4tf", "4tg"][e-26] : e >= 13 ? etg.PendList[e-13] : etg.PillarList[e]]), c.owner).place();
+	new etg.Permanent(c.card.as(Cards.Codes[e >= 29 ? etg.PillarList[c.owner.mark] : e >= 26 ? ["4te", "4tf", "4tg"][e-26] : e >= 13 ? etg.PendList[e-13] : etg.PillarList[e]]), c.owner).place();
 },
 pandemonium:function(c,t){
 	c.owner.foe.masscc(c, Actives.cseed, true);
@@ -1546,8 +1546,6 @@ steal:function(c,t){
 				c.owner.weapon = new etg.Weapon(t.card, c.owner);
 				c.owner.weapon.status.charges = 1;
 			}
-		}else if (t instanceof etg.Pillar){
-			new etg.Pillar(t.card, c.owner).place();
 		}else{
 			new etg.Permanent(t.card, c.owner).place();
 		}

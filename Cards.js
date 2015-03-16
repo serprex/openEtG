@@ -64,7 +64,7 @@ var TargetFilters = {
 		return c != t && t instanceof etg.CardInstance;
 	},
 	pill:function(c, t){
-		return t.isMaterial(etg.Pillar);
+		return t.isMaterial(etg.Permanent) && t.card.type == etg.PillarEnum;
 	},
 	weap:function(c, t){
 		return (t instanceof etg.Weapon || (t instanceof etg.Creature && t.card.type == etg.WeaponEnum)) && !t.status.immaterial && !t.status.burrowed;
