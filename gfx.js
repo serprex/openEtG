@@ -77,7 +77,7 @@ function makeArt(card, art, oldrend) {
 		template.addChild(artspr);
 	}
 	if (card.shiny){
-		template.addChild(new PIXI.Sprite(exports.shinyborder));
+		template.addChild(new PIXI.Sprite(exports.shinyborder[card.upped?1:0]));
 	}
 	var nametag = new PIXI.Sprite(Text(card.name, 12, card.upped ? "black" : "white"));
 	nametag.position.set(2, 2);
