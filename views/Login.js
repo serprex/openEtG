@@ -4,6 +4,8 @@ var ui = require("../uiutil");
 var chat = require("../chat");
 var sock = require("../sock");
 var options = require("../options");
+var bg_login = new Image()
+bg_login.src = "assets/bg_login.png";
 module.exports = function(){
 	function maybeLogin(e) {
 		e.cancelBubble = true;
@@ -66,13 +68,13 @@ module.exports = function(){
 	tutlink.target = "_blank";
 	tutlink.appendChild(document.createTextNode("Tutorial"));
 	var dom = [
-		[96, 196, px.domBox(400, 124)],
-		[100, 200, username],
-		[100, 230, password],
-		[260, 230, remember],
-		[300, 200, login],
-		[100, 300, tutlink],
-		[400, 200, ["Sandbox", require("./MainMenu")]],
+		[0, 0, bg_login],
+		[270, 350, username],
+		[270, 380, password],
+		[430, 380, remember],
+		[430, 350, login],
+		[270, 424, tutlink],
+		[530, 350, ["Sandbox", require("./MainMenu")]],
 	];
 	if (loadingBar) dom.push([0, 568, loadingBar]);
 	px.view({
