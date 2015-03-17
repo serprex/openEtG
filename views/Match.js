@@ -636,13 +636,14 @@ function startMatch(game, foeDeck) {
 					var child = permsprite[j][i].children[1], child2 = permsprite[j][i].children[2];
 					if (pr.card.type == etg.PillarEnum) {
 						child.texture = ui.getTextImage("1:" + (pr.status.pendstate ? pr.owner.mark : pr.card.element) + " x" + pr.status.charges, 10, pr.card.upped ? "black" : "white", ui.maybeLighten(pr.card));
-						child2 = null;
+						child2.texture = gfx.nopic;
+					}else{
+						if (pr.active.auto && pr.active.auto == Actives.locket) {
+							child.texture = ui.getTextImage("1:" + (pr.status.mode === undefined ? pr.owner.mark : pr.status.mode), 10, pr.card.upped ? "black" : "white", ui.maybeLighten(pr.card));
+						}
+						else child.texture = ui.getTextImage(pr.status.charges !== undefined ? " " + pr.status.charges : "", 10, pr.card.upped ? "black" : "white", ui.maybeLighten(pr.card));
+						child2.texture = ui.getTextImage(pr.activetext(), 8, pr.card.upped ? "black" : "white");
 					}
-					else if (pr.active.auto && pr.active.auto == Actives.locket) {
-						child.texture = ui.getTextImage("1:" + (pr.status.mode === undefined ? pr.owner.mark : pr.status.mode), 10, pr.card.upped ? "black" : "white", ui.maybeLighten(pr.card));
-					}
-					else child.texture = ui.getTextImage(pr.status.charges !== undefined ? " " + pr.status.charges : "", 10, pr.card.upped ? "black" : "white", ui.maybeLighten(pr.card));
-					if (child2) child2.texture = ui.getTextImage(pr.activetext(), 8, pr.card.upped ? "black" : "white");
 					drawStatus(pr, permsprite[j][i]);
 				} else permsprite[j][i].visible = false;
 			}
