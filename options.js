@@ -8,7 +8,7 @@ exports.register = function(opt, ele, nopersist){
 	var field = ele.type == "checkbox" ? "checked" : "value";
 	if (exports[opt]) ele[field] = exports[opt];
 	if (!nopersist && typeof localStorage !== "undefined"){
-		ele.addEventListener("input", function() {
+		ele.addEventListener("change", function() {
 			if (this[field]){
 				exports[opt] = localStorage[opt] = this[field];
 			}else{
@@ -17,7 +17,7 @@ exports.register = function(opt, ele, nopersist){
 			}
 		});
 	}else{
-		ele.addEventListener("input", function() {
+		ele.addEventListener("change", function() {
 			exports[opt] = field == "checked" && !this.checked ? "" : this[field];
 		});
 	}
