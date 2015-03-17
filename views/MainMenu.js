@@ -33,8 +33,8 @@ module.exports = function(nymph) {
 		[userutil.arenaCost(0), 60],
 		[userutil.arenaCost(1), 120],
 	];
-	function costText(lv){
-		return !sock.user ? "" : "\nCost: " + aicostpay[lv][0] + "$. Base reward: " + aicostpay[lv][1] + "$";
+	function costText(lv, nonewline){
+		return !sock.user ? "" : (nonewline ? "" : "\n") + "Cost: " + aicostpay[lv][0] + "$. Base reward: " + aicostpay[lv][1] + "$";
 	}
 	var tipjar = [
 		"Each card in your booster pack has a 50% chance of being from the chosen element",
@@ -81,47 +81,66 @@ module.exports = function(nymph) {
 		sock.emit("wealthtop");
 		this.style.display = "none";
 	}
-	function blueText(text){
+	function titleText(text, middle) {
 		var text = px.domText(text);
-		text.style.fontSize = "56px";
-		text.style.color = "#0c4262";
+		text.style.fontSize = "20px";
+		text.style.color = "white";
 		text.style.textAlign = "center";
 		text.style.verticalAlign = "middle";
-		text.style.width = "392px";
-		text.style.height = "80px";
+		text.style.width = middle ? "300px" : "250px";
+		//text.style.height = "80px";
 		text.style.pointerEvents = "none";
 		return text;
 	}
-	function tierText(text){
+	function tierText(text) {
 		var text = px.domText(text);
-		text.style.fontSize = "24px";
-		text.style.color = "#0c4262";
+		text.style.fontSize = "18px";
+		text.style.color = "white";
 		text.style.verticalAlign = "middle";
-		text.style.height = "80px";
+		//text.style.height = "80px";
+		text.style.pointerEvents = "none";
+		return text;
+	}
+	function labelText(text) {
+		var text = px.domText(text);
+		text.style.fontSize = "14px";
+		text.style.color = "white";
+		text.style.verticalAlign = "middle";
+		text.style.height = "20px";
 		text.style.pointerEvents = "none";
 		return text;
 	}
 	var dom = [
 		[40, 16, px.domBox(820, 60)],
-		[40, 92, px.domBox(392, 80)],
-		[40, 192, px.domBox(392, 80)],
-		[40, 437, px.domBox(392, 40)],
-		[40, 492, px.domBox(392, 80)],
-		[468, 92, px.domBox(392, 80)],
-		[468, 192, px.domBox(392, 80)],
-		[40, 92, blueText("AI BATTLE")],
-		[468, 92, blueText("ARENA")],
-		[40, 192, blueText("CARDS")],
-		[798, 96, tierText("Tier 1")],
-		[798, 134, tierText("Tier 2")],
+		[40, 92, px.domBox(250, 120)],
+		[40, 210, px.domBox(250, 120)],
+		[300, 92, px.domBox(300, 320)],
+		[300, 420, px.domBox(300, 170)],
+		[610, 92, px.domBox(250, 200)],
+		[610, 300, px.domBox(250, 200)],
+		[610, 510, px.domBox(250, 80)],
+		[300, 102, titleText("AI BATTLE",true)],
+		[610, 102, titleText("CARDS AND DECKS")],
+		[40, 220, titleText("LEADERBOARDS")],
+		[300, 430, titleText("ARENA"),true],
+		[610, 310, titleText("PLAYERS")],
+		[40, 102, titleText("STATS")],
+		[359, 460, tierText("Tier 1")],
+		[450, 460, tierText("Tier 2")],
+		[410, 140, labelText(costText(1,true))],
+		[410, 170, labelText(costText(2, true))],
+		[410, 200, labelText(costText(3, true))],
+		[410, 230, labelText(costText(4, true))],
+		[330, 310, labelText("Daily Challenges!")],
+		[460, 310, labelText("Go on adventure!")],
 		[50, 26, tinfo],
-		[478, 200, tstats],
-		[50, 100, ["Commoner", mkAi.mkAi(0), mkSetTip("Commoners have no upgraded cards & mostly common cards." + costText(0))]],
-		[150, 100, ["Mage", mkAi.mkPremade("mage"), mkSetTip("Mages have preconstructed decks with a couple rares." + costText(1))]],
-		[250, 100, ["Champion", mkAi.mkAi(2), mkSetTip("Champions have some upgraded cards." + costText(2))]],
-		[350, 100, ["Demigod", mkAi.mkPremade("demigod"), mkSetTip("Demigods are extremely powerful. Come prepared for anything." + costText(3))]],
-		[50, 200, ["Deck", require("./Editor"), mkSetTip("Edit & manage your decks.")]],
-		[250, 200, ["Wealth T50", wealthTop, mkSetTip("See who's collected the most wealth.")]],
+		[80, 140, tstats],
+		[320, 140, ["Commoner", mkAi.mkAi(0), mkSetTip("Commoners have no upgraded cards & mostly common cards." + costText(0))]],
+		[320, 170, ["Mage", mkAi.mkPremade("mage"), mkSetTip("Mages have preconstructed decks with a couple rares." + costText(1))]],
+		[320, 200, ["Champion", mkAi.mkAi(2), mkSetTip("Champions have some upgraded cards." + costText(2))]],
+		[320, 230, ["Demigod", mkAi.mkPremade("demigod"), mkSetTip("Demigods are extremely powerful. Come prepared for anything." + costText(3))]],
+		[700, 220, ["Deck", require("./Editor"), mkSetTip("Edit & manage your decks.")]],
+		[130, 260, ["Wealth T50", wealthTop, mkSetTip("See who's collected the most wealth.")]],
 		[777, 50, ["Next tip", function() {
 			tipNumber = (tipNumber+1) % tipjar.length;
 			tinfo.text = tipjar[tipNumber] + ".";
@@ -151,22 +170,22 @@ module.exports = function(nymph) {
 				sock.emit("arenatop", lvi);
 				this.style.display = "none";
 			}
-			var y = 100+i*45;
+			var x = 350+i*100;
 			if (sock.user){
 				dom.push(
-					[478, y, ["Arena AI", arenaAi, mkSetTip("In the arena you will face decks from other players." + costText(4+lvi.lv))]],
-					[578, y, ["Arena Info", arenaInfo, mkSetTip("Check how your arena deck is doing.")]]
+					[x, 490, ["Arena AI", arenaAi, mkSetTip("In the arena you will face decks from other players." + costText(4+lvi.lv))]],
+					[x, 540, ["Arena Info", arenaInfo, mkSetTip("Check how your arena deck is doing.")]]
 				);
 			}
 			dom.push(
-				[678, y, ["Arena T20", arenaTop, mkSetTip("See who the top players in arena are right now.")]]
+				[80+i*100, 290, ["Arena" + (i+1) + " T20", arenaTop, mkSetTip("See who the top players in arena are right now.")]]
 			);
 		})({lv:i});
 	}
 
 	if ((sock.user && sock.user.oracle) || typeof nymph === "string") {
 		var oracle = new PIXI.Sprite(gfx.getArt(nymph || sock.user.oracle));
-		oracle.position.set(450, 300);
+		oracle.position.set(92, 340);
 		stage.view = oracle;
 		delete sock.user.oracle;
 	}
@@ -302,39 +321,40 @@ module.exports = function(nymph) {
 	soundChange();
 	musicChange();
 	dom.push(
-		[50, 445, aideck],
-		[205, 445, aihp],
-		[240, 445, aimark],
-		[275, 445, aidraw],
-		[310, 445, aideckpower],
-		[350, 445, ["Custom", aiClick]],
-		[50, 500, foename],
-		[205, 500, pvphp],
-		[240, 500, pvpmark],
-		[275, 500, pvpdraw],
-		[310, 500, pvpdeck],
-		[50, 545, ["PvP", challengeClick]],
-		[150, 545, ["Trade", tradeClick]],
-		[250, 545, ["Reward", rewardClick]],
-		[350, 545, ["Library", libraryClick]],
-		[777, 245, ["Logout", logout.bind(null, "logout"), mkSetTip("Click here to log out.")]]
+		[305, 360, aideck],
+		[455, 360, aihp],
+		[490, 360, aimark],
+		[525, 360, aidraw],
+		[560, 360, aideckpower],
+		[400, 385, ["Custom", aiClick]],
+		[630, 350, foename],
+		[630, 400, pvphp],
+		[630, 425, pvpmark],
+		[630, 450, pvpdraw],
+		[630, 475, pvpdeck],
+		[630, 375, ["PvP", challengeClick]],
+		[720, 375, ["Trade", tradeClick]],
+		[720, 400, ["Library", libraryClick]],
+		[720, 475, ["Reward", rewardClick]],
+		[777, 550, ["Logout", logout.bind(null, "logout"), mkSetTip("Click here to log out.")]]
 	);
 	if (sock.user){
 		dom.push(
-			[50, 145, ["Quests", require("./QuestMain"), mkSetTip("Go on an adventure!")]],
-			[150, 145, ["Colosseum", require("./Colosseum"), mkSetTip("Try some daily challenges in the Colosseum!")]],
-			[150, 200, ["Shop", require("./Shop"), mkSetTip("Buy booster packs which contain cards from the elements you choose.")]],
-			[150, 245, ["Upgrade", require("./Upgrade"), mkSetTip("Upgrade or sell cards.")]],
-			[677, 245, ["Settings", function() {
+			[460, 280, ["Quests", require("./QuestMain"), mkSetTip("Go on an adventure!")]],
+			[350, 280, ["Colosseum", require("./Colosseum"), mkSetTip("Try some daily challenges in the Colosseum!")]],
+			[650, 260, ["Shop", require("./Shop"), mkSetTip("Buy booster packs which contain cards from the elements you choose.")]],
+			[750, 260, ["Upgrade", require("./Upgrade"), mkSetTip("Upgrade or sell cards.")]],
+			[660, 140, labelText("DECK: " + sock.user.selectedDeck)],
+			[637, 550, ["Settings", function() {
 				if (popdom && popdom.id == "settingspane"){
 					setDom(null);
 					return;
 				}
-				var div = px.domBox(392, 280);
+				var div = px.domBox(392, 156);
 				div.style.pointerEvents = "auto";
 				div.style.position = "absolute";
-				div.style.left = "468px";
-				div.style.top = "292px";
+				div.style.left = "460px";
+				div.style.top = "380px";
 				var wipe = px.domButton("Wipe Account",
 					function() {
 						if (foename.value == sock.user.name + "yesdelete") {
@@ -368,7 +388,7 @@ module.exports = function(nymph) {
 					[8, 53, enableSound], [135, 53, enableMusic], [260, 53, preloadart],
 					[8, 88, hideRightpane], [135, 88, printstats], [260, 88, hideCostIcon],
 					[8, 123, disableTut],
-					[309, 250, wipe]].forEach(function(info) {
+					[309, 123, wipe]].forEach(function(info) {
 					info[2].style.position = "absolute";
 					info[2].style.left = info[0] + "px";
 					info[2].style.top = info[1] + "px";
