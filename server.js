@@ -69,7 +69,7 @@ function genericChat(socket, data){
 function broadcast(data){
 	var msg = JSON.stringify(data);
 	wss.clients.forEach(function(sock){
-		sock.send(msg);
+		if (sock.readyState == 1) sock.send(msg);
 	});
 }
 function getAgedHp(hp, age){
@@ -339,14 +339,14 @@ var userEvents = {
 			}
 		});
 	},
-	canceltrade:function (data, user) {
+	canceltrade:function (data) {
 		var info = this.meta;
 		if (info.trade){
 			var foesock = usersock[info.trade.foe];
 			if (foesock){
 				sockEmit(foesock, "tradecanceled");
 				sockEmit(foesock, "chat", { mode: "red", msg: data.u + " has canceled the trade."});
-				delete foesock.meta.trade;
+				if (foesock.meta.trade.foe == data.u) delete foesock.meta.trade;
 			}
 			delete info.trade;
 		}
@@ -504,6 +504,18 @@ var userEvents = {
 			sockEmit(this, "boostergive", { cards: newCards, accountbound: bound, packtype: data.pack });
 		}
 	},
+	foecancel:function(data){
+		var info = this.meta;
+		if (info.duel){
+			var foesock = usersock[info.duel];
+			if (foesock){
+				sockEmit(foesock, "foeleft");
+				sockEmit(foesock, "chat", { mode: "red", msg: data.u + " has canceled the duel."});
+				if (foesock.meta.duel == data.u) delete foesock.meta.duel;
+			}
+			delete info.duel;
+		}
+	}
 };
 ["sellcard", "upgrade", "uppillar", "polish", "shpillar", "upshpillar", "addgold", "addloss", "addwin", "addcards", "addbound", "donedaily","unpolish","unupgrade","upshall"].forEach(function(event){
 	userEvents[event] = userutil[event];
@@ -620,6 +632,9 @@ var sockEvents = {
 			sockEmit(foesock, "chat", { mode: "red", msg: "You have sent a " + (data.pvp ? "PvP" : "trade") + " request to " + foename + "!" });
 		}
 	},
+	roomcancel:function(data){
+		delete rooms[data.room];
+	}
 };
 wss.on("connection", function(socket) {
 	socket.meta = {};

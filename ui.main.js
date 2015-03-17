@@ -104,6 +104,27 @@
 			game.cost = userutil.arenaCost(data.lv);
 			sock.user.gold -= game.cost;
 		},
+		tradegive:function(data){
+			if (sock.trade) require("./views/Trade")();
+		},
+		pvpgive:function(data){
+			if (sock.pvp) require("./views/Match")(data);
+		},
+		challenge:function(data) {
+			var span = document.createElement("span");
+			span.style.cursor = "pointer";
+			span.style.color = "blue";
+			span.addEventListener("click", function(){
+				if (data.pvp){
+					require("./views/Challenge").sendChallenge(sock.pvp = data.f);
+				}else{
+					sock.userEmit("tradewant", { f: sock.trade = data.f });
+				}
+			});
+			span.appendChild(document.createTextNode(data.f + (data.pvp ? " challenges you to a duel!" : " wants to trade with you!")));
+			chat.addSpan(span);
+			sock.emit("challrecv", {f: data.f, pvp: data.pvp});
+		}
 	};
 	var sock = require("./sock");
 	sock.et.onmessage = function(msg){

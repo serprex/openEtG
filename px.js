@@ -1,18 +1,18 @@
 "use strict";
 var lastmove = 0;
 document.addEventListener("mousemove", function(e){
-	var now = Date.now();
-	if (now - this.lastmove < 16){
+	if (e.timeStamp - this.lastmove < 16){
 		e.stopPropagation();
-		return;
+	}else{
+		this.lastmove = e.timeStamp;
 	}
-	this.lastmove = now;
 });
 var gfx = require("./gfx");
 var etg = require("./etg");
 var ui = require("./uiutil");
 var Cards = require("./Cards");
 var etgutil = require("./etgutil");
+var options = require("./options");
 var renderer = new PIXI.autoDetectRenderer(900, 600, {view:document.getElementById("leftpane"), transparent:true});
 var noStage = {}, curStage = noStage;
 var interman = new (require("./InteractionManager"))(noStage, renderer);
@@ -58,6 +58,24 @@ exports.domButton = function(text, click, mouseover) {
 		if (click) click.call(this);
 	});
 	if (mouseover) ele.addEventListener("mouseover", mouseover);
+	return ele;
+}
+exports.domCheck = 	function(text, change, opt, nopersist){
+	var lbl = document.createElement("label"), box = document.createElement("input");
+	box.type = "checkbox";
+	if (opt) options.register(opt, box, nopersist);
+	if (change) box.addEventListener("change", change);
+	lbl.appendChild(box);
+	lbl.appendChild(document.createTextNode(text));
+	return lbl;
+}
+exports.domInput = function(placeholder, opt, nopersist, keydown){
+	var ele = document.createElement("input");
+	ele.placeholder = placeholder;
+	if (opt) options.register(opt, ele, nopersist);
+	if (keydown){
+		if (keydown !== true) ele.addEventListener("keydown", keydown);
+	}else ele.className = "numput";
 	return ele;
 }
 exports.domEButton = function(e, click, ch){

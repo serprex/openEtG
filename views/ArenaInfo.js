@@ -45,7 +45,7 @@ module.exports = function(info) {
 				require("./Editor")(info, info.card);
 			}]], [300, 360, ["Test", function(){
 				var deck = sock.getDeck(), aideckcode = "05" + info.card + info.deck;
-				if (etgutil.decklength(deck) < 11 || etgutil.decklength(aideckcode) < 11) {
+				if (etgutil.decklength(deck) < 9 || etgutil.decklength(aideckcode) < 9) {
 					require("./Editor")();
 					return;
 				}

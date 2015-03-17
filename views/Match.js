@@ -10,6 +10,10 @@ var Effect = require("../Effect");
 var Actives = require("../Actives");
 var etgutil = require("../etgutil");
 function startMatch(game, foeDeck) {
+	if (sock.trade){
+		sock.userEmit("canceltrade");
+		delete sock.trade;
+	}
 	function drawBorder(obj, spr) {
 		if (obj) {
 			if (game.targetingMode) {

@@ -23,7 +23,7 @@ module.exports = function(){
 			sock.emit("login", data);
 		}
 	}
-	var loadingBar;
+	var loadingBar, sandbox;
 	if (gfx.load){
 		loadingBar = document.createElement("span");
 		loadingBar.style.backgroundColor = "#FFFFFF";
@@ -33,7 +33,7 @@ module.exports = function(){
 			loadingBar.style.width = (progress*900) + "px";
 		}, function(){
 			ui.playMusic("openingMusic");
-			if (sock.user) require("./MainMenu")();
+			if (sock.user || sandbox) require("./MainMenu")();
 		});
 	}
 	var login = px.domButton("Login", loginClick);
@@ -74,7 +74,10 @@ module.exports = function(){
 		[430, 380, remember],
 		[430, 350, login],
 		[270, 424, tutlink],
-		[530, 350, ["Sandbox", require("./MainMenu")]],
+		[530, 350, ["Sandbox", function(){
+			if (gfx.loaded) require("./MainMenu")();
+			else sandbox = true;
+		}]],
 	];
 	if (loadingBar) dom.push([0, 568, loadingBar]);
 	px.view({
