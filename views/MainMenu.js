@@ -133,7 +133,6 @@ module.exports = function(nymph) {
 		[410, 230, labelText(costText(4, true))],
 		[330, 310, labelText("Daily Challenges!")],
 		[460, 310, labelText("Go on adventure!")],
-		[660, 140, labelText("DECK: " + sock.user.selectedDeck)],
 		[50, 26, tinfo],
 		[80, 140, tstats],
 		[320, 140, ["Commoner", mkAi.mkAi(0), mkSetTip("Commoners have no upgraded cards & mostly common cards." + costText(0))]],
@@ -345,6 +344,7 @@ module.exports = function(nymph) {
 			[350, 280, ["Colosseum", require("./Colosseum"), mkSetTip("Try some daily challenges in the Colosseum!")]],
 			[650, 260, ["Shop", require("./Shop"), mkSetTip("Buy booster packs which contain cards from the elements you choose.")]],
 			[750, 260, ["Upgrade", require("./Upgrade"), mkSetTip("Upgrade or sell cards.")]],
+			[660, 140, labelText("DECK: " + sock.user.selectedDeck)],
 			[637, 550, ["Settings", function() {
 				if (popdom && popdom.id == "settingspane"){
 					setDom(null);
