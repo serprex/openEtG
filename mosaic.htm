@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<head>
+	<link href="forum/Smileys/default/water.png" rel="shortcut icon" />
+	<title>openEtG artcredit mosaic</title>
+	<style>
+		body {
+			background-color:black;
+			color:white;
+			margin:0;
+		}
+	</style>
+	<script src="etgify.js"></script>
+</head>
+<body>
+<img id="codeimg" src="assets/atlas.png">
+<span id="aname"></span>
+<script>
+"use strict";
+var atlas = require("./assets/atlas");
+var aname = document.getElementById("aname"), oldkey;
+var a2n = {
+	e: "Timpa & Ravi",
+	e13: "Kae",
+	r: "Timpa",
+	t: "Ravi",
+	s: "Kae",
+	sborder: "Kae",
+	silence: "Kae",
+	sanctuary: "Kae",
+	sacrifice: "Kae",
+	protection: "Kae",
+	singularity: "Kae",
+	shinyborder: "Kae",
+	gold: "??",
+
+}
+document.getElementById("codeimg").addEventListener("mousemove", function(e){
+	var x=e.pageX-this.offsetLeft, y=e.pageY-this.offsetTop;
+	for(var key in atlas){
+		var v=atlas[key];
+		if (x>=v[0] && x<= v[0]+v[2] && y>=v[1] && y<=v[1]+v[3]){
+			if (oldkey == key) return;
+			oldkey = key;
+			while(aname.firstChild) aname.firstChild.remove();
+			aname.appendChild(document.createTextNode(a2n[key] || a2n[key.replace(/\d+$/, "")]));
+			return;
+		}
+	}
+});
+</script>
+</body>
