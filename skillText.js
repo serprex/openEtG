@@ -11,7 +11,7 @@ var data = {
 	adrenaline:"Target creature attacks multiple times per turn. Weaker creatures gain more attacks",
 	aether:"Produce 1:12 on death",
 	aflatoxin:"Apply 2 poison to target. When target dies, it turns into a malignant cell",
-	aggroskele:"Summon a 2|2 Skeleton. All own skeletons attack target creature",
+	aggroskele:"Summon a Skeleton. All own skeletons attack target creature",
 	air:"Produce 1:9",
 	alphawolf:"Summon two 2|1 Pack Wolves on play",
 	antimatter:"Invert strength of target",
