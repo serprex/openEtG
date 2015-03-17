@@ -16,7 +16,6 @@ module.exports = function(nymph) {
 		document.removeEventListener("mousemove", resetTip);
 	}};
 	function setDom(dom){
-		if (oracle) oracle.visible = false;
 		if (popdom) document.body.removeChild(popdom);
 		if (popdom = dom) document.body.appendChild(dom);
 	}
