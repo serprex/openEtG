@@ -240,6 +240,15 @@ module.exports = function(nymph) {
 			buttons[i].classList[sock.user.selectedDeck == sock.user.quickdecks[i] ? "add" : "remove"]("selectedbutton");
 		}
 	}
+	function loadQuickdeck(x) {
+		return function() {
+			var deck = sock.user.quickdecks[x] || "";
+			sock.user.selectedDeck = deck;
+			sock.userEmit("setdeck", { name: deck });
+			deckLabel.text = "DECK: " + sock.user.selectedDeck;
+			fixQuickButtons();
+		}
+	}
 	dom.push(
 		[630, 350, foename],
 		[630, 475, ["PvP", require("./Challenge").bind(null, true)]],
@@ -249,15 +258,6 @@ module.exports = function(nymph) {
 	);
 	if (sock.user) {
 		var deckLabel = labelText("DECK: " + sock.user.selectedDeck);
-		function loadQuickdeck(x) {
-			return function() {
-				var deck = sock.user.quickdecks[x] || "";
-				sock.user.selectedDeck = deck;
-				sock.userEmit("setdeck", { name: deck });
-				deckLabel.text = "DECK: " + sock.user.selectedDeck;
-				fixQuickButtons();
-			}
-		}
 		for (var i = 0;i < 10;i++) {
 			var b = px.domButton(i + 1, loadQuickdeck(i));
 			b.style.width = "20px";
