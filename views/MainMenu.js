@@ -123,8 +123,6 @@ module.exports = function(nymph) {
 		[410, 170, labelText(costText(1))],
 		[410, 200, labelText(costText(2))],
 		[410, 230, labelText(costText(3))],
-		[330, 310, labelText("Daily Challenges!")],
-		[460, 310, labelText("Go on adventure!")],
 		[50, 26, tinfo],
 		[80, 140, tstats],
 		[320, 140, ["Commoner", mkAi.mkAi(0), mkSetTip("Commoners have no upgraded cards & mostly common cards.\n" + costText(0))]],
@@ -234,6 +232,12 @@ module.exports = function(nymph) {
 	var foename = px.domInput("Challenge/Trade", "foename", true, true);
 	soundChange();
 	musicChange();
+	var buttons = new Array(10);;
+	function fixQuickButtons() {
+		for (var i = 0;i < 10;i++) {
+			buttons[i].classList[sock.user.selectedDeck == sock.user.quickdecks[i] ? "add" : "remove"]("selectedbutton");
+		}
+	}
 	dom.push(
 		[630, 350, foename],
 		[630, 375, ["PvP", require("./Challenge")]],
@@ -242,13 +246,32 @@ module.exports = function(nymph) {
 		[720, 475, ["Reward", rewardClick]],
 		[777, 550, ["Logout", logout.bind(null, "logout"), mkSetTip("Click here to log out.")]]
 	);
-	if (sock.user){
+	if (sock.user) {
+		var deckLabel = labelText("DECK: " + sock.user.selectedDeck);
+		function loadQuickdeck(x) {
+			return function() {
+				var deck = sock.user.quickdecks[x] || "";
+				sock.user.selectedDeck = deck;
+				sock.userEmit("setdeck", { name: deck });
+				deckLabel.text = "DECK: " + sock.user.selectedDeck;
+				fixQuickButtons();
+			}
+		}
+		for (var i = 0;i < 10;i++) {
+			var b = px.domButton(i + 1, loadQuickdeck(i));
+			b.style.width = "20px";
+			if (sock.user.selectedDeck == sock.user.quickdecks[i]) b.classList.add("selectedbutton");
+			dom.push([620 + i * 22, 170, b]);
+			buttons[i] = b;
+		}
 		dom.push(
 			[460, 280, ["Quests", require("./QuestMain"), mkSetTip("Go on an adventure!")]],
 			[350, 280, ["Colosseum", require("./Colosseum"), mkSetTip("Try some daily challenges in the Colosseum!")]],
 			[650, 260, ["Shop", require("./Shop"), mkSetTip("Buy booster packs which contain cards from the elements you choose.")]],
 			[750, 260, ["Upgrade", require("./Upgrade"), mkSetTip("Upgrade or sell cards.")]],
-			[660, 140, labelText("DECK: " + sock.user.selectedDeck)],
+			[660, 140, deckLabel],
+			[330, 310, labelText("Daily Challenges!")],
+			[460, 310, labelText("Go on adventure!")],
 			[637, 550, ["Settings", function() {
 				if (popdom && popdom.id == "settingspane"){
 					setDom(null);
