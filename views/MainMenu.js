@@ -123,12 +123,14 @@ module.exports = function(nymph) {
 		[410, 170, labelText(costText(1))],
 		[410, 200, labelText(costText(2))],
 		[410, 230, labelText(costText(3))],
+		[385, 375, labelText("Duel a custom AI!")],
 		[50, 26, tinfo],
 		[80, 140, tstats],
 		[320, 140, ["Commoner", mkAi.mkAi(0), mkSetTip("Commoners have no upgraded cards & mostly common cards.\n" + costText(0))]],
 		[320, 170, ["Mage", mkAi.mkPremade("mage"), mkSetTip("Mages have preconstructed decks with a couple rares.\n" + costText(1))]],
 		[320, 200, ["Champion", mkAi.mkAi(2), mkSetTip("Champions have some upgraded cards.\n" + costText(2))]],
 		[320, 230, ["Demigod", mkAi.mkPremade("demigod"), mkSetTip("Demigods are extremely powerful. Come prepared for anything.\n" + costText(3))]],
+		[400, 345, ["Custom AI", require("./Challenge").bind(null, false), mkSetTip("Fight any deck you want, with custom stats both for you and the opponent.")]],
 		[700, 220, ["Deck", require("./Editor"), mkSetTip("Edit & manage your decks.")]],
 		[130, 260, ["Wealth T50", wealthTop, mkSetTip("See who's collected the most wealth.")]],
 		[777, 50, ["Next tip", function() {
@@ -229,7 +231,7 @@ module.exports = function(nymph) {
 		document.getElementById("rightpane").style.display = options.hideRightpane ? "none" : "inline";
 		sock.emit("chatus", {hide: !!options.offline || !!options.hideRightpane});
 	}
-	var foename = px.domInput("Challenge/Trade", "foename", true, true);
+	var foename = px.domInput("Trade/Library", "foename", true, true);
 	soundChange();
 	musicChange();
 	var buttons = new Array(10);;
@@ -240,10 +242,9 @@ module.exports = function(nymph) {
 	}
 	dom.push(
 		[630, 350, foename],
-		[630, 375, ["PvP", require("./Challenge")]],
-		[720, 375, ["Trade", tradeClick]],
-		[720, 400, ["Library", libraryClick]],
-		[720, 475, ["Reward", rewardClick]],
+		[630, 475, ["PvP", require("./Challenge").bind(null, true)]],
+		[720, 375, ["Library", libraryClick,mkSetTip("See exactly what cards you or others own")]],
+		[720, 475, ["Reward", rewardClick,mkSetTip("Redeem a reward code")]],
 		[777, 550, ["Logout", logout.bind(null, "logout"), mkSetTip("Click here to log out.")]]
 	);
 	if (sock.user) {
@@ -269,6 +270,7 @@ module.exports = function(nymph) {
 			[350, 280, ["Colosseum", require("./Colosseum"), mkSetTip("Try some daily challenges in the Colosseum!")]],
 			[650, 260, ["Shop", require("./Shop"), mkSetTip("Buy booster packs which contain cards from the elements you choose.")]],
 			[750, 260, ["Upgrade", require("./Upgrade"), mkSetTip("Upgrade or sell cards.")]],
+			[630, 375, ["Trade", tradeClick]],
 			[660, 140, deckLabel],
 			[330, 310, labelText("Daily Challenges!")],
 			[460, 310, labelText("Go on adventure!")],
