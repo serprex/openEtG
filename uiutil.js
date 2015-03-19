@@ -73,7 +73,7 @@ function getTextImage(text, size, color, bgcolor, width) {
 	var x = 0, y = 0, h = Math.floor(size*1.4), w = 0;
 	function pushChild(texture, num){
 		if (num === undefined) num = 1;
-		setMode(2);
+		setMode(1);
 		var w = size * num;
 		if (width && x + w > width){
 			x = 0;
@@ -95,7 +95,7 @@ function getTextImage(text, size, color, bgcolor, width) {
 	function pushText(text){
 		text = text.trim();
 		if (!text) return;
-		setMode(1);
+		setMode(0);
 		var w = ctx.measureText(text).width;
 		if (!width || x + w <= width){
 			textxy.push(text, x, y+size);
@@ -143,7 +143,10 @@ function getTextImage(text, size, color, bgcolor, width) {
 			if (num < 4) {
 				pushChild(icon, num);
 			}else{
+				setMode(1);
+				mode = 0;
 				pushText(num.toString());
+				mode = 1;
 				pushChild(icon);
 			}
 		}
