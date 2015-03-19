@@ -74,8 +74,6 @@ module.exports = function(nymph) {
 		if (event.target.tagName == "CANVAS" || event.target.tagName == "HTML") tinfo.text = sock.user ? tipjar[tipNumber] + "." : "To register, just type desired username & password in the fields to the right, then click 'Login'.";
 	}
 	var tinfo = px.domText(""), tstats = px.domText(sock.user ? sock.user.gold + "$ " + sock.user.name + "\nPvE " + sock.user.aiwins + " - " + sock.user.ailosses + "\nPvP " + sock.user.pvpwins + " - " + sock.user.pvplosses : "Sandbox");
-	tinfo.style.marginLeft = "2px";
-	tinfo.style.marginTop = "2px";
 	function wealthTop(){
 		sock.emit("wealthtop");
 		this.style.display = "none";
@@ -107,10 +105,10 @@ module.exports = function(nymph) {
 		aibox = px.domBox(300, 320),
 		arenabox = px.domBox(300, 170),
 		playbox = px.domBox(250, 200),
-		tipbox = px.domBox(820, 60);
+		tipbox = px.domBox(820, 60),
+		settingsbox = px.domBox(250, 28);
 	deckbox.appendChild(titleText("Cards & Decks"));
 	statbox.appendChild(titleText("Stats"));
-	statbox.appendChild(tstats);
 	leadbox.appendChild(titleText("Leaderboards"));
 	aibox.appendChild(titleText("AI Battle"));
 	arenabox.appendChild(titleText("Arena"));
@@ -118,31 +116,36 @@ module.exports = function(nymph) {
 	arenabox.appendChild(tierText(2));
 	playbox.appendChild(titleText("Players"));
 	tipbox.appendChild(tinfo);
+	var nextTip = px.domButton("Next tip", function() {
+		tipNumber = (tipNumber+1) % tipjar.length;
+		tinfo.text = tipjar[tipNumber] + ".";
+	});
+	nextTip.style.position = "absolute";
+	nextTip.style.right = "2px";
+	nextTip.style.bottom = "2px";
+	tipbox.appendChild(nextTip);
+	[px.domButton("Commoner", mkAi.mkAi(0), mkSetTip("Commoners have no upgraded cards & mostly common cards.\n" + costText(0))),
+		px.domButton("Mage", mkAi.mkPremade("mage"), mkSetTip("Mages have preconstructed decks with a couple rares.\n" + costText(1))),
+		px.domButton("Champion", mkAi.mkAi(2), mkSetTip("Champions have some upgraded cards.\n" + costText(2))),
+		px.domButton("Demigod", mkAi.mkPremade("demigod"), mkSetTip("Demigods are extremely powerful. Come prepared for anything.\n" + costText(3))),
+	].forEach(function(b,i){
+		aibox.appendChild(b);
+		var lab = labelText(costText(i));
+		lab.style.float = "right";
+		b.style.marginTop = lab.style.marginTop = "12px";
+		aibox.appendChild(lab);
+	});
 	var dom = [
 		[40, 16, tipbox],
-		[40, 92, statbox],
 		[40, 220, leadbox],
 		[300, 92, aibox],
-		[300, 420, arenabox],
 		[610, 92, deckbox],
 		[610, 300, playbox],
-		[610, 510, px.domBox(250, 80)],
-		[410, 140, labelText(costText(0))],
-		[410, 170, labelText(costText(1))],
-		[410, 200, labelText(costText(2))],
-		[410, 230, labelText(costText(3))],
+		[610, 562, settingsbox],
 		[385, 375, labelText("Duel a custom AI!")],
-		[320, 140, ["Commoner", mkAi.mkAi(0), mkSetTip("Commoners have no upgraded cards & mostly common cards.\n" + costText(0))]],
-		[320, 170, ["Mage", mkAi.mkPremade("mage"), mkSetTip("Mages have preconstructed decks with a couple rares.\n" + costText(1))]],
-		[320, 200, ["Champion", mkAi.mkAi(2), mkSetTip("Champions have some upgraded cards.\n" + costText(2))]],
-		[320, 230, ["Demigod", mkAi.mkPremade("demigod"), mkSetTip("Demigods are extremely powerful. Come prepared for anything.\n" + costText(3))]],
 		[400, 345, ["Custom AI", require("./Challenge").bind(null, false), mkSetTip("Fight any deck you want, with custom stats both for you and the opponent.")]],
 		[700, 220, ["Deck", require("./Editor"), mkSetTip("Edit & manage your decks.")]],
 		[130, 260, ["Wealth T50", wealthTop, mkSetTip("See who's collected the most wealth.")]],
-		[777, 50, ["Next tip", function() {
-			tipNumber = (tipNumber+1) % tipjar.length;
-			tinfo.text = tipjar[tipNumber] + ".";
-		}]]
 	];
 	stage.menudom = dom;
 	for (var i=0; i<2; i++){
@@ -261,16 +264,16 @@ module.exports = function(nymph) {
 			fixQuickButtons();
 		}
 	}
+	var blogout = px.domButton("Logout", logout.bind(null, "logout"), mkSetTip("Click here to log out."));
+	blogout.style.float = "right";
+	settingsbox.appendChild(blogout);
 	dom.push(
 		[630, 350, foename],
 		[630, 475, ["PvP", require("./Challenge").bind(null, true)]],
-		[720, 375, ["Library", libraryClick,mkSetTip("See exactly what cards you or others own")]],
-		[720, 475, ["Reward", rewardClick,mkSetTip("Redeem a reward code")]],
-		[777, 550, ["Logout", logout.bind(null, "logout"), mkSetTip("Click here to log out.")]]
+		[720, 375, ["Library", libraryClick,mkSetTip("See exactly what cards you or others own")]]
 	);
 	if (sock.user) {
 		var deckLabel = labelText("Deck: " + sock.user.selectedDeck);
-		deckLabel.style.marginLeft = "2px";
 		deckLabel.style.whiteSpace = "nowrap";
 		deckbox.appendChild(deckLabel);
 		for (var i = 0;i < 10;i++) {
@@ -280,66 +283,72 @@ module.exports = function(nymph) {
 			dom.push([620 + i * 22, 170, b]);
 			buttons[i] = b;
 		}
+		var bsettings = px.domButton("Settings", function() {
+			if (popdom && popdom.id == "settingspane"){
+				setDom(null);
+				return;
+			}
+			var div = px.domBox(392, 156);
+			div.style.pointerEvents = "auto";
+			div.style.position = "absolute";
+			div.style.left = "460px";
+			div.style.top = "380px";
+			var wipe = px.domButton("Wipe Account",
+				function() {
+					if (foename.value == sock.user.name + "yesdelete") {
+						logout("delete");
+					} else {
+						chat("Input '" + sock.user.name + "yesdelete' into Challenge to delete your account");
+					}
+				},
+				mkSetTip("Click here to permanently remove your account.")
+			);
+			function changeFunc(){
+				if (this.value == "Change Pass") this.value = "Confirm";
+				else {
+					this.value = "Change Pass";
+					sock.userEmit("passchange", { p: changePass.value });
+				}
+			}
+			var changePass = document.createElement("input"), changeBtn = px.domButton("Change Pass", changeFunc),
+				enableSound = px.domCheck("Enable sound", soundChange, "enableSound"),
+				enableMusic = px.domCheck("Enable music", musicChange, "enableMusic"),
+				preloadart = px.domCheck("Preload art", null, "preart"),
+				hideRightpane = px.domCheck("Hide rightpane", hideRightpaneChange, "hideRightpane"),
+				printstats = px.domCheck("Print stats", null, "stats"),
+				hideCostIcon = px.domCheck("Hide cost icon", gfx.refreshCaches, "hideCostIcon"),
+				disableTut = px.domCheck("Disable tutorial", null, "disableTut");
+			changePass.type = "password";
+			changePass.addEventListener("keydown", function(e){
+				if (e.keyCode == 13) changeFunc();
+			});
+			[[8, 8, changePass], [162, 8, changeBtn],
+				[8, 53, enableSound], [135, 53, enableMusic], [260, 53, preloadart],
+				[8, 88, hideRightpane], [135, 88, printstats], [260, 88, hideCostIcon],
+				[8, 123, disableTut],
+				[309, 123, wipe]].forEach(function(info) {
+				info[2].style.position = "absolute";
+				info[2].style.left = info[0] + "px";
+				info[2].style.top = info[1] + "px";
+				div.appendChild(info[2]);
+			});
+			div.id = "settingspane";
+			setDom(div);
+		});
+		bsettings.style.float = "left";
+		settingsbox.appendChild(bsettings);
+		statbox.appendChild(px.domText(sock.user.gold + "$ " + sock.user.name + "\nPvE " + sock.user.aiwins + " - " + sock.user.ailosses + "\nPvP " + sock.user.pvpwins + " - " + sock.user.pvplosses));
 		dom.push(
+			[40, 92, statbox],
+			[300, 420, arenabox],
 			[460, 280, ["Quests", require("./QuestMain"), mkSetTip("Go on an adventure!")]],
 			[350, 280, ["Colosseum", require("./Colosseum"), mkSetTip("Try some daily challenges in the Colosseum!")]],
 			[650, 260, ["Shop", require("./Shop"), mkSetTip("Buy booster packs which contain cards from the elements you choose.")]],
 			[750, 260, ["Upgrade", require("./Upgrade"), mkSetTip("Upgrade or sell cards.")]],
 			[630, 375, ["Trade", tradeClick]],
 			[330, 310, labelText("Daily Challenges!")],
-			[460, 310, labelText("Go on adventure!")],
-			[637, 550, ["Settings", function() {
-				if (popdom && popdom.id == "settingspane"){
-					setDom(null);
-					return;
-				}
-				var div = px.domBox(392, 156);
-				div.style.pointerEvents = "auto";
-				div.style.position = "absolute";
-				div.style.left = "460px";
-				div.style.top = "380px";
-				var wipe = px.domButton("Wipe Account",
-					function() {
-						if (foename.value == sock.user.name + "yesdelete") {
-							logout("delete");
-						} else {
-							chat("Input '" + sock.user.name + "yesdelete' into Challenge to delete your account");
-						}
-					},
-					mkSetTip("Click here to permanently remove your account.")
-				);
-				function changeFunc(){
-					if (this.value == "Change Pass") this.value = "Confirm";
-					else {
-						this.value = "Change Pass";
-						sock.userEmit("passchange", { p: changePass.value });
-					}
-				}
-				var changePass = document.createElement("input"), changeBtn = px.domButton("Change Pass", changeFunc),
-					enableSound = px.domCheck("Enable sound", soundChange, "enableSound"),
-					enableMusic = px.domCheck("Enable music", musicChange, "enableMusic"),
-					preloadart = px.domCheck("Preload art", null, "preart"),
-					hideRightpane = px.domCheck("Hide rightpane", hideRightpaneChange, "hideRightpane"),
-					printstats = px.domCheck("Print stats", null, "stats"),
-					hideCostIcon = px.domCheck("Hide cost icon", gfx.refreshCaches, "hideCostIcon"),
-					disableTut = px.domCheck("Disable tutorial", null, "disableTut");
-				changePass.type = "password";
-				changePass.addEventListener("keydown", function(e){
-					if (e.keyCode == 13) changeFunc();
-				});
-				[[8, 8, changePass], [162, 8, changeBtn],
-					[8, 53, enableSound], [135, 53, enableMusic], [260, 53, preloadart],
-					[8, 88, hideRightpane], [135, 88, printstats], [260, 88, hideCostIcon],
-					[8, 123, disableTut],
-					[309, 123, wipe]].forEach(function(info) {
-					info[2].style.position = "absolute";
-					info[2].style.left = info[0] + "px";
-					info[2].style.top = info[1] + "px";
-					div.appendChild(info[2]);
-				});
-				div.id = "settingspane";
-				setDom(div);
-			}]]
+			[460, 310, labelText("Go on an adventure!")],
+			[720, 475, ["Reward", rewardClick, mkSetTip("Redeem a reward code")]]
 		);
 	}
 	resetTip({target:{tagName:"HTML"}});
