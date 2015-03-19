@@ -80,12 +80,10 @@ module.exports = function(nymph) {
 		sock.emit("wealthtop");
 		this.style.display = "none";
 	}
-	function titleText(text, middle) {
+	function titleText(text){
 		var text = px.domText(text);
 		text.style.fontSize = "20px";
-		text.style.textAlign = "center";
-		text.style.width = middle ? "300px" : "250px";
-		text.style.pointerEvents = "none";
+		text.style.margin = "25%";
 		return text;
 	}
 	function tierText(text) {
@@ -97,26 +95,31 @@ module.exports = function(nymph) {
 	function labelText(text) {
 		var text = px.domText(text);
 		text.style.fontSize = "14px";
-		text.style.color = "white";
 		text.style.height = "20px";
 		text.style.pointerEvents = "none";
 		return text;
 	}
+	var deckbox = px.domBox(250, 200),
+		statbox = px.domBox(250, 120),
+		leadbox = px.domBox(250, 120),
+		aibox = px.domBox(300, 320),
+		arenabox = px.domBox(300, 170),
+		playbox = px.domBox(250, 200);
+	deckbox.appendChild(titleText("Cards & Decks"));
+	statbox.appendChild(titleText("Stats"));
+	leadbox.appendChild(titleText("Leaderboards"));
+	aibox.appendChild(titleText("AI Battle"));
+	arenabox.appendChild(titleText("Arena"));
+	playbox.appendChild(titleText("Players"))
 	var dom = [
 		[40, 16, px.domBox(820, 60)],
-		[40, 92, px.domBox(250, 120)],
-		[40, 210, px.domBox(250, 120)],
-		[300, 92, px.domBox(300, 320)],
-		[300, 420, px.domBox(300, 170)],
-		[610, 92, px.domBox(250, 200)],
-		[610, 300, px.domBox(250, 200)],
+		[40, 92, statbox],
+		[40, 220, leadbox],
+		[300, 92, aibox],
+		[300, 420, arenabox],
+		[610, 92, deckbox],
+		[610, 300, playbox],
 		[610, 510, px.domBox(250, 80)],
-		[300, 102, titleText("AI BATTLE",true)],
-		[610, 102, titleText("CARDS AND DECKS")],
-		[40, 220, titleText("LEADERBOARDS")],
-		[300, 430, titleText("ARENA"),true],
-		[610, 310, titleText("PLAYERS")],
-		[40, 102, titleText("STATS")],
 		[359, 460, tierText("Tier 1")],
 		[450, 460, tierText("Tier 2")],
 		[410, 140, labelText(costText(0))],
@@ -245,7 +248,7 @@ module.exports = function(nymph) {
 			var deck = sock.user.quickdecks[x] || "";
 			sock.user.selectedDeck = deck;
 			sock.userEmit("setdeck", { name: deck });
-			deckLabel.text = "DECK: " + sock.user.selectedDeck;
+			deckLabel.text = "Deck: " + sock.user.selectedDeck;
 			fixQuickButtons();
 		}
 	}
@@ -257,7 +260,11 @@ module.exports = function(nymph) {
 		[777, 550, ["Logout", logout.bind(null, "logout"), mkSetTip("Click here to log out.")]]
 	);
 	if (sock.user) {
-		var deckLabel = labelText("DECK: " + sock.user.selectedDeck);
+		var deckLabel = labelText("Deck: " + sock.user.selectedDeck);
+		deckLabel.style.marginLeft = "2px";
+		deckLabel.style.position = "fixed";
+		deckbox.appendChild(document.createElement("br"))
+		deckbox.appendChild(deckLabel);
 		for (var i = 0;i < 10;i++) {
 			var b = px.domButton(i + 1, loadQuickdeck(i));
 			b.style.width = "20px";
@@ -271,7 +278,6 @@ module.exports = function(nymph) {
 			[650, 260, ["Shop", require("./Shop"), mkSetTip("Buy booster packs which contain cards from the elements you choose.")]],
 			[750, 260, ["Upgrade", require("./Upgrade"), mkSetTip("Upgrade or sell cards.")]],
 			[630, 375, ["Trade", tradeClick]],
-			[660, 140, deckLabel],
 			[330, 310, labelText("Daily Challenges!")],
 			[460, 310, labelText("Go on adventure!")],
 			[637, 550, ["Settings", function() {
