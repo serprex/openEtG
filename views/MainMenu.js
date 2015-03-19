@@ -276,13 +276,16 @@ module.exports = function(nymph) {
 		var deckLabel = labelText("Deck: " + sock.user.selectedDeck);
 		deckLabel.style.whiteSpace = "nowrap";
 		deckbox.appendChild(deckLabel);
+		var quickslotsdiv = document.createElement("div");
+		quickslotsdiv.style.textAlign = "center";
 		for (var i = 0;i < 10;i++) {
 			var b = px.domButton(i + 1, loadQuickdeck(i));
 			b.style.width = "20px";
 			if (sock.user.selectedDeck == sock.user.quickdecks[i]) b.classList.add("selectedbutton");
-			dom.push([620 + i * 22, 170, b]);
 			buttons[i] = b;
+			quickslotsdiv.appendChild(b);
 		}
+		deckbox.appendChild(quickslotsdiv);
 		var bsettings = px.domButton("Settings", function() {
 			if (popdom && popdom.id == "settingspane"){
 				setDom(null);
