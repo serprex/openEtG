@@ -848,7 +848,7 @@ integrity:function(c,t){
 		[[0, "auto", "light"], [1, "blocked", "virtue"], [2, "buff", "martyr"], [3, "ownfreeze", "growth 2"], [4, "hit", "disarm"], [5, "auto", "sanctuary"]],
 		[[0, "", "airborne"]],
 		[[1, "hit", "neuro"]],
-		[[0, "", "nocturnal"], [0, "", "voodoo"], [1, "auto", "siphon"], [2, "hit", "vampire"], [3, "hit", "reducemaxhp"], [4, "destroy", "loot"], [5, "owndeath", "catlife"]],
+		[[0, "", "nocturnal"], [0, "", "voodoo"], [1, "auto", "siphon"], [2, "hit", "vampire"], [3, "hit", "reducemaxhp"], [4, "destroy", "loot"], [5, "owndeath", "catlife"], [5, "", "lives", 69105]],
 		[[2, "", "immaterial"]],
 	].forEach(function(slist, i){
 		slist.forEach(function(data){
