@@ -836,7 +836,7 @@ integrity:function(c,t){
 		etg.Thing.prototype.addactive.call(c.owner.shardgolem, event, active);
 	}
 	function addStatus(status, val){
-		c.owner.shardgolem[status] = val === undefined || val;
+		c.owner.shardgolem.status[status] = val === undefined || val;
 	}
 	[	[[2, "hit", "scramble"]],
 		[[0, "death", "growth 1"], [0, "", "nocturnal"]],
