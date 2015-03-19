@@ -74,8 +74,8 @@ module.exports = function(nymph) {
 		if (event.target.tagName == "CANVAS" || event.target.tagName == "HTML") tinfo.text = sock.user ? tipjar[tipNumber] + "." : "To register, just type desired username & password in the fields to the right, then click 'Login'.";
 	}
 	var tinfo = px.domText(""), tstats = px.domText(sock.user ? sock.user.gold + "$ " + sock.user.name + "\nPvE " + sock.user.aiwins + " - " + sock.user.ailosses + "\nPvP " + sock.user.pvpwins + " - " + sock.user.pvplosses : "Sandbox");
-	tinfo.style.maxWidth = "800px";
-
+	tinfo.style.marginLeft = "2px";
+	tinfo.style.marginTop = "2px";
 	function wealthTop(){
 		sock.emit("wealthtop");
 		this.style.display = "none";
@@ -83,13 +83,15 @@ module.exports = function(nymph) {
 	function titleText(text){
 		var text = px.domText(text);
 		text.style.fontSize = "20px";
-		text.style.margin = "25%";
+		text.style.textAlign = "center";
 		return text;
 	}
-	function tierText(text) {
-		var text = px.domText(text);
+	function tierText(tier) {
+		var text = px.domText("Tier "+tier);
 		text.style.fontSize = "18px";
-		text.style.pointerEvents = "none";
+		text.style.width = "50%";
+		text.style.float = tier == 1 ? "left" : "right";
+		text.style.textAlign = "center";
 		return text;
 	}
 	function labelText(text) {
@@ -104,15 +106,20 @@ module.exports = function(nymph) {
 		leadbox = px.domBox(250, 120),
 		aibox = px.domBox(300, 320),
 		arenabox = px.domBox(300, 170),
-		playbox = px.domBox(250, 200);
+		playbox = px.domBox(250, 200),
+		tipbox = px.domBox(820, 60);
 	deckbox.appendChild(titleText("Cards & Decks"));
 	statbox.appendChild(titleText("Stats"));
+	statbox.appendChild(tstats);
 	leadbox.appendChild(titleText("Leaderboards"));
 	aibox.appendChild(titleText("AI Battle"));
 	arenabox.appendChild(titleText("Arena"));
-	playbox.appendChild(titleText("Players"))
+	arenabox.appendChild(tierText(1));
+	arenabox.appendChild(tierText(2));
+	playbox.appendChild(titleText("Players"));
+	tipbox.appendChild(tinfo);
 	var dom = [
-		[40, 16, px.domBox(820, 60)],
+		[40, 16, tipbox],
 		[40, 92, statbox],
 		[40, 220, leadbox],
 		[300, 92, aibox],
@@ -120,15 +127,11 @@ module.exports = function(nymph) {
 		[610, 92, deckbox],
 		[610, 300, playbox],
 		[610, 510, px.domBox(250, 80)],
-		[359, 460, tierText("Tier 1")],
-		[450, 460, tierText("Tier 2")],
 		[410, 140, labelText(costText(0))],
 		[410, 170, labelText(costText(1))],
 		[410, 200, labelText(costText(2))],
 		[410, 230, labelText(costText(3))],
 		[385, 375, labelText("Duel a custom AI!")],
-		[50, 26, tinfo],
-		[80, 140, tstats],
 		[320, 140, ["Commoner", mkAi.mkAi(0), mkSetTip("Commoners have no upgraded cards & mostly common cards.\n" + costText(0))]],
 		[320, 170, ["Mage", mkAi.mkPremade("mage"), mkSetTip("Mages have preconstructed decks with a couple rares.\n" + costText(1))]],
 		[320, 200, ["Champion", mkAi.mkAi(2), mkSetTip("Champions have some upgraded cards.\n" + costText(2))]],
@@ -165,12 +168,18 @@ module.exports = function(nymph) {
 				sock.emit("arenatop", lvi);
 				this.style.display = "none";
 			}
-			var x = 350+i*100;
 			if (sock.user){
-				dom.push(
-					[x, 490, ["Arena AI", arenaAi, mkSetTip("In the arena you will face decks from other players.\n" + costText(4+lvi.lv))]],
-					[x, 540, ["Arena Info", arenaInfo, mkSetTip("Check how your arena deck is doing.")]]
-				);
+				var bdiv = document.createElement("div");
+				bdiv.style.float = i ? "right" : "left";
+				bdiv.style.textAlign = "center";
+				bdiv.style.width = "50%";
+				var aai = px.domButton("Arena AI", arenaAi, mkSetTip("In the arena you will face decks from other players.\n" + costText(4+lvi.lv)));
+				var ainfo = px.domButton("Arena Info", arenaInfo, mkSetTip("check how your arena deck is doing."));
+				bdiv.appendChild(aai);
+				bdiv.appendChild(document.createElement("br"));
+				bdiv.appendChild(document.createElement("br"));
+				bdiv.appendChild(ainfo);
+				arenabox.appendChild(bdiv);
 			}
 			dom.push(
 				[80+i*100, 290, ["Arena" + (i+1) + " T20", arenaTop, mkSetTip("See who the top players in arena are right now.")]]
@@ -262,8 +271,7 @@ module.exports = function(nymph) {
 	if (sock.user) {
 		var deckLabel = labelText("Deck: " + sock.user.selectedDeck);
 		deckLabel.style.marginLeft = "2px";
-		deckLabel.style.position = "fixed";
-		deckbox.appendChild(document.createElement("br"))
+		deckLabel.style.whiteSpace = "nowrap";
 		deckbox.appendChild(deckLabel);
 		for (var i = 0;i < 10;i++) {
 			var b = px.domButton(i + 1, loadQuickdeck(i));

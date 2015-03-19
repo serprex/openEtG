@@ -89,7 +89,7 @@ exports.domEButton = function(e, click, ch){
 	return ele;
 }
 exports.domText = function(text){
-	var ele = document.createElement("span");
+	var ele = document.createElement("div");
 	Object.defineProperty(ele, "text", {
 		get:function(){
 			return this.textcache;
