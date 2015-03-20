@@ -106,10 +106,20 @@ module.exports = function(nymph) {
 		arenabox = px.domBox(300, 170),
 		playbox = px.domBox(250, 200),
 		tipbox = px.domBox(820, 60),
-		settingsbox = px.domBox(250, 28);
+		settingsbox = px.domBox(250, 32);
 	deckbox.appendChild(titleText("Cards & Decks"));
+	var bdeck = px.domButton("Deck", require("./Editor"), mkSetTip("Edit & manage your decks."));
+	bdeck.style.position = "absolute";
+	bdeck.style.left = "90px";
+	bdeck.style.top = "130px";
+	deckbox.appendChild(bdeck);
 	statbox.appendChild(titleText("Stats"));
 	leadbox.appendChild(titleText("Leaderboards"));
+	var bwealth = px.domButton("Wealth T50", wealthTop, mkSetTip("See who's collected the most wealth."));
+	bwealth.style.position = "absolute";
+	bwealth.style.left = "85px";
+	leadbox.appendChild(bwealth);
+	leadbox.appendChild(document.createElement("br"));
 	aibox.appendChild(titleText("AI Battle"));
 	arenabox.appendChild(titleText("Arena"));
 	arenabox.appendChild(tierText(1));
@@ -141,11 +151,7 @@ module.exports = function(nymph) {
 		[300, 92, aibox],
 		[610, 92, deckbox],
 		[610, 300, playbox],
-		[610, 562, settingsbox],
-		[385, 375, labelText("Duel a custom AI!")],
-		[400, 345, ["Custom AI", require("./Challenge").bind(null, false), mkSetTip("Fight any deck you want, with custom stats both for you and the opponent.")]],
-		[700, 220, ["Deck", require("./Editor"), mkSetTip("Edit & manage your decks.")]],
-		[130, 260, ["Wealth T50", wealthTop, mkSetTip("See who's collected the most wealth.")]],
+		[610, 558, settingsbox],
 	];
 	stage.menudom = dom;
 	for (var i=0; i<2; i++){
@@ -184,9 +190,10 @@ module.exports = function(nymph) {
 				bdiv.appendChild(ainfo);
 				arenabox.appendChild(bdiv);
 			}
-			dom.push(
-				[80+i*100, 290, ["Arena" + (i+1) + " T20", arenaTop, mkSetTip("See who the top players in arena are right now.")]]
-			);
+			var atop = px.domButton("Arena" + (i+1) + " T20", arenaTop, mkSetTip("See who the top players in arena are right now."));
+			atop.style.position = "absolute";
+			atop.style.left = i?"140px":"30px";
+			leadbox.appendChild(atop);
 		})({lv:i});
 	}
 
@@ -247,6 +254,8 @@ module.exports = function(nymph) {
 		sock.emit("chatus", {hide: !!options.offline || !!options.hideRightpane});
 	}
 	var foename = px.domInput("Trade/Library", "foename", true, true);
+	foename.style.marginLeft = "46px";
+	playbox.appendChild(foename);
 	soundChange();
 	musicChange();
 	var buttons = new Array(10);;
@@ -267,11 +276,15 @@ module.exports = function(nymph) {
 	var blogout = px.domButton("Logout", logout.bind(null, "logout"), mkSetTip("Click here to log out."));
 	blogout.style.float = "right";
 	settingsbox.appendChild(blogout);
-	dom.push(
-		[630, 350, foename],
-		[630, 475, ["PvP", require("./Challenge").bind(null, true)]],
-		[720, 375, ["Library", libraryClick,mkSetTip("See exactly what cards you or others own")]]
-	);
+	var bpvp = px.domButton("PvP", require("./Challenge").bind(null, true)),
+		blibrary = px.domButton("Library", libraryClick,mkSetTip("See exactly what cards you or others own"));
+	bpvp.style.position = blibrary.style.position = "absolute";
+	bpvp.style.left = "30px";
+	bpvp.style.top = "100px";
+	blibrary.style.left = "140px";
+	blibrary.style.top = "75px";
+	playbox.appendChild(bpvp);
+	playbox.appendChild(blibrary);
 	if (sock.user) {
 		var deckLabel = labelText("Deck: " + sock.user.selectedDeck);
 		deckLabel.style.whiteSpace = "nowrap";
@@ -341,19 +354,48 @@ module.exports = function(nymph) {
 		bsettings.style.float = "left";
 		settingsbox.appendChild(bsettings);
 		statbox.appendChild(px.domText(sock.user.gold + "$ " + sock.user.name + "\nPvE " + sock.user.aiwins + " - " + sock.user.ailosses + "\nPvP " + sock.user.pvpwins + " - " + sock.user.pvplosses));
-		dom.push(
-			[40, 92, statbox],
-			[300, 420, arenabox],
-			[460, 280, ["Quests", require("./QuestMain"), mkSetTip("Go on an adventure!")]],
-			[350, 280, ["Colosseum", require("./Colosseum"), mkSetTip("Try some daily challenges in the Colosseum!")]],
-			[650, 260, ["Shop", require("./Shop"), mkSetTip("Buy booster packs which contain cards from the elements you choose.")]],
-			[750, 260, ["Upgrade", require("./Upgrade"), mkSetTip("Upgrade or sell cards.")]],
-			[630, 375, ["Trade", tradeClick]],
-			[330, 310, labelText("Daily Challenges!")],
-			[460, 310, labelText("Go on an adventure!")],
-			[720, 475, ["Reward", rewardClick, mkSetTip("Redeem a reward code")]]
-		);
+		var colocol = document.createElement("div"), questcol = document.createElement("div"),
+			bquest = px.domButton("Quests", require("./QuestMain"), mkSetTip("Go on an adventure!")),
+			bcolo = px.domButton("Colosseum", require("./Colosseum"), mkSetTip("Try some daily challenges in the Colosseum!")),
+			ctext = labelText("Daily Challenges!"),
+			qtext = labelText("Go on an adventure!");
+		colocol.style.marginTop = questcol.style.marginTop = "24px";
+		colocol.style.width = questcol.style.width = "45%";
+		colocol.style.float = "left";
+		colocol.style.textAlign = "right";
+		questcol.style.float = "right";
+		colocol.appendChild(bcolo);
+		colocol.appendChild(ctext);
+		questcol.appendChild(bquest);
+		questcol.appendChild(qtext);
+		aibox.appendChild(colocol);
+		aibox.appendChild(questcol);
+		var bshop = px.domButton("Shop", require("./Shop"), mkSetTip("Buy booster packs which contain cards from the elements you choose.")),
+			bupgrade = px.domButton("Upgrade", require("./Upgrade"), mkSetTip("Upgrade or sell cards."));
+		bshop.style.position = bupgrade.style.position = "absolute";
+		bshop.style.top = bupgrade.style.top = "170px"
+		bshop.style.left = "30px";
+		bupgrade.style.left = "140px";
+		deckbox.appendChild(bshop);
+		deckbox.appendChild(bupgrade);
+		var btrade = px.domButton("Trade", tradeClick, mkSetTip("Initiate trading cards with another player.")),
+			breward = px.domButton("Reward", rewardClick, mkSetTip("Redeem a reward code."));
+		btrade.style.position = breward.style.position = "absolute";
+		btrade.style.left = "30px";
+		btrade.style.top = "75px";
+		breward.style.left = "140px";
+		breward.style.top = "100px";
+		playbox.appendChild(btrade);
+		playbox.appendChild(breward);
+		dom.push([40, 92, statbox], [300, 420, arenabox]);
 	}
+	var customText = labelText("Duel a custom AI!");
+	var bcustom = px.domButton("Custom AI", require("./Challenge").bind(null, false), mkSetTip("Fight any deck you want, with custom stats both for you and the opponent."));
+	customText.style.textAlign = "center";
+	bcustom.style.marginLeft = "110px";
+	bcustom.style.marginTop = "16px";
+	aibox.appendChild(bcustom);
+	aibox.appendChild(customText);
 	resetTip({target:{tagName:"HTML"}});
 	px.view(stage);
 }

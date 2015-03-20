@@ -42,7 +42,7 @@ input[type="text"],input[type="password"],input:not([type]){width:150px}
 	border-bottom-color:#121212;
 	border-top-color:#969696;
 	border-right-color:#969696;
-	padding:2px;
+	padding:4px;
 	overflow:hidden;
 }
 .tutorialbox{

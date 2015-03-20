@@ -935,11 +935,10 @@ luciferin:function(c,t){
 	c.owner.dmg(-10);
 	c.owner.masscc(c, function(c,x){
 		for (var key in x.active){
-			if (x.active[key] && key != "ownplay"){
-				return;
-			}
+			if (key == "ownplay" || key == "owndiscard" || x.active[key].activename.every(function(name){return name in etg.passives})) continue;
+			return;
 		}
-		x.active.auto = Actives.light;
+		x.addactive("auto", Actives.light);
 	});
 },
 lycanthropy:function(c,t){
