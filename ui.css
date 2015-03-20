@@ -26,7 +26,7 @@ input[type="button"]:hover:active{background:linear-gradient(to bottom,#aabbc0,#
 input[type="text"],input[type="password"],input:not([type]){width:150px}
 .selectortext{
 	width:33px;
-	height:20px;
+	height:19px;
 	font-size:12px;
 	pointer-events:none;
 	color:black;

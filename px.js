@@ -333,15 +333,18 @@ function CardSelector(dom, cardmouseover, cardclick, maxedIndicator, filterboth)
 			}, "r")]);
 		})(i);
 	}
+	this.countText = new Array(6);
 	for (var i = 0;i < 6;i++) {
+		var x = 100 + i * 133;
+		var counti = this.countText[i] = document.createElement("div");
+		counti.style.textHeight = "0";
+		dom.push([x+100, 272, this.countText[i]]);
 		for (var j = 0;j < 15;j++) {
 			var sprite = new PIXI.Sprite(gfx.nopic);
-			sprite.position.set(100 + i * 133, 272 + j * 19);
-			var sprcount = exports.domText("");
-			dom.push([sprite.position.x + 100, sprite.position.y, sprcount]);
-			sprite.countText = sprcount;
+			sprite.position.set(x, 272 + j * 19);
 			this.addChild(sprite);
 			this.columnspr[i].push(sprite);
+			counti.appendChild(exports.domText(""));
 		}
 	}
 }
@@ -408,14 +411,15 @@ CardSelector.prototype.renderColumns = function(){
 					var scode = etgutil.asShiny(code, true);
 					shinyAmount = scode in this.cardpool ? this.cardpool[scode] - ((this.cardminus && this.cardminus[scode]) || 0) : 0;
 				}
-				spr.countText.text = cardAmount + (shinyAmount ? "/"+shinyAmount:"");
-				spr.countText.className = "selectortext"+(this.maxedIndicator && card.type != etg.PillarEnum && cardAmount >= 6 ?" "+(cardAmount >= 12 ? "beigeback" : "lightback"):"");
-				spr.countText.style.display = "";
+				var count = this.countText[i].children[j];
+				count.text = cardAmount + (shinyAmount ? "/"+shinyAmount:"");
+				count.className = "selectortext"+(this.maxedIndicator && card.type != etg.PillarEnum && cardAmount >= 6 ?(cardAmount >= 12 ? " beigeback" : " lightback"):"");
+				count.style.display = "";
 			}
 		}
 		for (;j < 15;j++) {
 			this.columnspr[i][j].visible = false;
-			this.columnspr[i][j].countText.style.display = "none";
+			this.countText[i].children[j].style.display = "none";
 		}
 	}
 }
