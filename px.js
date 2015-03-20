@@ -48,7 +48,7 @@ exports.domButton = function(text, click, mouseover) {
 		set:function(text){
 			if (text){
 				this.value = text;
-				this.style.display = "inline";
+				this.style.display = "";
 			}else this.style.display = "none";
 		}
 	});
@@ -151,7 +151,7 @@ function parseDom(info){
 	return ele;
 }
 exports.setDomVis = function(id, vis){
-	document.getElementById(id).style.display = vis ? "inline" : "none";
+	document.getElementById(id).style.display = vis ? "" : "none";
 }
 exports.view = function(stage) {
 	if (curStage.endnext){
@@ -179,7 +179,7 @@ exports.view = function(stage) {
 	if (stage.view){
 		if (!curStage.view) requestAnimate();
 		renderer.render(stage.view);
-		renderer.view.style.display = "inline";
+		renderer.view.style.display = "";
 		interman.stage = stage.view;
 	} else {
 		interman.stage = noStage;
@@ -383,7 +383,7 @@ CardSelector.prototype.renderCanvas = function() {
 	PIXI.Container.prototype.renderCanvas.apply(this, arguments);
 }
 CardSelector.prototype.makeColumns = function(){
-	this.bshowall.style.display = this.cardpool?"inline":"none";
+	this.bshowall.style.display = this.cardpool?"":"none";
 	var self = this;
 	for (var i = 0;i < 6;i++) {
 		this.columns[i] = etg.filtercards(i > 2,
@@ -410,7 +410,7 @@ CardSelector.prototype.renderColumns = function(){
 				}
 				spr.countText.text = cardAmount + (shinyAmount ? "/"+shinyAmount:"");
 				spr.countText.className = "selectortext"+(this.maxedIndicator && card.type != etg.PillarEnum && cardAmount >= 6 ?" "+(cardAmount >= 12 ? "beigeback" : "lightback"):"");
-				spr.countText.style.display = "inline";
+				spr.countText.style.display = "";
 			}
 		}
 		for (;j < 15;j++) {

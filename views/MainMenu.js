@@ -250,7 +250,7 @@ module.exports = function(nymph) {
 		ui.changeMusic(options.enableMusic);
 	}
 	function hideRightpaneChange(){
-		document.getElementById("rightpane").style.display = options.hideRightpane ? "none" : "inline";
+		document.getElementById("rightpane").style.display = options.hideRightpane ? "none" : "";
 		sock.emit("chatus", {hide: !!options.offline || !!options.hideRightpane});
 	}
 	var foename = px.domInput("Trade/Library", "foename", true, true);

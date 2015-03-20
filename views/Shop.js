@@ -8,7 +8,7 @@ var tutor = require("../tutor");
 var etgutil = require("../etgutil");
 function setVis(eles, vis) {
 	eles.forEach(function(x){
-		x.style.display = vis ? "inline" : "none";
+		x.style.display = vis ? "" : "none";
 	});
 }
 module.exports = function() {
@@ -51,7 +51,7 @@ module.exports = function() {
 
 	var bget = px.domButton("Take Cards", function () {
 		bget.style.display = "none";
-		bbuy.style.display = "inline";
+		bbuy.style.display = "";
 		popbooster.visible = false;
 		setVis(hidedom, true);
 	});
@@ -145,7 +145,7 @@ module.exports = function() {
 				tgold.text = sock.user.gold + "$";
 			}
 			if (etgutil.decklength(data.cards) < 11){
-				bget.style.display = "inline";
+				bget.style.display = "";
 				if (popbooster.children.length) popbooster.removeChildren();
 				etgutil.iterdeck(data.cards, function(code, i){
 					var x = i % 5, y = Math.floor(i/5);
@@ -156,7 +156,7 @@ module.exports = function() {
 				popbooster.visible = true;
 				setVis(hidedom, false);
 			}else{
-				bbuy.style.display = "inline";
+				bbuy.style.display = "";
 				var link = document.createElement("a");
 				link.href = "deck/" + data.cards;
 				link.target = "_blank";

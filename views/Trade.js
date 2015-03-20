@@ -25,7 +25,7 @@ module.exports = function() {
 				console.log("Confirmed", ownDeck.deck, foeDeck.deck);
 				sock.userEmit("confirmtrade", { cards: etgutil.encodedeck(ownDeck.deck), oppcards: etgutil.encodedeck(foeDeck.deck) });
 				btrade.style.display = "none";
-				tconfirm.style.display = "inline";
+				tconfirm.style.display = "";
 			}
 			else chat("Wait for your friend to choose!");
 		}
