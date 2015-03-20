@@ -31,6 +31,17 @@ var special = /view|endnext|cmds/;
 exports.getCmd = function(cmd){
 	return curStage.cmds ? curStage.cmds[cmd] : null;
 }
+exports.style = function(dom, style){
+	for(var key in style){
+		dom.style[key] = style[key];
+	}
+	return dom;
+}
+exports.domAdd = function(dom){
+	for (var i=1; i<arguments.length; i++){
+		dom.appendChild(arguments[i]);
+	}
+}
 exports.domBox = function(w, h){
 	var span = document.createElement("span");
 	span.style.width = w + "px";
@@ -139,19 +150,37 @@ exports.domText = function(text){
 	return ele;
 }
 function parseDom(info){
-	var ele;
-	if (typeof info[2] === "string"){
-		ele = exports.domText(info[2]);
-	}else if (info[2] instanceof Array){
-		ele = exports.domButton.apply(null, info[2]);
-	}else ele = info[2];
-	ele.style.left = info[0] + "px";
-	ele.style.top = info[1] + "px";
-	ele.style.position = "absolute";
+	var ele, base = typeof info[0] === "number" ? 2 : 0;
+	if (typeof info[base] === "string"){
+		ele = exports.domText(info[base]);
+	}else if (info[base] instanceof Array){
+		ele = exports.domButton.apply(null, info[base]);
+	}else ele = info[base];
+	if (info[base+1]){
+		info[base+1].forEach(function(info){
+			ele.appendChild(parseDom(info));
+		});
+	}
+	if (base){
+		ele.style.left = info[0] + "px";
+		ele.style.top = info[1] + "px";
+		ele.style.position = "absolute";
+	}
 	return ele;
 }
 exports.setDomVis = function(id, vis){
 	document.getElementById(id).style.display = vis ? "" : "none";
+}
+exports.domDiv = function(div){
+	var i = 1;
+	if (div instanceof Array){
+		div = document.createElement("div");
+		i = 0;
+	}
+	for(;i<arguments.length;i++){
+		div.appendChild(parseDom(arguments[i]));
+	}
+	return div;
 }
 exports.view = function(stage) {
 	if (curStage.endnext){
@@ -159,15 +188,13 @@ exports.view = function(stage) {
 	}
 	for (var key in stage){
 		if (!key.match(special)){
-			var dom = stage[key], div;
-			if (dom[0] instanceof Array){
-				div = document.createElement("div");
-				stage[key].forEach(function(info){
-					div.appendChild(parseDom(info));
-				});
-			}else div = parseDom(dom);
-			div.id = key;
-			stage[key] = div;
+			var div = stage[key];
+			if (div instanceof Array){
+				div = div[0] instanceof Array ?
+					exports.domDiv.apply(null, div) : parseDom(div);
+				div.id = key;
+				stage[key] = div;
+			}
 			document.body.appendChild(div);
 		}
 	}
