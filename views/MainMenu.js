@@ -289,7 +289,7 @@ module.exports = function(nymph) {
 				return;
 			}
 			var div = px.domBox(392, 156);
-			div.style({
+			px.style(div, {
 				position: "absolute",
 				left: "460px",
 				top: "380px",
