@@ -323,7 +323,7 @@ module.exports = function(nymph) {
 			changePass.addEventListener("keydown", function(e){
 				if (e.keyCode == 13) changeFunc();
 			});
-			exports.domDiv(div, [8, 8, changePass], [162, 8, changeBtn],
+			px.domDiv(div, [8, 8, changePass], [162, 8, changeBtn],
 				[8, 53, enableSound], [135, 53, enableMusic], [260, 53, preloadart],
 				[8, 88, hideRightpane], [135, 88, printstats], [260, 88, hideCostIcon],
 				[8, 123, disableTut],
