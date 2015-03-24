@@ -182,19 +182,23 @@ var userEvents = {
 	},
 	arenainfo:function(data, user){
 		var socket = this;
-		db.hgetall((data.lv?"B:":"A:") + data.u, function(err, obj){
-			if (!obj){
-				sockEmit(socket, "arenainfo", {deck:"", lv: data.lv});
-			}else{
-				db.zrevrank("arena"+(data.lv?"1":""), data.u, function(err, rank){
-					obj.day = sutil.getDay() - obj.day;
-					obj.curhp = getAgedHp(obj.hp, obj.day);
-					obj.lv = data.lv;
-					if (rank !== null)obj.rank = rank;
-					sockEmit(socket, "arenainfo", obj);
-				});
+		var task = sutil.mkTask(function(result){
+			var day = sutil.getDay();
+			function process(obj, rank){
+				if (!obj) return;
+				obj.day = day - obj.day;
+				obj.curhp = getAgedHp(obj.hp, obj.day);
+				if (rank !== null) obj.rank = rank;
 			}
+			process(result.A, result.ra);
+			process(result.B, result.rb);
+			sockEmit(socket, "arenainfo", {A:result.A, B:result.B});
 		});
+		db.hgetall("A:" + data.u, task("A"));
+		db.hgetall("B:" + data.u, task("B"));
+		db.zrevrank("arena", data.u, task("ra"));
+		db.zrevrank("arena1", data.u, task("rb"));
+		task();
 	},
 	modarena:function(data, user){
 		if (data.aname in users){

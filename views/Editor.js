@@ -9,9 +9,13 @@ var Cards = require("../Cards");
 var tutor = require("../tutor");
 var etgutil = require("../etgutil");
 var options = require("../options");
-module.exports = function(arena, acard, startempty) {
+module.exports = function(arena, ainfo, acard, startempty) {
 	if (!Cards.loaded) return;
-	if (arena && (!sock.user || arena.deck === undefined || acard === undefined)) arena = false;
+	var aupped;
+	if (arena){
+		if (!sock.user || ainfo.deck === undefined || acard === undefined) arena = false;
+		else aupped = Cards.Codes[acard].upped;
+	}
 	function updateField(renderdeck){
 		if (deckimport){
 			deckimport.value = etgutil.encodedeck(decksprite.deck) + "01" + etg.toTrueMark(editormark);
@@ -79,7 +83,7 @@ module.exports = function(arena, acard, startempty) {
 		cardArt.visible = true;
 	}
 	function incrpool(code, count){
-		if (code in Cards.Codes && (!arena || (!Cards.Codes[code].isOf(Cards.Codes[acard].asUpped(false).asShiny(false))) && (arena.lv || !Cards.Codes[code].upped))){
+		if (code in Cards.Codes && (!arena || (!Cards.Codes[code].isOf(Cards.Codes[acard].asUpped(false).asShiny(false))) && (aupped || !Cards.Codes[code].upped))){
 			cardpool[code] = (cardpool[code] || 0) + count;
 		}
 	}
@@ -192,7 +196,7 @@ module.exports = function(arena, acard, startempty) {
 				chat("35 cards required before submission");
 				return;
 			}
-			var data = { d: etgutil.encodedeck(decksprite.deck.slice(5)) + "01" + etg.toTrueMark(editormark), lv: arena.lv };
+			var data = { d: etgutil.encodedeck(decksprite.deck.slice(5)) + "01" + etg.toTrueMark(editormark), lv: aupped };
 			for(var k in arattr){
 				data[k] = arattr[k];
 			}
@@ -205,7 +209,7 @@ module.exports = function(arena, acard, startempty) {
 		}]], [8, 84, ["Exit", function() {
 			require("./ArenaInfo")(arena);
 		}]]);
-		var arpts = arena.lv?515:425, arattr = {hp:parseInt(arena.hp || 200), mark:parseInt(arena.mark || 2), draw:parseInt(arena.draw || 1)};
+		var arpts = aupped?515:425, arattr = {hp:parseInt(ainfo.hp || 200), mark:parseInt(ainfo.mark || 2), draw:parseInt(ainfo.draw || 1)};
 		var artable = {
 			hp: { min: 65, max: 200, incr: 45, cost: 1 },
 			mark: { cost: 45 },
@@ -266,7 +270,7 @@ module.exports = function(arena, acard, startempty) {
 				decksprite.rmCard(i);
 				updateField();
 			}
-		}, arena ? (startempty ? [] : etgutil.decodedeck(arena.deck)) : etgutil.decodedeck(sock.getDeck())
+		}, arena ? (startempty ? [] : etgutil.decodedeck(ainfo.deck)) : etgutil.decodedeck(sock.getDeck())
 	);
 	editorui.addChild(decksprite);
 	var cardsel = new px.CardSelector(dom, setCardArt,

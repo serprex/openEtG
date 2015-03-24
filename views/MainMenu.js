@@ -84,14 +84,6 @@ module.exports = function(nymph) {
 		text.style.textAlign = "center";
 		return text;
 	}
-	function tierText(tier) {
-		var text = px.domText("Tier "+tier);
-		text.style.fontSize = "18px";
-		text.style.width = "50%";
-		text.style.float = tier == 1 ? "left" : "right";
-		text.style.textAlign = "center";
-		return text;
-	}
 	function labelText(text) {
 		var text = px.domText(text);
 		text.style.fontSize = "14px";
@@ -112,8 +104,6 @@ module.exports = function(nymph) {
 	bwealth.style.position = "absolute";
 	bwealth.style.left = "85px";
 	arenabox.appendChild(titleText("Arena"));
-	arenabox.appendChild(tierText(1));
-	arenabox.appendChild(tierText(2));
 	playbox.appendChild(titleText("Players"));
 	var nextTip = px.domButton("Next tip", function() {
 		tipNumber = (tipNumber+1) % tipjar.length;
@@ -157,26 +147,18 @@ module.exports = function(nymph) {
 				sock.userEmit("foearena", lvi);
 				this.style.display = "none";
 			}
-			function arenaInfo() {
-				sock.userEmit("arenainfo", lvi);
-				this.style.display = "none";
-			}
 			function arenaTop() {
 				sock.emit("arenatop", lvi);
 				this.style.display = "none";
 			}
 			if (sock.user){
-				var bdiv = document.createElement("div");
-				px.style(bdiv, {
-					float: i ? "right" : "left",
-					textAlign: "center",
-					width: "50%",
-				});
-				var aai = px.domButton("Arena AI", arenaAi, mkSetTip("In the arena you will face decks from other players.\n" + costText(4+lvi.lv)));
-				var ainfo = px.domButton("Arena Info", arenaInfo, mkSetTip("check how your arena deck is doing."));
-				ainfo.style.marginTop = "24px";
-				px.domAdd(bdiv, aai, document.createElement("br"), ainfo);
-				arenabox.appendChild(bdiv);
+				var b = px.domButton("Arena AI", arenaAi, mkSetTip("In the arena you will face decks from other players.\n" + costText(4+lvi.lv)));
+				var lab = labelText(costText(4+lvi.lv));
+				var tx = px.domText("Tier " + (lvi.lv+1) + ": ");
+				tx.style.display = "inline";
+				lab.style.float = "right";
+				b.style.marginTop = lab.style.marginTop = tx.style.marginTop = "12px";
+				px.domAdd(arenabox, tx, b, lab);
 			}
 			var atop = px.domButton("Arena" + (i+1) + " T20", arenaTop, mkSetTip("See who the top players in arena are right now."));
 			px.style(atop, {
@@ -186,12 +168,18 @@ module.exports = function(nymph) {
 			leadbox.appendChild(atop);
 		})({lv:i});
 	}
-
-	if ((sock.user && sock.user.oracle) || typeof nymph === "string") {
-		var oracle = new PIXI.Sprite(gfx.getArt(nymph || sock.user.oracle));
-		oracle.position.set(92, 340);
-		stage.view = oracle;
-		delete sock.user.oracle;
+	function arenaInfo() {
+		sock.userEmit("arenainfo");
+		this.style.display = "none";
+	}
+	if (sock.user){
+		px.domDiv(arenabox, [4, 128, ["Arena Info", arenaInfo, mkSetTip("Check how your arena decks are doing.")]]);
+		if (nymph || sock.user.oracle) {
+			var oracle = new PIXI.Sprite(gfx.getArt(nymph || sock.user.oracle));
+			oracle.position.set(92, 340);
+			stage.view = oracle;
+			delete sock.user.oracle;
+		}
 	}
 	document.addEventListener("mousemove", resetTip);
 
