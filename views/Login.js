@@ -4,7 +4,7 @@ var ui = require("../uiutil");
 var chat = require("../chat");
 var sock = require("../sock");
 var options = require("../options");
-var bg_login = new Image()
+var bg_login = new Image();
 bg_login.src = "assets/bg_login.png";
 module.exports = function(){
 	function maybeLogin(e) {

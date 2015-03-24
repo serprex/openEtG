@@ -23,12 +23,12 @@ var tipjar = [
 	"Your arena deck will earn you 3$ per win & 1$ per loss",
 	"Colosseum lets you compete in a number of daily events for extra prizes. The colosseum challenges reset daily",
 	"Be sure to try the Proving Grounds Quests for some good cards",
-	"Be sure to keep track of the rarity icons; Grey means Common, Green means Uncommon, Blue means Rare, Orange means Shard, & Pink means Ultra Rare",
+	"Rarity hierarchy: Grey commons, green uncommons, blue rares, orange shard, & pink ultra rares",
 	"The Library button allows you to see all of a user's tradeable cards",
 	"If you are a new user, be sure to get the free Bronze & Silver packs from the Shop",
 	"Starter decks, cards from free packs, & all non-Common Daily Cards are account-bound; they cannot be traded or sold",
 	"If you include account-bound cards in an upgrade, the upgrade will also be account-bound",
-	"You'll receive a Daily Card upon logging in after midnight GMT0. If you submit an Arena deck, the deck will always contain 5 copies of that card",
+	"You'll receive a Daily Card upon logging in after midnight GMT0. If you submit an Arena deck, it contain 5 copies of that card",
 	"Unupgraded pillars & pendulums are free",
 	"Cards sell for around half as much as they cost to buy from a pack",
 	"Quests are free to try, & you always face the same deck. Keep trying until you collect your reward",
@@ -38,10 +38,9 @@ var tipjar = [
 	"If you type '/who' in chat you will get a list of the users who are online. '/w username message' will send your message only to one user",
 	"Chat commands: /who, /mute, /unmute, /clear, /w, /decks",
 	"Keyboard shortcuts: space ends turn, backspace cancels, w targets opponent, s targets yourself, 1 through 8 cast cards in hand",
-	"The first text bar under the game is the import/export bar & shows your current deck. The bar below it shows game messages & sometimes the opponent's deck",
 	"The AI Deck input may be used to fight any deck of your choice, but only in sandbox mode",
 	"Remember that you may use the logout button to enter sandbox mode to review the card pool, check rarities & try out new decks",
-	"Commoner & Champion have random decks, while Mage & Demigod have premade decks. Commoner & Mage are unupped, Champion has some upped, & Demigod is fully upped",
+	"Commoner & Mage are unupped, Champion has some upped, & Demigod is fully upped",
 	"Decks submitted to arena lose hp exponentially per day, down to a minimum of a quarter of their original hp",
 	"If you don't get what you want from the packs in the shop, ask to trade in chat or the openEtG forum",
 	"Rarity doesn't necessarily relate to card strength. You can go a long ways with commons & uncommons",
@@ -51,6 +50,15 @@ var tipjar = [
 	"Cards in packs have a (45/packsize)% chance to increment rarity",
 	"At Wealth T50 you can see which players have the highest wealth. Wealth is a combination of current gold & one's cardpool"
 ];
+function mkBox(w, h){
+	var d = document.createElement("div");
+	d.style.width = w + "px";
+	d.style.height = h + "px";
+	return d;
+}
+var bg_main = new Image();
+bg_main.src = "assets/bg_main.png";
+bg_main.style.zIndex = "-1";
 module.exports = function(nymph) {
 	var popdom, stage = {endnext: function(){
 		setDom(null);
@@ -91,18 +99,18 @@ module.exports = function(nymph) {
 		text.style.pointerEvents = "none";
 		return text;
 	}
-	var deckbox = px.domBox(250, 200),
-		statbox = px.domBox(250, 120),
-		leadbox = px.domBox(250, 120),
-		aibox = px.domBox(300, 320),
-		arenabox = px.domBox(300, 170),
-		playbox = px.domBox(250, 200),
-		tipbox = px.domBox(820, 60),
-		settingsbox = px.domBox(250, 32);
+	var deckbox = mkBox(196, 200),
+		statbox = mkBox(196, 120),
+		leadbox = mkBox(196, 120),
+		aibox = mkBox(292, 320),
+		arenabox = mkBox(292, 170),
+		playbox = mkBox(196, 200),
+		tipbox = mkBox(504, 48),
+		settingsbox = mkBox(196, 32);
 	deckbox.appendChild(titleText("Cards & Decks"));
 	var bwealth = px.domButton("Wealth T50", wealthTop, mkSetTip("See who's collected the most wealth."));
 	bwealth.style.position = "absolute";
-	bwealth.style.left = "85px";
+	bwealth.style.left = "52px";
 	arenabox.appendChild(titleText("Arena"));
 	playbox.appendChild(titleText("Players"));
 	var nextTip = px.domButton("Next tip", function() {
@@ -114,14 +122,15 @@ module.exports = function(nymph) {
 	nextTip.style.bottom = "2px";
 	tipbox.appendChild(nextTip);
 	var dom = stage.menudom = px.domDiv(
-		[40, 16, tipbox, [[tinfo]]],
-		[40, 220, leadbox, [[titleText("Leaderboards")], [bwealth], [document.createElement("br")]]],
-		[300, 92, aibox, [[titleText("AI Battle")]]],
-		[610, 92, deckbox, [
-			[90, 130, ["Deck", require("./Editor"), mkSetTip("Edit & manage your decks.")]],
+		[0, 0, bg_main],
+		[196, 4, tipbox, [[tinfo]]],
+		[86, 248, leadbox, [[titleText("Leaderboards")], [bwealth], [document.createElement("br")]]],
+		[304, 120, aibox, [[titleText("AI Battle")]]],
+		[620, 92, deckbox, [
+			[64, 108, ["Deck", require("./Editor"), mkSetTip("Edit & manage your decks.")]],
 		]],
-		[610, 300, playbox],
-		[610, 558, settingsbox]);
+		[620, 300, playbox],
+		[620, 558, settingsbox]);
 	[px.domButton("Commoner", mkAi.mkAi(0), mkSetTip("Commoners have no upgraded cards & mostly common cards.\n" + costText(0))),
 		px.domButton("Mage", mkAi.mkPremade("mage"), mkSetTip("Mages have preconstructed decks with a couple rares.\n" + costText(1))),
 		px.domButton("Champion", mkAi.mkAi(2), mkSetTip("Champions have some upgraded cards.\n" + costText(2))),
@@ -129,7 +138,7 @@ module.exports = function(nymph) {
 	].forEach(function(b,i){
 		var lab = labelText(costText(i));
 		lab.style.float = "right";
-		b.style.marginTop = lab.style.marginTop = "12px";
+		b.style.marginTop = lab.style.marginTop = "8px";
 		px.domAdd(aibox, b, lab);
 	});
 	for (var i=0; i<2; i++){
@@ -157,13 +166,13 @@ module.exports = function(nymph) {
 				var tx = px.domText("Tier " + (lvi.lv+1) + ": ");
 				tx.style.display = "inline";
 				lab.style.float = "right";
-				b.style.marginTop = lab.style.marginTop = tx.style.marginTop = "12px";
+				b.style.marginTop = lab.style.marginTop = tx.style.marginTop = "8px";
 				px.domAdd(arenabox, tx, b, lab);
 			}
 			var atop = px.domButton("Arena" + (i+1) + " T20", arenaTop, mkSetTip("See who the top players in arena are right now."));
 			px.style(atop, {
 				position: "absolute",
-				left: i?"140px":"30px",
+				left: i?"100px":"10px",
 			});
 			leadbox.appendChild(atop);
 		})({lv:i});
@@ -173,7 +182,7 @@ module.exports = function(nymph) {
 		this.style.display = "none";
 	}
 	if (sock.user){
-		px.domDiv(arenabox, [4, 128, ["Arena Info", arenaInfo, mkSetTip("Check how your arena decks are doing.")]]);
+		px.domDiv(arenabox, [20, 100, ["Arena Info", arenaInfo, mkSetTip("Check how your arena decks are doing.")]]);
 		if (nymph || sock.user.oracle) {
 			var oracle = new PIXI.Sprite(gfx.getArt(nymph || sock.user.oracle));
 			oracle.position.set(92, 340);
@@ -232,7 +241,7 @@ module.exports = function(nymph) {
 		sock.emit("chatus", {hide: !!options.offline || !!options.hideRightpane});
 	}
 	var foename = px.domInput("Trade/Library", "foename", true, true);
-	foename.style.marginLeft = "46px";
+	foename.style.marginLeft = "24px";
 	playbox.appendChild(foename);
 	soundChange();
 	musicChange();
@@ -255,12 +264,12 @@ module.exports = function(nymph) {
 	blogout.style.float = "right";
 	settingsbox.appendChild(blogout);
 	px.domDiv(playbox,
-		[30, 100, ["PvP", require("./Challenge").bind(null, true)]],
-		[140, 75, ["Library", libraryClick,mkSetTip("See exactly what cards you or others own")]]);
+		[10, 100, ["PvP", require("./Challenge").bind(null, true)]],
+		[120, 75, ["Library", libraryClick,mkSetTip("See exactly what cards you or others own")]]);
 	if (sock.user) {
 		var deckLabel = labelText("Deck: " + sock.user.selectedDeck);
 		deckLabel.style.whiteSpace = "nowrap";
-		deckbox.appendChild(deckLabel);
+		deckLabel.style.marginLeft = "16px";
 		var quickslotsdiv = document.createElement("div");
 		quickslotsdiv.style.textAlign = "center";
 		for (var i = 0;i < 10;i++) {
@@ -269,8 +278,9 @@ module.exports = function(nymph) {
 			if (sock.user.selectedDeck == sock.user.quickdecks[i]) b.classList.add("selectedbutton");
 			buttons[i] = b;
 			quickslotsdiv.appendChild(b);
+			if (i == 4) quickslotsdiv.appendChild(document.createElement("br"));
 		}
-		deckbox.appendChild(quickslotsdiv);
+		px.domAdd(deckbox, deckLabel, quickslotsdiv);
 		var bsettings = px.domButton("Settings", function() {
 			if (popdom && popdom.id == "settingspane"){
 				setDom(null);
@@ -324,7 +334,7 @@ module.exports = function(nymph) {
 		var colocol = document.createElement("div"), questcol = document.createElement("div"),
 			bquest = px.domButton("Quests", require("./QuestMain"), mkSetTip("Go on an adventure!")),
 			bcolo = px.domButton("Colosseum", require("./Colosseum"), mkSetTip("Try some daily challenges in the Colosseum!"));
-		colocol.style.marginTop = questcol.style.marginTop = "24px";
+		colocol.style.marginTop = questcol.style.marginTop = "12px";
 		colocol.style.width = questcol.style.width = "45%";
 		colocol.style.float = "left";
 		colocol.style.textAlign = "right";
@@ -333,25 +343,24 @@ module.exports = function(nymph) {
 		px.domAdd(questcol, bquest, labelText("Go on an adventure!"));
 		px.domAdd(aibox, colocol, questcol);
 		px.domDiv(deckbox,
-			[30, 170, ["Shop", require("./Shop"), mkSetTip("Buy booster packs which contain cards from the elements you choose.")]],
-			[140, 170, ["Upgrade", require("./Upgrade"), mkSetTip("Upgrade or sell cards.")]]);
+			[14, 128, ["Shop", require("./Shop"), mkSetTip("Buy booster packs which contain cards from the elements you choose.")]],
+			[114, 128, ["Upgrade", require("./Upgrade"), mkSetTip("Upgrade or sell cards.")]]);
 		px.domDiv(playbox,
-			[30, 75, ["Trade", tradeClick, mkSetTip("Initiate trading cards with another player.")]],
-			[140, 100, ["Reward", rewardClick, mkSetTip("Redeem a reward code.")]]);
+			[10, 75, ["Trade", tradeClick, mkSetTip("Initiate trading cards with another player.")]],
+			[120, 100, ["Reward", rewardClick, mkSetTip("Redeem a reward code.")]]);
 		px.domDiv(dom,
-			[40, 92, statbox, [
+			[86, 92, statbox, [
 				[titleText("Stats")],
 				[sock.user.gold + "$ " + sock.user.name + "\nPvE " + sock.user.aiwins + " - " + sock.user.ailosses + "\nPvP " + sock.user.pvpwins + " - " + sock.user.pvplosses]
 			]],
-			[300, 420, arenabox]);
+			[304, 380, arenabox]);
 	}
 	var customText = labelText("Duel a custom AI!");
 	var bcustom = px.domButton("Custom AI", require("./Challenge").bind(null, false), mkSetTip("Fight any deck you want, with custom stats both for you and the opponent."));
 	customText.style.textAlign = "center";
 	bcustom.style.marginLeft = "110px";
-	bcustom.style.marginTop = "16px";
-	aibox.appendChild(bcustom);
-	aibox.appendChild(customText);
+	bcustom.style.marginTop = "4px";
+	px.domAdd(aibox, bcustom, customText);
 	resetTip({target:{tagName:"HTML"}});
 	px.view(stage);
 }
