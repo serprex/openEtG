@@ -29,10 +29,9 @@ input[type="text"],input[type="password"],input:not([type]){width:150px}
 	height:19px;
 	font-size:12px;
 	pointer-events:none;
-	color:black;
 }
-.lightback{background-color:#999990}
-.beigeback{background-color:#a99683}
+.lightback{background-color:#999990;color:black}
+.beigeback{background-color:#a99683;color:black}
 .selectedbutton{background:linear-gradient(to bottom,#424748,#8999ff)!important}
 .bgbox{
 	background-color:#0d2e4a;
