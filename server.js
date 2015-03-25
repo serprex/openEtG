@@ -124,14 +124,10 @@ var userEvents = {
 		user.oracle = 0;
 		user.pool = "";
 		user.freepacks = starters[sid+4] + "," + starters[sid+5] + ",1";
-		user.dailymage = Math.floor(Math.random() * aiDecks.mage.length);
-		user.dailydg = Math.floor(Math.random() * aiDecks.demigod.length);
 		user.selectedDeck = "1";
 		var socket = this;
 		var task = sutil.mkTask(function(){
-			sutil.useruser(db, user, function(clientuser){
-				sockEmit(socket, "userdump", clientuser);
-			});
+			sockEvents.login.call(socket, {u:user.name, a:user.auth});
 		});
 		db.rpush("N:"+data.u,1,2,3,4,5,6,7,8,9,10, task("N"));
 		db.hmset("D:"+data.u, "1", starters[sid+1], "2", starters[sid+2], "3", starters[sid+3], task("D"));

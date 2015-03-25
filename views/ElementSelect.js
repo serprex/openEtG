@@ -26,7 +26,7 @@ module.exports = function() {
 		dom.push([100 + i * 32, 300, b]);
 	});
 	px.view({seldom: dom, cmds:{
-		userdump:function(data) {
+		login:function(data) {
 			delete data.x;
 			sock.user = data;
 			sock.prepuser();
