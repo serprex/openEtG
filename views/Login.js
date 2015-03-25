@@ -33,7 +33,8 @@ module.exports = function(){
 			loadingBar.style.width = (progress*900) + "px";
 		}, function(){
 			ui.playMusic("openingMusic");
-			if (sock.user || sandbox) require("./MainMenu")();
+			var mm = require("./MainMenu"); // Always require to begin loading bg_main
+			if (sock.user || sandbox) mm();
 		});
 	}
 	var login = px.domButton("Login", loginClick);
