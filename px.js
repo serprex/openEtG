@@ -31,11 +31,14 @@ var special = /view|endnext|cmds/;
 exports.getCmd = function(cmd){
 	return curStage.cmds ? curStage.cmds[cmd] : null;
 }
-exports.style = function(dom, style){
+exports.style = function(){
+	var style = arguments[arguments.length-1]
 	for(var key in style){
-		dom.style[key] = style[key];
+		for(var i=0; i<arguments.length-1; i++){
+			arguments[i].style[key] = style[key];
+		}
 	}
-	return dom;
+	return arguments[0];
 }
 exports.domAdd = function(dom){
 	for (var i=1; i<arguments.length; i++){
@@ -150,6 +153,7 @@ exports.domText = function(text){
 	return ele;
 }
 function parseDom(info){
+	if (info instanceof HTMLElement) return info;
 	var ele, base = typeof info[0] === "number" ? 2 : 0;
 	if (typeof info[base] === "string"){
 		ele = exports.domText(info[base]);

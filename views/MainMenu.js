@@ -73,9 +73,6 @@ module.exports = function(nymph) {
 			tinfo.text = text;
 		}
 	}
-	function costText(lv){
-		return !sock.user ? "" : "Cost: " + aicostpay[lv*2] + "$. Base reward: " + aicostpay[lv*2+1] + "$";
-	}
 	var tipNumber = etg.PlayerRng.upto(tipjar.length);
 
 	function resetTip(event) {
@@ -87,17 +84,19 @@ module.exports = function(nymph) {
 		this.style.display = "none";
 	}
 	function titleText(text){
-		var text = px.domText(text);
-		text.style.fontSize = "20px";
-		text.style.textAlign = "center";
-		return text;
+		return px.style(px.domText(text), {
+			fontSize: "20px",
+			textAlign: "center",
+		});
 	}
 	function labelText(text) {
-		var text = px.domText(text);
-		text.style.fontSize = "14px";
-		text.style.height = "20px";
-		text.style.pointerEvents = "none";
-		return text;
+		return px.style(px.domText(text), {
+			fontSize: "14px",
+			pointerEvents: "none",
+		});
+	}
+	function costText(lv, n){
+		return labelText((n ? "Base reward: " : "Cost: ") + aicostpay[lv*2+n] + "$");
 	}
 	var deckbox = mkBox(196, 200),
 		statbox = mkBox(196, 120),
@@ -105,8 +104,7 @@ module.exports = function(nymph) {
 		aibox = mkBox(292, 320),
 		arenabox = mkBox(292, 170),
 		playbox = mkBox(196, 200),
-		tipbox = mkBox(504, 48),
-		settingsbox = mkBox(196, 32);
+		tipbox = mkBox(504, 48);
 	deckbox.appendChild(titleText("Cards & Decks"));
 	var bwealth = px.domButton("Wealth T50", wealthTop, mkSetTip("See who's collected the most wealth."));
 	bwealth.style.position = "absolute";
@@ -127,19 +125,22 @@ module.exports = function(nymph) {
 		[86, 248, leadbox, [[titleText("Leaderboards")], [bwealth], [document.createElement("br")]]],
 		[304, 120, aibox, [[titleText("AI Battle")]]],
 		[620, 92, deckbox, [
-			[64, 108, ["Deck", require("./Editor"), mkSetTip("Edit & manage your decks.")]],
+			[64, 108, ["Editor", require("./Editor"), mkSetTip("Edit & manage your decks.")]],
 		]],
-		[620, 300, playbox],
-		[620, 558, settingsbox]);
-	[px.domButton("Commoner", mkAi.mkAi(0), mkSetTip("Commoners have no upgraded cards & mostly common cards.\n" + costText(0))),
-		px.domButton("Mage", mkAi.mkPremade("mage"), mkSetTip("Mages have preconstructed decks with a couple rares.\n" + costText(1))),
-		px.domButton("Champion", mkAi.mkAi(2), mkSetTip("Champions have some upgraded cards.\n" + costText(2))),
-		px.domButton("Demigod", mkAi.mkPremade("demigod"), mkSetTip("Demigods are extremely powerful. Come prepared for anything.\n" + costText(3))),
+		[620, 300, playbox]);
+	[px.domButton("Commoner", mkAi.mkAi(0), mkSetTip("Commoners have no upgraded cards & mostly common cards.")),
+		px.domButton("Mage", mkAi.mkPremade("mage"), mkSetTip("Mages have preconstructed decks with a couple rares.")),
+		px.domButton("Champion", mkAi.mkAi(2), mkSetTip("Champions have some upgraded cards.")),
+		px.domButton("Demigod", mkAi.mkPremade("demigod"), mkSetTip("Demigods are extremely powerful. Come prepared for anything.")),
 	].forEach(function(b,i){
-		var lab = labelText(costText(i));
-		lab.style.float = "right";
-		b.style.marginTop = lab.style.marginTop = "8px";
-		px.domAdd(aibox, b, lab);
+		var clab = costText(i, 0), rlab = costText(i, 1);
+		px.style(clab, rlab, {
+			position: "absolute",
+			top: 24+i*24+"px",
+		});
+		clab.style.right = "114px";
+		rlab.style.right = "4px";
+		px.domDiv(aibox, [4, 24+i*24, b], clab, rlab);
 	});
 	for (var i=0; i<2; i++){
 		(function(lvi){
@@ -161,13 +162,17 @@ module.exports = function(nymph) {
 				this.style.display = "none";
 			}
 			if (sock.user){
-				var b = px.domButton("Arena AI", arenaAi, mkSetTip("In the arena you will face decks from other players.\n" + costText(4+lvi.lv)));
-				var lab = labelText(costText(4+lvi.lv));
+				var b = px.domButton("Arena AI", arenaAi, mkSetTip("In the arena you will face decks from other players."));
+				var clab = costText(4+lvi.lv, 0), rlab = costText(4+lvi.lv, 1);
 				var tx = px.domText("Tier " + (lvi.lv+1) + ": ");
-				tx.style.display = "inline";
-				lab.style.float = "right";
-				b.style.marginTop = lab.style.marginTop = tx.style.marginTop = "8px";
-				px.domAdd(arenabox, tx, b, lab);
+				tx.appendChild(b);
+				px.style(clab, rlab, {
+					position: "absolute",
+					top: 24+i*24+"px",
+				});
+				clab.style.right = "114px";
+				rlab.style.right = "4px";
+				px.domDiv(arenabox, [4, 24+i*24, tx], clab, rlab);
 			}
 			var atop = px.domButton("Arena" + (i+1) + " T20", arenaTop, mkSetTip("See who the top players in arena are right now."));
 			px.style(atop, {
@@ -260,9 +265,7 @@ module.exports = function(nymph) {
 			fixQuickButtons();
 		}
 	}
-	var blogout = px.domButton("Logout", logout.bind(null, "logout"), mkSetTip("Click here to log out."));
-	blogout.style.float = "right";
-	settingsbox.appendChild(blogout);
+	px.domDiv(dom, [744, 558, ["Logout", logout.bind(null, "logout"), mkSetTip("Click here to log out.")]]);
 	px.domDiv(playbox,
 		[10, 100, ["PvP", require("./Challenge").bind(null, true)]],
 		[120, 75, ["Library", libraryClick,mkSetTip("See exactly what cards you or others own")]]);
@@ -329,13 +332,14 @@ module.exports = function(nymph) {
 			div.id = "settingspane";
 			setDom(div);
 		});
-		bsettings.style.float = "left";
-		settingsbox.appendChild(bsettings);
+		px.domDiv(dom, [620, 558, bsettings]);
 		var colocol = document.createElement("div"), questcol = document.createElement("div"),
 			bquest = px.domButton("Quests", require("./QuestMain"), mkSetTip("Go on an adventure!")),
 			bcolo = px.domButton("Colosseum", require("./Colosseum"), mkSetTip("Try some daily challenges in the Colosseum!"));
-		colocol.style.marginTop = questcol.style.marginTop = "12px";
-		colocol.style.width = questcol.style.width = "45%";
+		px.style(colocol, questcol, {
+			marginTop: "108px",
+			width: "45%",
+		});
 		colocol.style.float = "left";
 		colocol.style.textAlign = "right";
 		questcol.style.float = "right";
