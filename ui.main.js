@@ -23,12 +23,6 @@
 	}
 	var sockEvents = {
 		clear:chat.clear,
-		userdump:function(data) {
-			delete data.x;
-			sock.user = data;
-			sock.prepuser();
-			require("./views/MainMenu")();
-		},
 		passchange:function(data) {
 			sock.user.auth = data.auth;
 			chat("Password updated");

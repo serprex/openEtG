@@ -19,12 +19,18 @@ module.exports = function() {
 			var msg = { u: sock.user.name, a: sock.user.auth, e: i ==14 ? etg.PlayerRng.uptoceil(12) : i };
 			sock.user = undefined;
 			sock.emit("inituser", msg);
-			require("./MainMenu")();
 		});
 		b.addEventListener("mouseover", function(){
 			eledesc.text = i < 13 ? name : i == 13 ? "Build your own" : "Random";
 		});
 		dom.push([100 + i * 32, 300, b]);
 	});
-	px.view({seldom: dom});
+	px.view({seldom: dom, cmds:{
+		userdump:function(data) {
+			delete data.x;
+			sock.user = data;
+			sock.prepuser();
+			require("./MainMenu")();
+		},
+	}});
 }
