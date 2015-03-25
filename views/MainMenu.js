@@ -98,11 +98,11 @@ module.exports = function(nymph) {
 	function costText(lv, n){
 		return labelText((n ? "Base reward: " : "Cost: ") + aicostpay[lv*2+n] + "$");
 	}
-	var deckbox = mkBox(196, 200),
+	var deckbox = mkBox(196, 176),
 		statbox = mkBox(196, 120),
 		leadbox = mkBox(196, 120),
-		aibox = mkBox(292, 320),
-		arenabox = mkBox(292, 170),
+		aibox = mkBox(292, 240),
+		arenabox = mkBox(292, 130),
 		playbox = mkBox(196, 200),
 		tipbox = mkBox(504, 48);
 	deckbox.appendChild(titleText("Cards & Decks"));
@@ -162,17 +162,16 @@ module.exports = function(nymph) {
 				this.style.display = "none";
 			}
 			if (sock.user){
-				var b = px.domButton("Arena AI", arenaAi, mkSetTip("In the arena you will face decks from other players."));
-				var clab = costText(4+lvi.lv, 0), rlab = costText(4+lvi.lv, 1);
-				var tx = px.domText("Tier " + (lvi.lv+1) + ": ");
-				tx.appendChild(b);
+				var y = 24+i*24, b = px.domButton("Arena AI", arenaAi, mkSetTip("In the arena you will face decks from other players.")),
+					clab = costText(4+lvi.lv, 0), rlab = costText(4+lvi.lv, 1),
+					tx = px.domText("Tier " + (lvi.lv+1));
 				px.style(clab, rlab, {
 					position: "absolute",
-					top: 24+i*24+"px",
+					top: y+"px",
 				});
 				clab.style.right = "114px";
 				rlab.style.right = "4px";
-				px.domDiv(arenabox, [4, 24+i*24, tx], clab, rlab);
+				px.domDiv(arenabox, [4, y, tx], [40, y, b], clab, rlab);
 			}
 			var atop = px.domButton("Arena" + (i+1) + " T20", arenaTop, mkSetTip("See who the top players in arena are right now."));
 			px.style(atop, {
