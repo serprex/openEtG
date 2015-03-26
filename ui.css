@@ -33,6 +33,7 @@ input[type="text"],input[type="password"],input:not([type]){width:150px}
 .lightback{background-color:#999990;color:black}
 .beigeback{background-color:#a99683;color:black}
 .selectedbutton{background:linear-gradient(to bottom,#424748,#8999ff)!important}
+.editbtn{width:32px!important;margin-left:4px}
 .bgbox{
 	background-color:#0d2e4a;
 	border-style:solid;

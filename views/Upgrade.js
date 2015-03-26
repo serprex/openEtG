@@ -86,14 +86,19 @@ module.exports = function() {
 	var upgradeui = px.mkView(function(){
 		if (selectedCard) cardArt.texture = gfx.getArt(etgutil.asUpped(selectedCard, true));
 	});
+	var bupgrade = px.domButton("Upgrade", eventWrap(upgradeCard)),
+		bpolish = px.domButton("Polish", eventWrap(polishCard), function() { if (selectedCard) cardArt.texture = gfx.getArt(etgutil.asShiny(selectedCard, true)) }),
+		bunupgrade = px.domButton("Unupgrade", eventWrap(unupgradeCard)),
+		bunpolish = px.domButton("Unpolish", eventWrap(unpolishCard), function() { if (selectedCard) cardArt.texture = gfx.getArt(etgutil.asShiny(selectedCard, false)) }),
+		bsell = px.domButton("Sell", eventWrap(sellCard));
 	var stage = {view:upgradeui,
-		bexit: [5, 50, ["Exit", require("./MainMenu")]],
-		bupgrade: [150, 50, ["Upgrade", eventWrap(upgradeCard)]],
-		bpolish: [150, 95, ["Polish", eventWrap(polishCard), function() { if (selectedCard) cardArt.texture = gfx.getArt(etgutil.asShiny(selectedCard, true)) }]],
-		bunupgrade:[150, 50, ["Unupgrade", eventWrap(unupgradeCard)]],
-		bunpolish:[150, 95, ["Unpolish", eventWrap(unpolishCard), function() { if (selectedCard) cardArt.texture = gfx.getArt(etgutil.asShiny(selectedCard, false)) }]],
-		bsell:[150, 140, ["Sell", eventWrap(sellCard)]],
-		bauto:[5, 140, ["Autoconvert", autoCards]],
+		dom: [[5, 50, ["Exit", require("./MainMenu")]],
+			[150, 50, bupgrade],
+			[150, 95, bpolish],
+			[150, 50, bunupgrade],
+			[150, 95, bunpolish],
+			[150, 140, bsell],
+			[5, 140, ["Autoconvert", autoCards]]],
 	};
 
 	var goldcount = px.domText(sock.user.gold + "$");
@@ -123,30 +128,29 @@ module.exports = function() {
 			cardArt.texture = gfx.getArt(etgutil.asUpped(code, true));
 			selectedCard = code;
 			if (card.upped) {
-				px.setDomVis("bupgrade", false);
-				px.setDomVis("bunupgrade", true);
+				bupgrade.style.display = "none";
+				bunupgrade.style.display = "";
 				tinfo.text = card.isFree() ? "" : card.rarity != -1 ? "Convert into an 6 unupgraded copies." : "Convert into an unupgraded version.";
 			}else{
 				tinfo.text = card.isFree() ? "50$ to upgrade" : card.rarity != -1 ? "Convert 6 into an upgraded version." : "Convert into an upgraded version.";
-				px.setDomVis("bupgrade", true);
-				px.setDomVis("bunupgrade", false);
+				bupgrade.style.display = "";
+				bunupgrade.style.display = "none";
 			}
 			if (card.rarity == 5) {
-				px.setDomVis("bpolish", false);
-				px.setDomVis("bunpolish", false);
+				bpolish.style.display = bunpolish.style.display = "none";
 				tinfo3.text = "This card cannot be " + (card.shiny ? "un" : "") + "polished.";
 			}
 			else if (card.shiny){
-				px.setDomVis("bpolish", false);
-				px.setDomVis("bunpolish", true);
+				bpolish.style.display = "none";
+				bunpolish.style.display = "";
 				tinfo3.text = card.isFree() ? "" : card.rarity != -1 ? "Convert into 6 non-shiny copies." : "Convert into 2 non-shiny copies.";
 			}else{
 				tinfo3.text = card.isFree() ? "50$ to polish" : card.rarity == 5 ? "This card cannot be polished." : card.rarity != -1 ? "Convert 6 into a shiny version." : "Convert 2 into a shiny version.";
-				px.setDomVis("bpolish", true);
-				px.setDomVis("bunpolish", false);
+				bpolish.style.display = "";
+				bunpolish.style.display = "none";
 			}
-			px.setDomVis("bsell", ~card.rarity);
-			document.getElementById("bsell").value = card.isFree() ? "Polgrade" : "Sell";
+			bsell.style.display = ~card.rarity?"":"none";
+			bsell.value = card.isFree() ? "Polgrade" : "Sell";
 			tinfo2.text = card.rarity == -1 ? "" : card.isFree() ? "300$ to upgrade & polish" :
 				"Sell for " + userutil.sellValues[card.rarity] * (card.upped ? 6 : 1) * (card.shiny ? 6 : 1) + "$";
 			twarning.text = "";
@@ -155,10 +159,6 @@ module.exports = function() {
 	upgradeui.addChild(cardsel);
 	cardsel.cardminus = {};
 	adjustdeck();
+	px.style(bupgrade, bpolish, bsell, bunupgrade, bunpolish, {display: "none"});
 	px.view(stage);
-	px.setDomVis("bupgrade", false);
-	px.setDomVis("bpolish", false);
-	px.setDomVis("bsell", false);
-	px.setDomVis("bunupgrade", false);
-	px.setDomVis("bunpolish", false);
 }

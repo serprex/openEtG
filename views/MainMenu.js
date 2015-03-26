@@ -248,10 +248,9 @@ module.exports = function(nymph) {
 	playbox.appendChild(foename);
 	soundChange();
 	musicChange();
-	var buttons = new Array(10);;
 	function fixQuickButtons() {
 		for (var i = 0;i < 10;i++) {
-			buttons[i].classList[sock.user.selectedDeck == sock.user.quickdecks[i] ? "add" : "remove"]("selectedbutton");
+			quickslotsdiv.children[i].classList[sock.user.selectedDeck == sock.user.quickdecks[i] ? "add" : "remove"]("selectedbutton");
 		}
 	}
 	function loadQuickdeck(x) {
@@ -275,11 +274,9 @@ module.exports = function(nymph) {
 		quickslotsdiv.style.textAlign = "center";
 		for (var i = 0;i < 10;i++) {
 			var b = px.domButton(i + 1, loadQuickdeck(i));
-			b.style.width = "20px";
+			b.className = "editbtn";
 			if (sock.user.selectedDeck == sock.user.quickdecks[i]) b.classList.add("selectedbutton");
-			buttons[i] = b;
 			quickslotsdiv.appendChild(b);
-			if (i == 4) quickslotsdiv.appendChild(document.createElement("br"));
 		}
 		px.domAdd(deckbox, deckLabel, quickslotsdiv);
 		var bsettings = px.domButton("Settings", function() {

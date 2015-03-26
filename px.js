@@ -161,14 +161,11 @@ function parseDom(info){
 		});
 	}
 	if (base){
+		ele.style.position = "absolute";
 		ele.style.left = info[0] + "px";
 		ele.style.top = info[1] + "px";
-		ele.style.position = "absolute";
 	}
 	return ele;
-}
-exports.setDomVis = function(id, vis){
-	document.getElementById(id).style.display = vis ? "" : "none";
 }
 function _domAdd(dom, args, i){
 	while(i < args.length){

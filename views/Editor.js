@@ -106,7 +106,7 @@ module.exports = function(arena, ainfo, acard, startempty) {
 	}
 	function fixQuickButtons(){
 		for (var i = 0;i < 10;i++) {
-			buttons[i].classList[sock.user.selectedDeck == sock.user.quickdecks[i]?"add":"remove"]("selectedbutton");
+			buttons.children[i].classList[sock.user.selectedDeck == sock.user.quickdecks[i]?"add":"remove"]("selectedbutton");
 		}
 	}
 	function saveDeck(force){
@@ -189,7 +189,6 @@ module.exports = function(arena, ainfo, acard, startempty) {
 			saveDeck();
 		}
 	}
-	var buttons;
 	if (arena){
 		dom.push([8, 58, ["Save & Exit", function() {
 			if (decksprite.deck.length < 35 || sumscore()>arpts) {
@@ -236,12 +235,12 @@ module.exports = function(arena, ainfo, acard, startempty) {
 				if (sock.user) sock.userEmit("setdeck", { name: sock.user.selectedDeck });
 				startMenu();
 			}]], [220, 8, quickNum]);
-			buttons = new Array(10);
+			var buttons = document.createElement("div");
+			dom.push([300, 8, buttons]);
 			for (var i = 0;i < 10;i++) {
 				var b = px.domButton(i+1, quickDeck(i));
-				b.style.width = "32px";
-				dom.push([300 + i*36, 8, b]);
-				buttons[i] = b;
+				b.className = "editbtn";
+				buttons.appendChild(b);
 			}
 			fixQuickButtons();
 		}
