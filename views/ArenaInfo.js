@@ -27,7 +27,7 @@ module.exports = function(data) {
 			});
 			var marksprite = document.createElement("span");
 			marksprite.className = "ico e"+mark;
-			px.dom.add(div, [100, 4+y, (info.win || 0) + " - " + (info.loss || 0) + ": " + (info.rank+1)],
+			px.dom.add(div, [100, 4+y, (info.win || 0) + " - " + (info.loss || 0) + ": " + (info.rank == undefined?"Inactive":(info.rank+1))],
 				[200, 4+y, adeck],
 				[400, 224+y, "Age: " + info.day],
 				[100, 224+y, "HP: " + info.curhp + " / " + info.hp],

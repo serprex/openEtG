@@ -80,6 +80,16 @@ module.exports = function(){
 			else sandbox = true;
 		}]]);
 	if (loadingBar) px.dom.add(div, [0, 568, loadingBar]);
+	var xhr = new XMLHttpRequest();
+	xhr.addEventListener("load", function(){
+		var data = JSON.parse(this.responseText)[0];
+		var a = document.createElement("a");
+		a.href = data.html_url;
+		a.appendChild(document.createTextNode(data.author.login + ": " + data.commit.message));
+		px.dom.add(div, [270, 460, a]);
+	});
+	xhr.open("GET", "https://api.github.com/repos/serprex/openEtG/commits?per_page=1", true);
+	xhr.send();
 	px.view({
 		dom:div,
 		cmds:{
