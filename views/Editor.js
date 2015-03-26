@@ -141,13 +141,14 @@ module.exports = function(arena, ainfo, acard, startempty) {
 		etgutil.iterraw(sock.user.pool, incrpool);
 		etgutil.iterraw(sock.user.accountbound, incrpool);
 	}else cardpool = null;
-	var editorui = px.mkView(function(){cardArt.visible = false}), dom = [[8, 32, ["Clear", function(){
+	var editorui = px.mkView(function(){cardArt.visible = false}), div = px.dom.div([8, 32, ["Clear", function(){
 		if (sock.user) {
 			cardsel.cardminus = cardminus = {};
 		}
 		decksprite.deck.length = arena?5:0;
 		decksprite.renderDeck(decksprite.deck.length);
-	}]]];
+	}]]);
+	var stage = { view:editorui, dom:div, endnext: function() { document.removeEventListener("mousemove", resetCardArt, true); } };
 	function sumscore(){
 		var sum = 0;
 		for(var k in artable){
@@ -170,11 +171,11 @@ module.exports = function(arena, ainfo, acard, startempty) {
 		}
 		y = 128+y*20;
 		var data = artable[name];
-		var bv = px.domText(arattr[name]);
-		var bm = px.domButton("-", modattr.bind(null, -(data.incr || 1)));
-		var bp = px.domButton("+", modattr.bind(null, data.incr || 1));
+		var bv = px.dom.text(arattr[name]);
+		var bm = px.dom.button("-", modattr.bind(null, -(data.incr || 1)));
+		var bp = px.dom.button("+", modattr.bind(null, data.incr || 1));
 		bm.style.width = bp.style.width = "14px";
-		dom.push([4, y, name], [38, y, bm], [56, y, bv], [82, y, bp]);
+		px.dom.add(div, [4, y, name], [38, y, bm], [56, y, bv], [82, y, bp]);
 	}
 	function switchDeckCb(x){
 		return function() {
@@ -190,7 +191,7 @@ module.exports = function(arena, ainfo, acard, startempty) {
 		}
 	}
 	if (arena){
-		dom.push([8, 58, ["Save & Exit", function() {
+		px.dom.add(div, [8, 58, ["Save & Exit", function() {
 			if (decksprite.deck.length < 35 || sumscore()>arpts) {
 				chat("35 cards required before submission");
 				return;
@@ -214,31 +215,30 @@ module.exports = function(arena, ainfo, acard, startempty) {
 			mark: { cost: 45 },
 			draw: { cost: 135 },
 		};
-		var curpts = new px.domText((arpts-sumscore())/45);
-		dom.push([4, 188, curpts])
+		var curpts = new px.dom.text((arpts-sumscore())/45);
+		px.dom.add(div, [4, 188, curpts]);
 		makeattrui(0, "hp");
 		makeattrui(1, "mark");
 		makeattrui(2, "draw");
 	} else {
-		var quickNum = px.domButton("Save to #", saveTo);
-		dom.push([8, 58, ["Save & Exit", function() {
+		var quickNum = px.dom.button("Save to #", saveTo);
+		px.dom.add(div, [8, 58, ["Save & Exit", function() {
 			if (sock.user) saveDeck(true);
 			startMenu();
 		}]], [8, 84, ["Import", importDeck]]);
 		if (sock.user) {
-			var tname = px.domText(sock.user.selectedDeck);
-			dom.push([100, 8, tname],
+			var tname = px.dom.text(sock.user.selectedDeck),
+				buttons = document.createElement("div");
+			px.dom.add(div, [100, 8, tname],
 			[8, 110, ["Save", saveButton
 			]], [8, 136, ["Load", function() {
 				loadDeck(deckname.value);
 			}]], [8, 162, ["Exit", function() {
 				if (sock.user) sock.userEmit("setdeck", { name: sock.user.selectedDeck });
 				startMenu();
-			}]], [220, 8, quickNum]);
-			var buttons = document.createElement("div");
-			dom.push([300, 8, buttons]);
+			}]], [220, 8, quickNum], [300, 8, buttons]);
 			for (var i = 0;i < 10;i++) {
-				var b = px.domButton(i+1, quickDeck(i));
+				var b = px.dom.button(i+1, quickDeck(i));
 				b.className = "editbtn";
 				buttons.appendChild(b);
 			}
@@ -246,12 +246,12 @@ module.exports = function(arena, ainfo, acard, startempty) {
 		}
 	}
 	var marksprite = document.createElement("span");
-	dom.push([66, 200, marksprite]);
+	px.dom.add(div, [66, 200, marksprite]);
 	var editormark = 0;
 	for (var i = 0;i < 13;i++) {
 		(function(_i) {
-			dom.push([100 + i * 32, 234,
-				px.domEButton(i, function() {
+			px.dom.add([100 + i * 32, 234,
+				px.dom.icob(i, function() {
 					editormark = _i;
 					marksprite.className = "ico e"+_i;
 					updateField();
@@ -272,7 +272,7 @@ module.exports = function(arena, ainfo, acard, startempty) {
 		}, arena ? (startempty ? [] : etgutil.decodedeck(ainfo.deck)) : etgutil.decodedeck(sock.getDeck())
 	);
 	editorui.addChild(decksprite);
-	var cardsel = new px.CardSelector(dom, setCardArt,
+	var cardsel = new px.CardSelector(stage, setCardArt,
 		function(code){
 			if (decksprite.deck.length < 60) {
 				var card = Cards.Codes[code];
@@ -309,12 +309,11 @@ module.exports = function(arena, ainfo, acard, startempty) {
 			deckname.addEventListener("click", function(e){
 				this.setSelectionRange(0, 99);
 			});
-			dom.push([4, 4, deckname]);
+			px.dom.add(div, [4, 4, deckname]);
 		}
 		var deckimport = document.createElement("input");
 		deckimport.id = "deckimport";
 		deckimport.style.width = "190px";
-		deckimport.style.height = "20px";
 		deckimport.placeholder = "Deck";
 		deckimport.addEventListener("click", function(){this.setSelectionRange(0, 333)});
 		deckimport.addEventListener("keydown", function(e){
@@ -324,11 +323,10 @@ module.exports = function(arena, ainfo, acard, startempty) {
 			}
 		});
 		options.register("deck", deckimport);
-		dom.push([520, 238, deckimport]);
+		px.dom.add(div, [520, 238, deckimport]);
 	}
 	function resetCardArt() { cardArt.visible = false }
 	document.addEventListener("mousemove", resetCardArt, true);
-	var stage = { view: editorui, editdiv: dom, endnext: function() { document.removeEventListener("mousemove", resetCardArt, true); } };
 	if (!arena && sock.user) stage = tutor(tutor.Editor, 4, 220, stage);
 	px.view(stage);
 

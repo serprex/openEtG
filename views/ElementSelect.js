@@ -5,17 +5,16 @@ var gfx = require("../gfx");
 var sock = require("../sock");
 module.exports = function() {
 	var eledesc = px.domText("Select your starter element"),
-		dom = [
+		div = px.dom.div(
 		[100, 250, eledesc],
 		[100, 400, ["Exit", function(){
 			sock.userEmit("delete");
 			sock.user = undefined;
 			require("./Login")();
-		}]]
-	];
+		}]]);
 	etg.eleNames.forEach(function(name, i){
 		if (i < 1 || i > 14) return;
-		var b = px.domEButton(i < 13 ? i : i == 13 ? 14 : 13, function() {
+		var b = px.dom.icob(i < 13 ? i : i == 13 ? 14 : 13, function() {
 			var msg = { u: sock.user.name, a: sock.user.auth, e: i ==14 ? etg.PlayerRng.uptoceil(12) : i };
 			sock.user = undefined;
 			sock.emit("inituser", msg);
@@ -25,7 +24,7 @@ module.exports = function() {
 		});
 		dom.push([100 + i * 32, 300, b]);
 	});
-	px.view({seldom: dom, cmds:{
+	px.view({dom:div, cmds:{
 		login:function(data) {
 			delete data.x;
 			sock.user = data;

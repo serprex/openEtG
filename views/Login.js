@@ -37,7 +37,7 @@ module.exports = function(){
 			if (sock.user || sandbox) mm();
 		});
 	}
-	var login = px.domButton("Login", loginClick);
+	var login = px.dom.button("Login", loginClick);
 	var username = document.createElement("input");
 	var password = document.createElement("input");
 	var rememberCheck = document.createElement("input");
@@ -68,7 +68,7 @@ module.exports = function(){
 	tutlink.href = "forum/?topic=267"
 	tutlink.target = "_blank";
 	tutlink.appendChild(document.createTextNode("Tutorial"));
-	var dom = [
+	var div = px.dom.div(
 		[0, 0, bg_login],
 		[270, 350, username],
 		[270, 380, password],
@@ -78,11 +78,10 @@ module.exports = function(){
 		[530, 350, ["Sandbox", function(){
 			if (gfx.loaded) require("./MainMenu")();
 			else sandbox = true;
-		}]],
-	];
-	if (loadingBar) dom.push([0, 568, loadingBar]);
+		}]]);
+	if (loadingBar) px.dom.add(div, [0, 568, loadingBar]);
 	px.view({
-		logdom:dom,
+		dom:div,
 		cmds:{
 			login:function(data){
 				if (!data.err){

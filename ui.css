@@ -24,6 +24,14 @@ input[type="button"]{
 input[type="button"]:hover{background:linear-gradient(to bottom,#ccdde0,#586776)}
 input[type="button"]:hover:active{background:linear-gradient(to bottom,#aabbc0,#485766)}
 input[type="text"],input[type="password"],input:not([type]){width:150px}
+.infobox{
+	opacity:.7;
+	background-color:black;
+	font-size:10px;
+	transform:translate(-50%,-100%);
+	pointer-events:none;
+	max-width:196px;
+}
 .selectortext{
 	width:33px;
 	height:19px;
@@ -53,6 +61,7 @@ input[type="text"],input[type="password"],input:not([type]){width:150px}
 	color:#000000;
 	padding-left:4px;
 	padding-right:4px;
+	z-index:2;
 }
 .numput{width:32px!important}
 .imgb:hover{

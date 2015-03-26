@@ -2,22 +2,28 @@ var px = require("./px");
 var options = require("./options");
 var tutor = module.exports = function(tutdata, x, y, stage){
 	if (options.disableTut) return stage;
-	stage.tutor = [[x, y, px.domEButton(13, function() {
-		if (stage.tutspan) {
-			stage.tutspan.remove();
-			delete stage.tutspan;
+	var tutspan;
+	px.dom.add(stage.dom, px.dom.style(px.dom.icob(13, function() {
+		var self = this;
+		if (tutspan) {
+			tutspan.remove();
+			tutspan = undefined;
 			return;
 		}
-		stage.tutspan = document.createElement("div");
+		tutspan = document.createElement("div");
 		tutdata.forEach(function(info) {
-			var text = px.domText(info[info.length-1]);
+			var text = px.dom.text(info[info.length-1]);
 			text.className = "tutorialbox";
 			if (info.length > 2) text.style.width = info[2] + "px";
 			if (info.length > 3) text.style.height = info[3] + "px";
-			px.domAdd(stage.tutspan, [info[0], info[1], text]);
+			px.dom.add(tutspan, [info[0], info[1], text]);
 		});
-		document.body.appendChild(stage.tutspan);
-	})]];
+		stage.dom.appendChild(tutspan);
+	}),{
+		position:"absolute",
+		left:x+"px",
+		top:y+"px",
+	}));
 	return stage;
 }
 tutor.Editor = [[100, 32, 624, "Here the deck you are building shows up. Use the buttons to the left to save & load your deck:" +

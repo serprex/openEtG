@@ -7,10 +7,9 @@ var etgutil = require("../etgutil");
 
 module.exports = function(data) {
 	var stage = new PIXI.Container();
-	var dom = [
+	var div = px.dom.div(
 		[96, 576, "You get $3 every time your arena deck wins, & $1 every time it loses."],
-		[8, 300, ["Exit", require("./MainMenu")]],
-	];
+		[8, 300, ["Exit", require("./MainMenu")]]);
 	function renderInfo(info, y){
 		if (info){
 			if (y) info.card = etgutil.asUpped(info.card, true);
@@ -28,7 +27,7 @@ module.exports = function(data) {
 			});
 			var marksprite = document.createElement("span");
 			marksprite.className = "ico e"+mark;
-			dom.push([100, 4+y, (info.win || 0) + " - " + (info.loss || 0) + ": " + (info.rank+1)],
+			px.dom.add(div, [100, 4+y, (info.win || 0) + " - " + (info.loss || 0) + ": " + (info.rank+1)],
 				[200, 4+y, adeck],
 				[400, 224+y, "Age: " + info.day],
 				[100, 224+y, "HP: " + info.curhp + " / " + info.hp],
@@ -54,7 +53,7 @@ module.exports = function(data) {
 	if (sock.user.ocard){
 		for(var i=0; i<2; i++){
 			(function(uocard){
-				dom.push([734, 268+i*292, ["Create", function(){
+				px.dom.add(div, [734, 268+i*292, ["Create", function(){
 					require("./Editor")(data, data[uocard.upped?"B":"A"], uocard, true);
 				}]]);
 				var ocard = new PIXI.Sprite(gfx.getArt(uocard));
@@ -63,5 +62,5 @@ module.exports = function(data) {
 			})(etgutil.asUpped(sock.user.ocard, i == 1));
 		}
 	}
-	px.view({view: stage, ainfo: dom});
+	px.view({view:stage, dom:div});
 }

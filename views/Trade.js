@@ -8,9 +8,8 @@ var etgutil = require("../etgutil");
 var userutil = require("../userutil");
 var startMenu = require("./MainMenu");
 module.exports = function() {
-	var view = px.mkView();
-	var cardminus = {};
-	var btrade = px.domButton("Trade", function() {
+	var view = px.mkView(), cardminus = {}, stage = {view: view};
+	var btrade = px.dom.button("Trade", function() {
 		if (!cardChosen){
 			if (ownDeck.deck.length > 0) {
 				sock.emit("cardchosen", {c: etgutil.encodedeck(ownDeck.deck)});
@@ -30,9 +29,9 @@ module.exports = function() {
 			else chat("Wait for your friend to choose!");
 		}
 	});
-	var tconfirm = px.domText("Confirmed!");
+	var tconfirm = px.dom.text("Confirmed!");
 	tconfirm.style.display = "none";
-	var ownVal = px.domText(""), foeVal = px.domText("");
+	var ownVal = px.dom.text(""), foeVal = px.dom.text("");
 	var cardChosen = false;
 	function setCardArt(code){
 		cardArt.texture = gfx.getArt(code);
@@ -49,15 +48,15 @@ module.exports = function() {
 	foeDeck.position.x = 450;
 	view.addChild(ownDeck);
 	view.addChild(foeDeck);
-	var dom = [[10, 10, ["Cancel", function() {
+	var div = stage.dom = px.dom.div([10, 10, ["Cancel", function() {
 		sock.userEmit("canceltrade");
 		startMenu();
 	}]],
 		[100, 235, ownVal], [350, 235, foeVal],
-		[10, 40, btrade], [10, 60, tconfirm]];
+		[10, 40, btrade], [10, 60, tconfirm]);
 
 	var cardpool = etgutil.deck2pool(sock.user.pool);
-	var cardsel = new px.CardSelector(dom, setCardArt,
+	var cardsel = new px.CardSelector(stage, setCardArt,
 		function(code){
 			var card = Cards.Codes[code];
 			if (ownDeck.deck.length < 30 && !card.isFree() && code in cardpool && !(code in cardminus && cardminus[code] >= cardpool[code])) {
@@ -73,7 +72,7 @@ module.exports = function() {
 	var cardArt = new PIXI.Sprite(gfx.nopic);
 	cardArt.position.set(734, 8);
 	view.addChild(cardArt);
-	var cmds = {
+	stage.cmds = {
 		cardchosen: function(data){
 			foeDeck.deck = etgutil.decodedeck(data.c);
 			foeDeck.renderDeck(0);
@@ -86,5 +85,5 @@ module.exports = function() {
 		},
 		tradecanceled: startMenu,
 	};
-	px.view({view: view, tdom:dom, cmds:cmds});
+	px.view(stage);
 }

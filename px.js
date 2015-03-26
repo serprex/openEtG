@@ -13,6 +13,7 @@ var ui = require("./uiutil");
 var Cards = require("./Cards");
 var etgutil = require("./etgutil");
 var options = require("./options");
+var dom = exports.dom = require("./dom");
 var renderer = new PIXI.autoDetectRenderer(900, 600, {view:document.getElementById("leftpane"), transparent:true});
 var noStage = {}, curStage = noStage;
 var interman = new (require("./InteractionManager"))(noStage, renderer);
@@ -27,177 +28,18 @@ function requestAnimate() { requestAnimationFrame(animate); }
 exports.mkRenderTexture = function(width, height){
 	return new PIXI.RenderTexture(renderer, width, height);
 }
-var special = /view|endnext|cmds/;
 exports.getCmd = function(cmd){
 	return curStage.cmds ? curStage.cmds[cmd] : null;
-}
-exports.style = function(){
-	var style = arguments[arguments.length-1]
-	for(var key in style){
-		for(var i=0; i<arguments.length-1; i++){
-			arguments[i].style[key] = style[key];
-		}
-	}
-	return arguments[0];
-}
-exports.domBox = function(w, h){
-	var span = document.createElement("span");
-	span.style.width = w + "px";
-	span.style.height = h + "px";
-	span.className = "bgbox";
-	return span;
-}
-exports.domButton = function(text, click, mouseover) {
-	var ele = document.createElement("input");
-	ele.type = "button";
-	Object.defineProperty(ele, "text", {
-		get:function(){
-			return this.value;
-		},
-		set:function(text){
-			if (text){
-				this.value = text;
-				this.style.display = "";
-			}else this.style.display = "none";
-		}
-	});
-	ele.text = text;
-	ele.addEventListener("click", function() {
-		ui.playSound("buttonClick");
-		if (click) click.call(this);
-	});
-	if (mouseover) ele.addEventListener("mouseover", mouseover);
-	return ele;
-}
-exports.domCheck = 	function(text, change, opt, nopersist){
-	var lbl = document.createElement("label"), box = document.createElement("input");
-	box.type = "checkbox";
-	if (opt) options.register(opt, box, nopersist);
-	if (change) box.addEventListener("change", change);
-	lbl.appendChild(box);
-	lbl.appendChild(document.createTextNode(text));
-	return lbl;
-}
-exports.domInput = function(placeholder, opt, nopersist, keydown){
-	var ele = document.createElement("input");
-	ele.placeholder = placeholder;
-	if (opt) options.register(opt, ele, nopersist);
-	if (keydown){
-		if (keydown !== true) ele.addEventListener("keydown", keydown);
-	}else ele.className = "numput";
-	return ele;
-}
-exports.domEButton = function(e, click, ch){
-	if (!ch) ch = "e";
-	var ele = document.createElement("span");
-	ele.className = "imgb ico "+ch+e;
-	ele.addEventListener("click", function(){
-		ui.playSound("buttonClick");
-		if (click) click.call(this);
-	});
-	return ele;
-}
-exports.domText = function(text){
-	var ele = document.createElement("div");
-	Object.defineProperty(ele, "text", {
-		get:function(){
-			return this.textcache;
-		},
-		set:function(text){
-			text = text.toString();
-			if (this.textcache == text) return;
-			this.textcache = text;
-			while (this.firstChild) this.firstChild.remove();
-			text = text.replace(/\|/g, " | ");
-			var sep = /\d\d?:\d\d?|\$|\n/g, reres, lastindex = 0;
-			while (reres = sep.exec(text)){
-				var piece = reres[0];
-				if (reres.index != lastindex){
-					this.appendChild(document.createTextNode(text.slice(lastindex, reres.index)));
-				}
-				if (piece == "\n") {
-					this.appendChild(document.createElement("br"));
-				}else if (piece == "$") {
-					var sp = document.createElement("span");
-					sp.className = "ico gold";
-					this.appendChild(sp);
-				}else if (/^\d\d?:\d\d?$/.test(piece)) {
-					var parse = piece.split(":");
-					var num = parseInt(parse[0]);
-					if (num < 4) {
-						for (var j = 0;j < num;j++) {
-							var sp = document.createElement("span");
-							sp.className = "ico ce"+parse[1];
-							this.appendChild(sp);
-						}
-					}else{
-						this.appendChild(document.createTextNode(parse[0]));
-						var sp = document.createElement("span");
-						sp.className = "ico ce"+parse[1];
-						this.appendChild(sp);
-					}
-				}
-				lastindex = reres.index + piece.length;
-			}
-			if (lastindex != text.length){
-				this.appendChild(document.createTextNode(text.slice(lastindex)));
-			}
-		}
-	});
-	ele.text = text;
-	return ele;
-}
-function parseDom(info){
-	if (info instanceof HTMLElement) return info;
-	var ele, base = typeof info[0] === "number" ? 2 : 0;
-	if (typeof info[base] === "string"){
-		ele = exports.domText(info[base]);
-	}else if (info[base] instanceof Array){
-		ele = exports.domButton.apply(null, info[base]);
-	}else ele = info[base];
-	if (info[base+1]){
-		info[base+1].forEach(function(info){
-			ele.appendChild(parseDom(info));
-		});
-	}
-	if (base){
-		ele.style.position = "absolute";
-		ele.style.left = info[0] + "px";
-		ele.style.top = info[1] + "px";
-	}
-	return ele;
-}
-function _domAdd(dom, args, i){
-	while(i < args.length){
-		dom.appendChild(parseDom(args[i++]));
-	}
-	return dom;
-}
-exports.domAdd = function(dom){
-	return _domAdd(dom, arguments, 1);
-}
-exports.domDiv = function(){
-	return _domAdd(document.createElement("div"), arguments, 0);
 }
 exports.view = function(stage) {
 	if (curStage.endnext){
 		curStage.endnext();
 	}
-	for (var key in stage){
-		if (!key.match(special)){
-			var div = stage[key];
-			if (div instanceof Array){
-				div = _domAdd(document.createElement("div"), div, 0);
-				div.id = key;
-				stage[key] = div;
-			}
-			document.body.appendChild(div);
-		}
+	if (stage.dom){
+		document.body.appendChild(stage.dom);
 	}
-	for(var key in curStage){
-		if (!key.match(special)){
-			document.body.removeChild(curStage[key]);
-		}
+	if (curStage.dom){
+		curStage.dom.remove();
 	}
 	if (stage.view){
 		if (!curStage.view) requestAnimate();
@@ -313,7 +155,7 @@ DeckDisplay.prototype.mousemove = function(){
 		}
 	}
 }
-function CardSelector(dom, cardmouseover, cardclick, maxedIndicator, filterboth){
+function CardSelector(stage, cardmouseover, cardclick, maxedIndicator, filterboth){
 	var self = this;
 	PIXI.Container.call(this);
 	this._cardpool = this.cardpool = undefined;
@@ -326,31 +168,32 @@ function CardSelector(dom, cardmouseover, cardclick, maxedIndicator, filterboth)
 	this.filterboth = filterboth;
 	this.hitArea = new PIXI.math.Rectangle(100, 272, 800, 328);
 	this.maxedIndicator = maxedIndicator;
-	var bshiny = exports.domButton("Toggle Shiny", function() {
+	var bshiny = dom.button("Toggle Shiny", function() {
 		self.showshiny ^= true;
 		self.makeColumns();
 	});
-	this.bshowall = exports.domButton("Show All", function() {
+	this.bshowall = dom.button("Show All", function() {
 		this.value = (self.showall ^= true) ? "Auto Hide" : "Show All";
 		self.makeColumns();
 	});
-	dom.push([5, 578, bshiny], [5, 530, this.bshowall]);
+	var div = dom.add(stage.dom, bshiny, this.bshowall);
+	dom.add(div, [4, 530, this.bshowall], [4, 578, bshiny])
 	this.elefilter = this.rarefilter = 0;
 	this.columns = [[],[],[],[],[],[]];
 	this.columnspr = [[],[],[],[],[],[]];
 	for (var i = 0;i < 13;i++) {
 		(function(_i){
-			dom.push([(!i || i&1?4:40), 316 + Math.floor((i-1)/2) * 32,
-				exports.domEButton(i, function() {
+			dom.add(div, [(!i || i&1?4:40), 316 + Math.floor((i-1)/2) * 32,
+				dom.icob(i, function() {
 					self.elefilter = _i;
 					self.makeColumns();
-				})]
-			);
+				})
+			]);
 		})(i);
 	}
 	for (var i = 0;i < 5; i++){
 		(function(_i) {
-			dom.push([74, 338 + i * 32, exports.domEButton(i, function() {
+			dom.add([74, 338 + i * 32, dom.icob(i, function() {
 				self.rarefilter = _i;
 				self.makeColumns();
 			}, "r")]);
@@ -361,13 +204,13 @@ function CardSelector(dom, cardmouseover, cardclick, maxedIndicator, filterboth)
 		var x = 100 + i * 133;
 		var counti = this.countText[i] = document.createElement("div");
 		counti.style.textHeight = "0";
-		dom.push([x+100, 272, this.countText[i]]);
+		dom.add(div, [x+100, 272, this.countText[i]]);
 		for (var j = 0;j < 15;j++) {
 			var sprite = new PIXI.Sprite(gfx.nopic);
 			sprite.position.set(x, 272 + j * 19);
 			this.addChild(sprite);
 			this.columnspr[i].push(sprite);
-			counti.appendChild(exports.domText(""));
+			counti.appendChild(dom.text(""));
 		}
 	}
 }

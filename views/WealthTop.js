@@ -7,7 +7,6 @@ module.exports = function(info) {
 		chat("??");
 		return;
 	}
-	var stage = [[8, 300, ["Exit", require("./MainMenu")]]];
 	var tbl = document.createElement("table");
 	for (var i = 0;i < 50; i+=2) {
 		if (i+1 >= info.length) break;
@@ -32,5 +31,5 @@ module.exports = function(info) {
 		td[4].appendChild(document.createTextNode(info[i+50]));
 		td[5].appendChild(document.createTextNode(Math.round(info[i + 51]).toString()));
 	}
-	px.view({top50: [[8, 300, ["Exit", require("./MainMenu")]], [120, 10, tbl]]});
+	px.view({dom:px.dom.div([8, 300, ["Exit", require("./MainMenu")]], [120, 10, tbl])});
 }
