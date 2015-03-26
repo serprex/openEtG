@@ -61,12 +61,12 @@ bg_main.src = "assets/bg_main.png";
 bg_main.style.zIndex = "-1";
 module.exports = function(nymph) {
 	var popdom, stage = {endnext: function(){
-		setDom(null);
+		setPopup(null);
 		document.removeEventListener("mousemove", resetTip);
 	}};
-	function setDom(dom){
+	function setPopup(ele){
 		if (popdom) document.body.removeChild(popdom);
-		if (popdom = dom) document.body.appendChild(dom);
+		if (popdom = ele) document.body.appendChild(ele);
 	}
 	function mkSetTip(text){
 		return function(){
@@ -78,19 +78,19 @@ module.exports = function(nymph) {
 	function resetTip(event) {
 		if (event.target.tagName == "CANVAS" || event.target.tagName == "HTML") tinfo.text = sock.user ? tipjar[tipNumber] + "." : "To register, just type desired username & password in the fields to the right, then click 'Login'.";
 	}
-	var tinfo = px.domText(""), tstats = px.domText(sock.user ? sock.user.gold + "$ " + sock.user.name + "\nPvE " + sock.user.aiwins + " - " + sock.user.ailosses + "\nPvP " + sock.user.pvpwins + " - " + sock.user.pvplosses : "Sandbox");
+	var tinfo = px.dom.text(""), tstats = px.dom.text(sock.user ? sock.user.gold + "$ " + sock.user.name + "\nPvE " + sock.user.aiwins + " - " + sock.user.ailosses + "\nPvP " + sock.user.pvpwins + " - " + sock.user.pvplosses : "Sandbox");
 	function wealthTop(){
 		sock.emit("wealthtop");
 		this.style.display = "none";
 	}
 	function titleText(text){
-		return px.style(px.domText(text), {
+		return px.dom.style(px.dom.text(text), {
 			fontSize: "20px",
 			textAlign: "center",
 		});
 	}
 	function labelText(text) {
-		return px.style(px.domText(text), {
+		return px.dom.style(px.dom.text(text), {
 			fontSize: "14px",
 			pointerEvents: "none",
 		});
@@ -106,12 +106,12 @@ module.exports = function(nymph) {
 		playbox = mkBox(196, 200),
 		tipbox = mkBox(504, 48);
 	deckbox.appendChild(titleText("Cards & Decks"));
-	var bwealth = px.domButton("Wealth T50", wealthTop, mkSetTip("See who's collected the most wealth."));
+	var bwealth = px.dom.button("Wealth T50", wealthTop, mkSetTip("See who's collected the most wealth."));
 	bwealth.style.position = "absolute";
 	bwealth.style.left = "52px";
 	arenabox.appendChild(titleText("Arena"));
 	playbox.appendChild(titleText("Players"));
-	var nextTip = px.domButton("Next tip", function() {
+	var nextTip = px.dom.button("Next tip", function() {
 		tipNumber = (tipNumber+1) % tipjar.length;
 		tinfo.text = tipjar[tipNumber] + ".";
 	});
@@ -119,7 +119,7 @@ module.exports = function(nymph) {
 	nextTip.style.right = "2px";
 	nextTip.style.bottom = "2px";
 	tipbox.appendChild(nextTip);
-	var dom = stage.menudom = px.domDiv(bg_main,
+	var div = stage.dom = px.dom.div(bg_main,
 		[196, 4, tipbox, [[tinfo]]],
 		[86, 248, leadbox, [[titleText("Leaderboards")], [bwealth], [document.createElement("br")]]],
 		[304, 120, aibox, [[titleText("AI Battle")]]],
@@ -127,19 +127,19 @@ module.exports = function(nymph) {
 			[64, 108, ["Editor", require("./Editor"), mkSetTip("Edit & manage your decks.")]],
 		]],
 		[620, 300, playbox]);
-	[px.domButton("Commoner", mkAi.mkAi(0), mkSetTip("Commoners have no upgraded cards & mostly common cards.")),
-		px.domButton("Mage", mkAi.mkPremade("mage"), mkSetTip("Mages have preconstructed decks with a couple rares.")),
-		px.domButton("Champion", mkAi.mkAi(2), mkSetTip("Champions have some upgraded cards.")),
-		px.domButton("Demigod", mkAi.mkPremade("demigod"), mkSetTip("Demigods are extremely powerful. Come prepared for anything.")),
+	[px.dom.button("Commoner", mkAi.mkAi(0), mkSetTip("Commoners have no upgraded cards & mostly common cards.")),
+		px.dom.button("Mage", mkAi.mkPremade("mage"), mkSetTip("Mages have preconstructed decks with a couple rares.")),
+		px.dom.button("Champion", mkAi.mkAi(2), mkSetTip("Champions have some upgraded cards.")),
+		px.dom.button("Demigod", mkAi.mkPremade("demigod"), mkSetTip("Demigods are extremely powerful. Come prepared for anything.")),
 	].forEach(function(b,i){
 		var clab = costText(i, 0), rlab = costText(i, 1);
-		px.style(clab, rlab, {
+		px.dom.style(clab, rlab, {
 			position: "absolute",
 			top: 24+i*24+"px",
 		});
 		clab.style.right = "114px";
 		rlab.style.right = "4px";
-		px.domAdd(aibox, [4, 24+i*24, b], clab, rlab);
+		px.dom.add(aibox, [4, 24+i*24, b], clab, rlab);
 	});
 	for (var i=0; i<2; i++){
 		(function(lvi){
@@ -161,19 +161,19 @@ module.exports = function(nymph) {
 				this.style.display = "none";
 			}
 			if (sock.user){
-				var y = 24+i*24, b = px.domButton("Arena AI", arenaAi, mkSetTip("In the arena you will face decks from other players.")),
+				var y = 24+i*24, b = px.dom.button("Arena AI", arenaAi, mkSetTip("In the arena you will face decks from other players.")),
 					clab = costText(4+lvi.lv, 0), rlab = costText(4+lvi.lv, 1),
-					tx = px.domText("Tier " + (lvi.lv+1));
-				px.style(clab, rlab, {
+					tx = px.dom.text("Tier " + (lvi.lv+1));
+				px.dom.style(clab, rlab, {
 					position: "absolute",
 					top: y+"px",
 				});
 				clab.style.right = "114px";
 				rlab.style.right = "4px";
-				px.domAdd(arenabox, [4, y, tx], [40, y, b], clab, rlab);
+				px.dom.add(arenabox, [4, y, tx], [40, y, b], clab, rlab);
 			}
-			var atop = px.domButton("Arena" + (i+1) + " T20", arenaTop, mkSetTip("See who the top players in arena are right now."));
-			px.style(atop, {
+			var atop = px.dom.button("Arena" + (i+1) + " T20", arenaTop, mkSetTip("See who the top players in arena are right now."));
+			px.dom.style(atop, {
 				position: "absolute",
 				left: i?"100px":"10px",
 			});
@@ -185,7 +185,7 @@ module.exports = function(nymph) {
 		this.style.display = "none";
 	}
 	if (sock.user){
-		px.domAdd(arenabox, [20, 100, ["Arena Info", arenaInfo, mkSetTip("Check how your arena decks are doing.")]]);
+		px.dom.add(arenabox, [20, 100, ["Arena Info", arenaInfo, mkSetTip("Check how your arena decks are doing.")]]);
 		if (nymph || sock.user.oracle) {
 			var oracle = new PIXI.Sprite(gfx.getArt(nymph || sock.user.oracle));
 			oracle.position.set(92, 340);
@@ -214,7 +214,7 @@ module.exports = function(nymph) {
 		},
 		codegold:function(data) {
 			sock.user.gold += data.g;
-			chat.addSpan(px.domText(data.g + "$ added!\n"));
+			chat.addSpan(px.dom.text(data.g + "$ added!\n"));
 		},
 		codecode:function(data) {
 			sock.user.pool = etgutil.addcard(sock.user.pool, data.card);
@@ -243,7 +243,7 @@ module.exports = function(nymph) {
 		document.getElementById("rightpane").style.display = options.hideRightpane ? "none" : "";
 		sock.emit("chatus", {hide: !!options.offline || !!options.hideRightpane});
 	}
-	var foename = px.domInput("Trade/Library", "foename", true, true);
+	var foename = px.dom.input("Trade/Library", "foename", true, true);
 	foename.style.marginLeft = "24px";
 	playbox.appendChild(foename);
 	soundChange();
@@ -262,8 +262,8 @@ module.exports = function(nymph) {
 			fixQuickButtons();
 		}
 	}
-	px.domAdd(dom, [744, 558, ["Logout", logout.bind(null, "logout"), mkSetTip("Click here to log out.")]]);
-	px.domAdd(playbox,
+	px.dom.add(div, [744, 558, ["Logout", logout.bind(null, "logout"), mkSetTip("Click here to log out.")]]);
+	px.dom.add(playbox,
 		[10, 100, ["PvP", require("./Challenge").bind(null, true)]],
 		[120, 75, ["Library", libraryClick,mkSetTip("See exactly what cards you or others own")]]);
 	if (sock.user) {
@@ -273,24 +273,24 @@ module.exports = function(nymph) {
 		var quickslotsdiv = document.createElement("div");
 		quickslotsdiv.style.textAlign = "center";
 		for (var i = 0;i < 10;i++) {
-			var b = px.domButton(i + 1, loadQuickdeck(i));
+			var b = px.dom.button(i + 1, loadQuickdeck(i));
 			b.className = "editbtn";
 			if (sock.user.selectedDeck == sock.user.quickdecks[i]) b.classList.add("selectedbutton");
 			quickslotsdiv.appendChild(b);
 		}
-		px.domAdd(deckbox, deckLabel, quickslotsdiv);
-		var bsettings = px.domButton("Settings", function() {
+		px.dom.add(deckbox, deckLabel, quickslotsdiv);
+		var bsettings = px.dom.button("Settings", function() {
 			if (popdom && popdom.id == "settingspane"){
-				setDom(null);
+				setPopup(null);
 				return;
 			}
-			var div = px.domBox(392, 156);
-			px.style(div, {
+			var div = px.dom.box(392, 156);
+			px.dom.style(div, {
 				position: "absolute",
 				left: "460px",
 				top: "380px",
 			});
-			var wipe = px.domButton("Wipe Account",
+			var wipe = px.dom.button("Wipe Account",
 				function() {
 					if (foename.value == sock.user.name + "yesdelete") {
 						logout("delete");
@@ -307,47 +307,47 @@ module.exports = function(nymph) {
 					sock.userEmit("passchange", { p: changePass.value });
 				}
 			}
-			var changePass = document.createElement("input"), changeBtn = px.domButton("Change Pass", changeFunc),
-				enableSound = px.domCheck("Enable sound", soundChange, "enableSound"),
-				enableMusic = px.domCheck("Enable music", musicChange, "enableMusic"),
-				preloadart = px.domCheck("Preload art", null, "preart"),
-				hideRightpane = px.domCheck("Hide rightpane", hideRightpaneChange, "hideRightpane"),
-				printstats = px.domCheck("Print stats", null, "stats"),
-				hideCostIcon = px.domCheck("Hide cost icon", gfx.refreshCaches, "hideCostIcon"),
-				disableTut = px.domCheck("Disable tutorial", null, "disableTut");
+			var changePass = document.createElement("input"), changeBtn = px.dom.button("Change Pass", changeFunc),
+				enableSound = px.dom.check("Enable sound", soundChange, "enableSound"),
+				enableMusic = px.dom.check("Enable music", musicChange, "enableMusic"),
+				preloadart = px.dom.check("Preload art", null, "preart"),
+				hideRightpane = px.dom.check("Hide rightpane", hideRightpaneChange, "hideRightpane"),
+				printstats = px.dom.check("Print stats", null, "stats"),
+				hideCostIcon = px.dom.check("Hide cost icon", gfx.refreshCaches, "hideCostIcon"),
+				disableTut = px.dom.check("Disable tutorial", null, "disableTut");
 			changePass.type = "password";
 			changePass.addEventListener("keydown", function(e){
 				if (e.keyCode == 13) changeFunc();
 			});
-			px.domAdd(div, [8, 8, changePass], [162, 8, changeBtn],
+			px.dom.add(div, [8, 8, changePass], [162, 8, changeBtn],
 				[8, 53, enableSound], [135, 53, enableMusic], [260, 53, preloadart],
 				[8, 88, hideRightpane], [135, 88, printstats], [260, 88, hideCostIcon],
 				[8, 123, disableTut],
 				[309, 123, wipe]);
 			div.id = "settingspane";
-			setDom(div);
+			setPopup(div);
 		});
-		px.domAdd(dom, [620, 558, bsettings]);
+		px.dom.add(div, [620, 558, bsettings]);
 		var colocol = document.createElement("div"), questcol = document.createElement("div"),
-			bquest = px.domButton("Quests", require("./QuestMain"), mkSetTip("Go on an adventure!")),
-			bcolo = px.domButton("Colosseum", require("./Colosseum"), mkSetTip("Try some daily challenges in the Colosseum!"));
-		px.style(colocol, questcol, {
+			bquest = px.dom.button("Quests", require("./QuestMain"), mkSetTip("Go on an adventure!")),
+			bcolo = px.dom.button("Colosseum", require("./Colosseum"), mkSetTip("Try some daily challenges in the Colosseum!"));
+		px.dom.style(colocol, questcol, {
 			marginTop: "108px",
 			width: "45%",
 		});
 		colocol.style.float = "left";
 		colocol.style.textAlign = "right";
 		questcol.style.float = "right";
-		px.domAdd(colocol, bcolo, labelText("Daily Challenges!"));
-		px.domAdd(questcol, bquest, labelText("Go on an adventure!"));
-		px.domAdd(aibox, colocol, questcol);
-		px.domAdd(deckbox,
+		px.dom.add(colocol, bcolo, labelText("Daily Challenges!"));
+		px.dom.add(questcol, bquest, labelText("Go on an adventure!"));
+		px.dom.add(aibox, colocol, questcol);
+		px.dom.add(deckbox,
 			[14, 128, ["Shop", require("./Shop"), mkSetTip("Buy booster packs which contain cards from the elements you choose.")]],
 			[114, 128, ["Upgrade", require("./Upgrade"), mkSetTip("Upgrade or sell cards.")]]);
-		px.domAdd(playbox,
+		px.dom.add(playbox,
 			[10, 75, ["Trade", tradeClick, mkSetTip("Initiate trading cards with another player.")]],
 			[120, 100, ["Reward", rewardClick, mkSetTip("Redeem a reward code.")]]);
-		px.domAdd(dom,
+		px.dom.add(div,
 			[86, 92, statbox, [
 				[titleText("Stats")],
 				[sock.user.gold + "$ " + sock.user.name + "\nPvE " + sock.user.aiwins + " - " + sock.user.ailosses + "\nPvP " + sock.user.pvpwins + " - " + sock.user.pvplosses]
@@ -355,11 +355,11 @@ module.exports = function(nymph) {
 			[304, 380, arenabox]);
 	}
 	var customText = labelText("Duel a custom AI!");
-	var bcustom = px.domButton("Custom AI", require("./Challenge").bind(null, false), mkSetTip("Fight any deck you want, with custom stats both for you and the opponent."));
+	var bcustom = px.dom.button("Custom AI", require("./Challenge").bind(null, false), mkSetTip("Fight any deck you want, with custom stats both for you and the opponent."));
 	customText.style.textAlign = "center";
 	bcustom.style.marginLeft = "110px";
 	bcustom.style.marginTop = "4px";
-	px.domAdd(aibox, bcustom, customText);
+	px.dom.add(aibox, bcustom, customText);
 	resetTip({target:{tagName:"HTML"}});
 	px.view(stage);
 }

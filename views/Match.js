@@ -153,9 +153,9 @@ function startMatch(game, foeDeck) {
 	cloakgfx.beginFill(0);
 	cloakgfx.drawRect(130, 20, 660, 280);
 	gameui.addChild(cloakgfx);
-	var endturn = px.domButton("Accept Hand", endClick.bind(null, undefined));
-	var cancel = px.domButton("Mulligan", cancelClick);
-	var resign = px.domButton("Resign", function() {
+	var endturn = px.dom.button("Accept Hand", endClick.bind(null, undefined));
+	var cancel = px.dom.button("Mulligan", cancelClick);
+	var resign = px.dom.button("Resign", function() {
 		if (resigning){
 			if (!game.ai) sock.emit("foeleft");
 			game.setWinner(game.player2);
@@ -165,18 +165,16 @@ function startMatch(game, foeDeck) {
 			resigning = true;
 		}
 	});
-	var turntell = new px.domText("");
+	var turntell = new px.dom.text("");
 	turntell.style.pointerEvents = "none";
-	var foename = px.domText((game.level === undefined ? "" : ["Commoner", "Mage", "Champion", "Demigod", "Arena1", "Arena2"][game.level] + "\n") + (game.foename || "-"));
+	var foename = px.dom.text((game.level === undefined ? "" : ["Commoner", "Mage", "Champion", "Demigod", "Arena1", "Arena2"][game.level] + "\n") + (game.foename || "-"));
 	foename.style.textAlign = "center";
 	foename.style.width = "140px";
-	var dom = [
-		[800, 520, endturn],
+	var div = px.dom.div([800, 520, endturn],
 		[800, 490, cancel],
 		[8, 24, resign],
 		[800, 550, turntell],
-		[0, 64, foename],
-	];
+		[0, 64, foename]);
 	var activeInfo = {
 		firebolt:function(){
 			return 3+Math.floor(game.player1.quanta[etg.Fire]/4);
@@ -201,9 +199,11 @@ function startMatch(game, foeDeck) {
 			var info = obj.info(), actinfo = game.targetingMode && game.targetingMode(obj) && activeInfo[game.targetingText];
 			if (actinfo) info += "\nDmg " + actinfo(obj);
 			infobox.text = info;
-			infobox.style.left = px.mouse.x + "px";
-			infobox.style.top = px.mouse.y + "px";
-			infobox.style.display = "";
+			px.dom.style(infobox, {
+				left: px.mouse.x + "px",
+				top: px.mouse.y + "px",
+				display: "",
+			});
 		}
 	}
 	var handsprite = [new Array(8), new Array(8)];
@@ -212,9 +212,9 @@ function startMatch(game, foeDeck) {
 	var shiesprite = new Array(2);
 	var weapsprite = new Array(2);
 	var marksprite = [document.createElement("span"), document.createElement("span")], markspritexy = [];
-	var marktext = [px.domText(""), px.domText("")], marktextxy = [];
+	var marktext = [px.dom.text(""), px.dom.text("")], marktextxy = [];
 	var quantatext = [[], []], quantaxy = [[], []];
-	var hptext = [new px.domText(""), new px.domText("")], hpxy = [];
+	var hptext = [new px.dom.text(""), new px.dom.text("")], hpxy = [];
 	var playerOverlay = [new PIXI.Sprite(gfx.nopic), new PIXI.Sprite(gfx.nopic)];
 	var handOverlay = [new PIXI.Sprite(gfx.nopic), new PIXI.Sprite(gfx.nopic)];
 	var sabbathOverlay = [document.createElement("span"), document.createElement("span")];
@@ -355,14 +355,13 @@ function startMatch(game, foeDeck) {
 			}
 			var child, quantaxy = [j ? 792 : 0, j ? 106 : 308];
 			for (var k = 1;k < 13;k++) {
-				quantatext[j][k-1] = px.domText("");
+				quantatext[j][k-1] = px.dom.text("");
 				quantatext[j][k-1].style.fontSize = "16px";
 				quantatext[j][k-1].style.pointerEvents = "none";
-				dom.push([quantaxy[0] + ((k & 1) ? 32 : 86), quantaxy[1] + Math.floor((k - 1) / 2) * 32 + 4,
-					quantatext[j][k-1]]);
 				var quantaicon = document.createElement("span");
 				quantaicon.className = "ico e"+k;
-				dom.push([quantaxy[0] + ((k & 1) ? 0 : 54), quantaxy[1] + Math.floor((k - 1) / 2) * 32, quantaicon]);
+				px.dom.add(div, [quantaxy[0] + ((k & 1) ? 32 : 86), quantaxy[1] + Math.floor((k - 1) / 2) * 32 + 4, quantatext[j][k-1]],
+					[quantaxy[0] + ((k & 1) ? 0 : 54), quantaxy[1] + Math.floor((k - 1) / 2) * 32, quantaicon]);
 			}
 			px.setClick(playerOverlay[j], function() {
 				if (game.phase != etg.PlayPhase) return;
@@ -372,7 +371,7 @@ function startMatch(game, foeDeck) {
 				}
 			}, false);
 		})(j);
-		dom.push([markspritexy[j].x, markspritexy[j].y, marksprite[j]],
+		px.dom.add(div, [markspritexy[j].x, markspritexy[j].y, marksprite[j]],
 			[marktextxy[j].x, marktextxy[j].y, marktext[j]],
 			[hpxy[j].x-50, playerOverlay[j].y - 24, hptext[j]],
 			[j ? 792 : 0, j ? 80 : 288, sabbathOverlay[j]]);
@@ -393,15 +392,10 @@ function startMatch(game, foeDeck) {
 	var cardart = new PIXI.Sprite(gfx.nopic);
 	cardart.anchor.set(.5, 0);
 	gameui.addChild(cardart);
-	var infobox = px.domText("");
+	var infobox = px.dom.text("");
+	infobox.className = "infobox";
 	infobox.style.display = "none";
-	infobox.style.opacity = ".7";
-	infobox.style.backgroundColor = "black";
-	infobox.style.fontSize = "10px";
-	infobox.style.transform = "translate(-50%,-100%)";
-	infobox.style.pointerEvents = "none";
-	infobox.style.maxWidth = "196px";
-	dom.push([0, 0, infobox]);
+	div.appendChild(infobox);
 	function onkeydown(e) {
 		if (e.keyCode == 32) { // spc
 			endClick();
@@ -701,7 +695,7 @@ function startMatch(game, foeDeck) {
 	}
 	gameStep();
 	var gameInterval = setInterval(gameStep, 30);
-	px.view({view:gameui, gamedom:dom, endnext:function() {
+	px.view({view:gameui, dom:div, endnext:function() {
 		document.removeEventListener("keydown", onkeydown);
 		clearInterval(gameInterval);
 	}, cmds:cmds});

@@ -11,9 +11,9 @@ module.exports = function(){
 	var questmap = new PIXI.Sprite(gfx.bg_questmap);
 	questmap.position.set(124, 162);
 	questui.addChild(questmap);
-	var tinfo = px.domText("");
+	var tinfo = px.dom.text("");
 	tinfo.style.maxWidth = "850px";
-	var dom = [[9, 9, px.domBox(880, 111)], [26, 26, tinfo], [750, 246, ["Exit", require("./MainMenu")]]];
+	var div = px.dom.div([9, 9, px.dom.box(880, 111)], [26, 26, tinfo], [750, 246, ["Exit", require("./MainMenu")]]);
 	var areainfo = {
 		forest: ["Spooky Forest", new PIXI.math.Polygon(555, 221, 456, 307, 519, 436, 520, 472, 631, 440, 652, 390, 653, 351, 666, 321, 619, 246)],
 		city: ["Capital City", new PIXI.math.Polygon(456, 307, 519, 436, 520, 472, 328, 496, 258, 477, 259, 401)],
@@ -48,14 +48,18 @@ module.exports = function(){
 					xtot += points[i];
 					ytot += points[i+1];
 				}
-				var icon = document.createElement("span");
+				var icon = document.createElement("div");
 				icon.className = "ico e13";
-				icon.style.transform = "translate(-50%,-50%)";
-				icon.style.pointerEvents = "none";
-				dom.push([(xtot*2) / points.length, (ytot*2) / points.length, icon]);
+				div.appendChild(px.dom.style(icon, {
+					transform: "translate(-50%,-50%)",
+					pointerEvents: "none",
+					position: "absolute",
+					left: (xtot*2/points.length)+"px",
+					top: (ytot*2/points.length)+"px",
+				}));
 			}
 		})(areainfo[key], key);
 		questui.addChild(graphics);
 	}
-	px.view({view:questui, qdom:dom});
+	px.view({view:questui, dom:div});
 }

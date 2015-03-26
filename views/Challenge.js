@@ -69,51 +69,52 @@ module.exports = function(pvp) {
 		}
 	}
 	function labelText(text) {
-		var text = px.domText(text);
+		var text = px.dom.text(text);
 		text.style.fontSize = "18px";
 		text.style.color = "white";
 		text.style.pointerEvents = "none";
 		return text;
 	}
-	var foename = px.domInput("Challenge", "foename", true, maybeChallenge),
-		pvphp = px.domInput("HP", "pvphp", true),
-		pvpmark = px.domInput("Mark", "pvpmark", true),
-		pvpdraw = px.domInput("Draw", "pvpdraw", true),
-		pvpdeck = px.domInput("Deck", "pvpdeck", true),
-		pvpButton = px.domButton("PvP", function() { makeChallenge(options.foename) }),
-		cancelButton = px.domButton("Cancel", cancelClick);
+	var foename = px.dom.input("Challenge", "foename", true, maybeChallenge),
+		pvphp = px.dom.input("HP", "pvphp", true),
+		pvpmark = px.dom.input("Mark", "pvpmark", true),
+		pvpdraw = px.dom.input("Draw", "pvpdraw", true),
+		pvpdeck = px.dom.input("Deck", "pvpdeck", true),
+		pvpButton = px.dom.button("PvP", function() { makeChallenge(options.foename) }),
+		cancelButton = px.dom.button("Cancel", cancelClick);
 	cancelButton.style.visibility = "hidden";
 	var pvpInputs = [pvpButton,foename, pvphp, pvpmark, pvpdraw, pvpdeck];
-	var aideck = px.domInput("AI Deck", "aideck", true, maybeCustomAi),
-		aihp = px.domInput("HP", "aihp", true),
-		aimark = px.domInput("Mark", "aimark", true),
-		aidraw = px.domInput("Draw", "aidraw", true),
-		aideckpower = px.domInput("Deck", "aideckpower", true);
-	var challengeLabel = px.domText("");
+	var aideck = px.dom.input("AI Deck", "aideck", true, maybeCustomAi),
+		aihp = px.dom.input("HP", "aihp", true),
+		aimark = px.dom.input("Mark", "aimark", true),
+		aidraw = px.dom.input("Draw", "aidraw", true),
+		aideckpower = px.dom.input("Deck", "aideckpower", true);
+	var challengeLabel = px.dom.text("");
 	aideck.addEventListener("click", function() { this.setSelectionRange(0, 999) });
-	var dom = [
+	var div = px.dom.div(
 		[190, 300, ["Exit", exitClick]],
 		[190, 400, labelText("Own stats:")],
 		[190, 425, pvphp],
 		[190, 450, pvpmark],
 		[190, 475, pvpdraw],
 		[190, 500, pvpdeck]
-	];
-	if (pvp)
-		dom.push(
-		[110, 375, pvpButton],
-		[110, 400, cancelButton],
-		[190, 375, foename],
-		[190, 375, challengeLabel]);
-	else
-		dom.push(
-		[360, 375, ["Custom AI", aiClick]],
-		[440, 375, aideck],
-		[440, 400, labelText("AI's stats:")],
-		[440, 425, aihp],
-		[440, 450, aimark],
-		[440, 475, aidraw],
-		[440, 500, aideckpower]);
-	px.view({ dom: dom });
+	);
+	if (pvp){
+		px.dom.add(div,
+			[110, 375, pvpButton],
+			[110, 400, cancelButton],
+			[190, 375, foename],
+			[190, 375, challengeLabel]);
+	}else{
+		px.dom.add(div,
+			[360, 375, ["Custom AI", aiClick]],
+			[440, 375, aideck],
+			[440, 400, labelText("AI's stats:")],
+			[440, 425, aihp],
+			[440, 450, aimark],
+			[440, 475, aidraw],
+			[440, 500, aideckpower]);
+	}
+	px.view({dom:div});
 }
 module.exports.sendChallenge = sendChallenge;

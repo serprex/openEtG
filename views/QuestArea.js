@@ -15,16 +15,14 @@ module.exports = function(area) {
 	var questmap = new PIXI.Sprite(gfx.bg_quest);
 	questmap.position.set(124, 162);
 	questui.addChild(questmap);
-	var tinfo = px.domText("");
+	var tinfo = px.dom.text("");
 	tinfo.style.maxWidth = "850px";
-	var errinfo = px.domText("");
+	var errinfo = px.dom.text("");
 	tinfo.style.maxWidth = errinfo.style.maxWidth = 850;
-	var dom = [
-		[9, 9, px.domBox(880, 111)],
+	var div = px.dom.div([9, 9, px.dom.box(880, 111)],
 		[26, 26, tinfo],
 		[26, 125, errinfo],
-		[750, 246, ["Exit", require("./QuestMain")]]
-	];
+		[750, 246, ["Exit", require("./QuestMain")]]);
 	function mkQuestButton(quest, stage) {
 		var circle = document.createElement("span");
 		circle.className = "imgb";
@@ -52,10 +50,10 @@ module.exports = function(area) {
 		if ((sock.user.quest[quest] !== undefined) && Quest[quest]) {
 			for (var i = 0;i <= sock.user.quest[quest];i++) {
 				if ((pos = Quest[quest].info.pos[i])) {
-					dom.push([pos[0], pos[1], mkQuestButton(quest, i)]);
+					px.dom.add(div, [pos[0], pos[1], mkQuestButton(quest, i)]);
 				}
 			}
 		}
 	});
-	px.view({view:questui, qdom:dom});
+	px.view({view:questui, dom:div});
 }

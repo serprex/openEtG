@@ -38,30 +38,29 @@ module.exports = function(game) {
 			}
 		}
 	}
-	var dom = [
+	var div = px.dom.div(
 		[10, 290, game.ply + " plies\n" + (game.time / 1000).toFixed(1) + " seconds\n" + (winner && sock.user && game.level !== undefined ? (sock.user["streak" + game.level] || 0) + " win streak\n+" +
 			Math.min([5, 5, 7.5, 10, 7.5, 10][game.level] * Math.max(sock.user["streak" + game.level] - 1, 0), 100) + "% streak bonus" : "")],
-		[412, 440, ["Exit", exitFunc]]
-	];
+		[412, 440, ["Exit", exitFunc]]);
 
 	if (!game.quest && game.daily === undefined){
-		dom.push([412, 490, ["Rematch", rematch]]);
+		px.dom.add(div, [412, 490, ["Rematch", rematch]]);
 	}
 
 	if (winner){
-		var tinfo = px.domText(game.quest ? game.wintext : "You won!");
+		var tinfo = px.dom.text(game.quest ? game.wintext : "You won!");
 		tinfo.style.textAlign = "center";
 		tinfo.style.width = "900px";
-		dom.push([0, game.cardreward ? 100 : 250, tinfo]);
+		px.dom.add(div, [0, game.cardreward ? 100 : 250, tinfo]);
 	}
 
 	if (winner && sock.user){
 		if (game.level !== undefined || !game.ai) sock.userExec("addwin", { pvp: !game.ai });
 		if (game.goldreward) {
-			var goldwon = px.domText((game.goldreward - (game.cost || 0)) + "$");
+			var goldwon = px.dom.text((game.goldreward - (game.cost || 0)) + "$");
 			goldwon.style.textAlign = "center";
 			goldwon.style.width = "900px";
-			dom.push([0, 550, goldwon]);
+			px.dom.add(div, [0, 550, goldwon]);
 			sock.userExec("addgold", { g: game.goldreward });
 		}
 		if (game.cardreward) {
@@ -98,7 +97,7 @@ module.exports = function(game) {
 	}
 	document.addEventListener("keydown", onkeydown);
 
-	px.view({view:stage, domvic:dom, endnext: function() {
+	px.view({view:stage, dom:div, endnext:function() {
 		document.removeEventListener("keydown", onkeydown);
 	}});
 }

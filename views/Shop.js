@@ -28,20 +28,20 @@ module.exports = function() {
 		770, 90, 90, 184
 	));
 
-	var tgold = px.domText(sock.user.gold + "$");
-	var tinfo = px.domText("Select from which element you want.");
-	var tinfo2 = px.domText("Select which type of booster you want.");
-	var dom = [
+	var tgold = px.dom.text(sock.user.gold + "$");
+	var tinfo = px.dom.text("Select from which element you want.");
+	var tinfo2 = px.dom.text("Select which type of booster you want.");
+	var div = px.dom.div(
 		[775, 246, ["Exit", require("./MainMenu")]],
 		[775, 101, tgold],
 		[50, 26, tinfo],
 		[50, 51, tinfo2]
-	];
+	);
 	var hidedom = [tinfo, tinfo2];
 
 	if (sock.user.freepacks){
-		var freeinfo = px.domText("");
-		dom.push([350, 26, freeinfo]);
+		var freeinfo = px.dom.text("");
+		px.dom.add(div, [350, 26, freeinfo]);
 	}
 	function updateFreeInfo(rarity){
 		if (freeinfo){
@@ -49,7 +49,7 @@ module.exports = function() {
 		}
 	}
 
-	var bget = px.domButton("Take Cards", function () {
+	var bget = px.dom.button("Take Cards", function () {
 		bget.style.display = "none";
 		bbuy.style.display = "";
 		popbooster.visible = false;
@@ -76,49 +76,46 @@ module.exports = function() {
 			tinfo2.text = "You can't afford that!";
 		}
 	}
-	var bbuy = px.domButton("Buy Pack", buyPack);
-	dom.push([775, 156, bget], [775, 156, bbuy]);
+	var bbuy = px.dom.button("Buy Pack", buyPack);
+	px.dom.add(div, [775, 156, bget], [775, 156, bbuy]);
 
 	packdata.forEach(function(pack, n){
 		var g = document.createElement("div");
 		g.className = "imgb";
-		g.style.borderRadius = "6px";
-		g.style.border = "3px solid black";
-		g.style.width = "100px";
-		g.style.height = "150px";
-		g.style.backgroundColor = pack.color;
-		var name = px.domText(pack.type);
-		name.style.position = "absolute";
-		name.style.fontSize = "18px";
-		name.style.color = "black";
-		name.style.top = "50%";
-		name.style.textAlign = "center";
-		name.style.transform = "translateY(-50%)"
-		name.style.width = "100px";
-		g.appendChild(name);
-		var price = px.domText(pack.cost + "$");
-		price.style.position = "absolute";
+		px.dom.style(g, {
+			borderRadius: "6px",
+			border: "3px solid black",
+			width: "100px",
+			height: "150px",
+			backgroundColor: pack.color,
+		});
+		g.appendChild(px.dom.style(px.dom.text(pack.type), {
+			fontSize: "18px",
+			color: "black",
+			top: "50%",
+			left: "50%",
+			transform: "translate(-50%,-50%)",
+		}));
+		var price = px.dom.text(pack.cost + "$");
 		price.style.color = "black";
-		price.style.left = "7px";
-		price.style.top = "122px";
-		g.appendChild(price);
+		px.dom.add(g, [7, 122, price]);
 		g.addEventListener("click", function(){
 			packrarity = n;
 			tinfo2.text = pack.type + " Pack: " + pack.info;
 			updateFreeInfo(n);
 		});
-		dom.push([50+125*n, 280, g]);
+		px.dom.add(div, [50+125*n, 280, g]);
 		hidedom.push(g);
 	});
 
 	for (var i = 0;i < 15;i++) {
 		(function(_i) {
-			var b = px.domEButton(i, function() {
+			var b = px.dom.icob(i, function() {
 				packele = _i;
 				tinfo.text = "Selected Element: " + (packele>12 ? etg.eleNames[packele] : "1:" + packele);
 			});
 			hidedom.push(b);
-			dom.push([75 + Math.floor(i / 2)*64, 120 + (i == 14 ? 37 : (i % 2)*75), b]);
+			px.dom.add(div, [75 + Math.floor(i / 2)*64, 120 + (i == 14 ? 37 : (i % 2)*75), b]);
 		})(i);
 	}
 
@@ -173,6 +170,6 @@ module.exports = function() {
 			buyPack();
 		}
 	});
-	dom.push([777, 184, packmulti]);
-	px.view(tutor(tutor.Shop, 8, 500, { view: storeui, domshop: dom, cmds: cmds }));
+	px.dom.add(div, [777, 184, packmulti]);
+	px.view(tutor(tutor.Shop, 8, 500, { view:storeui, dom:div, cmds:cmds }));
 }

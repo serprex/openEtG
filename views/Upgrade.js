@@ -86,33 +86,32 @@ module.exports = function() {
 	var upgradeui = px.mkView(function(){
 		if (selectedCard) cardArt.texture = gfx.getArt(etgutil.asUpped(selectedCard, true));
 	});
-	var bupgrade = px.domButton("Upgrade", eventWrap(upgradeCard)),
-		bpolish = px.domButton("Polish", eventWrap(polishCard), function() { if (selectedCard) cardArt.texture = gfx.getArt(etgutil.asShiny(selectedCard, true)) }),
-		bunupgrade = px.domButton("Unupgrade", eventWrap(unupgradeCard)),
-		bunpolish = px.domButton("Unpolish", eventWrap(unpolishCard), function() { if (selectedCard) cardArt.texture = gfx.getArt(etgutil.asShiny(selectedCard, false)) }),
-		bsell = px.domButton("Sell", eventWrap(sellCard));
+	var bupgrade = px.dom.button("Upgrade", eventWrap(upgradeCard)),
+		bpolish = px.dom.button("Polish", eventWrap(polishCard), function() { if (selectedCard) cardArt.texture = gfx.getArt(etgutil.asShiny(selectedCard, true)) }),
+		bunupgrade = px.dom.button("Unupgrade", eventWrap(unupgradeCard)),
+		bunpolish = px.dom.button("Unpolish", eventWrap(unpolishCard), function() { if (selectedCard) cardArt.texture = gfx.getArt(etgutil.asShiny(selectedCard, false)) }),
+		bsell = px.dom.button("Sell", eventWrap(sellCard));
 	var stage = {view:upgradeui,
-		dom: [[5, 50, ["Exit", require("./MainMenu")]],
+		dom: px.dom.div([5, 50, ["Exit", require("./MainMenu")]],
 			[150, 50, bupgrade],
 			[150, 95, bpolish],
 			[150, 50, bunupgrade],
 			[150, 95, bunpolish],
 			[150, 140, bsell],
-			[5, 140, ["Autoconvert", autoCards]]],
+			[5, 140, ["Autoconvert", autoCards]]),
 	};
 
-	var goldcount = px.domText(sock.user.gold + "$");
-	var tinfo = px.domText("");
-	var tinfo2 = px.domText("");
-	var tinfo3 = px.domText("");
-	var twarning = px.domText("");
-	stage.domtext = [
+	var goldcount = px.dom.text(sock.user.gold + "$"),
+		tinfo = px.dom.text(""),
+		tinfo2 = px.dom.text(""),
+		tinfo3 = px.dom.text(""),
+		twarning = px.dom.text("");
+	stage.dom = px.dom.div(
 		[5, 240, goldcount],
 		[250, 50, tinfo],
 		[250, 140, tinfo2],
 		[250, 95, tinfo3],
-		[100, 170, twarning],
-	];
+		[100, 170, twarning]);
 
 	var cardArt = new PIXI.Sprite(gfx.nopic);
 	cardArt.position.set(734, 8);
@@ -121,7 +120,7 @@ module.exports = function() {
 	selectedCardArt.position.set(534, 8);
 	upgradeui.addChild(selectedCardArt);
 
-	var cardsel = new px.CardSelector(stage.domtext, null,
+	var cardsel = new px.CardSelector(stage, null,
 		function(code){
 			var card = Cards.Codes[code];
 			selectedCardArt.texture = gfx.getArt(code);
@@ -159,6 +158,6 @@ module.exports = function() {
 	upgradeui.addChild(cardsel);
 	cardsel.cardminus = {};
 	adjustdeck();
-	px.style(bupgrade, bpolish, bsell, bunupgrade, bunpolish, {display: "none"});
+	px.dom.style(bupgrade, bpolish, bsell, bunupgrade, bunpolish, {display: "none"});
 	px.view(stage);
 }
