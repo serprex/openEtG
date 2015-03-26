@@ -888,18 +888,17 @@ liquid:function(c,t){
 	t.addpoison(1);
 },
 livingweapon:function(c,t){
-	if (c.owner == t.owner || !t.owner.weapon){
-		t.remove();
-		var w = new etg.Weapon(t.card, t.owner);
-		w.atk = t.atk;
-		w.active = etg.clone(t.active);
-		w.castele = t.castele;
-		w.cast = t.cast;
-		w.usedactive = t.usedactive;
-		w.status = etg.clone(t.status);
-		w.place();
-		w.owner.dmg(-t.truehp());
-	}
+	if (t.owner.weapon) Actives.unsummon(c, t.owner.weapon);
+	t.remove();
+	var w = new etg.Weapon(t.card, t.owner);
+	w.atk = t.atk;
+	w.active = etg.clone(t.active);
+	w.castele = t.castele;
+	w.cast = t.cast;
+	w.usedactive = t.usedactive;
+	w.status = etg.clone(t.status);
+	w.place();
+	w.owner.dmg(-t.truehp());
 },
 lobotomize:function(c,t){
 	Effect.mkText("Lobotomize", t);
@@ -956,7 +955,7 @@ mend:function(c,t){
 },
 metamorph:function(c,t){
 	c.owner.mark = t instanceof etg.Player?t.mark:t.card.element;
-	c.owner.spend(c.owner.mark, -2);
+	c.owner.markpower++;
 },
 mimic:function(c,t){
 	if (c != t && t instanceof etg.Creature) {
@@ -1453,7 +1452,7 @@ sinkhole:function(c,t){
 	delete t.status.airborne;
 	t.lobo();
 	t.active.cast = Actives.unburrow;
-	t.cast = c.card.upped?1:0;
+	t.cast = c.card.upped?2:1;
 	t.castele = etg.Earth;
 	t.usedactive = true;
 },
@@ -1830,7 +1829,7 @@ evade50:function(c,t){
 	return c.owner.rng() < .5;
 },
 evadespell:function(c,t, data){
-	if (t instanceof etg.CardInstance && data.tgt == c) data.evade = true;
+	if (data.tgt == c && c.owner != t.owner && t instanceof etg.CardInstance) data.evade = true;
 },
 firewall:function(c,t){
 	if (!t.status.ranged){

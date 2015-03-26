@@ -163,7 +163,7 @@ var data = {
 	lycanthropy:"Gain 5|5 & become nocturnal",
 	martyr:"Increment strength per missing health",
 	mend:"Heal target creature 10",
-	metamorph:"Change mark to target's element. Produce 2 quanta of that element",
+	metamorph:"Change mark to target's element. Increment mark power",
 	midas:"Target permanent becomes a Golden Relic with \"2:0: Sacrifice & draw\"",
 	mimic:"Mimic: whenever a creature enters play, become its kind. Retain Mimic",
 	miracle:"Heal self to one below maximum HP. Consumes remaining 1:8",
