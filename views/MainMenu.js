@@ -119,8 +119,7 @@ module.exports = function(nymph) {
 	nextTip.style.right = "2px";
 	nextTip.style.bottom = "2px";
 	tipbox.appendChild(nextTip);
-	var dom = stage.menudom = px.domDiv(
-		[0, 0, bg_main],
+	var dom = stage.menudom = px.domDiv(bg_main,
 		[196, 4, tipbox, [[tinfo]]],
 		[86, 248, leadbox, [[titleText("Leaderboards")], [bwealth], [document.createElement("br")]]],
 		[304, 120, aibox, [[titleText("AI Battle")]]],
@@ -140,7 +139,7 @@ module.exports = function(nymph) {
 		});
 		clab.style.right = "114px";
 		rlab.style.right = "4px";
-		px.domDiv(aibox, [4, 24+i*24, b], clab, rlab);
+		px.domAdd(aibox, [4, 24+i*24, b], clab, rlab);
 	});
 	for (var i=0; i<2; i++){
 		(function(lvi){
@@ -171,7 +170,7 @@ module.exports = function(nymph) {
 				});
 				clab.style.right = "114px";
 				rlab.style.right = "4px";
-				px.domDiv(arenabox, [4, y, tx], [40, y, b], clab, rlab);
+				px.domAdd(arenabox, [4, y, tx], [40, y, b], clab, rlab);
 			}
 			var atop = px.domButton("Arena" + (i+1) + " T20", arenaTop, mkSetTip("See who the top players in arena are right now."));
 			px.style(atop, {
@@ -186,7 +185,7 @@ module.exports = function(nymph) {
 		this.style.display = "none";
 	}
 	if (sock.user){
-		px.domDiv(arenabox, [20, 100, ["Arena Info", arenaInfo, mkSetTip("Check how your arena decks are doing.")]]);
+		px.domAdd(arenabox, [20, 100, ["Arena Info", arenaInfo, mkSetTip("Check how your arena decks are doing.")]]);
 		if (nymph || sock.user.oracle) {
 			var oracle = new PIXI.Sprite(gfx.getArt(nymph || sock.user.oracle));
 			oracle.position.set(92, 340);
@@ -264,8 +263,8 @@ module.exports = function(nymph) {
 			fixQuickButtons();
 		}
 	}
-	px.domDiv(dom, [744, 558, ["Logout", logout.bind(null, "logout"), mkSetTip("Click here to log out.")]]);
-	px.domDiv(playbox,
+	px.domAdd(dom, [744, 558, ["Logout", logout.bind(null, "logout"), mkSetTip("Click here to log out.")]]);
+	px.domAdd(playbox,
 		[10, 100, ["PvP", require("./Challenge").bind(null, true)]],
 		[120, 75, ["Library", libraryClick,mkSetTip("See exactly what cards you or others own")]]);
 	if (sock.user) {
@@ -323,7 +322,7 @@ module.exports = function(nymph) {
 			changePass.addEventListener("keydown", function(e){
 				if (e.keyCode == 13) changeFunc();
 			});
-			px.domDiv(div, [8, 8, changePass], [162, 8, changeBtn],
+			px.domAdd(div, [8, 8, changePass], [162, 8, changeBtn],
 				[8, 53, enableSound], [135, 53, enableMusic], [260, 53, preloadart],
 				[8, 88, hideRightpane], [135, 88, printstats], [260, 88, hideCostIcon],
 				[8, 123, disableTut],
@@ -331,7 +330,7 @@ module.exports = function(nymph) {
 			div.id = "settingspane";
 			setDom(div);
 		});
-		px.domDiv(dom, [620, 558, bsettings]);
+		px.domAdd(dom, [620, 558, bsettings]);
 		var colocol = document.createElement("div"), questcol = document.createElement("div"),
 			bquest = px.domButton("Quests", require("./QuestMain"), mkSetTip("Go on an adventure!")),
 			bcolo = px.domButton("Colosseum", require("./Colosseum"), mkSetTip("Try some daily challenges in the Colosseum!"));
@@ -345,13 +344,13 @@ module.exports = function(nymph) {
 		px.domAdd(colocol, bcolo, labelText("Daily Challenges!"));
 		px.domAdd(questcol, bquest, labelText("Go on an adventure!"));
 		px.domAdd(aibox, colocol, questcol);
-		px.domDiv(deckbox,
+		px.domAdd(deckbox,
 			[14, 128, ["Shop", require("./Shop"), mkSetTip("Buy booster packs which contain cards from the elements you choose.")]],
 			[114, 128, ["Upgrade", require("./Upgrade"), mkSetTip("Upgrade or sell cards.")]]);
-		px.domDiv(playbox,
+		px.domAdd(playbox,
 			[10, 75, ["Trade", tradeClick, mkSetTip("Initiate trading cards with another player.")]],
 			[120, 100, ["Reward", rewardClick, mkSetTip("Redeem a reward code.")]]);
-		px.domDiv(dom,
+		px.domAdd(dom,
 			[86, 92, statbox, [
 				[titleText("Stats")],
 				[sock.user.gold + "$ " + sock.user.name + "\nPvE " + sock.user.aiwins + " - " + sock.user.ailosses + "\nPvP " + sock.user.pvpwins + " - " + sock.user.pvplosses]

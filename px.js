@@ -40,11 +40,6 @@ exports.style = function(){
 	}
 	return arguments[0];
 }
-exports.domAdd = function(dom){
-	for (var i=1; i<arguments.length; i++){
-		dom.appendChild(arguments[i]);
-	}
-}
 exports.domBox = function(w, h){
 	var span = document.createElement("span");
 	span.style.width = w + "px";
@@ -175,16 +170,17 @@ function parseDom(info){
 exports.setDomVis = function(id, vis){
 	document.getElementById(id).style.display = vis ? "" : "none";
 }
-exports.domDiv = function(div){
-	var i = 1;
-	if (div instanceof Array){
-		div = document.createElement("div");
-		i = 0;
+function _domAdd(dom, args, i){
+	while(i < args.length){
+		dom.appendChild(parseDom(args[i++]));
 	}
-	for(;i<arguments.length;i++){
-		div.appendChild(parseDom(arguments[i]));
-	}
-	return div;
+	return dom;
+}
+exports.domAdd = function(dom){
+	return _domAdd(dom, arguments, 1);
+}
+exports.domDiv = function(){
+	return _domAdd(document.createElement("div"), arguments, 0);
 }
 exports.view = function(stage) {
 	if (curStage.endnext){
@@ -194,8 +190,7 @@ exports.view = function(stage) {
 		if (!key.match(special)){
 			var div = stage[key];
 			if (div instanceof Array){
-				div = div[0] instanceof Array ?
-					exports.domDiv.apply(null, div) : parseDom(div);
+				div = _domAdd(document.createElement("div"), div, 0);
 				div.id = key;
 				stage[key] = div;
 			}
