@@ -92,6 +92,7 @@ module.exports = function() {
 		g.appendChild(px.dom.style(px.dom.text(pack.type), {
 			fontSize: "18px",
 			color: "black",
+			position: "absolute",
 			top: "50%",
 			left: "50%",
 			transform: "translate(-50%,-50%)",
