@@ -666,7 +666,7 @@ wss.on("connection", function(socket) {
 		}
 	});
 	socket.on("message", function(rawdata){
-		var data = JSON.parse(rawdata);
+		var data = sutil.parseJSON(rawdata);
 		if (!data) return;
 		console.log(data.u, data.x);
 		if (data.x in echoEvents){

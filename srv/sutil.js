@@ -69,3 +69,10 @@ exports.useruser = function(db, servuser, cb){
 exports.getDay = function(){
 	return Math.floor(Date.now()/86400000);
 }
+exports.parseJSON = function(x){
+	try{
+		return JSON.parse(x);
+	}catch(e){
+		return null;
+	}
+}
