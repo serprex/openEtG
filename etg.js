@@ -899,7 +899,7 @@ CardInstance.prototype.die = function(idx){
 Creature.prototype.deatheffect = Weapon.prototype.deatheffect = function(index) {
 	var data = {index:index}
 	this.procactive("death", data);
-	if (index>=0) Effect.mkDeath(ui.creaturePos(this.owner == this.owner.game.player1?0:1, index));
+	if (~index) Effect.mkDeath(ui.creaturePos(this.owner == this.owner.game.player1?0:1, index));
 }
 Creature.prototype.die = function() {
 	var index = this.remove();

@@ -804,7 +804,7 @@ integrity:function(c,t){
 		lobotomize:2, quint:2,
 	};
 	var stat=c.card.upped?.5:0;
-	for(var i=c.owner.hand.length-1; i>=0; i--){
+	for(var i=c.owner.hand.length-1; ~i; i--){
 		var card = c.owner.hand[i].card;
 		if (etg.ShardList.some(function(x) { return x && card.isOf(Cards.Codes[x]); })){
 			if (card.upped){
@@ -1390,7 +1390,7 @@ scramble:function(c,t){
 },
 serendipity:function(c){
 	var num = Math.min(8-c.owner.hand.length, 3), anyentro = false;
-	for(var i=num-1; i>=0; i--){
+	for(var i=num-1; ~i; i--){
 		var card = c.owner.randomcard(c.card.upped, function(x){return x.type != etg.PillarEnum && x.rarity < 4 && (i>0 || anyentro || x.element == etg.Entropy)});
 		anyentro |= card.element == etg.Entropy;
 		new etg.CardInstance(card.asShiny(c.card.shiny), c.owner).place();

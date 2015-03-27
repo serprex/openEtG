@@ -356,10 +356,9 @@ module.exports = function(nymph) {
 	}
 	var customText = labelText("Duel a custom AI!");
 	var bcustom = px.dom.button("Custom AI", require("./Challenge").bind(null, false), mkSetTip("Fight any deck you want, with custom stats both for you and the opponent."));
+	customText.style.width = "300px";
 	customText.style.textAlign = "center";
-	bcustom.style.marginLeft = "110px";
-	bcustom.style.marginTop = "4px";
-	px.dom.add(aibox, bcustom, customText);
+	px.dom.add(aibox, [110, 180, bcustom], [0, 204, customText]);
 	resetTip({target:{tagName:"HTML"}});
 	px.view(stage);
 }
