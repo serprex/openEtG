@@ -193,7 +193,7 @@ function CardSelector(stage, cardmouseover, cardclick, maxedIndicator, filterbot
 	}
 	for (var i = 0;i < 5; i++){
 		(function(_i) {
-			dom.add([74, 338 + i * 32, dom.icob(i, function() {
+			dom.add(div, [74, 338 + i * 32, dom.icob(i, function() {
 				self.rarefilter = _i;
 				self.makeColumns();
 			}, "r")]);

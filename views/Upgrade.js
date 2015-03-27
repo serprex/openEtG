@@ -90,28 +90,26 @@ module.exports = function() {
 		bpolish = px.dom.button("Polish", eventWrap(polishCard), function() { if (selectedCard) cardArt.texture = gfx.getArt(etgutil.asShiny(selectedCard, true)) }),
 		bunupgrade = px.dom.button("Unupgrade", eventWrap(unupgradeCard)),
 		bunpolish = px.dom.button("Unpolish", eventWrap(unpolishCard), function() { if (selectedCard) cardArt.texture = gfx.getArt(etgutil.asShiny(selectedCard, false)) }),
-		bsell = px.dom.button("Sell", eventWrap(sellCard));
-	var stage = {view:upgradeui,
-		dom: px.dom.div([5, 50, ["Exit", require("./MainMenu")]],
-			[150, 50, bupgrade],
-			[150, 95, bpolish],
-			[150, 50, bunupgrade],
-			[150, 95, bunpolish],
-			[150, 140, bsell],
-			[5, 140, ["Autoconvert", autoCards]]),
-	};
-
-	var goldcount = px.dom.text(sock.user.gold + "$"),
+		bsell = px.dom.button("Sell", eventWrap(sellCard)),
+		goldcount = px.dom.text(sock.user.gold + "$"),
 		tinfo = px.dom.text(""),
 		tinfo2 = px.dom.text(""),
 		tinfo3 = px.dom.text(""),
 		twarning = px.dom.text("");
-	stage.dom = px.dom.div(
+	var stage = {view:upgradeui,
+		dom: px.dom.div([5, 50, ["Exit", require("./MainMenu")]],
+		[150, 50, bupgrade],
+		[150, 95, bpolish],
+		[150, 50, bunupgrade],
+		[150, 95, bunpolish],
+		[150, 140, bsell],
+		[5, 140, ["Autoconvert", autoCards]],
 		[5, 240, goldcount],
 		[250, 50, tinfo],
 		[250, 140, tinfo2],
 		[250, 95, tinfo3],
-		[100, 170, twarning]);
+		[100, 170, twarning]),
+	};
 
 	var cardArt = new PIXI.Sprite(gfx.nopic);
 	cardArt.position.set(734, 8);
