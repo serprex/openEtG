@@ -245,12 +245,11 @@ module.exports = function(arena, ainfo, acard, startempty) {
 			fixQuickButtons();
 		}
 	}
-	var marksprite = document.createElement("span");
+	var editormark = 0, marksprite = document.createElement("span");
 	px.dom.add(div, [66, 200, marksprite]);
-	var editormark = 0;
 	for (var i = 0;i < 13;i++) {
 		(function(_i) {
-			px.dom.add([100 + i * 32, 234,
+			px.dom.add(div, [100 + i * 32, 234,
 				px.dom.icob(i, function() {
 					editormark = _i;
 					marksprite.className = "ico e"+_i;
