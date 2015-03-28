@@ -33,7 +33,7 @@ module.exports = function(game) {
 				game.getTarget(c, active);
 				if (c.owner.shield && c.owner.shield.status.reflect) evalIter(c.owner);
 				evalIter(c.owner.foe);
-				c.owner.creatures.forEach(function(cr){ if (cr.status.voodoo) evalIter(cr) });
+				c.owner.creatures.forEach(function(cr){ if (cr && cr.status.voodoo) evalIter(cr) });
 				delete game.targetingMode;
 			}else{
 				evalIter();

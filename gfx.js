@@ -26,7 +26,7 @@ function load(progress, postload){
 				var ts = [], bs = [];
 				for (var x = 0; x < tex.width; x += 132){
 					ts.push(new PIXI.Texture(tex, new PIXI.math.Rectangle(x, 0, 132, tex.height)));
-					bs.push(new PIXI.Texture(tex, new PIXI.math.Rectangle(x, 0, 132, 17)));
+					bs.push(new PIXI.Texture(tex, new PIXI.math.Rectangle(x, 0, 132, 16)));
 				}
 				exports.cardBacks = ts;
 				exports.cardBorders = bs;
@@ -164,15 +164,17 @@ function getCardImage(code) {
 function getInstImage(code, scale, cache){
 	return cache[code] || getArtImage(code, function(art) {
 		var card = Cards.Codes[code];
-		var rend = cache[code] || require("./px").mkRenderTexture(Math.ceil(128 * scale), Math.ceil(162 * scale));
+		var rend = cache[code] || require("./px").mkRenderTexture(Math.ceil(128 * scale), Math.ceil(160 * scale));
 		var btex = exports.cardBorders[card.element + (card.upped ? 13 : 0)];
+		var c = new PIXI.Container();
 		var border = new PIXI.Sprite(btex), border2 = new PIXI.Sprite(btex);
-		border.scale.x = border2.scale.x = 128/132;
-		border2.position.y = 162;
+		border.scale.x = border2.scale.x = 128.5/132;
+		border2.position.y = 160;
 		border2.scale.y = -1;
-		border.addChild(border2);
+		c.addChild(border);
+		c.addChild(border2);
 		var graphics = new PIXI.Graphics();
-		border.addChild(graphics);
+		c.addChild(graphics);
 		graphics.beginFill(ui.maybeLighten(card));
 		graphics.drawRect(0, 16, 128, 128);
 		if (card.shiny){
@@ -184,17 +186,17 @@ function getInstImage(code, scale, cache){
 		}
 		if (art) {
 			var artspr = new PIXI.Sprite(art);
-			artspr.position.set(0, 16);
+			artspr.position.y = 16;
 			if (card.shiny && rend.renderer.gl) artspr.shader = shinyFilter.getShader(rend.renderer);
-			border.addChild(artspr);
+			c.addChild(artspr);
 		}
 		var text = new PIXI.Sprite(Text(card.name, 16, card.upped ? "black" : "white"));
 		text.anchor.x = .5;
 		text.position.set(64, 142);
-		border.addChild(text);
+		c.addChild(text);
 		var mtx = new PIXI.math.Matrix();
 		mtx.scale(scale, scale);
-		rend.render(border, mtx);
+		rend.render(c, mtx);
 		return cache[code] = rend;
 	});
 }
