@@ -18,6 +18,17 @@ function Game(seed, flip){
 	this.expectedDamage = [0, 0];
 	this.time = Date.now();
 }
+var DefaultStatus = {
+	adrenaline:0,
+	chargecap:0,
+	delayed:0,
+	dive:0,
+	frozen:0,
+	poison:0,
+	steamatk:0,
+	storedAtk:0,
+	storedpower:0,
+};
 var statuscache = {};
 var activecache = {};
 var activecastcache = {};
@@ -86,7 +97,7 @@ function Card(type, info){
 		if (info.Status in statuscache){
 			this.status = statuscache[info.Status];
 		}else{
-			statuscache[info.Status] = this.status = {};
+			statuscache[info.Status] = this.status = Object.create(DefaultStatus);
 			iterSplit(info.Status, "+", function(status){
 				var eqidx = status.indexOf("=");
 				this.status[~eqidx?status.substr(0,eqidx):status] = eqidx == -1 || parseInt(status.substr(eqidx+1));
@@ -110,7 +121,7 @@ function Thing(card, owner){
 			this.status[key] = card.status[key];
 		}
 	}else{
-		this.status = clone(card.status)
+		this.status = cloneStatus(card.status)
 	}
 	this.active = clone(card.active);
 }
@@ -119,7 +130,7 @@ function Player(game){
 	this.owner = this;
 	this.shield = undefined;
 	this.weapon = undefined;
-	this.status = {poison:0};
+	this.status = Object.create(DefaultStatus);
 	this.neuro = false;
 	this.sosa = 0;
 	this.silence = false;
@@ -149,7 +160,7 @@ function Creature(card, owner){
 		this.cast = golem.cast;
 		this.castele = Earth;
 		this.active = clone(golem.active);
-		this.status = clone(golem.status);
+		this.status = cloneStatus(golem.status);
 	}else this.transform(card, owner);
 }
 function Permanent(card, owner){
@@ -239,7 +250,7 @@ Game.prototype.addData = function(data) {
 }
 function removeSoPa(p){
 	if (p){
-		delete p.status.patience;
+		p.status.patience = undefined;
 	}
 }
 Game.prototype.updateExpectedDamage = function(){
@@ -334,6 +345,15 @@ function clone(obj){
 	}
 	return result;
 }
+function cloneStatus(status){
+	var result = Object.create(DefaultStatus);
+	for(var key in status){
+		if (DefaultStatus[key] != status[key]){
+			result[key] = status[key];
+		}
+	}
+	return result;
+}
 function combineactive(a1, a2){
 	if (!a1){
 		return a2;
@@ -359,7 +379,7 @@ Player.prototype.clone = function(game){
 	function maybeClone(x){
 		return x && x.clone(obj);
 	}
-	obj.status = clone(this.status);
+	obj.status = cloneStatus(this.status);
 	obj.shield = maybeClone(this.shield);
 	obj.weapon = maybeClone(this.weapon);
 	obj.creatures = this.creatures.map(maybeClone);
@@ -387,7 +407,7 @@ CardInstance.prototype.clone = function(owner){
 	proto.clone = function(owner){
 		var obj = Object.create(proto);
 		obj.active = clone(this.active);
-		obj.status = clone(this.status);
+		obj.status = cloneStatus(this.status);
 		obj.owner = owner;
 		for(var attr in this){
 			if (!(attr in obj) && this.hasOwnProperty(attr)){
@@ -610,7 +630,7 @@ Player.prototype.endturn = function(discard) {
 					floodingPaidFlag = true;
 					floodingFlag = true;
 					if (!this.spend(Water, 1)){
-						delete this.permanents[i];
+						this.permanents[i] = undefined;
 					}
 				}else if (p.status.patience){
 					patienceFlag = true;
@@ -821,12 +841,10 @@ Player.prototype.spelldmg = function(x) {
 CardInstance.prototype.getIndex = function() { return this.owner.hand.indexOf(this); }
 Creature.prototype.getIndex = function() { return this.owner.creatures.indexOf(this); }
 Player.prototype.addpoison = function(x) {
-	this.defstatus("poison", 0);
 	this.status.poison += x;
 }
 Creature.prototype.addpoison = function(x) {
 	if (!this.active.ownpoison || this.active.ownpoison(this)){
-		this.defstatus("poison", 0);
 		this.status.poison += x;
 		if (this.status.voodoo){
 			this.owner.foe.addpoison(x);
@@ -844,14 +862,12 @@ Player.prototype.buffhp = Creature.prototype.buffhp = function(x) {
 	this.dmg(-x);
 }
 Weapon.prototype.delay = Creature.prototype.delay = function(x){
-	this.defstatus("delayed", 0);
 	this.status.delayed += x;
 	if (this.status.voodoo)this.owner.foe.delay(x);
 }
 Weapon.prototype.freeze = Creature.prototype.freeze = function(x){
 	if (!this.active.ownfreeze || this.active.ownfreeze(this)){
 		Effect.mkText("Freeze", this);
-		this.defstatus("frozen", 0);
 		if (x > this.status.frozen) this.status.frozen = x;
 		if (this.status.voodoo) this.owner.foe.freeze(x);
 	}
@@ -871,17 +887,17 @@ Creature.prototype.dmg = function(x, dontdie){
 	return dmg;
 }
 Creature.prototype.remove = function(index) {
-	if (this.owner.gpull == this)delete this.owner.gpull;
+	if (this.owner.gpull == this) this.owner.gpull = undefined;
 	if (index === undefined)index=this.getIndex();
 	if (~index){
-		delete this.owner.creatures[index];
+		this.owner.creatures[index] = undefined;
 	}
 	return index;
 }
 Permanent.prototype.remove = function(index){
 	if (index === undefined)index=this.getIndex();
 	if (~index){
-		delete this.owner.permanents[index];
+		this.owner.permanents[index] = undefined;
 	}
 	return index;
 }
@@ -929,7 +945,7 @@ Weapon.prototype.calcCore = Creature.prototype.calcCore = function(prefix, filte
 	if (!prefix(this)) return 0;
 	for (var j=0; j<2; j++){
 		var pl = j == 0 ? this.owner : this.owner.foe;
-		if (pl.permanents.some(function(pr){return pr.status[filterstat]})) return 1;
+		if (pl.permanents.some(function(pr){return pr && pr.status[filterstat]})) return 1;
 	}
 	return 0;
 }
@@ -960,9 +976,12 @@ Creature.prototype.calcBonusHp = function(){
 	return this.calcCore(isEclipseCandidate, "nightfall") + this.calcCore2(isWhetCandidate, "whetstone");
 }
 Thing.prototype.lobo = function(){
-	// TODO deal with combined actives
 	for (var key in this.active){
-		if (!(this.active[key].activename[0] in passives)) delete this.active[key];
+		this.active[key].activename.forEach(function(name){
+			if (!(name in passives)){
+				this.rmactive(key, name);
+			}
+		}, this);
 	}
 }
 Thing.prototype.mutantactive = function(){
@@ -1023,12 +1042,12 @@ Permanent.prototype.die = function(){
 }
 Weapon.prototype.remove = function() {
 	if (this.owner.weapon != this)return -1;
-	delete this.owner.weapon;
+	this.owner.weapon = undefined;
 	return 0;
 }
 Shield.prototype.remove = function() {
 	if (this.owner.shield != this)return -1;
-	delete this.owner.shield;
+	this.owner.shield = undefined;
 	return 0;
 }
 Thing.prototype.isMaterial = function(type) {
@@ -1072,11 +1091,6 @@ Thing.prototype.useactive = function(t) {
 	this.castSpell(t, this.active.cast);
 	this.owner.spend(castele, cast);
 	this.owner.game.updateExpectedDamage();
-}
-Player.prototype.defstatus = Thing.prototype.defstatus = function(key, def){
-	if (!(key in this.status)){
-		this.status[key] = def;
-	}
 }
 Weapon.prototype.attack = Creature.prototype.attack = function(stasis, freedomChance, target){
 	var isCreature = this instanceof Creature;
@@ -1135,7 +1149,9 @@ Weapon.prototype.attack = Creature.prototype.attack = function(stasis, freedomCh
 	if (this.status.delayed){
 		this.status.delayed--;
 	}
-	delete this.status.dive;
+	if (this.status.dive){
+		this.status.dive = 0;
+	}
 	if (isCreature && ~this.getIndex() && this.truehp() <= 0){
 		this.die();
 	}else if (!isCreature || ~this.getIndex()){
@@ -1237,6 +1253,7 @@ exports.iterSplit = iterSplit;
 exports.filtercards = filtercards;
 exports.countAdrenaline = countAdrenaline;
 exports.clone = clone;
+exports.cloneStatus = cloneStatus;
 exports.casttext = casttext;
 exports.fromTrueMark = fromTrueMark;
 exports.toTrueMark = toTrueMark;

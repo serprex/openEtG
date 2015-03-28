@@ -88,7 +88,6 @@ axe:function(c,t){
 	return c.owner.mark == etg.Fire || c.owner.mark == etg.Time?1:0;
 },
 axedraw:function(c,t){
-	c.defstatus("dive", 0);
 	c.status.dive++;
 },
 bblood:function(c,t){
@@ -163,7 +162,7 @@ brokenmirror:function(c,t, fromhand){
 },
 burrow:function(c,t){
 	c.status.burrowed = true;
-	delete c.status.airborne;
+	c.status.airborne = false;
 	c.active.cast = Actives.unburrow;
 	c.cast = 0;
 },
@@ -217,11 +216,11 @@ chimera:function(c,t){
 },
 clear:function(c,t){
 	Effect.mkText("Clear", t);
-	delete t.status.poison;
-	delete t.status.adrenaline;
-	delete t.status.aflatoxin;
-	delete t.status.momentum;
-	delete t.status.psion;
+	t.status.poison = 0;
+	t.status.adrenaline = 0;
+	t.status.aflatoxin = false;
+	t.status.momentum = false;
+	t.status.psion = false;
 	if (t.status.delayed > 0){
 		t.status.delayed--;
 	}
@@ -276,7 +275,6 @@ deathwish:function(c,t, data){
 	}
 },
 decrsteam:function(c){
-	c.defstatus("steamatk", 0);
 	if (c.status.steamatk > 0){
 		c.atk--;
 		c.status.steamatk--;
@@ -359,7 +357,6 @@ disshield:function(c,t, dmg){
 },
 dive:function(c,t){
 	Effect.mkText("Dive", c);
-	c.defstatus("dive", 0);
 	c.status.dive = c.trueatk();
 },
 divinity:function(c,t){
@@ -395,7 +392,7 @@ dshield:function(c,t){
 },
 dshieldoff:function(c,t){
 	if (c.owner == t){
-		delete c.status.immaterial;
+		c.status.immaterial = false;
 		c.rmactive("turnstart", "dshieldoff");
 	}
 },
@@ -451,7 +448,7 @@ endow:function(c,t){
 	c.active = etg.clone(t.active);
 	c.cast = t.cast;
 	c.castele = t.castele;
-	if (c.active.cast && c.active.cast == Actives.endow) {
+	if (c.active.cast == Actives.endow) {
 		delete c.active.cast;
 	}
 	c.atk += t.trueatk();
@@ -476,12 +473,12 @@ epochreset:function(c,t){
 },
 evolve:function(c,t){
 	c.transform(c.card.as(Cards.Shrieker));
-	delete c.status.burrowed;
+	c.status.burrowed = false;
 },
 feed:function(c,t){
 	t.addpoison(1);
 	etg.parseActive("growth 3")(c);
-	delete c.status.immaterial;
+	c.status.immaterial = false;
 },
 fickle:function(c,t){
 	if (t.owner != c.owner && t.owner.sanctuary){
@@ -532,7 +529,7 @@ flyingweapon:function(c,t){
 	cr.active = etg.clone(t.active);
 	cr.cast = t.cast;
 	cr.castele = t.castele;
-	cr.status = etg.clone(t.status);
+	cr.status = etg.cloneStatus(t.status);
 	cr.status.airborne = true;
 	cr.usedactive = t.usedactive;
 	cr.place();
@@ -614,7 +611,6 @@ gaincharge2:function(c,t){
 },
 gaintimecharge:function(c,t, drawstep){
 	if (!drawstep && c.owner == t){
-		c.defstatus("chargecap", 0);
 		if (c.status.chargecap < 4){
 			c.status.chargecap++;
 			c.status.charges++;
@@ -647,7 +643,7 @@ gpullspell:function(c,t){
 		t.owner.gpull = t;
 	}else{
 		t = t.owner;
-		delete t.gpull;
+		t.gpull = undefined;
 	}
 	Effect.mkText("Pull", t);
 },
@@ -657,7 +653,7 @@ gratitude:function(c,t){
 },
 grave:function(c,t){
 	if (!t.card.isOf(Cards.Singularity)){
-		delete c.status.burrowed;
+		c.status.burrowed = false;
 		c.transform(t.card);
 	}
 },
@@ -680,7 +676,6 @@ guard:function(c,t){
 halveatk: function(c, t) {
 	t = t || c;
 	var storedatk = Math.ceil(t.atk / 2);
-	if (!t.status.storedAtk) t.status.storedAtk = 0;
 	t.status.storedAtk += storedatk;
 	t.atk -= storedatk;
 },
@@ -896,7 +891,7 @@ livingweapon:function(c,t){
 		w.castele = t.castele;
 		w.cast = t.cast;
 		w.usedactive = t.usedactive;
-		w.status = etg.clone(t.status);
+		w.status = etg.cloneStatus(t.status);
 		w.place();
 		w.owner.dmg(-t.truehp());
 	}
@@ -904,8 +899,8 @@ livingweapon:function(c,t){
 lobotomize:function(c,t){
 	Effect.mkText("Lobotomize", t);
 	t.lobo();
-	delete t.status.momentum;
-	delete t.status.psion;
+	t.status.momentum = false;
+	t.status.psion = false;
 },
 locket: function(c, t) {
 	var ele = c.status.mode === undefined ? c.owner.mark : c.status.mode;
@@ -1232,7 +1227,7 @@ purify:function(c,t){
 		t.neuro = false;
 		t.sosa = 0;
 	}else{
-		delete t.status.aflatoxin;
+		t.status.aflatoxin = false;
 	}
 },
 queen:function(c,t){
@@ -1246,7 +1241,7 @@ quint:function(c,t){
 quinttog:function(c,t){
 	if (t.status.immaterial){
 		Effect.mkText("Materialize", t);
-		delete t.status.immaterial;
+		t.status.immaterial = false;
 	}else Actives.quint(c,t);
 },
 randomdr:function(c, t){
@@ -1450,7 +1445,7 @@ sing:function(c,t){
 sinkhole:function(c,t){
 	Effect.mkText("Sinkhole", t);
 	t.status.burrowed = true;
-	delete t.status.airborne;
+	t.status.airborne = false;
 	t.lobo();
 	t.active.cast = Actives.unburrow;
 	t.cast = c.card.upped?1:0;
@@ -1491,7 +1486,6 @@ skyblitz:function(c,t){
 	c.owner.creatures.forEach(function(cr){
 		if (cr && cr.status.airborne){
 			Effect.mkText("Dive", cr);
-			cr.defstatus("dive", 0);
 			cr.status.dive += cr.trueatk();
 		}
 	});
@@ -1557,7 +1551,6 @@ steal:function(c,t){
 },
 steam:function(c,t){
 	Effect.mkText("5|0", c);
-	c.defstatus("steamatk", 0);
 	c.status.steamatk += 5;
 	c.atk += 5;
 	if (!c.hasactive("postauto", "decrsteam")) c.addactive("postauto", Actives.decrsteam);
@@ -1650,13 +1643,13 @@ trick:function(c,t){
 },
 turngolem:function(c,t){
 	var golem = new etg.Creature(c.card.as(Cards.GolemAttacker), c.owner);
-	golem.atk = Math.floor((c.status.storedpower || 0) / 3);
-	golem.maxhp = golem.hp = c.status.storedpower || 0;
+	golem.atk = Math.floor(c.status.storedpower / 3);
+	golem.maxhp = golem.hp = c.status.storedpower;
 	golem.place();
 	c.owner.shield = undefined;
 },
 unappease:function(c,t){
-	delete c.status.appeased;
+	c.status.appeased = undefined;
 },
 unburrow:function(c,t){
 	c.status.burrowed = false;
@@ -1704,7 +1697,7 @@ vindicate:function(c,t, data){
 	}
 },
 unvindicate:function(c,t){
-	delete c.status.vindicated;
+	c.status.vindicated = undefined;
 },
 virtue:function(c,t,blocked){
 	c.owner.buffhp(blocked);
@@ -1731,12 +1724,11 @@ quantagift:function(c,t){
 },
 web:function(c,t){
 	Effect.mkText("Web", t);
-	delete t.status.airborne;
+	t.status.airborne = false;
 },
 wind:function(c,t){
-	if (!c.status.storedAtk) return;
 	c.atk += c.status.storedAtk;
-	delete c.status.storedAtk;
+	c.status.storedAtk = 0;
 },
 wisdom:function(c,t){
 	Effect.mkText("3|0", t);
@@ -1784,7 +1776,7 @@ pillcar:function(c,t){
 	}
 },
 absorbdmg:function(c,t, dmg, blocked){
-	c.status.storedpower = (c.status.storedpower || 0) + blocked;
+	c.status.storedpower += blocked;
 },
 absorber:function(c,t){
 	c.owner.spend(etg.Fire, -3);

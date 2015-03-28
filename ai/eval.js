@@ -304,7 +304,7 @@ var ActivesValues = Object.freeze({
 	tornado:9,
 	trick:4,
 	turngolem:function(c){
-		return c instanceof etg.CardInstance || !c.status.storedpower ? 0 : c.status.storedpower/3;
+		return c instanceof etg.CardInstance ? 0 : c.status.storedpower/3;
 	},
 	upkeep: -.5,
 	upload:3,
@@ -316,7 +316,7 @@ var ActivesValues = Object.freeze({
 	quantagift:4,
 	web:1,
 	wind:function(c){
-		return c instanceof etg.CardInstance || !c.status.storedAtk ? 0 : c.status.storedAtk/2 - 2;
+		return c instanceof etg.CardInstance ? -2 : c.status.storedAtk/2 - 2;
 	},
 	wisdom:4,
 	yoink:4,
@@ -434,7 +434,7 @@ function calcExpectedDamage(pl, wallCharges) {
 	if (!stasisFlag){
 		pl.creatures.forEach(function(c){
 			var dmg = estimateDamage(c, freedomChance, wallCharges);
-			if (dmg && !(c.status.psion && pl.foe.shield && pl.foe.shield.status.reflective)){
+			if (dmg && !(c.status.psion && pl.foe.shield && pl.foe.shield.status.reflect)){
 				totalDamage += dmg;
 			}
 		});
