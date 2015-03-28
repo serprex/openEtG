@@ -31,6 +31,7 @@ input[type="text"],input[type="password"],input:not([type]){width:150px}
 	transform:translate(-50%,-100%);
 	pointer-events:none;
 	max-width:196px;
+	position:absolute;
 }
 .selectortext{
 	width:33px;
