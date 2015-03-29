@@ -43,12 +43,16 @@ exports.add = function(div){
 exports.div = function(){
 	return _add(document.createElement("div"), arguments, 0);
 }
+exports.divwh = function(w, h){
+	var ele = document.createElement("div");
+	ele.style.width = w + "px";
+	ele.style.height = h + "px";
+	return ele;
+}
 exports.box = function(w, h){
-	var span = document.createElement("div");
-	span.style.width = w + "px";
-	span.style.height = h + "px";
-	span.className = "bgbox";
-	return span;
+	var ele = exports.divwh(w, h);
+	ele.className = "bgbox";
+	return ele;
 }
 exports.button = function(text, click, mouseover) {
 	var ele = document.createElement("input");

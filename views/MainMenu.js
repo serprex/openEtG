@@ -50,12 +50,6 @@ var tipjar = [
 	"Cards in packs have a (45/packsize)% chance to increment rarity",
 	"At Wealth T50 you can see which players have the highest wealth. Wealth is a combination of current gold & one's cardpool"
 ];
-function mkBox(w, h){
-	var d = document.createElement("div");
-	d.style.width = w + "px";
-	d.style.height = h + "px";
-	return d;
-}
 var bg_main = new Image();
 bg_main.src = "assets/bg_main.png";
 bg_main.style.zIndex = "-1";
@@ -98,31 +92,31 @@ module.exports = function(nymph) {
 	function costText(lv, n){
 		return labelText((n ? "Base reward: " : "Cost: ") + aicostpay[lv*2+n] + "$");
 	}
-	var deckbox = mkBox(196, 176),
-		statbox = mkBox(196, 120),
-		leadbox = mkBox(196, 120),
-		aibox = mkBox(292, 240),
-		arenabox = mkBox(292, 130),
-		playbox = mkBox(196, 200),
-		tipbox = mkBox(504, 48);
+	var deckbox = px.dom.divwh(196, 176),
+		statbox = px.dom.divwh(196, 120),
+		leadbox = px.dom.divwh(196, 120),
+		aibox = px.dom.divwh(292, 240),
+		arenabox = px.dom.divwh(292, 130),
+		playbox = px.dom.divwh(196, 200),
+		tipbox = px.dom.divwh(504, 48);
 	deckbox.appendChild(titleText("Cards & Decks"));
 	var bwealth = px.dom.button("Wealth T50", wealthTop, mkSetTip("See who's collected the most wealth."));
 	bwealth.style.position = "absolute";
 	bwealth.style.left = "52px";
 	arenabox.appendChild(titleText("Arena"));
 	playbox.appendChild(titleText("Players"));
-	var nextTip = px.dom.button("Next tip", function() {
+	var nextTip = px.dom.style(px.dom.button("Next tip", function() {
 		tipNumber = (tipNumber+1) % tipjar.length;
 		tinfo.text = tipjar[tipNumber] + ".";
+	}),{
+		position: "absolute",
+		right: "2px",
+		bottom: "2px",
 	});
-	nextTip.style.position = "absolute";
-	nextTip.style.right = "2px";
-	nextTip.style.bottom = "2px";
-	tipbox.appendChild(nextTip);
 	var div = stage.dom = px.dom.div(bg_main,
-		[196, 4, tipbox, [[tinfo]]],
-		[86, 248, leadbox, [[titleText("Leaderboards")], [bwealth], [document.createElement("br")]]],
-		[304, 120, aibox, [[titleText("AI Battle")]]],
+		[196, 4, tipbox, [tinfo, nextTip]],
+		[86, 248, leadbox, [titleText("Leaderboards"), bwealth, document.createElement("br")]],
+		[304, 120, aibox, [titleText("AI Battle")]],
 		[620, 92, deckbox, [
 			[64, 108, ["Editor", require("./Editor"), mkSetTip("Edit & manage your decks.")]],
 		]],
