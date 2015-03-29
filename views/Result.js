@@ -38,6 +38,31 @@ module.exports = function(game) {
 			}
 		}
 	}
+	function addBonuses(gold) {
+		var y = 0;
+		var testgold = gold;
+		bonusList.forEach(function(data) {
+			if (data[2]()) {
+				px.dom.add(div,[10, 370+y*20, data[0] + (options.stats ?  " (" + ((data[1]-1)*100).toFixed(0) + "%)" : "")]);
+				y++;
+				testgold *= data[1];
+			}
+		});
+		if (y > 0 && options.stats) {
+			px.dom.add(div, [10, 370 + y * 20, "Gold with bonuses: " + testgold]);
+		}
+		return gold;
+	}
+	var bonusList = [
+		["Elemental Mastery", 1.5, function() { return game.player1.hp == game.player1.maxhp }],
+		["Deckout", 1.5, function() { return game.player2.deck.length == 0 && game.player2.hp > 0 }],
+		["Double Kill", 1.25, function() { return game.player2.hp < -game.player2.maxhp }],
+		["Triple Kill", 1.25, function() { return game.player2.hp < -2 * game.player2.maxhp }],
+		["Waiter", 1.25, function() { return game.player1.deck.length == 0 }],
+		["Ground holding", 1.15, function() { return game.player1.countpermanents() > 9 }],
+		["Creature domination", 1.1, function() { return game.player1.countcreatures() >= 2*game.player2.countcreatures() }],
+
+	];
 	var div = px.dom.div(
 		[10, 290, game.ply + " plies\n" + (game.time / 1000).toFixed(1) + " seconds\n" + (winner && sock.user && game.level !== undefined ? (sock.user["streak" + game.level] || 0) + " win streak\n+" +
 			Math.min([5, 5, 7.5, 10, 7.5, 10][game.level] * Math.max(sock.user["streak" + game.level] - 1, 0), 100) + "% streak bonus" : "")],
@@ -57,7 +82,9 @@ module.exports = function(game) {
 	if (winner && sock.user){
 		if (game.level !== undefined || !game.ai) sock.userExec("addwin", { pvp: !game.ai });
 		if (game.goldreward) {
-			var goldwon = px.dom.text((game.goldreward - (game.cost || 0)) + "$");
+			var reward = game.goldreward - (game.cost || 0);
+			reward = addBonuses(reward);
+			var goldwon = px.dom.text(reward + "$");
 			goldwon.style.textAlign = "center";
 			goldwon.style.width = "900px";
 			px.dom.add(div, [0, 550, goldwon]);
