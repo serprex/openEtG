@@ -84,6 +84,7 @@ module.exports = function(){
 	xhr.addEventListener("load", function(){
 		var data = JSON.parse(this.responseText)[0];
 		var a = document.createElement("a");
+		a.target = "_blank";
 		a.href = data.html_url;
 		a.appendChild(document.createTextNode(data.author.login + ": " + data.commit.message));
 		px.dom.add(div, [270, 460, a]);
