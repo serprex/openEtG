@@ -199,11 +199,7 @@ function startMatch(game, foeDeck) {
 			var info = obj.info(), actinfo = game.targetingMode && game.targetingMode(obj) && activeInfo[game.targetingText];
 			if (actinfo) info += "\nDmg " + actinfo(obj);
 			infobox.text = info;
-			px.dom.style(infobox, {
-				left: px.mouse.x + "px",
-				top: px.mouse.y + "px",
-				display: "",
-			});
+			infobox.style.display = "";
 		}
 	}
 	var handsprite = [new Array(8), new Array(8)];
@@ -407,6 +403,12 @@ function startMatch(game, foeDeck) {
 			playerOverlay[e.keyCode == 87?1:0].click();
 		}
 	}
+	function onmousemove(e) {
+		px.dom.style(infobox, {
+			left: px.mouse.x + "px",
+			top: px.mouse.y + "px",
+		});
+	}
 	var cmds = {
 		endturn: function(data) {
 			game.player2.endturn(data.bits);
@@ -431,6 +433,7 @@ function startMatch(game, foeDeck) {
 			}
 		},
 	};
+	document.addEventListener("mousemove", onmousemove);
 	document.addEventListener("keydown", onkeydown);
 	function gameStep(){
 		if (game.turn == game.player2 && game.ai) {
@@ -697,6 +700,7 @@ function startMatch(game, foeDeck) {
 	var gameInterval = setInterval(gameStep, 30);
 	px.view({view:gameui, dom:div, endnext:function() {
 		document.removeEventListener("keydown", onkeydown);
+		document.removeEventListener("mousemove", onmousemove);
 		clearInterval(gameInterval);
 	}, cmds:cmds});
 }
