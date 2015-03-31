@@ -146,7 +146,7 @@ function Player(game){
 	this.creatures = new Array(23);
 	this.permanents = new Array(16);
 	this.mark = 0;
-	this.quanta = [];
+	this.quanta = new Array(13);
 	for(var i=1; i<13; i++)this.quanta[i]=0;
 	this.shardgolem = undefined;
 }

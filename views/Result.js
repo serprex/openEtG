@@ -39,19 +39,18 @@ module.exports = function(game) {
 		}
 	}
 	function addBonuses(gold) {
-		var y = 0;
-		var testgold = gold;
+		var y = 0, origgold = gold;
 		bonusList.forEach(function(data) {
 			if (data[2]()) {
-				px.dom.add(div,[10, 370+y*20, data[0] + (options.stats ?  " (" + ((data[1]-1)*100).toFixed(0) + "%)" : "")]);
+				px.dom.add(div,[10, 370+y*20, data[0] + (options.stats ?  " " + Math.round((data[1]-1)*100) + "%" : "")]);
 				y++;
-				testgold *= data[1];
+				gold *= data[1];
 			}
 		});
 		if (y > 0 && options.stats) {
-			px.dom.add(div, [10, 370 + y * 20, "Gold with bonuses: " + testgold]);
+			px.dom.add(div, [10, 370+y*20, "Gold with bonuses: " + Math.round(gold)]);
 		}
-		return gold;
+		return origgold;
 	}
 	var bonusList = [
 		["Elemental Mastery", 1.5, function() { return game.player1.hp == game.player1.maxhp }],
@@ -59,7 +58,7 @@ module.exports = function(game) {
 		["Double Kill", 1.25, function() { return game.player2.hp < -game.player2.maxhp }],
 		["Triple Kill", 1.25, function() { return game.player2.hp < -2 * game.player2.maxhp }],
 		["Waiter", 1.25, function() { return game.player1.deck.length == 0 }],
-		["Ground holding", 1.15, function() { return game.player1.countpermanents() > 9 }],
+		["Ground holding", 1.15, function() { return game.player1.countpermanents() > 7 }],
 		["Creature domination", 1.1, function() { return game.player1.countcreatures() >= 2*game.player2.countcreatures() }],
 
 	];
