@@ -80,9 +80,8 @@ module.exports = function(game) {
 	if (winner && sock.user){
 		if (game.level !== undefined || !game.ai) sock.userExec("addwin", { pvp: !game.ai });
 		if (game.goldreward) {
-			var reward = game.goldreward - (game.cost || 0);
-			reward = addBonuses(reward);
-			var goldwon = px.dom.text(reward + "$");
+			var reward = addBonuses(game.goldreward - (game.cost || 0)),
+				goldwon = px.dom.text(reward + "$");
 			goldwon.style.textAlign = "center";
 			goldwon.style.width = "900px";
 			px.dom.add(div, [0, 550, goldwon]);
