@@ -8,7 +8,7 @@
 	<script src="pixi.min.js"></script>
 	<script src="etgify.js"></script>
 </head>
-<body>
+<body onload="require('ui.main')">
 	<div id="rightpane">
 		<a href="artcredit.htm" target="_blank">Art credits</a>&emsp;&emsp;<a href="forum" target="_blank">Forum</a><br><br>
 		<label><input id="offline" type="checkbox">Appear Offline</label> <label><input id="afk" type="checkbox">Afk</label> <label><input id="wantpvp" type="checkbox">Seeking PvP</label>
@@ -16,6 +16,5 @@
 		<textarea id="chatinput" placeholder="Chat"></textarea>
 	</div>
 	<canvas id="leftpane" width=900 height=600></canvas>
-	<script src="ui.main.js"></script>
 </body>
 </html>
