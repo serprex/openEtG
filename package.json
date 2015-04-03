@@ -14,8 +14,8 @@
     "ws": "^0.7.1"
   },
   "devDependencies": {
-    "qunitjs": "^1.17.1",
-    "urllib": "^2.3.1"
+    "qunitjs": "^1.18.0",
+    "urllib": "^2.3.3"
   },
   "scripts": {
     "test": "npm start;firefox 127.0.0.1:13602/test.htm"

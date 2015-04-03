@@ -42,7 +42,7 @@ module.exports = function(game) {
 		var y = 0, bonus = 1;
 		bonusList.forEach(function(data) {
 			if (data[2]()) {
-				px.dom.add(div,[10, 370+y*20, data[0] + (options.stats ?  " " + Math.round((data[1]-1)*100) + "%" : "")]);
+				px.dom.add(div,[10, 370+y*20, data[0] + (options.stats ?  " " + Math.round(data[1]*100) + "%" : "")]);
 				y++;
 				bonus += data[1];
 			}
@@ -62,6 +62,7 @@ module.exports = function(game) {
 		["Creatureless", .1, function() { return !game.player1.countcreatures() }],
 		["Toxic", .1, function() { return game.player2.status.poison > 12 }],
 		["Equipped", .05, function() { return game.player1.weapon && game.player1.shield }],
+		["Mid turn", .1, function() { return game.turn == game.player1 }],
 	];
 	var div = px.dom.div(
 		[10, 290, game.ply + " plies\n" + (game.time / 1000).toFixed(1) + " seconds\n" + (winner && sock.user && game.level !== undefined ? (sock.user["streak" + game.level] || 0) + " win streak\n+" +
