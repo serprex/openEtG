@@ -116,7 +116,7 @@ function startMatch(game, foeDeck) {
 		}
 	}
 	var resigning, discarding, aiDelay = 0, aiState, aiCommand;
-	if (sock.user && (game.level !== undefined || !game.ai)) {
+	if (sock.user && !game.endurance && (game.level !== undefined || !game.ai)) {
 		sock.userExec("addloss", { pvp: !game.ai });
 		if (game.cost){
 			sock.userExec("addgold", { g: -game.cost });
