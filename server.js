@@ -10,7 +10,7 @@ var fs = require("fs");
 var db = require("redis").createClient();
 var app = require("connect")().
 	use(require("compression")()).
-	use(require("serve-static")(__dirname, { maxAge: 2626262 })).
+	use(require("serve-static")(__dirname, { maxAge: 2626262000 })).
 	use("/Cards", require("./srv/cardredirect")()).
 	use("/speed", require("./srv/speed")()).
 	use("/deck", require("./srv/deckredirect")()).
