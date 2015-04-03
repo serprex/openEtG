@@ -388,7 +388,7 @@ Player.prototype.clone = function(game){
 	}
 	obj.hand = this.hand.map(maybeClone);
 	obj.deck = this.deck.slice();
-	obj.quanta = this.quanta.slice();
+	obj.quanta = new Int8Array(this.quanta);
 	obj.game = game;
 	obj.owner = obj;
 	for(var attr in this){
