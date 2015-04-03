@@ -39,27 +39,29 @@ module.exports = function(game) {
 		}
 	}
 	function addBonuses(gold) {
-		var y = 0, origgold = gold;
+		var y = 0, bonus = 1;
 		bonusList.forEach(function(data) {
 			if (data[2]()) {
 				px.dom.add(div,[10, 370+y*20, data[0] + (options.stats ?  " " + Math.round((data[1]-1)*100) + "%" : "")]);
 				y++;
-				gold *= data[1];
+				bonus += data[1];
 			}
 		});
 		if (y > 0 && options.stats) {
-			px.dom.add(div, [10, 370+y*20, "Gold with bonuses: " + Math.round(gold)]);
+			px.dom.add(div, [10, 370+y*20, "Gold with bonuses: " + Math.round(gold*bonus)]);
 		}
-		return origgold;
+		return gold;
 	}
 	var bonusList = [
-		["Elemental Mastery", 1.25, function() { return game.player1.hp == game.player1.maxhp }],
-		["Deckout", 1.5, function() { return game.player2.deck.length == 0 && game.player2.hp > 0 }],
-		["Double Kill", 1.25, function() { return game.player2.hp < -game.player2.maxhp }],
-		["Waiter", 1.25, function() { return game.player1.deck.length == 0 }],
-		["Ground holding", 1.15, function() { return game.player1.countpermanents() > 7 }],
-		["Creature domination", 1.1, function() { return game.player1.countcreatures() >= 2*game.player2.countcreatures() }],
-
+		["Elemental Mastery", .2, function() { return game.player1.hp == game.player1.maxhp }],
+		["Deckout", .5, function() { return game.player2.deck.length == 0 && game.player2.hp > 0 }],
+		["Double Kill", .25, function() { return game.player2.hp < -game.player2.maxhp }],
+		["Waiter", .25, function() { return game.player1.deck.length == 0 }],
+		["Ground holding", .2, function() { return game.player1.countpermanents() > 7 }],
+		["Creature domination", .1, function() { return game.player1.countcreatures() > 2*game.player2.countcreatures() }],
+		["Creatureless", .1, function() { return !game.player1.countcreatures() }],
+		["Toxic", .1, function() { return game.player2.status.poison > 12 }],
+		["Equipped", .05, function() { return game.player1.weapon && game.player1.shield }],
 	];
 	var div = px.dom.div(
 		[10, 290, game.ply + " plies\n" + (game.time / 1000).toFixed(1) + " seconds\n" + (winner && sock.user && game.level !== undefined ? (sock.user["streak" + game.level] || 0) + " win streak\n+" +
