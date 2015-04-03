@@ -7,11 +7,10 @@ module.exports = function(db){
 			res.writeHead(503);
 			res.end();
 		}else{
-			var code = new Array(8);
+			var code = "";
 			for (var i=0; i<8; i++){
-				code[i] = 33+Math.floor(Math.random()*94);
+				code += String.fromCharCode(33+Math.floor(Math.random()*94));
 			}
-			code = String.fromCharCode.apply(String, code);
 			db.hexists("CodeHash", code, function(err, exists){
 				if (exists){
 					codeSmithLoop(res, iter+1, params);

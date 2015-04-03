@@ -15,7 +15,7 @@ function Game(seed, flip){
 	this.player1.foe = this.player2;
 	this.player2.foe = this.player1;
 	this.turn = (seed < etgutil.MAX_INT/2) === !flip ? this.player1 : this.player2;
-	this.expectedDamage = [0, 0];
+	this.expectedDamage = new Int32Array(2);
 	this.time = Date.now();
 }
 var DefaultStatus = {
@@ -88,7 +88,7 @@ function Card(type, info){
 				var a0 = ~eqidx ? active.substr(0, eqidx) : "auto";
 				var iscast = this.readCost("cast", a0);
 				Thing.prototype.addactive.call(this, iscast?"cast":a0, parseActive(active.substr(eqidx+1)));
-				if (iscast) activecastcache[info.Active] = [this.cast, this.castele];
+				if (iscast) activecastcache[info.Active] = new Int8Array([this.cast, this.castele]);
 			}, this);
 			Object.freeze(this.active);
 		}
@@ -146,8 +146,7 @@ function Player(game){
 	this.creatures = new Array(23);
 	this.permanents = new Array(16);
 	this.mark = 0;
-	this.quanta = new Array(13);
-	for(var i=1; i<13; i++)this.quanta[i]=0;
+	this.quanta = new Int8Array(13);
 	this.shardgolem = undefined;
 }
 function Creature(card, owner){
@@ -269,8 +268,8 @@ Game.prototype.updateExpectedDamage = function(){
 				this.expectedDamage[1] += this.player2.hp - gclone.player2.hp;
 			}
 			Effect.disable = false;
-			this.expectedDamage[0] = Math.round(this.expectedDamage[0]/3);
-			this.expectedDamage[1] = Math.round(this.expectedDamage[1]/3);
+			this.expectedDamage[0] = this.expectedDamage[0]/3|0;
+			this.expectedDamage[1] = this.expectedDamage[1]/3|0;
 		}
 	}
 }
@@ -578,7 +577,8 @@ Player.prototype.canspend = function(qtype, x) {
 			}
 		}
 		return false;
-	}else return this.quanta[qtype] >= x;
+	}
+	return this.quanta[qtype] >= x;
 }
 Player.prototype.spend = function(qtype, x) {
 	if (x == 0 || (x<0 && this.flatline))return true;
@@ -586,14 +586,10 @@ Player.prototype.spend = function(qtype, x) {
 	if (qtype == Chroma){
 		var b = x<0?-1:1;
 		for (var i=x*b; i>0; i--){
-			this.quanta[b==-1?this.uptoceil(12):this.randomquanta()] -= b;
+			var q = b==-1?this.uptoceil(12):this.randomquanta();
+			this.quanta[q] = Math.min(this.quanta[q]-b, 99);
 		}
-	}else this.quanta[qtype] -= x;
-	for (var i=1; i<13; i++){
-		if (this.quanta[i]>99){
-			this.quanta[i]=99;
-		}
-	}
+	}else this.quanta[qtype] = Math.min(this.quanta[qtype]-x, 99);
 	return true;
 }
 Player.prototype.countcreatures = function() {

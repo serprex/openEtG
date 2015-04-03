@@ -56,7 +56,7 @@ module.exports = function(level) {
 		return uprate ? etgutil.asUpped(x, Math.random() < uprate) : x;
 	}
 	var cardcount = {};
-	var eles = [etg.PlayerRng.uptoceil(12), etg.PlayerRng.uptoceil(12)], ecost = new Array(13);
+	var eles = [etg.PlayerRng.uptoceil(12), etg.PlayerRng.uptoceil(12)], ecost = new Float32Array(13);
 	for (var i = 0;i < 13;i++) {
 		ecost[i] = 0;
 	}
