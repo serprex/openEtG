@@ -196,7 +196,7 @@ function CardSelector(stage, cardmouseover, cardclick, maxedIndicator, filterbot
 			dom.add(div, [74, 338 + i * 32, dom.icob(i, function() {
 				self.rarefilter = _i;
 				self.makeColumns();
-			}, "r")]);
+			}, i?"r":"t")]);
 		})(i);
 	}
 	this.countText = new Array(6);

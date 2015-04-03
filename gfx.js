@@ -39,6 +39,7 @@ function load(progress, postload){
 			if (loadCount == assets.length){
 				var ui = require("./uiutil");
 				ui.loadSounds("cardClick", "buttonClick", "permPlay", "creaturePlay");
+				exports.r[0] = exports.nopic;
 				exports.r[-1] = exports.r[5];
 				exports.loaded = true;
 				postload();
@@ -68,7 +69,7 @@ function makeArt(card, art, oldrend) {
 	template.addChild(typemark);
 	var rarity = new PIXI.Sprite(exports.r[card.rarity]);
 	rarity.anchor.set(1, 1);
-	rarity.position.set(104, 252);
+	rarity.position.set(102, 252);
 	template.addChild(rarity);
 	if (art) {
 		var artspr = new PIXI.Sprite(art);
