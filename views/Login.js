@@ -87,7 +87,8 @@ module.exports = function(){
 		a.target = "_blank";
 		a.href = data.html_url;
 		a.appendChild(document.createTextNode(data.author.login + ": " + data.commit.message));
-		px.dom.add(div, [270, 460, a]);
+		a.style.maxWidth = "380px";
+		px.dom.add(div, [260, 460, a]);
 	});
 	xhr.open("GET", "https://api.github.com/repos/serprex/openEtG/commits?per_page=1", true);
 	xhr.send();
