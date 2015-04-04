@@ -16,7 +16,8 @@ var options = require("./options");
 var dom = exports.dom = require("./dom");
 var renderer = new PIXI.autoDetectRenderer(900, 600, {view:document.getElementById("leftpane"), transparent:true});
 var noStage = {}, curStage = noStage;
-var interman = new (require("./InteractionManager"))(noStage, renderer);
+var interman = require("./InteractionManager");
+interman.init(noStage, renderer);
 exports.mouse = interman.mouse;
 function animate() {
 	if (curStage.view){
@@ -59,7 +60,7 @@ exports.setClick = function(obj, click, sound) {
 		click.apply(this, arguments);
 	}
 }
-exports.hitTest = interman.hitTest.bind(interman);
+exports.hitTest = interman.hitTest;
 exports.setInteractive = function() {
 	for (var i = 0;i < arguments.length;i++) {
 		arguments[i].interactive = true;

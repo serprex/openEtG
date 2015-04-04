@@ -1,180 +1,144 @@
 // Modified/Simplified from PIXI's interaction manager
-function InteractionManager(stage, renderer)
+var over, down, DOMElement,
+	mouse = new PIXI.math.Point(), _tempPoint = new PIXI.math.Point();
+exports.init = function(stage, renderer)
 {
-	this.stage = stage;
-	this.over = null;
-	this.down = null;
-	this.mouse = new PIXI.math.Point();
-	this.interactionDOMElement = null;
-	this.onMouseMove = this.onMouseMove.bind(this);
-	this.onMouseDown = this.onMouseDown.bind(this);
-	this.onMouseOut = this.onMouseOut.bind(this);
-	this.onMouseUp = this.onMouseUp.bind(this);
-	this._tempPoint = new PIXI.math.Point();
-	if (renderer)
-	{
-		this.setTargetElement(renderer.view);
-	}
+	exports.stage = stage;
+	DOMElement = renderer.view;
+
+	DOMElement.addEventListener('mousemove', onMouseMove,  true);
+	DOMElement.addEventListener('mousedown', onMouseDown,  true);
+	DOMElement.addEventListener('mouseout',	 onMouseOut,   true);
+	window.addEventListener('mouseup', onMouseUp, true);
 }
 
-InteractionManager.prototype.constructor = InteractionManager;
-module.exports = InteractionManager;
+exports.uninit = function(){
+	if (!DOMElement)
+	{
+		return;
+	}
 
-InteractionManager.prototype.visitChildren = function (displayObject, visitFunc)
+	DOMElement.removeEventListener('mousemove', onMouseMove, true);
+	DOMElement.removeEventListener('mousedown', onMouseDown, true);
+	DOMElement.removeEventListener('mouseout',  onMouseOut,  true);
+	window.removeEventListener('mouseup',  onMouseUp, true);
+
+	exports.stage = DOMElement = null;
+}
+
+exports.hitTest = hitTest;
+exports.mouse = mouse;
+exports.stage = null;
+
+function visitChildren(displayObject, visitFunc)
 {
-	if (!displayObject.interactive || !this.hitTest(displayObject)) return;
+	if (!displayObject.interactive || !hitTest(displayObject)) return;
 	var children = displayObject.children;
 	for (var i = children.length - 1; i >= 0; i--)
 	{
-		var ret = this.visitChildren(children[i], visitFunc);
+		var ret = visitChildren(children[i], visitFunc);
 		if (ret)
 		{
 			return ret;
 		}
 	}
-	return visitFunc.call(this, displayObject);
+	return visitFunc(displayObject);
 };
 
-InteractionManager.prototype.setTargetElement = function (element)
+function onMouseMove(event)
 {
-	this.removeEvents();
-	this.interactionDOMElement = element;
-	this.addEvents();
-};
+	var rect = DOMElement.getBoundingClientRect();
+	mouse.set(
+		(event.clientX - rect.left) * (DOMElement.width / rect.width),
+		(event.clientY - rect.top) * (DOMElement.height / rect.height));
 
-InteractionManager.prototype.addEvents = function ()
-{
-	if (!this.interactionDOMElement)
-	{
-		return;
-	}
-
-	this.interactionDOMElement.addEventListener('mousemove', this.onMouseMove,  true);
-	this.interactionDOMElement.addEventListener('mousedown', this.onMouseDown,  true);
-	this.interactionDOMElement.addEventListener('mouseout',	 this.onMouseOut,   true);
-
-	window.addEventListener('mouseup', this.onMouseUp, true);
-};
-
-InteractionManager.prototype.removeEvents = function ()
-{
-	if (!this.interactionDOMElement)
-	{
-		return;
-	}
-
-	this.interactionDOMElement.removeEventListener('mousemove', this.onMouseMove, true);
-	this.interactionDOMElement.removeEventListener('mousedown', this.onMouseDown, true);
-	this.interactionDOMElement.removeEventListener('mouseout',  this.onMouseOut,  true);
-
-	this.interactionDOMElement = null;
-
-	window.removeEventListener('mouseup',  this.onMouseUp, true);
-};
-
-InteractionManager.prototype.onMouseMove = function (event)
-{
-	var rect = this.interactionDOMElement.getBoundingClientRect();
-	this.mouse.set(
-		(event.clientX - rect.left) * (this.interactionDOMElement.width / rect.width),
-		(event.clientY - rect.top) * (this.interactionDOMElement.height / rect.height));
-
-	var over = null;
-	this.visitChildren(this.stage, function(item){
+	var newOver = null;
+	visitChildren(exports.stage, function(item){
 		if (item.mousemove)
 		{
 			item.mousemove();
 		}
-		if (!over && (item.mouseover || item.mouseout))
+		if (!newOver && (item.mouseover || item.mouseout))
 		{
-			over = item;
+			newOver = item;
 		}
 	});
-	if (over !== this.over)
+	if (newOver !== over)
 	{
-		if (this.over && this.over.mouseout)
+		if (over && over.mouseout)
 		{
-			this.over.mouseout();
+			over.mouseout();
 		}
-		this.over = over;
-		if (this.over && this.over.mouseover)
+		over = newOver;
+		if (over && over.mouseover)
 		{
-			this.over.mouseover();
+			over.mouseover();
 		}
 	}
-};
+}
 
-InteractionManager.prototype.onMouseDown = function (event)
+function onMouseDown(event)
 {
-	var isRightButton = event.button === 2 || event.which === 3;
-	var downFunction = isRightButton ? 'rightdown' : 'mousedown';
-	var clickFunction = isRightButton ? 'rightclick' : 'click';
-	var upOutsideFunction = isRightButton ? 'rightupoutside' : 'mouseupoutside';
-
-	this.visitChildren(this.stage, function(item){
-		if (item[downFunction] || item[clickFunction] || item[upOutsideFunction])
+	if (event.which != 1) return;
+	visitChildren(exports.stage, function(item){
+		if (item.mousedown || item.click || item.mouseupoutside)
 		{
 			//call the function!
-			if (item[downFunction])
+			if (item.mousedown)
 			{
-				item[downFunction]();
+				item.mousedown();
 			}
-			this.down = item;
+			down = item;
 			return true;
 		}
 	});
-};
+}
 
-InteractionManager.prototype.onMouseOut = function (event)
+function onMouseOut(event)
 {
-	if (this.over)
+	if (over)
 	{
-		if (this.over.mouseout)
+		if (over.mouseout)
 		{
-			this.over.mouseout();
+			over.mouseout();
 		}
-		this.over = null;
+		over = null;
 	}
-};
+}
 
-InteractionManager.prototype.onMouseUp = function (event)
+function onMouseUp(event)
 {
-	var isRightButton = event.button === 2 || event.which === 3;
-
-	var upFunction = isRightButton ? 'rightup' : 'mouseup';
-	var clickFunction = isRightButton ? 'rightclick' : 'click';
-	var upOutsideFunction = isRightButton ? 'rightupoutside' : 'mouseupoutside';
-
-	var up = this.visitChildren(this.stage, function(item){
-		if (item[upFunction] || item[clickFunction] || item[upOutsideFunction])
+	if (event.which != 1) return;
+	var up = visitChildren(exports.stage, function(item){
+		if (item.mouseup || item.click || item.mouseupoutside)
 		{
-			if (item[upFunction])
+			if (item.mouseup)
 			{
-				item[upFunction]();
+				item.mouseup();
 			}
 			return item;
 		}
 	});
-	if (this.down)
+	if (down)
 	{
-		var ev = up === this.down ? clickFunction : upOutsideFunction;
-		if (this.down[ev])
+		var ev = up === down ? "click" : "mouseupoutside";
+		if (down[ev])
 		{
-			this.down[ev]();
+			down[ev]();
 		}
 	}
-	this.down = null;
-};
+	down = null;
+}
 
-InteractionManager.prototype.hitTest = function (item, xy)
+function hitTest(item, xy)
 {
 	if (!item.worldVisible) return false;
-	if (!xy) xy = this.mouse;
+	if (!xy) xy = mouse;
 
 	// map the global point to local space
-	item.worldTransform.applyInverse(xy,  this._tempPoint);
+	item.worldTransform.applyInverse(xy, _tempPoint);
 
-	var x = this._tempPoint.x, y = this._tempPoint.y;
+	var x = _tempPoint.x, y = _tempPoint.y;
 
 	//a sprite or display object with a hit area defined
 	if (item.hitArea && item.hitArea.contains)
@@ -198,6 +162,6 @@ InteractionManager.prototype.hitTest = function (item, xy)
 	}
 
 	return item.children.some(function(child){
-		return this.hitTest(child, xy);
-	}, this);
-};
+		return hitTest(child, xy);
+	});
+}
