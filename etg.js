@@ -307,19 +307,19 @@ Game.prototype.bitsToTgt = function(x) {
 	} else console.log("Unknown tgtop: " + tgtop + ", " + x);
 }
 Game.prototype.getTarget = function(src, active, cb) {
-	var targetingFilter = Cards.Targeting[active.activename[0]], game = this;
-	function realCb(){
-		cb();
-		game.targeting = null;
-	}
+	var targetingFilter = Cards.Targeting[active.activename[0]];
 	if (targetingFilter) {
+		var game = this;
 		this.targeting = {
 			filter: function(t) { return (t instanceof Player || t instanceof CardInstance || t.owner == this.turn || t.status.cloak || !t.owner.isCloaked()) && targetingFilter(src, t); },
-			cb: realCb,
+			cb: function(){
+				cb.apply(null, arguments);
+				game.targeting = null;
+			},
 			text: active.activename[0],
 			src: src,
 		}
-	} else realCb();
+	} else cb();
 }
 Player.prototype.shuffle = function(array) {
 	var counter = array.length, temp, index;
