@@ -14,7 +14,7 @@ module.exports = function(game) {
 			var active = c instanceof etg.CardInstance ? c.card.type == etg.SpellEnum && c.card.active : c.active.cast;
 			var cbits = game.tgtToBits(c) ^ 8;
 			function evalIter(t) {
-				if ((!game.targetingMode || (t && game.targetingMode(t))) && limit-- > 0) {
+				if ((!game.targeting || (t && game.targeting.filter(t))) && limit-- > 0) {
 					var tbits = game.tgtToBits(t) ^ 8;
 					var gameClone = game.clone();
 					gameClone.bitsToTgt(cbits).useactive(gameClone.bitsToTgt(tbits));
@@ -34,7 +34,7 @@ module.exports = function(game) {
 				if (c.owner.shield && c.owner.shield.status.reflect) evalIter(c.owner);
 				evalIter(c.owner.foe);
 				c.owner.creatures.forEach(function(cr){ if (cr && cr.status.voodoo) evalIter(cr) });
-				delete game.targetingMode;
+				game.targeting = null;
 			}else{
 				evalIter();
 			}

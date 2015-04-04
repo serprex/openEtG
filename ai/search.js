@@ -85,7 +85,7 @@ module.exports = function(game, previous) {
 					if (th in tgthash) return;
 					else tgthash[th] = true;
 				}
-				if ((!game.targetingMode || (t && game.targetingMode(t) && searchActive(active, c, t))) && (n || --limit > 0)) {
+				if ((!game.targeting || (t && game.targeting.filter(t) && searchActive(active, c, t))) && (n || --limit > 0)) {
 					var tbits = game.tgtToBits(t) ^ 8;
 					var gameClone = game.clone();
 					gameClone.bitsToTgt(cbits).useactive(gameClone.bitsToTgt(tbits));
@@ -121,7 +121,7 @@ module.exports = function(game, previous) {
 					pl.permanents.forEach(evalIter);
 					pl.hand.forEach(evalIter);
 				}
-				delete game.targetingMode;
+				game.targeting = null;
 				if (loglist) console.log(currentEval, preEval, c.toString(), active.activename[0], loglist);
 			}else{
 				evalIter();

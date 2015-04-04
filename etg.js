@@ -9,12 +9,13 @@ var skillText = require("./skillText");
 function Game(seed, flip){
 	this.rng = new MersenneTwister(seed);
 	this.phase = MulliganPhase1;
-	this.ply = 0;
 	this.player1 = new Player(this);
 	this.player2 = new Player(this);
 	this.player1.foe = this.player2;
 	this.player2.foe = this.player1;
 	this.turn = (seed < etgutil.MAX_INT/2) === !flip ? this.player1 : this.player2;
+	this.ply = 0;
+	this.targeting = null;
 	this.expectedDamage = new Int32Array(2);
 	this.time = Date.now();
 }
@@ -29,9 +30,7 @@ var DefaultStatus = {
 	storedAtk:0,
 	storedpower:0,
 };
-var statuscache = {};
-var activecache = {};
-var activecastcache = {};
+var statuscache = {}, activecache = {}, activecastcache = {};
 function parseActive(name){
 	if (name in Actives){
 		return Actives[name];
@@ -213,6 +212,8 @@ Game.prototype.clone = function(){
 	obj.player1.foe = obj.player2;
 	obj.player2.foe = obj.player1;
 	obj.turn = this.turn == this.player1 ? obj.player1 : obj.player2;
+	obj.ply = this.ply;
+	obj.targeting = this.targeting;
 	return obj;
 }
 Game.prototype.players = function(n){
@@ -306,13 +307,19 @@ Game.prototype.bitsToTgt = function(x) {
 	} else console.log("Unknown tgtop: " + tgtop + ", " + x);
 }
 Game.prototype.getTarget = function(src, active, cb) {
-	var targetingFilter = Cards.Targeting[active.activename[0]];
+	var targetingFilter = Cards.Targeting[active.activename[0]], game = this;
+	function realCb(){
+		cb();
+		game.targeting = null;
+	}
 	if (targetingFilter) {
-		this.targetingMode = function(t) { return (t instanceof Player || t instanceof CardInstance || t.owner == this.turn || t.status.cloak || !t.owner.isCloaked()) && targetingFilter(src, t); }
-		this.targetingModeCb = cb;
-		this.targetingText = active.activename[0];
-		this.targetingCard = src;
-	} else cb();
+		this.targeting = {
+			filter: function(t) { return (t instanceof Player || t instanceof CardInstance || t.owner == this.turn || t.status.cloak || !t.owner.isCloaked()) && targetingFilter(src, t); },
+			cb: realCb,
+			text: active.activename[0],
+			src: src,
+		}
+	} else realCb();
 }
 Player.prototype.shuffle = function(array) {
 	var counter = array.length, temp, index;
