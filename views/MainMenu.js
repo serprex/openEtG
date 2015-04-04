@@ -52,7 +52,7 @@ var tipjar = [
 ];
 var bg_main = new Image();
 bg_main.src = "assets/bg_main.png";
-bg_main.style.zIndex = "-1";
+bg_main.className = "bgimg";
 module.exports = function(nymph) {
 	var popdom, stage = {endnext: function(){
 		setPopup(null);
@@ -70,7 +70,7 @@ module.exports = function(nymph) {
 	var tipNumber = etg.PlayerRng.upto(tipjar.length);
 
 	function resetTip(event) {
-		if (event.target.tagName == "CANVAS" || event.target.tagName == "HTML") tinfo.text = sock.user ? tipjar[tipNumber] + "." : "To register, just type desired username & password in the fields to the right, then click 'Login'.";
+		if (event.target.tagName.match(/^(DIV|CANVAS|HTML)$/)) tinfo.text = sock.user ? tipjar[tipNumber] + "." : "To register, just type desired username & password in the fields to the right, then click 'Login'.";
 	}
 	var tinfo = px.dom.text(""), tstats = px.dom.text(sock.user ? sock.user.gold + "$ " + sock.user.name + "\nPvE " + sock.user.aiwins + " - " + sock.user.ailosses + "\nPvP " + sock.user.pvpwins + " - " + sock.user.pvplosses : "Sandbox");
 	function wealthTop(){

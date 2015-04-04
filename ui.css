@@ -43,6 +43,13 @@ input[type="text"],input[type="password"],input:not([type]){width:150px}
 .beigeback{background-color:#a99683;color:black}
 .selectedbutton{background:linear-gradient(to bottom,#424748,#8999ff)!important}
 .editbtn{width:32px!important;margin-left:4px}
+.bgimg{
+	-moz-user-select:none;
+	-webkit-user-select:none;
+	-ms-user-select:none;
+	pointer-events:none;
+	z-index:-1;
+}
 .bgbox{
 	background-color:#0d2e4a;
 	border-style:solid;
