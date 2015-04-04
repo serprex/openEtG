@@ -97,6 +97,7 @@ function startMatch(game, foeDeck) {
 				if (!game.ai) sock.emit("endturn", {bits: discard});
 				game.player1.endturn(discard);
 				delete game.targetingMode;
+				delete game.targetingCard;
 				if (foeplays.children.length)
 					foeplays.removeChildren();
 			}
@@ -112,6 +113,7 @@ function startMatch(game, foeDeck) {
 				if (!game.ai) sock.emit("mulligan");
 			} else if (game.targetingMode) {
 				delete game.targetingMode;
+				delete game.targetingCard;
 			} else discarding = false;
 		}
 	}
@@ -177,13 +179,13 @@ function startMatch(game, foeDeck) {
 		[0, 64, foename]);
 	var activeInfo = {
 		firebolt:function(){
-			return 3+Math.floor(game.player1.quanta[etg.Fire]/4);
+			return 3+Math.floor((game.player1.quanta[etg.Fire]-game.targetingCard.card.cost)/4);
 		},
 		drainlife:function(){
-			return 2+Math.floor(game.player1.quanta[etg.Darkness]/5);
+			return 2+Math.floor((game.player1.quanta[etg.Darkness]-game.targetingCard.card.cost)/5);
 		},
 		icebolt:function(){
-			var bolts = Math.floor(game.player1.quanta[etg.Water]/5);
+			var bolts = Math.floor((game.player1.quanta[etg.Water]-game.targetingCard.card.cost)/5);
 			return (2+bolts) + " " + (35+bolts*5) + "%";
 		},
 		catapult:function(t){
@@ -245,6 +247,7 @@ function startMatch(game, foeDeck) {
 							} else if (game.targetingMode) {
 								if (game.targetingMode(cardinst)) {
 									delete game.targetingMode;
+									delete game.targetingCard;
 									game.targetingModeCb(cardinst);
 								}
 							} else if (!_j && cardinst.canactive()) {
@@ -299,10 +302,12 @@ function startMatch(game, foeDeck) {
 					if (!inst) return;
 					if (game.targetingMode && game.targetingMode(inst)) {
 						delete game.targetingMode;
+						delete game.targetingCard;
 						game.targetingModeCb(inst);
 					} else if (_j == 0 && !game.targetingMode && inst.canactive()) {
 						game.getTarget(inst, inst.active.cast, function(tgt) {
 							delete game.targetingMode;
+							delete game.targetingCard;
 							if (!game.ai) sock.emit("cast", {bits: game.tgtToBits(inst) | game.tgtToBits(tgt) << 9});
 							inst.useactive(tgt);
 						});
@@ -363,6 +368,7 @@ function startMatch(game, foeDeck) {
 				if (game.phase != etg.PlayPhase) return;
 				if (game.targetingMode && game.targetingMode(game.players(_j))) {
 					delete game.targetingMode;
+					delete game.targetingCard;
 					game.targetingModeCb(game.players(_j));
 				}
 			}, false);

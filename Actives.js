@@ -587,7 +587,7 @@ forceplay:function(c,t){
 },
 fractal:function(c,t){
 	Effect.mkText("Fractal", t);
-	for(var i=6+Math.floor((c.owner.quanta[etg.Aether]-c.card.cost)/2); i>0; i--){
+	for(var i=6+Math.floor((c.owner.quanta[etg.Aether])/2); i>0; i--){
 		new etg.CardInstance(t.card, c.owner).place();
 	}
 	c.owner.quanta[etg.Aether] = 0;

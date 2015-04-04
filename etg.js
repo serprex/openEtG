@@ -311,6 +311,7 @@ Game.prototype.getTarget = function(src, active, cb) {
 		this.targetingMode = function(t) { return (t instanceof Player || t instanceof CardInstance || t.owner == this.turn || t.status.cloak || !t.owner.isCloaked()) && targetingFilter(src, t); }
 		this.targetingModeCb = cb;
 		this.targetingText = active.activename[0];
+		this.targetingCard = src;
 	} else cb();
 }
 Player.prototype.shuffle = function(array) {
@@ -1182,6 +1183,7 @@ CardInstance.prototype.useactive = function(target){
 	if (owner.neuro){
 		owner.addpoison(1);
 	}
+	owner.spend(card.costele, card.cost);
 	if (card.type <= PermanentEnum){
 		var cons = [Permanent, Weapon, Shield, Permanent][card.type];
 		new cons(card, owner).place(true);
@@ -1192,7 +1194,6 @@ CardInstance.prototype.useactive = function(target){
 		new Creature(card, owner).place(true);
 		ui.playSound("creaturePlay");
 	} else console.log("Unknown card type: " + card.type);
-	owner.spend(card.costele, card.cost);
 	this.procactive("cardplay");
 	owner.game.updateExpectedDamage();
 }
