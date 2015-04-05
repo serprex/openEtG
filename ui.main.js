@@ -143,7 +143,21 @@ function maybeSendChat(e) {
 		e.preventDefault();
 		var chatinput = document.getElementById("chatinput"), msg = chatinput.value.trim();
 		chatinput.value = "";
-		if (msg == "/clear"){
+		if (msg == "/help"){
+			var cmds = {
+				clear: "Clear chat",
+				who: "List users who're online",
+				roll: "Server rolls XdY publicly",
+				decks: "List all decks",
+				mod: "List mods",
+				mute: "If no user specified, mute chat entirely",
+				unmute: "If no user specified, unmute chat entirely",
+				w: "Whisper",
+			};
+			for (var cmd in cmds){
+				chat(cmd + " " + cmds[cmd]);
+			}
+		}else if (msg == "/clear"){
 			chat.clear();
 		}else if (msg == "/who"){
 			sock.emit("who");
