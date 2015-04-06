@@ -23,7 +23,7 @@ module.exports = function(reward, numberofcopies, code) {
 		return;
 	}
 	var rewardui = px.mkView(),
-		dom = px.dom.div([10, 40, ["Done", function() {
+		div = px.dom.div([10, 40, ["Done", function() {
 			if (chosenReward) {
 				if (code === undefined) {
 					sock.userExec("addbound", { c: etgutil.encodeCount(numberofcopies) + chosenReward });
@@ -52,8 +52,8 @@ module.exports = function(reward, numberofcopies, code) {
 			chosenReward = reward;
 			chosenRewardImage.texture = gfx.getArt(chosenReward);
 		}, "cardClick");
+		card.interactive = true;
 		rewardui.addChild(card);
-		px.setInteractive(card);
 	});
 
 	var cmds = {
@@ -64,5 +64,5 @@ module.exports = function(reward, numberofcopies, code) {
 		},
 	}
 
-	px.view({view:rewardui, dom:dom, cmds:cmds});
+	px.view({view:rewardui, dom:div, cmds:cmds});
 }
