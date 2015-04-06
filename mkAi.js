@@ -44,7 +44,7 @@ exports.mkAi = function(level, daily) {
 	return function() {
 		if (Cards.loaded){
 			var urdeck = sock.getDeck();
-			if (etgutil.decklength(urdeck) < (sock.user ? 31 : 11)) {
+			if (etgutil.decklength(urdeck) < (sock.user ? 31 : 9)) {
 				require("./views/Editor")();
 				return;
 			}

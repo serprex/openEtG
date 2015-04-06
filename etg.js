@@ -112,6 +112,9 @@ function Card(type, info){
 function Thing(card, owner){
 	this.owner = owner;
 	this.card = card;
+	this.cast = card.cast;
+	this.castele = card.castele;
+	this.usedactive = true;
 	if (this.status){
 		for (var key in this.status){
 			if (key in passives) delete this.status[key];
@@ -130,41 +133,38 @@ function Player(game){
 	this.shield = undefined;
 	this.weapon = undefined;
 	this.status = Object.create(DefaultStatus);
+	this.creatures = new Array(23);
+	this.permanents = new Array(16);
+	this.gpull = undefined;
+	this.hand = [];
+	this.deck = [];
+	this.quanta = new Int8Array(13);
 	this.neuro = false;
 	this.sosa = 0;
 	this.silence = false;
 	this.sanctuary = false;
 	this.precognition = false;
-	this.gpull = undefined;
 	this.nova = 0;
 	this.maxhp = this.hp = 100;
 	this.deckpower = 1;
 	this.drawpower = 1;
-	this.hand = [];
-	this.deck = [];
-	this.creatures = new Array(23);
-	this.permanents = new Array(16);
 	this.mark = 0;
-	this.quanta = new Int8Array(13);
 	this.shardgolem = undefined;
 }
 function Creature(card, owner){
-	this.usedactive = true;
 	if (card.isOf(Cards.ShardGolem)){
-		this.card = card;
 		this.owner = owner;
+		this.card = card;
 		var golem = owner.shardgolem || { stat: 1, cast: 0 };
-		this.atk = this.maxhp = this.hp = golem.stat;
 		this.cast = golem.cast;
 		this.castele = Earth;
-		this.active = clone(golem.active);
+		this.usedactive = true;
 		this.status = cloneStatus(golem.status);
+		this.active = clone(golem.active);
+		this.atk = this.maxhp = this.hp = golem.stat;
 	}else this.transform(card, owner);
 }
 function Permanent(card, owner){
-	this.usedactive = true;
-	this.cast = card.cast;
-	this.castele = card.castele;
 	Thing.apply(this, arguments);
 }
 function Weapon(card, owner){
@@ -380,15 +380,16 @@ function isEmpty(obj){
 	}
 	return true;
 }
-
 Player.prototype.clone = function(game){
 	var obj = Object.create(Player.prototype);
 	function maybeClone(x){
 		return x && x.clone(obj);
 	}
-	obj.status = cloneStatus(this.status);
+	obj.game = game;
+	obj.owner = obj;
 	obj.shield = maybeClone(this.shield);
 	obj.weapon = maybeClone(this.weapon);
+	obj.status = cloneStatus(this.status);
 	obj.creatures = this.creatures.map(maybeClone);
 	obj.permanents = this.permanents.map(maybeClone);
 	if (this.gpull){
@@ -397,8 +398,6 @@ Player.prototype.clone = function(game){
 	obj.hand = this.hand.map(maybeClone);
 	obj.deck = this.deck.slice();
 	obj.quanta = new Int8Array(this.quanta);
-	obj.game = game;
-	obj.owner = obj;
 	for(var attr in this){
 		if (!(attr in obj) && this.hasOwnProperty(attr)){
 			obj[attr] = this[attr];
@@ -413,9 +412,9 @@ CardInstance.prototype.clone = function(owner){
 	var proto = type.prototype;
 	proto.clone = function(owner){
 		var obj = Object.create(proto);
-		obj.active = clone(this.active);
-		obj.status = cloneStatus(this.status);
 		obj.owner = owner;
+		obj.status = cloneStatus(this.status);
+		obj.active = clone(this.active);
 		for(var attr in this){
 			if (!(attr in obj) && this.hasOwnProperty(attr)){
 				obj[attr] = this[attr];
@@ -933,11 +932,9 @@ Creature.prototype.die = function() {
 	}
 }
 Creature.prototype.transform = Weapon.prototype.transform = function(card, owner){
+	Thing.call(this, card, owner || this.owner);
 	this.maxhp = this.hp = card.health;
 	this.atk = card.attack;
-	this.cast = card.cast;
-	this.castele = card.castele;
-	Thing.call(this, card, owner || this.owner);
 	if (this.status.mutant){
 		var buff = this.owner.upto(25);
 		this.buffhp(Math.floor(buff/5));

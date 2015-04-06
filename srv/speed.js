@@ -8,20 +8,23 @@ function speed(req, res, next){
 		res.end();
 		return;
 	}
-	var hash = 0, str = req.url.slice(1);
-	for (var i=0; i<str.length; i++){
-		hash = hash*31 + str.charCodeAt(i) & 0x7FFFFFFF;
+	var hash = 0;
+	for (var i=1; i<req.url.length; i++){
+		hash = hash*31 + req.url.charCodeAt(i) & 0x7FFFFFFF;
 	}
 	var prng = Object.create(etg.Player.prototype);
 	prng.game = {rng: new mt(hash)};
-	var eles = {}, cards = [];
-	for(var i=0; i<6; i++){
-		var ele;
-		do ele = prng.uptoceil(12); while (eles[ele]);
-		eles[ele] = true;
+	var eles = new Uint8Array(12), cards = new Array(42);
+	for (var i=0; i<12; i++){
+		eles[i] = i+1;
+	}
+	for (var i=0; i<6; i++){
+		// Select a random set of unique elements through partial shuffling
+		var ei = i+prng.upto(12-i);
+		var ele = eles[ei];
+		eles[ei] = eles[i];
 		for(var j=0; j<7; j++){
-			var card = prng.randomcard(false, function(x){return x.element == ele && x.type && cards.indexOf(x.code) == -1});
-			cards.push(card.code);
+			cards[i*7+j] = prng.randomcard(false, function(x){return x.element == ele && x.type && cards.indexOf(x.code) == -1}).code;
 		}
 	}
 	require("./deckredirect")()({url: "/" + "01"+cards.join("01")}, res);
