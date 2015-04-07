@@ -144,7 +144,7 @@ module.exports = function() {
 			}
 			if (etgutil.decklength(data.cards) < 11){
 				bget.style.display = "";
-				if (popbooster.children.length) popbooster.removeChildren();
+				popbooster.removeChildren();
 				etgutil.iterdeck(data.cards, function(code, i){
 					var x = i % 5, y = Math.floor(i/5);
 					var cardArt = new PIXI.Sprite(gfx.getArt(code));

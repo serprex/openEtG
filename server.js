@@ -98,7 +98,7 @@ function modf(func){
 		});
 	}
 }
-var echoEvents = { endturn: true, cast: true, foeleft: true, mulligan: true, cardchosen: true };
+var echoEvents = new Set(["endturn", "cast", "foeleft", "mulligan", "cardchosen"]);
 var guestban = false;
 var userEvents = {
 	modadd:modf(function(data, user){
@@ -332,12 +332,28 @@ var userEvents = {
 					}
 					sockEmit(socket, "pvpgive", owndata);
 					sockEmit(foesock, "pvpgive", foedata);
+					if (foesock.meta.spectators){
+						foesock.meta.spectators.forEach(function(uname){
+							var sock = usersock[uname];
+							if (sock && sock.readyState == 1){
+								sockEmit(sock, "spectategive", foedata);
+							}
+						});
+					}
 				} else {
 					socket.meta.duel = f;
 					sockEmit(foesock, "challenge", { f:u, pvp:true });
 				}
 			}
 		});
+	},
+	spectate:function(data, user){
+		var tgt = usersock[data.f];
+		if (tgt && tgt.meta.duel){
+			sockEmit(tgt, "chat", { mode: "red", msg: data.u + " is spectating." });
+			if (!tgt.meta.spectators) tgt.meta.spectators = [];
+			tgt.meta.spectators.push(data.u);
+		}
 	},
 	canceltrade:function (data) {
 		var info = this.meta;
@@ -514,6 +530,7 @@ var userEvents = {
 				if (foesock.meta.duel == data.u) delete foesock.meta.duel;
 			}
 			delete info.duel;
+			delete info.spectators;
 		}
 	}
 };
@@ -555,8 +572,8 @@ var sockEvents = {
 			this.meta.foe = pendinggame;
 			pendinggame.meta.foe = this;
 			var deck0 = pendinggame.meta.deck, deck1 = data.deck;
-			var owndata = { seed: seed, deck: deck0, urdeck: deck1};
-			var foedata = { flip: true, seed: seed, deck: deck1, urdeck: deck0};
+			var owndata = { seed: seed, deck: deck0, urdeck: deck1 };
+			var foedata = { flip: true, seed: seed, deck: deck1, urdeck: deck0 };
 			var stat = this.meta.pvpstats, foestat = pendinggame.meta.pvpstats;
 			for (var key in stat) {
 				owndata["p1" + key] = stat[key];
@@ -669,10 +686,23 @@ wss.on("connection", function(socket) {
 		var data = sutil.parseJSON(rawdata);
 		if (!data) return;
 		console.log(data.u, data.x);
-		if (data.x in echoEvents){
+		if (echoEvents.has(data.x)){
 			var foe = this.meta.trade ? usersock[this.meta.trade.foe] : this.meta.foe;
 			if (foe && foe.readyState == 1){
 				foe.send(rawdata);
+				for(var i=1; i<=2; i++){
+					var spectators = (i==1?this:foe).meta.spectators;
+					if (spectators){
+						data.spectate = i;
+						var rawmsg = JSON.stringify(data);
+						spectators.forEach(function(uname){
+							var sock = usersock[uname];
+							if (sock && sock.readyState == 1){
+								sock.send(rawmsg);
+							}
+						});
+					}
+				}
 			}
 			return;
 		}

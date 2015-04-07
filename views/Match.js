@@ -406,10 +406,11 @@ function startMatch(game, foeDeck) {
 	}
 	var cmds = {
 		endturn: function(data) {
-			game.player2.endturn(data.bits);
+			(data.spectate == 1 ? game.player1 : game.player2).endturn(data.bits);
+			if (data.spectate) foeplays.removeChildren();
 		},
 		cast: function(data) {
-			var bits = data.bits, c = game.bitsToTgt(bits & 511), t = game.bitsToTgt((bits >> 9) & 511);
+			var bits = data.spectate == 1 ? data.bits^4104 : data.bits, c = game.bitsToTgt(bits & 511), t = game.bitsToTgt((bits >> 9) & 511);
 			console.log("cast", c.toString(), (t || "-").toString(), bits);
 			var sprite = new PIXI.Sprite(gfx.nopic);
 			sprite.position.set((foeplays.children.length&7) * 99, (foeplays.children.length>>3) * 19);
@@ -418,13 +419,14 @@ function startMatch(game, foeDeck) {
 			c.useactive(t);
 		},
 		foeleft: function(){
-			if (!game.ai) game.setWinner(game.player1);
+			if (!game.ai) game.setWinner(data.spectate == 1 ? game.player2 : game.player1);
 		},
 		mulligan: function(data){
 			if (data.draw === true) {
 				game.progressMulligan();
 			} else {
-				game.player2.drawhand(game.player2.hand.length - 1);
+				var pl = data.spectate == 1 ? game.player1 : game.player2;
+				pl.drawhand(pl.hand.length - 1);
 			}
 		},
 	};

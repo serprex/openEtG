@@ -98,10 +98,24 @@ var sockEvents = {
 		sock.user.gold -= game.cost;
 	},
 	tradegive:function(data){
-		if (sock.trade) require("./views/Trade")();
+		if (sock.trade){
+			delete sock.trade;
+			require("./views/Trade")();
+		}
 	},
 	pvpgive:function(data){
-		if (sock.pvp) require("./views/Match")(data);
+		if (sock.pvp){
+			delete sock.pvp;
+			require("./views/Match")(data);
+		}
+	},
+	spectategive:function(data){
+		if (sock.spectate){
+			delete sock.spectate;
+			if (require("./views/Match")(data)){
+				require("./InteractionManager").stage = {};
+			}
+		}
 	},
 	challenge:function(data) {
 		var span = document.createElement("span");

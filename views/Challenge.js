@@ -67,6 +67,7 @@ module.exports = function(pvp) {
 			else sock.emit("roomcancel", { room: sock.pvp });
 			delete sock.pvp;
 		}
+		delete sock.spectate;
 	}
 	function labelText(text) {
 		var text = px.dom.text(text);
@@ -81,15 +82,19 @@ module.exports = function(pvp) {
 		pvpdraw = px.dom.input("Draw", "pvpdraw", true),
 		pvpdeck = px.dom.input("Deck", "pvpdeck", true),
 		pvpButton = px.dom.button("PvP", function() { makeChallenge(options.foename) }),
+		spectateButton = px.dom.button("Spectate", function() {
+			sock.spectate = foename.value;
+			sock.userEmit("spectate", {f: sock.spectate});
+		}),
 		cancelButton = px.dom.button("Cancel", cancelClick);
 	cancelButton.style.visibility = "hidden";
-	var pvpInputs = [pvpButton,foename, pvphp, pvpmark, pvpdraw, pvpdeck];
+	var pvpInputs = [pvpButton,foename, pvphp, pvpmark, pvpdraw, pvpdeck, spectateButton];
 	var aideck = px.dom.input("AI Deck", "aideck", true, maybeCustomAi),
 		aihp = px.dom.input("HP", "aihp", true),
 		aimark = px.dom.input("Mark", "aimark", true),
 		aidraw = px.dom.input("Draw", "aidraw", true),
-		aideckpower = px.dom.input("Deck", "aideckpower", true);
-	var challengeLabel = px.dom.text("");
+		aideckpower = px.dom.input("Deck", "aideckpower", true),
+		challengeLabel = px.dom.text("");
 	aideck.addEventListener("click", function() { this.setSelectionRange(0, 999) });
 	var div = px.dom.div(
 		[190, 300, ["Exit", exitClick]],
@@ -97,11 +102,11 @@ module.exports = function(pvp) {
 		[190, 425, pvphp],
 		[190, 450, pvpmark],
 		[190, 475, pvpdraw],
-		[190, 500, pvpdeck]
-	);
+		[190, 500, pvpdeck]);
 	if (pvp){
 		px.dom.add(div,
 			[110, 375, pvpButton],
+			[110, 450, spectateButton],
 			[110, 400, cancelButton],
 			[190, 375, foename],
 			[190, 375, challengeLabel]);
