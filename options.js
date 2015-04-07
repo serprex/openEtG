@@ -1,7 +1,9 @@
 "use strict";
 if (typeof localStorage !== "undefined"){
+	delete localStorage["debug"];
+	delete localStorage["afk"];
 	for(var key in localStorage){
-		if (localStorage.hasOwnProperty(key) && key != "debug") exports[key] = localStorage[key];
+		if (localStorage.hasOwnProperty(key)) exports[key] = localStorage[key];
 	}
 }
 exports.register = function(opt, ele, nopersist){

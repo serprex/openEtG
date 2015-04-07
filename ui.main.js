@@ -265,7 +265,7 @@ function wantpvpChange(){
 }
 options.register("wantpvp", document.getElementById("wantpvp"));
 options.register("offline", document.getElementById("offline"));
-options.register("afk", document.getElementById("afk"));
+options.register("afk", document.getElementById("afk"), true);
 (function(callbacks){
 	for(var id in callbacks){
 		for(var event in callbacks[id]){
