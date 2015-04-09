@@ -54,7 +54,7 @@ module.exports = function(data) {
 		for(var i=0; i<2; i++){
 			(function(uocard){
 				px.dom.add(div, [734, 268+i*292, ["Create", function(){
-					require("./Editor")(data, data[uocard.upped?"B":"A"], uocard, true);
+					require("./Editor")(data, data[uocard.upped?"B":"A"] || {}, uocard, true);
 				}]]);
 				var ocard = new PIXI.Sprite(gfx.getArt(uocard));
 				ocard.position.set(734, 8+i*292);

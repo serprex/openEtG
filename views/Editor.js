@@ -13,7 +13,7 @@ module.exports = function(arena, ainfo, acard, startempty) {
 	if (!Cards.loaded) return;
 	var aupped;
 	if (arena){
-		if (!sock.user || ainfo.deck === undefined || acard === undefined) arena = false;
+		if (!sock.user || (!startempty && ainfo.deck === undefined) || acard === undefined) arena = false;
 		else aupped = Cards.Codes[acard].upped;
 	}
 	function updateField(renderdeck){
