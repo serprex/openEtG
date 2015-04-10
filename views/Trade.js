@@ -6,7 +6,10 @@ var chat = require("../chat");
 var Cards = require("../Cards");
 var etgutil = require("../etgutil");
 var userutil = require("../userutil");
-var startMenu = require("./MainMenu");
+function startMenu(){
+	// Avoids early recursive requires & blanks arguments
+	require("./MainMenu")();
+}
 module.exports = function() {
 	var view = px.mkView(), cardminus = {}, stage = {view: view};
 	var btrade = px.dom.button("Trade", function() {
