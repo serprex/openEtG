@@ -9,7 +9,7 @@ var Cards = require("../Cards");
 var Effect = require("../Effect");
 var Actives = require("../Actives");
 var etgutil = require("../etgutil");
-function startMatch(game, foeDeck) {
+function startMatch(game, foeDeck, spectate) {
 	if (sock.trade){
 		sock.userEmit("canceltrade");
 		delete sock.trade;
@@ -135,8 +135,10 @@ function startMatch(game, foeDeck) {
 		754, 301, 590,
 		796, 12, 301,
 	], gameui = new PIXI.Graphics();
-	gameui.hitArea = new PIXI.math.Rectangle(0, 0, 900, 600);
-	gameui.interactive = true;
+	if (!spectate) {
+		gameui.hitArea = new PIXI.math.Rectangle(0, 0, 900, 600);
+		gameui.interactive = true;
+	}
 	for(var j=0; j<4; j++){
 		gameui.lineStyle(1, [0x121212, 0x6a2e0d, 0x8a3e1d][j]);
 		for (var i=0; i<redhor.length; i+=3){
@@ -169,11 +171,12 @@ function startMatch(game, foeDeck) {
 	var foename = px.dom.text((game.level === undefined ? "" : ["Commoner", "Mage", "Champion", "Demigod", "Arena1", "Arena2"][game.level] + "\n") + (game.foename || "-"));
 	foename.style.textAlign = "center";
 	foename.style.width = "140px";
-	var div = px.dom.div([800, 520, endturn],
-		[800, 490, cancel],
-		[8, 24, resign],
+	var div = px.dom.div([8, 24, resign],
 		[800, 550, turntell],
 		[0, 64, foename]);
+	if (!spectate) {
+		px.dom.add([800, 520, endturn], [800, 490, cancel]);
+	}
 	var activeInfo = {
 		firebolt:function(){
 			return 3+Math.floor((game.player1.quanta[etg.Fire]-game.targeting.src.card.cost)/4);
@@ -430,8 +433,10 @@ function startMatch(game, foeDeck) {
 			}
 		},
 	};
-	document.addEventListener("mousemove", onmousemove);
-	document.addEventListener("keydown", onkeydown);
+	if (!spectate){
+		document.addEventListener("mousemove", onmousemove);
+		document.addEventListener("keydown", onkeydown);
+	}
 	function gameStep(){
 		if (game.turn == game.player2 && game.ai) {
 			if (game.phase == etg.PlayPhase){
@@ -710,7 +715,7 @@ function deckPower(deck, amount) {
 		return res;
 	}else return deck;
 }
-module.exports = function(data, ai) {
+module.exports = function(data, ai, spectate) {
 	var game = new etg.Game(data.seed, data.flip);
 	game.addData(data);
 	game.player1.maxhp = game.player1.hp;
@@ -741,6 +746,6 @@ module.exports = function(data, ai) {
 	game.turn.foe.drawhand(7);
 	if (data.foename) game.foename = data.foename;
 	if (ai) game.ai = true;
-	startMatch(game, foeDeck);
+	startMatch(game, foeDeck, spectate);
 	return game;
 }

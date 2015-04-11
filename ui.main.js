@@ -112,9 +112,7 @@ var sockEvents = {
 	spectategive:function(data){
 		if (sock.spectate){
 			delete sock.spectate;
-			if (require("./views/Match")(data)){
-				require("./InteractionManager").stage = {};
-			}
+			require("./views/Match")(data, false, true);
 		}
 	},
 	challenge:function(data) {
