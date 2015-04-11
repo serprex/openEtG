@@ -4,6 +4,8 @@ var gfx = require("../gfx");
 var Cards = require("../Cards");
 var etgutil = require("../etgutil");
 var userutil = require("../userutil");
+var CardSelector = require("../CardSelector");
+
 module.exports = function(data){
 	var view = px.mkView(), showbound = false,
 		cardpool = etgutil.deck2pool(data.pool), boundpool = etgutil.deck2pool(data.bound),
@@ -31,7 +33,7 @@ module.exports = function(data){
 		}]],
 		[10, 10, ["Exit", require("./MainMenu")]]),
 	};
-	var cardsel = new px.CardSelector(stage, function(code){
+	var cardsel = new CardSelector(stage, function(code){
 		cardArt.texture = gfx.getArt(code);
 	}, null, null, true);
 	cardsel.cardpool = cardpool;

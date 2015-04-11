@@ -6,6 +6,9 @@ var chat = require("../chat");
 var Cards = require("../Cards");
 var etgutil = require("../etgutil");
 var userutil = require("../userutil");
+var DeckDisplay = require("../DeckDisplay");
+var CardSelector = require("../CardSelector");
+
 function startMenu(){
 	// Avoids early recursive requires & blanks arguments
 	require("./MainMenu")();
@@ -40,14 +43,14 @@ module.exports = function() {
 		cardArt.texture = gfx.getArt(code);
 		cardArt.visible = true;
 	}
-	var ownDeck = new px.DeckDisplay(30, setCardArt,
+	var ownDeck = new DeckDisplay(30, setCardArt,
 		function(i) {
 			px.adjust(cardminus, ownDeck.deck[i], -1);
 			ownDeck.rmCard(i);
 			ownVal.text = userutil.calcWealth(cardminus);
 		}
 	);
-	var foeDeck = new px.DeckDisplay(30, setCardArt);
+	var foeDeck = new DeckDisplay(30, setCardArt);
 	foeDeck.position.x = 450;
 	view.addChild(ownDeck);
 	view.addChild(foeDeck);
@@ -59,7 +62,7 @@ module.exports = function() {
 		[10, 40, btrade], [10, 60, tconfirm]);
 
 	var cardpool = etgutil.deck2pool(sock.user.pool);
-	var cardsel = new px.CardSelector(stage, setCardArt,
+	var cardsel = new CardSelector(stage, setCardArt,
 		function(code){
 			var card = Cards.Codes[code];
 			if (ownDeck.deck.length < 30 && !card.isFree() && code in cardpool && !(code in cardminus && cardminus[code] >= cardpool[code])) {

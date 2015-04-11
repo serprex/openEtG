@@ -5,6 +5,8 @@ var sock = require("../sock");
 var Cards = require("../Cards");
 var etgutil = require("../etgutil");
 var userutil = require("../userutil");
+var CardSelector = require("../CardSelector");
+
 module.exports = function() {
 	function upgradeCard(card) {
 		if (!card.isFree()) {
@@ -118,7 +120,7 @@ module.exports = function() {
 	selectedCardArt.position.set(534, 8);
 	upgradeui.addChild(selectedCardArt);
 
-	var cardsel = new px.CardSelector(stage, null,
+	var cardsel = new CardSelector(stage, null,
 		function(code){
 			var card = Cards.Codes[code];
 			selectedCardArt.texture = gfx.getArt(code);

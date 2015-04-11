@@ -154,7 +154,7 @@ function startMatch(game, foeDeck, spectate) {
 	cloakgfx.beginFill(0);
 	cloakgfx.drawRect(130, 20, 660, 280);
 	gameui.addChild(cloakgfx);
-	var endturn = px.dom.button("Accept Hand", endClick.bind(null, undefined));
+	var endturn = px.dom.button("Accept Hand", function(){endClick()});
 	var cancel = px.dom.button("Mulligan", cancelClick);
 	var resign = px.dom.button("Resign", function() {
 		if (resigning){

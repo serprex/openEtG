@@ -9,6 +9,9 @@ var Cards = require("../Cards");
 var tutor = require("../tutor");
 var etgutil = require("../etgutil");
 var options = require("../options");
+var DeckDisplay = require("../DeckDisplay");
+var CardSelector = require("../CardSelector");
+
 module.exports = function(arena, ainfo, acard, startempty) {
 	if (!Cards.loaded) return;
 	var aupped;
@@ -258,7 +261,7 @@ module.exports = function(arena, ainfo, acard, startempty) {
 			]);
 		})(i);
 	}
-	var decksprite = new px.DeckDisplay(60, setCardArt,
+	var decksprite = new DeckDisplay(60, setCardArt,
 		function(i){
 			var code = decksprite.deck[i], card = Cards.Codes[code];
 			if (!arena || code != acard){
@@ -271,7 +274,7 @@ module.exports = function(arena, ainfo, acard, startempty) {
 		}, arena ? (startempty ? [] : etgutil.decodedeck(ainfo.deck)) : etgutil.decodedeck(sock.getDeck())
 	);
 	editorui.addChild(decksprite);
-	var cardsel = new px.CardSelector(stage, setCardArt,
+	var cardsel = new CardSelector(stage, setCardArt,
 		function(code){
 			if (decksprite.deck.length < 60) {
 				var card = Cards.Codes[code];
