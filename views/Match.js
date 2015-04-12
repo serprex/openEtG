@@ -175,7 +175,7 @@ function startMatch(game, foeDeck, spectate) {
 		[800, 550, turntell],
 		[0, 64, foename]);
 	if (!spectate) {
-		px.dom.add([800, 520, endturn], [800, 490, cancel]);
+		px.dom.add(div, [800, 520, endturn], [800, 490, cancel]);
 	}
 	var activeInfo = {
 		firebolt:function(){
