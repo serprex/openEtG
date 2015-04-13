@@ -1,11 +1,11 @@
 "use strict";
-var MersenneTwister = require("./MersenneTwister");
-var Actives = require("./Actives");
-var Effect = require("./Effect");
-var ui = require("./uiutil");
-var etgutil = require("./etgutil");
+var ui = require("./ui");
 var Cards = require("./Cards");
+var Effect = require("./Effect");
+var Actives = require("./Actives");
+var etgutil = require("./etgutil");
 var skillText = require("./skillText");
+var MersenneTwister = require("./MersenneTwister");
 function Game(seed, flip){
 	this.rng = new MersenneTwister(seed);
 	this.phase = MulliganPhase1;
@@ -708,8 +708,8 @@ Player.prototype.drawcard = function(drawstep) {
 		if (this.deck.length>0){
 			if (~new CardInstance(this.deck.pop(), this).place()){
 				this.procactive("draw", drawstep);
-				if (this.deck.length == 0 && this.game.player1 == this)
-					Effect.mkSpriteFade(ui.getTextImage("Last card!", 32, "white", 0));
+				if (this.deck.length == 0 && this.game.player1 == this && !Effect.disable)
+					Effect.mkSpriteFade(ui.getBasicTextImage("Last card!", 32, "white", "black"));
 			}
 		}else this.game.setWinner(this.foe);
 	}

@@ -135,7 +135,7 @@ CardSelector.prototype.renderColumns = function(){
 
 module.exports = CardSelector;
 var px = require("./px");
-var ui = require("./uiutil");
+var ui = require("./ui");
 var dom = require("./dom");
 var etg = require("./etg");
 var gfx = require("./gfx");

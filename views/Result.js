@@ -1,7 +1,7 @@
 "use strict";
 var px = require("../px");
+var ui = require("../ui");
 var gfx = require("../gfx");
-var ui = require("../uiutil");
 var chat = require("../chat");
 var mkAi = require("../mkAi");
 var sock = require("../sock");

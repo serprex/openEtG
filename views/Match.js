@@ -1,8 +1,8 @@
 "use strict";
 var px = require("../px");
+var ui = require("../ui");
 var etg = require("../etg");
 var gfx = require("../gfx");
-var ui = require("../uiutil");
 var mkAi = require("../mkAi");
 var sock = require("../sock");
 var Cards = require("../Cards");
@@ -566,7 +566,7 @@ function startMatch(game, foeDeck, spectate) {
 			cancel.style.display = "none";
 		}
 		foeplays.children.forEach(function(foeplay){
-			foeplay.texture = foeplay.card instanceof etg.Card ? gfx.getCardImage(foeplay.card.code) : ui.getTextImage(foeplay.card, 12);
+			foeplay.texture = foeplay.card instanceof etg.Card ? gfx.getCardImage(foeplay.card.code) : ui.getBasicTextImage(foeplay.card, 12);
 		});
 		foeplays.visible = !(cloakgfx.visible = game.player2.isCloaked());
 		fgfx.clear();
@@ -611,7 +611,7 @@ function startMatch(game, foeDeck, spectate) {
 		for (var j = 0;j < 2;j++) {
 			var pl = game.players(j);
 			sacrificeOverlay[j].visible = pl.sosa;
-			sabbathOverlay[j].style.display = pl.flatline ? "inline-block" : "none";
+			sabbathOverlay[j].style.display = pl.flatline ? "" : "none";
 			handOverlay[j].texture = (pl.silence? gfx.silence :
 				pl.sanctuary ? gfx.sanctuary :
 				pl.nova >= 3 ? gfx.singularity : gfx.nopic);
@@ -624,10 +624,9 @@ function startMatch(game, foeDeck, spectate) {
 					creasprite[j][i].texture = gfx.getCreatureImage(cr.card);
 					creasprite[j][i].visible = true;
 					var child = creasprite[j][i].children[1];
-					child.texture = ui.getTextImage(cr.trueatk() + "|" + cr.truehp() + (cr.status.charges ? " x" + cr.status.charges : ""), 10, cr.card.upped ? "black" : "white", ui.maybeLighten(cr.card));
+					child.texture = ui.getBasicTextImage(cr.trueatk() + "|" + cr.truehp() + (cr.status.charges ? " x" + cr.status.charges : ""), 10, cr.card.upped ? "black" : "white", ui.maybeLighten(cr.card));
 					var child2 = creasprite[j][i].children[2];
-					var activetext = cr.activetext();
-					child2.texture = ui.getTextImage(activetext, 8, cr.card.upped ? "black" : "white");
+					child2.texture = ui.getTextImage(cr.activetext(), 8, cr.card.upped ? "black" : "white");
 					drawStatus(cr, creasprite[j][i]);
 				} else creasprite[j][i].visible = false;
 			}
@@ -644,7 +643,7 @@ function startMatch(game, foeDeck, spectate) {
 						if (pr.active.auto && pr.active.auto == Actives.locket) {
 							child.texture = ui.getTextImage("1:" + (pr.status.mode === undefined ? pr.owner.mark : pr.status.mode), 10, pr.card.upped ? "black" : "white", ui.maybeLighten(pr.card));
 						}
-						else child.texture = ui.getTextImage(pr.status.charges !== undefined ? " " + pr.status.charges : "", 10, pr.card.upped ? "black" : "white", ui.maybeLighten(pr.card));
+						else child.texture = ui.getBasicTextImage((pr.status.charges == undefined ? "" : pr.status.charges) + "", 10, pr.card.upped ? "black" : "white", ui.maybeLighten(pr.card));
 						child2.texture = ui.getTextImage(pr.activetext(), 8, pr.card.upped ? "black" : "white");
 					}
 					drawStatus(pr, permsprite[j][i]);
@@ -654,7 +653,7 @@ function startMatch(game, foeDeck, spectate) {
 			if (wp && !(j == 1 && cloakgfx.visible)) {
 				weapsprite[j].visible = true;
 				var child = weapsprite[j].children[1];
-				child.texture = ui.getTextImage(wp.trueatk() + (wp.status.charges ? " x" + wp.status.charges : ""), 12, wp.card.upped ? "black" : "white", ui.maybeLighten(wp.card));
+				child.texture = ui.getBasicTextImage(wp.trueatk() + (wp.status.charges ? " x" + wp.status.charges : ""), 12, wp.card.upped ? "black" : "white", ui.maybeLighten(wp.card));
 				child.visible = true;
 				var child = weapsprite[j].children[2];
 				child.texture = ui.getTextImage(wp.activetext(), 12, wp.card.upped ? "black" : "white");
@@ -666,7 +665,7 @@ function startMatch(game, foeDeck, spectate) {
 			if (sh && !(j == 1 && cloakgfx.visible)) {
 				shiesprite[j].visible = true;
 				var child = shiesprite[j].children[1];
-				child.texture = ui.getTextImage(sh.status.charges ? "x" + sh.status.charges: sh.truedr().toString(), 12, sh.card.upped ? "black" : "white", ui.maybeLighten(sh.card));
+				child.texture = ui.getBasicTextImage(sh.status.charges ? "x" + sh.status.charges : sh.truedr().toString(), 12, sh.card.upped ? "black" : "white", ui.maybeLighten(sh.card));
 				child.visible = true;
 				var child = shiesprite[j].children[2];
 				child.texture = ui.getTextImage(sh.activetext(), 12, sh.card.upped ? "black" : "white");

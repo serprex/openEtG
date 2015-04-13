@@ -1,5 +1,5 @@
 var px = require("../px");
-var ui = require("../uiutil");
+var ui = require("../ui");
 var sock = require("../sock");
 var etgutil = require("../etgutil");
 var options = require("../options");

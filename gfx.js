@@ -1,5 +1,5 @@
 "use strict";
-var ui = require("./uiutil");
+var ui = require("./ui");
 var Cards = require("./Cards");
 var etgutil = require("./etgutil");
 var options = require("./options");
@@ -48,11 +48,15 @@ function load(progress, postload){
 		img.src = "assets/" + asset + ".png";
 	});
 }
-function Text(text, fontsize, color){
+function Text(text, fontsize, color, bgcolor){
 	var canvas = document.createElement("canvas"), ctx = canvas.getContext("2d");
 	var font = ctx.font = fontsize + "px Dosis";
 	canvas.width = ctx.measureText(text).width+1;
 	canvas.height = fontsize*1.4;
+	if (bgcolor !== undefined){
+		ctx.fillStyle = bgcolor;
+		ctx.fillRect(0, 0, canvas.width, canvas.height);
+	}
 	ctx.font = font;
 	ctx.fillStyle = color || "black";
 	ctx.fillText(text, 0, fontsize);

@@ -1,8 +1,8 @@
 "use strict";
 var px = require("../px");
+var ui = require("../ui");
 var etg = require("../etg");
 var gfx = require("../gfx");
-var ui = require("../uiutil");
 var chat = require("../chat");
 var sock = require("../sock");
 var Cards = require("../Cards");

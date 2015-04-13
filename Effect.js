@@ -1,6 +1,6 @@
 "use strict";
+var ui = require("./ui");
 var etg = require("./etg");
-var ui = require("./uiutil");
 function maybeTgtPos(pos){
 	return pos instanceof etg.Thing ? ui.tgtToPos(pos) : pos;
 }

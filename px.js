@@ -7,9 +7,9 @@ document.addEventListener("mousemove", function(e){
 		this.lastmove = e.timeStamp;
 	}
 });
+var ui = require("./ui");
 var gfx = require("./gfx");
 var etg = require("./etg");
-var ui = require("./uiutil");
 var Cards = require("./Cards");
 var etgutil = require("./etgutil");
 var options = require("./options");

@@ -1,9 +1,9 @@
 "use strict";
 var guestname, muteset = {}, muteall;
 var px = require("./px");
+var ui = require("./ui");
 var etg = require("./etg");
 var gfx = require("./gfx");
-var ui = require("./uiutil");
 var chat = require("./chat");
 var Cards = require("./Cards");
 var etgutil = require("./etgutil");

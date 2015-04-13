@@ -1,4 +1,4 @@
-var ui = require("./uiutil");
+var ui = require("./ui");
 var options = require("./options");
 
 exports.style = function(){

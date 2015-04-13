@@ -1,5 +1,5 @@
+var ui = require("./ui");
 var etg = require("./etg");
-var ui = require("./uiutil");
 var chat = require("./chat");
 var sock = require("./sock");
 var Cards = require("./Cards");

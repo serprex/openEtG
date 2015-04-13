@@ -54,8 +54,8 @@ DeckDisplay.prototype.mousemove = function(){
 }
 
 module.exports = DeckDisplay;
+var ui = require("./ui");
 var px = require("./px");
-var ui = require("./uiutil");
 var etg = require("./etg");
 var gfx = require("./gfx");
 var Cards = require("./Cards");

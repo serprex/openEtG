@@ -64,7 +64,7 @@ function tgtToPos(t) {
 	} else console.log("Unknown target");
 }
 var tximgcache = {};
-function getTextImage(text, size, color, bgcolor, width) {
+exports.getTextImage = function(text, size, color, bgcolor, width) {
 	if (!gfx.loaded || !text) return gfx.nopic;
 	var key = JSON.stringify(arguments);
 	if (key in tximgcache) {
@@ -179,6 +179,15 @@ function getTextImage(text, size, color, bgcolor, width) {
 		return tximgcache[key] = new PIXI.Texture(new PIXI.BaseTexture(canvas));
 	}
 }
+var btximgcache = {};
+exports.getBasicTextImage = function(){
+	if (!gfx.loaded || !text) return gfx.nopic;
+	var key = JSON.stringify(arguments);
+	if (key in btximgcache) {
+		return btximgcache[key];
+	}
+	return btximgcache[key] = gfx.Text.apply(null, arguments);
+}
 var sounds = {}, musics = {}, currentMusic;
 var soundEnabled = false, musicEnabled = false;
 function loadSounds() {
@@ -260,7 +269,6 @@ exports.creaturePos = creaturePos;
 exports.permanentPos = permanentPos;
 exports.cardPos = cardPos;
 exports.tgtToPos = tgtToPos;
-if (typeof PIXI !== "undefined") exports.getTextImage = getTextImage;
 exports.loadSounds = loadSounds;
 exports.loadMusics = loadMusics;
 exports.playSound = playSound;
