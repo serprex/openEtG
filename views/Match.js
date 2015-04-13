@@ -421,7 +421,7 @@ function startMatch(game, foeDeck, spectate) {
 			foeplays.addChild(sprite);
 			c.useactive(t);
 		},
-		foeleft: function(){
+		foeleft: function(data){
 			if (!game.ai) game.setWinner(data.spectate == 1 ? game.player2 : game.player1);
 		},
 		mulligan: function(data){
