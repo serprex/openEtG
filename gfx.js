@@ -37,7 +37,6 @@ function load(progress, postload){
 				}
 			}else process(asset, tex);
 			if (loadCount == assets.length){
-				var ui = require("./uiutil");
 				ui.loadSounds("cardClick", "buttonClick", "permPlay", "creaturePlay");
 				exports.r[0] = exports.nopic;
 				exports.r[-1] = exports.r[5];

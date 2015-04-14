@@ -1,5 +1,5 @@
 "use strict";
-var ui = require("./uiutil");
+var ui = require("./ui");
 function adrenathrottle(f){
 	return function(c){
 		if ((c.status.adrenaline || 0)<3 || (c instanceof etg.Creature && c.owner.weapon && c.owner.weapon.status.nothrottle)){
