@@ -623,7 +623,7 @@ function startMatch(game, foeDeck, spectate) {
 					creasprite[j][i].texture = gfx.getCreatureImage(cr.card);
 					creasprite[j][i].visible = true;
 					var child = creasprite[j][i].children[1];
-					child.texture = ui.getBasicTextImage(cr.trueatk() + "|" + cr.truehp() + (cr.status.charges ? " x" + cr.status.charges : ""), 10, cr.card.upped ? "black" : "white", ui.maybeLightenStr(cr.card));
+					child.texture = ui.getBasicTextImage(cr.trueatk() + " | " + cr.truehp() + (cr.status.charges ? " x" + cr.status.charges : ""), 10, cr.card.upped ? "black" : "white", ui.maybeLightenStr(cr.card));
 					var child2 = creasprite[j][i].children[2];
 					child2.texture = ui.getTextImage(cr.activetext(), 8, cr.card.upped ? "black" : "white");
 					drawStatus(cr, creasprite[j][i]);
