@@ -3,12 +3,15 @@ var etg = require("./etg");
 var gfx = require("./gfx");
 var options = require("./options");
 var Effect = require("./Effect");
-exports.elecols = [0xa99683, 0xaa5999, 0x636069, 0x996633, 0x5f4930, 0x50a005, 0xcc6611, 0x205080, 0x999990, 0x337ddd, 0xbfa622, 0x333333, 0x55aacc];
+exports.elecols = new Uint32Array([0xa99683, 0xaa5999, 0x636069, 0x996633, 0x5f4930, 0x50a005, 0xcc6611, 0x205080, 0x999990, 0x337ddd, 0xbfa622, 0x333333, 0x55aacc]);
 function lighten(c) {
 	return ((c & 255) + 255 >> 1) | (((c >> 8) & 255) + 255 >> 1 << 8) | (((c >> 16) & 255) + 255 >> 1 << 16);
 }
 exports.maybeLighten = function(card){
 	return card.upped ? lighten(exports.elecols[card.element]) : exports.elecols[card.element];
+}
+exports.maybeLightenStr = function(card){
+	return PIXI.utils.hex2string(exports.maybeLighten(card));
 }
 function fakepoint(x,y){
 	this.x = x;
@@ -156,7 +159,7 @@ exports.getTextImage = function(text, size, color, bgcolor, width) {
 	canvas.width = width || Math.max(w, x);
 	canvas.height = y+h;
 	if (bgcolor){
-		ctx.fillStyle = PIXI.utils.hex2string(bgcolor);
+		ctx.fillStyle = bgcolor;
 		ctx.fillRect(0, 0, canvas.width, canvas.height);
 	}
 	ctx.font = font;
@@ -180,7 +183,7 @@ exports.getTextImage = function(text, size, color, bgcolor, width) {
 	}
 }
 var btximgcache = {};
-exports.getBasicTextImage = function(){
+exports.getBasicTextImage = function(text){
 	if (!gfx.loaded || !text) return gfx.nopic;
 	var key = JSON.stringify(arguments);
 	if (key in btximgcache) {

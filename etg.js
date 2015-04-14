@@ -1003,13 +1003,25 @@ Thing.prototype.mutantactive = function(){
 		}
 	}
 }
-var adrtbl = Object.freeze([
-	[0, 0, 0, 0],
-	[1, 1, 1], [2, 2, 2], [3, 3, 3],
-	[3, 2], [4, 2], [4, 2], [5, 3], [6, 3],
-	[3], [4], [4], [4], [5], [5], [5]
-]);
-adrtbl.forEach(Object.freeze);
+// adrtbl is a bitpacked 2d array
+// [[0,0,0,0],[1,1,1],[2,2,2],[3,3,3],[3,2],[4,2],[4,2],[5,3],[6,3],[3],[4],[4],[4],[5],[5],[5]]
+var adrtbl = new Uint16Array([4, 587, 1171, 1755, 154, 162, 162, 234, 242, 25, 33, 33, 33, 41, 41, 41]);
+function countAdrenaline(x){
+	x = Math.abs(x|0);
+	return x>15?1:(adrtbl[x]&7)+1;
+}
+function getAdrenalRow(x){
+	x|=0;
+	var sign=(x>0)-(x<0);
+	x = Math.abs(x);
+	if (x>15) return new Int8Array(0);
+	var row = adrtbl[x], ret = new Int8Array(row&7);
+	for(var i=0; i<ret.length; i++){
+		var shift = (i+1)*3;
+		ret[i] = ((row&(7<<shift))>>shift)*sign;
+	}
+	return ret;
+}
 Weapon.prototype.trueatk = Creature.prototype.trueatk = function(adrenaline){
 	var dmg = this.atk;
 	if (this.status.dive)dmg += this.status.dive;
@@ -1018,8 +1030,10 @@ Weapon.prototype.trueatk = Creature.prototype.trueatk = function(adrenaline){
 	if (this.status.burrowed)dmg = Math.ceil(dmg/2);
 	var y=adrenaline || this.status.adrenaline || 0;
 	if (y<2)return dmg;
-	var row = adrtbl[dmg];
-	return row ? row[y-2] || 0 : 0;
+	var row = adrtbl[Math.abs(dmg)];
+	if (y-2 >= (row&7)) return 0;
+	var shift = (y-1)*3;
+	return ((row&(7<<shift))>>shift)*((dmg>0)-(dmg<0));
 }
 Shield.prototype.truedr = function(){
 	var dr = this.dr;
@@ -1201,10 +1215,6 @@ CardInstance.prototype.useactive = function(target){
 	this.procactive("cardplay");
 	owner.game.updateExpectedDamage();
 }
-function countAdrenaline(x){
-	var atks = adrtbl[Math.abs(x)];
-	return atks?atks.length+1:1;
-}
 var filtercache = [];
 function filtercards(upped, filter, cmp, showshiny){
 	if (!Cards.loaded) return;
@@ -1253,6 +1263,7 @@ exports.isEmpty = isEmpty;
 exports.iterSplit = iterSplit;
 exports.filtercards = filtercards;
 exports.countAdrenaline = countAdrenaline;
+exports.getAdrenalRow = getAdrenalRow;
 exports.clone = clone;
 exports.cloneStatus = cloneStatus;
 exports.casttext = casttext;
@@ -1283,7 +1294,6 @@ exports.MulliganPhase1 = 0;
 exports.MulliganPhase2 = 1;
 exports.PlayPhase = 2;
 exports.EndPhase = 3;
-exports.AdrenaTable = adrtbl;
 exports.PillarList = Object.freeze(["4sa", "4vc", "52g", "55k", "58o", "5bs", "5f0", "5i4", "5l8", "5oc", "5rg", "5uk", "61o"]);
 exports.PendList = Object.freeze(["4sc", "50u", "542", "576", "5aa", "5de", "5gi", "5jm", "5mq", "5pu", "5t2", "606", "63a"]);
 exports.NymphList = Object.freeze([undefined, "500", "534", "568", "59c", "5cg", "5fk", "5io", "5ls", "5p0", "5s4", "5v8", "62c"]);

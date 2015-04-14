@@ -192,8 +192,7 @@ function startMatch(game, foeDeck, spectate) {
 			return Math.ceil(t.truehp()*(t.status.frozen?150:100)/(t.truehp()+100));
 		},
 		adrenaline:function(t){
-			var tatk = Math.abs(t.trueatk());
-			return "extra: " + (tatk > 15 ? 0 : etg.AdrenaTable[tatk].join(", "));
+			return "extra: " + etg.getAdrenalRow(t.trueatk()).join(", ");
 		},
 	};
 	function setInfo(obj) {
@@ -624,7 +623,7 @@ function startMatch(game, foeDeck, spectate) {
 					creasprite[j][i].texture = gfx.getCreatureImage(cr.card);
 					creasprite[j][i].visible = true;
 					var child = creasprite[j][i].children[1];
-					child.texture = ui.getBasicTextImage(cr.trueatk() + "|" + cr.truehp() + (cr.status.charges ? " x" + cr.status.charges : ""), 10, cr.card.upped ? "black" : "white", ui.maybeLighten(cr.card));
+					child.texture = ui.getBasicTextImage(cr.trueatk() + "|" + cr.truehp() + (cr.status.charges ? " x" + cr.status.charges : ""), 10, cr.card.upped ? "black" : "white", ui.maybeLightenStr(cr.card));
 					var child2 = creasprite[j][i].children[2];
 					child2.texture = ui.getTextImage(cr.activetext(), 8, cr.card.upped ? "black" : "white");
 					drawStatus(cr, creasprite[j][i]);
@@ -637,13 +636,13 @@ function startMatch(game, foeDeck, spectate) {
 					permsprite[j][i].visible = true;
 					var child = permsprite[j][i].children[1], child2 = permsprite[j][i].children[2];
 					if (pr.card.type == etg.PillarEnum) {
-						child.texture = ui.getTextImage("1:" + (pr.status.pendstate ? pr.owner.mark : pr.card.element) + " x" + pr.status.charges, 10, pr.card.upped ? "black" : "white", ui.maybeLighten(pr.card));
+						child.texture = ui.getTextImage("1:" + (pr.status.pendstate ? pr.owner.mark : pr.card.element) + " x" + pr.status.charges, 10, pr.card.upped ? "black" : "white", ui.maybeLightenStr(pr.card));
 						child2.texture = gfx.nopic;
 					}else{
 						if (pr.active.auto && pr.active.auto == Actives.locket) {
-							child.texture = ui.getTextImage("1:" + (pr.status.mode === undefined ? pr.owner.mark : pr.status.mode), 10, pr.card.upped ? "black" : "white", ui.maybeLighten(pr.card));
+							child.texture = ui.getTextImage("1:" + (pr.status.mode === undefined ? pr.owner.mark : pr.status.mode), 10, pr.card.upped ? "black" : "white", ui.maybeLightenStr(pr.card));
 						}
-						else child.texture = ui.getBasicTextImage((pr.status.charges == undefined ? "" : pr.status.charges) + "", 10, pr.card.upped ? "black" : "white", ui.maybeLighten(pr.card));
+						else child.texture = ui.getBasicTextImage((pr.status.charges == undefined ? "" : pr.status.charges) + "", 10, pr.card.upped ? "black" : "white", ui.maybeLightenStr(pr.card));
 						child2.texture = ui.getTextImage(pr.activetext(), 8, pr.card.upped ? "black" : "white");
 					}
 					drawStatus(pr, permsprite[j][i]);
@@ -653,7 +652,7 @@ function startMatch(game, foeDeck, spectate) {
 			if (wp && !(j == 1 && cloakgfx.visible)) {
 				weapsprite[j].visible = true;
 				var child = weapsprite[j].children[1];
-				child.texture = ui.getBasicTextImage(wp.trueatk() + (wp.status.charges ? " x" + wp.status.charges : ""), 12, wp.card.upped ? "black" : "white", ui.maybeLighten(wp.card));
+				child.texture = ui.getBasicTextImage(wp.trueatk() + (wp.status.charges ? " x" + wp.status.charges : ""), 12, wp.card.upped ? "black" : "white", ui.maybeLightenStr(wp.card));
 				child.visible = true;
 				var child = weapsprite[j].children[2];
 				child.texture = ui.getTextImage(wp.activetext(), 12, wp.card.upped ? "black" : "white");
@@ -665,7 +664,7 @@ function startMatch(game, foeDeck, spectate) {
 			if (sh && !(j == 1 && cloakgfx.visible)) {
 				shiesprite[j].visible = true;
 				var child = shiesprite[j].children[1];
-				child.texture = ui.getBasicTextImage(sh.status.charges ? "x" + sh.status.charges : sh.truedr().toString(), 12, sh.card.upped ? "black" : "white", ui.maybeLighten(sh.card));
+				child.texture = ui.getBasicTextImage(sh.status.charges ? "x" + sh.status.charges : sh.truedr().toString(), 12, sh.card.upped ? "black" : "white", ui.maybeLightenStr(sh.card));
 				child.visible = true;
 				var child = shiesprite[j].children[2];
 				child.texture = ui.getTextImage(sh.activetext(), 12, sh.card.upped ? "black" : "white");
