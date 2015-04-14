@@ -9,6 +9,7 @@ var Cards = require("./Cards");
 var etgutil = require("./etgutil");
 var options = require("./options");
 var userutil = require("./userutil");
+var viewsLogin = require("./views/Login");
 var lastError = 0;
 window.onerror = function(){
 	var now = Date.now();
@@ -141,7 +142,7 @@ sock.et.onmessage = function(msg){
 require("./httpcards")(function(){
 	if (options.preart) sock.emit("cardart");
 });
-require("./views/Login")();
+viewsLogin();
 function chatmute(){
 	var muted = [];
 	for(var name in muteset){
