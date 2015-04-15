@@ -1017,8 +1017,8 @@ function getAdrenalRow(x){
 	if (x>15) return new Int8Array(0);
 	var row = adrtbl[x], ret = new Int8Array(row&7);
 	for(var i=0; i<ret.length; i++){
-		var shift = (i+1)*3;
-		ret[i] = ((row&(7<<shift))>>shift)*sign;
+		row >>= 3;
+		ret[i] = (row&7)*sign;
 	}
 	return ret;
 }
@@ -1032,8 +1032,7 @@ Weapon.prototype.trueatk = Creature.prototype.trueatk = function(adrenaline){
 	if (y<2)return dmg;
 	var row = adrtbl[Math.abs(dmg)];
 	if (y-2 >= (row&7)) return 0;
-	var shift = (y-1)*3;
-	return ((row&(7<<shift))>>shift)*((dmg>0)-(dmg<0));
+	return ((row>>(y-1)*3)&7)*((dmg>0)-(dmg<0));
 }
 Shield.prototype.truedr = function(){
 	var dr = this.dr;
