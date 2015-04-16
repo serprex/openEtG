@@ -34,9 +34,9 @@ module.exports = function(){
 			loadingBar.style.width = (progress*900) + "px";
 		}, function(){
 			ui.playMusic("openingMusic");
-			var mm = require("./MainMenu"); // Always require to begin loading bg_main
-			if (sock.user || sandbox) mm();
+			if (sock.user || sandbox) require("./MainMenu")();
 		});
+		require("./MainMenu"); // Queue loading bg_main
 	}
 	var login = px.dom.button("Login", loginClick);
 	var username = document.createElement("input");
