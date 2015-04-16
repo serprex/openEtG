@@ -1014,11 +1014,11 @@ function getAdrenalRow(x){
 	x|=0;
 	var sign=(x>0)-(x<0);
 	x = Math.abs(x);
-	if (x>15) return new Int8Array(0);
-	var row = adrtbl[x], ret = new Int8Array(row&7);
+	if (x>15) return "";
+	var row = adrtbl[x], ret = "";
 	for(var i=0; i<ret.length; i++){
 		row >>= 3;
-		ret[i] = (row&7)*sign;
+		ret += (i?", ":"")+((row&7)*sign);
 	}
 	return ret;
 }

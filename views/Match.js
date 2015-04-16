@@ -192,7 +192,7 @@ function startMatch(game, foeDeck, spectate) {
 			return Math.ceil(t.truehp()*(t.status.frozen?150:100)/(t.truehp()+100));
 		},
 		adrenaline:function(t){
-			return "extra: " + etg.getAdrenalRow(t.trueatk()).join(", ");
+			return "extra: " + etg.getAdrenalRow(t.trueatk());
 		},
 	};
 	function setInfo(obj) {
