@@ -63,6 +63,16 @@ module.exports = function(game) {
 		["Toxic", .1, function() { return game.player2.status.poison > 12 }],
 		["Equipped", .05, function() { return game.player1.weapon && game.player1.shield }],
 		["Mid turn", .1, function() { return game.turn == game.player1 }],
+		["Godlike", .75, function() { return !game.player1.bonusstats.takendamage }],
+		["All in One", .1, function(){ 
+			var i;
+			for (i = 0;i < 12;i++) {
+				if (game.player1.bonusstats.quantaspent[i] == 0) return false;
+			}
+			return true;
+		}],
+		["Pillarless", .2, function() { return game.player1.bonusstats.cardsplayed[0] == 0 }],
+		["Weapon Master", .1, function() {return game.player1.bonusstats.cardsplayed[1] >= 3 }]
 	];
 	var div = px.dom.div(
 		[10, 290, game.ply + " plies\n" + (game.time / 1000).toFixed(1) + " seconds\n" + (winner && sock.user && game.level !== undefined ? (sock.user["streak" + game.level] || 0) + " win streak\n+" +

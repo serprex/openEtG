@@ -150,6 +150,12 @@ function Player(game){
 	this.drawpower = 1;
 	this.mark = 0;
 	this.shardgolem = undefined;
+	this.bonusstats = {
+		cardsplayed : new Int32Array(6),
+		takendamage: false,
+		creatureskilled: 0,
+		quantaspent: new Int32Array(12)
+	}
 }
 function Creature(card, owner){
 	if (card.isOf(Cards.ShardGolem)){
@@ -596,7 +602,8 @@ Player.prototype.spend = function(qtype, x) {
 			var q = b==-1?this.uptoceil(12):this.randomquanta();
 			this.quanta[q] = Math.min(this.quanta[q]-b, 99);
 		}
-	}else this.quanta[qtype] = Math.min(this.quanta[qtype]-x, 99);
+	} else this.quanta[qtype] = Math.min(this.quanta[qtype] - x, 99);
+	if (x > 0 && qtype < 12) this.bonusstats.quantaspent[qtype] += x;
 	return true;
 }
 Player.prototype.countcreatures = function() {
@@ -832,6 +839,7 @@ Player.prototype.dmg = function(x, ignoresosa) {
 		return sosa?-x:heal;
 	}else{
 		this.hp -= x;
+		this.bonusstats.takendamage = true;
 		if (this.hp <= 0){
 			this.game.setWinner(this.foe);
 		}
@@ -921,6 +929,7 @@ Creature.prototype.deatheffect = Weapon.prototype.deatheffect = function(index) 
 	if (~index) Effect.mkDeath(ui.creaturePos(this.owner == this.owner.game.player1?0:1, index));
 }
 Creature.prototype.die = function() {
+	if (this.owner != this.owner.game.turn) this.owner.foe.bonusstats.creatureskilled++;
 	var index = this.remove();
 	if (~index){
 		if (!(this.active.predeath && this.active.predeath(this))){
@@ -1212,6 +1221,7 @@ CardInstance.prototype.useactive = function(target){
 		ui.playSound("creaturePlay");
 	} else console.log("Unknown card type: " + card.type);
 	this.procactive("cardplay");
+	owner.bonusstats.cardsplayed[card.type]++;
 	owner.game.updateExpectedDamage();
 }
 var filtercache = [];
