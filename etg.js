@@ -605,7 +605,7 @@ Player.prototype.spend = function(qtype, x) {
 		}
 	} else {
 		this.quanta[qtype] = Math.min(this.quanta[qtype] - x, 99);
-		if (bonusstats != null && x > 0) this.bonusstats.quantaspent[qtype-1] += x;
+		if (this.bonusstats != null && x > 0) this.bonusstats.quantaspent[qtype-1] += x;
 	}
 	return true;
 }
