@@ -597,14 +597,16 @@ Player.prototype.canspend = function(qtype, x) {
 Player.prototype.spend = function(qtype, x) {
 	if (x == 0 || (x<0 && this.flatline))return true;
 	if (!this.canspend(qtype, x))return false;
-	if (qtype == Chroma){
-		var b = x<0?-1:1;
-		for (var i=x*b; i>0; i--){
-			var q = b==-1?this.uptoceil(12):this.randomquanta();
-			this.quanta[q] = Math.min(this.quanta[q]-b, 99);
+	if (qtype == Chroma) {
+		var b = x < 0 ? -1 : 1;
+		for (var i = x * b;i > 0;i--) {
+			var q = b == -1 ? this.uptoceil(12) : this.randomquanta();
+			this.quanta[q] = Math.min(this.quanta[q] - b, 99);
 		}
-	} else this.quanta[qtype] = Math.min(this.quanta[qtype] - x, 99);
-	if (bonusstats != null && x > 0 && qtype != 0) this.bonusstats.quantaspent[qtype] += x;
+	} else {
+		this.quanta[qtype] = Math.min(this.quanta[qtype] - x, 99);
+		if (bonusstats != null && x > 0) this.bonusstats.quantaspent[qtype-1] += x;
+	}
 	return true;
 }
 Player.prototype.countcreatures = function() {

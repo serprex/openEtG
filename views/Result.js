@@ -67,7 +67,7 @@ module.exports = function(game) {
 		["All in One", .1, function(){ 
 			var i;
 			for (i = 1;i < 13;i++) {
-				if (game.player1.bonusstats.quantaspent[i] == 0) return false;
+				if (game.player1.bonusstats.quantaspent[i-1] == 0) return false;
 			}
 			return true;
 		}],
