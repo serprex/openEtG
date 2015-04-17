@@ -409,6 +409,7 @@ Player.prototype.clone = function(game){
 			obj[attr] = this[attr];
 		}
 	}
+	obj.bonusstats = null;
 	return obj;
 }
 CardInstance.prototype.clone = function(owner){
@@ -603,7 +604,7 @@ Player.prototype.spend = function(qtype, x) {
 			this.quanta[q] = Math.min(this.quanta[q]-b, 99);
 		}
 	} else this.quanta[qtype] = Math.min(this.quanta[qtype] - x, 99);
-	if (x > 0 && qtype < 12) this.bonusstats.quantaspent[qtype] += x;
+	if (bonusstats != null && x > 0 && qtype != 0) this.bonusstats.quantaspent[qtype] += x;
 	return true;
 }
 Player.prototype.countcreatures = function() {
@@ -839,7 +840,7 @@ Player.prototype.dmg = function(x, ignoresosa) {
 		return sosa?-x:heal;
 	}else{
 		this.hp -= x;
-		this.bonusstats.takendamage = true;
+		if (this.bonusstats != null) this.bonusstats.takendamage = true;
 		if (this.hp <= 0){
 			this.game.setWinner(this.foe);
 		}
@@ -929,7 +930,7 @@ Creature.prototype.deatheffect = Weapon.prototype.deatheffect = function(index) 
 	if (~index) Effect.mkDeath(ui.creaturePos(this.owner == this.owner.game.player1?0:1, index));
 }
 Creature.prototype.die = function() {
-	if (this.owner != this.owner.game.turn) this.owner.foe.bonusstats.creatureskilled++;
+	if (this.owner.bonusstats != null && this.owner != this.owner.game.turn) this.owner.foe.bonusstats.creatureskilled++;
 	var index = this.remove();
 	if (~index){
 		if (!(this.active.predeath && this.active.predeath(this))){
@@ -1221,7 +1222,7 @@ CardInstance.prototype.useactive = function(target){
 		ui.playSound("creaturePlay");
 	} else console.log("Unknown card type: " + card.type);
 	this.procactive("cardplay");
-	owner.bonusstats.cardsplayed[card.type]++;
+	if (owner.bonusstats != null) owner.bonusstats.cardsplayed[card.type]++;
 	owner.game.updateExpectedDamage();
 }
 var filtercache = [];

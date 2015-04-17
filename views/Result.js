@@ -66,7 +66,7 @@ module.exports = function(game) {
 		["Godlike", .75, function() { return !game.player1.bonusstats.takendamage }],
 		["All in One", .1, function(){ 
 			var i;
-			for (i = 0;i < 12;i++) {
+			for (i = 1;i < 13;i++) {
 				if (game.player1.bonusstats.quantaspent[i] == 0) return false;
 			}
 			return true;
