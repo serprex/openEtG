@@ -404,12 +404,12 @@ Player.prototype.clone = function(game){
 	obj.hand = this.hand.map(maybeClone);
 	obj.deck = this.deck.slice();
 	obj.quanta = new Int8Array(this.quanta);
+	obj.bonusstats = null;
 	for(var attr in this){
 		if (!(attr in obj) && this.hasOwnProperty(attr)){
 			obj[attr] = this[attr];
 		}
 	}
-	obj.bonusstats = null;
 	return obj;
 }
 CardInstance.prototype.clone = function(owner){
