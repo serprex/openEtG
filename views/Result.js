@@ -71,7 +71,7 @@ module.exports = function(game) {
 			}
 			return true;
 		}],
-		["Pillarless", .2, function() { return game.player1.bonusstats.cardsplayed[0] == 0 }],
+		["Pillarless", .1, function() { return game.player1.bonusstats.cardsplayed[0] == 0 }],
 		["Weapon Master", .1, function() {return game.player1.bonusstats.cardsplayed[1] >= 3 }]
 	];
 	var div = px.dom.div(
