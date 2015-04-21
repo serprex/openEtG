@@ -154,7 +154,8 @@ function Player(game){
 		cardsplayed : new Int32Array(6),
 		takendamage: false,
 		creatureskilled: 0,
-		quantaspent: new Int32Array(12)
+		quantaspent: new Int32Array(12),
+		otk: false
 	}
 }
 function Creature(card, owner){
@@ -692,6 +693,7 @@ Player.prototype.endturn = function(discard) {
 		this.foe.drawcard(true);
 	}
 	this.game.turn = this.foe;
+	if (this.bonusstats != null) this.bonusstats.otk = this.foe.hp == this.foe.maxhp;
 	this.foe.procactive("turnstart");
 	this.game.updateExpectedDamage();
 }

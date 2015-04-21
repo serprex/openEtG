@@ -62,7 +62,7 @@ input[type="text"],input[type="password"],input:not([type]){width:150px}
 	overflow:hidden;
 }
 .tutorialbox{
-	background-color:rgba(255,255,255,0.8);
+	background-color:rgba(255,255,255,0.7);
 	border:solid black 2px;
 	line-height:120%;
 	pointer-events:none;
