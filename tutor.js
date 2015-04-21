@@ -11,6 +11,9 @@ var tutor = module.exports = function(tutdata, x, y, stage){
 			return;
 		}
 		tutspan = document.createElement("div");
+		var tutbg = document.createElement("div");
+		tutbg.className = "tutorialbg";
+		px.dom.add(tutspan, tutbg);
 		tutdata.forEach(function(info) {
 			var text = px.dom.text(info[info.length-1]);
 			text.className = "tutorialbox";

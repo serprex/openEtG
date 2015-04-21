@@ -65,11 +65,17 @@ input[type="text"],input[type="password"],input:not([type]){width:150px}
 	background-color:rgba(255,255,255,0.7);
 	border:solid black 2px;
 	line-height:120%;
-	pointer-events:none;
 	color:#000000;
 	padding-left:4px;
 	padding-right:4px;
 	z-index:2;
+}
+.tutorialbg{
+    background-color:rgba(0,0,0,0.5);
+	pointer-events:none;
+    position:absolute;
+    height:600px;
+    width:900px;
 }
 .numput{width:32px!important}
 .imgb:hover{
