@@ -12,7 +12,7 @@ module.exports = function(db, users, sockEmit, usersock){
 			servuser.name = servuser.auth;
 		}
 		if(!servuser.salt){
-			servuser.salt = crypto.pseudoRandomBytes(16).toString("base64");
+			servuser.salt = crypto.pseudoRandomBytes(15).toString("base64");
 			servuser.iter = 100000;
 		}
 		function postHash(err, key){
