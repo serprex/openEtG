@@ -63,11 +63,10 @@ module.exports = function(game) {
 		["Toxic", .1, function() { return game.player2.status.poison > 12 }],
 		["Equipped", .05, function() { return game.player1.weapon && game.player1.shield }],
 		["Mid turn", .1, function() { return game.turn == game.player1 }],
-		["Godlike", .75, function() { return !game.player1.bonusstats.takendamage }],
-		["All in One", .1, function(){ 
-			var i;
-			for (i = 1;i < 13;i++) {
-				if (game.player1.bonusstats.quantaspent[i-1] == 0) return false;
+		["Without a Scratch", .5, function() { return !game.player1.bonusstats.takendamage }],
+		["All in One", .1, function(){
+			for (var i = 0;i < 12;i++) {
+				if (game.player1.bonusstats.quantaspent[i] == 0) return false;
 			}
 			return true;
 		}],
