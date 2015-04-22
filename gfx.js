@@ -119,6 +119,14 @@ function getArtImage(code, cb){
 		img.addEventListener("load", function(){
 			cb(artimagecache[code] = new PIXI.Texture(new PIXI.BaseTexture(img)));
 		});
+		img.addEventListener("error", function(){
+			if (!artpool && redcode >= "6qo"){
+				redcode = etgutil[redcode >= "g00"?"asShiny":"asUpped"](redcode, false);
+				getArtImage(redcode, function(x){
+					cb(artimagecache[code] = x);
+				});
+			}
+		});
 		img.src = "Cards/" + redcode + ".png";
 	}
 	return cb(artimagecache[code]);
