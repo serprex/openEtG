@@ -33,7 +33,7 @@ var afilter = {
 		return t.active.cast && (t.cast || t.usedactive);
 	},
 	silence:function(c,t){
-		return t instanceof etg.Player || (t.active.cast && !t.usedactive);
+		return t.active.cast && !t.usedactive;
 	},
 	lobotomize:function(c,t){
 		if (!t.status.momentum && !t.status.psion) {
@@ -49,7 +49,7 @@ var afilter = {
 };
 function searchActive(active, c, t){
 	var func = afilter[active.activename[0]];
-	return !func || t.hasactive("prespell", "protectonce") || func(c, t);
+	return !func || t instanceof etg.Player || t.hasactive("prespell", "protectonce") || func(c, t);
 }
 module.exports = function(game, previous) {
 	var currentEval, worstcard;
