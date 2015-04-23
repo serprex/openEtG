@@ -2,10 +2,31 @@
 exports.loaded = false;
 exports.Targeting = {};
 exports.Codes = {};
+exports.loadcards = function(cb, loadfunc){
+	if (exports.loaded) cb(exports);
+	var count = 0, names = ["pillar", "weapon", "shield", "permanent", "spell", "creature"];
+	function maybeLoaded(){
+		if (++count == names.length+1){
+			exports.loaded = true;
+			console.log("Cards loaded");
+			if (cb) cb();
+		}
+	}
+	names.forEach(function(name, i){
+		loadfunc(name + ".csv", function(text){
+			parseCsv(i, text);
+			maybeLoaded();
+		});
+	});
+	loadfunc("active.csv", function(text){
+		parseTargeting(text);
+		maybeLoaded();
+	});
+}
 var etg = require("./etg");
 var Actives = require("./Actives");
 var etgutil = require("./etgutil");
-exports.parseCsv = function(type, file){
+function parseCsv(type, file){
 	var keys;
 	etg.iterSplit(file, "\n", function(line){
 		if (!keys){
@@ -27,7 +48,7 @@ exports.parseCsv = function(type, file){
 		}
 	});
 }
-exports.parseTargeting = function(file){
+function parseTargeting(file){
 	etg.iterSplit(file, "\n", function(line){
 		var cidx = line.indexOf(",");
 		exports.Targeting[line.substr(0, cidx)] = getTargetFilter(line.substr(cidx+1));

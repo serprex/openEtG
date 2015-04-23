@@ -24,13 +24,16 @@ var afilter = {
 		return t.status.airborne;
 	},
 	freeze:function(c,t){
-		return t.status.frozen === undefined || t.status.frozen < 3;
+		return t.status.frozen < 3;
 	},
 	pacify:function(c,t){
 		return t.trueatk() != 0;
 	},
 	readiness:function(c,t){
 		return t.active.cast && (t.cast || t.usedactive);
+	},
+	silence:function(c,t){
+		return t instanceof etg.Player || (t.active.cast && !t.usedactive);
 	},
 	lobotomize:function(c,t){
 		if (!t.status.momentum && !t.status.psion) {

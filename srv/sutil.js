@@ -1,14 +1,12 @@
 "use strict";
 var fs = require("fs");
-var Cards = require("../Cards");
-exports.loadcards = function(){
-	var names = ["pillar", "weapon", "shield", "permanent", "spell", "creature"];
-	for(var i=0; i<names.length; i++){
-		Cards.parseCsv(i, fs.readFileSync(names[i] + ".csv").toString());
-	}
-	Cards.parseTargeting(fs.readFileSync("active.csv").toString());
-	console.log("Cards loaded");
-	Cards.loaded = true;
+exports.loadcards = function(cb){
+	require("../Cards").loadcards(cb, function(file, onload){
+		fs.readFile(file, {encoding:"utf8"}, function(err, str){
+			if (err) console.log(err.message);
+			else onload(str);
+		});
+	});
 }
 exports.prepuser = function(servuser){
 	["gold", "daily", "dailymage", "dailydg", "aiwins", "ailosses", "pvpwins", "pvplosses"].forEach(function(field){

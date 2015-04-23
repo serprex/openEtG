@@ -374,7 +374,7 @@ var statusValues = Object.freeze({
 function getDamage(c){
 	return damageHash[c.hash()] || 0;
 }
-function estimateDamage(c, freedomChance, wallCharges) {
+function estimateDamage(c, freedomChance, wallCharges, wallIndex) {
 	if (!c || c.status.frozen || c.status.delayed){
 		return 0;
 	}
@@ -383,8 +383,8 @@ function estimateDamage(c, freedomChance, wallCharges) {
 			return tatk;
 		} else if ((fshactive == Actives.weight || fshactive == Actives.wings) && fshactive(c.owner.foe.shield, c)) {
 			return 0;
-		}else if (wallCharges[0]){
-			wallCharges[0]--;
+		}else if (wallCharges[wallIndex]){
+			wallCharges[wallIndex]--;
 			return 0;
 		}else return Math.max(tatk - dr, 0);
 	}
@@ -410,7 +410,7 @@ function estimateDamage(c, freedomChance, wallCharges) {
 	damageHash[c.hash()] = atk;
 	return atk;
 }
-function calcExpectedDamage(pl, wallCharges) {
+function calcExpectedDamage(pl, wallCharges, wallIndex) {
 	var totalDamage = 0, stasisFlag = false, freedomChance = 0;
 	for(var i=0; i<16; i++){
 		var p;
@@ -429,17 +429,17 @@ function calcExpectedDamage(pl, wallCharges) {
 		freedomChance = 1-Math.pow(.7, freedomChance);
 	}
 	if (pl.foe.shield && pl.foe.shield.hasactive("shield", "blockwithcharge")){
-		wallCharges[0] = pl.foe.shield.status.charges;
+		wallCharges[wallIndex] = pl.foe.shield.status.charges;
 	}
 	if (!stasisFlag){
 		pl.creatures.forEach(function(c){
-			var dmg = estimateDamage(c, freedomChance, wallCharges);
+			var dmg = estimateDamage(c, freedomChance, wallCharges, wallIndex);
 			if (dmg && !(c.status.psion && pl.foe.shield && pl.foe.shield.status.reflect)){
 				totalDamage += dmg;
 			}
 		});
 	}
-	totalDamage += estimateDamage(pl.weapon, freedomChance, wallCharges);
+	totalDamage += estimateDamage(pl.weapon, freedomChance, wallCharges, wallIndex);
 	if (pl.foe.status.poison) totalDamage += pl.foe.status.poison;
 	return totalDamage;
 }
@@ -460,8 +460,8 @@ function checkpassives(c) {
 	for (var status in statuses)
 	{
 		if (uniqueStatuses[status] && !(c instanceof etg.CardInstance)) {
-			if (!~uniquesActive.indexOf(status)) {
-				uniquesActive.push(status);
+			if (!uniquesActive[status]) {
+				uniquesActive[status] = true;
 			}
 			else {
 				continue;
@@ -582,7 +582,7 @@ function caneventuallyactive(element, cost, pl){
 	});
 }
 
-var uniqueStatuses = {flooding:"all", nightfall:"all", tunnel:"self", patience:"self", cloak:"self"};
+var uniqueStatuses = Object.freeze({flooding:"all", nightfall:"all", tunnel:"self", patience:"self", cloak:"self"});
 var uniquesActive, damageHash;
 
 module.exports = function(game) {
@@ -593,25 +593,25 @@ module.exports = function(game) {
 	if (game.player1.deck.length == 0 && game.player1.hand.length < 8){
 		return -99999990;
 	}
-	var wallCharges = [[0],[0]];
+	var wallCharges = new Int32Array([0, 0]);
 	damageHash = [];
-	uniquesActive = [];
-	var expectedDamage = calcExpectedDamage(game.player2, wallCharges[0]);
+	uniquesActive = {};
+	var expectedDamage = calcExpectedDamage(game.player2, wallCharges, 0);
 	if (expectedDamage > game.player1.hp){
 		return Math.min(expectedDamage - game.player1.hp, 500)*-999;
 	}
 	if (game.player2.deck.length == 0){
 		return 99999980;
 	}
-	expectedDamage = calcExpectedDamage(game.player1, wallCharges[1]); // Call to fill damageHash
+	expectedDamage = calcExpectedDamage(game.player1, wallCharges, 1); // Call to fill damageHash
 	var gamevalue = expectedDamage > game.player2.hp ? 999 : 0;
 	for (var j = 0;j < 2;j++) {
-		for (var i = 0; i < uniquesActive.length; i++) {
-			if (uniqueStatuses[uniquesActive[i]] == "self")
-				uniquesActive[i] = undefined;
+		for (var key in uniqueStatuses) {
+			if (uniqueStatuses[key] == "self")
+				uniquesActive[key] = undefined;
 		}
 		logNest(j);
-		var pscore = wallCharges[j][0]*4, player = game.players(j);
+		var pscore = wallCharges[j]*4, player = game.players(j);
 		pscore += evalthing(player.weapon);
 		pscore += evalthing(player.shield);
 		logNest("creas");
@@ -652,5 +652,6 @@ module.exports = function(game) {
 	}
 	log("Eval", gamevalue);
 	logEnd();
+	damageHash = uniquesActive = null;
 	return gamevalue;
 }

@@ -8,13 +8,6 @@ var etgutil = require("../etgutil");
 var userutil = require("../userutil");
 module.exports = function(db, users, sockEmit, usersock){
 	function loginRespond(socket, servuser, pass, authkey){
-		if(!servuser.name){
-			servuser.name = servuser.auth;
-		}
-		if(!servuser.salt){
-			servuser.salt = crypto.pseudoRandomBytes(15).toString("base64");
-			servuser.iter = 100000;
-		}
 		function postHash(err, key){
 			if (err){
 				sockEmit(socket, "login", {err:err.message});
@@ -31,8 +24,9 @@ module.exports = function(db, users, sockEmit, usersock){
 				var day = sutil.getDay();
 				if (servuser.oracle < day){
 					servuser.oracle = day;
+					var ocardupped = Math.random() < .03;
 					var card = etg.PlayerRng.randomcard(false,
-						(function (y) { return function (x) { return x.type != etg.PillarEnum && ((x.rarity != 5) ^ y); } })(Math.random() < .03));
+						function (x) { return x.type != etg.PillarEnum && ((x.rarity != 5) ^ ocardupped); });
 					var ccode = etgutil.asShiny(card.code, card.rarity == 5);
 					if (card.rarity > 1) {
 						servuser.accountbound = user.accountbound = etgutil.addcard(user.accountbound, ccode);
@@ -49,6 +43,13 @@ module.exports = function(db, users, sockEmit, usersock){
 				usersock[user.name] = socket;
 				sockEmit(socket, "login", user);
 			});
+		}
+		if(!servuser.name){
+			servuser.name = servuser.auth;
+		}
+		if(!servuser.salt){
+			servuser.salt = crypto.pseudoRandomBytes(15).toString("base64");
+			servuser.iter = 100000;
 		}
 		if (authkey){
 			postHash(null, authkey);

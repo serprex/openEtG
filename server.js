@@ -1,9 +1,12 @@
 #!/usr/bin/node
 process.chdir(__dirname);
 "use strict";
-var users = {}, usersock = {}, rooms = {};
+var users = {}, usersock = {}, rooms = {}, wss;
 var sutil = require("./srv/sutil");
-sutil.loadcards();
+sutil.loadcards(function(){
+	wss = new (require("ws/lib/WebSocketServer"))({server:app.listen(13602)});
+	wss.on("connection", wssConnection);
+});
 var qstring = require("querystring");
 var crypto = require("crypto");
 var fs = require("fs");
@@ -14,7 +17,6 @@ var app = require("connect")().
 	use("/speed", require("./srv/speed")()).
 	use("/deck", require("./srv/deckredirect")()).
 	use("/code", require("./srv/codesmith")(db));
-var wss = new (require("ws/lib/WebSocketServer"))({server:app.listen(13602)});
 var etgutil = require("./etgutil");
 var userutil = require("./userutil");
 var etg = require("./etg");
@@ -652,7 +654,7 @@ var sockEvents = {
 		delete rooms[data.room];
 	}
 };
-wss.on("connection", function(socket) {
+function wssConnection(socket) {
 	socket.meta = {};
 	socket.on("close", function(){
 		for(var key in rooms){
@@ -729,4 +731,4 @@ wss.on("connection", function(socket) {
 			func.call(socket, data);
 		}
 	});
-});
+}
