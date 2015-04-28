@@ -49,7 +49,7 @@ module.exports = function(db, users, sockEmit, usersock){
 		}
 		if(!servuser.salt){
 			servuser.salt = crypto.pseudoRandomBytes(15).toString("base64");
-			servuser.iter = 100000;
+			servuser.iter = 99999+etg.PlayerRng.upto(9999);
 		}
 		if (authkey){
 			postHash(null, authkey);
