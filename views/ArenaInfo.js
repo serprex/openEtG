@@ -8,7 +8,7 @@ var etgutil = require("../etgutil");
 module.exports = function(data) {
 	var stage = new PIXI.Container();
 	var div = px.dom.div(
-		[96, 576, "You get $3 every time your arena deck wins, & $1 every time it loses."],
+		[96, 576, "You get 3$ every time your arena deck wins, & 1$ every time it loses."],
 		[8, 300, ["Exit", require("./MainMenu")]]);
 	function renderInfo(info, y){
 		if (info){
@@ -26,9 +26,9 @@ module.exports = function(data) {
 				i++;
 			});
 			var marksprite = document.createElement("span");
-			marksprite.className = "ico e"+mark;
-			px.dom.add(div, [100, 4+y, (info.win || 0) + " - " + (info.loss || 0) + ": " + (info.rank == undefined?"Inactive":(info.rank+1))],
-				[200, 4+y, adeck],
+			marksprite.className = "ico e" + mark;
+			px.dom.add(div, [100, 4 + y, "W-L: " + (info.win || 0) + " - " + (info.loss || 0) + ", Rank: " + (info.rank == undefined ? "Inactive" : (info.rank + 1)) + ", " + ((info.win || 0)*3+(info.loss || 0)*1)] + "$",
+				[300, 4+y, adeck],
 				[400, 224+y, "Age: " + info.day],
 				[100, 224+y, "HP: " + info.curhp + " / " + info.hp],
 				[200, 224+y, "Mark: " + info.mark],
