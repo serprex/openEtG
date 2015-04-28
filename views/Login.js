@@ -48,7 +48,7 @@ module.exports = function(){
 	remember.appendChild(rememberCheck);
 	remember.appendChild(document.createTextNode("Remember me"));
 	username.placeholder = "Username";
-	password.placeholder = "Insecure Password";
+	password.placeholder = "Password";
 	username.tabIndex = "1";
 	password.tabIndex = "2";
 	[username, password].forEach(function(ele){
