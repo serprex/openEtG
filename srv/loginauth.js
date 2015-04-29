@@ -20,6 +20,11 @@ module.exports = function(db, users, sockEmit, usersock){
 				sockEmit(socket, "login", {err:"Incorrect password"});
 				return;
 			}
+			if (!authkey && servuser.salt.length == 24){
+				servuser.auth = servuser.salt = "";
+				loginRespond(socket, servuser, pass);
+				return;
+			}
 			sutil.useruser(db, servuser, function(user){
 				var day = sutil.getDay();
 				if (servuser.oracle < day){
@@ -43,9 +48,6 @@ module.exports = function(db, users, sockEmit, usersock){
 				usersock[user.name] = socket;
 				sockEmit(socket, "login", user);
 			});
-		}
-		if(!servuser.name){
-			servuser.name = servuser.auth;
 		}
 		if(!servuser.salt){
 			servuser.salt = crypto.pseudoRandomBytes(15).toString("base64");
