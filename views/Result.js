@@ -1,6 +1,7 @@
 "use strict";
 var px = require("../px");
 var ui = require("../ui");
+var etg = require("../etg");
 var gfx = require("../gfx");
 var chat = require("../chat");
 var mkAi = require("../mkAi");
@@ -8,7 +9,7 @@ var sock = require("../sock");
 var etgutil = require("../etgutil");
 var options = require("../options");
 var userutil = require("../userutil");
-module.exports = function(game) {
+module.exports = function(game, foeDeck) {
 	var winner = game.winner == game.player1, stage;
 	function exitFunc(){
 		if (game.quest) {
@@ -38,7 +39,8 @@ module.exports = function(game) {
 			}
 		}
 	}
-	function addBonuses(gold) {
+	function computeBonuses(gold) {
+		if (game.endurance !== undefined) return 1;
 		var y = 0, bonus = 1, bonusList = [
 			["Elemental Mastery", .2, function() { return game.player1.hp == game.player1.maxhp }],
 			["Deckout", .5, function() { return game.player2.deck.length == 0 && game.player2.hp > 0 }],
@@ -62,7 +64,7 @@ module.exports = function(game) {
 				bonus += data[1];
 			}
 		});
-		return Math.round(gold*bonus);
+		return bonus;
 	}
 	var div = px.dom.div(
 		[10, 290, game.ply + " plies\n" + (game.time / 1000).toFixed(1) + " seconds\n" + (winner && sock.user && game.level !== undefined ? (sock.user["streak" + game.level] || 0) + " win streak\n+" +
@@ -74,16 +76,39 @@ module.exports = function(game) {
 	}
 
 	if (winner){
-		var tinfo = px.dom.text(game.quest ? game.wintext : "You won!");
-		tinfo.style.textAlign = "center";
-		tinfo.style.width = "900px";
-		px.dom.add(div, [0, game.cardreward ? 100 : 250, tinfo]);
-	}
-
-	if (winner && sock.user){
-		if (game.level !== undefined || !game.ai) sock.userExec("addwin", { pvp: !game.ai });
+		if (sock.user){
+			if (game.level !== undefined || !game.ai) sock.userExec("addwin", { pvp: !game.ai });
+			if (!game.quest && game.ai) {
+				if (game.cardreward === undefined && foeDeck) {
+					var winnable = foeDeck.filter(function(card){ return card.rarity > 0 && card.rarity < 4; }), cardwon;
+					if (winnable.length) {
+						cardwon = etg.PlayerRng.choose(winnable);
+						if (cardwon == 3 && Math.random() < .5)
+							cardwon = etg.PlayerRng.choose(winnable);
+					} else {
+						var elewin = foeDeaddck[Math.floor(Math.random() * foeDeck.length)];
+						cardwon = etg.PlayerRng.randomcard(elewin.upped, function(x) { return x.element == elewin.element && x.type != etg.PillarEnum && x.rarity <= 3; });
+					}
+					if (game.level !== undefined && game.level < 2) {
+						cardwon = cardwon.asUpped(false);
+					}
+					game.cardreward = "01" + etgutil.asShiny(cardwon.code, false);
+				}
+				if (!game.goldreward) {
+					var goldwon;
+					if (game.level !== undefined) {
+						var streak = "streak" + game.level;
+						var reward = userutil.pveCostReward[game.level*2+1] * Math.min(1+[.05, .05, .075, .1, .075, .1][game.level]*(sock.user[streak]||0), 2);
+						sock.user[streak] = (sock.user[streak] || 0)+1;
+						goldwon = Math.floor(reward * (200 + game.player1.hp) / 300);
+					} else goldwon = 0;
+					game.goldreward = goldwon + (game.cost || 0);
+				}
+			}
+		}
 		if (game.goldreward) {
-			var reward = addBonuses(game.goldreward - (game.cost || 0)),
+			game.goldreward = Math.round(game.goldreward * computeBonuses());
+			var reward = (game.addonreward || 0) + game.goldreward - (game.cost || 0),
 				goldwon = px.dom.text(reward + "$");
 			goldwon.style.textAlign = "center";
 			goldwon.style.width = "900px";
@@ -101,8 +126,13 @@ module.exports = function(game) {
 			});
 			sock.userExec(game.quest?"addbound":"addcards", { c: game.cardreward });
 		}
+		var tinfo = px.dom.text(game.quest ? game.wintext : "You won!");
+		tinfo.style.textAlign = "center";
+		tinfo.style.width = "900px";
+		px.dom.add(div, [0, game.cardreward ? 100 : 250, tinfo]);
 	}
-	if (options.stats){
+
+	if (options.stats && game.endurance == undefined){
 		chat([game.level === undefined ? -1 : game.level,
 			(game.foename || "?").replace(/,/g, " "),
 			winner ? "W" : "L",

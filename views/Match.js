@@ -89,7 +89,7 @@ function startMatch(game, foeDeck, spectate) {
 					sock.user["streak"+game.level] = 0;
 				}
 			}
-			require("./Result")(game);
+			require("./Result")(game, foeDeck);
 		} else if (game.turn == game.player1) {
 			if (discard == undefined && game.player1.hand.length == 8) {
 				discarding = true;
@@ -516,33 +516,6 @@ function startMatch(game, foeDeck, spectate) {
 			cardart.visible = false;
 			for(var j=0; j<2; j++){
 				marksprite[j].style.display = marktext[j].style.display = "";
-			}
-		}
-		if (game.winner == game.player1 && sock.user && !game.quest && game.ai) {
-			if (game.cardreward === undefined) {
-				var winnable = foeDeck.filter(function(card){ return card.rarity > 0 && card.rarity < 4; }), cardwon;
-				if (winnable.length) {
-					cardwon = etg.PlayerRng.choose(winnable);
-					if (cardwon == 3 && Math.random() < .5)
-						cardwon = etg.PlayerRng.choose(winnable);
-				} else {
-					var elewin = foeDeck[Math.floor(Math.random() * foeDeck.length)];
-					cardwon = etg.PlayerRng.randomcard(elewin.upped, function(x) { return x.element == elewin.element && x.type != etg.PillarEnum && x.rarity <= 3; });
-				}
-				if (game.level !== undefined && game.level < 2) {
-					cardwon = cardwon.asUpped(false);
-				}
-				game.cardreward = "01" + etgutil.asShiny(cardwon.code, false);
-			}
-			if (!game.goldreward) {
-				var goldwon;
-				if (game.level !== undefined) {
-					var streak = "streak" + game.level;
-					var reward = userutil.pveCostReward[game.level*2+1] * Math.min(1+[.05, .05, .075, .1, .075, .1][game.level]*(sock.user[streak]||0), 2);
-					sock.user[streak] = (sock.user[streak] || 0)+1;
-					goldwon = Math.floor(reward * (200 + game.player1.hp) / 300);
-				} else goldwon = 0;
-				game.goldreward = goldwon + (game.cost || 0) + (game.addonreward || 0);
 			}
 		}
 		if (game.phase != etg.EndPhase) {
