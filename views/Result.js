@@ -39,42 +39,31 @@ module.exports = function(game) {
 		}
 	}
 	function addBonuses(gold) {
-		var y = 0, bonus = 1;
+		var y = 0, bonus = 1, bonusList = [
+			["Elemental Mastery", .2, function() { return game.player1.hp == game.player1.maxhp }],
+			["Deckout", .5, function() { return game.player2.deck.length == 0 && game.player2.hp > 0 }],
+			["Double Kill", .25, function() { return game.player2.hp < -game.player2.maxhp }],
+			["Waiter", .2, function() { return game.player1.deck.length == 0 }],
+			["Grounds Keeper", .2, function() { return game.player1.countpermanents() > 7 }],
+			["Creature Domination", .1, function() { return game.player1.countcreatures() > 2*game.player2.countcreatures() }],
+			["Creatureless", .1, function() { return game.player1.bonusstats.cardsplayed[5] == 0 }],
+			["Toxic", .1, function() { return game.player2.status.poison > 12 }],
+			["Equipped", .05, function() { return game.player1.weapon && game.player1.shield }],
+			["Mid Turn", .1, function() { return game.turn == game.player1 }],
+			["Pillarless", .1, function() { return game.player1.bonusstats.cardsplayed[0] == 0 }],
+			["Weapon Master", .1, function() { return game.player1.bonusstats.cardsplayed[1] >= 3 }],
+			["Fancy Killer", .2, function() { return game.player1.bonusstats.creatureskilled >= 6 }],
+			["One Turn Kill", .2, function() { return game.player1.bonusstats.otk && game.player2.hp <= 0 }]
+		];
 		bonusList.forEach(function(data) {
 			if (data[2]()) {
-				px.dom.add(div,[10, 370+y*20, data[0] + (options.stats ?  " " + Math.round(data[1]*100) + "%" : "")]);
+				px.dom.add(div,[10, 370+y*20, data[0] + " " + Math.round(data[1]*100) + "%"]);
 				y++;
 				bonus += data[1];
 			}
 		});
-		if (y > 0 && options.stats) {
-			px.dom.add(div, [10, 370+y*20, "Gold with bonuses: " + Math.round(gold*bonus)]);
-		}
-		return gold;
+		return Math.round(gold*bonus);
 	}
-	var bonusList = [
-		["Elemental Mastery", .2, function() { return game.player1.hp == game.player1.maxhp }],
-		["Deckout", .5, function() { return game.player2.deck.length == 0 && game.player2.hp > 0 }],
-		["Double Kill", .25, function() { return game.player2.hp < -game.player2.maxhp }],
-		["Waiter", .25, function() { return game.player1.deck.length == 0 }],
-		["Ground holding", .2, function() { return game.player1.countpermanents() > 7 }],
-		["Creature domination", .1, function() { return game.player1.countcreatures() > 2*game.player2.countcreatures() }],
-		["Creatureless", .1, function() { return game.player1.bonusstats.cardsplayed[5] == 0 }],
-		["Toxic", .1, function() { return game.player2.status.poison > 12 }],
-		["Equipped", .05, function() { return game.player1.weapon && game.player1.shield }],
-		["Mid turn", .1, function() { return game.turn == game.player1 }],
-		["Without a Scratch", .5, function() { return !game.player1.bonusstats.takendamage }],
-		["All in One", .1, function(){
-			for (var i = 0;i < 12;i++) {
-				if (game.player1.bonusstats.quantaspent[i] == 0) return false;
-			}
-			return true;
-		}],
-		["Pillarless", .1, function() { return game.player1.bonusstats.cardsplayed[0] == 0 }],
-		["Weapon Master", .1, function() { return game.player1.bonusstats.cardsplayed[1] >= 3 }],
-		["Fancy Killer", .2, function() { return game.player1.bonusstats.creatureskilled >= 6 }],
-		["One Turn Kill", .3, function() { return game.player1.bonusstats.otk && game.player2.hp <= 0 }]
-	];
 	var div = px.dom.div(
 		[10, 290, game.ply + " plies\n" + (game.time / 1000).toFixed(1) + " seconds\n" + (winner && sock.user && game.level !== undefined ? (sock.user["streak" + game.level] || 0) + " win streak\n+" +
 			Math.min([5, 5, 7.5, 10, 7.5, 10][game.level] * Math.max(sock.user["streak" + game.level] - 1, 0), 100) + "% streak bonus" : "")],

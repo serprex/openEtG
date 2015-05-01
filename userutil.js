@@ -9,10 +9,18 @@ exports.rewardwords = {
 	shard: 4,
 	nymph: 5,
 };
-exports.cardValues = [25/3, 1.375, 5, 30, 35, 250];
-exports.sellValues = [5, 1, 3, 15, 20, 240];
+exports.cardValues = new Float32Array([25/3, 1.375, 5, 30, 35, 250]);
+exports.sellValues = new Uint8Array([5, 1, 3, 15, 20, 240]);
+exports.pveCostReward = new Uint8Array([
+	0, 15,
+	5, 30,
+	10, 65,
+	20, 200,
+	10, 60,
+	20, 120,
+]);
 exports.arenaCost = function(lv){
-	return lv ? 20 : 10;
+	return exports.pveCostReward[lv?10:8];
 }
 exports.calcWealth = function(cardpool){
 	var wealth = 0;

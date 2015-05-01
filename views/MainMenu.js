@@ -10,14 +10,6 @@ var Cards = require("../Cards");
 var etgutil = require("../etgutil");
 var options = require("../options");
 var userutil = require("../userutil");
-var aicostpay = [
-	0, 15,
-	5, 30,
-	10, 70,
-	20, 200,
-	userutil.arenaCost(0), 60,
-	userutil.arenaCost(1), 120,
-];
 var tipjar = [
 	"Each card in your booster pack has a 50% chance of being from the chosen element",
 	"Your arena deck will earn you 3$ per win & 1$ per loss",
@@ -90,7 +82,7 @@ module.exports = function(nymph) {
 		});
 	}
 	function costText(lv, n){
-		return labelText((n ? "Base reward: " : "Cost: ") + aicostpay[lv*2+n] + "$");
+		return labelText((n ? "Base reward: " : "Cost: ") + userutil.pveCostReward[lv*2+n] + "$");
 	}
 	var deckbox = px.dom.divwh(196, 176),
 		statbox = px.dom.divwh(196, 120),

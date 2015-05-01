@@ -152,11 +152,9 @@ function Player(game){
 	this.shardgolem = undefined;
 	this.bonusstats = {
 		cardsplayed : new Int32Array(6),
-		takendamage: false,
 		creatureskilled: 0,
-		quantaspent: new Int32Array(12),
 		otk: false
-	}
+	};
 }
 function Creature(card, owner){
 	if (card.isOf(Cards.ShardGolem)){
@@ -604,10 +602,7 @@ Player.prototype.spend = function(qtype, x) {
 			var q = b == -1 ? this.uptoceil(12) : this.randomquanta();
 			this.quanta[q] = Math.min(this.quanta[q] - b, 99);
 		}
-	} else {
-		this.quanta[qtype] = Math.min(this.quanta[qtype] - x, 99);
-		if (this.bonusstats != null && x > 0) this.bonusstats.quantaspent[qtype-1] += x;
-	}
+	} else this.quanta[qtype] = Math.min(this.quanta[qtype] - x, 99);
 	return true;
 }
 Player.prototype.countcreatures = function() {
@@ -844,7 +839,6 @@ Player.prototype.dmg = function(x, ignoresosa) {
 		return sosa?-x:heal;
 	}else{
 		this.hp -= x;
-		if (this.bonusstats != null) this.bonusstats.takendamage = true;
 		if (this.hp <= 0){
 			this.game.setWinner(this.foe);
 		}

@@ -9,6 +9,7 @@ var Cards = require("../Cards");
 var Effect = require("../Effect");
 var Actives = require("../Actives");
 var etgutil = require("../etgutil");
+var userutil = require("../userutil");
 function startMatch(game, foeDeck, spectate) {
 	if (sock.trade){
 		sock.userEmit("canceltrade");
@@ -537,7 +538,7 @@ function startMatch(game, foeDeck, spectate) {
 				var goldwon;
 				if (game.level !== undefined) {
 					var streak = "streak" + game.level;
-					var reward = [15, 30, 70, 200, 60, 120][game.level] * Math.min(1+[.05, .05, .075, .1, .075, .1][game.level]*(sock.user[streak]||0), 2);
+					var reward = userutil.pveCostReward[game.level*2+1] * Math.min(1+[.05, .05, .075, .1, .075, .1][game.level]*(sock.user[streak]||0), 2);
 					sock.user[streak] = (sock.user[streak] || 0)+1;
 					goldwon = Math.floor(reward * (200 + game.player1.hp) / 300);
 				} else goldwon = 0;
