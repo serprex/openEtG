@@ -39,7 +39,7 @@ module.exports = function(game, foeDeck) {
 			}
 		}
 	}
-	function computeBonuses(gold) {
+	function computeBonuses() {
 		if (game.endurance !== undefined) return 1;
 		var y = 0, bonus = 1, bonusList = [
 			["Elemental Mastery", .2, function() { return game.player1.hp == game.player1.maxhp }],
@@ -59,22 +59,18 @@ module.exports = function(game, foeDeck) {
 		];
 		bonusList.forEach(function(data) {
 			if (data[2]()) {
-				px.dom.add(div,[10, 370+y*20, data[0] + " " + Math.round(data[1]*100) + "%"]);
+				lefttext.push(data[0] + " " + Math.round(data[1]*100) + "%");
 				y++;
 				bonus += data[1];
 			}
 		});
 		return bonus;
 	}
-	var div = px.dom.div(
-		[10, 290, game.ply + " plies\n" + (game.time / 1000).toFixed(1) + " seconds\n" + (winner && sock.user && game.level !== undefined ? (sock.user["streak" + game.level] || 0) + " win streak\n+" +
-			Math.min([5, 5, 7.5, 10, 7.5, 10][game.level] * Math.max(sock.user["streak" + game.level] - 1, 0), 100) + "% streak bonus" : "")],
-		[412, 440, ["Exit", exitFunc]]);
-
+	var div = px.dom.div([412, 440, ["Exit", exitFunc]]), lefttext = [game.ply + " plies", (game.time / 1000).toFixed(1) + " seconds"];
 	if (!game.quest && game.daily === undefined){
 		px.dom.add(div, [412, 490, ["Rematch", rematch]]);
 	}
-
+	var streakrate = 0;
 	if (winner){
 		if (sock.user){
 			if (game.level !== undefined || !game.ai) sock.userExec("addwin", { pvp: !game.ai });
@@ -98,9 +94,11 @@ module.exports = function(game, foeDeck) {
 					var goldwon;
 					if (game.level !== undefined) {
 						var streak = "streak" + game.level;
-						var reward = userutil.pveCostReward[game.level*2+1] * Math.min(1+[.05, .05, .075, .1, .075, .1][game.level]*(sock.user[streak]||0), 2);
+						streakrate = Math.min([.05, .05, .075, .1, .075, .1][game.level]*(sock.user[streak]||0), 1);
+						var reward = userutil.pveCostReward[game.level*2+1] * (1+streakrate);
 						sock.user[streak] = (sock.user[streak] || 0)+1;
 						goldwon = Math.floor(reward * (200 + game.player1.hp) / 300);
+						lefttext.push(sock.user[streak] + " win streak", (streakrate * 100).toFixed(1) + "% streak bonus");
 					} else goldwon = 0;
 					game.goldreward = goldwon + (game.cost || 0);
 				}
@@ -131,6 +129,7 @@ module.exports = function(game, foeDeck) {
 		tinfo.style.width = "900px";
 		px.dom.add(div, [0, game.cardreward ? 100 : 250, tinfo]);
 	}
+	px.dom.add(div, [10, 290, lefttext.join("\n")]);
 
 	if (options.stats && game.endurance == undefined){
 		chat([game.level === undefined ? -1 : game.level,
@@ -144,7 +143,7 @@ module.exports = function(game, foeDeck) {
 			game.cardreward || "-",
 			userutil.calcWealth(etgutil.deck2pool(game.cardreward)),
 			!sock.user || game.level === undefined ? -1 : sock.user["streak"+game.level],
-			!sock.user || game.level === undefined ? 0 : Math.min([.05, .05, .075, .1, .075, .1][game.level]*Math.max(sock.user["streak"+game.level]-1, 0), 1).toFixed(3).replace(/\.?0+$/, "")].join());
+			streakrate.toFixed(3).replace(/\.?0+$/, "")].join());
 	}
 	function onkeydown(e){
 		if (e.keyCode == 32) exitFunc();
