@@ -49,7 +49,7 @@ module.exports = function(game, foeDeck) {
 			["Grounds Keeper", .2, function() { return game.player1.countpermanents() > 7 }],
 			["Creature Domination", .1, function() { return game.player1.countcreatures() > 2*game.player2.countcreatures() }],
 			["Creatureless", .1, function() { return game.player1.bonusstats.cardsplayed[5] == 0 }],
-			["Toxic", .1, function() { return game.player2.status.poison > 12 }],
+			["Toxic", .1, function() { return game.player2.status.poison > 18 }],
 			["Equipped", .05, function() { return game.player1.weapon && game.player1.shield }],
 			["Mid Turn", .1, function() { return game.turn == game.player1 }],
 			["Pillarless", .1, function() { return game.player1.bonusstats.cardsplayed[0] == 0 }],
