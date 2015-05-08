@@ -13,7 +13,7 @@ function Game(seed, flip){
 	this.player2 = new Player(this);
 	this.player1.foe = this.player2;
 	this.player2.foe = this.player1;
-	this.turn = (seed < etgutil.MAX_INT/2) === !flip ? this.player1 : this.player2;
+	this.first = this.turn = (seed < etgutil.MAX_INT/2) === !flip ? this.player1 : this.player2;
 	this.ply = 0;
 	this.targeting = null;
 	this.expectedDamage = new Int32Array(2);
@@ -217,6 +217,7 @@ Game.prototype.clone = function(){
 	obj.player1.foe = obj.player2;
 	obj.player2.foe = obj.player1;
 	obj.turn = this.turn == this.player1 ? obj.player1 : obj.player2;
+	obj.first = this.first == this.player1 ? obj.player1 : obj.player2;
 	obj.ply = this.ply;
 	obj.targeting = this.targeting;
 	return obj;

@@ -526,7 +526,7 @@ function startMatch(game, foeDeck, spectate) {
 				turntext = game.targeting.text;
 			}else{
 				turntext = game.turn == game.player1 ? "Your Turn" : "Their Turn";
-				if (game.phase < 2) turntext += "\n" + (game.phase ? "Second" : "First");
+				if (game.phase < 2) turntext += "\n" + (game.first == game.player1 ? "First": "Second");
 			}
 			turntell.text = turntext;
 			if (game.turn == game.player1){
