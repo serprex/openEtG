@@ -727,7 +727,7 @@ Player.prototype.drawhand = function(x) {
 			this.deck.push(this.hand.pop().card);
 		}
 		this.shuffle(this.deck);
-		for(var i=0; i<x; i++){
+		for(var i=0; i<x && this.deck.length>0; i++){
 			this.hand.push(new CardInstance(this.deck.pop(), this));
 		}
 	}
