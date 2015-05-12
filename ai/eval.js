@@ -176,6 +176,7 @@ var ActivesValues = Object.freeze({
 	ignite:4,
 	immolate:5,
 	improve:6,
+	inertia:2,
 	infect:4,
 	ink:3,
 	innovation:3,
