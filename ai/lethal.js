@@ -2,7 +2,7 @@
 var etg = require("../etg");
 var Cards = require("../Cards");
 module.exports = function(game) {
-	var limit = 333, cmdct, currentEval = game.player1.hp, casthash = [];
+	var limit = 333, cmdct, currentEval = game.player1.hp;
 	function iterLoop(game, cmdct0){
 		function iterCore(c) {
 			if (!c || !c.canactive()) return;
@@ -36,7 +36,7 @@ module.exports = function(game) {
 				evalIter();
 			}
 		}
-		var p2 = game.player2;
+		var p2 = game.player2, casthash = [];
 		p2.hand.forEach(iterCore);
 		p2.permanents.forEach(iterCore);
 		p2.creatures.forEach(iterCore);

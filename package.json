@@ -7,7 +7,7 @@
     "url": "https://github.com/serprex/openEtG.git"
   },
   "dependencies": {
-    "compression": "^1.4.3",
+    "compression": "^1.4.4",
     "connect": "^3.3.5",
     "redis": "^0.12.1",
     "serve-static": "^1.9.2",
@@ -15,7 +15,7 @@
   },
   "devDependencies": {
     "qunitjs": "^1.18.0",
-    "urllib": "^2.3.3"
+    "urllib": "^2.3.5"
   },
   "scripts": {
     "test": "npm start;firefox 127.0.0.1:13602/test.htm"
