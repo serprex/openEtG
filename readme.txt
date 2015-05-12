@@ -13,9 +13,9 @@ How to setup on Windows:
 
 4	Run "node updatedb.js" (NB it takes csv files as parameters if you don't want to download all of them)
 
-5	Build pixi.js from https://github.com/serprex/pixi.js/tree/oetg
+5	Build pixi.js from https://github.com/serprex/pixi.js/tree/oetg or download from http://etg.dek.im/pixi.min.js
 
-6	Build spritesheet-js from https://github.com/serprex/spritesheet-js
+6	Run "npm install -g spritesheet-js"
 
 6	ninja.exe should be in openEtG's folder. Run ninja.exe to build etgify.js
 

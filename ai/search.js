@@ -63,7 +63,7 @@ module.exports = function(game, previous) {
 		}
 		var lethal = require("./lethal")(game);
 		return lethal[0] < 0 ?
-			(!game.winner ? ["cast",  lethal[1]] : worstcard === undefined ? ["endturn", worstcard] : ["endturn"]):
+			(lethal[1] !== undefined ? ["cast",  lethal[1]] : worstcard === undefined ? ["endturn", worstcard] : ["endturn"]):
 			[0, currentEval, undefined, 2, [], 99, worstcard];
 	}
 	var limit = previous[5], cmdct = previous[2], cdepth = previous[3], nth = previous[0];
@@ -175,7 +175,7 @@ module.exports = function(game, previous) {
 	var ret = iterLoop(game, 1, undefined, previous[4]);
 	if (ret){
 		return [nth, currentEval, cmdct, cdepth, ret, limit, worstcard];
-	}else if (cmdct) {
+	}else if (cmdct !== undefined) {
 		return ["cast", cmdct];
 	} else if (game.player2.hand.length == 8) {
 		return ["endturn", worstcard];
