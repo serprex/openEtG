@@ -110,7 +110,7 @@ var data = {
 	gaintimecharge:"Gain a stack per own non-drawstep draw, up to 4 per turn",
 	gas:"Summon an Unstable Gas",
 	grave:"Whenever a creature dies, become an unburrowed of its kind",
-	give:function(c){return "Give own target to foe. Heal self "+(c.upped?10:5)},
+	give:function(c){return "Give own target to foe. Heal self "+(c.upped?10:5)+". Ignore sanctuary, may target immaterial"},
 	golemhit:"Target golem attacks",
 	gpull:"Intercept attacks directed to owner",
 	gpullspell:"Target creature intercepts attacks directed to its owner",
