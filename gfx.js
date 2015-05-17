@@ -61,9 +61,9 @@ function Text(text, fontsize, color, bgcolor){
 	ctx.fillText(text, 0, fontsize);
 	return new PIXI.Texture(new PIXI.BaseTexture(canvas));
 }
-var caimgcache = {}, artcache = {}, artimagecache = {};
-function setShinyShader(sprite, card){
-	if (card.shiny && rend.renderer.gl) sprite.shader = shinyFilter.getShader(rend.renderer);
+var caimgcache = {}, artcache = {}, artimagecache = {}, shinyShader;
+function setShinyShader(renderer, sprite, card){
+	if (card.shiny && renderer.gl) sprite.shader = shinyShader || (shinyShader = require("./ColorMatrixShader")(renderer));
 }
 function makeArt(card, art, oldrend) {
 	var rend = oldrend || require("./px").mkRenderTexture(132, 256);
@@ -80,7 +80,7 @@ function makeArt(card, art, oldrend) {
 	if (art) {
 		var artspr = new PIXI.Sprite(art);
 		artspr.position.set(2, 20);
-		setShinyShader(artspr, card);
+		setShinyShader(rend.renderer, artspr, card);
 		template.addChild(artspr);
 	}
 	if (card.shiny){
@@ -204,7 +204,7 @@ function getInstImage(scale){
 			if (art) {
 				var artspr = new PIXI.Sprite(art);
 				artspr.position.y = 16;
-				setShinyShader(artspr, card);
+				setShinyShader(rend.renderer, artspr, card);
 				c.addChild(artspr);
 			}
 			var text = new PIXI.Sprite(Text(card.name, 16, card.upped ? "black" : "white"));
@@ -257,5 +257,4 @@ if (typeof PIXI !== "undefined"){
 	exports.getArt = getArt;
 	exports.getCardImage = getCardImage;
 	exports.Text = Text;
-	var shinyFilter = new (require("./ColorMatrixFilter"))();
 }
