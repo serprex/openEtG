@@ -61,7 +61,7 @@ function Text(text, fontsize, color, bgcolor){
 	ctx.fillText(text, 0, fontsize);
 	return new PIXI.Texture(new PIXI.BaseTexture(canvas));
 }
-var caimgcache = {}, crimgcache = {}, wsimgcache = {}, artcache = {}, artimagecache = {};
+var caimgcache = {}, artcache = {}, artimagecache = {};
 function makeArt(card, art, oldrend) {
 	var rend = oldrend || require("./px").mkRenderTexture(132, 256);
 	var template = new PIXI.Container();
@@ -173,50 +173,47 @@ function getCardImage(code) {
 		return caimgcache[code] = rend;
 	}
 }
-function getInstImage(code, scale, cache){
-	return cache[code] || getArtImage(code, function(art) {
-		var card = Cards.Codes[code];
-		var rend = cache[code] || require("./px").mkRenderTexture(Math.ceil(128 * scale), Math.ceil(160 * scale));
-		var btex = exports.cardBorders[card.element + (card.upped ? 13 : 0)];
-		var c = new PIXI.Container();
-		var border = new PIXI.Sprite(btex), border2 = new PIXI.Sprite(btex);
-		border.scale.x = border2.scale.x = 128.5/132;
-		border2.position.y = 160;
-		border2.scale.y = -1;
-		c.addChild(border);
-		c.addChild(border2);
-		var graphics = new PIXI.Graphics();
-		c.addChild(graphics);
-		graphics.beginFill(ui.maybeLighten(card));
-		graphics.drawRect(0, 16, 128, 128);
-		if (card.shiny){
-			graphics.lineStyle(2, 0xdaa520);
-			graphics.moveTo(0, 14);
-			graphics.lineTo(128, 14);
-			graphics.moveTo(0, 147);
-			graphics.lineTo(128, 147);
-		}
-		if (art) {
-			var artspr = new PIXI.Sprite(art);
-			artspr.position.y = 16;
-			if (card.shiny && rend.renderer.gl) artspr.shader = shinyFilter.getShader(rend.renderer);
-			c.addChild(artspr);
-		}
-		var text = new PIXI.Sprite(Text(card.name, 16, card.upped ? "black" : "white"));
-		text.anchor.x = .5;
-		text.position.set(64, 142);
-		c.addChild(text);
-		var mtx = new PIXI.math.Matrix();
-		mtx.scale(scale, scale);
-		rend.render(c, mtx);
-		return cache[code] = rend;
-	});
-}
-function getCreatureImage(code) {
-	return getInstImage(code, .5, crimgcache);
-}
-function getWeaponShieldImage(code) {
-	return getInstImage(code, 5/8, wsimgcache);
+function getInstImage(scale){
+	var cache = {};
+	return function(code){
+		return cache[code] || getArtImage(code, function(art) {
+			var card = Cards.Codes[code];
+			var rend = cache[code] || require("./px").mkRenderTexture(Math.ceil(128 * scale), Math.ceil(160 * scale));
+			var btex = exports.cardBorders[card.element + (card.upped ? 13 : 0)];
+			var c = new PIXI.Container();
+			var border = new PIXI.Sprite(btex), border2 = new PIXI.Sprite(btex);
+			border.scale.x = border2.scale.x = 128.5/132;
+			border2.position.y = 160;
+			border2.scale.y = -1;
+			c.addChild(border);
+			c.addChild(border2);
+			var graphics = new PIXI.Graphics();
+			c.addChild(graphics);
+			graphics.beginFill(ui.maybeLighten(card));
+			graphics.drawRect(0, 16, 128, 128);
+			if (card.shiny){
+				graphics.lineStyle(2, 0xdaa520);
+				graphics.moveTo(0, 14);
+				graphics.lineTo(128, 14);
+				graphics.moveTo(0, 147);
+				graphics.lineTo(128, 147);
+			}
+			if (art) {
+				var artspr = new PIXI.Sprite(art);
+				artspr.position.y = 16;
+				if (card.shiny && rend.renderer.gl) artspr.shader = shinyFilter.getShader(rend.renderer);
+				c.addChild(artspr);
+			}
+			var text = new PIXI.Sprite(Text(card.name, 16, card.upped ? "black" : "white"));
+			text.anchor.x = .5;
+			text.position.set(64, 142);
+			c.addChild(text);
+			var mtx = new PIXI.math.Matrix();
+			mtx.scale(scale, scale);
+			rend.render(c, mtx);
+			return cache[code] = rend;
+		});
+	}
 }
 var artpool;
 exports.refreshCaches = function() {
@@ -252,10 +249,10 @@ if (typeof PIXI !== "undefined"){
 	exports.nopic = PIXI.Texture.emptyTexture;
 	exports.nopic.width = exports.nopic.height = 0;
 	exports.load = load;
-	exports.getPermanentImage = exports.getCreatureImage = getCreatureImage;
+	exports.getPermanentImage = exports.getCreatureImage = getInstImage(.5);
+	exports.getWeaponShieldImage = getInstImage(5/8);
 	exports.getArt = getArt;
 	exports.getCardImage = getCardImage;
-	exports.getWeaponShieldImage = getWeaponShieldImage;
 	exports.Text = Text;
 	var shinyFilter = new (require("./ColorMatrixFilter"))();
 }
