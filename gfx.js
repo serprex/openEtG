@@ -62,6 +62,9 @@ function Text(text, fontsize, color, bgcolor){
 	return new PIXI.Texture(new PIXI.BaseTexture(canvas));
 }
 var caimgcache = {}, artcache = {}, artimagecache = {};
+function setShinyShader(sprite, card){
+	if (card.shiny && rend.renderer.gl) sprite.shader = shinyFilter.getShader(rend.renderer);
+}
 function makeArt(card, art, oldrend) {
 	var rend = oldrend || require("./px").mkRenderTexture(132, 256);
 	var template = new PIXI.Container();
@@ -77,7 +80,7 @@ function makeArt(card, art, oldrend) {
 	if (art) {
 		var artspr = new PIXI.Sprite(art);
 		artspr.position.set(2, 20);
-		if (card.shiny && rend.renderer.gl) artspr.shader = shinyFilter.getShader(rend.renderer);
+		setShinyShader(artspr, card);
 		template.addChild(artspr);
 	}
 	if (card.shiny){
@@ -201,7 +204,7 @@ function getInstImage(scale){
 			if (art) {
 				var artspr = new PIXI.Sprite(art);
 				artspr.position.y = 16;
-				if (card.shiny && rend.renderer.gl) artspr.shader = shinyFilter.getShader(rend.renderer);
+				setShinyShader(artspr, card);
 				c.addChild(artspr);
 			}
 			var text = new PIXI.Sprite(Text(card.name, 16, card.upped ? "black" : "white"));
