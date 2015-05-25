@@ -39,7 +39,7 @@ exports.mkTask = function(cb){
 exports.initsalt = function(user){
 	if (!user.salt){
 		user.salt = require("crypto").pseudoRandomBytes(15).toString("base64");
-		user.iter = 99999+etg.PlayerRng.upto(9999);
+		user.iter = 99999+Math.floor(Math.random()*9999);
 	}
 }
 exports.useruser = function(db, servuser, cb){
