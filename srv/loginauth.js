@@ -49,10 +49,7 @@ module.exports = function(db, users, sockEmit, usersock){
 				sockEmit(socket, "login", user);
 			});
 		}
-		if(!servuser.salt){
-			servuser.salt = crypto.pseudoRandomBytes(15).toString("base64");
-			servuser.iter = 99999+etg.PlayerRng.upto(9999);
-		}
+		sutil.initsalt(servuser);
 		if (authkey){
 			postHash(null, authkey);
 		}else if (pass){

@@ -1,6 +1,6 @@
 #!/usr/bin/node
-process.chdir(__dirname);
 "use strict";
+process.chdir(__dirname);
 var users = {}, usersock = {}, rooms = {}, wss;
 var sutil = require("./srv/sutil");
 sutil.loadcards(function(){
@@ -8,7 +8,6 @@ sutil.loadcards(function(){
 	wss.on("connection", wssConnection);
 });
 var qstring = require("querystring");
-var crypto = require("crypto");
 var fs = require("fs");
 var db = require("redis").createClient();
 var app = require("connect")().
@@ -433,11 +432,8 @@ var userEvents = {
 			sockEmit(this, "passchange", {auth: user.name});
 		}else{
 			var socket = this;
-			if(!user.salt){
-				user.salt = crypto.pseudoRandomBytes(16).toString("base64");
-				user.iter = 100000;
-			}
-			crypto.pbkdf2(data.p, user.salt, parseInt(user.iter), 64, function(err, key){
+			sutil.initsalt(user);
+			require("crypto").pbkdf2(data.p, user.salt, parseInt(user.iter), 64, function(err, key){
 				if (!err){
 					user.auth = key.toString("base64");
 					sockEmit(socket, "passchange", {auth: user.auth});
