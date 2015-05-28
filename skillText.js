@@ -93,7 +93,7 @@ var data = {
 	fire:"Produce 1:6",
 	firebolt:"Deals 3 damage to target. Increment damage per 4:6 owned. Thaws target",
 	firewall:"Damage non-ranged attackers",
-	flatline:"No quanta is produced in foe's next turn",
+	flatline:"Foe produces no quanta until next turn",
 	flyself:"If equiped, cast Flying Weapon on self. Otherwise cast Living Weapon on self",
 	flyingweapon:"Target weapon becomes a flying creature",
 	foedraw:"Draw from foe's deck",
