@@ -76,7 +76,7 @@ var data = {
 	earthquake:"Destroy up to 3 stacks from target permanent",
 	eatspell:"Absorb next spell, gaining 1|1",
 	elf:"Become Fallen if target of Chaos Seed",
-	empathy:"Heal owner per creature owned per turn. Upkeep per 8 creatures",
+	empathy:"Heal owner per creature owned per turn. Upkeep per 8 creatures", //what upkeep? 1 life?
 	enchant:"Target permanent becomes immaterial",
 	endow:"Replicate attributes of target weapon",
 	envenom:"Target weapon gains \"Venom: apply poison on hit\"",
