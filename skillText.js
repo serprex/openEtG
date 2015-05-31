@@ -12,11 +12,11 @@ var data = {
 	aether:"Produce 1:12 on death",
 	aflatoxin:"Apply 2 poison to target. When target dies, it turns into a malignant cell",
 	aggroskele:"Summon a Skeleton. All own skeletons attack target creature",
-	air:"Produce 1:9",
+	air:"Produce 1:9 per turn",
 	alphawolf:"Summon two 2|1 Pack Wolves on play",
 	antimatter:"Invert strength of target",
 	appease:"Sacifice own creature & gain 1|1. If not, retaliate",
-	atk2hp:"Target's size is changed to match its strength",
+	atk2hp:"Target's health is changed to match its strength",
 	axedraw:"Increment damage per draw. Reset on attack",
 	bblood:"Target creature gains 0|20 & is delayed 6 turns",
 	becomearctic:"Become Arctic if frozen",
@@ -43,9 +43,9 @@ var data = {
 	corpseexplosion:["Sacrifice a creature to deal 1 damage to all creatures. Poisonous sacrifices poison foe",
 		"Sacrifice a creature to deal 1 damage to all enemy creatures. Poisonous sacrifices poison foe"],
 	counter:"Attack attacker when attacked & able to attack",
-	cpower:"Target gains 1 to 5 strength. Target gains 1 to 5 size",
+	cpower:"Target gains 1 to 5 strength. Target gains 1 to 5 health",
 	cseed:"A random effect is inflicted to target creature",
-	darkness:"Produce 1:11",
+	darkness:"Produce 1:11 per turn",
 	deadalive:{
 		hit:"Trigger a death effect on hit",
 		cast:"Trigger a death effect",
@@ -72,15 +72,15 @@ var data = {
 	dryspell:"Deal 1 damage to all creatures. Gain 1:7 per damage dealt. Removes cloak",
 	dshield:"Become immaterial until next turn",
 	duality:"Generate a copy of foe's next draw",
-	earth:"Produce 1:4",
+	earth:"Produce 1:4 per turn",
 	earthquake:"Destroy up to 3 stacks from target permanent",
 	eatspell:"Absorb next spell, gaining 1|1",
 	elf:"Become Fallen if target of Chaos Seed",
-	empathy:"Heal owner per creature owned per turn. Upkeep per 8 creatures", //what upkeep? 1 life?
+	empathy:"Heal owner per creature owned per turn. Consumes 1:5 per 8 creatures",
 	enchant:"Target permanent becomes immaterial",
 	endow:"Replicate attributes of target weapon",
 	envenom:"Target weapon gains \"Venom: apply poison on hit\"",
-	epidemic:"When a creature dies, transfer creature's poison counters to foe", //name would suggest spreading to other creatures, which would also be cool. this could be called "diseased corpse"?
+	epidemic:"When a creature dies, transfer creature's poison counters to foe",
 	epoch:"Silence player after playing 2 cards in a turn",
 	evade40:"40% chance to evade",
 	evade50:"50% chance to evade",
@@ -90,7 +90,7 @@ var data = {
 	feed:"Poison target creature & gain 3|3, but rematerialize",
 	fickle:"Swap target card with random affordable card from deck",
 	fiery:"Increment damage per 5:6 owned",
-	fire:"Produce 1:6",
+	fire:"Produce 1:6 per attack",
 	firebolt:"Deals 3 damage to target. Increment damage per 4:6 owned. Thaws target",
 	firewall:"Damage non-ranged attackers",
 	flatline:"Foe produces no quanta until next turn",
@@ -143,9 +143,9 @@ var data = {
 	innovation:"Discard target card, owner draws three cards",
 	integrity:"Combine all shards in hand to form a Shard Golem",
 	jetstream:"Target airborne creature gains 3|-1",
-	layegg:"Lay a Fate Egg",
+	layegg:"Summon a Fate Egg",
 	light:{
-		auto:"Produce 1:8",
+		auto:"Produce 1:8 per attack",
 		ownplay:"Produce 1:8 on play",
 	},
 	lightning:"Deal 5 damage to target",
@@ -159,9 +159,9 @@ var data = {
 		var charges = c.status.charges;
 		return "Lasts " + charges + " turn" + (charges == 1?"":"s");
 	},
-	luciferin:"All your creatures without skills produce 1:8. Heal owner 10",
+	luciferin:"All your creatures without skills produce 1:8 per attack. Heal owner 10",
 	lycanthropy:"Gain 5|5 & become nocturnal",
-	martyr:"Strength increases as health decreases",
+	martyr:"Strength includes difference of maximum health & current health",
 	mend:"Heal target creature 10",
 	metamorph:"Change mark to target's element. Increase mark power by 1",
 	midas:"Target permanent becomes a Golden Relic with \"2:0: Sacrifice & draw\"",
@@ -193,7 +193,7 @@ var data = {
 	phoenix:["Become an Ash on death", "Become a Minor Ash on death"],
 	photosynthesis:"Convert 1:8 to 2:5. May activate multiple times",
 	pillar:{
-		auto:function(c){return "Produce "+(c.element?1:3)+":"+c.element},
+		auto:function(c){return "Produce "+(c.element?1:3)+":"+c.element + " per turn"},
 		ownplay:function(c){return "Produce "+(c.element?1:3)+":"+c.element+" on play"}
 	},
 	pend:function(c){return "Oscilliate between producing "+(c.element?1:3)+":"+c.element + " & quanta of mark"},
@@ -212,12 +212,12 @@ var data = {
 		cast:"Apply 3 poison to foe"
 	},
 	poisonfoe:"May apply poison to foe on play",
-	powerdrain:"Drain half the target creature's strength & size, adding it to one of your creatures",
+	powerdrain:"Drain half the target creature's strength & health, adding it to one of your creatures",
 	precognition:"Reveal foe's hand until end of their turn. Draw",
 	predator:"Attacks twice if foe holds more than 4 cards",
 	protectall:"Bubble each of own creatures & permanents. Bubbles protect from next targeting or spell damage",
 	protectonce:"Evade next targeting, or prevent next source of spell damage",
-	purify:"Remove poison, and add 2 purify. Also removes sacrifice", //changed to clarify that it is not 2 purify PER poison
+	purify:"Remove poison & sacrifice. Apply 2 purify",
 	quantagift:"Gain 2:7 & 2 quanta of mark. Produce only 3:7 if mark is 1:7",
 	queen:"Summon a Firefly",
 	quint:"Target creature becomes immaterial. Thaws",
@@ -227,20 +227,20 @@ var data = {
 	randomdr:function(c){return "Damage reduction becomes 0 to "+(c.upped?3:2)+" on play"},
 	readiness:"Target creature's active becomes costless. Skill can be reactivated",
 	rebirth:["Become a Phoenix", "Become a Minor Phoenix"],
-	reducemaxhp:"attack maximum HP instead",
+	reducemaxhp:"Reduce maximum HP per damage dealt",
 	regen:"Apply 1 purify to owner on hit. Throttled",
-	regenerate:"Heal owner 5", //on use, on attack, or per turn?
+	regenerate:"Heal owner 5 per attack",
 	regeneratespell:"Replace non-stacking target's skills with \"Regenerate: Heal owner 5\"",
-	regrade:"Revert upgraded status of target card or creature. Produce 1 quanta of that element", //change was assuming that this only works on upgraded cards
-	reinforce:"Target creature absorbs caster, gaining it's stats", //clarified that target does not absorb itself, doubling it's stats
+	regrade:"Invert upgraded status of target card or creature. Produce 1 quanta of that element",
+	reinforce:"Target creature absorbs caster, gaining its stats",
 	ren:"Target creature will return to owner's hand instead of dying",
 	rewind:"Return target creature to top of owner's deck",
 	reveal:{
 		ownplay:"Reveal foe's hand",
 	},
 	ricochet:"Targeting spells affect an additional random non player target. Caster randomised",
-	sadism:["Creatures heal their owner when damaged", "Own creatures heal their owner when damaged"], //if not a creature trait, should be "owner is healed when their creatures are damaged" given the name of the effect.
-	salvage:"Restore permanents destroyed by foe to hand once per turn. Gain 1|1 if so", //does this recover as many permanents as it wants if they are all destroyed by one event? it's hard to clarify that.
+	sadism:["Players are healed for however much their creatures are damaged", "Owner is healed for however much their creatures are damaged"],
+	salvage:"Restore a permanent destroyed by foe to hand once per turn. Gain 1|1 if so",
 	salvageoff:"Become ready to salvage again at start of next turn",
 	sanctify:"Protection during foe's turn from hand & quanta control",
 	unsanctify:{
@@ -255,7 +255,7 @@ var data = {
 	serendipity:["Generate 3 random non-pillar cards in hand. One will be 1:1",
 		"Generate 3 random non-pillar upgraded cards in hand. One will be 1:1"],
 	shadow:["Summon a Shadow", "Summon a Tall Shadow"],
-	shtriga:"Gain -1|-1 & become immaterial per turn start", //does the -1|-1 apply every turn start? if not, "per"should be "on"
+	shtriga:"Gain -1|-1 & become immaterial at start of turn",
 	silence:"foe cannot play cards during their next turn, or target creature gains summoning sickness",
 	sing:"Target creature without Sing attacks owner",
 	singularity:"Not well behaved",
@@ -281,7 +281,7 @@ var data = {
 	stoneform:"Gain 0|20 & become a golem",
 	"storm 2":"Deals 2 damage to target player's creatures. Removes cloak",
 	"storm 3":"Deals 3 damage to target player's creatures. Removes cloak",
-	swarm:"gain 0|1 for every scarab",
+	swarm:"Base health is equal to count of ally scarabs",
 	swave:"Deals 4 damage to target. Instantly kill creature or destroy weapon if frozen",
 	tempering:["Target weapon deals an additional 3 damage per turn. Thaws",
 		"Target weapon deals an additional 5 damage per turn. Thaws"],
@@ -293,7 +293,7 @@ var data = {
 	tornado:["Randomly reshuffle 2 of foe's permanents & one of own into either deck",
 		"Randomly reshuffle 2 of foe's permanents into either deck"],
 	trick:"Swap target creature with a different creature from deck",
-	turngolem:"Become a Golem Attacker with size equal to collected power & a third as much strength",
+	turngolem:"Become a Golem Attacker with health equal to collected power & a third as much strength",
 	unburrow:"Unburrow",
 	unsummon:"Return target creature to owner's hand",
 	unvindicate:"Become ready to vindicate again at start of next turn",
@@ -311,7 +311,7 @@ var data = {
 	weight:"Evade creatures larger than 5",
 	wind:"Restore attack",
 	wings:"Evade non-airborne & non-ranged attackers",
-	wisdom:"Target gains 3|0. Immaterial Targets become psionic",
+	wisdom:"Target gains 3|0. May target immaterial, granting psionic",
 	yoink:"Steal target card",
 };
 [["dagger", "1:2 1:11. Increment damage if cloaked"], ["hammer", "1:3 1:4"], ["bow", "1:8 1:9"], ["staff", "1:5 1:7"], ["disc", "1:1 1:12"], ["axe", "1:6 1:10"]].forEach(function(x){
@@ -319,7 +319,7 @@ var data = {
 });
 [["pillmat", "1:4 1:6 1:7 1:9"], ["pillspi", "1:2 1:5 1:8 1:11"], ["pillcar", "1:1 1:3 1:10 1:12"]].forEach(function(x){
 	data[x[0]] = {
-		auto:"Produce 1 or 2 " + x[1],
+		auto:"Produce 1 or 2 " + x[1] + " per turn",
 		ownplay:"Produce 1 or 2 " + x[1] + " on play"
 	};
 });
@@ -334,8 +334,8 @@ var statusData = {
 	flooding:"Non aquatic creatures past first five creature slots die on turn end. Consumes 1:7. Unique",
 	freedom:"",
 	nightfall:auraText("Nocturnal creatures", "1|1", "2|1"),
-	nothrottle:"Throttling does not apply to any of your own creatures while equipped",
-	patience:"Each turn delay your own creatures. They gain 2|1. 4|1 if burrowed. 5|2 if flooded. Unique",
+	nothrottle:"Throttling does not apply to any of own creatures while equipped",
+	patience:"Each turn delay own creatures. They gain 2|1. 4|1 if burrowed. 5|2 if flooded. Unique",
 	poison:function(c,inst){return c==inst?"Enter with " + c.status.poison + " poison":inst.status.poison + " poison"},
 	stackable:"",
 	stasis:"Prevent creatures attacking at end of turn",
