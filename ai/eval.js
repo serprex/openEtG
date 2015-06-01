@@ -638,13 +638,13 @@ module.exports = function(game) {
 			player.hand.pop();
 			player.deck.push(code);
 		}
-		pscore += Math.min(8-player.hand.length, player.drawpower)*3;
+		pscore += Math.min(8-player.hand.length, player.drawpower)*2;
 		pscore += Math.sqrt(player.hp)*4;
 		if (player.status.poison) pscore -= player.status.poison;
 		if (player.precognition) pscore += .5;
 		if (!player.weapon) pscore += 1;
 		if (!player.shield) pscore += 1;
-		if (player.silence) pscore -= (player.hand.length+(player.hand.length>6?8:4))/4;
+		if (player.silence) pscore -= (player.hand.length+(player.hand.length>6?7:4))/4;
 		if (player.flatline) pscore -= 1;
 		if (player.neuro) pscore -= 5;
 		log("Eval", pscore);

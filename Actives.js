@@ -10,7 +10,7 @@ function quadpillarFactory(ele){
 	return function(c, t){
 		var n = c == t ? 1 : c.status.charges;
 		for(var i=0; i<n; i++){
-			for(var i=c.owner.rng()<.6?2:1; i>-1; i--){
+			for(var j=c.owner.rng()<.6?2:1; j>0; j--){
 				c.owner.spend(c.owner.choose(ele), -1);
 			}
 		}
