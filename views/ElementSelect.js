@@ -38,7 +38,7 @@ module.exports = function() {
 			sock.emit("inituser", msg);
 		});
 		b.addEventListener("mouseover", function(){
-			eledesc.text = (i < 13 ? name : i == 13 ? "Build your own" : "Random") + "\n\n" + descriptions[i-1];
+			eledesc.text = name + "\n\n" + descriptions[i-1];
 		});
 		px.dom.add(div, [100 + Math.floor((i-1)/2) * 64, 180+((i-1)&1)*64, b]);
 	});

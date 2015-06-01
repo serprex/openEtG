@@ -32,12 +32,21 @@ exports.calcWealth = function(cardpool){
 	}
 	if (typeof cardpool === "string"){
 		etgutil.iterraw(cardpool, wealthIter);
+	}else if (cardpool instanceof Array){
+		cardpool.forEach(function(x){wealthIter(x,1)});
 	}else{
 		for(var code in cardpool){
 			wealthIter(code, cardpool[code]);
 		}
 	}
 	return wealth;
+}
+exports.bazaar = function(data, user){
+	var cost = Math.ceil(exports.calcWealth(data.cards)*3);
+	if (user.gold >= cost){
+		user.gold -= cost;
+		user.pool = etgutil.mergedecks(user.pool, data.cards);
+	}
 }
 exports.sellcard = function(data, user){
 	if (etgutil.count(user.pool, data.card)){

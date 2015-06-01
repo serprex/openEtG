@@ -110,7 +110,7 @@ module.exports = function(nymph) {
 		[86, 248, leadbox, [titleText("Leaderboards"), bwealth, document.createElement("br")]],
 		[304, 120, aibox, [titleText("AI Battle")]],
 		[620, 92, deckbox, [
-			[64, 108, ["Editor", require("./Editor"), mkSetTip("Edit & manage your decks.")]],
+			[14, 108, ["Editor", require("./Editor"), mkSetTip("Edit & manage your decks.")]],
 		]],
 		[620, 300, playbox]);
 	[px.dom.button("Commoner", mkAi.mkAi(0), mkSetTip("Commoners have no upgraded cards & mostly common cards.")),
@@ -328,8 +328,9 @@ module.exports = function(nymph) {
 		px.dom.add(questcol, bquest, labelText("Go on an adventure!"));
 		px.dom.add(aibox, colocol, questcol);
 		px.dom.add(deckbox,
-			[14, 128, ["Shop", require("./Shop"), mkSetTip("Buy booster packs which contain cards from the elements you choose.")]],
-			[114, 128, ["Upgrade", require("./Upgrade"), mkSetTip("Upgrade or sell cards.")]]);
+			[14, 132, ["Shop", require("./Shop"), mkSetTip("Buy booster packs which contain cards from the elements you choose.")]],
+			[114, 132, ["Bazaar", require("./Bazaar"), mkSetTip("Buy singles at a 300% premium.")]],
+			[114, 108, ["Upgrade", require("./Upgrade"), mkSetTip("Upgrade or sell cards.")]]);
 		px.dom.add(playbox,
 			[10, 75, ["Trade", tradeClick, mkSetTip("Initiate trading cards with another player.")]],
 			[120, 100, ["Reward", rewardClick, mkSetTip("Redeem a reward code.")]]);

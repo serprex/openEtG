@@ -1,9 +1,18 @@
 "use strict";
-var ui = require("./ui");
 function adrenathrottle(f){
 	return function(c){
 		if ((c.status.adrenaline || 0)<3 || (c instanceof etg.Creature && c.owner.weapon && c.owner.weapon.status.nothrottle)){
 			return f.apply(null, arguments);
+		}
+	}
+}
+function quadpillarFactory(ele){
+	return function(c, t){
+		var n = c == t ? 1 : c.status.charges;
+		for(var i=0; i<n; i++){
+			for(var i=c.owner.rng()<.6?2:1; i>-1; i--){
+				c.owner.spend(c.owner.choose(ele), -1);
+			}
 		}
 	}
 }
@@ -244,6 +253,17 @@ counter:function(c,t){
 	if (!c.status.frozen && !c.status.delayed){
 		t.dmg(c.trueatk());
 	}
+},
+countimmbur:function(c){
+	var n = 0;
+	function test(x){
+		if (x && (x.status.immaterial || x.status.burrowed)) n++;
+	}
+	c.owner.creatures.forEach(test);
+	c.owner.permanents.forEach(test);
+	c.owner.foe.creatures.forEach(test);
+	c.owner.foe.permanents.forEach(test);
+	return n;
 },
 cpower:function(c,t){
 	var buff = t.owner.upto(25);
@@ -669,7 +689,7 @@ guard:function(c,t){
 	Effect.mkText("Guard", t);
 	c.delay(1);
 	t.delay(1);
-	if (!t.status.airborne){
+	if (c.status.airborne || !t.status.airborne){
 		t.dmg(c.trueatk());
 	}
 },
@@ -1659,6 +1679,8 @@ unsummon:function(c,t){
 	if (t.owner.hand.length < 8){
 		new etg.CardInstance(t.card, t.owner).place();
 		t.remove();
+	}else{
+		Actives.rewind(c, t);
 	}
 },
 upkeep:function(c,t){
@@ -1756,24 +1778,9 @@ pend:function(c,t){
 	c.owner.spend(ele, -c.status.charges * (ele > 0 ? 1 : 3));
 	c.status.pendstate = !c.status.pendstate;
 },
-pillmat:function(c,t){
-	var n = c==t || c.status.charges;
-	for(var i=n + c.owner.upto(n+1); i>0; i--){
-		c.owner.spend(c.owner.choose([etg.Earth, etg.Fire, etg.Water, etg.Air]), -1);
-	}
-},
-pillspi:function(c,t){
-	var n = c==t || c.status.charges;
-	for(var i=n + c.owner.upto(n+1); i>0; i--){
-		c.owner.spend(c.owner.choose([etg.Death, etg.Life, etg.Light, etg.Darkness]), -1);
-	}
-},
-pillcar:function(c,t){
-	var n = c==t || c.status.charges;
-	for(var i=n + c.owner.upto(n+1); i>0; i--){
-		c.owner.spend(c.owner.choose([etg.Entropy, etg.Gravity, etg.Time, etg.Aether]), -1);
-	}
-},
+pillmat:quadpillarFactory([4, 6, 7, 9]),
+pillspi:quadpillarFactory([2, 5, 8, 11]),
+pillcar:quadpillarFactory([1, 3, 10, 12]),
 absorbdmg:function(c,t, dmg, blocked){
 	c.status.storedpower += blocked;
 },
@@ -1863,6 +1870,7 @@ for(var key in Actives){
 	Actives[key].activename = [key];
 }
 module.exports = Actives;
-var Effect = require("./Effect");
+var ui = require("./ui");
 var etg = require("./etg");
 var Cards = require("./Cards");
+var Effect = require("./Effect");

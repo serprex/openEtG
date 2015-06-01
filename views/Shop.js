@@ -23,7 +23,7 @@ module.exports = function() {
 
 	storeui.addChild(px.mkBgRect(
 		40, 16, 820, 60,
-		40, 92, 530, 168,
+		40, 89, 494, 168,
 		40, 270, 620, 168,
 		770, 90, 90, 184
 	));
@@ -109,14 +109,14 @@ module.exports = function() {
 		hidedom.push(g);
 	});
 
-	for (var i = 0;i < 15;i++) {
+	for (var i = 0;i < 14;i++) {
 		(function(_i) {
 			var b = px.dom.icob(i, function() {
 				packele = _i;
-				tinfo.text = "Selected Element: " + (packele>12 ? etg.eleNames[packele] : "1:" + packele);
+				tinfo.text = "Selected Element: " + (packele == 13 ? "Random" : "1:" + packele);
 			});
 			hidedom.push(b);
-			px.dom.add(div, [75 + Math.floor(i / 2)*64, 120 + (i == 14 ? 37 : (i % 2)*75), b]);
+			px.dom.add(div, [75 + (i>>1)*64, 117 + (i&1)*75, b]);
 		})(i);
 	}
 

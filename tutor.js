@@ -39,7 +39,6 @@ tutor.Editor = [[100, 32, 624, "Here the deck you are building shows up. Use the
 		[300, 350, 320, "Clicking a card will add it to your deck. A number after a / shows how many shiny cards you have."],
 		[80, 530, ": Shows all cards, including those you don't own"],
 		[80, 575, ": Don't show shiny cards"]];
-tutor.Shop = [[45, 97, 520, 158, "1) Select the element of the pack you want to buy.\nEach card in the pack has a 50% chance of being the element you choose." +
-		"\nRandom pack means the cards is completely random instead,\n& Recently Released means it has a 50% chance of being a recently added card."],
+tutor.Shop = [[45, 97, 520, 158, "1) Select the element of the pack you want to buy.\nEach card in the pack has a 50% chance of being the element you choose.\nRandom pack means the cards is completely random instead."],
 		[45, 275, 610, 158, "2) Select the type of pack you want.\nYou will see the amount of cards & rarity of each pack in the upper box."],
 		[590, 97, 260, 158, "3) Buy the pack you selected!\nIf you want to buy many packs at once, type in the Bulk box how many you want.\nIn chat you will see a link to a deck code with the cards you got."]];

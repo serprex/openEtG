@@ -487,13 +487,6 @@ var userEvents = {
 				}else{
 					var notFromElement = Math.random() > .5, bumprarity = rarity+(Math.random() < bumprate), card = undefined;
 					if (data.element < 13) card = etg.PlayerRng.randomcard(false, function(x) { return (x.element == data.element) ^ notFromElement && x.rarity == bumprarity});
-					if (data.element == 14){
-						var newCardList = [
-							Cards.TidalHealing,Cards.DreamCatcher,Cards.Unsummon,Cards.BlackCat,Cards.NullMantis,Cards.Goon,Cards.Envenom,Cards.JetStream,
-							Cards.Osmosis,Cards.SharkofVoid,Cards.Tornado,Cards.Minotaur,Cards.WritofVengeance,Cards.WritofVindication,Cards.JackOLantern,Cards.ThermalRecoil,
-							Cards["52Pickup"],Cards.Alicorn,Cards.ScorpionClaws,Cards.Stormspike,Cards.Epoch,Cards.PsycheMetal,Cards.Byakko];
-						card = etg.PlayerRng.randomcard(false, function(x){ return notFromElement ^ ~newCardList.indexOf(x) && x.rarity == bumprarity});
-					}
 					if (!card) card = etg.PlayerRng.randomcard(false, function(x) { return x.rarity == bumprarity });
 					cardcode = card.code
 				}
@@ -531,7 +524,7 @@ var userEvents = {
 		}
 	}
 };
-["sellcard", "upgrade", "uppillar", "polish", "shpillar", "upshpillar", "addgold", "addloss", "addwin", "addcards", "addbound", "donedaily","unpolish","unupgrade","upshall"].forEach(function(event){
+["bazaar","sellcard","upgrade","uppillar","polish","shpillar","upshpillar","addgold","addloss","addwin","addcards","addbound","donedaily","unpolish","unupgrade","upshall"].forEach(function(event){
 	userEvents[event] = userutil[event];
 });
 var sockEvents = {

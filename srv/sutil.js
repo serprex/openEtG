@@ -67,7 +67,7 @@ exports.useruser = function(db, servuser, cb){
 	});
 	db.hgetall("Q:" + servuser.name, task("quest"));
 	db.hgetall("D:" + servuser.name, task("decks"));
-	db.lrange("N:" + servuser.name, 0, 9, task("quickdecks"));
+	db.lrange("N:" + servuser.name, 0, -1, task("quickdecks"));
 	task();
 }
 exports.getDay = function(){
