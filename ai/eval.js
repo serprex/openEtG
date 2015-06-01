@@ -73,6 +73,7 @@ var ActivesValues = Object.freeze({
 		return c.card.cost+(c.card.upped?1:0);
 	},
 	bravery:3,
+	brawl:8,
 	brew:4,
 	brokenmirror:2,
 	burrow:1,
@@ -82,6 +83,7 @@ var ActivesValues = Object.freeze({
 	clear:2,
 	corpseexplosion:1,
 	counter:3,
+	countimmbur:1,
 	cpower:4,
 	darkness:1,
 	deadalive:2,
@@ -312,8 +314,14 @@ var ActivesValues = Object.freeze({
 	vampire:function(c, ttatk){
 		return (c instanceof etg.CardInstance?c.card.attack:ttatk)*.7;
 	},
+	virtue:function(c){
+		return c instanceof etg.CardInstance ? (c.owner.foe.shield ? Math.min(c.owner.foe.shield.truedr(), c.attack) : 0) : (c.trueatk() - getDamage(c)) / 1.5;
+	},
 	virusplague:1,
 	void:5,
+	voidshell:function(c){
+		return (c.owner.maxhp - c.owner.hp) / 10;
+	},
 	quantagift:4,
 	web:1,
 	wind:function(c){

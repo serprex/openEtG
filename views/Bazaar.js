@@ -15,7 +15,7 @@ function startMenu(){
 }
 module.exports = function() {
 	var view = px.mkView(), stage = {view: view};
-	var btrade = px.dom.button("Buy", function() {
+	var bbuy = px.dom.button("Buy", function() {
 		if (ownDeck.deck.length == 0) return chat("You haven't chosen a card");
 		console.log(ownVal.text, ownVal.textContent);
 		if (sock.user.gold < parseInt(ownVal.text)) return chat("You cannot afford these");
@@ -34,8 +34,8 @@ module.exports = function() {
 		}
 	);
 	view.addChild(ownDeck);
-	var div = stage.dom = px.dom.div([10, 50, ["Exit", startMenu]],
-		[100, 235, ownVal], [10, 80, btrade]);
+	var div = stage.dom = px.dom.div([8, 100, ["Exit", startMenu]],
+		[100, 235, ownVal], [8, 160, bbuy], [8, 240, sock.user.gold + "$"]);
 
 	var cardsel = new CardSelector(stage, setCardArt,
 		function(code){
