@@ -40,7 +40,7 @@ module.exports = function() {
 	var cardsel = new CardSelector(stage, setCardArt,
 		function(code){
 			var card = Cards.Codes[code];
-			if (ownDeck.deck.length < 60 && card.rarity > 0 && card.rarity < 5 && !card.isFree()) {
+			if (ownDeck.deck.length < 60 && card.rarity > 0 && card.rarity < 4 && !card.isFree()) {
 				ownDeck.addCard(code);
 				ownVal.text = Math.ceil(userutil.calcWealth(ownDeck.deck)*3);
 			}
