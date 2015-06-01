@@ -160,6 +160,19 @@ bravery:function(c,t){
 		}
 	}
 },
+brawl:function(c,t){
+	c.owner.creatures.forEach(function(cr, i){
+		if (cr){
+			var fcr = c.owner.foe.creatures[i];
+			if (fcr){
+				fcr.dmg(cr.trueatk());
+				cr.dmg(fcr.trueatk());
+			}else{
+				cr.attack(false, 0);
+			}
+		}
+	});
+},
 brew:function(c,t){
 	Effect.mkText("Brew", c);
 	new etg.CardInstance(c.card.as(Cards.Codes[etg.AlchemyList[c.owner.uptoceil(12)]]), c.owner).place();
@@ -371,7 +384,7 @@ disfield:function(c,t, dmg){
 disshield:function(c,t, dmg){
 	if (!c.owner.spend(etg.Entropy, Math.ceil(dmg/3))){
 		c.owner.quanta[etg.Entropy] = 0;
-		c.owner.shield = undefined;
+		c.remove();
 	}
 	return true;
 },
@@ -1705,7 +1718,7 @@ vengeance:function(c,t){
 		if(!--c.status.charges) c.remove();
 		c.owner.creatures.forEach(function(cr){
 			if (cr && cr != t){
-				cr.attack();
+				cr.attack(false, 0);
 			}
 		});
 	}
@@ -1736,6 +1749,17 @@ void:function(c,t){
 	if (c.owner.foe.hp > c.owner.foe.maxhp){
 		c.owner.foe.hp = c.owner.foe.maxhp;
 	}
+},
+voidshell:function(c,t, dmg){
+	c.owner.maxhp -= dmg;
+	if (c.owner.maxhp < 1){
+		c.owner.maxhp = 1;
+		c.remove();
+	}
+	if (c.owner.hp > c.owner.maxhp){
+		c.owner.hp = c.owner.maxhp;
+	}
+	return true;
 },
 quantagift:function(c,t){
 	if (c.owner.mark != etg.Water){
