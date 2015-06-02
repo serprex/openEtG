@@ -866,7 +866,7 @@ integrity:function(c,t){
 		cast: shardCosts[active]
 	};
 	function addActive(event, active){
-		etg.Thing.prototype.addactive.call(c.owner.shardgolem, event, active);
+		etg.Thing.prototype.addactive.call(c.owner.shardgolem, event, etg.parseActive(active));
 	}
 	function addStatus(status, val){
 		c.owner.shardgolem.status[status] = val === undefined || val;
@@ -884,18 +884,19 @@ integrity:function(c,t){
 		[[0, "", "nocturnal"], [0, "", "voodoo"], [1, "auto", "siphon"], [2, "hit", "vampire"], [3, "hit", "reducemaxhp"], [4, "destroy", "loot"], [5, "owndeath", "catlife"], [5, "", "lives", 69105]],
 		[[2, "", "immaterial"]],
 	].forEach(function(slist, i){
-		slist.forEach(function(data){
-			if (tally[i+1]>data[0]){
-				if (!data[1]){
-					addStatus(data[2], data[3]);
-				}else{
-					addActive(data[1], etg.parseActive(data[2]));
-				}
+		var ishards = tally[i+1];
+		for(var j=0; j<slist.length; j++){
+			var data = slist[j];
+			if (ishards <= data[0]) return;
+			if (!data[1]){
+				addStatus(data[2], data[3]);
+			}else{
+				addActive(data[1], data[2]);
 			}
-		});
+		}
 	});
 	if (tally[etg.Death] > 0){
-		addActive("hit", etg.parseActive("poison " + tally[etg.Death]));
+		addActive("hit", "poison " + tally[etg.Death]);
 	}
 	new etg.Creature(c.card.as(Cards.ShardGolem), c.owner).place();
 },
