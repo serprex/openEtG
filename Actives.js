@@ -172,6 +172,7 @@ brawl:function(c,t){
 			}
 		}
 	});
+	c.owner.quanta[etg.Gravity] = 0;
 },
 brew:function(c,t){
 	Effect.mkText("Brew", c);

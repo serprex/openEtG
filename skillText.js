@@ -29,7 +29,7 @@ var data = {
 	boneyard:["When a creature dies, summon a 1|1 Skeleton", "When a creature dies, summon a 2|2 Skeleton"],
 	bounce:"Return to owner's hand instead of dying",
 	bravery:"Foe draws 2 cards, you draw an equal amount of cards",
-	brawl:"Own creatures attack. If a creature exists in opposing slot, they duel instead",
+	brawl:"Own creatures attack. If a creature exists in opposing slot, they duel instead. Consumes remaining 1:3",
 	brew:"Generate a random Alchemy card",
 	brokenmirror:["When foe plays a creature from hand, summon a 1|1 Phantom", "When foe plays a creature from hand, summon a 2|1 Phantom"],
 	butterfly:"Target something smaller than, or weaker than, 3. Replace target's skills with \"3:1 Destroy target permanent\"",
