@@ -275,8 +275,12 @@ countimmbur:function(c){
 	}
 	c.owner.creatures.forEach(test);
 	c.owner.permanents.forEach(test);
+	test(c.owner.weapon);
+	test(c.owner.shield);
 	c.owner.foe.creatures.forEach(test);
 	c.owner.foe.permanents.forEach(test);
+	test(c.owner.foe.weapon);
+	test(c.owner.foe.shield);
 	return n;
 },
 cpower:function(c,t){
