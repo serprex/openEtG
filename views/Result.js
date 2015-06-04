@@ -42,7 +42,7 @@ module.exports = function(game, foeDeck) {
 	function computeBonuses() {
 		if (game.endurance !== undefined) return 1;
 		var y = 0, bonus = 1, bonusList = [
-			["Elemental Mastery", .2, function() { return game.player1.hp == game.player1.maxhp }],
+			["Full Health", .2, function() { return game.player1.hp == game.player1.maxhp }],
 			["Deckout", .5, function() { return game.player2.deck.length == 0 && game.player2.hp > 0 }],
 			["Double Kill", .25, function() { return game.player2.hp < -game.player2.maxhp }],
 			["Waiter", .2, function() { return game.player1.deck.length == 0 }],
@@ -54,8 +54,9 @@ module.exports = function(game, foeDeck) {
 			["Mid Turn", .1, function() { return game.turn == game.player1 }],
 			["Pillarless", .1, function() { return game.player1.bonusstats.cardsplayed[0] == 0 }],
 			["Weapon Master", .1, function() { return game.player1.bonusstats.cardsplayed[1] >= 3 }],
-			["Fancy Killer", .2, function() { return game.player1.bonusstats.creatureskilled >= 6 }],
-			["One Turn Kill", .2, function() { return game.player1.bonusstats.otk && game.player2.hp <= 0 }]
+			["Murderer", .2, function() { return game.player1.bonusstats.creatureskilled >= 6 }],
+			["One Turn Kill", .2, function() { return game.player1.bonusstats.otk && game.player2.hp <= 0 }],
+			["Last point", .3, function() { return game.player1.hp == 1 }],
 		];
 		bonusList.forEach(function(data) {
 			if (data[2]()) {
