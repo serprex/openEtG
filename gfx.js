@@ -61,13 +61,14 @@ function Text(text, fontsize, color, bgcolor){
 	ctx.fillText(text, 0, fontsize);
 	return new PIXI.Texture(new PIXI.BaseTexture(canvas));
 }
-var caimgcache = {}, artcache = {}, artimagecache = {}, shinyShader;
+var caimgcache = {}, artimagecache = {}, shinyShader;
 function setShinyShader(renderer, sprite, card){
 	if (card.shiny && renderer.gl) sprite.shader = shinyShader || (shinyShader = require("./ColorMatrixShader")(renderer));
 }
-function makeArt(card, art, oldrend) {
+function makeArt(code, art, oldrend) {
 	var rend = oldrend || require("./px").mkRenderTexture(132, 256);
 	var template = new PIXI.Container();
+	var card = Cards.Codes[code];
 	template.addChild(new PIXI.Sprite(exports.cardBacks[card.element+(card.upped?13:0)]));
 	var typemark = new PIXI.Sprite(exports.t[card.type]);
 	typemark.anchor.set(1, 1);
@@ -108,37 +109,43 @@ function makeArt(card, art, oldrend) {
 	rend.render(template);
 	return rend;
 }
-function getArtImage(code, cb){
-	if (!(code in artimagecache)){
-		var redcode = code;
-		if (artpool){
-			while (!(redcode in artpool) && redcode >= "6qo"){
-				redcode = etgutil[redcode >= "g00"?"asShiny":"asUpped"](redcode, false);
-			}
-			if (!(redcode in artpool)) return cb(artimagecache[code] = undefined);
-			else if (redcode in artimagecache) return cb(artimagecache[code] = artimagecache[redcode]);
+function artFactory(realcb){
+	var cache = {};
+	return function func(code, extracb){
+		function cb(art){
+			cache[code] = realcb(code, art, cache[code]);
+			if (extracb) extracb(art);
+			return cache[code];
 		}
-		var img = new Image();
-		img.addEventListener("load", function(){
-			cb(artimagecache[code] = new PIXI.Texture(new PIXI.BaseTexture(img)));
-		});
-		img.addEventListener("error", function(){
-			if (!artpool && redcode >= "6qo"){
-				redcode = etgutil[redcode >= "g00"?"asShiny":"asUpped"](redcode, false);
-				getArtImage(redcode, function(x){
-					cb(artimagecache[code] = x);
+		if (code in cache) return cache[code];
+		if (!(code in artimagecache)){
+			var redcode = code;
+			if (artpool){
+				while (!(redcode in artpool) && redcode >= "6qo"){
+					redcode = etgutil[redcode >= "g00"?"asShiny":"asUpped"](redcode, false);
+				}
+				if (!(redcode in artpool)) return cb(artimagecache[code] = undefined);
+				else if (redcode in artimagecache) return cb(artimagecache[code] = artimagecache[redcode]);
+			}else{
+				var img = new Image();
+				img.addEventListener("load", function(){
+					cb(artimagecache[code] = new PIXI.Texture(new PIXI.BaseTexture(this)));
 				});
+				img.addEventListener("error", function(){
+					if (!artpool && redcode >= "6qo"){
+						redcode = etgutil[redcode >= "g00"?"asShiny":"asUpped"](redcode, false);
+						func(redcode, function(art){
+							cb(artimagecache[code] = art);
+						});
+					}
+				});
+				img.src = "Cards/" + redcode + ".png";
 			}
-		});
-		img.src = "Cards/" + redcode + ".png";
+		}
+		return cb(artimagecache[code]);
 	}
-	return cb(artimagecache[code]);
 }
-function getArt(code) {
-	return artcache[code] || getArtImage(code, function(art){
-		return artcache[code] = makeArt(Cards.Codes[code], art, artcache[code]);
-	});
-}
+var getArt = artFactory(makeArt);
 function getCardImage(code) {
 	if (caimgcache[code]) return caimgcache[code];
 	else {
@@ -177,57 +184,49 @@ function getCardImage(code) {
 	}
 }
 function getInstImage(scale){
-	var cache = {};
-	return function(code){
-		return cache[code] || getArtImage(code, function(art) {
-			var card = Cards.Codes[code];
-			var rend = cache[code] || require("./px").mkRenderTexture(Math.ceil(128 * scale), Math.ceil(160 * scale));
-			var btex = exports.cardBorders[card.element + (card.upped ? 13 : 0)];
-			var c = new PIXI.Container();
-			var border = new PIXI.Sprite(btex), border2 = new PIXI.Sprite(btex);
-			border.scale.x = border2.scale.x = 128.5/132;
-			border2.position.y = 160;
-			border2.scale.y = -1;
-			c.addChild(border);
-			c.addChild(border2);
-			var graphics = new PIXI.Graphics();
-			c.addChild(graphics);
-			graphics.beginFill(ui.maybeLighten(card));
-			graphics.drawRect(0, 16, 128, 128);
-			if (card.shiny){
-				graphics.lineStyle(2, 0xdaa520);
-				graphics.moveTo(0, 14);
-				graphics.lineTo(128, 14);
-				graphics.moveTo(0, 147);
-				graphics.lineTo(128, 147);
-			}
-			if (art) {
-				var artspr = new PIXI.Sprite(art);
-				artspr.position.y = 16;
-				setShinyShader(rend.renderer, artspr, card);
-				c.addChild(artspr);
-			}
-			var text = new PIXI.Sprite(Text(card.name, 16, card.upped ? "black" : "white"));
-			text.anchor.x = .5;
-			text.position.set(64, 142);
-			c.addChild(text);
-			var mtx = new PIXI.math.Matrix();
-			mtx.scale(scale, scale);
-			rend.render(c, mtx);
-			return cache[code] = rend;
-		});
-	}
+	return artFactory(function(code, art, oldrend){
+		var card = Cards.Codes[code];
+		var rend = oldrend || require("./px").mkRenderTexture(Math.ceil(128 * scale), Math.ceil(160 * scale));
+		var btex = exports.cardBorders[card.element + (card.upped ? 13 : 0)];
+		var c = new PIXI.Container();
+		var border = new PIXI.Sprite(btex), border2 = new PIXI.Sprite(btex);
+		border.scale.x = border2.scale.x = 128.5/132;
+		border2.position.y = 160;
+		border2.scale.y = -1;
+		c.addChild(border);
+		c.addChild(border2);
+		var graphics = new PIXI.Graphics();
+		c.addChild(graphics);
+		graphics.beginFill(ui.maybeLighten(card));
+		graphics.drawRect(0, 16, 128, 128);
+		if (card.shiny){
+			graphics.lineStyle(2, 0xdaa520);
+			graphics.moveTo(0, 14);
+			graphics.lineTo(128, 14);
+			graphics.moveTo(0, 147);
+			graphics.lineTo(128, 147);
+		}
+		if (art) {
+			var artspr = new PIXI.Sprite(art);
+			artspr.position.y = 16;
+			setShinyShader(rend.renderer, artspr, card);
+			c.addChild(artspr);
+		}
+		var text = new PIXI.Sprite(Text(card.name, 16, card.upped ? "black" : "white"));
+		text.anchor.x = .5;
+		text.position.set(64, 142);
+		c.addChild(text);
+		var mtx = new PIXI.math.Matrix();
+		mtx.scale(scale, scale);
+		rend.render(c, mtx);
+		return rend;
+	});
 }
 var artpool;
 exports.refreshCaches = function() {
 	for(var code in caimgcache){
 		caimgcache[code].destroy(true);
 		delete caimgcache[code];
-	}
-	for(var code in artcache){
-		getArtImage(code, function(art){
-			return artcache[code] = makeArt(Cards.Codes[code], art, artcache[code]);
-		});
 	}
 }
 exports.preloadCardArt = function(art){
@@ -240,17 +239,15 @@ exports.preloadCardArt = function(art){
 		if (i == art.length) return;
 		var code = art.substr(i, 3);
 		var img = new Image();
-		img.onload = function(){
-			this.onload = undefined;
+		img.addEventListener("load", function(){
 			artimagecache[code] = new PIXI.Texture(new PIXI.BaseTexture(this));
 			loadArt(i+3);
-		}
+		});
 		img.src = "Cards/" + code + ".png";
 	})(0);
 }
 if (typeof PIXI !== "undefined"){
 	exports.nopic = PIXI.Texture.emptyTexture;
-	exports.nopic.width = exports.nopic.height = 0;
 	exports.load = load;
 	exports.getPermanentImage = exports.getCreatureImage = getInstImage(.5);
 	exports.getWeaponShieldImage = getInstImage(5/8);
