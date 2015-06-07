@@ -8,7 +8,7 @@ var etgutil = require("../etgutil");
 module.exports = function(data) {
 	var stage = new PIXI.Container();
 	var div = px.dom.div(
-		[96, 576, "You get 3$ every time your arena deck wins, & 1$ every time it loses."],
+		[96, 576, "Earn 1$ when your arena deck is faced, & another 2$ when it wins"],
 		[8, 300, ["Exit", require("./MainMenu")]]);
 	function renderInfo(info, y){
 		if (info){
