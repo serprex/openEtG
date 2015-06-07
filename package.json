@@ -15,13 +15,13 @@
   },
   "devDependencies": {
     "qunitjs": "^1.18.0",
-    "urllib": "^2.3.5"
+    "urllib": "^2.3.8"
   },
   "scripts": {
     "test": "npm start;firefox 127.0.0.1:13602/test.htm"
   },
   "optionalDependencies": {
-    "hiredis": "^0.3.0"
+    "hiredis": "^0.4.0"
   },
   "license": "MIT"
 }

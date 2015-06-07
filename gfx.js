@@ -63,10 +63,10 @@ function Text(text, fontsize, color, bgcolor){
 }
 var caimgcache = {}, artimagecache = {}, shinyShader;
 function setShinyShader(renderer, sprite, card){
-	if (card.shiny && renderer.gl) sprite.shader = shinyShader || (shinyShader = require("./ColorMatrixShader")(renderer));
+	if (card.shiny && PIXI.gl) sprite.shader = shinyShader || (shinyShader = require("./ColorMatrixShader")(renderer));
 }
-function makeArt(code, art, oldrend) {
-	var rend = oldrend || require("./px").mkRenderTexture(132, 256);
+function makeArt(code, art, rend) {
+	if (!rend) rend = require("./px").mkRenderTexture(132, 256);
 	var template = new PIXI.Container();
 	var card = Cards.Codes[code];
 	template.addChild(new PIXI.Sprite(exports.cardBacks[card.element+(card.upped?13:0)]));
@@ -184,9 +184,9 @@ function getCardImage(code) {
 	}
 }
 function getInstImage(scale){
-	return artFactory(function(code, art, oldrend){
+	return artFactory(function(code, art, rend){
+		if (!rend) rend = require("./px").mkRenderTexture(Math.ceil(128 * scale), Math.ceil(160 * scale));
 		var card = Cards.Codes[code];
-		var rend = oldrend || require("./px").mkRenderTexture(Math.ceil(128 * scale), Math.ceil(160 * scale));
 		var btex = exports.cardBorders[card.element + (card.upped ? 13 : 0)];
 		var c = new PIXI.Container();
 		var border = new PIXI.Sprite(btex), border2 = new PIXI.Sprite(btex);
