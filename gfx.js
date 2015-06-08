@@ -132,9 +132,13 @@ function artFactory(realcb){
 				});
 				img.addEventListener("error", function(){
 					if (code >= "6qo"){
-						func(etgutil[code >= "g00"?"asShiny":"asUpped"](code, false), function(art){
-							cb(artimagecache[code] = art);
-						});
+						var redcode = etgutil[code >= "g00"?"asShiny":"asUpped"](code, false);
+						if (redcode in artimagecache) cb(artimagecache[code] = artimagecache[redcode]);
+						else{
+							func(redcode, function(art){
+								cb(artimagecache[code] = art);
+							});
+						}
 					}else artimagecache[code] = undefined;
 				});
 				img.src = "Cards/" + code + ".png";
