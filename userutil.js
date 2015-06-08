@@ -1,5 +1,4 @@
 "use strict";
-var etg = require("./etg");
 var Cards = require("./Cards");
 var etgutil = require("./etgutil");
 exports.rewardwords = {

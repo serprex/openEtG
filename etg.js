@@ -1246,9 +1246,6 @@ Player.prototype.randomcard = function(upped, filter){
 	var keys = filtercards(upped, filter);
 	return keys && keys.length && Cards.Codes[this.choose(keys)];
 }
-function activename(active){
-	return active?active.activename.join(" "):"";
-}
 function casttext(cast, castele){
 	return cast == 0?"0":cast + ":" + castele;
 }

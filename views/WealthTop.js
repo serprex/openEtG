@@ -22,7 +22,6 @@ module.exports = function(info) {
 		td[3].style.width = "24px";
 		td[4].style.width = "200px";
 		td[5].style.width = "166px";
-		var data = info[i];
 		td[0].appendChild(document.createTextNode(((i/2)+1).toString()));
 		td[1].appendChild(document.createTextNode(info[i]));
 		td[2].appendChild(document.createTextNode(Math.round(info[i + 1]).toString()));

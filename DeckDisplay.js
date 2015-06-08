@@ -1,3 +1,9 @@
+module.exports = DeckDisplay;
+var ui = require("./ui");
+var px = require("./px");
+var etg = require("./etg");
+var gfx = require("./gfx");
+
 function DeckDisplay(decksize, cardmouseover, cardclick, deck){
 	PIXI.Container.call(this);
 	this.deck = deck || [];
@@ -52,11 +58,3 @@ DeckDisplay.prototype.mousemove = function(){
 		}
 	}
 }
-
-module.exports = DeckDisplay;
-var ui = require("./ui");
-var px = require("./px");
-var etg = require("./etg");
-var gfx = require("./gfx");
-var Cards = require("./Cards");
-var etgutil = require("./etgutil");

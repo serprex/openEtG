@@ -1,6 +1,5 @@
 "use strict";
 var px = require("../px");
-var ui = require("../ui");
 var etg = require("../etg");
 var gfx = require("../gfx");
 var chat = require("../chat");
@@ -179,11 +178,6 @@ module.exports = function(arena, ainfo, acard, startempty) {
 		var bp = px.dom.button("+", modattr.bind(null, data.incr || 1));
 		bm.style.width = bp.style.width = "14px";
 		px.dom.add(div, [4, y, name], [38, y, bm], [56, y, bv], [82, y, bp]);
-	}
-	function switchDeckCb(x){
-		return function() {
-			loadDeck(x.toString());
-		}
 	}
 	function saveButton() {
 		if (deckname.value) {

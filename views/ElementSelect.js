@@ -1,7 +1,6 @@
 "use strict";
 var px = require("../px");
 var etg = require("../etg");
-var gfx = require("../gfx");
 var sock = require("../sock");
 
 module.exports = function() {

@@ -131,7 +131,7 @@ module.exports = function(level) {
 			Cards.ShortSword).code));
 		ecost[0] += Cards.Codes[deck[deck.length-1]].cost;
 	}
-	var pillarstart = deck.length, qpe = 0, qpesum = ecost[0], ismono = eles[0] == eles[1];
+	var qpe = 0, qpesum = ecost[0], ismono = eles[0] == eles[1];
 	for (var i = 1;i < 13;i++) {
 		if (!ecost[i] || ~eles.indexOf(i)) continue;
 		qpe++;

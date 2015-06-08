@@ -1,5 +1,4 @@
 "use strict";
-var lastmove = 0;
 document.addEventListener("mousemove", function(e){
 	if (e.timeStamp - this.lastmove < 16){
 		e.stopPropagation();
@@ -8,12 +7,7 @@ document.addEventListener("mousemove", function(e){
 	}
 });
 var ui = require("./ui");
-var gfx = require("./gfx");
-var etg = require("./etg");
-var Cards = require("./Cards");
-var etgutil = require("./etgutil");
-var options = require("./options");
-var dom = exports.dom = require("./dom");
+exports.dom = require("./dom");
 var renderer = new PIXI.autoDetectRenderer(900, 600, {view:document.getElementById("leftpane"), transparent:true});
 var noStage = {}, curStage = noStage;
 var interman = require("./InteractionManager");

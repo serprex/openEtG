@@ -54,7 +54,7 @@ module.exports = function() {
 	foeDeck.position.x = 450;
 	view.addChild(ownDeck);
 	view.addChild(foeDeck);
-	var div = stage.dom = px.dom.div([10, 10, ["Cancel", function() {
+	stage.dom = px.dom.div([10, 10, ["Cancel", function() {
 		sock.userEmit("canceltrade");
 		startMenu();
 	}]],

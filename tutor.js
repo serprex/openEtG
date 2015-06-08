@@ -4,7 +4,6 @@ var tutor = module.exports = function(tutdata, x, y, stage){
 	if (options.disableTut) return stage;
 	var tutspan;
 	px.dom.add(stage.dom, px.dom.style(px.dom.icob(13, function() {
-		var self = this;
 		if (tutspan) {
 			tutspan.remove();
 			tutspan = undefined;

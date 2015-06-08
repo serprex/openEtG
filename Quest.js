@@ -1,6 +1,5 @@
 "use strict";
 var sock = require("./sock");
-var Cards = require("./Cards");
 var etgutil = require("./etgutil");
 //Quest data
 exports.necromancer = [
@@ -181,7 +180,6 @@ exports.mkQuestAi = function(questname, stage, area) {
 
 //Dependency functions
 function requireQuest(user) {
-	var listofquests = this.questdependencies;
 	return this.questdependencies.every(function(dependency){
 		var progress = user.quest[dependency[0]];
 		return progress && progress >= dependency[1];

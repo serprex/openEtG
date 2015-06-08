@@ -1,3 +1,12 @@
+module.exports = CardSelector;
+var px = require("./px");
+var ui = require("./ui");
+var dom = require("./dom");
+var etg = require("./etg");
+var gfx = require("./gfx");
+var Cards = require("./Cards");
+var etgutil = require("./etgutil");
+
 function CardSelector(stage, cardmouseover, cardclick, maxedIndicator, filterboth){
 	var self = this;
 	PIXI.Container.call(this);
@@ -132,12 +141,3 @@ CardSelector.prototype.renderColumns = function(){
 		}
 	}
 }
-
-module.exports = CardSelector;
-var px = require("./px");
-var ui = require("./ui");
-var dom = require("./dom");
-var etg = require("./etg");
-var gfx = require("./gfx");
-var Cards = require("./Cards");
-var etgutil = require("./etgutil");

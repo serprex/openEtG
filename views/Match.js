@@ -9,7 +9,6 @@ var Cards = require("../Cards");
 var Effect = require("../Effect");
 var Actives = require("../Actives");
 var etgutil = require("../etgutil");
-var userutil = require("../userutil");
 function startMatch(game, foeDeck, spectate) {
 	if (sock.trade){
 		sock.userEmit("canceltrade");
@@ -211,7 +210,7 @@ function startMatch(game, foeDeck, spectate) {
 	var weapsprite = new Array(2);
 	var marksprite = [document.createElement("span"), document.createElement("span")], markspritexy = [];
 	var marktext = [px.dom.text(""), px.dom.text("")], marktextxy = [];
-	var quantatext = [[], []], quantaxy = [[], []];
+	var quantatext = [[], []];
 	var hptext = [new px.dom.text(""), new px.dom.text("")], hpxy = [];
 	var playerOverlay = [new PIXI.Sprite(gfx.nopic), new PIXI.Sprite(gfx.nopic)];
 	var handOverlay = [new PIXI.Sprite(gfx.nopic), new PIXI.Sprite(gfx.nopic)];
@@ -348,7 +347,7 @@ function startMatch(game, foeDeck, spectate) {
 				ui.reflectPos(playerOverlay[j]);
 				playerOverlay[j].y += 15;
 			}
-			var child, quantaxy = [j ? 792 : 0, j ? 106 : 308];
+			var quantaxy = [j ? 792 : 0, j ? 106 : 308];
 			for (var k = 1;k < 13;k++) {
 				quantatext[j][k-1] = px.dom.text("");
 				quantatext[j][k-1].style.fontSize = "16px";

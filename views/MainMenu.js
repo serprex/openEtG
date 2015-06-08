@@ -64,7 +64,7 @@ module.exports = function(nymph) {
 	function resetTip(event) {
 		if (event.target.tagName.match(/^(DIV|CANVAS|HTML)$/)) tinfo.text = sock.user ? tipjar[tipNumber] + "." : "To register, just type desired username & password in the fields to the right, then click 'Login'.";
 	}
-	var tinfo = px.dom.text(""), tstats = px.dom.text(sock.user ? sock.user.gold + "$ " + sock.user.name + "\nPvE " + sock.user.aiwins + " - " + sock.user.ailosses + "\nPvP " + sock.user.pvpwins + " - " + sock.user.pvplosses : "Sandbox");
+	var tinfo = px.dom.text("");
 	function wealthTop(){
 		sock.emit("wealthtop");
 		this.style.display = "none";

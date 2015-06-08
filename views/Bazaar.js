@@ -34,7 +34,7 @@ module.exports = function() {
 		}
 	);
 	view.addChild(ownDeck);
-	var div = stage.dom = px.dom.div([8, 100, ["Exit", startMenu]],
+	stage.dom = px.dom.div([8, 100, ["Exit", startMenu]],
 		[100, 235, ownVal], [8, 160, bbuy], [8, 240, sock.user.gold + "$"]);
 
 	var cardsel = new CardSelector(stage, setCardArt,
