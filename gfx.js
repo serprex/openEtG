@@ -117,10 +117,9 @@ function artFactory(realcb){
 			if (extracb) extracb(art);
 			return cache[code];
 		}
-		if (code in cache) return cache[code];
 		if (!(code in artimagecache)){
-			var redcode = code;
 			if (artpool){
+				var redcode = code;
 				while (!(redcode in artpool) && redcode >= "6qo"){
 					redcode = etgutil[redcode >= "g00"?"asShiny":"asUpped"](redcode, false);
 				}
@@ -132,17 +131,16 @@ function artFactory(realcb){
 					cb(artimagecache[code] = new PIXI.Texture(new PIXI.BaseTexture(this)));
 				});
 				img.addEventListener("error", function(){
-					if (!artpool && redcode >= "6qo"){
-						redcode = etgutil[redcode >= "g00"?"asShiny":"asUpped"](redcode, false);
-						func(redcode, function(art){
+					if (code >= "6qo"){
+						func(etgutil[code >= "g00"?"asShiny":"asUpped"](code, false), function(art){
 							cb(artimagecache[code] = art);
 						});
-					}
+					}else artimagecache[code] = undefined;
 				});
-				img.src = "Cards/" + redcode + ".png";
+				img.src = "Cards/" + code + ".png";
 			}
 		}
-		return cb(artimagecache[code]);
+		return cache[code] || cb(artimagecache[code]);
 	}
 }
 var getArt = artFactory(makeArt);
