@@ -54,7 +54,7 @@ module.exports = function(game, foeDeck) {
 			["Mid Turn", function() { return game.turn == game.player1 ? .1 : 0 }],
 			["Pillarless", function() { return game.player1.bonusstats.cardsplayed[0] == 0 ? .05 : 0 }],
 			["Weapon Master", function() { return game.player1.bonusstats.cardsplayed[1] >= 3 ? .1 : 0 }],
-			["Murderer", function() { return game.player1.bonusstats.creatureskilled > 5 ? .2 : 0 }],
+			["Murderer", function() { return game.player1.bonusstats.creatureskilled > 5 ? .15 : 0 }],
 			["One Turn Kill", function() { return game.player1.bonusstats.otk && game.player2.hp <= 0 ? .2 : 0 }],
 			["Last point", function() { return game.player1.hp == 1 ? .3 : 0 }],
 		].forEach(function(data) {
