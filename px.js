@@ -49,8 +49,12 @@ exports.view = function(stage) {
 }
 exports.setClick = function(obj, click, sound) {
 	if (sound === undefined) sound = "buttonClick";
+	else if (typeof sound !== "string"){
+		obj.click = click;
+		return;
+	}
 	obj.click = function() {
-		if (typeof sound === "string") ui.playSound(sound);
+		ui.playSound(sound);
 		click.apply(this, arguments);
 	}
 }
