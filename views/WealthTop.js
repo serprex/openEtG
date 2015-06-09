@@ -7,28 +7,19 @@ module.exports = function(info) {
 		chat("??");
 		return;
 	}
-	var tbl = document.createElement("table");
-	for (var i = 0;i < 50; i+=2) {
-		if (i+1 >= info.length) break;
-		var tr = document.createElement("tr");
-		tbl.appendChild(tr);
-		var td = new Array(5);
-		for (var j=0; j<6; j++){
-			tr.appendChild(td[j] = document.createElement("td"));
-		}
-		td[0].style.width = "24px";
-		td[1].style.width = "200px";
-		td[2].style.width = "166px";
-		td[3].style.width = "24px";
-		td[4].style.width = "200px";
-		td[5].style.width = "166px";
-		td[0].appendChild(document.createTextNode(((i/2)+1).toString()));
-		td[1].appendChild(document.createTextNode(info[i]));
-		td[2].appendChild(document.createTextNode(Math.round(info[i + 1]).toString()));
-		if (i+51 >= info.length) continue;
-		td[3].appendChild(document.createTextNode(((i/2)+26).toString()));
-		td[4].appendChild(document.createTextNode(info[i+50]));
-		td[5].appendChild(document.createTextNode(Math.round(info[i + 51]).toString()));
+	var ol1 = document.createElement("ol"), ol2 = document.createElement("ol");
+	ol1.className = ol2.className = "width400";
+	ol2.start = "26";
+	for (var i = 0; i < info.length; i+=2) {
+		var ol = i<50?ol1:ol2;
+		var li = document.createElement("li");
+		if (i%50 != 48) li.className = "underline";
+		li.appendChild(document.createTextNode(info[i]));
+		var score = document.createElement("span");
+		score.className = "floatRight";
+		score.appendChild(document.createTextNode(Math.round(info[i+1])));
+		li.appendChild(score);
+		ol.appendChild(li);
 	}
-	px.view({dom:px.dom.div([8, 300, ["Exit", require("./MainMenu")]], [120, 10, tbl])});
+	px.view({dom:px.dom.div([8, 300, ["Exit", require("./MainMenu")]], [80, 8, ol1], [480, 8, ol2])});
 }
