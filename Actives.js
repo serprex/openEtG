@@ -1631,7 +1631,7 @@ tempering:function(c,t){
 throwrock:function(c,t){
 	var dmg = c.card.upped?4:3;
 	Effect.mkText("-"+dmg, t);
-	t.spelldmg(dmg);
+	t.dmg(dmg);
 	t.owner.deck.splice(c.owner.upto(t.owner.deck.length), 0, c.card.as(Cards.ThrowRock));
 },
 tick:function(c,t){
