@@ -64,7 +64,7 @@ module.exports = function(game, foeDeck) {
 				bonus += ret;
 			}
 		});
-		lefttext.push((Math.round(bonus*100)-100) + "% total bonus");
+		lefttext.push((Math.round((streakrate+1)*bonus*100)-100) + "% total bonus");
 		return bonus;
 	}
 	var div = px.dom.div([412, 440, ["Exit", exitFunc]]), lefttext = [game.ply + " plies", (game.time / 1000).toFixed(1) + " seconds"];

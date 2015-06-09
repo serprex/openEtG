@@ -29,9 +29,9 @@ module.exports = function(db, users, sockEmit, usersock){
 				var day = sutil.getDay();
 				if (servuser.oracle < day){
 					servuser.oracle = day;
-					var ocardupped = Math.random() < .03;
+					var ocardnymph = Math.random() < .03;
 					var card = etg.PlayerRng.randomcard(false,
-						function (x) { return x.type != etg.PillarEnum && ((x.rarity != 5) ^ ocardupped); });
+						function (x) { return x.type != etg.PillarEnum && ((x.rarity != 5) ^ ocardnymph) && x.code != user.ocard; });
 					var ccode = etgutil.asShiny(card.code, card.rarity == 5);
 					if (card.rarity > 1) {
 						servuser.accountbound = user.accountbound = etgutil.addcard(user.accountbound, ccode);
