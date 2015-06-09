@@ -45,7 +45,7 @@ require("./httpcards")(function() {
 		equal(player1.creatures[0].card, Cards.MalignantCell, "Malignant");
 	});
 	gameTest("BoneWall", function() {
-		player1.quanta[etg.Death] = 10;
+		player1.quanta[etg.Death] = 8;
 		initHand(player1, Cards.BoneWall);
 		player1.hand[0].useactive();
 		new etg.Creature(Cards.CrimsonDragon, player2).place();
@@ -232,6 +232,14 @@ require("./httpcards")(function() {
 		equal(steam.trueatk(), 5, "5");
 		steam.attack();
 		equal(steam.trueatk(), 4, "4");
+	});
+	gameTest("Transform No Sick", function() {
+		player1.quanta[etg.Entropy] = 8;
+		var pixie = new etg.Creature(Cards.Pixie, player1);
+		pixie.place();
+		pixie.usedactive = false;
+		pixie.transform(Cards.Pixie);
+		ok(pixie.canactive(), "canactive");
 	});
 	gameTest("Voodoo", function() {
 		var voodoo = new etg.Creature(Cards.VoodooDoll, player1);
