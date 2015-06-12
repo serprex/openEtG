@@ -12,9 +12,11 @@ require("./httpcards")(function() {
 	}
 	function gameTest(){
 		game = new etg.Game(5489);
-		game.player1.mark = game.player2.mark = etg.Entropy;
 		player1 = game.player1;
 		player2 = game.player2;
+		player1.mark = player2.mark = etg.Entropy;
+		player1.deck = [Cards.AmethystPillar, Cards.AmethystPillar, Cards.AmethystPillar];
+		player2.deck = [Cards.BonePillar, Cards.BonePillar, Cards.BonePillar];
 		test.apply(null, arguments);
 	}
 	test("Upped Alignment", function() {
@@ -43,7 +45,7 @@ require("./httpcards")(function() {
 		equal(player1.creatures[0].card, Cards.MalignantCell, "Malignant");
 	});
 	gameTest("BoneWall", function() {
-		player1.quanta[etg.Death] = 10;
+		player1.quanta[etg.Death] = 8;
 		initHand(player1, Cards.BoneWall);
 		player1.hand[0].useactive();
 		new etg.Creature(Cards.CrimsonDragon, player2).place();
@@ -64,6 +66,7 @@ require("./httpcards")(function() {
 		equal(player1.creatures[0].card, Cards.Skeleton, "Skeleton");
 	});
 	gameTest("Deckout", function() {
+		player2.deck.length = 0;
 		player1.endturn();
 		equal(game.winner, player1);
 	});
@@ -201,10 +204,10 @@ require("./httpcards")(function() {
 	gameTest("Reflect", function() {
 		Actives.lightning(player1, player2);
 		ok(player1.hp == 100 && player2.hp == 95, "Plain spell");
-		player2.shield = new etg.Shield(Cards.ReflectiveShield, player2);
+		player2.shield = new etg.Shield(Cards.MirrorShield, player2);
 		Actives.lightning(player1, player2);
 		ok(player1.hp == 95 && player2.hp == 95, "Reflected spell");
-		player1.shield = new etg.Shield(Cards.ReflectiveShield, player1);
+		player1.shield = new etg.Shield(Cards.MirrorShield, player1);
 		Actives.lightning(player1, player2);
 		ok(player1.hp == 90 && player2.hp == 95, "Unreflected reflected spell");
 	});
@@ -229,6 +232,14 @@ require("./httpcards")(function() {
 		equal(steam.trueatk(), 5, "5");
 		steam.attack();
 		equal(steam.trueatk(), 4, "4");
+	});
+	gameTest("Transform No Sick", function() {
+		player1.quanta[etg.Entropy] = 8;
+		var pixie = new etg.Creature(Cards.Pixie, player1);
+		pixie.place();
+		pixie.usedactive = false;
+		pixie.transform(Cards.Pixie);
+		ok(pixie.canactive(), "canactive");
 	});
 	gameTest("Voodoo", function() {
 		var voodoo = new etg.Creature(Cards.VoodooDoll, player1);

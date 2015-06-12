@@ -24,6 +24,16 @@ input[type="button"]{
 input[type="button"]:hover{background:linear-gradient(to bottom,#ccdde0,#586776)}
 input[type="button"]:hover:active{background:linear-gradient(to bottom,#aabbc0,#485766)}
 input[type="text"],input[type="password"],input:not([type]){width:150px}
+.width400{width:400px;margin:0}
+.underline{border-bottom:1px solid #222;padding-bottom:1px}
+.floatRight{float:right}
+.atopol{width:800px;margin:0}
+.atoptext{float:left;width:200px}
+.atopdash{float:left;text-align:center;width:12px}
+.atop1{float:left;width:48px;text-align:right}
+.atop2{float:left;width:48px;text-align:right}
+.atop3{float:left;width:48px}
+.atop4{float:left;width:48px;text-align:right;margin-right:32px}
 .infobox{
 	opacity:.7;
 	background-color:black;

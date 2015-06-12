@@ -114,7 +114,6 @@ function Thing(card, owner){
 	this.card = card;
 	this.cast = card.cast;
 	this.castele = card.castele;
-	this.usedactive = true;
 	if (this.status){
 		for (var key in this.status){
 			if (key in passives) delete this.status[key];
@@ -124,6 +123,7 @@ function Thing(card, owner){
 		}
 	}else{
 		this.status = cloneStatus(card.status)
+		this.usedactive = true;
 	}
 	this.active = clone(card.active);
 }

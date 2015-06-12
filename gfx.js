@@ -111,11 +111,26 @@ function makeArt(code, art, rend) {
 }
 function artFactory(realcb){
 	var cache = {};
-	return function func(code, extracb){
+	return function(code){
 		function cb(art){
 			cache[code] = realcb(code, art, cache[code]);
-			if (extracb) extracb(art);
 			return cache[code];
+		}
+		function mkOnError(code){
+			return function onError(){
+				if (code >= "6qo"){
+					var redcode = etgutil[code >= "g00"?"asShiny":"asUpped"](code, false);
+					if (redcode in artimagecache) cb(artimagecache[code] = artimagecache[redcode]);
+					else{
+						this.removeEventListener("error", onError);
+						this.addEventListener("error", mkOnError(redcode));
+						this.addEventListener("load", function(){
+							artimagecache[redcode] = artimagecache[code];
+						});
+						this.src = "Cards/" + redcode + ".png";
+					}
+				}else artimagecache[code] = undefined;
+			}
 		}
 		if (!(code in artimagecache)){
 			if (artpool){
@@ -130,17 +145,7 @@ function artFactory(realcb){
 				img.addEventListener("load", function(){
 					cb(artimagecache[code] = new PIXI.Texture(new PIXI.BaseTexture(this)));
 				});
-				img.addEventListener("error", function(){
-					if (code >= "6qo"){
-						var redcode = etgutil[code >= "g00"?"asShiny":"asUpped"](code, false);
-						if (redcode in artimagecache) cb(artimagecache[code] = artimagecache[redcode]);
-						else{
-							func(redcode, function(art){
-								cb(artimagecache[code] = art);
-							});
-						}
-					}else artimagecache[code] = undefined;
-				});
+				img.addEventListener("error", mkOnError(code));
 				img.src = "Cards/" + code + ".png";
 			}
 		}
