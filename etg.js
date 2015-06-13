@@ -551,6 +551,13 @@ Player.prototype.isCloaked = function(){
 		return pr && pr.status.cloak;
 	});
 }
+Player.prototype.forEach = function(func, dohand){
+	func(pl.weapon);
+	func(pl.shield);
+	pl.creatures.forEach(func);
+	pl.permanents.forEach(func);
+	if (dohand) pl.hand.forEach(func);
+}
 function plinfocore(info, key, val){
 	if (val===true) info.push(key);
 	else if (val) info.push(val + key);
@@ -1134,7 +1141,7 @@ Thing.prototype.useactive = function(t) {
 		this.owner.game.updateExpectedDamage();
 	}
 }
-Creature.prototype.attackCreature = function(target, trueatk){
+Creature.prototype.attackCreature = Weapon.prototype.attackCreature = function(target, trueatk){
 	if (trueatk === undefined) trueatk = this.trueatk();
 	if (trueatk){
 		var dmg = target.dmg(trueatk);

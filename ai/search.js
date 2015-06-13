@@ -117,11 +117,7 @@ module.exports = function(game, previous) {
 				for (var j = 0;j < 2;j++) {
 					var pl = j == 0 ? c.owner : c.owner.foe;
 					evalIter(pl);
-					evalIter(pl.weapon);
-					evalIter(pl.shield);
-					pl.creatures.forEach(evalIter);
-					pl.permanents.forEach(evalIter);
-					pl.hand.forEach(evalIter);
+					pl.forEach(evalIter);
 				}
 				game.targeting = null;
 				if (loglist) console.log(currentEval, preEval, c.toString(), active.activename[0], loglist);

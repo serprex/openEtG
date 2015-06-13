@@ -277,14 +277,8 @@ countimmbur:function(c){
 	function test(x){
 		if (x && (x.status.immaterial || x.status.burrowed)) n++;
 	}
-	c.owner.creatures.forEach(test);
-	c.owner.permanents.forEach(test);
-	test(c.owner.weapon);
-	test(c.owner.shield);
-	c.owner.foe.creatures.forEach(test);
-	c.owner.foe.permanents.forEach(test);
-	test(c.owner.foe.weapon);
-	test(c.owner.foe.shield);
+	c.owner.forEach(test);
+	c.owner.foe.forEach(test);
 	return n;
 },
 cpower:function(c,t){
@@ -603,11 +597,7 @@ forceplay:function(c,t){
 		for(var i=0; i<2; i++){
 			var pl=i==0?c.owner:c.owner.foe;
 			tgttest(pl);
-			pl.creatures.forEach(tgttest);
-			pl.permanents.forEach(tgttest);
-			pl.hand.forEach(tgttest);
-			tgttest(pl.shield);
-			tgttest(pl.weapon);
+			pl.forEach(tgttest, true);
 		}
 		return tgts.length == 0 ? undefined : c.owner.choose(tgts);
 	}
@@ -789,14 +779,8 @@ inflation:function(c,t){
 			p.cast++;
 		}
 	}
-	c.owner.creatures.forEach(inflate);
-	c.owner.foe.creatures.forEach(inflate);
-	c.owner.permanents.forEach(inflate);
-	c.owner.foe.permanents.forEach(inflate);
-	inflate(c.owner.weapon);
-	inflate(c.owner.shield);
-	inflate(c.owner.foe.weapon);
-	inflate(c.owner.foe.shield);
+	c.owner.forEach(inflate);
+	c.owner.foe.forEach(inflate);
 },
 ink:function(c,t){
 	var p=new etg.Permanent(Cards.Cloak, c.owner);
@@ -1161,6 +1145,10 @@ paradox:function(c,t){
 },
 parallel:function(c,t){
 	Effect.mkText("Parallel", t);
+	if (t.card.isOf(Cards.Chimera)){
+		Actives.chimera(c, t);
+		return;
+	}
 	var copy = t.clone(c.owner);
 	copy.place();
 	if (copy.status.mutant){
@@ -1249,8 +1237,6 @@ protectall:function(c,t){
 	}
 	c.owner.creatures.forEach(protect);
 	c.owner.permanents.forEach(protect);
-	protect(c.owner.weapon);
-	protect(c.owner.shield);
 },
 protectonce:function(c,t, data){
 	if (data.tgt == c && c.owner != t.owner){
@@ -1371,11 +1357,7 @@ ricochet:function(c,t){
 		var tgts = [];
 		for(var i=0; i<2; i++){
 			var pl=i==0?c.owner:c.owner.foe;
-			pl.creatures.forEach(tgttest);
-			pl.permanents.forEach(tgttest);
-			pl.hand.forEach(tgttest);
-			tgttest(pl.shield);
-			tgttest(pl.weapon);
+			pl.forEach(tgttest, true);
 		}
 		if (tgts.length > 0){
 			var tgt = c.owner.choose(tgts), town = t.owner;

@@ -111,9 +111,6 @@ var TargetFilters = {
 	creaonly:function(c, t){
 		return t.isMaterial(etg.Creature) && t.card.type == etg.CreatureEnum;
 	},
-	creanonspell:function(c, t){
-		return t.isMaterial(etg.Creature) && t.card.type != etg.SpellEnum;
-	},
 	play:function(c, t){
 		return t instanceof etg.Player;
 	},
