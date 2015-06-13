@@ -1222,7 +1222,7 @@ predator:function(c,t){
 	if (fhand.length > 4 && !c.hasactive("turnstart", "predatoroff")){
 		c.addactive("turnstart", Actives.predatoroff);
 		c.attack(false, 0);
-		if (fhand.length) fhand[fhand.length-1].die();
+		if (fhand.length) Actives.destroycard(c, fhand[fhand.length-1]);
 	}
 },
 predatoroff:function(c,t){
