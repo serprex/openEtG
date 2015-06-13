@@ -169,8 +169,8 @@ brawl:function(c,t){
 		if (cr){
 			var fcr = c.owner.foe.creatures[i];
 			if (fcr){
-				fcr.dmg(cr.trueatk());
-				cr.dmg(fcr.trueatk());
+				fcr.attackCreature(cr);
+				cr.attackCreature(fcr);
 			}else{
 				cr.attack(false, 0);
 			}
@@ -267,9 +267,9 @@ corpseexplosion:function(c,t){
 		c.owner.foe.addpoison(poison);
 	}
 },
-counter:function(c,t){
-	if (!c.status.frozen && !c.status.delayed){
-		t.dmg(c.trueatk());
+counter:function(c,t, dmg){
+	if (!c.status.frozen && !c.status.delayed && dmg>0 && ~c.getIndex()){
+		c.attackCreature(t);
 	}
 },
 countimmbur:function(c){
@@ -708,7 +708,7 @@ guard:function(c,t){
 	c.delay(1);
 	t.delay(1);
 	if (c.status.airborne || !t.status.airborne){
-		t.dmg(c.trueatk());
+		t.attackCreature(c);
 	}
 },
 halveatk: function(c, t) {
