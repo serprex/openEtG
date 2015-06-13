@@ -234,6 +234,7 @@ chimera:function(c,t){
 	var chim = new etg.Creature(c.card, c.owner);
 	chim.atk = atk;
 	chim.maxhp = chim.hp = hp;
+	chim.active = {};
 	chim.status.momentum = true;
 	c.owner.creatures[0] = chim;
 	c.owner.creatures.length = 1;
@@ -555,6 +556,11 @@ firebolt:function(c,t){
 		}
 	}else{
 		t.status.frozen = 0;
+	}
+},
+firebrand:function(c,t, data){
+	if (data.tgt == c && data.active == Actives.tempering){
+		c.status.charges++;
 	}
 },
 flatline:function(c,t){
