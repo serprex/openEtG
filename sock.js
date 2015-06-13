@@ -1,7 +1,7 @@
 var chat = require("./chat");
 var etgutil = require("./etgutil");
 var options = require("./options");
-var userutil = require("./userutil");
+var usercmd = require("./usercmd");
 var socket = new WebSocket("ws://"+location.hostname+":13602");
 var buffer = [];
 var attempts = 0, attemptTimeout = 0;
@@ -51,7 +51,7 @@ exports.emit = function(x, data){
 exports.userExec = function(x, data){
 	if (!data) data = {};
 	exports.userEmit(x, data);
-	userutil[x](data, exports.user);
+	usercmd[x](data, exports.user);
 }
 exports.getDeck = function() {
 	if (exports.user) return exports.user.decknames[exports.user.selectedDeck] || "";

@@ -16,11 +16,12 @@ var app = require("connect")().
 	use("/speed", require("./srv/speed")()).
 	use("/deck", require("./srv/deckredirect")()).
 	use("/code", require("./srv/codesmith")(db));
-var etgutil = require("./etgutil");
-var userutil = require("./userutil");
 var etg = require("./etg");
-var aiDecks = require("./Decks");
 var Cards = require("./Cards");
+var aiDecks = require("./Decks");
+var etgutil = require("./etgutil");
+var usercmd = require("./usercmd");
+var userutil = require("./userutil");
 function storeUsers(){
 	for(var u in users){
 		var user = users[u];
@@ -524,9 +525,6 @@ var userEvents = {
 		}
 	}
 };
-["bazaar","sellcard","upgrade","uppillar","polish","shpillar","upshpillar","addgold","addloss","addwin","addcards","addbound","donedaily","unpolish","unupgrade","upshall"].forEach(function(event){
-	userEvents[event] = userutil[event];
-});
 var sockEvents = {
 	login:require("./srv/loginauth")(db, users, sockEmit, usersock),
 	guestchat:function(data) {
@@ -696,7 +694,7 @@ function wssConnection(socket) {
 			}
 			return;
 		}
-		var func = userEvents[data.x];
+		var func = userEvents[data.x] || usercmd[data.x];
 		if (func){
 			var u = data.u, auth = data.a;
 			delete data.a;
