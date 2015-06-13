@@ -90,6 +90,9 @@ var TargetFilters = {
 	weap:function(c, t){
 		return (t instanceof etg.Weapon || (t instanceof etg.Creature && t.card.type == etg.WeaponEnum)) && !t.status.immaterial && !t.status.burrowed;
 	},
+	shie:function(c, t){
+		return (t instanceof etg.Shield || (t instanceof etg.Creature && t.card.type == etg.ShieldEnum)) && !t.status.immaterial && !t.status.burrowed;
+	},
 	playerweap:function(c,t){
 		return t instanceof etg.Weapon && t == t.owner.weapon;
 	},

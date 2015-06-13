@@ -38,8 +38,8 @@ accelerationspell:function(c,t){
 },
 accretion:function(c,t){
 	Actives.destroy(c, t);
-	c.buffhp(15);
-	if (c.truehp() > 45){
+	c.buffhp(10);
+	if (c.truehp() > 30){
 		c.die();
 		if (c.owner.hand.length < 8){
 			new etg.CardInstance(c.card.as(Cards.BlackHole), c.owner).place();
@@ -60,9 +60,7 @@ aether:function(c,t){
 aflatoxin:function(c,t){
 	Effect.mkText("Aflatoxin", t);
 	t.addpoison(2);
-	if (!(t instanceof etg.Player)){
-		t.status.aflatoxin = true;
-	}
+	t.status.aflatoxin = true;
 },
 aggroskele:function(c,t){
 	new etg.Creature(c.card.as(Cards.Skeleton), c.owner).place();
@@ -92,6 +90,15 @@ appease:function(c,t){
 },
 atk2hp:function(c,t){
 	t.buffhp(t.trueatk()-t.hp);
+},
+autoburrow:function(c,t){
+	c.addactive("play", Actives.autoburrowproc);
+},
+autoburrowoff:function(c,t){
+	c.rmactive("play", "autoburrowproc");
+},
+autoburrowproc:function(c,t){
+	if (t.active.cast == Actives.burrow) Actives.burrow(t);
 },
 axe:function(c,t){
 	return c.owner.mark == etg.Fire || c.owner.mark == etg.Time?1:0;
@@ -146,11 +153,8 @@ bow:function(c,t){
 	return c.owner.mark == etg.Air || c.owner.mark == etg.Light?1:0;
 },
 bounce:function(c,t){
-	if (c.owner.hand.length < 8) {
-		new etg.CardInstance(c.card, c.owner).place();
-		c.remove();
-		return true;
-	}
+	Actives.unsummon(c, c);
+	return true;
 },
 bravery:function(c,t){
 	if (!c.owner.foe.sanctuary){
@@ -230,7 +234,6 @@ chimera:function(c,t){
 	var chim = new etg.Creature(c.card, c.owner);
 	chim.atk = atk;
 	chim.maxhp = chim.hp = hp;
-	chim.active = {};
 	chim.status.momentum = true;
 	c.owner.creatures[0] = chim;
 	c.owner.creatures.length = 1;
@@ -497,6 +500,7 @@ endow:function(c,t){
 },
 envenom:function(c,t){
 	t.addactive("hit", etg.parseActive("poison 1"));
+	t.addactive("shield", Actives.thornweak);
 },
 epidemic:function(c,t){
 	if (t.status.poison){
@@ -583,24 +587,15 @@ foedraw:function(c,t){
 	}
 },
 forceplay:function(c,t){
-	var card = t.card;
-	Effect.mkSpriteFade(require("./gfx").getCardImage(t.card), t, {x:t.owner == t.owner.game.player2 ? -1 : 1, y:0});
-	if (t.owner.sanctuary) return;
-	if (!t.owner.canspend(card.costele, card.cost)) return;
-	t.remove();
-	if (t.owner.neuro){
-		t.owner.addpoison(1);
-	}
 	function tgttest(x){
 		if (x && tgting(t.owner, x)) {
 			tgts.push(x);
 		}
 	}
-	if (card.type <= etg.PermanentEnum){
-		var cons = [etg.Permanent, etg.Weapon, etg.Shield, etg.Permanent][card.type];
-		new cons(card, t.owner).place(true);
-		ui.playSound("permPlay");
-	}else if (card.type == etg.SpellEnum){
+	var card = t.card, tgt;
+	Effect.mkSpriteFade(require("./gfx").getCardImage(t.card), t, {x:t.owner == t.owner.game.player2 ? -1 : 1, y:0});
+	if (t.owner.sanctuary) return;
+	if (card.type == etg.SpellEnum){
 		var tgting = Cards.Targeting[card.active.activename[0]];
 		if (tgting){
 			var tgts = [];
@@ -613,15 +608,14 @@ forceplay:function(c,t){
 				tgttest(pl.shield);
 				tgttest(pl.weapon);
 			}
-			if (tgts.length > 0){
-				t.castSpell(c.owner.choose(tgts), card.active);
-			}
-		}else t.castSpell(undefined, card.active);
-	}else if (card.type == etg.CreatureEnum){
-		new etg.Creature(card, t.owner).place(true);
-		ui.playSound("creaturePlay");
+			if (tgts.length == 0) return;
+			tgt = c.owner.choose(tgts);
+		}
 	}
-	t.owner.spend(card.costele, card.cost);
+	var realturn = t.owner.game.turn;
+	t.owner.game.turn = t.owner;
+	t.useactive(tgt);
+	t.owner.game.turn = realturn;
 },
 fractal:function(c,t){
 	Effect.mkText("Fractal", t);
@@ -1012,7 +1006,7 @@ miracle:function(c,t){
 	}
 },
 mitosis:function(c,t){
-	new etg.Creature(c.card, c.owner).place();
+	c.card.play(c.owner, c, t);
 },
 mitosisspell:function(c,t){
 	t.active.cast = Actives.mitosis;
@@ -1053,13 +1047,11 @@ mutation:function(c,t){
 },
 neuro:adrenathrottle(function(c,t){
 	t.addpoison(1);
-	if (t instanceof etg.Player){
-		t.neuro = true;
-	}
+	t.status.neuro = true;
 }),
 neuroify:function(c,t){
-	if (c.owner.foe.status.poison > 0){
-		c.owner.foe.neuro = true;
+	if (t.status.poison > 0){
+		t.status.neuro = true;
 	}
 },
 nightmare:function(c,t){
@@ -1227,9 +1219,11 @@ precognition:function(c,t){
 	c.owner.precognition = true;
 },
 predator:function(c,t){
-	if (c.owner.foe.hand.length > 4 && !c.hasactive("turnstart", "predatoroff")){
+	var fhand = c.owner.foe.hand;
+	if (fhand.length > 4 && !c.hasactive("turnstart", "predatoroff")){
 		c.addactive("turnstart", Actives.predatoroff);
 		c.attack(false, 0);
+		if (fhand.length) fhand[fhand.length-1].die();
 	}
 },
 predatoroff:function(c,t){
@@ -1261,11 +1255,10 @@ protectoncedmg:function(c,t){
 },
 purify:function(c,t){
 	t.status.poison = t.status.poison < 0?t.status.poison-2:-2;
+	t.status.aflatoxin = false;
+	t.status.neuro = false;
 	if (t instanceof etg.Player){
-		t.neuro = false;
 		t.sosa = 0;
-	}else{
-		t.status.aflatoxin = false;
 	}
 },
 queen:function(c,t){
@@ -1355,7 +1348,7 @@ rewind:function(c,t){
 	t.owner.deck.push(t.card);
 },
 ricochet:function(c,t){
-	if (!(t instanceof etg.CardInstance) || t.active == Actives.bolsterintodeck)return;
+	if (!(t instanceof etg.CardInstance)) return;
 	var tgting = Cards.Targeting[t.active.activename[0]];
 	function tgttest(x){
 		if (x) {
@@ -1387,9 +1380,9 @@ sadism:function(c, t, dmg){
 	}
 },
 salvage:function(c, t, data){
+	Actives["growth 1"](c);
 	if (!data.salvaged && !c.hasactive("turnstart", "salvageoff") && c.owner.game.turn != c.owner){
 		Effect.mkText("Salvage", c);
-		Actives["growth 1"](c);
 		data.salvaged = true;
 		c.owner.hand.push(new etg.CardInstance(t.card, c.owner));
 		c.addactive("turnstart", Actives.salvageoff);
@@ -1680,11 +1673,12 @@ trick:function(c,t){
 	}
 },
 turngolem:function(c,t){
-	var golem = new etg.Creature(c.card.as(Cards.GolemAttacker), c.owner);
+	var golem = new etg.Creature(c.card, c.owner);
 	golem.atk = Math.floor(c.status.storedpower / 3);
 	golem.maxhp = golem.hp = c.status.storedpower;
 	golem.place();
-	c.owner.shield = undefined;
+	c.remove();
+	c.owner.gpull = golem;
 },
 unappease:function(c,t){
 	c.status.appeased = undefined;
@@ -1886,6 +1880,11 @@ solar:function(c,t){
 },
 thorn:function(c,t){
 	if (!t.status.ranged && c.owner.rng() < .75){
+		t.addpoison(1);
+	}
+},
+thornweak:function(c,t){
+	if (!t.status.ranged && c.owner.rng() < .25){
 		t.addpoison(1);
 	}
 },

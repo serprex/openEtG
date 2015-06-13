@@ -25,6 +25,7 @@ var DefaultStatus = {
 	delayed:0,
 	dive:0,
 	frozen:0,
+	neuro:false,
 	poison:0,
 	steamatk:0,
 	storedAtk:0,
@@ -139,7 +140,6 @@ function Player(game){
 	this.hand = [];
 	this.deck = [];
 	this.quanta = new Int8Array(13);
-	this.neuro = false;
 	this.sosa = 0;
 	this.silence = false;
 	this.sanctuary = false;
@@ -939,7 +939,7 @@ Creature.prototype.die = function() {
 		}
 	}
 }
-Creature.prototype.transform = Weapon.prototype.transform = function(card, owner){
+Creature.prototype.transform = function(card, owner){
 	Thing.call(this, card, owner || this.owner);
 	this.maxhp = this.hp = card.health;
 	this.atk = card.attack;
@@ -947,6 +947,25 @@ Creature.prototype.transform = Weapon.prototype.transform = function(card, owner
 		var buff = this.owner.upto(25);
 		this.buffhp(Math.floor(buff/5));
 		this.atk += buff%5;
+		this.mutantactive();
+	}
+}
+Weapon.prototype.transform = function(card, owner){
+	Weapon.call(this, card, owner || this.owner);
+	if (this.status.mutant){
+		this.atk += this.owner.upto(5);
+		this.mutantactive();
+	}
+}
+Shield.prototype.transform = function(card, owner){
+	Shield.call(this, card, owner || this.owner);
+	if (this.status.mutant){
+		this.mutantactive();
+	}
+}
+Permanent.prototype.transform = function(card, owner){
+	Permanent.call(this, card, owner || this.owner);
+	if (this.status.mutant){
 		this.mutantactive();
 	}
 }
@@ -1108,11 +1127,12 @@ Thing.prototype.castSpell = function(t, active, nospell){
 	}
 }
 Thing.prototype.useactive = function(t) {
-	this.usedactive = true;
-	var castele = this.castele, cast = this.cast;
-	this.castSpell(t, this.active.cast);
-	this.owner.spend(castele, cast);
-	this.owner.game.updateExpectedDamage();
+	if (this.owner.spend(this.castele, this.cast)){
+		this.usedactive = true;
+		if (this.status.neuro) this.addpoison(1);
+		this.castSpell(t, this.active.cast);
+		this.owner.game.updateExpectedDamage();
+	}
 }
 Weapon.prototype.attack = Creature.prototype.attack = function(stasis, freedomChance, target){
 	var isCreature = this instanceof Creature;
@@ -1190,35 +1210,33 @@ Weapon.prototype.attack = Creature.prototype.attack = function(stasis, freedomCh
 		}
 	}
 }
-CardInstance.prototype.canactive = function(){
+CardInstance.prototype.canactive = function(spend){
 	if (this.owner.silence || this.owner.game.turn != this.owner)return false;
-	if (!this.card){
-		console.log("wtf cardless card");
-		return false;
-	}
-	return this.owner.canspend(this.card.costele, this.card.cost);
+	return this.owner[spend?"spend":"canspend"](this.card.costele, this.card.cost);
+}
+Card.prototype.play = function(owner, src, tgt){
+	if (this.type <= PermanentEnum){
+		var cons = [Permanent, Weapon, Shield, Permanent][this.type];
+		new cons(this, owner).place(true);
+		ui.playSound("permPlay");
+	}else if (this.type == SpellEnum){
+		src.castSpell(tgt, this.active);
+	}else if (this.type == CreatureEnum){
+		new Creature(this, owner).place(true);
+		ui.playSound("creaturePlay");
+	}else console.log("Unknown card type: " + this.type);
 }
 CardInstance.prototype.useactive = function(target){
-	if (!this.canactive()){
+	if (!this.canactive(true)){
 		console.log((this.owner==this.owner.game.player1?"1":"2") + " cannot cast " + (this || "-"));
 		return;
 	}
 	var owner = this.owner, card = this.card;
 	this.remove();
-	if (owner.neuro){
+	if (owner.status.neuro){
 		owner.addpoison(1);
 	}
-	owner.spend(card.costele, card.cost);
-	if (card.type <= PermanentEnum){
-		var cons = [Permanent, Weapon, Shield, Permanent][card.type];
-		new cons(card, owner).place(true);
-		ui.playSound("permPlay");
-	}else if (card.type == SpellEnum){
-		this.castSpell(target, card.active);
-	}else if (card.type == CreatureEnum){
-		new Creature(card, owner).place(true);
-		ui.playSound("creaturePlay");
-	} else console.log("Unknown card type: " + card.type);
+	this.card.play(owner, this, target);
 	this.procactive("cardplay");
 	if (owner.bonusstats != null) owner.bonusstats.cardsplayed[card.type]++;
 	owner.game.updateExpectedDamage();
