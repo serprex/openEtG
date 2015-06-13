@@ -132,6 +132,9 @@ var TargetFilters = {
 	paradox:function(c, t){
 		return t.isMaterial(etg.Creature) && t.truehp()<t.trueatk();
 	},
+	material:function(c, t){
+		return !t.status.immaterial && !t.status.burrowed;
+	},
 	airbornecrea:function(c, t){
 		return t.isMaterial(etg.Creature) && t.status.airborne;
 	},

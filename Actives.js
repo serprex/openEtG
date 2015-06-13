@@ -593,31 +593,36 @@ foedraw:function(c,t){
 	}
 },
 forceplay:function(c,t){
-	function tgttest(x){
-		if (x && tgting(t.owner, x)) {
-			tgts.push(x);
-		}
-	}
-	var card = t.card, tgt;
-	Effect.mkSpriteFade(require("./gfx").getCardImage(t.card), t, {x:t.owner == t.owner.game.player2 ? -1 : 1, y:0});
-	if (t.owner.sanctuary) return;
-	if (card.type == etg.SpellEnum){
-		var tgting = Cards.Targeting[card.active.activename[0]];
-		if (tgting){
-			var tgts = [];
-			for(var i=0; i<2; i++){
-				var pl=i==0?c.owner:c.owner.foe;
-				tgttest(pl);
-				pl.creatures.forEach(tgttest);
-				pl.permanents.forEach(tgttest);
-				pl.hand.forEach(tgttest);
-				tgttest(pl.shield);
-				tgttest(pl.weapon);
+	function findtgt(tgting){
+		function tgttest(x){
+			if (x && tgting(t.owner, x)) {
+				tgts.push(x);
 			}
-			if (tgts.length == 0) return;
-			tgt = c.owner.choose(tgts);
 		}
+		var tgts = [];
+		for(var i=0; i<2; i++){
+			var pl=i==0?c.owner:c.owner.foe;
+			tgttest(pl);
+			pl.creatures.forEach(tgttest);
+			pl.permanents.forEach(tgttest);
+			pl.hand.forEach(tgttest);
+			tgttest(pl.shield);
+			tgttest(pl.weapon);
+		}
+		return tgts.length == 0 ? undefined : c.owner.choose(tgts);
 	}
+	var tgting, tgt;
+	if (t instanceof etg.CardInstance){
+		var card = t.card;
+		Effect.mkSpriteFade(require("./gfx").getCardImage(t.card), t, {x:t.owner == t.owner.game.player2 ? -1 : 1, y:0});
+		if (t.owner.sanctuary) return;
+		if (card.type == etg.SpellEnum){
+			tgting = Cards.Targeting[card.active.activename[0]];
+		}
+	}else if (t.active.cast){
+		tgting = Cards.Targeting[t.active.cast.activename[0]];
+	}
+	if (tgting && !(tgt = findtgt(tgting))) return;
 	var realturn = t.owner.game.turn;
 	t.owner.game.turn = t.owner;
 	t.useactive(tgt);
