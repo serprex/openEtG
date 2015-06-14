@@ -292,9 +292,6 @@ cseed:function(c,t){
 dagger:function(c){
 	return (c.owner.mark == etg.Darkness||c.owner.mark == etg.Death) + c.owner.isCloaked();
 },
-darkness:function(c){
-	c.owner.spend(etg.Darkness, -1);
-},
 deadalive:function(c){
 	c.deatheffect(c.getIndex());
 },
@@ -1826,7 +1823,7 @@ cold:function(c,t){
 despair:function(c,t){
 	if (!t.status.ranged){
 		var chance = c.owner.creatures.reduce(function(chance, cr){
-			return cr && (cr.hasactive("auto", "siphon") || cr.hasactive("auto", "darkness")) ? chance+1 : chance;
+			return cr && cr.hasactive("auto", "siphon") ? chance+1 : chance;
 		}, 0);
 		if (c.owner.rng() < 1.4-Math.pow(.95, chance)){
 			Effect.mkText("-1|-1", t);

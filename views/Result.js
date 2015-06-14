@@ -42,7 +42,8 @@ module.exports = function(game, foeDeck) {
 	function computeBonuses() {
 		if (game.endurance !== undefined) return 1;
 		var bonus = 1;
-		[	["Full Health", function() { return game.player1.hp == game.player1.maxhp ? .2 : 0 }],
+		[	["Current Health", function() { return (game.player1.hp + 200)/300; }],
+			["Full Health", function() { return game.player1.hp == game.player1.maxhp ? .2 : 0 }],
 			["Deckout", function() { return game.player2.deck.length == 0 && game.player2.hp > 0 ? .5 : 0 }],
 			["Double Kill", function() { return game.player2.hp < -game.player2.maxhp ? .25 : 0 }],
 			["Waiter", function() { return game.player1.deck.length == 0 ? .2 : 0 }],
@@ -64,7 +65,7 @@ module.exports = function(game, foeDeck) {
 				bonus += ret;
 			}
 		});
-		lefttext.push((Math.round((streakrate+1)*bonus*100)-100) + "% total bonus");
+		lefttext.push((((streakrate+1)*bonus*100)-100).toFixed(1) + "% total bonus");
 		return bonus;
 	}
 	var div = px.dom.div([412, 440, ["Exit", exitFunc]]), lefttext = [game.ply + " plies", (game.time / 1000).toFixed(1) + " seconds"];
@@ -96,17 +97,16 @@ module.exports = function(game, foeDeck) {
 					if (game.level !== undefined) {
 						var streak = "streak" + game.level;
 						streakrate = Math.min([.05, .05, .075, .1, .075, .1][game.level]*(sock.user[streak]||0), 1);
-						var reward = userutil.pveCostReward[game.level*2+1] * (1+streakrate);
 						sock.user[streak] = (sock.user[streak] || 0)+1;
-						goldwon = Math.floor(reward * (200 + game.player1.hp) / 300);
 						lefttext.push(sock.user[streak] + " win streak", (streakrate * 100).toFixed(1) + "% streak bonus");
+						goldwon = Math.floor(userutil.pveCostReward[game.level*2+1] * (1+streakrate) * computeBonuses());
 					} else goldwon = 0;
 					game.goldreward = goldwon + (game.cost || 0);
 				}
 			}
 		}
 		if (game.goldreward) {
-			game.goldreward = Math.round(game.goldreward * computeBonuses());
+			game.goldreward = Math.round(game.goldreward);
 			var reward = (game.addonreward || 0) + game.goldreward - (game.cost || 0),
 				goldwon = px.dom.text(reward + "$");
 			goldwon.style.textAlign = "center";

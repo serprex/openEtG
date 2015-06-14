@@ -552,11 +552,11 @@ Player.prototype.isCloaked = function(){
 	});
 }
 Player.prototype.forEach = function(func, dohand){
-	func(pl.weapon);
-	func(pl.shield);
-	pl.creatures.forEach(func);
-	pl.permanents.forEach(func);
-	if (dohand) pl.hand.forEach(func);
+	func(this.weapon);
+	func(this.shield);
+	this.creatures.forEach(func);
+	this.permanents.forEach(func);
+	if (dohand) this.hand.forEach(func);
 }
 function plinfocore(info, key, val){
 	if (val===true) info.push(key);
