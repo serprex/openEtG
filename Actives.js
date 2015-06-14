@@ -128,6 +128,10 @@ beguilestop:function(c,t){
 		Actives.beguile(c, c);
 	}
 },
+bellweb:function(c,t){
+	Actives.web(c,t);
+	t.status.aquatic = true;
+},
 blackhole:function(c,t){
 	if (!t.sanctuary){
 		for (var q=1; q<13; q++){
@@ -412,6 +416,24 @@ draft:function(c,t){
 },
 drawcopy:function(c,t){
 	if (c.owner != t.owner) new etg.CardInstance(t.card, c.owner).place();
+},
+drawequip:function(c,t){
+	var idx = [];
+	c.owner.deck.forEach(function(code, i){
+		var type = Cards[code].type;
+		if (type == etg.WeaponEnum || type == etg.ShieldEnum){
+			idx.push(i);
+		}
+	});
+	if (idx.length){
+		var choice = c.owner.choose(idx);
+		new etg.CardInstance(c.owner.deck[choice], c.owner).place();
+		c.owner.deck.splice(choice, 1);
+	}
+},
+drawpillar:function(c,t){
+	var deck = c.owner.deck;
+	if (Cards[deck[deck.length-1]].type == etg.PillarEnum) Actives.hasten(c, t);
 },
 dryspell:function(c,t){
 	function dryeffect(c,t){
@@ -977,17 +999,20 @@ metamorph:function(c,t){
 	c.owner.mark = t instanceof etg.Player?t.mark:t.card.element;
 	c.owner.markpower++;
 },
-mimic:function(c,t){
-	if (c != t && t instanceof etg.Creature) {
-		c.transform(t.card);
-		c.addactive("play", Actives.mimic);
-	}
-},
 midas:function(c,t){
 	Actives.destroy(c, t, true);
 	var relic = new etg.Permanent(c.card.as(Cards.GoldenRelic), t.owner);
 	relic.usedactive = false;
 	relic.place();
+},
+millpillar:function(c,t){
+	if (Cards[t.deck[t.deck.length-1]].type == etg.PillarEnum) t.deck.length--;
+},
+mimic:function(c,t){
+	if (c != t && t instanceof etg.Creature) {
+		c.transform(t.card);
+		c.addactive("play", Actives.mimic);
+	}
 },
 miracle:function(c,t){
 	c.owner.quanta[etg.Light] = 0;
