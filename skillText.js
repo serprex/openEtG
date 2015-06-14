@@ -84,6 +84,9 @@ var data = {
 	envenom:"Target weapon gains \"Venom: apply poison on hit\"",
 	epidemic:"When a creature dies, transfer creature's poison counters to foe",
 	epoch:"Silence player after playing 2 cards in a turn",
+	epochreset:{
+		cast:"Reset silence counter",
+	},
 	evade40:"40% chance to evade",
 	evade50:"50% chance to evade",
 	evade100:"100% chance to evade",
