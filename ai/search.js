@@ -35,7 +35,7 @@ var afilter = {
 		return t.active.cast && !t.usedactive;
 	},
 	lobotomize:function(c,t){
-		if (!t.status.momentum && !t.status.psion) {
+		if (!t.status.momentum && !t.status.psionic) {
 			for (var key in t.active){
 				if (t.active[key] && key != "ownplay"){
 					return true;
