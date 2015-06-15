@@ -41,7 +41,6 @@ module.exports = function(data) {
 						require("./Editor")();
 						return;
 					}
-					require("../ui").parsepvpstats(gameData);
 					var gameData = { deck: adeck, urdeck: deck, seed: Math.random() * etgutil.MAX_INT, foename: "Test", cardreward: "",
 						p2hp:info.curhp, p2markpower:info.mark, p2drawpower:info.draw };
 					require("./Match")(gameData, true);

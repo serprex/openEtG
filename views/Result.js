@@ -30,11 +30,18 @@ module.exports = function(game, foeDeck) {
 		case 3:mkAi.mkPremade("demigod")();break;
 		case 4:sock.userEmit("foearena", {lv:0});break;
 		case 5:sock.userEmit("foearena", {lv:1});break;
-		default:
-			if (game.foename == "Custom"){
-				var gameData = { deck: options.aideck, urdeck: sock.getDeck(), seed: Math.random() * etgutil.MAX_INT, foename: "Custom", cardreward: "" };
-				ui.parsepvpstats(gameData);
-				ui.parseaistats(gameData);
+		case undefined:
+			if (game.foename == "Custom" || game.foename == "Test"){
+				var gameData = { deck: foeDeck, urdeck: sock.getDeck(), seed: Math.random() * etgutil.MAX_INT, foename: game.foename, cardreward: "" };
+				if (game.foename == "Custom"){
+					ui.parsepvpstats(gameData);
+					ui.parseaistats(gameData);
+				}else{
+					// Inaccurate if stats changed throughout game
+					gameData.p2hp = game.player2.maxhp;
+					gameData.p2markpower = game.player2.markpower;
+					gameData.p2deckpower = game.player2.deckpower;
+				}
 				require("./Match")(gameData, true);
 			}
 		}
