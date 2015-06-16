@@ -1168,13 +1168,13 @@ Weapon.prototype.attack = Creature.prototype.attack = function(stasis, freedomCh
 		var momentum = this.status.momentum ||
 			(this.status.burrowed && this.owner.permanents.some(function(pr){ return pr && pr.status.tunnel }));
 		if (this.status.airborne && freedomChance && this.owner.rng() < freedomChance){
-			if (!momentum && !target.shield && !target.gpull && !this.status.psion){
+			if (!momentum && !target.shield && !target.gpull && !this.status.psionic){
 				trueatk = Math.ceil(trueatk * 1.5);
 			}else{
 				momentum = true;
 			}
 		}
-		if (this.status.psion){
+		if (this.status.psionic){
 			target.spelldmg(trueatk);
 		}else if (momentum || trueatk < 0){
 			target.dmg(trueatk);

@@ -30,7 +30,7 @@ function startMatch(game, foeDeck, spectate) {
 	}
 	function drawStatus(obj, spr) {
 		var statuses = spr.children[0].children;
-		statuses[0].visible = obj.status.psion;
+		statuses[0].visible = obj.status.psionic;
 		statuses[1].visible = obj.status.aflatoxin;
 		statuses[2].visible = !obj.status.aflatoxin && obj.status.poison > 0;
 		statuses[3].visible = obj.status.airborne || obj.status.ranged;

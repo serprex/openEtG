@@ -251,7 +251,7 @@ clear:function(c,t){
 	t.status.adrenaline = 0;
 	t.status.aflatoxin = false;
 	t.status.momentum = false;
-	t.status.psion = false;
+	t.status.psionic = false;
 	if (t.status.delayed > 0){
 		t.status.delayed--;
 	}
@@ -946,7 +946,7 @@ lobotomize:function(c,t){
 	Effect.mkText("Lobotomize", t);
 	t.lobo();
 	t.status.momentum = false;
-	t.status.psion = false;
+	t.status.psionic = false;
 },
 locket: function(c, t) {
 	var ele = c.status.mode === undefined ? c.owner.mark : c.status.mode;
@@ -1794,7 +1794,7 @@ wisdom:function(c,t){
 	Effect.mkText("3|0", t);
 	t.atk += 3;
 	if (t.status.immaterial){
-		t.status.psion = true;
+		t.status.psionic = true;
 	}
 },
 yoink:function(c,t){

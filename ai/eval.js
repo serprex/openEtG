@@ -398,7 +398,7 @@ function estimateDamage(c, freedomChance, wallCharges, wallIndex) {
 		}else return Math.max(tatk - dr, 0);
 	}
 	var tatk = c.trueatk(), fsh = c.owner.foe.shield, fshactive = fsh && fsh.active.shield;
-	var momentum = !fsh || tatk <= 0 || c.status.momentum || c.status.psion ||
+	var momentum = !fsh || tatk <= 0 || c.status.momentum || c.status.psionic ||
 		(c.status.burrowed && c.owner.permanents.some(function(pr){ return pr && pr.status.tunnel }));
 	var dr = momentum ? 0 : fsh.truedr(), atk = estimateAttack(tatk);
 	if (c.status.adrenaline) {
@@ -443,7 +443,7 @@ function calcExpectedDamage(pl, wallCharges, wallIndex) {
 	if (!stasisFlag){
 		pl.creatures.forEach(function(c){
 			var dmg = estimateDamage(c, freedomChance, wallCharges, wallIndex);
-			if (dmg && !(c.status.psion && pl.foe.shield && pl.foe.shield.status.reflect)){
+			if (dmg && !(c.status.psionic && pl.foe.shield && pl.foe.shield.status.reflect)){
 				totalDamage += dmg;
 			}
 		});
@@ -506,7 +506,7 @@ function evalthing(c) {
 	}
 	if (isWeapon || isCreature) {
 		ttatk = getDamage(c);
-		if (c.status.psion && c.owner.foe.shield && c.owner.foe.shield.status.reflect) ttatk *= -1;
+		if (c.status.psionic && c.owner.foe.shield && c.owner.foe.shield.status.reflect) ttatk *= -1;
 		score += c.trueatk()/20;
 		score += ttatk*delayfactor;
 	}else ttatk = 0;

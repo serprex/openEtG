@@ -371,10 +371,14 @@ module.exports = function(c, event){
 		for(var key in c.status){
 			if (!c.status[key]) continue;
 			var entry = statusData[key];
-			if (entry === undefined) stext.push(c.status[key]===true?key:c.status[key]+key);
+			if (entry === undefined) {
+				var text = (c.status[key] === true ? key : c.status[key] + key);
+				text = text.charAt(0).toUpperCase() + text.slice(1);
+				stext.push(text);
+			}
 			else pushEntry(ret, c, "", entry);
-		}
-		if (stext.length) ret.unshift(stext.join(" "));
+		}		
+		if (stext.length) ret.unshift(stext.join(", ") + ".");
 		for(var key in c.active){
 			c.active[key].activename.forEach(function(name){
 				var entry = data[name];
