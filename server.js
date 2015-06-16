@@ -362,7 +362,7 @@ var userEvents = {
 			if (foesock){
 				sockEmit(foesock, "tradecanceled");
 				sockEmit(foesock, "chat", { mode: "red", msg: data.u + " has canceled the trade."});
-				if (foesock.meta.trade.foe == data.u) delete foesock.meta.trade;
+				if ( foesock.meta.trade && foesock.meta.trade.foe == data.u) delete foesock.meta.trade;
 			}
 			delete info.trade;
 		}
