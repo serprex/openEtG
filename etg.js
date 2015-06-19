@@ -317,7 +317,7 @@ Game.prototype.getTarget = function(src, active, cb) {
 	if (targetingFilter) {
 		var game = this;
 		this.targeting = {
-			filter: function(t) { return (t instanceof Player || t instanceof CardInstance || t.owner == this.turn || t.status.cloak || !t.owner.isCloaked()) && targetingFilter(src, t); },
+			filter: function(t) { return (t instanceof Player || t instanceof CardInstance || t.owner == game.turn || t.status.cloak || !t.owner.isCloaked()) && targetingFilter(src, t); },
 			cb: function(){
 				cb.apply(null, arguments);
 				game.targeting = null;
