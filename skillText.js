@@ -41,8 +41,8 @@ var data = {
 	chimera:"Combine all your creatures to form a Chimera with momentum & gravity pull",
 	clear:"Remove statuses from target creature, reduce delays by 1, & heal 1",
 	cold:"30% chance to freeze non-ranged attackers for 3",
-	corpseexplosion:["Sacrifice a creature to deal 1 damage to all creatures. Poisonous sacrifices poison foe",
-		"Sacrifice a creature to deal 1 damage to all enemy creatures. Poisonous sacrifices poison foe"],
+	corpseexplosion:["Sacrifice a creature to deal 1 damage to all creatures. Increment damage per 8 health of sacrifice. Poisonous sacrifices poison foe",
+		"Sacrifice a creature to deal 1 damage to all enemy creatures. Increment damage per 8 health of sacrifice. Poisonous sacrifices poison foe"],
 	counter:"Attack attacker when attacked & able to attack",
 	countimmbur:"Increment attack per immaterial or burrowed instance",
 	cpower:"Target gains 1 to 5 strength. Target gains 1 to 5 health",
@@ -71,6 +71,7 @@ var data = {
 	draft:"Target airborne creature loses airborne status, or vice versa. Produce 2:9",
 	drainlife:"Drains 2HP from target. Increment drain per 5:11 owned",
 	drawcopy:"When foe discards a card, generate a copy",
+	drawequip:"Draw next weapon or shield",
 	dryspell:"Deal 1 damage to all creatures. Gain 1:7 per damage dealt. Removes cloak",
 	dshield:"Become immaterial until next turn",
 	duality:"Generate a copy of foe's next draw",
@@ -147,6 +148,7 @@ var data = {
 	ink:"Summon a Cloak which lasts 1 turn",
 	innovation:"Discard target card, owner draws three cards",
 	integrity:"Combine all shards in hand to form a Shard Golem",
+	jelly:"Target creature becomes a 7|4 with active Pink Jelly costing 3 of their element",
 	jetstream:"Target airborne creature gains 3|-1",
 	layegg:"Summon a Fate Egg",
 	light:{
@@ -181,6 +183,7 @@ var data = {
 	neuro:"Apply poison on hit, also inflicting neurotoxin. Neurotoxin applies poison per card played by victim. Throttled",
 	neuroify:"Gives foe neurotoxin status if they are already poisoned",
 	nightmare:"Fill foe's hand with copies of target creature's card. Drain 2HP per added card",
+	nightshade:"Target creatures becomes nocturnal, gains 5|5, & has their active cleared",
 	nova:"Produce 1 quanta of each element. Increment singularity danger by 2. Summon singularity if danger exceeds 5",
 	nova2:"Produce 2 quanta of each element. Increment singularity danger by 3. Summon singularity if danger exceeds 5",
 	nullspell:"Cancel next spell until next turn, gaining 1|1",
@@ -290,6 +293,8 @@ var data = {
 	swave:"Deals 4 damage to target. Instantly kill creature or destroy weapon if frozen",
 	tempering:["Target weapon deals an additional 3 damage per turn. Thaws",
 		"Target weapon deals an additional 5 damage per turn. Thaws"],
+	tesseractsummon:["Each player summons a creature from their deck. Freeze summoned creatures by a quarter of their cost, rounded up",
+		"Summon a creature from own deck. Freeze summoned creature by a quarter of their cost, rounded up"],
 	thorn:"75% chance to poison non-ranged attackers",
 	throwrock:["Deal 3 spell damage to target creature, then shuffle Throw Rock into target's deck",
 		"Deal 4 spell damage to target creature, then shuffle Throw Rock into target's deck"],
@@ -377,7 +382,7 @@ module.exports = function(c, event){
 				stext.push(text);
 			}
 			else pushEntry(ret, c, "", entry);
-		}		
+		}
 		if (stext.length) ret.unshift(stext.join(", ") + ".");
 		for(var key in c.active){
 			c.active[key].activename.forEach(function(name){

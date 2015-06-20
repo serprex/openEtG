@@ -878,11 +878,11 @@ Player.prototype.buffhp = Creature.prototype.buffhp = function(x) {
 	}
 	this.dmg(-x);
 }
-Weapon.prototype.delay = Creature.prototype.delay = function(x){
+Thing.prototype.delay = function(x){
 	this.status.delayed += x;
-	if (this.status.voodoo)this.owner.foe.delay(x);
+	if (this.status.voodoo) this.owner.foe.delay(x);
 }
-Weapon.prototype.freeze = Creature.prototype.freeze = function(x){
+Thing.prototype.freeze = function(x){
 	if (!this.active.ownfreeze || this.active.ownfreeze(this)){
 		Effect.mkText("Freeze", this);
 		if (x > this.status.frozen) this.status.frozen = x;
@@ -945,6 +945,9 @@ Creature.prototype.die = function() {
 			this.deatheffect(index);
 		}
 	}
+}
+CardInstance.prototype.transform = function(card){
+	this.card = card;
 }
 Creature.prototype.transform = function(card, owner){
 	Thing.call(this, card, owner || this.owner);
@@ -1228,14 +1231,14 @@ CardInstance.prototype.canactive = function(spend){
 }
 Card.prototype.play = function(owner, src, tgt){
 	if (this.type <= PermanentEnum){
-		var cons = [Permanent, Weapon, Shield, Permanent][this.type];
-		new cons(this, owner).place(true);
 		ui.playSound("permPlay");
+		var cons = [Permanent, Weapon, Shield, Permanent][this.type];
+		return new cons(this, owner).place(true);
 	}else if (this.type == SpellEnum){
 		src.castSpell(tgt, this.active);
 	}else if (this.type == CreatureEnum){
-		new Creature(this, owner).place(true);
 		ui.playSound("creaturePlay");
+		return new Creature(this, owner).place(true);
 	}else console.log("Unknown card type: " + this.type);
 }
 CardInstance.prototype.useactive = function(target){
