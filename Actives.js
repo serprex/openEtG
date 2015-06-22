@@ -291,6 +291,11 @@ cpower:function(c,t){
 	t.buffhp(Math.floor(buff/5)+1);
 	t.atk += buff%5+1;
 },
+creatureupkeep:function(c,t){
+	c.owner.masscc(c, function(c, t){
+		Actives.upkeep(t);
+	}, true);
+},
 cseed:function(c,t){
 	Actives[c.owner.choose(["drainlife", "firebolt", "freeze", "gpullspell", "icebolt", "infect", "lightning", "lobotomize", "parallel", "rewind", "snipe", "swave"])](c, t);
 },
@@ -445,7 +450,7 @@ drawequip:function(c,t){
 	for(var i=c.owner.deck.length-1; i>-1; i--){
 		var card = c.owner.deck[i];
 		if (card.type == etg.WeaponEnum || card.type == etg.ShieldEnum){
-			if (~new CardInstance(card, c.owner).place()){
+			if (~new etg.CardInstance(card, c.owner).place()){
 				c.owner.procactive("draw");
 			}
 			return;
@@ -495,6 +500,11 @@ elf:function(c,t,data){
 		c.transform(c.card.as(Cards.FallenElf));
 		data.evade = true;
 	}
+},
+embezzle:function(c,t){
+	Effect.mkText("Embezzle", t);
+	t.lobo();
+	t.active.hit = Actives.forcedraw;
 },
 empathy:function(c,t){
 	var healsum = c.owner.countcreatures();
@@ -624,6 +634,11 @@ foedraw:function(c,t){
 			c.owner.deck.push(c.owner.foe.deck.pop());
 			c.owner.drawcard();
 		}
+	}
+},
+forcedraw:function(c,t){
+	if (!t.owner.sanctuary){
+		t.owner.drawcard();
 	}
 },
 forceplay:function(c,t){
@@ -910,7 +925,7 @@ integrity:function(c,t){
 		[[0, "", "poisonous"], [0, "", "adrenaline", 1], [2, "auto", "regenerate"]],
 		[[0, "buff", "fiery"]],
 		[[0, "", "aquatic"], [2, "hit", "regen"]],
-		[[0, "auto", "light"], [1, "blocked", "virtue"], [2, "buff", "martyr"], [3, "ownfreeze", "growth 2"], [4, "hit", "disarm"], [5, "auto", "sanctuary"]],
+		[[0, "auto", "light"], [1, "blocked", "virtue"], [2, "owndmg", "martyr"], [3, "ownfreeze", "growth 2"], [4, "hit", "disarm"], [5, "auto", "sanctuary"]],
 		[[0, "", "airborne"]],
 		[[1, "hit", "neuro"]],
 		[[0, "", "nocturnal"], [0, "", "voodoo"], [1, "auto", "siphon"], [2, "hit", "vampire"], [3, "hit", "reducemaxhp"], [4, "destroy", "loot"], [5, "owndeath", "catlife"], [5, "", "lives", 69105]],
@@ -937,7 +952,7 @@ jelly:function(c,t){
 	t.transform(tcard.as(Cards.PinkJelly));
 	t.active = {cast: Actives.jelly};
 	t.castele = tcard.element;
-	t.cast = 3;
+	t.cast = 4;
 	t.atk = 7;
 	t.maxhp = t.hp = 4;
 },
@@ -1022,8 +1037,8 @@ lycanthropy:function(c,t){
 	delete c.active.cast;
 	c.status.nocturnal = true;
 },
-martyr:function(c,t){
-	return c instanceof etg.Weapon ? 0 : c.maxhp-c.hp;
+martyr:function(c,t, dmg){
+	if (dmg>0) c.atk += dmg;
 },
 mend:function(c,t){
 	t.dmg(-10);
@@ -1765,10 +1780,7 @@ unsummon:function(c,t){
 	}
 },
 upkeep:function(c,t){
-	if (!c.owner.spend(c.card.element, 1)){
-		c.owner.quanta[c.card.element] = 0;
-		c.die();
-	}
+	if (!c.owner.spend(c.card.element, 1)) c.die();
 },
 upload:function(c,t){
 	Effect.mkText("2|0", t);
