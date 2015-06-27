@@ -230,7 +230,7 @@ var data = {
 	poisonfoe:"May apply poison to foe on play",
 	powerdrain:"Drain half the target creature's strength & health, adding it to one of your creatures",
 	precognition:"Reveal foe's hand until end of their turn. Draw",
-	predator:"Attacks twice if foe holds more than 4 cards",
+	predator:"Attack again if foe holds more than 4 cards, discard their last card if so",
 	protectall:"Bubble each of own creatures & permanents. Bubbles protect from next targeting or spell damage",
 	protectonce:"Evade next targeting, or prevent next source of spell damage",
 	purify:"Remove poison & sacrifice. Apply 2 purify",
