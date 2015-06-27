@@ -561,7 +561,7 @@ Player.prototype.info = function(){
 	for (var key in this.status){
 		plinfocore(info, key, this.status[key]);
 	}
-	["nova", "neuro", "sosa", "silence", "sanctuary", "precognition"].forEach(function(key){
+	["nova", "neuro", "sosa", "silence", "sanctuary", "flatline", "precognition"].forEach(function(key){
 		plinfocore(info, key, this[key]);
 	}, this);
 	if (this.gpull) info.push("gpull");
