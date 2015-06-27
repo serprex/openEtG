@@ -315,7 +315,7 @@ var ActivesValues = Object.freeze({
 		return (c instanceof etg.CardInstance?c.card.attack:ttatk)*.7;
 	},
 	virtue:function(c){
-		return c instanceof etg.CardInstance ? (c.owner.foe.shield ? Math.min(c.owner.foe.shield.truedr(), c.attack) : 0) : (c.trueatk() - getDamage(c)) / 1.5;
+		return c instanceof etg.CardInstance ? (c.owner.foe.shield ? Math.min(c.owner.foe.shield.truedr(), c.card.attack) : 0) : (c.trueatk() - getDamage(c)) / 1.5;
 	},
 	virusplague:1,
 	void:5,

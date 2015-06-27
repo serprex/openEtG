@@ -1075,7 +1075,7 @@ mitosis:function(c,t){
 },
 mitosisspell:function(c,t){
 	t.active.cast = Actives.mitosis;
-	t.castele = t.card.element;
+	t.castele = t.card.costele;
 	t.cast = t.card.cost;
 	t.buffhp(1);
 },
