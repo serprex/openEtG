@@ -49,7 +49,7 @@ module.exports = function(game, foeDeck) {
 	function computeBonuses() {
 		if (game.endurance !== undefined) return 1;
 		var bonus = 1;
-		[	["Current Health", function() { return (game.player1.hp + 200)/300; }],
+		[	["Current Health", function() { return Math.max(game.player1.hp, 0)/300; }],
 			["Full Health", function() { return game.player1.hp == game.player1.maxhp ? .2 : 0 }],
 			["Deckout", function() { return game.player2.deck.length == 0 && game.player2.hp > 0 ? .5 : 0 }],
 			["Double Kill", function() { return game.player2.hp < -game.player2.maxhp ? .25 : 0 }],
@@ -108,29 +108,30 @@ module.exports = function(game, foeDeck) {
 						lefttext.push(sock.user[streak] + " win streak", (streakrate * 100).toFixed(1) + "% streak bonus");
 						goldwon = Math.floor(userutil.pveCostReward[game.level*2+1] * (1+streakrate) * computeBonuses());
 					} else goldwon = 0;
-					game.goldreward = goldwon + (game.cost || 0);
+					game.goldreward = goldwon;
 				}
 			}
-		}
-		if (game.goldreward) {
-			game.goldreward = Math.round(game.goldreward);
-			var reward = (game.addonreward || 0) + game.goldreward - (game.cost || 0),
-				goldwon = px.dom.text(reward + "$");
-			goldwon.style.textAlign = "center";
-			goldwon.style.width = "900px";
-			px.dom.add(div, [0, 550, goldwon]);
-			sock.userExec("addgold", { g: game.goldreward });
-		}
-		if (game.cardreward) {
-			var x0 = 470-etgutil.decklength(game.cardreward)*20;
-			stage = new PIXI.Container();
-			etgutil.iterdeck(game.cardreward, function(code, i){
-				var cardArt = new PIXI.Sprite(gfx.getArt(code));
-				cardArt.anchor.x = .5;
-				cardArt.position.set(x0+i*40, 170);
-				stage.addChild(cardArt);
-			});
-			sock.userExec(game.quest?"addbound":"addcards", { c: game.cardreward });
+			if (game.addonreward){
+				game.goldreward = (game.goldreward || 0) + game.addonreward;
+			}
+			if (game.goldreward) {
+				var goldwon = px.dom.text(game.goldreward - (game.cost || 0) + "$");
+				goldwon.style.textAlign = "center";
+				goldwon.style.width = "900px";
+				px.dom.add(div, [0, 550, goldwon]);
+				sock.userExec("addgold", { g: game.goldreward });
+			}
+			if (game.cardreward) {
+				var x0 = 470-etgutil.decklength(game.cardreward)*20;
+				stage = new PIXI.Container();
+				etgutil.iterdeck(game.cardreward, function(code, i){
+					var cardArt = new PIXI.Sprite(gfx.getArt(code));
+					cardArt.anchor.x = .5;
+					cardArt.position.set(x0+i*40, 170);
+					stage.addChild(cardArt);
+				});
+				sock.userExec(game.quest?"addbound":"addcards", { c: game.cardreward });
+			}
 		}
 		var tinfo = px.dom.text(game.quest ? game.wintext : "You won!");
 		tinfo.style.textAlign = "center";

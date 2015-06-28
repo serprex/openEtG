@@ -11,12 +11,12 @@ exports.rewardwords = {
 exports.cardValues = new Float32Array([25/3, 1.375, 5, 30, 35, 250]);
 exports.sellValues = new Uint8Array([5, 1, 3, 15, 20, 240]);
 exports.pveCostReward = new Uint8Array([
-	0, 15,
-	5, 30,
-	10, 65,
-	20, 200,
-	10, 60,
-	20, 120,
+	0, 10,
+	5, 25,
+	10, 55,
+	20, 160,
+	10, 50,
+	20, 100,
 ]);
 exports.arenaCost = function(lv){
 	return exports.pveCostReward[lv?10:8];
