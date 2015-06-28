@@ -217,7 +217,7 @@ var data = {
 	powerdrain:"Drain half the target creature's strength & health, adding it to one of your creatures",
 	precognition:"Reveal foe's hand until end of their turn. Draw",
 	predator:"Attacks twice if foe holds more than 4 cards",
-	protectall:"Bubble each of own creatures & permanents. Bubbles protect from next targeting or spell damage",
+	protectall:"Bubble each of own creatures & permanents. Bubbles protect from next targeting by opponent or spell damage",
 	protectonce:"Evade next targeting, or prevent next source of spell damage",
 	purify:"Remove poison & sacrifice. Apply 2 purify",
 	quantagift:"Gain 2:7 & 2 quanta of mark. Produce only 3:7 if mark is 1:7",
