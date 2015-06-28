@@ -1699,7 +1699,7 @@ tesseractsummon:function(c,t){
 	for(var i=0; i<c.card.upped?1:2; i++){
 		var pl = i?c.owner.foe:c.owner,
 			crcard = pl.choose(pl.deck.filter(function(card){ return card.type == etg.CreatureEnum })),
-			cr = new Creature(crcard, pl);
+			cr = new etg.Creature(crcard, pl);
 		cr.freeze(Math.ceil(crcard.cost/4));
 		cr.place();
 	}

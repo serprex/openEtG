@@ -225,6 +225,7 @@ require("./httpcards")(function() {
 	});
 	gameTest("Steam", function() {
 		var steam = new etg.Creature(Cards.SteamMachine, game.player1);
+		game.player1.quanta[etg.Fire] = 8;
 		steam.usedactive = false;
 		steam.place();
 		equal(steam.trueatk(), 0, "0");
