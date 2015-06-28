@@ -61,7 +61,7 @@ function Text(text, fontsize, color, bgcolor){
 	ctx.fillText(text, 0, fontsize);
 	return new PIXI.Texture(new PIXI.BaseTexture(canvas));
 }
-var caimgcache = {}, artimagecache = {}, abimgcache = {}, shinyShader;
+var caimgcache = {}, artimagecache = {}, shinyShader;
 function setShinyShader(renderer, sprite, card){
 	if (card.shiny && PIXI.gl) sprite.shader = shinyShader || (shinyShader = require("./ColorMatrixShader")(renderer));
 }
@@ -153,39 +153,9 @@ function artFactory(realcb){
 	}
 }
 var getArt = artFactory(makeArt);
-function getAbilityImage(ability) {
-	var key = JSON.stringify(ability);
-	if (key in abimgcache) {
-		return abimgcache[key];
-	}
-	var rend = require("./px").mkRenderTexture(100, 20);
-	var graphics = new PIXI.Graphics();
-	graphics.lineStyle(1, 0x222222);
-	graphics.beginFill(ui.elecols[ability.element]);
-	graphics.drawRect(0, 0, 99, 19);
-	if (ability) {
-		var clipwidth = rend.width - 2;
-		if (ability.cost) {
-			var text = new PIXI.Sprite(Text(ability.cost, 11, "white"));
-			text.anchor.x = 1;
-			text.position.set(rend.width - 2, 3);
-			graphics.addChild(text);
-			clipwidth -= text.width + 2;
-		}
-		var text = new PIXI.Sprite(Text(ability.name, 11, "white"));
-		text.position.set(2, 3);
-		if (text.width > clipwidth) {
-			text.width = clipwidth;
-		}
-		graphics.addChild(text);
-	}
-	rend.render(graphics);
-	return abimgcache[key] = rend;
-}
-function getCardImage(code) {
-	if (caimgcache[code]) return caimgcache[code];
-	else {
-		var card = Cards.Codes[code];
+function getSlotImage(card, code){
+	if (code in caimgcache) return caimgcache[code];
+	else{
 		var rend = require("./px").mkRenderTexture(100, 20);
 		var graphics = new PIXI.Graphics();
 		graphics.lineStyle(1, card && card.shiny ? 0xdaa520 : 0x222222);
@@ -218,6 +188,12 @@ function getCardImage(code) {
 		rend.render(graphics);
 		return caimgcache[code] = rend;
 	}
+}
+function getAbilityImage(ability) {
+	return getSlotImage(ability, JSON.stringify(ability));
+}
+function getCardImage(code) {
+	return getSlotImage(Cards.Codes[code], code);
 }
 function getInstImage(scale){
 	return artFactory(function(code, art, rend){

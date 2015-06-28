@@ -420,11 +420,14 @@ function startMatch(game, foeDeck, spectate) {
 				sprite.card = c.card;
 			}
 			else{
-				var card = {};
-				card.name = c.active.cast.activename[0];
-				card.cost = c.cast;
-				card.element = c.castele;
-				sprite.card = card;
+				sprite.card = {
+					element: c.card.element,
+					costele: c.castele,
+					cost: c.cast,
+					name: c.active.cast.activename[0],
+					upped: c.card.upped,
+					shiny: c.card.shiny,
+				};
 			}
 			foeplays.addChild(sprite);
 			c.useactive(t);
