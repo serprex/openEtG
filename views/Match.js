@@ -415,8 +415,17 @@ function startMatch(game, foeDeck, spectate) {
 			var bits = data.spectate == 1 ? data.bits^4104 : data.bits, c = game.bitsToTgt(bits & 511), t = game.bitsToTgt((bits >> 9) & 511);
 			console.log("cast", c.toString(), (t || "-").toString(), bits);
 			var sprite = new PIXI.Sprite(gfx.nopic);
-			sprite.position.set((foeplays.children.length&7) * 99, (foeplays.children.length>>3) * 19);
-			sprite.card = c instanceof etg.CardInstance ? c.card : c.active.cast.activename[0];
+			sprite.position.set((foeplays.children.length & 7) * 99, (foeplays.children.length >> 3) * 19);
+			if (c instanceof etg.CardInstance){
+				sprite.card = c.card;
+			}
+			else{
+				var card = {};
+				card.name = c.active.cast.activename[0];
+				card.cost = c.cast;
+				card.element = c.castele;
+				sprite.card = card;
+			}
 			foeplays.addChild(sprite);
 			c.useactive(t);
 		},
@@ -538,7 +547,7 @@ function startMatch(game, foeDeck, spectate) {
 			cancel.style.display = "none";
 		}
 		foeplays.children.forEach(function(foeplay){
-			foeplay.texture = foeplay.card instanceof etg.Card ? gfx.getCardImage(foeplay.card.code) : ui.getBasicTextImage(foeplay.card, 12);
+			foeplay.texture = foeplay.card instanceof etg.Card ? gfx.getCardImage(foeplay.card.code) : gfx.getAbilityImage(foeplay.card);
 		});
 		foeplays.visible = !(cloakgfx.visible = game.player2.isCloaked());
 		fgfx.clear();

@@ -281,7 +281,7 @@ module.exports = function(nymph) {
 					if (foename.value == sock.user.name + "yesdelete") {
 						logout("delete");
 					} else {
-						chat("Input '" + sock.user.name + "yesdelete' into Challenge to delete your account");
+						chat("Input '" + sock.user.name + "yesdelete' into Trade/Library to delete your account");
 					}
 				},
 				mkSetTip("Click here to permanently remove your account.")
