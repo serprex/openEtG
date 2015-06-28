@@ -13,10 +13,10 @@ exports.sellValues = new Uint8Array([5, 1, 3, 15, 20, 240]);
 exports.pveCostReward = new Uint8Array([
 	0, 10,
 	5, 25,
+	10, 60,
+	20, 175,
 	10, 55,
-	20, 160,
-	10, 50,
-	20, 100,
+	20, 110,
 ]);
 exports.arenaCost = function(lv){
 	return exports.pveCostReward[lv?10:8];

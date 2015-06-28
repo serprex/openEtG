@@ -45,6 +45,16 @@ var tipjar = [
 var bg_main = new Image();
 bg_main.src = "assets/bg_main.png";
 bg_main.className = "bgimg";
+function addCostRewardHeaders(div){
+	var costText = px.dom.text("Cost"), rewardText = px.dom.text("Base Reward");
+	px.dom.style(costText, rewardText, {
+		position: "absolute",
+		top: "24px",
+	});
+	costText.style.right = "114px";
+	rewardText.style.right = "4px";
+	px.dom.add(div, costText, rewardText);
+}
 module.exports = function(nymph) {
 	var popdom, stage = {endnext: function(){
 		setPopup(null);
@@ -82,7 +92,7 @@ module.exports = function(nymph) {
 		});
 	}
 	function costText(lv, n){
-		return labelText((n ? "Base reward: " : "Cost: ") + userutil.pveCostReward[lv*2+n] + "$");
+		return labelText(userutil.pveCostReward[lv*2+n] + "$");
 	}
 	var deckbox = px.dom.divwh(196, 176),
 		statbox = px.dom.divwh(196, 120),
@@ -113,19 +123,21 @@ module.exports = function(nymph) {
 			[14, 108, ["Editor", require("./Editor"), mkSetTip("Edit & manage your decks.")]],
 		]],
 		[620, 300, playbox]);
+	addCostRewardHeaders(aibox);
+	addCostRewardHeaders(arenabox);
 	[px.dom.button("Commoner", mkAi.mkAi(0), mkSetTip("Commoners have no upgraded cards & mostly common cards.")),
 		px.dom.button("Mage", mkAi.mkPremade("mage"), mkSetTip("Mages have preconstructed decks with a couple rares.")),
 		px.dom.button("Champion", mkAi.mkAi(2), mkSetTip("Champions have some upgraded cards.")),
 		px.dom.button("Demigod", mkAi.mkPremade("demigod"), mkSetTip("Demigods are extremely powerful. Come prepared for anything.")),
 	].forEach(function(b,i){
-		var clab = costText(i, 0), rlab = costText(i, 1);
+		var y = 46+i*22, clab = costText(i, 0), rlab = costText(i, 1);
 		px.dom.style(clab, rlab, {
 			position: "absolute",
-			top: 24+i*24+"px",
+			top: y+"px",
 		});
 		clab.style.right = "114px";
 		rlab.style.right = "4px";
-		px.dom.add(aibox, [4, 24+i*24, b], clab, rlab);
+		px.dom.add(aibox, [4, y, b], clab, rlab);
 	});
 	for (var i=0; i<2; i++){
 		(function(lvi){
@@ -147,7 +159,7 @@ module.exports = function(nymph) {
 				this.style.display = "none";
 			}
 			if (sock.user){
-				var y = 24+i*24, b = px.dom.button("Arena AI", arenaAi, mkSetTip("In the arena you will face decks from other players.")),
+				var y = 46+i*22, b = px.dom.button("Arena AI", arenaAi, mkSetTip("In the arena you will face decks from other players.")),
 					clab = costText(4+lvi.lv, 0), rlab = costText(4+lvi.lv, 1),
 					tx = px.dom.text("Tier " + (lvi.lv+1));
 				px.dom.style(clab, rlab, {
@@ -318,7 +330,7 @@ module.exports = function(nymph) {
 			bquest = px.dom.button("Quests", require("./QuestMain"), mkSetTip("Go on an adventure!")),
 			bcolo = px.dom.button("Colosseum", require("./Colosseum"), mkSetTip("Try some daily challenges in the Colosseum!"));
 		px.dom.style(colocol, questcol, {
-			marginTop: "108px",
+			marginTop: "132px",
 			width: "45%",
 		});
 		colocol.style.float = "left";
@@ -341,11 +353,13 @@ module.exports = function(nymph) {
 			]],
 			[304, 380, arenabox]);
 	}
+	var customcol = document.createElement("div");
 	var customText = labelText("Duel a custom AI!");
 	var bcustom = px.dom.button("Custom AI", require("./Challenge").bind(null, false), mkSetTip("Fight any deck you want, with custom stats both for you and the opponent."));
-	customText.style.width = "300px";
-	customText.style.textAlign = "center";
-	px.dom.add(aibox, [110, 180, bcustom], [0, 204, customText]);
+	customcol.style.width = "100%";
+	customcol.style.textAlign = "center";
+	px.dom.add(customcol, bcustom, customText);
+	px.dom.add(aibox, [0, 200, customcol]);
 	resetTip({target:{tagName:"HTML"}});
 	px.view(stage);
 }
