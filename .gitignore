@@ -2,6 +2,7 @@ node_modules/*
 deckcache/*
 Cards/*
 vanilla/
+cia/
 atlas.js
 atlas.css
 atlas.png
@@ -12,7 +13,7 @@ tournify.js
 .ninja_log
 .ninja_deps
 pixi.*
-*.csv
+*.min.*
 *.exe
 *.gz
 *.rdb

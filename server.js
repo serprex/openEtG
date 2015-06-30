@@ -83,9 +83,11 @@ function wilson(up, total) {
 	return (phat + z2/(2*total) - z*Math.sqrt((phat*(1 - phat) + z2/(4*total))/total))/(1 + z2/total);
 }
 function sockEmit(socket, event, data){
-	if (!data) data = {};
-	data.x = event;
-	socket.send(JSON.stringify(data));
+	if (socket.readyState == 1){
+		if (!data) data = {};
+		data.x = event;
+		socket.send(JSON.stringify(data));
+	}
 }
 function modf(func){
 	return function(data, user){

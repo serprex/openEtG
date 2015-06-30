@@ -1,0 +1,77 @@
+E,Name,Code,Cost,R,Active,Status
+0,Quantum Locket,4sg,1,1,0=locketshift+locket,
+0,Quantum Locket,6r0,0,1,0=locketshift+locket,
+1,Ricochet,4vt,4,2,spell=ricochet,
+1,Ricochet,6ud,3,2,spell=ricochet,
+2,Boneyard,52n,3,1,death=boneyard,
+2,Graveyard,717,4,1,death=boneyard,
+2,Soul Catcher,52v,1:0,1,death=soulcatch,
+2,Soul Catcher,71f,0,1,death=soulcatch,
+2,Ouija Essence,530,3,2,death=ouija+upkeep+owndiscard=hasten,
+2,Ouija Source,71g,2,2,death=ouija+upkeep+owndiscard=hasten,
+2,Epidemic,533,5,1,death=epidemic,
+2,Epidemic,71j,4,1,death=epidemic,
+3,Catapult,561,3,2,2=catapult,
+3,Catapult,74h,3,2,1=catapult,
+3,Inertia,56a,1,1,spell=inertia,
+3,Inertia,74q,1:0,1,spell=inertia,
+4,Tunneling,59a,4,1,1=autoburrow+turnstart=autoburrowoff,tunnel
+4,Tunneling,77q,3,1,1=autoburrow+turnstart=autoburrowoff,tunnel
+4,Lodestone,59d,3,2,1=inflation,whetstone
+4,Lodestone,77t,3,2,0=inflation,whetstone
+5,Georesonator,59e,2,2,auto=paleomagnetism,
+5,Georesonator,77u,2,2,auto=paleomagnetism,
+5,Empathic Bond,5c6,5,1,empathy,
+5,Empathic Bond,7am,4,1,empathy,
+5,Shard of Gratitude,5cq,3,4,gratitude,
+5,Shard of Gratitude,7ba,2,4,gratitude,
+6,Lava,5fi,2,1,1:7=platearmor,
+6,Magma,7e2,3,1,1:7=platearmor,
+6,Heat Mirror,5fj,3,2,play=heatmirror,
+6,Heat Mirror,7e3,3,2,play=heatmirror,
+7,Flooding,5ih,3,1,0=die,flooding
+7,Flooding,7h1,2,1,0=die,flooding
+7,Clepsydra,5in,4,3,2:10=yoink+losecharge,charges=5
+7,Clepsydra,7h7,4,3,1:10=yoink+losecharge,charges=5
+7,Waterfall,5ip,4,1,1:3=momentum+upkeep,
+7,Waterfall,7h9,4,1,1:3=momentum,
+7,Whirlpool,5iq,2,1,1:11=scramble+losecharge,charges=3
+7,Whirlpool,7ha,2,1,1:11=scramble+losecharge,charges=5
+7,Shard of Patience,5j2,3,4,0=die,patience
+7,Shard of Patience,7hi,2,4,0=die,patience
+8,Sanctuary,5lm,4,1,gratitude+sanctify,
+8,Sanctuary,7k6,3,1,gratitude+sanctify,
+8,Writ of Vindication,5m0,3,2,death=vindicate+turnstart=unvindicate,
+8,Writ of Vindication,7kg,2,2,death=vindicate+turnstart=unvindicate,
+8,Writ of Vengeance,5m1,4,2,death=vengeance,stackable+additive+charges=108
+8,Writ of Vengeance,7kh,3,2,death=vengeance,stackable+additive+charges=108
+9,Unstable Gas,5om,5,2,1:6=ignite,
+9,Unstable Gas,7n6,4,2,1:6=ignite,
+9,Jet Stream,5p2,3,1,1:3=jetstream,
+9,Jet Stream,7ni,2,1,1:3=jetstream,
+9,Shard of Freedom,5pa,2,4,prespell=freeevade,freedom
+9,Shard of Freedom,7nq,1,4,prespell=freeevade,freedom
+10,Golden Hourglass,5rl,4,2,2=hasten,
+10,Golden Hourglass,7q5,4,2,1=hasten,
+10,Sundial,5rp,1,1,1:8=hasten+losecharge,stasis+charges=1
+10,Sundial,7q9,1:0,1,1:8=hasten+losecharge,stasis+charges=1
+10,Golden Relic,5s8,2,1,2:0=vend,token
+10,Golden Relic,7qo,1,1,2:0=vend,token
+10,Desert,5sc,4,1,creatureupkeep+upkeep,
+10,Desert,7qs,3,1,creatureupkeep+upkeep,
+11,Nightfall,5uq,3,1,,nightfall
+11,Eclipse,7ta,4,1,,nightfall
+11,Cloak,5v2,4,1,losecharge,cloak+charges=4
+11,Cloak,7ti,3,1,losecharge,cloak+charges=4
+11,Sadism,5vc,1,3,dmg=sadism,
+11,Selfish Sadism,7ts,1,3,dmg=sadism,
+11,Shard of Void,5vi,2,4,void,
+11,Shard of Void,7u2,1,4,void,
+12,Mindgate,623,4,2,2=duality,
+12,Mindgate,80j,4,2,1=duality,
+12,Broken Mirror,628,3,2,play=brokenmirror,
+12,Broken Mirror,80o,3,2,play=brokenmirror,
+12,Dream Catcher,62g,2,1,discard=drawcopy+auto=sanctify+ownplay=unsanctify+turnstart=unsanctify,
+12,Dream Catcher,810,1,1,discard=drawcopy+auto=sanctify+ownplay=unsanctify+turnstart=unsanctify,
+12,Tesseract,62h,3,2,2:10=tesseractsummon,
+12,Tesseract,811,3,2,2:10=tesseractsummon,

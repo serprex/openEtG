@@ -1,0 +1,59 @@
+E,Name,Code,Cost,R,Active,Health,Status
+0,Shield,4tc,0,1,,1,
+0,Tower Shield,6rs,4,1,,2,
+1,Dissipation Field,4vg,3,2,shield=disshield,0,
+1,Dissipation Field,6u0,3,2,shield=disfield,0,
+1,Reduce?,4vv,1,2,play=randomdr,0,
+1,Reduce?,6uf,1,2,play=randomdr,0,
+1,Chaos Mantle,501,7,2,shield=chaos,0,
+1,Chaos Mantle,6uh,7,2,shield=chaos,0,
+2,Skull Shield,52l,3,2,shield=skull,1,
+2,Skull Shield,715,1,2,shield=skull,1,
+2,Bone Wall,52r,7,2,shield=blockwithcharge+death=gaincharge2,0,stackable+charges=7
+2,Bone Wall,71b,5,2,shield=blockwithcharge+death=gaincharge2,0,stackable+charges=7
+3,Gravity Shield,55p,4,2,shield=weight,0,
+3,Gravity Shield,749,3,2,shield=weight,0,
+3,Repulsor,564,2,2,buff=accumulation,0,stackable+additive+charges=1
+3,Repulsors,74k,5,2,buff=accumulation,0,stackable+additive+charges=2
+3,Debris Barricade,569,7,2,shield=blockwithcharge+destroy=gaincharge2,0,stackable+charges=7
+3,Debris Barricade,74p,5,2,shield=blockwithcharge+destroy=gaincharge2,0,stackable+charges=7
+4,Titanium Shield,58s,4,2,,2,
+4,Diamond Shield,77c,6,2,,3,
+4,Golem Defender,59g,3,2,0=turngolem+shield=absorbdmg,1,golem
+4,Golem Defender,780,4,2,0=turngolem+shield=absorbdmg,2,golem
+5,Thorn Carapace,5c3,7,2,shield=thorn,0,
+5,Thorn Carapace,7aj,7,2,shield=thorn,1,
+5,Emerald Shield,5c4,4,2,,1,immaterial+reflect
+5,Jade Shield,7ak,6,2,,2,immaterial+reflect
+6,Fire Shield,5f5,6,2,shield=firewall,0,
+6,Fire Shield,7dl,4,2,shield=firewall,0,
+6,Thermal Recoil,5fn,1:0,2,shield=absorber,-1,
+6,Thermal Recoil,7e7,0,2,shield=absorber,-1,
+7,Ice Shield,5i9,6,2,shield=cold,1,
+7,Permafrost Shield,7gp,7,2,shield=cold,2,
+7,Bubble Shield,5im,2,2,1:8=clear,0,immaterial+reflect
+7,Bubble Shield,7h6,1,2,1:8=clear,0,immaterial+reflect
+8,Solar Shield,5ld,2,2,shield=solar,1,
+8,Solar Shield,7jt,2:0,2,shield=solar,1,
+8,Mirror Shield,5lg,1,2,,0,immaterial+reflect
+8,Mirror Shield,7k0,2,2,,1,immaterial+reflect
+8,Hope,5lk,7,2,buff=hope,0,immaterial
+8,Hope,7k4,7,2,buff=hope,1,immaterial
+9,Fog Mantle,5og,2,2,shield=evade40,0,
+9,Fog Mantle,7n0,1,2,shield=evade40,0,
+9,Wings,5oo,4,2,shield=wings+losecharge,0,charges=5
+9,Wings,7n8,3,2,shield=wings+losecharge,0,charges=5
+10,Procrastination,5rj,6,2,shield=slow,0,
+10,Procrastination,7q3,4,2,shield=slow,0,
+10,Time Barrier,5s0,7,2,shield=blockwithcharge+draw=gaintimecharge+auto=resetcap,0,charges=5+stackable
+10,Time Barrier,7qg,5,2,shield=blockwithcharge+draw=gaintimecharge+auto=resetcap,0,charges=5+stackable
+11,Dusk Mantle,5uo,5,2,shield=evade50,0,
+11,Dusk Mantle,7t8,4,2,shield=evade50,0,
+11,Despair,5va,6,2,shield=despair,0,
+11,Despair,7tq,4,2,shield=despair,0,
+11,Shell of Void,5vk,2,2,shield=voidshell,1,
+11,Shell of Void,7u4,3,2,shield=voidshell,2,
+12,Phase Shield,61t,4,2,shield=evade100+losecharge,0,charges=2
+12,Phase Shield,80d,6,2,shield=evade100+losecharge,0,charges=3
+12,Static Field,62b,2,2,shield=static,1,
+12,Static Field,80r,1,2,shield=static,1,

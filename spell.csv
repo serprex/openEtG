@@ -1,0 +1,185 @@
+E,Name,Code,Cost,R,Active
+0,Metamorphosis,4sb,1,1,metamorph
+0,Metamorphosis,6qr,0,1,metamorph
+0,Regrade,4sd,1,1,regrade
+0,Regrade,6qt,0,1,regrade
+1,Chaos Seed,4vi,1,1,cseed
+1,Chaos Power,6u2,1,1,cpower
+1,Nova,4vj,1:0,1,nova
+1,Supernova,6u3,2,1,nova2
+1,Mutation,4vk,2,1,mutation
+1,Improved Mutation,6u4,3,1,improve
+1,Antimatter,4vn,8,2,antimatter
+1,Antimatter,6u7,6,2,antimatter
+1,Butterfly Effect,4vo,5,1,butterfly
+1,Butterfly Effect,6u8,4,1,butterfly
+1,Pandemonium,4vp,3,1,pandemonium
+1,Pandemonium,6u9,5,1,pandemonium2
+1,Osmosis,505,4,2,powerdrain
+1,Osmosis,6ul,3,2,powerdrain
+1,Shard of Serendipity,50a,2,4,serendipity
+1,Shard of Serendipity,6uq,3,4,serendipity
+1,Pink Jelly,506,4,1,jelly
+1,Pink Jelly,6um,3,1,jelly
+2,Poison,52o,1,1,poison 2
+2,Deadly Poison,718,2,1,poison 3
+2,Plague,52p,4,2,plague
+2,Plague,719,2,2,plague
+2,Aflatoxin,52s,5,2,aflatoxin
+2,Aflatoxin,71c,4,2,aflatoxin
+2,Command Skeletons,531,3,1,aggroskele
+2,Command Skeletons,71h,3,1,aggroskele
+2,Corpse Explosion,532,1,1,corpseexplosion
+2,Corpse Explosion,71i,1,1,corpseexplosion
+2,Envenom,539,3,1,envenom
+2,Envenom,71p,2,1,envenom
+2,Shard of Sacrifice,53e,2,4,sosa
+2,Shard of Sacrifice,71u,2,4,sosa
+3,Momentum,55q,2,1,momentum
+3,Momentum,74a,1,1,momentum
+3,Gravity Pull,55t,2,1,gpullspell
+3,Gravity Pull,74d,1,1,gpullspell
+3,Black Hole,55v,4,2,blackhole
+3,Black Hole,74f,3,2,blackhole
+3,Chimera,560,7,3,chimera
+3,Chimera,74g,6,3,chimera
+3,Acceleration,562,3,1,accelerationspell
+3,Overdrive,74i,4,1,overdrivespell
+3,Tidal Healing,56d,3,1,tidalhealing
+3,Tidal Healing,74t,2,1,tidalhealing
+3,Brawl,56e,18,3,brawl
+3,Brawl,74u,15,3,brawl
+4,Plate Armor,58t,1,1,platearmor
+4,Plate Armor,77d,1,1,platearmor
+4,Protect Artifact,592,2,1,enchant
+4,Protect Artifact,77i,1,1,enchant
+4,Earthquake,593,3,2,earthquake
+4,Earthquake,77j,2,2,earthquake
+4,Stone Skin,594,2,1,sskin
+4,Stone Skin,77k,0,1,sskin
+4,Basilisk Blood,595,2,2,bblood
+4,Basilisk Blood,77l,1,2,bblood
+4,Sinkhole,598,2,1,sinkhole
+4,Sinkhole,77o,2,1,sinkhole
+4,Throw Rock,599,1,1,throwrock
+4,Throw Rock,77p,1,1,throwrock
+4,Shard of Integrity,59m,2,4,integrity
+4,Shard of Integrity,786,1,4,integrity
+5,Heal,5c2,3,1,heal
+5,Heal,7ai,2,1,heal
+5,Adrenaline,5c7,4,2,adrenaline
+5,Adrenaline,7an,3,2,adrenaline
+5,Mitosis,5c9,5,2,mitosisspell
+5,Mitosis,7ap,4,2,mitosisspell
+5,Living Weapon,5cd,2,1,livingweapon
+5,Living Weapon,7at,1,1,livingweapon
+5,Equalizer,5ch,2,1,atk2hp
+5,Equalizer,7b1,1,1,atk2hp
+5,Rejuvenation,5ci,4,3,regeneratespell
+5,Rejuvenation,7b2,3,3,regeneratespell
+5,Nightshade,5ct,5,1,nightshade
+5,Nightshade,7bd,4,1,nightshade
+6,Fire Bolt,5f4,3,1,firebolt
+6,Fire Bolt,7dk,2,1,firebolt
+6,Deflagration,5f6,3,1,destroy
+6,Deflagration,7dm,2,1,destroy
+6,Rain of Fire,5f8,7,2,storm 3
+6,Rain of Fire,7do,5,2,storm 3
+6,Immolation,5f9,0,1,immolate
+6,Cremation,7dp,0,1,immolate
+6,Rage Potion,5fb,3,2,rage
+6,Rage Elixir,7dr,3,2,rage
+6,Tempering,5ff,1,1,tempering
+6,Tempering,7dv,2,1,tempering
+6,Burn Card,5fg,2,2,destroycard
+6,Burn Card,7e0,1,2,destroycard
+6,Shard of Bravery,5fu,2,4,bravery
+6,Shard of Bravery,7ee,1,4,bravery
+7,Freeze,5i7,1,1,freeze
+7,Freeze,7gn,1,1,freeze
+7,Ice Bolt,5i8,2,1,icebolt
+7,Ice Bolt,7go,1,1,icebolt
+7,Purify,5ia,2,1,purify
+7,Purify,7gq,1,1,purify
+7,Nymph's Tears,5ig,7,2,nymph
+7,Nymph's Tears,7h0,6,2,nymph
+7,Dry Spell,5ij,1,1,dryspell
+7,Dry Spell,7h3,2:0,1,dryspell
+7,Gift of Oceanus,5ik,1:0,2,quantagift
+7,Gift of Oceanus,7h4,0,2,quantagift
+7,Atlantis's Protection,5it,4,2,protectall
+7,Atlantis's Protection,7hd,3,2,protectall
+8,Holy Light,5lc,1,1,holylight
+8,Holy Light,7js,0,1,holylight
+8,Blessing,5lf,3,1,bless
+8,Blessing,7jv,2,1,bless
+8,Miracle,5li,15,3,miracle
+8,Miracle,7k2,12,3,miracle
+8,Luciferin,5lj,2:0,2,luciferin
+8,Luciferin,7k3,0,2,luciferin
+8,Sabbath,5lp,3,1,flatline
+8,Sabbath,7k9,2,1,flatline
+8,Give,5lq,1,2,give
+8,Give,7ka,1,2,give
+8,Pacify,5lt,3,1,pacify
+8,Pacify,7kd,2,1,pacify
+8,Reinforce,5lv,4,2,bolsterintodeck
+8,Reinforce,7kf,3,2,bolsterintodeck
+8,Shard of Divinity,5m6,3,4,divinity
+8,Shard of Divinity,7km,2,4,divinity
+9,Thunderstorm,5oh,3,2,storm 2
+9,Thunderstorm,7n1,2,2,storm 2
+9,Flying Weapon,5oi,1,1,flyingweapon
+9,Flying Weapon,7n2,1:0,1,flyingweapon
+9,Shockwave,5on,2,1,swave
+9,Shockwave,7n7,1,1,swave
+9,Sky Blitz,5op,9,3,skyblitz
+9,Sky Blitz,7n9,8,3,skyblitz
+9,Draft,5oq,1,1,draft
+9,Draft,7na,0,1,draft
+9,Scattering Wind,5ov,2,3,scatterhand
+9,Scattering Wind,7nf,1,3,scatterhand
+9,Tornado,5p3,3,2,tornado
+9,Tornado,7nj,4,2,tornado
+10,Rewind,5rk,3,1,rewind
+10,Rewind,7q4,2,1,rewind
+10,Precognition,5rr,1,2,precognition
+10,Precognition,7qb,2:0,2,precognition
+10,Neurotoxin,5rv,4,2,neuroify
+10,Neurotoxin,7qf,3,2,neuroify
+10,Innovation,5s1,4,3,innovation
+10,Innovation,7qh,3,3,innovation
+10,Shard of Readiness,5se,2,4,readiness
+10,Shard of Readiness,7qu,1,4,readiness
+10,Midas's Touch,5s7,2,2,midas
+10,Midas's Touch,7qn,1,2,midas
+10,52 Pickup,5sa,20,3,deckblast
+10,52 Pickup,7qq,15,3,deckblast
+11,Steal,5up,4,2,steal
+11,Steal,7t9,3,2,steal
+11,Drain Life,5us,2,1,drainlife
+11,Drain Life,7tc,1,1,drainlife
+11,Liquid Shadow,5uu,4,2,liquid
+11,Liquid Shadow,7te,3,2,liquid
+11,Nightmare,5v1,2,1,nightmare
+11,Nightmare,7th,1,1,nightmare
+11,Yoink!,5vb,3,2,yoink
+11,Yoink!,7tr,2,2,yoink
+11,Beguile,5vd,5,3,beguile
+11,Beguile,7tt,4,3,beguile
+11,Embezzle,5vl,7,2,embezzle
+11,Embezzle,7u5,5,2,embezzle
+12,Lightning,61q,2,1,lightning
+12,Lightning,80a,1,1,lightning
+12,Parallel Universe,61r,7,2,parallel
+12,Parallel Universe,80b,6,2,parallel
+12,Quintessence,621,4,2,quint
+12,Quintessence,80h,3,2,quint
+12,Fractal,622,12,3,fractal
+12,Fractal,80i,10,3,fractal
+12,Silence,624,3,1,silence
+12,Silence,80k,2,1,silence
+12,Unsummon,62e,2,1,unsummon
+12,Unsummon,80u,1,1,unsummon
+12,Shard of Wisdom,62m,3,4,wisdom
+12,Shard of Wisdom,816,2,4,wisdom

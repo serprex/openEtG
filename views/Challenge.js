@@ -1,8 +1,10 @@
 var px = require("../px");
 var ui = require("../ui");
+var etg = require("../etg");
 var sock = require("../sock");
 var etgutil = require("../etgutil");
 var options = require("../options");
+var DeckDisplay = require("../DeckDisplay");
 
 function sendChallenge(foe) {
 	var deck = sock.getDeck();
@@ -76,6 +78,9 @@ module.exports = function(pvp) {
 		text.style.pointerEvents = "none";
 		return text;
 	}
+	var deck = etgutil.decodedeck(sock.getDeck()), mark = etg.fromTrueMark(deck.pop());
+	var view = new DeckDisplay(60, null, null, deck);
+	view.renderDeck(0);
 	var foename = px.dom.input("Challenge", "foename", true, maybeChallenge),
 		pvphp = px.dom.input("HP", "pvphp", true),
 		pvpmark = px.dom.input("Mark", "pvpmark", true),
@@ -94,9 +99,12 @@ module.exports = function(pvp) {
 		aimark = px.dom.input("Mark", "aimark", true),
 		aidraw = px.dom.input("Draw", "aidraw", true),
 		aideckpower = px.dom.input("Deck", "aideckpower", true),
-		challengeLabel = px.dom.text("");
+		challengeLabel = px.dom.text(""),
+		markSprite = document.createElement("span");
+	markSprite.className = "ico e"+mark;
 	aideck.addEventListener("click", function() { this.setSelectionRange(0, 999) });
 	var div = px.dom.div(
+		[66, 200, markSprite],
 		[190, 300, ["Exit", exitClick]],
 		[190, 400, labelText("Own stats:")],
 		[190, 425, pvphp],
@@ -120,6 +128,6 @@ module.exports = function(pvp) {
 			[440, 475, aidraw],
 			[440, 500, aideckpower]);
 	}
-	px.view({dom:div});
+	px.view({view:view, dom:div});
 }
 module.exports.sendChallenge = sendChallenge;
