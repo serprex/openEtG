@@ -63,8 +63,8 @@ E,Name,Code,Cost,R,Active,Status
 11,Eclipse,7ta,4,1,,nightfall
 11,Cloak,5v2,4,1,losecharge,cloak+charges=4
 11,Cloak,7ti,3,1,losecharge,cloak+charges=4
-11,Sadism,5vc,1,3,dmg=sadism,
-11,Selfish Sadism,7ts,1,3,dmg=sadism,
+11,Masochism,5vc,1,3,dmg=sadism,
+11,Sadism,7ts,1,3,dmg=sadism,
 11,Shard of Void,5vi,2,4,void,
 11,Shard of Void,7u2,1,4,void,
 12,Mindgate,623,4,2,2=duality,

@@ -255,7 +255,7 @@ var data = {
 		ownplay:"Reveal foe's hand",
 	},
 	ricochet:"Targeting spells affect an additional random non player target. Caster randomised",
-	sadism:["Players are healed for however much their creatures are damaged", "Owner is healed for however much their creatures are damaged"],
+	sadism:["Owner is healed however much their creatures are damaged", "Owner is healed however much creatures are damaged"],
 	salvage:"Restore a permanent destroyed by foe to hand once per turn. Gain 1|1 if so",
 	salvageoff:"Become ready to salvage again at start of next turn",
 	sanctify:"Protection during foe's turn from hand & quanta control",
