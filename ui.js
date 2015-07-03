@@ -99,16 +99,17 @@ exports.getTextImage = function(text, size, color, bgcolor, width) {
 		text = text.trim();
 		if (!text) return;
 		setMode(0);
-		var w = ctx.measureText(text).width;
+		var spacedText = text.replace(/\|/g, " | ");
+		var w = ctx.measureText(spacedText).width;
 		if (!width || x + w <= width){
-			textxy.push(text, x, y+size);
+			textxy.push(spacedText, x, y+size);
 			x += w;
 			return;
 		}
 		var idx = 0, endidx = 0, oldblock = "";
 		etg.iterSplit(text, " ", function(word){
 			var nextendidx = endidx + word.length + 1;
-			var newblock = text.slice(idx, nextendidx-1);
+			var newblock = text.slice(idx, nextendidx-1).replace(/\|/g, " | ");
 			if (width && x + ctx.measureText(newblock).width >= width){
 				textxy.push(oldblock, x, y+size);
 				newblock = word;
@@ -128,7 +129,6 @@ exports.getTextImage = function(text, size, color, bgcolor, width) {
 			}
 		}
 	}
-	text = text.replace(/\|/g, " | ");
 	var sep = /\d\d?:\d\d?|\n/g, reres, lastindex = 0;
 	while (reres = sep.exec(text)){
 		var piece = reres[0];
