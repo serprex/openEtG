@@ -847,7 +847,7 @@ Player.prototype.dmg = function(x, ignoresosa) {
 	}
 }
 Player.prototype.spelldmg = function(x) {
-	return (!this.shield || !this.shield.status.reflect?this:this.foe).dmg(x);
+	return (!this.shield || !this.shield.status.reflective?this:this.foe).dmg(x);
 }
 CardInstance.prototype.getIndex = function() { return this.owner.hand.indexOf(this); }
 Creature.prototype.getIndex = function() { return this.owner.creatures.indexOf(this); }

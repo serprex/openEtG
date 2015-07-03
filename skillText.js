@@ -114,8 +114,8 @@ var data = {
 	freeevade:"Own airborne creatures have a 30% chance to either deal 50% more damage or bypass shields. 20% chance to evade targeting",
 	freeze:["Freeze target for 3 turns. Being frozen disables attacking & per turn skills",
 		"Freeze target for 4 turns. Being frozen disables attacking & per turn skills"],
-	freezeperm:["Freeze target permanent for 3 turns. Being frozen disables per turn skills",
-		"Freeze target permanent for 4 turns. Being frozen disables per turn skills"],
+	freezeperm:["Freeze target non stacking permanent for 3 turns. Being frozen disables per turn skills",
+		"Freeze target non stacking permanent for 4 turns. Being frozen disables per turn skills"],
 	fungusrebirth:["Become a Fungus", "Become a Toxic Fungus"],
 	gaincharge2:{
 		death:"Gain 2 stacks per death",

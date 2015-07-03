@@ -37,7 +37,7 @@ flyingweapon,playerweap
 forceplay,forceplay
 fractal,crea
 freeze,crea+weap
-freezeperm,perm
+freezeperm,permnonstack
 give,notself:own:notplay:all
 golemhit,notself:golem
 gpullspell,crea+play

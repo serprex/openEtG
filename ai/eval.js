@@ -377,7 +377,7 @@ var statusValues = Object.freeze({
 		return 1 + c.owner.countcreatures() * 2;
 	},
 	freedom: 5,
-	reflect: 1
+	reflective: 1
 })
 
 function getDamage(c){
@@ -443,7 +443,7 @@ function calcExpectedDamage(pl, wallCharges, wallIndex) {
 	if (!stasisFlag){
 		pl.creatures.forEach(function(c){
 			var dmg = estimateDamage(c, freedomChance, wallCharges, wallIndex);
-			if (dmg && !(c.status.psionic && pl.foe.shield && pl.foe.shield.status.reflect)){
+			if (dmg && !(c.status.psionic && pl.foe.shield && pl.foe.shield.status.reflective)){
 				totalDamage += dmg;
 			}
 		});
@@ -506,7 +506,7 @@ function evalthing(c) {
 	}
 	if (isWeapon || isCreature) {
 		ttatk = getDamage(c);
-		if (c.status.psionic && c.owner.foe.shield && c.owner.foe.shield.status.reflect) ttatk *= -1;
+		if (c.status.psionic && c.owner.foe.shield && c.owner.foe.shield.status.reflective) ttatk *= -1;
 		score += c.trueatk()/20;
 		score += ttatk*delayfactor;
 	}else ttatk = 0;
