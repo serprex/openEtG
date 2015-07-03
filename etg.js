@@ -1046,8 +1046,8 @@ function getAdrenalRow(x){
 	var sign=(x>0)-(x<0);
 	x = Math.abs(x);
 	if (x>15) return "";
-	var row = adrtbl[x], ret = "";
-	for(var i=0; i<ret.length; i++){
+	var row = adrtbl[x], atks = row&7, ret = "";
+	for(var i=0; i<atks; i++){
 		row >>= 3;
 		ret += (i?", ":"")+((row&7)*sign);
 	}

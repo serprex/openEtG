@@ -8,9 +8,9 @@
   },
   "dependencies": {
     "compression": "^1.5.0",
-    "connect": "^3.3.5",
+    "connect": "^3.4.0",
     "redis": "^0.12.1",
-    "serve-static": "^1.9.3",
+    "serve-static": "^1.10.0",
     "ws": "^0.7.2"
   },
   "devDependencies": {
