@@ -1048,10 +1048,16 @@ metamorph:function(c,t){
 	c.owner.markpower++;
 },
 midas:function(c,t){
-	Actives.destroy(c, t, true);
-	var relic = new etg.Permanent(c.card.as(Cards.GoldenRelic), t.owner);
-	relic.usedactive = false;
-	relic.place();
+	if (t.status.stackable && t.status.charges > 1){
+		Actives.destroy(c, t, true);
+		var relic = new etg.Permanent(t.card.as(Cards.GoldenRelic), t.owner);
+		relic.usedactive = false;
+		relic.place();
+	}else{
+		t.transform(t.card.as(Cards.GoldenRelic));
+		if (t instanceof etg.Shield) t.dr = 1;
+		else if (t instanceof etg.Weapon) t.atk = 1;
+	}
 },
 millpillar:function(c,t){
 	if (t.deck[t.deck.length-1].type == etg.PillarEnum) t.deck.length--;

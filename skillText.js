@@ -349,13 +349,13 @@ function auraText(tgts, bufftext, upbufftext){
 }
 var statusData = {
 	cloak:"Cloaks own field",
-	charges:function(c){return etg.Thing.prototype.hasactive.call(c, "auto", "losecharge") || c.status.charges == 1?"":"Enter with " + c.status.charges + (c.status.stackable?" stacks":" charges")},
+	charges:function(c,inst){return c !== inst || etg.Thing.prototype.hasactive.call(c, "auto", "losecharge") || c.status.charges == 1?"":"Enter with " + c.status.charges + (c.status.stackable?" stacks":" charges")},
 	flooding:"Non aquatic creatures past first five creature slots die on turn end. Consumes 1:7. Unique",
 	freedom:"",
 	nightfall:auraText("Nocturnal creatures", "1|1", "2|1"),
 	nothrottle:"Throttling does not apply to any of own creatures while equipped",
 	patience:"Each turn delay own creatures. They gain 2|1. 4|1 if burrowed. 5|2 if flooded. Unique",
-	poison:function(c,inst){return c==inst?"Enter with " + c.status.poison + " poison":inst.status.poison + " poison"},
+	poison:function(c,inst){return c == inst ? "Enter with " + c.status.poison + " poison" : inst.status.poison + " poison"},
 	stackable:"",
 	stasis:"Prevent creatures attacking at end of turn",
 	tunnel:"Burrowed creatures bypass shields",
