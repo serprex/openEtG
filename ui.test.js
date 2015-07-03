@@ -3,7 +3,7 @@ require("./httpcards")(function() {
 	var etg = require("./etg");
 	var Cards = require("./Cards");
 	var etgutil = require("./etgutil");
-	var Actives = require("./Actives");
+	var Skills = require("./Skills");
 	var game, player1, player2;
 	function initHand(pl){
 		for(var i=1; i<arguments.length; i++){
@@ -77,26 +77,26 @@ require("./httpcards")(function() {
 			player1.hand[0].useactive();
 		}
 		equal(player1.permanents[0].status.charges, 2, "2 charges");
-		Actives.destroy(player2, player1.permanents[0]);
+		Skills.destroy(player2, player1.permanents[0]);
 		equal(player1.permanents[0].status.charges, 1, "1 charge");
-		Actives.destroy(player2, player1.permanents[0]);
+		Skills.destroy(player2, player1.permanents[0]);
 		ok(!player1.permanents[0], "poof");
 		equal(player1.permanents[1].card, Cards.SoulCatcher, "SoulCatcher");
-		Actives.destroy(player2, player1.permanents[1]);
+		Skills.destroy(player2, player1.permanents[1]);
 		ok(!player1.permanents[1], "SoulCatcher gone");
 		equal(player1.shield.card, Cards.Shield, "Shield");
-		Actives.destroy(player2, player1.shield);
+		Skills.destroy(player2, player1.shield);
 		ok(!player1.shield, "Shield gone");
 		equal(player1.weapon.card, Cards.Dagger, "Dagger");
-		Actives.destroy(player2, player1.weapon);
+		Skills.destroy(player2, player1.weapon);
 		ok(!player1.weapon, "Dagger gone");
 		initHand(player1, Cards.BoneWall);
 		player1.hand[0].useactive();
 		equal(player1.shield.status.charges, 7, "7 bones");
-		Actives.destroy(player2, player1.shield);
+		Skills.destroy(player2, player1.shield);
 		equal(player1.shield.status.charges, 6, "6 bones");
 		for(var i=0; i<6; i++){
-			Actives.destroy(player2, player1.shield);
+			Skills.destroy(player2, player1.shield);
 		}
 		ok(!player1.shield, "This town is all in hell");
 	});
@@ -123,9 +123,9 @@ require("./httpcards")(function() {
 		var pillars = player1.permanents[0];
 		ok(pillars.card.type == etg.PillarEnum, "ispillar");
 		equal(pillars.status.charges, 5, "5 charges");
-		Actives.earthquake(player2, pillars);
+		Skills.earthquake(player2, pillars);
 		equal(pillars.status.charges, 2, "2 charges");
-		Actives.earthquake(player2, pillars);
+		Skills.earthquake(player2, pillars);
 		ok(!player1.permanents[0], "poof");
 	});
 	gameTest("Eclipse", function() {
@@ -167,8 +167,8 @@ require("./httpcards")(function() {
 	});
 	gameTest("Lobotomize", function() {
 		var dev = new etg.Creature(Cards.Devourer, player1);
-		ok(!etg.isEmpty(dev.active), "Actives");
-		Actives.lobotomize(player1, dev);
+		ok(!etg.isEmpty(dev.active), "Skills");
+		Skills.lobotomize(player1, dev);
 		ok(etg.isEmpty(dev.active), "No actives");
 	});
 	gameTest("Obsession", function() {
@@ -180,46 +180,46 @@ require("./httpcards")(function() {
 	gameTest("Parallel", function() {
 		var damsel = new etg.Creature(Cards.Dragonfly, player1);
 		damsel.place();
-		Actives.parallel(player1, damsel);
+		Skills.parallel(player1, damsel);
 		equal(player1.creatures[1].card, Cards.Dragonfly, "PU'd");
-		Actives.web(player1, damsel);
+		Skills.web(player1, damsel);
 		ok(!damsel.status.airborne && player1.creatures[1].status.airborne, "Web'd");
 	});
 	gameTest("Phoenix", function() {
 		var phoenix = new etg.Creature(Cards.Phoenix, player1);
 		phoenix.place();
-		Actives.lightning(player1, phoenix);
+		Skills.lightning(player1, phoenix);
 		equal(player1.creatures[0].card, Cards.Ash, "Ash");
 	});
 	gameTest("Purify", function() {
-		Actives["poison 3"](player1);
+		Skills["poison 3"](player1);
 		equal(player2.status.poison, 3, "3");
-		Actives["poison 3"](player1, player2);
+		Skills["poison 3"](player1, player2);
 		equal(player2.status.poison, 6, "6");
-		Actives.purify(player1, player2);
+		Skills.purify(player1, player2);
 		equal(player2.status.poison, -2, "-2");
-		Actives.purify(player1, player2);
+		Skills.purify(player1, player2);
 		equal(player2.status.poison, -4, "-4");
 	});
 	gameTest("Reflect", function() {
-		Actives.lightning(player1, player2);
+		Skills.lightning(player1, player2);
 		ok(player1.hp == 100 && player2.hp == 95, "Plain spell");
 		player2.shield = new etg.Shield(Cards.MirrorShield, player2);
-		Actives.lightning(player1, player2);
+		Skills.lightning(player1, player2);
 		ok(player1.hp == 95 && player2.hp == 95, "Reflected spell");
 		player1.shield = new etg.Shield(Cards.MirrorShield, player1);
-		Actives.lightning(player1, player2);
+		Skills.lightning(player1, player2);
 		ok(player1.hp == 90 && player2.hp == 95, "Unreflected reflected spell");
 	});
 	gameTest("Steal", function() {
 		(player1.shield = new etg.Shield(Cards.BoneWall, player1)).status.charges=3;
-		Actives.steal(player2, player1.shield);
+		Skills.steal(player2, player1.shield);
 		ok(player1.shield && player1.shield.status.charges == 2, "Wish bones");
 		ok(player2.shield && player2.shield.status.charges == 1, "stole 1");
-		Actives.steal(player2, player1.shield);
+		Skills.steal(player2, player1.shield);
 		ok(player1.shield && player1.shield.status.charges == 1, "Lone bone");
 		ok(player2.shield && player2.shield.status.charges == 2, "stole 2");
-		Actives.steal(player2, player1.shield);
+		Skills.steal(player2, player1.shield);
 		ok(!player1.shield, "This town is all in hell");
 		ok(player2.shield && player2.shield.status.charges == 3, "stole 3");
 	});
@@ -245,13 +245,13 @@ require("./httpcards")(function() {
 	gameTest("Voodoo", function() {
 		var voodoo = new etg.Creature(Cards.VoodooDoll, player1);
 		voodoo.place();
-		Actives.lightning(player1, voodoo);
-		Actives.infect(player1, voodoo);
+		Skills.lightning(player1, voodoo);
+		Skills.infect(player1, voodoo);
 		equal(voodoo.hp, 11, "dmg");
 		equal(player2.hp, 95, "foe dmg");
 		equal(voodoo.status.poison, 1, "psn");
 		equal(player2.status.poison, 1, "foe psn");
-		Actives.holylight(player1, voodoo);
+		Skills.holylight(player1, voodoo);
 		equal(voodoo.hp, 1, "holy dmg");
 		equal(player2.hp, 85, "foe holy dmg");
 	});

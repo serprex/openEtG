@@ -24,7 +24,7 @@ exports.loadcards = function(cb, loadfunc){
 	});
 }
 var etg = require("./etg");
-var Actives = require("./Actives");
+var Skills = require("./Skills");
 var etgutil = require("./etgutil");
 function parseCsv(type, file){
 	var keys;
@@ -118,7 +118,7 @@ var TargetFilters = {
 		return !(t instanceof etg.Player);
 	},
 	sing:function(c, t){
-		return t.isMaterial(etg.Creature) && t.active.cast != Actives.sing;
+		return t.isMaterial(etg.Creature) && t.active.cast != Skills.sing;
 	},
 	butterfly:function(c, t){
 		return (t instanceof etg.Creature || t instanceof etg.Permanent) && !t.status.immaterial && !t.status.burrowed && ((t.trueatk && t.trueatk()<3) || (t instanceof etg.Creature && t.truehp()<3));

@@ -1,7 +1,7 @@
 "use strict";
 var etg = require("../etg");
 var Cards = require("../Cards");
-var Actives = require("../Actives");
+var Skills = require("../Skills");
 var enableLogging = false, logbuff, logstack;
 function logStart(){
 	if (enableLogging){
@@ -40,7 +40,7 @@ function log(x, y){
 function pillarval(c){
 	return c instanceof etg.CardInstance?.1:Math.sqrt(c.status.charges);
 }
-var ActivesValues = Object.freeze({
+var SkillsValues = Object.freeze({
 	ablaze:3,
 	accelerationspell:5,
 	acceleration:function(c){
@@ -207,7 +207,7 @@ var ActivesValues = Object.freeze({
 	momentum:2,
 	mutation:4,
 	neuro:function(c) {
-		return c.owner.foe.neuro?evalactive(c, etg.parseActive("poison 1"))+.1:6;
+		return c.owner.foe.neuro?evalactive(c, etg.parseSkill("poison 1"))+.1:6;
 	},
 	neurofy:function(c) {
 		return c.owner.foe.neuro?1:5;
@@ -390,7 +390,7 @@ function estimateDamage(c, freedomChance, wallCharges, wallIndex) {
 	function estimateAttack(tatk){
 		if (momentum) {
 			return tatk;
-		} else if ((fshactive == Actives.weight || fshactive == Actives.wings) && fshactive(c.owner.foe.shield, c)) {
+		} else if ((fshactive == Skills.weight || fshactive == Skills.wings) && fshactive(c.owner.foe.shield, c)) {
 			return 0;
 		}else if (wallCharges[wallIndex]){
 			wallCharges[wallIndex]--;
@@ -410,7 +410,7 @@ function estimateDamage(c, freedomChance, wallCharges, wallIndex) {
 		c.status.adrenaline = 1;
 	}
 	if (!momentum){
-		atk *= (fshactive == Actives.evade100 ? 0 : fshactive == Actives.evade50 ? .5 : fshactive == Actives.evade40 ? .6 : fshactive == Actives.chaos && fsh.card.upped ? .8 : 1);
+		atk *= (fshactive == Skills.evade100 ? 0 : fshactive == Skills.evade50 ? .5 : fshactive == Skills.evade40 ? .6 : fshactive == Skills.chaos && fsh.card.upped ? .8 : 1);
 	}
 	if (!fsh && freedomChance && c.status.airborne){
 		atk += Math.ceil(atk/2) * freedomChance;
@@ -456,7 +456,7 @@ function calcExpectedDamage(pl, wallCharges, wallIndex) {
 function evalactive(c, active, extra){
 	var sum = 0;
 	for(var i=0; i<active.activename.length; i++){
-		var aval = ActivesValues[active.activename[i]];
+		var aval = SkillsValues[active.activename[i]];
 		sum += aval === undefined?0:
 			aval instanceof Function?aval(c, extra):
 			aval instanceof Array?aval[c.card.upped?1:0]:aval;
@@ -469,8 +469,8 @@ function checkpassives(c) {
 	for (var status in statuses)
 	{
 		if (uniqueStatuses[status] && !(c instanceof etg.CardInstance)) {
-			if (!uniquesActive[status]) {
-				uniquesActive[status] = true;
+			if (!uniquesSkill[status]) {
+				uniquesSkill[status] = true;
 			}
 			else {
 				continue;
@@ -551,7 +551,7 @@ function evalcardinstance(cardInst) {
 	if (!cardInst) return 0;
 	var c = cardInst.card;
 	if (!caneventuallyactive(c.costele, c.cost, cardInst.owner)){
-		return c.active.discard == Actives.obsession ? (c.upped?-7:-6) : 0;
+		return c.active.discard == Skills.obsession ? (c.upped?-7:-6) : 0;
 	}
 	var score = 0;
 	if (c.type == etg.SpellEnum){
@@ -587,12 +587,12 @@ function evalcardinstance(cardInst) {
 function caneventuallyactive(element, cost, pl){
 	if (!cost || !element || pl.quanta[element] || !pl.mark || pl.mark == element) return true;
 	return pl.permanents.some(function(pr){
-		return pr && ((pr.card.type == etg.PillarEnum && (!pr.card.element || pr.card.element == element)) || (pr.active == Actives.locket && pr.status.mode == element));
+		return pr && ((pr.card.type == etg.PillarEnum && (!pr.card.element || pr.card.element == element)) || (pr.active == Skills.locket && pr.status.mode == element));
 	});
 }
 
 var uniqueStatuses = Object.freeze({flooding:"all", nightfall:"all", tunnel:"self", patience:"self", cloak:"self"});
-var uniquesActive, damageHash;
+var uniquesSkill, damageHash;
 
 module.exports = function(game) {
 	logStart();
@@ -604,7 +604,7 @@ module.exports = function(game) {
 	}
 	var wallCharges = new Int32Array([0, 0]);
 	damageHash = [];
-	uniquesActive = {};
+	uniquesSkill = {};
 	var expectedDamage = calcExpectedDamage(game.player2, wallCharges, 0);
 	if (expectedDamage > game.player1.hp){
 		return Math.min(expectedDamage - game.player1.hp, 500)*-999;
@@ -617,7 +617,7 @@ module.exports = function(game) {
 	for (var j = 0;j < 2;j++) {
 		for (var key in uniqueStatuses) {
 			if (uniqueStatuses[key] == "self")
-				uniquesActive[key] = undefined;
+				uniquesSkill[key] = undefined;
 		}
 		logNest(j);
 		var player = game.players(j), pscore = wallCharges[j]*4 + player.markpower;
@@ -661,6 +661,6 @@ module.exports = function(game) {
 	}
 	log("Eval", gamevalue);
 	logEnd();
-	damageHash = uniquesActive = null;
+	damageHash = uniquesSkill = null;
 	return gamevalue;
 }

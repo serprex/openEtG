@@ -2,7 +2,7 @@
 var ui = require("./ui");
 var Cards = require("./Cards");
 var Effect = require("./Effect");
-var Actives = require("./Actives");
+var Skills = require("./Skills");
 var etgutil = require("./etgutil");
 var skillText = require("./skillText");
 var MersenneTwister = require("./MersenneTwister");
@@ -33,15 +33,15 @@ var DefaultStatus = {
 };
 var emptyObj = Object.freeze({}), emptyStatus = Object.freeze(Object.create(DefaultStatus));
 var statuscache = {}, activecache = {}, activecastcache = {};
-function parseActive(name){
-	if (name in Actives){
-		return Actives[name];
+function parseSkill(name){
+	if (name in Skills){
+		return Skills[name];
 	}else{
 		var spidx = name.indexOf(" ");
 		if (~spidx){
-			Actives[name] = Actives[name.slice(0, spidx)](name.slice(spidx+1));
-			Actives[name].activename = [name];
-			return Actives[name];
+			Skills[name] = Skills[name.slice(0, spidx)](name.slice(spidx+1));
+			Skills[name].activename = [name];
+			return Skills[name];
 		}
 	}
 	console.log("Unknown active", name);
@@ -74,27 +74,27 @@ function Card(type, info){
 	}
 	this.cast = 0;
 	this.castele = 0;
-	if (info.Active){
+	if (info.Skill){
 		if (this.type == SpellEnum){
-			this.active = parseActive(info.Active);
-		}else if (info.Active in activecache){
-			this.active = activecache[info.Active];
-			var castinfo = activecastcache[info.Active];
+			this.active = parseSkill(info.Skill);
+		}else if (info.Skill in activecache){
+			this.active = activecache[info.Skill];
+			var castinfo = activecastcache[info.Skill];
 			if (castinfo){
 				this.cast = castinfo[0];
 				this.castele = castinfo[1];
 			}
 		}else{
-			activecache[info.Active] = this.active = {};
-			iterSplit(info.Active, "+", function(active){
+			activecache[info.Skill] = this.active = {};
+			iterSplit(info.Skill, "+", function(active){
 				var eqidx = active.indexOf("=");
 				var a0 = ~eqidx ? active.substr(0, eqidx) : "auto";
 				var cast = readCost(a0, this.element);
-				Thing.prototype.addactive.call(this, cast?"cast":a0, parseActive(active.substr(eqidx+1)));
+				Thing.prototype.addactive.call(this, cast?"cast":a0, parseSkill(active.substr(eqidx+1)));
 				if (cast){
 					this.cast = cast[0];
 					this.castele = cast[1];
-					activecastcache[info.Active] = cast;
+					activecastcache[info.Skill] = cast;
 				}
 			}, this);
 			Object.freeze(this.active);
@@ -1023,7 +1023,7 @@ Thing.prototype.mutantactive = function(){
 	if (index<0){
 		this.status[["momentum","immaterial"][~index]] = true;
 	}else{
-		var active = Actives[abilities[index]];
+		var active = Skills[abilities[index]];
 		if (abilities[index] == "growth 1"){
 			this.addactive("death", active);
 		}else{
@@ -1109,7 +1109,7 @@ Thing.prototype.rmactive = function(type, activename){
 			delete this.active[type];
 		} else {
 			this.active[type] = actives.reduce(function(previous, current, i){
-				return i == idx ? previous : combineactive(previous, Actives[current]);
+				return i == idx ? previous : combineactive(previous, Skills[current]);
 			}, null);
 		}
 	}
@@ -1155,7 +1155,7 @@ Weapon.prototype.attack = Creature.prototype.attack = function(stasis, freedomCh
 	if (isCreature){
 		this.dmg(this.status.poison, true);
 	}
-	if (target === undefined) target = this.active.cast == Actives.appease && !this.status.appeased ? this.owner : this.owner.foe;
+	if (target === undefined) target = this.active.cast == Skills.appease && !this.status.appeased ? this.owner : this.owner.foe;
 	if (this.active.auto && !this.status.frozen){
 		this.active.auto(this);
 	}
@@ -1302,7 +1302,7 @@ exports.casttext = casttext;
 exports.fromTrueMark = fromTrueMark;
 exports.toTrueMark = toTrueMark;
 exports.PlayerRng = PlayerRng;
-exports.parseActive = parseActive;
+exports.parseSkill = parseSkill;
 exports.Chroma = 0;
 exports.Entropy = 1;
 exports.Death = 2;

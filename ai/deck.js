@@ -1,7 +1,7 @@
 "use strict";
 var etg = require("../etg");
 var Cards = require("../Cards");
-var Actives = require("../Actives");
+var Skills = require("../Skills");
 var etgutil = require("../etgutil");
 
 function scorpion(card, deck){
@@ -98,10 +98,10 @@ module.exports = function(level) {
 				ecost[ele[1]] -= 8;
 			}else if (card.type == etg.CreatureEnum){
 				var auto = card.active.auto;
-				if (auto == Actives.light) ecost[etg.Light] -= 2;
-				else if (auto == Actives.fire) ecost[etg.Fire] -= 2;
-				else if (auto == Actives.air) ecost[etg.Air] -= 2;
-				else if (auto == Actives.earth) ecost[etg.Earth] -= 2;
+				if (auto == Skills.light) ecost[etg.Light] -= 2;
+				else if (auto == Skills.fire) ecost[etg.Fire] -= 2;
+				else if (auto == Skills.air) ecost[etg.Air] -= 2;
+				else if (auto == Skills.earth) ecost[etg.Earth] -= 2;
 			}else if (card.type == etg.ShieldEnum) anyshield++;
 			else if (card.type == etg.WeaponEnum) anyweapon++;
 		}

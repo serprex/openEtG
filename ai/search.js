@@ -46,7 +46,7 @@ var afilter = {
 		return true;
 	},
 };
-function searchActive(active, c, t){
+function searchSkill(active, c, t){
 	var func = afilter[active.activename[0]];
 	return !func || t instanceof etg.Player || t.hasactive("prespell", "protectonce") || func(c, t);
 }
@@ -87,7 +87,7 @@ module.exports = function(game, previous) {
 					if (th in tgthash) return;
 					else tgthash[th] = true;
 				}
-				if ((!game.targeting || (t && game.targeting.filter(t) && searchActive(active, c, t))) && (n || --limit > 0)) {
+				if ((!game.targeting || (t && game.targeting.filter(t) && searchSkill(active, c, t))) && (n || --limit > 0)) {
 					var tbits = game.tgtToBits(t) ^ 8;
 					var gameClone = game.clone();
 					gameClone.bitsToTgt(cbits).useactive(gameClone.bitsToTgt(tbits));

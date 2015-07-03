@@ -7,7 +7,7 @@ var mkAi = require("../mkAi");
 var sock = require("../sock");
 var Cards = require("../Cards");
 var Effect = require("../Effect");
-var Actives = require("../Actives");
+var Skills = require("../Skills");
 var etgutil = require("../etgutil");
 function startMatch(game, foeDeck, spectate) {
 	if (sock.trade){
@@ -624,7 +624,7 @@ function startMatch(game, foeDeck, spectate) {
 						child.texture = ui.getTextImage("1:" + (pr.status.pendstate ? pr.owner.mark : pr.card.element) + " x" + pr.status.charges, 10, pr.card.upped ? "black" : "white", ui.maybeLightenStr(pr.card));
 						child2.texture = gfx.nopic;
 					}else{
-						if (pr.active.auto && pr.active.auto == Actives.locket) {
+						if (pr.active.auto && pr.active.auto == Skills.locket) {
 							child.texture = ui.getTextImage("1:" + (pr.status.mode === undefined ? pr.owner.mark : pr.status.mode), 10, pr.card.upped ? "black" : "white", ui.maybeLightenStr(pr.card));
 						}
 						else child.texture = ui.getBasicTextImage((pr.status.charges == undefined ? "" : pr.status.charges) + "", 10, pr.card.upped ? "black" : "white", ui.maybeLightenStr(pr.card));
