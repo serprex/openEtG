@@ -20,6 +20,7 @@ function Game(seed, flip){
 	this.time = Date.now();
 	this.bonusstats = {
 		cardsplayed : new Int32Array(6),
+		creaturesplaced: 0,
 		creatureskilled: 0,
 		otk: false
 	};
@@ -782,6 +783,7 @@ Thing.prototype.place = function(fromhand){
 }
 Creature.prototype.place = function(fromhand){
 	if (place(this.owner.creatures, this)){
+		if (this.owner.game.bonusstats != null && this.owner == this.owner.game.player1) this.owner.game.bonusstats.creaturesplaced++;
 		Thing.prototype.place.call(this, fromhand);
 	}
 }

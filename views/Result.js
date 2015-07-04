@@ -56,7 +56,7 @@ module.exports = function(game, foeDeck) {
 			["Waiter", function() { return game.player1.deck.length == 0 ? .2 : 0 }],
 			["Grounds Keeper", function() { return Math.max((game.player1.countpermanents()-8)/40, 0) }],
 			["Creature Domination", function() { return game.player1.countcreatures() > 2*game.player2.countcreatures() ? .1 : 0 }],
-			["Creatureless", function() { return game.bonusstats.cardsplayed[5b] == 0 ? .1 : 0 }],
+			["Creatureless", function() { return game.bonusstats.creaturesplaced == 0 ? .1 : 0 }],
 			["Toxic", function() { return game.player2.status.poison > 18 ? .1 : 0 }],
 			["Equipped", function() { return game.player1.weapon && game.player1.shield ? .05 : 0 }],
 			["Mid Turn", function() { return game.turn == game.player1 ? .1 : 0 }],
