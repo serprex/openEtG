@@ -18,6 +18,11 @@ function Game(seed, flip){
 	this.targeting = null;
 	this.expectedDamage = new Int32Array(2);
 	this.time = Date.now();
+	this.bonusstats = {
+		cardsplayed : new Int32Array(6),
+		creatureskilled: 0,
+		otk: false
+	};
 }
 var DefaultStatus = {
 	adrenaline:0,
@@ -155,11 +160,6 @@ function Player(game){
 	this.markpower = 1;
 	this.mark = 0;
 	this.shardgolem = undefined;
-	this.bonusstats = {
-		cardsplayed : new Int32Array(6),
-		creatureskilled: 0,
-		otk: false
-	};
 }
 function Creature(card, owner){
 	if (card.isOf(Cards.ShardGolem)){
@@ -217,7 +217,10 @@ Game.prototype.clone = function(){
 	obj.turn = this.turn == this.player1 ? obj.player1 : obj.player2;
 	obj.first = this.first == this.player1 ? obj.player1 : obj.player2;
 	obj.ply = this.ply;
-	obj.targeting = this.targeting;
+	obj.targeting = null;
+	obj.expectedDamage = null;
+	obj.time = 0;
+	obj.bonusstats = null;
 	return obj;
 }
 Game.prototype.players = function(n){
@@ -406,7 +409,6 @@ Player.prototype.clone = function(game){
 	obj.hand = this.hand.map(maybeClone);
 	obj.deck = this.deck.slice();
 	obj.quanta = new Int8Array(this.quanta);
-	obj.bonusstats = null;
 	for(var attr in this){
 		if (!(attr in obj) && this.hasOwnProperty(attr)){
 			obj[attr] = this[attr];
@@ -689,12 +691,12 @@ Player.prototype.endturn = function(discard) {
 	for (var i = this.foe.drawpower; i > 0; i--) {
 		this.foe.drawcard(true);
 	}
+	if (this.game.bonusstats != null && this == this.game.player2) this.game.bonusstats.otk = this.hp == this.maxhp;
 	this.game.turn = this.foe;
-	if (this.bonusstats != null) this.bonusstats.otk = this.foe.hp == this.foe.maxhp;
-	this.foe.procactive("turnstart");
+	this.foe.proc("turnstart");
 	this.game.updateExpectedDamage();
 }
-Thing.prototype.procactive = function(name, param) {
+Thing.prototype.proc = function(name, param) {
 	function proc(c){
 		var a;
 		if (c && (a = c.active[name])){
@@ -716,7 +718,7 @@ Player.prototype.drawcard = function(drawstep) {
 	if (this.hand.length<8){
 		if (this.deck.length>0){
 			if (~new CardInstance(this.deck.pop(), this).place()){
-				this.procactive("draw", drawstep);
+				this.proc("draw", drawstep);
 				if (this.deck.length == 0 && this.game.player1 == this && !Effect.disable)
 					Effect.mkSpriteFade(ui.getBasicTextImage("Last card!", 32, "white", "black"));
 			}
@@ -776,7 +778,7 @@ Thing.prototype.activetext = function(){
 	return this.active.auto ? this.active.auto.activename.join(" ") : "";
 }
 Thing.prototype.place = function(fromhand){
-	this.procactive("play", fromhand);
+	this.proc("play", fromhand);
 }
 Creature.prototype.place = function(fromhand){
 	if (place(this.owner.creatures, this)){
@@ -891,7 +893,7 @@ Creature.prototype.dmg = function(x, dontdie){
 	if (!x)return 0;
 	var dmg = x<0 ? Math.max(this.hp-this.maxhp, x) : Math.min(this.truehp(), x);
 	this.hp -= dmg;
-	this.procactive("dmg", dmg);
+	this.proc("dmg", dmg);
 	if (this.truehp() <= 0){
 		if (!dontdie)this.die();
 	}else if (dmg>0 && this.status.voodoo)this.owner.foe.dmg(x);
@@ -921,21 +923,21 @@ CardInstance.prototype.remove = function(index) {
 }
 CardInstance.prototype.die = function(idx){
 	var idx = this.remove(idx);
-	if (~idx) this.procactive("discard");
+	if (~idx) this.proc("discard");
 }
 Creature.prototype.deatheffect = Weapon.prototype.deatheffect = function(index) {
 	var data = {index:index}
-	this.procactive("death", data);
+	this.proc("death", data);
 	if (~index) Effect.mkDeath(ui.creaturePos(this.owner == this.owner.game.player1?0:1, index));
 }
 Creature.prototype.die = function() {
-	if (this.owner.bonusstats != null && this.owner != this.owner.game.turn) this.owner.foe.bonusstats.creatureskilled++;
 	var index = this.remove();
 	if (~index){
 		if (!(this.active.predeath && this.active.predeath(this))){
 			if (this.status.aflatoxin & !this.card.isOf(Cards.MalignantCell)){
 				this.owner.creatures[index] = new Creature(this.card.as(Cards.MalignantCell), this.owner);
 			}
+			if (this.owner.game.bonusstats != null && this.owner == this.owner.game.player2) this.owner.game.bonusstats.creatureskilled++;
 			this.deatheffect(index);
 		}
 	}
@@ -1082,7 +1084,7 @@ Creature.prototype.truehp = function(){
 Permanent.prototype.getIndex = function() { return this.owner.permanents.indexOf(this); }
 Permanent.prototype.die = function(){
 	if (~this.remove()){
-		this.procactive("destroy", {});
+		this.proc("destroy", {});
 	}
 }
 Weapon.prototype.remove = function() {
@@ -1122,12 +1124,12 @@ Thing.prototype.canactive = function() {
 }
 Thing.prototype.castSpell = function(t, active, nospell){
 	var data = {tgt: t, active: active};
-	this.procactive("prespell", data);
+	this.proc("prespell", data);
 	if (data.evade){
 		if (t) Effect.mkText("Evade", t);
 	}else{
 		active(this, data.tgt);
-		if (!nospell) this.procactive("spell", data.tgt);
+		if (!nospell) this.proc("spell", data.tgt);
 	}
 }
 Thing.prototype.useactive = function(t) {
@@ -1246,8 +1248,8 @@ CardInstance.prototype.useactive = function(target){
 		owner.addpoison(1);
 	}
 	this.card.play(owner, this, target);
-	this.procactive("cardplay");
-	if (owner.bonusstats != null) owner.bonusstats.cardsplayed[card.type]++;
+	this.proc("cardplay");
+	if (owner.game.bonusstats != null) owner.game.bonusstats.cardsplayed[card.type]++;
 	owner.game.updateExpectedDamage();
 }
 var filtercache = [];

@@ -86,8 +86,8 @@ var data = {
 	embezzle:"Replaces target creature's skills with \"Defender draws card on hit\"",
 	empathy:"Heal owner per creature owned per turn. Consumes 1:5 per 8 creatures",
 	enchant:"Target permanent becomes immaterial",
-	endow:"Replicate attributes of target weapon",
-	envenom:"Target weapon gains \"Apply poison on hit. Throttled\"",
+	endow:"Gain attack, skills, & statuses of target weapon. Gain 0|2",
+	envenom:"Target weapon or shield gains \"Apply poison on hit. Throttled\" & \"25% chance to poison non-ranged attackers\"",
 	epidemic:"When a creature dies, transfer creature's poison counters to foe",
 	epoch:"Silence player after playing 2 cards in a turn",
 	epochreset:{

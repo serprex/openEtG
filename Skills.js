@@ -365,7 +365,7 @@ destroy:function(c,t, dontsalvage, donttalk){
 		}
 	}else t.remove();
 	if (!dontsalvage){
-		t.procactive("destroy", {});
+		t.proc("destroy", {});
 	}
 },
 destroycard:function(c,t){
@@ -451,7 +451,7 @@ drawequip:function(c,t){
 		var card = c.owner.deck[i];
 		if (card.type == etg.WeaponEnum || card.type == etg.ShieldEnum){
 			if (~new etg.CardInstance(card, c.owner).place()){
-				c.owner.procactive("draw");
+				c.owner.proc("draw");
 			}
 			return;
 		}
@@ -493,7 +493,7 @@ earthquake:function(c,t){
 	}else{
 		t.remove();
 	}
-	t.procactive("destroy", {});
+	t.proc("destroy", {});
 },
 elf:function(c,t,data){
 	if (data.tgt == c && data.active == Skills.cseed){
@@ -522,20 +522,18 @@ enchant:function(c,t){
 endow:function(c,t){
 	Effect.mkText("Endow", t);
 	for (key in t.status) {
-		if (typeof t.status[key] == "boolean")
-			c.status[key] = c.status[key] || t.status[key]
-		else if (typeof t.status[key] == "number")
-			c.status[key] = t.status[key] + (c.status[key] ? c.status[key] : 0);
-		else
-			c.status[key] = t.status[key];
+		c.status[key] = typeof t.status[key] == "boolean"? c.status[key] || t.status[key] :
+			typeof t.status[key] == "number" ? t.status[key] + (c.status[key] || 0) :
+			t.status[key];
 	}
  	if (c.status.adrenaline > 1)
 		c.status.adrenaline = 1;
 	c.active = etg.clone(t.active);
-	c.cast = t.cast;
-	c.castele = t.castele;
 	if (c.active.cast == Skills.endow) {
 		delete c.active.cast;
+	}else{
+		c.cast = t.cast;
+		c.castele = t.castele;
 	}
 	c.atk += t.trueatk();
 	if (t.active.buff){
@@ -1758,7 +1756,7 @@ trick:function(c,t){
 		var pick = t.owner.choose(cards);
 		var cr = t.owner.creatures[t.getIndex()] = new etg.Creature(t.owner.deck[pick], t.owner);
 		t.owner.deck[pick] = t.card;
-		cr.procactive("play");
+		cr.proc("play");
 	}
 },
 turngolem:function(c,t){
