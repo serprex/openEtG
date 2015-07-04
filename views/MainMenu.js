@@ -159,16 +159,15 @@ module.exports = function(nymph) {
 				this.style.display = "none";
 			}
 			if (sock.user){
-				var y = 46+i*22, b = px.dom.button("Arena AI", arenaAi, mkSetTip("In the arena you will face decks from other players.")),
-					clab = costText(4+lvi.lv, 0), rlab = costText(4+lvi.lv, 1),
-					tx = px.dom.text("Tier " + (lvi.lv+1));
+				var y = 46+i*22, b = px.dom.button("Arena" + (lvi.lv+1) + " AI", arenaAi, mkSetTip("In the arena you will face decks from other players.")),
+					clab = costText(4+lvi.lv, 0), rlab = costText(4+lvi.lv, 1);
 				px.dom.style(clab, rlab, {
 					position: "absolute",
 					top: y+"px",
 				});
 				clab.style.right = "114px";
 				rlab.style.right = "4px";
-				px.dom.add(arenabox, [4, y, tx], [40, y, b], clab, rlab);
+				px.dom.add(arenabox, [4, y, b], clab, rlab);
 			}
 			var atop = px.dom.button("Arena" + (i+1) + " T20", arenaTop, mkSetTip("See who the top players in arena are right now."));
 			px.dom.style(atop, {
