@@ -1,4 +1,4 @@
-E,Name,Code,R,Active,Status
+E,Name,Code,R,Skill,Status
 0,Quantum Pillar,4sa,,pillar,stackable+additive+charges=1
 0,Quantum Tower,6qq,,pillar+ownplay=pillar,stackable+additive+charges=1
 0,Quantum Pendulum,4sc,,pend,stackable+additive+charges=1

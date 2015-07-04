@@ -1,4 +1,4 @@
-E,Name,Code,Cost,R,Active,Health,Status
+E,Name,Code,Cost,R,Skill,Health,Status
 0,Shield,4tc,0,1,,1,
 0,Tower Shield,6rs,4,1,,2,
 1,Dissipation Field,4vg,3,2,shield=disshield,0,

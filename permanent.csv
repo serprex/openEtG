@@ -1,8 +1,8 @@
-E,Name,Code,Cost,R,Active,Status
+E,Name,Code,Cost,R,Skill,Status
 0,Quantum Locket,4sg,1,1,0=locketshift+locket,
 0,Quantum Locket,6r0,0,1,0=locketshift+locket,
-1,Ricochet,4vt,4,2,spell=ricochet,
-1,Ricochet,6ud,3,2,spell=ricochet,
+1,Ricochet,4vt,3,2,spell=ricochet,
+1,Ricochet,6ud,2,2,spell=ricochet,
 2,Boneyard,52n,3,1,death=boneyard,
 2,Graveyard,717,4,1,death=boneyard,
 2,Soul Catcher,52v,1:0,1,death=soulcatch,

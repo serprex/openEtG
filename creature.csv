@@ -1,4 +1,4 @@
-E,Name,Code,Cost,R,Active,Attack,Health,Status
+E,Name,Code,Cost,R,Skill,Attack,Health,Status
 2,Malignant Cell,4t8,0,1,postauto=mitosis,1,1,aquatic+nocturnal+token
 2,Malignant Cell,6ro,0,1,postauto=mitosis,1,1,aquatic+nocturnal+token
 1,Maxwell's Demon,4vd,5,2,2=paradox,3,2,airborne

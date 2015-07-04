@@ -1,4 +1,4 @@
-E,Name,Code,Cost,R,Active,Attack,Health,Status
+E,Name,Code,Cost,R,Skill,Attack,Health,Status
 0,Dagger,4t3,0,1,buff=dagger,2,1,nocturnal
 0,Dirk,6rj,0,1,buff=dagger,4,1,nocturnal
 0,Short Sword,4t4,1,1,,3,2,

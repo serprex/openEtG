@@ -33,6 +33,12 @@ var filters = {
 			if (~hasBurrow.indexOf(deck[i])) return true;
 		}
 	},
+	"59m":function integrity(card, deck){
+		var shardCount=0;
+		for(var i=0; i<deck.length; i++){
+			if (~etg.shardList.indexOf(deck[i]) && ++shardCount>3) return true;
+		}
+	},
 	"5lk":function hope(card, deck){
 		var hasLight = ["5lj","5ls","5ok","7k3","7jp","7kc"];
 		for(var i=0; i<deck.length; i++){
