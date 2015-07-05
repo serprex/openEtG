@@ -199,13 +199,16 @@ function startMatch(game, foeDeck, spectate) {
 			return Math.ceil(t.truehp()*(t.status.frozen?150:100)/(t.truehp()+100));
 		},
 		adrenaline:function(t){
-			return "extra: " + etg.getAdrenalRow(t.trueatk());
+			return "Extra: " + etg.getAdrenalRow(t.trueatk());
+		},
+		fractal:function(){
+			return "Copies: " + Math.min((6+Math.floor((game.player1.quanta[etg.Aether]-game.targeting.src.card.cost)/2)), 9-game.player1.hand.length);
 		},
 	};
 	function setInfo(obj) {
 		if (!cloakgfx.visible || obj.owner != game.player2 || obj.status.cloak) {
 			var info = obj.info(), actinfo = game.targeting && game.targeting.filter(obj) && activeInfo[game.targeting.text];
-			if (actinfo) info += "\nDmg " + actinfo(obj);
+			if (actinfo) info += "\n" + actinfo(obj);
 			infobox.text = info;
 			infobox.style.display = "";
 		}
