@@ -154,6 +154,13 @@ function startMatch(game, foeDeck, spectate) {
 	cloakgfx.beginFill(0);
 	cloakgfx.drawRect(130, 20, 660, 280);
 	gameui.addChild(cloakgfx);
+	var floodgfx = new PIXI.Graphics();
+	floodgfx.beginFill(0x003F7F, .375);
+	floodgfx.drawRect(149, 146, 644, 64);
+	floodgfx.drawRect(149, 210, 244, 64);
+	floodgfx.drawRect(107, 390, 644, 64);
+	floodgfx.drawRect(507, 326, 244, 64);
+	gameui.addChild(floodgfx);
 	var endturn = px.dom.button("Accept Hand", function(){endClick()});
 	var cancel = px.dom.button("Mulligan", cancelClick);
 	var resign = px.dom.button("Resign", function() {
@@ -471,6 +478,7 @@ function startMatch(game, foeDeck, spectate) {
 			}
 		}
 		var cardartcode, cardartx;
+		floodgfx.visible = false;
 		infobox.style.display = "none";
 		if (!cloakgfx.visible){
 			foeplays.children.forEach(function(foeplay){
@@ -616,6 +624,7 @@ function startMatch(game, foeDeck, spectate) {
 			}
 			for (var i = 0;i < 16;i++) {
 				var pr = pl.permanents[i];
+				if (pr && pr.status.flooding) floodgfx.visible = true;
 				if (pr && !(j == 1 && cloakgfx.visible && !pr.status.cloak)) {
 					permsprite[j][i].texture = gfx.getPermanentImage(pr.card.code);
 					permsprite[j][i].visible = true;
