@@ -6,6 +6,10 @@ function adrenathrottle(f){
 		}
 	}
 }
+function passive(f){
+	f.passive = true;
+	return f;
+}
 function quadpillarFactory(ele){
 	return function(c, t){
 		var n = c == t ? 1 : c.status.charges;
@@ -21,12 +25,12 @@ ablaze:function(c,t){
 	Effect.mkText("2|0", c);
 	c.atk += 2;
 },
-abomination:function(c,t,data){
+abomination:passive(function(c,t,data){
 	if (data.tgt == c && data.active == Skills.mutation){
 		Skills.improve(c, c);
 		data.evade = true;
 	}
-},
+}),
 acceleration:function(c,t){
 	Effect.mkText("2|-1", c);
 	c.atk += 2;
@@ -111,9 +115,9 @@ bblood:function(c,t){
 	t.buffhp(20);
 	t.delay(6);
 },
-becomearctic:function(c,t){
+becomearctic:passive(function(c,t){
 	c.transform(c.card.as(Cards.ArcticSquid));
-},
+}),
 beguile:function(c,t){
 	t.remove();
 	t.owner = t.owner.foe;
@@ -122,12 +126,12 @@ beguile:function(c,t){
 		t.addactive("turnstart", Skills.beguilestop);
 	}
 },
-beguilestop:function(c,t){
+beguilestop:passive(function(c,t){
 	if (t == c.owner){
 		c.rmactive("turnstart", "beguilestop");
 		Skills.beguile(c, c);
 	}
-},
+}),
 bellweb:function(c,t){
 	Skills.web(c,t);
 	t.status.aquatic = true;
@@ -156,10 +160,10 @@ boneyard:function(c,t){
 bow:function(c,t){
 	return c.owner.mark == etg.Air || c.owner.mark == etg.Light?1:0;
 },
-bounce:function(c,t){
+bounce:passive(function(c,t){
 	Skills.unsummon(c, c);
 	return true;
-},
+}),
 bravery:function(c,t){
 	if (!c.owner.foe.sanctuary){
 		for(var i=0; i<2 && c.owner.hand.length<8 && c.owner.foe.hand.length<8; i++){
@@ -224,9 +228,9 @@ catlife:function(c,t, data){
 		c.owner.creatures[data.index] = cl;
 	}
 },
-cell:function(c,t){
+cell:passive(function(c,t){
 	c.transform(c.card.as(Cards.MalignantCell));
-},
+}),
 chimera:function(c,t){
 	var atk=0, hp=0;
 	c.owner.creatures.forEach(function(cr){
@@ -272,11 +276,11 @@ corpseexplosion:function(c,t){
 		c.owner.foe.addpoison(poison);
 	}
 },
-counter:function(c,t, dmg){
+counter:passive(function(c,t, dmg){
 	if (!c.status.frozen && !c.status.delayed && dmg>0 && ~c.getIndex()){
 		c.attackCreature(t);
 	}
-},
+}),
 countimmbur:function(c){
 	var n = 0;
 	function test(x){
@@ -317,12 +321,12 @@ deathwish:function(c,t, data){
 		return data.tgt = c;
 	}
 },
-decrsteam:function(c){
+decrsteam:passive(function(c){
 	if (c.status.steamatk > 0){
 		c.atk--;
 		c.status.steamatk--;
 	}
-},
+}),
 deckblast:function(c,t){
 	c.owner.foe.spelldmg(Math.ceil(c.owner.deck.length/c.owner.deckpower));
 	c.owner.deck.length = 0;
@@ -471,12 +475,12 @@ dshield:function(c,t){
 	c.status.immaterial = true;
 	c.addactive("turnstart", Skills.dshieldoff);
 },
-dshieldoff:function(c,t){
+dshieldoff:passive(function(c,t){
 	if (c.owner == t){
 		c.status.immaterial = false;
 		c.rmactive("turnstart", "dshieldoff");
 	}
-},
+}),
 duality:function(c,t){
 	if (c.owner.foe.deck.length > 0 && c.owner.hand.length < 8){
 		new etg.CardInstance(c.owner.foe.deck[c.owner.foe.deck.length-1], c.owner).place();
@@ -495,12 +499,12 @@ earthquake:function(c,t){
 	}
 	t.proc("destroy", {});
 },
-elf:function(c,t,data){
+elf:passive(function(c,t,data){
 	if (data.tgt == c && data.active == Skills.cseed){
 		c.transform(c.card.as(Cards.FallenElf));
 		data.evade = true;
 	}
-},
+}),
 embezzle:function(c,t){
 	Effect.mkText("Embezzle", t);
 	t.lobo();
@@ -600,11 +604,11 @@ firebolt:function(c,t){
 		t.status.frozen = 0;
 	}
 },
-firebrand:function(c,t, data){
+firebrand:passive(function(c,t, data){
 	if (data.tgt == c && data.active == Skills.tempering){
 		c.status.charges++;
 	}
-},
+}),
 flatline:function(c,t){
 	if (!c.owner.foe.sanctuary){
 		c.owner.foe.flatline = true;
@@ -1022,7 +1026,7 @@ luciferin:function(c,t){
 	c.owner.dmg(-10);
 	c.owner.masscc(c, function(c,x){
 		for (var key in x.active){
-			if (key == "ownplay" || key == "owndiscard" || x.active[key].activename.every(function(name){return name in etg.passives})) continue;
+			if (key == "ownplay" || key == "owndiscard" || x.active[key].activename.every(function(name){return etg.parseActive[name].passive})) continue;
 			return;
 		}
 		x.addactive("auto", Skills.light);
@@ -1089,12 +1093,12 @@ momentum:function(c,t){
 	t.buffhp(1);
 	t.status.momentum = true;
 },
-mummy:function(c,t,data){
+mummy:passive(function(c,t,data){
 	if (data.tgt == c && data.active == Skills.rewind){
 		c.transform(c.card.as(Cards.Pharaoh));
 		data.evade = true;
 	}
-},
+}),
 mutant:function(c,t){
 	if (!c.mutantactive()){
 		c.active.cast = Skills.web;
@@ -1182,9 +1186,9 @@ nymph:function(c,t){
 	Skills.destroy(c, t, true, true);
 	new etg.Creature(t.card.as(Cards.Codes[etg.NymphList[e]]), t.owner).place();
 },
-obsession:function(c,t){
+obsession:passive(function(c,t){
 	c.owner.spelldmg(c.card.upped?10:8);
-},
+}),
 ouija:function(c,t){
 	if(!c.owner.foe.sanctuary && c.owner.foe.hand.length<8){
 		new etg.CardInstance(Cards.OuijaEssence, c.owner.foe).place();
@@ -1303,9 +1307,9 @@ predator:function(c,t){
 		if (fhand.length) Skills.destroycard(c, fhand[fhand.length-1]);
 	}
 },
-predatoroff:function(c,t){
+predatoroff:passive(function(c,t){
 	c.rmactive("turnstart", "predatoroff");
-},
+}),
 protectall:function(c,t){
 	function protect(p){
 		if (p && p.isMaterial()){
@@ -1316,18 +1320,18 @@ protectall:function(c,t){
 	c.owner.creatures.forEach(protect);
 	c.owner.permanents.forEach(protect);
 },
-protectonce:function(c,t, data){
+protectonce:passive(function(c,t, data){
 	if (data.tgt == c && c.owner != t.owner){
 		c.rmactive("prespell", "protectonce");
 		c.rmactive("spelldmg", "protectoncedmg");
 		data.evade = true;
 	}
-},
-protectoncedmg:function(c,t){
+}),
+protectoncedmg:passive(function(c,t){
 	c.rmactive("prespell", "protectonce");
 	c.rmactive("spelldmg", "protectoncedmg");
 	return true;
-},
+}),
 purify:function(c,t){
 	t.status.poison = t.status.poison < 0?t.status.poison-2:-2;
 	t.status.aflatoxin = false;
@@ -1457,7 +1461,7 @@ sadism:function(c, t, dmg){
 		c.owner.dmg(-dmg);
 	}
 },
-salvage:function(c, t, data){
+salvage:passive(function(c, t, data){
 	Skills["growth 1"](c);
 	if (!data.salvaged && !c.hasactive("turnstart", "salvageoff") && c.owner.game.turn != c.owner){
 		Effect.mkText("Salvage", c);
@@ -1465,7 +1469,7 @@ salvage:function(c, t, data){
 		c.owner.hand.push(new etg.CardInstance(t.card, c.owner));
 		c.addactive("turnstart", Skills.salvageoff);
 	}
-},
+}),
 salvageoff:function(c, t){
 	c.rmactive("turnstart", "salvageoff");
 },
@@ -1572,7 +1576,7 @@ siphonactive:function(c,t){
 	c.lobo();
 	//TODO handle multiple actives
 	for(var key in t.active){
-		if (!(t.active[key].activename[0] in etg.passives)) c.active[key] = t.active[key];
+		if (!(t.active[key].passive)) c.active[key] = t.active[key];
 	}
 	c.cast = t.cast;
 	c.castele = t.castele;
@@ -1584,12 +1588,12 @@ siphonstrength:function(c,t){
 	t.atk--;
 	c.atk++;
 },
-skeleton:function(c,t,data){
+skeleton:passive(function(c,t,data){
 	if (data.tgt == c && data.active == Skills.rewind){
 		Skills.hatch(c);
 		data.evade = true;
 	}
-},
+}),
 skyblitz:function(c,t){
 	c.owner.quanta[etg.Air] = 0;
 	c.owner.creatures.forEach(function(cr){
@@ -1817,9 +1821,9 @@ vindicate:function(c,t, data){
 unvindicate:function(c,t){
 	c.status.vindicated = undefined;
 },
-virtue:function(c,t,blocked){
+virtue:passive(function(c,t,blocked){
 	c.owner.buffhp(blocked);
-},
+}),
 virusinfect:function(c,t){
 	c.die();
 	Skills.infect(c, t);
