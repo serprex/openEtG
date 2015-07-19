@@ -59,11 +59,10 @@ var filters = {
 		}
 	},
 }
-module.exports = function(level) {
+module.exports = function(uprate, markpower, maxRarity) {
 	if (!Cards.loaded){
 		return;
 	}
-	var uprate = level == 0 ? 0 : level == 1 ? .1 : .3;
 	function upCode(x) {
 		return uprate ? etgutil.asUpped(x, Math.random() < uprate) : x;
 	}
@@ -72,12 +71,11 @@ module.exports = function(level) {
 	for (var i = 0;i < 13;i++) {
 		ecost[i] = 0;
 	}
-	ecost[eles[1]] -= 5 * (level > 1 ? 2 : 1);
+	ecost[eles[1]] -= 5 * markpower;
 	var deck = [];
 	var anyshield = 0, anyweapon = 0;
 	eles.forEach(function(ele, j){
 		for (var i = 20-j*10; i>0; i--) {
-			var maxRarity = level == 0 ? 2 : (level == 1 ? 3 : 4);
 			var card = etg.PlayerRng.randomcard(Math.random() < uprate, function(x) {
 				return x.element == ele && x.type != etg.PillarEnum && x.rarity <= maxRarity && cardcount[x.code] != 6 &&
 					!(x.type == etg.ShieldEnum && anyshield == 3) && !(x.type == etg.WeaponEnum && anyweapon == 3) && !x.isOf(Cards.Give) && !x.isOf(Cards.Precognition);

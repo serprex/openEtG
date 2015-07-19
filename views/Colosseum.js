@@ -20,7 +20,7 @@ function mkDaily(type) {
 	}
 	else {
 		return function() {
-			var game = mkAi.mkPremade(type == 3 ? "mage" : "demigod", type)();
+			var game = mkAi.mkPremade(type == 3 ? 1 : 3, type)();
 			if (game){
 				game.addonreward = type == 3 ? 90 : 200;
 				sock.userExec("donedaily", { daily: type });

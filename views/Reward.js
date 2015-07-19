@@ -39,7 +39,7 @@ module.exports = function(reward, numberofcopies, code) {
 		dom.add(div, [20, 100, "You will get " + numberofcopies + " copies of the card you choose"]);
 	}
 	if (code){
-		dom.add(div, [10, 10, ["Exit", require("./MainMenu")]]);
+		dom.add(div, [10, 10, ["Exit", function(){require("./MainMenu")()}]]);
 	}
 	var chosenRewardImage = new PIXI.Sprite(gfx.nopic);
 	chosenRewardImage.position.set(233, 10);

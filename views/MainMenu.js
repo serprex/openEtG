@@ -57,13 +57,30 @@ function addCostRewardHeaders(div){
 	dom.add(div, costText, rewardText);
 }
 function initEndless(){
-	var gameData = {};
+	var gameData = { deck: require("../ai/deck")(.5, 2, 5), urdeck: sock.getDeck(), seed: Math.random() * etgutil.MAX_INT, p2hp: etgutil.MAX_INT, p2markpower: 2, foename: "The Invincible", p2drawpower: 2, level: 7, goldreward: 0, cardreward: "" };
 	var game = require("./Match")(gameData, true);
-	var endlessRelic = Object.create(etg.Permanent);
+	var endlessRelic = Object.create(etg.Permanent.prototype);
+	endlessRelic.owner = game.player2;
 	endlessRelic.card = Cards.Dagger;
 	endlessRelic.status = {immaterial: true};
-	endlessRelic.active = {};
-	endlessRelic.place(game.player2);
+	function endlessAuto(c, t){
+		var plies = c.owner.game.ply;
+		if (c.owner.rng() < .1){
+			c.owner.markpower++;
+		}
+		if ((plies&15) == 13){
+			new etg.Creature(Cards.Singularity.asUpped(c.owner.rng() < plies/100), c.owner.foe).place();
+		}
+		if ((plies&1) || c.owner.rng() < .3) c.owner.foe.buffhp(-1);
+	}
+	function endlessDraw(c, t){
+		var idx = t.upto(t.deck.length);
+		t.deck.splice(idx, 0, t.hand[t.hand.length-1].card);
+	}
+	endlessAuto.activename = ["endless"];
+	endlessDraw.activename = ["endlessdraw"];
+	endlessRelic.active = {auto:endlessAuto, draw:endlessDraw};
+	game.player2.permanents[0] = endlessRelic;
 }
 module.exports = function(nymph) {
 	var popdom, stage = {endnext: function(){
@@ -136,9 +153,9 @@ module.exports = function(nymph) {
 	addCostRewardHeaders(aibox);
 	addCostRewardHeaders(arenabox);
 	[dom.button("Commoner", mkAi.mkAi(0), mkSetTip("Commoners have no upgraded cards & mostly common cards")),
-		dom.button("Mage", mkAi.mkPremade("mage"), mkSetTip("Mages have preconstructed decks with a couple rares")),
+		dom.button("Mage", mkAi.mkPremade(1), mkSetTip("Mages have preconstructed decks with a couple rares")),
 		dom.button("Champion", mkAi.mkAi(2), mkSetTip("Champions have some upgraded cards")),
-		dom.button("Demigod", mkAi.mkPremade("demigod"), mkSetTip("Demigods are extremely powerful. Come prepared for anything")),
+		dom.button("Demigod", mkAi.mkPremade(3), mkSetTip("Demigods are extremely powerful. Come prepared for anything")),
 	].forEach(function(b,i){
 		var y = 46+i*22, clab = costText(i, 0), rlab = costText(i, 1);
 		dom.style(clab, rlab, {

@@ -6,14 +6,18 @@ var Cards = require("./Cards");
 var aiDecks = require("./Decks");
 var etgutil = require("./etgutil");
 var options = require("./options");
-exports.mkPremade = function(name, daily) {
+var userutil = require("./userutil");
+var mkDeck = require("./ai/deck");
+
+exports.mkPremade = function(level, daily) {
+	var name = level == 1 ? "mage" : "demigod";
 	return function() {
 		var urdeck = sock.getDeck();
 		if (etgutil.decklength(urdeck) < (sock.user ? 31 : 11)) {
 			require("./views/Editor")();
 			return;
 		}
-		var cost = daily !== undefined ? 0 : name == "mage" ? 5 : 20, foedata;
+		var cost = daily !== undefined ? 0 : userutil.pveCostReward[level*2];
 		if (sock.user) {
 			if (daily === undefined){
 				if (sock.user.gold < cost) {
@@ -21,12 +25,12 @@ exports.mkPremade = function(name, daily) {
 					return;
 				}
 			}else{
-				foedata = aiDecks[name][sock.user[name == "mage" ? "dailymage" : "dailydg"]];
+				foedata = aiDecks[name][sock.user[level == 1 ? "dailymage" : "dailydg"]];
 			}
 		}
 		if (!foedata) foedata = aiDecks.giveRandom(name);
-		var gameData = { deck: foedata[1], urdeck: urdeck, seed: Math.random() * etgutil.MAX_INT, foename: foedata[0] };
-		if (name == "mage"){
+		var gameData = { level: level, deck: foedata[1], urdeck: urdeck, seed: Math.random() * etgutil.MAX_INT, foename: foedata[0] };
+		if (level == 1){
 			gameData.p2hp = 125;
 		}else{
 			gameData.p2hp = 200;
@@ -35,7 +39,6 @@ exports.mkPremade = function(name, daily) {
 		}
 		if (!sock.user) ui.parsepvpstats(gameData);
 		else gameData.cost = cost;
-		gameData.level = name == "mage" ? 1 : 3;
 		if (daily !== undefined) gameData.daily = daily;
 		return require("./views/Match")(gameData, true);
 	}
@@ -48,14 +51,14 @@ exports.mkAi = function(level, daily) {
 				require("./views/Editor")();
 				return;
 			}
-			var cost = daily !== undefined || level == 0 ? 0 : level == 1 ? 5 : 10;
+			var cost = daily !== undefined ? 0 : userutil.pveCostReward[level*2];
 			if (sock.user && cost) {
 				if (sock.user.gold < cost) {
 					chat("Requires " + cost + "\u00A4");
 					return;
 				}
 			}
-			var deck = require("./ai/deck")(level);
+			var deck = level == 0 ? mkDeck(0, 1, 2) : mkDeck(.4, 2, 4);
 			options.aideck = deck;
 
 			var randomNames = [

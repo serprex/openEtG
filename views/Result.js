@@ -26,9 +26,9 @@ module.exports = function(game, foeDeck) {
 	function rematch(){
 		switch(game.level){
 		case 0:mkAi.mkAi(0)();break;
-		case 1:mkAi.mkPremade("mage")();break;
+		case 1:mkAi.mkPremade(1)();break;
 		case 2:mkAi.mkAi(2)();break;
-		case 3:mkAi.mkPremade("demigod")();break;
+		case 3:mkAi.mkPremade(3)();break;
 		case 4:sock.userEmit("foearena", {lv:0});break;
 		case 5:sock.userEmit("foearena", {lv:1});break;
 		case undefined:
