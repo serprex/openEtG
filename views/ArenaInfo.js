@@ -1,13 +1,13 @@
 "use strict";
 var px = require("../px");
+var dom = require("../dom");
 var etg = require("../etg");
 var gfx = require("../gfx");
 var sock = require("../sock");
 var etgutil = require("../etgutil");
-
 module.exports = function(data) {
 	var stage = new PIXI.Container();
-	var div = px.dom.div(
+	var div = dom.div(
 		[96, 576, "Earn 1$ when your arena deck is faced, & another 2$ when it wins"],
 		[8, 300, ["Exit", require("./MainMenu")]]);
 	function renderInfo(info, y){
@@ -27,7 +27,7 @@ module.exports = function(data) {
 			});
 			var marksprite = document.createElement("span");
 			marksprite.className = "ico e" + mark;
-			px.dom.add(div, [100, 4 + y, "W-L: " + (info.win || 0) + " - " + (info.loss || 0) + ", Rank: " + (info.rank == undefined ? "Inactive" : (info.rank + 1)) + ", " + ((info.win || 0) * 3 + (info.loss || 0) * 1) + "$"],
+			dom.add(div, [100, 4 + y, "W-L: " + (info.win || 0) + " - " + (info.loss || 0) + ", Rank: " + (info.rank == undefined ? "Inactive" : (info.rank + 1)) + ", " + ((info.win || 0) * 3 + (info.loss || 0) * 1) + "$"],
 				[330, 4+y, adeck],
 				[400, 224+y, "Age: " + info.day],
 				[100, 224+y, "HP: " + info.curhp + " / " + info.hp],
@@ -52,7 +52,7 @@ module.exports = function(data) {
 	if (sock.user.ocard){
 		for(var i=0; i<2; i++){
 			(function(uocard){
-				px.dom.add(div, [734, 268+i*292, ["Create", function(){
+				dom.add(div, [734, 268+i*292, ["Create", function(){
 					require("./Editor")(data, data[uocard>"6qn"?"B":"A"] || {}, uocard, true);
 				}]]);
 				var ocard = new PIXI.Sprite(gfx.getArt(uocard));

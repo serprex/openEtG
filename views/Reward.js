@@ -1,5 +1,6 @@
 "use strict";
 var px = require("../px");
+var dom = require("../dom");
 var etg = require("../etg");
 var gfx = require("../gfx");
 var chat = require("../chat");
@@ -23,7 +24,7 @@ module.exports = function(reward, numberofcopies, code) {
 		return;
 	}
 	var rewardui = px.mkView(),
-		div = px.dom.div([10, 40, ["Done", function() {
+		div = dom.div([10, 40, ["Done", function() {
 			if (chosenReward) {
 				if (code === undefined) {
 					sock.userExec("addbound", { c: etgutil.encodeCount(numberofcopies) + chosenReward });
@@ -34,14 +35,12 @@ module.exports = function(reward, numberofcopies, code) {
 				}
 			}else chat("Choose a reward");
 		}]]);
-
 	if (numberofcopies > 1) {
-		px.dom.add(div, [20, 100, "You will get " + numberofcopies + " copies of the card you choose"]);
+		dom.add(div, [20, 100, "You will get " + numberofcopies + " copies of the card you choose"]);
 	}
 	if (code){
-		px.dom.add(div, [10, 10, ["Exit", require("./MainMenu")]]);
+		dom.add(div, [10, 10, ["Exit", require("./MainMenu")]]);
 	}
-
 	var chosenRewardImage = new PIXI.Sprite(gfx.nopic);
 	chosenRewardImage.position.set(233, 10);
 	rewardui.addChild(chosenRewardImage);

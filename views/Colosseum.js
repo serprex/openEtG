@@ -1,8 +1,9 @@
 "use strict";
 var px = require("../px");
-var sock = require("../sock");
-var aiDecks = require("../Decks");
+var dom = require("../dom");
 var mkAi = require("../mkAi");
+var sock = require("../sock");
+var Decks = require("../Decks");
 var startMenu = require("./MainMenu");
 function mkDaily(type) {
 	if (type < 3) {
@@ -28,24 +29,24 @@ function mkDaily(type) {
 	}
 }
 module.exports = function(){
-	var magename = aiDecks.mage[sock.user.dailymage][0];
-	var dgname = aiDecks.demigod[sock.user.dailydg][0];
+	var magename = Decks.mage[sock.user.dailymage][0];
+	var dgname = Decks.demigod[sock.user.dailydg][0];
 	var events = [
 		{ name: "Novice Endurance", desc: "Fight 3 Commoners in a row without healing in between. May try until you win." },
 		{ name: "Expert Endurance", desc: "Fight 3 Champions in a row. May try until you win." },
 		{ name: "Novice Duel", desc: "Fight " + magename + ". Only one attempt allowed." },
 		{ name: "Expert Duel", desc: "Fight " + dgname + ". Only one attempt allowed." }
 	];
-	var div = px.dom.div([50, 50, ["Exit", startMenu]]);
+	var div = dom.div([50, 50, ["Exit", startMenu]]);
 	for (var i = 1;i < 5;i++) {
 		var active = !(sock.user.daily & (1 << i));
 		if (active) {
-			px.dom.add(div, [50, 100 + 30 * i, ["Fight!", mkDaily(i)]]);
+			dom.add(div, [50, 100 + 30 * i, ["Fight!", mkDaily(i)]]);
 		}
-		px.dom.add(div, [130, 100 + 30 * i, active ? (events[i-1].name + ": " + events[i-1].desc) : i > 2 ? (sock.user.daily&(i==3?1:32) ? "You defeated this already today." : "You failed this today. Better luck tomorrow!") : "Completed."]);
+		dom.add(div, [130, 100 + 30 * i, active ? (events[i-1].name + ": " + events[i-1].desc) : i > 2 ? (sock.user.daily&(i==3?1:32) ? "You defeated this already today." : "You failed this today. Better luck tomorrow!") : "Completed."]);
 	}
 	if (sock.user.daily == 63){
-		px.dom.add(div, [50, 280, ["Nymph!", function(){
+		dom.add(div, [50, 280, ["Nymph!", function(){
 			var etg = require("../etg");
 			var nymph = etg.NymphList[etg.PlayerRng.uptoceil(12)];
 			sock.userExec("donedaily", {daily: 6, c: nymph});

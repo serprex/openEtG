@@ -1,5 +1,6 @@
 "use strict";
 var px = require("../px");
+var dom = require("../dom");
 var gfx = require("../gfx");
 var chat = require("../chat");
 var sock = require("../sock");
@@ -15,7 +16,7 @@ function startMenu(){
 }
 module.exports = function() {
 	var view = px.mkView(), cardminus = {}, stage = {view: view};
-	var btrade = px.dom.button("Trade", function() {
+	var btrade = dom.button("Trade", function() {
 		if (!cardChosen){
 			if (ownDeck.deck.length > 0) {
 				sock.emit("cardchosen", {c: etgutil.encodedeck(ownDeck.deck)});
@@ -35,9 +36,9 @@ module.exports = function() {
 			else chat("Wait for your friend to choose!");
 		}
 	});
-	var tconfirm = px.dom.text("Confirmed!");
+	var tconfirm = dom.text("Confirmed!");
 	tconfirm.style.display = "none";
-	var ownVal = px.dom.text(""), foeVal = px.dom.text("");
+	var ownVal = dom.text(""), foeVal = dom.text("");
 	var cardChosen = false;
 	function setCardArt(code){
 		cardArt.texture = gfx.getArt(code);
@@ -54,7 +55,7 @@ module.exports = function() {
 	foeDeck.position.x = 450;
 	view.addChild(ownDeck);
 	view.addChild(foeDeck);
-	stage.dom = px.dom.div([10, 10, ["Cancel", function() {
+	stage.dom = dom.div([10, 10, ["Cancel", function() {
 		sock.userEmit("canceltrade");
 		startMenu();
 	}]],

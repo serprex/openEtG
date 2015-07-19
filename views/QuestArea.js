@@ -1,4 +1,5 @@
 var px = require("../px");
+var dom = require("../dom");
 var gfx = require("../gfx");
 var sock = require("../sock");
 var Quest = require("../Quest");
@@ -15,11 +16,11 @@ module.exports = function(area) {
 	var questmap = new PIXI.Sprite(gfx.bg_quest);
 	questmap.position.set(124, 162);
 	questui.addChild(questmap);
-	var tinfo = px.dom.text("");
+	var tinfo = dom.text("");
 	tinfo.style.maxWidth = "850px";
-	var errinfo = px.dom.text("");
+	var errinfo = dom.text("");
 	tinfo.style.maxWidth = errinfo.style.maxWidth = 850;
-	var div = px.dom.div([9, 9, px.dom.box(880, 111)],
+	var div = dom.div([9, 9, dom.box(880, 111)],
 		[26, 26, tinfo],
 		[26, 125, errinfo],
 		[750, 246, ["Exit", require("./QuestMain")]]);
@@ -50,7 +51,7 @@ module.exports = function(area) {
 		if ((sock.user.quest[quest] !== undefined) && Quest[quest]) {
 			for (var i = 0;i <= sock.user.quest[quest];i++) {
 				if ((pos = Quest[quest].info.pos[i])) {
-					px.dom.add(div, [pos[0], pos[1], mkQuestButton(quest, i)]);
+					dom.add(div, [pos[0], pos[1], mkQuestButton(quest, i)]);
 				}
 			}
 		}

@@ -1,5 +1,6 @@
 "use strict";
 var px = require("../px");
+var dom = require("../dom");
 var chat = require("../chat");
 module.exports = function(info) {
 	info = info.top;
@@ -21,5 +22,5 @@ module.exports = function(info) {
 		li.appendChild(score);
 		ol.appendChild(li);
 	}
-	px.view({dom:px.dom.div([8, 300, ["Exit", require("./MainMenu")]], [80, 8, ol1], [480, 8, ol2])});
+	px.view({dom:dom.div([8, 300, ["Exit", require("./MainMenu")]], [80, 8, ol1], [480, 8, ol2])});
 }

@@ -1,5 +1,6 @@
 "use strict";
 var px = require("../px");
+var dom = require("../dom");
 var gfx = require("../gfx");
 var Cards = require("../Cards");
 var etgutil = require("../etgutil");
@@ -27,7 +28,7 @@ module.exports = function(data){
 	var wealth = data.gold + userutil.calcWealth(cardpool);
 	var stage = {
 		view:view,
-		dom:px.dom.div([100, 16, "Cumulative wealth: " + Math.round(wealth) + "\nZE Progress: " + progress + " / " + progressmax + "\nSZE Progress: " + shinyprogress + " / " + progressmax],
+		dom:dom.div([100, 16, "Cumulative wealth: " + Math.round(wealth) + "\nZE Progress: " + progress + " / " + progressmax + "\nSZE Progress: " + shinyprogress + " / " + progressmax],
 		[5, 554, ["Toggle Bound", function(){
 			cardsel.cardpool = (showbound ^= true) ? boundpool : cardpool;
 		}]],

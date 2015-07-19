@@ -1,5 +1,6 @@
 var px = require("../px");
 var ui = require("../ui");
+var dom = require("../dom");
 var gfx = require("../gfx");
 var chat = require("../chat");
 var sock = require("../sock");
@@ -38,7 +39,7 @@ module.exports = function(){
 		});
 		require("./MainMenu"); // Queue loading bg_main
 	}
-	var login = px.dom.button("Login", loginClick);
+	var login = dom.button("Login", loginClick);
 	var username = document.createElement("input");
 	var password = document.createElement("input");
 	var rememberCheck = document.createElement("input");
@@ -69,7 +70,7 @@ module.exports = function(){
 	tutlink.href = "forum/?topic=267"
 	tutlink.target = "_blank";
 	tutlink.appendChild(document.createTextNode("Tutorial"));
-	var div = px.dom.div(
+	var div = dom.div(
 		[0, 0, bg_login],
 		[270, 350, username],
 		[270, 380, password],
@@ -80,7 +81,7 @@ module.exports = function(){
 			if (gfx.loaded) require("./MainMenu")();
 			else sandbox = true;
 		}]]);
-	if (loadingBar) px.dom.add(div, [0, 568, loadingBar]);
+	if (loadingBar) dom.add(div, [0, 568, loadingBar]);
 	var xhr = new XMLHttpRequest();
 	xhr.addEventListener("load", function(){
 		var data = JSON.parse(this.responseText)[0];
@@ -89,7 +90,7 @@ module.exports = function(){
 		a.href = data.html_url;
 		a.appendChild(document.createTextNode(data.author.login + ": " + data.commit.message));
 		a.style.maxWidth = "380px";
-		px.dom.add(div, [260, 460, a]);
+		dom.add(div, [260, 460, a]);
 	});
 	xhr.open("GET", "https://api.github.com/repos/serprex/openEtG/commits?per_page=1", true);
 	xhr.send();

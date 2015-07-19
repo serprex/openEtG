@@ -1,9 +1,9 @@
-var px = require("./px");
+var dom = require("./dom");
 var options = require("./options");
 var tutor = module.exports = function(tutdata, x, y, stage){
 	if (options.disableTut) return stage;
 	var tutspan;
-	px.dom.add(stage.dom, px.dom.style(px.dom.icob(13, function() {
+	dom.add(stage.dom, dom.style(dom.icob(13, function() {
 		if (tutspan) {
 			tutspan.remove();
 			tutspan = undefined;
@@ -12,13 +12,13 @@ var tutor = module.exports = function(tutdata, x, y, stage){
 		tutspan = document.createElement("div");
 		var tutbg = document.createElement("div");
 		tutbg.className = "tutorialbg";
-		px.dom.add(tutspan, tutbg);
+		dom.add(tutspan, tutbg);
 		tutdata.forEach(function(info) {
-			var text = px.dom.text(info[info.length-1]);
+			var text = dom.text(info[info.length-1]);
 			text.className = "tutorialbox";
 			if (info.length > 2) text.style.width = info[2] + "px";
 			if (info.length > 3) text.style.height = info[3] + "px";
-			px.dom.add(tutspan, [info[0], info[1], text]);
+			dom.add(tutspan, [info[0], info[1], text]);
 		});
 		stage.dom.appendChild(tutspan);
 	}),{

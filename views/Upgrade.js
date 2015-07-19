@@ -1,12 +1,12 @@
 "use strict";
 var px = require("../px");
+var dom = require("../dom");
 var gfx = require("../gfx");
 var sock = require("../sock");
 var Cards = require("../Cards");
 var etgutil = require("../etgutil");
 var userutil = require("../userutil");
 var CardSelector = require("../CardSelector");
-
 module.exports = function() {
 	function upgradeCard(card) {
 		if (!card.isFree()) {
@@ -88,18 +88,18 @@ module.exports = function() {
 	var upgradeui = px.mkView(function(){
 		if (selectedCard) cardArt.texture = gfx.getArt(etgutil.asUpped(selectedCard, true));
 	});
-	var bupgrade = px.dom.button("Upgrade", eventWrap(upgradeCard)),
-		bpolish = px.dom.button("Polish", eventWrap(polishCard), function() { if (selectedCard) cardArt.texture = gfx.getArt(etgutil.asShiny(selectedCard, true)) }),
-		bunupgrade = px.dom.button("Unupgrade", eventWrap(unupgradeCard)),
-		bunpolish = px.dom.button("Unpolish", eventWrap(unpolishCard), function() { if (selectedCard) cardArt.texture = gfx.getArt(etgutil.asShiny(selectedCard, false)) }),
-		bsell = px.dom.button("Sell", eventWrap(sellCard)),
-		goldcount = px.dom.text(sock.user.gold + "$"),
-		tinfo = px.dom.text(""),
-		tinfo2 = px.dom.text(""),
-		tinfo3 = px.dom.text(""),
-		twarning = px.dom.text("");
+	var bupgrade = dom.button("Upgrade", eventWrap(upgradeCard)),
+		bpolish = dom.button("Polish", eventWrap(polishCard), function() { if (selectedCard) cardArt.texture = gfx.getArt(etgutil.asShiny(selectedCard, true)) }),
+		bunupgrade = dom.button("Unupgrade", eventWrap(unupgradeCard)),
+		bunpolish = dom.button("Unpolish", eventWrap(unpolishCard), function() { if (selectedCard) cardArt.texture = gfx.getArt(etgutil.asShiny(selectedCard, false)) }),
+		bsell = dom.button("Sell", eventWrap(sellCard)),
+		goldcount = dom.text(sock.user.gold + "$"),
+		tinfo = dom.text(""),
+		tinfo2 = dom.text(""),
+		tinfo3 = dom.text(""),
+		twarning = dom.text("");
 	var stage = {view:upgradeui,
-		dom: px.dom.div([5, 50, ["Exit", require("./MainMenu")]],
+		dom: dom.div([5, 50, ["Exit", require("./MainMenu")]],
 		[150, 50, bupgrade],
 		[150, 95, bpolish],
 		[150, 50, bunupgrade],
@@ -158,6 +158,6 @@ module.exports = function() {
 	upgradeui.addChild(cardsel);
 	cardsel.cardminus = {};
 	adjustdeck();
-	px.dom.style(bupgrade, bpolish, bsell, bunupgrade, bunpolish, {display: "none"});
+	dom.style(bupgrade, bpolish, bsell, bunupgrade, bunpolish, {display: "none"});
 	px.view(stage);
 }

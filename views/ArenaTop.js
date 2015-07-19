@@ -1,5 +1,6 @@
 "use strict";
 var px = require("../px");
+var dom = require("../dom");
 var chat = require("../chat");
 var Cards = require("../Cards");
 function mkText(text){
@@ -35,5 +36,5 @@ module.exports = function(data) {
 		li.appendChild(mkText(Cards.Codes[data[5]].asUpped(lv).name));
 		ol.appendChild(li);
 	});
-	px.view({dom:px.dom.div([8, 300, ["Exit", require("./MainMenu")]], [90, 50, ol])});
+	px.view({dom:dom.div([8, 300, ["Exit", require("./MainMenu")]], [90, 50, ol])});
 }

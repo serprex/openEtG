@@ -1,12 +1,12 @@
 "use strict";
 var px = require("../px");
+var dom = require("../dom");
 var etg = require("../etg");
 var sock = require("../sock");
-
 module.exports = function() {
-	var eledesc = px.dom.text("Select your starter element");
+	var eledesc = dom.text("Select your starter element");
 	eledesc.style.width = "700px";
-	var div = px.dom.div(
+	var div = dom.div(
 		[100, 300, eledesc],
 		[100, 450, ["Exit", function(){
 			sock.userEmit("delete");
@@ -31,7 +31,7 @@ module.exports = function() {
 		];
 	etg.eleNames.forEach(function(name, i){
 		if (i < 1 || i > 14) return;
-		var b = px.dom.icob(i < 13 ? i : i == 13 ? 14 : 13, function() {
+		var b = dom.icob(i < 13 ? i : i == 13 ? 14 : 13, function() {
 			var msg = { u: sock.user.name, a: sock.user.auth, e: i ==14 ? etg.PlayerRng.uptoceil(12) : i };
 			sock.user = undefined;
 			sock.emit("inituser", msg);
@@ -39,7 +39,7 @@ module.exports = function() {
 		b.addEventListener("mouseover", function(){
 			eledesc.text = name + "\n\n" + descriptions[i-1];
 		});
-		px.dom.add(div, [100 + Math.floor((i-1)/2) * 64, 180+((i-1)&1)*64, b]);
+		dom.add(div, [100 + Math.floor((i-1)/2) * 64, 180+((i-1)&1)*64, b]);
 	});
 	px.view({dom:div, cmds:{
 		login:function(data) {

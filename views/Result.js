@@ -1,6 +1,7 @@
 "use strict";
 var px = require("../px");
 var ui = require("../ui");
+var dom = require("../dom");
 var etg = require("../etg");
 var gfx = require("../gfx");
 var chat = require("../chat");
@@ -75,9 +76,9 @@ module.exports = function(game, foeDeck) {
 		lefttext.push((((streakrate+1)*bonus*100)-100).toFixed(1) + "% total bonus");
 		return bonus;
 	}
-	var div = px.dom.div([412, 440, ["Exit", exitFunc]]), lefttext = [game.ply + " plies", (game.time / 1000).toFixed(1) + " seconds"];
+	var div = dom.div([412, 440, ["Exit", exitFunc]]), lefttext = [game.ply + " plies", (game.time / 1000).toFixed(1) + " seconds"];
 	if (!game.quest && game.daily === undefined){
-		px.dom.add(div, [412, 490, ["Rematch", rematch]]);
+		dom.add(div, [412, 490, ["Rematch", rematch]]);
 	}
 	var streakrate = 0;
 	if (winner){
@@ -115,10 +116,10 @@ module.exports = function(game, foeDeck) {
 				game.goldreward = (game.goldreward || 0) + game.addonreward;
 			}
 			if (game.goldreward) {
-				var goldwon = px.dom.text(game.goldreward - (game.cost || 0) + "$");
+				var goldwon = dom.text(game.goldreward - (game.cost || 0) + "$");
 				goldwon.style.textAlign = "center";
 				goldwon.style.width = "900px";
-				px.dom.add(div, [0, 550, goldwon]);
+				dom.add(div, [0, 550, goldwon]);
 				sock.userExec("addgold", { g: game.goldreward });
 			}
 			if (game.cardreward) {
@@ -133,12 +134,12 @@ module.exports = function(game, foeDeck) {
 				sock.userExec(game.quest?"addbound":"addcards", { c: game.cardreward });
 			}
 		}
-		var tinfo = px.dom.text(game.quest ? game.wintext : "You won!");
+		var tinfo = dom.text(game.quest ? game.wintext : "You won!");
 		tinfo.style.textAlign = "center";
 		tinfo.style.width = "900px";
-		px.dom.add(div, [0, game.cardreward ? 100 : 250, tinfo]);
+		dom.add(div, [0, game.cardreward ? 100 : 250, tinfo]);
 	}
-	px.dom.add(div, [10, 290, lefttext.join("\n")]);
+	dom.add(div, [10, 290, lefttext.join("\n")]);
 
 	if (options.stats && game.endurance == undefined){
 		chat([game.level === undefined ? -1 : game.level,
@@ -161,7 +162,6 @@ module.exports = function(game, foeDeck) {
 		}
 	}
 	document.addEventListener("keydown", onkeydown);
-
 	px.view({view:stage, dom:div, endnext:function() {
 		document.removeEventListener("keydown", onkeydown);
 	}});

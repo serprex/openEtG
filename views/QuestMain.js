@@ -1,5 +1,6 @@
 "use strict";
 var px = require("../px");
+var dom = require("../dom");
 var gfx = require("../gfx");
 var sock = require("../sock");
 var Quest = require("../Quest");
@@ -11,9 +12,9 @@ module.exports = function(){
 	var questmap = new PIXI.Sprite(gfx.bg_questmap);
 	questmap.position.set(124, 162);
 	questui.addChild(questmap);
-	var tinfo = px.dom.text("");
+	var tinfo = dom.text("");
 	tinfo.style.maxWidth = "850px";
-	var div = px.dom.div([9, 9, px.dom.box(880, 111)], [26, 26, tinfo], [750, 246, ["Exit", require("./MainMenu")]]);
+	var div = dom.div([9, 9, dom.box(880, 111)], [26, 26, tinfo], [750, 246, ["Exit", require("./MainMenu")]]);
 	var areainfo = {
 		forest: ["Spooky Forest", new PIXI.math.Polygon(555, 221, 456, 307, 519, 436, 520, 472, 631, 440, 652, 390, 653, 351, 666, 321, 619, 246)],
 		city: ["Capital City", new PIXI.math.Polygon(456, 307, 519, 436, 520, 472, 328, 496, 258, 477, 259, 401)],
@@ -50,7 +51,7 @@ module.exports = function(){
 				}
 				var icon = document.createElement("div");
 				icon.className = "ico e13";
-				div.appendChild(px.dom.style(icon, {
+				div.appendChild(dom.style(icon, {
 					transform: "translate(-50%,-50%)",
 					pointerEvents: "none",
 					position: "absolute",

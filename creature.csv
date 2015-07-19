@@ -36,7 +36,7 @@ E,Name,Code,Cost,R,Skill,Attack,Health,Status
 2,Skeleton,52m,0,1,prespell=skeleton,1,1,nocturnal
 2,Skeleton,716,0,1,prespell=skeleton,2,2,nocturnal
 2,Mummy,52t,4,1,prespell=mummy,5,3,nocturnal
-2,Mummy,71d,3,1,prespell=mummy,5,3,nocturnal
+2,Mummy,71d,3,1,prespell=mummy,5,4,nocturnal
 2,Deathstalker,52u,2,1,hit=poison 2,0,1,poisonous+nocturnal
 2,Deathstalker,71e,2,1,hit=poison 2,0,3,poisonous+nocturnal
 2,Grey Nymph,534,8,5,2=aflatoxin,6,6,nocturnal
@@ -223,7 +223,7 @@ E,Name,Code,Cost,R,Skill,Attack,Health,Status
 9,Air Nymph,7ng,8,5,3=gas,6,6,
 9,Pixie,5p1,3,2,2:1=trick,1,2,airborne
 9,Pixie,7nh,2,2,2:1=trick,1,2,airborne
-9,Thunderbird,5p5,3,1,ownplay=drawpillar+1:10=millpillar,3,3,airborne
+9,Thunderbird,5p5,3,1,ownplay=drawpillar+1:10=millpillar,3,2,airborne
 9,Thunderbird,7nl,3,1,ownplay=drawpillar+1:10=millpillar,4,4,airborne
 10,Déjà Vu,5rh,1,1,1=deja,1,1,airborne
 10,Déjà Vu,7q1,1,1,1=deja,2,2,airborne

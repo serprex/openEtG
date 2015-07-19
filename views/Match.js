@@ -1,6 +1,7 @@
 "use strict";
 var px = require("../px");
 var ui = require("../ui");
+var dom = require("../dom");
 var etg = require("../etg");
 var gfx = require("../gfx");
 var mkAi = require("../mkAi");
@@ -161,9 +162,9 @@ function startMatch(game, foeDeck, spectate) {
 	floodgfx.drawRect(107, 390, 644, 64);
 	floodgfx.drawRect(507, 326, 244, 64);
 	gameui.addChild(floodgfx);
-	var endturn = px.dom.button("Accept Hand", function(){endClick()});
-	var cancel = px.dom.button("Mulligan", cancelClick);
-	var resign = px.dom.button("Resign", function() {
+	var endturn = dom.button("Accept Hand", function(){endClick()});
+	var cancel = dom.button("Mulligan", cancelClick);
+	var resign = dom.button("Resign", function() {
 		if (resigning){
 			if (!game.ai) sock.emit("foeleft");
 			game.setWinner(game.player2);
@@ -173,16 +174,16 @@ function startMatch(game, foeDeck, spectate) {
 			resigning = true;
 		}
 	});
-	var turntell = new px.dom.text("");
+	var turntell = new dom.text("");
 	turntell.style.pointerEvents = "none";
-	var foename = px.dom.text((game.level === undefined ? "" : ["Commoner", "Mage", "Champion", "Demigod", "Arena1", "Arena2"][game.level] + "\n") + (game.foename || "-"));
+	var foename = dom.text((game.level === undefined ? "" : ["Commoner", "Mage", "Champion", "Demigod", "Arena1", "Arena2"][game.level] + "\n") + (game.foename || "-"));
 	foename.style.textAlign = "center";
 	foename.style.width = "140px";
-	var div = px.dom.div([8, 24, resign],
+	var div = dom.div([8, 24, resign],
 		[800, 550, turntell],
 		[0, 64, foename]);
 	if (!spectate) {
-		px.dom.add(div, [800, 520, endturn], [800, 490, cancel]);
+		dom.add(div, [800, 520, endturn], [800, 490, cancel]);
 	}
 	var activeInfo = {
 		firebolt:function(){
@@ -219,9 +220,9 @@ function startMatch(game, foeDeck, spectate) {
 	var shiesprite = new Array(2);
 	var weapsprite = new Array(2);
 	var marksprite = [document.createElement("span"), document.createElement("span")], markspritexy = [];
-	var marktext = [px.dom.text(""), px.dom.text("")], marktextxy = [];
+	var marktext = [dom.text(""), dom.text("")], marktextxy = [];
 	var quantatext = [[], []];
-	var hptext = [new px.dom.text(""), new px.dom.text("")], hpxy = [];
+	var hptext = [new dom.text(""), new dom.text("")], hpxy = [];
 	var playerOverlay = [new PIXI.Sprite(gfx.nopic), new PIXI.Sprite(gfx.nopic)];
 	var handOverlay = [new PIXI.Sprite(gfx.nopic), new PIXI.Sprite(gfx.nopic)];
 	var sabbathOverlay = [document.createElement("span"), document.createElement("span")];
@@ -359,12 +360,12 @@ function startMatch(game, foeDeck, spectate) {
 			}
 			var quantaxy = [j ? 792 : 0, j ? 106 : 308];
 			for (var k = 1;k < 13;k++) {
-				quantatext[j][k-1] = px.dom.text("");
+				quantatext[j][k-1] = dom.text("");
 				quantatext[j][k-1].style.fontSize = "16px";
 				quantatext[j][k-1].style.pointerEvents = "none";
 				var quantaicon = document.createElement("span");
 				quantaicon.className = "ico e"+k;
-				px.dom.add(div, [quantaxy[0] + ((k & 1) ? 32 : 86), quantaxy[1] + Math.floor((k - 1) / 2) * 32 + 4, quantatext[j][k-1]],
+				dom.add(div, [quantaxy[0] + ((k & 1) ? 32 : 86), quantaxy[1] + Math.floor((k - 1) / 2) * 32 + 4, quantatext[j][k-1]],
 					[quantaxy[0] + ((k & 1) ? 0 : 54), quantaxy[1] + Math.floor((k - 1) / 2) * 32, quantaicon]);
 			}
 			px.setClick(playerOverlay[j], function() {
@@ -374,7 +375,7 @@ function startMatch(game, foeDeck, spectate) {
 				}
 			}, false);
 		})(j);
-		px.dom.add(div, [markspritexy[j].x, markspritexy[j].y, marksprite[j]],
+		dom.add(div, [markspritexy[j].x, markspritexy[j].y, marksprite[j]],
 			[marktextxy[j].x, marktextxy[j].y, marktext[j]],
 			[hpxy[j].x-50, playerOverlay[j].y - 24, hptext[j]],
 			[j ? 792 : 0, j ? 80 : 288, sabbathOverlay[j]]);
@@ -395,7 +396,7 @@ function startMatch(game, foeDeck, spectate) {
 	var cardart = new PIXI.Sprite(gfx.nopic);
 	cardart.anchor.set(.5, 0);
 	gameui.addChild(cardart);
-	var infobox = px.dom.text("");
+	var infobox = dom.text("");
 	infobox.className = "infobox";
 	infobox.style.display = "none";
 	div.appendChild(infobox);
@@ -411,7 +412,7 @@ function startMatch(game, foeDeck, spectate) {
 		}
 	}
 	function onmousemove(e) {
-		px.dom.style(infobox, {
+		dom.style(infobox, {
 			left: px.mouse.x + "px",
 			top: px.mouse.y + "px",
 		});

@@ -16,7 +16,7 @@ socket.onopen = function(){
 	buffer.length = 0;
 	chat("Connected");
 }
-socket.onclose = function reconnect(){
+socket.onclose = function(){
 	if (attemptTimeout) return;
 	if (attempts < 8) attempts++;
 	var timeout = 99+Math.floor(99*Math.random())*attempts;
