@@ -75,7 +75,9 @@ var SkillsValues = Object.freeze({
 	bravery:3,
 	brawl:8,
 	brew:4,
-	brokenmirror:2,
+	brokenmirror:function(c){
+		return c.owner.foe.shield && c.owner.foe.shield.status.reflective ? -3 : 2;
+	},
 	burrow:1,
 	butterfly:12,
 	catapult:6,

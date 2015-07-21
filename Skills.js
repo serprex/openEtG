@@ -509,6 +509,15 @@ embezzle:function(c,t){
 	Effect.mkText("Embezzle", t);
 	t.lobo();
 	t.active.hit = Skills.forcedraw;
+	t.active.owndeath = Skills.embezzledeath;
+},
+embezzledeath:function(c,t){
+	if (c.owner.foe.deck.length < 3){
+		c.owner.foe.deck.length = 0;
+		c.owner.game.setWinner(c.owner);
+	}else{
+		c.owner.foe.deck.length -= 3;
+	}
 },
 empathy:function(c,t){
 	var healsum = c.owner.countcreatures();
