@@ -1245,14 +1245,14 @@ CardInstance.prototype.useactive = function(target){
 		console.log((this.owner==this.owner.game.player1?"1":"2") + " cannot cast " + (this || "-"));
 		return;
 	}
-	var owner = this.owner, card = this.card;
+	var owner = this.owner;
 	this.remove();
 	if (owner.status.neuro){
 		owner.addpoison(1);
 	}
 	this.card.play(owner, this, target);
 	this.proc("cardplay");
-	if (owner.game.bonusstats != null) owner.game.bonusstats.cardsplayed[card.type]++;
+	if (owner.game.bonusstats != null) owner.game.bonusstats.cardsplayed[this.card.type]++;
 	owner.game.updateExpectedDamage();
 }
 var filtercache = [];
