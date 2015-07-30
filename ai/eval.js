@@ -120,6 +120,7 @@ var SkillsValues = Object.freeze({
 	earth:1,
 	earthquake:4,
 	eatspell:3,
+	embezzle:7,
 	empathy:function(c){
 		return c.owner.countcreatures();
 	},
@@ -136,6 +137,7 @@ var SkillsValues = Object.freeze({
 	flatline:1,
 	flyingweapon:7,
 	foedraw:8,
+	forcedraw:-10,
 	forceplay:2,
 	fractal:function(c){
 		return 9-c.owner.hand.length;
@@ -470,7 +472,8 @@ function checkpassives(c) {
 	var score = 0, statuses = c.status;
 	for (var status in statuses)
 	{
-		if (uniqueStatuses[status] && !(c instanceof etg.CardInstance)) {
+		// Skip cloak if it expires at end of turn
+		if (uniqueStatuses[status] && !(c instanceof etg.CardInstance) && !(status == "cloak" && c.status.charges == 0 && c.owner == c.owner.game.turn)) {
 			if (!uniquesSkill[status]) {
 				uniquesSkill[status] = true;
 			}
@@ -479,8 +482,7 @@ function checkpassives(c) {
 			}
 		}
 		var sval = statusValues[status];
-		score += sval === undefined ? 0 :
-			sval instanceof Function ? sval(c) : sval;
+		score += !sval ? 0 : sval instanceof Function ? sval(c) : sval;
 	}
 	return score;
 }
@@ -593,7 +595,7 @@ function caneventuallyactive(element, cost, pl){
 	});
 }
 
-var uniqueStatuses = Object.freeze({flooding:"all", nightfall:"all", tunnel:"self", patience:"self", cloak:"self"});
+var uniqueStatuses = Object.freeze({flooding:true, nightfall:true, tunnel:true, patience:true, cloak:true});
 var uniquesSkill, damageHash;
 
 module.exports = function(game) {
@@ -606,7 +608,7 @@ module.exports = function(game) {
 	}
 	var wallCharges = new Int32Array([0, 0]);
 	damageHash = [];
-	uniquesSkill = {};
+	uniquesSkill = {flooding: false, nightfall: false, tunnel: false, patience: false, cloak: false};
 	var expectedDamage = calcExpectedDamage(game.player2, wallCharges, 0);
 	if (expectedDamage > game.player1.hp){
 		return Math.min(expectedDamage - game.player1.hp, 500)*-999;
@@ -617,9 +619,11 @@ module.exports = function(game) {
 	expectedDamage = calcExpectedDamage(game.player1, wallCharges, 1); // Call to fill damageHash
 	var gamevalue = expectedDamage > game.player2.hp ? 999 : 0;
 	for (var j = 0;j < 2;j++) {
-		for (var key in uniqueStatuses) {
-			if (uniqueStatuses[key] == "self")
-				uniquesSkill[key] = undefined;
+		if (j == 1){
+			// Reset uniqueStatuses which are not global effects
+			uniquesSkill.tunnel = false;
+			uniquesSkill.patience = false;
+			uniquesSkill.cloak = false;
 		}
 		logNest(j);
 		var player = game.players(j), pscore = wallCharges[j]*4 + player.markpower;
