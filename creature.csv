@@ -164,7 +164,7 @@ E,Name,Code,Cost,R,Skill,Attack,Health,Status
 7,Toadfish,5ie,5,2,1:9=infect,6,4,poisonous+aquatic
 7,Puffer Fish,7gu,4,2,hit=poison 1,3,5,poisonous+aquatic
 7,Mind Flayer,5if,2,1,1:12=lobotomize,2,2,aquatic
-7,Ulitharid,7gv,3,1,1:12=lobotomize,3,4,aquatic
+7,Ulitharid,7gv,3,1,1:12=lobotomize,4,4,aquatic
 7,Steam Machine,5ii,4,2,2:6=steam+postauto=decrsteam,0,6,aquatic
 7,Steam Machine,7h2,5,2,2:6=steam+postauto=decrsteam,0,16,aquatic
 7,Squid,5il,3,1,1:11=ink+ownfreeze=becomearctic,2,3,aquatic
@@ -191,8 +191,8 @@ E,Name,Code,Cost,R,Skill,Attack,Health,Status
 8,Crusader,7k5,5,1,2=endow,3,5,
 8,Monk,5ln,4,2,hit=disarm,3,5,
 8,Monk,7k7,3,2,hit=disarm,3,5,
-8,Surgeon,5lo,2,1,1=clear,2,2,aquatic
-8,Surgeon,7k8,3,1,1=clear,3,4,aquatic
+8,Surgeon,5lo,2,1,1=clear,2,3,aquatic
+8,Surgeon,7k8,3,1,1=clear,4,5,aquatic
 8,Martyr,5lr,4,2,owndmg=martyr,3,6,
 8,Martyr,7kb,3,2,owndmg=martyr,3,7,
 8,White Nymph,5ls,9,5,4=luciferin,6,9,
