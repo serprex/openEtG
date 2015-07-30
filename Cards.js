@@ -1,42 +1,21 @@
 "use strict";
-exports.loaded = false;
 exports.Targeting = {};
 exports.Codes = {};
-exports.loadcards = function(cb, loadfunc){
-	if (exports.loaded) cb(exports);
-	var count = 0, names = ["pillar", "weapon", "shield", "permanent", "spell", "creature"];
-	function maybeLoaded(){
-		if (++count == names.length+1){
-			exports.loaded = true;
-			console.log("Cards loaded");
-			if (cb) cb();
-		}
-	}
-	names.forEach(function(name, i){
-		loadfunc(name + ".csv", function(text){
-			parseCsv(i, text);
-			maybeLoaded();
-		});
-	});
-	loadfunc("active.csv", function(text){
-		parseTargeting(text);
-		maybeLoaded();
+exports.loadcards = function(){
+	require("./Cards.json").forEach(function(cards, type){
+		if (type == 6) parseTargeting(cards);
+		else parseCsv(type, cards);
 	});
 }
-var etg = require("./etg");
-var Skills = require("./Skills");
-var etgutil = require("./etgutil");
-function parseCsv(type, file){
-	var keys;
-	etg.iterSplit(file, "\n", function(line){
-		if (!keys){
-			keys = line.split(",")
-		}else{
-			var cardinfo = {}, nth = 0;
-			etg.iterSplit(line, ",", function(value){
-				cardinfo[keys[nth++]] = value;
+function parseCsv(type, data){
+	var keys = data[0], cardinfo = {};
+	for(var i=1; i<data.length; i++){
+		cardinfo.E = i-1;
+		data[i].forEach(function(carddata){
+			keys.forEach(function(key, i){
+				cardinfo[key] = carddata[i];
 			});
-			var cardcode = cardinfo.Code;
+			var cardcode = cardinfo.Code = cardinfo.Code.toString(32);
 			if (cardcode in exports.Codes){
 				console.log(cardcode + " duplicate " + cardinfo.Name + " " + exports.Codes[cardcode].name);
 			}else{
@@ -45,14 +24,13 @@ function parseCsv(type, file){
 				cardinfo.Code = etgutil.asShiny(cardcode, true);
 				exports.Codes[cardinfo.Code] = new etg.Card(type, cardinfo);
 			}
-		}
-	});
+		});
+	}
 }
-function parseTargeting(file){
-	etg.iterSplit(file, "\n", function(line){
-		var cidx = line.indexOf(",");
-		exports.Targeting[line.substr(0, cidx)] = getTargetFilter(line.substr(cidx+1));
-	});
+function parseTargeting(data){
+	for(var i=0; i<data.length; i+=2){
+		exports.Targeting[data[i]] = getTargetFilter(data[i+1]);
+	}
 }
 function getTargetFilter(str){
 	function getFilterFunc(funcname){ return TargetFilters[funcname]; }
@@ -118,7 +96,7 @@ var TargetFilters = {
 		return !(t instanceof etg.Player);
 	},
 	sing:function(c, t){
-		return t.isMaterial(etg.Creature) && t.active.cast != Skills.sing;
+		return t.isMaterial(etg.Creature) && t.active.cast != c.active.cast;
 	},
 	butterfly:function(c, t){
 		return (t instanceof etg.Creature || t instanceof etg.Permanent) && !t.status.immaterial && !t.status.burrowed && ((t.trueatk && t.trueatk()<3) || (t instanceof etg.Creature && t.truehp()<3));
@@ -148,3 +126,5 @@ var TargetFilters = {
 		return t instanceof etg.Creature && !t.status.burrowed;
 	},
 };
+var etg = require("./etg");
+var etgutil = require("./etgutil");

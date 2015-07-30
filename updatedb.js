@@ -7,7 +7,7 @@ function download(gid, writeStream, cb){
 		writeStream: writeStream
 	}, cb);
 }
-var dbgid = [
+;[
 	["pillar", "0"],
 	["weapon", "1863409466"],
 	["shield", "457582620"],
@@ -15,8 +15,7 @@ var dbgid = [
 	["spell", "1605384839"],
 	["creature", "1045918250"],
 	["active", "657211460"],
-];
-dbgid.forEach(function(pair){
+].forEach(function(pair){
 	if (process.argv.length == 2 || process.argv.some(function(x) { return x.indexOf(pair[0]) == 0; })){
 		download(pair[1], fs.createWriteStream(pair[0]+".csv"), function(err, data, res){
 			if (err){

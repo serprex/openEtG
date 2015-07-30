@@ -45,44 +45,42 @@ exports.mkPremade = function(level, daily) {
 }
 exports.mkAi = function(level, daily) {
 	return function() {
-		if (Cards.loaded){
-			var urdeck = sock.getDeck();
-			if (etgutil.decklength(urdeck) < (sock.user ? 31 : 9)) {
-				require("./views/Editor")();
+		var urdeck = sock.getDeck();
+		if (etgutil.decklength(urdeck) < (sock.user ? 31 : 9)) {
+			require("./views/Editor")();
+			return;
+		}
+		var cost = daily !== undefined ? 0 : userutil.pveCostReward[level*2];
+		if (sock.user && cost) {
+			if (sock.user.gold < cost) {
+				chat("Requires " + cost + "\u00A4");
 				return;
 			}
-			var cost = daily !== undefined ? 0 : userutil.pveCostReward[level*2];
-			if (sock.user && cost) {
-				if (sock.user.gold < cost) {
-					chat("Requires " + cost + "\u00A4");
-					return;
-				}
-			}
-			var deck = level == 0 ? mkDeck(0, 1, 2) : mkDeck(.4, 2, 4);
-			options.aideck = deck;
-
-			var randomNames = [
-				"Adrienne", "Audrie",
-				"Billie", "Brendon",
-				"Charles", "Caddy",
-				"Dane", "Digna",
-				"Emory", "Evan",
-				"Fern",
-				"Garland", "Gord",
-				"Margie", "Mariah", "Martina", "Monroe", "Murray",
-				"Page", "Pariah",
-				"Rocky", "Ronald", "Ren",
-				"Seth", "Sherman", "Stormy",
-				"Tammi",
-				"Yuriko"
-			];
-
-			var gameData = { deck: deck, urdeck: urdeck, seed: Math.random() * etgutil.MAX_INT, p2hp: level == 0 ? 100 : level == 1 ? 125 : 150, p2markpower: level > 1 ? 2 : 1, foename: etg.PlayerRng.choose(randomNames), p2drawpower: level == 2 ? 2 : 1 };
-			if (!sock.user) ui.parsepvpstats(gameData);
-			else gameData.cost = cost;
-			gameData.level = level;
-			if (daily !== undefined) gameData.daily = daily;
-			return require("./views/Match")(gameData, true);
 		}
+		var deck = level == 0 ? mkDeck(0, 1, 2) : mkDeck(.4, 2, 4);
+		options.aideck = deck;
+
+		var randomNames = [
+			"Adrienne", "Audrie",
+			"Billie", "Brendon",
+			"Charles", "Caddy",
+			"Dane", "Digna",
+			"Emory", "Evan",
+			"Fern",
+			"Garland", "Gord",
+			"Margie", "Mariah", "Martina", "Monroe", "Murray",
+			"Page", "Pariah",
+			"Rocky", "Ronald", "Ren",
+			"Seth", "Sherman", "Stormy",
+			"Tammi",
+			"Yuriko"
+		];
+
+		var gameData = { deck: deck, urdeck: urdeck, seed: Math.random() * etgutil.MAX_INT, p2hp: level == 0 ? 100 : level == 1 ? 125 : 150, p2markpower: level > 1 ? 2 : 1, foename: etg.PlayerRng.choose(randomNames), p2drawpower: level == 2 ? 2 : 1 };
+		if (!sock.user) ui.parsepvpstats(gameData);
+		else gameData.cost = cost;
+		gameData.level = level;
+		if (daily !== undefined) gameData.daily = daily;
+		return require("./views/Match")(gameData, true);
 	}
 }

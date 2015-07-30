@@ -20,7 +20,7 @@ function quadpillarFactory(ele){
 		}
 	}
 }
-var Skills = {
+var Skills = module.exports = {
 ablaze:function(c,t){
 	Effect.mkText("2|0", c);
 	c.atk += 2;
@@ -1998,7 +1998,6 @@ wings:function(c,t){
 for(var key in Skills){
 	Skills[key].activename = [key];
 }
-module.exports = Skills;
 var ui = require("./ui");
 var etg = require("./etg");
 var Cards = require("./Cards");

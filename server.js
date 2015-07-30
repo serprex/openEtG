@@ -1,12 +1,15 @@
 #!/usr/bin/node
 "use strict";
 process.chdir(__dirname);
-var users = {}, usersock = {}, rooms = {}, wss;
+var users = {}, usersock = {}, rooms = {};
+var etg = require("./etg");
+var Cards = require("./Cards");
+Cards.loadcards();
+var aiDecks = require("./Decks");
+var etgutil = require("./etgutil");
+var usercmd = require("./usercmd");
+var userutil = require("./userutil");
 var sutil = require("./srv/sutil");
-sutil.loadcards(function(){
-	wss = new (require("ws/lib/WebSocketServer"))({server:app.listen(13602)});
-	wss.on("connection", wssConnection);
-});
 var qstring = require("querystring");
 var fs = require("fs");
 var db = require("redis").createClient();
@@ -16,12 +19,6 @@ var app = require("connect")().
 	use("/speed", require("./srv/speed")()).
 	use("/deck", require("./srv/deckredirect")()).
 	use("/code", require("./srv/codesmith")(db));
-var etg = require("./etg");
-var Cards = require("./Cards");
-var aiDecks = require("./Decks");
-var etgutil = require("./etgutil");
-var usercmd = require("./usercmd");
-var userutil = require("./userutil");
 function storeUsers(){
 	for(var u in users){
 		var user = users[u];
@@ -721,3 +718,5 @@ function wssConnection(socket) {
 		}
 	});
 }
+var wss = new (require("ws/lib/WebSocketServer"))({server:app.listen(13602)});
+wss.on("connection", wssConnection);

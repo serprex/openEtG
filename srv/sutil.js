@@ -1,13 +1,5 @@
 "use strict";
 var fs = require("fs");
-exports.loadcards = function(cb){
-	require("../Cards").loadcards(cb, function(file, onload){
-		fs.readFile(file, {encoding:"utf8"}, function(err, str){
-			if (err) console.log(err.message);
-			else onload(str);
-		});
-	});
-}
 exports.prepuser = function(servuser){
 	["gold", "daily", "dailymage", "dailydg", "aiwins", "ailosses", "pvpwins", "pvplosses"].forEach(function(field){
 		servuser[field] = parseInt(servuser[field] || 0);

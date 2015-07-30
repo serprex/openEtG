@@ -17,6 +17,7 @@ window.onerror = function(){
 		lastError = now;
 	}
 }
+Cards.loadcards();
 if (options.hideRightpane){
 	document.getElementById("rightpane").style.display = "none";
 }
@@ -138,10 +139,8 @@ sock.et.onmessage = function(msg){
 	var func = sockEvents[data.x] || px.getCmd(data.x);
 	if (func) func.call(this, data);
 }
-require("./httpcards")(function(){
-	if (options.preart) sock.emit("cardart");
-});
 viewsLogin();
+if (options.preart) sock.emit("cardart");
 function chatmute(){
 	var muted = [];
 	for(var name in muteset){

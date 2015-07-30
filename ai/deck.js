@@ -60,9 +60,6 @@ var filters = {
 	},
 }
 module.exports = function(uprate, markpower, maxRarity) {
-	if (!Cards.loaded){
-		return;
-	}
 	function upCode(x) {
 		return uprate ? etgutil.asUpped(x, Math.random() < uprate) : x;
 	}

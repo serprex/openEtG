@@ -354,6 +354,7 @@ function place(array, item){
 	}
 }
 function readCost(coststr, defaultElement){
+	if (typeof coststr == "number") return new Int8Array([coststr, defaultElement]);
 	var cidx = coststr.indexOf(":"), cost = parseInt(~cidx?coststr.substr(0,cidx):coststr);
 	return isNaN(cost) ? null : new Int8Array([cost, ~cidx?parseInt(coststr.substr(cidx+1)):defaultElement]);
 }
@@ -1256,7 +1257,6 @@ CardInstance.prototype.useactive = function(target){
 }
 var filtercache = [];
 function filtercards(upped, filter, cmp, showshiny){
-	if (!Cards.loaded) return;
 	var cacheidx = (upped?1:0)|(showshiny?2:0);
 	if (!(cacheidx in filtercache)){
 		filtercache[cacheidx] = [];

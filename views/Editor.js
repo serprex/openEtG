@@ -13,7 +13,6 @@ var DeckDisplay = require("../DeckDisplay");
 var CardSelector = require("../CardSelector");
 
 module.exports = function(arena, ainfo, acard, startempty) {
-	if (!Cards.loaded) return;
 	var aupped;
 	if (arena){
 		if (!sock.user || (!startempty && ainfo.deck === undefined) || acard === undefined) arena = false;
