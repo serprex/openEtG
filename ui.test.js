@@ -168,8 +168,8 @@ require("./httpcards")(function() {
 	gameTest("Lobotomize", function() {
 		var dev = new etg.Creature(Cards.Devourer, player1);
 		ok(!etg.isEmpty(dev.active), "Skills");
-		Skills.lobotomize(player1, dev);
-		ok(etg.isEmpty(dev.active), "No actives");
+		Skills.lobotomize(dev, dev);
+		ok(etg.isEmpty(dev.active), "No more");
 	});
 	gameTest("Obsession", function() {
 		initHand(player1, Cards.GhostofthePast, Cards.GhostofthePast, Cards.GhostofthePast, Cards.GhostofthePast, Cards.GhostofthePast, Cards.GhostofthePast, Cards.GhostofthePast, Cards.GhostofthePast);

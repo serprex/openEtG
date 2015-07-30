@@ -1014,7 +1014,7 @@ Creature.prototype.calcBonusHp = function(){
 Thing.prototype.lobo = function(){
 	for (var key in this.active){
 		this.active[key].activename.forEach(function(name){
-			if (!etg.parseActive[name].passive){
+			if (!parseSkill(name).passive){
 				this.rmactive(key, name);
 			}
 		}, this);
