@@ -1,6 +1,6 @@
 "use strict";
-exports.Targeting = {};
 exports.Codes = {};
+exports.Targeting = null;
 exports.loadcards = function(){
 	require("./Cards.json").forEach(function(cards, type){
 		if (type == 6) parseTargeting(cards);
@@ -28,9 +28,10 @@ function parseCsv(type, data){
 	}
 }
 function parseTargeting(data){
-	for(var i=0; i<data.length; i+=2){
-		exports.Targeting[data[i]] = getTargetFilter(data[i+1]);
+	for(var key in data){
+		data[key] = getTargetFilter(data[key]);
 	}
+	exports.Targeting = data;
 }
 function getTargetFilter(str){
 	function getFilterFunc(funcname){ return TargetFilters[funcname]; }

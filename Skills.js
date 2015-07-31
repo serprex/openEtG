@@ -1493,7 +1493,8 @@ scarab:function(c,t){
 },
 scatterhand:function(c,t){
 	if (!t.sanctuary){
-		t.drawhand(t.hand.length + (c.owner == t));
+		t.drawhand(t.hand.length);
+		c.owner.drawcard();
 	}
 },
 scramble:function(c,t){
@@ -1713,12 +1714,19 @@ tempering:function(c,t){
 	t.status.frozen = 0;
 },
 tesseractsummon:function(c,t){
-	for(var i=0; i<c.card.upped?1:2; i++){
-		var pl = i?c.owner.foe:c.owner,
-			crcard = pl.choose(pl.deck.filter(function(card){ return card.type == etg.CreatureEnum })),
+	for(var i=0; i<(c.card.upped?1:2); i++){
+		var pl = i?c.owner.foe:c.owner;
+		var candidates = [];
+		for(var j=0; j<pl.deck.length; j++){
+			if (pl.deck[j].type == etg.CreatureEnum) candidates.push(j);
+		}
+		if (candidates.length){
+			var idx = pl.choose(candidates), crcard = pl.deck[idx];
+			pl.deck.splice(idx, 1);
 			cr = new etg.Creature(crcard, pl);
-		cr.freeze(Math.ceil(crcard.cost/4));
-		cr.place();
+			cr.freeze(Math.ceil(crcard.cost/4));
+			cr.place();
+		}
 	}
 },
 throwrock:function(c,t){
@@ -1998,7 +2006,6 @@ wings:function(c,t){
 for(var key in Skills){
 	Skills[key].activename = [key];
 }
-var ui = require("./ui");
 var etg = require("./etg");
 var Cards = require("./Cards");
 var Effect = require("./Effect");

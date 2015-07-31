@@ -266,7 +266,7 @@ var data = {
 		ownplay:"Prevent foe's sanctification",
 	},
 	scarab:"Summon a Scarab",
-	scatterhand:"Target player shuffles their hand, & draws however many cards previously had",
+	scatterhand:"Target player shuffles their hand, & draws as many cards. Draw a card",
 	scramble:{
 		hit:"Randomly scramble foe's quanta on hit",
 		cast:"Randomly scramble target player's quanta",

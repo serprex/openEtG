@@ -2,7 +2,6 @@ var ui = require("./ui");
 var etg = require("./etg");
 var chat = require("./chat");
 var sock = require("./sock");
-var Cards = require("./Cards");
 var aiDecks = require("./Decks");
 var etgutil = require("./etgutil");
 var options = require("./options");
@@ -17,7 +16,7 @@ exports.mkPremade = function(level, daily) {
 			require("./views/Editor")();
 			return;
 		}
-		var cost = daily !== undefined ? 0 : userutil.pveCostReward[level*2];
+		var cost = daily !== undefined ? 0 : userutil.pveCostReward[level*2], foedata;
 		if (sock.user) {
 			if (daily === undefined){
 				if (sock.user.gold < cost) {
