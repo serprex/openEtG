@@ -158,7 +158,7 @@ var data = {
 	ink:"Summon a Cloak which lasts 1 turn",
 	innovation:"Discard target card, owner draws three cards",
 	integrity:"Combine all shards in hand to form a Shard Golem",
-	jelly:"Target creature becomes a 7|4 with active Pink Jelly costing 3 of their element",
+	jelly:"Target creature becomes a 7|4 with active Pink Jelly costing 4 of their element",
 	jetstream:"Target airborne creature gains 3|-1",
 	layegg:"Summon a Fate Egg",
 	light:{
@@ -380,7 +380,7 @@ function pushEntry(list, c, event, entry){
 }
 module.exports = function(c, event){
 	if (c instanceof etg.Card && c.type == etg.SpellEnum){
-		var entry = data[c.active.activename[0]];
+		var entry = data[c.active.cast.activename[0]];
 		return processEntry(c, "cast", entry);
 	}else{
 		var ret = [], stext = [];

@@ -28,7 +28,7 @@ function SpriteFade(texture, pos, anchor) {
 }
 function nop(){}
 function make(cons){
-	return function(){
+	return typeof PIXI === "undefined" ? nop : function(){
 		if (exports.disable || !anims) return;
 		var effect = Object.create(cons.prototype);
 		var effectOverride = cons.apply(effect, arguments);
@@ -79,12 +79,6 @@ if (typeof PIXI === "undefined"){
 		if (this.step > 50) this.alpha = 1 - ((this.step-50) / 50);
 	}
 }
-var makemake = [Death, Text, SpriteFade];
-for(var i=0; i<makemake.length; i++){
-	var cons = makemake[i];
-	if (typeof PIXI === "undefined"){
-		exports["mk" + cons.name] = nop;
-	}else{
-		exports["mk" + cons.name] = make(cons);
-	}
-}
+exports.mkDeath = make(Death);
+exports.mkText = make(Text);
+exports.mkSpriteFade = make(SpriteFade);

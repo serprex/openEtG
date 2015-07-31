@@ -82,7 +82,9 @@ function Card(type, info){
 	this.castele = 0;
 	if (info.Skill){
 		if (this.type == SpellEnum){
-			this.active = parseSkill(info.Skill);
+			this.active = {cast:parseSkill(info.Skill)};
+			this.cast = this.cost;
+			this.castele = this.costele;
 		}else if (info.Skill in activecache){
 			this.active = activecache[info.Skill];
 			var castinfo = activecastcache[info.Skill];
@@ -1234,7 +1236,7 @@ Card.prototype.play = function(owner, src, tgt){
 		var cons = [Permanent, Weapon, Shield, Permanent][this.type];
 		return new cons(this, owner).place(true);
 	}else if (this.type == SpellEnum){
-		src.castSpell(tgt, this.active);
+		src.castSpell(tgt, this.active.cast);
 	}else if (this.type == CreatureEnum){
 		ui.playSound("creaturePlay");
 		return new Creature(this, owner).place(true);

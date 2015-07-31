@@ -264,7 +264,7 @@ function startMatch(game, foeDeck, spectate) {
 									if (!game.ai) sock.emit("cast", {bits: game.tgtToBits(cardinst)});
 									cardinst.useactive();
 								} else {
-									game.getTarget(cardinst, cardinst.card.active, function(tgt) {
+									game.getTarget(cardinst, cardinst.card.active.cast, function(tgt) {
 										if (!game.ai) sock.emit("cast", {bits: game.tgtToBits(cardinst) | game.tgtToBits(tgt) << 9});
 										cardinst.useactive(tgt);
 									});

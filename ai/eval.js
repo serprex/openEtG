@@ -559,7 +559,7 @@ function evalcardinstance(cardInst) {
 	}
 	var score = 0;
 	if (c.type == etg.SpellEnum){
-		score += evalactive(cardInst, c.active);
+		score += evalactive(cardInst, c.active.cast);
 	} else {
 		for (var key in c.active) {
 			score += evalactive(cardInst, c.active[key]);

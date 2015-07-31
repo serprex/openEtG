@@ -1442,9 +1442,9 @@ rewind:function(c,t){
 	t.remove();
 	t.owner.deck.push(t.card);
 },
-ricochet:function(c,t){
+ricochet:function(c,t, data){
 	if (!(t instanceof etg.CardInstance)) return;
-	var tgting = Cards.Targeting[t.active.activename[0]];
+	var tgting = Cards.Targeting[data.active.activename[0]];
 	function tgttest(x){
 		if (x) {
 			if (tgting(t.owner, x)) tgts.push([x, t.owner]);
@@ -1460,7 +1460,7 @@ ricochet:function(c,t){
 		if (tgts.length > 0){
 			var tgt = c.owner.choose(tgts), town = t.owner;
 			t.owner = tgt[1];
-			t.castSpell(tgt[0], t.active, true);
+			t.castSpell(tgt[0], data.active, true);
 			t.owner = town;
 		}
 	}
