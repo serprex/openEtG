@@ -60,6 +60,7 @@ var SkillsValues = Object.freeze({
 		return c instanceof etg.CardInstance?-6:c.status.appeased?0:c.trueatk()*-1.5;
 	},
 	bblood:7,
+	bellweb:1,
 	blackhole:function(c){
 		var a=0, fq=c.owner.foe.quanta;
 		for(var i=1; i<13; i++){
@@ -87,14 +88,23 @@ var SkillsValues = Object.freeze({
 	counter:3,
 	countimmbur:1,
 	cpower:4,
+	creatureupkeep:function(c){
+		return c.owner.foe.countcreatures()-c.owner.countcreatures()/2;
+	},
 	darkness:1,
 	deadalive:2,
 	deathwish:1,
 	deckblast:function(c){
 		return c.owner.deck.length/2;
 	},
+	deepdive:function(c){
+		return c instanceof etg.CardInstance?c.card.attack:ttatk/1.5;
+	},
+	deepdiveproc:function(c){
+		return c instanceof etg.CardInstance?c.card.attack:ttatk;
+	},
 	deja:4,
-	deployblobs: function(c) {
+	deployblobs:function(c){
 		return 2+(c instanceof etg.CardInstance ? Math.min(c.card.attack, c.card.health) : Math.min(c.trueatk(), c.truehp()))/4;
 	},
 	destroy:8,
@@ -102,7 +112,6 @@ var SkillsValues = Object.freeze({
 	devour:function(c){
 		return 2+(c instanceof etg.CardInstance?c.card.health:c.truehp());
 	},
-	drawcopy:1,
 	disarm:function(c){
 		return !c.owner.foe.weapon ? .1 : c.owner.foe.hand.length == 8 ? .5 : c.owner.foe.weapon.card.cost;
 	},
@@ -114,6 +123,9 @@ var SkillsValues = Object.freeze({
 	divinity:3,
 	drainlife:10,
 	draft:1,
+	drawcopy:1,
+	drawequip:2,
+	drawpillar:1,
 	dryspell:5,
 	dshield:4,
 	duality:4,
@@ -143,6 +155,7 @@ var SkillsValues = Object.freeze({
 		return 9-c.owner.hand.length;
 	},
 	freeze:[3,3.5],
+	freezeperm:[3.5,4],
 	fungusrebirth:1,
 	gas:5,
 	give:1,
@@ -187,6 +200,7 @@ var SkillsValues = Object.freeze({
 	ink:3,
 	innovation:3,
 	integrity:4,
+	jelly:5,
 	jetstream:2.5,
 	layegg:5,
 	light:1,
@@ -200,6 +214,7 @@ var SkillsValues = Object.freeze({
 	mend:3,
 	metamorph: 2,
 	midas:6,
+	millpillar:1,
 	mimic:3,
 	miracle:function(c){
 		return c.owner.maxhp/8;
@@ -223,6 +238,7 @@ var SkillsValues = Object.freeze({
 		});
 		return val;
 	},
+	nightshade:6,
 	nova:4,
 	nova2:6,
 	nullspell:4,
@@ -270,6 +286,7 @@ var SkillsValues = Object.freeze({
 	regrade:3,
 	reinforce:.5,
 	ren:5,
+	retain:6,
 	rewind:6,
 	ricochet:2,
 	sadism:5,
@@ -305,6 +322,7 @@ var SkillsValues = Object.freeze({
 	"storm 3":12,
 	swave:6,
 	tempering:[2,3],
+	tesseractsummon:3,
 	throwrock:4,
 	tick:function(c){
 		return c instanceof etg.CardInstance ? 1 : 1+(c.maxhp-c.truehp())/c.maxhp;
@@ -314,7 +332,7 @@ var SkillsValues = Object.freeze({
 	turngolem:function(c){
 		return c instanceof etg.CardInstance ? 0 : c.status.storedpower/3;
 	},
-	upkeep: -.5,
+	upkeep:-.5,
 	upload:3,
 	vampire:function(c, ttatk){
 		return (c instanceof etg.CardInstance?c.card.attack:ttatk)*.7;
