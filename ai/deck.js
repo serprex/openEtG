@@ -36,7 +36,7 @@ var filters = {
 	"59m":function integrity(card, deck){
 		var shardCount=0;
 		for(var i=0; i<deck.length; i++){
-			if (~etg.shardList.indexOf(deck[i]) && ++shardCount>3) return true;
+			if (~etg.ShardList.indexOf(deck[i]) && ++shardCount>3) return true;
 		}
 	},
 	"5lk":function hope(card, deck){

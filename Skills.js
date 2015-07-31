@@ -1727,9 +1727,8 @@ tesseractsummon:function(c,t){
 			if (pl.deck[j].type == etg.CreatureEnum) candidates.push(j);
 		}
 		if (candidates.length){
-			var idx = pl.choose(candidates), crcard = pl.deck[idx];
+			var idx = pl.choose(candidates), crcard = pl.deck[idx], cr = new etg.Creature(crcard, pl);
 			pl.deck.splice(idx, 1);
-			cr = new etg.Creature(crcard, pl);
 			cr.freeze(Math.ceil(crcard.cost/4));
 			cr.place();
 		}

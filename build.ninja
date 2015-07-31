@@ -14,4 +14,4 @@ build assets/atlas.js:ssheet assets/gold.png assets/shinyborder0.png assets/shin
 build assets/atlas.png:optipng assets/atlas.js
 build assets/atlas.css:mkatlascss assets/atlas.js
 build etgify.min.js:uglify etgify.js
-default etgify.min.js tournify.js assets/atlas.png assets/atlas.css
+default etgify.js tournify.js assets/atlas.png assets/atlas.css

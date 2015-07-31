@@ -29,7 +29,7 @@ var credits = [
 		"55v", "564", "568", "56i", "576", "58p", "58q", "58r", "58u", "58v", "595", "599", "59a", "59f", "59g", "59i", "59m", "5bt", "5c3", "5c8", "5ca", "5cb", "5cc", "5cd", "5ce", "5cf", "5cg",
 		"5ch", "5ci", "5cq", "5de", "5f3", "5f8", "5f9", "5fd", "5fi", "5fu", "5gi", "5ia", "5ih", "5ik", "5im", "5in", "5ip", "5is", "5j2", "5jm", "5l9", "5la", "5lc", "5lf", "5lh", "5li", "5lk", "5ln", "5lo", "5lp", "5m6", "5mq", "5oh",
 		"5ou", "5p1", "5p3", "5pa", "5pu", "5rh", "5rm", "5rn", "5rq", "5rv", "5se", "5t2", "5uq", "5uu", "5vd", "5vg", "5vi", "61p", "61q", "61v", "620", "627", "62c", "62g", "62m", "6rr", "6u3", "77a", "77p", "7au", "7av", "7dj", "7e2", "7jq", "7k1", "7qa", "7ta", "809", "80a"]],
-	[["serprex", "http://fiction.wikia.com/wiki/User:Serprex"], ["504", "58t", "5cj", "5p4", "lrl", "5ro", "5rp", "5s0", "5va", "5vh", "622", "62a"]],
+	[["serprex", "http://fiction.wikia.com/wiki/User:Serprex"], ["504", "58t", "5cj", "5ct", "5p4", "lrl", "5ro", "5rp", "5s0", "5sb", "5va", "5vh", "622", "62a"]],
 	[["Thalas", "http://elementscommunity.org/forum/profile/?u=103"], ["5i9", "5if", "7dl"]],
 	[["vrt", "http://vrt-designs.com"], ["Donation thread", "http://elementscommunity.org/forum/card-art/help-support-an-artist"],
 		["4sb", "4vc", "4ve", "4vh", "52t", "55l", "55o", "55r", "560", "562", "563", "591", "5c0", "5c1", "5c9", "5f1", "5f2", "5fa", "5fc", "5i5", "5i7", "5id", "5ij", "5ll", "5oc", "5of", "5rk", "5rs",
