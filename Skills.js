@@ -673,7 +673,7 @@ forceplay:function(c,t){
 		Effect.mkSpriteFade(require("./gfx").getCardImage(t.card), t, {x:t.owner == t.owner.game.player2 ? -1 : 1, y:0});
 		if (t.owner.sanctuary) return;
 		if (card.type == etg.SpellEnum){
-			tgting = Cards.Targeting[card.active.activename[0]];
+			tgting = Cards.Targeting[card.active.cast.activename[0]];
 		}
 	}else if (t.active.cast){
 		tgting = Cards.Targeting[t.active.cast.activename[0]];
@@ -832,8 +832,8 @@ improve:function(c,t){
 	t.status.mutant = true;
 	t.transform(t.owner.randomcard(false, function(x){return x.type == etg.CreatureEnum}));
 },
-inertia:function(c,t, tt){
-	if (tt && c.owner == tt.owner){
+inertia:function(c,t, data){
+	if (data.tgt && c.owner == data.tgt.owner){
 		c.owner.spend(etg.Gravity, -2);
 	}
 },
@@ -1035,7 +1035,7 @@ luciferin:function(c,t){
 	c.owner.dmg(-10);
 	c.owner.masscc(c, function(c,x){
 		for (var key in x.active){
-			if (key == "ownplay" || key == "owndiscard" || x.active[key].activename.every(function(name){return etg.parseActive[name].passive})) continue;
+			if (key == "ownplay" || key == "owndiscard" || x.active[key].activename.every(function(name){return etg.parseSkill(name).passive})) continue;
 			return;
 		}
 		x.addactive("auto", Skills.light);

@@ -1134,7 +1134,7 @@ Thing.prototype.castSpell = function(t, active, nospell){
 		if (t) Effect.mkText("Evade", t);
 	}else{
 		active(this, data.tgt);
-		if (!nospell) this.proc("spell", data.tgt);
+		if (!nospell) this.proc("spell", data);
 	}
 }
 Thing.prototype.useactive = function(t) {
