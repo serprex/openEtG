@@ -99,6 +99,9 @@ var TargetFilters = {
 	sing:function(c, t){
 		return t.isMaterial(etg.Creature) && t.active.cast != c.active.cast;
 	},
+	notskele:function(c, t){
+		return t.isMaterial(etg.Creature) && !t.card.isOf(Cards.Skeleton);
+	},
 	butterfly:function(c, t){
 		return (t instanceof etg.Creature || t instanceof etg.Permanent) && !t.status.immaterial && !t.status.burrowed && ((t.trueatk && t.trueatk()<3) || (t instanceof etg.Creature && t.truehp()<3));
 	},

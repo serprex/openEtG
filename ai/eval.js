@@ -260,6 +260,7 @@ var SkillsValues = Object.freeze({
 	quinttog:7,
 	rage:[5, 6],
 	readiness: 3,
+	reap:7,
 	rebirth:[5, 2],
 	reducemaxhp: function(c, ttatk){
 		return (c instanceof etg.Creature ? ttatk : c.card.attack)*5/3;

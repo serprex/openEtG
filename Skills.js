@@ -338,15 +338,21 @@ deepdive:function(c,t){
 	c.status.burrowed = true;
 	c.addactive("turnstart", Skills.deepdiveproc);
 },
-deepdiveproc:function(c,t){
+deepdiveproc:passive(function(c,t){
 	if (t == c.owner){
-		c.active.cast = Skills.deepdive;
-		c.castele = etg.Water;
+		c.rmactive("turnstart", "deepdiveproc");
+		c.addactive("turnstart", Skills.deepdiveproc2);
 		c.status.airborne = true;
 		c.status.burrowed = false;
-		c.status.dive = c.trueatk()*3;
+		c.status.dive = c.trueatk()*2;
 	}
-},
+}),
+deepdiveproc2:passive(function(c,t){
+	c.rmactive("turnstart", "deepdiveproc2");
+	c.active.cast = Skills.deepdive;
+	c.castele = etg.Water;
+	c.status.airborne = false;
+}),
 deja:function(c,t){
 	delete c.active.cast;
 	Skills.parallel(c, c);
