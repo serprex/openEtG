@@ -688,7 +688,7 @@ function startMatch(game, foeDeck, spectate) {
 			if (px.hitTest(playerOverlay[j])){
 				setInfo(pl);
 			}else{
-				var poison = pl.status.poison, poisoninfo = (poison > 0 ? poison + " 1:2" : poison < 0 ? -poison + " 1:7" : "") + (pl.neuro ? " 1:10" : "");
+				var poison = pl.status.poison, poisoninfo = (poison > 0 ? poison + " 1:2" : poison < 0 ? -poison + " 1:7" : "") + (pl.status.neuro ? " 1:10" : "");
 				hptext[j].text = pl.hp + "/" + pl.maxhp + "\n" + pl.deck.length + "cards" + (!cloakgfx.visible && game.expectedDamage[j] ? "\nDmg: " + game.expectedDamage[j] : "") + (poisoninfo ? "\n" + poisoninfo : "");
 			}
 		}

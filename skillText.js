@@ -6,7 +6,7 @@ var data = {
 	absorbdmg:"Collect power per reduced damage",
 	absorber:"Produce 3:6 per attacker",
 	accelerationspell:"Replaces target creature's skills with \"Gain +2|-1 per turn\"",
-	accretion:"Destroy target permanent & gain 0|15. Return to owner's hand as a Blackhole if health exceeds 45",
+	accretion:"Destroy target permanent & gain 0|10. Return to owner's hand as a Blackhole if larger than 30",
 	accumulation:"Increment damage reduction per stack",
 	adrenaline:"Target creature attacks multiple times per turn. Weaker creatures gain more attacks",
 	aether:"Produce 1:12 on death",

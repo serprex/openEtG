@@ -97,10 +97,10 @@ var SkillsValues = Object.freeze({
 	deckblast:function(c){
 		return c.owner.deck.length/2;
 	},
-	deepdive:function(c){
+	deepdive:function(c, ttatk){
 		return c instanceof etg.CardInstance?c.card.attack:ttatk/1.5;
 	},
-	deepdiveproc:function(c){
+	deepdiveproc:function(c, ttatk){
 		return c instanceof etg.CardInstance?c.card.attack:ttatk;
 	},
 	deja:4,
@@ -226,10 +226,10 @@ var SkillsValues = Object.freeze({
 	momentum:2,
 	mutation:4,
 	neuro:function(c) {
-		return c.owner.foe.neuro?evalactive(c, etg.parseSkill("poison 1"))+.1:6;
+		return c.owner.foe.status.neuro?evalactive(c, etg.parseSkill("poison 1"))+.1:6;
 	},
 	neurofy:function(c) {
-		return c.owner.foe.neuro?1:5;
+		return c.owner.foe.status.neuro?1:5;
 	},
 	nightmare:function(c){
 		var val = 24-c.owner.foe.hand.length;
@@ -679,7 +679,7 @@ module.exports = function(game) {
 		if (!player.shield) pscore += 1;
 		if (player.silence) pscore -= (player.hand.length+(player.hand.length>6?7:4))/4;
 		if (player.flatline) pscore -= 1;
-		if (player.neuro) pscore -= 5;
+		if (player.status.neuro) pscore -= 5;
 		log("Eval", pscore);
 		logNestEnd();
 		gamevalue += pscore*(j?-1:1);
