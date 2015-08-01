@@ -185,6 +185,9 @@ var userEvents = {
 				obj.day = day - obj.day;
 				obj.curhp = getAgedHp(obj.hp, obj.day);
 				if (rank !== null) obj.rank = rank;
+				["draw", "hp", "loss", "mark", "win"].forEach(function(key){
+					obj[key] = parseInt(obj[key], 10);
+				});
 			}
 			process(result.A, result.ra);
 			process(result.B, result.rb);
