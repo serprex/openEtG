@@ -202,7 +202,6 @@ var SkillsValues = Object.freeze({
 	integrity:4,
 	jelly:5,
 	jetstream:2.5,
-	layegg:5,
 	light:1,
 	lightning:7,
 	liquid:5,
@@ -271,7 +270,6 @@ var SkillsValues = Object.freeze({
 	protectonce:2,
 	protectall:4,
 	purify:2,
-	queen:7,
 	quint:6,
 	quinttog:7,
 	rage:[5, 6],
@@ -292,7 +290,6 @@ var SkillsValues = Object.freeze({
 	sadism:5,
 	salvage:2,
 	sanctuary:6,
-	scarab:4,
 	scramble:function(c){
 		var a=0, fq=c.owner.foe.quanta;
 		for(var i=1; i<13; i++){
@@ -301,7 +298,6 @@ var SkillsValues = Object.freeze({
 		return a;
 	},
 	serendepity: 4,
-	shadow: 5,
 	shtriga:6,
 	silence:1,
 	singularity:-20,
@@ -320,6 +316,10 @@ var SkillsValues = Object.freeze({
 	stoneform:1,
 	"storm 2":6,
 	"storm 3":12,
+	"summon FateEgg":5,
+	"summon Firefly":6,
+	"summon Scarab":4,
+	"summon Shadow":3,
 	swave:6,
 	tempering:[2,3],
 	tesseractsummon:3,

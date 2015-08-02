@@ -161,7 +161,6 @@ var data = {
 	integrity:"Combine all shards in hand to form a Shard Golem",
 	jelly:"Target creature becomes a 7|4 with active Pink Jelly costing 4 of their element",
 	jetstream:"Target airborne creature gains 3|-1",
-	layegg:"Summon a Fate Egg",
 	light:{
 		auto:"Produce 1:8 per attack",
 		ownplay:"Produce 1:8 on play",
@@ -239,7 +238,6 @@ var data = {
 	protectonce:"Evade next targeting, or prevent next source of spell damage",
 	purify:"Remove poison & sacrifice. Apply 2 purify",
 	quantagift:"Gain 2:7 & 2 quanta of mark. Produce only 3:7 if mark is 1:7",
-	queen:"Summon a Firefly",
 	quint:"Target creature becomes immaterial. Thaws",
 	quinttog:"Target immaterial becomes material. Otherwise material targets become immaterial & thaw",
 	rage:["Target creature gains +5|-5. Thaws",
@@ -267,7 +265,6 @@ var data = {
 	unsanctify:{
 		ownplay:"Prevent foe's sanctification",
 	},
-	scarab:"Summon a Scarab",
 	scatterhand:"Target player shuffles their hand, & draws as many cards. Draw a card",
 	scramble:{
 		hit:"Randomly scramble foe's quanta on hit",
@@ -275,7 +272,6 @@ var data = {
 	},
 	serendipity:["Generate 3 random non-pillar cards in hand. One will be 1:1",
 		"Generate 3 random non-pillar upgraded cards in hand. One will be 1:1"],
-	shadow:["Summon a Shadow", "Summon a Tall Shadow"],
 	shtriga:"Gain -1|-1 & become immaterial at start of turn",
 	silence:"foe cannot play cards during their next turn, or target creature gains summoning sickness",
 	sing:"Target creature without Sing attacks owner",
@@ -302,6 +298,10 @@ var data = {
 	stoneform:"Gain 0|20 & become a golem",
 	"storm 2":"Deals 2 damage to target player's creatures. Removes cloak",
 	"storm 3":"Deals 3 damage to target player's creatures. Removes cloak",
+	"summon FateEgg":"Summon a Fate Egg",
+	"summon Firefly":"Summon a Firefly",
+	"summon Scarab":"Summon a Scarab",
+	"summon Shadow":["Summon a Shadow", "Summon a Tall Shadow"],
 	swarm:"Base health is equal to count of ally scarabs",
 	swave:"Deals 4 damage to target. Instantly kill creature or destroy weapon if frozen",
 	tempering:["Target weapon deals an additional 3 damage per turn. Thaws",

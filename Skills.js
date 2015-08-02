@@ -881,8 +881,8 @@ integrity:function(c,t){
 		["ablaze", "ablaze", "tempering", "destroy", "destroy", "rage"],
 		["steam", "steam", "freeze", "freeze", "nymph", "nymph"],
 		["mend", "endow", "endow", "luciferin", "luciferin", "luciferin"],
-		["queen", "queen", "snipe", "dive", "gas", "gas"],
-		["scarab", "scarab", "deja", "deja", "precognition", "precognition"],
+		["summon Firefly", "summon Firefly", "snipe", "dive", "gas", "gas"],
+		["summon Scarab", "summon Scarab", "deja", "deja", "precognition", "precognition"],
 		["siphonstrength", "siphonstrength", "yoink", "liquid", "liquid", "steal"],
 		["lobotomize", "lobotomize", "lobotomize", "quint", "quint", "quint"],
 	];
@@ -895,8 +895,8 @@ integrity:function(c,t){
 		ablaze:1, tempering:(c.card.upped?2:1), destroy:3, rage:2,
 		steam:2, freeze:2, nymph:4,
 		mend:1, endow:2, luciferin:4,
-		queen:2, snipe:2, dive:2, gas:2,
-		scarab:2, deja:4, precognition:2,
+		"summon Firefly":2, snipe:2, dive:2, gas:2,
+		"summon Scarab":2, deja:4, precognition:2,
 		siphonstrength:2, yoink:2, liquid:2, steal:3,
 		lobotomize:2, quint:2,
 	};
@@ -976,9 +976,6 @@ jelly:function(c,t){
 jetstream:function(c,t){
 	t.dmg(1);
 	t.atk += 3;
-},
-layegg:function(c,t){
-	new etg.Creature(c.card.as(Cards.FateEgg), c.owner).place();
 },
 light:function(c,t){
 	Effect.mkText("1:8", c);
@@ -1356,9 +1353,6 @@ purify:function(c,t){
 		t.sosa = 0;
 	}
 },
-queen:function(c,t){
-	new etg.Creature(c.card.as(Cards.Firefly), c.owner).place();
-},
 quint:function(c,t){
 	Effect.mkText("Immaterial", t);
 	t.status.immaterial = true;
@@ -1495,9 +1489,6 @@ sanctify:function(c,t){
 unsanctify:function(c,t){
 	c.owner.foe.sanctuary = false;
 },
-scarab:function(c,t){
-	new etg.Creature(c.card.as(Cards.Scarab), c.owner).place();
-},
 scatterhand:function(c,t){
 	if (!t.sanctuary){
 		t.drawhand(t.hand.length);
@@ -1520,9 +1511,6 @@ serendipity:function(c){
 		anyentro |= card.element == etg.Entropy;
 		new etg.CardInstance(card.asShiny(c.card.shiny), c.owner).place();
 	}
-},
-shadow:function(c,t){
-	new etg.Creature(c.card.as(Cards.Shadow), c.owner).place();
 },
 shtriga:function(c,t){
 	if (c.owner == t){
@@ -1695,6 +1683,12 @@ storm:function(x){
 	var n = parseInt(x);
 	return function(c,t){
 		t.masscc(c, function(c,x){x.spelldmg(n)});
+	}
+},
+summon:function(name){
+	var card = Cards[name];
+	return function(c,t){
+		new etg.Creature(c.card.as(card), c.owner).place();
 	}
 },
 swarm:function(c,t){
