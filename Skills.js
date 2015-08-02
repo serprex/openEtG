@@ -1071,6 +1071,7 @@ midas:function(c,t){
 		relic.usedactive = false;
 		relic.place();
 	}else{
+		t.status = Object.create(etg.DefaultStatus);
 		t.transform(t.card.as(Cards.GoldenRelic));
 		if (t instanceof etg.Shield) t.dr = 1;
 		else if (t instanceof etg.Weapon) t.atk = 1;
@@ -1417,7 +1418,7 @@ regeneratespell:function(c,t){
 	t.lobo();
 	t.active.auto = Skills.regenerate;
 	if (t instanceof etg.Permanent && !(t instanceof etg.Weapon)){
-		t.status = {};
+		t.status = Object.create(etg.DefaultStatus);
 	}
 },
 regrade:function(c,t){

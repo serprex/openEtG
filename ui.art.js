@@ -1,7 +1,24 @@
 "use strict";
+function hookRowMouseover(tr){
+	tr.addEventListener("mouseover", function(e){
+		for(var i=1; i<this.children.length; i++){
+			var child = this.children[i].children[0];
+			if (child.href && child.href.match(/\/Cards\/...\.png$/)){
+				imgs[i-1].src = child.href;
+				imgs[i-1].style.visibility = "";
+			}else imgs[i-1].style.visibility = "hidden";
+		}
+		for(;i-1<imgs.length;i++){
+			imgs[i-1].style.visibility = "hidden";
+		}
+	});
+}
 var Cards = require("./Cards");
 Cards.loadcards();
-var credits = [
+var imgs = new Array(8), imgdiv = document.getElementById("imgdiv");
+for(var i=0; i<8; i++) imgdiv.appendChild(imgs[i] = new Image());
+var table = document.createElement("table");
+[
 	[["andretimpa", "http://andretimpa.deviantart.com"], ["Opening Music", "sound/openingMusic.ogg"],
 		["4sa", "4si", "4sj", "4sk", "4sl", "4sm", "4sn", "4so", "4sp", "4sq", "4sr", "4ss", "4st", "4su", "4te", "4vr", "55k", "55p", "55s", "5ic", "5m0", "5m3", "5ol", "5rl", "5vj", "61r", "61s", "621", "6ub"]],
 	[["artimies", "http://elementscommunity.org/forum/profile/?u=140"], ["593"]],
@@ -29,30 +46,29 @@ var credits = [
 		"55v", "564", "568", "56i", "576", "58p", "58q", "58r", "58u", "58v", "595", "599", "59a", "59f", "59g", "59i", "59m", "5bt", "5c3", "5c8", "5ca", "5cb", "5cc", "5cd", "5ce", "5cf", "5cg",
 		"5ch", "5ci", "5cq", "5de", "5f3", "5f8", "5f9", "5fd", "5fi", "5fu", "5gi", "5ia", "5ih", "5ik", "5im", "5in", "5ip", "5is", "5j2", "5jm", "5l9", "5la", "5lc", "5lf", "5lh", "5li", "5lk", "5ln", "5lo", "5lp", "5m6", "5mq", "5oh",
 		"5ou", "5p1", "5p3", "5pa", "5pu", "5rh", "5rm", "5rn", "5rq", "5rv", "5se", "5t2", "5uq", "5uu", "5vd", "5vg", "5vi", "61p", "61q", "61v", "620", "627", "62c", "62g", "62m", "6rr", "6u3", "77a", "77p", "7au", "7av", "7dj", "7e2", "7jq", "7k1", "7qa", "7ta", "809", "80a"]],
-	[["serprex", "http://fiction.wikia.com/wiki/User:Serprex"], ["504", "58t", "5cj", "5ct", "5p4", "lrl", "5ro", "5rp", "5s0", "5sb", "5va", "5vh", "622", "62a"]],
+	[["serprex", "http://fiction.wikia.com/wiki/User:Serprex"], ["504", "58t", "5cj", "5ct", "5j0", "5p4", "lrl", "5ro", "5rp", "5s0", "5sb", "5va", "5vh", "5vl", "622", "62a", "62h"]],
 	[["Thalas", "http://elementscommunity.org/forum/profile/?u=103"], ["5i9", "5if", "7dl"]],
 	[["vrt", "http://vrt-designs.com"], ["Donation thread", "http://elementscommunity.org/forum/card-art/help-support-an-artist"],
 		["4sb", "4vc", "4ve", "4vh", "52t", "55l", "55o", "55r", "560", "562", "563", "591", "5c0", "5c1", "5c9", "5f1", "5f2", "5fa", "5fc", "5i5", "5i7", "5id", "5ij", "5ll", "5oc", "5of", "5rk", "5rs",
 		"5rt", "5uk", "5ul", "5um", "5ut", "5uv", "5v3", "61o", "61t", "624", "625", "626", "74a", "80g", "590"]],
 	[["NASA", "http://nasa.gov"], ["5p2"]],
 	[["freeSFX", "http://www.freesfx.co.uk"],[]]
-];
-var table = document.createElement("table");
-credits.forEach(function(credit){
+].forEach(function(credit){
 	var tr = document.createElement("tr");
+	hookRowMouseover(tr);
 	tr.className = "padtop";
 	var x = 0;
 	function incx(text, link){
 		var td = document.createElement("td");
 		var a = document.createElement("a");
 		a.href = link;
-		if (link.match(/\.png$/)) a.addEventListener("mouseover", function(){document.getElementById("codeimg").src=this.href;});
 		a.appendChild(document.createTextNode(text));
 		td.appendChild(a);
 		tr.appendChild(td);
 		if (++x == 9){
 			table.appendChild(tr);
 			tr = document.createElement("tr");
+			hookRowMouseover(tr);
 			tr.appendChild(document.createElement("td"));
 			x = 1;
 		}
@@ -69,4 +85,4 @@ credits.forEach(function(credit){
 	}
 	table.appendChild(tr);
 });
-document.body.insertBefore(table, document.getElementById("codeimg"));
+document.body.insertBefore(table, imgdiv);
