@@ -315,7 +315,7 @@ var data = {
 	tornado:["Randomly reshuffle 2 of foe's permanents & one of own into either deck",
 		"Randomly reshuffle 2 of foe's permanents into either deck"],
 	trick:"Swap target creature with a different creature from deck",
-	turngolem:"Become a Golem Attacker with health equal to collected power & a third as much strength",
+	turngolem:"Become a creature with health equal to collected power & a third as much strength",
 	unburrow:"Unburrow",
 	unsummon:"Return target creature to owner's hand. If hand full, return to top of deck",
 	unvindicate:"Become ready to vindicate again at start of next turn",

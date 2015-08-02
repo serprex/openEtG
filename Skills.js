@@ -469,7 +469,7 @@ drawequip:function(c,t){
 },
 drawpillar:function(c,t){
 	var deck = c.owner.deck;
-	if (deck[deck.length-1].type == etg.PillarEnum) Skills.hasten(c, t);
+	if (deck.length && deck[deck.length-1].type == etg.PillarEnum) Skills.hasten(c, t);
 },
 dryspell:function(c,t){
 	function dryeffect(c,t){
@@ -1078,7 +1078,7 @@ midas:function(c,t){
 	}
 },
 millpillar:function(c,t){
-	if (t.deck[t.deck.length-1].type == etg.PillarEnum) t.deck.length--;
+	if (t.deck.length && t.deck[t.deck.length-1].type == etg.PillarEnum) t.deck.length--;
 },
 mimic:function(c,t){
 	if (c != t && t instanceof etg.Creature) {
