@@ -458,7 +458,7 @@ drawcopy:function(c,t){
 },
 drawequip:function(c,t){
 	for(var i=c.owner.deck.length-1; i>-1; i--){
-		var card = c.owner.deck[i];
+		var card = c.owner.deck.splice(i, 1)[0];
 		if (card.type == etg.WeaponEnum || card.type == etg.ShieldEnum){
 			if (~new etg.CardInstance(card, c.owner).place()){
 				c.owner.proc("draw");
@@ -1728,8 +1728,7 @@ tesseractsummon:function(c,t){
 			if (pl.deck[j].type == etg.CreatureEnum) candidates.push(j);
 		}
 		if (candidates.length){
-			var idx = pl.choose(candidates), crcard = pl.deck[idx], cr = new etg.Creature(crcard, pl);
-			pl.deck.splice(idx, 1);
+			var idx = pl.choose(candidates), crcard = pl.deck.splice(idx, 1)[0], cr = new etg.Creature(crcard, pl);
 			cr.freeze(Math.ceil(crcard.cost/4));
 			cr.place();
 		}
