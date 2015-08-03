@@ -458,9 +458,10 @@ drawcopy:function(c,t){
 },
 drawequip:function(c,t){
 	for(var i=c.owner.deck.length-1; i>-1; i--){
-		var card = c.owner.deck.splice(i, 1)[0];
+		var card = c.owner.deck[i];
 		if (card.type == etg.WeaponEnum || card.type == etg.ShieldEnum){
 			if (~new etg.CardInstance(card, c.owner).place()){
+				c.owner.deck.splice(i, 1);
 				c.owner.proc("draw");
 			}
 			return;
