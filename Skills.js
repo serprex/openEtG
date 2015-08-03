@@ -1949,11 +1949,11 @@ despair:function(c,t){
 evade100:function(c,t){
 	return true;
 },
-evade40:function(c,t){
-	return c.owner.rng() < .4;
-},
-evade50:function(c,t){
-	return c.owner.rng() < .5;
+evade:function(x){
+	var n = parseInt(x)/100;
+	return function(c){
+		return c.owner.rng() < n;
+	};
 },
 evadespell:function(c,t, data){
 	if (data.tgt == c && c.owner != t.owner && t instanceof etg.CardInstance) data.evade = true;

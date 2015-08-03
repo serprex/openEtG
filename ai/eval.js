@@ -368,8 +368,8 @@ var SkillsValues = Object.freeze({
 	evade100:function(c){
 		return c.status?(c.status.charges == 0 && c.owner == c.owner.game.turn?0:1):1;
 	},
-	evade40:1,
-	evade50:1,
+	"evade 40":1,
+	"evade 50":1,
 	firewall:7,
 	chaos:[8, 9],
 	skull:5,
@@ -413,7 +413,7 @@ function estimateDamage(c, freedomChance, wallCharges, wallIndex) {
 	function estimateAttack(tatk){
 		if (momentum) {
 			return tatk;
-		} else if ((fshactive == Skills.weight || fshactive == Skills.wings) && fshactive(c.owner.foe.shield, c)) {
+		} else if ((~fshactive.activename.indexOf("weight") || ~fshactive.activename.indexOf("wings")) && fshactive(c.owner.foe.shield, c)) {
 			return 0;
 		}else if (wallCharges[wallIndex]){
 			wallCharges[wallIndex]--;
@@ -433,7 +433,7 @@ function estimateDamage(c, freedomChance, wallCharges, wallIndex) {
 		c.status.adrenaline = 1;
 	}
 	if (!momentum){
-		atk *= (fshactive == Skills.evade100 ? 0 : fshactive == Skills.evade50 ? .5 : fshactive == Skills.evade40 ? .6 : fshactive == Skills.chaos && fsh.card.upped ? .8 : 1);
+		atk *= (~fshactive.activename.indexOf("evade100") ? 0 : ~fshactive.activename.indexOf("evade 50") ? .5 : ~fshactive.activename.indexOf("evade 40") ? .6 : ~fshactive.activename.indexOf("chaos") && fsh.card.upped ? .8 : 1);
 	}
 	if (!fsh && freedomChance && c.status.airborne){
 		atk += Math.ceil(atk/2) * freedomChance;

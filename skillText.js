@@ -1,5 +1,6 @@
 "use strict";
 var etg = require("./etg");
+var Cards = require("./Cards");
 var data = {
 	ablaze:"Gain 2|0",
 	abomination:"Amiable to mutation",
@@ -95,8 +96,7 @@ var data = {
 	epochreset:{
 		cast:"Reset silence counter",
 	},
-	evade40:"40% chance to evade",
-	evade50:"50% chance to evade",
+	evade:function(x){ return x+"% chance to evade"; },
 	evade100:"100% chance to evade",
 	evadecrea:"Evade creature actives",
 	evadespell:"Evades targeting spells",
@@ -132,12 +132,14 @@ var data = {
 	gpull:"Intercept attacks directed to owner",
 	gpullspell:"Target creature intercepts attacks directed to its owner",
 	gratitude:"Heal owner 4",
-	"growth 1":{
-		death:"When a creature dies, gain 1|1",
-		ownfreeze:"Gains 1|1 instead of freezing",
-		cast:"Gain 1|1",
+	growth:function(x){
+		x = x+"|"+x;
+		return {
+			death:"When a creature dies, gain "+x,
+			ownfreeze:"Gains "+x+" instead of freezing",
+			cast:"Gain "+x,
+		};
 	},
-	"growth 2":"Gain 2|2",
 	guard:"Delay target creature & attack target if grounded or caster airborne. Delay self",
 	halveatk:"Attack is halved after attacking",
 	hasten:{
@@ -218,17 +220,12 @@ var data = {
 	pend:function(c){return "Oscilliate between producing "+(c.element?1:3)+":"+c.element + " & quanta of mark"},
 	plague:"Poison target player's creatures. Removes cloak",
 	platearmor:["Target gains 0|4", "Target gains 0|6"],
-	"poison 1":{
-		hit:"Apply poison on hit. Throttled",
-		cast:"Apply poison to foe"
-	},
-	"poison 2":{
-		hit:"Apply 2 poison on hit. Throttled",
-		cast:"Apply 2 poison to foe"
-	},
-	"poison 3":{
-		hit:"Apply 3 poison on hit. Throttled",
-		cast:"Apply 3 poison to foe"
+	poison:function(x){
+		x += "Apply "+(x === "1" ? "" : " ") + "poison "
+		return {
+			hit:x+"on hit. Throttled",
+			cast:x+"to foe",
+		};
 	},
 	poisonfoe:"May apply poison to foe on play",
 	powerdrain:"Drain half the target creature's strength & health, adding it to one of your creatures",
@@ -296,12 +293,11 @@ var data = {
 	steal:"Steal target permanent",
 	steam:"Gain 5|0",
 	stoneform:"Gain 0|20 & become a golem",
-	"storm 2":"Deals 2 damage to target player's creatures. Removes cloak",
-	"storm 3":"Deals 3 damage to target player's creatures. Removes cloak",
-	"summon FateEgg":"Summon a Fate Egg",
-	"summon Firefly":"Summon a Firefly",
-	"summon Scarab":"Summon a Scarab",
-	"summon Shadow":["Summon a Shadow", "Summon a Tall Shadow"],
+	storm:function(x){ return "Deals "+x+" damage to target player's creatures. Removes cloak" },
+	summon:function(x){
+		var card1 = Cards[x], card2 = card1.asUpped(true);
+		return card1.name == card2.name ? "Summon a "+card1.name : ["Summon a "+card1.name, "Summon a "+card2.name];
+	},
 	swarm:"Base health is equal to count of ally scarabs",
 	swave:"Deals 4 damage to target. Instantly kill creature or destroy weapon if frozen",
 	tempering:["Target weapon deals an additional 3 damage per turn. Thaws",
@@ -380,9 +376,14 @@ function pushEntry(list, c, event, entry){
 	var x = processEntry(c, event, entry);
 	if (x) list.push(x);
 }
+function getDataFromName(name){
+	if (name in data) return data[name];
+	var spidx = name.indexOf(" ");
+	return ~spidx ? (data[name] = data[name.slice(0,spidx)](name.slice(spidx+1))) : data[name];
+}
 module.exports = function(c, event){
 	if (c instanceof etg.Card && c.type == etg.SpellEnum){
-		var entry = data[c.active.cast.activename[0]];
+		var entry = getDataFromName(c.active.cast.activename[0]);
 		return processEntry(c, "cast", entry);
 	}else{
 		var ret = [], stext = [];
@@ -399,7 +400,7 @@ module.exports = function(c, event){
 		if (stext.length) ret.unshift(stext.join(", ") + ".");
 		for(var key in c.active){
 			c.active[key].activename.forEach(function(name){
-				var entry = data[name];
+				var entry = getDataFromName(name);
 				if (entry === undefined) return;
 				pushEntry(ret, c, key, entry);
 				if (key == "cast") ret[ret.length-1] = etg.casttext(c.cast, c.castele) + " " + ret[ret.length-1];
