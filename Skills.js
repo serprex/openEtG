@@ -779,7 +779,7 @@ guard:function(c,t){
 	c.delay(1);
 	t.delay(1);
 	if (c.status.airborne || !t.status.airborne){
-		t.attackCreature(c);
+		c.attackCreature(t);
 	}
 },
 halveatk: function(c, t) {
@@ -1687,9 +1687,8 @@ storm:function(x){
 	}
 },
 summon:function(name){
-	var card = Cards[name];
 	return function(c,t){
-		new etg.Creature(c.card.as(card), c.owner).place();
+		new etg.Creature(c.card.as(Cards[name]), c.owner).place();
 	}
 },
 swarm:function(c,t){

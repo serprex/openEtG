@@ -74,8 +74,9 @@ function initEndless(){
 		if ((plies&1) || c.owner.rng() < .3) c.owner.foe.buffhp(-1);
 	}
 	function endlessDraw(c, t){
-		var idx = t.upto(t.deck.length);
-		t.deck.splice(idx, 0, t.hand[t.hand.length-1].card);
+		var card = t.hand[t.hand.length-1].card;
+		if (t == c.owner.game.player1 && c.owner.rng() < .3) card = card.asUpped(false);
+		t.deck.splice(t.upto(t.deck.length), 0, card);
 	}
 	endlessAuto.activename = ["endless"];
 	endlessDraw.activename = ["endlessdraw"];
