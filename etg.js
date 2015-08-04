@@ -1254,7 +1254,7 @@ CardInstance.prototype.useactive = function(target){
 	}
 	this.card.play(owner, this, target);
 	this.proc("cardplay");
-	if (owner.game.bonusstats != null) owner.game.bonusstats.cardsplayed[this.card.type]++;
+	if (owner.game.bonusstats != null && owner == owner.game.player1) owner.game.bonusstats.cardsplayed[this.card.type]++;
 	owner.game.updateExpectedDamage();
 }
 var filtercache = [];
