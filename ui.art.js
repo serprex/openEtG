@@ -48,6 +48,7 @@ var table = document.createElement("table");
 		"5ou", "5p1", "5p3", "5pa", "5pu", "5rh", "5rm", "5rn", "5rq", "5rv", "5se", "5t2", "5uq", "5uu", "5vd", "5vg", "5vi", "61p", "61q", "61v", "620", "627", "62c", "62g", "62m", "6rr", "6u3", "77a", "77p", "7au", "7av", "7dj", "7e2", "7jq", "7k1", "7qa", "7ta", "809", "80a"]],
 	[["serprex", "http://fiction.wikia.com/wiki/User:Serprex"], ["504", "53a", "58t", "5cj", "5ct", "5fp", "5iv", "5j0", "5p4", "lrl", "5ro", "5rp", "5s0", "5sb", "5va", "5vh", "5vl", "622", "62a", "62h"]],
 	[["Thalas", "http://elementscommunity.org/forum/profile/?u=103"], ["5i9", "5if", "7dl"]],
+	[["TheManuz", "http://elementscommunity.org/forum/profile?u=75"], ["502", "5ot"]],
 	[["vrt", "http://vrt-designs.com"], ["Donation thread", "http://elementscommunity.org/forum/card-art/help-support-an-artist"],
 		["4sb", "4vc", "4ve", "4vh", "52t", "55l", "55o", "55r", "560", "562", "563", "591", "5c0", "5c1", "5c9", "5f1", "5f2", "5fa", "5fc", "5i5", "5i7", "5id", "5ij", "5ll", "5oc", "5of", "5rk", "5rs",
 		"5rt", "5uk", "5ul", "5um", "5ut", "5uv", "5v3", "61o", "61t", "624", "625", "626", "74a", "80g", "590"]],
