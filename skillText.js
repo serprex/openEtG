@@ -18,6 +18,7 @@ var data = {
 	antimatter:"Invert strength of target",
 	appease:"Sacifice own creature & gain 1|1. If not, retaliate",
 	atk2hp:"Target's health is changed to match its strength",
+	autoburrow:"Until end of turn, creatures with burrow enter play burrowed",
 	axedraw:"Increment damage per draw. Reset on attack",
 	bblood:"Target creature gains 0|20 & is delayed 6 turns",
 	becomearctic:"Become Arctic if frozen",
