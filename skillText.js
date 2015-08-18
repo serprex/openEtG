@@ -37,7 +37,7 @@ var data = {
 	brokenmirror:["When foe plays a creature from hand, summon a 1|1 Phantom", "When foe plays a creature from hand, summon a 2|1 Phantom"],
 	butterfly:"Target something smaller than, or weaker than, 3. Replace target's skills with \"3:1 Destroy target permanent\"",
 	burrow:"Burrow. Burrowed creatures attack with half strength",
-	catapult:"Sacrifice target creature to deal 100HP/(100+HP) damage foe. Frozen creatures increase damage by 50%. Poisoned creatures transfer poison",
+	catapult:"Sacrifice target creature to damage foe 100HP/(100+HP). Frozen targets deal 1.5x more. Poisoned creatures transfer poison",
 	catlife:"On death, regenerate with 1 fewer life",
 	cell:"Become Malignant if poisoned",
 	chaos:function(c){return (c.upped?"20% chance to evade. ":"")+"Non-ranged attacking creatures have a 30% chance to have a random effect cast on them"},

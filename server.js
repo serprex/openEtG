@@ -18,6 +18,7 @@ var app = require("connect")().
 	use(require("serve-static")(__dirname, { maxAge: 2626262000 })).
 	use("/speed", require("./srv/speed")()).
 	use("/deck", require("./srv/deckredirect")()).
+	use("/card", require("./srv/cardredirect")()).
 	use("/code", require("./srv/codesmith")(db));
 function storeUsers(){
 	for(var u in users){
