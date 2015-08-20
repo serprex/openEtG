@@ -9,6 +9,7 @@ function eleChar(card){
 function deckRedirect(req, res, next){
 	res.writeHead(200, {"Content-Type": "image/svg+xml"});
 	var deck = req.url.slice(1).replace(/\.svg$/, "");
+	if (deck.length%5) return next();
 	var readStream = fs.createReadStream("deckcache/" + deck);
 	readStream.on("open", function(){
 		this.pipe(res);
