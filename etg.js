@@ -345,7 +345,10 @@ function fromTrueMark(code){
 	return code >= 9010 && code <= 9022 ? code-9010 : -1;
 }
 function toTrueMark(n){
-	return (n+9010).toString(32);
+	return n+9010;
+}
+function toTrueMarkSuffix(n){
+	return "01"+(n+9010).toString(32);
 }
 function place(array, item){
 	for (var i=0; i<array.length; i++){
@@ -1310,6 +1313,7 @@ exports.cloneStatus = cloneStatus;
 exports.casttext = casttext;
 exports.fromTrueMark = fromTrueMark;
 exports.toTrueMark = toTrueMark;
+exports.toTrueMarkSuffix = toTrueMarkSuffix;
 exports.PlayerRng = PlayerRng;
 exports.parseSkill = parseSkill;
 exports.Chroma = 0;
