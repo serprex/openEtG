@@ -30,7 +30,7 @@ module.exports = function() {
 	var ownDeck = new DeckDisplay(60, setCardArt,
 		function(i) {
 			ownDeck.rmCard(i);
-			ownVal.text = Math.ceil(userutil.calcWealth(ownDeck.deck)*3);
+			ownVal.text = Math.ceil(userutil.calcWealth(ownDeck.deck, true)*3);
 		}
 	);
 	view.addChild(ownDeck);
@@ -42,7 +42,7 @@ module.exports = function() {
 			var card = Cards.Codes[code];
 			if (ownDeck.deck.length < 60 && card.rarity > 0 && card.rarity < 4 && !card.isFree()) {
 				ownDeck.addCard(code);
-				ownVal.text = Math.ceil(userutil.calcWealth(ownDeck.deck)*3);
+				ownVal.text = Math.ceil(userutil.calcWealth(ownDeck.deck, true)*3);
 			}
 		}
 	);

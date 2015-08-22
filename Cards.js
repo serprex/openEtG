@@ -1,5 +1,5 @@
 "use strict";
-exports.Codes = {};
+exports.Codes = [];
 exports.Targeting = null;
 exports.loadcards = function(){
 	require("./Cards.json").forEach(function(cards, type){
@@ -15,12 +15,12 @@ function parseCsv(type, data){
 			keys.forEach(function(key, i){
 				cardinfo[key] = carddata[i];
 			});
-			var cardcode = cardinfo.Code = cardinfo.Code.toString(32);
+			var cardcode = cardinfo.Code;
 			if (cardcode in exports.Codes){
 				console.log(cardcode + " duplicate " + cardinfo.Name + " " + exports.Codes[cardcode].name);
 			}else{
 				exports.Codes[cardcode] = new etg.Card(type, cardinfo);
-				if (cardcode < "6qo") exports[cardinfo.Name.replace(/\W/g, "")] = exports.Codes[cardcode];
+				if (cardcode < 7000) exports[cardinfo.Name.replace(/\W/g, "")] = exports.Codes[cardcode];
 				cardinfo.Code = etgutil.asShiny(cardcode, true);
 				exports.Codes[cardinfo.Code] = new etg.Card(type, cardinfo);
 			}

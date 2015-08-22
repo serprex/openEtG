@@ -21,7 +21,8 @@ exports.pveCostReward = new Uint8Array([
 exports.arenaCost = function(lv){
 	return exports.pveCostReward[lv?10:8];
 }
-exports.calcWealth = function(cardpool){
+exports.calcWealth = function(cardpool, isDecoded){
+	if (!cardpool) return 0;
 	var wealth = 0;
 	function wealthIter(code, count){
 		var card = Cards.Codes[code];
@@ -31,12 +32,8 @@ exports.calcWealth = function(cardpool){
 	}
 	if (typeof cardpool === "string"){
 		etgutil.iterraw(cardpool, wealthIter);
-	}else if (cardpool instanceof Array){
-		cardpool.forEach(function(x){wealthIter(x,1)});
 	}else{
-		for(var code in cardpool){
-			wealthIter(code, cardpool[code]);
-		}
+		cardpool.forEach(isDecoded ? function(code){wealthIter(code,1)} : function(count,code){wealthIter(code,count)});
 	}
 	return wealth;
 }

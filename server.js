@@ -617,14 +617,6 @@ var sockEvents = {
 			if (!err) sockEmit(socket, "wealthtop", {top: obj});
 		});
 	},
-	cardart:function(){
-		var socket = this;
-		fs.readdir(__dirname + "/Cards", function(err, files){
-			if (files){
-				sockEmit(socket, "cardart", {art: files.join("").replace(/\.png/g, "")});
-			}
-		});
-	},
 	chatus:function(data){
 		if (data.hide !== undefined) this.meta.offline = data.hide;
 		if (data.want !== undefined) this.meta.wantpvp = data.want;

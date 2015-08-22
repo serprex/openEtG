@@ -14,7 +14,7 @@ if (process.argv.length < 3){
 	writetd("Tot", "Ele", "C", "P", "S", "|", "R", "U", "C", "", "");
 	for(var i=0; i<13; i++){
 		var ofele = etg.filtercards(false, function(x){return x.element == i});
-		var creas = 0, perms = 0, spels = 0, comm = new Uint32Array(3), last = "000";
+		var creas = 0, perms = 0, spels = 0, comm = new Uint32Array(3), last = 0;
 		ofele.forEach(function(x){
 			if (x.type <= etg.PermanentEnum) perms++;
 			else if (x.type == etg.CreatureEnum) creas++;
@@ -24,7 +24,7 @@ if (process.argv.length < 3){
 				if (x.code > last) last = x.code;
 			}
 		});
-		writetd(ofele.length, etg.eleNames[i], creas, perms, spels, "|", comm[2], comm[1], comm[0], last, (parseInt(last, 32)+2000).toString(32));
+		writetd(ofele.length, etg.eleNames[i], creas, perms, spels, "|", comm[2], comm[1], comm[0], last.toString(32), (last+2000).toString(32));
 	}
 	write("[/table][/right]\n");
 }else{

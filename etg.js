@@ -66,7 +66,7 @@ function Card(type, info){
 	this.element = parseInt(info.E);
 	this.name = info.Name;
 	this.code = info.Code;
-	this.upped = (parseInt(this.code, 32)&0x3FFF) > 6999;
+	this.upped = (this.code&0x3FFF) > 6999;
 	this.rarity = parseInt(info.R) || 0;
 	this.attack = parseInt(info.Attack) || 0;
 	this.health = parseInt(info.Health) || 0;
@@ -200,7 +200,7 @@ Shield.prototype = Object.create(Permanent.prototype);
 CardInstance.prototype = Object.create(Thing.prototype);
 Object.defineProperty(CardInstance.prototype, "active", { get: function() { return this.card.active; }});
 Object.defineProperty(CardInstance.prototype, "status", { get: function() { return this.card.status; }});
-Object.defineProperty(Card.prototype, "shiny", { get: function() { return this.code > "fvv"; }});
+Object.defineProperty(Card.prototype, "shiny", { get: function() { return this.code & 16384; }});
 var Chroma = 0, Entropy = 1, Death = 2, Gravity = 3, Earth = 4, Life = 5, Fire = 6, Water = 7, Light = 8, Air = 9, Time = 10, Darkness = 11, Aether = 12;
 var PillarEnum = 0, WeaponEnum = 1, ShieldEnum = 2, PermanentEnum = 3, SpellEnum = 4, CreatureEnum = 5;
 var MulliganPhase1 = 0, MulliganPhase2 = 1, PlayPhase = 2, EndPhase = 3;
@@ -341,8 +341,7 @@ Player.prototype.shuffle = function(array) {
 	}
 	return array;
 }
-function fromTrueMark(x){
-	var code = parseInt(x, 32);
+function fromTrueMark(code){
 	return code >= 9010 && code <= 9022 ? code-9010 : -1;
 }
 function toTrueMark(n){
@@ -439,7 +438,7 @@ CardInstance.prototype.clone = function(owner){
 	}
 });
 CardInstance.prototype.hash = function(){
-	return parseInt(this.card.code, 32) << 1 | (this.owner == this.owner.game.player1);
+	return this.card.code << 1 | (this.owner == this.owner.game.player1);
 }
 function hashString(str){
 	var hash = 0;
@@ -458,7 +457,7 @@ function hashObj(obj){
 Creature.prototype.hash = function(){
 	var hash = this.owner == this.owner.game.player1 ? 17 : 19;
 	hash ^= hashObj(this.status) ^ (this.hp*17 + this.atk*31 - this.maxhp - this.usedactive * 3);
-	hash ^= parseInt(this.card.code, 32);
+	hash ^= this.card.code;
 	for (var key in this.active){
 		hash ^= hashString(key + ":" + this.active[key].activename.join(" "));
 	}
@@ -470,7 +469,7 @@ Creature.prototype.hash = function(){
 Permanent.prototype.hash = function(){
 	var hash = this.owner == this.owner.game.player1 ? 5351 : 5077;
 	hash ^= hashObj(this.status) ^ (this.usedactive * 3);
-	hash ^= parseInt(this.card.code, 32);
+	hash ^= this.card.code;
 	for (var key in this.active){
 		hash ^= hashString(key + "=" + this.active[key].activename.join(" "));
 	}
@@ -482,7 +481,7 @@ Permanent.prototype.hash = function(){
 Weapon.prototype.hash = function(){
 	var hash = this.owner == this.owner.game.player1 ? 13 : 11;
 	hash ^= hashObj(this.status) ^ (this.atk*31 - this.usedactive * 3);
-	hash ^= parseInt(this.card.code, 32);
+	hash ^= this.card.code;
 	for (var key in this.active){
 		hash ^= hashString(key + "-" + this.active[key].activename.join(" "));
 	}
@@ -494,7 +493,7 @@ Weapon.prototype.hash = function(){
 Shield.prototype.hash = function(){
 	var hash = this.owner == this.owner.game.player1 ? 5009 : 4259;
 	hash ^= hashObj(this.status) ^ (this.dr*31 - this.usedactive * 3);
-	hash ^= parseInt(this.card.code, 32);
+	hash ^= this.card.code;
 	for (var key in this.active){
 		hash ^= hashString(key + "~" + this.active[key].activename.join(" "));
 	}
@@ -1282,11 +1281,15 @@ Player.prototype.randomcard = function(upped, filter){
 function casttext(cast, castele){
 	return cast == 0?"0":cast + ":" + castele;
 }
-function cardCmp(x, y){
+function codeCmp(x, y){
 	var cx = Cards.Codes[x].asShiny(false), cy = Cards.Codes[y].asShiny(false);
 	return cx.upped - cy.upped || cx.element - cy.element || cx.cost - cy.cost || cx.type - cy.type || (cx.code > cy.code) - (cx.code < cy.code) || (x > y) - (x < y);
 }
+function cardCmp(x, y){
+	return codeCmp(x.code, y.code);
+}
 exports.cardCmp = cardCmp;
+exports.codeCmp = codeCmp;
 exports.Game = Game;
 exports.Thing = Thing;
 exports.Card = Card;
@@ -1332,10 +1335,10 @@ exports.MulliganPhase1 = 0;
 exports.MulliganPhase2 = 1;
 exports.PlayPhase = 2;
 exports.EndPhase = 3;
-exports.PillarList = Object.freeze(["4sa", "4vc", "52g", "55k", "58o", "5bs", "5f0", "5i4", "5l8", "5oc", "5rg", "5uk", "61o"]);
-exports.PendList = Object.freeze(["4sc", "50u", "542", "576", "5aa", "5de", "5gi", "5jm", "5mq", "5pu", "5t2", "606", "63a"]);
-exports.NymphList = Object.freeze([undefined, "500", "534", "568", "59c", "5cg", "5fk", "5io", "5ls", "5p0", "5s4", "5v8", "62c"]);
-exports.AlchemyList = Object.freeze([undefined, "4vn", "52s", "55v", "595", "5c7", "5fb", "5ig", "5lj", "5om", "5rr", "5uu", "621"]);
-exports.ShardList = Object.freeze([undefined, "50a", "53e", "56i", "59m", "5cq", "5fu", "5j2", "5m6", "5pa", "5se", "5vi", "62m"]);
+exports.PillarList = new Uint16Array([5002, 5100, 5200, 5300, 5400, 5500, 5600, 5700, 5800, 5900, 6000, 6100, 6200]);
+exports.PendList = new Uint16Array([5004, 5150, 5250, 5350, 5450, 5550, 5650, 5750, 5850, 5950, 6050, 6150, 6250]);
+exports.NymphList = new Uint16Array([0, 5120, 5220, 5320, 5420, 5520, 5620, 5720, 5820, 5920, 6020, 6120, 6220]);
+exports.AlchemyList = new Uint16Array([0, 5111, 5212, 5311, 5413, 5511, 5611, 5712, 5811, 5910, 6011, 6110, 6209]);
+exports.ShardList = new Uint16Array([0, 5130, 5230, 5330, 5430, 5530, 5630, 5730, 5830, 5930, 6030, 6130, 6230]);
 exports.eleNames = Object.freeze(["Chroma", "Entropy", "Death", "Gravity", "Earth", "Life", "Fire", "Water", "Light", "Air", "Time", "Darkness", "Aether", "Build your own", "Random"]);
 exports.DefaultStatus = DefaultStatus;

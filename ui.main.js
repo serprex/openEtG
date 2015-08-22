@@ -89,9 +89,6 @@ var sockEvents = {
 		if (lastindex != data.msg.length) span.appendChild(document.createTextNode(data.msg.slice(lastindex)));
 		chat.addSpan(span);
 	},
-	cardart:function(data) {
-		gfx.preloadCardArt(data.art);
-	},
 	foearena:function(data) {
 		var game = require("./views/Match")({ deck: data.deck, urdeck: sock.getDeck(), seed: data.seed,
 			p2hp: data.hp, foename: data.name, p2drawpower: data.draw, p2markpower: data.mark, arena: data.name, level: 4+data.lv }, true);

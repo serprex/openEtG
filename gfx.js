@@ -61,7 +61,7 @@ function Text(text, fontsize, color, bgcolor){
 	ctx.fillText(text, 0, fontsize);
 	return new PIXI.Texture(new PIXI.BaseTexture(canvas));
 }
-var caimgcache = {}, artimagecache = {}, shinyShader;
+var caimgcache = [], artimagecache = [], shinyShader;
 function setShinyShader(renderer, sprite, card){
 	if (card.shiny && PIXI.gl) sprite.shader = shinyShader || (shinyShader = require("./ColorMatrixShader")(renderer));
 }
@@ -118,8 +118,8 @@ function artFactory(realcb){
 		}
 		function mkOnError(code){
 			return function onError(){
-				if (code >= "6qo"){
-					var redcode = etgutil[code >= "g00"?"asShiny":"asUpped"](code, false);
+				if (code > 6999){
+					var redcode = etgutil[code & 16384?"asShiny":"asUpped"](code, false);
 					if (redcode in artimagecache) cb(artimagecache[code] = artimagecache[redcode]);
 					else{
 						this.removeEventListener("error", onError);
@@ -127,27 +127,18 @@ function artFactory(realcb){
 						this.addEventListener("load", function(){
 							artimagecache[redcode] = artimagecache[code];
 						});
-						this.src = "Cards/" + redcode + ".png";
+						this.src = "Cards/" + redcode.toString(32) + ".png";
 					}
 				}else artimagecache[code] = undefined;
 			}
 		}
 		if (!(code in artimagecache)){
-			if (artpool){
-				var redcode = code;
-				while (!(redcode in artpool) && redcode >= "6qo"){
-					redcode = etgutil[redcode >= "g00"?"asShiny":"asUpped"](redcode, false);
-				}
-				if (!(redcode in artpool)) return cb(artimagecache[code] = undefined);
-				else if (redcode in artimagecache) return cb(artimagecache[code] = artimagecache[redcode]);
-			}else{
-				var img = new Image();
-				img.addEventListener("load", function(){
-					cb(artimagecache[code] = new PIXI.Texture(new PIXI.BaseTexture(this)));
-				});
-				img.addEventListener("error", mkOnError(code));
-				img.src = "Cards/" + code + ".png";
-			}
+			var img = new Image();
+			img.addEventListener("load", function(){
+				cb(artimagecache[code] = new PIXI.Texture(new PIXI.BaseTexture(this)));
+			});
+			img.addEventListener("error", mkOnError(code));
+			img.src = "Cards/" + code.toString(32) + ".png";
 		}
 		return cache[code] || cb(artimagecache[code]);
 	}
@@ -234,29 +225,11 @@ function getInstImage(scale){
 		return rend;
 	});
 }
-var artpool;
 exports.refreshCaches = function() {
-	for(var code in caimgcache){
+	caimgcache.forEach(function(code){
 		caimgcache[code].destroy(true);
-		delete caimgcache[code];
-	}
-}
-exports.preloadCardArt = function(art){
-	var pool = {};
-	for(var i=0; i<art.length; i+=3){
-		pool[art.substr(i, 3)] = true;
-	}
-	artpool = pool;
-	(function loadArt(i){
-		if (i == art.length) return;
-		var code = art.substr(i, 3);
-		var img = new Image();
-		img.addEventListener("load", function(){
-			artimagecache[code] = new PIXI.Texture(new PIXI.BaseTexture(this));
-			loadArt(i+3);
-		});
-		img.src = "Cards/" + code + ".png";
-	})(0);
+	});
+	caimgcache.length = 0;
 }
 if (typeof PIXI !== "undefined"){
 	exports.nopic = PIXI.Texture.emptyTexture;

@@ -335,7 +335,6 @@ module.exports = function(nymph) {
 			var changePass = document.createElement("input"), changeBtn = dom.button("Change Pass", changeFunc),
 				enableSound = dom.check("Enable sound", soundChange, "enableSound"),
 				enableMusic = dom.check("Enable music", musicChange, "enableMusic"),
-				preloadart = dom.check("Preload art", null, "preart"),
 				hideRightpane = dom.check("Hide rightpane", hideRightpaneChange, "hideRightpane"),
 				printstats = dom.check("Print stats", null, "stats"),
 				hideCostIcon = dom.check("Hide cost icon", gfx.refreshCaches, "hideCostIcon"),
@@ -345,7 +344,7 @@ module.exports = function(nymph) {
 				if (e.keyCode == 13) changeFunc();
 			});
 			dom.add(div, [8, 8, changePass], [162, 8, changeBtn],
-				[8, 53, enableSound], [135, 53, enableMusic], [260, 53, preloadart],
+				[8, 53, enableSound], [135, 53, enableMusic],
 				[8, 88, hideRightpane], [135, 88, printstats], [260, 88, hideCostIcon],
 				[8, 123, disableTut],
 				[309, 123, wipe]);

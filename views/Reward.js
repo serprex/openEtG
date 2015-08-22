@@ -27,7 +27,7 @@ module.exports = function(reward, numberofcopies, code) {
 		div = dom.div([10, 40, ["Done", function() {
 			if (chosenReward) {
 				if (code === undefined) {
-					sock.userExec("addbound", { c: etgutil.encodeCount(numberofcopies) + chosenReward });
+					sock.userExec("addbound", { c: etgutil.encodeCount(numberofcopies) + chosenReward.toString(32) });
 					require("./MainMenu")();
 				}
 				else {

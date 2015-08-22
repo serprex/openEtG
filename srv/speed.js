@@ -27,8 +27,7 @@ function speed(req, res, next){
 			cards[i*7+j] = prng.randomcard(false, function(x){return x.element == ele && x.type && cards.indexOf(x.code) == -1}).code;
 		}
 	}
-	cards.sort(etg.cardCmp);
-	require("./deckredirect")()({url: "/" + "01"+cards.join("01")}, res);
+	require("./deckredirect")()({url: "/" + etgutil.encodedeck(cards)}, res);
 }
 module.exports = function(){
 	return speed;

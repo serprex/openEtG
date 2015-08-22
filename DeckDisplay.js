@@ -41,7 +41,7 @@ DeckDisplay.prototype.renderDeck = function(i){
 DeckDisplay.prototype.addCard = function(code, i){
 	if (i === undefined) i = 0;
 	for (;i < this.deck.length;i++) {
-		if (etg.cardCmp(this.deck[i], code) >= 0) break;
+		if (etg.codeCmp(this.deck[i], code) >= 0) break;
 	}
 	this.deck.splice(i, 0, code);
 	this.renderDeck(i);

@@ -14,8 +14,7 @@ module.exports = function(data){
 	cardArt.position.set(734, 8);
 	view.addChild(cardArt);
 	var progressmax = 0, progress = 0, shinyprogress = 0;
-	for(var code in Cards.Codes){
-		var card = Cards.Codes[code];
+	Cards.Codes.forEach(function(card, code){
 		if (!card.upped && !card.shiny && card.type && !card.status.token){
 			progressmax += 42;
 			var upcode = etgutil.asUpped(code, true);
@@ -24,7 +23,7 @@ module.exports = function(data){
 			upcode = etgutil.asUpped(code, true);
 			shinyprogress += Math.min((cardpool[code] || 0) + (boundpool[code] || 0) + ((cardpool[upcode] || 0) + (boundpool[upcode] || 0))*6, 42);
 		}
-	}
+	});
 	var wealth = data.gold + userutil.calcWealth(cardpool);
 	var stage = {
 		view:view,

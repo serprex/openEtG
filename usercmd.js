@@ -3,7 +3,7 @@ var etgutil = require("./etgutil");
 var userutil = require("./userutil");
 
 exports.bazaar = function(data, user){
-	var cost = Math.ceil(userutil.calcWealth(data.cards)*3);
+	var cost = Math.ceil(userutil.calcWealth(data.cards, true)*3);
 	if (user.gold >= cost){
 		user.gold -= cost;
 		user.pool = etgutil.mergedecks(user.pool, data.cards);
@@ -96,43 +96,45 @@ exports.upshpillar = function(data, user){
 exports.upshall = function(data, user) {
 	var pool = etgutil.deck2pool(user.pool);
 	var bound = etgutil.deck2pool(user.accountbound);
-	for(var code in pool){
+	pool.forEach(function(count, code){
 		var card = Cards.Codes[code];
-		if (!card || card.rarity == 5 || card.rarity < 1) continue;
+		if (!card || card.rarity == 5 || card.rarity < 1) return;
 		var dcode = etgutil.asShiny(etgutil.asUpped(card.code, false), false);
-		if (code == dcode) continue;
+		if (code == dcode) return;
 		if (!(dcode in pool)) pool[dcode] = 0;
-		pool[dcode] += pool[code]*(card.upped && card.shiny?36:6);
+		pool[dcode] += count*(card.upped && card.shiny?36:6);
 		pool[code] = 0;
-	}
-	for(var code in bound){
-		if (!(code in pool)) continue;
+	});
+	bound.forEach(function(count, code){
+		if (!(code in pool)) return;
 		var card = Cards.Codes[code];
-		if (!card || card.rarity == 5 || card.rarity < 1 || card.upped || card.shiny) continue;
-		pool[code] += Math.min(bound[code], 6);
-	}
-	for(var code in pool){
+		if (!card || card.rarity == 5 || card.rarity < 1 || card.upped || card.shiny) return;
+		pool[code] += Math.min(count, 6);
+	});
+	pool.forEach(function(count, code){
 		var card = Cards.Codes[code];
-		if (!card || card.rarity == 5 || card.rarity < 1 || card.upped || card.shiny) continue;
+		if (!card || card.rarity == 5 || card.rarity < 1 || card.upped || card.shiny) return;
 		var base = 6, pc = 0;
 		for(var i=1; i<4; i++){
 			var upcode = etgutil.asShiny(etgutil.asUpped(code, i&1), i&2);
-			pool[upcode] = Math.max(Math.min(Math.floor((pool[code]-base)/(i==3?36:6)), 6), 0);
+			pool[upcode] = Math.max(Math.min(Math.floor((count-base)/(i==3?36:6)), 6), 0);
 			pc += pool[upcode]*(i==3?36:6);
 			base += 36;
 		}
 		pool[code] -= pc;
-	}
-	for(var code in bound){
-		if (!(code in pool)) continue;
+	});
+	bound.forEach(function(count, code){
+		if (!(code in pool)) return;
 		var card = Cards.Codes[code];
-		if (!card || card.rarity == 5 || card.rarity < 1 || card.upped || card.shiny) continue;
-		pool[code] -= Math.min(bound[code], 6);
-	}
+		if (!card || card.rarity == 5 || card.rarity < 1 || card.upped || card.shiny) return;
+		pool[code] -= Math.min(count, 6);
+	});
 	var newpool = "";
-	for(var code in pool){
-		if (pool[code]) newpool = etgutil.addcard(newpool, code, pool[code]);
-	}
+	pool.forEach(function(count, code){
+		if (count){
+			if (count) newpool = etgutil.addcard(newpool, code, count);
+		}
+	});
 	user.pool = newpool;
 }
 exports.addgold = function(data, user) {

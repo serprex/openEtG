@@ -98,7 +98,7 @@ module.exports = function(game, foeDeck) {
 					if (game.level !== undefined && game.level < 2) {
 						cardwon = cardwon.asUpped(false);
 					}
-					game.cardreward = "01" + etgutil.asShiny(cardwon.code, false);
+					game.cardreward = "01" + etgutil.asShiny(cardwon.code, false).toString(32);
 				}
 				if (!game.goldreward) {
 					var goldwon;
@@ -151,7 +151,7 @@ module.exports = function(game, foeDeck) {
 			game.player1.maxhp,
 			(game.goldreward || 0) - (game.cost || 0),
 			game.cardreward || "-",
-			userutil.calcWealth(etgutil.deck2pool(game.cardreward)),
+			userutil.calcWealth(game.cardreward),
 			!sock.user || game.level === undefined ? -1 : sock.user["streak"+game.level],
 			streakrate.toFixed(3).replace(/\.?0+$/, "")].join());
 	}
