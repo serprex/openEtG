@@ -6,7 +6,7 @@ var options = require("./options");
 exports.loaded = false;
 function load(progress, postload){
 	exports.load = undefined;
-	var assets = ["cardBacks", "atlas", "bg_quest", "bg_questmap"];
+	var assets = ["cardBacks", "atlas"];
 	function process(asset, tex, base){
 		var id = asset.match(/\d+$/), tex = new PIXI.Texture(tex, base?new PIXI.math.Rectangle(base[0], base[1], base[2], base[3]):null);
 		if (id){

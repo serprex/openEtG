@@ -5,11 +5,21 @@ var gfx = require("../gfx");
 var sock = require("../sock");
 var Quest = require("../Quest");
 var options = require("../options");
+var bg_questmap;
 module.exports = function(){
 	var questui = px.mkView(function() {
 		tinfo.text = "Welcome to Potatotal Island. The perfect island for adventuring!";
 	});
-	var questmap = new PIXI.Sprite(gfx.bg_questmap);
+	if (!bg_questmap){
+		bg_questmap = new PIXI.Texture(new PIXI.BaseTexture());
+		var img = new Image();
+		img.addEventListener("load", function(){
+			bg_questmap.baseTexture = new PIXI.BaseTexture(img);
+			bg_questmap.frame = new PIXI.math.Rectangle(0, 0, img.width, img.height);
+		});
+		img.src = "assets/bg_questmap.png";
+	}
+	var questmap = new PIXI.Sprite(bg_questmap);
 	questmap.position.set(124, 162);
 	questui.addChild(questmap);
 	var tinfo = dom.text("");

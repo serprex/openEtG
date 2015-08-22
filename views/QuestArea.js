@@ -9,11 +9,20 @@ function startQuest(questname) {
 		sock.userEmit("updatequest", { quest: questname, newstage: 0 });
 	}
 }
+var bg_quest = new PIXI.Texture(new PIXI.BaseTexture());
+(function(){
+	var img = new Image();
+	img.addEventListener("load", function(){
+		bg_quest.baseTexture = new PIXI.BaseTexture(img);
+		bg_quest.frame = new PIXI.math.Rectangle(0, 0, img.width, img.height);
+	});
+	img.src = "assets/bg_quest.png";
+})();
 module.exports = function(area) {
 	var questui = px.mkView(function() {
 		tinfo.text = "";
 	});
-	var questmap = new PIXI.Sprite(gfx.bg_quest);
+	var questmap = new PIXI.Sprite(bg_quest);
 	questmap.position.set(124, 162);
 	questui.addChild(questmap);
 	var tinfo = dom.text("");
