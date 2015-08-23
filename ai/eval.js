@@ -60,6 +60,9 @@ var SkillsValues = Object.freeze({
 		return c instanceof etg.CardInstance?-6:c.status.appeased?0:c.trueatk()*-1.5;
 	},
 	bblood:7,
+	beguilestop:function(c){
+		return -getDamage(c);
+	},
 	bellweb:1,
 	blackhole:function(c){
 		var a=0, fq=c.owner.foe.quanta;

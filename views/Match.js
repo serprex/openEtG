@@ -612,7 +612,7 @@ function startMatch(game, foeDeck, spectate) {
 				pl.sanctuary ? gfx.sanctuary :
 				pl.nova >= 3 ? gfx.singularity : gfx.nopic);
 			for (var i = 0;i < 8;i++) {
-				handsprite[j][i].texture = gfx.getCardImage(pl.hand[i] ? (j == 0 || game.player1.precognition ? pl.hand[i].card.code : "0") : "1");
+				handsprite[j][i].texture = gfx.getCardImage(pl.hand[i] ? (j == 0 || game.player1.precognition ? pl.hand[i].card.code : 0) : 1);
 			}
 			for (var i = 0;i < 23;i++) {
 				var cr = pl.creatures[i];

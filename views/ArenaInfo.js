@@ -13,7 +13,7 @@ module.exports = function(data) {
 	function renderInfo(info, y){
 		if (info){
 			if (y) info.card = etgutil.asUpped(info.card, true);
-			var mark, i = 0, adeck = "05" + info.card + info.deck;
+			var mark, i = 0, adeck = "05" + info.card.toString(32) + info.deck;
 			etgutil.iterdeck(adeck, function(code){
 				var ismark = etg.fromTrueMark(code);
 				if (~ismark){
@@ -53,7 +53,7 @@ module.exports = function(data) {
 		for(var i=0; i<2; i++){
 			(function(uocard){
 				dom.add(div, [734, 268+i*292, ["Create", function(){
-					require("./Editor")(data, data[uocard>"6qn"?"B":"A"] || {}, uocard, true);
+					require("./Editor")(data, data[uocard>6999?"B":"A"] || {}, uocard, true);
 				}]]);
 				var ocard = new PIXI.Sprite(gfx.getArt(uocard));
 				ocard.position.set(734, 8+i*292);

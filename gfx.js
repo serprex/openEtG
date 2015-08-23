@@ -150,7 +150,7 @@ function getSlotImage(card, code){
 		var rend = require("./px").mkRenderTexture(100, 20);
 		var graphics = new PIXI.Graphics();
 		graphics.lineStyle(1, card && card.shiny ? 0xdaa520 : 0x222222);
-		graphics.beginFill(card ? ui.maybeLighten(card) : code == "0" ? 0x887766 : 0x111111);
+		graphics.beginFill(card ? ui.maybeLighten(card) : code == 0 ? 0x887766 : 0x111111);
 		graphics.drawRect(0, 0, 99, 19);
 		if (card) {
 			var clipwidth = rend.width-2;
@@ -226,8 +226,8 @@ function getInstImage(scale){
 	});
 }
 exports.refreshCaches = function() {
-	caimgcache.forEach(function(code){
-		caimgcache[code].destroy(true);
+	caimgcache.forEach(function(img){
+		img.destroy(true);
 	});
 	caimgcache.length = 0;
 }

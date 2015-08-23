@@ -185,6 +185,7 @@ var userEvents = {
 				if (!obj) return;
 				obj.day = day - obj.day;
 				obj.curhp = getAgedHp(obj.hp, obj.day);
+				obj.card = parseInt(obj.card, (obj.card.length==3?32:10));
 				if (rank !== null) obj.rank = rank;
 				["draw", "hp", "loss", "mark", "win"].forEach(function(key){
 					obj[key] = parseInt(obj[key], 10);
@@ -246,6 +247,7 @@ var userEvents = {
 				console.log("deck: "+ aname + " " + idx);
 				db.hgetall((data.lv?"B:":"A:")+aname, function(err, adeck){
 					var seed = Math.random();
+					adeck.card = parseInt(adeck.card, (adeck.card.length == 3?32:10));
 					if (data.lv) adeck.card = etgutil.asUpped(adeck.card, true);
 					adeck.hp = parseInt(adeck.hp || 200);
 					adeck.mark = parseInt(adeck.mark || 1);
@@ -255,7 +257,7 @@ var userEvents = {
 						seed: seed*etgutil.MAX_INT,
 						name: aname, hp: curhp,
 						mark: adeck.mark, draw: adeck.draw,
-						deck: adeck.deck + "05" + adeck.card, lv:data.lv});
+						deck: adeck.deck + "05" + adeck.card.toString(32), lv:data.lv});
 				});
 			});
 		});
@@ -603,6 +605,7 @@ var sockEvents = {
 				}else{
 					db.hmget((data.lv?"B:":"A:") + obj[i], "win", "loss", "day", "card", function(err, wl){
 						wl[2] = sutil.getDay()-wl[2];
+						wl[3] = parseInt(wl[3], (wl[3].length == 3?32:10));
 						t20.push([obj[i], Math.floor(obj[i+1])].concat(wl));
 						getwinloss(i+2);
 					});

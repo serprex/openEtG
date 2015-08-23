@@ -43,7 +43,7 @@ exports.useruser = function(db, servuser, cb){
 			pool: servuser.pool,
 			accountbound: servuser.accountbound,
 			gold: servuser.gold,
-			ocard: servuser.ocard,
+			ocard: parseInt(servuser.ocard, (servuser.ocard.length==3?32:10)),
 			freepacks: servuser.freepacks,
 			aiwins: servuser.aiwins,
 			ailosses: servuser.ailosses,
