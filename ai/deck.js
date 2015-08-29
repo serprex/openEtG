@@ -12,7 +12,7 @@ function scorpion(card, deck){
 	}
 }
 var filters = {
-	"4tc":function rustler(card, deck, ecost){
+	5036:function rustler(card, deck, ecost){
 		if (Math.abs(ecost[etg.Light]) > 5) return true;
 		var qpe=0;
 		for(var i=1; i<13; i++){
@@ -20,33 +20,33 @@ var filters = {
 		}
 		return qpe>3;
 	},
-	"52u":scorpion,
-	"56d":function tidalHealing(card, deck){
+	5214:scorpion,
+	5325:function tidalHealing(card, deck){
 		var aquaticCount = 0;
 		for(var i=0; i<deck.length; i++){
 			if (Cards.Codes[deck[i]].status.aquatic && ++aquaticCount>4) return true;
 		}
 	},
-	"59a":function tunneling(card, deck){
+	5418:function tunneling(card, deck){
 		var hasBurrow = ["590", "591", "598", "58p"];
 		for(var i=0; i<deck.length; i++){
 			if (~hasBurrow.indexOf(deck[i])) return true;
 		}
 	},
-	"59m":function integrity(card, deck){
+	5430:function integrity(card, deck){
 		var shardCount=0;
 		for(var i=0; i<deck.length; i++){
 			if (~etg.ShardList.indexOf(deck[i]) && ++shardCount>3) return true;
 		}
 	},
-	"5lk":function hope(card, deck){
+	5812:function hope(card, deck){
 		var hasLight = ["5lj","5ls","5ok","7k3","7jp","7kc"];
 		for(var i=0; i<deck.length; i++){
 			if (~hasLight.indexOf(deck[i])) return true;
 		}
 	},
-	"5rt":scorpion,
-	"5rv":function neurotoxin(card, deck){
+	6013:scorpion,
+	6015:function neurotoxin(card, deck){
 		var hasPoison = ["532","533","539","718","52o","52q","52u","52s","5c8","5ce","5c3","5i5","71i","71a","71p","71e","71j","71c","7ao","7au","7aj","7gl","7gu"];
 		var canInfect = ["534","538","712","719","52i","52s","5ie","5un","5uu","5v8","71c","71o","71k","7t7","7te","7to"];
 		for(var i=0; i<deck.length; i++){
