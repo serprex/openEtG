@@ -1291,6 +1291,20 @@ function codeCmp(x, y){
 function cardCmp(x, y){
 	return codeCmp(x.code, y.code);
 }
+function typedIndexOf(array, inst){
+	for(var i=0; i<array.length; i++){
+		if (array[i] == inst) return i;
+	}
+	return -1;
+}
+function typedSome(array, func){
+	for(var i=0; i<array.length; i++){
+		if (func(array[i])) return true;
+	}
+	return false;
+}
+exports.typedIndexOf = typedIndexOf;
+exports.typedSome = typedSome;
 exports.cardCmp = cardCmp;
 exports.codeCmp = codeCmp;
 exports.Game = Game;

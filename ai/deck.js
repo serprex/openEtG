@@ -4,11 +4,16 @@ var Cards = require("../Cards");
 var Skills = require("../Skills");
 var etgutil = require("../etgutil");
 
+var hasBuff = new Uint16Array([5125,5318,8230,5306,5730,5721,5807,6115,6218,6230,7106,7125,7306,7318,7730,7721,7807,8115,8218,9015]);
+var hasPoison = new Uint16Array([5218,5219,5225,7208,5208,5210,5214,5212,5512,5518,5507,5701,7218,7210,7225,7214,7219,7212,7512,7518,7507,7701,7710]);
+var canInfect = new Uint16Array([5220,5224,7202,7209,5202,5212,5710,6103,6110,6120,7212,7224,7220,8103,8110,8120]);
+var hasBurrow = new Uint16Array([5408,5409,5416,5401]);
+var hasLight = new Uint16Array([5811,5820,5908,7811,7801,7820]);
 function scorpion(card, deck){
-	var hasBuff = ["505","566","816","55q","5j2","5ip","5lf","5v3","62a","62m","6u2","6ul","74a","74m","7hi","7h9","7jv","7tj","80q","8pn"];
-	if (card.isOf(Cards.Deathstalker)) hasBuff.push(Cards.Nightfall.code, etgutil.asUpped(Cards.Nightfall.code, true));
+	var isDeath = card.isOf(Cards.Deathstalker); // Scan for Nightfall
 	for(var i=0; i<deck.length; i++){
-		if (~hasBuff.indexOf(deck[i])) return true;
+		if (~hasBuff.indexOf(deck[i]) ||
+			(isDeath && (deck[i] == 6106 || deck[i] == 8106))) return true;
 	}
 }
 var filters = {
@@ -28,32 +33,28 @@ var filters = {
 		}
 	},
 	5418:function tunneling(card, deck){
-		var hasBurrow = ["590", "591", "598", "58p"];
 		for(var i=0; i<deck.length; i++){
-			if (~hasBurrow.indexOf(deck[i])) return true;
+			if (~etg.typedIndexOf(hasBurrow, deck[i])) return true;
 		}
 	},
 	5430:function integrity(card, deck){
 		var shardCount=0;
 		for(var i=0; i<deck.length; i++){
-			if (~etg.ShardList.indexOf(deck[i]) && ++shardCount>3) return true;
+			if (~etg.typedIndexOf(etg.ShardList, deck[i]) && ++shardCount>3) return true;
 		}
 	},
 	5812:function hope(card, deck){
-		var hasLight = ["5lj","5ls","5ok","7k3","7jp","7kc"];
 		for(var i=0; i<deck.length; i++){
-			if (~hasLight.indexOf(deck[i])) return true;
+			if (~etg.typedIndexOf(hasLight, deck[i])) return true;
 		}
 	},
 	6013:scorpion,
 	6015:function neurotoxin(card, deck){
-		var hasPoison = ["532","533","539","718","52o","52q","52u","52s","5c8","5ce","5c3","5i5","71i","71a","71p","71e","71j","71c","7ao","7au","7aj","7gl","7gu"];
-		var canInfect = ["534","538","712","719","52i","52s","5ie","5un","5uu","5v8","71c","71o","71k","7t7","7te","7to"];
 		for(var i=0; i<deck.length; i++){
-			if (~hasPoison.indexOf(deck[i])) return true;
-			if (deck[i] == "5v0" || deck[i] == "7tg"){
+			if (~etg.typedIndexOf(hasPoison, deck[i])) return true;
+			if (deck[i] == 6112 || deck[i] == 8112){
 				for(var i=0; i<deck.length; i++){
-					if (~canInfect.indexOf(deck[i])) return true;
+					if (~etg.typedIndexOf(canInfect, deck[i])) return true;
 				}
 			}
 		}
@@ -64,14 +65,15 @@ module.exports = function(uprate, markpower, maxRarity) {
 		return uprate ? etgutil.asUpped(x, Math.random() < uprate) : x;
 	}
 	var cardcount = {};
-	var eles = [etg.PlayerRng.uptoceil(12), etg.PlayerRng.uptoceil(12)], ecost = new Float32Array(13);
+	var eles = new Uint8Array([etg.PlayerRng.uptoceil(12), etg.PlayerRng.uptoceil(12)]), ecost = new Float32Array(13);
 	for (var i = 0;i < 13;i++) {
 		ecost[i] = 0;
 	}
 	ecost[eles[1]] -= 5 * markpower;
 	var deck = [];
 	var anyshield = 0, anyweapon = 0;
-	eles.forEach(function(ele, j){
+	for(var j=0; j<2; j++){
+		var ele = eles[j];
 		for (var i = 20-j*10; i>0; i--) {
 			var card = etg.PlayerRng.randomcard(Math.random() < uprate, function(x) {
 				return x.element == ele && x.type != etg.PillarEnum && x.rarity <= maxRarity && cardcount[x.code] != 6 &&
@@ -106,7 +108,7 @@ module.exports = function(uprate, markpower, maxRarity) {
 			}else if (card.type == etg.ShieldEnum) anyshield++;
 			else if (card.type == etg.WeaponEnum) anyweapon++;
 		}
-	});
+	}
 	for (var i=deck.length-1; ~i; i--){
 		var filterFunc = filters[etgutil.asUpped(deck[i], false)];
 		if (filterFunc){
@@ -134,7 +136,7 @@ module.exports = function(uprate, markpower, maxRarity) {
 	}
 	var qpe = 0, qpesum = ecost[0], ismono = eles[0] == eles[1];
 	for (var i = 1;i < 13;i++) {
-		if (!ecost[i] || ~eles.indexOf(i)) continue;
+		if (!ecost[i] || eles[0] == i || eles[1] == i) continue;
 		qpe++;
 		qpesum += ecost[i];
 	}
