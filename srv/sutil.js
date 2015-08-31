@@ -1,8 +1,8 @@
 "use strict";
 var fs = require("fs");
 exports.prepuser = function(servuser){
-	["gold", "daily", "dailymage", "dailydg", "aiwins", "ailosses", "pvpwins", "pvplosses"].forEach(function(field){
-		servuser[field] = parseInt(servuser[field] || 0);
+	["gold", "daily", "dailymage", "dailydg", "aiwins", "ailosses", "pvpwins", "pvplosses", "ocard"].forEach(function(field){
+		servuser[field] = parseInt(servuser[field] || 0, 10);
 	});
 }
 exports.mkTask = function(cb){
@@ -43,7 +43,7 @@ exports.useruser = function(db, servuser, cb){
 			pool: servuser.pool,
 			accountbound: servuser.accountbound,
 			gold: servuser.gold,
-			ocard: parseInt(servuser.ocard, (servuser.ocard.length==3?32:10)),
+			ocard: servuser.ocard,
 			freepacks: servuser.freepacks,
 			aiwins: servuser.aiwins,
 			ailosses: servuser.ailosses,
