@@ -3,6 +3,7 @@ var ui = require("./ui");
 var Cards = require("./Cards");
 var etgutil = require("./etgutil");
 var options = require("./options");
+var Shaders = require("./Shaders");
 exports.loaded = false;
 function load(progress, postload){
 	exports.load = undefined;
@@ -61,9 +62,14 @@ function Text(text, fontsize, color, bgcolor){
 	ctx.fillText(text, 0, fontsize);
 	return new PIXI.Texture(new PIXI.BaseTexture(canvas));
 }
-var caimgcache = [], artimagecache = [], shinyShader;
+var caimgcache = [], artimagecache = [], shinyShader, grayShader;
 function setShinyShader(renderer, sprite, card){
-	if (card.shiny && PIXI.gl) sprite.shader = shinyShader || (shinyShader = require("./ColorMatrixShader")(renderer));
+	if (card.shiny && PIXI.gl) sprite.shader = shinyShader || (shinyShader = Shaders.GBRA(renderer));
+	return sprite;
+}
+function setGrayBorderShader(renderer, sprite, card){
+	if (!card.upped && PIXI.gl) sprite.shader = grayShader || (grayShader = Shaders.DarkGrayScale(renderer));
+	return sprite;
 }
 function makeArt(code, art, rend) {
 	if (!rend) rend = require("./px").mkRenderTexture(132, 256);
@@ -79,13 +85,12 @@ function makeArt(code, art, rend) {
 	rarity.position.set(102, 252);
 	template.addChild(rarity);
 	if (art) {
-		var artspr = new PIXI.Sprite(art);
+		var artspr = setShinyShader(rend.renderer, new PIXI.Sprite(art), card);
 		artspr.position.set(2, 20);
-		setShinyShader(rend.renderer, artspr, card);
 		template.addChild(artspr);
 	}
 	if (card.shiny){
-		template.addChild(new PIXI.Sprite(exports.shinyborder[card.upped?1:0]));
+		template.addChild(setGrayBorderShader(rend.renderer, new PIXI.Sprite(exports.shinyborder), card));
 	}
 	var nametag = new PIXI.Sprite(Text(card.name, 12, card.upped ? "black" : "white"));
 	nametag.position.set(2, 2);
