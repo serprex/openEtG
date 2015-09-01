@@ -180,9 +180,9 @@ function maybeSendChat(e) {
 			}
 			sock.emit("roll", data);
 		}else if (msg.match(/^\/decks/) && sock.user){
-			var prefix = msg.length > 6 && msg.slice(6).replace(/ {2,}/g, " ").trim().split(" ");
+			var rx = msg.length > 6 && new RegExp(msg.slice(7));
 			var names = Object.keys(sock.user.decknames);
-			if (prefix) names = names.filter(function(name){return prefix.some(function(x){return name.indexOf(x)==0;})});
+			if (rx) names = names.filter(function(name){return name.match(rx)});
 			names.sort();
 			names.forEach(function(name){
 				var deck = sock.user.decknames[name];
@@ -190,7 +190,7 @@ function maybeSendChat(e) {
 				var link = document.createElement("a");
 				link.href = "deck/" + deck;
 				link.target = "_blank";
-				link.className = "ico ce"+etg.fromTrueMark(deck.slice(-3));
+				link.className = "ico ce"+etg.fromTrueMark(parseInt(deck.slice(-3), 32));
 				span.appendChild(link);
 				span.appendChild(document.createTextNode(name+" "));
 				span.addEventListener("click", function(e){
