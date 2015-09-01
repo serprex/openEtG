@@ -15,7 +15,7 @@ module.exports = function() {
 	var packdata = [
 		{cost: 15, type: "Bronze", info: "10 Commons", color: "#cd7d32"},
 		{cost: 25, type: "Silver", info: "3 Commons, 3 Uncommons", color: "#c0c0c0"},
-		{cost: 60, type: "Gold", info: "3 Commons, 4 Uncommons, 1 Rare", color: "#ffd700"},
+		{cost: 77, type: "Gold", info: "1 Common, 2 Uncommons, 2 Rares", color: "#ffd700"},
 		{cost: 100, type: "Platinum", info: "4 Commons, 3 Uncommons, 1 Rare, 1 Shard", color: "#e4e4e4"},
 		{cost: 250, type: "Nymph", info: "1 Nymph", color: "#6699bb"},
 	];

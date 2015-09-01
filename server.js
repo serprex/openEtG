@@ -467,7 +467,7 @@ var userEvents = {
 		var pack = [
 			{ amount: 10, cost: 15, rare: []},
 			{ amount: 6, cost: 25, rare: [3]},
-			{ amount: 8, cost: 60, rare: [3, 7]},
+			{ amount: 5, cost: 77, rare: [1, 3]},
 			{ amount: 9, cost: 100, rare: [4, 7, 8]},
 			{ amount: 1, cost: 250, rare: [0, 0, 0, 0]},
 		][data.pack];
