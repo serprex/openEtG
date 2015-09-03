@@ -69,7 +69,7 @@ var sockEvents = {
 			if (reres.index != lastindex) span.appendChild(document.createTextNode(data.msg.slice(lastindex, reres.index)));
 			var notlink = false;
 			for(var i=2; i<reres[0].length; i+=5){
-				var code = reres[0].substr(i, 3);
+				var code = parseInt(reres[0].substr(i, 3), 32);
 				if (!(code in Cards.Codes) && etg.fromTrueMark(code) == -1){
 					notlink = true;
 					break;

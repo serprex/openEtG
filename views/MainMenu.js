@@ -336,7 +336,6 @@ module.exports = function(nymph) {
 				enableSound = dom.check("Enable sound", soundChange, "enableSound"),
 				enableMusic = dom.check("Enable music", musicChange, "enableMusic"),
 				hideRightpane = dom.check("Hide rightpane", hideRightpaneChange, "hideRightpane"),
-				printstats = dom.check("Print stats", null, "stats"),
 				hideCostIcon = dom.check("Hide cost icon", gfx.refreshCaches, "hideCostIcon"),
 				disableTut = dom.check("Disable tutorial", null, "disableTut");
 			changePass.type = "password";
@@ -345,7 +344,7 @@ module.exports = function(nymph) {
 			});
 			dom.add(div, [8, 8, changePass], [162, 8, changeBtn],
 				[8, 53, enableSound], [135, 53, enableMusic],
-				[8, 88, hideRightpane], [135, 88, printstats], [260, 88, hideCostIcon],
+				[8, 88, hideRightpane], [260, 88, hideCostIcon],
 				[8, 123, disableTut],
 				[309, 123, wipe]);
 			div.id = "settingspane";

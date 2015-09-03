@@ -141,7 +141,7 @@ module.exports = function(game, foeDeck) {
 	}
 	dom.add(div, [10, 290, lefttext.join("\n")]);
 
-	if (options.stats && game.endurance == undefined){
+	if (game.endurance == undefined){
 		chat([game.level === undefined ? -1 : game.level,
 			(game.foename || "?").replace(/,/g, " "),
 			winner ? "W" : "L",
@@ -153,7 +153,7 @@ module.exports = function(game, foeDeck) {
 			game.cardreward || "-",
 			userutil.calcWealth(game.cardreward),
 			!sock.user || game.level === undefined ? -1 : sock.user["streak"+game.level],
-			streakrate.toFixed(3).replace(/\.?0+$/, "")].join());
+			streakrate.toFixed(3).replace(/\.?0+$/, "")].join(), null, "Stats");
 	}
 	function onkeydown(e){
 		if (e.keyCode == 32) exitFunc();
