@@ -156,7 +156,7 @@ function maybeSendChat(e) {
 				clear: "Clear chat",
 				who: "List users who're online",
 				roll: "Server rolls XdY publicly",
-				decks: "List all decks",
+				decks: "List all decks. Accepts a regex filter",
 				mod: "List mods",
 				mute: "If no user specified, mute chat entirely",
 				unmute: "If no user specified, unmute chat entirely",
@@ -167,6 +167,12 @@ function maybeSendChat(e) {
 			}
 		}else if (msg == "/clear"){
 			chat.clear();
+		}else if (msg.match(/^\/clear /)){
+			var rx = new RegExp(msg.slice(7));
+			var chatBox = document.getElementById("chatBox");
+			for(var i=chatBox.children.length-1; i>=0; i--){
+				if (chatBox.children[i].textContent.match(rx)) chatBox.children[i].remove();
+			}
 		}else if (msg == "/who"){
 			sock.emit("who");
 		}else if (msg.match(/^\/roll( |$)\d*d?\d*$/)){
@@ -180,7 +186,7 @@ function maybeSendChat(e) {
 			}
 			sock.emit("roll", data);
 		}else if (msg.match(/^\/decks/) && sock.user){
-			var rx = msg.length > 6 && new RegExp(msg.slice(7));
+			var rx = msg.length > 7 && new RegExp(msg.slice(7));
 			var names = Object.keys(sock.user.decknames);
 			if (rx) names = names.filter(function(name){return name.match(rx)});
 			names.sort();

@@ -117,7 +117,7 @@ input[type="text"],input[type="password"],input:not([type]){width:150px}
 }
 #chatBox{
 	width:350px;
-	height:496px;
+	height:488px;
 	overflow-y:scroll;
 	overflow-x:hidden;
 	color:red;
