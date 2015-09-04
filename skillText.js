@@ -170,7 +170,7 @@ var data = {
 	},
 	lightning:"Deal 5 damage to target",
 	liquid:"Target creature is poisoned & skills are replaced with \"Heal owner per damage dealt\"",
-	livingweapon:"Target creature becomes equipped as a weapon. Heal target's owner for health of target",
+	livingweapon:"Target creature becomes equipped as a weapon, unequiping any prewielded weapon. Heal target's owner for health of target",
 	lobotomize:"Remove skills from target creature",
 	locket:"Produce quanta of mark",
 	locketshift:"Now produces quanta of target's element",

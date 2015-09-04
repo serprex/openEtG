@@ -153,8 +153,8 @@ function maybeSendChat(e) {
 		chatinput.value = "";
 		if (msg == "/help"){
 			var cmds = {
-				clear: "Clear chat",
-				who: "List users who're online",
+				clear: "Clear chat. Accepts a regex filter",
+				who: "List users online",
 				roll: "Server rolls XdY publicly",
 				decks: "List all decks. Accepts a regex filter",
 				mod: "List mods",
