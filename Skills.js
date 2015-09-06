@@ -14,8 +14,10 @@ function quadpillarFactory(ele){
 	return function(c, t){
 		var n = c == t ? 1 : c.status.charges;
 		for(var i=0; i<n; i++){
-			for(var j=c.owner.rng()<.6?2:1; j>0; j--){
-				c.owner.spend(c.owner.choose(ele), -1);
+			var r = c.owner.upto(16);
+			c.owner.spend((ele>>((r&3)<<2))&15, -1);
+			if (c.owner.rng()<.6){
+				c.owner.spend((ele>>(r&12))&15, -1);
 			}
 		}
 	}
@@ -1906,9 +1908,9 @@ pend:function(c,t){
 	c.owner.spend(ele, -c.status.charges * (ele > 0 ? 1 : 3));
 	c.status.pendstate = !c.status.pendstate;
 },
-pillmat:quadpillarFactory([4, 6, 7, 9]),
-pillspi:quadpillarFactory([2, 5, 8, 11]),
-pillcar:quadpillarFactory([1, 3, 10, 12]),
+pillmat:quadpillarFactory(18041), //4,6,7,9
+pillspi:quadpillarFactory(9611), //2,5,8,11
+pillcar:quadpillarFactory(5036), //1,3,10,12
 absorbdmg:function(c,t, dmg, blocked){
 	c.status.storedpower += blocked;
 },

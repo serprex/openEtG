@@ -41,7 +41,8 @@ var tipjar = [
 	"Mark cards are only obtainable through PvP events. A tournament deck verifier is at tournament.htm",
 	"After an AI battle you will win a random common, uncommon, or rare from your opponent's deck",
 	"Cards in packs have a (45/packsize)% chance to increment rarity",
-	"At Wealth T50 you can see which players have the highest wealth. Wealth is a combination of current gold & one's cardpool"
+	"At Wealth T50 you can see which players have the highest wealth. Wealth is a combination of current gold & one's cardpool",
+	"Throttling means that the effect is limited to 2 procs when attacking multiple times with adrenaline",
 ];
 var bg_main = new Image();
 bg_main.src = "assets/bg_main.png";

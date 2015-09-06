@@ -9,12 +9,12 @@
   "dependencies": {
     "compression": "^1.5.2",
     "connect": "^3.4.0",
-    "redis": "^0.12.1",
+    "redis": "^1.0.0",
     "serve-static": "^1.10.0",
     "ws": "^0.8.0"
   },
   "devDependencies": {
-    "qunitjs": "^1.18.0"
+    "qunitjs": "^1.19.0"
   },
   "scripts": {
     "test": "npm start;firefox 127.0.0.1:13602/test.htm"

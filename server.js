@@ -13,12 +13,9 @@ var sutil = require("./srv/sutil");
 var qstring = require("querystring");
 var fs = require("fs");
 var db = require("redis").createClient();
-var app = require("connect")().
+var app = require("connect")().use(require("./srv/forksrv")).
 	use(require("compression")()).
 	use(require("serve-static")(__dirname, { maxAge: 2626262000 })).
-	use("/speed", require("./srv/speed")()).
-	use("/deck", require("./srv/deckredirect")()).
-	use("/card", require("./srv/cardredirect")()).
 	use("/code", require("./srv/codesmith")(db));
 function storeUsers(){
 	for(var u in users){

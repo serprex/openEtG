@@ -1,16 +1,17 @@
 "use strict";
+var deck = require("./deck");
 var etg = require("../etg");
 var etgutil = require("../etgutil");
 var mt = require("../MersenneTwister");
-function speed(req, res, next){
-	if (req.url == "/"){
-		res.writeHead("302", {Location: "http://" + req.headers.host + "/speed/" + Math.random()*etgutil.MAX_INT });
+module.exports = function(url, res, date){
+	if (url == ""){
+		res.write("HTTP/1.1 302 Found\r\nLocation:http://etg.dek.im/speed/" + Math.random()*etgutil.MAX_INT+"\r\n\r\n");
 		res.end();
 		return;
 	}
 	var hash = 0;
-	for (var i=1; i<req.url.length; i++){
-		hash = hash*31 + req.url.charCodeAt(i) & 0x7FFFFFFF;
+	for (var i=1; i<url.length; i++){
+		hash = hash*31 + url.charCodeAt(i) & 0x7FFFFFFF;
 	}
 	var prng = Object.create(etg.Player.prototype);
 	prng.game = {rng: new mt(hash)};
@@ -27,8 +28,5 @@ function speed(req, res, next){
 			cards[i*7+j] = prng.randomcard(false, function(x){return x.element == ele && x.type && cards.indexOf(x.code) == -1}).code;
 		}
 	}
-	require("./deckredirect")()({url: "/" + etgutil.encodedeck(cards)}, res);
-}
-module.exports = function(){
-	return speed;
+	deck(etgutil.encodedeck(cards), res, date);
 }
