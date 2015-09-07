@@ -44,7 +44,15 @@ module.exports = function(url, res, date){
 		var textColor = card.upped ? "" : " fill='white'";
 		ret += "<rect class='"+elecls+"' width='128px' height='256px'/><text y='15px'" + textColor + ">" + card.name + "</text>";
 		ret += "<image xlink:href='../Cards/"+etgutil.asShiny(etgutil.asUpped(intCode, false), false).toString(32)+".png' y='20px' width='128px' height='128px'/>";
-		ret += "<text y='156px'" + textColor + ">" + card.info() + "</text>";
+		var info = card.info(), i=0, y=156;
+		while(~i && i<info.length){
+			var ni = Math.min(info.indexOf("\n", i), i+20);
+			if (ni == -1) ni = i+20;
+			ni = Math.min(ni, info.length);
+			ret += "<text y='"+y+"'" + textColor + ">" + info.slice(i, ni) + "</text>";
+			y += 16;
+			i = ni + (info[ni] == "\n");
+		}
 		ret = "<svg version='1.1' xmlns='http://www.w3.org/2000/svg' xmlns:xlink='http://www.w3.org/1999/xlink' height='256' width='128'><style type='text/css'><![CDATA[text{font-size:12px}"+classString()+"]]></style>" + ret + "</svg>";
 		zlib.gzip(ret, {level:9}, function(err, retbuf){
 			res.write(prefix);
