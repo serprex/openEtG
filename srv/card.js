@@ -7,7 +7,7 @@ var etgutil = require("../etgutil");
 function eleChar(card){
 	return String.fromCharCode(97+card.element+(card.upped?13:0));
 }
-module.exports = function(url, res){
+module.exports = function(url, res, date){
 	var code = url.slice(0, 3).replace(/\.svg$/, ""), intCode = parseInt(code, 32);
 	if (!(intCode in Cards.Codes)){
 		res.write("HTTP 1.1 404 Not Found\r\nConnection:close\r\n\r\n");

@@ -18,14 +18,12 @@ function m304(res){
 	res.write("HTTP/1.1 304 Not Modified\r\n\r\n");
 	return res.end();
 }
-module.exports = function(url, res, date){
-	var m404 = "HTTP/1.1 404 Not Found\r\n"+date+"Connection:close\r\n\r\n";
+module.exports = function(url, res, date, lastModified){
+	var m404 = "HTTP/1.1 404 Not Found\r\nConnection:close\r\n\r\n";
 	if (~url.indexOf("..")){
 		res.write(m404);
 		return res.end();
 	}
-	var split = url.split("\n"), lastModified = split[1];
-	url = split[0];
 	var contentType = mime[url.slice(url.lastIndexOf(".")+1)];
 	var prefix = "HTTP/1.1 200 OK\r\nContent-Encoding:gzip\r\nContent-Type:"+contentType+"\r\n"+date+"Connection:close\r\n\r\n";
 	if(cache[url]){
