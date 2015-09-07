@@ -10,7 +10,7 @@ function eleChar(card){
 module.exports = function(url, res, date){
 	var deck = url.replace(/\.svg$/, "");
 	if (deck.length%5){
-		res.write("HTTP 1.1 404 Not Found\r\nConnection:close\r\n\r\n");
+		res.write("HTTP/1.1 404 Not Found\r\nConnection:close\r\n\r\n");
 		return res.end();
 	}
 	var prefix = "HTTP/1.1 200 OK\r\nContent-Encoding:gzip\r\nContent-Type:image/svg+xml\r\n" + date + "Connection:close\r\n\r\n";
@@ -65,7 +65,7 @@ module.exports = function(url, res, date){
 			res.write(prefix);
 			res.write(retbuf);
 			res.end();
-			fs.writeFile("deckcache/" + deck, ret, function(){});
+			fs.writeFile("deckcache/" + deck, retbuf, function(){});
 		});
 	});
 }

@@ -47,11 +47,10 @@ module.exports = function(url, res){
 		ret += "<text y='156px'" + textColor + ">" + card.info() + "</text>";
 		ret = "<svg version='1.1' xmlns='http://www.w3.org/2000/svg' xmlns:xlink='http://www.w3.org/1999/xlink' height='256' width='128'><style type='text/css'><![CDATA[text{font-size:12px}"+classString()+"]]></style>" + ret + "</svg>";
 		zlib.gzip(ret, {level:9}, function(err, retbuf){
-			console.log(prefix, retbuf);
 			res.write(prefix);
 			res.write(retbuf);
 			res.end();
-			fs.writeFile("deckcache/" + code, ret, function(){});
+			fs.writeFile("deckcache/" + code, retbuf, function(){});
 		});
 	});
 }

@@ -7,10 +7,7 @@
     "url": "https://github.com/serprex/openEtG.git"
   },
   "dependencies": {
-    "compression": "^1.5.2",
-    "connect": "^3.4.0",
     "redis": "^1.0.0",
-    "serve-static": "^1.10.0",
     "ws": "^0.8.0"
   },
   "devDependencies": {

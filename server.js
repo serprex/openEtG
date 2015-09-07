@@ -13,10 +13,17 @@ var sutil = require("./srv/sutil");
 var qstring = require("querystring");
 var fs = require("fs");
 var db = require("redis").createClient();
-var app = require("connect")().use(require("./srv/forksrv")).
-	use(require("compression")()).
-	use(require("serve-static")(__dirname, { maxAge: 2626262000 })).
-	use("/code", require("./srv/codesmith")(db));
+var http = require("http");
+var codesmith = require("./srv/codesmith")(db);
+var forkcore = require("child_process").fork("./srv/forkcore");
+var app = http.createServer(function(req, res){
+	if (req.url.slice(0,6) == "/code?"){
+		codesmith(req, res);
+	}else{
+		var ifModifiedSince = req.headers["if-modified-since"];
+		forkcore.send(req.url.slice(1) + (ifModifiedSince?"\n"+ifModifiedSince:""), res.socket);
+	}
+});
 function storeUsers(){
 	for(var u in users){
 		var user = users[u];
