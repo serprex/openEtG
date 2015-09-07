@@ -617,7 +617,7 @@ function startMatch(game, foeDeck, spectate) {
 			for (var i = 0;i < 23;i++) {
 				var cr = pl.creatures[i];
 				if (cr && !(j == 1 && cloakgfx.visible)) {
-					creasprite[j][i].texture = gfx.getCreatureImage(cr.card);
+					creasprite[j][i].texture = gfx.getCreatureImage(cr.card.code);
 					creasprite[j][i].visible = true;
 					var child = creasprite[j][i].children[1];
 					child.texture = ui.getBasicTextImage(cr.trueatk() + " | " + cr.truehp() + (cr.status.charges ? " x" + cr.status.charges : ""), 10, cr.card.upped ? "black" : "white", ui.maybeLightenStr(cr.card));
