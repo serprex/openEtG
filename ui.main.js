@@ -233,7 +233,9 @@ function maybeSendChat(e) {
 			sock.userEmit("modclear");
 		}else if (sock.user && msg.match(/^\/mod(guest|mute|add|rm) /)){
 			var sp = msg.indexOf(" ");
-			sock.userEmit(msg.slice(1, sp), {m: msg.slice(sp+1)})
+			sock.userEmit(msg.slice(1, sp), {m: msg.slice(sp+1)});
+		}else if (msg.match(/^\/code /)){
+			sock.userEmit("codecreate", {t:msg.slice(6)});
 		}else if (!msg.match(/^\/[^/]/) || (sock.user && msg.match(/^\/w( |")/))) {
 			msg = msg.replace(/^\/\//, "/");
 			if (sock.user){

@@ -14,15 +14,10 @@ var qstring = require("querystring");
 var fs = require("fs");
 var db = require("redis").createClient();
 var http = require("http");
-var codesmith = require("./srv/codesmith")(db);
 var forkcore = require("child_process").fork("./srv/forkcore");
 var app = http.createServer(function(req, res){
-	if (req.url.slice(0,6) == "/code?"){
-		codesmith(req, res);
-	}else{
-		var ifModifiedSince = req.headers["if-modified-since"];
-		forkcore.send(req.url.slice(1) + (ifModifiedSince?"\n"+ifModifiedSince:""), res.socket);
-	}
+	var ifModifiedSince = req.headers["if-modified-since"];
+	forkcore.send(req.url.slice(1) + (ifModifiedSince?"\n"+ifModifiedSince:""), res.socket);
 });
 function storeUsers(){
 	for(var u in users){
@@ -265,6 +260,37 @@ var userEvents = {
 			});
 		});
 	},
+	codecreate:function(data, user){
+		var socket = this;
+		if (!data.t){
+			return sockEmit(socket, "chat", { mode: "red", msg: "Invalid type" });
+		}
+		db.sismember("Codesmiths", data.u, function(err, ismem){
+			function codeSmithLoop(iter){
+				if (iter == 999){
+					sockEmit(socket, "chat", { mode: "red", msg: "Failed to generate unique code."});
+				}else{
+					var code = "";
+					for (var i=0; i<8; i++){
+						code += String.fromCharCode(33+Math.floor(Math.random()*94));
+					}
+					db.hexists("CodeHash", code, function(err, exists){
+						if (exists){
+							codeSmithLoop(iter+1);
+						}else{
+							db.hset("CodeHash", code, data.t);
+							sockEmit(socket, "chat", { mode: "red", msg: data.t + " " + code});
+						}
+					});
+				}
+			}
+			if (ismem){
+				codeSmithLoop(0);
+			}else{
+				sockEmit(socket, "chat", { mode: "red", msg: "You are not a codesmith" });
+			}
+		});
+	},
 	codesubmit:function(data, user){
 		var socket = this;
 		db.hget("CodeHash", data.code, function(err, type){
@@ -280,7 +306,7 @@ var userEvents = {
 					db.hdel("CodeHash", data.code);
 				}
 			}else if (type.charAt(0) == "C"){
-				var c = type.slice(1);
+				var c = parseInt(type.slice(1), 32);
 				if (c in Cards.Codes){
 					user.pool = etgutil.addcard(user.pool, c);
 					sockEmit(socket, "codecode", {card: c});
