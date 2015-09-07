@@ -64,7 +64,6 @@ module.exports = function(game, foeDeck) {
 			["Pillarless", function() { return game.bonusstats.cardsplayed[0] == 0 ? .05 : 0 }],
 			["Weapon Master", function() { return game.bonusstats.cardsplayed[1] >= 3 ? .1 : 0 }],
 			["Murderer", function() { return game.bonusstats.creatureskilled > 5 ? .15 : 0 }],
-			["One Turn Kill", function() { return game.bonusstats.otk && game.player2.hp <= 0 ? .2 : 0 }],
 			["Last point", function() { return game.player1.hp == 1 ? .3 : 0 }],
 		].forEach(function(data) {
 			var ret = data[1]();

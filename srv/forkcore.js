@@ -16,9 +16,8 @@ process.on("message", function(msg, res){
 		}else if (url.slice(0,5).match(/^speed\/?/)){
 			speed(url.slice(6), res, d);
 		}else if (url.match(/^(vanilla\/|cia\/)?$|\.(js(on)?|html?|css|csv|png|ogg)$/)){
-			console.log(url);
 			if (url.match(/^(vanilla\/|cia\/)?$/)){
-				url += (url[url.length-1] == "/"?"":"/") + "index.html";
+				url += "index.html";
 			}
 			file(url, res, d, lines[1]);
 		}else if (url == "vanilla" || url == "cia"){

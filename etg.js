@@ -22,7 +22,6 @@ function Game(seed, flip){
 		cardsplayed : new Int32Array(6),
 		creaturesplaced: 0,
 		creatureskilled: 0,
-		otk: false
 	};
 }
 var DefaultStatus = {
@@ -697,7 +696,6 @@ Player.prototype.endturn = function(discard) {
 	for (var i = this.foe.drawpower; i > 0; i--) {
 		this.foe.drawcard(true);
 	}
-	if (this.game.bonusstats != null && this == this.game.player2) this.game.bonusstats.otk = this.hp == this.maxhp;
 	this.game.turn = this.foe;
 	this.foe.proc("turnstart");
 	this.game.updateExpectedDamage();

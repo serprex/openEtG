@@ -46,9 +46,12 @@ module.exports = function(url, res, date){
 		ret += "<image xlink:href='../Cards/"+etgutil.asShiny(etgutil.asUpped(intCode, false), false).toString(32)+".png' y='20px' width='128px' height='128px'/>";
 		var info = card.info(), i=0, y=156;
 		while(~i && i<info.length){
-			var ni = Math.min(info.indexOf("\n", i), i+20);
-			if (ni == -1) ni = i+20;
-			ni = Math.min(ni, info.length);
+			var ni = info.indexOf("\n", i);
+			if (ni == -1) ni = Math.min(i+23, info.length);
+			if (ni != info.length){
+				var lsp = info.lastIndexOf(" ", ni);
+				if (lsp > i) ni = lsp;
+			}
 			ret += "<text y='"+y+"'" + textColor + ">" + info.slice(i, ni) + "</text>";
 			y += 16;
 			i = ni + (info[ni] == "\n");
