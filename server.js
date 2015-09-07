@@ -141,10 +141,7 @@ var userEvents = {
 	},
 	delete:function(data, user) {
 		var u = data.u;
-		db.del("U:" + u);
-		db.del("Q:" + u);
-		db.del("D:" + u);
-		db.del("N:" + u);
+		db.del("U:"+u, "Q:"+u, "D:"+u, "N:"+u);
 		delete users[u];
 		delete usersock[u];
 	},
@@ -458,8 +455,7 @@ var userEvents = {
 	passchange:function(data, user){
 		if (!data.p){
 			var hkey = "U:"+user.name;
-			db.hdel(hkey, "salt");
-			db.hdel(hkey, "iter");
+			db.hdel(hkey, "salt", "iter");
 			db.hset(hkey, "auth", user.name);
 			delete user.salt;
 			delete user.iter;
@@ -531,7 +527,7 @@ var userEvents = {
 				freepacklist[data.pack]--;
 				user.accountbound = etgutil.mergedecks(user.accountbound, newCards);
 				if (freepacklist.every(function(x){return x == 0})) {
-					db.hdel("U:" + user.name, "freepacks");
+					db.hdel("U:"+user.name, "freepacks");
 					delete user.freepacks;
 				}
 				else{
