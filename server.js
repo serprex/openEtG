@@ -1,7 +1,7 @@
 #!/usr/bin/node
 "use strict";
 process.chdir(__dirname);
-var users = {}, usersock = {}, rooms = {};
+var users = {}, usersock = {}, rooms = {}, usergc = new Set();
 var etg = require("./etg");
 var Cards = require("./Cards");
 Cards.loadcards();
@@ -20,22 +20,23 @@ var app = http.createServer(function(req, res){
 	forkcore.send(req.url.slice(1) + (ifModifiedSince?"\n"+ifModifiedSince:""), res.socket);
 });
 function storeUsers(){
+	var margs = ["Users"];
 	for(var u in users){
 		var user = users[u];
 		if (user.pool || user.accountbound){
-			db.hset("Users", u, JSON.stringify(user));
+			margs.push(u, JSON.stringify(user));
 		}
 	}
+	if (margs.length > 1) db.send_command("hmset", margs);
 }
 setInterval(function(){
 	storeUsers();
 	// Clear inactive users
 	for(var u in users){
-		if (!(u in usersock)){
+		if (usergc.delete(u)){
 			delete users[u];
-		}else if (usersock[u].readyState == 3){
-			delete usersock[u];
-			delete users[u];
+		}else{
+			usergc.add(u);
 		}
 	}
 }, 300000);
@@ -45,6 +46,7 @@ process.on("exit", function(){
 	db.quit();
 });
 function loadUser(name, cb){
+	usergc.delete(name);
 	if (users[name]){
 		cb(users[name]);
 	}else{
@@ -640,11 +642,16 @@ function wssConnection(socket) {
 				delete rooms[key];
 			}
 		}
+		for(var key in usersock){
+			if (usersock[key] == this){
+				delete usersock[key];
+			}
+		}
 		var info = this.meta;
 		if (info){
 			if (info.trade){
 				var foesock = usersock[info.trade.foe];
-				if (foesock && usersock[to].readyState == 1){
+				if (foesock && foesock.readyState == 1){
 					var foeinfo = foesock.meta;
 					if (foeinfo && foeinfo.trade && usersock[foeinfo.trade.foe] == this){
 						sockEmit(foesock, "tradecanceled");
