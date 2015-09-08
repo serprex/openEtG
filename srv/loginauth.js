@@ -49,7 +49,7 @@ module.exports = function(db, users, sockEmit, usersock){
 			if (socket.readyState == 1){
 				usersock[user.name] = socket;
 				socket.send('{"x":"login",'+JSON.stringify(user, function(key, val){ return this == user && key.match(/^(salt|iter)$/) ? undefined : val }).slice(1));
-				user.daily = 128;
+				if (!user.daily) user.daily = 128;
 			}
 		}
 		sutil.initsalt(user);

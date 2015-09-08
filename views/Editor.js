@@ -93,7 +93,7 @@ module.exports = function(arena, ainfo, acard, startempty) {
 		return function() {
 			if (quickNum.classList.contains("selectedbutton")) {
 				saveButton();
-				sock.userExec("changequickdeck", { number: number, name: tname.textcache });
+				sock.userExec("changeqeck", { number: number, name: tname.textcache });
 				sock.user.qecks[number] = tname.textcache;
 				fixQuickButtons();
 				quickNum.classList.remove("selectedbutton");
