@@ -23,7 +23,7 @@ function storeUsers(){
 	for(var u in users){
 		var user = users[u];
 		if (user.pool || user.accountbound){
-			db.hmset("U:"+u, user);
+			db.hset("Users", u, JSON.stringify(user));
 		}
 	}
 }
@@ -44,6 +44,19 @@ process.on("exit", function(){
 	storeUsers();
 	db.quit();
 });
+function loadUser(name, cb){
+	if (users[name]){
+		cb(users[name]);
+	}else{
+		db.hget("Users", name, function(err, userstr){
+			if (err){
+				console.log(err.message);
+			}else if (userstr){
+				cb(users[name] = JSON.parse(userstr));
+			}
+		});
+	}
+}
 function activeUsers() {
 	var activeusers = [], userCount = 0;
 	for (var username in usersock) {
@@ -125,41 +138,32 @@ var userEvents = {
 		user.pool = "";
 		user.freepacks = starters[sid+4] + "," + starters[sid+5] + ",1";
 		user.selectedDeck = "1";
-		var socket = this;
-		var task = sutil.mkTask(function(){
-			sockEvents.login.call(socket, {u:user.name, a:user.auth});
-		});
-		db.rpush("N:"+data.u,1,2,3,4,5,6,7,8,9,10, task("N"));
-		db.hmset("D:"+data.u, "1", starters[sid+1], "2", starters[sid+2], "3", starters[sid+3], task("D"));
-		task();
+		user.qecks = ["1","2","3","4","5","6","7","8","9","10"];
+		user.decks = {1:starters[sid+1],2:starters[sid+2],3:starters[sid+3]};
+		user.quests = {};
+		sockEvents.login.call(socket, {u:user.name, a:user.auth});
 	},
 	logout:function(data, user) {
 		var u=data.u;
-		db.hmset("U:"+u, user);
+		db.hset("Users", u, JSON.stringify(user));
 		delete users[u];
 		delete usersock[u];
 	},
 	delete:function(data, user) {
 		var u = data.u;
-		db.del("U:"+u, "Q:"+u, "D:"+u, "N:"+u);
+		db.hdel("Users", u);
 		delete users[u];
 		delete usersock[u];
 	},
-	changequickdeck:function(data,user){
-		db.lset("N:"+user.name, data.number, data.name, function(err, res){
-			if (err){
-				db.rpush("N:"+data.u,1,2,3,4,5,6,7,8,9,10);
-			}
-		});
+	changequickdeck:function(data, user){
+		user.qecks[data.number] = data.name;
 	},
 	setdeck:function(data, user) {
-		if (data.d !== undefined) {
-			db.hset("D:"+user.name, data.name, data.d);
-		}
+		if (data.d !== undefined) user.decks[data.name] = data.d;
 		user.selectedDeck = data.name;
 	},
 	rmdeck:function(data, user){
-		db.hdel("D:"+user.name, data.name);
+		delete user.decks[data.name];
 	},
 	setarena:function(data, user){
 		if (!user.ocard || !data.d){
@@ -197,15 +201,9 @@ var userEvents = {
 		task();
 	},
 	modarena:function(data, user){
-		if (data.aname in users){
-			users[data.aname].gold += data.won?3:1;
-		}else{
-			db.exists("U:"+data.aname, function(err, exists){
-				if (exists){
-					db.hincrby("U:"+data.aname, "gold", data.won?3:1);
-				}
-			});
-		}
+		loadUser(data.aname, function(user){
+			user.gold += data.won?3:1;
+		});
 		var arena = "arena"+(data.lv?"1":""), akey = (data.lv?"B:":"A:")+data.aname;
 		db.zscore(arena, data.aname, function(err, score){
 			if (score === null) return;
@@ -334,50 +332,49 @@ var userEvents = {
 		});
 	},
 	foewant:function(data, user){
-		var u=data.u, f=data.f, socket = this;
+		var u=data.u, f=data.f;
 		if (u == f){
 			return;
 		}
 		console.log(u + " requesting " + f);
-		db.hget("D:"+u, user.selectedDeck, function(err, deck){
-			if (!deck) return;
-			socket.meta.deck = deck;
-			socket.meta.pvpstats = { hp: data.p1hp, markpower: data.p1markpower, deckpower: data.p1deckpower, drawpower: data.p1drawpower };
-			var foesock = usersock[f];
-			if (foesock && foesock.readyState == 1){
-				if (foesock.meta.duel == u) {
-					delete foesock.meta.duel;
-					var seed = Math.random() * etgutil.MAX_INT;
-					socket.meta.foe = foesock;
-					foesock.meta.foe = socket;
-					var deck0 = foesock.meta.deck, deck1 = socket.meta.deck;
-					var owndata = { seed: seed, deck: deck0, urdeck: deck1, foename:f };
-					var foedata = { flip: true, seed: seed, deck: deck1, urdeck: deck0 ,foename:u };
-					var stat = socket.meta.pvpstats, foestat = foesock.meta.pvpstats;
-					for (var key in stat) {
-						owndata["p1" + key] = stat[key];
-						foedata["p2" + key] = stat[key];
-					}
-					for (var key in foestat) {
-						owndata["p2" + key] = foestat[key];
-						foedata["p1" + key] = foestat[key];
-					}
-					sockEmit(socket, "pvpgive", owndata);
-					sockEmit(foesock, "pvpgive", foedata);
-					if (foesock.meta.spectators){
-						foesock.meta.spectators.forEach(function(uname){
-							var sock = usersock[uname];
-							if (sock && sock.readyState == 1){
-								sockEmit(sock, "spectategive", foedata);
-							}
-						});
-					}
-				} else {
-					socket.meta.duel = f;
-					sockEmit(foesock, "challenge", { f:u, pvp:true });
+		var deck = user.decks[user.selectedDeck];
+		if (!deck) return;
+		this.meta.deck = deck;
+		this.meta.pvpstats = { hp: data.p1hp, markpower: data.p1markpower, deckpower: data.p1deckpower, drawpower: data.p1drawpower };
+		var foesock = usersock[f];
+		if (foesock && foesock.readyState == 1){
+			if (foesock.meta.duel == u) {
+				delete foesock.meta.duel;
+				var seed = Math.random() * etgutil.MAX_INT;
+				this.meta.foe = foesock;
+				foesock.meta.foe = this;
+				var deck0 = foesock.meta.deck, deck1 = this.meta.deck;
+				var owndata = { seed: seed, deck: deck0, urdeck: deck1, foename:f };
+				var foedata = { flip: true, seed: seed, deck: deck1, urdeck: deck0 ,foename:u };
+				var stat = this.meta.pvpstats, foestat = foesock.meta.pvpstats;
+				for (var key in stat) {
+					owndata["p1" + key] = stat[key];
+					foedata["p2" + key] = stat[key];
 				}
+				for (var key in foestat) {
+					owndata["p2" + key] = foestat[key];
+					foedata["p1" + key] = foestat[key];
+				}
+				sockEmit(this, "pvpgive", owndata);
+				sockEmit(foesock, "pvpgive", foedata);
+				if (foesock.meta.spectators){
+					foesock.meta.spectators.forEach(function(uname){
+						var sock = usersock[uname];
+						if (sock && sock.readyState == 1){
+							sockEmit(sock, "spectategive", foedata);
+						}
+					});
+				}
+			} else {
+				this.meta.duel = f;
+				sockEmit(foesock, "challenge", { f:u, pvp:true });
 			}
-		});
+		}
 	},
 	spectate:function(data, user){
 		var tgt = usersock[data.f];
@@ -454,17 +451,14 @@ var userEvents = {
 	},
 	passchange:function(data, user){
 		if (!data.p){
-			var hkey = "U:"+user.name;
-			db.hdel(hkey, "salt", "iter");
-			db.hset(hkey, "auth", user.name);
-			delete user.salt;
-			delete user.iter;
+			user.salt = "";
+			user.iter = 0;
 			user.auth = user.name;
 			sockEmit(this, "passchange", {auth: user.name});
 		}else{
 			var socket = this;
 			sutil.initsalt(user);
-			require("crypto").pbkdf2(data.p, user.salt, parseInt(user.iter), 64, function(err, key){
+			require("crypto").pbkdf2(data.p, user.salt, user.iter, 64, function(err, key){
 				if (!err){
 					user.auth = key.toString("base64");
 					sockEmit(socket, "passchange", {auth: user.auth});
@@ -486,10 +480,9 @@ var userEvents = {
 		}
 	},
 	updatequest:function (data, user) {
-		db.hset("Q:" + data.u, data.quest, data.newstage);
+		user.quests[data.quest] = data.newstage;
 	},
 	booster:function(data, user) {
-		var freepacklist, bound;
 		var pack = [
 			{ amount: 10, cost: 15, rare: []},
 			{ amount: 6, cost: 25, rare: [3]},
@@ -499,10 +492,7 @@ var userEvents = {
 		][data.pack];
 		if (!pack) return;
 		var bumprate = .45/pack.amount;
-		if (user.freepacks){
-			freepacklist = user.freepacks.split(",");
-			if (freepacklist[data.pack] > 0) bound = true;
-		}
+		var bound = user.freepacks && user.freepacks[data.pack] > 0;
 		if (!bound && data.bulk){
 			pack.amount *= data.bulk;
 			pack.cost *= data.bulk;
@@ -524,14 +514,10 @@ var userEvents = {
 				newCards = etgutil.addcard(newCards, cardcode);
 			}
 			if (bound) {
-				freepacklist[data.pack]--;
+				user.freepacks[data.pack]--;
 				user.accountbound = etgutil.mergedecks(user.accountbound, newCards);
-				if (freepacklist.every(function(x){return x == 0})) {
-					db.hdel("U:"+user.name, "freepacks");
+				if (user.freepacks.every(function(x){return x == 0})) {
 					delete user.freepacks;
-				}
-				else{
-					user.freepacks = freepacklist.join(",");
 				}
 			}
 			else {
@@ -609,15 +595,10 @@ var sockEvents = {
 		}
 	},
 	librarywant:function(data){
-		if (data.f in users){
-			var u = users[data.f];
-			sockEmit(this, "librarygive", {pool:u.pool, bound:u.accountbound, gold:u.gold});
-		}else{
-			var socket = this;
-			db.hmget("U:"+data.f, "pool", "accountbound", "gold", function(err, info){
-				if (info) sockEmit(socket, "librarygive", {pool:info[0], bound:info[1], gold:parseInt(info[2])});
-			});
-		}
+		var socket = this;
+		loadUser(data.f, function(user){
+			sockEmit(socket, "librarygive", {pool:u.pool, bound:u.accountbound, gold:u.gold});
+		});
 	},
 	arenatop:function(data){
 		var socket = this;
@@ -719,24 +700,14 @@ function wssConnection(socket) {
 		}
 		var func = userEvents[data.x] || usercmd[data.x];
 		if (func){
-			var u = data.u, auth = data.a;
-			delete data.a;
-			if (!(u in users)){
-				if (data.x == "logout") return;
-				db.hgetall("U:"+u, function(err, obj){
-					if (obj){
-						sutil.prepuser(obj);
-						users[u] = obj;
-						if (auth == obj.auth) {
-							usersock[u] = socket;
-							func.call(socket, data, obj);
-						}
-					}
-				});
-			} else if (auth == users[u].auth) {
-				usersock[u] = socket;
-				func.call(socket, data, users[u]);
-			}
+			var u = data.u;
+			loadUser(u, function(user){
+				if (data.a == user.auth){
+					usersock[u] = socket;
+					delete data.a;
+					func.call(socket, data, users[u]);
+				}
+			});
 		}else if (func = sockEvents[data.x]){
 			func.call(socket, data);
 		}

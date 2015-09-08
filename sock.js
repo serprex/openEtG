@@ -54,25 +54,7 @@ exports.userExec = function(x, data){
 	usercmd[x](data, exports.user);
 }
 exports.getDeck = function() {
-	if (exports.user) return exports.user.decknames[exports.user.selectedDeck] || "";
+	if (exports.user) return exports.user.decks[exports.user.selectedDeck] || "";
 	var deck = (options.deck || "").trim();
 	return ~deck.indexOf(" ") ? etgutil.encodedeck(deck.split(" ")) : deck;
-}
-exports.prepuser = function(){
-	var user = exports.user;
-	user.pool = user.pool || "";
-	user.accountbound = user.accountbound || "";
-	if (!user.quest) {
-		user.quest = {};
-	}
-	if (!user.decknames) {
-		user.decknames = {};
-	}
-	if (user.freepacks) {
-		user.freepacks = user.freepacks.split(",").map(function(x){return parseInt(x, 10)});
-	}
-	if (!user.ailosses) user.ailosses = 0;
-	if (!user.aiwins) user.aiwins = 0;
-	if (!user.pvplosses) user.pvplosses = 0;
-	if (!user.pvpwins) user.pvpwins = 0;
 }

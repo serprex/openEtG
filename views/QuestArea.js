@@ -4,8 +4,8 @@ var gfx = require("../gfx");
 var sock = require("../sock");
 var Quest = require("../Quest");
 function startQuest(questname) {
-	if (!sock.user.quest[questname] && sock.user.quest[questname] != 0) {
-		sock.user.quest[questname] = 0;
+	if (!sock.user.quests[questname] && sock.user.quests[questname] != 0) {
+		sock.user.quests[questname] = 0;
 		sock.userEmit("updatequest", { quest: questname, newstage: 0 });
 	}
 }
@@ -38,7 +38,7 @@ module.exports = function(area) {
 		circle.className = "imgb";
 		circle.style.border = "2px solid #88aa66";
 		circle.style.borderRadius = "50%";
-		circle.style.backgroundColor = sock.user.quest[quest] > stage ? "#4cff00" : "black";
+		circle.style.backgroundColor = sock.user.quests[quest] > stage ? "#4cff00" : "black";
 		circle.style.display = "inline-block";
 		circle.style.width = circle.style.height = "32px";
 		circle.addEventListener("mouseover", function() {
@@ -57,8 +57,8 @@ module.exports = function(area) {
 	});
 	Quest.areas[area].forEach(function(quest){
 		var pos;
-		if ((sock.user.quest[quest] !== undefined) && Quest[quest]) {
-			for (var i = 0;i <= sock.user.quest[quest];i++) {
+		if ((sock.user.quests[quest] !== undefined) && Quest[quest]) {
+			for (var i = 0;i <= sock.user.quests[quest];i++) {
 				if ((pos = Quest[quest].info.pos[i])) {
 					dom.add(div, [pos[0], pos[1], mkQuestButton(quest, i)]);
 				}

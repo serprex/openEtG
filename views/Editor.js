@@ -94,12 +94,12 @@ module.exports = function(arena, ainfo, acard, startempty) {
 			if (quickNum.classList.contains("selectedbutton")) {
 				saveButton();
 				sock.userEmit("changequickdeck", { number: number, name: tname.textcache });
-				sock.user.quickdecks[number] = tname.textcache;
+				sock.user.qecks[number] = tname.textcache;
 				fixQuickButtons();
 				quickNum.classList.remove("selectedbutton");
 			}
 			else {
-				loadDeck(sock.user.quickdecks[number]);
+				loadDeck(sock.user.qecks[number]);
 			}
 		}
 	}
@@ -108,7 +108,7 @@ module.exports = function(arena, ainfo, acard, startempty) {
 	}
 	function fixQuickButtons(){
 		for (var i = 0;i < 10;i++) {
-			buttons.children[i].classList[sock.user.selectedDeck == sock.user.quickdecks[i]?"add":"remove"]("selectedbutton");
+			buttons.children[i].classList[sock.user.selectedDeck == sock.user.qecks[i]?"add":"remove"]("selectedbutton");
 		}
 	}
 	function saveDeck(force){
@@ -116,9 +116,9 @@ module.exports = function(arena, ainfo, acard, startempty) {
 		var olddeck = sock.getDeck();
 		if (decksprite.deck.length == 0){
 			sock.userEmit("rmdeck", {name: sock.user.selectedDeck});
-			delete sock.user.decknames[sock.user.selectedDeck];
+			delete sock.user.decks[sock.user.selectedDeck];
 		}else if (olddeck != dcode){
-			sock.user.decknames[sock.user.selectedDeck] = dcode;
+			sock.user.decks[sock.user.selectedDeck] = dcode;
 			sock.userEmit("setdeck", { d: dcode, name: sock.user.selectedDeck });
 		}else if (force) sock.userEmit("setdeck", {name: sock.user.selectedDeck });
 	}

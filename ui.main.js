@@ -187,11 +187,11 @@ function maybeSendChat(e) {
 			sock.emit("roll", data);
 		}else if (msg.match(/^\/decks/) && sock.user){
 			var rx = msg.length > 7 && new RegExp(msg.slice(7));
-			var names = Object.keys(sock.user.decknames);
+			var names = Object.keys(sock.user.decks);
 			if (rx) names = names.filter(function(name){return name.match(rx)});
 			names.sort();
 			names.forEach(function(name){
-				var deck = sock.user.decknames[name];
+				var deck = sock.user.decks[name];
 				var span = document.createElement("span");
 				var link = document.createElement("a");
 				link.href = "deck/" + deck;

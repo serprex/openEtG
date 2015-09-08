@@ -44,7 +44,7 @@ module.exports = function(){
 		}
 		dom.add(div, [130, 100 + 30 * i, active ? events[i-1] : i > 2 ? (sock.user.daily&(i==3?1:32) ? "You defeated this already today." : "You failed this today. Better luck tomorrow!") : "Completed."]);
 	}
-	if (sock.user.daily == 63){
+	if (sock.user.daily == 191){
 		dom.add(div, [50, 280, ["Nymph!", function(){
 			var etg = require("../etg");
 			var nymph = etg.NymphList[etg.PlayerRng.uptoceil(12)];

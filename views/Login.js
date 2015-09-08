@@ -103,9 +103,8 @@ module.exports = function(){
 					sock.user = data;
 					if (!sock.user.accountbound && !sock.user.pool) {
 						require("./ElementSelect")();
-					} else {
-						sock.prepuser();
-						if (gfx.loaded) require("./MainMenu")();
+					} else if (gfx.loaded){
+						require("./MainMenu")();
 					}
 					if (options.remember && typeof localStorage !== "undefined"){
 						localStorage.auth = sock.user.auth;

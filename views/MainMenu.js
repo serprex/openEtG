@@ -212,11 +212,12 @@ module.exports = function(nymph) {
 	}
 	if (sock.user){
 		dom.add(arenabox, [20, 100, ["Arena Info", arenaInfo, mkSetTip("Check how your arena decks are doing")]]);
-		if (nymph || sock.user.oracle) {
-			var oracle = new PIXI.Sprite(gfx.getArt(nymph || sock.user.oracle));
+		var showcard = nymph || (!sock.user.daily && sock.user.ocard);
+		if (showcard) {
+			var oracle = new PIXI.Sprite(gfx.getArt(showcard));
 			oracle.position.set(92, 340);
 			stage.view = oracle;
-			delete sock.user.oracle;
+			if (sock.user.daily == 0) sock.user.daily = 128;
 		}
 	}
 	document.addEventListener("mousemove", resetTip);
@@ -276,12 +277,12 @@ module.exports = function(nymph) {
 	musicChange();
 	function fixQuickButtons() {
 		for (var i = 0;i < 10;i++) {
-			quickslotsdiv.children[i].classList[sock.user.selectedDeck == sock.user.quickdecks[i] ? "add" : "remove"]("selectedbutton");
+			quickslotsdiv.children[i].classList[sock.user.selectedDeck == sock.user.qecks[i] ? "add" : "remove"]("selectedbutton");
 		}
 	}
 	function loadQuickdeck(x) {
 		return function() {
-			var deck = sock.user.quickdecks[x] || "";
+			var deck = sock.user.qecks[x] || "";
 			sock.user.selectedDeck = deck;
 			sock.userEmit("setdeck", { name: deck });
 			deckLabel.text = "Deck: " + sock.user.selectedDeck;
@@ -301,7 +302,7 @@ module.exports = function(nymph) {
 		for (var i = 0;i < 10;i++) {
 			var b = dom.button(i + 1, loadQuickdeck(i));
 			b.className = "editbtn";
-			if (sock.user.selectedDeck == sock.user.quickdecks[i]) b.classList.add("selectedbutton");
+			if (sock.user.selectedDeck == sock.user.qecks[i]) b.classList.add("selectedbutton");
 			quickslotsdiv.appendChild(b);
 		}
 		dom.add(deckbox, deckLabel, quickslotsdiv);

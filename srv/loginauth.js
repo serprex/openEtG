@@ -7,54 +7,57 @@ var aiDecks = require("../Decks");
 var etgutil = require("../etgutil");
 var userutil = require("../userutil");
 module.exports = function(db, users, sockEmit, usersock){
-	function loginRespond(socket, servuser, pass, authkey){
+	function loginRespond(socket, user, pass, authkey){
 		function postHash(err, key){
 			if (err){
 				sockEmit(socket, "login", {err:err.message});
 				return;
 			}
 			key = key.toString("base64");
-			if (!servuser.auth){
-				servuser.auth = key;
-			}else if (servuser.auth != key){
+			if (!user.auth){
+				user.salt = "";
+				user.iter = 0;
+				user.auth = key;
+			}else if (user.auth != key){
 				sockEmit(socket, "login", {err:"Incorrect password"});
 				return;
 			}
-			if (!authkey && servuser.salt.length == 24){
-				servuser.auth = servuser.salt = "";
-				loginRespond(socket, servuser, pass);
+			if (!authkey && user.salt.length == 24){
+				user.auth = user.salt = "";
+				loginRespond(socket, user, pass);
 				return;
 			}
-			sutil.useruser(db, servuser, function(user){
-				var day = sutil.getDay();
-				if (servuser.oracle < day){
-					servuser.oracle = day;
-					var ocardnymph = Math.random() < .03;
-					var card = etg.PlayerRng.randomcard(false,
-						function (x) { return x.type != etg.PillarEnum && ((x.rarity != 5) ^ ocardnymph) && x.code != user.ocard; });
-					var ccode = etgutil.asShiny(card.code, card.rarity == 5);
-					if (card.rarity > 1) {
-						servuser.accountbound = user.accountbound = etgutil.addcard(user.accountbound, ccode);
-					}
-					else {
-						servuser.pool = user.pool = etgutil.addcard(user.pool, ccode);
-					}
-					servuser.ocard = user.ocard = user.oracle = ccode;
-					servuser.daily = user.daily = 0;
-					servuser.dailymage = user.dailymage = Math.floor(Math.random() * aiDecks.mage.length);
-					servuser.dailydg = user.dailydg = Math.floor(Math.random() * aiDecks.demigod.length);
+			var day = sutil.getDay();
+			if (user.oracle < day){
+				user.oracle = day;
+				var ocardnymph = Math.random() < .03;
+				var card = etg.PlayerRng.randomcard(false,
+					function (x) { return x.type != etg.PillarEnum && ((x.rarity != 5) ^ ocardnymph) && x.code != user.ocard; });
+				var ccode = etgutil.asShiny(card.code, card.rarity == 5);
+				if (card.rarity > 1) {
+					user.accountbound = etgutil.addcard(user.accountbound, ccode);
 				}
-				if (user.name != "test") db.zadd("wealth", user.gold + userutil.calcWealth(user.pool), user.name);
+				else {
+					user.pool = etgutil.addcard(user.pool, ccode);
+				}
+				user.ocard = ccode;
+				user.daily = 0;
+				user.dailymage = Math.floor(Math.random() * aiDecks.mage.length);
+				user.dailydg = Math.floor(Math.random() * aiDecks.demigod.length);
+			}
+			if (user.name != "test") db.zadd("wealth", user.gold + userutil.calcWealth(user.pool), user.name);
+			if (socket.readyState == 1){
 				usersock[user.name] = socket;
-				sockEmit(socket, "login", user);
-			});
+				socket.send('{"x":"login",'+JSON.stringify(user, function(key, val){ return this == user && key.match(/^(salt|iter)$/) ? undefined : val }).slice(1));
+				user.daily = 128;
+			}
 		}
-		sutil.initsalt(servuser);
+		sutil.initsalt(user);
 		if (authkey){
 			postHash(null, authkey);
 		}else if (pass){
-			crypto.pbkdf2(pass, servuser.salt, parseInt(servuser.iter), 64, postHash);
-		}else postHash(null, servuser.name);
+			crypto.pbkdf2(pass, user.salt, user.iter, 64, postHash);
+		}else postHash(null, user.name);
 	}
 	function loginAuth(data){
 		var name = (data.u || "").trim();
@@ -65,9 +68,8 @@ module.exports = function(db, users, sockEmit, usersock){
 			loginRespond(this, users[name], data.p, data.a);
 		}else{
 			var socket = this;
-			db.hgetall("U:"+name, function (err, obj){
-				users[name] = obj || {name: name};
-				sutil.prepuser(users[name]);
+			db.hget("Users", name, function (err, userstr){
+				users[name] = userstr ? JSON.parse(userstr) : {name: name};
 				loginRespond(socket, users[name], data.p, data.a);
 			});
 		}

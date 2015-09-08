@@ -68,9 +68,9 @@ function startMatch(game, foeDeck, spectate) {
 							var newgame = require("../Quest").mkQuestAi(game.quest[0], game.quest[1] + 1, game.area);
 							newgame.addData(data);
 							return;
-						}else if (sock.user.quest[game.quest[0]] <= game.quest[1] || !(game.quest[0] in sock.user.quest)) {
+						}else if (sock.user.quests[game.quest[0]] <= game.quest[1] || !(game.quest[0] in sock.user.quests)) {
 							sock.userEmit("updatequest", { quest: game.quest[0], newstage: game.quest[1] + 1 });
-							sock.user.quest[game.quest[0]] = game.quest[1] + 1;
+							sock.user.quests[game.quest[0]] = game.quest[1] + 1;
 						}
 					}else if (game.daily){
 						if (game.endurance) {
