@@ -11,7 +11,6 @@ var usercmd = require("./usercmd");
 var userutil = require("./userutil");
 var sutil = require("./srv/sutil");
 var qstring = require("querystring");
-var fs = require("fs");
 var db = require("redis").createClient();
 var http = require("http");
 var forkcore = require("child_process").fork("./srv/forkcore");
@@ -29,7 +28,7 @@ function storeUsers(){
 	}
 	if (margs.length > 1) db.send_command("hmset", margs);
 }
-setInterval(function(){
+var usergcloop = setInterval(function(){
 	storeUsers();
 	// Clear inactive users
 	for(var u in users){
@@ -40,11 +39,15 @@ setInterval(function(){
 		}
 	}
 }, 300000);
-process.on("SIGTERM", process.exit).on("SIGINT", process.exit);
-process.on("exit", function(){
+function stop(){
+	clearInterval(usergcloop);
+	wss.close();
+	app.close();
+	forkcore.kill();
 	storeUsers();
 	db.quit();
-});
+}
+process.on("SIGTERM", stop).on("SIGINT", stop);
 function loadUser(name, cb){
 	usergc.delete(name);
 	if (users[name]){
