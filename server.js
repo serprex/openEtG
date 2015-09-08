@@ -155,16 +155,6 @@ var userEvents = {
 		delete users[u];
 		delete usersock[u];
 	},
-	changequickdeck:function(data, user){
-		user.qecks[data.number] = data.name;
-	},
-	setdeck:function(data, user) {
-		if (data.d !== undefined) user.decks[data.name] = data.d;
-		user.selectedDeck = data.name;
-	},
-	rmdeck:function(data, user){
-		delete user.decks[data.name];
-	},
 	setarena:function(data, user){
 		if (!user.ocard || !data.d){
 			return;
@@ -479,9 +469,6 @@ var userEvents = {
 			genericChat(this, data);
 		}
 	},
-	updatequest:function (data, user) {
-		user.quests[data.quest] = data.newstage;
-	},
 	booster:function(data, user) {
 		var pack = [
 			{ amount: 10, cost: 15, rare: []},
@@ -597,7 +584,7 @@ var sockEvents = {
 	librarywant:function(data){
 		var socket = this;
 		loadUser(data.f, function(user){
-			sockEmit(socket, "librarygive", {pool:u.pool, bound:u.accountbound, gold:u.gold});
+			sockEmit(socket, "librarygive", {pool:user.pool, bound:user.accountbound, gold:user.gold});
 		});
 	},
 	arenatop:function(data){

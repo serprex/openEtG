@@ -5,8 +5,7 @@ var sock = require("../sock");
 var Quest = require("../Quest");
 function startQuest(questname) {
 	if (!sock.user.quests[questname] && sock.user.quests[questname] != 0) {
-		sock.user.quests[questname] = 0;
-		sock.userEmit("updatequest", { quest: questname, newstage: 0 });
+		sock.userExec("updatequest", { quest: questname, newstage: 0 });
 	}
 }
 var bg_quest = new PIXI.Texture(new PIXI.BaseTexture());

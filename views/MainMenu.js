@@ -282,9 +282,7 @@ module.exports = function(nymph) {
 	}
 	function loadQuickdeck(x) {
 		return function() {
-			var deck = sock.user.qecks[x] || "";
-			sock.user.selectedDeck = deck;
-			sock.userEmit("setdeck", { name: deck });
+			sock.userExec("setdeck", { name: sock.user.qecks[x] || "" });
 			deckLabel.text = "Deck: " + sock.user.selectedDeck;
 			fixQuickButtons();
 		}

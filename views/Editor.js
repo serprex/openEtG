@@ -93,7 +93,7 @@ module.exports = function(arena, ainfo, acard, startempty) {
 		return function() {
 			if (quickNum.classList.contains("selectedbutton")) {
 				saveButton();
-				sock.userEmit("changequickdeck", { number: number, name: tname.textcache });
+				sock.userExec("changequickdeck", { number: number, name: tname.textcache });
 				sock.user.qecks[number] = tname.textcache;
 				fixQuickButtons();
 				quickNum.classList.remove("selectedbutton");
@@ -115,12 +115,10 @@ module.exports = function(arena, ainfo, acard, startempty) {
 		var dcode = etgutil.encodedeck(decksprite.deck) + etg.toTrueMarkSuffix(editormark);
 		var olddeck = sock.getDeck();
 		if (decksprite.deck.length == 0){
-			sock.userEmit("rmdeck", {name: sock.user.selectedDeck});
-			delete sock.user.decks[sock.user.selectedDeck];
+			sock.userExec("rmdeck", {name: sock.user.selectedDeck});
 		}else if (olddeck != dcode){
-			sock.user.decks[sock.user.selectedDeck] = dcode;
-			sock.userEmit("setdeck", { d: dcode, name: sock.user.selectedDeck });
-		}else if (force) sock.userEmit("setdeck", {name: sock.user.selectedDeck });
+			sock.userExec("setdeck", { d: dcode, name: sock.user.selectedDeck });
+		}else if (force) sock.userExec("setdeck", {name: sock.user.selectedDeck });
 	}
 	function loadDeck(x){
 		if (!x) return;
@@ -231,7 +229,7 @@ module.exports = function(arena, ainfo, acard, startempty) {
 			]], [8, 136, ["Load", function() {
 				loadDeck(deckname.value);
 			}]], [8, 162, ["Exit", function() {
-				if (sock.user) sock.userEmit("setdeck", { name: sock.user.selectedDeck });
+				if (sock.user) sock.userExec("setdeck", { name: sock.user.selectedDeck });
 				startMenu();
 			}]], [220, 8, quickNum], [300, 8, buttons]);
 			for (var i = 0;i < 10;i++) {

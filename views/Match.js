@@ -69,8 +69,7 @@ function startMatch(game, foeDeck, spectate) {
 							newgame.addData(data);
 							return;
 						}else if (sock.user.quests[game.quest[0]] <= game.quest[1] || !(game.quest[0] in sock.user.quests)) {
-							sock.userEmit("updatequest", { quest: game.quest[0], newstage: game.quest[1] + 1 });
-							sock.user.quests[game.quest[0]] = game.quest[1] + 1;
+							sock.userExec("updatequest", { quest: game.quest[0], newstage: game.quest[1] + 1 });
 						}
 					}else if (game.daily){
 						if (game.endurance) {
