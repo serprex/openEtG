@@ -42,7 +42,6 @@ module.exports = function(url, res, date, lastModified){
 		if (lastModified && new Date(mtime).getTime() <= new Date(lastModified).getTime()){
 			return m304(res);
 		}
-		console.log(url);
 		fs.readFile(url, function(err, buf){
 			if (err) return m404(res);
 			zlib.gzip(buf, {level:9}, function(err, gzbuf){
