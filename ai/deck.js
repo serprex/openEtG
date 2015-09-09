@@ -12,7 +12,7 @@ var hasLight = new Uint16Array([5811,5820,5908,7811,7801,7820]);
 function scorpion(card, deck){
 	var isDeath = card.isOf(Cards.Deathstalker); // Scan for Nightfall
 	for(var i=0; i<deck.length; i++){
-		if (~hasBuff.indexOf(deck[i]) ||
+		if (~etg.typedIndexOf(hasBuff, deck[i]) ||
 			(isDeath && (deck[i] == 6106 || deck[i] == 8106))) return true;
 	}
 }
