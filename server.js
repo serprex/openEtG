@@ -31,8 +31,8 @@ function activeUsers() {
 		if (sock && sock.readyState == 1){
 			userCount++;
 			if (sock.meta.offline) continue;
-			if (sock.meta.afk) username += " (afk)";
-			else if (sock.meta.wantpvp) username += "\xb6";
+			if (sock.meta.afk) name += " (afk)";
+			else if (sock.meta.wantpvp) name += "\xb6";
 			activeusers.push(name);
 		}
 	}
