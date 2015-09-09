@@ -10,6 +10,7 @@ var sock = require("../sock");
 var etgutil = require("../etgutil");
 var options = require("../options");
 var userutil = require("../userutil");
+var streak200 = new Uint8Array([10, 10, 15, 2, 15, 2]);
 module.exports = function(game, foeDeck) {
 	var winner = game.winner == game.player1, stage;
 	function exitFunc(){
@@ -72,7 +73,7 @@ module.exports = function(game, foeDeck) {
 				bonus += ret;
 			}
 		});
-		lefttext.push((((streakrate+1)*bonus*100)-100).toFixed(1) + "% total bonus");
+		lefttext.push(((streakrate+1)*bonus*100-100).toFixed(1) + "% total bonus");
 		return bonus;
 	}
 	var div = dom.div([412, 440, ["Exit", exitFunc]]), lefttext = [game.ply + " plies", (game.time / 1000).toFixed(1) + " seconds"];
@@ -102,10 +103,10 @@ module.exports = function(game, foeDeck) {
 				if (!game.goldreward) {
 					var goldwon;
 					if (game.level !== undefined) {
-						var streak = "streak" + game.level;
-						streakrate = Math.min([.05, .05, .075, .1, .075, .1][game.level]*(sock.user[streak]||0), 1);
-						sock.user[streak] = (sock.user[streak] || 0)+1;
-						lefttext.push(sock.user[streak] + " win streak", (streakrate * 100).toFixed(1) + "% streak bonus");
+						var streak = sock.user.streak[game.level] || 0;
+						streakrate = Math.min(streak200[game.level]*streak/200, 1);
+						sock.userExec("setstreak", {l:game.level, n:++streak});
+						lefttext.push(streak + " win streak", (streakrate * 100).toFixed(1) + "% streak bonus");
 						goldwon = Math.floor(userutil.pveCostReward[game.level*2+1] * (1+streakrate) * computeBonuses());
 					} else goldwon = 0;
 					game.goldreward = goldwon;
@@ -151,7 +152,7 @@ module.exports = function(game, foeDeck) {
 			(game.goldreward || 0) - (game.cost || 0),
 			game.cardreward || "-",
 			userutil.calcWealth(game.cardreward),
-			!sock.user || game.level === undefined ? -1 : sock.user["streak"+game.level],
+			!sock.user || game.level === undefined ? -1 : sock.user.streak[game.level],
 			streakrate.toFixed(3).replace(/\.?0+$/, "")].join(), null, "Stats");
 	}
 	function onkeydown(e){

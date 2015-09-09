@@ -85,7 +85,7 @@ function startMatch(game, foeDeck, spectate) {
 						}
 					}
 				}else if (!game.endurance && game.level !== undefined){
-					sock.user["streak"+game.level] = 0;
+					sock.user.streak[game.level] = 0;
 				}
 			}
 			require("./Result")(game, foeDeck);

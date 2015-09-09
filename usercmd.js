@@ -148,6 +148,9 @@ exports.addwin = function(data, user){
 	user[prefix+"wins"]++;
 	user[prefix+"losses"]--;
 }
+exports.setstreak = function(data, user){
+	user.streak[data.l] = data.n;
+}
 exports.addcards = function(data, user){
 	user.pool = etgutil.mergedecks(user.pool, data.c);
 }

@@ -1,12 +1,13 @@
 "use strict";
-var qstring = require("querystring");
 var crypto = require("crypto");
 var sutil = require("./sutil");
+var db = require("./db");
+var Us = require("./Us");
 var etg = require("../etg");
 var aiDecks = require("../Decks");
 var etgutil = require("../etgutil");
 var userutil = require("../userutil");
-module.exports = function(db, users, sockEmit, usersock){
+module.exports = function(sockEmit){
 	function loginRespond(socket, user, pass, authkey){
 		function postHash(err, key){
 			if (err){
@@ -47,7 +48,7 @@ module.exports = function(db, users, sockEmit, usersock){
 			}
 			if (user.name != "test") db.zadd("wealth", user.gold + userutil.calcWealth(user.pool), user.name);
 			if (socket.readyState == 1){
-				usersock[user.name] = socket;
+				Us.socks[user.name] = socket;
 				socket.send('{"x":"login",'+JSON.stringify(user, function(key, val){ return this == user && key.match(/^(salt|iter)$/) ? undefined : val }).slice(1));
 				if (!user.daily) user.daily = 128;
 			}
@@ -64,13 +65,13 @@ module.exports = function(db, users, sockEmit, usersock){
 		if (!name.length){
 			sockEmit(this, "login", {err:"No name"});
 			return;
-		}else if (name in users){
-			loginRespond(this, users[name], data.p, data.a);
 		}else{
 			var socket = this;
-			db.hget("Users", name, function (err, userstr){
-				users[name] = userstr ? JSON.parse(userstr) : {name: name};
-				loginRespond(socket, users[name], data.p, data.a);
+			Us.load(name, function(user){
+				loginRespond(socket, user, data.p, data.a);
+			}, function(){
+				var user = Us.users[name] = {name: name};
+				loginRespond(socket, user, data.p, data.a);
 			});
 		}
 	}

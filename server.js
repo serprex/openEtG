@@ -1,77 +1,39 @@
 #!/usr/bin/node
 "use strict";
 process.chdir(__dirname);
-var users = {}, usersock = {}, rooms = {}, usergc = new Set();
+var rooms = {};
 var etg = require("./etg");
 var Cards = require("./Cards");
 Cards.loadcards();
-var aiDecks = require("./Decks");
 var etgutil = require("./etgutil");
 var usercmd = require("./usercmd");
 var userutil = require("./userutil");
 var sutil = require("./srv/sutil");
-var qstring = require("querystring");
-var db = require("redis").createClient();
 var http = require("http");
+var db = require("./srv/db");
+var Us = require("./srv/Us");
 var forkcore = require("child_process").fork("./srv/forkcore");
 var app = http.createServer(function(req, res){
 	var ifModifiedSince = req.headers["if-modified-since"];
 	forkcore.send(req.url.slice(1) + (ifModifiedSince?"\n"+ifModifiedSince:""), res.socket);
 });
-function storeUsers(){
-	var margs = ["Users"];
-	for(var u in users){
-		var user = users[u];
-		if (user.pool || user.accountbound){
-			margs.push(u, JSON.stringify(user));
-		}
-	}
-	if (margs.length > 1) db.send_command("hmset", margs);
-}
-var usergcloop = setInterval(function(){
-	storeUsers();
-	// Clear inactive users
-	for(var u in users){
-		if (usergc.delete(u)){
-			delete users[u];
-		}else{
-			usergc.add(u);
-		}
-	}
-}, 300000);
 function stop(){
-	clearInterval(usergcloop);
 	wss.close();
 	app.close();
 	forkcore.kill();
-	storeUsers();
-	db.quit();
+	Us.stop();
 }
 process.on("SIGTERM", stop).on("SIGINT", stop);
-function loadUser(name, cb){
-	usergc.delete(name);
-	if (users[name]){
-		cb(users[name]);
-	}else{
-		db.hget("Users", name, function(err, userstr){
-			if (err){
-				console.log(err.message);
-			}else if (userstr){
-				cb(users[name] = JSON.parse(userstr));
-			}
-		});
-	}
-}
 function activeUsers() {
 	var activeusers = [], userCount = 0;
-	for (var username in usersock) {
-		var sock = usersock[username];
+	for (var name in Us.socks) {
+		var sock = Us.socks[name];
 		if (sock && sock.readyState == 1){
 			userCount++;
 			if (sock.meta.offline) continue;
 			if (sock.meta.afk) username += " (afk)";
 			else if (sock.meta.wantpvp) username += "\xb6";
-			activeusers.push(username);
+			activeusers.push(name);
 		}
 	}
 	var otherCount = wss.clients.length - userCount;
@@ -146,19 +108,20 @@ var userEvents = {
 		user.qecks = ["1","2","3","4","5","6","7","8","9","10"];
 		user.decks = {1:starters[sid+1],2:starters[sid+2],3:starters[sid+3]};
 		user.quests = {};
+		user.streak = [];
 		sockEvents.login.call(socket, {u:user.name, a:user.auth});
 	},
 	logout:function(data, user) {
 		var u=data.u;
 		db.hset("Users", u, JSON.stringify(user));
-		delete users[u];
-		delete usersock[u];
+		delete Us.users[u];
+		delete Us.socks[u];
 	},
 	delete:function(data, user) {
 		var u = data.u;
 		db.hdel("Users", u);
-		delete users[u];
-		delete usersock[u];
+		delete Us.users[u];
+		delete Us.socks[u];
 	},
 	setarena:function(data, user){
 		if (!user.ocard || !data.d){
@@ -196,7 +159,7 @@ var userEvents = {
 		task();
 	},
 	modarena:function(data, user){
-		loadUser(data.aname, function(user){
+		Us.load(data.aname, function(user){
 			user.gold += data.won?3:1;
 		});
 		var arena = "arena"+(data.lv?"1":""), akey = (data.lv?"B:":"A:")+data.aname;
@@ -336,7 +299,7 @@ var userEvents = {
 		if (!deck) return;
 		this.meta.deck = deck;
 		this.meta.pvpstats = { hp: data.p1hp, markpower: data.p1markpower, deckpower: data.p1deckpower, drawpower: data.p1drawpower };
-		var foesock = usersock[f];
+		var foesock = Us.socks[f];
 		if (foesock && foesock.readyState == 1){
 			if (foesock.meta.duel == u) {
 				delete foesock.meta.duel;
@@ -359,7 +322,7 @@ var userEvents = {
 				sockEmit(foesock, "pvpgive", foedata);
 				if (foesock.meta.spectators){
 					foesock.meta.spectators.forEach(function(uname){
-						var sock = usersock[uname];
+						var sock = Us.socks[uname];
 						if (sock && sock.readyState == 1){
 							sockEmit(sock, "spectategive", foedata);
 						}
@@ -372,7 +335,7 @@ var userEvents = {
 		}
 	},
 	spectate:function(data, user){
-		var tgt = usersock[data.f];
+		var tgt = Us.socks[data.f];
 		if (tgt && tgt.meta.duel){
 			sockEmit(tgt, "chat", { mode: "red", msg: data.u + " is spectating." });
 			if (!tgt.meta.spectators) tgt.meta.spectators = [];
@@ -382,7 +345,7 @@ var userEvents = {
 	canceltrade:function (data) {
 		var info = this.meta;
 		if (info.trade){
-			var foesock = usersock[info.trade.foe];
+			var foesock = Us.socks[info.trade.foe];
 			if (foesock){
 				sockEmit(foesock, "tradecanceled");
 				sockEmit(foesock, "chat", { mode: "red", msg: data.u + " has canceled the trade."});
@@ -398,9 +361,9 @@ var userEvents = {
 		}
 		thistrade.tradecards = data.cards;
 		thistrade.oppcards = data.oppcards;
-		var thatsock = usersock[thistrade.foe];
+		var thatsock = Us.socks[thistrade.foe];
 		var thattrade = thatsock && thatsock.meta.trade;
-		var otherUser = users[thistrade.foe];
+		var otherUser = Us.users[thistrade.foe];
 		if (!thattrade || !otherUser){
 			sockEmit(this, "tradecanceled");
 			delete this.meta.trade;
@@ -432,7 +395,7 @@ var userEvents = {
 			return;
 		}
 		console.log(u + " requesting " + f);
-		var foesock = usersock[f];
+		var foesock = Us.socks[f];
 		if (foesock && foesock.readyState == 1) {
 			this.meta.trade = {foe: f};
 			var foetrade = foesock.meta.trade;
@@ -464,8 +427,8 @@ var userEvents = {
 	chat:function (data) {
 		if (data.to) {
 			var to = data.to;
-			if (usersock[to] && usersock[to].readyState == 1) {
-				sockEmit(usersock[to], "chat", { msg: data.msg, mode: "blue", u: data.u });
+			if (Us.socks[to] && Us.socks[to].readyState == 1) {
+				sockEmit(Us.socks[to], "chat", { msg: data.msg, mode: "blue", u: data.u });
 				sockEmit(this, "chat", { msg: data.msg, mode: "blue", u: "To " + to });
 			}
 			else sockEmit(this, "chat", { mode: "red", msg: to + " is not here right now." });
@@ -522,7 +485,7 @@ var userEvents = {
 	foecancel:function(data){
 		var info = this.meta;
 		if (info.duel){
-			var foesock = usersock[info.duel];
+			var foesock = Us.socks[info.duel];
 			if (foesock){
 				sockEmit(foesock, "foeleft");
 				sockEmit(foesock, "chat", { mode: "red", msg: data.u + " has canceled the duel."});
@@ -534,7 +497,7 @@ var userEvents = {
 	}
 };
 var sockEvents = {
-	login:require("./srv/loginauth")(db, users, sockEmit, usersock),
+	login:require("./srv/login")(sockEmit),
 	guestchat:function(data) {
 		if (guestban) return;
 		data.guest = true;
@@ -588,7 +551,7 @@ var sockEvents = {
 	},
 	librarywant:function(data){
 		var socket = this;
-		loadUser(data.f, function(user){
+		Us.load(data.f, function(user){
 			sockEmit(socket, "librarygive", {pool:user.pool, bound:user.accountbound, gold:user.gold});
 		});
 	},
@@ -627,7 +590,7 @@ var sockEvents = {
 		sockEmit(this, "chat", { mode: "red", msg: activeUsers().join(", ") });
 	},
 	challrecv:function(data){
-		var foesock = usersock[data.f];
+		var foesock = Us.socks[data.f];
 		if (foesock && foesock.readyState == 1){
 			var info = foesock.meta, foename = data.pvp ? info.duel : info.trade ? info.trade.foe : "";
 			sockEmit(foesock, "chat", { mode: "red", msg: "You have sent a " + (data.pvp ? "PvP" : "trade") + " request to " + foename + "!" });
@@ -645,18 +608,18 @@ function wssConnection(socket) {
 				delete rooms[key];
 			}
 		}
-		for(var key in usersock){
-			if (usersock[key] == this){
-				delete usersock[key];
+		for(var key in Us.socks){
+			if (Us.socks[key] == this){
+				delete Us.socks[key];
 			}
 		}
 		var info = this.meta;
 		if (info){
 			if (info.trade){
-				var foesock = usersock[info.trade.foe];
+				var foesock = Us.socks[info.trade.foe];
 				if (foesock && foesock.readyState == 1){
 					var foeinfo = foesock.meta;
-					if (foeinfo && foeinfo.trade && usersock[foeinfo.trade.foe] == this){
+					if (foeinfo && foeinfo.trade && Us.socks[foeinfo.trade.foe] == this){
 						sockEmit(foesock, "tradecanceled");
 						delete foeinfo.trade;
 					}
@@ -676,7 +639,7 @@ function wssConnection(socket) {
 		if (!data) return;
 		console.log(data.u, data.x);
 		if (echoEvents.has(data.x)){
-			var foe = this.meta.trade ? usersock[this.meta.trade.foe] : this.meta.foe;
+			var foe = this.meta.trade ? Us.socks[this.meta.trade.foe] : this.meta.foe;
 			if (foe && foe.readyState == 1){
 				foe.send(rawdata);
 				for(var i=1; i<=2; i++){
@@ -685,7 +648,7 @@ function wssConnection(socket) {
 						data.spectate = i;
 						var rawmsg = JSON.stringify(data);
 						spectators.forEach(function(uname){
-							var sock = usersock[uname];
+							var sock = Us.socks[uname];
 							if (sock && sock.readyState == 1){
 								sock.send(rawmsg);
 							}
@@ -698,11 +661,11 @@ function wssConnection(socket) {
 		var func = userEvents[data.x] || usercmd[data.x];
 		if (func){
 			var u = data.u;
-			loadUser(u, function(user){
+			Us.load(u, function(user){
 				if (data.a == user.auth){
-					usersock[u] = socket;
+					Us.socks[u] = socket;
 					delete data.a;
-					func.call(socket, data, users[u]);
+					func.call(socket, data, Us.users[u]);
 				}
 			});
 		}else if (func = sockEvents[data.x]){
