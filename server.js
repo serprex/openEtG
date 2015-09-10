@@ -100,16 +100,17 @@ var userEvents = {
 		var starters = require("./srv/starter");
 		if (data.e < 1 || data.e > 13) return;
 		var sid = (data.e-1)*6;
+		user.pvpwins = user.pvplosses = user.aiwins = user.ailosses = 0;
 		user.accountbound = starters[sid];
 		user.oracle = 0;
 		user.pool = "";
-		user.freepacks = starters[sid+4] + "," + starters[sid+5] + ",1";
+		user.freepacks = [starters[sid+4], starters[sid+5], 1];
 		user.selectedDeck = "1";
 		user.qecks = ["1","2","3","4","5","6","7","8","9","10"];
 		user.decks = {1:starters[sid+1],2:starters[sid+2],3:starters[sid+3]};
 		user.quests = {};
 		user.streak = [];
-		sockEvents.login.call(socket, {u:user.name, a:user.auth});
+		sockEvents.login.call(this, {u:user.name, a:user.auth});
 	},
 	logout:function(data, user) {
 		var u=data.u;

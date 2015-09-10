@@ -45,7 +45,6 @@ module.exports = function() {
 		login:function(data) {
 			delete data.x;
 			sock.user = data;
-			sock.prepuser();
 			require("./MainMenu")();
 		},
 	}

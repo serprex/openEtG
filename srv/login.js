@@ -16,37 +16,35 @@ module.exports = function(sockEmit){
 			}
 			key = key.toString("base64");
 			if (!user.auth){
-				user.salt = "";
-				user.iter = 0;
 				user.auth = key;
 			}else if (user.auth != key){
 				sockEmit(socket, "login", {err:"Incorrect password"});
 				return;
-			}
-			if (!authkey && user.salt.length == 24){
+			}else if (!authkey && user.salt.length == 24){
 				user.auth = user.salt = "";
 				loginRespond(socket, user, pass);
 				return;
-			}
-			var day = sutil.getDay();
-			if (user.oracle < day){
-				user.oracle = day;
-				var ocardnymph = Math.random() < .03;
-				var card = etg.PlayerRng.randomcard(false,
-					function (x) { return x.type != etg.PillarEnum && ((x.rarity != 5) ^ ocardnymph) && x.code != user.ocard; });
-				var ccode = etgutil.asShiny(card.code, card.rarity == 5);
-				if (card.rarity > 1) {
-					user.accountbound = etgutil.addcard(user.accountbound, ccode);
+			}else{
+				var day = sutil.getDay();
+				if (user.oracle < day){
+					user.oracle = day;
+					var ocardnymph = Math.random() < .03;
+					var card = etg.PlayerRng.randomcard(false,
+						function (x) { return x.type != etg.PillarEnum && ((x.rarity != 5) ^ ocardnymph) && x.code != user.ocard; });
+					var ccode = etgutil.asShiny(card.code, card.rarity == 5);
+					if (card.rarity > 1) {
+						user.accountbound = etgutil.addcard(user.accountbound, ccode);
+					}
+					else {
+						user.pool = etgutil.addcard(user.pool, ccode);
+					}
+					user.ocard = ccode;
+					user.daily = 0;
+					user.dailymage = Math.floor(Math.random() * aiDecks.mage.length);
+					user.dailydg = Math.floor(Math.random() * aiDecks.demigod.length);
 				}
-				else {
-					user.pool = etgutil.addcard(user.pool, ccode);
-				}
-				user.ocard = ccode;
-				user.daily = 0;
-				user.dailymage = Math.floor(Math.random() * aiDecks.mage.length);
-				user.dailydg = Math.floor(Math.random() * aiDecks.demigod.length);
+				db.zadd("wealth", user.gold + userutil.calcWealth(user.pool), user.name);
 			}
-			if (user.name != "test") db.zadd("wealth", user.gold + userutil.calcWealth(user.pool), user.name);
 			if (socket.readyState == 1){
 				Us.socks[user.name] = socket;
 				socket.send('{"x":"login",'+JSON.stringify(user, function(key, val){ return this == user && key.match(/^(salt|iter)$/) ? undefined : val }).slice(1));
@@ -70,7 +68,7 @@ module.exports = function(sockEmit){
 			Us.load(name, function(user){
 				loginRespond(socket, user, data.p, data.a);
 			}, function(){
-				var user = Us.users[name] = {name: name};
+				var user = Us.users[name] = {name: name, gold: 0};
 				loginRespond(socket, user, data.p, data.a);
 			});
 		}

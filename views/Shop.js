@@ -42,6 +42,7 @@ module.exports = function() {
 	if (sock.user.freepacks){
 		var freeinfo = dom.text("");
 		dom.add(div, [350, 26, freeinfo]);
+		hidedom.push(freeinfo);
 	}
 	function updateFreeInfo(rarity){
 		if (freeinfo){
