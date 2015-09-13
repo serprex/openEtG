@@ -52,7 +52,7 @@ module.exports = function(){
 				tinfo.text = ainfo[0];
 			}
 			if (Quest.areas[k].some(function(quest) {
-				return (Quest[quest][0].dependency === undefined || Quest[quest][0].dependency(sock.user)) && ((sock.user.quest[quest] || 0) < Quest[quest].length);
+				return (Quest[quest][0].dependency === undefined || Quest[quest][0].dependency(sock.user)) && ((sock.user.quests[quest] || 0) < Quest[quest].length);
 			})) {
 				var xtot = 0, ytot = 0;
 				for (var i = 0;i < points.length; i+=2) {

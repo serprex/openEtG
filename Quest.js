@@ -178,10 +178,9 @@ exports.mkQuestAi = function(questname, stage, area) {
 	return game;
 }
 
-//Dependency functions
 function requireQuest(user) {
 	return this.questdependencies.every(function(dependency){
-		var progress = user.quest[dependency[0]];
+		var progress = user.quests[dependency[0]];
 		return progress && progress >= dependency[1];
 	});
 }
