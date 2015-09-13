@@ -309,10 +309,10 @@ module.exports = function(nymph) {
 				setPopup(null);
 				return;
 			}
-			var div = dom.box(392, 156);
+			var div = dom.box(267, 156);
 			dom.style(div, {
 				position: "absolute",
-				left: "460px",
+				left: "585px",
 				top: "380px",
 			});
 			var wipe = dom.button("Wipe Account",
@@ -336,17 +336,17 @@ module.exports = function(nymph) {
 				enableSound = dom.check("Enable sound", soundChange, "enableSound"),
 				enableMusic = dom.check("Enable music", musicChange, "enableMusic"),
 				hideRightpane = dom.check("Hide rightpane", hideRightpaneChange, "hideRightpane"),
-				hideCostIcon = dom.check("Hide cost icon", gfx.refreshCaches, "hideCostIcon"),
+				showCostIcon = dom.check("Show cost icon", gfx.refreshCaches, "showCostIcon"),
 				disableTut = dom.check("Disable tutorial", null, "disableTut");
 			changePass.type = "password";
 			changePass.addEventListener("keydown", function(e){
 				if (e.keyCode == 13) changeFunc();
 			});
-			dom.add(div, [8, 8, changePass], [162, 8, changeBtn],
+			dom.add(div, [8, 8, changePass], [184, 8, changeBtn],
 				[8, 53, enableSound], [135, 53, enableMusic],
-				[8, 88, hideRightpane], [260, 88, hideCostIcon],
+				[8, 88, hideRightpane], [135, 88, showCostIcon],
 				[8, 123, disableTut],
-				[309, 123, wipe]);
+				[184, 123, wipe]);
 			div.id = "settingspane";
 			setPopup(div);
 		});
