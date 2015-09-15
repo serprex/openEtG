@@ -1693,11 +1693,11 @@ summon:function(name){
 		new etg.Creature(c.card.as(Cards[name]), c.owner).place();
 	}
 },
-swarm:function(c,t){
+swarm:passive(function(c,t){
 	return c.owner.creatures.reduce(function(hp, cr){
 		return cr && cr.active.hp == Skills.swarm ? hp+1 : hp;
 	}, 0);
-},
+}),
 swave:function(c,t){
 	if (t.status.frozen){
 		Effect.mkText("Death", t);
