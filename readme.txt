@@ -1,7 +1,7 @@
 How to setup on Windows:
 
 1	Install
-	node.js @ http://nodejs.org
+	node.js 0.12.7 @ https://nodejs.org/dist/v0.12.7/
 	redis @ https://github.com/MSOpenTech/redis/releases
 	tortoisegit @ http://tortoisegit.org
 	git @ http://git-scm.com/download/win
@@ -11,14 +11,15 @@ How to setup on Windows:
 
 3	Hold Shift and right-click on your openEtG folder that you created in step 2, click Open command window here, run "npm install;npm install -g mkcjs optipng-bin spritesheet-js"
 
-4	Run "node updatedb.js" (NB it takes csv files as parameters if you don't want to download all of them)
+4	Build pixi.js from https://github.com/serprex/pixi.js/tree/oetg or download from http://etg.dek.im/pixi.min.js
 
-5	Build pixi.js from https://github.com/serprex/pixi.js/tree/oetg or download from http://etg.dek.im/pixi.min.js
+5a	ninja.exe should be in openEtG's folder. Run ninja.exe to build etgify.js
 
-6	ninja.exe should be in openEtG's folder. Run ninja.exe to build etgify.js
+5b If ninja.exe isn't working, run buildOpenEtG.bat instead and download 
+http://etg.dek.im/assets/atlas.js, http://etg.dek.im/assets/atlas.png and http://etg.dek.im/assets/atlas.css and add to the assets folder.
 
-7	Start redis-server and, in console, run "node server.js"
+6	Start redis-server and, in console, run "node server.js"
 
-8	Browse to http://127.0.0.1:13602 and it should work!
+7	Browse to http://127.0.0.1:13602 and it should work!
 
-NB when you edit a module you need to run step 6 to update etgify, & when the card DB is updated you need to run step 5
+NB when you edit a module you need to run step 5 to update etgify
