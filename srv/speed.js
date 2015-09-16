@@ -5,7 +5,7 @@ var etgutil = require("../etgutil");
 var mt = require("../MersenneTwister");
 module.exports = function(url, res, date){
 	if (url == ""){
-		res.write("HTTP/1.1 302 Found\r\nLocation:http://etg.dek.im/speed/" + Math.random()*etgutil.MAX_INT+"\r\n\r\n");
+		res.write("HTTP/1.1 302 Found\r\nLocation:/speed/" + Math.random()*etgutil.MAX_INT+"\r\n\r\n");
 		res.end();
 		return;
 	}

@@ -21,7 +21,7 @@ process.on("message", function(msg, res){
 			}
 			file(url, res, d, lines[1]);
 		}else if (url == "vanilla" || url == "cia"){
-			res.write("HTTP/1.1 302 Found\r\nLocation:http://etg.dek.im/"+url+"/\r\n\r\n");
+			res.write("HTTP/1.1 302 Found\r\nLocation:/"+url+"/\r\n\r\n");
 			res.end();
 		}else{
 			res.write("HTTP/1.1 404 Not Found\r\nConnection:close\r\n\r\nUnknown msg: " + msg);

@@ -1,7 +1,7 @@
 How to setup on Windows:
 
 1	Install
-	node.js 0.12.7 @ https://nodejs.org/dist/v0.12.7/
+	node.js @ https://nodejs.org
 	redis @ https://github.com/MSOpenTech/redis/releases
 	tortoisegit @ http://tortoisegit.org
 	git @ http://git-scm.com/download/win
@@ -15,7 +15,7 @@ How to setup on Windows:
 
 5a	ninja.exe should be in openEtG's folder. Run ninja.exe to build etgify.js
 
-5b If ninja.exe isn't working, run buildOpenEtG.bat instead and download 
+5b	If ninja.exe isn't working, run buildOpenEtG.bat instead and download
 http://etg.dek.im/assets/atlas.js, http://etg.dek.im/assets/atlas.png and http://etg.dek.im/assets/atlas.css and add to the assets folder.
 
 6	Start redis-server and, in console, run "node server.js"
