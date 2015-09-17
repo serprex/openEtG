@@ -60,7 +60,7 @@ module.exports = function(url, res, date){
 		addClass(cls, "fill:"+elecols[mark]);
 	}
 	ret = "<svg xmlns='http://www.w3.org/2000/svg' height='160'"+" width='"+(y?x+100:x)+"'><style type='text/css'><![CDATA[text{font-size:12px}"+classString()+"]]></style>" + ret + "</svg>";
-	zlib.gzip(ret, {level:9}, function(err, retbuf){
+	zlib.gzip(ret, {level:9}, (err, retbuf) => {
 		res.write(prefix);
 		res.write(retbuf);
 		res.end();

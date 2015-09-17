@@ -37,14 +37,14 @@ module.exports = function(url, res, date, lastModified){
 		return res.end();
 	}
 	// TODO make this more async
-	fs.stat(url, function(err, stat){
+	fs.stat(url, (err, stat) => {
 		var mtime = stat ? stat.mtime.toUTCString() : "";
 		if (lastModified && new Date(mtime).getTime() <= new Date(lastModified).getTime()){
 			return m304(res);
 		}
-		fs.readFile(url, function(err, buf){
+		fs.readFile(url, (err, buf) => {
 			if (err) return m404(res);
-			zlib.gzip(buf, {level:9}, function(err, gzbuf){
+			zlib.gzip(buf, {level:9}, (err, gzbuf) => {
 				res.write(addModified(prefix, mtime));
 				res.write(gzbuf);
 				res.end();

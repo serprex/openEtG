@@ -24,9 +24,9 @@ function stop(){
 	Us.stop();
 }
 process.on("SIGTERM", stop).on("SIGINT", stop);
-function activeUsers() {
+function activeUsers(){
 	var activeusers = [], userCount = 0;
-	for (var name in Us.socks) {
+	for (var name in Us.socks){
 		var sock = Us.socks[name];
 		if (sock && sock.readyState == 1){
 			userCount++;
@@ -46,14 +46,14 @@ function genericChat(socket, data){
 }
 function broadcast(data){
 	var msg = JSON.stringify(data);
-	wss.clients.forEach(function(sock){
+	wss.clients.forEach(sock => {
 		if (sock.readyState == 1) sock.send(msg);
 	});
 }
 function getAgedHp(hp, age){
 	return Math.max(hp - Math.pow(age, 2), hp/4)|0;
 }
-function wilson(up, total) {
+function wilson(up, total){
 	// from npm's wilson-score
 	var z = 2.326348, z2 = z*z, phat = up/total;
 	return (phat + z2/(2*total) - z*Math.sqrt((phat*(1 - phat) + z2/(4*total))/total))/(1 + z2/total);
@@ -67,12 +67,11 @@ function sockEmit(socket, event, data){
 }
 function modf(func){
 	return function(data, user){
-		var socket = this;
-		db.sismember("Mods", data.u, function(err, ismem){
+		db.sismember("Mods", data.u, (err, ismem) => {
 			if (ismem){
-				func.call(socket, data, user);
+				func.call(this, data, user);
 			}else{
-				sockEmit(socket, "chat", { mode: "red", msg: "You are not a mod" });
+				sockEmit(this, "chat", { mode: "red", msg: "You are not a mod" });
 			}
 		});
 	}
@@ -95,29 +94,29 @@ var userEvents = {
 	modclear:modf(function(data, user){
 		broadcast({x:"clear"});
 	}),
-	inituser:function(data, user) {
-		var starters = require("./srv/starter");
+	inituser:function(data, user){
+		var starter = require("./srv/starter.json");
 		if (data.e < 1 || data.e > 13) return;
 		var sid = (data.e-1)*6;
 		user.pvpwins = user.pvplosses = user.aiwins = user.ailosses = 0;
-		user.accountbound = starters[sid];
+		user.accountbound = starter[sid];
 		user.oracle = 0;
 		user.pool = "";
-		user.freepacks = [starters[sid+4], starters[sid+5], 1];
+		user.freepacks = [starter[sid+4], starter[sid+5], 1];
 		user.selectedDeck = "1";
 		user.qecks = ["1","2","3","4","5","6","7","8","9","10"];
-		user.decks = {1:starters[sid+1],2:starters[sid+2],3:starters[sid+3]};
+		user.decks = {1:starter[sid+1],2:starter[sid+2],3:starter[sid+3]};
 		user.quests = {};
 		user.streak = [];
 		sockEvents.login.call(this, {u:user.name, a:user.auth});
 	},
-	logout:function(data, user) {
+	logout:function(data, user){
 		var u=data.u;
 		db.hset("Users", u, JSON.stringify(user));
 		delete Us.users[u];
 		delete Us.socks[u];
 	},
-	delete:function(data, user) {
+	delete:function(data, user){
 		var u = data.u;
 		db.hdel("Users", u);
 		delete Us.users[u];
@@ -136,8 +135,7 @@ var userEvents = {
 		}
 	},
 	arenainfo:function(data, user){
-		var socket = this;
-		var task = sutil.mkTask(function(result){
+		var task = sutil.mkTask(result => {
 			var day = sutil.getDay();
 			function process(obj, rank){
 				if (!obj) return;
@@ -150,7 +148,7 @@ var userEvents = {
 			}
 			process(result.A, result.ra);
 			process(result.B, result.rb);
-			sockEmit(socket, "arenainfo", {A:result.A, B:result.B});
+			sockEmit(this, "arenainfo", {A:result.A, B:result.B});
 		});
 		db.hgetall("A:" + data.u, task("A"));
 		db.hgetall("B:" + data.u, task("B"));
@@ -182,21 +180,20 @@ var userEvents = {
 		});
 	},
 	foearena:function(data, user){
-		var socket = this;
-		db.zcard("arena"+(data.lv?"1":""), function(err, len){
-			if (!len)return;
+		db.zcard("arena"+(data.lv?"1":""), (err, len) => {
+			if (!len) return;
 			var cost = userutil.arenaCost(data.lv);
 			if (user.gold < cost)return;
 			user.gold -= cost;
 			var idx = etg.PlayerRng.upto(len);
-			db.zrange("arena"+(data.lv?"1":""), idx, idx, function(err, aname){
+			db.zrange("arena"+(data.lv?"1":""), idx, idx, (err, aname) => {
 				if (!aname || !aname.length){
 					console.log("No arena " + idx);
 					return;
 				}
 				aname = aname[0];
 				console.log("deck: "+ aname + " " + idx);
-				db.hgetall((data.lv?"B:":"A:")+aname, function(err, adeck){
+				db.hgetall((data.lv?"B:":"A:")+aname, (err, adeck) => {
 					var seed = Math.random();
 					adeck.card = parseInt(adeck.card, 10);
 					if (data.lv) adeck.card = etgutil.asUpped(adeck.card, true);
@@ -204,7 +201,7 @@ var userEvents = {
 					adeck.mark = parseInt(adeck.mark || 1);
 					adeck.draw = parseInt(adeck.draw || data.lv+1);
 					var curhp = getAgedHp(adeck.hp, sutil.getDay()-adeck.day);
-					sockEmit(socket, "foearena", {
+					sockEmit(this, "foearena", {
 						seed: seed*etgutil.MAX_INT,
 						name: aname, hp: curhp,
 						mark: adeck.mark, draw: adeck.draw,
@@ -214,78 +211,62 @@ var userEvents = {
 		});
 	},
 	codecreate:function(data, user){
-		var socket = this;
 		if (!data.t){
-			return sockEmit(socket, "chat", { mode: "red", msg: "Invalid type" });
+			return sockEmit(this, "chat", { mode: "red", msg: "Invalid type " + data.t });
 		}
-		db.sismember("Codesmiths", data.u, function(err, ismem){
-			function codeSmithLoop(iter){
-				if (iter == 999){
-					sockEmit(socket, "chat", { mode: "red", msg: "Failed to generate unique code."});
-				}else{
-					var code = "";
-					for (var i=0; i<8; i++){
-						code += String.fromCharCode(33+Math.floor(Math.random()*94));
-					}
-					db.hexists("CodeHash", code, function(err, exists){
-						if (exists){
-							codeSmithLoop(iter+1);
-						}else{
-							db.hset("CodeHash", code, data.t);
-							sockEmit(socket, "chat", { mode: "red", msg: data.t + " " + code});
-						}
-					});
-				}
-			}
+		db.sismember("Codesmiths", data.u, (err, ismem) => {
 			if (ismem){
-				codeSmithLoop(0);
+				db.eval(
+					"math.randomseed(ARGV[1])local c repeat c=''for i=1,8 do c=c..string.char(math.random(33,126))end until redis.call('hexists','CodeHash',c)==0 redis.call('hset','CodeHash',c,ARGV[2])return c",
+					0, Math.random()*etgutil.MAX_INT, data.t, (err, code) => {
+						if (err) console.log(err);
+						sockEmit(this, "chat", { mode: "red", msg: data.t + " " + code});
+					});
 			}else{
-				sockEmit(socket, "chat", { mode: "red", msg: "You are not a codesmith" });
+				sockEmit(this, "chat", { mode: "red", msg: "You are not a codesmith" });
 			}
 		});
 	},
 	codesubmit:function(data, user){
-		var socket = this;
-		db.hget("CodeHash", data.code, function(err, type){
+		db.hget("CodeHash", data.code, (err, type) => {
 			if (!type){
-				sockEmit(socket, "chat", { mode: "red", msg: "Code does not exist"});
+				sockEmit(this, "chat", { mode: "red", msg: "Code does not exist"});
 			}else if (type.charAt(0) == "G"){
 				var g = parseInt(type.slice(1));
 				if (isNaN(g)){
-					sockEmit(socket, "chat", { mode: "red", msg: "Invalid gold code type: " + type});
+					sockEmit(this, "chat", { mode: "red", msg: "Invalid gold code type: " + type});
 				}else{
 					user.gold += g;
-					sockEmit(socket, "codegold", {g: g});
+					sockEmit(this, "codegold", {g: g});
 					db.hdel("CodeHash", data.code);
 				}
 			}else if (type.charAt(0) == "C"){
 				var c = parseInt(type.slice(1), 32);
 				if (c in Cards.Codes){
 					user.pool = etgutil.addcard(user.pool, c);
-					sockEmit(socket, "codecode", {card: c});
+					sockEmit(this, "codecode", {card: c});
 					db.hdel("CodeHash", data.code);
-				}else sockEmit(socket, "chat", { mode: "red", msg: "Unknown card: " + type});
+				}else sockEmit(this, "chat", { mode: "red", msg: "Unknown card: " + type});
 			}else if (type.replace(/^!/, "") in userutil.rewardwords){
-				sockEmit(socket, "codecard", {type: type});
+				sockEmit(this, "codecard", {type: type});
 			}else{
-				sockEmit(socket, "chat", { mode: "red", msg: "Unknown code type: " + type});
+				sockEmit(this, "chat", { mode: "red", msg: "Unknown code type: " + type});
 			}
 		});
 	},
 	codesubmit2:function(data, user){
-		var socket = this;
-		db.hget("CodeHash", data.code, function(err, type){
+		db.hget("CodeHash", data.code, (err, type) => {
 			if (!type){
-				sockEmit(socket, "chat", { mode: "red", msg: "Code does not exist"});
+				sockEmit(this, "chat", { mode: "red", msg: "Code does not exist"});
 			}else if (type.replace(/^!/, "") in userutil.rewardwords){
 				var card = Cards.Codes[data.card];
 				if (card && card.rarity == userutil.rewardwords[type.replace(/^!/, "")] && card.shiny ^ (type.charAt(0) != "!")){
 					user.pool = etgutil.addcard(user.pool, data.card);
-					sockEmit(socket, "codedone", {card: data.card});
+					sockEmit(this, "codedone", {card: data.card});
 					db.hdel("CodeHash", data.code);
 				}
 			}else{
-				sockEmit(socket, "chat", { mode: "red", msg: "Unknown code type: " + type});
+				sockEmit(this, "chat", { mode: "red", msg: "Unknown code type: " + type});
 			}
 		});
 	},
@@ -301,7 +282,7 @@ var userEvents = {
 		this.meta.pvpstats = { hp: data.p1hp, markpower: data.p1markpower, deckpower: data.p1deckpower, drawpower: data.p1drawpower };
 		var foesock = Us.socks[f];
 		if (foesock && foesock.readyState == 1){
-			if (foesock.meta.duel == u) {
+			if (foesock.meta.duel == u){
 				delete foesock.meta.duel;
 				var seed = Math.random() * etgutil.MAX_INT;
 				this.meta.foe = foesock;
@@ -310,11 +291,11 @@ var userEvents = {
 				var owndata = { seed: seed, deck: deck0, urdeck: deck1, foename:f };
 				var foedata = { flip: true, seed: seed, deck: deck1, urdeck: deck0 ,foename:u };
 				var stat = this.meta.pvpstats, foestat = foesock.meta.pvpstats;
-				for (var key in stat) {
+				for (var key in stat){
 					owndata["p1" + key] = stat[key];
 					foedata["p2" + key] = stat[key];
 				}
-				for (var key in foestat) {
+				for (var key in foestat){
 					owndata["p2" + key] = foestat[key];
 					foedata["p1" + key] = foestat[key];
 				}
@@ -342,7 +323,7 @@ var userEvents = {
 			tgt.meta.spectators.push(data.u);
 		}
 	},
-	canceltrade:function (data) {
+	canceltrade:function(data){
 		var info = this.meta;
 		if (info.trade){
 			var foesock = Us.socks[info.trade.foe];
@@ -354,7 +335,7 @@ var userEvents = {
 			delete info.trade;
 		}
 	},
-	confirmtrade:function (data, user) {
+	confirmtrade:function(data, user){
 		var u = data.u, thistrade = this.meta.trade;
 		if (!thistrade){
 			return;
@@ -368,7 +349,7 @@ var userEvents = {
 			sockEmit(this, "tradecanceled");
 			delete this.meta.trade;
 			return;
-		} else if (thattrade.accepted) {
+		} else if (thattrade.accepted){
 			var player1Cards = thistrade.tradecards, player2Cards = thattrade.tradecards;
 			if (player1Cards != thattrade.oppcards || player2Cards != thistrade.oppcards){
 				sockEmit(this, "tradecanceled");
@@ -389,17 +370,17 @@ var userEvents = {
 			thistrade.accepted = true;
 		}
 	},
-	tradewant:function (data) {
+	tradewant:function(data){
 		var u = data.u, f = data.f;
-		if (u == f) {
+		if (u == f){
 			return;
 		}
 		console.log(u + " requesting " + f);
 		var foesock = Us.socks[f];
-		if (foesock && foesock.readyState == 1) {
+		if (foesock && foesock.readyState == 1){
 			this.meta.trade = {foe: f};
 			var foetrade = foesock.meta.trade;
-			if (foetrade && foetrade.foe == u) {
+			if (foetrade && foetrade.foe == u){
 				sockEmit(this, "tradegive");
 				sockEmit(foesock, "tradegive");
 			} else {
@@ -414,20 +395,19 @@ var userEvents = {
 			user.auth = user.name;
 			sockEmit(this, "passchange", {auth: user.name});
 		}else{
-			var socket = this;
 			sutil.initsalt(user);
-			require("crypto").pbkdf2(data.p, user.salt, user.iter, 64, function(err, key){
+			require("crypto").pbkdf2(data.p, user.salt, user.iter, 64, (err, key) => {
 				if (!err){
 					user.auth = key.toString("base64");
-					sockEmit(socket, "passchange", {auth: user.auth});
+					sockEmit(this, "passchange", {auth: user.auth});
 				}
 			});
 		}
 	},
-	chat:function (data) {
-		if (data.to) {
+	chat:function(data){
+		if (data.to){
 			var to = data.to;
-			if (Us.socks[to] && Us.socks[to].readyState == 1) {
+			if (Us.socks[to] && Us.socks[to].readyState == 1){
 				sockEmit(Us.socks[to], "chat", { msg: data.msg, mode: "blue", u: data.u });
 				sockEmit(this, "chat", { msg: data.msg, mode: "blue", u: "To " + to });
 			}
@@ -437,7 +417,7 @@ var userEvents = {
 			genericChat(this, data);
 		}
 	},
-	booster:function(data, user) {
+	booster:function(data, user){
 		var pack = [
 			{ amount: 10, cost: 15, rare: []},
 			{ amount: 6, cost: 25, rare: [3]},
@@ -453,25 +433,25 @@ var userEvents = {
 			pack.cost *= data.bulk;
 			for(var i=0; i<pack.rare.length; i++) pack.rare[i] *= data.bulk;
 		}
-		if (bound || user.gold >= pack.cost) {
+		if (bound || user.gold >= pack.cost){
 			var newCards = "", rarity = 1;
-			for (var i = 0;i < pack.amount;i++) {
+			for (var i = 0;i < pack.amount;i++){
 				while (i == pack.rare[rarity-1]) rarity++;
 				var cardcode;
 				if (rarity == 5){
 					cardcode = etg.NymphList[data.element > 0 && data.element < 13 ? data.element : etg.PlayerRng.uptoceil(12)];
 				}else{
 					var notFromElement = Math.random() > .5, bumprarity = rarity+(Math.random() < bumprate), card = undefined;
-					if (data.element < 13) card = etg.PlayerRng.randomcard(false, function(x) { return (x.element == data.element) ^ notFromElement && x.rarity == bumprarity});
-					if (!card) card = etg.PlayerRng.randomcard(false, function(x) { return x.rarity == bumprarity });
+					if (data.element < 13) card = etg.PlayerRng.randomcard(false, x => (x.element == data.element) ^ notFromElement && x.rarity == bumprarity);
+					if (!card) card = etg.PlayerRng.randomcard(false, x => x.rarity == bumprarity);
 					cardcode = card.code
 				}
 				newCards = etgutil.addcard(newCards, cardcode);
 			}
-			if (bound) {
+			if (bound){
 				user.freepacks[data.pack]--;
 				user.accountbound = etgutil.mergedecks(user.accountbound, newCards);
-				if (user.freepacks.every(function(x){return x == 0})) {
+				if (user.freepacks.every(x => x == 0)){
 					delete user.freepacks;
 				}
 			}
@@ -498,7 +478,7 @@ var userEvents = {
 };
 var sockEvents = {
 	login:require("./srv/login")(sockEmit),
-	guestchat:function(data) {
+	guestchat:function(data){
 		if (guestban) return;
 		data.guest = true;
 		data.u = "Guest_" + data.u;
@@ -514,12 +494,11 @@ var sockEvents = {
 		broadcast(data);
 	},
 	mod:function(data){
-		var socket = this;
-		db.smembers("Mods", function(err, mods){
-			sockEmit(socket, "chat", { mode: "red", msg: mods.join() });
+		db.smembers("Mods", (err, mods) => {
+			sockEmit(this, "chat", { mode: "red", msg: mods.join() });
 		});
 	},
-	pvpwant:function(data) {
+	pvpwant:function(data){
 		var pendinggame=rooms[data.room];
 		this.meta.deck = data.deck;
 		this.meta.pvpstats = { hp: data.hp, markpower: data.mark, deckpower: data.deck, drawpower: data.draw };
@@ -534,11 +513,11 @@ var sockEvents = {
 			var owndata = { seed: seed, deck: deck0, urdeck: deck1 };
 			var foedata = { flip: true, seed: seed, deck: deck1, urdeck: deck0 };
 			var stat = this.meta.pvpstats, foestat = pendinggame.meta.pvpstats;
-			for (var key in stat) {
+			for (var key in stat){
 				owndata["p1" + key] = stat[key];
 				foedata["p2" + key] = stat[key];
 			}
-			for (var key in foestat) {
+			for (var key in foestat){
 				owndata["p2" + key] = foestat[key];
 				foedata["p1" + key] = foestat[key];
 			}
@@ -550,21 +529,19 @@ var sockEvents = {
 		}
 	},
 	librarywant:function(data){
-		var socket = this;
-		Us.load(data.f, function(user){
-			sockEmit(socket, "librarygive", {pool:user.pool, bound:user.accountbound, gold:user.gold});
+		Us.load(data.f, (user) => {
+			sockEmit(this, "librarygive", {pool:user.pool, bound:user.accountbound, gold:user.gold});
 		});
 	},
 	arenatop:function(data){
-		var socket = this;
-		db.zrevrange("arena"+(data.lv?"1":""), 0, 19, "withscores", function(err, obj){
+		db.zrevrange("arena"+(data.lv?"1":""), 0, 19, "withscores", (err, obj) => {
 			if (err) return;
 			var t20 = [];
 			function getwinloss(i){
 				if (i == obj.length){
-					sockEmit(socket, "arenatop", {top: t20, lv:data.lv});
+					sockEmit(this, "arenatop", {top: t20, lv:data.lv});
 				}else{
-					db.hmget((data.lv?"B:":"A:") + obj[i], "win", "loss", "day", "card", function(err, wl){
+					db.hmget((data.lv?"B:":"A:") + obj[i], "win", "loss", "day", "card", (err, wl) => {
 						wl[2] = sutil.getDay()-wl[2];
 						wl[3] = parseInt(wl[3], 10);
 						t20.push([obj[i], Math.floor(obj[i+1])].concat(wl));
@@ -576,9 +553,8 @@ var sockEvents = {
 		});
 	},
 	wealthtop:function(data){
-		var socket = this;
-		db.zrevrange("wealth", 0, 49, "withscores", function(err, obj){
-			if (!err) sockEmit(socket, "wealthtop", {top: obj});
+		db.zrevrange("wealth", 0, 49, "withscores", (err, obj) => {
+			if (!err) sockEmit(this, {top: obj});
 		});
 	},
 	chatus:function(data){
@@ -600,7 +576,8 @@ var sockEvents = {
 		delete rooms[data.room];
 	}
 };
-function wssConnection(socket) {
+var wss = new (require("ws/lib/WebSocketServer"))({server:app.listen(13602)});
+wss.on("connection", function(socket){
 	socket.meta = {};
 	socket.on("close", function(){
 		for(var key in rooms){
@@ -647,7 +624,7 @@ function wssConnection(socket) {
 					if (spectators){
 						data.spectate = i;
 						var rawmsg = JSON.stringify(data);
-						spectators.forEach(function(uname){
+						spectators.forEach(uname => {
 							var sock = Us.socks[uname];
 							if (sock && sock.readyState == 1){
 								sock.send(rawmsg);
@@ -661,7 +638,7 @@ function wssConnection(socket) {
 		var func = userEvents[data.x] || usercmd[data.x];
 		if (func){
 			var u = data.u;
-			Us.load(u, function(user){
+			Us.load(u, user => {
 				if (data.a == user.auth){
 					Us.socks[u] = socket;
 					delete data.a;
@@ -672,6 +649,4 @@ function wssConnection(socket) {
 			func.call(socket, data);
 		}
 	});
-}
-var wss = new (require("ws/lib/WebSocketServer"))({server:app.listen(13602)});
-wss.on("connection", wssConnection);
+});

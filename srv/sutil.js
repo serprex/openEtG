@@ -1,11 +1,8 @@
 "use strict";
-var fs = require("fs");
 exports.mkTask = function(cb){
 	var params = {}, cbCount = 1;
 	function cbCheck(){
-		if (--cbCount == 0){
-			cb(params);
-		}
+		if(!--cbCount) cb(params);
 	}
 	return function(param){
 		if (arguments.length == 0){

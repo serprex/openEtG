@@ -25,7 +25,7 @@ module.exports = function(url, res, date){
 		var ele = eles[ei];
 		eles[ei] = eles[i];
 		for(var j=0; j<7; j++){
-			cards[i*7+j] = prng.randomcard(false, function(x){return x.element == ele && x.type && cards.indexOf(x.code) == -1}).code;
+			cards[i*7+j] = prng.randomcard(false, x => x.element == ele && x.type && cards.indexOf(x.code) == -1).code;
 		}
 	}
 	deck("01"+cards.join("01"), res, date);

@@ -35,7 +35,7 @@ function load(name, cb, errcb){
 	if (users[name]){
 		cb(users[name]);
 	}else{
-		db.hget("Users", name, function(err, userstr){
+		db.hget("Users", name, (err, userstr) => {
 			if (userstr){
 				var user = users[name] = JSON.parse(userstr);
 				if (!user.streak) user.streak = [];

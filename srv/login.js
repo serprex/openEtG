@@ -30,7 +30,7 @@ module.exports = function(sockEmit){
 					user.oracle = day;
 					var ocardnymph = Math.random() < .03;
 					var card = etg.PlayerRng.randomcard(false,
-						function (x) { return x.type != etg.PillarEnum && ((x.rarity != 5) ^ ocardnymph) && x.code != user.ocard; });
+						x => x.type != etg.PillarEnum && ((x.rarity != 5) ^ ocardnymph) && x.code != user.ocard);
 					var ccode = etgutil.asShiny(card.code, card.rarity == 5);
 					if (card.rarity > 1) {
 						user.accountbound = etgutil.addcard(user.accountbound, ccode);
@@ -65,9 +65,9 @@ module.exports = function(sockEmit){
 			return;
 		}else{
 			var socket = this;
-			Us.load(name, function(user){
+			Us.load(name, user => {
 				loginRespond(socket, user, data.p, data.a);
-			}, function(){
+			}, () => {
 				var user = Us.users[name] = {name: name, gold: 0};
 				loginRespond(socket, user, data.p, data.a);
 			});
