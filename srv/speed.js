@@ -28,5 +28,10 @@ module.exports = function(url, res, date){
 			cards[i*7+j] = prng.randomcard(false, x => x.element == ele && x.type && cards.indexOf(x.code) == -1).code;
 		}
 	}
-	deck("01"+cards.join("01"), res, date);
+	cards.sort(etg.codeCmp);
+	var code = "";
+	for (var i=0; i<cards.length; i++){
+		code += "01" + cards[i].toString(32);
+	}
+	deck(code, res, date);
 }
