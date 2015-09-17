@@ -536,25 +536,26 @@ var sockEvents = {
 	arenatop:function(data){
 		db.zrevrange("arena"+(data.lv?"1":""), 0, 19, "withscores", (err, obj) => {
 			if (err) return;
-			var t20 = [];
-			function getwinloss(i){
-				if (i == obj.length){
-					sockEmit(this, "arenatop", {top: t20, lv:data.lv});
-				}else{
-					db.hmget((data.lv?"B:":"A:") + obj[i], "win", "loss", "day", "card", (err, wl) => {
-						wl[2] = sutil.getDay()-wl[2];
-						wl[3] = parseInt(wl[3], 10);
-						t20.push([obj[i], Math.floor(obj[i+1])].concat(wl));
-						getwinloss(i+2);
-					});
+			var task = sutil.mkTask(res => {
+				var i=0, t20=[], day=sutil.getDay();
+				while (res[i]){
+					var wl = res[i];
+					wl[2] = day-wl[2];
+					wl[3] = parseInt(wl[3]);
+					t20.push([obj[i*2], Math.floor(obj[i*2+1])].concat(wl));
+					i++;
 				}
+				sockEmit(this, "arenatop", {top: t20, lv:data.lv});
+			});
+			for(var i=0; i<obj.length; i+=2){
+				db.hmget((data.lv?"B:":"A:") + obj[i], "win", "loss", "day", "card", task(i/2));
 			}
-			getwinloss(0);
+			task();
 		});
 	},
 	wealthtop:function(data){
 		db.zrevrange("wealth", 0, 49, "withscores", (err, obj) => {
-			if (!err) sockEmit(this, {top: obj});
+			if (!err) sockEmit(this, "wealthtop", {top: obj});
 		});
 	},
 	chatus:function(data){

@@ -56,7 +56,7 @@ var sockEvents = {
 		var now = new Date(), h = now.getHours(), m = now.getMinutes(),
 			hs = h < 10 ? "0"+h : h.toString(), ms = m < 10 ? "0"+m : m.toString();
 		var span = document.createElement("span");
-		if (data.mode != 1) span.style.color = data.mode == 2 ? "#336699" : "#dcdcdc";
+		if (data.mode != 1) span.style.color = data.mode == 2 ? "#69f" : "#ddd";
 		if (data.guest) span.style.fontStyle = "italic";
 		span.appendChild(document.createTextNode(hs + ms + " "));
 		if (data.u){

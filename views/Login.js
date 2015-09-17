@@ -31,7 +31,7 @@ module.exports = function(){
 		loadingBar.style.backgroundColor = "#FFFFFF";
 		loadingBar.style.height = "32px";
 		gfx.load(function(progress){
-			if (progress == 1) loadingBar.style.backgroundColor = "#336699";
+			if (progress == 1) loadingBar.style.backgroundColor = "#369";
 			loadingBar.style.width = (progress*900) + "px";
 		}, function(){
 			ui.playMusic("openingMusic");

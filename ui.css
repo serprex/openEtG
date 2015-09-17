@@ -8,7 +8,7 @@ body{
 	font:16px Dosis;
 }
 a{
-	color:#6699FF;
+	color:#69F;
 	text-decoration:none;
 }
 tr,td{padding:0}
@@ -49,9 +49,9 @@ input[type="text"],input[type="password"],input:not([type]){width:150px}
 	font-size:12px;
 	pointer-events:none;
 }
-.lightback{background-color:#aaaaaa;color:black}
+.lightback{background-color:#aaa;color:black}
 .beigeback{background-color:#a09080;color:black}
-.selectedbutton{background:linear-gradient(to bottom,#424748,#8999ff)!important}
+.selectedbutton{background:linear-gradient(to bottom,#424748,#89f)!important}
 .editbtn{width:32px!important;margin-left:4px}
 .bgimg{
 	-moz-user-select:none;
@@ -64,10 +64,10 @@ input[type="text"],input[type="password"],input:not([type]){width:150px}
 	background-color:#0d2e4a;
 	border-style:solid;
 	border-width:2px;
-	border-left-color:#121212;
-	border-bottom-color:#121212;
-	border-top-color:#969696;
-	border-right-color:#969696;
+	border-left-color:#111;
+	border-bottom-color:#111;
+	border-top-color:#999;
+	border-right-color:#999;
 	padding:4px;
 	overflow:hidden;
 }
@@ -75,7 +75,7 @@ input[type="text"],input[type="password"],input:not([type]){width:150px}
 	background-color:rgba(255,255,255,0.7);
 	border:solid black 2px;
 	line-height:120%;
-	color:#000000;
+	color:#000;
 	padding-left:4px;
 	padding-right:4px;
 	z-index:2;
@@ -121,7 +121,7 @@ input[type="text"],input[type="password"],input:not([type]){width:150px}
 	overflow-y:scroll;
 	overflow-x:hidden;
 	color:#bd3636;
-	background-color:#222222;
+	background-color:#222;
 	word-wrap:break-word;
 }
 #chatinput{
@@ -130,6 +130,6 @@ input[type="text"],input[type="password"],input:not([type]){width:150px}
 	resize:none;
 	border:0;
 	font:14px Dosis;
-	color:#dcdcdc;
-	background-color:#222222;
+	color:#ddd;
+	background-color:#222;
 }
