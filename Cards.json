@@ -167,7 +167,7 @@
 "readiness":"crea",
 "reap":"notskele",
 "regeneratespell":"crea+permnonstack",
-"regrade":"all",
+"regrade":"notself:notplay:all",
 "reinforce":"notself:crea",
 "ren":"crea",
 "rewind":"crea",

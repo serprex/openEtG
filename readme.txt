@@ -11,7 +11,7 @@ How to setup on Windows:
 
 3	Hold Shift and right-click on your openEtG folder that you created in step 2, click Open command window here, run "npm install;npm install -g mkcjs optipng-bin spritesheet-js"
 
-4	Build pixi.js from https://github.com/serprex/pixi.js/tree/oetg or download from http://etg.dek.im/pixi.min.js
+4	Build pixi.js from https://github.com/serprex/pixi.js or download from http://etg.dek.im/pixi.min.js
 
 5a	ninja.exe should be in openEtG's folder. Run ninja.exe to build etgify.js
 
