@@ -71,7 +71,7 @@ function modf(func){
 			if (ismem){
 				func.call(this, data, user);
 			}else{
-				sockEmit(this, "chat", { mode: "red", msg: "You are not a mod" });
+				sockEmit(this, "chat", { mode: 1, msg: "You are not a mod" });
 			}
 		});
 	}
@@ -212,7 +212,7 @@ var userEvents = {
 	},
 	codecreate:function(data, user){
 		if (!data.t){
-			return sockEmit(this, "chat", { mode: "red", msg: "Invalid type " + data.t });
+			return sockEmit(this, "chat", { mode: 1, msg: "Invalid type " + data.t });
 		}
 		db.sismember("Codesmiths", data.u, (err, ismem) => {
 			if (ismem){
@@ -220,21 +220,21 @@ var userEvents = {
 					"math.randomseed(ARGV[1])local c repeat c=''for i=1,8 do c=c..string.char(math.random(33,126))end until redis.call('hexists','CodeHash',c)==0 redis.call('hset','CodeHash',c,ARGV[2])return c",
 					0, Math.random()*etgutil.MAX_INT, data.t, (err, code) => {
 						if (err) console.log(err);
-						sockEmit(this, "chat", { mode: "red", msg: data.t + " " + code});
+						sockEmit(this, "chat", { mode: 1, msg: data.t + " " + code});
 					});
 			}else{
-				sockEmit(this, "chat", { mode: "red", msg: "You are not a codesmith" });
+				sockEmit(this, "chat", { mode: 1, msg: "You are not a codesmith" });
 			}
 		});
 	},
 	codesubmit:function(data, user){
 		db.hget("CodeHash", data.code, (err, type) => {
 			if (!type){
-				sockEmit(this, "chat", { mode: "red", msg: "Code does not exist"});
+				sockEmit(this, "chat", { mode: 1, msg: "Code does not exist"});
 			}else if (type.charAt(0) == "G"){
 				var g = parseInt(type.slice(1));
 				if (isNaN(g)){
-					sockEmit(this, "chat", { mode: "red", msg: "Invalid gold code type: " + type});
+					sockEmit(this, "chat", { mode: 1, msg: "Invalid gold code type: " + type});
 				}else{
 					user.gold += g;
 					sockEmit(this, "codegold", {g: g});
@@ -246,18 +246,18 @@ var userEvents = {
 					user.pool = etgutil.addcard(user.pool, c);
 					sockEmit(this, "codecode", {card: c});
 					db.hdel("CodeHash", data.code);
-				}else sockEmit(this, "chat", { mode: "red", msg: "Unknown card: " + type});
+				}else sockEmit(this, "chat", { mode: 1, msg: "Unknown card: " + type});
 			}else if (type.replace(/^!/, "") in userutil.rewardwords){
 				sockEmit(this, "codecard", {type: type});
 			}else{
-				sockEmit(this, "chat", { mode: "red", msg: "Unknown code type: " + type});
+				sockEmit(this, "chat", { mode: 1, msg: "Unknown code type: " + type});
 			}
 		});
 	},
 	codesubmit2:function(data, user){
 		db.hget("CodeHash", data.code, (err, type) => {
 			if (!type){
-				sockEmit(this, "chat", { mode: "red", msg: "Code does not exist"});
+				sockEmit(this, "chat", { mode: 1, msg: "Code does not exist"});
 			}else if (type.replace(/^!/, "") in userutil.rewardwords){
 				var card = Cards.Codes[data.card];
 				if (card && card.rarity == userutil.rewardwords[type.replace(/^!/, "")] && card.shiny ^ (type.charAt(0) != "!")){
@@ -266,7 +266,7 @@ var userEvents = {
 					db.hdel("CodeHash", data.code);
 				}
 			}else{
-				sockEmit(this, "chat", { mode: "red", msg: "Unknown code type: " + type});
+				sockEmit(this, "chat", { mode: 1, msg: "Unknown code type: " + type});
 			}
 		});
 	},
@@ -318,7 +318,7 @@ var userEvents = {
 	spectate:function(data, user){
 		var tgt = Us.socks[data.f];
 		if (tgt && tgt.meta.duel){
-			sockEmit(tgt, "chat", { mode: "red", msg: data.u + " is spectating." });
+			sockEmit(tgt, "chat", { mode: 1, msg: data.u + " is spectating." });
 			if (!tgt.meta.spectators) tgt.meta.spectators = [];
 			tgt.meta.spectators.push(data.u);
 		}
@@ -329,7 +329,7 @@ var userEvents = {
 			var foesock = Us.socks[info.trade.foe];
 			if (foesock){
 				sockEmit(foesock, "tradecanceled");
-				sockEmit(foesock, "chat", { mode: "red", msg: data.u + " has canceled the trade."});
+				sockEmit(foesock, "chat", { mode: 1, msg: data.u + " has canceled the trade."});
 				if ( foesock.meta.trade && foesock.meta.trade.foe == data.u) delete foesock.meta.trade;
 			}
 			delete info.trade;
@@ -353,9 +353,9 @@ var userEvents = {
 			var player1Cards = thistrade.tradecards, player2Cards = thattrade.tradecards;
 			if (player1Cards != thattrade.oppcards || player2Cards != thistrade.oppcards){
 				sockEmit(this, "tradecanceled");
-				sockEmit(this, "chat", { mode: "red", msg: "Trade disagreement."});
+				sockEmit(this, "chat", { mode: 1, msg: "Trade disagreement."});
 				sockEmit(thatsock, "tradecanceled");
-				sockEmit(thatsock, "chat", { mode: "red", msg: "Trade disagreement."});
+				sockEmit(thatsock, "chat", { mode: 1, msg: "Trade disagreement."});
 				return;
 			}
 			user.pool = etgutil.removedecks(user.pool, player1Cards);
@@ -408,10 +408,10 @@ var userEvents = {
 		if (data.to){
 			var to = data.to;
 			if (Us.socks[to] && Us.socks[to].readyState == 1){
-				sockEmit(Us.socks[to], "chat", { msg: data.msg, mode: "blue", u: data.u });
-				sockEmit(this, "chat", { msg: data.msg, mode: "blue", u: "To " + to });
+				sockEmit(Us.socks[to], "chat", { msg: data.msg, mode: 2, u: data.u });
+				sockEmit(this, "chat", { msg: data.msg, mode: 2, u: "To " + to });
 			}
-			else sockEmit(this, "chat", { mode: "red", msg: to + " is not here right now." });
+			else sockEmit(this, "chat", { mode: 1, msg: to + " is not here right now." });
 		}
 		else{
 			genericChat(this, data);
@@ -468,7 +468,7 @@ var userEvents = {
 			var foesock = Us.socks[info.duel];
 			if (foesock){
 				sockEmit(foesock, "foeleft");
-				sockEmit(foesock, "chat", { mode: "red", msg: data.u + " has canceled the duel."});
+				sockEmit(foesock, "chat", { mode: 1, msg: data.u + " has canceled the duel."});
 				if (foesock.meta.duel == data.u) delete foesock.meta.duel;
 			}
 			delete info.duel;
@@ -495,7 +495,7 @@ var sockEvents = {
 	},
 	mod:function(data){
 		db.smembers("Mods", (err, mods) => {
-			sockEmit(this, "chat", { mode: "red", msg: mods.join() });
+			sockEmit(this, "chat", { mode: 1, msg: mods.join() });
 		});
 	},
 	pvpwant:function(data){
@@ -563,13 +563,13 @@ var sockEvents = {
 		if (data.afk !== undefined) this.meta.afk = data.afk;
 	},
 	who:function(data){
-		sockEmit(this, "chat", { mode: "red", msg: activeUsers().join(", ") });
+		sockEmit(this, "chat", { mode: 1, msg: activeUsers().join(", ") });
 	},
 	challrecv:function(data){
 		var foesock = Us.socks[data.f];
 		if (foesock && foesock.readyState == 1){
 			var info = foesock.meta, foename = data.pvp ? info.duel : info.trade ? info.trade.foe : "";
-			sockEmit(foesock, "chat", { mode: "red", msg: "You have sent a " + (data.pvp ? "PvP" : "trade") + " request to " + foename + "!" });
+			sockEmit(foesock, "chat", { mode: 1, msg: "You have sent a " + (data.pvp ? "PvP" : "trade") + " request to " + foename + "!" });
 		}
 	},
 	roomcancel:function(data){

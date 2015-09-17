@@ -120,13 +120,16 @@ input[type="text"],input[type="password"],input:not([type]){width:150px}
 	height:488px;
 	overflow-y:scroll;
 	overflow-x:hidden;
-	color:red;
-	background-color:white;
+	color:#bd3636;
+	background-color:#222222;
 	word-wrap:break-word;
 }
 #chatinput{
 	width:350px;
 	height:40px;
 	resize:none;
+	border:0;
 	font:14px Dosis;
+	color:#dcdcdc;
+	background-color:#222222;
 }
