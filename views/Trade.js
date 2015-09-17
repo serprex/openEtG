@@ -19,7 +19,7 @@ module.exports = function() {
 	var btrade = dom.button("Trade", function() {
 		if (!cardChosen){
 			if (ownDeck.deck.length > 0) {
-				sock.emit("cardchosen", {c: etgutil.encodedeck(ownDeck.deck)});
+				sock.emit("cardchosen", {c: etgutil.encoderaw(ownDeck.deck)});
 				console.log("Offered", ownDeck.deck);
 				cardChosen = true;
 				btrade.value = "Confirm";
@@ -29,7 +29,7 @@ module.exports = function() {
 		}else{ // confirm
 			if (foeDeck.deck.length > 0) {
 				console.log("Confirmed", ownDeck.deck, foeDeck.deck);
-				sock.userEmit("confirmtrade", { cards: etgutil.encodedeck(ownDeck.deck), oppcards: etgutil.encodedeck(foeDeck.deck) });
+				sock.userEmit("confirmtrade", { cards: etgutil.encoderaw(ownDeck.deck), oppcards: etgutil.encoderaw(foeDeck.deck) });
 				btrade.style.display = "none";
 				tconfirm.style.display = "";
 			}

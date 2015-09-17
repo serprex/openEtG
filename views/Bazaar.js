@@ -19,7 +19,7 @@ module.exports = function() {
 		if (ownDeck.deck.length == 0) return chat("You haven't chosen a card");
 		console.log(ownVal.text, ownVal.textContent);
 		if (sock.user.gold < parseInt(ownVal.text)) return chat("You cannot afford these");
-		sock.userExec("bazaar", {cards:etgutil.encodedeck(ownDeck.deck)});
+		sock.userExec("bazaar", {cards:etgutil.encoderaw(ownDeck.deck)});
 		startMenu();
 	});
 	var ownVal = dom.text("");

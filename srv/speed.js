@@ -15,7 +15,7 @@ module.exports = function(url, res, date){
 	}
 	var prng = Object.create(etg.Player.prototype);
 	prng.game = {rng: new mt(hash)};
-	var eles = new Uint8Array(12), cards = new Array(42);
+	var eles = new Uint8Array(12), cards = new Uint16Array(42);
 	for (var i=0; i<12; i++){
 		eles[i] = i+1;
 	}
@@ -28,5 +28,5 @@ module.exports = function(url, res, date){
 			cards[i*7+j] = prng.randomcard(false, function(x){return x.element == ele && x.type && cards.indexOf(x.code) == -1}).code;
 		}
 	}
-	deck(etgutil.encodedeck(cards), res, date);
+	deck("01"+cards.join("01"), res, date);
 }

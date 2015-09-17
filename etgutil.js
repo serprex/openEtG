@@ -33,14 +33,13 @@ exports.count = function(deck, code){
 	return 0;
 }
 exports.decklength = function(deck){
-	var r = 0;
+	var r=0;
 	for(var i=0; i<deck.length; i+=5){
 		r += parseInt(deck.substr(i, 2), 32);
 	}
 	return r;
 }
 exports.encodedeck = function(deck){
-	if (!deck)return "";
 	var pool=[], out="";
 	deck.forEach(function(code){
 		if (code in pool){
@@ -49,10 +48,18 @@ exports.encodedeck = function(deck){
 			pool[code]=1;
 		}
 	});
-	var prevcode = 0, prevcount = 0;
 	pool.forEach(function(count, code){
 		out += encodeCount(count) + code.toString(32);
 	});
+	return out;
+}
+exports.encoderaw = function(deck){
+	var out = "", i=0;
+	while (i<deck.length){
+		var j=i++, dj=deck[j];
+		while (i<deck.length && deck[i] == dj) i++;
+		out += encodeCount(i-j) + dj.toString(32);
+	}
 	return out;
 }
 exports.decodedeck = function(deck) {
