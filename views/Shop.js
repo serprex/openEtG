@@ -13,11 +13,11 @@ function setVis(eles, vis) {
 }
 module.exports = function() {
 	var packdata = [
-		{cost: 15, type: "Bronze", info: "10 Commons", color: "#cd7d32"},
-		{cost: 25, type: "Silver", info: "3 Commons, 3 Uncommons", color: "#c0c0c0"},
-		{cost: 77, type: "Gold", info: "1 Common, 2 Uncommons, 2 Rares", color: "#ffd700"},
-		{cost: 100, type: "Platinum", info: "4 Commons, 3 Uncommons, 1 Rare, 1 Shard", color: "#e4e4e4"},
-		{cost: 250, type: "Nymph", info: "1 Nymph", color: "#6699bb"},
+		{cost: 15, type: "Bronze", info: "10 Commons", color: "#c73"},
+		{cost: 25, type: "Silver", info: "3 Commons, 3 Uncommons", color: "#ccc"},
+		{cost: 77, type: "Gold", info: "1 Common, 2 Uncommons, 2 Rares", color: "#fd0"},
+		{cost: 100, type: "Platinum", info: "4 Commons, 3 Uncommons, 1 Rare, 1 Shard", color: "#eee"},
+		{cost: 250, type: "Nymph", info: "1 Nymph", color: "#69b"},
 	];
 	var packele = -1, packrarity = -1, storeui = new PIXI.Container();
 
@@ -84,7 +84,7 @@ module.exports = function() {
 		g.className = "imgb";
 		dom.style(g, {
 			borderRadius: "6px",
-			border: "3px solid black",
+			border: "3px solid #000",
 			width: "100px",
 			height: "150px",
 			backgroundColor: pack.color,

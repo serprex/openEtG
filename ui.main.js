@@ -33,7 +33,7 @@ var sockEvents = {
 	},
 	roll:function(data) {
 		var span = document.createElement("span");
-		span.style.color = "#006000";
+		span.style.color = "#090";
 		if (data.u){
 			var b = document.createElement("b");
 			b.appendChild(document.createTextNode(data.u + " "));
@@ -116,7 +116,7 @@ var sockEvents = {
 	challenge:function(data) {
 		var span = document.createElement("span");
 		span.style.cursor = "pointer";
-		span.style.color = "#336699";
+		span.style.color = "#69f";
 		span.addEventListener("click", function(){
 			if (data.pvp){
 				require("./views/Challenge").sendChallenge(sock.pvp = data.f);

@@ -28,7 +28,7 @@ module.exports = function(){
 	var loadingBar, sandbox;
 	if (gfx.load){
 		loadingBar = document.createElement("span");
-		loadingBar.style.backgroundColor = "#FFFFFF";
+		loadingBar.style.backgroundColor = "#fff";
 		loadingBar.style.height = "32px";
 		gfx.load(function(progress){
 			if (progress == 1) loadingBar.style.backgroundColor = "#369";

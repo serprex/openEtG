@@ -37,7 +37,7 @@ module.exports = function(area) {
 		circle.className = "imgb";
 		circle.style.border = "2px solid #88aa66";
 		circle.style.borderRadius = "50%";
-		circle.style.backgroundColor = sock.user.quests[quest] > stage ? "#4cff00" : "black";
+		circle.style.backgroundColor = sock.user.quests[quest] > stage ? "#4f0" : "#000";
 		circle.style.display = "inline-block";
 		circle.style.width = circle.style.height = "32px";
 		circle.addEventListener("mouseover", function() {
