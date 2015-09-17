@@ -20,7 +20,7 @@ exports.mkPremade = function(level, daily) {
 		if (sock.user) {
 			if (daily === undefined){
 				if (sock.user.gold < cost) {
-					chat("Requires " + cost + "\u00A4");
+					chat("Requires " + cost + "$");
 					return;
 				}
 			}else{
@@ -52,7 +52,7 @@ exports.mkAi = function(level, daily) {
 		var cost = daily !== undefined ? 0 : userutil.pveCostReward[level*2];
 		if (sock.user && cost) {
 			if (sock.user.gold < cost) {
-				chat("Requires " + cost + "\u00A4");
+				chat("Requires " + cost + "$");
 				return;
 			}
 		}
