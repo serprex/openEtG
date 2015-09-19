@@ -33,7 +33,7 @@ module.exports = function(reward, numberofcopies, code) {
 				else {
 					sock.userEmit("codesubmit2", { code: code, card: chosenReward });
 				}
-			}else chat("Choose a reward");
+			}else chat("Choose a reward", "System");
 		}]]);
 	if (numberofcopies > 1) {
 		dom.add(div, [20, 100, "You will get " + numberofcopies + " copies of the card you choose"]);
@@ -58,7 +58,7 @@ module.exports = function(reward, numberofcopies, code) {
 	var cmds = {
 		codedone:function(data) {
 			sock.user.pool = etgutil.addcard(sock.user.pool, data.card);
-			chat(Cards.Codes[data.card].name + " added!");
+			chat(Cards.Codes[data.card].name + " added!", "System");
 			require("./MainMenu")();
 		},
 	}

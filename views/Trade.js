@@ -25,7 +25,7 @@ module.exports = function() {
 				btrade.value = "Confirm";
 				btrade.style.top = "60px";
 			}
-			else chat("You have to choose at least a card!");
+			else chat("You have to choose at least a card!", "System");
 		}else{ // confirm
 			if (foeDeck.deck.length > 0) {
 				console.log("Confirmed", ownDeck.deck, foeDeck.deck);
@@ -33,7 +33,7 @@ module.exports = function() {
 				btrade.style.display = "none";
 				tconfirm.style.display = "";
 			}
-			else chat("Wait for your friend to choose!");
+			else chat("Wait for your friend to choose!", "System");
 		}
 	});
 	var tconfirm = dom.text("Confirmed!");

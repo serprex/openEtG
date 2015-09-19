@@ -12,7 +12,7 @@ function mkText(text){
 module.exports = function(data) {
 	var lv = data.lv, info = data.top;
 	if (!info) {
-		chat("??");
+		chat("??", "System");
 		return;
 	}
 	var ol = document.createElement("ol");

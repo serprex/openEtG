@@ -5,7 +5,7 @@ var chat = require("../chat");
 module.exports = function(info) {
 	info = info.top;
 	if (!info) {
-		chat("??");
+		chat("??", "System");
 		return;
 	}
 	var ol1 = document.createElement("ol"), ol2 = document.createElement("ol");

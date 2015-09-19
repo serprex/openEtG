@@ -13,7 +13,7 @@ var lastError = 0;
 window.onerror = function(){
 	var now = Date.now();
 	if (lastError+999<now){
-		chat(Array.apply(null, arguments).join(", "));
+		chat(Array.apply(null, arguments).join(", "), "System");
 		lastError = now;
 	}
 }
@@ -25,11 +25,11 @@ var sockEvents = {
 	clear:chat.clear,
 	passchange:function(data) {
 		sock.user.auth = data.auth;
-		chat("Password updated");
+		chat("Password updated", "System");
 	},
 	mute:function(data) {
 		muteset[data.m] = true;
-		chat(data.m + " has been muted");
+		chat(data.m + " has been muted", "System");
 	},
 	roll:function(data) {
 		var span = document.createElement("span");
@@ -143,7 +143,7 @@ function chatmute(){
 	for(var name in muteset){
 		muted.push(name);
 	}
-	chat((muteall?"You have chat muted. ":"") + "Muted: " + muted.join(", "));
+	chat((muteall?"You have chat muted. ":"") + "Muted: " + muted.join(", "), "System");
 }
 function maybeSendChat(e) {
 	e.cancelBubble = true;
@@ -253,7 +253,7 @@ function maybeSendChat(e) {
 				var name = options.username || guestname || (guestname = (10000 + etg.PlayerRng.upto(89999) + ""));
 				if (!msg.match(/^\s*$/)) sock.emit("guestchat", { msg: msg, u: name });
 			}
-		}else chat("Not a command: " + msg);
+		}else chat("Not a command: " + msg, "System");
 	}
 }
 function offlineChange(){

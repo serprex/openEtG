@@ -14,7 +14,7 @@ socket.onopen = function(){
 	if (options.offline || options.wantpvp || options.afk) exports.emit("chatus", {hide: !!options.offline, wantpvp: !!options.wantpvp, afk: !!options.afk});
 	buffer.forEach(this.send, this);
 	buffer.length = 0;
-	chat("Connected");
+	chat("Connected", "System");
 }
 socket.onclose = function(){
 	if (attemptTimeout) return;
@@ -28,7 +28,7 @@ socket.onclose = function(){
 		socket.onclose = oldsock.onclose;
 		socket.onmessage = oldsock.onmessage;
 	}, timeout);
-	chat("Reconnecting in "+ timeout +"ms");
+	chat("Reconnecting in "+ timeout +"ms", "System");
 }
 exports.et = socket;
 exports.user = undefined;

@@ -16,9 +16,9 @@ function startMenu(){
 module.exports = function() {
 	var view = px.mkView(), stage = {view: view};
 	var bbuy = dom.button("Buy", function() {
-		if (ownDeck.deck.length == 0) return chat("You haven't chosen a card");
+		if (ownDeck.deck.length == 0) return chat("You haven't chosen a card", "System");
 		console.log(ownVal.text, ownVal.textContent);
-		if (sock.user.gold < parseInt(ownVal.text)) return chat("You cannot afford these");
+		if (sock.user.gold < parseInt(ownVal.text)) return chat("You cannot afford these", "System");
 		sock.userExec("bazaar", {cards:etgutil.encoderaw(ownDeck.deck)});
 		startMenu();
 	});

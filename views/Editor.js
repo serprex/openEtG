@@ -188,7 +188,7 @@ module.exports = function(arena, ainfo, acard, startempty) {
 	if (arena){
 		dom.add(div, [8, 58, ["Save & Exit", function() {
 			if (decksprite.deck.length < 35 || sumscore()>arpts) {
-				chat("35 cards required before submission");
+				chat("35 cards required before submission", "System");
 				return;
 			}
 			var data = { d: etgutil.encoderaw(decksprite.deck.slice(5)) + etg.toTrueMarkSuffix(editormark), lv: aupped };
@@ -199,7 +199,7 @@ module.exports = function(arena, ainfo, acard, startempty) {
 				data.mod = true;
 			}
 			sock.userEmit("setarena", data);
-			chat("Arena deck submitted");
+			chat("Arena deck submitted", "System");
 			startMenu();
 		}]], [8, 84, ["Exit", function() {
 			require("./ArenaInfo")(arena);

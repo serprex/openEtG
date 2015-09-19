@@ -177,7 +177,7 @@ module.exports = function(nymph) {
 				}
 				var cost = userutil.arenaCost(lvi.lv);
 				if (sock.user.gold < cost) {
-					chat("Requires " + cost + "$");
+					chat("Requires " + cost + "$", "System");
 					return;
 				}
 				sock.userEmit("foearena", lvi);
@@ -245,7 +245,7 @@ module.exports = function(nymph) {
 		},
 		codecode:function(data) {
 			sock.user.pool = etgutil.addcard(sock.user.pool, data.card);
-			chat(Cards.Codes[data.card].name + " added!");
+			chat(Cards.Codes[data.card].name + " added!", "System");
 		},
 	};
 	function tradeClick(foe) {
@@ -320,7 +320,7 @@ module.exports = function(nymph) {
 					if (foename.value == sock.user.name + "yesdelete") {
 						logout("delete");
 					} else {
-						chat("Input '" + sock.user.name + "yesdelete' into Trade/Library to delete your account");
+						chat("Input '" + sock.user.name + "yesdelete' into Trade/Library to delete your account", "System");
 					}
 				},
 				mkSetTip("Click here to permanently remove your account")

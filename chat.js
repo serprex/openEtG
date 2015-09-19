@@ -3,31 +3,35 @@ var chatBox = document.getElementById("chatBox");
 var tabs = document.getElementById("tabs");
 function addSpan(span, name) {
 	span.appendChild(document.createElement("br"));
-	var tabBox = tabMap[name || "Main"];
+	var tab = tabMap[name || "Main"];
+	var tabBox = tab[0];
 	if (tabBox == chatBox){
-		var scroll = Math.abs(chatBox.scrollTop - (chatBox.scrollHeight - chatBox.offsetHeight)) < 2;
+		var scroll = Math.abs(chatBox.scrollTop - chatBox.scrollHeight + chatBox.offsetHeight) < 2;
 		chatBox.appendChild(span);
 		if (scroll) chatBox.scrollTop = chatBox.scrollHeight;
 	}else{
 		tabBox.appendChild(span);
+		tab[1].style.fontWeight = "bold";
 	}
 }
 function chat(msg, fontcolor, name) {
 	var span = document.createElement("span");
-	if (fontcolor) span.style.color = fontcolor;
+	if (fontcolor == "System") name = fontcolor;
+	else if (fontcolor) span.style.color = fontcolor;
 	span.appendChild(document.createTextNode(msg));
 	addSpan(span, name);
 }
 module.exports = chat;
 var tabMap = {};
 chat.addTab = function(name, div){
+	var span = document.createElement("span");
 	var tabBox = div || document.createElement("div");
 	tabBox.id = "chatBox";
-	tabMap[name] = tabBox;
-	var span = document.createElement("span");
+	tabMap[name] = [tabBox, span];
 	span.className = "tab";
 	span.appendChild(document.createTextNode(name));
 	span.addEventListener("click", function(){
+		this.style.fontWeight = "";
 		if (chatBox != tabBox){
 			chatBox.parentElement.insertBefore(tabBox, chatBox);
 			chatBox.remove();
@@ -39,6 +43,7 @@ chat.addTab = function(name, div){
 	tabs.appendChild(span);
 }
 chat.addTab("Main", chatBox);
+chat.addTab("System");
 chat.addTab("Stats");
 chat.addSpan = addSpan;
 chat.clear = function(){
