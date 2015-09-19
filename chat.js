@@ -3,8 +3,12 @@ var chatBox = document.getElementById("chatBox");
 var tabs = document.getElementById("tabs");
 function addSpan(span, name) {
 	span.appendChild(document.createElement("br"));
-	var tab = tabMap[name || "Main"];
-	var tabBox = tab[0];
+	if (name){
+		var tab = tabMap[name];
+		var tabBox = tab[0];
+	}else{
+		var tabBox = chatBox;
+	}
 	if (tabBox == chatBox){
 		var scroll = Math.abs(chatBox.scrollTop - chatBox.scrollHeight + chatBox.offsetHeight) < 2;
 		chatBox.appendChild(span);
@@ -16,7 +20,7 @@ function addSpan(span, name) {
 }
 function chat(msg, fontcolor, name) {
 	var span = document.createElement("span");
-	if (fontcolor == "System") name = fontcolor;
+	if (fontcolor in tabMap) name = fontcolor;
 	else if (fontcolor) span.style.color = fontcolor;
 	span.appendChild(document.createTextNode(msg));
 	addSpan(span, name);

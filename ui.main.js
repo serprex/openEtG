@@ -45,7 +45,7 @@ var sockEvents = {
 		a.href = "speed/" + data.sum;
 		a.appendChild(document.createTextNode(data.sum));
 		span.appendChild(a);
-		chat.addSpan(span);
+		chat.addSpan(span, "Main");
 	},
 	chat:function(data) {
 		if (muteall && !data.mode) return;
@@ -87,7 +87,7 @@ var sockEvents = {
 			lastindex = reres.index + reres[0].length;
 		}
 		if (lastindex != data.msg.length) span.appendChild(document.createTextNode(data.msg.slice(lastindex)));
-		chat.addSpan(span);
+		chat.addSpan(span, data.mode == 1 ? null : "Main");
 	},
 	foearena:function(data) {
 		var game = require("./views/Match")({ deck: data.deck, urdeck: sock.getDeck(), seed: data.seed,
@@ -253,7 +253,7 @@ function maybeSendChat(e) {
 				var name = options.username || guestname || (guestname = (10000 + etg.PlayerRng.upto(89999) + ""));
 				if (!msg.match(/^\s*$/)) sock.emit("guestchat", { msg: msg, u: name });
 			}
-		}else chat("Not a command: " + msg, "System");
+		}else chat("Not a command: " + msg);
 	}
 }
 function offlineChange(){
