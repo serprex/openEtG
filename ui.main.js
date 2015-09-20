@@ -22,7 +22,7 @@ if (options.hideRightpane){
 	document.getElementById("rightpane").style.display = "none";
 }
 var sockEvents = {
-	clear:chat.clear,
+	clear:chat.clear.bind(null, "Main"),
 	passchange:function(data) {
 		sock.user.auth = data.auth;
 		chat("Password updated", "System");

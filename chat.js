@@ -50,6 +50,12 @@ chat.addTab("Main", chatBox);
 chat.addTab("System");
 chat.addTab("Stats");
 chat.addSpan = addSpan;
-chat.clear = function(){
-	while (chatBox.firstChild) chatBox.firstChild.remove();
+chat.clear = function(name){
+	if (name){
+		var tab = tabMap[name];
+		var tabBox = tab[0];
+	}else{
+		var tabBox = chatBox;
+	}
+	while (tabBox.firstChild) tabBox.firstChild.remove();
 }
