@@ -1,4 +1,4 @@
-#!/bin/node
+#!/usr/bin/env node
 var fs = require("fs");
 var png = fs.createReadStream("./assets/atlas.png", {start:16, end: 23});
 var pngw = 0, pngh = 0, pngp = 0;
