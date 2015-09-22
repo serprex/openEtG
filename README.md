@@ -45,4 +45,4 @@ Open Terminal. All `commands` will be done in Terminal.
 1. In the command window from previously, run the command: `npm start`
 1. Browse to [http://127.0.0.1:13602](http://127.0.0.1:13602) and the game should work!
 
-Note: When you edit a module you need to run step 5 to update etgify.
+Note: When you edit code you need to `npm run build-etgify` to update etgify.
