@@ -154,3 +154,18 @@ exports.text = function(text){
 	ele.text = text;
 	return ele;
 }
+var svgcache = {};
+function createHtml(html){
+	var dummy = document.createElement("div");
+	dummy.innerHTML = html;
+	return dummy.firstChild;
+}
+exports.loadSvg = function(url, cb){
+	if (svgcache[url]) return cb(createHtml(svgcache[url]));
+	var xhr = new XMLHttpRequest();
+	xhr.addEventListener("load", function(){
+		cb(createHtml(svgcache[url] = this.responseText));
+	});
+	xhr.open("GET", url, true);
+	xhr.send();
+}
