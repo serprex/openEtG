@@ -637,31 +637,38 @@ Player.prototype.endturn = function(discard) {
 	for(var i=0; i<16; i++){
 		var p;
 		if ((p=this.permanents[i])){
-			if(p.active.auto){
+			if (p.active.auto){
 				p.active.auto(p);
 			}
 			if (~p.getIndex()){
 				p.usedactive = false;
 				if (p.status.stasis){
 					stasisFlag = true;
-				}else if (p.status.flooding && !floodingPaidFlag){
+				}
+				if (p.status.flooding && !floodingPaidFlag){
 					floodingPaidFlag = true;
 					floodingFlag = true;
 					if (!this.spend(Water, 1)){
 						this.permanents[i] = undefined;
 					}
-				}else if (p.status.patience){
+				}
+				if (p.status.patience){
 					patienceFlag = true;
 					stasisFlag = true;
-				}else if (p.status.freedom){
+				}
+				if (p.status.freedom){
 					freedomChance++;
+				}
+				if (p.status.frozen){
+					p.status.frozen--;
 				}
 			}
 		}
 		if ((p=this.foe.permanents[i])){
 			if (p.status.stasis){
 				stasisFlag = true;
-			}else if (p.status.flooding){
+			}
+			if (p.status.flooding){
 				floodingFlag = true;
 			}
 		}
