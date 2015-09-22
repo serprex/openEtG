@@ -6,7 +6,7 @@ OpenEtG is an unofficial Open Web fork of the Flash game [Elements](http://eleme
 
 ## Developer Instructions
 
-### Mac
+### Mac Installation
 
 Open Terminal. All `commands` will be done in Terminal.
 
@@ -20,7 +20,7 @@ Open Terminal. All `commands` will be done in Terminal.
   * Since we open the page before thes server has fully started, you may need to refresh the page
   * To stop the server, press contrl+c in the Terminal
 
-### Windows
+### Windows Installation
 
 1. Download and Install the following:
   * [node.js](https://nodejs.org)
@@ -44,7 +44,7 @@ Open Terminal. All `commands` will be done in Terminal.
   1. Move `ninja.exe` into your openEtG folder
   1. Run `ninja.exe` to build `etgify.js`
   1. If `ninja.exe` isn't working:
-      1. Run `buildOpenEtG.bat`
+      1. Run `npm run build-etgify`
       1. Download [atlas.js](http://etg.dek.im/assets/atlas.js), [atlas.png](http://etg.dek.im/assets/atlas.png) and [atlas.css](http://etg.dek.im/assets/atlas.css) and move them to the `assets` folder
 1. Start redis-server
 1. In the command window from previously, run the command: `npm start`
