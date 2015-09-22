@@ -1,0 +1,53 @@
+# OpenEtG: An OpenWeb CCG
+
+## Description
+
+OpenEtG is an unofficial Open Web fork of the Flash game [Elements](http://elementsthegame.com).
+
+## Developer Instructions
+
+### Mac Installation
+
+Open Terminal. All `commands` will be done in Terminal.
+
+1. Install [Homebrew](http://brew.sh/)
+1. Install required software: `brew install git node redis`
+1. Clone the repository: `git clone https://github.com/serprex/openEtG.git && cd openEtG`
+1. Install [pixi.js](https://github.com/serprex/pixi.js): `curl -O --compressed 'http://etg.dek.im/pixi.min.js'`
+1. Install npm modules and build project: `npm install && npm run build`
+1. Start redis server in the background: `redis-server &`
+1. Start node http server and open the game: `open http://127.0.0.1:13602 && npm start`
+  * Since we open the page before thes server has fully started, you may need to refresh the page
+  * To stop the server, press contrl+c in the Terminal
+
+### Windows Installation
+
+1. Download and Install the following:
+  * [node.js](https://nodejs.org)
+  * [redis](https://github.com/MSOpenTech/redis/releases)
+  * [git](http://git-scm.com/download/win)
+  * [tortoisegit](http://tortoisegit.org)
+1. Clone the repository:
+  1. Right-click inside the folder where you want the game files to go
+  1. Click `Git Clone` to create an `openEtG` folder
+  1. When prompted, use this URL: `https://github.com/serprex/openEtG.git`
+1. Install [pixi.js](https://github.com/serprex/pixi.js):
+  1. Donwload [pixi.min.js](http://etg.dek.im/pixi.min.js) and place it in your openEtG folder
+  1. Optionally, you can build your own [pixi.js](https://github.com/serprex/pixi.js)
+1. Install npm modules and global npm binaries:
+  1. Shift+Right-Click on your `openEtG` folder
+  1. Click `Open command window here`
+  1. Run the command: `npm install; npm install -g mkcjs optipng-bin spritesheet-js`
+  1. Leave this command window open for later
+1. Build the project using ninja:
+  1. Download [ninja](https://github.com/martine/ninja/releases)
+  1. Move `ninja.exe` into your openEtG folder
+  1. Run `ninja.exe` to build `etgify.js`
+  1. If `ninja.exe` isn't working:
+      1. Run `npm run build-etgify`
+      1. Download [atlas.js](http://etg.dek.im/assets/atlas.js), [atlas.png](http://etg.dek.im/assets/atlas.png) and [atlas.css](http://etg.dek.im/assets/atlas.css) and move them to the `assets` folder
+1. Start redis-server
+1. In the command window from previously, run the command: `npm start`
+1. Browse to [http://127.0.0.1:13602](http://127.0.0.1:13602) and the game should work!
+
+Note: When you edit a module you need to run step 5 to update etgify.
