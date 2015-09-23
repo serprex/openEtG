@@ -25,9 +25,9 @@ function load(progress, postload){
 			var tex = new PIXI.BaseTexture(this);
 			if (asset == "cardBacks"){
 				var ts = [], bs = [];
-				for (var x = 0; x < tex.width; x += 132){
-					ts.push(new PIXI.Texture(tex, new PIXI.math.Rectangle(x, 0, 132, tex.height)));
-					bs.push(new PIXI.Texture(tex, new PIXI.math.Rectangle(x, 0, 132, 16)));
+				for (var x = 0; x < tex.width; x += 128){
+					ts.push(new PIXI.Texture(tex, new PIXI.math.Rectangle(x, 0, 128, tex.height)));
+					bs.push(new PIXI.Texture(tex, new PIXI.math.Rectangle(x, 0, 128, 16)));
 				}
 				exports.cardBacks = ts;
 				exports.cardBorders = bs;
@@ -72,7 +72,7 @@ function setGrayBorderShader(renderer, sprite, card){
 	return sprite;
 }
 function makeArt(code, art, rend) {
-	if (!rend) rend = require("./px").mkRenderTexture(132, 256);
+	if (!rend) rend = require("./px").mkRenderTexture(128, 256);
 	var template = new PIXI.Container();
 	var card = Cards.Codes[code];
 	template.addChild(new PIXI.Sprite(exports.cardBacks[card.element+(card.upped?13:0)]));
@@ -86,7 +86,7 @@ function makeArt(code, art, rend) {
 	template.addChild(rarity);
 	if (art) {
 		var artspr = setShinyShader(rend.renderer, new PIXI.Sprite(art), card);
-		artspr.position.set(2, 20);
+		artspr.position.set(0, 20);
 		template.addChild(artspr);
 	}
 	if (card.shiny){
@@ -198,7 +198,6 @@ function getInstImage(scale){
 		var btex = exports.cardBorders[card.element + (card.upped ? 13 : 0)];
 		var c = new PIXI.Container();
 		var border = new PIXI.Sprite(btex), border2 = new PIXI.Sprite(btex);
-		border.scale.x = border2.scale.x = 128.5/132;
 		border2.position.y = 160;
 		border2.scale.y = -1;
 		c.addChild(border);
