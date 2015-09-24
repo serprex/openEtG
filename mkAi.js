@@ -2,7 +2,7 @@ var ui = require("./ui");
 var etg = require("./etg");
 var chat = require("./chat");
 var sock = require("./sock");
-var aiDecks = require("./Decks.json");
+var Decks = require("./Decks.json");
 var etgutil = require("./etgutil");
 var options = require("./options");
 var userutil = require("./userutil");
@@ -24,10 +24,10 @@ exports.mkPremade = function(level, daily) {
 					return;
 				}
 			}else{
-				foedata = aiDecks[name][sock.user[level == 1 ? "dailymage" : "dailydg"]];
+				foedata = Decks[name][sock.user[level == 1 ? "dailymage" : "dailydg"]];
 			}
 		}
-		if (!foedata) foedata = etg.PlayerRng.choose(aiDecks[name]);
+		if (!foedata) foedata = etg.PlayerRng.choose(Decks[name]);
 		var gameData = { level: level, deck: foedata[1], urdeck: urdeck, seed: Math.random() * etgutil.MAX_INT, foename: foedata[0] };
 		if (level == 1){
 			gameData.p2hp = 125;
