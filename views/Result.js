@@ -10,7 +10,7 @@ var sock = require("../sock");
 var etgutil = require("../etgutil");
 var options = require("../options");
 var userutil = require("../userutil");
-var streak200 = new Uint8Array([10, 10, 15, 2, 15, 2]);
+var streak200 = new Uint8Array([10, 10, 15, 20, 15, 20]);
 module.exports = function(game, foeDeck) {
 	var winner = game.winner == game.player1, stage;
 	function exitFunc(){
@@ -103,10 +103,12 @@ module.exports = function(game, foeDeck) {
 				if (!game.goldreward) {
 					var goldwon;
 					if (game.level !== undefined) {
-						var streak = sock.user.streak[game.level] || 0;
-						streakrate = Math.min(streak200[game.level]*streak/200, 1);
-						sock.userExec("setstreak", {l:game.level, n:++streak});
-						lefttext.push(streak + " win streak", (streakrate * 100).toFixed(1) + "% streak bonus");
+						if (game.daily !== undefined){
+							var streak = sock.user.streak[game.level] || 0;
+							streakrate = Math.min(streak200[game.level]*streak/200, 1);
+							sock.userExec("setstreak", {l:game.level, n:++streak});
+							lefttext.push(streak + " win streak", (streakrate * 100).toFixed(1) + "% streak bonus");
+						}else var streak = 0;
 						goldwon = Math.floor(userutil.pveCostReward[game.level*2+1] * (1+streakrate) * computeBonuses());
 					} else goldwon = 0;
 					game.goldreward = goldwon;
