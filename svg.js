@@ -14,9 +14,9 @@ exports.card = function(code){
 	var ret="", x=16, y=0;
 	var card = Cards.Codes[code];
 	var textColor = card.upped ? "" : " fill='#fff'";
-	ret += "<image xlink:href='../assets/cardBacks.png' x='" + (card.element*-128) + "px' width='3328px' height='256px'/><text x='2px' y='15px'" + textColor + ">" + card.name + "</text><text x='108px' y='15px'"+textColor+">" + card.cost + "</text>";
-	ret += "<image xlink:href='../Cards/"+etgutil.asShiny(etgutil.asUpped(code, false), false).toString(32)+".png' x='2px' y='20px' width='128px' height='128px'/>";
-	var info = card.info(), i=0, y=156;
+	ret += "<image xlink:href='../assets/cardBacks.png' x='"+(card.element+card.upped*13)*-128+"' width='3328' height='256'/><text x='2' y='15'"+textColor+">"+card.name+"</text><text x='108' y='15'"+textColor+">"+card.cost+"</text>";
+	ret += "<image xlink:href='../Cards/"+etgutil.asShiny(etgutil.asUpped(code, false), false).toString(32)+".png' x='2' y='20' width='128' height='128'/>";
+	var info = card.info(), i=0, y=160;
 	while(~i && i<info.length){
 		var ni = info.indexOf("\n", i);
 		if (ni == -1) ni = Math.min(i+23, info.length);
@@ -24,8 +24,8 @@ exports.card = function(code){
 			var lsp = info.lastIndexOf(" ", ni);
 			if (lsp > i) ni = lsp;
 		}
-		ret += "<text y='"+y+"'"+textColor+">" + info.slice(i, ni) + "</text>";
-		y += 16;
+		ret += "<text x='2' y='"+y+"'"+textColor+">" + info.slice(i, ni) + "</text>";
+		y += 13;
 		i = ni + (info[ni] == "\n");
 	}
 	return prefix+" height='256' width='128'>"+cssPrefix+"]]></style>"+ret+"</svg>";
