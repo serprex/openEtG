@@ -1,6 +1,7 @@
 "use strict";
 var px = require("../px");
 var dom = require("../dom");
+var svg = require("../svg");
 var chat = require("../chat");
 var Cards = require("../Cards");
 function mkText(text){
@@ -15,6 +16,10 @@ module.exports = function(data) {
 		chat("??", "System");
 		return;
 	}
+	var s = dom.svg();
+	s.setAttribute("width", "128");
+	s.setAttribute("height", "256");
+	s.style.pointerEvents = "none";
 	var ol = document.createElement("ol");
 	ol.className = "atopol";
 	info.forEach(function(data, i){
@@ -35,25 +40,17 @@ module.exports = function(data) {
 		}
 		var card = Cards.Codes[data[5]].asUpped(lv);
 		var cname = mkText(card.name);
-		var mouseover = false, svg;
 		cname.addEventListener("mouseenter", function(e){
-			mouseover = true;
-			dom.loadSvg("/card/"+card.code.toString(32), function(res){
-				svg = res;
-				if (mouseover){
-					svg.style.position = "absolute";
-					svg.style.left = e.clientX+"px";
-					svg.style.top = e.clientY+"px";
-					document.body.appendChild(svg);
-				}
-			});
+			dom.svgToSvg(s, svg.card(card.code));
+			s.style.left = (e.clientX+4)+"px";
+			s.style.top = (e.clientY+4)+"px";
+			s.style.display = "";
 		});
 		cname.addEventListener("mouseleave", function(){
-			mouseover = false;
-			if (svg) svg.remove();
+			s.style.display = "none";
 		});
 		li.appendChild(cname);
 		ol.appendChild(li);
 	});
-	px.view({dom:dom.div([8, 300, ["Exit", require("./MainMenu")]], [90, 50, ol])});
+	px.view({dom:dom.div([8, 300, ["Exit", require("./MainMenu")]], [90, 50, ol], [0, 0, s])});
 }

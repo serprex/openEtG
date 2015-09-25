@@ -160,12 +160,11 @@ function createHtml(html){
 	dummy.innerHTML = html;
 	return dummy.firstChild;
 }
-exports.loadSvg = function(url, cb){
-	if (svgcache[url]) return cb(createHtml(svgcache[url]));
-	var xhr = new XMLHttpRequest();
-	xhr.addEventListener("load", function(){
-		cb(createHtml(svgcache[url] = this.responseText));
-	});
-	xhr.open("GET", url, true);
-	xhr.send();
+exports.svg = function(){
+	return document.createElementNS("http://www.w3.org/2000/svg", "svg");
+}
+exports.svgToSvg = function(svg, text){
+	if (!svg) svg = exports.svg();
+	svg.innerHTML = text.slice(text.indexOf(">")+1,-6);
+	return svg;
 }
