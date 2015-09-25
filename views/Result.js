@@ -103,7 +103,7 @@ module.exports = function(game, foeDeck) {
 				if (!game.goldreward) {
 					var goldwon;
 					if (game.level !== undefined) {
-						if (game.daily !== undefined){
+						if (game.daily == undefined){
 							var streak = sock.user.streak[game.level] || 0;
 							streakrate = Math.min(streak200[game.level]*streak/200, 1);
 							sock.userExec("setstreak", {l:game.level, n:++streak});

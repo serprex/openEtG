@@ -131,7 +131,7 @@ function Thing(card, owner){
 			if (key in passives) delete this.status[key];
 		}
 		for (var key in card.status){
-			this.status[key] = card.status[key];
+			if (!this.status[key]) this.status[key] = card.status[key];
 		}
 	}else{
 		this.status = cloneStatus(card.status);
