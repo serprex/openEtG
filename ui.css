@@ -23,7 +23,7 @@ input[type="button"]{
 }
 input[type="button"]:hover{background:linear-gradient(to bottom,#ccdde0,#586776)}
 input[type="button"]:hover:active{background:linear-gradient(to bottom,#aabbc0,#485766)}
-input[type="text"],input[type="password"],input:not([type]){width:150px;border:0;background-color:#111;color:#eee}
+input[type="text"],input[type="password"],input:not([type]){width:150px;border:2px solid #000;background-color:rgba(8,8,8,.5);color:#eee}
 .width400{width:400px;margin:0}
 .underline{border-bottom:1px solid #222;padding-bottom:1px}
 .floatRight{float:right}
