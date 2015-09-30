@@ -1,7 +1,8 @@
 "use strict";
 var fs = require("fs");
 var zlib = require("zlib");
-var cache = {};
+var sutil = require("./sutil");
+var cache = require("./cache");
 var mime = {
 	css:"text/css",
 	htm:"text/html",
@@ -11,49 +12,29 @@ var mime = {
 	ogg:"application/ogg",
 	png:"image/png",
 };
-function addModified(prefix, mtime){
-	return prefix.replace("\r\n", "\r\nLast-Modified:"+mtime+"\r\n");
-}
-function m304(res){
-	res.write("HTTP/1.1 304 Not Modified\r\n\r\n");
-	return res.end();
-}
-function m404(res){
-	res.write("HTTP/1.1 404 Not Found\r\nConnection:close\r\n\r\n");
-	return res.end();
-}
-module.exports = function(url, res, date, lastModified){
-	if (~url.indexOf("..")){
-		return m404(res);
-	}
+module.exports = function(url, resolve, reject){
 	var contentType = mime[url.slice(url.lastIndexOf(".")+1)];
-	var prefix = "HTTP/1.1 200 OK\r\nContent-Encoding:gzip\r\nContent-Type:"+contentType+"\r\n"+date+"Connection:close\r\n\r\n";
-	if (cache[url]){
-		if (lastModified && new Date(cache[url].mtime).getTime() <= new Date(lastModified).getTime()){
-			return m304(res);
-		}
-		res.write(addModified(prefix, cache[url].mtime));
-		res.write(cache[url].buf);
-		return res.end();
-	}
-	// TODO make this more async
-	fs.stat(url, (err, stat) => {
-		var mtime = stat ? stat.mtime.toUTCString() : "";
-		if (lastModified && new Date(mtime).getTime() <= new Date(lastModified).getTime()){
-			return m304(res);
-		}
-		fs.readFile(url, (err, buf) => {
-			if (err) return m404(res);
-			zlib.gzip(buf, {level:9}, (err, gzbuf) => {
-				res.write(addModified(prefix, mtime));
-				res.write(gzbuf);
-				res.end();
-				cache[url] = {mtime: mtime, buf:gzbuf};
-				fs.watch(url, {persistent:false}, function(event){
-					cache[url] = null;
-					this.close();
-				});
+	if (!contentType) return reject("Unknown MIME");
+	console.log(url);
+	var task = sutil.mkTask((res) => {
+		if (res.err) reject("ENOENT");
+		else{
+			fs.watch(url, {persistent:false}, function(event){
+				cache(url);
+				this.close();
 			});
-		});
+			res.stat.mtime.setMilliseconds(0);
+			resolve({
+				head: "Content-Encoding:gzip\r\nContent-Type:"+contentType+"\r\n",
+				date: res.stat.mtime,
+				buf: res.gzip,
+			});
+		}
+	})
+	fs.stat(url, task("stat"));
+	fs.readFile(url, (err, buf) => {
+		if (err) return reject(err.message);
+		zlib.gzip(buf, {level:9}, task("gzip"));
+		task();
 	});
 }

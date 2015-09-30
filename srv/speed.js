@@ -3,14 +3,9 @@ var deck = require("./deck");
 var etg = require("../etg");
 var etgutil = require("../etgutil");
 var mt = require("../MersenneTwister");
-module.exports = function(url, res, date){
-	if (url == ""){
-		res.write("HTTP/1.1 302 Found\r\nLocation:/speed/" + Math.random()*etgutil.MAX_INT+"\r\n\r\n");
-		res.end();
-		return;
-	}
+module.exports = function(url, resolve, reject, stime){
 	var hash = 0;
-	for (var i=1; i<url.length; i++){
+	for (var i=0; i<url.length; i++){
 		hash = hash*31 + url.charCodeAt(i) & 0x7FFFFFFF;
 	}
 	var prng = Object.create(etg.Player.prototype);
@@ -33,5 +28,5 @@ module.exports = function(url, res, date){
 	for (var i=0; i<cards.length; i++){
 		code += "01" + cards[i].toString(32);
 	}
-	deck(code, res, date);
+	deck(code, resolve, reject, stime);
 }
