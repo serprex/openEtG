@@ -16,5 +16,6 @@ module.exports = function(url, ifmod, path, res, func){
 		return res.end();
 	}, (err) => {
 		res.write("HTTP/1.1 404 Not Found\r\n\r\n"+err);
-	});
+		res.end();
+	}).catch(()=>{});
 }

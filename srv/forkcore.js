@@ -11,7 +11,9 @@ var deck = lutrequire("deck");
 var speed = lutrequire("speed");
 Cards.loadcards();
 process.on("message", function(msg, res){
+	if(!res)return;
 	try{
+		res.on("error",()=>{});
 		var d = "cache-control:no-cache\r\nDate:"+new Date().toUTCString()+"\r\n";
 		var lines = msg.split("\n"), url = lines[0], ifmod = new Date(lines[1]).getTime();
 		var idx = url.indexOf("/"), func = ~idx && lut[url.slice(0,idx)];
@@ -33,6 +35,6 @@ process.on("message", function(msg, res){
 			res.end();
 		}
 	}catch(ex){
-		console.log(ex);
+		console.log("Forkcore",ex);
 	}
 });

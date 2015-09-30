@@ -15,8 +15,9 @@ var Us = require("./srv/Us");
 var forkcore = require("child_process").fork("./srv/forkcore");
 var app = http.createServer(function(req, res){
 	var ifModifiedSince = req.headers["if-modified-since"];
-	forkcore.send(req.url.slice(1) + (ifModifiedSince?"\n"+ifModifiedSince:""), res.socket);
+	forkcore.send(req.url.slice(1) + (ifModifiedSince?"\n"+ifModifiedSince:""), res.socket, ()=>{});
 });
+app.on("clientError",()=>{});
 function stop(){
 	wss.close();
 	app.close();
