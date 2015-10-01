@@ -10,7 +10,7 @@ function mkDaily(type) {
 		return function() {
 			var dataNext = type == 1 ?
 				{ goldreward: 200, endurance: 2, cost: 0, daily: 1, cardreward: "", noheal: true} :
-				{ goldreward: 750, endurance: 2, cost: 0, daily: 2, cardreward: "" };
+				{ goldreward: 500, endurance: 1, cost: 0, daily: 2, cardreward: "" };
 			var game = mkAi.mkAi(type == 1 ? 0 : 2, type)();
 			if (game){
 				game.addData(dataNext);
@@ -33,7 +33,7 @@ module.exports = function(){
 	var dgname = Decks.demigod[sock.user.dailydg][0];
 	var events = [
 		"Novice Endurance Fight 3 Commoners in a row without healing in between. May try until you win.",
-		"Expert Endurance: Fight 3 Champions in a row. May try until you win.",
+		"Expert Endurance: Fight 2 Champions in a row. May try until you win.",
 		"Novice Duel: Fight " + magename + ". Only one attempt allowed.",
 		"Expert Duel: Fight " + dgname + ". Only one attempt allowed."];
 	var div = dom.div([50, 50, ["Exit", startMenu]]);
