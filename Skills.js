@@ -115,7 +115,7 @@ axedraw:function(c,t){
 bblood:function(c,t){
 	Effect.mkText("0|20", t);
 	t.buffhp(20);
-	t.delay(6);
+	t.delay(5);
 },
 becomearctic:passive(function(c,t){
 	c.transform(c.card.as(Cards.ArcticSquid));
@@ -251,6 +251,11 @@ chimera:function(c,t){
 	c.owner.creatures.length = 23;
 	c.owner.gpull = chim;
 },
+chromastat:function(c,t){
+	var n = c.hp + c.trueatk();
+	Effect.mkText("0:"+n);
+	c.owner.spend(0, -n);
+},
 clear:function(c,t){
 	Effect.mkText("Clear", t);
 	t.status.poison = 0;
@@ -381,7 +386,10 @@ destroy:function(c,t, dontsalvage, donttalk){
 	}
 },
 destroycard:function(c,t){
-	if (!t.owner.sanctuary){
+	if (t instanceof etg.Player){
+		if (!t.deck.length) t.game.setWinner(t.foe);
+		else t.deck.length--;
+	}else if (!t.owner.sanctuary){
 		t.die();
 	}
 },
@@ -1010,7 +1018,6 @@ livingweapon:function(c,t){
 lobotomize:function(c,t){
 	Effect.mkText("Lobotomize", t);
 	t.lobo();
-	t.status.momentum = false;
 	t.status.psionic = false;
 },
 locket: function(c, t) {
@@ -1745,6 +1752,8 @@ tick:function(c,t){
 },
 tidalhealing:function(c,t){
 	c.owner.masscc(c, function(c, t){
+		if (t.status.poison > 0) t.status.poison = 0;
+		if (t.status.frozen) t.status.frozen = 0;
 		if (t.status.aquatic && !t.hasactive("hit", "regen")) t.addactive("hit", Skills.regen);
 	});
 },

@@ -14,7 +14,7 @@ exports.pveCostReward = new Uint8Array([
 	0, 10,
 	5, 25,
 	10, 60,
-	20, 175,
+	20, 180,
 	10, 55,
 	20, 110,
 ]);
