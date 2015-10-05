@@ -42,6 +42,7 @@ var data = {
 	cell:"Become Malignant if poisoned",
 	chaos:function(c){return (c.upped?"20% chance to evade. ":"")+"Non-ranged attacking creatures have a 30% chance to have a random effect cast on them"},
 	chimera:"Combine all your creatures to form a Chimera with momentum & gravity pull",
+	chromastat:"Generate 1:0 per strength & health on hit",
 	clear:"Remove statuses from target creature, reduce delays by 1, & heal 1",
 	cold:"30% chance to freeze non-ranged attackers for 3",
 	corpseexplosion:["Sacrifice a creature to deal 1 damage to all creatures. Increment damage per 8 health of sacrifice. Poisonous sacrifices poison foe",
