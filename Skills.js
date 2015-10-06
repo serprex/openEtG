@@ -252,7 +252,7 @@ chimera:function(c,t){
 	c.owner.gpull = chim;
 },
 chromastat:function(c,t){
-	var n = c.hp + c.trueatk();
+	var n = c.truehp() + c.trueatk();
 	Effect.mkText("0:"+n);
 	c.owner.spend(0, -n);
 },

@@ -86,6 +86,9 @@ var SkillsValues = Object.freeze({
 	butterfly:12,
 	catapult:6,
 	chimera:4,
+	chromastat:function(c){
+		return 1+(c instace of etg.CardInstance ? c.card.health+c.card.attack : c.trueatk() + c.truehp())/3;
+	},
 	clear:2,
 	corpseexplosion:1,
 	counter:3,
