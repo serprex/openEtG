@@ -12,7 +12,7 @@
   },
   "devDependencies": {
     "qunitjs": "^1.19.0",
-    "mkcjs": "^0.0.2",
+    "mkcjs": "^0.0.3",
     "optipng-bin": "^3.0.2"
   },
   "scripts": {
