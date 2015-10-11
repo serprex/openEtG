@@ -17,7 +17,7 @@ Open Terminal. All `commands` will be done in Terminal.
 1. Install npm modules and build project: `npm install && npm run build`
 1. Start redis server in the background: `redis-server &`
 1. Start node http server and open the game: `open http://127.0.0.1:13602 && npm start`
-  * Since we open the page before thes server has fully started, you may need to refresh the page
+  * Since we open the page before the server has fully started, you may need to refresh the page
   * To stop the server, press ctrl+c in the Terminal
 
 ### Windows Installation
