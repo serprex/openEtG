@@ -8,12 +8,13 @@ openEtG is an unofficial Open Web fork of the Flash game [Elements](http://eleme
 
 ### Mac Installation
 
-Open Terminal. All `commands` will be done in Terminal.
+Open Terminal. All `commands` will be done in Terminal. You must have [XCode](https://developer.apple.com/xcode/) installed.
 
 1. Install [Homebrew](http://brew.sh/)
 1. Install required software: `brew install git node redis`
 1. Clone the repository: `git clone https://github.com/serprex/openEtG.git && cd openEtG`
 1. Install [pixi.js](https://github.com/serprex/pixi.js): `curl -O --compressed 'http://etg.dek.im/pixi.min.js'`
+1. Download [atlas.js](http://etg.dek.im/assets/atlas.js), [atlas.png](http://etg.dek.im/assets/atlas.png) and [atlas.css](http://etg.dek.im/assets/atlas.css) and move them to the `assets` folder
 1. Install npm modules and build project: `npm install && npm run build`
 1. Start redis server in the background: `redis-server &`
 1. Start node http server and open the game: `open http://127.0.0.1:13602 && npm start`
