@@ -16,7 +16,11 @@ Open Terminal. All `commands` will be done in Terminal. You must have [XCode](ht
 1. Install [pixi.js](https://github.com/serprex/pixi.js): `curl -O --compressed 'http://etg.dek.im/pixi.min.js'`
 1. Install atlas files: `curl --compressed 'http://etg.dek.im/assets/{atlas.js,atlas.png,atlas.css}' -o 'assets/#1'`
 1. Install npm modules and build project: `npm install && npm run build`
+
+#### Mac Start/Stop OpenEtG
+
 1. Start redis server in the background: `redis-server &`
+  * To stop the redis server run `pkill redis`, then press ctrl+c
 1. Start node http server and open the game: `open http://127.0.0.1:13602 && npm start`
   * Since we open the page before the server has fully started, you may need to refresh the page
   * To stop the server, press ctrl+c in the Terminal
