@@ -26,7 +26,7 @@ module.exports = function() {
 			"Element of speed. It speeds itself with card draw while delaying creatures & unsummoning them to their owner's deck.",
 			"Element of trickery. Steals its opponent's resources such as HP, quanta, cards, & permanents. May deny their opponent from healing through reducing maxium health.",
 			"Element of dimension. It copies creatures and generates cards. Many of their creatures are immaterial.",
-			"Start without any cards, but gain several extra booster cards instead!",
+			"Start without any cards, but gain several extra boosters instead!",
 			"Start with a random element!"
 		];
 	etg.eleNames.forEach(function(name, i){
