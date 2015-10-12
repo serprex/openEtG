@@ -386,6 +386,7 @@ module.exports = function(nymph) {
 		width: "45%",
 		float: "right",
 	});
+	if (!sock.user) customcol.style["margin-top"] = "128px";
 	dom.add(customcol, bcustom, customText);
 	dom.add(aibox, customcol);
 	resetTip({target:{tagName:"HTML"}});
