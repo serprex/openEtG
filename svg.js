@@ -15,7 +15,7 @@ exports.card = function(code){
 	var card = Cards.Codes[code];
 	var textColor = card.upped ? "" : " fill='#fff'";
 	ret += "<image xlink:href='../assets/cardBacks.png' x='"+(card.element+card.upped*13)*-128+"' width='3328' height='256'/><text x='2' y='15'"+textColor+">"+card.name+"</text><text x='108' y='15'"+textColor+">"+card.cost+"</text>";
-	ret += "<image xlink:href='../Cards/"+etgutil.asShiny(etgutil.asUpped(code, false), false).toString(32)+".png' x='2' y='20' width='128' height='128'/>";
+	ret += "<image xlink:href='../Cards/"+etgutil.asShiny(etgutil.asUpped(code, false), false).toString(32)+".png' y='20' width='128' height='128'/>";
 	var info = card.info(), i=0, y=160;
 	while(~i && i<info.length){
 		var ni = info.indexOf("\n", i);
