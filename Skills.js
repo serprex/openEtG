@@ -319,10 +319,10 @@ deadalive:function(c){
 deathwish:function(c,t, data){
 	var tgt = data.tgt, active = data.active;
 	if (!tgt || c.status.frozen || c.status.delayed || c.owner == t.owner || tgt.owner != c.owner || !(tgt instanceof etg.Creature) || !Cards.Targeting[active.activename[0]](t, c)) return;
-	if (!tgt.hasactive("spell", "deathwish")) return data.tgt = c;
+	if (!tgt.hasactive("prespell", "deathwish")) return data.tgt = c;
 	var totaldw = 0;
 	c.owner.creatures.forEach(function(cr){
-		if (cr && cr.hasactive("spell", "deathwish"))totaldw++;
+		if (cr && cr.hasactive("prespell", "deathwish"))totaldw++;
 	});
 	if (c.owner.rng() < 1/totaldw){
 		return data.tgt = c;

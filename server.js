@@ -38,7 +38,7 @@ function activeUsers(){
 		}
 	}
 	var otherCount = wss.clients.length - userCount;
-	activeusers.push(otherCount + " other connection" + (otherCount == 1 ? "" : "s"));
+	activeusers.push(otherCount + " lurker" + (otherCount == 1 ? "" : "s"));
 	return activeusers;
 }
 function genericChat(socket, data){
