@@ -136,26 +136,26 @@ var userEvents = {
 		}
 	},
 	arenainfo:function(data, user){
-		var task = sutil.mkTask(result => {
-			var day = sutil.getDay();
-			function process(obj, rank){
-				if (!obj) return;
-				obj.day = day - obj.day;
-				obj.curhp = getAgedHp(obj.hp, obj.day);
-				if (rank !== null) obj.rank = rank;
-				["draw", "hp", "loss", "mark", "win", "card"].forEach(function(key){
-					obj[key] = parseInt(obj[key], 10);
-				});
-			}
-			process(result.A, result.ra);
-			process(result.B, result.rb);
-			sockEmit(this, "arenainfo", {A:result.A, B:result.B});
-		});
-		db.hgetall("A:" + data.u, task("A"));
-		db.hgetall("B:" + data.u, task("B"));
-		db.zrevrank("arena", data.u, task("ra"));
-		db.zrevrank("arena1", data.u, task("rb"));
-		task();
+		db.batch([["hgetall", "A:" + data.u],
+			["hgetall", "B:" + data.u],
+			["zrevrank", "arena", data.u],
+			["zrevrank", "arena1", data.u]]).
+			exec((err, res) => {
+				console.log(err, res);
+				var day = sutil.getDay();
+				function process(obj, rank){
+					if (!obj) return;
+					obj.day = day - obj.day;
+					obj.curhp = getAgedHp(obj.hp, obj.day);
+					if (rank !== null) obj.rank = rank;
+					["draw", "hp", "loss", "mark", "win", "card"].forEach(function(key){
+						obj[key] = parseInt(obj[key], 10);
+					});
+				}
+				process(res[0], res[2]);
+				process(res[1], res[3]);
+				sockEmit(this, "arenainfo", {A:res[0], B:res[1]});
+			});
 	},
 	modarena:function(data, user){
 		Us.load(data.aname, function(user){
