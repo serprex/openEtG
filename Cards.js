@@ -118,7 +118,7 @@ var TargetFilters = {
 		return t.isMaterial(etg.Creature) && t.status.airborne;
 	},
 	golem:function(c, t){
-		return t.isMaterial() && t.status.golem;
+		return t.status.golem && t.attack;
 	},
 	groundcrea:function(c, t){
 		return t.isMaterial(etg.Creature) && !t.status.airborne;

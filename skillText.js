@@ -130,7 +130,7 @@ var data = {
 	gas:"Summon an Unstable Gas",
 	grave:"Whenever a creature dies, become an unburrowed of its kind",
 	give:function(c){return "Give own target to foe. Heal self "+(c.upped?10:5)+". Ignore sanctuary, may target immaterial"},
-	golemhit:"Target golem attacks",
+	golemhit:"Target golem attacks. May target immaterial",
 	gpull:"Intercept attacks directed to owner",
 	gpullspell:"Target creature intercepts attacks directed to its owner",
 	gratitude:"Heal owner 4",
