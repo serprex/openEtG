@@ -151,7 +151,7 @@ var data = {
 	hatch:"Become a random creature",
 	heal:"Heal target 20",
 	heatmirror:function(c){return "Heat Lightning: When foe plays a creature from hand, summon a " + (c.upped?"Ball Lightning":"Spark")},
-	holylight:"Heal target 10. Nocturnal targets are damaged instead",
+	holylight:"Heal target 10. Nocturnal targets are spell damaged instead",
 	hope:"Increment damage reduction per own 1:8 producing creature",
 	icebolt:"Deal 2 damage to target. Increment damage per 5:7 owned. May freeze target",
 	ignite:"Deal 20 spell damage to foe & 1 damage to all creatures",

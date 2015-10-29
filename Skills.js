@@ -817,7 +817,8 @@ heatmirror: function(c, t, fromhand) {
 	}
 },
 holylight:function(c,t){
-	t.spelldmg(t.status.nocturnal?10:-10);
+	if (t.status.nocturnal) t.spelldmg(10);
+	else t.dmg(-10);
 },
 hope:function(c,t){
 	return c.owner.creatures.reduce(function(dr, cr){
