@@ -1,0 +1,6 @@
+[submodule "vanilla"]
+	path = vanilla
+	url = git@github.com:serprex/openEtG-vanilla
+[submodule "cia"]
+	path = cia
+	url = git@github.com:ZephyrPhantom/openEtG-vanilla
