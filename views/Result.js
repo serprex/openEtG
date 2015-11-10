@@ -51,21 +51,30 @@ module.exports = function(game, foeDeck) {
 	function computeBonuses() {
 		if (game.endurance !== undefined) return 1;
 		var bonus = 1;
-		[	["Current Health", function() { return Math.max(game.player1.hp, 0)/300; }],
-			["Full Health", function() { return game.player1.hp == game.player1.maxhp ? .2 : 0 }],
-			["Deckout", function() { return game.player2.deck.length == 0 && game.player2.hp > 0 ? .5 : 0 }],
-			["Double Kill", function() { return game.player2.hp < -game.player2.maxhp ? .25 : 0 }],
-			["Waiter", function() { return game.player1.deck.length == 0 ? .2 : 0 }],
-			["Grounds Keeper", function() { return Math.max((game.player1.countpermanents()-8)/40, 0) }],
-			["Creature Domination", function() { return game.player1.countcreatures() > 2*game.player2.countcreatures() ? .1 : 0 }],
+		[	["Creature Domination", function() { return game.player1.countcreatures() > 2*game.player2.countcreatures() ? .1 : 0 }],
 			["Creatureless", function() { return game.bonusstats.creaturesplaced == 0 ? .1 : 0 }],
-			["Toxic", function() { return game.player2.status.poison > 18 ? .1 : 0 }],
+			["Current Health", function() { return Math.max(game.player1.hp, 0)/300; }],
+			["Deckout", function() { return game.player2.deck.length == 0 && game.player2.hp > 0 ? .5 : 0 }],
+			["Double Kill", function() { return game.player2.hp < -game.player2.maxhp ? .15 : 0 }],
 			["Equipped", function() { return game.player1.weapon && game.player1.shield ? .05 : 0 }],
-			["Mid Turn", function() { return game.turn == game.player1 ? .1 : 0 }],
-			["Pillarless", function() { return game.bonusstats.cardsplayed[0] == 0 ? .05 : 0 }],
-			["Weapon Master", function() { return game.bonusstats.cardsplayed[1] >= 3 ? .1 : 0 }],
-			["Murderer", function() { return game.bonusstats.creatureskilled > 5 ? .15 : 0 }],
+			["Full Health", function() { return game.player1.hp == game.player1.maxhp ? .2 : 0 }],
+			["Grounds Keeper", function() { return Math.max((game.player1.countpermanents()-8)/40, 0) }],
 			["Last point", function() { return game.player1.hp == 1 ? .3 : 0 }],
+			["Mid Turn", function() { return game.turn == game.player1 ? .1 : 0 }],
+			["Murderer", function() { return game.bonusstats.creatureskilled > 5 ? .15 : 0 }],
+			["Pillarless", function() { return game.bonusstats.cardsplayed[0] == 0 ? .05 : 0 }],
+			["Size matters", function() { return etgutil.decklength(sock.getDeck())-30/300 }],
+			["Toxic", function() { return game.player2.status.poison > 18 ? .1 : 0 }],
+			["Unupped", function() {
+				var unupnu = 0;
+				etgutil.iterraw(sock.getDeck(), function(code, count){
+					var card = Cards.Codes[code];
+					if (card && !card.upped) unupnu += count;
+				});
+				return unupnu/300;
+			}],
+			["Waiter", function() { return game.player1.deck.length == 0 ? .3 : 0 }],
+			["Weapon Master", function() { return game.bonusstats.cardsplayed[1] >= 3 ? .1 : 0 }],
 		].forEach(function(data) {
 			var ret = data[1]();
 			if (ret > 0) {
