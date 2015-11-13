@@ -64,7 +64,7 @@ exports.inventor = [
 	{ deck: "0d5de065c5065fh065f7018po", name: "Crazy Inventor", hp: 125, wintext: "Even with his inventions, you manage to defeat him. 'No, please, spare me, I will never hurt anyone again!' he cries. You agree to let him go, but only if he leaves the area and never comes back. You see him walking away and can't help but thinking that you haven't seen the last of him... On your way out of the house, you find some of his inventions and decide that they can be useful!", cardreward: "03561025fh025ii" },
 ];
 //Proving Grounds
-exports.pgdragon = [{ deck: "0g4sa014vf0152h0155o0158r015bt015f2015id015la015op015rm015ul0661t018pu", name: "Dragon Tamer", hp: 150, wintext: "You have proved your worth for the Dragon Tamer, and he gives you two of his dragons.", choicerewards: ["4vf", "52h", "55o", "58r", "5bt", "5f2", "5id", "5la", "5of", "5rm", "5ul", "61v"], rewardamount:2 }];
+exports.pgdragon = [{ deck: "0g4sa014vf0152h0155o0158r015bt015f2015id015la015op015rm015ul0661t018pu", name: "Dragon Tamer", hp: 150, wintext: "You have proved your worth for the Dragon Tamer, and he gives you two of his dragons.", choicerewards: [5103, 5201, 5304, 5403, 5501, 5602, 5709, 5802, 5903, 6006, 6101, 6207], rewardamount:2 }];
 exports.pgrare = [{ deck: "015360a4sa014vl0152q0155s0158v015c5065ff045fh015f7015ic015ir015lh025oi015ol015ro015ur0161u018po", name: "Master of Arms", hp: 150, wintext: "You have proved your worth for the Master of Arms, and he gives you one of his rare cards.", choicerewards: "rare" }];
 exports.pgshard = [{ deck: "0c4sa0250a0253e0256i0659m025cq025fu025j2025m6025pa025se025vi0262m018pm", name: "Gemcutter", hp: 150, wintext: "You have proved your worth for the Gemcutter and he gives you one of his shards.", choicerewards: "shard" }];
 exports.pgfarmer = [{ deck: "0a4sc044vs064vu0a5t2018pj", name: "Farmer", hp: 150, goldreward: 100, wintext: "You have proved your worth for the Farmer and he gives you 100 gold." }]
@@ -92,7 +92,7 @@ exports.chromatemple = [{
 
 //Menu info
 exports.necromancer.info = { pos: [[200, 200], [200, 250], [225, 300]], text: ["A horde of skeletons have been seen nearby, perhaps you should go investigate?", "They seemed to come from the forest, so you go inside.", "Deep inside the forest you find the necromancer responsible for filling the lands with undead!"] };
-exports.spirit.info = { pos: [[275, 350], [325, 375], [500, 200], [500, 250], [525, 275]], text:["You pursue the energy trail of the spirit to a dark cavern.\At first you think it has eluded you, but as you turn to leave, its dark shadowy form rises in front of you",
+exports.spirit.info = { pos: [[275, 350], [325, 375], [500, 200], [500, 250], [525, 275]], text:["You pursue the energy trail of the spirit to a dark cavern. At first you think it has eluded you, but as you turn to leave, its dark shadowy form rises in front of you",
 	"You approach the portal and a large Elemental steps out of the shadows, purple energy swirling about it.\
 		'Only the worthy may pass'...You state that your only intention is to destroy the portal not pass through it.\
 		'Only the incubus key can close this portal.' The guardian glowers at you darkly.\
