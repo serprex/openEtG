@@ -310,6 +310,25 @@ creatureupkeep:function(c,t){
 cseed:function(c,t){
 	Skills[c.owner.choose(["drainlife", "firebolt", "freeze", "gpullspell", "icebolt", "infect", "lightning", "lobotomize", "parallel", "rewind", "snipe", "swave"])](c, t);
 },
+cseed2:function(c,t){
+	var candidates = [];
+	for (var key in Skills) {
+		var tgting = Cards.Targeting[key];
+		try{
+			if (tgting && tgting(c, t)){
+				candidates.push(key);
+			}
+		}catch(e){}
+	}
+	for(;;){
+		var choice = c.owner.choose(candidates);
+		try{
+			Skills[choice](c, t);
+			Effect.mkText(choice, t);
+			return;
+		}catch(e){}
+	}
+},
 dagger:function(c){
 	return (c.owner.mark == etg.Darkness||c.owner.mark == etg.Death) + c.owner.isCloaked();
 },
@@ -816,6 +835,10 @@ heatmirror: function(c, t, fromhand) {
 		new etg.Creature(c.card.as(Cards.Spark), c.owner).place();
 	}
 },
+hitownertwice:function(c,t){
+	c.attack(false, 0, c.owner);
+	c.attack(false, 0, c.owner);
+},
 holylight:function(c,t){
 	if (t.status.nocturnal) t.spelldmg(10);
 	else t.dmg(-10);
@@ -1245,6 +1268,9 @@ pandemonium:function(c,t){
 pandemonium2:function(c,t){
 	t.masscc(c, Skills.cseed);
 },
+pandemonium3:function(c,t){
+	c.owner.foe.masscc(c, Skills.cseed2, true);
+},
 paradox:function(c,t){
 	Effect.mkText("Paradox", t);
 	t.die();
@@ -1524,11 +1550,7 @@ serendipity:function(c){
 	}
 },
 shtriga:function(c,t){
-	if (c.owner == t){
-		c.status.immaterial = true;
-		c.atk--;
-		c.dmg(1);
-	}
+	if (c.owner == t) c.status.immaterial = true;
 },
 silence:function(c,t){
 	if (t instanceof etg.Player){
