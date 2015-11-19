@@ -1262,7 +1262,18 @@ pandemonium2:function(c,t){
 	t.masscc(c, Skills.cseed);
 },
 pandemonium3:function(c,t){
-	c.owner.foe.masscc(c, Skills.cseed2, true);
+	function cs2(x){
+		if (x) { Skills.cseed2(c, x) }
+	}
+	for(var i=0; i<2; i++){
+		var pl = i ? c.owner.foe : c.owner;
+		pl.creatures.forEach(cs2);
+		pl.permanents.forEach(cs2);
+		cs2(pl.weapon);
+		cs2(pl.shield);
+		pl.hand.forEach(cs2);
+		cs2(pl);
+	}
 },
 paradox:function(c,t){
 	Effect.mkText("Paradox", t);
