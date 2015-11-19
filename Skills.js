@@ -826,8 +826,11 @@ heatmirror: function(c, t, fromhand) {
 	}
 },
 hitownertwice:function(c,t){
-	c.attack(false, 0, c.owner);
-	c.attack(false, 0, c.owner);
+	if (!c.hasactive("turnstart", "predatoroff")){
+		c.addactive("turnstart", Skills.predatoroff);
+		c.attack(false, 0, c.owner);
+		c.attack(false, 0, c.owner);
+	}
 },
 holylight:function(c,t){
 	if (t.status.nocturnal) t.spelldmg(10);
