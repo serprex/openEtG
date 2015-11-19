@@ -311,23 +311,13 @@ cseed:function(c,t){
 	Skills[c.owner.choose(["drainlife", "firebolt", "freeze", "gpullspell", "icebolt", "infect", "lightning", "lobotomize", "parallel", "rewind", "snipe", "swave"])](c, t);
 },
 cseed2:function(c,t){
-	var candidates = [];
-	for (var key in Skills) {
-		var tgting = Cards.Targeting[key];
-		try{
-			if (tgting && tgting(c, t)){
-				candidates.push(key);
-			}
-		}catch(e){}
-	}
-	for(;;){
-		var choice = c.owner.choose(candidates);
-		try{
-			Skills[choice](c, t);
-			Effect.mkText(choice, t);
-			return;
-		}catch(e){}
-	}
+	var choice = c.owner.choose(etg.filtercards(c.owner.upto(2), function(c){
+		if (c.type != etg.SpellEnum) return false;
+		var tgting = Cards.Targeting[c.active.cast.activename];
+		return tgting && tgting(c, t);
+	}));
+	Effect.mkText(choice.name, t);
+	c.castSpell(t, choice.active.cast);
 },
 dagger:function(c){
 	return (c.owner.mark == etg.Darkness||c.owner.mark == etg.Death) + c.owner.isCloaked();
