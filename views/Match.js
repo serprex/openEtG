@@ -10,21 +10,38 @@ var Cards = require("../Cards");
 var Effect = require("../Effect");
 var Skills = require("../Skills");
 var etgutil = require("../etgutil");
+var redhor = new Uint16Array([
+	12, 0, 900,
+	144, 145, 796,
+	301, 103, 796,
+	459, 103, 754,
+	590, 103, 754,
+]), redver = new Uint16Array([
+	103, 301, 590,
+	144, 12, 301,
+	275, 12, 144,
+	624, 459, 590,
+	754, 301, 590,
+	796, 12, 301,
+]);
 function startMatch(game, foeDeck, spectate) {
 	if (sock.trade){
 		sock.userEmit("canceltrade");
 		delete sock.trade;
 	}
+	function drawTgting(spr, col) {
+		fgfx.drawRect(spr.position.x - spr.width / 2, spr.position.y - spr.height / 2, spr.width, spr.height);
+	}
 	function drawBorder(obj, spr) {
 		if (obj) {
 			if (game.targeting) {
-				if (game.targeting.filter(obj)) {
+				if (game.targeting.filter(obj)){
 					fgfx.lineStyle(2, 0xff0000);
-					fgfx.drawRect(spr.position.x - spr.width / 2, spr.position.y - spr.height / 2, spr.width, spr.height);
+					drawTgting(spr, 0xff0000);
 					fgfx.lineStyle(2, 0xffffff);
 				}
 			} else if (obj.canactive() && !(obj.owner == game.player2 && game.player2.isCloaked())) {
-				fgfx.lineStyle(2, obj.card.element == 8 ? 0x000000 : 0xffffff);
+				fgfx.lineStyle(2, obj.card.element == 8 ? 0 : 0xffffff);
 				fgfx.drawRect(spr.position.x - spr.width / 2, spr.position.y - spr.height / 2 - 1, spr.width, (obj instanceof etg.Weapon || obj instanceof etg.Shield ? 12 : 10));
 			}
 		}
@@ -121,20 +138,7 @@ function startMatch(game, foeDeck, spectate) {
 			sock.userExec("addgold", { g: -game.cost });
 		}
 	}
-	var redhor = [
-		12, 0, 900,
-		144, 145, 796,
-		301, 103, 796,
-		459, 103, 754,
-		590, 103, 754,
-	], redver = [
-		103, 301, 590,
-		144, 12, 301,
-		275, 12, 144,
-		624, 459, 590,
-		754, 301, 590,
-		796, 12, 301,
-	], gameui = new PIXI.Graphics();
+	var gameui = new PIXI.Graphics();
 	if (!spectate) {
 		gameui.hitArea = new PIXI.math.Rectangle(0, 0, 900, 600);
 		gameui.interactive = true;
@@ -399,15 +403,41 @@ function startMatch(game, foeDeck, spectate) {
 	infobox.className = "infobox";
 	infobox.style.display = "none";
 	div.appendChild(infobox);
+	var cursor = null, currow = handsprite[0], currowi = 0;
 	function onkeydown(e) {
-		if (e.keyCode == 32) { // spc
+		var ch = String.fromCharCode(e.keyCode), chi;
+		if (e.keyCode == 27) {
+			resign.click();
+		} else if (ch == " ") {
 			endClick();
-		} else if (e.keyCode == 8) { // bsp
+		} else if (ch == "\b") {
 			cancelClick();
-		} else if (e.keyCode >= 49 && e.keyCode <= 56) {
-			handsprite[0][e.keyCode-49].click();
-		} else if (e.keyCode == 83 || e.keyCode == 87) { // s/w
-			playerOverlay[e.keyCode == 87?1:0].click();
+		} else if (ch == "\n" || e.keyCode == 192 || e.key == "`") {
+			if (cursor) cursor.click();
+		} else if (ch == "n") {
+			cursor = null;
+			currow = handsprite[0];
+			currowi = 0;
+		} else if (ch >= "1" && ch <= "8") {
+			cursor = (currow || handsprite)[currowi+e.keyCode-49];
+		} else if (~(chi = "Sw".indexOf(ch))) {
+			playerOverlay[chi].click();
+		} else if (~(chi = "QA".indexOf(ch))) {
+			shiesprite[chi].click();
+		} else if (~(chi = "ED".indexOf(ch))) {
+			weapsprite[chi].click();
+		} else if (~(chi = "RF".indexOf(ch))) {
+			currow = handsprite[rf];
+			currowi = 0;
+		} else if (~(chi = "ZXC".indexOf(ch))) {
+			currow = creasprite[e.shiftKey?1:0];
+			currowi = chi == 0 ? 0 : chi == 1 ? 8 : 15;
+		} else if (~(chi = "VB".indexOf(ch))) {
+			currow = permsprite[e.shiftKey?1:0];
+			currowi = chi*8;
+		} else if (~(chi = "HJKL".indexOf(ch))) {
+			if (chi == 0) currowi--;
+			else if (chi == 3) currowi++;
 		}
 	}
 	function onmousemove(e) {
@@ -619,9 +649,9 @@ function startMatch(game, foeDeck, spectate) {
 					creasprite[j][i].texture = gfx.getCreatureImage(cr.card.code);
 					creasprite[j][i].visible = true;
 					var child = creasprite[j][i].children[1];
-					child.texture = ui.getBasicTextImage(cr.trueatk() + " | " + cr.truehp() + (cr.status.charges ? " x" + cr.status.charges : ""), 10, cr.card.upped ? "black" : "white", ui.maybeLightenStr(cr.card));
+					child.texture = ui.getBasicTextImage(cr.trueatk() + " | " + cr.truehp() + (cr.status.charges ? " x" + cr.status.charges : ""), 10, cr.card.upped ? "#000" : "#fff", ui.maybeLightenStr(cr.card));
 					var child2 = creasprite[j][i].children[2];
-					child2.texture = ui.getTextImage(cr.activetext(), 8, cr.card.upped ? "black" : "white");
+					child2.texture = ui.getTextImage(cr.activetext(), 8, cr.card.upped ? "#000" : "#fff");
 					drawStatus(cr, creasprite[j][i]);
 				} else creasprite[j][i].visible = false;
 			}
@@ -633,14 +663,14 @@ function startMatch(game, foeDeck, spectate) {
 					permsprite[j][i].visible = true;
 					var child = permsprite[j][i].children[1], child2 = permsprite[j][i].children[2];
 					if (pr.card.type == etg.PillarEnum) {
-						child.texture = ui.getTextImage("1:" + (pr.status.pendstate ? pr.owner.mark : pr.card.element) + " x" + pr.status.charges, 10, pr.card.upped ? "black" : "white", ui.maybeLightenStr(pr.card));
+						child.texture = ui.getTextImage("1:" + (pr.status.pendstate ? pr.owner.mark : pr.card.element) + " x" + pr.status.charges, 10, pr.card.upped ? "#000" : "#fff", ui.maybeLightenStr(pr.card));
 						child2.texture = gfx.nopic;
 					}else{
 						if (pr.active.auto && pr.active.auto == Skills.locket) {
-							child.texture = ui.getTextImage("1:" + (pr.status.mode === undefined ? pr.owner.mark : pr.status.mode), 10, pr.card.upped ? "black" : "white", ui.maybeLightenStr(pr.card));
+							child.texture = ui.getTextImage("1:" + (pr.status.mode === undefined ? pr.owner.mark : pr.status.mode), 10, pr.card.upped ? "#000" : "#fff", ui.maybeLightenStr(pr.card));
 						}
-						else child.texture = ui.getBasicTextImage((pr.status.charges == undefined ? "" : pr.status.charges) + "", 10, pr.card.upped ? "black" : "white", ui.maybeLightenStr(pr.card));
-						child2.texture = ui.getTextImage(pr.activetext(), 8, pr.card.upped ? "black" : "white");
+						else child.texture = ui.getBasicTextImage((pr.status.charges == undefined ? "" : pr.status.charges) + "", 10, pr.card.upped ? "#000" : "#fff", ui.maybeLightenStr(pr.card));
+						child2.texture = ui.getTextImage(pr.activetext(), 8, pr.card.upped ? "#000" : "#fff");
 					}
 					drawStatus(pr, permsprite[j][i]);
 				} else permsprite[j][i].visible = false;
@@ -649,10 +679,10 @@ function startMatch(game, foeDeck, spectate) {
 			if (wp && !(j == 1 && cloakgfx.visible)) {
 				weapsprite[j].visible = true;
 				var child = weapsprite[j].children[1];
-				child.texture = ui.getBasicTextImage(wp.trueatk() + (wp.status.charges ? " x" + wp.status.charges : ""), 12, wp.card.upped ? "black" : "white", ui.maybeLightenStr(wp.card));
+				child.texture = ui.getBasicTextImage(wp.trueatk() + (wp.status.charges ? " x" + wp.status.charges : ""), 12, wp.card.upped ? "#000" : "#fff", ui.maybeLightenStr(wp.card));
 				child.visible = true;
 				var child = weapsprite[j].children[2];
-				child.texture = ui.getTextImage(wp.activetext(), 12, wp.card.upped ? "black" : "white");
+				child.texture = ui.getTextImage(wp.activetext(), 12, wp.card.upped ? "#000" : "#fff");
 				child.visible = true;
 				weapsprite[j].texture = gfx.getWeaponShieldImage(wp.card.code);
 				drawStatus(wp, weapsprite[j]);
@@ -661,10 +691,10 @@ function startMatch(game, foeDeck, spectate) {
 			if (sh && !(j == 1 && cloakgfx.visible)) {
 				shiesprite[j].visible = true;
 				var child = shiesprite[j].children[1];
-				child.texture = ui.getBasicTextImage(sh.status.charges ? "x" + sh.status.charges : sh.truedr().toString(), 12, sh.card.upped ? "black" : "white", ui.maybeLightenStr(sh.card));
+				child.texture = ui.getBasicTextImage(sh.status.charges ? "x" + sh.status.charges : sh.truedr().toString(), 12, sh.card.upped ? "#000" : "#fff", ui.maybeLightenStr(sh.card));
 				child.visible = true;
 				var child = shiesprite[j].children[2];
-				child.texture = ui.getTextImage(sh.activetext(), 12, sh.card.upped ? "black" : "white");
+				child.texture = ui.getTextImage(sh.activetext(), 12, sh.card.upped ? "#000" : "#fff");
 				child.visible = true;
 				shiesprite[j].texture = gfx.getWeaponShieldImage(sh.card.code);
 				drawStatus(sh, shiesprite[j]);
@@ -690,6 +720,13 @@ function startMatch(game, foeDeck, spectate) {
 				var poison = pl.status.poison, poisoninfo = (poison > 0 ? poison + " 1:2" : poison < 0 ? -poison + " 1:7" : "") + (pl.status.neuro ? " 1:10" : "");
 				hptext[j].text = pl.hp + "/" + pl.maxhp + "\n" + pl.deck.length + "cards" + (!cloakgfx.visible && game.expectedDamage[j] ? "\nDmg: " + game.expectedDamage[j] : "") + (poisoninfo ? "\n" + poisoninfo : "");
 			}
+		}
+		if (cursor) {
+			fgfx.lineStyle(1, 0x336699);
+			fgfx.beginFill(0, 0);
+			if (!currow || currow == handsprite[0] || currow == handsprite[1]) {
+				fgfx.drawRect(cursor.position.x, cursor.position.y, cursor.width, cursor.height);
+			}else drawTgting(cursor);
 		}
 		Effect.next(cloakgfx.visible);
 	}
