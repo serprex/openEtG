@@ -141,7 +141,6 @@ var userEvents = {
 			["zrevrank", "arena", data.u],
 			["zrevrank", "arena1", data.u]]).
 			exec((err, res) => {
-				console.log(err, res);
 				var day = sutil.getDay();
 				function process(obj, rank){
 					if (!obj) return;
