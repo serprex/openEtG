@@ -420,7 +420,7 @@ function startMatch(game, foeDeck, spectate) {
 			currowi = 0;
 		} else if (ch >= "1" && ch <= "8") {
 			cursor = (currow || handsprite)[currowi+e.keyCode-49];
-		} else if (~(chi = "Sw".indexOf(ch))) {
+		} else if (~(chi = "SW".indexOf(ch))) {
 			playerOverlay[chi].click();
 		} else if (~(chi = "QA".indexOf(ch))) {
 			shiesprite[chi].click();
