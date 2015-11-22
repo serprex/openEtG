@@ -7,6 +7,7 @@ var gfx = require("../gfx");
 var chat = require("../chat");
 var mkAi = require("../mkAi");
 var sock = require("../sock");
+var Cards = require("../Cards");
 var etgutil = require("../etgutil");
 var options = require("../options");
 var userutil = require("../userutil");
@@ -50,38 +51,38 @@ module.exports = function(game, foeDeck) {
 	}
 	function computeBonuses() {
 		if (game.endurance !== undefined) return 1;
-		var bonus = 1;
-		[	["Creature Domination", function() { return game.player1.countcreatures() > 2*game.player2.countcreatures() ? .1 : 0 }],
-			["Creatureless", function() { return game.bonusstats.creaturesplaced == 0 ? .1 : 0 }],
-			["Current Health", function() { return Math.max(game.player1.hp, 0)/300; }],
-			["Deckout", function() { return game.player2.deck.length == 0 && game.player2.hp > 0 ? .5 : 0 }],
-			["Double Kill", function() { return game.player2.hp < -game.player2.maxhp ? .15 : 0 }],
-			["Equipped", function() { return game.player1.weapon && game.player1.shield ? .05 : 0 }],
-			["Full Health", function() { return game.player1.hp == game.player1.maxhp ? .2 : 0 }],
-			["Grounds Keeper", function() { return Math.max((game.player1.countpermanents()-8)/40, 0) }],
-			["Last point", function() { return game.player1.hp == 1 ? .3 : 0 }],
-			["Mid Turn", function() { return game.turn == game.player1 ? .1 : 0 }],
-			["Murderer", function() { return game.bonusstats.creatureskilled > 5 ? .15 : 0 }],
-			["Pillarless", function() { return game.bonusstats.cardsplayed[0] == 0 ? .05 : 0 }],
-			["Size matters", function() { return etgutil.decklength(sock.getDeck())-30/300 }],
-			["Toxic", function() { return game.player2.status.poison > 18 ? .1 : 0 }],
-			["Unupped", function() {
+		var bonus = [
+			["Creature Domination", game.player1.countcreatures() > 2*game.player2.countcreatures() ? .1 : 0],
+			["Creatureless", game.bonusstats.creaturesplaced == 0 ? .1 : 0],
+			["Current Health", Math.max(game.player1.hp, 0)/300],
+			["Deckout", game.player2.deck.length == 0 && game.player2.hp > 0 ? .5 : 0],
+			["Double Kill", game.player2.hp < -game.player2.maxhp ? .15 : 0],
+			["Equipped", game.player1.weapon && game.player1.shield ? .05 : 0],
+			["Full Health", game.player1.hp == game.player1.maxhp ? .2 : 0],
+			["Grounds Keeper", Math.max((game.player1.countpermanents()-8)/40, 0)],
+			["Last point", game.player1.hp == 1 ? .3 : 0],
+			["Mid Turn", game.turn == game.player1 ? .1 : 0],
+			["Murderer", game.bonusstats.creatureskilled > 5 ? .15 : 0],
+			["Pillarless", game.bonusstats.cardsplayed[0] == 0 ? .05 : 0],
+			["Size matters", (etgutil.decklength(sock.getDeck())-36)/150],
+			["Toxic", game.player2.status.poison > 18 ? .1 : 0],
+			["Unupped", (function(){
 				var unupnu = 0;
 				etgutil.iterraw(sock.getDeck(), function(code, count){
 					var card = Cards.Codes[code];
 					if (card && !card.upped) unupnu += count;
 				});
 				return unupnu/300;
-			}],
-			["Waiter", function() { return game.player1.deck.length == 0 ? .3 : 0 }],
-			["Weapon Master", function() { return game.bonusstats.cardsplayed[1] >= 3 ? .1 : 0 }],
-		].forEach(function(data) {
-			var ret = data[1]();
-			if (ret > 0) {
-				lefttext.push(Math.round(ret*100) + "% " + data[0]);
-				bonus += ret;
-			}
-		});
+			})()],
+			["Waiter", game.player1.deck.length == 0 ? .3 : 0],
+			["Weapon Master", game.bonusstats.cardsplayed[1] >= 3 ? .1 : 0],
+		].reduce(function(bsum, data) {
+			var b = data[1];
+			if (b > 0) {
+				lefttext.push(Math.round(b*100) + "% " + data[0]);
+				return bsum + b;
+			}else return bsum;
+		}, 1);
 		lefttext.push(((streakrate+1)*bonus*100-100).toFixed(1) + "% total bonus");
 		return bonus;
 	}
