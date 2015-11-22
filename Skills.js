@@ -310,6 +310,15 @@ creatureupkeep:function(c,t){
 cseed:function(c,t){
 	Skills[c.owner.choose(["drainlife", "firebolt", "freeze", "gpullspell", "icebolt", "infect", "lightning", "lobotomize", "parallel", "rewind", "snipe", "swave"])](c, t);
 },
+cseed2:function(c,t){
+	var choice = c.owner.choose(etg.filtercards(c.owner.upto(2), function(c){
+		if (c.type != etg.SpellEnum) return false;
+		var tgting = Cards.Targeting[c.active.cast.activename];
+		return tgting && tgting(c, t);
+	}));
+	Effect.mkText(choice.name, t);
+	c.castSpell(t, choice.active.cast);
+},
 dagger:function(c){
 	return (c.owner.mark == etg.Darkness||c.owner.mark == etg.Death) + c.owner.isCloaked();
 },
@@ -450,6 +459,9 @@ divinity:function(c,t){
 		c.owner.maxhp = Math.min(c.owner.maxhp + 24, 500);
 	}
 	c.owner.dmg(-16);
+},
+dmgproduce:function(c,t, dmg){
+	c.owner.spend(0, -dmg);
 },
 drainlife:function(c,t){
 	c.owner.dmg(-t.spelldmg(2+Math.floor(c.owner.quanta[etg.Darkness]/5)));
@@ -814,6 +826,13 @@ heal:function(c,t){
 heatmirror: function(c, t, fromhand) {
 	if (fromhand && t instanceof etg.Creature && c.owner != t.owner) {
 		new etg.Creature(c.card.as(Cards.Spark), c.owner).place();
+	}
+},
+hitownertwice:function(c,t){
+	if (!c.hasactive("turnstart", "predatoroff")){
+		c.addactive("turnstart", Skills.predatoroff);
+		c.attack(false, 0, c.owner);
+		c.attack(false, 0, c.owner);
 	}
 },
 holylight:function(c,t){
@@ -1245,6 +1264,20 @@ pandemonium:function(c,t){
 pandemonium2:function(c,t){
 	t.masscc(c, Skills.cseed);
 },
+pandemonium3:function(c,t){
+	function cs2(x){
+		if (x) { Skills.cseed2(c, x) }
+	}
+	for(var i=0; i<2; i++){
+		var pl = i ? c.owner.foe : c.owner;
+		pl.creatures.forEach(cs2);
+		pl.permanents.forEach(cs2);
+		cs2(pl.weapon);
+		cs2(pl.shield);
+		pl.hand.forEach(cs2);
+		cs2(pl);
+	}
+},
 paradox:function(c,t){
 	Effect.mkText("Paradox", t);
 	t.die();
@@ -1524,11 +1557,7 @@ serendipity:function(c){
 	}
 },
 shtriga:function(c,t){
-	if (c.owner == t){
-		c.status.immaterial = true;
-		c.atk--;
-		c.dmg(1);
-	}
+	if (c.owner == t) c.status.immaterial = true;
 },
 silence:function(c,t){
 	if (t instanceof etg.Player){

@@ -10,13 +10,16 @@ function Death(pos){
 	this.position = maybeTgtPos(pos);
 }
 function Text(text, pos){
-	if (!pos){
-		console.log("Blank position " + text);
-		pos = new PIXI.math.Point(-99, -99);
-	}
 	PIXI.Sprite.call(this, ui.getTextImage(text, 16, "white"));
 	this.step = 0;
 	this.position = maybeTgtPos(pos);
+	for(var i=0; i<anims.children.length; i++){
+		var a = anims.children[i];
+		if (a.position.x == this.position.x && a.position.y == this.position.y){
+			this.position.y += 16;
+			i=-1;
+		}
+	}
 	this.anchor.x = .5;
 }
 function SpriteFade(texture, pos, anchor) {
@@ -66,11 +69,11 @@ if (typeof PIXI === "undefined"){
 		this.drawRect(-30, -30, 60, 60);
 	}
 	Text.prototype.next = function(){
-		if (++this.step==20){
+		if (++this.step==36){
 			return true;
 		}
 		this.position.y -= 2;
-		this.alpha = 1-Math.sqrt(this.step)/5;
+		this.alpha = 1-Math.sqrt(this.step)/6;
 	}
 	SpriteFade.prototype.next = function() {
 		if (++this.step == 100) {

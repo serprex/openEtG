@@ -16,18 +16,8 @@ exports.card = function(code){
 	var textColor = card.upped ? "" : " fill='#fff'";
 	ret += "<image xlink:href='../assets/cardBacks.png' x='"+(card.element+card.upped*13)*-128+"' width='3328' height='256'/><text x='2' y='15'"+textColor+">"+card.name+"</text><text x='108' y='15'"+textColor+">"+card.cost+"</text>";
 	ret += "<image xlink:href='../Cards/"+etgutil.asShiny(etgutil.asUpped(code, false), false).toString(32)+".png' y='20' width='128' height='128'/>";
-	var info = card.info(), i=0, y=160;
-	while(~i && i<info.length){
-		var ni = info.indexOf("\n", i);
-		if (ni == -1) ni = Math.min(i+23, info.length);
-		if (ni != info.length){
-			var lsp = info.lastIndexOf(" ", ni);
-			if (lsp > i) ni = lsp;
-		}
-		ret += "<text x='2' y='"+y+"'"+textColor+">" + info.slice(i, ni) + "</text>";
-		y += 13;
-		i = ni + (info[ni] == "\n");
-	}
+	var info = card.info();
+	ret += "<foreignObject x='2' y='140' width='124' height='116' requiredExtensions='http://www.w3.org/1999/xhtml'><body xmlns='http://www.w3.org/1999/xhtml'><p style='font-family:Dosis;font-size:10px;white-space:pre-wrap'>" + info.replace(/\|/g, " | ").replace(/(\d\d?):(\d+)/g, "$1<span class='ico ce$2'></span>") + "</p></body></foreignObject>";
 	return prefix+" height='256' width='128'>"+cssPrefix+"]]></style>"+ret+"</svg>";
 }
 exports.deck = function(deck){
