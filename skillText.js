@@ -76,6 +76,7 @@ var data = {
 	disshield:"Absorb damage. Consume 1:1 per 3 damage absorbed",
 	divinity:"Add 24 to maximum health & heal 16",
 	dive:"Double strength until next attack. Does not stack",
+	dmgproduce:"Generate 1:0 per damage dealt",
 	draft:"Target airborne creature loses airborne status, or vice versa. Produce 2:9",
 	drainlife:"Drains 2HP from target. Increment drain per 5:11 owned",
 	drawcopy:"When foe discards a card, generate a copy",

@@ -460,6 +460,9 @@ divinity:function(c,t){
 	}
 	c.owner.dmg(-16);
 },
+dmgproduce:function(c,t, dmg){
+	c.owner.spend(0, -dmg);
+},
 drainlife:function(c,t){
 	c.owner.dmg(-t.spelldmg(2+Math.floor(c.owner.quanta[etg.Darkness]/5)));
 },
