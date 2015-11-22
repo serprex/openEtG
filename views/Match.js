@@ -403,7 +403,7 @@ function startMatch(game, foeDeck, spectate) {
 	infobox.className = "infobox";
 	infobox.style.display = "none";
 	div.appendChild(infobox);
-	var cursor = null, currow = handsprite[0], currowi = 0;
+	var cursor = null, currow = handsprite[0], currowi = 0, currowo = 0;
 	function onkeydown(e) {
 		var ch = String.fromCharCode(e.keyCode), chi;
 		if (e.keyCode == 27) {
@@ -417,9 +417,10 @@ function startMatch(game, foeDeck, spectate) {
 		} else if (ch == "n") {
 			cursor = null;
 			currow = handsprite[0];
-			currowi = 0;
+			currowo = currowi = 0;
 		} else if (ch >= "1" && ch <= "8") {
-			cursor = (currow || handsprite)[currowi+e.keyCode-49];
+			currowo = e.keyCode - 49;
+			cursor = currow[currowi+currowo];
 		} else if (~(chi = "SW".indexOf(ch))) {
 			playerOverlay[chi].click();
 		} else if (~(chi = "QA".indexOf(ch))) {
@@ -427,7 +428,7 @@ function startMatch(game, foeDeck, spectate) {
 		} else if (~(chi = "ED".indexOf(ch))) {
 			weapsprite[chi].click();
 		} else if (~(chi = "RF".indexOf(ch))) {
-			currow = handsprite[rf];
+			currow = handsprite[chi];
 			currowi = 0;
 		} else if (~(chi = "ZXC".indexOf(ch))) {
 			currow = creasprite[e.shiftKey?1:0];
@@ -435,9 +436,35 @@ function startMatch(game, foeDeck, spectate) {
 		} else if (~(chi = "VB".indexOf(ch))) {
 			currow = permsprite[e.shiftKey?1:0];
 			currowi = chi*8;
-		} else if (~(chi = "HJKL".indexOf(ch))) {
-			if (chi == 0) currowi--;
-			else if (chi == 3) currowi++;
+		} else if (~(chi = "HL".indexOf(ch))) {
+			currowo += chi?1:-1;
+			if (currowo > 8) currowo = 0;
+			else if (currowo < 0) currowo = 8;
+			cursor = currow[currowi+currowo];
+		} else if (~(chi = "JK".indexOf(ch))) {
+			var jkmap = [
+				handsprite[0], 0,
+				permsprite[0], 8,
+				permsprite[0], 0,
+				creasprite[0], 15,
+				creasprite[0], 8,
+				creasprite[0], 0,
+				creasprite[1], 0,
+				creasprite[1], 8,
+				creasprite[1], 15,
+				permsprite[1], 0,
+				permsprite[1], 8,
+				handsprite[1], 0,
+			];
+			for(var i=0; i<jkmap.length; i+=2){
+				if (currow == jkmap[i] && jkmap[i+1] == currowi) break;
+			}
+			i += chi?2:-2;
+			if (i<0) i = jkmap.length-2;
+			else if (i>=jkmap.length) i = 0;
+			currow = jkmap[i];
+			currowi = jkmap[i+1];
+			cursor = currow[currowi+currowo];
 		}
 	}
 	function onmousemove(e) {
