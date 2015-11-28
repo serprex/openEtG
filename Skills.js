@@ -253,7 +253,7 @@ chimera:function(c,t){
 },
 chromastat:function(c,t){
 	var n = c.truehp() + c.trueatk();
-	Effect.mkText("0:"+n);
+	Effect.mkText(n+":0", c);
 	c.owner.spend(0, -n);
 },
 clear:function(c,t){
