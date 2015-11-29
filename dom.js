@@ -154,7 +154,6 @@ exports.text = function(text){
 	ele.text = text;
 	return ele;
 }
-var svgcache = {};
 function createHtml(html){
 	var dummy = document.createElement("div");
 	dummy.innerHTML = html;

@@ -1,7 +1,6 @@
 "use strict";
 var px = require("../px");
 var dom = require("../dom");
-var gfx = require("../gfx");
 var sock = require("../sock");
 var Quest = require("../Quest");
 var options = require("../options");

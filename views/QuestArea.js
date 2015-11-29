@@ -1,6 +1,5 @@
 var px = require("../px");
 var dom = require("../dom");
-var gfx = require("../gfx");
 var sock = require("../sock");
 var Quest = require("../Quest");
 function startQuest(questname) {

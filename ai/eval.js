@@ -94,6 +94,8 @@ var SkillsValues = Object.freeze({
 	counter:3,
 	countimmbur:1,
 	cpower:4,
+	cseed:4,
+	cseed2:4,
 	creatureupkeep:function(c){
 		return c.owner.foe.countcreatures()-c.owner.countcreatures()/2;
 	},
@@ -195,6 +197,9 @@ var SkillsValues = Object.freeze({
 	hatch:3,
 	heal:8,
 	heatmirror:2,
+	hitownertwice:function(c){
+		return (c instanceof etg.CardInstance ? c.card.attack : c.trueatk())*-2;
+	},
 	holylight:3,
 	hope:2,
 	icebolt:10,
@@ -233,15 +238,15 @@ var SkillsValues = Object.freeze({
 	neuro:function(c) {
 		return c.owner.foe.status.neuro?evalactive(c, etg.parseSkill("poison 1"))+.1:6;
 	},
-	neurofy:function(c) {
+	neuroify:function(c) {
 		return c.owner.foe.status.neuro?1:5;
 	},
 	nightmare:function(c){
-		var val = 24-c.owner.foe.hand.length;
+		var n = 0;
 		c.owner.hand.forEach(function(inst){
-			if (inst.card.isOf(Cards.Nightmare)) val /= 2;
+			if (inst.card.isOf(Cards.Nightmare)) n++;
 		});
-		return val;
+		return (24-c.owner.foe.hand.length) >> n;
 	},
 	nightshade:6,
 	nova:4,
@@ -258,6 +263,7 @@ var SkillsValues = Object.freeze({
 	paleomagnetism:[4,5],
 	pandemonium:3,
 	pandemonium2:4,
+	pandemonium3:5,
 	paradox:5,
 	parallel:8,
 	phoenix:3,

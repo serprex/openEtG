@@ -9,7 +9,6 @@ var mkAi = require("../mkAi");
 var sock = require("../sock");
 var Cards = require("../Cards");
 var etgutil = require("../etgutil");
-var options = require("../options");
 var userutil = require("../userutil");
 var streak200 = new Uint8Array([10, 10, 15, 20, 15, 20]);
 module.exports = function(game, foeDeck) {

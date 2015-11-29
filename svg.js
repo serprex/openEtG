@@ -33,7 +33,7 @@ exports.deck = function(deck){
 		}
 		return ret;
 	}
-	var ret="", x=16, y=0, classes = {}, mark;
+	var ret="", classes = {}, mark;
 	etgutil.iterdeck(deck, function(code){
 		if (!(code in Cards.Codes)){
 			var ismark = etg.fromTrueMark(code);

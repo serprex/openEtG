@@ -49,7 +49,7 @@ var data = {
 		"Sacrifice a creature to deal 1 damage to all enemy creatures. Increment damage per 8 health of sacrifice. Poisonous sacrifices poison foe"],
 	counter:"Attack attacker when attacked & able to attack",
 	countimmbur:"Increment attack per immaterial or burrowed instance",
-	cpower:"Target gains 1 to 5 strength. Target gains 1 to 5 health",
+	cpower:"Target gains 1 to 5 strength & 1 to 5 health",
 	creatureupkeep:"All creatures require upkeep",
 	cseed:"A random effect is inflicted to target creature",
 	cseed2:"A truly random effect is inflicted to target",
