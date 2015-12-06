@@ -3,12 +3,11 @@ var etg = require("./etg");
 var gfx = require("./gfx");
 var options = require("./options");
 var Effect = require("./Effect");
-exports.elecols = new Uint32Array([0xa99683, 0xaa5999, 0x636069, 0x996633, 0x5f4930, 0x50a005, 0xcc6611, 0x205080, 0x999990, 0x337ddd, 0xbfa622, 0x333333, 0x55aacc]);
-function lighten(c) {
-	return ((c & 255) + 255 >> 1) | (((c >> 8) & 255) + 255 >> 1 << 8) | (((c >> 16) & 255) + 255 >> 1 << 16);
-}
+exports.elecols = new Uint32Array([
+	0xaa9988, 0xaa5599, 0x776677, 0x996633, 0x665544, 0x55aa00, 0xcc5522, 0x225588, 0x888877, 0x3388dd, 0xccaa22, 0x333333, 0x55aacc,
+	0xddccbb, 0xddbbcc, 0xbbaabb, 0xccbb99, 0xbbaa99, 0xaacc77, 0xddaa88, 0x88aacc, 0xccccbb, 0x99bbee, 0xeedd88, 0x999999, 0xaaffee]);
 exports.maybeLighten = function(card){
-	return card.upped ? lighten(exports.elecols[card.element]) : exports.elecols[card.element];
+	return exports.elecols[card.element+card.upped*13];
 }
 exports.maybeLightenStr = function(card){
 	return PIXI.utils.hex2string(exports.maybeLighten(card));
@@ -43,7 +42,7 @@ function permanentPos(j, i) {
 	return p;
 }
 function cardPos(j, i) {
-	return new Point(j ? 15 : 780, (j ? 130 : 330) + 19 * i);
+	return new Point((j ? 6 : 766) + 66*(i>3), (j ? 80 : 308) + 48 * (i&3));
 }
 function tgtToPos(t) {
 	if (t instanceof etg.Creature) {
@@ -200,13 +199,6 @@ function loadSounds() {
 		}
 	}
 }
-function loadMusics() {
-	if (musicEnabled){
-		for (var i = 0;i < arguments.length;i++) {
-			musics[arguments[i]] = new Audio("sound/" + arguments[i] + ".ogg");
-		}
-	}
-}
 function playSound(name, dontreset) {
 	if (soundEnabled && !Effect.disable) {
 		var sound = sounds[name];
@@ -273,7 +265,6 @@ exports.permanentPos = permanentPos;
 exports.cardPos = cardPos;
 exports.tgtToPos = tgtToPos;
 exports.loadSounds = loadSounds;
-exports.loadMusics = loadMusics;
 exports.playSound = playSound;
 exports.playMusic = playMusic;
 exports.changeSound = changeSound;

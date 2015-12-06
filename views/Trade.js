@@ -18,7 +18,7 @@ module.exports = function() {
 	var view = px.mkView(), cardminus = {}, stage = {view: view};
 	var btrade = dom.button("Trade", function() {
 		if (!cardChosen){
-			if (ownDeck.deck.length > 0) {
+			if (ownDeck.deck.length) {
 				sock.emit("cardchosen", {c: etgutil.encoderaw(ownDeck.deck)});
 				console.log("Offered", ownDeck.deck);
 				cardChosen = true;
@@ -27,7 +27,7 @@ module.exports = function() {
 			}
 			else chat("You have to choose at least a card!", "System");
 		}else{ // confirm
-			if (foeDeck.deck.length > 0) {
+			if (foeDeck.deck.length) {
 				console.log("Confirmed", ownDeck.deck, foeDeck.deck);
 				sock.userEmit("confirmtrade", { cards: etgutil.encoderaw(ownDeck.deck), oppcards: etgutil.encoderaw(foeDeck.deck) });
 				btrade.style.display = "none";

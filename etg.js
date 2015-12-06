@@ -737,7 +737,7 @@ Player.prototype.drawcard = function(drawstep) {
 	}
 }
 Player.prototype.drawhand = function(x) {
-	while (this.hand.length > 0){
+	while (this.hand.length){
 		this.deck.push(this.hand.pop().card);
 	}
 	this.shuffle(this.deck);

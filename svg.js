@@ -3,8 +3,8 @@ var etg = require("./etg");
 var Cards = require("./Cards");
 var etgutil = require("./etgutil");
 var elecols = [
-	"#a99683", "#a59", "#636069", "#996633", "#5f4930", "#50a005", "#cc6611", "#205080", "#999990", "#337ddd", "#bfa622", "#333", "#5ac",
-	"#d4cac1", "#d4accc", "#b1afb3", "#ccb299", "#afa497", "#a7cf82", "#e5b288", "#8fa7bf", "#ccccc6", "#99beee", "#dfd28f", "#999", "#aad4e4"];
+	"#a98", "#a59", "#767", "#963", "#654", "#5a0", "#c52", "#258", "#887", "#38d", "#ca2", "#333", "#5ac",
+	"#dcb", "#dbc", "#bab", "#cb9", "#ba9", "#ac7", "#da8", "#8ac", "#ccb", "#9be", "#ed8", "#999", "#afe"];
 var cssPrefix = "<style type='text/css'><![CDATA[@import url(http://fonts.googleapis.com/css?family=Dosis);text{font-family:Dosis;font-size:12px}";
 function eleChar(card){
 	return String.fromCharCode(97+card.element+(card.upped?13:0));

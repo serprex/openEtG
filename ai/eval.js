@@ -676,7 +676,7 @@ module.exports = function(game) {
 		}
 		logNestEnd();
 		// Remove this if logic is updated to call endturn
-		if (player != game.turn && player.hand.length < 8 && player.deck.length > 0){
+		if (player != game.turn && player.hand.length < 8 && player.deck.length){
 			var code = player.deck.pop();
 			player.hand.push(new etg.CardInstance(code, player));
 			pscore += evalcardinstance(player.hand[player.hand.length-1]);

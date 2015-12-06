@@ -511,7 +511,7 @@ dshieldoff:passive(function(c,t){
 	}
 }),
 duality:function(c,t){
-	if (c.owner.foe.deck.length > 0 && c.owner.hand.length < 8){
+	if (c.owner.foe.deck.length && c.owner.hand.length < 8){
 		new etg.CardInstance(c.owner.foe.deck[c.owner.foe.deck.length-1], c.owner).place();
 	}
 },
@@ -619,7 +619,7 @@ fickle:function(c,t){
 			cards.push(i);
 		}
 	});
-	if (cards.length > 0){
+	if (cards.length){
 		var pick = t.owner.choose(cards);
 		t.owner.hand[t.getIndex()] = new etg.CardInstance(t.owner.deck[pick], t.owner);
 		t.owner.deck[pick] = t.card;
@@ -1502,7 +1502,7 @@ ricochet:function(c,t, data){
 			var pl=i==0?c.owner:c.owner.foe;
 			pl.forEach(tgttest, true);
 		}
-		if (tgts.length > 0){
+		if (tgts.length){
 			var tgt = c.owner.choose(tgts), town = t.owner;
 			t.owner = tgt[1];
 			t.castSpell(tgt[0], data.active, true);
@@ -1813,7 +1813,7 @@ trick:function(c,t){
 			cards.push(i);
 		}
 	});
-	if (cards.length > 0){
+	if (cards.length){
 		var pick = t.owner.choose(cards);
 		var cr = t.owner.creatures[t.getIndex()] = new etg.Creature(t.owner.deck[pick], t.owner);
 		t.owner.deck[pick] = t.card;
@@ -1928,7 +1928,9 @@ wisdom:function(c,t){
 	}
 },
 yoink:function(c,t){
-	if (!t.owner.sanctuary){
+	if (t instanceof etg.Player){
+		Skills.foedraw(c);
+	}else if (!t.owner.sanctuary){
 		t.remove();
 		if (c.owner.hand.length < 8){
 			t.owner = c.owner;

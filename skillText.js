@@ -338,7 +338,7 @@ var data = {
 	wind:"Restore attack",
 	wings:"Evade non-airborne & non-ranged attackers",
 	wisdom:"Target gains 3|0. May target immaterial, granting psionic",
-	yoink:"Steal target card",
+	yoink:"Steal foe's target card, or draw from foe's target player's deck",
 };
 [["dagger", "1:2 1:11. Increment damage if cloaked"], ["hammer", "1:3 1:4"], ["bow", "1:8 1:9"], ["staff", "1:5 1:7"], ["disc", "1:1 1:12"], ["axe", "1:6 1:10"]].forEach(function(x){
 	data[x[0]] = "Increment damage if mark is "+x[1];

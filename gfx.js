@@ -193,36 +193,31 @@ function getCardImage(code) {
 }
 function getInstImage(scale){
 	return artFactory(function(code, art, rend){
-		if (!rend) rend = require("./px").mkRenderTexture(Math.ceil(128 * scale), Math.ceil(160 * scale));
+		if (!rend) rend = require("./px").mkRenderTexture(Math.ceil(128 * scale), Math.ceil(152 * scale));
 		var card = Cards.Codes[code];
 		var btex = exports.cardBorders[card.element + (card.upped ? 13 : 0)];
 		var c = new PIXI.Container();
 		var border = new PIXI.Sprite(btex), border2 = new PIXI.Sprite(btex);
-		border2.position.y = 160;
-		border2.scale.y = -1;
+		border.scale.y = 1.25;
+		border2.position.y = 152;
+		border2.scale.y = -.25;
 		c.addChild(border);
 		c.addChild(border2);
 		var graphics = new PIXI.Graphics();
 		c.addChild(graphics);
 		graphics.beginFill(ui.maybeLighten(card));
-		graphics.drawRect(0, 16, 128, 128);
+		graphics.drawRect(0, 20, 128, 128);
 		if (card.shiny){
 			graphics.lineStyle(2, 0xdaa520);
-			graphics.moveTo(0, 14);
-			graphics.lineTo(128, 14);
-			graphics.moveTo(0, 147);
-			graphics.lineTo(128, 147);
+			graphics.moveTo(0, 20);
+			graphics.lineTo(128, 20);
 		}
 		if (art) {
 			var artspr = new PIXI.Sprite(art);
-			artspr.position.y = 16;
+			artspr.position.y = 20;
 			setShinyShader(rend.renderer, artspr, card);
 			c.addChild(artspr);
 		}
-		var text = new PIXI.Sprite(Text(card.name, 16, card.upped ? "black" : "white"));
-		text.anchor.x = .5;
-		text.position.set(64, 142);
-		c.addChild(text);
 		var mtx = new PIXI.math.Matrix();
 		mtx.scale(scale, scale);
 		rend.render(c, mtx);
@@ -239,6 +234,7 @@ if (typeof PIXI !== "undefined"){
 	exports.nopic = PIXI.Texture.emptyTexture;
 	exports.load = load;
 	exports.getPermanentImage = exports.getCreatureImage = getInstImage(.5);
+	exports.getHandImage = getInstImage(.5);
 	exports.getWeaponShieldImage = getInstImage(5/8);
 	exports.getArt = getArt;
 	exports.getCardImage = getCardImage;
