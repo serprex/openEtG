@@ -416,7 +416,7 @@ function startMatch(game, foeDeck, spectate) {
 			resign.click();
 		} else if (ch == " ") {
 			endClick();
-		} else if (ch == "\b") {
+		} else if (ch == "\b" || ch == "0") {
 			cancelClick();
 		} else if (ch == "\n" || e.keyCode == 192 || e.key == "`") {
 			if (cursor) cursor.click();
@@ -604,19 +604,11 @@ function startMatch(game, foeDeck, spectate) {
 			}
 		}
 		if (game.phase != etg.EndPhase) {
-			var turntext;
-			if (discarding){
-				endturn.text = "";
-				turntext = "Discard";
-			}else if (game.targeting){
-				turntext = game.targeting.text;
-			}else{
-				turntext = (game.turn == game.player1 ? "Your Turn" : "Their Turn") +
-					(game.phase >= 2 ? "" : " " + (game.first == game.player1 ? ", First": ", Second"));
-			}
-			turntell.text = turntext;
+			turntell.text = discarding ? "Discard" :
+				game.targeting ? game.targeting.text :
+				(game.turn == game.player1 ? "Your Turn" : "Their Turn") + (game.phase >= 2 ? "" : " " + (game.first == game.player1 ? ", First": ", Second"));
 			if (game.turn == game.player1){
-				endturn.text = game.phase == etg.PlayPhase ? "End Turn" : "Accept Hand";
+				endturn.text = discarding ? "" : game.phase == etg.PlayPhase ? "End Turn" : "Accept Hand";
 				cancel.text = game.phase != etg.PlayPhase ? "Mulligan" : game.targeting || discarding || resigning ? "Cancel" : "";
 			}else cancel.text = endturn.text = "";
 		}else{
