@@ -662,13 +662,7 @@ function startMatch(game, foeDeck, spectate) {
 			for (var i = 0;i < game.player1.hand.length;i++) {
 				var card = game.player1.hand[i].card;
 				var hspr = handsprite[0][i];
-				if (game.player1.canspend(card.costele, card.cost)){
-					hspr.alpha = 1;
-					hspr.tint = 0xffffff;
-				} else {
-					hspr.alpha = .7;
-					hspr.tint = 0x666666;
-				}
+				hspr.tint = game.player1.canspend(card.costele, card.cost) ? 0xffffff : 0x444444;
 			}
 		}
 		for (var j = 0;j < 2;j++) {
@@ -685,7 +679,7 @@ function startMatch(game, foeDeck, spectate) {
 				handsprite[j][i].texture = isfront ? gfx.getHandImage(card.code) : gfx.cback;
 				if (isfront){
 					handsprite[j][i].children[0].texture = card.cost ? ui.getBasicTextImage(card.cost, 11, card.upped ? "#000" : "#fff", ui.maybeLightenStr(card)) : gfx.nopic;
-					handsprite[j][i].children[1].texture = ui.getBasicTextImage(card.name, 11, card.upped ? "#000" : "#fff");
+					handsprite[j][i].children[1].texture = ui.getBasicTextImage(card.name, 11, card.upped && handsprite[j][i].tint == 0xffffff ? "#000" : "#fff");
 				} else {
 					handsprite[j][i].children[0].texture = handsprite[j][i].children[1].texture = gfx.nopic;
 				}
