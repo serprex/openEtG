@@ -646,13 +646,6 @@ function startMatch(game, foeDeck, spectate) {
 			}
 		}
 		fgfx.lineStyle(0, 0, 0);
-		if (game.turn == game.player1 && !game.targeting && game.phase != etg.EndPhase) {
-			for (var i = 0;i < game.player1.hand.length;i++) {
-				var card = game.player1.hand[i].card;
-				var hspr = handsprite[0][i];
-				hspr.tint = game.player1.canspend(card.costele, card.cost) ? 0xffffff : 0x444444;
-			}
-		}
 		for (var j = 0;j < 2;j++) {
 			var pl = game.players(j);
 			sacrificeOverlay[j].visible = pl.sosa;
@@ -662,16 +655,19 @@ function startMatch(game, foeDeck, spectate) {
 				pl.nova >= 3 ? gfx.singularity : gfx.nopic);
 			var i = 0;
 			for (;i < pl.hand.length;i++) {
-				var isfront = j == 0 || game.player1.precognition;
-				var card = pl.hand[i].card;
-				handsprite[j][i].texture = isfront ? gfx.getHandImage(card.code) : gfx.cback;
+				var isfront = j == 0 || game.player1.precognition,
+					card = pl.hand[i].card,
+					hspr = handsprite[j][i];
+				hspr.texture = isfront ? gfx.getHandImage(card.code) : gfx.cback;
 				if (isfront){
-					handsprite[j][i].children[0].texture = card.cost ? ui.getTextImage(card.cost + ":" + card.costele, 11, card.upped ? "#000" : "#fff", ui.maybeLightenStr(card)) : gfx.nopic;
-					handsprite[j][i].children[1].texture = ui.getBasicTextImage(card.name, 11, card.upped && handsprite[j][i].tint == 0xffffff ? "#000" : "#fff");
+					hspr.tint = pl.canspend(card.costele, card.cost) ? 0xffffff : 0x555555;
+					hspr.children[0].texture = card.cost ? ui.getTextImage(card.cost + ":" + card.costele, 11, card.upped ? "#000" : "#fff", ui.maybeLightenStr(card)) : gfx.nopic;
+					hspr.children[1].texture = ui.getBasicTextImage(card.name, 11, card.upped && handsprite[j][i].tint == 0xffffff ? "#000" : "#fff");
 				} else {
-					handsprite[j][i].children[0].texture = handsprite[j][i].children[1].texture = gfx.nopic;
+					hspr.tint = 0xffffff;
+					hspr.children[0].texture = hspr.children[1].texture = gfx.nopic;
 				}
-				handsprite[j][i].visible = true;
+				hspr.visible = true;
 			}
 			for(;i<8; i++) {
 				handsprite[j][i].visible = false;
