@@ -222,7 +222,6 @@ function startMatch(game, foeDeck, spectate) {
 	var shiesprite = new Array(2);
 	var weapsprite = new Array(2);
 	var marksprite = [document.createElement("span"), document.createElement("span")], markspritexy = [];
-	var marktext = [dom.text(""), dom.text("")], marktextxy = [];
 	var quantatext = [[], []];
 	var hptext = [new dom.text(""), new dom.text("")], hpxy = [];
 	var playerOverlay = [new PIXI.Sprite(gfx.nopic), new PIXI.Sprite(gfx.nopic)];
@@ -235,9 +234,6 @@ function startMatch(game, foeDeck, spectate) {
 		hptext[j].style.pointerEvents = "none";
 		hptext[j].style.fontSize = "12px";
 		hptext[j].style.lineHeight = "1.1";
-		marktext[j].style.pointerEvents = "none";
-		marktext[j].style.fontSize = "18px";
-		marktext[j].style.transform = "translate(-50%,-50%)";
 		playerOverlay[j].width = 95;
 		playerOverlay[j].height = 80;
 		sabbathOverlay[j].className = "sabbath";
@@ -249,7 +245,7 @@ function startMatch(game, foeDeck, spectate) {
 				handsprite[j][i] = new PIXI.Sprite(gfx.nopic);
 				handsprite[j][i].position = ui.cardPos(j, i);
 				var handtext = new PIXI.Sprite(gfx.nopic);
-				handtext.position.set(60, 10);
+				handtext.position.set(64, 11);
 				handtext.anchor.set(1, 0);
 				handsprite[j][i].addChild(handtext);
 				handtext = new PIXI.Sprite(gfx.nopic);
@@ -345,6 +341,10 @@ function startMatch(game, foeDeck, spectate) {
 			px.setInteractive.apply(null, permsprite[j]);
 			markspritexy[j] = new PIXI.math.Point(740, 470);
 			marksprite[j].style.transform = "translate(-50%,-50%)";
+			marksprite[j].style.textAlign = "center";
+			marksprite[j].style.pointerEvents = "none";
+			marksprite[j].style.fontSize = "18px";
+			marksprite[j].style.textShadow = "2px 2px 1px rgb(0,0,0),2px 2px 2px rgb(0,0,0)";
 			weapsprite[j] = makeInst(null, "weapon", new PIXI.math.Point(666, 512), 5/4);
 			shiesprite[j] = makeInst(null, "shield", new PIXI.math.Point(710, 536), 5/4);
 			if (j){
@@ -358,11 +358,9 @@ function startMatch(game, foeDeck, spectate) {
 				gameui.addChild(shiesprite[j]);
 			}
 			playerOverlay[j].anchor.set(.5, .5);
-			marktextxy[j] = new PIXI.math.Point(768, 470);
 			playerOverlay[j].position.set(50, 555);
 			hpxy[j] = new PIXI.math.Point(50, 550);
 			if (j) {
-				ui.reflectPos(marktextxy[j]);
 				ui.reflectPos(hpxy[j]);
 				ui.reflectPos(playerOverlay[j]);
 				playerOverlay[j].y += 15;
@@ -378,14 +376,12 @@ function startMatch(game, foeDeck, spectate) {
 					[quantaxy[0] + ((k & 1) ? 0 : 54), quantaxy[1] + Math.floor((k - 1) / 2) * 32, quantaicon]);
 			}
 			px.setClick(playerOverlay[j], function() {
-				if (game.phase != etg.PlayPhase) return;
-				if (game.targeting && game.targeting.filter(game.players(_j))) {
+				if (game.phase == etg.PlayPhase && game.targeting && game.targeting.filter(game.players(_j))) {
 					game.targeting.cb(game.players(_j));
 				}
 			}, false);
 		})(j);
 		dom.add(div, [markspritexy[j].x, markspritexy[j].y, marksprite[j]],
-			[marktextxy[j].x, marktextxy[j].y, marktext[j]],
 			[hpxy[j].x-50, playerOverlay[j].y - 24, hptext[j]],
 			[j ? 792 : 0, j ? 80 : 288, sabbathOverlay[j]]);
 		gameui.addChild(handOverlay[j]);
@@ -595,12 +591,12 @@ function startMatch(game, foeDeck, spectate) {
 			cardart.texture = gfx.getArt(cardartcode);
 			cardart.visible = true;
 			cardart.position.set(cardartx || 654, px.mouse.y > 300 ? 44 : 300);
-			if (px.mouse.y < 300) marktext[0].style.display = marksprite[0].style.display = cardartx >= 670 && cardartx <= 760 ? "none" : "";
-			else marktext[1].style.display = marksprite[1].style.display = cardartx >= 140 && cardartx <= 230 ? "none" : "";
+			if (px.mouse.y < 300) marksprite[0].style.display = cardartx >= 670 && cardartx <= 760 ? "none" : "";
+			else marksprite[1].style.display = cardartx >= 140 && cardartx <= 230 ? "none" : "";
 		} else {
 			cardart.visible = false;
 			for(var j=0; j<2; j++){
-				marksprite[j].style.display = marktext[j].style.display = "";
+				marksprite[j].style.display = "";
 			}
 		}
 		if (game.phase != etg.EndPhase) {
@@ -670,7 +666,7 @@ function startMatch(game, foeDeck, spectate) {
 				var card = pl.hand[i].card;
 				handsprite[j][i].texture = isfront ? gfx.getHandImage(card.code) : gfx.cback;
 				if (isfront){
-					handsprite[j][i].children[0].texture = card.cost ? ui.getBasicTextImage(card.cost, 11, card.upped ? "#000" : "#fff", ui.maybeLightenStr(card)) : gfx.nopic;
+					handsprite[j][i].children[0].texture = card.cost ? ui.getTextImage(card.cost + ":" + card.costele, 11, card.upped ? "#000" : "#fff", ui.maybeLightenStr(card)) : gfx.nopic;
 					handsprite[j][i].children[1].texture = ui.getBasicTextImage(card.name, 11, card.upped && handsprite[j][i].tint == 0xffffff ? "#000" : "#fff");
 				} else {
 					handsprite[j][i].children[0].texture = handsprite[j][i].children[1].texture = gfx.nopic;
@@ -737,7 +733,7 @@ function startMatch(game, foeDeck, spectate) {
 				drawStatus(sh, shiesprite[j]);
 			} else shiesprite[j].visible = false;
 			marksprite[j].className = "ico e"+pl.mark;
-			marktext[j].text = pl.markpower != 1 ? "x" + pl.markpower : "";
+			marksprite[j].textContent = pl.markpower != 1 ? pl.markpower : "";
 			for (var i = 1;i < 13;i++) {
 				quantatext[j][i-1].text = pl.quanta[i] || "";
 			}
