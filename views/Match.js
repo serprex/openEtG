@@ -6,6 +6,7 @@ var etg = require("../etg");
 var gfx = require("../gfx");
 var mkAi = require("../mkAi");
 var sock = require("../sock");
+var Game = require("../Game");
 var Cards = require("../Cards");
 var Effect = require("../Effect");
 var Skills = require("../Skills");
@@ -777,7 +778,7 @@ function deckPower(deck, amount) {
 	}else return deck;
 }
 module.exports = function(data, ai, spectate) {
-	var game = new etg.Game(data.seed, data.flip);
+	var game = new Game(data.seed, data.flip);
 	game.addData(data);
 	game.player1.maxhp = game.player1.hp;
 	game.player2.maxhp = game.player2.hp;

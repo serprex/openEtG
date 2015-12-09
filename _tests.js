@@ -2,6 +2,7 @@
 "use strict";
 var assert = require("assert");
 var etg = require("./etg");
+var Game = require("./Game");
 var Cards = require("./Cards");
 var Skills = require("./Skills");
 var etgutil = require("./etgutil");
@@ -36,7 +37,7 @@ M.test("Upped Alignment", function() {
 });
 M = new TestModule("Cards", {
 	beforeEach:function(){
-		this.game = new etg.Game(5489);
+		this.game = new Game(5489);
 		this.player1 = this.game.player1;
 		this.player2 = this.game.player2;
 		this.game.turn = this.player1;
