@@ -902,6 +902,7 @@ innovation:function(c,t){
 	}
 },
 integrity:function(c,t){
+	var Thing = require("./Thing");
 	var tally = [0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0];
 	var shardSkills = [
 		["deadalive", "mutation", "paradox", "improve", "improve", "antimatter"],
@@ -961,7 +962,7 @@ integrity:function(c,t){
 		cast: shardCosts[active]
 	};
 	function addSkill(event, active){
-		etg.Thing.prototype.addactive.call(c.owner.shardgolem, event, etg.parseSkill(active));
+		Thing.prototype.addactive.call(c.owner.shardgolem, event, etg.parseSkill(active));
 	}
 	function addStatus(status, val){
 		c.owner.shardgolem.status[status] = val === undefined || val;

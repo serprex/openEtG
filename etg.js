@@ -2,6 +2,7 @@
 var ui = require("./ui");
 var Cards = require("./Cards");
 var Effect = require("./Effect");
+var Thing = require("./Thing");
 var Skills = require("./Skills");
 var etgutil = require("./etgutil");
 var skillText = require("./skillText");
@@ -102,24 +103,6 @@ function Card(type, info){
 	}else this.status = emptyStatus;
 	Object.freeze(this);
 }
-function Thing(card, owner){
-	this.owner = owner;
-	this.card = card;
-	this.cast = card.cast;
-	this.castele = card.castele;
-	if (this.status){
-		for (var key in this.status){
-			if (key in passives) delete this.status[key];
-		}
-		for (var key in card.status){
-			if (!this.status[key]) this.status[key] = card.status[key];
-		}
-	}else{
-		this.status = cloneStatus(card.status);
-		this.usedactive = true;
-	}
-	this.active = clone(card.active);
-}
 function Player(game){
 	this.game = game;
 	this.owner = this;
@@ -184,7 +167,6 @@ Object.defineProperty(Card.prototype, "shiny", { get: function() { return this.c
 var Chroma = 0, Entropy = 1, Death = 2, Gravity = 3, Earth = 4, Life = 5, Fire = 6, Water = 7, Light = 8, Air = 9, Time = 10, Darkness = 11, Aether = 12;
 var PillarEnum = 0, WeaponEnum = 1, ShieldEnum = 2, PermanentEnum = 3, SpellEnum = 4, CreatureEnum = 5;
 var MulliganPhase1 = 0, MulliganPhase2 = 1, PlayPhase = 2, EndPhase = 3;
-var passives = Object.freeze({ airborne: true, aquatic: true, nocturnal: true, voodoo: true, swarm: true, ranged: true, additive: true, stackable: true, token: true, poisonous: true, golem: true });
 var PlayerRng = Object.create(Player.prototype);
 PlayerRng.rng = Math.random;
 PlayerRng.upto = function(x){ return Math.floor(Math.random()*x); }
@@ -235,17 +217,6 @@ function cloneStatus(status){
 		}
 	}
 	return result;
-}
-function combineactive(a1, a2){
-	if (!a1){
-		return a2;
-	}
-	var combine = function(){
-		var v1 = a1.apply(null, arguments), v2 = a2.apply(null, arguments);
-		return v1 === undefined ? v2 : v2 === undefined ? v1 : v1 === true || v2 === true ? true : v1+v2;
-	}
-	combine.activename = a1.activename.concat(a2.activename);
-	return combine;
 }
 function isEmpty(obj){
 	for(var key in obj){
@@ -381,7 +352,6 @@ Card.prototype.info = function(){
 		return text.join("\n");
 	}
 }
-Thing.prototype.toString = function(){ return this.card.name; }
 CardInstance.prototype.toString = function() { return "::" + this.card.name; }
 Player.prototype.toString = function(){ return this == this.game.player1?"p1":"p2"; }
 Card.prototype.toString = function(){ return this.code; }
@@ -566,24 +536,6 @@ Player.prototype.endturn = function(discard) {
 	this.foe.proc("turnstart");
 	this.game.updateExpectedDamage();
 }
-Thing.prototype.proc = function(name, param) {
-	function proc(c){
-		var a;
-		if (c && (a = c.active[name])){
-			a.call(null, c, this, param);
-		}
-	}
-	if (this.active && this.active["own" + name]){
-		this.active["own" + name].call(null, this, this, param);
-	}
-	for(var i=0; i<2; i++){
-		var pl = i==0?this.owner:this.owner.foe;
-		pl.creatures.forEach(proc, this);
-		pl.permanents.forEach(proc, this);
-		proc.call(this, pl.shield);
-		proc.call(this, pl.weapon);
-	}
-}
 Player.prototype.drawcard = function(drawstep) {
 	if (this.hand.length<8){
 		if (this.deck.length>0){
@@ -635,20 +587,6 @@ Weapon.prototype.info = function(){
 }
 Shield.prototype.info = function(){
 	return infocore(this, this.truedr() + "DR");
-}
-Thing.prototype.info = function(){
-	return skillText(this);
-}
-Thing.prototype.activetext = function(){
-	if (this.active.cast) return casttext(this.cast, this.castele) + this.active.cast.activename[0];
-	var order = ["hit", "death", "owndeath", "buff", "destroy", "draw", "play", "spell", "dmg", "shield", "postauto"];
-	for(var i=0; i<order.length; i++){
-		if (this.active[order[i]]) return order[i] + " " + this.active[order[i]].activename.join(" ");
-	}
-	return this.active.auto ? this.active.auto.activename.join(" ") : "";
-}
-Thing.prototype.place = function(fromhand){
-	this.proc("play", fromhand);
 }
 Creature.prototype.place = function(fromhand){
 	if (place(this.owner.creatures, this)){
@@ -744,17 +682,6 @@ Player.prototype.buffhp = Creature.prototype.buffhp = function(x) {
 		}
 	}
 	this.dmg(-x);
-}
-Thing.prototype.delay = function(x){
-	this.status.delayed += x;
-	if (this.status.voodoo) this.owner.foe.delay(x);
-}
-Thing.prototype.freeze = function(x){
-	if (!this.active.ownfreeze || this.active.ownfreeze(this)){
-		Effect.mkText("Freeze", this);
-		if (x > this.status.frozen) this.status.frozen = x;
-		if (this.status.voodoo) this.owner.foe.freeze(x);
-	}
 }
 Creature.prototype.spelldmg = function(x, dontdie){
 	if (this.active.spelldmg && this.active.spelldmg(this, undefined, x)) return 0;
@@ -880,33 +807,6 @@ Weapon.prototype.calcBonusAtk = Creature.prototype.calcBonusAtk = function(){
 Creature.prototype.calcBonusHp = function(){
 	return this.calcCore(isEclipseCandidate, "nightfall") + this.calcCore2(isWhetCandidate, "whetstone");
 }
-Thing.prototype.lobo = function(){
-	for (var key in this.active){
-		this.active[key].activename.forEach(function(name){
-			if (!parseSkill(name).passive){
-				this.rmactive(key, name);
-			}
-		}, this);
-	}
-}
-Thing.prototype.mutantactive = function(){
-	this.lobo();
-	var abilities = ["hatch","freeze","burrow","destroy","steal","dive","mend","paradox","lycanthropy","growth 1","infect","gpull","devour","mutation","growth 2","ablaze","poison 1","deja","endow","guard","mitosis"];
-	var index = this.owner.upto(abilities.length+2)-2;
-	if (index<0){
-		this.status[["momentum","immaterial"][~index]] = true;
-	}else{
-		var active = Skills[abilities[index]];
-		if (abilities[index] == "growth 1"){
-			this.addactive("death", active);
-		}else{
-			this.active.cast = active;
-			this.cast = this.owner.uptoceil(2);
-			this.castele = this.card.element;
-			return true;
-		}
-	}
-}
 // adrtbl is a bitpacked 2d array
 // [[0,0,0,0],[1,1,1],[2,2,2],[3,3,3],[3,2],[4,2],[4,2],[5,3],[6,3],[3],[4],[4],[4],[5],[5],[5]]
 var adrtbl = new Uint16Array([4, 587, 1171, 1755, 154, 162, 162, 234, 242, 25, 33, 33, 33, 41, 41, 41]);
@@ -967,49 +867,6 @@ Shield.prototype.remove = function() {
 	if (this.owner.shield != this)return -1;
 	this.owner.shield = undefined;
 	return 0;
-}
-Thing.prototype.isMaterial = function(type) {
-	return (type ? this instanceof type : !(this instanceof CardInstance) && !(this instanceof Player)) && !this.status.immaterial && !this.status.burrowed;
-}
-Thing.prototype.addactive = function(type, active){
-	this.active[type] = combineactive(this.active[type], active);
-}
-Thing.prototype.rmactive = function(type, activename){
-	if (!this.active[type])return;
-	var actives = this.active[type].activename, idx;
-	if (~(idx=actives.indexOf(activename))){
-		if (actives.length == 1){
-			delete this.active[type];
-		} else {
-			this.active[type] = actives.reduce(function(previous, current, i){
-				return i == idx ? previous : combineactive(previous, Skills[current]);
-			}, null);
-		}
-	}
-}
-Thing.prototype.hasactive = function(type, activename) {
-	return (type in this.active) && ~this.active[type].activename.indexOf(activename);
-}
-Thing.prototype.canactive = function() {
-	return this.owner.game.turn == this.owner && this.active.cast && !this.usedactive && !this.status.delayed && !this.status.frozen && this.owner.canspend(this.castele, this.cast);
-}
-Thing.prototype.castSpell = function(t, active, nospell){
-	var data = {tgt: t, active: active};
-	this.proc("prespell", data);
-	if (data.evade){
-		if (t) Effect.mkText("Evade", t);
-	}else{
-		active(this, data.tgt);
-		if (!nospell) this.proc("spell", data);
-	}
-}
-Thing.prototype.useactive = function(t) {
-	if (this.owner.spend(this.castele, this.cast)){
-		this.usedactive = true;
-		if (this.status.neuro) this.addpoison(1);
-		this.castSpell(t, this.active.cast);
-		this.owner.game.updateExpectedDamage();
-	}
 }
 Creature.prototype.attackCreature = Weapon.prototype.attackCreature = function(target, trueatk){
 	if (trueatk === undefined) trueatk = this.trueatk();
@@ -1179,7 +1036,6 @@ exports.Weapon = Weapon;
 exports.Shield = Shield;
 exports.Permanent = Permanent;
 exports.Creature = Creature;
-exports.passives = passives;
 exports.isEmpty = isEmpty;
 exports.iterSplit = iterSplit;
 exports.filtercards = filtercards;

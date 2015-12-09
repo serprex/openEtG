@@ -1,6 +1,7 @@
 "use strict";
 var etg = require("./etg");
 var Cards = require("./Cards");
+var Thing = require("./Thing");
 var data = {
 	ablaze:"Gain 2|0",
 	abomination:"Amiable to mutation",
@@ -356,7 +357,7 @@ function auraText(tgts, bufftext, upbufftext){
 }
 var statusData = {
 	cloak:"Cloaks own field",
-	charges:function(c,inst){return c !== inst || etg.Thing.prototype.hasactive.call(c, "auto", "losecharge") || c.status.charges == 1?"":"Enter with " + c.status.charges + (c.status.stackable?" stacks":" charges")},
+	charges:function(c,inst){return c !== inst || Thing.prototype.hasactive.call(c, "auto", "losecharge") || c.status.charges == 1?"":"Enter with " + c.status.charges + (c.status.stackable?" stacks":" charges")},
 	flooding:"Non aquatic creatures past first five creature slots die on turn end. Consumes 1:7. Unique",
 	freedom:"",
 	nightfall:auraText("Nocturnal creatures", "1|1", "2|1"),

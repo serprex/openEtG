@@ -18,12 +18,6 @@ function Game(seed, flip){
 }
 module.exports = Game;
 
-var etg = require("./etg");
-var etgutil = require("./etgutil");
-var Cards = require("./Cards");
-var Effect = require("./Effect");
-var MersenneTwister = require("./MersenneTwister");
-
 Game.prototype.clone = function(){
 	var obj = Object.create(Game.prototype);
 	obj.rng = this.rng.clone();
@@ -133,3 +127,9 @@ Game.prototype.getTarget = function(src, active, cb) {
 		}
 	} else cb();
 }
+
+var etg = require("./etg");
+var etgutil = require("./etgutil");
+var Cards = require("./Cards");
+var Effect = require("./Effect");
+var MersenneTwister = require("./MersenneTwister");
