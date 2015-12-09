@@ -4,6 +4,7 @@ var ui = require("../ui");
 var dom = require("../dom");
 var etg = require("../etg");
 var gfx = require("../gfx");
+var svg = require("../svg");
 var chat = require("../chat");
 var sock = require("../sock");
 var mkAi = require("../mkAi");
@@ -214,9 +215,12 @@ module.exports = function(nymph) {
 		dom.add(arenabox, [20, 100, ["Arena Info", arenaInfo, mkSetTip("Check how your arena decks are doing")]]);
 		var showcard = nymph || (!sock.user.daily && sock.user.ocard);
 		if (showcard) {
-			var oracle = new PIXI.Sprite(gfx.getArt(showcard));
-			oracle.position.set(92, 340);
-			stage.view = oracle;
+			var oracle = dom.svg();
+			oracle.setAttribute("width", "128");
+			oracle.setAttribute("height", "256");
+			oracle.style.pointerEvents = "none";
+			dom.add(div, [92, 340, oracle]);
+			dom.svgToSvg(oracle, svg.card(showcard));
 			if (sock.user.daily == 0) sock.user.daily = 128;
 		}
 	}
