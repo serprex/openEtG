@@ -14,10 +14,10 @@ exports.card = function(code){
 	var ret="", x=16, y=0;
 	var card = Cards.Codes[code];
 	var textColor = card.upped ? "" : " fill='#fff'";
-	ret += "<image xlink:href='../assets/cardBacks.png' x='"+(card.element+card.upped*13)*-128+"' width='3328' height='256'/><text x='2' y='15'"+textColor+">"+card.name+"</text>" + (card.cost ? "<text x='108' y='15'"+textColor+">"+card.cost+"</text>" : "");
-	ret += "<image xlink:href='../Cards/"+etgutil.asShiny(etgutil.asUpped(code, false), false).toString(32)+".png' y='20' width='128' height='128'/>";
+	ret += "<image xlink:href='../assets/cardBacks.png' x='"+(card.element+card.upped*13)*-128+"' width='3328' height='256'/><text x='2' y='15'"+textColor+">"+card.name+"</text>" + (card.cost ? "<text x='108' y='15'"+textColor+">"+card.cost+"</text>" : "") +
+		"<image xlink:href='../Cards/"+etgutil.asShiny(etgutil.asUpped(code, false), false).toString(32)+".png' y='20' width='128' height='128'/>";
 	var info = card.info();
-	ret += "<foreignObject x='2' y='140' width='124' height='116' requiredExtensions='http://www.w3.org/1999/xhtml'><body xmlns='http://www.w3.org/1999/xhtml'><p style='font-family:Dosis;font-size:10px;white-space:pre-wrap'>" + info.replace(/\|/g, " | ").replace(/(\d\d?):(\d+)/g, "$1<span class='ico ce$2'></span>") + "</p></body></foreignObject>";
+	ret += "<foreignObject x='2' y='140' width='124' height='116' requiredExtensions='http://www.w3.org/1999/xhtml'><body xmlns='http://www.w3.org/1999/xhtml'><p style='font-family:Dosis;font-size:10px;white-space:pre-wrap'>" + info.replace(/\|/g, " | ").replace(/(\d\d?):(\d+)/g, "$1<span class='ico ce$2'></span>") + (card.rarity?"<span class='ico r" + card.rarity + "' style='position:absolute;left:68px;top:88px'></span>" : "") + "<span class='ico t" + card.type + "' style='position:absolute;left:96px;top:88px'></span>" + "</p></body></foreignObject>";
 	return prefix+" height='256' width='128'>"+cssPrefix+"]]></style>"+ret+"</svg>";
 }
 exports.deck = function(deck){
