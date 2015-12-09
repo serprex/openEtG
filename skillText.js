@@ -227,7 +227,7 @@ var data = {
 	plague:"Poison target player's creatures. Removes cloak",
 	platearmor:["Target gains 0|4", "Target gains 0|6"],
 	poison:function(x){
-		x += "Apply "+(x === "1" ? "" : " ") + "poison "
+		x = "Apply "+(x === "1" ? "" : x + " ") + "poison ";
 		return {
 			hit:x+"on hit. Throttled",
 			cast:x+"to foe",

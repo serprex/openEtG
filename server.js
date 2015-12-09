@@ -26,18 +26,17 @@ function stop(){
 }
 process.on("SIGTERM", stop).on("SIGINT", stop);
 function activeUsers(){
-	var activeusers = [], userCount = 0;
+	var activeusers = [];
 	for (var name in Us.socks){
 		var sock = Us.socks[name];
 		if (sock && sock.readyState == 1){
-			userCount++;
 			if (sock.meta.offline) continue;
 			if (sock.meta.afk) name += " (afk)";
 			else if (sock.meta.wantpvp) name += "\xb6";
 			activeusers.push(name);
 		}
 	}
-	var otherCount = wss.clients.length - userCount;
+	var otherCount = wss.clients.length - activeusers.length;
 	activeusers.push(otherCount + " lurker" + (otherCount == 1 ? "" : "s"));
 	return activeusers;
 }
