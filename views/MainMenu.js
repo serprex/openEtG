@@ -11,6 +11,7 @@ var mkAi = require("../mkAi");
 var Cards = require("../Cards");
 var etgutil = require("../etgutil");
 var options = require("../options");
+var RngMock = require("../RngMock");
 var userutil = require("../userutil");
 var tipjar = [
 	"Each card in your booster pack has a 50% chance of being from the chosen element",
@@ -99,7 +100,7 @@ module.exports = function(nymph) {
 			tinfo.text = text + ".";
 		}
 	}
-	var tipNumber = etg.PlayerRng.upto(tipjar.length);
+	var tipNumber = RngMock.upto(tipjar.length);
 
 	function resetTip(event) {
 		if (event.target.tagName.match(/^(DIV|CANVAS|HTML)$/)) tinfo.text = sock.user ? tipjar[tipNumber] + "." : "To register, just type desired username & password in the fields to the right, then click 'Login'.";

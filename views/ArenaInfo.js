@@ -15,7 +15,7 @@ module.exports = function(data) {
 			if (y) info.card = etgutil.asUpped(info.card, true);
 			var mark, i = 0, adeck = "05" + info.card.toString(32) + info.deck;
 			etgutil.iterdeck(adeck, function(code){
-				var ismark = etg.fromTrueMark(code);
+				var ismark = etgutil.fromTrueMark(code);
 				if (~ismark){
 					mark = ismark;
 					return;

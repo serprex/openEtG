@@ -1,8 +1,10 @@
 "use strict";
 var etg = require("../etg");
+var util = require("../util");
 var Cards = require("../Cards");
 var Skills = require("../Skills");
 var etgutil = require("../etgutil");
+var RngMock = require("../RngMock");
 
 var hasBuff = new Uint16Array([5125,5318,8230,5306,5730,5721,5807,6115,6218,6230,7106,7125,7306,7318,7730,7721,7807,8115,8218,9015]);
 var hasPoison = new Uint16Array([5218,5219,5225,7208,5208,5210,5214,5212,5512,5518,5507,5701,7218,7210,7225,7214,7219,7212,7512,7518,7507,7701,7710]);
@@ -12,7 +14,7 @@ var hasLight = new Uint16Array([5811,5820,5908,7811,7801,7820]);
 function scorpion(card, deck){
 	var isDeath = card.isOf(Cards.Deathstalker); // Scan for Nightfall
 	for(var i=0; i<deck.length; i++){
-		if (~etg.typedIndexOf(hasBuff, deck[i]) ||
+		if (~util.typedIndexOf(hasBuff, deck[i]) ||
 			(isDeath && (deck[i] == 6106 || deck[i] == 8106))) return true;
 	}
 }
@@ -34,27 +36,27 @@ var filters = {
 	},
 	5418:function tunneling(card, deck){
 		for(var i=0; i<deck.length; i++){
-			if (~etg.typedIndexOf(hasBurrow, deck[i])) return true;
+			if (~util.typedIndexOf(hasBurrow, deck[i])) return true;
 		}
 	},
 	5430:function integrity(card, deck){
 		var shardCount=0;
 		for(var i=0; i<deck.length; i++){
-			if (~etg.typedIndexOf(etg.ShardList, deck[i]) && ++shardCount>3) return true;
+			if (~util.typedIndexOf(etg.ShardList, deck[i]) && ++shardCount>3) return true;
 		}
 	},
 	5812:function hope(card, deck){
 		for(var i=0; i<deck.length; i++){
-			if (~etg.typedIndexOf(hasLight, deck[i])) return true;
+			if (~util.typedIndexOf(hasLight, deck[i])) return true;
 		}
 	},
 	6013:scorpion,
 	6015:function neurotoxin(card, deck){
 		for(var i=0; i<deck.length; i++){
-			if (~etg.typedIndexOf(hasPoison, deck[i])) return true;
+			if (~util.typedIndexOf(hasPoison, deck[i])) return true;
 			if (deck[i] == 6112 || deck[i] == 8112){
 				for(var i=0; i<deck.length; i++){
-					if (~etg.typedIndexOf(canInfect, deck[i])) return true;
+					if (~util.typedIndexOf(canInfect, deck[i])) return true;
 				}
 			}
 		}
@@ -65,7 +67,7 @@ module.exports = function(uprate, markpower, maxRarity) {
 		return uprate ? etgutil.asUpped(x, Math.random() < uprate) : x;
 	}
 	var cardcount = {};
-	var eles = new Uint8Array([etg.PlayerRng.uptoceil(12), etg.PlayerRng.uptoceil(12)]), ecost = new Float32Array(13);
+	var eles = new Uint8Array([RngMock.uptoceil(12), RngMock.uptoceil(12)]), ecost = new Float32Array(13);
 	for (var i = 0;i < 13;i++) {
 		ecost[i] = 0;
 	}
@@ -75,7 +77,7 @@ module.exports = function(uprate, markpower, maxRarity) {
 	for(var j=0; j<2; j++){
 		var ele = eles[j];
 		for (var i = 20-j*10; i>0; i--) {
-			var card = etg.PlayerRng.randomcard(Math.random() < uprate, function(x) {
+			var card = RngMock.randomcard(Math.random() < uprate, function(x) {
 				return x.element == ele && x.type != etg.PillarEnum && x.rarity <= maxRarity && cardcount[x.code] != 6 &&
 					!(x.type == etg.ShieldEnum && anyshield == 3) && !(x.type == etg.WeaponEnum && anyweapon == 3) && !x.isOf(Cards.Give) && !x.isOf(Cards.Precognition);
 			});
@@ -157,6 +159,6 @@ module.exports = function(uprate, markpower, maxRarity) {
 			}
 		}
 	}
-	deck.push(etg.toTrueMark(eles[1]));
+	deck.push(etgutil.toTrueMark(eles[1]));
 	return etgutil.encodedeck(deck);
 }

@@ -1,8 +1,9 @@
 "use strict";
 var px = require("../px");
+var ui = require("../ui");
 var dom = require("../dom");
-var etg = require("../etg");
 var sock = require("../sock");
+var RngMock = require("../RngMock");
 module.exports = function() {
 	var eledesc = dom.text("Select your starter element");
 	eledesc.style.width = "700px";
@@ -29,10 +30,10 @@ module.exports = function() {
 			"Start without any cards, but gain several extra boosters instead!",
 			"Start with a random element!"
 		];
-	etg.eleNames.forEach(function(name, i){
+	ui.eleNames.forEach(function(name, i){
 		if (i < 1 || i > 14) return;
 		var b = dom.icob(i < 13 ? i : i == 13 ? 14 : 13, function() {
-			var msg = { u: sock.user.name, a: sock.user.auth, e: i ==14 ? etg.PlayerRng.uptoceil(12) : i };
+			var msg = { u: sock.user.name, a: sock.user.auth, e: i ==14 ? RngMock.uptoceil(12) : i };
 			sock.user = undefined;
 			sock.emit("inituser", msg);
 		});

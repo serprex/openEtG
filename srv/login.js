@@ -6,6 +6,7 @@ var Us = require("./Us");
 var etg = require("../etg");
 var aiDecks = require("../Decks");
 var etgutil = require("../etgutil");
+var RngMock = require("../RngMock");
 var userutil = require("../userutil");
 module.exports = function(sockEmit){
 	function loginRespond(socket, user, pass, authkey){
@@ -29,7 +30,7 @@ module.exports = function(sockEmit){
 				if (user.oracle < day){
 					user.oracle = day;
 					var ocardnymph = Math.random() < .03;
-					var card = etg.PlayerRng.randomcard(false,
+					var card = RngMock.randomcard(false,
 						x => x.type != etg.PillarEnum && ((x.rarity != 5) ^ ocardnymph) && x.code != user.ocard);
 					var ccode = etgutil.asShiny(card.code, card.rarity == 5);
 					if (card.rarity > 1) {

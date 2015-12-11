@@ -1,5 +1,6 @@
 "use strict";
 var etg = require("./etg");
+var Card = require("./Card");
 var Cards = require("./Cards");
 var Thing = require("./Thing");
 var data = {
@@ -377,7 +378,7 @@ function processEntry(c, event, entry){
 		event in entry ? processEntry(c, event, entry[event]) : "";
 }
 function asCard(c){
-	return c instanceof etg.Card?c:c.card;
+	return c instanceof Card ? c : c.card;
 }
 function pushEntry(list, c, event, entry){
 	var x = processEntry(c, event, entry);
@@ -389,7 +390,7 @@ function getDataFromName(name){
 	return ~spidx ? (data[name] = data[name.slice(0,spidx)](name.slice(spidx+1))) : data[name];
 }
 module.exports = function(c, event){
-	if (c instanceof etg.Card && c.type == etg.SpellEnum){
+	if (c instanceof Card && c.type == etg.SpellEnum){
 		var entry = getDataFromName(c.active.cast.activename[0]);
 		return processEntry(c, "cast", entry);
 	}else{
@@ -410,7 +411,7 @@ module.exports = function(c, event){
 				var entry = getDataFromName(name);
 				if (entry === undefined) return;
 				pushEntry(ret, c, key, entry);
-				if (key == "cast") ret[ret.length-1] = etg.casttext(c.cast, c.castele) + " " + ret[ret.length-1];
+				if (key == "cast") ret[ret.length-1] = c.cast + ":" + c.castele + " " + ret[ret.length-1];
 			});
 		}
 		return ret.join("\n");

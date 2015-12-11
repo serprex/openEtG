@@ -148,7 +148,6 @@ function artFactory(realcb){
 		return cache[code] || cb(artimagecache[code]);
 	}
 }
-var getArt = artFactory(makeArt);
 function getSlotImage(card, code){
 	if (code in caimgcache) return caimgcache[code];
 	else{
@@ -236,7 +235,7 @@ if (typeof PIXI !== "undefined"){
 	exports.getPermanentImage = exports.getCreatureImage = getInstImage(.5);
 	exports.getHandImage = getInstImage(.5);
 	exports.getWeaponShieldImage = getInstImage(5/8);
-	exports.getArt = getArt;
+	exports.getArt = artFactory(makeArt);
 	exports.getCardImage = getCardImage;
 	exports.getAbilityImage = getAbilityImage;
 	exports.Text = Text;

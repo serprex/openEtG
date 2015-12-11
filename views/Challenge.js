@@ -79,7 +79,7 @@ module.exports = function(pvp) {
 		text.style.pointerEvents = "none";
 		return text;
 	}
-	var deck = etgutil.decodedeck(sock.getDeck()), mark = etg.fromTrueMark(deck.pop());
+	var deck = etgutil.decodedeck(sock.getDeck()), mark = etgutil.fromTrueMark(deck.pop());
 	var view = new DeckDisplay(60, null, null, deck);
 	view.renderDeck(0);
 	var foename = dom.input("Challenge", "foename", true, maybeChallenge),

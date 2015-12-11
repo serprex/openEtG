@@ -6,6 +6,7 @@ var Game = require("./Game");
 var Cards = require("./Cards");
 var Skills = require("./Skills");
 var etgutil = require("./etgutil");
+var util = require("./util");
 Cards.loadcards();
 function initHand(pl){
 	for(var i=1; i<arguments.length; i++){
@@ -186,9 +187,9 @@ M.test("Hope", function() {
 });
 M.test("Lobotomize", function() {
 	var dev = new etg.Creature(Cards.Devourer, this.player1);
-	assert.ok(!etg.isEmpty(dev.active), "Skills");
+	assert.ok(!util.isEmpty(dev.active), "Skills");
 	Skills.lobotomize(dev, dev);
-	assert.ok(etg.isEmpty(dev.active), "No more");
+	assert.ok(util.isEmpty(dev.active), "No more");
 });
 M.test("Obsession", function() {
 	initHand(this.player1, Cards.GhostofthePast, Cards.GhostofthePast, Cards.GhostofthePast, Cards.GhostofthePast, Cards.GhostofthePast, Cards.GhostofthePast, Cards.GhostofthePast, Cards.GhostofthePast);

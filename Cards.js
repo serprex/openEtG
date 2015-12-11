@@ -19,10 +19,10 @@ function parseCsv(type, data){
 			if (cardcode in exports.Codes){
 				console.log(cardcode + " duplicate " + cardinfo.Name + " " + exports.Codes[cardcode].name);
 			}else{
-				exports.Codes[cardcode] = new etg.Card(type, cardinfo);
+				exports.Codes[cardcode] = new Card(type, cardinfo);
 				if (cardcode < 7000) exports[cardinfo.Name.replace(/\W/g, "")] = exports.Codes[cardcode];
 				cardinfo.Code = etgutil.asShiny(cardcode, true);
-				exports.Codes[cardinfo.Code] = new etg.Card(type, cardinfo);
+				exports.Codes[cardinfo.Code] = new Card(type, cardinfo);
 			}
 		});
 	}
@@ -91,10 +91,10 @@ var TargetFilters = {
 		return t.isMaterial(etg.Creature) && t.card.type == etg.CreatureEnum;
 	},
 	play:function(c, t){
-		return t instanceof etg.Player;
+		return t instanceof Player;
 	},
 	notplay:function(c, t){
-		return !(t instanceof etg.Player);
+		return !(t instanceof Player);
 	},
 	sing:function(c, t){
 		return t.isMaterial(etg.Creature) && t.active.cast != c.active.cast;
@@ -131,4 +131,6 @@ var TargetFilters = {
 	},
 };
 var etg = require("./etg");
+var Card = require("./Card");
+var Player = require("./Player");
 var etgutil = require("./etgutil");

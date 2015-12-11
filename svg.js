@@ -1,10 +1,7 @@
 "use strict";
-var etg = require("./etg");
+var ui = require("./ui");
 var Cards = require("./Cards");
 var etgutil = require("./etgutil");
-var elecols = [
-	"#a98", "#a59", "#768", "#963", "#654", "#5a0", "#c52", "#258", "#887", "#38d", "#ca2", "#333", "#5ac",
-	"#dcb", "#dbc", "#bac", "#cb9", "#ba9", "#ac7", "#da8", "#8ac", "#ccb", "#9be", "#ed8", "#999", "#ade"];
 var cssPrefix = "<style type='text/css'><![CDATA[@import url(http://fonts.googleapis.com/css?family=Dosis);text{font-family:Dosis;font-size:12px}";
 function eleChar(card){
 	return String.fromCharCode(97+card.element+(card.upped?13:0));
@@ -15,7 +12,7 @@ exports.card = function(code){
 	return "<svg xmlns='http://www.w3.org/2000/svg' xmlns:xlink='http://www.w3.org/1999/xlink' height='256' width='128'>"+cssPrefix+"]]></style><image xlink:href='../assets/cardBacks.png' x='"+(card.element+card.upped*13)*-128+"' width='3328' height='256'/><text x='2' y='15'"+textColor+">"+card.name+"</text>" + (card.cost ? "<text x='108' y='15'"+textColor+">"+card.cost+"</text>" : "") +
 		"<image xlink:href='../Cards/"+etgutil.asShiny(etgutil.asUpped(code, false), false).toString(32)+".png' y='20' width='128' height='128'/>" +
 		"<foreignObject x='2' y='140' width='124' height='116' requiredExtensions='http://www.w3.org/1999/xhtml'><body xmlns='http://www.w3.org/1999/xhtml'><p style='font-family:Dosis;font-size:10px;white-space:pre-wrap'>" +
-		card.info().replace(/\|/g, " | ").replace(/(\d\d?):(\d+)/g, "$1<span class='ico ce$2'></span>") +
+		card.info().replace(/\|/g, " | ").replace(/(\d\d?):(\d+)/g, "$1<span class='ico te$2'></span>") +
 		(card.rarity ? "<span class='ico r"+card.rarity+"' style='position:absolute;left:68px;top:88px'></span>" : "") +
 		"<span class='ico t"+card.type+"' style='position:absolute;left:96px;top:88px'></span></p></body></foreignObject></svg>";
 }
@@ -31,7 +28,7 @@ exports.deck = function(deck){
 		texts="", x=16, y=0, classes = {}, mark, paths = {}, suffix, pathsvg="";
 	etgutil.iterdeck(deck, function(code){
 		if (!(code in Cards.Codes)){
-			var ismark = etg.fromTrueMark(code);
+			var ismark = etgutil.fromTrueMark(code);
 			if (~ismark) mark = ismark;
 			return;
 		}
@@ -39,7 +36,7 @@ exports.deck = function(deck){
 		var elech = eleChar(card), elecls = (card.shiny?"A":"B") + " " + elech;
 		if (card.shiny) classes.A = "stroke:#daa520;stroke-width:.5";
 		else classes.B = "stroke:black;stroke-width:.5";
-		classes[elech] = "fill:"+elecols[card.element+(card.upped?13:0)];
+		classes[elech] = "fill:"+ui.maybeLightenStr(card);
 		var textColor = card.upped ? "" : " fill='#fff'";
 		if (!paths[elecls]) paths[elecls]="";
 		paths[elecls]+="M"+x+" "+y+"h100v16h-100";
@@ -55,8 +52,8 @@ exports.deck = function(deck){
 	}
 	if (mark !== undefined){
 		var cls = String.fromCharCode(97+mark);
-		classes[cls] = "fill:"+elecols[mark];
-		suffix = "<path class='"+cls+"' d='M0 0h16v160H0'/><text x='5' y='-4' transform='rotate(90)'"+(~[0,8,10,12].indexOf(mark)?"":" fill='#fff'")+">"+etg.eleNames[mark]+"</text></svg>";
+		classes[cls] = "fill:"+ui.strcols[mark];
+		suffix = "<path class='"+cls+"' d='M0 0h16v160H0'/><text x='5' y='-4' transform='rotate(90)'"+(~[0,8,10,12].indexOf(mark)?"":" fill='#fff'")+">"+ui.eleNames[mark]+"</text></svg>";
 	}else suffix = "</svg>"
 	return prefix+" height='160' width='"+(y?x+100:x)+"'>"+cssPrefix+classString()+"]]></style>"+pathsvg+texts+suffix;
 }

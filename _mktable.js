@@ -24,7 +24,7 @@ if (process.argv.length < 3){
 				if (x.code > last) last = x.code;
 			}
 		});
-		writetd(ofele.length, etg.eleNames[i], creas, perms, spels, "|", comm[2], comm[1], comm[0], last.toString(32), (last+2000).toString(32));
+		writetd(ofele.length, require("./ui").eleNames[i], creas, perms, spels, "|", comm[2], comm[1], comm[0], last.toString(32), (last+2000).toString(32));
 	}
 	write("[/table][/right]\n");
 }else{

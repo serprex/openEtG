@@ -395,7 +395,7 @@ destroy:function(c,t, dontsalvage, donttalk){
 	}
 },
 destroycard:function(c,t){
-	if (t instanceof etg.Player){
+	if (t instanceof Player){
 		if (!t.deck.length) t.game.setWinner(t.foe);
 		else t.deck.length--;
 	}else if (!t.owner.sanctuary){
@@ -422,7 +422,7 @@ die:function(c,t){
 	c.die();
 },
 disarm:function(c,t){
-	if (t instanceof etg.Player && t.weapon){
+	if (t instanceof Player && t.weapon){
 		Skills.unsummon(c, t.weapon);
 	}
 },
@@ -570,7 +570,7 @@ endow:function(c,t){
 	}
  	if (c.status.adrenaline > 1)
 		c.status.adrenaline = 1;
-	c.active = etg.clone(t.active);
+	c.active = util.clone(t.active);
 	if (c.active.cast == Skills.endow) {
 		delete c.active.cast;
 	}else{
@@ -634,7 +634,7 @@ fire:function(c,t){
 },
 firebolt:function(c,t){
 	t.spelldmg(3+Math.floor(c.owner.quanta[etg.Fire]/4));
-	if (t instanceof etg.Player){
+	if (t instanceof Player){
 		if (t.weapon){
 			t.weapon.status.frozen = 0;
 		}
@@ -658,7 +658,7 @@ flyself:function(c,t){
 flyingweapon:function(c,t){
 	var cr = new etg.Creature(t.card, t.owner);
 	cr.atk = t.atk;
-	cr.active = etg.clone(t.active);
+	cr.active = util.clone(t.active);
 	cr.cast = t.cast;
 	cr.castele = t.castele;
 	cr.status = etg.cloneStatus(t.status);
@@ -935,7 +935,7 @@ integrity:function(c,t){
 	var stat=c.card.upped?.5:0;
 	for(var i=c.owner.hand.length-1; ~i; i--){
 		var card = c.owner.hand[i].card;
-		if (etg.typedSome(etg.ShardList, function(x) { return x && card.isOf(Cards.Codes[x]); })){
+		if (util.typedSome(etg.ShardList, function(x) { return x && card.isOf(Cards.Codes[x]); })){
 			if (card.upped){
 				stat += .5;
 			}
@@ -1028,7 +1028,7 @@ livingweapon:function(c,t){
 	t.remove();
 	var w = new etg.Weapon(t.card, t.owner);
 	w.atk = t.atk;
-	w.active = etg.clone(t.active);
+	w.active = util.clone(t.active);
 	w.castele = t.castele;
 	w.cast = t.cast;
 	w.usedactive = t.usedactive;
@@ -1046,7 +1046,7 @@ locket: function(c, t) {
 	c.owner.spend(ele, ele > 0 ? -1 : -3);
 },
 locketshift:function(c,t){
-	c.status.mode = t instanceof etg.Player?t.mark:t.card.element;
+	c.status.mode = t instanceof Player?t.mark:t.card.element;
 },
 loot:function(c,t){
 	if (c.owner == t.owner && !c.hasactive("turnstart", "salvageoff")){
@@ -1089,7 +1089,7 @@ mend:function(c,t){
 	t.dmg(-10);
 },
 metamorph:function(c,t){
-	c.owner.mark = t instanceof etg.Player?t.mark:t.card.element;
+	c.owner.mark = t instanceof Player?t.mark:t.card.element;
 	c.owner.markpower++;
 },
 midas:function(c,t){
@@ -1394,7 +1394,7 @@ purify:function(c,t){
 	t.status.poison = t.status.poison < 0?t.status.poison-2:-2;
 	t.status.aflatoxin = false;
 	t.status.neuro = false;
-	if (t instanceof etg.Player){
+	if (t instanceof Player){
 		t.sosa = 0;
 	}
 },
@@ -1443,7 +1443,7 @@ rebirth:function(c,t){
 },
 reducemaxhp:function(c,t, dmg){
 	t.maxhp = Math.max(t.maxhp-dmg, 1);
-	if (t.maxhp > 500 && t instanceof etg.Player) t.maxhp = 500;
+	if (t.maxhp > 500 && t instanceof Player) t.maxhp = 500;
 	if (t.hp > t.maxhp) t.dmg(t.hp-t.maxhp);
 },
 regen:adrenathrottle(function(c,t){
@@ -1541,7 +1541,7 @@ scatterhand:function(c,t){
 	}
 },
 scramble:function(c,t){
-	if (t instanceof etg.Player && !t.sanctuary){
+	if (t instanceof Player && !t.sanctuary){
 		for (var i=0; i<9; i++){
 			if (t.spend(etg.Chroma, 1)){
 				t.spend(etg.Chroma, -1);
@@ -1561,7 +1561,7 @@ shtriga:function(c,t){
 	if (c.owner == t) c.status.immaterial = true;
 },
 silence:function(c,t){
-	if (t instanceof etg.Player){
+	if (t instanceof Player){
 		if (!t.sanctuary){
 			t.silence = true;
 		}
@@ -1741,7 +1741,7 @@ swave:function(c,t){
 		Effect.mkText("Death", t);
 		t.die();
 	}else{
-		if (t instanceof etg.Player && t.weapon && t.weapon.status.frozen){
+		if (t instanceof Player && t.weapon && t.weapon.status.frozen){
 			Skills.destroy(c, t.weapon);
 		}
 		Effect.mkText("-4", t);
@@ -1929,7 +1929,7 @@ wisdom:function(c,t){
 	}
 },
 yoink:function(c,t){
-	if (t instanceof etg.Player){
+	if (t instanceof Player){
 		Skills.foedraw(c);
 	}else if (!t.owner.sanctuary){
 		t.remove();
@@ -2050,5 +2050,7 @@ for(var key in Skills){
 	Skills[key].activename = [key];
 }
 var etg = require("./etg");
+var util = require("./util");
 var Cards = require("./Cards");
 var Effect = require("./Effect");
+var Player = require("./Player");

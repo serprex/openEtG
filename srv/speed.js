@@ -1,6 +1,6 @@
 "use strict";
 var deck = require("./deck");
-var etg = require("../etg");
+var Player = require("../Player");
 var etgutil = require("../etgutil");
 var mt = require("../MersenneTwister");
 module.exports = function(url, resolve, reject, stime){
@@ -8,7 +8,8 @@ module.exports = function(url, resolve, reject, stime){
 	for (var i=0; i<url.length; i++){
 		hash = hash*31 + url.charCodeAt(i) & 0x7FFFFFFF;
 	}
-	var prng = Object.create(etg.Player.prototype);
+	var prng = Object.create(Player.prototype);
+	prng.owner = prng;
 	prng.game = {rng: new mt(hash)};
 	var eles = new Uint8Array(12), cards = new Uint16Array(42);
 	for (var i=0; i<12; i++){
@@ -23,7 +24,7 @@ module.exports = function(url, resolve, reject, stime){
 			cards[i*7+j] = prng.randomcard(false, x => x.element == ele && x.type && cards.indexOf(x.code) == -1).code;
 		}
 	}
-	cards.sort(etg.codeCmp);
+	cards.sort(etgutil.codeCmp);
 	var code = "";
 	for (var i=0; i<cards.length; i++){
 		code += "01" + cards[i].toString(32);

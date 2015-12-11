@@ -9,6 +9,7 @@ var mkAi = require("../mkAi");
 var sock = require("../sock");
 var Cards = require("../Cards");
 var etgutil = require("../etgutil");
+var RngMock = require("../RngMock");
 var userutil = require("../userutil");
 var streak200 = new Uint8Array([10, 10, 15, 20, 15, 20]);
 module.exports = function(game, foeDeck) {
@@ -98,12 +99,12 @@ module.exports = function(game, foeDeck) {
 				if (game.cardreward === undefined && foeDeck) {
 					var winnable = foeDeck.filter(function(card){ return card.rarity > 0 && card.rarity < 4; }), cardwon;
 					if (winnable.length) {
-						cardwon = etg.PlayerRng.choose(winnable);
+						cardwon = RngMock.choose(winnable);
 						if (cardwon == 3 && Math.random() < .5)
-							cardwon = etg.PlayerRng.choose(winnable);
+							cardwon = RngMock.choose(winnable);
 					} else {
 						var elewin = foeDeaddck[Math.floor(Math.random() * foeDeck.length)];
-						cardwon = etg.PlayerRng.randomcard(elewin.upped, function(x) { return x.element == elewin.element && x.type != etg.PillarEnum && x.rarity <= 3; });
+						cardwon = RngMock.randomcard(elewin.upped, function(x) { return x.element == elewin.element && x.type != etg.PillarEnum && x.rarity <= 3; });
 					}
 					if (game.level !== undefined && game.level < 2) {
 						cardwon = cardwon.asUpped(false);

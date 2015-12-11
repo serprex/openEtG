@@ -5,6 +5,7 @@ var rooms = {};
 var etg = require("./etg");
 var Cards = require("./Cards");
 Cards.loadcards();
+var RngMock = require("./RngMock");
 var etgutil = require("./etgutil");
 var usercmd = require("./usercmd");
 var userutil = require("./userutil");
@@ -184,7 +185,7 @@ var userEvents = {
 			var cost = userutil.arenaCost(data.lv);
 			if (user.gold < cost)return;
 			user.gold -= cost;
-			var idx = etg.PlayerRng.upto(len);
+			var idx = RngMock.upto(len);
 			db.zrange("arena"+(data.lv?"1":""), idx, idx, (err, aname) => {
 				if (!aname || !aname.length){
 					console.log("No arena " + idx);
@@ -438,11 +439,11 @@ var userEvents = {
 				while (i == pack.rare[rarity-1]) rarity++;
 				var cardcode;
 				if (rarity == 5){
-					cardcode = etg.NymphList[data.element > 0 && data.element < 13 ? data.element : etg.PlayerRng.uptoceil(12)];
+					cardcode = etg.NymphList[data.element > 0 && data.element < 13 ? data.element : RngMock.uptoceil(12)];
 				}else{
 					var notFromElement = Math.random() > .5, bumprarity = rarity+(Math.random() < bumprate), card = undefined;
-					if (data.element < 13) card = etg.PlayerRng.randomcard(false, x => (x.element == data.element) ^ notFromElement && x.rarity == bumprarity);
-					if (!card) card = etg.PlayerRng.randomcard(false, x => x.rarity == bumprarity);
+					if (data.element < 13) card = RngMock.randomcard(false, x => (x.element == data.element) ^ notFromElement && x.rarity == bumprarity);
+					if (!card) card = RngMock.randomcard(false, x => x.rarity == bumprarity);
 					cardcode = card.code
 				}
 				newCards = etgutil.addcard(newCards, cardcode);
@@ -487,7 +488,7 @@ var sockEvents = {
 		var A = Math.min(data.A || 1, 99), X = data.X || etgutil.MAX_INT;
 		var sum = 0;
 		for(var i=0; i<A; i++){
-			sum += etg.PlayerRng.uptoceil(X);
+			sum += RngMock.uptoceil(X);
 		}
 		data.sum = sum;
 		broadcast(data);

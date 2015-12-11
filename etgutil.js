@@ -1,4 +1,5 @@
 "use strict";
+var Cards = require("./Cards");
 exports.MAX_INT = 4294967296;
 function encodeCount(count){
 	return count<=0?"00":count>=1023?"vv":(count<32?"0":"") + count.toString(32);
@@ -10,6 +11,22 @@ exports.asUpped = function(code, upped){
 }
 exports.asShiny = function(code, shiny){
 	return shiny ? (code|0x4000) : (code&0x3FFF);
+}
+exports.codeCmp = function(x, y){
+	var cx = Cards.Codes[exports.asShiny(x, false)], cy = Cards.Codes[exports.asShiny(y, false)];
+	return cx.upped - cy.upped || cx.element - cy.element || cx.cost - cy.cost || cx.type - cy.type || (cx.code > cy.code) - (cx.code < cy.code) || (x > y) - (x < y);
+}
+exports.cardCmp = function(x, y){
+	return exports.codeCmp(x.code, y.code);
+}
+exports.fromTrueMark = function(code){
+	return code >= 9010 && code <= 9022 ? code-9010 : -1;
+}
+exports.toTrueMark = function(n){
+	return n+9010;
+}
+exports.toTrueMarkSuffix = function(n){
+	return "01"+(n+9010).toString(32);
 }
 exports.iterdeck = function(deck, func){
 	var len = 0;

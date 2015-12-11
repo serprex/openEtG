@@ -1,8 +1,8 @@
 function Game(seed, flip){
 	this.rng = new MersenneTwister(seed);
 	this.phase = 0;
-	this.player1 = new etg.Player(this);
-	this.player2 = new etg.Player(this);
+	this.player1 = new Player(this);
+	this.player2 = new Player(this);
 	this.player1.foe = this.player2;
 	this.player2.foe = this.player1;
 	this.first = this.turn = (seed < etgutil.MAX_INT/2) === !flip ? this.player1 : this.player2;
@@ -97,7 +97,7 @@ Game.prototype.tgtToBits = function(x) {
 	if (x === undefined) {
 		return 0;
 	}
-	var bits = x instanceof etg.Player ? 1 :
+	var bits = x instanceof Player ? 1 :
 		x instanceof etg.Weapon ? 17 :
 		x instanceof etg.Shield ? 33 :
 		(x instanceof etg.Creature ? 2 : x instanceof etg.Permanent ? 4 : 5) | x.getIndex()<<4;
@@ -117,7 +117,7 @@ Game.prototype.getTarget = function(src, active, cb) {
 	if (targetingFilter) {
 		var game = this;
 		this.targeting = {
-			filter: function(t) { return (t instanceof etg.Player || t instanceof etg.CardInstance || t.owner == game.turn || t.status.cloak || !t.owner.isCloaked()) && targetingFilter(src, t); },
+			filter: function(t) { return (t instanceof Player || t instanceof etg.CardInstance || t.owner == game.turn || t.status.cloak || !t.owner.isCloaked()) && targetingFilter(src, t); },
 			cb: function(){
 				cb.apply(null, arguments);
 				game.targeting = null;
@@ -132,4 +132,5 @@ var etg = require("./etg");
 var etgutil = require("./etgutil");
 var Cards = require("./Cards");
 var Effect = require("./Effect");
+var Player = require("./Player");
 var MersenneTwister = require("./MersenneTwister");

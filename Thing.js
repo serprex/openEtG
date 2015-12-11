@@ -15,7 +15,7 @@ function Thing(card, owner){
 		this.status = etg.cloneStatus(card.status);
 		this.usedactive = true;
 	}
-	this.active = etg.clone(card.active);
+	this.active = util.clone(card.active);
 }
 module.exports = Thing;
 
@@ -43,7 +43,7 @@ Thing.prototype.info = function(){
 }
 var activetexts = ["hit", "death", "owndeath", "buff", "destroy", "draw", "play", "spell", "dmg", "shield", "postauto"];
 Thing.prototype.activetext = function(){
-	if (this.active.cast) return etg.casttext(this.cast, this.castele) + this.active.cast.activename[0];
+	if (this.active.cast) return this.cast + ":" + this.castele + this.active.cast.activename[0];
 	for(var i=0; i<activetexts.length; i++){
 		if (this.active[activetexts[i]])
 			return activetexts[i] + " " + this.active[activetexts[i]].activename.join(" ");
@@ -92,7 +92,7 @@ Thing.prototype.mutantactive = function(){
 	}
 }
 Thing.prototype.isMaterial = function(type) {
-	return (type ? this instanceof type : !(this instanceof etg.CardInstance) && !(this instanceof etg.Player)) && !this.status.immaterial && !this.status.burrowed;
+	return (type ? this instanceof type : !(this instanceof etg.CardInstance) && !(this instanceof Player)) && !this.status.immaterial && !this.status.burrowed;
 }
 function combineactive(a1, a2){
 	if (!a1){
@@ -145,8 +145,42 @@ Thing.prototype.useactive = function(t) {
 		this.owner.game.updateExpectedDamage();
 	}
 }
+Thing.prototype.rng = function(){
+	return this.owner.game.rng.real();
+}
+Thing.prototype.upto = function(x){
+	return Math.floor(this.owner.game.rng.rnd()*x);
+}
+Thing.prototype.uptoceil = function(x){
+	return Math.ceil((1-this.owner.game.rng.rnd())*x);
+}
+Thing.prototype.choose = function(x){
+	return x[this.upto(x.length)];
+}
+Thing.prototype.randomcard = function(upped, filter){
+	var keys = etg.filtercards(upped, filter);
+	return keys && keys.length && Cards.Codes[this.choose(keys)];
+}
+Thing.prototype.shuffle = function(array) {
+	var counter = array.length, temp, index;
+	while (counter--) {
+		index = this.upto(counter)|0;
+		temp = array[counter];
+		array[counter] = array[index];
+		array[index] = temp;
+	}
+	return array;
+}
+Thing.prototype.buffhp = function(x) {
+	var isPlayer = this instanceof require("./Player");
+	if (isPlayer && this.maxhp < 500) this.maxhp = Math.min(x, 500);
+	this.dmg(-x);
+}
 
 var etg = require("./etg");
+var util = require("./util");
+var Cards = require("./Cards");
 var Effect = require("./Effect");
+var Player = require("./Player");
 var Skills = require("./Skills");
 var skillText = require("./skillText");

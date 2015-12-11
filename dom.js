@@ -131,7 +131,9 @@ exports.text = function(text){
 				}else if (/^\d\d?:\d\d?$/.test(piece)) {
 					var parse = piece.split(":");
 					var num = parseInt(parse[0]);
-					if (num < 4) {
+					if (num == 0) {
+						this.appendChild(document.createTextNode("0"));
+					} else if (num < 4) {
 						for (var j = 0;j < num;j++) {
 							var sp = document.createElement("span");
 							sp.className = "ico ce"+parse[1];
@@ -153,11 +155,6 @@ exports.text = function(text){
 	});
 	ele.text = text;
 	return ele;
-}
-function createHtml(html){
-	var dummy = document.createElement("div");
-	dummy.innerHTML = html;
-	return dummy.firstChild;
 }
 exports.svg = function(){
 	return document.createElementNS("http://www.w3.org/2000/svg", "svg");

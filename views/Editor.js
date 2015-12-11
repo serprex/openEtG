@@ -20,7 +20,7 @@ module.exports = function(arena, ainfo, acard, startempty) {
 	}
 	function updateField(renderdeck){
 		if (deckimport){
-			deckimport.value = etgutil.encoderaw(decksprite.deck) + etg.toTrueMarkSuffix(editormark);
+			deckimport.value = etgutil.encoderaw(decksprite.deck) + etgutil.toTrueMarkSuffix(editormark);
 			deckimport.dispatchEvent(new Event("change"));
 		}
 	}
@@ -36,7 +36,7 @@ module.exports = function(arena, ainfo, acard, startempty) {
 	function processDeck() {
 		for (var i = decksprite.deck.length - 1;i >= 0;i--) {
 			if (!(decksprite.deck[i] in Cards.Codes)) {
-				var index = etg.fromTrueMark(decksprite.deck[i]);
+				var index = etgutil.fromTrueMark(decksprite.deck[i]);
 				if (~index) {
 					editormark = index;
 				}
@@ -45,7 +45,7 @@ module.exports = function(arena, ainfo, acard, startempty) {
 		}
 		marksprite.className = "ico e"+editormark;
 		if (decksprite.deck.length > 60) decksprite.deck.length = 60;
-		decksprite.deck.sort(etg.codeCmp);
+		decksprite.deck.sort(etgutil.codeCmp);
 		if (sock.user) {
 			cardsel.cardminus = cardminus = {};
 			for (var i = decksprite.deck.length - 1;i >= 0;i--) {
@@ -112,7 +112,7 @@ module.exports = function(arena, ainfo, acard, startempty) {
 		}
 	}
 	function saveDeck(force){
-		var dcode = etgutil.encoderaw(decksprite.deck) + etg.toTrueMarkSuffix(editormark);
+		var dcode = etgutil.encoderaw(decksprite.deck) + etgutil.toTrueMarkSuffix(editormark);
 		var olddeck = sock.getDeck();
 		if (decksprite.deck.length == 0){
 			sock.userExec("rmdeck", {name: sock.user.selectedDeck});
@@ -191,7 +191,7 @@ module.exports = function(arena, ainfo, acard, startempty) {
 				chat("35 cards required before submission", "System");
 				return;
 			}
-			var data = { d: etgutil.encoderaw(decksprite.deck.slice(5)) + etg.toTrueMarkSuffix(editormark), lv: aupped };
+			var data = { d: etgutil.encoderaw(decksprite.deck.slice(5)) + etgutil.toTrueMarkSuffix(editormark), lv: aupped };
 			for(var k in arattr){
 				data[k] = arattr[k];
 			}

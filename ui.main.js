@@ -1,11 +1,10 @@
 "use strict";
 var guestname, muteset = {}, muteall;
 var px = require("./px");
-var etg = require("./etg");
-var gfx = require("./gfx");
 var chat = require("./chat");
 var Cards = require("./Cards");
 var etgutil = require("./etgutil");
+var RngMock = require("./RngMock");
 var options = require("./options");
 var userutil = require("./userutil");
 var viewsLogin = require("./views/Login");
@@ -70,7 +69,7 @@ var sockEvents = {
 			var notlink = false;
 			for(var i=2; i<reres[0].length; i+=5){
 				var code = parseInt(reres[0].substr(i, 3), 32);
-				if (!(code in Cards.Codes) && etg.fromTrueMark(code) == -1){
+				if (!(code in Cards.Codes) && etgutil.fromTrueMark(code) == -1){
 					notlink = true;
 					break;
 				}
@@ -196,7 +195,7 @@ function maybeSendChat(e) {
 				var link = document.createElement("a");
 				link.href = "deck/" + deck;
 				link.target = "_blank";
-				link.className = "ico ce"+etg.fromTrueMark(parseInt(deck.slice(-3), 32));
+				link.className = "ico ce"+etgutil.fromTrueMark(parseInt(deck.slice(-3), 32));
 				span.appendChild(link);
 				span.appendChild(document.createTextNode(name+" "));
 				span.addEventListener("click", function(e){
@@ -250,7 +249,7 @@ function maybeSendChat(e) {
 				}
 				if (!data.msg.match(/^\s*$/)) sock.userEmit("chat", data);
 			}else{
-				var name = options.username || guestname || (guestname = (10000 + etg.PlayerRng.upto(89999) + ""));
+				var name = options.username || guestname || (guestname = (10000 + RngMock.upto(89999) + ""));
 				if (!msg.match(/^\s*$/)) sock.emit("guestchat", { msg: msg, u: name });
 			}
 		}else chat("Not a command: " + msg);

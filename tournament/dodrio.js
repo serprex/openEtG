@@ -22,7 +22,7 @@ module.exports = function(deck) {
 		}
 	}
 	for (var i = 0;i < elementList.length;i++) {
-		if (elementList[i] && elementList[i] < 6) return "You have too few " + etg.eleNames[i] + " cards";
+		if (elementList[i] && elementList[i] < 6) return "You have too few " + require("../ui").eleNames[i] + " cards";
 	}
 	if (eleCount < 3) return "Your deck contains too few elements (only " + eleCount + ")";
 	return "Legal";

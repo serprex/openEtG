@@ -1,5 +1,6 @@
 "use strict";
 var sock = require("./sock");
+var RngMock = require("./RngMock");
 var etgutil = require("./etgutil");
 //Quest data
 exports.necromancer = [
@@ -30,7 +31,7 @@ exports.spirit = [
 		You turn to face your assailant, apparently a sister of the maiden you fell earlier."},
 	{ deck: "0b606015ur025us035up025uu025v2035vb015uo025uv015v8025ul018pi", name: "Spirit of the Dark Maiden",
 	morph: function(card){
-		return require("./etg").PlayerRng.randomcard(card.upped, function(x){x.element == etg.Darkness && x.type == card.type});
+		return RngMock.randomcard(card.upped, function(x){x.element == etg.Darkness && x.type == card.type});
 	},
 	wintext: "As the maiden falls, your powers return to normal, and your allies settle back into their original forms.\
 		the shadows that gripped and drained your energies recede. Your strength returns to its former glory.\

@@ -6,6 +6,7 @@ var etg = require("../etg");
 var gfx = require("../gfx");
 var mkAi = require("../mkAi");
 var sock = require("../sock");
+var Card = require("../Card");
 var Game = require("../Game");
 var Cards = require("../Cards");
 var Effect = require("../Effect");
@@ -545,7 +546,7 @@ function startMatch(game, foeDeck, spectate) {
 		infobox.style.display = "none";
 		if (!cloakgfx.visible){
 			foeplays.children.forEach(function(foeplay){
-				if (foeplay.card instanceof etg.Card && px.hitTest(foeplay)) {
+				if (foeplay.card instanceof Card && px.hitTest(foeplay)) {
 					cardartcode = foeplay.card.code;
 				}
 			});
@@ -614,7 +615,7 @@ function startMatch(game, foeDeck, spectate) {
 			cancel.text = "";
 		}
 		foeplays.children.forEach(function(foeplay){
-			foeplay.texture = foeplay.card instanceof etg.Card ? gfx.getCardImage(foeplay.card.code) : gfx.getAbilityImage(foeplay.card);
+			foeplay.texture = foeplay.card instanceof Card ? gfx.getCardImage(foeplay.card.code) : gfx.getAbilityImage(foeplay.card);
 		});
 		foeplays.visible = !(cloakgfx.visible = game.player2.isCloaked());
 		fgfx.clear();
@@ -790,7 +791,7 @@ module.exports = function(data, ai, spectate) {
 			var idx;
 			if (code in Cards.Codes) {
 				pl.deck.push(Cards.Codes[code]);
-			} else if (~(idx = etg.fromTrueMark(code))) {
+			} else if (~(idx = etgutil.fromTrueMark(code))) {
 				pl.mark = idx;
 			}
 		});

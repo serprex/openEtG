@@ -1,8 +1,11 @@
 "use strict";
 var etg = require("./etg");
 var gfx = require("./gfx");
+var util = require("./util");
 var options = require("./options");
+var Player = require("./Player");;
 var Effect = require("./Effect");
+exports.eleNames = Object.freeze(["Chroma", "Entropy", "Death", "Gravity", "Earth", "Life", "Fire", "Water", "Light", "Air", "Time", "Darkness", "Aether", "Build your own", "Random"]);
 exports.elecols = new Uint32Array([
 	0xaa9988, 0xaa5599, 0x776688, 0x996633, 0x665544, 0x55aa00, 0xcc5522, 0x225588, 0x888877, 0x3388dd, 0xccaa22, 0x333333, 0x55aacc,
 	0xddccbb, 0xddbbcc, 0xbbaacc, 0xccbb99, 0xbbaa99, 0xaacc77, 0xddaa88, 0x88aacc, 0xccccbb, 0x99bbee, 0xeedd88, 0x999999, 0xaaddee]);
@@ -12,13 +15,12 @@ exports.maybeLighten = function(card){
 exports.maybeLightenStr = function(card){
 	return PIXI.utils.hex2string(exports.maybeLighten(card));
 }
-function fakepoint(x,y){
-	this.x = x;
-	this.y = y;
-}
 var Point;
 if (typeof PIXI === "undefined"){
-	Point = fakepoint;
+	Point = function(x,y){
+		this.x = x;
+		this.y = y;
+	};
 	Point.prototype.set = Point;
 }else Point = PIXI.math.Point;
 function reflectPos(obj) {
@@ -29,20 +31,16 @@ function creaturePos(j, i) {
 	var row = i < 8 ? 0 : i < 15 ? 1 : 2;
 	var column = row == 2 ? (i+1) % 8 : i % 8;
 	var p = new Point(151 + column * 79 + (row == 1 ? 79/2 : 0), 344 + row * 33);
-	if (j) {
-		reflectPos(p);
-	}
+	if (j) reflectPos(p);
 	return p;
 }
 function permanentPos(j, i) {
 	var p = new Point(140 + (i % 8) * 64  , 504 + Math.floor(i / 8) * 40);
-	if (j) {
-		reflectPos(p);
-	}
+	if (j) reflectPos(p);
 	return p;
 }
 function cardPos(j, i) {
-	return new Point((j ? 6 : 766) + 66*(i>3), (j ? 80 : 308) + 48 * (i&3));
+	return new Point((j ? 6 : 766) + 66*(i&1), (j ? 80 : 308) + 48 * (i>>1));
 }
 function tgtToPos(t) {
 	if (t instanceof etg.Creature) {
@@ -57,7 +55,7 @@ function tgtToPos(t) {
 		return p;
 	} else if (t instanceof etg.Permanent) {
 		return permanentPos(t.owner == t.owner.game.player2, t.getIndex());
-	} else if (t instanceof etg.Player) {
+	} else if (t instanceof Player) {
 		var p = new Point(50, 560);
 		if (t == t.owner.game.player2) reflectPos(p);
 		return p;
@@ -106,7 +104,7 @@ exports.getTextImage = function(text, size, color, bgcolor, width) {
 			return;
 		}
 		var idx = 0, endidx = 0, oldblock = "";
-		etg.iterSplit(text, " ", function(word){
+		util.iterSplit(text, " ", function(word){
 			var nextendidx = endidx + word.length + 1;
 			var newblock = text.slice(idx, nextendidx-1).replace(/\|/g, " | ");
 			if (width && x + ctx.measureText(newblock).width >= width){
@@ -142,7 +140,9 @@ exports.getTextImage = function(text, size, color, bgcolor, width) {
 			var parse = piece.split(":");
 			var num = parseInt(parse[0]);
 			var icon = gfx.e[parseInt(parse[1])];
-			if (num < 4) {
+			if (num == 0) {
+				pushText("0");
+			} else if (num < 4) {
 				pushIcon(icon, num);
 			}else{
 				setMode(1);

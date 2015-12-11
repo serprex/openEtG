@@ -1,7 +1,8 @@
 "use strict";
 var etg = require("../etg");
-var evalGameState = require("./eval");
 var Cards = require("../Cards");
+var Player = require("../Player");
+var evalGame = require("./eval");
 function getWorstCard(game){
 	var worstcard = 0, curEval = 2147483647, hash = {};
 	for (var i=0; i<8; i++){
@@ -10,7 +11,7 @@ function getWorstCard(game){
 		hash[code] = true;
 		var gclone = game.clone();
 		gclone.player2.hand[i].die();
-		var discvalue = evalGameState(gclone);
+		var discvalue = evalGame(gclone);
 		if (discvalue < curEval){
 			curEval = discvalue;
 			worstcard = i;
@@ -48,13 +49,13 @@ var afilter = {
 };
 function searchSkill(active, c, t){
 	var func = afilter[active.activename[0]];
-	return !func || t instanceof etg.Player || t.hasactive("prespell", "protectonce") || func(c, t);
+	return !func || t instanceof Player || t.hasactive("prespell", "protectonce") || func(c, t);
 }
 module.exports = function(game, previous) {
 	var currentEval, worstcard;
 	if (previous === undefined){
 		if (game.player2.hand.length < 8){
-			currentEval = evalGameState(game);
+			currentEval = evalGame(game);
 		}else{
 			var worst_eval = getWorstCard(game);
 			worstcard = worst_eval[0];
@@ -93,7 +94,7 @@ module.exports = function(game, previous) {
 					gameClone.bitsToTgt(cbits).useactive(gameClone.bitsToTgt(tbits));
 					var v, wc;
 					if (gameClone.player2.hand.length < 8){
-						v = evalGameState(gameClone);
+						v = evalGame(gameClone);
 					}else{
 						var worst_eval = getWorstCard(gameClone);
 						wc = worst_eval[0];
