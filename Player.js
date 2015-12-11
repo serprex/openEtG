@@ -121,7 +121,7 @@ Player.prototype.endturn = function(discard) {
 				if (p.status.flooding && !floodingPaidFlag){
 					floodingPaidFlag = true;
 					floodingFlag = true;
-					if (!this.spend(Water, 1)){
+					if (!this.spend(etg.Water, 1)){
 						this.permanents[i] = undefined;
 					}
 				}
@@ -273,3 +273,4 @@ Player.prototype.clone = function(game){
 }
 
 var etg = require("./etg");
+var Effect = require("./Effect");

@@ -4,7 +4,7 @@ var dom = require("../dom");
 var mkAi = require("../mkAi");
 var sock = require("../sock");
 var Decks = require("../Decks.json");
-var RngMock = require("./RngMock");
+var RngMock = require("../RngMock");
 var startMenu = require("./MainMenu");
 function mkDaily(type) {
 	if (type < 3) {
