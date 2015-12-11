@@ -1,3 +1,4 @@
+"use strict";
 function Game(seed, flip){
 	this.rng = new MersenneTwister(seed);
 	this.phase = 0;

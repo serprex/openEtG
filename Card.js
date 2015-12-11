@@ -1,3 +1,4 @@
+"use strict";
 function Card(type, info){
 	this.type = type;
 	this.element = parseInt(info.E);

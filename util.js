@@ -1,3 +1,4 @@
+"use strict";
 exports.iterSplit = function(src, str, func, thisObj){
 	for(var i=0;;i=j+str.length){
 		var j=src.indexOf(str, i);
