@@ -9,7 +9,8 @@ function eleChar(card){
 exports.card = function(code){
 	var card = Cards.Codes[code];
 	var textColor = card.upped ? "" : " fill='#fff'";
-	return "<svg xmlns='http://www.w3.org/2000/svg' xmlns:xlink='http://www.w3.org/1999/xlink' height='256' width='128'>"+cssPrefix+"]]></style><image xlink:href='../assets/cardBacks.png' x='"+(card.element+card.upped*13)*-128+"' width='3328' height='256'/><text x='2' y='15'"+textColor+">"+card.name+"</text>" + (card.cost ? "<text x='108' y='15'"+textColor+">"+card.cost+"</text>" : "") +
+	return "<svg xmlns='http://www.w3.org/2000/svg' xmlns:xlink='http://www.w3.org/1999/xlink' height='256' width='128'>"+cssPrefix +
+		"]]></style><image xlink:href='../assets/cardBacks.png' x='"+(card.element+card.upped*13)*-128+"' width='3328' height='256'/><text x='2' y='15'"+textColor+">"+card.name+"</text>" + (card.cost ? "<text x='108' y='15'"+textColor+">"+card.cost+"</text>" : "") +
 		"<image xlink:href='../Cards/"+etgutil.asShiny(etgutil.asUpped(code, false), false).toString(32)+".png' y='20' width='128' height='128'/>" +
 		"<foreignObject x='2' y='140' width='124' height='116' requiredExtensions='http://www.w3.org/1999/xhtml'><body xmlns='http://www.w3.org/1999/xhtml'><p style='font-family:Dosis;font-size:10px;white-space:pre-wrap'>" +
 		card.info().replace(/\|/g, " | ").replace(/(\d\d?):(\d+)/g, "$1<span class='ico te$2'></span>") +
@@ -34,8 +35,8 @@ exports.deck = function(deck){
 		}
 		var card = Cards.Codes[code];
 		var elech = eleChar(card), elecls = (card.shiny?"A":"B") + " " + elech;
-		if (card.shiny) classes.A = "stroke:#daa520;stroke-width:.5";
-		else classes.B = "stroke:black;stroke-width:.5";
+		if (card.shiny) classes.A = "stroke:#da2;stroke-width:.5";
+		else classes.B = "stroke:#000;stroke-width:.5";
 		classes[elech] = "fill:"+ui.maybeLightenStr(card);
 		var textColor = card.upped ? "" : " fill='#fff'";
 		if (!paths[elecls]) paths[elecls]="";

@@ -9,11 +9,14 @@ exports.eleNames = Object.freeze(["Chroma", "Entropy", "Death", "Gravity", "Eart
 exports.elecols = new Uint32Array([
 	0xaa9988, 0xaa5599, 0x776688, 0x996633, 0x665544, 0x55aa00, 0xcc5522, 0x225588, 0x888877, 0x3388dd, 0xccaa22, 0x333333, 0x55aacc,
 	0xddccbb, 0xddbbcc, 0xbbaacc, 0xccbb99, 0xbbaa99, 0xaacc77, 0xddaa88, 0x88aacc, 0xccccbb, 0x99bbee, 0xeedd88, 0x999999, 0xaaddee]);
+exports.strcols = [
+	'#a98', '#a59', '#768', '#963', '#654', '#5a0', '#c52', '#258', '#887', '#38d', '#ca2', '#333', '#5ac',
+	'#dcb', '#dbc', '#bac', '#cb9', '#ba9', '#ac7', '#da8', '#8ac', '#ccb', '#9be', '#ed8', '#999', '#ade'];
 exports.maybeLighten = function(card){
 	return exports.elecols[card.element+card.upped*13];
 }
 exports.maybeLightenStr = function(card){
-	return PIXI.utils.hex2string(exports.maybeLighten(card));
+	return exports.strcols[card.element+card.upped*13];
 }
 var Point;
 if (typeof PIXI === "undefined"){

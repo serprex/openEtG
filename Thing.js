@@ -1,4 +1,5 @@
-var passives = Object.freeze({ airborne: true, aquatic: true, nocturnal: true, voodoo: true, swarm: true, ranged: true, additive: true, stackable: true, token: true, poisonous: true, golem: true });
+"use strict"
+var passives = new Set(["airborne", "aquatic", "nocturnal", "voodoo", "swarm", "ranged", "additive", "stackable", "token", "poisonous", "golem"]);
 function Thing(card, owner){
 	this.owner = owner;
 	this.card = card;
@@ -6,7 +7,7 @@ function Thing(card, owner){
 	this.castele = card.castele;
 	if (this.status){
 		for (var key in this.status){
-			if (key in passives) delete this.status[key];
+			if (passives.has(key)) delete this.status[key];
 		}
 		for (var key in card.status){
 			if (!this.status[key]) this.status[key] = card.status[key];
