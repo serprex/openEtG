@@ -1,8 +1,38 @@
 "use strict";
+module.exports = function(c, event){
+	if (c instanceof Card && c.type == etg.SpellEnum){
+		var entry = getDataFromName(c.active.cast.activename[0]);
+		return processEntry(c, "cast", entry);
+	}else{
+		var ret = [], stext = [];
+		for(var key in c.status){
+			if (!c.status[key]) continue;
+			var entry = statusData[key];
+			if (entry === undefined) {
+				var text = (c.status[key] === true ? key : c.status[key] + key);
+				text = text.charAt(0).toUpperCase() + text.slice(1);
+				stext.push(text);
+			}
+			else pushEntry(ret, c, "", entry);
+		}
+		if (stext.length) ret.unshift(stext.join(", ") + ".");
+		for(var key in c.active){
+			c.active[key].activename.forEach(function(name){
+				var entry = getDataFromName(name);
+				if (entry === undefined) return;
+				pushEntry(ret, c, key, entry);
+				if (key == "cast") ret[ret.length-1] = c.cast + ":" + c.castele + " " + ret[ret.length-1];
+			});
+		}
+		return ret.join("\n");
+	}
+}
+
 var etg = require("./etg");
 var Card = require("./Card");
 var Cards = require("./Cards");
 var Thing = require("./Thing");
+
 var data = {
 	ablaze:"Gain 2|0",
 	abomination:"Amiable to mutation",
@@ -388,32 +418,4 @@ function getDataFromName(name){
 	if (name in data) return data[name];
 	var spidx = name.indexOf(" ");
 	return ~spidx ? (data[name] = data[name.slice(0,spidx)](name.slice(spidx+1))) : data[name];
-}
-module.exports = function(c, event){
-	if (c instanceof Card && c.type == etg.SpellEnum){
-		var entry = getDataFromName(c.active.cast.activename[0]);
-		return processEntry(c, "cast", entry);
-	}else{
-		var ret = [], stext = [];
-		for(var key in c.status){
-			if (!c.status[key]) continue;
-			var entry = statusData[key];
-			if (entry === undefined) {
-				var text = (c.status[key] === true ? key : c.status[key] + key);
-				text = text.charAt(0).toUpperCase() + text.slice(1);
-				stext.push(text);
-			}
-			else pushEntry(ret, c, "", entry);
-		}
-		if (stext.length) ret.unshift(stext.join(", ") + ".");
-		for(var key in c.active){
-			c.active[key].activename.forEach(function(name){
-				var entry = getDataFromName(name);
-				if (entry === undefined) return;
-				pushEntry(ret, c, key, entry);
-				if (key == "cast") ret[ret.length-1] = c.cast + ":" + c.castele + " " + ret[ret.length-1];
-			});
-		}
-		return ret.join("\n");
-	}
 }
