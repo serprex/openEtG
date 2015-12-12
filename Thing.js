@@ -173,10 +173,9 @@ Thing.prototype.shuffle = function(array) {
 	return array;
 }
 Thing.prototype.buffhp = function(x) {
-	var isPlayer = this instanceof require("./Player");
-	if (isPlayer && this.maxhp < 500) this.maxhp = Math.min(this.maxhp+x, 500);
+	if (this instanceof Player && this.maxhp <= 500) this.maxhp = Math.min(this.maxhp+x, 500);
 	else this.maxhp += x;
-	this.dmg(-x);
+	return this.dmg(-x);
 }
 
 var etg = require("./etg");

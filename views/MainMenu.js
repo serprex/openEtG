@@ -68,17 +68,17 @@ function initEndless(){
 	endlessRelic.status = {immaterial: true};
 	function endlessAuto(c, t){
 		var plies = c.owner.game.ply;
-		if (c.owner.rng() < .1){
+		if (c.rng() < .1){
 			c.owner.markpower++;
 		}
 		if ((plies&15) == 13){
-			new etg.Creature(Cards.Singularity.asUpped(c.owner.rng() < plies/100), c.owner.foe).place();
+			new etg.Creature(Cards.Singularity.asUpped(c.rng() < plies/100), c.owner.foe).place();
 		}
-		if ((plies&1) || c.owner.rng() < .3) c.owner.foe.buffhp(-1);
+		if ((plies&1) || c.rng() < .3) c.owner.foe.buffhp(-1);
 	}
 	function endlessDraw(c, t){
 		var card = t.hand[t.hand.length-1].card;
-		if (t == c.owner.game.player1 && c.owner.rng() < .3) card = card.asUpped(false);
+		if (t == c.owner.game.player1 && c.rng() < .3) card = card.asUpped(false);
 		t.deck.splice(t.upto(t.deck.length), 0, card);
 	}
 	endlessAuto.activename = ["endless"];

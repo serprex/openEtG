@@ -16,7 +16,7 @@ function quadpillarFactory(ele){
 		for(var i=0; i<n; i++){
 			var r = c.owner.upto(16);
 			c.owner.spend((ele>>((r&3)<<2))&15, -1);
-			if (c.owner.rng()<.6){
+			if (c.rng()<.6){
 				c.owner.spend((ele>>(r&12))&15, -1);
 			}
 		}
@@ -308,10 +308,10 @@ creatureupkeep:function(c,t){
 	}, true);
 },
 cseed:function(c,t){
-	Skills[c.owner.choose(["drainlife", "firebolt", "freeze", "gpullspell", "icebolt", "infect", "lightning", "lobotomize", "parallel", "rewind", "snipe", "swave"])](c, t);
+	Skills[c.choose(["drainlife", "firebolt", "freeze", "gpullspell", "icebolt", "infect", "lightning", "lobotomize", "parallel", "rewind", "snipe", "swave"])](c, t);
 },
 cseed2:function(c,t){
-	var choice = c.owner.choose(Cards.filter(c.owner.upto(2), function(c){
+	var choice = c.choose(Cards.filter(c.owner.upto(2), function(c){
 		if (c.type != etg.SpellEnum) return false;
 		var tgting = Cards.Targeting[c.active.cast.activename];
 		return tgting && tgting(c, t);
@@ -333,7 +333,7 @@ deathwish:function(c,t, data){
 	c.owner.creatures.forEach(function(cr){
 		if (cr && cr.hasactive("prespell", "deathwish"))totaldw++;
 	});
-	if (c.owner.rng() < 1/totaldw){
+	if (c.rng() < 1/totaldw){
 		return data.tgt = c;
 	}
 },
@@ -620,7 +620,7 @@ fickle:function(c,t){
 		}
 	});
 	if (cards.length){
-		var pick = t.owner.choose(cards);
+		var pick = t.choose(cards);
 		t.owner.hand[t.getIndex()] = new etg.CardInstance(t.owner.deck[pick], t.owner);
 		t.owner.deck[pick] = t.card;
 	}
@@ -694,7 +694,7 @@ forceplay:function(c,t){
 			tgttest(pl);
 			pl.forEach(tgttest, true);
 		}
-		return tgts.length == 0 ? undefined : c.owner.choose(tgts);
+		return tgts.length == 0 ? undefined : c.choose(tgts);
 	}
 	var tgting, tgt;
 	if (t instanceof etg.CardInstance){
@@ -722,7 +722,7 @@ fractal:function(c,t){
 },
 freeevade:function(c,t, data){
 	var tgt = data.tgt;
-	if (tgt instanceof etg.Creature && tgt.owner == c.owner && tgt.owner != t.owner && tgt.status.airborne && !tgt.status.frozen && c.owner.rng() > .8){
+	if (tgt instanceof etg.Creature && tgt.owner == c.owner && tgt.owner != t.owner && tgt.status.airborne && !tgt.status.frozen && c.rng() > .8){
 		data.evade = true;
 	}
 },
@@ -818,7 +818,7 @@ hasten:function(c,t){
 },
 hatch:function(c,t){
 	Effect.mkText("Hatch", c);
-	c.transform(c.owner.randomcard(c.card.upped, function(x){return x.type == etg.CreatureEnum}));
+	c.transform(c.randomcard(c.card.upped, function(x){return x.type == etg.CreatureEnum}));
 },
 heal:function(c,t){
 	t.dmg(-20);
@@ -846,7 +846,7 @@ hope:function(c,t){
 },
 icebolt:function(c,t){
 	var bolts = Math.floor(c.owner.quanta[etg.Water]/5);
-	if (c.owner.rng() < .35+bolts/20){
+	if (c.rng() < .35+bolts/20){
 		t.freeze(c.card.upped?4:3);
 	}
 	t.spelldmg(2+bolts);
@@ -867,7 +867,7 @@ immolate:function(c,t){
 improve:function(c,t){
 	Effect.mkText("Improve", t);
 	t.status.mutant = true;
-	t.transform(t.owner.randomcard(false, function(x){return x.type == etg.CreatureEnum}));
+	t.transform(t.randomcard(false, function(x){return x.type == etg.CreatureEnum}));
 },
 inertia:function(c,t, data){
 	if (data.tgt && c.owner == data.tgt.owner){
@@ -954,7 +954,7 @@ integrity:function(c,t){
 			shlist.push(i);
 		}
 	}
-	var active = shardSkills[c.owner.choose(shlist)-1][Math.min(num-1,5)];
+	var active = shardSkills[c.choose(shlist)-1][Math.min(num-1,5)];
 	c.owner.shardgolem = {
 		stat: Math.floor(stat),
 		status: {golem: true},
@@ -1152,7 +1152,7 @@ mutant:function(c,t){
 	c.status.mutant = true;
 },
 mutation:function(c,t){
-	var rnd = c.owner.rng();
+	var rnd = c.rng();
 	if (rnd<.1){
 		Effect.mkText("Death", t);
 		t.die();
@@ -1223,9 +1223,9 @@ noeatspell:function(c,t){
 nymph:function(c,t){
 	Effect.mkText("Nymph", t);
 	var e = t.card.element || (
-		t.active.auto == Skills.pillmat ? c.owner.choose([etg.Earth, etg.Fire, etg.Water, etg.Air]) :
-		t.active.auto == Skills.pillspi ? c.owner.choose([etg.Death, etg.Life, etg.Light, etg.Darkness]) :
-		t.active.auto == Skills.pillcar ? c.owner.choose([etg.Entropy, etg.Gravity, etg.Time, etg.Aether]) :
+		t.active.auto == Skills.pillmat ? c.choose([etg.Earth, etg.Fire, etg.Water, etg.Air]) :
+		t.active.auto == Skills.pillspi ? c.choose([etg.Death, etg.Life, etg.Light, etg.Darkness]) :
+		t.active.auto == Skills.pillcar ? c.choose([etg.Entropy, etg.Gravity, etg.Time, etg.Aether]) :
 		c.owner.uptoceil(12));
 	Skills.destroy(c, t, true, true);
 	new etg.Creature(t.card.as(Cards.Codes[etg.NymphList[e]]), t.owner).place();
@@ -1339,7 +1339,7 @@ poison:function(x){
 	});
 },
 poisonfoe:function(c){
-	if (c.owner.rng() < .7) c.owner.foe.addpoison(1);
+	if (c.rng() < .7) c.owner.foe.addpoison(1);
 },
 powerdrain:function(c,t){
 	var ti = [];
@@ -1347,7 +1347,7 @@ powerdrain:function(c,t){
 		if (c.owner.creatures[i]) ti.push(i);
 	}
 	if (!ti.length)return;
-	var tgt = c.owner.creatures[c.owner.choose(ti)], halfatk = Math.floor(t.trueatk()/2), halfhp = Math.floor(t.truehp()/2);
+	var tgt = c.owner.creatures[c.choose(ti)], halfatk = Math.floor(t.trueatk()/2), halfhp = Math.floor(t.truehp()/2);
 	t.atk -= halfatk;
 	t.buffhp(-halfhp);
 	tgt.atk += halfatk;
@@ -1504,7 +1504,7 @@ ricochet:function(c,t, data){
 			pl.forEach(tgttest, true);
 		}
 		if (tgts.length){
-			var tgt = c.owner.choose(tgts), town = t.owner;
+			var tgt = c.choose(tgts), town = t.owner;
 			t.owner = tgt[1];
 			t.castSpell(tgt[0], data.active, true);
 			t.owner = town;
@@ -1552,7 +1552,7 @@ scramble:function(c,t){
 serendipity:function(c){
 	var num = Math.min(8-c.owner.hand.length, 3), anyentro = false;
 	for(var i=num-1; ~i; i--){
-		var card = c.owner.randomcard(c.card.upped, function(x){return x.type != etg.PillarEnum && x.rarity < 4 && (i>0 || anyentro || x.element == etg.Entropy)});
+		var card = c.randomcard(c.card.upped, function(x){return x.type != etg.PillarEnum && x.rarity < 4 && (i>0 || anyentro || x.element == etg.Entropy)});
 		anyentro |= card.element == etg.Entropy;
 		new etg.CardInstance(card.asShiny(c.card.shiny), c.owner).place();
 	}
@@ -1574,7 +1574,7 @@ singularity:function(c,t){
 		Skills.antimatter(c, c);
 		return;
 	}
-	var r = c.owner.rng();
+	var r = c.rng();
 	if (r > .9){
 		c.status.adrenaline = 1;
 	}else if (r > .8){
@@ -1815,7 +1815,7 @@ trick:function(c,t){
 		}
 	});
 	if (cards.length){
-		var pick = t.owner.choose(cards);
+		var pick = t.choose(cards);
 		var cr = t.owner.creatures[t.getIndex()] = new etg.Creature(t.owner.deck[pick], t.owner);
 		t.owner.deck[pick] = t.card;
 		cr.proc("play");
@@ -1966,7 +1966,7 @@ blockwithcharge:function(c,t){
 	return true;
 },
 chaos:function(c,t){
-	var randomchance = c.owner.rng();
+	var randomchance = c.rng();
 	if (randomchance < .3) {
 		if (!t.status.ranged && t instanceof etg.Creature){
 			Skills.cseed(c, t);
@@ -1974,7 +1974,7 @@ chaos:function(c,t){
 	}else return c.card.upped && randomchance < .5;
 },
 cold:function(c,t){
-	if (!t.status.ranged && c.owner.rng()<.3){
+	if (!t.status.ranged && c.rng()<.3){
 		t.freeze(3);
 	}
 },
@@ -1983,7 +1983,7 @@ despair:function(c,t){
 		var chance = c.owner.creatures.reduce(function(chance, cr){
 			return cr && cr.hasactive("auto", "siphon") ? chance+1 : chance;
 		}, 0);
-		if (c.owner.rng() < 1.4-Math.pow(.95, chance)){
+		if (c.rng() < 1.4-Math.pow(.95, chance)){
 			Effect.mkText("-1|-1", t);
 			t.atk--;
 			t.dmg(1);
@@ -1996,7 +1996,7 @@ evade100:function(c,t){
 evade:function(x){
 	var n = parseInt(x)/100;
 	return function(c){
-		return c.owner.rng() < n;
+		return c.rng() < n;
 	};
 },
 evadespell:function(c,t, data){
@@ -2014,7 +2014,7 @@ firewall:function(c,t){
 skull:function(c,t){
 	if (t instanceof etg.Creature && !t.card.isOf(Cards.Skeleton)) {
 		var thp = t.truehp();
-		if (thp <= 0 || c.owner.rng() < .5/thp){
+		if (thp <= 0 || c.rng() < .5/thp){
 			var index = t.getIndex();
 			t.die();
 			if (!t.owner.creatures[index] || t.owner.creatures[index].card != Cards.MalignantCell){
@@ -2030,12 +2030,12 @@ solar:function(c,t){
 	c.owner.spend(etg.Light, -1);
 },
 thorn:function(c,t){
-	if (!t.status.ranged && c.owner.rng() < .75){
+	if (!t.status.ranged && c.rng() < .75){
 		t.addpoison(1);
 	}
 },
 thornweak:function(c,t){
-	if (!t.status.ranged && c.owner.rng() < .25){
+	if (!t.status.ranged && c.rng() < .25){
 		t.addpoison(1);
 	}
 },
