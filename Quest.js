@@ -23,7 +23,7 @@ exports.spirit = [
 		'Turn back foolish mortal. This road will only lead to your doom. My sisters will not be so forgiving!'"},
 	{ deck: "065ot025og065on0a6rb067n6018po", name: "Swamp Gas", wintext: "You escape the deadly explosions, just barely... A massive storm is approaching. You will need shelter.\
 		A nearby abandoned mansion may be your only option. Warily you open the door. It creaks forebodingly.\
-		You are greated by dank and musty air, but it seems otherwise empty. You sit and wait out the storm.\
+		You are greeted by dank and musty air, but it seems otherwise empty. You sit and wait out the storm.\
 		While waiting you could swear you hear footsteps in other rooms and voices talking.\
 		However, every search turns up nothing but empty ill kept rooms and dust.\
 		Just as you are about to leave, an evil laugh from behind you sends chills down your spine\

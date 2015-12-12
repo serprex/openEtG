@@ -72,7 +72,7 @@ function initEndless(){
 			c.owner.markpower++;
 		}
 		if ((plies&15) == 13){
-			new etg.Creature(Cards.Singularity.asUpped(c.rng() < plies/100), c.owner.foe).place();
+			c.owner.foe.addCrea(new Thing(Cards.Singularity.asUpped(c.rng() < plies/100), c.owner.foe));
 		}
 		if ((plies&1) || c.rng() < .3) c.owner.foe.buffhp(-1);
 	}

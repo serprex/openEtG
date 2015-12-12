@@ -38,7 +38,7 @@ function log(x, y){
 	}
 }
 function pillarval(c){
-	return c instanceof etg.CardInstance?.1:Math.sqrt(c.status.charges);
+	return c.type == etg.SpellEnum?.1:Math.sqrt(c.status.charges);
 }
 var SkillsValues = Object.freeze({
 	ablaze:3,
@@ -52,12 +52,12 @@ var SkillsValues = Object.freeze({
 	aggroskele:2,
 	air:1,
 	alphawolf:function(c){
-		return c instanceof etg.CardInstance?3:0;
+		return c.type == etg.SpellEnum?3:0;
 	},
 	animateweapon:4,
 	antimatter:12,
 	appease:function(c){
-		return c instanceof etg.CardInstance?-6:c.status.appeased?0:c.trueatk()*-1.5;
+		return c.type == etg.SpellEnum?-6:c.status.appeased?0:c.trueatk()*-1.5;
 	},
 	bblood:7,
 	beguilestop:function(c){
@@ -87,7 +87,7 @@ var SkillsValues = Object.freeze({
 	catapult:6,
 	chimera:4,
 	chromastat:function(c){
-		return 1+(c instanceof etg.CardInstance ? c.card.health+c.card.attack : c.trueatk() + c.truehp())/3;
+		return 1+(c.type == etg.SpellEnum ? c.card.health+c.card.attack : c.trueatk() + c.truehp())/3;
 	},
 	clear:2,
 	corpseexplosion:1,
@@ -106,19 +106,19 @@ var SkillsValues = Object.freeze({
 		return c.owner.deck.length/2;
 	},
 	deepdive:function(c, ttatk){
-		return c instanceof etg.CardInstance?c.card.attack:ttatk/1.5;
+		return c.type == etg.SpellEnum?c.card.attack:ttatk/1.5;
 	},
 	deepdiveproc:function(c, ttatk){
-		return c instanceof etg.CardInstance?c.card.attack:ttatk;
+		return c.type == etg.SpellEnum?c.card.attack:ttatk;
 	},
 	deja:4,
 	deployblobs:function(c){
-		return 2+(c instanceof etg.CardInstance ? Math.min(c.card.attack, c.card.health) : Math.min(c.trueatk(), c.truehp()))/4;
+		return 2+(c.type == etg.SpellEnum ? Math.min(c.card.attack, c.card.health) : Math.min(c.trueatk(), c.truehp()))/4;
 	},
 	destroy:8,
 	destroycard:1,
 	devour:function(c){
-		return 2+(c instanceof etg.CardInstance?c.card.health:c.truehp());
+		return 2+(c.type == etg.SpellEnum?c.card.health:c.truehp());
 	},
 	disarm:function(c){
 		return !c.owner.foe.weapon ? .1 : c.owner.foe.hand.length == 8 ? .5 : c.owner.foe.weapon.card.cost;
@@ -126,7 +126,7 @@ var SkillsValues = Object.freeze({
 	disfield:8,
 	disshield:7,
 	dive:function(c, ttatk){
-		return c instanceof etg.CardInstance?c.card.attack:ttatk-(c.status.dive||0)/1.5;
+		return c.type == etg.SpellEnum?c.card.attack:ttatk-(c.status.dive||0)/1.5;
 	},
 	divinity:3,
 	drainlife:10,
@@ -179,7 +179,7 @@ var SkillsValues = Object.freeze({
 		return dmg;
 	},
 	gpull:function(c){
-		return c instanceof etg.CardInstance || c != c.owner.gpull ? 2 : 0;
+		return c.type == etg.SpellEnum || c != c.owner.gpull ? 2 : 0;
 	},
 	gpullspell:3,
 	gratitude:4,
@@ -189,7 +189,7 @@ var SkillsValues = Object.freeze({
 	guard:4,
 	halveatk:function(c){
 		var atk;
-		return c instanceof etg.CardInstance ? -c.card.attack/4 : ((atk = c.trueatk()) < 0)-(atk > 0);
+		return c.type == etg.SpellEnum ? -c.card.attack/4 : ((atk = c.trueatk()) < 0)-(atk > 0);
 	},
 	hasten:function(c){
 		return Math.min(c.owner.deck.length/4, 10);
@@ -198,7 +198,7 @@ var SkillsValues = Object.freeze({
 	heal:8,
 	heatmirror:2,
 	hitownertwice:function(c){
-		return (c instanceof etg.CardInstance ? c.card.attack : c.trueatk())*-2;
+		return (c.type == etg.SpellEnum ? c.card.attack : c.trueatk())*-2;
 	},
 	holylight:3,
 	hope:2,
@@ -277,7 +277,7 @@ var SkillsValues = Object.freeze({
 	powerdrain:6,
 	precognition:1,
 	predator:function(c, tatk){
-		return !(c instanceof etg.CardInstance) && c.owner.foe.hand.length > 4 ? tatk + Math.max(c.owner.foe.hand.length-6, 1) : 1;
+		return c.type != etg.SpellEnum && c.owner.foe.hand.length > 4 ? tatk + Math.max(c.owner.foe.hand.length-6, 1) : 1;
 	},
 	protectonce:2,
 	protectall:4,
@@ -289,7 +289,7 @@ var SkillsValues = Object.freeze({
 	reap:7,
 	rebirth:[5, 2],
 	reducemaxhp: function(c, ttatk){
-		return (c instanceof etg.Creature ? ttatk : c.card.attack)*5/3;
+		return (ttatk == undefined ? c.card.attack : ttatk)*5/3;
 	},
 	regenerate: 5,
 	regeneratespell: 5,
@@ -337,20 +337,20 @@ var SkillsValues = Object.freeze({
 	tesseractsummon:3,
 	throwrock:4,
 	tick:function(c){
-		return c instanceof etg.CardInstance ? 1 : 1+(c.maxhp-c.truehp())/c.maxhp;
+		return c.type == etg.SpellEnum ? 1 : 1+(c.maxhp-c.truehp())/c.maxhp;
 	},
 	tornado:9,
 	trick:4,
 	turngolem:function(c){
-		return c instanceof etg.CardInstance ? 0 : c.status.storedpower/3;
+		return c.type == etg.SpellEnum ? 0 : c.status.storedpower/3;
 	},
 	upkeep:-.5,
 	upload:3,
 	vampire:function(c, ttatk){
-		return (c instanceof etg.CardInstance?c.card.attack:ttatk)*.7;
+		return (c.type == etg.SpellEnum?c.card.attack:ttatk)*.7;
 	},
 	virtue:function(c){
-		return c instanceof etg.CardInstance ? (c.owner.foe.shield ? Math.min(c.owner.foe.shield.truedr(), c.card.attack) : 0) : (c.trueatk() - getDamage(c)) / 1.5;
+		return c.type == etg.SpellEnum ? (c.owner.foe.shield ? Math.min(c.owner.foe.shield.truedr(), c.card.attack) : 0) : (c.trueatk() - getDamage(c)) / 1.5;
 	},
 	virusplague:1,
 	void:5,
@@ -360,7 +360,7 @@ var SkillsValues = Object.freeze({
 	quantagift:4,
 	web:1,
 	wind:function(c){
-		return c instanceof etg.CardInstance ? -2 : c.status.storedAtk/2 - 2;
+		return c.type == etg.SpellEnum ? -2 : c.status.storedAtk/2 - 2;
 	},
 	wisdom:4,
 	yoink:4,
@@ -373,7 +373,7 @@ var SkillsValues = Object.freeze({
 	pillcar:pillarval,
 	absorber:5,
 	blockwithcharge:function(c){
-		return (c instanceof etg.CardInstance?c.card.status.charges:c.status.charges)/(1+c.owner.foe.countcreatures()*2);
+		return (c.type == etg.SpellEnum?c.card.status.charges:c.status.charges)/(1+c.owner.foe.countcreatures()*2);
 	},
 	cold:7,
 	despair:5,
@@ -504,7 +504,7 @@ function checkpassives(c) {
 	for (var status in statuses)
 	{
 		// Skip cloak if it expires at end of turn
-		if (uniqueStatuses[status] && !(c instanceof etg.CardInstance) && !(status == "cloak" && c.status.charges == 0 && c.owner == c.owner.game.turn)) {
+		if (uniqueStatuses[status] && c.type == etg.SpellEnum && !(status == "cloak" && c.status.charges == 0 && c.owner == c.owner.game.turn)) {
 			if (!uniquesSkill[status]) {
 				uniquesSkill[status] = true;
 			}
@@ -522,9 +522,9 @@ var throttled = Object.freeze({"poison 1":true, "poison 2":true, "poison 3":true
 function evalthing(c) {
 	if (!c) return 0;
 	var ttatk, hp, poison, score = 0;
-	var isCreature = c instanceof etg.Creature, isWeapon = c instanceof etg.Weapon;
+	var isCreature = c.card.type == etg.CreatureEnum, isAttacker = isCreature || c.card.type == etg.WeaponEnum;
 	var adrenalinefactor = c.status.adrenaline ? etg.countAdrenaline(c.trueatk()) : 1;
-	if (isWeapon || isCreature){
+	if (isAttacker){
 		var delaymix = Math.max((c.status.frozen||0), (c.status.delayed||0))/adrenalinefactor, delayfactor = delaymix?1-Math.min(delaymix/5, .6):1;
 	}else{
 		var delaymix = 0, delayfactor = 1;
@@ -539,7 +539,7 @@ function evalthing(c) {
 			hp += Math.min(-poison, c.maxhp-c.hp);
 		}
 	}
-	if (isWeapon || isCreature) {
+	if (isAttacker) {
 		ttatk = getDamage(c);
 		if (c.status.psionic && c.owner.foe.shield && c.owner.foe.shield.status.reflective) ttatk *= -1;
 		score += c.trueatk()/20;
@@ -677,11 +677,11 @@ module.exports = function(game) {
 		logNestEnd();
 		// Remove this if logic is updated to call endturn
 		if (player != game.turn && player.hand.length < 8 && player.deck.length){
-			var code = player.deck.pop();
-			player.hand.push(new etg.CardInstance(code, player));
+			var card = player.deck.pop();
+			player.addCard(card);
 			pscore += evalcardinstance(player.hand[player.hand.length-1]);
 			player.hand.pop();
-			player.deck.push(code);
+			player.deck.push(card);
 		}
 		pscore += Math.min(8-player.hand.length, player.drawpower)*2;
 		pscore += Math.sqrt(player.hp)*4;

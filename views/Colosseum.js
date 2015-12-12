@@ -48,7 +48,7 @@ module.exports = function(){
 	if (sock.user.daily == 191){
 		dom.add(div, [50, 280, ["Nymph!", function(){
 			var etg = require("../etg");
-			var nymph = etg.NymphList[RngMock.uptoceil(12)];
+			var nymph = etg.NymphList[RngMock.upto(12)+1];
 			sock.userExec("donedaily", {daily: 6, c: nymph});
 			startMenu(nymph);
 		}]], [130, 280, "You successfully completed all tasks."]);

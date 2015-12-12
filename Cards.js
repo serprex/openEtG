@@ -78,73 +78,70 @@ var TargetFilters = {
 		return true;
 	},
 	card:function(c, t){
-		return c != t && t instanceof etg.CardInstance;
+		return c != t && t.type == etg.SpellEnum;
 	},
 	pill:function(c, t){
-		return t.isMaterial(etg.Permanent) && t.card.type == etg.PillarEnum;
+		return t.isMaterial(etg.PermanentEnum) && t.card.type == etg.PillarEnum;
 	},
 	weap:function(c, t){
-		return (t instanceof etg.Weapon || (t instanceof etg.Creature && t.card.type == etg.WeaponEnum)) && !t.status.immaterial && !t.status.burrowed;
+		return (t.type == etg.WeaponEnum || (~t.type && t.card.type == etg.WeaponEnum)) && !t.status.immaterial && !t.status.burrowed;
 	},
 	shie:function(c, t){
-		return (t instanceof etg.Shield || (t instanceof etg.Creature && t.card.type == etg.ShieldEnum)) && !t.status.immaterial && !t.status.burrowed;
+		return (t.type == etg.ShieldEnum || (~t.type && t.card.type == etg.ShieldEnum)) && !t.status.immaterial && !t.status.burrowed;
 	},
 	playerweap:function(c,t){
-		return t instanceof etg.Weapon && t == t.owner.weapon;
+		return t.type == etg.WeaponEnum;
 	},
 	perm:function(c, t){
-		return t.isMaterial(etg.Permanent);
+		return t.isMaterial(etg.PermanentEnum);
 	},
 	permnonstack:function(c,t){
-		return t.isMaterial(etg.Permanent) && !t.status.stackable;
+		return t.isMaterial(etg.PermanentEnum) && !t.status.stackable;
 	},
 	stack:function(c,t){
-		return t.isMaterial(etg.Permanent) && t.status.stackable;
+		return t.isMaterial(etg.PermanentEnum) && t.status.stackable;
 	},
 	crea:function(c, t){
-		return t.isMaterial(etg.Creature);
-	},
-	creaonly:function(c, t){
-		return t.isMaterial(etg.Creature) && t.card.type == etg.CreatureEnum;
+		return t.isMaterial(etg.CreatureEnum);
 	},
 	play:function(c, t){
-		return t instanceof Player;
+		return t.type == -1;
 	},
 	notplay:function(c, t){
-		return !(t instanceof Player);
+		return t.type != -1;
 	},
 	sing:function(c, t){
-		return t.isMaterial(etg.Creature) && t.active.cast != c.active.cast;
+		return t.isMaterial(etg.CreatureEnum) && t.active.cast != c.active.cast;
 	},
 	notskele:function(c, t){
-		return t.isMaterial(etg.Creature) && !t.card.isOf(exports.Skeleton);
+		return t.isMaterial(etg.CreatureEnum) && !t.card.isOf(exports.Skeleton);
 	},
 	butterfly:function(c, t){
-		return (t instanceof etg.Creature || t instanceof etg.Permanent) && !t.status.immaterial && !t.status.burrowed && ((t.trueatk && t.trueatk()<3) || (t instanceof etg.Creature && t.truehp()<3));
+		return (t.type == etg.CreatureEnum || t.type == etg.WeaponEnum) && !t.status.immaterial && !t.status.burrowed && (t.trueatk()<3 || (t.type == etg.CreatureEnum && t.truehp()<3));
 	},
 	devour:function(c, t){
-		return t.isMaterial(etg.Creature) && t.truehp()<c.truehp();
+		return t.isMaterial(etg.CreatureEnum) && t.truehp()<c.truehp();
 	},
 	paradox:function(c, t){
-		return t.isMaterial(etg.Creature) && t.truehp()<t.trueatk();
+		return t.isMaterial(etg.CreatureEnum) && t.truehp()<t.trueatk();
 	},
 	forceplay:function(c, t){
-		return t instanceof etg.CardInstance || (t.isMaterial() && t.active.cast);
+		return t.type == etg.SpellEnum || (t.isMaterial() && t.active.cast);
 	},
 	airbornecrea:function(c, t){
-		return t.isMaterial(etg.Creature) && t.status.airborne;
+		return t.isMaterial(etg.CreatureEnum) && t.status.airborne;
 	},
 	golem:function(c, t){
 		return t.status.golem && t.attack;
 	},
 	groundcrea:function(c, t){
-		return t.isMaterial(etg.Creature) && !t.status.airborne;
+		return t.isMaterial(etg.CreatureEnum) && !t.status.airborne;
 	},
 	wisdom:function(c, t){
-		return (t instanceof etg.Creature || t instanceof etg.Weapon) && !t.status.burrowed;
+		return (t.type == etg.CreatureEnum || t.type == etg.WeaponEnum) && !t.status.burrowed;
 	},
 	quinttog:function(c, t){
-		return t instanceof etg.Creature && !t.status.burrowed;
+		return t.type == etg.CreatureEnum && !t.status.burrowed;
 	},
 };
 var etg = require("./etg");

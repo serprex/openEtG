@@ -33,7 +33,7 @@ module.exports = function() {
 	ui.eleNames.forEach(function(name, i){
 		if (i < 1 || i > 14) return;
 		var b = dom.icob(i < 13 ? i : i == 13 ? 14 : 13, function() {
-			var msg = { u: sock.user.name, a: sock.user.auth, e: i ==14 ? RngMock.uptoceil(12) : i };
+			var msg = { u: sock.user.name, a: sock.user.auth, e: i ==14 ? RngMock.upto(12)+1 : i };
 			sock.user = undefined;
 			sock.emit("inituser", msg);
 		});

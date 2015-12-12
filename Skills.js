@@ -1,7 +1,7 @@
 "use strict";
 function adrenathrottle(f){
 	return function(c){
-		if ((c.status.adrenaline || 0)<3 || (c instanceof etg.Creature && c.owner.weapon && c.owner.weapon.status.nothrottle)){
+		if ((c.status.adrenaline || 0)<3 || (c.type == etg.CreatureEnum && c.owner.weapon && c.owner.weapon.status.nothrottle)){
 			return f.apply(null, arguments);
 		}
 	}
@@ -48,7 +48,7 @@ accretion:function(c,t){
 	if (c.truehp() > 30){
 		c.die();
 		if (c.owner.hand.length < 8){
-			new etg.CardInstance(c.card.as(Cards.BlackHole), c.owner).place();
+			c.owner.addCard(c.card.as(Cards.BlackHole));
 		}
 	}
 },
@@ -69,7 +69,7 @@ aflatoxin:function(c,t){
 	t.status.aflatoxin = true;
 },
 aggroskele:function(c,t){
-	new etg.Creature(c.card.as(Cards.Skeleton), c.owner).place();
+	c.owner.addCrea(new Thing(c.card.as(Cards.Skeleton), c.owner));
 	var dmg = c.owner.creatures.reduce(function(dmg, cr){
 		return cr && cr.card.isOf(Cards.Skeleton) ?
 			dmg + cr.trueatk() : dmg;
@@ -83,8 +83,8 @@ air:function(c,t){
 },
 alphawolf:function(c,t){
 	var pwolf = c.card.as(Cards.PackWolf);
-	new etg.Creature(pwolf, c.owner).place();
-	new etg.Creature(pwolf, c.owner).place();
+	c.owner.addCrea(new Thing(pwolf, c.owner));
+	c.owner.addCrea(new Thing(pwolf, c.owner));
 },
 antimatter:function(c,t){
 	Effect.mkText("Antimatter", t);
@@ -156,7 +156,7 @@ bolsterintodeck:function(c,t){
 },
 boneyard:function(c,t){
 	if (!t.card.isOf(Cards.Skeleton)){
-		new etg.Creature(c.card.as(Cards.Skeleton), c.owner).place();
+		c.owner.addCrea(new Thing(c.card.as(Cards.Skeleton), c.owner));
 	}
 },
 bow:function(c,t){
@@ -190,11 +190,11 @@ brawl:function(c,t){
 },
 brew:function(c,t){
 	Effect.mkText("Brew", c);
-	new etg.CardInstance(c.card.as(Cards.Codes[etg.AlchemyList[c.owner.uptoceil(12)]]), c.owner).place();
+	c.owner.addCard(c.card.as(Cards.Codes[etg.AlchemyList[c.owner.upto(12)+1]]));
 },
 brokenmirror:function(c,t, fromhand){
-	if (fromhand && t instanceof etg.Creature && c.owner != t.owner){
-		new etg.Creature(c.card.as(Cards.Phantom), c.owner).place();
+	if (fromhand && t.type == etg.CreatureEnum && c.owner != t.owner){
+		c.owner.addCrea(new Thing(c.card.as(Cards.Phantom), c.owner));
 	}
 },
 burrow:function(c,t){
@@ -241,11 +241,11 @@ chimera:function(c,t){
 			hp += cr.truehp();
 		}
 	});
-	var chim = new etg.Creature(c.card, c.owner);
+	var chim = new Thing(c.card, c.owner);
 	chim.atk = atk;
 	chim.maxhp = chim.hp = hp;
-	chim.active = {};
 	chim.status.momentum = true;
+	chim.type = etg.CreatureEnum;
 	c.owner.creatures[0] = chim;
 	c.owner.creatures.length = 1;
 	c.owner.creatures.length = 23;
@@ -327,7 +327,7 @@ deadalive:function(c){
 },
 deathwish:function(c,t, data){
 	var tgt = data.tgt, active = data.active;
-	if (!tgt || c.status.frozen || c.status.delayed || c.owner == t.owner || tgt.owner != c.owner || !(tgt instanceof etg.Creature) || !Cards.Targeting[active.activename[0]](t, c)) return;
+	if (!tgt || c.status.frozen || c.status.delayed || c.owner == t.owner || tgt.owner != c.owner || !(tgt.type = etg.CreatureEnum) || !Cards.Targeting[active.activename[0]](t, c)) return;
 	if (!tgt.hasactive("prespell", "deathwish")) return data.tgt = c;
 	var totaldw = 0;
 	c.owner.creatures.forEach(function(cr){
@@ -376,7 +376,7 @@ deja:function(c,t){
 deployblobs:function(c,t){
 	var blob = c.card.as(Cards.Blob);
 	for(var i=0; i<3; i++){
-		new etg.Creature(blob, c.owner).place();
+		c.owner.addCrea(new Thing(blob, c.owner));
 	}
 	c.atk -= 2;
 	c.dmg(2);
@@ -395,7 +395,7 @@ destroy:function(c,t, dontsalvage, donttalk){
 	}
 },
 destroycard:function(c,t){
-	if (t instanceof Player){
+	if (t.type == -1){
 		if (!t.deck.length) t.game.setWinner(t.foe);
 		else t.deck.length--;
 	}else if (!t.owner.sanctuary){
@@ -422,7 +422,7 @@ die:function(c,t){
 	c.die();
 },
 disarm:function(c,t){
-	if (t instanceof Player && t.weapon){
+	if (t.type == -1 && t.weapon){
 		Skills.unsummon(c, t.weapon);
 	}
 },
@@ -432,7 +432,7 @@ disc:function(c,t){
 discping:function(c,t){
 	t.dmg(1);
 	c.remove();
-	new etg.CardInstance(c.card, c.owner).place();
+	c.owner.addCard(c.card);
 },
 disfield:function(c,t, dmg){
 	if (!c.owner.spend(etg.Chroma, dmg)){
@@ -476,13 +476,13 @@ draft:function(c,t){
 	}
 },
 drawcopy:function(c,t){
-	if (c.owner != t.owner) new etg.CardInstance(t.card, c.owner).place();
+	if (c.owner != t.owner) c.owner.addCard(t.card);
 },
 drawequip:function(c,t){
 	for(var i=c.owner.deck.length-1; i>-1; i--){
 		var card = c.owner.deck[i];
 		if (card.type == etg.WeaponEnum || card.type == etg.ShieldEnum){
-			if (~new etg.CardInstance(card, c.owner).place()){
+			if (~c.owner.addCard(card)){
 				c.owner.deck.splice(i, 1);
 				c.owner.proc("draw");
 			}
@@ -512,7 +512,7 @@ dshieldoff:passive(function(c,t){
 }),
 duality:function(c,t){
 	if (c.owner.foe.deck.length && c.owner.hand.length < 8){
-		new etg.CardInstance(c.owner.foe.deck[c.owner.foe.deck.length-1], c.owner).place();
+		c.owner.addCard(c.owner.foe.deck[c.owner.foe.deck.length-1]);
 	}
 },
 earth:function(c,t){
@@ -621,7 +621,7 @@ fickle:function(c,t){
 	});
 	if (cards.length){
 		var pick = t.choose(cards);
-		t.owner.hand[t.getIndex()] = new etg.CardInstance(t.owner.deck[pick], t.owner);
+		(t.owner.hand[t.getIndex()] = new Thing(t.owner.deck[pick], t.owner)).type = etg.SpellEnum;
 		t.owner.deck[pick] = t.card;
 	}
 },
@@ -634,7 +634,7 @@ fire:function(c,t){
 },
 firebolt:function(c,t){
 	t.spelldmg(3+Math.floor(c.owner.quanta[etg.Fire]/4));
-	if (t instanceof Player){
+	if (t.type == -1){
 		if (t.weapon){
 			t.weapon.status.frozen = 0;
 		}
@@ -653,19 +653,13 @@ flatline:function(c,t){
 	}
 },
 flyself:function(c,t){
-	Skills[c instanceof etg.Weapon ? "flyingweapon" : "livingweapon"](c, c);
+	Skills[c.type == etg.WeaponEnum ? "flyingweapon" : "livingweapon"](c, c);
 },
 flyingweapon:function(c,t){
-	var cr = new etg.Creature(t.card, t.owner);
-	cr.atk = t.atk;
-	cr.active = util.clone(t.active);
-	cr.cast = t.cast;
-	cr.castele = t.castele;
-	cr.status = etg.cloneStatus(t.status);
-	cr.status.airborne = true;
-	cr.usedactive = t.usedactive;
-	cr.place();
 	t.owner.weapon = undefined;
+	t.type = etg.CreatureEnum;
+	cr.status.airborne = true;
+	t.owner.addCrea(t);
 },
 foedraw:function(c,t){
 	if (c.owner.hand.length < 8){
@@ -697,7 +691,7 @@ forceplay:function(c,t){
 		return tgts.length == 0 ? undefined : c.choose(tgts);
 	}
 	var tgting, tgt;
-	if (t instanceof etg.CardInstance){
+	if (t.type == etg.SpellEnum){
 		var card = t.card;
 		Effect.mkSpriteFade(require("./gfx").getCardImage(t.card), t, {x:t.owner == t.owner.game.player2 ? -1 : 1, y:0});
 		if (t.owner.sanctuary) return;
@@ -716,13 +710,13 @@ forceplay:function(c,t){
 fractal:function(c,t){
 	Effect.mkText("Fractal", t);
 	for(var i=6+Math.floor((c.owner.quanta[etg.Aether])/2); i>0; i--){
-		new etg.CardInstance(t.card, c.owner).place();
+		c.owner.addCard(t.card);
 	}
 	c.owner.quanta[etg.Aether] = 0;
 },
 freeevade:function(c,t, data){
 	var tgt = data.tgt;
-	if (tgt instanceof etg.Creature && tgt.owner == c.owner && tgt.owner != t.owner && tgt.status.airborne && !tgt.status.frozen && c.rng() > .8){
+	if (tgt.type == etg.CreatureEnum && tgt.owner == c.owner && tgt.owner != t.owner && tgt.status.airborne && !tgt.status.frozen && c.rng() > .8){
 		data.evade = true;
 	}
 },
@@ -749,13 +743,13 @@ gaintimecharge:function(c,t, drawstep){
 	}
 },
 gas:function(c,t){
-	new etg.Permanent(c.card.as(Cards.UnstableGas), c.owner).place();
+	c.owner.addPerm(new Thing(c.card.as(Cards.UnstableGas), c.owner));
 },
 give:function(c,t){
 	c.owner.dmg(c.card.upped?-10:-5);
-	if (!(t instanceof etg.CardInstance) && t.hasactive("auto", "singularity")){
+	if (t.type != etg.SpellEnum && t.hasactive("auto", "singularity")){
 		t.die();
-	}else if (t instanceof etg.Permanent){
+	}else if (t.type <= etg.PermanentEnum){
 		Skills.steal(c.owner.foe, t);
 	}else{
 		t.remove();
@@ -770,7 +764,7 @@ gpull:function(c,t){
 	Skills.gpullspell(c, c);
 },
 gpullspell:function(c,t){
-	if (t instanceof etg.Creature){
+	if (t.type == etg.CreatureEnum){
 		t.owner.gpull = t;
 	}else{
 		t = t.owner;
@@ -824,8 +818,8 @@ heal:function(c,t){
 	t.dmg(-20);
 },
 heatmirror:function(c,t, fromhand){
-	if (fromhand && t instanceof etg.Creature && c.owner != t.owner) {
-		new etg.Creature(c.card.as(Cards.Spark), c.owner).place();
+	if (fromhand && t.type == etg.CreatureEnum && c.owner != t.owner) {
+		c.owner.addCrea(new Thing(c.card.as(Cards.Spark), c.owner));
 	}
 },
 hitownertwice:passive(function(c,t){
@@ -889,9 +883,9 @@ inflation:function(c,t){
 	c.owner.foe.forEach(inflate);
 },
 ink:function(c,t){
-	var p=new etg.Permanent(Cards.Cloak, c.owner);
+	var p=new Thing(c.card.as(Cards.Cloak), c.owner);
 	p.status.charges = 1;
-	p.place();
+	c.owner.addPerm(p);
 },
 innovation:function(c,t){
 	if (!t.owner.sanctuary){
@@ -994,7 +988,7 @@ integrity:function(c,t){
 	if (tally[etg.Death] > 0){
 		addSkill("hit", "poison " + tally[etg.Death]);
 	}
-	new etg.Creature(c.card.as(Cards.ShardGolem), c.owner).place();
+	c.owner.addCrea(new Thing(c.card.as(Cards.ShardGolem), c.owner));
 },
 jelly:function(c,t){
 	var tcard = t.card;
@@ -1025,16 +1019,9 @@ liquid:function(c,t){
 },
 livingweapon:function(c,t){
 	if (t.owner.weapon) Skills.unsummon(c, t.owner.weapon);
+	t.owner.dmg(-t.truehp());
 	t.remove();
-	var w = new etg.Weapon(t.card, t.owner);
-	w.atk = t.atk;
-	w.active = util.clone(t.active);
-	w.castele = t.castele;
-	w.cast = t.cast;
-	w.usedactive = t.usedactive;
-	w.status = etg.cloneStatus(t.status);
-	w.place();
-	w.owner.dmg(-t.truehp());
+	t.owner.setWeapon(t);
 },
 lobotomize:function(c,t){
 	Effect.mkText("Lobotomize", t);
@@ -1046,7 +1033,7 @@ locket: function(c, t) {
 	c.owner.spend(ele, ele > 0 ? -1 : -3);
 },
 locketshift:function(c,t){
-	c.status.mode = t instanceof Player?t.mark:t.card.element;
+	c.status.mode = t.type == -1 ? t.mark : t.card.element;
 },
 loot:function(c,t){
 	if (c.owner == t.owner && !c.hasactive("turnstart", "salvageoff")){
@@ -1062,15 +1049,15 @@ loot:function(c,t){
 },
 losecharge:function(c,t){
 	if(--c.status.charges<0){
-		c[c instanceof etg.Creature?"die":"remove"]();
+		if (c.type == etg.CreatureEnum) c.die();
+		else c.remove();
 	}
 },
 luciferin:function(c,t){
 	c.owner.dmg(-10);
 	c.owner.masscc(c, function(c,x){
 		for (var key in x.active){
-			if (key == "ownplay" || key == "owndiscard" || x.active[key].activename.every(function(name){return etg.parseSkill(name).passive})) continue;
-			return;
+			if (key != "ownplay" && key != "owndiscard" && !x.active[key].activename.every(function(name){return etg.parseSkill(name).passive})) return;
 		}
 		x.addactive("auto", Skills.light);
 	});
@@ -1089,27 +1076,26 @@ mend:function(c,t){
 	t.dmg(-10);
 },
 metamorph:function(c,t){
-	c.owner.mark = t instanceof Player?t.mark:t.card.element;
+	c.owner.mark = t.type == -1 ? t.mark : t.card.element;
 	c.owner.markpower++;
 },
 midas:function(c,t){
 	if (t.status.stackable && t.status.charges > 1){
 		Skills.destroy(c, t, true);
-		var relic = new etg.Permanent(t.card.as(Cards.GoldenRelic), t.owner);
+		var relic = new Thing(t.card.as(Cards.GoldenRelic), t.owner);
 		relic.usedactive = false;
-		relic.place();
+		c.owner.addPerm(relic);
 	}else{
 		t.status = Object.create(etg.DefaultStatus);
 		t.transform(t.card.as(Cards.GoldenRelic));
-		if (t instanceof etg.Shield) t.dr = 1;
-		else if (t instanceof etg.Weapon) t.atk = 1;
+		t.atk = t.maxhp = t.hp = 1;
 	}
 },
 millpillar:function(c,t){
 	if (t.deck.length && t.deck[t.deck.length-1].type == etg.PillarEnum) t.deck.length--;
 },
 mimic:function(c,t){
-	if (c != t && t instanceof etg.Creature) {
+	if (c != t && t.type == etg.CreatureEnum) {
 		c.transform(t.card);
 		c.addactive("play", Skills.mimic);
 	}
@@ -1146,7 +1132,7 @@ mummy:passive(function(c,t,data){
 mutant:function(c,t){
 	if (!c.mutantactive()){
 		c.active.cast = Skills.web;
-		c.cast = c.owner.uptoceil(2);
+		c.cast = c.owner.upto(2)+1;
 	}
 	c.castele = c.owner.upto(13);
 	c.status.mutant = true;
@@ -1177,7 +1163,7 @@ nightmare:function(c,t){
 		Effect.mkText("Nightmare", t);
 		c.owner.dmg(-c.owner.foe.spelldmg(16-c.owner.foe.hand.length*2));
 		for(var i = c.owner.foe.hand.length; i<8; i++){
-			c.owner.foe.hand[i] = new etg.CardInstance(t.card, c.owner.foe);
+			c.owner.foe.addCard(t.card);
 		}
 	}
 },
@@ -1190,7 +1176,7 @@ nova:function(c,t){
 	}
 	c.owner.nova += 2;
 	if (c.owner.nova >= 6){
-		new etg.Creature(Cards.Singularity.asShiny(c.card.shiny), c.owner).place();
+		c.owner.addCrea(new Thing(Cards.Singularity.asShiny(c.card.shiny), c.owner));
 	}
 },
 nova2:function(c,t){
@@ -1199,7 +1185,7 @@ nova2:function(c,t){
 	}
 	c.owner.nova += 3;
 	if (c.owner.nova >= 6){
-		new etg.Creature(Cards.Singularity.asUpped(true).asShiny(c.card.shiny), c.owner).place();
+		c.owner.addCrea(new Thing(Cards.Singularity.asUpped(true).asShiny(c.card.shiny), c.owner));
 	}
 },
 nullspell:function(c,t){
@@ -1209,7 +1195,7 @@ nullspell:function(c,t){
 	}
 },
 eatspell:function(c,t, data){
-	if (t instanceof etg.CardInstance){
+	if (t.type == etg.SpellEnum){
 		Skills["growth 1"](c);
 		c.rmactive("prespell", "eatspell");
 		data.evade = true;
@@ -1226,16 +1212,16 @@ nymph:function(c,t){
 		t.active.auto == Skills.pillmat ? c.choose([etg.Earth, etg.Fire, etg.Water, etg.Air]) :
 		t.active.auto == Skills.pillspi ? c.choose([etg.Death, etg.Life, etg.Light, etg.Darkness]) :
 		t.active.auto == Skills.pillcar ? c.choose([etg.Entropy, etg.Gravity, etg.Time, etg.Aether]) :
-		c.owner.uptoceil(12));
+		c.owner.upto(12)+1);
 	Skills.destroy(c, t, true, true);
-	new etg.Creature(t.card.as(Cards.Codes[etg.NymphList[e]]), t.owner).place();
+	c.owner.addCrea(new Thing(t.card.as(Cards.Codes[etg.NymphList[e]]), t.owner));
 },
 obsession:passive(function(c,t){
 	c.owner.spelldmg(c.card.upped?10:8);
 }),
 ouija:function(c,t){
 	if(!c.owner.foe.sanctuary && c.owner.foe.hand.length<8){
-		new etg.CardInstance(Cards.OuijaEssence, c.owner.foe).place();
+		c.owner.foe.addCard(Cards.OuijaEssence);
 	}
 },
 overdrive:function(c,t){
@@ -1257,7 +1243,7 @@ pairproduce:function(c,t){
 },
 paleomagnetism:function(c,t){
 	var e = c.owner.upto(58);
-	new etg.Permanent(c.card.as(Cards.Codes[e >= 29 ? etg.PillarList[c.owner.mark] : e >= 26 ? 5012+e : e >= 13 ? etg.PendList[e-13] : etg.PillarList[e]]), c.owner).place();
+	c.owner.addPerm(new Thing(c.card.as(Cards.Codes[e >= 29 ? etg.PillarList[c.owner.mark] : e >= 26 ? 5012+e : e >= 13 ? etg.PendList[e-13] : etg.PillarList[e]]), c.owner));
 },
 pandemonium:function(c,t){
 	c.owner.foe.masscc(c, Skills.cseed, true);
@@ -1314,7 +1300,7 @@ parallel:function(c,t){
 },
 phoenix:function(c,t, data){
 	if (!c.owner.creatures[data.index]){
-		c.owner.creatures[data.index] = new etg.Creature(c.card.as(Cards.Ash), c.owner);
+		(c.owner.creatures[data.index] = new Thing(c.card.as(Cards.Ash), c.owner)).type = etg.CreatureEnum;
 	}
 },
 photosynthesis:function(c,t){
@@ -1394,7 +1380,7 @@ purify:function(c,t){
 	t.status.poison = t.status.poison < 0?t.status.poison-2:-2;
 	t.status.aflatoxin = false;
 	t.status.neuro = false;
-	if (t instanceof Player){
+	if (t.type == -1){
 		t.sosa = 0;
 	}
 },
@@ -1411,7 +1397,7 @@ quinttog:function(c,t){
 },
 randomdr:function(c, t){
 	if (c==t)
-		c.dr = c.owner.upto(c.card.upped?4:3);
+		c.maxhp = c.hp = c.owner.upto(c.card.upped?4:3);
 },
 rage:function(c,t){
 	var dmg = c.card.upped?6:5;
@@ -1433,7 +1419,8 @@ reap:function(c,t){
 	var index = t.getIndex();
 	t.die();
 	if (!t.owner.creatures[index] || t.owner.creatures[index].card != Cards.MalignantCell){
-		var skele = t.owner.creatures[index] = new etg.Creature(t.card.as(Cards.Skeleton), t.owner);
+		var skele = t.owner.creatures[index] = new Thing(t.card.as(Cards.Skeleton), t.owner);
+		skele.type = etg.CreatureEnum;
 		skele.atk = atk;
 		skele.maxhp = skele.hp = hp;
 	}
@@ -1443,7 +1430,7 @@ rebirth:function(c,t){
 },
 reducemaxhp:function(c,t, dmg){
 	t.maxhp = Math.max(t.maxhp-dmg, 1);
-	if (t.maxhp > 500 && t instanceof Player) t.maxhp = 500;
+	if (t.maxhp > 500 && t.type == -1) t.maxhp = 500;
 	if (t.hp > t.maxhp) t.dmg(t.hp-t.maxhp);
 },
 regen:adrenathrottle(function(c,t){
@@ -1456,7 +1443,7 @@ regenerate:function(c,t){
 regeneratespell:function(c,t){
 	t.lobo();
 	t.active.auto = Skills.regenerate;
-	if (t instanceof etg.Permanent && !(t instanceof etg.Weapon)){
+	if (t.type == etg.PermanentEnum || t.type == etg.ShieldEnum){
 		t.status = Object.create(etg.DefaultStatus);
 	}
 },
@@ -1489,7 +1476,7 @@ rewind:function(c,t){
 	t.owner.deck.push(t.card);
 },
 ricochet:function(c,t, data){
-	if (!(t instanceof etg.CardInstance)) return;
+	if (t.type != etg.SpellEnum) return;
 	var tgting = Cards.Targeting[data.active.activename[0]];
 	function tgttest(x){
 		if (x) {
@@ -1521,7 +1508,7 @@ salvage:passive(function(c, t, data){
 	if (!data.salvaged && !c.hasactive("turnstart", "salvageoff") && c.owner.game.turn != c.owner){
 		Effect.mkText("Salvage", c);
 		data.salvaged = true;
-		c.owner.hand.push(new etg.CardInstance(t.card, c.owner));
+		c.owner.addCard(t.card);
 		c.addactive("turnstart", Skills.salvageoff);
 	}
 }),
@@ -1541,7 +1528,7 @@ scatterhand:function(c,t){
 	}
 },
 scramble:function(c,t){
-	if (t instanceof Player && !t.sanctuary){
+	if (t.type == -1 && !t.sanctuary){
 		for (var i=0; i<9; i++){
 			if (t.spend(etg.Chroma, 1)){
 				t.spend(etg.Chroma, -1);
@@ -1554,20 +1541,15 @@ serendipity:function(c){
 	for(var i=num-1; ~i; i--){
 		var card = c.randomcard(c.card.upped, function(x){return x.type != etg.PillarEnum && x.rarity < 4 && (i>0 || anyentro || x.element == etg.Entropy)});
 		anyentro |= card.element == etg.Entropy;
-		new etg.CardInstance(card.asShiny(c.card.shiny), c.owner).place();
+		c.owner.addCard(card.asShiny(c.card.shiny));
 	}
 },
 shtriga:function(c,t){
 	if (c.owner == t) c.status.immaterial = true;
 },
 silence:function(c,t){
-	if (t instanceof Player){
-		if (!t.sanctuary){
-			t.silence = true;
-		}
-	}else{
-		t.usedactive = true;
-	}
+	if (~t.type) usedactive = true;
+	else if (!t.sanctuary) t.silence = true;
 },
 singularity:function(c,t){
 	if (c.trueatk() > 0){
@@ -1595,7 +1577,7 @@ singularity:function(c,t){
 	}else if (r > .2){
 		Skills.parallel(c, c);
 	}else if (r > .1){
-		c.owner.weapon = new etg.Weapon(Cards.Dagger.asShiny(c.card.shiny), c.owner);
+		c.owner.setWeapon(new Thing(Cards.Dagger.asShiny(c.card.shiny), c.owner));
 	}
 },
 sing:function(c,t){
@@ -1669,8 +1651,8 @@ soulcatch:function(c,t){
 },
 spores:function(c,t){
 	var spore = c.card.as(Cards.Spore);
-	new etg.Creature(spore, c.owner).place();
-	new etg.Creature(spore, c.owner).place();
+	c.owner.addCrea(new Thing(spore, c.owner));
+	c.owner.addCrea(new Thing(spore, c.owner));
 },
 sskin:function(c,t){
 	c.owner.buffhp(c.owner.quanta[etg.Earth]);
@@ -1684,28 +1666,28 @@ static:function(c){
 steal:function(c,t){
 	if (t.status.stackable){
 		Skills.destroy(c, t, true);
-		if (t instanceof etg.Shield){
+		if (t.type == etg.ShieldEnum){
 			if (c.owner.shield && c.owner.shield.card == t.card){
 				c.owner.shield.status.charges++;
 			}else{
-				c.owner.shield = new etg.Shield(t.card, c.owner);
+				c.owner.setShield(new Thing(t.card, c.owner));
 				c.owner.shield.status.charges = 1;
 			}
-		}else if (t instanceof etg.Weapon){
+		}else if (t.type == etg.WeaponEnum){
 			if (c.owner.weapon && c.owner.weapon.card == t.card){
 				c.owner.shield.status.charges++;
 			}else{
-				c.owner.weapon = new etg.Weapon(t.card, c.owner);
+				c.owner.setWeapon(new Thing(t.card, c.owner));
 				c.owner.weapon.status.charges = 1;
 			}
 		}else{
-			new etg.Permanent(t.card, c.owner).place();
+			c.owner.addPerm(new Thing(t.card, c.owner));
 		}
 	}else{
 		t.remove();
-		t.owner = c.owner;
 		t.usedactive = true;
-		t.place();
+		t.owner = c.owner;
+		c.owner.addPerm(t);
 	}
 },
 steam:function(c,t){
@@ -1728,7 +1710,7 @@ storm:function(x){
 },
 summon:function(name){
 	return function(c,t){
-		new etg.Creature(c.card.as(Cards[name]), c.owner).place();
+		c.owner.addCrea(new Thing(c.card.as(Cards[name]), c.owner));
 	}
 },
 swarm:passive(function(c,t){
@@ -1741,7 +1723,7 @@ swave:function(c,t){
 		Effect.mkText("Death", t);
 		t.die();
 	}else{
-		if (t instanceof Player && t.weapon && t.weapon.status.frozen){
+		if (t.type == -1 && t.weapon && t.weapon.status.frozen){
 			Skills.destroy(c, t.weapon);
 		}
 		Effect.mkText("-4", t);
@@ -1762,9 +1744,9 @@ tesseractsummon:function(c,t){
 			if (pl.deck[j].type == etg.CreatureEnum) candidates.push(j);
 		}
 		if (candidates.length){
-			var idx = pl.choose(candidates), crcard = pl.deck.splice(idx, 1)[0], cr = new etg.Creature(crcard, pl);
+			var idx = pl.choose(candidates), crcard = pl.deck.splice(idx, 1)[0], cr = new Thing(crcard, pl);
 			cr.freeze(Math.ceil(crcard.cost/4));
-			cr.place();
+			c.owner.addCrea(cr);
 		}
 	}
 },
@@ -1816,18 +1798,19 @@ trick:function(c,t){
 	});
 	if (cards.length){
 		var pick = t.choose(cards);
-		var cr = t.owner.creatures[t.getIndex()] = new etg.Creature(t.owner.deck[pick], t.owner);
+		var cr = t.owner.creatures[t.getIndex()] = new Thing(t.owner.deck[pick], t.owner);
+		cr.type = etg.CreatureEnum;
 		t.owner.deck[pick] = t.card;
 		cr.proc("play");
 	}
 },
 turngolem:function(c,t){
-	var golem = new etg.Creature(c.card, c.owner);
-	golem.atk = Math.floor(c.status.storedpower / 3);
-	golem.maxhp = golem.hp = c.status.storedpower;
-	golem.place();
 	c.remove();
-	c.owner.gpull = golem;
+	c.atk = Math.floor(c.status.storedpower / 3);
+	c.maxhp = c.hp = c.status.storedpower;
+	c.status.storedpower = 0;
+	c.owner.addCrea(c);
+	c.owner.gpull = c;
 },
 unappease:function(c,t){
 	c.status.appeased = undefined;
@@ -1839,8 +1822,8 @@ unburrow:function(c,t){
 },
 unsummon:function(c,t){
 	if (t.owner.hand.length < 8){
-		new etg.CardInstance(t.card, t.owner).place();
 		t.remove();
+		t.owner.addCard(t.card);
 	}else{
 		Skills.rewind(c, t);
 	}
@@ -1929,7 +1912,7 @@ wisdom:function(c,t){
 	}
 },
 yoink:function(c,t){
-	if (t instanceof Player){
+	if (t.type == -1){
 		Skills.foedraw(c);
 	}else if (!t.owner.sanctuary){
 		t.remove();
@@ -1968,7 +1951,7 @@ blockwithcharge:function(c,t){
 chaos:function(c,t){
 	var randomchance = c.rng();
 	if (randomchance < .3) {
-		if (!t.status.ranged && t instanceof etg.Creature){
+		if (!t.status.ranged && t.type == etg.CreatureEnum){
 			Skills.cseed(c, t);
 		}
 	}else return c.card.upped && randomchance < .5;
@@ -2000,10 +1983,10 @@ evade:function(x){
 	};
 },
 evadespell:function(c,t, data){
-	if (data.tgt == c && c.owner != t.owner && t instanceof etg.CardInstance) data.evade = true;
+	if (data.tgt == c && c.owner != t.owner && t.type == etg.SpellEnum) data.evade = true;
 },
 evadecrea:function(c,t, data){
-	if (data.tgt == c && c.owner != t.owner && t instanceof etg.Creature) data.evade = true;
+	if (data.tgt == c && c.owner != t.owner && t.type == etg.SpellEnum) data.evade = true;
 },
 firewall:function(c,t){
 	if (!t.status.ranged){
@@ -2012,13 +1995,13 @@ firewall:function(c,t){
 	}
 },
 skull:function(c,t){
-	if (t instanceof etg.Creature && !t.card.isOf(Cards.Skeleton)) {
+	if (t.type == etg.CreatureEnum && !t.card.isOf(Cards.Skeleton)) {
 		var thp = t.truehp();
 		if (thp <= 0 || c.rng() < .5/thp){
 			var index = t.getIndex();
 			t.die();
 			if (!t.owner.creatures[index] || t.owner.creatures[index].card != Cards.MalignantCell){
-				t.owner.creatures[index] = new etg.Creature(t.card.as(Cards.Skeleton), t.owner);
+				(t.owner.creatures[index] = new Thing(t.card.as(Cards.Skeleton), t.owner)).type = etg.CreatureEnum;
 			}
 		}
 	}
@@ -2040,7 +2023,7 @@ thornweak:function(c,t){
 	}
 },
 weight:function(c,t){
-	return t instanceof etg.Creature && t.truehp()>5;
+	return t.type == etg.CreatureEnum && t.truehp()>5;
 },
 wings:function(c,t){
 	return !t.status.airborne && !t.status.ranged;
@@ -2052,5 +2035,6 @@ for(var key in Skills){
 var etg = require("./etg");
 var util = require("./util");
 var Cards = require("./Cards");
+var Thing = require("./Thing");
 var Effect = require("./Effect");
 var Player = require("./Player");

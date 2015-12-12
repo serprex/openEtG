@@ -9,7 +9,7 @@ module.exports = function(game) {
 			var ch = c.hash();
 			if (ch in casthash) return;
 			else casthash[ch] = true;
-			var active = c instanceof etg.CardInstance ? c.card.type == etg.SpellEnum && c.card.active.cast : c.active.cast;
+			var active = c.active.cast;
 			var cbits = game.tgtToBits(c) ^ 8;
 			function evalIter(t) {
 				if ((!game.targeting || (t && game.targeting.filter(t))) && --limit > 0) {

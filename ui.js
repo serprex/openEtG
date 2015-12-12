@@ -46,23 +46,23 @@ function cardPos(j, i) {
 	return new Point((j ? 6 : 766) + 66*(i&1), (j ? 80 : 308) + 48 * (i>>1));
 }
 function tgtToPos(t) {
-	if (t instanceof etg.Creature) {
+	if (t.type == etg.CreatureEnum) {
 		return creaturePos(t.owner == t.owner.game.player2, t.getIndex());
-	} else if (t instanceof etg.Weapon) {
+	} else if (t.type == etg.WeaponEnum) {
 		var p = new Point(666, 512);
 		if (t.owner == t.owner.game.player2) reflectPos(p);
 		return p;
-	} else if (t instanceof etg.Shield) {
+	} else if (t.type == etg.ShieldEnum) {
 		var p = new Point(710, 532);
 		if (t.owner == t.owner.game.player2) reflectPos(p);
 		return p;
-	} else if (t instanceof etg.Permanent) {
+	} else if (t.type == etg.PermanentEnum) {
 		return permanentPos(t.owner == t.owner.game.player2, t.getIndex());
-	} else if (t instanceof Player) {
+	} else if (t.type == -1) {
 		var p = new Point(50, 560);
 		if (t == t.owner.game.player2) reflectPos(p);
 		return p;
-	} else if (t instanceof etg.CardInstance) {
+	} else if (t.type == etg.SpellEnum) {
 		return cardPos(t.owner == t.owner.game.player2, t.owner.hand.indexOf(t));
 	} else console.log("Unknown target");
 }

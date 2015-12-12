@@ -21,16 +21,63 @@ function Player(game){
 	this.drawpower = 1;
 	this.markpower = 1;
 	this.mark = 0;
+	this.type = -1;
 	this.shardgolem = undefined;
 }
-Player.prototype = Object.create(require("./Thing").prototype);
 module.exports = Player;
+var Thing = require("./Thing")
+Player.prototype = Object.create(Thing.prototype);
 
 Player.prototype.toString = function(){ return this == this.game.player1?"p1":"p2"; }
 Player.prototype.isCloaked = function(){
 	return this.permanents.some(function(pr){
 		return pr && pr.status.cloak;
 	});
+}
+Player.prototype.addCrea = function(x, fromhand){
+	if (util.place(this.creatures, x)){
+		if (this.game.bonusstats != null && this == this.game.player1) this.game.bonusstats.creaturesplaced++;
+		x.type = etg.CreatureEnum;
+		x.place(fromhand);
+	}
+}
+Player.prototype.addPerm = function(x, fromhand){
+	if (x.status.additive){
+		var dullcode = etgutil.asShiny(x.card.code, false);
+		for(var i=0; i<16; i++){
+			if (this.permanents[i] && etgutil.asShiny(this.permanents[i].card.code, false) == dullcode){
+				this.permanents[i].status.charges += x.status.charges;
+				this.permanents[i].place(fromhand);
+				return;
+			}
+		}
+	}
+	if (util.place(this.permanents, x)){
+		x.type = etg.PermanentEnum;
+		x.place(fromhand);
+	}
+}
+Player.prototype.setWeapon = function(x, fromhand){
+	x.type = etg.WeaponEnum;
+	this.owner.weapon = x;
+	x.place(fromhand);
+}
+Player.prototype.setShield = function(x, fromhand){
+	if (x.status.additive && this.shield && x.card.as(this.shield.card) == x.card){
+		this.shield.status.charges += x.status.charges;
+	}else{
+		x.type = etg.ShieldEnum;
+		this.shield = x;
+	}
+	x.place(fromhand);
+}
+Player.prototype.addCardInstance = function(x){
+	if (this.hand.length >= 8) return -1;
+	x.type = etg.SpellEnum;
+	this.hand.push(x);
+}
+Player.prototype.addCard = function(card){
+	this.addCardInstance(new Thing(card, this));
 }
 Player.prototype.forEach = function(func, dohand){
 	func(this.weapon);
@@ -62,7 +109,7 @@ Player.prototype.randomquanta = function() {
 	if (nonzero == 0){
 		return -1;
 	}
-	nonzero = this.uptoceil(nonzero);
+	nonzero = 1+this.upto(nonzero);
 	for(var i=1; i<13; i++){
 		if ((nonzero -= this.quanta[i])<=0){
 			return i;
@@ -81,7 +128,7 @@ Player.prototype.spend = function(qtype, x) {
 	if (!qtype) {
 		var b = x < 0 ? -1 : 1;
 		for (var i = x * b;i > 0;i--) {
-			var q = b == -1 ? this.uptoceil(12) : this.randomquanta();
+			var q = b == -1 ? 1+this.upto(12) : this.randomquanta();
 			this.quanta[q] = Math.min(this.quanta[q] - b, 99);
 		}
 	} else this.quanta[qtype] = Math.min(this.quanta[qtype] - x, 99);
@@ -183,7 +230,7 @@ Player.prototype.endturn = function(discard) {
 Player.prototype.drawcard = function(drawstep) {
 	if (this.hand.length<8){
 		if (this.deck.length>0){
-			if (~new etg.CardInstance(this.deck.pop(), this).place()){
+			if (~this.addCard(this.deck.pop())){
 				this.proc("draw", drawstep);
 				if (this.deck.length == 0 && this.game.player1 == this && !Effect.disable)
 					Effect.mkSpriteFade(ui.getBasicTextImage("Last card!", 32, "white", "black"));
@@ -198,7 +245,7 @@ Player.prototype.drawhand = function(x) {
 	this.shuffle(this.deck);
 	if (x > this.deck.length) x = deck.length;
 	for(var i=0; i<x; i++){
-		this.hand.push(new etg.CardInstance(this.deck.pop(), this));
+		this.addCard(this.deck.pop());
 	}
 }
 function destroyCloak(pr){
@@ -271,6 +318,11 @@ Player.prototype.clone = function(game){
 	}
 	return obj;
 }
+Player.prototype.hash = function(){
+	return this == this.game.player1 ? 0 : 0x7fffffff;
+}
 
 var etg = require("./etg");
+var util = require("./util");
+var etgutil = require("./etgutil");
 var Effect = require("./Effect");

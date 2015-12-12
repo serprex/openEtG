@@ -43,7 +43,7 @@ function startMatch(game, foeDeck, spectate) {
 				}
 			} else if (obj.canactive() && !(obj.owner == game.player2 && game.player2.isCloaked())) {
 				fgfx.lineStyle(2, obj.card.element == 8 ? 0 : 0xffffff);
-				fgfx.drawRect(spr.position.x - spr.width / 2, spr.position.y - spr.height / 2 - 1, spr.width, (obj instanceof etg.Weapon || obj instanceof etg.Shield ? 12 : 10));
+				fgfx.drawRect(spr.position.x - spr.width / 2, spr.position.y - spr.height / 2 - 1, spr.width, (obj.type == etg.WeaponEnum || obj.type == etg.ShieldEnum ? 12 : 10));
 			}
 		}
 	}
@@ -487,7 +487,7 @@ function startMatch(game, foeDeck, spectate) {
 			console.log("cast", c.toString(), (t || "-").toString(), bits);
 			var sprite = new PIXI.Sprite(gfx.nopic);
 			sprite.position.set((foeplays.children.length & 7) * 99, (foeplays.children.length >> 3) * 19);
-			if (c instanceof etg.CardInstance){
+			if (c.type == etg.SpellEnum){
 				sprite.card = c.card;
 			}
 			else{

@@ -92,16 +92,17 @@ Card.prototype.isOf = function(card){
 	return card.code == etgutil.asShiny(etgutil.asUpped(this.code, false), false);
 }
 Card.prototype.play = function(owner, src, tgt){
-	if (this.type <= etg.PermanentEnum){
-		ui.playSound("permPlay");
-		var cons = [etg.Permanent, etg.Weapon, etg.Shield, etg.Permanent][this.type];
-		return new cons(this, owner).place(true);
-	}else if (this.type == etg.SpellEnum){
+	if (this.type == etg.SpellEnum){
 		src.castSpell(tgt, this.active.cast);
-	}else if (this.type == etg.CreatureEnum){
-		ui.playSound("creaturePlay");
-		return new etg.Creature(this, owner).place(true);
-	}else console.log("Unknown card type: " + this.type);
+	}else{
+		ui.playSound(this.type <= etg.PermanentEnum ? "permPlay" : "creaturePlay");
+		var thing = new Thing(this, owner);
+		if (this.type == etg.CreatureEnum) owner.addCrea(thing);
+		else if (this.type == etg.PermanentEnum || this.type == etg.PillarEnum) owner.addPerm(thing);
+		else if (this.type == etg.WeaponEnum) owner.setWeapon(thing);
+		else owner.setShield(thing);
+		return thing;
+	}
 }
 function readCost(coststr, defaultElement){
 	if (typeof coststr == "number") return new Int8Array([coststr, defaultElement]);

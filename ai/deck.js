@@ -67,7 +67,7 @@ module.exports = function(uprate, markpower, maxRarity) {
 		return uprate ? etgutil.asUpped(x, Math.random() < uprate) : x;
 	}
 	var cardcount = {};
-	var eles = new Uint8Array([RngMock.uptoceil(12), RngMock.uptoceil(12)]), ecost = new Float32Array(13);
+	var eles = new Uint8Array([RngMock.upto(12)+1, RngMock.upto(12)+1]), ecost = new Float32Array(13);
 	for (var i = 0;i < 13;i++) {
 		ecost[i] = 0;
 	}

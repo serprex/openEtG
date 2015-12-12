@@ -439,7 +439,7 @@ var userEvents = {
 				while (i == pack.rare[rarity-1]) rarity++;
 				var cardcode;
 				if (rarity == 5){
-					cardcode = etg.NymphList[data.element > 0 && data.element < 13 ? data.element : RngMock.uptoceil(12)];
+					cardcode = etg.NymphList[data.element > 0 && data.element < 13 ? data.element : RngMock.upto(12)+1];
 				}else{
 					var notFromElement = Math.random() > .5, bumprarity = rarity+(Math.random() < bumprate), card = undefined;
 					if (data.element < 13) card = RngMock.randomcard(false, x => (x.element == data.element) ^ notFromElement && x.rarity == bumprarity);
@@ -488,7 +488,7 @@ var sockEvents = {
 		var A = Math.min(data.A || 1, 99), X = data.X || etgutil.MAX_INT;
 		var sum = 0;
 		for(var i=0; i<A; i++){
-			sum += RngMock.uptoceil(X);
+			sum += RngMock.upto(X)+1;
 		}
 		data.sum = sum;
 		broadcast(data);
