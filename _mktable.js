@@ -9,11 +9,12 @@ function writetd(){
 }
 if (process.argv.length < 3){
 	var etg = require("./etg");
-	require("./Cards").loadcards();
+	var Cards = require("./Cards");
+	Cards.loadcards();
 	write("[right][table]");
 	writetd("Tot", "Ele", "C", "P", "S", "|", "R", "U", "C", "", "");
 	for(var i=0; i<13; i++){
-		var ofele = etg.filtercards(false, function(x){return x.element == i});
+		var ofele = Cards.filter(false, function(x){return x.element == i});
 		var creas = 0, perms = 0, spels = 0, comm = new Uint32Array(3), last = 0;
 		ofele.forEach(function(x){
 			if (x.type <= etg.PermanentEnum) perms++;

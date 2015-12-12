@@ -7,6 +7,23 @@ exports.loadcards = function(){
 		else parseCsv(type, cards);
 	});
 }
+var filtercache = [];
+exports.filter = function(upped, filter, cmp, showshiny){
+	var cacheidx = (upped?1:0)|(showshiny?2:0);
+	if (!(cacheidx in filtercache)){
+		filtercache[cacheidx] = [];
+		for (var key in exports.Codes){
+			var card = exports.Codes[key];
+			if (card.upped == upped && !card.shiny == !showshiny && !card.status.token){
+				filtercache[cacheidx].push(card);
+			}
+		}
+		filtercache[cacheidx].sort();
+	}
+	var keys = filtercache[cacheidx].filter(filter);
+	if (cmp) keys.sort(cmp);
+	return keys;
+}
 function parseCsv(type, data){
 	var keys = data[0], cardinfo = {};
 	for(var i=1; i<data.length; i++){

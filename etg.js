@@ -497,29 +497,11 @@ CardInstance.prototype.useactive = function(target){
 	if (owner.game.bonusstats != null && owner == owner.game.player1) owner.game.bonusstats.cardsplayed[this.card.type]++;
 	owner.game.updateExpectedDamage();
 }
-var filtercache = [];
-function filtercards(upped, filter, cmp, showshiny){
-	var cacheidx = (upped?1:0)|(showshiny?2:0);
-	if (!(cacheidx in filtercache)){
-		filtercache[cacheidx] = [];
-		for (var key in Cards.Codes){
-			var card = Cards.Codes[key];
-			if (card.upped == upped && !card.shiny == !showshiny && !card.status.token){
-				filtercache[cacheidx].push(card);
-			}
-		}
-		filtercache[cacheidx].sort();
-	}
-	var keys = filtercache[cacheidx].filter(filter);
-	if (cmp) keys.sort(cmp);
-	return keys;
-}
 exports.CardInstance = CardInstance;
 exports.Weapon = Weapon;
 exports.Shield = Shield;
 exports.Permanent = Permanent;
 exports.Creature = Creature;
-exports.filtercards = filtercards;
 exports.countAdrenaline = countAdrenaline;
 exports.getAdrenalRow = getAdrenalRow;
 exports.cloneStatus = cloneStatus;

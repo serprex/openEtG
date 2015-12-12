@@ -1,7 +1,6 @@
 "use strict";
 var px = require("../px");
 var dom = require("../dom");
-var etg = require("../etg");
 var gfx = require("../gfx");
 var chat = require("../chat");
 var sock = require("../sock");
@@ -16,7 +15,7 @@ module.exports = function(reward, numberofcopies, code) {
 		if (shiny) reward = reward.slice(1);
 		var upped = reward.slice(0, 5) == "upped";
 		var rarity = userutil.rewardwords[upped ? reward.slice(5) : reward];
-		rewardList = etg.filtercards(upped, function(x) { return x.rarity == rarity }).map(function(card){ return card.asShiny(shiny).code });
+		rewardList = Cards.filter(upped, function(x) { return x.rarity == rarity }).map(function(card){ return card.asShiny(shiny).code });
 	}else if (reward instanceof Array){
 		rewardList = reward;
 	}else{

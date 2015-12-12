@@ -1,6 +1,6 @@
 // Modified/Simplified from PIXI's interaction manager
 var over, down, DOMElement,
-	mouse = new PIXI.math.Point(), _tempPoint = new PIXI.math.Point();
+	mouse = new PIXI.math.Point();
 exports.init = function(stage, renderer)
 {
 	exports.stage = stage;
@@ -136,9 +136,9 @@ function hitTest(item, xy)
 	if (!xy) xy = mouse;
 
 	// map the global point to local space
-	item.worldTransform.applyInverse(xy, _tempPoint);
-
-	var x = _tempPoint.x, y = _tempPoint.y;
+	var tmpPoint = new PIXI.math.Point();
+	item.worldTransform.applyInverse(xy, tmpPoint);
+	var x = tmpPoint.x, y = tmpPoint.y;
 
 	//a sprite or display object with a hit area defined
 	if (item.hitArea && item.hitArea.contains)

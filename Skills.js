@@ -311,7 +311,7 @@ cseed:function(c,t){
 	Skills[c.owner.choose(["drainlife", "firebolt", "freeze", "gpullspell", "icebolt", "infect", "lightning", "lobotomize", "parallel", "rewind", "snipe", "swave"])](c, t);
 },
 cseed2:function(c,t){
-	var choice = c.owner.choose(etg.filtercards(c.owner.upto(2), function(c){
+	var choice = c.owner.choose(Cards.filter(c.owner.upto(2), function(c){
 		if (c.type != etg.SpellEnum) return false;
 		var tgting = Cards.Targeting[c.active.cast.activename];
 		return tgting && tgting(c, t);

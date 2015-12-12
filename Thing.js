@@ -159,7 +159,7 @@ Thing.prototype.choose = function(x){
 	return x[this.upto(x.length)];
 }
 Thing.prototype.randomcard = function(upped, filter){
-	var keys = etg.filtercards(upped, filter);
+	var keys = Cards.filter(upped, filter);
 	return keys && keys.length && Cards.Codes[this.choose(keys)];
 }
 Thing.prototype.shuffle = function(array) {

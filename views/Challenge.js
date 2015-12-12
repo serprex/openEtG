@@ -1,7 +1,6 @@
 var px = require("../px");
 var ui = require("../ui");
 var dom = require("../dom");
-var etg = require("../etg");
 var sock = require("../sock");
 var etgutil = require("../etgutil");
 var options = require("../options");

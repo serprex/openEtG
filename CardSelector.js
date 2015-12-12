@@ -107,7 +107,7 @@ CardSelector.prototype.makeColumns = function(){
 	this.bshowall.style.display = this.cardpool?"":"none";
 	var self = this;
 	for (var i = 0;i < 6;i++) {
-		this.columns[i] = etg.filtercards(i > 2,
+		this.columns[i] = Cards.filter(i > 2,
 			function(x) { return (x.element == self.elefilter || self.rarefilter == 4) &&
 				((i % 3 == 0 && x.type == etg.CreatureEnum) || (i % 3 == 1 && x.type <= etg.PermanentEnum) || (i % 3 == 2 && x.type == etg.SpellEnum)) &&
 				(!self.cardpool || x.code in self.cardpool || (self.filterboth && etgutil.asShiny(x.code, true) in self.cardpool) || self.showall || x.isFree()) && (!self.rarefilter || self.rarefilter == Math.min(x.rarity, 4));
