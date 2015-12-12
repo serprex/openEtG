@@ -823,18 +823,18 @@ hatch:function(c,t){
 heal:function(c,t){
 	t.dmg(-20);
 },
-heatmirror: function(c, t, fromhand) {
+heatmirror:function(c,t, fromhand){
 	if (fromhand && t instanceof etg.Creature && c.owner != t.owner) {
 		new etg.Creature(c.card.as(Cards.Spark), c.owner).place();
 	}
 },
-hitownertwice:function(c,t){
+hitownertwice:passive(function(c,t){
 	if (!c.hasactive("turnstart", "predatoroff")){
 		c.addactive("turnstart", Skills.predatoroff);
 		c.attack(false, 0, c.owner);
 		c.attack(false, 0, c.owner);
 	}
-},
+}),
 holylight:function(c,t){
 	if (t.status.nocturnal) t.spelldmg(10);
 	else t.dmg(-10);
