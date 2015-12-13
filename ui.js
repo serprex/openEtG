@@ -58,7 +58,7 @@ function tgtToPos(t) {
 		return p;
 	} else if (t.type == etg.PermanentEnum) {
 		return permanentPos(t.owner == t.owner.game.player2, t.getIndex());
-	} else if (t.type == -1) {
+	} else if (t.type == etg.PlayerEnum) {
 		var p = new Point(50, 560);
 		if (t == t.owner.game.player2) reflectPos(p);
 		return p;

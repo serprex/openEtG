@@ -21,7 +21,7 @@ function Player(game){
 	this.drawpower = 1;
 	this.markpower = 1;
 	this.mark = 0;
-	this.type = -1;
+	this.type = etg.PlayerEnum;
 	this.shardgolem = undefined;
 }
 module.exports = Player;

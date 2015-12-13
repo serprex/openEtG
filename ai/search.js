@@ -49,7 +49,7 @@ var afilter = {
 };
 function searchSkill(active, c, t){
 	var func = afilter[active.activename[0]];
-	return !func || t.type == -1 || t.hasactive("prespell", "protectonce") || func(c, t);
+	return !func || t.type == etg.PlayerEnum || t.hasactive("prespell", "protectonce") || func(c, t);
 }
 module.exports = function(game, previous) {
 	var currentEval, worstcard;

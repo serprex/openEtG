@@ -393,7 +393,7 @@ destroy:function(c,t, dontsalvage, donttalk){
 	}
 },
 destroycard:function(c,t){
-	if (t.type == -1){
+	if (t.type == etg.PlayerEnum){
 		if (!t.deck.length) t.game.setWinner(t.foe);
 		else t.deck.length--;
 	}else if (!t.owner.sanctuary){
@@ -420,7 +420,7 @@ die:function(c,t){
 	c.die();
 },
 disarm:function(c,t){
-	if (t.type == -1 && t.weapon){
+	if (t.type == etg.PlayerEnum && t.weapon){
 		Skills.unsummon(c, t.weapon);
 	}
 },
@@ -632,7 +632,7 @@ fire:function(c,t){
 },
 firebolt:function(c,t){
 	t.spelldmg(3+Math.floor(c.owner.quanta[etg.Fire]/4));
-	if (t.type == -1){
+	if (t.type == etg.PlayerEnum){
 		if (t.weapon){
 			t.weapon.status.frozen = 0;
 		}
@@ -1031,7 +1031,7 @@ locket: function(c, t) {
 	c.owner.spend(ele, ele > 0 ? -1 : -3);
 },
 locketshift:function(c,t){
-	c.status.mode = t.type == -1 ? t.mark : t.card.element;
+	c.status.mode = t.type == etg.PlayerEnum ? t.mark : t.card.element;
 },
 loot:function(c,t){
 	if (c.owner == t.owner && !c.hasactive("turnstart", "salvageoff")){
@@ -1074,7 +1074,7 @@ mend:function(c,t){
 	t.dmg(-10);
 },
 metamorph:function(c,t){
-	c.owner.mark = t.type == -1 ? t.mark : t.card.element;
+	c.owner.mark = t.type == etg.PlayerEnum ? t.mark : t.card.element;
 	c.owner.markpower++;
 },
 midas:function(c,t){
@@ -1378,7 +1378,7 @@ purify:function(c,t){
 	t.status.poison = t.status.poison < 0?t.status.poison-2:-2;
 	t.status.aflatoxin = false;
 	t.status.neuro = false;
-	if (t.type == -1){
+	if (t.type == etg.PlayerEnum){
 		t.sosa = 0;
 	}
 },
@@ -1428,7 +1428,7 @@ rebirth:function(c,t){
 },
 reducemaxhp:function(c,t, dmg){
 	t.maxhp = Math.max(t.maxhp-dmg, 1);
-	if (t.maxhp > 500 && t.type == -1) t.maxhp = 500;
+	if (t.maxhp > 500 && t.type == etg.PlayerEnum) t.maxhp = 500;
 	if (t.hp > t.maxhp) t.dmg(t.hp-t.maxhp);
 },
 regen:adrenathrottle(function(c,t){
@@ -1526,7 +1526,7 @@ scatterhand:function(c,t){
 	}
 },
 scramble:function(c,t){
-	if (t.type == -1 && !t.sanctuary){
+	if (t.type == etg.PlayerEnum && !t.sanctuary){
 		for (var i=0; i<9; i++){
 			if (t.spend(etg.Chroma, 1)){
 				t.spend(etg.Chroma, -1);
@@ -1546,7 +1546,7 @@ shtriga:function(c,t){
 	if (c.owner == t) c.status.immaterial = true;
 },
 silence:function(c,t){
-	if (~t.type) usedactive = true;
+	if (t.type != etg.PlayerEnum) usedactive = true;
 	else if (!t.sanctuary) t.silence = true;
 },
 singularity:function(c,t){
@@ -1721,7 +1721,7 @@ swave:function(c,t){
 		Effect.mkText("Death", t);
 		t.die();
 	}else{
-		if (t.type == -1 && t.weapon && t.weapon.status.frozen){
+		if (t.type == etg.PlayerEnum && t.weapon && t.weapon.status.frozen){
 			Skills.destroy(c, t.weapon);
 		}
 		Effect.mkText("-4", t);
@@ -1910,7 +1910,7 @@ wisdom:function(c,t){
 	}
 },
 yoink:function(c,t){
-	if (t.type == -1){
+	if (t.type == etg.PlayerEnum){
 		Skills.foedraw(c);
 	}else if (!t.owner.sanctuary){
 		t.remove();

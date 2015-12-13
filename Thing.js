@@ -260,7 +260,7 @@ Thing.prototype.mutantactive = function(){
 	}
 }
 Thing.prototype.isMaterial = function(type) {
-	return (type == etg.PermanentEnum ? this.type <= type : type ? this.type == type : this.type != etg.SpellEnum && this.type != -1) && !this.status.immaterial && !this.status.burrowed;
+	return (type == etg.PermanentEnum ? this.type <= type : type ? this.type == type : this.type != etg.SpellEnum && this.type != etg.PlayerEnum) && !this.status.immaterial && !this.status.burrowed;
 }
 function combineactive(a1, a2){
 	if (!a1){

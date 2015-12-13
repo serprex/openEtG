@@ -82,6 +82,7 @@ exports.ShieldEnum = 2;
 exports.PermanentEnum = 3;
 exports.SpellEnum = 4;
 exports.CreatureEnum = 5;
+exports.PlayerEnum = 6;
 exports.MulliganPhase1 = 0;
 exports.MulliganPhase2 = 1;
 exports.PlayPhase = 2;

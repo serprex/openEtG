@@ -81,13 +81,13 @@ var TargetFilters = {
 		return c != t && t.type == etg.SpellEnum;
 	},
 	pill:function(c, t){
-		return t.isMaterial(etg.PermanentEnum) && t.card.type == etg.PillarEnum;
+		return t.isMaterial(etg.PillarEnum);
 	},
 	weap:function(c, t){
-		return (t.type == etg.WeaponEnum || (~t.type && t.card.type == etg.WeaponEnum)) && !t.status.immaterial && !t.status.burrowed;
+		return (t.type == etg.WeaponEnum || (t.type != etg.PlayerEnum && t.card.type == etg.WeaponEnum)) && !t.status.immaterial && !t.status.burrowed;
 	},
 	shie:function(c, t){
-		return (t.type == etg.ShieldEnum || (~t.type && t.card.type == etg.ShieldEnum)) && !t.status.immaterial && !t.status.burrowed;
+		return (t.type == etg.ShieldEnum || (t.type != etg.PlayerEnum && t.card.type == etg.ShieldEnum)) && !t.status.immaterial && !t.status.burrowed;
 	},
 	playerweap:function(c,t){
 		return t.type == etg.WeaponEnum;
@@ -105,10 +105,10 @@ var TargetFilters = {
 		return t.isMaterial(etg.CreatureEnum);
 	},
 	play:function(c, t){
-		return t.type == -1;
+		return t.type == etg.PlayerEnum;
 	},
 	notplay:function(c, t){
-		return t.type != -1;
+		return t.type != etg.PlayerEnum;
 	},
 	sing:function(c, t){
 		return t.isMaterial(etg.CreatureEnum) && t.active.cast != c.active.cast;
