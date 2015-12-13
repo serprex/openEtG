@@ -8,8 +8,8 @@ function writetd(){
 	write("[/tr]");
 }
 if (process.argv.length < 3){
-	var etg = require("./etg");
-	var Cards = require("./Cards");
+	var etg = require("../etg");
+	var Cards = require("../Cards");
 	Cards.loadcards();
 	write("[right][table]");
 	writetd("Tot", "Ele", "C", "P", "S", "|", "R", "U", "C", "", "");
@@ -25,11 +25,11 @@ if (process.argv.length < 3){
 				if (x.code > last) last = x.code;
 			}
 		});
-		writetd(ofele.length, require("./ui").eleNames[i], creas, perms, spels, "|", comm[2], comm[1], comm[0], last.toString(32), (last+2000).toString(32));
+		writetd(ofele.length, require("../ui").eleNames[i], creas, perms, spels, "|", comm[2], comm[1], comm[0], last.toString(32), (last+2000).toString(32));
 	}
 	write("[/table][/right]\n");
 }else{
-	var decks = require("./Decks")[process.argv[2]];
+	var decks = require("../Decks")[process.argv[2]];
 	if (decks){
 		decks.forEach(function(deck){
 			write("[deck title="+deck[0]+"]"+deck[1]+"[/deck]");

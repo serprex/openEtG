@@ -1,13 +1,13 @@
 #!/usr/bin/env node
 "use strict";
 var assert = require("assert");
-var etg = require("./etg");
-var util = require("./util");
-var Game = require("./Game");
-var Cards = require("./Cards");
-var Thing = require("./Thing");
-var Skills = require("./Skills");
-var etgutil = require("./etgutil");
+var etg = require("../etg");
+var util = require("../util");
+var Game = require("../Game");
+var Cards = require("../Cards");
+var Thing = require("../Thing");
+var Skills = require("../Skills");
+var etgutil = require("../etgutil");
 Cards.loadcards();
 function initHand(pl){
 	for(var i=1; i<arguments.length; i++){

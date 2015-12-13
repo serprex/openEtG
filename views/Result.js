@@ -35,7 +35,7 @@ module.exports = function(game, foeDeck) {
 		case 5:sock.userEmit("foearena", {lv:1});break;
 		case undefined:
 			if (game.foename == "Custom" || game.foename == "Test"){
-				var gameData = { deck: etgutil.encodedeck(foeDeck), urdeck: sock.getDeck(), seed: Math.random() * etgutil.MAX_INT, foename: game.foename, cardreward: "" };
+				var gameData = { deck: etgutil.encodedeck(foeDeck) + etgutil.toTrueMarkSuffix(game.player2.mark), urdeck: sock.getDeck(), seed: Math.random() * etgutil.MAX_INT, foename: game.foename, cardreward: "" };
 				if (game.foename == "Custom"){
 					ui.parsepvpstats(gameData);
 					ui.parseaistats(gameData);
