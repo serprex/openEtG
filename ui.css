@@ -8,7 +8,7 @@ body{
 	font:16px Dosis;
 }
 a{
-	color:#69F;
+	color:#69f;
 	text-decoration:none;
 }
 tr,td{padding:0}
@@ -50,7 +50,7 @@ input[type="text"],input[type="password"],input:not([type]){width:150px;border:2
 	pointer-events:none;
 }
 .lightback{background-color:#aaa;color:#000}
-.beigeback{background-color:#a09080;color:#000}
+.beigeback{background-color:#a98;color:#000}
 .selectedbutton{background:linear-gradient(to bottom,#424748,#89f)!important}
 .editbtn{width:32px!important;margin-left:4px}
 .bgimg{

@@ -25,6 +25,7 @@ Thing.prototype.transform = function(card){
 	for (var key in card.status){
 		if (!this.status[key]) this.status[key] = card.status[key];
 	}
+	this.active = util.clone(card.active);
 	if (this.status.mutant){
 		var buff = this.upto(25);
 		this.buffhp(Math.floor(buff/5));
