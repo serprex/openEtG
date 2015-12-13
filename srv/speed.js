@@ -1,6 +1,6 @@
 "use strict";
 var deck = require("./deck");
-var Cards = require("./Cards");
+var Cards = require("../Cards");
 var Player = require("../Player");
 var mt = require("../MersenneTwister");
 module.exports = function(url, resolve, reject, stime){
