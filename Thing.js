@@ -77,7 +77,7 @@ Thing.prototype.remove = function(index){
 	}
 	return index;
 }
-Thing.prototype.die = function(index){
+Thing.prototype.die = function(){
 	var idx = this.remove();
 	if (idx == -1) return;
 	if (this.type <= etg.PermanentEnum){
@@ -86,10 +86,10 @@ Thing.prototype.die = function(index){
 		this.proc("discard");
 	} else if (this.type == etg.CreatureEnum && !(this.active.predeath && this.active.predeath(this))){
 		if (this.status.aflatoxin & !this.card.isOf(Cards.MalignantCell)){
-			(this.owner.creatures[index] = new Thing(this.card.as(Cards.MalignantCell), this.owner)).type = etg.CreatureEnum;
+			(this.owner.creatures[idx] = new Thing(this.card.as(Cards.MalignantCell), this.owner)).type = etg.CreatureEnum;
 		}
 		if (this.owner.game.bonusstats != null && this.owner == this.owner.game.player2) this.owner.game.bonusstats.creatureskilled++;
-		this.deatheffect(index);
+		this.deatheffect(idx);
 	}
 }
 Thing.prototype.deatheffect = function(index){
@@ -260,7 +260,7 @@ Thing.prototype.mutantactive = function(){
 	}
 }
 Thing.prototype.isMaterial = function(type) {
-	return (type ? this.type == type : this.type != etg.SpellEnum && this.type != -1) && !this.status.immaterial && !this.status.burrowed;
+	return (type == etg.PermanentEnum ? this.type <= type : type ? this.type == type : this.type != etg.SpellEnum && this.type != -1) && !this.status.immaterial && !this.status.burrowed;
 }
 function combineactive(a1, a2){
 	if (!a1){

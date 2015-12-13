@@ -123,10 +123,8 @@ becomearctic:passive(function(c,t){
 beguile:function(c,t){
 	t.remove();
 	t.owner = t.owner.foe;
-	t.place();
-	if (c != t){
-		t.addactive("turnstart", Skills.beguilestop);
-	}
+	t.owner.addCrea(t);
+	if (c != t) t.addactive("turnstart", Skills.beguilestop);
 },
 beguilestop:passive(function(c,t){
 	if (t == c.owner){
@@ -754,7 +752,7 @@ give:function(c,t){
 	}else{
 		t.remove();
 		t.owner = c.owner.foe;
-		t.place();
+		t.owner.addCrea(t);
 	}
 },
 golemhit:function(c,t){
@@ -1276,7 +1274,7 @@ parallel:function(c,t){
 		return;
 	}
 	var copy = t.clone(c.owner);
-	copy.place();
+	t.owner.addCrea(copy);
 	if (copy.status.mutant){
 		var buff = c.owner.upto(25);
 		copy.buffhp(Math.floor(buff/5));

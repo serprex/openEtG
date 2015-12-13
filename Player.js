@@ -147,7 +147,7 @@ Player.prototype.countpermanents = function() {
 Player.prototype.endturn = function(discard) {
 	this.game.ply++;
 	if (discard != undefined){
-		this.hand[discard].die(discard);
+		this.hand[discard].die();
 	}
 	this.spend(this.mark, this.markpower * (this.mark > 0 ? -1 : -3));
 	if (this.foe.status.poison){
