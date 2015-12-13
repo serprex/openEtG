@@ -20,19 +20,6 @@ function cloneStatus(status){
 	}
 	return result;
 }
-function parseSkill(name){
-	if (name in Skills){
-		return Skills[name];
-	}else{
-		var spidx = name.indexOf(" ");
-		if (~spidx){
-			Skills[name] = Skills[name.slice(0, spidx)](name.slice(spidx+1));
-			Skills[name].activename = [name];
-			return Skills[name];
-		}
-	}
-	console.log("Unknown active", name);
-}
 // adrtbl is a bitpacked 2d array
 // [[0,0,0,0],[1,1,1],[2,2,2],[3,3,3],[3,2],[4,2],[4,2],[5,3],[6,3],[3],[4],[4],[4],[5],[5],[5]]
 var adrtbl = new Uint16Array([4, 587, 1171, 1755, 154, 162, 162, 234, 242, 25, 33, 33, 33, 41, 41, 41]);
@@ -92,5 +79,3 @@ exports.PendList = new Uint16Array([5004, 5150, 5250, 5350, 5450, 5550, 5650, 57
 exports.NymphList = new Uint16Array([0, 5120, 5220, 5320, 5420, 5520, 5620, 5720, 5820, 5920, 6020, 6120, 6220]);
 exports.AlchemyList = new Uint16Array([0, 5111, 5212, 5311, 5413, 5511, 5611, 5712, 5811, 5910, 6011, 6110, 6209]);
 exports.ShardList = new Uint16Array([0, 5130, 5230, 5330, 5430, 5530, 5630, 5730, 5830, 5930, 6030, 6130, 6230]);
-
-var Skills = require("./Skills");

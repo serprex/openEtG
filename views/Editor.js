@@ -45,7 +45,7 @@ module.exports = function(arena, ainfo, acard, startempty) {
 		}
 		marksprite.className = "ico e"+editormark;
 		if (decksprite.deck.length > 60) decksprite.deck.length = 60;
-		decksprite.deck.sort(etgutil.codeCmp);
+		decksprite.deck.sort(Cards.codeCmp);
 		if (sock.user) {
 			cardsel.cardminus = cardminus = {};
 			for (var i = decksprite.deck.length - 1;i >= 0;i--) {

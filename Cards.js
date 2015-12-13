@@ -7,6 +7,13 @@ exports.loadcards = function(){
 		else parseCsv(type, cards);
 	});
 }
+exports.codeCmp = function(x, y){
+	var cx = exports.Codes[etgutil.asShiny(x, false)], cy = Cards.Codes[etgutil.asShiny(y, false)];
+	return cx.upped - cy.upped || cx.element - cy.element || cx.cost - cy.cost || cx.type - cy.type || (cx.code > cy.code) - (cx.code < cy.code) || (x > y) - (x < y);
+}
+exports.cardCmp = function(x, y){
+	return exports.codeCmp(x.code, y.code);
+}
 var filtercache = [];
 exports.filter = function(upped, filter, cmp, showshiny){
 	var cacheidx = (upped?1:0)|(showshiny?2:0);

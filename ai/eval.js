@@ -2,6 +2,7 @@
 var etg = require("../etg");
 var Cards = require("../Cards");
 var Skills = require("../Skills");
+var parseSkill = require("./parseSkill");
 var enableLogging = false, logbuff, logstack;
 function logStart(){
 	if (enableLogging){
@@ -236,7 +237,7 @@ var SkillsValues = Object.freeze({
 	momentum:2,
 	mutation:4,
 	neuro:function(c) {
-		return c.owner.foe.status.neuro?evalactive(c, etg.parseSkill("poison 1"))+.1:6;
+		return c.owner.foe.status.neuro?evalactive(c, parseSkill("poison 1"))+.1:6;
 	},
 	neuroify:function(c) {
 		return c.owner.foe.status.neuro?1:5;

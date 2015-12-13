@@ -2,7 +2,7 @@ module.exports = DeckDisplay;
 var ui = require("./ui");
 var px = require("./px");
 var gfx = require("./gfx");
-var etgutil = require("./etgutil");
+var Cards = require("./Cards");
 
 function DeckDisplay(decksize, cardmouseover, cardclick, deck){
 	PIXI.Container.call(this);
@@ -41,7 +41,7 @@ DeckDisplay.prototype.renderDeck = function(i){
 DeckDisplay.prototype.addCard = function(code, i){
 	if (i === undefined) i = 0;
 	for (;i < this.deck.length;i++) {
-		if (etgutil.codeCmp(this.deck[i], code) >= 0) break;
+		if (Cards.codeCmp(this.deck[i], code) >= 0) break;
 	}
 	this.deck.splice(i, 0, code);
 	this.renderDeck(i);

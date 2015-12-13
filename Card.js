@@ -19,7 +19,7 @@ function Card(type, info){
 	this.castele = 0;
 	if (info.Skill){
 		if (this.type == etg.SpellEnum){
-			this.active = {cast:etg.parseSkill(info.Skill)};
+			this.active = {cast:parseSkill(info.Skill)};
 			this.cast = this.cost;
 			this.castele = this.costele;
 		}else if (info.Skill in activecache){
@@ -35,7 +35,7 @@ function Card(type, info){
 				var eqidx = active.indexOf("=");
 				var a0 = ~eqidx ? active.substr(0, eqidx) : "auto";
 				var cast = readCost(a0, this.element);
-				Thing.prototype.addactive.call(this, cast?"cast":a0, etg.parseSkill(active.substr(eqidx+1)));
+				Thing.prototype.addactive.call(this, cast?"cast":a0, parseSkill(active.substr(eqidx+1)));
 				if (cast){
 					this.cast = cast[0];
 					this.castele = cast[1];
@@ -117,5 +117,6 @@ var Cards = require("./Cards");
 var Thing = require("./Thing");
 var etgutil = require("./etgutil");
 var skillText = require("./skillText");
+var parseSkill = require("./parseSkill");
 var emptyObj = Object.freeze({}), emptyStatus = Object.freeze(Object.create(etg.DefaultStatus));
 var statuscache = {}, activecache = {}, activecastcache = {};

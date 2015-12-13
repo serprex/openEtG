@@ -583,7 +583,7 @@ endow:function(c,t){
 	c.buffhp(2);
 },
 envenom:function(c,t){
-	t.addactive("hit", etg.parseSkill("poison 1"));
+	t.addactive("hit", parseSkill("poison 1"));
 	t.addactive("shield", Skills.thornweak);
 },
 epidemic:function(c,t){
@@ -603,7 +603,7 @@ evolve:function(c,t){
 },
 feed:function(c,t){
 	t.addpoison(1);
-	etg.parseSkill("growth 3")(c);
+	parseSkill("growth 3")(c);
 	c.status.immaterial = false;
 },
 fickle:function(c,t){
@@ -951,11 +951,11 @@ integrity:function(c,t){
 	c.owner.shardgolem = {
 		stat: Math.floor(stat),
 		status: {golem: true},
-		active: {cast:etg.parseSkill(active)},
+		active: {cast:parseSkill(active)},
 		cast: shardCosts[active]
 	};
 	function addSkill(event, active){
-		Thing.prototype.addactive.call(c.owner.shardgolem, event, etg.parseSkill(active));
+		Thing.prototype.addactive.call(c.owner.shardgolem, event, parseSkill(active));
 	}
 	function addStatus(status, val){
 		c.owner.shardgolem.status[status] = val === undefined || val;
@@ -1056,7 +1056,7 @@ luciferin:function(c,t){
 	c.owner.dmg(-10);
 	c.owner.masscc(c, function(c,x){
 		for (var key in x.active){
-			if (key != "ownplay" && key != "owndiscard" && !x.active[key].activename.every(function(name){return etg.parseSkill(name).passive})) return;
+			if (key != "ownplay" && key != "owndiscard" && !x.active[key].activename.every(function(name){return parseSkill(name).passive})) return;
 		}
 		x.addactive("auto", Skills.light);
 	});
@@ -2050,3 +2050,4 @@ var Cards = require("./Cards");
 var Thing = require("./Thing");
 var Effect = require("./Effect");
 var Player = require("./Player");
+var parseSkill = require("./parseSkill");

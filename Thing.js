@@ -230,7 +230,7 @@ Thing.prototype.freeze = function(x){
 Thing.prototype.lobo = function(){
 	for (var key in this.active){
 		this.active[key].activename.forEach(function(name){
-			if (!etg.parseSkill(name).passive){
+			if (!parseSkill(name).passive){
 				this.rmactive(key, name);
 			}
 		}, this);
@@ -453,3 +453,4 @@ var Effect = require("./Effect");
 var Player = require("./Player");
 var Skills = require("./Skills");
 var skillText = require("./skillText");
+var parseSkill = require("./parseSkill");
