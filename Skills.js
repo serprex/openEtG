@@ -657,7 +657,7 @@ flyself:function(c,t){
 flyingweapon:function(c,t){
 	t.owner.weapon = undefined;
 	t.type = etg.CreatureEnum;
-	cr.status.airborne = true;
+	t.status.airborne = true;
 	t.owner.addCrea(t);
 },
 foedraw:function(c,t){
