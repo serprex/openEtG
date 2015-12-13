@@ -88,7 +88,7 @@ var TargetFilters = {
 		return c != t && t.type == etg.SpellEnum;
 	},
 	pill:function(c, t){
-		return t.isMaterial(etg.PillarEnum);
+		return t.isMaterial(etg.PermanentEnum) && t.card.type == etg.PillarEnum;
 	},
 	weap:function(c, t){
 		return (t.type == etg.WeaponEnum || (t.type != etg.PlayerEnum && t.card.type == etg.WeaponEnum)) && !t.status.immaterial && !t.status.burrowed;

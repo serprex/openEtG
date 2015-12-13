@@ -913,13 +913,13 @@ integrity:function(c,t){
 	];
 	var shardCosts = {
 		burrow:1, stoneform:1, guard:1, bblood:2,
-		deadalive:1, mutation:2, paradox:2, improve:2, antimatter:4,
+		deadalive:1, mutation:2, paradox:2, improve:2, antimatter:3,
 		infect:1, aflatoxin:2,
-		devour:3, blackhole:4,
-		"growth 2":2, adrenaline:2, mitosis:4,
+		devour:3, blackhole:3,
+		"growth 2":2, adrenaline:2, mitosis:3,
 		ablaze:1, tempering:(c.card.upped?2:1), destroy:3, rage:2,
-		steam:2, freeze:2, nymph:4,
-		mend:1, endow:2, luciferin:4,
+		steam:2, freeze:2, nymph:3,
+		mend:1, endow:2, luciferin:3,
 		"summon Firefly":2, snipe:2, dive:2, gas:2,
 		"summon Scarab":2, deja:4, precognition:2,
 		siphonstrength:2, yoink:2, liquid:2, steal:3,
@@ -1213,7 +1213,7 @@ nymph:function(c,t){
 		t.active.auto == Skills.pillcar ? c.choose([etg.Entropy, etg.Gravity, etg.Time, etg.Aether]) :
 		c.owner.upto(12)+1);
 	Skills.destroy(c, t, true, true);
-	c.owner.addCrea(new Thing(t.card.as(Cards.Codes[etg.NymphList[e]])));
+	t.owner.addCrea(new Thing(t.card.as(Cards.Codes[etg.NymphList[e]])));
 },
 obsession:passive(function(c,t){
 	c.owner.spelldmg(c.card.upped?10:8);
