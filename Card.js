@@ -91,16 +91,16 @@ Card.prototype.asShiny = function(shiny){
 Card.prototype.isOf = function(card){
 	return card.code == etgutil.asShiny(etgutil.asUpped(this.code, false), false);
 }
-Card.prototype.play = function(owner, src, tgt){
+Card.prototype.play = function(owner, src, tgt, fromhand){
 	if (this.type == etg.SpellEnum){
 		src.castSpell(tgt, this.active.cast);
 	}else{
 		ui.playSound(this.type <= etg.PermanentEnum ? "permPlay" : "creaturePlay");
-		var thing = new Thing(this, owner);
-		if (this.type == etg.CreatureEnum) owner.addCrea(thing);
-		else if (this.type == etg.PermanentEnum || this.type == etg.PillarEnum) owner.addPerm(thing);
-		else if (this.type == etg.WeaponEnum) owner.setWeapon(thing);
-		else owner.setShield(thing);
+		var thing = new Thing(this);
+		if (this.type == etg.CreatureEnum) owner.addCrea(thing, fromhand);
+		else if (this.type == etg.PermanentEnum || this.type == etg.PillarEnum) owner.addPerm(thing, fromhand);
+		else if (this.type == etg.WeaponEnum) owner.setWeapon(thing, fromhand);
+		else owner.setShield(thing, fromhand);
 		return thing;
 	}
 }

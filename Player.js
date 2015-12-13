@@ -36,10 +36,13 @@ Player.prototype.isCloaked = function(){
 }
 Player.prototype.addCrea = function(x, fromhand){
 	if (util.place(this.creatures, x)){
-		if (this.game.bonusstats != null && this == this.game.player1) this.game.bonusstats.creaturesplaced++;
-		x.type = etg.CreatureEnum;
-		x.place(fromhand);
+		if (fromhand && this.game.bonusstats != null && this == this.game.player1) this.game.bonusstats.creaturesplaced++;
+		x.place(this, etg.CreatureEnum, fromhand);
 	}
+}
+Player.prototype.setCrea = function(idx, x){
+	this.creatures[idx] = x;
+	x.place(this, etg.CreatureEnum, false);
 }
 Player.prototype.addPerm = function(x, fromhand){
 	if (x.status.additive){
@@ -47,37 +50,33 @@ Player.prototype.addPerm = function(x, fromhand){
 		for(var i=0; i<16; i++){
 			if (this.permanents[i] && etgutil.asShiny(this.permanents[i].card.code, false) == dullcode){
 				this.permanents[i].status.charges += x.status.charges;
-				this.permanents[i].place(fromhand);
+				this.permanents[i].place(this, etg.PermanentEnum, fromhand);
 				return;
 			}
 		}
 	}
 	if (util.place(this.permanents, x)){
-		x.type = etg.PermanentEnum;
-		x.place(fromhand);
+		x.place(this, etg.PermanentEnum, fromhand);
 	}
 }
 Player.prototype.setWeapon = function(x, fromhand){
-	x.type = etg.WeaponEnum;
 	this.owner.weapon = x;
-	x.place(fromhand);
+	x.place(this, etg.WeaponEnum, fromhand);
 }
 Player.prototype.setShield = function(x, fromhand){
 	if (x.status.additive && this.shield && x.card.as(this.shield.card) == x.card){
 		this.shield.status.charges += x.status.charges;
-	}else{
-		x.type = etg.ShieldEnum;
-		this.shield = x;
-	}
-	x.place(fromhand);
+	}else this.shield = x;
+	x.place(this, etg.ShieldEnum, fromhand);
 }
 Player.prototype.addCardInstance = function(x){
 	if (this.hand.length >= 8) return -1;
+	x.owner = this;
 	x.type = etg.SpellEnum;
 	this.hand.push(x);
 }
 Player.prototype.addCard = function(card){
-	this.addCardInstance(new Thing(card, this));
+	this.addCardInstance(new Thing(card));
 }
 Player.prototype.forEach = function(func, dohand){
 	func(this.weapon);

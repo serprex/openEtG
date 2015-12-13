@@ -1,53 +1,44 @@
 "use strict"
 var passives = new Set(["airborne", "aquatic", "nocturnal", "voodoo", "swarm", "ranged", "additive", "stackable", "token", "poisonous", "golem"]);
-function Thing(card, owner){
-	this.owner = owner;
+function Thing(card){
+	this.owner = null;
 	this.card = card;
-	if (!this.status && card.isOf(Cards.ShardGolem)){
-		var golem = owner.shardgolem || { stat: 1, cast: 0 };
-		this.cast = golem.cast;
-		this.castele = etg.Earth;
-		this.atk = this.maxhp = this.hp = golem.stat;
-		this.status = etg.cloneStatus(golem.status);
-		this.usedactive = true;
-		this.type = 0;
-		this.active = util.clone(golem.active);
-		return;
-	}
 	this.cast = card.cast;
 	this.castele = card.castele;
 	this.maxhp = this.hp = card.health;
 	this.atk = card.attack;
-	if (this.status){
-		for (var key in this.status){
-			if (passives.has(key)) delete this.status[key];
-		}
-		for (var key in card.status){
-			if (!this.status[key]) this.status[key] = card.status[key];
-		}
-	}else{
-		this.status = etg.cloneStatus(card.status);
-		this.usedactive = true;
-		this.type = 0;
-	}
+	this.status = etg.cloneStatus(card.status);
+	this.usedactive = true;
+	this.type = 0;
 	this.active = util.clone(card.active);
 }
 module.exports = Thing;
 
 Thing.prototype.toString = function(){ return this.card.name; }
-Thing.prototype.transform = function(card, owner){
-	Thing.call(this, card, owner || this.owner);
+Thing.prototype.transform = function(card){
+	this.card = card;
+	this.maxhp = this.hp = card.health;
+	this.atk = card.attack;
+	for (var key in this.status){
+		if (passives.has(key)) this.status[key] = etg.DefaultStatus[key];
+	}
+	for (var key in card.status){
+		if (!this.status[key]) this.status[key] = card.status[key];
+	}
 	if (this.status.mutant){
-		var buff = this.owner.upto(25);
+		var buff = this.upto(25);
 		this.buffhp(Math.floor(buff/5));
 		this.atk += buff%5;
 		this.mutantactive();
+	}else{
+		this.cast = card.cast;
+		this.castele = card.castele;
 	}
 }
 Thing.prototype.getIndex = function(){
-	if (this.type == etg.WeaponEnum) return this.weapon == this ? 0 : -1;
-	if (this.type == etg.ShieldEnum) return this.shield == this ? 0 : -1;
-	return (this.type == etg.CreatureEnum ? this.owner.creatures :
+	return this.type == etg.WeaponEnum ? (this.weapon == this ? 0 : -1) :
+		this.type == etg.ShieldEnum ? (this.shield == this ? 0 : -1) :
+		(this.type == etg.CreatureEnum ? this.owner.creatures :
 		this.type == etg.PermanentEnum ? this.owner.permanents :
 		this.owner.hand).indexOf(this);
 }
@@ -86,7 +77,9 @@ Thing.prototype.die = function(){
 		this.proc("discard");
 	} else if (this.type == etg.CreatureEnum && !(this.active.predeath && this.active.predeath(this))){
 		if (this.status.aflatoxin & !this.card.isOf(Cards.MalignantCell)){
-			(this.owner.creatures[idx] = new Thing(this.card.as(Cards.MalignantCell), this.owner)).type = etg.CreatureEnum;
+			var cell = this.owner.creatures[idx] = new Thing(this.card.as(Cards.MalignantCell));
+			cell.owner = this.owner;
+			cell.type = etg.CreatureEnum;
 		}
 		if (this.owner.game.bonusstats != null && this.owner == this.owner.game.player2) this.owner.game.bonusstats.creatureskilled++;
 		this.deatheffect(idx);
@@ -192,7 +185,9 @@ Thing.prototype.activetext = function(){
 	}
 	return this.active.auto ? this.active.auto.activename.join(" ") : "";
 }
-Thing.prototype.place = function(fromhand){
+Thing.prototype.place = function(owner, type, fromhand){
+	this.owner = owner;
+	this.type = type;
 	this.proc("play", fromhand);
 }
 Thing.prototype.dmg = function(x, dontdie){
@@ -313,11 +308,11 @@ Thing.prototype.useactive = function(t) {
 	var owner = this.owner;
 	if (this.type == etg.SpellEnum){
 		if (!this.canactive(true)){
-			return console.log((this.owner==this.owner.game.player1?"1":"2") + " cannot cast " + (this || "-"));
+			return console.log(this.owner + " cannot cast " + this);
 		}
 		this.remove();
 		if (owner.status.neuro) owner.addpoison(1);
-		this.card.play(owner, this, t);
+		this.card.play(owner, this, t, true);
 		this.proc("cardplay");
 		if (owner.game.bonusstats != null && owner == owner.game.player1) owner.game.bonusstats.cardsplayed[this.card.type]++;
 		owner.game.updateExpectedDamage();
