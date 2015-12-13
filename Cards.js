@@ -91,10 +91,10 @@ var TargetFilters = {
 		return t.isMaterial(etg.PermanentEnum) && t.card.type == etg.PillarEnum;
 	},
 	weap:function(c, t){
-		return (t.type == etg.WeaponEnum || (t.type != etg.PlayerEnum && t.card.type == etg.WeaponEnum)) && !t.status.immaterial && !t.status.burrowed;
+		return (t.type == etg.WeaponEnum || (t.type < etg.SpellEnum && t.card.type == etg.WeaponEnum)) && !t.status.immaterial && !t.status.burrowed;
 	},
 	shie:function(c, t){
-		return (t.type == etg.ShieldEnum || (t.type != etg.PlayerEnum && t.card.type == etg.ShieldEnum)) && !t.status.immaterial && !t.status.burrowed;
+		return (t.type == etg.ShieldEnum || (t.type < etg.SpellEnum && t.card.type == etg.ShieldEnum)) && !t.status.immaterial && !t.status.burrowed;
 	},
 	playerweap:function(c,t){
 		return t.type == etg.WeaponEnum;
