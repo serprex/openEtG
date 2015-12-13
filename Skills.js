@@ -1698,7 +1698,9 @@ steal:function(c,t){
 		t.remove();
 		t.usedactive = true;
 		t.owner = c.owner;
-		c.owner.addPerm(t);
+		if (t.type == etg.PermanentEnum) c.owner.addPerm(t);
+		else if (t.type == etg.WeaponEnum) c.owner.setWeapon(t);
+		else c.owner.setShield(t);
 	}
 },
 steam:function(c,t){

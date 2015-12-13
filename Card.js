@@ -118,5 +118,5 @@ var Thing = require("./Thing");
 var etgutil = require("./etgutil");
 var skillText = require("./skillText");
 var parseSkill = require("./parseSkill");
-var emptyObj = Object.freeze({}), emptyStatus = Object.freeze(Object.create(etg.DefaultStatus));
-var statuscache = {}, activecache = {}, activecastcache = {};
+var emptyObj = Object.freeze({}), emptyStatus = Object.freeze(Object.create(etg.DefaultStatus)),
+	statuscache = {}, activecache = {}, activecastcache = {};

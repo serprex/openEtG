@@ -49,7 +49,6 @@ exports.countAdrenaline = countAdrenaline;
 exports.getAdrenalRow = getAdrenalRow;
 exports.calcAdrenaline = calcAdrenaline;
 exports.cloneStatus = cloneStatus;
-exports.parseSkill = parseSkill;
 exports.Chroma = 0;
 exports.Entropy = 1;
 exports.Death = 2;
