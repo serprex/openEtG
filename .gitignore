@@ -1,5 +1,4 @@
 node_modules/*
-deckcache/*
 Cards/*
 atlas.js
 atlas.css
@@ -10,9 +9,9 @@ etgify.js
 tournify.js
 .ninja_log
 .ninja_deps
+pushserver.sh
 pixi.*
 *.min.*
 *.exe
 *.gz
 *.rdb
-*.sh
