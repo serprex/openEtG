@@ -1,7 +1,6 @@
 "use strict";
 var etg = require("../etg");
 var Cards = require("../Cards");
-var Player = require("../Player");
 var evalGame = require("./eval");
 function getWorstCard(game){
 	var worstcard = 0, curEval = 2147483647, hash = {};

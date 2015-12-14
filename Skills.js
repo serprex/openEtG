@@ -2050,5 +2050,4 @@ var util = require("./util");
 var Cards = require("./Cards");
 var Thing = require("./Thing");
 var Effect = require("./Effect");
-var Player = require("./Player");
 var parseSkill = require("./parseSkill");

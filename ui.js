@@ -3,7 +3,6 @@ var etg = require("./etg");
 var gfx = require("./gfx");
 var util = require("./util");
 var options = require("./options");
-var Player = require("./Player");;
 var Effect = require("./Effect");
 exports.eleNames = Object.freeze(["Chroma", "Entropy", "Death", "Gravity", "Earth", "Life", "Fire", "Water", "Light", "Air", "Time", "Darkness", "Aether", "Build your own", "Random"]);
 exports.elecols = new Uint32Array([

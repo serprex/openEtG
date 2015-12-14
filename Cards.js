@@ -153,5 +153,4 @@ var TargetFilters = {
 };
 var etg = require("./etg");
 var Card = require("./Card");
-var Player = require("./Player");
 var etgutil = require("./etgutil");

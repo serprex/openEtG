@@ -1,5 +1,4 @@
 "use strict";
-var etg = require("../etg");
 var Cards = require("../Cards");
 module.exports = function(game) {
 	var limit = 333, cmdct, currentEval = game.player1.hp;
