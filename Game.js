@@ -96,10 +96,10 @@ Game.prototype.updateExpectedDamage = function(){
 }
 Game.prototype.tgtToBits = function(x) {
 	if (x === undefined) return 0;
-	var bits = x.type == etg.PlayerEnum ? 1 :
-		x.type == etg.WeaponEnum ? 17 :
-		x.type == etg.ShieldEnum ? 33 :
-		(x.type == etg.CreatureEnum ? 2 : x.type == etg.PermanentEnum ? 4 : 5) | x.getIndex()<<4;
+	var bits = x.type == etg.Player ? 1 :
+		x.type == etg.Weapon ? 17 :
+		x.type == etg.Shield ? 33 :
+		(x.type == etg.Creature ? 2 : x.type == etg.Permanent ? 4 : 5) | x.getIndex()<<4;
 	return x.owner == this.player2 ? bits|8 : bits;
 }
 Game.prototype.bitsToTgt = function(x) {
@@ -116,7 +116,7 @@ Game.prototype.getTarget = function(src, active, cb) {
 	if (targetingFilter) {
 		var game = this;
 		this.targeting = {
-			filter: function(t) { return (t.type == etg.PlayerEnum || t.type == etg.SpellEnum || t.owner == game.turn || t.status.cloak || !t.owner.isCloaked()) && targetingFilter(src, t); },
+			filter: function(t) { return (t.type == etg.Player || t.type == etg.Spell || t.owner == game.turn || t.status.cloak || !t.owner.isCloaked()) && targetingFilter(src, t); },
 			cb: function(){
 				cb.apply(null, arguments);
 				game.targeting = null;

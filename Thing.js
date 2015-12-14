@@ -37,34 +37,34 @@ Thing.prototype.transform = function(card){
 	}
 }
 Thing.prototype.getIndex = function(){
-	return this.type == etg.WeaponEnum ? (this.weapon == this ? 0 : -1) :
-		this.type == etg.ShieldEnum ? (this.shield == this ? 0 : -1) :
-		(this.type == etg.CreatureEnum ? this.owner.creatures :
-		this.type == etg.PermanentEnum ? this.owner.permanents :
+	return this.type == etg.Weapon ? (this.weapon == this ? 0 : -1) :
+		this.type == etg.Shield ? (this.shield == this ? 0 : -1) :
+		(this.type == etg.Creature ? this.owner.creatures :
+		this.type == etg.Permanent ? this.owner.permanents :
 		this.owner.hand).indexOf(this);
 }
 Thing.prototype.remove = function(index){
-	if (this.type == etg.WeaponEnum){
+	if (this.type == etg.Weapon){
 		if (this.owner.weapon != this) return -1;
 		this.owner.weapon = undefined;
 		return 0;
 	}
-	if (this.type == etg.ShieldEnum){
+	if (this.type == etg.Shield){
 		if (this.owner.shield != this) return -1;
 		this.owner.shield = undefined;
 		return 0;
 	}
 	if (index === undefined) index = this.getIndex();
 	var arr = undefined;
-	if (this.type == etg.CreatureEnum) {
+	if (this.type == etg.Creature) {
 		if (this.owner.gpull == this) this.owner.gpull = undefined;
 		arr = this.owner.creatures;
-	}else if (this.type == etg.PermanentEnum) {
+	}else if (this.type == etg.Permanent) {
 		arr = this.owner.permanents;
 	}
 	if (arr != undefined){
 		arr[index] = undefined;
-	} else if (this.type == etg.SpellEnum && ~index) {
+	} else if (this.type == etg.Spell && ~index) {
 		this.owner.hand.splice(index, 1);
 	}
 	return index;
@@ -72,15 +72,15 @@ Thing.prototype.remove = function(index){
 Thing.prototype.die = function(){
 	var idx = this.remove();
 	if (idx == -1) return;
-	if (this.type <= etg.PermanentEnum){
+	if (this.type <= etg.Permanent){
 		this.proc("destroy", {});
-	} else if (this.type == etg.SpellEnum){
+	} else if (this.type == etg.Spell){
 		this.proc("discard");
-	} else if (this.type == etg.CreatureEnum && !(this.active.predeath && this.active.predeath(this))){
+	} else if (this.type == etg.Creature && !(this.active.predeath && this.active.predeath(this))){
 		if (this.status.aflatoxin & !this.card.isOf(Cards.MalignantCell)){
 			var cell = this.owner.creatures[idx] = new Thing(this.card.as(Cards.MalignantCell));
 			cell.owner = this.owner;
-			cell.type = etg.CreatureEnum;
+			cell.type = etg.Creature;
 		}
 		if (this.owner.game.bonusstats != null && this.owner == this.owner.game.player2) this.owner.game.bonusstats.creatureskilled++;
 		this.deatheffect(idx);
@@ -158,10 +158,10 @@ Thing.prototype.calcCore2 = function(prefix, filterstat){
 	return bonus;
 }
 function isEclipseCandidate(c){
-	return c.status.nocturnal && c.type == etg.CreatureEnum;
+	return c.status.nocturnal && c.type == etg.Creature;
 }
 function isWhetCandidate(c){
-	return c.status.golem || c.type == etg.WeaponEnum || c.card.type == etg.WeaponEnum;
+	return c.status.golem || c.type == etg.Weapon || c.card.type == etg.Weapon;
 }
 Thing.prototype.calcBonusAtk = function(){
 	return this.calcCore2(isEclipseCandidate, "nightfall") + this.calcCore(isWhetCandidate, "whetstone");
@@ -170,9 +170,9 @@ Thing.prototype.calcBonusHp = function(){
 	return this.calcCore(isEclipseCandidate, "nightfall") + this.calcCore2(isWhetCandidate, "whetstone") + (this.active.hp ? this.active.hp(this) : 0);
 }
 Thing.prototype.info = function(){
-	var info = this.type == etg.CreatureEnum ? this.trueatk()+"|"+this.truehp()+"/"+this.maxhp :
-		this.type == etg.WeaponEnum ? this.trueatk().toString() :
-		this.type == etg.ShieldEnum ? this.truedr().toString() :
+	var info = this.type == etg.Creature ? this.trueatk()+"|"+this.truehp()+"/"+this.maxhp :
+		this.type == etg.Weapon ? this.trueatk().toString() :
+		this.type == etg.Shield ? this.truedr().toString() :
 		"";
 	var stext = skillText(this);
 	return !info ? stext : stext ? info + "\n" + stext : info;
@@ -193,7 +193,7 @@ Thing.prototype.place = function(owner, type, fromhand){
 }
 Thing.prototype.dmg = function(x, dontdie){
 	if (!x) return 0;
-	else if (this.type == etg.WeaponEnum) return x<0 ? 0 : this.owner.dmg(x);
+	else if (this.type == etg.Weapon) return x<0 ? 0 : this.owner.dmg(x);
 	else{
 		var dmg = x<0 ? Math.max(this.hp-this.maxhp, x) : Math.min(this.truehp(), x);
 		this.hp -= dmg;
@@ -209,7 +209,7 @@ Thing.prototype.spelldmg = function(x, dontdie){
 	return this.dmg(x, dontdie);
 }
 Thing.prototype.addpoison = function(x) {
-	if (this.type == etg.WeaponEnum) this.owner.addpoison(x);
+	if (this.type == etg.Weapon) this.owner.addpoison(x);
 	else if (!this.active.ownpoison || this.active.ownpoison(this)){
 		this.status.poison += x;
 		if (this.status.voodoo){
@@ -256,7 +256,7 @@ Thing.prototype.mutantactive = function(){
 	}
 }
 Thing.prototype.isMaterial = function(type) {
-	return (type == etg.PermanentEnum ? this.type <= type : type ? this.type == type : this.type != etg.SpellEnum && this.type != etg.PlayerEnum) && !this.status.immaterial && !this.status.burrowed;
+	return (type == etg.Permanent ? this.type <= type : type ? this.type == type : this.type != etg.Spell && this.type != etg.Player) && !this.status.immaterial && !this.status.burrowed;
 }
 function combineactive(a1, a2){
 	if (!a1){
@@ -290,7 +290,7 @@ Thing.prototype.hasactive = function(type, activename) {
 }
 Thing.prototype.canactive = function(spend) {
 	if (this.owner.game.turn != this.owner) return false;
-	else if (this.type == etg.SpellEnum){
+	else if (this.type == etg.Spell){
 		if (this.owner.silence) return false;
 		return this.owner[spend?"spend":"canspend"](this.card.costele, this.card.cost);
 	}else return this.active.cast && !this.usedactive && !this.status.delayed && !this.status.frozen && this.owner.canspend(this.castele, this.cast);
@@ -307,7 +307,7 @@ Thing.prototype.castSpell = function(t, active, nospell){
 }
 Thing.prototype.useactive = function(t) {
 	var owner = this.owner;
-	if (this.type == etg.SpellEnum){
+	if (this.type == etg.Spell){
 		if (!this.canactive(true)){
 			return console.log(this.owner + " cannot cast " + this);
 		}
@@ -347,7 +347,7 @@ Thing.prototype.attackCreature = function(target, trueatk){
 	}
 }
 Thing.prototype.attack = function(stasis, freedomChance, target){
-	var isCreature = this.type == etg.CreatureEnum;
+	var isCreature = this.type == etg.Creature;
 	if (isCreature){
 		this.dmg(this.status.poison, true);
 	}
@@ -439,7 +439,7 @@ Thing.prototype.shuffle = function(array) {
 	return array;
 }
 Thing.prototype.buffhp = function(x) {
-	if (this.type != etg.WeaponEnum){
+	if (this.type != etg.Weapon){
 		if (this instanceof Player && this.maxhp <= 500) this.maxhp = Math.min(this.maxhp+x, 500);
 		else this.maxhp += x;
 	}

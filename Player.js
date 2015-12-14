@@ -21,7 +21,7 @@ function Player(game){
 	this.drawpower = 1;
 	this.markpower = 1;
 	this.mark = 0;
-	this.type = etg.PlayerEnum;
+	this.type = etg.Player;
 	this.shardgolem = undefined;
 }
 module.exports = Player;
@@ -37,12 +37,12 @@ Player.prototype.isCloaked = function(){
 Player.prototype.addCrea = function(x, fromhand){
 	if (util.place(this.creatures, x)){
 		if (fromhand && this.game.bonusstats != null && this == this.game.player1) this.game.bonusstats.creaturesplaced++;
-		x.place(this, etg.CreatureEnum, fromhand);
+		x.place(this, etg.Creature, fromhand);
 	}
 }
 Player.prototype.setCrea = function(idx, x){
 	this.creatures[idx] = x;
-	x.place(this, etg.CreatureEnum, false);
+	x.place(this, etg.Creature, false);
 }
 Player.prototype.addPerm = function(x, fromhand){
 	if (x.status.additive){
@@ -50,29 +50,29 @@ Player.prototype.addPerm = function(x, fromhand){
 		for(var i=0; i<16; i++){
 			if (this.permanents[i] && etgutil.asShiny(this.permanents[i].card.code, false) == dullcode){
 				this.permanents[i].status.charges += x.status.charges;
-				this.permanents[i].place(this, etg.PermanentEnum, fromhand);
+				this.permanents[i].place(this, etg.Permanent, fromhand);
 				return;
 			}
 		}
 	}
 	if (util.place(this.permanents, x)){
-		x.place(this, etg.PermanentEnum, fromhand);
+		x.place(this, etg.Permanent, fromhand);
 	}
 }
 Player.prototype.setWeapon = function(x, fromhand){
 	this.owner.weapon = x;
-	x.place(this, etg.WeaponEnum, fromhand);
+	x.place(this, etg.Weapon, fromhand);
 }
 Player.prototype.setShield = function(x, fromhand){
 	if (x.status.additive && this.shield && x.card.as(this.shield.card) == x.card){
 		this.shield.status.charges += x.status.charges;
 	}else this.shield = x;
-	x.place(this, etg.ShieldEnum, fromhand);
+	x.place(this, etg.Shield, fromhand);
 }
 Player.prototype.addCardInstance = function(x){
 	if (this.hand.length >= 8) return -1;
 	x.owner = this;
-	x.type = etg.SpellEnum;
+	x.type = etg.Spell;
 	this.hand.push(x);
 }
 Player.prototype.addCard = function(card){

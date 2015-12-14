@@ -109,7 +109,7 @@ CardSelector.prototype.makeColumns = function(){
 	for (var i = 0;i < 6;i++) {
 		this.columns[i] = Cards.filter(i > 2,
 			function(x) { return (x.element == self.elefilter || self.rarefilter == 4) &&
-				((i % 3 == 0 && x.type == etg.CreatureEnum) || (i % 3 == 1 && x.type <= etg.PermanentEnum) || (i % 3 == 2 && x.type == etg.SpellEnum)) &&
+				((i % 3 == 0 && x.type == etg.Creature) || (i % 3 == 1 && x.type <= etg.Permanent) || (i % 3 == 2 && x.type == etg.Spell)) &&
 				(!self.cardpool || x.code in self.cardpool || (self.filterboth && etgutil.asShiny(x.code, true) in self.cardpool) || self.showall || x.isFree()) && (!self.rarefilter || self.rarefilter == Math.min(x.rarity, 4));
 			}, Cards.cardCmp, this.showshiny && !this.filterboth);
 	}
@@ -131,7 +131,7 @@ CardSelector.prototype.renderColumns = function(){
 				}
 				var count = this.countText[i].children[j];
 				count.text = cardAmount + (shinyAmount ? "/"+shinyAmount:"");
-				count.className = "selectortext"+(this.maxedIndicator && card.type != etg.PillarEnum && cardAmount >= 6 ?(cardAmount >= 12 ? " beigeback" : " lightback"):"");
+				count.className = "selectortext"+(this.maxedIndicator && card.type != etg.Pillar && cardAmount >= 6 ?(cardAmount >= 12 ? " beigeback" : " lightback"):"");
 				count.style.display = "";
 			}
 		}

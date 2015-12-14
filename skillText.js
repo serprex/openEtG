@@ -1,6 +1,6 @@
 "use strict";
 module.exports = function(c, event){
-	if (c instanceof Card && c.type == etg.SpellEnum){
+	if (c instanceof Card && c.type == etg.Spell){
 		var entry = getDataFromName(c.active.cast.activename[0]);
 		return processEntry(c, "cast", entry);
 	}else{

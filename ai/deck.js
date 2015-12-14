@@ -78,12 +78,12 @@ module.exports = function(uprate, markpower, maxRarity) {
 		var ele = eles[j];
 		for (var i = 20-j*10; i>0; i--) {
 			var card = RngMock.randomcard(Math.random() < uprate, function(x) {
-				return x.element == ele && x.type != etg.PillarEnum && x.rarity <= maxRarity && cardcount[x.code] != 6 &&
-					!(x.type == etg.ShieldEnum && anyshield == 3) && !(x.type == etg.WeaponEnum && anyweapon == 3) && !x.isOf(Cards.Give) && !x.isOf(Cards.Precognition);
+				return x.element == ele && x.type != etg.Pillar && x.rarity <= maxRarity && cardcount[x.code] != 6 &&
+					!(x.type == etg.Shield && anyshield == 3) && !(x.type == etg.Weapon && anyweapon == 3) && !x.isOf(Cards.Give) && !x.isOf(Cards.Precognition);
 			});
 			deck.push(card.code);
 			cardcount[card.code] = (cardcount[card.code] || 0) + 1;
-			if (!(((card.type == etg.WeaponEnum && !anyweapon) || (card.type == etg.ShieldEnum && !anyshield)) && cardcount[card.code])) {
+			if (!(((card.type == etg.Weapon && !anyweapon) || (card.type == etg.Shield && !anyshield)) && cardcount[card.code])) {
 				ecost[card.costele] += card.cost;
 			}
 			if (card.cast) {
@@ -101,14 +101,14 @@ module.exports = function(uprate, markpower, maxRarity) {
 				}
 			}else if (card.isOf(Cards.Georesonator)){
 				ecost[ele[1]] -= 8;
-			}else if (card.type == etg.CreatureEnum){
+			}else if (card.type == etg.Creature){
 				var auto = card.active.auto;
 				if (auto == Skills.light) ecost[etg.Light] -= 2;
 				else if (auto == Skills.fire) ecost[etg.Fire] -= 2;
 				else if (auto == Skills.air) ecost[etg.Air] -= 2;
 				else if (auto == Skills.earth) ecost[etg.Earth] -= 2;
-			}else if (card.type == etg.ShieldEnum) anyshield++;
-			else if (card.type == etg.WeaponEnum) anyweapon++;
+			}else if (card.type == etg.Shield) anyshield++;
+			else if (card.type == etg.Weapon) anyweapon++;
 		}
 	}
 	for (var i=deck.length-1; ~i; i--){

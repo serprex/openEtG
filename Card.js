@@ -18,7 +18,7 @@ function Card(type, info){
 	this.cast = 0;
 	this.castele = 0;
 	if (info.Skill){
-		if (this.type == etg.SpellEnum){
+		if (this.type == etg.Spell){
 			this.active = {cast:parseSkill(info.Skill)};
 			this.cast = this.cost;
 			this.castele = this.costele;
@@ -67,15 +67,15 @@ Card.prototype.as = function(card){
 	return card.asUpped(this.upped).asShiny(this.shiny);
 }
 Card.prototype.isFree = function() {
-	return this.type == etg.PillarEnum && !this.upped && !this.rarity && !this.shiny;
+	return this.type == etg.Pillar && !this.upped && !this.rarity && !this.shiny;
 }
 Card.prototype.info = function(){
-	if (this.type == etg.SpellEnum){
+	if (this.type == etg.Spell){
 		return skillText(this);
 	}else{
 		var text = [];
-		if (this.type == etg.ShieldEnum && this.health) text.push("Reduce damage by "+this.health)
-		else if (this.type == etg.CreatureEnum || this.type == etg.WeaponEnum) text.push(this.attack+"|"+this.health);
+		if (this.type == etg.Shield && this.health) text.push("Reduce damage by "+this.health)
+		else if (this.type == etg.Creature || this.type == etg.Weapon) text.push(this.attack+"|"+this.health);
 		var skills = skillText(this);
 		if (skills) text.push(skills);
 		return text.join("\n");
@@ -92,14 +92,14 @@ Card.prototype.isOf = function(card){
 	return card.code == etgutil.asShiny(etgutil.asUpped(this.code, false), false);
 }
 Card.prototype.play = function(owner, src, tgt, fromhand){
-	if (this.type == etg.SpellEnum){
+	if (this.type == etg.Spell){
 		src.castSpell(tgt, this.active.cast);
 	}else{
-		ui.playSound(this.type <= etg.PermanentEnum ? "permPlay" : "creaturePlay");
+		ui.playSound(this.type <= etg.Permanent ? "permPlay" : "creaturePlay");
 		var thing = new Thing(this);
-		if (this.type == etg.CreatureEnum) owner.addCrea(thing, fromhand);
-		else if (this.type == etg.PermanentEnum || this.type == etg.PillarEnum) owner.addPerm(thing, fromhand);
-		else if (this.type == etg.WeaponEnum) owner.setWeapon(thing, fromhand);
+		if (this.type == etg.Creature) owner.addCrea(thing, fromhand);
+		else if (this.type == etg.Permanent || this.type == etg.Pillar) owner.addPerm(thing, fromhand);
+		else if (this.type == etg.Weapon) owner.setWeapon(thing, fromhand);
 		else owner.setShield(thing, fromhand);
 		return thing;
 	}

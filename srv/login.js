@@ -31,7 +31,7 @@ module.exports = function(sockEmit){
 					user.oracle = day;
 					var ocardnymph = Math.random() < .03;
 					var card = RngMock.randomcard(false,
-						x => x.type != etg.PillarEnum && ((x.rarity != 5) ^ ocardnymph) && x.code != user.ocard);
+						x => x.type != etg.Pillar && ((x.rarity != 5) ^ ocardnymph) && x.code != user.ocard);
 					var ccode = etgutil.asShiny(card.code, card.rarity == 5);
 					if (card.rarity > 1) {
 						user.accountbound = etgutil.addcard(user.accountbound, ccode);

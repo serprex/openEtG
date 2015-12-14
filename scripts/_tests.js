@@ -13,7 +13,7 @@ function initHand(pl){
 	for(var i=1; i<arguments.length; i++){
 		var cardinst = pl.hand[i-1] = new Thing(arguments[i]);
 		cardinst.owner = pl;
-		cardinst.type = etg.SpellEnum;
+		cardinst.type = etg.Spell;
 	}
 }
 class TestModule{
@@ -146,7 +146,7 @@ M.test("Earthquake", function() {
 	}
 	assert.equal(this.player1.hand.length, 3, "handlength");
 	var pillars = this.player1.permanents[0];
-	assert.ok(pillars.card.type == etg.PillarEnum, "ispillar");
+	assert.ok(pillars.card.type == etg.Pillar, "ispillar");
 	assert.equal(pillars.status.charges, 5, "5 charges");
 	Skills.earthquake(this.player2, pillars);
 	assert.equal(pillars.status.charges, 2, "2 charges");

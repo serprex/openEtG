@@ -49,7 +49,7 @@ var afilter = {
 };
 function searchSkill(active, c, t){
 	var func = afilter[active.activename[0]];
-	return !func || t.type == etg.PlayerEnum || t.hasactive("prespell", "protectonce") || func(c, t);
+	return !func || t.type == etg.Player || t.hasactive("prespell", "protectonce") || func(c, t);
 }
 module.exports = function(game, previous) {
 	var currentEval, worstcard;
@@ -80,7 +80,7 @@ module.exports = function(game, previous) {
 			var ch = c.hash();
 			if (ch in casthash) return;
 			else casthash[ch] = true;
-			var active = c.type == etg.SpellEnum ? c.card.type == etg.SpellEnum && c.card.active.cast : c.active.cast;
+			var active = c.type == etg.Spell ? c.card.type == etg.Spell && c.card.active.cast : c.active.cast;
 			var cbits = game.tgtToBits(c) ^ 8, tgthash = [], loglist = n && {};
 			function evalIter(t) {
 				if (t && t.hash){

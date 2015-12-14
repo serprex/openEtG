@@ -17,9 +17,9 @@ if (process.argv.length < 3){
 		var ofele = Cards.filter(false, function(x){return x.element == i});
 		var creas = 0, perms = 0, spels = 0, comm = new Uint32Array(3), last = 0;
 		ofele.forEach(function(x){
-			if (x.type <= etg.PermanentEnum) perms++;
-			else if (x.type == etg.CreatureEnum) creas++;
-			else if (x.type == etg.SpellEnum) spels++;
+			if (x.type <= etg.Permanent) perms++;
+			else if (x.type == etg.Creature) creas++;
+			else if (x.type == etg.Spell) spels++;
 			if (x.rarity > 0 && x.rarity < 4){
 				comm[x.rarity-1]++;
 				if (x.code > last) last = x.code;
