@@ -104,7 +104,7 @@ module.exports = function(game, foeDeck) {
 							cardwon = RngMock.choose(winnable);
 					} else {
 						var elewin = foeDeaddck[Math.floor(Math.random() * foeDeck.length)];
-						cardwon = RngMock.randomcard(elewin.upped, function(x) { return x.element == elewin.element && x.type != etg.PillarEnum && x.rarity <= 3; });
+						cardwon = RngMock.randomcard(elewin.upped, function(x) { return x.element == elewin.element && x.type != etg.Pillar && x.rarity <= 3; });
 					}
 					if (game.level !== undefined && game.level < 2) {
 						cardwon = cardwon.asUpped(false);

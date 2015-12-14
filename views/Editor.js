@@ -50,7 +50,7 @@ module.exports = function(arena, ainfo, acard, startempty) {
 			cardsel.cardminus = cardminus = {};
 			for (var i = decksprite.deck.length - 1;i >= 0;i--) {
 				var code = decksprite.deck[i], card = Cards.Codes[code];
-				if (card.type != etg.PillarEnum) {
+				if (card.type != etg.Pillar) {
 					if (sumCardMinus(cardminus, code) == 6) {
 						decksprite.deck.splice(i, 1);
 						continue;
@@ -272,7 +272,7 @@ module.exports = function(arena, ainfo, acard, startempty) {
 				var card = Cards.Codes[code];
 				if (sock.user && !card.isFree()) {
 					if (!(code in cardpool) || (code in cardminus && cardminus[code] >= cardpool[code]) ||
-						(card.type != etg.PillarEnum && sumCardMinus(cardminus, code) >= 6)) {
+						(card.type != etg.Pillar && sumCardMinus(cardminus, code) >= 6)) {
 						return;
 					}
 					px.adjust(cardminus, code, 1);
