@@ -419,7 +419,7 @@ Thing.prototype.rng = function(){
 	return this.owner.game.rng.real();
 }
 Thing.prototype.upto = function(x){
-	return Math.floor(this.owner.game.rng.rnd()*x);
+	return this.owner.game.rng.rnd()*x|0;
 }
 Thing.prototype.choose = function(x){
 	return x[this.upto(x.length)];

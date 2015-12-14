@@ -1,6 +1,6 @@
 "use strict";
 // Bastardized version of Raphael Pigulla's pure JavaScript MersenneTwister @ https://github.com/pigulla/mersennetwister
-var MAX_INT = 4294967296, N = 624, M = 397, UPPER_MASK = 0x80000000, LOWER_MASK = 0x7fffffff, MAG_01 = new Uint32Array([0, 0x9908b0df]);
+var MAX_INT=4294967296, N=624, M=397, UPPER_MASK=0x80000000, LOWER_MASK=0x7fffffff, MAG_01=new Uint32Array([0, 0x9908b0df]);
 function MersenneTwister(seed) {
 	this.mti = 0;
 	this.mt = new Uint32Array(N);
