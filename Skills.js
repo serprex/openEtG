@@ -1811,7 +1811,6 @@ trick:function(c,t){
 	});
 	if (cards.length){
 		var pick = t.choose(cards);
-		var cr = t.owner.creatures[t.getIndex()] = new Thing(t.owner.deck[pick]);
 		t.owner.setCrea(t.getIndex(), new Thing(t.owner.deck[pick]));
 		t.owner.deck[pick] = t.card;
 	}
