@@ -240,7 +240,7 @@ function startMatch(game, foeDeck, spectate) {
 		playerOverlay[j].height = 80;
 		sabbathOverlay[j].className = "sabbath";
 		sabbathOverlay[j].style.display = "none";
-		handOverlay[j].position.set(j ? 9 : 774, j ? 99 : 300);
+		handOverlay[j].position.set(j ? 3 : 763, j ? 72 : 300);
 		sacrificeOverlay[j].position.set(j ? 800 : 0, j ? 7 : 502);
 		(function(_j) {
 			for (var i = 0;i < 8;i++) {
