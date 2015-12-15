@@ -663,8 +663,8 @@ function startMatch(game, foeDeck, spectate) {
 				hspr.texture = isfront ? gfx.getHandImage(card.code) : gfx.cback;
 				if (isfront){
 					hspr.tint = pl.canspend(card.costele, card.cost) ? 0xffffff : 0x555555;
-					hspr.children[0].texture = card.cost ? ui.getTextImage(card.cost + ":" + card.costele, 11, card.upped ? "#000" : "#fff", ui.maybeLightenStr(card)) : gfx.nopic;
-					hspr.children[1].texture = ui.getBasicTextImage(card.name, 11, card.upped && handsprite[j][i].tint == 0xffffff ? "#000" : "#fff");
+					hspr.children[0].texture = card.cost ? gfx.getTextImage(card.cost + ":" + card.costele, 11, card.upped ? "#000" : "#fff", ui.maybeLightenStr(card)) : gfx.nopic;
+					hspr.children[1].texture = gfx.Text(card.name, 11, card.upped && handsprite[j][i].tint == 0xffffff ? "#000" : "#fff");
 				} else {
 					hspr.tint = 0xffffff;
 					hspr.children[0].texture = hspr.children[1].texture = gfx.nopic;
@@ -680,9 +680,9 @@ function startMatch(game, foeDeck, spectate) {
 					creasprite[j][i].texture = gfx.getCreatureImage(cr.card.code);
 					creasprite[j][i].visible = true;
 					var child = creasprite[j][i].children[1];
-					child.texture = ui.getBasicTextImage(cr.trueatk() + " | " + cr.truehp() + (cr.status.charges ? " x" + cr.status.charges : ""), 11, cr.card.upped ? "#000" : "#fff", ui.maybeLightenStr(cr.card));
+					child.texture = gfx.Text(cr.trueatk() + " | " + cr.truehp() + (cr.status.charges ? " x" + cr.status.charges : ""), 11, cr.card.upped ? "#000" : "#fff", ui.maybeLightenStr(cr.card));
 					var child2 = creasprite[j][i].children[2];
-					child2.texture = ui.getTextImage(cr.activetext(), 11, cr.card.upped ? "#000" : "#fff");
+					child2.texture = gfx.getTextImage(cr.activetext(), 11, cr.card.upped ? "#000" : "#fff");
 					drawStatus(cr, creasprite[j][i]);
 				} else creasprite[j][i].visible = false;
 			}
@@ -694,14 +694,14 @@ function startMatch(game, foeDeck, spectate) {
 					permsprite[j][i].visible = true;
 					var child = permsprite[j][i].children[1], child2 = permsprite[j][i].children[2];
 					if (pr.card.type == etg.Pillar) {
-						child.texture = ui.getTextImage("1:" + (pr.status.pendstate ? pr.owner.mark : pr.card.element) + " x" + pr.status.charges, 11, pr.card.upped ? "#000" : "#fff", ui.maybeLightenStr(pr.card));
+						child.texture = gfx.getTextImage("1:" + (pr.status.pendstate ? pr.owner.mark : pr.card.element) + " x" + pr.status.charges, 11, pr.card.upped ? "#000" : "#fff", ui.maybeLightenStr(pr.card));
 						child2.texture = gfx.nopic;
 					}else{
 						if (pr.active.auto && pr.active.auto == Skills.locket) {
-							child.texture = ui.getTextImage("1:" + (pr.status.mode === undefined ? pr.owner.mark : pr.status.mode), 11, pr.card.upped ? "#000" : "#fff", ui.maybeLightenStr(pr.card));
+							child.texture = gfx.getTextImage("1:" + (pr.status.mode === undefined ? pr.owner.mark : pr.status.mode), 11, pr.card.upped ? "#000" : "#fff", ui.maybeLightenStr(pr.card));
 						}
-						else child.texture = ui.getBasicTextImage((pr.status.charges == undefined ? "" : pr.status.charges) + "", 11, pr.card.upped ? "#000" : "#fff", ui.maybeLightenStr(pr.card));
-						child2.texture = ui.getTextImage(pr.activetext(), 11, pr.card.upped ? "#000" : "#fff");
+						else child.texture = gfx.Text((pr.status.charges == undefined ? "" : pr.status.charges) + "", 11, pr.card.upped ? "#000" : "#fff", ui.maybeLightenStr(pr.card));
+						child2.texture = gfx.getTextImage(pr.activetext(), 11, pr.card.upped ? "#000" : "#fff");
 					}
 					drawStatus(pr, permsprite[j][i]);
 				} else permsprite[j][i].visible = false;
@@ -710,10 +710,10 @@ function startMatch(game, foeDeck, spectate) {
 			if (wp && !(j == 1 && cloakgfx.visible)) {
 				weapsprite[j].visible = true;
 				var child = weapsprite[j].children[1];
-				child.texture = ui.getBasicTextImage(wp.trueatk() + (wp.status.charges ? " x" + wp.status.charges : ""), 12, wp.card.upped ? "#000" : "#fff", ui.maybeLightenStr(wp.card));
+				child.texture = gfx.Text(wp.trueatk() + (wp.status.charges ? " x" + wp.status.charges : ""), 12, wp.card.upped ? "#000" : "#fff", ui.maybeLightenStr(wp.card));
 				child.visible = true;
 				var child = weapsprite[j].children[2];
-				child.texture = ui.getTextImage(wp.activetext(), 12, wp.card.upped ? "#000" : "#fff");
+				child.texture = gfx.getTextImage(wp.activetext(), 12, wp.card.upped ? "#000" : "#fff");
 				child.visible = true;
 				weapsprite[j].texture = gfx.getWeaponShieldImage(wp.card.code);
 				drawStatus(wp, weapsprite[j]);
@@ -722,10 +722,10 @@ function startMatch(game, foeDeck, spectate) {
 			if (sh && !(j == 1 && cloakgfx.visible)) {
 				shiesprite[j].visible = true;
 				var child = shiesprite[j].children[1];
-				child.texture = ui.getBasicTextImage(sh.status.charges ? "x" + sh.status.charges : sh.truedr().toString(), 12, sh.card.upped ? "#000" : "#fff", ui.maybeLightenStr(sh.card));
+				child.texture = gfx.Text(sh.status.charges ? "x" + sh.status.charges : sh.truedr().toString(), 12, sh.card.upped ? "#000" : "#fff", ui.maybeLightenStr(sh.card));
 				child.visible = true;
 				var child = shiesprite[j].children[2];
-				child.texture = ui.getTextImage(sh.activetext(), 12, sh.card.upped ? "#000" : "#fff");
+				child.texture = gfx.getTextImage(sh.activetext(), 12, sh.card.upped ? "#000" : "#fff");
 				child.visible = true;
 				shiesprite[j].texture = gfx.getWeaponShieldImage(sh.card.code);
 				drawStatus(sh, shiesprite[j]);

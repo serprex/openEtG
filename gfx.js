@@ -48,7 +48,11 @@ function load(progress, postload){
 		img.src = "assets/" + asset + ".png";
 	});
 }
+var btximgcache = {};
 function Text(text, fontsize, color, bgcolor){
+	if (!text) return exports.nopic;
+	var key = JSON.stringify(arguments);
+	if (key in btximgcache) return btximgcache[key];
 	var canvas = document.createElement("canvas"), ctx = canvas.getContext("2d");
 	var font = ctx.font = fontsize + "px Dosis";
 	canvas.width = ctx.measureText(text).width+1;
@@ -60,7 +64,7 @@ function Text(text, fontsize, color, bgcolor){
 	ctx.font = font;
 	ctx.fillStyle = color || "black";
 	ctx.fillText(text, 0, fontsize);
-	return new PIXI.Texture(new PIXI.BaseTexture(canvas));
+	return bximgcache[key] = new PIXI.Texture(new PIXI.BaseTexture(canvas));
 }
 var caimgcache = [], artimagecache = [], shinyShader, grayShader;
 function setShinyShader(renderer, sprite, card){
@@ -108,7 +112,7 @@ function makeArt(code, art, rend) {
 			template.addChild(eleicon);
 		}
 	}
-	var infospr = new PIXI.Sprite(ui.getTextImage(card.info(), 11, card.upped ? "black" : "white", "", rend.width-4));
+	var infospr = new PIXI.Sprite(exports.getTextImage(card.info(), 11, card.upped ? "black" : "white", "", rend.width-4));
 	infospr.position.set(2, 150);
 	template.addChild(infospr);
 	rend.render(template);
@@ -222,6 +226,124 @@ function getInstImage(scale){
 		rend.render(c, mtx);
 		return rend;
 	});
+}
+var tximgcache = {};
+exports.getTextImage = function(text, size, color, bgcolor, width) {
+	if (!text) return exports.nopic;
+	var key = JSON.stringify(arguments);
+	if (key in tximgcache) {
+		return tximgcache[key];
+	}
+	var x = 0, y = 0, h = Math.floor(size*1.4), w = 0;
+	function pushIcon(texture, num){
+		if (num === undefined) num = 1;
+		setMode(1);
+		var w = size * num;
+		if (width && x + w > width){
+			x = 0;
+			y += h;
+		}
+		for (var i = 0; i<num; i++){
+			iconxy.push(texture, x, y);
+			x += size;
+		}
+	}
+	var canvas = document.createElement("canvas"), ctx = canvas.getContext("2d");
+	var textxy = [], font = ctx.font = size + "px Dosis", mode = 0, iconxy = [];
+	function setMode(m){
+		if (mode != m){
+			if (x) x += 3;
+			mode = m;
+		}
+	}
+	function pushText(text){
+		text = text.trim();
+		if (!text) return;
+		setMode(0);
+		var spacedText = text.replace(/\|/g, " | ");
+		var w = ctx.measureText(spacedText).width;
+		if (!width || x + w <= width){
+			textxy.push(spacedText, x, y+size);
+			x += w;
+			return;
+		}
+		var idx = 0, endidx = 0, oldblock = "";
+		util.iterSplit(text, " ", function(word){
+			var nextendidx = endidx + word.length + 1;
+			var newblock = text.slice(idx, nextendidx-1).replace(/\|/g, " | ");
+			if (width && x + ctx.measureText(newblock).width >= width){
+				textxy.push(oldblock, x, y+size);
+				newblock = word;
+				idx = endidx;
+				x = 0;
+				y += h;
+			}
+			oldblock = newblock;
+			endidx = nextendidx;
+		});
+		if (idx != text.length){
+			textxy.push(oldblock, x, y+size);
+			x += ctx.measureText(oldblock).width;
+			if (width && x >= width){
+				x = 0;
+				y += h;
+			}
+		}
+	}
+	var sep = /\d\d?:\d\d?|\n/g, reres, lastindex = 0;
+	while (reres = sep.exec(text)){
+		var piece = reres[0];
+		if (reres.index != lastindex){
+			pushText(text.slice(lastindex, reres.index));
+		}
+		if (piece == "\n"){
+			w = Math.max(w, x);
+			x = 0;
+			y += h;
+		}else{
+			var parse = piece.split(":");
+			var num = parseInt(parse[0]);
+			var icon = exports.e[parseInt(parse[1])];
+			if (num == 0) {
+				pushText("0");
+			} else if (num < 4) {
+				pushIcon(icon, num);
+			}else{
+				setMode(1);
+				mode = 0;
+				pushText(num.toString());
+				mode = 1;
+				pushIcon(icon);
+			}
+		}
+		lastindex = reres.index + piece.length;
+	}
+	if (lastindex != text.length) pushText(text.slice(lastindex));
+	canvas.width = width || Math.max(w, x);
+	canvas.height = y+h;
+	if (bgcolor){
+		ctx.fillStyle = bgcolor;
+		ctx.fillRect(0, 0, canvas.width, canvas.height);
+	}
+	ctx.font = font;
+	ctx.fillStyle = color || "black";
+	for(var i=0; i<textxy.length; i+=3){
+		ctx.fillText(textxy[i], textxy[i+1], textxy[i+2]);
+	}
+	if (iconxy.length){
+		var rend = require("./px").mkRenderTexture(canvas.width, canvas.height);
+		var spr = new PIXI.Sprite(new PIXI.Texture(new PIXI.BaseTexture(canvas)));
+		for (var i=0; i<iconxy.length; i+=3){
+			var ico = new PIXI.Sprite(iconxy[i]);
+			ico.position.set(iconxy[i+1], iconxy[i+2]);
+			ico.scale.set(size/32, size/32);
+			spr.addChild(ico);
+		}
+		rend.render(spr);
+		return tximgcache[key] = rend;
+	}else{
+		return tximgcache[key] = new PIXI.Texture(new PIXI.BaseTexture(canvas));
+	}
 }
 exports.refreshCaches = function() {
 	caimgcache.forEach(function(img){

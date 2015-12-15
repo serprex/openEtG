@@ -37,10 +37,7 @@ function visitChildren(displayObject, visitFunc)
 	for (var i = children.length - 1; i >= 0; i--)
 	{
 		var ret = visitChildren(children[i], visitFunc);
-		if (ret)
-		{
-			return ret;
-		}
+		if (ret) return ret;
 	}
 	return visitFunc(displayObject);
 };
@@ -83,7 +80,6 @@ function onMouseDown(event)
 	visitChildren(exports.stage, function(item){
 		if (item.mousedown || item.click || item.mouseupoutside)
 		{
-			//call the function!
 			if (item.mousedown)
 			{
 				item.mousedown();
@@ -140,12 +136,10 @@ function hitTest(item, xy)
 	item.worldTransform.applyInverse(xy, tmpPoint);
 	var x = tmpPoint.x, y = tmpPoint.y;
 
-	//a sprite or display object with a hit area defined
 	if (item.hitArea && item.hitArea.contains)
 	{
 		return item.hitArea.contains(x, y);
 	}
-	// a sprite with no hitarea defined
 	else if (item instanceof PIXI.Sprite)
 	{
 		var width = item.texture.frame.width;

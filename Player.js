@@ -237,7 +237,7 @@ Player.prototype.drawcard = function(drawstep) {
 			if (~this.addCard(this.deck.pop())){
 				this.proc("draw", drawstep);
 				if (this.deck.length == 0 && this.game.player1 == this && !Effect.disable)
-					Effect.mkSpriteFade(ui.getBasicTextImage("Last card!", 32, "white", "black"));
+					Effect.mkSpriteFade(require("./gfx").Text("Last card!", 32, "white", "black"));
 			}
 		}else this.game.setWinner(this.foe);
 	}
