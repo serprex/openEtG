@@ -1,5 +1,6 @@
 "use strict";
 var ui = require("./ui");
+var util = require("./util");
 var audio = require("./audio");
 var Cards = require("./Cards");
 var etgutil = require("./etgutil");
@@ -65,7 +66,7 @@ function Text(text, fontsize, color, bgcolor){
 	ctx.font = font;
 	ctx.fillStyle = color || "black";
 	ctx.fillText(text, 0, fontsize);
-	return bximgcache[key] = new PIXI.Texture(new PIXI.BaseTexture(canvas));
+	return btximgcache[key] = new PIXI.Texture(new PIXI.BaseTexture(canvas));
 }
 var caimgcache = [], artimagecache = [], shinyShader, grayShader;
 function setShinyShader(renderer, sprite, card){

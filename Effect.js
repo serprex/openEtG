@@ -1,5 +1,6 @@
 "use strict";
 var ui = require("./ui");
+var gfx = require("./gfx");
 var Thing = require("./Thing");
 function maybeTgtPos(pos){
 	return pos instanceof Thing ? ui.tgtToPos(pos) : pos;

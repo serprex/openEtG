@@ -291,7 +291,7 @@ Thing.prototype.hasactive = function(type, activename) {
 Thing.prototype.canactive = function(spend) {
 	if (this.owner.game.turn != this.owner) return false;
 	else if (this.type == etg.Spell){
-		return this.owner.usedactive && this.owner[spend?"spend":"canspend"](this.card.costele, this.card.cost);
+		return !this.owner.usedactive && this.owner[spend?"spend":"canspend"](this.card.costele, this.card.cost);
 	}else return this.active.cast && !this.usedactive && !this.status.delayed && !this.status.frozen && this.owner.canspend(this.castele, this.cast);
 }
 Thing.prototype.castSpell = function(t, active, nospell){
