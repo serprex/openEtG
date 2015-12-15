@@ -1,7 +1,5 @@
 "use strict";
 var etg = require("./etg");
-var util = require("./util");
-var Effect = require("./Effect");
 exports.eleNames = Object.freeze(["Chroma", "Entropy", "Death", "Gravity", "Earth", "Life", "Fire", "Water", "Light", "Air", "Time", "Darkness", "Aether", "Build your own", "Random"]);
 exports.elecols = new Uint32Array([
 	0xaa9988, 0xaa5599, 0x776688, 0x996633, 0x665544, 0x55aa00, 0xcc5522, 0x225588, 0x888877, 0x3388dd, 0xccaa22, 0x333333, 0x55aacc,
@@ -63,65 +61,8 @@ function tgtToPos(t) {
 		return cardPos(t.owner == t.owner.game.player2, t.owner.hand.indexOf(t));
 	} else console.log("Unknown target");
 }
-var sounds = {}, musics = {}, currentMusic;
-var soundEnabled = false, musicEnabled = false;
-function loadSounds() {
-	if (soundEnabled){
-		for (var i = 0;i < arguments.length;i++) {
-			sounds[arguments[i]] = new Audio("sound/" + arguments[i] + ".ogg");
-		}
-	}
-}
-function playSound(name, dontreset) {
-	if (soundEnabled && !Effect.disable) {
-		var sound = sounds[name];
-		if (!sound){
-			sound = sounds[name] = new Audio("sound/" + name + ".ogg");
-		}
-		if (!dontreset && sound.duration) sound.currentTime = 0;
-		sound.play();
-	}
-}
-function playMusic(name) {
-	if (name == currentMusic || Effect.disable) return;
-	var music;
-	if (musicEnabled && (music = musics[currentMusic])) music.pause();
-	currentMusic = name;
-	if (musicEnabled){
-		music = musics[name];
-		if (!music){
-			music = musics[name] = new Audio("sound/" + name + ".ogg");
-			music.loop = true;
-		}
-		music.play();
-	}
-}
-function changeSound(enabled) {
-	soundEnabled = enabled;
-	if (!soundEnabled) {
-		for (var sound in sounds) {
-			sounds[sound].pause();
-		}
-	}
-}
-function changeMusic(enabled) {
-	musicEnabled = enabled;
-	if (!musicEnabled) {
-		var music = musics[currentMusic];
-		if (music) music.pause();
-	}else{
-		var name = currentMusic;
-		currentMusic = null;
-		playMusic(name);
-	}
-}
 exports.reflectPos = reflectPos;
 exports.creaturePos = creaturePos;
 exports.permanentPos = permanentPos;
 exports.cardPos = cardPos;
 exports.tgtToPos = tgtToPos;
-exports.loadSounds = loadSounds;
-exports.playSound = playSound;
-exports.playMusic = playMusic;
-exports.changeSound = changeSound;
-exports.changeMusic = changeMusic;

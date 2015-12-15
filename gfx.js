@@ -1,5 +1,6 @@
 "use strict";
 var ui = require("./ui");
+var audio = require("./audio");
 var Cards = require("./Cards");
 var etgutil = require("./etgutil");
 var options = require("./options");
@@ -38,7 +39,7 @@ function load(progress, postload){
 				}
 			}else process(asset, tex);
 			if (loadCount == assets.length){
-				ui.loadSounds("cardClick", "buttonClick", "permPlay", "creaturePlay");
+				audio.loadSounds("cardClick", "buttonClick", "permPlay", "creaturePlay");
 				exports.r[0] = exports.nopic;
 				exports.r[-1] = exports.r[5];
 				exports.loaded = true;

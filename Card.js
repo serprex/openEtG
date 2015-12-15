@@ -95,7 +95,7 @@ Card.prototype.play = function(owner, src, tgt, fromhand){
 	if (this.type == etg.Spell){
 		src.castSpell(tgt, this.active.cast);
 	}else{
-		ui.playSound(this.type <= etg.Permanent ? "permPlay" : "creaturePlay");
+		audio.playSound(this.type <= etg.Permanent ? "permPlay" : "creaturePlay");
 		var thing = new Thing(this);
 		if (this.type == etg.Creature) owner.addCrea(thing, fromhand);
 		else if (this.type == etg.Permanent || this.type == etg.Pillar) owner.addPerm(thing, fromhand);
@@ -110,9 +110,9 @@ function readCost(coststr, defaultElement){
 	return isNaN(cost) ? null : new Int8Array([cost, ~cidx?parseInt(coststr.substr(cidx+1)):defaultElement]);
 }
 
-var ui = require("./ui");
 var etg = require("./etg");
 var util = require("./util");
+var audio = require("./audio");
 var Cards = require("./Cards");
 var Thing = require("./Thing");
 var etgutil = require("./etgutil");

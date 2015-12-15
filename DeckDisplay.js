@@ -1,7 +1,7 @@
 module.exports = DeckDisplay;
-var ui = require("./ui");
 var px = require("./px");
 var gfx = require("./gfx");
+var audio = require("./audio");
 var Cards = require("./Cards");
 
 function DeckDisplay(decksize, cardmouseover, cardclick, deck){
@@ -25,7 +25,7 @@ DeckDisplay.prototype.pos2idx = function(){
 DeckDisplay.prototype.click = function(){
 	var index = this.pos2idx();
 	if (index >= 0 && index < this.deck.length){
-		ui.playSound("cardClick");
+		audio.playSound("cardClick");
 		if (this.cardclick) this.cardclick(index);
 	}
 }

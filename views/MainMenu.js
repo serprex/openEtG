@@ -1,6 +1,5 @@
 "use strict";
 var px = require("../px");
-var ui = require("../ui");
 var dom = require("../dom");
 var etg = require("../etg");
 var gfx = require("../gfx");
@@ -8,6 +7,7 @@ var svg = require("../svg");
 var chat = require("../chat");
 var sock = require("../sock");
 var mkAi = require("../mkAi");
+var audio = require("../audio");
 var Cards = require("../Cards");
 var etgutil = require("../etgutil");
 var options = require("../options");
@@ -266,10 +266,10 @@ module.exports = function(nymph) {
 		if (name) sock.emit("librarywant", { f: name });
 	}
 	function soundChange() {
-		ui.changeSound(options.enableSound);
+		audio.changeSound(options.enableSound);
 	}
 	function musicChange() {
-		ui.changeMusic(options.enableMusic);
+		audio.changeMusic(options.enableMusic);
 	}
 	function hideRightpaneChange(){
 		document.getElementById("rightpane").style.display = options.hideRightpane ? "none" : "";

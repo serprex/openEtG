@@ -1,5 +1,5 @@
 "use strict";
-var ui = require("./ui");
+var audio = require("./audio");
 var options = require("./options");
 
 exports.style = function(){
@@ -71,7 +71,7 @@ exports.button = function(text, click, mouseover) {
 	});
 	ele.text = text;
 	ele.addEventListener("click", function() {
-		ui.playSound("buttonClick");
+		audio.playSound("buttonClick");
 		if (click) click.call(this);
 	});
 	if (mouseover) ele.addEventListener("mouseover", mouseover);
@@ -100,7 +100,7 @@ exports.icob = function(e, click, ch){
 	var ele = document.createElement("span");
 	ele.className = "imgb ico "+ch+e;
 	ele.addEventListener("click", function(){
-		ui.playSound("buttonClick");
+		audio.playSound("buttonClick");
 		if (click) click.call(this);
 	});
 	return ele;

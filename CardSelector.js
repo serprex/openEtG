@@ -1,9 +1,9 @@
 module.exports = CardSelector;
 var px = require("./px");
-var ui = require("./ui");
 var dom = require("./dom");
 var etg = require("./etg");
 var gfx = require("./gfx");
+var audio = require("./audio");
 var Cards = require("./Cards");
 var etgutil = require("./etgutil");
 
@@ -71,7 +71,7 @@ CardSelector.prototype.click = function(){
 	if (!this.cardclick) return;
 	var col = this.columns[Math.floor((px.mouse.x-100)/133)], card;
 	if (col && (card = col[Math.floor((px.mouse.y-272)/19)])){
-		ui.playSound("cardClick");
+		audio.playSound("cardClick");
 		var code = card.code;
 		if (this.filterboth && !this.showshiny){
 			var scode = card.asShiny(true).code;

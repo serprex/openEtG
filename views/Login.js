@@ -1,9 +1,9 @@
 var px = require("../px");
-var ui = require("../ui");
 var dom = require("../dom");
 var gfx = require("../gfx");
 var chat = require("../chat");
 var sock = require("../sock");
+var audio = require("../audio");
 var options = require("../options");
 var bg_login = new Image();
 bg_login.src = "assets/bg_login.png";
@@ -34,7 +34,7 @@ module.exports = function(){
 			if (progress == 1) loadingBar.style.backgroundColor = "#369";
 			loadingBar.style.width = (progress*900) + "px";
 		}, function(){
-			ui.playMusic("openingMusic");
+			audio.playMusic("openingMusic");
 			if (sock.user || sandbox) require("./MainMenu")();
 		});
 		require("./MainMenu"); // Queue loading bg_main

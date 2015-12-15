@@ -7,7 +7,7 @@ document.addEventListener("mousemove", function(e){
 		lastmove = e.timeStamp;
 	}
 });
-var ui = require("./ui");
+var audio = require("./audio");
 var renderer = new PIXI.autoDetectRenderer(900, 600, {view:document.getElementById("leftpane"), transparent:true});
 var noStage = {}, curStage = noStage;
 var interman = require("./InteractionManager");
@@ -54,7 +54,7 @@ exports.setClick = function(obj, click, sound) {
 		return;
 	}
 	obj.click = function() {
-		ui.playSound(sound);
+		audio.playSound(sound);
 		click.apply(this, arguments);
 	}
 }
