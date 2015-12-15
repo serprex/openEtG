@@ -1,11 +1,11 @@
 var px = require("../px");
-var ui = require("../ui");
 var dom = require("../dom");
 var svg = require("../svg");
 var chat = require("../chat");
 var sock = require("../sock");
 var tutor = require("../tutor");
 var etgutil = require("../etgutil");
+var options = require("../options");
 
 module.exports = function() {
 	var packdata = [
@@ -57,7 +57,7 @@ module.exports = function() {
 		}
 		var pack = packdata[packrarity];
 		var boostdata = { pack: packrarity, element: packele };
-		ui.parseInput(boostdata, "bulk", packmulti.value, 99);
+		options.parseInput(boostdata, "bulk", packmulti.value, 99);
 		if (sock.user.gold >= pack.cost * (boostdata.bulk || 1) || (sock.user.freepacks && sock.user.freepacks[packrarity] > 0)) {
 			sock.userEmit("booster", boostdata);
 			bbuy.style.display = "none";
@@ -122,7 +122,7 @@ module.exports = function() {
 			else {
 				sock.user.pool = etgutil.mergedecks(sock.user.pool, data.cards);
 				var bdata = {};
-				ui.parseInput(bdata, "bulk", packmulti.value, 99);
+				options.parseInput(bdata, "bulk", packmulti.value, 99);
 				sock.user.gold -= packdata[data.packtype].cost * (bdata.bulk || 1);
 				tgold.text = sock.user.gold + "$";
 			}

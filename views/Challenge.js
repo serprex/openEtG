@@ -1,5 +1,4 @@
 var px = require("../px");
-var ui = require("../ui");
 var dom = require("../dom");
 var sock = require("../sock");
 var etgutil = require("../etgutil");
@@ -13,7 +12,7 @@ function sendChallenge(foe) {
 		return;
 	}
 	var gameData = {};
-	ui.parsepvpstats(gameData);
+	options.parsepvpstats(gameData);
 	if (sock.user) {
 		gameData.f = foe;
 		sock.userEmit("foewant", gameData);
@@ -44,8 +43,8 @@ module.exports = function(pvp) {
 			return;
 		}
 		var gameData = { deck: options.aideck, urdeck: deck, seed: Math.random() * etgutil.MAX_INT, foename: "Custom", cardreward: "" };
-		ui.parsepvpstats(gameData);
-		ui.parseaistats(gameData);
+		options.parsepvpstats(gameData);
+		options.parseaistats(gameData);
 		require("./Match")(gameData, true);
 	}
 	function maybeChallenge(e) {

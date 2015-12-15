@@ -1,7 +1,6 @@
 "use strict";
 var etg = require("./etg");
 var util = require("./util");
-var options = require("./options");
 var Effect = require("./Effect");
 exports.eleNames = Object.freeze(["Chroma", "Entropy", "Death", "Gravity", "Earth", "Life", "Fire", "Water", "Light", "Air", "Time", "Darkness", "Aether", "Build your own", "Random"]);
 exports.elecols = new Uint32Array([
@@ -116,23 +115,6 @@ function changeMusic(enabled) {
 		playMusic(name);
 	}
 }
-function parseInput(data, key, value, limit) {
-	var value = parseInt(value);
-	if (value === 0 || value > 0)
-		data[key] = limit ? Math.min(value, limit) : value;
-}
-function parsepvpstats(data){
-	parseInput(data, "p1hp", options.pvphp);
-	parseInput(data, "p1drawpower", options.pvpdraw, 8);
-	parseInput(data, "p1markpower", options.pvpmark, 1188);
-	parseInput(data, "p1deckpower", options.pvpdeck);
-}
-function parseaistats(data){
-	parseInput(data, "p2hp", options.aihp);
-	parseInput(data, "p2drawpower", options.aidraw, 8);
-	parseInput(data, "p2markpower", options.aimark, 1188);
-	parseInput(data, "p2deckpower", options.aideckpower);
-}
 exports.reflectPos = reflectPos;
 exports.creaturePos = creaturePos;
 exports.permanentPos = permanentPos;
@@ -143,6 +125,3 @@ exports.playSound = playSound;
 exports.playMusic = playMusic;
 exports.changeSound = changeSound;
 exports.changeMusic = changeMusic;
-exports.parseInput = parseInput;
-exports.parsepvpstats = parsepvpstats;
-exports.parseaistats = parseaistats;

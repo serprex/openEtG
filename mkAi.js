@@ -1,4 +1,3 @@
-var ui = require("./ui");
 var chat = require("./chat");
 var sock = require("./sock");
 var Decks = require("./Decks.json");
@@ -36,7 +35,7 @@ exports.mkPremade = function(level, daily) {
 			gameData.p2markpower = 3;
 			gameData.p2drawpower = 2;
 		}
-		if (!sock.user) ui.parsepvpstats(gameData);
+		if (!sock.user) options.parsepvpstats(gameData);
 		else gameData.cost = cost;
 		if (daily !== undefined) gameData.daily = daily;
 		return require("./views/Match")(gameData, true);
@@ -76,7 +75,7 @@ exports.mkAi = function(level, daily) {
 		];
 
 		var gameData = { deck: deck, urdeck: urdeck, seed: Math.random() * etgutil.MAX_INT, p2hp: level == 0 ? 100 : level == 1 ? 125 : 150, p2markpower: level > 1 ? 2 : 1, foename: RngMock.choose(randomNames), p2drawpower: level == 2 ? 2 : 1 };
-		if (!sock.user) ui.parsepvpstats(gameData);
+		if (!sock.user) options.parsepvpstats(gameData);
 		else gameData.cost = cost;
 		gameData.level = level;
 		if (daily !== undefined) gameData.daily = daily;

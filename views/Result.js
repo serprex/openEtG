@@ -1,6 +1,5 @@
 "use strict";
 var px = require("../px");
-var ui = require("../ui");
 var dom = require("../dom");
 var etg = require("../etg");
 var gfx = require("../gfx");
@@ -9,6 +8,7 @@ var mkAi = require("../mkAi");
 var sock = require("../sock");
 var Cards = require("../Cards");
 var etgutil = require("../etgutil");
+var options = require("../options");
 var RngMock = require("../RngMock");
 var userutil = require("../userutil");
 var streak200 = new Uint8Array([10, 10, 15, 20, 15, 20]);
@@ -37,8 +37,8 @@ module.exports = function(game, foeDeck) {
 			if (game.foename == "Custom" || game.foename == "Test"){
 				var gameData = { deck: etgutil.encodedeck(foeDeck) + etgutil.toTrueMarkSuffix(game.player2.mark), urdeck: sock.getDeck(), seed: Math.random() * etgutil.MAX_INT, foename: game.foename, cardreward: "" };
 				if (game.foename == "Custom"){
-					ui.parsepvpstats(gameData);
-					ui.parseaistats(gameData);
+					options.parsepvpstats(gameData);
+					options.parseaistats(gameData);
 				}else{
 					// Inaccurate if stats changed throughout game
 					gameData.p2hp = game.player2.maxhp;
