@@ -439,7 +439,7 @@ Thing.prototype.shuffle = function(array) {
 }
 Thing.prototype.buffhp = function(x) {
 	if (this.type != etg.Weapon){
-		if (this instanceof Player && this.maxhp <= 500) this.maxhp = Math.min(this.maxhp+x, 500);
+		if (this.type == etg.Player && this.maxhp <= 500) this.maxhp = Math.min(this.maxhp+x, 500);
 		else this.maxhp += x;
 	}
 	return this.dmg(-x);
