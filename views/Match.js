@@ -652,7 +652,7 @@ function startMatch(game, foeDeck, spectate) {
 			var pl = game.players(j);
 			sacrificeOverlay[j].visible = pl.sosa;
 			sabbathOverlay[j].style.display = pl.flatline ? "" : "none";
-			handOverlay[j].texture = (pl.silence? gfx.silence :
+			handOverlay[j].texture = (pl.usedactive ? gfx.silence :
 				pl.sanctuary ? gfx.sanctuary :
 				pl.nova >= 3 ? gfx.singularity : gfx.nopic);
 			var i = 0;

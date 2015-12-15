@@ -1,10 +1,18 @@
 "use strict";
 function Player(game){
-	this.game = game;
 	this.owner = this;
+	this.card = null;
+	this.cast = 0;
+	this.castele = 0;
+	this.maxhp = this.hp = 100;
+	this.atk = 0;
+	this.status = Object.create(etg.DefaultStatus);
+	this.usedactive = false;
+	this.type = etg.Player;
+	this.active = {};
+	this.game = game;
 	this.shield = undefined;
 	this.weapon = undefined;
-	this.status = Object.create(etg.DefaultStatus);
 	this.creatures = new Array(23);
 	this.permanents = new Array(16);
 	this.gpull = undefined;
@@ -12,16 +20,13 @@ function Player(game){
 	this.deck = [];
 	this.quanta = new Int8Array(13);
 	this.sosa = 0;
-	this.silence = false;
 	this.sanctuary = false;
 	this.precognition = false;
 	this.nova = 0;
-	this.maxhp = this.hp = 100;
 	this.deckpower = 1;
 	this.drawpower = 1;
 	this.markpower = 1;
 	this.mark = 0;
-	this.type = etg.Player;
 	this.shardgolem = undefined;
 }
 module.exports = Player;
@@ -94,7 +99,7 @@ Player.prototype.info = function(){
 	for (var key in this.status){
 		plinfocore(info, key, this.status[key]);
 	}
-	["nova", "neuro", "sosa", "silence", "sanctuary", "flatline", "precognition"].forEach(function(key){
+	["nova", "neuro", "sosa", "usedactive", "sanctuary", "flatline", "precognition"].forEach(function(key){
 		plinfocore(info, key, this[key]);
 	}, this);
 	if (this.gpull) info.push("gpull");
@@ -217,7 +222,7 @@ Player.prototype.endturn = function(discard) {
 		this.foe.sosa--;
 	}
 	this.nova = 0;
-	this.flatline = this.silence = false;
+	this.flatline = this.usedactive = false;
 	this.foe.precognition = this.foe.sanctuary = false;
 	for (var i = this.foe.drawpower; i > 0; i--) {
 		this.foe.drawcard(true);
@@ -288,33 +293,42 @@ Player.prototype.dmg = function(x, ignoresosa) {
 	}
 }
 Player.prototype.spelldmg = function(x) {
-	return (!this.shield || !this.shield.status.reflective?this:this.foe).dmg(x);
+	return (this.shield && this.shield.status.reflective?this.foe:this).dmg(x);
 }
-Player.prototype.addpoison = function(x) {
-	this.status.poison += x;
-}
-Player.prototype.truehp = function(){ return this.hp; }
 Player.prototype.clone = function(game){
-	var obj = Object.create(Player.prototype);
 	function maybeClone(x){
 		return x && x.clone(obj);
 	}
-	obj.game = game;
+	var obj = Object.create(Player.prototype);
 	obj.owner = obj;
+	obj.card = this.card;
+	obj.cast = this.cast;
+	obj.castele = this.castele;
+	obj.hp = this.hp;
+	obj.maxhp = this.maxhp;
+	obj.atk = this.atk;
+	obj.status = etg.cloneStatus(this.status);
+	obj.usedactive = this.usedactive;
+	obj.type = this.type;
+	obj.active = util.clone(this.active);
+	obj.game = game;
 	obj.shield = maybeClone(this.shield);
 	obj.weapon = maybeClone(this.weapon);
-	obj.status = etg.cloneStatus(this.status);
 	obj.creatures = this.creatures.map(maybeClone);
 	obj.permanents = this.permanents.map(maybeClone);
-	obj.hand = this.hand.map(maybeClone);
 	obj.gpull = this.gpull && obj.creatures[this.gpull.getIndex()];
+	obj.hand = this.hand.map(maybeClone);
 	obj.deck = this.deck.slice();
 	obj.quanta = new Int8Array(this.quanta);
-	for(var attr in this){
-		if (!(attr in obj) && this.hasOwnProperty(attr)){
-			obj[attr] = this[attr];
-		}
-	}
+	obj.sosa = this.sosa;
+	obj.sanctuary = this.sanctuary;
+	obj.precognition = this.precognition;
+	obj.nova = this.nova;
+	obj.deckpower = this.deckpower;
+	obj.drawpower = this.drawpower;
+	obj.markpower = this.markpower;
+	obj.mark = this.mark;
+	obj.shardgolem = this.shardgolem;
 	return obj;
 }
 Player.prototype.hash = function(){

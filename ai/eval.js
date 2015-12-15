@@ -690,7 +690,7 @@ module.exports = function(game) {
 		if (player.precognition) pscore += .5;
 		if (!player.weapon) pscore += 1;
 		if (!player.shield) pscore += 1;
-		if (player.silence) pscore -= (player.hand.length+(player.hand.length>6?7:4))/4;
+		if (player.usedactive) pscore -= (player.hand.length+(player.hand.length>6?7:4))/4;
 		if (player.flatline) pscore -= 1;
 		if (player.status.neuro) pscore -= 5;
 		log("Eval", pscore);

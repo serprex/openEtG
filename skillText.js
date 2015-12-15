@@ -308,7 +308,7 @@ var data = {
 	serendipity:["Generate 3 random non-pillar cards in hand. One will be 1:1",
 		"Generate 3 random non-pillar upgraded cards in hand. One will be 1:1"],
 	shtriga:"Become immaterial at start of turn",
-	silence:"foe cannot play cards during their next turn, or target creature gains summoning sickness",
+	silence:"Target player cannot play cards until their turn ends, or target creature gains summoning sickness",
 	sing:"Target creature without Sing attacks owner",
 	singularity:"Not well behaved",
 	sinkhole:["Target creature is burrowed. Replace creature's skills with 1:4: unburrow",

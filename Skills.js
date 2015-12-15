@@ -1559,8 +1559,7 @@ shtriga:function(c,t){
 	if (c.owner == t) c.status.immaterial = true;
 },
 silence:function(c,t){
-	if (t.type != etg.Player) usedactive = true;
-	else if (!t.sanctuary) t.silence = true;
+	if (t.type != etg.Player || !t.sanctuary) t.usedactive = true;
 },
 singularity:function(c,t){
 	if (c.trueatk() > 0){
