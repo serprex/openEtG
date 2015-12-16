@@ -347,8 +347,8 @@ function startMatch(game, foeDeck, spectate) {
 			marksprite[j].style.pointerEvents = "none";
 			marksprite[j].style.fontSize = "18px";
 			marksprite[j].style.textShadow = "2px 2px 1px rgb(0,0,0),2px 2px 2px rgb(0,0,0)";
-			weapsprite[j] = makeInst(null, "weapon", new PIXI.math.Point(666, 512), 5/4);
-			shiesprite[j] = makeInst(null, "shield", new PIXI.math.Point(710, 536), 5/4);
+			weapsprite[j] = makeInst(null, "weapon", new PIXI.math.Point(670, 508), 5/4);
+			shiesprite[j] = makeInst(null, "shield", new PIXI.math.Point(710, 540), 5/4);
 			if (j){
 				gameui.addChild(shiesprite[j]);
 				gameui.addChild(weapsprite[j]);

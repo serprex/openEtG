@@ -33,7 +33,7 @@ function creaturePos(j, i) {
 	return p;
 }
 function permanentPos(j, i) {
-	var p = new Point(140 + (i % 8) * 64  , 504 + Math.floor(i / 8) * 40);
+	var p = new Point(142+((i&7)<<6), 498+(i>>3)*(j?50:62));
 	if (j) reflectPos(p);
 	return p;
 }
@@ -44,11 +44,11 @@ function tgtToPos(t) {
 	if (t.type == etg.Creature) {
 		return creaturePos(t.owner == t.owner.game.player2, t.getIndex());
 	} else if (t.type == etg.Weapon) {
-		var p = new Point(666, 512);
+		var p = new Point(666, 508);
 		if (t.owner == t.owner.game.player2) reflectPos(p);
 		return p;
 	} else if (t.type == etg.Shield) {
-		var p = new Point(710, 532);
+		var p = new Point(710, 540);
 		if (t.owner == t.owner.game.player2) reflectPos(p);
 		return p;
 	} else if (t.type == etg.Permanent) {
@@ -58,7 +58,7 @@ function tgtToPos(t) {
 		if (t == t.owner.game.player2) reflectPos(p);
 		return p;
 	} else if (t.type == etg.Spell) {
-		return cardPos(t.owner == t.owner.game.player2, t.owner.hand.indexOf(t));
+		return cardPos(t.owner == t.owner.game.player2, t.getIndex());
 	} else console.log("Unknown target");
 }
 exports.reflectPos = reflectPos;
