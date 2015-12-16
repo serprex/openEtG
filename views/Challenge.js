@@ -73,7 +73,7 @@ module.exports = function(pvp) {
 	function labelText(text) {
 		var text = dom.text(text);
 		text.style.fontSize = "18px";
-		text.style.color = "white";
+		text.style.color = "#fff";
 		text.style.pointerEvents = "none";
 		return text;
 	}

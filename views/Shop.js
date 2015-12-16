@@ -79,14 +79,14 @@ module.exports = function() {
 		});
 		g.appendChild(dom.style(dom.text(pack.type), {
 			fontSize: "18px",
-			color: "black",
+			color: "#000",
 			position: "absolute",
 			top: "50%",
 			left: "50%",
 			transform: "translate(-50%,-50%)",
 		}));
 		var price = dom.text(pack.cost + "$");
-		price.style.color = "black";
+		price.style.color = "#000";
 		dom.add(g, [7, 122, price]);
 		g.addEventListener("click", function(){
 			packrarity = n;

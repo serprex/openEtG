@@ -11,7 +11,7 @@ function Death(pos){
 	this.position = maybeTgtPos(pos);
 }
 function Text(text, pos){
-	PIXI.Sprite.call(this, gfx.getTextImage(text, 16, "white"));
+	PIXI.Sprite.call(this, gfx.getTextImage(text, 16, "#fff"));
 	this.step = 0;
 	this.position = maybeTgtPos(pos);
 	for(var i=0; i<anims.children.length; i++){

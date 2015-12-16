@@ -64,7 +64,7 @@ function Text(text, fontsize, color, bgcolor){
 		ctx.fillRect(0, 0, canvas.width, canvas.height);
 	}
 	ctx.font = font;
-	ctx.fillStyle = color || "black";
+	ctx.fillStyle = color || "#000";
 	ctx.fillText(text, 0, fontsize);
 	return btximgcache[key] = new PIXI.Texture(new PIXI.BaseTexture(canvas));
 }
@@ -98,11 +98,11 @@ function makeArt(code, art, rend) {
 	if (card.shiny){
 		template.addChild(setGrayBorderShader(rend.renderer, new PIXI.Sprite(exports.shinyborder), card));
 	}
-	var nametag = new PIXI.Sprite(Text(card.name, 12, card.upped ? "black" : "white"));
+	var nametag = new PIXI.Sprite(Text(card.name, 12, card.upped ? "#000" : "#fff"));
 	nametag.position.set(2, 2);
 	template.addChild(nametag);
 	if (card.cost) {
-		var text = new PIXI.Sprite(Text(card.cost, 12, card.upped ? "black" : "white"));
+		var text = new PIXI.Sprite(Text(card.cost, 12, card.upped ? "#000" : "#fff"));
 		text.anchor.x = 1;
 		text.position.set(rend.width-3, 2);
 		template.addChild(text);
@@ -114,7 +114,7 @@ function makeArt(code, art, rend) {
 			template.addChild(eleicon);
 		}
 	}
-	var infospr = new PIXI.Sprite(exports.getTextImage(card.info(), 11, card.upped ? "black" : "white", "", rend.width-4));
+	var infospr = new PIXI.Sprite(exports.getTextImage(card.info(), 11, card.upped ? "#000" : "#fff", "", rend.width-4));
 	infospr.position.set(2, 150);
 	template.addChild(infospr);
 	rend.render(template);
@@ -165,7 +165,7 @@ function getSlotImage(card, code){
 		if (card) {
 			var clipwidth = rend.width-2;
 			if (card.cost) {
-				var text = new PIXI.Sprite(Text(card.cost, 11, card.upped ? "black" : "white"));
+				var text = new PIXI.Sprite(Text(card.cost, 11, card.upped ? "#000" : "#fff"));
 				text.anchor.x = 1;
 				text.position.set(rend.width-2, 3);
 				graphics.addChild(text);
@@ -179,7 +179,7 @@ function getSlotImage(card, code){
 					clipwidth -= 18;
 				}
 			}
-			var text = new PIXI.Sprite(Text(card.name, 11, card.upped ? "black" : "white"));
+			var text = new PIXI.Sprite(Text(card.name, 11, card.upped ? "#000" : "#fff"));
 			text.position.set(2, 3);
 			if (text.width > clipwidth){
 				text.width = clipwidth;
@@ -328,7 +328,7 @@ exports.getTextImage = function(text, size, color, bgcolor, width) {
 		ctx.fillRect(0, 0, canvas.width, canvas.height);
 	}
 	ctx.font = font;
-	ctx.fillStyle = color || "black";
+	ctx.fillStyle = color || "#000";
 	for(var i=0; i<textxy.length; i+=3){
 		ctx.fillText(textxy[i], textxy[i+1], textxy[i+2]);
 	}
