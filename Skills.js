@@ -692,7 +692,7 @@ forceplay:function(c,t){
 	var tgting, tgt;
 	if (t.type == etg.Spell){
 		var card = t.card;
-		Effect.mkSpriteFade(require("./gfx").getHandImage(t.card), t, {x:t.owner == t.owner.game.player2 ? -1 : 1, y:0});
+		Effect.mkSpriteFadeHandImage(t.card, t, {x:t.owner == t.owner.game.player2 ? -1 : 1, y:0});
 		if (t.owner.sanctuary) return;
 		if (card.type == etg.Spell){
 			tgting = Cards.Targeting[card.active.cast.activename[0]];

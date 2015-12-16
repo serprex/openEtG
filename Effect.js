@@ -30,13 +30,19 @@ function SpriteFade(texture, pos, anchor) {
 	this.step = 0;
 	this.position = maybeTgtPos(pos) || new PIXI.math.Point(450, 300);
 }
+function SpriteFadeText(targs, pos, anchor){
+	return new SpriteFade(gfx.Text.call(null, targs), pos, anchor);
+}
+function SpriteFadeHandImage(card, pos, anchor){
+	return new SpriteFade(gfx.getHandImage(card), pos, anchor);
+}
 function nop(){}
 function make(cons){
 	return typeof PIXI === "undefined" ? nop : function(){
 		if (exports.disable || !anims) return;
 		var effect = Object.create(cons.prototype);
 		var effectOverride = cons.apply(effect, arguments);
-		anims.addChild(effectOverride === undefined ? effect : effectOverride);
+		anims.addChild(effectOverride || effect);
 	}
 }
 if (typeof PIXI === "undefined"){
@@ -86,3 +92,5 @@ if (typeof PIXI === "undefined"){
 exports.mkDeath = make(Death);
 exports.mkText = make(Text);
 exports.mkSpriteFade = make(SpriteFade);
+exports.mkSpriteFadeText = make(SpriteFadeText);
+exports.mkSpriteFadeHandImage = make(SpriteFadeHandImage);
