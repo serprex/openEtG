@@ -356,8 +356,7 @@ exports.refreshCaches = function() {
 if (typeof PIXI !== "undefined"){
 	exports.nopic = PIXI.Texture.emptyTexture;
 	exports.load = load;
-	exports.getPermanentImage = exports.getCreatureImage = getInstImage(.5);
-	exports.getHandImage = getInstImage(.5);
+	exports.getHandImage = exports.getPermanentImage = exports.getCreatureImage = getInstImage(.5);
 	exports.getWeaponShieldImage = getInstImage(5/8);
 	exports.getArt = artFactory(makeArt);
 	exports.getCardImage = getCardImage;

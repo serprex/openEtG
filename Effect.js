@@ -77,10 +77,10 @@ if (typeof PIXI === "undefined"){
 		this.alpha = 1-Math.sqrt(this.step)/6;
 	}
 	SpriteFade.prototype.next = function() {
-		if (++this.step == 100) {
+		if (++this.step == 128) {
 			return true;
 		}
-		if (this.step > 50) this.alpha = 1 - ((this.step-50) / 50);
+		if (this.step > 64) this.alpha = 2-this.step/64;
 	}
 }
 exports.mkDeath = make(Death);
