@@ -1,7 +1,7 @@
 {
   "name": "openEtG",
   "description": "openEtG",
-  "readme": "readme.txt",
+  "readme": "README.md",
   "repository": {
     "type": "git",
     "url": "https://github.com/serprex/openEtG.git"
@@ -15,11 +15,11 @@
     "optipng-bin": "^3.0.2"
   },
   "scripts": {
-    "test": "./_tests.js",
+    "test": "./scripts/tests.js",
     "build-etgify": "mkcjs etgify.js etg.js CardSelector.js Cards.js Cards.json Shaders.js DeckDisplay.js Decks.json Effect.js InteractionManager.js MersenneTwister.js Quest.js Skills.js ai/deck.js ai/eval.js ai/lethal.js ai/mulligan.js ai/search.js assets/atlas.js chat.js dom.js etgutil.js gfx.js mkAi.js options.js px.js skillText.js sock.js tutor.js ui.js ui.main.js usercmd.js userutil.js views/ArenaInfo.js views/ArenaTop.js views/Bazaar.js views/Challenge.js views/Colosseum.js views/Editor.js views/ElementSelect.js views/Library.js views/Login.js views/MainMenu.js views/Match.js views/QuestArea.js views/QuestMain.js views/Result.js views/Reward.js views/Shop.js views/Shop.js views/Trade.js views/Upgrade.js views/WealthTop.js",
     "build-tournify": "mkcjs tournament/commoner.js tournament/dodrio.js",
     "build-atlas-png": "optipng -o2 -strip all assets/atlas.png",
-    "build-atlas-css": "./mkatlascss.js",
+    "build-atlas-css": "./scripts/mkatlascss.js",
     "build": "npm run build-etgify && npm run build-tournify && npm run build-atlas-png && npm run build-atlas-css"
   },
   "optionalDependencies": {
