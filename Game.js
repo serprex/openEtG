@@ -6,7 +6,7 @@ function Game(seed, flip){
 	this.player2 = new Player(this);
 	this.player1.foe = this.player2;
 	this.player2.foe = this.player1;
-	this.first = this.turn = (seed < etgutil.MAX_INT/2) === !flip ? this.player1 : this.player2;
+	this.first = this.turn = (seed&1)^!flip ? this.player1 : this.player2;
 	this.ply = 0;
 	this.targeting = null;
 	this.expectedDamage = new Int16Array(2);
