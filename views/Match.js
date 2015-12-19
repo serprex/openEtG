@@ -49,16 +49,16 @@ function startMatch(game, foeDeck, spectate) {
 	}
 	function drawStatus(obj, spr) {
 		var statuses = spr.children[0].children;
-		statuses[0].visible = obj.status.psionic;
-		statuses[1].visible = obj.status.aflatoxin;
-		statuses[2].visible = !obj.status.aflatoxin && obj.status.poison > 0;
-		statuses[3].visible = obj.status.airborne || obj.status.ranged;
-		statuses[4].visible = obj.status.momentum;
-		statuses[5].visible = obj.status.adrenaline;
-		statuses[6].visible = obj.status.poison < 0;
-		statuses[7].visible = obj.status.delayed;
+		statuses[0].visible = obj.status.get("psionic");
+		statuses[1].visible = obj.status.get("aflatoxin");
+		statuses[2].visible = !obj.status.get("aflatoxin") && obj.status.get("poison") > 0;
+		statuses[3].visible = obj.status.get("airborne") || obj.status.get("ranged");
+		statuses[4].visible = obj.status.get("momentum");
+		statuses[5].visible = obj.status.get("adrenaline");
+		statuses[6].visible = obj.status.get("poison") < 0;
+		statuses[7].visible = obj.status.get("delayed");
 		statuses[8].visible = obj == obj.owner.gpull;
-		statuses[9].visible = obj.status.frozen;
+		statuses[9].visible = obj.status.get("frozen");
 		statuses[10].visible = obj.hasactive("prespell", "protectonce");
 		spr.alpha = obj.isMaterial() ? 1 : .7;
 	}
@@ -201,7 +201,7 @@ function startMatch(game, foeDeck, spectate) {
 			return (2+bolts) + " " + (35+bolts*5) + "%";
 		},
 		catapult:function(t){
-			return Math.ceil(t.truehp()*(t.status.frozen?150:100)/(t.truehp()+100));
+			return Math.ceil(t.truehp()*(t.status.get("frozen")?150:100)/(t.truehp()+100));
 		},
 		adrenaline:function(t){
 			return "Extra: " + etg.getAdrenalRow(t.trueatk());
@@ -211,7 +211,7 @@ function startMatch(game, foeDeck, spectate) {
 		},
 	};
 	function setInfo(obj) {
-		if (!cloakgfx.visible || obj.owner != game.player2 || obj.status.cloak) {
+		if (!cloakgfx.visible || obj.owner != game.player2 || obj.status.get("cloak")) {
 			var info = obj.info(), actinfo = game.targeting && game.targeting.filter(obj) && activeInfo[game.targeting.text];
 			if (actinfo) info += "\n" + actinfo(obj);
 			infobox.text = info;
@@ -562,7 +562,7 @@ function startMatch(game, foeDeck, spectate) {
 			}
 			for (var i = 0;i < 16;i++) {
 				var pr = pl.permanents[i];
-				if (pr && (j == 0 || !cloakgfx.visible || pr.status.cloak) && px.hitTest(permsprite[j][i])) {
+				if (pr && (j == 0 || !cloakgfx.visible || pr.status.get("cloak")) && px.hitTest(permsprite[j][i])) {
 					cardartcode = pr.card.code;
 					cardartx = permsprite[j][i].position.x;
 					setInfo(pr);
@@ -680,7 +680,8 @@ function startMatch(game, foeDeck, spectate) {
 					creasprite[j][i].texture = gfx.getCreatureImage(cr.card.code);
 					creasprite[j][i].visible = true;
 					var child = creasprite[j][i].children[1];
-					child.texture = gfx.Text(cr.trueatk() + " | " + cr.truehp() + (cr.status.charges ? " x" + cr.status.charges : ""), 11, cr.card.upped ? "#000" : "#fff", ui.maybeLightenStr(cr.card));
+					var charges = cr.status.get("charges");
+					child.texture = gfx.Text(cr.trueatk() + " | " + cr.truehp() + (charges ? " x" + charges : ""), 11, cr.card.upped ? "#000" : "#fff", ui.maybeLightenStr(cr.card));
 					var child2 = creasprite[j][i].children[2];
 					child2.texture = gfx.getTextImage(cr.activetext(), 11, cr.card.upped ? "#000" : "#fff");
 					drawStatus(cr, creasprite[j][i]);
@@ -688,19 +689,22 @@ function startMatch(game, foeDeck, spectate) {
 			}
 			for (var i = 0;i < 16;i++) {
 				var pr = pl.permanents[i];
-				if (pr && pr.status.flooding) floodgfx.visible = true;
-				if (pr && !(j == 1 && cloakgfx.visible && !pr.status.cloak)) {
+				if (pr && pr.status.get("flooding")) floodgfx.visible = true;
+				if (pr && !(j == 1 && cloakgfx.visible && !pr.status.get("cloak"))) {
 					permsprite[j][i].texture = gfx.getPermanentImage(pr.card.code);
 					permsprite[j][i].visible = true;
 					var child = permsprite[j][i].children[1], child2 = permsprite[j][i].children[2];
 					if (pr.card.type == etg.Pillar) {
-						child.texture = gfx.getTextImage("1:" + (pr.status.pendstate ? pr.owner.mark : pr.card.element) + " x" + pr.status.charges, 11, pr.card.upped ? "#000" : "#fff", ui.maybeLightenStr(pr.card));
+						child.texture = gfx.getTextImage("1:" + (pr.status.get("pendstate") ? pr.owner.mark : pr.card.element) + " x" + pr.status.get("charges"), 11, pr.card.upped ? "#000" : "#fff", ui.maybeLightenStr(pr.card));
 						child2.texture = gfx.nopic;
 					}else{
 						if (pr.active.auto && pr.active.auto == Skills.locket) {
-							child.texture = gfx.getTextImage("1:" + (pr.status.mode === undefined ? pr.owner.mark : pr.status.mode), 11, pr.card.upped ? "#000" : "#fff", ui.maybeLightenStr(pr.card));
+							child.texture = gfx.getTextImage("1:" + (pr.status.get("mode") || pr.owner.mark), 11, pr.card.upped ? "#000" : "#fff", ui.maybeLightenStr(pr.card));
 						}
-						else child.texture = gfx.Text((pr.status.charges == undefined ? "" : pr.status.charges) + "", 11, pr.card.upped ? "#000" : "#fff", ui.maybeLightenStr(pr.card));
+						else{
+							var charges = pr.status.get("charges");
+							child.texture = gfx.Text((charges || "").toString(), 11, pr.card.upped ? "#000" : "#fff", ui.maybeLightenStr(pr.card));
+						}
 						child2.texture = gfx.getTextImage(pr.activetext(), 11, pr.card.upped ? "#000" : "#fff");
 					}
 					drawStatus(pr, permsprite[j][i]);
@@ -709,8 +713,9 @@ function startMatch(game, foeDeck, spectate) {
 			var wp = pl.weapon;
 			if (wp && !(j == 1 && cloakgfx.visible)) {
 				weapsprite[j].visible = true;
+				var charges = wp.status.get("charges")
 				var child = weapsprite[j].children[1];
-				child.texture = gfx.Text(wp.trueatk() + (wp.status.charges ? " x" + wp.status.charges : ""), 12, wp.card.upped ? "#000" : "#fff", ui.maybeLightenStr(wp.card));
+				child.texture = gfx.Text(wp.trueatk() + (charges ? " x" + charges : ""), 12, wp.card.upped ? "#000" : "#fff", ui.maybeLightenStr(wp.card));
 				child.visible = true;
 				var child = weapsprite[j].children[2];
 				child.texture = gfx.getTextImage(wp.activetext(), 12, wp.card.upped ? "#000" : "#fff");
@@ -721,8 +726,9 @@ function startMatch(game, foeDeck, spectate) {
 			var sh = pl.shield;
 			if (sh && !(j == 1 && cloakgfx.visible)) {
 				shiesprite[j].visible = true;
+				var charges = sh.status.get("charges")
 				var child = shiesprite[j].children[1];
-				child.texture = gfx.Text(sh.status.charges ? "x" + sh.status.charges : sh.truedr().toString(), 12, sh.card.upped ? "#000" : "#fff", ui.maybeLightenStr(sh.card));
+				child.texture = gfx.Text(charges ? "x" + charges : sh.truedr().toString(), 12, sh.card.upped ? "#000" : "#fff", ui.maybeLightenStr(sh.card));
 				child.visible = true;
 				var child = shiesprite[j].children[2];
 				child.texture = gfx.getTextImage(sh.activetext(), 12, sh.card.upped ? "#000" : "#fff");
@@ -748,7 +754,7 @@ function startMatch(game, foeDeck, spectate) {
 			if (px.hitTest(playerOverlay[j])){
 				setInfo(pl);
 			}else{
-				var poison = pl.status.poison, poisoninfo = (poison > 0 ? poison + " 1:2" : poison < 0 ? -poison + " 1:7" : "") + (pl.status.neuro ? " 1:10" : "");
+				var poison = pl.status.get("poison"), poisoninfo = (poison > 0 ? poison + " 1:2" : poison < 0 ? -poison + " 1:7" : "") + (pl.status.get("neuro") ? " 1:10" : "");
 				hptext[j].text = pl.hp + "/" + pl.maxhp + "\n" + pl.deck.length + "cards" + (!cloakgfx.visible && game.expectedDamage[j] ? "\nDmg: " + game.expectedDamage[j] : "") + (poisoninfo ? "\n" + poisoninfo : "");
 			}
 		}

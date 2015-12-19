@@ -20,10 +20,10 @@ function getWorstCard(game){
 }
 var afilter = {
 	web:function(c,t){
-		return t.status.airborne;
+		return t.status.get("airborne");
 	},
 	freeze:function(c,t){
-		return t.status.frozen < 3;
+		return t.status.get("frozen") < 3;
 	},
 	pacify:function(c,t){
 		return t.trueatk() != 0;
@@ -35,7 +35,7 @@ var afilter = {
 		return t.active.cast && !t.usedactive;
 	},
 	lobotomize:function(c,t){
-		if (!t.status.momentum && !t.status.psionic) {
+		if (!t.status.get("momentum") && !t.status.get("psionic")) {
 			for (var key in t.active){
 				if (t.active[key] && key != "ownplay"){
 					return true;

@@ -66,7 +66,7 @@ module.exports = function(game, foeDeck) {
 			["Perfect Damage", game.player2.hp == 0 ? .1 : 0],
 			["Pillarless", game.bonusstats.cardsplayed[0] == 0 ? .05 : 0],
 			["Size matters", (etgutil.decklength(sock.getDeck())-36)/150],
-			["Toxic", game.player2.status.poison > 18 ? .1 : 0],
+			["Toxic", game.player2.status.get("poison") > 18 ? .1 : 0],
 			["Unupped", (function(){
 				var unupnu = 0;
 				etgutil.iterraw(sock.getDeck(), function(code, count){

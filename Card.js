@@ -49,12 +49,11 @@ function Card(type, info){
 		if (info.Status in statuscache){
 			this.status = statuscache[info.Status];
 		}else{
-			statuscache[info.Status] = this.status = Object.create(etg.DefaultStatus);
+			statuscache[info.Status] = this.status = new Status();
 			util.iterSplit(info.Status, "+", function(status){
 				var eqidx = status.indexOf("=");
-				this.status[~eqidx?status.substr(0,eqidx):status] = eqidx == -1 || parseInt(status.substr(eqidx+1));
+				this.status.set(~eqidx?status.substr(0,eqidx):status, eqidx == -1 || parseInt(status.substr(eqidx+1)));
 			}, this);
-			Object.freeze(this.status);
 		}
 	}else this.status = emptyStatus;
 	Object.freeze(this);
@@ -115,8 +114,8 @@ var util = require("./util");
 var audio = require("./audio");
 var Cards = require("./Cards");
 var Thing = require("./Thing");
+var Status = require("./Status");
 var etgutil = require("./etgutil");
 var skillText = require("./skillText");
 var parseSkill = require("./parseSkill");
-var emptyObj = Object.freeze({}), emptyStatus = Object.freeze(Object.create(etg.DefaultStatus)),
-	statuscache = {}, activecache = {}, activecastcache = {};
+var emptyObj = Object.freeze({}), emptyStatus = new Status(), statuscache = {}, activecache = {}, activecastcache = {};

@@ -21,7 +21,7 @@ exports.filter = function(upped, filter, cmp, showshiny){
 		filtercache[cacheidx] = [];
 		for (var key in exports.Codes){
 			var card = exports.Codes[key];
-			if (card.upped == upped && !card.shiny == !showshiny && !card.status.token){
+			if (card.upped == upped && !card.shiny == !showshiny && !card.status.get("token")){
 				filtercache[cacheidx].push(card);
 			}
 		}
@@ -91,10 +91,10 @@ var TargetFilters = {
 		return t.isMaterial(etg.Permanent) && t.card.type == etg.Pillar;
 	},
 	weap:function(c, t){
-		return (t.type == etg.Weapon || (t.type < etg.Spell && t.card.type == etg.Weapon)) && !t.status.immaterial && !t.status.burrowed;
+		return (t.type == etg.Weapon || (t.type < etg.Spell && t.card.type == etg.Weapon)) && !t.status.get("immaterial") && !t.status.get("burrowed");
 	},
 	shie:function(c, t){
-		return (t.type == etg.Shield || (t.type < etg.Spell && t.card.type == etg.Shield)) && !t.status.immaterial && !t.status.burrowed;
+		return (t.type == etg.Shield || (t.type < etg.Spell && t.card.type == etg.Shield)) && !t.status.get("immaterial") && !t.status.get("burrowed");
 	},
 	playerweap:function(c,t){
 		return t.type == etg.Weapon;
@@ -103,10 +103,10 @@ var TargetFilters = {
 		return t.isMaterial(etg.Permanent);
 	},
 	permnonstack:function(c,t){
-		return t.isMaterial(etg.Permanent) && !t.status.stackable;
+		return t.isMaterial(etg.Permanent) && !t.status.get("stackable");
 	},
 	stack:function(c,t){
-		return t.isMaterial(etg.Permanent) && t.status.stackable;
+		return t.isMaterial(etg.Permanent) && t.status.get("stackable");
 	},
 	crea:function(c, t){
 		return t.isMaterial(etg.Creature);
@@ -124,7 +124,7 @@ var TargetFilters = {
 		return t.isMaterial(etg.Creature) && !t.card.isOf(exports.Skeleton);
 	},
 	butterfly:function(c, t){
-		return (t.type == etg.Creature || t.type == etg.Weapon) && !t.status.immaterial && !t.status.burrowed && (t.trueatk()<3 || (t.type == etg.Creature && t.truehp()<3));
+		return (t.type == etg.Creature || t.type == etg.Weapon) && !t.status.get("immaterial") && !t.status.get("burrowed") && (t.trueatk()<3 || (t.type == etg.Creature && t.truehp()<3));
 	},
 	devour:function(c, t){
 		return t.isMaterial(etg.Creature) && t.truehp()<c.truehp();
@@ -136,19 +136,19 @@ var TargetFilters = {
 		return t.type == etg.Spell || (t.isMaterial() && t.active.cast);
 	},
 	airbornecrea:function(c, t){
-		return t.isMaterial(etg.Creature) && t.status.airborne;
+		return t.isMaterial(etg.Creature) && t.status.get("airborne");
 	},
 	golem:function(c, t){
-		return t.status.golem && t.attack;
+		return t.status.get("golem") && t.attack;
 	},
 	groundcrea:function(c, t){
-		return t.isMaterial(etg.Creature) && !t.status.airborne;
+		return t.isMaterial(etg.Creature) && !t.status.get("airborne");
 	},
 	wisdom:function(c, t){
-		return (t.type == etg.Creature || t.type == etg.Weapon) && !t.status.burrowed;
+		return (t.type == etg.Creature || t.type == etg.Weapon) && !t.status.get("burrowed");
 	},
 	quinttog:function(c, t){
-		return t.type == etg.Creature && !t.status.burrowed;
+		return t.type == etg.Creature && !t.status.get("burrowed");
 	},
 };
 var etg = require("./etg");

@@ -6,7 +6,7 @@ function Player(game){
 	this.castele = 0;
 	this.maxhp = this.hp = 100;
 	this.atk = 0;
-	this.status = Object.create(etg.DefaultStatus);
+	this.status = new Status();
 	this.usedactive = false;
 	this.type = etg.Player;
 	this.active = {};
@@ -36,7 +36,7 @@ Player.prototype = Object.create(Thing.prototype);
 Player.prototype.toString = function(){ return this == this.game.player1?"p1":"p2"; }
 Player.prototype.isCloaked = function(){
 	return this.permanents.some(function(pr){
-		return pr && pr.status.cloak;
+		return pr && pr.status.get("cloak");
 	});
 }
 Player.prototype.addCrea = function(x, fromhand){
@@ -50,11 +50,11 @@ Player.prototype.setCrea = function(idx, x){
 	x.place(this, etg.Creature, false);
 }
 Player.prototype.addPerm = function(x, fromhand){
-	if (x.status.additive){
+	if (x.status.get("additive")){
 		var dullcode = etgutil.asShiny(x.card.code, false);
 		for(var i=0; i<16; i++){
 			if (this.permanents[i] && etgutil.asShiny(this.permanents[i].card.code, false) == dullcode){
-				this.permanents[i].status.charges += x.status.charges;
+				this.permanents[i].status.incr("charges", x.status.get("charges"));
 				this.permanents[i].place(this, etg.Permanent, fromhand);
 				return;
 			}
@@ -69,8 +69,8 @@ Player.prototype.setWeapon = function(x, fromhand){
 	x.place(this, etg.Weapon, fromhand);
 }
 Player.prototype.setShield = function(x, fromhand){
-	if (x.status.additive && this.shield && x.card.as(this.shield.card) == x.card){
-		this.shield.status.charges += x.status.charges;
+	if (x.status.get("additive") && this.shield && x.card.as(this.shield.card) == x.card){
+		this.shield.status.incr("charges", x.status.get("charges"));
 	}else this.shield = x;
 	x.place(this, etg.Shield, fromhand);
 }
@@ -96,8 +96,8 @@ function plinfocore(info, key, val){
 }
 Player.prototype.info = function(){
 	var info = [this.hp + "/" + this.maxhp + " " + this.deck.length + "cards"];
-	for (var key in this.status){
-		plinfocore(info, key, this.status[key]);
+	for (var i=0; i<this.status.keys.length; i++){
+		plinfocore(info, this.status.keys[i], this.status.vals[i]);
 	}
 	["nova", "neuro", "sosa", "usedactive", "sanctuary", "flatline", "precognition"].forEach(function(key){
 		plinfocore(info, key, this[key]);
@@ -154,9 +154,8 @@ Player.prototype.endturn = function(discard) {
 		this.hand[discard].die();
 	}
 	this.spend(this.mark, this.markpower * (this.mark > 0 ? -1 : -3));
-	if (this.foe.status.poison){
-		this.foe.dmg(this.foe.status.poison);
-	}
+	var poison = this.foe.status.get("poison");
+	if (poison) this.foe.dmg(poison);
 	var patienceFlag = false, floodingFlag = false, stasisFlag = false, floodingPaidFlag = false, freedomChance = 0;
 	for(var i=0; i<16; i++){
 		var p;
@@ -166,33 +165,30 @@ Player.prototype.endturn = function(discard) {
 			}
 			if (~p.getIndex()){
 				p.usedactive = false;
-				if (p.status.stasis){
+				if (p.status.get("stasis")){
 					stasisFlag = true;
 				}
-				if (p.status.flooding && !floodingPaidFlag){
+				if (p.status.get("flooding") && !floodingPaidFlag){
 					floodingPaidFlag = true;
 					floodingFlag = true;
 					if (!this.spend(etg.Water, 1)){
 						this.permanents[i] = undefined;
 					}
 				}
-				if (p.status.patience){
+				if (p.status.get("patience")){
 					patienceFlag = true;
 					stasisFlag = true;
 				}
-				if (p.status.freedom){
+				if (p.status.get("freedom")){
 					freedomChance++;
 				}
-				if (p.status.frozen){
-					p.status.frozen--;
-				}
+				p.status.maybeDecr("frozen");
 			}
 		}
 		if ((p=this.foe.permanents[i])){
-			if (p.status.stasis){
+			if (p.status.get("stasis")){
 				stasisFlag = true;
-			}
-			if (p.status.flooding){
+			}else if (p.status.get("flooding")){
 				floodingFlag = true;
 			}
 		}
@@ -204,11 +200,11 @@ Player.prototype.endturn = function(discard) {
 		if (cr){
 			if (patienceFlag){
 				var floodbuff = floodingFlag && i>4;
-				cr.atk += floodbuff?5:cr.status.burrowed?4:2;
+				cr.atk += floodbuff?5:cr.status.get("burrowed")?4:2;
 				cr.buffhp(floodbuff?2:1);
 			}
 			cr.attack(stasisFlag, freedomChance);
-			if (floodingFlag && !cr.status.aquatic && cr.isMaterial() && cr.getIndex() > 4){
+			if (floodingFlag && !cr.status.get("aquatic") && cr.isMaterial() && cr.getIndex() > 4){
 				cr.die();
 			}
 		}
@@ -253,7 +249,7 @@ Player.prototype.drawhand = function(x) {
 	}
 }
 function destroyCloak(pr){
-	if (pr && pr.status.cloak) pr.die();
+	if (pr && pr.status.get("cloak")) pr.die();
 }
 Player.prototype.masscc = function(caster, func, massmass){
 	this.permanents.forEach(destroyCloak);
@@ -293,7 +289,7 @@ Player.prototype.dmg = function(x, ignoresosa) {
 	}
 }
 Player.prototype.spelldmg = function(x) {
-	return (this.shield && this.shield.status.reflective?this.foe:this).dmg(x);
+	return (this.shield && this.shield.status.get("reflective")?this.foe:this).dmg(x);
 }
 Player.prototype.clone = function(game){
 	function maybeClone(x){
@@ -307,7 +303,7 @@ Player.prototype.clone = function(game){
 	obj.hp = this.hp;
 	obj.maxhp = this.maxhp;
 	obj.atk = this.atk;
-	obj.status = etg.cloneStatus(this.status);
+	obj.status = this.status.clone();
 	obj.usedactive = this.usedactive;
 	obj.type = this.type;
 	obj.active = util.clone(this.active);
@@ -332,10 +328,11 @@ Player.prototype.clone = function(game){
 	return obj;
 }
 Player.prototype.hash = function(){
-	return this == this.game.player1 ? 0 : 0x7fffffff;
+	return this == this.game.player1 ?0 : 0x7fffffff;
 }
 
 var etg = require("./etg");
 var util = require("./util");
+var Status = require("./Status");
 var etgutil = require("./etgutil");
 var Effect = require("./Effect");

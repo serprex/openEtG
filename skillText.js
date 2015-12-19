@@ -5,11 +5,13 @@ module.exports = function(c, event){
 		return processEntry(c, "cast", entry);
 	}else{
 		var ret = [], stext = [];
-		for(var key in c.status){
-			if (!c.status[key]) continue;
+		for(var i=0; i<c.status.keys.length; i++){
+			var val = c.status.vals[i];
+			if (!val) continue;
+			var key = c.status.keys[i];
 			var entry = statusData[key];
 			if (entry === undefined) {
-				var text = (c.status[key] === true ? key : c.status[key] + key);
+				var text = (val == 1 ? key : val + key);
 				text = text.charAt(0).toUpperCase() + text.slice(1);
 				stext.push(text);
 			}
@@ -212,7 +214,7 @@ var data = {
 	locketshift:"Now produces quanta of target's element",
 	loot:"Steal a random permanent from foe when own permanent is destroyed",
 	losecharge:function(c, inst){
-		var charges = c.status.charges;
+		var charges = c.status.get("charges");
 		return "Lasts " + charges + " turn" + (charges == 1?"":"s");
 	},
 	luciferin:"All your creatures without skills produce 1:8 per attack. Heal owner 10",
@@ -388,13 +390,13 @@ function auraText(tgts, bufftext, upbufftext){
 }
 var statusData = {
 	cloak:"Cloaks own field",
-	charges:function(c,inst){return c !== inst || Thing.prototype.hasactive.call(c, "auto", "losecharge") || c.status.charges == 1?"":"Enter with " + c.status.charges + (c.status.stackable?" stacks":" charges")},
+	charges:function(c,inst){return c !== inst || Thing.prototype.hasactive.call(c, "auto", "losecharge") || c.status.get("charges") == 1?"":"Enter with " + c.status.get("charges") + (c.status.get("stackable")?" stacks":" charges")},
 	flooding:"Non aquatic creatures past first five creature slots die on turn end. Consumes 1:7. Unique",
 	freedom:"",
 	nightfall:auraText("Nocturnal creatures", "1|1", "2|1"),
 	nothrottle:"Throttling does not apply to any of own creatures while equipped",
 	patience:"Each turn delay own creatures. They gain 2|1. 4|1 if burrowed. 5|2 if flooded. Unique",
-	poison:function(c,inst){return c == inst ? "Enter with " + c.status.poison + " poison" : inst.status.poison + " poison"},
+	poison:function(c,inst){return c == inst ? "Enter with " + c.status.get("poison") + " poison" : inst.status.get("poison") + " poison"},
 	stackable:"",
 	stasis:"Prevent creatures attacking at end of turn",
 	tunnel:"Burrowed creatures bypass shields",

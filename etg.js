@@ -1,29 +1,8 @@
 "use strict";
-var DefaultStatus = exports.DefaultStatus = {
-	adrenaline:0,
-	chargecap:0,
-	delayed:0,
-	dive:0,
-	frozen:0,
-	neuro:false,
-	poison:0,
-	steamatk:0,
-	storedAtk:0,
-	storedpower:0,
-};
-function cloneStatus(status){
-	var result = Object.create(DefaultStatus);
-	for(var key in status){
-		if (DefaultStatus[key] != status[key]){
-			result[key] = status[key];
-		}
-	}
-	return result;
-}
 // adrtbl is a bitpacked 2d array
 // [[0,0,0,0],[1,1,1],[2,2,2],[3,3,3],[3,2],[4,2],[4,2],[5,3],[6,3],[3],[4],[4],[4],[5],[5],[5]]
 var adrtbl = new Uint16Array([4, 587, 1171, 1755, 154, 162, 162, 234, 242, 25, 33, 33, 33, 41, 41, 41]);
-function getAdrenalRow(x){
+exports.getAdrenalRow = function(x){
 	x|=0;
 	var sign=(x>0)-(x<0);
 	x = Math.abs(x);
@@ -35,20 +14,16 @@ function getAdrenalRow(x){
 	}
 	return ret;
 }
-function countAdrenaline(x){
+exports.countAdrenaline = function(x){
 	x = Math.abs(x|0);
 	return x>15?1:(adrtbl[x]&7)+1;
 }
-function calcAdrenaline(y, dmg){
+exports.calcAdrenaline = function(y, dmg){
 	if (y<2)return dmg;
 	var row = adrtbl[Math.abs(dmg)];
 	if (y-2 >= (row&7)) return 0;
 	return ((row>>(y-1)*3)&7)*((dmg>0)-(dmg<0));
 }
-exports.countAdrenaline = countAdrenaline;
-exports.getAdrenalRow = getAdrenalRow;
-exports.calcAdrenaline = calcAdrenaline;
-exports.cloneStatus = cloneStatus;
 exports.Chroma = 0;
 exports.Entropy = 1;
 exports.Death = 2;

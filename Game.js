@@ -70,7 +70,7 @@ Game.prototype.addData = function(data) {
 }
 function removeSoPa(p){
 	if (p){
-		p.status.patience = undefined;
+		p.status.set("patience", 0);
 	}
 }
 Game.prototype.updateExpectedDamage = function(){
@@ -116,7 +116,7 @@ Game.prototype.getTarget = function(src, active, cb) {
 	if (targetingFilter) {
 		var game = this;
 		this.targeting = {
-			filter: function(t) { return (t.type == etg.Player || t.type == etg.Spell || t.owner == game.turn || t.status.cloak || !t.owner.isCloaked()) && targetingFilter(src, t); },
+			filter: function(t) { return (t.type == etg.Player || t.type == etg.Spell || t.owner == game.turn || t.status.get("cloak") || !t.owner.isCloaked()) && targetingFilter(src, t); },
 			cb: function(){
 				cb.apply(null, arguments);
 				game.targeting = null;

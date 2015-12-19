@@ -31,7 +31,7 @@ var filters = {
 	5325:function tidalHealing(card, deck){
 		var aquaticCount = 0;
 		for(var i=0; i<deck.length; i++){
-			if (Cards.Codes[deck[i]].status.aquatic && ++aquaticCount>4) return true;
+			if (Cards.Codes[deck[i]].status.get("aquatic") && ++aquaticCount>4) return true;
 		}
 	},
 	5418:function tunneling(card, deck){
