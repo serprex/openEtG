@@ -1,7 +1,6 @@
 #!/usr/bin/node
 "use strict";
 process.chdir(__dirname);
-var rooms = {};
 var etg = require("./etg");
 var Cards = require("./Cards");
 Cards.loadcards();
@@ -13,6 +12,10 @@ var sutil = require("./srv/sutil");
 var http = require("http");
 var db = require("./srv/db");
 var Us = require("./srv/Us");
+
+const MAX_INT = 0x100000000;
+var rooms = {};
+
 var forkcore = require("child_process").fork("./srv/forkcore");
 var app = http.createServer(function(req, res){
 	var ifModifiedSince = req.headers["if-modified-since"];
@@ -194,7 +197,6 @@ var userEvents = {
 				aname = aname[0];
 				console.log("deck: "+ aname + " " + idx);
 				db.hgetall((data.lv?"B:":"A:")+aname, (err, adeck) => {
-					var seed = Math.random();
 					adeck.card = parseInt(adeck.card, 10);
 					if (data.lv) adeck.card = etgutil.asUpped(adeck.card, true);
 					adeck.hp = parseInt(adeck.hp || 200);
@@ -202,7 +204,7 @@ var userEvents = {
 					adeck.draw = parseInt(adeck.draw || data.lv+1);
 					var curhp = getAgedHp(adeck.hp, sutil.getDay()-adeck.day);
 					sockEmit(this, "foearena", {
-						seed: seed*etgutil.MAX_INT,
+						seed: Math.random()*MAX_INT,
 						name: aname, hp: curhp,
 						mark: adeck.mark, draw: adeck.draw,
 						deck: adeck.deck + "05" + adeck.card.toString(32), lv:data.lv});
@@ -218,7 +220,7 @@ var userEvents = {
 			if (ismem){
 				db.eval(
 					"math.randomseed(ARGV[1])local c repeat c=''for i=1,8 do c=c..string.char(math.random(33,126))end until redis.call('hexists','CodeHash',c)==0 redis.call('hset','CodeHash',c,ARGV[2])return c",
-					0, Math.random()*etgutil.MAX_INT, data.t, (err, code) => {
+					0, Math.random()*MAX_INT, data.t, (err, code) => {
 						if (err) console.log(err);
 						sockEmit(this, "chat", { mode: 1, msg: data.t + " " + code});
 					});
@@ -284,7 +286,7 @@ var userEvents = {
 		if (foesock && foesock.readyState == 1){
 			if (foesock.meta.duel == u){
 				delete foesock.meta.duel;
-				var seed = Math.random() * etgutil.MAX_INT;
+				var seed = Math.random()*MAX_INT;
 				this.meta.foe = foesock;
 				foesock.meta.foe = this;
 				var deck0 = foesock.meta.deck, deck1 = this.meta.deck;
@@ -485,7 +487,7 @@ var sockEvents = {
 		genericChat(this, data);
 	},
 	roll:function(data){
-		var A = Math.min(data.A || 1, 99), X = data.X || etgutil.MAX_INT;
+		var A = Math.min(data.A || 1, 99), X = data.X || MAX_INT;
 		var sum = 0;
 		for(var i=0; i<A; i++){
 			sum += RngMock.upto(X)+1;
@@ -506,7 +508,7 @@ var sockEvents = {
 			return;
 		}
 		if (pendinggame && pendinggame.readyState == 1){
-			var seed = Math.random()*etgutil.MAX_INT;
+			var seed = Math.random()*MAX_INT;
 			this.meta.foe = pendinggame;
 			pendinggame.meta.foe = this;
 			var deck0 = pendinggame.meta.deck, deck1 = data.deck;
