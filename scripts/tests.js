@@ -54,7 +54,7 @@ M.test("Adrenaline", function() {
 	this.player1.addCrea(new Thing(Cards.Devourer));
 	this.player1.addCrea(new Thing(Cards.HornedFrog));
 	this.player1.addCrea(new Thing(Cards.CrimsonDragon.asUpped(true)));
-	for(var i=0; i<3; i++) this.player1.creatures[i].status.adrenaline = 1;
+	for(var i=0; i<3; i++) this.player1.creatures[i].status.set("adrenaline", 1);
 	this.player2.quanta[etg.Life]=3;
 	this.player1.endturn();
 	assert.equal(this.player2.hp, 68, "dmg");
@@ -63,7 +63,7 @@ M.test("Adrenaline", function() {
 });
 M.test("Aflatoxin", function() {
 	this.player1.addCrea(new Thing(Cards.Devourer));
-	this.player1.creatures[0].status.aflatoxin = true;
+	this.player1.creatures[0].status.set("aflatoxin", 1);
 	this.player1.creatures[0].die();
 	assert.ok(this.player1.creatures[0], "Something");
 	assert.equal(this.player1.creatures[0].card, Cards.MalignantCell, "Malignant");
@@ -78,9 +78,9 @@ M.test("BoneWall", function() {
 	this.player1.endturn();
 	this.player2.endturn();
 	assert.ok(this.player1.shield, "BW exists");
-	assert.equal(this.player1.shield.status.charges, 4, "4 charges");
+	assert.equal(this.player1.shield.status.get("charges"), 4, "4 charges");
 	this.player2.creatures[0].die();
-	assert.equal(this.player1.shield.status.charges, 6, "6 charges");
+	assert.equal(this.player1.shield.status.get("charges"), 6, "6 charges");
 });
 M.test("Boneyard", function() {
 	this.player1.addCrea(new Thing(Cards.Devourer));
@@ -101,9 +101,9 @@ M.test("Destroy", function() {
 	while(this.player1.hand.length){
 		this.player1.hand[0].useactive();
 	}
-	assert.equal(this.player1.permanents[0].status.charges, 2, "2 charges");
+	assert.equal(this.player1.permanents[0].status.get("charges"), 2, "2 charges");
 	Skills.destroy(this.player2, this.player1.permanents[0]);
-	assert.equal(this.player1.permanents[0].status.charges, 1, "1 charge");
+	assert.equal(this.player1.permanents[0].status.get("charges"), 1, "1 charge");
 	Skills.destroy(this.player2, this.player1.permanents[0]);
 	assert.ok(!this.player1.permanents[0], "poof");
 	assert.equal(this.player1.permanents[1].card, Cards.SoulCatcher, "SoulCatcher");
@@ -117,9 +117,9 @@ M.test("Destroy", function() {
 	assert.ok(!this.player1.weapon, "Dagger gone");
 	initHand(this.player1, Cards.BoneWall);
 	this.player1.hand[0].useactive();
-	assert.equal(this.player1.shield.status.charges, 7, "7 bones");
+	assert.equal(this.player1.shield.status.get("charges"), 7, "7 bones");
 	Skills.destroy(this.player2, this.player1.shield);
-	assert.equal(this.player1.shield.status.charges, 6, "6 bones");
+	assert.equal(this.player1.shield.status.get("charges"), 6, "6 bones");
 	for(var i=0; i<6; i++){
 		Skills.destroy(this.player2, this.player1.shield);
 	}
@@ -147,9 +147,9 @@ M.test("Earthquake", function() {
 	assert.equal(this.player1.hand.length, 3, "handlength");
 	var pillars = this.player1.permanents[0];
 	assert.ok(pillars.card.type == etg.Pillar, "ispillar");
-	assert.equal(pillars.status.charges, 5, "5 charges");
+	assert.equal(pillars.status.get("charges"), 5, "5 charges");
 	Skills.earthquake(this.player2, pillars);
-	assert.equal(pillars.status.charges, 2, "2 charges");
+	assert.equal(pillars.status.get("charges"), 2, "2 charges");
 	Skills.earthquake(this.player2, pillars);
 	assert.ok(!this.player1.permanents[0], "poof");
 });
@@ -176,7 +176,7 @@ M.test("Gpull", function() {
 	this.player2.deck = [Cards.ColossalDragon];
 	this.player1.endturn();
 	assert.equal(this.player2.gpull.hp, 24, "dmg redirected");
-	assert.equal(this.player2.gpull.status.poison, 1, "psn redirected");
+	assert.equal(this.player2.gpull.status.get("poison"), 1, "psn redirected");
 	this.player2.gpull.die();
 	assert.ok(!this.player2.gpull, "gpull death poof");
 });
@@ -209,7 +209,7 @@ M.test("Parallel", function() {
 	Skills.parallel(damsel, damsel);
 	assert.equal(this.player1.creatures[1].card, Cards.Dragonfly, "PU'd");
 	Skills.web(this.player1, damsel);
-	assert.ok(!damsel.status.airborne && this.player1.creatures[1].status.airborne, "Web'd");
+	assert.ok(!damsel.status.get("airborne") && this.player1.creatures[1].status.get("airborne"), "Web'd");
 });
 M.test("Phoenix", function() {
 	this.player1.addCrea(new Thing(Cards.Phoenix));
@@ -219,13 +219,13 @@ M.test("Phoenix", function() {
 });
 M.test("Purify", function() {
 	Skills["poison 3"](this.player1);
-	assert.equal(this.player2.status.poison, 3, "3");
+	assert.equal(this.player2.status.get("poison"), 3, "3");
 	Skills["poison 3"](this.player1, this.player2);
-	assert.equal(this.player2.status.poison, 6, "6");
+	assert.equal(this.player2.status.get("poison"), 6, "6");
 	Skills.purify(this.player1, this.player2);
-	assert.equal(this.player2.status.poison, -2, "-2");
+	assert.equal(this.player2.status.get("poison"), -2, "-2");
 	Skills.purify(this.player1, this.player2);
-	assert.equal(this.player2.status.poison, -4, "-4");
+	assert.equal(this.player2.status.get("poison"), -4, "-4");
 });
 M.test("Reflect", function() {
 	Skills.lightning(this.player1, this.player2);
@@ -239,16 +239,16 @@ M.test("Reflect", function() {
 });
 M.test("Steal", function() {
 	this.player1.setShield(new Thing(Cards.BoneWall));
-	this.player1.shield.status.charges=3;
+	this.player1.shield.status.set("charges", 3);
 	Skills.steal(this.player2, this.player1.shield);
-	assert.ok(this.player1.shield && this.player1.shield.status.charges == 2, "Wish bones");
-	assert.ok(this.player2.shield && this.player2.shield.status.charges == 1, "stole 1");
+	assert.ok(this.player1.shield && this.player1.shield.status.get("charges") == 2, "Wish bones");
+	assert.ok(this.player2.shield && this.player2.shield.status.get("charges") == 1, "stole 1");
 	Skills.steal(this.player2, this.player1.shield);
-	assert.ok(this.player1.shield && this.player1.shield.status.charges == 1, "Lone bone");
-	assert.ok(this.player2.shield && this.player2.shield.status.charges == 2, "stole 2");
+	assert.ok(this.player1.shield && this.player1.shield.status.get("charges") == 1, "Lone bone");
+	assert.ok(this.player2.shield && this.player2.shield.status.get("charges") == 2, "stole 2");
 	Skills.steal(this.player2, this.player1.shield);
 	assert.ok(!this.player1.shield, "This town is all in hell");
-	assert.ok(this.player2.shield && this.player2.shield.status.charges == 3, "stole 3");
+	assert.ok(this.player2.shield && this.player2.shield.status.get("charges") == 3, "stole 3");
 });
 M.test("Steam", function() {
 	this.player1.addCrea(new Thing(Cards.SteamMachine));
@@ -276,8 +276,8 @@ M.test("Voodoo", function() {
 	Skills.infect(this.player1, voodoo);
 	assert.equal(voodoo.hp, 11, "dmg");
 	assert.equal(this.player2.hp, 95, "foe dmg");
-	assert.equal(voodoo.status.poison, 1, "psn");
-	assert.equal(this.player2.status.poison, 1, "foe psn");
+	assert.equal(voodoo.status.get("poison"), 1, "psn");
+	assert.equal(this.player2.status.get("poison"), 1, "foe psn");
 	Skills.holylight(this.player1, voodoo);
 	assert.equal(voodoo.hp, 1, "holy dmg");
 	assert.equal(this.player2.hp, 85, "foe holy dmg");

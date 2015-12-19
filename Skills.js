@@ -1016,7 +1016,7 @@ locket: function(c, t) {
 	c.owner.spend(ele, ele > 0 ? -1 : -3);
 },
 locketshift:function(c,t){
-	c.status.mode.set("mode", t.type == etg.Player ? t.mark : t.card.element);
+	c.status.set("mode", t.type == etg.Player ? t.mark : t.card.element);
 },
 loot:function(c,t){
 	if (c.owner == t.owner && !c.hasactive("turnstart", "salvageoff")){
@@ -1935,7 +1935,7 @@ absorber:function(c,t){
 	c.owner.spend(etg.Fire, -3);
 },
 blockwithcharge:function(c,t){
-	if (c.status.maybeDecr("charges", 0)){
+	if (c.status.maybeDecr("charges") < 2){
 		c.die();
 	}
 	return true;
