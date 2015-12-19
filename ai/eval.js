@@ -581,7 +581,6 @@ function evalthing(c) {
 }
 
 function evalcardinstance(cardInst) {
-	if (!cardInst) return 0;
 	var c = cardInst.card;
 	if (!caneventuallyactive(c.costele, c.cost, cardInst.owner)){
 		return c.active.discard == Skills.obsession ? (c.upped?-7:-6) : 0;

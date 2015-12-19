@@ -94,7 +94,6 @@ var data = {
 	},
 	deathwish:"Intercepts targeting on allies",
 	deckblast:"Damage foe per card in deck. Discard deck",
-	decrsteam:"Decrement strength from steam after attack",
 	deepdive:"Burrow, replace active with \"2:3 Freeze target permanent\", next turn unburrow into the air & triple strength until next attack",
 	deja:"Remove active & summon copy",
 	deployblobs:"Summon 3 Blobs & gain -2|-2",
@@ -331,7 +330,7 @@ var data = {
 	sskin:"Increment maximum HP per 1:4 owned. Heal same",
 	static:"Deal 1 spell damage to foe per attacker",
 	steal:"Steal target permanent",
-	steam:"Gain 5|0",
+	steam:"Gain 5 steam. Increment strength per steam. Steam decrements after attacking",
 	stoneform:"Gain 0|20 & become a golem",
 	storm:function(x){ return "Deals "+x+" damage to target player's creatures. Removes cloak" },
 	summon:function(x){

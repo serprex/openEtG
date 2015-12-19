@@ -330,7 +330,7 @@ deathwish:function(c,t, data){
 	}
 },
 decrsteam:passive(function(c){
-	if (c.status.maybeDecr("steamatk")){
+	if (c.status.maybeDecr("steam")){
 		c.atk--;
 	}
 }),
@@ -1684,7 +1684,7 @@ steal:function(c,t){
 },
 steam:function(c,t){
 	Effect.mkText("5|0", c);
-	c.status.incr("steamatk", 5);
+	c.status.incr("steam", 5);
 	c.atk += 5;
 	if (!c.hasactive("postauto", "decrsteam")) c.addactive("postauto", Skills.decrsteam);
 },
