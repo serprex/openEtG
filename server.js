@@ -413,7 +413,7 @@ var userEvents = {
 				sockEmit(Us.socks[to], "chat", { msg: data.msg, mode: 2, u: data.u });
 				sockEmit(this, "chat", { msg: data.msg, mode: 2, u: "To " + to });
 			}
-			else sockEmit(this, "chat", { mode: 1, msg: to + " is not here right now." });
+			else sockEmit(this, "chat", { mode: 1, msg: to + " is not here right now.\nFailed to deliver: " + data.msg });
 		}
 		else{
 			genericChat(this, data);
