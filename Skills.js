@@ -218,7 +218,7 @@ catapult:function(c,t){
 },
 catlife:function(c,t, data){
 	if (!c.owner.creatures[data.index]){
-		var lives = c.status.maybeDecr("lives") < 2;
+		var lives = c.status.maybeDecr("lives");
 		if (!lives) return;
 		Effect.mkText((lives-1) + " lives");
 		var cl = c.clone(c.owner);
@@ -1031,7 +1031,7 @@ loot:function(c,t){
 	}
 },
 losecharge:function(c,t){
-	if(c.status.maybeDecr("charges") < 2){
+	if(!c.status.maybeDecr("charges")){
 		if (c.type == etg.Creature) c.die();
 		else c.remove();
 	}
@@ -1835,7 +1835,7 @@ vend:function(c){
 },
 vengeance:function(c,t){
 	if (c.owner == t.owner && c.owner == c.owner.game.turn.foe){
-		if(c.status.maybeDecr("charges") < 2) c.remove();
+		if (c.status.maybeDecr("charges") < 2) c.remove();
 		c.owner.creatures.forEach(function(cr){
 			if (cr && cr != t){
 				cr.attack(false, 0);
