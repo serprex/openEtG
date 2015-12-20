@@ -63,12 +63,12 @@ module.exports = function(game, previous) {
 		var lethal = require("./lethal")(game);
 		return lethal[0] < 0 ?
 			(lethal[1] !== undefined ? ["cast",  lethal[1]] : worstcard === undefined ? ["endturn", worstcard] : ["endturn"]):
-			[0, currentEval, undefined, 2, [], 99, worstcard];
+			[0, currentEval, -1, 2, [], 512, worstcard];
 	}
 	var limit = previous[5], cmdct = previous[2], cdepth = previous[3], nth = previous[0];
 	currentEval = previous[1];
 	worstcard = previous[6];
-	var tend = Date.now() + 40;
+	var tend = Date.now() + 9;
 	function iterLoop(game, n, cmdct0, casthash) {
 		function incnth(tgt){
 			nth++;
@@ -100,7 +100,7 @@ module.exports = function(game, previous) {
 						v = worst_eval[1];
 					}
 					if (v < currentEval || (v == currentEval && n > cdepth)) {
-						cmdct = cmdct0 || (cbits | tbits << 9);
+						cmdct = ~cmdct0 ? cmdct0 : (cbits | tbits << 9);
 						worstcard = wc;
 						cdepth = n;
 						currentEval = v;
@@ -167,12 +167,9 @@ module.exports = function(game, previous) {
 			p2.creatures.forEach(iterCore);
 		}
 	}
-	var ret = iterLoop(game, 1, undefined, previous[4]);
-	if (ret){
-		return [nth, currentEval, cmdct, cdepth, ret, limit, worstcard];
-	}else if (cmdct !== undefined) {
-		return ["cast", cmdct];
-	} else if (game.player2.hand.length == 8) {
-		return ["endturn", worstcard];
-	} else return ["endturn"];
+	var ret = iterLoop(game, 1, -1, previous[4]);
+	return ret ? [nth, currentEval, cmdct, cdepth, ret, limit, worstcard] :
+		~cmdct ? ["cast", cmdct] :
+		game.player2.hand.length == 8 ? ["endturn", worstcard] :
+		["endturn"];
 }
