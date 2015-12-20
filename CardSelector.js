@@ -95,7 +95,7 @@ CardSelector.prototype._renderWebGL = function() {
 		this._cardminus = this.cardminus;
 		this._cardpool = this.cardpool;
 		this.makeColumns();
-	}else if (this.cardminus && !this.cardminus.rendered){
+	}else if (this.cardminus && !this.cardminus[0]){
 		this.renderColumns();
 	}
 }
@@ -116,7 +116,7 @@ CardSelector.prototype.makeColumns = function(){
 	this.renderColumns();
 }
 CardSelector.prototype.renderColumns = function(){
-	if (this.cardminus) this.cardminus.rendered = true;
+	if (this.cardminus) this.cardminus[0] = 1;
 	for (var i = 0;i < 6; i++){
 		for (var j = 0;j < this.columns[i].length;j++) {
 			var spr = this.columnspr[i][j], code = this.columns[i][j].code;

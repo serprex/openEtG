@@ -15,7 +15,7 @@ function startMenu(){
 	require("./MainMenu")();
 }
 module.exports = function() {
-	var view = px.mkView(), cardminus = {}, stage = {view: view};
+	var view = px.mkView(), cardminus = [], stage = {view: view};
 	var btrade = dom.button("Trade", function() {
 		if (!cardChosen){
 			if (ownDeck.deck.length) {

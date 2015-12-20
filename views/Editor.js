@@ -47,7 +47,7 @@ module.exports = function(arena, ainfo, acard, startempty) {
 		if (decksprite.deck.length > 60) decksprite.deck.length = 60;
 		decksprite.deck.sort(Cards.codeCmp);
 		if (sock.user) {
-			cardsel.cardminus = cardminus = {};
+			cardsel.cardminus = cardminus = [];
 			for (var i = decksprite.deck.length - 1;i >= 0;i--) {
 				var code = decksprite.deck[i], card = Cards.Codes[code];
 				if (card.type != etg.Pillar) {
@@ -143,7 +143,7 @@ module.exports = function(arena, ainfo, acard, startempty) {
 	}else cardpool = null;
 	var editorui = px.mkView(function(){cardArt.visible = false}), div = dom.div([8, 32, ["Clear", function(){
 		if (sock.user) {
-			cardsel.cardminus = cardminus = {};
+			cardsel.cardminus = cardminus = [];
 		}
 		decksprite.deck.length = arena?5:0;
 		decksprite.renderDeck(decksprite.deck.length);

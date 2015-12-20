@@ -77,5 +77,5 @@ exports.adjust = function adjust(cardminus, code, x) {
 	if (code in cardminus) {
 		cardminus[code] += x;
 	} else cardminus[code] = x;
-	delete cardminus.rendered;
+	cardminus[0] = 0;
 }
