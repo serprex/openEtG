@@ -73,27 +73,6 @@ exports.mkView = function(mouseover){
 	}
 	return view;
 }
-exports.mkBgRect = function(){
-	var g = new PIXI.Graphics();
-	g.beginFill(0x0d2e4a);
-	for(var i=0; i<arguments.length; i+=4){
-		g.drawRect(arguments[i], arguments[i+1], arguments[i+2], arguments[i+3], 6);
-	}
-	g.endFill();
-	g.lineStyle(2, 0x121212);
-	for(var i=0; i<arguments.length; i+=4){
-		g.moveTo(arguments[i], arguments[i+1]);
-		g.lineTo(arguments[i], arguments[i+1]+arguments[i+3]);
-		g.lineTo(arguments[i]+arguments[i+2], arguments[i+1]+arguments[i+3]);
-	}
-	g.lineStyle(2, 0x969696);
-	for(var i=0; i<arguments.length; i+=4){
-		g.moveTo(arguments[i], arguments[i+1]);
-		g.lineTo(arguments[i]+arguments[i+2], arguments[i+1]);
-		g.lineTo(arguments[i]+arguments[i+2], arguments[i+1]+arguments[i+3]);
-	}
-	return g;
-}
 exports.adjust = function adjust(cardminus, code, x) {
 	if (code in cardminus) {
 		cardminus[code] += x;
