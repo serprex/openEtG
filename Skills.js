@@ -319,7 +319,7 @@ deadalive:function(c){
 },
 deathwish:function(c,t, data){
 	var tgt = data.tgt, active = data.active;
-	if (!tgt || c.status.get("frozen") || c.status.get("delayed") || c.owner == t.owner || tgt.owner != c.owner || !(tgt.type = etg.Creature) || !Cards.Targeting[active.activename[0]](t, c)) return;
+	if (!tgt || c.status.get("frozen") || c.status.get("delayed") || c.owner == t.owner || tgt.owner != c.owner || tgt.type != etg.Creature || !Cards.Targeting[active.activename[0]](t, c)) return;
 	if (!tgt.hasactive("prespell", "deathwish")) return data.tgt = c;
 	var totaldw = 0;
 	c.owner.creatures.forEach(function(cr){
@@ -1676,7 +1676,6 @@ steal:function(c,t){
 	}else{
 		t.remove();
 		t.usedactive = true;
-		t.owner = c.owner;
 		if (t.type == etg.Permanent) c.owner.addPerm(t);
 		else if (t.type == etg.Weapon) c.owner.setWeapon(t);
 		else c.owner.setShield(t);

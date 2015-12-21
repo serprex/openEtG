@@ -6,6 +6,7 @@ var gfx = require("../gfx");
 var chat = require("../chat");
 var mkAi = require("../mkAi");
 var sock = require("../sock");
+var util = require("../util");
 var Cards = require("../Cards");
 var etgutil = require("../etgutil");
 var options = require("../options");
@@ -35,7 +36,7 @@ module.exports = function(game, foeDeck) {
 		case 5:sock.userEmit("foearena", {lv:1});break;
 		case undefined:
 			if (game.foename == "Custom" || game.foename == "Test"){
-				var gameData = { deck: etgutil.encodedeck(foeDeck) + etgutil.toTrueMarkSuffix(game.player2.mark), urdeck: sock.getDeck(), seed: Math.random() * etgutil.MAX_INT, foename: game.foename, cardreward: "" };
+				var gameData = { deck: etgutil.encodedeck(foeDeck) + etgutil.toTrueMarkSuffix(game.player2.mark), urdeck: sock.getDeck(), seed: util.randint(), foename: game.foename, cardreward: "" };
 				if (game.foename == "Custom"){
 					options.parsepvpstats(gameData);
 					options.parseaistats(gameData);

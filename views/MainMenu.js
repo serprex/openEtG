@@ -6,6 +6,7 @@ var gfx = require("../gfx");
 var svg = require("../svg");
 var chat = require("../chat");
 var sock = require("../sock");
+var util = require("../util");
 var mkAi = require("../mkAi");
 var audio = require("../audio");
 var Cards = require("../Cards");
@@ -60,7 +61,7 @@ function addCostRewardHeaders(div){
 	dom.add(div, costText, rewardText);
 }
 function initEndless(){
-	var gameData = { deck: require("../ai/deck")(.5, 2, 5), urdeck: sock.getDeck(), seed: Math.random() * etgutil.MAX_INT, p2hp: etgutil.MAX_INT, p2markpower: 2, foename: "The Invincible", p2drawpower: 2, level: 7, goldreward: 0, cardreward: "" };
+	var gameData = { deck: require("../ai/deck")(.5, 2, 5), urdeck: sock.getDeck(), seed: util.randint(), p2hp: 0x100000000, p2markpower: 2, foename: "The Invincible", p2drawpower: 2, level: 7, goldreward: 0, cardreward: "" };
 	var game = require("./Match")(gameData, true);
 	var endlessRelic = Object.create(etg.Thing.prototype);
 	endlessRelic.owner = game.player2;

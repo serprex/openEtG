@@ -178,7 +178,7 @@ function maybeSendChat(e) {
 			var data = {u:sock.user ? sock.user.name : ""}
 			var ndn = msg.slice(6).split("d");
 			if (!ndn[1]){
-				data.X = parseInt(ndn[0] || etgutil.MAX_INT);
+				data.X = parseInt(ndn[0] || 0x100000000);
 			}else{
 				data.A = parseInt(ndn[0]);
 				data.X = parseInt(ndn[1]);

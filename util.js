@@ -40,3 +40,6 @@ exports.hashObj = function(obj){
 	for (var key in obj) hash ^= exports.hashString(key) ^ obj[key];
 	return hash;
 }
+exports.randint = function(){
+	return Math.random()*0x100000000;
+}

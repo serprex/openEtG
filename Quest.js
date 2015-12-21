@@ -1,5 +1,6 @@
 "use strict";
 var sock = require("./sock");
+var util = require("./util");
 var RngMock = require("./RngMock");
 var etgutil = require("./etgutil");
 //Quest data
@@ -161,7 +162,7 @@ exports.mkQuestAi = function(questname, stage, area) {
 	if (etgutil.decklength(urdeck) < (sock.user ? 31 : 11)) {
 		return "ERROR: Your deck is invalid or missing! Please exit & create a valid deck in the deck editor.";
 	}
-	var game = require("./views/Match")({ deck: quest.deck, urdeck: urdeck, seed: Math.random() * etgutil.MAX_INT, p2hp: hp, p2markpower: markpower, foename: quest.name, p1hp: playerHPstart, p2drawpower: drawpower }, true);
+	var game = require("./views/Match")({ deck: quest.deck, urdeck: urdeck, seed: util.randint(), p2hp: hp, p2markpower: markpower, foename: quest.name, p1hp: playerHPstart, p2drawpower: drawpower }, true);
 	if (quest.morph) {
 		game.player1.deck = game.player1.deck.map(quest.morph.bind(quest));
 	}

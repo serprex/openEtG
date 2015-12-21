@@ -448,7 +448,6 @@ var etg = require("./etg");
 var util = require("./util");
 var Cards = require("./Cards");
 var Effect = require("./Effect");
-var Player = require("./Player");
 var Skills = require("./Skills");
 var skillText = require("./skillText");
 var parseSkill = require("./parseSkill");

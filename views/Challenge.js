@@ -1,6 +1,7 @@
 var px = require("../px");
 var dom = require("../dom");
 var sock = require("../sock");
+var util = require("../util");
 var etgutil = require("../etgutil");
 var options = require("../options");
 var DeckDisplay = require("../DeckDisplay");
@@ -42,7 +43,7 @@ module.exports = function(pvp) {
 			require("./Editor")();
 			return;
 		}
-		var gameData = { deck: options.aideck, urdeck: deck, seed: Math.random() * etgutil.MAX_INT, foename: "Custom", cardreward: "" };
+		var gameData = { deck: options.aideck, urdeck: deck, seed: util.randint(), foename: "Custom", cardreward: "" };
 		options.parsepvpstats(gameData);
 		options.parseaistats(gameData);
 		require("./Match")(gameData, true);

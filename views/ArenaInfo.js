@@ -3,6 +3,7 @@ var px = require("../px");
 var dom = require("../dom");
 var gfx = require("../gfx");
 var sock = require("../sock");
+var util = require("../util");
 var etgutil = require("../etgutil");
 module.exports = function(data) {
 	var stage = new PIXI.Container();
@@ -40,7 +41,7 @@ module.exports = function(data) {
 						require("./Editor")();
 						return;
 					}
-					var gameData = { deck: adeck, urdeck: deck, seed: Math.random() * etgutil.MAX_INT, foename: "Test", cardreward: "",
+					var gameData = { deck: adeck, urdeck: deck, seed: util.randint(), foename: "Test", cardreward: "",
 						p2hp:info.curhp, p2markpower:info.mark, p2drawpower:info.draw };
 					require("./Match")(gameData, true);
 				}]], [66, 200+y, marksprite]);

@@ -128,7 +128,6 @@ Game.prototype.getTarget = function(src, active, cb) {
 }
 
 var etg = require("./etg");
-var etgutil = require("./etgutil");
 var Cards = require("./Cards");
 var Effect = require("./Effect");
 var Player = require("./Player");
