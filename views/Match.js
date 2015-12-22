@@ -144,7 +144,7 @@ function startMatch(game, foeDeck, spectate) {
 		gameui.hitArea = new PIXI.math.Rectangle(0, 0, 900, 600);
 		gameui.interactive = true;
 	}
-	for(var j=0; j<4; j++){
+	for(var j=0; j<3; j++){
 		gameui.lineStyle(1, [0x121212, 0x6a2e0d, 0x8a3e1d][j]);
 		for (var i=0; i<redhor.length; i+=3){
 			gameui.moveTo(redhor[i+1], redhor[i]-j);
