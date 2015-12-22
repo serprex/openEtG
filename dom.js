@@ -13,21 +13,17 @@ exports.style = function(){
 }
 function parseDom(info){
 	if (info instanceof HTMLElement) return info;
-	var ele, base = typeof info[0] === "number" ? 2 : 0;
-	if (typeof info[base] === "string"){
-		ele = exports.text(info[base]);
-	}else if (info[base] instanceof Array){
-		ele = exports.button.apply(null, info[base]);
-	}else ele = info[base];
-	if (info[base+1]){
-		info[base+1].forEach(function(info){
-			ele.appendChild(parseDom(info));
-		});
-	}
+	var base = typeof info[0] === "number" ? 2 : 0, infob = info[base],
+		ele = typeof infob === "string" ? exports.text(infob) :
+			infob instanceof Array ? exports.button.apply(null, infob) :
+			infob;
 	if (base){
 		ele.style.position = "absolute";
 		ele.style.left = info[0] + "px";
 		ele.style.top = info[1] + "px";
+	}
+	for (var i=base+1; i<info.length; i++){
+		ele.appendChild(parseDom(info[i]));
 	}
 	return ele;
 }

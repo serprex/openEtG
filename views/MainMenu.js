@@ -148,12 +148,12 @@ module.exports = function(nymph) {
 		bottom: "2px",
 	});
 	var div = stage.dom = dom.div(bg_main,
-		[196, 4, tipbox, [tinfo, nextTip]],
-		[86, 248, leadbox, [titleText("Leaderboards"), bwealth, document.createElement("br")]],
-		[304, 120, aibox, [titleText("AI Battle")]],
-		[620, 92, deckbox, [
+		[196, 4, tipbox, tinfo, nextTip],
+		[86, 248, leadbox, titleText("Leaderboards"), bwealth, document.createElement("br")],
+		[304, 120, aibox, titleText("AI Battle")],
+		[620, 92, deckbox,
 			[14, 108, ["Editor", require("./Editor"), mkSetTip("Edit & manage your decks")]],
-		]],
+		],
 		[620, 300, playbox]);
 	addCostRewardHeaders(aibox);
 	addCostRewardHeaders(arenabox);
@@ -379,10 +379,10 @@ module.exports = function(nymph) {
 			[10, 75, ["Trade", tradeClick, mkSetTip("Initiate trading cards with another player")]],
 			[120, 100, ["Reward", rewardClick, mkSetTip("Redeem a reward code")]]);
 		dom.add(div,
-			[86, 92, statbox, [
-				[titleText("Stats")],
-				[sock.user.gold + "$ " + sock.user.name + "\nPvE " + sock.user.aiwins + " - " + sock.user.ailosses + "\nPvP " + sock.user.pvpwins + " - " + sock.user.pvplosses]
-			]],
+			[86, 92, statbox,
+				titleText("Stats"),
+				[sock.user.gold + "$ " + sock.user.name + "\nPvE " + sock.user.aiwins + " - " + sock.user.ailosses + "\nPvP " + sock.user.pvpwins + " - " + sock.user.pvplosses],
+			],
 			[304, 380, arenabox]);
 	}
 	var customcol = document.createElement("div");
