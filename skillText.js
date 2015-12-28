@@ -251,7 +251,7 @@ var data = {
 	paradox:"Kill target creature which is stronger than it is large",
 	parallel:"Duplicate target creature",
 	phoenix:["Become an Ash on death", "Become a Minor Ash on death"],
-	photosynthesis:"Convert 1:8 to 2:5. May activate multiple times",
+	photosynthesis:"Produce 2:5. May activate multiple times",
 	pillar:{
 		auto:function(c){return "Produce "+(c.element?1:3)+":"+c.element + " per turn"},
 		ownplay:function(c){return "Produce "+(c.element?1:3)+":"+c.element+" on play"}
