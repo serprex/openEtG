@@ -1,6 +1,7 @@
 "use strict";
 var etg = require("../etg");
 var Cards = require("../Cards");
+var Skills = require("../Skills");
 var evalGame = require("./eval");
 function getWorstCard(game){
 	var worstcard = 0, curEval = 2147483647, hash = {};
@@ -91,6 +92,12 @@ module.exports = function(game, previous) {
 					var tbits = game.tgtToBits(t) ^ 8;
 					var gameClone = game.clone();
 					gameClone.bitsToTgt(cbits).useactive(gameClone.bitsToTgt(tbits));
+					if (c.status.get("patience") && c.active.cast == Skills.die){
+						for(var i=0; i<16; i++){
+							var pr = c.owner.permanents[i];
+							if (pr && pr.status.get("patience") && pr.active.cast == Skills.die) pr.useactive();
+						}
+					}
 					var v, wc;
 					if (gameClone.player2.hand.length < 8){
 						v = evalGame(gameClone);
