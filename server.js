@@ -480,6 +480,35 @@ var userEvents = {
 };
 var sockEvents = {
 	login:require("./srv/login")(sockEmit),
+	konglogin:function(data){
+		var socket = this;
+		db.get("kongapi", function(err, key){
+			if (!key) return; // TODO error
+			var https = require("https");
+			var login = sockEvents.login;
+			https.get("https://api.kongregate.com/api/authenticate.json?user_id="+data.u+"&game_auth_token="+data.g+"&api_key="+key, function(res) {
+				var data = "";
+				res.setEncoding("utf8");
+				res.on("data", function(chunk){
+					data += chunk;
+				});
+				res.on("end", function(){
+					var json = sutil.parseJSON(data);
+					if (!json) return; // TODO error
+					if (json.success){
+						var name = "Kong:" + json.username;
+						Us.load(name, user => {
+							user.auth = data.g;
+							login.call(socket, {u: name, a: data.g});
+						}, () => {
+							var user = Us.users[name] = {name: name, gold: 0, auth: data.g};
+							login.call(socket, {u: name, a: data.g});
+						});
+					}
+				});
+			});
+		});
+	},
 	guestchat:function(data){
 		if (guestban) return;
 		data.guest = true;

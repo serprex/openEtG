@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<title>openEtG</title>
+<script src="https://kongregate.com/javascripts/kongregate_api.js"></script>
+<script src="pixi.min.js"></script>
+<script src="etgify.js"></script>
+<script>"use strict";
+	window.PIXI=require("./pixi");
+	require.f("views/Login",function(m){
+		var px = require("./px");
+		var dom = require("./dom");
+		var gfx = require("./gfx");
+		var sock = require("./sock");
+		var audio = require("./audio");
+		m.exports=function(){
+			if (gfx.load) {
+				gfx.load(function(progress){
+				}, function(){
+					audio.playMusic("openingMusic");
+					if (sock.user || sandbox) require("./views/MainMenu")();
+				});
+			}
+			var sandbox = kong.services.isGuest();
+			if (sandbox && gfx.loaded){
+				return require("./views/MainMenu")();
+			}
+			sock.emit("konglogin", {u:kong.services.getUserId(),g:kong.services.getGameAuthToken()});
+			px.view({
+				dom:dom.div([0, 0, "Logging in.."]),
+				cmds:{
+					login:function(data){
+						if (!data.err){
+							delete data.x;
+							sock.user = data;
+							if (!sock.user.accountbound && !sock.user.pool){
+								require("./views/ElementSelect")();
+							}else if (gfx.loaded){
+								require("./views/MainMenu")();
+							}
+						}else{
+							alert(data.err);
+						}
+					}
+				}
+			});
+		}
+	});
+	kongregateAPI.loadAPI(function(){
+		window.kong = kongregateAPI.getAPI();
+		require("./ui.main");
+	});
+</script>
+<link href="//fonts.googleapis.com/css?family=Dosis" rel="stylesheet" type="text/css">
+<link href="favicon.png" rel="shortcut icon">
+<link href="ui.css" rel="stylesheet">
+<link href="assets/atlas.css" rel="stylesheet">
+<div id="rightpane">
+	<div style="margin-bottom:8px"><a href="artcredit.htm" target="_blank">Art credits</a>&emsp;&emsp;<a href="forum" target="_blank">Forum</a></div>
+	<label><input id="offline" type="checkbox">Appear Offline</label> <label><input id="afk" type="checkbox">Afk</label> <label><input id="wantpvp" type="checkbox">Seeking PvP</label>
+	<div id="tabs"></div>
+	<div id="chatBox"></div>
+	<textarea id="chatinput" placeholder="Chat"></textarea>
+</div>
+<canvas id="leftpane" width=900 height=600></canvas>

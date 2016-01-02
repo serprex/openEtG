@@ -138,11 +138,7 @@ sock.et.onmessage = function(msg){
 viewsLogin();
 if (options.preart) sock.emit("cardart");
 function chatmute(){
-	var muted = [];
-	for(var name in muteset){
-		muted.push(name);
-	}
-	chat((muteall?"You have chat muted. ":"") + "Muted: " + muted.join(", "), "System");
+	chat((muteall?"You have chat muted. ":"") + "Muted: " + Object.keys(muteset).join(", "), "System");
 }
 function maybeSendChat(e) {
 	e.cancelBubble = true;
