@@ -500,6 +500,13 @@ var sockEvents = {
 						Us.load(name, user => {
 							user.auth = data.g;
 							login.call(socket, {u: name, a: data.g});
+							var req = https.request({
+								hostname: "www.kongregate.com",
+								path: "/api/submit_statistics.json",
+								method: "POST",
+							});
+							req.write("user_id="+data.u+"\napi_key="+key+"\nWealth="+(user.gold+userutil.calcWealth(user.pool)));
+							req.end();
 						}, () => {
 							var user = Us.users[name] = {name: name, gold: 0, auth: data.g};
 							login.call(socket, {u: name, a: data.g});

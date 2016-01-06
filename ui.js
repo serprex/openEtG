@@ -38,7 +38,7 @@ function permanentPos(j, i) {
 	return p;
 }
 function cardPos(j, i) {
-	return new Point((j ? 6 : 766) + 66*(i&1), (j ? 80 : 308) + 48 * (i>>1));
+	return new Point((j ? 6 : 763) + 66*(i&1), (j ? 80 : 308) + 48 * (i>>1));
 }
 function tgtToPos(t) {
 	if (t.type == etg.Creature) {
