@@ -51,7 +51,7 @@ MersenneTwister.prototype.rnd = function () {
 MersenneTwister.prototype.clone = function () {
 	var obj = Object.create(MersenneTwister.prototype);
 	obj.mti = this.mti;
-	obj.mt = new Int32Array(this.mt);
+	obj.mt = new Uint32Array(this.mt);
 	return obj;
 };
 module.exports = MersenneTwister;
