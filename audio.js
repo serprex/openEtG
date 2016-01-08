@@ -48,6 +48,6 @@ exports.changeMusic = function(enabled) {
 	}else{
 		var name = currentMusic;
 		currentMusic = null;
-		playMusic(name);
+		exports.playMusic(name);
 	}
 }
