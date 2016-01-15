@@ -2,7 +2,7 @@
 var etg = require("../etg");
 var Cards = require("../Cards");
 var Skills = require("../Skills");
-var parseSkill = require("./parseSkill");
+var parseSkill = require("../parseSkill");
 var enableLogging = false, logbuff, logstack;
 function logStart(){
 	if (enableLogging){
