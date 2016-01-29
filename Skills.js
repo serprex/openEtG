@@ -1737,7 +1737,7 @@ tesseractsummon:function(c,t){
 		}
 		if (candidates.length){
 			var idx = pl.choose(candidates), crcard = pl.deck.splice(idx, 1)[0], cr = new Thing(crcard);
-			c.owner.addCrea(cr);
+			pl.addCrea(cr);
 			cr.freeze(Math.ceil(crcard.cost/4));
 		}
 	}
