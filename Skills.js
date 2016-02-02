@@ -220,7 +220,7 @@ catlife:function(c,t, data){
 	if (!c.owner.creatures[data.index]){
 		var lives = c.status.maybeDecr("lives");
 		if (!lives) return;
-		Effect.mkText((lives-1) + " lives");
+		Effect.mkText((lives-1) + " lives", c);
 		var cl = c.clone(c.owner);
 		cl.hp = cl.maxhp = c.card.health;
 		cl.atk = c.card.attack;
