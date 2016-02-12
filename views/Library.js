@@ -15,7 +15,7 @@ module.exports = function(data){
 	view.addChild(cardArt);
 	var progressmax = 0, progress = 0, shinyprogress = 0;
 	Cards.Codes.forEach(function(card, code){
-		if (!card.upped && !card.shiny && card.type && !card.status.token){
+		if (!card.upped && !card.shiny && card.type && !card.status.get("token")){
 			progressmax += 42;
 			var upcode = etgutil.asUpped(code, true);
 			progress += Math.min((cardpool[code] || 0) + (boundpool[code] || 0) + ((cardpool[upcode] || 0) + (boundpool[upcode] || 0))*6, 42);

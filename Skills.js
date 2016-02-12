@@ -1259,7 +1259,7 @@ parallel:function(c,t){
 		return;
 	}
 	var copy = t.clone(c.owner);
-	t.owner.addCrea(copy);
+	c.owner.addCrea(copy);
 	if (copy.status.get("mutant")){
 		var buff = c.owner.upto(25);
 		copy.buffhp(Math.floor(buff/5));
