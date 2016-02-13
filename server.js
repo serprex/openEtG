@@ -1,24 +1,24 @@
 #!/usr/bin/node
 "use strict";
 process.chdir(__dirname);
-var etg = require("./etg");
-var Cards = require("./Cards");
+const etg = require("./etg");
+const Cards = require("./Cards");
 Cards.loadcards();
-var RngMock = require("./RngMock");
-var etgutil = require("./etgutil");
-var usercmd = require("./usercmd");
-var userutil = require("./userutil");
-var sutil = require("./srv/sutil");
-var http = require("http");
-var db = require("./srv/db");
-var Us = require("./srv/Us");
+const RngMock = require("./RngMock");
+const etgutil = require("./etgutil");
+const usercmd = require("./usercmd");
+const userutil = require("./userutil");
+const sutil = require("./srv/sutil");
+const http = require("http");
+const db = require("./srv/db");
+const Us = require("./srv/Us");
 
 const MAX_INT = 0x100000000;
-var rooms = {};
+const rooms = {};
 
-var forkcore = require("child_process").fork("./srv/forkcore");
-var app = http.createServer(function(req, res){
-	var ifModifiedSince = req.headers["if-modified-since"];
+const forkcore = require("child_process").fork("./srv/forkcore");
+const app = http.createServer(function(req, res){
+	const ifModifiedSince = req.headers["if-modified-since"];
 	forkcore.send(req.url.slice(1) + (ifModifiedSince?"\n"+ifModifiedSince:""), res.socket, ()=>{});
 });
 app.on("clientError",()=>{});
@@ -30,7 +30,7 @@ function stop(){
 }
 process.on("SIGTERM", stop).on("SIGINT", stop);
 function activeUsers(){
-	var activeusers = [];
+	const activeusers = [];
 	for (var name in Us.socks){
 		var sock = Us.socks[name];
 		if (sock && sock.readyState == 1){
@@ -40,7 +40,7 @@ function activeUsers(){
 			activeusers.push(name);
 		}
 	}
-	var otherCount = wss.clients.length - activeusers.length;
+	const otherCount = wss.clients.length - activeusers.length;
 	activeusers.push(otherCount + " lurker" + (otherCount == 1 ? "" : "s"));
 	return activeusers;
 }
@@ -49,7 +49,7 @@ function genericChat(socket, data){
 	broadcast(data);
 }
 function broadcast(data){
-	var msg = JSON.stringify(data);
+	const msg = JSON.stringify(data);
 	wss.clients.forEach(sock => {
 		if (sock.readyState == 1) sock.send(msg);
 	});
@@ -59,7 +59,7 @@ function getAgedHp(hp, age){
 }
 function wilson(up, total){
 	// from npm's wilson-score
-	var z = 2.326348, z2 = z*z, phat = up/total;
+	const z = 2.326348, z2 = z*z, phat = up/total;
 	return (phat + z2/(2*total) - z*Math.sqrt((phat*(1 - phat) + z2/(4*total))/total))/(1 + z2/total);
 }
 function sockEmit(socket, event, data){
@@ -80,9 +80,9 @@ function modf(func){
 		});
 	}
 }
-var echoEvents = new Set(["endturn", "cast", "foeleft", "mulligan", "cardchosen"]);
+const echoEvents = new Set(["endturn", "cast", "foeleft", "mulligan", "cardchosen"]);
 var guestban = false;
-var userEvents = {
+const userEvents = {
 	modadd:modf(function(data, user){
 		db.sadd("Mods", data.m);
 	}),
@@ -99,7 +99,7 @@ var userEvents = {
 		broadcast({x:"clear"});
 	}),
 	inituser:function(data, user){
-		var starter = require("./srv/starter.json");
+		const starter = require("./srv/starter.json");
 		if (data.e < 1 || data.e > 13) return;
 		var sid = (data.e-1)*6;
 		user.pvpwins = user.pvplosses = user.aiwins = user.ailosses = 0;
@@ -115,13 +115,13 @@ var userEvents = {
 		sockEvents.login.call(this, {u:user.name, a:user.auth});
 	},
 	logout:function(data, user){
-		var u=data.u;
+		const u=data.u;
 		db.hset("Users", u, JSON.stringify(user));
 		delete Us.users[u];
 		delete Us.socks[u];
 	},
 	delete:function(data, user){
-		var u = data.u;
+		const u = data.u;
 		db.hdel("Users", u);
 		delete Us.users[u];
 		delete Us.socks[u];
@@ -160,11 +160,9 @@ var userEvents = {
 			});
 	},
 	modarena:function(data, user){
-		Us.load(data.aname, function(user){
-			user.gold += data.won?3:1;
-		});
+		Us.load(data.aname, user => user.gold += data.won?3:1);
 		var arena = "arena"+(data.lv?"1":""), akey = (data.lv?"B:":"A:")+data.aname;
-		db.zscore(arena, data.aname, function(err, score){
+		db.zscore(arena, data.aname, (err, score) => {
 			if (score === null) return;
 			var task = sutil.mkTask(function(wld){
 				if (wld.err) return;
@@ -481,25 +479,22 @@ var userEvents = {
 var sockEvents = {
 	login:require("./srv/login")(sockEmit),
 	konglogin:function(data){
-		var socket = this;
-		db.get("kongapi", function(err, key){
+		db.get("kongapi", (err, key) => {
 			if (!key) return; // TODO error
 			var https = require("https");
 			var login = sockEvents.login;
-			https.get("https://api.kongregate.com/api/authenticate.json?user_id="+data.u+"&game_auth_token="+data.g+"&api_key="+key, function(res) {
+			https.get("https://api.kongregate.com/api/authenticate.json?user_id="+data.u+"&game_auth_token="+data.g+"&api_key="+key, res => {
 				var data = "";
 				res.setEncoding("utf8");
-				res.on("data", function(chunk){
-					data += chunk;
-				});
-				res.on("end", function(){
+				res.on("data", chunk => data += chunk);
+				res.on("end", () => {
 					var json = sutil.parseJSON(data);
 					if (!json) return; // TODO error
 					if (json.success){
 						var name = "Kong:" + json.username;
 						Us.load(name, user => {
 							user.auth = data.g;
-							login.call(socket, {u: name, a: data.g});
+							login.call(this, {u: name, a: data.g});
 							var req = https.request({
 								hostname: "www.kongregate.com",
 								path: "/api/submit_statistics.json",
@@ -509,7 +504,7 @@ var sockEvents = {
 							req.end();
 						}, () => {
 							var user = Us.users[name] = {name: name, gold: 0, auth: data.g};
-							login.call(socket, {u: name, a: data.g});
+							login.call(this, {u: name, a: data.g});
 						});
 					}
 				});
@@ -567,7 +562,7 @@ var sockEvents = {
 		}
 	},
 	librarywant:function(data){
-		Us.load(data.f, (user) => {
+		Us.load(data.f, user => {
 			sockEmit(this, "librarygive", {pool:user.pool, bound:user.accountbound, gold:user.gold});
 		});
 	},
@@ -615,77 +610,80 @@ var sockEvents = {
 		delete rooms[data.room];
 	}
 };
-var wss = new (require("ws/lib/WebSocketServer"))({server:app.listen(13602)});
-wss.on("connection", function(socket){
+function onSocketClose(){
+	for(var key in rooms){
+		if (rooms[key] == this){
+			delete rooms[key];
+		}
+	}
+	for(var key in Us.socks){
+		if (Us.socks[key] == this){
+			delete Us.socks[key];
+		}
+	}
+	var info = this.meta;
+	if (info){
+		if (info.trade){
+			var foesock = Us.socks[info.trade.foe];
+			if (foesock && foesock.readyState == 1){
+				var foeinfo = foesock.meta;
+				if (foeinfo && foeinfo.trade && Us.socks[foeinfo.trade.foe] == this){
+					sockEmit(foesock, "tradecanceled");
+					delete foeinfo.trade;
+				}
+			}
+		}
+		if (info.foe){
+			var foeinfo = info.foe.meta;
+			if (foeinfo && foeinfo.foe == this){
+				sockEmit(info.foe, "foeleft");
+				delete foeinfo.foe;
+			}
+		}
+	}
+}
+function onSocketMessage(rawdata){
+	var data = sutil.parseJSON(rawdata);
+	if (!data) return;
+	console.log(data.u, data.x);
+	if (echoEvents.has(data.x)){
+		var foe = this.meta.trade ? Us.socks[this.meta.trade.foe] : this.meta.foe;
+		if (foe && foe.readyState == 1){
+			foe.send(rawdata);
+			for(var i=1; i<=2; i++){
+				var spectators = (i==1?this:foe).meta.spectators;
+				if (spectators){
+					data.spectate = i;
+					var rawmsg = JSON.stringify(data);
+					spectators.forEach(uname => {
+						var sock = Us.socks[uname];
+						if (sock && sock.readyState == 1){
+							sock.send(rawmsg);
+						}
+					});
+				}
+			}
+		}
+		return;
+	}
+	var func = userEvents[data.x] || usercmd[data.x];
+	if (func){
+		var u = data.u;
+		Us.load(u, user => {
+			if (data.a == user.auth){
+				Us.socks[u] = this;
+				delete data.a;
+				func.call(this, data, Us.users[u]);
+			}
+		});
+	}else if (func = sockEvents[data.x]){
+		func.call(this, data);
+	}
+}
+function onSocketConnection(socket){
 	socket.meta = {};
-	socket.on("close", function(){
-		for(var key in rooms){
-			if (rooms[key] == this){
-				delete rooms[key];
-			}
-		}
-		for(var key in Us.socks){
-			if (Us.socks[key] == this){
-				delete Us.socks[key];
-			}
-		}
-		var info = this.meta;
-		if (info){
-			if (info.trade){
-				var foesock = Us.socks[info.trade.foe];
-				if (foesock && foesock.readyState == 1){
-					var foeinfo = foesock.meta;
-					if (foeinfo && foeinfo.trade && Us.socks[foeinfo.trade.foe] == this){
-						sockEmit(foesock, "tradecanceled");
-						delete foeinfo.trade;
-					}
-				}
-			}
-			if (info.foe){
-				var foeinfo = info.foe.meta;
-				if (foeinfo && foeinfo.foe == this){
-					sockEmit(info.foe, "foeleft");
-					delete foeinfo.foe;
-				}
-			}
-		}
-	});
-	socket.on("message", function(rawdata){
-		var data = sutil.parseJSON(rawdata);
-		if (!data) return;
-		console.log(data.u, data.x);
-		if (echoEvents.has(data.x)){
-			var foe = this.meta.trade ? Us.socks[this.meta.trade.foe] : this.meta.foe;
-			if (foe && foe.readyState == 1){
-				foe.send(rawdata);
-				for(var i=1; i<=2; i++){
-					var spectators = (i==1?this:foe).meta.spectators;
-					if (spectators){
-						data.spectate = i;
-						var rawmsg = JSON.stringify(data);
-						spectators.forEach(uname => {
-							var sock = Us.socks[uname];
-							if (sock && sock.readyState == 1){
-								sock.send(rawmsg);
-							}
-						});
-					}
-				}
-			}
-			return;
-		}
-		var func = userEvents[data.x] || usercmd[data.x];
-		if (func){
-			var u = data.u;
-			Us.load(u, user => {
-				if (data.a == user.auth){
-					Us.socks[u] = socket;
-					delete data.a;
-					func.call(socket, data, Us.users[u]);
-				}
-			});
-		}else if (func = sockEvents[data.x]){
-			func.call(socket, data);
-		}
-	});
-});
+	socket.on("close", onSocketClose);
+	socket.on("message", onSocketMessage);
+}
+var wss = new (require("ws/lib/WebSocketServer"))({server:app.listen(13602)});
+wss.on("connection", onSocketConnection);

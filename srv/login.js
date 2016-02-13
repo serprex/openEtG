@@ -65,12 +65,9 @@ module.exports = function(sockEmit){
 			sockEmit(this, "login", {err:"No name"});
 			return;
 		}else{
-			var socket = this;
-			Us.load(name, user => {
-				loginRespond(socket, user, data.p, data.a);
-			}, () => {
+			Us.load(name, user => loginRespond(this, user, data.p, data.a), () => {
 				var user = Us.users[name] = {name: name, gold: 0};
-				loginRespond(socket, user, data.p, data.a);
+				loginRespond(this, user, data.p, data.a);
 			});
 		}
 	}

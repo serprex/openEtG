@@ -30,7 +30,7 @@ exports.stop = function(){
 	storeUsers();
 	db.quit();
 }
-function load(name, cb, errcb){
+exports.load = function(name, cb, errcb){
 	usergc.delete(name);
 	if (users[name]){
 		cb(users[name]);
@@ -46,4 +46,3 @@ function load(name, cb, errcb){
 		});
 	}
 }
-exports.load = load;
