@@ -1994,7 +1994,7 @@ skull:function(c,t){
 			t.die();
 			if (!t.owner.creatures[index] || t.owner.creatures[index].card != Cards.MalignantCell){
 				var skele = t.owner.creatures[index] = new Thing(t.card.as(Cards.Skeleton));
-				skele.owner = c.owner;
+				skele.owner = t.owner;
 				skele.type = etg.Creature;
 			}
 		}
