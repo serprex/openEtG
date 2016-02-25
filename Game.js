@@ -69,9 +69,7 @@ Game.prototype.addData = function(data) {
 	}
 }
 function removeSoPa(p){
-	if (p){
-		p.status.set("patience", 0);
-	}
+	if (p) p.status.set("patience", 0);
 }
 Game.prototype.updateExpectedDamage = function(){
 	if (this.expectedDamage){

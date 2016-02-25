@@ -92,9 +92,9 @@ module.exports = function(game, previous) {
 					var tbits = game.tgtToBits(t) ^ 8;
 					var gameClone = game.clone();
 					gameClone.bitsToTgt(cbits).useactive(gameClone.bitsToTgt(tbits));
-					if (c.status.get("patience") && c.active.cast == Skills.die){
+					if (c.type == etg.Permanent && c.status.get("patience") && c.active.cast == Skills.die && c.owner == game.player2){
 						for(var i=0; i<16; i++){
-							var pr = c.owner.permanents[i];
+							var pr = gameClone.player2.permanents[i];
 							if (pr && pr.status.get("patience") && pr.active.cast == Skills.die) pr.useactive();
 						}
 					}
