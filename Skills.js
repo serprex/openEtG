@@ -1800,6 +1800,7 @@ turngolem:function(c,t){
 	c.atk = Math.floor(storedpower / 3);
 	c.maxhp = c.hp = storedpower;
 	c.status.set("storedpower", 0);
+	delete c.active.cast;
 	c.owner.addCrea(c);
 	c.owner.gpull = c;
 },
