@@ -1,6 +1,8 @@
 language: node_js
-node_js: "5.7"
+node_js: "5"
 script: ./scripts/tests.js
+sudo: required
+dist: trusty
 git:
  submodules: false
 notifications:
