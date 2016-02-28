@@ -1,5 +1,6 @@
 language: node_js
-node_js: "4.1"
+node_js: "5.7"
+script: ./scripts/tests.js
 git:
  submodules: false
 notifications:

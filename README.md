@@ -1,3 +1,5 @@
+[![Build](https://travis-ci.org/serprex/openEtG.svg?branch=master)](https://travis-ci.org/serprex/openEtG)
+
 # openEtG: An OpenWeb CCG
 
 ## Description
