@@ -2,8 +2,6 @@
 
 # openEtG: An OpenWeb CCG
 
-## Description
-
 openEtG is an unofficial Open Web fork of the Flash game [Elements](http://elementsthegame.com).
 
 ## Developer Instructions

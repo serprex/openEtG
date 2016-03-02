@@ -732,14 +732,16 @@ gas:function(c,t){
 },
 give:function(c,t){
 	c.owner.dmg(c.card.upped?-10:-5);
-	if (t.type != etg.Spell && t.hasactive("auto", "singularity")){
+	if (t.type == etg.Spell){
+		t.remove();
+		c.owner.foe.addCard(t.card);
+	}else if (t.hasactive("auto", "singularity")){
 		t.die();
 	}else if (t.type <= etg.Permanent){
 		Skills.steal(c.owner.foe, t);
 	}else{
 		t.remove();
-		t.owner = c.owner.foe;
-		t.owner.addCrea(t);
+		c.owner.foe.addCrea(t);
 	}
 },
 golemhit:function(c,t){
