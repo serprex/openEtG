@@ -28,8 +28,8 @@ function load(progress, postload){
 			if (asset == "cardBacks"){
 				var ts = [], bs = [];
 				for (var x = 0; x < tex.width; x += 128){
-					ts.push(new PIXI.Texture(tex, new PIXI.math.Rectangle(x, 0, 128, tex.height)));
-					bs.push(new PIXI.Texture(tex, new PIXI.math.Rectangle(x, 0, 128, 16)));
+					bs.push(new PIXI.Texture(tex, new PIXI.math.Rectangle(x, 0, 128, 20)));
+					ts.push(new PIXI.Texture(tex, new PIXI.math.Rectangle(x, 20, 128, tex.height-20)));
 				}
 				exports.cardBacks = ts;
 				exports.cardBorders = bs;
@@ -81,7 +81,11 @@ function makeArt(code, art, rend) {
 	if (!rend) rend = require("./px").mkRenderTexture(128, 256);
 	var template = new PIXI.Container();
 	var card = Cards.Codes[code];
-	template.addChild(new PIXI.Sprite(exports.cardBacks[card.element+(card.upped?13:0)]));
+	var cardHeader = new PIXI.Sprite(exports.cardBorders[card.element+(card.upped?13:0)]);
+	template.addChild(cardHeader);
+	var cardBack = new PIXI.Sprite(exports.cardBacks[card.element+(card.upped?13:0)]);
+	cardBack.position.y = 148;
+	template.addChild(cardBack);
 	var typemark = new PIXI.Sprite(exports.t[card.type]);
 	typemark.anchor.set(1, 1);
 	typemark.position.set(128, 252);
@@ -90,6 +94,10 @@ function makeArt(code, art, rend) {
 	rarity.anchor.set(1, 1);
 	rarity.position.set(102, 252);
 	template.addChild(rarity);
+	var graphics = new PIXI.Graphics();
+	graphics.beginFill(ui.maybeLighten(card));
+	graphics.drawRect(0, 20, 128, 128);
+	template.addChild(graphics);
 	if (art) {
 		var artspr = setShinyShader(rend.renderer, new PIXI.Sprite(art), card);
 		artspr.position.set(0, 20);
@@ -203,9 +211,8 @@ function getInstImage(scale){
 		var btex = exports.cardBorders[card.element + (card.upped ? 13 : 0)];
 		var c = new PIXI.Container();
 		var border = new PIXI.Sprite(btex), border2 = new PIXI.Sprite(btex);
-		border.scale.y = 1.25;
 		border2.position.y = 152;
-		border2.scale.y = -.25;
+		border2.scale.y = -.2;
 		c.addChild(border);
 		c.addChild(border2);
 		var graphics = new PIXI.Graphics();
