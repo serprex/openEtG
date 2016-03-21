@@ -160,9 +160,7 @@ Player.prototype.endturn = function(discard) {
 	for(var i=0; i<16; i++){
 		var p;
 		if ((p=this.permanents[i])){
-			if (p.active.auto){
-				p.trigger("auto")
-			}
+			p.trigger("auto")
 			if (~p.getIndex()){
 				p.usedactive = false;
 				if (p.status.get("stasis")){
@@ -211,7 +209,7 @@ Player.prototype.endturn = function(discard) {
 	});
 	if (this.shield){
 		this.shield.usedactive = false;
-		if(this.shield.active.auto) this.shield.trigger("auto");
+		this.shield.trigger("auto");
 	}
 	if (this.weapon)this.weapon.attack();
 	if (this.foe.sosa > 0){

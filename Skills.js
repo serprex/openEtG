@@ -562,10 +562,7 @@ endow:function(c,t){
 		c.cast = t.cast;
 		c.castele = t.castele;
 	}
-	c.atk += t.trueatk();
-	if (t.active.buff){
-		c.atk -= t.trigger("buff");
-	}
+	c.atk += t.trueatk() - t.trigger("buff");
 	c.buffhp(2);
 },
 envenom:function(c,t){
@@ -1223,7 +1220,7 @@ pacify:function(c,t){
 },
 pairproduce:function(c,t){
 	c.owner.permanents.forEach(function(p){
-		if (p && p.card.type == etg.Pillar && p.active.auto) p.trigger("auto");
+		if (p && p.card.type == etg.Pillar) p.trigger("auto");
 	});
 },
 paleomagnetism:function(c,t){
