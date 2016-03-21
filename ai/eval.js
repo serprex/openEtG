@@ -426,7 +426,7 @@ function estimateDamage(c, freedomChance, wallCharges, wallIndex) {
 	function estimateAttack(tatk){
 		if (momentum) {
 			return tatk;
-		} else if (fshactive && (~fshactive.name.indexOf("weight") || ~fshactive.name.indexOf("wings")) && fshactive(c.owner.foe.shield, c)) {
+		} else if (fshactive && (~fshactive.name.indexOf("weight") || ~fshactive.name.indexOf("wings")) && fshactive.func(c.owner.foe.shield, c)) {
 			return 0;
 		}else if (wallCharges[wallIndex]){
 			wallCharges[wallIndex]--;
