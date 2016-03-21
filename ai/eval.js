@@ -426,7 +426,7 @@ function estimateDamage(c, freedomChance, wallCharges, wallIndex) {
 	function estimateAttack(tatk){
 		if (momentum) {
 			return tatk;
-		} else if (fshactive && (~fshactive.activename.indexOf("weight") || ~fshactive.activename.indexOf("wings")) && fshactive(c.owner.foe.shield, c)) {
+		} else if (fshactive && (~fshactive.name.indexOf("weight") || ~fshactive.name.indexOf("wings")) && fshactive(c.owner.foe.shield, c)) {
 			return 0;
 		}else if (wallCharges[wallIndex]){
 			wallCharges[wallIndex]--;
@@ -446,7 +446,7 @@ function estimateDamage(c, freedomChance, wallCharges, wallIndex) {
 		c.status.set("adrenaline", 1);
 	}
 	if (!momentum && fshactive){
-		atk *= (~fshactive.activename.indexOf("evade100") ? 0 : ~fshactive.activename.indexOf("evade 50") ? .5 : ~fshactive.activename.indexOf("evade 40") ? .6 : ~fshactive.activename.indexOf("chaos") && fsh.card.upped ? .8 : 1);
+		atk *= (~fshactive.name.indexOf("evade100") ? 0 : ~fshactive.name.indexOf("evade 50") ? .5 : ~fshactive.name.indexOf("evade 40") ? .6 : ~fshactive.name.indexOf("chaos") && fsh.card.upped ? .8 : 1);
 	}
 	if (!fsh && freedomChance && c.status.get("airborne")){
 		atk += Math.ceil(atk/2) * freedomChance;
@@ -487,8 +487,8 @@ function calcExpectedDamage(pl, wallCharges, wallIndex) {
 
 function evalactive(c, active, extra){
 	var sum = 0;
-	for(var i=0; i<active.activename.length; i++){
-		var aval = SkillsValues[active.activename[i]];
+	for(var i=0; i<active.name.length; i++){
+		var aval = SkillsValues[active.name[i]];
 		sum += aval === undefined?0:
 			aval instanceof Function?aval(c, extra):
 			aval instanceof Array?aval[c.card.upped?1:0]:aval;

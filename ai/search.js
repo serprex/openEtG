@@ -48,7 +48,7 @@ var afilter = {
 	},
 };
 function searchSkill(active, c, t){
-	var func = afilter[active.activename[0]];
+	var func = afilter[active.name[0]];
 	return !func || t.type == etg.Player || t.hasactive("prespell", "protectonce") || func(c, t);
 }
 module.exports = function(game, previous) {
@@ -119,7 +119,7 @@ module.exports = function(game, previous) {
 				}
 			}
 			var preEval = currentEval;
-			if (active && active.activename[0] in Cards.Targeting) {
+			if (active && active.name[0] in Cards.Targeting) {
 				game.getTarget(c, active);
 				for (var j = 0;j < 2;j++) {
 					var pl = j == 0 ? c.owner : c.owner.foe;
@@ -127,7 +127,7 @@ module.exports = function(game, previous) {
 					pl.forEach(evalIter);
 				}
 				game.targeting = null;
-				if (loglist) console.log(currentEval, preEval, c.toString(), active.activename[0], loglist);
+				if (loglist) console.log(currentEval, preEval, c.toString(), active.name[0], loglist);
 			}else{
 				evalIter();
 				if (loglist) console.log(currentEval, preEval, c.toString(), loglist);

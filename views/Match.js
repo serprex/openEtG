@@ -495,7 +495,7 @@ function startMatch(game, foeDeck, spectate) {
 					element: c.card.element,
 					costele: c.castele,
 					cost: c.cast,
-					name: c.active.cast.activename[0],
+					name: c.active.cast.name[0],
 					upped: c.card.upped,
 					shiny: c.card.shiny,
 				};

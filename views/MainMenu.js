@@ -82,9 +82,7 @@ function initEndless(){
 		if (t == c.owner.game.player1 && c.rng() < .3) card = card.asUpped(false);
 		t.deck.splice(t.upto(t.deck.length), 0, card);
 	}
-	endlessAuto.activename = ["endless"];
-	endlessDraw.activename = ["endlessdraw"];
-	endlessRelic.active = {auto:endlessAuto, draw:endlessDraw};
+	endlessRelic.active = {auto:{name: ["endlessAuto"], func: endlessAuto}, draw:{name: ["endlessdraw"], func: endlessDraw}};
 	game.player2.permanents[0] = endlessRelic;
 }
 module.exports = function(nymph) {

@@ -25,7 +25,7 @@ module.exports = function(game) {
 					}
 				}
 			}
-			if (active && active.activename[0] in Cards.Targeting) {
+			if (active && active.name[0] in Cards.Targeting) {
 				game.getTarget(c, active);
 				if (c.owner.shield && c.owner.shield.status.reflective) evalIter(c.owner);
 				evalIter(c.owner.foe);

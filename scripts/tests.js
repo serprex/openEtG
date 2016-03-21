@@ -102,26 +102,26 @@ M.test("Destroy", function() {
 		this.player1.hand[0].useactive();
 	}
 	assert.equal(this.player1.permanents[0].status.get("charges"), 2, "2 charges");
-	Skills.destroy(this.player2, this.player1.permanents[0]);
+	Skills.destroy.func(this.player2, this.player1.permanents[0]);
 	assert.equal(this.player1.permanents[0].status.get("charges"), 1, "1 charge");
-	Skills.destroy(this.player2, this.player1.permanents[0]);
+	Skills.destroy.func(this.player2, this.player1.permanents[0]);
 	assert.ok(!this.player1.permanents[0], "poof");
 	assert.equal(this.player1.permanents[1].card, Cards.SoulCatcher, "SoulCatcher");
-	Skills.destroy(this.player2, this.player1.permanents[1]);
+	Skills.destroy.func(this.player2, this.player1.permanents[1]);
 	assert.ok(!this.player1.permanents[1], "SoulCatcher gone");
 	assert.equal(this.player1.shield.card, Cards.Shield, "Shield");
-	Skills.destroy(this.player2, this.player1.shield);
+	Skills.destroy.func(this.player2, this.player1.shield);
 	assert.ok(!this.player1.shield, "Shield gone");
 	assert.equal(this.player1.weapon.card, Cards.Dagger, "Dagger");
-	Skills.destroy(this.player2, this.player1.weapon);
+	Skills.destroy.func(this.player2, this.player1.weapon);
 	assert.ok(!this.player1.weapon, "Dagger gone");
 	initHand(this.player1, Cards.BoneWall);
 	this.player1.hand[0].useactive();
 	assert.equal(this.player1.shield.status.get("charges"), 7, "7 bones");
-	Skills.destroy(this.player2, this.player1.shield);
+	Skills.destroy.func(this.player2, this.player1.shield);
 	assert.equal(this.player1.shield.status.get("charges"), 6, "6 bones");
 	for(var i=0; i<6; i++){
-		Skills.destroy(this.player2, this.player1.shield);
+		Skills.destroy.func(this.player2, this.player1.shield);
 	}
 	assert.ok(!this.player1.shield, "This town is all in hell");
 });
@@ -148,9 +148,9 @@ M.test("Earthquake", function() {
 	var pillars = this.player1.permanents[0];
 	assert.ok(pillars.card.type == etg.Pillar, "ispillar");
 	assert.equal(pillars.status.get("charges"), 5, "5 charges");
-	Skills.earthquake(this.player2, pillars);
+	Skills.earthquake.func(this.player2, pillars);
 	assert.equal(pillars.status.get("charges"), 2, "2 charges");
-	Skills.earthquake(this.player2, pillars);
+	Skills.earthquake.func(this.player2, pillars);
 	assert.ok(!this.player1.permanents[0], "poof");
 });
 M.test("Eclipse", function() {
@@ -194,7 +194,7 @@ M.test("Lobotomize", function() {
 	this.player1.addCrea(new Thing(Cards.Devourer));
 	var dev = this.player1.creatures[0];
 	assert.ok(!util.isEmpty(dev.active), "Skills");
-	Skills.lobotomize(dev, dev);
+	Skills.lobotomize.func(dev, dev);
 	assert.ok(util.isEmpty(dev.active), "No more");
 });
 M.test("Obsession", function() {
@@ -206,47 +206,47 @@ M.test("Obsession", function() {
 M.test("Parallel", function() {
 	this.player1.addCrea(new Thing(Cards.Dragonfly))
 	var damsel = this.player1.creatures[0];
-	Skills.parallel(damsel, damsel);
+	Skills.parallel.func(damsel, damsel);
 	assert.equal(this.player1.creatures[1].card, Cards.Dragonfly, "PU'd");
-	Skills.web(this.player1, damsel);
+	Skills.web.func(this.player1, damsel);
 	assert.ok(!damsel.status.get("airborne") && this.player1.creatures[1].status.get("airborne"), "Web'd");
 });
 M.test("Phoenix", function() {
 	this.player1.addCrea(new Thing(Cards.Phoenix));
 	var phoenix = this.player1.creatures[0];
-	Skills.lightning(this.player1, phoenix);
+	Skills.lightning.func(this.player1, phoenix);
 	assert.equal(this.player1.creatures[0].card, Cards.Ash, "Ash");
 });
 M.test("Purify", function() {
-	Skills["poison 3"](this.player1);
+	Skills["poison 3"].func(this.player1);
 	assert.equal(this.player2.status.get("poison"), 3, "3");
-	Skills["poison 3"](this.player1, this.player2);
+	Skills["poison 3"].func(this.player1, this.player2);
 	assert.equal(this.player2.status.get("poison"), 6, "6");
-	Skills.purify(this.player1, this.player2);
+	Skills.purify.func(this.player1, this.player2);
 	assert.equal(this.player2.status.get("poison"), -2, "-2");
-	Skills.purify(this.player1, this.player2);
+	Skills.purify.func(this.player1, this.player2);
 	assert.equal(this.player2.status.get("poison"), -4, "-4");
 });
 M.test("Reflect", function() {
-	Skills.lightning(this.player1, this.player2);
+	Skills.lightning.func(this.player1, this.player2);
 	assert.ok(this.player1.hp == 100 && this.player2.hp == 95, "Plain spell");
 	this.player2.setShield(new Thing(Cards.MirrorShield));
-	Skills.lightning(this.player1, this.player2);
+	Skills.lightning.func(this.player1, this.player2);
 	assert.ok(this.player1.hp == 95 && this.player2.hp == 95, "Reflected spell");
 	this.player1.setShield(new Thing(Cards.MirrorShield));
-	Skills.lightning(this.player1, this.player2);
+	Skills.lightning.func(this.player1, this.player2);
 	assert.ok(this.player1.hp == 90 && this.player2.hp == 95, "Unreflected reflected spell");
 });
 M.test("Steal", function() {
 	this.player1.setShield(new Thing(Cards.BoneWall));
 	this.player1.shield.status.set("charges", 3);
-	Skills.steal(this.player2, this.player1.shield);
+	Skills.steal.func(this.player2, this.player1.shield);
 	assert.ok(this.player1.shield && this.player1.shield.status.get("charges") == 2, "Wish bones");
 	assert.ok(this.player2.shield && this.player2.shield.status.get("charges") == 1, "stole 1");
-	Skills.steal(this.player2, this.player1.shield);
+	Skills.steal.func(this.player2, this.player1.shield);
 	assert.ok(this.player1.shield && this.player1.shield.status.get("charges") == 1, "Lone bone");
 	assert.ok(this.player2.shield && this.player2.shield.status.get("charges") == 2, "stole 2");
-	Skills.steal(this.player2, this.player1.shield);
+	Skills.steal.func(this.player2, this.player1.shield);
 	assert.ok(!this.player1.shield, "This town is all in hell");
 	assert.ok(this.player2.shield && this.player2.shield.status.get("charges") == 3, "stole 3");
 });
@@ -272,13 +272,13 @@ M.test("Transform No Sick", function() {
 M.test("Voodoo", function() {
 	var voodoo = new Thing(Cards.VoodooDoll);
 	this.player1.addCrea(voodoo);
-	Skills.lightning(this.player1, voodoo);
-	Skills.infect(this.player1, voodoo);
+	Skills.lightning.func(this.player1, voodoo);
+	Skills.infect.func(this.player1, voodoo);
 	assert.equal(voodoo.hp, 11, "dmg");
 	assert.equal(this.player2.hp, 95, "foe dmg");
 	assert.equal(voodoo.status.get("poison"), 1, "psn");
 	assert.equal(this.player2.status.get("poison"), 1, "foe psn");
-	Skills.holylight(this.player1, voodoo);
+	Skills.holylight.func(this.player1, voodoo);
 	assert.equal(voodoo.hp, 1, "holy dmg");
 	assert.equal(this.player2.hp, 85, "foe holy dmg");
 });

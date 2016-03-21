@@ -29,7 +29,7 @@ ablaze:function(c,t){
 },
 abomination:passive(function(c,t,data){
 	if (data.tgt == c && data.active == Skills.mutation){
-		Skills.improve(c, c);
+		Skills.improve.func(c, c);
 		data.evade = true;
 	}
 }),
@@ -43,7 +43,7 @@ accelerationspell:function(c,t){
 	t.active.auto = Skills.acceleration;
 },
 accretion:function(c,t){
-	Skills.destroy(c, t);
+	Skills.destroy.func(c, t);
 	c.buffhp(10);
 	if (c.truehp() > 30){
 		c.die();
@@ -91,7 +91,7 @@ antimatter:function(c,t){
 	t.atk -= t.trueatk()*2;
 },
 appease:function(c,t){
-	Skills.devour(c, t);
+	Skills.devour.func(c, t);
 	c.status.set("appeased", 1);
 },
 atk2hp:function(c,t){
@@ -104,7 +104,7 @@ autoburrowoff:function(c,t){
 	c.rmactive("play", "autoburrowproc");
 },
 autoburrowproc:function(c,t){
-	if (t.active.cast == Skills.burrow) Skills.burrow(t);
+	if (t.active.cast == Skills.burrow) Skills.burrow.func(t);
 },
 axe:function(c,t){
 	return c.owner.mark == etg.Fire || c.owner.mark == etg.Time?1:0;
@@ -129,11 +129,11 @@ beguile:function(c,t){
 beguilestop:passive(function(c,t){
 	if (t == c.owner){
 		c.rmactive("turnstart", "beguilestop");
-		Skills.beguile(c, c);
+		Skills.beguile.func(c, c);
 	}
 }),
 bellweb:function(c,t){
-	Skills.web(c,t);
+	Skills.web.func(c,t);
 	t.status.set("aquatic", 1);
 },
 blackhole:function(c,t){
@@ -161,7 +161,7 @@ bow:function(c,t){
 	return c.owner.mark == etg.Air || c.owner.mark == etg.Light?1:0;
 },
 bounce:passive(function(c,t){
-	Skills.unsummon(c, c);
+	Skills.unsummon.func(c, c);
 	return true;
 }),
 bravery:function(c,t){
@@ -265,7 +265,7 @@ clear:function(c,t){
 	t.status.maybeDecr("frozen");
 	t.dmg(-1);
 	if (t.hasactive("turnstart", "beguilestop")){
-		Skills.beguilestop(t, t.owner);
+		Skills.beguilestop.func(t, t.owner);
 	}
 },
 corpseexplosion:function(c,t){
@@ -296,16 +296,16 @@ cpower:function(c,t){
 },
 creatureupkeep:function(c,t){
 	c.owner.masscc(c, function(c, t){
-		Skills.upkeep(t);
+		Skills.upkeep.func(t);
 	}, true);
 },
 cseed:function(c,t){
-	Skills[c.choose(["drainlife", "firebolt", "freeze", "gpullspell", "icebolt", "infect", "lightning", "lobotomize", "parallel", "rewind", "snipe", "swave"])](c, t);
+	Skills[c.choose(["drainlife", "firebolt", "freeze", "gpullspell", "icebolt", "infect", "lightning", "lobotomize", "parallel", "rewind", "snipe", "swave"])].func(c, t);
 },
 cseed2:function(c,t){
 	var choice = c.choose(Cards.filter(c.owner.upto(2), function(c){
 		if (c.type != etg.Spell) return false;
-		var tgting = Cards.Targeting[c.active.cast.activename];
+		var tgting = Cards.Targeting[c.active.cast.name[0]];
 		return tgting && tgting(c, t);
 	}));
 	Effect.mkText(choice.name, t);
@@ -318,8 +318,8 @@ deadalive:function(c){
 	c.deatheffect(c.getIndex());
 },
 deathwish:function(c,t, data){
-	var tgt = data.tgt, active = data.active;
-	if (!tgt || c.status.get("frozen") || c.status.get("delayed") || c.owner == t.owner || tgt.owner != c.owner || tgt.type != etg.Creature || !Cards.Targeting[active.activename[0]](t, c)) return;
+	var tgt = data.tgt;
+	if (!tgt || c.status.get("frozen") || c.status.get("delayed") || c.owner == t.owner || tgt.owner != c.owner || tgt.type != etg.Creature || !Cards.Targeting[data.active.name[0]](t, c)) return;
 	if (!tgt.hasactive("prespell", "deathwish")) return data.tgt = c;
 	var totaldw = 0;
 	c.owner.creatures.forEach(function(cr){
@@ -362,7 +362,7 @@ deepdiveproc2:passive(function(c,t){
 }),
 deja:function(c,t){
 	delete c.active.cast;
-	Skills.parallel(c, c);
+	Skills.parallel.func(c, c);
 },
 deployblobs:function(c,t){
 	var blob = c.card.as(Cards.Blob);
@@ -396,7 +396,7 @@ destroycard:function(c,t){
 detain:function(c,t){
 	t.dmg(1);
 	t.atk--;
-	Skills["growth 1"](c);
+	Skills["growth 1"].func(c);
 	t.status.set("airborne", 0);
 	t.status.set("burrowed", 1);
 },
@@ -412,7 +412,7 @@ die:function(c,t){
 },
 disarm:function(c,t){
 	if (t.type == etg.Player && t.weapon){
-		Skills.unsummon(c, t.weapon);
+		Skills.unsummon.func(c, t.weapon);
 	}
 },
 disc:function(c,t){
@@ -479,7 +479,7 @@ drawequip:function(c,t){
 },
 drawpillar:function(c,t){
 	var deck = c.owner.deck;
-	if (deck.length && deck[deck.length-1].type == etg.Pillar) Skills.hasten(c, t);
+	if (deck.length && deck[deck.length-1].type == etg.Pillar) Skills.hasten.func(c, t);
 },
 dryspell:function(c,t){
 	function dryeffect(c,t){
@@ -564,7 +564,7 @@ endow:function(c,t){
 	}
 	c.atk += t.trueatk();
 	if (t.active.buff){
-		c.atk -= t.active.buff(t);
+		c.atk -= t.trigger("buff");
 	}
 	c.buffhp(2);
 },
@@ -578,7 +578,7 @@ epidemic:function(c,t){
 },
 epoch:function(c,t){
 
-	if (c.status.incr("epoch", 1) > 1) Skills.silence(c, t.owner);
+	if (c.status.incr("epoch", 1) > 1) Skills.silence.func(c, t.owner);
 },
 epochreset:function(c,t){
 	c.status.set("epoch", 0);
@@ -638,7 +638,7 @@ flatline:function(c,t){
 	}
 },
 flyself:function(c,t){
-	Skills[c.type == etg.Weapon ? "flyingweapon" : "livingweapon"](c, c);
+	Skills[c.type == etg.Weapon ? "flyingweapon" : "livingweapon"].func(c, c);
 },
 flyingweapon:function(c,t){
 	t.owner.weapon = undefined;
@@ -681,10 +681,10 @@ forceplay:function(c,t){
 		Effect.mkSpriteFadeHandImage(t.card, t, {x:t.owner == t.owner.game.player2 ? -1 : 1, y:0});
 		if (t.owner.sanctuary) return;
 		if (card.type == etg.Spell){
-			tgting = Cards.Targeting[card.active.cast.activename[0]];
+			tgting = Cards.Targeting[card.active.cast.name[0]];
 		}
 	}else if (t.active.cast){
-		tgting = Cards.Targeting[t.active.cast.activename[0]];
+		tgting = Cards.Targeting[t.active.cast.name[0]];
 	}
 	if (tgting && !(tgt = findtgt(tgting))) return;
 	var realturn = t.owner.game.turn;
@@ -709,7 +709,7 @@ freeze:function(c,t){
 	t.freeze(c.card.upped ? 4 : 3);
 },
 freezeperm:function(c,t){
-	Skills.freeze(c, t);
+	Skills.freeze.func(c, t);
 },
 fungusrebirth:function(c,t){
 	c.transform(c.card.as(Cards.Fungus));
@@ -738,7 +738,7 @@ give:function(c,t){
 	}else if (t.hasactive("auto", "singularity")){
 		t.die();
 	}else if (t.type <= etg.Permanent){
-		Skills.steal(c.owner.foe, t);
+		Skills.steal.func(c.owner.foe, t);
 	}else{
 		t.remove();
 		c.owner.foe.addCrea(t);
@@ -748,7 +748,7 @@ golemhit:function(c,t){
 	t.attack(false, 0);
 },
 gpull:function(c,t){
-	Skills.gpullspell(c, c);
+	Skills.gpullspell.func(c, c);
 },
 gpullspell:function(c,t){
 	if (t.type == etg.Creature){
@@ -1003,7 +1003,7 @@ liquid:function(c,t){
 	t.addpoison(1);
 },
 livingweapon:function(c,t){
-	if (t.owner.weapon) Skills.unsummon(c, t.owner.weapon);
+	if (t.owner.weapon) Skills.unsummon.func(c, t.owner.weapon);
 	t.owner.dmg(-t.truehp());
 	t.remove();
 	t.owner.setWeapon(t);
@@ -1027,7 +1027,7 @@ loot:function(c,t){
 		if (foe.shield && foe.shield.isMaterial()) perms.push(foe.shield);
 		if (perms.length){
 			Effect.mkText("Looted", c);
-			Skills.steal(c, foe.choose(perms));
+			Skills.steal.func(c, foe.choose(perms));
 			c.addactive("turnstart", Skills.salvageoff);
 		}
 	}
@@ -1042,7 +1042,7 @@ luciferin:function(c,t){
 	c.owner.dmg(-10);
 	c.owner.masscc(c, function(c,x){
 		for (var key in x.active){
-			if (key != "ownplay" && key != "owndiscard" && !x.active[key].activename.every(function(name){return parseSkill(name).passive})) return;
+			if (key != "ownplay" && key != "owndiscard" && !x.active[key].name.every(function(name){return parseSkill(name).passive})) return;
 		}
 		x.addactive("auto", Skills.light);
 	});
@@ -1066,7 +1066,7 @@ metamorph:function(c,t){
 },
 midas:function(c,t){
 	if (t.status.get("stackable") && t.status.get("charges") > 1){
-		Skills.destroy(c, t, true);
+		Skills.destroy.func(c, t, true);
 		var relic = new Thing(t.card.as(Cards.GoldenRelic));
 		relic.usedactive = false;
 		c.owner.addPerm(relic);
@@ -1128,7 +1128,7 @@ mutation:function(c,t){
 		Effect.mkText("Death", t);
 		t.die();
 	}else if (rnd<.5){
-		Skills.improve(c, t);
+		Skills.improve.func(c, t);
 	}else{
 		Effect.mkText("Abomination", t);
 		t.transform(Cards.Abomination.asShiny(t.card.shiny));
@@ -1153,7 +1153,7 @@ nightmare:function(c,t){
 	}
 },
 nightshade:function(c,t){
-	Skills.lycanthropy(t);
+	Skills.lycanthropy.func(t);
 },
 nova:function(c,t){
 	for (var i=1; i<13; i++){
@@ -1181,7 +1181,7 @@ nullspell:function(c,t){
 },
 eatspell:function(c,t, data){
 	if (t.type == etg.Spell){
-		Skills["growth 1"](c);
+		Skills["growth 1"].func(c);
 		c.rmactive("prespell", "eatspell");
 		data.evade = true;
 	}
@@ -1198,7 +1198,7 @@ nymph:function(c,t){
 		t.active.auto == Skills.pillspi ? c.choose([etg.Death, etg.Life, etg.Light, etg.Darkness]) :
 		t.active.auto == Skills.pillcar ? c.choose([etg.Entropy, etg.Gravity, etg.Time, etg.Aether]) :
 		c.owner.upto(12)+1);
-	Skills.destroy(c, t, true, true);
+	Skills.destroy.func(c, t, true, true);
 	t.owner.addCrea(new Thing(t.card.as(Cards.Codes[etg.NymphList[e]])));
 },
 obsession:passive(function(c,t){
@@ -1223,7 +1223,7 @@ pacify:function(c,t){
 },
 pairproduce:function(c,t){
 	c.owner.permanents.forEach(function(p){
-		if (p && p.card.type == etg.Pillar && p.active.auto) p.active.auto(p);
+		if (p && p.card.type == etg.Pillar && p.active.auto) p.trigger("auto");
 	});
 },
 paleomagnetism:function(c,t){
@@ -1238,7 +1238,7 @@ pandemonium2:function(c,t){
 },
 pandemonium3:function(c,t){
 	function cs2(x){
-		if (x) { Skills.cseed2(c, x) }
+		if (x) { Skills.cseed2.func(c, x) }
 	}
 	for(var i=0; i<2; i++){
 		var pl = i ? c.owner.foe : c.owner;
@@ -1257,7 +1257,7 @@ paradox:function(c,t){
 parallel:function(c,t){
 	Effect.mkText("Parallel", t);
 	if (t.card.isOf(Cards.Chimera)){
-		Skills.chimera(c, t);
+		Skills.chimera.func(c, t);
 		return;
 	}
 	var copy = t.clone(c.owner);
@@ -1295,7 +1295,7 @@ photosynthesis:function(c,t){
 	}
 },
 plague:function(c,t){
-	t.masscc(c, Skills.infect);
+	t.masscc(c, Skills.infect.func);
 },
 platearmor:function(c,t){
 	var buff = c.card.upped?6:4;
@@ -1332,7 +1332,7 @@ predator:function(c,t){
 	if (fhand.length > 4 && !c.hasactive("turnstart", "predatoroff")){
 		c.addactive("turnstart", Skills.predatoroff);
 		c.attack(false, 0);
-		if (fhand.length) Skills.destroycard(c, fhand[fhand.length-1]);
+		if (fhand.length) Skills.destroycard.func(c, fhand[fhand.length-1]);
 	}
 },
 predatoroff:passive(function(c,t){
@@ -1376,7 +1376,7 @@ quinttog:function(c,t){
 	if (t.status.immaterial){
 		Effect.mkText("Materialize", t);
 		t.status.set("immaterial", 0);
-	}else Skills.quint(c,t);
+	}else Skills.quint.func(c,t);
 },
 randomdr:function(c, t){
 	if (c==t)
@@ -1461,7 +1461,7 @@ rewind:function(c,t){
 },
 ricochet:function(c,t, data){
 	if (t.type != etg.Spell) return;
-	var tgting = Cards.Targeting[data.active.activename[0]];
+	var tgting = Cards.Targeting[data.active.name[0]];
 	function tgttest(x){
 		if (x) {
 			if (tgting(t.owner, x)) tgts.push([x, t.owner]);
@@ -1488,7 +1488,7 @@ sadism:function(c, t, dmg){
 	}
 },
 salvage:passive(function(c, t, data){
-	Skills["growth 1"](c);
+	Skills["growth 1"].func(c);
 	if (!data.salvaged && !c.hasactive("turnstart", "salvageoff") && c.owner.game.turn != c.owner){
 		Effect.mkText("Salvage", c);
 		data.salvaged = true;
@@ -1546,7 +1546,7 @@ silence:function(c,t){
 },
 singularity:function(c,t){
 	if (c.trueatk() > 0){
-		Skills.antimatter(c, c);
+		Skills.antimatter.func(c, c);
 		return;
 	}
 	var r = c.rng();
@@ -1555,20 +1555,20 @@ singularity:function(c,t){
 	}else if (r > .8){
 		c.active.hit = Skills.vampire;
 	}else if (r > .7){
-		Skills.quint(c, c);
+		Skills.quint.func(c, c);
 	}else if (r > .6){
-		Skills.scramble(c, c.owner);
+		Skills.scramble.func(c, c.owner);
 	}else if (r > .5){
-		Skills.blackhole(c.owner.foe, c.owner);
+		Skills.blackhole.func(c.owner.foe, c.owner);
 	}else if (r > .4){
 		var buff = c.owner.upto(25);
 		c.buffhp(Math.floor(buff/5)+1);
 		c.atk -= buff%5+1;
 	}else if (r > .3){
-		Skills.nova(c.owner.foe);
+		Skills.nova.func(c.owner.foe);
 		c.owner.foe.nova = 0;
 	}else if (r > .2){
-		Skills.parallel(c, c);
+		Skills.parallel.func(c, c);
 	}else if (r > .1){
 		c.owner.setWeapon(new Thing(Cards.Dagger.asShiny(c.card.shiny)));
 	}
@@ -1611,7 +1611,7 @@ siphonstrength:function(c,t){
 },
 skeleton:passive(function(c,t,data){
 	if (data.tgt == c && data.active == Skills.rewind){
-		Skills.hatch(c);
+		Skills.hatch.func(c);
 		data.evade = true;
 	}
 }),
@@ -1658,7 +1658,7 @@ static:function(c){
 },
 steal:function(c,t){
 	if (t.status.get("stackable")){
-		Skills.destroy(c, t, true);
+		Skills.destroy.func(c, t, true);
 		if (t.type == etg.Shield){
 			if (c.owner.shield && c.owner.shield.card == t.card){
 				c.owner.shield.status.incr("charges", 1);
@@ -1718,7 +1718,7 @@ swave:function(c,t){
 		t.die();
 	}else{
 		if (t.type == etg.Player && t.weapon && t.weapon.status.get("frozen")){
-			Skills.destroy(c, t.weapon);
+			Skills.destroy.func(c, t.weapon);
 		}
 		Effect.mkText("-4", t);
 		t.spelldmg(4);
@@ -1779,7 +1779,7 @@ tornado:function(c,t){
 			var newpl = pl.upto(2) ? pl : pl.foe;
 			newpl.deck.splice(newpl.upto(newpl.deck.length), 0, pr.card);
 			Effect.mkText("Shuffled", pr);
-			Skills.destroy(c, pr, true, true);
+			Skills.destroy.func(c, pr, true, true);
 		}
 	}
 },
@@ -1819,7 +1819,7 @@ unsummon:function(c,t){
 		t.remove();
 		t.owner.addCard(t.card);
 	}else{
-		Skills.rewind(c, t);
+		Skills.rewind.func(c, t);
 	}
 },
 upkeep:function(c,t){
@@ -1861,11 +1861,11 @@ virtue:passive(function(c,t,blocked){
 }),
 virusinfect:function(c,t){
 	c.die();
-	Skills.infect(c, t);
+	Skills.infect.func(c, t);
 },
 virusplague:function(c,t){
 	c.die();
-	Skills.plague(c, t);
+	Skills.plague.func(c, t);
 },
 void:function(c,t){
 	c.owner.foe.maxhp = Math.max(c.owner.foe.maxhp-3, 1);
@@ -1907,7 +1907,7 @@ wisdom:function(c,t){
 },
 yoink:function(c,t){
 	if (t.type == etg.Player){
-		Skills.foedraw(c);
+		Skills.foedraw.func(c);
 	}else if (!t.owner.sanctuary){
 		t.remove();
 		if (c.owner.hand.length < 8){
@@ -1947,7 +1947,7 @@ chaos:function(c,t){
 	var randomchance = c.rng();
 	if (randomchance < .3) {
 		if (t.type == etg.Creature && !t.status.get("ranged")){
-			Skills.cseed(c, t);
+			Skills.cseed.func(c, t);
 		}
 	}else return c.card.upped && randomchance < .5;
 },
@@ -2027,7 +2027,7 @@ wings:function(c,t){
 },
 };
 for(var key in Skills){
-	Skills[key].activename = [key];
+	Skills[key] = {name: [key], func:Skills[key]};
 }
 var etg = require("./etg");
 var util = require("./util");

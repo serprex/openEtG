@@ -5,9 +5,7 @@ module.exports = function(name){
 	}else{
 		var spidx = name.indexOf(" ");
 		if (~spidx){
-			Skills[name] = Skills[name.slice(0, spidx)](name.slice(spidx+1));
-			Skills[name].activename = [name];
-			return Skills[name];
+			return Skills[name] = { func: Skills[name.slice(0, spidx)].func(name.slice(spidx+1)), name: [name] };
 		}
 		console.log("Unknown active", name);
 	}

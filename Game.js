@@ -110,7 +110,7 @@ Game.prototype.bitsToTgt = function(x) {
 		console.log("Unknown tgtop: " + tgtop + ", " + x4);
 }
 Game.prototype.getTarget = function(src, active, cb) {
-	var targetingFilter = Cards.Targeting[active.activename[0]];
+	var targetingFilter = Cards.Targeting[active.name[0]];
 	if (targetingFilter) {
 		var game = this;
 		this.targeting = {
@@ -119,7 +119,7 @@ Game.prototype.getTarget = function(src, active, cb) {
 				cb.apply(null, arguments);
 				game.targeting = null;
 			},
-			text: active.activename[0],
+			text: active.name[0],
 			src: src,
 		}
 	} else cb();

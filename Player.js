@@ -161,7 +161,7 @@ Player.prototype.endturn = function(discard) {
 		var p;
 		if ((p=this.permanents[i])){
 			if (p.active.auto){
-				p.active.auto(p);
+				p.trigger("auto")
 			}
 			if (~p.getIndex()){
 				p.usedactive = false;
@@ -211,7 +211,7 @@ Player.prototype.endturn = function(discard) {
 	});
 	if (this.shield){
 		this.shield.usedactive = false;
-		if(this.shield.active.auto)this.shield.active.auto(this.shield);
+		if(this.shield.active.auto) this.shield.trigger("auto");
 	}
 	if (this.weapon)this.weapon.attack();
 	if (this.foe.sosa > 0){
