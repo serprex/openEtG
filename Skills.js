@@ -1,8 +1,8 @@
 "use strict";
 function adrenathrottle(f){
-	return function(c){
+	return function(c, t, data){
 		if (c.status.get("adrenaline")<3 || (c.type == etg.Creature && c.owner.weapon && c.owner.weapon.status.get("nothrottle"))){
-			return f.apply(null, arguments);
+			return f(c, t, data);
 		}
 	}
 }

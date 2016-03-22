@@ -120,7 +120,7 @@ Thing.prototype.hash = function(){
 	return hash & 0x7ffffff;
 }
 Thing.prototype.trigger = function(name, t, param) {
-	return this.active[name] ? this.active[name].func.call(null, this, t, param) : 0;
+	return this.active[name] ? this.active[name].func(this, t, param) : 0;
 }
 Thing.prototype.proc = function(name, param) {
 	function proc(c){
@@ -263,8 +263,8 @@ function combineactive(a1, a2){
 	if (!a1){
 		return a2;
 	}
-	return { func: function(){
-		var v1 = a1.apply(null, arguments), v2 = a2.apply(null, arguments);
+	return { func: function(c, t, data){
+		var v1 = a1.func(c, t, data), v2 = a2.func(c, t, data);
 		return v1 === undefined ? v2 : v2 === undefined ? v1 : v1 === true || v2 === true ? true : v1+v2;
 	}, name: a1.name.concat(a2.name) };
 }
