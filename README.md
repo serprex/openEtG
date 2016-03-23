@@ -16,6 +16,11 @@ Open Terminal. All `commands` will be done in Terminal. You must have [XCode](ht
 1. Install [pixi.js](https://github.com/serprex/pixi.js): `curl -O --compressed 'http://etg.dek.im/pixi.min.js'`
 1. Install atlas files: `curl --compressed 'http://etg.dek.im/assets/{atlas.js,atlas.png,atlas.css}' -o 'assets/#1'`
 1. Install npm modules and build project: `npm install && npm run build`
+1. Install [ninja](https://github.com/ninja-build/ninja/releases)
+1. Install [mkcjs](https://www.npmjs.com/package/mkcjs) `npm install -g mkcjs`
+1. Install [spritesheet-js](https://www.npmjs.com/package/spritesheet-js) `npm install -g spritesheet-js`
+1. Install [optipng](https://www.npmjs.com/package/optipng) `npm install optipng`
+1. Build the project with ninja `ninja`
 
 #### Mac Start/Stop OpenEtG
 
