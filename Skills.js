@@ -1228,10 +1228,10 @@ paleomagnetism:function(c,t){
 	c.owner.addPerm(new Thing(c.card.as(Cards.Codes[e >= 29 ? etg.PillarList[c.owner.mark] : e >= 26 ? 5012+e : e >= 13 ? etg.PendList[e-13] : etg.PillarList[e]])));
 },
 pandemonium:function(c,t){
-	c.owner.foe.masscc(c, Skills.cseed, true);
+	c.owner.foe.masscc(c, Skills.cseed.func, true);
 },
 pandemonium2:function(c,t){
-	t.masscc(c, Skills.cseed);
+	t.masscc(c, Skills.cseed.func);
 },
 pandemonium3:function(c,t){
 	function cs2(x){
