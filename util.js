@@ -31,13 +31,8 @@ exports.isEmpty = function(obj){
 	return true;
 }
 exports.hashString = function(str){
-	var hash = 0;
-	for (var i=0; i<str.length; i++) hash = hash*31 + str.charCodeAt(i) & 0x7FFFFFFF;
-	return hash;
-}
-exports.hashObj = function(obj){
-	var hash = 0;
-	for (var key in obj) hash ^= exports.hashString(key) ^ obj[key];
+	var hash = 5381;
+	for (var i=0; i<str.length; i++) hash = hash*33 + str.charCodeAt(i) & 0x7FFFFFFF;
 	return hash;
 }
 exports.randint = function(){
