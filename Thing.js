@@ -378,7 +378,7 @@ Thing.prototype.attack = function(stasis, freedomChance, target){
 			if (!target.shield || !target.shield.trigger("shield", this, tryDmg, blocked)){
 				if (truedr > 0) this.trigger("blocked", target.shield, blocked);
 				if (tryDmg > 0) this.trigger("hit", target, target.dmg(tryDmg));
-			}else if (this.active.blocked) this.active.blocked(this, target.shield, trueatk);
+			}else this.trigger("blocked", target.shield, trueatk);
 		}
 	}
 	var frozen = this.status.maybeDecr("frozen");
