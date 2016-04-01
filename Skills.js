@@ -1924,8 +1924,8 @@ pend:function(c,t){
 pillmat:quadpillarFactory(18041), //4,6,7,9
 pillspi:quadpillarFactory(9611), //2,5,8,11
 pillcar:quadpillarFactory(5036), //1,3,10,12
-absorbdmg:function(c,t, dmg, blocked){
-	c.status.incr("storedpower", blocked);
+absorbdmg:function(c,t, data){
+	c.status.incr("storedpower", data.blocked);
 },
 absorber:function(c,t){
 	c.owner.spend(etg.Fire, -3);

@@ -340,7 +340,7 @@ Thing.prototype.attackCreature = function(target, trueatk){
 	if (trueatk){
 		var dmg = target.dmg(trueatk);
 		if (dmg) this.trigger("hit", target, dmg);
-		target.trigger("shield", this, dmg);
+		target.trigger("shield", this, {dmg: dmg, blocked: 0});
 	}
 }
 Thing.prototype.attack = function(stasis, freedomChance, target){
@@ -374,10 +374,10 @@ Thing.prototype.attack = function(stasis, freedomChance, target){
 			this.attackCreature(target.gpull, trueatk);
 		}else{
 			var truedr = target.shield ? target.shield.truedr() : 0;
-			var tryDmg = Math.max(trueatk - truedr, 0), blocked = Math.max(Math.min(truedr, trueatk), 0);
-			if (!target.shield || !target.shield.trigger("shield", this, tryDmg, blocked)){
-				if (truedr > 0) this.trigger("blocked", target.shield, blocked);
-				if (tryDmg > 0) this.trigger("hit", target, target.dmg(tryDmg));
+			var data = {dmg: Math.max(trueatk - truedr, 0), blocked: Math.max(Math.min(truedr, trueatk), 0)};
+			if (!target.shield || !target.shield.trigger("shield", this, data)){
+				if (truedr > 0) this.trigger("blocked", target.shield, data.blocked);
+				if (data.dmg > 0) this.trigger("hit", target, target.dmg(data.dmg));
 			}else this.trigger("blocked", target.shield, trueatk);
 		}
 	}
