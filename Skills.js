@@ -271,8 +271,8 @@ corpseexplosion:function(c,t){
 	var poison = t.status.get("poison") + t.status.get("poisonous");
 	if (poison) c.owner.foe.addpoison(poison);
 },
-counter:function(c,t, dmg){
-	if (!c.status.get("frozen") && !c.status.get("delayed") && dmg>0 && ~c.getIndex()){
+counter:function(c,t, data){
+	if (!c.status.get("frozen") && !c.status.get("delayed") && data.dmg>0 && ~c.getIndex()){
 		c.attackCreature(t);
 	}
 },
@@ -419,21 +419,21 @@ discping:function(c,t){
 	c.remove();
 	c.owner.addCard(c.card);
 },
-disfield:function(c,t, dmg){
-	if (!c.owner.spend(etg.Chroma, dmg)){
+disfield:function(c,t, data){
+	if (!c.owner.spend(etg.Chroma, data.dmg)){
 		for(var i=1; i<13; i++){
 			c.owner.quanta[i] = 0;
 		}
 		c.owner.shield = undefined;
 	}
-	return true;
+	data.dmg = 0;
 },
-disshield:function(c,t, dmg){
-	if (!c.owner.spend(etg.Entropy, Math.ceil(dmg/3))){
+disshield:function(c,t, data){
+	if (!c.owner.spend(etg.Entropy, Math.ceil(data.dmg/3))){
 		c.owner.quanta[etg.Entropy] = 0;
 		c.remove();
 	}
-	return true;
+	data.dmg = 0;
 },
 dive:function(c,t){
 	Effect.mkText("Dive", c);
@@ -1866,8 +1866,8 @@ void:function(c,t){
 		c.owner.foe.hp = c.owner.foe.maxhp;
 	}
 },
-voidshell:function(c,t, dmg){
-	c.owner.maxhp -= dmg;
+voidshell:function(c,t, data){
+	c.owner.maxhp -= data.dmg;
 	if (c.owner.maxhp < 1){
 		c.owner.maxhp = 1;
 		c.remove();
@@ -1875,7 +1875,7 @@ voidshell:function(c,t, dmg){
 	if (c.owner.hp > c.owner.maxhp){
 		c.owner.hp = c.owner.maxhp;
 	}
-	return true;
+	data.dmg = 0;
 },
 quantagift:function(c,t){
 	if (c.owner.mark != etg.Water){
@@ -1934,7 +1934,7 @@ blockwithcharge:function(c,t){
 	if (c.status.maybeDecr("charges") < 2){
 		c.die();
 	}
-	return true;
+	data.dmg = 0;
 },
 chaos:function(c,t){
 	var randomchance = c.rng();
@@ -1962,12 +1962,12 @@ despair:function(c,t){
 	}
 },
 evade100:function(c,t){
-	return true;
+	data.dmg = 0;
 },
 evade:function(x){
 	var n = parseInt(x)/100;
-	return function(c){
-		return c.rng() < n;
+	return function(c,t, data){
+		if (c.rng() < n) data.dmg = 0;
 	};
 },
 evadespell:function(c,t, data){
@@ -2012,11 +2012,11 @@ thornweak:function(c,t){
 		t.addpoison(1);
 	}
 },
-weight:function(c,t){
-	return t.type == etg.Creature && t.truehp()>5;
+weight:function(c,t, dmg){
+	if (t.type == etg.Creature && t.truehp()>5) data.dmg = 0;
 },
 wings:function(c,t){
-	return !t.status.get("airborne") && !t.status.get("ranged");
+	if (!t.status.get("airborne") && !t.status.get("ranged")) data.dmg = 0;
 },
 };
 for(var key in Skills){

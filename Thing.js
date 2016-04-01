@@ -373,12 +373,12 @@ Thing.prototype.attack = function(stasis, freedomChance, target){
 		}else if (target.gpull){
 			this.attackCreature(target.gpull, trueatk);
 		}else{
-			var truedr = target.shield ? target.shield.truedr() : 0;
-			var data = {dmg: Math.max(trueatk - truedr, 0), blocked: Math.max(Math.min(truedr, trueatk), 0)};
-			if (!target.shield || !target.shield.trigger("shield", this, data)){
-				if (truedr > 0) this.trigger("blocked", target.shield, data.blocked);
-				if (data.dmg > 0) this.trigger("hit", target, target.dmg(data.dmg));
-			}else this.trigger("blocked", target.shield, trueatk);
+			var truedr = target.shield ? Math.min(target.shield.truedr(), trueatk) : 0;
+			var data = {dmg: trueatk - truedr, blocked: truedr};
+			if (target.shield) target.shield.trigger("shield", this, data);
+			var dmg = target.dmg(data.dmg);
+			if (dmg > 0) this.trigger("hit", target, dmg);
+			if (dmg != trueatk) this.trigger("blocked", target.shield, trueatk - dmg);
 		}
 	}
 	var frozen = this.status.maybeDecr("frozen");
