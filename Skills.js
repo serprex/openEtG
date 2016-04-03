@@ -1930,7 +1930,7 @@ absorbdmg:function(c,t, data){
 absorber:function(c,t){
 	c.owner.spend(etg.Fire, -3);
 },
-blockwithcharge:function(c,t){
+blockwithcharge:function(c,t, data){
 	if (c.status.maybeDecr("charges") < 2){
 		c.die();
 	}
@@ -1961,7 +1961,7 @@ despair:function(c,t){
 		}
 	}
 },
-evade100:function(c,t){
+evade100:function(c,t, data){
 	data.dmg = 0;
 },
 evade:function(x){
@@ -2012,10 +2012,10 @@ thornweak:function(c,t){
 		t.addpoison(1);
 	}
 },
-weight:function(c,t, dmg){
+weight:function(c,t, data){
 	if (t.type == etg.Creature && t.truehp()>5) data.dmg = 0;
 },
-wings:function(c,t){
+wings:function(c,t, data){
 	if (!t.status.get("airborne") && !t.status.get("ranged")) data.dmg = 0;
 },
 };
