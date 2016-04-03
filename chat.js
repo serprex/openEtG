@@ -2,13 +2,16 @@
 var chatBox = document.getElementById("chatBox");
 var tabs = document.getElementById("tabs");
 function addSpan(span, name) {
-	span.appendChild(document.createElement("br"));
 	if (name){
 		var tab = tabMap[name];
 		var tabBox = tab[0];
 	}else{
 		var tabBox = chatBox;
 	}
+	if (tabBox != tabMap.Main[0]){
+		addSpan(span.cloneNode(true), "Main")
+	}
+	span.appendChild(document.createElement("br"));
 	if (tabBox == chatBox){
 		var scroll = Math.abs(chatBox.scrollTop - chatBox.scrollHeight + chatBox.offsetHeight) < 2;
 		chatBox.appendChild(span);
