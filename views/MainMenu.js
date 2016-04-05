@@ -10,6 +10,8 @@ var util = require("../util");
 var mkAi = require("../mkAi");
 var audio = require("../audio");
 var Cards = require("../Cards");
+var Thing = require("../Thing");
+var Status = require("../Status");
 var etgutil = require("../etgutil");
 var options = require("../options");
 var RngMock = require("../RngMock");
@@ -63,10 +65,10 @@ function addCostRewardHeaders(div){
 function initEndless(){
 	var gameData = { deck: require("../ai/deck")(.5, 2, 5), urdeck: sock.getDeck(), seed: util.randint(), p2hp: 0x100000000, p2markpower: 2, foename: "The Invincible", p2drawpower: 2, level: 7, goldreward: 0, cardreward: "" };
 	var game = require("./Match")(gameData, true);
-	var endlessRelic = Object.create(etg.Thing.prototype);
-	endlessRelic.owner = game.player2;
-	endlessRelic.card = Cards.Dagger;
-	endlessRelic.status = {immaterial: true};
+	var endlessRelic = Object.create(Thing.prototype);
+	endlessRelic.card = Cards.Despair;
+	endlessRelic.status = new Status();
+	endlessRelic.status.set("immaterial", 1);
 	function endlessAuto(c, t){
 		var plies = c.owner.game.ply;
 		if (c.rng() < .1){
@@ -82,8 +84,8 @@ function initEndless(){
 		if (t == c.owner.game.player1 && c.rng() < .3) card = card.asUpped(false);
 		t.deck.splice(t.upto(t.deck.length), 0, card);
 	}
-	endlessRelic.active = {auto:{name: ["endlessAuto"], func: endlessAuto}, draw:{name: ["endlessdraw"], func: endlessDraw}};
-	game.player2.permanents[0] = endlessRelic;
+	endlessRelic.active = {auto:{name: ["@&%"], func: endlessAuto}, draw:{name: ["~~!"], func: endlessDraw}};
+	game.player2.addPerm(endlessRelic);
 }
 module.exports = function(nymph) {
 	var popdom, stage = {endnext: function(){

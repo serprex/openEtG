@@ -519,7 +519,7 @@ var throttled = Object.freeze({"poison 1":true, "poison 2":true, "poison 3":true
 function evalthing(c) {
 	if (!c) return 0;
 	var ttatk, hp, poison, score = 0;
-	var isCreature = c.card.type == etg.Creature, isAttacker = isCreature || c.card.type == etg.Weapon;
+	var isCreature = (c.type == etg.Spell ? c.card.type : c.type) == etg.Creature, isAttacker = isCreature || (c.type == etg.Spell ? c.card.type : c.type) == etg.Weapon;
 	if (isAttacker){
 		var ctrueatk = c.trueatk();
 		var adrenalinefactor = c.status.get("adrenaline") ? etg.countAdrenaline(ctrueatk) : 1;
