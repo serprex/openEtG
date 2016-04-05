@@ -8,7 +8,7 @@ function addSpan(span, name) {
 	}else{
 		var tabBox = chatBox;
 	}
-	if (tabBox != tabMap.Main[0]){
+	if (tabBox != tabMap.Main[0] && tabBox != tabMap.Stats[0]){
 		addSpan(span.cloneNode(true), "Main")
 	}
 	span.appendChild(document.createElement("br"));
