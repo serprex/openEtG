@@ -38,7 +38,6 @@ var Thing = require("./Thing");
 var data = {
 	ablaze:"Gain 2|0",
 	abomination:"Amiable to mutation",
-	absorbdmg:"Collect power per reduced damage",
 	absorber:"Produce 3:6 per attacker",
 	accelerationspell:"Replaces target creature's skills with \"Gain +2|-1 per turn\"",
 	accretion:"Destroy target permanent & gain 0|10. Return to owner's hand as a Blackhole if larger than 30",
@@ -351,7 +350,7 @@ var data = {
 	tornado:["Randomly reshuffle 2 of foe's permanents & one of own into either deck",
 		"Randomly reshuffle 2 of foe's permanents into either deck"],
 	trick:"Swap target creature with a different creature from deck",
-	turngolem:"Become a creature with health per collected power & a third the strength",
+	turngolem:"Become a creature with health per damage blocked & a third as much strength",
 	unburrow:"Unburrow",
 	unsummon:"Return target creature to owner's hand. If hand full, return to top of deck",
 	unvindicate:"Become ready to vindicate again at start of next turn",

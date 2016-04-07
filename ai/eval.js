@@ -424,14 +424,18 @@ function estimateDamage(c, freedomChance, wallCharges, wallIndex) {
 		return 0;
 	}
 	function estimateAttack(tatk){
+		var data = {dmg: tatk, blocked: 0};
 		if (momentum) {
 			return tatk;
-		} else if (fshactive && (~fshactive.name.indexOf("weight") || ~fshactive.name.indexOf("wings")) && fshactive.func(c.owner.foe.shield, c, {dmg: tatk, blocked: 0})) {
-			return 0;
-		}else if (wallCharges[wallIndex]){
+		}
+		if (fshactive && (~fshactive.name.indexOf("weight") || ~fshactive.name.indexOf("wings"))) {
+			fshactive.func(c.owner.foe.shield, c, data);
+			if (!data.dmg) return 0;
+		} else if (wallCharges[wallIndex]){
 			wallCharges[wallIndex]--;
 			return 0;
-		}else return Math.max(tatk - dr, 0);
+		}
+		return Math.max(tatk - dr, 0);
 	}
 	var tatk = c.trueatk(), fsh = c.owner.foe.shield, fshactive = fsh && fsh.active.shield;
 	var momentum = !fsh || tatk <= 0 || c.status.get("momentum") || c.status.get("psionic") ||
