@@ -53,7 +53,7 @@ function load(progress, postload){
 var btximgcache = {};
 function Text(text, fontsize, color, bgcolor){
 	if (!text) return exports.nopic;
-	var key = JSON.stringify(arguments);
+	var key = text + "#" + fontsize + "#" + color + "#" + bgcolor;
 	if (key in btximgcache) return btximgcache[key];
 	var canvas = document.createElement("canvas"), ctx = canvas.getContext("2d");
 	var font = ctx.font = fontsize + "px Dosis";
@@ -239,10 +239,8 @@ function getInstImage(scale){
 var tximgcache = {};
 exports.getTextImage = function(text, size, color, bgcolor, width) {
 	if (!text) return exports.nopic;
-	var key = JSON.stringify(arguments);
-	if (key in tximgcache) {
-		return tximgcache[key];
-	}
+	var key = text + "#" + size + "#" + color + "#" + bgcolor + "#" + width;
+	if (key in tximgcache) return tximgcache[key];
 	var x = 0, y = 0, h = Math.floor(size*1.4), w = 0;
 	function pushIcon(texture, num){
 		if (num === undefined) num = 1;
