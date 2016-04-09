@@ -483,11 +483,11 @@ var sockEvents = {
 			if (!key) return; // TODO error
 			const https = require("https");
 			https.get("https://api.kongregate.com/api/authenticate.json?user_id="+data.u+"&game_auth_token="+data.g+"&api_key="+key, res => {
-				var data = "";
+				var jtext = "";
 				res.setEncoding("utf8");
-				res.on("data", chunk => data += chunk);
+				res.on("data", chunk => jtext += chunk);
 				res.on("end", () => {
-					var json = sutil.parseJSON(data);
+					var json = sutil.parseJSON(jtext);
 					if (!json) return; // TODO error
 					if (json.success){
 						var name = "Kong:" + json.username;
