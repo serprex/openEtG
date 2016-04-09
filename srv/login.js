@@ -16,15 +16,12 @@ module.exports = function(sockEmit){
 				return;
 			}
 			key = key.toString("base64");
-			if (!user.auth){
-				user.auth = key;
-			}else if (user.auth != key){
+			if (user.auth && user.auth != key){
 				sockEmit(socket, "login", {err:"Incorrect password"});
 				return;
 			}else if (!authkey && user.salt.length == 24){
 				user.auth = user.salt = "";
-				loginRespond(socket, user, pass);
-				return;
+				return loginRespond(socket, user, pass);
 			}else{
 				var day = sutil.getDay();
 				if (user.oracle < day){
@@ -57,7 +54,7 @@ module.exports = function(sockEmit){
 			postHash(null, authkey);
 		}else if (pass){
 			crypto.pbkdf2(pass, user.salt, user.iter, 64, postHash);
-		}else postHash(null, user.name);
+		}else postHash(null, "");
 	}
 	function loginAuth(data){
 		var name = (data.u || "").trim();

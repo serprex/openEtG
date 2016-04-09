@@ -481,8 +481,7 @@ var sockEvents = {
 	konglogin:function(data){
 		db.get("kongapi", (err, key) => {
 			if (!key) return; // TODO error
-			var https = require("https");
-			var login = sockEvents.login;
+			const https = require("https");
 			https.get("https://api.kongregate.com/api/authenticate.json?user_id="+data.u+"&game_auth_token="+data.g+"&api_key="+key, res => {
 				var data = "";
 				res.setEncoding("utf8");
@@ -494,7 +493,7 @@ var sockEvents = {
 						var name = "Kong:" + json.username;
 						Us.load(name, user => {
 							user.auth = data.g;
-							login.call(this, {u: name, a: data.g});
+							sockEvents.login.call(this, {u: name, a: data.g});
 							var req = https.request({
 								hostname: "www.kongregate.com",
 								path: "/api/submit_statistics.json",
@@ -504,7 +503,7 @@ var sockEvents = {
 							req.end();
 						}, () => {
 							var user = Us.users[name] = {name: name, gold: 0, auth: data.g};
-							login.call(this, {u: name, a: data.g});
+							sockEvents.login.call(this, {u: name, a: data.g});
 						});
 					}
 				});
