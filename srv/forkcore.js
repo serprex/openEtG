@@ -14,7 +14,7 @@ process.on("message", function(msg, res){
 	if(!res)return;
 	try{
 		res.on("error",()=>{});
-		var d = "cache-control:no-cache\r\nDate:"+new Date().toUTCString()+"\r\n";
+		var d = "Cache-Control:no-cache\r\nDate:"+new Date().toUTCString()+"\r\n";
 		var lines = msg.split("\n"), url = lines[0].replace(/\?.*$/,''), ifmod = new Date(lines[1]).getTime();
 		var idx = url.indexOf("/"), func = ~idx && lut[url.slice(0,idx)];
 		if (func){
