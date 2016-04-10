@@ -1974,7 +1974,7 @@ evadespell:function(c,t, data){
 	if (data.tgt == c && c.owner != t.owner && t.type == etg.Spell) data.evade = true;
 },
 evadecrea:function(c,t, data){
-	if (data.tgt == c && c.owner != t.owner && t.type == etg.Spell) data.evade = true;
+	if (data.tgt == c && c.owner != t.owner && t.type == etg.Creature) data.evade = true;
 },
 firewall:function(c,t){
 	if (!t.status.get("ranged")){
