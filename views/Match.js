@@ -412,7 +412,7 @@ function startMatch(game, foeDeck, spectate) {
 		var ch = String.fromCharCode(e.keyCode), chi;
 		if (e.keyCode == 27) {
 			resign.click();
-		} else if (ch == " ") {
+		} else if (ch == " " || e.keyCode == 13) {
 			endClick();
 		} else if (ch == "\b" || ch == "0") {
 			cancelClick();
