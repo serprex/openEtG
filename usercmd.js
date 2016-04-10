@@ -142,6 +142,8 @@ exports.addgold = function(data, user){
 }
 exports.addloss = function (data, user){
 	user[data.pvp?"pvplosses":"ailosses"]++;
+	if (data.l !== undefined) user.streak[data.l] = 0;
+	if (data.g) user.gold += data.g;
 }
 exports.addwin = function(data, user){
 	var prefix = data.pvp?"pvp":"ai";

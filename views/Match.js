@@ -134,10 +134,7 @@ function startMatch(game, foeDeck, spectate) {
 	}
 	var resigning, discarding, aiDelay = 0, aiState, aiCommand;
 	if (sock.user && !game.endurance && (game.level !== undefined || !game.ai)) {
-		sock.userExec("addloss", { pvp: !game.ai });
-		if (game.cost){
-			sock.userExec("addgold", { g: -game.cost });
-		}
+		sock.userExec("addloss", { pvp: !game.ai, l: game.level, g: -game.cost });
 	}
 	var gameui = new PIXI.Graphics();
 	if (!spectate) {
