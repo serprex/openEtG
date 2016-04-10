@@ -53,7 +53,7 @@ module.exports = function(){
 	username.tabIndex = "1";
 	password.tabIndex = "2";
 	[username, password].forEach(function(ele){
-		ele.addEventListener("keydown", maybeLogin);
+		ele.addEventListener("keypress", maybeLogin);
 	});
 	options.register("username", username);
 	options.register("remember", rememberCheck);

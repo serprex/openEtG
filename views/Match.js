@@ -469,7 +469,8 @@ function startMatch(game, foeDeck, spectate) {
 			currow = jkmap[i];
 			currowi = jkmap[i+1];
 			cursor = currow[currowi+currowo];
-		}
+		} else return;
+		e.preventDefault();
 	}
 	function onmousemove(e) {
 		dom.style(infobox, {
@@ -517,7 +518,7 @@ function startMatch(game, foeDeck, spectate) {
 	};
 	if (!spectate){
 		document.addEventListener("mousemove", onmousemove);
-		document.addEventListener("keydown", onkeydown);
+		document.addEventListener("keypress", onkeydown);
 	}
 	function gameStep(){
 		if (game.turn == game.player2 && game.ai) {
@@ -770,7 +771,7 @@ function startMatch(game, foeDeck, spectate) {
 	gameStep();
 	var gameInterval = setInterval(gameStep, 30);
 	px.view({view:gameui, dom:div, endnext:function() {
-		document.removeEventListener("keydown", onkeydown);
+		document.removeEventListener("keypress", onkeydown);
 		document.removeEventListener("mousemove", onmousemove);
 		clearInterval(gameInterval);
 	}, cmds:cmds});

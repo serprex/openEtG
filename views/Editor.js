@@ -295,7 +295,7 @@ module.exports = function(arena, ainfo, acard, startempty) {
 			deckname.style.width = "80px";
 			deckname.placeholder = "Name";
 			deckname.value = sock.user.selectedDeck;
-			deckname.addEventListener("keydown", function(e){
+			deckname.addEventListener("keypress", function(e){
 				if (e.keyCode == 13) {
 					loadDeck(this.value);
 				}
@@ -310,7 +310,7 @@ module.exports = function(arena, ainfo, acard, startempty) {
 		deckimport.style.width = "190px";
 		deckimport.placeholder = "Deck";
 		deckimport.addEventListener("click", function(){this.setSelectionRange(0, 333)});
-		deckimport.addEventListener("keydown", function(e){
+		deckimport.addEventListener("keypress", function(e){
 			if (e.keyCode == 13){
 				this.blur();
 				importDeck();

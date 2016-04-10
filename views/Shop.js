@@ -154,7 +154,7 @@ module.exports = function() {
 	var packmulti = document.createElement("input");
 	packmulti.style.width = "64px";
 	packmulti.placeholder = "Bulk";
-	packmulti.addEventListener("keydown", function(e){
+	packmulti.addEventListener("keypress", function(e){
 		if (e.keyCode == 13){
 			buyPack();
 		}

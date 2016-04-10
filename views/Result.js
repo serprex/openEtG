@@ -175,8 +175,8 @@ module.exports = function(game, foeDeck) {
 			rematch();
 		}
 	}
-	document.addEventListener("keydown", onkeydown);
+	document.addEventListener("keypress", onkeydown);
 	px.view({view:stage, dom:div, endnext:function() {
-		document.removeEventListener("keydown", onkeydown);
+		document.removeEventListener("keypress", onkeydown);
 	}});
 }

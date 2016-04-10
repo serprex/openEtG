@@ -87,7 +87,7 @@ exports.input = function(placeholder, opt, nopersist, keydown){
 	ele.placeholder = placeholder;
 	if (opt) options.register(opt, ele, nopersist);
 	if (keydown){
-		if (keydown !== true) ele.addEventListener("keydown", keydown);
+		if (keydown !== true) ele.addEventListener("keypress", keydown);
 	}else ele.className = "numput";
 	return ele;
 }

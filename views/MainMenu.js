@@ -345,7 +345,7 @@ module.exports = function(nymph) {
 				showCostIcon = dom.check("Show cost icon", gfx.refreshCaches, "showCostIcon"),
 				disableTut = dom.check("Disable tutorial", null, "disableTut");
 			changePass.type = "password";
-			changePass.addEventListener("keydown", function(e){
+			changePass.addEventListener("keypress", function(e){
 				if (e.keyCode == 13) changeFunc();
 			});
 			dom.add(div, [8, 8, changePass], [184, 8, changeBtn],
