@@ -49,6 +49,7 @@ var tipjar = [
 	"At Wealth T50 you can see which players have the highest wealth. Wealth is a combination of current gold & one's cardpool",
 	"Throttling means that the effect is limited to 2 procs when attacking multiple times with adrenaline",
 ];
+var menuChat = chat.MainMenuChat;
 var bg_main = new Image();
 bg_main.src = "assets/bg_main.png";
 bg_main.className = "bgimg";
@@ -89,8 +90,9 @@ function initEndless(){
 }
 module.exports = function(nymph) {
 	var popdom, stage = {endnext: function(){
-		setPopup(null);
 		document.removeEventListener("mousemove", resetTip);
+		menuChat.style.display = "none";
+		return setPopup(null);
 	}};
 	function setPopup(ele){
 		if (popdom) document.body.removeChild(popdom);
@@ -149,12 +151,12 @@ module.exports = function(nymph) {
 	});
 	var div = stage.dom = dom.div(bg_main,
 		[196, 4, tipbox, tinfo, nextTip],
-		[86, 248, leadbox, titleText("Leaderboards"), bwealth, document.createElement("br")],
+		[626, 436, leadbox, titleText("Leaderboards"), bwealth, document.createElement("br")],
 		[304, 120, aibox, titleText("AI Battle")],
 		[620, 92, deckbox,
 			[14, 108, ["Editor", require("./Editor"), mkSetTip("Edit & manage your decks")]],
 		],
-		[620, 300, playbox]);
+		[616, 300, playbox]);
 	addCostRewardHeaders(aibox);
 	addCostRewardHeaders(arenabox);
 	[dom.button("Commoner", mkAi.mkAi(0), mkSetTip("Commoners have no upgraded cards & mostly common cards")),
@@ -224,6 +226,15 @@ module.exports = function(nymph) {
 			dom.add(div, [92, 340, oracle]);
 			dom.svgToSvg(oracle, svg.card(showcard));
 			if (sock.user.daily == 0) sock.user.daily = 128;
+		} else {
+			menuChat.style.display = "";
+			menuChat.scrollTop = menuChat.scrollHeight;
+			dom.add(div, [99, 532, dom.input("Chat", null, null, function (e){
+				if (e.keyCode == 13){
+					if (!this.value.match(/^\s*$/)) sock.userEmit("chat", {msg:this.value});
+					this.value = "";
+				}
+			})]);
 		}
 	}
 	document.addEventListener("mousemove", resetTip);
@@ -233,7 +244,6 @@ module.exports = function(nymph) {
 			sock.userEmit(cmd);
 			sock.user = undefined;
 			options.remember = false;
- 			if (typeof localStorage !== "undefined") delete localStorage.remember;
 		}
 		require("./Login")();
 	}
@@ -312,8 +322,7 @@ module.exports = function(nymph) {
 		dom.add(deckbox, deckLabel, quickslotsdiv);
 		var bsettings = dom.button("Settings", function() {
 			if (popdom && popdom.id == "settingspane"){
-				setPopup(null);
-				return;
+				return setPopup(null);
 			}
 			var div = dom.box(267, 156);
 			dom.style(div, {

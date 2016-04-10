@@ -393,7 +393,7 @@ const userEvents = {
 			user.salt = "";
 			user.iter = 0;
 			user.auth = user.name;
-			sockEmit(this, "passchange", {auth: user.name});
+			sockEmit(this, "passchange", {auth: ""});
 		}else{
 			sutil.initsalt(user);
 			require("crypto").pbkdf2(data.p, user.salt, user.iter, 64, (err, key) => {
