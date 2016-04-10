@@ -133,7 +133,7 @@ module.exports = function(nymph) {
 		leadbox = dom.divwh(196, 120),
 		aibox = dom.divwh(292, 240),
 		arenabox = dom.divwh(292, 130),
-		playbox = dom.divwh(196, 200),
+		playbox = dom.divwh(196, 128),
 		tipbox = dom.divwh(504, 48);
 	deckbox.appendChild(titleText("Cards & Decks"));
 	var bwealth = dom.button("Wealth T50", wealthTop, mkSetTip("See who's collected the most wealth"));
