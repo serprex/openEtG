@@ -515,7 +515,7 @@ function startMatch(game, foeDeck, spectate) {
 	};
 	if (!spectate){
 		document.addEventListener("mousemove", onmousemove);
-		document.addEventListener("keypress", onkeydown);
+		document.addEventListener("keydown", onkeydown);
 	}
 	function gameStep(){
 		if (game.turn == game.player2 && game.ai) {
@@ -768,7 +768,7 @@ function startMatch(game, foeDeck, spectate) {
 	gameStep();
 	var gameInterval = setInterval(gameStep, 30);
 	px.view({view:gameui, dom:div, endnext:function() {
-		document.removeEventListener("keypress", onkeydown);
+		document.removeEventListener("keydown", onkeydown);
 		document.removeEventListener("mousemove", onmousemove);
 		clearInterval(gameInterval);
 	}, cmds:cmds});

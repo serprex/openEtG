@@ -202,7 +202,7 @@ function maybeSendChat(e) {
 						deckimport.value = deck;
 						deckname.dispatchEvent(new Event("change"));
 						deckimport.dispatchEvent(new Event("change"));
-						var e = new Event("keydown");
+						var e = new Event("keypress");
 						e.keyCode = 13;
 						deckname.dispatchEvent(e);
 						deckimport.dispatchEvent(e);
@@ -271,7 +271,7 @@ options.register("afk", document.getElementById("afk"), true);
 	}
 })({
 	leftpane: {click: function(){this.blur()}},
-	chatinput: {keydown: maybeSendChat},
+	chatinput: {keypress: maybeSendChat},
 	offline: {change: offlineChange},
 	afk: {change: afkChange},
 	wantpvp: {change: wantpvpChange},
