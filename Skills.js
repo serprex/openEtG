@@ -582,7 +582,7 @@ evolve:function(c,t){
 },
 feed:function(c,t){
 	t.addpoison(1);
-	parseSkill("growth 3")(c);
+	parseSkill("growth 3").func(c);
 	c.status.set("immaterial", 0);
 },
 fickle:function(c,t){
