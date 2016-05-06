@@ -142,7 +142,8 @@ function chatmute(){
 }
 function maybeSendChat(e) {
 	e.cancelBubble = true;
-	if (e.keyCode == 13) {
+	var kc = e.which || e.keyCode;
+	if (kc == 13) {
 		e.preventDefault();
 		var chatinput = document.getElementById("chatinput"), msg = chatinput.value.trim();
 		chatinput.value = "";

@@ -170,8 +170,9 @@ module.exports = function(game, foeDeck) {
 			streakrate.toFixed(3).replace(/\.?0+$/, "")].join(), null, "Stats");
 	}
 	function onkeydown(e){
-		if (e.keyCode == 32 || e.keyCode == 13) exitFunc();
-		else if (e.keyCode == 87 && !game.quest && game.daily === undefined){
+		var kc = e.which || e.keyCode;
+		if (kc == 32 || kc == 13) exitFunc();
+		else if (kc == 87 && !game.quest && game.daily === undefined){
 			rematch();
 		}
 	}

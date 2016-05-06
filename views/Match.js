@@ -406,21 +406,23 @@ function startMatch(game, foeDeck, spectate) {
 	div.appendChild(infobox);
 	var cursor = null, currow = handsprite[0], currowi = 0, currowo = 0;
 	function onkeydown(e) {
-		var ch = String.fromCharCode(e.keyCode), chi;
-		if (e.keyCode == 27) {
+		if (e.target.id == 'chatinput') return;
+		var kc = e.which || e.keyCode;
+		var ch = String.fromCharCode(kc), chi;
+		if (kc == 27) {
 			resign.click();
-		} else if (ch == " " || e.keyCode == 13) {
+		} else if (ch == " " || kc == 13) {
 			endClick();
 		} else if (ch == "\b" || ch == "0") {
 			cancelClick();
-		} else if (ch == "\n" || e.keyCode == 192 || e.key == "`") {
+		} else if (kc == 192 || e.key == "`") {
 			if (cursor) cursor.click();
 		} else if (ch == "N") {
 			cursor = null;
 			currow = handsprite[0];
 			currowo = currowi = 0;
 		} else if (ch >= "1" && ch <= "8") {
-			currowo = e.keyCode - 49;
+			currowo = kc - 49;
 			cursor = currow[currowi+currowo];
 		} else if (~(chi = "SW".indexOf(ch))) {
 			playerOverlay[chi].click();

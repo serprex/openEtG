@@ -15,7 +15,6 @@ var mime = {
 module.exports = function(url, resolve, reject){
 	var contentType = mime[url.slice(url.lastIndexOf(".")+1)];
 	if (!contentType) return reject("Unknown MIME");
-	console.log(url);
 	var task = sutil.mkTask((res) => {
 		if (res.err) reject("ENOENT");
 		else{
