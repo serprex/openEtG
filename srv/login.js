@@ -53,7 +53,7 @@ module.exports = function(sockEmit){
 		if (authkey){
 			postHash(null, authkey);
 		}else if (pass){
-			crypto.pbkdf2(pass, user.salt, user.iter, 64, postHash);
+			crypto.pbkdf2(pass, user.salt, user.iter, 64, "SHA1", postHash);
 		}else postHash(null, "");
 	}
 	function loginAuth(data){
