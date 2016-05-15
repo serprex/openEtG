@@ -1283,9 +1283,7 @@ phoenix:function(c,t, data){
 photosynthesis:function(c,t){
 	Effect.mkText("2:5", c);
 	c.owner.spend(etg.Life, -2);
-	if (c.cast > 0){
-		c.usedactive = false;
-	}
+	if (c.cast > 0) c.usedactive = false;
 },
 plague:function(c,t){
 	t.masscc(c, Skills.infect.func);
@@ -1594,6 +1592,7 @@ siphonactive:function(c,t){
 	}
 	c.cast = t.cast;
 	c.castele = t.castele;
+	c.usedactive = false;
 	t.lobo();
 },
 siphonstrength:function(c,t){

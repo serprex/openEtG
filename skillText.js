@@ -314,7 +314,7 @@ var data = {
 	sinkhole:["Target creature is burrowed. Replace creature's skills with 1:4: unburrow",
 		"Target creature is burrowed. Replace creature's skills with 2:4: unburrow"],
 	siphon:"Siphon 1:0 from foe as 1:11. Throttled",
-	siphonactive:"Steal target creature's skills",
+	siphonactive:"Steal target creature's skills. May activate again this turn",
 	siphonstrength:"Absorb 1|0 from target creature",
 	skeleton:"Become a random creature if target of Reverse Time",
 	skull:"Attacking creatures may die & become skeletons. Smaller creatures are more likely to die",
