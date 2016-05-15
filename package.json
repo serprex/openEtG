@@ -9,7 +9,6 @@
   "dependencies": {
     "bufferutil": "^1.2.1",
     "redis": "^2.6.0-2",
-    "utf-8-validate": "^1.2.1",
     "ws": "^1.1.0"
   },
   "devDependencies": {
