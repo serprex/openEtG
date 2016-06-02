@@ -163,7 +163,7 @@ function isEclipseCandidate(c){
 	return c.status.get("nocturnal") && c.type == etg.Creature;
 }
 function isWhetCandidate(c){
-	return c.status.get("golem") || c.type == etg.Weapon || c.card.type == etg.Weapon;
+	return c.status.get("golem") || c.type == etg.Weapon || (c.type != etg.Player && c.card.type == etg.Weapon);
 }
 Thing.prototype.calcBonusAtk = function(){
 	return this.calcCore2(isEclipseCandidate, "nightfall") + this.calcCore(isWhetCandidate, "whetstone");
