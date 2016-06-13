@@ -116,9 +116,10 @@ module.exports = function(game, foeDeck) {
 					var goldwon;
 					if (game.level !== undefined) {
 						if (game.daily == undefined){
-							var streak = sock.user.streak[game.level] || 0;
+							var streak = (sock.user.streakback || 0) + 1;
+							sock.user.streakback = 0;
 							streakrate = Math.min(streak200[game.level]*streak/200, 1);
-							sock.userExec("setstreak", {l:game.level, n:++streak});
+							sock.userExec("setstreak", {l:game.level, n:streak});
 							lefttext.push(streak + " win streak", (streakrate * 100).toFixed(1) + "% streak bonus");
 						}else var streak = 0;
 						goldwon = Math.floor(userutil.pveCostReward[game.level*2+1] * (1+streakrate) * computeBonuses());
