@@ -8,7 +8,7 @@
   },
   "dependencies": {
     "bufferutil": "^1.2.1",
-    "redis": "^2.6.0-2",
+    "redis": "^2.6.2",
     "ws": "^1.1.0"
   },
   "devDependencies": {
@@ -24,7 +24,7 @@
     "build": "npm run build-etgify && npm run build-tournify && npm run build-atlas-png && npm run build-atlas-css"
   },
   "optionalDependencies": {
-    "hiredis": "^0.4.1"
+    "hiredis": "^0.5.0"
   },
   "license": "MIT"
 }

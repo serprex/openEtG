@@ -72,27 +72,18 @@ exports.unpolish = function(data, user){
 	var use = ~card.rarity ? 6 : 2;
 	untransmute(user, card.code, etgutil.asShiny, use);
 }
-exports.uppillar = function(data, user){
-	var card = Cards.Codes[data.c];
-	if (card && user.gold >= 50 && card.isFree()){
-		user.gold -= 50;
-		user.pool = etgutil.addcard(user.pool, etgutil.asUpped(data.c, true));
+function upshpi(cost, func){
+	return function(data, user) {
+		var card = Cards.Codes[data.c];
+		if (card && user.gold >= cost && card.isFree()){
+			user.gold -= cost;
+			user.pool = etgutil.addcard(user.pool, func(data.c));
+		}
 	}
 }
-exports.shpillar = function(data, user){
-	var card = Cards.Codes[data.c];
-	if (card && user.gold >= 50 && card.isFree()){
-		user.gold -= 50;
-		user.pool = etgutil.addcard(user.pool, etgutil.asShiny(data.c, true));
-	}
-}
-exports.upshpillar = function(data, user){
-	var card = Cards.Codes[data.c];
-	if (card && user.gold >= 300 && card.isFree()){
-		user.gold -= 300;
-		user.pool = etgutil.addcard(user.pool, etgutil.asUpped(etgutil.asShiny(data.c, true), true));
-	}
-}
+exports.uppillar = upshpi(50, function(code){ return etgutil.asUpped(code, true); });
+exports.shpillar = upshpi(50, function(code){ return etgutil.asShiny(code, true); });
+exports.upshpillar = upshpi(300, function(code) { return etgutil.asUpped(etgutil.asShiny(code, true), true); });
 exports.upshall = function(data, user){
 	var pool = etgutil.deck2pool(user.pool);
 	var bound = etgutil.deck2pool(user.accountbound);
