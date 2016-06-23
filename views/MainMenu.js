@@ -216,7 +216,7 @@ module.exports = function(nymph) {
 		this.style.display = "none";
 	}
 	if (sock.user){
-		dom.add(arenabox, [20, 100, ["Arena Info", arenaInfo, mkSetTip("Check how your arena decks are doing")]]);
+		dom.add(arenabox, [20, 100, ["Arena Deck", arenaInfo, mkSetTip("Check how your arena decks are doing")]]);
 		var showcard = nymph || (!sock.user.daily && sock.user.ocard);
 		if (showcard) {
 			var oracle = dom.svg();
