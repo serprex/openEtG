@@ -81,7 +81,7 @@ module.exports = function(game, previous) {
 			if (ch in casthash) return;
 			else casthash[ch] = true;
 			var active = c.type == etg.Spell ? c.card.type == etg.Spell && c.card.active.cast : c.active.cast;
-			var cbits = game.tgtToBits(c) ^ 8, tgthash = [], loglist = n && {};
+			var cbits = game.tgtToBits(c) ^ 8, tgthash = [];
 			function evalIter(t) {
 				if (t && t.hash){
 					var th = t.hash();
@@ -114,7 +114,6 @@ module.exports = function(game, previous) {
 					}
 					if (n && v-currentEval < 24) {
 						iterLoop(gameClone, 0, cbits | tbits << 9, []);
-						if (loglist) loglist[t || "-"] = currentEval;
 					}
 				}
 			}
@@ -127,10 +126,8 @@ module.exports = function(game, previous) {
 					pl.forEach(evalIter);
 				}
 				game.targeting = null;
-				if (loglist) console.log(currentEval, preEval, c.toString(), active.name[0], loglist);
 			}else{
 				evalIter();
-				if (loglist) console.log(currentEval, preEval, c.toString(), loglist);
 			}
 			return true;
 		}
