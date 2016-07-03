@@ -12,6 +12,7 @@ var Cards = require("../Cards");
 var Effect = require("../Effect");
 var Skills = require("../Skills");
 var etgutil = require("../etgutil");
+var aiSearch = require("../ai/search");
 var redhor = new Uint16Array([
 	12, 0, 900,
 	144, 145, 796,
@@ -525,15 +526,19 @@ function startMatch(game, foeDeck, spectate) {
 			if (game.phase == etg.PlayPhase){
 				if (!aiCommand){
 					Effect.disable = true;
-					aiState = require("../ai/search")(game, aiState);
+					if (aiState) {
+						aiState.step(game);
+					} else {
+						aiState = new aiSearch(game);
+					}
 					Effect.disable = false;
-					if (aiState.length <= 2){
+					if (aiState.cmd){
 						aiCommand = true;
 					}
 				}
 				var now;
 				if (aiCommand && (now = Date.now()) > aiDelay){
-					cmds[aiState[0]]({bits: aiState[1]});
+					cmds[aiState.cmd]({ bits: aiState.cmdct });
 					aiState = undefined;
 					aiCommand = false;
 					aiDelay = now + (game.turn == game.player1 ? 2000 : 200);
