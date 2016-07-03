@@ -1,6 +1,7 @@
 "use strict";
 exports.mkTask = function(cb){
-	var params = {}, cbCount = 1;
+	const params = {};
+	var cbCount = 1;
 	function cbCheck(){
 		if(!--cbCount) cb(params);
 	}

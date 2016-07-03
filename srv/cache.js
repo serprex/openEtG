@@ -1,16 +1,12 @@
 "use strict";
-var cache = {};
-var stime = new Date();
+const cache = {}, stime = new Date();
 stime.setMilliseconds(0);
-module.exports = function(url, ifmod, path, res, func){
-	if (arguments.length == 1) return delete cache[url];
-	var data = cache[url];
-	if (!data) cache[url] = data = new Promise((resolve, reject) => func(path, resolve, reject, stime));
+function respond(res, data, ifmod) {
 	data.then(data => {
 		if (data.date.getTime() <= ifmod){
 			res.write("HTTP/1.1 304 Not Modified\r\n\r\n");
 		}else{
-			res.write("HTTP/1.1 200 OK\r\n"+data.head+"Last-Modified:"+data.date.toUTCString()+"\r\nDate:"+new Date().toUTCString()+"\r\nConnection:close\r\n\r\n");
+			res.write("HTTP/1.1 200 OK\r\n"+data.head+"Last-Modified:"+data.date.toUTCString()+"\r\nDate:"+new Date().toUTCString()+"\r\nCache-Control:no-cache\r\nConnection:close\r\n\r\n");
 			res.write(data.buf);
 		}
 		return res.end();
@@ -19,4 +15,16 @@ module.exports = function(url, ifmod, path, res, func){
 		res.end();
 		delete cache[url];
 	}).catch(()=>{});
+}
+exports.rm = function(url) {
+	delete cache[url];
+}
+exports.try = function(res, url, ifmod) {
+	const data = cache[url];
+	if (!data) return false;
+	respond(res, data, ifmod);
+	return true;
+}
+exports.add = function(res, url, ifmod, path, func){
+	respond(res, cache[url] = new Promise((resolve, reject) => func(path, resolve, reject, stime)), ifmod);
 }

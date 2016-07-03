@@ -1,12 +1,12 @@
 "use strict";
-var db = require("./db");
-var users = {}, socks = {}, usergc = new Set();
+const db = require("./db"),
+	users = {}, socks = {}, usergc = new Set();
 exports.users = users;
 exports.socks = socks;
 function storeUsers(){
-	var margs = ["Users"];
-	for(var u in users){
-		var user = users[u];
+	const margs = ["Users"];
+	for(const u in users){
+		const user = users[u];
 		if (user.pool || user.accountbound){
 			margs.push(u, JSON.stringify(user));
 		}
@@ -14,10 +14,10 @@ function storeUsers(){
 	if (margs.length > 1) db.send_command("hmset", margs);
 }
 exports.storeUsers = storeUsers;
-var usergcloop = setInterval(function(){
+const usergcloop = setInterval(function(){
 	storeUsers();
 	// Clear inactive users
-	for(var u in users){
+	for(const u in users){
 		if (usergc.delete(u)){
 			delete users[u];
 		}else{
@@ -37,7 +37,7 @@ exports.load = function(name, cb, errcb){
 	}else{
 		db.hget("Users", name, (err, userstr) => {
 			if (userstr){
-				var user = users[name] = JSON.parse(userstr);
+				const user = users[name] = JSON.parse(userstr);
 				if (!user.streak) user.streak = [];
 				cb(user);
 			}else if (errcb){

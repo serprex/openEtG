@@ -1,13 +1,13 @@
 "use strict";
-var crypto = require("crypto");
-var sutil = require("./sutil");
-var db = require("./db");
-var Us = require("./Us");
-var etg = require("../etg");
-var aiDecks = require("../Decks");
-var etgutil = require("../etgutil");
-var RngMock = require("../RngMock");
-var userutil = require("../userutil");
+const crypto = require("crypto"),
+	sutil = require("./sutil"),
+	db = require("./db"),
+	Us = require("./Us"),
+	etg = require("../etg"),
+	aiDecks = require("../Decks"),
+	etgutil = require("../etgutil"),
+	RngMock = require("../RngMock"),
+	userutil = require("../userutil");
 module.exports = function(sockEmit){
 	function loginRespond(socket, user, pass, authkey){
 		function postHash(err, key){
@@ -23,13 +23,13 @@ module.exports = function(sockEmit){
 				user.auth = user.salt = "";
 				return loginRespond(socket, user, pass);
 			}else{
-				var day = sutil.getDay();
+				const day = sutil.getDay();
 				if (user.oracle < day){
 					user.oracle = day;
-					var ocardnymph = Math.random() < .03;
-					var card = RngMock.randomcard(false,
+					const ocardnymph = Math.random() < .03;
+					const card = RngMock.randomcard(false,
 						x => x.type != etg.Pillar && ((x.rarity != 5) ^ ocardnymph) && x.code != user.ocard);
-					var ccode = etgutil.asShiny(card.code, card.rarity == 5);
+					const ccode = etgutil.asShiny(card.code, card.rarity == 5);
 					if (card.rarity > 1) {
 						user.accountbound = etgutil.addcard(user.accountbound, ccode);
 					}
@@ -57,13 +57,13 @@ module.exports = function(sockEmit){
 		}else postHash(null, "");
 	}
 	function loginAuth(data){
-		var name = (data.u || "").trim();
+		const name = (data.u || "").trim();
 		if (!name.length){
 			sockEmit(this, "login", {err:"No name"});
 			return;
 		}else{
 			Us.load(name, user => loginRespond(this, user, data.p, data.a), () => {
-				var user = Us.users[name] = {name: name, gold: 0};
+				const user = Us.users[name] = {name: name, gold: 0};
 				loginRespond(this, user, data.p, data.a);
 			});
 		}
