@@ -19,7 +19,8 @@ Status.prototype.get = function(key){
 }
 Status.prototype.set = function(key, val){
 	var idx = this.keys.indexOf(key);
-	if (~idx) this.vals[idx] = val|0;
+	val |= 0;
+	if (~idx) this.vals[idx] = val;
 	else{
 		this.keys.push(key);
 		this.vals.push(val);
@@ -27,6 +28,7 @@ Status.prototype.set = function(key, val){
 }
 Status.prototype.incr = function(key, val){
 	var idx = this.keys.indexOf(key);
+	val |= 0;
 	if (~idx) return this.vals[idx] += val;
 	else{
 		this.keys.push(key);
@@ -45,7 +47,9 @@ Status.prototype.clear = function(){
 Status.prototype.hash = function(){
 	var ret = 0xdeadbeef;
 	for(var i=0; i<this.keys.length; i++){
-		ret ^= util.hashString(this.keys[i]) ^ this.vals[i]*0x04004004;
+		if (this.vals[i]) {
+			ret ^= util.hashString(this.keys[i]) ^ this.vals[i]*0x04004004;
+		}
 	}
 	return ret;
 }
