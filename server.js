@@ -55,7 +55,7 @@ function broadcast(data){
 	});
 }
 function getAgedHp(hp, age){
-	return Math.max(hp - Math.pow(age, 2), hp/4)|0;
+	return Math.max(hp-age*age, hp/2)|0;
 }
 function wilson(up, total){
 	// from npm's wilson-score
