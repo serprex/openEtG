@@ -598,7 +598,7 @@ function evalcardinstance(cardInst) {
 		}
 		score += checkpassives(cardInst);
 		if (c.type == etg.Creature){
-			score += c.attack;
+			score += c.status.get("frozen") || c.status.get("delayed") ? 0 : c.attack;
 			var hp = Math.max(c.health, 0), poison = c.status.get("poison");
 			if (poison > 0){
 				hp = Math.max(hp - poison*2, 0);
