@@ -169,7 +169,7 @@ const userEvents = {
 				var won = parseInt(data.won?wld.incr:wld.mget[0]),
 					loss = parseInt(data.won?wld.mget[0]:wld.incr),
 					day = parseInt(wld.mget[1]);
-				if (!data.won && (won == 0 && loss == 5 || loss-won > 15 || sutil.getDay()-day > 14)){
+				if (!data.won && (loss-won > 15 || sutil.getDay()-day > 14)){
 					db.zrem(arena, data.aname);
 				}else{
 					db.zadd(arena, wilson(won+1, won+loss+1)*1000, data.aname);
@@ -684,5 +684,5 @@ function onSocketConnection(socket){
 	socket.on("close", onSocketClose);
 	socket.on("message", onSocketMessage);
 }
-var wss = new (require("ws/lib/WebSocketServer"))({server:app.listen(13602)});
+const wss = new (require("ws/lib/WebSocketServer"))({server:app.listen(13602)});
 wss.on("connection", onSocketConnection);

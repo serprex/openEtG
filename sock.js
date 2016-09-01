@@ -28,7 +28,7 @@ socket.onclose = function(){
 		socket.onclose = oldsock.onclose;
 		socket.onmessage = oldsock.onmessage;
 	}, timeout);
-	chat("Reconnecting in "+ timeout +"ms", "System");
+	chat("Reconnecting in "+ timeout + "ms", "System");
 }
 exports.et = socket;
 exports.user = undefined;

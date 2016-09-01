@@ -599,7 +599,9 @@ fickle:function(c,t){
 	});
 	if (cards.length){
 		var pick = t.choose(cards);
-		(t.owner.hand[t.getIndex()] = new Thing(t.owner.deck[pick])).type = etg.Spell;
+		var card = t.owner.hand[t.getIndex()] = new Thing(t.owner.deck[pick]);
+		card.type = etg.Spell;
+		card.owner = t.owner;
 		t.owner.deck[pick] = t.card;
 	}
 },
@@ -1275,7 +1277,7 @@ parallel:function(c,t){
 },
 phoenix:function(c,t, data){
 	if (!c.owner.creatures[data.index]){
-		var ash =c.owner.creatures[data.index] = new Thing(c.card.as(Cards.Ash));
+		var ash = c.owner.creatures[data.index] = new Thing(c.card.as(Cards.Ash));
 		ash.owner = c.owner;
 		ash.type = etg.Creature;
 	}
