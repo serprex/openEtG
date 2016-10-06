@@ -204,7 +204,11 @@ module.exports = function(arena, ainfo, acard, startempty) {
 		}]], [8, 84, ["Exit", function() {
 			require("./ArenaInfo")(arena);
 		}]]);
-		var arpts = aupped?515:425, arattr = {hp:parseInt(ainfo.hp || 200), mark:parseInt(ainfo.mark || 2), draw:parseInt(ainfo.draw || 1)};
+		function attrval(x, d) {
+			x = +x;
+			return x === 0 ? 0 : (x || d);
+		}
+		var arpts = aupped?515:425, arattr = {hp:attrval(ainfo.hp, 200), mark:attrval(ainfo.mark, 2), draw:attrval(ainfo.draw, 1)};
 		var artable = {
 			hp: { min: 65, max: 200, incr: 45, cost: 1 },
 			mark: { cost: 45 },

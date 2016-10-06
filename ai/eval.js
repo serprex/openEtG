@@ -161,7 +161,7 @@ var SkillsValues = Object.freeze({
 	forcedraw:-10,
 	forceplay:2,
 	fractal:function(c){
-		return 9-c.owner.hand.length;
+		return 3+(9-c.owner.hand.length)/4;
 	},
 	freeze:[3,3.5],
 	freezeperm:[3.5,4],
