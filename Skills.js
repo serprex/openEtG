@@ -1366,7 +1366,7 @@ quint:function(c,t){
 	t.status.set("frozen", 0);
 },
 quinttog:function(c,t){
-	if (t.status.immaterial){
+	if (t.status.get("immaterial")){
 		Effect.mkText("Materialize", t);
 		t.status.set("immaterial", 0);
 	}else Skills.quint.func(c,t);
