@@ -42,7 +42,8 @@ function pillarval(c){
 	return c.type == etg.Spell?.1:Math.sqrt(c.status.get("charges"));
 }
 var SkillsValues = Object.freeze({
-	ablaze:3,
+	"ablaze 1":1,
+	"ablaze 2":3,
 	accelerationspell:5,
 	acceleration:function(c){
 		return c.truehp()-2;
@@ -185,7 +186,7 @@ var SkillsValues = Object.freeze({
 	gpullspell:3,
 	gratitude:4,
 	grave:1,
-	"growth 1":3,
+	"growth 1":2,
 	"growth 2":5,
 	guard:4,
 	halveatk:function(c){

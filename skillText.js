@@ -36,7 +36,7 @@ var Cards = require("./Cards");
 var Thing = require("./Thing");
 
 var data = {
-	ablaze:"Gain 2|0",
+	ablaze:function(x){return "Gain " + x + "|0"},
 	abomination:"Amiable to mutation",
 	absorber:"Produce 3:6 per attacker",
 	accelerationspell:"Replaces target creature's skills with \"Gain +2|-1 per turn\"",

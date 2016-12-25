@@ -19,9 +19,12 @@ function quadpillarFactory(ele){
 	}
 }
 var Skills = module.exports = {
-ablaze:function(c,t){
-	Effect.mkText("2|0", c);
-	c.atk += 2;
+ablaze:function(x){
+	var n = +x;
+	return function(c,t) {
+		Effect.mkText(n+"|0", c);
+		c.atk += n;
+	}
 },
 abomination:function(c,t,data){
 	if (data.tgt == c && data.active == Skills.mutation){
@@ -765,7 +768,7 @@ grave:function(c,t){
 	}
 },
 growth:function(x){
-	var n = parseInt(x);
+	var n = +x;
 	return function(c,t) {
 		Effect.mkText(n+"|"+n, c)
 		c.buffhp(n);
@@ -886,7 +889,7 @@ integrity:function(c,t){
 		["devour", "devour", "devour", "devour", "devour", "blackhole"],
 		["burrow", "stoneform", "guard", "guard", "bblood", "bblood"],
 		["growth 2", "adrenaline", "adrenaline", "adrenaline", "adrenaline", "mitosis"],
-		["ablaze", "ablaze", "tempering", "destroy", "destroy", "rage"],
+		["ablaze 1", "ablaze 2", "tempering", "destroy", "destroy", "rage"],
 		["steam", "steam", "freeze", "freeze", "nymph", "nymph"],
 		["mend", "endow", "endow", "luciferin", "luciferin", "luciferin"],
 		["summon Firefly", "summon Firefly", "snipe", "dive", "gas", "gas"],
@@ -1296,7 +1299,7 @@ platearmor:function(c,t){
 	t.buffhp(buff);
 },
 poison:function(x){
-	var n = parseInt(x);
+	var n = +x;
 	return adrenathrottle(function(c,t){
 		(t || c.owner.foe).addpoison(n);
 	});
@@ -1691,7 +1694,7 @@ stoneform:function(c,t){
 	c.status.set("golem", 1);
 },
 storm:function(x){
-	var n = parseInt(x);
+	var n = +x;
 	return function(c,t){
 		t.masscc(c, function(c,x){x.spelldmg(n)});
 	}
@@ -1966,7 +1969,7 @@ evade100:function(c,t, data){
 	data.dmg = 0;
 },
 evade:function(x){
-	var n = parseInt(x)/100;
+	var n = (+x)/100;
 	return function(c,t, data){
 		if (c.rng() < n) data.dmg = 0;
 	};
