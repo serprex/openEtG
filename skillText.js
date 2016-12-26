@@ -36,7 +36,12 @@ var Cards = require("./Cards");
 var Thing = require("./Thing");
 
 var data = {
-	ablaze:function(x){return "Gain " + x + "|0"},
+	ablaze:function(x){
+		return {
+			cast:"Gain " + x + "|0",
+			auto:"Gain " + x + "|0 per turn",
+		}
+	},
 	abomination:"Amiable to mutation",
 	absorber:"Produce 3:6 per attacker",
 	accelerationspell:"Replaces target creature's skills with \"Gain +2|-1 per turn\"",
@@ -140,7 +145,7 @@ var data = {
 	feed:"Poison target creature & gain 3|3, but rematerialize",
 	fickle:"Swap target card with random affordable card from deck",
 	fiery:"Increment damage per 5:6 owned",
-	fire:"Produce 1:6 per attack",
+	fire:"Produce 1:6 per turn",
 	firebolt:"Deals 3 damage to target. Increment damage per 4:6 owned. Thaws target",
 	firewall:"Damage non-ranged attackers",
 	flatline:"Foe produces no quanta until next turn",
@@ -174,6 +179,7 @@ var data = {
 			death:"When a death occurs, gain "+x,
 			ownfreeze:"Gains "+x+" instead of freezing",
 			cast:"Gain "+x,
+			auto:"Gain "+x+" per turn",
 		};
 	},
 	guard:"Delay target creature & attack target if grounded or caster airborne. Delay self",
@@ -201,7 +207,7 @@ var data = {
 	jelly:"Target creature becomes a 7|4 with active Pink Jelly costing 4 of their element",
 	jetstream:"Target airborne creature gains 3|-1",
 	light:{
-		auto:"Produce 1:8 per attack",
+		auto:"Produce 1:8 per turn",
 		ownplay:"Produce 1:8 on play",
 	},
 	lightning:"Deal 5 damage to target",
@@ -215,7 +221,7 @@ var data = {
 		var charges = c.status.get("charges");
 		return "Lasts " + charges + " turn" + (charges == 1?"":"s");
 	},
-	luciferin:"All your creatures without skills produce 1:8 per attack. Heal owner 10",
+	luciferin:"All your creatures without skills produce 1:8 per turn. Heal owner 10",
 	lycanthropy:"Gain 5|5 & become nocturnal",
 	martyr:"Increment strength per damage received",
 	mend:"Heal target creature 10",
@@ -283,7 +289,7 @@ var data = {
 	rebirth:["Become a Phoenix", "Become a Minor Phoenix"],
 	reducemaxhp:"Reduce maximum HP per damage dealt",
 	regen:"Apply 1 purify to owner on hit. Throttled",
-	regenerate:"Heal owner 5 per attack",
+	regenerate:"Heal owner 5 per turn",
 	regeneratespell:"Replace non-stacking target's skills with \"Regenerate: Heal owner 5\"",
 	regrade:"Invert upgraded status of target. Produce 1 quanta of that element",
 	reinforce:"Target creature absorbs caster, gaining its stats",
