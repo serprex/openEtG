@@ -539,7 +539,24 @@ function evalthing(c) {
 			hp = Math.max(hp - poison*2, 0);
 			if (c.status.get("aflatoxin")) score -= 2;
 		}else if (poison < 0){
-			hp += Math.min(-poison, c.maxhp-c.hp);
+			hp = Math.max(Math.min(hp-poison, c.maxhp), 0);
+		}
+		if (hp == 0) {
+			for (var j=0; j<2; j++) {
+				var pl = j ? c.owner : c.owner.foe;
+				for (var i=0; i<23; i++) {
+					var cr = pl.creatures[i];
+					if (cr && cr.active.death) {
+						score += evalactive(cr, cr.active.death, ttatk) * (j?3:-3);
+					}
+				}
+				for (var i=0; i<16; i++) {
+					var pr = pl.permanents[i];
+					if (pr && pr.active.death) {
+						score += evalactive(pr, pr.active.death, ttatk) * (j?3:-3);
+					}
+				}
+			}
 		}
 	}
 	if (isAttacker) {
