@@ -169,11 +169,7 @@ const userEvents = {
 				var won = parseInt(data.won?wld.incr:wld.mget[0]),
 					loss = parseInt(data.won?wld.mget[0]:wld.incr),
 					day = parseInt(wld.mget[1]);
-				if (!data.won && (loss-won > 15 || sutil.getDay()-day > 14)){
-					db.zrem(arena, data.aname);
-				}else{
-					db.zadd(arena, wilson(won+1, won+loss+1)*1000, data.aname);
-				}
+				db.zadd(arena, wilson(won+1, won+loss+1)*1000, data.aname);
 			});
 			db.hincrby(akey, data.won?"win":"loss", 1, task("incr"));
 			db.hmget(akey, data.won?"loss":"win", "day", task("mget"));
@@ -183,6 +179,7 @@ const userEvents = {
 	foearena:function(data, user){
 		db.zcard("arena"+(data.lv?"1":""), (err, len) => {
 			if (!len) return;
+			if (len > 20) len = 20;
 			var cost = userutil.arenaCost(data.lv);
 			if (user.gold < cost)return;
 			user.gold -= cost;
