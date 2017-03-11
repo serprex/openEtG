@@ -31,8 +31,8 @@ function stop(){
 process.on("SIGTERM", stop).on("SIGINT", stop);
 function activeUsers(){
 	const activeusers = [];
-	for (var name in Us.socks){
-		var sock = Us.socks[name];
+	for (const name in Us.socks){
+		const sock = Us.socks[name];
 		if (sock && sock.readyState == 1){
 			if (sock.meta.offline) continue;
 			if (sock.meta.afk) name += " (afk)";
@@ -50,7 +50,7 @@ function genericChat(socket, data){
 }
 function broadcast(data){
 	const msg = JSON.stringify(data);
-	for (var sock of wss.clients) {
+	for (const sock of wss.clients) {
 		if (sock.readyState == 1) sock.send(msg);
 	}
 }
@@ -288,11 +288,11 @@ const userEvents = {
 				var owndata = { seed: seed, deck: deck0, urdeck: deck1, foename:f };
 				var foedata = { flip: true, seed: seed, deck: deck1, urdeck: deck0 ,foename:u };
 				var stat = this.meta.pvpstats, foestat = foesock.meta.pvpstats;
-				for (var key in stat){
+				for (const key in stat){
 					owndata["p1" + key] = stat[key];
 					foedata["p2" + key] = stat[key];
 				}
-				for (var key in foestat){
+				for (const key in foestat){
 					owndata["p2" + key] = foestat[key];
 					foedata["p1" + key] = foestat[key];
 				}
@@ -542,11 +542,11 @@ var sockEvents = {
 			var owndata = { seed: seed, deck: deck0, urdeck: deck1 };
 			var foedata = { flip: true, seed: seed, deck: deck1, urdeck: deck0 };
 			var stat = this.meta.pvpstats, foestat = pendinggame.meta.pvpstats;
-			for (var key in stat){
+			for (const key in stat){
 				owndata["p1" + key] = stat[key];
 				foedata["p2" + key] = stat[key];
 			}
-			for (var key in foestat){
+			for (const key in foestat){
 				owndata["p2" + key] = foestat[key];
 				foedata["p1" + key] = foestat[key];
 			}
