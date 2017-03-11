@@ -7,9 +7,8 @@
     "url": "https://github.com/serprex/openEtG.git"
   },
   "dependencies": {
-    "bufferutil": "^1.2.1",
     "redis": "^2.6.2",
-    "ws": "^1.1.1"
+    "ws": "^2.2.0"
   },
   "devDependencies": {
     "mkcjs": "^0.1.0",
@@ -24,7 +23,7 @@
     "build": "npm run build-etgify && npm run build-tournify && npm run build-atlas-png && npm run build-atlas-css"
   },
   "optionalDependencies": {
-    "hiredis": "^0.5.0"
+    "bufferutil": "^3.0.0"
   },
   "license": "MIT"
 }

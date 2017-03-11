@@ -40,7 +40,7 @@ function activeUsers(){
 			activeusers.push(name);
 		}
 	}
-	const otherCount = wss.clients.length - activeusers.length;
+	const otherCount = wss.clients.size - activeusers.length;
 	activeusers.push(otherCount + " lurker" + (otherCount == 1 ? "" : "s"));
 	return activeusers;
 }
@@ -50,9 +50,9 @@ function genericChat(socket, data){
 }
 function broadcast(data){
 	const msg = JSON.stringify(data);
-	wss.clients.forEach(sock => {
+	for (var sock of wss.clients) {
 		if (sock.readyState == 1) sock.send(msg);
-	});
+	}
 }
 function getAgedHp(hp, age){
 	return Math.max(hp-age*age, hp/2)|0;
@@ -681,5 +681,5 @@ function onSocketConnection(socket){
 	socket.on("close", onSocketClose);
 	socket.on("message", onSocketMessage);
 }
-const wss = new (require("ws/lib/WebSocketServer"))({server:app.listen(13602)});
+const wss = new (require("ws/lib/WebSocketServer"))({server:app.listen(13602), clientTracking:true});
 wss.on("connection", onSocketConnection);
