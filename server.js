@@ -169,7 +169,7 @@ const userEvents = {
 				var won = parseInt(data.won?wld.incr:wld.mget[0]),
 					loss = parseInt(data.won?wld.mget[0]:wld.incr),
 					day = parseInt(wld.mget[1]);
-				db.zadd(arena, wilson(won+1, won+loss+1)*1000, data.aname);
+				db.zadd(arena, wilson(won+1, won+loss+1)*1000-(sutil.getDay() - day), data.aname);
 			});
 			db.hincrby(akey, data.won?"win":"loss", 1, task("incr"));
 			db.hmget(akey, data.won?"loss":"win", "day", task("mget"));
