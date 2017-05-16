@@ -1,17 +1,17 @@
 #!/usr/bin/env node
 "use strict";
-var assert = require("assert");
-var etg = require("../etg");
-var util = require("../util");
-var Game = require("../Game");
-var Cards = require("../Cards");
-var Thing = require("../Thing");
-var Skills = require("../Skills");
-var etgutil = require("../etgutil");
+const assert = require("assert"),
+	etg = require("../etg"),
+	util = require("../util"),
+	Game = require("../Game"),
+	Cards = require("../Cards"),
+	Thing = require("../Thing"),
+	Skills = require("../Skills"),
+	etgutil = require("../etgutil");
 Cards.loadcards();
-function initHand(pl){
-	for(var i=1; i<arguments.length; i++){
-		var cardinst = pl.hand[i-1] = new Thing(arguments[i]);
+function initHand(pl, ...args){
+	for(var i=0; i<args.length; i++){
+		var cardinst = pl.hand[i] = new Thing(args[i]);
 		cardinst.owner = pl;
 		cardinst.type = etg.Spell;
 	}

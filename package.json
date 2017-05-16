@@ -4,15 +4,15 @@
   "readme": "README.md",
   "repository": {
     "type": "git",
-    "url": "https://github.com/serprex/openEtG.git"
+    "url": "https://github.com/serprex/openEtG"
   },
   "dependencies": {
-    "redis": "^2.6.2",
-    "ws": "^2.2.0"
+    "redis": "^2.7",
+    "ws": "^2.3"
   },
   "devDependencies": {
     "mkcjs": "^0.1.0",
-    "optipng-bin": "^3.0.2"
+    "optipng-bin": "^4.0"
   },
   "scripts": {
     "test": "./scripts/tests.js",
