@@ -681,5 +681,5 @@ function onSocketConnection(socket){
 	socket.on("close", onSocketClose);
 	socket.on("message", onSocketMessage);
 }
-const wss = new (require("ws/lib/WebSocketServer"))({server:app.listen(13602), clientTracking:true});
+const wss = new (require("ws/lib/WebSocketServer"))({server:app.listen(13602), clientTracking:true, perMessageDeflate:true});
 wss.on("connection", onSocketConnection);

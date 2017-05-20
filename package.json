@@ -8,7 +8,7 @@
   },
   "dependencies": {
     "redis": "^2.7",
-    "ws": "^2.3"
+    "ws": "^3.0"
   },
   "devDependencies": {
     "mkcjs": "^0.1.0",
