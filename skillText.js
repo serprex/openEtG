@@ -314,6 +314,7 @@ var data = {
 	serendipity:["Generate 3 random non-pillar cards in hand. One will be 1:1",
 		"Generate 3 random non-pillar upgraded cards in hand. One will be 1:1"],
 	shtriga:"Become immaterial at start of turn",
+	shuffle3:"Shuffle 3 copies of target card into own deck",
 	silence:"Target player cannot play cards until their turn ends, or target creature gains summoning sickness",
 	sing:"Target creature without Sing attacks owner",
 	singularity:"Not well behaved",

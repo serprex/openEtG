@@ -1537,6 +1537,10 @@ shardgolem:function(c,t){
 shtriga:function(c,t){
 	if (c.owner == t) c.status.set("immaterial", 1);
 },
+shuffle3:function(c,t){
+	for (var i=0; i<3; i++)
+		c.owner.deck.splice(c.owner.upto(c.owner.deck.length), 0, t.card);
+},
 silence:function(c,t){
 	if (t.type != etg.Player || !t.sanctuary) t.usedactive = true;
 },
