@@ -718,11 +718,9 @@ gaincharge2:function(c,t){
 	}
 },
 gaintimecharge:function(c,t, drawstep){
-	if (!drawstep && c.owner == t){
-		if (c.status.get("chargecap", 4)){
-			c.status.incr("chargecap", 1);
-			c.status.incr("charges", 1);
-		}
+	if (!drawstep && c.owner == t && c.status.get("chargecap") < 4) {
+		c.status.incr("chargecap", 1);
+		c.status.incr("charges", 1);
 	}
 },
 gas:function(c,t){
