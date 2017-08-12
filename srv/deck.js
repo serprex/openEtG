@@ -8,7 +8,7 @@ module.exports = function(url, resolve, reject, stime){
 	}
 	zlib.gzip(svg.deck(deck), {level:9}, (err, buf) =>
 		resolve({
-			head:"Content-Encoding:gzip\r\nContent-Type:image/svg+xml\r\n",
+			head: {"Content-Encoding": "gzip", "Content-Type": "image/svg+xml"},
 			date:stime,
 			buf:buf,
 		})

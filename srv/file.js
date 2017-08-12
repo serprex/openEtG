@@ -24,7 +24,7 @@ module.exports = function(url, resolve, reject){
 			});
 			res.stat.mtime.setMilliseconds(0);
 			resolve({
-				head: "Content-Encoding:gzip\r\nContent-Type:"+contentType+"\r\n",
+				head: { "Content-Encoding": "gzip", "Content-Type": contentType },
 				date: res.stat.mtime,
 				buf: res.gzip,
 			});

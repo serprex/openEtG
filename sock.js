@@ -2,7 +2,7 @@ var chat = require("./chat");
 var etgutil = require("./etgutil");
 var options = require("./options");
 var usercmd = require("./usercmd");
-var socket = new WebSocket("ws://"+location.hostname+":13602");
+var socket = new WebSocket("wss://"+location.hostname+":13602");
 var buffer = [];
 var attempts = 0, attemptTimeout = 0;
 socket.onopen = function(){
@@ -23,7 +23,7 @@ socket.onclose = function(){
 	attemptTimeout = setTimeout(function(){
 		attemptTimeout = 0;
 		var oldsock = socket;
-		exports.et = socket = new WebSocket("ws://"+location.hostname+":13602");
+		exports.et = socket = new WebSocket("wss://"+location.hostname+":13602");
 		socket.onopen = oldsock.onopen;
 		socket.onclose = oldsock.onclose;
 		socket.onmessage = oldsock.onmessage;

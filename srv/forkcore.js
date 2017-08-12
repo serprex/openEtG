@@ -10,14 +10,12 @@ const util = require("../util"),
 	card = lutrequire("card"),
 	deck = lutrequire("deck"),
 	speed = lutrequire("speed");
-Cards.loadcards();
-process.on("message", function(msg, res){
+module.exports = function(req, res){
 	if(!res) return;
 	try{
 		res.on("error",()=>{});
-		const lines = msg.split("\n"),
-			url = lines[0].replace(/\?.*$/,''),
-			ifmod = new Date(lines[1]).getTime();
+		const url = req.url.slice(1);
+		const ifmod = new Date(req.headers["if-modified-since"] || "").getTime();
 		if (cache.try(res, url, ifmod)) return;
 		const idx = url.indexOf("/"),
 			func = ~idx && lut[url.slice(0,idx)];
@@ -26,16 +24,16 @@ process.on("message", function(msg, res){
 		}else if (url.indexOf("..")==-1 && url.match(/^(vanilla\/|cia\/)?$|\.(js(on)?|html?|css|csv|png|ogg)$/)){
 			cache.add(res, url, ifmod, (url.match(/^(vanilla\/|cia\/)?$/) ? url + "index.html" : url), file);
 		}else if (url == "vanilla" || url == "cia"){
-			res.write("HTTP/1.1 302 Found\r\nLocation:/"+url+"/\r\n\r\n");
+			res.writeHead(302, { Location: "/" + url + "/" });
 			res.end();
 		}else if (url == "speed"){
-			res.write("HTTP/1.1 302 Found\r\nLocation:/speed/" + util.randint() + "\r\n\r\n");
+			res.writeHead(302, { Location: "/speed/" + util.readint() });
 			res.end();
 		}else{
-			res.write("HTTP/1.1 404 Not Found\r\nConnection:close\r\n\r\nUnknown msg: " + msg);
-			res.end();
+			res.writeHead(404, { Connection: "close" });
+			res.end("Unknown msg: " + msg);
 		}
 	}catch (ex){
 		console.log("Forkcore", ex);
 	}
-});
+}

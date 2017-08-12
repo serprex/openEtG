@@ -1,6 +1,8 @@
 #!/usr/bin/node
 "use strict";
 process.chdir(__dirname);
+const fs = require("fs");
+const https = require("https");
 const etg = require("./etg");
 const Cards = require("./Cards");
 Cards.loadcards();
@@ -9,23 +11,21 @@ const etgutil = require("./etgutil");
 const usercmd = require("./usercmd");
 const userutil = require("./userutil");
 const sutil = require("./srv/sutil");
-const http = require("http");
 const db = require("./srv/db");
 const Us = require("./srv/Us");
 
 const MAX_INT = 0x100000000;
 const rooms = {};
 
-const forkcore = require("child_process").fork("./srv/forkcore");
-const app = http.createServer(function(req, res){
-	const ifModifiedSince = req.headers["if-modified-since"];
-	forkcore.send(req.url.slice(1) + (ifModifiedSince?"\n"+ifModifiedSince:""), res.socket, ()=>{});
-});
+const forkcore = require("./srv/forkcore");
+const app = https.createServer({
+	key: fs.readFileSync('../certs/oetg-key.pem'),
+	cert: fs.readFileSync('../certs/oetg-cert.pem'),
+}, forkcore);
 app.on("clientError",()=>{});
 function stop(){
 	wss.close();
 	app.close();
-	forkcore.kill();
 	Us.stop();
 }
 process.on("SIGTERM", stop).on("SIGINT", stop);

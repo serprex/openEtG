@@ -4,15 +4,18 @@ stime.setMilliseconds(0);
 function respond(res, data, ifmod) {
 	data.then(data => {
 		if (data.date.getTime() <= ifmod){
-			res.write("HTTP/1.1 304 Not Modified\r\n\r\n");
+			res.writeHead(304);
 		}else{
-			res.write("HTTP/1.1 200 OK\r\n"+data.head+"Last-Modified:"+data.date.toUTCString()+"\r\nDate:"+new Date().toUTCString()+"\r\nCache-Control:no-cache\r\nConnection:close\r\n\r\n");
+			data.head["Last-Modified"] = data.date.toUTCString();
+			data.head["Date"] = new Date().toUTCString();
+			data.head["Cache-Control"] = "no-cache";
+			res.writeHead(200, data.head);
 			res.write(data.buf);
 		}
 		return res.end();
 	}, err => {
-		res.write("HTTP/1.1 404 Not Found\r\n\r\n"+err);
-		res.end();
+		res.writeHead(404)
+		res.end(err);
 		delete cache[url];
 	}).catch(()=>{});
 }
