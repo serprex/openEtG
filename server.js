@@ -3,6 +3,7 @@
 process.chdir(__dirname);
 const fs = require("fs");
 const https = require("https");
+const http2 = require("http2");
 const etg = require("./etg");
 const Cards = require("./Cards");
 Cards.loadcards();
@@ -18,7 +19,7 @@ const MAX_INT = 0x100000000;
 const rooms = {};
 
 const forkcore = require("./srv/forkcore");
-const app = https.createServer({
+const app = http2.createServer({
 	key: fs.readFileSync('../certs/oetg-key.pem'),
 	cert: fs.readFileSync('../certs/oetg-cert.pem'),
 }, forkcore);
@@ -478,7 +479,6 @@ var sockEvents = {
 	konglogin:function(data){
 		db.get("kongapi", (err, key) => {
 			if (!key) return; // TODO error
-			const https = require("https");
 			https.get("https://api.kongregate.com/api/authenticate.json?user_id="+data.u+"&game_auth_token="+data.g+"&api_key="+key, res => {
 				var jtext = "";
 				res.setEncoding("utf8");
