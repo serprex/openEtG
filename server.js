@@ -4,6 +4,7 @@ process.chdir(__dirname);
 const fs = require("fs");
 const https = require("https");
 const http2 = require("http2");
+const uws = require("uws");
 const etg = require("./etg");
 const Cards = require("./Cards");
 Cards.loadcards();
@@ -19,17 +20,6 @@ const MAX_INT = 0x100000000;
 const rooms = {};
 
 const keycerttask = sutil.mkTask(res => {
-	const app = http2.createServer({
-		key: res.key,
-		cert: res.cert,
-	}, require("./srv/forkcore"));
-	app.on("clientError",()=>{});
-	function stop(){
-		wss.close();
-		app.close();
-		Us.stop();
-	}
-	process.on("SIGTERM", stop).on("SIGINT", stop);
 	function activeUsers(){
 		const activeusers = [];
 		for (const name in Us.socks){
@@ -41,8 +31,6 @@ const keycerttask = sutil.mkTask(res => {
 				activeusers.push(name);
 			}
 		}
-		const otherCount = wss.clients.size - activeusers.length;
-		activeusers.push(otherCount + " lurker" + (otherCount == 1 ? "" : "s"));
 		return activeusers;
 	}
 	function genericChat(socket, data){
@@ -50,10 +38,7 @@ const keycerttask = sutil.mkTask(res => {
 		broadcast(data);
 	}
 	function broadcast(data){
-		const msg = JSON.stringify(data);
-		for (const sock of wss.clients) {
-			if (sock.readyState == 1) sock.send(msg);
-		}
+		wss.broadcast(JSON.stringify(data));
 	}
 	function getAgedHp(hp, age){
 		return Math.max(hp-age*age, hp/2)|0;
@@ -681,8 +666,18 @@ const keycerttask = sutil.mkTask(res => {
 		socket.on("close", onSocketClose);
 		socket.on("message", onSocketMessage);
 	}
-	const wss = new (require("ws/lib/WebSocketServer"))({server:app.listen(13602), clientTracking:true, perMessageDeflate:true});
+	const app = http2.createServer({
+		key: res.key,
+		cert: res.cert,
+	}, require("./srv/forkcore")).listen(13602).on("clientError", ()=>{});
+	const wss = new uws.Server({server:app, clientTracking:true, perMessageDeflate:true});
 	wss.on("connection", onSocketConnection);
+	function stop(){
+		app.close();
+		wss.close();
+		Us.stop();
+	}
+	process.on("SIGTERM", stop).on("SIGINT", stop);
 });
 fs.readFile('../certs/oetg-key.pem', keycerttask('key'));
 fs.readFile('../certs/oetg-cert.pem', keycerttask('cert'));

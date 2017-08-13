@@ -1,17 +1,14 @@
 "use strict";
-const lut = {};
-function lutrequire(x){
-	return lut[x] = require("./"+x);
-}
 const util = require("../util"),
 	cache = require("./cache"),
 	file = require("./file"),
-	Cards = require("../Cards"),
-	card = lutrequire("card"),
-	deck = lutrequire("deck"),
-	speed = lutrequire("speed");
+	Cards = require("../Cards");
+const lut = {
+	card: require("./card"),
+	deck: require("./deck"),
+	speed: require("./speed"),
+};
 module.exports = function(req, res){
-	if(!res) return;
 	try{
 		res.on("error",()=>{});
 		const url = req.url.slice(1);
@@ -31,7 +28,7 @@ module.exports = function(req, res){
 			res.end();
 		}else{
 			res.writeHead(404, { Connection: "close" });
-			res.end("Unknown msg: " + msg);
+			res.end("Unknown url: " + url);
 		}
 	}catch (ex){
 		console.log("Forkcore", ex);

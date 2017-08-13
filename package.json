@@ -9,7 +9,7 @@
   "dependencies": {
     "http2": "^3.3.6",
     "redis": "^2.8.0",
-    "ws": "^3.1.0"
+    "uws": "^8.14.1"
   },
   "devDependencies": {
     "mkcjs": "^0.1.0",
@@ -22,9 +22,6 @@
     "build-atlas-png": "optipng -o2 -strip all assets/atlas.png",
     "build-atlas-css": "./scripts/mkatlascss.js",
     "build": "npm run build-etgify && npm run build-tournify && npm run build-atlas-png && npm run build-atlas-css"
-  },
-  "optionalDependencies": {
-    "bufferutil": "^3.0.0"
   },
   "license": "MIT"
 }
