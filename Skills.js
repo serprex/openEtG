@@ -311,7 +311,11 @@ cseed2:function(c,t){
 	c.castSpell(t, choice.active.cast);
 },
 dagger:function(c){
-	return (c.owner.mark == etg.Darkness||c.owner.mark == etg.Death) + c.owner.isCloaked();
+	var buff = (c.owner.mark == etg.Darkness||c.owner.mark == etg.Death);
+	c.owner.permanents.forEach(function(p){
+		if (p && p.status.get("cloak")) buff++;
+	});
+	return buff;
 },
 deadalive:function(c){
 	c.deatheffect(c.getIndex());

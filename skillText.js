@@ -379,7 +379,7 @@ var data = {
 	wisdom:"Target gains 3|0. May target immaterial, granting psionic",
 	yoink:"Steal foe's target card, or draw from foe's target player's deck",
 };
-[["dagger", "1:2 1:11. Increment damage if cloaked"], ["hammer", "1:3 1:4"], ["bow", "1:8 1:9"], ["staff", "1:5 1:7"], ["disc", "1:1 1:12"], ["axe", "1:6 1:10"]].forEach(function(x){
+[["dagger", "1:2 1:11. Increment damage per own cloak"], ["hammer", "1:3 1:4"], ["bow", "1:8 1:9"], ["staff", "1:5 1:7"], ["disc", "1:1 1:12"], ["axe", "1:6 1:10"]].forEach(function(x){
 	data[x[0]] = "Increment damage if mark is "+x[1];
 });
 [["pillmat", "1:4 1:6 1:7 1:9"], ["pillspi", "1:2 1:5 1:8 1:11"], ["pillcar", "1:1 1:3 1:10 1:12"]].forEach(function(x){
