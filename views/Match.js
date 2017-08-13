@@ -26,7 +26,7 @@ var redhor = new Uint16Array([
 	754, 301, 600,
 	796, 12, 301,
 ]);
-function startMatch(game, foeDeck, spectate) {
+function startMatch(game, gameData, spectate) {
 	if (sock.trade){
 		sock.userEmit("canceltrade");
 		delete sock.trade;
@@ -107,7 +107,7 @@ function startMatch(game, foeDeck, spectate) {
 					sock.user.streak[game.level] = 0;
 				}
 			}
-			require("./Result")(game, foeDeck);
+			require("./Result")(game, gameData);
 		} else if (game.turn == game.player1) {
 			if (discard == undefined && game.player1.hand.length == 8) {
 				discarding = true;
@@ -816,11 +816,10 @@ module.exports = function(data, ai, spectate) {
 			pl.deckpower = 2;
 		}
 	}
-	var foeDeck = game.player2.deck.slice();
 	game.turn.drawhand(7);
 	game.turn.foe.drawhand(7);
-	if (data.foename) game.foename = data.foename;
 	if (ai) game.ai = true;
-	startMatch(game, foeDeck, spectate);
+	data.p2deck = game.player2.deck.slice();
+	startMatch(game, data, spectate);
 	return game;
 }

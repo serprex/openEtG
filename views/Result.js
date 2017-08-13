@@ -13,8 +13,9 @@ var options = require("../options");
 var RngMock = require("../RngMock");
 var userutil = require("../userutil");
 var streak200 = new Uint8Array([10, 10, 15, 20, 15, 20]);
-module.exports = function(game, foeDeck) {
+module.exports = function(game, data) {
 	var winner = game.winner == game.player1, stage;
+	var foeDeck = data.p2deck;
 	function exitFunc(){
 		if (game.quest) {
 			if (winner && game.choicerewards)
@@ -41,10 +42,9 @@ module.exports = function(game, foeDeck) {
 					options.parsepvpstats(gameData);
 					options.parseaistats(gameData);
 				}else{
-					// Inaccurate if stats changed throughout game
-					gameData.p2hp = game.player2.maxhp;
-					gameData.p2markpower = game.player2.markpower;
-					gameData.p2deckpower = game.player2.deckpower;
+					gameData.p2hp = data.p2hp;
+					gameData.p2markpower = data.p2markpower;
+					gameData.p2drawpower = data.p2drawpower;
 				}
 				require("./Match")(gameData, true);
 			}
