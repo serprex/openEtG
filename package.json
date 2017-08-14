@@ -7,9 +7,10 @@
     "url": "https://github.com/serprex/openEtG"
   },
   "dependencies": {
-    "http2": "^3.3.6",
+    "bufferutil": "^3.0.2",
+    "httpolyglot": "^0.1.2",
     "redis": "^2.8.0",
-    "uws": "^8.14.1"
+    "ws": "^3.1.0"
   },
   "devDependencies": {
     "mkcjs": "^0.1.0",

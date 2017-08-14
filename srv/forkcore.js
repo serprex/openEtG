@@ -11,14 +11,14 @@ const lut = {
 module.exports = function(req, res){
 	try{
 		res.on("error",()=>{});
-		const url = req.url.slice(1);
+		const qidx = req.url.indexOf('?'), url = ~qidx ? req.url.slice(1, qidx) : req.url.slice(1);
 		const ifmod = new Date(req.headers["if-modified-since"] || "").getTime();
 		if (cache.try(res, url, ifmod)) return;
 		const idx = url.indexOf("/"),
 			func = ~idx && lut[url.slice(0,idx)];
 		if (func){
 			cache.add(res, url, ifmod, url.slice(idx+1), func);
-		}else if (url.indexOf("..")==-1 && url.match(/^(vanilla\/|cia\/)?$|\.(js(on)?|html?|css|csv|png|ogg)$/)){
+		}else if (!~url.indexOf("..") && url.match(/^(vanilla\/|cia\/)?$|\.(js(on)?|html?|css|csv|png|ogg)$/)){
 			cache.add(res, url, ifmod, (url.match(/^(vanilla\/|cia\/)?$/) ? url + "index.html" : url), file);
 		}else if (url == "vanilla" || url == "cia"){
 			res.writeHead(302, { Location: "/" + url + "/" });

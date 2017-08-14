@@ -3,8 +3,8 @@
 process.chdir(__dirname);
 const fs = require("fs");
 const https = require("https");
-const http2 = require("http2");
-const uws = require("uws");
+const httpoly = require("httpolyglot");
+const ws = require("ws");
 const etg = require("./etg");
 const Cards = require("./Cards");
 Cards.loadcards();
@@ -38,7 +38,10 @@ const keycerttask = sutil.mkTask(res => {
 		broadcast(data);
 	}
 	function broadcast(data){
-		wss.broadcast(JSON.stringify(data));
+		const msg = JSON.stringify(data);
+		for (const sock of wss.clients) {
+			if (sock.readyState === 1) sock.send(msg);
+		}
 	}
 	function getAgedHp(hp, age){
 		return Math.max(hp-age*age, hp/2)|0;
@@ -666,11 +669,11 @@ const keycerttask = sutil.mkTask(res => {
 		socket.on("close", onSocketClose);
 		socket.on("message", onSocketMessage);
 	}
-	const app = http2.createServer({
+	const app = httpoly.createServer({
 		key: res.key,
 		cert: res.cert,
 	}, require("./srv/forkcore")).listen(13602).on("clientError", ()=>{});
-	const wss = new uws.Server({server:app, clientTracking:true, perMessageDeflate:true});
+	const wss = new ws.Server({server:app, clientTracking:true, perMessageDeflate:true});
 	wss.on("connection", onSocketConnection);
 	function stop(){
 		app.close();
