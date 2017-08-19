@@ -13,6 +13,7 @@ exports.card = function(code){
 		"]]></style><image xlink:href='../assets/cardBacks.png' x='"+(card.element+card.upped*13)*-128+"' width='3328' height='127'/>" +
 		"<image xlink:href='../assets/cardBacks.png' x='"+(card.element+card.upped*13)*-128+"' y='128' width='3328' height='127'/>" +
 		"<text x='2' y='15'"+textColor+">"+card.name+"</text>" + (card.cost ? "<text x='108' y='15'"+textColor+">"+card.cost+"</text>" : "") +
+		"<rect x='0' y='20' width='128' height='128' fill='" + ui.maybeLightenStr(card) + "'/>" +
 		"<image xlink:href='../Cards/"+etgutil.asShiny(etgutil.asUpped(code, false), false).toString(32)+".png' y='20' width='128' height='128'/>" +
 		"<foreignObject x='2' y='140' width='124' height='116' requiredExtensions='http://www.w3.org/1999/xhtml'><body xmlns='http://www.w3.org/1999/xhtml'><p style='font-family:Dosis;font-size:10px;white-space:pre-wrap'>" +
 		card.info().replace(/\|/g, " / ").replace(/(\d\d?):(\d+)/g, "$1<span class='ico te$2'></span>") +
