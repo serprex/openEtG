@@ -289,9 +289,10 @@ countimmbur:function(c){
 	return n;
 },
 cpower:function(c,t){
-	var buff = t.owner.upto(25);
-	t.buffhp(Math.floor(buff/5)+1);
-	t.atk += buff%5+1;
+	var buff = t.owner.upto(25), bh = (buff/5|0)+1, ba = buff%5+1;
+	Effect.mkText(ba + "|" + bh, t);
+	t.buffhp(bh);
+	t.atk += ba;
 },
 creatureupkeep:function(c,t){
 	c.owner.masscc(c, function(c, t){

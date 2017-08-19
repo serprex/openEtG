@@ -267,7 +267,7 @@ exports.getTextImage = function(text, size, color, bgcolor, width) {
 		text = text.trim();
 		if (!text) return;
 		setMode(0);
-		var spacedText = text.replace(/\|/g, " | ");
+		var spacedText = text.replace(/\|/g, " / ");
 		var w = ctx.measureText(spacedText).width;
 		if (!width || x + w <= width){
 			textxy.push(spacedText, x, y+size);
@@ -277,7 +277,7 @@ exports.getTextImage = function(text, size, color, bgcolor, width) {
 		var idx = 0, endidx = 0, oldblock = "";
 		util.iterSplit(text, " ", function(word){
 			var nextendidx = endidx + word.length + 1;
-			var newblock = text.slice(idx, nextendidx-1).replace(/\|/g, " | ");
+			var newblock = text.slice(idx, nextendidx-1).replace(/\|/g, " / ");
 			if (width && x + ctx.measureText(newblock).width >= width){
 				textxy.push(oldblock, x, y+size);
 				newblock = word;
