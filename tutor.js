@@ -2,26 +2,31 @@ var dom = require("./dom");
 var options = require("./options");
 var tutor = module.exports = function(tutdata, x, y, stage){
 	if (options.disableTut) return stage;
-	var tutspan;
-	dom.add(stage.dom, dom.style(dom.icob(13, function() {
+	var tutspan, tutbtn = document.createElement("span");
+	tutbtn.className = "imgb ico e13";
+	tutbtn.addEventListener("mouseenter", function() {
+		if (!tutspan) {
+			tutspan = document.createElement("div");
+			var tutbg = document.createElement("div");
+			tutbg.className = "tutorialbg";
+			dom.add(tutspan, tutbg);
+			tutdata.forEach(function(info) {
+				var text = dom.text(info[info.length-1]);
+				text.className = "tutorialbox";
+				if (info.length > 2) text.style.width = info[2] + "px";
+				if (info.length > 3) text.style.height = info[3] + "px";
+				dom.add(tutspan, [info[0], info[1], text]);
+			});
+			stage.dom.appendChild(tutspan);
+		}
+	});
+	tutbtn.addEventListener("mouseleave", function() {
 		if (tutspan) {
 			tutspan.remove();
 			tutspan = undefined;
-			return;
 		}
-		tutspan = document.createElement("div");
-		var tutbg = document.createElement("div");
-		tutbg.className = "tutorialbg";
-		dom.add(tutspan, tutbg);
-		tutdata.forEach(function(info) {
-			var text = dom.text(info[info.length-1]);
-			text.className = "tutorialbox";
-			if (info.length > 2) text.style.width = info[2] + "px";
-			if (info.length > 3) text.style.height = info[3] + "px";
-			dom.add(tutspan, [info[0], info[1], text]);
-		});
-		stage.dom.appendChild(tutspan);
-	}),{
+	});
+	dom.add(stage.dom, dom.style(tutbtn,{
 		position:"absolute",
 		left:x+"px",
 		top:y+"px",
