@@ -1,12 +1,6 @@
 "use strict";
 exports.Codes = [];
 exports.Targeting = null;
-exports.loadcards = function(){
-	require("./Cards.json").forEach(function(cards, type){
-		if (type == 6) parseTargeting(cards);
-		else parseCsv(type, cards);
-	});
-}
 exports.codeCmp = function(x, y){
 	var cx = exports.Codes[etgutil.asShiny(x, false)], cy = exports.Codes[etgutil.asShiny(y, false)];
 	return cx.upped - cy.upped || cx.element - cy.element || cx.cost - cy.cost || cx.type - cy.type || (cx.code > cy.code) - (cx.code < cy.code) || (x > y) - (x < y);
@@ -154,3 +148,8 @@ var TargetFilters = {
 var etg = require("./etg");
 var Card = require("./Card");
 var etgutil = require("./etgutil");
+
+require("./Cards.json").forEach(function(cards, type){
+	if (type == 6) parseTargeting(cards);
+	else parseCsv(type, cards);
+});

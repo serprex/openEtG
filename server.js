@@ -7,7 +7,6 @@ const httpoly = require("httpolyglot");
 const ws = require("ws");
 const etg = require("./etg");
 const Cards = require("./Cards");
-Cards.loadcards();
 const RngMock = require("./RngMock");
 const etgutil = require("./etgutil");
 const usercmd = require("./usercmd");

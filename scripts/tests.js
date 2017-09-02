@@ -8,7 +8,6 @@ const assert = require("assert"),
 	Thing = require("../Thing"),
 	Skills = require("../Skills"),
 	etgutil = require("../etgutil");
-Cards.loadcards();
 function initHand(pl, ...args){
 	for(var i=0; i<args.length; i++){
 		var cardinst = pl.hand[i] = new Thing(args[i]);

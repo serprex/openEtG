@@ -10,7 +10,6 @@ function writetd(){
 if (process.argv.length < 3){
 	var etg = require("../etg");
 	var Cards = require("../Cards");
-	Cards.loadcards();
 	write("[right][table]");
 	writetd("Tot", "Ele", "C", "P", "S", "|", "R", "U", "C", "", "");
 	for(var i=0; i<13; i++){

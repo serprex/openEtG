@@ -2,7 +2,6 @@
 var Cards = require("../Cards");
 var etgutil = require("../etgutil");
 var decks = require("../Decks");
-Cards.loadcards();
 var pool = "";
 function buildPool(x){pool = etgutil.mergedecks(pool, x[1])}
 decks.mage.forEach(buildPool);

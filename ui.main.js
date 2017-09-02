@@ -16,7 +16,6 @@ window.onerror = function(){
 		lastError = now;
 	}
 }
-Cards.loadcards();
 if (options.hideRightpane){
 	document.getElementById("rightpane").style.display = "none";
 }

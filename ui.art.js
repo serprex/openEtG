@@ -14,7 +14,6 @@ function hookRowMouseover(tr){
 	});
 }
 var Cards = require("./Cards");
-Cards.loadcards();
 var imgs = new Array(8), imgdiv = document.getElementById("imgdiv");
 for(var i=0; i<8; i++) imgdiv.appendChild(imgs[i] = new Image());
 var table = document.createElement("table");
