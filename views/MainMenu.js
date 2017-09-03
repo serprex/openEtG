@@ -109,10 +109,6 @@ module.exports = function(nymph) {
 		if (event.target.tagName.match(/^(DIV|CANVAS|HTML)$/)) tinfo.text = sock.user ? tipjar[tipNumber] + "." : "To register, just type desired username & password in the fields to the right, then click 'Login'.";
 	}
 	var tinfo = dom.text("");
-	function wealthTop(){
-		sock.emit("wealthtop");
-		this.style.display = "none";
-	}
 	function titleText(text){
 		return dom.style(dom.text(text), {
 			fontSize: "20px",
@@ -136,7 +132,7 @@ module.exports = function(nymph) {
 		playbox = dom.divwh(196, 128),
 		tipbox = dom.divwh(504, 48);
 	deckbox.appendChild(titleText("Cards & Decks"));
-	var bwealth = dom.button("Wealth T50", wealthTop, mkSetTip("See who's collected the most wealth"));
+	var bwealth = dom.button("Wealth T50", require("./WealthTop"), mkSetTip("See who's collected the most wealth"));
 	bwealth.style.position = "absolute";
 	bwealth.style.left = "52px";
 	arenabox.appendChild(titleText("Arena"));
@@ -251,7 +247,6 @@ module.exports = function(nymph) {
 		librarygive: require("./Library"),
 		arenainfo: require("./ArenaInfo"),
 		arenatop: require("./ArenaTop"),
-		wealthtop: require("./WealthTop"),
 		codecard:function(data){
 			require("./Reward")(data.type, data.num, foename.value);
 		},
