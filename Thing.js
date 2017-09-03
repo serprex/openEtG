@@ -39,8 +39,8 @@ Thing.prototype.transform = function(card){
 	}
 }
 Thing.prototype.getIndex = function(){
-	return this.type == etg.Weapon ? (this.weapon == this ? 0 : -1) :
-		this.type == etg.Shield ? (this.shield == this ? 0 : -1) :
+	return this.type == etg.Weapon ? (this.owner.weapon == this ? 0 : -1) :
+		this.type == etg.Shield ? (this.owner.shield == this ? 0 : -1) :
 		(this.type == etg.Creature ? this.owner.creatures :
 		this.type == etg.Permanent ? this.owner.permanents :
 		this.owner.hand).indexOf(this);

@@ -2031,7 +2031,7 @@ wings:function(c,t, data){
 },
 };
 for(var key in Skills){
-	Skills[key] = {name: [key], func:Skills[key]};
+	Skills[key] = {name: [key], func:Skills[key], passive:false};
 }
 Skills.abomination.passive=
 Skills.becomearctic.passive=
