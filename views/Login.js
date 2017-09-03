@@ -1,5 +1,4 @@
 var px = require("../px");
-var dom = require("../dom");
 var gfx = require("../gfx");
 var chat = require("../chat");
 var sock = require("../sock");
@@ -48,27 +47,25 @@ module.exports = function(){
 		else sandbox = true;
 	}});
 	var bg_login = h("img", { src: "assets/bg_login.png", className: "bgimg" });
-	var username = h("input", { placeholder: 'Username', autofocus: true, tabIndex: '1' });
-	var password = h("input", { type: 'password', placeholder: 'Password', tabIndex: '2' });
-	var rememberCheck = h("input", { type: 'checkbox' });
-	var remember = h("label", {}, rememberCheck, 'Remember me');
-	[username, password].forEach(function(ele){
-		console.log(ele);
-		ele.attributes.onKeyPress = maybeLogin;
+	var username = h("input", { placeholder: 'Username', autofocus: true, tabIndex: '1', onKeyPress: maybeLogin });
+	var password = h("input", { type: 'password', placeholder: 'Password', tabIndex: '2', onKeyPress: maybeLogin });
+	var rememberCheck = h("input", {
+		type: 'checkbox',
+		onChange: function() {
+			if (typeof localStorage !== "undefined"){
+				if (!this.checked) delete localStorage.auth;
+				else if (sock.user) localStorage.auth = sock.user.auth;
+			}
+		},
 	});
+	var remember = h("label", {}, rememberCheck, 'Remember me');
 	/*
 	options.register("username", username);
 	options.register("remember", rememberCheck);
-	rememberCheck.addEventListener("change", function() {
-		if (typeof localStorage !== "undefined"){
-			if (!this.checked) delete localStorage.auth;
-			else if (sock.user) localStorage.auth = sock.user.auth;
-		}
-	});
+	*/
 	if (options.remember && typeof localStorage !== "undefined"){
 		loginClick(localStorage.auth);
 	}
-	*/
 	var tutlink = h("a", { href: "forum/?topic=267", target: "_blank" }, "Tutorial");
 	var div = [[0, 0, bg_login],
 		[270, 350, username],
@@ -82,7 +79,7 @@ module.exports = function(){
 		x[2].attributes.style = { position: 'absolute', left: x[0]+'px', top: x[1]+'px' };
 		return x[2];
 	});
-	var view = h('div', { children: div });
+	var view = h('div', { id: 'app', style: { display: '' }, children: div });
 	var xhr = new XMLHttpRequest();
 	xhr.addEventListener("load", function(){
 		var data = JSON.parse(this.responseText)[0];
@@ -98,6 +95,9 @@ module.exports = function(){
 	xhr.send();
 	preact.render(view, null, app);
 	px.view({
+		endnext: function(){
+			app.style.display = "none";
+		},
 		cmds:{
 			login:function(data){
 				if (!data.err){
