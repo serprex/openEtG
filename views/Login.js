@@ -22,7 +22,6 @@ module.exports = function(){
 			sock.emit("login", data);
 		}
 	}
-	var app = document.getElementById("app");
 	var h = preact.h, loadingBar, sandbox;
 	if (gfx.load){
 		loadingBar = h("span", {
@@ -34,7 +33,7 @@ module.exports = function(){
 		gfx.load(function(progress){
 			if (progress == 1) loadingBar.attributes.style.backgroundColor = "#369";
 			loadingBar.attributes.style.width = (progress*900) + "px";
-			preact.render(view, null, app);
+			px.render(view);
 		}, function(){
 			audio.playMusic("openingMusic");
 			if (sock.user || sandbox) require("./MainMenu")();
@@ -89,15 +88,13 @@ module.exports = function(){
 			style: { maxWidth: '380px', position: 'absolute', left: '260px', top: '460px' }
 		}, data.author.login + ": " + data.commit.message);
 		view.children = view.children.concat([a]);
-		preact.render(view, null, app);
+		px.render(view);
 	});
 	xhr.open("GET", "https://api.github.com/repos/serprex/openEtG/commits?per_page=1", true);
 	xhr.send();
-	preact.render(view, null, app);
+	px.render(view);
 	px.view({
-		endnext: function(){
-			app.style.display = "none";
-		},
+		endnext: px.hideapp,
 		cmds:{
 			login:function(data){
 				if (!data.err){

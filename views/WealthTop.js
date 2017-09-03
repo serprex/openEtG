@@ -4,7 +4,7 @@ var chat = require("../chat");
 var sock = require("../sock");
 
 module.exports = function() {
-	var h = preact.h, app = document.getElementById('app');
+	var h = preact.h;
 	var ol1 = h('ol', {
 		className: 'width400',
 		style: {
@@ -34,11 +34,9 @@ module.exports = function() {
 			},
 		})
 	);
-	preact.render(view, null, app);
+	px.render(view);
 	px.view({
-		endnext: function() {
-			app.style.display = "none";
-		},
+		endnext: px.hideapp,
 		cmds:{
 			wealthtop:function(info){
 				info = info.top;
@@ -51,7 +49,7 @@ module.exports = function() {
 				}
 				ol1.children = ol1c;
 				ol2.children = ol2c;
-				preact.render(view, null, app);
+				px.render(view);
 			}
 		}
 	});
