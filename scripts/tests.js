@@ -29,13 +29,11 @@ class TestModule{
 }
 var M = new TestModule("Upped Alignment");
 M.test("Upped Alignment", function() {
-	for(var key in Cards.Codes){
-		key = parseInt(key);
+	for(let key in Cards.Codes){
+		key |= 0;
 		if (!key) continue;
 		var un = etgutil.asUpped(key, false), up = etgutil.asUpped(key, true);
-		if (!(un in Cards.Codes) || !(up in Cards.Codes)){
-			assert.fail(key);
-		}
+		assert.ok(Cards.Codes[un] && Cards.Codes[up], key);
 	}
 });
 M = new TestModule("Cards", {

@@ -5,14 +5,12 @@ var chat = require("../chat");
 var sock = require("../sock");
 var audio = require("../audio");
 var options = require("../options");
-var bg_login = new Image();
-bg_login.src = "assets/bg_login.png";
-bg_login.className = "bgimg";
+
 module.exports = function(){
 	function maybeLogin(e) {
 		e.cancelBubble = true;
 		if (e.keyCode == 13) {
-			this.blur();
+			e.target.blur();
 			loginClick();
 		}
 	}
@@ -25,36 +23,40 @@ module.exports = function(){
 			sock.emit("login", data);
 		}
 	}
-	var loadingBar, sandbox;
+	var app = document.getElementById("app");
+	var h = preact.h, loadingBar, sandbox;
 	if (gfx.load){
-		loadingBar = document.createElement("span");
-		loadingBar.style.backgroundColor = "#fff";
-		loadingBar.style.height = "32px";
+		loadingBar = h("span", {
+			style: {
+				backgroundColor: "#fff",
+				height: "32px",
+			}
+		});
 		gfx.load(function(progress){
-			if (progress == 1) loadingBar.style.backgroundColor = "#369";
-			loadingBar.style.width = (progress*900) + "px";
+			if (progress == 1) loadingBar.attributes.style.backgroundColor = "#369";
+			loadingBar.attributes.style.width = (progress*900) + "px";
+			preact.render(view, null, app);
 		}, function(){
 			audio.playMusic("openingMusic");
 			if (sock.user || sandbox) require("./MainMenu")();
 		});
 		require("./MainMenu"); // Queue loading bg_main
 	}
-	var login = dom.button("Login", loginClick);
-	var username = document.createElement("input");
-	var password = document.createElement("input");
-	var rememberCheck = document.createElement("input");
-	var remember = document.createElement("label");
-	password.type = "password";
-	rememberCheck.type = "checkbox";
-	remember.appendChild(rememberCheck);
-	remember.appendChild(document.createTextNode("Remember me"));
-	username.placeholder = "Username";
-	password.placeholder = "Password";
-	username.tabIndex = "1";
-	password.tabIndex = "2";
+	var login = h("input", { type: "button", value: "Login", onClick: loginClick});
+	var btnsandbox = h("input", {type: "button", value: "Sandbox", onClick: function(){
+		if (gfx.loaded) require("./MainMenu")();
+		else sandbox = true;
+	}});
+	var bg_login = h("img", { src: "assets/bg_login.png", className: "bgimg" });
+	var username = h("input", { placeholder: 'Username', autofocus: true, tabIndex: '1' });
+	var password = h("input", { type: 'password', placeholder: 'Password', tabIndex: '2' });
+	var rememberCheck = h("input", { type: 'checkbox' });
+	var remember = h("label", {}, rememberCheck, 'Remember me');
 	[username, password].forEach(function(ele){
-		ele.addEventListener("keypress", maybeLogin);
+		console.log(ele);
+		ele.attributes.onKeyPress = maybeLogin;
 	});
+	/*
 	options.register("username", username);
 	options.register("remember", rememberCheck);
 	rememberCheck.addEventListener("change", function() {
@@ -66,36 +68,36 @@ module.exports = function(){
 	if (options.remember && typeof localStorage !== "undefined"){
 		loginClick(localStorage.auth);
 	}
-	var tutlink = document.createElement("a");
-	tutlink.href = "forum/?topic=267"
-	tutlink.target = "_blank";
-	tutlink.appendChild(document.createTextNode("Tutorial"));
-	var div = dom.div(
-		[0, 0, bg_login],
+	*/
+	var tutlink = h("a", { href: "forum/?topic=267", target: "_blank" }, "Tutorial");
+	var div = [[0, 0, bg_login],
 		[270, 350, username],
 		[270, 380, password],
 		[430, 380, remember],
 		[430, 350, login],
 		[270, 424, tutlink],
-		[530, 350, ["Sandbox", function(){
-			if (gfx.loaded) require("./MainMenu")();
-			else sandbox = true;
-		}]]);
-	if (loadingBar) dom.add(div, [0, 568, loadingBar]);
+		[530, 350, btnsandbox]];
+	if (loadingBar) div.push([0, 568, loadingBar]);
+	div = div.map(x => {
+		x[2].attributes.style = { position: 'absolute', left: x[0]+'px', top: x[1]+'px' };
+		return x[2];
+	});
+	var view = h('div', { children: div });
 	var xhr = new XMLHttpRequest();
 	xhr.addEventListener("load", function(){
 		var data = JSON.parse(this.responseText)[0];
-		var a = document.createElement("a");
-		a.target = "_blank";
-		a.href = data.html_url;
-		a.appendChild(document.createTextNode(data.author.login + ": " + data.commit.message));
-		a.style.maxWidth = "380px";
-		dom.add(div, [260, 460, a]);
+		var a = h('a', {
+			target: '_blank',
+			href: data.html_url,
+			style: { maxWidth: '380px', position: 'absolute', left: '260px', top: '460px' }
+		}, data.author.login + ": " + data.commit.message);
+		view.children = view.children.concat([a]);
+		preact.render(view, null, app);
 	});
 	xhr.open("GET", "https://api.github.com/repos/serprex/openEtG/commits?per_page=1", true);
 	xhr.send();
+	preact.render(view, null, app);
 	px.view({
-		dom:div,
 		cmds:{
 			login:function(data){
 				if (!data.err){
@@ -115,5 +117,4 @@ module.exports = function(){
 			}
 		}
 	});
-	username.focus();
 }

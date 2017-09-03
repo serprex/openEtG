@@ -1,8 +1,9 @@
 <!DOCTYPE html>
 <title>openEtG</title>
-<script>"use strict";var TCALL=0;function tryInit(){if(++TCALL==3){window.PIXI=require("./pixi");require("./ui.main")}}document.addEventListener("DOMContentLoaded",tryInit)</script>
+<script>"use strict";var TCALL=0;function tryInit(){if(++TCALL==4){window.PIXI=require("./pixi");require("./ui.main")}}document.addEventListener("DOMContentLoaded",tryInit)</script>
 <script async src="pixi.min.js" onload="tryInit()"></script>
 <script async src="etgify.js" onload="tryInit()"></script>
+<script async src="//unpkg.com/preact@8.2.5" onload="tryInit()"></script>
 <link href="//fonts.googleapis.com/css?family=Dosis" rel="stylesheet" type="text/css">
 <link href="favicon.png" rel="shortcut icon">
 <link href="ui.css" rel="stylesheet">
@@ -14,4 +15,5 @@
 	<div id="chatBox"></div>
 	<textarea id="chatinput" placeholder="Chat"></textarea>
 </div>
+<div id="app" style="width:900px;height:600px;position:absolute"></div>
 <canvas id="leftpane" width=900 height=600></canvas>
