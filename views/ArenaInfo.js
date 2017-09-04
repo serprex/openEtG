@@ -6,10 +6,22 @@ var sock = require("../sock");
 var util = require("../util");
 var etgutil = require("../etgutil");
 module.exports = function(data) {
-	var stage = new PIXI.Container();
-	var div = dom.div(
-		[96, 576, "Earn 1$ when your arena deck is faced, & another 2$ when it wins"],
-		[8, 300, ["Exit", require("./MainMenu")]]);
+	var stage = new PIXI.Container(), h = preact.h;
+	var div = h('div', { id: 'app', style: { display: '' }},
+		h('span', { style: { position: 'absolute', left: '96px', top: '576px' }}, "Earn 1$ when your arena deck is faced, & another 2$ when it wins"),
+		h('input', {
+			type: 'button',
+			value: 'Exit',
+			style: {
+				position: 'absolute',
+				left: '8px',
+				top: '300px',
+			},
+			onClick: function() {
+				require('./MainMenu')();
+			}
+		})
+	);
 	function renderInfo(info, y){
 		if (info){
 			if (y) info.card = etgutil.asUpped(info.card, true);
@@ -25,41 +37,70 @@ module.exports = function(data) {
 				stage.addChild(spr);
 				i++;
 			});
-			var marksprite = document.createElement("span");
-			marksprite.className = "ico e" + mark;
-			dom.add(div, [100, 4 + y, "W-L: " + (info.win || 0) + " - " + (info.loss || 0) + ", Rank: " + (info.rank == undefined ? "Inactive" : (info.rank + 1)) + ", " + ((info.win || 0) * 3 + (info.loss || 0) * 1) + "$"],
-				[330, 4+y, adeck],
-				[400, 224+y, "Age: " + info.day],
-				[100, 224+y, "HP: " + info.curhp + " / " + info.hp],
-				[200, 224+y, "Mark: " + info.mark],
-				[300, 224+y, "Draw: " + info.draw],
-				[500, 224+y, ["Modify", function(){
-					require("./Editor")(data, info, info.card);
-				}]], [600, 224+y, ["Test", function(){
-					var deck = sock.getDeck();
-					if (etgutil.decklength(deck) < 9 || etgutil.decklength(adeck) < 9) {
-						require("./Editor")();
-						return;
+			div.children.push(
+				h('span', { style: { position: 'absolute', left: '100px', top: 4+y+'px' }}, "W-L: " + (info.win || 0) + " - " + (info.loss || 0) + ", Rank: " + (info.rank == undefined ? "Inactive" : (info.rank + 1)) + ", " + ((info.win || 0) * 3 + (info.loss || 0) * 1) + "$"),
+				h('span', { style: { position: 'absolute', left: '330px', top: 4+y+'px' }}, adeck),
+				h('span', { style: { position: 'absolute', left: '400px', top: 224+y+'px' }}, 'Age: ' + info.day),
+				h('span', { style: { position: 'absolute', left: '100px', top: 224+y+'px' }}, "HP: " + info.curhp + ' / ' + info.hp),
+				h('span', { style: { position: 'absolute', left: '200px', top: 224+y+'px' }}, "Mark: " + info.mark),
+				h('span', { style: { position: 'absolute', left: '300px', top: 224+y+'px' }}, "Draw: " + info.draw),
+				h('input', {
+					type: 'button',
+					value: 'Modify',
+					style: {
+						position: 'absolute',
+						left: '500px',
+						top: 224+y+'px',
+					},
+					onClick: function(){
+						require("./Editor")(data, info, info.card);
 					}
-					var gameData = { deck: adeck, urdeck: deck, seed: util.randint(), foename: "Test", cardreward: "",
-						p2hp:info.curhp, p2markpower:info.mark, p2drawpower:info.draw };
-					require("./Match")(gameData, true);
-				}]], [66, 200+y, marksprite]);
+				}),
+				h('input', {
+					type: 'button',
+					value: 'Test',
+					style: {
+						position: 'absolute',
+						left: '600px',
+						top: 224+y+'px',
+					},
+					onClick: function(){
+						var deck = sock.getDeck();
+						if (etgutil.decklength(deck) < 9 || etgutil.decklength(adeck) < 9) {
+							require("./Editor")();
+							return;
+						}
+						var gameData = { deck: adeck, urdeck: deck, seed: util.randint(), foename: "Test", cardreward: "",
+							p2hp:info.curhp, p2markpower:info.mark, p2drawpower:info.draw };
+						require("./Match")(gameData, true);
+					}
+				}),
+				h('span', { className: 'ico e' + mark, style: { position: 'absolute', left: '66px', top: 200+y+'px' } })
+			);
 		}
 	}
 	renderInfo(data.A, 0);
 	renderInfo(data.B, 300);
 	if (sock.user.ocard){
 		for(var i=0; i<2; i++){
-			(function(uocard){
-				dom.add(div, [734, 268+i*292, ["Create", function(){
+			let uocard = etgutil.asUpped(sock.user.ocard, i == 1);
+			div.children.push(h('input', {
+				type: 'button',
+				value: 'Create',
+				style: {
+					position: 'absolute',
+					left: '734px',
+					top: '268'+i*292+'px',
+				},
+				onClick: function(){
 					require("./Editor")(data, data[uocard>6999?"B":"A"] || {}, uocard, true);
-				}]]);
-				var ocard = new PIXI.Sprite(gfx.getArt(uocard));
-				ocard.position.set(734, 8+i*292);
-				stage.addChild(ocard);
-			})(etgutil.asUpped(sock.user.ocard, i == 1));
+				}
+			}));
+			var ocard = new PIXI.Sprite(gfx.getArt(uocard));
+			ocard.position.set(734, 8+i*292);
+			stage.addChild(ocard);
 		}
 	}
-	px.view({view:stage, dom:div});
+	px.view({endnext: px.hideapp, view:stage});
+	px.render(div);
 }
