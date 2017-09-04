@@ -166,7 +166,7 @@ function maybeSendChat(e) {
 			var rx = new RegExp(msg.slice(7));
 			var chatBox = document.getElementById("chatBox");
 			for(var i=chatBox.children.length-1; i>=0; i--){
-				if (chatBox.children[i].textContent.match(rx)) chatBox.children[i].remove();
+				if (chatBox.children[i].textContent.match(rx)) chatBox.removeChild(chatBox.children[i]);
 			}
 		}else if (msg == "/who"){
 			sock.emit("who");

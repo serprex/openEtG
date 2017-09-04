@@ -47,7 +47,7 @@ module.exports = function(){
 	}});
 	var bg_login = h("img", { src: "assets/bg_login.png", className: "bgimg" });
 	var username = h("input", { placeholder: 'Username', autofocus: true, tabIndex: '1', onKeyPress: maybeLogin });
-	var passwordEle, password = h("input", { ref: input => { passwordEle = input; }, type: 'password', placeholder: 'Password', tabIndex: '2', onKeyPress: maybeLogin });
+	var passwordEle, password = h("input", { ref: function(input) { passwordEle = input; }, type: 'password', placeholder: 'Password', tabIndex: '2', onKeyPress: maybeLogin });
 	var rememberCheck = h("input", {
 		type: 'checkbox',
 		onChange: function() {
@@ -72,7 +72,7 @@ module.exports = function(){
 		[270, 424, tutlink],
 		[530, 350, btnsandbox]];
 	if (loadingBar) div.push([0, 568, loadingBar]);
-	div = div.map(x => {
+	div = div.map(function(x){
 		x[2].attributes.style = { position: 'absolute', left: x[0]+'px', top: x[1]+'px' };
 		return x[2];
 	});

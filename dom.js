@@ -104,7 +104,7 @@ exports.IconBtn = function(props) {
 			audio.playSound('buttonClick');
 			if (props.click) props.click.call(e.target, e);
 		},
-		...this.props.props,
+		onMouseOver: props.onMouseOver,
 	});
 }
 exports.ExitBtn = function(props) {
@@ -139,7 +139,7 @@ exports.text = function(text){
 			text = text.toString();
 			if (this.textcache == text) return;
 			this.textcache = text;
-			while (this.firstChild) this.firstChild.remove();
+			while (this.lastChild) this.removeChild(this.lastChild);
 			text = text.replace(/\|/g, " | ");
 			var sep = /\d\d?:\d\d?|\$|\n/g, reres, lastindex = 0;
 			while (reres = sep.exec(text)){

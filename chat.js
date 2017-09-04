@@ -45,7 +45,7 @@ chat.addTab = function(name, div){
 		this.style.fontWeight = "";
 		if (chatBox != tabBox){
 			chatBox.parentElement.insertBefore(tabBox, chatBox);
-			chatBox.remove();
+			chatBox.parentElement.removeChild(chatBox);
 			chatBox = tabBox;
 		}
 		chatBox.scrollTop = chatBox.scrollHeight;
@@ -77,5 +77,5 @@ chat.clear = function(name){
 	}else{
 		var tabBox = chatBox;
 	}
-	while (tabBox.firstChild) tabBox.firstChild.remove();
+	while (tabBox.lastChild) tabBox.removeChild(tabBox.lastChild);
 }

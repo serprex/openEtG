@@ -50,12 +50,10 @@ module.exports = function() {
 				sock.user = undefined;
 				sock.emit("inituser", msg);
 			},
-			props: {
-				onMouseOver: function() {
-					eledesc.children = [name + "\n\n" + descriptions[i-1]];
-					px.render(view);
-				},
-			}
+			onMouseOver: function() {
+				eledesc.children = [name + "\n\n" + descriptions[i-1]];
+				px.render(view);
+			},
 		}));
 	}
 	px.view({

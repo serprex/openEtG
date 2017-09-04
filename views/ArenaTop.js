@@ -24,7 +24,7 @@ module.exports = function(lvi) {
 		px.view({
 			endnext: function(){
 				px.hideapp();
-				s.remove();
+				document.body.removeChild(s);
 			},
 			cmds: {
 				arenatop: function(info){

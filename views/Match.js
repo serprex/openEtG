@@ -660,7 +660,7 @@ function startMatch(game, gameData, spectate) {
 			sabbathOverlay[j].style.display = pl.flatline ? "" : "none";
 			handOverlay[j].texture = (pl.usedactive ? gfx.silence :
 				pl.sanctuary ? gfx.sanctuary :
-				pl.nova >= 3 && pl.hand.some(c => c.card.isOf(Cards.Nova)) ? gfx.singularity : gfx.nopic);
+				pl.nova >= 3 && pl.hand.some(function(c){ return c.card.isOf(Cards.Nova) }) ? gfx.singularity : gfx.nopic);
 			var i = 0;
 			for (;i < pl.hand.length;i++) {
 				var isfront = j == 0 || game.player1.precognition,

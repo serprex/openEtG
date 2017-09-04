@@ -128,7 +128,7 @@ module.exports = function() {
 			}
 			if (etgutil.decklength(data.cards) < 11){
 				bget.style.display = "";
-				while (popbooster.firstChild) popbooster.firstChild.remove();
+				while (popbooster.lastChild) popbooster.removeChild(popbooster.lastChild);
 				etgutil.iterdeck(data.cards, function(code, i){
 					var x = i % 5, y = Math.floor(i/5);
 					var cardArt = dom.svg();

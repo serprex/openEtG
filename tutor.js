@@ -22,7 +22,7 @@ var tutor = module.exports = function(tutdata, x, y, stage){
 	});
 	tutbtn.addEventListener("mouseleave", function() {
 		if (tutspan) {
-			tutspan.remove();
+			tutspan.parentElement.removeChild(tutspan);
 			tutspan = undefined;
 		}
 	});

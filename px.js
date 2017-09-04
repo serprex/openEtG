@@ -41,7 +41,7 @@ exports.view = function(stage) {
 		document.body.appendChild(stage.dom);
 	}
 	if (curStage.dom){
-		curStage.dom.remove();
+		document.body.removeChild(curStage.dom);
 	}
 	if (stage.view){
 		if (!curStage.view) requestAnimate();

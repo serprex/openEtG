@@ -12,15 +12,12 @@
 	var etg = require("./etg");
 	var Cards = require("./Cards");
 	var etgutil = require("./etgutil")
-	Cards.loadcards();
+
 	function testDeck() {
 		var deckcode = document.getElementById("deckcode");
 		var legality = document.getElementById("legality");
 		var rulesets = document.getElementById("rulesets");
-		if (!Cards.loaded){
-			legality.value = "Card DB not yet downloaded";
-			return;
-		}
+
 		var code = ~deckcode.value.indexOf(" ") ? deckcode.value.split(" ") : etgutil.decodedeck(deckcode.value);
 		var deck = [];
 		var markele;
