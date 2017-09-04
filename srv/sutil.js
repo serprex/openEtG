@@ -1,4 +1,5 @@
 "use strict";
+const crypto = require('crypto');
 exports.mkTask = function(cb){
 	const params = {};
 	var cbCount = 1;
@@ -23,8 +24,9 @@ exports.mkTask = function(cb){
 }
 exports.initsalt = function(user){
 	if (!user.salt){
-		user.salt = require("crypto").pseudoRandomBytes(15).toString("base64");
-		user.iter = 99999+Math.floor(Math.random()*9999);
+		user.salt = crypto.pseudoRandomBytes(15).toString("base64");
+		user.iter = 99999;
+		user.algo = "SHA512";
 	}
 }
 exports.getDay = function(){

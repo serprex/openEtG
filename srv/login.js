@@ -16,13 +16,18 @@ module.exports = function(sockEmit){
 				return;
 			}
 			key = key.toString("base64");
-			if (user.auth && user.auth != key){
-				sockEmit(socket, "login", {err:"Incorrect password"});
-				return;
-			}else if (!authkey && user.salt.length == 24){
+			if (user.auth != key){
+				if (user.auth){
+					sockEmit(socket, "login", {err:"Incorrect password"});
+					return;
+				} else {
+					user.auth = key;
+				}
+			}else if (!authkey && !user.algo){
 				user.auth = user.salt = "";
 				return loginRespond(socket, user, pass);
-			}else{
+			}
+			if (socket.readyState == 1){
 				const day = sutil.getDay();
 				if (user.oracle < day){
 					user.oracle = day;
@@ -41,19 +46,17 @@ module.exports = function(sockEmit){
 					user.dailymage = Math.floor(Math.random() * aiDecks.mage.length);
 					user.dailydg = Math.floor(Math.random() * aiDecks.demigod.length);
 				}
-				db.zadd("wealth", user.gold + userutil.calcWealth(user.pool), user.name);
-			}
-			if (socket.readyState == 1){
 				Us.socks[user.name] = socket;
-				socket.send('{"x":"login",'+JSON.stringify(user, function(key, val){ return this == user && key.match(/^(salt|iter)$/) ? undefined : val }).slice(1));
+				socket.send('{"x":"login",'+JSON.stringify(user, function(key, val){ return this == user && key.match(/^(salt|iter|algo)$/) ? undefined : val }).slice(1));
 				if (!user.daily) user.daily = 128;
+				db.zadd("wealth", user.gold + userutil.calcWealth(user.pool), user.name);
 			}
 		}
 		sutil.initsalt(user);
 		if (authkey){
 			postHash(null, authkey);
 		}else if (pass){
-			crypto.pbkdf2(pass, user.salt, user.iter, 64, "SHA1", postHash);
+			crypto.pbkdf2(pass, user.salt, user.iter, 64, user.algo||"SHA1", postHash);
 		}else postHash(null, "");
 	}
 	function loginAuth(data){

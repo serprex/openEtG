@@ -41,22 +41,21 @@ module.exports = function() {
 	];
 	for (let i=1; i<=14; i++) {
 		var name = ui.eleNames[i];
-		view.children.push(h('span', {
-			className: 'imgb ico e' + (i < 13 ? i : i == 13 ? 14 : 13),
-			style: {
-				position: 'absolute',
-				left: 100+Math.floor((i-1)/2)*64 + 'px',
-				top: 180+((i-1)&1)*64+'px',
-			},
-			onClick: function() {
+		view.children.push(h(dom.IconBtn, {
+			e: 'e' + (i < 13 ? i : i == 13 ? 14 : 13),
+			x: 100+Math.floor((i-1)/2)*64,
+			y: 180+((i-1)&1)*64,
+			click: function() {
 				var msg = { u: sock.user.name, a: sock.user.auth, e: i == 14 ? RngMock.upto(12)+1 : i };
 				sock.user = undefined;
 				sock.emit("inituser", msg);
 			},
-			onMouseOver: function() {
-				eledesc.children = [name + "\n\n" + descriptions[i-1]];
-				px.render(view);
-			},
+			props: {
+				onMouseOver: function() {
+					eledesc.children = [name + "\n\n" + descriptions[i-1]];
+					px.render(view);
+				},
+			}
 		}));
 	}
 	px.view({

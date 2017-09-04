@@ -17,7 +17,7 @@ module.exports = function(){
 		if (!sock.user && options.username) {
 			var data = {u:options.username}
 			if (typeof auth !== "string"){
-				if (password.value) data.p = password.value;
+				if (passwordEle.value) data.p = passwordEle.value;
 			}else data.a = auth;
 			sock.emit("login", data);
 		}
@@ -47,7 +47,7 @@ module.exports = function(){
 	}});
 	var bg_login = h("img", { src: "assets/bg_login.png", className: "bgimg" });
 	var username = h("input", { placeholder: 'Username', autofocus: true, tabIndex: '1', onKeyPress: maybeLogin });
-	var password = h("input", { type: 'password', placeholder: 'Password', tabIndex: '2', onKeyPress: maybeLogin });
+	var passwordEle, password = h("input", { ref: input => { passwordEle = input; }, type: 'password', placeholder: 'Password', tabIndex: '2', onKeyPress: maybeLogin });
 	var rememberCheck = h("input", {
 		type: 'checkbox',
 		onChange: function() {
