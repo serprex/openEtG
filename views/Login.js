@@ -58,10 +58,8 @@ module.exports = function(){
 		},
 	});
 	var remember = h("label", {}, rememberCheck, 'Remember me');
-	/*
 	options.register("username", username);
 	options.register("remember", rememberCheck);
-	*/
 	if (options.remember && typeof localStorage !== "undefined"){
 		loginClick(localStorage.auth);
 	}
