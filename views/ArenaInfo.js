@@ -9,18 +9,7 @@ module.exports = function(data) {
 	var stage = new PIXI.Container(), h = preact.h;
 	var div = h('div', { id: 'app', style: { display: '' }},
 		h('span', { style: { position: 'absolute', left: '96px', top: '576px' }}, "Earn 1$ when your arena deck is faced, & another 2$ when it wins"),
-		h('input', {
-			type: 'button',
-			value: 'Exit',
-			style: {
-				position: 'absolute',
-				left: '8px',
-				top: '300px',
-			},
-			onClick: function() {
-				require('./MainMenu')();
-			}
-		})
+		h(dom.ExitBtn, { x: 8, y: 300 })
 	);
 	function renderInfo(info, y){
 		if (info){

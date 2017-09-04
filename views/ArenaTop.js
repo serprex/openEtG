@@ -19,19 +19,8 @@ module.exports = function(lvi) {
 		s.style.position = 'absolute';
 		s.style.display = 'none';
 		document.body.appendChild(s);
-		var ol = h("ol", { className: "atopol", style: { position: 'absolute', left: '90px', top: '50px' } });
-		var view = h('div', { id: 'app', style: { display: '' } }, ol,
-			h('input', {
-				type: 'button',
-				value: 'Exit',
-				onClick: function(){ require("./MainMenu")() },
-				style: {
-					position: 'absolute',
-					left: '8px',
-					top: '300px',
-				},
-			})
-		);
+		var ol = h('ol', { className: "atopol", style: { position: 'absolute', left: '90px', top: '50px' } });
+		var view = h('div', { id: 'app', style: { display: '' } }, ol, h(dom.ExitBtn, { x: 8, y: 300, }));
 		px.view({
 			endnext: function(){
 				px.hideapp();

@@ -107,6 +107,18 @@ exports.IconBtn = function(props) {
 		...this.props.props,
 	});
 }
+exports.ExitBtn = function(props) {
+	return h('input', {
+		type: 'button',
+		value: 'Exit',
+		onClick: function() { require('./views/MainMenu')(); },
+		style: {
+			position: 'absolute',
+			left: props.x + 'px',
+			top: props.y + 'px',
+		}
+	});
+}
 exports.icob = function(e, click, ch){
 	if (!ch) ch = "e";
 	var ele = document.createElement("span");

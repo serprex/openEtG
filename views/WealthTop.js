@@ -1,7 +1,8 @@
 "use strict";
-var px = require("../px");
-var chat = require("../chat");
-var sock = require("../sock");
+var px = require('../px'),
+	dom = require('../dom'),
+	chat = require('../chat'),
+	sock = require('../sock');
 
 module.exports = function() {
 	var h = preact.h;
@@ -22,18 +23,7 @@ module.exports = function() {
 			top: '8px',
 		},
 	});
-	var view = h('div', { id: 'app', style: { display: '' } }, ol1, ol2,
-		h('input', {
-			type: 'button',
-			value: 'Exit',
-			onClick: function(){require('./MainMenu')()},
-			style: {
-				position: 'absolute',
-				left: '8px',
-				top: '300px',
-			},
-		})
-	);
+	var view = h('div', { id: 'app', style: { display: '' } }, ol1, ol2, h(dom.ExitBtn, { x: 8, y: 300, }));
 	px.view({
 		endnext: px.hideapp,
 		cmds:{

@@ -39,16 +39,7 @@ module.exports = function(data){
 				cardsel.cardpool = (showbound ^= true) ? boundpool : cardpool
 			}
 		}),
-		h('input', {
-			type: 'button',
-			value: 'Exit',
-			style: {
-				position: 'absolute',
-				left: '10px',
-				top: '10px',
-			},
-			onClick: function() { require('./MainMenu')(); },
-		})
+		h(dom.ExitBtn, { x: 8, y: 8 })
 	);
 	var stage = {
 		endnext:px.hideapp,

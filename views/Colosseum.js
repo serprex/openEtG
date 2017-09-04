@@ -37,18 +37,7 @@ module.exports = function(){
 		"Expert Endurance: Fight 2 Champions in a row. May try until you win.",
 		"Novice Duel: Fight " + magename + ". Only one attempt allowed.",
 		"Expert Duel: Fight " + dgname + ". Only one attempt allowed."];
-	var div = h('div', { id: 'app', style: { display: '' }},
-		h('input', {
-			type: 'button',
-			value: 'Exit',
-			style: {
-				position: 'absolute',
-				left: '50px',
-				top: '50px',
-			},
-			onClick: startMenu
-		})
-	);
+	var div = h('div', { id: 'app', style: { display: '' }}, h(dom.ExitBtn, { x: 50, y: 50 }));
 	for (var i = 1;i < 5;i++) {
 		var active = !(sock.user.daily & (1 << i));
 		if (active) {
