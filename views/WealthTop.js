@@ -34,7 +34,6 @@ module.exports = function() {
 			},
 		})
 	);
-	px.render(view);
 	px.view({
 		endnext: px.hideapp,
 		cmds:{
@@ -53,5 +52,6 @@ module.exports = function() {
 			}
 		}
 	});
+	px.render(view);
 	sock.emit("wealthtop");
 }

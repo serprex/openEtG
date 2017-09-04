@@ -1,56 +1,74 @@
 "use strict";
 var px = require("../px");
 var dom = require("../dom");
+var sock = require("../sock");
 var svg = require("../svg");
 var chat = require("../chat");
 var Cards = require("../Cards");
+var h = preact.h;
 function mkText(text){
-	var div = document.createElement("span");
-	div.className = "atoptext";
-	div.appendChild(document.createTextNode(text));
-	return div;
+	return h("span", { className: "atoptext" }, text);
 }
-module.exports = function(data) {
-	var lv = data.lv, info = data.top;
-	if (!info) {
-		chat("??", "System");
-		return;
-	}
-	var s = dom.svg();
-	s.setAttribute("width", "128");
-	s.setAttribute("height", "256");
-	s.style.pointerEvents = "none";
-	var ol = document.createElement("ol");
-	ol.className = "atopol";
-	info.forEach(function(data, i){
-		var li = document.createElement("li");
-		if (i != info.length-1) li.className = "underline";
-		li.appendChild(mkText(data[0]));
-		for(var i=1; i<=4; i++){
-			if (i == 3){
-				var dash = document.createElement("span");
-				dash.className = "atopdash";
-				dash.appendChild(document.createTextNode("-"));
-				li.appendChild(dash);
+module.exports = function(lvi) {
+	var lv = lvi.lv;
+	return function() {
+		var s = dom.svg();
+		s.setAttribute("width", "128");
+		s.setAttribute("height", "256");
+		s.style.pointerEvents = "none";
+		s.style.position = 'absolute';
+		s.style.display = 'none';
+		document.body.appendChild(s);
+		var ol = h("ol", { className: "atopol", style: { position: 'absolute', left: '90px', top: '50px' } });
+		var view = h('div', { id: 'app', style: { display: '' } }, ol,
+			h('input', {
+				type: 'button',
+				value: 'Exit',
+				onClick: function(){ require("./MainMenu")() },
+				style: {
+					position: 'absolute',
+					left: '8px',
+					top: '300px',
+				},
+			})
+		);
+		px.view({
+			endnext: function(){
+				px.hideapp();
+				s.remove();
+			},
+			cmds: {
+				arenatop: function(info){
+					info = info.top;
+					ol.children = info.map(function(data, i){
+						var lic = [mkText(data[0])];
+						for(var i=1; i<=4; i++){
+							if (i == 3){
+								lic.push(h('span', { className: 'atopdash' }, '-'));
+							}
+							lic.push(h('span', { className: 'atop'+i }, data[i]));
+						}
+						var card = Cards.Codes[data[5]].asUpped(lv);
+						var cname = mkText(card.name);
+						cname.attributes.onMouseEnter = function(e){
+							dom.svgToSvg(s, svg.card(card.code));
+							s.style.left = (e.clientX+4)+"px";
+							s.style.top = (e.clientY+4)+"px";
+							s.style.display = "";
+						};
+						cname.attributes.onMouseLeave = function(){
+							s.style.display = "none";
+						};
+						lic.push(cname);
+						var li = h("li", { children: lic });
+						if (i != info.length-1) li.className = "underline";
+						return li;
+					});
+					px.render(view);
+				}
 			}
-			var col = document.createElement("span");
-			col.className = "atop"+i;
-			col.appendChild(document.createTextNode(data[i]));
-			li.appendChild(col);
-		}
-		var card = Cards.Codes[data[5]].asUpped(lv);
-		var cname = mkText(card.name);
-		cname.addEventListener("mouseenter", function(e){
-			dom.svgToSvg(s, svg.card(card.code));
-			s.style.left = (e.clientX+4)+"px";
-			s.style.top = (e.clientY+4)+"px";
-			s.style.display = "";
 		});
-		cname.addEventListener("mouseleave", function(){
-			s.style.display = "none";
-		});
-		li.appendChild(cname);
-		ol.appendChild(li);
-	});
-	px.view({dom:dom.div([8, 300, ["Exit", require("./MainMenu")]], [90, 50, ol], [0, 0, s])});
+		px.render(view);
+		sock.emit("arenatop", lvi);
+	}
 }

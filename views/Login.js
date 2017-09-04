@@ -92,7 +92,6 @@ module.exports = function(){
 	});
 	xhr.open("GET", "https://api.github.com/repos/serprex/openEtG/commits?per_page=1", true);
 	xhr.send();
-	px.render(view);
 	px.view({
 		endnext: px.hideapp,
 		cmds:{
@@ -114,4 +113,5 @@ module.exports = function(){
 			}
 		}
 	});
+	px.render(view);
 }

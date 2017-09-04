@@ -185,7 +185,6 @@ module.exports = function(nymph) {
 				this.style.display = "none";
 			}
 			function arenaTop() {
-				sock.emit("arenatop", lvi);
 				this.style.display = "none";
 			}
 			if (sock.user){
@@ -199,7 +198,7 @@ module.exports = function(nymph) {
 				rlab.style.right = "4px";
 				dom.add(arenabox, [4, y, b], clab, rlab);
 			}
-			var atop = dom.button("Arena" + (i+1) + " T20", arenaTop, mkSetTip("See who the top players in arena are right now"));
+			var atop = dom.button("Arena" + (i+1) + " T20", require("./ArenaTop")(lvi), mkSetTip("See who the top players in arena are right now"));
 			dom.style(atop, {
 				position: "absolute",
 				left: i?"100px":"10px",
@@ -246,7 +245,6 @@ module.exports = function(nymph) {
 	stage.cmds = {
 		librarygive: require("./Library"),
 		arenainfo: require("./ArenaInfo"),
-		arenatop: require("./ArenaTop"),
 		codecard:function(data){
 			require("./Reward")(data.type, data.num, foename.value);
 		},
