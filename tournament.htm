@@ -22,7 +22,7 @@
 		var deck = [];
 		var markele;
 		for (var i = 0;i < code.length;i++) {
-		    var maybeMark = ~etg.fromTrueMark(code[i]);
+		    var maybeMark = ~etgutil.fromTrueMark(code[i]);
 			if (maybeMark) markele = maybeMark;
 			else if (Cards.Codes[code[i]]) deck.push(Cards.Codes[etgutil.asShiny(code[i], false)]);
 			else {
