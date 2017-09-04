@@ -13,7 +13,7 @@
     "ws": "^3.1.0"
   },
   "devDependencies": {
-    "mkcjs": "^0.1.0",
+    "mkcjs": "^0.2.0",
     "optipng-bin": "^4.0"
   },
   "scripts": {

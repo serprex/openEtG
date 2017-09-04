@@ -8,7 +8,7 @@ var userutil = require("../userutil");
 var CardSelector = require("../CardSelector");
 
 module.exports = function(data){
-	var view = px.mkView(), showbound = false,
+	var h = preact.h, view = px.mkView(), showbound = false,
 		cardpool = etgutil.deck2pool(data.pool), boundpool = etgutil.deck2pool(data.bound),
 		cardArt = new PIXI.Sprite(gfx.nopic);
 	cardArt.position.set(734, 8);
@@ -25,13 +25,26 @@ module.exports = function(data){
 		}
 	});
 	var wealth = data.gold + userutil.calcWealth(cardpool);
+	var domview = h('div', { id: 'app', style: {display: '' }},
+		h('span', { style: { position: 'absolute', left: '100px', top: '16px' } }, "Cumulative wealth: " + Math.round(wealth) + "\nZE Progress: " + progress + " / " + progressmax + "\nSZE Progress: " + shinyprogress + " / " + progressmax),
+		h('input', {
+			type: 'button',
+			value: 'Toggle Bound',
+			style: {
+				position: 'absolute',
+				left: '5px',
+				top: '554px',
+			},
+			onClick: function() {
+				cardsel.cardpool = (showbound ^= true) ? boundpool : cardpool
+			}
+		}),
+		h(dom.ExitBtn, { x: 8, y: 8 })
+	);
 	var stage = {
+		endnext:px.hideapp,
+		dom:dom.div(),
 		view:view,
-		dom:dom.div([100, 16, "Cumulative wealth: " + Math.round(wealth) + "\nZE Progress: " + progress + " / " + progressmax + "\nSZE Progress: " + shinyprogress + " / " + progressmax],
-		[5, 554, ["Toggle Bound", function(){
-			cardsel.cardpool = (showbound ^= true) ? boundpool : cardpool;
-		}]],
-		[10, 10, ["Exit", require("./MainMenu")]]),
 	};
 	var cardsel = new CardSelector(stage, function(code){
 		cardArt.texture = gfx.getArt(code);
@@ -39,4 +52,5 @@ module.exports = function(data){
 	cardsel.cardpool = cardpool;
 	view.addChild(cardsel);
 	px.view(stage);
+	px.render(domview);
 }

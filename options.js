@@ -21,20 +21,39 @@ exports.parseaistats = function(data){
 	parseInput(data, "p2deckpower", exports.aideckpower);
 }
 exports.register = function(opt, ele, nopersist){
-	var field = ele.type == "checkbox" ? "checked" : "value";
-	if (exports[opt]) ele[field] = exports[opt];
-	if (!nopersist && typeof localStorage !== "undefined"){
-		ele.addEventListener("change", function() {
-			if (this[field]){
-				exports[opt] = localStorage[opt] = this[field];
-			}else{
-				delete localStorage[opt];
-				delete exports[opt];
+	if (ele instanceof HTMLElement) {
+		var field = ele.type == "checkbox" ? "checked" : "value";
+		if (exports[opt]) ele[field] = exports[opt];
+		if (!nopersist && typeof localStorage !== "undefined"){
+			ele.addEventListener("change", function() {
+				if (this[field]){
+					exports[opt] = localStorage[opt] = this[field];
+				}else{
+					delete localStorage[opt];
+					delete exports[opt];
+				}
+			});
+		}else{
+			ele.addEventListener("change", function() {
+				exports[opt] = field == "checked" && !this.checked ? "" : this[field];
+			});
+		}
+	} else {
+		var field = ele.attributes.type == "checkbox" ? "checked" : "value";
+		if (exports[opt]) ele.attributes[field] = exports[opt];
+		if (!nopersist && typeof localStorage !== "undefined"){
+			ele.attributes.onChange = function(e) {
+				if (e.target[field]){
+					exports[opt] = localStorage[opt] = e.target[field];
+				}else{
+					delete localStorage[opt];
+					delete exports[opt];
+				}
+			};
+		}else{
+			ele.attributes.onChange = function(e) {
+				exports[opt] = field == "checked" && !e.target.checked ? "" : e.target[field];
 			}
-		});
-	}else{
-		ele.addEventListener("change", function() {
-			exports[opt] = field == "checked" && !this.checked ? "" : this[field];
-		});
+		}
 	}
 }

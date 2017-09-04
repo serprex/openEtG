@@ -1,6 +1,7 @@
 "use strict";
 var audio = require("./audio");
 var options = require("./options");
+var h = preact.h;
 
 exports.style = function(){
 	var style = arguments[arguments.length-1]
@@ -90,6 +91,33 @@ exports.input = function(placeholder, opt, nopersist, keydown){
 		if (keydown !== true) ele.addEventListener("keypress", keydown);
 	}else ele.className = "numput";
 	return ele;
+}
+exports.IconBtn = function(props) {
+	return h('span', {
+		className: 'imgb ico ' + props.e,
+		style: {
+			position: 'absolute',
+			left: props.x + 'px',
+			top: props.y + 'px',
+		},
+		onClick: function(e){
+			audio.playSound('buttonClick');
+			if (props.click) props.click.call(e.target, e);
+		},
+		...this.props.props,
+	});
+}
+exports.ExitBtn = function(props) {
+	return h('input', {
+		type: 'button',
+		value: 'Exit',
+		onClick: function() { require('./views/MainMenu')(); },
+		style: {
+			position: 'absolute',
+			left: props.x + 'px',
+			top: props.y + 'px',
+		}
+	});
 }
 exports.icob = function(e, click, ch){
 	if (!ch) ch = "e";

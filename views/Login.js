@@ -1,18 +1,15 @@
 var px = require("../px");
-var dom = require("../dom");
 var gfx = require("../gfx");
 var chat = require("../chat");
 var sock = require("../sock");
 var audio = require("../audio");
 var options = require("../options");
-var bg_login = new Image();
-bg_login.src = "assets/bg_login.png";
-bg_login.className = "bgimg";
+
 module.exports = function(){
 	function maybeLogin(e) {
 		e.cancelBubble = true;
 		if (e.keyCode == 13) {
-			this.blur();
+			e.target.blur();
 			loginClick();
 		}
 	}
@@ -20,82 +17,81 @@ module.exports = function(){
 		if (!sock.user && options.username) {
 			var data = {u:options.username}
 			if (typeof auth !== "string"){
-				if (password.value) data.p = password.value;
+				if (passwordEle.value) data.p = passwordEle.value;
 			}else data.a = auth;
 			sock.emit("login", data);
 		}
 	}
-	var loadingBar, sandbox;
+	var h = preact.h, loadingBar, sandbox;
 	if (gfx.load){
-		loadingBar = document.createElement("span");
-		loadingBar.style.backgroundColor = "#fff";
-		loadingBar.style.height = "32px";
+		loadingBar = h("span", {
+			style: {
+				backgroundColor: "#fff",
+				height: "32px",
+			}
+		});
 		gfx.load(function(progress){
-			if (progress == 1) loadingBar.style.backgroundColor = "#369";
-			loadingBar.style.width = (progress*900) + "px";
+			if (progress == 1) loadingBar.attributes.style.backgroundColor = "#369";
+			loadingBar.attributes.style.width = (progress*900) + "px";
+			px.render(view);
 		}, function(){
 			audio.playMusic("openingMusic");
 			if (sock.user || sandbox) require("./MainMenu")();
 		});
 		require("./MainMenu"); // Queue loading bg_main
 	}
-	var login = dom.button("Login", loginClick);
-	var username = document.createElement("input");
-	var password = document.createElement("input");
-	var rememberCheck = document.createElement("input");
-	var remember = document.createElement("label");
-	password.type = "password";
-	rememberCheck.type = "checkbox";
-	remember.appendChild(rememberCheck);
-	remember.appendChild(document.createTextNode("Remember me"));
-	username.placeholder = "Username";
-	password.placeholder = "Password";
-	username.tabIndex = "1";
-	password.tabIndex = "2";
-	[username, password].forEach(function(ele){
-		ele.addEventListener("keypress", maybeLogin);
+	var login = h("input", { type: "button", value: "Login", onClick: loginClick});
+	var btnsandbox = h("input", {type: "button", value: "Sandbox", onClick: function(){
+		if (gfx.loaded) require("./MainMenu")();
+		else sandbox = true;
+	}});
+	var bg_login = h("img", { src: "assets/bg_login.png", className: "bgimg" });
+	var username = h("input", { placeholder: 'Username', autofocus: true, tabIndex: '1', onKeyPress: maybeLogin });
+	var passwordEle, password = h("input", { ref: input => { passwordEle = input; }, type: 'password', placeholder: 'Password', tabIndex: '2', onKeyPress: maybeLogin });
+	var rememberCheck = h("input", {
+		type: 'checkbox',
+		onChange: function() {
+			if (typeof localStorage !== "undefined"){
+				if (!this.checked) delete localStorage.auth;
+				else if (sock.user) localStorage.auth = sock.user.auth;
+			}
+		},
 	});
+	var remember = h("label", {}, rememberCheck, 'Remember me');
 	options.register("username", username);
 	options.register("remember", rememberCheck);
-	rememberCheck.addEventListener("change", function() {
-		if (typeof localStorage !== "undefined"){
-			if (!this.checked) delete localStorage.auth;
-			else if (sock.user) localStorage.auth = sock.user.auth;
-		}
-	});
 	if (options.remember && typeof localStorage !== "undefined"){
 		loginClick(localStorage.auth);
 	}
-	var tutlink = document.createElement("a");
-	tutlink.href = "forum/?topic=267"
-	tutlink.target = "_blank";
-	tutlink.appendChild(document.createTextNode("Tutorial"));
-	var div = dom.div(
-		[0, 0, bg_login],
+	var tutlink = h("a", { href: "forum/?topic=267", target: "_blank" }, "Tutorial");
+	var div = [[0, 0, bg_login],
 		[270, 350, username],
 		[270, 380, password],
 		[430, 380, remember],
 		[430, 350, login],
 		[270, 424, tutlink],
-		[530, 350, ["Sandbox", function(){
-			if (gfx.loaded) require("./MainMenu")();
-			else sandbox = true;
-		}]]);
-	if (loadingBar) dom.add(div, [0, 568, loadingBar]);
+		[530, 350, btnsandbox]];
+	if (loadingBar) div.push([0, 568, loadingBar]);
+	div = div.map(x => {
+		x[2].attributes.style = { position: 'absolute', left: x[0]+'px', top: x[1]+'px' };
+		return x[2];
+	});
+	var view = h('div', { id: 'app', style: { display: '' }, children: div });
 	var xhr = new XMLHttpRequest();
 	xhr.addEventListener("load", function(){
 		var data = JSON.parse(this.responseText)[0];
-		var a = document.createElement("a");
-		a.target = "_blank";
-		a.href = data.html_url;
-		a.appendChild(document.createTextNode(data.author.login + ": " + data.commit.message));
-		a.style.maxWidth = "380px";
-		dom.add(div, [260, 460, a]);
+		var a = h('a', {
+			target: '_blank',
+			href: data.html_url,
+			style: { maxWidth: '380px', position: 'absolute', left: '260px', top: '460px' }
+		}, data.author.login + ": " + data.commit.message);
+		view.children = view.children.concat([a]);
+		px.render(view);
 	});
 	xhr.open("GET", "https://api.github.com/repos/serprex/openEtG/commits?per_page=1", true);
 	xhr.send();
 	px.view({
-		dom:div,
+		endnext: px.hideapp,
 		cmds:{
 			login:function(data){
 				if (!data.err){
@@ -115,5 +111,5 @@ module.exports = function(){
 			}
 		}
 	});
-	username.focus();
+	px.render(view);
 }

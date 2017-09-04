@@ -8,6 +8,7 @@ document.addEventListener("mousemove", function(e){
 	}
 });
 var audio = require("./audio");
+var app = document.getElementById("app");
 var renderer = new PIXI.autoDetectRenderer(900, 600, {view:document.getElementById("leftpane"), transparent:true});
 var noStage = {}, curStage = noStage;
 var interman = require("./InteractionManager");
@@ -25,6 +26,12 @@ exports.mkRenderTexture = function(width, height){
 }
 exports.getCmd = function(cmd){
 	return curStage.cmds ? curStage.cmds[cmd] : null;
+}
+exports.render = function(view) {
+	return preact.render(view, null, app);
+}
+exports.hideapp = function(view) {
+	app.style.display = 'none';
 }
 exports.view = function(stage) {
 	if (curStage.endnext){
