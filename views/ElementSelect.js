@@ -8,14 +8,8 @@ module.exports = function() {
 	var h = preact.h;
 	var eledesc = h('div', { style: { position: 'absolute', left: '100px', top: '300px', width: '700px' }}, "Select your starter element");
 	var view = h('div', { id: 'app', style: { display: '' } },
-		eledesc, h('input', {
-			type: 'button',
-			value: 'Exit',
-			style: {
-				position: 'absolute',
-				left: '100px',
-				top: '450px',
-			},
+		eledesc, h(dom.ExitBtn, {
+			x: 100, y: 450,
 			onClick: function() {
 				sock.userEmit("delete");
 				sock.user = undefined;

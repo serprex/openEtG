@@ -26,7 +26,7 @@ module.exports = function(data){
 	});
 	var wealth = data.gold + userutil.calcWealth(cardpool);
 	var domview = h('div', { id: 'app', style: {display: '' }},
-		h('span', { style: { position: 'absolute', left: '100px', top: '16px' } }, "Cumulative wealth: " + Math.round(wealth) + "\nZE Progress: " + progress + " / " + progressmax + "\nSZE Progress: " + shinyprogress + " / " + progressmax),
+		h('span', { style: { position: 'absolute', left: '100px', top: '16px', whiteSpace: 'pre' } }, "Cumulative wealth: " + Math.round(wealth) + "\nZE Progress: " + progress + " / " + progressmax + "\nSZE Progress: " + shinyprogress + " / " + progressmax),
 		h('input', {
 			type: 'button',
 			value: 'Toggle Bound',

@@ -14,8 +14,7 @@ var RngMock = require("../RngMock");
 var userutil = require("../userutil");
 var streak200 = new Uint8Array([10, 10, 15, 20, 15, 20]);
 module.exports = function(game, data) {
-	var winner = game.winner == game.player1, stage;
-	var foeDeck = data.p2deck;
+	var winner = game.winner == game.player1, stage, foeDeck = data.p2deck, h = preact.h;
 	function exitFunc(){
 		if (game.quest) {
 			if (winner && game.choicerewards)
@@ -88,9 +87,20 @@ module.exports = function(game, data) {
 		lefttext.push(((streakrate+1)*bonus*100-100).toFixed(1) + "% total bonus");
 		return bonus;
 	}
-	var div = dom.div([412, 440, ["Exit", exitFunc]]), lefttext = [game.ply + " plies", (game.time / 1000).toFixed(1) + " seconds"];
+	var view = h('div', { id: 'app', style: { display: ''} },
+		h(dom.ExitBtn, { x: 412, y: 440, onClick: exitFunc }));
+	var lefttext = [game.ply + " plies", (game.time / 1000).toFixed(1) + " seconds"];
 	if (!game.quest && game.daily === undefined){
-		dom.add(div, [412, 490, ["Rematch", rematch]]);
+		view.children.push(h('input', {
+			type: 'button',
+			value: 'Rematch',
+			onClick: rematch,
+			style: {
+				position: 'absolute',
+				left: '412px',
+				top: '490px',
+			},
+		}));
 	}
 	var streakrate = 0;
 	if (winner){
@@ -131,10 +141,17 @@ module.exports = function(game, data) {
 				game.goldreward = (game.goldreward || 0) + game.addonreward;
 			}
 			if (game.goldreward) {
-				var goldwon = dom.text(game.goldreward - (game.cost || 0) + "$");
-				goldwon.style.textAlign = "center";
-				goldwon.style.width = "900px";
-				dom.add(div, [0, 550, goldwon]);
+				var goldwon = game.goldreward - (game.cost || 0) + "$";
+				view.children.push(h(dom.Text, {
+					text: goldwon,
+					style: {
+						textAlign: 'center',
+						width: '900px',
+						position: 'absolute',
+						left: '0px',
+						top: '550px',
+					}
+				}));
 				sock.userExec("addgold", { g: game.goldreward });
 			}
 			if (game.cardreward) {
@@ -149,12 +166,19 @@ module.exports = function(game, data) {
 				sock.userExec(game.quest?"addbound":"addcards", { c: game.cardreward });
 			}
 		}
-		var tinfo = dom.text(game.quest ? game.wintext : "You won!");
-		tinfo.style.textAlign = "center";
-		tinfo.style.width = "900px";
-		dom.add(div, [0, game.cardreward ? 100 : 250, tinfo]);
+		var tinfo = game.quest ? game.wintext : "You won!";
+		view.children.push(h(dom.Text, {
+			text: tinfo,
+			style: {
+				textAlign: 'center',
+				width: '900px',
+				position: 'absolute',
+				left: '0px',
+				top: game.cardreward ? '100px' : '250px',
+			}
+		}));
 	}
-	dom.add(div, [10, 290, lefttext.join("\n")]);
+	view.children.push(h('span', { style: { position: 'absolute', left: '8px', top: '290px', whiteSpace: 'pre' }}, lefttext.join("\n")));
 
 	if (game.endurance == undefined){
 		chat([game.level === undefined ? -1 : game.level,
@@ -178,7 +202,9 @@ module.exports = function(game, data) {
 		}
 	}
 	document.addEventListener("keydown", onkeydown);
-	px.view({view:stage, dom:div, endnext:function() {
+	px.view({view:stage, endnext:function() {
+		px.hideapp();
 		document.removeEventListener("keydown", onkeydown);
 	}});
+	px.render(view);
 }

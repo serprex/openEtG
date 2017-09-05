@@ -238,7 +238,7 @@ Thing.prototype.lobo = function(){
 		}, this);
 	}
 }
-var mutantabilities = ["hatch","freeze","burrow","destroy","steal","dive","mend","paradox","lycanthropy","growth 1","infect","gpull","devour","mutation","growth 2","ablaze","poison 1","deja","endow","guard","mitosis"];
+var mutantabilities = ["hatch","freeze","burrow","destroy","steal","dive","mend","paradox","lycanthropy","growth 1","infect","gpull","devour","mutation","growth 2","ablaze 2","poison 1","deja","endow","guard","mitosis"];
 Thing.prototype.mutantactive = function(){
 	this.lobo();
 	var index = this.owner.upto(mutantabilities.length+2)-2;
