@@ -1,7 +1,10 @@
 "use strict";
-if (typeof localStorage !== "undefined")
+var hasLocalStorage = true;
+try {
 	for(var key in localStorage)
 		if (localStorage.hasOwnProperty(key)) exports[key] = localStorage[key];
+} catch(e) { hasLocalStorage = false; }
+
 function parseInput(data, key, value, limit) {
 	var value = parseInt(value);
 	if (value === 0 || value > 0)
@@ -24,7 +27,7 @@ exports.register = function(opt, ele, nopersist){
 	if (ele instanceof HTMLElement) {
 		var field = ele.type == "checkbox" ? "checked" : "value";
 		if (exports[opt]) ele[field] = exports[opt];
-		if (!nopersist && typeof localStorage !== "undefined"){
+		if (!nopersist && hasLocalStorage){
 			ele.addEventListener("change", function() {
 				if (this[field]){
 					exports[opt] = localStorage[opt] = this[field];
@@ -41,7 +44,7 @@ exports.register = function(opt, ele, nopersist){
 	} else {
 		var field = ele.attributes.type == "checkbox" ? "checked" : "value";
 		if (exports[opt]) ele.attributes[field] = exports[opt];
-		if (!nopersist && typeof localStorage !== "undefined"){
+		if (!nopersist && hasLocalStorage){
 			ele.attributes.onChange = function(e) {
 				if (e.target[field]){
 					exports[opt] = localStorage[opt] = e.target[field];

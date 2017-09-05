@@ -23,26 +23,27 @@
 			var sandbox = kong.services.isGuest();
 			if (sandbox && gfx.loaded){
 				return require("./views/MainMenu")();
-			}
-			sock.emit("konglogin", {u:kong.services.getUserId(),g:kong.services.getGameAuthToken()});
-			px.view({
-				dom:dom.div([0, 0, "Logging in.."]),
-				cmds:{
-					login:function(data){
-						if (!data.err){
-							delete data.x;
-							sock.user = data;
-							if (!sock.user.accountbound && !sock.user.pool){
-								require("./views/ElementSelect")();
-							}else if (gfx.loaded){
-								require("./views/MainMenu")();
+			} else {
+				sock.emit("konglogin", {u:kong.services.getUserId(),g:kong.services.getGameAuthToken()});
+				px.view({
+					dom:dom.div([0, 0, "Logging in.."]),
+					cmds:{
+						login:function(data){
+							if (!data.err){
+								delete data.x;
+								sock.user = data;
+								if (!sock.user.accountbound && !sock.user.pool){
+									require("./views/ElementSelect")();
+								}else if (gfx.loaded){
+									require("./views/MainMenu")();
+								}
+							}else{
+								alert(data.err);
 							}
-						}else{
-							alert(data.err);
 						}
 					}
-				}
-			});
+				});
+			}
 		}
 	});
 	kongregateAPI.loadAPI(function(){
@@ -62,3 +63,4 @@
 	<textarea id="chatinput" placeholder="Chat"></textarea>
 </div>
 <canvas id="leftpane" width=900 height=600></canvas>
+<div id="app"></div>

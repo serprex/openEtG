@@ -464,14 +464,20 @@ const keycerttask = sutil.mkTask(res => {
 		login:require("./srv/login")(sockEmit),
 		konglogin:function(data){
 			db.get("kongapi", (err, key) => {
-				if (!key) return; // TODO error
+				if (!key) {
+					sockEmit(this, "login", {err: "Global error: no kong api in db"});
+					return;
+				}
 				https.get("https://api.kongregate.com/api/authenticate.json?user_id="+data.u+"&game_auth_token="+data.g+"&api_key="+key, res => {
 					var jtext = "";
 					res.setEncoding("utf8");
 					res.on("data", chunk => jtext += chunk);
 					res.on("end", () => {
 						var json = sutil.parseJSON(jtext);
-						if (!json) return; // TODO error
+						if (!json) {
+							sockEmit(this, "login", {err: "Kong returned invalid JSON"});
+							return;
+						}
 						if (json.success){
 							var name = "Kong:" + json.username;
 							Us.load(name, user => {
@@ -488,6 +494,8 @@ const keycerttask = sutil.mkTask(res => {
 								var user = Us.users[name] = {name: name, gold: 0, auth: data.g};
 								sockEvents.login.call(this, {u: name, a: data.g});
 							});
+						} else {
+							sockEmit(this, "login", {err: json.error + ": " + json.error_description});
 						}
 					});
 				});

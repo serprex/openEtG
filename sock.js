@@ -2,7 +2,7 @@ var chat = require("./chat");
 var etgutil = require("./etgutil");
 var options = require("./options");
 var usercmd = require("./usercmd");
-var endpoint = (location.protocol == "http:" ? "ws://" : "wss://") + location.hostname + ":13602";
+var endpoint = (/^\d+\.\d+\.\d+\.\d+$/.test(location.hostname) ? "ws://" : "wss://") + location.hostname + ":13602";
 var socket = new WebSocket(endpoint);
 var buffer = [];
 var attempts = 0, attemptTimeout = 0;

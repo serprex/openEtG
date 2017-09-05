@@ -79,7 +79,7 @@ module.exports = function(data) {
 				style: {
 					position: 'absolute',
 					left: '734px',
-					top: '268'+i*292+'px',
+					top: 268+i*292+'px',
 				},
 				onClick: function(){
 					require("./Editor")(data, data[uocard>6999?"B":"A"] || {}, uocard, true);
