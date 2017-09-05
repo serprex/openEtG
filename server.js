@@ -374,14 +374,13 @@ const keycerttask = sutil.mkTask(res => {
 			}
 		},
 		passchange:function(data, user){
+			user.salt = '';
 			if (!data.p){
-				user.salt = "";
-				user.iter = 0;
-				user.auth = user.name;
+				user.auth = '';
 				sockEmit(this, "passchange", {auth: ""});
 			}else{
 				sutil.initsalt(user);
-				require("crypto").pbkdf2(data.p, user.salt, user.iter, 64, (err, key) => {
+				require("crypto").pbkdf2(data.p, user.salt, user.iter, 64, user.algo, (err, key) => {
 					if (!err){
 						user.auth = key.toString("base64");
 						sockEmit(this, "passchange", {auth: user.auth});
