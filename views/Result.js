@@ -1,18 +1,18 @@
 "use strict";
-var px = require("../px");
-var dom = require("../dom");
-var etg = require("../etg");
-var gfx = require("../gfx");
-var chat = require("../chat");
-var mkAi = require("../mkAi");
-var sock = require("../sock");
-var util = require("../util");
-var Cards = require("../Cards");
-var etgutil = require("../etgutil");
-var options = require("../options");
-var RngMock = require("../RngMock");
-var userutil = require("../userutil");
-var streak200 = new Uint8Array([10, 10, 15, 20, 15, 20]);
+var px = require("../px"),
+	etg = require("../etg"),
+	gfx = require("../gfx"),
+	chat = require("../chat"),
+	mkAi = require("../mkAi"),
+	sock = require("../sock"),
+	util = require("../util"),
+	Cards = require("../Cards"),
+	etgutil = require("../etgutil"),
+	options = require("../options"),
+	RngMock = require("../RngMock"),
+	userutil = require("../userutil"),
+	Components = require('../Components'),
+	streak200 = new Uint8Array([10, 10, 15, 20, 15, 20]);
 module.exports = function(game, data) {
 	var winner = game.winner == game.player1, stage, foeDeck = data.p2deck, h = preact.h;
 	function exitFunc(){
@@ -87,8 +87,7 @@ module.exports = function(game, data) {
 		lefttext.push(((streakrate+1)*bonus*100-100).toFixed(1) + "% total bonus");
 		return bonus;
 	}
-	var view = h('div', { id: 'app', style: { display: ''} },
-		h(dom.ExitBtn, { x: 412, y: 440, onClick: exitFunc }));
+	var view = h(Components.App, {}, h(Components.ExitBtn, { x: 412, y: 440, onClick: exitFunc }));
 	var lefttext = [game.ply + " plies", (game.time / 1000).toFixed(1) + " seconds"];
 	if (!game.quest && game.daily === undefined){
 		view.children.push(h('input', {
@@ -142,7 +141,7 @@ module.exports = function(game, data) {
 			}
 			if (game.goldreward) {
 				var goldwon = game.goldreward - (game.cost || 0) + "$";
-				view.children.push(h(dom.Text, {
+				view.children.push(h(Components.Text, {
 					text: goldwon,
 					style: {
 						textAlign: 'center',
@@ -167,7 +166,7 @@ module.exports = function(game, data) {
 			}
 		}
 		var tinfo = game.quest ? game.wintext : "You won!";
-		view.children.push(h(dom.Text, {
+		view.children.push(h(Components.Text, {
 			text: tinfo,
 			style: {
 				textAlign: 'center',

@@ -1,9 +1,10 @@
-var px = require("../px");
-var gfx = require("../gfx");
-var chat = require("../chat");
-var sock = require("../sock");
-var audio = require("../audio");
-var options = require("../options");
+const px = require("../px"),
+	gfx = require("../gfx"),
+	chat = require("../chat"),
+	sock = require("../sock"),
+	audio = require("../audio"),
+	options = require("../options"),
+	Components = require('../Components');
 
 module.exports = function(){
 	function maybeLogin(e) {
@@ -76,7 +77,7 @@ module.exports = function(){
 		x[2].attributes.style = { position: 'absolute', left: x[0]+'px', top: x[1]+'px' };
 		return x[2];
 	});
-	var view = h('div', { id: 'app', style: { display: '' }, children: div });
+	var view = h(Components.App, { children: div });
 	var xhr = new XMLHttpRequest();
 	xhr.addEventListener("load", function(){
 		var data = JSON.parse(this.responseText)[0];

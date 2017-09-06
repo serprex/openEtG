@@ -1,15 +1,16 @@
 "use strict";
-var px = require("../px");
-var dom = require("../dom");
-var gfx = require("../gfx");
-var sock = require("../sock");
-var util = require("../util");
-var etgutil = require("../etgutil");
+const px = require("../px"),
+	gfx = require("../gfx"),
+	sock = require("../sock"),
+	util = require("../util"),
+	etgutil = require("../etgutil"),
+	Components = require('../Components');
+
 module.exports = function(data) {
 	var stage = new PIXI.Container(), h = preact.h;
-	var div = h('div', { id: 'app', style: { display: '' }},
-		h(dom.Text, { style: { position: 'absolute', left: '96px', top: '576px' }, text: "Earn 1$ when your arena deck is faced, & another 2$ when it wins"}),
-		h(dom.ExitBtn, { x: 8, y: 300 })
+	var div = h(Components.App, {},
+		h(Components.Text, { style: { position: 'absolute', left: '96px', top: '576px' }, text: "Earn 1$ when your arena deck is faced, & another 2$ when it wins"}),
+		h(Components.ExitBtn, { x: 8, y: 300 })
 	);
 	function renderInfo(info, y){
 		if (info){
@@ -27,7 +28,7 @@ module.exports = function(data) {
 				i++;
 			});
 			div.children.push(
-				h(dom.Text, { style: { position: 'absolute', left: '100px', top: 4+y+'px' }, text: "W-L: " + (info.win || 0) + " - " + (info.loss || 0) + ", Rank: " + (info.rank == undefined ? "Inactive" : (info.rank + 1)) + ", " + ((info.win || 0) * 3 + (info.loss || 0) * 1) + "$"}),
+				h(Components.Text, { style: { position: 'absolute', left: '100px', top: 4+y+'px' }, text: "W-L: " + (info.win || 0) + " - " + (info.loss || 0) + ", Rank: " + (info.rank == undefined ? "Inactive" : (info.rank + 1)) + ", " + ((info.win || 0) * 3 + (info.loss || 0) * 1) + "$"}),
 				h('span', { style: { position: 'absolute', left: '330px', top: 4+y+'px' }}, adeck),
 				h('span', { style: { position: 'absolute', left: '400px', top: 224+y+'px' }}, 'Age: ' + info.day),
 				h('span', { style: { position: 'absolute', left: '100px', top: 224+y+'px' }}, "HP: " + info.curhp + ' / ' + info.hp),

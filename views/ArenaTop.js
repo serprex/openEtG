@@ -1,11 +1,12 @@
 "use strict";
-var px = require("../px");
-var dom = require("../dom");
-var sock = require("../sock");
-var svg = require("../svg");
-var chat = require("../chat");
-var Cards = require("../Cards");
-var h = preact.h;
+const px = require("../px"),
+	dom = require("../dom"),
+	sock = require("../sock"),
+	svg = require("../svg"),
+	chat = require("../chat"),
+	Cards = require("../Cards"),
+	Components = require('../Components'),
+	h = preact.h;
 function mkText(text){
 	return h("span", { className: "atoptext" }, text);
 }
@@ -20,7 +21,7 @@ module.exports = function(lvi) {
 		s.style.display = 'none';
 		document.body.appendChild(s);
 		var ol = h('ol', { className: "atopol", style: { position: 'absolute', left: '90px', top: '50px' } });
-		var view = h('div', { id: 'app', style: { display: '' } }, ol, h(dom.ExitBtn, { x: 8, y: 300, }));
+		var view = h(Components.App, {}, ol, h(Components.ExitBtn, { x: 8, y: 300, }));
 		px.view({
 			endnext: function(){
 				px.hideapp();

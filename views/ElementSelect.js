@@ -1,14 +1,15 @@
 "use strict";
-var px = require("../px");
-var ui = require("../ui");
-var dom = require("../dom");
-var sock = require("../sock");
-var RngMock = require("../RngMock");
+const px = require("../px"),
+	ui = require("../ui"),
+	sock = require("../sock"),
+	RngMock = require("../RngMock"),
+	Components = require('../Components');
+
 module.exports = function() {
 	var h = preact.h;
 	var eledesc = h('div', { style: { position: 'absolute', left: '100px', top: '300px', width: '700px' }}, "Select your starter element");
-	var view = h('div', { id: 'app', style: { display: '' } },
-		eledesc, h(dom.ExitBtn, {
+	var view = h(Components.App, {},
+		eledesc, h(Components.ExitBtn, {
 			x: 100, y: 450,
 			onClick: function() {
 				sock.userEmit("delete");
@@ -35,7 +36,7 @@ module.exports = function() {
 	];
 	for (let i=1; i<=14; i++) {
 		var name = ui.eleNames[i];
-		view.children.push(h(dom.IconBtn, {
+		view.children.push(h(Components.IconBtn, {
 			e: 'e' + (i < 13 ? i : i == 13 ? 14 : 13),
 			x: 100+Math.floor((i-1)/2)*64,
 			y: 180+((i-1)&1)*64,

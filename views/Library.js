@@ -1,11 +1,12 @@
 "use strict";
-var px = require("../px");
-var dom = require("../dom");
-var gfx = require("../gfx");
-var Cards = require("../Cards");
-var etgutil = require("../etgutil");
-var userutil = require("../userutil");
-var CardSelector = require("../CardSelector");
+const px = require("../px"),
+	dom = require("../dom"),
+	gfx = require("../gfx"),
+	Cards = require("../Cards"),
+	etgutil = require("../etgutil"),
+	userutil = require("../userutil"),
+	CardSelector = require("../CardSelector"),
+	Components = require('../Components');
 
 module.exports = function(data){
 	var h = preact.h, view = px.mkView(), showbound = false,
@@ -25,7 +26,7 @@ module.exports = function(data){
 		}
 	});
 	var wealth = data.gold + userutil.calcWealth(cardpool);
-	var domview = h('div', { id: 'app', style: {display: '' }},
+	var domview = h(Components.App, {},
 		h('span', { style: { position: 'absolute', left: '100px', top: '16px', whiteSpace: 'pre' } }, "Cumulative wealth: " + Math.round(wealth) + "\nZE Progress: " + progress + " / " + progressmax + "\nSZE Progress: " + shinyprogress + " / " + progressmax),
 		h('input', {
 			type: 'button',
@@ -39,7 +40,7 @@ module.exports = function(data){
 				cardsel.cardpool = (showbound ^= true) ? boundpool : cardpool
 			}
 		}),
-		h(dom.ExitBtn, { x: 8, y: 8 })
+		h(Components.ExitBtn, { x: 8, y: 8 })
 	);
 	var stage = {
 		endnext:px.hideapp,

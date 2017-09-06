@@ -1,12 +1,12 @@
 "use strict";
-var px = require('../px'),
-	dom = require('../dom'),
+const px = require('../px'),
 	chat = require('../chat'),
-	sock = require('../sock');
+	sock = require('../sock'),
+	Components = require('../Components'),
+	h = preact.h;
 
 module.exports = function() {
-	var h = preact.h;
-	var ol1 = h('ol', {
+	const ol1 = h('ol', {
 		className: 'width400',
 		style: {
 			position: 'absolute',
@@ -14,7 +14,7 @@ module.exports = function() {
 			top: '8px',
 		},
 	});
-	var ol2 = h('ol', {
+	const ol2 = h('ol', {
 		className: 'width400',
 		start: '26',
 		style: {
@@ -23,7 +23,7 @@ module.exports = function() {
 			top: '8px',
 		},
 	});
-	var view = h('div', { id: 'app', style: { display: '' } }, ol1, ol2, h(dom.ExitBtn, { x: 8, y: 300, }));
+	var view = h(Components.App, {}, ol1, ol2, h(Components.ExitBtn, { x: 8, y: 300, }));
 	px.view({
 		endnext: px.hideapp,
 		cmds:{

@@ -71,12 +71,12 @@ exports.encoderaw = function(deck){
 	return out;
 }
 exports.decodedeck = function(deck) {
-    if (!deck) return [];
-    var out = [];
+	if (!deck) return [];
+	var out = [];
 	exports.iterdeck(deck, function(code){
 		out.push(code);
 	});
-    return out;
+	return out;
 }
 exports.deck2pool = function(deck, pool) {
 	if (!deck) return [];

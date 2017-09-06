@@ -34,6 +34,7 @@ input[type="text"],input[type="password"],input:not([type]){width:150px;border:2
 .atop2{float:left;width:48px;text-align:right}
 .atop3{float:left;width:48px}
 .atop4{float:left;width:48px;text-align:right;margin-right:32px}
+.cardslot{font:12px Dosis;height:20px;width:100px;display:table-cell;vertical-align:middle;border:1px solid}
 .infobox{
 	opacity:.7;
 	background-color:#000;
@@ -81,11 +82,11 @@ input[type="text"],input[type="password"],input:not([type]){width:150px;border:2
 	z-index:2;
 }
 .tutorialbg{
-    background-color:rgba(0,0,0,0.5);
+	background-color:rgba(0,0,0,0.5);
 	pointer-events:none;
-    position:absolute;
-    height:600px;
-    width:900px;
+	position:absolute;
+	height:600px;
+	width:900px;
 }
 .numput{width:32px!important}
 .imgb:hover{

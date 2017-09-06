@@ -1,3 +1,4 @@
+"use strict";
 module.exports = DeckDisplay;
 var px = require("./px");
 var gfx = require("./gfx");

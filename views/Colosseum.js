@@ -1,11 +1,12 @@
 "use strict";
-var px = require("../px");
-var dom = require("../dom");
-var mkAi = require("../mkAi");
-var sock = require("../sock");
-var Decks = require("../Decks.json");
-var RngMock = require("../RngMock");
-var startMenu = require("./MainMenu");
+const px = require("../px"),
+	dom = require("../dom"),
+	mkAi = require("../mkAi"),
+	sock = require("../sock"),
+	Decks = require("../Decks.json"),
+	RngMock = require("../RngMock"),
+	startMenu = require("./MainMenu"),
+	Components = require('./Components');
 function mkDaily(type) {
 	if (type < 3) {
 		return function() {
@@ -37,7 +38,7 @@ module.exports = function(){
 		"Expert Endurance: Fight 2 Champions in a row. May try until you win.",
 		"Novice Duel: Fight " + magename + ". Only one attempt allowed.",
 		"Expert Duel: Fight " + dgname + ". Only one attempt allowed."];
-	var div = h('div', { id: 'app', style: { display: '' }}, h(dom.ExitBtn, { x: 50, y: 50 }));
+	var div = h(Components.App, {}, h(Components.ExitBtn, { x: 50, y: 50 }));
 	for (var i = 1;i < 5;i++) {
 		var active = !(sock.user.daily & (1 << i));
 		if (active) {

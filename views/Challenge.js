@@ -1,10 +1,11 @@
-var px = require("../px");
-var dom = require("../dom");
-var sock = require("../sock");
-var util = require("../util");
-var etgutil = require("../etgutil");
-var options = require("../options");
-var DeckDisplay = require("../DeckDisplay");
+const px = require("../px"),
+	dom = require("../dom"),
+	sock = require("../sock"),
+	util = require("../util"),
+	etgutil = require("../etgutil"),
+	options = require("../options"),
+	Components = require('../Components'),
+	h = preact.h;
 
 function sendChallenge(foe) {
 	var deck = sock.getDeck();
@@ -28,10 +29,11 @@ function sendChallenge(foe) {
 module.exports = function(pvp) {
 	function makeChallenge(foe) {
 		if (!foe) return;
-		pvpInputs.forEach(function(x) { x.style.visibility = "hidden" });
-		cancelButton.style.visibility = "visible";
-		challengeLabel.text = "You have challenged " + foe;
+		pvpInputs.forEach(function(x) { x.attributes.style.visibility = "hidden" });
+		cancelButton.attributes.style.visibility = "visible";
+		challengeLabel.attributes.children = ["You have challenged " + foe];
 		sendChallenge(options.foename);
+		px.render(view);
 	}
 	function maybeCustomAi(e) {
 		if (e.keyCode == 13) aiClick.call(this);
@@ -61,73 +63,108 @@ module.exports = function(pvp) {
 		require("./MainMenu")();
 	}
 	function cancelClick() {
-		pvpInputs.forEach(function(x) { x.style.visibility = "visible" });
-		challengeLabel.text = "";
-		cancelButton.style.visibility = "hidden";
+		pvpInputs.forEach(function(x) { x.attributes.style.visibility = "visible" });
+		challengeLabel.attributes.children = [];
+		cancelButton.attributes.style.visibility = "hidden";
 		if (sock.pvp) {
 			if (sock.user) sock.userEmit("foecancel");
 			else sock.emit("roomcancel", { room: sock.pvp });
 			delete sock.pvp;
 		}
 		delete sock.spectate;
+		px.render(view);
 	}
-	function labelText(text) {
-		var text = dom.text(text);
-		text.style.fontSize = "18px";
-		text.style.color = "#fff";
-		text.style.pointerEvents = "none";
-		return text;
+	function labelText(x, y, text) {
+		return h('span', { style: { fontSize: '18px', color: '#fff', pointerEvents: 'none', position: 'absolute', left: x+'px', top: y+'px' }});
 	}
 	var deck = etgutil.decodedeck(sock.getDeck()), mark = etgutil.fromTrueMark(deck.pop());
-	var view = new DeckDisplay(60, null, null, deck);
-	view.renderDeck(0);
-	var foename = dom.input("Challenge", "foename", true, maybeChallenge),
-		pvphp = dom.input("HP", "pvphp", true),
-		pvpmark = dom.input("Mark", "pvpmark", true),
-		pvpdraw = dom.input("Draw", "pvpdraw", true),
-		pvpdeck = dom.input("Deck", "pvpdeck", true),
-		pvpButton = dom.button("PvP", function() { makeChallenge(options.foename) }),
-		spectateButton = dom.button("Spectate", function() {
-			sock.spectate = foename.value;
-			sock.userEmit("spectate", {f: sock.spectate});
+	var children = [h(Components.DeckDisplay, {deck:deck})];
+	var foename = h(Components.Input, {
+		placeholder:"Challenge",
+		opt:"foename",
+		onKeyPress: maybeChallenge,
+		x: 190, y: 375,
+	});
+	var pvphp = h(Components.Input, { placeholder: "HP", opt: "pvphp", num: true, x: 190, y: 425 }),
+		pvpmark = h(Components.Input, { placeholder: "Mark", opt: "pvpmark", num: true, x: 190, y: 450 }),
+		pvpdraw = h(Components.Input, { placeholder: "Draw", opt: "pvpdraw", num: true, x: 190, y: 475 }),
+		pvpdeck = h(Components.Input, { placeholder: "Deck", opt: "pvpdeck", num: true, x: 190, y: 500 }),
+		pvpButton = h('input', {
+			type: 'button',
+			value: 'PvP',
+			onClick: function() { makeChallenge(options.foename) },
+			style: {
+				position: 'absolute',
+				left: '110px',
+				top: '375px',
+			},
 		}),
-		cancelButton = dom.button("Cancel", cancelClick);
-	cancelButton.style.visibility = "hidden";
-	var pvpInputs = [pvpButton,foename, pvphp, pvpmark, pvpdraw, pvpdeck, spectateButton];
-	var aideck = dom.input("AI Deck", "aideck", true, maybeCustomAi),
-		aihp = dom.input("HP", "aihp", true),
-		aimark = dom.input("Mark", "aimark", true),
-		aidraw = dom.input("Draw", "aidraw", true),
-		aideckpower = dom.input("Deck", "aideckpower", true),
-		challengeLabel = dom.text(""),
-		markSprite = document.createElement("span");
-	markSprite.className = "ico e"+mark;
-	aideck.addEventListener("click", function() { this.setSelectionRange(0, 999) });
-	var div = dom.div(
-		[66, 200, markSprite],
-		[190, 300, ["Exit", exitClick]],
-		[190, 400, labelText("Own stats:")],
-		[190, 425, pvphp],
-		[190, 450, pvpmark],
-		[190, 475, pvpdraw],
-		[190, 500, pvpdeck]);
+		spectateButton = h('input', {
+			type: 'button',
+			value: 'Spectate',
+			onClick: function() {
+				sock.spectate = options.foename;
+				sock.userEmit("spectate", {f: sock.spectate});
+			},
+			style: {
+				position: 'absolute',
+				left: '110px',
+				top: '450px',
+			},
+		}),
+		cancelButton = h('input', {
+			type: 'button',
+			value: 'Cancel',
+			onClick: cancelClick,
+			style: {
+				visibility: 'hidden',
+				position: 'absolute',
+				left: '110px',
+				top: '400px',
+			}
+		});
+	var pvpInputs = [pvpButton, foename, pvphp, pvpmark, pvpdraw, pvpdeck, spectateButton];
+	var aideck = h(Components.Input, {
+			placeholder: 'AI Deck',
+			opt: 'aideck',
+			onKeyPress: maybeCustomAi,
+			x: 440, y: 375,
+		}),
+		aihp = h(Components.Input, {
+			placeholder: 'HP',
+			opt: 'aihp',
+			num: true,
+			x: 440, y: 425,
+		}),
+		aimark = h(Components.Input, { placeholder: "Mark", opt: "aimark", num: true, x: 440, y: 450 }),
+		aidraw = h(Components.Input, { placeholder: "Draw", opt: "aidraw", num: true, x: 440, y: 475 }),
+		aideckpower = h(Components.Input, { placeholder: "Deck", opt: "aideckpower", num: true, x: 440, y: 500}),
+		challengeLabel = h('div', { style: { position: 'absolute', left: '190px', top: '375px' } }),
+		markSprite = h('span', { className: 'ico e'+mark, style: { position: 'absolute', left: '66px', top: '200px' }});
+	// aideck.addEventListener("click", function() { this.setSelectionRange(0, 999) });
+	children.push(markSprite,
+		h(Components.ExitBtn, { x: 190, y: 300, onClick: exitClick }),
+		labelText(190, 400, "Own stats:"),
+		pvphp, pvpmark, pvpdraw, pvpdeck);
 	if (pvp){
-		dom.add(div,
-			[110, 375, pvpButton],
-			[110, 450, spectateButton],
-			[110, 400, cancelButton],
-			[190, 375, foename],
-			[190, 375, challengeLabel]);
+		children.push(pvpButton, spectateButton, cancelButton, foename, challengeLabel);
 	}else{
-		dom.add(div,
-			[360, 375, ["Custom AI", aiClick]],
-			[440, 375, aideck],
-			[440, 400, labelText("AI's stats:")],
-			[440, 425, aihp],
-			[440, 450, aimark],
-			[440, 475, aidraw],
-			[440, 500, aideckpower]);
+		children.push(
+			h('input', {
+				type: 'button',
+				value: 'Custom AI',
+				onClick: aiClick,
+				style: {
+					position: 'absolute',
+					left: '360px',
+					top: '375px',
+				}
+			}), aideck, labelText(440, 400, "AI's stats:"),
+			aihp, aimark, aidraw, aideckpower
+		);
 	}
-	px.view({view:view, dom:div});
+	px.view({endnext:px.hideapp});
+	var view = h(Components.App, { children: children });
+	px.render(view);
 }
 module.exports.sendChallenge = sendChallenge;
