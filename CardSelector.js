@@ -33,23 +33,19 @@ function CardSelector(stage, cardmouseover, cardclick, maxedIndicator, filterbot
 	this.elefilter = this.rarefilter = 0;
 	this.columns = [[],[],[],[],[],[]];
 	this.columnspr = [[],[],[],[],[],[]];
-	for (var i = 0;i < 13;i++) {
-		(function(_i){
-			dom.add(div, [(!i || i&1?4:40), 316 + Math.floor((i-1)/2) * 32,
-				dom.icob(i, function() {
-					self.elefilter = _i;
-					self.makeColumns();
-				})
-			]);
-		})(i);
-	}
-	for (var i = 0;i < 5; i++){
-		(function(_i) {
-			dom.add(div, [74, 338 + i * 32, dom.icob(i, function() {
-				self.rarefilter = _i;
+	for (let i = 0;i < 13;i++) {
+		dom.add(div, [(!i || i&1?4:40), 316 + Math.floor((i-1)/2) * 32,
+			dom.icob(i, function() {
+				self.elefilter = i;
 				self.makeColumns();
-			}, i?"r":"t")]);
-		})(i);
+			})
+		]);
+	}
+	for (let i = 0;i < 5; i++){
+		dom.add(div, [74, 338 + i * 32, dom.icob(i, function() {
+			self.rarefilter = i;
+			self.makeColumns();
+		}, i?"r":"t")]);
 	}
 	this.countText = new Array(6);
 	for (var i = 0;i < 6;i++) {

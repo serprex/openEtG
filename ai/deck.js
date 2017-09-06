@@ -14,7 +14,7 @@ var hasLight = new Uint16Array([5811,5820,5908,7811,7801,7820]);
 function scorpion(card, deck){
 	var isDeath = card.isOf(Cards.Deathstalker); // Scan for Nightfall
 	for(var i=0; i<deck.length; i++){
-		if (~util.typedIndexOf(hasBuff, deck[i]) ||
+		if (~hasBuff.indexOf(deck[i]) ||
 			(isDeath && (deck[i] == 6106 || deck[i] == 8106))) return true;
 	}
 }
@@ -36,24 +36,24 @@ var filters = {
 	},
 	5418:function tunneling(card, deck){
 		for(var i=0; i<deck.length; i++){
-			if (~util.typedIndexOf(hasBurrow, deck[i])) return true;
+			if (~hasBurrow.indexOf(deck[i])) return true;
 		}
 	},
 	5430:function integrity(card, deck){
 		var shardCount=0;
 		for(var i=0; i<deck.length; i++){
-			if (~util.typedIndexOf(etg.ShardList, deck[i]) && ++shardCount>3) return true;
+			if (~etg.ShardList.indexOf(deck[i]) && ++shardCount>3) return true;
 		}
 	},
 	5812:function hope(card, deck){
 		for(var i=0; i<deck.length; i++){
-			if (~util.typedIndexOf(hasLight, deck[i])) return true;
+			if (~hasLight.indexOf(deck[i])) return true;
 		}
 	},
 	6013:scorpion,
 	6015:function neurotoxin(card, deck){
 		for(var i=0; i<deck.length; i++){
-			if (~util.typedIndexOf(hasPoison, deck[i])) return true;
+			if (~hasPoison.indexOf(deck[i])) return true;
 			if (deck[i] == 6112 || deck[i] == 8112){
 				for(var i=0; i<deck.length; i++){
 					if (~util.typedIndexOf(canInfect, deck[i])) return true;

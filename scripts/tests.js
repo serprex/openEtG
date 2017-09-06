@@ -8,6 +8,12 @@ const assert = require("assert"),
 	Thing = require("../Thing"),
 	Skills = require("../Skills"),
 	etgutil = require("../etgutil");
+
+function isEmpty(obj){
+	for(let key in obj)
+		if (obj[key] !== undefined) return false;
+	return true;
+}
 function initHand(pl, ...args){
 	for(var i=0; i<args.length; i++){
 		var cardinst = pl.hand[i] = new Thing(args[i]);
@@ -190,9 +196,9 @@ M.test("Hope", function() {
 M.test("Lobotomize", function() {
 	this.player1.addCrea(new Thing(Cards.Devourer));
 	var dev = this.player1.creatures[0];
-	assert.ok(!util.isEmpty(dev.active), "Skills");
+	assert.ok(!isEmpty(dev.active), "Skills");
 	Skills.lobotomize.func(dev, dev);
-	assert.ok(util.isEmpty(dev.active), "No more");
+	assert.ok(isEmpty(dev.active), "No more");
 });
 M.test("Obsession", function() {
 	initHand(this.player1, Cards.GhostofthePast, Cards.GhostofthePast, Cards.GhostofthePast, Cards.GhostofthePast, Cards.GhostofthePast, Cards.GhostofthePast, Cards.GhostofthePast, Cards.GhostofthePast);
