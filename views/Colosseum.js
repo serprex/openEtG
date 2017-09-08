@@ -6,7 +6,7 @@ const px = require("../px"),
 	Decks = require("../Decks.json"),
 	RngMock = require("../RngMock"),
 	startMenu = require("./MainMenu"),
-	Components = require('./Components');
+	Components = require('../Components');
 function mkDaily(type) {
 	if (type < 3) {
 		return function() {
