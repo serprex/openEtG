@@ -27,13 +27,13 @@ input[type="text"],input[type="password"],input:not([type]){width:150px;border:2
 .width400{width:400px;margin:0}
 .underline{border-bottom:1px solid #222;padding-bottom:1px}
 .floatRight{float:right}
-.atopol{width:800px;margin:0}
-.atoptext{float:left;width:200px}
-.atopdash{float:left;text-align:center;width:12px}
-.atop1{float:left;width:48px;text-align:right}
-.atop2{float:left;width:48px;text-align:right}
-.atop3{float:left;width:48px}
-.atop4{float:left;width:48px;text-align:right;margin-right:32px}
+.atopol{width:900px;margin:0}
+.atoptext{display:inline-block;width:200px}
+.atopdash{display:inline-block;text-align:center;width:12px}
+.atop1{display:inline-block;width:48px;text-align:right}
+.atop2{display:inline-block;width:48px;text-align:right}
+.atop3{display:inline-block;width:48px}
+.atop4{display:inline-block;width:48px;text-align:right;margin-right:32px}
 .cardslot{font:12px Dosis;height:20px;width:100px;display:table-cell;vertical-align:middle;border:1px solid}
 .infobox{
 	opacity:.7;
