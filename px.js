@@ -8,7 +8,7 @@ document.addEventListener("mousemove", function(e){
 	}
 });
 var audio = require("./audio");
-var app = document.getElementById("app");
+var app = document.getElementById("app2");
 var renderer = new PIXI.autoDetectRenderer(900, 600, {view:document.getElementById("leftpane"), transparent:true});
 var noStage = {}, curStage = noStage;
 var interman = require("./InteractionManager");

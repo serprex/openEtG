@@ -9,13 +9,25 @@ exports.App = function App(props) {
 	return h('div', { id: 'app', style: { display: '' }, children: props.children });
 }
 
+exports.rect = function(x, y, wid, hei) {
+	let style = {
+		position: 'absolute',
+		left: x+'px',
+		top: y+'px',
+		width: wid+'px',
+		height: hei+'px',
+	};
+	return function(props) {
+		return h('div', Object.assign({}, props, { style: props.style ? Object.assign({}, props.style, style) : style }));
+	}
+}
+
 function CardImage(props) {
-	let card = props.card, spans = [h('span', {}, card.name)];
+	let card = props.card, spans = [h('span', { style: { color: card.upped && "#000" } }, card.name)];
 	let bordcol = card && card.shiny ? '#daa520' : '#222';
 	let bgcol = card ? ui.maybeLightenStr(card) : card === null ? '#876' : '#111';
-	console.log(bgcol);
 	if (card && card.cost) {
-		spans.push(h('span', { style: { float: 'right', marginRight: '2px' }}, card.cost));
+		spans.push(h('span', { style: { float: 'right', marginRight: '2px', color: card.upped && '#000' }}, card.cost));
 		if (card.costele !== card.element) {
 			span.push(h('span', { className: 'ico ce' + card.costele, style: { float: 'right' }}));
 		}
@@ -107,7 +119,7 @@ exports.ExitBtn = function(props) {
 	return h('input', {
 		type: 'button',
 		value: 'Exit',
-		onClick: props.onClick || function() { require('./views/MainMenu')(); },
+		onClick: props.onClick || function() { props.doNav(require('./views/MainMenu')); },
 		style: {
 			position: 'absolute',
 			left: props.x + 'px',

@@ -1,14 +1,14 @@
 "use strict";
-var guestname, muteset = {}, muteall;
-var px = require("./px");
-var chat = require("./chat");
-var Cards = require("./Cards");
-var etgutil = require("./etgutil");
-var RngMock = require("./RngMock");
-var options = require("./options");
-var userutil = require("./userutil");
-var viewsLogin = require("./views/Login");
-var lastError = 0;
+const muteset = {},
+	px = require("./px"),
+	chat = require("./chat"),
+	Cards = require("./Cards"),
+	etgutil = require("./etgutil"),
+	RngMock = require("./RngMock"),
+	options = require("./options"),
+	userutil = require("./userutil"),
+	viewsLogin = require("./views/Login");
+var guestname, muteall, lastError = 0;
 window.onerror = function(){
 	var now = Date.now();
 	if (lastError+999<now){
@@ -127,14 +127,14 @@ var sockEvents = {
 		sock.emit("challrecv", {f: data.f, pvp: data.pvp});
 	}
 };
-var sock = require("./sock");
+const sock = require("./sock");
 sock.et.onmessage = function(msg){
 	var data = JSON.parse(msg.data);
 	if (data.u && data.u in muteset) return;
 	var func = sockEvents[data.x] || px.getCmd(data.x);
 	if (func) func.call(this, data);
 }
-viewsLogin();
+preact.render(preact.h(require('./views/App'), { view: viewsLogin }), null, document.getElementById("app"));
 if (options.preart) sock.emit("cardart");
 function chatmute(){
 	chat((muteall?"You have chat muted. ":"") + "Muted: " + Object.keys(muteset).join(", "), "System");
