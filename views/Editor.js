@@ -1,16 +1,17 @@
 "use strict";
-var px = require("../px");
-var dom = require("../dom");
-var etg = require("../etg");
-var gfx = require("../gfx");
-var chat = require("../chat");
-var sock = require("../sock");
-var Cards = require("../Cards");
-var tutor = require("../tutor");
-var etgutil = require("../etgutil");
-var options = require("../options");
-var DeckDisplay = require("../DeckDisplay");
-var CardSelector = require("../CardSelector");
+const px = require("../px"),
+	dom = require("../dom"),
+	etg = require("../etg"),
+	gfx = require("../gfx"),
+	chat = require("../chat"),
+	sock = require("../sock"),
+	Cards = require("../Cards"),
+	tutor = require("../tutor"),
+	etgutil = require("../etgutil"),
+	options = require("../options"),
+	DeckDisplay = require("../DeckDisplay"),
+	CardSelector = require("../CardSelector"),
+	h = preact.h;
 
 module.exports = function(arena, ainfo, acard, startempty) {
 	var aupped;

@@ -226,7 +226,7 @@ module.exports = class MainMenu extends preact.Component {
 			let lvi = {lv:i};
 			function arenaAi(e) {
 				if (etgutil.decklength(sock.getDeck()) < 31) {
-					require("./Editor")();
+					self.props.doNav(require("./Editor"));
 					return;
 				}
 				const cost = userutil.arenaCost(lvi.lv);
@@ -618,7 +618,7 @@ module.exports = class MainMenu extends preact.Component {
 			h('input', {
 				type: 'button',
 				value: 'Editor',
-				onClick: require('./Editor'),
+				onClick: function() { self.props.doNav(require('./Editor')) },
 				onMouseOver: mkSetTip("Edit & manage your decks"),
 			}),
 			h(LabelText, { text: 'Edit & manage your decks' })

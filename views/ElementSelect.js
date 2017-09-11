@@ -3,22 +3,9 @@ const px = require("../px"),
 	ui = require("../ui"),
 	sock = require("../sock"),
 	RngMock = require("../RngMock"),
-	Components = require('../Components');
-
-module.exports = function() {
-	var h = preact.h;
-	var eledesc = h('div', { style: { position: 'absolute', left: '100px', top: '300px', width: '700px' }}, "Select your starter element");
-	var view = h(Components.App, {},
-		eledesc, h(Components.ExitBtn, {
-			x: 100, y: 450,
-			onClick: function() {
-				sock.userEmit("delete");
-				sock.user = undefined;
-				require("./Login")();
-			},
-		})
-	);
-	var descriptions = [
+	Components = require('../Components'),
+	h = preact.h,
+	descriptions = [
 		"Element of randomness. Trade off consistency for cost effectiveness, make use of all elements, spawn mutants, & seek turn advantages into disadvantages.",
 		"Element of decay. Gains advantages through destroying creatures and exhibiting control through poison.",
 		"Element of order. Employs huge creatures that defend their owner, eat smaller creatures, and bypass shields.",
@@ -34,33 +21,55 @@ module.exports = function() {
 		"Start without any cards, but gain several extra boosters instead!",
 		"Start with a random element!",
 	];
-	for (let i=1; i<=14; i++) {
-		var name = ui.eleNames[i];
-		view.children.push(h(Components.IconBtn, {
-			e: 'e' + (i < 13 ? i : i == 13 ? 14 : 13),
-			x: 100+Math.floor((i-1)/2)*64,
-			y: 180+((i-1)&1)*64,
-			click: function() {
-				var msg = { u: sock.user.name, a: sock.user.auth, e: i == 14 ? RngMock.upto(12)+1 : i };
-				sock.user = undefined;
-				sock.emit("inituser", msg);
-			},
-			onMouseOver: function() {
-				eledesc.children = [name + "\n\n" + descriptions[i-1]];
-				px.render(view);
-			},
-		}));
+
+module.exports = class ElementSelect extends preact.Component {
+	constructor(props) {
+		super(props)
+		this.state.eledesc = 'Select your starter element';
 	}
-	px.view({
-		endnext: px.hideapp,
-		cmds:{
-			login:function(data) {
-				console.log(data);
-				delete data.x;
-				sock.user = data;
-				require("./MainMenu")();
-			},
+
+	render() {
+		const self = this;
+		const eledesc = h('div', { style: {
+			position: 'absolute',
+			left: '100px',
+			top: '300px',
+			width: '700px',
+			whiteSpace: 'pre-wrap',
+		}}, this.state.eledesc);
+		var mainc = [eledesc, h(Components.ExitBtn, {
+				x: 100, y: 450,
+				onClick: function() {
+					sock.userEmit("delete");
+					sock.user = undefined;
+					self.props.doNav(require('./Login'));
+				},
+			})
+		];
+		for (let i=1; i<=14; i++) {
+			mainc.push(h(Components.IconBtn, {
+				e: 'e' + (i < 13 ? i : i == 13 ? 14 : 13),
+				x: 100+Math.floor((i-1)/2)*64,
+				y: 180+((i-1)&1)*64,
+				click: function() {
+					var msg = { u: sock.user.name, a: sock.user.auth, e: i == 14 ? RngMock.upto(12)+1 : i };
+					sock.user = undefined;
+					sock.emit("inituser", msg);
+				},
+				onMouseOver: function() {
+					self.setState({ eledesc: ui.eleNames[i] + "\n\n" + descriptions[i-1] });
+				},
+			}));
 		}
-	});
-	px.render(view);
+		px.view({
+			cmds:{
+				login:function(data) {
+					delete data.x;
+					sock.user = data;
+					self.props.doNav(require("./MainMenu"));
+				},
+			}
+		});
+		return h('div', { children: mainc });
+	}
 }
