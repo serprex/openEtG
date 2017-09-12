@@ -19,38 +19,38 @@ const px = require('../px'),
 	userutil = require('../userutil'),
 	h = preact.h,
 	tipjar = [
-	"Each card in your booster pack has a 50% chance of being from the chosen element",
-	"Your arena deck will earn you 3$ per win & 1$ per loss",
-	"Colosseum lets you compete in a number of daily events for extra prizes. The colosseum challenges reset daily",
-	"Be sure to try the Proving Grounds Quests for some good cards",
-	"Rarity ratings: Grey commons, green uncommons, blue rares, orange shard, & pink ultra rares",
-	"The Library button allows you to see all of a user's cards & progress",
-	"If you are a new user, be sure to get the free Bronze & Silver packs from the Shop",
-	"Starter decks, cards from free packs, & all non-Common Daily Cards are account-bound; they cannot be traded or sold",
-	"If you include account-bound cards in an upgrade, the upgrade will also be account-bound",
-	"You'll receive a Daily Card upon logging in after midnight GMT0. If you submit an Arena deck, it contain 5 copies of that card",
-	"Unupgraded pillars & pendulums are free",
-	"Cards sell for around half as much as they cost to buy from a pack",
-	"Quests are free to try, & you always face the same deck. Keep trying until you collect your reward",
-	"You may mulligan at the start of the game to shuffle & redraw your hand with one less card",
-	"Your account name is case sensitive",
-	"Arena Tier 1 is unupgraded, while Tier 2 is upgraded. All decks in a tier have the same number of points",
-	"If you type '/who' in chat you will get a list of the users who are online. '/w username message' will send your message only to one user",
-	"Chat commands: /who, /mute, /unmute, /clear, /w, /decks",
-	"Keyboard shortcuts: space ends turn, backspace cancels, w targets opponent, s targets yourself, 1 through 8 cast cards in hand",
-	"Remember that you may use the logout button to enter sandbox mode to review the card pool, check rarities & try out new decks",
-	"Commoner & Mage are unupped, Champion has some upped, & Demigod is fully upped",
-	"Decks submitted to arena lose hp exponentially per day, down to a minimum of a quarter of their original hp",
-	"If you don't get what you want from the packs in the shop, ask to trade in chat or the openEtG forum",
-	"Rarity doesn't necessarily relate to card strength. You can go a long ways with commons & uncommons",
-	"A ply is half a turn",
-	"Mark cards are only obtainable through PvP events. A tournament deck verifier is at tournament.htm",
-	"After an AI battle you will win a random common, uncommon, or rare from your opponent's deck",
-	"Cards in packs have a (45/packsize)% chance to increment rarity",
-	"At Wealth T50 you can see which players have the highest wealth. Wealth is a combination of current gold & one's cardpool",
-	"Throttling means that the effect is limited to 2 procs when attacking multiple times with adrenaline",
-];
-var menuChat = chat.MainMenuChat;
+		"Each card in your booster pack has a 50% chance of being from the chosen element",
+		"Your arena deck will earn you 3$ per win & 1$ per loss",
+		"Colosseum lets you compete in a number of daily events for extra prizes. The colosseum challenges reset daily",
+		"Be sure to try the Proving Grounds Quests for some good cards",
+		"Rarity ratings: Grey commons, green uncommons, blue rares, orange shard, & pink ultra rares",
+		"The Library button allows you to see all of a user's cards & progress",
+		"If you are a new user, be sure to get the free Bronze & Silver packs from the Shop",
+		"Starter decks, cards from free packs, & all non-Common Daily Cards are account-bound; they cannot be traded or sold",
+		"If you include account-bound cards in an upgrade, the upgrade will also be account-bound",
+		"You'll receive a Daily Card upon logging in after midnight GMT0. If you submit an Arena deck, it contain 5 copies of that card",
+		"Unupgraded pillars & pendulums are free",
+		"Cards sell for around half as much as they cost to buy from a pack",
+		"Quests are free to try, & you always face the same deck. Keep trying until you collect your reward",
+		"You may mulligan at the start of the game to shuffle & redraw your hand with one less card",
+		"Your account name is case sensitive",
+		"Arena Tier 1 is unupgraded, while Tier 2 is upgraded. All decks in a tier have the same number of points",
+		"If you type '/who' in chat you will get a list of the users who are online. '/w username message' will send your message only to one user",
+		"Chat commands: /who, /mute, /unmute, /clear, /w, /decks",
+		"Keyboard shortcuts: space ends turn, backspace cancels, w targets opponent, s targets yourself, 1 through 8 cast cards in hand",
+		"Remember that you may use the logout button to enter sandbox mode to review the card pool, check rarities & try out new decks",
+		"Commoner & Mage are unupped, Champion has some upped, & Demigod is fully upped",
+		"Decks submitted to arena lose hp exponentially per day, down to a minimum of a quarter of their original hp",
+		"If you don't get what you want from the packs in the shop, ask to trade in chat or the openEtG forum",
+		"Rarity doesn't necessarily relate to card strength. You can go a long ways with commons & uncommons",
+		"A ply is half a turn",
+		"Mark cards are only obtainable through PvP events. A tournament deck verifier is at tournament.htm",
+		"After an AI battle you will win a random common, uncommon, or rare from your opponent's deck",
+		"Cards in packs have a (45/packsize)% chance to increment rarity",
+		"At Wealth T50 you can see which players have the highest wealth. Wealth is a combination of current gold & one's cardpool",
+		"Throttling means that the effect is limited to 2 procs when attacking multiple times with adrenaline",
+	];
+const menuChat = chat.MainMenuChat;
 function CostRewardHeaders(x, y, wid, hei) {
 	return function(props){
 		return h(Components.rect(x, y, wid, hei), Object.assign({}, props.props, {
@@ -223,18 +223,18 @@ module.exports = class MainMenu extends preact.Component {
 			);
 		});
 		for (var i=0; i<2; i++){
-			let lvi = {lv:i};
+			let lvi = i;
 			function arenaAi(e) {
 				if (etgutil.decklength(sock.getDeck()) < 31) {
 					self.props.doNav(require("./Editor"));
 					return;
 				}
-				const cost = userutil.arenaCost(lvi.lv);
+				const cost = userutil.arenaCost(lvi);
 				if (sock.user.gold < cost) {
 					chat("Requires " + cost + "$", "System");
 					return;
 				}
-				sock.userEmit("foearena", lvi);
+				sock.userEmit("foearena", {lv:lvi});
 				e.target.style.display = "none";
 			}
 			if (sock.user){
@@ -242,7 +242,7 @@ module.exports = class MainMenu extends preact.Component {
 				arenac.push(
 					h('input', {
 						type: 'button',
-						value: 'Arena' + (lvi.lv+1) + ' AI',
+						value: 'Arena' + (lvi+1) + ' AI',
 						onClick: arenaAi,
 						onMouseOver: mkSetTip("In the arena you will face decks from other players"),
 						style: {
@@ -251,12 +251,12 @@ module.exports = class MainMenu extends preact.Component {
 							top: y,
 						}
 					}),
-					h(CostText, { n: 0, lv: 4+lvi.lv, style: {
+					h(CostText, { n: 0, lv: 4+lvi, style: {
 						position: 'absolute',
 						top: y,
 						right: '114px',
 					}}),
-					h(CostText, { n: 1, lv: 4+lvi.lv, style: {
+					h(CostText, { n: 1, lv: 4+lvi, style: {
 						position: 'absolute',
 						top: y,
 						right: '4px',
@@ -266,7 +266,7 @@ module.exports = class MainMenu extends preact.Component {
 			leadc.push(h('input', {
 				type: 'button',
 				value: 'Arena'+(i+1) + ' T20',
-				onClick: function(){ self.props.doNav(require('./ArenaTop')(lvi)) },
+				onClick: function(){ self.props.doNav(require('./ArenaTop'), {lv: lvi}); },
 				onMouseOver: mkSetTip("See who the top players in arena are right now"),
 				style: {
 					position: 'absolute',
@@ -303,7 +303,7 @@ module.exports = class MainMenu extends preact.Component {
 						left: '92px',
 						top: '340px',
 					},
-					dangerouslySetHtml: { __html: oraclesvg.slice(text.indexOf('>')+1,-6) },
+					dangerouslySetHtml: { __html: oraclesvg.slice(oraclesvg.indexOf('>')+1,-6) },
 				}));
 				if (sock.user.daily == 0) sock.user.daily = 128;
 			} else {
@@ -507,7 +507,7 @@ module.exports = class MainMenu extends preact.Component {
 			}), bcolo = h('input', {
 				type: 'button',
 				value: 'Colosseum',
-				onClick: require("./Colosseum"),
+				onClick: function() { self.props.doNav(require("./Colosseum")); },
 				onMouseOver: mkSetTip("Try some daily challenges in the Colosseum")
 			}), bendless = h('input', {
 				type: 'button',
@@ -537,7 +537,7 @@ module.exports = class MainMenu extends preact.Component {
 				h('input', {
 					type: 'button',
 					value: 'Shop',
-					onClick: require('./Shop'),
+					onClick: function() { self.props.doNav(require('./Shop')) },
 					onMouseOver: mkSetTip("Buy booster packs which contain cards from the elements you choose"),
 					style: {
 						position: 'absolute',

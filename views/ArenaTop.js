@@ -7,58 +7,72 @@ const px = require("../px"),
 	Cards = require("../Cards"),
 	Components = require('../Components'),
 	h = preact.h;
-function mkText(text){
-	return h("span", { className: "atoptext" }, text);
-}
-module.exports = function(lvi) {
-	var lv = lvi.lv;
-	return function() {
-		var s = dom.svg();
-		s.setAttribute("width", "128");
-		s.setAttribute("height", "256");
-		s.style.pointerEvents = "none";
-		s.style.position = 'absolute';
-		s.style.display = 'none';
-		document.body.appendChild(s);
-		var ol = h('ol', { className: "atopol", style: { position: 'absolute', left: '90px', top: '50px' } });
-		var view = h(Components.App, {}, ol, h(Components.ExitBtn, { x: 8, y: 300, }));
+
+module.exports = class ArenaTop extends preact.Component {
+	componentDidMount() {
+		if (!this.svg) {
+			const s = this.svg = dom.svg();
+			s.setAttribute("width", "128");
+			s.setAttribute("height", "256");
+			s.style.pointerEvents = "none";
+			s.style.position = 'absolute';
+			s.style.display = 'none';
+		}
+		document.body.appendChild(this.svg);
+	}
+
+	componentWillUnmount() {
+		document.body.removeChild(this.svg);
+	}
+
+	render() {
+		const self = this, lv = this.props.lv;
 		px.view({
-			endnext: function(){
-				px.hideapp();
-				document.body.removeChild(s);
-			},
 			cmds: {
 				arenatop: function(info){
-					info = info.top;
-					ol.children = info.map(function(data, i){
-						var lic = [mkText(data[0])];
-						for(var i=1; i<=4; i++){
-							if (i == 3){
-								lic.push(h('span', { className: 'atopdash' }, '-'));
-							}
-							lic.push(h('span', { className: 'atop'+i }, data[i]));
-						}
-						var card = Cards.Codes[data[5]].asUpped(lv);
-						var cname = mkText(card.name);
-						cname.attributes.onMouseEnter = function(e){
-							dom.svgToSvg(s, svg.card(card.code));
-							s.style.left = (e.clientX+4)+"px";
-							s.style.top = (e.clientY+4)+"px";
-							s.style.display = "";
-						};
-						cname.attributes.onMouseLeave = function(){
-							s.style.display = "none";
-						};
-						lic.push(cname);
-						var li = h("li", { children: lic });
-						if (i != info.length-1) li.className = "underline";
-						return li;
-					});
-					px.render(view);
+					self.setState(info);
 				}
 			}
 		});
-		px.render(view);
-		sock.emit("arenatop", lvi);
+		const info = this.state.top || [];
+		sock.emit("arenatop", this.props);
+		const ol = h('ol', {
+			className: "atopol",
+			style: {
+				position: 'absolute',
+				left: '90px',
+				top: '50px'
+			},
+			children: info.map(function(data, i){
+				const lic = [h('span', { className: 'atoptext' }, data[0])];
+				for(var i=1; i<=4; i++){
+					if (i == 3){
+						lic.push(h('span', { className: 'atopdash' }, '-'));
+					}
+					lic.push(h('span', { className: 'atop'+i }, data[i]));
+				}
+				const card = Cards.Codes[data[5]].asUpped(lv);
+				const cname = h('span', {
+					className: 'atoptext',
+					onMouseEnter: function(e) {
+						dom.svgToSvg(this.svg, svg.card(card.code));
+						this.svg.style.left = e.clientX+4+'px';
+						this.svg.style.top = e.clientY+4+'px';
+						this.svg.style.display = '';
+					},
+					onMouseLeave: function() {
+						this.svg.style.display = 'none';
+					},
+				}, card.name);
+				cname.attributes.onMouseEnter = function(e){
+				};
+				cname.attributes.onMouseLeave = function(){
+					s.style.display = "none";
+				};
+				lic.push(cname);
+				return h("li", { className: i != info.length-1 && 'underline', children: lic });
+			}),
+		});
+		return h('div', {}, ol, h(Components.ExitBtn, { x: 8, y: 300, doNav: this.props.doNav, }));
 	}
 }
