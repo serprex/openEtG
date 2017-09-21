@@ -1,13 +1,11 @@
 "use strict";
 const ui = require('./ui'),
+	etg = require('./etg'),
 	audio = require('./audio'),
 	Cards = require('./Cards'),
+	etgutil = require('./etgutil'),
 	options = require('./options'),
 	h = preact.h, Component = preact.Component;
-
-exports.App = function App(props) {
-	return h('div', { id: 'app', style: { display: '' }, children: props.children });
-}
 
 exports.rect = function(x, y, wid, hei) {
 	let style = {
@@ -23,13 +21,13 @@ exports.rect = function(x, y, wid, hei) {
 }
 
 function CardImage(props) {
-	let card = props.card, spans = [h('span', { style: { color: card.upped && "#000" } }, card.name)];
+	let card = props.card, spans = [h('span', {}, card.name)];
 	let bordcol = card && card.shiny ? '#daa520' : '#222';
 	let bgcol = card ? ui.maybeLightenStr(card) : card === null ? '#876' : '#111';
 	if (card && card.cost) {
-		spans.push(h('span', { style: { float: 'right', marginRight: '2px', color: card.upped && '#000' }}, card.cost));
+		spans.push(h('span', { style: { float: 'right', marginRight: '2px' }}, card.cost));
 		if (card.costele !== card.element) {
-			span.push(h('span', { className: 'ico ce' + card.costele, style: { float: 'right' }}));
+			spans.push(h('span', { className: 'ico ce' + card.costele, style: { float: 'right' }}));
 		}
 	}
 	return h('div', {
@@ -39,6 +37,7 @@ function CardImage(props) {
 		style: {
 			backgroundColor: bgcol,
 			borderColor: bordcol,
+			color: card && card.upped ? '#000' : '#fff',
 			position: 'absolute',
 			left: props.x + 'px',
 			top: props.y + 'px',
@@ -99,7 +98,7 @@ exports.Text = function(props){
 	return ele;
 }
 
-exports.IconBtn = function(props) {
+function IconBtn(props) {
 	return h('span', {
 		className: 'imgb ico ' + props.e,
 		style: {
@@ -114,6 +113,7 @@ exports.IconBtn = function(props) {
 		onMouseOver: props.onMouseOver,
 	});
 }
+exports.IconBtn = IconBtn;
 
 exports.ExitBtn = function(props) {
 	return h('input', {
@@ -150,3 +150,128 @@ class DeckDisplay extends Component {
 	}
 }
 exports.DeckDisplay = DeckDisplay;
+
+class CardSelector extends Component {
+	constructor(props) {
+		super(props)
+		this.state = {
+			shiny: false,
+			showall: false,
+			element: 0,
+			rarity: 0,
+		};
+	}
+
+	render() {
+		const self = this;
+		const children = [
+			h('input', {
+				type: 'button',
+				value: 'Toggle Shiny',
+				style: {
+					position: 'absolute',
+					left: '4px',
+					top: '578px',
+				},
+				onClick: function() {
+					self.setState(Object.assign({}, self.state, { shiny: !self.state.shiny }));
+				},
+			}),
+			h('input', {
+				type: 'button',
+				value: self.state.showall ? 'Auto Hide' : 'Show All',
+				style: {
+					position: 'absolute',
+					left: '4px',
+					top: '530px',
+				},
+				onClick: function() {
+					self.setState(Object.assign({}, this.state, { showall: !self.state.showall }));
+				},
+			}),
+		];
+		for (let i = 0;i < 13; i++) {
+			children.push(h(IconBtn, {
+				e: 'e'+i,
+				x: !i || i&1?4:40,
+				y: 316 + Math.floor((i-1)/2) * 32,
+				click: function() {
+					self.setState(Object.assign({}, self.state, { element: i }));
+				},
+			}));
+		}
+		for (let i = 0;i < 5; i++){
+			children.push(h(IconBtn, {
+				e: (i?'r':'t')+i,
+				x: 74,
+				y: 338+i*32,
+				click: function() {
+					self.setState(Object.assign({}, self.state, { rarity: i }));
+				},
+			}));
+		}
+		for (let i = 0;i < 6; i++) {
+			const x = 100+i*133;
+			const column = Cards.filter(i > 2,
+				function(x) {
+					return (
+						x.element == self.state.element ||
+						self.state.rarity == 4
+					) && (
+						i % 3 == 0 && x.type == etg.Creature ||
+						i % 3 == 1 && x.type <= etg.Permanent ||
+						i % 3 == 2 && x.type == etg.Spell
+					) && (
+						!self.props.cardpool ||
+						x.code in self.props.cardpool ||
+						self.props.filterboth && etgutil.asShiny(x.code, true) in self.props.cardpool ||
+						self.state.showall ||
+						x.isFree()
+					) && (
+						!self.state.rarity ||
+						self.state.rarity == Math.min(x.rarity, 4)
+					);
+				}, Cards.cardCmp, this.state.shiny && !this.props.filterboth);
+			const countTexts = [];
+			for (let j=0; j<column.length; j++) {
+				const y = 272+j*19, card = column[j], code = card.code;
+				children.push(h(CardImage, {
+					x: x, y: y,
+					card: card,
+					onClick: self.props.onClick && function() {
+						if (self.props.filterboth && !self.state.shiny){
+							const scode = card.asShiny(true).code;
+							if (scode in self.props.cardpool && self.props.cardpool[scode] > ((self.state.cardminus && self.state.cardminus[scode]) || 0)) {
+								code = scode;
+							}
+						}
+						return self.props.onClick(code);
+					},
+					onMouseOver: self.props.onMouseOver && function() { return self.props.onMouseOver(code); },
+				}));
+				if (this.props.cardpool) {
+					const scode = etgutil.asShiny(card.code, true);
+					var cardAmount = card.isFree() ? "-" : code in this.props.cardpool ? this.props.cardpool[code] - ((this.state.cardminus && this.state.cardminus[code]) || 0) : 0, shinyAmount = 0;
+					if (this.props.filterboth && !this.state.shiny) {
+						shinyAmount = scode in this.props.cardpool ? this.props.cardpool[scode] - ((this.state.cardminus && this.state.cardminus[scode]) || 0) : 0;
+					}
+					countTexts.push(h('div', {
+						className: 'selectortext' + (this.props.maxedIndicator && card.type != etg.Pillar && cardAmount >= 6 ?(cardAmount >= 12 ? ' beigeback' : ' lightback'):''),
+					}, cardAmount + (shinyAmount ? '/' + shinyAmount : '')));
+				}
+			}
+			children.push(h('div', {
+				style: {
+					position: 'absolute',
+					left: x+100+'px',
+					top: '272px',
+					textHeight: '0',
+					whiteSpace: 'pre',
+				},
+				children: countTexts,
+			}));
+		}
+		return h('div', {}, children);
+	}
+}
+exports.CardSelector = CardSelector;

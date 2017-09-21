@@ -8,7 +8,7 @@ var Cards = require("./Cards");
 var etgutil = require("./etgutil");
 
 function CardSelector(stage, cardmouseover, cardclick, maxedIndicator, filterboth){
-	var self = this;
+	const self = this;
 	PIXI.Container.call(this);
 	this._cardpool = this.cardpool = undefined;
 	this._cardminus = this.cardminus = undefined;
@@ -122,7 +122,6 @@ CardSelector.prototype.renderColumns = function(){
 				var card = Cards.Codes[code], scode = etgutil.asShiny(code, true);
 				var cardAmount = card.isFree() ? "-" : code in this.cardpool ? this.cardpool[code] - ((this.cardminus && this.cardminus[code]) || 0) : 0, shinyAmount = 0;
 				if (this.filterboth && !this.showshiny) {
-					var scode = etgutil.asShiny(code, true);
 					shinyAmount = scode in this.cardpool ? this.cardpool[scode] - ((this.cardminus && this.cardminus[scode]) || 0) : 0;
 				}
 				var count = this.countText[i].children[j];

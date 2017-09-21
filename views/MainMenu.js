@@ -303,7 +303,7 @@ module.exports = class MainMenu extends preact.Component {
 						left: '92px',
 						top: '340px',
 					},
-					dangerouslySetHtml: { __html: oraclesvg.slice(oraclesvg.indexOf('>')+1,-6) },
+					dangerouslySetInnerHTML: { __html: oraclesvg.slice(oraclesvg.indexOf('>')+1,-6) },
 				}));
 				if (sock.user.daily == 0) sock.user.daily = 128;
 			} else {
@@ -346,7 +346,7 @@ module.exports = class MainMenu extends preact.Component {
 			},
 		}));
 		var stage = { cmds: {
-			librarygive: require("./Library"),
+			librarygive: function(data) { self.props.doNav(require("./Library"), data) },
 			arenainfo: require("./ArenaInfo"),
 			codecard:function(data){
 				require("./Reward")(data.type, data.num, foename.value);
@@ -425,7 +425,7 @@ module.exports = class MainMenu extends preact.Component {
 			})
 		);
 		if (sock.user) {
-			var quickslots = [];
+			const quickslots = [];
 			for (var i = 0;i < 10;i++) {
 				quickslots.push(h('input', {
 					type: 'button',
