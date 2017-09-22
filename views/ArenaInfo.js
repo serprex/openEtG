@@ -1,33 +1,35 @@
 "use strict";
-const px = require("../px"),
-	gfx = require("../gfx"),
-	sock = require("../sock"),
-	util = require("../util"),
-	etgutil = require("../etgutil"),
-	Components = require('../Components');
+const px = require('../px'),
+	Cards = require('../Cards'),
+	sock = require('../sock'),
+	util = require('../util'),
+	etgutil = require('../etgutil'),
+	Components = require('../Components'),
+	h = preact.h;
 
-module.exports = function(data) {
-	var stage = new PIXI.Container(), h = preact.h;
-	var div = h(Components.App, {},
+module.exports = function(props) {
+	const children = [
 		h(Components.Text, { style: { position: 'absolute', left: '96px', top: '576px' }, text: "Earn 1$ when your arena deck is faced, & another 2$ when it wins"}),
-		h(Components.ExitBtn, { x: 8, y: 300 })
-	);
+		h(Components.ExitBtn, { x: 8, y: 300, doNav: props.doNav }),
+	];
 	function renderInfo(info, y){
 		if (info){
 			if (y) info.card = etgutil.asUpped(info.card, true);
-			var mark, i = 0, adeck = "05" + info.card.toString(32) + info.deck;
+			var mark, i = 0, adeck = '05' + info.card.toString(32) + info.deck;
 			etgutil.iterdeck(adeck, function(code){
-				var ismark = etgutil.fromTrueMark(code);
+				const ismark = etgutil.fromTrueMark(code);
 				if (~ismark){
 					mark = ismark;
 					return;
 				}
-				var spr = new PIXI.Sprite(gfx.getCardImage(code));
-				spr.position.set(100 + Math.floor(i / 10) * 99, y + 32 + (i % 10) * 19);
-				stage.addChild(spr);
+				children.push(h(Components.CardImage, {
+					x: 100 + Math.floor(i / 10) * 99,
+					y: y + 32+ (i % 10) * 19,
+					card: Cards.Codes[code],
+				}));
 				i++;
 			});
-			div.children.push(
+			children.push(
 				h(Components.Text, { style: { position: 'absolute', left: '100px', top: 4+y+'px' }, text: "W-L: " + (info.win || 0) + " - " + (info.loss || 0) + ", Rank: " + (info.rank == undefined ? "Inactive" : (info.rank + 1)) + ", " + ((info.win || 0) * 3 + (info.loss || 0) * 1) + "$"}),
 				h('span', { style: { position: 'absolute', left: '330px', top: 4+y+'px' }}, adeck),
 				h('span', { style: { position: 'absolute', left: '400px', top: 224+y+'px' }}, 'Age: ' + info.day),
@@ -43,7 +45,7 @@ module.exports = function(data) {
 						top: 224+y+'px',
 					},
 					onClick: function(){
-						require("./Editor")(data, info, info.card);
+						require("./Editor")(props, info, info.card);
 					}
 				}),
 				h('input', {
@@ -60,7 +62,7 @@ module.exports = function(data) {
 							require("./Editor")();
 							return;
 						}
-						var gameData = { deck: adeck, urdeck: deck, seed: util.randint(), foename: "Test", cardreward: "",
+						const gameData = { deck: adeck, urdeck: deck, seed: util.randint(), foename: "Test", cardreward: "",
 							p2hp:info.curhp, p2markpower:info.mark, p2drawpower:info.draw };
 						require("./Match")(gameData, true);
 					}
@@ -69,12 +71,12 @@ module.exports = function(data) {
 			);
 		}
 	}
-	renderInfo(data.A, 0);
-	renderInfo(data.B, 300);
+	renderInfo(props.A, 0);
+	renderInfo(props.B, 300);
 	if (sock.user.ocard){
 		for(var i=0; i<2; i++){
 			let uocard = etgutil.asUpped(sock.user.ocard, i == 1);
-			div.children.push(h('input', {
+			children.push(h('input', {
 				type: 'button',
 				value: 'Create',
 				style: {
@@ -83,14 +85,11 @@ module.exports = function(data) {
 					top: 268+i*292+'px',
 				},
 				onClick: function(){
-					require("./Editor")(data, data[uocard>6999?"B":"A"] || {}, uocard, true);
+					require("./Editor")(props, props[uocard>6999?"B":"A"] || {}, uocard, true);
 				}
 			}));
-			var ocard = new PIXI.Sprite(gfx.getArt(uocard));
-			ocard.position.set(734, 8+i*292);
-			stage.addChild(ocard);
+			children.push(h(Components.Card, { x: 734, y: 8+i*292, code: uocard }));
 		}
 	}
-	px.view({endnext: px.hideapp, view:stage});
-	px.render(div);
+	return h('div', { children: children });
 }

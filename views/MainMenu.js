@@ -3,7 +3,6 @@ const px = require('../px'),
 	dom = require('../dom'),
 	etg = require('../etg'),
 	gfx = require('../gfx'),
-	svg = require('../svg'),
 	chat = require('../chat'),
 	sock = require('../sock'),
 	util = require('../util'),
@@ -99,6 +98,7 @@ module.exports = class MainMenu extends preact.Component {
 		super(props);
 		const self = this;
 		self.state = {
+			showcard: props.nymph || !sock.user.daily && sock.user.ocard,
 			showsettings: false,
 			tipNumber: RngMock.upto(tipjar.length),
 			tipText: '',
@@ -222,19 +222,18 @@ module.exports = class MainMenu extends preact.Component {
 				})
 			);
 		});
-		for (var i=0; i<2; i++){
-			let lvi = i;
+		for (let i=0; i<2; i++){
 			function arenaAi(e) {
 				if (etgutil.decklength(sock.getDeck()) < 31) {
 					self.props.doNav(require("./Editor"));
 					return;
 				}
-				const cost = userutil.arenaCost(lvi);
+				const cost = userutil.arenaCost(i);
 				if (sock.user.gold < cost) {
 					chat("Requires " + cost + "$", "System");
 					return;
 				}
-				sock.userEmit("foearena", {lv:lvi});
+				sock.userEmit("foearena", {lv:i});
 				e.target.style.display = "none";
 			}
 			if (sock.user){
@@ -242,7 +241,7 @@ module.exports = class MainMenu extends preact.Component {
 				arenac.push(
 					h('input', {
 						type: 'button',
-						value: 'Arena' + (lvi+1) + ' AI',
+						value: 'Arena' + (i+1) + ' AI',
 						onClick: arenaAi,
 						onMouseOver: mkSetTip("In the arena you will face decks from other players"),
 						style: {
@@ -251,12 +250,12 @@ module.exports = class MainMenu extends preact.Component {
 							top: y,
 						}
 					}),
-					h(CostText, { n: 0, lv: 4+lvi, style: {
+					h(CostText, { n: 0, lv: 4+i, style: {
 						position: 'absolute',
 						top: y,
 						right: '114px',
 					}}),
-					h(CostText, { n: 1, lv: 4+lvi, style: {
+					h(CostText, { n: 1, lv: 4+i, style: {
 						position: 'absolute',
 						top: y,
 						right: '4px',
@@ -266,7 +265,7 @@ module.exports = class MainMenu extends preact.Component {
 			leadc.push(h('input', {
 				type: 'button',
 				value: 'Arena'+(i+1) + ' T20',
-				onClick: function(){ self.props.doNav(require('./ArenaTop'), {lv: lvi}); },
+				onClick: function(){ self.props.doNav(require('./ArenaTop'), {lv: i}); },
 				onMouseOver: mkSetTip("See who the top players in arena are right now"),
 				style: {
 					position: 'absolute',
@@ -292,19 +291,8 @@ module.exports = class MainMenu extends preact.Component {
 					},
 				})
 			);
-			var showcard = this.props.nymph || (!sock.user.daily && sock.user.ocard);
-			if (showcard) {
-				let oraclesvg = svg.card(showcard);
-				mainc.push(h('svg', {
-					width: '128',
-					height: '256',
-					style: {
-						position: 'absolute',
-						left: '92px',
-						top: '340px',
-					},
-					dangerouslySetInnerHTML: { __html: oraclesvg.slice(oraclesvg.indexOf('>')+1,-6) },
-				}));
+			if (self.state.showcard) {
+				mainc.push(h(Components.Card, { x: 92, y: 340, card: self.state.showcard }));
 				if (sock.user.daily == 0) sock.user.daily = 128;
 			} else {
 				menuChat.style.display = "";
@@ -347,7 +335,7 @@ module.exports = class MainMenu extends preact.Component {
 		}));
 		var stage = { cmds: {
 			librarygive: function(data) { self.props.doNav(require("./Library"), data) },
-			arenainfo: require("./ArenaInfo"),
+			arenainfo: function(data) { self.props.doNav(require("./ArenaInfo"), data) },
 			codecard:function(data){
 				require("./Reward")(data.type, data.num, foename.value);
 			},

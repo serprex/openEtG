@@ -1,6 +1,7 @@
 "use strict";
 const ui = require('./ui'),
 	etg = require('./etg'),
+	svg = require('./svg'),
 	audio = require('./audio'),
 	Cards = require('./Cards'),
 	etgutil = require('./etgutil'),
@@ -125,6 +126,22 @@ exports.ExitBtn = function(props) {
 			left: props.x + 'px',
 			top: props.y + 'px',
 		}
+	});
+}
+
+exports.Card = function(props) {
+	const card = props.card || props.code && Cards.Codes[props.code];
+	if (!card) return null;
+	const svgcard = svg.card(card);
+	return h('svg', {
+		width: '128',
+		height: '256',
+		style: {
+			position: 'absolute',
+			left: props.x + 'px',
+			top: props.y + 'px',
+		},
+		dangerouslySetInnerHTML: { __html: svgcard.slice(svgcard.indexOf('>')+1,-6) },
 	});
 }
 

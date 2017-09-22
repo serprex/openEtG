@@ -4,7 +4,6 @@ const px = require('../px'),
 	Cards = require('../Cards'),
 	etgutil = require('../etgutil'),
 	userutil = require('../userutil'),
-	svg = require('../svg'),
 	Components = require('../Components'),
 	h = preact.h;
 
@@ -25,19 +24,9 @@ module.exports = class Library extends preact.Component {
 			}
 		});
 		const wealth = this.props.gold + userutil.calcWealth(cardpool);
-		const svgcard = this.state.code && svg.card(Cards.Codes[this.state.code]);
 		return h('div', {},
 			h('span', { style: { position: 'absolute', left: '100px', top: '16px', whiteSpace: 'pre' } }, "Cumulative wealth: " + Math.round(wealth) + "\nZE Progress: " + progress + " / " + progressmax + "\nSZE Progress: " + shinyprogress + " / " + progressmax),
-			svgcard && h('svg', {
-				width: '128',
-				height: '256',
-				style: {
-					position: 'absolute',
-					left: '734px',
-					top: '8px',
-				},
-				dangerouslySetInnerHTML: { __html: svgcard.slice(svgcard.indexOf('>')+1,-6) },
-			}),
+			h(Components.Card, { x: 734, y: 8, code: this.state.code }),
 			h('input', {
 				type: 'button',
 				value: 'Toggle Bound',
