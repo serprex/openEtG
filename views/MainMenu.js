@@ -393,7 +393,7 @@ module.exports = class MainMenu extends preact.Component {
 			h('input', {
 				type: 'button',
 				value: 'PvP',
-				onClick: function() { require('./Challenge')(true); },
+				onClick: function() { self.props.doNav(require('./Challenge'), {pvp:true}); },
 				style: {
 					position: 'absolute',
 					left: '10px',
@@ -596,7 +596,7 @@ module.exports = class MainMenu extends preact.Component {
 				type: 'button',
 				value: 'Custom AI',
 				onClick: function() {
-					require('./Challenge')(false);
+					self.props.doNav(require('./Challenge'), {pvp:false});
 				},
 				onMouseOver: mkSetTip("Play versus any deck you want, with custom stats for you & the AI")
 			}),

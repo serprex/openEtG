@@ -27,12 +27,6 @@ exports.mkRenderTexture = function(width, height){
 exports.getCmd = function(cmd){
 	return curStage.cmds ? curStage.cmds[cmd] : null;
 }
-exports.render = function(view) {
-	return preact.render(view, null, app);
-}
-exports.hideapp = function(view) {
-	app.style.display = 'none';
-}
 exports.view = function(stage) {
 	if (curStage.endnext){
 		curStage.endnext();

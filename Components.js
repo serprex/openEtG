@@ -52,6 +52,7 @@ exports.Input = function(props){
 	var ele = h('input', {
 		placeholder: props.placeholder,
 		onKeyPress: props.onKeyPress,
+		onClick: props.onClick,
 		style: {
 			position: 'absolute',
 			left: props.x + 'px',

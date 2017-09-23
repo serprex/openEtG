@@ -74,7 +74,7 @@ module.exports = function(props) {
 	renderInfo(props.A, 0);
 	renderInfo(props.B, 300);
 	if (sock.user.ocard){
-		for(var i=0; i<2; i++){
+		for(let i=0; i<2; i++){
 			let uocard = etgutil.asUpped(sock.user.ocard, i == 1);
 			children.push(h('input', {
 				type: 'button',
