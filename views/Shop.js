@@ -1,20 +1,21 @@
-var px = require("../px");
-var dom = require("../dom");
-var svg = require("../svg");
-var chat = require("../chat");
-var sock = require("../sock");
-var tutor = require("../tutor");
-var etgutil = require("../etgutil");
-var options = require("../options");
+const px = require("../px"),
+	dom = require("../dom"),
+	svg = require("../svg"),
+	chat = require("../chat"),
+	sock = require("../sock"),
+	tutor = require("../tutor"),
+	etgutil = require("../etgutil"),
+	options = require("../options");
+
+const packdata = [
+	{cost: 15, type: "Bronze", info: "10 Commons", color: "#c73"},
+	{cost: 25, type: "Silver", info: "3 Commons, 3 Uncommons", color: "#ccc"},
+	{cost: 77, type: "Gold", info: "1 Common, 2 Uncommons, 2 Rares", color: "#fd0"},
+	{cost: 100, type: "Platinum", info: "4 Commons, 3 Uncommons, 1 Rare, 1 Shard", color: "#eee"},
+	{cost: 250, type: "Nymph", info: "1 Nymph", color: "#69b"},
+];
 
 module.exports = function() {
-	var packdata = [
-		{cost: 15, type: "Bronze", info: "10 Commons", color: "#c73"},
-		{cost: 25, type: "Silver", info: "3 Commons, 3 Uncommons", color: "#ccc"},
-		{cost: 77, type: "Gold", info: "1 Common, 2 Uncommons, 2 Rares", color: "#fd0"},
-		{cost: 100, type: "Platinum", info: "4 Commons, 3 Uncommons, 1 Rare, 1 Shard", color: "#eee"},
-		{cost: 250, type: "Nymph", info: "1 Nymph", color: "#69b"},
-	];
 	var packele = -1, packrarity = -1;
 	var tgold = dom.text(sock.user.gold + "$");
 	var tinfo = dom.text("Select from which element you want.");

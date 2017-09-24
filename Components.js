@@ -67,7 +67,7 @@ exports.Input = function(props){
 exports.Text = function(props){
 	var text = props.text.toString().replace(/\|/g, ' / ');
 	var sep = /\d\d?:\d\d?|\$|\n/g, reres, lastindex = 0;
-	var ele = h('div', { style: props.style }), elec = [];
+	var ele = h('div', { class: props.class, style: props.style }), elec = [];
 	while (reres = sep.exec(text)){
 		var piece = reres[0];
 		if (reres.index != lastindex){
