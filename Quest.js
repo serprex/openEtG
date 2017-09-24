@@ -162,7 +162,8 @@ exports.mkQuestAi = function(questname, stage, area) {
 	if (etgutil.decklength(urdeck) < (sock.user ? 31 : 11)) {
 		return "ERROR: Your deck is invalid or missing! Please exit & create a valid deck in the deck editor.";
 	}
-	var game = require("./views/Match")({ deck: quest.deck, urdeck: urdeck, seed: util.randint(), p2hp: hp, p2markpower: markpower, foename: quest.name, p1hp: playerHPstart, p2drawpower: drawpower }, true);
+	const gamedata = require("./mkGame")({ deck: quest.deck, urdeck: urdeck, seed: util.randint(), p2hp: hp, p2markpower: markpower, foename: quest.name, p1hp: playerHPstart, p2drawpower: drawpower, ai: true });
+	const game = gamedata.game;
 	if (quest.morph) {
 		game.player1.deck = game.player1.deck.map(quest.morph.bind(quest));
 	}
@@ -177,7 +178,7 @@ exports.mkQuestAi = function(questname, stage, area) {
 		game.choicerewards = quest.choicerewards;
 		game.rewardamount = quest.rewardamount;
 	}
-	return game;
+	return gamedata;
 }
 
 function requireQuest(user) {

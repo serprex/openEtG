@@ -10,7 +10,7 @@ const px = require("../px"),
 function mkDaily(type) {
 	if (type < 3) {
 		return function() {
-			const game = mkAi.mkAi(type == 1 ? 0 : 2, type)();
+			const gamedata = mkAi.mkAi(type == 1 ? 0 : 2, type)(), game = gamedata.game;
 			if (game){
 				const dataNext = type == 1 ?
 					{ goldreward: 200, endurance: 2, cost: 0, daily: 1, cardreward: "", noheal: true} :
@@ -18,15 +18,17 @@ function mkDaily(type) {
 				game.addData(dataNext);
 				game.dataNext = dataNext;
 			}
+			mkAi.run(gamedata);
 		}
 	}
 	else {
 		return function() {
-			const game = mkAi.mkPremade(type == 3 ? 1 : 3, type)();
+			const gamedata = mkAi.mkPremade(type == 3 ? 1 : 3, type)(), game = gamedata.game;
 			if (game){
 				game.addonreward = type == 3 ? 90 : 200;
 				sock.userExec("donedaily", { daily: type });
 			}
+			mkAi.run(gamedata);
 		}
 	}
 }

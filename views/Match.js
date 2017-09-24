@@ -1,19 +1,19 @@
 "use strict";
-var px = require("../px");
-var ui = require("../ui");
-var dom = require("../dom");
-var etg = require("../etg");
-var gfx = require("../gfx");
-var mkAi = require("../mkAi");
-var sock = require("../sock");
-var Card = require("../Card");
-var Game = require("../Game");
-var Cards = require("../Cards");
-var Effect = require("../Effect");
-var Skills = require("../Skills");
-var etgutil = require("../etgutil");
-var aiSearch = require("../ai/search");
-var redhor = new Uint16Array([
+const px = require("../px"),
+	ui = require("../ui"),
+	dom = require("../dom"),
+	etg = require("../etg"),
+	gfx = require("../gfx"),
+	mkAi = require("../mkAi"),
+	sock = require("../sock"),
+	Card = require("../Card"),
+	Game = require("../Game"),
+	Cards = require("../Cards"),
+	Effect = require("../Effect"),
+	Skills = require("../Skills"),
+	etgutil = require("../etgutil"),
+	aiSearch = require("../ai/search");
+const redhor = new Uint16Array([
 	12, 0, 900,
 	144, 145, 796,
 	301, 103, 796,
@@ -26,7 +26,7 @@ var redhor = new Uint16Array([
 	754, 301, 600,
 	796, 12, 301,
 ]);
-function startMatch(game, gameData, spectate) {
+function startMatch(game, gameData, doNav) {
 	if (sock.trade){
 		sock.userEmit("canceltrade");
 		delete sock.trade;
@@ -92,11 +92,12 @@ function startMatch(game, gameData, spectate) {
 						}
 					}else if (game.daily){
 						if (game.endurance) {
-							var data = addNoHealData(game);
+							const data = addNoHealData(game);
 							data.endurance--;
-							var newgame = mkAi.mkAi(game.level, true)();
-							newgame.addData(data);
-							newgame.dataNext = data;
+							const newgame = mkAi.mkAi(game.level, true)();
+							newgame.game.addData(data);
+							newgame.game.dataNext = data;
+							mkAi.run(newgame);
 							return;
 						}
 						else {
@@ -107,7 +108,7 @@ function startMatch(game, gameData, spectate) {
 					sock.user.streak[game.level] = 0;
 				}
 			}
-			require("./Result")(game, gameData);
+			doNav(require("./Result"), { game: game, data: gameData });
 		} else if (game.turn == game.player1) {
 			if (discard == undefined && game.player1.hand.length == 8) {
 				discarding = true;
@@ -139,7 +140,7 @@ function startMatch(game, gameData, spectate) {
 		sock.userExec("addloss", { pvp: !game.ai, l: game.level, g: -game.cost });
 	}
 	var gameui = new PIXI.Graphics();
-	if (!spectate) {
+	if (!gameData.spectate) {
 		gameui.hitArea = new PIXI.math.Rectangle(0, 0, 900, 600);
 		gameui.interactive = true;
 	}
@@ -185,7 +186,7 @@ function startMatch(game, gameData, spectate) {
 	var div = dom.div([8, 20, resign],
 		[762, 580, turntell],
 		[0, 40, foename]);
-	if (!spectate) {
+	if (!gameData.spectate) {
 		dom.add(div, [800, 530, endturn], [800, 560, cancel]);
 	}
 	var activeInfo = {
@@ -517,7 +518,7 @@ function startMatch(game, gameData, spectate) {
 			}
 		},
 	};
-	if (!spectate){
+	if (!gameData.spectate){
 		document.addEventListener("mousemove", onmousemove);
 		document.addEventListener("keydown", onkeydown);
 	}
@@ -781,45 +782,20 @@ function startMatch(game, gameData, spectate) {
 		clearInterval(gameInterval);
 	}, cmds:cmds});
 }
-function deckPower(deck, amount) {
-	if (amount > 1){
-		var res = deck.slice();
-		for (var i = 1;i < amount;i++) {
-			Array.prototype.push.apply(res, deck);
-		}
-		return res;
-	}else return deck;
-}
-module.exports = function(data, ai, spectate) {
-	var game = new Game(data.seed, data.flip);
-	game.addData(data);
-	game.player1.maxhp = game.player1.hp;
-	game.player2.maxhp = game.player2.hp;
-	var deckpower = [data.p1deckpower, data.p2deckpower];
-	var decks = [data.urdeck, data.deck];
-	for (var j = 0;j < 2;j++) {
-		var pl = game.players(j);
-		etgutil.iterdeck(decks[j], function(code){
-			var idx;
-			if (code in Cards.Codes) {
-				pl.deck.push(Cards.Codes[code]);
-			} else if (~(idx = etgutil.fromTrueMark(code))) {
-				pl.mark = idx;
-			}
-		});
-		if (deckpower[j]) {
-			pl.deck = deckPower(pl.deck, deckpower[j]);
-			pl.deckpower = deckpower[j];
-		}
-		else if (pl.drawpower > 1){
-			pl.deck = deckPower(pl.deck, 2);
-			pl.deckpower = 2;
-		}
+module.exports = class Match extends preact.Component {
+	constructor(props) {
+		super(props);
 	}
-	game.turn.drawhand(7);
-	game.turn.foe.drawhand(7);
-	if (ai) game.ai = true;
-	data.p2deck = game.player2.deck.slice();
-	startMatch(game, data, spectate);
-	return game;
+
+	componentDidMount() {
+		startMatch(this.props.game, this.props.data, this.props.doNav);
+	}
+
+	componentWillUnmount() {
+		px.view({});
+	}
+
+	render() {
+		return null;
+	}
 }

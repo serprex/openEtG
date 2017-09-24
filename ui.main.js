@@ -7,7 +7,8 @@ const muteset = {},
 	RngMock = require("./RngMock"),
 	options = require("./options"),
 	userutil = require("./userutil"),
-	viewsLogin = require("./views/Login");
+	viewsLogin = require("./views/Login"),
+	mkGame = require('./mkGame');
 var guestname, muteall, lastError = 0;
 window.onerror = function(){
 	var now = Date.now();
@@ -88,27 +89,29 @@ var sockEvents = {
 		chat.addSpan(span, data.mode == 1 ? null : "Main");
 	},
 	foearena:function(data) {
-		var game = require("./views/Match")({ deck: data.deck, urdeck: sock.getDeck(), seed: data.seed,
-			p2hp: data.hp, foename: data.name, p2drawpower: data.draw, p2markpower: data.mark, arena: data.name, level: 4+data.lv }, true);
-		game.cost = userutil.arenaCost(data.lv);
-		sock.user.gold -= game.cost;
+		const gamedata = mkGame({ deck: data.deck, urdeck: sock.getDeck(), seed: data.seed,
+			p2hp: data.hp, foename: data.name, p2drawpower: data.draw, p2markpower: data.mark, arena: data.name, level: 4+data.lv, ai: true });
+		gamedata.game.cost = userutil.arenaCost(data.lv);
+		sock.user.gold -= gamedata.game.cost;
+		px.doNav(require("./views/Match"), gamedata);
 	},
 	tradegive:function(data){
 		if (sock.trade){
 			delete sock.trade;
-			require("./views/Trade")();
+			px.doNav(require("./views/Trade"));
 		}
 	},
 	pvpgive:function(data){
 		if (sock.pvp){
 			delete sock.pvp;
-			require("./views/Match")(data);
+			px.doNav(require("./views/Match"), mkGame(data));
 		}
 	},
 	spectategive:function(data){
 		if (sock.spectate){
 			delete sock.spectate;
-			require("./views/Match")(data, false, true);
+			data.spectate = true;
+			px.doNav(require("./views/Match"), mkGame(data));
 		}
 	},
 	challenge:function(data) {

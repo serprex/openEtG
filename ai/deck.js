@@ -56,7 +56,7 @@ var filters = {
 			if (~hasPoison.indexOf(deck[i])) return true;
 			if (deck[i] == 6112 || deck[i] == 8112){
 				for(var i=0; i<deck.length; i++){
-					if (~util.typedIndexOf(canInfect, deck[i])) return true;
+					if (~canInfect.indexOf(deck[i])) return true;
 				}
 			}
 		}

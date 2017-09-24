@@ -184,10 +184,10 @@ module.exports = class MainMenu extends preact.Component {
 				h(Components.Text, { text: self.state.tipText }),
 				nextTip
 			)];
-		[["Commoner", mkAi.mkAi(0), mkSetTip("Commoners have no upgraded cards & mostly common cards")],
-			["Mage", mkAi.mkPremade(1), mkSetTip("Mages have preconstructed decks with a couple rares")],
-			["Champion", mkAi.mkAi(2), mkSetTip("Champions have some upgraded cards")],
-			["Demigod", mkAi.mkPremade(3), mkSetTip("Demigods are extremely powerful. Come prepared for anything")],
+		[["Commoner", mkAi.run(self.props.doNav, mkAi.mkAi(0)), mkSetTip("Commoners have no upgraded cards & mostly common cards")],
+			["Mage", mkAi.run(self.props.doNav, mkAi.mkPremade(1)), mkSetTip("Mages have preconstructed decks with a couple rares")],
+			["Champion", mkAi.run(self.props.doNav, mkAi.mkAi(2)), mkSetTip("Champions have some upgraded cards")],
+			["Demigod", mkAi.run(self.props.doNav, mkAi.mkPremade(3)), mkSetTip("Demigods are extremely powerful. Come prepared for anything")],
 		].forEach(function(b,i){
 			const y = 46+i*22+'px';
 			aic.push(
