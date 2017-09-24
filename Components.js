@@ -146,26 +146,19 @@ exports.Card = function(props) {
 	});
 }
 
-class DeckDisplay extends Component {
-	constructor(props) {
-		super(props)
-		this.state = { deck: props.deck || [] };
-	}
-
-	render() {
-		return h('div', {
-			children: this.state.deck.map(function(code, i){
-				let card = Cards.Codes[code];
-				return card ? h(CardImage, {
-					card: card,
-					onMouseOver: this.props.onMouseOver,
-					onClick: this.props.onClick,
-					x: 100 + Math.floor(i / 10) * 99,
-					y: 32 + (i % 10) * 19,
-				}) : null;
-			}, this),
-		});
-	}
+function DeckDisplay(props) {
+	return h('div', {
+		children: props.deck.map(function(code, i){
+			const card = Cards.Codes[code];
+			return card && h(CardImage, {
+				card: card,
+				onMouseOver: function() { return props.onMouseOver(i, code); },
+				onClick: function() { return props.onClick(i, code); },
+				x: 100 + Math.floor(i / 10) * 99,
+				y: 32 + (i % 10) * 19,
+			});
+		}),
+	});
 }
 exports.DeckDisplay = DeckDisplay;
 
@@ -192,7 +185,7 @@ class CardSelector extends Component {
 					top: '578px',
 				},
 				onClick: function() {
-					self.setState(Object.assign({}, self.state, { shiny: !self.state.shiny }));
+					self.setState({ shiny: !self.state.shiny });
 				},
 			}),
 			h('input', {
@@ -204,7 +197,7 @@ class CardSelector extends Component {
 					top: '530px',
 				},
 				onClick: function() {
-					self.setState(Object.assign({}, this.state, { showall: !self.state.showall }));
+					self.setState({ showall: !self.state.showall });
 				},
 			}),
 		];
@@ -214,7 +207,7 @@ class CardSelector extends Component {
 				x: !i || i&1?4:40,
 				y: 316 + Math.floor((i-1)/2) * 32,
 				click: function() {
-					self.setState(Object.assign({}, self.state, { element: i }));
+					self.setState({ element: i });
 				},
 			}));
 		}
@@ -224,7 +217,7 @@ class CardSelector extends Component {
 				x: 74,
 				y: 338+i*32,
 				click: function() {
-					self.setState(Object.assign({}, self.state, { rarity: i }));
+					self.setState({ rarity: i });
 				},
 			}));
 		}
@@ -259,7 +252,7 @@ class CardSelector extends Component {
 					onClick: self.props.onClick && function() {
 						if (self.props.filterboth && !self.state.shiny){
 							const scode = card.asShiny(true).code;
-							if (scode in self.props.cardpool && self.props.cardpool[scode] > ((self.state.cardminus && self.state.cardminus[scode]) || 0)) {
+							if (scode in self.props.cardpool && self.props.cardpool[scode] > ((self.props.cardminus && self.props.cardminus[scode]) || 0)) {
 								code = scode;
 							}
 						}
@@ -269,9 +262,9 @@ class CardSelector extends Component {
 				}));
 				if (this.props.cardpool) {
 					const scode = etgutil.asShiny(card.code, true);
-					var cardAmount = card.isFree() ? "-" : code in this.props.cardpool ? this.props.cardpool[code] - ((this.state.cardminus && this.state.cardminus[code]) || 0) : 0, shinyAmount = 0;
+					var cardAmount = card.isFree() ? "-" : code in this.props.cardpool ? this.props.cardpool[code] - ((this.props.cardminus && this.props.cardminus[code]) || 0) : 0, shinyAmount = 0;
 					if (this.props.filterboth && !this.state.shiny) {
-						shinyAmount = scode in this.props.cardpool ? this.props.cardpool[scode] - ((this.state.cardminus && this.state.cardminus[scode]) || 0) : 0;
+						shinyAmount = scode in this.props.cardpool ? this.props.cardpool[scode] - ((this.props.cardminus && this.props.cardminus[scode]) || 0) : 0;
 					}
 					countTexts.push(h('div', {
 						className: 'selectortext' + (this.props.maxedIndicator && card.type != etg.Pillar && cardAmount >= 6 ?(cardAmount >= 12 ? ' beigeback' : ' lightback'):''),

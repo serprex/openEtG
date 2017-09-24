@@ -33,8 +33,9 @@ exports.iterraw = function(deck, func){
 	}
 }
 exports.count = function(deck, code){
+	const key = code.toString(32);
 	for(var i=0; i<deck.length; i+=5){
-		if (code == parseInt(deck.substr(i+2, 3), 32)){
+		if (key == deck.substr(i+2, 3)){
 			return parseInt(deck.substr(i, 2), 32);
 		}
 	}

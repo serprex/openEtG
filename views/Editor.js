@@ -1,338 +1,511 @@
 "use strict";
-const px = require("../px"),
-	dom = require("../dom"),
-	etg = require("../etg"),
-	gfx = require("../gfx"),
-	chat = require("../chat"),
-	sock = require("../sock"),
-	Cards = require("../Cards"),
-	tutor = require("../tutor"),
-	etgutil = require("../etgutil"),
-	options = require("../options"),
-	DeckDisplay = require("../DeckDisplay"),
-	CardSelector = require("../CardSelector"),
+const px = require('../px'),
+	etg = require('../etg'),
+	gfx = require('../gfx'),
+	chat = require('../chat'),
+	sock = require('../sock'),
+	Cards = require('../Cards'),
+	tutor = require('../tutor'),
+	etgutil = require('../etgutil'),
+	options = require('../options'),
+	Components = require('../Components'),
 	h = preact.h;
 
-module.exports = function(arena, ainfo, acard, startempty) {
-	var aupped;
-	if (arena){
-		if (!sock.user || (!startempty && ainfo.deck === undefined) || acard === undefined) arena = false;
-		else aupped = Cards.Codes[acard].upped;
-	}
-	function updateField(renderdeck){
-		if (deckimport){
-			deckimport.value = etgutil.encoderaw(decksprite.deck) + etgutil.toTrueMarkSuffix(editormark);
-			deckimport.dispatchEvent(new Event("change"));
-		}
-	}
-	function sumCardMinus(cardminus, code){
-		var sum = 0;
-		for (var i=0; i<2; i++){
-			for (var j=0; j<2; j++){
-				sum += cardminus[etgutil.asShiny(etgutil.asUpped(code, i==0), j==0)] || 0;
+function adjust(cardminus, code, amt) {
+	const mod = cardminus.slice();
+	mod[code] = (cardminus[code] || 0) + amt;
+	return mod;
+}
+
+const artable = {
+	hp: { min: 65, max: 200, incr: 45, cost: 1 },
+	mark: { cost: 45 },
+	draw: { cost: 135 },
+};
+function attrval(x, d) {
+	x = +x;
+	return x === 0 ? 0 : (x || d);
+}
+
+module.exports = class Editor extends preact.Component {
+	constructor(props) {
+		super(props);
+		const aupped = props.acard && props.acard.upped;
+		const baseacard = props.acard && props.acard.asUpped(false).asShiny(false);
+		const pool = sock.user && {};
+		function incrpool(code, count){
+			if (code in Cards.Codes && (!props.acard || !Cards.Codes[code].isOf(baseacard) && (aupped || !Cards.Codes[code].upped))){
+				pool[code] = (pool[code] || 0) + count;
 			}
 		}
-		return sum;
+		if (pool) {
+			etgutil.iterraw(sock.user.pool, incrpool);
+			etgutil.iterraw(sock.user.accountbound, incrpool);
+		}
+		const deckmark = this.processDeck(etgutil.decodedeck(props.startempty ? '' : props.acard ? props.adeck || '' : sock.getDeck()));
+		this.state = {
+			pool: pool,
+			deck: deckmark.deck,
+			mark: deckmark.mark,
+			arattr: props.ainfo && {
+				hp: attrval(props.ainfo.hp, 200),
+				mark: attrval(props.ainfo.mark, 2),
+				draw: attrval(props.ainfo.draw, 1),
+			},
+		};
 	}
-	function processDeck() {
-		for (var i = decksprite.deck.length - 1;i >= 0;i--) {
-			if (!(decksprite.deck[i] in Cards.Codes)) {
-				var index = etgutil.fromTrueMark(decksprite.deck[i]);
+
+	processDeck(deck) {
+		let mark = 0;
+		for (var i = deck.length - 1;i >= 0;i--) {
+			if (!(deck[i] in Cards.Codes)) {
+				const index = etgutil.fromTrueMark(deck[i]);
 				if (~index) {
-					editormark = index;
+					mark = index;
 				}
-				decksprite.deck.splice(i, 1);
+				deck.splice(i, 1);
 			}
 		}
-		marksprite.className = "ico e"+editormark;
-		if (decksprite.deck.length > 60) decksprite.deck.length = 60;
-		decksprite.deck.sort(Cards.codeCmp);
+		if (this.props.acard) {
+			deck.unshift(props.acard, props.acard, props.acard, props.acard, props.acard);
+		}
+		return {mark: mark, deck: deck};
+	}
+
+	render() {
+		const self = this, aupped = this.props.acard && this.props.acard.upped;
+		const arpts = aupped?515:425;
+		const sortedDeck = self.state.deck.slice();
+		sortedDeck.sort(Cards.codeCmp);
+		const cardminus = [];
 		if (sock.user) {
-			cardsel.cardminus = cardminus = [];
-			for (var i = decksprite.deck.length - 1;i >= 0;i--) {
-				var code = decksprite.deck[i], card = Cards.Codes[code];
+			for (var i = sortedDeck.length - 1;i >= 0;i--) {
+				var code = sortedDeck[i], card = Cards.Codes[code];
 				if (card.type != etg.Pillar) {
-					if (sumCardMinus(cardminus, code) == 6) {
-						decksprite.deck.splice(i, 1);
+					if (sumCardMinus(code) == 6) {
+						sortedDeck.splice(i, 1);
 						continue;
 					}
 				}
 				if (!card.isFree()) {
-					if ((cardminus[code] || 0) < (cardpool[code] || 0)) {
-						px.adjust(cardminus, code, 1);
+					if ((cardminus[code] || 0) < (self.state.pool[code] || 0)) {
+						cardminus[code] = (cardminus[code] || 0) + 1;
 					} else {
 						code = etgutil.asShiny(code, !card.shiny);
 						card = Cards.Codes[code];
 						if (card.isFree()){
-							decksprite.deck[i] = code;
-						}else if ((cardminus[code] || 0) < (cardpool[code] || 0)) {
-							decksprite.deck[i] = code;
-							px.adjust(cardminus, code, 1);
+							sortedDeck[i] = code;
+						}else if ((cardminus[code] || 0) < (self.state.pool[code] || 0)) {
+							sortedDeck[i] = code;
+							cardminus[code] = (cardminus[code] || 0) + 1;
 						} else {
-							decksprite.deck.splice(i, 1);
+							sortedDeck.splice(i, 1);
 						}
 					}
 				}
 			}
-			if (arena){
-				decksprite.deck.unshift(acard, acard, acard, acard, acard);
+		}
+		let deckimportctrl;
+		function sumCardMinus(code){
+			var sum = 0;
+			for (var i=0; i<4; i++){
+				sum += cardminus[etgutil.asShiny(etgutil.asUpped(code, i&1), i&2)] || 0;
 			}
+			return sum;
 		}
-		updateField();
-		decksprite.renderDeck(0);
-	}
-	function setCardArt(code){
-		cardArt.texture = gfx.getArt(code);
-		cardArt.visible = true;
-	}
-	function incrpool(code, count){
-		if (code in Cards.Codes && (!arena || (!Cards.Codes[code].isOf(Cards.Codes[acard].asUpped(false).asShiny(false))) && (aupped || !Cards.Codes[code].upped))){
-			cardpool[code] = (cardpool[code] || 0) + count;
+		function setCardArt(code){
+			self.setState({card: Cards.Codes[code]});
 		}
-	}
-	function quickDeck(number) {
-		return function() {
-			if (quickNum.classList.contains("selectedbutton")) {
-				saveButton();
-				sock.userExec("changeqeck", { number: number, name: tname.textcache });
-				sock.user.qecks[number] = tname.textcache;
-				fixQuickButtons();
-				quickNum.classList.remove("selectedbutton");
-			}
-			else {
-				loadDeck(sock.user.qecks[number]);
-			}
-		}
-	}
-	function saveTo() {
-		this.classList.toggle("selectedbutton");
-	}
-	function fixQuickButtons(){
-		for (var i = 0;i < 10;i++) {
-			buttons.children[i].classList[sock.user.selectedDeck == sock.user.qecks[i]?"add":"remove"]("selectedbutton");
-		}
-	}
-	function saveDeck(force){
-		var dcode = etgutil.encoderaw(decksprite.deck) + etgutil.toTrueMarkSuffix(editormark);
-		var olddeck = sock.getDeck();
-		if (decksprite.deck.length == 0){
-			sock.userExec("rmdeck", {name: sock.user.selectedDeck});
-		}else if (olddeck != dcode){
-			sock.userExec("setdeck", { d: dcode, name: sock.user.selectedDeck });
-		}else if (force) sock.userExec("setdeck", {name: sock.user.selectedDeck });
-	}
-	function loadDeck(x){
-		if (!x) return;
-		saveDeck();
-		deckname.value = sock.user.selectedDeck = x;
-		tname.text = x;
-		fixQuickButtons();
-		decksprite.deck = etgutil.decodedeck(sock.getDeck());
-		processDeck();
-	}
-	function importDeck(){
-		var dvalue = options.deck.trim();
-		decksprite.deck = ~dvalue.indexOf(" ") ? dvalue.split(" ") : etgutil.decodedeck(dvalue);
-		processDeck();
-	}
-	var cardminus, cardpool;
-	if (sock.user){
-		cardminus = [];
-		cardpool = [];
-		etgutil.iterraw(sock.user.pool, incrpool);
-		etgutil.iterraw(sock.user.accountbound, incrpool);
-	}else cardpool = null;
-	var editorui = px.mkView(function(){cardArt.visible = false}), div = dom.div([8, 32, ["Clear", function(){
-		if (sock.user) {
-			cardsel.cardminus = cardminus = [];
-		}
-		decksprite.deck.length = arena?5:0;
-		decksprite.renderDeck(decksprite.deck.length);
-	}]]);
-	var stage = { view:editorui, dom:div, endnext: function() { document.removeEventListener("mousemove", resetCardArt, true); } };
-	function sumscore(){
-		var sum = 0;
-		for(var k in artable){
-			sum += arattr[k]*artable[k].cost;
-		}
-		return sum;
-	}
-	function makeattrui(y, name){
-		function modattr(x){
-			arattr[name] += x;
-			if (arattr[name] >= (data.min || 0) && (!data.max || arattr[name] <= data.max)){
-				var sum = sumscore();
-				if (sum <= arpts){
-					bv.text = arattr[name];
-					curpts.text = (arpts-sum)/45;
-					return;
+		function quickDeck(number) {
+			return function(e) {
+				if (self.state.setQeck) {
+					saveButton();
+					sock.userExec("changeqeck", { number: number, name: sock.user.selectedDeck });
+					sock.user.qecks[number] = sock.user.selectedDeck;
+					self.setState({ setQeck: false });
+				}
+				else {
+					loadDeck(sock.user.qecks[number]);
 				}
 			}
-			arattr[name] -= x;
 		}
-		y = 128+y*20;
-		var data = artable[name];
-		var bv = dom.text(arattr[name]);
-		var bm = dom.button("-", modattr.bind(null, -(data.incr || 1)));
-		var bp = dom.button("+", modattr.bind(null, data.incr || 1));
-		bm.style.width = bp.style.width = "14px";
-		dom.add(div, [4, y, name], [38, y, bm], [56, y, bv], [82, y, bp]);
-	}
-	function saveButton() {
-		if (deckname.value) {
-			sock.user.selectedDeck = deckname.value;
-			fixQuickButtons();
-			tname.text = sock.user.selectedDeck;
+		function saveTo() {
+			self.setState({ setQeck: !self.state.setQeck });
+		}
+		function saveDeck(force){
+			const dcode = etgutil.encodedeck(sortedDeck) + etgutil.toTrueMarkSuffix(self.state.mark),
+				olddeck = sock.getDeck();
+			if (sortedDeck.length == 0){
+				sock.userExec("rmdeck", {name: sock.user.selectedDeck});
+			}else if (olddeck != dcode){
+				sock.userExec("setdeck", { d: dcode, name: sock.user.selectedDeck });
+			}else if (force) sock.userExec("setdeck", { name: sock.user.selectedDeck });
+		}
+		function loadDeck(x){
+			if (!x) return;
 			saveDeck();
+			sock.user.selectedDeck = x;
+			self.setState(self.processDeck(etgutil.decodedeck(sock.getDeck())));
 		}
-	}
-	if (arena){
-		dom.add(div, [8, 58, ["Save & Exit", function() {
-			if (decksprite.deck.length < 35 || sumscore()>arpts) {
-				chat("35 cards required before submission", "System");
-				return;
-			}
-			var data = { d: etgutil.encoderaw(decksprite.deck.slice(5)) + etgutil.toTrueMarkSuffix(editormark), lv: aupped };
-			for(var k in arattr){
-				data[k] = arattr[k];
-			}
-			if (!startempty){
-				data.mod = true;
-			}
-			sock.userEmit("setarena", data);
-			chat("Arena deck submitted", "System");
-			startMenu();
-		}]], [8, 84, ["Exit", function() {
-			require("./ArenaInfo")(arena);
-		}]]);
-		function attrval(x, d) {
-			x = +x;
-			return x === 0 ? 0 : (x || d);
+		function importDeck(){
+			const dvalue = options.deck.trim();
+			self.setState(self.processDeck(~dvalue.indexOf(" ") ? dvalue.split(" ") : etgutil.decodedeck(dvalue)));
 		}
-		var arpts = aupped?515:425, arattr = {hp:attrval(ainfo.hp, 200), mark:attrval(ainfo.mark, 2), draw:attrval(ainfo.draw, 1)};
-		var artable = {
-			hp: { min: 65, max: 200, incr: 45, cost: 1 },
-			mark: { cost: 45 },
-			draw: { cost: 135 },
-		};
-		var curpts = new dom.text((arpts-sumscore())/45);
-		dom.add(div, [4, 188, curpts]);
-		makeattrui(0, "hp");
-		makeattrui(1, "mark");
-		makeattrui(2, "draw");
-	} else {
-		var quickNum = dom.button("Save to #", saveTo);
-		dom.add(div, [8, 58, ["Save & Exit", function() {
-			if (sock.user) saveDeck(true);
-			startMenu();
-		}]], [8, 84, ["Import", importDeck]]);
-		if (sock.user) {
-			var tname = dom.text(sock.user.selectedDeck),
-				buttons = document.createElement("div");
-			dom.add(div, [100, 8, tname],
-			[8, 110, ["Save", saveButton
-			]], [8, 136, ["Load", function() {
-				loadDeck(deckname.value);
-			}]], [8, 162, ["Exit", function() {
-				if (sock.user) sock.userExec("setdeck", { name: sock.user.selectedDeck });
-				startMenu();
-			}]], [220, 8, quickNum], [300, 8, buttons]);
-			for (var i = 0;i < 10;i++) {
-				var b = dom.button(i+1, quickDeck(i));
-				b.className = "editbtn";
-				buttons.appendChild(b);
-			}
-			fixQuickButtons();
-		}
-	}
-	var editormark = 0, marksprite = document.createElement("span");
-	dom.add(div, [66, 200, marksprite]);
-	for (var i = 0;i < 13;i++) {
-		(function(_i) {
-			dom.add(div, [100 + i * 32, 234,
-				dom.icob(i, function() {
-					editormark = _i;
-					marksprite.className = "ico e"+_i;
-					updateField();
-				})
-			]);
-		})(i);
-	}
-	var decksprite = new DeckDisplay(60, setCardArt,
-		function(i){
-			var code = decksprite.deck[i], card = Cards.Codes[code];
-			if (!arena || code != acard){
-				if (sock.user && !card.isFree()) {
-					px.adjust(cardminus, code, -1);
-				}
-				decksprite.rmCard(i);
-				updateField();
-			}
-		}, arena ? (startempty ? [] : etgutil.decodedeck(ainfo.deck)) : etgutil.decodedeck(sock.getDeck())
-	);
-	editorui.addChild(decksprite);
-	var cardsel = new CardSelector(stage, setCardArt,
-		function(code){
-			if (decksprite.deck.length < 60) {
-				var card = Cards.Codes[code];
-				if (sock.user && !card.isFree()) {
-					if (!(code in cardpool) || (code in cardminus && cardminus[code] >= cardpool[code]) ||
-						(card.type != etg.Pillar && sumCardMinus(cardminus, code) >= 6)) {
-						return;
+		const editorui = [
+			h('input', {
+				type: 'button',
+				value: 'Clear',
+				onClick: function() {
+					if (sock.user) {
+						self.setState({deck:[]});
 					}
-					px.adjust(cardminus, code, 1);
-				}
-				decksprite.addCard(code, arena?5:0);
-				updateField();
+				},
+				style: {
+					position: 'absolute',
+					left: '8px',
+					top: '32px',
+				},
+			}),
+		];
+		let sumscore = 0;
+		if (self.state.arattr) {
+			for(var k in artable){
+				sumscore += self.state.arattr[k]*artable[k].cost;
 			}
-		}, !arena, !!cardpool
-	);
-	cardsel.cardpool = cardpool;
-	cardsel.cardminus = cardminus;
-	editorui.addChild(cardsel);
-	var cardArt = new PIXI.Sprite(gfx.nopic);
-	cardArt.position.set(734, 8);
-	editorui.addChild(cardArt);
-	if (!arena){
-		if (sock.user){
-			var deckname = document.createElement("input");
-			deckname.id = "deckname";
-			deckname.style.width = "80px";
-			deckname.placeholder = "Name";
-			deckname.value = sock.user.selectedDeck;
-			deckname.addEventListener("keypress", function(e){
-				if (e.keyCode == 13) {
-					loadDeck(this.value);
-				}
-			});
-			deckname.addEventListener("click", function(e){
-				this.setSelectionRange(0, 99);
-			});
-			dom.add(div, [4, 4, deckname]);
 		}
-		var deckimport = document.createElement("input");
-		deckimport.id = "deckimport";
-		deckimport.style.width = "190px";
-		deckimport.placeholder = "Deck";
-		deckimport.addEventListener("click", function(){this.setSelectionRange(0, 333)});
-		deckimport.addEventListener("keypress", function(e){
-			if (e.keyCode == 13){
-				this.blur();
-				importDeck();
+		function makeattrui(y, name){
+			function mkmodattr(x){
+				return function() {
+					const newval = self.state.arattr[name] + x;
+					if (
+						newval >= (data.min || 0) &&
+						!data.max || newval <= data.max &&
+						sumscore - self.state.arattr[name] + newval <= arpts
+					) {
+						self.setState({ [name]: newval })
+					}
+				}
 			}
+			y = 128+y*20+'px';
+			var data = artable[name];
+			editorui.push(
+				h('div', {
+					style: {
+						position: 'absolute',
+						left: '4px',
+						top: y+'px',
+					},
+				}, name),
+				h('input', {
+					type: 'button',
+					value: '-',
+					onClick: mkmodattr(-(data.incr || 1)),
+				}),
+				h('input', {
+					type: 'button',
+					value: '+',
+					onClick: mkmodattr(data.incr || 1),
+				}),
+				h('div', {
+					style: {
+						position: 'absolute',
+						left: '4px',
+						top: y,
+					}
+				}, name),
+				h('input', {
+					type: 'button',
+					value: '-',
+					onClick: mkmodattr(-(data.incr || 1)),
+					style: {
+						position: 'absolute',
+						left: '38px',
+						top: y,
+						width: '14px',
+					},
+				}),
+				h('input', {
+					type: 'button',
+					value: '+',
+					onClick: mkmodattr(data.incr || 1),
+					style: {
+						position: 'absolute',
+						left: '82px',
+						top: y,
+						width: '14px',
+					},
+				}),
+				h('div', {
+					style: {
+						position: 'absolute',
+						left: '56px',
+						top: y,
+					},
+				}, self.state.arattr[name]+'')
+			);
+		}
+		function saveButton() {
+			if (decknamectrl.value) {
+				sock.user.selectedDeck = decknamectrl.value;
+				saveDeck();
+				self.setState({});
+			}
+		}
+		if (self.props.acard){
+			editorui.push(
+				h('input', {
+					type: 'button',
+					value: 'Save & Exit',
+					onClick: function() {
+						if (self.state.deck.length < 35 || sumscore>arpts) {
+							return chat("35 cards required before submission", "System");
+						}
+						const data = Object.assign({
+							d: etgutil.encoderaw(self.state.deck.slice(5)) + etgutil.toTrueMarkSuffix(self.state.mark),
+							lv: aupped,
+						}, self.state.arattr);
+						if (!self.props.startempty){
+							data.mod = true;
+						}
+						sock.userEmit("setarena", data);
+						chat("Arena deck submitted", "System");
+						self.props.doNav(require('./MainMenu'));
+					},
+					style: {
+						position: 'absolute',
+						left: '8px',
+						top: '58px',
+					},
+				}),
+				h('input', {
+					type: 'button',
+					value: 'Exit',
+					onClick: function() {
+						sock.userEmit('arenainfo');
+					},
+					style: {
+						position: 'absolute',
+						left: '8px',
+						top: '84px',
+					},
+				}),
+				h('div', {
+					style: {
+						position: 'absolute',
+						left: '4px',
+						top: '188px',
+					},
+				}, (arpts-sumscore)/45+'')
+			);
+			makeattrui(0, "hp");
+			makeattrui(1, "mark");
+			makeattrui(2, "draw");
+		} else {
+			editorui.push(h('input', {
+				type: 'button',
+				value: 'Save & Exit',
+				onClick: function() {
+					if (sock.user) saveDeck(true);
+					self.props.doNav(require('./MainMenu'));
+				},
+				style: {
+					position: 'absolute',
+					left: '8px',
+					top: '58px',
+				},
+			}));
+			editorui.push(h('input', {
+				type: 'button',
+				value: 'Import',
+				onClick: importDeck,
+				style: {
+					position: 'absolute',
+					left: '8px',
+					top: '84px',
+				},
+			}));
+			if (sock.user) {
+				const tname = h('div', {
+						style: {
+							position: 'absolute',
+							top: '8px',
+							left: '100px',
+						},
+					}, sock.user.selectedDeck), buttons = [];
+				for (var i = 0;i < 10;i++) {
+					buttons.push(h('input', {
+						type: 'button',
+						value: i+1+'',
+						className: 'editbtn',
+						onClick: quickDeck(i),
+					}));
+				}
+				editorui.push(tname,
+					h('input', {
+						type: 'button',
+						value: 'Save',
+						onClick: saveButton,
+						style: {
+							position: 'absolute',
+							left: '8px',
+							top: '110px',
+						},
+					}),
+					h('input', {
+						type: 'button',
+						value: 'Load',
+						onClick: function() { loadDeck(decknamectrl.value) },
+						style: {
+							position: 'absolute',
+							left: '8px',
+							top: '136px',
+						},
+					}),
+					h('input', {
+						type: 'button',
+						value: 'Exit',
+						onClick: function() {
+							if (sock.user) sock.userExec("setdeck", { name: sock.user.selectedDeck });
+							self.props.doNav(require('./MainMenu'));
+						},
+						style: {
+							position: 'absolute',
+							left: '8px',
+							top: '162px',
+						},
+					}),
+					h('input', {
+						type: 'button',
+						value: 'Save to #',
+						className: self.state.setQeck && 'selectedbutton',
+						onClick: saveTo,
+						style: {
+							position: 'absolute',
+							left: '220px',
+							top: '8px',
+						},
+					}),
+					h('div', {
+						children: buttons,
+						style: {
+							position: 'absolute',
+							left: '300px',
+							top: '8px',
+						},
+					})
+				);
+			}
+		}
+		editorui.push(h('span', {
+			className: 'ico e'+self.state.mark,
+			style: {
+				position: 'absolute',
+				left: '66px',
+				top: '200px',
+			},
+		}));
+		for (let i = 0;i < 13;i++) {
+			editorui.push(h(Components.IconBtn, {
+				e: 'e'+i,
+				x: 100+i*32,
+				y: 234,
+				click: function() {
+					self.setState({mark:i});
+				},
+			}));
+		}
+		const decksprite = h(Components.DeckDisplay, {
+			onMouseOver: function(i, code) { return setCardArt(code); },
+			onClick: function(i, code) {
+				if (!self.props.acard || code != self.props.acard.code) {
+					const newdeck = self.state.deck.slice();
+					newdeck.splice(i, 1);
+					self.setState({ deck: newdeck });
+				}
+			},
+			deck: sortedDeck,
 		});
-		options.register("deck", deckimport);
-		dom.add(div, [520, 238, deckimport]);
+		const cardsel = h(Components.CardSelector, {
+			onMouseOver: setCardArt,
+			onClick: function(code){
+				if (sortedDeck.length < 60) {
+					const card = Cards.Codes[code];
+					if (sock.user && !card.isFree()) {
+						if (!(code in self.state.pool) || (code in cardminus && cardminus[code] >= self.state.pool[code]) ||
+							(card.type != etg.Pillar && sumCardMinus(code) >= 6)) {
+							return;
+						}
+					}
+					self.setState({ deck: self.state.deck.concat([code]) });
+				}
+			},
+			maxedIndicator: !self.props.acard,
+			filterboth: !!self.state.pool,
+			cardpool: self.state.pool,
+			cardminus: cardminus,
+		});
+		const cardArt = h(Components.Card, { x: 734, y: 8, card: this.state.card });
+		editorui.push(decksprite, cardsel, cardArt);
+		var decknamectrl;
+		if (!self.props.arena){
+			if (sock.user){
+				const deckname = h('input', {
+					id: 'deckname',
+					placeholder: 'Name',
+					value: sock.user.selectedDeck,
+					ref: function(ctrl) {
+						decknamectrl = ctrl;
+					},
+					onKeyPress: function(e) {
+						if (e.keyCode == 13) {
+							loadDeck(e.target.value);
+						}
+					},
+					onClick: function(e) {
+						e.target.setSelectionRange(0, 999);
+					},
+					style: {
+						position: 'absolute',
+						left: '4px',
+						top: '4px',
+						width: '80px',
+					},
+				});
+				editorui.push(deckname);
+			}
+			const deckimport = h('input', {
+				id: 'deckimport',
+				placeholder: 'Deck',
+				autofocus: true,
+				value: etgutil.encodedeck(sortedDeck) + etgutil.toTrueMarkSuffix(self.state.mark),
+				style: {
+					position: 'absolute',
+					left: '520px',
+					top: '238px',
+					width: '190px',
+				},
+				ref: function(ctrl) {
+					deckimportctrl = ctrl;
+					if (ctrl) {
+						options.register('deck', ctrl);
+						ctrl.focus();
+						ctrl.setSelectionRange(0, 999);
+					}
+				},
+				onClick: function(e) { e.target.setSelectionRange(0, 999) },
+				onKeyPress: function(e) {
+					if (e.keyCode == 13){
+						e.target.blur();
+						importDeck();
+					}
+				},
+			});
+			editorui.push(deckimport);
+		}
+		px.view({ cmds: {
+			arenainfo: function(data) { self.props.doNav(require("./ArenaInfo"), data); }
+		}});
+		// if (!arena && sock.user) stage = tutor(tutor.Editor, 4, 220, stage);
+		return h('div', { children: editorui });
 	}
-	function resetCardArt() { cardArt.visible = false }
-	document.addEventListener("mousemove", resetCardArt, true);
-	if (!arena && sock.user) stage = tutor(tutor.Editor, 4, 220, stage);
-	px.view(stage);
-
-	if (!arena){
-		deckimport.focus();
-		deckimport.setSelectionRange(0, 333);
-	}
-	processDeck();
 }
-var startMenu = require("./MainMenu");

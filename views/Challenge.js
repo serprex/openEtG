@@ -117,14 +117,14 @@ module.exports = class Challenge extends preact.Component {
 					left: '110px',
 					top: '400px',
 				}
-			});
-		var aideck = h(Components.Input, {
-			placeholder: 'AI Deck',
-			opt: 'aideck',
-			onKeyPress: maybeCustomAi,
-			onClick: function(e) { e.target.setSelectionRange(0, 999) },
-			x: 440, y: 375,
-		}),
+			}),
+			aideck = h(Components.Input, {
+				placeholder: 'AI Deck',
+				opt: 'aideck',
+				onKeyPress: maybeCustomAi,
+				onClick: function(e) { e.target.setSelectionRange(0, 999) },
+				x: 440, y: 375,
+			}),
 			aihp = h(Components.Input, {
 				placeholder: 'HP',
 				opt: 'aihp',
