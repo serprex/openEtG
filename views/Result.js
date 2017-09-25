@@ -37,8 +37,8 @@ module.exports = class Result extends preact.Component {
 		if (game.quest) {
 			if (winner && game.choicerewards) {
 				this.props.doNav(require("./Reward"), {
-					choicerewards: game.choicerewards,
-					rewardamount: game.rewardamount,
+					type: game.choicerewards,
+					amount: game.rewardamount,
 				});
 			}
 			else {

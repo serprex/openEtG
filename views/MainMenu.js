@@ -337,7 +337,7 @@ module.exports = class MainMenu extends preact.Component {
 			librarygive: function(data) { self.props.doNav(require("./Library"), data) },
 			arenainfo: function(data) { self.props.doNav(require("./ArenaInfo"), data) },
 			codecard:function(data){
-				require("./Reward")(data.type, data.num, foename.value);
+				self.props.doNav(require("./Reward"), { type: data.type, amount: data.num, code: foename.value });
 			},
 			codegold:function(data) {
 				sock.user.gold += data.g;
