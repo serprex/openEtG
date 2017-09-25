@@ -21,6 +21,20 @@ exports.rect = function(x, y, wid, hei) {
 	}
 }
 
+exports.Box = function(props) {
+	return h('div', {
+		class: 'bgbox',
+		children: props.children,
+		style: {
+			position: 'absolute',
+			left: props.x+'px',
+			top: props.y+'px',
+			width: props.width+'px',
+			height: props.height+'px',
+		},
+	});
+}
+
 function CardImage(props) {
 	let card = props.card, spans = [h('span', {}, card.name)];
 	let bordcol = card && card.shiny ? '#daa520' : '#222';

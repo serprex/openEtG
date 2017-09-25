@@ -1,11 +1,12 @@
 const px = require("../px"),
-	dom = require("../dom"),
 	svg = require("../svg"),
 	chat = require("../chat"),
 	sock = require("../sock"),
 	tutor = require("../tutor"),
 	etgutil = require("../etgutil"),
-	options = require("../options");
+	options = require("../options"),
+	Components = require('../Components'),
+	h = preact.h;
 
 const packdata = [
 	{cost: 15, type: "Bronze", info: "10 Commons", color: "#c73"},
@@ -15,151 +16,231 @@ const packdata = [
 	{cost: 250, type: "Nymph", info: "1 Nymph", color: "#69b"},
 ];
 
-module.exports = function() {
-	var packele = -1, packrarity = -1;
-	var tgold = dom.text(sock.user.gold + "$");
-	var tinfo = dom.text("Select from which element you want.");
-	var tinfo2 = dom.text("Select which type of booster you want.");
-	var div = dom.div(
-		[40, 16, dom.box(820, 60)],
-		[40, 89, dom.box(494, 168)],
-		[40, 270, dom.box(620, 168)],
-		[770, 90, dom.box(90, 184)],
-		[775, 246, ["Exit", require("./MainMenu")]],
-		[775, 101, tgold],
-		[50, 26, tinfo],
-		[50, 51, tinfo2]);
-
-	if (sock.user.freepacks){
-		var freeinfo = dom.text("");
-		dom.add(div, [350, 26, freeinfo]);
-	}
-	function updateFreeInfo(rarity){
-		if (freeinfo){
-			freeinfo.text = sock.user.freepacks[rarity] ? "Free " + packdata[rarity].type + " packs left: " + sock.user.freepacks[rarity] : "";
-		}
+module.exports = class Shop extends preact.Component {
+	constructor(props) {
+		super(props);
+		this.state = {
+			info1: "Select from which element you want.",
+			info2: "Select which type of booster you want.",
+			packele: -1,
+			packrarity: -1,
+			showbuy: false,
+			cards: '',
+		};
 	}
 
-	var bget = dom.button("Take Cards", function () {
-		bget.style.display = "none";
-		bbuy.style.display = "";
-		popbooster.style.display = "none";
-	});
-	bget.style.display = "none";
+	render() {
+		const self = this;
+		const children = [
+			h(Components.Box, {
+				x: 40, y: 16,
+				width: 820, height: 60,
+			}),
+			h(Components.Box, {
+				x: 40, y: 89,
+				width: 494, height: 168,
+			}),
+			h(Components.Box, {
+				x: 40, y: 270,
+				width: 620, height: 168,
+			}),
+			h(Components.Box, {
+				x: 770, y: 90,
+				width: 90, height: 184,
+			}),
+			h(Components.Text, {
+				text: sock.user.gold + '$',
+				style: {
+					position: 'absolute',
+					left: '775px',
+					top: '101px',
+				},
+			}),
+			h(Components.Text, {
+				text: this.state.info1,
+				style: {
+					position: 'absolute',
+					left: '50px',
+					top: '25px',
+				},
+			}),
+			h('span', {
+				style: {
+					position: 'absolute',
+					left: '50px',
+					top: '50px',
+				},
+			}, this.state.info2),
+			h(Components.ExitBtn, { x: 775, y: 246, doNav: this.props.doNav }),
+		];
 
-	function buyPack() {
-		if (packrarity == -1) {
-			tinfo2.text = "Select a pack first!";
-			return;
+		if (sock.user.freepacks){
+			children.push(h('span', {
+				style: {
+					position: 'absolute',
+					left: '350px',
+					top: '26px',
+				},
+			}, sock.user.freepacks[self.state.packrarity] ? "Free " + packdata[self.state.packrarity].type + " packs left: " + sock.user.freepacks[self.state.packrarity] : ""));
 		}
-		if (packele == -1) {
-			tinfo.text = "Select an element first!";
-			return;
-		}
-		var pack = packdata[packrarity];
-		var boostdata = { pack: packrarity, element: packele };
-		options.parseInput(boostdata, "bulk", packmulti.value, 99);
-		if (sock.user.gold >= pack.cost * (boostdata.bulk || 1) || (sock.user.freepacks && sock.user.freepacks[packrarity] > 0)) {
-			sock.userEmit("booster", boostdata);
-			bbuy.style.display = "none";
-		} else {
-			tinfo2.text = "You can't afford that!";
-		}
-	}
-	var bbuy = dom.button("Buy Pack", buyPack);
-	dom.add(div, [775, 156, bget], [775, 156, bbuy]);
-	packdata.forEach(function(pack, n){
-		var g = document.createElement("div");
-		g.className = "imgb";
-		dom.style(g, {
-			borderRadius: "6px",
-			border: "3px solid #000",
-			width: "100px",
-			height: "150px",
-			backgroundColor: pack.color,
+
+		const bget = self.state.cards && h('input', {
+			type: 'button',
+			value: 'Take Cards',
+			onClick: function() {
+				self.setState({ hidebuy: false, hideget: true, cards: '' });
+			},
+			style: {
+				position: 'absolute',
+				left: '775px',
+				top: '156px',
+			},
 		});
-		g.appendChild(dom.style(dom.text(pack.type), {
-			fontSize: "18px",
-			color: "#000",
-			position: "absolute",
-			top: "50%",
-			left: "50%",
-			transform: "translate(-50%,-50%)",
-		}));
-		var price = dom.text(pack.cost + "$");
-		price.style.color = "#000";
-		dom.add(g, [7, 122, price]);
-		g.addEventListener("click", function(){
-			packrarity = n;
-			tinfo2.text = pack.type + " Pack: " + pack.info;
-			updateFreeInfo(n);
-		});
-		dom.add(div, [50+125*n, 280, g]);
-	});
 
-	for (var i = 0;i < 14;i++) {
-		(function(_i) {
-			var b = dom.icob(i, function() {
-				packele = _i;
-				tinfo.text = "Selected Element: " + (packele == 13 ? "Random" : "1:" + packele);
+		function buyPack() {
+			const pack = packdata[self.state.packrarity];
+			const boostdata = { pack: self.state.packrarity, element: self.state.packele };
+			options.parseInput(boostdata, "bulk", options.bulk, 99);
+			console.log(boostdata);
+			if (sock.user.gold >= pack.cost * (boostdata.bulk || 1) || (sock.user.freepacks && sock.user.freepacks[self.state.packrarity] > 0)) {
+				sock.userEmit("booster", boostdata);
+				self.setState({ hidebuy: true });
+			} else {
+				self.setState({info2: "You can't afford that!"});
+			}
+		}
+		const bbuy = self.state.showbuy && h('input', {
+			type: 'button',
+			value: 'Buy Pack',
+			onClick: buyPack,
+			style: {
+				position: 'absolute',
+				left: '775px',
+				top: '156px',
+			},
+		});
+		children.push(bget, bbuy);
+		packdata.forEach(function(pack, n){
+			const g = h('div', {
+				class: 'imgb',
+				onClick: function() {
+					const update = { packrarity: n, info2: pack.type + " Pack: " + pack.info};
+					if (~self.state.packele) update.showbuy = true;
+					self.setState(update);
+				},
+				style: {
+					color: '#000',
+					position: 'absolute',
+					left: 50+125*n+'px',
+					top: 280+'px',
+					borderRadius: "6px",
+					border: "3px solid #000",
+					width: "100px",
+					height: "150px",
+					backgroundColor: pack.color,
+				},
+			},
+				h('span', {
+					style: {
+						fontSize: "18px",
+						position: "absolute",
+						top: "50%",
+						left: "50%",
+						transform: "translate(-50%,-50%)",
+					}
+				}, pack.type),
+				h(Components.Text, {
+					text: pack.cost + '$',
+					style: {
+						position: 'absolute',
+						left: '7px',
+						top: '122px',
+					},
+				}));
+			children.push(g);
+		});
+
+		for (let i = 0;i < 14;i++) {
+			children.push(h(Components.IconBtn, {
+				e: 'e'+i,
+				x: 75 + (i>>1)*64,
+				y: 117 + (i&1)*75,
+				click: function() {
+					const update = {
+						packele: i,
+						info1: "Selected Element: " + (i == 13 ? "Random" : "1:" + i),
+					};
+					if (~self.state.packrarity) update.showbuy = true;
+					self.setState(update);
+				},
+			}));
+		}
+
+		if (this.state.cards) {
+			const cardchildren = [];
+			etgutil.iterdeck(this.state.cards, function(code, i){
+				const x = i % 5, y = Math.floor(i/5);
+				cardchildren.push(h(Components.Card, {
+					x: 7+x*140,
+					y: y?298:14,
+					code: code,
+				}));
 			});
-			dom.add(div, [75 + (i>>1)*64, 117 + (i&1)*75, b]);
-		})(i);
-	}
-
-	var popbooster = dom.box(710, 568);
-	popbooster.style.display = "none";
-	dom.add(div, [40, 16, popbooster]);
-
-	var cmds = {
-		boostergive: function(data) {
-			if (data.accountbound) {
-				sock.user.accountbound = etgutil.mergedecks(sock.user.accountbound, data.cards);
-				if (sock.user.freepacks){
-					sock.user.freepacks[data.packtype]--;
-					updateFreeInfo(packrarity);
-				}
-			}
-			else {
-				sock.user.pool = etgutil.mergedecks(sock.user.pool, data.cards);
-				var bdata = {};
-				options.parseInput(bdata, "bulk", packmulti.value, 99);
-				sock.user.gold -= packdata[data.packtype].cost * (bdata.bulk || 1);
-				tgold.text = sock.user.gold + "$";
-			}
-			if (etgutil.decklength(data.cards) < 11){
-				bget.style.display = "";
-				while (popbooster.lastChild) popbooster.removeChild(popbooster.lastChild);
-				etgutil.iterdeck(data.cards, function(code, i){
-					var x = i % 5, y = Math.floor(i/5);
-					var cardArt = dom.svg();
-					cardArt.setAttribute("width", "128");
-					cardArt.setAttribute("height", "256");
-					cardArt.style.position = "absolute";
-					cardArt.style.left = (7+x*140)+"px";
-					cardArt.style.top = (y?298:14)+"px";
-					dom.svgToSvg(cardArt, svg.card(code));
-					popbooster.appendChild(cardArt);
-				});
-				popbooster.style.display = "";
-			}else{
-				bbuy.style.display = "";
-				var link = document.createElement("a");
-				link.href = "deck/" + data.cards;
-				link.target = "_blank";
-				link.appendChild(document.createTextNode(data.cards));
-				chat.addSpan(link);
-			}
-		},
-	};
-	var packmulti = document.createElement("input");
-	packmulti.style.width = "64px";
-	packmulti.placeholder = "Bulk";
-	packmulti.addEventListener("keypress", function(e){
-		if (e.keyCode == 13){
-			buyPack();
+			children.push(h(Components.Box, {
+				x: 40, y: 16,
+				width: 710, height: 568,
+				children: cardchildren,
+			}));
 		}
-	});
-	dom.add(div, [777, 184, packmulti]);
-	px.view(tutor(tutor.Shop, 8, 500, { dom:div, cmds:cmds }));
+
+		var cmds = {
+			boostergive: function(data) {
+				if (data.accountbound) {
+					sock.user.accountbound = etgutil.mergedecks(sock.user.accountbound, data.cards);
+					if (sock.user.freepacks){
+						sock.user.freepacks[data.packtype]--;
+					}
+				}
+				else {
+					sock.user.pool = etgutil.mergedecks(sock.user.pool, data.cards);
+					const bdata = {};
+					options.parseInput(bdata, "bulk", options.bulk, 99);
+					sock.user.gold -= packdata[data.packtype].cost * (bdata.bulk || 1);
+				}
+				if (etgutil.decklength(data.cards) < 11){
+					self.setState({ cards: data.cards, showbuy: false, });
+				}else{
+					self.setState({});
+					const link = document.createElement("a");
+					link.href = "deck/" + data.cards;
+					link.target = "_blank";
+					link.appendChild(document.createTextNode(data.cards));
+					chat.addSpan(link);
+				}
+			},
+		};
+		const packmulti = h('input', {
+			placeholder: 'Bulk',
+			ref: function(ctrl) { ctrl && options.register('bulk', ctrl, true); },
+			onKeyPress: function(e) {
+				if (e.keyCode == 13){
+					buyPack();
+				}
+			},
+			style: {
+				position: 'absolute',
+				top: '184px',
+				left: '777px',
+				width: '64px',
+			},
+		});
+		const tut = h(tutor.Tutor, {
+			x: 8,
+			y: 500,
+			data: tutor.Shop,
+		});
+		children.push(packmulti, tut);
+		px.view({ cmds:cmds });
+		return h('div', { children: children });
+	}
 }
