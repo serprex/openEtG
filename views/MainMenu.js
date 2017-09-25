@@ -333,7 +333,7 @@ module.exports = class MainMenu extends preact.Component {
 				top: '558px',
 			},
 		}));
-		var stage = { cmds: {
+		const stage = { cmds: {
 			librarygive: function(data) { self.props.doNav(require("./Library"), data) },
 			arenainfo: function(data) { self.props.doNav(require("./ArenaInfo"), data) },
 			codecard:function(data){
@@ -371,7 +371,7 @@ module.exports = class MainMenu extends preact.Component {
 			sock.emit("chatus", {hide: !!options.offline || !!options.hideRightpane});
 		}
 		var foename, foectrl = h('input', {
-			ref: x => {
+			ref: function(x) {
 				if (x) options.register('foename', x, true);
 				foename = x;
 			},
@@ -490,7 +490,7 @@ module.exports = class MainMenu extends preact.Component {
 			const bquest = h('input', {
 				type: 'button',
 				value: 'Quests',
-				onClick: require('./QuestMain'),
+				onClick: function() { self.props.doNav(require('./QuestMain')) },
 				onMouseOver: mkSetTip('Go on an adventure'),
 			}), bcolo = h('input', {
 				type: 'button',

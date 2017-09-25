@@ -137,7 +137,7 @@ sock.et.onmessage = function(msg){
 	var func = sockEvents[data.x] || px.getCmd(data.x);
 	if (func) func.call(this, data);
 }
-preact.render(preact.h(require('./views/App'), { view: viewsLogin }), null, document.getElementById("app"));
+preact.render(preact.h(require('./views/App'), { view: viewsLogin }), document.body);
 if (options.preart) sock.emit("cardart");
 function chatmute(){
 	chat((muteall?"You have chat muted. ":"") + "Muted: " + Object.keys(muteset).join(", "), "System");

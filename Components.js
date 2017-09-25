@@ -79,9 +79,10 @@ exports.Input = function(props){
 }
 
 exports.Text = function(props){
+	if (!props.text) return null;
 	var text = props.text.toString().replace(/\|/g, ' / ');
 	var sep = /\d\d?:\d\d?|\$|\n/g, reres, lastindex = 0;
-	var ele = h('div', { class: props.class, style: props.style }), elec = [];
+	const elec = [];
 	while (reres = sep.exec(text)){
 		var piece = reres[0];
 		if (reres.index != lastindex){
@@ -110,8 +111,7 @@ exports.Text = function(props){
 	if (lastindex != text.length){
 		elec.push(text.slice(lastindex));
 	}
-	ele.children = elec;
-	return ele;
+	return h('div', { class: props.class, style: props.style, children: elec });
 }
 
 function IconBtn(props) {

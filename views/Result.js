@@ -35,7 +35,7 @@ module.exports = class Result extends preact.Component {
 	exitFunc() {
 		const game = this.props.game;
 		if (game.quest) {
-			if (winner && game.choicerewards) {
+			if (game.winner === game.player1 && game.choicerewards) {
 				this.props.doNav(require("./Reward"), {
 					type: game.choicerewards,
 					amount: game.rewardamount,
@@ -87,7 +87,7 @@ module.exports = class Result extends preact.Component {
 
 	render() {
 		const game = this.props.game, data = this.props.data;
-		const winner = game.winner == game.player1, foeDeck = data.p2deck;
+		const winner = game.winner === game.player1, foeDeck = data.p2deck;
 		function computeBonuses() {
 			if (game.endurance !== undefined) return 1;
 			const bonus = [

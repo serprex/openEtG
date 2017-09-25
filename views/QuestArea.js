@@ -1,67 +1,109 @@
-var px = require("../px");
-var dom = require("../dom");
-var sock = require("../sock");
-var Quest = require("../Quest");
+const sock = require("../sock"),
+	Quest = require("../Quest"),
+	Components = require('../Components'),
+	h = preact.h;
 function startQuest(questname) {
 	if (!sock.user.quests[questname] && sock.user.quests[questname] != 0) {
 		sock.userExec("updatequest", { quest: questname, newstage: 0 });
 	}
 }
-var bg_quest = new PIXI.Texture(new PIXI.BaseTexture());
-(function(){
-	var img = new Image();
-	img.addEventListener("load", function(){
-		bg_quest.baseTexture = new PIXI.BaseTexture(img);
-		bg_quest.frame = new PIXI.math.Rectangle(0, 0, img.width, img.height);
-	});
-	img.src = "assets/bg_quest.png";
-})();
-module.exports = function(area) {
-	var questui = px.mkView(function() {
-		tinfo.text = "";
-	});
-	var questmap = new PIXI.Sprite(bg_quest);
-	questmap.position.set(124, 162);
-	questui.addChild(questmap);
-	var tinfo = dom.text("");
-	tinfo.style.maxWidth = "850px";
-	var errinfo = dom.text("");
-	tinfo.style.maxWidth = errinfo.style.maxWidth = 850;
-	var div = dom.div([9, 9, dom.box(880, 111)],
-		[26, 26, tinfo],
-		[26, 125, errinfo],
-		[750, 246, ["Exit", require("./QuestMain")]]);
-	function mkQuestButton(quest, stage) {
-		var circle = document.createElement("span");
-		circle.className = "imgb";
-		circle.style.border = "2px solid #88aa66";
-		circle.style.borderRadius = "50%";
-		circle.style.backgroundColor = sock.user.quests[quest] > stage ? "#4f0" : "#000";
-		circle.style.display = "inline-block";
-		circle.style.width = circle.style.height = "32px";
-		circle.addEventListener("mouseover", function() {
-			tinfo.text = Quest[quest].info.text[stage];
+module.exports = class QuestArea extends preact.Component {
+	render() {
+		const self = this;
+		const questmap = h('img', {
+			src: 'assets/bg_quest.png',
+			style: {
+				position: 'absolute',
+				left: '124px',
+				top: '162px',
+			},
 		});
-		circle.addEventListener("click", function() {
-			var err = Quest.mkQuestAi(quest, stage, area);
-			if (typeof err === "string") errinfo.text = err;
+		const tinfo = h(Components.Text, {
+			text: self.state.info,
+			style: {
+				position: 'absolute',
+				left: '26px',
+				top: '26px',
+				maxWidth: '850px',
+			},
 		});
-		return circle;
-	}
-	Quest.areas[area].forEach(function(quest){
-		var stage0 = Quest[quest][0];
-		if (stage0.dependency === undefined || stage0.dependency(sock.user))
-			startQuest(quest);
-	});
-	Quest.areas[area].forEach(function(quest){
-		var pos;
-		if ((sock.user.quests[quest] !== undefined) && Quest[quest]) {
-			for (var i = 0;i <= sock.user.quests[quest];i++) {
-				if ((pos = Quest[quest].info.pos[i])) {
-					dom.add(div, [pos[0], pos[1], mkQuestButton(quest, i)]);
+		const errinfo = h(Components.Text, {
+			text: self.state.err,
+			style: {
+				position: 'absolute',
+				left: '26px',
+				top: '125px',
+				maxWidth: '850px',
+			},
+		});
+		const children = [
+			questmap,
+			h(Components.Box, {
+				x: 9, y: 9,
+				width: 880, height: 111,
+			}),
+			tinfo, errinfo,
+			h('input', {
+				type: 'button',
+				value: 'Exit',
+				onClick: function() { self.props.doNav(require('./QuestMain')); },
+				style: {
+					position: 'absolute',
+					left: '750px',
+					top: '246px',
+				},
+			}),
+		];
+		function QuestButton(props) {
+			const quest = props.quest, stage = props.stage;
+			return h('span', {
+				class: 'imgb',
+				style: {
+					border: "2px solid #88aa66",
+					borderRadius: "50%",
+					backgroundColor: sock.user.quests[quest] > stage ? "#4f0" : "#000",
+					display: "inline-block",
+					position: 'absolute',
+					left: props.x+'px',
+					top: props.y+'px',
+					width: '32px',
+					height: '32px',
+				},
+				onMouseOver: function() {
+					if (self.state.info !== Quest[quest].info.text[stage]) {
+						self.setState({ info: Quest[quest].info.text[stage] });
+					}
+				},
+				onMouseOut: function() {
+					self.setState({ info: '' });
+				},
+				onClick: function() {
+					const err = Quest.mkQuestAi(quest, stage, self.props.area);
+					if (typeof err === "string") self.setState({ err: err });
+					else self.props.doNav(require('./Match'), err);
+				},
+			});
+		}
+		Quest.areas[self.props.area].forEach(function(quest){
+			var stage0 = Quest[quest][0];
+			if (stage0.dependency === undefined || stage0.dependency(sock.user))
+				startQuest(quest);
+		});
+		Quest.areas[self.props.area].forEach(function(quest){
+			var pos;
+			if ((sock.user.quests[quest] !== undefined) && Quest[quest]) {
+				for (var i = 0;i <= sock.user.quests[quest];i++) {
+					if ((pos = Quest[quest].info.pos[i])) {
+						children.push(h(QuestButton, {
+							quest: quest,
+							stage: i,
+							x: pos[0],
+							y: pos[1],
+						}));
+					}
 				}
 			}
-		}
-	});
-	px.view({view:questui, dom:div});
+		});
+		return h('div', { children: children });
+	}
 }
