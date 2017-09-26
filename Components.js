@@ -46,7 +46,7 @@ function CardImage(props) {
 		}
 	}
 	return h('div', {
-		className: 'cardslot',
+		class: 'cardslot',
 		onMouseOver: props.onMouseOver,
 		onClick: props.onClick,
 		style: {
@@ -63,7 +63,11 @@ function CardImage(props) {
 exports.CardImage = CardImage;
 
 exports.Input = function(props){
-	var ele = h('input', {
+	return h('input', {
+		class: props.num ? 'numput' : undefined,
+		ref: props.opt ? function(ctrl) {
+			ctrl && options.register(props.opt, ctrl, props.nopersist);
+		} : undefined,
 		placeholder: props.placeholder,
 		onKeyPress: props.onKeyPress,
 		onClick: props.onClick,
@@ -73,9 +77,6 @@ exports.Input = function(props){
 			top: props.y + 'px',
 		},
 	});
-	if (props.num) ele.className = 'numput';
-	if (props.opt) options.register(props.opt, ele, props.nopersist);
-	return ele;
 }
 
 exports.Text = function(props){

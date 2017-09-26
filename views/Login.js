@@ -76,10 +76,17 @@ module.exports = class Login extends preact.Component {
 			else self.sandbox = true;
 		}});
 		var bg_login = h("img", { src: "assets/bg_login.png", className: "bgimg" });
-		var username = h("input", { placeholder: 'Username', autofocus: true, tabIndex: '1', onKeyPress: maybeLogin });
+		var username = h("input", {
+			placeholder: 'Username',
+			autofocus: true,
+			tabIndex: '1',
+			onKeyPress: maybeLogin,
+			ref: function(ctrl) { ctrl && options.register('username', ctrl); },
+		});
 		var passwordEle, password = h("input", { ref: function(input) { passwordEle = input; }, type: 'password', placeholder: 'Password', tabIndex: '2', onKeyPress: maybeLogin });
 		var rememberCheck = h("input", {
 			type: 'checkbox',
+			ref: function(ctrl) { ctrl && options.register('remember', ctrl); },
 			onChange: function() {
 				if (typeof localStorage !== "undefined"){
 					if (!this.checked) delete localStorage.auth;
@@ -88,8 +95,6 @@ module.exports = class Login extends preact.Component {
 			},
 		});
 		var remember = h("label", {}, rememberCheck, 'Remember me');
-		options.register("username", username);
-		options.register("remember", rememberCheck);
 		if (options.remember && typeof localStorage !== "undefined" && localStorage.auth){
 			loginClick(localStorage.auth);
 		}

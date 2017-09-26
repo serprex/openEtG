@@ -1,54 +1,79 @@
 "use strict";
-var px = require("../px");
-var dom = require("../dom");
-var gfx = require("../gfx");
-var chat = require("../chat");
-var sock = require("../sock");
-var Cards = require("../Cards");
-var etgutil = require("../etgutil");
-var userutil = require("../userutil");
-var DeckDisplay = require("../DeckDisplay");
-var CardSelector = require("../CardSelector");
-function startMenu(){
-	// Avoids early recursive requires & blanks arguments
-	require("./MainMenu")();
-}
-module.exports = function() {
-	var view = px.mkView(), stage = {view: view};
-	var bbuy = dom.button("Buy", function() {
-		if (ownDeck.deck.length == 0) return chat("You haven't chosen a card", "System");
-		console.log(ownVal.text, ownVal.textContent);
-		if (sock.user.gold < parseInt(ownVal.text)) return chat("You cannot afford these", "System");
-		sock.userExec("bazaar", {cards:etgutil.encoderaw(ownDeck.deck)});
-		startMenu();
-	});
-	var ownVal = dom.text("");
-	function setCardArt(code){
-		cardArt.texture = gfx.getArt(code);
-		cardArt.visible = true;
+const chat = require("../chat"),
+	sock = require("../sock"),
+	Cards = require("../Cards"),
+	etgutil = require("../etgutil"),
+	userutil = require("../userutil"),
+	Components = require('../Components'),
+	h = preact.h;
+module.exports = class Bazaar extends preact.Component {
+	constructor(props) {
+		super(props);
+		this.state = {
+			code: null,
+			deck: [],
+		};
 	}
-	var ownDeck = new DeckDisplay(60, setCardArt,
-		function(i) {
-			ownDeck.rmCard(i);
-			ownVal.text = Math.ceil(userutil.calcWealth(ownDeck.deck, true)*3);
-		}
-	);
-	view.addChild(ownDeck);
-	stage.dom = dom.div([8, 100, ["Exit", startMenu]],
-		[100, 235, ownVal], [8, 160, bbuy], [8, 240, sock.user.gold + "$"]);
 
-	var cardsel = new CardSelector(stage, setCardArt,
-		function(code){
-			var card = Cards.Codes[code];
-			if (ownDeck.deck.length < 60 && card.rarity > 0 && card.rarity < 4 && !card.isFree()) {
-				ownDeck.addCard(code);
-				ownVal.text = Math.ceil(userutil.calcWealth(ownDeck.deck, true)*3);
-			}
+	render() {
+		const self = this, children = [h(Components.ExitBtn, { x: 8, y: 100, doNav: self.props.doNav })],
+			cost = Math.ceil(userutil.calcWealth(self.state.deck, true)*3);
+
+		if (self.state.deck.length > 0 && sock.user.gold >= cost) {
+			children.push(h('input', {
+				type: 'button',
+				value: 'Buy',
+				style: {
+					position: 'absolute',
+					left: '8px',
+					top: '160px',
+				},
+				onClick: function() {
+					sock.userExec("bazaar", {cards:etgutil.encoderaw(self.state.deck)});
+					self.props.doNav(require('./MainMenu'));
+				}
+			}));
 		}
-	);
-	view.addChild(cardsel);
-	var cardArt = new PIXI.Sprite(gfx.nopic);
-	cardArt.position.set(734, 8);
-	view.addChild(cardArt);
-	px.view(stage);
+		children.push(
+			h(Components.Text, {
+				text: cost + '$',
+				style: {
+					position: 'absolute',
+					left: '100px',
+					top: '235px',
+					color: cost > sock.user.gold ? '#f44' : '#fff',
+				},
+			}),
+			h(Components.Text, {
+				text: sock.user.gold + '$',
+				style: {
+					position: 'absolute',
+					left: '8px',
+					top: '240px',
+				},
+			}),
+			h(Components.DeckDisplay, {
+				deck: self.state.deck,
+				onMouseOver: function(i, code) { self.setState({code: code}); },
+				onClick: function(i) {
+					const newdeck = self.state.deck.slice();
+					newdeck.splice(i, 1);
+					self.setState({ deck: newdeck });
+				},
+			}),
+			h(Components.CardSelector, {
+				onMouseOver: function(code) { self.setState({code: code}); },
+				onClick: function(code) {
+					const card = Cards.Codes[code];
+					if (self.state.deck.length < 60 && card.rarity > 0 && card.rarity < 4 && !card.isFree()) {
+						self.setState({ deck: self.state.deck.concat([code]) });
+					}
+				}
+			})
+		);
+		if (self.state.code) {
+			children.push(h(Components.Card, { x: 734, y: 8, code: self.state.code }));
+		}
+		return h('div', { children: children });
+	}
 }

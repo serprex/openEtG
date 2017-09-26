@@ -356,8 +356,7 @@ module.exports = class MainMenu extends preact.Component {
 			sock.userEmit("codesubmit", { code: foename.value });
 		}
 		function libraryClick() {
-			var name = foename.value;
-			if (!name && sock.user) name = sock.user.name;
+			const name = foename.value || sock.user && sock.user.name;
 			if (name) sock.emit("librarywant", { f: name });
 		}
 		function soundChange() {
@@ -536,7 +535,7 @@ module.exports = class MainMenu extends preact.Component {
 				h('input', {
 					type: 'button',
 					value: 'Bazaar',
-					onClick: require('./Bazaar'),
+					onClick: function() { self.props.doNav(require('./Bazaar')) },
 					onMouseOver: mkSetTip("Buy singles at a 300% premium"),
 					style: {
 						position: 'absolute',
