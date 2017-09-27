@@ -1,96 +1,143 @@
 "use strict";
-var px = require("../px");
-var dom = require("../dom");
-var gfx = require("../gfx");
-var chat = require("../chat");
-var sock = require("../sock");
-var Cards = require("../Cards");
-var etgutil = require("../etgutil");
-var userutil = require("../userutil");
-var DeckDisplay = require("../DeckDisplay");
-var CardSelector = require("../CardSelector");
+const px = require('../px'),
+	chat = require("../chat"),
+	sock = require("../sock"),
+	Cards = require("../Cards"),
+	etgutil = require("../etgutil"),
+	userutil = require("../userutil"),
+	Components = require('../Components'),
+	h = preact.h;
 
-function startMenu(){
-	// Avoids early recursive requires & blanks arguments
-	require("./MainMenu")();
-}
-module.exports = function() {
-	var view = px.mkView(), cardminus = [], stage = {view: view};
-	var btrade = dom.button("Trade", function() {
-		if (!cardChosen){
-			if (ownDeck.deck.length) {
-				sock.emit("cardchosen", {c: etgutil.encoderaw(ownDeck.deck)});
-				console.log("Offered", ownDeck.deck);
-				cardChosen = true;
-				btrade.value = "Confirm";
-				btrade.style.top = "60px";
-			}
-			else chat("You have to choose at least a card!", "System");
-		}else{ // confirm
-			if (foeDeck.deck.length) {
-				console.log("Confirmed", ownDeck.deck, foeDeck.deck);
-				sock.userEmit("confirmtrade", { cards: etgutil.encoderaw(ownDeck.deck), oppcards: etgutil.encoderaw(foeDeck.deck) });
-				btrade.style.display = "none";
-				tconfirm.style.display = "";
-			}
-			else chat("Wait for your friend to choose!", "System");
-		}
-	});
-	var tconfirm = dom.text("Confirmed!");
-	tconfirm.style.display = "none";
-	var ownVal = dom.text(""), foeVal = dom.text("");
-	var cardChosen = false;
-	function setCardArt(code){
-		cardArt.texture = gfx.getArt(code);
-		cardArt.visible = true;
+module.exports = class Trade extends preact.Component {
+	constructor(props) {
+		super(props);
+		this.state = {
+			confirm: 0,
+			code: 0,
+			deck: [],
+			offer: [],
+			cardminus: [],
+		};
 	}
-	var ownDeck = new DeckDisplay(30, setCardArt,
-		function(i) {
-			px.adjust(cardminus, ownDeck.deck[i], -1);
-			ownDeck.rmCard(i);
-			ownVal.text = userutil.calcWealth(cardminus);
-		}
-	);
-	var foeDeck = new DeckDisplay(30, setCardArt);
-	foeDeck.position.x = 450;
-	view.addChild(ownDeck);
-	view.addChild(foeDeck);
-	stage.dom = dom.div([10, 10, ["Cancel", function() {
-		sock.userEmit("canceltrade");
-		startMenu();
-	}]],
-		[100, 235, ownVal], [350, 235, foeVal],
-		[10, 40, btrade], [10, 60, tconfirm]);
 
-	var cardpool = etgutil.deck2pool(sock.user.pool);
-	var cardsel = new CardSelector(stage, setCardArt,
-		function(code){
-			var card = Cards.Codes[code];
-			if (ownDeck.deck.length < 30 && !card.isFree() && code in cardpool && !(code in cardminus && cardminus[code] >= cardpool[code])) {
-				px.adjust(cardminus, code, 1);
-				ownDeck.addCard(code);
-				ownVal.text = userutil.calcWealth(cardminus);
-			}
+	componentWillMount() {
+		const self = this;
+		px.view({ cmds: {
+			cardchosen: function(data){
+				self.setState({ offer: etgutil.decodedeck(data.c) })
+			},
+			tradedone: function(data) {
+				sock.user.pool = etgutil.mergedecks(sock.user.pool, data.newcards);
+				sock.user.pool = etgutil.removedecks(sock.user.pool, data.oldcards);
+				self.props.doNav(require('./MainMenu'));
+			},
+			tradecanceled: function() { self.props.doNav(require('./MainMenu')); },
+		}});
+	}
+
+	componentWillUnmount() {
+		px.view({});
+	}
+
+	render() {
+		const self = this, cardminus = [], children = [];
+		console.log(self.state);
+		for (let i=0; i<self.state.deck.length; i++) {
+			cardminus[self.state.deck[i]]++;
 		}
-	);
-	cardsel.cardpool = cardpool;
-	cardsel.cardminus = cardminus;
-	view.addChild(cardsel);
-	var cardArt = new PIXI.Sprite(gfx.nopic);
-	cardArt.position.set(734, 8);
-	view.addChild(cardArt);
-	stage.cmds = {
-		cardchosen: function(data){
-			foeDeck.deck = etgutil.decodedeck(data.c);
-			foeDeck.renderDeck(0);
-			foeVal.text = userutil.calcWealth(data.c);
-		},
-		tradedone: function(data) {
-			sock.user.pool = etgutil.mergedecks(sock.user.pool, data.newcards);
-			sock.user.pool = etgutil.removedecks(sock.user.pool, data.oldcards);
-			startMenu();
-		},
-		tradecanceled: startMenu,
-	};
-	px.view(stage);
+		if (self.state.confirm < 2) {
+			children.push(h('input', {
+				type: 'button',
+				value: self.state.confirm ? 'Confirm' : 'Trade',
+				onClick: self.state.confirm ? function() {
+					if (self.state.offer.length) {
+						sock.userEmit("confirmtrade", { cards: etgutil.encoderaw(self.state.deck), oppcards: etgutil.encoderaw(self.state.offer) });
+						self.setState({ confirm: 2 });
+					}
+					else chat("Wait for your friend to choose!", "System");
+				} : function() {
+					if (self.state.deck.length) {
+						sock.emit("cardchosen", {c: etgutil.encoderaw(self.state.deck)});
+						self.setState({ confirm: 1 })
+					}
+					else chat("You have to choose at least a card!", "System");
+				},
+				style: {
+					position: 'absolute',
+					left: '10px',
+					top: self.state.confirm ? '60px' : '40px',
+				},
+			}));
+		} else {
+			children.push(h('span', {
+				style: {
+					position: 'absolute',
+					left: '10px',
+					top: '60px',
+				},
+			}, 'Confirmed!'));
+		}
+		const ownVal = h(Components.Text, {
+			text: userutil.calcWealth(self.state.deck, true) + '$',
+			style: {
+				position: 'absolute',
+				left: '100px',
+				top: '235px',
+			},
+		});
+		const foeVal = h(Components.Text, {
+			text: userutil.calcWealth(self.state.offer, true) + '$',
+			style: {
+				position: 'absolute',
+				left: '350px',
+				top: '235px',
+			},
+		});
+		const ownDeck = h(Components.DeckDisplay, {
+			deck: self.state.deck,
+			onMouseOver: function(i, code) { self.setState({ code: code }); },
+			onClick: function(i) {
+				const newdeck = self.state.deck.slice();
+				newdeck.splice(i, 1);
+				self.setState({ deck: newdeck });
+			},
+		});
+		const foeDeck = h(Components.DeckDisplay, {
+			deck: self.state.offer, x: 450,
+			onMouseOver: function(i, code) { self.setState({ code: code }); },
+		});
+		children.push(ownDeck, foeDeck, ownVal, foeVal,
+			h('input', {
+				type: 'button',
+				value: 'Cancel',
+				onClick: function() {
+					sock.userEmit("canceltrade");
+					self.props.doNav(require('./MainMenu'));
+				},
+				style: {
+					position: 'absolute',
+					left: '10px',
+					top: '10px',
+				},
+			})
+		);
+
+		const cardpool = etgutil.deck2pool(sock.user.pool);
+		const cardsel = h(Components.CardSelector, {
+			cardpool: cardpool,
+			cardminus: cardminus,
+			onMouseOver: function(code) { self.setState({ code: code }); },
+			onClick: function(code){
+				const card = Cards.Codes[code];
+				if (self.state.deck.length < 30 && !card.isFree() && code in cardpool && !(code in cardminus && cardminus[code] >= cardpool[code])) {
+					self.setState({ deck: self.state.deck.concat([code]) });
+				}
+			},
+		});
+		children.push(cardsel);
+		if (self.state.code) {
+			children.push(h(Components.Card, { x: 734, y: 8, code: self.state.code }));
+		}
+		return h('div', { children: children });
+	}
 }

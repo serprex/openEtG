@@ -169,7 +169,7 @@ function DeckDisplay(props) {
 				card: card,
 				onMouseOver: function() { return props.onMouseOver(i, code); },
 				onClick: function() { return props.onClick(i, code); },
-				x: 100 + Math.floor(i / 10) * 99,
+				x: (props.x || 0) + 100 + Math.floor(i / 10) * 99,
 				y: 32 + (i % 10) * 19,
 			});
 		}),

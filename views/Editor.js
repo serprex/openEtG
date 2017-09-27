@@ -11,11 +11,6 @@ const px = require('../px'),
 	Components = require('../Components'),
 	h = preact.h;
 
-function adjust(cardminus, code, amt) {
-	const mod = cardminus.slice();
-	mod[code] = (cardminus[code] || 0) + amt;
-	return mod;
-}
 
 const artable = {
 	hp: { min: 65, max: 200, incr: 45, cost: 1 },
