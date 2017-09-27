@@ -74,9 +74,3 @@ exports.mkView = function(mouseover){
 	}
 	return view;
 }
-exports.adjust = function adjust(cardminus, code, x) {
-	if (code in cardminus) {
-		cardminus[code] += x;
-	} else cardminus[code] = x;
-	cardminus[0] = 0;
-}

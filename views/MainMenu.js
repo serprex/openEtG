@@ -546,7 +546,7 @@ module.exports = class MainMenu extends preact.Component {
 				h('input', {
 					type: 'button',
 					value: 'Upgrade',
-					onClick: require('./Upgrade'),
+					onClick: function() { self.props.doNav(require('./Upgrade')) },
 					onMouseOver: mkSetTip("Upgrade or sell cards"),
 					style: {
 						position: 'absolute',

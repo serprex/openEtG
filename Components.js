@@ -267,7 +267,7 @@ class CardSelector extends Component {
 					onClick: self.props.onClick && function() {
 						if (self.props.filterboth && !self.state.shiny){
 							const scode = card.asShiny(true).code;
-							if (scode in self.props.cardpool && self.props.cardpool[scode] > ((self.props.cardminus && self.props.cardminus[scode]) || 0)) {
+							if (scode in self.props.cardpool && self.props.cardpool[scode] > (self.props.cardminus && self.props.cardminus[scode] || 0)) {
 								code = scode;
 							}
 						}
@@ -277,9 +277,9 @@ class CardSelector extends Component {
 				}));
 				if (this.props.cardpool) {
 					const scode = etgutil.asShiny(card.code, true);
-					var cardAmount = card.isFree() ? "-" : code in this.props.cardpool ? this.props.cardpool[code] - ((this.props.cardminus && this.props.cardminus[code]) || 0) : 0, shinyAmount = 0;
+					var cardAmount = card.isFree() ? "-" : code in this.props.cardpool ? this.props.cardpool[code] - (this.props.cardminus && this.props.cardminus[code] || 0) : 0, shinyAmount = 0;
 					if (this.props.filterboth && !this.state.shiny) {
-						shinyAmount = scode in this.props.cardpool ? this.props.cardpool[scode] - ((this.props.cardminus && this.props.cardminus[scode]) || 0) : 0;
+						shinyAmount = scode in this.props.cardpool ? this.props.cardpool[scode] - (this.props.cardminus && this.props.cardminus[scode] || 0) : 0;
 					}
 					countTexts.push(h('div', {
 						className: 'selectortext' + (this.props.maxedIndicator && card.type != etg.Pillar && cardAmount >= 6 ?(cardAmount >= 12 ? ' beigeback' : ' lightback'):''),
