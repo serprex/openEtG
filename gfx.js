@@ -114,7 +114,7 @@ function makeArt(code, art, rend) {
 		text.anchor.x = 1;
 		text.position.set(rend.width-3, 2);
 		template.addChild(text);
-		if (card.element && ((card.costele == card.element) ^ !options.showCostIcon)) {
+		if (card.costele != card.element) {
 			var eleicon = new PIXI.Sprite(exports.e[card.costele]);
 			eleicon.position.set(rend.width-text.width-5, 10);
 			eleicon.anchor.set(1, .5);
@@ -178,7 +178,7 @@ function getSlotImage(card, code){
 				text.position.set(rend.width-2, 3);
 				graphics.addChild(text);
 				clipwidth -= text.width+2;
-				if (card.element && ((card.costele == card.element) ^ !options.showCostIcon)) {
+				if (card.costele == card.element) {
 					var eleicon = new PIXI.Sprite(exports.e[card.costele]);
 					eleicon.position.set(clipwidth, 10);
 					eleicon.anchor.set(1, .5);

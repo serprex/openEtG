@@ -133,7 +133,7 @@ module.exports = class MainMenu extends preact.Component {
 		}
 
 		function TitleText(props){
-			return h('span', {
+			return h('div', {
 				style: { fontSize: '20px', textAlign: 'center' },
 			}, props.text);
 		}
@@ -144,7 +144,7 @@ module.exports = class MainMenu extends preact.Component {
 			});
 		}
 		function CostText(props){
-			return h(Components.LabelText, {
+			return h(LabelText, {
 				text: userutil.pveCostReward[props.lv*2+props.n] + "$",
 				style: props.style,
 			});
@@ -177,7 +177,7 @@ module.exports = class MainMenu extends preact.Component {
 		});
 		const deckc = [h(TitleText, { text: 'Cards & Decks' })],
 			leadc = [h(TitleText, { text: 'Leaderboards' }), bwealth, h('br')],
-			aic = [h(LabelText, { text: 'AI Battle' })],
+			aic = [h(TitleText, { text: 'AI Battle' })],
 			arenac = [h(TitleText, { text: 'Arena' })],
 			playc = [h(TitleText, { text: 'Players' })],
 			mainc = [h(Components.rect(196, 4, 504, 48), {},
@@ -437,53 +437,8 @@ module.exports = class MainMenu extends preact.Component {
 					top: '558px',
 				},
 				onClick: function() {
-					if (this.popdom && this.popdom.id == "settingspane"){
-						return setPopup(null);
-					}
-					var wipe = dom.button("Wipe Account",
-						function() {
-							if (foename.value == sock.user.name + "yesdelete") {
-								logout('delete');
-							} else {
-								chat("Input '" + sock.user.name + "yesdelete' into Trade/Library to delete your account", "System");
-							}
-						},
-						mkSetTip("Click here to permanently remove your account")
-					);
-					function changeFunc(){
-						if (this.value == "Change Pass") this.value = "Confirm";
-						else {
-							this.value = "Change Pass";
-							sock.userEmit("passchange", { p: changePass.value });
-						}
-					}
-					var changePass = document.createElement("input"), changeBtn = dom.button("Change Pass", changeFunc),
-						enableSound = dom.check("Enable sound", soundChange, "enableSound"),
-						enableMusic = dom.check("Enable music", musicChange, "enableMusic"),
-						hideRightpane = dom.check("Hide rightpane", hideRightpaneChange, "hideRightpane"),
-						showCostIcon = dom.check("Show cost icon", gfx.refreshCaches, "showCostIcon"),
-						disableTut = dom.check("Disable tutorial", null, "disableTut");
-					changePass.type = "password";
-					changePass.addEventListener("keypress", function(e){
-						if (e.keyCode == 13) changeFunc();
-					});
-					dom.add(div, [8, 8, changePass], [184, 8, changeBtn],
-						[8, 53, enableSound], [135, 53, enableMusic],
-						[8, 88, hideRightpane], [135, 88, showCostIcon],
-						[8, 123, disableTut],
-						[184, 123, wipe]);
-					var settingspane = h('div', {
-						id: 'settingspane',
-						style: {
-							position: 'absolute',
-							left: '585px',
-							top: '380px',
-							width: '267px',
-							height: '156px',
-						},
-					});
-					setPopup(settingspane);
-				}
+					self.setState({ showsettings: !self.state.showsettings });
+				},
 			});
 			mainc.push(bsettings);
 			const bquest = h('input', {
@@ -607,16 +562,114 @@ module.exports = class MainMenu extends preact.Component {
 				value: 'Editor',
 				onClick: function() { self.props.doNav(require('./Editor')) },
 				onMouseOver: mkSetTip("Edit & manage your decks"),
-			}),
-			h(LabelText, { text: 'Edit & manage your decks' })
+				style: {
+					position: 'absolute',
+					left: '14px',
+					top: '108px',
+				},
+			})
 		);
 		px.view(stage);
 		mainc.push(
 			h(Components.rect(626, 436, 196, 120), { children: leadc }),
 			h(CostRewardHeaders(304, 120, 292, 240), { children: aic }),
 			h(Components.rect(620, 92, 196, 176), { children: deckc }),
-			h(Components.rect(616, 300, 292, 130), { children: playc })
+			h(Components.rect(616, 300, 206, 130), { children: playc })
 		);
+		if (self.state.showsettings) {
+			function changeFunc(){
+				if (this.value == "Change Pass") this.value = "Confirm";
+				else {
+					this.value = "Change Pass";
+					sock.userEmit("passchange", { p: changePass.value });
+				}
+			}
+			const wipe = h('input', {
+				type: 'button',
+				value: 'Wipe Account',
+				onClick: function() {
+					if (foename.value == sock.user.name + "yesdelete") {
+						logout('delete');
+					} else {
+						chat("Input '" + sock.user.name + "yesdelete' into Trade/Library to delete your account", "System");
+					}
+				},
+				onMouseOver: mkSetTip("Click here to permanently remove your account"),
+				style: {
+					position: 'absolute',
+					left: '184px',
+					top: '123px',
+				},
+			}), changePass = h('input', {
+				placeholder: 'New Password',
+				onKeyPress: function(e) {
+					if (e.keyCode == 13) changeFunc();
+				},
+				style: {
+					position: 'absolute',
+					left: '8px',
+					top: '8px',
+				},
+			}), changeBtn = h('input', {
+				type: 'button',
+				value: 'Change Pass',
+				onClick: changeFunc,
+				style: {
+					position: 'absolute',
+					left: '184px',
+					top: '8px',
+				},
+			}), enableSound = h('label', {
+				style: {
+					position: 'absolute',
+					left: '8px',
+					top: '53px',
+				},
+			}, h('input', {
+				type: 'checkbox',
+				ref: function(ctrl) { ctrl && options.register('enableSound', ctrl); },
+				onChange: soundChange,
+			}), 'Enable sound'), enableMusic = h('label', {
+				style: {
+					position: 'absolute',
+					left: '135px',
+					top: '53px',
+				},
+			}, h('input', {
+				type: 'checkbox',
+				ref: function(ctrl) { ctrl && options.register('enableMusic', ctrl); },
+				onChange: musicChange,
+			}), 'Enable music'), hideRightpane = h('label', {
+				style: {
+					position: 'absolute',
+					left: '8px',
+					top: '88px',
+				},
+			}, h('input', {
+				type: 'checkbox',
+				ref: function(ctrl) { ctrl && options.register('hideRightpane', ctrl); },
+				onChange: hideRightpaneChange,
+			}), 'Hide rightpane'), disableTut = h('label', {
+				style: {
+					position: 'absolute',
+					left: '8px',
+					top: '123px',
+				},
+			}, h('input', {
+				type: 'checkbox',
+				ref: function(ctrl) { ctrl && options.register('disableTut', ctrl); },
+			}), 'Disable tutorial');
+			mainc.push(h('div', {
+				className: 'bgbox',
+				style: {
+					position: 'absolute',
+					left: '585px',
+					top: '380px',
+					width: '267px',
+					height: '156px',
+				},
+			}, wipe, changePass, enableSound, enableMusic, hideRightpane, disableTut));
+		}
 		return h('div', { className: 'bg_main', children: mainc });
 	}
 }
