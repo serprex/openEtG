@@ -104,13 +104,12 @@ module.exports = class MainMenu extends preact.Component {
 			tipText: '',
 			selectedDeck: sock.user.selectedDeck,
 		};
-		this.resetTip = (function (e) {
+		this.resetTip = function (e) {
 			if (e.target.tagName.match(/^(DIV|CANVAS|HTML)$/)) {
-				this.setState(Object.assign({}, self.state, {
-					tipText: sock.user ? tipjar[self.state.tipNumber] : "To register, just type desired username & password in the fields to the right, then click 'Login'",
-				}));
+				const tipText = sock.user ? tipjar[self.state.tipNumber] : "To register, just type desired username & password in the fields to the right, then click 'Login'";
+				if (tipText !== self.state.tipText) self.setState({ tipText: tipText });
 			}
-		}).bind(this);
+		};
 	}
 
 	componentWillUnmount() {
@@ -127,7 +126,7 @@ module.exports = class MainMenu extends preact.Component {
 		function mkSetTip(text){
 			return function(){
 				if (self.state.tipText != text) {
-					self.setState(Object.assign({}, self.state, { tipText: text }));
+					self.setState({ tipText: text });
 				}
 			}
 		}
