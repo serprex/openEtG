@@ -336,7 +336,7 @@ module.exports = class MainMenu extends preact.Component {
 			librarygive: function(data) { self.props.doNav(require("./Library"), data) },
 			arenainfo: function(data) { self.props.doNav(require("./ArenaInfo"), data) },
 			codecard:function(data){
-				self.props.doNav(require("./Reward"), { type: data.type, amount: data.num, code: foename.value });
+				self.props.doNav(require("./Reward"), { type: data.type, amount: data.num, code: options.foename });
 			},
 			codegold:function(data) {
 				sock.user.gold += data.g;
@@ -348,14 +348,14 @@ module.exports = class MainMenu extends preact.Component {
 			},
 		}};
 		function tradeClick(foe) {
-			sock.trade = typeof foe === "string" ? foe : foename.value;
+			sock.trade = typeof foe === "string" ? foe : options.foename;
 			sock.userEmit("tradewant", { f: sock.trade });
 		}
 		function rewardClick() {
-			sock.userEmit("codesubmit", { code: foename.value });
+			sock.userEmit("codesubmit", { code: options.foename });
 		}
 		function libraryClick() {
-			const name = foename.value || sock.user && sock.user.name;
+			const name = options.foename || sock.user && sock.user.name;
 			if (name) sock.emit("librarywant", { f: name });
 		}
 		function soundChange() {
@@ -368,10 +368,9 @@ module.exports = class MainMenu extends preact.Component {
 			document.getElementById("rightpane").style.display = options.hideRightpane ? "none" : "";
 			sock.emit("chatus", {hide: !!options.offline || !!options.hideRightpane});
 		}
-		var foename, foectrl = h('input', {
+		var foectrl = h('input', {
 			ref: function(x) {
 				if (x) options.register('foename', x, true);
-				foename = x;
 			},
 			placeholder: 'Trade/Library',
 			style: {
@@ -587,7 +586,7 @@ module.exports = class MainMenu extends preact.Component {
 				type: 'button',
 				value: 'Wipe Account',
 				onClick: function() {
-					if (foename.value == sock.user.name + "yesdelete") {
+					if (options.foename == sock.user.name + "yesdelete") {
 						logout('delete');
 					} else {
 						chat("Input '" + sock.user.name + "yesdelete' into Trade/Library to delete your account", "System");
