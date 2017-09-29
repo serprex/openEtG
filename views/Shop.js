@@ -101,7 +101,6 @@ module.exports = class Shop extends preact.Component {
 			const pack = packdata[self.state.packrarity];
 			const boostdata = { pack: self.state.packrarity, element: self.state.packele };
 			options.parseInput(boostdata, "bulk", options.bulk, 99);
-			console.log(boostdata);
 			if (sock.user.gold >= pack.cost * (boostdata.bulk || 1) || (sock.user.freepacks && sock.user.freepacks[self.state.packrarity] > 0)) {
 				sock.userEmit("booster", boostdata);
 				self.setState({ hidebuy: true });
