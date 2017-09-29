@@ -10,6 +10,7 @@ const px = require('../px'),
 	audio = require('../audio'),
 	Cards = require('../Cards'),
 	Thing = require('../Thing'),
+	mkGame = require('../mkGame'),
 	Status = require('../Status'),
 	etgutil = require('../etgutil'),
 	options = require('../options'),
@@ -69,9 +70,9 @@ function CostRewardHeaders(x, y, wid, hei) {
 	}
 }
 function initEndless(){
-	var gameData = { deck: require("../ai/deck")(.5, 2, 5), urdeck: sock.getDeck(), seed: util.randint(), p2hp: 0x100000000, p2markpower: 2, foename: "The Invincible", p2drawpower: 2, level: 7, goldreward: 0, cardreward: "" };
-	var game = require("./Match")(gameData, true);
-	var endlessRelic = Object.create(Thing.prototype);
+	const gameData = mkGame({ deck: require("../ai/deck")(.5, 2, 5), urdeck: sock.getDeck(), seed: util.randint(), p2hp: 0x100000000, p2markpower: 2, foename: "The Invincible", p2drawpower: 2, level: 7, goldreward: 0, cardreward: "", ai: true });
+	const game = gameData.game;
+	const endlessRelic = Object.create(Thing.prototype);
 	endlessRelic.card = Cards.Despair;
 	endlessRelic.status = new Status();
 	endlessRelic.status.set("immaterial", 1);
@@ -92,6 +93,7 @@ function initEndless(){
 	}
 	endlessRelic.active = {auto:{name: ["@&%"], func: endlessAuto}, draw:{name: ["~~!"], func: endlessDraw}};
 	game.player2.addPerm(endlessRelic);
+	return gameData;
 }
 module.exports = class MainMenu extends preact.Component {
 	constructor(props) {
@@ -452,7 +454,7 @@ module.exports = class MainMenu extends preact.Component {
 			}), bendless = h('input', {
 				type: 'button',
 				value: 'Endless',
-				onClick: initEndless,
+				onClick: function() { self.props.doNav(require('./Match'), initEndless()) },
 				onMouseOver: mkSetTip("See how long you last against The Invincible")
 			});
 			const colocol = h('div', {
