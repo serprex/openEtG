@@ -383,7 +383,7 @@ module.exports = class MainMenu extends preact.Component {
 		function loadQuickdeck(x) {
 			return function() {
 				sock.userExec("setdeck", { name: sock.user.qecks[x] || "" });
-				self.setState({}, self.state, { selectedDeck: sock.user.selectedDeck });
+				self.setState({ selectedDeck: sock.user.selectedDeck });
 			}
 		}
 		playc.push(
