@@ -98,11 +98,11 @@ module.exports = class MainMenu extends preact.Component {
 		super(props);
 		const self = this;
 		self.state = {
-			showcard: props.nymph || !sock.user.daily && sock.user.ocard,
+			showcard: props.nymph || sock.user && !sock.user.daily && sock.user.ocard,
 			showsettings: false,
 			tipNumber: RngMock.upto(tipjar.length),
 			tipText: '',
-			selectedDeck: sock.user.selectedDeck,
+			selectedDeck: sock.user ? sock.user.selectedDeck : '',
 		};
 		this.resetTip = function (e) {
 			if (e.target.tagName.match(/^(DIV|CANVAS|HTML)$/)) {
