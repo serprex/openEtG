@@ -1,6 +1,7 @@
 "use strict";
 const px = require('../px'),
 	Cards = require('../Cards'),
+	mkGame = require('../mkGame'),
 	sock = require('../sock'),
 	util = require('../util'),
 	etgutil = require('../etgutil'),
@@ -45,7 +46,11 @@ module.exports = function(props) {
 						top: 224+y+'px',
 					},
 					onClick: function(){
-						require("./Editor")(props, info, info.card);
+						props.doNav(require("./Editor"), {
+							adeck: info.deck,
+							acard: Cards.Codes[info.card],
+							ainfo: info,
+						});
 					}
 				}),
 				h('input', {
@@ -59,12 +64,12 @@ module.exports = function(props) {
 					onClick: function(){
 						var deck = sock.getDeck();
 						if (etgutil.decklength(deck) < 9 || etgutil.decklength(adeck) < 9) {
-							require("./Editor")();
+							props.doNav(require("./Editor"));
 							return;
 						}
-						const gameData = { deck: adeck, urdeck: deck, seed: util.randint(), foename: "Test", cardreward: "",
-							p2hp:info.curhp, p2markpower:info.mark, p2drawpower:info.draw };
-						require("./Match")(gameData, true);
+						const gameData = mkGame({ deck: adeck, urdeck: deck, seed: util.randint(), foename: "Test", cardreward: "",
+							p2hp:info.curhp, p2markpower:info.mark, p2drawpower:info.draw, ai: true });
+						props.doNav(require("./Match"), gameData);
 					}
 				}),
 				h('span', { className: 'ico e' + mark, style: { position: 'absolute', left: '66px', top: 200+y+'px' } })
@@ -85,7 +90,12 @@ module.exports = function(props) {
 					top: 268+i*292+'px',
 				},
 				onClick: function(){
-					require("./Editor")(props, props[uocard>6999?"B":"A"] || {}, uocard, true);
+					props.doNav(require("./Editor"), {
+						adeck: (props[uocard>6999?"B":"A"] || {}).deck,
+						acard: Cards.Codes[uocard],
+						ainfo: {},
+						startempty: true,
+					});
 				}
 			}));
 			children.push(h(Components.Card, { x: 734, y: 8+i*292, code: uocard }));

@@ -61,9 +61,6 @@ module.exports = class Editor extends preact.Component {
 				deck.splice(i, 1);
 			}
 		}
-		if (this.props.acard) {
-			deck.unshift(props.acard, props.acard, props.acard, props.acard, props.acard);
-		}
 		return {mark: mark, deck: deck};
 	}
 
@@ -99,6 +96,10 @@ module.exports = class Editor extends preact.Component {
 					}
 				}
 			}
+		}
+		if (this.props.acard) {
+			const code = this.props.acard.code;
+			sortedDeck.unshift(code, code, code, code, code);
 		}
 		let deckimportctrl;
 		function sumCardMinus(code){
@@ -174,33 +175,16 @@ module.exports = class Editor extends preact.Component {
 					const newval = self.state.arattr[name] + x;
 					if (
 						newval >= (data.min || 0) &&
-						!data.max || newval <= data.max &&
-						sumscore - self.state.arattr[name] + newval <= arpts
+						(!data.max || newval <= data.max) &&
+						sumscore + (newval - self.state.arattr[name]) * artable[name].cost <= arpts
 					) {
-						self.setState({ [name]: newval })
+						self.setState({ arattr: Object.assign({}, self.state.arattr, { [name]: newval })});
 					}
 				}
 			}
 			y = 128+y*20+'px';
 			var data = artable[name];
 			editorui.push(
-				h('div', {
-					style: {
-						position: 'absolute',
-						left: '4px',
-						top: y+'px',
-					},
-				}, name),
-				h('input', {
-					type: 'button',
-					value: '-',
-					onClick: mkmodattr(-(data.incr || 1)),
-				}),
-				h('input', {
-					type: 'button',
-					value: '+',
-					onClick: mkmodattr(data.incr || 1),
-				}),
 				h('div', {
 					style: {
 						position: 'absolute',
@@ -252,11 +236,11 @@ module.exports = class Editor extends preact.Component {
 					type: 'button',
 					value: 'Save & Exit',
 					onClick: function() {
-						if (self.state.deck.length < 35 || sumscore>arpts) {
+						if (self.state.deck.length < 30 || sumscore>arpts) {
 							return chat("35 cards required before submission", "System");
 						}
 						const data = Object.assign({
-							d: etgutil.encoderaw(self.state.deck.slice(5)) + etgutil.toTrueMarkSuffix(self.state.mark),
+							d: etgutil.encoderaw(self.state.deck) + etgutil.toTrueMarkSuffix(self.state.mark),
 							lv: aupped,
 						}, self.state.arattr);
 						if (!self.props.startempty){
@@ -411,10 +395,15 @@ module.exports = class Editor extends preact.Component {
 		}
 		const decksprite = h(Components.DeckDisplay, {
 			onMouseOver: function(i, code) { return setCardArt(code); },
-			onClick: function(i, code) {
+			onClick: function(_, code) {
 				if (!self.props.acard || code != self.props.acard.code) {
 					const newdeck = self.state.deck.slice();
-					newdeck.splice(i, 1);
+					for (let i=0; i<newdeck.length; i++) {
+						if (newdeck[i] == code) {
+							newdeck.splice(i, 1);
+							break;
+						}
+					}
 					self.setState({ deck: newdeck });
 				}
 			},
@@ -442,7 +431,7 @@ module.exports = class Editor extends preact.Component {
 		const cardArt = h(Components.Card, { x: 734, y: 8, card: this.state.card });
 		editorui.push(decksprite, cardsel, cardArt);
 		var decknamectrl;
-		if (!self.props.arena){
+		if (!self.props.acard){
 			if (sock.user){
 				const deckname = h('input', {
 					id: 'deckname',
