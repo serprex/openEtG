@@ -98,8 +98,8 @@ module.exports = class Editor extends preact.Component {
 			}
 		}
 		if (this.props.acard) {
-			const code = this.props.acard.code;
-			sortedDeck.unshift(code, code, code, code, code);
+			const acode = this.props.acard.code;
+			sortedDeck.unshift(acode, acode, acode, acode, acode);
 		}
 		let deckimportctrl;
 		function sumCardMinus(code){

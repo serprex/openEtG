@@ -260,7 +260,8 @@ class CardSelector extends Component {
 				}, Cards.cardCmp, this.state.shiny && !this.props.filterboth);
 			const countTexts = [];
 			for (let j=0; j<column.length; j++) {
-				const y = 272+j*19, card = column[j], code = card.code;
+				const y = 272+j*19, card = column[j];
+				let code = card.code;
 				children.push(h(CardImage, {
 					x: x, y: y,
 					card: card,
