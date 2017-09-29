@@ -11,7 +11,7 @@ const px = require("../px"),
 function sendChallenge(foe) {
 	var deck = sock.getDeck();
 	if (etgutil.decklength(deck) < (sock.user ? 31 : 9)) {
-		require("./Editor")();
+		px.doNav(require("./Editor"));
 		return;
 	}
 	var gameData = {};
