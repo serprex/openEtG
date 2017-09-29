@@ -795,6 +795,10 @@ module.exports = class Match extends preact.Component {
 		px.view({});
 	}
 
+	componentWillReceiveProps(props) {
+		startMatch(props.game, props.data, props.doNav);
+	}
+
 	render() {
 		return null;
 	}
