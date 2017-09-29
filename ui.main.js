@@ -7,7 +7,6 @@ const muteset = {},
 	RngMock = require("./RngMock"),
 	options = require("./options"),
 	userutil = require("./userutil"),
-	viewsLogin = require("./views/Login"),
 	mkGame = require('./mkGame');
 var guestname, muteall, lastError = 0;
 window.onerror = function(){
@@ -137,7 +136,7 @@ sock.et.onmessage = function(msg){
 	var func = sockEvents[data.x] || px.getCmd(data.x);
 	if (func) func.call(this, data);
 }
-preact.render(preact.h(require('./views/App'), { view: viewsLogin }), document.body);
+preact.render(preact.h(require('./views/App'), { view: require("./views/Login") }), document.body);
 if (options.preart) sock.emit("cardart");
 function chatmute(){
 	chat((muteall?"You have chat muted. ":"") + "Muted: " + Object.keys(muteset).join(", "), "System");

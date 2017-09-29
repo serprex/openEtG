@@ -7,35 +7,38 @@
 <script>"use strict";
 	window.PIXI=require("./pixi");
 	require.f("views/Login",function(m){
-		var px = require("./px");
-		var dom = require("./dom");
-		var gfx = require("./gfx");
-		var sock = require("./sock");
-		var audio = require("./audio");
+		const px = require("./px"),
+			dom = require("./dom"),
+			gfx = require("./gfx"),
+			sock = require("./sock"),
+			audio = require("./audio");
 		m.exports=function(){
+			function doNav(mod) {
+				document.body.removeChild(document.getElementById('loggingin'));
+				preact.render(preact.h(require('./views/App'), { view: require(mod) }), document.body);
+			}
 			if (gfx.load) {
 				gfx.load(function(progress){
 				}, function(){
 					audio.playMusic("openingMusic");
-					if (sock.user || sandbox) require("./views/MainMenu")();
+					if (sock.user || sandbox) ;
 				});
 			}
 			var sandbox = kong.services.isGuest();
 			if (sandbox && gfx.loaded){
-				return require("./views/MainMenu")();
+				doNav("./views/MainMenu");
 			} else {
 				sock.emit("konglogin", {u:kong.services.getUserId(),g:kong.services.getGameAuthToken()});
 				px.view({
-					dom:dom.div([0, 0, "Logging in.."]),
 					cmds:{
 						login:function(data){
 							if (!data.err){
 								delete data.x;
 								sock.user = data;
 								if (!sock.user.accountbound && !sock.user.pool){
-									require("./views/ElementSelect")();
+									doNav("./views/ElementSelect");
 								}else if (gfx.loaded){
-									require("./views/MainMenu")();
+									doNav("./views/MainMenu");
 								}
 							}else{
 								alert(data.err);
@@ -63,4 +66,4 @@
 	<textarea id="chatinput" placeholder="Chat"></textarea>
 </div>
 <canvas id="leftpane" width=900 height=600></canvas>
-<div id="app"></div>
+<div id='loggingin'>Logging in..</div>
