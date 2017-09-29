@@ -2,6 +2,7 @@ const px = require("../px"),
 	dom = require("../dom"),
 	sock = require("../sock"),
 	util = require("../util"),
+	mkGame = require('../mkGame'),
 	etgutil = require("../etgutil"),
 	options = require("../options"),
 	Components = require('../Components'),
@@ -41,13 +42,13 @@ module.exports = class Challenge extends preact.Component {
 			if (!options.aideck) return;
 			var deck = sock.getDeck();
 			if (etgutil.decklength(deck) < 9 || etgutil.decklength(options.aideck) < 9) {
-				require("./Editor")();
+				self.props.doNav(require("./Editor"));
 				return;
 			}
-			var gameData = { deck: options.aideck, urdeck: deck, seed: util.randint(), foename: "Custom", cardreward: "" };
+			var gameData = { deck: options.aideck, urdeck: deck, seed: util.randint(), foename: "Custom", cardreward: "", ai: true };
 			options.parsepvpstats(gameData);
 			options.parseaistats(gameData);
-			require("./Match")(gameData, true);
+			self.props.doNav(require("./Match"), mkGame(gameData));
 		}
 		function maybeChallenge(e) {
 			e.cancelBubble = true;

@@ -7,7 +7,7 @@ const px = require("../px"),
 	RngMock = require("../RngMock"),
 	Components = require('../Components'),
 	h = preact.h;
-function mkDaily(type) {
+function mkDaily(doNav, type) {
 	if (type < 3) {
 		return function() {
 			const gamedata = mkAi.mkAi(type == 1 ? 0 : 2, type)(), game = gamedata.game;
@@ -18,7 +18,7 @@ function mkDaily(type) {
 				game.addData(dataNext);
 				game.dataNext = dataNext;
 			}
-			mkAi.run(gamedata);
+			mkAi.run(doNav, gamedata);
 		}
 	}
 	else {
@@ -28,7 +28,7 @@ function mkDaily(type) {
 				game.addonreward = type == 3 ? 90 : 200;
 				sock.userExec("donedaily", { daily: type });
 			}
-			mkAi.run(gamedata);
+			mkAi.run(doNav, gamedata);
 		}
 	}
 }
@@ -53,7 +53,7 @@ module.exports = class Colosseum extends preact.Component {
 						left: '50px',
 						top: 100+30*i+'px',
 					},
-					onClick:mkDaily(i),
+					onClick:mkDaily(this.props.doNav, i),
 				}));
 			}
 			children.push(h('span', { style: { position: 'absolute', left: '130px', top: 100+30*i+'px' }},
@@ -67,7 +67,7 @@ module.exports = class Colosseum extends preact.Component {
 				onClick: function(){
 					const nymph = etg.NymphList[RngMock.upto(12)+1];
 					sock.userExec("donedaily", {daily: 6, c: nymph});
-					self.doNav(require('./MainMenu'), { nymph: nymph });
+					self.props.doNav(require('./MainMenu'), { nymph: nymph });
 				}
 			}), h('span', { style: { position: 'absolute', left: '130px', top: '280px' }}, "You successfully completed all tasks."));
 		}

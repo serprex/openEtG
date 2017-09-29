@@ -55,20 +55,15 @@ module.exports = class ArenaTop extends preact.Component {
 				const cname = h('span', {
 					className: 'atoptext',
 					onMouseEnter: function(e) {
-						dom.svgToSvg(this.svg, svg.card(card.code));
-						this.svg.style.left = e.clientX+4+'px';
-						this.svg.style.top = e.clientY+4+'px';
-						this.svg.style.display = '';
+						dom.svgToSvg(self.svg, svg.card(card.code));
+						self.svg.style.left = e.clientX+4+'px';
+						self.svg.style.top = e.clientY+4+'px';
+						self.svg.style.display = '';
 					},
 					onMouseLeave: function() {
-						this.svg.style.display = 'none';
+						self.svg.style.display = 'none';
 					},
 				}, card.name);
-				cname.attributes.onMouseEnter = function(e){
-				};
-				cname.attributes.onMouseLeave = function(){
-					s.style.display = "none";
-				};
 				lic.push(cname);
 				return h("li", { className: i != info.length-1 && 'underline', children: lic });
 			}),

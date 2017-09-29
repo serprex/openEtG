@@ -97,7 +97,7 @@ function startMatch(game, gameData, doNav) {
 							const newgame = mkAi.mkAi(game.level, true)();
 							newgame.game.addData(data);
 							newgame.game.dataNext = data;
-							mkAi.run(newgame);
+							mkAi.run(doNav, newgame);
 							return;
 						}
 						else {
