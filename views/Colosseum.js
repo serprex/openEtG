@@ -10,22 +10,22 @@ const px = require("../px"),
 function mkDaily(doNav, type) {
 	if (type < 3) {
 		return function() {
-			const gamedata = mkAi.mkAi(type == 1 ? 0 : 2, type)(), game = gamedata.game;
-			if (game){
+			const gamedata = mkAi.mkAi(type == 1 ? 0 : 2, type)();
+			if (gamedata){
 				const dataNext = type == 1 ?
 					{ goldreward: 200, endurance: 2, cost: 0, daily: 1, cardreward: "", noheal: true} :
 					{ goldreward: 500, endurance: 1, cost: 0, daily: 2, cardreward: "" };
-				game.addData(dataNext);
-				game.dataNext = dataNext;
+				gamedata.game.addData(dataNext);
+				gamedata.game.dataNext = dataNext;
 			}
 			mkAi.run(doNav, gamedata);
 		}
 	}
 	else {
 		return function() {
-			const gamedata = mkAi.mkPremade(type == 3 ? 1 : 3, type)(), game = gamedata.game;
-			if (game){
-				game.addonreward = type == 3 ? 90 : 200;
+			const gamedata = mkAi.mkPremade(type == 3 ? 1 : 3, type)();
+			if (gamedata){
+				gamedata.game.addonreward = type == 3 ? 90 : 200;
 				sock.userExec("donedaily", { daily: type });
 			}
 			mkAi.run(doNav, gamedata);
