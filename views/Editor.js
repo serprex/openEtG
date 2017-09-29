@@ -110,7 +110,7 @@ module.exports = class Editor extends preact.Component {
 			return sum;
 		}
 		function setCardArt(code){
-			self.setState({card: Cards.Codes[code]});
+			if (!self.state.card || self.state.card.code != code) self.setState({card: Cards.Codes[code]});
 		}
 		function quickDeck(number) {
 			return function(e) {
@@ -141,6 +141,7 @@ module.exports = class Editor extends preact.Component {
 			if (!x) return;
 			saveDeck();
 			sock.user.selectedDeck = x;
+			options.deck = sock.getDeck();
 			self.setState(self.processDeck(etgutil.decodedeck(sock.getDeck())));
 		}
 		function importDeck(){
@@ -434,7 +435,6 @@ module.exports = class Editor extends preact.Component {
 		if (!self.props.acard){
 			if (sock.user){
 				const deckname = h('input', {
-					id: 'deckname',
 					placeholder: 'Name',
 					value: sock.user.selectedDeck,
 					ref: function(ctrl) {
@@ -472,8 +472,10 @@ module.exports = class Editor extends preact.Component {
 					deckimportctrl = ctrl;
 					if (ctrl) {
 						options.register('deck', ctrl);
-						ctrl.focus();
-						ctrl.setSelectionRange(0, 999);
+						if (!self.firstRender) {
+							ctrl.setSelectionRange(0, 999);
+							self.firstRender = true;
+						}
 					}
 				},
 				onClick: function(e) { e.target.setSelectionRange(0, 999) },
