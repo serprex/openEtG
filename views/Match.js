@@ -12,7 +12,9 @@ const px = require("../px"),
 	Effect = require("../Effect"),
 	Skills = require("../Skills"),
 	etgutil = require("../etgutil"),
-	aiSearch = require("../ai/search");
+	aiSearch = require("../ai/search"),
+	h = preact.h;
+
 const redhor = new Uint16Array([
 	12, 0, 900,
 	144, 145, 796,
@@ -26,7 +28,7 @@ const redhor = new Uint16Array([
 	754, 301, 600,
 	796, 12, 301,
 ]);
-function startMatch(game, gameData, doNav) {
+function startMatch(self, game, gameData, doNav) {
 	if (sock.trade){
 		sock.userEmit("canceltrade");
 		delete sock.trade;
@@ -366,16 +368,6 @@ function startMatch(game, gameData, doNav) {
 				ui.reflectPos(hpxy[j]);
 				ui.reflectPos(playerOverlay[j]);
 				playerOverlay[j].y += 15;
-			}
-			var quantaxy = [j ? 792 : 0, j ? 106 : 308];
-			for (var k = 1;k < 13;k++) {
-				quantatext[j][k-1] = dom.text("");
-				quantatext[j][k-1].style.fontSize = "16px";
-				quantatext[j][k-1].style.pointerEvents = "none";
-				var quantaicon = document.createElement("span");
-				quantaicon.className = "ico e"+k;
-				dom.add(div, [quantaxy[0] + ((k & 1) ? 32 : 86), quantaxy[1] + Math.floor((k - 1) / 2) * 32 + 4, quantatext[j][k-1]],
-					[quantaxy[0] + ((k & 1) ? 0 : 54), quantaxy[1] + Math.floor((k - 1) / 2) * 32, quantaicon]);
 			}
 			px.setClick(playerOverlay[j], function() {
 				if (game.phase == etg.PlayPhase && game.targeting && game.targeting.filter(game.players(_j))) {
@@ -745,8 +737,16 @@ function startMatch(game, gameData, doNav) {
 			} else shiesprite[j].visible = false;
 			marksprite[j].className = "ico e"+pl.mark;
 			marksprite[j].textContent = pl.markpower != 1 ? pl.markpower : "";
+			let newqtext = null;
+			const qt = j ? self.state.quantatext1 : self.state.quantatext0;
 			for (var i = 1;i < 13;i++) {
-				quantatext[j][i-1].text = pl.quanta[i] || "";
+				if (qt[i-1] != pl.quanta[i] || '') {
+					if (!newqtext) newqtext = qt.slice();
+					newqtext[i-1] = pl.quanta[i] || '';
+				}
+			}
+			if (newqtext) {
+				self.setState({ ['quantatext'+j]: newqtext });
 			}
 			fgfx.beginFill(0);
 			fgfx.drawRect(playerOverlay[j].x - 41, playerOverlay[j].y - 25, 82, 16);
@@ -785,10 +785,14 @@ function startMatch(game, gameData, doNav) {
 module.exports = class Match extends preact.Component {
 	constructor(props) {
 		super(props);
+		this.state = {
+			quantatext0: ['','','','','','','','','','','',''],
+			quantatext1: ['','','','','','','','','','','',''],
+		};
 	}
 
 	componentDidMount() {
-		startMatch(this.props.game, this.props.data, this.props.doNav);
+		startMatch(this, this.props.game, this.props.data, this.props.doNav);
 	}
 
 	componentWillUnmount() {
@@ -796,10 +800,34 @@ module.exports = class Match extends preact.Component {
 	}
 
 	componentWillReceiveProps(props) {
-		startMatch(props.game, props.data, props.doNav);
+		startMatch(this, props.game, props.data, props.doNav);
 	}
 
 	render() {
-		return null;
+		const self = this, children = [];
+		for (let j=0; j<2; j++) {
+			const qx = j ? 792 : 0, qy = j ? 106 : 308,
+				qt = j ? self.state.quantatext1 : self.state.quantatext0;
+			for (var k = 1;k < 13; k++) {
+				children.push(h('span', {
+					className: 'ico e'+k,
+					style: {
+						position: 'absolute',
+						left: qx + ((k & 1) ? 0 : 54) + 'px',
+						top: qy + Math.floor((k - 1) / 2) * 32 + 'px',
+					},
+				}), h('span', {
+					style: {
+						position: 'absolute',
+						left: qx + ((k & 1) ? 32 : 86) + 'px',
+						top: qy + Math.floor((k - 1) / 2) * 32 + 4 + 'px',
+						fontSize: '16px',
+						pointerEvents: 'none',
+					},
+				}, qt[k-1]));
+			}
+		}
+
+		return h('div', { children: children });
 	}
 }
