@@ -77,57 +77,6 @@ function setGrayBorderShader(renderer, sprite, card){
 	if (!card.upped && PIXI.gl) sprite.shader = grayShader || (grayShader = Shaders.DarkGrayScale(renderer));
 	return sprite;
 }
-function makeArt(code, art, rend) {
-	if (!rend) rend = require("./px").mkRenderTexture(128, 256);
-	var template = new PIXI.Container();
-	var card = Cards.Codes[code];
-	var cardHeader = new PIXI.Sprite(exports.cardBorders[card.element+(card.upped?13:0)]);
-	template.addChild(cardHeader);
-	var cardBack = new PIXI.Sprite(exports.cardBacks[card.element+(card.upped?13:0)]);
-	cardBack.position.y = 148;
-	template.addChild(cardBack);
-	var typemark = new PIXI.Sprite(exports.t[card.type]);
-	typemark.anchor.set(1, 1);
-	typemark.position.set(128, 252);
-	template.addChild(typemark);
-	var rarity = new PIXI.Sprite(exports.r[card.rarity]);
-	rarity.anchor.set(1, 1);
-	rarity.position.set(102, 252);
-	template.addChild(rarity);
-	var graphics = new PIXI.Graphics();
-	graphics.beginFill(ui.maybeLighten(card));
-	graphics.drawRect(0, 20, 128, 128);
-	template.addChild(graphics);
-	if (art) {
-		var artspr = setShinyShader(rend.renderer, new PIXI.Sprite(art), card);
-		artspr.position.set(0, 20);
-		template.addChild(artspr);
-	}
-	if (card.shiny){
-		template.addChild(setGrayBorderShader(rend.renderer, new PIXI.Sprite(exports.shinyborder), card));
-	}
-	var nametag = new PIXI.Sprite(Text(card.name, 12, card.upped ? "#000" : "#fff"));
-	nametag.position.set(2, 2);
-	template.addChild(nametag);
-	if (card.cost) {
-		var text = new PIXI.Sprite(Text(card.cost, 12, card.upped ? "#000" : "#fff"));
-		text.anchor.x = 1;
-		text.position.set(rend.width-3, 2);
-		template.addChild(text);
-		if (card.costele != card.element) {
-			var eleicon = new PIXI.Sprite(exports.e[card.costele]);
-			eleicon.position.set(rend.width-text.width-5, 10);
-			eleicon.anchor.set(1, .5);
-			eleicon.scale.set(.5, .5);
-			template.addChild(eleicon);
-		}
-	}
-	var infospr = new PIXI.Sprite(exports.getTextImage(card.info(), 11, card.upped ? "#000" : "#fff", "", rend.width-4));
-	infospr.position.set(2, 150);
-	template.addChild(infospr);
-	rend.render(template);
-	return rend;
-}
 function artFactory(realcb){
 	var cache = {};
 	return function(code){
@@ -363,7 +312,6 @@ if (typeof PIXI !== "undefined"){
 	exports.load = load;
 	exports.getHandImage = exports.getPermanentImage = exports.getCreatureImage = getInstImage(.5);
 	exports.getWeaponShieldImage = getInstImage(5/8);
-	exports.getArt = artFactory(makeArt);
 	exports.getCardImage = getCardImage;
 	exports.getAbilityImage = getAbilityImage;
 	exports.Text = Text;

@@ -13,6 +13,7 @@ const px = require("../px"),
 	Skills = require("../Skills"),
 	etgutil = require("../etgutil"),
 	aiSearch = require("../ai/search"),
+	Components = require('../Components'),
 	h = preact.h;
 
 const redhor = new Uint16Array([
@@ -392,9 +393,6 @@ function startMatch(self, game, gameData, doNav) {
 	Effect.register(anims);
 	var foeplays = new PIXI.Container();
 	gameui.addChild(foeplays);
-	var cardart = new PIXI.Sprite(gfx.nopic);
-	cardart.anchor.set(.5, 0);
-	gameui.addChild(cardart);
 	var infobox = dom.text("");
 	infobox.className = "infobox";
 	infobox.style.display = "none";
@@ -589,13 +587,13 @@ function startMatch(self, game, gameData, doNav) {
 			}
 		}
 		if (cardartcode) {
-			cardart.texture = gfx.getArt(cardartcode);
-			cardart.visible = true;
-			cardart.position.set(cardartx || 654, px.mouse.y > 300 ? 44 : 300);
+			self.setState({ hovercode: cardartcode, hoverx: (cardartx || 654)-32, hovery: px.mouse.y > 300 ? 44 : 300 });
 			if (px.mouse.y < 300) marksprite[0].style.display = cardartx >= 670 && cardartx <= 760 ? "none" : "";
 			else marksprite[1].style.display = cardartx >= 140 && cardartx <= 230 ? "none" : "";
 		} else {
-			cardart.visible = false;
+			if (self.state.hovercode) {
+				self.setState({ hovercode: 0 });
+			}
 			for(var j=0; j<2; j++){
 				marksprite[j].style.display = "";
 			}
@@ -826,6 +824,13 @@ module.exports = class Match extends preact.Component {
 					},
 				}, qt[k-1]));
 			}
+		}
+		if (self.state.hovercode) {
+			children.push(h(Components.Card, {
+				x: self.state.hoverx,
+				y: self.state.hovery,
+				code: self.state.hovercode,
+			}));
 		}
 
 		return h('div', { children: children });
