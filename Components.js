@@ -156,6 +156,8 @@ exports.Card = function(props) {
 			position: 'absolute',
 			left: props.x + 'px',
 			top: props.y + 'px',
+			pointerEvents: 'none',
+			zIndex: '4',
 		},
 		dangerouslySetInnerHTML: { __html: svgcard.slice(svgcard.indexOf('>')+1,-6) },
 	});

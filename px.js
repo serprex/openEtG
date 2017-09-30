@@ -7,10 +7,9 @@ document.addEventListener("mousemove", function(e){
 		lastmove = e.timeStamp;
 	}
 });
-var audio = require("./audio");
-var renderer = new PIXI.autoDetectRenderer(900, 600, {view:document.getElementById("leftpane"), transparent:true});
-var noStage = {}, curStage = noStage;
-var interman = require("./InteractionManager");
+const renderer = new PIXI.autoDetectRenderer(900, 600, {view:document.getElementById("leftpane"), transparent:true}), noStage = {};
+var curStage = noStage;
+const interman = require("./InteractionManager");
 interman.init(noStage, renderer);
 exports.mouse = interman.mouse;
 function animate() {
@@ -52,13 +51,4 @@ exports.setInteractive = function() {
 	for (var i = 0;i < arguments.length;i++) {
 		arguments[i].interactive = true;
 	}
-}
-exports.mkView = function(mouseover){
-	var view = new PIXI.Container();
-	view.interactive = true;
-	if (mouseover){
-		view.hitArea = new PIXI.math.Rectangle(0, 0, 900, 600);
-		view.mouseover = mouseover;
-	}
-	return view;
 }

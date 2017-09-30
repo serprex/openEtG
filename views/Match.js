@@ -43,8 +43,13 @@ const svgbg = (function() {
 		}
 		redren.push(h('path', { d: path, stroke: ['#111', '#6a2e0d', '#8a3e1d'][j], strokeWidth: '3' }));
 	}
-	return h('svg', { width: '900', height: '600', children: redren });
+	return h('svg', { width: '900', height: '600', style: { position: 'absolute', left: '0', top: '0', zIndex: '-8', pointerEvents: 'none' }, children: redren });
 })();
+
+const floodsvg = h('svg', { width: '900', height: '600', style: { position: 'absolute', left: '0', top: '0', zIndex: '1', pointerEvents: 'none' } },
+	h('path', { d: 'M149 146l644 0l0 64l-400 0l0 64l-244 0zM107 454l644 0l0-128l-244 0l0 64l-400 0z', fill: '#0486' })
+);
+
 function startMatch(self, game, gameData, doNav) {
 	if (sock.trade){
 		sock.userEmit("canceltrade");
@@ -167,13 +172,6 @@ function startMatch(self, game, gameData, doNav) {
 	cloakgfx.beginFill(0);
 	cloakgfx.drawRect(130, 20, 660, 280);
 	gameui.addChild(cloakgfx);
-	var floodgfx = new PIXI.Graphics();
-	floodgfx.beginFill(0x003F7F, .375);
-	floodgfx.drawRect(149, 146, 644, 64);
-	floodgfx.drawRect(149, 210, 244, 64);
-	floodgfx.drawRect(107, 390, 644, 64);
-	floodgfx.drawRect(507, 326, 244, 64);
-	gameui.addChild(floodgfx);
 	var endturn = dom.button("Accept Hand", function(){endClick()});
 	var cancel = dom.button("Mulligan", cancelClick);
 	var resign = dom.button("Resign", function() {
@@ -539,7 +537,7 @@ function startMatch(self, game, gameData, doNav) {
 			}
 		}
 		var cardartcode, cardartx;
-		floodgfx.visible = false;
+		let floodvisible = false;
 		infobox.style.display = "none";
 		if (!cloakgfx.visible){
 			foeplays.children.forEach(function(foeplay){
@@ -686,7 +684,7 @@ function startMatch(self, game, gameData, doNav) {
 			}
 			for (var i = 0;i < 16;i++) {
 				var pr = pl.permanents[i];
-				if (pr && pr.status.get("flooding")) floodgfx.visible = true;
+				if (pr && pr.status.get("flooding")) floodvisible = true;
 				if (pr && !(j == 1 && cloakgfx.visible && !pr.status.get("cloak"))) {
 					permsprite[j][i].texture = gfx.getPermanentImage(pr.card.code);
 					permsprite[j][i].visible = true;
@@ -770,6 +768,7 @@ function startMatch(self, game, gameData, doNav) {
 				fgfx.drawRect(cursor.position.x, cursor.position.y, cursor.width, cursor.height);
 			}else drawTgting(cursor);
 		}
+		if (floodvisible !== self.state.flooded) self.setState({ flooded: floodvisible });
 		Effect.next(cloakgfx.visible);
 	}
 	gameStep();
@@ -784,6 +783,7 @@ module.exports = class Match extends preact.Component {
 	constructor(props) {
 		super(props);
 		this.state = {
+			flooded: false,
 			quantatext0: ['','','','','','','','','','','',''],
 			quantatext1: ['','','','','','','','','','','',''],
 		};
@@ -803,6 +803,7 @@ module.exports = class Match extends preact.Component {
 
 	render() {
 		const self = this, children = [svgbg];
+		if (self.state.flooded) children.push(floodsvg);
 		for (let j=0; j<2; j++) {
 			const qx = j ? 792 : 0, qy = j ? 106 : 308,
 				qt = j ? self.state.quantatext1 : self.state.quantatext0;
