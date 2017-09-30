@@ -101,7 +101,6 @@ module.exports = class Editor extends preact.Component {
 			const acode = this.props.acard.code;
 			sortedDeck.unshift(acode, acode, acode, acode, acode);
 		}
-		let deckimportctrl;
 		function sumCardMinus(code){
 			var sum = 0;
 			for (var i=0; i<4; i++){
@@ -141,7 +140,6 @@ module.exports = class Editor extends preact.Component {
 			if (!x) return;
 			saveDeck();
 			sock.user.selectedDeck = x;
-			options.deck = sock.getDeck();
 			self.setState(self.processDeck(etgutil.decodedeck(sock.getDeck())));
 		}
 		function importDeck(){
@@ -286,6 +284,7 @@ module.exports = class Editor extends preact.Component {
 				value: 'Save & Exit',
 				onClick: function() {
 					if (sock.user) saveDeck(true);
+					else options.deck = etgutil.encodedeck(self.state.deck) + etgutil.toTrueMarkSuffix(self.state.mark);
 					self.props.doNav(require('./MainMenu'));
 				},
 				style: {
@@ -469,7 +468,6 @@ module.exports = class Editor extends preact.Component {
 					width: '190px',
 				},
 				ref: function(ctrl) {
-					deckimportctrl = ctrl;
 					if (ctrl) {
 						options.register('deck', ctrl);
 						if (!self.firstRender) {

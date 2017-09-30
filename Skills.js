@@ -1147,7 +1147,7 @@ neuroify:function(c,t){
 nightmare:function(c,t){
 	if (!c.owner.foe.sanctuary){
 		Effect.mkText("Nightmare", t);
-		c.owner.dmg(-c.owner.foe.spelldmg(16-c.owner.foe.hand.length*2));
+		c.owner.dmg(-c.owner.foe.spelldmg((8-c.owner.foe.hand.length)*(c.card.upped?2:1)));
 		for(var i = c.owner.foe.hand.length; i<8; i++){
 			c.owner.foe.addCard(t.card);
 		}

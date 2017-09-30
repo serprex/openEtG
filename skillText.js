@@ -238,7 +238,7 @@ var data = {
 	mutant:"Enter with mutant abilities",
 	neuro:"Apply poison on hit, also inflicting neurotoxin. Neurotoxin applies poison per card played by victim. Throttled",
 	neuroify:"Gives foe neurotoxin status if they are already poisoned",
-	nightmare:"Fill foe's hand with copies of target creature's card. Drain 2HP per added card",
+	nightmare:function(c) { return "Fill foe's hand with copies of target creature's card. Drain " + (c.upped?"2":"1") + "HP per added card"; },
 	nightshade:"Target creatures becomes nocturnal, gains 5|5, & has their active cleared",
 	nova:"Produce 1 quanta of each element. Increment singularity danger by 2. Summon singularity if danger exceeds 5",
 	nova2:"Produce 2 quanta of each element. Increment singularity danger by 3. Summon singularity if danger exceeds 5",
