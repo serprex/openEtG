@@ -147,9 +147,6 @@ function getSlotImage(card, code){
 		return caimgcache[code] = rend;
 	}
 }
-function getAbilityImage(ability) {
-	return getSlotImage(ability, JSON.stringify(ability));
-}
 function getCardImage(code) {
 	return getSlotImage(Cards.Codes[code], code);
 }
@@ -313,6 +310,5 @@ if (typeof PIXI !== "undefined"){
 	exports.getHandImage = exports.getPermanentImage = exports.getCreatureImage = getInstImage(.5);
 	exports.getWeaponShieldImage = getInstImage(5/8);
 	exports.getCardImage = getCardImage;
-	exports.getAbilityImage = getAbilityImage;
 	exports.Text = Text;
 }

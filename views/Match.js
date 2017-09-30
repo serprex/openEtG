@@ -86,10 +86,6 @@ const activeInfo = {
 };
 
 function startMatch(self, game, gameData, doNav) {
-	if (sock.trade){
-		sock.userEmit("canceltrade");
-		delete sock.trade;
-	}
 	function drawTgting(spr, col) {
 		fgfx.drawRect(spr.position.x - spr.width / 2, spr.position.y - spr.height / 2, spr.width, spr.height);
 	}
@@ -176,7 +172,7 @@ function startMatch(self, game, gameData, doNav) {
 				if (!game.ai) sock.emit("endturn", {bits: discard});
 				game.player1.endturn(discard);
 				game.targeting = null;
-				foeplays.removeChildren();
+				self.setState({ foeplays: [] });
 			}
 		}
 	}
@@ -399,8 +395,6 @@ function startMatch(self, game, gameData, doNav) {
 	var anims = new PIXI.Container();
 	gameui.addChild(anims);
 	Effect.register(anims);
-	var foeplays = new PIXI.Container();
-	gameui.addChild(foeplays);
 	var infobox = dom.text("");
 	infobox.className = "infobox";
 	infobox.style.display = "none";
@@ -481,18 +475,17 @@ function startMatch(self, game, gameData, doNav) {
 	var cmds = {
 		endturn: function(data) {
 			(data.spectate == 1 ? game.player1 : game.player2).endturn(data.bits);
-			if (data.spectate) foeplays.removeChildren();
+			if (data.spectate) self.setState({ foeplays: [] });
 		},
 		cast: function(data) {
-			var bits = data.spectate == 1 ? data.bits^4104 : data.bits, c = game.bitsToTgt(bits & 511), t = game.bitsToTgt((bits >> 9) & 511);
+			const bits = data.spectate == 1 ? data.bits^4104 : data.bits, c = game.bitsToTgt(bits & 511), t = game.bitsToTgt((bits >> 9) & 511);
 			console.log("cast", c.toString(), (t || "-").toString(), bits);
-			var sprite = new PIXI.Sprite(gfx.nopic);
-			sprite.position.set((foeplays.children.length & 7) * 99, (foeplays.children.length >> 3) * 19);
+			let play;
 			if (c.type == etg.Spell){
-				sprite.card = c.card;
+				play = c.card;
 			}
 			else{
-				sprite.card = {
+				play = {
 					element: c.card.element,
 					costele: c.castele,
 					cost: c.cast,
@@ -501,7 +494,7 @@ function startMatch(self, game, gameData, doNav) {
 					shiny: c.card.shiny,
 				};
 			}
-			foeplays.addChild(sprite);
+			self.setState({ foeplays: self.state.foeplays.concat([play]) });
 			c.useactive(t);
 		},
 		foeleft: function(data){
@@ -546,15 +539,11 @@ function startMatch(self, game, gameData, doNav) {
 				cmds.mulligan({draw: require("../ai/mulligan")(game.player2)});
 			}
 		}
-		var cardartcode, cardartx;
+		var cardartcode = 0, cardartx;
 		let floodvisible = false;
 		infobox.style.display = "none";
 		if (!self.state.cloaked){
-			foeplays.children.forEach(function(foeplay){
-				if (foeplay.card instanceof Card && px.hitTest(foeplay)) {
-					cardartcode = foeplay.card.code;
-				}
-			});
+			cardartcode = self.state.foecardcode;
 		}
 		for (var j = 0;j < 2;j++) {
 			var pl = game.players(j);
@@ -595,7 +584,12 @@ function startMatch(self, game, gameData, doNav) {
 			}
 		}
 		if (cardartcode) {
-			self.setState({ hovercode: cardartcode, hoverx: (cardartx || 654)-32, hovery: px.mouse.y > 300 ? 44 : 300 });
+			self.setState({
+				hovercode: cardartcode,
+				hoverx: (cardartx || 654)-32,
+				hovery: px.mouse.y > 300 ? 44 : 300,
+				foecardcode: cardartcode == self.state.foecardcode ? cardartcode : 0,
+			});
 			if (px.mouse.y < 300) marksprite[0].style.display = cardartx >= 670 && cardartx <= 760 ? "none" : "";
 			else marksprite[1].style.display = cardartx >= 140 && cardartx <= 230 ? "none" : "";
 		} else {
@@ -619,11 +613,7 @@ function startMatch(self, game, gameData, doNav) {
 			endturn.text = "Continue";
 			cancel.text = "";
 		}
-		foeplays.children.forEach(function(foeplay){
-			foeplay.texture = foeplay.card instanceof Card ? gfx.getCardImage(foeplay.card.code) : gfx.getAbilityImage(foeplay.card);
-		});
 		const cloaked = game.player2.isCloaked();
-		foeplays.visible = !cloaked;
 		if (cloaked != self.state.cloaked) {
 			self.setState({ cloaked: cloaked });
 		}
@@ -797,13 +787,19 @@ module.exports = class Match extends preact.Component {
 	constructor(props) {
 		super(props);
 		this.state = {
+			cloaked: false,
 			flooded: false,
+			foeplays: [],
 			quantatext0: ['','','','','','','','','','','',''],
 			quantatext1: ['','','','','','','','','','','',''],
 		};
 	}
 
 	componentDidMount() {
+		if (sock.trade){
+			sock.userEmit("canceltrade");
+			delete sock.trade;
+		}
 		startMatch(this, this.props.game, this.props.data, this.props.doNav);
 	}
 
@@ -819,6 +815,25 @@ module.exports = class Match extends preact.Component {
 		const self = this, children = [svgbg];
 		if (self.state.cloaked) children.push(cloaksvg);
 		if (self.state.flooded) children.push(floodsvg);
+		if (!self.state.cloaked) {
+			for(let i=0; i<self.state.foeplays.length; i++) {
+				let play = self.state.foeplays[i];
+				children.push(h(Components.CardImage, {
+					key: 'foeplay' + i,
+					x: (i & 7) * 99,
+					y: (i >> 3) * 19,
+					card: play,
+					onMouseOver: function() {
+						if (play instanceof Card && self.state.foecardcode != play.code) {
+							self.setState({ foecardcode: play.code });
+						}
+					},
+					onMouseOut: function() {
+						self.setState({ foecardcode: 0 });
+					},
+				}));
+			}
+		}
 		for (let j=0; j<2; j++) {
 			const qx = j ? 792 : 0, qy = j ? 106 : 308,
 				qt = j ? self.state.quantatext1 : self.state.quantatext0;
