@@ -16,19 +16,35 @@ const px = require("../px"),
 	Components = require('../Components'),
 	h = preact.h;
 
-const redhor = new Uint16Array([
-	12, 0, 900,
-	144, 145, 796,
-	301, 103, 796,
-	459, 103, 754,
-]), redver = new Uint16Array([
-	103, 301, 600,
-	144, 12, 301,
-	275, 12, 144,
-	624, 459, 600,
-	754, 301, 600,
-	796, 12, 301,
-]);
+const svgbg = (function() {
+	const redhor = new Uint16Array([
+		12, 0, 900,
+		144, 145, 796,
+		301, 103, 796,
+		459, 103, 754,
+	]), redver = new Uint16Array([
+		103, 301, 600,
+		144, 12, 301,
+		275, 12, 144,
+		624, 459, 600,
+		754, 301, 600,
+		796, 12, 301,
+	]);
+	let redren = [];
+	for(let j=0; j<3; j++){
+		let path = '';
+		for (var i=0; i<redhor.length; i+=3){
+			path += 'M'+ redhor[i+1] + ' ' + (redhor[i]-j) +
+				'L' + redhor[i+2] + ' ' + (redhor[i]-j);
+		}
+		for (var i=0; i<redver.length; i+=3){
+			path += 'M'+ (redver[i]+j) + ' ' + redver[i+1] +
+				'L' + (redver[i]+j) + ' ' + redver[i+2];
+		}
+		redren.push(h('path', { d: path, stroke: ['#111', '#6a2e0d', '#8a3e1d'][j], strokeWidth: '3' }));
+	}
+	return h('svg', { width: '900', height: '600', children: redren });
+})();
 function startMatch(self, game, gameData, doNav) {
 	if (sock.trade){
 		sock.userEmit("canceltrade");
@@ -147,17 +163,6 @@ function startMatch(self, game, gameData, doNav) {
 		gameui.hitArea = new PIXI.math.Rectangle(0, 0, 900, 600);
 		gameui.interactive = true;
 	}
-	for(var j=0; j<3; j++){
-		gameui.lineStyle(1, [0x121212, 0x6a2e0d, 0x8a3e1d][j]);
-		for (var i=0; i<redhor.length; i+=3){
-			gameui.moveTo(redhor[i+1], redhor[i]-j);
-			gameui.lineTo(redhor[i+2], redhor[i]-j);
-		}
-		for (var i=0; i<redver.length; i+=3){
-			gameui.moveTo(redver[i]+j, redver[i+1]);
-			gameui.lineTo(redver[i]+j, redver[i+2]);
-		}
-	}
 	var cloakgfx = new PIXI.Graphics();
 	cloakgfx.beginFill(0);
 	cloakgfx.drawRect(130, 20, 660, 280);
@@ -227,13 +232,12 @@ function startMatch(self, game, gameData, doNav) {
 	var shiesprite = new Array(2);
 	var weapsprite = new Array(2);
 	var marksprite = [document.createElement("span"), document.createElement("span")], markspritexy = [];
-	var quantatext = [[], []];
 	var hptext = [new dom.text(""), new dom.text("")], hpxy = [];
 	var playerOverlay = [new PIXI.Sprite(gfx.nopic), new PIXI.Sprite(gfx.nopic)];
 	var handOverlay = [new PIXI.Sprite(gfx.nopic), new PIXI.Sprite(gfx.nopic)];
 	var sabbathOverlay = [document.createElement("span"), document.createElement("span")];
 	var sacrificeOverlay = [new PIXI.Sprite(gfx.sacrifice), new PIXI.Sprite(gfx.sacrifice)];
-	for (var j = 0;j < 2;j++) {
+	for (let j = 0;j < 2;j++) {
 		hptext[j].style.textAlign = "center";
 		hptext[j].style.width = "100px";
 		hptext[j].style.pointerEvents = "none";
@@ -245,137 +249,133 @@ function startMatch(self, game, gameData, doNav) {
 		sabbathOverlay[j].style.display = "none";
 		handOverlay[j].position.set(j ? 3 : 759, j ? 75 : 305);
 		sacrificeOverlay[j].position.set(j ? 800 : 0, j ? 7 : 502);
-		(function(_j) {
-			for (var i = 0;i < 8;i++) {
-				handsprite[j][i] = new PIXI.Sprite(gfx.nopic);
-				handsprite[j][i].position = ui.cardPos(j, i);
-				var handtext = new PIXI.Sprite(gfx.nopic);
-				handtext.position.set(64, 11);
-				handtext.anchor.set(1, 0);
-				handsprite[j][i].addChild(handtext);
-				handtext = new PIXI.Sprite(gfx.nopic);
-				handtext.position.set(0, -1);
-				handsprite[j][i].addChild(handtext);
-				gameui.addChild(handsprite[j][i]);
-				(function(_i) {
-					px.setClick(handsprite[j][i], function() {
-						if (game.phase != etg.PlayPhase) return;
-						var cardinst = game.players(_j).hand[_i];
-						if (cardinst) {
-							if (!_j && discarding) {
-								endClick(_i);
-							} else if (game.targeting) {
-								if (game.targeting.filter(cardinst)) {
-									game.targeting.cb(cardinst);
-								}
-							} else if (!_j && cardinst.canactive()) {
-								if (cardinst.card.type != etg.Spell) {
-									console.log("summoning", _i);
-									if (!game.ai) sock.emit("cast", {bits: game.tgtToBits(cardinst)});
-									cardinst.useactive();
-								} else {
-									game.getTarget(cardinst, cardinst.card.active.cast, function(tgt) {
-										if (!game.ai) sock.emit("cast", {bits: game.tgtToBits(cardinst) | game.tgtToBits(tgt) << 9});
-										cardinst.useactive(tgt);
-									});
-								}
-							}
+		for (let i = 0;i < 8;i++) {
+			handsprite[j][i] = new PIXI.Sprite(gfx.nopic);
+			handsprite[j][i].position = ui.cardPos(j, i);
+			var handtext = new PIXI.Sprite(gfx.nopic);
+			handtext.position.set(64, 11);
+			handtext.anchor.set(1, 0);
+			handsprite[j][i].addChild(handtext);
+			handtext = new PIXI.Sprite(gfx.nopic);
+			handtext.position.set(0, -1);
+			handsprite[j][i].addChild(handtext);
+			gameui.addChild(handsprite[j][i]);
+			handsprite[j][i].click = function() {
+				if (game.phase != etg.PlayPhase) return;
+				var cardinst = game.players(j).hand[i];
+				if (cardinst) {
+					if (!j && discarding) {
+						endClick(i);
+					} else if (game.targeting) {
+						if (game.targeting.filter(cardinst)) {
+							game.targeting.cb(cardinst);
 						}
-					}, false);
-				})(i);
-			}
-			function makeInst(insts, i, pos, scale){
-				if (scale === undefined) scale = 1;
-				var spr = new PIXI.Sprite(gfx.nopic);
-				var statuses = new PIXI.Container();
-				for (var k=0; k<7; k++){
-					var icon = new PIXI.Sprite(gfx.s[k]);
-					icon.alpha = .6;
-					icon.anchor.y = 1;
-					icon.position.set(-34 * scale + [4, 1, 1, 0, 3, 2, 1][k] * 8, 36 * scale);
-					statuses.addChild(icon);
-				}
-				for (var k=0; k<3; k++){
-					var icon = new PIXI.Sprite(gfx.sborder[k]);
-					icon.position.set(-32 * scale, -40 * scale);
-					icon.scale.set(scale, scale);
-					statuses.addChild(icon);
-				}
-				var bubble = new PIXI.Sprite(gfx.protection);
-				bubble.position.set(-40 * scale, -40 * scale);
-				bubble.scale.set(scale, scale);
-				statuses.addChild(bubble);
-				spr.addChild(statuses);
-				var stattext = new PIXI.Sprite(gfx.nopic);
-				stattext.position.set(-32 * scale, -31 * scale);
-				spr.addChild(stattext);
-				var activetext = new PIXI.Sprite(gfx.nopic);
-				activetext.position.set(-32 * scale, -40 * scale);
-				spr.addChild(activetext);
-				spr.anchor.set(.5, .5);
-				spr.position = pos;
-				px.setClick(spr, function() {
-					if (game.phase != etg.PlayPhase) return;
-					var inst = insts ? insts[i] : game.players(_j)[i];
-					if (!inst) return;
-					if (game.targeting && game.targeting.filter(inst)) {
-						game.targeting.cb(inst);
-					} else if (_j == 0 && !game.targeting && inst.canactive()) {
-						game.getTarget(inst, inst.active.cast, function(tgt) {
-							if (!game.ai) sock.emit("cast", {bits: game.tgtToBits(inst) | game.tgtToBits(tgt) << 9});
-							inst.useactive(tgt);
-						});
+					} else if (!j && cardinst.canactive()) {
+						if (cardinst.card.type != etg.Spell) {
+							console.log("summoning", i);
+							if (!game.ai) sock.emit("cast", {bits: game.tgtToBits(cardinst)});
+							cardinst.useactive();
+						} else {
+							game.getTarget(cardinst, cardinst.card.active.cast, function(tgt) {
+								if (!game.ai) sock.emit("cast", {bits: game.tgtToBits(cardinst) | game.tgtToBits(tgt) << 9});
+								cardinst.useactive(tgt);
+							});
+						}
 					}
-				}, false);
-				return spr;
-			}
-			for (var i = 0;i < 23;i++) {
-				creasprite[j][i] = makeInst(game.players(j).creatures, i, ui.creaturePos(j, i));
-			}
-			for (var i = 0;i < 23;i++){
-				gameui.addChild(creasprite[j][j?22-i:i]);
-			}
-			for (var i = 0;i < 16;i++) {
-				permsprite[j][i] = makeInst(game.players(j).permanents, i, ui.permanentPos(j, i));
-			}
-			for (var i = 0;i < 16;i++){
-				gameui.addChild(permsprite[j][j?15-i:i]);
-			}
-			px.setInteractive.apply(null, handsprite[j]);
-			px.setInteractive.apply(null, creasprite[j]);
-			px.setInteractive.apply(null, permsprite[j]);
-			markspritexy[j] = new PIXI.math.Point(740, 470);
-			marksprite[j].style.transform = "translate(-50%,-50%)";
-			marksprite[j].style.textAlign = "center";
-			marksprite[j].style.pointerEvents = "none";
-			marksprite[j].style.fontSize = "18px";
-			marksprite[j].style.textShadow = "2px 2px 1px rgb(0,0,0),2px 2px 2px rgb(0,0,0)";
-			weapsprite[j] = makeInst(null, "weapon", new PIXI.math.Point(670, 508), 5/4);
-			shiesprite[j] = makeInst(null, "shield", new PIXI.math.Point(710, 540), 5/4);
-			if (j){
-				gameui.addChild(shiesprite[j]);
-				gameui.addChild(weapsprite[j]);
-				ui.reflectPos(weapsprite[j]);
-				ui.reflectPos(shiesprite[j]);
-				ui.reflectPos(markspritexy[j]);
-			}else{
-				gameui.addChild(weapsprite[j]);
-				gameui.addChild(shiesprite[j]);
-			}
-			playerOverlay[j].anchor.set(.5, .5);
-			playerOverlay[j].position.set(50, 555);
-			hpxy[j] = new PIXI.math.Point(50, 550);
-			if (j) {
-				ui.reflectPos(hpxy[j]);
-				ui.reflectPos(playerOverlay[j]);
-				playerOverlay[j].y += 15;
-			}
-			px.setClick(playerOverlay[j], function() {
-				if (game.phase == etg.PlayPhase && game.targeting && game.targeting.filter(game.players(_j))) {
-					game.targeting.cb(game.players(_j));
 				}
-			}, false);
-		})(j);
+			};
+		}
+		function makeInst(insts, i, pos, scale){
+			if (scale === undefined) scale = 1;
+			var spr = new PIXI.Sprite(gfx.nopic);
+			var statuses = new PIXI.Container();
+			for (var k=0; k<7; k++){
+				var icon = new PIXI.Sprite(gfx.s[k]);
+				icon.alpha = .6;
+				icon.anchor.y = 1;
+				icon.position.set(-34 * scale + [4, 1, 1, 0, 3, 2, 1][k] * 8, 36 * scale);
+				statuses.addChild(icon);
+			}
+			for (var k=0; k<3; k++){
+				var icon = new PIXI.Sprite(gfx.sborder[k]);
+				icon.position.set(-32 * scale, -40 * scale);
+				icon.scale.set(scale, scale);
+				statuses.addChild(icon);
+			}
+			var bubble = new PIXI.Sprite(gfx.protection);
+			bubble.position.set(-40 * scale, -40 * scale);
+			bubble.scale.set(scale, scale);
+			statuses.addChild(bubble);
+			spr.addChild(statuses);
+			var stattext = new PIXI.Sprite(gfx.nopic);
+			stattext.position.set(-32 * scale, -31 * scale);
+			spr.addChild(stattext);
+			var activetext = new PIXI.Sprite(gfx.nopic);
+			activetext.position.set(-32 * scale, -40 * scale);
+			spr.addChild(activetext);
+			spr.anchor.set(.5, .5);
+			spr.position = pos;
+			spr.click = function() {
+				if (game.phase != etg.PlayPhase) return;
+				var inst = insts ? insts[i] : game.players(j)[i];
+				if (!inst) return;
+				if (game.targeting && game.targeting.filter(inst)) {
+					game.targeting.cb(inst);
+				} else if (j == 0 && !game.targeting && inst.canactive()) {
+					game.getTarget(inst, inst.active.cast, function(tgt) {
+						if (!game.ai) sock.emit("cast", {bits: game.tgtToBits(inst) | game.tgtToBits(tgt) << 9});
+						inst.useactive(tgt);
+					});
+				}
+			};
+			return spr;
+		}
+		for (var i = 0;i < 23;i++) {
+			creasprite[j][i] = makeInst(game.players(j).creatures, i, ui.creaturePos(j, i));
+		}
+		for (var i = 0;i < 23;i++){
+			gameui.addChild(creasprite[j][j?22-i:i]);
+		}
+		for (var i = 0;i < 16;i++) {
+			permsprite[j][i] = makeInst(game.players(j).permanents, i, ui.permanentPos(j, i));
+		}
+		for (var i = 0;i < 16;i++){
+			gameui.addChild(permsprite[j][j?15-i:i]);
+		}
+		px.setInteractive.apply(null, handsprite[j]);
+		px.setInteractive.apply(null, creasprite[j]);
+		px.setInteractive.apply(null, permsprite[j]);
+		markspritexy[j] = new PIXI.math.Point(740, 470);
+		marksprite[j].style.transform = "translate(-50%,-50%)";
+		marksprite[j].style.textAlign = "center";
+		marksprite[j].style.pointerEvents = "none";
+		marksprite[j].style.fontSize = "18px";
+		marksprite[j].style.textShadow = "2px 2px 1px rgb(0,0,0),2px 2px 2px rgb(0,0,0)";
+		weapsprite[j] = makeInst(null, "weapon", new PIXI.math.Point(670, 508), 5/4);
+		shiesprite[j] = makeInst(null, "shield", new PIXI.math.Point(710, 540), 5/4);
+		if (j){
+			gameui.addChild(shiesprite[j]);
+			gameui.addChild(weapsprite[j]);
+			ui.reflectPos(weapsprite[j]);
+			ui.reflectPos(shiesprite[j]);
+			ui.reflectPos(markspritexy[j]);
+		}else{
+			gameui.addChild(weapsprite[j]);
+			gameui.addChild(shiesprite[j]);
+		}
+		playerOverlay[j].anchor.set(.5, .5);
+		playerOverlay[j].position.set(50, 555);
+		hpxy[j] = new PIXI.math.Point(50, 550);
+		if (j) {
+			ui.reflectPos(hpxy[j]);
+			ui.reflectPos(playerOverlay[j]);
+			playerOverlay[j].y += 15;
+		}
+		playerOverlay[j].click = function() {
+			if (game.phase == etg.PlayPhase && game.targeting && game.targeting.filter(game.players(j))) {
+				game.targeting.cb(game.players(j));
+			}
+		};
 		dom.add(div, [markspritexy[j].x, markspritexy[j].y, marksprite[j]],
 			[hpxy[j].x-50, playerOverlay[j].y - 24, hptext[j]],
 			[j ? 792 : 0, j ? 80 : 288, sabbathOverlay[j]]);
@@ -802,7 +802,7 @@ module.exports = class Match extends preact.Component {
 	}
 
 	render() {
-		const self = this, children = [];
+		const self = this, children = [svgbg];
 		for (let j=0; j<2; j++) {
 			const qx = j ? 792 : 0, qy = j ? 106 : 308,
 				qt = j ? self.state.quantatext1 : self.state.quantatext0;

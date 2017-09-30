@@ -8,7 +8,6 @@ document.addEventListener("mousemove", function(e){
 	}
 });
 var audio = require("./audio");
-var app = document.getElementById("app2");
 var renderer = new PIXI.autoDetectRenderer(900, 600, {view:document.getElementById("leftpane"), transparent:true});
 var noStage = {}, curStage = noStage;
 var interman = require("./InteractionManager");
@@ -47,17 +46,6 @@ exports.view = function(stage) {
 		renderer.view.style.display = "none";
 	}
 	curStage = stage;
-}
-exports.setClick = function(obj, click, sound) {
-	if (sound === undefined) sound = "buttonClick";
-	else if (typeof sound !== "string"){
-		obj.click = click;
-		return;
-	}
-	obj.click = function() {
-		audio.playSound(sound);
-		click.apply(this, arguments);
-	}
 }
 exports.hitTest = interman.hitTest;
 exports.setInteractive = function() {
