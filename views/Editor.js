@@ -467,6 +467,7 @@ module.exports = class Editor extends preact.Component {
 				},
 				ref: function(ctrl) {
 					if (ctrl) {
+						options.deck = ctrl.value;
 						options.register('deck', ctrl);
 						if (!self.firstRender) {
 							ctrl.setSelectionRange(0, 999);

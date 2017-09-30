@@ -16,8 +16,15 @@ exports.card = function(code){
 		"<image xlink:href='../Cards/"+etgutil.asShiny(etgutil.asUpped(code, false), false).toString(32)+".png' y='20' width='128' height='128'/>" +
 		"<foreignObject x='2' y='140' width='124' height='116'><p xmlns='http://www.w3.org/1999/xhtml' style='font-family:Dosis;font-size:10px;white-space:pre-wrap" +
 		(textColor ? "" : ";color:#000") + "'>" +
-		card.info().replace(/\|/g, " / ").replace(/(\d\d?):(\d+)/g, "$1<span class='ico te$2'></span>") +
-		(card.rarity ? "<span class='ico r"+card.rarity+"' style='position:absolute;left:68px;top:88px'></span>" : "") +
+		card.info().replace(/\|/g, " / ").replace(/(\d\d?):(\d\d?) ?/g, function(m, n, e) {
+			switch (n|0) {
+				case 0: return '0';
+				case 1: return "<span class='ico te"+e+"'></span>";
+				case 2: return "<span class='ico te"+e+"'></span><span class='ico te"+e+"'></span>";
+				case 3: return "<span class='ico te"+e+"'></span><span class='ico te"+e+"'></span><span class='ico te"+e+"'></span>";
+				default: return n+"<span class='ico te"+e+"'></span>";
+			}
+		}) + (card.rarity ? "<span class='ico r"+card.rarity+"' style='position:absolute;left:68px;top:88px'></span>" : "") +
 		"<span class='ico t"+card.type+"' style='position:absolute;left:96px;top:88px'></span></p></foreignObject></svg>";
 }
 exports.deck = function(deck){
