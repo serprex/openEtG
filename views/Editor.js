@@ -151,9 +151,7 @@ module.exports = class Editor extends preact.Component {
 				type: 'button',
 				value: 'Clear',
 				onClick: function() {
-					if (sock.user) {
-						self.setState({deck:[]});
-					}
+					self.setState({deck:[]});
 				},
 				style: {
 					position: 'absolute',
