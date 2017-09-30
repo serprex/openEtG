@@ -50,6 +50,41 @@ const floodsvg = h('svg', { width: '900', height: '600', style: { position: 'abs
 	h('path', { d: 'M149 146l644 0l0 64l-400 0l0 64l-244 0zM107 454l644 0l0-128l-244 0l0 64l-400 0z', fill: '#0486' })
 );
 
+const cloaksvg = h('div', {
+	style: {
+		position: 'absolute',
+		left: '130px',
+		top: '20px',
+		width: '660px',
+		height: '280px',
+		backgroundColor: '#000',
+		zIndex: '1',
+		pointerEvents: 'none',
+	},
+});
+
+const activeInfo = {
+	firebolt:function(t, game){
+		return 3+Math.floor((game.player1.quanta[etg.Fire]-game.targeting.src.card.cost)/4);
+	},
+	drainlife:function(t, game){
+		return 2+Math.floor((game.player1.quanta[etg.Darkness]-game.targeting.src.card.cost)/5);
+	},
+	icebolt:function(t, game){
+		var bolts = Math.floor((game.player1.quanta[etg.Water]-game.targeting.src.card.cost)/5);
+		return (2+bolts) + " " + (35+bolts*5) + "%";
+	},
+	catapult:function(t){
+		return Math.ceil(t.truehp()*(t.status.get("frozen")?150:100)/(t.truehp()+100));
+	},
+	adrenaline:function(t){
+		return "Extra: " + etg.getAdrenalRow(t.trueatk());
+	},
+	fractal:function(t, game){
+		return "Copies: " + Math.min((6+Math.floor((game.player1.quanta[etg.Aether]-game.targeting.src.card.cost)/2)), 9-game.player1.hand.length);
+	},
+};
+
 function startMatch(self, game, gameData, doNav) {
 	if (sock.trade){
 		sock.userEmit("canceltrade");
@@ -168,10 +203,6 @@ function startMatch(self, game, gameData, doNav) {
 		gameui.hitArea = new PIXI.math.Rectangle(0, 0, 900, 600);
 		gameui.interactive = true;
 	}
-	var cloakgfx = new PIXI.Graphics();
-	cloakgfx.beginFill(0);
-	cloakgfx.drawRect(130, 20, 660, 280);
-	gameui.addChild(cloakgfx);
 	var endturn = dom.button("Accept Hand", function(){endClick()});
 	var cancel = dom.button("Mulligan", cancelClick);
 	var resign = dom.button("Resign", function() {
@@ -195,31 +226,10 @@ function startMatch(self, game, gameData, doNav) {
 	if (!gameData.spectate) {
 		dom.add(div, [800, 530, endturn], [800, 560, cancel]);
 	}
-	var activeInfo = {
-		firebolt:function(){
-			return 3+Math.floor((game.player1.quanta[etg.Fire]-game.targeting.src.card.cost)/4);
-		},
-		drainlife:function(){
-			return 2+Math.floor((game.player1.quanta[etg.Darkness]-game.targeting.src.card.cost)/5);
-		},
-		icebolt:function(){
-			var bolts = Math.floor((game.player1.quanta[etg.Water]-game.targeting.src.card.cost)/5);
-			return (2+bolts) + " " + (35+bolts*5) + "%";
-		},
-		catapult:function(t){
-			return Math.ceil(t.truehp()*(t.status.get("frozen")?150:100)/(t.truehp()+100));
-		},
-		adrenaline:function(t){
-			return "Extra: " + etg.getAdrenalRow(t.trueatk());
-		},
-		fractal:function(){
-			return "Copies: " + Math.min((6+Math.floor((game.player1.quanta[etg.Aether]-game.targeting.src.card.cost)/2)), 9-game.player1.hand.length);
-		},
-	};
 	function setInfo(obj) {
-		if (!cloakgfx.visible || obj.owner != game.player2 || obj.status.get("cloak")) {
-			var info = obj.info(), actinfo = game.targeting && game.targeting.filter(obj) && activeInfo[game.targeting.text];
-			if (actinfo) info += "\n" + actinfo(obj);
+		if (!self.state.cloaked || obj.owner != game.player2 || obj.status.get("cloak")) {
+			const info = obj.info(), actinfo = game.targeting && game.targeting.filter(obj) && activeInfo[game.targeting.text];
+			if (actinfo) info += "\n" + actinfo(obj, game);
 			infobox.text = info;
 			infobox.style.display = "";
 		}
@@ -539,7 +549,7 @@ function startMatch(self, game, gameData, doNav) {
 		var cardartcode, cardartx;
 		let floodvisible = false;
 		infobox.style.display = "none";
-		if (!cloakgfx.visible){
+		if (!self.state.cloaked){
 			foeplays.children.forEach(function(foeplay){
 				if (foeplay.card instanceof Card && px.hitTest(foeplay)) {
 					cardartcode = foeplay.card.code;
@@ -557,13 +567,13 @@ function startMatch(self, game, gameData, doNav) {
 			}
 			for (var i = 0;i < 16;i++) {
 				var pr = pl.permanents[i];
-				if (pr && (j == 0 || !cloakgfx.visible || pr.status.get("cloak")) && px.hitTest(permsprite[j][i])) {
+				if (pr && (j == 0 || !self.state.cloaked || pr.status.get("cloak")) && px.hitTest(permsprite[j][i])) {
 					cardartcode = pr.card.code;
 					cardartx = permsprite[j][i].position.x;
 					setInfo(pr);
 				}
 			}
-			if (j == 0 || !cloakgfx.visible) {
+			if (j == 0 || !self.state.cloaked) {
 				for (var i = 0;i < 23;i++) {
 					var cr = pl.creatures[i];
 					if (cr && px.hitTest(creasprite[j][i])) {
@@ -612,7 +622,11 @@ function startMatch(self, game, gameData, doNav) {
 		foeplays.children.forEach(function(foeplay){
 			foeplay.texture = foeplay.card instanceof Card ? gfx.getCardImage(foeplay.card.code) : gfx.getAbilityImage(foeplay.card);
 		});
-		foeplays.visible = !(cloakgfx.visible = game.player2.isCloaked());
+		const cloaked = game.player2.isCloaked();
+		foeplays.visible = !cloaked;
+		if (cloaked != self.state.cloaked) {
+			self.setState({ cloaked: cloaked });
+		}
 		fgfx.clear();
 		fgfx.beginFill(0, 0);
 		fgfx.lineStyle(2, 0xffffff);
@@ -671,7 +685,7 @@ function startMatch(self, game, gameData, doNav) {
 			}
 			for (var i = 0;i < 23;i++) {
 				var cr = pl.creatures[i];
-				if (cr && !(j == 1 && cloakgfx.visible)) {
+				if (cr && !(j == 1 && self.state.cloaked)) {
 					creasprite[j][i].texture = gfx.getCreatureImage(cr.card.code);
 					creasprite[j][i].visible = true;
 					var child = creasprite[j][i].children[1];
@@ -685,7 +699,7 @@ function startMatch(self, game, gameData, doNav) {
 			for (var i = 0;i < 16;i++) {
 				var pr = pl.permanents[i];
 				if (pr && pr.status.get("flooding")) floodvisible = true;
-				if (pr && !(j == 1 && cloakgfx.visible && !pr.status.get("cloak"))) {
+				if (pr && !(j == 1 && self.state.cloaked && !pr.status.get("cloak"))) {
 					permsprite[j][i].texture = gfx.getPermanentImage(pr.card.code);
 					permsprite[j][i].visible = true;
 					var child = permsprite[j][i].children[1], child2 = permsprite[j][i].children[2];
@@ -706,7 +720,7 @@ function startMatch(self, game, gameData, doNav) {
 				} else permsprite[j][i].visible = false;
 			}
 			var wp = pl.weapon;
-			if (wp && !(j == 1 && cloakgfx.visible)) {
+			if (wp && !(j == 1 && self.state.cloaked)) {
 				weapsprite[j].visible = true;
 				var charges = wp.status.get("charges")
 				var child = weapsprite[j].children[1];
@@ -719,7 +733,7 @@ function startMatch(self, game, gameData, doNav) {
 				drawStatus(wp, weapsprite[j]);
 			} else weapsprite[j].visible = false;
 			var sh = pl.shield;
-			if (sh && !(j == 1 && cloakgfx.visible)) {
+			if (sh && !(j == 1 && self.state.cloaked)) {
 				shiesprite[j].visible = true;
 				var charges = sh.status.get("charges")
 				var child = shiesprite[j].children[1];
@@ -749,7 +763,7 @@ function startMatch(self, game, gameData, doNav) {
 			if (pl.hp > 0){
 				fgfx.beginFill(ui.elecols[etg.Life]);
 				fgfx.drawRect(playerOverlay[j].x - 40, playerOverlay[j].y - 24, 80 * pl.hp / pl.maxhp, 14);
-				if (!cloakgfx.visible && game.expectedDamage[j]) {
+				if (!self.state.cloaked && game.expectedDamage[j]) {
 					fgfx.beginFill(ui.elecols[game.expectedDamage[j] >= pl.hp ? etg.Fire : game.expectedDamage[j] > 0 ? etg.Time : etg.Water]);
 					fgfx.drawRect(playerOverlay[j].x - 40 + 80 * pl.hp / pl.maxhp, playerOverlay[j].y - 24, -80 * Math.min(game.expectedDamage[j], pl.hp) / pl.maxhp, 14);
 				}
@@ -758,7 +772,7 @@ function startMatch(self, game, gameData, doNav) {
 				setInfo(pl);
 			}else{
 				var poison = pl.status.get("poison"), poisoninfo = (poison > 0 ? poison + " 1:2" : poison < 0 ? -poison + " 1:7" : "") + (pl.status.get("neuro") ? " 1:10" : "");
-				hptext[j].text = pl.hp + "/" + pl.maxhp + "\n" + pl.deck.length + "cards" + (!cloakgfx.visible && game.expectedDamage[j] ? "\nDmg: " + game.expectedDamage[j] : "") + (poisoninfo ? "\n" + poisoninfo : "");
+				hptext[j].text = pl.hp + "/" + pl.maxhp + "\n" + pl.deck.length + "cards" + (!self.state.cloaked && game.expectedDamage[j] ? "\nDmg: " + game.expectedDamage[j] : "") + (poisoninfo ? "\n" + poisoninfo : "");
 			}
 		}
 		if (cursor) {
@@ -769,7 +783,7 @@ function startMatch(self, game, gameData, doNav) {
 			}else drawTgting(cursor);
 		}
 		if (floodvisible !== self.state.flooded) self.setState({ flooded: floodvisible });
-		Effect.next(cloakgfx.visible);
+		Effect.next(self.state.cloaked);
 	}
 	gameStep();
 	var gameInterval = setInterval(gameStep, 30);
@@ -803,6 +817,7 @@ module.exports = class Match extends preact.Component {
 
 	render() {
 		const self = this, children = [svgbg];
+		if (self.state.cloaked) children.push(cloaksvg);
 		if (self.state.flooded) children.push(floodsvg);
 		for (let j=0; j<2; j++) {
 			const qx = j ? 792 : 0, qy = j ? 106 : 308,
