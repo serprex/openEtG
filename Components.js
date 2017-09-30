@@ -9,7 +9,7 @@ const ui = require('./ui'),
 	h = preact.h, Component = preact.Component;
 
 exports.rect = function(x, y, wid, hei) {
-	let style = {
+	const style = {
 		position: 'absolute',
 		left: x+'px',
 		top: y+'px',

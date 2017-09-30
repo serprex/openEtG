@@ -553,7 +553,15 @@ const keycerttask = sutil.mkTask(res => {
 		},
 		librarywant:function(data){
 			Us.load(data.f, user => {
-				sockEmit(this, "librarygive", {pool:user.pool, bound:user.accountbound, gold:user.gold});
+				sockEmit(this, "librarygive", {
+					pool:user.pool,
+					bound:user.accountbound,
+					gold:user.gold,
+					pvpwins: user.pvpwins,
+					pvplosses: user.pvplosses,
+					aiwins: user.aiwins,
+					ailosses: user.ailosses,
+				});
 			});
 		},
 		arenatop:function(data){

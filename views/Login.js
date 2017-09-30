@@ -17,7 +17,7 @@ module.exports = class Login extends preact.Component {
 		const self = this;
 		if (gfx.load){
 			gfx.load(function(progress){
-				self.setState(Object.assign({}, self.state, { progress: progress }))
+				self.setState({ progress: progress });
 			}, function(){
 				audio.playMusic("openingMusic");
 				if (sock.user || self.sandbox) {
@@ -33,13 +33,13 @@ module.exports = class Login extends preact.Component {
 		var xhr = new XMLHttpRequest();
 		xhr.addEventListener("load", function(){
 			var data = JSON.parse(this.responseText)[0];
-			self.setState(Object.assign({}, this.state, {
+			self.setState({
 				commit: h('a', {
 					target: '_blank',
 					href: data.html_url,
 					style: { maxWidth: '380px', position: 'absolute', left: '260px', top: '460px' }
 				}, data.author.login + ": " + data.commit.message)
-			}));
+			});
 		});
 		xhr.open("GET", "https://api.github.com/repos/serprex/openEtG/commits?per_page=1", true);
 		xhr.send();
