@@ -396,7 +396,6 @@ function startMatch(self, game, gameData, doNav) {
 	var anims = new PIXI.Container();
 	gameui.addChild(anims);
 	Effect.register(anims);
-	var cursor = null, currow = handsprite[0], currowi = 0, currowo = 0;
 	function onkeydown(e) {
 		if (e.target.id == 'chatinput') return;
 		var kc = e.which || e.keyCode;
@@ -407,59 +406,14 @@ function startMatch(self, game, gameData, doNav) {
 			endClick();
 		} else if (ch == "\b" || ch == "0") {
 			cancelClick();
-		} else if (kc == 192 || e.key == "`") {
-			if (cursor) cursor.click();
-		} else if (ch == "N") {
-			cursor = null;
-			currow = handsprite[0];
-			currowo = currowi = 0;
-		} else if (ch >= "1" && ch <= "8") {
-			currowo = kc - 49;
-			cursor = currow[currowi+currowo];
 		} else if (~(chi = "SW".indexOf(ch))) {
 			playerOverlay[chi].click();
 		} else if (~(chi = "QA".indexOf(ch))) {
 			shiesprite[chi].click();
 		} else if (~(chi = "ED".indexOf(ch))) {
 			weapsprite[chi].click();
-		} else if (~(chi = "RF".indexOf(ch))) {
-			currow = handsprite[chi];
-			currowi = 0;
-		} else if (~(chi = "ZXC".indexOf(ch))) {
-			currow = creasprite[e.shiftKey?1:0];
-			currowi = chi == 0 ? 0 : chi == 1 ? 8 : 15;
-		} else if (~(chi = "VB".indexOf(ch))) {
-			currow = permsprite[e.shiftKey?1:0];
-			currowi = chi*8;
-		} else if (~(chi = "HL".indexOf(ch))) {
-			currowo += chi?1:-1;
-			if (currowo > 8) currowo = 0;
-			else if (currowo < 0) currowo = 8;
-			cursor = currow[currowi+currowo];
-		} else if (~(chi = "JK".indexOf(ch))) {
-			var jkmap = [
-				handsprite[0], 0,
-				permsprite[0], 8,
-				permsprite[0], 0,
-				creasprite[0], 15,
-				creasprite[0], 8,
-				creasprite[0], 0,
-				creasprite[1], 0,
-				creasprite[1], 8,
-				creasprite[1], 15,
-				permsprite[1], 0,
-				permsprite[1], 8,
-				handsprite[1], 0,
-			];
-			for(var i=0; i<jkmap.length; i+=2){
-				if (currow == jkmap[i] && jkmap[i+1] == currowi) break;
-			}
-			i += chi?2:-2;
-			if (i<0) i = jkmap.length-2;
-			else if (i>=jkmap.length) i = 0;
-			currow = jkmap[i];
-			currowi = jkmap[i+1];
-			cursor = currow[currowi+currowo];
+		} else if (~(chi = "12345678".indexOf(ch))) {
+			handsprite[0][chi].click();
 		} else return;
 		e.preventDefault();
 	}
@@ -759,13 +713,6 @@ function startMatch(self, game, gameData, doNav) {
 				var poison = pl.status.get("poison"), poisoninfo = (poison > 0 ? poison + " 1:2" : poison < 0 ? -poison + " 1:7" : "") + (pl.status.get("neuro") ? " 1:10" : "");
 				hptext[j].text = pl.hp + "/" + pl.maxhp + "\n" + pl.deck.length + "cards" + (!self.state.cloaked && game.expectedDamage[j] ? "\nDmg: " + game.expectedDamage[j] : "") + (poisoninfo ? "\n" + poisoninfo : "");
 			}
-		}
-		if (cursor) {
-			fgfx.lineStyle(1, 0x336699);
-			fgfx.beginFill(0, 0);
-			if (!currow || currow == handsprite[0] || currow == handsprite[1]) {
-				fgfx.drawRect(cursor.position.x, cursor.position.y, cursor.width, cursor.height);
-			}else drawTgting(cursor);
 		}
 		if (floodvisible !== self.state.flooded) self.setState({ flooded: floodvisible });
 		if (tooltip !== self.state.tooltip) {
