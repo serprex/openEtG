@@ -222,12 +222,13 @@ function startMatch(self, game, gameData, doNav) {
 	if (!gameData.spectate) {
 		dom.add(div, [800, 530, endturn], [800, 560, cancel]);
 	}
-	function setInfo(obj) {
+	function setInfo(tooltip, obj) {
 		if (!self.state.cloaked || obj.owner != game.player2 || obj.status.get("cloak")) {
 			const info = obj.info(), actinfo = game.targeting && game.targeting.filter(obj) && activeInfo[game.targeting.text];
 			if (actinfo) info += "\n" + actinfo(obj, game);
-			infobox.text = info;
-			infobox.style.display = "";
+			return info;
+		} else {
+			return tooltip;
 		}
 	}
 	var handsprite = [new Array(8), new Array(8)];
@@ -395,10 +396,6 @@ function startMatch(self, game, gameData, doNav) {
 	var anims = new PIXI.Container();
 	gameui.addChild(anims);
 	Effect.register(anims);
-	var infobox = dom.text("");
-	infobox.className = "infobox";
-	infobox.style.display = "none";
-	div.appendChild(infobox);
 	var cursor = null, currow = handsprite[0], currowi = 0, currowo = 0;
 	function onkeydown(e) {
 		if (e.target.id == 'chatinput') return;
@@ -467,10 +464,9 @@ function startMatch(self, game, gameData, doNav) {
 		e.preventDefault();
 	}
 	function onmousemove(e) {
-		dom.style(infobox, {
-			left: px.mouse.x + "px",
-			top: px.mouse.y + "px",
-		});
+		if (self.state.tooltip) {
+			self.setState({ toolx: px.mouse.x, tooly: px.mouse.y });
+		}
 	}
 	var cmds = {
 		endturn: function(data) {
@@ -540,8 +536,7 @@ function startMatch(self, game, gameData, doNav) {
 			}
 		}
 		var cardartcode = 0, cardartx;
-		let floodvisible = false;
-		infobox.style.display = "none";
+		let floodvisible = false, tooltip = '';
 		if (!self.state.cloaked){
 			cardartcode = self.state.foecardcode;
 		}
@@ -559,7 +554,7 @@ function startMatch(self, game, gameData, doNav) {
 				if (pr && (j == 0 || !self.state.cloaked || pr.status.get("cloak")) && px.hitTest(permsprite[j][i])) {
 					cardartcode = pr.card.code;
 					cardartx = permsprite[j][i].position.x;
-					setInfo(pr);
+					tooltip = setInfo(tooltip, pr);
 				}
 			}
 			if (j == 0 || !self.state.cloaked) {
@@ -568,18 +563,18 @@ function startMatch(self, game, gameData, doNav) {
 					if (cr && px.hitTest(creasprite[j][i])) {
 						cardartcode = cr.card.code;
 						cardartx = creasprite[j][i].position.x;
-						setInfo(cr);
+						tooltip = setInfo(tooltip, cr);
 					}
 				}
 				if (pl.weapon && px.hitTest(weapsprite[j])) {
 					cardartcode = pl.weapon.card.code;
 					cardartx = weapsprite[j].position.x;
-					setInfo(pl.weapon);
+					tooltip = setInfo(tooltip, pl.weapon);
 				}
 				if (pl.shield && px.hitTest(shiesprite[j])) {
 					cardartcode = pl.shield.card.code;
 					cardartx = shiesprite[j].position.x;
-					setInfo(pl.shield);
+					tooltip = setInfo(tooltip, pl.shield);
 				}
 			}
 		}
@@ -759,7 +754,7 @@ function startMatch(self, game, gameData, doNav) {
 				}
 			}
 			if (px.hitTest(playerOverlay[j])){
-				setInfo(pl);
+				tooltip = setInfo(tooltip, pl);
 			}else{
 				var poison = pl.status.get("poison"), poisoninfo = (poison > 0 ? poison + " 1:2" : poison < 0 ? -poison + " 1:7" : "") + (pl.status.get("neuro") ? " 1:10" : "");
 				hptext[j].text = pl.hp + "/" + pl.maxhp + "\n" + pl.deck.length + "cards" + (!self.state.cloaked && game.expectedDamage[j] ? "\nDmg: " + game.expectedDamage[j] : "") + (poisoninfo ? "\n" + poisoninfo : "");
@@ -773,6 +768,9 @@ function startMatch(self, game, gameData, doNav) {
 			}else drawTgting(cursor);
 		}
 		if (floodvisible !== self.state.flooded) self.setState({ flooded: floodvisible });
+		if (tooltip !== self.state.tooltip) {
+			self.setState({ tooltip: tooltip, toolx: px.mouse.x, tooly: px.mouse.y });
+		}
 		Effect.next(self.state.cloaked);
 	}
 	gameStep();
@@ -789,6 +787,9 @@ module.exports = class Match extends preact.Component {
 		this.state = {
 			cloaked: false,
 			flooded: false,
+			tooltip: '',
+			toolx: 0,
+			tooly: 0,
 			foeplays: [],
 			quantatext0: ['','','','','','','','','','','',''],
 			quantatext1: ['','','','','','','','','','','',''],
@@ -833,6 +834,17 @@ module.exports = class Match extends preact.Component {
 					},
 				}));
 			}
+		}
+		if (self.state.tooltip) {
+			children.push(h(Components.Text, {
+				class: 'infobox',
+				text: self.state.tooltip,
+				style: {
+					position: 'absolute',
+					left: self.state.toolx + 'px',
+					top: self.state.tooly + 'px',
+				},
+			}));
 		}
 		for (let j=0; j<2; j++) {
 			const qx = j ? 792 : 0, qy = j ? 106 : 308,
