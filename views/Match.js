@@ -225,8 +225,7 @@ function startMatch(self, game, gameData, doNav) {
 	function setInfo(tooltip, obj) {
 		if (!self.state.cloaked || obj.owner != game.player2 || obj.status.get("cloak")) {
 			const info = obj.info(), actinfo = game.targeting && game.targeting.filter(obj) && activeInfo[game.targeting.text];
-			if (actinfo) info += "\n" + actinfo(obj, game);
-			return info;
+			return info + (actinfo ? '\n' + actinfo(obj, game) : '');
 		} else {
 			return tooltip;
 		}
