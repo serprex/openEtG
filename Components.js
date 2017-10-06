@@ -40,10 +40,12 @@ function CardImage(props) {
 	let bordcol = card && card.shiny ? '#daa520' : '#222';
 	let bgcol = card ? ui.maybeLightenStr(card) : card === null ? '#876' : '#111';
 	if (card && card.cost) {
-		spans.push(h('span', { style: { float: 'right', marginRight: '2px' }}, card.cost));
-		if (card.costele !== card.element) {
-			spans.push(h('span', { className: 'ico ce' + card.costele, style: { float: 'right' }}));
-		}
+		spans.push(h('span', {
+			style: {
+				float: 'right',
+				marginRight: '2px',
+			}
+		}, card.cost, card.costele !== card.element && h('span', { className: 'ico te' + card.costele })));
 	}
 	return h('div', {
 		class: 'cardslot',

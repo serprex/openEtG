@@ -11,11 +11,11 @@ exports.card = function(code){
 	return "<svg xmlns='http://www.w3.org/2000/svg' xmlns:xlink='http://www.w3.org/1999/xlink' height='256' width='128'>"+cssPrefix +
 		"]]></style><image xlink:href='../assets/cardBacks.png' x='"+(card.element+card.upped*13)*-128+"' width='3328' height='127'/>" +
 		"<image xlink:href='../assets/cardBacks.png' x='"+(card.element+card.upped*13)*-128+"' y='128' width='3328' height='127'/>" +
-		"<text x='2' y='15'"+textColor+">"+card.name+"</text>" + (card.cost ? "<text x='108' y='15'"+textColor+">"+card.cost+"</text>" : "") +
+		"<text x='2' y='15'"+textColor+">"+card.name+"</text>" +
 		"<rect x='0' y='20' width='128' height='128' fill='" + ui.maybeLightenStr(card) + "'/>" +
 		"<image xlink:href='../Cards/"+etgutil.asShiny(etgutil.asUpped(code, false), false).toString(32)+".png' y='20' width='128' height='128'/>" +
-		"<foreignObject x='2' y='140' width='124' height='116'><p xmlns='http://www.w3.org/1999/xhtml' style='font-family:Dosis;font-size:10px;white-space:pre-wrap" +
-		(textColor ? "" : ";color:#000") + "'>" +
+		"<foreignObject width='128' height='256'><p xmlns='http://www.w3.org/1999/xhtml' style='font-family:Dosis;font-size:10px;white-space:pre-wrap" +
+		(textColor ? "" : ";color:#000") + ";position:absolute;left:2px;top:150px;right:2px;height:106px;margin:0'>" +
 		card.info().replace(/\|/g, " / ").replace(/(\d\d?):(\d\d?) ?/g, function(m, n, e) {
 			switch (n|0) {
 				case 0: return '0';
@@ -24,8 +24,9 @@ exports.card = function(code){
 				case 3: return "<span class='ico te"+e+"'></span><span class='ico te"+e+"'></span><span class='ico te"+e+"'></span>";
 				default: return n+"<span class='ico te"+e+"'></span>";
 			}
-		}) + (card.rarity ? "<span class='ico r"+card.rarity+"' style='position:absolute;left:68px;top:88px'></span>" : "") +
-		"<span class='ico t"+card.type+"' style='position:absolute;left:96px;top:88px'></span></p></foreignObject></svg>";
+		}) + (card.rarity ? "<span class='ico r"+card.rarity+"' style='position:absolute;right:30px;bottom:2px'></span>" : "") +
+		(card.cost ? "<span style='position:absolute;right:2px;top:-150px'>" + card.cost + (card.element != card.costele ? "<span class='ico ce"+card.costele+"'></span>" : "") + "</span>" : "") +
+		"<span class='ico t"+card.type+"' style='position:absolute;right:2px;bottom:2px'></span></p></foreignObject></svg>";
 }
 exports.deck = function(deck){
 	function classString(){
