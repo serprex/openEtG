@@ -88,7 +88,7 @@ module.exports = class Shop extends preact.Component {
 			type: 'button',
 			value: 'Take Cards',
 			onClick: function() {
-				self.setState({ hidebuy: false, hideget: true, cards: '' });
+				self.setState({ showbuy: true, hideget: true, cards: '' });
 			},
 			style: {
 				position: 'absolute',
@@ -103,7 +103,7 @@ module.exports = class Shop extends preact.Component {
 			options.parseInput(boostdata, "bulk", options.bulk, 99);
 			if (sock.user.gold >= pack.cost * (boostdata.bulk || 1) || (sock.user.freepacks && sock.user.freepacks[self.state.packrarity] > 0)) {
 				sock.userEmit("booster", boostdata);
-				self.setState({ hidebuy: true });
+				self.setState({ showbuy: false });
 			} else {
 				self.setState({info2: "You can't afford that!"});
 			}
