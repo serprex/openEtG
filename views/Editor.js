@@ -309,11 +309,11 @@ module.exports = class Editor extends preact.Component {
 							left: '100px',
 						},
 					}, sock.user.selectedDeck), buttons = [];
-				for (var i = 0;i < 10;i++) {
+				for (let i = 0;i < 10;i++) {
 					buttons.push(h('input', {
 						type: 'button',
 						value: i+1+'',
-						className: 'editbtn',
+						className: 'editbtn' + (sock.user.selectedDeck == sock.user.qecks[i] ? ' selectedbutton' : ''),
 						onClick: quickDeck(i),
 					}));
 				}
