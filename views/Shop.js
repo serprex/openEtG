@@ -192,7 +192,7 @@ module.exports = class Shop extends preact.Component {
 			}));
 		}
 
-		var cmds = {
+		const cmds = {
 			boostergive: function(data) {
 				if (data.accountbound) {
 					sock.user.accountbound = etgutil.mergedecks(sock.user.accountbound, data.cards);
@@ -207,7 +207,7 @@ module.exports = class Shop extends preact.Component {
 					sock.user.gold -= packdata[data.packtype].cost * (bdata.bulk || 1);
 				}
 				if (etgutil.decklength(data.cards) < 11){
-					self.setState({ cards: data.cards, showbuy: false, });
+					self.setState({ cards: data.cards, showbuy: false });
 				}else{
 					self.setState({});
 					const link = document.createElement("a");

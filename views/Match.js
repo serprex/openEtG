@@ -538,14 +538,9 @@ function startMatch(self, game, gameData, doNav) {
 				hovery: px.mouse.y > 300 ? 44 : 300,
 				foecardcode: cardartcode == self.state.foecardcode ? cardartcode : 0,
 			});
-			if (px.mouse.y < 300) marksprite[0].style.display = cardartx >= 670 && cardartx <= 760 ? "none" : "";
-			else marksprite[1].style.display = cardartx >= 140 && cardartx <= 230 ? "none" : "";
 		} else {
 			if (self.state.hovercode) {
 				self.setState({ hovercode: 0 });
-			}
-			for(var j=0; j<2; j++){
-				marksprite[j].style.display = "";
 			}
 		}
 		if (game.phase != etg.EndPhase) {
