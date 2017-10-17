@@ -531,15 +531,15 @@ function startMatch(self, game, gameData, doNav) {
 				}
 			}
 		}
-		if (cardartcode) {
-			self.setState({
-				hovercode: cardartcode,
-				hoverx: (cardartx || 654)-32,
-				hovery: px.mouse.y > 300 ? 44 : 300,
-				foecardcode: cardartcode == self.state.foecardcode ? cardartcode : 0,
-			});
-		} else {
-			if (self.state.hovercode) {
+		if (cardartcode != self.state.hovercode) {
+			if (cardartcode) {
+				self.setState({
+					hovercode: cardartcode,
+					hoverx: (cardartx || 654)-32,
+					hovery: px.mouse.y > 300 ? 44 : 300,
+					foecardcode: cardartcode == self.state.foecardcode ? cardartcode : 0,
+				});
+			} else {
 				self.setState({ hovercode: 0 });
 			}
 		}

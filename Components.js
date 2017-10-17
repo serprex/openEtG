@@ -99,7 +99,7 @@ exports.Text = function(props){
 			var parse = piece.split(":");
 			var num = parseInt(parse[0]);
 			if (num == 0) {
-				elec.push(h('0'));
+				elec.push('0');
 			} else if (num < 4) {
 				var icon = h('span', { className: 'ico ce'+parse[1] });
 				for (var j = 0;j < num;j++) {

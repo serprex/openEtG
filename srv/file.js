@@ -19,15 +19,17 @@ module.exports = function(url, resolve, reject){
 	if (url.startsWith('Cards/') && !fs.existsSync(url)) {
 		const code = url.match(/^Cards\/([a-v\d]{3})\.png$/);
 		if (code) {
-			resolve({
-				status: '302',
-				head: { Location: "/Cards/" + etgutil.asUpped(parseInt(code[1], 32), false).toString(32) + ".png" },
-				date: new Date(),
-				buf: '',
-			});
-		} else {
-			reject("ENOENT");
+			const unupped = etgutil.asShiny(etgutil.asUpped(parseInt(code[1], 32), false), false).toString(32);
+			if (unupped != code[1]) {
+				resolve({
+					status: '302',
+					head: { Location: `/Cards/${unupped}.png` },
+					date: new Date(),
+					buf: '',
+				});
+			}
 		}
+		reject("ENOENT");
 	}
 	const task = sutil.mkTask(res => {
 		if (res.err) reject("ENOENT");
