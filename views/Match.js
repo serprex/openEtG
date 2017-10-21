@@ -245,7 +245,7 @@ function startMatch(self, game, gameData, doNav) {
 		hptext[j].style.lineHeight = "1.1";
 		playerOverlay[j].width = 95;
 		playerOverlay[j].height = 80;
-		sabbathOverlay[j].className = "sabbath";
+		sabbathOverlay[j].className = "ico sabbath";
 		sabbathOverlay[j].style.display = "none";
 		handOverlay[j].position.set(j ? 3 : 759, j ? 75 : 305);
 		sacrificeOverlay[j].position.set(j ? 800 : 0, j ? 7 : 502);

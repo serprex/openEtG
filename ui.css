@@ -100,13 +100,6 @@ input[type="text"],input[type="password"],input:not([type]){width:150px;border:2
 	filter:brightness(0.4);
 	cursor:pointer;
 }
-.sabbath{
-	background:url(assets/sabbath.png);
-	display:inline-block;
-	height:228px;
-	width:103px;
-	pointer-events:none;
-}
 #leftpane{
 	position:absolute;
 	-moz-user-select:none;
