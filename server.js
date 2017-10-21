@@ -167,28 +167,26 @@ const keycerttask = sutil.mkTask(res => {
 		foearena:function(data, user){
 			db.zcard("arena"+(data.lv?"1":""), (err, len) => {
 				if (!len) return;
-				if (len > 20) len = 20;
-				var cost = userutil.arenaCost(data.lv);
+				const cost = userutil.arenaCost(data.lv);
 				if (user.gold < cost)return;
 				user.gold -= cost;
-				var idx = RngMock.upto(len);
-				db.zrange("arena"+(data.lv?"1":""), idx, idx, (err, aname) => {
+				const idx = RngMock.upto(Math.min(len, 20));
+				db.zrevrange("arena"+(data.lv?"1":""), idx, idx, (err, aname) => {
 					if (!aname || !aname.length){
 						console.log("No arena " + idx);
 						return;
 					}
 					aname = aname[0];
-					console.log("deck: "+ aname + " " + idx);
 					db.hgetall((data.lv?"B:":"A:")+aname, (err, adeck) => {
 						adeck.card = parseInt(adeck.card, 10);
 						if (data.lv) adeck.card = etgutil.asUpped(adeck.card, true);
 						adeck.hp = parseInt(adeck.hp || 200);
 						adeck.mark = parseInt(adeck.mark || 1);
 						adeck.draw = parseInt(adeck.draw || data.lv+1);
-						var curhp = getAgedHp(adeck.hp, sutil.getDay()-adeck.day);
+						const curhp = getAgedHp(adeck.hp, sutil.getDay()-adeck.day);
 						sockEmit(this, "foearena", {
 							seed: Math.random()*MAX_INT,
-							name: aname, hp: curhp,
+							name: aname, hp: curhp, rank: idx,
 							mark: adeck.mark, draw: adeck.draw,
 							deck: adeck.deck + "05" + adeck.card.toString(32), lv:data.lv});
 					});

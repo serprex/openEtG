@@ -99,6 +99,7 @@ module.exports = class Result extends preact.Component {
 				["Equipped", game.player1.weapon && game.player1.shield ? .05 : 0],
 				["Full Health", game.player1.hp == game.player1.maxhp ? .2 : 0],
 				["Grounds Keeper", (game.player1.countpermanents()-8)/40],
+				["Head Hunter", [1, .5, .25, .12, .06, .03, .01][data.rank]],
 				["Last point", game.player1.hp == 1 ? .3 : 0],
 				["Mid Turn", game.turn == game.player1 ? .1 : 0],
 				["Murderer", game.bonusstats.creatureskilled > 5 ? .15 : 0],

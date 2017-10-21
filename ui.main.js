@@ -88,7 +88,7 @@ var sockEvents = {
 		chat.addSpan(span, data.mode == 1 ? null : "Main");
 	},
 	foearena:function(data) {
-		const gamedata = mkGame({ deck: data.deck, urdeck: sock.getDeck(), seed: data.seed,
+		const gamedata = mkGame({ deck: data.deck, urdeck: sock.getDeck(), seed: data.seed, rank: data.rank,
 			p2hp: data.hp, foename: data.name, p2drawpower: data.draw, p2markpower: data.mark, arena: data.name, level: 4+data.lv, ai: true });
 		gamedata.game.cost = userutil.arenaCost(data.lv);
 		sock.user.gold -= gamedata.game.cost;

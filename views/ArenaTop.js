@@ -19,6 +19,15 @@ module.exports = class ArenaTop extends preact.Component {
 			s.style.display = 'none';
 		}
 		document.body.appendChild(this.svg);
+		sock.emit("arenatop", this.props);
+		const self = this;
+		px.view({
+			cmds: {
+				arenatop: function(info){
+					self.setState(info);
+				}
+			}
+		});
 	}
 
 	componentWillUnmount() {
@@ -27,15 +36,7 @@ module.exports = class ArenaTop extends preact.Component {
 
 	render() {
 		const self = this, lv = this.props.lv;
-		px.view({
-			cmds: {
-				arenatop: function(info){
-					self.setState(info);
-				}
-			}
-		});
 		const info = this.state.top || [];
-		sock.emit("arenatop", this.props);
 		const ol = h('ol', {
 			className: "atopol",
 			style: {
