@@ -235,7 +235,6 @@ function startMatch(self, game, gameData, doNav) {
 	var hptext = [new dom.text(""), new dom.text("")], hpxy = [];
 	var playerOverlay = [new PIXI.Sprite(gfx.nopic), new PIXI.Sprite(gfx.nopic)];
 	var handOverlay = [new PIXI.Sprite(gfx.nopic), new PIXI.Sprite(gfx.nopic)];
-	var sabbathOverlay = [document.createElement("span"), document.createElement("span")];
 	var sacrificeOverlay = [new PIXI.Sprite(gfx.sacrifice), new PIXI.Sprite(gfx.sacrifice)];
 	for (let j = 0;j < 2;j++) {
 		hptext[j].style.textAlign = "center";
@@ -245,8 +244,6 @@ function startMatch(self, game, gameData, doNav) {
 		hptext[j].style.lineHeight = "1.1";
 		playerOverlay[j].width = 95;
 		playerOverlay[j].height = 80;
-		sabbathOverlay[j].className = "ico sabbath";
-		sabbathOverlay[j].style.display = "none";
 		handOverlay[j].position.set(j ? 3 : 759, j ? 75 : 305);
 		sacrificeOverlay[j].position.set(j ? 800 : 0, j ? 7 : 502);
 		for (let i = 0;i < 8;i++) {
@@ -377,8 +374,7 @@ function startMatch(self, game, gameData, doNav) {
 			}
 		};
 		dom.add(div, [markspritexy[j].x, markspritexy[j].y, marksprite[j]],
-			[hpxy[j].x-50, playerOverlay[j].y - 24, hptext[j]],
-			[j ? 792 : 0, j ? 80 : 288, sabbathOverlay[j]]);
+			[hpxy[j].x-50, playerOverlay[j].y - 24, hptext[j]]);
 		gameui.addChild(handOverlay[j]);
 		gameui.addChild(sacrificeOverlay[j]);
 		gameui.addChild(playerOverlay[j]);
@@ -589,7 +585,9 @@ function startMatch(self, game, gameData, doNav) {
 		for (var j = 0;j < 2;j++) {
 			var pl = game.players(j);
 			sacrificeOverlay[j].visible = pl.sosa;
-			sabbathOverlay[j].style.display = pl.flatline ? "" : "none";
+			if (self.state['sabbath'+j] != pl.flatline) {
+				self.setState({ ['sabbath'+j]: pl.flatline });
+			}
 			handOverlay[j].texture = (pl.usedactive ? gfx.silence :
 				pl.sanctuary ? gfx.sanctuary :
 				pl.nova >= 3 && pl.hand.some(function(c){ return c.card.isOf(Cards.Nova) }) ? gfx.singularity : gfx.nopic);
@@ -783,17 +781,6 @@ module.exports = class Match extends preact.Component {
 				width: '140px',
 			},
 		}, ((["Commoner", "Mage", "Champion", "Demigod", "Arena1", "Arena2"][this.props.game.level]||"") + "\n") + (this.props.game.foename || "-")));
-		if (self.state.tooltip) {
-			children.push(h(Components.Text, {
-				class: 'infobox',
-				text: self.state.tooltip,
-				style: {
-					position: 'absolute',
-					left: self.state.toolx + 'px',
-					top: self.state.tooly + 'px',
-				},
-			}));
-		}
 		for (let j=0; j<2; j++) {
 			const qx = j ? 792 : 0, qy = j ? 106 : 308,
 				qt = j ? self.state.quantatext1 : self.state.quantatext0;
@@ -815,12 +802,33 @@ module.exports = class Match extends preact.Component {
 					},
 				}, qt[k-1]));
 			}
+			if (self.state['sabbath'+j]) {
+				children.push(h('span', {
+					className: 'ico sabbath',
+					style: {
+						position: 'absolute',
+						left: j?'792px':'0px',
+						top: j?'80px':'288px',
+					},
+				}));
+			}
 		}
 		if (self.state.hovercode) {
 			children.push(h(Components.Card, {
 				x: self.state.hoverx,
 				y: self.state.hovery,
 				code: self.state.hovercode,
+			}));
+		}
+		if (self.state.tooltip) {
+			children.push(h(Components.Text, {
+				class: 'infobox',
+				text: self.state.tooltip,
+				style: {
+					position: 'absolute',
+					left: self.state.toolx + 'px',
+					top: self.state.tooly + 'px',
+				},
 			}));
 		}
 
