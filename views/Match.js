@@ -211,10 +211,7 @@ function startMatch(self, game, gameData, doNav) {
 			resigning = true;
 		}
 	});
-	var turntell = new dom.text("");
-	turntell.style.pointerEvents = "none";
-	var div = dom.div([8, 20, resign],
-		[762, 580, turntell]);
+	var div = dom.div([8, 20, resign]);
 	if (!gameData.spectate) {
 		dom.add(div, [800, 530, endturn], [800, 560, cancel]);
 	}
@@ -231,7 +228,6 @@ function startMatch(self, game, gameData, doNav) {
 	var permsprite = [new Array(16), new Array(16)];
 	var shiesprite = new Array(2);
 	var weapsprite = new Array(2);
-	var marksprite = [document.createElement("span"), document.createElement("span")], markspritexy = [];
 	var hptext = [new dom.text(""), new dom.text("")], hpxy = [];
 	var playerOverlay = [new PIXI.Sprite(gfx.nopic), new PIXI.Sprite(gfx.nopic)];
 	var handOverlay = [new PIXI.Sprite(gfx.nopic), new PIXI.Sprite(gfx.nopic)];
@@ -342,12 +338,6 @@ function startMatch(self, game, gameData, doNav) {
 		px.setInteractive.apply(null, handsprite[j]);
 		px.setInteractive.apply(null, creasprite[j]);
 		px.setInteractive.apply(null, permsprite[j]);
-		markspritexy[j] = new PIXI.math.Point(740, 470);
-		marksprite[j].style.transform = "translate(-50%,-50%)";
-		marksprite[j].style.textAlign = "center";
-		marksprite[j].style.pointerEvents = "none";
-		marksprite[j].style.fontSize = "18px";
-		marksprite[j].style.textShadow = "2px 2px 1px rgb(0,0,0),2px 2px 2px rgb(0,0,0)";
 		weapsprite[j] = makeInst(null, "weapon", new PIXI.math.Point(670, 508), 5/4);
 		shiesprite[j] = makeInst(null, "shield", new PIXI.math.Point(710, 540), 5/4);
 		if (j){
@@ -355,7 +345,6 @@ function startMatch(self, game, gameData, doNav) {
 			gameui.addChild(weapsprite[j]);
 			ui.reflectPos(weapsprite[j]);
 			ui.reflectPos(shiesprite[j]);
-			ui.reflectPos(markspritexy[j]);
 		}else{
 			gameui.addChild(weapsprite[j]);
 			gameui.addChild(shiesprite[j]);
@@ -373,8 +362,7 @@ function startMatch(self, game, gameData, doNav) {
 				game.targeting.cb(game.players(j));
 			}
 		};
-		dom.add(div, [markspritexy[j].x, markspritexy[j].y, marksprite[j]],
-			[hpxy[j].x-50, playerOverlay[j].y - 24, hptext[j]]);
+		dom.add(div, [hpxy[j].x-50, playerOverlay[j].y - 24, hptext[j]]);
 		gameui.addChild(handOverlay[j]);
 		gameui.addChild(sacrificeOverlay[j]);
 		gameui.addChild(playerOverlay[j]);
@@ -486,7 +474,13 @@ function startMatch(self, game, gameData, doNav) {
 			cardartcode = self.state.foecardcode;
 		}
 		for (var j = 0;j < 2;j++) {
-			var pl = game.players(j);
+			const pl = game.players(j);
+			if (self.state['mark'+j] != pl.mark) {
+				self.setState({['mark'+j]:pl.mark});
+			}
+			if (self.state['markpower'+j] != pl.markpower) {
+				self.setState({['markpower'+j]:pl.markpower});
+			}
 			if (j == 0 || game.player1.precognition) {
 				for (var i = 0;i < pl.hand.length;i++) {
 					if (px.hitTest(handsprite[j][i])) {
@@ -535,18 +529,22 @@ function startMatch(self, game, gameData, doNav) {
 				self.setState({ hovercode: 0 });
 			}
 		}
+		let turntell;
 		if (game.phase != etg.EndPhase) {
-			turntell.text = discarding ? "Discard" :
+			turntell = discarding ? "Discard" :
 				game.targeting ? game.targeting.text :
-				(game.turn == game.player1 ? "Your Turn" : "Their Turn") + (game.phase >= 2 ? "" : " " + (game.first == game.player1 ? ", First": ", Second"));
+				(game.turn == game.player1 ? "Your Turn" : "Their Turn") + (game.phase >= 2 ? "" : game.first == game.player1 ? ", First": ", Second");
 			if (game.turn == game.player1){
 				endturn.text = discarding ? "" : game.phase == etg.PlayPhase ? "End Turn" : "Accept Hand";
 				cancel.text = game.phase != etg.PlayPhase ? "Mulligan" : game.targeting || discarding || resigning ? "Cancel" : "";
 			}else cancel.text = endturn.text = "";
 		}else{
-			turntell.text = (game.turn == game.player1 ? "Your" : "Their") + " Turn " + (game.winner == game.player1?", Won":", Lost");
+			turntell = (game.turn == game.player1 ? "Your" : "Their") + " Turn" + (game.winner == game.player1?", Won":", Lost");
 			endturn.text = "Continue";
 			cancel.text = "";
+		}
+		if (turntell != self.state.turntell) {
+			self.setState({ turntell: turntell });
 		}
 		const cloaked = game.player2.isCloaked();
 		if (cloaked != self.state.cloaked) {
@@ -672,8 +670,6 @@ function startMatch(self, game, gameData, doNav) {
 				shiesprite[j].texture = gfx.getWeaponShieldImage(sh.card.code);
 				drawStatus(sh, shiesprite[j]);
 			} else shiesprite[j].visible = false;
-			marksprite[j].className = "ico e"+pl.mark;
-			marksprite[j].textContent = pl.markpower != 1 ? pl.markpower : "";
 			let newqtext = null;
 			const qt = j ? self.state.quantatext1 : self.state.quantatext0;
 			for (var i = 1;i < 13;i++) {
@@ -726,9 +722,17 @@ module.exports = class Match extends preact.Component {
 			tooltip: '',
 			toolx: 0,
 			tooly: 0,
+			hovercode: 0,
 			foeplays: [],
 			quantatext0: ['','','','','','','','','','','',''],
 			quantatext1: ['','','','','','','','','','','',''],
+			mark0: props.game.player1.mark,
+			mark1: props.game.player2.mark,
+			markpower0: props.game.player1.markpower,
+			markpower1: props.game.player2.markpower,
+			sabbath0: false,
+			sabbath1: false,
+			turntell: '',
 		};
 	}
 
@@ -781,6 +785,14 @@ module.exports = class Match extends preact.Component {
 				width: '140px',
 			},
 		}, ((["Commoner", "Mage", "Champion", "Demigod", "Arena1", "Arena2"][this.props.game.level]||"") + "\n") + (this.props.game.foename || "-")));
+		children.push(h('span', {
+			style: {
+				position: 'absolute',
+				left: '762px',
+				top: '580px',
+				pointerEvents: 'none',
+			},
+		}, self.state.turntell));
 		for (let j=0; j<2; j++) {
 			const qx = j ? 792 : 0, qy = j ? 106 : 308,
 				qt = j ? self.state.quantatext1 : self.state.quantatext0;
@@ -802,6 +814,19 @@ module.exports = class Match extends preact.Component {
 					},
 				}, qt[k-1]));
 			}
+			children.push(h('span', {
+				className: 'ico e' + self.state['mark'+j],
+				style: {
+					position: 'absolute',
+					left: j?'160px':'740px',
+					top: j?'130px':'470px',
+					transform: 'translate(-50%,-50%)',
+					textAlign: 'center',
+					pointerEvents: 'none',
+					fontSize: '18px',
+					textShadow: '2px 2px 1px #000,2px 2px 2px #000',
+				},
+			}, self.state['markpower'+j] !== 1 && self.state['markpower'+j]));
 			if (self.state['sabbath'+j]) {
 				children.push(h('span', {
 					className: 'ico sabbath',
