@@ -213,12 +213,8 @@ function startMatch(self, game, gameData, doNav) {
 	});
 	var turntell = new dom.text("");
 	turntell.style.pointerEvents = "none";
-	var foename = dom.text((game.level === undefined ? "" : ["Commoner", "Mage", "Champion", "Demigod", "Arena1", "Arena2"][game.level] + "\n") + (game.foename || "-"));
-	foename.style.textAlign = "center";
-	foename.style.width = "140px";
 	var div = dom.div([8, 20, resign],
-		[762, 580, turntell],
-		[0, 40, foename]);
+		[762, 580, turntell]);
 	if (!gameData.spectate) {
 		dom.add(div, [800, 530, endturn], [800, 560, cancel]);
 	}
@@ -722,6 +718,7 @@ function startMatch(self, game, gameData, doNav) {
 		clearInterval(gameInterval);
 	}, cmds:cmds});
 }
+
 module.exports = class Match extends preact.Component {
 	constructor(props) {
 		super(props);
@@ -776,6 +773,16 @@ module.exports = class Match extends preact.Component {
 				}));
 			}
 		}
+		children.push(h('div', {
+			style: {
+				whiteSpace: 'pre-wrap',
+				textAlign: 'center',
+				position: 'absolute',
+				left: '0px',
+				top: '40px',
+				width: '140px',
+			},
+		}, ((["Commoner", "Mage", "Champion", "Demigod", "Arena1", "Arena2"][this.props.game.level]||"") + "\n") + (this.props.game.foename || "-")));
 		if (self.state.tooltip) {
 			children.push(h(Components.Text, {
 				class: 'infobox',
