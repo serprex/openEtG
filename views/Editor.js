@@ -237,7 +237,7 @@ module.exports = class Editor extends preact.Component {
 							return chat("35 cards required before submission", "System");
 						}
 						const data = Object.assign({
-							d: etgutil.encoderaw(self.state.deck) + etgutil.toTrueMarkSuffix(self.state.mark),
+							d: etgutil.encodedeck(sortedDeck.slice(5)) + etgutil.toTrueMarkSuffix(self.state.mark),
 							lv: aupped,
 						}, self.state.arattr);
 						if (!self.props.startempty){
