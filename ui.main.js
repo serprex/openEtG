@@ -30,7 +30,7 @@ var sockEvents = {
 		chat(data.m + " has been muted", "System");
 	},
 	roll:function(data) {
-		var span = document.createElement("span");
+		var span = document.createElement("div");
 		span.style.color = "#090";
 		if (data.u){
 			var b = document.createElement("b");
@@ -53,7 +53,7 @@ var sockEvents = {
 		}
 		var now = new Date(), h = now.getHours(), m = now.getMinutes(),
 			hs = h < 10 ? "0"+h : h.toString(), ms = m < 10 ? "0"+m : m.toString();
-		var span = document.createElement("span");
+		var span = document.createElement("div");
 		if (data.mode != 1) span.style.color = data.mode == 2 ? "#69f" : "#ddd";
 		if (data.guest) span.style.fontStyle = "italic";
 		span.appendChild(document.createTextNode(hs + ms + " "));
@@ -114,7 +114,7 @@ var sockEvents = {
 		}
 	},
 	challenge:function(data) {
-		var span = document.createElement("span");
+		var span = document.createElement("div");
 		span.style.cursor = "pointer";
 		span.style.color = "#69f";
 		span.addEventListener("click", function(){
@@ -189,7 +189,7 @@ function maybeSendChat(e) {
 			names.sort();
 			names.forEach(function(name){
 				var deck = sock.user.decks[name];
-				var span = document.createElement("span");
+				var span = document.createElement("div");
 				var link = document.createElement("a");
 				link.href = "deck/" + deck;
 				link.target = "_blank";

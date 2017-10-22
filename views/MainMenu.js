@@ -342,7 +342,13 @@ module.exports = class MainMenu extends preact.Component {
 			},
 			codegold:function(data) {
 				sock.user.gold += data.g;
-				chat.addSpan(dom.text(data.g + "$ added!\n"));
+				const goldspan = document.createElement('span');
+				goldspan.className = 'ico gold';
+				const msg = document.createElement('div');
+				msg.appendChild(document.createTextNode(data.g));
+				msg.appendChild(goldspan);
+				msg.appendChild(document.createTextNode(' added!'));
+				chat.addSpan(msg);
 			},
 			codecode:function(data) {
 				sock.user.pool = etgutil.addcard(sock.user.pool, data.card);

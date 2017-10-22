@@ -211,6 +211,7 @@ module.exports = class Shop extends preact.Component {
 				}else{
 					self.setState({});
 					const link = document.createElement("a");
+					link.style.display = 'block';
 					link.href = "deck/" + data.cards;
 					link.target = "_blank";
 					link.appendChild(document.createTextNode(data.cards));

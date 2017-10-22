@@ -13,7 +13,6 @@ function addSpan(span, name) {
 	} else if (tabBox == tabMap.Main[0]) {
 		addSpan(span.cloneNode(true), "MainMenu");
 	}
-	span.appendChild(document.createElement("br"));
 	if (tabBox == chatBox){
 		var scroll = Math.abs(tabBox.scrollTop - tabBox.scrollHeight + tabBox.offsetHeight) < 2;
 		tabBox.appendChild(span);
@@ -26,7 +25,7 @@ function addSpan(span, name) {
 	}
 }
 function chat(msg, fontcolor, name) {
-	var span = document.createElement("span");
+	var span = document.createElement("div");
 	if (fontcolor in tabMap) name = fontcolor;
 	else if (fontcolor) span.style.color = fontcolor;
 	span.appendChild(document.createTextNode(msg));
