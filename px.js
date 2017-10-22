@@ -26,15 +26,6 @@ exports.getCmd = function(cmd){
 	return curStage.cmds ? curStage.cmds[cmd] : null;
 }
 exports.view = function(stage) {
-	if (curStage.endnext){
-		curStage.endnext();
-	}
-	if (stage.dom){
-		document.body.appendChild(stage.dom);
-	}
-	if (curStage.dom){
-		document.body.removeChild(curStage.dom);
-	}
 	if (stage.view){
 		if (!curStage.view) requestAnimate();
 		renderer.render(stage.view);

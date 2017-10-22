@@ -71,7 +71,6 @@ module.exports = class Colosseum extends preact.Component {
 				}
 			}), h('span', { style: { position: 'absolute', left: '130px', top: '280px' }}, "You successfully completed all tasks."));
 		}
-		px.view({endnext:px.hideapp});
 		return h('div', { children: children });
 	}
 }

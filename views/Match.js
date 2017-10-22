@@ -104,7 +104,7 @@ function startMatch(self, game, gameData, doNav) {
 		}
 	}
 	function drawStatus(obj, spr) {
-		var statuses = spr.children[0].children;
+		const statuses = spr.children[0].children;
 		statuses[0].visible = obj.status.get("psionic");
 		statuses[1].visible = obj.status.get("aflatoxin");
 		statuses[2].visible = !obj.status.get("aflatoxin") && obj.status.get("poison") > 0;
@@ -177,9 +177,8 @@ function startMatch(self, game, gameData, doNav) {
 		}
 	}
 	function cancelClick(){
-		if (resigning) {
-			resign.value = "Resign";
-			resigning = false;
+		if (self.state.resigning) {
+			self.setState({resigning: false});
 		} else if (game.turn == game.player1) {
 			if (game.phase <= etg.MulliganPhase2 && game.player1.hand.length) {
 				game.player1.drawhand(game.player1.hand.length - 1);
@@ -189,7 +188,16 @@ function startMatch(self, game, gameData, doNav) {
 			} else discarding = false;
 		}
 	}
-	var resigning, discarding, aiDelay = 0, aiState, aiCommand;
+	function resignClick(){
+		if (self.state.resigning){
+			if (!game.ai) sock.emit("foeleft");
+			game.setWinner(game.player2);
+			endClick();
+		} else {
+			self.setState({ resigning: true });
+		}
+	}
+	var discarding, aiDelay = 0, aiState, aiCommand;
 	if (sock.user && !game.endurance && (game.level !== undefined || !game.ai)) {
 		sock.user.streakback = sock.user.streak[game.level];
 		sock.userExec("addloss", { pvp: !game.ai, l: game.level, g: -game.cost });
@@ -199,22 +207,11 @@ function startMatch(self, game, gameData, doNav) {
 		gameui.hitArea = new PIXI.math.Rectangle(0, 0, 900, 600);
 		gameui.interactive = true;
 	}
-	var endturn = dom.button("Accept Hand", function(){endClick()});
-	var cancel = dom.button("Mulligan", cancelClick);
-	var resign = dom.button("Resign", function() {
-		if (resigning){
-			if (!game.ai) sock.emit("foeleft");
-			game.setWinner(game.player2);
-			endClick();
-		}else{
-			resign.value = "Confirm";
-			resigning = true;
-		}
+	self.setState({
+		funcEnd: endClick,
+		funcCancel: cancelClick,
+		funcResign: resignClick,
 	});
-	var div = dom.div([8, 20, resign]);
-	if (!gameData.spectate) {
-		dom.add(div, [800, 530, endturn], [800, 560, cancel]);
-	}
 	function setInfo(tooltip, obj) {
 		if (!self.state.cloaked || obj.owner != game.player2 || obj.status.get("cloak")) {
 			const info = obj.info(), actinfo = game.targeting && game.targeting.filter(obj) && activeInfo[game.targeting.text];
@@ -371,7 +368,7 @@ function startMatch(self, game, gameData, doNav) {
 		var kc = e.which || e.keyCode;
 		var ch = String.fromCharCode(kc), chi;
 		if (kc == 27) {
-			resign.click();
+			resignClick();
 		} else if (ch == " " || kc == 13) {
 			endClick();
 		} else if (ch == "\b" || ch == "0") {
@@ -520,22 +517,28 @@ function startMatch(self, game, gameData, doNav) {
 				self.setState({ hovercode: 0 });
 			}
 		}
-		let turntell;
+		let turntell, cancelText, endText;
 		if (game.phase != etg.EndPhase) {
 			turntell = discarding ? "Discard" :
 				game.targeting ? game.targeting.text :
 				(game.turn == game.player1 ? "Your Turn" : "Their Turn") + (game.phase >= 2 ? "" : game.first == game.player1 ? ", First": ", Second");
 			if (game.turn == game.player1){
-				endturn.text = discarding ? "" : game.phase == etg.PlayPhase ? "End Turn" : "Accept Hand";
-				cancel.text = game.phase != etg.PlayPhase ? "Mulligan" : game.targeting || discarding || resigning ? "Cancel" : "";
-			}else cancel.text = endturn.text = "";
+				endText = discarding ? "" : game.phase == etg.PlayPhase ? "End Turn" : "Accept Hand";
+				cancelText = game.phase != etg.PlayPhase ? "Mulligan" : game.targeting || discarding || self.state.resigning ? "Cancel" : "";
+			}else cancelText = endText = "";
 		}else{
 			turntell = (game.turn == game.player1 ? "Your" : "Their") + " Turn" + (game.winner == game.player1?", Won":", Lost");
-			endturn.text = "Continue";
-			cancel.text = "";
+			endText = "Continue";
+			cancelText = "";
 		}
 		if (turntell != self.state.turntell) {
 			self.setState({ turntell: turntell });
+		}
+		if (cancelText != self.state.cancelText) {
+			self.setState({ cancelText: cancelText });
+		}
+		if (endText != self.state.endText) {
+			self.setState({ endText: endText });
 		}
 		const cloaked = game.player2.isCloaked();
 		if (cloaked != self.state.cloaked) {
@@ -699,12 +702,15 @@ function startMatch(self, game, gameData, doNav) {
 		Effect.next(self.state.cloaked);
 	}
 	gameStep();
-	var gameInterval = setInterval(gameStep, 30);
-	px.view({view:gameui, dom:div, endnext:function() {
-		document.removeEventListener("keydown", onkeydown);
-		document.removeEventListener("mousemove", onmousemove);
-		clearInterval(gameInterval);
-	}, cmds:cmds});
+	const gameInterval = setInterval(gameStep, 30);
+	self.setState({
+		endnext: function() {
+			document.removeEventListener("keydown", onkeydown);
+			document.removeEventListener("mousemove", onmousemove);
+			clearInterval(gameInterval);
+		}
+	});
+	px.view({view:gameui, cmds:cmds});
 }
 
 module.exports = class Match extends preact.Component {
@@ -729,6 +735,9 @@ module.exports = class Match extends preact.Component {
 			sabbath0: false,
 			sabbath1: false,
 			turntell: '',
+			resigning: false,
+			endText: 'Accept Hand',
+			cancelText: 'Mulligan',
 		};
 	}
 
@@ -741,6 +750,9 @@ module.exports = class Match extends preact.Component {
 	}
 
 	componentWillUnmount() {
+		if (this.state.endnext) {
+			this.state.endnext();
+		}
 		px.view({});
 	}
 
@@ -864,6 +876,42 @@ module.exports = class Match extends preact.Component {
 					top: self.state.tooly + 'px',
 				},
 			}));
+		}
+		children.push(h('input', {
+			type: 'button',
+			value: self.state.resigning ? 'Confirm' : 'Resign',
+			onClick: function() { self.state.funcResign() },
+			style: {
+				position: 'absolute',
+				left: '8px',
+				top: '20px',
+			},
+		}));
+		if (!self.props.data.spectate) {
+			if (self.state.cancelText) {
+				children.push(h('input', {
+					type: 'button',
+					value: self.state.cancelText,
+					onClick: function() { self.state.funcCancel() },
+					style: {
+						position: 'absolute',
+						left: '800px',
+						top: '560px',
+					},
+				}));
+			}
+			if (self.state.endText) {
+				children.push(h('input', {
+					type: 'button',
+					value: self.state.endText,
+					onClick: function() { self.state.funcEnd() },
+					style: {
+						position: 'absolute',
+						left: '800px',
+						top: '530px',
+					},
+				}));
+			}
 		}
 
 		return h('div', { children: children });
