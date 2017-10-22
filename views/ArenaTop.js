@@ -1,8 +1,6 @@
 "use strict";
 const px = require("../px"),
-	dom = require("../dom"),
 	sock = require("../sock"),
-	svg = require("../svg"),
 	chat = require("../chat"),
 	Cards = require("../Cards"),
 	Components = require('../Components'),
@@ -10,15 +8,6 @@ const px = require("../px"),
 
 module.exports = class ArenaTop extends preact.Component {
 	componentDidMount() {
-		if (!this.svg) {
-			const s = this.svg = dom.svg();
-			s.setAttribute("width", "128");
-			s.setAttribute("height", "256");
-			s.style.pointerEvents = "none";
-			s.style.position = 'absolute';
-			s.style.display = 'none';
-		}
-		document.body.appendChild(this.svg);
 		sock.emit("arenatop", this.props);
 		const self = this;
 		px.view({
@@ -28,10 +17,6 @@ module.exports = class ArenaTop extends preact.Component {
 				}
 			}
 		});
-	}
-
-	componentWillUnmount() {
-		document.body.removeChild(this.svg);
 	}
 
 	render() {
@@ -56,19 +41,24 @@ module.exports = class ArenaTop extends preact.Component {
 				const cname = h('span', {
 					className: 'atoptext',
 					onMouseEnter: function(e) {
-						dom.svgToSvg(self.svg, svg.card(card.code));
-						self.svg.style.left = e.clientX+4+'px';
-						self.svg.style.top = e.clientY+4+'px';
-						self.svg.style.display = '';
+						self.setState({card: card, cardx: e.clientX+4, cardy: e.clientY+4});
 					},
 					onMouseLeave: function() {
-						self.svg.style.display = 'none';
+						self.setState({card: false});
 					},
 				}, card.name);
 				lic.push(cname);
 				return h("li", { className: i != info.length-1 && 'underline', children: lic });
 			}),
 		});
-		return h('div', {}, ol, h(Components.ExitBtn, { x: 8, y: 300, doNav: this.props.doNav, }));
+		return h('div', {},
+			ol,
+			h(Components.ExitBtn, { x: 8, y: 300, doNav: this.props.doNav, }),
+			self.state.card && h(Components.Card, {
+				card: self.state.card,
+				x: self.state.cardx,
+				y: self.state.cardy,
+			})
+		);
 	}
 }
