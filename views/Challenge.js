@@ -74,8 +74,8 @@ module.exports = class Challenge extends preact.Component {
 		function labelText(x, y, text) {
 			return h('span', { style: { fontSize: '18px', color: '#fff', pointerEvents: 'none', position: 'absolute', left: x+'px', top: y+'px' }});
 		}
-		var deck = etgutil.decodedeck(sock.getDeck()), mark = etgutil.fromTrueMark(deck.pop());
-		const children = [h(Components.DeckDisplay, {deck:deck})],
+		const deck = etgutil.decodedeck(sock.getDeck());
+		const children = [h(Components.DeckDisplay, {deck:deck, renderMark:true})],
 			foename = !self.state.challenge && h(Components.Input, {
 				placeholder:"Challenge",
 				opt:"foename",
@@ -135,9 +135,8 @@ module.exports = class Challenge extends preact.Component {
 			aimark = h(Components.Input, { placeholder: "Mark", opt: "aimark", num: true, x: 440, y: 450 }),
 			aidraw = h(Components.Input, { placeholder: "Draw", opt: "aidraw", num: true, x: 440, y: 475 }),
 			aideckpower = h(Components.Input, { placeholder: "Deck", opt: "aideckpower", num: true, x: 440, y: 500}),
-			challengeLabel = self.state.challenge && h('div', { style: { position: 'absolute', left: '190px', top: '375px' } }, 'You have challenged ' + self.state.challenge),
-			markSprite = h('span', { className: 'ico e'+mark, style: { position: 'absolute', left: '66px', top: '200px' }});
-		children.push(markSprite,
+			challengeLabel = self.state.challenge && h('div', { style: { position: 'absolute', left: '190px', top: '375px' } }, 'You have challenged ' + self.state.challenge);
+		children.push(
 			h(Components.ExitBtn, { x: 190, y: 300, onClick: exitClick }),
 			labelText(190, 400, "Own stats:"),
 			pvphp, pvpmark, pvpdraw, pvpdeck);

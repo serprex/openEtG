@@ -16,21 +16,13 @@ module.exports = function(props) {
 	function renderInfo(info, y){
 		if (info){
 			if (y) info.card = etgutil.asUpped(info.card, true);
-			var mark, i = 0, adeck = '05' + info.card.toString(32) + info.deck;
-			etgutil.iterdeck(adeck, function(code){
-				const ismark = etgutil.fromTrueMark(code);
-				if (~ismark){
-					mark = ismark;
-					return;
-				}
-				children.push(h(Components.CardImage, {
-					x: 100 + Math.floor(i / 10) * 99,
-					y: y + 32+ (i % 10) * 19,
-					card: Cards.Codes[code],
-				}));
-				i++;
-			});
+			const adeck = '05' + info.card.toString(32) + info.deck;
 			children.push(
+				h(Components.DeckDisplay, {
+					deck: etgutil.decodedeck(adeck),
+					renderMark: true,
+					y: y,
+				}),
 				h(Components.Text, { style: { position: 'absolute', left: '100px', top: 4+y+'px' }, text: "W-L: " + (info.win || 0) + " - " + (info.loss || 0) + ", Rank: " + (info.rank == undefined ? "Inactive" : (info.rank + 1)) + ", " + ((info.win || 0) * 3 + (info.loss || 0) * 1) + "$"}),
 				h('span', { style: { position: 'absolute', left: '330px', top: 4+y+'px' }}, adeck),
 				h('span', { style: { position: 'absolute', left: '400px', top: 224+y+'px' }}, 'Age: ' + info.day),
@@ -71,8 +63,7 @@ module.exports = function(props) {
 							p2hp:info.curhp, p2markpower:info.mark, p2drawpower:info.draw, ai: true });
 						props.doNav(require("./Match"), gameData);
 					}
-				}),
-				h('span', { className: 'ico e' + mark, style: { position: 'absolute', left: '66px', top: 200+y+'px' } })
+				})
 			);
 		}
 	}

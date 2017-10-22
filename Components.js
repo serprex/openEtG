@@ -166,17 +166,35 @@ exports.Card = function(props) {
 }
 
 function DeckDisplay(props) {
-	return h('div', {
-		children: props.deck.map(function(code, i){
-			const card = Cards.Codes[code];
-			return card && h(CardImage, {
+	let mark = -1, i = -1;
+	const children = props.deck.map(function(code){
+		const card = Cards.Codes[code];
+		if (card) {
+			i++;
+			return h(CardImage, {
 				card: card,
-				onMouseOver: function() { return props.onMouseOver(i, code); },
-				onClick: function() { return props.onClick(i, code); },
+				onMouseOver: props.onMouseOver && function() { return props.onMouseOver(i, code); },
+				onClick: props.onClick && function() { return props.onClick(i, code); },
 				x: (props.x || 0) + 100 + Math.floor(i / 10) * 99,
-				y: 32 + (i % 10) * 19,
+				y: (props.y || 0) + 32 + (i % 10) * 19,
 			});
-		}),
+		} else {
+			const ismark = etgutil.fromTrueMark(code);
+			if (~ismark) mark = ismark
+		}
+	});
+	if (~mark && props.renderMark) {
+		children.push(h('span', {
+			className: 'ico e' + mark,
+			style: {
+				position: 'absolute',
+				left: (props.x||0)+66+'px',
+				top: (props.y||0)+200+'px',
+			},
+		}));
+	}
+	return h('div', {
+		children: children,
 	});
 }
 exports.DeckDisplay = DeckDisplay;
