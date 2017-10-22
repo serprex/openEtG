@@ -228,16 +228,10 @@ function startMatch(self, game, gameData, doNav) {
 	var permsprite = [new Array(16), new Array(16)];
 	var shiesprite = new Array(2);
 	var weapsprite = new Array(2);
-	var hptext = [new dom.text(""), new dom.text("")], hpxy = [];
 	var playerOverlay = [new PIXI.Sprite(gfx.nopic), new PIXI.Sprite(gfx.nopic)];
 	var handOverlay = [new PIXI.Sprite(gfx.nopic), new PIXI.Sprite(gfx.nopic)];
 	var sacrificeOverlay = [new PIXI.Sprite(gfx.sacrifice), new PIXI.Sprite(gfx.sacrifice)];
 	for (let j = 0;j < 2;j++) {
-		hptext[j].style.textAlign = "center";
-		hptext[j].style.width = "100px";
-		hptext[j].style.pointerEvents = "none";
-		hptext[j].style.fontSize = "12px";
-		hptext[j].style.lineHeight = "1.1";
 		playerOverlay[j].width = 95;
 		playerOverlay[j].height = 80;
 		handOverlay[j].position.set(j ? 3 : 759, j ? 75 : 305);
@@ -351,9 +345,7 @@ function startMatch(self, game, gameData, doNav) {
 		}
 		playerOverlay[j].anchor.set(.5, .5);
 		playerOverlay[j].position.set(50, 555);
-		hpxy[j] = new PIXI.math.Point(50, 550);
 		if (j) {
-			ui.reflectPos(hpxy[j]);
 			ui.reflectPos(playerOverlay[j]);
 			playerOverlay[j].y += 15;
 		}
@@ -362,7 +354,6 @@ function startMatch(self, game, gameData, doNav) {
 				game.targeting.cb(game.players(j));
 			}
 		};
-		dom.add(div, [hpxy[j].x-50, playerOverlay[j].y - 24, hptext[j]]);
 		gameui.addChild(handOverlay[j]);
 		gameui.addChild(sacrificeOverlay[j]);
 		gameui.addChild(playerOverlay[j]);
@@ -694,8 +685,11 @@ function startMatch(self, game, gameData, doNav) {
 			if (px.hitTest(playerOverlay[j])){
 				tooltip = setInfo(tooltip, pl);
 			}else{
-				var poison = pl.status.get("poison"), poisoninfo = (poison > 0 ? poison + " 1:2" : poison < 0 ? -poison + " 1:7" : "") + (pl.status.get("neuro") ? " 1:10" : "");
-				hptext[j].text = pl.hp + "/" + pl.maxhp + "\n" + pl.deck.length + "cards" + (!self.state.cloaked && game.expectedDamage[j] ? "\nDmg: " + game.expectedDamage[j] : "") + (poisoninfo ? "\n" + poisoninfo : "");
+				const poison = pl.status.get("poison"), poisoninfo = (poison > 0 ? poison + " 1:2" : poison < 0 ? -poison + " 1:7" : "") + (pl.status.get("neuro") ? " 1:10" : "");
+				const hptext = pl.hp + "/" + pl.maxhp + "\n" + pl.deck.length + "cards" + (!self.state.cloaked && game.expectedDamage[j] ? "\nDmg: " + game.expectedDamage[j] : "") + (poisoninfo ? "\n" + poisoninfo : "");
+				if (self.state['hptext'+j] != hptext) {
+					self.setState({['hptext'+j]: hptext});
+				}
 			}
 		}
 		if (floodvisible !== self.state.flooded) self.setState({ flooded: floodvisible });
@@ -724,6 +718,8 @@ module.exports = class Match extends preact.Component {
 			tooly: 0,
 			hovercode: 0,
 			foeplays: [],
+			hptext0: '',
+			hptext1: '',
 			quantatext0: ['','','','','','','','','','','',''],
 			quantatext1: ['','','','','','','','','','','',''],
 			mark0: props.game.player1.mark,
@@ -827,6 +823,19 @@ module.exports = class Match extends preact.Component {
 					textShadow: '2px 2px 1px #000,2px 2px 2px #000',
 				},
 			}, self.state['markpower'+j] !== 1 && self.state['markpower'+j]));
+			children.push(h(Components.Text, {
+				text: self.state['hptext'+j],
+				style: {
+					textAlign: 'center',
+					width: '100px',
+					pointerEvents: 'none',
+					fontSize: '12px',
+					lineHeight: '1.1',
+					position: 'absolute',
+					left: j?'800px':'0px',
+					top: j?'36px':'531px',
+				},
+			}));
 			if (self.state['sabbath'+j]) {
 				children.push(h('span', {
 					className: 'ico sabbath',
