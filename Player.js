@@ -231,7 +231,7 @@ Player.prototype.drawcard = function(drawstep) {
 			if (~this.addCard(this.deck.pop())){
 				this.proc("draw", drawstep);
 				if (this.deck.length == 0 && this.game.player1 == this && !Effect.disable)
-					Effect.mkSpriteFadeText(["Last card!", 32, "#fff", "#000"]);
+					Effect.mkSpriteFadeText("Last card!", { x: 450, y: 300 });
 			}
 		}else this.game.setWinner(this.foe);
 	}

@@ -360,9 +360,7 @@ function startMatch(self, game, gameData, doNav) {
 	px.setInteractive.apply(null, playerOverlay);
 	var fgfx = new PIXI.Graphics();
 	gameui.addChild(fgfx);
-	var anims = new PIXI.Container();
-	gameui.addChild(anims);
-	Effect.register(anims);
+	Effect.clear();
 	function onkeydown(e) {
 		if (e.target.id == 'chatinput') return;
 		var kc = e.which || e.keyCode;
@@ -699,7 +697,10 @@ function startMatch(self, game, gameData, doNav) {
 		if (tooltip !== self.state.tooltip) {
 			self.setState({ tooltip: tooltip, toolx: px.mouse.x, tooly: px.mouse.y });
 		}
-		Effect.next(self.state.cloaked);
+		const effects = Effect.next(self.state.cloaked);
+		if (effects != self.state.effects) {
+			self.setState({ effects: effects });
+		}
 	}
 	gameStep();
 	const gameInterval = setInterval(gameStep, 30);
@@ -858,6 +859,9 @@ module.exports = class Match extends preact.Component {
 					},
 				}));
 			}
+		}
+		if (self.state.effects) {
+			Array.prototype.push.apply(children, self.state.effects);
 		}
 		if (self.state.hovercode) {
 			children.push(h(Components.Card, {
