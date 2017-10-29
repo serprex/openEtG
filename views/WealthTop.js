@@ -23,7 +23,7 @@ module.exports = class WealthTop extends preact.Component {
 		if (top) {
 			for (var i = 0; i < top.length; i+=2) {
 				const ol = i<50?ol1c:ol2c;
-				const li = h('li', { className: i%50 != 48 && 'underline' }, top[i], h('span', { className: 'floatRight' }, Math.round(top[i+1])));
+				const li = h('li', {}, top[i], h('span', { className: 'floatRight' }, Math.round(top[i+1])));
 				ol.push(li);
 			}
 		}

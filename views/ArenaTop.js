@@ -48,7 +48,7 @@ module.exports = class ArenaTop extends preact.Component {
 					},
 				}, card.name);
 				lic.push(cname);
-				return h("li", { className: i != info.length-1 && 'underline', children: lic });
+				return h('li', { children: lic });
 			}),
 		});
 		return h('div', {},
