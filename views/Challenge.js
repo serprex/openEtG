@@ -1,5 +1,4 @@
 const px = require("../px"),
-	dom = require("../dom"),
 	sock = require("../sock"),
 	util = require("../util"),
 	mkGame = require('../mkGame'),

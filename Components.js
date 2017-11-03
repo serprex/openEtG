@@ -23,7 +23,7 @@ exports.rect = function(x, y, wid, hei) {
 
 exports.Box = function(props) {
 	return h('div', {
-		class: 'bgbox',
+		className: 'bgbox',
 		children: props.children,
 		style: {
 			position: 'absolute',
@@ -36,7 +36,7 @@ exports.Box = function(props) {
 }
 
 function CardImage(props) {
-	let card = props.card, spans = [h('span', {}, card.name)];
+	let card = props.card, spans = [card.name];
 	let bordcol = card && card.shiny ? '#daa520' : '#222';
 	let bgcol = card ? ui.maybeLightenStr(card) : card === null ? '#876' : '#111';
 	if (card && card.cost) {
@@ -48,7 +48,7 @@ function CardImage(props) {
 		}, card.cost, card.costele !== card.element && h('span', { className: 'ico te' + card.costele })));
 	}
 	return h('div', {
-		class: 'cardslot',
+		className: 'cardslot',
 		onMouseOver: props.onMouseOver,
 		onClick: props.onClick,
 		style: {
@@ -66,7 +66,7 @@ exports.CardImage = CardImage;
 
 exports.Input = function(props){
 	return h('input', {
-		class: props.num ? 'numput' : undefined,
+		className: props.num ? 'numput' : undefined,
 		ref: props.opt ? function(ctrl) {
 			ctrl && options.register(props.opt, ctrl, props.nopersist);
 		} : undefined,
@@ -83,11 +83,13 @@ exports.Input = function(props){
 
 exports.Text = function(props){
 	if (!props.text) return null;
-	var text = props.text.toString().replace(/\|/g, ' / ');
-	var sep = /\d\d?:\d\d?|\$|\n/g, reres, lastindex = 0;
+	const text = props.text.toString().replace(/\|/g, ' / ');
+	const sep = /\d\d?:\d\d?|\$|\n/g;
+	const icoprefix = 'ico ' + (props.icoprefix || 'ce');
+	let reres, lastindex = 0;
 	const elec = [];
 	while (reres = sep.exec(text)){
-		var piece = reres[0];
+		const piece = reres[0];
 		if (reres.index != lastindex){
 			elec.push(text.slice(lastindex, reres.index));
 		}
@@ -96,17 +98,17 @@ exports.Text = function(props){
 		}else if (piece == "$") {
 			elec.push(h('span', { className: 'ico gold' }));
 		}else if (/^\d\d?:\d\d?$/.test(piece)) {
-			var parse = piece.split(":");
-			var num = parseInt(parse[0]);
+			const parse = piece.split(":");
+			const num = parseInt(parse[0]);
 			if (num == 0) {
 				elec.push('0');
 			} else if (num < 4) {
-				var icon = h('span', { className: 'ico ce'+parse[1] });
-				for (var j = 0;j < num;j++) {
+				const icon = h('span', { className: icoprefix+parse[1] });
+				for (let j = 0;j < num;j++) {
 					elec.push(icon);
 				}
 			}else{
-				elec.push(parse[0], h('span', { className: 'ico ce'+parse[1] }))
+				elec.push(parse[0], h('span', { className: icoprefix+parse[1] }))
 			}
 		}
 		lastindex = reres.index + piece.length;
@@ -114,7 +116,7 @@ exports.Text = function(props){
 	if (lastindex != text.length){
 		elec.push(text.slice(lastindex));
 	}
-	return h('div', { class: props.class, style: props.style, children: elec });
+	return h('div', { className: props.className, style: props.style, children: elec });
 }
 
 function IconBtn(props) {

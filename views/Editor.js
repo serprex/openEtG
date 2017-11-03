@@ -1,7 +1,6 @@
 "use strict";
 const px = require('../px'),
 	etg = require('../etg'),
-	gfx = require('../gfx'),
 	chat = require('../chat'),
 	sock = require('../sock'),
 	Cards = require('../Cards'),

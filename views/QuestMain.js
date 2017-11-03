@@ -113,7 +113,7 @@ module.exports = class QuestMain extends preact.Component {
 					ytot += points[i+1];
 				}
 				const icon = h('div', {
-					class: 'ico e13',
+					className: 'ico e13',
 					style: {
 						transform: "translate(-50%,-50%)",
 						pointerEvents: "none",

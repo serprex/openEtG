@@ -1,5 +1,4 @@
 const px = require("../px"),
-	gfx = require("../gfx"),
 	chat = require("../chat"),
 	sock = require("../sock"),
 	audio = require("../audio"),
@@ -14,23 +13,7 @@ module.exports = class Login extends preact.Component {
 	}
 
 	componentDidMount() {
-		const self = this;
-		if (gfx.load){
-			gfx.load(function(progress){
-				self.setState({ progress: progress });
-			}, function(){
-				audio.playMusic("openingMusic");
-				if (sock.user || self.sandbox) {
-					if (sock.user && !sock.user.accountbound && !sock.user.pool) {
-						self.props.doNav(require("./ElementSelect"));
-					} else {
-						self.props.doNav(require("./MainMenu"));
-					}
-				}
-			});
-		}
-
-		var xhr = new XMLHttpRequest();
+		const self = this, xhr = new XMLHttpRequest();
 		xhr.addEventListener("load", function(){
 			var data = JSON.parse(this.responseText)[0];
 			self.setState({
@@ -72,8 +55,7 @@ module.exports = class Login extends preact.Component {
 		});
 		var login = h("input", { type: "button", value: "Login", onClick: loginClick});
 		var btnsandbox = h("input", {type: "button", value: "Sandbox", onClick: function(){
-			if (gfx.loaded) self.props.doNav(require("./MainMenu"));
-			else self.sandbox = true;
+			self.props.doNav(require("./MainMenu"));
 		}});
 		var bg_login = h("img", { src: "assets/bg_login.png", className: "bgimg" });
 		var username = h("input", {
@@ -121,12 +103,10 @@ module.exports = class Login extends preact.Component {
 						if (options.remember && typeof localStorage !== "undefined"){
 							localStorage.auth = data.auth;
 						}
-						if (gfx.loaded) {
-							if (!sock.user.accountbound && !sock.user.pool) {
-								self.props.doNav(require("./ElementSelect"));
-							} else {
-								self.props.doNav(require("./MainMenu"));
-							}
+						if (!sock.user.accountbound && !sock.user.pool) {
+							self.props.doNav(require("./ElementSelect"));
+						} else {
+							self.props.doNav(require("./MainMenu"));
 						}
 					} else {
 						chat(data.err);

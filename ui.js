@@ -13,14 +13,11 @@ exports.maybeLighten = function(card){
 exports.maybeLightenStr = function(card){
 	return exports.strcols[card.element+card.upped*13];
 }
-var Point;
-if (typeof PIXI === "undefined"){
-	Point = function(x,y){
-		this.x = x;
-		this.y = y;
-	};
-	Point.prototype.set = Point;
-}else Point = PIXI.math.Point;
+function Point(x,y){
+	this.x = x;
+	this.y = y;
+};
+Point.prototype.set = Point;
 function reflectPos(obj) {
 	var pos = obj instanceof Point ? obj : obj.position;
 	pos.set(900 - pos.x, 600 - pos.y);
@@ -61,7 +58,6 @@ function tgtToPos(t) {
 		return cardPos(t.owner == t.owner.game.player2, t.getIndex());
 	} else console.log("Unknown target");
 }
-exports.reflectPos = reflectPos;
 exports.creaturePos = creaturePos;
 exports.permanentPos = permanentPos;
 exports.cardPos = cardPos;

@@ -1,6 +1,5 @@
 'use strict';
 const px = require('../px'),
-	gfx = require('../gfx'),
 	Cards = require('../Cards'),
 	etgutil = require('../etgutil'),
 	userutil = require('../userutil'),

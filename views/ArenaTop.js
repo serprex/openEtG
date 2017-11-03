@@ -41,7 +41,7 @@ module.exports = class ArenaTop extends preact.Component {
 				const cname = h('span', {
 					className: 'atoptext',
 					onMouseEnter: function(e) {
-						self.setState({card: card, cardx: e.clientX+4, cardy: e.clientY+4});
+						self.setState({card: card, cardx: e.pageX+4, cardy: e.pageY+4});
 					},
 					onMouseLeave: function() {
 						self.setState({card: false});

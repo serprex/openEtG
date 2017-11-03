@@ -76,8 +76,8 @@ Game.prototype.updateExpectedDamage = function(){
 		this.expectedDamage[0] = this.expectedDamage[1] = 0;
 		if (!this.winner){
 			Effect.disable = true;
-			for(var i = 0; i<3; i++){
-				var gclone = this.clone();
+			for(let i = 0; i<3; i++){
+				const gclone = this.clone();
 				gclone.player1.permanents.forEach(removeSoPa);
 				gclone.player2.permanents.forEach(removeSoPa);
 				gclone.rng.seed(gclone.rng.mt[0]^(i*997));

@@ -1,8 +1,6 @@
 "use strict";
 const px = require('../px'),
-	dom = require('../dom'),
 	etg = require('../etg'),
-	gfx = require('../gfx'),
 	chat = require('../chat'),
 	sock = require('../sock'),
 	util = require('../util'),
@@ -107,7 +105,7 @@ module.exports = class MainMenu extends preact.Component {
 			selectedDeck: sock.user ? sock.user.selectedDeck : '',
 		};
 		this.resetTip = function (e) {
-			if (e.target.tagName.match(/^(DIV|CANVAS|HTML)$/)) {
+			if (e.target.tagName && e.target.tagName.match(/^(DIV|CANVAS|HTML)$/)) {
 				const tipText = sock.user ? tipjar[self.state.tipNumber] : "To register, just type desired username & password in the fields to the right, then click 'Login'";
 				if (tipText !== self.state.tipText) self.setState({ tipText: tipText });
 			}

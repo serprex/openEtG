@@ -33,7 +33,7 @@ exports.Tutor = class Tutor extends preact.Component {
 					if (info.length > 2) style.width = info[2] + "px";
 					if (info.length > 3) style.height = info[3] + "px";
 					return h(Components.Text, {
-						class: 'tutorialbox',
+						className: 'tutorialbox',
 						text: info[info.length-1],
 						style: style,
 					});

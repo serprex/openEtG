@@ -272,7 +272,6 @@ options.register("afk", document.getElementById("afk"), true);
 		}
 	}
 })({
-	leftpane: {click: function(){this.blur()}},
 	chatinput: {keypress: maybeSendChat},
 	offline: {change: offlineChange},
 	afk: {change: afkChange},

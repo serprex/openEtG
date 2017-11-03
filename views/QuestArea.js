@@ -57,7 +57,7 @@ module.exports = class QuestArea extends preact.Component {
 		function QuestButton(props) {
 			const quest = props.quest, stage = props.stage;
 			return h('span', {
-				class: 'imgb',
+				className: 'imgb',
 				style: {
 					border: "2px solid #88aa66",
 					borderRadius: "50%",

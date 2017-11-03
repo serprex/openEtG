@@ -1,7 +1,6 @@
 "use strict";
 var px = require("../px"),
 	etg = require("../etg"),
-	gfx = require("../gfx"),
 	chat = require("../chat"),
 	mkAi = require("../mkAi"),
 	sock = require("../sock"),

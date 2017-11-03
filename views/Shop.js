@@ -121,7 +121,7 @@ module.exports = class Shop extends preact.Component {
 		children.push(bget, bbuy);
 		packdata.forEach(function(pack, n){
 			const g = h('div', {
-				class: 'imgb',
+				className: 'imgb',
 				onClick: function() {
 					const update = { packrarity: n, info2: pack.type + " Pack: " + pack.info};
 					if (~self.state.packele) update.showbuy = true;
