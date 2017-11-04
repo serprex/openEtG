@@ -20,7 +20,7 @@ module.exports = class Trade extends preact.Component {
 		};
 	}
 
-	componentWillMount() {
+	componentDidMount() {
 		const self = this;
 		px.view({ cmds: {
 			cardchosen: function(data){

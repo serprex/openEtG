@@ -9,13 +9,13 @@ const px = require("../px"),
 module.exports = class Login extends preact.Component {
 	constructor(props) {
 		super(props);
-		this.state = { commit: null, progress: 0 };
+		this.state = { commit: null, password: '' };
 	}
 
 	componentDidMount() {
 		const self = this, xhr = new XMLHttpRequest();
 		xhr.addEventListener("load", function(){
-			var data = JSON.parse(this.responseText)[0];
+			const data = JSON.parse(this.responseText)[0];
 			self.setState({
 				commit: h('a', {
 					target: '_blank',
@@ -41,32 +41,25 @@ module.exports = class Login extends preact.Component {
 			if (!sock.user && options.username) {
 				let data = {u:options.username}
 				if (typeof auth !== "string"){
-					data.p = passwordEle.value;
+					data.p = self.state.password;
 				}else data.a = auth;
 				sock.emit("login", data);
 			}
 		}
-		var loadingBar = h("span", {
-			style: {
-				backgroundColor: this.state.progress == 1 ? "#369" : "#fff",
-				height: "32px",
-				width: (this.state.progress*900) + "px",
-			}
-		});
-		var login = h("input", { type: "button", value: "Login", onClick: loginClick});
-		var btnsandbox = h("input", {type: "button", value: "Sandbox", onClick: function(){
+		const login = h("input", { type: "button", value: "Login", onClick: loginClick});
+		const btnsandbox = h("input", {type: "button", value: "Sandbox", onClick: function(){
 			self.props.doNav(require("./MainMenu"));
 		}});
-		var bg_login = h("img", { src: "assets/bg_login.png", className: "bgimg" });
-		var username = h("input", {
+		const bg_login = h("img", { src: "assets/bg_login.png", className: "bgimg" });
+		const username = h("input", {
 			placeholder: 'Username',
 			autofocus: true,
 			tabIndex: '1',
 			onKeyPress: maybeLogin,
 			ref: function(ctrl) { ctrl && options.register('username', ctrl); },
 		});
-		var passwordEle, password = h("input", { ref: function(input) { passwordEle = input; }, type: 'password', placeholder: 'Password', tabIndex: '2', onKeyPress: maybeLogin });
-		var rememberCheck = h("input", {
+		const password = h("input", { onInput: function(e){ self.setState({ password: e.target.value }) }, value: self.state.password, type: 'password', placeholder: 'Password', tabIndex: '2', onKeyPress: maybeLogin });
+		const rememberCheck = h("input", {
 			type: 'checkbox',
 			ref: function(ctrl) { ctrl && options.register('remember', ctrl); },
 			onChange: function() {
@@ -76,23 +69,23 @@ module.exports = class Login extends preact.Component {
 				}
 			},
 		});
-		var remember = h("label", {}, rememberCheck, 'Remember me');
+		const remember = h("label", {}, rememberCheck, 'Remember me');
 		if (options.remember && typeof localStorage !== "undefined" && localStorage.auth){
 			loginClick(localStorage.auth);
 		}
-		var tutlink = h("a", { href: "forum/?topic=267", target: "_blank" }, "Tutorial");
-		var div = [[0, 0, bg_login],
+		const tutlink = h("a", { href: "forum/?topic=267", target: "_blank" }, "Tutorial");
+		const div = [[0, 0, bg_login],
 			[270, 350, username],
 			[270, 380, password],
 			[430, 380, remember],
 			[430, 350, login],
 			[270, 424, tutlink],
 			[530, 350, btnsandbox]];
-		if (loadingBar) div.push([0, 568, loadingBar]);
-		div = div.map(function(x){
+		for (let i=0; i<div.length; i++) {
+			const x = div[i];
 			x[2].attributes.style = { position: 'absolute', left: x[0]+'px', top: x[1]+'px' };
-			return x[2];
-		});
+			div[i] = x[2];
+		};
 		div.push(this.state.commit);
 		px.view({
 			cmds:{

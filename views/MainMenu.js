@@ -374,16 +374,13 @@ module.exports = class MainMenu extends preact.Component {
 			document.getElementById("rightpane").style.display = options.hideRightpane ? "none" : "";
 			sock.emit("chatus", {hide: !!options.offline || !!options.hideRightpane});
 		}
-		var foectrl = h('input', {
-			ref: function(x) {
-				if (x) options.register('foename', x, true);
-			},
+		playc.push(h('input', {
+			ref: function(ctrl) { ctrl && options.register('foename', ctrl, true); },
 			placeholder: 'Trade/Library',
 			style: {
 				marginLeft: '24px',
 			},
-		});
-		playc.push(foectrl);
+		}));
 		soundChange();
 		musicChange();
 		function loadQuickdeck(x) {

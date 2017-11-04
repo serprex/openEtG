@@ -41,6 +41,7 @@ module.exports = class Editor extends preact.Component {
 			pool: pool,
 			deck: deckmark.deck,
 			mark: deckmark.mark,
+			deckname: sock.user.selectedDeck,
 			arattr: props.ainfo && {
 				hp: attrval(props.ainfo.hp, 200),
 				mark: attrval(props.ainfo.mark, 2),
@@ -220,8 +221,8 @@ module.exports = class Editor extends preact.Component {
 			);
 		}
 		function saveButton() {
-			if (decknamectrl.value) {
-				sock.user.selectedDeck = decknamectrl.value;
+			if (this.state.deckname) {
+				sock.user.selectedDeck = this.state.deckname;
 				saveDeck();
 				self.setState({});
 			}
@@ -330,7 +331,7 @@ module.exports = class Editor extends preact.Component {
 					h('input', {
 						type: 'button',
 						value: 'Load',
-						onClick: function() { loadDeck(decknamectrl.value) },
+						onClick: function() { loadDeck(this.state.deckname) },
 						style: {
 							position: 'absolute',
 							left: '8px',
@@ -427,14 +428,13 @@ module.exports = class Editor extends preact.Component {
 		});
 		const cardArt = h(Components.Card, { x: 734, y: 8, card: this.state.card });
 		editorui.push(decksprite, cardsel, cardArt);
-		var decknamectrl;
 		if (!self.props.acard){
 			if (sock.user){
 				const deckname = h('input', {
 					placeholder: 'Name',
-					value: sock.user.selectedDeck,
-					ref: function(ctrl) {
-						decknamectrl = ctrl;
+					value: self.state.deckname,
+					onInput: function(e) {
+						self.setState({deckname: e.target.value});
 					},
 					onKeyPress: function(e) {
 						if (e.keyCode == 13) {
