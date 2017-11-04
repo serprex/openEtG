@@ -1,8 +1,8 @@
 "use strict";
-var ui = require("./ui");
-var Cards = require("./Cards");
-var etgutil = require("./etgutil");
-var cssPrefix = "<style type='text/css'><![CDATA[@import url(https://fonts.googleapis.com/css?family=Dosis);text{font-family:Dosis;font-size:12px}";
+const ui = require("./ui"),
+	Cards = require("./Cards"),
+	etgutil = require("./etgutil"),
+	cssPrefix = "<style type='text/css'><![CDATA[@import url(https://fonts.googleapis.com/css?family=Dosis);text{font-family:Dosis;font-size:12px}";
 function eleChar(card){
 	return String.fromCharCode(97+card.element+(card.upped?13:0));
 }
@@ -31,7 +31,7 @@ exports.card = function(code){
 exports.deck = function(deck){
 	function classString(){
 		var ret = "";
-		for(var cls in classes){
+		for(const cls in classes){
 			ret += "."+cls+"{"+classes[cls]+"}";
 		}
 		return ret;
@@ -59,7 +59,7 @@ exports.deck = function(deck){
 			x+=100;
 		}
 	});
-	for (var elecls in paths){
+	for (const elecls in paths){
 		pathsvg += "<path class='"+elecls+"' d='"+paths[elecls]+"'/>";
 	}
 	if (mark !== undefined){

@@ -257,7 +257,7 @@ Thing.prototype.mutantactive = function(){
 	}
 }
 Thing.prototype.isMaterial = function(type) {
-	return (type == etg.Permanent ? this.type <= type : type ? this.type == type : this.type != etg.Spell && this.type != etg.Player) && !this.status.get("immaterial") && !this.status.get("burrowed");
+	return (type == etg.Permanent ? this.type <= type : type ? this.type == type : this.type != etg.Player) && !this.status.get("immaterial") && !this.status.get("burrowed");
 }
 function combineactive(a1, a2){
 	if (!a1){

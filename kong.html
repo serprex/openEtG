@@ -1,15 +1,12 @@
 <!DOCTYPE html>
-<title>openEtG</title>
+<title>openEtG-kong</title>
 <script src="https://cdn1.kongregate.com/javascripts/kongregate_api.js"></script>
-<script src="pixi.min.js"></script>
 <script src="etgify.js"></script>
-<script src="preact.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/preact/8.2.6/preact.min.js" integrity="sha256-eywBMR9DKSaKNsE+pfdHEvuFJCYUiATCyqAzSDR6DKg=" crossorigin="anonymous" onload="tryInit()"></script>
 <script>"use strict";
 	window.PIXI=require("./pixi");
 	require.f("views/Login",function(m){
 		const px = require("./px"),
-			dom = require("./dom"),
-			gfx = require("./gfx"),
 			sock = require("./sock"),
 			audio = require("./audio");
 		m.exports=function(){
@@ -17,15 +14,8 @@
 				document.body.removeChild(document.getElementById('loggingin'));
 				preact.render(preact.h(require('./views/App'), { view: require(mod) }), document.body);
 			}
-			if (gfx.load) {
-				gfx.load(function(progress){
-				}, function(){
-					audio.playMusic("openingMusic");
-					if (sock.user || sandbox) ;
-				});
-			}
-			var sandbox = kong.services.isGuest();
-			if (sandbox && gfx.loaded){
+			const sandbox = kong.services.isGuest();
+			if (sandbox){
 				doNav("./views/MainMenu");
 			} else {
 				sock.emit("konglogin", {u:kong.services.getUserId(),g:kong.services.getGameAuthToken()});
@@ -37,7 +27,7 @@
 								sock.user = data;
 								if (!sock.user.accountbound && !sock.user.pool){
 									doNav("./views/ElementSelect");
-								}else if (gfx.loaded){
+								}else{
 									doNav("./views/MainMenu");
 								}
 							}else{
@@ -65,5 +55,4 @@
 	<div id="chatBox"></div>
 	<textarea id="chatinput" placeholder="Chat"></textarea>
 </div>
-<canvas id="leftpane" width=900 height=600></canvas>
 <div id='loggingin'>Logging in..</div>

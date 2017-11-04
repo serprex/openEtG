@@ -19,14 +19,25 @@ module.exports = function(url, resolve, reject){
 	if (url.startsWith('Cards/') && !fs.existsSync(url)) {
 		const code = url.match(/^Cards\/([a-v\d]{3})\.png$/);
 		if (code) {
-			const unupped = etgutil.asShiny(etgutil.asUpped(parseInt(code[1], 32), false), false).toString(32);
-			if (unupped != code[1]) {
+			const icode = parseInt(code[1], 32),
+				isShiny = icode&0x4000;
+			if (isShiny) {
 				resolve({
 					status: '302',
-					head: { Location: `/Cards/${unupped}.png` },
+					head: { Location: `/Cards/${etgutil.asShiny(icode, false).toString(32)}.png` },
 					date: new Date(),
 					buf: '',
 				});
+			} else {
+				const unupped = etgutil.asUpped(icode, false).toString(32);
+				if (unupped != code[1]) {
+					resolve({
+						status: '302',
+						head: { Location: `/Cards/${unupped}.png` },
+						date: new Date(),
+						buf: '',
+					});
+				}
 			}
 		}
 		reject("ENOENT");

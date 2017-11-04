@@ -84,18 +84,19 @@ const activeInfo = {
 };
 
 function ThingInst(props) {
-	const obj = props.obj, game = props.game;
-	const scale = obj.type == etg.Weapon || obj.type == etg.Shield ? 1.2 :
-		obj.type == etg.Spell ? .85 : 1;
+	const obj = props.obj, game = props.game,
+		scale = obj.type === etg.Weapon || obj.type === etg.Shield ? 1.2 : obj.type == etg.Spell ? .85 : 1,
+		isSpell = obj.type === etg.Spell;
 	const children = [
 		h('img', {
 			src: '/Cards/' + obj.card.code.toString(32) + '.png',
 			style: {
 				position: 'absolute',
 				left: '0',
-				top: 8 * scale + 'px',
+				top: isSpell ? '0' : '10px',
 				width: 64 * scale + 'px',
 				height: 64 * scale + 'px',
+				backgroundColor: ui.maybeLightenStr(obj.card),
 			}
 		})
 	];
@@ -114,12 +115,12 @@ function ThingInst(props) {
 		obj.status.get("frozen"),
 	];
 	for (let k=0; k<7; k++) {
-		if (visible[k]) {
+		if (!isSpell && visible[k]) {
 			children.push(h('div', {
 				className: 'ico s'+k,
 				style: {
 					position: 'absolute',
-					top: 64 * scale + 'px',
+					top: 64 * scale + 10 + 'px',
 					left: [32, 8, 8, 0, 24, 16, 8][k] + 'px',
 					opacity: '.6',
 				},
@@ -127,7 +128,7 @@ function ThingInst(props) {
 		}
 	}
 	for (let k=0; k<3; k++) {
-		if (bordervisible[k]) {
+		if (!isSpell && bordervisible[k]) {
 			children.push(h('div', {
 				className: 'ico sborder'+k,
 				style: {
@@ -140,7 +141,7 @@ function ThingInst(props) {
 		}
 	}
 	let statText, topText;
-	if (obj.type !== etg.Spell) {
+	if (!isSpell) {
 		const charges = obj.status.get('charges');
 		topText = obj.activetext();
 		if (obj.type === etg.Creature) {
@@ -160,6 +161,8 @@ function ThingInst(props) {
 		} else if (obj.type === etg.Shield) {
 			statText = charges ? 'x' + charges : obj.truedr().toString();
 		}
+	} else {
+		statText = obj.card.cost + ':' + obj.card.costele;
 	}
 	if (topText) {
 		children.push(h(Components.Text, {
@@ -180,7 +183,7 @@ function ThingInst(props) {
 			icoprefix: 'te',
 			style: {
 				position: 'absolute',
-				top: '10px',
+				top: isSpell ? '0' : '10px',
 				right: '0',
 				height: '11px',
 				backgroundColor: ui.maybeLightenStr(obj.card),
@@ -212,10 +215,10 @@ function ThingInst(props) {
 		children: children,
 		style: {
 			position: 'absolute',
-			left: pos.x - 36 * scale + 'px',
+			left: pos.x - 32 * scale + 'px',
 			top: pos.y - 36 * scale + 'px',
-			width: 72 * scale + 'px',
-			height: 72 * scale + 'px',
+			width: 64 * scale + 4 + 'px',
+			height: (isSpell ? 64 : 72) * scale + 4 + 'px',
 			opacity: obj.isMaterial() ? '1' : '.7',
 			border: tgtstyle(game, obj),
 			color: obj.card.upped ? '#000' : '#fff',
@@ -496,11 +499,11 @@ function startMatch(self, game, gameData, doNav) {
 
 function tgtstyle(game, obj) {
 	if (game.targeting) {
-		if (game.targeting.filter(obj)) return '#f00 1px solid';
+		if (game.targeting.filter(obj)) return '#f00 2px solid';
 	} else {
-		if (obj.owner === game.player1 && obj.canactive()) return '#fff 1px solid';
+		if (obj.owner === game.player1 && obj.canactive()) return '#fff 2px solid';
 	}
-	return  '#0000 1px solid';
+	return  '#0000 2px solid';
 }
 
 module.exports = class Match extends preact.Component {
