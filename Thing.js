@@ -288,7 +288,7 @@ Thing.prototype.hasactive = function(type, name) {
 	return (type in this.active) && ~this.active[type].name.indexOf(name);
 }
 Thing.prototype.canactive = function(spend) {
-	if (this.owner.game.turn != this.owner) return false;
+	if (this.owner.game.turn != this.owner || this.owner.game.phase !== etg.PlayPhase) return false;
 	else if (this.type == etg.Spell){
 		return !this.owner.usedactive && this.owner[spend?"spend":"canspend"](this.card.costele, this.card.cost);
 	}else return this.active.cast && !this.usedactive && !this.status.get("delayed") && !this.status.get("frozen") && this.owner.canspend(this.castele, this.cast);

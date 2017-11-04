@@ -1,4 +1,5 @@
 "use strict";
+const Status = require("./Status"), emptyObj = Object.freeze({}), emptyStatus = new Status(), statuscache = {}, activecache = {}, activecastcache = {};
 function Card(type, info){
 	this.type = type;
 	this.element = parseInt(info.E);
@@ -114,8 +115,6 @@ var util = require("./util");
 var audio = require("./audio");
 var Cards = require("./Cards");
 var Thing = require("./Thing");
-var Status = require("./Status");
 var etgutil = require("./etgutil");
 var skillText = require("./skillText");
 var parseSkill = require("./parseSkill");
-var emptyObj = Object.freeze({}), emptyStatus = new Status(), statuscache = {}, activecache = {}, activecastcache = {};

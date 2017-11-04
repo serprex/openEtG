@@ -495,7 +495,12 @@ function startMatch(self, game, gameData, doNav) {
 }
 
 function tgtstyle(game, obj) {
-	return game.targeting && game.targeting.filter(obj) ? '#f00 1px solid' : '#0000 1px solid';
+	if (game.targeting) {
+		if (game.targeting.filter(obj)) return '#f00 1px solid';
+	} else {
+		if (obj.owner === game.player1 && obj.canactive()) return '#fff 1px solid';
+	}
+	return  '#0000 1px solid';
 }
 
 module.exports = class Match extends preact.Component {
@@ -679,8 +684,8 @@ module.exports = class Match extends preact.Component {
 						className: 'ico cback',
 						style: {
 							position: 'absolute',
-							left: pos.x + 'px',
-							top: pos.y + 'px',
+							left: pos.x - 32 + 'px',
+							top: pos.y - 38 + 'px',
 						}
 					}));
 				}

@@ -30,7 +30,7 @@ function Player(game){
 	this.shardgolem = undefined;
 }
 module.exports = Player;
-var Thing = require("./Thing")
+const Thing = require("./Thing")
 Player.prototype = Object.create(Thing.prototype);
 
 Player.prototype.toString = function(){ return this == this.game.player1?"p1":"p2"; }
