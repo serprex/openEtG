@@ -16,6 +16,14 @@ window.onerror = function(){
 		lastError = now;
 	}
 }
+var lastmove = 0;
+document.addEventListener("mousemove", function(e){
+	if (e.timeStamp - lastmove < 16){
+		e.stopPropagation();
+	}else{
+		lastmove = e.timeStamp;
+	}
+});
 if (options.hideRightpane){
 	document.getElementById("rightpane").style.display = "none";
 }
