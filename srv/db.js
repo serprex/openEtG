@@ -1,2 +1,2 @@
-"use strict";
-module.exports = require("redis").createClient();
+'use strict';
+module.exports = require('redis').createClient();

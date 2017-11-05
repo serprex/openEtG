@@ -1,30 +1,34 @@
-"use strict";
-const fs = require("fs"),
-	zlib = require("zlib"),
-	sutil = require("./sutil"),
-	etgutil = require("../etgutil"),
-	cache = require("./cache"),
+'use strict';
+const fs = require('fs'),
+	zlib = require('zlib'),
+	sutil = require('./sutil'),
+	etgutil = require('../etgutil'),
+	cache = require('./cache'),
 	mime = {
-		css:"text/css",
-		htm:"text/html",
-		html:"text/html",
-		js:"application/javascript",
-		json:"application/json",
-		ogg:"application/ogg",
-		png:"image/png",
+		css: 'text/css',
+		htm: 'text/html',
+		html: 'text/html',
+		js: 'application/javascript',
+		json: 'application/json',
+		ogg: 'application/ogg',
+		png: 'image/png',
 	};
-module.exports = function(url, resolve, reject){
-	const contentType = mime[url.slice(url.lastIndexOf(".")+1)];
-	if (!contentType) return reject("Unknown MIME");
+module.exports = function(url, resolve, reject) {
+	const contentType = mime[url.slice(url.lastIndexOf('.') + 1)];
+	if (!contentType) return reject('Unknown MIME');
 	if (url.startsWith('Cards/') && !fs.existsSync(url)) {
 		const code = url.match(/^Cards\/([a-v\d]{3})\.png$/);
 		if (code) {
 			const icode = parseInt(code[1], 32),
-				isShiny = icode&0x4000;
+				isShiny = icode & 0x4000;
 			if (isShiny) {
 				resolve({
 					status: '302',
-					head: { Location: `/Cards/${etgutil.asShiny(icode, false).toString(32)}.png` },
+					head: {
+						Location: `/Cards/${etgutil
+							.asShiny(icode, false)
+							.toString(32)}.png`,
+					},
 					date: new Date(),
 					buf: '',
 				});
@@ -40,27 +44,27 @@ module.exports = function(url, resolve, reject){
 				}
 			}
 		}
-		reject("ENOENT");
+		reject('ENOENT');
 	}
 	const task = sutil.mkTask(res => {
-		if (res.err) reject("ENOENT");
-		else{
-			fs.watch(url, {persistent:false}, function(event){
+		if (res.err) reject('ENOENT');
+		else {
+			fs.watch(url, { persistent: false }, function(event) {
 				cache.rm(url);
 				this.close();
 			});
 			res.stat.mtime.setMilliseconds(0);
 			resolve({
-				head: { "Content-Encoding": "gzip", "Content-Type": contentType },
+				head: { 'Content-Encoding': 'gzip', 'Content-Type': contentType },
 				date: res.stat.mtime,
 				buf: res.gzip,
 			});
 		}
-	})
-	fs.stat(url, task("stat"));
+	});
+	fs.stat(url, task('stat'));
 	fs.readFile(url, (err, buf) => {
 		if (err) return reject(err.message);
-		zlib.gzip(buf, {level:9}, task("gzip"));
+		zlib.gzip(buf, { level: 9 }, task('gzip'));
 		task();
 	});
-}
+};
