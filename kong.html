@@ -8,14 +8,9 @@
 		const px = require("./px"),
 			sock = require("./sock"),
 			audio = require("./audio");
-		m.exports=function(){
-			function doNav(mod) {
-				document.body.removeChild(document.getElementById('loggingin'));
-				preact.render(preact.h(require('./views/App'), { view: require(mod) }), document.body);
-			}
-			const sandbox = kong.services.isGuest();
-			if (sandbox){
-				doNav("./views/MainMenu");
+		m.exports=function(props){
+			if (kong.services.isGuest()){
+				props.doNav(require("./views/MainMenu"));
 			} else {
 				sock.emit("konglogin", {u:kong.services.getUserId(),g:kong.services.getGameAuthToken()});
 				px.view({
@@ -25,9 +20,9 @@
 								delete data.x;
 								sock.user = data;
 								if (!sock.user.accountbound && !sock.user.pool){
-									doNav("./views/ElementSelect");
+									props.doNav(require("./views/ElementSelect"));
 								}else{
-									doNav("./views/MainMenu");
+									props.doNav(require("./views/MainMenu"));
 								}
 							}else{
 								alert(data.err);
@@ -36,6 +31,7 @@
 					}
 				});
 			}
+			return "Logging in..";
 		}
 	});
 	kongregateAPI.loadAPI(function(){
@@ -54,4 +50,3 @@
 	<div id="chatBox"></div>
 	<textarea id="chatinput" placeholder="Chat"></textarea>
 </div>
-<div id='loggingin'>Logging in..</div>

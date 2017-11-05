@@ -321,7 +321,7 @@ module.exports = class MainMenu extends preact.Component {
 			}
 			self.props.doNav(require("./Login"));
 		}
-		mainc.push(h('input', {
+		mainc.push(typeof kong === 'undefined' && h('input', {
 			type: 'button',
 			value: 'Logout',
 			onClick: logout.bind(null, 'logout'),
