@@ -24,7 +24,7 @@ png.on("end", function(){
 		if (asset.match(/e\d+/)){
 			for (let i=0; i<2; i++){
 				const dati = data.map(x => +(x/(2+i)).toFixed(2)), name = (i?"t":"c")+asset;
-				addRule(rules, name, "margin:4px 2px 0px 2px;"+bgstrx[i]+"width:"+dati[2]+"px;height:"+dati[3]+"px", "background-position:-"+dati[0]+"px -"+dati[1]+"px");
+				addRule(rules, name, bgstrx[i]+"width:"+dati[2]+"px;height:"+dati[3]+"px", "background-position:-"+dati[0]+"px -"+dati[1]+"px");
 			}
 		}
 	}

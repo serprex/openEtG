@@ -685,13 +685,21 @@ module.exports = class Match extends preact.Component {
 				} else if (card) {
 					const pos = ui.cardPos(j, i);
 					children.push(h('div', {
-						className: 'ico cback',
 						style: {
 							position: 'absolute',
 							left: pos.x - 32 + 'px',
 							top: pos.y - 38 + 'px',
-						}
-					}));
+							width: '68px',
+							height: '80px',
+							border: tgtstyle(game, card),
+						},
+					}, h('div', {
+						className: 'ico cback',
+						style: {
+							left: '2px',
+							top: '2px',
+						},
+					})));
 				}
 			}
 			for (let i = 0;i < 23;i++) {
