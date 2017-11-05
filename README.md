@@ -13,13 +13,11 @@ Open Terminal. All `commands` will be done in Terminal. You must have [XCode](ht
 1. Install [Homebrew](http://brew.sh/)
 1. Install required software: `brew install git node redis`
 1. Clone the repository: `git clone https://github.com/serprex/openEtG.git && cd openEtG`
-1. Install [pixi.js](https://github.com/serprex/pixi.js): `curl -O --compressed 'http://etg.dek.im/pixi.min.js'`
 1. Install atlas files: `curl --compressed 'http://etg.dek.im/assets/{atlas.js,atlas.png,atlas.css}' -o 'assets/#1'`
 1. Install npm modules and build project: `npm install && npm run build`
 1. Install [ninja](https://github.com/ninja-build/ninja/releases)
 1. Install [mkcjs](https://www.npmjs.com/package/mkcjs) `npm install -g mkcjs`
 1. Install [spritesheet-js](https://www.npmjs.com/package/spritesheet-js) `npm install -g spritesheet-js`
-1. Install [optipng](https://www.npmjs.com/package/optipng) `npm install optipng`
 1. Build the project with ninja `ninja`
 
 #### Mac Start/Stop OpenEtG
@@ -41,18 +39,15 @@ Open Terminal. All `commands` will be done in Terminal. You must have [XCode](ht
   1. Right-click inside the folder where you want the game files to go
   1. Click `Git Clone` to create an `openEtG` folder
   1. When prompted, use this URL: `https://github.com/serprex/openEtG.git`
-1. Install [pixi.js](https://github.com/serprex/pixi.js):
-  1. Download [pixi.min.js](http://etg.dek.im/pixi.min.js) and place it in your openEtG folder
-  1. Optionally, you can build your own [pixi.js](https://github.com/serprex/pixi.js)
 1. Install npm modules and global npm binaries:
   1. Shift+Right-Click on your `openEtG` folder
   1. Click `Open command window here`
   1. Run the command: `npm install; npm install -g spritesheet-js`
   1. Leave this command window open for later
-  1. Run `npm run build-etgify`
+  1. Run `npm run build-bundle`
   1. Download [atlas.js](http://etg.dek.im/assets/atlas.js), [atlas.png](http://etg.dek.im/assets/atlas.png) and [atlas.css](http://etg.dek.im/assets/atlas.css) and move them to the `assets` folder
 1. Start redis-server
 1. In the command window from previously, run the command: `npm start`
 1. Browse to [http://127.0.0.1:13602](http://127.0.0.1:13602) and the game should work!
 
-Note: When you edit code you need to `npm run build-etgify` to update etgify.
+Note: When you edit code you need to `npm run build-bundle` to update the bundle.
