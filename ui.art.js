@@ -22,6 +22,7 @@ for (let i = 0; i < CardData.length - 1; i++) {
 		for (let k = 0; k < Cardj.length; k++) {
 			const [name, code] = Cardj[k];
 			Cards[code.toString(32)] = name;
+			Cards[(code | 0x4000).toString(32)] = name;
 		}
 	}
 }
@@ -75,7 +76,6 @@ var table = document.createElement('table');
 	],
 	[
 		['kae', '//willowdream.deviantart.com'],
-		['Sabbath Overlay', 'assets/sabbath.png'],
 		[
 			'4sd',
 			'4sg',
