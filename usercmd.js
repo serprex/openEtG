@@ -54,7 +54,7 @@ exports.upgrade = function(data, user){
 	var use = ~card.rarity ? 6 : 1;
 	transmute(user, card.code, etgutil.asUpped, use);
 }
-exports.unupgrade = function(data, user){
+exports.downgrade = function(data, user){
 	var card = Cards.Codes[data.card];
 	if (!card || !card.upped) return;
 	var use = ~card.rarity ? 6 : 1;

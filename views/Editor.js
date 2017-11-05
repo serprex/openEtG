@@ -32,7 +32,7 @@ module.exports = class Editor extends preact.Component {
 				pool[code] = (pool[code] || 0) + count;
 			}
 		}
-		if (pool) {
+		if (sock.user && pool) {
 			etgutil.iterraw(sock.user.pool, incrpool);
 			etgutil.iterraw(sock.user.accountbound, incrpool);
 		}
@@ -41,7 +41,7 @@ module.exports = class Editor extends preact.Component {
 			pool: pool,
 			deck: deckmark.deck,
 			mark: deckmark.mark,
-			deckname: sock.user.selectedDeck,
+			deckname: sock.user && sock.user.selectedDeck,
 			arattr: props.ainfo && {
 				hp: attrval(props.ainfo.hp, 200),
 				mark: attrval(props.ainfo.mark, 2),

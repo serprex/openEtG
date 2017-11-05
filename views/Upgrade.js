@@ -23,12 +23,12 @@ module.exports = class Upgrade extends preact.Component {
 			}
 			else return "You need 50$ to afford an upgraded pillar!";
 		}
-		function unupgradeCard(card) {
+		function downgradeCard(card) {
 			if (card.rarity || (card.shiny && card.upped)) {
-				if (!card.upped) return "You cannot unupgrade unupgraded cards.";
-				sock.userExec("unupgrade", { card: card.code });
+				if (!card.upped) return "You cannot downgrade downgraded cards.";
+				sock.userExec("downgrade", { card: card.code });
 			}
-			else return "You cannot unupgrade pillars; sell it instead."
+			else return "You cannot downgrade pillars; sell it instead."
 		}
 		function polishCard(card) {
 			if (!card.isFree()) {
@@ -163,12 +163,12 @@ module.exports = class Upgrade extends preact.Component {
 
 		if (self.state.code1) {
 			children.push(h(Components.Card, {
-				x: 734, y: 8, code: self.state.code1,
+				x: 534, y: 8, code: self.state.code1,
 			}));
 		}
 		if (self.state.code2) {
 			children.push(h(Components.Card, {
-				x: 534, y: 8, code: self.state.code2,
+				x: 734, y: 8, code: self.state.code2,
 			}));
 		}
 
@@ -183,6 +183,7 @@ module.exports = class Upgrade extends preact.Component {
 					code2: etgutil.asUpped(code, true),
 					error: '',
 					canGrade: true,
+					canLish: true,
 					canSell: !!~card.rarity,
 					sellText: card.isFree() ? "Polgrade" : "Sell",
 				};
