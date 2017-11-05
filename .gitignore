@@ -4,13 +4,13 @@ atlas.js
 atlas.css
 atlas.png
 favicon.png
-Dosis.ttf
 etgify.js
 tournify.js
 .ninja_log
 .ninja_deps
 pushserver.sh
 pixi.*
+bundle.js
 *.min.*
 *.exe
 *.gz

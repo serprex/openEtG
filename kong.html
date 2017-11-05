@@ -1,44 +1,6 @@
 <!DOCTYPE html>
 <title>openEtG-kong</title>
 <script src="https://cdn1.kongregate.com/javascripts/kongregate_api.js"></script>
-<script src="etgify.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/preact/8.2.6/preact.min.js" integrity="sha256-eywBMR9DKSaKNsE+pfdHEvuFJCYUiATCyqAzSDR6DKg=" crossorigin="anonymous"></script>
-<script>"use strict";
-	require.f("views/Login",function(m){
-		const px = require("./px"),
-			sock = require("./sock"),
-			audio = require("./audio");
-		m.exports=function(props){
-			if (kong.services.isGuest()){
-				props.doNav(require("./views/MainMenu"));
-			} else {
-				sock.emit("konglogin", {u:kong.services.getUserId(),g:kong.services.getGameAuthToken()});
-				px.view({
-					cmds:{
-						login:function(data){
-							if (!data.err){
-								delete data.x;
-								sock.user = data;
-								if (!sock.user.accountbound && !sock.user.pool){
-									props.doNav(require("./views/ElementSelect"));
-								}else{
-									props.doNav(require("./views/MainMenu"));
-								}
-							}else{
-								alert(data.err);
-							}
-						}
-					}
-				});
-			}
-			return "Logging in..";
-		}
-	});
-	kongregateAPI.loadAPI(function(){
-		window.kong = kongregateAPI.getAPI();
-		require("./ui.main");
-	});
-</script>
 <link href="//fonts.googleapis.com/css?family=Dosis" rel="stylesheet" type="text/css">
 <link href="favicon.png" rel="shortcut icon">
 <link href="ui.css" rel="stylesheet">
@@ -50,3 +12,5 @@
 	<div id="chatBox"></div>
 	<textarea id="chatinput" placeholder="Chat"></textarea>
 </div>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/preact/8.2.6/preact.min.js" integrity="sha256-eywBMR9DKSaKNsE+pfdHEvuFJCYUiATCyqAzSDR6DKg=" crossorigin="anonymous"></script>
+<script src="bundle.js"></script>

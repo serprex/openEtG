@@ -11,7 +11,7 @@ const px = require("../px"),
 module.exports = class Reward extends preact.Component {
 	constructor(props) {
 		super(props);
-		const reward = props.type;
+		let reward = props.type;
 		var rewardList;
 		if (typeof reward == "string") {
 			var shiny = reward.charAt(0) == "!";

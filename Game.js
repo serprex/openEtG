@@ -54,7 +54,7 @@ Game.prototype.progressMulligan = function(){
 		}
 	}
 }
-var blacklist = new Set(["spectate", "flip", "seed", "p1deckpower", "p2deckpower", "deck", "urdeck"]);
+const blacklist = new Set(["spectate", "flip", "seed", "p1deckpower", "p2deckpower", "deck", "urdeck"]);
 Game.prototype.addData = function(data) {
 	for (var key in data) {
 		if (!blacklist.has(key)){

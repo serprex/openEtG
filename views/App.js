@@ -1,3 +1,5 @@
+const h = preact.h;
+
 module.exports = class App extends preact.Component {
 	constructor(props) {
 		super(props);
@@ -11,6 +13,6 @@ module.exports = class App extends preact.Component {
 	}
 
 	render() {
-		return preact.h(this.state.view, this.state.viewProps);
+		return h(this.state.view, this.state.viewProps);
 	}
 }
