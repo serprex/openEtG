@@ -13,8 +13,16 @@ function hookRowMouseover(tr) {
 		}
 	});
 }
-var Cards = require('./Cards');
-var imgs = new Array(8),
+const CardData = require('./Cards.json');
+const Cards = {};
+for (let i = 0; i < CardData.length - 1; i++) {
+	const Cardi = CardData[i];
+	for (let j = 1; j < Cardi.length; j++) {
+		const [name, code] = Cardi[j];
+		Cards[code.toString(32)] = name;
+	}
+}
+const imgs = new Array(8),
 	imgdiv = document.getElementById('imgdiv');
 for (var i = 0; i < 8; i++) imgdiv.appendChild((imgs[i] = new Image()));
 var table = document.createElement('table');
@@ -479,7 +487,7 @@ var table = document.createElement('table');
 	var codes = credit[credit.length - 1];
 	if (codes.length) {
 		codes.forEach(function(code, i) {
-			incx(Cards.Codes[parseInt(code, 32)].name, 'Cards/' + code + '.png');
+			incx(Cards[parseInt(code, 32)], 'Cards/' + code + '.png');
 		});
 	}
 	table.appendChild(tr);

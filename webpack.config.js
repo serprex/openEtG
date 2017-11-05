@@ -1,9 +1,13 @@
 module.exports = {
-	entry: './ui.main.js',
+	entry: {
+		main: './ui.main.js',
+		art: './ui.art.js',
+		mosaic: './ui.mosaic.js',
+	},
 	output: {
 		path: __dirname,
-		filename: 'bundle.js',
-		sourceMapFilename: 'bundle.js.map',
+		filename: 'bundle.[name].js',
+		sourceMapFilename: 'bundle.[name].js.map',
 	},
 	module: {
 		rules: [
