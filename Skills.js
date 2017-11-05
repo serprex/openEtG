@@ -1395,6 +1395,11 @@ readiness:function(c,t){
 		t.usedactive = false;
 	}
 },
+readyweapon:function(c,t){
+	if (t.type === etg.Weapon) {
+		t.usedactive = false;
+	}
+},
 reap:function(c,t){
 	if (t.card.isOf(Cards.Skeleton)) return;
 	var atk = t.trueatk(), hp = t.truehp();
