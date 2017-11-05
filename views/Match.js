@@ -89,6 +89,7 @@ function ThingInst(props) {
 		isSpell = obj.type === etg.Spell;
 	const children = [
 		h('img', {
+			className: obj.card.shiny ? 'shiny' : undefined,
 			src: '/Cards/' + obj.card.code.toString(32) + '.png',
 			style: {
 				position: 'absolute',
