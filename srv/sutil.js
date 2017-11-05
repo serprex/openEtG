@@ -7,7 +7,7 @@ exports.mkTask = function(cb) {
 		if (!--cbCount) cb(params);
 	}
 	return param => {
-		if (arguments.length == 0) {
+		if (param === undefined) {
 			cbCheck();
 		} else {
 			cbCount++;

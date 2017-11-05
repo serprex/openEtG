@@ -1,4 +1,4 @@
-#!/usr/bin/node
+#!/usr/bin/env node
 'use strict';
 process.chdir(__dirname);
 const fs = require('fs');
@@ -189,7 +189,7 @@ const keycerttask = sutil.mkTask(res => {
 				akey = (data.lv ? 'B:' : 'A:') + data.aname;
 			db.zscore(arena, data.aname, (err, score) => {
 				if (score === null) return;
-				var task = sutil.mkTask(function(wld) {
+				var task = sutil.mkTask(wld => {
 					if (wld.err) return;
 					var won = parseInt(data.won ? wld.incr : wld.mget[0]),
 						loss = parseInt(data.won ? wld.mget[0] : wld.incr),
