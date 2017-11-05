@@ -171,12 +171,7 @@ Thing.prototype.calcCore = function(prefix, filterstat) {
 	if (!prefix(this)) return 0;
 	for (var j = 0; j < 2; j++) {
 		var pl = j == 0 ? this.owner : this.owner.foe;
-		if (
-			pl.permanents.some(function(pr) {
-				return pr && pr.status.get(filterstat);
-			})
-		)
-			return 1;
+		if (pl.permanents.some(pr => pr && pr.status.get(filterstat))) return 1;
 	}
 	return 0;
 };
@@ -294,14 +289,14 @@ Thing.prototype.freeze = function(x) {
 };
 Thing.prototype.lobo = function() {
 	for (var key in this.active) {
-		this.active[key].name.forEach(function(name) {
+		this.active[key].name.forEach(name => {
 			if (!parseSkill(name).passive) {
 				this.rmactive(key, name);
 			}
-		}, this);
+		});
 	}
 };
-var mutantabilities = [
+const mutantabilities = [
 	'hatch',
 	'freeze',
 	'burrow',
@@ -376,9 +371,11 @@ Thing.prototype.rmactive = function(type, name) {
 		if (actives.length == 1) {
 			delete this.active[type];
 		} else {
-			this.active[type] = actives.reduce(function(previous, current, i) {
-				return i == idx ? previous : combineactive(previous, Skills[current]);
-			}, null);
+			this.active[type] = actives.reduce(
+				(previous, current, i) =>
+					i == idx ? previous : combineactive(previous, Skills[current]),
+				null,
+			);
 		}
 	}
 };
@@ -481,9 +478,7 @@ Thing.prototype.attack = function(stasis, freedomChance, target) {
 		var momentum =
 			this.status.get('momentum') ||
 			(this.status.get('burrowed') &&
-				this.owner.permanents.some(function(pr) {
-					return pr && pr.status.get('tunnel');
-				}));
+				this.owner.permanents.some(pr => pr && pr.status.get('tunnel')));
 		var psionic = this.status.get('psionic');
 		if (
 			freedomChance &&

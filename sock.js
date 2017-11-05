@@ -1,13 +1,13 @@
-var chat = require('./chat');
-var etgutil = require('./etgutil');
-var options = require('./options');
-var usercmd = require('./usercmd');
-var endpoint =
+const chat = require('./chat'),
+	etgutil = require('./etgutil'),
+	options = require('./options'),
+	usercmd = require('./usercmd');
+const endpoint =
 	(/^\d+\.\d+\.\d+\.\d+$/.test(location.hostname) ? 'ws://' : 'wss://') +
 	location.hostname +
 	':13602';
 var socket = new WebSocket(endpoint);
-var buffer = [];
+const buffer = [];
 var attempts = 0,
 	attemptTimeout = 0;
 socket.onopen = function() {
@@ -29,10 +29,10 @@ socket.onopen = function() {
 socket.onclose = function() {
 	if (attemptTimeout) return;
 	if (attempts < 8) attempts++;
-	var timeout = 99 + Math.floor(99 * Math.random()) * attempts;
-	attemptTimeout = setTimeout(function() {
+	const timeout = 99 + Math.floor(99 * Math.random()) * attempts;
+	attemptTimeout = setTimeout(() => {
 		attemptTimeout = 0;
-		var oldsock = socket;
+		const oldsock = socket;
 		exports.et = socket = new WebSocket(endpoint);
 		socket.onopen = oldsock.onopen;
 		socket.onclose = oldsock.onclose;
@@ -51,7 +51,7 @@ exports.userEmit = function(x, data) {
 exports.emit = function(x, data) {
 	if (!data) data = {};
 	data.x = x;
-	var msg = JSON.stringify(data);
+	const msg = JSON.stringify(data);
 	if (socket && socket.readyState == 1) {
 		socket.send(msg);
 	} else {

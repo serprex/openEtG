@@ -12,9 +12,7 @@ module.exports = class ArenaTop extends preact.Component {
 		const self = this;
 		px.view({
 			cmds: {
-				arenatop: function(info) {
-					self.setState(info);
-				},
+				arenatop: info => self.setState(info),
 			},
 		});
 	}
@@ -31,7 +29,7 @@ module.exports = class ArenaTop extends preact.Component {
 					left: '90px',
 					top: '50px',
 				}}
-				children={info.map(function(data, i) {
+				children={info.map((data, i) => {
 					const lic = [<span className="atoptext">{data[0]}</span>];
 					for (var i = 1; i <= 4; i++) {
 						if (i == 3) {
@@ -49,8 +47,7 @@ module.exports = class ArenaTop extends preact.Component {
 									cardx: e.pageX + 4,
 									cardy: e.pageY + 4,
 								})}
-							onMouseLeave={() => self.setState({ card: false })}
-						>
+							onMouseLeave={() => self.setState({ card: false })}>
 							{card.name}
 						</span>
 					);

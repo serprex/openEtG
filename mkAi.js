@@ -11,7 +11,7 @@ const chat = require('./chat'),
 
 exports.mkPremade = function(level, daily) {
 	var name = level == 1 ? 'mage' : 'demigod';
-	return function() {
+	return () => {
 		var urdeck = sock.getDeck();
 		if (etgutil.decklength(urdeck) < (sock.user ? 31 : 11)) {
 			return;
@@ -81,7 +81,7 @@ const randomNames = [
 	'Yuriko',
 ];
 exports.mkAi = function(level, daily) {
-	return function() {
+	return () => {
 		var urdeck = sock.getDeck();
 		if (etgutil.decklength(urdeck) < (sock.user ? 31 : 9)) {
 			return;
@@ -115,9 +115,7 @@ exports.mkAi = function(level, daily) {
 };
 exports.run = function run(doNav, gamedata) {
 	if (typeof gamedata === 'function') {
-		return function() {
-			run(doNav, gamedata());
-		};
+		return () => run(doNav, gamedata());
 	}
 	if (gamedata) {
 		doNav(require('./views/Match'), gamedata);

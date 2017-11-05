@@ -16,7 +16,7 @@ function storeUsers() {
 	if (margs.length > 1) db.send_command('hmset', margs);
 }
 exports.storeUsers = storeUsers;
-const usergcloop = setInterval(function() {
+const usergcloop = setInterval(() => {
 	storeUsers();
 	// Clear inactive users
 	for (const u in users) {

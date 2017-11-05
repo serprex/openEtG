@@ -1,6 +1,6 @@
 'use strict';
 function adrenathrottle(f) {
-	return function(c, t, data) {
+	return (c, t, data) => {
 		if (
 			c.status.get('adrenaline') < 3 ||
 			(c.type == etg.Creature &&
@@ -12,7 +12,7 @@ function adrenathrottle(f) {
 	};
 }
 function quadpillarFactory(ele) {
-	return function(c, t) {
+	return (c, t) => {
 		var n = c == t ? 1 : c.status.get('charges');
 		for (var i = 0; i < n; i++) {
 			var r = c.owner.upto(16);
@@ -26,7 +26,7 @@ function quadpillarFactory(ele) {
 const Skills = (module.exports = {
 	ablaze: x => {
 		var n = +x;
-		return function(c, t) {
+		return (c, t) => {
 			Effect.mkText(n + '|0', c);
 			c.atk += n;
 		};

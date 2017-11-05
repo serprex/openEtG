@@ -77,8 +77,8 @@ exports.unpolish = function(data, user) {
 	untransmute(user, card.code, etgutil.asShiny, use);
 };
 function upshpi(cost, func) {
-	return function(data, user) {
-		var card = Cards.Codes[data.c];
+	return (data, user) => {
+		const card = Cards.Codes[data.c];
 		if (card && user.gold >= cost && card.isFree()) {
 			user.gold -= cost;
 			user.pool = etgutil.addcard(user.pool, func(data.c));
@@ -97,7 +97,7 @@ exports.upshpillar = upshpi(300, function(code) {
 exports.upshall = function(data, user) {
 	var pool = etgutil.deck2pool(user.pool);
 	var bound = etgutil.deck2pool(user.accountbound);
-	pool.forEach(function(count, code) {
+	pool.forEach((count, code) => {
 		var card = Cards.Codes[code];
 		if (!card || card.rarity == 5 || card.rarity < 1) return;
 		var dcode = etgutil.asShiny(etgutil.asUpped(card.code, false), false);
@@ -106,7 +106,7 @@ exports.upshall = function(data, user) {
 		pool[dcode] += count * (card.upped && card.shiny ? 36 : 6);
 		pool[code] = 0;
 	});
-	bound.forEach(function(count, code) {
+	bound.forEach((count, code) => {
 		if (!(code in pool)) return;
 		var card = Cards.Codes[code];
 		if (
@@ -119,7 +119,7 @@ exports.upshall = function(data, user) {
 			return;
 		pool[code] += Math.min(count, 6);
 	});
-	pool.forEach(function(count, code) {
+	pool.forEach((count, code) => {
 		var card = Cards.Codes[code];
 		if (
 			!card ||
@@ -142,7 +142,7 @@ exports.upshall = function(data, user) {
 		}
 		pool[code] -= pc;
 	});
-	bound.forEach(function(count, code) {
+	bound.forEach((count, code) => {
 		if (!(code in pool)) return;
 		var card = Cards.Codes[code];
 		if (
@@ -156,7 +156,7 @@ exports.upshall = function(data, user) {
 		pool[code] -= Math.min(count, 6);
 	});
 	var newpool = '';
-	pool.forEach(function(count, code) {
+	pool.forEach((count, code) => {
 		if (count) {
 			if (count) newpool = etgutil.addcard(newpool, code, count);
 		}

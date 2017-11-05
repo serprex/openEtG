@@ -37,9 +37,7 @@ Player.prototype.toString = function() {
 	return this == this.game.player1 ? 'p1' : 'p2';
 };
 Player.prototype.isCloaked = function() {
-	return this.permanents.some(function(pr) {
-		return pr && pr.status.get('cloak');
-	});
+	return this.permanents.some(pr => pr && pr.status.get('cloak'));
 };
 Player.prototype.addCrea = function(x, fromhand) {
 	if (util.place(this.creatures, x)) {
@@ -117,9 +115,9 @@ Player.prototype.info = function() {
 		'sanctuary',
 		'flatline',
 		'precognition',
-	].forEach(function(key) {
+	].forEach(key => {
 		plinfocore(info, key, this[key]);
-	}, this);
+	});
 	if (this.gpull) info.push('gpull');
 	return info.join('\n');
 };
@@ -157,14 +155,10 @@ Player.prototype.spend = function(qtype, x) {
 	return true;
 };
 Player.prototype.countcreatures = function() {
-	return this.creatures.reduce(function(count, cr) {
-		return count + !!cr;
-	}, 0);
+	return this.creatures.reduce((count, cr) => count + !!cr, 0);
 };
 Player.prototype.countpermanents = function() {
-	return this.permanents.reduce(function(count, pr) {
-		return count + !!pr;
-	}, 0);
+	return this.permanents.reduce((count, pr) => count + !!pr, 0);
 };
 Player.prototype.endturn = function(discard) {
 	this.game.ply++;
@@ -216,7 +210,7 @@ Player.prototype.endturn = function(discard) {
 	if (freedomChance) {
 		freedomChance = 1 - Math.pow(0.7, freedomChance);
 	}
-	this.creatures.slice().forEach(function(cr, i) {
+	this.creatures.slice().forEach((cr, i) => {
 		if (cr) {
 			if (patienceFlag) {
 				var floodbuff = floodingFlag && i > 4;

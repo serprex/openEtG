@@ -6,12 +6,12 @@ exports.mkTask = function(cb) {
 	function cbCheck() {
 		if (!--cbCount) cb(params);
 	}
-	return function(param) {
+	return param => {
 		if (arguments.length == 0) {
 			cbCheck();
 		} else {
 			cbCount++;
-			return function(err, res) {
+			return (err, res) => {
 				params[param] = res;
 				if (err) {
 					if (!params.err) params.err = {};

@@ -18,9 +18,9 @@ module.exports = function(c, event) {
 			} else pushEntry(ret, c, '', entry);
 		}
 		if (stext.length) ret.unshift(stext.join(', ') + '.');
-		for (var key in c.active) {
-			c.active[key].name.forEach(function(name) {
-				var entry = getDataFromName(name);
+		for (const key in c.active) {
+			c.active[key].name.forEach(name => {
+				const entry = getDataFromName(name);
 				if (entry === undefined) return;
 				pushEntry(ret, c, key, entry);
 				if (key == 'cast')
@@ -38,7 +38,7 @@ const etg = require('./etg'),
 	Thing = require('./Thing');
 
 const data = {
-	ablaze: function(x) {
+	ablaze: x => {
 		return {
 			cast: 'Gain ' + x + '|0',
 			auto: 'Gain ' + x + '|0 per turn',
@@ -75,7 +75,7 @@ const data = {
 	blockwithcharge: 'Block attack per stack',
 	bolsterintodeck:
 		'Push 3 copies of target creature onto own deck. Cannot ricochet',
-	boneyard: function(c) {
+	boneyard: c => {
 		return (
 			'When a non-skeleton dies, summon a ' +
 			(c.upped ? '2|2' : '1|1') +
@@ -98,7 +98,7 @@ const data = {
 		'Sacrifice target creature to damage foe 100HP/(100+HP). Frozen targets deal 1.5x more. Poisoned creatures transfer poison',
 	catlife: 'On death, regenerate with 1 fewer life',
 	cell: 'Become Malignant if poisoned',
-	chaos: function(c) {
+	chaos: c => {
 		return (
 			(c.upped ? '20% chance to evade. ' : '') +
 			'Non-ranged attacking creatures have a 30% chance to have a random effect cast on them'
@@ -172,7 +172,7 @@ const data = {
 	epochreset: {
 		cast: 'Reset silence counter',
 	},
-	evade: function(x) {
+	evade: x => {
 		return x + '% chance to evade';
 	},
 	evade100: '100% chance to evade',
@@ -213,7 +213,7 @@ const data = {
 	gaintimecharge: 'Gain a stack per own non-drawstep draw, up to 4 per turn',
 	gas: 'Summon an Unstable Gas',
 	grave: 'When a death occurs, unburrowed & become of its kind',
-	give: function(c) {
+	give: c => {
 		return (
 			'Give own target to foe. Heal self ' +
 			(c.upped ? 10 : 5) +
@@ -224,7 +224,7 @@ const data = {
 	gpull: 'Intercept attacks directed to owner',
 	gpullspell: 'Target creature intercepts attacks directed to its owner',
 	gratitude: 'Heal owner 4',
-	growth: function(x) {
+	growth: x => {
 		x = x + '|' + x;
 		return {
 			death: 'When a death occurs, gain ' + x,
@@ -242,7 +242,7 @@ const data = {
 	},
 	hatch: 'Become a random creature',
 	heal: 'Heal target 20',
-	heatmirror: function(c) {
+	heatmirror: c => {
 		return (
 			'Heat Lightning: When foe plays a creature from hand, summon a ' +
 			(c.upped ? 'Ball Lightning' : 'Spark')
@@ -254,7 +254,7 @@ const data = {
 	icebolt:
 		'Deal 2 damage to target. Increment damage per 5:7 owned. May freeze target',
 	ignite: 'Deal 20 spell damage to foe & 1 damage to all creatures',
-	immolate: function(c) {
+	immolate: c => {
 		return (
 			'Sacrifice a creature to produce ' +
 			(c.upped ? 7 : 5) +
@@ -284,7 +284,7 @@ const data = {
 	locket: 'Produce quanta of mark',
 	locketshift: "Now produces quanta of target's element",
 	loot: 'Steal a random permanent from foe when own permanent is destroyed',
-	losecharge: function(c, inst) {
+	losecharge: (c, inst) => {
 		var charges = c.status.get('charges');
 		return 'Lasts ' + charges + ' turn' + (charges == 1 ? '' : 's');
 	},
@@ -310,7 +310,7 @@ const data = {
 	neuro:
 		'Apply poison on hit, also inflicting neurotoxin. Neurotoxin applies poison per card played by victim. Throttled',
 	neuroify: 'Gives foe neurotoxin status if they are already poisoned',
-	nightmare: function(c) {
+	nightmare: c => {
 		return (
 			"Fill foe's hand with copies of target creature's card. Drain " +
 			(c.upped ? '2' : '1') +
@@ -347,14 +347,14 @@ const data = {
 	phoenix: ['Become an Ash on death', 'Become a Minor Ash on death'],
 	photosynthesis: 'Produce 2:5. May activate multiple times',
 	pillar: {
-		auto: function(c) {
+		auto: c => {
 			return 'Produce ' + (c.element ? 1 : 3) + ':' + c.element + ' per turn';
 		},
-		ownplay: function(c) {
+		ownplay: c => {
 			return 'Produce ' + (c.element ? 1 : 3) + ':' + c.element + ' on play';
 		},
 	},
-	pend: function(c) {
+	pend: c => {
 		return (
 			'Oscilliate between producing ' +
 			(c.element ? 1 : 3) +
@@ -365,7 +365,7 @@ const data = {
 	},
 	plague: "Poison target player's creatures. Removes cloak",
 	platearmor: ['Target gains 0|4', 'Target gains 0|6'],
-	poison: function(x) {
+	poison: x => {
 		x = 'Apply ' + (x === '1' ? '' : x + ' ') + 'poison ';
 		return {
 			hit: x + 'on hit. Throttled',
@@ -390,7 +390,7 @@ const data = {
 		'Target creature gains +5|-5. Thaws',
 		'Target creature gains +6|-6. Thaws',
 	],
-	randomdr: function(c) {
+	randomdr: c => {
 		return 'Damage reduction becomes 0 to ' + (c.upped ? 3 : 2) + ' on play';
 	},
 	readiness:
@@ -465,11 +465,11 @@ const data = {
 	steam:
 		'Gain 5 steam. Increment strength per steam. Steam decrements after attacking',
 	stoneform: 'Gain 0|20 & become a golem',
-	storm: function(x) {
+	storm: x => {
 		return 'Deals ' + x + " damage to target player's creatures. Removes cloak";
 	},
-	summon: function(x) {
-		var card1 = Cards[x],
+	summon: x => {
+		const card1 = Cards[x],
 			card2 = card1.asUpped(true);
 		return card1.name == card2.name
 			? 'Summon a ' + card1.name
@@ -508,9 +508,7 @@ const data = {
 	unsummon:
 		"Return target creature to owner's hand. If hand full, return to top of deck",
 	unvindicate: 'Become ready to vindicate again at start of next turn',
-	upkeep: function(c) {
-		return 'Consumes 1:' + c.element;
-	},
+	upkeep: c => 'Consumes 1:' + c.element,
 	upload: 'Target gains 2|0 & Byt gains 0|-2',
 	vampire: 'Heal owner per damage dealt',
 	vend: 'Sacrifice & draw',
@@ -536,34 +534,31 @@ const data = {
 	['staff', '1:5 1:7'],
 	['disc', '1:1 1:12'],
 	['axe', '1:6 1:10'],
-].forEach(function(x) {
+].forEach(x => {
 	data[x[0]] = 'Increment damage if mark is ' + x[1];
 });
 [
 	['pillmat', '1:4 1:6 1:7 1:9'],
 	['pillspi', '1:2 1:5 1:8 1:11'],
 	['pillcar', '1:1 1:3 1:10 1:12'],
-].forEach(function(x) {
+].forEach(x => {
 	data[x[0]] = {
 		auto: 'Produce 1 or 2 ' + x[1] + ' per turn',
 		ownplay: 'Produce 1 or 2 ' + x[1] + ' on play',
 	};
 });
 function auraText(tgts, bufftext, upbufftext) {
-	return function(c) {
-		return (
-			tgts +
-			' gain ' +
-			(c.upped ? upbufftext : bufftext) +
-			' while ' +
-			c.name +
-			' in play. Unique'
-		);
-	};
+	return c =>
+		tgts +
+		' gain ' +
+		(c.upped ? upbufftext : bufftext) +
+		' while ' +
+		c.name +
+		' in play. Unique';
 }
 var statusData = {
 	cloak: 'Cloaks own field',
-	charges: function(c, inst) {
+	charges: (c, inst) => {
 		return c !== inst ||
 			Thing.prototype.hasactive.call(c, 'auto', 'losecharge') ||
 			c.status.get('charges') == 1
@@ -580,7 +575,7 @@ var statusData = {
 		'Throttling does not apply to any of own creatures while equipped',
 	patience:
 		'Each turn delay own creatures. They gain 2|1. 4|1 if burrowed. 5|2 if flooded. Unique',
-	poison: function(c, inst) {
+	poison: (c, inst) => {
 		return c == inst
 			? 'Enter with ' + c.status.get('poison') + ' poison'
 			: inst.status.get('poison') + ' poison';

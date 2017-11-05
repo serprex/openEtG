@@ -30,7 +30,7 @@ document.addEventListener('mousemove', function(e) {
 if (options.hideRightpane) {
 	document.getElementById('rightpane').style.display = 'none';
 }
-var sockEvents = {
+const sockEvents = {
 	clear: chat.clear.bind(null, 'Main'),
 	passchange: function(data) {
 		sock.user.auth = data.auth;
@@ -240,12 +240,9 @@ function maybeSendChat(e) {
 		} else if (msg.match(/^\/decks/) && sock.user) {
 			var rx = msg.length > 7 && new RegExp(msg.slice(7));
 			var names = Object.keys(sock.user.decks);
-			if (rx)
-				names = names.filter(function(name) {
-					return name.match(rx);
-				});
+			if (rx) names = names.filter(name => name.match(rx));
 			names.sort();
-			names.forEach(function(name) {
+			names.forEach(name => {
 				var deck = sock.user.decks[name];
 				var span = document.createElement('div');
 				var link = document.createElement('a');
@@ -328,9 +325,9 @@ function wantpvpChange() {
 options.register('wantpvp', document.getElementById('wantpvp'));
 options.register('offline', document.getElementById('offline'));
 options.register('afk', document.getElementById('afk'), true);
-(function(callbacks) {
-	for (var id in callbacks) {
-		for (var event in callbacks[id]) {
+(callbacks => {
+	for (const id in callbacks) {
+		for (const event in callbacks[id]) {
 			document.getElementById(id).addEventListener(event, callbacks[id][event]);
 		}
 	}

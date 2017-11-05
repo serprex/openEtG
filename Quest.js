@@ -78,11 +78,11 @@ exports.spirit = [
 	{
 		deck: '0b606015ur025us035up025uu025v2035vb015uo025uv015v8025ul018pi',
 		name: 'Spirit of the Dark Maiden',
-		morph: function(card) {
-			return RngMock.randomcard(card.upped, function(x) {
-				x.element == etg.Darkness && x.type == card.type;
-			});
-		},
+		morph: card =>
+			RngMock.randomcard(
+				card.upped,
+				x => x.element == etg.Darkness && x.type == card.type,
+			),
 		wintext:
 			"As the maiden falls, your powers return to normal, and your allies settle back into their original forms.\
 		the shadows that gripped and drained your energies recede. Your strength returns to its former glory.\
@@ -690,7 +690,7 @@ exports.mkQuestAi = function(questname, stage, area) {
 };
 
 function requireQuest(user) {
-	return this.questdependencies.every(function(dependency) {
+	return this.questdependencies.every(dependency => {
 		var progress = user.quests[dependency[0]];
 		return progress && progress >= dependency[1];
 	});

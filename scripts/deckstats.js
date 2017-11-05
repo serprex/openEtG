@@ -1,14 +1,14 @@
 #!/bin/node
-var Cards = require('../Cards');
-var etgutil = require('../etgutil');
-var decks = require('../Decks');
+const Cards = require('../Cards'),
+	etgutil = require('../etgutil'),
+	decks = require('../Decks');
 var pool = '';
 function buildPool(x) {
 	pool = etgutil.mergedecks(pool, x[1]);
 }
 decks.mage.forEach(buildPool);
 decks.demigod.forEach(buildPool);
-var a = Cards.filter(false, function(card) {
+const a = Cards.filter(false, function(card) {
 	return (
 		card.rarity > 0 &&
 		card.rarity < 4 &&
@@ -17,29 +17,19 @@ var a = Cards.filter(false, function(card) {
 			0
 	);
 });
-a.forEach(function(x) {
-	console.log(x.name);
-});
-var pool2 = etgutil.deck2pool(pool),
+a.forEach(x => console.log(x.name));
+const pool2 = etgutil.deck2pool(pool),
 	poolrank = [];
-pool2.forEach(function(code, count) {
+pool2.forEach((code, count) => {
 	if (etgutil.asUpped(code, true) == code)
 		pool2[etgutil.asUpped(code, false)] =
 			(pool2[etgutil.asUpped(code, false)] || 0) + count;
 });
-pool2.forEach(function(code, count) {
-	var card = Cards.Codes[code];
+pool2.forEach((code, count) => {
+	const card = Cards.Codes[code];
 	if (!card || card.upped || card.rarity < 1) return;
 	poolrank.push([card.name, count]);
 });
-poolrank.sort(function(x, y) {
-	return x[1] - y[1];
-});
+poolrank.sort((x, y) => x[1] - y[1]);
 console.log(poolrank);
-console.log(
-	etgutil.encodedeck(
-		a.map(function(x) {
-			return x.code;
-		}),
-	),
-);
+console.log(etgutil.encodedeck(a.map(x => x.code)));

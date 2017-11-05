@@ -55,14 +55,14 @@ exports.decklength = function(deck) {
 exports.encodedeck = function(deck) {
 	var pool = [],
 		out = '';
-	deck.forEach(function(code) {
+	deck.forEach((code) => {
 		if (code in pool) {
 			pool[code]++;
 		} else {
 			pool[code] = 1;
 		}
 	});
-	pool.forEach(function(count, code) {
+	pool.forEach((count, code) => {
 		out += encodeCount(count) + code.toString(32);
 	});
 	return out;

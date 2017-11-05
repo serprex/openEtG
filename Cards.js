@@ -42,8 +42,8 @@ function parseCsv(type, data) {
 		cardinfo = {};
 	for (var i = 1; i < data.length; i++) {
 		cardinfo.E = i - 1;
-		data[i].forEach(function(carddata) {
-			keys.forEach(function(key, i) {
+		data[i].forEach(carddata => {
+			keys.forEach((key, i) => {
 				cardinfo[key] = carddata[i];
 			});
 			var cardcode = cardinfo.Code;
@@ -198,7 +198,7 @@ var etg = require('./etg');
 var Card = require('./Card');
 var etgutil = require('./etgutil');
 
-require('./Cards.json').forEach(function(cards, type) {
+require('./Cards.json').forEach((cards, type) => {
 	if (type == 6) parseTargeting(cards);
 	else parseCsv(type, cards);
 });

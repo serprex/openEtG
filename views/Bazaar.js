@@ -1,9 +1,9 @@
-"use strict";
-const chat = require("../chat"),
-	sock = require("../sock"),
-	Cards = require("../Cards"),
-	etgutil = require("../etgutil"),
-	userutil = require("../userutil"),
+'use strict';
+const chat = require('../chat'),
+	sock = require('../sock'),
+	Cards = require('../Cards'),
+	etgutil = require('../etgutil'),
+	userutil = require('../userutil'),
 	Components = require('../Components'),
 	h = preact.h;
 module.exports = class Bazaar extends preact.Component {
@@ -16,23 +16,30 @@ module.exports = class Bazaar extends preact.Component {
 	}
 
 	render() {
-		const self = this, children = [h(Components.ExitBtn, { x: 8, y: 100, doNav: self.props.doNav })],
-			cost = Math.ceil(userutil.calcWealth(self.state.deck, true)*3);
+		const self = this,
+			children = [
+				h(Components.ExitBtn, { x: 8, y: 100, doNav: self.props.doNav }),
+			],
+			cost = Math.ceil(userutil.calcWealth(self.state.deck, true) * 3);
 
 		if (self.state.deck.length > 0 && sock.user.gold >= cost) {
-			children.push(h('input', {
-				type: 'button',
-				value: 'Buy',
-				style: {
-					position: 'absolute',
-					left: '8px',
-					top: '160px',
-				},
-				onClick: function() {
-					sock.userExec("bazaar", {cards:etgutil.encoderaw(self.state.deck)});
-					self.props.doNav(require('./MainMenu'));
-				}
-			}));
+			children.push(
+				h('input', {
+					type: 'button',
+					value: 'Buy',
+					style: {
+						position: 'absolute',
+						left: '8px',
+						top: '160px',
+					},
+					onClick: function() {
+						sock.userExec('bazaar', {
+							cards: etgutil.encoderaw(self.state.deck),
+						});
+						self.props.doNav(require('./MainMenu'));
+					},
+				}),
+			);
 		}
 		children.push(
 			h(Components.Text, {
@@ -54,7 +61,9 @@ module.exports = class Bazaar extends preact.Component {
 			}),
 			h(Components.DeckDisplay, {
 				deck: self.state.deck,
-				onMouseOver: function(i, code) { self.setState({code: code}); },
+				onMouseOver: function(i, code) {
+					self.setState({ code: code });
+				},
 				onClick: function(i) {
 					const newdeck = self.state.deck.slice();
 					newdeck.splice(i, 1);
@@ -62,18 +71,27 @@ module.exports = class Bazaar extends preact.Component {
 				},
 			}),
 			h(Components.CardSelector, {
-				onMouseOver: function(code) { self.setState({code: code}); },
+				onMouseOver: function(code) {
+					self.setState({ code: code });
+				},
 				onClick: function(code) {
 					const card = Cards.Codes[code];
-					if (self.state.deck.length < 60 && card.rarity > 0 && card.rarity < 4 && !card.isFree()) {
+					if (
+						self.state.deck.length < 60 &&
+						card.rarity > 0 &&
+						card.rarity < 4 &&
+						!card.isFree()
+					) {
 						self.setState({ deck: self.state.deck.concat([code]) });
 					}
-				}
-			})
+				},
+			}),
 		);
 		if (self.state.code) {
-			children.push(h(Components.Card, { x: 734, y: 8, code: self.state.code }));
+			children.push(
+				h(Components.Card, { x: 734, y: 8, code: self.state.code }),
+			);
 		}
 		return h('div', { children: children });
 	}
-}
+};

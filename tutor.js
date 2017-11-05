@@ -27,7 +27,7 @@ exports.Tutor = class Tutor extends preact.Component {
 			children.push(<div className="tutorialbg" />);
 			children.push(
 				<div
-					children={tutdata.map(function(info) {
+					children={tutdata.map(info => {
 						const style = {
 							position: 'absolute',
 							left: info[0] + 'px',

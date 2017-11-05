@@ -1,12 +1,14 @@
-"use strict";
-var etg = require("../etg");
-var Cards = require("../Cards");
-module.exports = function(pl){
-	if (pl.hand.length < 6)return true;
-	var hasQuanta = pl.hand.some(function(c){
-		var card = c.card;
-		return card.type == etg.Pillar || card.isOf(Cards.Nova) || card.isOf(Cards.Immolation) || card.isOf(Cards.GiftofOceanus) || card.isOf(Cards.QuantumLocket);
-	});
-	if (hasQuanta) return true;
-	return pl.deck.every(function(code){ return Cards.Codes[code].type != etg.Pillar });
-}
+'use strict';
+const etg = require('../etg'),
+	Cards = require('../Cards');
+module.exports = pl =>
+	pl.hand.length < 6 ||
+	pl.hand.some(
+		({ card }) =>
+			card.type == etg.Pillar ||
+			card.isOf(Cards.Nova) ||
+			card.isOf(Cards.Immolation) ||
+			card.isOf(Cards.GiftofOceanus) ||
+			card.isOf(Cards.QuantumLocket),
+	) ||
+	pl.deck.every(code => Cards.Codes[code].type != etg.Pillar);

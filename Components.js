@@ -17,14 +17,13 @@ exports.rect = function(x, y, wid, hei) {
 		width: wid + 'px',
 		height: hei + 'px',
 	};
-	return function(props) {
-		return h(
+	return props =>
+		h(
 			'div',
 			Object.assign({}, props, {
 				style: props.style ? Object.assign({}, props.style, style) : style,
 			}),
 		);
-	};
 };
 
 exports.Box = function(props) {
@@ -198,7 +197,7 @@ exports.Card = function(props) {
 function DeckDisplay(props) {
 	let mark = -1,
 		i = -1;
-	const children = props.deck.map(function(code) {
+	const children = props.deck.map(code => {
 		const card = Cards.Codes[code];
 		if (card) {
 			i++;
