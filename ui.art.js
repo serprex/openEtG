@@ -18,8 +18,11 @@ const Cards = {};
 for (let i = 0; i < CardData.length - 1; i++) {
 	const Cardi = CardData[i];
 	for (let j = 1; j < Cardi.length; j++) {
-		const [name, code] = Cardi[j];
-		Cards[code.toString(32)] = name;
+		const Cardj = Cardi[j];
+		for (let k = 0; k < Cardj.length; k++) {
+			const [name, code] = Cardj[k];
+			Cards[code.toString(32)] = name;
+		}
 	}
 }
 const imgs = new Array(8),
@@ -486,9 +489,7 @@ var table = document.createElement('table');
 	}
 	var codes = credit[credit.length - 1];
 	if (codes.length) {
-		codes.forEach(function(code, i) {
-			incx(Cards[parseInt(code, 32)], 'Cards/' + code + '.png');
-		});
+		codes.forEach((code, i) => incx(Cards[code], 'Cards/' + code + '.png'));
 	}
 	table.appendChild(tr);
 });
