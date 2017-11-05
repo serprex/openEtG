@@ -46,8 +46,8 @@ chat.addTab = function(name, div) {
 	tabMap[name] = [tabBox, span];
 	span.className = 'tab';
 	span.appendChild(document.createTextNode(name + ' '));
-	span.addEventListener('click', function() {
-		this.style.fontWeight = '';
+	span.addEventListener('click', () => {
+		span.style.fontWeight = '';
 		if (chatBox != tabBox) {
 			chatBox.parentElement.insertBefore(tabBox, chatBox);
 			chatBox.parentElement.removeChild(chatBox);

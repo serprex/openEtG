@@ -232,7 +232,7 @@ module.exports = class Shop extends preact.Component {
 
 		if (this.state.cards) {
 			const cardchildren = [];
-			etgutil.iterdeck(this.state.cards, function(code, i) {
+			etgutil.iterdeck(this.state.cards, (code, i) => {
 				const x = i % 5,
 					y = Math.floor(i / 5);
 				cardchildren.push(

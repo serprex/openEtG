@@ -145,8 +145,9 @@ module.exports = function(uprate, markpower, maxRarity) {
 	for (var j = 0; j < 2; j++) {
 		var ele = eles[j];
 		for (var i = 20 - j * 10; i > 0; i--) {
-			var card = RngMock.randomcard(Math.random() < uprate, function(x) {
-				return (
+			var card = RngMock.randomcard(
+				Math.random() < uprate,
+				x =>
 					x.element == ele &&
 					x.type != etg.Pillar &&
 					x.rarity <= maxRarity &&
@@ -154,9 +155,8 @@ module.exports = function(uprate, markpower, maxRarity) {
 					!(x.type == etg.Shield && anyshield == 3) &&
 					!(x.type == etg.Weapon && anyweapon == 3) &&
 					!x.isOf(Cards.Give) &&
-					!x.isOf(Cards.Precognition)
-				);
-			});
+					!x.isOf(Cards.Precognition),
+			);
 			deck.push(card.code);
 			cardcount[card.code] = (cardcount[card.code] || 0) + 1;
 			if (

@@ -55,7 +55,7 @@ exports.decklength = function(deck) {
 exports.encodedeck = function(deck) {
 	var pool = [],
 		out = '';
-	deck.forEach((code) => {
+	deck.forEach(code => {
 		if (code in pool) {
 			pool[code]++;
 		} else {
@@ -81,15 +81,13 @@ exports.encoderaw = function(deck) {
 exports.decodedeck = function(deck) {
 	if (!deck) return [];
 	var out = [];
-	exports.iterdeck(deck, function(code) {
-		out.push(code);
-	});
+	exports.iterdeck(deck, code => out.push(code));
 	return out;
 };
 exports.deck2pool = function(deck, pool) {
 	if (!deck) return [];
 	pool = pool || [];
-	exports.iterraw(deck, function(code, count) {
+	exports.iterraw(deck, (code, count) => {
 		if (code in pool) {
 			pool[code] += count;
 		} else {
@@ -114,7 +112,7 @@ exports.addcard = function(deck, card, x) {
 };
 exports.mergedecks = function(deck) {
 	for (var i = 1; i < arguments.length; i++) {
-		exports.iterraw(arguments[i], function(code, count) {
+		exports.iterraw(arguments[i], (code, count) => {
 			deck = exports.addcard(deck, code, count);
 		});
 	}
@@ -122,7 +120,7 @@ exports.mergedecks = function(deck) {
 };
 exports.removedecks = function(deck) {
 	for (var i = 1; i < arguments.length; i++) {
-		exports.iterraw(arguments[i], function(code, count) {
+		exports.iterraw(arguments[i], (code, count) => {
 			deck = exports.addcard(deck, code, -count);
 		});
 	}

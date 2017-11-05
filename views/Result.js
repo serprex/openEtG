@@ -203,13 +203,13 @@ module.exports = class Result extends preact.Component {
 								cardwon = RngMock.choose(winnable);
 						} else {
 							var elewin = foeDeck[Math.floor(Math.random() * foeDeck.length)];
-							cardwon = RngMock.randomcard(elewin.upped, function(x) {
-								return (
+							cardwon = RngMock.randomcard(
+								elewin.upped,
+								x =>
 									x.element == elewin.element &&
 									x.type != etg.Pillar &&
-									x.rarity <= 3
-								);
-							});
+									x.rarity <= 3,
+							);
 						}
 						if (game.level !== undefined && game.level < 2) {
 							cardwon = cardwon.asUpped(false);
@@ -260,15 +260,15 @@ module.exports = class Result extends preact.Component {
 				}
 				if (game.cardreward) {
 					var x0 = 470 - etgutil.decklength(game.cardreward) * 20 - 64;
-					etgutil.iterdeck(game.cardreward, function(code, i) {
+					etgutil.iterdeck(game.cardreward, (code, i) =>
 						children.push(
 							h(Components.Card, {
 								x: x0 + i * 40,
 								y: 170,
 								code: code,
 							}),
-						);
-					});
+						),
+					);
 					sock.userExec(game.quest ? 'addbound' : 'addcards', {
 						c: game.cardreward,
 					});

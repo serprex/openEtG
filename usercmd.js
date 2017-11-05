@@ -85,15 +85,11 @@ function upshpi(cost, func) {
 		}
 	};
 }
-exports.uppillar = upshpi(50, function(code) {
-	return etgutil.asUpped(code, true);
-});
-exports.shpillar = upshpi(50, function(code) {
-	return etgutil.asShiny(code, true);
-});
-exports.upshpillar = upshpi(300, function(code) {
-	return etgutil.asUpped(etgutil.asShiny(code, true), true);
-});
+exports.uppillar = upshpi(50, code => etgutil.asUpped(code, true));
+exports.shpillar = upshpi(50, code => etgutil.asShiny(code, true));
+exports.upshpillar = upshpi(300, code =>
+	etgutil.asUpped(etgutil.asShiny(code, true), true),
+);
 exports.upshall = function(data, user) {
 	var pool = etgutil.deck2pool(user.pool);
 	var bound = etgutil.deck2pool(user.accountbound);

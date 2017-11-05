@@ -18,9 +18,9 @@ module.exports = class Reward extends preact.Component {
 			if (shiny) reward = reward.slice(1);
 			var upped = reward.slice(0, 5) == 'upped';
 			var rarity = userutil.rewardwords[upped ? reward.slice(5) : reward];
-			rewardList = Cards.filter(upped, function(x) {
-				return x.rarity == rarity;
-			}).map(card => card.asShiny(shiny).code);
+			rewardList = Cards.filter(upped, x => x.rarity == rarity).map(
+				card => card.asShiny(shiny).code,
+			);
 		} else if (reward instanceof Array) {
 			rewardList = reward;
 		}

@@ -38,7 +38,7 @@ exports.card = function(code) {
 		card
 			.info()
 			.replace(/\|/g, ' / ')
-			.replace(/(\d\d?):(\d\d?) ?/g, function(m, n, e) {
+			.replace(/(\d\d?):(\d\d?) ?/g, (m, n, e) => {
 				switch (n | 0) {
 					case 0:
 						return '0';
@@ -101,7 +101,7 @@ exports.deck = function(deck) {
 		paths = {},
 		suffix,
 		pathsvg = '';
-	etgutil.iterdeck(deck, function(code) {
+	etgutil.iterdeck(deck, code => {
 		if (!(code in Cards.Codes)) {
 			var ismark = etgutil.fromTrueMark(code);
 			if (~ismark) mark = ismark;

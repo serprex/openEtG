@@ -21,7 +21,7 @@ module.exports = function(data) {
 	const decks = [data.urdeck, data.deck];
 	for (var j = 0; j < 2; j++) {
 		const pl = game.players(j);
-		etgutil.iterdeck(decks[j], function(code) {
+		etgutil.iterdeck(decks[j], code => {
 			var idx;
 			if (code in Cards.Codes) {
 				pl.deck.push(Cards.Codes[code]);

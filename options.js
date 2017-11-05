@@ -29,17 +29,17 @@ exports.register = function(opt, ele, nopersist) {
 		ename = ele.type == 'checkbox' ? 'change' : 'input';
 	if (exports[opt]) ele[field] = exports[opt];
 	if (!nopersist && hasLocalStorage) {
-		ele.addEventListener(ename, function() {
-			if (this[field]) {
-				exports[opt] = localStorage[opt] = this[field];
+		ele.addEventListener(ename, () => {
+			if (ele[field]) {
+				exports[opt] = localStorage[opt] = ele[field];
 			} else {
 				delete localStorage[opt];
 				delete exports[opt];
 			}
 		});
 	} else {
-		ele.addEventListener(ename, function() {
-			exports[opt] = field == 'checked' && !this.checked ? '' : this[field];
+		ele.addEventListener(ename, () => {
+			exports[opt] = field == 'checked' && !ele.checked ? '' : ele[field];
 		});
 	}
 };
