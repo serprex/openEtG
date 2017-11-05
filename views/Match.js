@@ -298,7 +298,7 @@ function startMatch(self, game, gameData, doNav) {
 		}
 	}
 	function endClick(discard) {
-		if (game.turn == game.player1 && game.phase <= etg.MulliganPhase2){
+		if (game.turn == game.player1 && game.phase === etg.MulliganPhase){
 			if (!game.ai) sock.emit("mulligan", {draw: true});
 			game.progressMulligan();
 		}else if (game.winner) {
@@ -352,7 +352,7 @@ function startMatch(self, game, gameData, doNav) {
 		if (self.state.resigning) {
 			self.setState({resigning: false});
 		} else if (game.turn == game.player1) {
-			if (game.phase <= etg.MulliganPhase2 && game.player1.hand.length) {
+			if (game.phase === etg.MulliganPhase && game.player1.hand.length) {
 				game.player1.drawhand(game.player1.hand.length - 1);
 				if (!game.ai) sock.emit("mulligan");
 				self.setState({ game: game });
@@ -478,7 +478,7 @@ function startMatch(self, game, gameData, doNav) {
 					aiCommand = false;
 					aiDelay = now + (game.turn == game.player1 ? 2000 : 200);
 				}
-			}else if (game.phase <= etg.MulliganPhase2){
+			}else if (game.phase === etg.MulliganPhase){
 				cmds.mulligan({draw: require("../ai/mulligan")(game.player2)});
 			}
 		}
@@ -573,7 +573,7 @@ module.exports = class Match extends preact.Component {
 		if (game.phase != etg.EndPhase) {
 			turntell = self.state.discarding ? "Discard" :
 				game.targeting ? game.targeting.text :
-				(game.turn == game.player1 ? "Your Turn" : "Their Turn") + (game.phase >= 2 ? "" : game.first == game.player1 ? ", First": ", Second");
+				(game.turn == game.player1 ? "Your Turn" : "Their Turn") + (game.phase > etg.MulliganPhase ? "" : game.first == game.player1 ? ", First": ", Second");
 			if (game.turn == game.player1){
 				endText = self.state.discarding ? "" : game.phase == etg.PlayPhase ? "End Turn" : "Accept Hand";
 				cancelText = game.phase != etg.PlayPhase ? "Mulligan" : game.targeting || self.state.discarding || self.state.resigning ? "Cancel" : "";
@@ -837,7 +837,7 @@ module.exports = class Match extends preact.Component {
 				top: '580px',
 				pointerEvents: 'none',
 			},
-		}, self.state.turntell));
+		}, turntell));
 		if (self.state.effects) {
 			Array.prototype.push.apply(children, self.state.effects);
 		}

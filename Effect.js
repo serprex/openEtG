@@ -99,16 +99,16 @@ if (!h){
 	Text.prototype.next = function(){
 		if (++this.step >= 36) return null;
 		this.position.y -= 2;
-		return h('div', {
+		return h(Components.Text, {
+			text: this.text,
 			style: {
 				position: 'absolute',
 				left: this.position.x+'px',
 				top: this.position.y+'px',
 				opacity: 1-Math.sqrt(this.step)/6,
 				fontSize: '16px',
-				color: '#fff',
 			}
-		}, this.text);
+		});
 	}
 	SpriteFade.prototype.next = function() {
 		if (++this.step >= 128) return null;

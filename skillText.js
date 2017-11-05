@@ -285,7 +285,7 @@ const data = {
 		"Target creature gains +6|-6. Thaws"],
 	randomdr:function(c){return "Damage reduction becomes 0 to "+(c.upped?3:2)+" on play"},
 	readiness:"Target creature's active becomes costless. Skill can be reactivated",
-	readyweapon:"Weapons enter without summoning sickness",
+	readyequip:"Equipment enters without summoning sickness",
 	reap:"Target creature dies & is reborn a skeleton with same stats",
 	rebirth:["Become a Phoenix", "Become a Minor Phoenix"],
 	reducemaxhp:"Reduce maximum HP per damage dealt",

@@ -39,7 +39,7 @@ module.exports = class Login extends preact.Component {
 		}
 		function loginClick(auth) {
 			if (!sock.user && options.username) {
-				let data = {u:options.username}
+				const data = {u:options.username}
 				if (typeof auth !== "string"){
 					data.p = self.state.password;
 				}else data.a = auth;

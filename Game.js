@@ -47,15 +47,12 @@ Game.prototype.setWinner = function(play){
 	}
 }
 Game.prototype.progressMulligan = function(){
-	if (this.phase == etg.MulliganPhase1){
-		this.phase = etg.MulliganPhase2;
-	}else if(this.phase == etg.MulliganPhase2){
-		this.phase = etg.PlayPhase;
-	}else{
-		console.log("Not mulligan phase: " + game.phase);
-		return;
+	if(this.phase === etg.MulliganPhase) {
+		this.turn = this.turn.foe;
+		if(this.turn === this.first){
+			this.phase = etg.PlayPhase;
+		}
 	}
-	this.turn = this.turn.foe;
 }
 var blacklist = new Set(["spectate", "flip", "seed", "p1deckpower", "p2deckpower", "deck", "urdeck"]);
 Game.prototype.addData = function(data) {

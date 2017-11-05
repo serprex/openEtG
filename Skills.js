@@ -1395,8 +1395,8 @@ readiness:function(c,t){
 		t.usedactive = false;
 	}
 },
-readyweapon:function(c,t){
-	if (t.type === etg.Weapon) {
+readyequip:function(c,t){
+	if (t.type === etg.Weapon || t.type === etg.Shield) {
 		t.usedactive = false;
 	}
 },
