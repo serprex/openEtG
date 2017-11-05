@@ -299,7 +299,13 @@ class CardSelector extends Component {
 						return self.props.onClick(code);
 					},
 					onMouseOver: self.props.onMouseOver && function() {
-						return self.props.onMouseOver(self.state.shiny ? etgutil.asShiny(code, true) : code);
+						if (self.props.filterboth && !self.state.shiny){
+							const scode = card.asShiny(true).code;
+							if (scode in self.props.cardpool && self.props.cardpool[scode] > (self.props.cardminus && self.props.cardminus[scode] || 0)) {
+								code = scode;
+							}
+						}
+						return self.props.onMouseOver(code);
 					},
 				}));
 				if (this.props.cardpool) {
