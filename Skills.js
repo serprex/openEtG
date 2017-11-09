@@ -521,7 +521,6 @@ const Skills = (module.exports = {
 	},
 	draft: (c, t) => {
 		Effect.mkText('Draft', t);
-		c.owner.spend(etg.Air, -2);
 		var isborne = !t.status.get('airborne');
 		t.status.set('airborne', isborne);
 		if (isborne && t.active.cast == Skills.burrow) delete t.active.cast;

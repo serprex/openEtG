@@ -661,7 +661,7 @@ function tgtstyle(game, obj) {
 	} else {
 		if (obj.owner === game.player1 && obj.canactive()) return '#fff 2px solid';
 	}
-	return '#0000 2px solid';
+	return 'transparent 2px solid';
 }
 
 module.exports = class Match extends preact.Component {

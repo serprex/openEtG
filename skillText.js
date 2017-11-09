@@ -144,8 +144,7 @@ const data = {
 	divinity: 'Add 24 to maximum health & heal 16',
 	dive: 'Double strength until next attack. Does not stack',
 	dmgproduce: 'Generate 1:0 per damage dealt',
-	draft:
-		'Target airborne creature loses airborne status, or vice versa. Produce 2:9',
+	draft: 'Target airborne creature loses airborne status, or vice versa',
 	drainlife: 'Drains 2HP from target. Increment drain per 5:11 owned',
 	drawcopy: 'When foe discards a card, generate a copy',
 	drawequip: 'Draw next weapon or shield',
@@ -213,13 +212,10 @@ const data = {
 	gaintimecharge: 'Gain a stack per own non-drawstep draw, up to 4 per turn',
 	gas: 'Summon an Unstable Gas',
 	grave: 'When a death occurs, unburrowed & become of its kind',
-	give: c => {
-		return (
-			'Give own target to foe. Heal self ' +
-			(c.upped ? 10 : 5) +
-			'. Ignore sanctuary, may target immaterial'
-		);
-	},
+	give: c =>
+		'Give own target to foe. Heal self ' +
+		(c.upped ? 10 : 5) +
+		'. Ignore sanctuary, may target immaterial',
 	golemhit: 'Target golem attacks. May target immaterial',
 	gpull: 'Intercept attacks directed to owner',
 	gpullspell: 'Target creature intercepts attacks directed to its owner',
@@ -242,25 +238,19 @@ const data = {
 	},
 	hatch: 'Become a random creature',
 	heal: 'Heal target 20',
-	heatmirror: c => {
-		return (
-			'Heat Lightning: When foe plays a creature from hand, summon a ' +
-			(c.upped ? 'Ball Lightning' : 'Spark')
-		);
-	},
+	heatmirror: c =>
+		'Heat Lightning: When foe plays a creature from hand, summon a ' +
+		(c.upped ? 'Ball Lightning' : 'Spark'),
 	hitownertwice: 'Attack owner twice when attacking',
 	holylight: 'Heal target 10. Nocturnal targets are spell damaged instead',
 	hope: 'Increment damage reduction per own 1:8 producing creature',
 	icebolt:
 		'Deal 2 damage to target. Increment damage per 5:7 owned. May freeze target',
 	ignite: 'Deal 20 spell damage to foe & 1 damage to all creatures',
-	immolate: c => {
-		return (
-			'Sacrifice a creature to produce ' +
-			(c.upped ? 7 : 5) +
-			':6 & 1 quanta of each other element'
-		);
-	},
+	immolate: c =>
+		'Sacrifice a creature to produce ' +
+		(c.upped ? 7 : 5) +
+		':6 & 1 quanta of each other element',
 	improve: 'Mutate target creature',
 	inertia: 'When own is targeted, produce 2:3',
 	infect: 'Poison target creature',
@@ -271,10 +261,7 @@ const data = {
 	jelly:
 		'Target creature becomes a 7|4 with active Pink Jelly costing 4 of their element',
 	jetstream: 'Target airborne creature gains 3|-1',
-	light: {
-		auto: 'Produce 1:8 per turn',
-		ownplay: 'Produce 1:8 on play',
-	},
+	light: 'Produce 1:8 per turn',
 	lightning: 'Deal 5 damage to target',
 	liquid:
 		'Target creature is poisoned & skills are replaced with "Heal owner per damage dealt"',
@@ -285,7 +272,7 @@ const data = {
 	locketshift: "Now produces quanta of target's element",
 	loot: 'Steal a random permanent from foe when own permanent is destroyed',
 	losecharge: (c, inst) => {
-		var charges = c.status.get('charges');
+		const charges = c.status.get('charges');
 		return 'Lasts ' + charges + ' turn' + (charges == 1 ? '' : 's');
 	},
 	luciferin:
@@ -310,13 +297,10 @@ const data = {
 	neuro:
 		'Apply poison on hit, also inflicting neurotoxin. Neurotoxin applies poison per card played by victim. Throttled',
 	neuroify: 'Gives foe neurotoxin status if they are already poisoned',
-	nightmare: c => {
-		return (
-			"Fill foe's hand with copies of target creature's card. Drain " +
-			(c.upped ? '2' : '1') +
-			'HP per added card'
-		);
-	},
+	nightmare: c =>
+		"Fill foe's hand with copies of target creature's card. Drain " +
+		(c.upped ? '2' : '1') +
+		'HP per added card',
 	nightshade:
 		'Target creatures becomes nocturnal, gains 5|5, & has their active cleared',
 	nova:
@@ -346,23 +330,13 @@ const data = {
 	parallel: 'Duplicate target creature',
 	phoenix: ['Become an Ash on death', 'Become a Minor Ash on death'],
 	photosynthesis: 'Produce 2:5. May activate multiple times',
-	pillar: {
-		auto: c => {
-			return 'Produce ' + (c.element ? 1 : 3) + ':' + c.element + ' per turn';
-		},
-		ownplay: c => {
-			return 'Produce ' + (c.element ? 1 : 3) + ':' + c.element + ' on play';
-		},
-	},
-	pend: c => {
-		return (
-			'Oscilliate between producing ' +
-			(c.element ? 1 : 3) +
-			':' +
-			c.element +
-			' & quanta of mark'
-		);
-	},
+	pillar: c => 'Produce ' + (c.element ? 1 : 3) + ':' + c.element + ' per turn',
+	pend: c =>
+		'Oscilliate between producing ' +
+		(c.element ? 1 : 3) +
+		':' +
+		c.element +
+		' & quanta of mark',
 	plague: "Poison target player's creatures. Removes cloak",
 	platearmor: ['Target gains 0|4', 'Target gains 0|6'],
 	poison: x => {
@@ -390,9 +364,8 @@ const data = {
 		'Target creature gains +5|-5. Thaws',
 		'Target creature gains +6|-6. Thaws',
 	],
-	randomdr: c => {
-		return 'Damage reduction becomes 0 to ' + (c.upped ? 3 : 2) + ' on play';
-	},
+	randomdr: c =>
+		'Damage reduction becomes 0 to ' + (c.upped ? 3 : 2) + ' on play',
 	readiness:
 		"Target creature's active becomes costless. Skill can be reactivated",
 	readyequip: 'Equipment enters without summoning sickness',
@@ -465,9 +438,8 @@ const data = {
 	steam:
 		'Gain 5 steam. Increment strength per steam. Steam decrements after attacking',
 	stoneform: 'Gain 0|20 & become a golem',
-	storm: x => {
-		return 'Deals ' + x + " damage to target player's creatures. Removes cloak";
-	},
+	storm: x =>
+		'Deals ' + x + " damage to target player's creatures. Removes cloak",
 	summon: x => {
 		const card1 = Cards[x],
 			card2 = card1.asUpped(true);
@@ -558,15 +530,14 @@ function auraText(tgts, bufftext, upbufftext) {
 }
 var statusData = {
 	cloak: 'Cloaks own field',
-	charges: (c, inst) => {
-		return c !== inst ||
-			Thing.prototype.hasactive.call(c, 'auto', 'losecharge') ||
-			c.status.get('charges') == 1
+	charges: (c, inst) =>
+		c !== inst ||
+		Thing.prototype.hasactive.call(c, 'auto', 'losecharge') ||
+		c.status.get('charges') == 1
 			? ''
 			: 'Enter with ' +
-					c.status.get('charges') +
-					(c.status.get('stackable') ? ' stacks' : ' charges');
-	},
+				c.status.get('charges') +
+				(c.status.get('stackable') ? ' stacks' : ' charges'),
 	flooding:
 		'Non aquatic creatures past first five creature slots die on turn end. Consumes 1:7. Unique',
 	freedom: '',
@@ -575,11 +546,10 @@ var statusData = {
 		'Throttling does not apply to any of own creatures while equipped',
 	patience:
 		'Each turn delay own creatures. They gain 2|1. 4|1 if burrowed. 5|2 if flooded. Unique',
-	poison: (c, inst) => {
-		return c == inst
+	poison: (c, inst) =>
+		c == inst
 			? 'Enter with ' + c.status.get('poison') + ' poison'
-			: inst.status.get('poison') + ' poison';
-	},
+			: inst.status.get('poison') + ' poison',
 	stackable: '',
 	stasis: 'Prevent creatures attacking at end of turn',
 	tunnel: 'Burrowed creatures bypass shields',
