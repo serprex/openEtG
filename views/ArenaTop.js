@@ -46,7 +46,8 @@ module.exports = class ArenaTop extends preact.Component {
 									card: card,
 									cardx: e.pageX + 4,
 									cardy: e.pageY + 4,
-								})}
+								})
+							}
 							onMouseLeave={() => self.setState({ card: false })}>
 							{card.name}
 						</span>

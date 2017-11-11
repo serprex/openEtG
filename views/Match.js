@@ -181,6 +181,7 @@ function ThingInst(props) {
 				width: 64 * scale + 'px',
 				height: 64 * scale + 'px',
 				backgroundColor: ui.maybeLightenStr(obj.card),
+				pointerEvents: 'none',
 			},
 		}),
 	];
@@ -332,11 +333,7 @@ function ThingInst(props) {
 			color: obj.card.upped ? '#000' : '#fff',
 			fontSize: '10px',
 		},
-		onMouseOver:
-			props.setInfo &&
-			function(e) {
-				return props.setInfo(e, obj, pos.x);
-			},
+		onMouseOver: props.setInfo && (e => props.setInfo(e, obj, pos.x)),
 		onMouseOut: props.onMouseOut,
 		onClick: function() {
 			if (game.phase != etg.PlayPhase) return;
