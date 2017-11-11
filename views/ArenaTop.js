@@ -33,9 +33,9 @@ module.exports = class ArenaTop extends preact.Component {
 					const lic = [<span className="atoptext">{data[0]}</span>];
 					for (var i = 1; i <= 4; i++) {
 						if (i == 3) {
-							lic.push(<span className="atopdash">'-'</span>);
+							lic.push(<span className="atopdash">-</span>);
 						}
-						lic.push(<span className={'atop' + i}>data[i]</span>);
+						lic.push(<span className={'atop' + i}>{data[i]}</span>);
 					}
 					const card = Cards.Codes[data[5]].asUpped(lv);
 					const cname = (

@@ -264,7 +264,7 @@ const keycerttask = sutil.mkTask(res => {
 			});
 		},
 		codesubmit: function(data, user) {
-			db.hget('CodeHash', data.code, (err, type) => {
+			db.hget('CodeHash', data.code || '', (err, type) => {
 				if (!type) {
 					sockEmit(this, 'chat', { mode: 1, msg: 'Code does not exist' });
 				} else if (type.charAt(0) == 'G') {
@@ -298,7 +298,7 @@ const keycerttask = sutil.mkTask(res => {
 			});
 		},
 		codesubmit2: function(data, user) {
-			db.hget('CodeHash', data.code, (err, type) => {
+			db.hget('CodeHash', data.code || '', (err, type) => {
 				if (!type) {
 					sockEmit(this, 'chat', { mode: 1, msg: 'Code does not exist' });
 				} else if (type.replace(/^!/, '') in userutil.rewardwords) {
