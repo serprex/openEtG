@@ -112,7 +112,14 @@ module.exports = class Result extends preact.Component {
 		const game = this.props.game,
 			data = this.props.data;
 		const winner = game.winner === game.player1,
-			foeDeck = data.p2deck;
+			foeDeck = data.p2deck,
+			children = [
+				h(Components.ExitBtn, { x: 412, y: 440, onClick: this.exitFunc }),
+			],
+			lefttext = [
+				game.ply + ' plies',
+				(game.time / 1000).toFixed(1) + ' seconds',
+			];
 		function computeBonuses() {
 			if (game.endurance !== undefined) return 1;
 			const bonus = [
@@ -124,13 +131,14 @@ module.exports = class Result extends preact.Component {
 				],
 				['Creatureless', game.bonusstats.creaturesplaced == 0 ? 0.1 : 0],
 				['Current Health', game.player1.hp / 300],
+				['Max Health', (game.player1.maxhp - 100) / 600],
+				['Full Health', game.player1.hp == game.player1.maxhp ? 0.2 : 0],
 				[
 					'Deckout',
 					game.player2.deck.length == 0 && game.player2.hp > 0 ? 0.5 : 0,
 				],
 				['Double Kill', game.player2.hp < -game.player2.maxhp ? 0.15 : 0],
 				['Equipped', game.player1.weapon && game.player1.shield ? 0.05 : 0],
-				['Full Health', game.player1.hp == game.player1.maxhp ? 0.2 : 0],
 				['Grounds Keeper', (game.player1.countpermanents() - 8) / 40],
 				['Head Hunter', [1, 0.5, 0.25, 0.12, 0.06, 0.03, 0.01][data.rank]],
 				['Last point', game.player1.hp == 1 ? 0.3 : 0],
@@ -165,13 +173,6 @@ module.exports = class Result extends preact.Component {
 			);
 			return bonus;
 		}
-		const children = [
-			h(Components.ExitBtn, { x: 412, y: 440, onClick: this.exitFunc }),
-		];
-		var lefttext = [
-			game.ply + ' plies',
-			(game.time / 1000).toFixed(1) + ' seconds',
-		];
 		if (!game.quest && game.daily === undefined) {
 			children.push(
 				h('input', {
@@ -202,7 +203,8 @@ module.exports = class Result extends preact.Component {
 							if (cardwon == 3 && Math.random() < 0.5)
 								cardwon = RngMock.choose(winnable);
 						} else {
-							var elewin = foeDeck[Math.floor(Math.random() * foeDeck.length)];
+							const elewin =
+								foeDeck[Math.floor(Math.random() * foeDeck.length)];
 							cardwon = RngMock.randomcard(
 								elewin.upped,
 								x =>
