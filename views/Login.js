@@ -38,21 +38,23 @@ if (typeof kongregateAPI === 'undefined') {
 			const xhr = new XMLHttpRequest();
 			xhr.addEventListener('load', () => {
 				const data = JSON.parse(xhr.responseText)[0];
-				this.setState({
-					commit: (
-						<a
-							target="_blank"
-							href={data.html_url}
-							style={{
-								maxWidth: '380px',
-								position: 'absolute',
-								left: '260px',
-								top: '460px',
-							}}>
-							{data.author.login + ': ' + data.commit.message}
-						</a>
-					),
-				});
+				if (data) {
+					this.setState({
+						commit: (
+							<a
+								target="_blank"
+								href={data.html_url}
+								style={{
+									maxWidth: '380px',
+									position: 'absolute',
+									left: '260px',
+									top: '460px',
+								}}>
+								{data.author.login + ': ' + data.commit.message}
+							</a>
+						),
+					});
+				}
 			});
 			xhr.open(
 				'GET',

@@ -544,9 +544,9 @@ function startMatch(self, game, gameData, doNav) {
 	Effect.clear();
 	function onkeydown(e) {
 		if (e.target.id == 'chatinput') return;
-		var kc = e.which || e.keyCode;
-		var ch = String.fromCharCode(kc),
-			chi;
+		const kc = e.which || e.keyCode,
+			ch = String.fromCharCode(kc);
+		let chi;
 		if (kc == 27) {
 			resignClick();
 		} else if (ch == ' ' || kc == 13) {
@@ -691,6 +691,7 @@ module.exports = class Match extends preact.Component {
 	}
 
 	componentWillReceiveProps(props) {
+		this.componentWillUnmount();
 		startMatch(this, props.game, props.data, props.doNav);
 	}
 

@@ -254,14 +254,14 @@ function maybeSendChat(e) {
 				span.appendChild(document.createTextNode(name + ' '));
 				span.addEventListener('click', function(e) {
 					if (e.target != this) return;
-					var deckname = document.getElementById('deckname'),
+					const deckname = document.getElementById('deckname'),
 						deckimport = document.getElementById('deckimport');
 					if (deckname && deckimport) {
 						deckname.value = name;
 						deckimport.value = deck;
 						deckname.dispatchEvent(new Event('change'));
 						deckimport.dispatchEvent(new Event('change'));
-						var e = new Event('keypress');
+						const e = new Event('keypress');
 						e.keyCode = 13;
 						deckname.dispatchEvent(e);
 						deckimport.dispatchEvent(e);

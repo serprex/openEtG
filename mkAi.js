@@ -82,18 +82,18 @@ const randomNames = [
 ];
 exports.mkAi = function(level, daily) {
 	return () => {
-		var urdeck = sock.getDeck();
+		const urdeck = sock.getDeck();
 		if (etgutil.decklength(urdeck) < (sock.user ? 31 : 9)) {
 			return;
 		}
-		var cost = daily !== undefined ? 0 : userutil.pveCostReward[level * 2];
+		const cost = daily !== undefined ? 0 : userutil.pveCostReward[level * 2];
 		if (sock.user && cost) {
 			if (sock.user.gold < cost) {
 				chat('Requires ' + cost + '$', 'System');
 				return;
 			}
 		}
-		var deck = level == 0 ? mkDeck(0, 1, 2) : mkDeck(0.4, 2, 4);
+		const deck = level == 0 ? mkDeck(0, 1, 2) : mkDeck(0.4, 2, 4);
 		options.aideck = deck;
 
 		const gameData = {

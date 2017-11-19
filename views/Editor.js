@@ -256,8 +256,8 @@ module.exports = class Editor extends preact.Component {
 			);
 		}
 		function saveButton() {
-			if (this.state.deckname) {
-				sock.user.selectedDeck = this.state.deckname;
+			if (self.state.deckname) {
+				sock.user.selectedDeck = self.state.deckname;
 				saveDeck();
 				self.setState({});
 			}
@@ -296,7 +296,7 @@ module.exports = class Editor extends preact.Component {
 				h('input', {
 					type: 'button',
 					value: 'Exit',
-					onClick: function() {
+					onClick: () => {
 						sock.userEmit('arenainfo');
 					},
 					style: {
@@ -394,9 +394,7 @@ module.exports = class Editor extends preact.Component {
 					h('input', {
 						type: 'button',
 						value: 'Load',
-						onClick: function() {
-							loadDeck(this.state.deckname);
-						},
+						onClick: () => loadDeck(this.state.deckname),
 						style: {
 							position: 'absolute',
 							left: '8px',
@@ -506,17 +504,16 @@ module.exports = class Editor extends preact.Component {
 		if (!self.props.acard) {
 			if (sock.user) {
 				const deckname = h('input', {
+					id: 'deckname',
 					placeholder: 'Name',
 					value: self.state.deckname,
-					onInput: function(e) {
-						self.setState({ deckname: e.target.value });
-					},
-					onKeyPress: function(e) {
+					onInput: e => self.setState({ deckname: e.target.value }),
+					onKeyPress: e => {
 						if (e.keyCode == 13) {
 							loadDeck(e.target.value);
 						}
 					},
-					onClick: function(e) {
+					onClick: (e) => {
 						e.target.setSelectionRange(0, 999);
 					},
 					style: {
@@ -541,7 +538,7 @@ module.exports = class Editor extends preact.Component {
 					top: '238px',
 					width: '190px',
 				},
-				ref: function(ctrl) {
+				ref: (ctrl) => {
 					if (ctrl) {
 						options.deck = ctrl.value;
 						options.register('deck', ctrl);
@@ -551,10 +548,10 @@ module.exports = class Editor extends preact.Component {
 						}
 					}
 				},
-				onClick: function(e) {
+				onClick: (e) => {
 					e.target.setSelectionRange(0, 999);
 				},
-				onKeyPress: function(e) {
+				onKeyPress: (e) => {
 					if (e.keyCode == 13) {
 						e.target.blur();
 						importDeck();
@@ -565,7 +562,7 @@ module.exports = class Editor extends preact.Component {
 		}
 		px.view({
 			cmds: {
-				arenainfo: function(data) {
+				arenainfo: (data) => {
 					self.props.doNav(require('./ArenaInfo'), data);
 				},
 			},
