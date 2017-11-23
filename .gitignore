@@ -9,8 +9,7 @@ tournify.js
 .ninja_log
 .ninja_deps
 pushserver.sh
-pixi.*
-bundle.js
+bundle.*.js
 *.min.*
 *.exe
 *.gz
