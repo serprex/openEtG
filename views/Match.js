@@ -322,6 +322,7 @@ function ThingInst(props) {
 	const pos = ui.tgtToPos(obj);
 	return h('div', {
 		children: children,
+		className: tgtclass(game, obj),
 		style: {
 			position: 'absolute',
 			left: pos.x - 32 * scale + 'px',
@@ -329,9 +330,9 @@ function ThingInst(props) {
 			width: 64 * scale + 4 + 'px',
 			height: (isSpell ? 64 : 72) * scale + 4 + 'px',
 			opacity: obj.isMaterial() ? '1' : '.7',
-			border: tgtstyle(game, obj),
 			color: obj.card.upped ? '#000' : '#fff',
 			fontSize: '10px',
+			border: 'transparent 2px solid',
 		},
 		onMouseOver: props.setInfo && (e => props.setInfo(e, obj, pos.x)),
 		onMouseOut: props.onMouseOut,
@@ -652,13 +653,13 @@ function startMatch(self, game, gameData, doNav) {
 	px.view({ cmds: cmds });
 }
 
-function tgtstyle(game, obj) {
+function tgtclass(game, obj) {
 	if (game.targeting) {
-		if (game.targeting.filter(obj)) return '#f00 2px solid';
+		if (game.targeting.filter(obj)) return 'ants-red';
 	} else {
-		if (obj.owner === game.player1 && obj.canactive()) return '#fff 2px solid';
+		if (obj.owner === game.player1 && obj.canactive()) return 'ants-black';
 	}
-	return 'transparent 2px solid';
+	return;
 }
 
 module.exports = class Match extends preact.Component {
@@ -788,13 +789,14 @@ module.exports = class Match extends preact.Component {
 			const plpos = ui.tgtToPos(pl);
 			children.push(
 				h('div', {
+					className: tgtclass(game, pl),
 					style: {
 						position: 'absolute',
 						left: plpos.x - 48 + 'px',
 						top: plpos.y - 40 + 'px',
 						width: '96px',
 						height: '80px',
-						border: tgtstyle(game, pl),
+						border: 'transparent 2px solid',
 					},
 					onClick: self.state.playerClick[j],
 					onMouseOver: function(e) {
@@ -891,13 +893,14 @@ module.exports = class Match extends preact.Component {
 						h(
 							'div',
 							{
+								className: tgtclass(game, card),
 								style: {
 									position: 'absolute',
 									left: pos.x - 32 + 'px',
 									top: pos.y - 38 + 'px',
 									width: '68px',
 									height: '80px',
-									border: tgtstyle(game, card),
+									border: 'transparent 2px solid',
 								},
 							},
 							h('div', {

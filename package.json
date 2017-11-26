@@ -10,7 +10,7 @@
     "bufferutil": "^3.0.3",
     "httpolyglot": "^0.1.2",
     "redis": "^2.8.0",
-    "ws": "^3.3.1"
+    "ws": "^3.3.2"
   },
   "devDependencies": {
     "babel-core": "^6.26.0",

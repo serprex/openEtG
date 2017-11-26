@@ -131,6 +131,17 @@ input[type="text"],input[type="password"],input:not([type]){width:150px;border:2
 	0% { filter: hue-rotate(90deg) }
 	100% { filter: hue-rotate(270deg) }
 }
+@keyframes ants { to { background-position: 100% 100% } }
+.ants-red {
+	background: linear-gradient(#fff, #fff) padding-box,
+		repeating-linear-gradient(-45deg, red 0, red 25%, #fff 0, #fff 50%) 0 / .6em .6em;
+	animation: ants 8s linear infinite;
+}
+.ants-black {
+	background: linear-gradient(#fff, #fff) padding-box,
+		repeating-linear-gradient(-45deg, #000 0, #000 25%, #fff 0, #fff 50%) 0 / .6em .6em;
+	animation: ants 8s linear infinite;
+}
 .shiny {
 	animation: animatedShiny 8s linear infinite alternate-reverse;
 }
