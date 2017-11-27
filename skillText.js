@@ -191,7 +191,7 @@ const data = {
 	flyingweapon: 'Target weapon becomes a flying creature',
 	foedraw: "Draw from foe's deck",
 	forcedraw: 'Defender draws card on hit',
-	forceplay: 'Foe activates target',
+	forceplay: 'Owner of target activates target',
 	fractal:
 		"Generate 6 copies of target creature's card. Consumes remaining 1:12. Generate another copy per 2:12 consumed",
 	freeevade:
