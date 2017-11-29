@@ -291,22 +291,6 @@ function ThingInst(props) {
 			}),
 		);
 	}
-	children.push(
-		h(
-			'span',
-			{
-				style: {
-					color: obj.card.upped ? '#000' : '#fff',
-					textAlign: 'center',
-					position: 'absolute',
-					left: '0',
-					top: 64 * scale + 'px',
-					width: 72 * scale + 'px',
-				},
-			},
-			obj.card.name,
-		),
-	);
 	if (obj.hasactive('prespell', 'protectonce')) {
 		children.push(
 			h('div', {
