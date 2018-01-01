@@ -10,7 +10,7 @@
     "bufferutil": "^3.0.3",
     "httpolyglot": "^0.1.2",
     "redis": "^2.8.0",
-    "ws": "^3.3.2"
+    "ws": "^3.3.3"
   },
   "devDependencies": {
     "babel-core": "^6.26.0",
@@ -20,8 +20,8 @@
     "babel-preset-react": "^6.24.1",
     "mkcjs": "^0.2.0",
     "optipng-bin": "^4.0",
-    "prettier": "^1.8.2",
-    "webpack": "^3.8.1"
+    "prettier": "^1.9.2",
+    "webpack": "^3.10.0"
   },
   "scripts": {
     "test": "./scripts/tests.js",
