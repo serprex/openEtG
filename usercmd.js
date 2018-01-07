@@ -1,9 +1,9 @@
-var Cards = require('./Cards');
-var etgutil = require('./etgutil');
-var userutil = require('./userutil');
+const Cards = require('./Cards'),
+	etgutil = require('./etgutil'),
+	userutil = require('./userutil');
 
 exports.bazaar = function(data, user) {
-	var cost = Math.ceil(userutil.calcWealth(data.cards, true) * 3);
+	const cost = Math.ceil(userutil.calcWealth(data.cards, true) * 3);
 	if (user.gold >= cost) {
 		user.gold -= cost;
 		user.pool = etgutil.mergedecks(user.pool, data.cards);
@@ -11,8 +11,8 @@ exports.bazaar = function(data, user) {
 };
 exports.sellcard = function(data, user) {
 	if (etgutil.count(user.pool, data.card)) {
-		var card = Cards.Codes[data.card];
-		var sellValue =
+		const card = Cards.Codes[data.card];
+		const sellValue =
 			userutil.sellValues[card.rarity] *
 			(card.upped ? 6 : 1) *
 			(card.shiny ? 6 : 1);
@@ -23,10 +23,10 @@ exports.sellcard = function(data, user) {
 	}
 };
 function transmute(user, oldcard, func, use) {
-	var poolCount = etgutil.count(user.pool, oldcard);
-	var newcard = func(oldcard, true);
+	const poolCount = etgutil.count(user.pool, oldcard);
+	const newcard = func(oldcard, true);
 	if (poolCount < use) {
-		var boundCount = etgutil.count(user.accountbound, oldcard);
+		const boundCount = etgutil.count(user.accountbound, oldcard);
 		if (poolCount + boundCount >= use) {
 			user.accountbound = etgutil.addcard(user.accountbound, oldcard, -use);
 			if (boundCount < use)
@@ -39,10 +39,10 @@ function transmute(user, oldcard, func, use) {
 	}
 }
 function untransmute(user, oldcard, func, use) {
-	var poolCount = etgutil.count(user.pool, oldcard);
-	var newcard = func(oldcard, false);
+	const poolCount = etgutil.count(user.pool, oldcard);
+	const newcard = func(oldcard, false);
 	if (poolCount == 0) {
-		var boundCount = etgutil.count(user.accountbound, oldcard);
+		const boundCount = etgutil.count(user.accountbound, oldcard);
 		if (boundCount) {
 			user.accountbound = etgutil.addcard(user.accountbound, oldcard, -1);
 			user.accountbound = etgutil.addcard(user.accountbound, newcard, use);
@@ -53,27 +53,27 @@ function untransmute(user, oldcard, func, use) {
 	}
 }
 exports.upgrade = function(data, user) {
-	var card = Cards.Codes[data.card];
+	const card = Cards.Codes[data.card];
 	if (!card || card.upped) return;
-	var use = ~card.rarity ? 6 : 1;
+	const use = ~card.rarity ? 6 : 1;
 	transmute(user, card.code, etgutil.asUpped, use);
 };
 exports.downgrade = function(data, user) {
-	var card = Cards.Codes[data.card];
+	const card = Cards.Codes[data.card];
 	if (!card || !card.upped) return;
-	var use = ~card.rarity ? 6 : 1;
+	const use = ~card.rarity ? 6 : 1;
 	untransmute(user, card.code, etgutil.asUpped, use);
 };
 exports.polish = function(data, user) {
-	var card = Cards.Codes[data.card];
+	const card = Cards.Codes[data.card];
 	if (!card || card.shiny || card.rarity == 5) return;
-	var use = ~card.rarity ? 6 : 2;
+	const use = ~card.rarity ? 6 : 2;
 	transmute(user, card.code, etgutil.asShiny, use);
 };
 exports.unpolish = function(data, user) {
-	var card = Cards.Codes[data.card];
+	const card = Cards.Codes[data.card];
 	if (!card || !card.shiny || card.rarity == 5) return;
-	var use = ~card.rarity ? 6 : 2;
+	const use = ~card.rarity ? 6 : 2;
 	untransmute(user, card.code, etgutil.asShiny, use);
 };
 function upshpi(cost, func) {
@@ -91,12 +91,12 @@ exports.upshpillar = upshpi(300, code =>
 	etgutil.asUpped(etgutil.asShiny(code, true), true),
 );
 exports.upshall = function(data, user) {
-	var pool = etgutil.deck2pool(user.pool);
-	var bound = etgutil.deck2pool(user.accountbound);
+	const pool = etgutil.deck2pool(user.pool);
+	const bound = etgutil.deck2pool(user.accountbound);
 	pool.forEach((count, code) => {
-		var card = Cards.Codes[code];
-		if (!card || card.rarity == 5 || card.rarity < 1) return;
-		var dcode = etgutil.asShiny(etgutil.asUpped(card.code, false), false);
+		const card = Cards.Codes[code];
+		if (!card || (card.rarity == 5 && card.shiny) || card.rarity < 1) return;
+		const dcode = etgutil.asShiny(etgutil.asUpped(card.code, false), false);
 		if (code == dcode) return;
 		if (!(dcode in pool)) pool[dcode] = 0;
 		pool[dcode] += count * (card.upped && card.shiny ? 36 : 6);
@@ -104,7 +104,7 @@ exports.upshall = function(data, user) {
 	});
 	bound.forEach((count, code) => {
 		if (!(code in pool)) return;
-		var card = Cards.Codes[code];
+		const card = Cards.Codes[code];
 		if (
 			!card ||
 			card.rarity == 5 ||
@@ -116,31 +116,25 @@ exports.upshall = function(data, user) {
 		pool[code] += Math.min(count, 6);
 	});
 	pool.forEach((count, code) => {
-		var card = Cards.Codes[code];
-		if (
-			!card ||
-			card.rarity == 5 ||
-			card.rarity < 1 ||
-			card.upped ||
-			card.shiny
-		)
-			return;
-		var base = 6,
-			pc = 0;
-		for (var i = 1; i < 4; i++) {
-			var upcode = etgutil.asShiny(etgutil.asUpped(code, i & 1), i & 2);
+		const card = Cards.Codes[code];
+		if (!card || card.rarity < 1 || card.upped || card.shiny) return;
+		count -= 6;
+		let pc = 0;
+		for (let i = 1; i < 4; i++) {
+			if (card.rarity == 5 && i & 2) continue;
+			const upcode = etgutil.asShiny(etgutil.asUpped(code, i & 1), i & 2);
 			pool[upcode] = Math.max(
-				Math.min(Math.floor((count - base) / (i == 3 ? 36 : 6)), 6),
+				Math.min(Math.floor(count / (i == 3 ? 36 : 6)), 6),
 				0,
 			);
 			pc += pool[upcode] * (i == 3 ? 36 : 6);
-			base += 36;
+			count -= 36;
 		}
 		pool[code] -= pc;
 	});
 	bound.forEach((count, code) => {
 		if (!(code in pool)) return;
-		var card = Cards.Codes[code];
+		const card = Cards.Codes[code];
 		if (
 			!card ||
 			card.rarity == 5 ||
@@ -151,11 +145,9 @@ exports.upshall = function(data, user) {
 			return;
 		pool[code] -= Math.min(count, 6);
 	});
-	var newpool = '';
+	let newpool = '';
 	pool.forEach((count, code) => {
-		if (count) {
-			if (count) newpool = etgutil.addcard(newpool, code, count);
-		}
+		if (count) newpool = etgutil.addcard(newpool, code, count);
 	});
 	user.pool = newpool;
 };
@@ -168,7 +160,7 @@ exports.addloss = function(data, user) {
 	if (data.g) user.gold += data.g;
 };
 exports.addwin = function(data, user) {
-	var prefix = data.pvp ? 'pvp' : 'ai';
+	const prefix = data.pvp ? 'pvp' : 'ai';
 	user[prefix + 'wins']++;
 	user[prefix + 'losses']--;
 };

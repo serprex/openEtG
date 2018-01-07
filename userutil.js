@@ -1,6 +1,6 @@
 'use strict';
-var Cards = require('./Cards');
-var etgutil = require('./etgutil');
+const Cards = require('./Cards'),
+	etgutil = require('./etgutil');
 exports.rewardwords = {
 	mark: -1,
 	pillar: 0,
