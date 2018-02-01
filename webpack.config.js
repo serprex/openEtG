@@ -17,9 +17,9 @@ module.exports = {
 				use: {
 					loader: 'babel-loader',
 					query: {
-						presets: ["env", "react"],
+						presets: ["@babel/preset-env", "@babel/preset-react"],
 						plugins: [
-							["transform-react-jsx", { pragma: "h" }]
+							["@babel/plugin-transform-react-jsx", { pragma: "h" }]
 						]
 					}
 				},

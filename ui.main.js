@@ -1,5 +1,5 @@
 'use strict';
-require('babel-polyfill');
+require('@babel/polyfill');
 const muteset = {},
 	px = require('./px'),
 	chat = require('./chat'),
