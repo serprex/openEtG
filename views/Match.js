@@ -433,7 +433,7 @@ function startMatch(self, game, gameData, doNav) {
 								game.quest[1] + 1,
 								game.area,
 							);
-							newgame.addData(data);
+							newgame.game.addData(data);
 							mkAi.run(doNav, newgame);
 							return;
 						} else if (
