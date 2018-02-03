@@ -8,10 +8,6 @@ exports.getCmd = function(cmd) {
 exports.view = function(stage) {
 	curStage = stage;
 };
-exports.doNav = function(view, viewProps) {
-	store.dispatch({
-		type: 'NAV',
-		nav: view,
-		props: viewProps,
-	});
+exports.doNav = function(view, props) {
+	store.store.dispatch(store.doNav(view, props));
 }

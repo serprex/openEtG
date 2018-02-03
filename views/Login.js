@@ -172,7 +172,7 @@ if (typeof kongregateAPI === 'undefined') {
 		}
 	});
 } else {
-	module.exports = connect()(({ doNav }) => {
+	module.exports = connect()(({ doNav, dispatch }) => {
 		kongregateAPI.loadAPI(() => {
 			const kong = kongregateAPI.getAPI();
 			if (kong.services.isGuest()) {
@@ -188,7 +188,7 @@ if (typeof kongregateAPI === 'undefined') {
 							if (!data.err) {
 								delete data.x;
 								sock.user = data;
-								this.props.dispatch(store.setOptTemp('selectedDeck', data.selectedDeck));
+								dispatch(store.setOptTemp('selectedDeck', data.selectedDeck));
 								if (!sock.user.accountbound && !sock.user.pool) {
 									doNav(require('./ElementSelect'));
 								} else {
