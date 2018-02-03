@@ -8,6 +8,11 @@ const px = require('../px'),
 	h = React.createElement;
 
 module.exports = class ArenaTop extends React.Component {
+	constructor(props) {
+		super(props);
+		this.state = {};
+	}
+
 	componentDidMount() {
 		sock.emit('arenatop', this.props);
 		const self = this;

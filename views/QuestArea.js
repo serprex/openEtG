@@ -10,6 +10,11 @@ function startQuest(questname) {
 	}
 }
 module.exports = class QuestArea extends React.Component {
+	constructor(props) {
+		super(props);
+		this.state = {};
+	}
+
 	render() {
 		const self = this;
 		const questmap = h('img', {

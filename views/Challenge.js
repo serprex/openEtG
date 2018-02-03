@@ -6,7 +6,7 @@ const px = require('../px'),
 	options = require('../options'),
 	Components = require('../Components'),
 	React = require('react'),
-	h = React.h;
+	h = React.createElement;
 
 function sendChallenge(foe) {
 	var deck = sock.getDeck();
@@ -28,6 +28,11 @@ function sendChallenge(foe) {
 }
 
 module.exports = class Challenge extends React.Component {
+	constructor(props) {
+		super(props);
+		this.state = {};
+	}
+
 	render() {
 		const self = this;
 		function makeChallenge(foe) {

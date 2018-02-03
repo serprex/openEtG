@@ -8,6 +8,11 @@ const sock = require('../sock'),
 	h = React.createElement;
 
 module.exports = class Upgrade extends React.Component {
+	constructor(props) {
+		super(props);
+		this.state = {};
+	}
+
 	render() {
 		const self = this,
 			children = [];

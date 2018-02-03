@@ -26,7 +26,9 @@ const px = require('../px'),
 module.exports = class ElementSelect extends React.Component {
 	constructor(props) {
 		super(props);
-		this.state.eledesc = 'Select your starter element';
+		this.state = {
+			eledesc: 'Select your starter element'
+		};
 	}
 
 	render() {

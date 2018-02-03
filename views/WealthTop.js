@@ -7,6 +7,11 @@ const px = require('../px'),
 	h = React.createElement;
 
 module.exports = class WealthTop extends React.Component {
+	constructor(props) {
+		super(props);
+		this.state = {};
+	}
+
 	componentDidMount() {
 		px.view({
 			cmds: {
