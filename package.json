@@ -9,10 +9,12 @@
   "dependencies": {
     "bufferutil": "^3.0.3",
     "httpolyglot": "^0.1.2",
+    "react": "^16.2.0",
+    "react-redux": "^5.0.6",
     "redis": "^2.8.0",
+    "redux": "^3.7.2",
     "webpack-cli": "^2.0.4",
-    "ws": "^4.0.0",
-    "react": "^16.2.0"
+    "ws": "^4.0.0"
   },
   "devDependencies": {
     "@babel/core": "^7.0.0-beta.39",

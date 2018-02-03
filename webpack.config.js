@@ -9,6 +9,7 @@ module.exports = {
 		filename: 'bundle.[name].js',
 		sourceMapFilename: 'bundle.[name].js.map',
 	},
+	devtool: 'cheap-source-map',
 	module: {
 		rules: [
 			{

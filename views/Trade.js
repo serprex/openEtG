@@ -22,19 +22,18 @@ module.exports = class Trade extends React.Component {
 	}
 
 	componentDidMount() {
-		const self = this;
 		px.view({
 			cmds: {
-				cardchosen: function(data) {
-					self.setState({ offer: etgutil.decodedeck(data.c) });
+				cardchosen: data => {
+					this.setState({ offer: etgutil.decodedeck(data.c) });
 				},
-				tradedone: function(data) {
+				tradedone: data => {
 					sock.user.pool = etgutil.mergedecks(sock.user.pool, data.newcards);
 					sock.user.pool = etgutil.removedecks(sock.user.pool, data.oldcards);
-					self.props.doNav(require('./MainMenu'));
+					this.props.doNav(require('./MainMenu'));
 				},
-				tradecanceled: function() {
-					self.props.doNav(require('./MainMenu'));
+				tradecanceled: () => {
+					this.props.doNav(require('./MainMenu'));
 				},
 			},
 		});

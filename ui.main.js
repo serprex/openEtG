@@ -9,19 +9,23 @@ const muteset = {},
 	options = require('./options'),
 	userutil = require('./userutil'),
 	mkGame = require('./mkGame'),
+	App = require('./views/App'),
+	store = require('./store'),
+	{ Provider } = require('react-redux'),
 	reactDOM = require('react-dom'),
-	react = require('react');
-var guestname,
+	React = require('react'),
+	h = React.createElement;
+let guestname,
 	muteall,
-	lastError = 0;
+	lastError = 0,
+	lastmove = 0;
 window.onerror = function() {
-	var now = Date.now();
+	const now = Date.now();
 	if (lastError + 999 < now) {
 		chat(Array.apply(null, arguments).join(', '), 'System');
 		lastError = now;
 	}
 };
-var lastmove = 0;
 document.addEventListener('mousemove', function(e) {
 	if (e.timeStamp - lastmove < 16) {
 		e.stopPropagation();
@@ -43,17 +47,17 @@ const sockEvents = {
 		chat(data.m + ' has been muted', 'System');
 	},
 	roll: function(data) {
-		var span = document.createElement('div');
+		const span = document.createElement('div');
 		span.style.color = '#090';
 		if (data.u) {
-			var b = document.createElement('b');
+			const b = document.createElement('b');
 			b.appendChild(document.createTextNode(data.u + ' '));
 			span.appendChild(b);
 		}
 		span.appendChild(
 			document.createTextNode((data.A || 1) + 'd' + data.X + ' '),
 		);
-		var a = document.createElement('a');
+		const a = document.createElement('a');
 		a.target = '_blank';
 		a.href = 'speed/' + data.sum;
 		a.appendChild(document.createTextNode(data.sum));
@@ -184,7 +188,9 @@ sock.et.onmessage = function(msg) {
 	if (func) func.call(this, data);
 };
 reactDOM.render(
-	react.createElement(require('./views/App'), { view: require('./views/Login') }),
+	<Provider store={store}>
+		<App />
+	</Provider>,
 	document.getElementById("leftpane"),
 );
 if (options.preart) sock.emit('cardart');
