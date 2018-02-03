@@ -6,9 +6,10 @@ const px = require('../px'),
 	etgutil = require('../etgutil'),
 	userutil = require('../userutil'),
 	Components = require('../Components'),
-	h = preact.h;
+	React = require('react'),
+	h = React.createElement;
 
-module.exports = class Trade extends preact.Component {
+module.exports = class Trade extends React.Component {
 	constructor(props) {
 		super(props);
 		this.state = {
@@ -47,7 +48,6 @@ module.exports = class Trade extends preact.Component {
 		const self = this,
 			cardminus = [],
 			children = [];
-		console.log(self.state);
 		for (let i = 0; i < self.state.deck.length; i++) {
 			cardminus[self.state.deck[i]]++;
 		}
@@ -82,19 +82,11 @@ module.exports = class Trade extends preact.Component {
 				}),
 			);
 		} else {
-			children.push(
-				h(
-					'span',
-					{
-						style: {
+			children.push(<span style={{
 							position: 'absolute',
 							left: '10px',
 							top: '60px',
-						},
-					},
-					'Confirmed!',
-				),
-			);
+						}}>Confirmed!</span>);
 		}
 		const ownVal = h(Components.Text, {
 			text: userutil.calcWealth(self.state.deck, true) + '$',

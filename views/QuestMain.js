@@ -3,7 +3,8 @@ const sock = require('../sock'),
 	Quest = require('../Quest'),
 	options = require('../options'),
 	Components = require('../Components'),
-	h = preact.h;
+	React = require('react'),
+	h = React.createElement;
 
 function isLeft(p0x, p0y, p1x, p1y, p2x, p2y) {
 	return (p1x - p0x) * (p2y - p0y) - (p2x - p0x) * (p1y - p0y);
@@ -126,7 +127,7 @@ const areainfo = {
 	],
 };
 
-module.exports = class QuestMain extends preact.Component {
+module.exports = class QuestMain extends React.Component {
 	constructor(props) {
 		super(props);
 		this.state = { area: null };

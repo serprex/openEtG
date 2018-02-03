@@ -4,9 +4,10 @@ const px = require('../px'),
 	chat = require('../chat'),
 	Cards = require('../Cards'),
 	Components = require('../Components'),
-	h = preact.h;
+	React = require('react'),
+	h = React.createElement;
 
-module.exports = class ArenaTop extends preact.Component {
+module.exports = class ArenaTop extends React.Component {
 	componentDidMount() {
 		sock.emit('arenatop', this.props);
 		const self = this;

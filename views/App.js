@@ -1,6 +1,6 @@
-const h = preact.h;
+const React = require('react');
 
-module.exports = class App extends preact.Component {
+module.exports = class App extends React.Component {
 	constructor(props) {
 		super(props);
 		this.doNav = this.doNav.bind(this);
@@ -19,6 +19,6 @@ module.exports = class App extends preact.Component {
 	}
 
 	render() {
-		return h(this.state.view, this.state.viewProps);
+		return React.createElement(this.state.view, this.state.viewProps);
 	}
 };

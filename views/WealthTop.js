@@ -3,16 +3,14 @@ const px = require('../px'),
 	chat = require('../chat'),
 	sock = require('../sock'),
 	Components = require('../Components'),
-	h = preact.h;
+	React = require('react'),
+	h = React.createElement;
 
-module.exports = class WealthTop extends preact.Component {
+module.exports = class WealthTop extends React.Component {
 	componentDidMount() {
-		const self = this;
 		px.view({
 			cmds: {
-				wealthtop: function(info) {
-					self.setState(info);
-				},
+				wealthtop: info => this.setState(info)
 			},
 		});
 		sock.emit('wealthtop');

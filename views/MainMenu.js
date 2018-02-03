@@ -15,7 +15,8 @@ const px = require('../px'),
 	RngMock = require('../RngMock'),
 	Components = require('../Components'),
 	userutil = require('../userutil'),
-	h = preact.h,
+	React = require('react'),
+	h = React.createElement,
 	tipjar = [
 		'Each card in your booster pack has a 50% chance of being from the chosen element',
 		'Your arena deck will earn you 3$ per win & 1$ per loss',
@@ -125,7 +126,7 @@ function initEndless() {
 	game.player2.addPerm(endlessRelic);
 	return gameData;
 }
-module.exports = class MainMenu extends preact.Component {
+module.exports = class MainMenu extends React.Component {
 	constructor(props) {
 		super(props);
 		const self = this;

@@ -12,7 +12,8 @@ const px = require('../px'),
 	etgutil = require('../etgutil'),
 	aiSearch = require('../ai/search'),
 	Components = require('../Components'),
-	h = preact.h;
+	React = require('react'),
+	h = React.createElement;
 
 const svgbg = (() => {
 	const redhor = new Uint16Array([
@@ -646,7 +647,7 @@ function tgtclass(game, obj) {
 	return;
 }
 
-module.exports = class Match extends preact.Component {
+module.exports = class Match extends React.Component {
 	constructor(props) {
 		super(props);
 		this.state = {

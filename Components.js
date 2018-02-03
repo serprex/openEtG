@@ -6,8 +6,8 @@ const ui = require('./ui'),
 	Cards = require('./Cards'),
 	etgutil = require('./etgutil'),
 	options = require('./options'),
-	h = preact.h,
-	Component = preact.Component;
+	React = require('react'),
+	h = React.createElement;
 
 exports.rect = function(x, y, wid, hei) {
 	const style = {
@@ -239,7 +239,7 @@ function DeckDisplay(props) {
 }
 exports.DeckDisplay = DeckDisplay;
 
-class CardSelector extends Component {
+class CardSelector extends React.Component {
 	constructor(props) {
 		super(props);
 		this.state = {

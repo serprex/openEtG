@@ -4,7 +4,8 @@ const px = require('../px'),
 	sock = require('../sock'),
 	RngMock = require('../RngMock'),
 	Components = require('../Components'),
-	h = preact.h,
+	React = require('react'),
+	h = React.createElement,
 	descriptions = [
 		'Element of randomness. Trade off consistency for cost effectiveness, make use of all elements, spawn mutants, & seek turn advantages into disadvantages.',
 		'Element of decay. Gains advantages through destroying creatures and exhibiting control through poison.',
@@ -22,7 +23,7 @@ const px = require('../px'),
 		'Start with a random element!',
 	];
 
-module.exports = class ElementSelect extends preact.Component {
+module.exports = class ElementSelect extends React.Component {
 	constructor(props) {
 		super(props);
 		this.state.eledesc = 'Select your starter element';

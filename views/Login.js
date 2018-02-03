@@ -4,10 +4,11 @@ const px = require('../px'),
 	audio = require('../audio'),
 	options = require('../options'),
 	Components = require('../Components'),
-	h = preact.h;
+	React = require('react'),
+	h = React.createElement;
 
 if (typeof kongregateAPI === 'undefined') {
-	module.exports = class Login extends preact.Component {
+	module.exports = class Login extends React.Component {
 		constructor(props) {
 			super(props);
 			this.state = { commit: null, password: '' };
@@ -101,7 +102,7 @@ if (typeof kongregateAPI === 'undefined') {
 			const username = (
 				<input
 					placeholder="Username"
-					autofocus={true}
+					autoFocus={true}
 					tabIndex="1"
 					onKeyPress={maybeLogin}
 					ref={ctrl => ctrl && options.register('username', ctrl)}

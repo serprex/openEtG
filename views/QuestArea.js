@@ -1,13 +1,15 @@
 const sock = require('../sock'),
 	Quest = require('../Quest'),
 	Components = require('../Components'),
-	h = preact.h;
+	React = require('react'),
+	h = React.createElement;
+
 function startQuest(questname) {
 	if (!sock.user.quests[questname] && sock.user.quests[questname] != 0) {
 		sock.userExec('updatequest', { quest: questname, newstage: 0 });
 	}
 }
-module.exports = class QuestArea extends preact.Component {
+module.exports = class QuestArea extends React.Component {
 	render() {
 		const self = this;
 		const questmap = h('img', {

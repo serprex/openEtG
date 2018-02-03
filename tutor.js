@@ -1,8 +1,14 @@
 const options = require('./options'),
-	Components = require('./Components'),
-	h = preact.h;
+	Text = require('./Components'),
+	React = require('react'),
+	h = React.createElement;
 
-exports.Tutor = class Tutor extends preact.Component {
+exports.Tutor = class Tutor extends React.Component {
+	constructor(props) {
+		super(props);
+		this.state = { showtut: false };
+	}
+
 	render() {
 		if (options.disableTut) return null;
 		const tutdata = this.props.data;
@@ -35,11 +41,11 @@ exports.Tutor = class Tutor extends preact.Component {
 						};
 						if (info.length > 2) style.width = info[2] + 'px';
 						if (info.length > 3) style.height = info[3] + 'px';
-						return h(Components.Text, {
-							className: 'tutorialbox',
-							text: info[info.length - 1],
-							style: style,
-						});
+						return <Text
+							className='tutorialbox'
+							text={info[info.length - 1]}
+							style={style}
+						/>;
 					})}
 				/>,
 			);

@@ -5,8 +5,10 @@ const chat = require('../chat'),
 	etgutil = require('../etgutil'),
 	userutil = require('../userutil'),
 	Components = require('../Components'),
-	h = preact.h;
-module.exports = class Bazaar extends preact.Component {
+	React = require('react'),
+	h = React.createElement;
+
+module.exports = class Bazaar extends React.Component {
 	constructor(props) {
 		super(props);
 		this.state = {

@@ -6,7 +6,8 @@ const px = require('../px'),
 	etgutil = require('../etgutil'),
 	options = require('../options'),
 	Components = require('../Components'),
-	h = preact.h;
+	React = require('react'),
+	h = React.createElement;
 
 const packdata = [
 	{ cost: 15, type: 'Bronze', info: '10 Commons', color: '#c73' },
@@ -26,7 +27,7 @@ const packdata = [
 	{ cost: 250, type: 'Nymph', info: '1 Nymph', color: '#69b' },
 ];
 
-module.exports = class Shop extends preact.Component {
+module.exports = class Shop extends React.Component {
 	constructor(props) {
 		super(props);
 		this.state = {

@@ -8,7 +8,8 @@ const px = require('../px'),
 	etgutil = require('../etgutil'),
 	options = require('../options'),
 	Components = require('../Components'),
-	h = preact.h;
+	React = require('react'),
+	h = React.createElement;
 
 const artable = {
 	hp: { min: 65, max: 200, incr: 45, cost: 1 },
@@ -20,7 +21,7 @@ function attrval(x, d) {
 	return x === 0 ? 0 : x || d;
 }
 
-module.exports = class Editor extends preact.Component {
+module.exports = class Editor extends React.Component {
 	constructor(props) {
 		super(props);
 		const aupped = props.acard && props.acard.upped;
@@ -82,7 +83,7 @@ module.exports = class Editor extends preact.Component {
 		sortedDeck.sort(Cards.codeCmp);
 		const cardminus = [];
 		if (sock.user) {
-			for (var i = sortedDeck.length - 1; i >= 0; i--) {
+			for (let i = sortedDeck.length - 1; i >= 0; i--) {
 				var code = sortedDeck[i],
 					card = Cards.Codes[code];
 				if (card.type != etg.Pillar) {
@@ -368,6 +369,7 @@ module.exports = class Editor extends preact.Component {
 				for (let i = 0; i < 10; i++) {
 					buttons.push(
 						h('input', {
+							key: i,
 							type: 'button',
 							value: i + 1 + '',
 							className:
@@ -528,7 +530,7 @@ module.exports = class Editor extends preact.Component {
 			const deckimport = h('input', {
 				id: 'deckimport',
 				placeholder: 'Deck',
-				autofocus: true,
+				autoFocus: true,
 				value:
 					etgutil.encodedeck(sortedDeck) +
 					etgutil.toTrueMarkSuffix(self.state.mark),

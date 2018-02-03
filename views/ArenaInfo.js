@@ -6,7 +6,8 @@ const px = require('../px'),
 	util = require('../util'),
 	etgutil = require('../etgutil'),
 	Components = require('../Components'),
-	h = preact.h;
+	React = require('react'),
+	h = React.createElement;
 
 module.exports = function(props) {
 	const children = [

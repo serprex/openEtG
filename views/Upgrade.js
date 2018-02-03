@@ -4,9 +4,10 @@ const sock = require('../sock'),
 	etgutil = require('../etgutil'),
 	userutil = require('../userutil'),
 	Components = require('../Components'),
-	h = preact.h;
+	React = require('react'),
+	h = React.createElement;
 
-module.exports = class Upgrade extends preact.Component {
+module.exports = class Upgrade extends React.Component {
 	render() {
 		const self = this,
 			children = [];

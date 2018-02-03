@@ -1,8 +1,8 @@
 'use strict';
 const ui = require('./ui'),
 	Thing = require('./Thing'),
-	h = typeof preact !== 'undefined' && preact.h,
-	Components = h && require('./Components');
+	Components = require('./Components'),
+	h = require('react').createElement;
 const anims = [];
 
 function maybeTgtPos(pos) {

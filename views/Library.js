@@ -4,9 +4,10 @@ const px = require('../px'),
 	etgutil = require('../etgutil'),
 	userutil = require('../userutil'),
 	Components = require('../Components'),
-	h = preact.h;
+	React = require('react'),
+	h = React.createElement;
 
-module.exports = class Library extends preact.Component {
+module.exports = class Library extends React.Component {
 	constructor(props) {
 		super(props);
 		this.state = {

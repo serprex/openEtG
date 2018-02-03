@@ -8,7 +8,9 @@ const muteset = {},
 	RngMock = require('./RngMock'),
 	options = require('./options'),
 	userutil = require('./userutil'),
-	mkGame = require('./mkGame');
+	mkGame = require('./mkGame'),
+	reactDOM = require('react-dom'),
+	react = require('react');
 var guestname,
 	muteall,
 	lastError = 0;
@@ -181,9 +183,9 @@ sock.et.onmessage = function(msg) {
 	var func = sockEvents[data.x] || px.getCmd(data.x);
 	if (func) func.call(this, data);
 };
-preact.render(
-	preact.h(require('./views/App'), { view: require('./views/Login') }),
-	document.body,
+reactDOM.render(
+	react.createElement(require('./views/App'), { view: require('./views/Login') }),
+	document.getElementById("leftpane"),
 );
 if (options.preart) sock.emit('cardart');
 function chatmute() {
@@ -203,7 +205,7 @@ function maybeSendChat(e) {
 			msg = chatinput.value.trim();
 		chatinput.value = '';
 		if (msg == '/help') {
-			var cmds = {
+			const cmds = {
 				clear: 'Clear chat. Accepts a regex filter',
 				who: 'List users online',
 				roll: 'Server rolls XdY publicly',
@@ -213,23 +215,23 @@ function maybeSendChat(e) {
 				unmute: 'If no user specified, unmute chat entirely',
 				w: 'Whisper',
 			};
-			for (var cmd in cmds) {
+			for (const cmd in cmds) {
 				chat(cmd + ' ' + cmds[cmd]);
 			}
 		} else if (msg == '/clear') {
 			chat.clear();
 		} else if (msg.match(/^\/clear /)) {
-			var rx = new RegExp(msg.slice(7));
-			var chatBox = document.getElementById('chatBox');
-			for (var i = chatBox.children.length - 1; i >= 0; i--) {
+			const rx = new RegExp(msg.slice(7));
+			const chatBox = document.getElementById('chatBox');
+			for (let i = chatBox.children.length - 1; i >= 0; i--) {
 				if (chatBox.children[i].textContent.match(rx))
 					chatBox.removeChild(chatBox.children[i]);
 			}
 		} else if (msg == '/who') {
 			sock.emit('who');
 		} else if (msg.match(/^\/roll( |$)\d*d?\d*$/)) {
-			var data = { u: sock.user ? sock.user.name : '' };
-			var ndn = msg.slice(6).split('d');
+			const data = { u: sock.user ? sock.user.name : '' };
+			const ndn = msg.slice(6).split('d');
 			if (!ndn[1]) {
 				data.X = parseInt(ndn[0] || 0x100000000);
 			} else {
@@ -238,14 +240,14 @@ function maybeSendChat(e) {
 			}
 			sock.emit('roll', data);
 		} else if (msg.match(/^\/decks/) && sock.user) {
-			var rx = msg.length > 7 && new RegExp(msg.slice(7));
+			const rx = msg.length > 7 && new RegExp(msg.slice(7));
 			var names = Object.keys(sock.user.decks);
 			if (rx) names = names.filter(name => name.match(rx));
 			names.sort();
 			names.forEach(name => {
-				var deck = sock.user.decks[name];
-				var span = document.createElement('div');
-				var link = document.createElement('a');
+				const deck = sock.user.decks[name];
+				const span = document.createElement('div');
+				const link = document.createElement('a');
 				link.href = 'deck/' + deck;
 				link.target = '_blank';
 				link.className =

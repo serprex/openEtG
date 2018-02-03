@@ -24,6 +24,7 @@ input[type="button"]{
 input[type="button"]:hover{background:linear-gradient(to bottom,#ccdde0,#586776)}
 input[type="button"]:hover:active{background:linear-gradient(to bottom,#aabbc0,#485766)}
 input[type="text"],input[type="password"],input:not([type]){width:150px;border:2px solid rgba(0,0,0,.7777777);border-radius:4px;background-color:rgba(8,8,8,.5);color:#eee}
+.leftpane{position:absolute;width:900px;height:600px}
 .bg_main{background-image:url(assets/bg_main.png);width:900px;height:600px}
 .width400{width:400px;margin:0}
 .floatRight{float:right}

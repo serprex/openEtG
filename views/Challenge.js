@@ -5,7 +5,8 @@ const px = require('../px'),
 	etgutil = require('../etgutil'),
 	options = require('../options'),
 	Components = require('../Components'),
-	h = preact.h;
+	React = require('react'),
+	h = React.h;
 
 function sendChallenge(foe) {
 	var deck = sock.getDeck();
@@ -26,7 +27,7 @@ function sendChallenge(foe) {
 	sock.pvp = foe;
 }
 
-module.exports = class Challenge extends preact.Component {
+module.exports = class Challenge extends React.Component {
 	render() {
 		const self = this;
 		function makeChallenge(foe) {

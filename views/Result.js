@@ -1,5 +1,5 @@
 'use strict';
-var px = require('../px'),
+const px = require('../px'),
 	etg = require('../etg'),
 	chat = require('../chat'),
 	mkAi = require('../mkAi'),
@@ -13,9 +13,10 @@ var px = require('../px'),
 	mkGame = require('../mkGame'),
 	Components = require('../Components'),
 	streak200 = new Uint8Array([10, 10, 15, 20, 15, 20]),
-	h = preact.h;
+	React = require('react'),
+	h = React.createElement;
 
-module.exports = class Result extends preact.Component {
+module.exports = class Result extends React.Component {
 	constructor(props) {
 		super(props);
 		this.onkeydown = this.onkeydown.bind(this);

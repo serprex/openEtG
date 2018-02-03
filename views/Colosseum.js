@@ -6,7 +6,8 @@ const px = require('../px'),
 	Decks = require('../Decks.json'),
 	RngMock = require('../RngMock'),
 	Components = require('../Components'),
-	h = preact.h;
+	React = require('react'),
+	h = React.createElement;
 function mkDaily(doNav, type) {
 	if (type < 3) {
 		return () => {
@@ -45,7 +46,7 @@ function mkDaily(doNav, type) {
 		};
 	}
 }
-module.exports = class Colosseum extends preact.Component {
+module.exports = class Colosseum extends React.Component {
 	render() {
 		const self = this;
 		const magename = Decks.mage[sock.user.dailymage][0],
