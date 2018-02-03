@@ -5,16 +5,17 @@ const px = require('../px'),
 	etgutil = require('../etgutil'),
 	options = require('../options'),
 	Components = require('../Components'),
+	{ connect } = require('react-redux'),
 	React = require('react'),
 	h = React.createElement;
 
 function sendChallenge(foe) {
-	var deck = sock.getDeck();
+	const deck = sock.getDeck();
 	if (etgutil.decklength(deck) < (sock.user ? 31 : 9)) {
 		px.doNav(require('./Editor'));
 		return;
 	}
-	var gameData = {};
+	const gameData = {};
 	options.parsepvpstats(gameData);
 	if (sock.user) {
 		gameData.f = foe;
@@ -27,7 +28,7 @@ function sendChallenge(foe) {
 	sock.pvp = foe;
 }
 
-module.exports = class Challenge extends React.Component {
+module.exports = connect(({opts}) => ({ aideck: opts.aideck, foename: opts.foename }))(class Challenge extends React.Component {
 	constructor(props) {
 		super(props);
 		this.state = {};
@@ -37,24 +38,24 @@ module.exports = class Challenge extends React.Component {
 		const self = this;
 		function makeChallenge(foe) {
 			if (!foe) return;
-			sendChallenge(options.foename);
+			sendChallenge(self.props.foename);
 			self.setState({ challenge: foe });
 		}
 		function maybeCustomAi(e) {
 			if (e.keyCode == 13) aiClick.call(this);
 		}
 		function aiClick() {
-			if (!options.aideck) return;
+			if (!self.props.aideck) return;
 			var deck = sock.getDeck();
 			if (
 				etgutil.decklength(deck) < 9 ||
-				etgutil.decklength(options.aideck) < 9
+				etgutil.decklength(self.props.aideck) < 9
 			) {
 				self.props.doNav(require('./Editor'));
 				return;
 			}
 			var gameData = {
-				deck: options.aideck,
+				deck: self.props.aideck,
 				urdeck: deck,
 				seed: util.randint(),
 				foename: 'Custom',
@@ -67,7 +68,7 @@ module.exports = class Challenge extends React.Component {
 		}
 		function maybeChallenge(e) {
 			e.cancelBubble = true;
-			if (e.keyCode == 13) makeChallenge(options.foename);
+			if (e.keyCode == 13) makeChallenge(self.props.foename);
 		}
 		function exitClick() {
 			if (sock.pvp) {
@@ -153,7 +154,7 @@ module.exports = class Challenge extends React.Component {
 					type: 'button',
 					value: 'PvP',
 					onClick: function() {
-						makeChallenge(options.foename);
+						makeChallenge(self.props.foename);
 					},
 					style: {
 						position: 'absolute',
@@ -167,7 +168,7 @@ module.exports = class Challenge extends React.Component {
 					type: 'button',
 					value: 'Spectate',
 					onClick: function() {
-						sock.spectate = options.foename;
+						sock.spectate = self.props.foename;
 						sock.userEmit('spectate', { f: sock.spectate });
 					},
 					style: {
@@ -271,5 +272,5 @@ module.exports = class Challenge extends React.Component {
 		}
 		return h('div', { children: children });
 	}
-};
+});
 module.exports.sendChallenge = sendChallenge;

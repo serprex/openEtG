@@ -9,21 +9,21 @@ const ui = require('./ui'),
 	React = require('react'),
 	h = React.createElement;
 
+const rectCache = {};
 exports.rect = function(x, y, wid, hei) {
-	const style = {
-		position: 'absolute',
-		left: x + 'px',
-		top: y + 'px',
-		width: wid + 'px',
-		height: hei + 'px',
-	};
-	return props =>
-		h(
-			'div',
-			Object.assign({}, props, {
-				style: props.style ? Object.assign({}, props.style, style) : style,
-			}),
-		);
+	const key = `${x}|${y}|${wid}|${hei}`;
+	if (rectCache[key]) return rectCache[key];
+	else {
+		const style = {
+			position: 'absolute',
+			left: x + 'px',
+			top: y + 'px',
+			width: wid + 'px',
+			height: hei + 'px',
+		};
+		return rectCache[key] = props =>
+			<div {...props} style={props.style ? Object.assign({}, props.style, style) : style} />
+	}
 };
 
 exports.Box = function(props) {

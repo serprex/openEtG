@@ -1,8 +1,8 @@
 'use strict';
 const sock = require('../sock'),
 	Quest = require('../Quest'),
-	options = require('../options'),
 	Components = require('../Components'),
+	{ connect } = require('react-redux'),
 	React = require('react'),
 	h = React.createElement;
 
@@ -127,7 +127,7 @@ const areainfo = {
 	],
 };
 
-module.exports = class QuestMain extends React.Component {
+module.exports = connect(({opts}) => ({ aideck: opts.aideck }))(class QuestMain extends React.Component {
 	constructor(props) {
 		super(props);
 		this.state = { area: null };
@@ -190,7 +190,7 @@ module.exports = class QuestMain extends React.Component {
 			if (!(key in Quest.areas)) continue;
 			const ainfo = areainfo[key],
 				points = ainfo[1];
-			if (options.aideck == 'quest') {
+			if (this.props.aideck == 'quest') {
 				children.push(
 					h(
 						'svg',
@@ -221,9 +221,9 @@ module.exports = class QuestMain extends React.Component {
 						(sock.user.quests[quest] || 0) < Quest[quest].length,
 				)
 			) {
-				var xtot = 0,
+				let xtot = 0,
 					ytot = 0;
-				for (var i = 0; i < points.length; i += 2) {
+				for (let i = 0; i < points.length; i += 2) {
 					xtot += points[i];
 					ytot += points[i + 1];
 				}
@@ -242,4 +242,4 @@ module.exports = class QuestMain extends React.Component {
 		}
 		return h('div', { children: children });
 	}
-};
+});

@@ -82,7 +82,7 @@ const keycerttask = sutil.mkTask(res => {
 		'mulligan',
 		'cardchosen',
 	]);
-	var guestban = false;
+	let guestban = false;
 	const userEvents = {
 		modadd: modf(function(data, user) {
 			db.sadd('Mods', data.m);
@@ -102,7 +102,7 @@ const keycerttask = sutil.mkTask(res => {
 		inituser: function(data, user) {
 			const starter = require('./srv/starter.json');
 			if (data.e < 1 || data.e > 13) return;
-			var sid = (data.e - 1) * 6;
+			const sid = (data.e - 1) * 6;
 			user.pvpwins = user.pvplosses = user.aiwins = user.ailosses = 0;
 			user.accountbound = starter[sid];
 			user.oracle = 0;
@@ -135,7 +135,7 @@ const keycerttask = sutil.mkTask(res => {
 			if (!user.ocard || !data.d) {
 				return;
 			}
-			var au = (data.lv ? 'B:' : 'A:') + data.u;
+			const au = (data.lv ? 'B:' : 'A:') + data.u;
 			if (data.mod) {
 				db.hmset(au, {
 					deck: data.d,
@@ -166,7 +166,7 @@ const keycerttask = sutil.mkTask(res => {
 					['zrevrank', 'arena1', data.u],
 				])
 				.exec((err, res) => {
-					var day = sutil.getDay();
+					const day = sutil.getDay();
 					function process(obj, rank) {
 						if (!obj) return;
 						obj.day = day - obj.day;
@@ -185,13 +185,13 @@ const keycerttask = sutil.mkTask(res => {
 		},
 		modarena: function(data, user) {
 			Us.load(data.aname, user => (user.gold += data.won ? 3 : 1));
-			var arena = 'arena' + (data.lv ? '1' : ''),
+			const arena = 'arena' + (data.lv ? '1' : ''),
 				akey = (data.lv ? 'B:' : 'A:') + data.aname;
 			db.zscore(arena, data.aname, (err, score) => {
 				if (score === null) return;
-				var task = sutil.mkTask(wld => {
+				const task = sutil.mkTask(wld => {
 					if (wld.err) return;
-					var won = parseInt(data.won ? wld.incr : wld.mget[0]),
+					const won = parseInt(data.won ? wld.incr : wld.mget[0]),
 						loss = parseInt(data.won ? wld.mget[0] : wld.incr),
 						day = parseInt(wld.mget[1]);
 					db.zadd(
@@ -268,7 +268,7 @@ const keycerttask = sutil.mkTask(res => {
 				if (!type) {
 					sockEmit(this, 'chat', { mode: 1, msg: 'Code does not exist' });
 				} else if (type.charAt(0) == 'G') {
-					var g = parseInt(type.slice(1));
+					const g = parseInt(type.slice(1));
 					if (isNaN(g)) {
 						sockEmit(this, 'chat', {
 							mode: 1,
@@ -280,7 +280,7 @@ const keycerttask = sutil.mkTask(res => {
 						db.hdel('CodeHash', data.code);
 					}
 				} else if (type.charAt(0) == 'C') {
-					var c = parseInt(type.slice(1), 32);
+					const c = parseInt(type.slice(1), 32);
 					if (c in Cards.Codes) {
 						user.pool = etgutil.addcard(user.pool, c);
 						sockEmit(this, 'codecode', { card: c });
@@ -302,7 +302,7 @@ const keycerttask = sutil.mkTask(res => {
 				if (!type) {
 					sockEmit(this, 'chat', { mode: 1, msg: 'Code does not exist' });
 				} else if (type.replace(/^!/, '') in userutil.rewardwords) {
-					var card = Cards.Codes[data.card];
+					const card = Cards.Codes[data.card];
 					if (
 						card &&
 						card.rarity == userutil.rewardwords[type.replace(/^!/, '')] &&
@@ -321,13 +321,13 @@ const keycerttask = sutil.mkTask(res => {
 			});
 		},
 		foewant: function(data, user) {
-			var u = data.u,
+			const u = data.u,
 				f = data.f;
 			if (u == f) {
 				return;
 			}
 			console.log(u + ' requesting ' + f);
-			var deck = user.decks[user.selectedDeck];
+			const deck = user.decks[user.selectedDeck];
 			if (!deck) return;
 			this.meta.deck = deck;
 			this.meta.pvpstats = {
@@ -336,24 +336,24 @@ const keycerttask = sutil.mkTask(res => {
 				deckpower: data.p1deckpower,
 				drawpower: data.p1drawpower,
 			};
-			var foesock = Us.socks[f];
+			const foesock = Us.socks[f];
 			if (foesock && foesock.readyState == 1) {
 				if (foesock.meta.duel == u) {
 					delete foesock.meta.duel;
-					var seed = Math.random() * MAX_INT;
+					const seed = Math.random() * MAX_INT;
 					this.meta.foe = foesock;
 					foesock.meta.foe = this;
-					var deck0 = foesock.meta.deck,
+					const deck0 = foesock.meta.deck,
 						deck1 = this.meta.deck;
-					var owndata = { seed: seed, deck: deck0, urdeck: deck1, foename: f };
-					var foedata = {
+					const owndata = { seed: seed, deck: deck0, urdeck: deck1, foename: f };
+					const foedata = {
 						flip: true,
 						seed: seed,
 						deck: deck1,
 						urdeck: deck0,
 						foename: u,
 					};
-					var stat = this.meta.pvpstats,
+					const stat = this.meta.pvpstats,
 						foestat = foesock.meta.pvpstats;
 					for (const key in stat) {
 						owndata['p1' + key] = stat[key];
@@ -367,7 +367,7 @@ const keycerttask = sutil.mkTask(res => {
 					sockEmit(foesock, 'pvpgive', foedata);
 					if (foesock.meta.spectators) {
 						foesock.meta.spectators.forEach(function(uname) {
-							var sock = Us.socks[uname];
+							const sock = Us.socks[uname];
 							if (sock && sock.readyState == 1) {
 								sockEmit(sock, 'spectategive', foedata);
 							}
@@ -380,7 +380,7 @@ const keycerttask = sutil.mkTask(res => {
 			}
 		},
 		spectate: function(data, user) {
-			var tgt = Us.socks[data.f];
+			const tgt = Us.socks[data.f];
 			if (tgt && tgt.meta.duel) {
 				sockEmit(tgt, 'chat', { mode: 1, msg: data.u + ' is spectating.' });
 				if (!tgt.meta.spectators) tgt.meta.spectators = [];
@@ -388,9 +388,9 @@ const keycerttask = sutil.mkTask(res => {
 			}
 		},
 		canceltrade: function(data) {
-			var info = this.meta;
+			const info = this.meta;
 			if (info.trade) {
-				var foesock = Us.socks[info.trade.foe];
+				const foesock = Us.socks[info.trade.foe];
 				if (foesock) {
 					sockEmit(foesock, 'tradecanceled');
 					sockEmit(foesock, 'chat', {
@@ -404,22 +404,22 @@ const keycerttask = sutil.mkTask(res => {
 			}
 		},
 		confirmtrade: function(data, user) {
-			var u = data.u,
+			const u = data.u,
 				thistrade = this.meta.trade;
 			if (!thistrade) {
 				return;
 			}
 			thistrade.tradecards = data.cards;
 			thistrade.oppcards = data.oppcards;
-			var thatsock = Us.socks[thistrade.foe];
-			var thattrade = thatsock && thatsock.meta.trade;
-			var otherUser = Us.users[thistrade.foe];
+			const thatsock = Us.socks[thistrade.foe];
+			const thattrade = thatsock && thatsock.meta.trade;
+			const otherUser = Us.users[thistrade.foe];
 			if (!thattrade || !otherUser) {
 				sockEmit(this, 'tradecanceled');
 				delete this.meta.trade;
 				return;
 			} else if (thattrade.accepted) {
-				var player1Cards = thistrade.tradecards,
+				const player1Cards = thistrade.tradecards,
 					player2Cards = thattrade.tradecards;
 				if (
 					player1Cards != thattrade.oppcards ||
@@ -450,16 +450,16 @@ const keycerttask = sutil.mkTask(res => {
 			}
 		},
 		tradewant: function(data) {
-			var u = data.u,
+			const u = data.u,
 				f = data.f;
 			if (u == f) {
 				return;
 			}
 			console.log(u + ' requesting ' + f);
-			var foesock = Us.socks[f];
+			const foesock = Us.socks[f];
 			if (foesock && foesock.readyState == 1) {
 				this.meta.trade = { foe: f };
-				var foetrade = foesock.meta.trade;
+				const foetrade = foesock.meta.trade;
 				if (foetrade && foetrade.foe == u) {
 					sockEmit(this, 'tradegive');
 					sockEmit(foesock, 'tradegive');
@@ -492,7 +492,7 @@ const keycerttask = sutil.mkTask(res => {
 		},
 		chat: function(data) {
 			if (data.to) {
-				var to = data.to;
+				const to = data.to;
 				if (Us.socks[to] && Us.socks[to].readyState == 1) {
 					sockEmit(Us.socks[to], 'chat', { msg: data.msg, mode: 2, u: data.u });
 					sockEmit(this, 'chat', { msg: data.msg, mode: 2, u: 'To ' + to });
@@ -506,7 +506,7 @@ const keycerttask = sutil.mkTask(res => {
 			}
 		},
 		booster: function(data, user) {
-			var pack = [
+			const pack = [
 				{ amount: 10, cost: 15, rare: [] },
 				{ amount: 6, cost: 25, rare: [3] },
 				{ amount: 5, cost: 77, rare: [1, 3] },
@@ -514,19 +514,19 @@ const keycerttask = sutil.mkTask(res => {
 				{ amount: 1, cost: 250, rare: [0, 0, 0, 0] },
 			][data.pack];
 			if (!pack) return;
-			var bumprate = 0.45 / pack.amount;
-			var bound = user.freepacks && user.freepacks[data.pack] > 0;
+			const bumprate = 0.45 / pack.amount;
+			const bound = user.freepacks && user.freepacks[data.pack] > 0;
 			if (!bound && data.bulk) {
 				pack.amount *= data.bulk;
 				pack.cost *= data.bulk;
-				for (var i = 0; i < pack.rare.length; i++) pack.rare[i] *= data.bulk;
+				for (let i = 0; i < pack.rare.length; i++) pack.rare[i] *= data.bulk;
 			}
 			if (bound || user.gold >= pack.cost) {
-				var newCards = '',
+				let newCards = '',
 					rarity = 1;
-				for (var i = 0; i < pack.amount; i++) {
+				for (let i = 0; i < pack.amount; i++) {
 					while (i == pack.rare[rarity - 1]) rarity++;
-					var cardcode;
+					let cardcode;
 					if (rarity == 5) {
 						cardcode =
 							etg.NymphList[
@@ -535,7 +535,7 @@ const keycerttask = sutil.mkTask(res => {
 									: RngMock.upto(12) + 1
 							];
 					} else {
-						var notFromElement = Math.random() > 0.5,
+						let notFromElement = Math.random() > 0.5,
 							bumprarity = rarity + (Math.random() < bumprate),
 							card = undefined;
 						if (data.element < 13)
@@ -569,9 +569,9 @@ const keycerttask = sutil.mkTask(res => {
 			}
 		},
 		foecancel: function(data) {
-			var info = this.meta;
+			const info = this.meta;
 			if (info.duel) {
-				var foesock = Us.socks[info.duel];
+				const foesock = Us.socks[info.duel];
 				if (foesock) {
 					sockEmit(foesock, 'foeleft');
 					sockEmit(foesock, 'chat', {
@@ -585,7 +585,7 @@ const keycerttask = sutil.mkTask(res => {
 			}
 		},
 	};
-	var sockEvents = {
+	const sockEvents = {
 		login: require('./srv/login')(sockEmit),
 		konglogin: function(data) {
 			db.get('kongapi', (err, key) => {
@@ -601,23 +601,22 @@ const keycerttask = sutil.mkTask(res => {
 						'&api_key=' +
 						key,
 					res => {
-						var jtext = '';
-						res.setEncoding('utf8');
-						res.on('data', chunk => (jtext += chunk));
+						const chunks = [];
+						res.on('data', chunk => chunks.push(chunk));
 						res.on('end', () => {
-							var json = sutil.parseJSON(jtext);
+							const json = sutil.parseJSON(Buffer.concat(chunks).toString());
 							if (!json) {
 								sockEmit(this, 'login', { err: 'Kong returned invalid JSON' });
 								return;
 							}
 							if (json.success) {
-								var name = 'Kong:' + json.username;
+								const name = 'Kong:' + json.username;
 								Us.load(
 									name,
 									user => {
 										user.auth = data.g;
 										sockEvents.login.call(this, { u: name, a: data.g });
-										var req = https.request({
+										const req = https.request({
 											hostname: 'www.kongregate.com',
 											path: '/api/submit_statistics.json',
 											method: 'POST',
@@ -633,11 +632,11 @@ const keycerttask = sutil.mkTask(res => {
 										req.end();
 									},
 									() => {
-										var user = (Us.users[name] = {
+										Us.users[name] = {
 											name: name,
 											gold: 0,
 											auth: data.g,
-										});
+										};
 										sockEvents.login.call(this, { u: name, a: data.g });
 									},
 								);
@@ -658,10 +657,10 @@ const keycerttask = sutil.mkTask(res => {
 			genericChat(this, data);
 		},
 		roll: function(data) {
-			var A = Math.min(data.A || 1, 99),
+			const A = Math.min(data.A || 1, 99),
 				X = data.X || MAX_INT;
-			var sum = 0;
-			for (var i = 0; i < A; i++) {
+			let sum = 0;
+			for (let i = 0; i < A; i++) {
 				sum += RngMock.upto(X) + 1;
 			}
 			data.sum = sum;
@@ -673,7 +672,7 @@ const keycerttask = sutil.mkTask(res => {
 			});
 		},
 		pvpwant: function(data) {
-			var pendinggame = rooms[data.room];
+			const pendinggame = rooms[data.room];
 			this.meta.deck = data.deck;
 			this.meta.pvpstats = {
 				hp: data.hp,
@@ -685,14 +684,14 @@ const keycerttask = sutil.mkTask(res => {
 				return;
 			}
 			if (pendinggame && pendinggame.readyState == 1) {
-				var seed = Math.random() * MAX_INT;
+				const seed = Math.random() * MAX_INT;
 				this.meta.foe = pendinggame;
 				pendinggame.meta.foe = this;
-				var deck0 = pendinggame.meta.deck,
+				const deck0 = pendinggame.meta.deck,
 					deck1 = data.deck;
-				var owndata = { seed: seed, deck: deck0, urdeck: deck1 };
-				var foedata = { flip: true, seed: seed, deck: deck1, urdeck: deck0 };
-				var stat = this.meta.pvpstats,
+				const owndata = { seed: seed, deck: deck0, urdeck: deck1 };
+				const foedata = { flip: true, seed: seed, deck: deck1, urdeck: deck0 };
+				const stat = this.meta.pvpstats,
 					foestat = pendinggame.meta.pvpstats;
 				for (const key in stat) {
 					owndata['p1' + key] = stat[key];
@@ -730,12 +729,12 @@ const keycerttask = sutil.mkTask(res => {
 				'withscores',
 				(err, obj) => {
 					if (err) return;
-					var task = sutil.mkTask(res => {
-						var i = 0,
+					const task = sutil.mkTask(res => {
+						let i = 0,
 							t20 = [],
 							day = sutil.getDay();
 						while (res[i]) {
-							var wl = res[i];
+							const wl = res[i];
 							wl[2] = day - wl[2];
 							wl[3] = parseInt(wl[3]);
 							t20.push([obj[i * 2], Math.floor(obj[i * 2 + 1])].concat(wl));
@@ -743,7 +742,7 @@ const keycerttask = sutil.mkTask(res => {
 						}
 						sockEmit(this, 'arenatop', { top: t20, lv: data.lv });
 					});
-					for (var i = 0; i < obj.length; i += 2) {
+					for (let i = 0; i < obj.length; i += 2) {
 						db.hmget(
 							(data.lv ? 'B:' : 'A:') + obj[i],
 							'win',
@@ -771,9 +770,9 @@ const keycerttask = sutil.mkTask(res => {
 			sockEmit(this, 'chat', { mode: 1, msg: activeUsers().join(', ') });
 		},
 		challrecv: function(data) {
-			var foesock = Us.socks[data.f];
+			const foesock = Us.socks[data.f];
 			if (foesock && foesock.readyState == 1) {
-				var info = foesock.meta,
+				const info = foesock.meta,
 					foename = data.pvp ? info.duel : info.trade ? info.trade.foe : '';
 				sockEmit(foesock, 'chat', {
 					mode: 1,
@@ -791,22 +790,22 @@ const keycerttask = sutil.mkTask(res => {
 		},
 	};
 	function onSocketClose() {
-		for (var key in rooms) {
+		for (const key in rooms) {
 			if (rooms[key] == this) {
 				delete rooms[key];
 			}
 		}
-		for (var key in Us.socks) {
+		for (const key in Us.socks) {
 			if (Us.socks[key] == this) {
 				delete Us.socks[key];
 			}
 		}
-		var info = this.meta;
+		const info = this.meta;
 		if (info) {
 			if (info.trade) {
-				var foesock = Us.socks[info.trade.foe];
+				const foesock = Us.socks[info.trade.foe];
 				if (foesock && foesock.readyState == 1) {
-					var foeinfo = foesock.meta;
+					const foeinfo = foesock.meta;
 					if (foeinfo && foeinfo.trade && Us.socks[foeinfo.trade.foe] == this) {
 						sockEmit(foesock, 'tradecanceled');
 						delete foeinfo.trade;
@@ -814,7 +813,7 @@ const keycerttask = sutil.mkTask(res => {
 				}
 			}
 			if (info.foe) {
-				var foeinfo = info.foe.meta;
+				const foeinfo = info.foe.meta;
 				if (foeinfo && foeinfo.foe == this) {
 					sockEmit(info.foe, 'foeleft');
 					delete foeinfo.foe;
@@ -823,20 +822,20 @@ const keycerttask = sutil.mkTask(res => {
 		}
 	}
 	function onSocketMessage(rawdata) {
-		var data = sutil.parseJSON(rawdata);
+		const data = sutil.parseJSON(rawdata);
 		if (!data) return;
 		console.log(data.u, data.x);
 		if (echoEvents.has(data.x)) {
-			var foe = this.meta.trade ? Us.socks[this.meta.trade.foe] : this.meta.foe;
+			const foe = this.meta.trade ? Us.socks[this.meta.trade.foe] : this.meta.foe;
 			if (foe && foe.readyState == 1) {
 				foe.send(rawdata);
-				for (var i = 1; i <= 2; i++) {
-					var spectators = (i == 1 ? this : foe).meta.spectators;
+				for (let i = 1; i <= 2; i++) {
+					const spectators = (i == 1 ? this : foe).meta.spectators;
 					if (spectators) {
 						data.spectate = i;
-						var rawmsg = JSON.stringify(data);
+						const rawmsg = JSON.stringify(data);
 						spectators.forEach(uname => {
-							var sock = Us.socks[uname];
+							const sock = Us.socks[uname];
 							if (sock && sock.readyState == 1) {
 								sock.send(rawmsg);
 							}
@@ -846,9 +845,9 @@ const keycerttask = sutil.mkTask(res => {
 			}
 			return;
 		}
-		var func = userEvents[data.x] || usercmd[data.x];
+		let func = userEvents[data.x] || usercmd[data.x];
 		if (func) {
-			var u = data.u;
+			const u = data.u;
 			Us.load(u, user => {
 				if (data.a == user.auth) {
 					Us.socks[u] = this;

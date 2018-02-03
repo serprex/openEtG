@@ -1,8 +1,8 @@
 'use strict';
 const ui = require('./ui'),
 	Thing = require('./Thing'),
-	Components = require('./Components'),
-	h = require('react').createElement;
+	Components = typeof global === 'undefined' && require('./Components'),
+	h = typeof global === 'undefined' ? require('react').createElement : ()=>{};
 const anims = [];
 
 function maybeTgtPos(pos) {

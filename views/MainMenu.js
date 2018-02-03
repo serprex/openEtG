@@ -12,9 +12,11 @@ const px = require('../px'),
 	Status = require('../Status'),
 	etgutil = require('../etgutil'),
 	options = require('../options'),
+	store = require('../store'),
 	RngMock = require('../RngMock'),
 	Components = require('../Components'),
 	userutil = require('../userutil'),
+	{ connect } = require('react-redux'),
 	React = require('react'),
 	h = React.createElement,
 	tipjar = [
@@ -103,7 +105,7 @@ function initEndless() {
 	endlessRelic.status = new Status();
 	endlessRelic.status.set('immaterial', 1);
 	function endlessAuto(c, t) {
-		var plies = c.owner.game.ply;
+		const plies = c.owner.game.ply;
 		if (c.rng() < 0.1) {
 			c.owner.markpower++;
 		}
@@ -115,7 +117,7 @@ function initEndless() {
 		if (plies & 1 || c.rng() < 0.3) c.owner.foe.buffhp(-1);
 	}
 	function endlessDraw(c, t) {
-		var card = t.hand[t.hand.length - 1].card;
+		let card = t.hand[t.hand.length - 1].card;
 		if (t == c.owner.game.player1 && c.rng() < 0.3) card = card.asUpped(false);
 		t.deck.splice(t.upto(t.deck.length), 0, card);
 	}
@@ -126,7 +128,15 @@ function initEndless() {
 	game.player2.addPerm(endlessRelic);
 	return gameData;
 }
-module.exports = class MainMenu extends React.Component {
+module.exports = connect(({opts}) => ({
+	remember: opts.remember,
+	foename: opts.foename,
+	enableSound: opts.enableSound,
+	enableMusic: opts.enableMusic,
+	hideRightpane: opts.hideRightpane,
+	offline: opts.offline,
+	selectedDeck: opts.selectedDeck,
+}))(class MainMenu extends React.Component {
 	constructor(props) {
 		super(props);
 		const self = this;
@@ -136,7 +146,6 @@ module.exports = class MainMenu extends React.Component {
 			showsettings: false,
 			tipNumber: RngMock.upto(tipjar.length),
 			tipText: '',
-			selectedDeck: sock.user ? sock.user.selectedDeck : '',
 		};
 		this.resetTip = function(e) {
 			if (e.target.tagName && e.target.tagName.match(/^(DIV|CANVAS|HTML)$/)) {
@@ -191,11 +200,11 @@ module.exports = class MainMenu extends React.Component {
 				style: props.style,
 			});
 		}
-		var nextTip = h('input', {
+		const nextTip = h('input', {
 			type: 'button',
 			value: 'Next Tip',
 			onClick: function() {
-				let newTipNumber = (self.state.tipNumber + 1) % tipjar.length;
+				const newTipNumber = (self.state.tipNumber + 1) % tipjar.length;
 				self.setState({
 					tipNumber: newTipNumber,
 					tipText: tipjar[newTipNumber],
@@ -404,7 +413,7 @@ module.exports = class MainMenu extends React.Component {
 			if (sock.user) {
 				sock.userEmit(cmd);
 				sock.user = undefined;
-				options.remember = false;
+				self.props.dispatch(store.setOpt('remember', false));
 			}
 			self.props.doNav(require('./Login'));
 		}
@@ -434,7 +443,7 @@ module.exports = class MainMenu extends React.Component {
 					self.props.doNav(require('./Reward'), {
 						type: data.type,
 						amount: data.num,
-						code: options.foename,
+						code: self.props.foename,
 					});
 				},
 				codegold: function(data) {
@@ -454,35 +463,34 @@ module.exports = class MainMenu extends React.Component {
 			},
 		};
 		function tradeClick(foe) {
-			sock.trade = typeof foe === 'string' ? foe : options.foename;
+			sock.trade = typeof foe === 'string' ? foe : self.props.foename;
 			sock.userEmit('tradewant', { f: sock.trade });
 		}
 		function rewardClick() {
-			sock.userEmit('codesubmit', { code: options.foename });
+			sock.userEmit('codesubmit', { code: self.props.foename });
 		}
 		function libraryClick() {
-			const name = options.foename || (sock.user && sock.user.name);
+			const name = self.props.foename || (sock.user && sock.user.name);
 			if (name) sock.emit('librarywant', { f: name });
 		}
 		function soundChange() {
-			audio.changeSound(options.enableSound);
+			audio.changeSound(self.props.enableSound);
 		}
 		function musicChange() {
-			audio.changeMusic(options.enableMusic);
+			audio.changeMusic(self.props.enableMusic);
 		}
 		function hideRightpaneChange() {
-			document.getElementById('rightpane').style.display = options.hideRightpane
+			document.getElementById('rightpane').style.display = self.props.hideRightpane
 				? 'none'
 				: '';
 			sock.emit('chatus', {
-				hide: !!options.offline || !!options.hideRightpane,
+				hide: !!self.props.offline || !!self.props.hideRightpane,
 			});
 		}
 		playc.push(
 			h('input', {
-				ref: function(ctrl) {
-					ctrl && options.register('foename', ctrl, true);
-				},
+				value: self.props.foename,
+				onChange: e => self.props.dispatch(store.setOptTemp('foename', e.target.value)),
 				placeholder: 'Trade/Library',
 				style: {
 					marginLeft: '24px',
@@ -493,8 +501,11 @@ module.exports = class MainMenu extends React.Component {
 		musicChange();
 		function loadQuickdeck(x) {
 			return () => {
-				sock.userExec('setdeck', { name: sock.user.qecks[x] || '' });
-				self.setState({ selectedDeck: sock.user.selectedDeck });
+				const deckname = sock.user.qecks[x] || '';
+				sock.userExec('setdeck', { name: deckname });
+				self.props.dispatch(store.setOptTemp('selectedDeck', sock.user.selectedDeck));
+				self.props.dispatch(store.setOptTemp('deckname', deckname));
+				self.props.dispatch(store.setOpt('deck', sock.getDeck()));
 			};
 		}
 		playc.push(
@@ -524,14 +535,14 @@ module.exports = class MainMenu extends React.Component {
 		);
 		if (sock.user) {
 			const quickslots = [];
-			for (var i = 0; i < 10; i++) {
+			for (let i = 0; i < 10; i++) {
 				quickslots.push(
 					h('input', {
 						type: 'button',
 						value: i + 1,
 						className:
 							'editbtn' +
-							(sock.user.selectedDeck == sock.user.qecks[i]
+							(self.props.selectedDeck == sock.user.qecks[i]
 								? ' selectedbutton'
 								: ''),
 						onClick: loadQuickdeck(i),
@@ -540,7 +551,7 @@ module.exports = class MainMenu extends React.Component {
 			}
 			deckc.push(
 				h(LabelText, {
-					text: 'Deck: ' + self.state.selectedDeck,
+					text: 'Deck: ' + self.props.selectedDeck,
 					style: {
 						whiteSpace: 'nowrap',
 						marginLeft: '16px',
@@ -548,7 +559,7 @@ module.exports = class MainMenu extends React.Component {
 				}),
 				h('div', { style: { textAlign: 'center' }, children: quickslots }),
 			);
-			var bsettings = h('input', {
+			const bsettings = h('input', {
 				type: 'button',
 				value: 'Settings',
 				style: {
@@ -740,10 +751,10 @@ module.exports = class MainMenu extends React.Component {
 		);
 		px.view(stage);
 		mainc.push(
-			h(Components.rect(626, 436, 196, 120), { children: leadc }),
-			h(CostRewardHeaders(304, 120, 292, 240), { children: aic }),
-			h(Components.rect(620, 92, 196, 176), { children: deckc }),
-			h(Components.rect(616, 300, 206, 130), { children: playc }),
+			h(Components.rect(626, 436, 196, 120), {}, ...leadc),
+			h(CostRewardHeaders(304, 120, 292, 240), {}, ...aic),
+			h(Components.rect(620, 92, 196, 176), {}, ...deckc),
+			h(Components.rect(616, 300, 206, 130), {}, ...playc),
 		);
 		if (self.state.showsettings) {
 			function changeFunc() {
@@ -757,7 +768,7 @@ module.exports = class MainMenu extends React.Component {
 					type: 'button',
 					value: 'Wipe Account',
 					onClick: function() {
-						if (options.foename == sock.user.name + 'yesdelete') {
+						if (self.props.foename == sock.user.name + 'yesdelete') {
 							logout('delete');
 						} else {
 							chat(
@@ -891,6 +902,6 @@ module.exports = class MainMenu extends React.Component {
 				),
 			);
 		}
-		return h('div', { className: 'bg_main', children: mainc });
+		return h('div', { className: 'bg_main' }, ...mainc);
 	}
-};
+});

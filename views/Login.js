@@ -4,11 +4,13 @@ const px = require('../px'),
 	audio = require('../audio'),
 	options = require('../options'),
 	Components = require('../Components'),
+	store = require('../store'),
+	{ connect } = require('react-redux'),
 	React = require('react'),
 	h = React.createElement;
 
 if (typeof kongregateAPI === 'undefined') {
-	module.exports = class Login extends React.Component {
+	module.exports = connect(({opts}) => ({ remember: opts.remember, username: opts.username }))(class Login extends React.Component {
 		constructor(props) {
 			super(props);
 			this.state = { commit: null, password: '' };
@@ -21,9 +23,10 @@ if (typeof kongregateAPI === 'undefined') {
 						if (!data.err) {
 							delete data.x;
 							sock.user = data;
-							if (options.remember && typeof localStorage !== 'undefined') {
+							if (this.props.remember && typeof localStorage !== 'undefined') {
 								localStorage.auth = data.auth;
 							}
+							this.props.dispatch(store.setOptTemp('selectedDeck', data.selectedDeck));
 							if (!sock.user.accountbound && !sock.user.pool) {
 								this.props.doNav(require('./ElementSelect'));
 							} else {
@@ -75,8 +78,8 @@ if (typeof kongregateAPI === 'undefined') {
 				}
 			}
 			function loginClick(auth) {
-				if (!sock.user && options.username) {
-					const data = { u: options.username };
+				if (!sock.user && self.props.username) {
+					const data = { u: self.props.username };
 					if (typeof auth !== 'string') {
 						data.p = self.state.password;
 					} else data.a = auth;
@@ -120,26 +123,23 @@ if (typeof kongregateAPI === 'undefined') {
 					style={{ position: 'absolute', left: '270px', top: '380px' }}
 				/>
 			);
-			const rememberCheck = (
-				<input
-					type="checkbox"
-					ref={ctrl => ctrl && options.register('remember', ctrl)}
-					onChange={() => {
-						if (typeof localStorage !== 'undefined') {
-							if (!this.checked) delete localStorage.auth;
-							else if (sock.user) localStorage.auth = sock.user.auth;
-						}
-					}}
-				/>
-			);
 			const remember = (
 				<label style={{ position: 'absolute', left: '430px', top: '380px' }}>
-					{rememberCheck}
-					{'Remember me'}
+					<input
+						type="checkbox"
+						ref={ctrl => ctrl && options.register('remember', ctrl)}
+						onChange={e => {
+							if (typeof localStorage !== 'undefined') {
+								if (!e.target.checked) delete localStorage.auth;
+								else if (sock.user) localStorage.auth = sock.user.auth;
+							}
+						}}
+					/>
+					Remember me
 				</label>
 			);
 			if (
-				options.remember &&
+				self.props.remember &&
 				typeof localStorage !== 'undefined' &&
 				localStorage.auth
 			) {
@@ -170,9 +170,9 @@ if (typeof kongregateAPI === 'undefined') {
 				</div>
 			);
 		}
-	};
+	});
 } else {
-	module.exports = ({ doNav }) => {
+	module.exports = connect()(({ doNav }) => {
 		kongregateAPI.loadAPI(() => {
 			const kong = kongregateAPI.getAPI();
 			if (kong.services.isGuest()) {
@@ -184,10 +184,11 @@ if (typeof kongregateAPI === 'undefined') {
 				});
 				px.view({
 					cmds: {
-						login: function(data) {
+						login: data => {
 							if (!data.err) {
 								delete data.x;
 								sock.user = data;
+								this.props.dispatch(store.setOptTemp('selectedDeck', data.selectedDeck));
 								if (!sock.user.accountbound && !sock.user.pool) {
 									doNav(require('./ElementSelect'));
 								} else {
@@ -202,5 +203,5 @@ if (typeof kongregateAPI === 'undefined') {
 			}
 		});
 		return 'Logging in..';
-	};
+	});
 }

@@ -5,14 +5,15 @@ const chat = require('./chat'),
 	RngMock = require('./RngMock'),
 	etgutil = require('./etgutil'),
 	options = require('./options'),
+	store = require('./store'),
 	userutil = require('./userutil'),
 	mkDeck = require('./ai/deck'),
 	mkGame = require('./mkGame');
 
 exports.mkPremade = function(level, daily) {
-	var name = level == 1 ? 'mage' : 'demigod';
+	const name = level == 1 ? 'mage' : 'demigod';
 	return () => {
-		var urdeck = sock.getDeck();
+		const urdeck = sock.getDeck();
 		if (etgutil.decklength(urdeck) < (sock.user ? 31 : 11)) {
 			return;
 		}
@@ -94,7 +95,7 @@ exports.mkAi = function(level, daily) {
 			}
 		}
 		const deck = level == 0 ? mkDeck(0, 1, 2) : mkDeck(0.4, 2, 4);
-		options.aideck = deck;
+		store.store.dispatch(store.setOptTemp('aideck', deck));
 
 		const gameData = {
 			deck: deck,

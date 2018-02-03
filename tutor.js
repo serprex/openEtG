@@ -1,16 +1,16 @@
-const options = require('./options'),
-	Text = require('./Components'),
+const Text = require('./Components'),
+	{ connect } = require('react-redux'),
 	React = require('react'),
 	h = React.createElement;
 
-exports.Tutor = class Tutor extends React.Component {
+exports.Tutor = connect(({opts}) => ({ disableTut: opts.disableTut }))(class Tutor extends React.Component {
 	constructor(props) {
 		super(props);
 		this.state = { showtut: false };
 	}
 
 	render() {
-		if (options.disableTut) return null;
+		if (this.props.disableTut) return null;
 		const tutdata = this.props.data;
 		const tutbtn = (
 			<span
@@ -52,7 +52,7 @@ exports.Tutor = class Tutor extends React.Component {
 		}
 		return <div children={children} />;
 	}
-};
+});
 exports.Editor = [
 	[
 		100,

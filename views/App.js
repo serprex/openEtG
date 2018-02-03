@@ -1,22 +1,9 @@
 const React = require('react'),
+	store = require('../store'),
 	{ connect } = require('react-redux');
 
-module.exports = connect(state => ({ view: state.nav, viewProps: state.navprops }))(class App extends React.Component {
-	constructor(props) {
-		super(props);
-		this.doNav = this.doNav.bind(this);
-		require('../px').doNav = this.doNav; // TODO remove px.doNav
-	}
-
-	doNav(view, viewProps) {
-		this.props.dispatch({
-			type: 'NAV',
-			nav: view,
-			props: viewProps,
-		});
-	}
-
-	render() {
-		return React.createElement(this.props.view, Object.assign({ doNav: this.doNav }, this.props.viewProps));
-	}
+module.exports = connect(state => ({ view: state.nav.view || require('./Login'), viewProps: state.nav.props }))(function App(props) {
+	return React.createElement(props.view, Object.assign({
+		doNav: (view, viewProps) => props.dispatch(store.doNav(view, viewProps))
+	}, props.viewProps));
 });

@@ -7,7 +7,9 @@ const px = require('../px'),
 	tutor = require('../tutor'),
 	etgutil = require('../etgutil'),
 	options = require('../options'),
+	store = require('../store'),
 	Components = require('../Components'),
+	{ connect } = require('react-redux'),
 	React = require('react'),
 	h = React.createElement;
 
@@ -21,7 +23,7 @@ function attrval(x, d) {
 	return x === 0 ? 0 : x || d;
 }
 
-module.exports = class Editor extends React.Component {
+module.exports = connect(({opts}) => ({ deck: opts.deck, deckname: opts.deckname }))(class Editor extends React.Component {
 	constructor(props) {
 		super(props);
 		const aupped = props.acard && props.acard.upped;
@@ -52,7 +54,6 @@ module.exports = class Editor extends React.Component {
 			pool: pool,
 			deck: deckmark.deck,
 			mark: deckmark.mark,
-			deckname: sock.user && sock.user.selectedDeck,
 			arattr: props.ainfo && {
 				hp: attrval(props.ainfo.hp, 200),
 				mark: attrval(props.ainfo.mark, 2),
@@ -160,10 +161,13 @@ module.exports = class Editor extends React.Component {
 			if (!x) return;
 			saveDeck();
 			sock.user.selectedDeck = x;
+			self.props.dispatch(store.setOptTemp('selectedDeck', sock.user.selectedDeck));
+			self.props.dispatch(store.setOptTemp('deckname', sock.user.selectedDeck));
+			self.props.dispatch(store.setOpt('deck', sock.getDeck()));
 			self.setState(self.processDeck(etgutil.decodedeck(sock.getDeck())));
 		}
 		function importDeck() {
-			const dvalue = options.deck.trim();
+			const dvalue = self.props.deck.trim();
 			self.setState(
 				self.processDeck(
 					~dvalue.indexOf(' ') ? dvalue.split(' ') : etgutil.decodedeck(dvalue),
@@ -174,9 +178,7 @@ module.exports = class Editor extends React.Component {
 			h('input', {
 				type: 'button',
 				value: 'Clear',
-				onClick: function() {
-					self.setState({ deck: [] });
-				},
+				onClick: () => self.setState({ deck: [] }),
 				style: {
 					position: 'absolute',
 					left: '8px',
@@ -257,10 +259,10 @@ module.exports = class Editor extends React.Component {
 			);
 		}
 		function saveButton() {
-			if (self.state.deckname) {
-				sock.user.selectedDeck = self.state.deckname;
+			if (self.props.deckname) {
+				sock.user.selectedDeck = self.props.deckname;
+				self.props.dispatch(store.setOptTemp('selectedDeck', sock.user.selectedDeck));
 				saveDeck();
-				self.setState({});
 			}
 		}
 		if (self.props.acard) {
@@ -329,9 +331,9 @@ module.exports = class Editor extends React.Component {
 					onClick: function() {
 						if (sock.user) saveDeck(true);
 						else
-							options.deck =
+							self.props.dispatch(store.setOpt('deck',
 								etgutil.encodedeck(self.state.deck) +
-								etgutil.toTrueMarkSuffix(self.state.mark);
+								etgutil.toTrueMarkSuffix(self.state.mark)));
 						self.props.doNav(require('./MainMenu'));
 					},
 					style: {
@@ -396,7 +398,7 @@ module.exports = class Editor extends React.Component {
 					h('input', {
 						type: 'button',
 						value: 'Load',
-						onClick: () => loadDeck(this.state.deckname),
+						onClick: () => loadDeck(this.props.deckname),
 						style: {
 							position: 'absolute',
 							left: '8px',
@@ -505,11 +507,10 @@ module.exports = class Editor extends React.Component {
 		editorui.push(decksprite, cardsel, cardArt);
 		if (!self.props.acard) {
 			if (sock.user) {
-				const deckname = h('input', {
-					id: 'deckname',
+				editorui.push(h('input', {
 					placeholder: 'Name',
-					value: self.state.deckname,
-					onInput: e => self.setState({ deckname: e.target.value }),
+					value: self.props.deckname,
+					onChange: e => self.props.dispatch(store.setOptTemp('deckname', e.target.value)),
 					onKeyPress: e => {
 						if (e.keyCode == 13) {
 							loadDeck(e.target.value);
@@ -524,11 +525,9 @@ module.exports = class Editor extends React.Component {
 						top: '4px',
 						width: '80px',
 					},
-				});
-				editorui.push(deckname);
+				}));
 			}
 			const deckimport = h('input', {
-				id: 'deckimport',
 				placeholder: 'Deck',
 				autoFocus: true,
 				value:
@@ -540,10 +539,12 @@ module.exports = class Editor extends React.Component {
 					top: '238px',
 					width: '190px',
 				},
-				ref: (ctrl) => {
+				onChange: e => {
+					self.props.dispatch(store.setOptTemp('deck', e.target.value));
+				},
+				ref: ctrl => {
 					if (ctrl) {
-						options.deck = ctrl.value;
-						options.register('deck', ctrl);
+						self.props.dispatch(store.setOptTemp('deck', ctrl.value));
 						if (!self.firstRender) {
 							ctrl.setSelectionRange(0, 999);
 							self.firstRender = true;
@@ -573,4 +574,4 @@ module.exports = class Editor extends React.Component {
 			editorui.push(h(tutor.Tutor, { data: tutor.Editor, x: 4, y: 220 }));
 		return h('div', { children: editorui });
 	}
-};
+});

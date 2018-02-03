@@ -1,14 +1,14 @@
 const chat = require('./chat'),
 	etgutil = require('./etgutil'),
-	options = require('./options'),
+	{store} = require('./store'),
 	usercmd = require('./usercmd');
 const endpoint =
 	(/^\d+\.\d+\.\d+\.\d+$/.test(location.hostname) ? 'ws://' : 'wss://') +
 	location.hostname +
 	':13602';
-var socket = new WebSocket(endpoint);
 const buffer = [];
-var attempts = 0,
+let socket = new WebSocket(endpoint),
+	attempts = 0,
 	attemptTimeout = 0;
 socket.onopen = function() {
 	attempts = 0;
@@ -16,11 +16,12 @@ socket.onopen = function() {
 		clearTimeout(attemptTimeout);
 		attemptTimeout = 0;
 	}
-	if (options.offline || options.wantpvp || options.afk)
+	const {opts} = store.getState();
+	if (opts.offline || opts.wantpvp || opts.afk)
 		exports.emit('chatus', {
-			hide: !!options.offline,
-			wantpvp: !!options.wantpvp,
-			afk: !!options.afk,
+			hide: !!opts.offline,
+			wantpvp: !!opts.wantpvp,
+			afk: !!opts.afk,
 		});
 	buffer.forEach(this.send, this);
 	buffer.length = 0;
@@ -65,6 +66,6 @@ exports.userExec = function(x, data) {
 };
 exports.getDeck = function() {
 	if (exports.user) return exports.user.decks[exports.user.selectedDeck] || '';
-	var deck = (options.deck || '').trim();
+	const deck = (store.getState().opts.deck || '').trim();
 	return ~deck.indexOf(' ') ? etgutil.encodedeck(deck.split(' ')) : deck;
 };

@@ -19,10 +19,10 @@ let guestname,
 	muteall,
 	lastError = 0,
 	lastmove = 0;
-window.onerror = function() {
+window.onerror = function(...args) {
 	const now = Date.now();
 	if (lastError + 999 < now) {
-		chat(Array.apply(null, arguments).join(', '), 'System');
+		chat(args.join(', '), 'System');
 		lastError = now;
 	}
 };
@@ -33,9 +33,6 @@ document.addEventListener('mousemove', function(e) {
 		lastmove = e.timeStamp;
 	}
 });
-if (options.hideRightpane) {
-	document.getElementById('rightpane').style.display = 'none';
-}
 const sockEvents = {
 	clear: chat.clear.bind(null, 'Main'),
 	passchange: function(data) {
@@ -188,12 +185,11 @@ sock.et.onmessage = function(msg) {
 	if (func) func.call(this, data);
 };
 reactDOM.render(
-	<Provider store={store}>
+	<Provider store={store.store}>
 		<App />
 	</Provider>,
 	document.getElementById("leftpane"),
 );
-if (options.preart) sock.emit('cardart');
 function chatmute() {
 	chat(
 		(muteall ? 'You have chat muted. ' : '') +
@@ -262,18 +258,9 @@ function maybeSendChat(e) {
 				span.appendChild(document.createTextNode(name + ' '));
 				span.addEventListener('click', function(e) {
 					if (e.target != this) return;
-					const deckname = document.getElementById('deckname'),
-						deckimport = document.getElementById('deckimport');
-					if (deckname && deckimport) {
-						deckname.value = name;
-						deckimport.value = deck;
-						deckname.dispatchEvent(new Event('change'));
-						deckimport.dispatchEvent(new Event('change'));
-						const e = new Event('keypress');
-						e.keyCode = 13;
-						deckname.dispatchEvent(e);
-						deckimport.dispatchEvent(e);
-					}
+					store.store.dispatch(store.setOptTemp('selectedDeck', name));
+					store.store.dispatch(store.setOptTemp('deckname', name));
+					store.store.dispatch(store.setOpt('deck', deck));
 				});
 				chat.addSpan(span);
 			});
@@ -294,14 +281,14 @@ function maybeSendChat(e) {
 		} else if (sock.user && msg == '/modclear') {
 			sock.userEmit('modclear');
 		} else if (sock.user && msg.match(/^\/mod(guest|mute|add|rm) /)) {
-			var sp = msg.indexOf(' ');
+			const sp = msg.indexOf(' ');
 			sock.userEmit(msg.slice(1, sp), { m: msg.slice(sp + 1) });
 		} else if (msg.match(/^\/code /)) {
 			sock.userEmit('codecreate', { t: msg.slice(6) });
 		} else if (!msg.match(/^\/[^/]/) || (sock.user && msg.match(/^\/w( |")/))) {
 			msg = msg.replace(/^\/\//, '/');
 			if (sock.user) {
-				var data = { msg: msg };
+				const data = { msg: msg };
 				if (msg.match(/^\/w( |")/)) {
 					var match = msg.match(/^\/w"([^"]*)"/);
 					var to = (match && match[1]) || msg.slice(3, msg.indexOf(' ', 4));
@@ -312,8 +299,8 @@ function maybeSendChat(e) {
 				}
 				if (!data.msg.match(/^\s*$/)) sock.userEmit('chat', data);
 			} else {
-				var name =
-					options.username ||
+				const name =
+					store.store.getState().opts.username ||
 					guestname ||
 					(guestname = 10000 + RngMock.upto(89999) + '');
 				if (!msg.match(/^\s*$/)) sock.emit('guestchat', { msg: msg, u: name });
@@ -322,13 +309,17 @@ function maybeSendChat(e) {
 	}
 }
 function offlineChange() {
-	sock.emit('chatus', { hide: !!options.offline || !!options.hideRightpane });
+	const {opts} = store.store.getState();
+	sock.emit('chatus', { hide: !!opts.offline || !!opts.hideRightpane });
 }
 function afkChange() {
-	sock.emit('chatus', { afk: !!options.afk });
+	sock.emit('chatus', { afk: !!store.store.getState().opts.afk });
 }
 function wantpvpChange() {
-	sock.emit('chatus', { want: !!options.wantpvp });
+	sock.emit('chatus', { want: !!store.store.getState().opts.wantpvp });
+}
+if (store.store.getState().opts.hideRightpane) {
+	document.getElementById('rightpane').style.display = 'none';
 }
 options.register('wantpvp', document.getElementById('wantpvp'));
 options.register('offline', document.getElementById('offline'));
