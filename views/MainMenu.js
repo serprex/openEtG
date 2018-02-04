@@ -1,6 +1,5 @@
 'use strict';
-const px = require('../px'),
-	etg = require('../etg'),
+const etg = require('../etg'),
 	chat = require('../chat'),
 	sock = require('../sock'),
 	util = require('../util'),
@@ -164,6 +163,35 @@ module.exports = connect(({opts}) => ({
 
 	componentDidMount() {
 		document.addEventListener('mousemove', this.resetTip);
+		this.props.dispatch(store.setCmds({
+			librarygive: data => {
+				this.props.doNav(require('./Library'), data);
+			},
+			arenainfo: data => {
+				this.props.doNav(require('./ArenaInfo'), data);
+			},
+			codecard: data => {
+				this.props.doNav(require('./Reward'), {
+					type: data.type,
+					amount: data.num,
+					code: self.props.foename,
+				});
+			},
+			codegold: data => {
+				sock.user.gold += data.g;
+				const goldspan = document.createElement('span');
+				goldspan.className = 'ico gold';
+				const msg = document.createElement('div');
+				msg.appendChild(document.createTextNode(data.g));
+				msg.appendChild(goldspan);
+				msg.appendChild(document.createTextNode(' added!'));
+				chat.addSpan(msg);
+			},
+			codecode: data => {
+				sock.user.pool = etgutil.addcard(sock.user.pool, data.card);
+				chat(Cards.Codes[data.card].name + ' added!', 'System');
+			},
+		}));
 	}
 
 	render() {
@@ -431,37 +459,6 @@ module.exports = connect(({opts}) => ({
 					},
 				}),
 		);
-		const stage = {
-			cmds: {
-				librarygive: function(data) {
-					self.props.doNav(require('./Library'), data);
-				},
-				arenainfo: function(data) {
-					self.props.doNav(require('./ArenaInfo'), data);
-				},
-				codecard: function(data) {
-					self.props.doNav(require('./Reward'), {
-						type: data.type,
-						amount: data.num,
-						code: self.props.foename,
-					});
-				},
-				codegold: function(data) {
-					sock.user.gold += data.g;
-					const goldspan = document.createElement('span');
-					goldspan.className = 'ico gold';
-					const msg = document.createElement('div');
-					msg.appendChild(document.createTextNode(data.g));
-					msg.appendChild(goldspan);
-					msg.appendChild(document.createTextNode(' added!'));
-					chat.addSpan(msg);
-				},
-				codecode: function(data) {
-					sock.user.pool = etgutil.addcard(sock.user.pool, data.card);
-					chat(Cards.Codes[data.card].name + ' added!', 'System');
-				},
-			},
-		};
 		function tradeClick(foe) {
 			sock.trade = typeof foe === 'string' ? foe : self.props.foename;
 			sock.userEmit('tradewant', { f: sock.trade });
@@ -749,7 +746,6 @@ module.exports = connect(({opts}) => ({
 				},
 			}),
 		);
-		px.view(stage);
 		mainc.push(
 			h(Components.rect(626, 436, 196, 120), {}, ...leadc),
 			h(CostRewardHeaders(304, 120, 292, 240), {}, ...aic),

@@ -1,9 +1,9 @@
 'use strict';
-const px = require('../px'),
-	ui = require('../ui'),
+const ui = require('../ui'),
 	sock = require('../sock'),
 	RngMock = require('../RngMock'),
 	Components = require('../Components'),
+	store = require('../store'),
 	React = require('react'),
 	h = React.createElement,
 	descriptions = [
@@ -31,6 +31,17 @@ module.exports = class ElementSelect extends React.Component {
 		};
 	}
 
+	componentDidMount() {
+		store.store.dispatch(store.setCmds({
+			login: data => {
+				delete data.x;
+				sock.user = data;
+				store.store.dispatch(store.setOptTemp('selectedDeck', data.selectedDeck));
+				this.props.doNav(require('./MainMenu'));
+			}
+		}));
+	}
+
 	render() {
 		const self = this;
 		const eledesc = h(
@@ -46,7 +57,7 @@ module.exports = class ElementSelect extends React.Component {
 			},
 			this.state.eledesc,
 		);
-		var mainc = [
+		const mainc = [
 			eledesc,
 			h(Components.ExitBtn, {
 				x: 100,
@@ -81,15 +92,6 @@ module.exports = class ElementSelect extends React.Component {
 				}),
 			);
 		}
-		px.view({
-			cmds: {
-				login: function(data) {
-					delete data.x;
-					sock.user = data;
-					self.props.doNav(require('./MainMenu'));
-				},
-			},
-		});
 		return h('div', { children: mainc });
 	}
 };

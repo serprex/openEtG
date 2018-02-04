@@ -1,6 +1,5 @@
 'use strict';
-const px = require('../px'),
-	ui = require('../ui'),
+const ui = require('../ui'),
 	etg = require('../etg'),
 	mkAi = require('../mkAi'),
 	sock = require('../sock'),
@@ -12,6 +11,7 @@ const px = require('../px'),
 	etgutil = require('../etgutil'),
 	aiSearch = require('../ai/search'),
 	Components = require('../Components'),
+	store = require('../store'),
 	React = require('react'),
 	h = React.createElement;
 
@@ -635,16 +635,13 @@ function startMatch(self, game, gameData, doNav) {
 			clearInterval(gameInterval);
 		},
 	});
-	px.view({ cmds: cmds });
+	store.store.dispatch(store.setCmds(cmds));
 }
 
 function tgtclass(game, obj) {
 	if (game.targeting) {
 		if (game.targeting.filter(obj)) return 'ants-red';
-	} else {
-		if (obj.owner === game.player1 && obj.canactive()) return 'ants-black';
-	}
-	return;
+	} else if (obj.owner === game.player1 && obj.canactive()) return 'ants-black';
 }
 
 module.exports = class Match extends React.Component {
@@ -673,7 +670,7 @@ module.exports = class Match extends React.Component {
 		if (this.state.endnext) {
 			this.state.endnext();
 		}
-		px.view({});
+		store.store.dispatch(store.setCmds({}));
 	}
 
 	componentWillReceiveProps(props) {

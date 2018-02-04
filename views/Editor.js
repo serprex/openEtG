@@ -1,6 +1,5 @@
 'use strict';
-const px = require('../px'),
-	etg = require('../etg'),
+const etg = require('../etg'),
 	chat = require('../chat'),
 	sock = require('../sock'),
 	Cards = require('../Cards'),
@@ -60,6 +59,14 @@ module.exports = connect(({opts}) => ({ deck: opts.deck, deckname: opts.deckname
 				draw: attrval(props.ainfo.draw, 1),
 			},
 		};
+	}
+
+	componentDidMount() {
+		this.props.dispatch(store.setCmds({
+			arenainfo: data => {
+				this.props.doNav(require('./ArenaInfo'), data);
+			},
+		}));
 	}
 
 	processDeck(deck) {
@@ -563,13 +570,6 @@ module.exports = connect(({opts}) => ({ deck: opts.deck, deckname: opts.deckname
 			});
 			editorui.push(deckimport);
 		}
-		px.view({
-			cmds: {
-				arenainfo: (data) => {
-					self.props.doNav(require('./ArenaInfo'), data);
-				},
-			},
-		});
 		if (!this.props.acard && sock.user)
 			editorui.push(h(tutor.Tutor, { data: tutor.Editor, x: 4, y: 220 }));
 		return h('div', { children: editorui });

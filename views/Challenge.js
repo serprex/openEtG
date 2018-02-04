@@ -1,10 +1,10 @@
-const px = require('../px'),
-	sock = require('../sock'),
+const sock = require('../sock'),
 	util = require('../util'),
 	mkGame = require('../mkGame'),
 	etgutil = require('../etgutil'),
 	options = require('../options'),
 	Components = require('../Components'),
+	store = require('../store'),
 	{ connect } = require('react-redux'),
 	React = require('react'),
 	h = React.createElement;
@@ -12,7 +12,7 @@ const px = require('../px'),
 function sendChallenge(foe) {
 	const deck = sock.getDeck();
 	if (etgutil.decklength(deck) < (sock.user ? 31 : 9)) {
-		px.doNav(require('./Editor'));
+		store.store.dispatch(store.doNav(require('./Editor')));
 		return;
 	}
 	const gameData = {};

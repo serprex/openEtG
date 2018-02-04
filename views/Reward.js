@@ -1,11 +1,11 @@
 'use strict';
-const px = require('../px'),
-	chat = require('../chat'),
+const chat = require('../chat'),
 	sock = require('../sock'),
 	Cards = require('../Cards'),
 	etgutil = require('../etgutil'),
 	userutil = require('../userutil'),
 	Components = require('../Components'),
+	store = require('../store'),
 	React = require('react'),
 	h = React.createElement;
 
@@ -27,6 +27,16 @@ module.exports = class Reward extends React.Component {
 		this.state = {
 			rewardList: rewardList,
 		};
+	}
+
+	componentDidMount() {
+		store.store.dispatch(store.setCmds({
+			codedone: data => {
+				sock.user.pool = etgutil.addcard(sock.user.pool, data.card);
+				chat(Cards.Codes[data.card].name + ' added!', 'System');
+				this.props.doNav(require('./MainMenu'));
+			},
+		}));
 	}
 
 	render() {
@@ -105,14 +115,6 @@ module.exports = class Reward extends React.Component {
 				h(Components.Card, { x: 233, y: 10, code: self.state.chosenReward }),
 		);
 
-		const cmds = {
-			codedone: function(data) {
-				sock.user.pool = etgutil.addcard(sock.user.pool, data.card);
-				chat(Cards.Codes[data.card].name + ' added!', 'System');
-				self.props.doNav(require('./MainMenu'));
-			},
-		};
-		px.view({ cmds: cmds });
 		return h('div', { children: rewardui });
 	}
 };

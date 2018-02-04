@@ -1,8 +1,8 @@
 'use strict';
-const px = require('../px'),
-	chat = require('../chat'),
+const chat = require('../chat'),
 	sock = require('../sock'),
 	Components = require('../Components'),
+	store = require('../store'),
 	React = require('react'),
 	h = React.createElement;
 
@@ -13,11 +13,9 @@ module.exports = class WealthTop extends React.Component {
 	}
 
 	componentDidMount() {
-		px.view({
-			cmds: {
-				wealthtop: info => this.setState(info)
-			},
-		});
+		store.store.dispatch(store.setCmds({
+			wealthtop: info => this.setState(info)
+		}));
 		sock.emit('wealthtop');
 	}
 

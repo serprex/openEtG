@@ -1,6 +1,5 @@
 'use strict';
-const px = require('../px'),
-	Cards = require('../Cards'),
+const Cards = require('../Cards'),
 	etgutil = require('../etgutil'),
 	userutil = require('../userutil'),
 	Components = require('../Components'),

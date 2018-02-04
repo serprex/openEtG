@@ -1,7 +1,6 @@
 'use strict';
 require('@babel/polyfill');
 const muteset = {},
-	px = require('./px'),
 	chat = require('./chat'),
 	Cards = require('./Cards'),
 	etgutil = require('./etgutil'),
@@ -133,25 +132,25 @@ const sockEvents = {
 		});
 		gamedata.game.cost = userutil.arenaCost(data.lv);
 		sock.user.gold -= gamedata.game.cost;
-		px.doNav(require('./views/Match'), gamedata);
+		store.store.dispatch(store.doNav(require('./views/Match'), gamedata));
 	},
 	tradegive: function(data) {
 		if (sock.trade) {
 			delete sock.trade;
-			px.doNav(require('./views/Trade'));
+			store.store.dispatch(store.doNav(require('./views/Trade')));
 		}
 	},
 	pvpgive: function(data) {
 		if (sock.pvp) {
 			delete sock.pvp;
-			px.doNav(require('./views/Match'), mkGame(data));
+			store.store.dispatch(store.doNav(require('./views/Match'), mkGame(data)));
 		}
 	},
 	spectategive: function(data) {
 		if (sock.spectate) {
 			delete sock.spectate;
 			data.spectate = true;
-			px.doNav(require('./views/Match'), mkGame(data));
+			store.store.dispatch(store.doNav(require('./views/Match'), mkGame(data)));
 		}
 	},
 	challenge: function(data) {
@@ -179,9 +178,9 @@ const sockEvents = {
 };
 const sock = require('./sock');
 sock.et.onmessage = function(msg) {
-	var data = JSON.parse(msg.data);
+	const data = JSON.parse(msg.data);
 	if (data.u && data.u in muteset) return;
-	var func = sockEvents[data.x] || px.getCmd(data.x);
+	const func = sockEvents[data.x] || store.store.getState().cmds[data.x];
 	if (func) func.call(this, data);
 };
 reactDOM.render(

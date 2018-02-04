@@ -11,19 +11,24 @@ try {
 
 exports.doNav = (view, props) => ({ type: 'NAV', view, props });
 
-exports.setOptTemp = (key, val) => ({
-	type: 'OPT',
-	key,
-	val,
-});
+exports.setOptTemp = (key, val) => (dispatch) => {
+	if (hasLocalStorage && !val) delete localStorage[key];
+	dispatch({
+		type: 'OPT',
+		key,
+		val,
+	})
+};
 
-exports.setOpt = hasLocalStorage ? (key, val) => (dispatch, getState) => {
+exports.setOpt = hasLocalStorage ? (key, val) => (dispatch) => {
 	if (hasLocalStorage) {
 		if (val) localStorage[key] = val;
 		else delete localStorage[key];
 	}
 	dispatch(exports.setOptTemp(key, val));
 } : exports.setOptTemp;
+
+exports.setCmds = cmds => ({ type: 'CMD', cmds })
 
 exports.store = redux.createStore((state, action) => {
 	if (action.type === 'NAV') {
@@ -32,10 +37,14 @@ exports.store = redux.createStore((state, action) => {
 	else if (action.type === 'OPT') {
 		return Object.assign({}, state, { opts: Object.assign({}, state.opts, { [action.key]: action.val }) });
 	}
+	else if (action.type == 'CMD') {
+		return Object.assign({}, state, { cmds: action.cmds });
+	}
 	return state;
 }, {
 	nav: {},
-	opts
+	opts,
+	cmds: {},
 }, redux.applyMiddleware(({dispatch, getState}) => next => action => {
 	if (typeof action === 'function') {
 		return action(dispatch, getState);

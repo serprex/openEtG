@@ -1,9 +1,9 @@
 'use strict';
-const px = require('../px'),
-	sock = require('../sock'),
+const sock = require('../sock'),
 	chat = require('../chat'),
 	Cards = require('../Cards'),
 	Components = require('../Components'),
+	store = require('../store'),
 	React = require('react'),
 	h = React.createElement;
 
@@ -15,12 +15,9 @@ module.exports = class ArenaTop extends React.Component {
 
 	componentDidMount() {
 		sock.emit('arenatop', this.props);
-		const self = this;
-		px.view({
-			cmds: {
-				arenatop: info => self.setState(info),
-			},
-		});
+		store.store.dispatch(store.setCmds({
+			arenatop: info => this.setState(info),
+		}));
 	}
 
 	render() {

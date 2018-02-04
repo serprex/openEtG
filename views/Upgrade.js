@@ -82,12 +82,12 @@ module.exports = class Upgrade extends React.Component {
 					? func(Cards.Codes[self.state.code1])
 					: 'Pick a card, any card.';
 				if (error) self.setState({ error: error });
-				else self.setState({});
+				else self.forceUpdate();
 			};
 		}
 		function autoCards() {
 			sock.userExec('upshall');
-			self.setState({});
+			self.forceUpdate();
 		}
 		const exit = h(Components.ExitBtn, {
 				x: 5,

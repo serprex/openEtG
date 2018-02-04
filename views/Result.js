@@ -1,6 +1,5 @@
 'use strict';
-const px = require('../px'),
-	etg = require('../etg'),
+const etg = require('../etg'),
 	chat = require('../chat'),
 	mkAi = require('../mkAi'),
 	sock = require('../sock'),

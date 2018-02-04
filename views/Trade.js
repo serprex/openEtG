@@ -1,11 +1,11 @@
 'use strict';
-const px = require('../px'),
-	chat = require('../chat'),
+const chat = require('../chat'),
 	sock = require('../sock'),
 	Cards = require('../Cards'),
 	etgutil = require('../etgutil'),
 	userutil = require('../userutil'),
 	Components = require('../Components'),
+	store = require('../store'),
 	React = require('react'),
 	h = React.createElement;
 
@@ -22,25 +22,23 @@ module.exports = class Trade extends React.Component {
 	}
 
 	componentDidMount() {
-		px.view({
-			cmds: {
-				cardchosen: data => {
-					this.setState({ offer: etgutil.decodedeck(data.c) });
-				},
-				tradedone: data => {
-					sock.user.pool = etgutil.mergedecks(sock.user.pool, data.newcards);
-					sock.user.pool = etgutil.removedecks(sock.user.pool, data.oldcards);
-					this.props.doNav(require('./MainMenu'));
-				},
-				tradecanceled: () => {
-					this.props.doNav(require('./MainMenu'));
-				},
+		store.store.dispatch(store.setCmds({
+			cardchosen: data => {
+				this.setState({ offer: etgutil.decodedeck(data.c) });
 			},
-		});
+			tradedone: data => {
+				sock.user.pool = etgutil.mergedecks(sock.user.pool, data.newcards);
+				sock.user.pool = etgutil.removedecks(sock.user.pool, data.oldcards);
+				this.props.doNav(require('./MainMenu'));
+			},
+			tradecanceled: () => {
+				this.props.doNav(require('./MainMenu'));
+			},
+		}));
 	}
 
 	componentWillUnmount() {
-		px.view({});
+		store.store.dispatch(store.setCmds({}));
 	}
 
 	render() {

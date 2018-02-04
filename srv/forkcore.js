@@ -21,7 +21,7 @@ module.exports = function(req, res) {
 			cache.add(res, url, ifmod, url.slice(idx + 1), func);
 		} else if (
 			!~url.indexOf('..') &&
-			url.match(/^(vanilla\/|cia\/)?$|\.(js(on)?|html?|css|csv|png|ogg)$/)
+			url.match(/^(vanilla\/|cia\/)?$|\.(js(on|\.map)?|html?|css|csv|png|ogg)$/)
 		) {
 			cache.add(
 				res,

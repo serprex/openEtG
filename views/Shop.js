@@ -1,11 +1,11 @@
-const px = require('../px'),
-	svg = require('../svg'),
+const svg = require('../svg'),
 	chat = require('../chat'),
 	sock = require('../sock'),
 	tutor = require('../tutor'),
 	etgutil = require('../etgutil'),
 	options = require('../options'),
 	Components = require('../Components'),
+	store = require('../store'),
 	React = require('react'),
 	h = React.createElement;
 
@@ -38,6 +38,38 @@ module.exports = class Shop extends React.Component {
 			showbuy: false,
 			cards: '',
 		};
+	}
+
+	componentDidMount() {
+		store.store.dispatch(store.setCmds({
+			boostergive: data => {
+				if (data.accountbound) {
+					sock.user.accountbound = etgutil.mergedecks(
+						sock.user.accountbound,
+						data.cards,
+					);
+					if (sock.user.freepacks) {
+						sock.user.freepacks[data.packtype]--;
+					}
+				} else {
+					sock.user.pool = etgutil.mergedecks(sock.user.pool, data.cards);
+					const bdata = {};
+					options.parseInput(bdata, 'bulk', options.bulk, 99);
+					sock.user.gold -= packdata[data.packtype].cost * (bdata.bulk || 1);
+				}
+				if (etgutil.decklength(data.cards) < 11) {
+					this.setState({ cards: data.cards, showbuy: false });
+				} else {
+					this.forceUpdate();
+					const link = document.createElement('a');
+					link.style.display = 'block';
+					link.href = 'deck/' + data.cards;
+					link.target = '_blank';
+					link.appendChild(document.createTextNode(data.cards));
+					chat.addSpan(link);
+				}
+			},
+		}));
 	}
 
 	render() {
@@ -255,35 +287,6 @@ module.exports = class Shop extends React.Component {
 			);
 		}
 
-		const cmds = {
-			boostergive: function(data) {
-				if (data.accountbound) {
-					sock.user.accountbound = etgutil.mergedecks(
-						sock.user.accountbound,
-						data.cards,
-					);
-					if (sock.user.freepacks) {
-						sock.user.freepacks[data.packtype]--;
-					}
-				} else {
-					sock.user.pool = etgutil.mergedecks(sock.user.pool, data.cards);
-					const bdata = {};
-					options.parseInput(bdata, 'bulk', options.bulk, 99);
-					sock.user.gold -= packdata[data.packtype].cost * (bdata.bulk || 1);
-				}
-				if (etgutil.decklength(data.cards) < 11) {
-					self.setState({ cards: data.cards, showbuy: false });
-				} else {
-					self.setState({});
-					const link = document.createElement('a');
-					link.style.display = 'block';
-					link.href = 'deck/' + data.cards;
-					link.target = '_blank';
-					link.appendChild(document.createTextNode(data.cards));
-					chat.addSpan(link);
-				}
-			},
-		};
 		const packmulti = h('input', {
 			placeholder: 'Bulk',
 			ref: function(ctrl) {
@@ -307,7 +310,6 @@ module.exports = class Shop extends React.Component {
 			data: tutor.Shop,
 		});
 		children.push(packmulti, tut);
-		px.view({ cmds: cmds });
 		return h('div', { children: children });
 	}
 };

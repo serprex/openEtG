@@ -1,5 +1,4 @@
-const px = require('../px'),
-	chat = require('../chat'),
+const chat = require('../chat'),
 	sock = require('../sock'),
 	audio = require('../audio'),
 	options = require('../options'),
@@ -17,27 +16,25 @@ if (typeof kongregateAPI === 'undefined') {
 		}
 
 		componentDidMount() {
-			px.view({
-				cmds: {
-					login: data => {
-						if (!data.err) {
-							delete data.x;
-							sock.user = data;
-							if (this.props.remember && typeof localStorage !== 'undefined') {
-								localStorage.auth = data.auth;
-							}
-							this.props.dispatch(store.setOptTemp('selectedDeck', data.selectedDeck));
-							if (!sock.user.accountbound && !sock.user.pool) {
-								this.props.doNav(require('./ElementSelect'));
-							} else {
-								this.props.doNav(require('./MainMenu'));
-							}
-						} else {
-							chat(data.err);
+			this.props.dispatch(store.setCmds({
+				login: data => {
+					if (!data.err) {
+						delete data.x;
+						sock.user = data;
+						if (this.props.remember && typeof localStorage !== 'undefined') {
+							localStorage.auth = data.auth;
 						}
-					},
+						this.props.dispatch(store.setOptTemp('selectedDeck', data.selectedDeck));
+						if (!sock.user.accountbound && !sock.user.pool) {
+							this.props.doNav(require('./ElementSelect'));
+						} else {
+							this.props.doNav(require('./MainMenu'));
+						}
+					} else {
+						chat(data.err);
+					}
 				},
-			});
+			}));
 
 			const xhr = new XMLHttpRequest();
 			xhr.addEventListener('load', () => {
@@ -172,36 +169,39 @@ if (typeof kongregateAPI === 'undefined') {
 		}
 	});
 } else {
-	module.exports = connect()(({ doNav, dispatch }) => {
-		kongregateAPI.loadAPI(() => {
-			const kong = kongregateAPI.getAPI();
-			if (kong.services.isGuest()) {
-				doNav(require('./MainMenu'));
-			} else {
-				sock.emit('konglogin', {
-					u: kong.services.getUserId(),
-					g: kong.services.getGameAuthToken(),
-				});
-				px.view({
-					cmds: {
+	module.exports = connect()(class Login extends React.Component {
+		componentDidMount() {
+			kongregateAPI.loadAPI(() => {
+				const kong = kongregateAPI.getAPI();
+				if (kong.services.isGuest()) {
+					this.props.doNav(require('./MainMenu'));
+				} else {
+					sock.emit('konglogin', {
+						u: kong.services.getUserId(),
+						g: kong.services.getGameAuthToken(),
+					});
+					this.props.dispatch(store.setCmds({
 						login: data => {
 							if (!data.err) {
 								delete data.x;
 								sock.user = data;
-								dispatch(store.setOptTemp('selectedDeck', data.selectedDeck));
+								this.props.dispatch(store.setOptTemp('selectedDeck', data.selectedDeck));
 								if (!sock.user.accountbound && !sock.user.pool) {
-									doNav(require('./ElementSelect'));
+									this.props.doNav(require('./ElementSelect'));
 								} else {
-									doNav(require('./MainMenu'));
+									this.props.doNav(require('./MainMenu'));
 								}
 							} else {
 								alert(data.err);
 							}
 						},
-					},
-				});
-			}
-		});
-		return 'Logging in..';
+					}));
+				}
+			});
+		}
+
+		render() {
+			return 'Logging in..';
+		}
 	});
 }
