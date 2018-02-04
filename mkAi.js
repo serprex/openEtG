@@ -114,13 +114,13 @@ exports.mkAi = function(level, daily) {
 		return mkGame(gameData);
 	};
 };
-exports.run = function run(doNav, gamedata) {
+exports.run = function run(gamedata) {
 	if (typeof gamedata === 'function') {
-		return () => run(doNav, gamedata());
+		return () => run(gamedata());
 	}
 	if (gamedata) {
-		doNav(require('./views/Match'), gamedata);
+		store.store.dispatch(store.doNav(require('./views/Match'), gamedata));
 	} else {
-		doNav(require('./views/Editor'));
+		store.store.dispatch(store.doNav(require('./views/Editor')));
 	}
 };

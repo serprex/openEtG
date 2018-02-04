@@ -24,11 +24,11 @@ if (typeof kongregateAPI === 'undefined') {
 						if (this.props.remember && typeof localStorage !== 'undefined') {
 							localStorage.auth = data.auth;
 						}
-						this.props.dispatch(store.setOptTemp('selectedDeck', data.selectedDeck));
 						if (!sock.user.accountbound && !sock.user.pool) {
-							this.props.doNav(require('./ElementSelect'));
+							this.props.dispatch(store.doNav(require('./ElementSelect')));
 						} else {
-							this.props.doNav(require('./MainMenu'));
+							this.props.dispatch(store.setOptTemp('selectedDeck', data.selectedDeck));
+							this.props.dispatch(store.doNav(require('./MainMenu')));
 						}
 					} else {
 						chat(data.err);
@@ -95,7 +95,7 @@ if (typeof kongregateAPI === 'undefined') {
 				<input
 					type="button"
 					value="Sandbox"
-					onClick={() => self.props.doNav(require('./MainMenu'))}
+					onClick={() => this.props.dispatch(store.doNav(require('./MainMenu')))}
 					style={{ position: 'absolute', left: '530px', top: '350px' }}
 				/>
 			);
@@ -174,7 +174,7 @@ if (typeof kongregateAPI === 'undefined') {
 			kongregateAPI.loadAPI(() => {
 				const kong = kongregateAPI.getAPI();
 				if (kong.services.isGuest()) {
-					this.props.doNav(require('./MainMenu'));
+					this.props.dispatch(store.doNav(require('./MainMenu')));
 				} else {
 					sock.emit('konglogin', {
 						u: kong.services.getUserId(),
@@ -185,11 +185,11 @@ if (typeof kongregateAPI === 'undefined') {
 							if (!data.err) {
 								delete data.x;
 								sock.user = data;
-								this.props.dispatch(store.setOptTemp('selectedDeck', data.selectedDeck));
 								if (!sock.user.accountbound && !sock.user.pool) {
-									this.props.doNav(require('./ElementSelect'));
+									this.props.dispatch(store.doNav(require('./ElementSelect')));
 								} else {
-									this.props.doNav(require('./MainMenu'));
+									this.props.dispatch(store.setOptTemp('selectedDeck', data.selectedDeck));
+									this.props.dispatch(store.doNav(require('./MainMenu')));
 								}
 							} else {
 								alert(data.err);

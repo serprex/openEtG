@@ -5,6 +5,7 @@ const Cards = require('../Cards'),
 	util = require('../util'),
 	etgutil = require('../etgutil'),
 	Components = require('../Components'),
+	store = require('../store'),
 	React = require('react'),
 	h = React.createElement;
 
@@ -14,7 +15,7 @@ module.exports = function(props) {
 			style: { position: 'absolute', left: '96px', top: '576px' },
 			text: 'Earn 1$ when your arena deck is faced, & another 2$ when it wins',
 		}),
-		h(Components.ExitBtn, { x: 8, y: 300, doNav: props.doNav }),
+		h(Components.ExitBtn, { x: 8, y: 300 }),
 	];
 	function renderInfo(info, y) {
 		if (info) {
@@ -81,11 +82,11 @@ module.exports = function(props) {
 						top: 224 + y + 'px',
 					},
 					onClick: function() {
-						props.doNav(require('./Editor'), {
+						store.store.dispatch(store.doNav(require('./Editor'), {
 							adeck: info.deck,
 							acard: Cards.Codes[info.card],
 							ainfo: info,
-						});
+						}));
 					},
 				}),
 				h('input', {
@@ -99,7 +100,7 @@ module.exports = function(props) {
 					onClick: function() {
 						var deck = sock.getDeck();
 						if (etgutil.decklength(deck) < 9 || etgutil.decklength(adeck) < 9) {
-							props.doNav(require('./Editor'));
+							store.store.dispatch(store.doNav(require('./Editor')));
 							return;
 						}
 						const gameData = mkGame({
@@ -113,7 +114,7 @@ module.exports = function(props) {
 							p2drawpower: info.draw,
 							ai: true,
 						});
-						props.doNav(require('./Match'), gameData);
+						store.store.dispatch(store.doNav(require('./Match'), gameData));
 					},
 				}),
 			);
@@ -134,12 +135,12 @@ module.exports = function(props) {
 						top: 268 + i * 292 + 'px',
 					},
 					onClick: function() {
-						props.doNav(require('./Editor'), {
+						store.store.dispatch(store.doNav(require('./Editor'), {
 							adeck: (props[uocard > 6999 ? 'B' : 'A'] || {}).deck,
 							acard: Cards.Codes[uocard],
 							ainfo: {},
 							startempty: true,
-						});
+						}));
 					},
 				}),
 			);

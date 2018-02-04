@@ -60,7 +60,7 @@ module.exports = class WealthTop extends React.Component {
 			{},
 			ol1,
 			ol2,
-			h(Components.ExitBtn, { x: 8, y: 300, doNav: this.props.doNav }),
+			h(Components.ExitBtn, { x: 8, y: 300 }),
 		);
 	}
 };

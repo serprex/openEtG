@@ -75,78 +75,71 @@ module.exports = class Shop extends React.Component {
 	render() {
 		const self = this;
 		const children = [
-			h(Components.Box, {
-				x: 40,
-				y: 16,
-				width: 820,
-				height: 60,
-			}),
-			h(Components.Box, {
-				x: 40,
-				y: 89,
-				width: 494,
-				height: 168,
-			}),
-			h(Components.Box, {
-				x: 40,
-				y: 270,
-				width: 620,
-				height: 168,
-			}),
-			h(Components.Box, {
-				x: 770,
-				y: 90,
-				width: 90,
-				height: 184,
-			}),
-			h(Components.Text, {
-				text: sock.user.gold + '$',
-				style: {
+			<Components.Box
+				x={40}
+				y={16}
+				width={820}
+				height={60}
+			/>,
+			<Components.Box
+				x={40}
+				y={89}
+				width={494}
+				height={168}
+			/>,
+			<Components.Box
+				x={40}
+				y={270}
+				width={620}
+				height={168}
+			/>,
+			<Components.Box
+				x={770}
+				y={90}
+				width={90}
+				height={184}
+			/>,
+			<Components.Text
+				text={sock.user.gold + '$'}
+				style={{
 					position: 'absolute',
 					left: '775px',
 					top: '101px',
-				},
-			}),
-			h(Components.Text, {
-				text: this.state.info1,
-				style: {
+				}}
+			/>,
+			<Components.Text
+				text={this.state.info1}
+				style={{
 					position: 'absolute',
 					left: '50px',
 					top: '25px',
-				},
-			}),
-			h(
-				'span',
-				{
-					style: {
-						position: 'absolute',
-						left: '50px',
-						top: '50px',
-					},
-				},
-				this.state.info2,
-			),
-			h(Components.ExitBtn, { x: 775, y: 246, doNav: this.props.doNav }),
+				}}
+			/>,
+			<span
+				style={{
+					position: 'absolute',
+					left: '50px',
+					top: '50px',
+				}}>{this.state.info2}</span>,
+			<Components.ExitBtn x={775} y={246} />,
 		];
 
 		if (sock.user.freepacks) {
 			children.push(
-				h(
-					'span',
-					{
-						style: {
-							position: 'absolute',
-							left: '350px',
-							top: '26px',
-						},
-					},
+				<span
+					style={{
+						position: 'absolute',
+						left: '350px',
+						top: '26px',
+					}}>{
 					sock.user.freepacks[self.state.packrarity]
 						? 'Free ' +
 							packdata[self.state.packrarity].type +
 							' packs left: ' +
 							sock.user.freepacks[self.state.packrarity]
-						: '',
-				),
+						: ''
+					}
+				</span>,
 			);
 		}
 

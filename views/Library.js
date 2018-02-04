@@ -104,7 +104,7 @@ module.exports = class Library extends React.Component {
 					self.setState({ showbound: !self.state.showbound });
 				},
 			}),
-			h(Components.ExitBtn, { x: 8, y: 8, doNav: self.props.doNav }),
+			h(Components.ExitBtn, { x: 8, y: 8 }),
 			h(Components.CardSelector, {
 				cardpool: this.state.showbound ? boundpool : cardpool,
 				filterboth: true,

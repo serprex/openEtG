@@ -1,9 +1,9 @@
 'use strict';
-var etg = require('../etg');
-var Cards = require('../Cards');
-var Skills = require('../Skills');
-var parseSkill = require('../parseSkill');
-var enableLogging = false,
+const etg = require('../etg'),
+	Cards = require('../Cards'),
+	Skills = require('../Skills'),
+	parseSkill = require('../parseSkill');
+let enableLogging = false,
 	logbuff,
 	logstack;
 function logStart() {
@@ -43,21 +43,17 @@ function log(x, y) {
 function pillarval(c) {
 	return c.type == etg.Spell ? 0.1 : Math.sqrt(c.status.get('charges'));
 }
-var SkillsValues = Object.freeze({
+const SkillsValues = Object.freeze({
 	'ablaze 1': 1,
 	'ablaze 2': 3,
 	accelerationspell: 5,
-	acceleration: function(c) {
-		return c.truehp() - 2;
-	},
+	acceleration: c => c.truehp() - 2,
 	accretion: 8,
 	adrenaline: 8,
 	aflatoxin: 5,
 	aggroskele: 2,
 	air: 1,
-	alphawolf: function(c) {
-		return c.type == etg.Spell ? 3 : 0;
-	},
+	alphawolf: c => c.type == etg.Spell ? 3 : 0,
 	animateweapon: 4,
 	antimatter: 12,
 	appease: function(c) {
@@ -66,9 +62,7 @@ var SkillsValues = Object.freeze({
 			: c.status.get('appeased') ? 0 : c.trueatk() * -1.5;
 	},
 	bblood: 7,
-	beguilestop: function(c) {
-		return -getDamage(c);
-	},
+	beguilestop: c => -getDamage(c),
 	bellweb: 1,
 	blackhole: function(c) {
 		var a = 0,
@@ -166,9 +160,7 @@ var SkillsValues = Object.freeze({
 	earthquake: 4,
 	eatspell: 3,
 	embezzle: 7,
-	empathy: function(c) {
-		return c.owner.countcreatures();
-	},
+	empathy: c => c.owner.countcreatures(),
 	enchant: 6,
 	endow: 4,
 	envenom: 3,
@@ -184,9 +176,7 @@ var SkillsValues = Object.freeze({
 	foedraw: 8,
 	forcedraw: -10,
 	forceplay: 2,
-	fractal: function(c) {
-		return 3 + (9 - c.owner.hand.length) / 4;
-	},
+	fractal: c => 3 + (9 - c.owner.hand.length) / 4,
 	freeze: [3, 3.5],
 	freezeperm: [3.5, 4],
 	fungusrebirth: 1,
@@ -258,12 +248,8 @@ var SkillsValues = Object.freeze({
 	midas: 6,
 	millpillar: 1,
 	mimic: 3,
-	miracle: function(c) {
-		return c.owner.maxhp / 8;
-	},
-	mitosis: function(c) {
-		return 4 + c.card.cost;
-	},
+	miracle: c => c.owner.maxhp / 8,
+	mitosis: c => 4 + c.card.cost,
 	mitosisspell: 6,
 	momentum: 2,
 	mutation: 4,
@@ -437,7 +423,7 @@ var SkillsValues = Object.freeze({
 		return !c.status.get('charges') && c.owner == c.owner.game.turn ? 0 : 6;
 	},
 });
-var statusValues = Object.freeze({
+const statusValues = Object.freeze({
 	airborne: 0.2,
 	ranged: 0.2,
 	voodoo: 1,
@@ -560,9 +546,9 @@ function calcExpectedDamage(pl, wallCharges, wallIndex) {
 }
 
 function evalactive(c, active, extra) {
-	var sum = 0;
-	for (var i = 0; i < active.name.length; i++) {
-		var aval = SkillsValues[active.name[i]];
+	let sum = 0;
+	for (let i = 0; i < active.name.length; i++) {
+		const aval = SkillsValues[active.name[i]];
 		sum +=
 			aval === undefined
 				? 0
@@ -600,14 +586,15 @@ function checkpassives(c) {
 	return score;
 }
 
-var throttled = Object.freeze({
-	'poison 1': true,
-	'poison 2': true,
-	'poison 3': true,
-	neuro: true,
-	regen: true,
-	siphon: true,
-});
+const throttled = Object.freeze(new Set([
+	'poison 1',
+	'poison 2',
+	'poison 3',
+	'neuro',
+	'regen',
+	'siphon',
+]));
+
 function evalthing(c) {
 	if (!c) return 0;
 	var ttatk,
@@ -669,14 +656,14 @@ function evalthing(c) {
 		score += ctrueatk / 20;
 		score += ttatk * delayfactor;
 	} else ttatk = 0;
-	var throttlefactor =
+	const throttlefactor =
 		adrenalinefactor < 3 ||
 		(isCreature && c.owner.weapon && c.owner.weapon.status.get('nothrottle'))
 			? adrenalinefactor
 			: 2;
-	for (var key in c.active) {
-		var adrfactor =
-			key in throttled
+	for (const key in c.active) {
+		const adrfactor =
+			throttled.has(key)
 				? throttlefactor
 				: key == 'disarm' ? 1 : adrenalinefactor;
 		if (key == 'hit') {
@@ -716,7 +703,7 @@ function evalthing(c) {
 	}
 	if (delaymix) {
 		// TODO this is redundant alongside delayfactor
-		var delayed = Math.min(
+		const delayed = Math.min(
 			delaymix * (c.status.get('adrenaline') ? 0.5 : 1),
 			12,
 		);
@@ -800,7 +787,7 @@ const uniqueStatuses = new Set([
 	'patience',
 	'cloak',
 ]);
-var uniquesSkill, damageHash;
+let uniquesSkill, damageHash;
 
 module.exports = function(game) {
 	logStart();
@@ -810,7 +797,7 @@ module.exports = function(game) {
 	if (game.player1.deck.length == 0 && game.player1.hand.length < 8) {
 		return -99999990;
 	}
-	var wallCharges = new Int32Array([0, 0]);
+	const wallCharges = new Int32Array([0, 0]);
 	damageHash = [];
 	uniquesSkill = {
 		flooding: false,
@@ -819,7 +806,7 @@ module.exports = function(game) {
 		patience: false,
 		cloak: false,
 	};
-	var expectedDamage = calcExpectedDamage(game.player2, wallCharges, 0);
+	let expectedDamage = calcExpectedDamage(game.player2, wallCharges, 0);
 	if (expectedDamage > game.player1.hp) {
 		return Math.min(expectedDamage - game.player1.hp, 500) * -999;
 	}
@@ -827,8 +814,8 @@ module.exports = function(game) {
 		return 99999980;
 	}
 	expectedDamage = calcExpectedDamage(game.player1, wallCharges, 1); // Call to fill damageHash
-	var gamevalue = expectedDamage > game.player2.hp ? 999 : 0;
-	for (var j = 0; j < 2; j++) {
+	let gamevalue = expectedDamage > game.player2.hp ? 999 : 0;
+	for (let j = 0; j < 2; j++) {
 		if (j == 1) {
 			// Reset non global effects
 			uniquesSkill.tunnel = false;
@@ -836,28 +823,28 @@ module.exports = function(game) {
 			uniquesSkill.cloak = false;
 		}
 		logNest(j);
-		var player = game.players(j),
-			pscore = wallCharges[j] * 4 + player.markpower;
+		const player = game.players(j);
+		let pscore = wallCharges[j] * 4 + player.markpower;
 		pscore += evalthing(player.weapon);
 		pscore += evalthing(player.shield);
 		logNest('creas');
-		for (var i = 0; i < 23; i++) {
+		for (let i = 0; i < 23; i++) {
 			pscore += evalthing(player.creatures[i]);
 		}
 		logNestEnd();
 		logNest('perms');
-		for (var i = 0; i < 16; i++) {
+		for (let i = 0; i < 16; i++) {
 			pscore += evalthing(player.permanents[i]);
 		}
 		logNestEnd();
 		logNest('hand');
-		for (var i = 0; i < player.hand.length; i++) {
+		for (let i = 0; i < player.hand.length; i++) {
 			pscore += evalcardinstance(player.hand[i]);
 		}
 		logNestEnd();
 		// Remove this if logic is updated to call endturn
 		if (player != game.turn && player.hand.length < 8 && player.deck.length) {
-			var card = player.deck.pop();
+			const card = player.deck.pop();
 			player.addCard(card);
 			pscore += evalcardinstance(player.hand[player.hand.length - 1]);
 			player.hand.pop();

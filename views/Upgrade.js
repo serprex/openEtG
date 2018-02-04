@@ -89,11 +89,7 @@ module.exports = class Upgrade extends React.Component {
 			sock.userExec('upshall');
 			self.forceUpdate();
 		}
-		const exit = h(Components.ExitBtn, {
-				x: 5,
-				y: 50,
-				doNav: this.props.doNav,
-			}),
+		const exit = <Components.ExitBtn x={5} y={50} />,
 			bupgrade =
 				self.state.canGrade &&
 				h('input', {

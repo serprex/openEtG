@@ -381,7 +381,7 @@ function addNoHealData(game) {
 	return data;
 }
 
-function startMatch(self, game, gameData, doNav) {
+function startMatch(self, game, gameData) {
 	function drawTgting(spr, col) {
 		fgfx.drawRect(
 			spr.position.x - spr.width / 2,
@@ -435,7 +435,7 @@ function startMatch(self, game, gameData, doNav) {
 								game.area,
 							);
 							newgame.game.addData(data);
-							mkAi.run(doNav, newgame);
+							mkAi.run(newgame);
 							return;
 						} else if (
 							sock.user.quests[game.quest[0]] <= game.quest[1] ||
@@ -453,7 +453,7 @@ function startMatch(self, game, gameData, doNav) {
 							const newgame = mkAi.mkAi(game.level, true)();
 							newgame.game.addData(data);
 							newgame.game.dataNext = data;
-							mkAi.run(doNav, newgame);
+							mkAi.run(newgame);
 							return;
 						} else {
 							sock.userExec('donedaily', {
@@ -465,7 +465,7 @@ function startMatch(self, game, gameData, doNav) {
 					sock.user.streak[game.level] = 0;
 				}
 			}
-			doNav(require('./Result'), { game: game, data: gameData });
+			store.store.dispatch(store.doNav(require('./Result'), { game: game, data: gameData }));
 		} else if (game.turn == game.player1) {
 			if (discard == undefined && game.player1.hand.length == 8) {
 				self.setState({ discarding: true });
@@ -624,7 +624,7 @@ function startMatch(self, game, gameData, doNav) {
 		}
 		const effects = Effect.next(self.state.cloaked);
 		if (effects !== self.state.effects) {
-			self.setState({ effects: effects });
+			self.setState({ effects });
 		}
 	}
 	gameStep();
@@ -663,7 +663,7 @@ module.exports = class Match extends React.Component {
 			sock.userEmit('canceltrade');
 			delete sock.trade;
 		}
-		startMatch(this, this.props.game, this.props.data, this.props.doNav);
+		startMatch(this, this.props.game, this.props.data);
 	}
 
 	componentWillUnmount() {
@@ -675,7 +675,7 @@ module.exports = class Match extends React.Component {
 
 	componentWillReceiveProps(props) {
 		this.componentWillUnmount();
-		startMatch(this, props.game, props.data, props.doNav);
+		startMatch(this, props.game, props.data);
 	}
 
 	setInfo(e, obj, x) {

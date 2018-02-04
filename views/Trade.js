@@ -29,10 +29,10 @@ module.exports = class Trade extends React.Component {
 			tradedone: data => {
 				sock.user.pool = etgutil.mergedecks(sock.user.pool, data.newcards);
 				sock.user.pool = etgutil.removedecks(sock.user.pool, data.oldcards);
-				this.props.doNav(require('./MainMenu'));
+				store.store.dispatch(store.doNav(require('./MainMenu')));
 			},
 			tradecanceled: () => {
-				this.props.doNav(require('./MainMenu'));
+				store.store.dispatch(store.doNav(require('./MainMenu')));
 			},
 		}));
 	}
@@ -129,7 +129,7 @@ module.exports = class Trade extends React.Component {
 				value: 'Cancel',
 				onClick: function() {
 					sock.userEmit('canceltrade');
-					self.props.doNav(require('./MainMenu'));
+					store.store.dispatch(store.doNav(require('./MainMenu')));
 				},
 				style: {
 					position: 'absolute',

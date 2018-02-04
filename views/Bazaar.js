@@ -5,6 +5,7 @@ const chat = require('../chat'),
 	etgutil = require('../etgutil'),
 	userutil = require('../userutil'),
 	Components = require('../Components'),
+	store = require('../store'),
 	React = require('react'),
 	h = React.createElement;
 
@@ -20,7 +21,7 @@ module.exports = class Bazaar extends React.Component {
 	render() {
 		const self = this,
 			children = [
-				h(Components.ExitBtn, { x: 8, y: 100, doNav: self.props.doNav }),
+				h(Components.ExitBtn, { x: 8, y: 100 }),
 			],
 			cost = Math.ceil(userutil.calcWealth(self.state.deck, true) * 3);
 
@@ -38,7 +39,7 @@ module.exports = class Bazaar extends React.Component {
 						sock.userExec('bazaar', {
 							cards: etgutil.encoderaw(self.state.deck),
 						});
-						self.props.doNav(require('./MainMenu'));
+						store.store.dispatch(store.doNav(require('./MainMenu')));
 					},
 				}),
 			);

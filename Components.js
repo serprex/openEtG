@@ -6,6 +6,7 @@ const ui = require('./ui'),
 	Cards = require('./Cards'),
 	etgutil = require('./etgutil'),
 	options = require('./options'),
+	store = require('./store'),
 	React = require('react'),
 	h = React.createElement;
 
@@ -164,7 +165,7 @@ exports.ExitBtn = function(props) {
 		onClick:
 			props.onClick ||
 			function() {
-				props.doNav(require('./views/MainMenu'));
+				store.store.dispatch(store.doNav(require('./views/MainMenu')));
 			},
 		style: {
 			position: 'absolute',

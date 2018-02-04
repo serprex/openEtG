@@ -11,9 +11,10 @@ const etg = require('../etg'),
 	userutil = require('../userutil'),
 	mkGame = require('../mkGame'),
 	Components = require('../Components'),
-	streak200 = new Uint8Array([10, 10, 15, 20, 15, 20]),
+	store = require('../store'),
 	React = require('react'),
-	h = React.createElement;
+	h = React.createElement,
+	streak200 = new Uint8Array([10, 10, 15, 20, 15, 20]);
 
 module.exports = class Result extends React.Component {
 	constructor(props) {
@@ -39,17 +40,17 @@ module.exports = class Result extends React.Component {
 		const game = this.props.game;
 		if (game.quest) {
 			if (game.winner === game.player1 && game.choicerewards) {
-				this.props.doNav(require('./Reward'), {
+				store.store.dispatch(store.doNav(require('./Reward'), {
 					type: game.choicerewards,
 					amount: game.rewardamount,
-				});
+				}));
 			} else {
-				this.props.doNav(require('./QuestArea'), { area: game.area });
+				store.store.dispatch(store.doNav(require('./QuestArea'), { area: game.area }));
 			}
 		} else if (game.daily !== undefined) {
-			this.props.doNav(require('./Colosseum'));
+			store.store.dispatch(store.doNav(require('./Colosseum')));
 		} else {
-			this.props.doNav(require('./MainMenu'));
+			store.store.dispatch(store.doNav(require('./MainMenu')));
 		}
 	}
 
@@ -58,16 +59,16 @@ module.exports = class Result extends React.Component {
 			data = this.props.data;
 		switch (game.level) {
 			case 0:
-				mkAi.run(this.props.doNav, mkAi.mkAi(0)());
+				mkAi.run(mkAi.mkAi(0)());
 				break;
 			case 1:
-				mkAi.run(this.props.doNav, mkAi.mkPremade(1)());
+				mkAi.run(mkAi.mkPremade(1)());
 				break;
 			case 2:
-				mkAi.run(this.props.doNav, mkAi.mkAi(2)());
+				mkAi.run(mkAi.mkAi(2)());
 				break;
 			case 3:
-				mkAi.run(this.props.doNav, mkAi.mkPremade(3)());
+				mkAi.run(mkAi.mkPremade(3)());
 				break;
 			case 4:
 				sock.userEmit('foearena', { lv: 0 });
@@ -95,7 +96,7 @@ module.exports = class Result extends React.Component {
 						gameData.p2markpower = data.p2markpower;
 						gameData.p2drawpower = data.p2drawpower;
 					}
-					this.props.doNav(require('./Match'), mkGame(gameData));
+					store.store.dispatch(store.doNav(require('./Match'), mkGame(gameData)));
 				}
 		}
 	}

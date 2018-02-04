@@ -63,7 +63,7 @@ module.exports = class ArenaTop extends React.Component {
 		return (
 			<div>
 				{ol}
-				<Components.ExitBtn x={8} y={300} doNav={this.props.doNav} />
+				<Components.ExitBtn x={8} y={300} />
 				{self.state.card && (
 					<Components.Card
 						card={self.state.card}

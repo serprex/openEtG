@@ -34,7 +34,7 @@ module.exports = class Reward extends React.Component {
 			codedone: data => {
 				sock.user.pool = etgutil.addcard(sock.user.pool, data.card);
 				chat(Cards.Codes[data.card].name + ' added!', 'System');
-				this.props.doNav(require('./MainMenu'));
+				store.store.dispatch(store.doNav(require('./MainMenu')));
 			},
 		}));
 	}
@@ -47,7 +47,7 @@ module.exports = class Reward extends React.Component {
 			code = props.code;
 		if (!self.state.rewardList) {
 			console.log('Unknown reward', reward);
-			props.doNav(require('./MainMenu'));
+			store.store.dispatch(store.doNav(require('./MainMenu')));
 			return;
 		}
 		const rewardui = [
@@ -62,7 +62,7 @@ module.exports = class Reward extends React.Component {
 									etgutil.encodeCount(numberofcopies) +
 									self.state.chosenReward.toString(32),
 							});
-							self.props.doNav(require('./MainMenu'));
+							store.store.dispatch(store.doNav(require('./MainMenu')));
 						} else {
 							sock.userEmit('codesubmit2', {
 								code: code,
@@ -94,9 +94,7 @@ module.exports = class Reward extends React.Component {
 			);
 		}
 		if (code) {
-			rewardui.push(
-				h(Components.ExitBtn, { x: 10, y: 10, doNav: props.doNav }),
-			);
+			rewardui.push(<Components.ExitBtn x={10} y={10} />);
 		}
 		self.state.rewardList.forEach((reward, i) => {
 			const card = h(Components.CardImage, {

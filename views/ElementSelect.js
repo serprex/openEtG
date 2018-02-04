@@ -37,7 +37,7 @@ module.exports = class ElementSelect extends React.Component {
 				delete data.x;
 				sock.user = data;
 				store.store.dispatch(store.setOptTemp('selectedDeck', data.selectedDeck));
-				this.props.doNav(require('./MainMenu'));
+				store.store.dispatch(store.doNav(require('./MainMenu')));
 			}
 		}));
 	}
@@ -65,7 +65,7 @@ module.exports = class ElementSelect extends React.Component {
 				onClick: function() {
 					sock.userEmit('delete');
 					sock.user = undefined;
-					self.props.doNav(require('./Login'));
+					store.store.dispatch(store.doNav(require('./Login')));
 				},
 			}),
 		];

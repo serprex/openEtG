@@ -46,15 +46,15 @@ module.exports = connect(({opts}) => ({ aideck: opts.aideck, foename: opts.foena
 		}
 		function aiClick() {
 			if (!self.props.aideck) return;
-			var deck = sock.getDeck();
+			const deck = sock.getDeck();
 			if (
 				etgutil.decklength(deck) < 9 ||
 				etgutil.decklength(self.props.aideck) < 9
 			) {
-				self.props.doNav(require('./Editor'));
+				this.props.dispatch(store.doNav(require('./Editor')));
 				return;
 			}
-			var gameData = {
+			const gameData = {
 				deck: self.props.aideck,
 				urdeck: deck,
 				seed: util.randint(),
@@ -64,7 +64,7 @@ module.exports = connect(({opts}) => ({ aideck: opts.aideck, foename: opts.foena
 			};
 			options.parsepvpstats(gameData);
 			options.parseaistats(gameData);
-			self.props.doNav(require('./Match'), mkGame(gameData));
+			this.props.dispatch(store.doNav(require('./Match'), mkGame(gameData)));
 		}
 		function maybeChallenge(e) {
 			e.cancelBubble = true;
@@ -76,7 +76,7 @@ module.exports = connect(({opts}) => ({ aideck: opts.aideck, foename: opts.foena
 				else sock.emit('roomcancel', { room: sock.pvp });
 				delete sock.pvp;
 			}
-			self.props.doNav(require('./MainMenu'));
+			self.props.dispatch(store.doNav(require('./MainMenu')));
 		}
 		function cancelClick() {
 			if (sock.pvp) {

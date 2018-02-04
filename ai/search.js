@@ -1,9 +1,9 @@
 'use strict';
-var etg = require('../etg');
-var Cards = require('../Cards');
-var Skills = require('../Skills');
-var evalGame = require('./eval');
-var lethal = require('./lethal');
+const etg = require('../etg'),
+	Cards = require('../Cards'),
+	Skills = require('../Skills'),
+	evalGame = require('./eval'),
+	lethal = require('./lethal');
 function getWorstCard(game) {
 	var worstcard = 0,
 		curEval = 0x7fffffff,
@@ -22,7 +22,7 @@ function getWorstCard(game) {
 	}
 	return [worstcard, curEval];
 }
-var afilter = {
+const afilter = {
 	web: function(c, t) {
 		return t.status.get('airborne');
 	},
@@ -75,7 +75,7 @@ function AiSearch(game) {
 				: ((this.cmdct = worstcard), 'endturn');
 }
 function searchSkill(active, c, t) {
-	var func = afilter[active.name[0]];
+	const func = afilter[active.name[0]];
 	return (
 		!func ||
 		t.type == etg.Player ||
@@ -208,7 +208,7 @@ AiSearch.prototype.step = function(game, previous) {
 		}
 		return false;
 	}
-	var ret = iterLoop(game, 1, -1, this.casthash);
+	const ret = iterLoop(game, 1, -1, this.casthash);
 	if (ret) {
 		this.nth = nth;
 		this.eval = currentEval;

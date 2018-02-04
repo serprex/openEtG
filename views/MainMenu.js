@@ -165,17 +165,17 @@ module.exports = connect(({opts}) => ({
 		document.addEventListener('mousemove', this.resetTip);
 		this.props.dispatch(store.setCmds({
 			librarygive: data => {
-				this.props.doNav(require('./Library'), data);
+				this.props.dispatch(store.doNav(require('./Library'), data));
 			},
 			arenainfo: data => {
-				this.props.doNav(require('./ArenaInfo'), data);
+				this.props.dispatch(store.doNav(require('./ArenaInfo'), data));
 			},
 			codecard: data => {
-				this.props.doNav(require('./Reward'), {
+				this.props.dispatch(store.doNav(require('./Reward'), {
 					type: data.type,
 					amount: data.num,
 					code: self.props.foename,
-				});
+				}));
 			},
 			codegold: data => {
 				sock.user.gold += data.g;
@@ -248,7 +248,7 @@ module.exports = connect(({opts}) => ({
 			type: 'button',
 			value: 'Wealth T50',
 			onClick: function() {
-				self.props.doNav(require('./WealthTop'));
+				self.props.dispatch(store.doNav(require('./WealthTop')));
 			},
 			onMouseOver: mkSetTip("See who's collected the most wealth"),
 			style: {
@@ -272,22 +272,22 @@ module.exports = connect(({opts}) => ({
 		[
 			[
 				'Commoner',
-				mkAi.run(self.props.doNav, mkAi.mkAi(0)),
+				mkAi.run(mkAi.mkAi(0)),
 				mkSetTip('Commoners have no upgraded cards & mostly common cards'),
 			],
 			[
 				'Mage',
-				mkAi.run(self.props.doNav, mkAi.mkPremade(1)),
+				mkAi.run(mkAi.mkPremade(1)),
 				mkSetTip('Mages have preconstructed decks with a couple rares'),
 			],
 			[
 				'Champion',
-				mkAi.run(self.props.doNav, mkAi.mkAi(2)),
+				mkAi.run(mkAi.mkAi(2)),
 				mkSetTip('Champions have some upgraded cards'),
 			],
 			[
 				'Demigod',
-				mkAi.run(self.props.doNav, mkAi.mkPremade(3)),
+				mkAi.run(mkAi.mkPremade(3)),
 				mkSetTip('Demigods are extremely powerful. Come prepared for anything'),
 			],
 		].forEach((b, i) => {
@@ -327,7 +327,7 @@ module.exports = connect(({opts}) => ({
 		for (let i = 0; i < 2; i++) {
 			function arenaAi(e) {
 				if (etgutil.decklength(sock.getDeck()) < 31) {
-					self.props.doNav(require('./Editor'));
+					self.props.dispatch(store.doNav(require('./Editor')));
 					return;
 				}
 				const cost = userutil.arenaCost(i);
@@ -379,7 +379,7 @@ module.exports = connect(({opts}) => ({
 					type: 'button',
 					value: 'Arena' + (i + 1) + ' T20',
 					onClick: function() {
-						self.props.doNav(require('./ArenaTop'), { lv: i });
+						self.props.dispatch(store.doNav(require('./ArenaTop'), { lv: i }));
 					},
 					onMouseOver: mkSetTip(
 						'See who the top players in arena are right now',
@@ -443,7 +443,7 @@ module.exports = connect(({opts}) => ({
 				sock.user = undefined;
 				self.props.dispatch(store.setOpt('remember', false));
 			}
-			self.props.doNav(require('./Login'));
+			self.props.dispatch(store.doNav(require('./Login')));
 		}
 		mainc.push(
 			typeof kongregateAPI === 'undefined' &&
@@ -510,7 +510,7 @@ module.exports = connect(({opts}) => ({
 				type: 'button',
 				value: 'PvP',
 				onClick: function() {
-					self.props.doNav(require('./Challenge'), { pvp: true });
+					self.props.dispatch(store.doNav(require('./Challenge'), { pvp: true }));
 				},
 				style: {
 					position: 'absolute',
@@ -573,7 +573,7 @@ module.exports = connect(({opts}) => ({
 					type: 'button',
 					value: 'Quests',
 					onClick: function() {
-						self.props.doNav(require('./QuestMain'));
+						self.props.dispatch(store.doNav(require('./QuestMain')));
 					},
 					onMouseOver: mkSetTip('Go on an adventure'),
 				}),
@@ -581,7 +581,7 @@ module.exports = connect(({opts}) => ({
 					type: 'button',
 					value: 'Colosseum',
 					onClick: function() {
-						self.props.doNav(require('./Colosseum'));
+						self.props.dispatch(store.doNav(require('./Colosseum')));
 					},
 					onMouseOver: mkSetTip('Try some daily challenges in the Colosseum'),
 				}),
@@ -589,7 +589,7 @@ module.exports = connect(({opts}) => ({
 					type: 'button',
 					value: 'Endless',
 					onClick: function() {
-						self.props.doNav(require('./Match'), initEndless());
+						self.props.dispatch(store.doNav(require('./Match'), initEndless()));
 					},
 					onMouseOver: mkSetTip('See how long you last against The Invincible'),
 				});
@@ -626,7 +626,7 @@ module.exports = connect(({opts}) => ({
 					type: 'button',
 					value: 'Shop',
 					onClick: function() {
-						self.props.doNav(require('./Shop'));
+						self.props.dispatch(store.doNav(require('./Shop')));
 					},
 					onMouseOver: mkSetTip(
 						'Buy booster packs which contain cards from the elements you choose',
@@ -641,7 +641,7 @@ module.exports = connect(({opts}) => ({
 					type: 'button',
 					value: 'Bazaar',
 					onClick: function() {
-						self.props.doNav(require('./Bazaar'));
+						self.props.dispatch(store.doNav(require('./Bazaar')));
 					},
 					onMouseOver: mkSetTip('Buy singles at a 300% premium'),
 					style: {
@@ -654,7 +654,7 @@ module.exports = connect(({opts}) => ({
 					type: 'button',
 					value: 'Upgrade',
 					onClick: function() {
-						self.props.doNav(require('./Upgrade'));
+						self.props.dispatch(store.doNav(require('./Upgrade')));
 					},
 					onMouseOver: mkSetTip('Upgrade or sell cards'),
 					style: {
@@ -722,7 +722,7 @@ module.exports = connect(({opts}) => ({
 					type: 'button',
 					value: 'Custom AI',
 					onClick: function() {
-						self.props.doNav(require('./Challenge'), { pvp: false });
+						self.props.dispatch(store.doNav(require('./Challenge'), { pvp: false }));
 					},
 					onMouseOver: mkSetTip(
 						'Play versus any deck you want, with custom stats for you & the AI',
@@ -736,7 +736,7 @@ module.exports = connect(({opts}) => ({
 				type: 'button',
 				value: 'Editor',
 				onClick: function() {
-					self.props.doNav(require('./Editor'));
+					self.props.dispatch(store.doNav(require('./Editor')));
 				},
 				onMouseOver: mkSetTip('Edit & manage your decks'),
 				style: {

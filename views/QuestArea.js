@@ -1,6 +1,7 @@
 const sock = require('../sock'),
 	Quest = require('../Quest'),
 	Components = require('../Components'),
+	store = require('../store'),
 	React = require('react'),
 	h = React.createElement;
 
@@ -57,7 +58,7 @@ module.exports = class QuestArea extends React.Component {
 				type: 'button',
 				value: 'Exit',
 				onClick: function() {
-					self.props.doNav(require('./QuestMain'));
+					store.store.dispatch(store.doNav(require('./QuestMain')));
 				},
 				style: {
 					position: 'absolute',
@@ -92,8 +93,8 @@ module.exports = class QuestArea extends React.Component {
 				},
 				onClick: function() {
 					const err = Quest.mkQuestAi(quest, stage, self.props.area);
-					if (typeof err === 'string') self.setState({ err: err });
-					else self.props.doNav(require('./Match'), err);
+					if (typeof err === 'string') self.setState({ err });
+					else store.store.dispatch(store.doNav(require('./Match'), err));
 				},
 			});
 		}

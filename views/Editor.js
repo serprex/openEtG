@@ -6,8 +6,8 @@ const etg = require('../etg'),
 	tutor = require('../tutor'),
 	etgutil = require('../etgutil'),
 	options = require('../options'),
-	store = require('../store'),
 	Components = require('../Components'),
+	store = require('../store'),
 	{ connect } = require('react-redux'),
 	React = require('react'),
 	h = React.createElement;
@@ -64,7 +64,7 @@ module.exports = connect(({opts}) => ({ deck: opts.deck, deckname: opts.deckname
 	componentDidMount() {
 		this.props.dispatch(store.setCmds({
 			arenainfo: data => {
-				this.props.doNav(require('./ArenaInfo'), data);
+				this.props.dispatch(store.doNav(require('./ArenaInfo'), data));
 			},
 		}));
 	}
@@ -217,7 +217,7 @@ module.exports = connect(({opts}) => ({ deck: opts.deck, deckname: opts.deckname
 				};
 			}
 			y = 128 + y * 20 + 'px';
-			var data = artable[name];
+			const data = artable[name];
 			editorui.push(
 				h(
 					'div',
@@ -295,7 +295,7 @@ module.exports = connect(({opts}) => ({ deck: opts.deck, deckname: opts.deckname
 						}
 						sock.userEmit('setarena', data);
 						chat('Arena deck submitted', 'System');
-						self.props.doNav(require('./MainMenu'));
+						self.props.dispatch(store.doNav(require('./MainMenu')));
 					},
 					style: {
 						position: 'absolute',
@@ -341,7 +341,7 @@ module.exports = connect(({opts}) => ({ deck: opts.deck, deckname: opts.deckname
 							self.props.dispatch(store.setOpt('deck',
 								etgutil.encodedeck(self.state.deck) +
 								etgutil.toTrueMarkSuffix(self.state.mark)));
-						self.props.doNav(require('./MainMenu'));
+						self.props.dispatch(store.doNav(require('./MainMenu')));
 					},
 					style: {
 						position: 'absolute',
@@ -418,7 +418,7 @@ module.exports = connect(({opts}) => ({ deck: opts.deck, deckname: opts.deckname
 						onClick: function() {
 							if (sock.user)
 								sock.userExec('setdeck', { name: sock.user.selectedDeck });
-							self.props.doNav(require('./MainMenu'));
+							self.props.dispatch(store.doNav(require('./MainMenu')));
 						},
 						style: {
 							position: 'absolute',

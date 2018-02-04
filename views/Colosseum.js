@@ -7,7 +7,7 @@ const etg = require('../etg'),
 	Components = require('../Components'),
 	React = require('react'),
 	h = React.createElement;
-function mkDaily(doNav, type) {
+function mkDaily(type) {
 	if (type < 3) {
 		return () => {
 			const gamedata = mkAi.mkAi(type == 1 ? 0 : 2, type)();
@@ -32,7 +32,7 @@ function mkDaily(doNav, type) {
 				gamedata.game.addData(dataNext);
 				gamedata.game.dataNext = dataNext;
 			}
-			mkAi.run(doNav, gamedata);
+			mkAi.run(gamedata);
 		};
 	} else {
 		return () => {
@@ -41,7 +41,7 @@ function mkDaily(doNav, type) {
 				gamedata.game.addonreward = type == 3 ? 90 : 200;
 				sock.userExec('donedaily', { daily: type });
 			}
-			mkAi.run(doNav, gamedata);
+			mkAi.run(gamedata);
 		};
 	}
 }
@@ -57,7 +57,7 @@ module.exports = class Colosseum extends React.Component {
 			'Expert Duel: Fight ' + dgname + '. Only one attempt allowed.',
 		];
 		const children = [
-			h(Components.ExitBtn, { x: 50, y: 50, doNav: self.props.doNav }),
+			h(Components.ExitBtn, { x: 50, y: 50 }),
 		];
 		for (var i = 1; i < 5; i++) {
 			const active = !(sock.user.daily & (1 << i));
@@ -71,7 +71,7 @@ module.exports = class Colosseum extends React.Component {
 							left: '50px',
 							top: 100 + 30 * i + 'px',
 						},
-						onClick: mkDaily(this.props.doNav, i),
+						onClick: mkDaily(i),
 					}),
 				);
 			}
@@ -104,7 +104,7 @@ module.exports = class Colosseum extends React.Component {
 					onClick: function() {
 						const nymph = etg.NymphList[RngMock.upto(12) + 1];
 						sock.userExec('donedaily', { daily: 6, c: nymph });
-						self.props.doNav(require('./MainMenu'), { nymph: nymph });
+						store.store.dispatch(store.doNav(require('./MainMenu'), { nymph }));
 					},
 				}),
 				h(

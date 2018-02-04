@@ -151,7 +151,7 @@ module.exports = connect(({opts}) => ({ aideck: opts.aideck }))(class QuestMain 
 			},
 			onClick: function() {
 				if (self.state.area) {
-					self.props.doNav(require('./QuestArea'), { area: self.state.area });
+					self.props.dispatch(store.doNav(require('./QuestArea'), { area: self.state.area }));
 				}
 			},
 			style: {
@@ -180,11 +180,7 @@ module.exports = connect(({opts}) => ({ aideck: opts.aideck }))(class QuestMain 
 				height: 111,
 			}),
 			tinfo,
-			h(Components.ExitBtn, {
-				doNav: this.props.doNav,
-				x: 750,
-				y: 246,
-			}),
+			<Components.ExitBtn x={750} y={246} />,
 		];
 		for (let key in areainfo) {
 			if (!(key in Quest.areas)) continue;
