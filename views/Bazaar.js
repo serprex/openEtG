@@ -95,6 +95,6 @@ module.exports = class Bazaar extends React.Component {
 				h(Components.Card, { x: 734, y: 8, code: self.state.code }),
 			);
 		}
-		return h('div', { children: children });
+		return h(React.Fragment, null, ...children);
 	}
 };

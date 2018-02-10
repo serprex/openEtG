@@ -236,6 +236,6 @@ module.exports = connect(({opts}) => ({ aideck: opts.aideck }))(class QuestMain 
 				children.push(icon);
 			}
 		}
-		return h('div', { children: children });
+		return h(React.Fragment, null, ...children);
 	}
 });

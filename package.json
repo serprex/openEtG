@@ -30,6 +30,7 @@
   },
   "scripts": {
     "test": "./scripts/tests.js",
+    "dev": "webpack --mode=development --watch",
     "build-bundle": "webpack -p",
     "build-tournify": "mkcjs tournament/commoner.js tournament/dodrio.js",
     "build-atlas-png": "optipng -o2 -strip all assets/atlas.png",

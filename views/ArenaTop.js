@@ -21,8 +21,7 @@ module.exports = class ArenaTop extends React.Component {
 	}
 
 	render() {
-		const self = this,
-			lv = this.props.lv;
+		const lv = this.props.lv;
 		const info = this.state.top || [];
 		const ol = (
 			<ol
@@ -34,7 +33,7 @@ module.exports = class ArenaTop extends React.Component {
 				}}
 				children={info.map((data, i) => {
 					const lic = [<span className="atoptext">{data[0]}</span>];
-					for (var i = 1; i <= 4; i++) {
+					for (let i = 1; i <= 4; i++) {
 						if (i == 3) {
 							lic.push(<span className="atopdash">-</span>);
 						}
@@ -45,13 +44,13 @@ module.exports = class ArenaTop extends React.Component {
 						<span
 							className="atoptext"
 							onMouseEnter={e =>
-								self.setState({
+								this.setState({
 									card: card,
 									cardx: e.pageX + 4,
 									cardy: e.pageY + 4,
 								})
 							}
-							onMouseLeave={() => self.setState({ card: false })}>
+							onMouseLeave={() => this.setState({ card: false })}>
 							{card.name}
 						</span>
 					);
@@ -61,17 +60,17 @@ module.exports = class ArenaTop extends React.Component {
 			/>
 		);
 		return (
-			<div>
+			<React.Fragment>
 				{ol}
 				<Components.ExitBtn x={8} y={300} />
-				{self.state.card && (
+				{this.state.card && (
 					<Components.Card
-						card={self.state.card}
-						x={self.state.cardx}
-						y={self.state.cardy}
+						card={this.state.card}
+						x={this.state.cardx}
+						y={this.state.cardy}
 					/>
 				)}
-			</div>
+			</React.Fragment>
 		);
 	}
 };

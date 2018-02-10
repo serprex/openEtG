@@ -328,6 +328,6 @@ module.exports = class Result extends React.Component {
 				'Stats',
 			);
 		}
-		return h('div', { children: children });
+		return h(React.Fragment, null, ...children);
 	}
 };

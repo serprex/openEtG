@@ -120,6 +120,6 @@ module.exports = class QuestArea extends React.Component {
 				}
 			}
 		});
-		return h('div', { children: children });
+		return h(React.Fragment, null, ...children);
 	}
 };

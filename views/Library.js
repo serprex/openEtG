@@ -49,7 +49,7 @@ module.exports = class Library extends React.Component {
 		});
 		const wealth = this.props.gold + userutil.calcWealth(cardpool);
 		return h(
-			'div',
+			React.Fragment,
 			{},
 			h(
 				'span',

@@ -113,6 +113,6 @@ module.exports = class Reward extends React.Component {
 				h(Components.Card, { x: 233, y: 10, code: self.state.chosenReward }),
 		);
 
-		return h('div', { children: rewardui });
+		return h(React.Fragment, null, ...rewardui);
 	}
 };

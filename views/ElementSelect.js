@@ -92,6 +92,6 @@ module.exports = class ElementSelect extends React.Component {
 				}),
 			);
 		}
-		return h('div', { children: mainc });
+		return h(React.Fragment, null, ...mainc);
 	}
 };

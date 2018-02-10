@@ -270,7 +270,7 @@ module.exports = connect(({opts}) => ({ aideck: opts.aideck, foename: opts.foena
 				aideckpower,
 			);
 		}
-		return h('div', { children: children });
+		return h(React.Fragment, null, ...children);
 	}
 });
 module.exports.sendChallenge = sendChallenge;

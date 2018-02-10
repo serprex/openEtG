@@ -572,6 +572,6 @@ module.exports = connect(({opts}) => ({ deck: opts.deck, deckname: opts.deckname
 		}
 		if (!this.props.acard && sock.user)
 			editorui.push(h(tutor.Tutor, { data: tutor.Editor, x: 4, y: 220 }));
-		return h('div', { children: editorui });
+		return h(React.Fragment, null, ...editorui);
 	}
 });

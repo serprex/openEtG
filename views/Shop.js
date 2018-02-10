@@ -303,6 +303,6 @@ module.exports = class Shop extends React.Component {
 			data: tutor.Shop,
 		});
 		children.push(packmulti, tut);
-		return h('div', { children: children });
+		return h(React.Fragment, null, ...children);
 	}
 };

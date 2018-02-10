@@ -47,7 +47,6 @@ function mkDaily(type) {
 }
 module.exports = class Colosseum extends React.Component {
 	render() {
-		const self = this;
 		const magename = Decks.mage[sock.user.dailymage][0],
 			dgname = Decks.demigod[sock.user.dailydg][0];
 		const events = [
@@ -76,23 +75,18 @@ module.exports = class Colosseum extends React.Component {
 				);
 			}
 			children.push(
-				h(
-					'span',
-					{
-						style: {
-							position: 'absolute',
-							left: '130px',
-							top: 100 + 30 * i + 'px',
-						},
-					},
-					active
-						? events[i - 1]
-						: i > 2
-							? sock.user.daily & (i == 3 ? 1 : 32)
-								? 'You defeated this already today.'
-								: 'You failed this today. Better luck tomorrow!'
-							: 'Completed.',
-				),
+				<span style={{
+					position: 'absolute',
+					left: '130px',
+					top: 100 + 30 * i + 'px',
+				}}>
+				{active ? events[i - 1]
+					: i > 2 ?
+						sock.user.daily & (i == 3 ? 1 : 32)
+						? 'You defeated this already today.'
+						: 'You failed this today. Better luck tomorrow!'
+					: 'Completed.'}
+				</span>
 			);
 		}
 		if (sock.user.daily == 191) {
@@ -107,13 +101,11 @@ module.exports = class Colosseum extends React.Component {
 						store.store.dispatch(store.doNav(require('./MainMenu'), { nymph }));
 					},
 				}),
-				h(
-					'span',
-					{ style: { position: 'absolute', left: '130px', top: '280px' } },
-					'You successfully completed all tasks.',
-				),
+				<span style={{ position: 'absolute', left: '130px', top: '280px' }}>
+					You successfully completed all tasks.
+				</span>,
 			);
 		}
-		return h('div', { children: children });
+		return h(React.Fragment, null, ...children);
 	}
 };

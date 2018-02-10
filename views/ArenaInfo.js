@@ -149,5 +149,5 @@ module.exports = function(props) {
 			);
 		}
 	}
-	return h('div', { children: children });
+	return h(React.Fragment, null, ...children);
 };
