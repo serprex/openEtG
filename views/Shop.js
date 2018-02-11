@@ -6,6 +6,7 @@ const svg = require('../svg'),
 	options = require('../options'),
 	Components = require('../Components'),
 	store = require('../store'),
+	{ connect } = require('react-redux'),
 	React = require('react'),
 	h = React.createElement;
 
@@ -27,7 +28,7 @@ const packdata = [
 	{ cost: 250, type: 'Nymph', info: '1 Nymph', color: '#69b' },
 ];
 
-module.exports = class Shop extends React.Component {
+module.exports = connect(state => ({ bulk: state.opts.bulk || '1' }))(class Shop extends React.Component {
 	constructor(props) {
 		super(props);
 		this.state = {
@@ -41,7 +42,7 @@ module.exports = class Shop extends React.Component {
 	}
 
 	componentDidMount() {
-		store.store.dispatch(store.setCmds({
+		this.props.dispatch(store.setCmds({
 			boostergive: data => {
 				if (data.accountbound) {
 					sock.user.accountbound = etgutil.mergedecks(
@@ -54,7 +55,7 @@ module.exports = class Shop extends React.Component {
 				} else {
 					sock.user.pool = etgutil.mergedecks(sock.user.pool, data.cards);
 					const bdata = {};
-					options.parseInput(bdata, 'bulk', options.bulk, 99);
+					options.parseInput(bdata, 'bulk', this.props.bulk, 99);
 					sock.user.gold -= packdata[data.packtype].cost * (bdata.bulk || 1);
 				}
 				if (etgutil.decklength(data.cards) < 11) {
@@ -73,6 +74,7 @@ module.exports = class Shop extends React.Component {
 	}
 
 	render() {
+		console.log(this.props);
 		const self = this;
 		const children = [
 			<Components.Box
@@ -164,7 +166,7 @@ module.exports = class Shop extends React.Component {
 				pack: self.state.packrarity,
 				element: self.state.packele,
 			};
-			options.parseInput(boostdata, 'bulk', options.bulk, 99);
+			options.parseInput(boostdata, 'bulk', self.props.bulk, 99);
 			if (
 				sock.user.gold >= pack.cost * (boostdata.bulk || 1) ||
 				(sock.user.freepacks && sock.user.freepacks[self.state.packrarity] > 0)
@@ -189,19 +191,18 @@ module.exports = class Shop extends React.Component {
 			});
 		children.push(bget, bbuy);
 		packdata.forEach((pack, n) => {
-			const g = h(
-				'div',
-				{
-					className: 'imgb',
-					onClick: function() {
+			children.push(
+				<div
+					className='imgb'
+					onClick={() => {
 						const update = {
 							packrarity: n,
 							info2: pack.type + ' Pack: ' + pack.info,
 						};
 						if (~self.state.packele) update.showbuy = true;
 						self.setState(update);
-					},
-					style: {
+					}}
+					style={{
 						color: '#000',
 						position: 'absolute',
 						left: 50 + 125 * n + 'px',
@@ -211,48 +212,41 @@ module.exports = class Shop extends React.Component {
 						width: '100px',
 						height: '150px',
 						backgroundColor: pack.color,
-					},
-				},
-				h(
-					'span',
-					{
-						style: {
-							fontSize: '18px',
-							position: 'absolute',
-							top: '50%',
-							left: '50%',
-							transform: 'translate(-50%,-50%)',
-						},
-					},
-					pack.type,
-				),
-				h(Components.Text, {
-					text: pack.cost + '$',
-					style: {
+					}}>
+					<span style={{
+						fontSize: '18px',
 						position: 'absolute',
-						left: '7px',
-						top: '122px',
-					},
-				}),
+						top: '50%',
+						left: '50%',
+						transform: 'translate(-50%,-50%)',
+					}}>{pack.type}</span>
+					<Components.Text
+						text={pack.cost + '$'}
+						style={{
+							position: 'absolute',
+							left: '7px',
+							top: '122px',
+						}}
+					/>
+				</div>
 			);
-			children.push(g);
 		});
 
 		for (let i = 0; i < 14; i++) {
 			children.push(
-				h(Components.IconBtn, {
-					e: 'e' + i,
-					x: 75 + (i >> 1) * 64,
-					y: 117 + (i & 1) * 75,
-					click: function() {
+				<Components.IconBtn
+					e={'e' + i}
+					x={75 + (i >> 1) * 64}
+					y={117 + (i & 1) * 75}
+					click={() => {
 						const update = {
 							packele: i,
 							info1: 'Selected Element: ' + (i == 13 ? 'Random' : '1:' + i),
 						};
 						if (~self.state.packrarity) update.showbuy = true;
 						self.setState(update);
-					},
-				}),
+					}}
+				/>
 			);
 		}
 
@@ -262,33 +256,31 @@ module.exports = class Shop extends React.Component {
 				const x = i % 5,
 					y = Math.floor(i / 5);
 				cardchildren.push(
-					h(Components.Card, {
-						x: 7 + x * 140,
-						y: y ? 298 : 14,
-						code: code,
-					}),
+					<Components.Card
+						x={7 + x * 140}
+						y={y ? 298 : 14}
+						code={code}
+					/>
 				);
 			});
 			children.push(
-				h(Components.Box, {
-					x: 40,
-					y: 16,
-					width: 710,
-					height: 568,
-					children: cardchildren,
-				}),
+				<Components.Box
+					x={40}
+					y={16}
+					width={710}
+					height={568}
+					children={cardchildren}
+				/>
 			);
 		}
 
 		const packmulti = h('input', {
+			type: 'number',
 			placeholder: 'Bulk',
-			ref: function(ctrl) {
-				ctrl && options.register('bulk', ctrl, true);
-			},
-			onKeyPress: function(e) {
-				if (e.keyCode == 13) {
-					buyPack();
-				}
+			value: this.props.bulk,
+			onChange: e => this.props.dispatch(store.setOptTemp('bulk', e.target.value)),
+			onKeyPress: e => {
+				if (e.which == 13) buyPack();
 			},
 			style: {
 				position: 'absolute',
@@ -305,4 +297,4 @@ module.exports = class Shop extends React.Component {
 		children.push(packmulti, tut);
 		return h(React.Fragment, null, ...children);
 	}
-};
+});

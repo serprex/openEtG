@@ -519,7 +519,7 @@ module.exports = connect(({opts}) => ({ deck: opts.deck, deckname: opts.deckname
 					value: self.props.deckname,
 					onChange: e => self.props.dispatch(store.setOptTemp('deckname', e.target.value)),
 					onKeyPress: e => {
-						if (e.keyCode == 13) {
+						if (e.which == 13) {
 							loadDeck(e.target.value);
 						}
 					},
@@ -562,7 +562,7 @@ module.exports = connect(({opts}) => ({ deck: opts.deck, deckname: opts.deckname
 					e.target.setSelectionRange(0, 999);
 				},
 				onKeyPress: (e) => {
-					if (e.keyCode == 13) {
+					if (e.which == 13) {
 						e.target.blur();
 						importDeck();
 					}

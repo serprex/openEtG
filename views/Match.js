@@ -50,7 +50,7 @@ const svgbg = (() => {
 			12,
 			301,
 		]);
-	let redren = [];
+	const redren = [];
 	for (let j = 0; j < 3; j++) {
 		let path = '';
 		for (let i = 0; i < redhor.length; i += 3) {
@@ -76,49 +76,43 @@ const svgbg = (() => {
 				redver[i + 2];
 		}
 		redren.push(
-			h('path', {
-				d: path,
-				stroke: ['#111', '#6a2e0d', '#8a3e1d'][j],
-				strokeWidth: '3',
-			}),
+			<path
+				key={i}
+				d={path}
+				stroke={['#111', '#6a2e0d', '#8a3e1d'][j]}
+				strokeWidth='3'
+			/>
 		);
 	}
-	return h('svg', {
-		width: '900',
-		height: '600',
-		style: {
+	return <svg
+		width='900'
+		height='600'
+		style={{
 			position: 'absolute',
 			left: '0',
 			top: '0',
 			zIndex: '-8',
 			pointerEvents: 'none',
-		},
-		children: redren,
-	});
+		}}>{redren}</svg>;
 })();
 
-const floodsvg = h(
-	'svg',
-	{
-		width: '900',
-		height: '600',
-		style: {
-			position: 'absolute',
-			left: '0',
-			top: '0',
-			zIndex: '1',
-			pointerEvents: 'none',
-		},
-	},
-	h('path', {
-		d:
-			'M149 146l644 0l0 64l-400 0l0 64l-244 0zM107 454l644 0l0-128l-244 0l0 64l-400 0z',
-		fill: '#0486',
-	}),
-);
+const floodsvg = <svg
+	width='900'
+	height='600'
+	style={{
+		position: 'absolute',
+		left: '0',
+		top: '0',
+		zIndex: '1',
+		pointerEvents: 'none',
+	}}>
+		<path
+			d='M149 146l644 0l0 64l-400 0l0 64l-244 0zM107 454l644 0l0-128l-244 0l0 64l-400 0z'
+			fill='#0486' />
+	</svg>;
 
-const cloaksvg = h('div', {
-	style: {
+const cloaksvg = <div
+	style={{
 		position: 'absolute',
 		left: '130px',
 		top: '20px',
@@ -127,8 +121,8 @@ const cloaksvg = h('div', {
 		backgroundColor: '#000',
 		zIndex: '1',
 		pointerEvents: 'none',
-	},
-});
+	}}
+/>;
 
 const activeInfo = {
 	firebolt: (t, game) =>
@@ -260,48 +254,44 @@ function ThingInst(props) {
 	}
 	if (topText) {
 		children.push(
-			h(
-				Components.Text,
-				{
-					text: topText,
-					icoprefix: 'te',
-					style: {
-						position: 'absolute',
-						left: '0',
-						top: '-8px',
-						width: 72 * scale + 'px',
-						height: '11px',
-					},
-				},
-				topText,
-			),
+			<Components.Text
+				text={topText}
+				icoprefix='te'
+				style={{
+					position: 'absolute',
+					left: '0',
+					top: '-8px',
+					width: 72 * scale + 'px',
+					height: '11px',
+				}}
+			/>
 		);
 	}
 	if (statText) {
 		children.push(
-			h(Components.Text, {
-				text: statText,
-				icoprefix: 'te',
-				style: {
+			<Components.Text
+				text={statText}
+				icoprefix='te'
+				style={{
 					position: 'absolute',
 					top: isSpell ? '0' : '10px',
 					right: '0',
 					height: '11px',
 					backgroundColor: ui.maybeLightenStr(obj.card),
-				},
-			}),
+				}}
+			/>
 		);
 	}
 	if (obj.hasactive('prespell', 'protectonce')) {
 		children.push(
-			h('div', {
-				className: 'ico protection',
-				style: {
+			<div
+				className='ico protection'
+				style={{
 					position: 'absolute',
 					left: '0',
 					top: '0',
-				},
-			}),
+				}}
+			/>
 		);
 	}
 	const pos = ui.tgtToPos(obj);

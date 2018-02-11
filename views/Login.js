@@ -68,9 +68,7 @@ if (typeof kongregateAPI === 'undefined') {
 		render() {
 			const self = this;
 			function maybeLogin(e) {
-				e.cancelBubble = true;
-				if (e.keyCode == 13) {
-					e.target.blur();
+				if (e.which == 13) {
 					loginClick();
 				}
 			}

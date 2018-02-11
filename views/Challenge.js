@@ -42,7 +42,7 @@ module.exports = connect(({opts}) => ({ aideck: opts.aideck, foename: opts.foena
 			self.setState({ challenge: foe });
 		}
 		function maybeCustomAi(e) {
-			if (e.keyCode == 13) aiClick.call(this);
+			if (e.which == 13) aiClick.call(this);
 		}
 		function aiClick() {
 			if (!self.props.aideck) return;
@@ -68,7 +68,7 @@ module.exports = connect(({opts}) => ({ aideck: opts.aideck, foename: opts.foena
 		}
 		function maybeChallenge(e) {
 			e.cancelBubble = true;
-			if (e.keyCode == 13) makeChallenge(self.props.foename);
+			if (e.which == 13) makeChallenge(self.props.foename);
 		}
 		function exitClick() {
 			if (sock.pvp) {

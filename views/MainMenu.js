@@ -421,7 +421,7 @@ module.exports = connect(({opts}) => ({
 					h('input', {
 						placeholder: 'Chat',
 						onKeyDown: function(e) {
-							if (e.keyCode == 13) {
+							if (e.which == 13) {
 								if (!e.target.value.match(/^\s*$/))
 									sock.userEmit('chat', { msg: e.target.value });
 								e.target.value = '';
@@ -787,7 +787,7 @@ module.exports = connect(({opts}) => ({
 				changePass = h('input', {
 					placeholder: 'New Password',
 					onKeyPress: function(e) {
-						if (e.keyCode == 13) changeFunc();
+						if (e.which == 13) changeFunc();
 					},
 					style: {
 						position: 'absolute',

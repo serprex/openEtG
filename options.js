@@ -26,9 +26,5 @@ exports.register = function(opt, ele, nopersist) {
 		ename = ele.type == 'checkbox' ? 'change' : 'input';
 	if (opts[opt]) ele[field] = opts[opt];
 	const method = nopersist ? store.setOptTemp : store.setOpt;
-	ele.addEventListener(ename, () => {
-		console.log(store, store.store);
-		store.store.dispatch(method(opt, ele[field]));
-		console.log(opt, ele[field]);
-	});
+	ele.addEventListener(ename, () => store.store.dispatch(method(opt, ele[field])));
 };

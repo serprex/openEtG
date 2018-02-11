@@ -112,21 +112,21 @@ exports.Text = function(props) {
 			elec.push(text.slice(lastindex, reres.index));
 		}
 		if (piece == '\n') {
-			elec.push(h('br'));
+			elec.push(<br />);
 		} else if (piece == '$') {
-			elec.push(h('span', { className: 'ico gold' }));
+			elec.push(<span className='ico gold' />);
 		} else if (/^\d\d?:\d\d?$/.test(piece)) {
 			const parse = piece.split(':');
 			const num = parseInt(parse[0]);
 			if (num == 0) {
 				elec.push('0');
 			} else if (num < 4) {
-				const icon = h('span', { className: icoprefix + parse[1] });
+				const icon = <span className={icoprefix + parse[1]} />;
 				for (let j = 0; j < num; j++) {
 					elec.push(icon);
 				}
 			} else {
-				elec.push(parse[0], h('span', { className: icoprefix + parse[1] }));
+				elec.push(parse[0], <span className={icoprefix + parse[1]} />);
 			}
 		}
 		lastindex = reres.index + piece.length;
@@ -134,11 +134,9 @@ exports.Text = function(props) {
 	if (lastindex != text.length) {
 		elec.push(text.slice(lastindex));
 	}
-	return h('div', {
-		className: props.className,
-		style: props.style,
-		children: elec,
-	});
+	return <div
+		className={props.className}
+		style={props.style}>{elec}</div>;
 };
 
 function IconBtn(props) {
@@ -234,9 +232,7 @@ function DeckDisplay(props) {
 			}),
 		);
 	}
-	return h('div', {
-		children: children,
-	});
+	return children;
 }
 exports.DeckDisplay = DeckDisplay;
 
@@ -415,7 +411,7 @@ class CardSelector extends React.Component {
 				}),
 			);
 		}
-		return h('div', {}, children);
+		return children;
 	}
 }
 exports.CardSelector = CardSelector;
