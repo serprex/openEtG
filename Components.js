@@ -79,25 +79,6 @@ function CardImage(props) {
 }
 exports.CardImage = CardImage;
 
-exports.Input = function(props) {
-	return h('input', {
-		className: props.num ? 'numput' : undefined,
-		ref: props.opt
-			? function(ctrl) {
-					ctrl && options.register(props.opt, ctrl, props.nopersist);
-				}
-			: undefined,
-		placeholder: props.placeholder,
-		onKeyPress: props.onKeyPress,
-		onClick: props.onClick,
-		style: {
-			position: 'absolute',
-			left: props.x + 'px',
-			top: props.y + 'px',
-		},
-	});
-};
-
 exports.Text = function(props) {
 	if (!props.text) return null;
 	const text = props.text.toString().replace(/\|/g, ' / ');

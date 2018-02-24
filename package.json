@@ -10,23 +10,23 @@
     "bufferutil": "^3.0.3",
     "httpolyglot": "^0.1.2",
     "react": "^16.2.0",
-    "react-redux": "^5.0.6",
+    "react-redux": "^5.0.7",
     "redis": "^2.8.0",
     "redux": "^3.7.2",
-    "ws": "^4.0.0"
+    "ws": "^4.1.0"
   },
   "devDependencies": {
-    "@babel/core": "^7.0.0-beta.39",
-    "@babel/polyfill": "^7.0.0-beta.39",
-    "@babel/preset-env": "^7.0.0-beta.39",
-    "@babel/preset-react": "^7.0.0-beta.39",
+    "@babel/core": "^7.0.0-beta.40",
+    "@babel/polyfill": "^7.0.0-beta.40",
+    "@babel/preset-env": "^7.0.0-beta.40",
+    "@babel/preset-react": "^7.0.0-beta.40",
     "babel-loader": "^8.0.0-beta.0",
     "mkcjs": "^0.2.1",
     "optipng-bin": "^4.0",
     "prettier": "^1.10.2",
     "react-dom": "^16.2.0",
-    "webpack": "^4.0.0-beta.1",
-    "webpack-cli": "^2.0.4"
+    "webpack": "^4.0.0-beta.3",
+    "webpack-cli": "^2.0.8"
   },
   "scripts": {
     "test": "./scripts/tests.js",

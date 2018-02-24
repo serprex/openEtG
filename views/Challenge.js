@@ -28,7 +28,19 @@ function sendChallenge(foe) {
 	sock.pvp = foe;
 }
 
-module.exports = connect(({opts}) => ({ aideck: opts.aideck, foename: opts.foename }))(class Challenge extends React.Component {
+module.exports = connect(({opts}) => ({
+	aideck: opts.aideck,
+	foename: opts.foename,
+	pvphp: opts.pvphp,
+	pvpmark: opts.pvpmark,
+	pvpdraw: opts.pvpdraw,
+	pvpdeck: opts.pvpdeck,
+	aideck: opts.aideck,
+	aihp: opts.aihp,
+	aimark: opts.aimark,
+	aidraw: opts.aidraw,
+	aideckpower: opts.aideckpower,
+}))(class Challenge extends React.Component {
 	constructor(props) {
 		super(props);
 		this.state = {};
@@ -101,52 +113,72 @@ module.exports = connect(({opts}) => ({ aideck: opts.aideck, foename: opts.foena
 		}
 		const deck = etgutil.decodedeck(sock.getDeck());
 		const children = [
-				h(Components.DeckDisplay, { deck: deck, renderMark: true }),
+				<Components.DeckDisplay deck={deck} renderMark />,
 			],
 			foename =
 				!self.state.challenge &&
-				h(Components.Input, {
-					placeholder: 'Challenge',
-					opt: 'foename',
-					onKeyPress: maybeChallenge,
-					x: 190,
-					y: 375,
-				}),
+				<input
+					placeholder='Challenge'
+					value={this.props.foename}
+					onChange={e => this.props.dispatch(store.setOptTemp('foename', e.target.value))}
+					onKeyPress={maybeChallenge}
+					style={{
+						position: 'absolute',
+						left: '190px',
+						top: '375px',
+					}}
+				/>,
 			pvphp =
 				!self.state.challenge &&
-				h(Components.Input, {
+				h('input', {
 					placeholder: 'HP',
-					opt: 'pvphp',
-					num: true,
-					x: 190,
-					y: 425,
+					value: this.props.pvphp,
+					onChange: e => this.props.dispatch(store.setOptTemp('pvphp', e.target.value)),
+					className: 'numput',
+					style: {
+						position: 'absolute',
+						left: '190px',
+						top: '425px',
+					}
 				}),
 			pvpmark =
 				!self.state.challenge &&
-				h(Components.Input, {
+				h('input', {
 					placeholder: 'Mark',
-					opt: 'pvpmark',
-					num: true,
-					x: 190,
-					y: 450,
+					value: this.props.pvpmark,
+					onChange: e => this.props.dispatch(store.setOptTemp('pvpmark', e.target.value)),
+					className: 'numput',
+					style: {
+						position: 'absolute',
+						left: '190px',
+						top: '450px',
+					}
 				}),
 			pvpdraw =
 				!self.state.challenge &&
-				h(Components.Input, {
+				h('input', {
 					placeholder: 'Draw',
-					opt: 'pvpdraw',
-					num: true,
-					x: 190,
-					y: 475,
+					value: this.props.pvpdraw,
+					onChange: e => this.props.dispatch(store.setOptTemp('pvpdraw', e.target.value)),
+					className: 'numput',
+					style: {
+						position: 'absolute',
+						left: '190px',
+						top: '475px',
+					}
 				}),
 			pvpdeck =
 				!self.state.challenge &&
-				h(Components.Input, {
+				h('input', {
 					placeholder: 'Deck',
-					opt: 'pvpdeck',
-					num: true,
-					x: 190,
-					y: 500,
+					value: this.props.pvpdeck,
+					onChange: e => this.props.dispatch(store.setOptTemp('pvpdeck', e.target.value)),
+					className: 'numput',
+					style: {
+						position: 'absolute',
+						left: '190px',
+						top: '500px',
+					}
 				}),
 			pvpButton =
 				!self.state.challenge &&
@@ -189,53 +221,71 @@ module.exports = connect(({opts}) => ({ aideck: opts.aideck, foename: opts.foena
 						top: '400px',
 					},
 				}),
-			aideck = h(Components.Input, {
+			aideck = h('input', {
 				placeholder: 'AI Deck',
-				opt: 'aideck',
+				value: this.props.aideck,
+				onChange: e => this.props.dispatch(store.setOpt('aideck', e.target.value)),
 				onKeyPress: maybeCustomAi,
 				onClick: function(e) {
 					e.target.setSelectionRange(0, 999);
 				},
-				x: 440,
-				y: 375,
+				style: {
+					position: 'absolute',
+					left: '440px',
+					top: '375px',
+				}
 			}),
-			aihp = h(Components.Input, {
+			aihp = h('input', {
 				placeholder: 'HP',
-				opt: 'aihp',
-				num: true,
-				x: 440,
-				y: 425,
+				value: this.props.aihp,
+				onChange: e => this.props.dispatch(store.setOpt('aihp', e.target.value)),
+				className: 'numput',
+				style: {
+					position: 'absolute',
+					left: '440px',
+					top: '425px',
+				}
 			}),
-			aimark = h(Components.Input, {
+			aimark = h('input', {
 				placeholder: 'Mark',
-				opt: 'aimark',
-				num: true,
-				x: 440,
-				y: 450,
+				value: this.props.aimark,
+				onChange: e => this.props.dispatch(store.setOpt('aimark', e.target.value)),
+				className: 'numput',
+				style: {
+					position: 'absolute',
+					left: '440px',
+					top: '450px',
+				}
 			}),
-			aidraw = h(Components.Input, {
+			aidraw = h('input', {
 				placeholder: 'Draw',
-				opt: 'aidraw',
-				num: true,
-				x: 440,
-				y: 475,
+				value: this.props.aidraw,
+				onChange: e => this.props.dispatch(store.setOpt('aidraw', e.target.value)),
+				className: 'numput',
+				style: {
+					position: 'absolute',
+					left: '440px',
+					top: '475px',
+				}
 			}),
-			aideckpower = h(Components.Input, {
+			aideckpower = h('input', {
 				placeholder: 'Deck',
-				opt: 'aideckpower',
-				num: true,
-				x: 440,
-				y: 500,
+				value: this.props.aideckpower,
+				onChange: e => this.props.dispatch(store.setOptTemp('aideckpower', e.target.value)),
+				className: 'numput',
+				style: {
+					position: 'absolute',
+					left: '440px',
+					top: '500px',
+				}
 			}),
 			challengeLabel =
 				self.state.challenge &&
-				h(
-					'div',
-					{ style: { position: 'absolute', left: '190px', top: '375px' } },
-					'You have challenged ' + self.state.challenge,
-				);
+				<div style={{ position: 'absolute', left: '190px', top: '375px' }}>
+					You have challenged {self.state.challenge}
+				</div>;
 		children.push(
-			h(Components.ExitBtn, { x: 190, y: 300, onClick: exitClick }),
+			<Components.ExitBtn x={190} y={300} onClick={exitClick} />,
 			labelText(190, 400, 'Own stats:'),
 			pvphp,
 			pvpmark,
