@@ -2,6 +2,7 @@
 const sock = require('../sock'),
 	Quest = require('../Quest'),
 	Components = require('../Components'),
+	store = require('../store'),
 	{ connect } = require('react-redux'),
 	React = require('react'),
 	h = React.createElement;
