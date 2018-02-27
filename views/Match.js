@@ -77,7 +77,7 @@ const svgbg = (() => {
 		}
 		redren.push(
 			<path
-				key={i}
+				key={j}
 				d={path}
 				stroke={['#111', '#6a2e0d', '#8a3e1d'][j]}
 				strokeWidth='3'
