@@ -163,7 +163,7 @@ module.exports = class Result extends React.Component {
 				['Waiter', game.player1.deck.length == 0 ? 0.3 : 0],
 				['Weapon Master', game.bonusstats.cardsplayed[1] >= 3 ? 0.1 : 0],
 			].reduce((bsum, data) => {
-				var b = data[1];
+				const b = data[1];
 				if (b > 0) {
 					lefttext.push(Math.round(b * 100) + '% ' + data[0]);
 					return bsum + b;
@@ -224,7 +224,7 @@ module.exports = class Result extends React.Component {
 						var goldwon;
 						if (game.level !== undefined) {
 							if (game.daily == undefined) {
-								var streak = (sock.user.streakback || 0) + 1;
+								const streak = (sock.user.streakback || 0) + 1;
 								sock.user.streakback = 0;
 								streakrate = Math.min(streak200[game.level] * streak / 200, 1);
 								sock.userExec('setstreak', { l: game.level, n: streak });
@@ -232,7 +232,7 @@ module.exports = class Result extends React.Component {
 									streak + ' win streak',
 									(streakrate * 100).toFixed(1) + '% streak bonus',
 								);
-							} else var streak = 0;
+							}
 							goldwon = Math.floor(
 								userutil.pveCostReward[game.level * 2 + 1] *
 									(1 + streakrate) *

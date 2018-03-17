@@ -521,7 +521,7 @@ const Skills = (module.exports = {
 	},
 	draft: (c, t) => {
 		Effect.mkText('Draft', t);
-		var isborne = !t.status.get('airborne');
+		const isborne = !t.status.get('airborne');
 		t.status.set('airborne', isborne);
 		if (isborne && t.active.cast == Skills.burrow) delete t.active.cast;
 	},
@@ -529,8 +529,8 @@ const Skills = (module.exports = {
 		if (c.owner != t.owner) c.owner.addCard(t.card);
 	},
 	drawequip: (c, t) => {
-		for (var i = c.owner.deck.length - 1; i > -1; i--) {
-			var card = c.owner.deck[i];
+		for (let i = c.owner.deck.length - 1; i > -1; i--) {
+			const card = c.owner.deck[i];
 			if (card.type == etg.Weapon || card.type == etg.Shield) {
 				if (~c.owner.addCard(card)) {
 					c.owner.deck.splice(i, 1);
@@ -541,7 +541,7 @@ const Skills = (module.exports = {
 		}
 	},
 	drawpillar: (c, t) => {
-		var deck = c.owner.deck;
+		const deck = c.owner.deck;
 		if (deck.length && deck[deck.length - 1].type == etg.Pillar)
 			Skills.hasten.func(c, t);
 	},
@@ -603,7 +603,7 @@ const Skills = (module.exports = {
 		}
 	},
 	empathy: (c, t) => {
-		var healsum = c.owner.countcreatures();
+		const healsum = c.owner.countcreatures();
 		Effect.mkText('+' + healsum, c);
 		c.owner.dmg(-healsum);
 		if (!c.owner.spend(etg.Life, Math.floor(healsum / 8))) {
@@ -617,9 +617,9 @@ const Skills = (module.exports = {
 	},
 	endow: (c, t) => {
 		Effect.mkText('Endow', t);
-		for (var i = 0; i < t.status.keys.length; i++) {
-			var key = t.status.keys[i],
-				val = t.status.vals[i];
+		for (let i = 0; i < t.status.keys.length; i++) {
+			const key = t.status.keys[i],
+			let val = t.status.vals[i];
 			if (key == 'adrenaline' && val > 1) val = 1;
 			c.status.incr(key, val);
 		}
@@ -638,7 +638,7 @@ const Skills = (module.exports = {
 		t.addactive('shield', Skills.thornweak);
 	},
 	epidemic: (c, t) => {
-		var poison = t.status.get('poison');
+		const poison = t.status.get('poison');
 		if (poison) c.owner.foe.addpoison(poison);
 	},
 	epoch: (c, t) => {
@@ -660,17 +660,17 @@ const Skills = (module.exports = {
 		if (t.owner != c.owner && t.owner.sanctuary) {
 			return;
 		}
-		var cards = [];
+		const cards = [];
 		t.owner.deck.forEach((card, i) => {
-			var cost = card.cost;
+			let cost = card.cost;
 			if (!card.element || card.element == c.castele) cost += c.cast;
 			if (t.owner.canspend(card.costele, cost)) {
 				cards.push(i);
 			}
 		});
 		if (cards.length) {
-			var pick = t.choose(cards);
-			var card = (t.owner.hand[t.getIndex()] = new Thing(t.owner.deck[pick]));
+			const pick = t.choose(cards);
+			const card = (t.owner.hand[t.getIndex()] = new Thing(t.owner.deck[pick]));
 			card.type = etg.Spell;
 			card.owner = t.owner;
 			t.owner.deck[pick] = t.card;
@@ -733,17 +733,17 @@ const Skills = (module.exports = {
 					tgts.push(x);
 				}
 			}
-			var tgts = [];
-			for (var i = 0; i < 2; i++) {
-				var pl = i == 0 ? c.owner : c.owner.foe;
+			const tgts = [];
+			for (let i = 0; i < 2; i++) {
+				const pl = i == 0 ? c.owner : c.owner.foe;
 				tgttest(pl);
 				pl.forEach(tgttest, true);
 			}
 			return tgts.length == 0 ? undefined : c.choose(tgts);
 		}
-		var tgting, tgt;
+		let tgting, tgt;
 		if (t.type == etg.Spell) {
-			var card = t.card;
+			const card = t.card;
 			Effect.mkSpriteFadeHandImage(t.card, t, {
 				x: t.owner == t.owner.game.player2 ? -1 : 1,
 				y: 0,
@@ -756,20 +756,20 @@ const Skills = (module.exports = {
 			tgting = Cards.Targeting[t.active.cast.name[0]];
 		}
 		if (tgting && !(tgt = findtgt(tgting))) return;
-		var realturn = t.owner.game.turn;
+		const realturn = t.owner.game.turn;
 		t.owner.game.turn = t.owner;
 		t.useactive(tgt);
 		t.owner.game.turn = realturn;
 	},
 	fractal: (c, t) => {
 		Effect.mkText('Fractal', t);
-		for (var i = 6 + Math.floor(c.owner.quanta[etg.Aether] / 2); i > 0; i--) {
+		for (let i = 6 + Math.floor(c.owner.quanta[etg.Aether] / 2); i > 0; i--) {
 			c.owner.addCard(t.card);
 		}
 		c.owner.quanta[etg.Aether] = 0;
 	},
 	freeevade: (c, t, data) => {
-		var tgt = data.tgt;
+		const tgt = data.tgt;
 		if (
 			tgt &&
 			tgt.type == etg.Creature &&
@@ -845,7 +845,7 @@ const Skills = (module.exports = {
 		}
 	},
 	growth: x => {
-		var n = +x;
+		const n = +x;
 		return (c, t) => {
 			Effect.mkText(n + '|' + n, c);
 			c.buffhp(n);
@@ -862,7 +862,7 @@ const Skills = (module.exports = {
 	},
 	halveatk: (c, t) => {
 		t = t || c;
-		var storedatk = Math.ceil(t.atk / 2);
+		const storedatk = Math.ceil(t.atk / 2);
 		t.status.incr('storedAtk', storedatk);
 		t.atk -= storedatk;
 	},
@@ -902,7 +902,7 @@ const Skills = (module.exports = {
 		);
 	},
 	icebolt: (c, t) => {
-		var bolts = Math.floor(c.owner.quanta[etg.Water] / 5);
+		const bolts = Math.floor(c.owner.quanta[etg.Water] / 5);
 		if (c.rng() < 0.35 + bolts / 20) {
 			t.freeze(c.card.upped ? 4 : 3);
 		}
@@ -922,7 +922,7 @@ const Skills = (module.exports = {
 	immolate: (c, t) => {
 		t.die();
 		if (!t.hasactive('auto', 'singularity')) {
-			for (var i = 1; i < 13; i++) c.owner.spend(i, -1);
+			for (let i = 1; i < 13; i++) c.owner.spend(i, -1);
 			c.owner.spend(etg.Fire, c.card.upped ? -7 : -5);
 		}
 	},
@@ -951,22 +951,21 @@ const Skills = (module.exports = {
 		c.owner.foe.forEach(inflate);
 	},
 	ink: (c, t) => {
-		var p = new Thing(c.card.as(Cards.Cloak));
+		const p = new Thing(c.card.as(Cards.Cloak));
 		p.status.set('charges', 1);
 		c.owner.addPerm(p);
 	},
 	innovation: (c, t) => {
 		if (!t.owner.sanctuary) {
 			t.die();
-			for (var i = 0; i < 3; i++) {
+			for (let i = 0; i < 3; i++) {
 				t.owner.drawcard();
 			}
 		}
 	},
 	integrity: (c, t) => {
-		var Thing = require('./Thing');
-		var tally = [0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0];
-		var shardSkills = [
+		const tally = [0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0];
+		const shardSkills = [
 			['deadalive', 'mutation', 'paradox', 'improve', 'improve', 'antimatter'],
 			['infect', 'infect', 'infect', 'infect', 'aflatoxin', 'aflatoxin'],
 			['devour', 'devour', 'devour', 'devour', 'devour', 'blackhole'],
@@ -1001,7 +1000,7 @@ const Skills = (module.exports = {
 			],
 			['lobotomize', 'lobotomize', 'lobotomize', 'quint', 'quint', 'quint'],
 		];
-		var shardCosts = {
+		const shardCosts = {
 			burrow: 1,
 			stoneform: 1,
 			guard: 1,
@@ -1127,7 +1126,7 @@ const Skills = (module.exports = {
 		c.owner.addCrea(new Thing(c.card.as(Cards.ShardGolem)), true);
 	},
 	jelly: (c, t) => {
-		var tcard = t.card;
+		const tcard = t.card;
 		t.transform(tcard.as(Cards.PinkJelly));
 		t.active = { cast: Skills.jelly };
 		t.castele = tcard.element;
