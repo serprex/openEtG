@@ -647,7 +647,7 @@ const keycerttask = sutil.mkTask(res => {
 							}
 						});
 					},
-				);
+				).on('error', e => console.log(e));
 			});
 		},
 		guestchat: function(data) {

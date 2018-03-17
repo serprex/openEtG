@@ -618,7 +618,7 @@ const Skills = (module.exports = {
 	endow: (c, t) => {
 		Effect.mkText('Endow', t);
 		for (let i = 0; i < t.status.keys.length; i++) {
-			const key = t.status.keys[i],
+			const key = t.status.keys[i];
 			let val = t.status.vals[i];
 			if (key == 'adrenaline' && val > 1) val = 1;
 			c.status.incr(key, val);

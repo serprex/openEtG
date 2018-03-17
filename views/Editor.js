@@ -173,14 +173,6 @@ module.exports = connect(({opts}) => ({ deck: opts.deck, deckname: opts.deckname
 			self.props.dispatch(store.setOpt('deck', sock.getDeck()));
 			self.setState(self.processDeck(etgutil.decodedeck(sock.getDeck())));
 		}
-		function importDeck() {
-			const dvalue = self.props.deck.trim();
-			self.setState(
-				self.processDeck(
-					~dvalue.indexOf(' ') ? dvalue.split(' ') : etgutil.decodedeck(dvalue),
-				),
-			);
-		}
 		const editorui = [
 			h('input', {
 				type: 'button',
@@ -347,18 +339,6 @@ module.exports = connect(({opts}) => ({ deck: opts.deck, deckname: opts.deckname
 						position: 'absolute',
 						left: '8px',
 						top: '58px',
-					},
-				}),
-			);
-			editorui.push(
-				h('input', {
-					type: 'button',
-					value: 'Import',
-					onClick: importDeck,
-					style: {
-						position: 'absolute',
-						left: '8px',
-						top: '84px',
 					},
 				}),
 			);
@@ -548,6 +528,7 @@ module.exports = connect(({opts}) => ({ deck: opts.deck, deckname: opts.deckname
 				},
 				onChange: e => {
 					self.props.dispatch(store.setOptTemp('deck', e.target.value));
+					self.setState(self.processDeck(etgutil.decodedeck(e.target.value)));
 				},
 				ref: ctrl => {
 					if (ctrl) {
@@ -560,12 +541,6 @@ module.exports = connect(({opts}) => ({ deck: opts.deck, deckname: opts.deckname
 				},
 				onClick: (e) => {
 					e.target.setSelectionRange(0, 999);
-				},
-				onKeyPress: (e) => {
-					if (e.which == 13) {
-						e.target.blur();
-						importDeck();
-					}
 				},
 			});
 			editorui.push(deckimport);

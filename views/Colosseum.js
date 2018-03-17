@@ -5,6 +5,7 @@ const etg = require('../etg'),
 	Decks = require('../Decks.json'),
 	RngMock = require('../RngMock'),
 	Components = require('../Components'),
+	store = require('../store'),
 	React = require('react'),
 	h = React.createElement;
 function mkDaily(type) {

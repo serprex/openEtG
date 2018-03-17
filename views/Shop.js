@@ -28,7 +28,7 @@ const packdata = [
 	{ cost: 250, type: 'Nymph', info: '1 Nymph', color: '#69b' },
 ];
 
-module.exports = connect(state => ({ bulk: state.opts.bulk || '1' }))(class Shop extends React.Component {
+module.exports = connect(({opts}) => ({ bulk: typeof opts.bulk === 'string' ? opts.bulk : '1' }))(class Shop extends React.Component {
 	constructor(props) {
 		super(props);
 		this.state = {
