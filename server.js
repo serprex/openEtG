@@ -620,7 +620,7 @@ const keycerttask = sutil.mkTask(res => {
 											hostname: 'www.kongregate.com',
 											path: '/api/submit_statistics.json',
 											method: 'POST',
-										});
+										}).on('error', e => console.log(e));
 										req.write(
 											'user_id=' +
 												data.u +
@@ -878,8 +878,9 @@ const keycerttask = sutil.mkTask(res => {
 		server: app,
 		clientTracking: true,
 		perMessageDeflate: true,
-	});
-	wss.on('connection', onSocketConnection);
+	})
+		.on('error', e => console.log(e))
+		.on('connection', onSocketConnection);
 	function stop() {
 		app.close();
 		wss.close();
