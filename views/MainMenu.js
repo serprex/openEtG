@@ -135,6 +135,7 @@ module.exports = connect(({opts}) => ({
 	hideRightpane: opts.hideRightpane,
 	offline: opts.offline,
 	selectedDeck: opts.selectedDeck,
+	disableTut: opts.disableTut,
 }))(class MainMenu extends React.Component {
 	constructor(props) {
 		super(props);
@@ -870,9 +871,8 @@ module.exports = connect(({opts}) => ({
 					},
 					h('input', {
 						type: 'checkbox',
-						ref: function(ctrl) {
-							ctrl && options.register('disableTut', ctrl);
-						},
+						checked: this.props.disableTut,
+						onChange: e => this.props.dispatch(store.setOpt('disableTut', e.target.checked)),
 					}),
 					'Disable tutorial',
 				);

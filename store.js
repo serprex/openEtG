@@ -3,7 +3,7 @@ const redux = require('redux'), opts = {};
 
 let hasLocalStorage = true;
 try {
-	for (let key in localStorage)
+	for (const key in localStorage)
 		if (localStorage.hasOwnProperty(key)) opts[key] = localStorage[key];
 } catch (e) {
 	hasLocalStorage = false;

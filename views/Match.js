@@ -885,11 +885,13 @@ module.exports = class Match extends React.Component {
 					);
 				}
 			}
+			const creatures = [], perms = [];
 			for (let i = 0; i < 23; i++) {
 				const cr = pl.creatures[i];
 				if (cr && !(j == 1 && cloaked)) {
-					children.push(
+					creatures.push(
 						h(ThingInst, {
+							key: i,
 							obj: cr,
 							game: game,
 							setGame: function(g) {
@@ -909,8 +911,9 @@ module.exports = class Match extends React.Component {
 				const pr = pl.permanents[i];
 				if (pr && pr.status.get('flooding')) floodvisible = true;
 				if (pr && !(j == 1 && cloaked && !pr.status.get('cloak'))) {
-					children.push(
+					perms.push(
 						h(ThingInst, {
+							key: i,
 							obj: pr,
 							game: game,
 							setGame: function(g) {
@@ -926,6 +929,11 @@ module.exports = class Match extends React.Component {
 					);
 				}
 			}
+			if (j == 1) {
+				creatures.reverse();
+				perms.reverse();
+			}
+			children.push(creatures, perms);
 			const wp = pl.weapon;
 			if (wp && !(j == 1 && cloaked)) {
 				children.push(

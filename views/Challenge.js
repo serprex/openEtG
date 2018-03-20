@@ -54,7 +54,7 @@ module.exports = connect(({opts}) => ({
 			self.setState({ challenge: foe });
 		}
 		function maybeCustomAi(e) {
-			if (e.which == 13) aiClick.call(this);
+			if (e.which == 13) aiClick.call(self);
 		}
 		function aiClick() {
 			if (!self.props.aideck) return;
@@ -63,7 +63,7 @@ module.exports = connect(({opts}) => ({
 				etgutil.decklength(deck) < 9 ||
 				etgutil.decklength(self.props.aideck) < 9
 			) {
-				this.props.dispatch(store.doNav(require('./Editor')));
+				self.props.dispatch(store.doNav(require('./Editor')));
 				return;
 			}
 			const gameData = {
@@ -76,7 +76,7 @@ module.exports = connect(({opts}) => ({
 			};
 			options.parsepvpstats(gameData);
 			options.parseaistats(gameData);
-			this.props.dispatch(store.doNav(require('./Match'), mkGame(gameData)));
+			self.props.dispatch(store.doNav(require('./Match'), mkGame(gameData)));
 		}
 		function maybeChallenge(e) {
 			e.cancelBubble = true;
