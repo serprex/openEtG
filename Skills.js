@@ -285,7 +285,7 @@ const Skills = (module.exports = {
 		}
 	},
 	corpseexplosion: (c, t) => {
-		var dmg = 1 + Math.floor(t.truehp() / 8);
+		const dmg = 1 + Math.floor(t.truehp() / 8);
 		t.die();
 		c.owner.foe.masscc(
 			c,
@@ -294,7 +294,7 @@ const Skills = (module.exports = {
 			},
 			!c.card.upped,
 		);
-		var poison = t.status.get('poison') + t.status.get('poisonous');
+		const poison = t.status.get('poison') + t.status.get('poisonous');
 		if (poison) c.owner.foe.addpoison(poison);
 	},
 	counter: (c, t, data) => {
@@ -1964,7 +1964,7 @@ const Skills = (module.exports = {
 		}
 	},
 	throwrock: (c, t) => {
-		var dmg = c.card.upped ? 4 : 3;
+		const dmg = c.card.upped ? 4 : 3;
 		Effect.mkText('-' + dmg, t);
 		t.dmg(dmg);
 		t.owner.deck.splice(

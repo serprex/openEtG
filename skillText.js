@@ -110,8 +110,8 @@ const data = {
 	clear: 'Remove statuses from target creature, reduce delays by 1, & heal 1',
 	cold: '30% chance to freeze non-ranged attackers for 3',
 	corpseexplosion: [
-		'Sacrifice a creature to deal 1 damage to all creatures. Increment damage per 8 health of sacrifice. Poisonous sacrifices poison foe',
-		'Sacrifice a creature to deal 1 damage to all enemy creatures. Increment damage per 8 health of sacrifice. Poisonous sacrifices poison foe',
+		'Sacrifice a creature to deal 1 spell damage to all creatures. Increment damage per 8 health of sacrifice. Poisonous sacrifices poison foe',
+		'Sacrifice a creature to deal 1 spell damage to all enemy creatures. Increment damage per 8 health of sacrifice. Poisonous sacrifices poison foe',
 	],
 	counter: 'Attack attacker when attacked & able to attack',
 	countimmbur: 'Increment attack per immaterial or burrowed instance',
@@ -125,7 +125,7 @@ const data = {
 		cast: 'Trigger a death effect',
 	},
 	deathwish: 'Intercepts targeting on allies',
-	deckblast: 'Damage foe per card in deck. Discard deck',
+	deckblast: 'Spell damage foe per card in deck. Discard deck',
 	deepdive:
 		'Burrow, replace active with "2:3 Freeze target permanent", next turn unburrow into the air & triple strength until next attack',
 	deja: 'Remove active & summon copy',
@@ -150,7 +150,7 @@ const data = {
 	drawequip: 'Draw next weapon or shield',
 	drawpillar: 'When played, if next draw is a pillar, draw it',
 	dryspell:
-		'Deal 1 damage to all creatures. Gain 1:7 per damage dealt. Removes cloak',
+		'Deal 1 spell damage to all creatures. Gain 1:7 per damage dealt. Removes cloak',
 	dshield: 'Become immaterial until next turn',
 	duality: "Generate a copy of foe's next draw",
 	earth: 'Produce 1:4 per turn',
@@ -183,7 +183,7 @@ const data = {
 	fiery: 'Increment damage per 5:6 owned',
 	fire: 'Produce 1:6 per turn',
 	firebolt:
-		'Deals 3 damage to target. Increment damage per 4:6 owned. Thaws target',
+		'Deals 3 spell damage to target. Increment damage per 4:6 owned. Thaws target',
 	firewall: 'Damage non-ranged attackers',
 	flatline: 'Foe produces no quanta until next turn',
 	flyself:
@@ -245,8 +245,8 @@ const data = {
 	holylight: 'Heal target 10. Nocturnal targets are spell damaged instead',
 	hope: 'Increment damage reduction per own 1:8 producing creature',
 	icebolt:
-		'Deal 2 damage to target. Increment damage per 5:7 owned. May freeze target',
-	ignite: 'Deal 20 spell damage to foe & 1 damage to all creatures',
+		'Deal 2 spell damage to target. Increment damage per 5:7 owned. May freeze target',
+	ignite: 'Deal 20 spell damage to foe & 1 spell damage to all creatures',
 	immolate: c =>
 		'Sacrifice a creature to produce ' +
 		(c.upped ? 7 : 5) +
@@ -262,7 +262,7 @@ const data = {
 		'Target creature becomes a 7|4 with active Pink Jelly costing 4 of their element',
 	jetstream: 'Target airborne creature gains 3|-1',
 	light: 'Produce 1:8 per turn',
-	lightning: 'Deal 5 damage to target',
+	lightning: 'Deal 5 spell damage to target',
 	liquid:
 		'Target creature is poisoned & skills are replaced with "Heal owner per damage dealt"',
 	livingweapon:
@@ -439,7 +439,7 @@ const data = {
 		'Gain 5 steam. Increment strength per steam. Steam decrements after attacking',
 	stoneform: 'Gain 0|20 & become a golem',
 	storm: x =>
-		'Deals ' + x + " damage to target player's creatures. Removes cloak",
+		'Deals ' + x + " spell damage to target player's creatures. Removes cloak",
 	summon: x => {
 		const card1 = Cards[x],
 			card2 = card1.asUpped(true);
@@ -449,7 +449,7 @@ const data = {
 	},
 	swarm: 'Base health is equal to count of ally scarabs',
 	swave:
-		'Deals 4 damage to target. Instantly kill creature or destroy weapon if frozen',
+		'Deals 4 spell damage to target. Instantly kill creature or destroy weapon if frozen',
 	tempering: [
 		'Target weapon deals an additional 3 damage per turn. Thaws',
 		'Target weapon deals an additional 5 damage per turn. Thaws',
@@ -460,12 +460,12 @@ const data = {
 	],
 	thorn: '75% chance to poison non-ranged attackers',
 	throwrock: [
-		"Deal 3 spell damage to target creature, then shuffle Throw Rock into target's deck",
-		"Deal 4 spell damage to target creature, then shuffle Throw Rock into target's deck",
+		"Deal 3 damage to target creature, then shuffle Throw Rock into target's deck",
+		"Deal 4 damage to target creature, then shuffle Throw Rock into target's deck",
 	],
 	tick: [
-		'Takes 1 damage. If damage results in death, deal 18 damage to foe',
-		"Takes 3 damage. If damage results in death, deal 4 damage to all foe's creatures",
+		'Takes 1 damage. If damage results in death, deal 18 spell damage to foe',
+		"Takes 3 damage. If damage results in death, deal 4 spell damage to all foe's creatures",
 	],
 	tidalhealing:
 		'Remove poison & freezing from own creatures. Own aquatic creatures gain "Apply 1 purify to owner on hit. Throttled". Does not stack',
@@ -528,7 +528,7 @@ function auraText(tgts, bufftext, upbufftext) {
 		c.name +
 		' in play. Unique';
 }
-var statusData = {
+const statusData = {
 	cloak: 'Cloaks own field',
 	charges: (c, inst) =>
 		c !== inst ||
