@@ -17,8 +17,8 @@ exports.mkPremade = function(level, daily) {
 		if (etgutil.decklength(urdeck) < (sock.user ? 31 : 11)) {
 			return;
 		}
-		var cost = daily !== undefined ? 0 : userutil.pveCostReward[level * 2],
-			foedata;
+		const cost = daily !== undefined ? 0 : userutil.pveCostReward[level * 2];
+		let foedata;
 		if (sock.user) {
 			if (daily === undefined) {
 				if (sock.user.gold < cost) {
@@ -30,7 +30,7 @@ exports.mkPremade = function(level, daily) {
 			}
 		}
 		if (!foedata) foedata = RngMock.choose(Decks[name]);
-		var gameData = {
+		const gameData = {
 			level: level,
 			deck: foedata[1],
 			urdeck: urdeck,

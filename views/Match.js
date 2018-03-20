@@ -638,7 +638,6 @@ module.exports = class Match extends React.Component {
 	constructor(props) {
 		super(props);
 		this.state = {
-			game: props.game,
 			tooltip: '',
 			foeplays: [],
 			discarding: false,
@@ -670,12 +669,12 @@ module.exports = class Match extends React.Component {
 
 	setInfo(e, obj, x) {
 		const actinfo =
-			this.state.game.targeting &&
-			this.state.game.targeting.filter(obj) &&
-			activeInfo[this.state.game.targeting.text];
+			this.props.game.targeting &&
+			this.props.game.targeting.filter(obj) &&
+			activeInfo[this.props.game.targeting.text];
 		this.setState({
 			tooltip:
-				obj.info() + (actinfo ? '\n' + actinfo(obj, this.state.game) : ''),
+				obj.info() + (actinfo ? '\n' + actinfo(obj, this.props.game) : ''),
 			toolx: e.pageX,
 			tooly: e.pageY,
 		});
@@ -699,7 +698,7 @@ module.exports = class Match extends React.Component {
 	render() {
 		const self = this,
 			children = [svgbg];
-		const game = this.state.game;
+		const game = this.props.game;
 		let turntell, endText, cancelText;
 		const cloaked = game.player2.isCloaked();
 

@@ -1225,7 +1225,7 @@ const Skills = (module.exports = {
 	midas: (c, t) => {
 		if (t.status.get('stackable') && t.status.get('charges') > 1) {
 			Skills.destroy.func(c, t, true);
-			var relic = new Thing(t.card.as(Cards.GoldenRelic));
+			const relic = new Thing(t.card.as(Cards.GoldenRelic));
 			relic.usedactive = false;
 			c.owner.addPerm(relic);
 		} else {
