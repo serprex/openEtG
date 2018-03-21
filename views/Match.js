@@ -295,58 +295,55 @@ function ThingInst(props) {
 		);
 	}
 	const pos = ui.tgtToPos(obj);
-	return h('div', {
-		children: children,
-		className: tgtclass(game, obj),
-		style: {
-			position: 'absolute',
-			left: pos.x - 32 * scale + 'px',
-			top: pos.y - 36 * scale + 'px',
-			width: 64 * scale + 4 + 'px',
-			height: (isSpell ? 64 : 72) * scale + 4 + 'px',
-			opacity: obj.isMaterial() ? '1' : '.7',
-			color: obj.card.upped ? '#000' : '#fff',
-			fontSize: '10px',
-			border: 'transparent 2px solid',
-		},
-		onMouseOver: props.setInfo && (e => props.setInfo(e, obj, pos.x)),
-		onMouseOut: props.onMouseOut,
-		onClick: function() {
-			if (game.phase != etg.PlayPhase) return;
-			if (obj.type !== etg.Spell) {
-				if (game.targeting && game.targeting.filter(obj)) {
-					game.targeting.cb(obj);
-					props.setGame(game);
-				} else if (
-					obj.owner == game.player1 &&
-					!game.targeting &&
-					obj.canactive()
-				) {
-					game.getTarget(obj, obj.active.cast, tgt => {
-						if (!game.ai)
-							sock.emit('cast', {
-								bits: game.tgtToBits(obj) | (game.tgtToBits(tgt) << 9),
-							});
-						obj.useactive(tgt);
-						props.setGame(game);
-					});
-					props.setGame(game);
-				}
-			} else {
-				if (obj.owner == game.player1 && props.discarding) {
-					props.funcEnd(obj.getIndex());
-				} else if (game.targeting) {
-					if (game.targeting.filter(obj)) {
+	return h('div', Object.assign(
+		isSpell && obj.owner == game.player2 && !game.player1.precognition ?
+		{
+			className: tgtclass(game, obj),
+			style: {
+				position: 'absolute',
+				left: pos.x - 32 + 'px',
+				top: pos.y - 38 + 'px',
+				width: '68px',
+				height: '80px',
+				border: 'transparent 2px solid',
+			},
+			children: [h('div', {
+				className: 'ico cback',
+				style: {
+					left: '2px',
+					top: '2px',
+				},
+			})],
+		}
+		: {
+			children: children,
+			className: tgtclass(game, obj),
+			style: {
+				position: 'absolute',
+				left: pos.x - 32 * scale + 'px',
+				top: pos.y - 36 * scale + 'px',
+				width: 64 * scale + 4 + 'px',
+				height: (isSpell ? 64 : 72) * scale + 4 + 'px',
+				opacity: obj.isMaterial() ? '1' : '.7',
+				color: obj.card.upped ? '#000' : '#fff',
+				fontSize: '10px',
+				border: 'transparent 2px solid',
+			},
+		},{
+			onMouseOver: props.setInfo && (e => props.setInfo(e, obj, pos.x)),
+			onMouseOut: props.onMouseOut,
+			onClick: function() {
+				if (game.phase != etg.PlayPhase) return;
+				if (obj.type !== etg.Spell) {
+					if (game.targeting && game.targeting.filter(obj)) {
 						game.targeting.cb(obj);
 						props.setGame(game);
-					}
-				} else if (obj.owner == game.player1 && obj.canactive()) {
-					if (obj.card.type != etg.Spell) {
-						if (!game.ai) sock.emit('cast', { bits: game.tgtToBits(obj) });
-						obj.useactive();
-						props.setGame(game);
-					} else {
-						game.getTarget(obj, obj.card.active.cast, tgt => {
+					} else if (
+						obj.owner == game.player1 &&
+						!game.targeting &&
+						obj.canactive()
+					) {
+						game.getTarget(obj, obj.active.cast, tgt => {
 							if (!game.ai)
 								sock.emit('cast', {
 									bits: game.tgtToBits(obj) | (game.tgtToBits(tgt) << 9),
@@ -356,10 +353,35 @@ function ThingInst(props) {
 						});
 						props.setGame(game);
 					}
+				} else {
+					if (obj.owner == game.player1 && props.discarding) {
+						props.funcEnd(obj.getIndex());
+					} else if (game.targeting) {
+						if (game.targeting.filter(obj)) {
+							game.targeting.cb(obj);
+							props.setGame(game);
+						}
+					} else if (obj.owner == game.player1 && obj.canactive()) {
+						if (obj.card.type != etg.Spell) {
+							if (!game.ai) sock.emit('cast', { bits: game.tgtToBits(obj) });
+							obj.useactive();
+							props.setGame(game);
+						} else {
+							game.getTarget(obj, obj.card.active.cast, tgt => {
+								if (!game.ai)
+									sock.emit('cast', {
+										bits: game.tgtToBits(obj) | (game.tgtToBits(tgt) << 9),
+									});
+								obj.useactive(tgt);
+								props.setGame(game);
+							});
+							props.setGame(game);
+						}
+					}
 				}
-			}
-		},
-	});
+			},
+		})
+	);
 }
 
 function addNoHealData(game) {
@@ -464,7 +486,7 @@ function startMatch(self, game, gameData) {
 				if (!game.ai) sock.emit('endturn', { bits: discard });
 				game.player1.endturn(discard);
 				game.targeting = null;
-				self.setState({ foeplays: [], game: game });
+				self.setState({ foeplays: [] });
 			}
 		}
 	}
@@ -475,10 +497,10 @@ function startMatch(self, game, gameData) {
 			if (game.phase === etg.MulliganPhase && game.player1.hand.length) {
 				game.player1.drawhand(game.player1.hand.length - 1);
 				if (!game.ai) sock.emit('mulligan');
-				self.setState({ game: game });
+				self.forceUpdate();
 			} else if (game.targeting) {
 				game.targeting = null;
-				self.setState({ game: game });
+				self.forceUpdate();
 			} else self.setState({ discarding: false });
 		}
 	}
@@ -507,7 +529,7 @@ function startMatch(self, game, gameData) {
 				game.targeting.filter(game.players(j))
 			) {
 				game.targeting.cb(game.players(j));
-				self.setState({ game: game });
+				self.forceUpdate();
 			}
 		};
 	}
@@ -545,7 +567,7 @@ function startMatch(self, game, gameData) {
 		endturn: function(data) {
 			(data.spectate == 1 ? game.player1 : game.player2).endturn(data.bits);
 			if (data.spectate) self.setState({ foeplays: [] });
-			self.setState({ game: game });
+			self.forceUpdate();
 		},
 		cast: function(data) {
 			const bits = data.spectate == 1 ? data.bits ^ 4104 : data.bits,
@@ -566,12 +588,12 @@ function startMatch(self, game, gameData) {
 			}
 			self.setState({ foeplays: self.state.foeplays.concat([play]) });
 			c.useactive(t);
-			self.setState({ game: game });
+			self.forceUpdate();
 		},
 		foeleft: function(data) {
 			if (!game.ai)
 				game.setWinner(data.spectate == 1 ? game.player2 : game.player1);
-			self.setState({ game: game });
+			self.forceUpdate();
 		},
 		mulligan: function(data) {
 			if (data.draw === true) {
@@ -580,7 +602,7 @@ function startMatch(self, game, gameData) {
 				const pl = data.spectate == 1 ? game.player1 : game.player2;
 				pl.drawhand(pl.hand.length - 1);
 			}
-			self.setState({ game: game });
+			self.forceUpdate();
 		},
 	};
 	if (!gameData.spectate) {
@@ -838,52 +860,19 @@ module.exports = class Match extends React.Component {
 				);
 			}
 			for (let i = 0; i < pl.hand.length; i++) {
-				const isfront = j == 0 || game.player1.precognition,
-					card = pl.hand[i];
-				if (isfront) {
-					children.push(
-						h(ThingInst, {
-							obj: card,
-							game: game,
-							setGame: function(g) {
-								self.setState({ game: g });
-							},
-							discarding: self.state.discarding,
-							funcEnd: self.state.funcEnd,
-							setInfo: function(e, obj, x) {
-								return self.setCard(e, obj.card, x);
-							},
-							onMouseOut: function() {
-								self.clearCard();
-							},
-						}),
-					);
-				} else if (card) {
-					const pos = ui.cardPos(j, i);
-					children.push(
-						h(
-							'div',
-							{
-								className: tgtclass(game, card),
-								style: {
-									position: 'absolute',
-									left: pos.x - 32 + 'px',
-									top: pos.y - 38 + 'px',
-									width: '68px',
-									height: '80px',
-									border: 'transparent 2px solid',
-								},
-							},
-							h('div', {
-								className: 'ico cback',
-								style: {
-									left: '2px',
-									top: '2px',
-								},
-							}),
-						),
-					);
-				}
+				children.push(
+					h(ThingInst, {
+						obj: pl.hand[i],
+						game: game,
+						setGame: () => self.forceUpdate(),
+						discarding: self.state.discarding,
+						funcEnd: self.state.funcEnd,
+						setInfo: function(e, obj, x) {
+							return self.setCard(e, obj.card, x);
+						},
+						onMouseOut: () => self.clearCard(),
+					}),
+				);
 			}
 			const creatures = [], perms = [];
 			for (let i = 0; i < 23; i++) {
@@ -894,9 +883,7 @@ module.exports = class Match extends React.Component {
 							key: i,
 							obj: cr,
 							game: game,
-							setGame: function(g) {
-								self.setState({ game: g });
-							},
+							setGame: () => self.forceUpdate(),
 							setInfo: function(e, obj, x) {
 								return self.setInfo(e, obj, x);
 							},
@@ -916,15 +903,9 @@ module.exports = class Match extends React.Component {
 							key: i,
 							obj: pr,
 							game: game,
-							setGame: function(g) {
-								self.setState({ game: g });
-							},
-							setInfo: function(e, obj, x) {
-								return self.setInfo(e, obj, x);
-							},
-							onMouseOut: function() {
-								self.clearCard();
-							},
+							setGame: () => self.forceUpdate(),
+							setInfo: (e, obj, x) => self.setInfo(e, obj, x),
+							onMouseOut: () => self.clearCard(),
 						}),
 					);
 				}
@@ -940,15 +921,9 @@ module.exports = class Match extends React.Component {
 					h(ThingInst, {
 						obj: wp,
 						game: game,
-						setGame: function(g) {
-							self.setState({ game: g });
-						},
-						setInfo: function(e, obj, x) {
-							return self.setInfo(e, obj, x);
-						},
-						onMouseOut: function() {
-							self.clearCard();
-						},
+						setGame: () => self.forceUpdate(),
+						setInfo: (e, obj, x) => self.setInfo(e, obj, x),
+						onMouseOut: () => self.clearCard(),
 					}),
 				);
 			}
@@ -958,15 +933,9 @@ module.exports = class Match extends React.Component {
 					h(ThingInst, {
 						obj: sh,
 						game: game,
-						setGame: function(g) {
-							self.setState({ game: g });
-						},
-						setInfo: function(e, obj, x) {
-							return self.setInfo(e, obj, x);
-						},
-						onMouseOut: function() {
-							self.clearCard();
-						},
+						setGame: () => self.forceUpdate(),
+						setInfo: (e, obj, x) => self.setInfo(e, obj, x),
+						onMouseOut: () => self.clearCard(),
 					}),
 				);
 			}
