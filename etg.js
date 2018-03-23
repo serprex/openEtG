@@ -1,7 +1,7 @@
 'use strict';
 // adrtbl is a bitpacked 2d array
 // [[0,0,0,0],[1,1,1],[2,2,2],[3,3,3],[3,2],[4,2],[4,2],[5,3],[6,3],[3],[4],[4],[4],[5],[5],[5]]
-var adrtbl = new Uint16Array([
+const adrtbl = new Uint16Array([
 	4,
 	587,
 	1171,

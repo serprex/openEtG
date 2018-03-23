@@ -457,7 +457,7 @@ Thing.prototype.attackCreature = function(target, trueatk) {
 	}
 };
 Thing.prototype.attack = function(stasis, freedomChance, target) {
-	var isCreature = this.type == etg.Creature;
+	const isCreature = this.type == etg.Creature;
 	if (isCreature) {
 		this.dmg(this.status.get('poison'), true);
 	}
@@ -470,16 +470,16 @@ Thing.prototype.attack = function(stasis, freedomChance, target) {
 		this.trigger('auto');
 	}
 	this.usedactive = false;
-	var trueatk;
+	let trueatk;
 	if (
 		!(stasis || this.status.get('frozen') || this.status.get('delayed')) &&
 		(trueatk = this.trueatk()) != 0
 	) {
-		var momentum =
+		let momentum =
 			this.status.get('momentum') ||
 			(this.status.get('burrowed') &&
 				this.owner.permanents.some(pr => pr && pr.status.get('tunnel')));
-		var psionic = this.status.get('psionic');
+		const psionic = this.status.get('psionic');
 		if (
 			freedomChance &&
 			this.status.get('airborne') &&
@@ -509,14 +509,14 @@ Thing.prototype.attack = function(stasis, freedomChance, target) {
 			if (dmg != trueatk) this.trigger('blocked', target.shield, trueatk - dmg);
 		}
 	}
-	var frozen = this.status.maybeDecr('frozen');
+	const frozen = this.status.maybeDecr('frozen');
 	this.status.maybeDecr('delayed');
 	this.status.set('dive', 0);
 	if (isCreature && ~this.getIndex() && this.truehp() <= 0) {
 		this.die();
 	} else if (!isCreature || ~this.getIndex()) {
 		if (!frozen) this.trigger('postauto');
-		var adrenaline = this.status.get('adrenaline');
+		const adrenaline = this.status.get('adrenaline');
 		if (adrenaline) {
 			if (adrenaline < etg.countAdrenaline(this.trueatk(0))) {
 				this.status.incr('adrenaline', 1);
@@ -537,11 +537,11 @@ Thing.prototype.choose = function(x) {
 	return x[this.upto(x.length)];
 };
 Thing.prototype.randomcard = function(upped, filter) {
-	var keys = Cards.filter(upped, filter);
+	const keys = Cards.filter(upped, filter);
 	return keys && keys.length && Cards.Codes[this.choose(keys)];
 };
 Thing.prototype.shuffle = function(array) {
-	var counter = array.length,
+	let counter = array.length,
 		temp,
 		index;
 	while (counter--) {

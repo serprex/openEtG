@@ -407,7 +407,7 @@ const data = {
 		'Generate 3 random non-pillar upgraded cards in hand. One will be 1:1',
 	],
 	shtriga: 'Become immaterial at start of turn',
-	shuffle3: 'Shuffle 3 copies of target creature into own deck',
+	shuffle3: "Shuffle 3 copies of target creature or opponent's instance into own deck",
 	silence:
 		'Target player cannot play cards until their turn ends, or target creature gains summoning sickness',
 	sing: 'Target creature without Sing attacks owner',

@@ -175,6 +175,9 @@ var TargetFilters = {
 	forceplay: function(c, t) {
 		return t.type == etg.Spell || (t.isMaterial() && t.active.cast);
 	},
+	shuffle3: function(c, t) {
+		return t.isMaterial() && (t.type == etg.Creature || t.owner != c.owner);
+	},
 	airbornecrea: function(c, t) {
 		return t.isMaterial(etg.Creature) && t.status.get('airborne');
 	},
