@@ -272,7 +272,6 @@ const ThingInst = connect(({opts}) => ({ lofiArt: opts.lofiArt }))(function Thin
 					left: '0',
 					top: '-8px',
 					width: 72 * scale + 'px',
-					height: '11px',
 				}}
 			/>
 		);
@@ -283,10 +282,11 @@ const ThingInst = connect(({opts}) => ({ lofiArt: opts.lofiArt }))(function Thin
 				text={statText}
 				icoprefix='te'
 				style={{
+					fontSize: '12px',
 					position: 'absolute',
 					top: isSpell ? '0' : '10px',
 					right: '0',
-					height: '11px',
+					paddingLeft: '2px',
 					backgroundColor: ui.maybeLightenStr(obj.card),
 				}}
 			/>
@@ -546,7 +546,7 @@ function startMatch(self, game, gameData) {
 		funcEnd: endClick,
 		funcCancel: cancelClick,
 		funcResign: resignClick,
-		playerClick: playerClick,
+		playerClick,
 	});
 	Effect.clear();
 	function onkeydown(e) {
