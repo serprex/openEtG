@@ -3,7 +3,7 @@ const ui = require('./ui'),
 	Cards = require('./Cards'),
 	etgutil = require('./etgutil'),
 	cssPrefix =
-		"<style type='text/css'><![CDATA[@import url(https://fonts.googleapis.com/css?family=Dosis);text{font-family:Dosis;font-size:12px}";
+		"<style type='text/css'><![CDATA[text{font:12px sans-serif}";
 function eleChar(card) {
 	return String.fromCharCode(97 + card.element + (card.upped ? 13 : 0));
 }

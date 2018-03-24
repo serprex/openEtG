@@ -28,54 +28,51 @@ exports.rect = function(x, y, wid, hei) {
 };
 
 exports.Box = function(props) {
-	return h('div', {
-		className: 'bgbox',
-		children: props.children,
-		style: {
+	return <div
+		className='bgbox'
+		children={props.children}
+		style={{
 			position: 'absolute',
 			left: props.x + 'px',
 			top: props.y + 'px',
 			width: props.width + 'px',
 			height: props.height + 'px',
-		},
-	});
+		}}>
+		{props.children || null}
+	</div>;
 };
 
 function CardImage(props) {
-	let card = props.card,
-		spans = [card.name];
-	let bordcol = card && card.shiny ? '#daa520' : '#222';
-	let bgcol = card ? ui.maybeLightenStr(card) : card === null ? '#876' : '#111';
-	if (card && card.cost) {
-		spans.push(
-			h(
-				'span',
-				{
-					style: {
-						float: 'right',
-						marginRight: '2px',
-					},
-				},
-				card.cost,
-				card.costele !== card.element &&
-					h('span', { className: 'ico te' + card.costele }),
-			),
-		);
-	}
-	return h('div', {
-		className: 'cardslot',
-		onMouseOver: props.onMouseOver,
-		onClick: props.onClick,
-		style: {
+	const card = props.card,
+		bordcol = card && card.shiny ? '#daa520' : '#222',
+		bgcol = card ? ui.maybeLightenStr(card) : card === null ? '#876' : '#111';
+	return <div
+		className='cardslot'
+		onMouseOver={props.onMouseOver}
+		onClick={props.onClick}
+		style={{
 			backgroundColor: bgcol,
 			borderColor: bordcol,
 			color: card && card.upped ? '#000' : '#fff',
 			position: 'absolute',
 			left: props.x + 'px',
 			top: props.y + 'px',
-		},
-		children: spans,
-	});
+			whiteSpace: 'nowrap',
+			overflow: 'hidden',
+		}}>
+		{card.name}
+		{!!card.cost && <span
+			style={{
+				position: 'absolute',
+				right: '0',
+				backgroundColor: bgcol,
+				paddingLeft: '2px',
+			}}>
+			{card.cost}
+			{card.costele !== card.element &&
+				<span className={'ico te' + card.costele } />}
+		</span>}
+	</div>;
 }
 exports.CardImage = CardImage;
 
@@ -158,20 +155,20 @@ exports.Card = function(props) {
 	const card = props.card || (props.code && Cards.Codes[props.code]);
 	if (!card) return null;
 	const svgcard = svg.card(card);
-	return h('svg', {
-		width: '128',
-		height: '256',
-		style: {
+	return <svg
+		width={'128'}
+		height={'256'}
+		style={{
 			position: 'absolute',
 			left: props.x + 'px',
 			top: props.y + 'px',
 			pointerEvents: 'none',
 			zIndex: '4',
-		},
-		dangerouslySetInnerHTML: {
+		}}
+		dangerouslySetInnerHTML={{
 			__html: svgcard.slice(svgcard.indexOf('>') + 1, -6),
-		},
-	});
+		}}
+	/>;
 };
 
 function DeckDisplay(props) {
@@ -182,7 +179,7 @@ function DeckDisplay(props) {
 		if (card) {
 			i++;
 			return h(CardImage, {
-				card: card,
+				card,
 				onMouseOver:
 					props.onMouseOver &&
 					function() {
@@ -203,14 +200,14 @@ function DeckDisplay(props) {
 	});
 	if (~mark && props.renderMark) {
 		children.push(
-			h('span', {
-				className: 'ico e' + mark,
-				style: {
+			<span
+				className={'ico e' + mark}
+				style={{
 					position: 'absolute',
 					left: (props.x || 0) + 66 + 'px',
 					top: (props.y || 0) + 200 + 'px',
-				},
-			}),
+				}}
+			/>
 		);
 	}
 	return children;
@@ -231,53 +228,43 @@ class CardSelector extends React.Component {
 	render() {
 		const self = this;
 		const children = [
-			h('input', {
-				type: 'button',
-				value: 'Toggle Shiny',
-				style: {
+			<input type='button'
+				value='Toggle Shiny'
+				style={{
 					position: 'absolute',
 					left: '4px',
 					top: '578px',
-				},
-				onClick: function() {
-					self.setState({ shiny: !self.state.shiny });
-				},
-			}),
-			h('input', {
-				type: 'button',
-				value: self.state.showall ? 'Auto Hide' : 'Show All',
-				style: {
+				}}
+				onClick={() => self.setState({ shiny: !self.state.shiny })}
+			/>,
+			<input type='button'
+				value={self.state.showall ? 'Auto Hide' : 'Show All'}
+				style={{
 					position: 'absolute',
 					left: '4px',
 					top: '530px',
-				},
-				onClick: function() {
-					self.setState({ showall: !self.state.showall });
-				},
-			}),
+				}}
+				onClick={() => self.setState({ showall: !self.state.showall })}
+			/>,
 		];
 		for (let i = 0; i < 13; i++) {
 			children.push(
-				h(IconBtn, {
-					e: 'e' + i,
-					x: !i || i & 1 ? 4 : 40,
-					y: 316 + Math.floor((i - 1) / 2) * 32,
-					click: function() {
-						self.setState({ element: i });
-					},
-				}),
+				<IconBtn
+					e={'e' + i}
+					x={!i || i & 1 ? 4 : 40}
+					y={316 + Math.floor((i - 1) / 2) * 32}
+					click={() => self.setState({ element: i })}
+				/>
 			);
 		}
 		for (let i = 0; i < 5; i++) {
 			children.push(
-				h(IconBtn, {
-					e: (i ? 'r' : 't') + i,
-					x: 74,
-					y: 338 + i * 32,
-					click: function() {
-						self.setState({ rarity: i });
-					},
-				}),
+				<IconBtn
+					e={(i ? 'r' : 't') + i}
+					x={74}
+					y={338 + i * 32}
+					click={() => self.setState({ rarity: i })}
+				/>
 			);
 		}
 		for (let i = 0; i < 6; i++) {
@@ -308,11 +295,11 @@ class CardSelector extends React.Component {
 					card = column[j];
 				let code = card.code;
 				children.push(
-					h(CardImage, {
-						x: x,
-						y: y,
-						card: card,
-						onClick:
+					<CardImage
+						x={x}
+						y={y}
+						card={card}
+						onClick={
 							self.props.onClick &&
 							function() {
 								if (self.props.filterboth && !self.state.shiny) {
@@ -327,8 +314,8 @@ class CardSelector extends React.Component {
 									}
 								}
 								return self.props.onClick(code);
-							},
-						onMouseOver:
+							}}
+						onMouseOver={
 							self.props.onMouseOver &&
 							function() {
 								if (self.props.filterboth && !self.state.shiny) {
@@ -343,8 +330,8 @@ class CardSelector extends React.Component {
 									}
 								}
 								return self.props.onMouseOver(code);
-							},
-					}),
+							}}
+					/>
 				);
 				if (this.props.cardpool) {
 					const scode = etgutil.asShiny(card.code, true);
@@ -363,33 +350,28 @@ class CardSelector extends React.Component {
 								: 0;
 					}
 					countTexts.push(
-						h(
-							'div',
-							{
-								className:
-									'selectortext' +
-									(this.props.maxedIndicator &&
-									card.type != etg.Pillar &&
-									cardAmount >= 6
-										? cardAmount >= 12 ? ' beigeback' : ' lightback'
-										: ''),
-							},
-							cardAmount + (shinyAmount ? '/' + shinyAmount : ''),
-						),
+						<div className={'selectortext' +
+							(this.props.maxedIndicator &&
+							card.type != etg.Pillar &&
+							cardAmount >= 6
+									? cardAmount >= 12 ? ' beigeback' : ' lightback'
+									: '')}>
+							{cardAmount + (shinyAmount ? '/' + shinyAmount : '')}
+						</div>
 					);
 				}
 			}
 			children.push(
-				h('div', {
-					style: {
+				<div
+					style={{
 						position: 'absolute',
 						left: x + 100 + 'px',
 						top: '272px',
 						textHeight: '0',
 						whiteSpace: 'pre',
-					},
-					children: countTexts,
-				}),
+					}}
+					children={countTexts}
+				/>
 			);
 		}
 		return children;
