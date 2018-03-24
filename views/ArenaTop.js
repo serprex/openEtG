@@ -60,7 +60,7 @@ module.exports = class ArenaTop extends React.Component {
 			/>
 		);
 		return (
-			<React.Fragment>
+			<>
 				{ol}
 				<Components.ExitBtn x={8} y={300} />
 				{this.state.card && (
@@ -70,7 +70,7 @@ module.exports = class ArenaTop extends React.Component {
 						y={this.state.cardy}
 					/>
 				)}
-			</React.Fragment>
+			</>
 		);
 	}
 };

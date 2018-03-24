@@ -93,7 +93,7 @@ module.exports = class Upgrade extends React.Component {
 			sock.user.accountbound,
 			etgutil.deck2pool(sock.user.pool),
 		);
-		return <React.Fragment>
+		return <>
 			<Components.ExitBtn x={5} y={50} />
 			{self.state.canGrade &&
 				<input
@@ -261,6 +261,6 @@ module.exports = class Upgrade extends React.Component {
 					self.setState(newstate);
 				}}
 			/>
-		</React.Fragment>
+		</>
 	}
 };

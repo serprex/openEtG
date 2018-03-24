@@ -32,7 +32,7 @@ module.exports = class WealthTop extends React.Component {
 				</li>);
 			}
 		}
-		return <React.Fragment>
+		return <>
 			<ol
 				className='width400'
 				style={{
@@ -49,6 +49,6 @@ module.exports = class WealthTop extends React.Component {
 					top: '8px',
 				}}>{ol2c}</ol>
 			<Components.ExitBtn x={8} y={300} />
-		</React.Fragment>
+		</>
 	}
 };

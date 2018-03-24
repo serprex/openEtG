@@ -19,82 +19,67 @@ module.exports = class Bazaar extends React.Component {
 	}
 
 	render() {
-		const self = this,
-			children = [
-				h(Components.ExitBtn, { x: 8, y: 100 }),
-			],
-			cost = Math.ceil(userutil.calcWealth(self.state.deck, true) * 3);
-
-		if (self.state.deck.length > 0 && sock.user.gold >= cost) {
-			children.push(
-				h('input', {
-					type: 'button',
-					value: 'Buy',
-					style: {
+		const cost = Math.ceil(userutil.calcWealth(this.state.deck, true) * 3);
+		return <>
+			<Components.ExitBtn x={8} y={100} />
+			{this.state.deck.length > 0 && sock.user.gold >= cost && (
+				<input
+					type='button'
+					value='Buy'
+					style={{
 						position: 'absolute',
 						left: '8px',
 						top: '160px',
-					},
-					onClick: function() {
+					}}
+					onClick={() => {
 						sock.userExec('bazaar', {
-							cards: etgutil.encoderaw(self.state.deck),
+							cards: etgutil.encoderaw(this.state.deck),
 						});
 						store.store.dispatch(store.doNav(require('./MainMenu')));
-					},
-				}),
-			);
-		}
-		children.push(
-			h(Components.Text, {
-				text: cost + '$',
-				style: {
+					}}
+				/>
+			)}
+			<Components.Text
+				text={cost + '$'}
+				style={{
 					position: 'absolute',
 					left: '100px',
 					top: '235px',
 					color: cost > sock.user.gold ? '#f44' : '#fff',
-				},
-			}),
-			h(Components.Text, {
-				text: sock.user.gold + '$',
-				style: {
+				}}
+			/>
+			<Components.Text
+				text={sock.user.gold + '$'}
+				style={{
 					position: 'absolute',
 					left: '8px',
 					top: '240px',
-				},
-			}),
-			h(Components.DeckDisplay, {
-				deck: self.state.deck,
-				onMouseOver: function(i, code) {
-					self.setState({ code: code });
-				},
-				onClick: function(i) {
-					const newdeck = self.state.deck.slice();
+				}}
+			/>
+			<Components.DeckDisplay
+				deck={this.state.deck}
+				onMouseOver={(i, code) => this.setState({ code: code })}
+				onClick={(i) => {
+					const newdeck = this.state.deck.slice();
 					newdeck.splice(i, 1);
-					self.setState({ deck: newdeck });
-				},
-			}),
-			h(Components.CardSelector, {
-				onMouseOver: function(code) {
-					self.setState({ code: code });
-				},
-				onClick: function(code) {
+					this.setState({ deck: newdeck });
+				}}
+			/>
+			<Components.CardSelector
+				onMouseOver={(code) => this.setState({ code: code })}
+				onClick={(code) => {
 					const card = Cards.Codes[code];
 					if (
-						self.state.deck.length < 60 &&
+						this.state.deck.length < 60 &&
 						card.rarity > 0 &&
 						card.rarity < 4 &&
 						!card.isFree()
 					) {
-						self.setState({ deck: self.state.deck.concat([code]) });
+						this.setState({ deck: this.state.deck.concat([code]) });
 					}
-				},
-			}),
-		);
-		if (self.state.code) {
-			children.push(
-				h(Components.Card, { x: 734, y: 8, code: self.state.code }),
-			);
-		}
-		return h(React.Fragment, null, ...children);
+				}}
+			/>
+			{this.state.code && <Components.Card x={734} y={8} code={this.state.code} />}
+		</>;
 	}
 };
