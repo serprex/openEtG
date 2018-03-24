@@ -27,7 +27,7 @@ exports.card = function(code) {
 		"<rect x='0' y='20' width='128' height='128' fill='" +
 		ui.maybeLightenStr(card) +
 		"'/>" +
-		"<foreignObject width='128' height='256'><p xmlns='http://www.w3.org/1999/xhtml' style='font-family:Dosis;font-size:10px;white-space:pre-wrap" +
+		"<foreignObject width='128' height='256'><p xmlns='http://www.w3.org/1999/xhtml' style='font:10px sans-serif;white-space:pre-wrap" +
 		(textColor ? '' : ';color:#000') +
 		";position:absolute;left:2px;top:150px;right:2px;height:106px;margin:0'>" +
 		'<img ' +
