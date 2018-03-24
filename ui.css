@@ -138,8 +138,7 @@ input[type="text"],input[type="password"],input[type="number"],input:not([type])
 		repeating-linear-gradient(-45deg, red 0, red 25%, #fff 0, #fff 50%) 0 / .6em .6em;
 	animation:ants 8s linear infinite;
 }
-.ants-black { border:2px #fff solid!important }
-.ants-light { border:2px #000 solid!important }
+.canactive { border:2px #000 solid!important;box-shadow:0 0 5px #fff }
 .shiny {
 	animation:animatedShiny 8s linear infinite alternate-reverse;
 }

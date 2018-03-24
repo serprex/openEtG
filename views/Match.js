@@ -662,8 +662,7 @@ function startMatch(self, game, gameData) {
 function tgtclass(game, obj) {
 	if (game.targeting) {
 		if (game.targeting.filter(obj)) return 'ants-red';
-	} else if (obj.owner === game.player1 && obj.canactive())
-		return obj.card && obj.card.element == etg.Light ? 'ants-light' : 'ants-black';
+	} else if (obj.owner === game.player1 && obj.canactive()) return 'canactive';
 }
 
 module.exports = class Match extends React.Component {
