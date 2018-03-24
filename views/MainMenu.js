@@ -136,6 +136,7 @@ module.exports = connect(({opts}) => ({
 	offline: opts.offline,
 	selectedDeck: opts.selectedDeck,
 	disableTut: opts.disableTut,
+	lofiArt: opts.lofiArt,
 }))(class MainMenu extends React.Component {
 	constructor(props) {
 		super(props);
@@ -761,10 +762,19 @@ module.exports = connect(({opts}) => ({
 					sock.userEmit('passchange', { p: changePass.value });
 				}
 			}
-			const wipe = h('input', {
-					type: 'button',
-					value: 'Wipe Account',
-					onClick: function() {
+			mainc.push(
+				<div className='bgbox'
+					style={{
+						position: 'absolute',
+						left: '585px',
+						top: '380px',
+						width: '267px',
+						height: '156px',
+					}}>
+				<input
+					type='button'
+					value='Wipe Account'
+					onClick={() => {
 						if (self.props.foename == sock.user.name + 'yesdelete') {
 							logout('delete');
 						} else {
@@ -775,128 +785,103 @@ module.exports = connect(({opts}) => ({
 								'System',
 							);
 						}
-					},
-					onMouseOver: mkSetTip(
+					}}
+					onMouseOver={mkSetTip(
 						'Click here to permanently remove your account',
-					),
-					style: {
+					)}
+					style={{
 						position: 'absolute',
 						left: '184px',
-						top: '123px',
-					},
-				}),
-				changePass = h('input', {
-					placeholder: 'New Password',
-					onKeyPress: function(e) {
+						top: '8px',
+					}}
+				/>
+				<input
+					placeholder='New Password'
+					onKeyPress={(e) => {
 						if (e.which == 13) changeFunc();
-					},
-					style: {
+					}}
+					style={{
 						position: 'absolute',
 						left: '8px',
 						top: '8px',
-					},
-				}),
-				changeBtn = h('input', {
-					type: 'button',
-					value: 'Change Pass',
-					onClick: changeFunc,
-					style: {
+					}}
+				/>
+				<input
+					type='button'
+					value='Change Pass'
+					onClick={changeFunc}
+					style={{
 						position: 'absolute',
 						left: '184px',
 						top: '8px',
-					},
-				}),
-				enableSound = h(
-					'label',
-					{
-						style: {
-							position: 'absolute',
-							left: '8px',
-							top: '53px',
-						},
-					},
-					h('input', {
-						type: 'checkbox',
-						ref: function(ctrl) {
-							ctrl && options.register('enableSound', ctrl);
-						},
-						onChange: soundChange,
-					}),
-					'Enable sound',
-				),
-				enableMusic = h(
-					'label',
-					{
-						style: {
-							position: 'absolute',
-							left: '135px',
-							top: '53px',
-						},
-					},
-					h('input', {
-						type: 'checkbox',
-						ref: function(ctrl) {
-							ctrl && options.register('enableMusic', ctrl);
-						},
-						onChange: musicChange,
-					}),
-					'Enable music',
-				),
-				hideRightpane = h(
-					'label',
-					{
-						style: {
-							position: 'absolute',
-							left: '8px',
-							top: '88px',
-						},
-					},
-					h('input', {
-						type: 'checkbox',
-						ref: function(ctrl) {
-							ctrl && options.register('hideRightpane', ctrl);
-						},
-						onChange: hideRightpaneChange,
-					}),
-					'Hide rightpane',
-				),
-				disableTut = h(
-					'label',
-					{
-						style: {
-							position: 'absolute',
-							left: '8px',
-							top: '123px',
-						},
-					},
-					h('input', {
-						type: 'checkbox',
-						checked: this.props.disableTut,
-						onChange: e => this.props.dispatch(store.setOpt('disableTut', e.target.checked)),
-					}),
-					'Disable tutorial',
-				);
-			mainc.push(
-				h(
-					'div',
-					{
-						className: 'bgbox',
-						style: {
-							position: 'absolute',
-							left: '585px',
-							top: '380px',
-							width: '267px',
-							height: '156px',
-						},
-					},
-					wipe,
-					changePass,
-					enableSound,
-					enableMusic,
-					hideRightpane,
-					disableTut,
-				),
-			);
+					}}
+				/>
+				<label
+					style={{
+						position: 'absolute',
+						left: '8px',
+						top: '53px',
+					}}>
+					<input
+						type='checkbox'
+						ref={(ctrl) => ctrl && options.register('enableSound', ctrl)}
+						onChange={soundChange}
+					/>
+					Enable sound
+				</label>
+				<label
+					style={{
+						position: 'absolute',
+						left: '135px',
+						top: '53px',
+					}}>
+					<input
+						type='checkbox'
+						ref={(ctrl) => ctrl && options.register('enableMusic', ctrl)}
+						onChange={musicChange}
+					/>
+					Enable music
+				</label>
+				<label
+					style={{
+						position: 'absolute',
+						left: '8px',
+						top: '88px',
+					}}>
+					<input
+						type='checkbox'
+						ref={(ctrl) => ctrl && options.register('hideRightpane', ctrl)}
+						onChange={hideRightpaneChange}
+					/>
+					Hide rightpane
+				</label>
+				<label
+					style={{
+						position: 'absolute',
+						left: '8px',
+						top: '123px',
+					}}>
+					<input
+						type='checkbox'
+						checked={this.props.disableTut}
+						onChange={e => this.props.dispatch(store.setOpt('disableTut', e.target.checked))}
+					/>
+					Disable tutorial
+				</label>
+				<label
+					style={{
+						position: 'absolute',
+						left: '135px',
+						top: '123px',
+					}}>
+					<input
+						type='checkbox'
+						checked={this.props.lofiArt}
+						onChange={e => this.props.dispatch(store.setOpt('lofiArt', e.target.checked))}
+					/>
+					Lofi Art
+				</label>
+			</div>);
 		}
 		return h('div', { className: 'bg_main' }, ...mainc);
 	}

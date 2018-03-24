@@ -21,13 +21,13 @@ const adrtbl = new Uint16Array([
 ]);
 exports.getAdrenalRow = function(x) {
 	x |= 0;
-	var sign = (x > 0) - (x < 0);
+	const sign = (x > 0) - (x < 0);
 	x = Math.abs(x);
 	if (x > 15) return '';
-	var row = adrtbl[x],
+	let row = adrtbl[x],
 		atks = row & 7,
 		ret = '';
-	for (var i = 0; i < atks; i++) {
+	for (let i = 0; i < atks; i++) {
 		row >>= 3;
 		ret += (i ? ', ' : '') + (row & 7) * sign;
 	}
@@ -39,7 +39,7 @@ exports.countAdrenaline = function(x) {
 };
 exports.calcAdrenaline = function(y, dmg) {
 	if (y < 2) return dmg;
-	var row = adrtbl[Math.abs(dmg)];
+	const row = adrtbl[Math.abs(dmg)];
 	if (y - 2 >= (row & 7)) return 0;
 	return ((row >> ((y - 1) * 3)) & 7) * ((dmg > 0) - (dmg < 0));
 };

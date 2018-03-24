@@ -129,20 +129,17 @@ input[type="text"],input[type="password"],input[type="number"],input:not([type])
 	background-color:#222;
 }
 @keyframes animatedShiny {
-	0% { filter: hue-rotate(90deg) }
-	100% { filter: hue-rotate(270deg) }
+	0% { filter:hue-rotate(90deg) }
+	100% { filter:hue-rotate(270deg) }
 }
-@keyframes ants { to { background-position: 100% 100% } }
+@keyframes ants { to { background-position:100% 100% } }
 .ants-red {
-	background: linear-gradient(#fff, #fff) padding-box,
+	background:linear-gradient(#fff, #fff) padding-box,
 		repeating-linear-gradient(-45deg, red 0, red 25%, #fff 0, #fff 50%) 0 / .6em .6em;
-	animation: ants 8s linear infinite;
+	animation:ants 8s linear infinite;
 }
-.ants-black {
-	background: linear-gradient(#fff, #fff) padding-box,
-		repeating-linear-gradient(-45deg, #000 0, #000 25%, #fff 0, #fff 50%) 0 / .6em .6em;
-	animation: ants 8s linear infinite;
-}
+.ants-black { border:2px #fff solid!important }
+.ants-light { border:2px #000 solid!important }
 .shiny {
-	animation: animatedShiny 8s linear infinite alternate-reverse;
+	animation:animatedShiny 8s linear infinite alternate-reverse;
 }

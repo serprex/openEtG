@@ -12,6 +12,7 @@ const ui = require('../ui'),
 	aiSearch = require('../ai/search'),
 	Components = require('../Components'),
 	store = require('../store'),
+	{connect} = require('react-redux'),
 	React = require('react'),
 	h = React.createElement;
 
@@ -157,7 +158,7 @@ const activeInfo = {
 		),
 };
 
-function ThingInst(props) {
+const ThingInst = connect(({opts}) => ({ lofiArt: opts.lofiArt }))(function ThingInst(props) {
 	const obj = props.obj,
 		game = props.game,
 		scale =
@@ -165,11 +166,9 @@ function ThingInst(props) {
 				? 1.2
 				: obj.type == etg.Spell ? 0.85 : 1,
 		isSpell = obj.type === etg.Spell;
-	const children = [
-		h('img', {
-			className: obj.card.shiny ? 'shiny' : undefined,
-			src: '/Cards/' + obj.card.code.toString(32) + '.png',
-			style: {
+	const children = props.lofiArt ? [
+		<div className={obj.card.shiny ? 'shiny' : undefined}
+			style={{
 				position: 'absolute',
 				left: '0',
 				top: isSpell ? '0' : '10px',
@@ -177,8 +176,21 @@ function ThingInst(props) {
 				height: 64 * scale + 'px',
 				backgroundColor: ui.maybeLightenStr(obj.card),
 				pointerEvents: 'none',
-			},
-		}),
+			}}
+		>{obj.card ? obj.card.name : obj.name}</div>
+	] : [
+		<img className={obj.card.shiny ? 'shiny' : undefined}
+			src={'/Cards/' + obj.card.code.toString(32) + '.png'}
+			style={{
+				position: 'absolute',
+				left: '0',
+				top: isSpell ? '0' : '10px',
+				width: 64 * scale + 'px',
+				height: 64 * scale + 'px',
+				backgroundColor: ui.maybeLightenStr(obj.card),
+				pointerEvents: 'none',
+			}}
+		/>
 	];
 	const visible = [
 		obj.status.get('psionic'),
@@ -197,30 +209,28 @@ function ThingInst(props) {
 	for (let k = 0; k < 7; k++) {
 		if (!isSpell && visible[k]) {
 			children.push(
-				h('div', {
-					className: 'ico s' + k,
-					style: {
+				<div className={'ico s' + k}
+					style={{
 						position: 'absolute',
 						top: 64 * scale + 10 + 'px',
 						left: [32, 8, 8, 0, 24, 16, 8][k] + 'px',
 						opacity: '.6',
-					},
-				}),
+					}}
+				/>
 			);
 		}
 	}
 	for (let k = 0; k < 3; k++) {
 		if (!isSpell && bordervisible[k]) {
 			children.push(
-				h('div', {
-					className: 'ico sborder' + k,
-					style: {
+				<div className={'ico sborder' + k}
+					style={{
 						position: 'absolute',
 						left: '0',
 						top: '0',
 						transform: scale === 1 ? undefined : 'scale(' + scale + ')',
-					},
-				}),
+					}}
+				/>
 			);
 		}
 	}
@@ -284,8 +294,7 @@ function ThingInst(props) {
 	}
 	if (obj.hasactive('prespell', 'protectonce')) {
 		children.push(
-			<div
-				className='ico protection'
+			<div className='ico protection'
 				style={{
 					position: 'absolute',
 					left: '0',
@@ -298,7 +307,13 @@ function ThingInst(props) {
 	return h('div', Object.assign(
 		isSpell && obj.owner == game.player2 && !game.player1.precognition ?
 		{
-			className: tgtclass(game, obj),
+			children: [h('div', {
+				className: 'ico cback',
+				style: {
+					left: '2px',
+					top: '2px',
+				},
+			})],
 			style: {
 				position: 'absolute',
 				left: pos.x - 32 + 'px',
@@ -307,17 +322,9 @@ function ThingInst(props) {
 				height: '80px',
 				border: 'transparent 2px solid',
 			},
-			children: [h('div', {
-				className: 'ico cback',
-				style: {
-					left: '2px',
-					top: '2px',
-				},
-			})],
 		}
 		: {
 			children: children,
-			className: tgtclass(game, obj),
 			style: {
 				position: 'absolute',
 				left: pos.x - 32 * scale + 'px',
@@ -330,6 +337,7 @@ function ThingInst(props) {
 				border: 'transparent 2px solid',
 			},
 		},{
+			className: tgtclass(game, obj),
 			onMouseOver: props.setInfo && (e => props.setInfo(e, obj, pos.x)),
 			onMouseOut: props.onMouseOut,
 			onClick: function() {
@@ -382,7 +390,7 @@ function ThingInst(props) {
 			},
 		})
 	);
-}
+});
 
 function addNoHealData(game) {
 	const data = game.dataNext || {};
@@ -653,7 +661,8 @@ function startMatch(self, game, gameData) {
 function tgtclass(game, obj) {
 	if (game.targeting) {
 		if (game.targeting.filter(obj)) return 'ants-red';
-	} else if (obj.owner === game.player1 && obj.canactive()) return 'ants-black';
+	} else if (obj.owner === game.player1 && obj.canactive())
+		return obj.card && obj.card.element == etg.Light ? 'ants-light' : 'ants-black';
 }
 
 module.exports = class Match extends React.Component {
@@ -781,66 +790,56 @@ module.exports = class Match extends React.Component {
 
 			const plpos = ui.tgtToPos(pl);
 			children.push(
-				h('div', {
-					className: tgtclass(game, pl),
-					style: {
+				<div className={tgtclass(game, pl)}
+					style={{
 						position: 'absolute',
 						left: plpos.x - 48 + 'px',
 						top: plpos.y - 40 + 'px',
 						width: '96px',
 						height: '80px',
 						border: 'transparent 2px solid',
-					},
-					onClick: self.state.playerClick[j],
-					onMouseOver: function(e) {
-						self.setInfo(e, pl);
-					},
-				}),
-			);
-			children.push(
-				h(
-					'span',
-					{
-						className: 'ico e' + pl.mark,
-						style: {
-							position: 'absolute',
-							left: j ? '160px' : '740px',
-							top: j ? '130px' : '470px',
-							transform: 'translate(-50%,-50%)',
-							textAlign: 'center',
-							pointerEvents: 'none',
-							fontSize: '18px',
-							textShadow: '2px 2px 1px #000,2px 2px 2px #000',
-						},
-					},
-					pl.markpower !== 1 && pl.markpower,
-				),
+					}}
+					onClick={self.state.playerClick[j]}
+					onMouseOver={(e) => self.setInfo(e, pl)}
+				/>,
+				<span className={'ico e' + pl.mark}
+					style={{
+						position: 'absolute',
+						left: j ? '160px' : '740px',
+						top: j ? '130px' : '470px',
+						transform: 'translate(-50%,-50%)',
+						textAlign: 'center',
+						pointerEvents: 'none',
+						fontSize: '18px',
+						textShadow: '2px 2px 1px #000,2px 2px 2px #000',
+					}}>
+					{pl.markpower !== 1 && pl.markpower}
+				</span>
 			);
 			if (pl.sosa) {
 				children.push(
-					h('div', {
-						className: 'ico sacrifice',
-						style: {
+					<div className={'ico sacrifice'}
+						style={{
 							position: 'absolute',
 							left: j ? '800px' : '0',
 							top: j ? '7px' : '502px',
-						},
-					}),
+							pointerEvents: 'none',
+						}}
+					/>
 				);
 			}
 			if (pl.flatline) {
 				children.push(
-					h('span', {
-						className: 'ico sabbath',
-						style: {
+					<span className='ico sabbath'
+						style={{
 							position: 'absolute',
 							left: j ? '792px' : '0',
 							top: j ? '80px' : '288px',
-						},
-					}),
+						}}
+					/>
 				);
 			}
-			let handOverlay = pl.usedactive
+			const handOverlay = pl.usedactive
 				? 'ico silence'
 				: pl.sanctuary
 					? 'ico sanctuary'
@@ -849,29 +848,26 @@ module.exports = class Match extends React.Component {
 						: '';
 			if (handOverlay) {
 				children.push(
-					h('span', {
-						className: handOverlay,
-						style: {
+					<span className={handOverlay}
+						style={{
 							position: 'absolute',
 							left: j ? '3px' : '759px',
 							top: j ? '75px' : '305px',
-						},
-					}),
+						}}
+					/>
 				);
 			}
 			for (let i = 0; i < pl.hand.length; i++) {
 				children.push(
-					h(ThingInst, {
-						obj: pl.hand[i],
-						game: game,
-						setGame: () => self.forceUpdate(),
-						discarding: self.state.discarding,
-						funcEnd: self.state.funcEnd,
-						setInfo: function(e, obj, x) {
-							return self.setCard(e, obj.card, x);
-						},
-						onMouseOut: () => self.clearCard(),
-					}),
+					<ThingInst
+						obj={pl.hand[i]}
+						game={game}
+						setGame={() => self.forceUpdate()}
+						discarding={self.state.discarding}
+						funcEnd={self.state.funcEnd}
+						setInfo={(e, obj, x) => self.setCard(e, obj.card, x)}
+						onMouseOut={() => self.clearCard()}
+					/>
 				);
 			}
 			const creatures = [], perms = [];
@@ -879,18 +875,14 @@ module.exports = class Match extends React.Component {
 				const cr = pl.creatures[i];
 				if (cr && !(j == 1 && cloaked)) {
 					creatures.push(
-						h(ThingInst, {
-							key: i,
-							obj: cr,
-							game: game,
-							setGame: () => self.forceUpdate(),
-							setInfo: function(e, obj, x) {
-								return self.setInfo(e, obj, x);
-							},
-							onMouseOut: function() {
-								self.clearCard();
-							},
-						}),
+						<ThingInst
+							key={i}
+							obj={cr}
+							game={game}
+							setGame={() => self.forceUpdate()}
+							setInfo={(e, obj, x) => self.setInfo(e, obj, x)}
+							onMouseOut={() => self.clearCard()}
+						/>
 					);
 				}
 			}
@@ -899,14 +891,14 @@ module.exports = class Match extends React.Component {
 				if (pr && pr.status.get('flooding')) floodvisible = true;
 				if (pr && !(j == 1 && cloaked && !pr.status.get('cloak'))) {
 					perms.push(
-						h(ThingInst, {
-							key: i,
-							obj: pr,
-							game: game,
-							setGame: () => self.forceUpdate(),
-							setInfo: (e, obj, x) => self.setInfo(e, obj, x),
-							onMouseOut: () => self.clearCard(),
-						}),
+						<ThingInst
+							key={i}
+							obj={pr}
+							game={game}
+							setGame={() => self.forceUpdate()}
+							setInfo={(e, obj, x) => self.setInfo(e, obj, x)}
+							onMouseOut={() => self.clearCard()}
+						/>
 					);
 				}
 			}
@@ -918,86 +910,82 @@ module.exports = class Match extends React.Component {
 			const wp = pl.weapon;
 			if (wp && !(j == 1 && cloaked)) {
 				children.push(
-					h(ThingInst, {
-						obj: wp,
-						game: game,
-						setGame: () => self.forceUpdate(),
-						setInfo: (e, obj, x) => self.setInfo(e, obj, x),
-						onMouseOut: () => self.clearCard(),
-					}),
+					<ThingInst
+						obj={wp}
+						game={game}
+						setGame={() => self.forceUpdate()}
+						setInfo={(e, obj, x) => self.setInfo(e, obj, x)}
+						onMouseOut={() => self.clearCard()}
+					/>
 				);
 			}
 			const sh = pl.shield;
 			if (sh && !(j == 1 && cloaked)) {
 				children.push(
-					h(ThingInst, {
-						obj: sh,
-						game: game,
-						setGame: () => self.forceUpdate(),
-						setInfo: (e, obj, x) => self.setInfo(e, obj, x),
-						onMouseOut: () => self.clearCard(),
-					}),
+					<ThingInst
+						obj={sh}
+						game={game}
+						setGame={() => self.forceUpdate()}
+						setInfo={(e, obj, x) => self.setInfo(e, obj, x)}
+						onMouseOut={() => self.clearCard()}
+					/>
 				);
 			}
 			const qx = j ? 792 : 0,
 				qy = j ? 106 : 308;
 			for (let k = 1; k < 13; k++) {
 				children.push(
-					h('span', {
-						className: 'ico e' + k,
-						style: {
+					<span className={'ico e' + k}
+						style={{
 							position: 'absolute',
 							left: qx + (k & 1 ? 0 : 54) + 'px',
 							top: qy + Math.floor((k - 1) / 2) * 32 + 'px',
-						},
-					}),
-					h(
-						'span',
-						{
-							style: {
-								position: 'absolute',
-								left: qx + (k & 1 ? 32 : 86) + 'px',
-								top: qy + Math.floor((k - 1) / 2) * 32 + 4 + 'px',
-								fontSize: '16px',
-								pointerEvents: 'none',
-							},
-						},
-						pl.quanta[k] || '',
-					),
+						}}
+					/>,
+					<span
+						style={{
+							position: 'absolute',
+							left: qx + (k & 1 ? 32 : 86) + 'px',
+							top: qy + Math.floor((k - 1) / 2) * 32 + 4 + 'px',
+							fontSize: '16px',
+							pointerEvents: 'none',
+						}}>
+						{pl.quanta[k] || ''}
+					</span>
 				);
 			}
 			children.push(
-				h('div', {
-					style: {
+				<div
+					style={{
 						backgroundColor: '#000',
 						position: 'absolute',
 						left: plpos.x - 41 + 'px',
 						top: j ? '36px' : '531px',
 						width: '82px',
 						height: '16px',
-					},
-				}),
+					}}
+				/>
 			);
 			if (pl.hp > 0) {
 				children.push(
-					h('div', {
-						style: {
+					<div
+						style={{
 							backgroundColor: ui.strcols[etg.Life],
 							position: 'absolute',
 							left: plpos.x - 40 + 'px',
 							top: j ? '37px' : '532px',
 							width: 80 * pl.hp / pl.maxhp + 'px',
 							height: '14px',
-						},
-					}),
+						}}
+					/>
 				);
 				if (!cloaked && game.expectedDamage[j]) {
 					const x1 = 80 * pl.hp / pl.maxhp;
 					const x2 =
 						x1 - 80 * Math.min(game.expectedDamage[j], pl.hp) / pl.maxhp;
 					children.push(
-						h('div', {
-							style: {
+						<div
+							style={{
 								backgroundColor:
 									ui.strcols[
 										game.expectedDamage[j] >= pl.hp
@@ -1009,8 +997,8 @@ module.exports = class Match extends React.Component {
 								top: j ? '37px' : '532px',
 								width: Math.max(x1, x2) - Math.min(x1, x2) + 'px',
 								height: '14px',
-							},
-						}),
+							}}
+						/>
 					);
 				}
 			}
@@ -1048,110 +1036,93 @@ module.exports = class Match extends React.Component {
 		if (floodvisible) children.push(floodsvg);
 
 		children.push(
-			h(
-				'div',
-				{
-					style: {
-						whiteSpace: 'pre-wrap',
-						textAlign: 'center',
-						position: 'absolute',
-						left: '0px',
-						top: '40px',
-						width: '140px',
-					},
-				},
-				(['Commoner', 'Mage', 'Champion', 'Demigod', 'Arena1', 'Arena2'][
+			<div
+				style={{
+					whiteSpace: 'pre-wrap',
+					textAlign: 'center',
+					position: 'absolute',
+					left: '0px',
+					top: '40px',
+					width: '140px',
+				}}>
+				{(['Commoner', 'Mage', 'Champion', 'Demigod', 'Arena1', 'Arena2'][
 					this.props.game.level
 				] || '') +
 					'\n' +
-					(this.props.game.foename || '-'),
-			),
-		);
-		children.push(
-			h(
-				'span',
-				{
-					style: {
-						position: 'absolute',
-						left: '762px',
-						top: '580px',
-						pointerEvents: 'none',
-					},
-				},
-				turntell,
-			),
+					(this.props.game.foename || '-')}
+			</div>,
+			<span
+				style={{
+					position: 'absolute',
+					left: '762px',
+					top: '580px',
+					pointerEvents: 'none',
+				}}>
+				{turntell}
+			</span>
 		);
 		if (self.state.effects) {
 			Array.prototype.push.apply(children, self.state.effects);
 		}
 		if (self.state.hovercode) {
 			children.push(
-				h(Components.Card, {
-					x: self.state.hoverx,
-					y: self.state.hovery,
-					code: self.state.hovercode,
-				}),
+				<Components.Card
+					x={self.state.hoverx}
+					y={self.state.hovery}
+					code={self.state.hovercode}
+				/>
 			);
 		}
 		if (self.state.tooltip) {
 			children.push(
-				h(Components.Text, {
-					className: 'infobox',
-					text: self.state.tooltip,
-					icoprefix: 'te',
-					style: {
+				<Components.Text
+					className='infobox'
+					text={self.state.tooltip}
+					icoprefix='te'
+					style={{
 						position: 'absolute',
 						left: self.state.toolx + 'px',
 						top: self.state.tooly + 'px',
-					},
-				}),
+					}}
+				/>
 			);
 		}
 		children.push(
-			h('input', {
-				type: 'button',
-				value: self.state.resigning ? 'Confirm' : 'Resign',
-				onClick: function() {
-					self.state.funcResign();
-				},
-				style: {
+			<input type='button'
+				value={self.state.resigning ? 'Confirm' : 'Resign'}
+				onClick={() => self.state.funcResign()}
+				style={{
 					position: 'absolute',
 					left: '8px',
 					top: '20px',
-				},
-			}),
+				}}
+			/>
 		);
 		if (!self.props.data.spectate) {
 			if (cancelText) {
 				children.push(
-					h('input', {
-						type: 'button',
-						value: cancelText,
-						onClick: function() {
-							self.state.funcCancel();
-						},
-						style: {
+					<input type='button'
+						value={cancelText}
+						onClick={() => self.state.funcCancel()}
+						style={{
 							position: 'absolute',
 							left: '800px',
 							top: '560px',
-						},
-					}),
+						}}
+					/>
 				);
 			}
 			if (endText) {
 				children.push(
-					h('input', {
-						type: 'button',
-						value: endText,
-						onClick: function() {
-							self.state.funcEnd();
-						},
-						style: {
+					<input type='button'
+						value={endText}
+						onClick={() => self.state.funcEnd()}
+						style={{
 							position: 'absolute',
 							left: '800px',
 							top: '530px',
-						},
-					}),
+						}}
+					/>
 				);
 			}
 		}
