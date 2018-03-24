@@ -18,7 +18,6 @@ input[type="button"]{
 	border:solid #000 1px;
 	width:72px;
 	height:20px;
-	font-size:14px;
 	cursor:pointer;
 }
 input[type="button"]:hover{background:linear-gradient(to bottom,#ccdde0,#586776)}
@@ -35,7 +34,7 @@ input[type="text"],input[type="password"],input[type="number"],input:not([type])
 .atop2{display:inline-block;width:48px;text-align:right}
 .atop3{display:inline-block;width:48px}
 .atop4{display:inline-block;width:48px;text-align:right;margin-right:32px}
-.cardslot{font-size:12px;height:20px;width:100px;display:table-cell;vertical-align:middle;border:1px solid}
+.cardslot{font-size:11px;height:20px;width:100px;display:table-cell;line-height:20px;border:1px solid}
 .infobox{
 	opacity:.7;
 	background-color:#000;
@@ -118,15 +117,16 @@ input[type="text"],input[type="password"],input[type="number"],input:not([type])
 	color:#bd3636;
 	background-color:#222;
 	word-wrap:break-word;
+	font:14px sans-serif;
 }
 #chatinput{
 	width:350px;
 	height:40px;
 	resize:none;
 	border:0;
-	font-size:14px;
 	color:#ddd;
 	background-color:#222;
+	font:14px sans-serif;
 }
 @keyframes animatedShiny {
 	0% { filter:hue-rotate(90deg) }
