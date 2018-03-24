@@ -1227,7 +1227,7 @@ const Skills = (module.exports = {
 			Skills.destroy.func(c, t, true);
 			const relic = new Thing(t.card.as(Cards.GoldenRelic));
 			relic.usedactive = false;
-			c.owner.addPerm(relic);
+			t.owner.addPerm(relic);
 		} else {
 			t.status.clear();
 			t.transform(t.card.as(Cards.GoldenRelic));
