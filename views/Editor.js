@@ -452,15 +452,10 @@ module.exports = connect(({opts}) => ({ deck: opts.deck, deckname: opts.deckname
 		}
 		const decksprite = <Components.DeckDisplay
 			onMouseOver={(_, code) => setCardArt(code)}
-			onClick={(_, code) => {
+			onClick={(i, code) => {
 				if (!self.props.acard || code != self.props.acard.code) {
 					const newdeck = sortedDeck.slice();
-					for (let i = 0; i < newdeck.length; i++) {
-						if (newdeck[i] == code) {
-							newdeck.splice(i, 1);
-							break;
-						}
-					}
+					newdeck.splice(i, 1);
 					self.setState({ deck: newdeck });
 				}
 			}}

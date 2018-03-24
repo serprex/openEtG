@@ -173,17 +173,17 @@ exports.Card = function(props) {
 
 function DeckDisplay(props) {
 	let mark = -1,
-		i = -1;
-	const children = props.deck.map(code => {
+		j = -1;
+	const children = props.deck.map((code, i) => {
 		const card = Cards.Codes[code];
 		if (card) {
-			i++;
+			j++;
 			return <CardImage
 				card={card}
 				onMouseOver={props.onMouseOver && (() => props.onMouseOver(i, code))}
 				onClick={props.onClick && (() => props.onClick(i, code))}
-				x={(props.x || 0) + 100 + Math.floor(i / 10) * 99}
-				y={(props.y || 0) + 32 + (i % 10) * 19}
+				x={(props.x || 0) + 100 + Math.floor(j / 10) * 99}
+				y={(props.y || 0) + 32 + (j % 10) * 19}
 			/>;
 		} else {
 			const ismark = etgutil.fromTrueMark(code);

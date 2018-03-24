@@ -58,7 +58,7 @@ module.exports = class Bazaar extends React.Component {
 			/>
 			<Components.DeckDisplay
 				deck={this.state.deck}
-				onMouseOver={(i, code) => this.setState({ code: code })}
+				onMouseOver={(i, code) => this.setState({ code })}
 				onClick={(i) => {
 					const newdeck = this.state.deck.slice();
 					newdeck.splice(i, 1);
