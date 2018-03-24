@@ -963,6 +963,7 @@ module.exports = class Match extends React.Component {
 						top: j ? '36px' : '531px',
 						width: '82px',
 						height: '16px',
+						pointerEvents: 'none',
 					}}
 				/>
 			);
@@ -976,6 +977,7 @@ module.exports = class Match extends React.Component {
 							top: j ? '37px' : '532px',
 							width: 80 * pl.hp / pl.maxhp + 'px',
 							height: '14px',
+							pointerEvents: 'none',
 						}}
 					/>
 				);
@@ -997,6 +999,7 @@ module.exports = class Match extends React.Component {
 								top: j ? '37px' : '532px',
 								width: Math.max(x1, x2) - Math.min(x1, x2) + 'px',
 								height: '14px',
+								pointerEvents: 'none',
 							}}
 						/>
 					);

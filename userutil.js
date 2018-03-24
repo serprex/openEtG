@@ -18,20 +18,20 @@ exports.pveCostReward = new Uint8Array([
 	10,
 	60,
 	20,
-	180,
+	222,
 	10,
 	55,
 	20,
-	110,
+	111,
 ]);
 exports.arenaCost = function(lv) {
 	return exports.pveCostReward[lv ? 10 : 8];
 };
 exports.calcWealth = function(cardpool, isDecoded) {
 	if (!cardpool) return 0;
-	var wealth = 0;
+	let wealth = 0;
 	function wealthIter(code, count) {
-		var card = Cards.Codes[code];
+		const card = Cards.Codes[code];
 		if (
 			card &&
 			card.rarity != -1 &&
@@ -49,12 +49,8 @@ exports.calcWealth = function(cardpool, isDecoded) {
 	} else {
 		cardpool.forEach(
 			isDecoded
-				? function(code) {
-						wealthIter(code, 1);
-					}
-				: function(count, code) {
-						wealthIter(code, count);
-					},
+				? (code) => wealthIter(code, 1)
+				: (count, code) => wealthIter(code, count)
 		);
 	}
 	return wealth;
