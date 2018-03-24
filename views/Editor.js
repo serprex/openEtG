@@ -71,7 +71,7 @@ module.exports = connect(({opts}) => ({ deck: opts.deck, deckname: opts.deckname
 
 	processDeck(deck) {
 		let mark = 0;
-		for (var i = deck.length - 1; i >= 0; i--) {
+		for (let i = deck.length - 1; i >= 0; i--) {
 			if (!(deck[i] in Cards.Codes)) {
 				const index = etgutil.fromTrueMark(deck[i]);
 				if (~index) {
@@ -80,7 +80,7 @@ module.exports = connect(({opts}) => ({ deck: opts.deck, deckname: opts.deckname
 				deck.splice(i, 1);
 			}
 		}
-		return { mark: mark, deck: deck };
+		return { mark, deck };
 	}
 
 	render() {
@@ -92,7 +92,7 @@ module.exports = connect(({opts}) => ({ deck: opts.deck, deckname: opts.deckname
 		const cardminus = [];
 		if (sock.user) {
 			for (let i = sortedDeck.length - 1; i >= 0; i--) {
-				var code = sortedDeck[i],
+				let code = sortedDeck[i],
 					card = Cards.Codes[code];
 				if (card.type != etg.Pillar) {
 					if (sumCardMinus(code) == 6) {
@@ -450,13 +450,11 @@ module.exports = connect(({opts}) => ({ deck: opts.deck, deckname: opts.deckname
 				}),
 			);
 		}
-		const decksprite = h(Components.DeckDisplay, {
-			onMouseOver: function(i, code) {
-				return setCardArt(code);
-			},
-			onClick: function(_, code) {
+		const decksprite = <Components.DeckDisplay
+			onMouseOver={(_, code) => setCardArt(code)}
+			onClick={(_, code) => {
 				if (!self.props.acard || code != self.props.acard.code) {
-					const newdeck = self.state.deck.slice();
+					const newdeck = sortedDeck.slice();
 					for (let i = 0; i < newdeck.length; i++) {
 						if (newdeck[i] == code) {
 							newdeck.splice(i, 1);
@@ -465,9 +463,9 @@ module.exports = connect(({opts}) => ({ deck: opts.deck, deckname: opts.deckname
 					}
 					self.setState({ deck: newdeck });
 				}
-			},
-			deck: sortedDeck,
-		});
+			}}
+			deck={sortedDeck}
+		/>;
 		const cardsel = h(Components.CardSelector, {
 			onMouseOver: setCardArt,
 			onClick: function(code) {

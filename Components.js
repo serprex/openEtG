@@ -178,21 +178,13 @@ function DeckDisplay(props) {
 		const card = Cards.Codes[code];
 		if (card) {
 			i++;
-			return h(CardImage, {
-				card,
-				onMouseOver:
-					props.onMouseOver &&
-					function() {
-						return props.onMouseOver(i, code);
-					},
-				onClick:
-					props.onClick &&
-					function() {
-						return props.onClick(i, code);
-					},
-				x: (props.x || 0) + 100 + Math.floor(i / 10) * 99,
-				y: (props.y || 0) + 32 + (i % 10) * 19,
-			});
+			return <CardImage
+				card={card}
+				onMouseOver={props.onMouseOver && (() => props.onMouseOver(i, code))}
+				onClick={props.onClick && (() => props.onClick(i, code))}
+				x={(props.x || 0) + 100 + Math.floor(i / 10) * 99}
+				y={(props.y || 0) + 32 + (i % 10) * 19}
+			/>;
 		} else {
 			const ismark = etgutil.fromTrueMark(code);
 			if (~ismark) mark = ismark;
@@ -200,8 +192,7 @@ function DeckDisplay(props) {
 	});
 	if (~mark && props.renderMark) {
 		children.push(
-			<span
-				className={'ico e' + mark}
+			<span className={'ico e' + mark}
 				style={{
 					position: 'absolute',
 					left: (props.x || 0) + 66 + 'px',
