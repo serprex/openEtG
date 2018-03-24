@@ -119,6 +119,7 @@ input[type="text"],input[type="password"],input[type="number"],input:not([type])
 	word-wrap:break-word;
 	font:14px sans-serif;
 }
+.chatBox div:not(:first-child) { margin-top:4px }
 #chatinput{
 	width:350px;
 	height:40px;
