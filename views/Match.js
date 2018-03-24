@@ -341,6 +341,7 @@ const ThingInst = connect(({opts}) => ({ lofiArt: opts.lofiArt }))(function Thin
 			onMouseOver: props.setInfo && (e => props.setInfo(e, obj, pos.x)),
 			onMouseOut: props.onMouseOut,
 			onClick: function() {
+				props.onMouseOut();
 				if (game.phase != etg.PlayPhase) return;
 				if (obj.type !== etg.Spell) {
 					if (game.targeting && game.targeting.filter(obj)) {
@@ -777,9 +778,7 @@ module.exports = class Match extends React.Component {
 								self.setCard(e, play, e.pageX);
 							}
 						},
-						onMouseOut: function() {
-							self.clearCard();
-						},
+						onMouseOut: () => self.clearCard(),
 					}),
 				);
 			}
