@@ -121,7 +121,7 @@ exports.blacksummoner = [
 		markpower: 12,
 		cardreward: '027t5',
 		wintext:
-			'You defeat the Dark Summoner that controlled the dragons. The dragons fly away, but two of them stays, looking at you. You decide to let them join you!',
+			'You defeat the Dark Summoner that controlled the dragons. The dragons fly away, but two of them stay, looking at you. You decide to let them join you!',
 	},
 ];
 

@@ -80,37 +80,33 @@ module.exports = class Reward extends React.Component {
 		];
 		if (numberofcopies > 1) {
 			rewardui.push(
-				h(
-					'div',
-					{
-						style: {
-							position: 'absolute',
-							left: '20px',
-							top: '100px',
-						},
-					},
-					'You will get ' + numberofcopies + ' copies of the card you choose',
-				),
+				<div
+					style={{
+						position: 'absolute',
+						left: '20px',
+						top: '100px',
+					}}>
+					You will get {numberofcopies} copies of the card you choose
+				</div>
 			);
 		}
 		if (code) {
 			rewardui.push(<Components.ExitBtn x={10} y={10} />);
 		}
 		self.state.rewardList.forEach((reward, i) => {
-			const card = h(Components.CardImage, {
-				x: 100 + Math.floor(i / 12 * 13),
-				y: 272 + (i % 12) * 19,
-				card: Cards.Codes[reward],
-				onClick: function() {
-					self.setState({ chosenReward: reward });
-				},
-			});
-			rewardui.push(card);
+			rewardui.push(
+				<Components.CardImage
+					x={100 + Math.floor(i / 12) * 108}
+					y={272 + (i % 12) * 20}
+					card={Cards.Codes[reward]}
+					onClick={() => self.setState({ chosenReward: reward })}
+				/>
+			);
 		});
 
 		rewardui.push(
 			self.state.chosenReward &&
-				h(Components.Card, { x: 233, y: 10, code: self.state.chosenReward }),
+				<Components.Card x={233} y={10} code={self.state.chosenReward} />,
 		);
 
 		return h(React.Fragment, null, ...rewardui);
