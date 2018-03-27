@@ -71,21 +71,21 @@ const sockEvents = {
 			Notification.requestPermission();
 			new Notification(data.u, { body: data.msg });
 		}
-		var now = new Date(),
+		const now = new Date(),
 			h = now.getHours(),
 			m = now.getMinutes(),
 			hs = h < 10 ? '0' + h : h.toString(),
 			ms = m < 10 ? '0' + m : m.toString();
-		var span = document.createElement('div');
+		const span = document.createElement('div');
 		if (data.mode != 1) span.style.color = data.mode == 2 ? '#69f' : '#ddd';
 		if (data.guest) span.style.fontStyle = 'italic';
 		span.appendChild(document.createTextNode(hs + ms + ' '));
 		if (data.u) {
-			var belly = document.createElement('b');
+			const belly = document.createElement('b');
 			belly.appendChild(document.createTextNode(data.u + ' '));
 			span.appendChild(belly);
 		}
-		var decklink = /\b(([01][0-9a-v]{4})+)\b/g,
+		let decklink = /\b(([01][0-9a-v]{4})+)\b/g,
 			reres,
 			lastindex = 0;
 		while ((reres = decklink.exec(data.msg))) {
@@ -93,9 +93,9 @@ const sockEvents = {
 				span.appendChild(
 					document.createTextNode(data.msg.slice(lastindex, reres.index)),
 				);
-			var notlink = false;
-			for (var i = 2; i < reres[0].length; i += 5) {
-				var code = parseInt(reres[0].substr(i, 3), 32);
+			let notlink = false;
+			for (let i = 2; i < reres[0].length; i += 5) {
+				const code = parseInt(reres[0].substr(i, 3), 32);
 				if (!(code in Cards.Codes) && etgutil.fromTrueMark(code) == -1) {
 					notlink = true;
 					break;
@@ -105,7 +105,7 @@ const sockEvents = {
 				lastindex = reres.index;
 				continue;
 			}
-			var link = document.createElement('a');
+			const link = document.createElement('a');
 			link.href = 'deck/' + reres[0];
 			link.target = '_blank';
 			link.appendChild(document.createTextNode(reres[0]));
@@ -154,7 +154,7 @@ const sockEvents = {
 		}
 	},
 	challenge: function(data) {
-		var span = document.createElement('div');
+		const span = document.createElement('div');
 		span.style.cursor = 'pointer';
 		span.style.color = '#69f';
 		span.addEventListener('click', function() {
@@ -199,10 +199,10 @@ function chatmute() {
 }
 function maybeSendChat(e) {
 	e.cancelBubble = true;
-	var kc = e.which || e.keyCode;
+	const kc = e.which || e.keyCode;
 	if (kc == 13) {
 		e.preventDefault();
-		var chatinput = document.getElementById('chatinput'),
+		let chatinput = document.getElementById('chatinput'),
 			msg = chatinput.value.trim();
 		chatinput.value = '';
 		if (msg == '/help') {
@@ -242,7 +242,7 @@ function maybeSendChat(e) {
 			sock.emit('roll', data);
 		} else if (msg.match(/^\/decks/) && sock.user) {
 			const rx = msg.length > 7 && new RegExp(msg.slice(7));
-			var names = Object.keys(sock.user.decks);
+			let names = Object.keys(sock.user.decks);
 			if (rx) names = names.filter(name => name.match(rx));
 			names.sort();
 			names.forEach(name => {
@@ -289,8 +289,8 @@ function maybeSendChat(e) {
 			if (sock.user) {
 				const data = { msg: msg };
 				if (msg.match(/^\/w( |")/)) {
-					var match = msg.match(/^\/w"([^"]*)"/);
-					var to = (match && match[1]) || msg.slice(3, msg.indexOf(' ', 4));
+					const match = msg.match(/^\/w"([^"]*)"/);
+					const to = (match && match[1]) || msg.slice(3, msg.indexOf(' ', 4));
 					if (!to) return;
 					chatinput.value = msg.slice(0, 4 + to.length);
 					data.msg = msg.slice(4 + to.length);

@@ -363,7 +363,7 @@ const Skills = (module.exports = {
 		c.castSpell(t, choice.active.cast);
 	},
 	dagger: c => {
-		var buff = c.owner.mark == etg.Darkness || c.owner.mark == etg.Death;
+		let buff = c.owner.mark == etg.Darkness || c.owner.mark == etg.Death;
 		c.owner.permanents.forEach(p => {
 			if (p && p.status.get('cloak')) buff++;
 		});
@@ -1041,9 +1041,9 @@ const Skills = (module.exports = {
 			lobotomize: 2,
 			quint: 2,
 		};
-		var stat = c.card.upped ? 0.5 : 0;
-		for (var i = c.owner.hand.length - 1; ~i; i--) {
-			var card = c.owner.hand[i].card;
+		let stat = c.card.upped ? 0.5 : 0;
+		for (let i = c.owner.hand.length - 1; ~i; i--) {
+			const card = c.owner.hand[i].card;
 			if (etg.ShardList.some(x => x && card.isOf(Cards.Codes[x]))) {
 				if (card.upped) {
 					stat += 0.5;
@@ -1052,9 +1052,9 @@ const Skills = (module.exports = {
 				c.owner.hand.splice(i, 1);
 			}
 		}
-		var num = 0,
+		let num = 0,
 			shlist = [];
-		for (var i = 1; i < 13; i++) {
+		for (let i = 1; i < 13; i++) {
 			stat += tally[i] * 2;
 			if (tally[i] > num) {
 				num = tally[i];
@@ -1064,8 +1064,8 @@ const Skills = (module.exports = {
 				shlist.push(i);
 			}
 		}
-		var active = shardSkills[c.choose(shlist) - 1][Math.min(num - 1, 5)];
-		var shardgolem = (c.owner.shardgolem = {
+		const active = shardSkills[c.choose(shlist) - 1][Math.min(num - 1, 5)];
+		const shardgolem = (c.owner.shardgolem = {
 			stat: Math.floor(stat),
 			status: new Status(),
 			active: { cast: parseSkill(active) },
@@ -1109,9 +1109,9 @@ const Skills = (module.exports = {
 			],
 			[[2, '', 'immaterial']],
 		].forEach((slist, i) => {
-			var ishards = tally[i + 1];
-			for (var j = 0; j < slist.length; j++) {
-				var data = slist[j];
+			const ishards = tally[i + 1];
+			for (let j = 0; j < slist.length; j++) {
+				const data = slist[j];
 				if (ishards <= data[0]) return;
 				if (!data[1]) {
 					shardgolem.status.set(data[2], data[3] === undefined ? 1 : data[3]);
@@ -1164,7 +1164,7 @@ const Skills = (module.exports = {
 		t.status.set('psionic', 0);
 	},
 	locket: (c, t) => {
-		var ele = c.status.get('mode') || c.owner.mark;
+		const ele = c.status.get('mode') || c.owner.mark;
 		c.owner.spend(ele, ele > 0 ? -1 : -3);
 	},
 	locketshift: (c, t) => {
@@ -1194,7 +1194,7 @@ const Skills = (module.exports = {
 	luciferin: (c, t) => {
 		c.owner.dmg(-10);
 		c.owner.masscc(c, (c, x) => {
-			for (var key in x.active) {
+			for (const key in x.active) {
 				if (
 					key != 'ownplay' &&
 					key != 'owndiscard' &&
@@ -1282,7 +1282,7 @@ const Skills = (module.exports = {
 		c.status.set('mutant', 1);
 	},
 	mutation: (c, t) => {
-		var rnd = c.rng();
+		const rnd = c.rng();
 		if (rnd < 0.1) {
 			Effect.mkText('Death', t);
 			t.die();
@@ -1310,7 +1310,7 @@ const Skills = (module.exports = {
 					(8 - c.owner.foe.hand.length) * (c.card.upped ? 2 : 1),
 				),
 			);
-			for (var i = c.owner.foe.hand.length; i < 8; i++) {
+			for (let i = c.owner.foe.hand.length; i < 8; i++) {
 				c.owner.foe.addCard(t.card);
 			}
 		}
@@ -1319,7 +1319,7 @@ const Skills = (module.exports = {
 		Skills.lycanthropy.func(t);
 	},
 	nova: (c, t) => {
-		for (var i = 1; i < 13; i++) {
+		for (let i = 1; i < 13; i++) {
 			c.owner.spend(i, -1);
 		}
 		c.owner.nova += 2;
@@ -1328,7 +1328,7 @@ const Skills = (module.exports = {
 		}
 	},
 	nova2: (c, t) => {
-		for (var i = 1; i < 13; i++) {
+		for (let i = 1; i < 13; i++) {
 			c.owner.spend(i, -2);
 		}
 		c.owner.nova += 3;
@@ -1358,7 +1358,7 @@ const Skills = (module.exports = {
 	},
 	nymph: (c, t) => {
 		Effect.mkText('Nymph', t);
-		var e =
+		const e =
 			t.card.element ||
 			(t.active.auto == Skills.pillmat
 				? c.choose([etg.Earth, etg.Fire, etg.Water, etg.Air])
@@ -1396,7 +1396,7 @@ const Skills = (module.exports = {
 		});
 	},
 	paleomagnetism: (c, t) => {
-		var e = c.owner.upto(58);
+		const e = c.owner.upto(58);
 		c.owner.addPerm(
 			new Thing(
 				c.card.as(
@@ -1423,8 +1423,8 @@ const Skills = (module.exports = {
 				Skills.cseed2.func(c, x);
 			}
 		}
-		for (var i = 0; i < 2; i++) {
-			var pl = i ? c.owner.foe : c.owner;
+		for (let i = 0; i < 2; i++) {
+			const pl = i ? c.owner.foe : c.owner;
 			pl.creatures.forEach(cs2);
 			pl.permanents.forEach(cs2);
 			cs2(pl.weapon);
@@ -1443,21 +1443,21 @@ const Skills = (module.exports = {
 			Skills.chimera.func(c, t);
 			return;
 		}
-		var copy = t.clone(c.owner);
+		const copy = t.clone(c.owner);
 		c.owner.addCrea(copy);
 		if (copy.status.get('mutant')) {
-			var buff = c.owner.upto(25);
+			const buff = c.owner.upto(25);
 			copy.buffhp(Math.floor(buff / 5));
 			copy.atk += buff % 5;
 			copy.mutantactive();
 		}
 		if (copy.status.get('voodoo')) {
 			c.owner.foe.dmg(copy.maxhp - copy.hp);
-			var poison = copy.status.get('poison');
+			const poison = copy.status.get('poison');
 			if (poison) c.owner.foe.addpoison(poison);
 			if (c.owner.foe.weapon) {
-				var delayed = copy.status.get('delayed');
-				var frozen = copy.status.get('frozen');
+				const delayed = copy.status.get('delayed');
+				const frozen = copy.status.get('frozen');
 				if (delayed) c.owner.foe.delay(delayed);
 				if (frozen) c.owner.foe.freeze(frozen);
 			}
@@ -1465,7 +1465,7 @@ const Skills = (module.exports = {
 	},
 	phoenix: (c, t, data) => {
 		if (!c.owner.creatures[data.index]) {
-			var ash = (c.owner.creatures[data.index] = new Thing(
+			const ash = (c.owner.creatures[data.index] = new Thing(
 				c.card.as(Cards.Ash),
 			));
 			ash.owner = c.owner;
@@ -1481,12 +1481,12 @@ const Skills = (module.exports = {
 		t.masscc(c, Skills.infect.func);
 	},
 	platearmor: (c, t) => {
-		var buff = c.card.upped ? 6 : 4;
+		const buff = c.card.upped ? 6 : 4;
 		Effect.mkText('0|' + buff, t);
 		t.buffhp(buff);
 	},
 	poison: x => {
-		var n = +x;
+		const n = +x;
 		return adrenathrottle((c, t) => {
 			(t || c.owner.foe).addpoison(n);
 		});
@@ -1495,12 +1495,12 @@ const Skills = (module.exports = {
 		if (c.rng() < 0.7) c.owner.foe.addpoison(1);
 	},
 	powerdrain: (c, t) => {
-		var ti = [];
-		for (var i = 0; i < 23; i++) {
+		const ti = [];
+		for (let i = 0; i < 23; i++) {
 			if (c.owner.creatures[i]) ti.push(i);
 		}
 		if (!ti.length) return;
-		var tgt = c.owner.creatures[c.choose(ti)],
+		const tgt = c.owner.creatures[c.choose(ti)],
 			halfatk = Math.floor(t.trueatk() / 2),
 			halfhp = Math.floor(t.truehp() / 2);
 		t.atk -= halfatk;
@@ -1513,7 +1513,7 @@ const Skills = (module.exports = {
 		c.owner.precognition = true;
 	},
 	predator: (c, t) => {
-		var fhand = c.owner.foe.hand;
+		const fhand = c.owner.foe.hand;
 		if (fhand.length > 4 && !c.hasactive('turnstart', 'predatoroff')) {
 			c.addactive('turnstart', Skills.predatoroff);
 			c.attack(false, 0);
@@ -1546,7 +1546,7 @@ const Skills = (module.exports = {
 		return true;
 	},
 	purify: (c, t) => {
-		var poison = t.status.get('poison');
+		const poison = t.status.get('poison');
 		t.status.set('poison', poison < 0 ? poison - 2 : -2);
 		t.status.set('aflatoxin', 0);
 		t.status.set('neuro', 0);
@@ -1567,7 +1567,7 @@ const Skills = (module.exports = {
 		if (c == t) c.maxhp = c.hp = c.owner.upto(c.card.upped ? 4 : 3);
 	},
 	rage: (c, t) => {
-		var dmg = c.card.upped ? 6 : 5;
+		const dmg = c.card.upped ? 6 : 5;
 		Effect.mkText(dmg + '|-' + dmg, t);
 		t.atk += dmg;
 		t.spelldmg(dmg);
@@ -1587,15 +1587,15 @@ const Skills = (module.exports = {
 	},
 	reap: (c, t) => {
 		if (t.card.isOf(Cards.Skeleton)) return;
-		var atk = t.trueatk(),
-			hp = t.truehp();
-		var index = t.getIndex();
+		const atk = t.trueatk(),
+			hp = t.truehp(),
+			index = t.getIndex();
 		t.die();
 		if (
 			!t.owner.creatures[index] ||
 			t.owner.creatures[index].card != Cards.MalignantCell
 		) {
-			var skele = (t.owner.creatures[index] = new Thing(
+			const skele = (t.owner.creatures[index] = new Thing(
 				t.card.as(Cards.Skeleton),
 			));
 			skele.owner = t.owner;
@@ -1631,7 +1631,7 @@ const Skills = (module.exports = {
 		c.owner.spend(t.card.element, -1);
 	},
 	reinforce: (c, t) => {
-		var atk = c.trueatk(),
+		const atk = c.trueatk(),
 			hp = c.truehp();
 		Effect.mkText(atk + '|' + hp, t);
 		t.atk += atk;
@@ -1657,7 +1657,7 @@ const Skills = (module.exports = {
 	},
 	ricochet: (c, t, data) => {
 		if (t.type != etg.Spell) return;
-		var tgting = Cards.Targeting[data.active.name[0]];
+		const tgting = Cards.Targeting[data.active.name[0]];
 		function tgttest(x) {
 			if (x) {
 				if (tgting(t.owner, x)) tgts.push([x, t.owner]);
@@ -1665,13 +1665,13 @@ const Skills = (module.exports = {
 			}
 		}
 		if (tgting) {
-			var tgts = [];
-			for (var i = 0; i < 2; i++) {
-				var pl = i == 0 ? c.owner : c.owner.foe;
+			const tgts = [];
+			for (let i = 0; i < 2; i++) {
+				const pl = i == 0 ? c.owner : c.owner.foe;
 				pl.forEach(tgttest, true);
 			}
 			if (tgts.length) {
-				var tgt = c.choose(tgts),
+				const tgt = c.choose(tgts),
 					town = t.owner;
 				t.owner = tgt[1];
 				t.castSpell(tgt[0], data.active, true);
@@ -1714,7 +1714,7 @@ const Skills = (module.exports = {
 	},
 	scramble: (c, t) => {
 		if (t.type == etg.Player && !t.sanctuary) {
-			for (var i = 0; i < 9; i++) {
+			for (let i = 0; i < 9; i++) {
 				if (t.spend(etg.Chroma, 1)) {
 					t.spend(etg.Chroma, -1);
 				}
@@ -1722,10 +1722,10 @@ const Skills = (module.exports = {
 		}
 	},
 	serendipity: c => {
-		var num = Math.min(8 - c.owner.hand.length, 3),
-			anyentro = false;
-		for (var i = num - 1; ~i; i--) {
-			var card = c.randomcard(c.card.upped, x => {
+		const num = Math.min(8 - c.owner.hand.length, 3);
+		let anyentro = false;
+		for (let i = num - 1; ~i; i--) {
+			const card = c.randomcard(c.card.upped, x => {
 				return (
 					x.type != etg.Pillar &&
 					x.rarity < 4 &&
@@ -1738,7 +1738,7 @@ const Skills = (module.exports = {
 	},
 	shardgolem: (c, t) => {
 		if (!c.maxhp) {
-			var golem = c.owner.shardgolem || { stat: 1, cast: 0 };
+			const golem = c.owner.shardgolem || { stat: 1, cast: 0 };
 			c.cast = golem.cast;
 			c.castele = etg.Earth;
 			c.atk = c.maxhp = c.hp = golem.stat;
@@ -1750,7 +1750,7 @@ const Skills = (module.exports = {
 		if (c.owner == t) c.status.set('immaterial', 1);
 	},
 	shuffle3: (c, t) => {
-		for (var i = 0; i < 3; i++)
+		for (let i = 0; i < 3; i++)
 			c.owner.deck.splice(c.owner.upto(c.owner.deck.length), 0, t.card);
 	},
 	silence: (c, t) => {
@@ -1761,7 +1761,7 @@ const Skills = (module.exports = {
 			Skills.antimatter.func(c, c);
 			return;
 		}
-		var r = c.rng();
+		const r = c.rng();
 		if (r > 0.9) {
 			c.status.set('adrenaline', 1);
 		} else if (r > 0.8) {
@@ -1773,7 +1773,7 @@ const Skills = (module.exports = {
 		} else if (r > 0.5) {
 			Skills.blackhole.func(c.owner.foe, c.owner);
 		} else if (r > 0.4) {
-			var buff = c.owner.upto(25);
+			const buff = c.owner.upto(25);
 			c.buffhp(Math.floor(buff / 5) + 1);
 			c.atk -= buff % 5 + 1;
 		} else if (r > 0.3) {
@@ -1807,8 +1807,7 @@ const Skills = (module.exports = {
 	siphonactive: (c, t) => {
 		Effect.mkText('Siphon', t);
 		c.lobo();
-		//TODO handle multiple actives
-		for (var key in t.active) {
+		for (const key in t.active) {
 			if (!t.active[key].passive) c.active[key] = t.active[key];
 		}
 		c.cast = t.cast;
@@ -1843,12 +1842,12 @@ const Skills = (module.exports = {
 	},
 	sosa: (c, t) => {
 		c.owner.sosa = 2;
-		for (var i = 1; i < 13; i++) {
+		for (let i = 1; i < 13; i++) {
 			if (i != etg.Death) {
 				c.owner.quanta[i] = 0;
 			}
 		}
-		var n = c.card.upped ? 40 : 48;
+		const n = c.card.upped ? 40 : 48;
 		c.owner.dmg(Math.max(Math.ceil(c.owner.maxhp * n / 100), n), true);
 	},
 	soulcatch: (c, t) => {
@@ -1856,7 +1855,7 @@ const Skills = (module.exports = {
 		c.owner.spend(etg.Death, -3);
 	},
 	spores: (c, t) => {
-		var spore = c.card.as(Cards.Spore);
+		const spore = c.card.as(Cards.Spore);
 		c.owner.addCrea(new Thing(spore));
 		c.owner.addCrea(new Thing(spore));
 	},
@@ -1911,7 +1910,7 @@ const Skills = (module.exports = {
 		c.status.set('golem', 1);
 	},
 	storm: x => {
-		var n = +x;
+		const n = +x;
 		return (c, t) => {
 			t.masscc(c, (c, x) => {
 				x.spelldmg(n);
@@ -1942,20 +1941,20 @@ const Skills = (module.exports = {
 		}
 	},
 	tempering: (c, t) => {
-		var atk = c.card.upped ? 5 : 3;
+		const atk = c.card.upped ? 5 : 3;
 		Effect.mkText(atk + '|0', t);
 		t.atk += atk;
 		t.status.set('frozen', 0);
 	},
 	tesseractsummon: (c, t) => {
-		for (var i = 0; i < (c.card.upped ? 1 : 2); i++) {
-			var pl = i ? c.owner.foe : c.owner;
-			var candidates = [];
-			for (var j = 0; j < pl.deck.length; j++) {
+		for (let i = 0; i < (c.card.upped ? 1 : 2); i++) {
+			const pl = i ? c.owner.foe : c.owner;
+			const candidates = [];
+			for (let j = 0; j < pl.deck.length; j++) {
 				if (pl.deck[j].type == etg.Creature) candidates.push(j);
 			}
 			if (candidates.length) {
-				var idx = pl.choose(candidates),
+				const idx = pl.choose(candidates),
 					crcard = pl.deck.splice(idx, 1)[0],
 					cr = new Thing(crcard);
 				pl.addCrea(cr);
@@ -1992,20 +1991,20 @@ const Skills = (module.exports = {
 		});
 	},
 	tornado: (c, t) => {
-		var pl = c.owner.foe;
-		for (var i = 0; i < 3; i++) {
+		let pl = c.owner.foe;
+		for (let i = 0; i < 3; i++) {
 			if (i == 2) {
 				if (c.card.upped) return;
 				else pl = c.owner;
 			}
-			var perms = pl.permanents.filter(x => {
+			const perms = pl.permanents.filter(x => {
 				return x && x.isMaterial();
 			});
 			if (pl.weapon && pl.weapon.isMaterial()) perms.push(pl.weapon);
 			if (pl.shield && pl.shield.isMaterial()) perms.push(pl.shield);
 			if (perms.length) {
-				var pr = pl.choose(perms);
-				var newpl = pl.upto(2) ? pl : pl.foe;
+				const pr = pl.choose(perms);
+				const newpl = pl.upto(2) ? pl : pl.foe;
 				newpl.deck.splice(newpl.upto(newpl.deck.length), 0, pr.card);
 				Effect.mkText('Shuffled', pr);
 				Skills.destroy.func(c, pr, true, true);
@@ -2013,7 +2012,7 @@ const Skills = (module.exports = {
 		}
 	},
 	trick: (c, t) => {
-		var cards = [];
+		const cards = [];
 		t.owner.deck.forEach((card, i) => {
 			if (
 				card.type == etg.Creature &&
@@ -2023,14 +2022,14 @@ const Skills = (module.exports = {
 			}
 		});
 		if (cards.length) {
-			var pick = t.choose(cards);
+			const pick = t.choose(cards);
 			t.owner.setCrea(t.getIndex(), new Thing(t.owner.deck[pick]));
 			t.owner.deck[pick] = t.card;
 		}
 	},
 	turngolem: (c, t) => {
 		c.remove();
-		var storedpower = c.status.get('storedpower');
+		const storedpower = c.status.get('storedpower');
 		c.atk = Math.floor(storedpower / 3);
 		c.maxhp = c.hp = storedpower;
 		c.status.set('storedpower', 0);
@@ -2158,8 +2157,8 @@ const Skills = (module.exports = {
 			c.owner.spend(c.card.element, c.card.element > 0 ? -1 : -3);
 	},
 	pend: (c, t) => {
-		var pendstate = c.status.get('pendstate');
-		var ele = pendstate ? c.owner.mark : c.card.element;
+		const pendstate = c.status.get('pendstate');
+		const ele = pendstate ? c.owner.mark : c.card.element;
 		c.owner.spend(ele, c.status.get('charges') * (ele > 0 ? -1 : -3));
 		c.status.set('pendstate', pendstate ? 0 : 1);
 	},
@@ -2179,7 +2178,7 @@ const Skills = (module.exports = {
 		data.dmg = 0;
 	},
 	chaos: (c, t) => {
-		var randomchance = c.rng();
+		const randomchance = c.rng();
 		if (randomchance < 0.3) {
 			if (t.type == etg.Creature && !t.status.get('ranged')) {
 				Skills.cseed.func(c, t);
@@ -2193,7 +2192,7 @@ const Skills = (module.exports = {
 	},
 	despair: (c, t) => {
 		if (!t.status.get('ranged')) {
-			var chance = c.owner.creatures.reduce((chance, cr) => {
+			const chance = c.owner.creatures.reduce((chance, cr) => {
 				return cr && cr.hasactive('auto', 'siphon') ? chance + 1 : chance;
 			}, 0);
 			if (c.rng() < 1.4 - Math.pow(0.95, chance)) {
@@ -2207,7 +2206,7 @@ const Skills = (module.exports = {
 		data.dmg = 0;
 	},
 	evade: x => {
-		var n = +x / 100;
+		const n = +x / 100;
 		return (c, t, data) => {
 			if (c.rng() < n) data.dmg = 0;
 		};
@@ -2228,15 +2227,15 @@ const Skills = (module.exports = {
 	},
 	skull: (c, t) => {
 		if (t.type == etg.Creature && !t.card.isOf(Cards.Skeleton)) {
-			var thp = t.truehp();
+			const thp = t.truehp();
 			if (thp <= 0 || c.rng() < 0.5 / thp) {
-				var index = t.getIndex();
+				const index = t.getIndex();
 				t.die();
 				if (
 					!t.owner.creatures[index] ||
 					t.owner.creatures[index].card != Cards.MalignantCell
 				) {
-					var skele = (t.owner.creatures[index] = new Thing(
+					const skele = (t.owner.creatures[index] = new Thing(
 						t.card.as(Cards.Skeleton),
 					));
 					skele.owner = t.owner;
@@ -2268,10 +2267,10 @@ const Skills = (module.exports = {
 		if (!t.status.get('airborne') && !t.status.get('ranged')) data.dmg = 0;
 	},
 });
-for (var key in Skills) {
+for (const key in Skills) {
 	Skills[key] = { name: [key], func: Skills[key], passive: false };
 }
-Skills.abomination.passive = Skills.becomearctic.passive = Skills.beguilestop.passive = Skills.bounce.passive = Skills.cell.passive = Skills.counter.passive = Skills.decrsteam.passive = Skills.deepdiveproc.passive = Skills.deepdiveproc2.passive = Skills.dshieldoff.passive = Skills.elf.passive = Skills.firebrand.passive = Skills.hitownertwice.passive = Skills.mummy.passive = Skills.obsession.passive = Skills.predatoroff.passive = Skills.protectonce.passive = Skills.protectoncedmg.passive = Skills.salvage.passive = Skills.skeleton.passive = Skills.swarm.passive = Skills.virtue.passive = true;
+Skills.abomination.passive = Skills.becomearctic.passive = Skills.beguilestop.passive = Skills.bounce.passive = Skills.cell.passive = Skills.counter.passive = Skills.decrsteam.passive = Skills.deepdiveproc.passive = Skills.deepdiveproc2.passive = Skills.dshieldoff.passive = Skills.elf.passive = Skills.firebrand.passive = Skills.hitownertwice.passive = Skills.martyr.passive = Skills.mummy.passive = Skills.obsession.passive = Skills.predatoroff.passive = Skills.protectonce.passive = Skills.protectoncedmg.passive = Skills.salvage.passive = Skills.skeleton.passive = Skills.swarm.passive = Skills.virtue.passive = true;
 var etg = require('./etg');
 var util = require('./util');
 var Cards = require('./Cards');
