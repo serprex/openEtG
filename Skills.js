@@ -1,4 +1,3 @@
-'use strict';
 function adrenathrottle(f) {
 	return (c, t, data) => {
 		if (
@@ -1658,13 +1657,13 @@ const Skills = (module.exports = {
 	ricochet: (c, t, data) => {
 		if (t.type != etg.Spell) return;
 		const tgting = Cards.Targeting[data.active.name[0]];
-		function tgttest(x) {
-			if (x) {
-				if (tgting(t.owner, x)) tgts.push([x, t.owner]);
-				if (tgting(t.owner.foe, x)) tgts.push([x, t.owner.foe]);
-			}
-		}
 		if (tgting) {
+			function tgttest(x) {
+				if (x) {
+					if (tgting(t.owner, x)) tgts.push([x, t.owner]);
+					if (tgting(t.owner.foe, x)) tgts.push([x, t.owner.foe]);
+				}
+			}
 			const tgts = [];
 			for (let i = 0; i < 2; i++) {
 				const pl = i == 0 ? c.owner : c.owner.foe;
