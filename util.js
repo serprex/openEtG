@@ -1,9 +1,11 @@
 'use strict';
 exports.iterSplit = function(src, str, func, thisObj) {
-	for (let i = 0; ; i = j + str.length) {
+	let i = 0;
+	while (true) {
 		const j = src.indexOf(str, i);
 		func.call(thisObj, src.slice(i, ~j ? j : src.length));
 		if (j == -1) return;
+		i = j + str.length;
 	}
 };
 exports.place = function(array, item) {
