@@ -20,7 +20,7 @@ module.exports = {
 					query: {
 						presets: ["@babel/preset-env", "@babel/preset-react"],
 						plugins: [
-							["@babel/plugin-transform-react-jsx", { pragma: "h", pragmaFrag: "React.Fragment" }]
+							"@babel/plugin-transform-react-jsx"
 						]
 					}
 				},

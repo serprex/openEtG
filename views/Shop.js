@@ -1,7 +1,7 @@
 const svg = require('../svg'),
 	chat = require('../chat'),
 	sock = require('../sock'),
-	tutor = require('../tutor'),
+	Tutor = require('../tutor'),
 	etgutil = require('../etgutil'),
 	options = require('../options'),
 	Components = require('../Components'),
@@ -147,18 +147,17 @@ module.exports = connect(({opts}) => ({ bulk: typeof opts.bulk === 'string' ? op
 
 		const bget =
 			self.state.cards &&
-			h('input', {
-				type: 'button',
-				value: 'Take Cards',
-				onClick: function() {
+			<input type='button'
+				value='Take Cards'
+				onClick={() => {
 					self.setState({ showbuy: true, hideget: true, cards: '' });
-				},
-				style: {
+				}}
+				style={{
 					position: 'absolute',
 					left: '775px',
 					top: '156px',
-				},
-			});
+				}}
+			/>;
 
 		function buyPack() {
 			const pack = packdata[self.state.packrarity];
@@ -179,16 +178,15 @@ module.exports = connect(({opts}) => ({ bulk: typeof opts.bulk === 'string' ? op
 		}
 		const bbuy =
 			self.state.showbuy &&
-			h('input', {
-				type: 'button',
-				value: 'Buy Pack',
-				onClick: buyPack,
-				style: {
+			<input type='button'
+				value='Buy Pack'
+				onClick={buyPack}
+				style={{
 					position: 'absolute',
 					left: '775px',
 					top: '156px',
-				},
-			});
+				}}
+			/>;
 		children.push(bget, bbuy);
 		packdata.forEach((pack, n) => {
 			children.push(
@@ -274,27 +272,26 @@ module.exports = connect(({opts}) => ({ bulk: typeof opts.bulk === 'string' ? op
 			);
 		}
 
-		const packmulti = h('input', {
-			type: 'number',
-			placeholder: 'Bulk',
-			value: this.props.bulk,
-			onChange: e => this.props.dispatch(store.setOptTemp('bulk', e.target.value)),
-			onKeyPress: e => {
+		const packmulti = <input type='number'
+			placeholder='Bulk'
+			value={this.props.bulk}
+			onChange={e => this.props.dispatch(store.setOptTemp('bulk', e.target.value))}
+			onKeyPress={e => {
 				if (e.which == 13) buyPack();
-			},
-			style: {
+			}}
+			style={{
 				position: 'absolute',
 				top: '184px',
 				left: '777px',
 				width: '64px',
-			},
-		});
-		const tut = h(tutor.Tutor, {
-			x: 8,
-			y: 500,
-			data: tutor.Shop,
-		});
+			}}
+		/>;
+		const tut = <Tutor.Tutor
+			x={8}
+			y={500}
+			data={tutor.Shop}
+		/>;
 		children.push(packmulti, tut);
-		return h(React.Fragment, null, ...children);
+		return children;
 	}
 });

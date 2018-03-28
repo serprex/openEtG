@@ -1,5 +1,5 @@
 'use strict';
-var passives = new Set([
+const passives = new Set([
 	'airborne',
 	'aquatic',
 	'nocturnal',
@@ -33,17 +33,17 @@ Thing.prototype.transform = function(card) {
 	this.card = card;
 	this.maxhp = this.hp = card.health;
 	this.atk = card.attack;
-	for (var i = 0; i < this.status.keys.length; i++) {
-		var key = this.status.keys[i];
+	for (let i = 0; i < this.status.keys.length; i++) {
+		const key = this.status.keys[i];
 		if (passives.has(key)) this.status.vals[i] = 0;
 	}
-	for (var i = 0; i < card.status.keys.length; i++) {
-		var key = card.status.keys[i];
+	for (let i = 0; i < card.status.keys.length; i++) {
+		const key = card.status.keys[i];
 		if (!this.status.get(key)) this.status.set(key, card.status.vals[i]);
 	}
 	this.active = util.clone(card.active);
 	if (this.status.get('mutant')) {
-		var buff = this.upto(25);
+		const buff = this.upto(25);
 		this.buffhp(Math.floor(buff / 5));
 		this.atk += buff % 5;
 		this.mutantactive();
@@ -74,7 +74,7 @@ Thing.prototype.remove = function(index) {
 		return 0;
 	}
 	if (index === undefined) index = this.getIndex();
-	var arr = undefined;
+	let arr = undefined;
 	if (this.type == etg.Creature) {
 		if (this.owner.gpull == this) this.owner.gpull = undefined;
 		arr = this.owner.creatures;
@@ -89,7 +89,7 @@ Thing.prototype.remove = function(index) {
 	return index;
 };
 Thing.prototype.die = function() {
-	var idx = this.remove();
+	const idx = this.remove();
 	if (idx == -1) return;
 	if (this.type <= etg.Permanent) {
 		this.proc('destroy', {});
@@ -97,7 +97,7 @@ Thing.prototype.die = function() {
 		this.proc('discard');
 	} else if (this.type == etg.Creature && !this.trigger('predeath')) {
 		if (this.status.get('aflatoxin') & !this.card.isOf(Cards.MalignantCell)) {
-			var cell = (this.owner.creatures[idx] = new Thing(
+			const cell = (this.owner.creatures[idx] = new Thing(
 				this.card.as(Cards.MalignantCell),
 			));
 			cell.owner = this.owner;
@@ -112,7 +112,7 @@ Thing.prototype.die = function() {
 	}
 };
 Thing.prototype.deatheffect = function(index) {
-	var data = { index: index };
+	const data = { index: index };
 	this.proc('death', data);
 	if (~index)
 		Effect.mkDeath(
@@ -120,7 +120,7 @@ Thing.prototype.deatheffect = function(index) {
 		);
 };
 Thing.prototype.clone = function(owner) {
-	var obj = Object.create(Thing.prototype);
+	const obj = Object.create(Thing.prototype);
 	obj.owner = owner;
 	obj.card = this.card;
 	obj.cast = this.cast;
@@ -135,13 +135,13 @@ Thing.prototype.clone = function(owner) {
 	return obj;
 };
 Thing.prototype.hash = function() {
-	var hash =
+	let hash =
 		(this.owner == this.owner.game.player1 ? 17 : 19) ^
 		(this.type * 0x8888888) ^
 		this.card.code ^
 		this.status.hash() ^
 		(this.hp * 17 + this.atk * 31 - this.maxhp - this.usedactive * 3);
-	for (var key in this.active) {
+	for (const key in this.active) {
 		hash ^= util.hashString(key + ':' + this.active[key].name.join(' '));
 	}
 	if (this.active.cast) {
@@ -288,7 +288,7 @@ Thing.prototype.freeze = function(x) {
 	}
 };
 Thing.prototype.lobo = function() {
-	for (var key in this.active) {
+	for (const key in this.active) {
 		this.active[key].name.forEach(name => {
 			if (!parseSkill(name).passive) {
 				this.rmactive(key, name);
@@ -365,9 +365,9 @@ Thing.prototype.addactive = function(type, active) {
 };
 Thing.prototype.rmactive = function(type, name) {
 	if (!this.active[type]) return;
-	var actives = this.active[type].name,
-		idx;
-	if (~(idx = actives.indexOf(name))) {
+	const actives = this.active[type].name;
+	const idx = actives.indexOf(name);
+	if (~idx) {
 		if (actives.length == 1) {
 			delete this.active[type];
 		} else {

@@ -3,8 +3,7 @@ const chat = require('../chat'),
 	sock = require('../sock'),
 	Components = require('../Components'),
 	store = require('../store'),
-	React = require('react'),
-	h = React.createElement;
+	React = require('react');
 
 module.exports = class WealthTop extends React.Component {
 	constructor(props) {

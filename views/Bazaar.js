@@ -6,8 +6,7 @@ const chat = require('../chat'),
 	userutil = require('../userutil'),
 	Components = require('../Components'),
 	store = require('../store'),
-	React = require('react'),
-	h = React.createElement;
+	React = require('react');
 
 module.exports = class Bazaar extends React.Component {
 	constructor(props) {

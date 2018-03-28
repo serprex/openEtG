@@ -5,7 +5,6 @@ const ui = require('../ui'),
 	Components = require('../Components'),
 	store = require('../store'),
 	React = require('react'),
-	h = React.createElement,
 	descriptions = [
 		'Element of randomness. Trade off consistency for cost effectiveness, make use of all elements, spawn mutants, & seek turn advantages into disadvantages.',
 		'Element of decay. Gains advantages through destroying creatures and exhibiting control through poison.',
@@ -43,55 +42,50 @@ module.exports = class ElementSelect extends React.Component {
 	}
 
 	render() {
-		const self = this;
-		const eledesc = h(
-			'div',
-			{
-				style: {
-					position: 'absolute',
-					left: '100px',
-					top: '300px',
-					width: '700px',
-					whiteSpace: 'pre-wrap',
-				},
-			},
-			this.state.eledesc,
-		);
-		const mainc = [
-			eledesc,
-			h(Components.ExitBtn, {
-				x: 100,
-				y: 450,
-				onClick: function() {
-					sock.userEmit('delete');
-					sock.user = undefined;
-					store.store.dispatch(store.doNav(require('./Login')));
-				},
-			}),
-		];
+		const mainc = [];
 		for (let i = 1; i <= 14; i++) {
 			mainc.push(
-				h(Components.IconBtn, {
-					e: 'e' + (i < 13 ? i : i == 13 ? 14 : 13),
-					x: 100 + Math.floor((i - 1) / 2) * 64,
-					y: 180 + ((i - 1) & 1) * 64,
-					click: function() {
-						var msg = {
+				<Components.IconBtn
+					key={i}
+					e={'e' + (i < 13 ? i : i == 13 ? 14 : 13)}
+					x={100 + Math.floor((i - 1) / 2) * 64}
+					y={180 + ((i - 1) & 1) * 64}
+					click={() => {
+						const msg = {
 							u: sock.user.name,
 							a: sock.user.auth,
 							e: i == 14 ? RngMock.upto(12) + 1 : i,
 						};
 						sock.user = undefined;
 						sock.emit('inituser', msg);
-					},
-					onMouseOver: function() {
-						self.setState({
-							eledesc: ui.eleNames[i] + '\n\n' + descriptions[i - 1],
-						});
-					},
-				}),
+					}}
+					onMouseOver={() =>
+						self.setState({ eledesc: ui.eleNames[i] + '\n\n' + descriptions[i - 1], })
+					}
+				/>,
 			);
 		}
-		return h(React.Fragment, null, ...mainc);
+		return <>
+			<div
+				style={{
+					position: 'absolute',
+					left: '100px',
+					top: '300px',
+					width: '700px',
+					whiteSpace: 'pre-wrap',
+				}}>
+				{this.state.eledesc}
+			</div>
+			<Components.ExitBtn
+				x={100}
+				y={450}
+				onClick={() => {
+					sock.userEmit('delete');
+					sock.user = undefined;
+					store.store.dispatch(store.doNav(require('./Login')));
+				}}
+			/>
+			{mainc}
+		</>
 	}
 };

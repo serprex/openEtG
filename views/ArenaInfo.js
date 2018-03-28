@@ -6,8 +6,7 @@ const Cards = require('../Cards'),
 	etgutil = require('../etgutil'),
 	Components = require('../Components'),
 	store = require('../store'),
-	React = require('react'),
-	h = React.createElement;
+	React = require('react');
 
 function RenderInfo(props) {
 	const {info, y} = props;

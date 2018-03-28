@@ -6,8 +6,8 @@ const etg = require('../etg'),
 	RngMock = require('../RngMock'),
 	Components = require('../Components'),
 	store = require('../store'),
-	React = require('react'),
-	h = React.createElement;
+	React = require('react');
+
 function mkDaily(type) {
 	if (type < 3) {
 		return () => {
@@ -57,22 +57,21 @@ module.exports = class Colosseum extends React.Component {
 			'Expert Duel: Fight ' + dgname + '. Only one attempt allowed.',
 		];
 		const children = [
-			h(Components.ExitBtn, { x: 50, y: 50 }),
+			<Components.ExitBtn x={50} y={50} />,
 		];
 		for (var i = 1; i < 5; i++) {
 			const active = !(sock.user.daily & (1 << i));
 			if (active) {
 				children.push(
-					h('input', {
-						type: 'button',
-						value: 'Fight!',
-						style: {
+					<input type='button'
+						value='Fight!'
+						style={{
 							position: 'absolute',
 							left: '50px',
 							top: 100 + 30 * i + 'px',
-						},
-						onClick: mkDaily(i),
-					}),
+						}}
+						onClick={mkDaily(i)}
+					/>,
 				);
 			}
 			children.push(
@@ -92,21 +91,20 @@ module.exports = class Colosseum extends React.Component {
 		}
 		if (sock.user.daily == 191) {
 			children.push(
-				h('input', {
-					type: 'button',
-					value: 'Nymph!',
-					style: { position: 'absolute', left: '50px', top: '280px' },
-					onClick: function() {
+				<input type='button'
+					value='Nymph!'
+					style={{ position: 'absolute', left: '50px', top: '280px' }}
+					onClick={() => {
 						const nymph = etg.NymphList[RngMock.upto(12) + 1];
 						sock.userExec('donedaily', { daily: 6, c: nymph });
 						store.store.dispatch(store.doNav(require('./MainMenu'), { nymph }));
-					},
-				}),
+					}}
+				/>,
 				<span style={{ position: 'absolute', left: '130px', top: '280px' }}>
 					You successfully completed all tasks.
 				</span>,
 			);
 		}
-		return h(React.Fragment, null, ...children);
+		return children;
 	}
 };

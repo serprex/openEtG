@@ -115,7 +115,7 @@ module.exports = class Result extends React.Component {
 		const winner = game.winner === game.player1,
 			foeDeck = data.p2deck,
 			children = [
-				h(Components.ExitBtn, { x: 412, y: 440, onClick: this.exitFunc }),
+				<Components.ExitBtn x={412} y={440} onClick={this.exitFunc} />,
 			],
 			lefttext = [
 				game.ply + ' plies',
@@ -152,7 +152,7 @@ module.exports = class Result extends React.Component {
 				[
 					'Unupped',
 					(function() {
-						var unupnu = 0;
+						let unupnu = 0;
 						etgutil.iterraw(sock.getDeck(), (code, count) => {
 							const card = Cards.Codes[code];
 							if (card && !card.upped) unupnu += count;
@@ -176,26 +176,25 @@ module.exports = class Result extends React.Component {
 		}
 		if (!game.quest && game.daily === undefined) {
 			children.push(
-				h('input', {
-					type: 'button',
-					value: 'Rematch',
-					onClick: this.rematch,
-					style: {
+				<input type='button'
+					value='Rematch'
+					onClick={this.rematch}
+					style={{
 						position: 'absolute',
 						left: '412px',
 						top: '490px',
-					},
-				}),
+					}}
+				/>,
 			);
 		}
-		var streakrate = 0;
+		let streakrate = 0;
 		if (winner) {
 			if (sock.user) {
 				if (game.level !== undefined || !game.ai)
 					sock.userExec('addwin', { pvp: !game.ai });
 				if (!game.quest && game.ai) {
 					if (game.cardreward === undefined && foeDeck) {
-						var winnable = foeDeck.filter(
+						let winnable = foeDeck.filter(
 								card => card.rarity > 0 && card.rarity < 4,
 							),
 							cardwon;
@@ -221,7 +220,7 @@ module.exports = class Result extends React.Component {
 							'01' + etgutil.asShiny(cardwon.code, false).toString(32);
 					}
 					if (!game.goldreward) {
-						var goldwon;
+						let goldwon;
 						if (game.level !== undefined) {
 							if (game.daily == undefined) {
 								const streak = (sock.user.streakback || 0) + 1;
@@ -246,30 +245,30 @@ module.exports = class Result extends React.Component {
 					game.goldreward = (game.goldreward || 0) + game.addonreward;
 				}
 				if (game.goldreward) {
-					var goldwon = game.goldreward - (game.cost || 0) + '$';
+					const goldwon = game.goldreward - (game.cost || 0) + '$';
 					children.push(
-						h(Components.Text, {
-							text: goldwon,
-							style: {
+						<Components.Text
+							text={goldwon}
+							style={{
 								textAlign: 'center',
 								width: '900px',
 								position: 'absolute',
 								left: '0px',
 								top: '550px',
-							},
-						}),
+							}}
+						/>,
 					);
 					sock.userExec('addgold', { g: game.goldreward });
 				}
 				if (game.cardreward) {
-					var x0 = 470 - etgutil.decklength(game.cardreward) * 20 - 64;
+					const x0 = 470 - etgutil.decklength(game.cardreward) * 20 - 64;
 					etgutil.iterdeck(game.cardreward, (code, i) =>
 						children.push(
-							h(Components.Card, {
-								x: x0 + i * 40,
-								y: 170,
-								code: code,
-							}),
+							<Components.Card
+								x={x0 + i * 40}
+								y={170}
+								code={code}
+							/>,
 						),
 					);
 					sock.userExec(game.quest ? 'addbound' : 'addcards', {
@@ -277,33 +276,29 @@ module.exports = class Result extends React.Component {
 					});
 				}
 			}
-			var tinfo = game.quest ? game.wintext : 'You won!';
 			children.push(
-				h(Components.Text, {
-					text: tinfo,
-					style: {
+				<Components.Text
+					text={game.quest ? game.wintext : 'You won!'}
+					style={{
 						textAlign: 'center',
 						width: '900px',
 						position: 'absolute',
 						left: '0px',
 						top: game.cardreward ? '100px' : '250px',
-					},
-				}),
+					}}
+				/>
 			);
 		}
 		children.push(
-			h(
-				'span',
-				{
-					style: {
-						position: 'absolute',
-						left: '8px',
-						top: '290px',
-						whiteSpace: 'pre',
-					},
-				},
-				lefttext.join('\n'),
-			),
+			<span
+				style={{
+					position: 'absolute',
+					left: '8px',
+					top: '290px',
+					whiteSpace: 'pre',
+				}}>
+				{lefttext.join('\n')}
+			</span>
 		);
 
 		if (game.endurance == undefined) {
@@ -328,6 +323,6 @@ module.exports = class Result extends React.Component {
 				'Stats',
 			);
 		}
-		return h(React.Fragment, null, ...children);
+		return children;
 	}
 };

@@ -403,36 +403,6 @@ function addNoHealData(game) {
 }
 
 function startMatch(self, game, gameData) {
-	function drawTgting(spr, col) {
-		fgfx.drawRect(
-			spr.position.x - spr.width / 2,
-			spr.position.y - spr.height / 2,
-			spr.width,
-			spr.height,
-		);
-	}
-	function drawBorder(obj, spr) {
-		if (obj) {
-			if (game.targeting) {
-				if (game.targeting.filter(obj)) {
-					fgfx.lineStyle(2, 0xff0000);
-					drawTgting(spr, 0xff0000);
-					fgfx.lineStyle(2, 0xffffff);
-				}
-			} else if (
-				obj.canactive() &&
-				!(obj.owner == game.player2 && game.player2.isCloaked())
-			) {
-				fgfx.lineStyle(2, obj.card.element == 8 ? 0 : 0xffffff);
-				fgfx.drawRect(
-					spr.position.x - spr.width / 2,
-					spr.position.y - spr.height / 2 - 1,
-					spr.width,
-					obj.type == etg.Weapon || obj.type == etg.Shield ? 12 : 10,
-				);
-			}
-		}
-	}
 	function endClick(discard) {
 		if (game.turn == game.player1 && game.phase === etg.MulliganPhase) {
 			if (!game.ai) sock.emit('mulligan', { draw: true });
@@ -522,7 +492,7 @@ function startMatch(self, game, gameData) {
 			self.setState({ resigning: true });
 		}
 	}
-	var aiDelay = 0,
+	let aiDelay = 0,
 		aiState,
 		aiCommand;
 	if (sock.user && !game.endurance && (game.level !== undefined || !game.ai)) {
@@ -632,7 +602,7 @@ function startMatch(self, game, gameData) {
 						aiCommand = true;
 					}
 				}
-				var now;
+				let now;
 				if (aiCommand && (now = Date.now()) > aiDelay) {
 					cmds[aiState.cmd]({ bits: aiState.cmdct });
 					aiState = undefined;

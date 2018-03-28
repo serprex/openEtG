@@ -5,8 +5,7 @@ const chat = require('../chat'),
 	Components = require('../Components'),
 	store = require('../store'),
 	{ connect } = require('react-redux'),
-	React = require('react'),
-	h = React.createElement;
+	React = require('react');
 
 if (typeof kongregateAPI === 'undefined') {
 	module.exports = connect(({opts}) => ({ remember: opts.remember, username: opts.username }))(class Login extends React.Component {

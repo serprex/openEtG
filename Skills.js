@@ -12,9 +12,9 @@ function adrenathrottle(f) {
 }
 function quadpillarFactory(ele) {
 	return (c, t) => {
-		var n = c == t ? 1 : c.status.get('charges');
-		for (var i = 0; i < n; i++) {
-			var r = c.owner.upto(16);
+		const n = c == t ? 1 : c.status.get('charges');
+		for (let i = 0; i < n; i++) {
+			const r = c.owner.upto(16);
 			c.owner.spend((ele >> ((r & 3) << 2)) & 15, -1);
 			if (c.rng() < 0.6) {
 				c.owner.spend((ele >> (r & 12)) & 15, -1);
@@ -24,7 +24,7 @@ function quadpillarFactory(ele) {
 }
 const Skills = (module.exports = {
 	ablaze: x => {
-		var n = +x;
+		const n = +x;
 		return (c, t) => {
 			Effect.mkText(n + '|0', c);
 			c.atk += n;
@@ -73,7 +73,7 @@ const Skills = (module.exports = {
 	},
 	aggroskele: (c, t) => {
 		c.owner.addCrea(new Thing(c.card.as(Cards.Skeleton)));
-		var dmg = c.owner.creatures.reduce(
+		const dmg = c.owner.creatures.reduce(
 			(dmg, cr) =>
 				cr && cr.card.isOf(Cards.Skeleton) ? dmg + cr.trueatk() : dmg,
 			0,
@@ -86,7 +86,7 @@ const Skills = (module.exports = {
 		c.owner.spend(etg.Air, -1);
 	},
 	alphawolf: (c, t) => {
-		var pwolf = c.card.as(Cards.PackWolf);
+		const pwolf = c.card.as(Cards.PackWolf);
 		c.owner.addCrea(new Thing(pwolf));
 		c.owner.addCrea(new Thing(pwolf));
 	},
@@ -142,7 +142,7 @@ const Skills = (module.exports = {
 	},
 	blackhole: (c, t) => {
 		if (!t.sanctuary) {
-			for (var q = 1; q < 13; q++) {
+			for (let q = 1; q < 13; q++) {
 				c.owner.dmg(-Math.min(t.quanta[q], 3));
 				t.quanta[q] = Math.max(t.quanta[q] - 3, 0);
 			}
@@ -171,7 +171,7 @@ const Skills = (module.exports = {
 	bravery: (c, t) => {
 		if (!c.owner.foe.sanctuary) {
 			for (
-				var i = 0;
+				let i = 0;
 				i < 2 && c.owner.hand.length < 8 && c.owner.foe.hand.length < 8;
 				i++
 			) {
@@ -183,7 +183,7 @@ const Skills = (module.exports = {
 	brawl: (c, t) => {
 		c.owner.creatures.forEach((cr, i) => {
 			if (cr) {
-				var fcr = c.owner.foe.creatures[i];
+				const fcr = c.owner.foe.creatures[i];
 				if (fcr) {
 					fcr.attackCreature(cr);
 					cr.attackCreature(fcr);
@@ -225,17 +225,17 @@ const Skills = (module.exports = {
 				t.truehp() * (t.status.get('frozen') ? 150 : 100) / (t.truehp() + 100),
 			),
 		);
-		var poison = t.status.get('poison');
+		const poison = t.status.get('poison');
 		if (poison) c.owner.foe.addpoison(poison);
-		var frozen = t.status.get('frozen');
+		const frozen = t.status.get('frozen');
 		if (frozen) c.owner.foe.freeze(frozen);
 	},
 	catlife: (c, t, data) => {
 		if (!c.owner.creatures[data.index]) {
-			var lives = c.status.maybeDecr('lives');
+			const lives = c.status.maybeDecr('lives');
 			if (!lives) return;
 			Effect.mkText(lives - 1 + ' lives', c);
-			var cl = c.clone(c.owner);
+			const cl = c.clone(c.owner);
 			cl.hp = cl.maxhp = c.card.health;
 			cl.atk = c.card.attack;
 			c.owner.creatures[data.index] = cl;
@@ -245,7 +245,7 @@ const Skills = (module.exports = {
 		c.transform(c.card.as(Cards.MalignantCell));
 	},
 	chimera: (c, t) => {
-		var atk = 0,
+		let atk = 0,
 			hp = 0;
 		c.owner.creatures.forEach(cr => {
 			if (cr) {
@@ -253,7 +253,7 @@ const Skills = (module.exports = {
 				hp += cr.truehp();
 			}
 		});
-		var chim = new Thing(c.card);
+		const chim = new Thing(c.card);
 		chim.owner = c.owner;
 		chim.atk = atk;
 		chim.maxhp = chim.hp = hp;
@@ -265,7 +265,7 @@ const Skills = (module.exports = {
 		c.owner.gpull = chim;
 	},
 	chromastat: (c, t) => {
-		var n = c.truehp() + c.trueatk();
+		const n = c.truehp() + c.trueatk();
 		Effect.mkText(n + ':0', c);
 		c.owner.spend(0, -n);
 	},
@@ -307,7 +307,7 @@ const Skills = (module.exports = {
 		}
 	},
 	countimmbur: c => {
-		var n = 0;
+		let n = 0;
 		function test(x) {
 			if (x && (x.status.get('immaterial') || x.status.get('burrowed'))) n++;
 		}
@@ -316,7 +316,7 @@ const Skills = (module.exports = {
 		return n;
 	},
 	cpower: (c, t) => {
-		var buff = t.owner.upto(25),
+		const buff = t.owner.upto(25),
 			bh = ((buff / 5) | 0) + 1,
 			ba = buff % 5 + 1;
 		Effect.mkText(ba + '|' + bh, t);
@@ -351,10 +351,10 @@ const Skills = (module.exports = {
 		].func(c, t);
 	},
 	cseed2: (c, t) => {
-		var choice = c.choose(
+		const choice = c.choose(
 			Cards.filter(c.owner.upto(2), c => {
 				if (c.type != etg.Spell) return false;
-				var tgting = Cards.Targeting[c.active.cast.name[0]];
+				const tgting = Cards.Targeting[c.active.cast.name[0]];
 				return tgting && tgting(c, t);
 			}),
 		);
@@ -372,7 +372,7 @@ const Skills = (module.exports = {
 		c.deatheffect(c.getIndex());
 	},
 	deathwish: (c, t, data) => {
-		var tgt = data.tgt;
+		const tgt = data.tgt;
 		if (
 			!tgt ||
 			c.status.get('frozen') ||
@@ -384,7 +384,7 @@ const Skills = (module.exports = {
 		)
 			return;
 		if (!tgt.hasactive('prespell', 'deathwish')) return (data.tgt = c);
-		var totaldw = 0;
+		let totaldw = 0;
 		c.owner.creatures.forEach(cr => {
 			if (cr && cr.hasactive('prespell', 'deathwish')) totaldw++;
 		});
@@ -428,8 +428,8 @@ const Skills = (module.exports = {
 		Skills.parallel.func(c, c);
 	},
 	deployblobs: (c, t) => {
-		var blob = c.card.as(Cards.Blob);
-		for (var i = 0; i < 3; i++) {
+		const blob = c.card.as(Cards.Blob);
+		for (let i = 0; i < 3; i++) {
 			c.owner.addCrea(new Thing(blob));
 		}
 		c.atk -= 2;
@@ -488,7 +488,7 @@ const Skills = (module.exports = {
 	},
 	disfield: (c, t, data) => {
 		if (!c.owner.spend(etg.Chroma, data.dmg)) {
-			for (var i = 1; i < 13; i++) {
+			for (let i = 1; i < 13; i++) {
 				c.owner.quanta[i] = 0;
 			}
 			c.owner.shield = undefined;
@@ -1171,7 +1171,7 @@ const Skills = (module.exports = {
 	},
 	loot: (c, t) => {
 		if (c.owner == t.owner && !c.hasactive('turnstart', 'salvageoff')) {
-			var foe = c.owner.foe,
+			const foe = c.owner.foe,
 				perms = foe.permanents.filter(x => {
 					return x && x.isMaterial();
 				});

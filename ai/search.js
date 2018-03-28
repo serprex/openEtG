@@ -5,16 +5,16 @@ const etg = require('../etg'),
 	evalGame = require('./eval'),
 	lethal = require('./lethal');
 function getWorstCard(game) {
-	var worstcard = 0,
+	let worstcard = 0,
 		curEval = 0x7fffffff,
 		hash = {};
-	for (var i = 0; i < 8; i++) {
-		var code = game.player2.hand[i].card.code;
+	for (let i = 0; i < 8; i++) {
+		const code = game.player2.hand[i].card.code;
 		if (code in hash) continue;
 		hash[code] = true;
-		var gclone = game.clone();
+		const gclone = game.clone();
 		gclone.player2.hand[i].die();
-		var discvalue = evalGame(gclone);
+		const discvalue = evalGame(gclone);
 		if (discvalue < curEval) {
 			curEval = discvalue;
 			worstcard = i;
@@ -23,24 +23,14 @@ function getWorstCard(game) {
 	return [worstcard, curEval];
 }
 const afilter = {
-	web: function(c, t) {
-		return t.status.get('airborne');
-	},
-	freeze: function(c, t) {
-		return t.status.get('frozen') < 3;
-	},
-	pacify: function(c, t) {
-		return t.trueatk() != 0;
-	},
-	readiness: function(c, t) {
-		return t.active.cast && (t.cast || t.usedactive);
-	},
-	silence: function(c, t) {
-		return t.active.cast && !t.usedactive;
-	},
-	lobotomize: function(c, t) {
+	web: (c, t) => t.status.get('airborne'),
+	freeze: (c, t) => t.status.get('frozen') < 3,
+	pacify: (c, t) => t.trueatk() != 0,
+	readiness: (c, t) => t.active.cast && (t.cast || t.usedactive),
+	silence: (c, t) => t.active.cast && !t.usedactive,
+	lobotomize: (c, t) => {
 		if (!t.status.get('momentum') && !t.status.get('psionic')) {
-			for (var key in t.active) {
+			for (const key in t.active) {
 				if (t.active[key] && key != 'ownplay') {
 					return true;
 				}
@@ -51,12 +41,12 @@ const afilter = {
 	},
 };
 function AiSearch(game) {
-	var worstcard;
+	let worstcard;
 	if (game.player2.hand.length < 8) {
 		worstcard = undefined;
 		this.eval = evalGame(game);
 	} else {
-		var worst_eval = getWorstCard(game);
+		const worst_eval = getWorstCard(game);
 		worstcard = worst_eval[0];
 		this.eval = worst_eval[1];
 	}
