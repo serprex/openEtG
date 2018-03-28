@@ -1,7 +1,7 @@
 const svg = require('../svg'),
 	chat = require('../chat'),
 	sock = require('../sock'),
-	Tutor = require('../tutor'),
+	Tutor = require('../Tutor'),
 	etgutil = require('../etgutil'),
 	options = require('../options'),
 	Components = require('../Components'),
@@ -286,12 +286,7 @@ module.exports = connect(({opts}) => ({ bulk: typeof opts.bulk === 'string' ? op
 				width: '64px',
 			}}
 		/>;
-		const tut = <Tutor.Tutor
-			x={8}
-			y={500}
-			data={tutor.Shop}
-		/>;
-		children.push(packmulti, tut);
+		children.push(packmulti, <Tutor.Shop x={8} y={500} />);
 		return children;
 	}
 });

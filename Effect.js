@@ -16,8 +16,8 @@ function Text(text, pos) {
 	this.step = 0;
 	this.position = maybeTgtPos(pos);
 	this.text = text;
-	for (var i = 0; i < anims.length; i++) {
-		var a = anims[i];
+	for (let i = 0; i < anims.length; i++) {
+		const a = anims[i];
 		if (
 			a.position &&
 			a.position.x == this.position.x &&
@@ -67,14 +67,14 @@ function make(cons) {
 		? nop
 		: function() {
 				if (exports.disable || !anims) return;
-				var effect = Object.create(cons.prototype);
-				var effectOverride = cons.apply(effect, arguments);
+				const effect = Object.create(cons.prototype);
+				const effectOverride = cons.apply(effect, arguments);
 				anims.push(effectOverride || effect);
 			};
 }
 if (!h) {
 	exports.disable = true;
-	exports.register = exports.next = nop;
+	exports.next = nop;
 } else {
 	exports.disable = false;
 	exports.clear = function(doc) {

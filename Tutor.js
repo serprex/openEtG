@@ -1,59 +1,53 @@
 const {Text} = require('./Components'),
 	{ connect } = require('react-redux'),
-	React = require('react'),
-	h = React.createElement;
+	React = require('react');
 
-exports.Tutor = connect(({opts}) => ({ disableTut: opts.disableTut }))(class Tutor extends React.Component {
-	constructor(props) {
-		super(props);
-		this.state = { showtut: false };
-	}
-
-	render() {
-		if (this.props.disableTut) return null;
-		const tutdata = this.props.data;
-		const tutbtn = (
-			<span
-				className="imgb ico e13"
-				onMouseEnter={() => {
-					this.setState({ showtut: true });
-				}}
-				onMouseLeave={() => {
-					this.setState({ showtut: false });
-				}}
-				style={{
-					position: 'absolute',
-					left: this.props.x + 'px',
-					top: this.props.y + 'px',
-				}}
-			/>
-		);
-		const children = [tutbtn];
-		if (this.state.showtut) {
-			children.push(<div className="tutorialbg" />);
-			children.push(
-				<div
-					children={tutdata.map(info => {
-						const style = {
-							position: 'absolute',
-							left: info[0] + 'px',
-							top: info[1] + 'px',
-						};
-						if (info.length > 2) style.width = info[2] + 'px';
-						if (info.length > 3) style.height = info[3] + 'px';
-						return <Text
-							className='tutorialbox'
-							text={info[info.length - 1]}
-							style={style}
-						/>;
-					})}
-				/>,
-			);
+const connector = connect(({opts}) => ({ disableTut: opts.disableTut }))
+const mkTutor = function(data) {
+	const splash = <div className="tutorialbg">
+		{data.map((info, i) => {
+			const style = {
+				position: 'absolute',
+				left: info[0] + 'px',
+				top: info[1] + 'px',
+			};
+			if (info.length > 2) style.width = info[2] + 'px';
+			if (info.length > 3) style.height = info[3] + 'px';
+			return <Text key={i} className='tutorialbox'
+				text={info[info.length - 1]}
+				style={style}
+			/>;
+		})}
+	</div>;
+	return connector(class Tutor extends React.Component {
+		constructor(props) {
+			super(props);
+			this.state = { showtut: false };
 		}
-		return <div children={children} />;
-	}
-});
-exports.Editor = [
+
+		render() {
+			if (this.props.disableTut) return null;
+			return <>
+				<span className="imgb ico e13"
+					onMouseEnter={() => {
+						this.setState({ showtut: true });
+					}}
+					onMouseLeave={() => {
+						this.setState({ showtut: false });
+					}}
+					style={{
+						position: 'absolute',
+						left: this.props.x + 'px',
+						top: this.props.y + 'px',
+					}}
+				/>
+				{this.state.showtut && splash}
+			</>;
+		}
+	});
+}
+
+exports.Editor = mkTutor([
 	[
 		100,
 		32,
@@ -90,8 +84,8 @@ exports.Editor = [
 	],
 	[80, 530, ": Shows all cards, including those you don't own"],
 	[80, 575, ": Don't show shiny cards"],
-];
-exports.Shop = [
+]);
+exports.Shop = mkTutor([
 	[
 		45,
 		97,
@@ -113,4 +107,4 @@ exports.Shop = [
 		158,
 		'3) Buy the pack you selected!\nIf you want to buy many packs at once, type in the Bulk box how many you want.\nIn chat you will see a link to a deck code with the cards you got.',
 	],
-];
+]);
