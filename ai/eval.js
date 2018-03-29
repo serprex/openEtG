@@ -326,7 +326,7 @@ const SkillsValues = Object.freeze({
 	tick: (c) => c.type == etg.Spell ? 1 : 1 + (c.maxhp - c.truehp()) / c.maxhp,
 	tornado: 9,
 	trick: 4,
-	turngolem: (c) => c.status.get('storedpower') / 3,
+	turngolem: (c) => c.status.get('storedpower') >> 1,
 	upkeep: -0.5,
 	upload: 3,
 	vampire: (c, ttatk) => (c.type == etg.Spell ? c.card.attack : ttatk) * 0.7,

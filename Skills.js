@@ -2029,7 +2029,7 @@ const Skills = (module.exports = {
 	turngolem: (c, t) => {
 		c.remove();
 		const storedpower = c.status.get('storedpower');
-		c.atk = Math.floor(storedpower / 3);
+		c.atk = storedpower >> 1;
 		c.maxhp = c.hp = storedpower;
 		c.status.set('storedpower', 0);
 		delete c.active.cast;

@@ -475,7 +475,7 @@ const data = {
 	],
 	trick: 'Swap target creature with a different creature from deck',
 	turngolem:
-		'Become a creature with health per damage blocked & a third as much strength',
+		'Become a creature which intercepts attacks with health per damage blocked & half as much strength',
 	unburrow: 'Unburrow',
 	unsummon:
 		"Return target creature to owner's hand. If hand full, return to top of deck",
