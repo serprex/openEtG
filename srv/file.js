@@ -10,6 +10,7 @@ const fs = require('fs'),
 		html: 'text/html',
 		js: 'application/javascript',
 		json: 'application/json',
+		map: 'application/octet-stream',
 		ogg: 'application/ogg',
 		png: 'image/png',
 	};

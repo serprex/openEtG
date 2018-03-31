@@ -1946,8 +1946,8 @@ const Skills = (module.exports = {
 		t.status.set('frozen', 0);
 	},
 	tesseractsummon: (c, t) => {
-		for (let i = 0; i < (c.card.upped ? 1 : 2); i++) {
-			const pl = i ? c.owner.foe : c.owner;
+		for (let i = 0; i < 3; i++) {
+			const pl = i ? c.owner : c.owner.foe;
 			const candidates = [];
 			for (let j = 0; j < pl.deck.length; j++) {
 				if (pl.deck[j].type == etg.Creature) candidates.push(j);

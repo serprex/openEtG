@@ -6,7 +6,7 @@ function encodeCount(count) {
 }
 exports.encodeCount = encodeCount;
 exports.asUpped = function(code, upped) {
-	var isUpped = (code & 0x3fff) > 6999;
+	const isUpped = (code & 0x3fff) > 6999;
 	return isUpped == upped ? code : code + (isUpped ? -2000 : 2000);
 };
 exports.asShiny = function(code, shiny) {
@@ -22,23 +22,23 @@ exports.toTrueMarkSuffix = function(n) {
 	return '01' + (n + 9010).toString(32);
 };
 exports.iterdeck = function(deck, func) {
-	var len = 0;
-	for (var i = 0; i < deck.length; i += 5) {
-		var count = parseInt(deck.substr(i, 2), 32),
+	let len = 0;
+	for (let i = 0; i < deck.length; i += 5) {
+		const count = parseInt(deck.substr(i, 2), 32),
 			code = parseInt(deck.substr(i + 2, 3), 32);
-		for (var j = 0; j < count; j++) func(code, len++);
+		for (let j = 0; j < count; j++) func(code, len++);
 	}
 };
 exports.iterraw = function(deck, func) {
-	for (var i = 0; i < deck.length; i += 5) {
-		var count = parseInt(deck.substr(i, 2), 32),
+	for (let i = 0; i < deck.length; i += 5) {
+		const count = parseInt(deck.substr(i, 2), 32),
 			code = parseInt(deck.substr(i + 2, 3), 32);
 		func(code, count);
 	}
 };
 exports.count = function(deck, code) {
 	const key = code.toString(32);
-	for (var i = 0; i < deck.length; i += 5) {
+	for (let i = 0; i < deck.length; i += 5) {
 		if (key == deck.substr(i + 2, 3)) {
 			return parseInt(deck.substr(i, 2), 32);
 		}
@@ -46,15 +46,15 @@ exports.count = function(deck, code) {
 	return 0;
 };
 exports.decklength = function(deck) {
-	var r = 0;
-	for (var i = 0; i < deck.length; i += 5) {
+	let r = 0;
+	for (let i = 0; i < deck.length; i += 5) {
 		r += parseInt(deck.substr(i, 2), 32);
 	}
 	return r;
 };
 exports.encodedeck = function(deck) {
-	var pool = [],
-		out = '';
+	const pool = [];
+	let out = '';
 	deck.forEach(code => {
 		if (code in pool) {
 			pool[code]++;
@@ -68,11 +68,11 @@ exports.encodedeck = function(deck) {
 	return out;
 };
 exports.encoderaw = function(deck) {
-	var out = '',
+	let out = '',
 		i = 0;
 	while (i < deck.length) {
-		var j = i++,
-			dj = deck[j];
+		let j = i++;
+		const dj = deck[j];
 		while (i < deck.length && deck[i] == dj) i++;
 		out += encodeCount(i - j) + dj.toString(32);
 	}
@@ -80,7 +80,7 @@ exports.encoderaw = function(deck) {
 };
 exports.decodedeck = function(deck) {
 	if (!deck) return [];
-	var out = [];
+	const out = [];
 	exports.iterdeck(deck, code => out.push(code));
 	return out;
 };
@@ -99,10 +99,10 @@ exports.deck2pool = function(deck, pool) {
 exports.addcard = function(deck, card, x) {
 	if (deck === undefined) deck = '';
 	if (x === undefined) x = 1;
-	for (var i = 0; i < deck.length; i += 5) {
-		var code = parseInt(deck.substr(i + 2, 3), 32);
+	for (let i = 0; i < deck.length; i += 5) {
+		const code = parseInt(deck.substr(i + 2, 3), 32);
 		if (code == card) {
-			var count = parseInt(deck.substr(i, 2), 32) + x;
+			const count = parseInt(deck.substr(i, 2), 32) + x;
 			return count <= 0
 				? deck.slice(0, i) + deck.slice(i + 5)
 				: deck.slice(0, i) + encodeCount(count) + deck.slice(i + 2);
@@ -111,7 +111,7 @@ exports.addcard = function(deck, card, x) {
 	return x <= 0 ? deck : deck + encodeCount(x) + card.toString(32);
 };
 exports.mergedecks = function(deck) {
-	for (var i = 1; i < arguments.length; i++) {
+	for (let i = 1; i < arguments.length; i++) {
 		exports.iterraw(arguments[i], (code, count) => {
 			deck = exports.addcard(deck, code, count);
 		});
@@ -119,7 +119,7 @@ exports.mergedecks = function(deck) {
 	return deck;
 };
 exports.removedecks = function(deck) {
-	for (var i = 1; i < arguments.length; i++) {
+	for (let i = 1; i < arguments.length; i++) {
 		exports.iterraw(arguments[i], (code, count) => {
 			deck = exports.addcard(deck, code, -count);
 		});

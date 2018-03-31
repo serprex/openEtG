@@ -2,7 +2,7 @@
 const Cards = require('../Cards'),
 	etgutil = require('../etgutil'),
 	decks = require('../Decks');
-var pool = '';
+let pool = '';
 function buildPool(x) {
 	pool = etgutil.mergedecks(pool, x[1]);
 }

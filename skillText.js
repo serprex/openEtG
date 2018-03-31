@@ -454,10 +454,7 @@ const data = {
 		'Target weapon deals an additional 3 damage per turn. Thaws',
 		'Target weapon deals an additional 5 damage per turn. Thaws',
 	],
-	tesseractsummon: [
-		'Each player summons a creature from their deck. Freeze summoned creatures by a quarter of their cost, rounded up',
-		'Summon a creature from own deck. Freeze summoned creature by a quarter of their cost, rounded up',
-	],
+	tesseractsummon: 'Summon 2 creatures from own deck, foe summons 1 creature from their deck. Freeze summoned creatures by a quarter of their cost, rounded up',
 	thorn: '75% chance to poison non-ranged attackers',
 	throwrock: [
 		"Deal 3 damage to target creature, then shuffle Throw Rock into target's deck",
