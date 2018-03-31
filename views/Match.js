@@ -271,7 +271,9 @@ const ThingInst = connect(({opts}) => ({ lofiArt: opts.lofiArt }))(function Thin
 					position: 'absolute',
 					left: '0',
 					top: '-8px',
-					width: 72 * scale + 'px',
+					width: 64 * scale + 'px',
+					overflow: 'hidden',
+					backgroundColor: ui.maybeLightenStr(obj.card),
 				}}
 			/>
 		);
@@ -663,7 +665,7 @@ module.exports = class Match extends React.Component {
 		store.store.dispatch(store.setCmds({}));
 	}
 
-	componentWillReceiveProps(props) {
+	UNSAFE_componentWillReceiveProps(props) {
 		this.componentWillUnmount();
 		startMatch(this, props.game, props.data);
 	}
