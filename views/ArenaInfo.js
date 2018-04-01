@@ -12,7 +12,7 @@ function RenderInfo(props) {
 	const {info, y} = props;
 	if (info) {
 		const card = y ? etgutil.asUpped(info.card, true) : info.card;
-		const adeck = '05' + info.card.toString(32) + info.deck;
+		const adeck = '05' + card.toString(32) + info.deck;
 		return <>
 			<Components.DeckDisplay
 				deck={etgutil.decodedeck(adeck)}
@@ -32,9 +32,10 @@ function RenderInfo(props) {
 					((info.win || 0) * 3 + (info.loss || 0) * 1) +
 					'$'}
 			/>
-			<span style={{ position: 'absolute', left: '330px', top: 4 + y + 'px' }}>
-				{adeck}
-			</span>
+			<input readOnly
+				style={{ position: 'absolute', left: '330px', top: 4 + y + 'px', width: '190px' }}
+				value={adeck}
+			/>
 			<span style={{ position: 'absolute', left: '400px', top: 224 + y + 'px' }}>
 				Age: {info.day}
 			</span>
@@ -70,7 +71,7 @@ function RenderInfo(props) {
 					top: 224 + y + 'px',
 				}}
 				onClick={() => {
-					var deck = sock.getDeck();
+					const deck = sock.getDeck();
 					if (etgutil.decklength(deck) < 9 || etgutil.decklength(adeck) < 9) {
 						store.store.dispatch(store.doNav(require('./Editor')));
 						return;

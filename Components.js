@@ -118,37 +118,34 @@ exports.Text = function(props) {
 };
 
 function IconBtn(props) {
-	return h('span', {
-		className: 'imgb ico ' + props.e,
-		style: {
+	return <span className={'imgb ico ' + props.e}
+		style={{
 			position: 'absolute',
 			left: props.x + 'px',
 			top: props.y + 'px',
-		},
-		onClick: function(e) {
+		}}
+		onClick={(e) => {
 			audio.playSound('buttonClick');
 			if (props.click) props.click.call(e.target, e);
-		},
-		onMouseOver: props.onMouseOver,
-	});
+		}}
+		onMouseOver={props.onMouseOver}
+	/>;
 }
 exports.IconBtn = IconBtn;
 
 exports.ExitBtn = function(props) {
-	return h('input', {
-		type: 'button',
-		value: 'Exit',
-		onClick:
-			props.onClick ||
-			function() {
+	return <input type='button'
+		value='Exit'
+		onClick={props.onClick ||
+			(() => {
 				store.store.dispatch(store.doNav(require('./views/MainMenu')));
-			},
-		style: {
+			})}
+		style={{
 			position: 'absolute',
 			left: props.x + 'px',
 			top: props.y + 'px',
-		},
-	});
+		}}
+	/>;
 };
 
 exports.Card = function(props) {

@@ -123,8 +123,8 @@ module.exports = connect(({opts}) => ({ deck: opts.deck, deckname: opts.deckname
 			sortedDeck.unshift(acode, acode, acode, acode, acode);
 		}
 		function sumCardMinus(code) {
-			var sum = 0;
-			for (var i = 0; i < 4; i++) {
+			let sum = 0;
+			for (let i = 0; i < 4; i++) {
 				sum +=
 					cardminus[etgutil.asShiny(etgutil.asUpped(code, i & 1), i & 2)] || 0;
 			}
@@ -174,20 +174,19 @@ module.exports = connect(({opts}) => ({ deck: opts.deck, deckname: opts.deckname
 			self.setState(self.processDeck(etgutil.decodedeck(sock.getDeck())));
 		}
 		const editorui = [
-			h('input', {
-				type: 'button',
-				value: 'Clear',
-				onClick: () => self.setState({ deck: [] }),
-				style: {
+			<input type='button'
+				value='Clear'
+				onClick={() => self.setState({ deck: [] })}
+				style={{
 					position: 'absolute',
 					left: '8px',
 					top: '32px',
-				},
-			}),
+				}}
+			/>
 		];
 		let sumscore = 0;
 		if (self.state.arattr) {
-			for (var k in artable) {
+			for (const k in artable) {
 				sumscore += self.state.arattr[k] * artable[k].cost;
 			}
 		}
@@ -211,50 +210,36 @@ module.exports = connect(({opts}) => ({ deck: opts.deck, deckname: opts.deckname
 			y = 128 + y * 20 + 'px';
 			const data = artable[name];
 			editorui.push(
-				h(
-					'div',
-					{
-						style: {
-							position: 'absolute',
-							left: '4px',
-							top: y,
-						},
-					},
-					name,
-				),
-				h('input', {
-					type: 'button',
-					value: '-',
-					onClick: mkmodattr(-(data.incr || 1)),
-					style: {
+				<div style={{
+					position: 'absolute',
+					left: '4px',
+					top: y,
+				}}>{name}</div>,
+				<input type='button'
+					value='-'
+					onClick={mkmodattr(-(data.incr || 1))}
+					style={{
 						position: 'absolute',
 						left: '38px',
 						top: y,
 						width: '14px',
-					},
-				}),
-				h('input', {
-					type: 'button',
-					value: '+',
-					onClick: mkmodattr(data.incr || 1),
-					style: {
+					}}
+				/>,
+				<input type='button'
+					value='+'
+					onClick={mkmodattr(data.incr || 1)}
+					style={{
 						position: 'absolute',
 						left: '82px',
 						top: y,
 						width: '14px',
-					},
-				}),
-				h(
-					'div',
-					{
-						style: {
-							position: 'absolute',
-							left: '56px',
-							top: y,
-						},
-					},
-					self.state.arattr[name] + '',
-				),
+					}}
+				/>,
+				<div style={{
+					position: 'absolute',
+					left: '56px',
+					top: y,
+				}}>{self.state.arattr[name] + ''}</div>,
 			);
 		}
 		function saveButton() {
@@ -429,25 +414,22 @@ module.exports = connect(({opts}) => ({ deck: opts.deck, deckname: opts.deckname
 			}
 		}
 		editorui.push(
-			h('span', {
-				className: 'ico e' + self.state.mark,
-				style: {
+			<span className={'ico e' + self.state.mark}
+				style={{
 					position: 'absolute',
 					left: '66px',
 					top: '200px',
-				},
-			}),
+				}}
+			/>,
 		);
 		for (let i = 0; i < 13; i++) {
 			editorui.push(
-				h(Components.IconBtn, {
-					e: 'e' + i,
-					x: 100 + i * 32,
-					y: 234,
-					click: function() {
-						self.setState({ mark: i });
-					},
-				}),
+				<Components.IconBtn
+					e={'e' + i}
+					x={100 + i * 32}
+					y={234}
+					click={() => self.setState({ mark: i })}
+				/>,
 			);
 		}
 		const decksprite = <Components.DeckDisplay
