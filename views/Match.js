@@ -338,9 +338,9 @@ const ThingInst = connect(({opts}) => ({ lofiArt: opts.lofiArt }))(function Thin
 				fontSize: '10px',
 				border: 'transparent 2px solid',
 			},
+			onMouseOver: props.setInfo && (e => props.setInfo(e, obj, pos.x)),
 		},{
 			className: tgtclass(game, obj),
-			onMouseOver: props.setInfo && (e => props.setInfo(e, obj, pos.x)),
 			onMouseOut: props.onMouseOut,
 			onClick: function() {
 				props.onMouseOut();
