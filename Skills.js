@@ -616,11 +616,8 @@ const Skills = (module.exports = {
 	},
 	endow: (c, t) => {
 		Effect.mkText('Endow', t);
-		for (let i = 0; i < t.status.keys.length; i++) {
-			const key = t.status.keys[i];
-			let val = t.status.vals[i];
-			if (key == 'adrenaline' && val > 1) val = 1;
-			c.status.incr(key, val);
+		for (const [key, val] of t.status.map) {
+			c.status.incr(key, key == 'adrenaline' && val > 1 ? 1 : val);
 		}
 		c.active = util.clone(t.active);
 		if (c.active.cast == Skills.endow) {
@@ -838,10 +835,9 @@ const Skills = (module.exports = {
 		c.owner.dmg(-4);
 	},
 	grave: (c, t) => {
-		if (!t.card.isOf(Cards.Singularity)) {
-			c.status.set('burrowed', 0);
-			c.transform(t.card);
-		}
+		c.status.set('burrowed', 0);
+		c.transform(t.card);
+		c.status.set('nocturnal', 1);
 	},
 	growth: x => {
 		const n = +x;

@@ -52,8 +52,8 @@ Player.prototype.setCrea = function(idx, x) {
 };
 Player.prototype.addPerm = function(x, fromhand) {
 	if (x.status.get('additive')) {
-		var dullcode = etgutil.asShiny(x.card.code, false);
-		for (var i = 0; i < 16; i++) {
+		const dullcode = etgutil.asShiny(x.card.code, false);
+		for (let i = 0; i < 16; i++) {
 			if (
 				this.permanents[i] &&
 				etgutil.asShiny(this.permanents[i].card.code, false) == dullcode
@@ -103,9 +103,9 @@ function plinfocore(info, key, val) {
 	else if (val) info.push(val + key);
 }
 Player.prototype.info = function() {
-	var info = [this.hp + '/' + this.maxhp + ' ' + this.deck.length + 'cards'];
-	for (var i = 0; i < this.status.keys.length; i++) {
-		plinfocore(info, this.status.keys[i], this.status.vals[i]);
+	const info = [this.hp + '/' + this.maxhp + ' ' + this.deck.length + 'cards'];
+	for (const [k, v] of this.status.map) {
+		plinfocore(info, k, v);
 	}
 	[
 		'nova',

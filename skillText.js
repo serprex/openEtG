@@ -1,18 +1,16 @@
 'use strict';
 module.exports = function(c, event) {
 	if (c instanceof Card && c.type == etg.Spell) {
-		var entry = getDataFromName(c.active.cast.name[0]);
+		const entry = getDataFromName(c.active.cast.name[0]);
 		return processEntry(c, 'cast', entry);
 	} else {
-		var ret = [],
+		const ret = [],
 			stext = [];
-		for (var i = 0; i < c.status.keys.length; i++) {
-			var val = c.status.vals[i];
+		for (const [key, val] of c.status.map) {
 			if (!val) continue;
-			var key = c.status.keys[i];
-			var entry = statusData[key];
+			const entry = statusData[key];
 			if (entry === undefined) {
-				var text = val == 1 ? key : val + key;
+				let text = val == 1 ? key : val + key;
 				text = text.charAt(0).toUpperCase() + text.slice(1);
 				stext.push(text);
 			} else pushEntry(ret, c, '', entry);
@@ -211,7 +209,7 @@ const data = {
 	},
 	gaintimecharge: 'Gain a stack per own non-drawstep draw, up to 4 per turn',
 	gas: 'Summon an Unstable Gas',
-	grave: 'When a death occurs, unburrowed & become of its kind',
+	grave: "When a death occurs, unburrowed & become of dying's kind. Maintain nocturnal",
 	give: c =>
 		'Give own target to foe. Heal self ' +
 		(c.upped ? 10 : 5) +

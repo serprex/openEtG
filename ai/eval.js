@@ -501,10 +501,8 @@ function evalactive(c, active, extra) {
 }
 
 function checkpassives(c) {
-	let score = 0,
-		kl = c.status.keys.length;
-	for (let i = 0; i < kl; i++) {
-		const status = c.status.keys[i];
+	let score = 0;
+	for (const status of c.status.map.keys()) {
 		// Skip cloak if it expires at end of turn
 		if (
 			uniqueStatuses.has(status) &&

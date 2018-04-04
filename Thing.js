@@ -33,13 +33,11 @@ Thing.prototype.transform = function(card) {
 	this.card = card;
 	this.maxhp = this.hp = card.health;
 	this.atk = card.attack;
-	for (let i = 0; i < this.status.keys.length; i++) {
-		const key = this.status.keys[i];
-		if (passives.has(key)) this.status.vals[i] = 0;
+	for (const key of this.status.map.keys()) {
+		if (passives.has(key)) this.status.map.delete(key);
 	}
-	for (let i = 0; i < card.status.keys.length; i++) {
-		const key = card.status.keys[i];
-		if (!this.status.get(key)) this.status.set(key, card.status.vals[i]);
+	for (const [key, val] of card.status.map) {
+		if (!this.status.get(key)) this.status.map.set(key, val);
 	}
 	this.active = util.clone(card.active);
 	if (this.status.get('mutant')) {
