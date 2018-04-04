@@ -21,8 +21,9 @@ Status.prototype.incr = function(key, val) {
 	this.map.set(key, (this.map.get(key)|0)+val);
 };
 Status.prototype.maybeDecr = function(key) {
-	const val = this.map.get(key);
+	const val = this.get(key);
 	if (val > 0) this.map.set(key, val-1);
+	return val;
 };
 Status.prototype.clear = function() {
 	this.map.clear();
