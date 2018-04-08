@@ -337,6 +337,7 @@ const ThingInst = connect(({opts}) => ({ lofiArt: opts.lofiArt }))(function Thin
 				color: obj.card.upped ? '#000' : '#fff',
 				fontSize: '10px',
 				border: 'transparent 2px solid',
+				zIndex: !isSpell && obj.status.get('cloak') ? '2' : undefined,
 			},
 			onMouseOver: props.setInfo && (e => props.setInfo(e, obj, pos.x)),
 		},{
