@@ -420,101 +420,151 @@ module.exports = class Match extends React.Component {
 			discarding: false,
 			resigning: false,
 			effects: null,
-			playerClick: [],
 		};
+	}
+
+	endClick(discard) {
+		const self = this, { game } = this.props;
+		if (game.turn == game.player1 && game.phase === etg.MulliganPhase) {
+			if (!game.ai) sock.emit('mulligan', { draw: true });
+			game.progressMulligan();
+		} else if (game.winner) {
+			if (sock.user) {
+				if (game.arena) {
+					sock.userEmit('modarena', {
+						aname: game.arena,
+						won: game.winner == game.player2,
+						lv: game.level - 4,
+					});
+				}
+				if (game.winner == game.player1) {
+					if (game.quest) {
+						if (game.autonext) {
+							const data = addNoHealData(game);
+							const newgame = require('../Quest').mkQuestAi(
+								game.quest[0],
+								game.quest[1] + 1,
+								game.area,
+							);
+							newgame.game.addData(data);
+							mkAi.run(newgame);
+							return;
+						} else if (
+							sock.user.quests[game.quest[0]] <= game.quest[1] ||
+							!(game.quest[0] in sock.user.quests)
+						) {
+							sock.userExec('updatequest', {
+								quest: game.quest[0],
+								newstage: game.quest[1] + 1,
+							});
+						}
+					} else if (game.daily) {
+						if (game.endurance) {
+							const data = addNoHealData(game);
+							data.endurance--;
+							const newgame = mkAi.mkAi(game.level, true)();
+							newgame.game.addData(data);
+							newgame.game.dataNext = data;
+							mkAi.run(newgame);
+							return;
+						} else {
+							sock.userExec('donedaily', {
+								daily: game.daily == 4 ? 5 : game.daily == 3 ? 0 : game.daily,
+							});
+						}
+					}
+				} else if (!game.endurance && game.level !== undefined) {
+					sock.user.streak[game.level] = 0;
+				}
+			}
+			store.store.dispatch(store.doNav(require('./Result'), { game: game, data: self.props.data }));
+		} else if (game.turn == game.player1) {
+			if (discard == undefined && game.player1.hand.length == 8) {
+				self.setState({ discarding: true });
+			} else {
+				self.setState({ discarding: false });
+				if (!game.ai) sock.emit('endturn', { bits: discard });
+				game.player1.endturn(discard);
+				game.targeting = null;
+				self.setState({ foeplays: [] });
+			}
+		}
+	}
+
+	cancelClick() {
+		const self = this, { game } = this.props;
+		if (self.state.resigning) {
+			self.setState({ resigning: false });
+		} else if (game.turn == game.player1) {
+			if (game.phase === etg.MulliganPhase && game.player1.hand.length) {
+				game.player1.drawhand(game.player1.hand.length - 1);
+				if (!game.ai) sock.emit('mulligan');
+				self.forceUpdate();
+			} else if (game.targeting) {
+				game.targeting = null;
+				self.forceUpdate();
+			} else self.setState({ discarding: false });
+		}
+	}
+
+	resignClick() {
+		const self = this, { game } = this.props;
+		if (self.state.resigning) {
+			if (!game.ai) sock.emit('foeleft');
+			game.setWinner(game.player2);
+			endClick();
+		} else {
+			self.setState({ resigning: true });
+		}
+	}
+
+	playerClick(j) {
+		const { game } = this.props;
+		if (
+			game.phase == etg.PlayPhase &&
+			game.targeting &&
+			game.targeting.filter(game.players(j))
+		) {
+			game.targeting.cb(game.players(j));
+			this.forceUpdate();
+		}
+	}
+
+	gameStep() {
+		const { game } = this.props;
+		if (game.turn == game.player2 && game.ai) {
+			if (game.phase == etg.PlayPhase) {
+				if (!aiCommand) {
+					Effect.disable = true;
+					if (aiState) {
+						aiState.step(game);
+					} else {
+						aiState = new aiSearch(game);
+					}
+					Effect.disable = false;
+					if (aiState.cmd) {
+						aiCommand = true;
+					}
+				}
+				let now;
+				if (aiCommand && (now = Date.now()) > aiDelay) {
+					cmds[aiState.cmd]({ bits: aiState.cmdct });
+					aiState = undefined;
+					aiCommand = false;
+					aiDelay = now + (game.turn == game.player1 ? 2000 : 200);
+				}
+			} else if (game.phase === etg.MulliganPhase) {
+				cmds.mulligan({ draw: require('../ai/mulligan')(game.player2) });
+			}
+		}
+		const effects = Effect.next(this.state.cloaked);
+		if (effects !== this.state.effects) {
+			this.setState({ effects });
+		}
 	}
 
 	startMatch(game, gameData) {
 		const self = this;
-		function endClick(discard) {
-			if (game.turn == game.player1 && game.phase === etg.MulliganPhase) {
-				if (!game.ai) sock.emit('mulligan', { draw: true });
-				game.progressMulligan();
-			} else if (game.winner) {
-				if (sock.user) {
-					if (game.arena) {
-						sock.userEmit('modarena', {
-							aname: game.arena,
-							won: game.winner == game.player2,
-							lv: game.level - 4,
-						});
-					}
-					if (game.winner == game.player1) {
-						if (game.quest) {
-							if (game.autonext) {
-								const data = addNoHealData(game);
-								const newgame = require('../Quest').mkQuestAi(
-									game.quest[0],
-									game.quest[1] + 1,
-									game.area,
-								);
-								newgame.game.addData(data);
-								mkAi.run(newgame);
-								return;
-							} else if (
-								sock.user.quests[game.quest[0]] <= game.quest[1] ||
-								!(game.quest[0] in sock.user.quests)
-							) {
-								sock.userExec('updatequest', {
-									quest: game.quest[0],
-									newstage: game.quest[1] + 1,
-								});
-							}
-						} else if (game.daily) {
-							if (game.endurance) {
-								const data = addNoHealData(game);
-								data.endurance--;
-								const newgame = mkAi.mkAi(game.level, true)();
-								newgame.game.addData(data);
-								newgame.game.dataNext = data;
-								mkAi.run(newgame);
-								return;
-							} else {
-								sock.userExec('donedaily', {
-									daily: game.daily == 4 ? 5 : game.daily == 3 ? 0 : game.daily,
-								});
-							}
-						}
-					} else if (!game.endurance && game.level !== undefined) {
-						sock.user.streak[game.level] = 0;
-					}
-				}
-				store.store.dispatch(store.doNav(require('./Result'), { game: game, data: gameData }));
-			} else if (game.turn == game.player1) {
-				if (discard == undefined && game.player1.hand.length == 8) {
-					self.setState({ discarding: true });
-				} else {
-					self.setState({ discarding: false });
-					if (!game.ai) sock.emit('endturn', { bits: discard });
-					game.player1.endturn(discard);
-					game.targeting = null;
-					self.setState({ foeplays: [] });
-				}
-			}
-		}
-		function cancelClick() {
-			if (self.state.resigning) {
-				self.setState({ resigning: false });
-			} else if (game.turn == game.player1) {
-				if (game.phase === etg.MulliganPhase && game.player1.hand.length) {
-					game.player1.drawhand(game.player1.hand.length - 1);
-					if (!game.ai) sock.emit('mulligan');
-					self.forceUpdate();
-				} else if (game.targeting) {
-					game.targeting = null;
-					self.forceUpdate();
-				} else self.setState({ discarding: false });
-			}
-		}
-		function resignClick() {
-			if (self.state.resigning) {
-				if (!game.ai) sock.emit('foeleft');
-				game.setWinner(game.player2);
-				endClick();
-			} else {
-				self.setState({ resigning: true });
-			}
-		}
 		let aiDelay = 0,
 			aiState,
 			aiCommand;
@@ -522,25 +572,6 @@ module.exports = class Match extends React.Component {
 			sock.user.streakback = sock.user.streak[game.level];
 			sock.userExec('addloss', { pvp: !game.ai, l: game.level, g: -game.cost });
 		}
-		const playerClick = [];
-		for (let j = 0; j < 2; j++) {
-			playerClick[j] = function() {
-				if (
-					game.phase == etg.PlayPhase &&
-					game.targeting &&
-					game.targeting.filter(game.players(j))
-				) {
-					game.targeting.cb(game.players(j));
-					self.forceUpdate();
-				}
-			};
-		}
-		self.setState({
-			funcEnd: endClick,
-			funcCancel: cancelClick,
-			funcResign: resignClick,
-			playerClick,
-		});
 		Effect.clear();
 		function onkeydown(e) {
 			if (e.target.id == 'chatinput') return;
@@ -548,13 +579,13 @@ module.exports = class Match extends React.Component {
 				ch = String.fromCharCode(kc);
 			let chi;
 			if (kc == 27) {
-				resignClick();
+				self.resignClick();
 			} else if (ch == ' ' || kc == 13) {
-				endClick();
+				self.endClick();
 			} else if (ch == '\b' || ch == '0') {
-				cancelClick();
+				self.cancelClick();
 			} else if (~(chi = 'SW'.indexOf(ch))) {
-				playerClick[chi]();
+				self.playerClick(chi);
 			} /* else if (~(chi = "QA".indexOf(ch))) {
 				shiesprite[chi].click();
 			} else if (~(chi = "ED".indexOf(ch))) {
@@ -610,39 +641,8 @@ module.exports = class Match extends React.Component {
 		if (!gameData.spectate) {
 			document.addEventListener('keydown', onkeydown);
 		}
-		function gameStep() {
-			if (game.turn == game.player2 && game.ai) {
-				if (game.phase == etg.PlayPhase) {
-					if (!aiCommand) {
-						Effect.disable = true;
-						if (aiState) {
-							aiState.step(game);
-						} else {
-							aiState = new aiSearch(game);
-						}
-						Effect.disable = false;
-						if (aiState.cmd) {
-							aiCommand = true;
-						}
-					}
-					let now;
-					if (aiCommand && (now = Date.now()) > aiDelay) {
-						cmds[aiState.cmd]({ bits: aiState.cmdct });
-						aiState = undefined;
-						aiCommand = false;
-						aiDelay = now + (game.turn == game.player1 ? 2000 : 200);
-					}
-				} else if (game.phase === etg.MulliganPhase) {
-					cmds.mulligan({ draw: require('../ai/mulligan')(game.player2) });
-				}
-			}
-			const effects = Effect.next(self.state.cloaked);
-			if (effects !== self.state.effects) {
-				self.setState({ effects });
-			}
-		}
-		gameStep();
-		const gameInterval = setInterval(gameStep, 30);
+		this.gameStep();
+		const gameInterval = setInterval(() => this.gameStep(), 30);
 		self.setState({
 			endnext: function() {
 				document.removeEventListener('keydown', onkeydown);
@@ -771,7 +771,7 @@ module.exports = class Match extends React.Component {
 						height: '80px',
 						border: 'transparent 2px solid',
 					}}
-					onClick={self.state.playerClick[j]}
+					onClick={() => self.playerClick(j)}
 					onMouseOver={(e) => self.setInfo(e, pl)}
 				/>,
 				<span className={'ico e' + pl.mark}
@@ -836,7 +836,7 @@ module.exports = class Match extends React.Component {
 						game={game}
 						setGame={() => self.forceUpdate()}
 						discarding={self.state.discarding}
-						funcEnd={self.state.funcEnd}
+						funcEnd={self.endClick.bind(self)}
 						setInfo={(e, obj, x) => self.setCard(e, obj.card, x)}
 						onMouseOut={() => self.clearCard()}
 					/>
@@ -1065,7 +1065,7 @@ module.exports = class Match extends React.Component {
 		children.push(
 			<input type='button'
 				value={self.state.resigning ? 'Confirm' : 'Resign'}
-				onClick={() => self.state.funcResign()}
+				onClick={() => self.resignClick()}
 				style={{
 					position: 'absolute',
 					left: '8px',
@@ -1078,7 +1078,7 @@ module.exports = class Match extends React.Component {
 				children.push(
 					<input type='button'
 						value={cancelText}
-						onClick={() => self.state.funcCancel()}
+						onClick={() => self.cancelClick()}
 						style={{
 							position: 'absolute',
 							left: '800px',
@@ -1091,7 +1091,7 @@ module.exports = class Match extends React.Component {
 				children.push(
 					<input type='button'
 						value={endText}
-						onClick={() => self.state.funcEnd()}
+						onClick={() => self.endClick()}
 						style={{
 							position: 'absolute',
 							left: '800px',
