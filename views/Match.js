@@ -466,7 +466,7 @@ module.exports = connect()(class Match extends React.Component {
 		if (this.state.resigning) {
 			if (!game.ai) sock.emit('foeleft');
 			game.setWinner(game.player2);
-			endClick();
+			this.endClick();
 		} else {
 			this.setState({ resigning: true });
 		}
