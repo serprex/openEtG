@@ -343,55 +343,7 @@ const ThingInst = connect(({opts}) => ({ lofiArt: opts.lofiArt }))(function Thin
 		},{
 			className: tgtclass(game, obj),
 			onMouseOut: props.onMouseOut,
-			onClick: function() {
-				props.onMouseOut();
-				if (game.phase != etg.PlayPhase) return;
-				if (obj.type !== etg.Spell) {
-					if (game.targeting && game.targeting.filter(obj)) {
-						game.targeting.cb(obj);
-						props.setGame(game);
-					} else if (
-						obj.owner == game.player1 &&
-						!game.targeting &&
-						obj.canactive()
-					) {
-						game.getTarget(obj, obj.active.cast, tgt => {
-							if (!game.ai)
-								sock.emit('cast', {
-									bits: game.tgtToBits(obj) | (game.tgtToBits(tgt) << 9),
-								});
-							obj.useactive(tgt);
-							props.setGame(game);
-						});
-						props.setGame(game);
-					}
-				} else {
-					if (obj.owner == game.player1 && props.discarding) {
-						props.funcEnd(obj.getIndex());
-					} else if (game.targeting) {
-						if (game.targeting.filter(obj)) {
-							game.targeting.cb(obj);
-							props.setGame(game);
-						}
-					} else if (obj.owner == game.player1 && obj.canactive()) {
-						if (obj.card.type != etg.Spell) {
-							if (!game.ai) sock.emit('cast', { bits: game.tgtToBits(obj) });
-							obj.useactive();
-							props.setGame(game);
-						} else {
-							game.getTarget(obj, obj.card.active.cast, tgt => {
-								if (!game.ai)
-									sock.emit('cast', {
-										bits: game.tgtToBits(obj) | (game.tgtToBits(tgt) << 9),
-									});
-								obj.useactive(tgt);
-								props.setGame(game);
-							});
-							props.setGame(game);
-						}
-					}
-				}
-			},
+			onClick: () => props.onClick(obj),
 		})
 	);
 });
@@ -411,7 +363,7 @@ function tgtclass(game, obj) {
 	} else if (obj.owner === game.player1 && obj.canactive()) return 'canactive';
 }
 
-module.exports = class Match extends React.Component {
+module.exports = connect()(class Match extends React.Component {
 	constructor(props) {
 		super(props);
 		this.state = {
@@ -420,11 +372,14 @@ module.exports = class Match extends React.Component {
 			discarding: false,
 			resigning: false,
 			effects: null,
+			aiState: null,
+			aiCommand: false,
+			aiDelay: 0,
 		};
 	}
 
 	endClick(discard) {
-		const self = this, { game } = this.props;
+		const { game } = this.props;
 		if (game.turn == game.player1 && game.phase === etg.MulliganPhase) {
 			if (!game.ai) sock.emit('mulligan', { draw: true });
 			game.progressMulligan();
@@ -477,44 +432,43 @@ module.exports = class Match extends React.Component {
 					sock.user.streak[game.level] = 0;
 				}
 			}
-			store.store.dispatch(store.doNav(require('./Result'), { game: game, data: self.props.data }));
+			this.props.dispatch(store.doNav(require('./Result'), { game: game, data: this.props.data }));
 		} else if (game.turn == game.player1) {
 			if (discard == undefined && game.player1.hand.length == 8) {
-				self.setState({ discarding: true });
+				this.setState({ discarding: true });
 			} else {
-				self.setState({ discarding: false });
 				if (!game.ai) sock.emit('endturn', { bits: discard });
 				game.player1.endturn(discard);
 				game.targeting = null;
-				self.setState({ foeplays: [] });
+				this.setState({ discarding: false, foeplays: [] });
 			}
 		}
 	}
 
 	cancelClick() {
-		const self = this, { game } = this.props;
-		if (self.state.resigning) {
-			self.setState({ resigning: false });
+		const { game } = this.props;
+		if (this.state.resigning) {
+			this.setState({ resigning: false });
 		} else if (game.turn == game.player1) {
 			if (game.phase === etg.MulliganPhase && game.player1.hand.length) {
 				game.player1.drawhand(game.player1.hand.length - 1);
 				if (!game.ai) sock.emit('mulligan');
-				self.forceUpdate();
+				this.forceUpdate();
 			} else if (game.targeting) {
 				game.targeting = null;
-				self.forceUpdate();
-			} else self.setState({ discarding: false });
+				this.forceUpdate();
+			} else this.setState({ discarding: false });
 		}
 	}
 
 	resignClick() {
-		const self = this, { game } = this.props;
-		if (self.state.resigning) {
+		const { game } = this.props;
+		if (this.state.resigning) {
 			if (!game.ai) sock.emit('foeleft');
 			game.setWinner(game.player2);
 			endClick();
 		} else {
-			self.setState({ resigning: true });
+			this.setState({ resigning: true });
 		}
 	}
 
@@ -530,28 +484,81 @@ module.exports = class Match extends React.Component {
 		}
 	}
 
-	gameStep() {
+	thingClick(obj) {
+		const { game } = this.props;
+		this.clearCard();
+		if (game.phase != etg.PlayPhase) return;
+		if (obj.type !== etg.Spell) {
+			if (game.targeting && game.targeting.filter(obj)) {
+				game.targeting.cb(obj);
+				this.forceUpdate();
+			} else if (
+				obj.owner == game.player1 &&
+				!game.targeting &&
+				obj.canactive()
+			) {
+				game.getTarget(obj, obj.active.cast, tgt => {
+					if (!game.ai)
+						sock.emit('cast', {
+							bits: game.tgtToBits(obj) | (game.tgtToBits(tgt) << 9),
+						});
+					obj.useactive(tgt);
+					this.forceUpdate();
+				});
+				this.forceUpdate();
+			}
+		} else {
+			if (obj.owner == game.player1 && this.state.discarding) {
+				this.endClick(obj.getIndex());
+			} else if (game.targeting) {
+				if (game.targeting.filter(obj)) {
+					game.targeting.cb(obj);
+					this.forceUpdate();
+				}
+			} else if (obj.owner == game.player1 && obj.canactive()) {
+				if (obj.card.type != etg.Spell) {
+					if (!game.ai) sock.emit('cast', { bits: game.tgtToBits(obj) });
+					obj.useactive();
+					this.forceUpdate();
+				} else {
+					game.getTarget(obj, obj.card.active.cast, tgt => {
+						if (!game.ai)
+							sock.emit('cast', {
+								bits: game.tgtToBits(obj) | (game.tgtToBits(tgt) << 9),
+							});
+						obj.useactive(tgt);
+						this.forceUpdate();
+					});
+					this.forceUpdate();
+				}
+			}
+		}
+	}
+
+	gameStep(cmds) {
 		const { game } = this.props;
 		if (game.turn == game.player2 && game.ai) {
 			if (game.phase == etg.PlayPhase) {
-				if (!aiCommand) {
+				if (!this.state.aiCommand) {
 					Effect.disable = true;
-					if (aiState) {
-						aiState.step(game);
+					if (this.state.aiState) {
+						this.state.aiState.step(game);
 					} else {
-						aiState = new aiSearch(game);
+						this.setState({aiState: new aiSearch(game)});
 					}
 					Effect.disable = false;
-					if (aiState.cmd) {
-						aiCommand = true;
+					if (this.state.aiState.cmd) {
+						this.setState({aiCommand: true});
 					}
 				}
 				let now;
-				if (aiCommand && (now = Date.now()) > aiDelay) {
-					cmds[aiState.cmd]({ bits: aiState.cmdct });
-					aiState = undefined;
-					aiCommand = false;
-					aiDelay = now + (game.turn == game.player1 ? 2000 : 200);
+				if (this.state.aiCommand && (now = Date.now()) > this.state.aiDelay) {
+					cmds[this.state.aiState.cmd]({ bits: this.state.aiState.cmdct });
+					this.setState({
+						aiState: null,
+						aiCommand: false,
+						aiDelay: now + (game.turn == game.player1 ? 2000 : 200),
+					});
 				}
 			} else if (game.phase === etg.MulliganPhase) {
 				cmds.mulligan({ draw: require('../ai/mulligan')(game.player2) });
@@ -563,11 +570,8 @@ module.exports = class Match extends React.Component {
 		}
 	}
 
-	startMatch(game, gameData) {
+	startMatch({ game, data, dispatch }) {
 		const self = this;
-		let aiDelay = 0,
-			aiState,
-			aiCommand;
 		if (sock.user && !game.endurance && (game.level !== undefined || !game.ai)) {
 			sock.user.streakback = sock.user.streak[game.level];
 			sock.userExec('addloss', { pvp: !game.ai, l: game.level, g: -game.cost });
@@ -586,13 +590,16 @@ module.exports = class Match extends React.Component {
 				self.cancelClick();
 			} else if (~(chi = 'SW'.indexOf(ch))) {
 				self.playerClick(chi);
-			} /* else if (~(chi = "QA".indexOf(ch))) {
-				shiesprite[chi].click();
+			} else if (~(chi = "QA".indexOf(ch))) {
+				const { shield } = game.players(chi);
+				if (shield) self.thingClick(shield);
 			} else if (~(chi = "ED".indexOf(ch))) {
-				weapsprite[chi].click();
+				const { weapon } = game.players(chi);
+				if (weapon) self.thingClick(weapon);
 			} else if (~(chi = "12345678".indexOf(ch))) {
-				handsprite[0][chi].click();
-			} */ else
+				const card = game.player1.hand[chi];
+				if (card) self.thingClick(card);
+			} else
 				return;
 			e.preventDefault();
 		}
@@ -638,18 +645,18 @@ module.exports = class Match extends React.Component {
 				self.forceUpdate();
 			},
 		};
-		if (!gameData.spectate) {
+		if (!data.spectate) {
 			document.addEventListener('keydown', onkeydown);
 		}
-		this.gameStep();
-		const gameInterval = setInterval(() => this.gameStep(), 30);
+		this.gameStep(cmds);
+		const gameInterval = setInterval(() => this.gameStep(cmds), 30);
 		self.setState({
 			endnext: function() {
 				document.removeEventListener('keydown', onkeydown);
 				clearInterval(gameInterval);
 			},
 		});
-		store.store.dispatch(store.setCmds(cmds));
+		dispatch(store.setCmds(cmds));
 	}
 
 	componentDidMount() {
@@ -657,19 +664,21 @@ module.exports = class Match extends React.Component {
 			sock.userEmit('canceltrade');
 			delete sock.trade;
 		}
-		this.startMatch(this.props.game, this.props.data);
+		this.startMatch(this.props);
 	}
 
 	componentWillUnmount() {
 		if (this.state.endnext) {
 			this.state.endnext();
 		}
-		store.store.dispatch(store.setCmds({}));
+		this.props.dispatch(store.setCmds({}));
 	}
 
 	UNSAFE_componentWillReceiveProps(props) {
-		this.componentWillUnmount();
-		this.startMatch(props.game, props.data);
+		if (props.game !== this.props.game) {
+			this.componentWillUnmount();
+			this.startMatch(props);
+		}
 	}
 
 	setInfo(e, obj, x) {
@@ -835,10 +844,10 @@ module.exports = class Match extends React.Component {
 						obj={pl.hand[i]}
 						game={game}
 						setGame={() => self.forceUpdate()}
-						discarding={self.state.discarding}
 						funcEnd={self.endClick.bind(self)}
 						setInfo={(e, obj, x) => self.setCard(e, obj.card, x)}
 						onMouseOut={() => self.clearCard()}
+						onClick={obj => self.thingClick(obj)}
 					/>
 				);
 			}
@@ -854,6 +863,7 @@ module.exports = class Match extends React.Component {
 							setGame={() => self.forceUpdate()}
 							setInfo={(e, obj, x) => self.setInfo(e, obj, x)}
 							onMouseOut={() => self.clearCard()}
+							onClick={obj => self.thingClick(obj)}
 						/>
 					);
 				}
@@ -870,6 +880,7 @@ module.exports = class Match extends React.Component {
 							setGame={() => self.forceUpdate()}
 							setInfo={(e, obj, x) => self.setInfo(e, obj, x)}
 							onMouseOut={() => self.clearCard()}
+							onClick={obj => self.thingClick(obj)}
 						/>
 					);
 				}
@@ -888,6 +899,7 @@ module.exports = class Match extends React.Component {
 						setGame={() => self.forceUpdate()}
 						setInfo={(e, obj, x) => self.setInfo(e, obj, x)}
 						onMouseOut={() => self.clearCard()}
+						onClick={obj => self.thingClick(obj)}
 					/>
 				);
 			}
@@ -900,6 +912,7 @@ module.exports = class Match extends React.Component {
 						setGame={() => self.forceUpdate()}
 						setInfo={(e, obj, x) => self.setInfo(e, obj, x)}
 						onMouseOut={() => self.clearCard()}
+						onClick={obj => self.thingClick(obj)}
 					/>
 				);
 			}
@@ -1104,4 +1117,4 @@ module.exports = class Match extends React.Component {
 
 		return h(React.Fragment, null, ...children);
 	}
-};
+});
