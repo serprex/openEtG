@@ -2,7 +2,7 @@
 exports.Codes = [];
 exports.Targeting = null;
 exports.codeCmp = function(x, y) {
-	var cx = exports.Codes[etgutil.asShiny(x, false)],
+	const cx = exports.Codes[etgutil.asShiny(x, false)],
 		cy = exports.Codes[etgutil.asShiny(y, false)];
 	return (
 		cx.upped - cy.upped ||
@@ -16,13 +16,13 @@ exports.codeCmp = function(x, y) {
 exports.cardCmp = function(x, y) {
 	return exports.codeCmp(x.code, y.code);
 };
-var filtercache = [];
+const filtercache = [];
 exports.filter = function(upped, filter, cmp, showshiny) {
-	var cacheidx = (upped ? 1 : 0) | (showshiny ? 2 : 0);
+	const cacheidx = (upped ? 1 : 0) | (showshiny ? 2 : 0);
 	if (!(cacheidx in filtercache)) {
 		filtercache[cacheidx] = [];
-		for (var key in exports.Codes) {
-			var card = exports.Codes[key];
+		for (const key in exports.Codes) {
+			const card = exports.Codes[key];
 			if (
 				card.upped == upped &&
 				!card.shiny == !showshiny &&
@@ -33,14 +33,14 @@ exports.filter = function(upped, filter, cmp, showshiny) {
 		}
 		filtercache[cacheidx].sort();
 	}
-	var keys = filtercache[cacheidx].filter(filter);
+	const keys = filtercache[cacheidx].filter(filter);
 	if (cmp) keys.sort(cmp);
 	return keys;
 };
 function parseCsv(type, data) {
-	var keys = data[0],
+	const keys = data[0],
 		cardinfo = {};
-	for (var i = 1; i < data.length; i++) {
+	for (let i = 1; i < data.length; i++) {
 		cardinfo.E = i - 1;
 		data[i].forEach(carddata => {
 			keys.forEach((key, i) => {
@@ -66,7 +66,7 @@ function parseCsv(type, data) {
 	}
 }
 function parseTargeting(data) {
-	for (var key in data) {
+	for (const key in data) {
 		data[key] = getTargetFilter(data[key]);
 	}
 	exports.Targeting = data;
@@ -116,20 +116,14 @@ var TargetFilters = {
 		return t.isMaterial(etg.Permanent) && t.card.type == etg.Pillar;
 	},
 	weap: function(c, t) {
-		return (
+		return t.isMaterial() &&
 			(t.type == etg.Weapon ||
-				(t.type < etg.Spell && t.card.type == etg.Weapon)) &&
-			!t.status.get('immaterial') &&
-			!t.status.get('burrowed')
-		);
+				(t.type != etg.Spell && t.card.type == etg.Weapon));
 	},
 	shie: function(c, t) {
-		return (
+		return t.isMaterial() &&
 			(t.type == etg.Shield ||
-				(t.type < etg.Spell && t.card.type == etg.Shield)) &&
-			!t.status.get('immaterial') &&
-			!t.status.get('burrowed')
-		);
+				(t.type != etg.Spell && t.card.type == etg.Shield));
 	},
 	playerweap: function(c, t) {
 		return t.type == etg.Weapon;

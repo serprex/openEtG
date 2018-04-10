@@ -103,12 +103,12 @@ Card.prototype.info = function() {
 	if (this.type == etg.Spell) {
 		return skillText(this);
 	} else {
-		var text = [];
+		const text = [];
 		if (this.type == etg.Shield && this.health)
 			text.push('Reduce damage by ' + this.health);
 		else if (this.type == etg.Creature || this.type == etg.Weapon)
 			text.push(this.attack + '|' + this.health);
-		var skills = skillText(this);
+		const skills = skillText(this);
 		if (skills) text.push(skills);
 		return text.join('\n');
 	}
@@ -134,7 +134,7 @@ Card.prototype.play = function(owner, src, tgt, fromhand) {
 		src.castSpell(tgt, this.active.cast);
 	} else {
 		audio.playSound(this.type <= etg.Permanent ? 'permPlay' : 'creaturePlay');
-		var thing = new Thing(this);
+		const thing = new Thing(this);
 		if (this.type == etg.Creature) owner.addCrea(thing, fromhand);
 		else if (this.type == etg.Permanent || this.type == etg.Pillar)
 			owner.addPerm(thing, fromhand);
@@ -146,7 +146,7 @@ Card.prototype.play = function(owner, src, tgt, fromhand) {
 function readCost(coststr, defaultElement) {
 	if (typeof coststr == 'number')
 		return new Int8Array([coststr, defaultElement]);
-	var cidx = coststr.indexOf(':'),
+	const cidx = coststr.indexOf(':'),
 		cost = parseInt(~cidx ? coststr.substr(0, cidx) : coststr);
 	return isNaN(cost)
 		? null

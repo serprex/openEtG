@@ -319,11 +319,11 @@ const mutantabilities = [
 ];
 Thing.prototype.mutantactive = function() {
 	this.lobo();
-	var index = this.owner.upto(mutantabilities.length + 2) - 2;
+	const index = this.owner.upto(mutantabilities.length + 2) - 2;
 	if (index < 0) {
 		this.status.set(['momentum', 'immaterial'][~index], 1);
 	} else {
-		var active = Skills[mutantabilities[index]];
+		const active = Skills[mutantabilities[index]];
 		if (mutantabilities[index] == 'growth 1') {
 			this.addactive('death', active);
 		} else {
@@ -349,7 +349,7 @@ function combineactive(a1, a2) {
 	}
 	return {
 		func: function(c, t, data) {
-			var v1 = a1.func(c, t, data),
+			const v1 = a1.func(c, t, data),
 				v2 = a2.func(c, t, data);
 			return v1 === undefined
 				? v2
@@ -414,10 +414,10 @@ Thing.prototype.castSpell = function(t, active, nospell) {
 	}
 };
 Thing.prototype.useactive = function(t) {
-	var owner = this.owner;
+	const owner = this.owner;
 	if (this.type == etg.Spell) {
 		if (!this.canactive(true)) {
-			return console.log(this.owner + ' cannot cast ' + this);
+			return console.log(owner + ' cannot cast ' + this);
 		}
 		this.remove();
 		if (owner.status.get('neuro')) owner.addpoison(1);
