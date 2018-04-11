@@ -1861,7 +1861,7 @@ const Skills = (module.exports = {
 		return c.owner.mark == etg.Life || c.owner.mark == etg.Water ? 1 : 0;
 	},
 	static: c => {
-		c.owner.foe.spelldmg(1);
+		c.owner.foe.spelldmg(2);
 	},
 	steal: (c, t) => {
 		if (t.status.get('stackable')) {

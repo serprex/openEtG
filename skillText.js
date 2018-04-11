@@ -431,7 +431,7 @@ const data = {
 	soulcatch: 'When a death occurs, produce 3:2',
 	spores: ['Summon 2 spores on death', 'Summon 2 toxic spores on death'],
 	sskin: 'Increment maximum HP per 1:4 owned. Heal same',
-	static: 'Deal 1 spell damage to foe per attacker',
+	static: 'Deal 2 spell damage to foe per attacker',
 	steal: 'Steal target permanent',
 	steam:
 		'Gain 5 steam. Increment strength per steam. Steam decrements after attacking',

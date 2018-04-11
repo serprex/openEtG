@@ -39,7 +39,7 @@
 	[["Fog Mantle",5904,2,2,"shield=evade 40",0,""],["Fog Mantle",7904,1,2,"shield=evade 40",0,""],["Wings",5912,4,2,"shield=wings+losecharge",0,"charges=5"],["Wings",7912,3,2,"shield=wings+losecharge",0,"charges=5"]],
 	[["Procrastination",6003,6,2,"shield=slow",0,""],["Procrastination",8003,4,2,"shield=slow",0,""],["Time Barrier",6016,7,2,"shield=blockwithcharge+draw=gaintimecharge+auto=resetcap",0,"charges=5+stackable"],["Time Barrier",8016,5,2,"shield=blockwithcharge+draw=gaintimecharge+auto=resetcap",0,"charges=5+stackable"]],
 	[["Dusk Mantle",6104,5,2,"shield=evade 50",0,""],["Dusk Mantle",8104,4,2,"shield=evade 50",0,""],["Despair",6122,6,2,"shield=despair",0,""],["Despair",8122,4,2,"shield=despair",0,""],["Shell of Void",6132,2,2,"shield=voidshell",1,""],["Shell of Void",8132,3,2,"shield=voidshell",2,""]],
-	[["Phase Shield",6205,4,2,"shield=evade100+losecharge",0,"charges=2"],["Phase Shield",8205,6,2,"shield=evade100+losecharge",0,"charges=3"],["Static Field",6219,2,2,"shield=static",1,""],["Static Field",8219,1,2,"shield=static",1,""]]],
+	[["Phase Shield",6205,4,2,"shield=evade100+losecharge",0,"charges=2"],["Phase Shield",8205,6,2,"shield=evade100+losecharge",0,"charges=3"],["Static Field",6219,3,2,"shield=static",1,""],["Static Field",8219,1,2,"shield=static",1,""]]],
 [["Name","Code","Cost","R","Skill","Status"],
 	[["Quantum Locket",5008,1,1,"0=locketshift+locket",""],["Quantum Locket",7008,0,1,"0=locketshift+locket",""]],
 	[["Ricochet",5117,3,2,"spell=ricochet",""],["Ricochet",7117,2,2,"spell=ricochet",""]],
