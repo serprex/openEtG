@@ -803,16 +803,15 @@ const Skills = (module.exports = {
 	},
 	give: (c, t) => {
 		c.owner.dmg(c.card.upped ? -10 : -5);
-		if (t.type == etg.Spell) {
-			t.remove();
-			c.owner.foe.addCard(t.card);
-		} else if (t.hasactive('auto', 'singularity')) {
+		if (t.type !== etg.Spell && t.hasactive('auto', 'singularity')) {
 			t.die();
-		} else if (t.type <= etg.Permanent) {
-			Skills.steal.func(c.owner.foe, t);
 		} else {
 			t.remove();
-			c.owner.foe.addCrea(t);
+			if (t.type == etg.Permanent) c.owner.foe.addPerm(t);
+			else if (t.type == etg.Creature) c.owner.foe.addCrea(t);
+			else if (t.type == etg.Shield) c.owner.foe.setShield(t);
+			else if (t.type == etg.Weapon) c.owner.foe.setWeapon(t);
+			else c.owner.foe.addCard(t.card);
 		}
 	},
 	golemhit: (c, t) => {
@@ -1865,31 +1864,17 @@ const Skills = (module.exports = {
 	},
 	steal: (c, t) => {
 		if (t.status.get('stackable')) {
+			const inst = t.clone();
+			inst.status.set('charges', 1);
 			Skills.destroy.func(c, t, true);
-			if (t.type == etg.Shield) {
-				if (c.owner.shield && c.owner.shield.card == t.card) {
-					c.owner.shield.status.incr('charges', 1);
-				} else {
-					c.owner.setShield(new Thing(t.card));
-					c.owner.shield.status.set('charges', 1);
-				}
-			} else if (t.type == etg.Weapon) {
-				if (c.owner.weapon && c.owner.weapon.card == t.card) {
-					c.owner.weapon.status.incr('charges', 1);
-				} else {
-					c.owner.setWeapon(new Thing(t.card));
-					c.owner.weapon.status.set('charges', 1);
-				}
-			} else {
-				c.owner.addPerm(new Thing(t.card));
-			}
+			t = inst;
 		} else {
 			t.remove();
-			t.usedactive = true;
-			if (t.type == etg.Permanent) c.owner.addPerm(t);
-			else if (t.type == etg.Weapon) c.owner.setWeapon(t);
-			else c.owner.setShield(t);
 		}
+		t.usedactive = true;
+		if (t.type == etg.Permanent) c.owner.addPerm(t);
+		else if (t.type == etg.Weapon) c.owner.setWeapon(t);
+		else c.owner.setShield(t);
 	},
 	steam: (c, t) => {
 		Effect.mkText('5|0', c);
