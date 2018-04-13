@@ -1,8 +1,9 @@
 'use strict';
 const ui = require('./ui'),
 	Thing = require('./Thing'),
-	Components = typeof global === 'undefined' && require('./Components'),
-	h = typeof global === 'undefined' ? require('react').createElement : ()=>{};
+	isNode = typeof global === 'undefined',
+	Components = isNode && require('./Components'),
+	h = isNode ? require('react').createElement : ()=>{};
 const anims = [];
 
 function maybeTgtPos(pos) {
@@ -63,21 +64,21 @@ function SpriteFadeHandImage(card, pos, anchor) {
 }
 function nop() {}
 function make(cons) {
-	return !h
+	return isNode
 		? nop
 		: function() {
-				if (exports.disable || !anims) return;
+				if (exports.disable) return;
 				const effect = Object.create(cons.prototype);
 				const effectOverride = cons.apply(effect, arguments);
 				anims.push(effectOverride || effect);
 			};
 }
-if (!h) {
+if (isNode) {
 	exports.disable = true;
 	exports.next = nop;
 } else {
 	exports.disable = false;
-	exports.clear = function(doc) {
+	exports.clear = function() {
 		anims.length = 0;
 	};
 	exports.next = function(p2cloaked) {
@@ -112,13 +113,12 @@ if (!h) {
 	};
 	Text.prototype.next = function() {
 		if (++this.step >= 36) return null;
-		this.position.y -= 2;
 		return h(Components.Text, {
 			text: this.text,
 			style: {
 				position: 'absolute',
 				left: this.position.x + 'px',
-				top: this.position.y + 'px',
+				top: (this.position.y - this.position.y*2) + 'px',
 				opacity: 1 - Math.sqrt(this.step) / 6,
 				fontSize: '16px',
 			},
