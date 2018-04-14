@@ -629,7 +629,7 @@ function evalthing(c) {
 	}
 	score += checkpassives(c);
 	if (isCreature) {
-		if (c.owner.gpull == c) {
+		if (hp && c.owner.gpull == c) {
 			score = (score + hp) * Math.log(hp) / 4;
 			if (c.status.get('voodoo')) score += hp;
 			if (c.active.shield && !delaymix) {
