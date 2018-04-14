@@ -58,10 +58,11 @@ module.exports = connect(({opts}) => ({ bulk: typeof opts.bulk === 'string' ? op
 					options.parseInput(bdata, 'bulk', this.props.bulk, 99);
 					sock.user.gold -= packdata[data.packtype].cost * (bdata.bulk || 1);
 				}
-				if (etgutil.decklength(data.cards) < 11) {
+				const dlen = etgutil.decklength(data.cards);
+				if (dlen < 121) {
 					this.setState({ cards: data.cards, showbuy: false });
 				} else {
-					this.forceUpdate();
+					this.setState({ showbuy: true });
 					const link = document.createElement('a');
 					link.style.display = 'block';
 					link.href = 'deck/' + data.cards;
@@ -74,7 +75,6 @@ module.exports = connect(({opts}) => ({ bulk: typeof opts.bulk === 'string' ? op
 	}
 
 	render() {
-		console.log(this.props);
 		const self = this;
 		const children = [
 			<Components.Box
@@ -249,26 +249,40 @@ module.exports = connect(({opts}) => ({ bulk: typeof opts.bulk === 'string' ? op
 		}
 
 		if (this.state.cards) {
-			const cardchildren = [];
-			etgutil.iterdeck(this.state.cards, (code, i) => {
-				const x = i % 5,
-					y = Math.floor(i / 5);
-				cardchildren.push(
-					<Components.Card
-						x={7 + x * 140}
-						y={y ? 298 : 14}
-						code={code}
-					/>
-				);
-			});
+			const dlen = etgutil.decklength(this.state.cards);
+			let cardchildren;
+			if (dlen < 11) {
+				cardchildren = [];
+				etgutil.iterdeck(this.state.cards, (code, i) => {
+					const x = i % 5,
+						y = Math.floor(i / 5);
+					cardchildren.push(
+						<Components.Card
+							x={7 + x * 140}
+							y={y ? 298 : 14}
+							code={code}
+						/>
+					);
+				});
+			} else if (dlen < 61) {
+				cardchildren = <Components.DeckDisplay
+					deck={etgutil.decodedeck(this.state.cards)}
+				/>;
+			} else {
+				const deck = etgutil.decodedeck(this.state.cards);
+				cardchildren = <>
+					<Components.DeckDisplay deck={deck.slice(0, 60)} />
+					<Components.DeckDisplay y={244} deck={deck.slice(60)} />
+				</>;
+			}
 			children.push(
 				<Components.Box
 					x={40}
 					y={16}
 					width={710}
-					height={568}
-					children={cardchildren}
-				/>
+					height={568}>
+					{cardchildren}
+				</Components.Box>
 			);
 		}
 
