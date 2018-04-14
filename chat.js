@@ -18,7 +18,7 @@ function addSpan(span, name) {
 		addSpan(span.cloneNode(true), 'MainMenu');
 	}
 	if (tabBox == chatBox) {
-		var scroll =
+		const scroll =
 			Math.abs(tabBox.scrollTop - tabBox.scrollHeight + tabBox.offsetHeight) <
 			2;
 		tabBox.appendChild(span);
@@ -31,14 +31,14 @@ function addSpan(span, name) {
 	}
 }
 function chat(msg, fontcolor, name) {
-	var span = document.createElement('div');
+	const span = document.createElement('div');
 	if (fontcolor in tabMap) name = fontcolor;
 	else if (fontcolor) span.style.color = fontcolor;
 	span.appendChild(document.createTextNode(msg));
 	addSpan(span, name);
 }
 module.exports = chat;
-var tabMap = {};
+const tabMap = {};
 chat.addTab = function(name, div) {
 	var span = document.createElement('span');
 	var tabBox = div || document.createElement('div');
@@ -62,7 +62,7 @@ chat.addTab('System');
 chat.addTab('Stats');
 chat.addTab('MainMenu');
 tabMap.MainMenu[1].style.display = 'none';
-var menuChat = (chat.MainMenuChat = tabMap.MainMenu[0]);
+const menuChat = (chat.MainMenuChat = tabMap.MainMenu[0]);
 menuChat.style.display = 'none';
 menuChat.style.position = 'absolute';
 menuChat.style.left = '72px';

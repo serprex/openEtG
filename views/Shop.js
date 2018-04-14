@@ -63,13 +63,13 @@ module.exports = connect(({opts}) => ({ bulk: typeof opts.bulk === 'string' ? op
 					this.setState({ cards: data.cards, showbuy: false });
 				} else {
 					this.setState({ showbuy: true });
-					const link = document.createElement('a');
-					link.style.display = 'block';
-					link.href = 'deck/' + data.cards;
-					link.target = '_blank';
-					link.appendChild(document.createTextNode(data.cards));
-					chat.addSpan(link);
 				}
+				const link = document.createElement('a');
+				link.style.display = 'block';
+				link.href = 'deck/' + data.cards;
+				link.target = '_blank';
+				link.appendChild(document.createTextNode(data.cards));
+				chat.addSpan(link);
 			},
 		}));
 	}
