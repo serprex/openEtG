@@ -5,7 +5,6 @@ const ui = require('./ui'),
 	audio = require('./audio'),
 	Cards = require('./Cards'),
 	etgutil = require('./etgutil'),
-	options = require('./options'),
 	store = require('./store'),
 	React = require('react'),
 	h = React.createElement;

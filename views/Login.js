@@ -1,7 +1,6 @@
 const chat = require('../chat'),
 	sock = require('../sock'),
 	audio = require('../audio'),
-	options = require('../options'),
 	Components = require('../Components'),
 	store = require('../store'),
 	{ connect } = require('react-redux'),
@@ -102,7 +101,8 @@ if (typeof kongregateAPI === 'undefined') {
 					autoFocus={true}
 					tabIndex="1"
 					onKeyPress={maybeLogin}
-					ref={ctrl => ctrl && options.register('username', ctrl)}
+					value={self.props.username}
+					onChange={e => self.props.dispatch(store.setOpt('username', e.target.value))}
 					style={{ position: 'absolute', left: '270px', top: '350px' }}
 				/>
 			);
@@ -121,12 +121,13 @@ if (typeof kongregateAPI === 'undefined') {
 				<label style={{ position: 'absolute', left: '430px', top: '380px' }}>
 					<input
 						type="checkbox"
-						ref={ctrl => ctrl && options.register('remember', ctrl)}
+						checked={self.props.remember}
 						onChange={e => {
 							if (typeof localStorage !== 'undefined') {
 								if (!e.target.checked) delete localStorage.auth;
 								else if (sock.user) localStorage.auth = sock.user.auth;
 							}
+							self.props.dispatch(store.setOpt('remember', e.target.checked));
 						}}
 					/>
 					Remember me
