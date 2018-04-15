@@ -69,7 +69,7 @@ module.exports = connect(({opts}) => ({ bulk: typeof opts.bulk === 'string' ? op
 				link.href = 'deck/' + data.cards;
 				link.target = '_blank';
 				link.appendChild(document.createTextNode(data.cards));
-				chat.addSpan(link);
+				chat.addSpan(link, 'Packs');
 			},
 		}));
 	}
@@ -190,8 +190,7 @@ module.exports = connect(({opts}) => ({ bulk: typeof opts.bulk === 'string' ? op
 		children.push(bget, bbuy);
 		packdata.forEach((pack, n) => {
 			children.push(
-				<div
-					className='imgb'
+				<div className='imgb'
 					onClick={() => {
 						const update = {
 							packrarity: n,

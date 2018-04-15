@@ -1,5 +1,5 @@
 'use strict';
-const redux = require('redux'), opts = {};
+const redux = require('redux'), opts = { channel: 'Main' };
 
 let hasLocalStorage = true;
 try {
@@ -33,6 +33,9 @@ exports.setCmds = cmds => ({ type: 'CMD', cmds });
 exports.mute = name => ({ type: 'MUTE', name });
 exports.unmute = name => ({ type: 'UNMUTE', name });
 
+exports.clearChat = name => ({ type: 'CHAT_CLEAR', name });
+exports.chat = (span, name) => ({ type: 'CHAT', span, name });
+
 exports.store = redux.createStore((state, action) => {
 	switch(action.type) {
 		case 'NAV':
@@ -51,12 +54,24 @@ exports.store = redux.createStore((state, action) => {
 			muted.delete(action.name);
 			return Object.assign({}, state, { muted });
 		}
+		case 'CHAT_CLEAR': {
+			const chat = new Map(state.chat);
+			chat.delete(action.name);
+			return Object.assign({}, state, { chat });
+		}
+		case 'CHAT': {
+			const chat = new Map(state.chat);
+			chat.set(action.name, (chat.get(action.name) || []).concat([action.span]));
+			if (action.name !== 'Main') chat.set('Main', (chat.get('Main') || []).concat([action.span]));
+			return Object.assign({}, state, { chat });
+		}
 	}
 	return state;
 }, {
 	nav: {},
 	opts,
 	cmds: {},
+	chat: new Map(),
 	muted: new Set(),
 }, redux.applyMiddleware(({dispatch, getState}) => next => action => {
 	if (typeof action === 'function') {

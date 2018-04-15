@@ -1,6 +1,7 @@
 'use strict';
 const etg = require('../etg'),
 	chat = require('../chat'),
+	Chat = require('./Chat'),
 	sock = require('../sock'),
 	util = require('../util'),
 	mkAi = require('../mkAi'),
@@ -50,7 +51,6 @@ const etg = require('../etg'),
 		"At Wealth T50 you can see which players have the highest wealth. Wealth is a combination of current gold & one's cardpool",
 		'Throttling means that the effect is limited to 2 procs when attacking multiple times with adrenaline',
 	];
-const menuChat = chat.MainMenuChat;
 function CostRewardHeaders(x, y, wid, hei) {
 	return props => {
 		return h(
@@ -160,7 +160,6 @@ module.exports = connect(({opts}) => ({
 
 	componentWillUnmount() {
 		document.removeEventListener('mousemove', this.resetTip);
-		menuChat.style.display = 'none';
 	}
 
 	componentDidMount() {
@@ -417,9 +416,21 @@ module.exports = connect(({opts}) => ({
 				);
 				if (sock.user.daily == 0) sock.user.daily = 128;
 			} else {
-				menuChat.style.display = '';
-				menuChat.scrollTop = menuChat.scrollHeight;
 				mainc.push(
+					h(Chat, {
+						channel: 'Main',
+						style: {
+							position: 'absolute',
+							left: '72px',
+							top: '228px',
+							width: '224px',
+							height: '300px',
+							overflow: 'hidden',
+							background: 'transparent',
+							fontSize: '14px',
+							opacity: '0.6',
+						}
+					}),
 					h('input', {
 						placeholder: 'Chat',
 						onKeyDown: function(e) {

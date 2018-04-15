@@ -1,7 +1,10 @@
-const chat = require('./chat'),
+const Cards = require('./Cards'),
+	chat = require('./chat'),
 	etgutil = require('./etgutil'),
+	mkGame = require('./mkGame'),
 	store = require('./store'),
-	usercmd = require('./usercmd');
+	usercmd = require('./usercmd'),
+	userutil = require('./userutil');
 const endpoint =
 	(/^\d+\.\d+\.\d+\.\d+$/.test(location.hostname) ? 'ws://' : 'wss://') +
 	location.hostname +
@@ -12,7 +15,7 @@ let socket = new WebSocket(endpoint),
 	attemptTimeout = 0,
 	guestname;
 const sockEvents = {
-	clear: () => chat.clear('Main'),
+	clear: () => store.store.dispatch(store.clearChat('Main')),
 	passchange: (data) => {
 		exports.user.auth = data.auth;
 		chat('Password updated', 'System');
@@ -43,12 +46,14 @@ const sockEvents = {
 		if (store.store.getState().opts.muteall && !data.mode) return;
 		if (
 			typeof Notification !== 'undefined' &&
+			Notification.permission !== 'denied' &&
 			exports.user &&
 			~data.msg.indexOf(exports.user.name) &&
 			!document.hasFocus()
 		) {
-			Notification.requestPermission();
-			new Notification(data.u, { body: data.msg });
+			Notification.requestPermission().then(result => {
+				if (result == 'granted') new Notification(data.u, { body: data.msg });
+			});
 		}
 		const now = new Date(),
 			h = now.getHours(),
