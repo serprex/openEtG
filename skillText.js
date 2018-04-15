@@ -316,10 +316,12 @@ const data = {
 		'Replaces target creature\'s skills with "Gain +3|-1 per turn"',
 	pacify: "Reduce target's attack to 0",
 	pairproduce: 'Activate own pillars',
-	paleomagnetism: [
-		"Summon a pillar matching mark per turn. Third chance to summon a pillar matching foe's mark",
-		"Summon a tower matching mark per turn & on play. Third chance to summon a tower matching foe's mark",
-	],
+	paleomagnetism: {
+		auto: [
+			"Summon a pillar matching mark per turn. Third chance to summon a pillar matching foe's mark",
+			"Summon a tower matching mark per turn & on play. Third chance to summon a tower matching foe's mark",
+		]
+	},
 	pandemonium: 'Random effects are inflicted to all creatures. Removes cloak',
 	pandemonium2:
 		"Random effects are inflicted to target player's creatures. Removes cloak",

@@ -13,6 +13,7 @@ scripts/deploypem.sh
 oetg-cert.pem
 oetg-key.pem
 bundle.*.js
+bundle.*.js.map
 *.min.*
 *.exe
 *.gz
