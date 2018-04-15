@@ -8,170 +8,18 @@ const chat = require('./chat'),
 	userutil = require('./userutil'),
 	mkGame = require('./mkGame'),
 	App = require('./views/App'),
+	sock = require('./sock'),
 	store = require('./store'),
 	{ Provider } = require('react-redux'),
 	reactDOM = require('react-dom'),
 	React = require('react');
-let guestname,
-	lastError = 0;
+let lastError = 0;
 window.onerror = function(...args) {
 	const now = Date.now();
 	if (lastError + 999 < now) {
 		chat(args.join(', '), 'System');
 		lastError = now;
 	}
-};
-const sockEvents = {
-	clear: () => chat.clear('Main'),
-	passchange: (data) => {
-		sock.user.auth = data.auth;
-		chat('Password updated', 'System');
-	},
-	mute: (data) => {
-		store.store.dispatch(store.mute(data.m));
-		chat(data.m + ' has been muted', 'System');
-	},
-	roll: (data) => {
-		const span = document.createElement('div');
-		span.style.color = '#090';
-		if (data.u) {
-			const b = document.createElement('b');
-			b.appendChild(document.createTextNode(data.u + ' '));
-			span.appendChild(b);
-		}
-		span.appendChild(
-			document.createTextNode((data.A || 1) + 'd' + data.X + ' '),
-		);
-		const a = document.createElement('a');
-		a.target = '_blank';
-		a.href = 'speed/' + data.sum;
-		a.appendChild(document.createTextNode(data.sum));
-		span.appendChild(a);
-		chat.addSpan(span, 'Main');
-	},
-	chat: (data) => {
-		if (store.store.getState().opts.muteall && !data.mode) return;
-		if (
-			typeof Notification !== 'undefined' &&
-			sock.user &&
-			~data.msg.indexOf(sock.user.name) &&
-			!document.hasFocus()
-		) {
-			Notification.requestPermission();
-			new Notification(data.u, { body: data.msg });
-		}
-		const now = new Date(),
-			h = now.getHours(),
-			m = now.getMinutes(),
-			hs = h < 10 ? '0' + h : h.toString(),
-			ms = m < 10 ? '0' + m : m.toString();
-		const span = document.createElement('div');
-		if (data.mode != 1) span.style.color = data.mode == 2 ? '#69f' : '#ddd';
-		if (data.guest) span.style.fontStyle = 'italic';
-		span.appendChild(document.createTextNode(hs + ms + ' '));
-		if (data.u) {
-			const belly = document.createElement('b');
-			belly.appendChild(document.createTextNode(data.u + ' '));
-			span.appendChild(belly);
-		}
-		let decklink = /\b(([01][0-9a-v]{4})+)\b/g,
-			reres,
-			lastindex = 0;
-		while ((reres = decklink.exec(data.msg))) {
-			if (reres.index != lastindex)
-				span.appendChild(
-					document.createTextNode(data.msg.slice(lastindex, reres.index)),
-				);
-			let notlink = false;
-			for (let i = 2; i < reres[0].length; i += 5) {
-				const code = parseInt(reres[0].substr(i, 3), 32);
-				if (!(code in Cards.Codes) && etgutil.fromTrueMark(code) == -1) {
-					notlink = true;
-					break;
-				}
-			}
-			if (notlink) {
-				lastindex = reres.index;
-				continue;
-			}
-			const link = document.createElement('a');
-			link.href = 'deck/' + reres[0];
-			link.target = '_blank';
-			link.appendChild(document.createTextNode(reres[0]));
-			span.appendChild(link);
-			lastindex = reres.index + reres[0].length;
-		}
-		if (lastindex != data.msg.length)
-			span.appendChild(document.createTextNode(data.msg.slice(lastindex)));
-		chat.addSpan(span, data.mode == 1 ? null : 'Main');
-	},
-	foearena: (data) => {
-		const gamedata = mkGame({
-			deck: data.deck,
-			urdeck: sock.getDeck(),
-			seed: data.seed,
-			rank: data.rank,
-			p2hp: data.hp,
-			foename: data.name,
-			p2drawpower: data.draw,
-			p2markpower: data.mark,
-			arena: data.name,
-			level: 4 + data.lv,
-			ai: true,
-		});
-		gamedata.game.cost = userutil.arenaCost(data.lv);
-		sock.user.gold -= gamedata.game.cost;
-		store.store.dispatch(store.doNav(require('./views/Match'), gamedata));
-	},
-	tradegive: (data) => {
-		if (sock.trade) {
-			delete sock.trade;
-			store.store.dispatch(store.doNav(require('./views/Trade')));
-		}
-	},
-	pvpgive: (data) => {
-		if (sock.pvp) {
-			delete sock.pvp;
-			store.store.dispatch(store.doNav(require('./views/Match'), mkGame(data)));
-		}
-	},
-	spectategive: (data) => {
-		if (sock.spectate) {
-			delete sock.spectate;
-			data.spectate = true;
-			store.store.dispatch(store.doNav(require('./views/Match'), mkGame(data)));
-		}
-	},
-	challenge: (data) => {
-		const span = document.createElement('div');
-		span.style.cursor = 'pointer';
-		span.style.color = '#69f';
-		span.addEventListener('click', () => {
-			if (data.pvp) {
-				require('./views/Challenge').sendChallenge((sock.pvp = data.f));
-			} else {
-				sock.userEmit('tradewant', { f: (sock.trade = data.f) });
-			}
-		});
-		span.appendChild(
-			document.createTextNode(
-				data.f +
-					(data.pvp
-						? ' challenges you to a duel!'
-						: ' wants to trade with you!'),
-			),
-		);
-		chat.addSpan(span);
-		sock.emit('challrecv', { f: data.f, pvp: data.pvp });
-	},
-};
-const sock = require('./sock');
-sock.et.onmessage = function(msg) {
-	const state = store.store.getState();
-	const data = JSON.parse(msg.data);
-	if (data.u && state.muted.has(data.u)) return;
-	const func = sockEvents[data.x] || state.cmds[data.x];
-	if (func) func.call(this, data);
 };
 reactDOM.render(
 	<Provider store={store.store}>
