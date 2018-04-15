@@ -11,7 +11,7 @@ if (process.argv.length < 3) {
 	const etg = require('../etg'),
 		Cards = require('../Cards');
 	write('[right][table]');
-	writetd('Tot', 'Ele', 'C', 'P', 'S', '|', 'R', 'U', 'C', '', '');
+	writetd('Tot', 'E', 'C', 'P', 'S', '|', 'R', 'U', 'C', '', '');
 	for (var i = 0; i < 13; i++) {
 		var ofele = Cards.filter(false, x => x.element == i);
 		var creas = 0,
@@ -30,7 +30,7 @@ if (process.argv.length < 3) {
 		});
 		writetd(
 			ofele.length,
-			require('../ui').eleNames[i],
+			":" + require('../ui').eleNames[i].toLowerCase(),
 			creas,
 			perms,
 			spels,

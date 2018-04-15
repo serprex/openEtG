@@ -1390,17 +1390,12 @@ const Skills = (module.exports = {
 		});
 	},
 	paleomagnetism: (c, t) => {
-		const e = c.owner.upto(58);
+		const e = c.owner.upto(6);
+		const list = e&1 ? etg.PillarList : etg.PendList;
 		c.owner.addPerm(
 			new Thing(
 				c.card.as(
-					Cards.Codes[
-						e >= 29
-							? etg.PillarList[c.owner.mark]
-							: e >= 26
-								? 5012 + e
-								: e >= 13 ? etg.PendList[e - 13] : etg.PillarList[e]
-					],
+					Cards.Codes[list[e < 4 ? c.owner.mark : c.owner.foe.mark]],
 				),
 			),
 		);
