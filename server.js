@@ -624,6 +624,8 @@ const keycerttask = sutil.mkTask(res => {
 										req.write(
 											'user_id=' +
 												data.u +
+												'\ngame_auth_token=' +
+												data.g +
 												'\napi_key=' +
 												key +
 												'\nWealth=' +

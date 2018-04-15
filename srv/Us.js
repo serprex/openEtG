@@ -1,10 +1,9 @@
 'use strict';
 const db = require('./db'),
 	users = {},
-	socks = {},
 	usergc = new Set();
 exports.users = users;
-exports.socks = socks;
+exports.socks = {};
 function storeUsers() {
 	const margs = ['Users'];
 	for (const u in users) {
@@ -33,8 +32,8 @@ exports.stop = function() {
 	db.quit();
 };
 exports.load = function(name, cb, errcb) {
-	usergc.delete(name);
 	if (users[name]) {
+		usergc.delete(name);
 		cb(users[name]);
 	} else {
 		db.hget('Users', name, (err, userstr) => {
