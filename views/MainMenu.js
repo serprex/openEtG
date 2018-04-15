@@ -489,14 +489,6 @@ module.exports = connect(({opts}) => ({
 		function musicChange() {
 			audio.changeMusic(self.props.enableMusic);
 		}
-		function hideRightpaneChange() {
-			document.getElementById('rightpane').style.display = self.props.hideRightpane
-				? 'none'
-				: '';
-			sock.emit('chatus', {
-				hide: !!self.props.offline || !!self.props.hideRightpane,
-			});
-		}
 		playc.push(
 			h('input', {
 				value: self.props.foename,
@@ -859,10 +851,9 @@ module.exports = connect(({opts}) => ({
 						left: '8px',
 						top: '88px',
 					}}>
-					<input
-						type='checkbox'
-						ref={(ctrl) => ctrl && options.register('hideRightpane', ctrl)}
-						onChange={hideRightpaneChange}
+					<input type='checkbox'
+						checked={this.props.hideRightpane}
+						onChange={e => this.props.dispatch(store.setOpt('hideRightpane', e.target.checked))}
 					/>
 					Hide rightpane
 				</label>
