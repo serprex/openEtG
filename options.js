@@ -20,11 +20,3 @@ exports.parseaistats = function(data) {
 	parseInput(data, 'p2markpower', opts.aimark, 1188);
 	parseInput(data, 'p2deckpower', opts.aideckpower);
 };
-exports.register = function(opt, ele, nopersist) {
-	const {opts} = store.store.getState();
-	const field = ele.type == 'checkbox' ? 'checked' : 'value',
-		ename = ele.type == 'checkbox' ? 'change' : 'input';
-	if (opts[opt]) ele[field] = opts[opt];
-	const method = nopersist ? store.setOptTemp : store.setOpt;
-	ele.addEventListener(ename, () => store.store.dispatch(method(opt, ele[field])));
-};

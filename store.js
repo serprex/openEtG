@@ -61,8 +61,9 @@ exports.store = redux.createStore((state, action) => {
 		}
 		case 'CHAT': {
 			const chat = new Map(state.chat);
-			chat.set(action.name, (chat.get(action.name) || []).concat([action.span]));
-			if (action.name !== 'Main') chat.set('Main', (chat.get('Main') || []).concat([action.span]));
+			const name = action.name || state.opts.channel;
+			chat.set(name, (chat.get(name) || []).concat([action.span]));
+			if (action.name === 'System') chat.set('Main', (chat.get('Main') || []).concat([action.span]));
 			return Object.assign({}, state, { chat });
 		}
 	}

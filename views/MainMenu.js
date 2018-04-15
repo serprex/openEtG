@@ -483,12 +483,6 @@ module.exports = connect(({opts}) => ({
 			const name = self.props.foename || (sock.user && sock.user.name);
 			if (name) sock.emit('librarywant', { f: name });
 		}
-		function soundChange() {
-			audio.changeSound(self.props.enableSound);
-		}
-		function musicChange() {
-			audio.changeMusic(self.props.enableMusic);
-		}
 		playc.push(
 			h('input', {
 				value: self.props.foename,
@@ -499,8 +493,8 @@ module.exports = connect(({opts}) => ({
 				},
 			}),
 		);
-		soundChange();
-		musicChange();
+		audio.changeSound(self.props.enableSound);
+		audio.changeMusic(self.props.enableMusic);
 		function loadQuickdeck(x) {
 			return () => {
 				const deckname = sock.user.qecks[x] || '';
@@ -825,10 +819,9 @@ module.exports = connect(({opts}) => ({
 						left: '8px',
 						top: '53px',
 					}}>
-					<input
-						type='checkbox'
-						ref={(ctrl) => ctrl && options.register('enableSound', ctrl)}
-						onChange={soundChange}
+					<input type='checkbox'
+						value={this.props.enableSound}
+						onChange={e => this.props.dispatch(store.setOpt('enableSound', e.target.value))}
 					/>
 					Enable sound
 				</label>
@@ -838,10 +831,9 @@ module.exports = connect(({opts}) => ({
 						left: '135px',
 						top: '53px',
 					}}>
-					<input
-						type='checkbox'
-						ref={(ctrl) => ctrl && options.register('enableMusic', ctrl)}
-						onChange={musicChange}
+					<input type='checkbox'
+						value={this.props.enableMusic}
+						onChange={e => this.props.dispatch(store.setOpt('enableMusic', e.target.value))}
 					/>
 					Enable music
 				</label>
