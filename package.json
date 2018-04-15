@@ -7,26 +7,26 @@
     "url": "https://github.com/serprex/openEtG"
   },
   "dependencies": {
-    "bufferutil": "^3.0.3",
+    "bufferutil": "^3.0.4",
     "httpolyglot": "^0.1.2",
     "redis": "^2.8.0",
-    "ws": "^5.1.0"
+    "ws": "^5.1.1"
   },
   "devDependencies": {
-    "@babel/core": "^7.0.0-beta.42",
-    "@babel/polyfill": "^7.0.0-beta.42",
-    "@babel/preset-env": "^7.0.0-beta.42",
-    "@babel/preset-react": "^7.0.0-beta.42",
+    "@babel/core": "^7.0.0-beta.44",
+    "@babel/polyfill": "^7.0.0-beta.44",
+    "@babel/preset-env": "^7.0.0-beta.44",
+    "@babel/preset-react": "^7.0.0-beta.44",
     "babel-loader": "^8.0.0-beta.2",
     "mkcjs": "^0.2.1",
     "optipng-bin": "^4.0",
-    "prettier": "^1.11.1",
-    "react": "^16.3.0",
-    "react-dom": "^16.3.0",
+    "prettier": "^1.12.0",
+    "react": "^16.3.1",
+    "react-dom": "^16.3.1",
     "react-redux": "^5.0.7",
     "redux": "^3.7.2",
-    "webpack": "^4.4.1",
-    "webpack-cli": "^2.0.13"
+    "webpack": "^4.5.0",
+    "webpack-cli": "^2.0.14"
   },
   "scripts": {
     "test": "./scripts/tests.js",
