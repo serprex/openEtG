@@ -4,8 +4,7 @@ const sock = require('../sock'),
 	etgutil = require('../etgutil'),
 	userutil = require('../userutil'),
 	Components = require('../Components'),
-	React = require('react'),
-	h = React.createElement;
+	React = require('react');
 
 module.exports = class Upgrade extends React.Component {
 	constructor(props) {
@@ -14,12 +13,11 @@ module.exports = class Upgrade extends React.Component {
 	}
 
 	render() {
-		const self = this,
-			children = [];
+		const self = this;
 		function upgradeCard(card) {
 			if (!card.isFree()) {
 				if (card.upped) return 'You cannot upgrade upgraded cards.';
-				var use = card.rarity != -1 ? 6 : 1;
+				const use = card.rarity != -1 ? 6 : 1;
 				if (cardpool[card.code] >= use) {
 					sock.userExec('upgrade', { card: card.code });
 				} else
@@ -42,7 +40,7 @@ module.exports = class Upgrade extends React.Component {
 			if (!card.isFree()) {
 				if (card.shiny) return 'You cannot polish shiny cards.';
 				if (card.rarity == 5) return 'You cannot polish Nymphs.';
-				var use = card.rarity != -1 ? 6 : 2;
+				const use = card.rarity != -1 ? 6 : 2;
 				if (cardpool[card.code] >= use) {
 					sock.userExec('polish', { card: card.code });
 				} else
@@ -70,7 +68,7 @@ module.exports = class Upgrade extends React.Component {
 					sock.userExec('upshpillar', { c: card.code });
 				} else return 'You need 300$ to afford a shiny upgraded pillar!';
 			} else {
-				var codecount = etgutil.count(sock.user.pool, card.code);
+				const codecount = etgutil.count(sock.user.pool, card.code);
 				if (codecount) {
 					sock.userExec('sellcard', { card: card.code });
 				} else return 'This card is bound to your account; you cannot sell it.';

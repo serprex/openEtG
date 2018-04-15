@@ -1,7 +1,6 @@
 'use strict';
 require('@babel/polyfill');
-const muteset = {},
-	chat = require('./chat'),
+const chat = require('./chat'),
 	Cards = require('./Cards'),
 	etgutil = require('./etgutil'),
 	RngMock = require('./RngMock'),
@@ -12,12 +11,9 @@ const muteset = {},
 	store = require('./store'),
 	{ Provider } = require('react-redux'),
 	reactDOM = require('react-dom'),
-	React = require('react'),
-	h = React.createElement;
+	React = require('react');
 let guestname,
-	muteall,
-	lastError = 0,
-	lastmove = 0;
+	lastError = 0;
 window.onerror = function(...args) {
 	const now = Date.now();
 	if (lastError + 999 < now) {
@@ -25,24 +21,17 @@ window.onerror = function(...args) {
 		lastError = now;
 	}
 };
-document.addEventListener('mousemove', function(e) {
-	if (e.timeStamp - lastmove < 16) {
-		e.stopPropagation();
-	} else {
-		lastmove = e.timeStamp;
-	}
-});
 const sockEvents = {
-	clear: chat.clear.bind(null, 'Main'),
-	passchange: function(data) {
+	clear: () => chat.clear('Main'),
+	passchange: (data) => {
 		sock.user.auth = data.auth;
 		chat('Password updated', 'System');
 	},
-	mute: function(data) {
-		muteset[data.m] = true;
+	mute: (data) => {
+		store.store.dispatch(store.mute(data.m));
 		chat(data.m + ' has been muted', 'System');
 	},
-	roll: function(data) {
+	roll: (data) => {
 		const span = document.createElement('div');
 		span.style.color = '#090';
 		if (data.u) {
@@ -60,8 +49,8 @@ const sockEvents = {
 		span.appendChild(a);
 		chat.addSpan(span, 'Main');
 	},
-	chat: function(data) {
-		if (muteall && !data.mode) return;
+	chat: (data) => {
+		if (store.store.getState().opts.muteall && !data.mode) return;
 		if (
 			typeof Notification !== 'undefined' &&
 			sock.user &&
@@ -116,7 +105,7 @@ const sockEvents = {
 			span.appendChild(document.createTextNode(data.msg.slice(lastindex)));
 		chat.addSpan(span, data.mode == 1 ? null : 'Main');
 	},
-	foearena: function(data) {
+	foearena: (data) => {
 		const gamedata = mkGame({
 			deck: data.deck,
 			urdeck: sock.getDeck(),
@@ -134,30 +123,30 @@ const sockEvents = {
 		sock.user.gold -= gamedata.game.cost;
 		store.store.dispatch(store.doNav(require('./views/Match'), gamedata));
 	},
-	tradegive: function(data) {
+	tradegive: (data) => {
 		if (sock.trade) {
 			delete sock.trade;
 			store.store.dispatch(store.doNav(require('./views/Trade')));
 		}
 	},
-	pvpgive: function(data) {
+	pvpgive: (data) => {
 		if (sock.pvp) {
 			delete sock.pvp;
 			store.store.dispatch(store.doNav(require('./views/Match'), mkGame(data)));
 		}
 	},
-	spectategive: function(data) {
+	spectategive: (data) => {
 		if (sock.spectate) {
 			delete sock.spectate;
 			data.spectate = true;
 			store.store.dispatch(store.doNav(require('./views/Match'), mkGame(data)));
 		}
 	},
-	challenge: function(data) {
+	challenge: (data) => {
 		const span = document.createElement('div');
 		span.style.cursor = 'pointer';
 		span.style.color = '#69f';
-		span.addEventListener('click', function() {
+		span.addEventListener('click', () => {
 			if (data.pvp) {
 				require('./views/Challenge').sendChallenge((sock.pvp = data.f));
 			} else {
@@ -178,9 +167,10 @@ const sockEvents = {
 };
 const sock = require('./sock');
 sock.et.onmessage = function(msg) {
+	const state = store.store.getState();
 	const data = JSON.parse(msg.data);
-	if (data.u && data.u in muteset) return;
-	const func = sockEvents[data.x] || store.store.getState().cmds[data.x];
+	if (data.u && state.muted.has(data.u)) return;
+	const func = sockEvents[data.x] || state.cmds[data.x];
 	if (func) func.call(this, data);
 };
 reactDOM.render(
@@ -190,10 +180,11 @@ reactDOM.render(
 	document.getElementById("leftpane"),
 );
 function chatmute() {
+	const state = store.store.getState();
 	chat(
-		(muteall ? 'You have chat muted. ' : '') +
+		(state.opts.muteall ? 'You have chat muted. ' : '') +
 			'Muted: ' +
-			Object.keys(muteset).join(', '),
+			Array.from(state.muted).join(', '),
 		'System',
 	);
 }
@@ -264,16 +255,16 @@ function maybeSendChat(e) {
 				chat.addSpan(span);
 			});
 		} else if (msg == '/mute') {
-			muteall = true;
+			store.store.dispatch(store.setOptTemp('muteall', true));
 			chatmute();
 		} else if (msg == '/unmute') {
-			muteall = false;
+			store.store.dispatch(store.setOptTemp('muteall', false));
 			chatmute();
 		} else if (msg.match(/^\/mute /)) {
-			muteset[msg.slice(6)] = true;
+			store.store.dispatch(store.mute(msg.slice(6)));
 			chatmute();
 		} else if (msg.match(/^\/unmute /)) {
-			delete muteset[msg.slice(8)];
+			store.store.dispatch(store.unmute(msg.slice(8)));
 			chatmute();
 		} else if (msg == '/mod') {
 			sock.emit('mod');

@@ -28,23 +28,36 @@ exports.setOpt = hasLocalStorage ? (key, val) => (dispatch) => {
 	dispatch(exports.setOptTemp(key, val));
 } : exports.setOptTemp;
 
-exports.setCmds = cmds => ({ type: 'CMD', cmds })
+exports.setCmds = cmds => ({ type: 'CMD', cmds });
+
+exports.mute = name => ({ type: 'MUTE', name });
+exports.unmute = name => ({ type: 'UNMUTE', name });
 
 exports.store = redux.createStore((state, action) => {
-	if (action.type === 'NAV') {
-		return Object.assign({}, state, { nav: { view: action.view, props: action.props }});
-	}
-	else if (action.type === 'OPT') {
-		return Object.assign({}, state, { opts: Object.assign({}, state.opts, { [action.key]: action.val }) });
-	}
-	else if (action.type == 'CMD') {
-		return Object.assign({}, state, { cmds: action.cmds });
+	switch(action.type) {
+		case 'NAV':
+			return Object.assign({}, state, { nav: { view: action.view, props: action.props }});
+		case 'OPT':
+			return Object.assign({}, state, { opts: Object.assign({}, state.opts, { [action.key]: action.val }) });
+		case 'CMD':
+			return Object.assign({}, state, { cmds: action.cmds });
+		case 'MUTE': {
+			const muted = new Set(state.muted);
+			muted.add(action.name);
+			return Object.assign({}, state, { muted });
+		}
+		case 'UNMUTE': {
+			const muted = new Set(state.muted);
+			muted.delete(action.name);
+			return Object.assign({}, state, { muted });
+		}
 	}
 	return state;
 }, {
 	nav: {},
 	opts,
 	cmds: {},
+	muted: new Set(),
 }, redux.applyMiddleware(({dispatch, getState}) => next => action => {
 	if (typeof action === 'function') {
 		return action(dispatch, getState);

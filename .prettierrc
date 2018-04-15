@@ -1,4 +1,5 @@
 {
+	"parser": "babylon",
 	"useTabs": true,
 	"jsxBracketSameLine": true,
 	"trailingComma": "all",
