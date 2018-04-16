@@ -120,7 +120,7 @@ input[type="text"],input[type="password"],input[type="number"],input:not([type])
 	font:14px sans-serif;
 }
 .chatBox div:not(:first-child) { margin-top:4px }
-#chatinput{
+.chatinput{
 	width:350px;
 	height:40px;
 	resize:none;
@@ -128,6 +128,13 @@ input[type="text"],input[type="password"],input[type="number"],input:not([type])
 	color:#ddd;
 	background-color:#222;
 	font:14px sans-serif;
+}
+.tab {
+	padding-left: 12px;
+}
+.tabsel {
+	padding-left: 12px;
+	font-weight: bold;
 }
 @keyframes animatedShiny {
 	0% { filter:hue-rotate(90deg) }

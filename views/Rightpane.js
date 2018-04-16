@@ -25,7 +25,7 @@ function maybeSendChat(e) {
 		chatinput.value = '';
 		if (msg == '/help') {
 			const cmds = {
-				clear: 'Clear chat. Accepts a regex filter',
+				clear: 'Clear chat',
 				who: 'List users online',
 				roll: 'Server rolls XdY publicly',
 				decks: 'List all decks. Accepts a regex filter',
@@ -39,13 +39,6 @@ function maybeSendChat(e) {
 			}
 		} else if (msg == '/clear') {
 			store.store.dispatch(store.clearChat(store.store.getState().opts.channel));
-		} else if (msg.match(/^\/clear /)) {
-			const rx = new RegExp(msg.slice(7));
-			const chatBox = document.getElementById('chatBox');
-			for (let i = chatBox.children.length - 1; i >= 0; i--) {
-				if (chatBox.children[i].textContent.match(rx))
-					chatBox.removeChild(chatBox.children[i]);
-			}
 		} else if (msg == '/who') {
 			sock.emit('who');
 		} else if (msg.match(/^\/roll( |$)\d*d?\d*$/)) {
@@ -120,6 +113,11 @@ function maybeSendChat(e) {
 	}
 }
 
+const ChannelTab = connect(({opts}) => ({ selected: opts.channel }))(function ChannelTab(props) {
+	return <span className={props.selected == props.channel ? 'tabsel' : 'tab'}
+		onClick={e => props.dispatch(store.setOptTemp('channel', props.channel))}>{props.channel}</span>;
+})
+
 module.exports = connect(state => ({
 	wantpvp: state.opts.wantpvp,
 	offline: state.opts.offline,
@@ -131,32 +129,31 @@ module.exports = connect(state => ({
 		<div style={{ marginBottom: '8px' }}>
 			<a href="artcredit.htm" target="_blank">Art credits</a>&emsp;&emsp;<a href="forum" target="_blank">Forum</a>&emsp;&emsp;<a href="https://discordapp.com/invite/Ja4wrFm" target="_blank">Discord</a>
 		</div>
-		<label><input id="offline" type="checkbox" checked={props.offline}
+		<label><input type="checkbox" checked={props.offline}
 			onChange={e => {
 				sock.emit('chatus', { hide: e.target.checked });
 				props.dispatch(store.setOpt('offline', e.target.checked))
 			}} />
 			Appear Offline</label>{' '}
-		<label><input id="afk" type="checkbox" checked={props.afk}
+		<label><input type="checkbox" checked={props.afk}
 			onChange={e => {
 				sock.emit('chatus', { afk: e.target.checked });
 				props.dispatch(store.setOptTemp('afk', e.target.checked))
 			}} />
 			Afk</label>{' '}
-		<label><input id="wantpvp" type="checkbox" checked={props.wantpvp}
+		<label><input type="checkbox" checked={props.wantpvp}
 			onChange={e => {
 				sock.emit('chatus', { want: e.target.checked });
 				props.dispatch(store.setOpt('wantpvp', e.target.checked))
 			}} />
 			Seeking PvP</label>
 		<div>
-			<span className='tab' onClick={e => props.dispatch(store.setOptTemp('channel', 'Main'))}>Main </span>
-			<span className='tab' onClick={e => props.dispatch(store.setOptTemp('channel', 'System'))}>System </span>
-			<span className='tab' onClick={e => props.dispatch(store.setOptTemp('channel', 'Stats'))}>Stats </span>
-			<span className='tab' onClick={e => props.dispatch(store.setOptTemp('channel', 'Packs'))}>Packs</span>
+			<ChannelTab channel='Main' />
+			<ChannelTab channel='System' />
+			<ChannelTab channel='Stats' />
+			<ChannelTab channel='Packs' />
 		</div>
 		<Chat channel={props.channel} />
-		<div id="chatBox" />
-		<textarea id="chatinput" placeholder="Chat" onKeyPress={maybeSendChat} />
+		<textarea className="chatinput" placeholder="Chat" onKeyPress={maybeSendChat} />
 	</>;
 });
