@@ -21,7 +21,7 @@ const rooms = {};
 const keycerttask = sutil.mkTask(res => {
 	function activeUsers() {
 		const activeusers = [];
-		for (const name in Us.socks) {
+		for (let name in Us.socks) {
 			const sock = Us.socks[name];
 			if (sock && sock.readyState == 1) {
 				if (sock.meta.offline) continue;
