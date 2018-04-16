@@ -64,12 +64,7 @@ module.exports = connect(({opts}) => ({ bulk: typeof opts.bulk === 'string' ? op
 				} else {
 					this.setState({ showbuy: true });
 				}
-				const link = document.createElement('a');
-				link.style.display = 'block';
-				link.href = 'deck/' + data.cards;
-				link.target = '_blank';
-				link.appendChild(document.createTextNode(data.cards));
-				chat.addSpan(link, 'Packs');
+				chat.addSpan(<a style={{ display: 'block' }} href={`deck/${data.cards}`} target='_blank'>{data.cards}</a>, 'Packs');
 			},
 		}));
 	}

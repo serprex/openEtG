@@ -180,13 +180,7 @@ module.exports = connect(({opts}) => ({
 			},
 			codegold: data => {
 				sock.user.gold += data.g;
-				const goldspan = document.createElement('span');
-				goldspan.className = 'ico gold';
-				const msg = document.createElement('div');
-				msg.appendChild(document.createTextNode(data.g));
-				msg.appendChild(goldspan);
-				msg.appendChild(document.createTextNode(' added!'));
-				chat.addSpan(msg);
+				chat.addSpan(<div>{data.g}<span className='ico gold' /> added!</div>);
 			},
 			codecode: data => {
 				sock.user.pool = etgutil.addcard(sock.user.pool, data.card);

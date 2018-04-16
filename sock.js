@@ -4,7 +4,8 @@ const Cards = require('./Cards'),
 	mkGame = require('./mkGame'),
 	store = require('./store'),
 	usercmd = require('./usercmd'),
-	userutil = require('./userutil');
+	userutil = require('./userutil'),
+	React = require('react');
 const endpoint =
 	(/^\d+\.\d+\.\d+\.\d+$/.test(location.hostname) ? 'ws://' : 'wss://') +
 	location.hostname +
@@ -25,22 +26,10 @@ const sockEvents = {
 		chat(data.m + ' has been muted', 'System');
 	},
 	roll: (data) => {
-		const span = document.createElement('div');
-		span.style.color = '#090';
-		if (data.u) {
-			const b = document.createElement('b');
-			b.appendChild(document.createTextNode(data.u + ' '));
-			span.appendChild(b);
-		}
-		span.appendChild(
-			document.createTextNode((data.A || 1) + 'd' + data.X + ' '),
-		);
-		const a = document.createElement('a');
-		a.target = '_blank';
-		a.href = 'speed/' + data.sum;
-		a.appendChild(document.createTextNode(data.sum));
-		span.appendChild(a);
-		chat.addSpan(span, 'Main');
+		chat.addSpan(<div style={{color: '#090'}}>
+			{data.u && <b>{data.u} </b>}
+			{(data.A || 1)}d{data.X} <a href={`speed/${data.sum}`} target='_blank'>{data.sum}</a>
+		</div>, 'Main');
 	},
 	chat: (data) => {
 		if (store.store.getState().opts.muteall && !data.mode) return;
@@ -59,24 +48,17 @@ const sockEvents = {
 			h = now.getHours(),
 			m = now.getMinutes(),
 			hs = h < 10 ? '0' + h : h.toString(),
-			ms = m < 10 ? '0' + m : m.toString();
-		const span = document.createElement('div');
-		if (data.mode != 1) span.style.color = data.mode == 2 ? '#69f' : '#ddd';
-		if (data.guest) span.style.fontStyle = 'italic';
-		span.appendChild(document.createTextNode(hs + ms + ' '));
-		if (data.u) {
-			const belly = document.createElement('b');
-			belly.appendChild(document.createTextNode(data.u + ' '));
-			span.appendChild(belly);
-		}
+			ms = m < 10 ? '0' + m : m.toString(),
+			style = {},
+			text = [];
+		if (data.mode != 1) style.color = data.mode == 2 ? '#69f' : '#ddd';
+		if (data.guest) style.fontStyle = 'italic';
 		let decklink = /\b(([01][0-9a-v]{4})+)\b/g,
 			reres,
 			lastindex = 0;
 		while ((reres = decklink.exec(data.msg))) {
 			if (reres.index != lastindex)
-				span.appendChild(
-					document.createTextNode(data.msg.slice(lastindex, reres.index)),
-				);
+				text.push(data.msg.slice(lastindex, reres.index));
 			let notlink = false;
 			for (let i = 2; i < reres[0].length; i += 5) {
 				const code = parseInt(reres[0].substr(i, 3), 32);
@@ -89,16 +71,15 @@ const sockEvents = {
 				lastindex = reres.index;
 				continue;
 			}
-			const link = document.createElement('a');
-			link.href = 'deck/' + reres[0];
-			link.target = '_blank';
-			link.appendChild(document.createTextNode(reres[0]));
-			span.appendChild(link);
+			text.appendChild(<a href={`deck/${reres[0]}`} target='_blank'>{reres[0]}</a>);
 			lastindex = reres.index + reres[0].length;
 		}
 		if (lastindex != data.msg.length)
-			span.appendChild(document.createTextNode(data.msg.slice(lastindex)));
-		chat.addSpan(span, data.mode == 1 ? null : 'Main');
+			text.push(data.msg.slice(lastindex));
+		chat.addSpan(<div style={style}>
+			{hs}{ms} {data.u && <b>{data.u} </b>}
+			{text}
+		</div>, data.mode == 1 ? null : 'Main');
 	},
 	foearena: (data) => {
 		const gamedata = mkGame({
