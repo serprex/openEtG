@@ -83,9 +83,11 @@ Player.prototype.setShield = function(x, fromhand) {
 	x.place(this, etg.Shield, fromhand);
 };
 Player.prototype.addCardInstance = function(x) {
-	x.owner = this;
-	x.type = etg.Spell;
-	this.hand.push(x);
+	if (this.hand.length < 8) {
+		x.owner = this;
+		x.type = etg.Spell;
+		this.hand.push(x);
+	}
 };
 Player.prototype.addCard = function(card) {
 	this.addCardInstance(new Thing(card));
