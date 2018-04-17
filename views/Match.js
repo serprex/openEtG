@@ -488,49 +488,28 @@ module.exports = connect()(class Match extends React.Component {
 		const { game } = this.props;
 		this.clearCard();
 		if (game.phase != etg.PlayPhase) return;
-		if (obj.type !== etg.Spell) {
-			if (game.targeting && game.targeting.filter(obj)) {
+		if (obj.owner == game.player1 && this.state.discarding) {
+			if (obj.type == etg.Spell) this.endClick(obj.getIndex());
+		} else if (game.targeting) {
+			if (game.targeting.filter(obj)) {
 				game.targeting.cb(obj);
 				this.forceUpdate();
-			} else if (
-				obj.owner == game.player1 &&
-				!game.targeting &&
-				obj.canactive()
-			) {
-				game.getTarget(obj, obj.active.cast, tgt => {
-					if (!game.ai)
-						sock.emit('cast', {
-							bits: game.tgtToBits(obj) | (game.tgtToBits(tgt) << 9),
-						});
-					obj.useactive(tgt);
-					this.forceUpdate();
-				});
-				this.forceUpdate();
 			}
-		} else {
-			if (obj.owner == game.player1 && this.state.discarding) {
-				this.endClick(obj.getIndex());
-			} else if (game.targeting) {
-				if (game.targeting.filter(obj)) {
-					game.targeting.cb(obj);
-					this.forceUpdate();
-				}
-			} else if (obj.owner == game.player1 && obj.canactive()) {
-				if (obj.card.type != etg.Spell) {
-					if (!game.ai) sock.emit('cast', { bits: game.tgtToBits(obj) });
-					obj.useactive();
-					this.forceUpdate();
-				} else {
-					game.getTarget(obj, obj.card.active.cast, tgt => {
-						if (!game.ai)
-							sock.emit('cast', {
-								bits: game.tgtToBits(obj) | (game.tgtToBits(tgt) << 9),
-							});
-						obj.useactive(tgt);
-						this.forceUpdate();
+		} else if (obj.owner == game.player1 && obj.canactive()) {
+			const cb = tgt => {
+				if (!game.ai) {
+					sock.emit('cast', {
+						bits: game.tgtToBits(obj) | (game.tgtToBits(tgt) << 9),
 					});
-					this.forceUpdate();
 				}
+				obj.useactive(tgt);
+				this.forceUpdate();
+			};
+			if (obj.type == etg.Spell && obj.card.type != etg.Spell) {
+				cb();
+			} else {
+				game.getTarget(obj, obj.active.cast, cb);
+				this.forceUpdate();
 			}
 		}
 	}

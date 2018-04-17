@@ -83,7 +83,6 @@ Player.prototype.setShield = function(x, fromhand) {
 	x.place(this, etg.Shield, fromhand);
 };
 Player.prototype.addCardInstance = function(x) {
-	if (this.hand.length >= 8) return -1;
 	x.owner = this;
 	x.type = etg.Spell;
 	this.hand.push(x);

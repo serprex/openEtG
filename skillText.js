@@ -257,7 +257,7 @@ const data = {
 	innovation: 'Discard target card, owner draws three cards',
 	integrity: 'Combine all shards in hand to form a Shard Golem',
 	jelly:
-		'Target creature becomes a 7|4 with active Pink Jelly costing 4 of their element',
+		'Target creature becomes a 7|4 Pink Jelly with active Pink Jelly costing 4 of their element',
 	jetstream: 'Target airborne creature gains 3|-1',
 	light: 'Produce 1:8 per turn',
 	lightning: 'Deal 5 spell damage to target',
@@ -284,9 +284,9 @@ const data = {
 	mimic:
 		'Mimic: whenever a creature enters play, become its kind. Retain Mimic',
 	miracle: 'Heal self to one below maximum HP. Consumes remaining 1:8',
-	mitosis: 'Summon a daughter creature',
+	mitosis: 'Cast own card',
 	mitosisspell:
-		'Non-weapon creature gains 0|1 & active "Mitosis: Summon a daughter creature" costing target\'s card\'s cost',
+		'Creature gains 0|1 & active "Cast own card" costing target\'s card\'s cost',
 	momentum: 'Target ignores shield effects & gains 1|1',
 	mummy: 'Become a Pharaoh if target of Reverse Time',
 	mutation:

@@ -1,26 +1,26 @@
 'use strict';
-var Cards = require('../Cards');
+const Cards = require('../Cards');
 module.exports = function(game) {
-	var limit = 333,
+	let limit = 333,
 		cmdct,
 		currentEval = game.player1.hp;
 	function iterLoop(game, cmdct0) {
 		function iterCore(c) {
 			if (!c || !c.canactive()) return;
-			var ch = c.hash();
+			const ch = c.hash();
 			if (ch in casthash) return;
 			else casthash[ch] = true;
-			var active = c.active.cast;
-			var cbits = game.tgtToBits(c) ^ 8;
+			const active = c.active.cast;
+			const cbits = game.tgtToBits(c) ^ 8;
 			function evalIter(t) {
 				if (
 					(!game.targeting || (t && game.targeting.filter(t))) &&
 					--limit > 0
 				) {
-					var tbits = game.tgtToBits(t) ^ 8;
-					var gameClone = game.clone();
+					const tbits = game.tgtToBits(t) ^ 8;
+					const gameClone = game.clone();
 					gameClone.bitsToTgt(cbits).useactive(gameClone.bitsToTgt(tbits));
-					var v =
+					const v =
 						gameClone.winner == gameClone.player2
 							? -999
 							: gameClone.winner == gameClone.player1
@@ -48,7 +48,7 @@ module.exports = function(game) {
 				evalIter();
 			}
 		}
-		var p2 = game.player2,
+		const p2 = game.player2,
 			casthash = [];
 		p2.hand.forEach(iterCore);
 		p2.permanents.forEach(iterCore);

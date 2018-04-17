@@ -46,7 +46,7 @@ function parseCsv(type, data) {
 			keys.forEach((key, i) => {
 				cardinfo[key] = carddata[i];
 			});
-			var cardcode = cardinfo.Code;
+			const cardcode = cardinfo.Code;
 			if (cardcode in exports.Codes) {
 				console.log(
 					cardcode +
@@ -71,32 +71,7 @@ function parseTargeting(data) {
 	}
 	exports.Targeting = data;
 }
-function getTargetFilter(str) {
-	function getFilterFunc(funcname) {
-		return TargetFilters[funcname];
-	}
-	if (str in TargetFilters) {
-		return TargetFilters[str];
-	} else {
-		var splitIdx = str.lastIndexOf(':');
-		var prefixes = ~splitIdx
-				? str
-						.substr(0, splitIdx)
-						.split(':')
-						.map(getFilterFunc)
-				: [],
-			filters = (~splitIdx ? str.substr(splitIdx + 1) : str)
-				.split('+')
-				.map(getFilterFunc);
-		return (TargetFilters[str] = function(c, t) {
-			function check(f) {
-				return f(c, t);
-			}
-			return prefixes.every(check) && filters.some(check);
-		});
-	}
-}
-var TargetFilters = {
+const TargetFilters = {
 	own: function(c, t) {
 		return c.owner == t.owner;
 	},
@@ -191,6 +166,31 @@ var TargetFilters = {
 		return t.type == etg.Creature && !t.status.get('burrowed');
 	},
 };
+function getTargetFilter(str) {
+	function getFilterFunc(funcname) {
+		return TargetFilters[funcname];
+	}
+	if (str in TargetFilters) {
+		return TargetFilters[str];
+	} else {
+		const splitIdx = str.lastIndexOf(':');
+		const prefixes = ~splitIdx
+				? str
+						.substr(0, splitIdx)
+						.split(':')
+						.map(getFilterFunc)
+				: [],
+			filters = (~splitIdx ? str.substr(splitIdx + 1) : str)
+				.split('+')
+				.map(getFilterFunc);
+		return (TargetFilters[str] = function(c, t) {
+			function check(f) {
+				return f(c, t);
+			}
+			return prefixes.every(check) && filters.some(check);
+		});
+	}
+}
 var etg = require('./etg');
 var Card = require('./Card');
 var etgutil = require('./etgutil');

@@ -129,20 +129,6 @@ Card.prototype.asShiny = function(shiny) {
 Card.prototype.isOf = function(card) {
 	return card.code == etgutil.asShiny(etgutil.asUpped(this.code, false), false);
 };
-Card.prototype.play = function(owner, src, tgt, fromhand) {
-	if (this.type == etg.Spell) {
-		src.castSpell(tgt, this.active.cast);
-	} else {
-		audio.playSound(this.type <= etg.Permanent ? 'permPlay' : 'creaturePlay');
-		const thing = new Thing(this);
-		if (this.type == etg.Creature) owner.addCrea(thing, fromhand);
-		else if (this.type == etg.Permanent || this.type == etg.Pillar)
-			owner.addPerm(thing, fromhand);
-		else if (this.type == etg.Weapon) owner.setWeapon(thing, fromhand);
-		else owner.setShield(thing, fromhand);
-		return thing;
-	}
-};
 function readCost(coststr, defaultElement) {
 	if (typeof coststr == 'number')
 		return new Int8Array([coststr, defaultElement]);

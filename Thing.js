@@ -221,7 +221,7 @@ Thing.prototype.info = function() {
 	var stext = skillText(this);
 	return !info ? stext : stext ? info + '\n' + stext : info;
 };
-var activetexts = [
+const activetexts = [
 	'hit',
 	'death',
 	'owndeath',
@@ -404,7 +404,7 @@ Thing.prototype.canactive = function(spend) {
 		);
 };
 Thing.prototype.castSpell = function(t, active, nospell) {
-	var data = { tgt: t, active: active };
+	const data = { tgt: t, active: active };
 	this.proc('prespell', data);
 	if (data.evade) {
 		if (t) Effect.mkText('Evade', t);
@@ -413,25 +413,38 @@ Thing.prototype.castSpell = function(t, active, nospell) {
 		if (!nospell) this.proc('spell', data);
 	}
 };
+Thing.prototype.play = function(tgt, fromhand) {
+	const {owner, card} = this;
+	this.remove();
+	if (card.type == etg.Spell) {
+		this.castSpell(tgt, this.active.cast);
+	} else {
+		audio.playSound(card.type <= etg.Permanent ? 'permPlay' : 'creaturePlay');
+		if (card.type == etg.Creature) owner.addCrea(this, fromhand);
+		else if (card.type == etg.Permanent || card.type == etg.Pillar)
+			owner.addPerm(this, fromhand);
+		else if (card.type == etg.Weapon) owner.setWeapon(this, fromhand);
+		else owner.setShield(this, fromhand);
+	}
+};
 Thing.prototype.useactive = function(t) {
-	const owner = this.owner;
+	const {owner} = this;
 	if (this.type == etg.Spell) {
 		if (!this.canactive(true)) {
 			return console.log(owner + ' cannot cast ' + this);
 		}
 		this.remove();
 		if (owner.status.get('neuro')) owner.addpoison(1);
-		this.card.play(owner, this, t, true);
+		this.play(t, true);
 		this.proc('cardplay');
 		if (owner.game.bonusstats != null && owner == owner.game.player1)
 			owner.game.bonusstats.cardsplayed[this.card.type]++;
-		owner.game.updateExpectedDamage();
 	} else if (owner.spend(this.castele, this.cast)) {
 		this.usedactive = true;
 		if (this.status.get('neuro')) this.addpoison(1);
 		this.castSpell(t, this.active.cast);
-		owner.game.updateExpectedDamage();
 	}
+	owner.game.updateExpectedDamage();
 };
 Thing.prototype.truedr = function() {
 	return this.hp + this.trigger('buff');
@@ -441,8 +454,7 @@ Thing.prototype.truehp = function() {
 };
 Thing.prototype.trueatk = function(adrenaline) {
 	if (adrenaline === undefined) adrenaline = this.status.get('adrenaline');
-	var dmg = this.atk + this.status.get('dive') + this.trigger('buff');
-	dmg += this.calcBonusAtk();
+	let dmg = this.atk + this.status.get('dive') + this.trigger('buff') + this.calcBonusAtk();
 	if (this.status.get('burrowed')) dmg = Math.ceil(dmg / 2);
 	return etg.calcAdrenaline(adrenaline, dmg);
 };
@@ -562,6 +574,7 @@ Thing.prototype.buffhp = function(x) {
 var ui = require('./ui');
 var etg = require('./etg');
 var util = require('./util');
+var audio = require('./audio');
 var Cards = require('./Cards');
 var Effect = require('./Effect');
 var Skills = require('./Skills');

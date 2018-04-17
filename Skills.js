@@ -22,7 +22,7 @@ function quadpillarFactory(ele) {
 		}
 	};
 }
-const Skills = (module.exports = {
+const Skills = {
 	ablaze: x => {
 		const n = +x;
 		return (c, t) => {
@@ -165,6 +165,7 @@ const Skills = (module.exports = {
 		return c.owner.mark == etg.Air || c.owner.mark == etg.Light ? 1 : 0;
 	},
 	bounce: (c, t) => {
+		c.hp = c.maxhp;
 		Skills.unsummon.func(c, c);
 		return true;
 	},
@@ -484,7 +485,7 @@ const Skills = (module.exports = {
 	discping: (c, t) => {
 		t.dmg(1);
 		c.remove();
-		c.owner.addCard(c.card);
+		c.owner.addCardInstance(c);
 	},
 	disfield: (c, t, data) => {
 		if (!c.owner.spend(etg.Chroma, data.dmg)) {
@@ -525,7 +526,7 @@ const Skills = (module.exports = {
 		if (isborne && t.active.cast == Skills.burrow) delete t.active.cast;
 	},
 	drawcopy: (c, t) => {
-		if (c.owner != t.owner) c.owner.addCard(t.card);
+		if (c.owner != t.owner) c.owner.addCardInstance(t.clone(c.owner));
 	},
 	drawequip: (c, t) => {
 		for (let i = c.owner.deck.length - 1; i > -1; i--) {
@@ -1247,7 +1248,9 @@ const Skills = (module.exports = {
 		}
 	},
 	mitosis: (c, t) => {
-		c.card.play(c.owner, c, t);
+		const inst = new Thing(c.card);
+		inst.owner = c.owner;
+		inst.play(c);
 	},
 	mitosisspell: (c, t) => {
 		t.active.cast = Skills.mitosis;
@@ -2023,7 +2026,7 @@ const Skills = (module.exports = {
 	unsummon: (c, t) => {
 		if (t.owner.hand.length < 8) {
 			t.remove();
-			t.owner.addCard(t.card);
+			t.owner.addCardInstance(t);
 		} else {
 			Skills.rewind.func(c, t);
 		}
@@ -2241,11 +2244,12 @@ const Skills = (module.exports = {
 	wings: (c, t, data) => {
 		if (!t.status.get('airborne') && !t.status.get('ranged')) data.dmg = 0;
 	},
-});
+};
 for (const key in Skills) {
 	Skills[key] = { name: [key], func: Skills[key], passive: false };
 }
 Skills.abomination.passive = Skills.becomearctic.passive = Skills.beguilestop.passive = Skills.bounce.passive = Skills.cell.passive = Skills.counter.passive = Skills.decrsteam.passive = Skills.deepdiveproc.passive = Skills.deepdiveproc2.passive = Skills.dshieldoff.passive = Skills.elf.passive = Skills.firebrand.passive = Skills.hitownertwice.passive = Skills.martyr.passive = Skills.mummy.passive = Skills.obsession.passive = Skills.predatoroff.passive = Skills.protectonce.passive = Skills.protectoncedmg.passive = Skills.salvage.passive = Skills.skeleton.passive = Skills.swarm.passive = Skills.virtue.passive = true;
+module.exports = Skills;
 var etg = require('./etg');
 var util = require('./util');
 var Cards = require('./Cards');

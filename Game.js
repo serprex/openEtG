@@ -20,7 +20,7 @@ function Game(seed, flip) {
 module.exports = Game;
 
 Game.prototype.clone = function() {
-	var obj = Object.create(Game.prototype);
+	const obj = Object.create(Game.prototype);
 	obj.rng = this.rng.clone();
 	obj.phase = this.phase;
 	obj.player1 = this.player1.clone(obj);
@@ -64,9 +64,9 @@ const blacklist = new Set([
 	'urdeck',
 ]);
 Game.prototype.addData = function(data) {
-	for (var key in data) {
+	for (const key in data) {
 		if (!blacklist.has(key)) {
-			var p1or2 = key.match(/^p(1|2)/);
+			const p1or2 = key.match(/^p(1|2)/);
 			if (p1or2) {
 				this['player' + p1or2[1]][key.slice(2)] = data[key];
 			} else this[key] = data[key];
@@ -99,7 +99,7 @@ Game.prototype.updateExpectedDamage = function() {
 };
 Game.prototype.tgtToBits = function(x) {
 	if (x === undefined) return 0;
-	var bits =
+	const bits =
 		x.type == etg.Player
 			? 1
 			: x.type == etg.Weapon
@@ -111,7 +111,7 @@ Game.prototype.tgtToBits = function(x) {
 	return x.owner == this.player2 ? bits | 8 : bits;
 };
 Game.prototype.bitsToTgt = function(x) {
-	var tgtop = x & 7,
+	const tgtop = x & 7,
 		x4 = x >> 4,
 		player = this.players(!(x & 8));
 	return tgtop == 0
@@ -127,23 +127,22 @@ Game.prototype.bitsToTgt = function(x) {
 						: console.log('Unknown tgtop: ' + tgtop + ', ' + x4);
 };
 Game.prototype.getTarget = function(src, active, cb) {
-	var targetingFilter = Cards.Targeting[active.name[0]];
+	const targetingFilter = Cards.Targeting[active.name[0]];
 	if (targetingFilter) {
-		var game = this;
 		this.targeting = {
-			filter: function(t) {
+			filter: (t) => {
 				return (
 					(t.type == etg.Player ||
 						t.type == etg.Spell ||
-						t.owner == game.turn ||
+						t.owner == this.turn ||
 						t.status.get('cloak') ||
 						!t.owner.isCloaked()) &&
 					targetingFilter(src, t)
 				);
 			},
-			cb: function() {
-				cb.apply(null, arguments);
-				game.targeting = null;
+			cb: (...args) => {
+				cb(...args);
+				this.targeting = null;
 			},
 			text: active.name[0],
 			src: src,
