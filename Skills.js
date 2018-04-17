@@ -166,7 +166,7 @@ const Skills = {
 	},
 	bounce: (c, t) => {
 		c.hp = c.maxhp;
-		Skills.unsummon.func(c, c);
+		unsummon(c);
 		return true;
 	},
 	bravery: (c, t) => {
@@ -476,7 +476,7 @@ const Skills = {
 	},
 	disarm: (c, t) => {
 		if (t.type == etg.Player && t.weapon) {
-			Skills.unsummon.func(c, t.weapon);
+			unsummon(t.weapon);
 		}
 	},
 	disc: (c, t) => {
@@ -1148,7 +1148,7 @@ const Skills = {
 		t.addpoison(1);
 	},
 	livingweapon: (c, t) => {
-		if (t.owner.weapon) Skills.unsummon.func(c, t.owner.weapon);
+		if (t.owner.weapon) unsummon(t.owner.weapon);
 		t.owner.dmg(-t.truehp());
 		t.remove();
 		t.owner.setWeapon(t);
@@ -2026,7 +2026,7 @@ const Skills = {
 	unsummon: (c, t) => {
 		if (t.owner.hand.length < 8) {
 			t.remove();
-			t.owner.addCardInstance(t);
+			t.owner.addCard(t.card);
 		} else {
 			Skills.rewind.func(c, t);
 		}
@@ -2245,6 +2245,14 @@ const Skills = {
 		if (!t.status.get('airborne') && !t.status.get('ranged')) data.dmg = 0;
 	},
 };
+function unsummon(t) {
+	if (t.owner.hand.length < 8) {
+		t.remove();
+		t.owner.addCardInstance(t);
+	} else {
+		Skills.rewind.func(c, t);
+	}
+}
 for (const key in Skills) {
 	Skills[key] = { name: [key], func: Skills[key], passive: false };
 }
