@@ -58,14 +58,14 @@ function maybeSendChat(e) {
 			names.sort();
 			names.forEach(name => {
 				const deck = sock.user.decks[name];
-				chat.addSpan(<div onClick={function(e) {
-					if (e.target != this) return;
-					store.store.dispatch(store.setOptTemp('selectedDeck', name));
-					store.store.dispatch(store.setOptTemp('deckname', name));
-					store.store.dispatch(store.setOpt('deck', deck));
-				}}>
+				chat.addSpan(<div>
 					<a href={`deck/${deck}`} target='_blank' className={'ico ce' + etgutil.fromTrueMark(parseInt(deck.slice(-3), 32))} />
-					{name}
+					<span onClick={e => {
+						sock.user.selectedDeck = name;
+						store.store.dispatch(store.setOptTemp('selectedDeck', name));
+						store.store.dispatch(store.setOptTemp('deckname', name));
+						store.store.dispatch(store.setOpt('deck', deck));
+					}}>{name}</span>
 				</div>);
 			});
 		} else if (msg == '/mute') {

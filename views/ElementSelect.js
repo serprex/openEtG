@@ -60,7 +60,7 @@ module.exports = class ElementSelect extends React.Component {
 						sock.emit('inituser', msg);
 					}}
 					onMouseOver={() =>
-						self.setState({ eledesc: ui.eleNames[i] + '\n\n' + descriptions[i - 1], })
+						this.setState({ eledesc: ui.eleNames[i] + '\n\n' + descriptions[i - 1], })
 					}
 				/>,
 			);

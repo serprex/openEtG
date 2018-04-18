@@ -794,7 +794,7 @@ module.exports = connect(({opts}) => ({
 					style={{
 						position: 'absolute',
 						left: '8px',
-						top: '8px',
+						top: '4px',
 					}}
 				/>
 				<input
@@ -803,15 +803,15 @@ module.exports = connect(({opts}) => ({
 					onClick={changeFunc}
 					style={{
 						position: 'absolute',
-						left: '184px',
-						top: '8px',
+						left: '8px',
+						top: '32px',
 					}}
 				/>
 				<label
 					style={{
 						position: 'absolute',
-						left: '8px',
-						top: '53px',
+						left: '135px',
+						top: '88px',
 					}}>
 					<input type='checkbox'
 						value={this.props.enableSound}

@@ -41,17 +41,8 @@ module.exports = connect(({opts}) => ({ deck: opts.deck, deckname: opts.deckname
 			etgutil.iterraw(sock.user.pool, incrpool);
 			etgutil.iterraw(sock.user.accountbound, incrpool);
 		}
-		const deckmark = this.processDeck(
-			etgutil.decodedeck(
-				props.startempty
-					? ''
-					: props.acard ? props.adeck || '' : sock.getDeck(),
-			),
-		);
 		this.state = {
 			pool: pool,
-			deck: deckmark.deck,
-			mark: deckmark.mark,
 			arattr: props.ainfo && {
 				hp: attrval(props.ainfo.hp, 200),
 				mark: attrval(props.ainfo.mark, 2),
@@ -68,8 +59,9 @@ module.exports = connect(({opts}) => ({ deck: opts.deck, deckname: opts.deckname
 		}));
 	}
 
-	processDeck(deck) {
-		let mark = 0;
+	static getDerivedStateFromProps(props) {
+		let mark = 0,
+			deck = etgutil.decodedeck(props.startempty ? '' : props.acard ? props.adeck || '' : sock.getDeck())
 		for (let i = deck.length - 1; i >= 0; i--) {
 			if (!(deck[i] in Cards.Codes)) {
 				const index = etgutil.fromTrueMark(deck[i]);
@@ -170,7 +162,6 @@ module.exports = connect(({opts}) => ({ deck: opts.deck, deckname: opts.deckname
 			self.props.dispatch(store.setOptTemp('selectedDeck', sock.user.selectedDeck));
 			self.props.dispatch(store.setOptTemp('deckname', sock.user.selectedDeck));
 			self.props.dispatch(store.setOpt('deck', sock.getDeck()));
-			self.setState(self.processDeck(etgutil.decodedeck(sock.getDeck())));
 		}
 		const editorui = [
 			<input type='button'
@@ -502,7 +493,6 @@ module.exports = connect(({opts}) => ({ deck: opts.deck, deckname: opts.deckname
 				},
 				onChange: e => {
 					self.props.dispatch(store.setOptTemp('deck', e.target.value));
-					self.setState(self.processDeck(etgutil.decodedeck(e.target.value)));
 				},
 				ref: ctrl => {
 					if (ctrl) {
