@@ -203,6 +203,5 @@ exports.userExec = function(x, data) {
 };
 exports.getDeck = function() {
 	if (exports.user) return exports.user.decks[exports.user.selectedDeck] || '';
-	const deck = (store.store.getState().opts.deck || '').trim();
-	return ~deck.indexOf(' ') ? etgutil.encodedeck(deck.split(' ')) : deck;
+	return store.store.getState().opts.deck;
 };

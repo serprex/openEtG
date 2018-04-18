@@ -8,8 +8,7 @@ const etg = require('../etg'),
 	Components = require('../Components'),
 	store = require('../store'),
 	{ connect } = require('react-redux'),
-	React = require('react'),
-	h = React.createElement;
+	React = require('react');
 
 const artable = {
 	hp: { min: 65, max: 200, incr: 45, cost: 1 },
@@ -37,16 +36,17 @@ module.exports = connect(({opts}) => ({ deck: opts.deck, deckname: opts.deckname
 				pool[code] = (pool[code] || 0) + count;
 			}
 		}
-		if (sock.user && pool) {
+		if (pool) {
 			etgutil.iterraw(sock.user.pool, incrpool);
 			etgutil.iterraw(sock.user.accountbound, incrpool);
 		}
 		this.state = {
 			pool: pool,
+			deckname: props.deckname ? '' : '-',
 			arattr: props.ainfo && {
 				hp: attrval(props.ainfo.hp, 200),
-				mark: attrval(props.ainfo.mark, 2),
-				draw: attrval(props.ainfo.draw, 1),
+				mark: attrval(props.ainfo.mark, aupped ? 1 : 2),
+				draw: attrval(props.ainfo.draw, aupped ? 2 : 1),
 			},
 		};
 	}
@@ -59,9 +59,10 @@ module.exports = connect(({opts}) => ({ deck: opts.deck, deckname: opts.deckname
 		}));
 	}
 
-	static getDerivedStateFromProps(props) {
+	static getDerivedStateFromProps(nextProps, prevState) {
+		if (nextProps.deckname === prevState.deckname) return null;
 		let mark = 0,
-			deck = etgutil.decodedeck(props.startempty ? '' : props.acard ? props.adeck || '' : sock.getDeck())
+			deck = etgutil.decodedeck(nextProps.startempty ? '' : nextProps.acard ? nextProps.adeck || '' : nextProps.deck)
 		for (let i = deck.length - 1; i >= 0; i--) {
 			if (!(deck[i] in Cards.Codes)) {
 				const index = etgutil.fromTrueMark(deck[i]);
@@ -78,8 +79,7 @@ module.exports = connect(({opts}) => ({ deck: opts.deck, deckname: opts.deckname
 		const self = this,
 			aupped = this.props.acard && this.props.acard.upped;
 		const arpts = aupped ? 515 : 425;
-		const sortedDeck = self.state.deck.slice();
-		sortedDeck.sort(Cards.codeCmp);
+		const sortedDeck = self.state.deck.slice().sort(Cards.codeCmp);
 		const cardminus = [];
 		if (sock.user) {
 			for (let i = sortedDeck.length - 1; i >= 0; i--) {
@@ -229,7 +229,7 @@ module.exports = connect(({opts}) => ({ deck: opts.deck, deckname: opts.deckname
 					position: 'absolute',
 					left: '56px',
 					top: y,
-				}}>{self.state.arattr[name] + ''}</div>,
+				}}>{self.state.arattr[name]}</div>,
 			);
 		}
 		function saveButton() {
@@ -241,10 +241,9 @@ module.exports = connect(({opts}) => ({ deck: opts.deck, deckname: opts.deckname
 		}
 		if (self.props.acard) {
 			editorui.push(
-				h('input', {
-					type: 'button',
-					value: 'Save & Exit',
-					onClick: function() {
+				<input type='button'
+					value='Save & Exit'
+					onClick={function() {
 						if (self.state.deck.length < 30 || sumscore > arpts) {
 							return chat('35 cards required before submission', 'System');
 						}
@@ -263,143 +262,122 @@ module.exports = connect(({opts}) => ({ deck: opts.deck, deckname: opts.deckname
 						sock.userEmit('setarena', data);
 						chat('Arena deck submitted', 'System');
 						self.props.dispatch(store.doNav(require('./MainMenu')));
-					},
-					style: {
+					}}
+					style={{
 						position: 'absolute',
 						left: '8px',
 						top: '58px',
-					},
-				}),
-				h('input', {
-					type: 'button',
-					value: 'Exit',
-					onClick: () => {
+					}}
+				/>,
+				<input type='button'
+					value='Exit'
+					onClick={() => {
 						sock.userEmit('arenainfo');
-					},
-					style: {
+					}}
+					style={{
 						position: 'absolute',
 						left: '8px',
 						top: '84px',
-					},
-				}),
-				h(
-					'div',
-					{
-						style: {
-							position: 'absolute',
-							left: '4px',
-							top: '188px',
-						},
-					},
-					(arpts - sumscore) / 45 + '',
-				),
+					}}
+				/>,
+				<div style={{
+					position: 'absolute',
+					left: '4px',
+					top: '188px',
+				}}>
+					{(arpts - sumscore) / 45}
+				</div>
 			);
 			makeattrui(0, 'hp');
 			makeattrui(1, 'mark');
 			makeattrui(2, 'draw');
 		} else {
 			editorui.push(
-				h('input', {
-					type: 'button',
-					value: 'Save & Exit',
-					onClick: function() {
+				<input type='button'
+					value='Save & Exit'
+					onClick={function() {
 						if (sock.user) saveDeck(true);
 						else
 							self.props.dispatch(store.setOpt('deck',
 								etgutil.encodedeck(self.state.deck) +
 								etgutil.toTrueMarkSuffix(self.state.mark)));
 						self.props.dispatch(store.doNav(require('./MainMenu')));
-					},
-					style: {
+					}}
+					style={{
 						position: 'absolute',
 						left: '8px',
 						top: '58px',
-					},
-				}),
+					}}
+				/>,
 			);
 			if (sock.user) {
-				const tname = h(
-						'div',
-						{
-							style: {
-								position: 'absolute',
-								top: '8px',
-								left: '100px',
-							},
-						},
-						sock.user.selectedDeck,
-					),
-					buttons = [];
+				const buttons = [];
 				for (let i = 0; i < 10; i++) {
 					buttons.push(
-						h('input', {
-							key: i,
-							type: 'button',
-							value: i + 1 + '',
-							className:
+						<input type='button'
+							key={i}
+							value={i + 1 + ''}
+							className={
 								'editbtn' +
 								(sock.user.selectedDeck == sock.user.qecks[i]
 									? ' selectedbutton'
-									: ''),
-							onClick: quickDeck(i),
-						}),
+									: '')}
+							onClick={quickDeck(i)}
+						/>
 					);
 				}
 				editorui.push(
-					tname,
-					h('input', {
-						type: 'button',
-						value: 'Save',
-						onClick: saveButton,
-						style: {
+					<div style={{
+						position: 'absolute',
+						top: '8px',
+						left: '100px',
+					}}>{sock.user.selectedDeck}</div>,
+					<input type='button'
+						value='Save'
+						onClick={saveButton}
+						style={{
 							position: 'absolute',
 							left: '8px',
 							top: '110px',
-						},
-					}),
-					h('input', {
-						type: 'button',
-						value: 'Load',
-						onClick: () => loadDeck(this.props.deckname),
-						style: {
+						}}
+					/>,
+					<input type='button'
+						value='Load'
+						onClick={() => loadDeck(this.props.deckname)}
+						style={{
 							position: 'absolute',
 							left: '8px',
 							top: '136px',
-						},
-					}),
-					h('input', {
-						type: 'button',
-						value: 'Exit',
-						onClick: function() {
+						}}
+					/>,
+					<input type='button'
+						value='Exit'
+						onClick={function() {
 							if (sock.user)
 								sock.userExec('setdeck', { name: sock.user.selectedDeck });
 							self.props.dispatch(store.doNav(require('./MainMenu')));
-						},
-						style: {
+						}}
+						style={{
 							position: 'absolute',
 							left: '8px',
 							top: '162px',
-						},
-					}),
-					h('input', {
-						type: 'button',
-						value: 'Save to #',
-						className: self.state.setQeck && 'selectedbutton',
-						onClick: saveTo,
-						style: {
+						}}
+					/>,
+					<input type='button'
+						value='Save to #'
+						className={self.state.setQeck && 'selectedbutton'}
+						onClick={saveTo}
+						style={{
 							position: 'absolute',
 							left: '220px',
 							top: '8px',
-						},
-					}),
-					h('div', {
-						children: buttons,
-						style: {
-							position: 'absolute',
-							left: '300px',
-							top: '8px',
-						},
-					}),
+						}}
+					/>,
+					<div style={{
+						position: 'absolute',
+						left: '300px',
+						top: '8px',
+					}}>{buttons}</div>,
 				);
 			}
 		}
@@ -433,9 +411,9 @@ module.exports = connect(({opts}) => ({ deck: opts.deck, deckname: opts.deckname
 			}}
 			deck={sortedDeck}
 		/>;
-		const cardsel = h(Components.CardSelector, {
-			onMouseOver: setCardArt,
-			onClick: function(code) {
+		const cardsel = <Components.CardSelector
+			onMouseOver={setCardArt}
+			onClick={function(code) {
 				if (sortedDeck.length < 60) {
 					const card = Cards.Codes[code];
 					if (sock.user && !card.isFree()) {
@@ -449,52 +427,52 @@ module.exports = connect(({opts}) => ({ deck: opts.deck, deckname: opts.deckname
 					}
 					self.setState({ deck: self.state.deck.concat([code]) });
 				}
-			},
-			maxedIndicator: !self.props.acard,
-			filterboth: !!self.state.pool,
-			cardpool: self.state.pool,
-			cardminus: cardminus,
-		});
-		const cardArt = h(Components.Card, { x: 734, y: 8, card: this.state.card });
+			}}
+			maxedIndicator={!self.props.acard}
+			filterboth={!!self.state.pool}
+			cardpool={self.state.pool}
+			cardminus={cardminus}
+		/>;
+		const cardArt = <Components.Card x={734} y={8} card={this.state.card} />;
 		editorui.push(decksprite, cardsel, cardArt);
 		if (!self.props.acard) {
 			if (sock.user) {
-				editorui.push(h('input', {
-					placeholder: 'Name',
-					value: self.props.deckname,
-					onChange: e => self.props.dispatch(store.setOptTemp('deckname', e.target.value)),
-					onKeyPress: e => {
+				editorui.push(<input
+					placeholder='Name'
+					value={self.props.deckname}
+					onChange={e => self.props.dispatch(store.setOptTemp('deckname', e.target.value))}
+					onKeyPress={e => {
 						if (e.which == 13) {
 							loadDeck(e.target.value);
 						}
-					},
-					onClick: (e) => {
+					}}
+					onClick={e => {
 						e.target.setSelectionRange(0, 999);
-					},
-					style: {
+					}}
+					style={{
 						position: 'absolute',
 						left: '4px',
 						top: '4px',
 						width: '80px',
-					},
-				}));
+					}}
+				/>);
 			}
-			const deckimport = h('input', {
-				placeholder: 'Deck',
-				autoFocus: true,
-				value:
+			editorui.push(<input
+				placeholder='Deck'
+				autoFocus
+				value={
 					etgutil.encodedeck(sortedDeck) +
-					etgutil.toTrueMarkSuffix(self.state.mark),
-				style: {
+					etgutil.toTrueMarkSuffix(self.state.mark)}
+				style={{
 					position: 'absolute',
 					left: '520px',
 					top: '238px',
 					width: '190px',
-				},
-				onChange: e => {
+				}}
+				onChange={e => {
 					self.props.dispatch(store.setOptTemp('deck', e.target.value));
-				},
-				ref: ctrl => {
+				}}
+				ref={ctrl => {
 					if (ctrl) {
 						self.props.dispatch(store.setOptTemp('deck', ctrl.value));
 						if (!self.firstRender) {
@@ -502,15 +480,14 @@ module.exports = connect(({opts}) => ({ deck: opts.deck, deckname: opts.deckname
 							self.firstRender = true;
 						}
 					}
-				},
-				onClick: (e) => {
+				}}
+				onClick={e => {
 					e.target.setSelectionRange(0, 999);
-				},
-			});
-			editorui.push(deckimport);
+				}}
+			/>);
 		}
 		if (!this.props.acard && sock.user)
 			editorui.push(<Tutor.Editor x={4} y={220} />);
-		return h(React.Fragment, null, ...editorui);
+		return editorui;
 	}
 });
