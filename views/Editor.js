@@ -40,6 +40,7 @@ module.exports = connect(({opts}) => ({ deck: opts.deck, deckname: opts.deckname
 			etgutil.iterraw(sock.user.pool, incrpool);
 			etgutil.iterraw(sock.user.accountbound, incrpool);
 		}
+		this.deckRef = React.createRef();
 		this.state = {
 			pool: pool,
 			deckname: props.deckname ? '' : '-',
@@ -52,6 +53,7 @@ module.exports = connect(({opts}) => ({ deck: opts.deck, deckname: opts.deckname
 	}
 
 	componentDidMount() {
+		this.deckRef.current.setSelectionRange(0, 999);
 		this.props.dispatch(store.setCmds({
 			arenainfo: data => {
 				this.props.dispatch(store.doNav(require('./ArenaInfo'), data));
@@ -460,9 +462,7 @@ module.exports = connect(({opts}) => ({ deck: opts.deck, deckname: opts.deckname
 			editorui.push(<input
 				placeholder='Deck'
 				autoFocus
-				value={
-					etgutil.encodedeck(sortedDeck) +
-					etgutil.toTrueMarkSuffix(self.state.mark)}
+				value={this.props.deck}
 				style={{
 					position: 'absolute',
 					left: '520px',
@@ -472,15 +472,7 @@ module.exports = connect(({opts}) => ({ deck: opts.deck, deckname: opts.deckname
 				onChange={e => {
 					self.props.dispatch(store.setOptTemp('deck', e.target.value));
 				}}
-				ref={ctrl => {
-					if (ctrl) {
-						self.props.dispatch(store.setOptTemp('deck', ctrl.value));
-						if (!self.firstRender) {
-							ctrl.setSelectionRange(0, 999);
-							self.firstRender = true;
-						}
-					}
-				}}
+				ref={this.deckRef}
 				onClick={e => {
 					e.target.setSelectionRange(0, 999);
 				}}
