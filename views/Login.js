@@ -34,14 +34,19 @@ if (typeof kongregateAPI === 'undefined') {
 				},
 			}));
 
-			const xhr = new XMLHttpRequest();
-			xhr.addEventListener('load', () => {
-				const data = JSON.parse(xhr.responseText)[0];
-				if (data) {
-					this.setState({
-						commit: (
-							<a
-								target="_blank"
+			if (
+				this.props.remember &&
+				typeof localStorage !== 'undefined' &&
+				localStorage.auth
+			) {
+				this.loginClick(localStorage.auth);
+			} else {
+				fetch('https://api.github.com/repos/serprex/openEtG/commits?per_page=1')
+					.then(res => res.json())
+					.then(([data]) => {
+						this.setState({
+							commit: (
+								<a target="_blank"
 								href={data.html_url}
 								style={{
 									maxWidth: '380px',
@@ -49,118 +54,85 @@ if (typeof kongregateAPI === 'undefined') {
 									left: '260px',
 									top: '460px',
 								}}>
-								{data.author.login + ': ' + data.commit.message}
-							</a>
-						),
+									{data.author.login}: {data.commit.message}
+								</a>
+							),
+						});
 					});
-				}
-			});
-			xhr.open(
-				'GET',
-				'https://api.github.com/repos/serprex/openEtG/commits?per_page=1',
-				true,
-			);
-			xhr.send();
+			}
+		}
+
+		loginClick(auth) {
+			if (!sock.user && this.props.username) {
+				const data = { u: this.props.username };
+				if (auth) data.a = auth;
+				else data.p = this.state.password;
+				sock.emit('login', data);
+			}
+		}
+
+		maybeLogin(e) {
+			if (e.which == 13) {
+				this.loginClick();
+			}
 		}
 
 		render() {
-			const self = this;
-			function maybeLogin(e) {
-				if (e.which == 13) {
-					loginClick();
-				}
-			}
-			function loginClick(auth) {
-				if (!sock.user && self.props.username) {
-					const data = { u: self.props.username };
-					if (typeof auth !== 'string') {
-						data.p = self.state.password;
-					} else data.a = auth;
-					sock.emit('login', data);
-				}
-			}
-			const login = (
-				<input
-					type="button"
-					value="Login"
-					onClick={loginClick}
-					style={{ position: 'absolute', left: '430px', top: '350px' }}
-				/>
-			);
-			const btnsandbox = (
-				<input
-					type="button"
-					value="Sandbox"
-					onClick={() => this.props.dispatch(store.doNav(require('./MainMenu')))}
-					style={{ position: 'absolute', left: '530px', top: '350px' }}
-				/>
-			);
-			const username = (
-				<input
-					placeholder="Username"
-					autoFocus={true}
-					tabIndex="1"
-					onKeyPress={maybeLogin}
-					value={self.props.username}
-					onChange={e => self.props.dispatch(store.setOpt('username', e.target.value))}
-					style={{ position: 'absolute', left: '270px', top: '350px' }}
-				/>
-			);
-			const password = (
-				<input
-					onInput={e => self.setState({ password: e.target.value })}
-					value={self.state.password}
-					type="password"
-					placeholder="Password"
-					tabIndex="2"
-					onKeyPress={maybeLogin}
-					style={{ position: 'absolute', left: '270px', top: '380px' }}
-				/>
-			);
-			const remember = (
-				<label style={{ position: 'absolute', left: '430px', top: '380px' }}>
-					<input
-						type="checkbox"
-						checked={self.props.remember}
-						onChange={e => {
-							if (typeof localStorage !== 'undefined') {
-								if (!e.target.checked) delete localStorage.auth;
-								else if (sock.user) localStorage.auth = sock.user.auth;
-							}
-							self.props.dispatch(store.setOpt('remember', e.target.checked));
-						}}
-					/>
-					Remember me
-				</label>
-			);
-			if (
-				self.props.remember &&
-				typeof localStorage !== 'undefined' &&
-				localStorage.auth
-			) {
-				loginClick(localStorage.auth);
-			}
-			const tutlink = (
-				<a
-					href="forum/?topic=267"
-					target="_blank"
-					style={{ position: 'absolute', left: '270px', top: '424px' }}>
-					Tutorial
-				</a>
-			);
 			return (
-				<div
-					style={{
-						backgroundImage: 'url(assets/bg_login.png)',
-						width: '900px',
-						height: '600px',
-					}}>
-					{username}
-					{password}
-					{remember}
-					{login}
-					{tutlink}
-					{btnsandbox}
+				<div style={{
+					backgroundImage: 'url(assets/bg_login.png)',
+					width: '900px',
+					height: '600px',
+				}}>
+					<input
+						placeholder="Username"
+						autoFocus={true}
+						tabIndex="1"
+						onKeyPress={e => this.maybeLogin(e)}
+						value={this.props.username}
+						onChange={e => this.props.dispatch(store.setOpt('username', e.target.value))}
+						style={{ position: 'absolute', left: '270px', top: '350px' }}
+					/>
+					<input
+						onInput={e => this.setState({ password: e.target.value })}
+						value={this.state.password}
+						type="password"
+						placeholder="Password"
+						tabIndex="2"
+						onKeyPress={e => this.maybeLogin(e)}
+						style={{ position: 'absolute', left: '270px', top: '380px' }}
+					/>
+					<label style={{ position: 'absolute', left: '430px', top: '380px' }}>
+						<input
+							type="checkbox"
+							checked={this.props.remember}
+							onChange={e => {
+								if (typeof localStorage !== 'undefined') {
+									if (!e.target.checked) delete localStorage.auth;
+									else if (sock.user) localStorage.auth = sock.user.auth;
+								}
+								this.props.dispatch(store.setOpt('remember', e.target.checked));
+							}}
+						/>
+						Remember me
+					</label>
+					<input
+						type="button"
+						value="Login"
+						onClick={e => this.loginClick()}
+						style={{ position: 'absolute', left: '430px', top: '350px' }}
+					/>
+					<a target="_blank"
+						href="forum/?topic=267"
+						style={{ position: 'absolute', left: '270px', top: '424px' }}>
+						Tutorial
+					</a>
+					<input
+						type="button"
+						value="Sandbox"
+						onClick={() => this.props.dispatch(store.doNav(require('./MainMenu')))}
+						style={{ position: 'absolute', left: '530px', top: '350px' }}
+					/>
 					{this.state.commit}
 				</div>
 			);
