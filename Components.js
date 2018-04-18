@@ -6,25 +6,7 @@ const ui = require('./ui'),
 	Cards = require('./Cards'),
 	etgutil = require('./etgutil'),
 	store = require('./store'),
-	React = require('react'),
-	h = React.createElement;
-
-const rectCache = {};
-exports.rect = function(x, y, wid, hei) {
-	const key = `${x}|${y}|${wid}|${hei}`;
-	if (rectCache[key]) return rectCache[key];
-	else {
-		const style = {
-			position: 'absolute',
-			left: x + 'px',
-			top: y + 'px',
-			width: wid + 'px',
-			height: hei + 'px',
-		};
-		return rectCache[key] = props =>
-			<div {...props} style={props.style ? Object.assign({}, props.style, style) : style} />
-	}
-};
+	React = require('react');
 
 exports.Box = function(props) {
 	return <div
