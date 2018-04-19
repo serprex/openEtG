@@ -1,102 +1,144 @@
 'use strict';
-var ui = require('./ui');
-var etg = require('./etg');
-var gfx = require('./gfx');
+const ui = require('./ui'),
+	Thing = require('./Thing'),
+	isNode = typeof global === 'undefined',
+	Components = isNode && require('./Components'),
+	h = isNode ? require('react').createElement : ()=>{};
+const anims = [];
+
 function maybeTgtPos(pos) {
-	return pos instanceof etg.Thing ? ui.tgtToPos(pos) : pos;
+	return pos instanceof Thing ? ui.tgtToPos(pos) : pos;
 }
 function Death(pos) {
-	PIXI.Graphics.call(this);
 	this.step = 0;
 	this.position = maybeTgtPos(pos);
 }
 function Text(text, pos) {
-	if (!pos) {
-		console.log('Blank position ' + text);
-		pos = new PIXI.math.Point(-99, -99);
-	}
-	PIXI.Sprite.call(this, ui.getTextImage(text, 16, 'white'));
 	this.step = 0;
 	this.position = maybeTgtPos(pos);
-	for (var i = 0; i < anims.children.length; i++) {
-		var a = anims.children[i];
-		if (a.position.x == this.position.x && a.position.y == this.position.y) {
+	this.text = text;
+	for (let i = 0; i < anims.length; i++) {
+		const a = anims[i];
+		if (
+			a.position &&
+			a.position.x == this.position.x &&
+			a.position.y == this.position.y
+		) {
 			this.position.y += 16;
 			i = -1;
 		}
 	}
-	this.anchor.x = 0.5;
 }
-function SpriteFade(texture, pos) {
-	PIXI.Sprite.call(this, texture);
-	this.anchor.set(0.5, 0.5);
+function SpriteFade(child) {
 	this.step = 0;
-	this.position = maybeTgtPos(pos) || new PIXI.math.Point(450, 300);
+	this.child = child;
 }
-function SpriteFadeText(targs, pos, anchor) {
-	return new SpriteFade(gfx.Text.call(null, targs), pos, anchor);
+function SpriteFadeText(text, pos) {
+	return new SpriteFade(
+		h(
+			'div',
+			{
+				style: {
+					position: 'absolute',
+					left: pos.x + 'px',
+					top: pos.y + 'px',
+					transform: 'translate(-50%,-50%)',
+					fontSize: '16px',
+					color: '#fff',
+					backgroundColor: '#000',
+					padding: '32px',
+				},
+			},
+			text,
+		),
+	);
+}
+function SpriteFadeHandImage(card, pos, anchor) {
+	return new SpriteFade(
+		h(Components.CardImage, {
+			card: card,
+			x: pos.x + anchor.x * 100,
+			y: pos.y + anchor.y * 20,
+		}),
+	);
 }
 function nop() {}
 function make(cons) {
-	return function() {
-		if (exports.disable || !anims) return;
-		var effect = Object.create(cons.prototype);
-		var effectOverride = cons.apply(effect, arguments);
-		anims.addChild(effectOverride === undefined ? effect : effectOverride);
-	};
+	return isNode
+		? nop
+		: function() {
+				if (exports.disable) return;
+				const effect = Object.create(cons.prototype);
+				const effectOverride = cons.apply(effect, arguments);
+				anims.push(effectOverride || effect);
+			};
 }
-if (typeof PIXI === 'undefined') {
+if (isNode) {
 	exports.disable = true;
-	exports.register = exports.next = nop;
+	exports.next = nop;
 } else {
-	var anims;
 	exports.disable = false;
-	exports.register = function(doc) {
-		anims = doc;
+	exports.clear = function() {
+		anims.length = 0;
 	};
 	exports.next = function(p2cloaked) {
-		if (anims) {
-			for (var i = anims.children.length - 1; i >= 0; i--) {
-				var child = anims.children[i];
-				if (
-					(p2cloaked &&
-						new PIXI.math.Rectangle(130, 20, 660, 280).contains(
-							child.position.x,
-							child.position.y,
-						)) ||
-					child.next()
-				) {
-					anims.removeChild(child);
+		const result = [];
+		for (let i = anims.length - 1; i >= 0; i--) {
+			const anim = anims[i];
+			if (anim.position && p2cloaked) {
+				const pos = anim.position;
+				if (pos.x > 130 && pos.x < 660 && pos.y > 20 && pos.y < 280) {
+					anims.splice(i, 1);
 				}
 			}
+			let r = anim.next();
+			if (r === null) {
+				anims.splice(i, 1);
+			}
+			result.push(r);
 		}
+		return result.length ? result : null;
 	};
-	Death.prototype = Object.create(PIXI.Graphics.prototype);
-	Text.prototype = Object.create(PIXI.Sprite.prototype);
-	SpriteFade.prototype = Object.create(PIXI.Sprite.prototype);
 	Death.prototype.next = function() {
-		if (++this.step == 15) {
-			return true;
-		}
-		this.clear();
-		this.beginFill(0, 1 - this.step / 15);
-		this.drawRect(-30, -30, 60, 60);
+		if (++this.step >= 15) return null;
+		return h('div', {
+			style: {
+				position: 'absolute',
+				left: this.position.x + 'px',
+				top: this.position.y + 'px',
+				opacity: 1 - this.step / 15,
+				backgroundColor: '#000',
+			},
+		});
 	};
 	Text.prototype.next = function() {
-		if (++this.step == 20) {
-			return true;
-		}
-		this.position.y -= 2;
-		this.alpha = 1 - Math.sqrt(this.step) / 5;
+		if (++this.step >= 36) return null;
+		return h(Components.Text, {
+			text: this.text,
+			style: {
+				position: 'absolute',
+				left: this.position.x + 'px',
+				top: (this.position.y - this.position.y*2) + 'px',
+				opacity: 1 - Math.sqrt(this.step) / 6,
+				fontSize: '16px',
+			},
+		});
 	};
 	SpriteFade.prototype.next = function() {
-		if (++this.step == 100) {
-			return true;
-		}
-		if (this.step > 50) this.alpha = 1 - (this.step - 50) / 50;
+		if (++this.step >= 128) return null;
+		return h(
+			'div',
+			{
+				style: {
+					opacity: this.step > 64 ? 2 - this.step / 64 : 1,
+				},
+			},
+			this.child,
+		);
 	};
 }
 exports.mkDeath = make(Death);
 exports.mkText = make(Text);
 exports.mkSpriteFade = make(SpriteFade);
 exports.mkSpriteFadeText = make(SpriteFadeText);
+exports.mkSpriteFadeHandImage = make(SpriteFadeHandImage);

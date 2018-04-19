@@ -3,7 +3,7 @@ var ui = require('./ui');
 var util = require('../util');
 var Cards = require('./Cards');
 var Effect = require('./Effect');
-var Actives = require('./Actives');
+var Actives = require('./Skills');
 var etgutil = require('../etgutil');
 var skillText = require('./skillText');
 function Thing(card, owner) {

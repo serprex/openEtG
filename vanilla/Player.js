@@ -4,7 +4,7 @@ var etg = require('./etg');
 var util = require('../util');
 var Cards = require('./Cards');
 var Effect = require('./Effect');
-var Actives = require('./Actives');
+var Actives = require('./Skills');
 var CardInstance = etg.CardInstance;
 var Thing = etg.Thing;
 function Player(game) {

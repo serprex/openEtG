@@ -1,7 +1,7 @@
 "use strict";
 var etg = require("../etg");
 var Cards = require("../Cards");
-var Actives = require("../Actives");
+var Actives = require("../Skills");
 var enableLogging = false, logbuff, logstack;
 function logStart(){
 	if (enableLogging){
@@ -529,7 +529,7 @@ function evalthing(c) {
 	}
 	score += checkpassives(c);
 	if (isCreature){
-		if (c.owner.gpull == c){
+		if (hp && c.owner.gpull == c){
 			score = (score + hp) * Math.log(hp)/4;
 			if (c.status.voodoo) score += hp;
 			if (c.active.shield && !delaymix){

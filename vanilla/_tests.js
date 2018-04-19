@@ -4,7 +4,7 @@ const assert = require('assert'),
 	etg = require('./etg'),
 	Game = require('./Game'),
 	etgutil = require('../etgutil'),
-	Actives = require('./Actives'),
+	Actives = require('./Skills'),
 	Cards = require('./Cards');
 function initHand(pl, ...args) {
 	for (var i = 0; i < args.length; i++) {

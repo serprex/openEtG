@@ -2,7 +2,7 @@
 var etg = require("../etg");
 var util = require("../../util");
 var Cards = require("../Cards");
-var Actives = require("../Actives");
+var Actives = require("../Skills");
 var etgutil = require("../../etgutil");
 var RngMock = require("../RngMock");
 

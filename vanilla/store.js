@@ -1,34 +1,15 @@
 'use strict';
-const redux = require('redux'), opts = { channel: 'Main' };
-
-let hasLocalStorage = true;
-try {
-	for (const key in localStorage)
-		if (localStorage.hasOwnProperty(key)) opts[key] = localStorage[key];
-} catch (e) {
-	hasLocalStorage = false;
-}
+const redux = require('redux');
 
 exports.doNav = (view, props) => ({ type: 'NAV', view, props });
 
-exports.setOptTemp = (key, val) => (dispatch) => {
-	if (hasLocalStorage && !val) delete localStorage[key];
-	dispatch({
-		type: 'OPT',
-		key,
-		val,
-	});
-};
-
-exports.setOpt = hasLocalStorage ? (key, val) => (dispatch) => {
-	if (hasLocalStorage) {
-		if (val) localStorage[key] = val;
-		else delete localStorage[key];
-	}
-	dispatch(exports.setOptTemp(key, val));
-} : exports.setOptTemp;
-
 exports.setCmds = cmds => ({ type: 'CMD', cmds });
+
+exports.setOpt = exports.setOptTemp = (key, val) => ({
+	type: 'OPT',
+	key,
+	val,
+});
 
 exports.mute = name => ({ type: 'MUTE', name });
 exports.unmute = name => ({ type: 'UNMUTE', name });
@@ -69,7 +50,7 @@ exports.store = redux.createStore((state, action) => {
 	return state;
 }, {
 	nav: {},
-	opts,
+	opts: { channel: 'Main' },
 	cmds: {},
 	chat: new Map(),
 	muted: new Set(),

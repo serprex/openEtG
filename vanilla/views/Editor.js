@@ -3,7 +3,7 @@ var sock = require("../sock");
 var Cards = require("../Cards");
 var mkAi = require("../mkAi");
 var etgutil = require("../../etgutil");
-var react = require('react');
+const React = require('react');
 module.exports = class Editor extends React.Component {
 	render() {
 		function sumCardMinus(cardminus, code){

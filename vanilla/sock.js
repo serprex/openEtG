@@ -79,8 +79,7 @@ var sockEvents = {
 		chat.addSpan(span);
 	},
 };
-var sock = require('./sock');
-sock.et.onmessage = function(msg) {
+socket.onmessage = function(msg) {
 	var data = JSON.parse(msg.data);
 	var func = sockEvents[data.x] || px.getCmd(data.x);
 	if (func) {

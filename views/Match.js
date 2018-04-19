@@ -4,11 +4,10 @@ const ui = require('../ui'),
 	mkAi = require('../mkAi'),
 	sock = require('../sock'),
 	Card = require('../Card'),
-	Game = require('../Game'),
 	Cards = require('../Cards'),
 	Effect = require('../Effect'),
+	Game = require('../Game'),
 	Skills = require('../Skills'),
-	etgutil = require('../etgutil'),
 	aiSearch = require('../ai/search'),
 	Components = require('../Components'),
 	store = require('../store'),
@@ -689,8 +688,8 @@ module.exports = connect()(class Match extends React.Component {
 
 	render() {
 		const self = this,
+			{game} = this.props,
 			children = [svgbg];
-		const game = this.props.game;
 		let turntell, endText, cancelText;
 		const cloaked = game.player2.isCloaked();
 
@@ -1028,7 +1027,7 @@ module.exports = connect()(class Match extends React.Component {
 			</span>
 		);
 		if (self.state.effects) {
-			Array.prototype.push.apply(children, self.state.effects);
+			children.push(self.state.effects);
 		}
 		if (self.state.hovercode) {
 			children.push(
