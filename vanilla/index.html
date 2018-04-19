@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<title>openEtG-vanilla</title>
+<link href="../forum/Smileys/default/life.png" rel="shortcut icon">
+<link href="../assets/atlas.css" rel="stylesheet">
+<link href="../ui.css" rel="stylesheet">
+<script>"use strict";var TCALL=0;function tryInit(){if(++TCALL==3){window.PIXI=require("./pixi");require("./ui.main")}}document.addEventListener("DOMContentLoaded",tryInit)</script>
+<script async src="pixi.min.js" onload="tryInit()"></script>
+<script async src="etgify.js" onload="tryInit()"></script>
+<div id="rightpane">
+	<div style="margin-bottom:8px"><a href="../artcredit.htm" target="_blank">Art credits</a>&emsp;&emsp;<a href="../forum/?board=2" target="_blank">Forum</a></div>
+	<input id="foename" type="text" placeholder="Challenge" onkeydown="maybeChallenge(event)"/> <input id="pvphp" class="numput" type="text" placeholder="HP"/><input id="pvpmark" class="numput" type="text" placeholder="Mark"/><input id="pvpdeck" class="numput" type="text" placeholder="Deck"/><input id="pvpdraw" class="numput" type="text" placeholder="Draw"/><br>
+	<input id="challenge" type="button" style="width:40px" value="PvP" onclick="challengeClick()"/>
+	<input id="username" type="text" placeholder="Name"/>
+	<div id="tabs"></div>
+	<div id="chatBox" class="chatBox"></div>
+	<textarea id="chatinput" placeholder="Chat" onkeydown="maybeSendChat(event)"></textarea>
+</div>
+<canvas id="leftpane" width=900 height=600></canvas>
+<input id="deckimport" type="text" placeholder="Deck" style="left:0px;top:600px;width:900px;position:absolute;"/>

@@ -1,0 +1,5 @@
+rule mkcjs
+ command=mkcjs $out $in
+build etgify.js:mkcjs etg.js Cards.json ../assets/atlas.js InteractionManager.js ../chat.js skillText.js px.js sock.js ../etgutil.js ../util.js ui.js Actives.js ../MersenneTwister.js Effect.js Card.js Cards.js Game.js Player.js RngMock.js gfx.js views/Login.js views/Editor.js views/Match.js views/Result.js mkAi.js ai/deck.js ai/eval.js ai/lethal.js ai/search.js Decks.json ../options.js ui.main.js
+build tournify.js:mkcjs tournament/rotation.js tournament/wintercoming.js tournament/quantacontrolreturns.js tournament/inception.js tournament/tamerandomness.js tournament/shoecobbler.js tournament/powerless3.js tournament/barbershop.js tournament/specialization2.js tournament/venomouspoison.js tournament/specialization3.js tournament/heartoftheswarm.js tournament/symmetricity.js tournament/valentine.js tournament/superstitionsofrationality.js tournament/threescompanytwo.js
+default etgify.js tournify.js

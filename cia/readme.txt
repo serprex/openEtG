@@ -1,0 +1,1 @@
+This serves as the html stub that accesses ../vanilla for the game engine. Mostly used to carry different card data

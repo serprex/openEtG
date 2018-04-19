@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>Name Game</title>
+	<link href="../forum/Smileys/default/earth.png" rel="shortcut icon" />
+	<style>
+		body {
+			background-color:black;
+			color:white;
+			margin:0;
+		}
+		a {
+			color:#6699FF;
+			text-decoration:none;
+		}
+	</style>
+	<script src="etgify.js"></script>
+</head>
+<body>
+	<input id="nameinput" type="text" placeholder="Name" style="width:420px"> <label><input id="sortele" type="checkbox" checked>Sort by Element</label>
+	<br>Hide:
+	<label><input id="hidepillar" type="checkbox" checked>Pillars</label>
+	<label><input id="hidemark" type="checkbox" checked>Marks</label>
+	<label><input id="hideshard" type="checkbox" checked>Shards</label>
+	<label><input id="hiderare" type="checkbox">Rares</label>
+	<label><input id="hidenymph" type="checkbox">Nymphs</label>
+	<br>Ignore prefix:
+	<label><input id="ignoreElite" type="checkbox">Elite</label>
+	<label><input id="ignoreImproved" type="checkbox">Improved</label>
+	<label><input id="ignoreShard" type="checkbox">Shard</label>
+	<label><input id="ignoreMark" type="checkbox">Mark</label></label>
+	<br>Upgraded:
+	<label><input name="upped" type="radio" value="no" checked>No</label>
+	<label><input name="upped" type="radio" value="yes">Yes</label>
+	<label><input name="upped" type="radio" value="both">Both</label>
+	<br><div id="infobox"></div>
+	<script>
+	"use strict";
+	var etg = require("./etg");
+	var Cards = require("./Cards");
+	Cards.loadcards();
+	var infobox = document.getElementById("infobox");
+	infobox.appendChild(document.createTextNode("Cards loaded"));
+	document.getElementById("nameinput").addEventListener("keydown", printstat);
+	function printstat(e){
+		if (e.keyCode != 13) return;
+		var letter, hide = {}, ignore = function(name){return name};
+		["pillar", "mark", "shard", "rare", "nymph"].forEach(function(x){
+			if (document.getElementById("hide"+x).checked) hide[x] = true;
+		});
+		["Elite", "Improved", "Shard", "Mark"].forEach(function(x){
+			if (document.getElementById("ignore"+x).checked){
+				var oldignore = ignore;
+				ignore = function(name){
+					return oldignore(name).replace(new RegExp("^" + x + "( of)? "), "");
+				}
+			}
+		});
+		var upped = document.querySelector("input[name='upped']:checked").value;
+		function cardfilter(card){
+			if (ignore(card.name).charAt(0) == letter){
+				if (hide.pillar && !card.type) return false;
+				if (hide.mark && card.name.match(/^Mark of /)) return false;
+				if (hide.shard && card.name.match(/^Shard of /)) return false;
+				if (hide.rare && (card.tier == 6 || card.tier == 8 || card.tier == 18)) return false;
+				if (hide.nymph && (card.tier == 15 || card.tier == 20)) return false;
+				return true;
+			}else return false;
+		}
+		while (infobox.firstChild) infobox.firstChild.remove();
+		var deck = [], letters = {};
+		for(var i=0; i<this.value.length; i++){
+			letter = this.value.charAt(i).toUpperCase();
+			if (letter in letters) continue;
+			letters[letter] = true;
+			if (upped == "no" || upped == "both") Array.prototype.push.apply(deck, Cards.filter(false, cardfilter));
+			if (upped == "yes" || upped == "both") Array.prototype.push.apply(deck, Cards.filter(true, cardfilter));
+		}
+		if (document.getElementById("sortele").checked) deck.sort(function(x,y){return x.element-y.element});
+		for(var i=0; i<deck.length; i+=70){
+			var img = document.createElement("img");
+			img.src = "http://dek.im/deck/" + deck.slice(i, i+70).map(function(x){return x.code.toString(32)}).join(" ");
+			infobox.appendChild(img);
+		}
+		if (!deck.length) infobox.appendChild(document.createTextNode("No matches"));
+	}
+	</script>
+</body>
+</html>

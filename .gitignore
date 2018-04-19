@@ -1,14 +1,13 @@
 node_modules/*
 Cards/*
+cia/Cards/*
 atlas.js
 atlas.css
 atlas.png
 favicon.png
-etgify.js
-tournify.js
 .ninja_log
 .ninja_deps
-pushserver.sh
+*pushserver.sh
 scripts/deploypem.sh
 oetg-cert.pem
 oetg-key.pem

@@ -1,0 +1,130 @@
+<body>
+<script>
+function removeAt(list, idx){
+	var ret = list[idx];
+	list.splice(idx, 1);
+	return ret;
+}
+function generateMatches() {
+	var elements = [":aether",":air",":darkness",":death",":earth",":entropy",":fire",":gravity",":life",":light",":time",":water"];
+	var ret = [];
+	var players = document.getElementById("playin").value.split("\n");
+	if (players.length&1){
+		console.log("Uneven number of players");
+		return;
+	}
+	var matchlist = [];
+	var matches = [];
+	for(var i=0;i<elements.length;i++){
+		matches[i] = new Array(elements.length);
+		matches[i][i] = true;
+	}
+	var playing = [];
+	var counter = players.length;
+	while (counter--) {
+		var index = Math.floor(Math.random()*counter);
+		var temp = players[counter];
+		players[counter] = players[index];
+		players[index] = temp;
+	}
+	generateMatchlist(matches, playing);
+	while(matchlist.length){
+		var i = matchlist.pop();
+		ret.push(players[i[0]], players[i[1]]);
+	}
+	ret = generate_match_table(ret);
+	for(var i=0; i<ret.length; i++){
+		out.appendChild(document.createTextNode(ret[i]));
+		out.appendChild(document.createElement("br"));
+	}
+	out.appendChild(document.createElement("hr"));
+	ret = generate_match_spoilers(ret);
+	for(var i=0; i<ret.length; i++){
+		out.appendChild(document.createTextNode(ret[i]));
+		out.appendChild(document.createElement("br"));
+	}
+	function generateMatchlist(matches_, playing_){
+		var matches__ = matches_.map(function(x){return x.slice()});
+		for(var i=0;i<players.length;i++){
+			if(!playing_[i]){
+				var i1=getElement(players[i]);
+				for(var j=i+1;j<players.length;j++){
+					if(!playing_[j]){
+						var j1=getElement(players[j]);
+						if(!matches__[i1][j1]){
+							matches__[i1][j1] = matches__[j1][i1] = true;
+							var playing__ = playing_.slice();
+							playing__[i] = playing__[j]=true;
+							if (generateMatchlist(matches__, playing__)){
+								matchlist.push([i, j]);
+								return true;
+							}
+						}
+					}
+				}
+				return false;
+			}
+		}
+		return true;
+	}
+	function getElement(s){
+		for(var i=0;i<elements.length;i++){
+			if(s.indexOf(elements[i]) == 0)return i;
+		}
+		return -1;
+	}
+}
+
+function generate_match_table(input) {
+	var first=true, ret = ["[table]"], acc = "";
+	for(var i=0; i<input.length; i++){
+		var s=input[i];
+		if(s == "")continue;
+		if(first){
+			if(i>0){
+				ret.push(acc + "[/td][/tr]");
+				acc = "";
+			}
+			acc += "[tr][td]"+((i/2)+1)+"[/td][td]";
+		}
+		else acc += "[/td][td]vs[/td][td]";
+		acc += s;
+		first ^= true;
+	}
+	ret.push(acc + "[/td][/tr]", "[/table]");
+	return ret;
+}
+
+function generate_match_spoilers(input) {
+	var elements = ["Aether","Air","Darkness","Death","Earth","Entropy","Fire","Gravity","Life","Light","Time","Water"];
+	var teammatches = [];
+	for(var i=0;i<elements.length;i++){
+		teammatches[i] = [];
+	}
+	var td="[/td]";
+	for(var i = 0; i<input.length; i++){
+		var s = input[i];
+		if(s == "[/table]")break;
+		if(s == "" || s == "[table]")continue;
+		for(var j=0;j<elements.length;j++){
+			if(~s.indexOf(":"+elements[j].toLowerCase())){
+				var ss=s.split("[/td]"), s2;
+				if(~ss[3].indexOf(":"+elements[j].toLowerCase()))s2=ss[3]+"|"+ss[0]+td+ss[3]+td+ss[1]+td+ss[4];
+				else s2=ss[1]+"|"+ss[0]+td+ss[1]+td+ss[3]+td+ss[4];
+				teammatches[j].push(s2);
+			}
+		}
+	}
+	console.log(teammatches);
+	var ret = [];
+	for(var i=0;i<elements.length;i++){
+		ret.push("[spoiler="+elements[i]+"][table]");
+		teammatches[i].sort();
+		while(teammatches[i].length)ret.push(removeAt(teammatches[i], 0).split("|")[1]);
+		ret.push("[/table][/spoiler]");
+	}
+	return ret;
+}
+</script>
+<textarea id="playin"></textarea><input type="button" value="Generate" onclick="generateMatches()"><br><div id="out"></div>
+</body>
