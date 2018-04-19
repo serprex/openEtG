@@ -1,2 +1,0 @@
-#!/bin/sh
-node ../node_modules/mkcjs/mkcjs `awk '{if($2=="etgify.js:mkcjs"){$1="";$2="etgify.js";print $0}}' build.ninja`

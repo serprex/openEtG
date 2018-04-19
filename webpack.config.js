@@ -3,6 +3,7 @@ module.exports = {
 		main: './ui.main.js',
 		art: './ui.art.js',
 		mosaic: './ui.mosaic.js',
+		vanilla: './vanilla/ui.main.js',
 	},
 	output: {
 		path: __dirname,

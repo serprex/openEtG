@@ -1,8 +1,6 @@
 'use strict';
 var etg = require('./etg');
-var gfx = require('./gfx');
 var util = require('../util');
-var options = require('../options');
 var Effect = require('./Effect');
 exports.elecols = new Uint32Array([
 	0xaa9988,

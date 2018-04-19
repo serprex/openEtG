@@ -1,1 +1,1 @@
-http://etg.dek.im/forum/?board=2
+https://etg.dek.im/forum/?board=2

@@ -1,1 +1,0 @@
-node ..\node_modules\mkcjs\mkcjs etgify.js etg.js Cards.json ../assets/atlas.js ../InteractionManager.js ../chat.js skillText.js px.js sock.js ../etgutil.js ../util.js ui.js Actives.js ../MersenneTwister.js Effect.js Card.js Cards.js Game.js gfx.js views/Login.js views/Editor.js views/Match.js views/Result.js mkAi.js ai/deck.js ai/eval.js ai/lethal.js ai/search.js Decks.json

@@ -17,7 +17,7 @@ exports.setOptTemp = (key, val) => (dispatch) => {
 		type: 'OPT',
 		key,
 		val,
-	})
+	});
 };
 
 exports.setOpt = hasLocalStorage ? (key, val) => (dispatch) => {

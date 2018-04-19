@@ -40,5 +40,5 @@ module.exports = function(data) {
 	game.turn.drawhand(7);
 	game.turn.foe.drawhand(7);
 	data.p2deck = game.player2.deck.slice();
-	return { game: game, data: data };
+	return { game, data };
 };

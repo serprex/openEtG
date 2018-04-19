@@ -31,11 +31,9 @@
   "scripts": {
     "test": "./scripts/tests.js",
     "dev": "webpack --mode=development --watch",
-    "build-bundle": "webpack -p",
-    "build-tournify": "mkcjs tournament/commoner.js tournament/dodrio.js",
+    "build": "webpack -p",
     "build-atlas-png": "optipng -o2 -strip all assets/atlas.png",
-    "build-atlas-css": "./scripts/mkatlascss.js",
-    "build": "npm run build-bundle && npm run build-tournify && npm run build-atlas-png && npm run build-atlas-css"
+    "build-atlas-css": "./scripts/mkatlascss.js"
   },
   "license": "MIT"
 }
