@@ -6,8 +6,7 @@ const chat = require('../chat'),
 	userutil = require('../userutil'),
 	Components = require('../Components'),
 	store = require('../store'),
-	React = require('react'),
-	h = React.createElement;
+	React = require('react');
 
 module.exports = class Trade extends React.Component {
 	constructor(props) {
@@ -42,128 +41,106 @@ module.exports = class Trade extends React.Component {
 	}
 
 	render() {
-		const self = this,
-			cardminus = [],
-			children = [];
-		for (let i = 0; i < self.state.deck.length; i++) {
-			cardminus[self.state.deck[i]]++;
+		const cardminus = [];
+		for (let i = 0; i < this.state.deck.length; i++) {
+			cardminus[this.state.deck[i]]++;
 		}
-		if (self.state.confirm < 2) {
-			children.push(
-				h('input', {
-					type: 'button',
-					value: self.state.confirm ? 'Confirm' : 'Trade',
-					onClick: self.state.confirm
-						? function() {
-								if (self.state.offer.length) {
+		const cardpool = etgutil.deck2pool(sock.user.pool);
+		return <>
+			{this.state.confirm < 2 ?
+				<input
+					type='button'
+					value={this.state.confirm ? 'Confirm' : 'Trade'}
+					onClick={this.state.confirm
+						? () => {
+								if (this.state.offer.length) {
 									sock.userEmit('confirmtrade', {
-										cards: etgutil.encoderaw(self.state.deck),
-										oppcards: etgutil.encoderaw(self.state.offer),
+										cards: etgutil.encoderaw(this.state.deck),
+										oppcards: etgutil.encoderaw(this.state.offer),
 									});
-									self.setState({ confirm: 2 });
+									this.setState({ confirm: 2 });
 								} else chat('Wait for your friend to choose!', 'System');
 							}
-						: function() {
-								if (self.state.deck.length) {
+						: () => {
+								if (this.state.deck.length) {
 									sock.emit('cardchosen', {
-										c: etgutil.encoderaw(self.state.deck),
+										c: etgutil.encoderaw(this.state.deck),
 									});
-									self.setState({ confirm: 1 });
+									this.setState({ confirm: 1 });
 								} else chat('You have to choose at least a card!', 'System');
-							},
-					style: {
+							}}
+					style={{
 						position: 'absolute',
 						left: '10px',
-						top: self.state.confirm ? '60px' : '40px',
-					},
-				}),
-			);
-		} else {
-			children.push(<span style={{
-							position: 'absolute',
-							left: '10px',
-							top: '60px',
-						}}>Confirmed!</span>);
-		}
-		const ownVal = h(Components.Text, {
-			text: userutil.calcWealth(self.state.deck, true) + '$',
-			style: {
-				position: 'absolute',
-				left: '100px',
-				top: '235px',
-			},
-		});
-		const foeVal = h(Components.Text, {
-			text: userutil.calcWealth(self.state.offer, true) + '$',
-			style: {
-				position: 'absolute',
-				left: '350px',
-				top: '235px',
-			},
-		});
-		const ownDeck = h(Components.DeckDisplay, {
-			deck: self.state.deck,
-			onMouseOver: function(i, code) {
-				self.setState({ code: code });
-			},
-			onClick: function(i) {
-				const newdeck = self.state.deck.slice();
-				newdeck.splice(i, 1);
-				self.setState({ deck: newdeck });
-			},
-		});
-		const foeDeck = h(Components.DeckDisplay, {
-			deck: self.state.offer,
-			x: 450,
-			onMouseOver: function(i, code) {
-				self.setState({ code: code });
-			},
-		});
-		children.push(
-			ownDeck,
-			foeDeck,
-			ownVal,
-			foeVal,
-			h('input', {
-				type: 'button',
-				value: 'Cancel',
-				onClick: function() {
+						top: this.state.confirm ? '60px' : '40px',
+					}}
+				/>
+				:
+				<span style={{
+					position: 'absolute',
+					left: '10px',
+					top: '60px',
+				}}>Confirmed!</span>
+			}
+			<Components.DeckDisplay
+				deck={this.state.deck}
+				onMouseOver={(i, code) => this.setState({ code })}
+				onClick={i => {
+					const newdeck = this.state.deck.slice();
+					newdeck.splice(i, 1);
+					this.setState({ deck: newdeck });
+				}}
+			/>
+			<Components.DeckDisplay
+				deck={this.state.offer}
+				x={450}
+				onMouseOver={(i, code) => this.setState({ code })}
+			/>
+			<Components.Text
+				text={userutil.calcWealth(this.state.deck, true) + '$'}
+				style={{
+					position: 'absolute',
+					left: '100px',
+					top: '235px',
+				}}
+			/>
+			<Components.Text
+				text={userutil.calcWealth(this.state.offer, true) + '$'}
+				style={{
+					position: 'absolute',
+					left: '350px',
+					top: '235px',
+				}}
+			/>
+			<input type='button'
+				value='Cancel'
+				onClick={() => {
 					sock.userEmit('canceltrade');
 					store.store.dispatch(store.doNav(require('./MainMenu')));
-				},
-				style: {
+				}}
+				style={{
 					position: 'absolute',
 					left: '10px',
 					top: '10px',
-				},
-			}),
-		);
-
-		const cardpool = etgutil.deck2pool(sock.user.pool);
-		const cardsel = h(Components.CardSelector, {
-			cardpool: cardpool,
-			cardminus: cardminus,
-			onMouseOver: function(code) {
-				self.setState({ code: code });
-			},
-			onClick: function(code) {
-				const card = Cards.Codes[code];
-				if (
-					self.state.deck.length < 30 &&
-					!card.isFree() &&
-					code in cardpool &&
-					!(code in cardminus && cardminus[code] >= cardpool[code])
-				) {
-					self.setState({ deck: self.state.deck.concat([code]) });
-				}
-			},
-		});
-		children.push(cardsel);
-		if (self.state.code) {
-			children.push(
-				h(Components.Card, { x: 734, y: 8, code: self.state.code }),
-			);
-		}
-		return h(React.Fragment, null, ...children);
+				}}
+			/>
+			<Components.CardSelector
+				cardpool={cardpool}
+				cardminus={cardminus}
+				onMouseOver={code => this.setState({ code: code })}
+				onClick={code => {
+					const card = Cards.Codes[code];
+					if (
+						this.state.deck.length < 30 &&
+						!card.isFree() &&
+						code in cardpool &&
+						!(code in cardminus && cardminus[code] >= cardpool[code])
+					) {
+						this.setState({ deck: this.state.deck.concat([code]) });
+					}
+				}}
+			/>
+			{!!this.state.code && <Components.Card x={734} y={8} code={this.state.code} />}
+		</>;
 	}
 };

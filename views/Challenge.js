@@ -6,8 +6,7 @@ const sock = require('../sock'),
 	Components = require('../Components'),
 	store = require('../store'),
 	{ connect } = require('react-redux'),
-	React = require('react'),
-	h = React.createElement;
+	React = require('react');
 
 function sendChallenge(foe) {
 	const deck = sock.getDeck();
@@ -26,6 +25,18 @@ function sendChallenge(foe) {
 		sock.emit('pvpwant', gameData);
 	}
 	sock.pvp = foe;
+}
+
+function LabelText(props) {
+	return <span
+		style={{
+			fontSize: '18px',
+			color: '#fff',
+			pointerEvents: 'none',
+			position: 'absolute',
+			left: props.x + 'px',
+			top: props.y + 'px',
+		}}>{props.children}</span>;
 }
 
 module.exports = connect(({opts}) => ({
@@ -99,18 +110,6 @@ module.exports = connect(({opts}) => ({
 			delete sock.spectate;
 			self.setState({ challenge: null });
 		}
-		function labelText(x, y, text) {
-			return h('span', {
-				style: {
-					fontSize: '18px',
-					color: '#fff',
-					pointerEvents: 'none',
-					position: 'absolute',
-					left: x + 'px',
-					top: y + 'px',
-				},
-			});
-		}
 		const deck = etgutil.decodedeck(sock.getDeck());
 		const children = [
 				<Components.DeckDisplay deck={deck} renderMark />,
@@ -130,155 +129,148 @@ module.exports = connect(({opts}) => ({
 				/>,
 			pvphp =
 				!self.state.challenge &&
-				h('input', {
-					placeholder: 'HP',
-					value: this.props.pvphp,
-					onChange: e => this.props.dispatch(store.setOptTemp('pvphp', e.target.value)),
-					className: 'numput',
-					style: {
+				<input
+					placeholder='HP'
+					value={this.props.pvphp}
+					onChange={e => this.props.dispatch(store.setOptTemp('pvphp', e.target.value))}
+					className='numput'
+					style={{
 						position: 'absolute',
 						left: '190px',
 						top: '425px',
-					}
-				}),
+					}}
+				/>,
 			pvpmark =
 				!self.state.challenge &&
-				h('input', {
-					placeholder: 'Mark',
-					value: this.props.pvpmark,
-					onChange: e => this.props.dispatch(store.setOptTemp('pvpmark', e.target.value)),
-					className: 'numput',
-					style: {
+				<input
+					placeholder='Mark'
+					value={this.props.pvpmark}
+					onChange={e => this.props.dispatch(store.setOptTemp('pvpmark', e.target.value))}
+					className='numput'
+					style={{
 						position: 'absolute',
 						left: '190px',
 						top: '450px',
-					}
-				}),
+					}}
+				/>,
 			pvpdraw =
 				!self.state.challenge &&
-				h('input', {
-					placeholder: 'Draw',
-					value: this.props.pvpdraw,
-					onChange: e => this.props.dispatch(store.setOptTemp('pvpdraw', e.target.value)),
-					className: 'numput',
-					style: {
+				<input
+					placeholder='Draw'
+					value={this.props.pvpdraw}
+					onChange={e => this.props.dispatch(store.setOptTemp('pvpdraw', e.target.value))}
+					className='numput'
+					style={{
 						position: 'absolute',
 						left: '190px',
 						top: '475px',
-					}
-				}),
+					}}
+				/>,
 			pvpdeck =
 				!self.state.challenge &&
-				h('input', {
-					placeholder: 'Deck',
-					value: this.props.pvpdeck,
-					onChange: e => this.props.dispatch(store.setOptTemp('pvpdeck', e.target.value)),
-					className: 'numput',
-					style: {
+				<input
+					placeholder='Deck'
+					value={this.props.pvpdeck}
+					onChange={e => this.props.dispatch(store.setOptTemp('pvpdeck', e.target.value))}
+					className='numput'
+					style={{
 						position: 'absolute',
 						left: '190px',
 						top: '500px',
-					}
-				}),
+					}}
+				/>,
 			pvpButton =
 				!self.state.challenge &&
-				h('input', {
-					type: 'button',
-					value: 'PvP',
-					onClick: function() {
-						makeChallenge(self.props.foename);
-					},
-					style: {
+				<input type='button'
+					value='PvP'
+					onClick={() => makeChallenge(self.props.foename)}
+					style={{
 						position: 'absolute',
 						left: '110px',
 						top: '375px',
-					},
-				}),
+					}}
+				/>,
 			spectateButton =
 				!self.state.challenge &&
-				h('input', {
-					type: 'button',
-					value: 'Spectate',
-					onClick: function() {
+				<input type='button'
+					value='Spectate'
+					onClick={() => {
 						sock.spectate = self.props.foename;
 						sock.userEmit('spectate', { f: sock.spectate });
-					},
-					style: {
+					}}
+					style={{
 						position: 'absolute',
 						left: '110px',
 						top: '450px',
-					},
-				}),
+					}}
+				/>,
 			cancelButton =
 				self.state.challenge &&
-				h('input', {
-					type: 'button',
-					value: 'Cancel',
-					onClick: cancelClick,
-					style: {
+				<input type='button'
+					value='Cancel'
+					onClick={cancelClick}
+					style={{
 						position: 'absolute',
 						left: '110px',
 						top: '400px',
-					},
-				}),
-			aideck = h('input', {
-				placeholder: 'AI Deck',
-				value: this.props.aideck,
-				onChange: e => this.props.dispatch(store.setOpt('aideck', e.target.value)),
-				onKeyPress: maybeCustomAi,
-				onClick: function(e) {
-					e.target.setSelectionRange(0, 999);
-				},
-				style: {
+					}}
+				/>,
+			aideck = <input
+				placeholder='AI Deck'
+				value={this.props.aideck}
+				onChange={e => this.props.dispatch(store.setOpt('aideck', e.target.value))}
+				onKeyPress={maybeCustomAi}
+				onClick={e => e.target.setSelectionRange(0, 999)}
+				style={{
 					position: 'absolute',
 					left: '440px',
 					top: '375px',
-				}
-			}),
-			aihp = h('input', {
-				placeholder: 'HP',
-				value: this.props.aihp,
-				onChange: e => this.props.dispatch(store.setOpt('aihp', e.target.value)),
-				className: 'numput',
-				style: {
+				}}
+			/>,
+			aihp = <input
+				placeholder='HP'
+				value={this.props.aihp}
+				onChange={e => this.props.dispatch(store.setOpt('aihp', e.target.value))}
+				className='numput'
+				style={{
 					position: 'absolute',
 					left: '440px',
 					top: '425px',
-				}
-			}),
-			aimark = h('input', {
-				placeholder: 'Mark',
-				value: this.props.aimark,
-				onChange: e => this.props.dispatch(store.setOpt('aimark', e.target.value)),
-				className: 'numput',
-				style: {
+				}}
+			/>,
+			aimark = <input
+				placeholder='Mark'
+				value={this.props.aimark}
+				onChange={e => this.props.dispatch(store.setOpt('aimark', e.target.value))}
+				className='numput'
+				style={{
 					position: 'absolute',
 					left: '440px',
 					top: '450px',
-				}
-			}),
-			aidraw = h('input', {
-				placeholder: 'Draw',
-				value: this.props.aidraw,
-				onChange: e => this.props.dispatch(store.setOpt('aidraw', e.target.value)),
-				className: 'numput',
-				style: {
+				}}
+			/>,
+			aidraw = <input
+				placeholder='Draw'
+				value={this.props.aidraw}
+				onChange={e => this.props.dispatch(store.setOpt('aidraw', e.target.value))}
+				className='numput'
+				style={{
 					position: 'absolute',
 					left: '440px',
 					top: '475px',
-				}
-			}),
-			aideckpower = h('input', {
-				placeholder: 'Deck',
-				value: this.props.aideckpower,
-				onChange: e => this.props.dispatch(store.setOptTemp('aideckpower', e.target.value)),
-				className: 'numput',
-				style: {
+				}}
+			/>,
+			aideckpower = <input
+				placeholder='Deck'
+				value={this.props.aideckpower}
+				onChange={e => this.props.dispatch(store.setOptTemp('aideckpower', e.target.value))}
+				className='numput'
+				style={{
 					position: 'absolute',
 					left: '440px',
 					top: '500px',
-				}
-			}),
+				}}
+			/>,
 			challengeLabel =
 				self.state.challenge &&
 				<div style={{ position: 'absolute', left: '190px', top: '375px' }}>
@@ -286,7 +278,7 @@ module.exports = connect(({opts}) => ({
 				</div>;
 		children.push(
 			<Components.ExitBtn x={190} y={300} onClick={exitClick} />,
-			labelText(190, 400, 'Own stats:'),
+			<LabelText x={190} y={400}>Own stats</LabelText>,
 			pvphp,
 			pvpmark,
 			pvpdraw,
@@ -302,25 +294,24 @@ module.exports = connect(({opts}) => ({
 			);
 		} else {
 			children.push(
-				h('input', {
-					type: 'button',
-					value: 'Custom AI',
-					onClick: aiClick,
-					style: {
+				<input type='button'
+					value='Custom AI'
+					onClick={aiClick}
+					style={{
 						position: 'absolute',
 						left: '360px',
 						top: '375px',
-					},
-				}),
+					}}
+				/>,
 				aideck,
-				labelText(440, 400, "AI's stats:"),
+				<LabelText x={440} y={400}>AI's stats:</LabelText>,
 				aihp,
 				aimark,
 				aidraw,
 				aideckpower,
 			);
 		}
-		return h(React.Fragment, null, ...children);
+		return children;
 	}
 });
 module.exports.sendChallenge = sendChallenge;

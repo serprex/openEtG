@@ -6,8 +6,7 @@ const chat = require('../chat'),
 	userutil = require('../userutil'),
 	Components = require('../Components'),
 	store = require('../store'),
-	React = require('react'),
-	h = React.createElement;
+	React = require('react');
 
 module.exports = class Reward extends React.Component {
 	constructor(props) {
@@ -51,10 +50,9 @@ module.exports = class Reward extends React.Component {
 			return;
 		}
 		const rewardui = [
-			h('input', {
-				type: 'button',
-				value: 'Done',
-				onClick: function() {
+			<input type='button'
+				value='Done'
+				onClick={() => {
 					if (self.state.chosenReward) {
 						if (code === undefined) {
 							sock.userExec('addbound', {
@@ -70,13 +68,13 @@ module.exports = class Reward extends React.Component {
 							});
 						}
 					} else chat('Choose a reward', 'System');
-				},
-				style: {
+				}}
+				style={{
 					position: 'absolute',
 					left: '10px',
 					top: '40px',
-				},
-			}),
+				}}
+			/>,
 		];
 		if (numberofcopies > 1) {
 			rewardui.push(
@@ -109,6 +107,6 @@ module.exports = class Reward extends React.Component {
 				<Components.Card x={233} y={10} code={self.state.chosenReward} />,
 		);
 
-		return h(React.Fragment, null, ...rewardui);
+		return rewardui;
 	}
 };

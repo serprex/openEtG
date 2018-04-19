@@ -13,8 +13,7 @@ const ui = require('../ui'),
 	Components = require('../Components'),
 	store = require('../store'),
 	{connect} = require('react-redux'),
-	React = require('react'),
-	h = React.createElement;
+	React = require('react');
 
 const svgbg = (() => {
 	const redhor = new Uint16Array([
@@ -306,16 +305,16 @@ const ThingInst = connect(({opts}) => ({ lofiArt: opts.lofiArt }))(function Thin
 		);
 	}
 	const pos = ui.tgtToPos(obj);
-	return h('div', Object.assign(
+	return React.createElement('div', Object.assign(
 		isSpell && obj.owner == game.player2 && !game.player1.precognition ?
 		{
-			children: [h('div', {
-				className: 'ico cback',
-				style: {
+			children: [<div
+				className='ico cback'
+				style={{
 					left: '2px',
 					top: '2px',
-				},
-			})],
+				}}
+			/>],
 			style: {
 				position: 'absolute',
 				left: pos.x - 32 + 'px',
@@ -729,18 +728,18 @@ module.exports = connect()(class Match extends React.Component {
 			for (let i = 0; i < self.state.foeplays.length; i++) {
 				let play = self.state.foeplays[i];
 				children.push(
-					h(Components.CardImage, {
-						key: 'foeplay' + i,
-						x: (i & 7) * 99,
-						y: (i >> 3) * 19,
-						card: play,
-						onMouseOver: function(e) {
+					<Components.CardImage
+						key={'foeplay' + i}
+						x={(i & 7) * 99}
+						y={(i >> 3) * 19}
+						card={play}
+						onMouseOver={(e) => {
 							if (play instanceof Card) {
 								self.setCard(e, play, e.pageX);
 							}
-						},
-						onMouseOut: () => self.clearCard(),
-					}),
+						}}
+						onMouseOut={() => self.clearCard()}
+					/>,
 				);
 			}
 		}
@@ -985,9 +984,9 @@ module.exports = connect()(class Match extends React.Component {
 					: '') +
 				(poisoninfo ? '\n' + poisoninfo : '');
 			children.push(
-				h(Components.Text, {
-					text: hptext,
-					style: {
+				<Components.Text
+					text={hptext}
+					style={{
 						textAlign: 'center',
 						width: '100px',
 						pointerEvents: 'none',
@@ -996,8 +995,8 @@ module.exports = connect()(class Match extends React.Component {
 						position: 'absolute',
 						left: j ? '800px' : '0px',
 						top: j ? '36px' : '531px',
-					},
-				}),
+					}}
+				/>,
 			);
 		}
 		if (floodvisible) children.push(floodsvg);
@@ -1094,6 +1093,6 @@ module.exports = connect()(class Match extends React.Component {
 			}
 		}
 
-		return h(React.Fragment, null, ...children);
+		return children;
 	}
 });

@@ -4,8 +4,7 @@ const sock = require('../sock'),
 	Components = require('../Components'),
 	store = require('../store'),
 	{ connect } = require('react-redux'),
-	React = require('react'),
-	h = React.createElement;
+	React = require('react');
 
 function isLeft(p0x, p0y, p1x, p1y, p2x, p2y) {
 	return (p1x - p0x) * (p2y - p0y) - (p2x - p0x) * (p1y - p0y);
@@ -135,51 +134,44 @@ module.exports = connect(({opts}) => ({ aideck: opts.aideck }))(class QuestMain 
 	}
 
 	render() {
-		const self = this;
-		const questmap = h('img', {
-			src: 'assets/bg_questmap.png',
-			onMouseMove: function(e) {
+		const questmap = <img src='assets/bg_questmap.png'
+			onMouseMove={(e) => {
 				for (let key in areainfo) {
 					const info = areainfo[key];
 					if (polytest(areainfo[key][1], e.pageX, e.pageY)) {
-						if (self.state.area != key) {
-							self.setState({ area: key });
+						if (this.state.area != key) {
+							this.setState({ area: key });
 						}
 						return;
 					}
 				}
-				self.setState({ area: null });
-			},
-			onClick: function() {
-				if (self.state.area) {
-					self.props.dispatch(store.doNav(require('./QuestArea'), { area: self.state.area }));
+				this.setState({ area: null });
+			}}
+			onClick={() => {
+				if (this.state.area) {
+					this.props.dispatch(store.doNav(require('./QuestArea'), { area: this.state.area }));
 				}
-			},
-			style: {
+			}}
+			style={{
 				position: 'absolute',
 				left: '124px',
 				top: '162px',
-			},
-		});
-		const tinfo = h(Components.Text, {
-			text: self.state.area
-				? areainfo[self.state.area][0]
-				: 'Welcome to Potatotal Island. The perfect island for adventuring!',
-			style: {
+			}}
+		/>;
+		const tinfo = <Components.Text
+			text={this.state.area
+				? areainfo[this.state.area][0]
+				: 'Welcome to Potatotal Island. The perfect island for adventuring!'}
+			style={{
 				position: 'absolute',
 				left: '26px',
 				top: '26px',
 				maxWidth: '850px',
-			},
-		});
+			}}
+		/>;
 		const children = [
 			questmap,
-			h(Components.Box, {
-				x: 9,
-				y: 9,
-				width: 880,
-				height: 111,
-			}),
+			<Components.Box x={9} y={9} width={880} height={111} />,
 			tinfo,
 			<Components.ExitBtn x={750} y={246} />,
 		];
@@ -189,25 +181,23 @@ module.exports = connect(({opts}) => ({ aideck: opts.aideck }))(class QuestMain 
 				points = ainfo[1];
 			if (this.props.aideck == 'quest') {
 				children.push(
-					h(
-						'svg',
-						{
-							width: '900px',
-							height: '600px',
-							style: {
-								position: 'absolute',
-								left: '0px',
-								top: '0px',
-								pointerEvents: 'none',
-							},
-						},
-						h('polygon', {
-							points: points.join(' '),
-							fill: 'none',
-							stroke: '#f00',
-							strokeWidth: '4',
-						}),
-					),
+					<svg
+						width='900px'
+						height='600px'
+						style={{
+							position: 'absolute',
+							left: '0px',
+							top: '0px',
+							pointerEvents: 'none',
+						}}
+					>
+						<polygon
+							points={points.join(' ')}
+							fill='none'
+							stroke='#f00'
+							strokeWidth='4'
+						/>
+					</svg>,
 				);
 			}
 			if (
@@ -224,19 +214,19 @@ module.exports = connect(({opts}) => ({ aideck: opts.aideck }))(class QuestMain 
 					xtot += points[i];
 					ytot += points[i + 1];
 				}
-				const icon = h('div', {
-					className: 'ico e13',
-					style: {
-						transform: 'translate(-50%,-50%)',
-						pointerEvents: 'none',
-						position: 'absolute',
-						left: xtot * 2 / points.length + 'px',
-						top: ytot * 2 / points.length + 'px',
-					},
-				});
-				children.push(icon);
+				children.push(
+					<div className='ico e13'
+						style={{
+							transform: 'translate(-50%,-50%)',
+							pointerEvents: 'none',
+							position: 'absolute',
+							left: xtot * 2 / points.length + 'px',
+							top: ytot * 2 / points.length + 'px',
+						}}
+					/>,
+				);
 			}
 		}
-		return h(React.Fragment, null, ...children);
+		return children;
 	}
 });

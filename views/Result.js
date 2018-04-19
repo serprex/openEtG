@@ -13,7 +13,6 @@ const etg = require('../etg'),
 	Components = require('../Components'),
 	store = require('../store'),
 	React = require('react'),
-	h = React.createElement,
 	streak200 = new Uint8Array([10, 10, 15, 20, 15, 20]);
 
 module.exports = class Result extends React.Component {
@@ -151,7 +150,7 @@ module.exports = class Result extends React.Component {
 				['Toxic', game.player2.status.get('poison') > 18 ? 0.1 : 0],
 				[
 					'Unupped',
-					(function() {
+					(() => {
 						let unupnu = 0;
 						etgutil.iterraw(sock.getDeck(), (code, count) => {
 							const card = Cards.Codes[code];

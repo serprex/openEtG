@@ -119,25 +119,16 @@ const sockEvents = {
 		}
 	},
 	challenge: (data) => {
-		const span = document.createElement('div');
-		span.style.cursor = 'pointer';
-		span.style.color = '#69f';
-		span.addEventListener('click', () => {
+		chat.addSpan(<div style={{ cursor: 'pointer', color: '#69f' }} onClick={() => {
 			if (data.pvp) {
 				require('./views/Challenge').sendChallenge((exports.pvp = data.f));
 			} else {
 				exports.userEmit('tradewant', { f: (exports.trade = data.f) });
 			}
-		});
-		span.appendChild(
-			document.createTextNode(
-				data.f +
-					(data.pvp
-						? ' challenges you to a duel!'
-						: ' wants to trade with you!'),
-			),
-		);
-		chat.addSpan(span);
+		}}>
+			{data.f}
+			{data.pvp ? ' challenges you to a duel!' : ' wants to trade with you!'}
+		</div>);
 		exports.emit('challrecv', { f: data.f, pvp: data.pvp });
 	},
 };

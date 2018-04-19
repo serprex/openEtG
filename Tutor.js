@@ -53,7 +53,7 @@ exports.Editor = mkTutor([
 		32,
 		624,
 		'Here the deck you are building shows up. Use the buttons to the left to save & load your deck:' +
-			'\nClear: Erase this deck\nSave & Exit: Save the current deck & return to the main menu\nImport: Import a deck code from the import box\nSave: Save the current deck to the name in the name box in the top left' +
+			'\nClear: Erase this deck\nSave & Exit: Save the current deck & return to the main menu\nSave: Save the current deck to the name in the name box in the top left' +
 			'\nLoad: Load the deck with the name you have typed in the name box in the top left\nSave to #: Save the current deck & name to one of the quickload slots\nTip: Use one of the quickdeck buttons as a "New Deck" button, & then save any decks you make there to a proper name',
 	],
 	[

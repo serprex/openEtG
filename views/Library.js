@@ -3,8 +3,7 @@ const Cards = require('../Cards'),
 	etgutil = require('../etgutil'),
 	userutil = require('../userutil'),
 	Components = require('../Components'),
-	React = require('react'),
-	h = React.createElement;
+	React = require('react');
 
 module.exports = class Library extends React.Component {
 	constructor(props) {
@@ -16,7 +15,6 @@ module.exports = class Library extends React.Component {
 	}
 
 	render() {
-		const self = this;
 		const cardpool = etgutil.deck2pool(this.props.pool),
 			boundpool = etgutil.deck2pool(this.props.bound);
 		let progressmax = 0,
@@ -48,70 +46,46 @@ module.exports = class Library extends React.Component {
 			}
 		});
 		const wealth = this.props.gold + userutil.calcWealth(cardpool);
-		return h(
-			React.Fragment,
-			{},
-			h(
-				'span',
-				{
-					style: {
-						position: 'absolute',
-						left: '100px',
-						top: '16px',
-						whiteSpace: 'pre',
-					},
-				},
-				'Cumulative wealth: ' +
-					Math.round(wealth) +
-					'\nZE Progress: ' +
-					progress +
-					' / ' +
-					progressmax +
-					'\nSZE Progress: ' +
-					shinyprogress +
-					' / ' +
-					progressmax,
-			),
-			h(
-				'span',
-				{
-					style: {
-						position: 'absolute',
-						left: '300px',
-						top: '16px',
-						whiteSpace: 'pre',
-					},
-				},
-				'PvE ' +
-					this.props.aiwins +
-					' - ' +
-					this.props.ailosses +
-					'\nPvP ' +
-					this.props.pvpwins +
-					' - ' +
-					this.props.pvplosses,
-			),
-			h(Components.Card, { x: 734, y: 8, code: this.state.code }),
-			h('input', {
-				type: 'button',
-				value: 'Toggle Bound',
-				style: {
+		return <>
+			<span style={{
+				position: 'absolute',
+				left: '100px',
+				top: '16px',
+				whiteSpace: 'pre',
+			}}>
+				Cumulative wealth: {Math.round(wealth)}
+				{'\nZE Progress: '}{progress} / {progressmax}
+				{'\nSZE Progress: '}{shinyprogress} / {progressmax}
+			</span>
+			<span style={{
+				position: 'absolute',
+				left: '333px',
+				top: '16px',
+				whiteSpace: 'pre',
+			}}>
+				PvE {this.props.aiwins} - {this.props.ailosses}
+				{'\nPvP '}{this.props.pvpwins} - {this.props.pvplosses}
+			</span>
+			<Components.Card x={734} y={8} code={this.state.code} />
+			<input type='button'
+				value='Toggle Bound'
+				style={{
 					position: 'absolute',
 					left: '5px',
 					top: '554px',
-				},
-				onClick: function() {
-					self.setState({ showbound: !self.state.showbound });
-				},
-			}),
-			h(Components.ExitBtn, { x: 8, y: 8 }),
-			h(Components.CardSelector, {
-				cardpool: this.state.showbound ? boundpool : cardpool,
-				filterboth: true,
-				onMouseOver: function(code) {
-					code != self.state.code && self.setState({ code: code });
-				},
-			}),
-		);
+				}}
+				onClick={() => {
+					this.setState({ showbound: !this.state.showbound });
+				}}
+			/>
+			<Components.ExitBtn x={8} y={8} />
+			<Components.CardSelector
+				cardpool={this.state.showbound ? boundpool : cardpool}
+				filterboth
+				onMouseOver={code => {
+					code != this.state.code && this.setState({ code: code });
+				}}
+			/>
+		</>;
 	}
 };

@@ -7,8 +7,7 @@ const svg = require('../svg'),
 	Components = require('../Components'),
 	store = require('../store'),
 	{ connect } = require('react-redux'),
-	React = require('react'),
-	h = React.createElement;
+	React = require('react');
 
 const packdata = [
 	{ cost: 15, type: 'Bronze', info: '10 Commons', color: '#c73' },
