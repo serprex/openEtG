@@ -79,10 +79,11 @@ function CostRewardHeaders(props) {
 function LabelText(props) {
 	return <Components.Text
 		text={props.text}
-		style={Object.assign({
+		style={{
 			fontSize: '14px',
 			pointerEvents: 'none',
-		}, props.style)}
+			...props.style,
+		}}
 	/>;
 }
 function CostText(props) {

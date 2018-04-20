@@ -304,8 +304,8 @@ const ThingInst = connect(({opts}) => ({ lofiArt: opts.lofiArt }))(function Thin
 		);
 	}
 	const pos = ui.tgtToPos(obj);
-	return React.createElement('div', Object.assign(
-		isSpell && obj.owner == game.player2 && !game.player1.precognition ?
+	return React.createElement('div', {
+		...(isSpell && obj.owner == game.player2 && !game.player1.precognition ?
 		{
 			children: [<div
 				className='ico cback'
@@ -338,11 +338,11 @@ const ThingInst = connect(({opts}) => ({ lofiArt: opts.lofiArt }))(function Thin
 				zIndex: !isSpell && obj.status.get('cloak') ? '2' : undefined,
 			},
 			onMouseOver: props.setInfo && (e => props.setInfo(e, obj, pos.x)),
-		},{
+		}),
 			className: tgtclass(game, obj),
 			onMouseOut: props.onMouseOut,
 			onClick: () => props.onClick(obj),
-		})
+		}
 	);
 });
 

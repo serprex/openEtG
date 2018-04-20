@@ -132,21 +132,21 @@ module.exports = connect()(class ArenaEditor extends React.Component {
 			<AttrUi y={0} name='hp' value={self.state.arattr.hp}
 				onChange={val =>
 					self.setState({
-						arattr: Object.assign({}, self.state.arattr, { [name]: val }),
+						arattr: { ...self.state.arattr, [name]: val },
 					})
 				}
 			/>
 			<AttrUi y={1} name='mark' value={self.state.arattr.mark}
 				onChange={val =>
 					self.setState({
-						arattr: Object.assign({}, self.state.arattr, { [name]: val }),
+						arattr: { ...self.state.arattr, [name]: val },
 					})
 				}
 			/>
 			<AttrUi y={2} name='draw' value={self.state.arattr.draw}
 				onChange={val =>
 					self.setState({
-						arattr: Object.assign({}, self.state.arattr, { [name]: val }),
+						arattr: { ...self.state.arattr, [name]: val },
 					})
 				}
 			/>
@@ -164,15 +164,13 @@ module.exports = connect()(class ArenaEditor extends React.Component {
 						this.props.dispatch(store.chatMsg('35 cards required before submission', 'System'));
 						return;
 					}
-					const data = Object.assign(
-						{
-							d:
-								etgutil.encodedeck(this.state.deck) +
-								etgutil.toTrueMarkSuffix(this.state.mark),
-							lv: this.props.acard.upped,
-						},
-						this.state.arattr,
-					);
+					const data = {
+						d:
+							etgutil.encodedeck(this.state.deck) +
+							etgutil.toTrueMarkSuffix(this.state.mark),
+						lv: this.props.acard.upped,
+						...this.state.arattr,
+					};
 					if (!this.props.acreate) {
 						data.mod = true;
 					}
