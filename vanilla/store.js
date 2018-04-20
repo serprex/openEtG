@@ -50,7 +50,7 @@ exports.store = redux.createStore((state, action) => {
 	return state;
 }, {
 	nav: {},
-	opts: { channel: 'Main' },
+	opts: { channel: 'Main', deck: '' },
 	cmds: {},
 	chat: new Map(),
 	muted: new Set(),
