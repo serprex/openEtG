@@ -36,7 +36,6 @@ module.exports = class ElementSelect extends React.Component {
 				delete data.x;
 				sock.user = data;
 				store.store.dispatch(store.setOptTemp('selectedDeck', data.selectedDeck));
-				store.store.dispatch(store.setOptTemp('deckname', data.selectedDeck));
 				store.store.dispatch(store.setOptTemp('deck', sock.getDeck()));
 				store.store.dispatch(store.doNav(require('./MainMenu')));
 			}

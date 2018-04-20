@@ -269,7 +269,7 @@ module.exports = connect(({opts}) => ({
 		for (let i = 0; i < 2; i++) {
 			function arenaAi(e) {
 				if (etgutil.decklength(sock.getDeck()) < 31) {
-					self.props.dispatch(store.doNav(require('./Editor')));
+					self.props.dispatch(store.doNav(require('./DeckEditor')));
 					return;
 				}
 				const cost = userutil.arenaCost(i);
@@ -466,7 +466,6 @@ module.exports = connect(({opts}) => ({
 							const deckname = sock.user.qecks[i] || '';
 							sock.userExec('setdeck', { name: deckname });
 							self.props.dispatch(store.setOptTemp('selectedDeck', sock.user.selectedDeck));
-							self.props.dispatch(store.setOptTemp('deckname', deckname));
 							self.props.dispatch(store.setOpt('deck', sock.getDeck()));
 						}}
 					/>,
@@ -611,10 +610,10 @@ module.exports = connect(({opts}) => ({
 				<CostRewardHeaders x={304} y={380} wid={292} hei={130}>{arenac}</CostRewardHeaders>,
 			);
 		}
-		//const customstyle = { width: '45%', float: 'right' }
-		//if (!sock.user) customstyle.marginTop = '128px';
+		const customstyle = { width: '45%', float: 'right' }
+		if (!sock.user) customstyle.marginTop = '128px';
 		aic.push(
-			<div>{/* style={customprops}> */}
+			<div style={customstyle}>
 				<input type='button'
 					value='Custom AI'
 					onClick={() => {
@@ -631,7 +630,7 @@ module.exports = connect(({opts}) => ({
 			<input type='button'
 				value='Editor'
 				onClick={() => {
-					this.props.dispatch(store.doNav(require('./Editor')));
+					this.props.dispatch(store.doNav(sock.user ? require('./DeckEditor') : require('./SandboxEditor')));
 				}}
 				onMouseOver={this.mkSetTip('Edit & manage your decks')}
 				style={{

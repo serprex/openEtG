@@ -11,7 +11,7 @@ const sock = require('../sock'),
 function sendChallenge(foe) {
 	const deck = sock.getDeck();
 	if (etgutil.decklength(deck) < (sock.user ? 31 : 9)) {
-		store.store.dispatch(store.doNav(require('./Editor')));
+		store.store.dispatch(store.doNav(require('./DeckEditor')));
 		return;
 	}
 	const gameData = {};
@@ -74,7 +74,7 @@ module.exports = connect(({opts}) => ({
 				etgutil.decklength(deck) < 9 ||
 				etgutil.decklength(self.props.aideck) < 9
 			) {
-				self.props.dispatch(store.doNav(require('./Editor')));
+				self.props.dispatch(store.doNav(require('./DeckEditor')));
 				return;
 			}
 			const gameData = {

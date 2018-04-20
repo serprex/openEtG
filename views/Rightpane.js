@@ -62,7 +62,6 @@ function maybeSendChat(e) {
 					<span onClick={e => {
 						sock.user.selectedDeck = name;
 						store.store.dispatch(store.setOptTemp('selectedDeck', name));
-						store.store.dispatch(store.setOptTemp('deckname', name));
 						store.store.dispatch(store.setOpt('deck', deck));
 					}}>{name}</span>
 				</div>);

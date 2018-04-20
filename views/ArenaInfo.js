@@ -16,7 +16,7 @@ function RenderInfo(props) {
 		return <>
 			<Components.DeckDisplay
 				deck={etgutil.decodedeck(adeck)}
-				renderMark={true}
+				renderMark
 				y={y}
 			/>
 			<Components.Text
@@ -56,7 +56,7 @@ function RenderInfo(props) {
 					top: 224 + y + 'px',
 				}}
 				onClick={() => {
-					store.store.dispatch(store.doNav(require('./Editor'), {
+					store.store.dispatch(store.doNav(require('./ArenaEditor'), {
 						adeck: info.deck,
 						acard: Cards.Codes[card],
 						ainfo: info,
@@ -73,7 +73,7 @@ function RenderInfo(props) {
 				onClick={() => {
 					const deck = sock.getDeck();
 					if (etgutil.decklength(deck) < 9 || etgutil.decklength(adeck) < 9) {
-						store.store.dispatch(store.doNav(require('./Editor')));
+						store.store.dispatch(store.chatMsg('Deck too small'));
 						return;
 					}
 					const gameData = mkGame({
@@ -106,11 +106,11 @@ function ArenaCard(props) {
 				top: 260 + y + 'px',
 			}}
 			onClick={() => {
-				store.store.dispatch(store.doNav(require('./Editor'), {
-					adeck: (info || {}).deck,
+				store.store.dispatch(store.doNav(require('./ArenaEditor'), {
+					adeck: '',
 					acard: Cards.Codes[code],
 					ainfo: {},
-					startempty: true,
+					acreate: true,
 				}));
 			}}
 		/>
@@ -118,7 +118,7 @@ function ArenaCard(props) {
 	</>;
 }
 
-module.exports = function(props) {
+module.exports = function ArenaInfo(props) {
 	return <>
 		<Components.Text
 			style={{ position: 'absolute', left: '96px', top: '576px' }}

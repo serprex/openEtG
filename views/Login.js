@@ -24,7 +24,6 @@ if (typeof kongregateAPI === 'undefined') {
 							this.props.dispatch(store.doNav(require('./ElementSelect')));
 						} else {
 							this.props.dispatch(store.setOptTemp('selectedDeck', data.selectedDeck));
-							this.props.dispatch(store.setOptTemp('deckname', data.selectedDeck));
 							this.props.dispatch(store.setOptTemp('deck', sock.getDeck()));
 							this.props.dispatch(store.doNav(require('./MainMenu')));
 						}

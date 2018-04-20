@@ -120,6 +120,6 @@ exports.run = function run(gamedata) {
 	if (gamedata) {
 		store.store.dispatch(store.doNav(require('./views/Match'), gamedata));
 	} else {
-		store.store.dispatch(store.doNav(require('./views/Editor')));
+		store.store.dispatch(store.doNav(require('./views/DeckEditor')));
 	}
 };
