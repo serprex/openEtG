@@ -34,7 +34,7 @@ function maybeSendChat(e) {
 				w: 'Whisper',
 			};
 			for (const cmd in cmds) {
-				chat(`${cmd} ${cmds[cmd]}`);
+				store.store.dispatch(store.chatMsg(`${cmd} ${cmds[cmd]}`));
 			}
 		} else if (msg == '/clear') {
 			store.store.dispatch(store.clearChat(store.store.getState().opts.channel));
@@ -55,17 +55,17 @@ function maybeSendChat(e) {
 			let names = Object.keys(sock.user.decks);
 			if (rx) names = names.filter(name => name.match(rx));
 			names.sort();
-			names.forEach(name => {
+			store.store.dispatch(store.chat(names.map(name => {
 				const deck = sock.user.decks[name];
-				chat.addSpan(<div>
+				return <div>
 					<a href={`deck/${deck}`} target='_blank' className={'ico ce' + etgutil.fromTrueMark(parseInt(deck.slice(-3), 32))} />
 					<span onClick={e => {
 						sock.user.selectedDeck = name;
 						store.store.dispatch(store.setOptTemp('selectedDeck', name));
 						store.store.dispatch(store.setOpt('deck', deck));
 					}}>{name}</span>
-				</div>);
-			});
+				</div>;
+			})));
 		} else if (msg == '/mute') {
 			store.store.dispatch(store.setOptTemp('muteall', true));
 			chatmute();
@@ -107,7 +107,7 @@ function maybeSendChat(e) {
 					(guestname = 10000 + RngMock.upto(89999) + '');
 				if (!msg.match(/^\s*$/)) sock.emit('guestchat', { msg: msg, u: name });
 			}
-		} else chat('Not a command: ' + msg);
+		} else store.store.dispatch(store.chatMsg('Not a command: ' + msg));
 	}
 }
 

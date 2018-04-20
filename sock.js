@@ -118,7 +118,7 @@ const sockEvents = {
 		}
 	},
 	challenge: (data) => {
-		chat.addSpan(<div style={{ cursor: 'pointer', color: '#69f' }} onClick={() => {
+		store.store.dispatch(store.chat(<div style={{ cursor: 'pointer', color: '#69f' }} onClick={() => {
 			if (data.pvp) {
 				require('./views/Challenge').sendChallenge((exports.pvp = data.f));
 			} else {
@@ -127,7 +127,7 @@ const sockEvents = {
 		}}>
 			{data.f}
 			{data.pvp ? ' challenges you to a duel!' : ' wants to trade with you!'}
-		</div>);
+		</div>));
 		exports.emit('challrecv', { f: data.f, pvp: data.pvp });
 	},
 };

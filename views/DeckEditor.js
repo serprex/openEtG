@@ -29,7 +29,7 @@ module.exports = connect(({opts}) => ({ deck: opts.deck, selectedDeck: opts.sele
 		this.deckRef = React.createRef();
 		this.state = {
 			pool: pool,
-			selectedDeck: props.selectedDeck ? '' : '-',
+			selectedDeck: null,
 			setQeck: false,
 		};
 	}
@@ -68,26 +68,24 @@ module.exports = connect(({opts}) => ({ deck: opts.deck, selectedDeck: opts.sele
 					etgutil.encodedeck(self.state.deck) +
 					etgutil.toTrueMarkSuffix(self.state.mark),
 				olddeck = sock.getDeck();
-			console.log(olddeck == dcode, olddeck, dcode);
 			if (olddeck != dcode) {
 				sock.userExec('setdeck', { d: dcode, name: sock.user.selectedDeck });
 				self.props.dispatch(store.setOpt('deck', sock.getDeck()));
 			} else if (force)
 				sock.userExec('setdeck', { name: sock.user.selectedDeck });
 		}
-		function setSelectedDeck(x) {
+		function loadDeck(x) {
+			if (!x) return;
+			saveDeck();
 			sock.user.selectedDeck = x;
 			self.props.dispatch(store.setOptTemp('selectedDeck', sock.user.selectedDeck));
 			self.props.dispatch(store.setOpt('deck', sock.getDeck()));
-			saveDeck();
-		}
-		function loadDeck(x) {
-			if (!x) return;
-			setSelectedDeck(x);
 		}
 		function saveButton() {
 			if (self.state.deckname) {
-				setSelectedDeck(self.state.deckname);
+				sock.user.selectedDeck = self.state.deckname;
+				self.props.dispatch(store.setOptTemp('selectedDeck', sock.user.selectedDeck));
+				saveDeck();
 			}
 		}
 		const buttons = [];
@@ -154,6 +152,7 @@ module.exports = connect(({opts}) => ({ deck: opts.deck, selectedDeck: opts.sele
 				}}
 				onChange={e => {
 					self.props.dispatch(store.setOptTemp('deck', e.target.value));
+					self.setState({selectedDeck: null});
 				}}
 				ref={this.deckRef}
 				onClick={e => {
