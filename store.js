@@ -1,5 +1,7 @@
 'use strict';
-const redux = require('redux'), opts = { channel: 'Main' };
+const redux = require('redux'),
+	React = require('react'),
+	opts = { channel: 'Main' };
 
 let hasLocalStorage = true;
 try {
@@ -34,6 +36,11 @@ exports.mute = name => ({ type: 'MUTE', name });
 exports.unmute = name => ({ type: 'UNMUTE', name });
 exports.clearChat = name => ({ type: 'CHAT_CLEAR', name });
 exports.chat = (span, name) => ({ type: 'CHAT', span, name });
+exports.chatMsg = (msg, fontcolor, name) => ({
+	type: 'CHAT',
+	span: <div style={!name && fontcolor && { color: fontcolor }}>{msg}</div>,
+	name: name || fontcolor,
+});
 
 exports.store = redux.createStore((state, action) => {
 	switch(action.type) {

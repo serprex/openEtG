@@ -1,10 +1,9 @@
 'use strict';
-const chat = require('../chat'),
-	sock = require('../sock'),
-	Cards = require('../Cards'),
+const Cards = require('../Cards'),
 	etgutil = require('../etgutil'),
 	userutil = require('../userutil'),
 	Components = require('../Components'),
+	sock = require('../sock'),
 	store = require('../store'),
 	React = require('react');
 
@@ -32,7 +31,7 @@ module.exports = class Reward extends React.Component {
 		store.store.dispatch(store.setCmds({
 			codedone: data => {
 				sock.user.pool = etgutil.addcard(sock.user.pool, data.card);
-				chat(Cards.Codes[data.card].name + ' added!', 'System');
+				store.store.dispatch(store.chatMsg(Cards.Codes[data.card].name + ' added!', 'System'));
 				store.store.dispatch(store.doNav(require('./MainMenu')));
 			},
 		}));
@@ -67,7 +66,7 @@ module.exports = class Reward extends React.Component {
 								card: self.state.chosenReward,
 							});
 						}
-					} else chat('Choose a reward', 'System');
+					} else store.store.dispatch(store.chatMsg('Choose a reward', 'System'));
 				}}
 				style={{
 					position: 'absolute',

@@ -2,7 +2,6 @@
 require('@babel/polyfill');
 const App = require('./views/App'),
 	Rightpane = require('./views/Rightpane'),
-	chat = require('./chat'),
 	store = require('./store'),
 	{ Provider } = require('react-redux'),
 	reactDOM = require('react-dom'),
@@ -11,7 +10,7 @@ let lastError = 0;
 window.onerror = function(...args) {
 	const now = Date.now();
 	if (lastError + 999 < now) {
-		chat(args.join(', '), 'System');
+		store.store.dispatch(store.chatMsg(args.join(', '), 'System'));
 		lastError = now;
 	}
 };

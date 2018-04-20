@@ -1,7 +1,5 @@
-const chat = require('../chat'),
+const Components = require('../Components'),
 	sock = require('../sock'),
-	audio = require('../audio'),
-	Components = require('../Components'),
 	store = require('../store'),
 	{ connect } = require('react-redux'),
 	React = require('react');
@@ -31,7 +29,7 @@ if (typeof kongregateAPI === 'undefined') {
 							this.props.dispatch(store.doNav(require('./MainMenu')));
 						}
 					} else {
-						chat(data.err);
+						this.props.dispatch(store.chatMsg(data.err));
 					}
 				},
 			}));

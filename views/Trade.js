@@ -1,10 +1,9 @@
 'use strict';
-const chat = require('../chat'),
-	sock = require('../sock'),
-	Cards = require('../Cards'),
+const Cards = require('../Cards'),
 	etgutil = require('../etgutil'),
 	userutil = require('../userutil'),
 	Components = require('../Components'),
+	sock = require('../sock'),
 	store = require('../store'),
 	React = require('react');
 
@@ -59,7 +58,7 @@ module.exports = class Trade extends React.Component {
 										oppcards: etgutil.encoderaw(this.state.offer),
 									});
 									this.setState({ confirm: 2 });
-								} else chat('Wait for your friend to choose!', 'System');
+								} else store.store.dispatch(store.chatMsg('Wait for your friend to choose!', 'System'));
 							}
 						: () => {
 								if (this.state.deck.length) {
@@ -67,7 +66,7 @@ module.exports = class Trade extends React.Component {
 										c: etgutil.encoderaw(this.state.deck),
 									});
 									this.setState({ confirm: 1 });
-								} else chat('You have to choose at least a card!', 'System');
+								} else store.store.dispatch(store.chatMsg('You have to choose at least a card!', 'System'));
 							}}
 					style={{
 						position: 'absolute',

@@ -1,11 +1,11 @@
 'use strict';
-const ui = require('./ui'),
-	etg = require('./etg'),
-	svg = require('./svg'),
-	audio = require('./audio'),
-	Cards = require('./Cards'),
-	etgutil = require('./etgutil'),
-	store = require('./store'),
+const ui = require('../ui'),
+	etg = require('../etg'),
+	svg = require('../svg'),
+	audio = require('../audio'),
+	Cards = require('../Cards'),
+	etgutil = require('../etgutil'),
+	store = require('../store'),
 	React = require('react');
 
 exports.Box = function(props) {
@@ -119,7 +119,7 @@ exports.ExitBtn = function(props) {
 		value='Exit'
 		onClick={props.onClick ||
 			(() => {
-				store.store.dispatch(store.doNav(require('./views/MainMenu')));
+				store.store.dispatch(store.doNav(require('../views/MainMenu')));
 			})}
 		style={{
 			position: 'absolute',

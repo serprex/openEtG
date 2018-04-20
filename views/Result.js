@@ -1,6 +1,5 @@
 'use strict';
 const etg = require('../etg'),
-	chat = require('../chat'),
 	mkAi = require('../mkAi'),
 	sock = require('../sock'),
 	util = require('../util'),
@@ -301,7 +300,7 @@ module.exports = class Result extends React.Component {
 		);
 
 		if (game.endurance == undefined) {
-			chat(
+			store.store.dispatch(store.chatMsg(
 				[
 					game.level === undefined ? -1 : game.level,
 					(game.foename || '?').replace(/,/g, ' '),
@@ -320,7 +319,7 @@ module.exports = class Result extends React.Component {
 				].join(),
 				null,
 				'Stats',
-			);
+			));
 		}
 		return children;
 	}

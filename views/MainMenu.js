@@ -1,7 +1,6 @@
 'use strict';
 const etg = require('../etg'),
-	chat = require('../chat'),
-	Chat = require('./Chat'),
+	Chat = require('../Components/Chat'),
 	sock = require('../sock'),
 	util = require('../util'),
 	mkAi = require('../mkAi'),
@@ -25,19 +24,17 @@ const etg = require('../etg'),
 		'Starter decks, cards from free packs, & all non-Common Daily Cards are account-bound; they cannot be traded or sold',
 		'If you include account-bound cards in an upgrade, the upgrade will also be account-bound',
 		"You'll receive a Daily Card upon logging in after midnight GMT0. If you submit an Arena deck, it contain 5 copies of that card",
-		'Unupgraded pillars & pendulums are free',
 		'Cards sell for around half as much as they cost to buy from a pack',
 		'Quests are free to try, & you always face the same deck. Keep trying until you collect your reward',
 		'You may mulligan at the start of the game to shuffle & redraw your hand with one less card',
 		'Your account name is case sensitive',
 		'Arena Tier 1 is unupgraded, while Tier 2 is upgraded. All decks in a tier have the same number of points',
-		"If you type '/who' in chat you will get a list of the users who are online. '/w username message' will send your message only to one user",
-		'Chat commands: /who, /mute, /unmute, /clear, /w, /decks',
+		"Typing '/who' in chat you will get a list of the users who are online. '/w username message' will send your message only to one user",
+		"Typing '/help' in chat will list all commands",
 		'Keyboard shortcuts: space ends turn, backspace cancels, w targets opponent, s targets yourself, 1 through 8 cast cards in hand',
 		'Remember that you may use the logout button to enter sandbox mode to review the card pool, check rarities & try out new decks',
 		'Commoner & Mage are unupped, Champion has some upped, & Demigod is fully upped',
 		'Decks submitted to arena lose hp exponentially per day, down to a minimum of a quarter of their original hp',
-		"If you don't get what you want from the packs in the shop, ask to trade in chat or the openEtG forum",
 		"Rarity doesn't necessarily relate to card strength. You can go a long ways with commons & uncommons",
 		'A ply is half a turn',
 		'Mark cards are only obtainable through PvP events. A tournament deck verifier is at tournament.htm',
@@ -156,11 +153,11 @@ module.exports = connect(({opts}) => ({
 			},
 			codegold: data => {
 				sock.user.gold += data.g;
-				chat.addSpan(<div>{data.g}<span className='ico gold' /> added!</div>);
+				this.props.dispatch(store.chat(<div>{data.g}<span className='ico gold' /> added!</div>));
 			},
 			codecode: data => {
 				sock.user.pool = etgutil.addcard(sock.user.pool, data.card);
-				chat(Cards.Codes[data.card].name + ' added!', 'System');
+				this.props.dispatch(store.chatMsg(Cards.Codes[data.card].name + ' added!', 'System'));
 			},
 		}));
 	}
@@ -277,7 +274,7 @@ module.exports = connect(({opts}) => ({
 				}
 				const cost = userutil.arenaCost(i);
 				if (sock.user.gold < cost) {
-					chat('Requires ' + cost + '$', 'System');
+					self.props.dispatch(store.chatMsg(`Requires ${cost}$`, 'System'));
 					return;
 				}
 				sock.userEmit('foearena', { lv: i });
@@ -657,7 +654,7 @@ module.exports = connect(({opts}) => ({
 					self.setState({ changepass: false, newpass: '', newpass2: '' });
 				} else {
 					self.setState({ newpass: '', newpass2: '' });
-					chat('Passwords do not match', 'System');
+					self.props.dispatch(store.chatMsg('Passwords do not match', 'System'));
 				}
 			}
 			mainc.push(
@@ -676,12 +673,12 @@ module.exports = connect(({opts}) => ({
 						if (this.props.foename == sock.user.name + 'yesdelete') {
 							logout('delete');
 						} else {
-							chat(
+							self.props.dispatch(store.chatMsg(
 								"Input '" +
 									sock.user.name +
 									"yesdelete' into Trade/Library to delete your account",
 								'System',
-							);
+							));
 						}
 					}}
 					onMouseOver={this.mkSetTip(

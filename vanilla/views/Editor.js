@@ -15,13 +15,13 @@ module.exports = connect(state => ({ deck: state.opts.deck }))(class Editor exte
 			deckstr: '',
 			deck: [],
 			mark: 0,
-			cardminus: {},
+			cardminus: [],
 		};
 	}
 
 	static getDerivedStateFromProps(nextProps, prevState) {
 		if (nextProps.deck == prevState.deckstr) return null;
-		const cardminus = {}, mark = 0, deck = nextProps.deck.split(' ');
+		const cardminus = [], mark = 0, deck = nextProps.deck.split(' ');
 		for (var i = deck.length - 1;i >= 0;i--) {
 			const code = +deck[i];
 			if (!code || !(code in Cards.Codes)) {

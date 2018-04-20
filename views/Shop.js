@@ -1,5 +1,4 @@
 const svg = require('../svg'),
-	chat = require('../chat'),
 	sock = require('../sock'),
 	Tutor = require('../Tutor'),
 	etgutil = require('../etgutil'),
@@ -63,7 +62,7 @@ module.exports = connect(({opts}) => ({ bulk: typeof opts.bulk === 'string' ? op
 				} else {
 					this.setState({ showbuy: true });
 				}
-				chat.addSpan(<a style={{ display: 'block' }} href={`deck/${data.cards}`} target='_blank'>{data.cards}</a>, 'Packs');
+				this.props.dispatch(store.chat(<a style={{ display: 'block' }} href={`deck/${data.cards}`} target='_blank'>{data.cards}</a>, 'Packs'));
 			},
 		}));
 	}

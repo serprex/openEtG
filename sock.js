@@ -1,5 +1,4 @@
 const Cards = require('./Cards'),
-	chat = require('./chat'),
 	etgutil = require('./etgutil'),
 	mkGame = require('./mkGame'),
 	store = require('./store'),
@@ -19,17 +18,17 @@ const sockEvents = {
 	clear: () => store.store.dispatch(store.clearChat('Main')),
 	passchange: (data) => {
 		exports.user.auth = data.auth;
-		chat('Password updated', 'System');
+		store.store.dispatch(store.chatMsg('Password updated', 'System'));
 	},
 	mute: (data) => {
 		store.store.dispatch(store.mute(data.m));
-		chat(data.m + ' has been muted', 'System');
+		store.store.dispatch(store.chatMsg(data.m + ' has been muted', 'System'));
 	},
 	roll: (data) => {
-		chat.addSpan(<div style={{color: '#090'}}>
+		store.store.dispatch(store.chat(<div style={{color: '#090'}}>
 			{data.u && <b>{data.u} </b>}
 			{(data.A || 1)}d{data.X} <a href={`speed/${data.sum}`} target='_blank'>{data.sum}</a>
-		</div>, 'Main');
+		</div>, 'Main'));
 	},
 	chat: (data) => {
 		if (store.store.getState().opts.muteall && !data.mode) return;
@@ -76,10 +75,10 @@ const sockEvents = {
 		}
 		if (lastindex != data.msg.length)
 			text.push(data.msg.slice(lastindex));
-		chat.addSpan(<div style={style}>
+		store.store.dispatch(store.chat(<div style={style}>
 			{hs}{ms} {data.u && <b>{data.u} </b>}
 			{text}
-		</div>, data.mode == 1 ? null : 'Main');
+		</div>, data.mode == 1 ? null : 'Main'));
 	},
 	foearena: (data) => {
 		const gamedata = mkGame({
@@ -154,7 +153,7 @@ socket.onopen = function() {
 		});
 	buffer.forEach(this.send, this);
 	buffer.length = 0;
-	chat('Connected', 'System');
+	store.store.dispatch(store.chat('Connected', 'System'));
 };
 socket.onclose = function() {
 	if (attemptTimeout) return;
@@ -168,7 +167,7 @@ socket.onclose = function() {
 		socket.onclose = oldsock.onclose;
 		socket.onmessage = oldsock.onmessage;
 	}, timeout);
-	chat('Reconnecting in ' + timeout + 'ms', 'System');
+	store.store.dispatch(store.chat('Reconnecting in ' + timeout + 'ms', 'System'));
 };
 exports.user = undefined;
 exports.userEmit = function(x, data) {

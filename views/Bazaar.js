@@ -1,6 +1,5 @@
 'use strict';
-const chat = require('../chat'),
-	sock = require('../sock'),
+const sock = require('../sock'),
 	Cards = require('../Cards'),
 	etgutil = require('../etgutil'),
 	userutil = require('../userutil'),

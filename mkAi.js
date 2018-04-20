@@ -1,12 +1,11 @@
-const chat = require('./chat'),
-	sock = require('./sock'),
-	util = require('./util'),
+const etgutil = require('./etgutil'),
 	Decks = require('./Decks.json'),
-	RngMock = require('./RngMock'),
-	etgutil = require('./etgutil'),
 	options = require('./options'),
+	RngMock = require('./RngMock'),
+	sock = require('./sock'),
 	store = require('./store'),
 	userutil = require('./userutil'),
+	util = require('./util'),
 	mkDeck = require('./ai/deck'),
 	mkGame = require('./mkGame');
 
@@ -22,7 +21,7 @@ exports.mkPremade = function(level, daily) {
 		if (sock.user) {
 			if (daily === undefined) {
 				if (sock.user.gold < cost) {
-					chat('Requires ' + cost + '$', 'System');
+					store.store.dispatch(store.chatMsg(`Requires${cost}$`, 'System'));
 					return;
 				}
 			} else {
@@ -90,7 +89,7 @@ exports.mkAi = function(level, daily) {
 		const cost = daily !== undefined ? 0 : userutil.pveCostReward[level * 2];
 		if (sock.user && cost) {
 			if (sock.user.gold < cost) {
-				chat('Requires ' + cost + '$', 'System');
+				store.store.dispatch(store.chatMsg(`Requires ${cost}$`, 'System'));
 				return;
 			}
 		}

@@ -1,8 +1,7 @@
 'use strict';
-const sock = require('../sock'),
-	chat = require('../chat'),
-	Cards = require('../Cards'),
+const Cards = require('../Cards'),
 	Components = require('../Components'),
+	sock = require('../sock'),
 	store = require('../store'),
 	React = require('react');
 

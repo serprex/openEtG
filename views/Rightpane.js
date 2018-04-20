@@ -1,5 +1,4 @@
-const chat = require('../chat'),
-	Chat = require('./Chat'),
+const Chat = require('../Components/Chat'),
 	etgutil = require('../etgutil'),
 	RngMock = require('../RngMock'),
 	sock = require('../sock'),
@@ -8,12 +7,12 @@ const chat = require('../chat'),
 	React = require('react');
 function chatmute() {
 	const state = store.store.getState();
-	chat(
+	store.store.dispatch(store.chatMsg(
 		(state.opts.muteall ? 'You have chat muted. ' : '') +
 			'Muted: ' +
 			Array.from(state.muted).join(', '),
 		'System',
-	);
+	));
 }
 function maybeSendChat(e) {
 	e.cancelBubble = true;
@@ -35,7 +34,7 @@ function maybeSendChat(e) {
 				w: 'Whisper',
 			};
 			for (const cmd in cmds) {
-				chat(cmd + ' ' + cmds[cmd]);
+				chat(`${cmd} ${cmds[cmd]}`);
 			}
 		} else if (msg == '/clear') {
 			store.store.dispatch(store.clearChat(store.store.getState().opts.channel));

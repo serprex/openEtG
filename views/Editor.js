@@ -1,11 +1,10 @@
 'use strict';
 const etg = require('../etg'),
-	chat = require('../chat'),
-	sock = require('../sock'),
 	Cards = require('../Cards'),
 	Tutor = require('../Tutor'),
 	etgutil = require('../etgutil'),
 	Components = require('../Components'),
+	sock = require('../sock'),
 	store = require('../store'),
 	{ connect } = require('react-redux'),
 	React = require('react');
@@ -142,9 +141,6 @@ module.exports = connect(({opts}) => ({ deck: opts.deck, deckname: opts.deckname
 				}
 			};
 		}
-		function saveTo() {
-			self.setState({ setQeck: !self.state.setQeck });
-		}
 		function saveDeck(force) {
 			const dcode =
 					etgutil.encodedeck(sortedDeck) +
@@ -245,25 +241,26 @@ module.exports = connect(({opts}) => ({ deck: opts.deck, deckname: opts.deckname
 			editorui.push(
 				<input type='button'
 					value='Save & Exit'
-					onClick={function() {
-						if (self.state.deck.length < 30 || sumscore > arpts) {
-							return chat('35 cards required before submission', 'System');
+					onClick={() => {
+						if (this.state.deck.length < 30 || sumscore > arpts) {
+							this.props.dispatch(store.chatMsg('35 cards required before submission', 'System'));
+							return;
 						}
 						const data = Object.assign(
 							{
 								d:
 									etgutil.encodedeck(sortedDeck.slice(5)) +
-									etgutil.toTrueMarkSuffix(self.state.mark),
+									etgutil.toTrueMarkSuffix(this.state.mark),
 								lv: aupped,
 							},
-							self.state.arattr,
+							this.state.arattr,
 						);
-						if (!self.props.startempty) {
+						if (!this.props.startempty) {
 							data.mod = true;
 						}
 						sock.userEmit('setarena', data);
-						chat('Arena deck submitted', 'System');
-						self.props.dispatch(store.doNav(require('./MainMenu')));
+						this.props.dispatch(store.chatMsg('Arena deck submitted', 'System'));
+						this.props.dispatch(store.doNav(require('./MainMenu')));
 					}}
 					style={{
 						position: 'absolute',
@@ -367,8 +364,8 @@ module.exports = connect(({opts}) => ({ deck: opts.deck, deckname: opts.deckname
 					/>,
 					<input type='button'
 						value='Save to #'
-						className={self.state.setQeck && 'selectedbutton'}
-						onClick={saveTo}
+						className={self.state.setQeck ? 'selectedbutton' : undefined}
+						onClick={() => self.setState({ setQeck: !self.state.setQeck })}
 						style={{
 							position: 'absolute',
 							left: '220px',
