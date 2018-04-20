@@ -23,7 +23,8 @@ module.exports = class Result extends React.Component {
 	}
 
 	onkeydown(e) {
-		const kc = e.which || e.keyCode;
+		if (e.target !== document.body) return;
+		const kc = e.which;
 		if (kc == 32 || kc == 13) this.exitFunc();
 		else if (
 			kc == 87 &&

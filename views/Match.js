@@ -555,7 +555,7 @@ module.exports = connect()(class Match extends React.Component {
 		}
 		Effect.clear();
 		function onkeydown(e) {
-			if (e.target.id == 'chatinput') return;
+			if (e.target !== document.body) return;
 			const kc = e.which || e.keyCode,
 				ch = String.fromCharCode(kc);
 			let chi;
