@@ -126,7 +126,7 @@ module.exports = connect()(class ArenaEditor extends React.Component {
 		return <>
 			<Editor acard={this.props.acard} deck={this.state.deck} mark={this.state.mark}
 				pool={this.state.pool}
-				setDeck={deck => this.setState({deck})}
+				setDeck={deck => this.setState({deck: deck.filter(x => x !== this.props.acard.code)})}
 				setMark={mark => this.setState({mark})}
 			/>
 			<AttrUi y={0} name='hp' value={self.state.arattr.hp}
