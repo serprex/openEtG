@@ -240,7 +240,7 @@ Player.prototype.endturn = function(discard) {
 	this.nova = 0;
 	this.flatline = this.usedactive = false;
 	this.foe.precognition = this.foe.sanctuary = false;
-	for (var i = this.foe.drawpower; i > 0; i--) {
+	for (let i = this.foe.drawpower; i > 0; i--) {
 		this.foe.drawcard(true);
 	}
 	this.game.turn = this.foe;
