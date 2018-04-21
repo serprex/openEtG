@@ -2,6 +2,7 @@
 require('@babel/polyfill');
 const App = require('./views/App'),
 	Rightpane = require('./views/Rightpane'),
+	sock = require('./sock'),
 	store = require('./store'),
 	{ Provider } = require('react-redux'),
 	reactDOM = require('react-dom'),
@@ -14,6 +15,7 @@ window.onerror = function(...args) {
 		lastError = now;
 	}
 };
+sock.emit('motd');
 reactDOM.render(
 	<Provider store={store.store}>
 		<App />

@@ -99,6 +99,20 @@ const keycerttask = sutil.mkTask(res => {
 		modclear: modf(function(data, user) {
 			broadcast({ x: 'clear' });
 		}),
+		modmotd: modf(function(data, user) {
+			const match = data.m.match(/^(\d+) ?(.*)$/);
+			if (match) {
+				const num = match[1],
+					text = match[2];
+				if (text) {
+					db.zadd('Motd', num, text);
+				} else {
+					db.zremrangebyscore('Motd', num, num);
+				}
+			} else {
+				sockEmit(this, 'chat', { mode: 1, msg: 'Invalid format' });
+			}
+		}),
 		inituser: function(data, user) {
 			const starter = require('./srv/starter.json');
 			if (data.e < 1 || data.e > 13) return;
@@ -667,6 +681,14 @@ const keycerttask = sutil.mkTask(res => {
 			}
 			data.sum = sum;
 			broadcast(data);
+		},
+		motd: function(data) {
+			db.zrange('Motd', 0, -1, 'withscores', (err, ms) => {
+				if (err) return;
+				for (let i=0; i<ms.length; i+=2) {
+					sockEmit(this, 'chat', { mode: 1, msg: `motd ${ms[i+1]} ${ms[i]}` });
+				}
+			});
 		},
 		mod: function(data) {
 			db.smembers('Mods', (err, mods) => {

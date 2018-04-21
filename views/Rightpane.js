@@ -78,11 +78,13 @@ function maybeSendChat(e) {
 		} else if (msg.match(/^\/unmute /)) {
 			store.store.dispatch(store.unmute(msg.slice(8)));
 			chatmute();
+		} else if (msg == '/motd') {
+			sock.emit('motd');
 		} else if (msg == '/mod') {
 			sock.emit('mod');
 		} else if (sock.user && msg == '/modclear') {
 			sock.userEmit('modclear');
-		} else if (sock.user && msg.match(/^\/mod(guest|mute|add|rm) /)) {
+		} else if (sock.user && msg.match(/^\/mod(guest|mute|add|rm|motd) /)) {
 			const sp = msg.indexOf(' ');
 			sock.userEmit(msg.slice(1, sp), { m: msg.slice(sp + 1) });
 		} else if (msg.match(/^\/code /)) {
