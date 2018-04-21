@@ -29,7 +29,6 @@ module.exports = {
 										"last 1 ios version",
 										"last 1 and_chr version",
 										"last 1 edge version",
-										"ie 11",
 									],
 								},
 							},
