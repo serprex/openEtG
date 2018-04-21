@@ -12,14 +12,13 @@ module.exports = class ArenaTop extends React.Component {
 	}
 
 	componentDidMount() {
-		sock.emit('arenatop', this.props);
+		sock.emit('arenatop', { lv: this.props.lv });
 		store.store.dispatch(store.setCmds({
 			arenatop: info => this.setState(info),
 		}));
 	}
 
 	render() {
-		const lv = this.props.lv;
 		const info = this.state.top || [];
 		return (
 			<>
@@ -38,7 +37,7 @@ module.exports = class ArenaTop extends React.Component {
 							}
 							lic.push(<span className={'atop' + i}>{data[i]}</span>);
 						}
-						const card = Cards.Codes[data[5]].asUpped(lv);
+						const card = Cards.Codes[data[5]].asUpped(this.props.lv);
 						lic.push(
 							<span
 								className="atoptext"
@@ -49,7 +48,7 @@ module.exports = class ArenaTop extends React.Component {
 										cardy: e.pageY + 4,
 									})
 								}
-								onMouseLeave={() => this.setState({ card: false })}>
+								onMouseLeave={() => this.setState({ card: null })}>
 								{card.name}
 							</span>,
 						)

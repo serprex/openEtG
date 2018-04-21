@@ -139,12 +139,6 @@ module.exports = connect(({opts}) => ({
 	componentDidMount() {
 		document.addEventListener('mousemove', this.resetTip);
 		this.props.dispatch(store.setCmds({
-			librarygive: data => {
-				this.props.dispatch(store.doNav(require('./Library'), data));
-			},
-			arenainfo: data => {
-				this.props.dispatch(store.doNav(require('./ArenaInfo'), data));
-			},
 			codecard: data => {
 				this.props.dispatch(store.doNav(require('./Reward'), {
 					type: data.type,
@@ -336,9 +330,8 @@ module.exports = connect(({opts}) => ({
 			arenac.push(
 				<input type='button'
 					value='Arena Deck'
-					onClick={e => {
-						sock.userEmit('arenainfo');
-						e.target.style.display = 'none';
+					onClick={() => {
+						this.props.dispatch(store.doNav(require('./ArenaInfo')));
 					}}
 					onMouseOver={this.mkSetTip('Check how your arena decks are doing')}
 					style={{
@@ -408,17 +401,6 @@ module.exports = connect(({opts}) => ({
 					}}
 				/>,
 		);
-		function tradeClick(foe) {
-			sock.trade = typeof foe === 'string' ? foe : self.props.foename;
-			sock.userEmit('tradewant', { f: sock.trade });
-		}
-		function rewardClick() {
-			sock.userEmit('codesubmit', { code: self.props.foename });
-		}
-		function libraryClick() {
-			const name = self.props.foename || (sock.user && sock.user.name);
-			if (name) sock.emit('librarywant', { f: name });
-		}
 		playc.push(
 			<input
 				placeholder='Trade/Library'
@@ -443,7 +425,10 @@ module.exports = connect(({opts}) => ({
 			/>,
 			<input type='button'
 				value='Library'
-				onClick={libraryClick}
+				onClick={() => {
+					const name = self.props.foename || (sock.user && sock.user.name);
+					if (name) this.props.dispatch(store.doNav(require('./Library'), { name }));
+				}}
 				onMouseOver={this.mkSetTip('See exactly what cards you or others own')}
 				style={{
 					position: 'absolute',
@@ -566,7 +551,10 @@ module.exports = connect(({opts}) => ({
 			playc.push(
 				<input type='button'
 					value='Trade'
-					onClick={tradeClick}
+					onClick={foe => {
+						sock.trade = typeof foe === 'string' ? foe : self.props.foename;
+						sock.userEmit('tradewant', { f: sock.trade });
+					}}
 					onMouseOver={this.mkSetTip('Initiate trading cards with another player')}
 					style={{
 						position: 'absolute',
@@ -576,7 +564,9 @@ module.exports = connect(({opts}) => ({
 				/>,
 				<input type='button'
 					value='Reward'
-					onClick={rewardClick}
+					onClick={() => {
+						sock.userEmit('codesubmit', { code: self.props.foename });
+					}}
 					onMouseOver={this.mkSetTip('Redeem a reward code')}
 					style={{
 						position: 'absolute',

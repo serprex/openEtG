@@ -1,5 +1,7 @@
 'use strict';
 const Cards = require('../Cards'),
+	sock = require('../sock'),
+	store = require('../store'),
 	etgutil = require('../etgutil'),
 	userutil = require('../userutil'),
 	Components = require('../Components'),
@@ -11,12 +13,21 @@ module.exports = class Library extends React.Component {
 		this.state = {
 			code: 0,
 			showbound: false,
+			pool: '',
+			bound: '',
 		};
 	}
 
+	componentDidMount() {
+		sock.emit('librarywant', { f: this.props.name });
+		store.store.dispatch(store.setCmds({
+			librarygive: data => this.setState(data),
+		}));
+	}
+
 	render() {
-		const cardpool = etgutil.deck2pool(this.props.pool),
-			boundpool = etgutil.deck2pool(this.props.bound);
+		const cardpool = etgutil.deck2pool(this.state.pool),
+			boundpool = etgutil.deck2pool(this.state.bound);
 		let progressmax = 0,
 			progress = 0,
 			shinyprogress = 0;
@@ -45,7 +56,7 @@ module.exports = class Library extends React.Component {
 				);
 			}
 		});
-		const wealth = this.props.gold + userutil.calcWealth(cardpool);
+		const wealth = this.state.gold + userutil.calcWealth(cardpool);
 		return <>
 			<span style={{
 				position: 'absolute',
@@ -63,8 +74,8 @@ module.exports = class Library extends React.Component {
 				top: '16px',
 				whiteSpace: 'pre',
 			}}>
-				PvE {this.props.aiwins} - {this.props.ailosses}
-				{'\nPvP '}{this.props.pvpwins} - {this.props.pvplosses}
+				PvE {this.state.aiwins} - {this.state.ailosses}
+				{'\nPvP '}{this.state.pvpwins} - {this.state.pvplosses}
 			</span>
 			<Components.Card x={734} y={8} code={this.state.code} />
 			<input type='button'

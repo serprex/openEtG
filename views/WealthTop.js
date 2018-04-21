@@ -20,7 +20,7 @@ module.exports = class WealthTop extends React.Component {
 	render() {
 		const ol1c = [],
 			ol2c = [],
-			top = this.state.top;
+			{top} = this.state;
 		if (top) {
 			for (let i = 0; i < top.length; i += 2) {
 				const ol = i < 50 ? ol1c : ol2c;
@@ -31,15 +31,13 @@ module.exports = class WealthTop extends React.Component {
 			}
 		}
 		return <>
-			<ol
-				className='width400'
+			<ol className='width400'
 				style={{
 					position: 'absolute',
 					left: '80px',
 					top: '8px',
 				}}>{ol1c}</ol>
-			<ol
-				className='width400'
+			<ol className='width400'
 				start='26'
 				style={{
 					position: 'absolute',

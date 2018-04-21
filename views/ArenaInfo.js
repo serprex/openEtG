@@ -2,10 +2,10 @@
 const Cards = require('../Cards'),
 	mkGame = require('../mkGame'),
 	sock = require('../sock'),
+	store = require('../store'),
 	util = require('../util'),
 	etgutil = require('../etgutil'),
 	Components = require('../Components'),
-	store = require('../store'),
 	React = require('react');
 
 function RenderInfo(props) {
@@ -118,18 +118,32 @@ function ArenaCard(props) {
 	</>;
 }
 
-module.exports = function ArenaInfo(props) {
-	return <>
-		<Components.Text
-			style={{ position: 'absolute', left: '96px', top: '576px' }}
-			text='Earn 1$ when your arena deck is faced, & another 2$ when it wins'
-		/>
-		<Components.ExitBtn x={8} y={300} />
-		<RenderInfo info={props.A} y={0} />
-		<RenderInfo info={props.B} y={300} />
-		{!!sock.user.ocard && <>
-			<ArenaCard info={props.A} y={8} code={etgutil.asUpped(sock.user.ocard, false)} />
-			<ArenaCard info={props.B} y={300} code={etgutil.asUpped(sock.user.ocard, true)} />
-		</>}
-	</>;
+module.exports = class ArenaInfo extends React.Component {
+	constructor(props) {
+		super(props);
+		this.state = {};
+	}
+
+	componentDidMount() {
+		sock.userEmit('arenainfo');
+		store.store.dispatch(store.setCmds({
+			arenainfo: data => this.setState(data),
+		}));
+	}
+
+	render() {
+		return <>
+			<Components.Text
+				style={{ position: 'absolute', left: '96px', top: '576px' }}
+				text='Earn 1$ when your arena deck is faced, & another 2$ when it wins'
+			/>
+			<Components.ExitBtn x={8} y={300} />
+			<RenderInfo info={this.state.A} y={0} />
+			<RenderInfo info={this.state.B} y={300} />
+			{!!sock.user.ocard && <>
+				<ArenaCard info={this.state.A} y={8} code={etgutil.asUpped(sock.user.ocard, false)} />
+				<ArenaCard info={this.state.B} y={300} code={etgutil.asUpped(sock.user.ocard, true)} />
+			</>}
+		</>;
+	}
 };

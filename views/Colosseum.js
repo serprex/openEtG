@@ -56,13 +56,11 @@ module.exports = class Colosseum extends React.Component {
 			'Novice Duel: Fight ' + magename + '. Only one attempt allowed.',
 			'Expert Duel: Fight ' + dgname + '. Only one attempt allowed.',
 		];
-		const children = [
-			<Components.ExitBtn x={50} y={50} />,
-		];
+		const eventui = [];
 		for (let i = 1; i < 5; i++) {
 			const active = !(sock.user.daily & (1 << i));
-			if (active) {
-				children.push(
+			eventui.push(<React.Fragment key={i}>
+				{active &&
 					<input type='button'
 						value='Fight!'
 						style={{
@@ -71,10 +69,8 @@ module.exports = class Colosseum extends React.Component {
 							top: 100 + 30 * i + 'px',
 						}}
 						onClick={mkDaily(i)}
-					/>,
-				);
-			}
-			children.push(
+					/>
+				}
 				<span style={{
 					position: 'absolute',
 					left: '130px',
@@ -87,10 +83,12 @@ module.exports = class Colosseum extends React.Component {
 						: 'You failed this today. Better luck tomorrow!'
 					: 'Completed.'}
 				</span>
-			);
+			</React.Fragment>);
 		}
-		if (sock.user.daily == 191) {
-			children.push(
+		return <>
+			<Components.ExitBtn x={50} y={50} />
+			{eventui}
+			{sock.user.daily == 191 && <>
 				<input type='button'
 					value='Nymph!'
 					style={{ position: 'absolute', left: '50px', top: '280px' }}
@@ -99,12 +97,11 @@ module.exports = class Colosseum extends React.Component {
 						sock.userExec('donedaily', { daily: 6, c: nymph });
 						store.store.dispatch(store.doNav(require('./MainMenu'), { nymph }));
 					}}
-				/>,
+				/>
 				<span style={{ position: 'absolute', left: '130px', top: '280px' }}>
 					You successfully completed all tasks.
-				</span>,
-			);
-		}
-		return children;
+				</span>
+			</>}
+		</>;
 	}
 };
