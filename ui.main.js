@@ -1,5 +1,4 @@
 'use strict';
-require('@babel/polyfill');
 const App = require('./views/App'),
 	Rightpane = require('./views/Rightpane'),
 	sock = require('./sock'),

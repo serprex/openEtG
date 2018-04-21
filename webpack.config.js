@@ -19,7 +19,21 @@ module.exports = {
 				use: {
 					loader: 'babel-loader',
 					query: {
-						presets: ["@babel/preset-env", "@babel/preset-react"],
+						presets: ["@babel/preset-react", [
+							"@babel/preset-env", {
+								useBuiltIns: 'usage',
+								targets: {
+									browsers: [
+										"firefox esr",
+										"last 2 chrome version",
+										"last 1 ios version",
+										"last 1 and_chr version",
+										"last 1 edge version",
+										"ie 11",
+									],
+								},
+							},
+						]],
 						plugins: [
 							"@babel/plugin-transform-react-jsx",
 							"@babel/plugin-proposal-object-rest-spread",
