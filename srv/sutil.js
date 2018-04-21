@@ -2,7 +2,7 @@
 const crypto = require('crypto');
 exports.mkTask = function(cb) {
 	const params = {};
-	var cbCount = 1;
+	let cbCount = 1;
 	function cbCheck() {
 		if (!--cbCount) cb(params);
 	}

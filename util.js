@@ -1,9 +1,9 @@
 'use strict';
-exports.iterSplit = function(src, str, func, thisObj) {
+exports.iterSplit = function*(src, str) {
 	let i = 0;
 	while (true) {
 		const j = src.indexOf(str, i);
-		func.call(thisObj, src.slice(i, ~j ? j : src.length));
+		yield src.slice(i, ~j ? j : src.length);
 		if (j == -1) return;
 		i = j + str.length;
 	}

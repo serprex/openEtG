@@ -59,7 +59,7 @@ module.exports = class Colosseum extends React.Component {
 		const children = [
 			<Components.ExitBtn x={50} y={50} />,
 		];
-		for (var i = 1; i < 5; i++) {
+		for (let i = 1; i < 5; i++) {
 			const active = !(sock.user.daily & (1 << i));
 			if (active) {
 				children.push(

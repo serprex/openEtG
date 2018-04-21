@@ -326,7 +326,7 @@ const keycerttask = sutil.mkTask(res => {
 			if (u == f) {
 				return;
 			}
-			console.log(u + ' requesting ' + f);
+			console.log(`${u} requesting ${f}`);
 			const deck = user.decks[user.selectedDeck];
 			if (!deck) return;
 			this.meta.deck = deck;
@@ -455,7 +455,7 @@ const keycerttask = sutil.mkTask(res => {
 			if (u == f) {
 				return;
 			}
-			console.log(u + ' requesting ' + f);
+			console.log(`${u} requesting ${f}`);
 			const foesock = Us.socks[f];
 			if (foesock && foesock.readyState == 1) {
 				this.meta.trade = { foe: f };

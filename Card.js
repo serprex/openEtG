@@ -14,9 +14,7 @@ function Card(type, info) {
 	this.attack = parseInt(info.Attack) || 0;
 	this.health = parseInt(info.Health) || 0;
 	if (info.Cost) {
-		var cost = readCost(info.Cost, this.element);
-		this.cost = cost[0];
-		this.costele = cost[1];
+		[this.cost, this.costele] = readCost(info.Cost, this.element);
 	} else {
 		this.cost = 0;
 		this.costele = 0;
@@ -30,33 +28,26 @@ function Card(type, info) {
 			this.castele = this.costele;
 		} else if (info.Skill in activecache) {
 			this.active = activecache[info.Skill];
-			var castinfo = activecastcache[info.Skill];
+			const castinfo = activecastcache[info.Skill];
 			if (castinfo) {
-				this.cast = castinfo[0];
-				this.castele = castinfo[1];
+				[this.cast, this.castele] = castinfo;
 			}
 		} else {
 			activecache[info.Skill] = this.active = {};
-			util.iterSplit(
-				info.Skill,
-				'+',
-				function(active) {
-					var eqidx = active.indexOf('=');
-					var a0 = ~eqidx ? active.substr(0, eqidx) : 'auto';
-					var cast = readCost(a0, this.element);
-					Thing.prototype.addactive.call(
-						this,
-						cast ? 'cast' : a0,
-						parseSkill(active.substr(eqidx + 1)),
-					);
-					if (cast) {
-						this.cast = cast[0];
-						this.castele = cast[1];
-						activecastcache[info.Skill] = cast;
-					}
-				},
-				this,
-			);
+			for (const active of util.iterSplit(info.Skill, '+')) {
+				const eqidx = active.indexOf('=');
+				const a0 = ~eqidx ? active.substr(0, eqidx) : 'auto';
+				const cast = readCost(a0, this.element);
+				Thing.prototype.addactive.call(
+					this,
+					cast ? 'cast' : a0,
+					parseSkill(active.substr(eqidx + 1)),
+				);
+				if (cast) {
+					[this.cast, this.castele] = cast;
+					activecastcache[info.Skill] = cast;
+				}
+			}
 			Object.freeze(this.active);
 		}
 	} else this.active = emptyObj;
@@ -65,18 +56,13 @@ function Card(type, info) {
 			this.status = statuscache[info.Status];
 		} else {
 			statuscache[info.Status] = this.status = new Status();
-			util.iterSplit(
-				info.Status,
-				'+',
-				function(status) {
-					var eqidx = status.indexOf('=');
-					this.status.set(
-						~eqidx ? status.substr(0, eqidx) : status,
-						eqidx == -1 || parseInt(status.substr(eqidx + 1)),
-					);
-				},
-				this,
-			);
+			for (const status of util.iterSplit(info.Status, '+')) {
+				const eqidx = status.indexOf('=');
+				this.status.set(
+					~eqidx ? status.substr(0, eqidx) : status,
+					eqidx == -1 || parseInt(status.substr(eqidx + 1)),
+				);
+			}
 		}
 	} else this.status = emptyStatus;
 	Object.freeze(this);

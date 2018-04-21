@@ -153,7 +153,7 @@ socket.onopen = function() {
 		});
 	buffer.forEach(this.send, this);
 	buffer.length = 0;
-	store.store.dispatch(store.chat('Connected', 'System'));
+	store.store.dispatch(store.chatMsg('Connected', 'System'));
 };
 socket.onclose = function() {
 	if (attemptTimeout) return;
@@ -167,7 +167,7 @@ socket.onclose = function() {
 		socket.onclose = oldsock.onclose;
 		socket.onmessage = oldsock.onmessage;
 	}, timeout);
-	store.store.dispatch(store.chat('Reconnecting in ' + timeout + 'ms', 'System'));
+	store.store.dispatch(store.chatMsg('Reconnecting in ' + timeout + 'ms', 'System'));
 };
 exports.user = undefined;
 exports.userEmit = function(x, data) {

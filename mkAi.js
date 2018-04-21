@@ -21,7 +21,7 @@ exports.mkPremade = function(level, daily) {
 		if (sock.user) {
 			if (daily === undefined) {
 				if (sock.user.gold < cost) {
-					store.store.dispatch(store.chatMsg(`Requires${cost}$`, 'System'));
+					store.store.dispatch(store.chatMsg(`Requires ${cost}$`, 'System'));
 					return;
 				}
 			} else {
