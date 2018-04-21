@@ -318,7 +318,6 @@ module.exports = class Result extends React.Component {
 						: sock.user.streak[game.level],
 					streakrate.toFixed(3).replace(/\.?0+$/, ''),
 				].join(),
-				null,
 				'Stats',
 			));
 		}

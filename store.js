@@ -36,10 +36,10 @@ exports.mute = name => ({ type: 'MUTE', name });
 exports.unmute = name => ({ type: 'UNMUTE', name });
 exports.clearChat = name => ({ type: 'CHAT_CLEAR', name });
 exports.chat = (span, name) => ({ type: 'CHAT', span, name });
-exports.chatMsg = (msg, fontcolor, name) => ({
+exports.chatMsg = (msg, name) => ({
 	type: 'CHAT',
-	span: <div style={!name && fontcolor && { color: fontcolor }}>{msg}</div>,
-	name: name || fontcolor,
+	span: <div>{msg}</div>,
+	name,
 });
 
 exports.store = redux.createStore((state, action) => {
