@@ -11,7 +11,6 @@ const ui = require('../ui'),
 exports.Box = function(props) {
 	return <div
 		className='bgbox'
-		children={props.children}
 		style={{
 			position: 'absolute',
 			left: props.x + 'px',
