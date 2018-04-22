@@ -30,7 +30,7 @@
     "webpack-cli": "^2.0.15"
   },
   "scripts": {
-    "test": "./scripts/tests.js",
+    "test": "./scripts/tests.js && ./vanilla/_tests.js",
     "dev": "webpack --mode=development --watch",
     "build": "webpack -p",
     "build-atlas-png": "optipng -o2 -strip all assets/atlas.png",

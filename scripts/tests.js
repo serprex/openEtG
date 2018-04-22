@@ -14,8 +14,8 @@ function isEmpty(obj) {
 	return true;
 }
 function initHand(pl, ...args) {
-	for (var i = 0; i < args.length; i++) {
-		var cardinst = (pl.hand[i] = new Thing(args[i]));
+	for (let i = 0; i < args.length; i++) {
+		const cardinst = (pl.hand[i] = new Thing(args[i]));
 		cardinst.owner = pl;
 		cardinst.type = etg.Spell;
 	}
@@ -26,18 +26,18 @@ class TestModule {
 		this.opts = opts || {};
 	}
 	test(name, func) {
-		var ctx = {};
+		const ctx = {};
 		if (this.opts.beforeEach) this.opts.beforeEach.call(ctx, this);
 		func.call(ctx, this);
 		console.log('pass ', name);
 	}
 }
-var M = new TestModule('Upped Alignment');
+let M = new TestModule('Upped Alignment');
 M.test('Upped Alignment', function() {
 	for (let key in Cards.Codes) {
 		key |= 0;
 		if (!key) continue;
-		var un = etgutil.asUpped(key, false),
+		const un = etgutil.asUpped(key, false),
 			up = etgutil.asUpped(key, true);
 		assert.ok(Cards.Codes[un] && Cards.Codes[up], key);
 	}
@@ -48,6 +48,7 @@ M = new TestModule('Cards', {
 		this.player1 = this.game.player1;
 		this.player2 = this.game.player2;
 		this.game.turn = this.player1;
+		this.game.phase = etg.PlayPhase;
 		this.player1.mark = this.player2.mark = etg.Entropy;
 		this.player1.deck = [
 			Cards.AmethystPillar,
@@ -61,7 +62,7 @@ M.test('Adrenaline', function() {
 	this.player1.addCrea(new Thing(Cards.Devourer));
 	this.player1.addCrea(new Thing(Cards.HornedFrog));
 	this.player1.addCrea(new Thing(Cards.CrimsonDragon.asUpped(true)));
-	for (var i = 0; i < 3; i++)
+	for (let i = 0; i < 3; i++)
 		this.player1.creatures[i].status.set('adrenaline', 1);
 	this.player2.quanta[etg.Life] = 3;
 	this.player1.endturn();
@@ -87,6 +88,7 @@ M.test('BoneWall', function() {
 	this.player2.addCrea(new Thing(Cards.CrimsonDragon));
 	this.player2.addCrea(new Thing(Cards.CrimsonDragon));
 	this.player2.addCrea(new Thing(Cards.CrimsonDragon));
+	assert.ok(this.player1.shield, 'BW exists?');
 	this.player1.endturn();
 	this.player2.endturn();
 	assert.ok(this.player1.shield, 'BW exists');
@@ -147,7 +149,7 @@ M.test('Destroy', function() {
 	assert.equal(this.player1.shield.status.get('charges'), 7, '7 bones');
 	Skills.destroy.func(this.player2, this.player1.shield);
 	assert.equal(this.player1.shield.status.get('charges'), 6, '6 bones');
-	for (var i = 0; i < 6; i++) {
+	for (let i = 0; i < 6; i++) {
 		Skills.destroy.func(this.player2, this.player1.shield);
 	}
 	assert.ok(!this.player1.shield, 'This town is all in hell');
@@ -178,11 +180,11 @@ M.test('Earthquake', function() {
 		Cards.AmethystPillar,
 		Cards.AmethystPillar,
 	);
-	for (var i = 0; i < 5; i++) {
+	for (let i = 0; i < 5; i++) {
 		this.player1.hand[0].useactive();
 	}
 	assert.equal(this.player1.hand.length, 3, 'handlength');
-	var pillars = this.player1.permanents[0];
+	const pillars = this.player1.permanents[0];
 	assert.ok(pillars.card.type == etg.Pillar, 'ispillar');
 	assert.equal(pillars.status.get('charges'), 5, '5 charges');
 	Skills.earthquake.func(this.player2, pillars);
@@ -193,7 +195,7 @@ M.test('Earthquake', function() {
 M.test('Eclipse', function() {
 	this.player1.deck = [Cards.Ash, Cards.Ash, Cards.Ash];
 	this.player2.deck = [Cards.Ash, Cards.Ash, Cards.Ash];
-	for (var i = 0; i < 2; i++)
+	for (let i = 0; i < 2; i++)
 		this.player1.addCrea(new Thing(Cards.MinorVampire.asUpped(true)));
 	this.player1.hp = 50;
 	this.player1.endturn();
@@ -220,16 +222,16 @@ M.test('Gpull', function() {
 M.test('Hope', function() {
 	this.player1.setShield(new Thing(Cards.Hope));
 	this.player1.addCrea(new Thing(Cards.Photon));
-	for (var i = 0; i < 3; i++) {
+	for (let i = 0; i < 3; i++) {
 		this.player1.addCrea(new Thing(Cards.Photon.asUpped(true)));
 	}
 	this.player1.endturn();
 	assert.equal(this.player1.shield.truedr(), 3, 'DR');
-	assert.equal(this.player1.quanta[etg.Light], 4, 'RoL');
+	assert.equal(this.player1.quanta[etg.Light], 3, 'RoL');
 });
 M.test('Lobotomize', function() {
 	this.player1.addCrea(new Thing(Cards.Devourer));
-	var dev = this.player1.creatures[0];
+	const dev = this.player1.creatures[0];
 	assert.ok(!isEmpty(dev.active), 'Skills');
 	Skills.lobotomize.func(dev, dev);
 	assert.ok(isEmpty(dev.active), 'No more');
@@ -252,7 +254,7 @@ M.test('Obsession', function() {
 });
 M.test('Parallel', function() {
 	this.player1.addCrea(new Thing(Cards.Dragonfly));
-	var damsel = this.player1.creatures[0];
+	const damsel = this.player1.creatures[0];
 	Skills.parallel.func(damsel, damsel);
 	assert.equal(this.player1.creatures[1].card, Cards.Dragonfly, "PU'd");
 	Skills.web.func(this.player1, damsel);
@@ -264,7 +266,7 @@ M.test('Parallel', function() {
 });
 M.test('Phoenix', function() {
 	this.player1.addCrea(new Thing(Cards.Phoenix));
-	var phoenix = this.player1.creatures[0];
+	const phoenix = this.player1.creatures[0];
 	Skills.lightning.func(this.player1, phoenix);
 	assert.equal(this.player1.creatures[0].card, Cards.Ash, 'Ash');
 });
@@ -309,19 +311,19 @@ M.test('Steal', function() {
 		'Lone bone',
 	);
 	assert.ok(
-		this.player2.shield && this.player2.shield.status.get('charges') == 2,
+		this.player2.shield && this.player2.shield.status.get('charges') == 1,
 		'stole 2',
 	);
 	Skills.steal.func(this.player2, this.player1.shield);
 	assert.ok(!this.player1.shield, 'This town is all in hell');
 	assert.ok(
-		this.player2.shield && this.player2.shield.status.get('charges') == 3,
+		this.player2.shield && this.player2.shield.status.get('charges') == 1,
 		'stole 3',
 	);
 });
 M.test('Steam', function() {
 	this.player1.addCrea(new Thing(Cards.SteamMachine));
-	var steam = this.player1.creatures[0];
+	const steam = this.player1.creatures[0];
 	this.player1.quanta[etg.Fire] = 8;
 	steam.usedactive = false;
 	assert.equal(steam.trueatk(), 0, '0');
@@ -333,13 +335,13 @@ M.test('Steam', function() {
 M.test('Transform No Sick', function() {
 	this.player1.quanta[etg.Entropy] = 8;
 	this.player1.addCrea(new Thing(Cards.Pixie));
-	var pixie = this.player1.creatures[0];
+	const pixie = this.player1.creatures[0];
 	pixie.usedactive = false;
 	pixie.transform(Cards.Pixie);
 	assert.ok(pixie.canactive(), 'canactive');
 });
 M.test('Voodoo', function() {
-	var voodoo = new Thing(Cards.VoodooDoll);
+	const voodoo = new Thing(Cards.VoodooDoll);
 	this.player1.addCrea(voodoo);
 	Skills.lightning.func(this.player1, voodoo);
 	Skills.infect.func(this.player1, voodoo);

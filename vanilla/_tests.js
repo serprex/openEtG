@@ -7,7 +7,7 @@ const assert = require('assert'),
 	Actives = require('./Skills'),
 	Cards = require('./Cards');
 function initHand(pl, ...args) {
-	for (var i = 0; i < args.length; i++) {
+	for (let i = 0; i < args.length; i++) {
 		pl.hand[i] = new etg.CardInstance(args[i], pl);
 	}
 }
@@ -17,18 +17,18 @@ class TestModule {
 		this.opts = opts || {};
 	}
 	test(name, func) {
-		var ctx = {};
+		const ctx = {};
 		if (this.opts.beforeEach) this.opts.beforeEach.call(ctx, this);
 		func.call(ctx, this);
 		console.log('pass ', name);
 	}
 }
-var M = new TestModule('Upped Alignment');
+let M = new TestModule('Upped Alignment');
 M.test('Upped Alignment', function() {
 	for (let key in Cards.Codes) {
 		key |= 0;
 		if (!key) continue;
-		var un = etgutil.asUpped(key, false),
+		const un = etgutil.asUpped(key, false),
 			up = etgutil.asUpped(key, true);
 		assert.ok(Cards.Codes[un] && Cards.Codes[up], key);
 	}
@@ -142,7 +142,7 @@ M.test('Destroy', function() {
 	assert.equal(this.player1.shield.status.charges, 7, '7 bones');
 	Actives.destroy.func(this.player2, this.player1.shield);
 	assert.equal(this.player1.shield.status.charges, 6, '6 bones');
-	for (var i = 0; i < 6; i++) {
+	for (let i = 0; i < 6; i++) {
 		Actives.destroy.func(this.player2, this.player1.shield);
 	}
 	assert.ok(!this.player1.shield, 'This town is all in hell');
@@ -166,11 +166,11 @@ M.test('Earthquake', function() {
 		Cards.AmethystPillar,
 		Cards.AmethystPillar,
 	);
-	for (var i = 0; i < 5; i++) {
+	for (let i = 0; i < 5; i++) {
 		this.player1.hand[0].useactive();
 	}
 	assert.equal(this.player1.hand.length, 3, 'handlength');
-	var pillars = this.player1.permanents[0];
+	const pillars = this.player1.permanents[0];
 	assert.ok(pillars instanceof etg.Pillar, 'ispillar');
 	assert.equal(pillars.status.charges, 5, '5 charges');
 	Actives.earthquake.func(this.player2, pillars);
@@ -181,7 +181,7 @@ M.test('Earthquake', function() {
 M.test('Eclipse', function() {
 	this.player1.deck = [Cards.Ash, Cards.Ash, Cards.Ash];
 	this.player2.deck = [Cards.Ash, Cards.Ash, Cards.Ash];
-	for (var i = 0; i < 2; i++)
+	for (let i = 0; i < 2; i++)
 		new etg.Creature(Cards.MinorVampire.asUpped(true), this.player1).place();
 	this.player1.hp = 50;
 	this.player1.endturn();
@@ -214,7 +214,7 @@ M.test('Gpull', function() {
 M.test('Hope', function() {
 	this.player1.shield = new etg.Shield(Cards.Hope, this.player1);
 	new etg.Creature(Cards.Photon, this.player1).place();
-	for (var i = 0; i < 3; i++) {
+	for (let i = 0; i < 3; i++) {
 		new etg.Creature(Cards.Photon.asUpped(true), this.player1).place();
 	}
 	this.player1.endturn();
@@ -222,7 +222,7 @@ M.test('Hope', function() {
 	assert.equal(this.player1.quanta[etg.Light], 3, 'RoL');
 });
 M.test('Lobotomize', function() {
-	var dev = new etg.Creature(Cards.Devourer, this.player1);
+	const dev = new etg.Creature(Cards.Devourer, this.player1);
 	assert.ok(dev.active.auto, 'Siphon');
 	assert.ok(dev.active.cast, 'Burrow');
 	Actives.lobotomize.func(this.player1, dev);
@@ -246,7 +246,7 @@ M.test('Obsession', function() {
 	assert.equal(this.player1.hand.length, 7, 'Discarded');
 });
 M.test('Parallel', function() {
-	var damsel = new etg.Creature(Cards.Dragonfly.asUpped(true), this.player1);
+	const damsel = new etg.Creature(Cards.Dragonfly.asUpped(true), this.player1);
 	damsel.place();
 	Actives.parallel.func(this.player1, damsel);
 	assert.equal(
@@ -261,7 +261,7 @@ M.test('Parallel', function() {
 	);
 });
 M.test('Phoenix', function() {
-	var phoenix = new etg.Creature(Cards.Phoenix, this.player1);
+	const phoenix = new etg.Creature(Cards.Phoenix, this.player1);
 	phoenix.place();
 	Actives.lightning.func(this.player1, phoenix);
 	assert.equal(this.player1.creatures[0].card, Cards.Ash, 'Ash');
@@ -320,7 +320,7 @@ M.test('Steal', function() {
 	);
 });
 M.test('Steam', function() {
-	var steam = new etg.Creature(Cards.SteamMachine, this.player1);
+	const steam = new etg.Creature(Cards.SteamMachine, this.player1);
 	steam.usedactive = false;
 	steam.place();
 	assert.equal(steam.trueatk(), 0, '0');
@@ -330,7 +330,7 @@ M.test('Steam', function() {
 	assert.equal(steam.trueatk(), 4, '4');
 });
 M.test('Voodoo', function() {
-	var voodoo = new etg.Creature(Cards.VoodooDoll, this.player1);
+	const voodoo = new etg.Creature(Cards.VoodooDoll, this.player1);
 	voodoo.place();
 	Actives.lightning.func(this.player1, voodoo);
 	Actives.infect.func(this.player1, voodoo);
