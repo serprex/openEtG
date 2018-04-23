@@ -7,12 +7,12 @@ const Status = require('./Status'),
 	activecastcache = {};
 function Card(type, info) {
 	this.type = type;
-	this.element = parseInt(info.E);
+	this.element = info.E;
 	this.name = info.Name;
 	this.code = info.Code;
-	this.rarity = parseInt(info.R) || 0;
-	this.attack = parseInt(info.Attack) || 0;
-	this.health = parseInt(info.Health) || 0;
+	this.rarity = info.R || 0;
+	this.attack = info.Attack || 0;
+	this.health = info.Health || 0;
 	if (info.Cost) {
 		[this.cost, this.costele] = readCost(info.Cost, this.element);
 	} else {
@@ -60,7 +60,7 @@ function Card(type, info) {
 				const eqidx = status.indexOf('=');
 				this.status.set(
 					~eqidx ? status.substr(0, eqidx) : status,
-					eqidx == -1 || parseInt(status.substr(eqidx + 1)),
+					eqidx == -1 || +status.substr(eqidx + 1),
 				);
 			}
 		}
@@ -119,12 +119,12 @@ function readCost(coststr, defaultElement) {
 	if (typeof coststr == 'number')
 		return new Int8Array([coststr, defaultElement]);
 	const cidx = coststr.indexOf(':'),
-		cost = parseInt(~cidx ? coststr.substr(0, cidx) : coststr);
+		cost = +(~cidx ? coststr.substr(0, cidx) : coststr);
 	return isNaN(cost)
 		? null
 		: new Int8Array([
 				cost,
-				~cidx ? parseInt(coststr.substr(cidx + 1)) : defaultElement,
+				~cidx ? +(coststr.substr(cidx + 1)) : defaultElement,
 			]);
 }
 

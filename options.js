@@ -2,7 +2,7 @@
 const store = require('./store');
 
 function parseInput(data, key, value, limit) {
-	const val = parseInt(value);
+	const val = +value;
 	if (val === 0 || val > 0) data[key] = limit ? Math.min(val, limit) : val;
 }
 exports.parseInput = parseInput;

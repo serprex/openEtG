@@ -17,6 +17,7 @@ const Us = require('./srv/Us');
 
 const MAX_INT = 0x100000000;
 const rooms = {};
+const sockmeta = new WeakMap();
 
 const keycerttask = sutil.mkTask(res => {
 	function activeUsers() {
@@ -24,9 +25,9 @@ const keycerttask = sutil.mkTask(res => {
 		for (let name in Us.socks) {
 			const sock = Us.socks[name];
 			if (sock && sock.readyState == 1) {
-				if (sock.meta.offline) continue;
-				if (sock.meta.afk) name += ' (afk)';
-				else if (sock.meta.wantpvp) name += '\xb6';
+				if (sockmeta.get(sock).offline) continue;
+				if (sockmeta.get(sock).afk) name += ' (afk)';
+				else if (sockmeta.get(sock).wantpvp) name += '\xb6';
 				activeusers.push(name);
 			}
 		}
@@ -168,7 +169,7 @@ const keycerttask = sutil.mkTask(res => {
 					draw: data.draw,
 					mark: data.mark,
 				});
-				db.zadd('arena' + (data.lv ? '1' : ''), 200, data.u);
+				db.zadd(`arena${data.lv ? '1' : ''}`, 200, data.u);
 			}
 		},
 		arenainfo: function(data, user) {
@@ -189,7 +190,7 @@ const keycerttask = sutil.mkTask(res => {
 						['draw', 'hp', 'loss', 'mark', 'win', 'card'].forEach(function(
 							key,
 						) {
-							obj[key] = parseInt(obj[key], 10);
+							obj[key] = +obj[key];
 						});
 					}
 					process(res[0], res[2]);
@@ -205,9 +206,9 @@ const keycerttask = sutil.mkTask(res => {
 				if (score === null) return;
 				const task = sutil.mkTask(wld => {
 					if (wld.err) return;
-					const won = parseInt(data.won ? wld.incr : wld.mget[0]),
-						loss = parseInt(data.won ? wld.mget[0] : wld.incr),
-						day = parseInt(wld.mget[1]);
+					const won = +(data.won ? wld.incr : wld.mget[0]),
+						loss = +(data.won ? wld.mget[0] : wld.incr),
+						day = +wld.mget[1];
 					db.zadd(
 						arena,
 						wilson(won + 1, won + loss + 1) * 1000 - (sutil.getDay() - day),
@@ -220,7 +221,7 @@ const keycerttask = sutil.mkTask(res => {
 			});
 		},
 		foearena: function(data, user) {
-			db.zcard('arena' + (data.lv ? '1' : ''), (err, len) => {
+			db.zcard(`arena${data.lv ? '1' : ''}`, (err, len) => {
 				if (!len) return;
 				const cost = userutil.arenaCost(data.lv);
 				if (user.gold < cost) return;
@@ -233,11 +234,11 @@ const keycerttask = sutil.mkTask(res => {
 					}
 					aname = aname[0];
 					db.hgetall((data.lv ? 'B:' : 'A:') + aname, (err, adeck) => {
-						adeck.card = parseInt(adeck.card, 10);
+						adeck.card = +adeck.card;
 						if (data.lv) adeck.card = etgutil.asUpped(adeck.card, true);
-						adeck.hp = parseInt(adeck.hp || 200);
-						adeck.mark = parseInt(adeck.mark || 1);
-						adeck.draw = parseInt(adeck.draw || data.lv + 1);
+						adeck.hp = +adeck.hp || 200;
+						adeck.mark = +adeck.mark || 1;
+						adeck.draw = +adeck.draw || data.lv + 1;
 						const curhp = getAgedHp(adeck.hp, sutil.getDay() - adeck.day);
 						sockEmit(this, 'foearena', {
 							seed: Math.random() * MAX_INT,
@@ -257,7 +258,7 @@ const keycerttask = sutil.mkTask(res => {
 			if (!data.t) {
 				return sockEmit(this, 'chat', {
 					mode: 1,
-					msg: 'Invalid type ' + data.t,
+					msg: `Invalid type ${data.t}`,
 				});
 			}
 			db.sismember('Codesmiths', data.u, (err, ismem) => {
@@ -282,11 +283,11 @@ const keycerttask = sutil.mkTask(res => {
 				if (!type) {
 					sockEmit(this, 'chat', { mode: 1, msg: 'Code does not exist' });
 				} else if (type.charAt(0) == 'G') {
-					const g = parseInt(type.slice(1));
+					const g = +type.slice(1);
 					if (isNaN(g)) {
 						sockEmit(this, 'chat', {
 							mode: 1,
-							msg: 'Invalid gold code type: ' + type,
+							msg: `Invalid gold code type: ${type}`,
 						});
 					} else {
 						user.gold += g;
@@ -300,13 +301,13 @@ const keycerttask = sutil.mkTask(res => {
 						sockEmit(this, 'codecode', { card: c });
 						db.hdel('CodeHash', data.code);
 					} else
-						sockEmit(this, 'chat', { mode: 1, msg: 'Unknown card: ' + type });
+						sockEmit(this, 'chat', { mode: 1, msg: `Unknown card: ${type}` });
 				} else if (type.replace(/^!/, '') in userutil.rewardwords) {
-					sockEmit(this, 'codecard', { type: type });
+					sockEmit(this, 'codecard', { type });
 				} else {
 					sockEmit(this, 'chat', {
 						mode: 1,
-						msg: 'Unknown code type: ' + type,
+						msg: `Unknown code type: ${type}`,
 					});
 				}
 			});
@@ -343,8 +344,9 @@ const keycerttask = sutil.mkTask(res => {
 			console.log(`${u} requesting ${f}`);
 			const deck = user.decks[user.selectedDeck];
 			if (!deck) return;
-			this.meta.deck = deck;
-			this.meta.pvpstats = {
+			const thismeta = sockmeta.get(this);
+			thismeta.deck = deck;
+			thismeta.pvpstats = {
 				hp: data.p1hp,
 				markpower: data.p1markpower,
 				deckpower: data.p1deckpower,
@@ -352,13 +354,14 @@ const keycerttask = sutil.mkTask(res => {
 			};
 			const foesock = Us.socks[f];
 			if (foesock && foesock.readyState == 1) {
-				if (foesock.meta.duel == u) {
-					delete foesock.meta.duel;
+				const foemeta = sockmeta.get(foesock);
+				if (foemeta.duel == u) {
+					delete foemeta.duel;
 					const seed = Math.random() * MAX_INT;
-					this.meta.foe = foesock;
-					foesock.meta.foe = this;
-					const deck0 = foesock.meta.deck,
-						deck1 = this.meta.deck;
+					thismeta.foe = foesock;
+					foemeta.foe = this;
+					const deck0 = foemeta.deck,
+						deck1 = thismeta.deck;
 					const owndata = { seed: seed, deck: deck0, urdeck: deck1, foename: f };
 					const foedata = {
 						flip: true,
@@ -367,20 +370,20 @@ const keycerttask = sutil.mkTask(res => {
 						urdeck: deck0,
 						foename: u,
 					};
-					const stat = this.meta.pvpstats,
-						foestat = foesock.meta.pvpstats;
+					const stat = thismeta.pvpstats,
+						foestat = foemeta.pvpstats;
 					for (const key in stat) {
-						owndata['p1' + key] = stat[key];
-						foedata['p2' + key] = stat[key];
+						owndata[`p1${key}`] = stat[key];
+						foedata[`p2${key}`] = stat[key];
 					}
 					for (const key in foestat) {
-						owndata['p2' + key] = foestat[key];
-						foedata['p1' + key] = foestat[key];
+						owndata[`p2${key}`] = foestat[key];
+						foedata[`p1${key}`] = foestat[key];
 					}
 					sockEmit(this, 'pvpgive', owndata);
 					sockEmit(foesock, 'pvpgive', foedata);
-					if (foesock.meta.spectators) {
-						foesock.meta.spectators.forEach(function(uname) {
+					if (foemeta.spectators) {
+						foemeta.spectators.forEach(function(uname) {
 							const sock = Us.socks[uname];
 							if (sock && sock.readyState == 1) {
 								sockEmit(sock, 'spectategive', foedata);
@@ -388,56 +391,67 @@ const keycerttask = sutil.mkTask(res => {
 						});
 					}
 				} else {
-					this.meta.duel = f;
+					thismeta.duel = f;
 					sockEmit(foesock, 'challenge', { f: u, pvp: true });
 				}
 			}
 		},
 		spectate: function(data, user) {
-			const tgt = Us.socks[data.f];
-			if (tgt && tgt.meta.duel) {
-				sockEmit(tgt, 'chat', { mode: 1, msg: data.u + ' is spectating.' });
-				if (!tgt.meta.spectators) tgt.meta.spectators = [];
-				tgt.meta.spectators.push(data.u);
+			const tgt = Us.socks[data.f], tgtmeta = sockmeta.get(tgt);
+			if (tgt && tgtmeta.duel) {
+				sockEmit(tgt, 'chat', { mode: 1, msg: `${data.u} is spectating.` });
+				if (!tgtmeta.spectators) tgtmeta.spectators = [];
+				tgtmeta.spectators.push(data.u);
 			}
 		},
 		canceltrade: function(data) {
-			const info = this.meta;
+			const info = sockmeta.get(this);
 			if (info.trade) {
-				const foesock = Us.socks[info.trade.foe];
+				const foesock = Us.socks[info.trade.foe], foemeta = sockmeta.get(foesock);
 				if (foesock) {
 					sockEmit(foesock, 'tradecanceled');
 					sockEmit(foesock, 'chat', {
 						mode: 1,
-						msg: data.u + ' has canceled the trade.',
+						msg: `${data.u} has canceled the trade.`,
 					});
-					if (foesock.meta.trade && foesock.meta.trade.foe == data.u)
-						delete foesock.meta.trade;
+					if (foemeta.trade && foemeta.trade.foe == data.u)
+						delete foemeta.trade;
 				}
 				delete info.trade;
 			}
 		},
 		confirmtrade: function(data, user) {
 			const u = data.u,
-				thistrade = this.meta.trade;
+				thismeta = sockmeta.get(this),
+				thistrade = thismeta.trade;
 			if (!thistrade) {
 				return;
 			}
 			thistrade.tradecards = data.cards;
+			thistrade.g = Math.abs(data.g|0);
 			thistrade.oppcards = data.oppcards;
-			const thatsock = Us.socks[thistrade.foe];
-			const thattrade = thatsock && thatsock.meta.trade;
+			thistrade.gopher = Math.abs(data.gopher|0);
+			const thatsock = Us.socks[thistrade.foe], thatmeta = thatsock && sockmeta.get(thatsock);
+			const thattrade = thatmeta && thatmeta.trade;
 			const otherUser = Us.users[thistrade.foe];
 			if (!thattrade || !otherUser) {
 				sockEmit(this, 'tradecanceled');
-				delete this.meta.trade;
+				delete thismeta.trade;
 				return;
 			} else if (thattrade.accepted) {
 				const player1Cards = thistrade.tradecards,
-					player2Cards = thattrade.tradecards;
+					player2Cards = thattrade.tradecards,
+					player1Gold = thistrade.g,
+					player2Gold = thattrade.g,
+					p1gdelta = (player2Gold - player1Gold)|0,
+					p2gdelta = (player1Gold - player2Gold)|0;
 				if (
-					player1Cards != thattrade.oppcards ||
-					player2Cards != thistrade.oppcards
+					player1Cards !== thattrade.oppcards ||
+					player2Cards !== thistrade.oppcards ||
+					player1Gold !== thattrade.gopher ||
+					player2Gold !== thistrade.gopher ||
+					user.gold + p1gdelta < 0 ||
+					otherUser.gold + p2gdelta < 0
 				) {
 					sockEmit(this, 'tradecanceled');
 					sockEmit(this, 'chat', { mode: 1, msg: 'Trade disagreement.' });
@@ -445,20 +459,24 @@ const keycerttask = sutil.mkTask(res => {
 					sockEmit(thatsock, 'chat', { mode: 1, msg: 'Trade disagreement.' });
 					return;
 				}
-				user.pool = etgutil.removedecks(user.pool, player1Cards);
-				user.pool = etgutil.mergedecks(user.pool, player2Cards);
-				otherUser.pool = etgutil.removedecks(otherUser.pool, player2Cards);
-				otherUser.pool = etgutil.mergedecks(otherUser.pool, player1Cards);
 				sockEmit(this, 'tradedone', {
 					oldcards: player1Cards,
 					newcards: player2Cards,
+					g: p1gdelta,
 				});
 				sockEmit(thatsock, 'tradedone', {
 					oldcards: player2Cards,
 					newcards: player1Cards,
+					g: p2gdelta,
 				});
-				delete this.meta.trade;
-				delete thatsock.meta.trade;
+				user.pool = etgutil.removedecks(user.pool, player1Cards);
+				user.pool = etgutil.mergedecks(user.pool, player2Cards);
+				user.gold += p1gdelta;
+				otherUser.pool = etgutil.removedecks(otherUser.pool, player2Cards);
+				otherUser.pool = etgutil.mergedecks(otherUser.pool, player1Cards);
+				otherUser.gold += p2gdelta;
+				delete thismeta.trade;
+				delete thatmeta.trade;
 			} else {
 				thistrade.accepted = true;
 			}
@@ -472,8 +490,8 @@ const keycerttask = sutil.mkTask(res => {
 			console.log(`${u} requesting ${f}`);
 			const foesock = Us.socks[f];
 			if (foesock && foesock.readyState == 1) {
-				this.meta.trade = { foe: f };
-				const foetrade = foesock.meta.trade;
+				sockmeta.get(this).trade = { foe: f };
+				const foetrade = sockmeta.get(foesock).trade;
 				if (foetrade && foetrade.foe == u) {
 					sockEmit(this, 'tradegive');
 					sockEmit(foesock, 'tradegive');
@@ -513,7 +531,7 @@ const keycerttask = sutil.mkTask(res => {
 				} else
 					sockEmit(this, 'chat', {
 						mode: 1,
-						msg: to + ' is not here right now.\nFailed to deliver: ' + data.msg,
+						msg: `${to} is not here right now.\nFailed to deliver: ${data.msg}`,
 					});
 			} else {
 				genericChat(this, data);
@@ -583,16 +601,17 @@ const keycerttask = sutil.mkTask(res => {
 			}
 		},
 		foecancel: function(data) {
-			const info = this.meta;
+			const info = sockmeta.get(this);
 			if (info.duel) {
 				const foesock = Us.socks[info.duel];
 				if (foesock) {
+					const foemeta = sockmeta.get(foesock);
 					sockEmit(foesock, 'foeleft');
 					sockEmit(foesock, 'chat', {
 						mode: 1,
 						msg: data.u + ' has canceled the duel.',
 					});
-					if (foesock.meta.duel == data.u) delete foesock.meta.duel;
+					if (foemeta.duel == data.u) delete foemeta.duel;
 				}
 				delete info.duel;
 				delete info.spectators;
@@ -608,12 +627,7 @@ const keycerttask = sutil.mkTask(res => {
 					return;
 				}
 				https.get(
-					'https://api.kongregate.com/api/authenticate.json?user_id=' +
-						data.u +
-						'&game_auth_token=' +
-						data.g +
-						'&api_key=' +
-						key,
+					`https://api.kongregate.com/api/authenticate.json?user_id=${data.u}&game_auth_token=${data.g}&api_key=${key}`,
 					res => {
 						const chunks = [];
 						res.on('data', chunk => chunks.push(chunk));
@@ -635,16 +649,7 @@ const keycerttask = sutil.mkTask(res => {
 											path: '/api/submit_statistics.json',
 											method: 'POST',
 										}).on('error', e => console.log(e));
-										req.write(
-											'user_id=' +
-												data.u +
-												'\ngame_auth_token=' +
-												data.g +
-												'\napi_key=' +
-												key +
-												'\nWealth=' +
-												(user.gold + userutil.calcWealth(user.pool)),
-										);
+										req.write(`user_id=${data.u}\ngame_auth_token=${data.g}\napi_key=${key}\nWealth=${user.gold + userutil.calcWealth(user.pool)}`);
 										req.end();
 									},
 									() => {
@@ -697,8 +702,9 @@ const keycerttask = sutil.mkTask(res => {
 		},
 		pvpwant: function(data) {
 			const pendinggame = rooms[data.room];
-			this.meta.deck = data.deck;
-			this.meta.pvpstats = {
+			const thismeta = sockmeta.get(this);
+			thismeta.deck = data.deck;
+			thismeta.pvpstats = {
 				hp: data.hp,
 				markpower: data.mark,
 				deckpower: data.deck,
@@ -709,14 +715,15 @@ const keycerttask = sutil.mkTask(res => {
 			}
 			if (pendinggame && pendinggame.readyState == 1) {
 				const seed = Math.random() * MAX_INT;
-				this.meta.foe = pendinggame;
-				pendinggame.meta.foe = this;
-				const deck0 = pendinggame.meta.deck,
+				const pendmeta = sockmeta.get(pendinggame);
+				thismeta.foe = pendinggame;
+				pendmeta.foe = this;
+				const deck0 = pendmeta.deck,
 					deck1 = data.deck;
 				const owndata = { seed: seed, deck: deck0, urdeck: deck1 };
 				const foedata = { flip: true, seed: seed, deck: deck1, urdeck: deck0 };
-				const stat = this.meta.pvpstats,
-					foestat = pendinggame.meta.pvpstats;
+				const stat = thismeta.pvpstats,
+					foestat = pendmeta.pvpstats;
 				for (const key in stat) {
 					owndata['p1' + key] = stat[key];
 					foedata['p2' + key] = stat[key];
@@ -747,7 +754,7 @@ const keycerttask = sutil.mkTask(res => {
 		},
 		arenatop: function(data) {
 			db.zrevrange(
-				'arena' + (data.lv ? '1' : ''),
+				`arena${data.lv ? '1' : ''}`,
 				0,
 				19,
 				'withscores',
@@ -760,7 +767,7 @@ const keycerttask = sutil.mkTask(res => {
 						while (res[i]) {
 							const wl = res[i];
 							wl[2] = day - wl[2];
-							wl[3] = parseInt(wl[3]);
+							wl[3] = +wl[3];
 							t20.push([obj[i * 2], Math.floor(obj[i * 2 + 1])].concat(wl));
 							i++;
 						}
@@ -786,9 +793,10 @@ const keycerttask = sutil.mkTask(res => {
 			});
 		},
 		chatus: function(data) {
-			if (data.hide !== undefined) this.meta.offline = data.hide;
-			if (data.want !== undefined) this.meta.wantpvp = data.want;
-			if (data.afk !== undefined) this.meta.afk = data.afk;
+			const thismeta = sockmeta.get(this);
+			if (data.hide !== undefined) thismeta.offline = data.hide;
+			if (data.want !== undefined) thismeta.wantpvp = data.want;
+			if (data.afk !== undefined) thismeta.afk = data.afk;
 		},
 		who: function(data) {
 			sockEmit(this, 'chat', { mode: 1, msg: activeUsers().join(', ') });
@@ -796,16 +804,11 @@ const keycerttask = sutil.mkTask(res => {
 		challrecv: function(data) {
 			const foesock = Us.socks[data.f];
 			if (foesock && foesock.readyState == 1) {
-				const info = foesock.meta,
+				const info = sockmeta.get(foesock),
 					foename = data.pvp ? info.duel : info.trade ? info.trade.foe : '';
 				sockEmit(foesock, 'chat', {
 					mode: 1,
-					msg:
-						'You have sent a ' +
-						(data.pvp ? 'PvP' : 'trade') +
-						' request to ' +
-						foename +
-						'!',
+					msg: `You have sent a ${data.pvp ? 'PvP' : 'trade'} request to ${foename}!`,
 				});
 			}
 		},
@@ -824,12 +827,12 @@ const keycerttask = sutil.mkTask(res => {
 				delete Us.socks[key];
 			}
 		}
-		const info = this.meta;
+		const info = sockmeta.get(this);
 		if (info) {
 			if (info.trade) {
 				const foesock = Us.socks[info.trade.foe];
 				if (foesock && foesock.readyState == 1) {
-					const foeinfo = foesock.meta;
+					const foeinfo = sockmeta.get(foesock);
 					if (foeinfo && foeinfo.trade && Us.socks[foeinfo.trade.foe] == this) {
 						sockEmit(foesock, 'tradecanceled');
 						delete foeinfo.trade;
@@ -837,7 +840,7 @@ const keycerttask = sutil.mkTask(res => {
 				}
 			}
 			if (info.foe) {
-				const foeinfo = info.foe.meta;
+				const foeinfo = sockmeta.get(info.foe);
 				if (foeinfo && foeinfo.foe == this) {
 					sockEmit(info.foe, 'foeleft');
 					delete foeinfo.foe;
@@ -850,11 +853,12 @@ const keycerttask = sutil.mkTask(res => {
 		if (!data) return;
 		console.log(data.u, data.x);
 		if (echoEvents.has(data.x)) {
-			const foe = this.meta.trade ? Us.socks[this.meta.trade.foe] : this.meta.foe;
+			const thismeta = sockmeta.get(this);
+			const foe = thismeta.trade ? Us.socks[thismeta.trade.foe] : thismeta.foe;
 			if (foe && foe.readyState == 1) {
 				foe.send(rawdata);
 				for (let i = 1; i <= 2; i++) {
-					const spectators = (i == 1 ? this : foe).meta.spectators;
+					const spectators = (i == 1 ? thismeta : sockmeta.get(foe)).spectators;
 					if (spectators) {
 						data.spectate = i;
 						const rawmsg = JSON.stringify(data);
@@ -884,7 +888,7 @@ const keycerttask = sutil.mkTask(res => {
 		}
 	}
 	function onSocketConnection(socket) {
-		socket.meta = {};
+		sockmeta.set(socket, {});
 		socket.on('close', onSocketClose);
 		socket.on('message', onSocketMessage);
 	}

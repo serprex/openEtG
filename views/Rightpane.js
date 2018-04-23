@@ -44,10 +44,10 @@ function maybeSendChat(e) {
 			const data = { u: sock.user ? sock.user.name : '' };
 			const ndn = msg.slice(6).split('d');
 			if (!ndn[1]) {
-				data.X = parseInt(ndn[0] || 0x100000000);
+				data.X = +ndn[0] || 0x100000000;
 			} else {
-				data.A = parseInt(ndn[0]);
-				data.X = parseInt(ndn[1]);
+				data.A = +ndn[0];
+				data.X = +ndn[1];
 			}
 			sock.emit('roll', data);
 		} else if (msg.match(/^\/decks/) && sock.user) {

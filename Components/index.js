@@ -75,7 +75,7 @@ exports.Text = function(props) {
 			elec.push(<span className='ico gold' />);
 		} else if (/^\d\d?:\d\d?$/.test(piece)) {
 			const parse = piece.split(':');
-			const num = parseInt(parse[0]);
+			const num = +parse[0];
 			if (num == 0) {
 				elec.push('0');
 			} else if (num < 4) {
