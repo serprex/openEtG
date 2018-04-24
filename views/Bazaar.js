@@ -77,7 +77,7 @@ module.exports = class Bazaar extends React.Component {
 					}
 				}}
 			/>
-			{this.state.code && <Components.Card x={734} y={8} code={this.state.code} />}
+			<Components.Card x={734} y={8} code={this.state.code} />
 		</>;
 	}
 };

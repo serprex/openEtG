@@ -11,7 +11,7 @@ module.exports = connect(state => ({
 
 	getSnapshotBeforeUpdate(prevProps, prevState) {
 		const chat = this.chatRef.current;
-		if (prevProps.channel !== this.props.channel || Math.abs(chat.scrollTop - chat.scrollHeight + chat.offsetHeight) < 2) {
+		if (prevProps.channel !== this.props.channel || Math.abs(chat.scrollTop - chat.scrollHeight + chat.offsetHeight) < 8) {
 			return -1;
 		}
 		return chat.scrollTop;

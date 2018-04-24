@@ -54,7 +54,7 @@ module.exports = class Trade extends React.Component {
 		}
 		const cardpool = etgutil.deck2pool(sock.user.pool);
 		return <>
-			{!this.state.confirm || (this.state.confirm == 1 && this.state.canconfirm) ?
+			{(!this.state.confirm || (this.state.confirm == 1 && this.state.canconfirm)) &&
 				<input type='button'
 					value={this.state.confirm ? 'Confirm' : 'Trade'}
 					onClick={this.state.confirm
@@ -84,12 +84,6 @@ module.exports = class Trade extends React.Component {
 						top: this.state.confirm ? '60px' : '40px',
 					}}
 				/>
-				:
-				(this.state.confirm == 2 && <span style={{
-					position: 'absolute',
-					left: '10px',
-					top: '60px',
-				}}>Confirmed!</span>)
 			}
 			<Components.DeckDisplay
 				deck={this.state.deck}
