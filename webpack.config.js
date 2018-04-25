@@ -1,8 +1,8 @@
 module.exports = {
 	entry: {
-		main: './ui.main.js',
-		art: './ui.art.js',
-		mosaic: './ui.mosaic.js',
+		main: './ui/main.js',
+		art: './ui/art.js',
+		mosaic: './ui/mosaic.js',
 		vanilla: './vanilla/ui.main.js',
 	},
 	output: {

@@ -5,15 +5,15 @@ const fs = require('fs');
 const https = require('https');
 const httpoly = require('httpolyglot');
 const ws = require('ws');
-const etg = require('./etg');
-const Cards = require('./Cards');
-const RngMock = require('./RngMock');
-const etgutil = require('./etgutil');
-const usercmd = require('./usercmd');
-const userutil = require('./userutil');
-const sutil = require('./srv/sutil');
-const db = require('./srv/db');
-const Us = require('./srv/Us');
+const etg = require('./src/etg');
+const Cards = require('./src/Cards');
+const RngMock = require('./src/RngMock');
+const etgutil = require('./src/etgutil');
+const usercmd = require('./src/usercmd');
+const userutil = require('./src/userutil');
+const sutil = require('./src/srv/sutil');
+const db = require('./src/srv/db');
+const Us = require('./src/srv/Us');
 
 const MAX_INT = 0x100000000;
 const rooms = {};
@@ -115,7 +115,7 @@ const keycerttask = sutil.mkTask(res => {
 			}
 		}),
 		inituser: function(data, user) {
-			const starter = require('./srv/starter.json');
+			const starter = require('./src/srv/starter.json');
 			if (data.e < 1 || data.e > 13) return;
 			const sid = (data.e - 1) * 6;
 			user.pvpwins = user.pvplosses = user.aiwins = user.ailosses = 0;
@@ -619,7 +619,7 @@ const keycerttask = sutil.mkTask(res => {
 		},
 	};
 	const sockEvents = {
-		login: require('./srv/login')(sockEmit),
+		login: require('./src/srv/login')(sockEmit),
 		konglogin: function(data) {
 			db.get('kongapi', (err, key) => {
 				if (!key) {
@@ -898,7 +898,7 @@ const keycerttask = sutil.mkTask(res => {
 				key: res.key,
 				cert: res.cert,
 			},
-			require('./srv/forkcore'),
+			require('./src/srv/forkcore'),
 		)
 		.listen(13602)
 		.on('clientError', () => {});

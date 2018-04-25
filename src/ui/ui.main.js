@@ -1,8 +1,8 @@
 'use strict';
-const App = require('./views/App'),
-	Rightpane = require('./views/Rightpane'),
-	sock = require('./sock'),
-	store = require('./store'),
+const App = require('../views/App'),
+	Rightpane = require('../views/Rightpane'),
+	sock = require('../sock'),
+	store = require('../store'),
 	{ Provider } = require('react-redux'),
 	reactDOM = require('react-dom'),
 	React = require('react');

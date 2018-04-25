@@ -1,5 +1,5 @@
 'use strict';
-const atlas = require('./assets/atlas');
+const atlas = require('../../assets/atlas');
 const name = document.getElementById('aname');
 const a2n = {
 	e: 'Timpa & Ravi',

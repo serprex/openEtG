@@ -13,7 +13,7 @@ function hookRowMouseover(tr) {
 		}
 	});
 }
-const CardData = require('./Cards.json');
+const CardData = require('../Cards.json');
 const Cards = {};
 for (let i = 0; i < CardData.length - 1; i++) {
 	const Cardi = CardData[i];

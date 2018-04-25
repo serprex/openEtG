@@ -9,8 +9,7 @@ favicon.png
 .ninja_deps
 *pushserver.sh
 scripts/deploypem.sh
-oetg-cert.pem
-oetg-key.pem
+*.pem
 bundle.*.js
 bundle.*.js.map
 *.min.*
