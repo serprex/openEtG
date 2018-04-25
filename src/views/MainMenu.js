@@ -137,6 +137,9 @@ module.exports = connect(({opts}) => ({
 	}
 
 	componentDidMount() {
+		if (sock.user && sock.user.daily == 0 && sock.user.ocard) {
+			sock.user.daily = 128;
+		}
 		document.addEventListener('mousemove', this.resetTip);
 		this.props.dispatch(store.setCmds({
 			codecard: data => {
@@ -186,27 +189,7 @@ module.exports = connect(({opts}) => ({
 			],
 			aic = [<TitleText text='AI Battle' />],
 			arenac = [<TitleText text='Arena' />],
-			playc = [<TitleText text='Players' />],
-			mainc = [
-				<Rect x={196} y={4} wid={504} hei={48}>
-					<Components.Text text={this.state.tipText } />
-					<input type='button'
-						value='Next Tip'
-						onClick={() => {
-							const newTipNumber = (this.state.tipNumber + 1) % tipjar.length;
-							this.setState({
-								tipNumber: newTipNumber,
-								tipText: tipjar[newTipNumber],
-							});
-						}}
-						style={{
-							position: 'absolute',
-							right: '2px',
-							bottom: '2px',
-						}}
-					/>
-				</Rect>
-			];
+			playc = [<TitleText text='Players' />];
 		[
 			[
 				'Commoner',
@@ -341,43 +324,6 @@ module.exports = connect(({opts}) => ({
 					}}
 				/>,
 			);
-			if (this.state.showcard) {
-				mainc.push(
-					<Components.Card x={92} y={340} card={this.state.showcard} />,
-				);
-				if (sock.user.daily == 0) sock.user.daily = 128;
-			} else {
-				mainc.push(
-					<Chat channel='Main'
-						style={{
-							position: 'absolute',
-							left: '72px',
-							top: '228px',
-							width: '224px',
-							height: '300px',
-							overflow: 'hidden',
-							background: 'transparent',
-							fontSize: '14px',
-							opacity: '0.6',
-						}}
-					/>,
-					<input
-						placeholder='Chat'
-						onKeyDown={e => {
-							if (e.which == 13) {
-								if (!e.target.value.match(/^\s*$/))
-									sock.userEmit('chat', { msg: e.target.value });
-								e.target.value = '';
-							}
-						}}
-						style={{
-							position: 'absolute',
-							left: '99px',
-							top: '532px',
-						}}
-					/>,
-				);
-			}
 		}
 
 		function logout(cmd) {
@@ -388,19 +334,6 @@ module.exports = connect(({opts}) => ({
 			}
 			self.props.dispatch(store.doNav(require('./Login')));
 		}
-		mainc.push(
-			typeof kongregateAPI === 'undefined' &&
-				<input type='button'
-					value='Logout'
-					onClick={() => logout('logout')}
-					onMouseOver={this.mkSetTip('Click here to log out')}
-					style={{
-						position: 'absolute',
-						left: '744px',
-						top: '558px',
-					}}
-				/>,
-		);
 		playc.push(
 			<input
 				placeholder='Trade/Library'
@@ -457,17 +390,6 @@ module.exports = connect(({opts}) => ({
 					/>,
 				);
 			}
-			mainc.push(<input type='button'
-				value='Settings'
-				style={{
-					position: 'absolute',
-					left: '620px',
-					top: '558px',
-				}}
-				onClick={() => {
-					this.setState({ showsettings: !this.state.showsettings, changepass: false, newpass: '', newpass2: '' });
-				}}
-			/>);
 			aic.push(<div
 				style={{
 					marginTop: '132px',
@@ -575,31 +497,6 @@ module.exports = connect(({opts}) => ({
 					}}
 				/>,
 			);
-			mainc.push(
-				<Rect
-					x={86}
-					y={92}
-					wid={196}
-					hei={120}
-				>
-					<TitleText text='Stats' />
-					<Components.Text
-						text={
-							sock.user.gold +
-							'$ ' +
-							sock.user.name +
-							'\nPvE ' +
-							sock.user.aiwins +
-							' - ' +
-							sock.user.ailosses +
-							'\nPvP ' +
-							sock.user.pvpwins +
-							' - ' +
-							sock.user.pvplosses}
-					/>
-				</Rect>,
-				<CostRewardHeaders x={304} y={380} wid={292} hei={130}>{arenac}</CostRewardHeaders>,
-			);
 		}
 		const customstyle = { width: '45%', float: 'right' }
 		if (!sock.user) customstyle.marginTop = '128px';
@@ -631,167 +528,260 @@ module.exports = connect(({opts}) => ({
 				}}
 			/>,
 		);
-		mainc.push(
-			<Rect x={626} y={436} wid={196} hei={120}>{leadc}</Rect>,
-			<CostRewardHeaders x={304} y={120} wid={292} hei={240}>{aic}</CostRewardHeaders>,
-			<Rect x={620} y={92} wid={196} hei={176}>{deckc}</Rect>,
-			<Rect x={616} y={300} wid={206} hei={130}>{playc}</Rect>,
-		);
-		if (this.state.showsettings) {
-			function changeFunc() {
-				if (self.state.newpass === self.state.newpass2) {
-					sock.userEmit('passchange', { p: self.state.newpass });
-					self.setState({ changepass: false, newpass: '', newpass2: '' });
-				} else {
-					self.setState({ newpass: '', newpass2: '' });
-					self.props.dispatch(store.chatMsg('Passwords do not match', 'System'));
-				}
+		function changeFunc() {
+			if (self.state.newpass === self.state.newpass2) {
+				sock.userEmit('passchange', { p: self.state.newpass });
+				self.setState({ changepass: false, newpass: '', newpass2: '' });
+			} else {
+				self.setState({ newpass: '', newpass2: '' });
+				self.props.dispatch(store.chatMsg('Passwords do not match', 'System'));
 			}
-			mainc.push(
-				<div className='bgbox'
-					style={{
-						position: 'absolute',
-						left: '585px',
-						top: '380px',
-						width: '267px',
-						height: '156px',
-					}}>
-				<input
-					type='button'
-					value='Wipe Account'
-					onClick={() => {
-						if (this.props.foename == sock.user.name + 'yesdelete') {
-							logout('delete');
-						} else {
-							self.props.dispatch(store.chatMsg(
-								"Input '" +
-									sock.user.name +
-									"yesdelete' into Trade/Library to delete your account",
-								'System',
-							));
-						}
-					}}
-					onMouseOver={this.mkSetTip(
-						'Click here to permanently remove your account',
-					)}
-					style={{
-						position: 'absolute',
-						left: '184px',
-						top: '8px',
-					}}
-				/>
-				{this.state.changepass ? <>
-					<input
-						placeholder='New Password'
-						value={this.state.newpass}
-						onChange={e => this.setState({ newpass: e.target.value })}
-						onKeyPress={(e) => {
-							if (e.which == 13) changeFunc();
-						}}
-						style={{
-							position: 'absolute',
-							left: '8px',
-							top: '4px',
-						}}
-					/>
-					<input
-						placeholder='Confirm New'
-						value={this.state.newpass2}
-						onChange={e => this.setState({ newpass2: e.target.value })}
-						onKeyPress={(e) => {
-							if (e.which == 13) changeFunc();
-						}}
-						style={{
-							position: 'absolute',
-							left: '8px',
-							top: '32px',
-						}}
-					/>
-					<input
-						type='button'
-						value='Change Pass'
-						onClick={changeFunc}
-						style={{
-							position: 'absolute',
-							left: '8px',
-							top: '56px',
-						}}
-					/>
-				</> :
-				<input
-					type='button'
-					value='Change Pass'
-					onClick={() => this.setState({ changepass: true })}
-					style={{
-						position: 'absolute',
-						left: '8px',
-						top: '8px',
-					}}
-				/>}
-				<label
-					style={{
-						position: 'absolute',
-						left: '135px',
-						top: '88px',
-					}}>
-					<input type='checkbox'
-						value={this.props.enableSound}
-						onChange={e => this.props.dispatch(store.setOpt('enableSound', e.target.value))}
-					/>
-					Enable sound
-				</label>
-				<label
-					style={{
-						position: 'absolute',
-						left: '135px',
-						top: '53px',
-					}}>
-					<input type='checkbox'
-						value={this.props.enableMusic}
-						onChange={e => this.props.dispatch(store.setOpt('enableMusic', e.target.value))}
-					/>
-					Enable music
-				</label>
-				<label
-					style={{
-						position: 'absolute',
-						left: '8px',
-						top: '88px',
-					}}>
-					<input type='checkbox'
-						checked={this.props.hideRightpane}
-						onChange={e => this.props.dispatch(store.setOpt('hideRightpane', e.target.checked))}
-					/>
-					Hide rightpane
-				</label>
-				<label
-					style={{
-						position: 'absolute',
-						left: '8px',
-						top: '123px',
-					}}>
-					<input
-						type='checkbox'
-						checked={this.props.disableTut}
-						onChange={e => this.props.dispatch(store.setOpt('disableTut', e.target.checked))}
-					/>
-					Disable tutorial
-				</label>
-				<label
-					style={{
-						position: 'absolute',
-						left: '135px',
-						top: '123px',
-					}}>
-					<input
-						type='checkbox'
-						checked={this.props.lofiArt}
-						onChange={e => this.props.dispatch(store.setOpt('lofiArt', e.target.checked))}
-					/>
-					Lofi Art
-				</label>
-			</div>);
 		}
-		return <div className='bg_main'>{mainc}</div>;
+		return <div className='bg_main'>
+			<>
+				<Rect x={196} y={4} wid={504} hei={48}>
+					<Components.Text text={this.state.tipText } />
+					<input type='button'
+						value='Next Tip'
+						onClick={() => {
+							const newTipNumber = (this.state.tipNumber + 1) % tipjar.length;
+							this.setState({
+								tipNumber: newTipNumber,
+								tipText: tipjar[newTipNumber],
+							});
+						}}
+						style={{
+							position: 'absolute',
+							right: '2px',
+							bottom: '2px',
+						}}
+					/>
+				</Rect>
+				{sock.user && <>
+					<input type='button'
+						value='Settings'
+						style={{
+							position: 'absolute',
+							left: '620px',
+							top: '558px',
+						}}
+						onClick={() => {
+							this.setState({ showsettings: !this.state.showsettings, changepass: false, newpass: '', newpass2: '' });
+						}}
+					/>
+					<Rect
+						x={86}
+						y={92}
+						wid={196}
+						hei={120}
+					>
+						<TitleText text='Stats' />
+						<Components.Text
+							text={
+								sock.user.gold +
+								'$ ' +
+								sock.user.name +
+								'\nPvE ' +
+								sock.user.aiwins +
+								' - ' +
+								sock.user.ailosses +
+								'\nPvP ' +
+								sock.user.pvpwins +
+								' - ' +
+								sock.user.pvplosses}
+						/>
+					</Rect>
+					<CostRewardHeaders x={304} y={380} wid={292} hei={130}>{arenac}</CostRewardHeaders>
+					{ this.state.showcard ?
+						<Components.Card x={92} y={340} card={this.state.showcard} />
+						: <>
+							<Chat channel='Main'
+								style={{
+									position: 'absolute',
+									left: '72px',
+									top: '228px',
+									width: '224px',
+									height: '300px',
+									overflow: 'hidden',
+									background: 'transparent',
+									fontSize: '14px',
+									opacity: '0.6',
+								}}
+							/>
+							<input
+								placeholder='Chat'
+								onKeyDown={e => {
+									if (e.which == 13) {
+										if (!e.target.value.match(/^\s*$/))
+											sock.userEmit('chat', { msg: e.target.value });
+										e.target.value = '';
+									}
+								}}
+								style={{
+									position: 'absolute',
+									left: '99px',
+									top: '532px',
+								}}
+							/>
+						</>
+					}
+					</>
+				}
+				<Rect x={626} y={436} wid={196} hei={120}>{leadc}</Rect>,
+				<CostRewardHeaders x={304} y={120} wid={292} hei={240}>{aic}</CostRewardHeaders>,
+				<Rect x={620} y={92} wid={196} hei={176}>{deckc}</Rect>,
+				<Rect x={616} y={300} wid={206} hei={130}>{playc}</Rect>,
+				{typeof kongregateAPI === 'undefined' &&
+					<input type='button'
+						value='Logout'
+						onClick={() => logout('logout')}
+						onMouseOver={this.mkSetTip('Click here to log out')}
+						style={{
+							position: 'absolute',
+							left: '744px',
+							top: '558px',
+						}}
+					/>
+				}
+				{this.state.showsettings &&
+					<Components.Box x={585} y={380} width={267} height={156}>
+						<input
+							type='button'
+							value='Wipe Account'
+							onClick={() => {
+								if (this.props.foename == sock.user.name + 'yesdelete') {
+									logout('delete');
+								} else {
+									self.props.dispatch(store.chatMsg(
+										"Input '" +
+											sock.user.name +
+											"yesdelete' into Trade/Library to delete your account",
+										'System',
+									));
+								}
+							}}
+							onMouseOver={this.mkSetTip(
+								'Click here to permanently remove your account',
+							)}
+							style={{
+								position: 'absolute',
+								left: '184px',
+								top: '8px',
+							}}
+						/>
+						{this.state.changepass ? <>
+							<input
+								placeholder='New Password'
+								value={this.state.newpass}
+								onChange={e => this.setState({ newpass: e.target.value })}
+								onKeyPress={(e) => {
+									if (e.which == 13) changeFunc();
+								}}
+								style={{
+									position: 'absolute',
+									left: '8px',
+									top: '4px',
+								}}
+							/>
+							<input
+								placeholder='Confirm New'
+								value={this.state.newpass2}
+								onChange={e => this.setState({ newpass2: e.target.value })}
+								onKeyPress={(e) => {
+									if (e.which == 13) changeFunc();
+								}}
+								style={{
+									position: 'absolute',
+									left: '8px',
+									top: '32px',
+								}}
+							/>
+							<input
+								type='button'
+								value='Change Pass'
+								onClick={changeFunc}
+								style={{
+									position: 'absolute',
+									left: '8px',
+									top: '56px',
+								}}
+							/>
+						</> :
+						<input
+							type='button'
+							value='Change Pass'
+							onClick={() => this.setState({ changepass: true })}
+							style={{
+								position: 'absolute',
+								left: '8px',
+								top: '8px',
+							}}
+						/>}
+						<label
+							style={{
+								position: 'absolute',
+								left: '135px',
+								top: '88px',
+							}}>
+							<input type='checkbox'
+								value={this.props.enableSound}
+								onChange={e => this.props.dispatch(store.setOpt('enableSound', e.target.value))}
+							/>
+							Enable sound
+						</label>
+						<label
+							style={{
+								position: 'absolute',
+								left: '135px',
+								top: '53px',
+							}}>
+							<input type='checkbox'
+								value={this.props.enableMusic}
+								onChange={e => this.props.dispatch(store.setOpt('enableMusic', e.target.value))}
+							/>
+							Enable music
+						</label>
+						<label
+							style={{
+								position: 'absolute',
+								left: '8px',
+								top: '88px',
+							}}>
+							<input type='checkbox'
+								checked={this.props.hideRightpane}
+								onChange={e => this.props.dispatch(store.setOpt('hideRightpane', e.target.checked))}
+							/>
+							Hide rightpane
+						</label>
+						<label
+							style={{
+								position: 'absolute',
+								left: '8px',
+								top: '123px',
+							}}>
+							<input
+								type='checkbox'
+								checked={this.props.disableTut}
+								onChange={e => this.props.dispatch(store.setOpt('disableTut', e.target.checked))}
+							/>
+							Disable tutorial
+						</label>
+						<label
+							style={{
+								position: 'absolute',
+								left: '135px',
+								top: '123px',
+							}}>
+							<input
+								type='checkbox'
+								checked={this.props.lofiArt}
+								onChange={e => this.props.dispatch(store.setOpt('lofiArt', e.target.checked))}
+							/>
+							Lofi Art
+						</label>
+					</Components.Box>
+				}
+			</>
+		</div>;
 	}
 });
