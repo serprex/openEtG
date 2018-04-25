@@ -384,7 +384,7 @@ const statusValues = Object.freeze({
 });
 
 function getDamage(c) {
-	return damageHash[c.hash()] || 0;
+	return damageHash.get(c.hash()) || 0;
 }
 function estimateDamage(c, freedomChance, wallCharges, wallIndex) {
 	if (!c || c.status.get('frozen') || c.status.get('delayed')) {
@@ -440,7 +440,7 @@ function estimateDamage(c, freedomChance, wallCharges, wallIndex) {
 		atk += Math.ceil(atk / 2) * freedomChance;
 	}
 	if (c.owner.foe.sosa) atk *= -1;
-	damageHash[c.hash()] = atk;
+	damageHash.set(c.hash(), atk);
 	return atk;
 }
 function calcExpectedDamage(pl, wallCharges, wallIndex) {
@@ -513,8 +513,8 @@ function checkpassives(c) {
 				c.owner == c.owner.game.turn
 			)
 		) {
-			if (!uniquesSkill[status]) {
-				uniquesSkill[status] = true;
+			if (!uniquesSkill.has(status)) {
+				uniquesSkill.add(status);
 			} else {
 				continue;
 			}
@@ -741,14 +741,8 @@ module.exports = function(game) {
 		return -99999990;
 	}
 	const wallCharges = new Int32Array([0, 0]);
-	damageHash = [];
-	uniquesSkill = {
-		flooding: false,
-		nightfall: false,
-		tunnel: false,
-		patience: false,
-		cloak: false,
-	};
+	damageHash = new Map();
+	uniquesSkill = new Set();
 	let expectedDamage = calcExpectedDamage(game.player2, wallCharges, 0);
 	if (expectedDamage > game.player1.hp) {
 		return Math.min(expectedDamage - game.player1.hp, 500) * -999;
@@ -761,9 +755,9 @@ module.exports = function(game) {
 	for (let j = 0; j < 2; j++) {
 		if (j == 1) {
 			// Reset non global effects
-			uniquesSkill.tunnel = false;
-			uniquesSkill.patience = false;
-			uniquesSkill.cloak = false;
+			uniquesSkill.delete('tunnel');
+			uniquesSkill.delete('patience');
+			uniquesSkill.delete('cloak');
 		}
 		logNest(j);
 		const player = game.players(j);
