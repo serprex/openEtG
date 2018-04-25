@@ -97,6 +97,39 @@ function TitleText(props) {
 		{props.text}
 	</div>;
 }
+function AiButton(props) {
+	const { name, onClick, onMouseOver, y, lv } = props;
+	return <>
+		<input type='button'
+			value={name}
+			onClick={onClick}
+			onMouseOver={onMouseOver}
+			style={{
+				position: 'absolute',
+				left: '4px',
+				top: `${y}px`,
+			}}
+		/>
+		<CostText
+			n={0}
+			lv={lv}
+			style={{
+				position: 'absolute',
+				top: `${y}px`,
+				right: '114px',
+			}}
+		/>
+		<CostText
+			n={1}
+			lv={lv}
+			style={{
+				position: 'absolute',
+				top: `${y}px`,
+				right: '4px',
+			}}
+		/>
+	</>;
+}
 
 module.exports = connect(({opts}) => ({
 	remember: opts.remember,
@@ -169,81 +202,9 @@ module.exports = connect(({opts}) => ({
 	}
 
 	render() {
-		const self = this;
-
-		const deckc = [<TitleText text='Cards & Decks' />],
-			leadc = [
-				<TitleText text='Leaderboards' />,
-				<input type='button'
-					value='Wealth T50'
-					onClick={() => {
-						this.props.dispatch(store.doNav(require('./WealthTop')));
-					}}
-					onMouseOver={this.mkSetTip("See who's collected the most wealth")}
-					style={{
-						position: 'absolute',
-						left: '52px',
-					}}
-				/>,
-				<br />,
-			],
-			aic = [<TitleText text='AI Battle' />],
-			arenac = [<TitleText text='Arena' />],
-			playc = [<TitleText text='Players' />];
-		[
-			[
-				'Commoner',
-				mkAi.run(mkAi.mkAi(0)),
-				this.mkSetTip('Commoners have no upgraded cards & mostly common cards'),
-			],
-			[
-				'Mage',
-				mkAi.run(mkAi.mkPremade(1)),
-				this.mkSetTip('Mages have preconstructed decks with a couple rares'),
-			],
-			[
-				'Champion',
-				mkAi.run(mkAi.mkAi(2)),
-				this.mkSetTip('Champions have some upgraded cards'),
-			],
-			[
-				'Demigod',
-				mkAi.run(mkAi.mkPremade(3)),
-				this.mkSetTip('Demigods are extremely powerful. Come prepared for anything'),
-			],
-		].forEach(([name, onClick, onMouseOver], i) => {
-			const y = 46 + i * 22 + 'px';
-			aic.push(
-				<input type='button'
-					value={name}
-					onClick={onClick}
-					onMouseOver={onMouseOver}
-					style={{
-						position: 'absolute',
-						left: '4px',
-						top: y,
-					}}
-				/>,
-				<CostText
-					n={0}
-					lv={i}
-					style={{
-						position: 'absolute',
-						top: y,
-						right: '114px',
-					}}
-				/>,
-				<CostText
-					n={1}
-					lv={i}
-					style={{
-						position: 'absolute',
-						top: y,
-						right: '4px',
-					}}
-				/>,
-			);
-		});
+		const self = this,
+			leadc = [],
+			arenac = [];
 		for (let i = 0; i < 2; i++) {
 			function arenaAi(e) {
 				if (etgutil.decklength(sock.getDeck()) < 31) {
@@ -259,42 +220,21 @@ module.exports = connect(({opts}) => ({
 				e.target.style.display = 'none';
 			}
 			if (sock.user) {
-				const y = 46 + i * 22 + 'px';
 				arenac.push(
-					<input type='button'
-						value={'Arena' + (i + 1) + ' AI'}
+					<AiButton name={'Arena' + (i + 1) + ' AI'}
+						key={i}
 						onClick={arenaAi}
 						onMouseOver={this.mkSetTip(
 							'In the arena you will face decks from other players',
 						)}
-						style={{
-							position: 'absolute',
-							left: '4px',
-							top: y,
-						}}
-					/>,
-					<CostText
-						n={0}
-						lv={4 + i}
-						style={{
-							position: 'absolute',
-							top: y,
-							right: '114px',
-						}}
-					/>,
-					<CostText
-						n={1}
-						lv={4 + i}
-						style={{
-							position: 'absolute',
-							top: y,
-							right: '4px',
-						}}
-					/>,
+						y={46+i*22}
+						lv={4+i}
+					/>
 				);
 			}
 			leadc.push(
 				<input type='button'
+					key={i}
 					value={'Arena' + (i + 1) + ' T20'}
 					onClick={() => {
 						this.props.dispatch(store.doNav(require('./ArenaTop'), { lv: i }));
@@ -309,22 +249,6 @@ module.exports = connect(({opts}) => ({
 				/>,
 			);
 		}
-		if (sock.user) {
-			arenac.push(
-				<input type='button'
-					value='Arena Deck'
-					onClick={() => {
-						this.props.dispatch(store.doNav(require('./ArenaInfo')));
-					}}
-					onMouseOver={this.mkSetTip('Check how your arena decks are doing')}
-					style={{
-						position: 'absolute',
-						left: '20px',
-						top: '100px',
-					}}
-				/>,
-			);
-		}
 
 		function logout(cmd) {
 			if (sock.user) {
@@ -334,47 +258,14 @@ module.exports = connect(({opts}) => ({
 			}
 			self.props.dispatch(store.doNav(require('./Login')));
 		}
-		playc.push(
-			<input
-				placeholder='Trade/Library'
-				value={this.props.foename}
-				onChange={e => this.props.dispatch(store.setOptTemp('foename', e.target.value))}
-				style={{ marginLeft: '24px' }}
-			/>,
-		);
 		audio.changeSound(this.props.enableSound);
 		audio.changeMusic(this.props.enableMusic);
-		playc.push(
-			<input type='button'
-				value='PvP'
-				onClick={() => {
-					this.props.dispatch(store.doNav(require('./Challenge'), { pvp: true }));
-				}}
-				style={{
-					position: 'absolute',
-					left: '10px',
-					top: '100px',
-				}}
-			/>,
-			<input type='button'
-				value='Library'
-				onClick={() => {
-					const name = self.props.foename || (sock.user && sock.user.name);
-					if (name) this.props.dispatch(store.doNav(require('./Library'), { name }));
-				}}
-				onMouseOver={this.mkSetTip('See exactly what cards you or others own')}
-				style={{
-					position: 'absolute',
-					left: '120px',
-					top: '75px',
-				}}
-			/>,
-		);
+		const quickslots = [];
 		if (sock.user) {
-			const quickslots = [];
 			for (let i = 0; i < 10; i++) {
 				quickslots.push(
 					<input type='button'
+						key={i}
 						value={i + 1}
 						className={
 							'editbtn' +
@@ -390,144 +281,7 @@ module.exports = connect(({opts}) => ({
 					/>,
 				);
 			}
-			aic.push(<div
-				style={{
-					marginTop: '132px',
-					width: '45%',
-					float: 'left',
-					textAlign: 'right',
-				}}>
-				<input
-					type='button'
-					value='Colosseum'
-					onClick={() => {
-						this.props.dispatch(store.doNav(require('./Colosseum')));
-					}}
-					onMouseOver={this.mkSetTip('Try some daily challenges in the Colosseum')}
-				/>
-				<LabelText text='Daily Challenges' />
-			</div>,
-			<div style={{
-				marginTop: '132px',
-				width: '45%',
-				float: 'right',
-			}}>
-				<input type='button'
-					value='Quests'
-					onClick={() => {
-						this.props.dispatch(store.doNav(require('./QuestMain')));
-					}}
-					onMouseOver={this.mkSetTip('Go on an adventure')}
-				/>
-				<LabelText text='Go on an adventure' />
-				</div>
-			);
-			deckc.push(
-				<LabelText
-					text={'Deck: ' + self.props.selectedDeck}
-					style={{
-						whiteSpace: 'nowrap',
-						marginLeft: '16px',
-					}}
-				/>,
-				<div style={{ textAlign: 'center' }}>{quickslots}</div>,
-				<input type='button'
-					value='Shop'
-					onClick={() => {
-						this.props.dispatch(store.doNav(require('./Shop')));
-					}}
-					onMouseOver={this.mkSetTip(
-						'Buy booster packs which contain cards from the elements you choose',
-					)}
-					style={{
-						position: 'absolute',
-						left: '14px',
-						top: '132px',
-					}}
-				/>,
-				<input type='button'
-					value='Bazaar'
-					onClick={() => {
-						this.props.dispatch(store.doNav(require('./Bazaar')));
-					}}
-					onMouseOver={this.mkSetTip('Buy singles at a 300% premium')}
-					style={{
-						position: 'absolute',
-						left: '114px',
-						top: '132px',
-					}}
-				/>,
-				<input type='button'
-					value='Upgrade'
-					onClick={() => {
-						this.props.dispatch(store.doNav(require('./Upgrade')));
-					}}
-					onMouseOver={this.mkSetTip('Upgrade or sell cards')}
-					style={{
-						position: 'absolute',
-						left: '114px',
-						top: '108px',
-					}}
-				/>,
-			);
-			playc.push(
-				<input type='button'
-					value='Trade'
-					onClick={foe => {
-						sock.trade = typeof foe === 'string' ? foe : self.props.foename;
-						sock.userEmit('tradewant', { f: sock.trade });
-					}}
-					onMouseOver={this.mkSetTip('Initiate trading cards with another player')}
-					style={{
-						position: 'absolute',
-						left: '10px',
-						top: '75px',
-					}}
-				/>,
-				<input type='button'
-					value='Reward'
-					onClick={() => {
-						sock.userEmit('codesubmit', { code: self.props.foename });
-					}}
-					onMouseOver={this.mkSetTip('Redeem a reward code')}
-					style={{
-						position: 'absolute',
-						left: '120px',
-						top: '100px',
-					}}
-				/>,
-			);
 		}
-		const customstyle = { width: '45%', float: 'right' }
-		if (!sock.user) customstyle.marginTop = '128px';
-		aic.push(
-			<div style={customstyle}>
-				<input type='button'
-					value='Custom AI'
-					onClick={() => {
-						this.props.dispatch(store.doNav(require('./Challenge'), { pvp: false }));
-					}}
-					onMouseOver={this.mkSetTip(
-						'Play versus any deck you want, with custom stats for you & the AI',
-					)}
-				/>
-				<LabelText text='Duel a custom AI' />
-			</div>,
-		);
-		deckc.push(
-			<input type='button'
-				value='Editor'
-				onClick={() => {
-					this.props.dispatch(store.doNav(sock.user ? require('./DeckEditor') : require('./SandboxEditor')));
-				}}
-				onMouseOver={this.mkSetTip('Edit & manage your decks')}
-				style={{
-					position: 'absolute',
-					left: '14px',
-					top: '108px',
-				}}
-			/>,
-		);
 		function changeFunc() {
 			if (self.state.newpass === self.state.newpass2) {
 				sock.userEmit('passchange', { p: self.state.newpass });
@@ -578,20 +332,30 @@ module.exports = connect(({opts}) => ({
 						<TitleText text='Stats' />
 						<Components.Text
 							text={
-								sock.user.gold +
-								'$ ' +
-								sock.user.name +
-								'\nPvE ' +
-								sock.user.aiwins +
-								' - ' +
-								sock.user.ailosses +
-								'\nPvP ' +
-								sock.user.pvpwins +
-								' - ' +
-								sock.user.pvplosses}
+								`${sock.user.gold}$ ${sock.user.name}` +
+								`\nPvE ${sock.user.aiwins} - ${sock.user.ailosses}` +
+								`\nPvP ${sock.user.pvpwins} - ${sock.user.pvplosses}`
+							}
 						/>
 					</Rect>
-					<CostRewardHeaders x={304} y={380} wid={292} hei={130}>{arenac}</CostRewardHeaders>
+					<CostRewardHeaders x={304} y={380} wid={292} hei={130}>
+						<TitleText text='Arena' />
+						{sock.user &&
+							<input type='button'
+								value='Arena Deck'
+								onClick={() => {
+									this.props.dispatch(store.doNav(require('./ArenaInfo')));
+								}}
+								onMouseOver={this.mkSetTip('Check how your arena decks are doing')}
+								style={{
+									position: 'absolute',
+									left: '20px',
+									top: '100px',
+								}}
+							/>
+						}
+						{arenac}
+					</CostRewardHeaders>
 					{ this.state.showcard ?
 						<Components.Card x={92} y={340} card={this.state.showcard} />
 						: <>
@@ -627,10 +391,216 @@ module.exports = connect(({opts}) => ({
 					}
 					</>
 				}
-				<Rect x={626} y={436} wid={196} hei={120}>{leadc}</Rect>,
-				<CostRewardHeaders x={304} y={120} wid={292} hei={240}>{aic}</CostRewardHeaders>,
-				<Rect x={620} y={92} wid={196} hei={176}>{deckc}</Rect>,
-				<Rect x={616} y={300} wid={206} hei={130}>{playc}</Rect>,
+				<Rect x={626} y={436} wid={196} hei={120}>
+					<TitleText text='Leaderboards' />
+					<input type='button'
+						value='Wealth T50'
+						onClick={() => {
+							this.props.dispatch(store.doNav(require('./WealthTop')));
+						}}
+						onMouseOver={this.mkSetTip("See who's collected the most wealth")}
+						style={{
+							position: 'absolute',
+							left: '52px',
+						}}
+					/>
+					<br />
+					{leadc}
+				</Rect>
+				<CostRewardHeaders x={304} y={120} wid={292} hei={240}>
+					<TitleText text='AI Battle' />
+					<AiButton name='Commoner'
+						y={68} lv={0}
+						onClick={mkAi.run(mkAi.mkAi(0))}
+						onMouseOver={this.mkSetTip('Commoners have no upgraded cards & mostly common cards')}
+					/>
+					<AiButton name='Mage'
+						y={90} lv={1}
+						onClick={mkAi.run(mkAi.mkPremade(1))}
+						onMouseOver={this.mkSetTip('Commoners have no upgraded cards & mostly common cards')}
+					/>
+					<AiButton name='Champion'
+						y={112} lv={2}
+						onClick={mkAi.run(mkAi.mkAi(2))}
+						onMouseOver={this.mkSetTip('Commoners have no upgraded cards & mostly common cards')}
+					/>
+					<AiButton name='Demigod'
+						y={134} lv={3}
+						onClick={mkAi.run(mkAi.mkPremade(3))}
+						onMouseOver={this.mkSetTip('Commoners have no upgraded cards & mostly common cards')}
+					/>
+					{sock.user && <>
+						<div style={{
+							marginTop: '132px',
+							width: '45%',
+							float: 'left',
+							textAlign: 'right',
+						}}>
+							<input
+								type='button'
+								value='Colosseum'
+								onClick={() => {
+									this.props.dispatch(store.doNav(require('./Colosseum')));
+								}}
+								onMouseOver={this.mkSetTip('Try some daily challenges in the Colosseum')}
+							/>
+							<LabelText text='Daily Challenges' />
+						</div>
+						<div style={{
+							marginTop: '132px',
+							width: '45%',
+							float: 'right',
+						}}>
+							<input type='button'
+								value='Quests'
+								onClick={() => {
+									this.props.dispatch(store.doNav(require('./QuestMain')));
+								}}
+								onMouseOver={this.mkSetTip('Go on an adventure')}
+							/>
+							<LabelText text='Go on an adventure' />
+						</div>
+						<div style={{
+							width: '45%',
+							float: 'right',
+							marginTop: sock.user ? undefined : '128px',
+						}}>
+							<input type='button'
+								value='Custom AI'
+								onClick={() => {
+									this.props.dispatch(store.doNav(require('./Challenge'), { pvp: false }));
+								}}
+								onMouseOver={this.mkSetTip(
+									'Play versus any deck you want, with custom stats for you & the AI',
+								)}
+							/>
+							<LabelText text='Duel a custom AI' />
+						</div>
+					</>}
+				</CostRewardHeaders>
+				<Rect x={620} y={92} wid={196} hei={176}>
+					<TitleText text='Cards & Decks' />
+					<input type='button'
+						value='Editor'
+						onClick={() => {
+							this.props.dispatch(store.doNav(sock.user ? require('./DeckEditor') : require('./SandboxEditor')));
+						}}
+						onMouseOver={this.mkSetTip('Edit & manage your decks')}
+						style={{
+							position: 'absolute',
+							left: '14px',
+							top: '108px',
+						}}
+					/>
+					{sock.user && <>
+						<LabelText
+							text={'Deck: ' + self.props.selectedDeck}
+							style={{
+								whiteSpace: 'nowrap',
+								marginLeft: '16px',
+							}}
+						/>
+						<div style={{ textAlign: 'center' }}>{quickslots}</div>
+						<input type='button'
+							value='Shop'
+							onClick={() => {
+								this.props.dispatch(store.doNav(require('./Shop')));
+							}}
+							onMouseOver={this.mkSetTip(
+								'Buy booster packs which contain cards from the elements you choose',
+							)}
+							style={{
+								position: 'absolute',
+								left: '14px',
+								top: '132px',
+							}}
+						/>
+						<input type='button'
+							value='Bazaar'
+							onClick={() => {
+								this.props.dispatch(store.doNav(require('./Bazaar')));
+							}}
+							onMouseOver={this.mkSetTip('Buy singles at a 300% premium')}
+							style={{
+								position: 'absolute',
+								left: '114px',
+								top: '132px',
+							}}
+						/>
+						<input type='button'
+							value='Upgrade'
+							onClick={() => {
+								this.props.dispatch(store.doNav(require('./Upgrade')));
+							}}
+							onMouseOver={this.mkSetTip('Upgrade or sell cards')}
+							style={{
+								position: 'absolute',
+								left: '114px',
+								top: '108px',
+							}}
+						/>
+					</>}
+				</Rect>
+				<Rect x={616} y={300} wid={206} hei={130}>
+					<TitleText text='Players' />
+					<input
+						placeholder='Trade/Library'
+						value={this.props.foename}
+						onChange={e => this.props.dispatch(store.setOptTemp('foename', e.target.value))}
+						style={{ marginLeft: '24px' }}
+					/>
+					<input type='button'
+						value='PvP'
+						onClick={() => {
+							this.props.dispatch(store.doNav(require('./Challenge'), { pvp: true }));
+						}}
+						style={{
+							position: 'absolute',
+							left: '10px',
+							top: '100px',
+						}}
+					/>
+					<input type='button'
+						value='Library'
+						onClick={() => {
+							const name = self.props.foename || (sock.user && sock.user.name);
+							if (name) this.props.dispatch(store.doNav(require('./Library'), { name }));
+						}}
+						onMouseOver={this.mkSetTip('See exactly what cards you or others own')}
+						style={{
+							position: 'absolute',
+							left: '120px',
+							top: '75px',
+						}}
+					/>
+					{sock.user && <>
+						<input type='button'
+							value='Trade'
+							onClick={foe => {
+								sock.trade = typeof foe === 'string' ? foe : self.props.foename;
+								sock.userEmit('tradewant', { f: sock.trade });
+							}}
+							onMouseOver={this.mkSetTip('Initiate trading cards with another player')}
+							style={{
+								position: 'absolute',
+								left: '10px',
+								top: '75px',
+							}}
+						/>
+						<input type='button'
+							value='Reward'
+							onClick={() => {
+								sock.userEmit('codesubmit', { code: self.props.foename });
+							}}
+							onMouseOver={this.mkSetTip('Redeem a reward code')}
+							style={{
+								position: 'absolute',
+								left: '120px',
+								top: '100px',
+							}}
+						/>
+					</>}
+				</Rect>
 				{typeof kongregateAPI === 'undefined' &&
 					<input type='button'
 						value='Logout'
