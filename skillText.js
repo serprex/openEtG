@@ -210,21 +210,18 @@ const data = {
 	gaintimecharge: 'Gain a stack per own non-drawstep draw, up to 4 per turn',
 	gas: 'Summon an Unstable Gas',
 	grave: "When a death occurs, unburrowed & become of dying's kind. Maintain nocturnal",
-	give: c =>
-		'Give own target to foe. Heal self ' +
-		(c.upped ? 10 : 5) +
-		'. Ignore sanctuary, may target immaterial',
+	give: c => `Give own target to foe. Heal self ${c.upped ? 10 : 5}. Ignore sanctuary, may target immaterial`,
 	golemhit: 'Target golem attacks. May target immaterial',
 	gpull: 'Intercept attacks directed to owner',
 	gpullspell: 'Target creature intercepts attacks directed to its owner',
 	gratitude: 'Heal owner 4',
 	growth: x => {
-		x = x + '|' + x;
+		x = `${x}|${x}`;
 		return {
-			death: 'When a death occurs, gain ' + x,
-			ownfreeze: 'Gains ' + x + ' instead of freezing',
-			cast: 'Gain ' + x,
-			auto: 'Gain ' + x + ' per turn',
+			death: `When a death occurs, gain ${x}`,
+			ownfreeze: `Gains ${x} instead of freezing`,
+			cast: `Gain ${x}`,
+			auto: `Gain ${x} per turn`,
 		};
 	},
 	guard:
