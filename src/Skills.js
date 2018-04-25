@@ -523,7 +523,12 @@ const Skills = {
 		Effect.mkText('Draft', t);
 		const isborne = !t.status.get('airborne');
 		t.status.set('airborne', isborne);
-		if (isborne && t.active.cast == Skills.burrow) delete t.active.cast;
+		if (isborne) {
+			t.status.incr('dive', t.trueatk());
+			if (t.active.cast == Skills.burrow) delete t.active.cast;
+		} else {
+			t.status.incr('dive', Math.floor(t.trueatk()/-2));
+		}
 	},
 	drawcopy: (c, t) => {
 		if (c.owner != t.owner) c.owner.addCardInstance(t.clone(c.owner));

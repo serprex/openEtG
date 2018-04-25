@@ -36,12 +36,10 @@ const etg = require('./etg'),
 	Thing = require('./Thing');
 
 const data = {
-	ablaze: x => {
-		return {
-			cast: 'Gain ' + x + '|0',
-			auto: 'Gain ' + x + '|0 per turn',
-		};
-	},
+	ablaze: x => ({
+		cast: `Gain ${x}|0`,
+		auto: `Gain ${x}|0 per turn`,
+	}),
 	abomination: 'Amiable to mutation',
 	absorber: 'Produce 3:6 per attacker',
 	accelerationspell:
@@ -96,12 +94,10 @@ const data = {
 		'Sacrifice target creature to damage foe 100HP/(100+HP). Frozen targets deal 1.5x more. Poisoned creatures transfer poison',
 	catlife: 'On death, regenerate with 1 fewer life',
 	cell: 'Become Malignant if poisoned',
-	chaos: c => {
-		return (
-			(c.upped ? '20% chance to evade. ' : '') +
-			'Non-ranged attacking creatures have a 30% chance to have a random effect cast on them'
-		);
-	},
+	chaos: c => (
+		(c.upped ? '20% chance to evade. ' : '') +
+		'Non-ranged attacking creatures have a 30% chance to have a random effect cast on them'
+	),
 	chimera:
 		'Combine all your creatures to form a Chimera with momentum & gravity pull',
 	chromastat: 'Generate 1:0 per strength & health on hit',
@@ -142,7 +138,7 @@ const data = {
 	divinity: 'Add 24 to maximum health & heal 16',
 	dive: 'Double strength until next attack. Does not stack',
 	dmgproduce: 'Generate 1:0 per damage dealt',
-	draft: 'Target airborne creature loses airborne status, or vice versa',
+	draft: 'Target airborne creature loses airborne status, or vice versa. Becoming airborne dives creature, losing airborne halves next attack',
 	drainlife: 'Drains 2HP from target. Increment drain per 5:11 owned',
 	drawcopy: 'When foe discards a card, generate a copy',
 	drawequip: 'Draw next weapon or shield',
