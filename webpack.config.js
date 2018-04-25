@@ -1,9 +1,9 @@
 module.exports = {
 	entry: {
-		main: './ui/main.js',
-		art: './ui/art.js',
-		mosaic: './ui/mosaic.js',
-		vanilla: './vanilla/ui.main.js',
+		main: './src/ui/main.js',
+		art: './src/ui/art.js',
+		mosaic: './src/ui/mosaic.js',
+		vanilla: './src/vanilla/ui.main.js',
 	},
 	output: {
 		path: __dirname,
