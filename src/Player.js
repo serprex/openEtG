@@ -167,15 +167,15 @@ Player.prototype.endturn = function(discard) {
 		this.hand[discard].die();
 	}
 	this.spend(this.mark, this.markpower * (this.mark > 0 ? -1 : -3));
-	var poison = this.foe.status.get('poison');
+	const poison = this.foe.status.get('poison');
 	if (poison) this.foe.dmg(poison);
-	var patienceFlag = false,
+	let patienceFlag = false,
 		floodingFlag = false,
 		stasisFlag = false,
 		floodingPaidFlag = false,
 		freedomChance = 0;
-	for (var i = 0; i < 16; i++) {
-		var p;
+	for (let i = 0; i < 16; i++) {
+		let p;
 		if ((p = this.permanents[i])) {
 			p.trigger('auto');
 			if (~p.getIndex()) {
@@ -214,7 +214,7 @@ Player.prototype.endturn = function(discard) {
 	this.creatures.slice().forEach((cr, i) => {
 		if (cr) {
 			if (patienceFlag) {
-				var floodbuff = floodingFlag && i > 4;
+				const floodbuff = floodingFlag && i > 4;
 				cr.atk += floodbuff ? 5 : cr.status.get('burrowed') ? 4 : 2;
 				cr.buffhp(floodbuff ? 2 : 1);
 			}

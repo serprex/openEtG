@@ -182,7 +182,7 @@ const Skills = {
 		}
 	},
 	brawl: (c, t) => {
-		c.owner.creatures.forEach((cr, i) => {
+		c.owner.creatures.slice().forEach((cr, i) => {
 			if (cr) {
 				const fcr = c.owner.foe.creatures[i];
 				if (fcr) {
@@ -2053,7 +2053,7 @@ const Skills = {
 	vengeance: (c, t) => {
 		if (c.owner == t.owner && c.owner == c.owner.game.turn.foe) {
 			if (c.status.maybeDecr('charges') < 2) c.remove();
-			c.owner.creatures.forEach(cr => {
+			c.owner.creatures.slice().forEach(cr => {
 				if (cr && cr != t) {
 					cr.attack(false, 0);
 				}
