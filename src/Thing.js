@@ -136,7 +136,7 @@ Thing.prototype.hash = function() {
 	let hash =
 		(this.owner == this.owner.game.player1 ? 17 : 19) ^
 		(this.type * 0x8888888) ^
-		this.card.code ^
+		(this.card.code & 0x3fff) ^
 		this.status.hash() ^
 		(this.hp * 17 + this.atk * 31 - this.maxhp - this.usedactive * 3);
 	for (const key in this.active) {

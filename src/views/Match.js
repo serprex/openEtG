@@ -370,10 +370,10 @@ module.exports = connect()(class Match extends React.Component {
 			discarding: false,
 			resigning: false,
 			effects: null,
-			aiState: null,
-			aiCommand: false,
-			aiDelay: 0,
 		};
+		this.aiState = null;
+		this.aiCommand = false;
+		this.aiDelay = 0;
 	}
 
 	endClick(discard) {
@@ -516,26 +516,23 @@ module.exports = connect()(class Match extends React.Component {
 		const { game } = this.props;
 		if (game.turn == game.player2 && game.ai) {
 			if (game.phase == etg.PlayPhase) {
-				if (!this.state.aiCommand) {
+				let now;
+				if (!this.aiCommand) {
 					Effect.disable = true;
-					if (this.state.aiState) {
-						this.state.aiState.step(game);
+					if (this.aiState) {
+						this.aiState.step(game);
 					} else {
-						this.setState({aiState: new aiSearch(game)});
+						this.aiState = new aiSearch(game);
 					}
 					Effect.disable = false;
-					if (this.state.aiState.cmd) {
-						this.setState({aiCommand: true});
+					if (this.aiState.cmd) {
+						this.aiCommand = true;
 					}
-				}
-				let now;
-				if (this.state.aiCommand && (now = Date.now()) > this.state.aiDelay) {
-					cmds[this.state.aiState.cmd]({ bits: this.state.aiState.cmdct });
-					this.setState({
-						aiState: null,
-						aiCommand: false,
-						aiDelay: now + (game.turn == game.player1 ? 2000 : 200),
-					});
+				} else if ((now = Date.now()) > this.aiDelay) {
+					cmds[this.aiState.cmd]({ bits: this.aiState.cmdct });
+					this.aiState = null;
+					this.aiCommand = false;
+					this.aiDelay = now + (game.turn == game.player1 ? 2000 : 200);
 				}
 			} else if (game.phase === etg.MulliganPhase) {
 				cmds.mulligan({ draw: require('../ai/mulligan')(game.player2) });
