@@ -15,53 +15,44 @@ function attrval(x, d) {
 	x = +x;
 	return x === 0 ? 0 : x || d;
 }
-function AttrUi({y, name, value, onChange}) {
-	function mkmodattr(x) {
-		return () => {
-			const newval = value + x;
-			if (
-				newval >= (data.min || 0) &&
-				(!data.max || newval <= data.max) &&
-				sumscore +
-					(newval - value) * artable[name].cost <=
-					arpts
-			) {
-				onChange(newval);
-			}
-		};
-	}
-	y = 128 + y * 20 + 'px';
+function AttrUi({y, name, value, sumscore, arpts, onChange}) {
+	const top = `${128 + y * 20}px`;
 	const data = artable[name];
+	const incr = data.incr || 1;
 	return <>
 		<div style={{
 			position: 'absolute',
 			left: '4px',
-			top: y,
+			top,
 		}}>{name}</div>
-		<input type='button'
-			value='-'
-			onClick={mkmodattr(-(data.incr || 1))}
-			style={{
-				position: 'absolute',
-				left: '38px',
-				top: y,
-				width: '14px',
-			}}
-		/>
-		<input type='button'
-			value='+'
-			onClick={mkmodattr(data.incr || 1)}
-			style={{
-				position: 'absolute',
-				left: '82px',
-				top: y,
-				width: '14px',
-			}}
-		/>
+		{value - incr >= (data.min || 0) &&
+			<input type='button'
+				value='-'
+				onClick={() => onChange(value - incr)}
+				style={{
+					position: 'absolute',
+					left: '38px',
+					top,
+					width: '14px',
+				}}
+			/>
+		}
+		{(!data.max || value + incr <= data.max) && sumscore + incr * artable[name].cost <= arpts &&
+			<input type='button'
+					value='+'
+					onClick={() => onChange(value + incr)}
+					style={{
+						position: 'absolute',
+						left: '82px',
+						top,
+						width: '14px',
+					}}
+				/>
+		}
 		<div style={{
 			position: 'absolute',
 			left: '56px',
-			top: y,
+			top,
 		}}>{value}</div>
 	</>;
 }
@@ -95,60 +86,38 @@ module.exports = connect()(class ArenaEditor extends React.Component {
 			}
 		}
 		this.state = {
-			arattr: {
-				hp: attrval(props.ainfo.hp, 200),
-				mark: attrval(props.ainfo.mark, props.acard.upped ? 1 : 2),
-				draw: attrval(props.ainfo.draw, props.acard.upped ? 2 : 1),
-			},
+			hp: attrval(props.ainfo.hp, 200),
+			mark: attrval(props.ainfo.mark, props.acard.upped ? 1 : 2),
+			draw: attrval(props.ainfo.draw, props.acard.upped ? 2 : 1),
 			pool,
 			deck,
-			mark,
+			dmark: mark,
 		};
 	}
 
-	componentDidMount() {
-		this.props.dispatch(store.setCmds({
-			arenainfo: data => {
-				this.props.dispatch(store.doNav(require('../views/ArenaInfo'), data));
-			},
-		}));
-	}
-
 	render() {
-		const self = this;
 		const arpts = this.props.acard && this.props.acard.upped ? 515 : 425;
 		let sumscore = 0;
-		if (self.state.arattr) {
-			for (const k in artable) {
-				sumscore += self.state.arattr[k] * artable[k].cost;
-			}
+		for (const k in artable) {
+			sumscore += this.state[k] * artable[k].cost;
 		}
 		return <>
-			<Editor acard={this.props.acard} deck={this.state.deck} mark={this.state.mark}
+			<Editor acard={this.props.acard} deck={this.state.deck} mark={this.state.dmark}
 				pool={this.state.pool}
 				setDeck={deck => this.setState({deck: deck.filter(x => x !== this.props.acard.code)})}
-				setMark={mark => this.setState({mark})}
+				setMark={dmark => this.setState({dmark})}
 			/>
-			<AttrUi y={0} name='hp' value={self.state.arattr.hp}
-				onChange={val =>
-					self.setState({
-						arattr: { ...self.state.arattr, [name]: val },
-					})
-				}
+			<AttrUi y={0} name='hp' value={this.state.hp}
+				sumscore={sumscore} arpts={arpts}
+				onChange={val => this.setState({ hp: val })}
 			/>
-			<AttrUi y={1} name='mark' value={self.state.arattr.mark}
-				onChange={val =>
-					self.setState({
-						arattr: { ...self.state.arattr, [name]: val },
-					})
-				}
+			<AttrUi y={1} name='mark' value={this.state.mark}
+				sumscore={sumscore} arpts={arpts}
+				onChange={val => this.setState({ mark: val })}
 			/>
-			<AttrUi y={2} name='draw' value={self.state.arattr.draw}
-				onChange={val =>
-					self.setState({
-						arattr: { ...self.state.arattr, [name]: val },
-					})
-				}
+			<AttrUi y={2} name='draw' value={this.state.draw}
+				sumscore={sumscore} arpts={arpts}
+				onChange={val => this.setState({ draw: val })}
 			/>
 			<div style={{
 				position: 'absolute',
@@ -169,7 +138,9 @@ module.exports = connect()(class ArenaEditor extends React.Component {
 							etgutil.encodedeck(this.state.deck) +
 							etgutil.toTrueMarkSuffix(this.state.mark),
 						lv: this.props.acard.upped,
-						...this.state.arattr,
+						hp: this.state.hp,
+						mark: this.state.mark,
+						draw: this.state.draw,
 					};
 					if (!this.props.acreate) {
 						data.mod = true;
@@ -187,7 +158,7 @@ module.exports = connect()(class ArenaEditor extends React.Component {
 			<input type='button'
 				value='Exit'
 				onClick={() => {
-					sock.userEmit('arenainfo');
+					this.props.dispatch(store.doNav(require('../views/ArenaInfo')));
 				}}
 				style={{
 					position: 'absolute',

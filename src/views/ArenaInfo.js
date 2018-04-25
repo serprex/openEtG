@@ -22,15 +22,9 @@ function RenderInfo(props) {
 			<Components.Text
 				style={{ position: 'absolute', left: '100px', top: 4 + y + 'px' }}
 				text={
-					'W-L: ' +
-					(info.win || 0) +
-					' - ' +
-					(info.loss || 0) +
-					', Rank: ' +
-					(info.rank == undefined ? 'Inactive' : info.rank + 1) +
-					', ' +
-					((info.win || 0) * 3 + (info.loss || 0) * 1) +
-					'$'}
+					`W-L: ${info.win || 0} - ${info.loss || 0}` +
+					`, Rank: ${info.rank == undefined ? 'Inactive' : info.rank + 1}` +
+					`, ${(info.win || 0) * 3 + (info.loss || 0)}$`}
 			/>
 			<input readOnly
 				style={{ position: 'absolute', left: '330px', top: 4 + y + 'px', width: '190px' }}
