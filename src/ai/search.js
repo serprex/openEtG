@@ -73,10 +73,10 @@ function searchSkill(active, c, t) {
 	);
 }
 AiSearch.prototype.step = function(game, previous) {
-	const tend = Date.now() + 30, casthash = this.casthash;
+	const tend = Date.now() + 30;
 	let currentEval = this.eval,
 		nth = this.nth;
-	const iterLoop = (game, n, cmdct0) => {
+	const iterLoop = (game, n, cmdct0, casthash) => {
 		const incnth = tgt => {
 			nth++;
 			return iterCore(tgt) && Date.now() > tend;
@@ -135,7 +135,7 @@ AiSearch.prototype.step = function(game, previous) {
 						currentEval = v;
 					}
 					if (n && v - currentEval < 24) {
-						iterLoop(gameClone, 0, cbits | (tbits << 9), []);
+						iterLoop(gameClone, 0, cbits | (tbits << 9), new Set());
 					}
 				}
 			};
@@ -193,7 +193,7 @@ AiSearch.prototype.step = function(game, previous) {
 		}
 		return false;
 	};
-	const ret = iterLoop(game, 1, -1);
+	const ret = iterLoop(game, 1, -1, this.casthash);
 	if (ret) {
 		this.nth = nth;
 		this.eval = currentEval;
