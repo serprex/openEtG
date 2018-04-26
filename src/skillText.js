@@ -79,7 +79,7 @@ const data = {
 		);
 	},
 	bounce: "Return to owner's hand instead of dying",
-	bravery: 'Foe draws 2 cards, you draw an equal amount of cards',
+	bravery: 'Foe draws 2 cards, draw an equal amount of cards',
 	brawl:
 		'Own creatures attack. If a creature exists in opposing slot, they duel instead. Consumes remaining 1:3',
 	brew: 'Generate a random Alchemy card',
@@ -99,7 +99,7 @@ const data = {
 		'Non-ranged attacking creatures have a 30% chance to have a random effect cast on them'
 	),
 	chimera:
-		'Combine all your creatures to form a Chimera with momentum & gravity pull',
+		'Combine all own creatures to form a Chimera with momentum & gravity pull',
 	chromastat: 'Generate 1:0 per strength & health on hit',
 	clear: 'Remove statuses from target creature, reduce delays by 1, & heal 1',
 	cold: '30% chance to freeze non-ranged attackers for 3',
@@ -121,7 +121,7 @@ const data = {
 	deathwish: 'Intercepts targeting on allies',
 	deckblast: 'Spell damage foe per card in deck. Discard deck',
 	deepdive:
-		'Burrow, replace active with "2:3 Freeze target permanent", next turn unburrow into the air & triple strength until next attack',
+		'Burrow, replace active with "2:3 Freeze target permanent" while burrowed, next turn unburrow into the air & triple strength until next attack',
 	deja: 'Remove active & summon copy',
 	deployblobs: 'Summon 3 Blobs & gain -2|-2',
 	despair:
@@ -267,7 +267,7 @@ const data = {
 		return 'Lasts ' + charges + ' turn' + (charges == 1 ? '' : 's');
 	},
 	luciferin:
-		'All your creatures without skills produce 1:8 per turn. Heal owner 10',
+		'All own creatures without skills produce 1:8 per turn. Heal owner 10',
 	lycanthropy: 'Gain 5|5 & become nocturnal',
 	martyr: 'Increment strength per damage received',
 	mend: 'Heal target creature 10',
@@ -341,7 +341,7 @@ const data = {
 	},
 	poisonfoe: 'May apply poison to foe on play',
 	powerdrain:
-		"Drain half the target creature's strength & health, adding it to one of your creatures",
+		"Drain half target creature's strength & health, adding it to one of own creatures",
 	precognition: "Reveal foe's hand until end of their turn. Draw",
 	predator:
 		'Attack again if foe holds more than 4 cards, discard their last card if so',
