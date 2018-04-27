@@ -138,7 +138,6 @@ module.exports = connect(({user, opts}) => ({
 	enableSound: opts.enableSound,
 	enableMusic: opts.enableMusic,
 	hideRightpane: opts.hideRightpane,
-	offline: opts.offline,
 	disableTut: opts.disableTut,
 	lofiArt: opts.lofiArt,
 }))(class MainMenu extends React.Component {

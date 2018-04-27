@@ -56,14 +56,14 @@ const SkillsValues = Object.freeze({
 	alphawolf: c => c.type == etg.Spell ? 3 : 0,
 	animateweapon: 4,
 	antimatter: 12,
-	appease: (c) =>
+	appease: c =>
 		c.type == etg.Spell
 			? -6
 			: c.status.get('appeased') ? 0 : c.trueatk() * -1.5,
 	bblood: 7,
 	beguilestop: c => -getDamage(c),
 	bellweb: 1,
-	blackhole: (c) => {
+	blackhole: c => {
 		let a = 0,
 			fq = c.owner.foe.quanta;
 		for (let i = 1; i < 13; i++) {
@@ -73,11 +73,11 @@ const SkillsValues = Object.freeze({
 	},
 	bless: 4,
 	boneyard: 3,
-	bounce: (c) => c.card.cost + (c.card.upped ? 1 : 0),
-	bravery: 3,
+	bounce: c => c.card.cost + (c.card.upped ? 1 : 0),
+	bravery:c => Math.min(4, 8 - Math.max(c.owner.hand.length - 1, c.owner.foe.hand.length)),
 	brawl: 8,
 	brew: 4,
-	brokenmirror: (c) =>
+	brokenmirror: c =>
 		c.owner.foe.shield && c.owner.foe.shield.status.get('reflective')
 			? -3
 			: 2,
@@ -85,7 +85,7 @@ const SkillsValues = Object.freeze({
 	butterfly: 12,
 	catapult: 6,
 	chimera: 4,
-	chromastat: (c) =>
+	chromastat: c =>
 		1 +
 		(c.type == etg.Spell
 			? c.card.health + c.card.attack
@@ -98,15 +98,15 @@ const SkillsValues = Object.freeze({
 	cpower: 4,
 	cseed: 4,
 	cseed2: 4,
-	creatureupkeep: (c) => c.owner.foe.countcreatures() - c.owner.countcreatures() / 2,
+	creatureupkeep: c => c.owner.foe.countcreatures() - c.owner.countcreatures() / 2,
 	darkness: 1,
 	deadalive: 2,
 	deathwish: 1,
-	deckblast: (c) => c.owner.deck.length / 2,
+	deckblast: c => c.owner.deck.length / 2,
 	deepdive: (c, ttatk) => c.type == etg.Spell ? c.card.attack : ttatk / 1.5,
 	deepdiveproc: (c, ttatk) => c.type == etg.Spell ? c.card.attack : ttatk,
 	deja: 4,
-	deployblobs: (c) =>
+	deployblobs: c =>
 		2 +
 		(c.type == etg.Spell
 			? Math.min(c.card.attack, c.card.health)
@@ -114,8 +114,8 @@ const SkillsValues = Object.freeze({
 			4,
 	destroy: 8,
 	destroycard: 1,
-	devour: (c) => 2 + (c.type == etg.Spell ? c.card.health : c.truehp()),
-	disarm: (c) =>
+	devour: c => 2 + (c.type == etg.Spell ? c.card.health : c.truehp()),
+	disarm: c =>
 		!c.owner.foe.weapon
 			? 0.1
 			: c.owner.foe.hand.length == 8 ? 0.5 : c.owner.foe.weapon.card.cost,
@@ -160,7 +160,7 @@ const SkillsValues = Object.freeze({
 	fungusrebirth: 1,
 	gas: 5,
 	give: 1,
-	golemhit: (c) => {
+	golemhit: c => {
 		let dmg = 0;
 		for (let i = 0; i < 23; i++) {
 			const cr = c.owner.creatures[i];
@@ -176,24 +176,24 @@ const SkillsValues = Object.freeze({
 		}
 		return dmg;
 	},
-	gpull: (c) => c.type == etg.Spell || c != c.owner.gpull ? 2 : 0,
+	gpull: c => c.type == etg.Spell || c != c.owner.gpull ? 2 : 0,
 	gpullspell: 3,
 	gratitude: 4,
 	grave: 1,
 	'growth 1': 2,
 	'growth 2': 5,
 	guard: 4,
-	halveatk: (c) => {
+	halveatk: c => {
 		let atk;
 		return c.type == etg.Spell
 			? -c.card.attack / 4
 			: ((atk = c.trueatk()) < 0) - (atk > 0);
 	},
-	hasten: (c) => Math.min(c.owner.deck.length / 4, 10),
+	hasten: c => Math.min(c.owner.deck.length / 4, 10),
 	hatch: 3,
 	heal: 8,
 	heatmirror: 2,
-	hitownertwice: (c) => (c.type == etg.Spell ? c.card.attack : c.trueatk()) * -2,
+	hitownertwice: c => (c.type == etg.Spell ? c.card.attack : c.trueatk()) * -2,
 	holylight: 3,
 	hope: 2,
 	icebolt: 10,
@@ -225,12 +225,12 @@ const SkillsValues = Object.freeze({
 	mitosisspell: 6,
 	momentum: 2,
 	mutation: 4,
-	neuro: (c) =>
+	neuro: c =>
 		c.owner.foe.status.get('neuro')
 			? evalactive(c, parseSkill('poison 1')) + 0.1
 			: 6,
-	neuroify: (c) => c.owner.foe.status.get('neuro') ? 1 : 5,
-	nightmare: (c) => {
+	neuroify: c => c.owner.foe.status.get('neuro') ? 1 : 5,
+	nightmare: c => {
 		let n = 0;
 		c.owner.hand.forEach(inst => {
 			if (inst.card.isOf(Cards.Nightmare)) n++;
@@ -243,7 +243,7 @@ const SkillsValues = Object.freeze({
 	nullspell: 4,
 	nymph: 7,
 	ouija: 3,
-	overdrive: (c) => c.truehp() - 1,
+	overdrive: c => c.truehp() - 1,
 	overdrivespell: 5,
 	pacify: 5,
 	pairproduce: 2,
@@ -288,7 +288,7 @@ const SkillsValues = Object.freeze({
 	sadism: 5,
 	salvage: 2,
 	sanctuary: 6,
-	scramble: (c) => {
+	scramble: c => {
 		let a = 0,
 			fq = c.owner.foe.quanta;
 		for (let i = 1; i < 13; i++) {
@@ -323,14 +323,14 @@ const SkillsValues = Object.freeze({
 	tempering: [2, 3],
 	tesseractsummon: 3,
 	throwrock: 4,
-	tick: (c) => c.type == etg.Spell ? 1 : 1 + (c.maxhp - c.truehp()) / c.maxhp,
+	tick: c => c.type == etg.Spell ? 1 : 1 + (c.maxhp - c.truehp()) / c.maxhp,
 	tornado: 9,
 	trick: 4,
-	turngolem: (c) => c.status.get('storedpower') >> 1,
+	turngolem: c => c.status.get('storedpower') >> 1,
 	upkeep: -0.5,
 	upload: 3,
 	vampire: (c, ttatk) => (c.type == etg.Spell ? c.card.attack : ttatk) * 0.7,
-	virtue: (c) =>
+	virtue: c =>
 		c.type == etg.Spell
 			? c.owner.foe.shield
 				? Math.min(c.owner.foe.shield.truedr(), c.card.attack)
@@ -338,10 +338,10 @@ const SkillsValues = Object.freeze({
 			: (c.trueatk() - getDamage(c)) / 1.5,
 	virusplague: 1,
 	void: 5,
-	voidshell: (c) => (c.owner.maxhp - c.owner.hp) / 10,
+	voidshell: c => (c.owner.maxhp - c.owner.hp) / 10,
 	quantagift: 4,
 	web: 1,
-	wind: (c) => c.status.get('storedAtk') / 2 - 2,
+	wind: c => c.status.get('storedAtk') / 2 - 2,
 	wisdom: 4,
 	yoink: 4,
 	vengeance: 2,
@@ -352,23 +352,23 @@ const SkillsValues = Object.freeze({
 	pillspi: pillarval,
 	pillcar: pillarval,
 	absorber: 5,
-	blockwithcharge: (c) => c.status.get('charges') / (1 + c.owner.foe.countcreatures() * 2),
+	blockwithcharge: c => c.status.get('charges') / (1 + c.owner.foe.countcreatures() * 2),
 	cold: 7,
 	despair: 5,
-	evade100: (c) => !c.status.get('charges') && c.owner == c.owner.game.turn ? 0 : 1,
+	evade100: c => !c.status.get('charges') && c.owner == c.owner.game.turn ? 0 : 1,
 	'evade 40': 1,
 	'evade 50': 1,
 	firewall: 7,
 	chaos: [8, 9],
 	skull: 5,
 	slow: 6,
-	solar: (c) => {
+	solar: c => {
 		const coq = c.owner.quanta[etg.Light];
 		return 5 - 4 * coq / (4 + coq);
 	},
 	thorn: 5,
 	weight: 5,
-	wings: (c) => !c.status.get('charges') && c.owner == c.owner.game.turn ? 0 : 6,
+	wings: c => !c.status.get('charges') && c.owner == c.owner.game.turn ? 0 : 6,
 });
 const statusValues = Object.freeze({
 	airborne: 0.2,
@@ -376,9 +376,9 @@ const statusValues = Object.freeze({
 	voodoo: 1,
 	swarm: 1,
 	tunnel: 3,
-	cloak: (c) => !c.status.get('charges') && c.owner == c.owner.game.turn ? 0 : 4,
-	flooding: (c) => c.owner.foe.countcreatures() - 3,
-	patience: (c) => 1 + c.owner.countcreatures() * 2,
+	cloak: c => !c.status.get('charges') && c.owner == c.owner.game.turn ? 0 : 4,
+	flooding: c => c.owner.foe.countcreatures() - 3,
+	patience: c => 1 + c.owner.countcreatures() * 2,
 	freedom: 5,
 	reflective: 1,
 });

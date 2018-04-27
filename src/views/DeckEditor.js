@@ -65,6 +65,7 @@ module.exports = connect(({user, opts}) => ({
 		function saveDeck(name, force) {
 			if (self.state.deck.length == 0) {
 				sock.userExec('rmdeck', { name });
+				self.props.dispatch(store.setOpt('deck', ''));
 				return;
 			}
 			const dcode =
