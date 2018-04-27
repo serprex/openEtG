@@ -136,7 +136,7 @@ module.exports = connect(({user}) => ({user}))(class ArenaEditor extends React.C
 					const data = {
 						d:
 							etgutil.encodedeck(this.state.deck) +
-							etgutil.toTrueMarkSuffix(this.state.mark),
+							etgutil.toTrueMarkSuffix(this.state.dmark),
 						lv: this.props.acard.upped,
 						hp: this.state.hp,
 						mark: this.state.mark,

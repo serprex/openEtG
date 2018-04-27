@@ -96,7 +96,7 @@ const sockEvents = {
 			ai: true,
 		});
 		gamedata.game.cost = userutil.arenaCost(data.lv);
-		const state = store.store.getState();
+		const {user} = store.store.getState();
 		store.store.dispatch(store.updateUser({
 			gold: user.gold - gamedata.game.cost,
 		}));
@@ -175,7 +175,7 @@ socket.onclose = function() {
 };
 exports.userEmit = function(x, data) {
 	if (!data) data = {};
-	const user = store.store.getState().user;
+	const {user} = store.store.getState();
 	data.u = user.name;
 	data.a = user.auth;
 	exports.emit(x, data);
