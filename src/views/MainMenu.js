@@ -276,7 +276,7 @@ module.exports = connect(({user, opts}) => ({
 						onClick={() => {
 							const deckname = self.props.user.qecks[i] || '';
 							sock.userExec('setdeck', { name: deckname });
-							self.props.dispatch(store.setOptTemp('selectedDeck', self.props.user.selectedDeck));
+							self.props.dispatch(store.setOptTemp('selectedDeck', deckname));
 							self.props.dispatch(store.setOpt('deck', sock.getDeck()));
 						}}
 					/>,

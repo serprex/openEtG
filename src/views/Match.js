@@ -1063,7 +1063,7 @@ module.exports = connect(({user}) => ({user}))(class Match extends React.Compone
 				}}
 			/>
 		);
-		if (!self.props.data.spectate && game.turn == game.player1) {
+		if (!self.props.data.spectate && (game.turn == game.player1 || game.winner)) {
 			if (cancelText) {
 				children.push(
 					<input type='button'
