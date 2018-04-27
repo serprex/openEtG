@@ -61,7 +61,7 @@ function maybeSendChat(e) {
 				return <div>
 					<a href={`deck/${deck}`} target='_blank' className={'ico ce' + etgutil.fromTrueMark(parseInt(deck.slice(-3), 32))} />
 					<span onClick={e => {
-						store.store.dispatch(store.updateUser({ selectedDeck: name }));
+						sock.userExec('setdeck', { name });
 						store.store.dispatch(store.setOpt('deck', deck));
 					}}>{name}</span>
 				</div>;
