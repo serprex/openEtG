@@ -5,24 +5,33 @@ const etgutil = require('../etgutil'),
 	{connect} = require('react-redux'),
 	React = require('react');
 
+function processDeck(dcode) {
+	let mark = 0,
+		deck = etgutil.decodedeck(dcode);
+	for (let i = deck.length - 1; i >= 0; i--) {
+		if (!(deck[i] in Cards.Codes)) {
+			const index = etgutil.fromTrueMark(deck[i]);
+			if (~index) {
+				mark = index;
+			}
+			deck.splice(i, 1);
+		}
+	}
+	return { mark, deck };
+}
+
 module.exports = connect(state => ({
 	deck: state.opts.deck,
 }))(class SandboxEditor extends React.Component {
 	constructor(props) {
 		super(props);
 
-		let mark = 0,
-			deck = etgutil.decodedeck(props.deck);
-		for (let i = deck.length - 1; i >= 0; i--) {
-			if (!(deck[i] in Cards.Codes)) {
-				const index = etgutil.fromTrueMark(deck[i]);
-				if (~index) {
-					mark = index;
-				}
-				deck.splice(i, 1);
-			}
-		}
-		this.state = { mark, deck };
+		this.deckRef = React.createRef();
+		this.state = processDeck(props.deck);
+	}
+
+	componentDidMount() {
+		this.deckRef.current.setSelectionRange(0, 999);
 	}
 
 	render() {
@@ -30,6 +39,19 @@ module.exports = connect(state => ({
 			<Editor deck={this.state.deck} mark={this.state.mark} pool={this.state.pool}
 				setDeck={deck => this.setState({deck})}
 				setMark={mark => this.setState({mark})}
+			/>
+			<input placeholder='Deck'
+				autoFocus
+				value={this.props.deck}
+				style={{
+					position: 'absolute',
+					left: '520px',
+					top: '238px',
+					width: '190px',
+				}}
+				onChange={e => this.setState(processDeck(e.target.value))}
+				ref={this.deckRef}
+				onClick={e => e.target.setSelectionRange(0, 999)}
 			/>
 			<input type='button'
 				value='Save & Exit'

@@ -23,7 +23,6 @@ if (typeof kongregateAPI === 'undefined') {
 						if (!data.accountbound && !data.pool) {
 							this.props.dispatch(store.doNav(require('./ElementSelect'), { user: data }));
 						} else {
-							this.props.dispatch(store.setOptTemp('selectedDeck', data.selectedDeck));
 							this.props.dispatch(store.setOptTemp('deck', sock.getDeck()));
 							this.props.dispatch(store.doNav(require('./MainMenu')));
 						}
@@ -156,7 +155,6 @@ if (typeof kongregateAPI === 'undefined') {
 								if (!data.accountbound && !data.pool) {
 									this.props.dispatch(store.doNav(require('./ElementSelect'), { user: data }));
 								} else {
-									this.props.dispatch(store.setOptTemp('selectedDeck', data.selectedDeck));
 									this.props.dispatch(store.doNav(require('./MainMenu')));
 								}
 							} else {

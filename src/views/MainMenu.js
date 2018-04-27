@@ -139,7 +139,6 @@ module.exports = connect(({user, opts}) => ({
 	enableMusic: opts.enableMusic,
 	hideRightpane: opts.hideRightpane,
 	offline: opts.offline,
-	selectedDeck: opts.selectedDeck,
 	disableTut: opts.disableTut,
 	lofiArt: opts.lofiArt,
 }))(class MainMenu extends React.Component {
@@ -270,13 +269,11 @@ module.exports = connect(({user, opts}) => ({
 						value={i + 1}
 						className={
 							'editbtn' +
-							(self.props.selectedDeck == self.props.user.qecks[i]
+							(self.props.user.selectedDeck == self.props.user.qecks[i]
 								? ' selectedbutton'
 								: '')}
 						onClick={() => {
-							const deckname = self.props.user.qecks[i] || '';
-							sock.userExec('setdeck', { name: deckname });
-							self.props.dispatch(store.setOptTemp('selectedDeck', deckname));
+							sock.userExec('setdeck', { name: self.props.user.qecks[i] || '' });
 							self.props.dispatch(store.setOpt('deck', sock.getDeck()));
 						}}
 					/>,
@@ -495,7 +492,7 @@ module.exports = connect(({user, opts}) => ({
 					/>
 					{self.props.user && <>
 						<LabelText
-							text={'Deck: ' + self.props.selectedDeck}
+							text={'Deck: ' + self.props.user.selectedDeck}
 							style={{
 								whiteSpace: 'nowrap',
 								marginLeft: '16px',

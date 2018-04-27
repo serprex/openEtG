@@ -259,6 +259,7 @@ const Skills = {
 		chim.atk = atk;
 		chim.maxhp = chim.hp = hp;
 		chim.status.set('momentum', 1);
+		chim.status.set('airborne', 1);
 		chim.type = etg.Creature;
 		c.owner.creatures[0] = chim;
 		c.owner.creatures.length = 1;

@@ -10,7 +10,6 @@ const etgutil = require('../etgutil'),
 module.exports = connect(({user, opts}) => ({
 	user,
 	deck: opts.deck,
-	selectedDeck: opts.selectedDeck,
 }))(class DeckEditor extends React.Component {
 	constructor(props) {
 		super(props);
@@ -39,7 +38,7 @@ module.exports = connect(({user, opts}) => ({
 	}
 
 	static getDerivedStateFromProps(nextProps, prevState) {
-		if (nextProps.selectedDeck === prevState.selectedDeck) return null;
+		if (nextProps.user.selectedDeck === prevState.selectedDeck) return null;
 		let mark = 0,
 			deck = etgutil.decodedeck(nextProps.deck);
 		for (let i = deck.length - 1; i >= 0; i--) {
@@ -52,8 +51,8 @@ module.exports = connect(({user, opts}) => ({
 			}
 		}
 		return { mark, deck,
-			deckname: nextProps.selectedDeck,
-			selectedDeck: nextProps.selectedDeck,
+			deckname: nextProps.user.selectedDeck,
+			selectedDeck: nextProps.user.selectedDeck,
 		};
 	}
 
@@ -63,9 +62,9 @@ module.exports = connect(({user, opts}) => ({
 
 	render() {
 		const self = this;
-		function saveDeck(force) {
+		function saveDeck(name, force) {
 			if (self.state.deck.length == 0) {
-				sock.userExec('rmdeck', { name: self.props.user.selectedDeck });
+				sock.userExec('rmdeck', { name });
 				return;
 			}
 			const dcode =
@@ -73,23 +72,20 @@ module.exports = connect(({user, opts}) => ({
 					etgutil.toTrueMarkSuffix(self.state.mark),
 				olddeck = sock.getDeck();
 			if (olddeck != dcode) {
-				sock.userExec('setdeck', { d: dcode, name: self.props.user.selectedDeck });
+				sock.userExec('setdeck', { d: dcode, name });
 				self.props.dispatch(store.setOpt('deck', sock.getDeck()));
 			} else if (force)
-				sock.userExec('setdeck', { name: self.props.user.selectedDeck });
+				sock.userExec('setdeck', { name });
 		}
-		function loadDeck(x) {
-			if (!x) return;
-			saveDeck();
-			self.props.dispatch(store.updateUser({ selectedDeck: x }));
-			self.props.dispatch(store.setOptTemp('selectedDeck', x));
+		function loadDeck(name) {
+			if (!name) return;
+			saveDeck(self.props.user.selectedDeck);
+			sock.userExec('setdeck', { name });
 			self.props.dispatch(store.setOpt('deck', sock.getDeck()));
 		}
 		function saveButton() {
 			if (self.state.deckname) {
-				self.props.dispatch(store.updateUser({ selectedDeck: self.state.deckname }));
-				self.props.dispatch(store.setOptTemp('selectedDeck', self.state.deckname));
-				saveDeck();
+				saveDeck(self.state.deckname);
 			}
 		}
 		const buttons = [];
@@ -144,8 +140,7 @@ module.exports = connect(({user, opts}) => ({
 				}}
 			/>
 			<Tutor.Editor x={4} y={220} />
-			<input
-				placeholder='Deck'
+			<input placeholder='Deck'
 				autoFocus
 				value={this.props.deck}
 				style={{
@@ -212,7 +207,7 @@ module.exports = connect(({user, opts}) => ({
 			<input type='button'
 				value='Save & Exit'
 				onClick={() => {
-					saveDeck(true);
+					saveDeck(this.props.user.selectedDeck, true);
 					this.props.dispatch(store.doNav(require('../views/MainMenu')));
 				}}
 				style={{
