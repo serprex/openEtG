@@ -291,7 +291,7 @@ const keycerttask = sutil.mkTask(res => {
 						});
 					} else {
 						user.gold += g;
-						sockEmit(this, 'codegold', { g: g });
+						sockEmit(this, 'codegold', { g });
 						db.hdel('CodeHash', data.code);
 					}
 				} else if (type.charAt(0) == 'C') {
@@ -302,7 +302,7 @@ const keycerttask = sutil.mkTask(res => {
 						db.hdel('CodeHash', data.code);
 					} else
 						sockEmit(this, 'chat', { mode: 1, msg: `Unknown card: ${type}` });
-				} else if (type.replace(/^!/, '') in userutil.rewardwords) {
+				} else if (type.replace(/^!?(upped)?/, '') in userutil.rewardwords) {
 					sockEmit(this, 'codecard', { type });
 				} else {
 					sockEmit(this, 'chat', {
