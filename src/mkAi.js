@@ -12,20 +12,21 @@ const etgutil = require('./etgutil'),
 exports.mkPremade = function(level, daily) {
 	const name = level == 1 ? 'mage' : 'demigod';
 	return () => {
-		const urdeck = sock.getDeck();
-		if (etgutil.decklength(urdeck) < (sock.user ? 31 : 11)) {
+		const urdeck = sock.getDeck(),
+			{user} = store.store.getState();
+		if (etgutil.decklength(urdeck) < (user ? 31 : 11)) {
 			return;
 		}
 		const cost = daily !== undefined ? 0 : userutil.pveCostReward[level * 2];
 		let foedata;
-		if (sock.user) {
+		if (user) {
 			if (daily === undefined) {
-				if (sock.user.gold < cost) {
+				if (user.gold < cost) {
 					store.store.dispatch(store.chatMsg(`Requires ${cost}$`, 'System'));
 					return;
 				}
 			} else {
-				foedata = Decks[name][sock.user[level == 1 ? 'dailymage' : 'dailydg']];
+				foedata = Decks[name][user[level == 1 ? 'dailymage' : 'dailydg']];
 			}
 		}
 		if (!foedata) foedata = RngMock.choose(Decks[name]);
@@ -44,7 +45,7 @@ exports.mkPremade = function(level, daily) {
 			gameData.p2markpower = 3;
 			gameData.p2drawpower = 2;
 		}
-		if (!sock.user) options.parsepvpstats(gameData);
+		if (!user) options.parsepvpstats(gameData);
 		else gameData.cost = cost;
 		if (daily !== undefined) gameData.daily = daily;
 		return mkGame(gameData);
@@ -82,13 +83,14 @@ const randomNames = [
 ];
 exports.mkAi = function(level, daily) {
 	return () => {
-		const urdeck = sock.getDeck();
-		if (etgutil.decklength(urdeck) < (sock.user ? 31 : 9)) {
+		const urdeck = sock.getDeck(),
+			{user} = store.store.getState();
+		if (etgutil.decklength(urdeck) < (user ? 31 : 9)) {
 			return;
 		}
 		const cost = daily !== undefined ? 0 : userutil.pveCostReward[level * 2];
-		if (sock.user && cost) {
-			if (sock.user.gold < cost) {
+		if (user && cost) {
+			if (user.gold < cost) {
 				store.store.dispatch(store.chatMsg(`Requires ${cost}$`, 'System'));
 				return;
 			}
@@ -106,7 +108,7 @@ exports.mkAi = function(level, daily) {
 			p2drawpower: level == 2 ? 2 : 1,
 			ai: true,
 		};
-		if (!sock.user) options.parsepvpstats(gameData);
+		if (!user) options.parsepvpstats(gameData);
 		else gameData.cost = cost;
 		gameData.level = level;
 		if (daily !== undefined) gameData.daily = daily;

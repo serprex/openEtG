@@ -11,12 +11,14 @@ const etg = require('../etg'),
 	mkGame = require('../mkGame'),
 	Components = require('../Components'),
 	store = require('../store'),
+	{connect} = require('react-redux'),
 	React = require('react'),
 	streak200 = new Uint8Array([10, 10, 15, 20, 15, 20]);
 
-module.exports = class Result extends React.Component {
+module.exports = connect(({user}) => ({user}))(class Result extends React.Component {
 	constructor(props) {
 		super(props);
+		this.state = {};
 		this.onkeydown = this.onkeydown.bind(this);
 		this.rematch = this.rematch.bind(this);
 		this.exitFunc = this.exitFunc.bind(this);
@@ -36,7 +38,7 @@ module.exports = class Result extends React.Component {
 	}
 
 	exitFunc() {
-		const game = this.props.game;
+		const {game} = this.props;
 		if (game.quest) {
 			if (game.winner === game.player1 && game.choicerewards) {
 				store.store.dispatch(store.doNav(require('./Reward'), {
@@ -102,20 +104,10 @@ module.exports = class Result extends React.Component {
 
 	componentDidMount() {
 		document.addEventListener('keydown', this.onkeydown);
-	}
-
-	componentWillUnmount() {
-		document.removeEventListener('keydown', this.onkeydown);
-	}
-
-	render() {
 		const game = this.props.game,
 			data = this.props.data;
 		const winner = game.winner === game.player1,
 			foeDeck = data.p2deck,
-			children = [
-				<Components.ExitBtn x={412} y={440} onClick={this.exitFunc} />,
-			],
 			lefttext = [
 				game.ply + ' plies',
 				(game.time / 1000).toFixed(1) + ' seconds',
@@ -173,22 +165,9 @@ module.exports = class Result extends React.Component {
 			);
 			return bonus;
 		}
-		if (!game.quest && game.daily === undefined) {
-			children.push(
-				<input type='button'
-					value='Rematch'
-					onClick={this.rematch}
-					style={{
-						position: 'absolute',
-						left: '412px',
-						top: '490px',
-					}}
-				/>,
-			);
-		}
 		let streakrate = 0;
 		if (winner) {
-			if (sock.user) {
+			if (this.props.user) {
 				if (game.level !== undefined || !game.ai)
 					sock.userExec('addwin', { pvp: !game.ai });
 				if (!game.quest && game.ai) {
@@ -222,10 +201,11 @@ module.exports = class Result extends React.Component {
 						let goldwon;
 						if (game.level !== undefined) {
 							if (game.daily == undefined) {
-								const streak = (sock.user.streakback || 0) + 1;
-								sock.user.streakback = 0;
+								const streak = (this.props.streakback || 0) + 1;
+								if (streak !== this.props.user.streak[game.level]) {
+									sock.userExec('setstreak', { l: game.level, n: streak });
+								}
 								streakrate = Math.min(streak200[game.level] * streak / 200, 1);
-								sock.userExec('setstreak', { l: game.level, n: streak });
 								lefttext.push(
 									streak + ' win streak',
 									(streakrate * 100).toFixed(1) + '% streak bonus',
@@ -244,62 +224,16 @@ module.exports = class Result extends React.Component {
 					game.goldreward = (game.goldreward || 0) + game.addonreward;
 				}
 				if (game.goldreward) {
-					const goldwon = game.goldreward - (game.cost || 0) + '$';
-					children.push(
-						<Components.Text
-							text={goldwon}
-							style={{
-								textAlign: 'center',
-								width: '900px',
-								position: 'absolute',
-								left: '0px',
-								top: '550px',
-							}}
-						/>,
-					);
 					sock.userExec('addgold', { g: game.goldreward });
 				}
 				if (game.cardreward) {
-					const x0 = 470 - etgutil.decklength(game.cardreward) * 20 - 64;
-					etgutil.iterdeck(game.cardreward, (code, i) =>
-						children.push(
-							<Components.Card
-								x={x0 + i * 40}
-								y={170}
-								code={code}
-							/>,
-						),
-					);
 					sock.userExec(game.quest ? 'addbound' : 'addcards', {
 						c: game.cardreward,
 					});
 				}
 			}
-			children.push(
-				<Components.Text
-					text={game.quest ? game.wintext : 'You won!'}
-					style={{
-						textAlign: 'center',
-						width: '900px',
-						position: 'absolute',
-						left: '0px',
-						top: game.cardreward ? '100px' : '250px',
-					}}
-				/>
-			);
 		}
-		children.push(
-			<span
-				style={{
-					position: 'absolute',
-					left: '8px',
-					top: '290px',
-					whiteSpace: 'pre',
-				}}>
-				{lefttext.join('\n')}
-			</span>
-		);
-
+		this.setState({lefttext: lefttext.join('\n')});
 		if (game.endurance == undefined) {
 			store.store.dispatch(store.chatMsg(
 				[
@@ -313,14 +247,85 @@ module.exports = class Result extends React.Component {
 					(game.goldreward || 0) - (game.cost || 0),
 					game.cardreward || '-',
 					userutil.calcWealth(game.cardreward),
-					!sock.user || game.level === undefined
+					!this.props.user || game.level === undefined
 						? -1
-						: sock.user.streak[game.level],
+						: this.props.user.streak[game.level],
 					streakrate.toFixed(3).replace(/\.?0+$/, ''),
 				].join(),
 				'Stats',
 			));
 		}
-		return children;
 	}
-};
+
+	componentWillUnmount() {
+		document.removeEventListener('keydown', this.onkeydown);
+	}
+
+	render() {
+		const {game} = this.props;
+		const cards = [];
+		if (game.cardreward) {
+			const x0 = 470 - etgutil.decklength(game.cardreward) * 20 - 64;
+			etgutil.iterdeck(game.cardreward, (code, i) =>
+				cards.push(
+					<Components.Card
+						key={i}
+						x={x0 + i * 40}
+						y={170}
+						code={code}
+					/>,
+				),
+			);
+		}
+		return <>
+			<Components.ExitBtn x={412} y={440} onClick={this.exitFunc} />
+			{!game.quest && game.daily === undefined &&
+				<input type='button'
+					value='Rematch'
+					onClick={this.rematch}
+					style={{
+						position: 'absolute',
+						left: '412px',
+						top: '490px',
+					}}
+				/>
+			}
+			{this.props.user && <>
+				{game.winner == game.player1 && <>
+					{game.goldreward > 0 &&
+						<Components.Text
+							text={game.goldreward - (game.cost || 0) + '$'}
+							style={{
+								textAlign: 'center',
+								width: '900px',
+								position: 'absolute',
+								left: '0px',
+								top: '550px',
+							}}
+						/>
+					}
+					{cards.length > 0 && cards}
+					<Components.Text
+						text={game.quest ? game.wintext : 'You won!'}
+						style={{
+							textAlign: 'center',
+							width: '900px',
+							position: 'absolute',
+							left: '0px',
+							top: game.cardreward ? '100px' : '250px',
+						}}
+					/>
+				</>}
+				<span
+					style={{
+						position: 'absolute',
+						left: '8px',
+						top: '290px',
+						whiteSpace: 'pre',
+					}}>
+					{this.state.lefttext}
+				</span>
+			</>}
+		</>
+	}
+});

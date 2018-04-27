@@ -2,7 +2,6 @@ const Cards = require('./Cards'),
 	etgutil = require('./etgutil'),
 	mkGame = require('./mkGame'),
 	store = require('./store'),
-	usercmd = require('./usercmd'),
 	userutil = require('./userutil'),
 	React = require('react');
 const endpoint =
@@ -17,7 +16,7 @@ let socket = new WebSocket(endpoint),
 const sockEvents = {
 	clear: () => store.store.dispatch(store.clearChat('Main')),
 	passchange: (data) => {
-		exports.user.auth = data.auth;
+		store.store.dispatch(store.updateUser({ auth: data.auth }));
 		store.store.dispatch(store.chatMsg('Password updated', 'System'));
 	},
 	mute: (data) => {
@@ -31,12 +30,14 @@ const sockEvents = {
 		</div>, 'Main'));
 	},
 	chat: (data) => {
-		if (store.store.getState().opts.muteall && !data.mode) return;
-		if (
+		const state = store.store.getState();
+		if (state.opts.muteall) {
+			if (!data.mode) return;
+		} else if (
 			typeof Notification !== 'undefined' &&
 			Notification.permission !== 'denied' &&
-			exports.user &&
-			~data.msg.indexOf(exports.user.name) &&
+			state.user &&
+			~data.msg.indexOf(state.user.name) &&
 			!document.hasFocus()
 		) {
 			Notification.requestPermission().then(result => {
@@ -95,7 +96,10 @@ const sockEvents = {
 			ai: true,
 		});
 		gamedata.game.cost = userutil.arenaCost(data.lv);
-		exports.user.gold -= gamedata.game.cost;
+		const state = store.store.getState();
+		store.store.dispatch(store.updateUser({
+			gold: user.gold - gamedata.game.cost,
+		}));
 		store.store.dispatch(store.doNav(require('./views/Match'), gamedata));
 	},
 	tradegive: (data) => {
@@ -169,11 +173,11 @@ socket.onclose = function() {
 	}, timeout);
 	store.store.dispatch(store.chatMsg('Reconnecting in ' + timeout + 'ms', 'System'));
 };
-exports.user = undefined;
 exports.userEmit = function(x, data) {
 	if (!data) data = {};
-	data.u = exports.user.name;
-	data.a = exports.user.auth;
+	const user = store.store.getState().user;
+	data.u = user.name;
+	data.a = user.auth;
 	exports.emit(x, data);
 };
 exports.emit = function(x, data) {
@@ -189,9 +193,11 @@ exports.emit = function(x, data) {
 exports.userExec = function(x, data) {
 	if (!data) data = {};
 	exports.userEmit(x, data);
-	usercmd[x](data, exports.user);
+	store.store.dispatch(store.userCmd(x, data));
 };
 exports.getDeck = function() {
-	if (exports.user) return exports.user.decks[exports.user.selectedDeck] || '';
-	return store.store.getState().opts.deck;
+	const state = store.store.getState();
+	return state.user ?
+		state.user.decks[state.user.selectedDeck] || '' :
+		state.opts.deck;
 };

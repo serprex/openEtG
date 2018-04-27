@@ -4,9 +4,10 @@ const sock = require('../sock'),
 	etgutil = require('../etgutil'),
 	userutil = require('../userutil'),
 	Components = require('../Components'),
+	{connect} = require('react-redux'),
 	React = require('react');
 
-module.exports = class Upgrade extends React.Component {
+module.exports = connect(({user})=>({user}))(class Upgrade extends React.Component {
 	constructor(props) {
 		super(props);
 		this.state = {};
@@ -26,7 +27,7 @@ module.exports = class Upgrade extends React.Component {
 						use +
 						' copies to be able to upgrade this card!'
 					);
-			} else if (sock.user.gold >= 50) {
+			} else if (self.props.user.gold >= 50) {
 				sock.userExec('uppillar', { c: card.code });
 			} else return 'You need 50$ to afford an upgraded pillar!';
 		}
@@ -49,7 +50,7 @@ module.exports = class Upgrade extends React.Component {
 						use +
 						' copies to be able to polish this card!'
 					);
-			} else if (sock.user.gold >= 50) {
+			} else if (self.props.user.gold >= 50) {
 				sock.userExec('shpillar', { c: card.code });
 			} else return 'You need 50$ to afford a shiny pillar!';
 		}
@@ -64,11 +65,11 @@ module.exports = class Upgrade extends React.Component {
 			if (card.rarity == -1)
 				return "You really don't want to sell that, trust me.";
 			else if (card.isFree()) {
-				if (sock.user.gold >= 300) {
+				if (self.props.user.gold >= 300) {
 					sock.userExec('upshpillar', { c: card.code });
 				} else return 'You need 300$ to afford a shiny upgraded pillar!';
 			} else {
-				const codecount = etgutil.count(sock.user.pool, card.code);
+				const codecount = etgutil.count(self.props.user.pool, card.code);
 				if (codecount) {
 					sock.userExec('sellcard', { card: card.code });
 				} else return 'This card is bound to your account; you cannot sell it.';
@@ -80,16 +81,14 @@ module.exports = class Upgrade extends React.Component {
 					? func(Cards.Codes[self.state.code1])
 					: 'Pick a card, any card.';
 				if (error) self.setState({ error });
-				else self.forceUpdate();
 			};
 		}
 		function autoCards() {
 			sock.userExec('upshall');
-			self.forceUpdate();
 		}
 		const cardpool = etgutil.deck2pool(
-			sock.user.accountbound,
-			etgutil.deck2pool(sock.user.pool),
+			self.props.user.accountbound,
+			etgutil.deck2pool(self.props.user.pool),
 		);
 		return <>
 			<Components.ExitBtn x={5} y={50} />
@@ -142,7 +141,7 @@ module.exports = class Upgrade extends React.Component {
 				}}
 			/>
 			<Components.Text
-				text={sock.user.gold + '$'}
+				text={self.props.user.gold + '$'}
 				style={{
 					position: 'absolute',
 					left: '5px',
@@ -261,4 +260,4 @@ module.exports = class Upgrade extends React.Component {
 			/>
 		</>
 	}
-};
+});

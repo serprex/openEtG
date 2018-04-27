@@ -361,7 +361,7 @@ function tgtclass(game, obj) {
 	} else if (obj.owner === game.player1 && obj.canactive()) return 'canactive';
 }
 
-module.exports = connect()(class Match extends React.Component {
+module.exports = connect(({user}) => ({user}))(class Match extends React.Component {
 	constructor(props) {
 		super(props);
 		this.state = {
@@ -374,15 +374,16 @@ module.exports = connect()(class Match extends React.Component {
 		this.aiState = null;
 		this.aiCommand = false;
 		this.aiDelay = 0;
+		this.streakback = 0;
 	}
 
 	endClick(discard) {
-		const { game } = this.props;
+		const { game, user } = this.props;
 		if (game.turn == game.player1 && game.phase === etg.MulliganPhase) {
 			if (!game.ai) sock.emit('mulligan', { draw: true });
 			game.progressMulligan();
 		} else if (game.winner) {
-			if (sock.user) {
+			if (user) {
 				if (game.arena) {
 					sock.userEmit('modarena', {
 						aname: game.arena,
@@ -403,8 +404,8 @@ module.exports = connect()(class Match extends React.Component {
 							mkAi.run(newgame);
 							return;
 						} else if (
-							sock.user.quests[game.quest[0]] <= game.quest[1] ||
-							!(game.quest[0] in sock.user.quests)
+							user.quests[game.quest[0]] <= game.quest[1] ||
+							!(game.quest[0] in user.quests)
 						) {
 							sock.userExec('updatequest', {
 								quest: game.quest[0],
@@ -427,10 +428,12 @@ module.exports = connect()(class Match extends React.Component {
 						}
 					}
 				} else if (!game.endurance && game.level !== undefined) {
-					sock.user.streak[game.level] = 0;
+					const streak = user.streak.slice();
+					streak[game.level] = 0;
+					this.props.dispatch(store.updateUser({ streak }));
 				}
 			}
-			this.props.dispatch(store.doNav(require('./Result'), { game: game, data: this.props.data }));
+			this.props.dispatch(store.doNav(require('./Result'), { game: game, data: this.props.data, streakback: this.streakback }));
 		} else if (game.turn == game.player1) {
 			if (discard == undefined && game.player1.hand.length == 8) {
 				this.setState({ discarding: true });
@@ -546,9 +549,9 @@ module.exports = connect()(class Match extends React.Component {
 
 	startMatch({ game, data, dispatch }) {
 		const self = this;
-		if (sock.user && !game.endurance && (game.level !== undefined || !game.ai)) {
-			sock.user.streakback = sock.user.streak[game.level];
+		if (this.props.user && !game.endurance && (game.level !== undefined || !game.ai)) {
 			sock.userExec('addloss', { pvp: !game.ai, l: game.level, g: -game.cost });
+			this.streakback = this.props.user.streak[game.level];
 		}
 		Effect.clear();
 		function onkeydown(e) {

@@ -5,8 +5,10 @@ const Cards = require('./Cards'),
 exports.bazaar = function(data, user) {
 	const cost = Math.ceil(userutil.calcWealth(data.cards, true) * 3);
 	if (user.gold >= cost) {
-		user.gold -= cost;
-		user.pool = etgutil.mergedecks(user.pool, data.cards);
+		return {
+			gold: user.gold - cost,
+			pool: etgutil.mergedecks(user.pool, data.cards),
+		};
 	}
 };
 exports.sellcard = function(data, user) {
@@ -17,8 +19,10 @@ exports.sellcard = function(data, user) {
 			(card.upped ? 6 : 1) *
 			(card.shiny ? 6 : 1);
 		if (sellValue) {
-			user.pool = etgutil.addcard(user.pool, data.card, -1);
-			user.gold += sellValue;
+			return {
+				gold: user.gold + sellValue,
+				pool: etgutil.addcard(user.pool, data.card, -1),
+			}
 		}
 	}
 };
@@ -28,14 +32,17 @@ function transmute(user, oldcard, func, use) {
 	if (poolCount < use) {
 		const boundCount = etgutil.count(user.accountbound, oldcard);
 		if (poolCount + boundCount >= use) {
-			user.accountbound = etgutil.addcard(user.accountbound, oldcard, -use);
+			const result = {};
+			result.accountbound = etgutil.addcard(user.accountbound, oldcard, -use);
 			if (boundCount < use)
-				user.pool = etgutil.addcard(user.pool, oldcard, boundCount - use);
-			user.accountbound = etgutil.addcard(user.accountbound, newcard);
+				result.pool = etgutil.addcard(user.pool, oldcard, boundCount - use);
+			result.accountbound = etgutil.addcard(result.accountbound, newcard);
+			return result;
 		}
 	} else {
-		user.pool = etgutil.addcard(user.pool, oldcard, -use);
-		user.pool = etgutil.addcard(user.pool, newcard);
+		return {
+			pool: etgutil.addcard(etgutil.addcard(user.pool, oldcard, -use), newcard),
+		};
 	}
 }
 function untransmute(user, oldcard, func, use) {
@@ -44,44 +51,48 @@ function untransmute(user, oldcard, func, use) {
 	if (poolCount == 0) {
 		const boundCount = etgutil.count(user.accountbound, oldcard);
 		if (boundCount) {
-			user.accountbound = etgutil.addcard(user.accountbound, oldcard, -1);
-			user.accountbound = etgutil.addcard(user.accountbound, newcard, use);
+			return {
+				accountbound: etgutil.addcard(etgutil.addcard(user.accountbound, oldcard, -1), newcard, use),
+			};
 		}
 	} else {
-		user.pool = etgutil.addcard(user.pool, oldcard, -1);
-		user.pool = etgutil.addcard(user.pool, newcard, use);
+		return {
+			pool: etgutil.addcard(etgutil.addcard(user.pool, oldcard, -1), newcard, use),
+		};
 	}
 }
 exports.upgrade = function(data, user) {
 	const card = Cards.Codes[data.card];
 	if (!card || card.upped) return;
 	const use = ~card.rarity ? 6 : 1;
-	transmute(user, card.code, etgutil.asUpped, use);
+	return transmute(user, card.code, etgutil.asUpped, use);
 };
 exports.downgrade = function(data, user) {
 	const card = Cards.Codes[data.card];
 	if (!card || !card.upped) return;
 	const use = ~card.rarity ? 6 : 1;
-	untransmute(user, card.code, etgutil.asUpped, use);
+	return untransmute(user, card.code, etgutil.asUpped, use);
 };
 exports.polish = function(data, user) {
 	const card = Cards.Codes[data.card];
 	if (!card || card.shiny || card.rarity == 5) return;
 	const use = ~card.rarity ? 6 : 2;
-	transmute(user, card.code, etgutil.asShiny, use);
+	return transmute(user, card.code, etgutil.asShiny, use);
 };
 exports.unpolish = function(data, user) {
 	const card = Cards.Codes[data.card];
 	if (!card || !card.shiny || card.rarity == 5) return;
 	const use = ~card.rarity ? 6 : 2;
-	untransmute(user, card.code, etgutil.asShiny, use);
+	return untransmute(user, card.code, etgutil.asShiny, use);
 };
 function upshpi(cost, func) {
 	return (data, user) => {
 		const card = Cards.Codes[data.c];
 		if (card && user.gold >= cost && card.isFree()) {
-			user.gold -= cost;
-			user.pool = etgutil.addcard(user.pool, func(data.c));
+			return {
+				gold: user.gold - cost,
+				pool: etgutil.addcard(user.pool, func(data.c)),
+			};
 		}
 	};
 }
@@ -149,46 +160,75 @@ exports.upshall = function(data, user) {
 	pool.forEach((count, code) => {
 		if (count) newpool = etgutil.addcard(newpool, code, count);
 	});
-	user.pool = newpool;
+	return { pool: newpool };
 };
 exports.addgold = function(data, user) {
-	user.gold += data.g;
+	return { gold: user.gold + data.g };
 };
 exports.addloss = function(data, user) {
-	user[data.pvp ? 'pvplosses' : 'ailosses']++;
-	if (data.l !== undefined) user.streak[data.l] = 0;
-	if (data.g) user.gold += data.g;
+	const losses = data.pvp ? 'pvplosses' : 'ailosses';
+	const result = {
+		[losses]: user[losses]+1,
+	};
+	if (data.l !== undefined) {
+		result.streak = user.streak.slice();
+		result.streak[data.l] = 0;
+	}
+	if (data.g) result.gold = user.gold + data.g;
+	return result;
 };
 exports.addwin = function(data, user) {
 	const prefix = data.pvp ? 'pvp' : 'ai';
-	user[prefix + 'wins']++;
-	user[prefix + 'losses']--;
+	return {
+		[`${prefix}wins`]: user[`${prefix}wins`]+1,
+		[`${prefix}losses`]: user[`${prefix}losses`]-1,
+	};
 };
 exports.setstreak = function(data, user) {
-	user.streak[data.l] = data.n;
+	const streak = user.streak.slice();
+	streak[data.l] = data.n;
+	return { streak };
 };
 exports.addcards = function(data, user) {
-	user.pool = etgutil.mergedecks(user.pool, data.c);
+	return { pool: etgutil.mergedecks(user.pool, data.c) };
 };
 exports.addbound = function(data, user) {
-	user.accountbound = etgutil.mergedecks(user.accountbound, data.c);
+	return { accountbound: etgutil.mergedecks(user.accountbound, data.c) };
 };
 exports.donedaily = function(data, user) {
+	const result = {};
 	if (data.daily == 6 && !(user.daily & 64)) {
-		user.pool = etgutil.addcard(user.pool, data.c);
+		result.pool = etgutil.addcard(user.pool, data.c);
 	}
-	user.daily |= 1 << data.daily;
+	result.daily = user.daily | 1 << data.daily;
+	return result;
 };
 exports.changeqeck = function(data, user) {
-	user.qecks[data.number] = data.name;
+	const qecks = user.qecks.slice();
+	qecks[data.number] = data.name;
+	return { qecks };
 };
 exports.setdeck = function(data, user) {
-	if (data.d !== undefined) user.decks[data.name] = data.d;
-	user.selectedDeck = data.name;
+	const result = {};
+	if (data.d !== undefined) {
+		result.decks = {
+			...user.decks,
+			[data.name]: data.d,
+		};
+	}
+	result.selectedDeck = data.name;
+	return result;
 };
 exports.rmdeck = function(data, user) {
-	delete user.decks[data.name];
+	const result = { decks: { ...user.decks } };
+	delete result.decks[data.name];
+	return result;
 };
 exports.updatequest = function(data, user) {
-	user.quests[data.quest] = data.newstage;
+	return {
+		quests: {
+			...user.quests,
+			[data.quest]: data.newstage,
+		}
+	};
 };

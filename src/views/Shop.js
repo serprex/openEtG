@@ -26,7 +26,10 @@ const packdata = [
 	{ cost: 250, type: 'Nymph', info: '1 Nymph', color: '#69b' },
 ];
 
-module.exports = connect(({opts}) => ({ bulk: typeof opts.bulk === 'string' ? opts.bulk : '1' }))(class Shop extends React.Component {
+module.exports = connect(({user, opts}) => ({
+	user,
+	bulk: typeof opts.bulk === 'string' ? opts.bulk : '1'
+}))(class Shop extends React.Component {
 	constructor(props) {
 		super(props);
 		this.state = {
@@ -42,20 +45,24 @@ module.exports = connect(({opts}) => ({ bulk: typeof opts.bulk === 'string' ? op
 	componentDidMount() {
 		this.props.dispatch(store.setCmds({
 			boostergive: data => {
+				const userdelta = {};
 				if (data.accountbound) {
-					sock.user.accountbound = etgutil.mergedecks(
-						sock.user.accountbound,
+					userdelta.accountbound = etgutil.mergedecks(
+						this.props.user.accountbound,
 						data.cards,
 					);
-					if (sock.user.freepacks) {
-						sock.user.freepacks[data.packtype]--;
+					const freepacks = this.props.freepacks && this.props.freepacks.slice();
+					if (freepacks) {
+						freepacks[data.packtype]--;
+						userdelta.freepacks = freepacks;
 					}
 				} else {
-					sock.user.pool = etgutil.mergedecks(sock.user.pool, data.cards);
 					const bdata = {};
 					options.parseInput(bdata, 'bulk', this.props.bulk, 99);
-					sock.user.gold -= packdata[data.packtype].cost * (bdata.bulk || 1);
+					userdelta.pool = etgutil.mergedecks(this.props.user.pool, data.cards);
+					userdelta.gold = this.props.user.gold - packdata[data.packtype].cost * (bdata.bulk || 1);
 				}
+				this.props.dispatch(store.updateUser(userdelta));
 				const dlen = etgutil.decklength(data.cards);
 				if (dlen < 121) {
 					this.setState({ cards: data.cards, showbuy: false });
@@ -95,7 +102,7 @@ module.exports = connect(({opts}) => ({ bulk: typeof opts.bulk === 'string' ? op
 				height={184}
 			/>,
 			<Components.Text
-				text={sock.user.gold + '$'}
+				text={this.props.user.gold + '$'}
 				style={{
 					position: 'absolute',
 					left: '775px',
@@ -119,7 +126,7 @@ module.exports = connect(({opts}) => ({ bulk: typeof opts.bulk === 'string' ? op
 			<Components.ExitBtn x={775} y={246} />,
 		];
 
-		if (sock.user.freepacks) {
+		if (this.props.user.freepacks) {
 			children.push(
 				<span
 					style={{
@@ -127,11 +134,11 @@ module.exports = connect(({opts}) => ({ bulk: typeof opts.bulk === 'string' ? op
 						left: '350px',
 						top: '26px',
 					}}>{
-					sock.user.freepacks[self.state.packrarity]
+					this.props.user.freepacks[self.state.packrarity]
 						? 'Free ' +
 							packdata[self.state.packrarity].type +
 							' packs left: ' +
-							sock.user.freepacks[self.state.packrarity]
+							this.props.user.freepacks[self.state.packrarity]
 						: ''
 					}
 				</span>,
@@ -160,8 +167,8 @@ module.exports = connect(({opts}) => ({ bulk: typeof opts.bulk === 'string' ? op
 			};
 			options.parseInput(boostdata, 'bulk', self.props.bulk, 99);
 			if (
-				sock.user.gold >= pack.cost * (boostdata.bulk || 1) ||
-				(sock.user.freepacks && sock.user.freepacks[self.state.packrarity] > 0)
+				self.props.user.gold >= pack.cost * (boostdata.bulk || 1) ||
+				(self.props.user.freepacks && self.props.user.freepacks[self.state.packrarity] > 0)
 			) {
 				sock.userEmit('booster', boostdata);
 				self.setState({ showbuy: false });

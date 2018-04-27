@@ -1,8 +1,9 @@
 'use strict';
-var sock = require('./sock');
-var util = require('./util');
-var RngMock = require('./RngMock');
-var etgutil = require('./etgutil');
+const sock = require('./sock');
+const store = require('./store');
+const util = require('./util');
+const RngMock = require('./RngMock');
+const etgutil = require('./etgutil');
 //Quest data
 exports.necromancer = [
 	{
@@ -654,7 +655,8 @@ exports.mkQuestAi = function(questname, stage, area) {
 	var hp = quest.hp || 100;
 	var playerHPstart = quest.urhp || 100;
 	var urdeck = sock.getDeck();
-	if (etgutil.decklength(urdeck) < (sock.user ? 31 : 11)) {
+	const {user} = store.store.getState();
+	if (etgutil.decklength(urdeck) < (user ? 31 : 11)) {
 		return 'ERROR: Your deck is invalid or missing! Please exit & create a valid deck in the deck editor.';
 	}
 	const gamedata = require('./mkGame')({
@@ -678,8 +680,8 @@ exports.mkQuestAi = function(questname, stage, area) {
 	game.noheal = quest.noheal;
 	game.area = area;
 	if (
-		sock.user.quests[questname] <= stage ||
-		!(questname in sock.user.quests)
+		user.quests[questname] <= stage ||
+		!(questname in user.quests)
 	) {
 		game.cardreward = quest.cardreward;
 		game.goldreward = quest.goldreward;

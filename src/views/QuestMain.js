@@ -1,6 +1,5 @@
 'use strict';
-const sock = require('../sock'),
-	Quest = require('../Quest'),
+const Quest = require('../Quest'),
 	Components = require('../Components'),
 	store = require('../store'),
 	{ connect } = require('react-redux'),
@@ -127,7 +126,7 @@ const areainfo = {
 	],
 };
 
-module.exports = connect(({opts}) => ({ aideck: opts.aideck }))(class QuestMain extends React.Component {
+module.exports = connect(({user, opts}) => ({ user, aideck: opts.aideck }))(class QuestMain extends React.Component {
 	constructor(props) {
 		super(props);
 		this.state = { area: null };
@@ -204,8 +203,8 @@ module.exports = connect(({opts}) => ({ aideck: opts.aideck }))(class QuestMain 
 				Quest.areas[key].some(
 					quest =>
 						(Quest[quest][0].dependency === undefined ||
-							Quest[quest][0].dependency(sock.user)) &&
-						(sock.user.quests[quest] || 0) < Quest[quest].length,
+							Quest[quest][0].dependency(this.props.user)) &&
+						(this.props.user.quests[quest] || 0) < Quest[quest].length,
 				)
 			) {
 				let xtot = 0,

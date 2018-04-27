@@ -6,6 +6,7 @@ const Cards = require('../Cards'),
 	util = require('../util'),
 	etgutil = require('../etgutil'),
 	Components = require('../Components'),
+	{connect} = require('react-redux'),
 	React = require('react');
 
 function RenderInfo(props) {
@@ -112,7 +113,7 @@ function ArenaCard(props) {
 	</>;
 }
 
-module.exports = class ArenaInfo extends React.Component {
+module.exports = connect(({user}) => ({ ocard: user.ocard }))(class ArenaInfo extends React.Component {
 	constructor(props) {
 		super(props);
 		this.state = {};
@@ -134,10 +135,10 @@ module.exports = class ArenaInfo extends React.Component {
 			<Components.ExitBtn x={8} y={300} />
 			<RenderInfo info={this.state.A} y={0} />
 			<RenderInfo info={this.state.B} y={300} />
-			{!!sock.user.ocard && <>
-				<ArenaCard info={this.state.A} y={8} code={etgutil.asUpped(sock.user.ocard, false)} />
-				<ArenaCard info={this.state.B} y={300} code={etgutil.asUpped(sock.user.ocard, true)} />
+			{!!this.props.ocard && <>
+				<ArenaCard info={this.state.A} y={8} code={etgutil.asUpped(this.props.ocard, false)} />
+				<ArenaCard info={this.state.B} y={300} code={etgutil.asUpped(this.props.ocard, true)} />
 			</>}
 		</>;
 	}
-};
+});

@@ -7,7 +7,11 @@ const etgutil = require('../etgutil'),
 	{connect} = require('react-redux'),
 	React = require('react');
 
-module.exports = connect(({opts}) => ({ deck: opts.deck, selectedDeck: opts.selectedDeck }))(class DeckEditor extends React.Component {
+module.exports = connect(({user, opts}) => ({
+	user,
+	deck: opts.deck,
+	selectedDeck: opts.selectedDeck,
+}))(class DeckEditor extends React.Component {
 	constructor(props) {
 		super(props);
 
@@ -24,8 +28,8 @@ module.exports = connect(({opts}) => ({ deck: opts.deck, selectedDeck: opts.sele
 				pool[code] = (pool[code] || 0) + count;
 			}
 		}
-		etgutil.iterraw(sock.user.pool, incrpool);
-		etgutil.iterraw(sock.user.accountbound, incrpool);
+		etgutil.iterraw(props.user.pool, incrpool);
+		etgutil.iterraw(props.user.accountbound, incrpool);
 		this.deckRef = React.createRef();
 		this.state = {
 			pool: pool,
@@ -61,7 +65,7 @@ module.exports = connect(({opts}) => ({ deck: opts.deck, selectedDeck: opts.sele
 		const self = this;
 		function saveDeck(force) {
 			if (self.state.deck.length == 0) {
-				sock.userExec('rmdeck', { name: sock.user.selectedDeck });
+				sock.userExec('rmdeck', { name: self.props.user.selectedDeck });
 				return;
 			}
 			const dcode =
@@ -69,22 +73,22 @@ module.exports = connect(({opts}) => ({ deck: opts.deck, selectedDeck: opts.sele
 					etgutil.toTrueMarkSuffix(self.state.mark),
 				olddeck = sock.getDeck();
 			if (olddeck != dcode) {
-				sock.userExec('setdeck', { d: dcode, name: sock.user.selectedDeck });
+				sock.userExec('setdeck', { d: dcode, name: self.props.user.selectedDeck });
 				self.props.dispatch(store.setOpt('deck', sock.getDeck()));
 			} else if (force)
-				sock.userExec('setdeck', { name: sock.user.selectedDeck });
+				sock.userExec('setdeck', { name: self.props.user.selectedDeck });
 		}
 		function loadDeck(x) {
 			if (!x) return;
 			saveDeck();
-			sock.user.selectedDeck = x;
-			self.props.dispatch(store.setOptTemp('selectedDeck', sock.user.selectedDeck));
+			self.props.dispatch(store.updateUser({ selectedDeck: x }));
+			self.props.dispatch(store.setOptTemp('selectedDeck', x));
 			self.props.dispatch(store.setOpt('deck', sock.getDeck()));
 		}
 		function saveButton() {
 			if (self.state.deckname) {
-				sock.user.selectedDeck = self.state.deckname;
-				self.props.dispatch(store.setOptTemp('selectedDeck', sock.user.selectedDeck));
+				self.props.dispatch(store.updateUser({ selectedDeck: self.state.deckname }));
+				self.props.dispatch(store.setOptTemp('selectedDeck', self.state.deckname));
 				saveDeck();
 			}
 		}
@@ -96,7 +100,7 @@ module.exports = connect(({opts}) => ({ deck: opts.deck, selectedDeck: opts.sele
 					value={i + 1 + ''}
 					className={
 						'editbtn' +
-						(sock.user.selectedDeck == sock.user.qecks[i]
+						(self.props.user.selectedDeck == self.props.user.qecks[i]
 							? ' selectedbutton'
 							: '')}
 					onClick={() => {
@@ -104,12 +108,12 @@ module.exports = connect(({opts}) => ({ deck: opts.deck, selectedDeck: opts.sele
 							saveButton();
 							sock.userExec('changeqeck', {
 								number: i,
-								name: sock.user.selectedDeck,
+								name: self.props.user.selectedDeck,
 							});
-							sock.user.qecks[i] = sock.user.selectedDeck;
+							self.props.user.qecks[i] = self.props.user.selectedDeck;
 							self.setState({ setQeck: false });
 						} else {
-							loadDeck(sock.user.qecks[i]);
+							loadDeck(self.props.user.qecks[i]);
 						}
 					}}
 				/>
@@ -163,7 +167,7 @@ module.exports = connect(({opts}) => ({ deck: opts.deck, selectedDeck: opts.sele
 				position: 'absolute',
 				top: '8px',
 				left: '100px',
-			}}>{sock.user.selectedDeck}</div>
+			}}>{self.props.user.selectedDeck}</div>
 			<input type='button'
 				value='Save'
 				onClick={saveButton}
@@ -185,8 +189,8 @@ module.exports = connect(({opts}) => ({ deck: opts.deck, selectedDeck: opts.sele
 			<input type='button'
 				value='Exit'
 				onClick={function() {
-					if (sock.user)
-						sock.userExec('setdeck', { name: sock.user.selectedDeck });
+					if (self.props.user)
+						sock.userExec('setdeck', { name: self.props.user.selectedDeck });
 					self.props.dispatch(store.doNav(require('../views/MainMenu')));
 				}}
 				style={{

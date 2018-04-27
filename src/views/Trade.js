@@ -5,9 +5,10 @@ const Cards = require('../Cards'),
 	Components = require('../Components'),
 	sock = require('../sock'),
 	store = require('../store'),
+	{connect} = require('react-redux'),
 	React = require('react');
 
-module.exports = class Trade extends React.Component {
+module.exports = connect(({user})=>({user}))(class Trade extends React.Component {
 	constructor(props) {
 		super(props);
 		this.state = {
@@ -23,7 +24,7 @@ module.exports = class Trade extends React.Component {
 	}
 
 	componentDidMount() {
-		store.store.dispatch(store.setCmds({
+		this.props.dispatch(store.setCmds({
 			cardchosen: data => {
 				this.setState({
 					offer: etgutil.decodedeck(data.c),
@@ -32,19 +33,20 @@ module.exports = class Trade extends React.Component {
 				});
 			},
 			tradedone: data => {
-				sock.user.pool = etgutil.mergedecks(sock.user.pool, data.newcards);
-				sock.user.pool = etgutil.removedecks(sock.user.pool, data.oldcards);
-				sock.user.gold += data.g;
-				store.store.dispatch(store.doNav(require('./MainMenu')));
+				this.props.dispatch(store.updateUser({
+					pool: etgutil.removedecks(etgutil.mergedecks(this.props.user.pool, data.newcards), data.oldcards),
+					gold: this.props.user.gold + data.g,
+				}));
+				this.props.dispatch(store.doNav(require('./MainMenu')));
 			},
 			tradecanceled: () => {
-				store.store.dispatch(store.doNav(require('./MainMenu')));
+				this.props.dispatch(store.doNav(require('./MainMenu')));
 			},
 		}));
 	}
 
 	componentWillUnmount() {
-		store.store.dispatch(store.setCmds({}));
+		this.props.dispatch(store.setCmds({}));
 	}
 
 	render() {
@@ -52,7 +54,7 @@ module.exports = class Trade extends React.Component {
 		for (const code of this.state.deck) {
 			cardminus[code] = (cardminus[code] || 0) + 1;
 		}
-		const cardpool = etgutil.deck2pool(sock.user.pool);
+		const cardpool = etgutil.deck2pool(this.props.user.pool);
 		return <>
 			{(!this.state.confirm || (this.state.confirm == 1 && this.state.canconfirm)) &&
 				<input type='button'
@@ -67,7 +69,7 @@ module.exports = class Trade extends React.Component {
 										gopher: this.state.gopher,
 									});
 									this.setState({ confirm: 2 });
-								} else store.store.dispatch(store.chatMsg('Wait for your friend to choose!', 'System'));
+								} else this.props.dispatch(store.chatMsg('Wait for your friend to choose!', 'System'));
 							}
 						: () => {
 								if (this.state.deck.length) {
@@ -76,7 +78,7 @@ module.exports = class Trade extends React.Component {
 										g: this.state.gold,
 									});
 									this.setState({ confirm: 1 });
-								} else store.store.dispatch(store.chatMsg('You have to choose at least a card!', 'System'));
+								} else this.props.dispatch(store.chatMsg('You have to choose at least a card!', 'System'));
 							}}
 					style={{
 						position: 'absolute',
@@ -135,7 +137,7 @@ module.exports = class Trade extends React.Component {
 				value='Cancel'
 				onClick={() => {
 					sock.userEmit('canceltrade');
-					store.store.dispatch(store.doNav(require('./MainMenu')));
+					this.props.dispatch(store.doNav(require('./MainMenu')));
 				}}
 				style={{
 					position: 'absolute',
@@ -147,7 +149,7 @@ module.exports = class Trade extends React.Component {
 				placeholder='Gold'
 				value={this.state.gold}
 				onChange={e => this.setState({
-					gold: Math.min(sock.user.gold, Math.abs(e.target.value|0)),
+					gold: Math.min(this.props.user.gold, Math.abs(e.target.value|0)),
 				})}
 				style={{
 					position: 'absolute',
@@ -175,4 +177,4 @@ module.exports = class Trade extends React.Component {
 			<Components.Card x={734} y={8} code={this.state.code} />
 		</>;
 	}
-};
+});

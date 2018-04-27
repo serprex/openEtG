@@ -131,7 +131,8 @@ function AiButton(props) {
 	</>;
 }
 
-module.exports = connect(({opts}) => ({
+module.exports = connect(({user, opts}) => ({
+	user,
 	remember: opts.remember,
 	foename: opts.foename,
 	enableSound: opts.enableSound,
@@ -146,7 +147,7 @@ module.exports = connect(({opts}) => ({
 		super(props);
 		this.state = {
 			showcard:
-				props.nymph || (sock.user && !sock.user.daily && sock.user.ocard),
+				props.nymph || (props.user && !props.user.daily && props.user.ocard),
 			showsettings: false,
 			changepass: false,
 			newpass: '',
@@ -157,7 +158,7 @@ module.exports = connect(({opts}) => ({
 
 		this.resetTip = e => {
 			if (e.target.tagName && e.target.tagName.match(/^(DIV|CANVAS|HTML)$/)) {
-				const tipText = sock.user
+				const tipText = this.props.user
 					? tipjar[this.state.tipNumber]
 					: "To register, just type desired username & password in the fields to the right, then click 'Login'";
 				if (tipText !== this.state.tipText) this.setState({ tipText });
@@ -170,8 +171,8 @@ module.exports = connect(({opts}) => ({
 	}
 
 	componentDidMount() {
-		if (sock.user && sock.user.daily == 0 && sock.user.ocard) {
-			sock.user.daily = 128;
+		if (this.props.user && this.props.user.daily == 0 && this.props.user.ocard) {
+			this.props.dispatch(store.updateUser({ daily: 128 }));
 		}
 		document.addEventListener('mousemove', this.resetTip);
 		this.props.dispatch(store.setCmds({
@@ -183,11 +184,11 @@ module.exports = connect(({opts}) => ({
 				}));
 			},
 			codegold: data => {
-				sock.user.gold += data.g;
+				this.props.dispatch(store.updateUser({ gold: this.props.user.gold + data.g }));
 				this.props.dispatch(store.chat(<div>{data.g}<span className='ico gold' /> added!</div>));
 			},
 			codecode: data => {
-				sock.user.pool = etgutil.addcard(sock.user.pool, data.card);
+				this.props.dispatch(store.updateUser({ pool: etgutil.addcard(this.props.user.pool, data.card) }));
 				this.props.dispatch(store.chatMsg(Cards.Codes[data.card].name + ' added!', 'System'));
 			},
 		}));
@@ -212,14 +213,14 @@ module.exports = connect(({opts}) => ({
 					return;
 				}
 				const cost = userutil.arenaCost(i);
-				if (sock.user.gold < cost) {
+				if (self.props.user.gold < cost) {
 					self.props.dispatch(store.chatMsg(`Requires ${cost}$`, 'System'));
 					return;
 				}
 				sock.userEmit('foearena', { lv: i });
 				e.target.style.display = 'none';
 			}
-			if (sock.user) {
+			if (self.props.user) {
 				arenac.push(
 					<AiButton name={'Arena' + (i + 1) + ' AI'}
 						key={i}
@@ -251,9 +252,9 @@ module.exports = connect(({opts}) => ({
 		}
 
 		function logout(cmd) {
-			if (sock.user) {
+			if (self.props.user) {
 				sock.userEmit(cmd);
-				sock.user = undefined;
+				self.props.dispatch(store.setUser(null));
 				self.props.dispatch(store.setOpt('remember', false));
 			}
 			self.props.dispatch(store.doNav(require('./Login')));
@@ -261,7 +262,7 @@ module.exports = connect(({opts}) => ({
 		audio.changeSound(this.props.enableSound);
 		audio.changeMusic(this.props.enableMusic);
 		const quickslots = [];
-		if (sock.user) {
+		if (self.props.user) {
 			for (let i = 0; i < 10; i++) {
 				quickslots.push(
 					<input type='button'
@@ -269,13 +270,13 @@ module.exports = connect(({opts}) => ({
 						value={i + 1}
 						className={
 							'editbtn' +
-							(self.props.selectedDeck == sock.user.qecks[i]
+							(self.props.selectedDeck == self.props.user.qecks[i]
 								? ' selectedbutton'
 								: '')}
 						onClick={() => {
-							const deckname = sock.user.qecks[i] || '';
+							const deckname = self.props.user.qecks[i] || '';
 							sock.userExec('setdeck', { name: deckname });
-							self.props.dispatch(store.setOptTemp('selectedDeck', sock.user.selectedDeck));
+							self.props.dispatch(store.setOptTemp('selectedDeck', self.props.user.selectedDeck));
 							self.props.dispatch(store.setOpt('deck', sock.getDeck()));
 						}}
 					/>,
@@ -311,7 +312,7 @@ module.exports = connect(({opts}) => ({
 						}}
 					/>
 				</Rect>
-				{sock.user && <>
+				{self.props.user && <>
 					<input type='button'
 						value='Settings'
 						style={{
@@ -332,15 +333,15 @@ module.exports = connect(({opts}) => ({
 						<TitleText text='Stats' />
 						<Components.Text
 							text={
-								`${sock.user.gold}$ ${sock.user.name}` +
-								`\nPvE ${sock.user.aiwins} - ${sock.user.ailosses}` +
-								`\nPvP ${sock.user.pvpwins} - ${sock.user.pvplosses}`
+								`${self.props.user.gold}$ ${self.props.user.name}` +
+								`\nPvE ${self.props.user.aiwins} - ${self.props.user.ailosses}` +
+								`\nPvP ${self.props.user.pvpwins} - ${self.props.user.pvplosses}`
 							}
 						/>
 					</Rect>
 					<CostRewardHeaders x={304} y={380} wid={292} hei={130}>
 						<TitleText text='Arena' />
-						{sock.user &&
+						{self.props.user &&
 							<input type='button'
 								value='Arena Deck'
 								onClick={() => {
@@ -429,7 +430,7 @@ module.exports = connect(({opts}) => ({
 						onClick={mkAi.run(mkAi.mkPremade(3))}
 						onMouseOver={this.mkSetTip('Commoners have no upgraded cards & mostly common cards')}
 					/>
-					{sock.user && <>
+					{self.props.user && <>
 						<div style={{
 							marginTop: '132px',
 							width: '45%',
@@ -463,7 +464,7 @@ module.exports = connect(({opts}) => ({
 						<div style={{
 							width: '45%',
 							float: 'right',
-							marginTop: sock.user ? undefined : '128px',
+							marginTop: self.props.user ? undefined : '128px',
 						}}>
 							<input type='button'
 								value='Custom AI'
@@ -483,7 +484,7 @@ module.exports = connect(({opts}) => ({
 					<input type='button'
 						value='Editor'
 						onClick={() => {
-							this.props.dispatch(store.doNav(sock.user ? require('./DeckEditor') : require('./SandboxEditor')));
+							this.props.dispatch(store.doNav(self.props.user ? require('./DeckEditor') : require('./SandboxEditor')));
 						}}
 						onMouseOver={this.mkSetTip('Edit & manage your decks')}
 						style={{
@@ -492,7 +493,7 @@ module.exports = connect(({opts}) => ({
 							top: '108px',
 						}}
 					/>
-					{sock.user && <>
+					{self.props.user && <>
 						<LabelText
 							text={'Deck: ' + self.props.selectedDeck}
 							style={{
@@ -563,7 +564,7 @@ module.exports = connect(({opts}) => ({
 					<input type='button'
 						value='Library'
 						onClick={() => {
-							const name = self.props.foename || (sock.user && sock.user.name);
+							const name = self.props.foename || (self.props.user && self.props.user.name);
 							if (name) this.props.dispatch(store.doNav(require('./Library'), { name }));
 						}}
 						onMouseOver={this.mkSetTip('See exactly what cards you or others own')}
@@ -573,7 +574,7 @@ module.exports = connect(({opts}) => ({
 							top: '75px',
 						}}
 					/>
-					{sock.user && <>
+					{self.props.user && <>
 						<input type='button'
 							value='Trade'
 							onClick={foe => {
@@ -619,13 +620,11 @@ module.exports = connect(({opts}) => ({
 							type='button'
 							value='Wipe Account'
 							onClick={() => {
-								if (this.props.foename == sock.user.name + 'yesdelete') {
+								if (this.props.foename == self.props.user.name + 'yesdelete') {
 									logout('delete');
 								} else {
 									self.props.dispatch(store.chatMsg(
-										"Input '" +
-											sock.user.name +
-											"yesdelete' into Trade/Library to delete your account",
+										`Input '${self.props.user.name}yesdelete' into Trade/Library to delete your account`,
 										'System',
 									));
 								}

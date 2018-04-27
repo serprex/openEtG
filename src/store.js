@@ -1,5 +1,6 @@
 'use strict';
-const redux = require('redux'),
+const usercmd = require('./usercmd'),
+	redux = require('redux'),
 	React = require('react'),
 	opts = { channel: 'Main' };
 
@@ -42,6 +43,10 @@ exports.chatMsg = (msg, name) => ({
 	name,
 });
 
+exports.setUser = user => ({ type: 'USER_SET', user });
+exports.userCmd = (cmd, data) => ({ type: 'USER_CMD', cmd, data });
+exports.updateUser = data => ({ type: 'USER_UPDATE', data });
+
 exports.store = redux.createStore((state, action) => {
 	switch(action.type) {
 		case 'NAV':
@@ -50,6 +55,25 @@ exports.store = redux.createStore((state, action) => {
 			return { ...state, opts: { ...state.opts, [action.key]: action.val }};
 		case 'CMD':
 			return { ...state, cmds: action.cmds };
+		case 'USER_SET':
+			return { ...state, user: action.user };
+		case 'USER_CMD':
+			console.log(action, state.user);
+			return {
+				...state,
+				user: {
+					...state.user,
+					...usercmd[action.cmd](action.data, state.user),
+				},
+			};
+		case 'USER_UPDATE':
+			return {
+				...state,
+				user: {
+					...state.user,
+					...action.data,
+				},
+			};
 		case 'MUTE': {
 			const muted = new Set(state.muted);
 			muted.add(action.name);

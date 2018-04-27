@@ -16,12 +16,12 @@ if (typeof kongregateAPI === 'undefined') {
 				login: data => {
 					if (!data.err) {
 						delete data.x;
-						sock.user = data;
+						this.props.dispatch(store.setUser(data));
 						if (this.props.remember && typeof localStorage !== 'undefined') {
 							localStorage.auth = data.auth;
 						}
-						if (!sock.user.accountbound && !sock.user.pool) {
-							this.props.dispatch(store.doNav(require('./ElementSelect')));
+						if (!data.accountbound && !data.pool) {
+							this.props.dispatch(store.doNav(require('./ElementSelect'), { user: data }));
 						} else {
 							this.props.dispatch(store.setOptTemp('selectedDeck', data.selectedDeck));
 							this.props.dispatch(store.setOptTemp('deck', sock.getDeck()));
@@ -62,7 +62,7 @@ if (typeof kongregateAPI === 'undefined') {
 		}
 
 		loginClick(auth) {
-			if (!sock.user && this.props.username) {
+			if (this.props.username) {
 				const data = { u: this.props.username };
 				if (auth) data.a = auth;
 				else data.p = this.state.password;
@@ -106,9 +106,8 @@ if (typeof kongregateAPI === 'undefined') {
 							type="checkbox"
 							checked={this.props.remember}
 							onChange={e => {
-								if (typeof localStorage !== 'undefined') {
-									if (!e.target.checked) delete localStorage.auth;
-									else if (sock.user) localStorage.auth = sock.user.auth;
+								if (typeof localStorage !== 'undefined' && !e.target.checked) {
+									delete localStorage.auth;
 								}
 								this.props.dispatch(store.setOpt('remember', e.target.checked));
 							}}
@@ -153,9 +152,9 @@ if (typeof kongregateAPI === 'undefined') {
 						login: data => {
 							if (!data.err) {
 								delete data.x;
-								sock.user = data;
-								if (!sock.user.accountbound && !sock.user.pool) {
-									this.props.dispatch(store.doNav(require('./ElementSelect')));
+								this.props.dispatch(store.setUser(data));
+								if (!data.accountbound && !data.pool) {
+									this.props.dispatch(store.doNav(require('./ElementSelect'), { user: data }));
 								} else {
 									this.props.dispatch(store.setOptTemp('selectedDeck', data.selectedDeck));
 									this.props.dispatch(store.doNav(require('./MainMenu')));

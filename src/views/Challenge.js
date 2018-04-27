@@ -9,14 +9,15 @@ const sock = require('../sock'),
 	React = require('react');
 
 function sendChallenge(foe) {
-	const deck = sock.getDeck();
-	if (etgutil.decklength(deck) < (sock.user ? 31 : 9)) {
+	const deck = sock.getDeck(),
+		{user} = store.store.getState();
+	if (etgutil.decklength(deck) < (user ? 31 : 9)) {
 		store.store.dispatch(store.doNav(require('./DeckEditor')));
 		return;
 	}
 	const gameData = {};
 	options.parsepvpstats(gameData);
-	if (sock.user) {
+	if (user) {
 		gameData.f = foe;
 		sock.userEmit('foewant', gameData);
 	} else {
@@ -39,7 +40,8 @@ function LabelText(props) {
 		}}>{props.children}</span>;
 }
 
-module.exports = connect(({opts}) => ({
+module.exports = connect(({user, opts}) => ({
+	hasUser: !!user,
 	aideck: opts.aideck,
 	foename: opts.foename,
 	pvphp: opts.pvphp,
@@ -95,7 +97,7 @@ module.exports = connect(({opts}) => ({
 		}
 		function exitClick() {
 			if (sock.pvp) {
-				if (sock.user) sock.userEmit('foecancel');
+				if (self.props.hasUser) sock.userEmit('foecancel');
 				else sock.emit('roomcancel', { room: sock.pvp });
 				delete sock.pvp;
 			}
@@ -103,7 +105,7 @@ module.exports = connect(({opts}) => ({
 		}
 		function cancelClick() {
 			if (sock.pvp) {
-				if (sock.user) sock.userEmit('foecancel');
+				if (self.props.hasUser) sock.userEmit('foecancel');
 				else sock.emit('roomcancel', { room: sock.pvp });
 				delete sock.pvp;
 			}

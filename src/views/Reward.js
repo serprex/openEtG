@@ -32,7 +32,8 @@ module.exports = class Reward extends React.Component {
 		if (this.state.rewardList) {
 			store.store.dispatch(store.setCmds({
 				codedone: data => {
-					sock.user.pool = etgutil.addcard(sock.user.pool, data.card);
+					const {user} = store.store.getState();
+					store.store.dispatch(store.updateUser({ pool: etgutil.addcard(user.pool, data.card) }));
 					store.store.dispatch(store.chatMsg(Cards.Codes[data.card].name + ' added!', 'System'));
 					store.store.dispatch(store.doNav(require('./MainMenu')));
 				},
@@ -89,8 +90,7 @@ module.exports = class Reward extends React.Component {
 					onClick={() => this.setState({ chosenReward: reward })}
 				/>
 			)}
-			{this.state.chosenReward &&
-				<Components.Card x={233} y={10} code={this.state.chosenReward} />}
+			<Components.Card x={233} y={10} code={this.state.chosenReward} />
 		</>;
 	}
 };

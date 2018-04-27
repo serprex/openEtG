@@ -34,7 +34,7 @@ module.exports = class ElementSelect extends React.Component {
 		store.store.dispatch(store.setCmds({
 			login: data => {
 				delete data.x;
-				sock.user = data;
+				store.store.dispatch(store.setUser(data));
 				store.store.dispatch(store.setOptTemp('selectedDeck', data.selectedDeck));
 				store.store.dispatch(store.setOptTemp('deck', sock.getDeck()));
 				store.store.dispatch(store.doNav(require('./MainMenu')));
@@ -53,11 +53,10 @@ module.exports = class ElementSelect extends React.Component {
 					y={180 + ((i - 1) & 1) * 64}
 					click={() => {
 						const msg = {
-							u: sock.user.name,
-							a: sock.user.auth,
+							u: this.props.user.name,
+							a: this.props.user.auth,
 							e: i == 14 ? RngMock.upto(12) + 1 : i,
 						};
-						sock.user = undefined;
 						sock.emit('inituser', msg);
 					}}
 					onMouseOver={() =>
@@ -82,7 +81,8 @@ module.exports = class ElementSelect extends React.Component {
 				y={450}
 				onClick={() => {
 					sock.userEmit('delete');
-					sock.user = undefined;
+					store.store.dispatch(store.setUser(null));
+					store.store.dispatch(store.setOpt('remember', false));
 					store.store.dispatch(store.doNav(require('./Login')));
 				}}
 			/>

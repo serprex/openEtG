@@ -880,7 +880,7 @@ const keycerttask = sutil.mkTask(res => {
 				if (data.a == user.auth) {
 					Us.socks[u] = this;
 					delete data.a;
-					func.call(this, data, Us.users[u]);
+					Object.assign(user, func.call(this, data, user));
 				}
 			});
 		} else if ((func = sockEvents[data.x])) {

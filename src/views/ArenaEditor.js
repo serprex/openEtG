@@ -57,7 +57,7 @@ function AttrUi({y, name, value, sumscore, arpts, onChange}) {
 	</>;
 }
 
-module.exports = connect()(class ArenaEditor extends React.Component {
+module.exports = connect(({user}) => ({user}))(class ArenaEditor extends React.Component {
 	constructor(props) {
 		super(props);
 		const baseacard = props.acard.asUpped(false).asShiny(false);
@@ -72,8 +72,8 @@ module.exports = connect()(class ArenaEditor extends React.Component {
 				pool[code] = (pool[code] || 0) + count;
 			}
 		}
-		etgutil.iterraw(sock.user.pool, incrpool);
-		etgutil.iterraw(sock.user.accountbound, incrpool);
+		etgutil.iterraw(props.user.pool, incrpool);
+		etgutil.iterraw(props.user.accountbound, incrpool);
 		let mark = 0,
 			deck = etgutil.decodedeck(props.adeck);
 		for (let i = deck.length - 1; i >= 0; i--) {

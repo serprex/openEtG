@@ -5,9 +5,10 @@ const sock = require('../sock'),
 	userutil = require('../userutil'),
 	Components = require('../Components'),
 	store = require('../store'),
+	{connect} = require('react-redux'),
 	React = require('react');
 
-module.exports = class Bazaar extends React.Component {
+module.exports = connect(({user})=>({user}))(class Bazaar extends React.Component {
 	constructor(props) {
 		super(props);
 		this.state = {
@@ -20,7 +21,7 @@ module.exports = class Bazaar extends React.Component {
 		const cost = Math.ceil(userutil.calcWealth(this.state.deck, true) * 3);
 		return <>
 			<Components.ExitBtn x={8} y={100} />
-			{this.state.deck.length > 0 && sock.user.gold >= cost && (
+			{this.state.deck.length > 0 && this.props.user.gold >= cost && (
 				<input
 					type='button'
 					value='Buy'
@@ -43,11 +44,11 @@ module.exports = class Bazaar extends React.Component {
 					position: 'absolute',
 					left: '100px',
 					top: '235px',
-					color: cost > sock.user.gold ? '#f44' : '#fff',
+					color: cost > this.props.user.gold ? '#f44' : '#fff',
 				}}
 			/>
 			<Components.Text
-				text={sock.user.gold + '$'}
+				text={this.props.user.gold + '$'}
 				style={{
 					position: 'absolute',
 					left: '8px',
@@ -80,4 +81,4 @@ module.exports = class Bazaar extends React.Component {
 			<Components.Card x={734} y={8} code={this.state.code} />
 		</>;
 	}
-};
+});

@@ -16,7 +16,8 @@ function chatmute() {
 }
 function maybeSendChat(e) {
 	e.cancelBubble = true;
-	const kc = e.which || e.keyCode;
+	const kc = e.which || e.keyCode,
+		{user} = store.store.getState();
 	if (kc == 13) {
 		e.preventDefault();
 		let chatinput = e.target,
@@ -41,7 +42,7 @@ function maybeSendChat(e) {
 		} else if (msg == '/who') {
 			sock.emit('who');
 		} else if (msg.match(/^\/roll( |$)\d*d?\d*$/)) {
-			const data = { u: sock.user ? sock.user.name : '' };
+			const data = { u: user ? user.name : '' };
 			const ndn = msg.slice(6).split('d');
 			if (!ndn[1]) {
 				data.X = +ndn[0] || 0x100000000;
@@ -50,17 +51,17 @@ function maybeSendChat(e) {
 				data.X = +ndn[1];
 			}
 			sock.emit('roll', data);
-		} else if (msg.match(/^\/decks/) && sock.user) {
+		} else if (msg.match(/^\/decks/) && user) {
 			const rx = msg.length > 7 && new RegExp(msg.slice(7));
-			let names = Object.keys(sock.user.decks);
+			let names = Object.keys(user.decks);
 			if (rx) names = names.filter(name => name.match(rx));
 			names.sort();
 			store.store.dispatch(store.chat(names.map(name => {
-				const deck = sock.user.decks[name];
+				const deck = user.decks[name];
 				return <div>
 					<a href={`deck/${deck}`} target='_blank' className={'ico ce' + etgutil.fromTrueMark(parseInt(deck.slice(-3), 32))} />
 					<span onClick={e => {
-						sock.user.selectedDeck = name;
+						store.store.dispatch(store.updateUser({ selectedDeck: name }));
 						store.store.dispatch(store.setOptTemp('selectedDeck', name));
 						store.store.dispatch(store.setOpt('deck', deck));
 					}}>{name}</span>
@@ -82,16 +83,16 @@ function maybeSendChat(e) {
 			sock.emit('motd');
 		} else if (msg == '/mod') {
 			sock.emit('mod');
-		} else if (sock.user && msg == '/modclear') {
+		} else if (user && msg == '/modclear') {
 			sock.userEmit('modclear');
-		} else if (sock.user && msg.match(/^\/mod(guest|mute|add|rm|motd) /)) {
+		} else if (user && msg.match(/^\/mod(guest|mute|add|rm|motd) /)) {
 			const sp = msg.indexOf(' ');
 			sock.userEmit(msg.slice(1, sp), { m: msg.slice(sp + 1) });
 		} else if (msg.match(/^\/code /)) {
 			sock.userEmit('codecreate', { t: msg.slice(6) });
-		} else if (!msg.match(/^\/[^/]/) || (sock.user && msg.match(/^\/w( |")/))) {
+		} else if (!msg.match(/^\/[^/]/) || (user && msg.match(/^\/w( |")/))) {
 			msg = msg.replace(/^\/\//, '/');
-			if (sock.user) {
+			if (user) {
 				const data = { msg: msg };
 				if (msg.match(/^\/w( |")/)) {
 					const match = msg.match(/^\/w"([^"]*)"/);
