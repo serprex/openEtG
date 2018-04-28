@@ -141,39 +141,37 @@ const activeInfo = {
 };
 
 const ThingInst = connect(({opts}) => ({ lofiArt: opts.lofiArt }))(function ThingInst(props) {
-	const obj = props.obj,
-		game = props.game,
+	const {obj, game} = props,
 		scale =
 			obj.type === etg.Weapon || obj.type === etg.Shield
 				? 1.2
 				: obj.type == etg.Spell ? 0.85 : 1,
-		isSpell = obj.type === etg.Spell;
-	const children = props.lofiArt ? [
-		<div className={obj.card.shiny ? 'shiny' : undefined}
+		isSpell = obj.type === etg.Spell,
+		pos = ui.tgtToPos(obj);
+	if (isSpell && obj.owner == game.player2 && !game.player1.precognition)
+	{
+		return <div
 			style={{
 				position: 'absolute',
-				left: '0',
-				top: isSpell ? '0' : '10px',
-				width: 64 * scale + 'px',
-				height: 64 * scale + 'px',
-				backgroundColor: ui.maybeLightenStr(obj.card),
-				pointerEvents: 'none',
+				left: pos.x - 32 + 'px',
+				top: pos.y - 38 + 'px',
+				width: '68px',
+				height: '80px',
+				border: 'transparent 2px solid',
 			}}
-		>{obj.card ? obj.card.name : obj.name}</div>
-	] : [
-		<img className={obj.card.shiny ? 'shiny' : undefined}
-			src={'/Cards/' + obj.card.code.toString(32) + '.png'}
-			style={{
-				position: 'absolute',
-				left: '0',
-				top: isSpell ? '0' : '10px',
-				width: 64 * scale + 'px',
-				height: 64 * scale + 'px',
-				backgroundColor: ui.maybeLightenStr(obj.card),
-				pointerEvents: 'none',
-			}}
-		/>
-	];
+			className={tgtclass(game, obj)}
+			onMouseOut={props.onMouseOut}
+			onClick={() => props.onClick(obj)}
+		>
+			<div className='ico cback'
+				style={{
+					left: '2px',
+					top: '2px',
+				}}
+			/>
+		</div>;
+	}
+	const children = [];
 	const visible = [
 		obj.status.get('psionic'),
 		obj.status.get('aflatoxin'),
@@ -192,6 +190,7 @@ const ThingInst = connect(({opts}) => ({ lofiArt: opts.lofiArt }))(function Thin
 		if (!isSpell && visible[k]) {
 			children.push(
 				<div className={'ico s' + k}
+					key={k}
 					style={{
 						position: 'absolute',
 						top: 64 * scale + 10 + 'px',
@@ -206,6 +205,7 @@ const ThingInst = connect(({opts}) => ({ lofiArt: opts.lofiArt }))(function Thin
 		if (!isSpell && bordervisible[k]) {
 			children.push(
 				<div className={'ico sborder' + k}
+					key={7+k}
 					style={{
 						position: 'absolute',
 						left: '0',
@@ -237,10 +237,54 @@ const ThingInst = connect(({opts}) => ({ lofiArt: opts.lofiArt }))(function Thin
 			statText = charges ? 'x' + charges : obj.truedr().toString();
 		}
 	} else {
-		statText = obj.card.cost + ':' + obj.card.costele;
+		statText = `${obj.card.cost}:${obj.card.costele}`;
 	}
-	if (topText) {
-		children.push(
+	return <div
+		style={{
+			position: 'absolute',
+			left: pos.x - 32 * scale + 'px',
+			top: pos.y - 36 * scale + 'px',
+			width: 64 * scale + 4 + 'px',
+			height: (isSpell ? 64 : 72) * scale + 4 + 'px',
+			opacity: obj.isMaterial() ? '1' : '.7',
+			color: obj.card.upped ? '#000' : '#fff',
+			fontSize: '10px',
+			border: 'transparent 2px solid',
+			zIndex: !isSpell && obj.status.get('cloak') ? '2' : undefined,
+		}}
+		onMouseOver={props.setInfo && (e => props.setInfo(e, obj, pos.x))}
+		className={tgtclass(game, obj)}
+		onMouseOut={props.onMouseOut}
+		onClick={() => props.onClick(obj)}
+	>
+		{props.lofiArt ?
+			<div key={0} className={obj.card.shiny ? 'shiny' : undefined}
+				style={{
+					position: 'absolute',
+					left: '0',
+					top: isSpell ? '0' : '10px',
+					width: 64 * scale + 'px',
+					height: 64 * scale + 'px',
+					backgroundColor: ui.maybeLightenStr(obj.card),
+					pointerEvents: 'none',
+				}}
+			>{obj.card ? obj.card.name : obj.name}</div>
+			:
+			<img key={0} className={obj.card.shiny ? 'shiny' : undefined}
+				src={'/Cards/' + obj.card.code.toString(32) + '.png'}
+				style={{
+					position: 'absolute',
+					left: '0',
+					top: isSpell ? '0' : '10px',
+					width: 64 * scale + 'px',
+					height: 64 * scale + 'px',
+					backgroundColor: ui.maybeLightenStr(obj.card),
+					pointerEvents: 'none',
+				}}
+			/>
+		}
+		{children}
+		{topText &&
 			<Components.Text
 				text={topText}
 				icoprefix='te'
@@ -253,10 +297,8 @@ const ThingInst = connect(({opts}) => ({ lofiArt: opts.lofiArt }))(function Thin
 					backgroundColor: ui.maybeLightenStr(obj.card),
 				}}
 			/>
-		);
-	}
-	if (statText) {
-		children.push(
+		}
+		{statText &&
 			<Components.Text
 				text={statText}
 				icoprefix='te'
@@ -269,10 +311,8 @@ const ThingInst = connect(({opts}) => ({ lofiArt: opts.lofiArt }))(function Thin
 					backgroundColor: ui.maybeLightenStr(obj.card),
 				}}
 			/>
-		);
-	}
-	if (obj.hasactive('prespell', 'protectonce')) {
-		children.push(
+		}
+		{obj.hasactive('prespell', 'protectonce') &&
 			<div className='ico protection'
 				style={{
 					position: 'absolute',
@@ -280,49 +320,8 @@ const ThingInst = connect(({opts}) => ({ lofiArt: opts.lofiArt }))(function Thin
 					top: '0',
 				}}
 			/>
-		);
-	}
-	const pos = ui.tgtToPos(obj);
-	return React.createElement('div', {
-		...(isSpell && obj.owner == game.player2 && !game.player1.precognition ?
-		{
-			children: [<div
-				className='ico cback'
-				style={{
-					left: '2px',
-					top: '2px',
-				}}
-			/>],
-			style: {
-				position: 'absolute',
-				left: pos.x - 32 + 'px',
-				top: pos.y - 38 + 'px',
-				width: '68px',
-				height: '80px',
-				border: 'transparent 2px solid',
-			},
 		}
-		: {
-			children: children,
-			style: {
-				position: 'absolute',
-				left: pos.x - 32 * scale + 'px',
-				top: pos.y - 36 * scale + 'px',
-				width: 64 * scale + 4 + 'px',
-				height: (isSpell ? 64 : 72) * scale + 4 + 'px',
-				opacity: obj.isMaterial() ? '1' : '.7',
-				color: obj.card.upped ? '#000' : '#fff',
-				fontSize: '10px',
-				border: 'transparent 2px solid',
-				zIndex: !isSpell && obj.status.get('cloak') ? '2' : undefined,
-			},
-			onMouseOver: props.setInfo && (e => props.setInfo(e, obj, pos.x)),
-		}),
-			className: tgtclass(game, obj),
-			onMouseOut: props.onMouseOut,
-			onClick: () => props.onClick(obj),
-		}
-	);
+	</div>;
 });
 
 function addNoHealData(game) {
@@ -340,9 +339,30 @@ function tgtclass(game, obj) {
 	} else if (obj.owner === game.player1 && obj.canactive()) return 'canactive';
 }
 
+function FoePlays({ foeplays, setCard, clearCard }) {
+	return foeplays.map((play, i) =>
+		<Components.CardImage
+			key={i}
+			x={(i & 7) * 99}
+			y={(i >> 3) * 19}
+			card={play}
+			onMouseOver={e => {
+				if (play instanceof Card) {
+					setCard(e, play, e.pageX);
+				}
+			}}
+			onMouseOut={clearCard}
+		/>
+	);
+}
+
 module.exports = connect(({user}) => ({user}))(class Match extends React.Component {
 	constructor(props) {
 		super(props);
+		this.aiState = null;
+		this.aiCommand = false;
+		this.aiDelay = 0;
+		this.streakback = 0;
 		this.state = {
 			tooltip: '',
 			foeplays: [],
@@ -350,10 +370,6 @@ module.exports = connect(({user}) => ({user}))(class Match extends React.Compone
 			resigning: false,
 			effects: null,
 		};
-		this.aiState = null;
-		this.aiCommand = false;
-		this.aiDelay = 0;
-		this.streakback = 0;
 	}
 
 	endClick(discard) {
@@ -668,7 +684,7 @@ module.exports = connect(({user}) => ({user}))(class Match extends React.Compone
 	render() {
 		const self = this,
 			{game} = this.props,
-			children = [svgbg];
+			children = [];
 		let turntell, endText, cancelText;
 		const cloaked = game.player2.isCloaked();
 
@@ -697,32 +713,18 @@ module.exports = connect(({user}) => ({user}))(class Match extends React.Compone
 			endText = 'Continue';
 			cancelText = '';
 		}
-		if (cloaked) {
-			children.push(cloaksvg);
-		} else {
-			for (let i = 0; i < self.state.foeplays.length; i++) {
-				let play = self.state.foeplays[i];
-				children.push(
-					<Components.CardImage
-						key={'foeplay' + i}
-						x={(i & 7) * 99}
-						y={(i >> 3) * 19}
-						card={play}
-						onMouseOver={(e) => {
-							if (play instanceof Card) {
-								self.setCard(e, play, e.pageX);
-							}
-						}}
-						onMouseOut={() => self.clearCard()}
-					/>,
-				);
-			}
-		}
 		let floodvisible = false;
 		for (let j = 0; j < 2; j++) {
 			const pl = game.players(j);
 
 			const plpos = ui.tgtToPos(pl);
+			const handOverlay = pl.usedactive
+				? 'ico silence'
+				: pl.sanctuary
+					? 'ico sanctuary'
+					: pl.nova >= 3 && pl.hand.some(c => c.card.isOf(Cards.Nova))
+						? 'ico singularity'
+						: '';
 			children.push(
 				<div className={tgtclass(game, pl)}
 					style={{
@@ -734,7 +736,7 @@ module.exports = connect(({user}) => ({user}))(class Match extends React.Compone
 						border: 'transparent 2px solid',
 					}}
 					onClick={() => self.playerClick(j)}
-					onMouseOver={(e) => self.setInfo(e, pl)}
+					onMouseOver={e => self.setInfo(e, pl)}
 				/>,
 				<span className={'ico e' + pl.mark}
 					style={{
@@ -748,10 +750,8 @@ module.exports = connect(({user}) => ({user}))(class Match extends React.Compone
 						textShadow: '2px 2px 1px #000,2px 2px 2px #000',
 					}}>
 					{pl.markpower !== 1 && pl.markpower}
-				</span>
-			);
-			if (pl.sosa) {
-				children.push(
+				</span>,
+				!!pl.sosa &&
 					<div className={'ico sacrifice'}
 						style={{
 							position: 'absolute',
@@ -759,41 +759,28 @@ module.exports = connect(({user}) => ({user}))(class Match extends React.Compone
 							top: j ? '7px' : '502px',
 							pointerEvents: 'none',
 						}}
-					/>
-				);
-			}
-			if (pl.flatline) {
-				children.push(
+					/>,
+				!!pl.flatline &&
 					<span className='ico sabbath'
 						style={{
 							position: 'absolute',
 							left: j ? '792px' : '0',
 							top: j ? '80px' : '288px',
 						}}
-					/>
-				);
-			}
-			const handOverlay = pl.usedactive
-				? 'ico silence'
-				: pl.sanctuary
-					? 'ico sanctuary'
-					: pl.nova >= 3 && pl.hand.some(c => c.card.isOf(Cards.Nova))
-						? 'ico singularity'
-						: '';
-			if (handOverlay) {
-				children.push(
+					/>,
+				handOverlay &&
 					<span className={handOverlay}
 						style={{
 							position: 'absolute',
 							left: j ? '3px' : '759px',
 							top: j ? '75px' : '305px',
 						}}
-					/>
-				);
-			}
+					/>,
+			);
+			const cards=[], creatures = [], perms = [];
 			for (let i = 0; i < pl.hand.length; i++) {
-				children.push(
-					<ThingInst
+				cards.push(
+					<ThingInst key={i}
 						obj={pl.hand[i]}
 						game={game}
 						setGame={() => self.forceUpdate()}
@@ -804,13 +791,11 @@ module.exports = connect(({user}) => ({user}))(class Match extends React.Compone
 					/>
 				);
 			}
-			const creatures = [], perms = [];
 			for (let i = 0; i < 23; i++) {
 				const cr = pl.creatures[i];
 				if (cr && !(j == 1 && cloaked)) {
 					creatures.push(
-						<ThingInst
-							key={i}
+						<ThingInst key={i}
 							obj={cr}
 							game={game}
 							setGame={() => self.forceUpdate()}
@@ -826,8 +811,7 @@ module.exports = connect(({user}) => ({user}))(class Match extends React.Compone
 				if (pr && pr.status.get('flooding')) floodvisible = true;
 				if (pr && !(j == 1 && cloaked && !pr.status.get('cloak'))) {
 					perms.push(
-						<ThingInst
-							key={i}
+						<ThingInst key={i}
 							obj={pr}
 							game={game}
 							setGame={() => self.forceUpdate()}
@@ -842,33 +826,29 @@ module.exports = connect(({user}) => ({user}))(class Match extends React.Compone
 				creatures.reverse();
 				perms.reverse();
 			}
-			children.push(creatures, perms);
+			children.push(cards, creatures, perms);
 			const wp = pl.weapon;
-			if (wp && !(j == 1 && cloaked)) {
-				children.push(
-					<ThingInst
-						obj={wp}
-						game={game}
-						setGame={() => self.forceUpdate()}
-						setInfo={(e, obj, x) => self.setInfo(e, obj, x)}
-						onMouseOut={() => self.clearCard()}
-						onClick={obj => self.thingClick(obj)}
-					/>
-				);
-			}
+			children.push(wp && !(j == 1 && cloaked) &&
+				<ThingInst
+					obj={wp}
+					game={game}
+					setGame={() => self.forceUpdate()}
+					setInfo={(e, obj, x) => self.setInfo(e, obj, x)}
+					onMouseOut={() => self.clearCard()}
+					onClick={obj => self.thingClick(obj)}
+				/>
+			);
 			const sh = pl.shield;
-			if (sh && !(j == 1 && cloaked)) {
-				children.push(
-					<ThingInst
-						obj={sh}
-						game={game}
-						setGame={() => self.forceUpdate()}
-						setInfo={(e, obj, x) => self.setInfo(e, obj, x)}
-						onMouseOut={() => self.clearCard()}
-						onClick={obj => self.thingClick(obj)}
-					/>
-				);
-			}
+			children.push(sh && !(j == 1 && cloaked) &&
+				<ThingInst
+					obj={sh}
+					game={game}
+					setGame={() => self.forceUpdate()}
+					setInfo={(e, obj, x) => self.setInfo(e, obj, x)}
+					onMouseOut={() => self.clearCard()}
+					onClick={obj => self.thingClick(obj)}
+				/>
+			);
 			const qx = j ? 792 : 0,
 				qy = j ? 106 : 308;
 			for (let k = 1; k < 13; k++) {
@@ -905,44 +885,9 @@ module.exports = connect(({user}) => ({user}))(class Match extends React.Compone
 					}}
 				/>
 			);
-			if (pl.hp > 0) {
-				children.push(
-					<div
-						style={{
-							backgroundColor: ui.strcols[etg.Life],
-							position: 'absolute',
-							left: plpos.x - 40 + 'px',
-							top: j ? '37px' : '532px',
-							width: 80 * pl.hp / pl.maxhp + 'px',
-							height: '14px',
-							pointerEvents: 'none',
-						}}
-					/>
-				);
-				if (!cloaked && game.expectedDamage[j]) {
-					const x1 = 80 * pl.hp / pl.maxhp;
-					const x2 =
-						x1 - 80 * Math.min(game.expectedDamage[j], pl.hp) / pl.maxhp;
-					children.push(
-						<div
-							style={{
-								backgroundColor:
-									ui.strcols[
-										game.expectedDamage[j] >= pl.hp
-											? etg.Fire
-											: game.expectedDamage[j] > 0 ? etg.Time : etg.Water
-									],
-								position: 'absolute',
-								left: plpos.x - 40 + Math.min(x1, x2),
-								top: j ? '37px' : '532px',
-								width: Math.max(x1, x2) - Math.min(x1, x2) + 'px',
-								height: '14px',
-								pointerEvents: 'none',
-							}}
-						/>
-					);
-				}
-			}
+			const x1 = 80 * pl.hp / pl.maxhp;
+			const x2 =
+				x1 - 80 * Math.min(game.expectedDamage[j], pl.hp) / pl.maxhp;
 			const poison = pl.status.get('poison'),
 				poisoninfo =
 					(poison > 0 ? poison + ' 1:2' : poison < 0 ? -poison + ' 1:7' : '') +
@@ -953,7 +898,37 @@ module.exports = connect(({user}) => ({user}))(class Match extends React.Compone
 					? '\nDmg: ' + game.expectedDamage[j]
 					: '') +
 				(poisoninfo ? '\n' + poisoninfo : '');
-			children.push(
+			children.push(pl.hp > 0 && <>
+				<div
+					style={{
+						backgroundColor: ui.strcols[etg.Life],
+						position: 'absolute',
+						left: plpos.x - 40 + 'px',
+						top: j ? '37px' : '532px',
+						width: 80 * pl.hp / pl.maxhp + 'px',
+						height: '14px',
+						pointerEvents: 'none',
+					}}
+				/>
+				{!cloaked && game.expectedDamage[j] !== 0 &&
+					<div
+						style={{
+							backgroundColor:
+								ui.strcols[
+									game.expectedDamage[j] >= pl.hp
+										? etg.Fire
+										: game.expectedDamage[j] > 0 ? etg.Time : etg.Water
+								],
+							position: 'absolute',
+							left: plpos.x - 40 + Math.min(x1, x2),
+							top: j ? '37px' : '532px',
+							width: Math.max(x1, x2) - Math.min(x1, x2) + 'px',
+							height: '14px',
+							pointerEvents: 'none',
+						}}
+					/>
+				}
+			</>,
 				<Components.Text
 					text={hptext}
 					style={{
@@ -969,9 +944,17 @@ module.exports = connect(({user}) => ({user}))(class Match extends React.Compone
 				/>,
 			);
 		}
-		if (floodvisible) children.push(floodsvg);
-
-		children.push(
+		return <>
+			{svgbg}
+			{cloaked ? cloaksvg :
+				<FoePlays
+					foeplays={this.state.foeplays}
+					setCard={(e, play, x) => this.setCard(e, play, e.pageX)}
+					clearCard={() => this.clearCard()}
+				/>
+			}
+			{children}
+			{floodvisible && floodsvg}
 			<div
 				style={{
 					whiteSpace: 'pre-wrap',
@@ -981,12 +964,10 @@ module.exports = connect(({user}) => ({user}))(class Match extends React.Compone
 					top: '40px',
 					width: '140px',
 				}}>
-				{(['Commoner', 'Mage', 'Champion', 'Demigod', 'Arena1', 'Arena2'][
+				{`${['Commoner', 'Mage', 'Champion', 'Demigod', 'Arena1', 'Arena2'][
 					this.props.game.level
-				] || '') +
-					'\n' +
-					(this.props.game.foename || '-')}
-			</div>,
+				] || ''}\n${this.props.game.foename || '-'}`}
+			</div>
 			<span
 				style={{
 					position: 'absolute',
@@ -996,21 +977,13 @@ module.exports = connect(({user}) => ({user}))(class Match extends React.Compone
 				}}>
 				{turntell}
 			</span>
-		);
-		if (self.state.effects) {
-			children.push(self.state.effects);
-		}
-		if (self.state.hovercode) {
-			children.push(
-				<Components.Card
-					x={self.state.hoverx}
-					y={self.state.hovery}
-					code={self.state.hovercode}
-				/>
-			);
-		}
-		if (self.state.tooltip) {
-			children.push(
+			{this.state.effects}
+			<Components.Card
+				x={self.state.hoverx}
+				y={self.state.hovery}
+				code={self.state.hovercode}
+			/>
+			{self.state.tooltip &&
 				<Components.Text
 					className='infobox'
 					text={self.state.tooltip}
@@ -1021,9 +994,7 @@ module.exports = connect(({user}) => ({user}))(class Match extends React.Compone
 						top: self.state.tooly + 'px',
 					}}
 				/>
-			);
-		}
-		children.push(
+			}
 			<input type='button'
 				value={self.state.resigning ? 'Confirm' : 'Resign'}
 				onClick={() => self.resignClick()}
@@ -1033,10 +1004,8 @@ module.exports = connect(({user}) => ({user}))(class Match extends React.Compone
 					top: '20px',
 				}}
 			/>
-		);
-		if (!self.props.data.spectate && (game.turn == game.player1 || game.winner)) {
-			if (cancelText) {
-				children.push(
+			{!self.props.data.spectate && (game.turn == game.player1 || game.winner) && <>
+				{cancelText &&
 					<input type='button'
 						value={cancelText}
 						onClick={() => self.cancelClick()}
@@ -1046,10 +1015,8 @@ module.exports = connect(({user}) => ({user}))(class Match extends React.Compone
 							top: '560px',
 						}}
 					/>
-				);
-			}
-			if (endText) {
-				children.push(
+				}
+				{endText &&
 					<input type='button'
 						value={endText}
 						onClick={() => self.endClick()}
@@ -1059,10 +1026,8 @@ module.exports = connect(({user}) => ({user}))(class Match extends React.Compone
 							top: '530px',
 						}}
 					/>
-				);
-			}
-		}
-
-		return children;
+				}
+			</>}
+		</>;
 	}
 });

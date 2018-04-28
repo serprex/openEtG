@@ -378,7 +378,7 @@ Thing.prototype.rmactive = function(type, name) {
 	}
 };
 Thing.prototype.hasactive = function(type, name) {
-	return type in this.active && ~this.active[type].name.indexOf(name);
+	return type in this.active && this.active[type].name.indexOf(name) !== -1;
 };
 Thing.prototype.canactive = function(spend) {
 	if (
