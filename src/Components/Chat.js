@@ -22,6 +22,11 @@ module.exports = connect(state => ({
 		chat.scrollTop = ~snapshot ? snapshot : chat.scrollHeight;
 	}
 
+	componentDidMount() {
+		const chat = this.chatRef.current;
+		chat.scrollTop = chat.scrollHeight;
+	}
+
 	render() {
 		return <div className='chatBox' style={this.props.style} ref={this.chatRef}>
 			{this.props.chat.get(this.props.channel)}
