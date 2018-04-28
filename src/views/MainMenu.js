@@ -288,6 +288,24 @@ module.exports = connect(({user, opts}) => ({
 				self.props.dispatch(store.chatMsg('Passwords do not match', 'System'));
 			}
 		}
+		const customAi = (
+			<div style={{
+				width: '45%',
+				float: 'right',
+				marginTop: self.props.user ? undefined : '128px',
+			}}>
+				<input type='button'
+					value='Custom AI'
+					onClick={() => {
+						this.props.dispatch(store.doNav(require('./Challenge'), { pvp: false }));
+					}}
+					onMouseOver={this.mkSetTip(
+						'Play versus any deck you want, with custom stats for you & the AI',
+					)}
+				/>
+				<LabelText text='Duel a custom AI' />
+			</div>
+		);
 		return <div className='bg_main'>
 			<>
 				<Rect x={196} y={4} wid={504} hei={48}>
@@ -426,7 +444,7 @@ module.exports = connect(({user, opts}) => ({
 						onClick={mkAi.run(mkAi.mkPremade(3))}
 						onMouseOver={this.mkSetTip('Commoners have no upgraded cards & mostly common cards')}
 					/>
-					{self.props.user && <>
+					{self.props.user ? <>
 						<div style={{
 							marginTop: '132px',
 							width: '45%',
@@ -457,23 +475,8 @@ module.exports = connect(({user, opts}) => ({
 							/>
 							<LabelText text='Go on an adventure' />
 						</div>
-						<div style={{
-							width: '45%',
-							float: 'right',
-							marginTop: self.props.user ? undefined : '128px',
-						}}>
-							<input type='button'
-								value='Custom AI'
-								onClick={() => {
-									this.props.dispatch(store.doNav(require('./Challenge'), { pvp: false }));
-								}}
-								onMouseOver={this.mkSetTip(
-									'Play versus any deck you want, with custom stats for you & the AI',
-								)}
-							/>
-							<LabelText text='Duel a custom AI' />
-						</div>
-					</>}
+						{customAi}
+					</> : customAi}
 				</CostRewardHeaders>
 				<Rect x={620} y={92} wid={196} hei={176}>
 					<TitleText text='Cards & Decks' />
