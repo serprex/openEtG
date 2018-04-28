@@ -71,7 +71,7 @@ const sockEvents = {
 				lastindex = reres.index;
 				continue;
 			}
-			text.appendChild(<a href={`deck/${reres[0]}`} target='_blank'>{reres[0]}</a>);
+			text.push(<a href={`deck/${reres[0]}`} target='_blank'>{reres[0]}</a>);
 			lastindex = reres.index + reres[0].length;
 		}
 		if (lastindex != data.msg.length)
