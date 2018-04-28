@@ -645,7 +645,8 @@ const Skills = {
 		if (poison) c.owner.foe.addpoison(poison);
 	},
 	epoch: (c, t) => {
-		if (c.status.incr('epoch', 1) > 1) Skills.silence.func(c, t.owner);
+		c.status.incr('epoch', 1);
+		if (c.status.get('epoch') > 1) Skills.silence.func(c, t.owner);
 	},
 	epochreset: (c, t) => {
 		c.status.set('epoch', 0);

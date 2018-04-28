@@ -53,26 +53,10 @@ const svgbg = (() => {
 	for (let j = 0; j < 3; j++) {
 		let path = '';
 		for (let i = 0; i < redhor.length; i += 3) {
-			path +=
-				'M' +
-				redhor[i + 1] +
-				' ' +
-				(redhor[i] - j) +
-				'L' +
-				redhor[i + 2] +
-				' ' +
-				(redhor[i] - j);
+			path += `M${redhor[i + 1]} ${redhor[i] - j}L${redhor[i + 2]} ${redhor[i] - j}`;
 		}
 		for (let i = 0; i < redver.length; i += 3) {
-			path +=
-				'M' +
-				(redver[i] + j) +
-				' ' +
-				redver[i + 1] +
-				'L' +
-				(redver[i] + j) +
-				' ' +
-				redver[i + 2];
+			path += `M${redver[i] + j} ${redver[i + 1]}L${redver[i] + j} ${redver[i + 2]}`;
 		}
 		redren.push(
 			<path
@@ -237,23 +221,18 @@ const ThingInst = connect(({opts}) => ({ lofiArt: opts.lofiArt }))(function Thin
 		const charges = obj.status.get('charges');
 		topText = obj.activetext();
 		if (obj.type === etg.Creature) {
-			statText =
-				obj.trueatk() + ' | ' + obj.truehp() + (charges ? ' x' + charges : '');
+			statText = `${obj.trueatk()} | ${obj.truehp()}${charges ? ' x' + charges : ''}`;
 		} else if (obj.type === etg.Permanent) {
 			if (obj.card.type === etg.Pillar) {
-				statText =
-					'1:' +
-					(obj.status.get('pendstate') ? obj.owner.mark : obj.card.element) +
-					' x' +
-					charges;
+				statText = `1:${obj.status.get('pendstate') ? obj.owner.mark : obj.card.element} x${charges}`;
 				topText = '';
 			} else if (obj.active.auto && obj.active.auto === Skills.locket) {
-				statText = '1:' + (obj.status.get('mode') || obj.owner.mark);
+				statText = `1:${obj.status.get('mode') || obj.owner.mark}`;
 			} else {
 				statText = (charges || '').toString();
 			}
 		} else if (obj.type === etg.Weapon) {
-			statText = obj.trueatk() + (charges ? ' x' + charges : '');
+			statText = `${obj.trueatk()}${charges ? ' x' + charges : ''}`;
 		} else if (obj.type === etg.Shield) {
 			statText = charges ? 'x' + charges : obj.truedr().toString();
 		}
@@ -541,7 +520,7 @@ module.exports = connect(({user}) => ({user}))(class Match extends React.Compone
 				cmds.mulligan({ draw: require('../ai/mulligan')(game.player2) });
 			}
 		}
-		const effects = Effect.next(this.state.cloaked);
+		const effects = Effect.next(game.player2.isCloaked());
 		if (effects !== this.state.effects) {
 			this.setState({ effects });
 		}
@@ -556,7 +535,7 @@ module.exports = connect(({user}) => ({user}))(class Match extends React.Compone
 		Effect.clear();
 		function onkeydown(e) {
 			if (e.target !== document.body) return;
-			const kc = e.which || e.keyCode,
+			const kc = e.which,
 				ch = String.fromCharCode(kc);
 			let chi;
 			if (kc == 27) {
@@ -698,7 +677,7 @@ module.exports = connect(({user}) => ({user}))(class Match extends React.Compone
 				? 'Discard'
 				: game.targeting
 					? game.targeting.text
-					: (game.turn == game.player1 ? 'Your Turn' : 'Their Turn') +
+					: `${game.turn == game.player1 ? 'Your' : 'Their'} Turn` +
 						(game.phase > etg.MulliganPhase
 							? ''
 							: game.first == game.player1 ? ', First' : ', Second');
@@ -714,10 +693,7 @@ module.exports = connect(({user}) => ({user}))(class Match extends React.Compone
 							: '';
 			} else cancelText = endText = '';
 		} else {
-			turntell =
-				(game.turn == game.player1 ? 'Your' : 'Their') +
-				' Turn' +
-				(game.winner == game.player1 ? ', Won' : ', Lost');
+			turntell = `${game.turn == game.player1 ? 'Your' : 'Their'} Turn, ${game.winner == game.player1 ? 'Won' : 'Lost'}`;
 			endText = 'Continue';
 			cancelText = '';
 		}
@@ -972,12 +948,7 @@ module.exports = connect(({user}) => ({user}))(class Match extends React.Compone
 					(poison > 0 ? poison + ' 1:2' : poison < 0 ? -poison + ' 1:7' : '') +
 					(pl.status.get('neuro') ? ' 1:10' : '');
 			const hptext =
-				pl.hp +
-				'/' +
-				pl.maxhp +
-				'\n' +
-				pl.deck.length +
-				'cards' +
+				`${pl.hp}/${pl.maxhp}\n${pl.deck.length}cards` +
 				(!cloaked && game.expectedDamage[j]
 					? '\nDmg: ' + game.expectedDamage[j]
 					: '') +
