@@ -30,6 +30,7 @@
     "webpack-cli": "^2.0.15"
   },
   "scripts": {
+    "start": "./server.js",
     "test": "./scripts/tests.js && ./vanilla/_tests.js",
     "dev": "webpack --mode=development --watch",
     "build": "webpack -p",

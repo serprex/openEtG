@@ -15,10 +15,6 @@ Open Terminal. All `commands` will be done in Terminal. You must have [XCode](ht
 1. Clone the repository: `git clone https://github.com/serprex/openEtG.git && cd openEtG`
 1. Install atlas files: `curl --compressed 'http://etg.dek.im/assets/{atlas.js,atlas.png,atlas.css}' -o 'assets/#1'`
 1. Install npm modules and build project: `npm install && npm run build`
-1. Install [ninja](https://github.com/ninja-build/ninja/releases)
-1. Install [mkcjs](https://www.npmjs.com/package/mkcjs) `npm install -g mkcjs`
-1. Install [spritesheet-js](https://www.npmjs.com/package/spritesheet-js) `npm install -g spritesheet-js`
-1. Build the project with ninja `ninja`
 
 #### Mac Start/Stop OpenEtG
 
@@ -34,7 +30,7 @@ Open Terminal. All `commands` will be done in Terminal. You must have [XCode](ht
   * [node.js](https://nodejs.org)
   * [redis](https://github.com/MSOpenTech/redis/releases)
   * [git](http://git-scm.com/download/win)
-  * [tortoisegit](http://tortoisegit.org)
+  * [tortoisegit](https://tortoisegit.org)
 1. Clone the repository:
   1. Right-click inside the folder where you want the game files to go
   1. Click `Git Clone` to create an `openEtG` folder
@@ -44,10 +40,10 @@ Open Terminal. All `commands` will be done in Terminal. You must have [XCode](ht
   1. Click `Open command window here`
   1. Run the command: `npm install; npm install -g spritesheet-js`
   1. Leave this command window open for later
-  1. Run `npm run build-bundle`
+  1. Run `npm run build`
   1. Download [atlas.js](http://etg.dek.im/assets/atlas.js), [atlas.png](http://etg.dek.im/assets/atlas.png) and [atlas.css](http://etg.dek.im/assets/atlas.css) and move them to the `assets` folder
 1. Start redis-server
 1. In the command window from previously, run the command: `npm start`
 1. Browse to [http://127.0.0.1:13602](http://127.0.0.1:13602) and the game should work!
 
-Note: When you edit code you need to `npm run build-bundle` to update the bundle.
+Note: When you edit code you need to `npm run build` to update the bundle.
