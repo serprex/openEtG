@@ -70,11 +70,10 @@ module.exports = connect(({user, opts}) => ({
 			}
 			const dcode =
 					etgutil.encodedeck(self.state.deck) +
-					etgutil.toTrueMarkSuffix(self.state.mark),
-				olddeck = sock.getDeck();
-			if (olddeck != dcode) {
+					etgutil.toTrueMarkSuffix(self.state.mark);
+			if (dcode !== self.props.user.decks[name]) {
 				sock.userExec('setdeck', { d: dcode, name });
-				self.props.dispatch(store.setOpt('deck', sock.getDeck()));
+				self.props.dispatch(store.setOpt('deck', dcode));
 			} else if (force)
 				sock.userExec('setdeck', { name });
 		}

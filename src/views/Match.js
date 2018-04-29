@@ -550,7 +550,7 @@ module.exports = connect(({user}) => ({user}))(class Match extends React.Compone
 		}
 		Effect.clear();
 		function onkeydown(e) {
-			if (e.target !== document.body) return;
+			if (e.target.tagName === 'TEXTAREA') return;
 			const kc = e.which,
 				ch = String.fromCharCode(kc);
 			let chi;

@@ -58,7 +58,6 @@ exports.store = redux.createStore((state, action) => {
 		case 'USER_SET':
 			return { ...state, user: action.user };
 		case 'USER_CMD':
-			console.log(action, state.user);
 			return {
 				...state,
 				user: {
