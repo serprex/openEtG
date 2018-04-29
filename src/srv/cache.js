@@ -3,7 +3,7 @@ const cache = {},
 	stime = new Date();
 stime.setMilliseconds(0);
 function respond(url, res, data, ifmod) {
-	data
+	return data
 		.then(data => {
 			if (data.date.getTime() <= ifmod) {
 				res.writeHead(304);
@@ -20,7 +20,7 @@ function respond(url, res, data, ifmod) {
 			try {
 				res.writeHead('404');
 				res.end(err);
-			} catch (e) {}
+			} catch {}
 			delete cache[url];
 		});
 }
@@ -37,9 +37,7 @@ exports.add = function(res, url, ifmod, path, func) {
 	respond(
 		url,
 		res,
-		(cache[url] = new Promise((resolve, reject) =>
-			func(path, resolve, reject, stime),
-		)),
+		(cache[url] = func(path, stime)),
 		ifmod,
 	);
 };

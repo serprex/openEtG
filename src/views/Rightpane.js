@@ -127,7 +127,7 @@ module.exports = connect(state => ({
 }))(function Rightpane(props) {
 	return props.showRightpane && <>
 		<div style={{ marginBottom: '8px' }}>
-			<a href="artcredit.htm" target="_blank">Art credits</a>&emsp;&emsp;<a href="forum" target="_blank">Forum</a>&emsp;&emsp;<a href="https://discordapp.com/invite/Ja4wrFm" target="_blank">Discord</a>
+			<a href="artcredit.htm" target="_blank">Art credits</a>&emsp;&emsp;<a href="forum" target="_blank">Forum</a>&emsp;&emsp;<a href="https://discordapp.com/invite/U9pthSE" target="_blank">Discord</a>
 		</div>
 		<label><input type="checkbox" checked={props.offline}
 			onChange={e => {

@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 'use strict';
 process.chdir(__dirname);
-const fs = require('fs');
+const fs = require('fs/promises');
 const https = require('https');
 const httpoly = require('httpolyglot');
 const ws = require('ws');
@@ -18,8 +18,11 @@ const Us = require('./src/srv/Us');
 const MAX_INT = 0x100000000;
 const rooms = {};
 const sockmeta = new WeakMap();
-
-const keycerttask = sutil.mkTask(res => {
+(async () => {
+	const [keypem, certpem] = await Promise.all([
+		fs.readFile('../certs/oetg-key.pem'),
+		fs.readFile('../certs/oetg-cert.pem'),
+	]).catch(() => []);
 	function activeUsers() {
 		const activeusers = [];
 		for (let name in Us.socks) {
@@ -895,8 +898,8 @@ const keycerttask = sutil.mkTask(res => {
 	const app = httpoly
 		.createServer(
 			{
-				key: res.key,
-				cert: res.cert,
+				key: keypem,
+				cert: certpem,
 			},
 			require('./src/srv/forkcore'),
 		)
@@ -915,7 +918,4 @@ const keycerttask = sutil.mkTask(res => {
 		Us.stop();
 	}
 	process.on('SIGTERM', stop).on('SIGINT', stop);
-});
-fs.readFile('../certs/oetg-key.pem', keycerttask('key'));
-fs.readFile('../certs/oetg-cert.pem', keycerttask('cert'));
-keycerttask();
+})().catch(e => setImmediate(() => {throw e;}));
