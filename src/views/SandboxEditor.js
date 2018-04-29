@@ -34,6 +34,11 @@ module.exports = connect(state => ({
 		this.deckRef.current.setSelectionRange(0, 999);
 	}
 
+	currentDeckCode() {
+		return etgutil.encodedeck(this.state.deck) +
+			etgutil.toTrueMarkSuffix(this.state.mark);
+	}
+
 	render() {
 		return  <>
 			<Editor deck={this.state.deck} mark={this.state.mark} pool={this.state.pool}
@@ -42,7 +47,7 @@ module.exports = connect(state => ({
 			/>
 			<input placeholder='Deck'
 				autoFocus
-				value={this.props.deck}
+				value={this.currentDeckCode()}
 				style={{
 					position: 'absolute',
 					left: '520px',
@@ -56,9 +61,7 @@ module.exports = connect(state => ({
 			<input type='button'
 				value='Save & Exit'
 				onClick={() => {
-					this.props.dispatch(store.setOpt('deck',
-						etgutil.encodedeck(this.state.deck) +
-						etgutil.toTrueMarkSuffix(this.state.mark)));
+					this.props.dispatch(store.setOpt('deck', this.currentDeckCode()));
 					this.props.dispatch(store.doNav(require('../views/MainMenu')));
 				}}
 				style={{

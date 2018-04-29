@@ -7,9 +7,23 @@ const etgutil = require('../etgutil'),
 	{connect} = require('react-redux'),
 	React = require('react');
 
+function processDeck(dcode) {
+	let mark = 0,
+		deck = etgutil.decodedeck(dcode);
+	for (let i = deck.length - 1; i >= 0; i--) {
+		if (!(deck[i] in Cards.Codes)) {
+			const index = etgutil.fromTrueMark(deck[i]);
+			if (~index) {
+				mark = index;
+			}
+			deck.splice(i, 1);
+		}
+	}
+	return { mark, deck };
+}
+
 module.exports = connect(({user, opts}) => ({
 	user,
-	deck: opts.deck,
 }))(class DeckEditor extends React.Component {
 	constructor(props) {
 		super(props);
@@ -39,20 +53,10 @@ module.exports = connect(({user, opts}) => ({
 
 	static getDerivedStateFromProps(nextProps, prevState) {
 		if (nextProps.user.selectedDeck === prevState.selectedDeck) return null;
-		let mark = 0,
-			deck = etgutil.decodedeck(nextProps.deck);
-		for (let i = deck.length - 1; i >= 0; i--) {
-			if (!(deck[i] in Cards.Codes)) {
-				const index = etgutil.fromTrueMark(deck[i]);
-				if (~index) {
-					mark = index;
-				}
-				deck.splice(i, 1);
-			}
-		}
-		return { mark, deck,
+		return {
 			deckname: nextProps.user.selectedDeck,
 			selectedDeck: nextProps.user.selectedDeck,
+			...processDeck(sock.getDeck()),
 		};
 	}
 
@@ -60,12 +64,16 @@ module.exports = connect(({user, opts}) => ({
 		this.deckRef.current.setSelectionRange(0, 999);
 	}
 
+	currentDeckCode() {
+		return etgutil.encodedeck(this.state.deck) +
+			etgutil.toTrueMarkSuffix(this.state.mark);
+	}
+
 	render() {
 		const self = this;
 		function saveDeck(name, force) {
 			if (self.state.deck.length == 0) {
 				sock.userExec('rmdeck', { name });
-				self.props.dispatch(store.setOpt('deck', ''));
 				return;
 			}
 			const dcode =
@@ -73,7 +81,6 @@ module.exports = connect(({user, opts}) => ({
 					etgutil.toTrueMarkSuffix(self.state.mark);
 			if (dcode !== self.props.user.decks[name]) {
 				sock.userExec('setdeck', { d: dcode, name });
-				self.props.dispatch(store.setOpt('deck', dcode));
 			} else if (force)
 				sock.userExec('setdeck', { name });
 		}
@@ -81,7 +88,6 @@ module.exports = connect(({user, opts}) => ({
 			if (!name) return;
 			saveDeck(self.props.user.selectedDeck);
 			sock.userExec('setdeck', { name });
-			self.props.dispatch(store.setOpt('deck', sock.getDeck()));
 		}
 		function saveButton() {
 			if (self.state.deckname) {
@@ -142,17 +148,14 @@ module.exports = connect(({user, opts}) => ({
 			<Tutor.Editor x={4} y={220} />
 			<input placeholder='Deck'
 				autoFocus
-				value={this.props.deck}
+				value={this.currentDeckCode()}
 				style={{
 					position: 'absolute',
 					left: '520px',
 					top: '238px',
 					width: '190px',
 				}}
-				onChange={e => {
-					self.props.dispatch(store.setOptTemp('deck', e.target.value));
-					self.setState({selectedDeck: null});
-				}}
+				onChange={e => this.setState(processDeck(e.target.value))}
 				ref={this.deckRef}
 				onClick={e => {
 					e.target.setSelectionRange(0, 999);
