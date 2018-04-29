@@ -648,13 +648,13 @@ exports.areas = {
 	],
 };
 exports.mkQuestAi = function(questname, stage, area) {
-	var quest = exports[questname][stage];
+	const quest = exports[questname][stage];
 	if (!quest) return 'Quest ' + questname + ':' + stage + ' does not exist.';
-	var markpower = quest.markpower || 1;
-	var drawpower = quest.drawpower || 1;
-	var hp = quest.hp || 100;
-	var playerHPstart = quest.urhp || 100;
-	var urdeck = sock.getDeck();
+	const markpower = quest.markpower || 1;
+	const drawpower = quest.drawpower || 1;
+	const hp = quest.hp || 100;
+	const playerHPstart = quest.urhp || 100;
+	const urdeck = sock.getDeck();
 	const {user} = store.store.getState();
 	if (etgutil.decklength(urdeck) < (user ? 31 : 11)) {
 		return 'ERROR: Your deck is invalid or missing! Please exit & create a valid deck in the deck editor.';
@@ -693,7 +693,7 @@ exports.mkQuestAi = function(questname, stage, area) {
 
 function requireQuest(user) {
 	return this.questdependencies.every(dependency => {
-		var progress = user.quests[dependency[0]];
+		const progress = user.quests[dependency[0]];
 		return progress && progress >= dependency[1];
 	});
 }

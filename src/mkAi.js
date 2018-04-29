@@ -13,8 +13,10 @@ exports.mkPremade = function(level, daily) {
 	const name = level == 1 ? 'mage' : 'demigod';
 	return () => {
 		const urdeck = sock.getDeck(),
-			{user} = store.store.getState();
-		if (etgutil.decklength(urdeck) < (user ? 31 : 11)) {
+			{user} = store.store.getState(),
+			minsize = user ? 31 : 11;
+		if (etgutil.decklength(urdeck) < minsize) {
+			store.store.dispatch(store.chatMsg(`Deck requires ${minsize} cards`, 'System'))
 			return;
 		}
 		const cost = daily !== undefined ? 0 : userutil.pveCostReward[level * 2];
@@ -84,8 +86,10 @@ const randomNames = [
 exports.mkAi = function(level, daily) {
 	return () => {
 		const urdeck = sock.getDeck(),
-			{user} = store.store.getState();
-		if (etgutil.decklength(urdeck) < (user ? 31 : 9)) {
+			{user} = store.store.getState(),
+			minsize = user ? 31 : 11;
+		if (etgutil.decklength(urdeck) < minsize) {
+			store.store.dispatch(store.chatMsg(`Deck requires ${minsize} cards`, 'System'))
 			return;
 		}
 		const cost = daily !== undefined ? 0 : userutil.pveCostReward[level * 2];
@@ -99,6 +103,7 @@ exports.mkAi = function(level, daily) {
 		store.store.dispatch(store.setOptTemp('aideck', deck));
 
 		const gameData = {
+			level: level,
 			deck: deck,
 			urdeck: urdeck,
 			seed: util.randint(),
@@ -110,7 +115,6 @@ exports.mkAi = function(level, daily) {
 		};
 		if (!user) options.parsepvpstats(gameData);
 		else gameData.cost = cost;
-		gameData.level = level;
 		if (daily !== undefined) gameData.daily = daily;
 		return mkGame(gameData);
 	};
@@ -121,7 +125,5 @@ exports.run = function run(gamedata) {
 	}
 	if (gamedata) {
 		store.store.dispatch(store.doNav(require('./views/Match'), gamedata));
-	} else {
-		store.store.dispatch(store.doNav(require('./views/DeckEditor')));
 	}
 };

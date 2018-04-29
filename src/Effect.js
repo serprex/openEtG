@@ -1,9 +1,9 @@
 'use strict';
 const ui = require('./ui'),
 	Thing = require('./Thing'),
-	isNode = typeof global === 'undefined',
-	Components = isNode && require('./Components'),
-	h = isNode ? require('react').createElement : ()=>{};
+	isNode = typeof window === 'undefined',
+	Components = isNode ? {} : require('./Components'),
+	h = isNode ? () => {} : require('react').createElement;
 const anims = [];
 
 function maybeTgtPos(pos) {
@@ -86,12 +86,12 @@ if (isNode) {
 		for (let i = anims.length - 1; i >= 0; i--) {
 			const anim = anims[i];
 			if (anim.position && p2cloaked) {
-				const pos = anim.position;
-				if (pos.x > 130 && pos.x < 660 && pos.y > 20 && pos.y < 280) {
+				const { position: { x, y } } = anim.position;
+				if (x > 130 && x < 660 && y > 20 && y < 280) {
 					anims.splice(i, 1);
 				}
 			}
-			let r = anim.next();
+			const r = anim.next();
 			if (r === null) {
 				anims.splice(i, 1);
 			}
@@ -118,7 +118,7 @@ if (isNode) {
 			style: {
 				position: 'absolute',
 				left: this.position.x + 'px',
-				top: (this.position.y - this.position.y*2) + 'px',
+				top: (this.position.y - this.step*2) + 'px',
 				opacity: 1 - Math.sqrt(this.step) / 6,
 				fontSize: '16px',
 			},
