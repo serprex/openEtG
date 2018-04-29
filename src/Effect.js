@@ -86,7 +86,7 @@ if (isNode) {
 		for (let i = anims.length - 1; i >= 0; i--) {
 			const anim = anims[i];
 			if (anim.position && p2cloaked) {
-				const { position: { x, y } } = anim.position;
+				const { position: { x, y } } = anim;
 				if (x > 130 && x < 660 && y > 20 && y < 280) {
 					anims.splice(i, 1);
 				}
