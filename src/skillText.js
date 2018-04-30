@@ -6,7 +6,7 @@ module.exports = function(c, event) {
 	} else {
 		const ret = [],
 			stext = [];
-		for (const [key, val] of c.status.map) {
+		for (const [key, val] of c.status) {
 			if (!val) continue;
 			const entry = statusData[key];
 			if (entry === undefined) {
@@ -263,7 +263,7 @@ const data = {
 	locketshift: "Now produces quanta of target's element",
 	loot: 'Steal a random permanent from foe when own permanent is destroyed',
 	losecharge: (c, inst) => {
-		const charges = c.status.get('charges');
+		const charges = c.getStatus('charges');
 		return 'Lasts ' + charges + ' turn' + (charges == 1 ? '' : 's');
 	},
 	luciferin:
@@ -523,11 +523,11 @@ const statusData = {
 	charges: (c, inst) =>
 		c !== inst ||
 		Thing.prototype.hasactive.call(c, 'auto', 'losecharge') ||
-		c.status.get('charges') == 1
+		c.getStatus('charges') == 1
 			? ''
 			: 'Enter with ' +
-				c.status.get('charges') +
-				(c.status.get('stackable') ? ' stacks' : ' charges'),
+				c.getStatus('charges') +
+				(c.getStatus('stackable') ? ' stacks' : ' charges'),
 	flooding:
 		'Non aquatic creatures past first five creature slots die on turn end. Consumes 1:7. Unique',
 	freedom: '',
@@ -538,8 +538,8 @@ const statusData = {
 		'Each turn delay own creatures. They gain 2|1. 4|1 if burrowed. 5|2 if flooded. Unique',
 	poison: (c, inst) =>
 		c == inst
-			? 'Enter with ' + c.status.get('poison') + ' poison'
-			: inst.status.get('poison') + ' poison',
+			? 'Enter with ' + c.getStatus('poison') + ' poison'
+			: inst.getStatus('poison') + ' poison',
 	stackable: '',
 	stasis: 'Prevent creatures attacking at end of turn',
 	tunnel: 'Burrowed creatures bypass shields',

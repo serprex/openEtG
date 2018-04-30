@@ -74,7 +74,7 @@ Game.prototype.addData = function(data) {
 	}
 };
 function removeSoPa(p) {
-	if (p) p.status.set('patience', 0);
+	if (p) p.setStatus('patience', 0);
 }
 Game.prototype.updateExpectedDamage = function() {
 	if (this.expectedDamage) {
@@ -135,7 +135,7 @@ Game.prototype.getTarget = function(src, active, cb) {
 					(t.type == etg.Player ||
 						t.type == etg.Spell ||
 						t.owner == this.turn ||
-						t.status.get('cloak') ||
+						t.getStatus('cloak') ||
 						!t.owner.isCloaked()) &&
 					targetingFilter(src, t)
 				);

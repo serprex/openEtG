@@ -139,7 +139,7 @@ module.exports = connect(({user}) => ({user}))(class Result extends React.Compon
 				['Perfect Damage', game.player2.hp == 0 ? 0.1 : 0],
 				['Pillarless', game.bonusstats.cardsplayed[0] == 0 ? 0.05 : 0],
 				['Size matters', (etgutil.decklength(sock.getDeck()) - 36) / 150],
-				['Toxic', game.player2.status.get('poison') > 18 ? 0.1 : 0],
+				['Toxic', game.player2.getStatus('poison') > 18 ? 0.1 : 0],
 				[
 					'Unupped',
 					(() => {

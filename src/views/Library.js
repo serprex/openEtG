@@ -47,7 +47,7 @@ module.exports = class Library extends React.Component {
 				!card.upped &&
 				!card.shiny &&
 				card.type &&
-				!card.status.get('token')
+				!card.getStatus('token')
 			) {
 				progressmax += 42;
 				const prog = codeprog(code);

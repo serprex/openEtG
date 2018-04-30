@@ -24,13 +24,13 @@ function getWorstCard(game) {
 	return [worstcard, curEval];
 }
 const afilter = {
-	web: (c, t) => t.status.get('airborne'),
-	freeze: (c, t) => t.status.get('frozen') < 3,
+	web: (c, t) => t.getStatus('airborne'),
+	freeze: (c, t) => t.getStatus('frozen') < 3,
 	pacify: (c, t) => t.trueatk(),
 	readiness: (c, t) => t.active.cast && (t.cast || t.usedactive),
 	silence: (c, t) => t.active.cast && !t.usedactive,
 	lobotomize: (c, t) => {
-		if (!t.status.get('psionic')) {
+		if (!t.getStatus('psionic')) {
 			for (const key in t.active) {
 				if (key != 'ownplay' && t.active[key].name.some(name => !parseSkill(name).passive)) {
 					return true;
@@ -108,7 +108,7 @@ AiSearch.prototype.step = function(game, previous) {
 					gameClone.bitsToTgt(cbits).useactive(gameClone.bitsToTgt(tbits));
 					if (
 						c.type == etg.Permanent &&
-						c.status.get('patience') &&
+						c.getStatus('patience') &&
 						c.active.cast == Skills.die &&
 						c.owner == game.player2
 					) {
@@ -116,7 +116,7 @@ AiSearch.prototype.step = function(game, previous) {
 							const pr = gameClone.player2.permanents[i];
 							if (
 								pr &&
-								pr.status.get('patience') &&
+								pr.getStatus('patience') &&
 								pr.active.cast == Skills.die
 							)
 								pr.useactive();

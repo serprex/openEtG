@@ -4,7 +4,7 @@ const etg = require('../etg'),
 	Skills = require('../Skills'),
 	parseSkill = require('../parseSkill');
 function pillarval(c) {
-	return c.type == etg.Spell ? 0.1 : Math.sqrt(c.status.get('charges'));
+	return c.type == etg.Spell ? 0.1 : Math.sqrt(c.getStatus('charges'));
 }
 const SkillsValues = Object.freeze({
 	'ablaze 1': 1,
@@ -22,7 +22,7 @@ const SkillsValues = Object.freeze({
 	appease: c =>
 		c.type == etg.Spell
 			? -6
-			: c.status.get('appeased') ? 0 : c.trueatk() * -1.5,
+			: c.getStatus('appeased') ? 0 : c.trueatk() * -1.5,
 	bblood: 7,
 	beguilestop: c => -getDamage(c),
 	bellweb: 1,
@@ -41,7 +41,7 @@ const SkillsValues = Object.freeze({
 	brawl: 8,
 	brew: 4,
 	brokenmirror: c =>
-		c.owner.foe.shield && c.owner.foe.shield.status.get('reflective')
+		c.owner.foe.shield && c.owner.foe.shield.getStatus('reflective')
 			? -3
 			: 2,
 	burrow: 1,
@@ -87,7 +87,7 @@ const SkillsValues = Object.freeze({
 	dive: (c, ttatk) =>
 		c.type == etg.Spell
 			? c.card.attack
-			: ttatk - c.status.get('dive') / 1.5,
+			: ttatk - c.getStatus('dive') / 1.5,
 	divinity: 3,
 	drainlife: 10,
 	draft: 1,
@@ -129,9 +129,9 @@ const SkillsValues = Object.freeze({
 			const cr = c.owner.creatures[i];
 			if (
 				cr &&
-				cr.status.get('golem') &&
-				!cr.status.get('delayed') &&
-				!cr.status.get('frozen')
+				cr.getStatus('golem') &&
+				!cr.getStatus('delayed') &&
+				!cr.getStatus('frozen')
 			) {
 				const atk = getDamage(cr);
 				if (atk > dmg) dmg = atk;
@@ -189,10 +189,10 @@ const SkillsValues = Object.freeze({
 	momentum: 2,
 	mutation: 4,
 	neuro: c =>
-		c.owner.foe.status.get('neuro')
+		c.owner.foe.getStatus('neuro')
 			? evalactive(c, parseSkill('poison 1')) + 0.1
 			: 6,
-	neuroify: c => c.owner.foe.status.get('neuro') ? 1 : 5,
+	neuroify: c => c.owner.foe.getStatus('neuro') ? 1 : 5,
 	nightmare: c => {
 		let n = 0;
 		c.owner.hand.forEach(inst => {
@@ -289,7 +289,7 @@ const SkillsValues = Object.freeze({
 	tick: c => c.type == etg.Spell ? 1 : 1 + (c.maxhp - c.truehp()) / c.maxhp,
 	tornado: 9,
 	trick: 4,
-	turngolem: c => c.status.get('storedpower') >> 1,
+	turngolem: c => c.getStatus('storedpower') >> 1,
 	upkeep: -0.5,
 	upload: 3,
 	vampire: (c, ttatk) => (c.type == etg.Spell ? c.card.attack : ttatk) * 0.7,
@@ -304,7 +304,7 @@ const SkillsValues = Object.freeze({
 	voidshell: c => (c.owner.maxhp - c.owner.hp) / 10,
 	quantagift: 4,
 	web: 1,
-	wind: c => c.status.get('storedAtk') / 2 - 2,
+	wind: c => c.getStatus('storedAtk') / 2 - 2,
 	wisdom: 4,
 	yoink: 4,
 	vengeance: 2,
@@ -315,10 +315,10 @@ const SkillsValues = Object.freeze({
 	pillspi: pillarval,
 	pillcar: pillarval,
 	absorber: 5,
-	blockwithcharge: c => c.status.get('charges') / (1 + c.owner.foe.countcreatures() * 2),
+	blockwithcharge: c => c.getStatus('charges') / (1 + c.owner.foe.countcreatures() * 2),
 	cold: 7,
 	despair: 5,
-	evade100: c => !c.status.get('charges') && c.owner == c.owner.game.turn ? 0 : 1,
+	evade100: c => !c.getStatus('charges') && c.owner == c.owner.game.turn ? 0 : 1,
 	'evade 40': 1,
 	'evade 50': 1,
 	firewall: 7,
@@ -331,7 +331,7 @@ const SkillsValues = Object.freeze({
 	},
 	thorn: 5,
 	weight: 5,
-	wings: c => !c.status.get('charges') && c.owner == c.owner.game.turn ? 0 : 6,
+	wings: c => !c.getStatus('charges') && c.owner == c.owner.game.turn ? 0 : 6,
 });
 const statusValues = Object.freeze({
 	airborne: 0.2,
@@ -339,7 +339,7 @@ const statusValues = Object.freeze({
 	voodoo: 1,
 	swarm: 1,
 	tunnel: 3,
-	cloak: c => !c.status.get('charges') && c.owner == c.owner.game.turn ? 0 : 4,
+	cloak: c => !c.getStatus('charges') && c.owner == c.owner.game.turn ? 0 : 4,
 	flooding: c => c.owner.foe.countcreatures() - 3,
 	patience: c => 1 + c.owner.countcreatures() * 2,
 	freedom: 5,
@@ -350,7 +350,7 @@ function getDamage(c) {
 	return damageHash.get(c.hash()) || 0;
 }
 function estimateDamage(c, freedomChance, wallCharges, wallIndex) {
-	if (!c || c.status.get('frozen') || c.status.get('delayed')) {
+	if (!c || c.getStatus('frozen') || c.getStatus('delayed')) {
 		return 0;
 	}
 	function estimateAttack(tatk) {
@@ -376,19 +376,19 @@ function estimateDamage(c, freedomChance, wallCharges, wallIndex) {
 	const momentum =
 		!fsh ||
 		tatk <= 0 ||
-		c.status.get('momentum') ||
-		c.status.get('psionic') ||
-		(c.status.get('burrowed') &&
-			c.owner.permanents.some(pr => pr && pr.status.get('tunnel')));
+		c.getStatus('momentum') ||
+		c.getStatus('psionic') ||
+		(c.getStatus('burrowed') &&
+			c.owner.permanents.some(pr => pr && pr.getStatus('tunnel')));
 	const dr = momentum ? 0 : fsh.truedr();
 	let atk = estimateAttack(tatk);
-	if (c.status.get('adrenaline')) {
+	if (c.getStatus('adrenaline')) {
 		const attacks = etg.countAdrenaline(tatk);
-		while (c.status.get('adrenaline') < attacks) {
-			c.status.incr('adrenaline', 1);
+		while (c.getStatus('adrenaline') < attacks) {
+			c.incrStatus('adrenaline', 1);
 			atk += estimateAttack(c.trueatk());
 		}
-		c.status.set('adrenaline', 1);
+		c.setStatus('adrenaline', 1);
 	}
 	if (!momentum && fshactive) {
 		atk *= ~fshactive.name.indexOf('evade100')
@@ -399,12 +399,12 @@ function estimateDamage(c, freedomChance, wallCharges, wallIndex) {
 					? 0.6
 					: ~fshactive.name.indexOf('chaos') && fsh.card.upped ? 0.8 : 1;
 	}
-	if (!fsh && freedomChance && c.status.get('airborne')) {
+	if (!fsh && freedomChance && c.getStatus('airborne')) {
 		atk += Math.ceil(atk / 2) * freedomChance;
 	}
-	if (c.status.get('psionic') &&
+	if (c.getStatus('psionic') &&
 		pl.foe.shield &&
-		pl.foe.shield.status.get('reflective')) atk *= -1;
+		pl.foe.shield.getStatus('reflective')) atk *= -1;
 	if (c.owner.foe.sosa) atk *= -1;
 	damageHash.set(c.hash(), atk);
 	return atk;
@@ -416,19 +416,19 @@ function calcExpectedDamage(pl, wallCharges, wallIndex) {
 	for (let i = 0; i < 16; i++) {
 		let p;
 		if ((p = pl.permanents[i])) {
-			if (!stasisFlag && (p.status.get('stasis') || p.status.get('patience'))) {
+			if (!stasisFlag && (p.getStatus('stasis') || p.getStatus('patience'))) {
 				stasisFlag = true;
-			} else if (p.status.get('freedom')) {
+			} else if (p.getStatus('freedom')) {
 				freedomChance++;
 			}
 		}
-		if (!stasisFlag && (p = pl.foe.permanents[i]) && p.status.get('stasis')) {
+		if (!stasisFlag && (p = pl.foe.permanents[i]) && p.getStatus('stasis')) {
 			stasisFlag = true;
 		}
 	}
 	if (freedomChance) freedomChance = 1 - Math.pow(0.7, freedomChance);
 	if (pl.foe.shield && pl.foe.shield.hasactive('shield', 'blockwithcharge')) {
-		wallCharges[wallIndex] = pl.foe.shield.status.get('charges');
+		wallCharges[wallIndex] = pl.foe.shield.getStatus('charges');
 	}
 	if (!stasisFlag) {
 		pl.creatures.forEach(c => {
@@ -438,7 +438,7 @@ function calcExpectedDamage(pl, wallCharges, wallIndex) {
 	return (
 		totalDamage +
 		estimateDamage(pl.weapon, freedomChance, wallCharges, wallIndex) +
-		pl.foe.status.get('poison')
+		pl.foe.getStatus('poison')
 	);
 }
 
@@ -458,14 +458,14 @@ function evalactive(c, active, extra) {
 
 function checkpassives(c) {
 	let score = 0;
-	for (const status of c.status.map.keys()) {
+	for (const [status, val] of c.status) {
 		// Skip cloak if it expires at end of turn
-		if (
+		if (val &&
 			uniqueStatuses.has(status) &&
 			c.type == etg.Spell &&
 			!(
 				status == 'cloak' &&
-				!c.status.get('charges') &&
+				!c.getStatus('charges') &&
 				c.owner == c.owner.game.turn
 			)
 		) {
@@ -505,11 +505,11 @@ function evalthing(c) {
 			isCreature || (c.type == etg.Spell ? c.card.type : c.type) == etg.Weapon;
 	if (isAttacker) {
 		ctrueatk = c.trueatk();
-		adrenalinefactor = c.status.get('adrenaline')
+		adrenalinefactor = c.getStatus('adrenaline')
 			? etg.countAdrenaline(ctrueatk)
 			: 1;
 		delaymix =
-			Math.max(c.status.get('frozen'), c.status.get('delayed')) /
+			Math.max(c.getStatus('frozen'), c.getStatus('delayed')) /
 			adrenalinefactor;
 		delayfactor = delaymix ? 1 - Math.min(delaymix / 5, 0.6) : 1;
 	} else {
@@ -519,10 +519,10 @@ function evalthing(c) {
 	}
 	if (isCreature) {
 		hp = Math.max(c.truehp(), 0);
-		poison = c.status.get('poison');
+		poison = c.getStatus('poison');
 		if (poison > 0) {
 			hp = Math.max(hp - poison * 2, 0);
-			if (c.status.get('aflatoxin')) score -= 2;
+			if (c.getStatus('aflatoxin')) score -= 2;
 		} else if (poison < 0) {
 			hp = Math.max(Math.min(hp - poison, c.maxhp), 0);
 		}
@@ -546,18 +546,12 @@ function evalthing(c) {
 	}
 	if (isAttacker) {
 		ttatk = getDamage(c);
-		if (
-			c.status.get('psionic') &&
-			c.owner.foe.shield &&
-			c.owner.foe.shield.status.get('reflective')
-		)
-			ttatk *= -1;
 		score += ctrueatk / 20;
 		score += ttatk * delayfactor;
 	} else ttatk = 0;
 	const throttlefactor =
 		adrenalinefactor < 3 ||
-		(isCreature && c.owner.weapon && c.owner.weapon.status.get('nothrottle'))
+		(isCreature && c.owner.weapon && c.owner.weapon.getStatus('nothrottle'))
 			? adrenalinefactor
 			: 2;
 	for (const key in c.active) {
@@ -568,11 +562,11 @@ function evalthing(c) {
 		if (key == 'hit') {
 			score +=
 				evalactive(c, c.active.hit, ttatk) *
-				(ttatk ? 1 : c.status.get('immaterial') ? 0 : 0.3) *
+				(ttatk ? 1 : c.getStatus('immaterial') ? 0 : 0.3) *
 				adrfactor *
 				delayfactor;
 		} else if (key == 'auto') {
-			if (!c.status.get('frozen')) {
+			if (!c.getStatus('frozen')) {
 				score += evalactive(c, c.active.auto, ttatk) * adrfactor;
 			}
 		} else if (key == 'cast') {
@@ -587,23 +581,23 @@ function evalthing(c) {
 	if (isCreature) {
 		if (hp && c.owner.gpull == c) {
 			score = (score + hp) * Math.log(hp) / 4;
-			if (c.status.get('voodoo')) score += hp;
+			if (c.getStatus('voodoo')) score += hp;
 			if (c.active.shield && !delaymix) {
 				score += evalactive(c, c.active.shield);
 			}
 		} else
 			score *= hp
-				? c.status.get('immaterial') || c.status.get('burrowed')
+				? c.getStatus('immaterial') || c.getStatus('burrowed')
 					? 1.3
 					: 1 + Math.log(Math.min(hp, 33)) / 7
 				: 0.2;
 	} else {
-		score *= c.status.get('immaterial') ? 1.35 : 1.25;
+		score *= c.getStatus('immaterial') ? 1.35 : 1.25;
 	}
 	if (delaymix) {
 		// TODO this is redundant alongside delayfactor
 		const delayed = Math.min(
-			delaymix * (c.status.get('adrenaline') ? 0.5 : 1),
+			delaymix * (c.getStatus('adrenaline') ? 0.5 : 1),
 			12,
 		);
 		score *= 1 - 12 * delayed / (12 + delayed) / 16;
@@ -625,17 +619,17 @@ function evalcardinstance(cardInst) {
 		}
 		score += checkpassives(cardInst);
 		if (c.type == etg.Creature) {
-			score += c.status.get('frozen') || c.status.get('delayed') ? 0 : c.attack;
+			score += c.getStatus('frozen') || c.getStatus('delayed') ? 0 : c.attack;
 			let hp = Math.max(c.health, 0),
-				poison = c.status.get('poison');
+				poison = c.getStatus('poison');
 			if (poison > 0) {
 				hp = Math.max(hp - poison * 2, 0);
-				if (c.status.get('aflatoxin')) score -= 2;
+				if (c.getStatus('aflatoxin')) score -= 2;
 			} else if (poison < 0) {
 				hp += Math.min(-poison, c.maxhp - c.hp);
 			}
 			score *= hp
-				? c.status.get('immaterial') || c.status.get('burrowed')
+				? c.getStatus('immaterial') || c.getStatus('burrowed')
 					? 1.3
 					: 1 + Math.log(Math.min(hp, 33)) / 7
 				: 0.5;
@@ -671,7 +665,7 @@ function caneventuallyactive(element, cost, pl) {
 			pr &&
 			((pr.card.type == etg.Pillar &&
 				(!pr.card.element || pr.card.element == element)) ||
-				(pr.active == Skills.locket && pr.status.get('mode') == element)),
+				(pr.active == Skills.locket && pr.getStatus('mode') == element)),
 		);
 }
 
@@ -733,14 +727,14 @@ module.exports = function(game) {
 		pscore +=
 			Math.min(8 - player.hand.length, player.drawpower) * 2 +
 			Math.sqrt(player.hp) * 4 -
-			player.status.get('poison');
+			player.getStatus('poison');
 		if (player.precognition) pscore += 0.5;
 		if (!player.weapon) pscore += 1;
 		if (!player.shield) pscore += 1;
 		if (player.usedactive)
 			pscore -= (player.hand.length + (player.hand.length > 6 ? 7 : 4)) / 4;
 		if (player.flatline) pscore -= 1;
-		if (player.status.get('neuro')) pscore -= 5;
+		if (player.getStatus('neuro')) pscore -= 5;
 		gamevalue += pscore * (j ? -1 : 1);
 	}
 	damageHash = uniquesSkill = null;

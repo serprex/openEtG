@@ -37,11 +37,11 @@ module.exports = function(game) {
 			}
 			if (active && active.name[0] in Cards.Targeting) {
 				game.getTarget(c, active);
-				if (c.owner.shield && c.owner.shield.status.reflective)
+				if (c.owner.shield && c.owner.shield.getStatus('reflective'))
 					evalIter(c.owner);
 				evalIter(c.owner.foe);
 				c.owner.creatures.forEach(cr => {
-					if (cr && cr.status.voodoo) evalIter(cr);
+					if (cr && cr.getStatus('voodoo')) evalIter(cr);
 				});
 				game.targeting = null;
 			} else {

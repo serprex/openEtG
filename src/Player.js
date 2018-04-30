@@ -1,4 +1,5 @@
 'use strict';
+const imm = require('immutable');
 function Player(game) {
 	this.owner = this;
 	this.card = null;
@@ -6,7 +7,7 @@ function Player(game) {
 	this.castele = 0;
 	this.maxhp = this.hp = 100;
 	this.atk = 0;
-	this.status = new Status();
+	this.status = new imm.Map();
 	this.usedactive = false;
 	this.type = etg.Player;
 	this.active = {};
@@ -37,7 +38,7 @@ Player.prototype.toString = function() {
 	return this == this.game.player1 ? 'p1' : 'p2';
 };
 Player.prototype.isCloaked = function() {
-	return this.permanents.some(pr => pr && pr.status.get('cloak'));
+	return this.permanents.some(pr => pr && pr.getStatus('cloak'));
 };
 Player.prototype.addCrea = function(x, fromhand) {
 	if (util.place(this.creatures, x)) {
@@ -51,14 +52,14 @@ Player.prototype.setCrea = function(idx, x) {
 	x.place(this, etg.Creature, false);
 };
 Player.prototype.addPerm = function(x, fromhand) {
-	if (x.status.get('additive')) {
+	if (x.getStatus('additive')) {
 		const dullcode = etgutil.asShiny(x.card.code, false);
 		for (let i = 0; i < 16; i++) {
 			if (
 				this.permanents[i] &&
 				etgutil.asShiny(this.permanents[i].card.code, false) == dullcode
 			) {
-				this.permanents[i].status.incr('charges', x.status.get('charges'));
+				this.permanents[i].incrStatus('charges', x.getStatus('charges'));
 				this.permanents[i].place(this, etg.Permanent, fromhand);
 				return;
 			}
@@ -74,11 +75,11 @@ Player.prototype.setWeapon = function(x, fromhand) {
 };
 Player.prototype.setShield = function(x, fromhand) {
 	if (
-		x.status.get('additive') &&
+		x.getStatus('additive') &&
 		this.shield &&
 		x.card.as(this.shield.card) == x.card
 	) {
-		this.shield.status.incr('charges', x.status.get('charges'));
+		this.shield.incrStatus('charges', x.getStatus('charges'));
 	} else this.shield = x;
 	x.place(this, etg.Shield, fromhand);
 };
@@ -105,7 +106,7 @@ function plinfocore(info, key, val) {
 }
 Player.prototype.info = function() {
 	const info = [this.hp + '/' + this.maxhp + ' ' + this.deck.length + 'cards'];
-	for (const [k, v] of this.status.map) {
+	for (const [k, v] of this.status) {
 		plinfocore(info, k, v);
 	}
 	[
@@ -123,15 +124,15 @@ Player.prototype.info = function() {
 	return info.join('\n');
 };
 Player.prototype.randomquanta = function() {
-	var nonzero = 0;
-	for (var i = 1; i < 13; i++) {
+	let nonzero = 0;
+	for (let i = 1; i < 13; i++) {
 		nonzero += this.quanta[i];
 	}
 	if (nonzero == 0) {
 		return -1;
 	}
 	nonzero = 1 + this.upto(nonzero);
-	for (var i = 1; i < 13; i++) {
+	for (let i = 1; i < 13; i++) {
 		if ((nonzero -= this.quanta[i]) <= 0) {
 			return i;
 		}
@@ -140,16 +141,16 @@ Player.prototype.randomquanta = function() {
 Player.prototype.canspend = function(qtype, x) {
 	if (x <= 0) return true;
 	if (qtype) return this.quanta[qtype] >= x;
-	for (var i = 1; i < 13; i++) x -= this.quanta[i];
+	for (let i = 1; i < 13; i++) x -= this.quanta[i];
 	return x <= 0;
 };
 Player.prototype.spend = function(qtype, x) {
 	if (x == 0 || (x < 0 && this.flatline)) return true;
 	if (!this.canspend(qtype, x)) return false;
 	if (!qtype) {
-		var b = x < 0 ? -1 : 1;
-		for (var i = x * b; i > 0; i--) {
-			var q = b == -1 ? 1 + this.upto(12) : this.randomquanta();
+		const b = x < 0 ? -1 : 1;
+		for (let i = x * b; i > 0; i--) {
+			const q = b == -1 ? 1 + this.upto(12) : this.randomquanta();
 			this.quanta[q] = Math.min(this.quanta[q] - b, 99);
 		}
 	} else this.quanta[qtype] = Math.min(this.quanta[qtype] - x, 99);
@@ -167,7 +168,7 @@ Player.prototype.endturn = function(discard) {
 		this.hand[discard].die();
 	}
 	this.spend(this.mark, this.markpower * (this.mark > 0 ? -1 : -3));
-	const poison = this.foe.status.get('poison');
+	const poison = this.foe.getStatus('poison');
 	if (poison) this.foe.dmg(poison);
 	let patienceFlag = false,
 		floodingFlag = false,
@@ -180,30 +181,30 @@ Player.prototype.endturn = function(discard) {
 			p.trigger('auto');
 			if (~p.getIndex()) {
 				p.usedactive = false;
-				if (p.status.get('stasis')) {
+				if (p.getStatus('stasis')) {
 					stasisFlag = true;
 				}
-				if (p.status.get('flooding') && !floodingPaidFlag) {
+				if (p.getStatus('flooding') && !floodingPaidFlag) {
 					floodingPaidFlag = true;
 					floodingFlag = true;
 					if (!this.spend(etg.Water, 1)) {
 						this.permanents[i] = undefined;
 					}
 				}
-				if (p.status.get('patience')) {
+				if (p.getStatus('patience')) {
 					patienceFlag = true;
 					stasisFlag = true;
 				}
-				if (p.status.get('freedom')) {
+				if (p.getStatus('freedom')) {
 					freedomChance++;
 				}
-				p.status.maybeDecr('frozen');
+				p.maybeDecrStatus('frozen');
 			}
 		}
 		if ((p = this.foe.permanents[i])) {
-			if (p.status.get('stasis')) {
+			if (p.getStatus('stasis')) {
 				stasisFlag = true;
-			} else if (p.status.get('flooding')) {
+			} else if (p.getStatus('flooding')) {
 				floodingFlag = true;
 			}
 		}
@@ -215,13 +216,13 @@ Player.prototype.endturn = function(discard) {
 		if (cr) {
 			if (patienceFlag) {
 				const floodbuff = floodingFlag && i > 4;
-				cr.atk += floodbuff ? 5 : cr.status.get('burrowed') ? 4 : 2;
+				cr.atk += floodbuff ? 5 : cr.getStatus('burrowed') ? 4 : 2;
 				cr.buffhp(floodbuff ? 2 : 1);
 			}
 			cr.attack(stasisFlag, freedomChance);
 			if (
 				floodingFlag &&
-				!cr.status.get('aquatic') &&
+				!cr.getStatus('aquatic') &&
 				cr.isMaterial() &&
 				cr.getIndex() > 4
 			) {
@@ -268,19 +269,19 @@ Player.prototype.drawhand = function(x) {
 	}
 	this.shuffle(this.deck);
 	if (x > this.deck.length) x = deck.length;
-	for (var i = 0; i < x; i++) {
+	for (let i = 0; i < x; i++) {
 		this.addCard(this.deck.pop());
 	}
 };
 function destroyCloak(pr) {
-	if (pr && pr.status.get('cloak')) pr.die();
+	if (pr && pr.getStatus('cloak')) pr.die();
 }
 Player.prototype.masscc = function(caster, func, massmass) {
 	this.permanents.forEach(destroyCloak);
 	if (massmass) this.foe.permanents.forEach(destroyCloak);
-	var crs = this.creatures.slice(),
+	const crs = this.creatures.slice(),
 		crsfoe = massmass && this.foe.creatures.slice();
-	for (var i = 0; i < 23; i++) {
+	for (let i = 0; i < 23; i++) {
 		if (crs[i] && crs[i].isMaterial()) {
 			func(caster, crs[i]);
 		}
@@ -297,12 +298,12 @@ Player.prototype.freeze = function(x) {
 };
 Player.prototype.dmg = function(x, ignoresosa) {
 	if (!x) return 0;
-	var sosa = this.sosa && !ignoresosa;
+	const sosa = this.sosa && !ignoresosa;
 	if (sosa) {
 		x *= -1;
 	}
 	if (x < 0) {
-		var heal = Math.max(this.hp - this.maxhp, x);
+		const heal = Math.max(this.hp - this.maxhp, x);
 		this.hp -= heal;
 		return sosa ? -x : heal;
 	} else {
@@ -314,7 +315,7 @@ Player.prototype.dmg = function(x, ignoresosa) {
 	}
 };
 Player.prototype.spelldmg = function(x) {
-	return (this.shield && this.shield.status.get('reflective')
+	return (this.shield && this.shield.getStatus('reflective')
 		? this.foe
 		: this
 	).dmg(x);
@@ -323,7 +324,7 @@ Player.prototype.clone = function(game) {
 	function maybeClone(x) {
 		return x && x.clone(obj);
 	}
-	var obj = Object.create(Player.prototype);
+	const obj = Object.create(Player.prototype);
 	obj.owner = obj;
 	obj.card = this.card;
 	obj.cast = this.cast;
@@ -331,7 +332,7 @@ Player.prototype.clone = function(game) {
 	obj.hp = this.hp;
 	obj.maxhp = this.maxhp;
 	obj.atk = this.atk;
-	obj.status = this.status.clone();
+	obj.status = this.status;
 	obj.usedactive = this.usedactive;
 	obj.type = this.type;
 	obj.active = util.clone(this.active);
@@ -361,6 +362,5 @@ Player.prototype.hash = function() {
 
 var etg = require('./etg');
 var util = require('./util');
-var Status = require('./Status');
 var etgutil = require('./etgutil');
 var Effect = require('./Effect');

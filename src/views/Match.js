@@ -126,7 +126,7 @@ const activeInfo = {
 	},
 	catapult: t =>
 		Math.ceil(
-			t.truehp() * (t.status.get('frozen') ? 150 : 100) / (t.truehp() + 100),
+			t.truehp() * (t.getStatus('frozen') ? 150 : 100) / (t.truehp() + 100),
 		),
 	adrenaline: t => 'Extra: ' + etg.getAdrenalRow(t.trueatk()),
 	fractal: (t, game) =>
@@ -173,18 +173,18 @@ const ThingInst = connect(({opts}) => ({ lofiArt: opts.lofiArt }))(function Thin
 	}
 	const children = [];
 	const visible = [
-		obj.status.get('psionic'),
-		obj.status.get('aflatoxin'),
-		!obj.status.get('aflatoxin') && obj.status.get('poison') > 0,
-		obj.status.get('airborne') || obj.status.get('ranged'),
-		obj.status.get('momentum'),
-		obj.status.get('adrenaline'),
-		obj.status.get('poison') < 0,
+		obj.getStatus('psionic'),
+		obj.getStatus('aflatoxin'),
+		!obj.getStatus('aflatoxin') && obj.getStatus('poison') > 0,
+		obj.getStatus('airborne') || obj.getStatus('ranged'),
+		obj.getStatus('momentum'),
+		obj.getStatus('adrenaline'),
+		obj.getStatus('poison') < 0,
 	];
 	const bordervisible = [
-		obj.status.get('delayed'),
+		obj.getStatus('delayed'),
 		obj == obj.owner.gpull,
-		obj.status.get('frozen'),
+		obj.getStatus('frozen'),
 	];
 	for (let k = 0; k < 7; k++) {
 		if (!isSpell && visible[k]) {
@@ -218,16 +218,16 @@ const ThingInst = connect(({opts}) => ({ lofiArt: opts.lofiArt }))(function Thin
 	}
 	let statText, topText;
 	if (!isSpell) {
-		const charges = obj.status.get('charges');
+		const charges = obj.getStatus('charges');
 		topText = obj.activetext();
 		if (obj.type === etg.Creature) {
 			statText = `${obj.trueatk()} | ${obj.truehp()}${charges ? ' x' + charges : ''}`;
 		} else if (obj.type === etg.Permanent) {
 			if (obj.card.type === etg.Pillar) {
-				statText = `1:${obj.status.get('pendstate') ? obj.owner.mark : obj.card.element} x${charges}`;
+				statText = `1:${obj.getStatus('pendstate') ? obj.owner.mark : obj.card.element} x${charges}`;
 				topText = '';
 			} else if (obj.active.auto && obj.active.auto === Skills.locket) {
-				statText = `1:${obj.status.get('mode') || obj.owner.mark}`;
+				statText = `1:${obj.getStatus('mode') || obj.owner.mark}`;
 			} else {
 				statText = (charges || '').toString();
 			}
@@ -250,7 +250,7 @@ const ThingInst = connect(({opts}) => ({ lofiArt: opts.lofiArt }))(function Thin
 			color: obj.card.upped ? '#000' : '#fff',
 			fontSize: '10px',
 			border: 'transparent 2px solid',
-			zIndex: !isSpell && obj.status.get('cloak') ? '2' : undefined,
+			zIndex: !isSpell && obj.getStatus('cloak') ? '2' : undefined,
 		}}
 		onMouseOver={props.setInfo && (e => props.setInfo(e, obj, pos.x))}
 		className={tgtclass(game, obj)}
@@ -808,8 +808,8 @@ module.exports = connect(({user}) => ({user}))(class Match extends React.Compone
 			}
 			for (let i = 0; i < 16; i++) {
 				const pr = pl.permanents[i];
-				if (pr && pr.status.get('flooding')) floodvisible = true;
-				if (pr && !(j == 1 && cloaked && !pr.status.get('cloak'))) {
+				if (pr && pr.getStatus('flooding')) floodvisible = true;
+				if (pr && !(j == 1 && cloaked && !pr.getStatus('cloak'))) {
 					perms.push(
 						<ThingInst key={i}
 							obj={pr}
@@ -888,10 +888,10 @@ module.exports = connect(({user}) => ({user}))(class Match extends React.Compone
 			const x1 = 80 * pl.hp / pl.maxhp;
 			const x2 =
 				x1 - 80 * Math.min(game.expectedDamage[j], pl.hp) / pl.maxhp;
-			const poison = pl.status.get('poison'),
+			const poison = pl.getStatus('poison'),
 				poisoninfo =
 					(poison > 0 ? poison + ' 1:2' : poison < 0 ? -poison + ' 1:7' : '') +
-					(pl.status.get('neuro') ? ' 1:10' : '');
+					(pl.getStatus('neuro') ? ' 1:10' : '');
 			const hptext =
 				`${pl.hp}/${pl.maxhp}\n${pl.deck.length}cards` +
 				(!cloaked && game.expectedDamage[j]

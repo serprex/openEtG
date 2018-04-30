@@ -1,7 +1,6 @@
 'use strict';
-const Status = require('./Status'),
+const imm = require('immutable'),
 	emptyObj = Object.freeze({}),
-	emptyStatus = new Status(),
 	statuscache = {},
 	activecache = {},
 	activecastcache = {};
@@ -55,16 +54,17 @@ function Card(type, info) {
 		if (info.Status in statuscache) {
 			this.status = statuscache[info.Status];
 		} else {
-			statuscache[info.Status] = this.status = new Status();
+			this.status = new imm.Map();
 			for (const status of util.iterSplit(info.Status, '+')) {
 				const eqidx = status.indexOf('=');
-				this.status.set(
+				this.status = this.status.set(
 					~eqidx ? status.substr(0, eqidx) : status,
 					eqidx == -1 || +status.substr(eqidx + 1),
 				);
 			}
+			statuscache[info.Status] = this.status;
 		}
-	} else this.status = emptyStatus;
+	} else this.status = new imm.Map();
 	Object.freeze(this);
 }
 Object.defineProperty(Card.prototype, 'shiny', {
@@ -115,6 +115,9 @@ Card.prototype.asShiny = function(shiny) {
 Card.prototype.isOf = function(card) {
 	return card.code == etgutil.asShiny(etgutil.asUpped(this.code, false), false);
 };
+Card.prototype.getStatus = function(key) {
+	return this.status.get(key) || 0;
+}
 function readCost(coststr, defaultElement) {
 	if (typeof coststr == 'number')
 		return new Int8Array([coststr, defaultElement]);

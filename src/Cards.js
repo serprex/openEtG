@@ -26,7 +26,7 @@ exports.filter = function(upped, filter, cmp, showshiny) {
 			if (
 				card.upped == upped &&
 				!card.shiny == !showshiny &&
-				!card.status.get('token')
+				!card.getStatus('token')
 			) {
 				filtercache[cacheidx].push(card);
 			}
@@ -107,10 +107,10 @@ const TargetFilters = {
 		return t.isMaterial(etg.Permanent);
 	},
 	permnonstack: function(c, t) {
-		return t.isMaterial(etg.Permanent) && !t.status.get('stackable');
+		return t.isMaterial(etg.Permanent) && !t.getStatus('stackable');
 	},
 	stack: function(c, t) {
-		return t.isMaterial(etg.Permanent) && t.status.get('stackable');
+		return t.isMaterial(etg.Permanent) && t.getStatus('stackable');
 	},
 	crea: function(c, t) {
 		return t.isMaterial(etg.Creature);
@@ -130,8 +130,8 @@ const TargetFilters = {
 	butterfly: function(c, t) {
 		return (
 			(t.type == etg.Creature || t.type == etg.Weapon) &&
-			!t.status.get('immaterial') &&
-			!t.status.get('burrowed') &&
+			!t.getStatus('immaterial') &&
+			!t.getStatus('burrowed') &&
 			(t.trueatk() < 3 || (t.type == etg.Creature && t.truehp() < 3))
 		);
 	},
@@ -148,22 +148,22 @@ const TargetFilters = {
 		return t.isMaterial() && (t.type == etg.Creature || t.owner != c.owner);
 	},
 	airbornecrea: function(c, t) {
-		return t.isMaterial(etg.Creature) && t.status.get('airborne');
+		return t.isMaterial(etg.Creature) && t.getStatus('airborne');
 	},
 	golem: function(c, t) {
-		return t.status.get('golem') && t.attack;
+		return t.getStatus('golem') && t.attack;
 	},
 	groundcrea: function(c, t) {
-		return t.isMaterial(etg.Creature) && !t.status.get('airborne');
+		return t.isMaterial(etg.Creature) && !t.getStatus('airborne');
 	},
 	wisdom: function(c, t) {
 		return (
 			(t.type == etg.Creature || t.type == etg.Weapon) &&
-			!t.status.get('burrowed')
+			!t.getStatus('burrowed')
 		);
 	},
 	quinttog: function(c, t) {
-		return t.type == etg.Creature && !t.status.get('burrowed');
+		return t.type == etg.Creature && !t.getStatus('burrowed');
 	},
 };
 function getTargetFilter(str) {

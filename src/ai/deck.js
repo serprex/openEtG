@@ -96,7 +96,7 @@ const filters = {
 	5325: function tidalHealing(card, deck) {
 		let aquaticCount = 0;
 		for (let i = 0; i < deck.length; i++) {
-			if (Cards.Codes[deck[i]].status.get('aquatic') && ++aquaticCount > 4)
+			if (Cards.Codes[deck[i]].getStatus('aquatic') && ++aquaticCount > 4)
 				return true;
 		}
 	},
