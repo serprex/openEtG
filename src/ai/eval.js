@@ -402,9 +402,6 @@ function estimateDamage(c, freedomChance, wallCharges, wallIndex) {
 	if (!fsh && freedomChance && c.getStatus('airborne')) {
 		atk += Math.ceil(atk / 2) * freedomChance;
 	}
-	if (c.getStatus('psionic') &&
-		pl.foe.shield &&
-		pl.foe.shield.getStatus('reflective')) atk *= -1;
 	if (c.owner.foe.sosa) atk *= -1;
 	damageHash.set(c.hash(), atk);
 	return atk;
@@ -432,7 +429,12 @@ function calcExpectedDamage(pl, wallCharges, wallIndex) {
 	}
 	if (!stasisFlag) {
 		pl.creatures.forEach(c => {
-			totalDamage += estimateDamage(c, freedomChance, wallCharges, wallIndex);
+			if (c) {
+				const dmg = estimateDamage(c, freedomChance, wallCharges, wallIndex);
+				if (!(c.getStatus('psionic') &&
+					pl.foe.shield &&
+					pl.foe.shield.getStatus('reflective'))) totalDamage += dmg;
+			}
 		});
 	}
 	return (
@@ -512,10 +514,17 @@ function evalthing(c) {
 			Math.max(c.getStatus('frozen'), c.getStatus('delayed')) /
 			adrenalinefactor;
 		delayfactor = delaymix ? 1 - Math.min(delaymix / 5, 0.6) : 1;
+		ttatk = getDamage(c);
+		if (c.getStatus('psionic') &&
+			c.owner.foe.shield &&
+			c.owner.foe.shield.getStatus('reflective')) ttatk *= -1;
+		score += ctrueatk / 20;
+		score += ttatk * delayfactor;
 	} else {
 		delaymix = 0;
 		delayfactor = 1;
 		adrenalinefactor = 1;
+		ttatk = 0;
 	}
 	if (isCreature) {
 		hp = Math.max(c.truehp(), 0);
@@ -544,11 +553,6 @@ function evalthing(c) {
 			}
 		}
 	}
-	if (isAttacker) {
-		ttatk = getDamage(c);
-		score += ctrueatk / 20;
-		score += ttatk * delayfactor;
-	} else ttatk = 0;
 	const throttlefactor =
 		adrenalinefactor < 3 ||
 		(isCreature && c.owner.weapon && c.owner.weapon.getStatus('nothrottle'))
