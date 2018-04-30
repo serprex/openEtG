@@ -1070,11 +1070,10 @@ const Skills = {
 		const active = shardSkills[c.choose(shlist) - 1][Math.min(num - 1, 5)];
 		const shardgolem = (c.owner.shardgolem = {
 			stat: Math.floor(stat),
-			status: new imm.Map(),
+			status: new imm.Map({ golem: 1 }),
 			active: new imm.Map({ cast: parseSkill(active) }),
 			cast: shardCosts[active],
 		});
-		shardgolem.setStatus('golem', 1);
 		function addSkill(event, active) {
 			Thing.prototype.addactive.call(shardgolem, event, parseSkill(active));
 		}
@@ -1117,7 +1116,7 @@ const Skills = {
 				const data = slist[j];
 				if (ishards <= data[0]) return;
 				if (!data[1]) {
-					shardgolem.setStatus(data[2], data[3] === undefined ? 1 : data[3]);
+					shardgolem.status = shardgolem.status.set(data[2], data[3] === undefined ? 1 : data[3]);
 				} else {
 					addSkill(data[1], data[2]);
 				}
