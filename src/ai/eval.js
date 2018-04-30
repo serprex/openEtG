@@ -3,43 +3,6 @@ const etg = require('../etg'),
 	Cards = require('../Cards'),
 	Skills = require('../Skills'),
 	parseSkill = require('../parseSkill');
-let enableLogging = false,
-	logbuff,
-	logstack;
-function logStart() {
-	if (enableLogging) {
-		logbuff = {};
-		logstack = [];
-	}
-}
-function logEnd() {
-	if (enableLogging) {
-		console.log(logbuff);
-		logstack = logbuff = undefined;
-	}
-}
-function logNest(x) {
-	if (enableLogging) {
-		logstack.push(logbuff);
-		logbuff = logbuff[x] = {};
-	}
-}
-function logNestEnd(x) {
-	if (enableLogging) {
-		logbuff = logstack.pop();
-	}
-}
-function log(x, y) {
-	if (enableLogging) {
-		if (!(x in logbuff)) {
-			logbuff[x] = y;
-		} else if (logbuff[x] instanceof Array) {
-			logbuff[x].push(y);
-		} else {
-			logbuff[x] = [logbuff[x], y];
-		}
-	}
-}
 function pillarval(c) {
 	return c.type == etg.Spell ? 0.1 : Math.sqrt(c.status.get('charges'));
 }
@@ -439,6 +402,9 @@ function estimateDamage(c, freedomChance, wallCharges, wallIndex) {
 	if (!fsh && freedomChance && c.status.get('airborne')) {
 		atk += Math.ceil(atk / 2) * freedomChance;
 	}
+	if (c.status.get('psionic') &&
+		pl.foe.shield &&
+		pl.foe.shield.status.get('reflective')) atk *= -1;
 	if (c.owner.foe.sosa) atk *= -1;
 	damageHash.set(c.hash(), atk);
 	return atk;
@@ -466,17 +432,7 @@ function calcExpectedDamage(pl, wallCharges, wallIndex) {
 	}
 	if (!stasisFlag) {
 		pl.creatures.forEach(c => {
-			const dmg = estimateDamage(c, freedomChance, wallCharges, wallIndex);
-			if (
-				dmg &&
-				!(
-					c.status.get('psionic') &&
-					pl.foe.shield &&
-					pl.foe.shield.status.get('reflective')
-				)
-			) {
-				totalDamage += dmg;
-			}
+			totalDamage += estimateDamage(c, freedomChance, wallCharges, wallIndex);
 		});
 	}
 	return (
@@ -652,7 +608,6 @@ function evalthing(c) {
 		);
 		score *= 1 - 12 * delayed / (12 + delayed) / 16;
 	}
-	log(c, score);
 	return score;
 }
 
@@ -707,20 +662,17 @@ function evalcardinstance(cardInst) {
 				? 1
 				: 0.9 +
 					Math.log(1 + cardInst.owner.quanta[cardInst.card.costele]) / 50);
-	log(c, score);
 	return score;
 }
 
 function caneventuallyactive(element, cost, pl) {
-	if (!cost || !element || pl.quanta[element] || !pl.mark || pl.mark == element)
-		return true;
-	return pl.permanents.some(
-		pr =>
+	return (!cost || !element || pl.quanta[element] > 0 || !pl.mark || pl.mark == element) ||
+		pl.permanents.some(pr =>
 			pr &&
 			((pr.card.type == etg.Pillar &&
 				(!pr.card.element || pr.card.element == element)) ||
 				(pr.active == Skills.locket && pr.status.get('mode') == element)),
-	);
+		);
 }
 
 const uniqueStatuses = new Set([
@@ -733,7 +685,6 @@ const uniqueStatuses = new Set([
 let uniquesSkill, damageHash;
 
 module.exports = function(game) {
-	logStart();
 	if (game.winner) {
 		return game.winner == game.player1 ? 99999999 : -99999999;
 	}
@@ -759,27 +710,19 @@ module.exports = function(game) {
 			uniquesSkill.delete('patience');
 			uniquesSkill.delete('cloak');
 		}
-		logNest(j);
 		const player = game.players(j);
 		let pscore = wallCharges[j] * 4 + player.markpower;
 		pscore += evalthing(player.weapon);
 		pscore += evalthing(player.shield);
-		logNest('creas');
 		for (let i = 0; i < 23; i++) {
 			pscore += evalthing(player.creatures[i]);
 		}
-		logNestEnd();
-		logNest('perms');
 		for (let i = 0; i < 16; i++) {
 			pscore += evalthing(player.permanents[i]);
 		}
-		logNestEnd();
-		logNest('hand');
 		for (let i = 0; i < player.hand.length; i++) {
 			pscore += evalcardinstance(player.hand[i]);
 		}
-		logNestEnd();
-		// Remove this if logic is updated to call endturn
 		if (player != game.turn && player.hand.length < 8 && player.deck.length) {
 			const card = player.deck.pop();
 			player.addCard(card);
@@ -798,12 +741,8 @@ module.exports = function(game) {
 			pscore -= (player.hand.length + (player.hand.length > 6 ? 7 : 4)) / 4;
 		if (player.flatline) pscore -= 1;
 		if (player.status.get('neuro')) pscore -= 5;
-		log('Eval', pscore);
-		logNestEnd();
 		gamevalue += pscore * (j ? -1 : 1);
 	}
-	log('Eval', gamevalue);
-	logEnd();
 	damageHash = uniquesSkill = null;
 	return gamevalue;
 };

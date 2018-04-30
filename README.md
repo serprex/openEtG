@@ -10,10 +10,10 @@ openEtG is an unofficial Open Web fork of the Flash game [Elements](http://eleme
 
 Open Terminal. All `commands` will be done in Terminal. You must have [XCode](https://developer.apple.com/xcode/) installed.
 
-1. Install [Homebrew](http://brew.sh/)
+1. Install [Homebrew](https://brew.sh/)
 1. Install required software: `brew install git node redis`
 1. Clone the repository: `git clone https://github.com/serprex/openEtG.git && cd openEtG`
-1. Install atlas files: `curl --compressed 'http://etg.dek.im/assets/{atlas.js,atlas.png,atlas.css}' -o 'assets/#1'`
+1. Install atlas files: `curl --compressed 'https://etg.dek.im/assets/{atlas.js,atlas.png,atlas.css}' -o 'assets/#1'`
 1. Install npm modules and build project: `npm install && npm run build`
 
 #### Mac Start/Stop OpenEtG
@@ -29,7 +29,7 @@ Open Terminal. All `commands` will be done in Terminal. You must have [XCode](ht
 1. Download and Install the following:
   * [node.js](https://nodejs.org)
   * [redis](https://github.com/MSOpenTech/redis/releases)
-  * [git](http://git-scm.com/download/win)
+  * [git](https://git-scm.com/download/win)
   * [tortoisegit](https://tortoisegit.org)
 1. Clone the repository:
   1. Right-click inside the folder where you want the game files to go
@@ -41,7 +41,7 @@ Open Terminal. All `commands` will be done in Terminal. You must have [XCode](ht
   1. Run the command: `npm install; npm install -g spritesheet-js`
   1. Leave this command window open for later
   1. Run `npm run build`
-  1. Download [atlas.js](http://etg.dek.im/assets/atlas.js), [atlas.png](http://etg.dek.im/assets/atlas.png) and [atlas.css](http://etg.dek.im/assets/atlas.css) and move them to the `assets` folder
+  1. Download [atlas.js](https://etg.dek.im/assets/atlas.js), [atlas.png](https://etg.dek.im/assets/atlas.png) and [atlas.css](https://etg.dek.im/assets/atlas.css) and move them to the `assets` folder
 1. Start redis-server
 1. In the command window from previously, run the command: `npm start`
 1. Browse to [http://127.0.0.1:13602](http://127.0.0.1:13602) and the game should work!
