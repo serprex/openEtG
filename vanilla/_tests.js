@@ -1,11 +1,11 @@
 #!/usr/bin/env node
 'use strict';
 const assert = require('assert'),
-	etg = require('./etg'),
-	Game = require('./Game'),
-	etgutil = require('../etgutil'),
-	Actives = require('./Skills'),
-	Cards = require('./Cards');
+	etg = require('../src/vanilla/etg'),
+	Game = require('../src/vanilla/Game'),
+	etgutil = require('../src/etgutil'),
+	Actives = require('../src/vanilla/Skills'),
+	Cards = require('../src/vanilla/Cards');
 function initHand(pl, ...args) {
 	for (let i = 0; i < args.length; i++) {
 		pl.hand[i] = new etg.CardInstance(args[i], pl);

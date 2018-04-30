@@ -1,13 +1,13 @@
 #!/usr/bin/env node
 'use strict';
 const assert = require('assert'),
-	etg = require('../etg'),
-	util = require('../util'),
-	Game = require('../Game'),
-	Cards = require('../Cards'),
-	Thing = require('../Thing'),
-	Skills = require('../Skills'),
-	etgutil = require('../etgutil');
+	etg = require('../src/etg'),
+	util = require('../src/util'),
+	Game = require('../src/Game'),
+	Cards = require('../src/Cards'),
+	Thing = require('../src/Thing'),
+	Skills = require('../src/Skills'),
+	etgutil = require('../src/etgutil');
 
 function isEmpty(obj) {
 	for (let key in obj) if (obj[key] !== undefined) return false;
