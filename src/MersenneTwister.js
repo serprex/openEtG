@@ -12,11 +12,11 @@ function MersenneTwister(seed) {
 	this.seed(seed);
 }
 MersenneTwister.prototype.seed = function(seed) {
-	var oldmt = seed >>> 0;
+	let oldmt = seed >>> 0;
 	this.mti = N;
 	this.mt[0] = oldmt;
-	for (var mti = 1; mti < N; mti++) {
-		var s = oldmt ^ (oldmt >>> 30);
+	for (let mti = 1; mti < N; mti++) {
+		const s = oldmt ^ (oldmt >>> 30);
 		this.mt[mti] = oldmt =
 			(((((s & 0xffff0000) >>> 16) * 1812433253) << 16) +
 				(s & 0x0000ffff) * 1812433253 +
@@ -25,9 +25,10 @@ MersenneTwister.prototype.seed = function(seed) {
 	}
 };
 MersenneTwister.prototype.int = function() {
-	var y;
+	let y;
 	if (this.mti >= N) {
-		for (var kk = 0; kk < N - M; kk++) {
+		let kk = 0;
+		for (; kk < N - M; kk++) {
 			y = (this.mt[kk] & UPPER_MASK) | (this.mt[kk + 1] & LOWER_MASK);
 			this.mt[kk] = this.mt[kk + M] ^ (y >>> 1) ^ MAG_01[y & 1];
 		}

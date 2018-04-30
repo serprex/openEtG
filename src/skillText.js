@@ -1,7 +1,7 @@
 'use strict';
 module.exports = function(c, event) {
 	if (c instanceof Card && c.type == etg.Spell) {
-		const entry = getDataFromName(c.active.cast.name[0]);
+		const entry = getDataFromName(c.active.get('cast').name[0]);
 		return processEntry(c, 'cast', entry);
 	} else {
 		const ret = [],
@@ -16,14 +16,13 @@ module.exports = function(c, event) {
 			} else pushEntry(ret, c, '', entry);
 		}
 		if (stext.length) ret.unshift(stext.join(', ') + '.');
-		for (const key in c.active) {
-			c.active[key].name.forEach(name => {
+		for (const [k, v] of c.active) {
+			v.name.forEach(name => {
 				const entry = getDataFromName(name);
 				if (entry === undefined) return;
-				pushEntry(ret, c, key, entry);
-				if (key == 'cast')
-					ret[ret.length - 1] =
-						c.cast + ':' + c.castele + ' ' + ret[ret.length - 1];
+				pushEntry(ret, c, k, entry);
+				if (k == 'cast')
+					ret[ret.length - 1] = `${c.cast}:${c.castele} ${ret[ret.length - 1]}`;
 			});
 		}
 		return ret.join('\n');

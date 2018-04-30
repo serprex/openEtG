@@ -22,7 +22,7 @@ function Thing(card) {
 	this.status = card.status;
 	this.usedactive = true;
 	this.type = 0;
-	this.active = util.clone(card.active);
+	this.active = card.active;
 }
 module.exports = Thing;
 
@@ -37,7 +37,7 @@ Thing.prototype.transform = function(card) {
 	for (const [key, val] of card.status) {
 		if (!this.getStatus(key)) this.status = this.status.set(key, val);
 	}
-	this.active = util.clone(card.active);
+	this.active = card.active;
 	if (this.status.get('mutant')) {
 		const buff = this.upto(25);
 		this.buffhp(Math.floor(buff / 5));
@@ -127,7 +127,7 @@ Thing.prototype.clone = function(owner) {
 	obj.status = this.status;
 	obj.usedactive = this.usedactive;
 	obj.type = this.type;
-	obj.active = util.clone(this.active);
+	obj.active = this.active;
 	return obj;
 };
 Thing.prototype.hash = function() {
@@ -137,16 +137,17 @@ Thing.prototype.hash = function() {
 		(this.card.code & 0x3fff) ^
 		this.status.hashCode() ^
 		(this.hp * 17 + this.atk * 31 - this.maxhp - this.usedactive * 3);
-	for (const key in this.active) {
-		hash ^= util.hashString(key + ':' + this.active[key].name.join(' '));
+	for (const [k, v] of this.active) {
+		hash ^= util.hashString(k + ':' + v.name.join(' '));
 	}
-	if (this.active.cast) {
+	if (this.active.has('cast')) {
 		hash ^= (this.castele | (this.cast << 16)) * 7;
 	}
 	return hash & 0x7ffffff;
 };
 Thing.prototype.trigger = function(name, t, param) {
-	return this.active[name] ? this.active[name].func(this, t, param) : 0;
+	const a = this.active.get(name);
+	return a ? a.func(this, t, param) : 0;
 };
 Thing.prototype.proc = function(name, param) {
 	function proc(c) {
@@ -233,13 +234,15 @@ const activetexts = [
 	'postauto',
 ];
 Thing.prototype.activetext = function() {
-	if (this.active.cast)
-		return this.cast + ':' + this.castele + this.active.cast.name[0];
-	for (let i = 0; i < activetexts.length; i++) {
-		if (this.active[activetexts[i]])
-			return activetexts[i] + ' ' + this.active[activetexts[i]].name.join(' ');
+	const acast = this.active.get('cast');
+	if (acast)
+		return this.cast + ':' + this.castele + acast.name[0];
+	for (const akey of activetexts) {
+		const a = this.active.get(akey);
+		if (a) return akey + ' ' + a.name.join(' ');
 	}
-	return this.active.auto ? this.active.auto.name.join(' ') : '';
+	const aauto = this.active.get('auto');
+	return aauto ? aauto.name.join(' ') : '';
 };
 Thing.prototype.place = function(owner, type, fromhand) {
 	this.owner = owner;
@@ -265,7 +268,7 @@ Thing.prototype.spelldmg = function(x, dontdie) {
 };
 Thing.prototype.addpoison = function(x) {
 	if (this.type == etg.Weapon) this.owner.addpoison(x);
-	else if (!this.active.ownpoison || this.trigger('ownpoison')) {
+	else if (!this.active.has('ownpoison') || this.trigger('ownpoison')) {
 		this.incrStatus('poison', x);
 		if (this.status.get('voodoo')) {
 			this.owner.foe.addpoison(x);
@@ -277,17 +280,17 @@ Thing.prototype.delay = function(x) {
 	if (this.status.get('voodoo')) this.owner.foe.delay(x);
 };
 Thing.prototype.freeze = function(x) {
-	if (!this.active.ownfreeze || this.trigger('ownfreeze')) {
+	if (!this.active.has('ownfreeze') || this.trigger('ownfreeze')) {
 		Effect.mkText('Freeze', this);
-		if (x > this.status.get('frozen')) this.setStatus('frozen', x);
+		if (x > this.getStatus('frozen')) this.setStatus('frozen', x);
 		if (this.status.get('voodoo')) this.owner.foe.freeze(x);
 	}
 };
 Thing.prototype.lobo = function() {
-	for (const key in this.active) {
-		this.active[key].name.forEach(name => {
+	for (const [k, v] of this.active) {
+		v.name.forEach(name => {
 			if (!parseSkill(name).passive) {
-				this.rmactive(key, name);
+				this.rmactive(k, name);
 			}
 		});
 	}
@@ -325,7 +328,7 @@ Thing.prototype.mutantactive = function() {
 		if (mutantabilities[index] == 'growth 1') {
 			this.addactive('death', active);
 		} else {
-			this.active.cast = active;
+			this.active = this.active.set('cast', active);
 			this.cast = 1 + this.owner.upto(2);
 			this.castele = this.card.element;
 			return true;
@@ -357,26 +360,32 @@ function combineactive(a1, a2) {
 	};
 }
 Thing.prototype.addactive = function(type, active) {
-	this.active[type] = combineactive(this.active[type], active);
+	this.active = this.active.update(type, v => combineactive(v, active));
 };
+Thing.prototype.getSkill = function(type) {
+	return this.active.get(type);
+}
+Thing.prototype.setSkill = function(type, sk) {
+	this.active = this.active.set(type, sk);
+}
 Thing.prototype.rmactive = function(type, name) {
-	if (!this.active[type]) return;
-	const actives = this.active[type].name;
+	const atype = this.active.get(type);
+	if (!atype) return;
+	const actives = atype.name;
 	const idx = actives.indexOf(name);
 	if (~idx) {
-		if (actives.length == 1) {
-			delete this.active[type];
-		} else {
-			this.active[type] = actives.reduce(
+		this.active = actives.length === 1 ?
+			this.active.delete(type) :
+			this.active.set(type, actives.reduce(
 				(previous, current, i) =>
 					i == idx ? previous : combineactive(previous, Skills[current]),
 				null,
-			);
-		}
+			));
 	}
 };
 Thing.prototype.hasactive = function(type, name) {
-	return type in this.active && this.active[type].name.indexOf(name) !== -1;
+	const atype = this.active.get(type);
+	return !!(atype && ~atype.name.indexOf(name));
 };
 Thing.prototype.canactive = function(spend) {
 	if (
@@ -394,18 +403,18 @@ Thing.prototype.canactive = function(spend) {
 		);
 	} else
 		return (
-			this.active.cast &&
+			this.active.has('cast') &&
 			!this.usedactive &&
 			!this.status.get('delayed') &&
 			!this.status.get('frozen') &&
 			this.owner.canspend(this.castele, this.cast)
 		);
 };
-Thing.prototype.castSpell = function(t, active, nospell) {
-	const data = { tgt: t, active: active };
+Thing.prototype.castSpell = function(tgt, active, nospell) {
+	const data = { tgt, active };
 	this.proc('prespell', data);
 	if (data.evade) {
-		if (t) Effect.mkText('Evade', t);
+		if (tgt) Effect.mkText('Evade', tgt);
 	} else {
 		active.func(this, data.tgt);
 		if (!nospell) this.proc('spell', data);
@@ -415,7 +424,7 @@ Thing.prototype.play = function(tgt, fromhand) {
 	const {owner, card} = this;
 	this.remove();
 	if (card.type == etg.Spell) {
-		this.castSpell(tgt, this.active.cast);
+		this.castSpell(tgt, this.active.get('cast'));
 	} else {
 		audio.playSound(card.type <= etg.Permanent ? 'permPlay' : 'creaturePlay');
 		if (card.type == etg.Creature) owner.addCrea(this, fromhand);
@@ -429,7 +438,7 @@ Thing.prototype.useactive = function(t) {
 	const {owner} = this;
 	if (this.type == etg.Spell) {
 		if (!this.canactive(true)) {
-			return console.log(owner + ' cannot cast ' + this);
+			return console.log(`${owner} cannot cast ${this}`);
 		}
 		this.remove();
 		if (owner.status.get('neuro')) owner.addpoison(1);
@@ -440,7 +449,7 @@ Thing.prototype.useactive = function(t) {
 	} else if (owner.spend(this.castele, this.cast)) {
 		this.usedactive = true;
 		if (this.status.get('neuro')) this.addpoison(1);
-		this.castSpell(t, this.active.cast);
+		this.castSpell(t, this.active.get('cast'));
 	}
 	owner.game.updateExpectedDamage();
 };
@@ -465,13 +474,13 @@ Thing.prototype.attackCreature = function(target, trueatk) {
 	}
 };
 Thing.prototype.attack = function(stasis, freedomChance, target) {
-	const isCreature = this.type == etg.Creature;
+	const isCreature = this.type === etg.Creature;
 	if (isCreature) {
 		this.dmg(this.getStatus('poison'), true);
 	}
 	if (target === undefined)
 		target =
-			this.active.cast == Skills.appease && !this.status.get('appeased')
+			this.active.get('cast') === Skills.appease && !this.status.get('appeased')
 				? this.owner
 				: this.owner.foe;
 	if (!this.status.get('frozen')) {
@@ -481,7 +490,7 @@ Thing.prototype.attack = function(stasis, freedomChance, target) {
 	let trueatk;
 	if (
 		!(stasis || this.status.get('frozen') || this.status.get('delayed')) &&
-		(trueatk = this.trueatk()) != 0
+		(trueatk = this.trueatk())
 	) {
 		let momentum =
 			this.status.get('momentum') ||

@@ -12,11 +12,6 @@ exports.place = function(array, item) {
 	for (let i = 0; i < array.length; i++)
 		if (!array[i]) return (array[i] = item);
 };
-exports.clone = function(obj) {
-	const result = {};
-	for (const key in obj) result[key] = obj[key];
-	return result;
-};
 exports.hashString = function(str) {
 	let hash = 5381;
 	for (let i = 0; i < str.length; i++)

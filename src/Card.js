@@ -1,6 +1,5 @@
 'use strict';
 const imm = require('immutable'),
-	emptyObj = Object.freeze({}),
 	statuscache = {},
 	activecache = {},
 	activecastcache = {};
@@ -22,7 +21,7 @@ function Card(type, info) {
 	this.castele = 0;
 	if (info.Skill) {
 		if (this.type == etg.Spell) {
-			this.active = { cast: parseSkill(info.Skill) };
+			this.active = new imm.Map({ cast: parseSkill(info.Skill) });
 			this.cast = this.cost;
 			this.castele = this.costele;
 		} else if (info.Skill in activecache) {
@@ -32,7 +31,7 @@ function Card(type, info) {
 				[this.cast, this.castele] = castinfo;
 			}
 		} else {
-			activecache[info.Skill] = this.active = {};
+			this.active = new imm.Map();
 			for (const active of util.iterSplit(info.Skill, '+')) {
 				const eqidx = active.indexOf('=');
 				const a0 = ~eqidx ? active.substr(0, eqidx) : 'auto';
@@ -47,9 +46,9 @@ function Card(type, info) {
 					activecastcache[info.Skill] = cast;
 				}
 			}
-			Object.freeze(this.active);
+			activecache[info.Skill] = this.active;
 		}
-	} else this.active = emptyObj;
+	} else this.active = new imm.Map();
 	if (info.Status) {
 		if (info.Status in statuscache) {
 			this.status = statuscache[info.Status];

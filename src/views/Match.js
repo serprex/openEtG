@@ -226,7 +226,7 @@ const ThingInst = connect(({opts}) => ({ lofiArt: opts.lofiArt }))(function Thin
 			if (obj.card.type === etg.Pillar) {
 				statText = `1:${obj.getStatus('pendstate') ? obj.owner.mark : obj.card.element} x${charges}`;
 				topText = '';
-			} else if (obj.active.auto && obj.active.auto === Skills.locket) {
+			} else if (obj.active.get('auto') === Skills.locket) {
 				statText = `1:${obj.getStatus('mode') || obj.owner.mark}`;
 			} else {
 				statText = (charges || '').toString();
@@ -501,10 +501,10 @@ module.exports = connect(({user}) => ({user}))(class Match extends React.Compone
 				obj.useactive(tgt);
 				this.forceUpdate();
 			};
-			if (obj.type == etg.Spell && obj.card.type != etg.Spell) {
+			if (obj.type === etg.Spell && obj.card.type !== etg.Spell) {
 				cb();
 			} else {
-				game.getTarget(obj, obj.active.cast, cb);
+				game.getTarget(obj, obj.active.get('cast'), cb);
 				this.forceUpdate();
 			}
 		}
@@ -593,7 +593,7 @@ module.exports = connect(({user}) => ({user}))(class Match extends React.Compone
 						element: c.card.element,
 						costele: c.castele,
 						cost: c.cast,
-						name: c.active.cast.name[0],
+						name: c.active.get('cast').name[0],
 						upped: c.card.upped,
 						shiny: c.card.shiny,
 					};

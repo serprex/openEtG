@@ -10,7 +10,7 @@ module.exports = function(game) {
 			const ch = c.hash();
 			if (ch in casthash) return;
 			else casthash[ch] = true;
-			const active = c.active.cast;
+			const active = c.active.get('cast');
 			const cbits = game.tgtToBits(c) ^ 8;
 			function evalIter(t) {
 				if (

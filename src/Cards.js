@@ -122,7 +122,7 @@ const TargetFilters = {
 		return t.type != etg.Player;
 	},
 	sing: function(c, t) {
-		return t.isMaterial(etg.Creature) && t.active.cast != c.active.cast;
+		return t.isMaterial(etg.Creature) && t.active.get('cast') !== c.active.get('cast');
 	},
 	notskele: function(c, t) {
 		return t.isMaterial(etg.Creature) && !t.card.isOf(exports.Skeleton);
@@ -142,7 +142,7 @@ const TargetFilters = {
 		return t.isMaterial(etg.Creature) && t.truehp() < t.trueatk();
 	},
 	forceplay: function(c, t) {
-		return t.type == etg.Spell || (t.isMaterial() && t.active.cast);
+		return t.type == etg.Spell || (t.isMaterial() && t.active.get('cast'));
 	},
 	shuffle3: function(c, t) {
 		return t.isMaterial() && (t.type == etg.Creature || t.owner != c.owner);

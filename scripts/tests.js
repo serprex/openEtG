@@ -9,10 +9,6 @@ const assert = require('assert'),
 	Skills = require('../src/Skills'),
 	etgutil = require('../src/etgutil');
 
-function isEmpty(obj) {
-	for (let key in obj) if (obj[key] !== undefined) return false;
-	return true;
-}
 function initHand(pl, ...args) {
 	for (let i = 0; i < args.length; i++) {
 		const cardinst = (pl.hand[i] = new Thing(args[i]));
@@ -232,9 +228,9 @@ M.test('Hope', function() {
 M.test('Lobotomize', function() {
 	this.player1.addCrea(new Thing(Cards.Devourer));
 	const dev = this.player1.creatures[0];
-	assert.ok(!isEmpty(dev.active), 'Skills');
+	assert.ok(dev.active.size, 'Skills');
 	Skills.lobotomize.func(dev, dev);
-	assert.ok(isEmpty(dev.active), 'No more');
+	assert.ok(!dev.active.size, 'No more');
 });
 M.test('Obsession', function() {
 	initHand(

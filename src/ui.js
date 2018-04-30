@@ -126,7 +126,9 @@ function tgtToPos(t) {
 		return p;
 	} else if (t.type == etg.Spell) {
 		return cardPos(t.owner == t.owner.game.player2, t.getIndex());
-	} else console.log('Unknown target');
+	} else {
+		return { x: -999, y: -999 };
+	}
 }
 exports.creaturePos = creaturePos;
 exports.permanentPos = permanentPos;

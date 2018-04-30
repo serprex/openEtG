@@ -1,3 +1,4 @@
+const imm = require('immutable');
 function adrenathrottle(f) {
 	return (c, t, data) => {
 		if (
@@ -43,7 +44,7 @@ const Skills = {
 	},
 	accelerationspell: (c, t) => {
 		t.lobo();
-		t.active.auto = Skills.acceleration;
+		t.setSkill('auto', Skills.acceleration);
 	},
 	accretion: (c, t) => {
 		Skills.destroy.func(c, t);
@@ -108,7 +109,7 @@ const Skills = {
 		c.rmactive('play', 'autoburrowproc');
 	},
 	autoburrowproc: (c, t) => {
-		if (t.active.cast == Skills.burrow) Skills.burrow.func(t);
+		if (t.getSkill('cast') === Skills.burrow) Skills.burrow.func(t);
 	},
 	axe: (c, t) => {
 		return c.owner.mark == etg.Fire || c.owner.mark == etg.Time ? 1 : 0;
@@ -209,12 +210,12 @@ const Skills = {
 	burrow: (c, t) => {
 		c.setStatus('burrowed', 1);
 		c.setStatus('airborne', 0);
-		c.active.cast = Skills.unburrow;
+		c.setSkill('cast', Skills.unburrow);
 		c.cast = 0;
 	},
 	butterfly: (c, t) => {
 		t.lobo();
-		t.active.cast = Skills.destroy;
+		t.setSkill('cast', Skills.destroy);
 		t.cast = 3;
 		t.castele = etg.Entropy;
 	},
@@ -356,12 +357,12 @@ const Skills = {
 		const choice = c.choose(
 			Cards.filter(c.owner.upto(2), c => {
 				if (c.type != etg.Spell) return false;
-				const tgting = Cards.Targeting[c.active.cast.name[0]];
+				const tgting = Cards.Targeting[c.active.get('cast').name[0]];
 				return tgting && tgting(c, t);
 			}),
 		);
 		Effect.mkText(choice.name, t);
-		c.castSpell(t, choice.active.cast);
+		c.castSpell(t, choice.active.get('cast'));
 	},
 	dagger: c => {
 		let buff = c.owner.mark == etg.Darkness || c.owner.mark == etg.Death;
@@ -404,7 +405,7 @@ const Skills = {
 		c.owner.deck.length = 0;
 	},
 	deepdive: (c, t) => {
-		c.active.cast = Skills.freezeperm;
+		c.setSkill('cast', Skills.freezeperm);
 		c.castele = etg.Gravity;
 		c.setStatus('airborne', 0);
 		c.setStatus('burrowed', 1);
@@ -421,12 +422,12 @@ const Skills = {
 	},
 	deepdiveproc2: (c, t) => {
 		c.rmactive('turnstart', 'deepdiveproc2');
-		c.active.cast = Skills.deepdive;
+		c.setSkill('cast', Skills.deepdive);
 		c.castele = etg.Water;
 		c.setStatus('airborne', false);
 	},
 	deja: (c, t) => {
-		delete c.active.cast;
+		c.active = c.active.delete('cast');
 		Skills.parallel.func(c, c);
 	},
 	deployblobs: (c, t) => {
@@ -526,7 +527,7 @@ const Skills = {
 		t.setStatus('airborne', isborne);
 		if (isborne) {
 			t.incrStatus('dive', t.trueatk());
-			if (t.active.cast == Skills.burrow) delete t.active.cast;
+			if (t.getSkill('cast') === Skills.burrow) t.active = t.active.remove('cast');
 		} else {
 			t.incrStatus('dive', Math.floor(t.trueatk()/-2));
 		}
@@ -597,8 +598,8 @@ const Skills = {
 	embezzle: (c, t) => {
 		Effect.mkText('Embezzle', t);
 		t.lobo();
-		t.active.hit = Skills.forcedraw;
-		t.active.owndeath = Skills.embezzledeath;
+		t.addactive('hit', Skills.forcedraw);
+		t.addactive('owndeath', Skills.embezzledeath);
 	},
 	embezzledeath: (c, t) => {
 		if (c.owner.foe.deck.length < 3) {
@@ -626,10 +627,10 @@ const Skills = {
 		for (const [key, val] of t.status) {
 			c.incrStatus(key, key == 'adrenaline' && val > 1 ? 1 : val);
 		}
-		c.active = util.clone(t.active);
-		if (c.active.cast == Skills.endow) {
-			delete c.active.cast;
+		if (t.active.get('cast') === Skills.endow) {
+			c.active = c.active.delete('cast');
 		} else {
+			c.active = t.active;
 			c.cast = t.cast;
 			c.castele = t.castele;
 		}
@@ -754,10 +755,10 @@ const Skills = {
 			});
 			if (t.owner.sanctuary) return;
 			if (card.type == etg.Spell) {
-				tgting = Cards.Targeting[card.active.cast.name[0]];
+				tgting = Cards.Targeting[card.active.get('cast').name[0]];
 			}
-		} else if (t.active.cast) {
-			tgting = Cards.Targeting[t.active.cast.name[0]];
+		} else if (t.active.has('cast')) {
+			tgting = Cards.Targeting[t.active.get('cast').name[0]];
 		}
 		if (tgting && !(tgt = findtgt(tgting))) return;
 		const realturn = t.owner.game.turn;
@@ -944,7 +945,7 @@ const Skills = {
 	},
 	inflation: (c, t) => {
 		function inflate(p) {
-			if (p && p.isMaterial() && p.active.cast) {
+			if (p && p.isMaterial() && p.active.has('cast')) {
 				if (!p.cast) p.castele = 0;
 				p.cast++;
 			}
@@ -1069,8 +1070,8 @@ const Skills = {
 		const active = shardSkills[c.choose(shlist) - 1][Math.min(num - 1, 5)];
 		const shardgolem = (c.owner.shardgolem = {
 			stat: Math.floor(stat),
-			status: new Status(),
-			active: { cast: parseSkill(active) },
+			status: new imm.Map(),
+			active: new imm.Map({ cast: parseSkill(active) }),
 			cast: shardCosts[active],
 		});
 		shardgolem.setStatus('golem', 1);
@@ -1130,7 +1131,6 @@ const Skills = {
 	jelly: (c, t) => {
 		const tcard = t.card;
 		t.transform(tcard.as(Cards.PinkJelly));
-		t.active = { cast: Skills.jelly };
 		t.castele = tcard.element;
 		t.cast = 4;
 		t.atk = 7;
@@ -1151,7 +1151,7 @@ const Skills = {
 	liquid: (c, t) => {
 		Effect.mkText('Liquid', t);
 		t.lobo();
-		t.active.hit = Skills.vampire;
+		t.setSkill('hit', Skills.vampire);
 		t.addpoison(1);
 	},
 	livingweapon: (c, t) => {
@@ -1196,11 +1196,11 @@ const Skills = {
 	luciferin: (c, t) => {
 		c.owner.dmg(-10);
 		c.owner.masscc(c, (c, x) => {
-			for (const key in x.active) {
+			for (const [key, act] of x.active) {
 				if (
 					key != 'ownplay' &&
 					key != 'owndiscard' &&
-					!x.active[key].name.every(name => parseSkill(name).passive)
+					!act.name.every(name => parseSkill(name).passive)
 				)
 					return;
 			}
@@ -1211,7 +1211,7 @@ const Skills = {
 		Effect.mkText('5|5', c);
 		c.buffhp(5);
 		c.atk += 5;
-		delete c.active.cast;
+		c.active = c.active.delete('cast');
 		c.setStatus('nocturnal', 1);
 	},
 	martyr: (c, t, dmg) => {
@@ -1260,7 +1260,7 @@ const Skills = {
 		inst.play(c);
 	},
 	mitosisspell: (c, t) => {
-		t.active.cast = Skills.mitosis;
+		t.setSkill('cast', Skills.mitosis);
 		t.castele = t.card.costele;
 		t.cast = t.card.cost;
 		t.buffhp(1);
@@ -1279,7 +1279,7 @@ const Skills = {
 	},
 	mutant: (c, t) => {
 		if (!c.mutantactive()) {
-			c.active.cast = Skills.web;
+			c.setSkill('cast', Skills.web);
 			c.cast = c.owner.upto(2) + 1;
 		}
 		c.castele = c.owner.upto(13);
@@ -1362,13 +1362,14 @@ const Skills = {
 	},
 	nymph: (c, t) => {
 		Effect.mkText('Nymph', t);
+		const tauto = t.active.get('auto');
 		const e =
 			t.card.element ||
-			(t.active.auto == Skills.pillmat
+			(tauto == Skills.pillmat
 				? c.choose([etg.Earth, etg.Fire, etg.Water, etg.Air])
-				: t.active.auto == Skills.pillspi
+				: tauto == Skills.pillspi
 					? c.choose([etg.Death, etg.Life, etg.Light, etg.Darkness])
-					: t.active.auto == Skills.pillcar
+					: tauto == Skills.pillcar
 						? c.choose([etg.Entropy, etg.Gravity, etg.Time, etg.Aether])
 						: c.owner.upto(12) + 1);
 		Skills.destroy.func(c, t, true, true);
@@ -1389,7 +1390,7 @@ const Skills = {
 	},
 	overdrivespell: (c, t) => {
 		t.lobo();
-		t.active.auto = Skills.overdrive;
+		t.addactive('auto', Skills.overdrive);
 	},
 	pacify: (c, t) => {
 		t.atk -= t.trueatk();
@@ -1574,7 +1575,7 @@ const Skills = {
 	},
 	readiness: (c, t) => {
 		Effect.mkText('Ready', t);
-		if (t.active.cast) {
+		if (t.active.has('cast')) {
 			t.cast = 0;
 			t.usedactive = false;
 		}
@@ -1620,7 +1621,7 @@ const Skills = {
 	},
 	regeneratespell: (c, t) => {
 		t.lobo();
-		t.active.auto = Skills.regenerate;
+		t.addactive('auto', Skills.regenerate);
 		if (t.type == etg.Permanent || t.type == etg.Shield) {
 			t.clearStatus();
 		}
@@ -1737,12 +1738,17 @@ const Skills = {
 	},
 	shardgolem: (c, t) => {
 		if (!c.maxhp) {
-			const golem = c.owner.shardgolem || { stat: 1, cast: 0 };
+			const golem = c.owner.shardgolem || {
+				stat: 1,
+				cast: 0,
+				status: new imm.Map(),
+				active: new imm.Map(),
+			};
 			c.cast = golem.cast;
 			c.castele = etg.Earth;
 			c.atk = c.maxhp = c.hp = golem.stat;
 			c.status = golem.status;
-			c.active = util.clone(golem.active);
+			c.active = golem.active;
 		}
 	},
 	shtriga: (c, t) => {
@@ -1764,7 +1770,7 @@ const Skills = {
 		if (r > 0.9) {
 			c.setStatus('adrenaline', 1);
 		} else if (r > 0.8) {
-			c.active.hit = Skills.vampire;
+			c.addactive('hit', Skills.vampire);
 		} else if (r > 0.7) {
 			Skills.quint.func(c, c);
 		} else if (r > 0.6) {
@@ -1792,7 +1798,7 @@ const Skills = {
 		t.setStatus('burrowed', 1);
 		t.setStatus('airborne', 0);
 		t.lobo();
-		t.active.cast = Skills.unburrow;
+		t.setSkill('cast', Skills.unburrow);
 		t.cast = c.card.upped ? 2 : 1;
 		t.castele = etg.Earth;
 		t.usedactive = true;
@@ -1806,8 +1812,8 @@ const Skills = {
 	siphonactive: (c, t) => {
 		Effect.mkText('Siphon', t);
 		c.lobo();
-		for (const key in t.active) {
-			if (!t.active[key].passive) c.active[key] = t.active[key];
+		for (const [key, act] of t.active) {
+			if (!act.passive) c.setSkill(key, act);
 		}
 		c.cast = t.cast;
 		c.castele = t.castele;
@@ -1891,7 +1897,7 @@ const Skills = {
 	stoneform: (c, t) => {
 		Effect.mkText('0|20', c);
 		c.buffhp(20);
-		delete c.active.cast;
+		c.active = c.active.delete('cast');
 		c.setStatus('golem', 1);
 	},
 	storm: x => {
@@ -1909,7 +1915,7 @@ const Skills = {
 	},
 	swarm: (c, t) => {
 		return c.owner.creatures.reduce(
-			(hp, cr) => (cr && cr.active.hp == Skills.swarm ? hp + 1 : hp),
+			(hp, cr) => (cr && cr.hasactive.get('hp', 'swarm') ? hp + 1 : hp),
 			0,
 		);
 	},

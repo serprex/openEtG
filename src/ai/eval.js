@@ -372,7 +372,7 @@ function estimateDamage(c, freedomChance, wallCharges, wallIndex) {
 	}
 	const tatk = c.trueatk(),
 		fsh = c.owner.foe.shield,
-		fshactive = fsh && fsh.active.shield;
+		fshactive = fsh && fsh.active.get('shield');
 	const momentum =
 		!fsh ||
 		tatk <= 0 ||
@@ -531,14 +531,14 @@ function evalthing(c) {
 				const pl = j ? c.owner : c.owner.foe;
 				for (let i = 0; i < 23; i++) {
 					const cr = pl.creatures[i];
-					if (cr && cr.active.death) {
-						score += evalactive(cr, cr.active.death, ttatk) * (j ? 3 : -3);
+					if (cr && cr.active.get('death')) {
+						score += evalactive(cr, cr.active.get('death'), ttatk) * (j ? 3 : -3);
 					}
 				}
 				for (let i = 0; i < 16; i++) {
 					const pr = pl.permanents[i];
-					if (pr && pr.active.death) {
-						score += evalactive(pr, pr.active.death, ttatk) * (j ? 3 : -3);
+					if (pr && pr.active.get('death')) {
+						score += evalactive(pr, pr.active.get('death'), ttatk) * (j ? 3 : -3);
 					}
 				}
 			}
@@ -554,27 +554,27 @@ function evalthing(c) {
 		(isCreature && c.owner.weapon && c.owner.weapon.getStatus('nothrottle'))
 			? adrenalinefactor
 			: 2;
-	for (const key in c.active) {
+	for (const [key, act] of c.active) {
 		const adrfactor =
 			throttled.has(key)
 				? throttlefactor
 				: key == 'disarm' ? 1 : adrenalinefactor;
 		if (key == 'hit') {
 			score +=
-				evalactive(c, c.active.hit, ttatk) *
+				evalactive(c, act, ttatk) *
 				(ttatk ? 1 : c.getStatus('immaterial') ? 0 : 0.3) *
 				adrfactor *
 				delayfactor;
 		} else if (key == 'auto') {
 			if (!c.getStatus('frozen')) {
-				score += evalactive(c, c.active.auto, ttatk) * adrfactor;
+				score += evalactive(c, act, ttatk) * adrfactor;
 			}
 		} else if (key == 'cast') {
 			if (caneventuallyactive(c.castele, c.cast, c.owner)) {
-				score += evalactive(c, c.active.cast, ttatk) * delayfactor;
+				score += evalactive(c, act, ttatk) * delayfactor;
 			}
 		} else if (key != (isCreature ? 'shield' : 'owndeath')) {
-			score += evalactive(c, c.active[key]);
+			score += evalactive(c, act);
 		}
 	}
 	score += checkpassives(c);
@@ -582,8 +582,8 @@ function evalthing(c) {
 		if (hp && c.owner.gpull == c) {
 			score = (score + hp) * Math.log(hp) / 4;
 			if (c.getStatus('voodoo')) score += hp;
-			if (c.active.shield && !delaymix) {
-				score += evalactive(c, c.active.shield);
+			if (c.active.get('shield') && !delaymix) {
+				score += evalactive(c, c.active.get('shield'));
 			}
 		} else
 			score *= hp
@@ -608,14 +608,14 @@ function evalthing(c) {
 function evalcardinstance(cardInst) {
 	const c = cardInst.card;
 	if (!caneventuallyactive(c.costele, c.cost, cardInst.owner)) {
-		return c.active.discard == Skills.obsession ? (c.upped ? -7 : -6) : 0;
+		return c.active.get('discard') == Skills.obsession ? (c.upped ? -7 : -6) : 0;
 	}
 	let score = 0;
 	if (c.type == etg.Spell) {
-		score += evalactive(cardInst, c.active.cast);
+		score += evalactive(cardInst, c.active.get('cast'));
 	} else {
-		for (const key in c.active) {
-			score += evalactive(cardInst, c.active[key]);
+		for (const act of c.active.values()) {
+			score += evalactive(cardInst, act);
 		}
 		score += checkpassives(cardInst);
 		if (c.type == etg.Creature) {
@@ -664,8 +664,8 @@ function caneventuallyactive(element, cost, pl) {
 		pl.permanents.some(pr =>
 			pr &&
 			((pr.card.type == etg.Pillar &&
-				(!pr.card.element || pr.card.element == element)) ||
-				(pr.active == Skills.locket && pr.getStatus('mode') == element)),
+				(!pr.card.element || pr.card.element === element)) ||
+				(pr.active.get('cast') === Skills.locket && pr.getStatus('mode') === element)),
 		);
 }
 

@@ -27,12 +27,12 @@ const afilter = {
 	web: (c, t) => t.getStatus('airborne'),
 	freeze: (c, t) => t.getStatus('frozen') < 3,
 	pacify: (c, t) => t.trueatk(),
-	readiness: (c, t) => t.active.cast && (t.cast || t.usedactive),
-	silence: (c, t) => t.active.cast && !t.usedactive,
+	readiness: (c, t) => t.active.get('cast') && (t.cast || t.usedactive),
+	silence: (c, t) => t.active.get('cast') && !t.usedactive,
 	lobotomize: (c, t) => {
 		if (!t.getStatus('psionic')) {
-			for (const key in t.active) {
-				if (key != 'ownplay' && t.active[key].name.some(name => !parseSkill(name).passive)) {
+			for (const [key, act] of t.active) {
+				if (key != 'ownplay' && act.name.some(name => !parseSkill(name).passive)) {
 					return true;
 				}
 			}
@@ -86,10 +86,7 @@ AiSearch.prototype.step = function(game, previous) {
 			const ch = c.hash();
 			if (casthash.has(ch)) return;
 			casthash.add(ch);
-			const active =
-				c.type == etg.Spell
-					? c.card.type == etg.Spell && c.card.active.cast
-					: c.active.cast;
+			const active = (c.type !== etg.Spell || c.card.type === etg.Spell) && c.active.get('cast');
 			const cbits = game.tgtToBits(c) ^ 8,
 				tgthash = new Set();
 			const evalIter = t => {
@@ -107,17 +104,17 @@ AiSearch.prototype.step = function(game, previous) {
 						gameClone = game.clone();
 					gameClone.bitsToTgt(cbits).useactive(gameClone.bitsToTgt(tbits));
 					if (
-						c.type == etg.Permanent &&
+						c.type === etg.Permanent &&
 						c.getStatus('patience') &&
-						c.active.cast == Skills.die &&
-						c.owner == game.player2
+						c.active.get('cast') === Skills.die &&
+						c.owner === game.player2
 					) {
 						for (let i = 0; i < 16; i++) {
 							const pr = gameClone.player2.permanents[i];
 							if (
 								pr &&
 								pr.getStatus('patience') &&
-								pr.active.cast == Skills.die
+								pr.active.get('cast') === Skills.die
 							)
 								pr.useactive();
 						}

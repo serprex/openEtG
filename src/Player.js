@@ -10,7 +10,7 @@ function Player(game) {
 	this.status = new imm.Map();
 	this.usedactive = false;
 	this.type = etg.Player;
-	this.active = {};
+	this.active = new imm.Map();
 	this.game = game;
 	this.shield = undefined;
 	this.weapon = undefined;
@@ -335,7 +335,7 @@ Player.prototype.clone = function(game) {
 	obj.status = this.status;
 	obj.usedactive = this.usedactive;
 	obj.type = this.type;
-	obj.active = util.clone(this.active);
+	obj.active = this.active;
 	obj.game = game;
 	obj.shield = maybeClone(this.shield);
 	obj.weapon = maybeClone(this.weapon);
