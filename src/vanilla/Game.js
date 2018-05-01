@@ -4,9 +4,9 @@ var etg = require('./etg');
 var Cards = require('./Cards');
 var Effect = require('./Effect');
 var Player = require('./Player');
-var MersenneTwister = require('../MersenneTwister');
+const Rng = require('rng.js');
 function Game(seed, flip) {
-	this.rng = new MersenneTwister(seed);
+	this.rng = new Rng(seed, ~seed);
 	this.phase = etg.PlayPhase;
 	this.ply = 0;
 	this.player1 = new Player(this);

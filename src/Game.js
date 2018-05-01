@@ -1,6 +1,7 @@
 'use strict';
+const Rng = require('rng.js');
 function Game(seed, flip) {
-	this.rng = new MersenneTwister(seed);
+	this.rng = new Rng(seed, ~seed);
 	this.phase = 0;
 	this.player1 = new Player(this);
 	this.player2 = new Player(this);
@@ -21,7 +22,11 @@ module.exports = Game;
 
 Game.prototype.clone = function() {
 	const obj = Object.create(Game.prototype);
-	obj.rng = this.rng.clone();
+	obj.rng = new Rng(this.rng.lowSeed, this.rng.highSeed);
+	obj.rng.lowConstant = this.rng.lowConstant;
+	obj.rng.highConstant = this.rng.highConstant;
+	obj.rng.lowStateCount = this.rng.lowStateCount;
+	obj.rng.highStateCount = this.rng.highStateCount;
 	obj.phase = this.phase;
 	obj.player1 = this.player1.clone(obj);
 	obj.player2 = this.player2.clone(obj);
@@ -85,7 +90,7 @@ Game.prototype.updateExpectedDamage = function() {
 				const gclone = this.clone();
 				gclone.player1.permanents.forEach(removeSoPa);
 				gclone.player2.permanents.forEach(removeSoPa);
-				gclone.rng.seed(gclone.rng.mt[0] ^ (i * 997));
+				gclone.rng.setSeed(gclone.rng.highState ^ (i * 997), gclone.rng.lowState ^ (i * 650));
 				gclone.turn.endturn();
 				if (!gclone.winner) gclone.turn.endturn();
 				this.expectedDamage[0] += this.player1.hp - gclone.player1.hp;
@@ -154,4 +159,3 @@ var etg = require('./etg');
 var Cards = require('./Cards');
 var Effect = require('./Effect');
 var Player = require('./Player');
-var MersenneTwister = require('./MersenneTwister');
