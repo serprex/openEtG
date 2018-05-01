@@ -1914,7 +1914,7 @@ const Skills = {
 	},
 	swarm: (c, t) => {
 		return c.owner.creatures.reduce(
-			(hp, cr) => (cr && cr.hasactive.get('hp', 'swarm') ? hp + 1 : hp),
+			(hp, cr) => (cr && cr.hasactive('hp', 'swarm') ? hp + 1 : hp),
 			0,
 		);
 	},
