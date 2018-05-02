@@ -22,7 +22,31 @@ function processDeck(dcode) {
 	return { mark, deck };
 }
 
-module.exports = connect(({user, opts}) => ({
+const DeckNames = connect(({user}) => ({user}))(function DeckNames({ user, name, onClick }) {
+	let rx;
+	try {
+		rx = name && new RegExp(name);
+	} catch (_e) {
+		rx = name;
+	}
+	let names = Object.keys(user.decks);
+	if (rx) names = names.filter(name => name.match(rx));
+	return names.sort().slice(0, 84).map((name, i) => {
+		const deck = user.decks[name];
+		return <div key={i} style={{
+			position: 'absolute',
+			left: `${4+Math.floor(i/14)*150}px`,
+			top: `${32+(i%14)*21}px`,
+			width: '142px',
+			overflow: 'hidden',
+		}}>
+			<a href={`deck/${deck}`} target='_blank' className={'ico ce' + etgutil.fromTrueMark(parseInt(deck.slice(-3), 32))} />
+			<span onClick={() => onClick(name)}>{name}</span>
+		</div>
+	});
+})
+
+module.exports = connect(({user}) => ({
 	user,
 }))(class DeckEditor extends React.Component {
 	constructor(props) {
@@ -46,6 +70,7 @@ module.exports = connect(({user, opts}) => ({
 		this.deckRef = React.createRef();
 		this.state = {
 			pool: pool,
+			deckname: '',
 			selectedDeck: null,
 			setQeck: false,
 		};
@@ -54,7 +79,6 @@ module.exports = connect(({user, opts}) => ({
 	static getDerivedStateFromProps(nextProps, prevState) {
 		if (nextProps.user.selectedDeck === prevState.selectedDeck) return null;
 		return {
-			deckname: nextProps.user.selectedDeck,
 			selectedDeck: nextProps.user.selectedDeck,
 			...processDeck(sock.getDeck()),
 		};
@@ -89,11 +113,6 @@ module.exports = connect(({user, opts}) => ({
 			saveDeck(self.props.user.selectedDeck);
 			sock.userExec('setdeck', { name });
 		}
-		function saveButton() {
-			if (self.state.deckname) {
-				saveDeck(self.state.deckname);
-			}
-		}
 		const buttons = [];
 		for (let i = 0; i < 10; i++) {
 			buttons.push(
@@ -106,8 +125,8 @@ module.exports = connect(({user, opts}) => ({
 							? ' selectedbutton'
 							: '')}
 					onClick={() => {
-						if (self.state.setQeck) {
-							saveButton();
+						if (this.state.setQeck) {
+							saveDeck(this.props.selectedDeck);
 							sock.userExec('changeqeck', {
 								number: i,
 								name: self.props.user.selectedDeck,
@@ -125,25 +144,6 @@ module.exports = connect(({user, opts}) => ({
 			<Editor deck={this.state.deck} mark={this.state.mark} pool={this.state.pool}
 				setDeck={deck => this.setState({deck})}
 				setMark={mark => this.setState({mark})}
-			/>
-			<input
-				placeholder='Name'
-				value={self.state.deckname}
-				onChange={e => self.setState({ deckname: e.target.value })}
-				onKeyPress={e => {
-					if (e.which == 13) {
-						loadDeck(e.target.value);
-					}
-				}}
-				onClick={e => {
-					e.target.setSelectionRange(0, 999);
-				}}
-				style={{
-					position: 'absolute',
-					left: '4px',
-					top: '4px',
-					width: '80px',
-				}}
 			/>
 			<Tutor.Editor x={4} y={220} />
 			<input placeholder='Deck'
@@ -164,33 +164,20 @@ module.exports = connect(({user, opts}) => ({
 			<div style={{
 				position: 'absolute',
 				top: '8px',
-				left: '100px',
+				left: '8px',
 			}}>{self.props.user.selectedDeck}</div>
 			<input type='button'
-				value='Save'
-				onClick={saveButton}
+				value='Decks'
+				onClick={() => this.setState({ deckmode: true })}
 				style={{
 					position: 'absolute',
 					left: '8px',
-					top: '110px',
+					top: '58px',
 				}}
 			/>
 			<input type='button'
-				value='Load'
-				onClick={() => loadDeck(this.state.deckname)}
-				style={{
-					position: 'absolute',
-					left: '8px',
-					top: '136px',
-				}}
-			/>
-			<input type='button'
-				value='Exit'
-				onClick={function() {
-					if (self.props.user)
-						sock.userExec('setdeck', { name: self.props.user.selectedDeck });
-					self.props.dispatch(store.doNav(require('../views/MainMenu')));
-				}}
+				value='Revert'
+				onClick={() => this.setState(processDeck(sock.getDeck()))}
 				style={{
 					position: 'absolute',
 					left: '8px',
@@ -199,8 +186,8 @@ module.exports = connect(({user, opts}) => ({
 			/>
 			<input type='button'
 				value='Save to #'
-				className={self.state.setQeck ? 'selectedbutton' : undefined}
-				onClick={() => self.setState({ setQeck: !self.state.setQeck })}
+				className={this.state.setQeck ? 'selectedbutton' : undefined}
+				onClick={() => self.setState({ setQeck: !this.state.setQeck })}
 				style={{
 					position: 'absolute',
 					left: '220px',
@@ -208,7 +195,7 @@ module.exports = connect(({user, opts}) => ({
 				}}
 			/>
 			<input type='button'
-				value='Save & Exit'
+				value='Exit'
 				onClick={() => {
 					saveDeck(this.props.user.selectedDeck, true);
 					this.props.dispatch(store.doNav(require('../views/MainMenu')));
@@ -216,7 +203,7 @@ module.exports = connect(({user, opts}) => ({
 				style={{
 					position: 'absolute',
 					left: '8px',
-					top: '58px',
+					top: '110px',
 				}}
 			/>
 			<div style={{
@@ -224,6 +211,55 @@ module.exports = connect(({user, opts}) => ({
 				left: '300px',
 				top: '8px',
 			}}>{buttons}</div>
+			{this.state.deckmode && <div className='bgbox' style={{
+				position: 'absolute',
+				top: '270px',
+				width: '900px',
+				height: '330px',
+			}}>
+				<input placeholder='Name'
+					value={this.state.deckname}
+					onChange={e => this.setState({ deckname: e.target.value })}
+					onKeyPress={e => {
+						if (e.which == 13) {
+							loadDeck(e.target.value);
+						}
+					}}
+					onClick={e => {
+						e.target.setSelectionRange(0, 999);
+					}}
+					style={{
+						position: 'absolute',
+						left: '4px',
+						top: '4px',
+					}}
+				/>
+				<input type='button'
+					value='Create'
+					style={{
+						position: 'absolute',
+						left: '158px',
+						top: '4px',
+					}}
+					onClick={() => {
+						saveDeck(this.props.user.selectedDeck);
+						saveDeck(this.state.deckname);
+						this.setState({ deckmode: false, deckname: '' });
+					}}
+				/>
+				<input type='button'
+					value='Exit'
+					style={{
+						position: 'absolute',
+						left: '794px',
+						top: '4px',
+					}}
+					onClick={() => {
+						this.setState({ deckmode: false, deckname: '' });
+					}}
+				/>
+				<DeckNames name={this.state.deckname} onClick={loadDeck} />
+			</div>}
 		</>;
 	}
 });
