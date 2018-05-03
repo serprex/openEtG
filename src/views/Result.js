@@ -18,13 +18,12 @@ const etg = require('../etg'),
 module.exports = connect(({user}) => ({user}))(class Result extends React.Component {
 	constructor(props) {
 		super(props);
-		this.state = {};
-		this.onkeydown = this.onkeydown.bind(this);
-		this.rematch = this.rematch.bind(this);
-		this.exitFunc = this.exitFunc.bind(this);
+		this.state = {
+			lefttext: '',
+		};
 	}
 
-	onkeydown(e) {
+	onkeydown = (e) => {
 		if (e.target !== document.body) return;
 		const kc = e.which;
 		if (kc == 32 || kc == 13) this.exitFunc();
@@ -37,7 +36,7 @@ module.exports = connect(({user}) => ({user}))(class Result extends React.Compon
 		}
 	}
 
-	exitFunc() {
+	exitFunc = () => {
 		const {game} = this.props;
 		if (game.quest) {
 			if (game.winner === game.player1 && game.choicerewards) {
@@ -55,7 +54,7 @@ module.exports = connect(({user}) => ({user}))(class Result extends React.Compon
 		}
 	}
 
-	rematch() {
+	rematch = () => {
 		const game = this.props.game,
 			data = this.props.data;
 		switch (game.level) {

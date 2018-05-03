@@ -1,10 +1,10 @@
 #!/usr/bin/node
 'use strict';
-var write = process.stdout.write.bind(process.stdout);
-function writetd() {
+const write = process.stdout.write.bind(process.stdout);
+function writetd(...args) {
 	write('[tr]');
-	for (var i = 0; i < arguments.length; i++)
-		if (arguments[i] !== undefined) write('[td]' + arguments[i] + '[/td]');
+	for (const arg of args)
+		if (arg !== undefined) write(`[td]${arg}[/td]`);
 	write('[/tr]');
 }
 if (process.argv.length < 3) {
@@ -12,9 +12,9 @@ if (process.argv.length < 3) {
 		Cards = require('../Cards');
 	write('[right][table]');
 	writetd('Tot', 'E', 'C', 'P', 'S', '|', 'R', 'U', 'C', '', '');
-	for (var i = 0; i < 13; i++) {
-		var ofele = Cards.filter(false, x => x.element == i);
-		var creas = 0,
+	for (let i = 0; i < 13; i++) {
+		const ofele = Cards.filter(false, x => x.element == i);
+		let creas = 0,
 			perms = 0,
 			spels = 0,
 			comm = new Uint32Array(3),
@@ -47,7 +47,7 @@ if (process.argv.length < 3) {
 	const decks = require('../Decks')[process.argv[2]];
 	if (decks) {
 		decks.forEach(deck =>
-			write('[deck title=' + deck[0] + ']' + deck[1] + '[/deck]'),
+			write(`[deck title=${deck[0]}]${deck[1]}[/deck]`),
 		);
 	}
 }

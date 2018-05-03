@@ -22,29 +22,179 @@ function processDeck(dcode) {
 	return { mark, deck };
 }
 
-const DeckNames = connect(({user}) => ({user}))(function DeckNames({ user, name, onClick }) {
-	let rx;
-	try {
-		rx = name && new RegExp(name);
-	} catch (_e) {
-		rx = name;
+const Qecks = connect(({user}) => ({user}))(class Qecks extends React.Component {
+	constructor(props) {
+		super(props);
+		this.state = {
+			setQeck: false,
+		};
 	}
+
+	render() {
+		const buttons = [];
+		for (let i = 0; i < 10; i++) {
+			buttons.push(
+				<input type='button'
+					key={i}
+					value={`${i+1}`}
+					className={
+						'editbtn' +
+						(this.props.user.selectedDeck == this.props.user.qecks[i]
+							? ' selectedbutton'
+							: '')}
+					onClick={() => {
+						if (this.state.setQeck) {
+							sock.userExec('changeqeck', {
+								number: i,
+								name: this.props.user.selectedDeck,
+							});
+							this.setState({ setQeck: false });
+						} else if (this.props.onClick) {
+							this.props.onClick(this.props.user.qecks[i]);
+						}
+					}}
+				/>
+			);
+		}
+		return <>
+			<input type='button'
+				value='Save to #'
+				className={this.state.setQeck ? 'selectedbutton' : undefined}
+				onClick={() => this.setState({ setQeck: !this.state.setQeck })}
+				style={{
+					position: 'absolute',
+					left: '220px',
+					top: '8px',
+				}}
+			/>
+			<div style={{
+				position: 'absolute',
+				left: '300px',
+				top: '8px',
+			}}>{buttons}</div>
+		</>;
+	}
+});
+
+function DeckName({i, name, deck, onClick}) {
+	return <div style={{
+		position: 'absolute',
+		left: `${4+Math.floor(i/14)*150}px`,
+		top: `${32+(i%14)*21}px`,
+		width: '142px',
+		height: '21px',
+		overflow: 'hidden',
+		textOverflow: 'ellipsis',
+		whiteSpace: 'nowrap',
+	}}>
+		<a href={`deck/${deck}`} target='_blank' className={'ico ce' + etgutil.fromTrueMark(parseInt(deck.slice(-3), 32))} />
+		<span onClick={() => onClick(name)}>{name}</span>
+	</div>;
+}
+
+const DeckNames = connect(({user}) => ({user}))(function DeckNames({ user, name, page, setPage, onClick }) {
 	let names = Object.keys(user.decks);
-	if (rx) names = names.filter(name => name.match(rx));
-	return names.sort().slice(0, 84).map((name, i) => {
-		const deck = user.decks[name];
-		return <div key={i} style={{
-			position: 'absolute',
-			left: `${4+Math.floor(i/14)*150}px`,
-			top: `${32+(i%14)*21}px`,
-			width: '142px',
-			overflow: 'hidden',
-		}}>
-			<a href={`deck/${deck}`} target='_blank' className={'ico ce' + etgutil.fromTrueMark(parseInt(deck.slice(-3), 32))} />
-			<span onClick={() => onClick(name)}>{name}</span>
-		</div>
-	});
-})
+	try {
+		const rx = name && new RegExp(name);
+		if (rx) {
+			names = names.filter(name => name.match(rx));
+		}
+	} catch (_e) {
+		names = names.filter(name => ~name.indexOf(name));
+	}
+	const pages = Math.ceil(names.length / 84);
+	if (page >= pages) page = pages-1;
+	let pagebtns = null;
+	if (pages > 1) {
+		pagebtns = [];
+		const lo = Math.max(page-8, 0), hi = Math.min(lo+15, pages);
+		for (let i=lo; i<hi; i++) {
+			pagebtns.push(<input key={i} type='button'
+				className={`editbtn${i==page? ' selectedbutton' : ''}`}
+				value={`${i+1}`}
+				onClick={() => setPage(i)}
+			/>);
+		}
+	}
+	return <>
+		{pages > 1 && <div style={{ position: 'absolute', left: '238px', top: '4px', width: '552px' }}>
+			{page > 0 && <input type='button' className='editbtn'
+				value='<<'
+				onClick={() => setPage(page-1)}
+			/>}
+			{page+1 < pages && <input type='button' className='editbtn'
+				value='>>'
+				onClick={() => setPage(page+1)}
+			/>}
+			{pagebtns}
+		</div>}
+		{names.sort().slice(page*84, page*84+84).map((name, i) =>
+			<DeckName key={name} deck={user.decks[name]} name={name} i={i} onClick={onClick} />
+		)}
+	</>
+});
+
+const DeckSelector = connect(({user}) => ({user}))(class DeckSelector extends React.Component {
+	constructor(props) {
+		super(props);
+		this.state = {
+			page: 0,
+			name: '',
+		};
+	}
+
+	setPage = page => this.setState({ page });
+
+	render() {
+		return (
+			<div className='bgbox' style={{
+				position: 'absolute',
+				top: '270px',
+				width: '900px',
+				height: '330px',
+			}}>
+				<input placeholder='Name'
+					value={this.state.name}
+					onChange={e => this.setState({ name: e.target.value })}
+					onKeyPress={e => {
+						if (e.which == 13) {
+							this.props.loadDeck(e.target.value);
+						}
+					}}
+					onClick={e => e.target.setSelectionRange(0, 999)}
+					style={{
+						position: 'absolute',
+						left: '4px',
+						top: '4px',
+					}}
+				/>
+				<input type='button'
+					value='Create'
+					style={{
+						position: 'absolute',
+						left: '158px',
+						top: '4px',
+					}}
+					onClick={() => {
+						this.props.saveDeck(this.props.user.selectedDeck);
+						this.props.saveDeck(this.state.name);
+						this.props.onClose();
+					}}
+				/>
+				<input type='button'
+					value='Exit'
+					style={{
+						position: 'absolute',
+						left: '794px',
+						top: '4px',
+					}}
+					onClick={this.props.onClose}
+				/>
+				<DeckNames name={this.state.name} page={this.state.page} setPage={this.setPage} onClick={this.props.loadDeck} />
+			</div>
+		);
+	}
+});
 
 module.exports = connect(({user}) => ({
 	user,
@@ -72,7 +222,6 @@ module.exports = connect(({user}) => ({
 			pool: pool,
 			deckname: '',
 			selectedDeck: null,
-			setQeck: false,
 		};
 	}
 
@@ -93,53 +242,30 @@ module.exports = connect(({user}) => ({
 			etgutil.toTrueMarkSuffix(this.state.mark);
 	}
 
-	render() {
-		const self = this;
-		function saveDeck(name, force) {
-			if (self.state.deck.length == 0) {
-				sock.userExec('rmdeck', { name });
-				return;
-			}
-			const dcode =
-					etgutil.encodedeck(self.state.deck) +
-					etgutil.toTrueMarkSuffix(self.state.mark);
-			if (dcode !== self.props.user.decks[name]) {
-				sock.userExec('setdeck', { d: dcode, name });
-			} else if (force)
-				sock.userExec('setdeck', { name });
+	saveDeck = (name, force) => {
+		if (this.state.deck.length == 0) {
+			sock.userExec('rmdeck', { name });
+			return;
 		}
-		function loadDeck(name) {
-			if (!name) return;
-			saveDeck(self.props.user.selectedDeck);
+		const dcode =
+				etgutil.encodedeck(this.state.deck) +
+				etgutil.toTrueMarkSuffix(this.state.mark);
+		if (dcode !== this.props.user.decks[name]) {
+			sock.userExec('setdeck', { d: dcode, name });
+		} else if (force)
 			sock.userExec('setdeck', { name });
-		}
-		const buttons = [];
-		for (let i = 0; i < 10; i++) {
-			buttons.push(
-				<input type='button'
-					key={i}
-					value={i + 1 + ''}
-					className={
-						'editbtn' +
-						(self.props.user.selectedDeck == self.props.user.qecks[i]
-							? ' selectedbutton'
-							: '')}
-					onClick={() => {
-						if (this.state.setQeck) {
-							saveDeck(this.props.selectedDeck);
-							sock.userExec('changeqeck', {
-								number: i,
-								name: self.props.user.selectedDeck,
-							});
-							self.props.user.qecks[i] = self.props.user.selectedDeck;
-							self.setState({ setQeck: false });
-						} else {
-							loadDeck(self.props.user.qecks[i]);
-						}
-					}}
-				/>
-			);
-		}
+	}
+
+	loadDeck = (name) => {
+		if (!name) return;
+		this.saveDeck(this.props.user.selectedDeck);
+		sock.userExec('setdeck', { name });
+	}
+
+	deckModeOn = () => this.setState({ deckmode: true });
+	deckModeOff = () => this.setState({ deckmode: false });
+
+	render() {
 		return <>
 			<Editor deck={this.state.deck} mark={this.state.mark} pool={this.state.pool}
 				setDeck={deck => this.setState({deck})}
@@ -165,10 +291,10 @@ module.exports = connect(({user}) => ({
 				position: 'absolute',
 				top: '8px',
 				left: '8px',
-			}}>{self.props.user.selectedDeck}</div>
+			}}>{this.props.user.selectedDeck}</div>
 			<input type='button'
 				value='Decks'
-				onClick={() => this.setState({ deckmode: true })}
+				onClick={this.deckModeOn}
 				style={{
 					position: 'absolute',
 					left: '8px',
@@ -185,19 +311,9 @@ module.exports = connect(({user}) => ({
 				}}
 			/>
 			<input type='button'
-				value='Save to #'
-				className={this.state.setQeck ? 'selectedbutton' : undefined}
-				onClick={() => self.setState({ setQeck: !this.state.setQeck })}
-				style={{
-					position: 'absolute',
-					left: '220px',
-					top: '8px',
-				}}
-			/>
-			<input type='button'
 				value='Exit'
 				onClick={() => {
-					saveDeck(this.props.user.selectedDeck, true);
+					this.saveDeck(this.props.user.selectedDeck, true);
 					this.props.dispatch(store.doNav(require('../views/MainMenu')));
 				}}
 				style={{
@@ -206,60 +322,12 @@ module.exports = connect(({user}) => ({
 					top: '110px',
 				}}
 			/>
-			<div style={{
-				position: 'absolute',
-				left: '300px',
-				top: '8px',
-			}}>{buttons}</div>
-			{this.state.deckmode && <div className='bgbox' style={{
-				position: 'absolute',
-				top: '270px',
-				width: '900px',
-				height: '330px',
-			}}>
-				<input placeholder='Name'
-					value={this.state.deckname}
-					onChange={e => this.setState({ deckname: e.target.value })}
-					onKeyPress={e => {
-						if (e.which == 13) {
-							loadDeck(e.target.value);
-						}
-					}}
-					onClick={e => {
-						e.target.setSelectionRange(0, 999);
-					}}
-					style={{
-						position: 'absolute',
-						left: '4px',
-						top: '4px',
-					}}
-				/>
-				<input type='button'
-					value='Create'
-					style={{
-						position: 'absolute',
-						left: '158px',
-						top: '4px',
-					}}
-					onClick={() => {
-						saveDeck(this.props.user.selectedDeck);
-						saveDeck(this.state.deckname);
-						this.setState({ deckmode: false, deckname: '' });
-					}}
-				/>
-				<input type='button'
-					value='Exit'
-					style={{
-						position: 'absolute',
-						left: '794px',
-						top: '4px',
-					}}
-					onClick={() => {
-						this.setState({ deckmode: false, deckname: '' });
-					}}
-				/>
-				<DeckNames name={this.state.deckname} onClick={loadDeck} />
-			</div>}
+			<Qecks onClick={this.loadDeck} />
+			{this.state.deckmode && <DeckSelector
+				loadDeck={this.loadDeck}
+				saveDeck={this.saveDeck}
+				onClose={this.deckModeOff}
+			/>}
 		</>;
 	}
 });

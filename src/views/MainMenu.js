@@ -496,6 +496,9 @@ module.exports = connect(({user, opts}) => ({
 						<LabelText
 							text={'Deck: ' + self.props.user.selectedDeck}
 							style={{
+								width: '180px',
+								overflow: 'hidden',
+								textOverflow: 'ellipsis',
 								whiteSpace: 'nowrap',
 								marginLeft: '16px',
 							}}

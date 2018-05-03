@@ -50,11 +50,15 @@ function maybeSendChat(e) {
 			}
 			sock.emit('roll', data);
 		} else if (msg.match(/^\/decks/) && user) {
-			const rx = msg.length > 7 && new RegExp(msg.slice(7));
 			let names = Object.keys(user.decks);
-			if (rx) names = names.filter(name => name.match(rx));
-			names.sort();
-			store.store.dispatch(store.chat(names.map(name => {
+			try {
+				const rx = msg.length > 7 && new RegExp(msg.slice(7));
+				if (rx) {
+					names = names.filter(name => name.match(rx));
+				}
+			} catch (_e) {
+			}
+			store.store.dispatch(store.chat(names.sort().map(name => {
 				const deck = user.decks[name];
 				return <div>
 					<a href={`deck/${deck}`} target='_blank' className={'ico ce' + etgutil.fromTrueMark(parseInt(deck.slice(-3), 32))} />
