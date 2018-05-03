@@ -25,7 +25,7 @@ function RenderInfo(props) {
 				text={
 					`W-L: ${info.win || 0} - ${info.loss || 0}` +
 					`, Rank: ${info.rank == undefined ? 'Inactive' : info.rank + 1}` +
-					`, ${(info.win || 0) * 3 + (info.loss || 0)}$`}
+					`, ${(info.win || 0) * 15 + (info.loss || 0) * 5}$`}
 			/>
 			<input readOnly
 				style={{ position: 'absolute', left: '330px', top: 4 + y + 'px', width: '190px' }}
@@ -104,7 +104,7 @@ function ArenaCard(props) {
 				store.store.dispatch(store.doNav(require('./ArenaEditor'), {
 					adeck: '',
 					acard: Cards.Codes[code],
-					ainfo: {},
+					ainfo: { day: info ? info.day : 8 },
 					acreate: true,
 				}));
 			}}
@@ -129,8 +129,8 @@ module.exports = connect(({user}) => ({ ocard: user.ocard }))(class ArenaInfo ex
 	render() {
 		return <>
 			<Components.Text
-				style={{ position: 'absolute', left: '96px', top: '576px' }}
-				text='Earn 1$ when your arena deck is faced, & another 2$ when it wins'
+				style={{ position: 'absolute', left: '96px', top: '560px' }}
+				text="Earn 5$ when your arena deck is faced, & another 10$ when it wins\nEarn 25$ for submitting a new arena deck, or 250$ if it's been a week"
 			/>
 			<Components.ExitBtn x={8} y={300} />
 			<RenderInfo info={this.state.A} y={0} />

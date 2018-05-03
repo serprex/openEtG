@@ -361,7 +361,7 @@ module.exports = connect(({user, opts}) => ({
 								onClick={() => {
 									this.props.dispatch(store.doNav(require('./ArenaInfo')));
 								}}
-								onMouseOver={this.mkSetTip('Check how your arena decks are doing')}
+								onMouseOver={this.mkSetTip('Check how your arena decks are doing. Submitting a new deck earns 25$, while submitting after a week earns 250$')}
 								style={{
 									position: 'absolute',
 									left: '20px',

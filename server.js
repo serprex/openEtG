@@ -162,17 +162,24 @@ const sockmeta = new WeakMap();
 					mark: data.mark,
 				});
 			} else {
-				db.hmset(au, {
-					day: sutil.getDay(),
-					deck: data.d,
-					card: user.ocard,
-					win: 0,
-					loss: 0,
-					hp: data.hp,
-					draw: data.draw,
-					mark: data.mark,
+				db.hmget(au, 'day', (err, res) => {
+					const day = res ? res[0] : 0,
+						today = sutil.getDay();
+					if (day !== today) {
+						user.gold += today - day > 6 ? 250 : 25;
+					}
+					db.hmset(au, {
+						day: today,
+						deck: data.d,
+						card: user.ocard,
+						win: 0,
+						loss: 0,
+						hp: data.hp,
+						draw: data.draw,
+						mark: data.mark,
+					});
+					db.zadd(`arena${data.lv ? '1' : ''}`, 200, data.u);
 				});
-				db.zadd(`arena${data.lv ? '1' : ''}`, 200, data.u);
 			}
 		},
 		arenainfo: function(data, user) {
@@ -202,7 +209,7 @@ const sockmeta = new WeakMap();
 				});
 		},
 		modarena: function(data, user) {
-			Us.load(data.aname, user => (user.gold += data.won ? 3 : 1));
+			Us.load(data.aname, user => (user.gold += data.won ? 15 : 5));
 			const arena = 'arena' + (data.lv ? '1' : ''),
 				akey = (data.lv ? 'B:' : 'A:') + data.aname;
 			db.zscore(arena, data.aname, (err, score) => {

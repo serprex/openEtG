@@ -146,6 +146,9 @@ module.exports = connect(({user}) => ({user}))(class ArenaEditor extends React.C
 						data.mod = true;
 					}
 					sock.userEmit('setarena', data);
+					if (this.props.ainfo.day > 0) {
+						this.props.dispatch(store.updateUser({ gold: this.props.user.gold + (this.props.ainfo.day > 6 ? 250 : 25) }));
+					}
 					this.props.dispatch(store.chatMsg('Arena deck submitted', 'System'));
 					this.props.dispatch(store.doNav(require('../views/MainMenu')));
 				}}
