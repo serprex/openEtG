@@ -262,7 +262,7 @@ module.exports = connect(({user}) => ({
 		sock.userExec('setdeck', { name });
 	}
 
-	deckModeOn = () => this.setState({ deckmode: true });
+	deckModeToggle = () => this.setState({ deckmode: !this.state.deckmode });
 	deckModeOff = () => this.setState({ deckmode: false });
 
 	render() {
@@ -294,7 +294,7 @@ module.exports = connect(({user}) => ({
 			}}>{this.props.user.selectedDeck}</div>
 			<input type='button'
 				value='Decks'
-				onClick={this.deckModeOn}
+				onClick={this.deckModeToggle}
 				style={{
 					position: 'absolute',
 					left: '8px',
