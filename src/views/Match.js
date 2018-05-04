@@ -556,13 +556,13 @@ module.exports = connect(({user}) => ({user}))(class Match extends React.Compone
 		} else if (~(chi = 'SW'.indexOf(ch))) {
 			this.playerClick(chi);
 		} else if (~(chi = "QA".indexOf(ch))) {
-			const { shield } = game.players(chi);
+			const { shield } = this.props.game.players(chi);
 			if (shield) this.thingClick(shield);
 		} else if (~(chi = "ED".indexOf(ch))) {
-			const { weapon } = game.players(chi);
+			const { weapon } = this.props.game.players(chi);
 			if (weapon) this.thingClick(weapon);
 		} else if (~(chi = "12345678".indexOf(ch))) {
-			const card = game.player1.hand[chi];
+			const card = this.props.game.player1.hand[chi];
 			if (card) this.thingClick(card);
 		} else
 			return;
