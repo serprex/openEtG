@@ -130,7 +130,7 @@ module.exports = connect(({user}) => ({ ocard: user.ocard }))(class ArenaInfo ex
 		return <>
 			<Components.Text
 				style={{ position: 'absolute', left: '96px', top: '560px' }}
-				text="Earn 5$ when your arena deck is faced, & another 10$ when it wins\nEarn 25$ for submitting a new arena deck, or 250$ if it's been a week"
+				text={"Earn 5$ when your arena deck is faced, & another 10$ when it wins\nEarn 25$ for submitting a new arena deck, or 250$ if it's been a week"}
 			/>
 			<Components.ExitBtn x={8} y={300} />
 			<RenderInfo info={this.state.A} y={0} />
