@@ -526,10 +526,11 @@ const Skills = {
 		const isborne = !t.getStatus('airborne');
 		t.setStatus('airborne', isborne);
 		if (isborne) {
-			t.incrStatus('dive', t.trueatk());
+			Effect.mkText('3|0', t);
+			t.atk += 3;
 			if (t.getSkill('cast') === Skills.burrow) t.active = t.active.remove('cast');
 		} else {
-			t.incrStatus('dive', Math.floor(t.trueatk()/-2));
+			t.spelldmg(3);
 		}
 	},
 	drawcopy: (c, t) => {
