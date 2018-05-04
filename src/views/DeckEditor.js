@@ -7,11 +7,14 @@ const etgutil = require('../etgutil'),
 	{connect} = require('react-redux'),
 	React = require('react');
 
-function processDeck(dcode) {
+function processDeck(pool, dcode) {
 	let mark = 0,
-		deck = etgutil.decodedeck(dcode);
+		deck = etgutil.decodedeck(dcode),
+		counts = new Map();
 	for (let i = deck.length - 1; i >= 0; i--) {
-		if (!(deck[i] in Cards.Codes)) {
+		const count = (counts.get(deck[i])|0)+1;
+		counts.set(deck[i], count);
+		if (!(deck[i] in Cards.Codes) || count > pool[deck[i]]) {
 			const index = etgutil.fromTrueMark(deck[i]);
 			if (~index) {
 				mark = index;
@@ -229,7 +232,7 @@ module.exports = connect(({user}) => ({
 		if (nextProps.user.selectedDeck === prevState.selectedDeck) return null;
 		return {
 			selectedDeck: nextProps.user.selectedDeck,
-			...processDeck(sock.getDeck()),
+			...processDeck(prevState.pool, sock.getDeck()),
 		};
 	}
 
@@ -281,7 +284,7 @@ module.exports = connect(({user}) => ({
 					top: '238px',
 					width: '190px',
 				}}
-				onChange={e => this.setState(processDeck(e.target.value))}
+				onChange={e => this.setState(processDeck(this.state.pool, e.target.value))}
 				ref={this.deckRef}
 				onClick={e => {
 					e.target.setSelectionRange(0, 999);
@@ -303,7 +306,7 @@ module.exports = connect(({user}) => ({
 			/>
 			<input type='button'
 				value='Revert'
-				onClick={() => this.setState(processDeck(sock.getDeck()))}
+				onClick={() => this.setState(processDeck(this.state.pool, sock.getDeck()))}
 				style={{
 					position: 'absolute',
 					left: '8px',
