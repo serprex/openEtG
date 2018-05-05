@@ -1,5 +1,7 @@
 'use strict';
 const imm = require('immutable'),
+	etg = require('./etg'),
+	util = require('./util'),
 	statuscache = {},
 	activecache = {},
 	activecastcache = {};
@@ -130,8 +132,6 @@ function readCost(coststr, defaultElement) {
 			]);
 }
 
-var etg = require('./etg');
-var util = require('./util');
 var audio = require('./audio');
 var Cards = require('./Cards');
 var Thing = require('./Thing');
