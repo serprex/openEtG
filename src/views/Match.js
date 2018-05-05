@@ -692,10 +692,12 @@ module.exports = connect(({user}) => ({user}))(class Match extends React.Compone
 			if (game.turn == game.player1) {
 				endText = this.state.discarding
 					? ''
-					: game.phase == etg.PlayPhase ? 'End Turn' : 'Accept Hand';
+					: game.phase == etg.PlayPhase ? 'End Turn'
+					: game.turn == game.player1 ? 'Accept Hand'
+					: '';
 				cancelText =
 					game.phase != etg.PlayPhase
-						? 'Mulligan'
+						? (game.turn == game.player1 ? 'Mulligan' : '')
 						: game.targeting || this.state.discarding || this.state.resigning
 							? 'Cancel'
 							: '';
