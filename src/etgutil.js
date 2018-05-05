@@ -103,7 +103,7 @@ exports.addcard = function(deck, card, x = 1) {
 };
 exports.mergedecks = function(deck, ...args) {
 	for (const arg of args) {
-		exports.iterraw(args, (code, count) => {
+		exports.iterraw(arg, (code, count) => {
 			deck = exports.addcard(deck, code, count);
 		});
 	}
