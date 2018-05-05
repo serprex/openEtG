@@ -139,7 +139,7 @@ exports.upshall = function(data, user) {
 				0,
 			);
 			pc += pool[upcode] * (i == 3 ? 36 : 6);
-			count -= 36;
+			count -= i === 1 && data.up ? 42 : 36;
 		}
 		pool[code] -= pc;
 	});
