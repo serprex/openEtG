@@ -22,11 +22,7 @@ module.exports = connect(({user})=>({user}))(class Upgrade extends React.Compone
 				if (cardpool[card.code] >= use) {
 					sock.userExec('upgrade', { card: card.code });
 				} else
-					return (
-						'You need at least ' +
-						use +
-						' copies to be able to upgrade this card!'
-					);
+					return `You need at least ${use} copies to be able to upgrade this card!`;
 			} else if (self.props.user.gold >= 50) {
 				sock.userExec('uppillar', { c: card.code });
 			} else return 'You need 50$ to afford an upgraded pillar!';
@@ -45,11 +41,7 @@ module.exports = connect(({user})=>({user}))(class Upgrade extends React.Compone
 				if (cardpool[card.code] >= use) {
 					sock.userExec('polish', { card: card.code });
 				} else
-					return (
-						'You need at least ' +
-						use +
-						' copies to be able to polish this card!'
-					);
+					return `You need at least ${use} copies to be able to polish this card!`;
 			} else if (self.props.user.gold >= 50) {
 				sock.userExec('shpillar', { c: card.code });
 			} else return 'You need 50$ to afford a shiny pillar!';
@@ -85,6 +77,9 @@ module.exports = connect(({user})=>({user}))(class Upgrade extends React.Compone
 		}
 		function autoCards() {
 			sock.userExec('upshall');
+		}
+		function autoCardsUp() {
+			sock.userExec('upshall', { up: 1 });
 		}
 		const cardpool = etgutil.deck2pool(
 			self.props.user.accountbound,
@@ -137,7 +132,17 @@ module.exports = connect(({user})=>({user}))(class Upgrade extends React.Compone
 				style={{
 					position: 'absolute',
 					left: '5px',
-					top: '140px',
+					top: '138px',
+				}}
+			/>
+			<input
+				type='button'
+				value='Fullconvert'
+				onClick={autoCardsUp}
+				style={{
+					position: 'absolute',
+					left: '5px',
+					top: '162px',
 				}}
 			/>
 			<Components.Text

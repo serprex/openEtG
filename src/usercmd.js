@@ -129,7 +129,7 @@ exports.upshall = function(data, user) {
 	pool.forEach((count, code) => {
 		const card = Cards.Codes[code];
 		if (!card || card.rarity < 1 || card.upped || card.shiny) return;
-		count -= 6;
+		if (!data.up) count -= 6;
 		let pc = 0;
 		for (let i = 1; i < 4; i++) {
 			if (card.rarity == 5 && i & 2) continue;
