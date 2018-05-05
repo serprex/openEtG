@@ -44,7 +44,7 @@ const Skills = {
 	},
 	accelerationspell: (c, t) => {
 		t.lobo();
-		t.setSkill('auto', Skills.acceleration);
+		t.setSkill('auto', c.card.upped ? Skills.overdrive : Skills.acceleration);
 	},
 	accretion: (c, t) => {
 		Skills.destroy.func(c, t);
@@ -1387,10 +1387,6 @@ const Skills = {
 		Effect.mkText('3|-1', c);
 		c.atk += 3;
 		c.dmg(1, true);
-	},
-	overdrivespell: (c, t) => {
-		t.lobo();
-		t.addactive('auto', Skills.overdrive);
 	},
 	pacify: (c, t) => {
 		t.atk -= t.trueatk();

@@ -25,7 +25,7 @@ function processDeck(pool, dcode) {
 	return { mark, deck };
 }
 
-const Qecks = connect(({user}) => ({user}))(class Qecks extends React.Component {
+const Qecks = connect(({user}) => ({user}))(class Qecks extends React.PureComponent {
 	constructor(props) {
 		super(props);
 		this.state = {

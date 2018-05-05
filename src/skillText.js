@@ -41,8 +41,8 @@ const data = {
 	}),
 	abomination: 'Amiable to mutation',
 	absorber: 'Produce 3:6 per attacker',
-	accelerationspell:
-		'Replaces target creature\'s skills with "Gain +2|-1 per turn"',
+	accelerationspell: c =>
+		`Replaces target creature\'s skills with "Gain +${c.upped ? 3 : 2}|-1 per turn"`,
 	accretion:
 		"Destroy target permanent & gain 0|10. Return to owner's hand as a Blackhole if larger than 30",
 	accumulation: 'Increment damage reduction per stack',
@@ -164,9 +164,7 @@ const data = {
 	epochreset: {
 		cast: 'Reset silence counter',
 	},
-	evade: x => {
-		return x + '% chance to evade';
-	},
+	evade: x => x + '% chance to evade',
 	evade100: '100% chance to evade',
 	evadecrea: "Evades foe's creatures' targeting",
 	evadespell: "Evades foe's targeting spells",
@@ -304,8 +302,6 @@ const data = {
 		'spell damage owner 10 on discard',
 	],
 	ouija: "When a death occurs, generate Ouija Essence in foe's hand",
-	overdrivespell:
-		'Replaces target creature\'s skills with "Gain +3|-1 per turn"',
 	pacify: "Reduce target's attack to 0",
 	pairproduce: 'Activate own pillars',
 	paleomagnetism: {
@@ -322,7 +318,7 @@ const data = {
 	parallel: 'Duplicate target creature',
 	phoenix: ['Become an Ash on death', 'Become a Minor Ash on death'],
 	photosynthesis: 'Produce 2:5. May activate multiple times',
-	pillar: c => 'Produce ' + (c.element ? 1 : 3) + ':' + c.element + ' per turn',
+	pillar: c => `Produce ${c.element ? 1 : 3}:${c.element} per turn`,
 	pend: c =>
 		'Oscilliate between producing ' +
 		(c.element ? 1 : 3) +
@@ -357,7 +353,7 @@ const data = {
 		'Target creature gains +6|-6. Thaws',
 	],
 	randomdr: c =>
-		'Damage reduction becomes 0 to ' + (c.upped ? 3 : 2) + ' on play',
+		`Damage reduction becomes 0 to ${c.upped ? 3 : 2} on play`,
 	readiness:
 		"Target creature's active becomes costless. Skill can be reactivated",
 	readyequip: 'Equipment enters without summoning sickness',

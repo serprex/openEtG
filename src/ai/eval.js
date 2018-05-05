@@ -207,7 +207,6 @@ const SkillsValues = Object.freeze({
 	nymph: 7,
 	ouija: 3,
 	overdrive: c => c.truehp() - 1,
-	overdrivespell: 5,
 	pacify: 5,
 	pairproduce: 2,
 	paleomagnetism: [4, 5],
