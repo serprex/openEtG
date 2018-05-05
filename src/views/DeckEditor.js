@@ -12,9 +12,10 @@ function processDeck(pool, dcode) {
 		deck = etgutil.decodedeck(dcode),
 		counts = new Map();
 	for (let i = deck.length - 1; i >= 0; i--) {
+		const card = Cards.Codes[deck[i]];
 		const count = (counts.get(deck[i])|0)+1;
 		counts.set(deck[i], count);
-		if (!(deck[i] in Cards.Codes) || count > pool[deck[i]]) {
+		if (!card || (!card.isFree() && count > pool[deck[i]])) {
 			const index = etgutil.fromTrueMark(deck[i]);
 			if (~index) {
 				mark = index;
@@ -180,7 +181,7 @@ const DeckSelector = connect(({user}) => ({user}))(class DeckSelector extends Re
 					}}
 					onClick={() => {
 						this.props.saveDeck(this.props.user.selectedDeck);
-						this.props.saveDeck(this.state.name);
+						this.props.saveDeck(this.state.name, true);
 						this.props.onClose();
 					}}
 				/>
@@ -250,9 +251,7 @@ module.exports = connect(({user}) => ({
 			sock.userExec('rmdeck', { name });
 			return;
 		}
-		const dcode =
-				etgutil.encodedeck(this.state.deck) +
-				etgutil.toTrueMarkSuffix(this.state.mark);
+		const dcode = this.currentDeckCode();
 		if (dcode !== this.props.user.decks[name]) {
 			sock.userExec('setdeck', { d: dcode, name });
 		} else if (force)

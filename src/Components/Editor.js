@@ -18,7 +18,7 @@ function sumCardMinus(cardMinus, code) {
 	return sum;
 }
 
-module.exports = connect()(class Editor extends React.PureComponent {
+module.exports = connect()(class Editor extends React.Component {
 	constructor(props) {
 		super(props);
 		this.state = {
