@@ -1,4 +1,6 @@
 'use strict';
+const etg = require('./etg'),
+	etgutil = require('./etgutil');
 exports.Codes = [];
 exports.Targeting = null;
 exports.codeCmp = function(x, y) {
@@ -37,6 +39,44 @@ exports.filter = function(upped, filter, cmp, showshiny) {
 	if (cmp) keys.sort(cmp);
 	return keys;
 };
+function sumCardMinus(cardMinus, code) {
+	let sum = 0;
+	for (let i = 0; i < 4; i++) {
+		sum +=
+			cardMinus[etgutil.asShiny(etgutil.asUpped(code, i & 1), i & 2)] || 0;
+	}
+	return sum;
+}
+exports.filterDeck = function(deck, pool) {
+	const cardMinus = [];
+	for (let i = deck.length - 1; i >= 0; i--) {
+		let code = deck[i],
+			card = exports.Codes[code];
+		if (card.type != etg.Pillar) {
+			if (sumCardMinus(cardMinus, code) == 6) {
+				deck.splice(i, 1);
+				continue;
+			}
+		}
+		if (!card.isFree()) {
+			if ((cardMinus[code] || 0) < (pool[code] || 0)) {
+				cardMinus[code] = (cardMinus[code] || 0) + 1;
+			} else {
+				code = etgutil.asShiny(code, !card.shiny);
+				card = exports.Codes[code];
+				if (card.isFree()) {
+					deck[i] = code;
+				} else if ((cardMinus[code] || 0) < (pool[code] || 0)) {
+					deck[i] = code;
+					cardMinus[code] = (cardMinus[code] || 0) + 1;
+				} else {
+					deck.splice(i, 1);
+				}
+			}
+		}
+	}
+	return cardMinus;
+}
 function parseCsv(type, data) {
 	const keys = data[0],
 		cardinfo = {};
@@ -191,9 +231,7 @@ function getTargetFilter(str) {
 		});
 	}
 }
-var etg = require('./etg');
 var Card = require('./Card');
-var etgutil = require('./etgutil');
 
 require('./Cards.json').forEach((cards, type) => {
 	if (type == 6) parseTargeting(cards);

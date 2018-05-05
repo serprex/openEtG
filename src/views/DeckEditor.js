@@ -9,13 +9,9 @@ const etgutil = require('../etgutil'),
 
 function processDeck(pool, dcode) {
 	let mark = 0,
-		deck = etgutil.decodedeck(dcode),
-		counts = new Map();
+		deck = etgutil.decodedeck(dcode);
 	for (let i = deck.length - 1; i >= 0; i--) {
-		const card = Cards.Codes[deck[i]];
-		const count = (counts.get(deck[i])|0)+1;
-		counts.set(deck[i], count);
-		if (!card || (!card.isFree() && count > pool[deck[i]])) {
+		if (!Cards.Codes[deck[i]]) {
 			const index = etgutil.fromTrueMark(deck[i]);
 			if (~index) {
 				mark = index;
@@ -23,7 +19,9 @@ function processDeck(pool, dcode) {
 			deck.splice(i, 1);
 		}
 	}
-	return { mark, deck };
+	deck.sort(Cards.codeCmp).splice(60);
+	const cardMinus = Cards.filterDeck(deck, pool);
+	return { mark, deck, cardMinus };
 }
 
 const Qecks = connect(({user}) => ({user}))(class Qecks extends React.PureComponent {
@@ -270,7 +268,12 @@ module.exports = connect(({user}) => ({
 	render() {
 		return <>
 			<Editor deck={this.state.deck} mark={this.state.mark} pool={this.state.pool}
-				setDeck={deck => this.setState({deck})}
+				cardMinus={this.state.cardMinus}
+				setDeck={deck => {
+					deck.sort(Cards.codeCmp);
+					const cardMinus = Cards.filterDeck(deck, this.state.pool);
+					this.setState({deck, cardMinus});
+				}}
 				setMark={mark => this.setState({mark})}
 			/>
 			<Tutor.Editor x={4} y={220} />

@@ -61,7 +61,7 @@ module.exports = connect(({user}) => ({user}))(class ArenaEditor extends React.C
 	constructor(props) {
 		super(props);
 		const baseacard = props.acard.asUpped(false).asShiny(false);
-		const pool = {};
+		const pool = [];
 		function incrpool(code, count) {
 			if (
 				code in Cards.Codes &&
@@ -74,6 +74,7 @@ module.exports = connect(({user}) => ({user}))(class ArenaEditor extends React.C
 		}
 		etgutil.iterraw(props.user.pool, incrpool);
 		etgutil.iterraw(props.user.accountbound, incrpool);
+		pool[this.props.acard.code] = 0;
 		let mark = 0,
 			deck = etgutil.decodedeck(props.adeck);
 		for (let i = deck.length - 1; i >= 0; i--) {
@@ -95,16 +96,24 @@ module.exports = connect(({user}) => ({user}))(class ArenaEditor extends React.C
 		};
 	}
 
+	setDeck = deck => {
+		deck.sort(Cards.codeCmp);
+		const cardMinus = Cards.filterDeck(deck, this.state.pool);
+		this.setState({cardMinus, deck});
+	}
+
 	render() {
-		const arpts = this.props.acard && this.props.acard.upped ? 515 : 425;
+		const arpts = this.props.acard.upped ? 515 : 425;
 		let sumscore = 0;
 		for (const k in artable) {
 			sumscore += this.state[k] * artable[k].cost;
 		}
+		const acode = this.props.acard.code;
 		return <>
-			<Editor acard={this.props.acard} deck={this.state.deck} mark={this.state.dmark}
-				pool={this.state.pool}
-				setDeck={deck => this.setState({deck: deck.filter(x => x !== this.props.acard.code)})}
+			<Editor deck={[acode, acode, acode, acode, acode].concat(this.state.deck)}
+				mark={this.state.dmark}
+				pool={this.state.pool} cardMinus={this.state.cardMinus}
+				setDeck={this.setDeck}
 				setMark={dmark => this.setState({dmark})}
 			/>
 			<AttrUi y={0} name='hp' value={this.state.hp}

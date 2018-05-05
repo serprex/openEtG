@@ -56,11 +56,7 @@ exports.encodedeck = function(deck) {
 	const pool = [];
 	let out = '';
 	deck.forEach(code => {
-		if (code in pool) {
-			pool[code]++;
-		} else {
-			pool[code] = 1;
-		}
+		pool[code] = (pool[code] || 0) + 1;
 	});
 	pool.forEach((count, code) => {
 		out += encodeCount(count) + code.toString(32);
@@ -88,17 +84,12 @@ exports.deck2pool = function(deck, pool) {
 	if (!deck) return [];
 	pool = pool || [];
 	exports.iterraw(deck, (code, count) => {
-		if (code in pool) {
-			pool[code] += count;
-		} else {
-			pool[code] = count;
-		}
+		pool[code] = (pool[code] || 0) + count;
 	});
 	return pool;
 };
-exports.addcard = function(deck, card, x) {
+exports.addcard = function(deck, card, x = 1) {
 	if (deck === undefined) deck = '';
-	if (x === undefined) x = 1;
 	for (let i = 0; i < deck.length; i += 5) {
 		const code = parseInt(deck.substr(i + 2, 3), 32);
 		if (code == card) {
@@ -110,17 +101,17 @@ exports.addcard = function(deck, card, x) {
 	}
 	return x <= 0 ? deck : deck + encodeCount(x) + card.toString(32);
 };
-exports.mergedecks = function(deck) {
-	for (let i = 1; i < arguments.length; i++) {
-		exports.iterraw(arguments[i], (code, count) => {
+exports.mergedecks = function(deck, ...args) {
+	for (const arg of args) {
+		exports.iterraw(args, (code, count) => {
 			deck = exports.addcard(deck, code, count);
 		});
 	}
 	return deck;
 };
-exports.removedecks = function(deck) {
-	for (let i = 1; i < arguments.length; i++) {
-		exports.iterraw(arguments[i], (code, count) => {
+exports.removedecks = function(deck, ...args) {
+	for (const arg of args) {
+		exports.iterraw(arg, (code, count) => {
 			deck = exports.addcard(deck, code, -count);
 		});
 	}

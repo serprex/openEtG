@@ -17,6 +17,7 @@ function processDeck(dcode) {
 			deck.splice(i, 1);
 		}
 	}
+	deck.splice(60);
 	return { mark, deck };
 }
 
@@ -42,7 +43,7 @@ module.exports = connect(state => ({
 	render() {
 		return  <>
 			<Editor deck={this.state.deck} mark={this.state.mark} pool={this.state.pool}
-				setDeck={deck => this.setState({deck})}
+				setDeck={deck => this.setState({deck:deck.sort(Cards.codeCmp)})}
 				setMark={mark => this.setState({mark})}
 			/>
 			<input placeholder='Deck'
