@@ -16,6 +16,9 @@ function initHand(pl, ...args) {
 		cardinst.type = etg.Spell;
 	}
 }
+function initDeck(...args) {
+	return args.map(x => new Thing(x));
+}
 class TestModule {
 	constructor(name, opts) {
 		this.name = name;
@@ -46,12 +49,16 @@ M = new TestModule('Cards', {
 		this.game.turn = this.player1;
 		this.game.phase = etg.PlayPhase;
 		this.player1.mark = this.player2.mark = etg.Entropy;
-		this.player1.deck = [
+		this.player1.deck = initDeck(
 			Cards.AmethystPillar,
 			Cards.AmethystPillar,
 			Cards.AmethystPillar,
-		];
-		this.player2.deck = [Cards.BonePillar, Cards.BonePillar, Cards.BonePillar];
+		);
+		this.player2.deck = initDeck(
+			Cards.BonePillar,
+			Cards.BonePillar,
+			Cards.BonePillar,
+		);
 	},
 });
 M.test('Adrenaline', function() {
@@ -189,8 +196,8 @@ M.test('Earthquake', function() {
 	assert.ok(!this.player1.permanents[0], 'poof');
 });
 M.test('Eclipse', function() {
-	this.player1.deck = [Cards.Ash, Cards.Ash, Cards.Ash];
-	this.player2.deck = [Cards.Ash, Cards.Ash, Cards.Ash];
+	this.player1.deck = initDeck(Cards.Ash, Cards.Ash, Cards.Ash);
+	this.player2.deck = initDeck(Cards.Ash, Cards.Ash, Cards.Ash);
 	for (let i = 0; i < 2; i++)
 		this.player1.addCrea(new Thing(Cards.MinorVampire.asUpped(true)));
 	this.player1.hp = 50;
@@ -208,7 +215,7 @@ M.test('Gpull', function() {
 	this.player2.addCrea(new Thing(Cards.ColossalDragon));
 	this.player2.gpull = this.player2.creatures[0];
 	this.player1.addCrea(new Thing(Cards.Scorpion));
-	this.player2.deck = [Cards.ColossalDragon];
+	this.player2.deck = initDeck(Cards.ColossalDragon);
 	this.player1.endturn();
 	assert.equal(this.player2.gpull.hp, 24, 'dmg redirected');
 	assert.equal(this.player2.gpull.getStatus('poison'), 1, 'psn redirected');

@@ -1,16 +1,17 @@
 'use strict';
 const Game = require('./Game'),
 	Cards = require('./Cards'),
+	Thing = require('./Thing'),
 	etgutil = require('./etgutil');
 
 function deckPower(deck, amount) {
-	if (amount > 1) {
-		var res = deck.slice();
-		for (var i = 1; i < amount; i++) {
-			Array.prototype.push.apply(res, deck);
+	const res = [];
+	for (let i = 0; i < amount; i++) {
+		for (let j = 0; j < deck.length; j++) {
+			res.push(new Thing(deck[j]));
 		}
-		return res;
-	} else return deck;
+	}
+	return res;
 }
 module.exports = function(data) {
 	const game = new Game(data.seed, data.flip);
@@ -19,26 +20,20 @@ module.exports = function(data) {
 	game.player2.maxhp = game.player2.hp;
 	const deckpower = [data.p1deckpower, data.p2deckpower];
 	const decks = [data.urdeck, data.deck];
-	for (var j = 0; j < 2; j++) {
-		const pl = game.players(j);
+	for (let j = 0; j < 2; j++) {
+		const pl = game.players(j), deck = [];
 		etgutil.iterdeck(decks[j], code => {
-			var idx;
+			let idx;
 			if (code in Cards.Codes) {
-				pl.deck.push(Cards.Codes[code]);
+				deck.push(Cards.Codes[code]);
 			} else if (~(idx = etgutil.fromTrueMark(code))) {
 				pl.mark = idx;
 			}
 		});
-		if (deckpower[j]) {
-			pl.deck = deckPower(pl.deck, deckpower[j]);
-			pl.deckpower = deckpower[j];
-		} else if (pl.drawpower > 1) {
-			pl.deck = deckPower(pl.deck, 2);
-			pl.deckpower = 2;
-		}
+		pl.deckpower = deckpower[j] || (pl.drawpower > 1 ? 2 : 1);
+		pl.deck = deckPower(deck, pl.deckpower);
 	}
 	game.turn.drawhand(7);
 	game.turn.foe.drawhand(7);
-	data.p2deck = game.player2.deck.slice();
 	return { game, data };
 };

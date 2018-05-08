@@ -251,7 +251,7 @@ Player.prototype.endturn = function(discard) {
 Player.prototype.drawcard = function(drawstep) {
 	if (this.hand.length < 8) {
 		if (this.deck.length > 0) {
-			if (~this.addCard(this.deck.pop())) {
+			if (~this.addCardInstance(this.deck.pop())) {
 				this.proc('draw', drawstep);
 				if (
 					this.deck.length == 0 &&
@@ -264,13 +264,12 @@ Player.prototype.drawcard = function(drawstep) {
 	}
 };
 Player.prototype.drawhand = function(x) {
-	while (this.hand.length) {
-		this.deck.push(this.hand.pop().card);
-	}
+	this.deck.push(...this.hand);
+	this.hand.length = 0;
 	this.shuffle(this.deck);
 	if (x > this.deck.length) x = deck.length;
 	for (let i = 0; i < x; i++) {
-		this.addCard(this.deck.pop());
+		this.addCardInstance(this.deck.pop());
 	}
 };
 function destroyCloak(pr) {
@@ -321,10 +320,10 @@ Player.prototype.spelldmg = function(x) {
 	).dmg(x);
 };
 Player.prototype.clone = function(game) {
+	const obj = Object.create(Player.prototype);
 	function maybeClone(x) {
 		return x && x.clone(obj);
 	}
-	const obj = Object.create(Player.prototype);
 	obj.owner = obj;
 	obj.card = this.card;
 	obj.cast = this.cast;
@@ -343,7 +342,7 @@ Player.prototype.clone = function(game) {
 	obj.permanents = this.permanents.map(maybeClone);
 	obj.gpull = this.gpull && obj.creatures[this.gpull.getIndex()];
 	obj.hand = this.hand.map(maybeClone);
-	obj.deck = this.deck.slice();
+	obj.deck = this.deck.map(maybeClone);
 	obj.quanta = new Int8Array(this.quanta);
 	obj.sosa = this.sosa;
 	obj.sanctuary = this.sanctuary;

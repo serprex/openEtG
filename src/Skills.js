@@ -155,7 +155,7 @@ const Skills = {
 		t.buffhp(3);
 	},
 	bolsterintodeck: (c, t) => {
-		c.owner.deck.push(t.card, t.card, t.card);
+		c.owner.deck.push(new Thing(t.card), new Thing(t.card), new Thing(t.card));
 	},
 	boneyard: (c, t) => {
 		if (!t.card.isOf(Cards.Skeleton)) {
@@ -539,8 +539,8 @@ const Skills = {
 	drawequip: (c, t) => {
 		for (let i = c.owner.deck.length - 1; i > -1; i--) {
 			const card = c.owner.deck[i];
-			if (card.type == etg.Weapon || card.type == etg.Shield) {
-				if (~c.owner.addCard(card)) {
+			if (card.card.type == etg.Weapon || card.card.type == etg.Shield) {
+				if (~c.owner.addCardInstance(card)) {
 					c.owner.deck.splice(i, 1);
 					c.owner.proc('draw');
 				}
@@ -550,7 +550,7 @@ const Skills = {
 	},
 	drawpillar: (c, t) => {
 		const deck = c.owner.deck;
-		if (deck.length && deck[deck.length - 1].type == etg.Pillar)
+		if (deck.length && deck[deck.length - 1].card.type == etg.Pillar)
 			Skills.hasten.func(c, t);
 	},
 	dryspell: (c, t) => {
@@ -574,7 +574,7 @@ const Skills = {
 	},
 	duality: (c, t) => {
 		if (c.owner.foe.deck.length && c.owner.hand.length < 8) {
-			c.owner.addCard(c.owner.foe.deck[c.owner.foe.deck.length - 1]);
+			c.owner.addCardInstance(c.owner.foe.deck[c.owner.foe.deck.length - 1].clone(c.owner));
 		}
 	},
 	earth: (c, t) => {
@@ -667,7 +667,7 @@ const Skills = {
 			return;
 		}
 		const cards = [];
-		t.owner.deck.forEach((card, i) => {
+		t.owner.deck.forEach(({card}, i) => {
 			let cost = card.cost;
 			if (!card.element || card.element == c.castele) cost += c.cast;
 			if (t.owner.canspend(card.costele, cost)) {
@@ -676,10 +676,10 @@ const Skills = {
 		});
 		if (cards.length) {
 			const pick = t.choose(cards);
-			const card = (t.owner.hand[t.getIndex()] = new Thing(t.owner.deck[pick]));
+			const card = (t.owner.hand[t.getIndex()] = t.owner.deck[pick]);
 			card.type = etg.Spell;
 			card.owner = t.owner;
-			t.owner.deck[pick] = t.card;
+			t.owner.deck[pick] = t;
 		}
 	},
 	fiery: (c, t) => {
@@ -1237,7 +1237,7 @@ const Skills = {
 		}
 	},
 	millpillar: (c, t) => {
-		if (t.deck.length && t.deck[t.deck.length - 1].type == etg.Pillar)
+		if (t.deck.length && t.deck[t.deck.length - 1].card.type == etg.Pillar)
 			t.deck.length--;
 	},
 	mimic: (c, t) => {
@@ -1649,7 +1649,7 @@ const Skills = {
 	rewind: (c, t) => {
 		Effect.mkText('Rewind', t);
 		t.remove();
-		t.owner.deck.push(t.card);
+		t.owner.deck.push(new Thing(t.card));
 	},
 	ricochet: (c, t, data) => {
 		if (t.type != etg.Spell) return;
@@ -1752,7 +1752,7 @@ const Skills = {
 	},
 	shuffle3: (c, t) => {
 		for (let i = 0; i < 3; i++)
-			c.owner.deck.splice(c.owner.upto(c.owner.deck.length), 0, t.card);
+			c.owner.deck.splice(c.owner.upto(c.owner.deck.length), 0, new Thing(t.card));
 	},
 	silence: (c, t) => {
 		if (t.type != etg.Player || !t.sanctuary) t.usedactive = true;
@@ -1942,8 +1942,7 @@ const Skills = {
 			}
 			if (candidates.length) {
 				const idx = pl.choose(candidates),
-					crcard = pl.deck.splice(idx, 1)[0],
-					cr = new Thing(crcard);
+					[cr] = pl.deck.splice(idx, 1);
 				pl.addCrea(cr);
 				cr.freeze(Math.ceil(crcard.cost / 4));
 			}
@@ -1956,7 +1955,7 @@ const Skills = {
 		t.owner.deck.splice(
 			c.owner.upto(t.owner.deck.length),
 			0,
-			c.card.as(Cards.ThrowRock),
+			new Thing(c.card.as(Cards.ThrowRock)),
 		);
 	},
 	tick: (c, t) => {
@@ -1992,7 +1991,7 @@ const Skills = {
 			if (perms.length) {
 				const pr = pl.choose(perms);
 				const newpl = pl.upto(2) ? pl : pl.foe;
-				newpl.deck.splice(newpl.upto(newpl.deck.length), 0, pr.card);
+				newpl.deck.splice(newpl.upto(newpl.deck.length), 0, new Thing(pr.card));
 				Effect.mkText('Shuffled', pr);
 				Skills.destroy.func(c, pr, true, true);
 			}
@@ -2010,8 +2009,8 @@ const Skills = {
 		});
 		if (cards.length) {
 			const pick = t.choose(cards);
-			t.owner.setCrea(t.getIndex(), new Thing(t.owner.deck[pick]));
-			t.owner.deck[pick] = t.card;
+			t.owner.setCrea(t.getIndex(), t.owner.deck[pick]);
+			t.owner.deck[pick] = t;
 		}
 	},
 	turngolem: (c, t) => {

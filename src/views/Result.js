@@ -218,9 +218,7 @@ module.exports = connect(({user}) => ({user}))(class Result extends React.Compon
 			case undefined:
 				if (game.foename == 'Custom' || game.foename == 'Test') {
 					const gameData = {
-						deck:
-							etgutil.encodedeck(data.p2deck) +
-							etgutil.toTrueMarkSuffix(game.player2.mark),
+						deck: data.deck,
 						urdeck: sock.getDeck(),
 						seed: util.randint(),
 						foename: game.foename,

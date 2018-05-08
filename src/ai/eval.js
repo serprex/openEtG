@@ -721,11 +721,9 @@ module.exports = function(game) {
 			pscore += evalcardinstance(player.hand[i]);
 		}
 		if (player != game.turn && player.hand.length < 8 && player.deck.length) {
-			const card = player.deck.pop();
-			player.addCard(card);
+			player.addCardInstance(player.deck.pop());
 			pscore += evalcardinstance(player.hand[player.hand.length - 1]);
-			player.hand.pop();
-			player.deck.push(card);
+			player.deck.push(player.hand.pop());
 		}
 		pscore +=
 			Math.min(8 - player.hand.length, player.drawpower) * 2 +
