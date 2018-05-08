@@ -255,7 +255,7 @@ const Skills = {
 				hp += cr.truehp();
 			}
 		});
-		const chim = new Thing(c.card);
+		const chim = new Thing(c.card.as(Cards.Chimera));
 		chim.owner = c.owner;
 		chim.atk = atk;
 		chim.maxhp = chim.hp = hp;
@@ -1436,7 +1436,7 @@ const Skills = {
 	parallel: (c, t) => {
 		Effect.mkText('Parallel', t);
 		if (t.card.isOf(Cards.Chimera)) {
-			Skills.chimera.func(c, t);
+			Skills.chimera.func(c);
 			return;
 		}
 		const copy = t.clone(c.owner);
