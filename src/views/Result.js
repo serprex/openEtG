@@ -70,8 +70,8 @@ const BonusList = [
 	},
 	{
 		name: 'First past the post',
-		desc: 'Win with non-positive hp, or foe loses with positive hp',
-		func: game => game.player1.hp <= 0 || game.player2.hp > 0 ? 0.1 : 0,
+		desc: 'Win with non-positive hp, or foe loses from damage with positive hp',
+		func: game => game.player2.deck.length && (game.player1.hp <= 0 || game.player2.hp > 0) ? 0.1 : 0,
 	},
 	{
 		name: 'Grounds Keeper',
