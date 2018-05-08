@@ -473,7 +473,7 @@ const data = {
 		"When an ally death occurs, during foe's turn, expend a stack & ally creatures attack",
 	vindicate: 'When an ally death occurs, it attacks again. Unready',
 	virtue: "Increment owner's maximum health by damge blocked when attacking",
-	virusinfect: 'Sacrifice self & poison target creature',
+	virusinfect: 'Sacrifice self & poison target',
 	virusplague: "Sacrifice self & poison target player's creatures",
 	void: "Reduce foe's maximum HP by 3",
 	voidshell: 'Absorb damage. Reduce maximum HP per damage absorbed',
