@@ -15,11 +15,139 @@ const etg = require('../etg'),
 	React = require('react'),
 	streak200 = new Uint8Array([10, 10, 15, 20, 15, 20]);
 
+function TooltipText(props) {
+	return <div onMouseOver={e => props.setTip(e, props.tip)} onMouseOut={props.clearTip}>
+		{props.children}
+	</div>;
+}
+
+const BonusList = [
+	{
+		name: 'Are we idle yet?',
+		desc: 'Take longer than 3 minutes to win',
+		func: game => game.time > 180000 ? Math.min((game.time-180000)/60000, 0.2) : 0,
+	},
+	{
+		name: 'Creature Domination',
+		desc: 'More than twice as many creatures than foe',
+		func: game =>
+			game.player1.countcreatures() > 2 * game.player2.countcreatures() ? 0.1 : 0,
+	},
+	{
+		name: 'Creatureless',
+		desc: 'Never play a creature',
+		func: game => game.bonusstats.creaturesplaced == 0 ? 0.1 : 0,
+	},
+	{
+		name: 'Current Health',
+		desc: '1% per 3hp',
+		func: game => game.player1.hp / 300,
+	},
+	{
+		name: 'Max Health',
+		desc: '1% per 6 maxhp over 100',
+		func: game => (game.player1.maxhp - 100) / 600,
+	},
+	{
+		name: 'Full Health',
+		desc: 'Hp equal to maxhp',
+		func: game => game.player1.hp == game.player1.maxhp ? 0.2 : 0,
+	},
+	{
+		name: 'Deckout',
+		desc: 'Win through deckout',
+		func: game => game.player2.deck.length == 0 && game.player2.hp > 0 ? 0.5 : 0,
+	},
+	{
+		name: 'Double Kill',
+		desc: 'Foe lost with as much negative hp as maxhp',
+		func: game => game.player2.hp <= -game.player2.maxhp ? 0.15 : 0,
+	},
+	{
+		name: 'Equipped',
+		desc: 'End match wielding a weapon & shield',
+		func: game => game.player1.weapon && game.player1.shield ? 0.05 : 0,
+	},
+	{
+		name: 'First past the post',
+		desc: 'Win with non-positive hp, or foe loses with positive hp',
+		func: game => game.player1.hp <= 0 || game.player2.hp > 0 ? 0.1 : 0,
+	},
+	{
+		name: 'Grounds Keeper',
+		desc: '2.5% per permanent over 8',
+		func: game => (game.player1.countpermanents() - 8) / 40,
+	},
+	{
+		name: 'Head Hunter',
+		desc: "Defeat arena's top 7 decks",
+		func: (game, data) => [1, 0.5, 0.25, 0.12, 0.06, 0.03, 0.01][data.rank],
+	},
+	{
+		name: 'Last point',
+		desc: 'End with 1hp',
+		func: game => game.player1.hp == 1 ? 0.3 : 0,
+	},
+	{
+		name: 'Mid Turn',
+		desc: 'Defeat foe with game ended still on own turn',
+		func: game => game.turn == game.player1 ? 0.1 : 0,
+	},
+	{
+		name: 'Murderer',
+		desc: 'Kill over 5 creatures',
+		func: game => game.bonusstats.creatureskilled > 5 ? 0.15 : 0,
+	},
+	{
+		name: 'Perfect Damage',
+		desc: 'Foe lost with 0hp',
+		func: game => game.player2.hp == 0 ? 0.1 : 0,
+	},
+	{
+		name: 'Pillarless',
+		desc: 'Never play a pillar',
+		func: game => game.bonusstats.cardsplayed[0] == 0 ? 0.05 : 0,
+	},
+	{
+		name: 'Size matters',
+		desc: '0.666..% per card in deck over 36',
+		func: game => (etgutil.decklength(sock.getDeck()) - 36) / 150,
+	},
+	{
+		name: 'Toxic',
+		desc: 'Foe lost with 18 poison',
+		func: game => game.player2.getStatus('poison') > 18 ? 0.1 : 0,
+	},
+	{
+		name: 'Unupped',
+		desc: '0.333..% per unupped card in deck',
+		func: game => {
+			let unupnu = 0;
+			etgutil.iterraw(sock.getDeck(), (code, count) => {
+				const card = Cards.Codes[code];
+				if (card && !card.upped) unupnu += count;
+			});
+			return unupnu / 300;
+		},
+	},
+	{
+		name: 'Waiter',
+		desc: 'Won with 0 cards in deck',
+		func: game => game.player1.deck.length == 0 ? 0.3 : 0,
+	},
+	{
+		name: 'Weapon Master',
+		desc: 'Play over 2 weapons',
+		func: game => game.bonusstats.cardsplayed[1] > 2 ? 0.1 : 0,
+	},
+];
+
 module.exports = connect(({user}) => ({user}))(class Result extends React.Component {
 	constructor(props) {
 		super(props);
 		this.state = {
-			lefttext: '',
+			lefttext: [],
+			tooltip: null,
 		};
 	}
 
@@ -35,6 +163,17 @@ module.exports = connect(({user}) => ({user}))(class Result extends React.Compon
 			this.rematch();
 		}
 	}
+
+	setTip = (e, text) =>
+		this.setState({
+			tooltip: <div style={{
+				position: 'absolute',
+				left: '8px',
+				top: '258px',
+			}}>{text}</div>
+		});
+
+	clearTip = () => this.setState({ tooltip: null });
 
 	exitFunc = () => {
 		const {game} = this.props;
@@ -101,6 +240,23 @@ module.exports = connect(({user}) => ({user}))(class Result extends React.Compon
 		}
 	}
 
+	computeBonuses(game, data, lefttext, streakrate) {
+		if (game.endurance !== undefined) return 1;
+		const bonus = BonusList.reduce((bsum, bonus) => {
+			const b = bonus.func(game, data);
+			if (b > 0) {
+				lefttext.push(<TooltipText tip={bonus.desc} setTip={this.setTip} clearTip={this.clearTip}>
+					{Math.round(b * 100)}% {bonus.name}
+				</TooltipText>);
+				return bsum + b;
+			} else return bsum;
+		}, 1);
+		lefttext.push(
+			<div>{((streakrate + 1) * bonus * 100 - 100).toFixed(1)}% total bonus</div>,
+		);
+		return bonus;
+	}
+
 	componentDidMount() {
 		document.addEventListener('keydown', this.onkeydown);
 		const game = this.props.game,
@@ -108,62 +264,9 @@ module.exports = connect(({user}) => ({user}))(class Result extends React.Compon
 		const winner = game.winner === game.player1,
 			foeDeck = data.p2deck,
 			lefttext = [
-				game.ply + ' plies',
-				(game.time / 1000).toFixed(1) + ' seconds',
+				<div>{game.ply} plies</div>,
+				<div>{(game.time / 1000).toFixed(1)} seconds</div>,
 			];
-		function computeBonuses() {
-			if (game.endurance !== undefined) return 1;
-			const bonus = [
-				[
-					'Creature Domination',
-					game.player1.countcreatures() > 2 * game.player2.countcreatures()
-						? 0.1
-						: 0,
-				],
-				['Creatureless', game.bonusstats.creaturesplaced == 0 ? 0.1 : 0],
-				['Current Health', game.player1.hp / 300],
-				['Max Health', (game.player1.maxhp - 100) / 600],
-				['Full Health', game.player1.hp == game.player1.maxhp ? 0.2 : 0],
-				[
-					'Deckout',
-					game.player2.deck.length == 0 && game.player2.hp > 0 ? 0.5 : 0,
-				],
-				['Double Kill', game.player2.hp < -game.player2.maxhp ? 0.15 : 0],
-				['Equipped', game.player1.weapon && game.player1.shield ? 0.05 : 0],
-				['Grounds Keeper', (game.player1.countpermanents() - 8) / 40],
-				['Head Hunter', [1, 0.5, 0.25, 0.12, 0.06, 0.03, 0.01][data.rank]],
-				['Last point', game.player1.hp == 1 ? 0.3 : 0],
-				['Mid Turn', game.turn == game.player1 ? 0.1 : 0],
-				['Murderer', game.bonusstats.creatureskilled > 5 ? 0.15 : 0],
-				['Perfect Damage', game.player2.hp == 0 ? 0.1 : 0],
-				['Pillarless', game.bonusstats.cardsplayed[0] == 0 ? 0.05 : 0],
-				['Size matters', (etgutil.decklength(sock.getDeck()) - 36) / 150],
-				['Toxic', game.player2.getStatus('poison') > 18 ? 0.1 : 0],
-				[
-					'Unupped',
-					(() => {
-						let unupnu = 0;
-						etgutil.iterraw(sock.getDeck(), (code, count) => {
-							const card = Cards.Codes[code];
-							if (card && !card.upped) unupnu += count;
-						});
-						return unupnu / 300;
-					})(),
-				],
-				['Waiter', game.player1.deck.length == 0 ? 0.3 : 0],
-				['Weapon Master', game.bonusstats.cardsplayed[1] >= 3 ? 0.1 : 0],
-			].reduce((bsum, data) => {
-				const b = data[1];
-				if (b > 0) {
-					lefttext.push(Math.round(b * 100) + '% ' + data[0]);
-					return bsum + b;
-				} else return bsum;
-			}, 1);
-			lefttext.push(
-				((streakrate + 1) * bonus * 100 - 100).toFixed(1) + '% total bonus',
-			);
-			return bonus;
-		}
 		let streakrate = 0;
 		if (winner) {
 			if (this.props.user) {
@@ -206,14 +309,15 @@ module.exports = connect(({user}) => ({user}))(class Result extends React.Compon
 								}
 								streakrate = Math.min(streak200[game.level] * streak / 200, 1);
 								lefttext.push(
-									streak + ' win streak',
-									(streakrate * 100).toFixed(1) + '% streak bonus',
+									<TooltipText tip={streak + ' win streak'} setTip={this.setTip} clearTip={this.clearTip}>
+										{(streakrate * 100).toFixed(1)}% streak bonus
+									</TooltipText>,
 								);
 							}
 							goldwon = Math.floor(
 								userutil.pveCostReward[game.level * 2 + 1] *
 									(1 + streakrate) *
-									computeBonuses(),
+									this.computeBonuses(game, data, lefttext, streakrate),
 							);
 						} else goldwon = 0;
 						game.goldreward = goldwon;
@@ -232,7 +336,7 @@ module.exports = connect(({user}) => ({user}))(class Result extends React.Compon
 				}
 			}
 		}
-		this.setState({lefttext: lefttext.join('\n')});
+		this.setState({lefttext});
 		if (game.endurance == undefined) {
 			store.store.dispatch(store.chatMsg(
 				[
@@ -320,10 +424,10 @@ module.exports = connect(({user}) => ({user}))(class Result extends React.Compon
 						position: 'absolute',
 						left: '8px',
 						top: '290px',
-						whiteSpace: 'pre',
 					}}>
 					{this.state.lefttext}
 				</span>
+				{this.state.tooltip}
 			</>}
 		</>
 	}

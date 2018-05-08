@@ -364,7 +364,7 @@ module.exports = connect(({user}) => ({user}))(class Match extends React.Compone
 		this.aiDelay = 0;
 		this.streakback = 0;
 		this.state = {
-			tooltip: '',
+			tooltip: null,
 			foeplays: [],
 			discarding: false,
 			resigning: false,
@@ -653,9 +653,16 @@ module.exports = connect(({user}) => ({user}))(class Match extends React.Compone
 			activeInfo[this.props.game.targeting.text];
 		this.setState({
 			tooltip:
-				obj.info() + (actinfo ? '\n' + actinfo(obj, this.props.game) : ''),
-			toolx: e.pageX,
-			tooly: e.pageY,
+				<Components.Text
+					className='infobox'
+					text={obj.info() + (actinfo ? '\n' + actinfo : '')}
+					icoprefix='te'
+					style={{
+						position: 'absolute',
+						left: e.pageX + 'px',
+						top: e.pageY + 'px',
+					}}
+				/>
 		});
 		if (obj.type !== etg.Player) {
 			this.setCard(e, obj.card, x);
@@ -663,7 +670,7 @@ module.exports = connect(({user}) => ({user}))(class Match extends React.Compone
 	}
 
 	clearCard = () => {
-		this.setState({ hovercode: 0, tooltip: '' });
+		this.setState({ hovercode: 0, tooltip: null });
 	}
 
 	setCard(e, card, x) {
@@ -977,18 +984,7 @@ module.exports = connect(({user}) => ({user}))(class Match extends React.Compone
 				y={this.state.hovery}
 				code={this.state.hovercode}
 			/>
-			{this.state.tooltip &&
-				<Components.Text
-					className='infobox'
-					text={this.state.tooltip}
-					icoprefix='te'
-					style={{
-						position: 'absolute',
-						left: this.state.toolx + 'px',
-						top: this.state.tooly + 'px',
-					}}
-				/>
-			}
+			{this.state.tooltip}
 			<input type='button'
 				value={this.state.resigning ? 'Confirm' : 'Resign'}
 				onClick={this.resignClick}
