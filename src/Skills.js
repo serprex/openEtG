@@ -1944,7 +1944,7 @@ const Skills = {
 				const idx = pl.choose(candidates),
 					[cr] = pl.deck.splice(idx, 1);
 				pl.addCrea(cr);
-				cr.freeze(Math.ceil(crcard.cost / 4));
+				cr.freeze(Math.ceil(cr.card.cost / 4));
 			}
 		}
 	},
