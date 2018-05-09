@@ -11,4 +11,4 @@ module.exports = pl =>
 			card.isOf(Cards.GiftofOceanus) ||
 			card.isOf(Cards.QuantumLocket),
 	) ||
-	pl.deck.every(code => Cards.Codes[code].type != etg.Pillar);
+	pl.deck.every(({ card }) => card.type != etg.Pillar);

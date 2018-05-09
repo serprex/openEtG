@@ -3,6 +3,7 @@ const sock = require('./sock');
 const store = require('./store');
 const util = require('./util');
 const RngMock = require('./RngMock');
+const Thing = require('./Thing');
 const etgutil = require('./etgutil');
 //Quest data
 exports.necromancer = [
@@ -672,7 +673,7 @@ exports.mkQuestAi = function(questname, stage, area) {
 	});
 	const game = gamedata.game;
 	if (quest.morph) {
-		game.player1.deck = game.player1.deck.map(quest.morph.bind(quest));
+		game.player1.deck = game.player1.deck.map(x => new Thing(quest.morph(x.card)));
 	}
 	game.quest = [questname, stage];
 	game.wintext = quest.wintext || '';
