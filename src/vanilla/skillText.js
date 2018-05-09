@@ -415,7 +415,7 @@ function pushEntry(list, c, event, entry) {
 }
 module.exports = function(c, event) {
 	if (c instanceof Card && c.type == etg.SpellEnum) {
-		var entry = data[c.active.auto.name[0]];
+		var entry = data[c.active.get('auto').name[0]];
 		return processEntry(c, 'cast', entry);
 	} else {
 		var ret = [],

@@ -133,7 +133,7 @@ const activeInfo = {
 		return (2+bolts) + " " + (35+bolts*5) + "%";
 	},
 	catapult: (t, game) => {
-		return Math.ceil(t.truehp()*(t.status.frozen?150:100)/(t.truehp()+100));
+		return Math.ceil(t.truehp()*(t.status.get('frozen')?150:100)/(t.truehp()+100));
 	},
 	adrenaline: (t, game) => {
 		return "Extra: " + etg.getAdrenalRow(t.trueatk());
@@ -237,7 +237,7 @@ module.exports = connect()(class Match extends React.Component {
 			if (obj.type == etg.Spell && obj.card.type != etg.Spell) {
 				cb();
 			} else {
-				game.getTarget(obj, obj.active.cast, cb);
+				game.getTarget(obj, obj.active.get('cast'), cb);
 				this.forceUpdate();
 			}
 		}

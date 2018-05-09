@@ -3,40 +3,6 @@ var etg = require("../etg");
 var Cards = require("../Cards");
 var Actives = require("../Skills");
 var enableLogging = false, logbuff, logstack;
-function logStart(){
-	if (enableLogging){
-		logbuff = {};
-		logstack = [];
-	}
-}
-function logEnd(){
-	if (enableLogging){
-		console.log(logbuff);
-		logstack = logbuff = undefined;
-	}
-}
-function logNest(x){
-	if (enableLogging){
-		logstack.push(logbuff);
-		logbuff = logbuff[x] = {};
-	}
-}
-function logNestEnd(x){
-	if (enableLogging){
-		logbuff = logstack.pop();
-	}
-}
-function log(x, y){
-	if (enableLogging){
-		if (!(x in logbuff)){
-			logbuff[x] = y;
-		}else if (logbuff[x] instanceof Array){
-			logbuff[x].push(y);
-		}else{
-			logbuff[x] = [logbuff[x], y];
-		}
-	}
-}
 function pillarval(c){
 	return c instanceof etg.CardInstance?.1:Math.sqrt(c.status.charges);
 }
@@ -469,8 +435,8 @@ function checkpassives(c) {
 	for (var status in statuses)
 	{
 		if (uniqueStatuses[status] && !(c instanceof etg.CardInstance)) {
-			if (!uniquesActive[status]) {
-				uniquesActive[status] = true;
+			if (!uniquesActive.has(status)) {
+				uniquesActive.add(status);
 			}
 			else {
 				continue;
@@ -543,7 +509,6 @@ function evalthing(c) {
 		var delayed = Math.min(delaymix*(c.status.adrenaline?.5:1), 12);
 		score *= 1-(12*delayed/(12+delayed))/16;
 	}
-	log(c, score);
 	return score;
 }
 
@@ -580,7 +545,6 @@ function evalcardinstance(cardInst) {
 		}
 	}
 	score *= !cardInst.card.cost ? .8 : (cardInst.canactive() ? .6 : .5) * (!cardInst.card.costele?1:.9+Math.log(1+cardInst.owner.quanta[cardInst.card.costele])/50);
-	log(c, score);
 	return score;
 }
 
@@ -595,7 +559,6 @@ var uniqueStatuses = Object.freeze({flooding:"all", nightfall:"all", tunnel:"sel
 var uniquesActive, damageHash;
 
 module.exports = function(game) {
-	logStart();
 	if (game.winner){
 		return game.winner==game.player1?99999999:-99999999;
 	}
@@ -604,7 +567,7 @@ module.exports = function(game) {
 	}
 	var wallCharges = new Int32Array([0, 0]);
 	damageHash = [];
-	uniquesActive = {};
+	uniquesActive = new Set();
 	var expectedDamage = calcExpectedDamage(game.player2, wallCharges, 0);
 	if (expectedDamage > game.player1.hp){
 		return Math.min(expectedDamage - game.player1.hp, 500)*-999;
@@ -617,27 +580,20 @@ module.exports = function(game) {
 	for (var j = 0;j < 2;j++) {
 		for (var key in uniqueStatuses) {
 			if (uniqueStatuses[key] == "self")
-				uniquesActive[key] = undefined;
+				uniquesActive.delete(key);
 		}
-		logNest(j);
 		var pscore = wallCharges[j]*4, player = game.players(j);
 		pscore += evalthing(player.weapon);
 		pscore += evalthing(player.shield);
-		logNest("creas");
 		for (var i = 0; i < 23; i++) {
 			pscore += evalthing(player.creatures[i]);
 		}
-		logNestEnd();
-		logNest("perms");
 		for (var i = 0; i < 16; i++) {
 			pscore += evalthing(player.permanents[i]);
 		}
-		logNestEnd();
-		logNest("hand");
 		for (var i = 0; i < player.hand.length; i++) {
 			pscore += evalcardinstance(player.hand[i]);
 		}
-		logNestEnd();
 		// Remove this if logic is updated to call endturn
 		if (player != game.turn && player.hand.length < 8 && player.deck.length > 0){
 			var code = player.deck.pop();
@@ -655,12 +611,8 @@ module.exports = function(game) {
 		if (player.silence) pscore -= (player.hand.length+(player.hand.length>6?7:4))/4;
 		if (player.flatline) pscore -= 1;
 		if (player.neuro) pscore -= 5;
-		log("Eval", pscore);
-		logNestEnd();
 		gamevalue += pscore*(j?-1:1);
 	}
-	log("Eval", gamevalue);
-	logEnd();
 	damageHash = uniquesActive = null;
 	return gamevalue;
 }

@@ -10,17 +10,16 @@ function Thing(card, owner) {
 	this.owner = owner;
 	this.card = card;
 	if (this.status) {
-		for (var key in this.status) {
-			if (key in passives) delete this.status[key];
+		for (const key in this.status) {
+			if (key in passives) this.status = this.status.delete(key);
 		}
-		for (var key in card.status) {
-			this.status[key] = card.status[key];
+		for (const key in card.status) {
+			this.status = this.status.set(key, card.status.get(key));
 		}
 	} else {
-		this.status = util.clone(card.status);
+		this.status = card.status;
 	}
-	this.active = util.clone(card.active);
-	delete this.active.discard;
+	this.active = card.active.delete('discard');
 }
 function Creature(card, owner) {
 	this.usedactive = 2;
@@ -32,8 +31,8 @@ function Creature(card, owner) {
 		this.maxhp = this.hp = golem.hpStat;
 		this.cast = golem.cast;
 		this.castele = Earth;
-		this.active = util.clone(golem.active);
-		this.status = util.clone(golem.status);
+		this.active = golem.active;
+		this.status = golem.status;
 	} else this.transform(card, owner);
 }
 function Permanent(card, owner) {
@@ -126,8 +125,8 @@ thingtypes.forEach(function(type) {
 	var proto = type.prototype;
 	proto.clone = function(owner) {
 		var obj = Object.create(proto);
-		obj.active = util.clone(this.active);
-		obj.status = util.clone(this.status);
+		obj.active = this.active;
+		obj.status = this.status;
 		obj.owner = owner;
 		for (var attr in this) {
 			if (!(attr in obj) && this.hasOwnProperty(attr)) {
@@ -158,7 +157,7 @@ Creature.prototype.hash = function() {
 	for (var key in this.active) {
 		hash ^= util.hashString(key + ':' + this.active[key].name.join(':'));
 	}
-	if (this.active.cast) {
+	if (this.active.has('cast')) {
 		hash ^= this.cast * 7 + this.castele * 23;
 	}
 	return hash & 0x7fffffff;
@@ -170,7 +169,7 @@ Permanent.prototype.hash = function() {
 	for (var key in this.active) {
 		hash ^= util.hashString(key + '=' + this.active[key].name.join(' '));
 	}
-	if (this.active.cast) {
+	if (this.active.has('cast')) {
 		hash ^= this.cast * 7 + this.castele * 23;
 	}
 	return hash & 0x7fffffff;
@@ -182,7 +181,7 @@ Weapon.prototype.hash = function() {
 	for (var key in this.active) {
 		hash ^= util.hashString(key + '-' + this.active[key].name.join(' '));
 	}
-	if (this.active.cast) {
+	if (this.active.has('cast')) {
 		hash ^= this.cast * 7 + this.castele * 23;
 	}
 	return hash & 0x7fffffff;
@@ -194,7 +193,7 @@ Shield.prototype.hash = function() {
 	for (var key in this.active) {
 		hash ^= util.hashString(key + '~' + this.active[key].name.join(' '));
 	}
-	if (this.active.cast) {
+	if (this.active.has('cast')) {
 		hash ^= this.cast * 7 + this.castele * 23;
 	}
 	return hash & 0x7fffffff;
@@ -250,8 +249,8 @@ Thing.prototype.info = function() {
 	return skillText(this);
 };
 Thing.prototype.activetext = function() {
-	if (this.active.cast)
-		return casttext(this.cast, this.castele) + this.active.cast.name.join(' ');
+	if (this.active.has('cast'))
+		return casttext(this.cast, this.castele) + this.active.get('cast').name.join(' ');
 	var order = [
 		'cost',
 		'hit',
@@ -268,7 +267,7 @@ Thing.prototype.activetext = function() {
 		if (this.active[order[i]])
 			return order[i] + ' ' + this.active[order[i]].name.join(' ');
 	}
-	return this.active.auto ? this.active.auto.name.join(' ') : '';
+	return this.active.has('auto') ? this.active.get('auto').name.join(' ') : '';
 };
 Thing.prototype.place = function(fromhand) {
 	this.proc('play', [fromhand]);
@@ -376,23 +375,23 @@ Creature.prototype.getIndex = function() {
 };
 Creature.prototype.addpoison = function(x) {
 	this.defstatus('poison', 0);
-	this.status.poison += x;
-	if (this.status.voodoo) {
+	this.status.set('poison', this.status.get('poison') + x);
+	if (this.status.get('voodoo')) {
 		this.owner.foe.addpoison(x);
 	}
 };
 Weapon.prototype.buffhp = function() {};
 Weapon.prototype.delay = Creature.prototype.delay = function(x) {
 	this.defstatus('delayed', 0);
-	this.status.delayed += x;
-	if (this.status.voodoo) this.owner.foe.delay(x);
+	this.status.set('delayed', this.status.get('delayed') + x);
+	if (this.status.get('voodoo')) this.owner.foe.delay(x);
 };
 Weapon.prototype.freeze = Creature.prototype.freeze = function(x) {
-	if (!this.active.ownfreeze || this.active.ownfreeze(this)) {
+	if (!this.active.has('ownfreeze') || this.active.get('ownfreeze').func(this)) {
 		Effect.mkText('Freeze', this);
 		this.defstatus('frozen', 0);
-		if (x > this.status.frozen) this.status.frozen = x;
-		if (this.status.voodoo) this.owner.foe.freeze(x);
+		if (x > this.status.get('frozen')) this.status.set('frozen', x);
+		if (this.status.get('voodoo')) this.owner.foe.freeze(x);
 	}
 };
 Creature.prototype.spelldmg = Creature.prototype.dmg = function(x, dontdie) {
@@ -403,11 +402,11 @@ Creature.prototype.spelldmg = Creature.prototype.dmg = function(x, dontdie) {
 	this.proc('dmg', [dmg]);
 	if (this.truehp() <= 0) {
 		if (!dontdie) this.die();
-	} else if (dmg > 0 && this.status.voodoo) this.owner.foe.dmg(x);
+	} else if (dmg > 0 && this.status.get('voodoo')) this.owner.foe.dmg(x);
 	return dmg;
 };
 Creature.prototype.remove = function(index) {
-	if (this.owner.gpull == this) delete this.owner.gpull;
+	if (this.owner.gpull == this) this.owner.gpull = null;
 	if (index === undefined) index = this.getIndex();
 	if (~index) {
 		delete this.owner.creatures[index];
@@ -489,13 +488,13 @@ Thing.prototype.evade = function(sender) {
 Creature.prototype.evade = function(sender) {
 	if (
 		sender != this.owner &&
-		this.status.airborne &&
+		this.status.get('airborne') &&
 		this.card.element == Air
 	) {
 		var freedomChance = 0;
 		for (var i = 0; i < 16; i++) {
-			if (this.owner.permanents[i] && this.owner.permanents[i].status.freedom) {
-				freedomChance += 0.25 * this.owner.permanents[i].status.charges;
+			if (this.owner.permanents[i] && this.owner.permanents[i].status.get('freedom')) {
+				freedomChance += 0.25 * this.owner.permanents[i].status.get('charges');
 			}
 		}
 		return freedomChance && this.owner.rng() < freedomChance;
@@ -556,13 +555,13 @@ Thing.prototype.mutantactive = function() {
 	this.lobo();
 	var index = this.owner.upto(mutantabilities.length + 2) - 2;
 	if (index < 0) {
-		this.status[['momentum', 'immaterial'][~index]] = true;
+		this.status = this.status.set(['momentum', 'immaterial'][~index], true);
 	} else {
 		var active = Actives[mutantabilities[index]];
 		if (active == Actives.growth1) {
 			this.addactive('death', active);
 		} else {
-			this.active.cast = active;
+			this.active = this.active.set('cast', active);
 			this.cast = this.owner.upto(2) + 1;
 			this.castele = this.card.element;
 		}
@@ -653,23 +652,24 @@ Thing.prototype.addactive = function(type, active) {
 	this.active[type] = combineactive(this.active[type], active);
 };
 Thing.prototype.rmactive = function(type, name) {
-	if (!this.active[type]) return;
-	var actives = this.active[type].name,
+	if (!this.active.has(type)) return;
+	var actives = this.active.get(type).name,
 		idx;
 	if (~(idx = actives.indexOf(name))) {
 		if (actives.length == 1) {
-			delete this.active[type];
+			this.active = this.active.delete(type);
 		} else {
-			this.active[type] = actives.reduce(function(previous, current, i) {
+			this.active = this.active.set(type, actives.reduce(function(previous, current, i) {
 				return i == idx ? previous : combineactive(previous, Actives[current]);
-			}, null);
+			}, null));
 		}
 	}
 };
 Thing.prototype.defstatus = function(key, def) {
 	if (!(key in this.status)) {
-		this.status[key] = def;
+		this.status = this.status.set(key, def);
 	}
+	return this.status.get('key');
 };
 Thing.prototype.hasactive = function(type, name) {
 	return type in this.active && ~this.active[type].name.indexOf(name);
@@ -677,7 +677,7 @@ Thing.prototype.hasactive = function(type, name) {
 Thing.prototype.canactive = function() {
 	return (
 		this.owner.game.turn == this.owner &&
-		this.active.cast &&
+		this.active.has('cast') &&
 		!this.usedactive &&
 		!this.status.delayed &&
 		!this.status.frozen &&
@@ -689,7 +689,7 @@ Thing.prototype.useactive = function(t) {
 	var castele = this.castele,
 		cast = this.cast;
 	if (!t || !t.evade(this.owner)) {
-		this.active.cast.func(this, t);
+		this.active.get('cast').func(this, t);
 		this.proc('spell');
 	} else if (t) Effect.mkText('Evade', t);
 	this.owner.spend(castele, cast);
@@ -706,8 +706,8 @@ Weapon.prototype.attack = Creature.prototype.attack = function(
 	var target = this.owner.foe;
 	if (
 		!this.status.frozen ||
-		this.active.auto == Actives.overdrive ||
-		this.active.auto == Actives.acceleration
+		this.active.get('auto') == Actives.overdrive ||
+		this.active.get('auto') == Actives.acceleration
 	) {
 		this.trigger('auto');
 	}
@@ -741,7 +741,7 @@ Weapon.prototype.attack = Creature.prototype.attack = function(
 			if (
 				!momentum &&
 				(fsh = target.shield) &&
-				(fsha = fsh.active.shield) &&
+				(fsha = fsh.active.get('shield')) &&
 				(fsha == Actives.wings || fsha == Actives.weight)
 			) {
 				stillblock = fsha(fsh, this);
@@ -761,7 +761,7 @@ Weapon.prototype.attack = Creature.prototype.attack = function(
 			var tryDmg = Math.max(trueatk - truedr, 0);
 			if (
 				!target.shield ||
-				!target.shield.active.shield ||
+				!target.shield.active.get('shield') ||
 				!target.shield.trigger('shield', this, tryDmg)
 			) {
 				if (tryDmg > 0) {
@@ -823,7 +823,7 @@ CardInstance.prototype.useactive = function(target) {
 		new cons(card, owner).place(true);
 	} else if (card.type == SpellEnum) {
 		if (!target || !target.evade(owner)) {
-			card.active.auto.func(this, target);
+			card.active.get('auto').func(this, target);
 		}
 	} else if (card.type == CreatureEnum) {
 		new Creature(card, owner).place(true);

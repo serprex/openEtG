@@ -1,11 +1,15 @@
 'use strict';
+const imm = require('immutable'),
+	util = require('../util'),
+	statuscache = {},
+	activecache = {},
+	activecastcache = {};
 function Card(type, info) {
 	this.type = type;
-	this.element = parseInt(info.E);
+	this.element = info.E;
 	this.name = info.Name;
 	this.code = info.Code;
-	this.tier = parseInt(info.Tier);
-	this.upped = this.code > 6999;
+	this.tier = info.Tier;
 	if (info.Attack) {
 		this.attack = parseInt(info.Attack);
 	}
@@ -15,42 +19,52 @@ function Card(type, info) {
 	this.readCost('cost', info.Cost || '0');
 	if (info.Active) {
 		if (this.type == etg.SpellEnum) {
-			this.active = Actives[info.Active];
+			this.active = new imm.Map({ cast: Actives[info.Active] });
+			this.cast = this.cost;
+			this.castele = this.costele;
 		} else if (info.Active in activecache) {
 			this.active = activecache[info.Active];
 			var castinfo = activecastcache[info.Active];
 			if (castinfo) {
-				this.cast = castinfo[0];
-				this.castele = castinfo[1];
+				[this.cast, this.castele] = castinfo;
 			}
 		} else {
-			activecache[info.Active] = this.active = {};
-			var actives = info.Active.split('+');
-			for (var i = 0; i < actives.length; i++) {
-				var active = actives[i].split('=');
+			this.active = new imm.Map();
+			for (const active of util.iterSplit(info.Active, '+')) {
+				const eqidx = active.indexOf('=');
+				const a0 = ~eqidx ? active.substr(0, eqidx) : 'auto';
+				const cast = this.readCost(a0, this.element);
 				if (active.length == 1) {
-					this.active.auto = Actives[active[0]];
+					this.active = this.active.set('auto', Actives[active[0]]);
 				} else {
 					var iscast = this.readCost('cast', active[0]);
-					this.active[iscast ? 'cast' : active[0]] = Actives[active[1]];
+					this.active = this.active.set(iscast ? 'cast' : active[0], Actives[active[1]]);
 					if (iscast) activecastcache[info.Active] = [this.cast, this.castele];
 				}
-			}
+			}	activecache[info.Active] = this.active;
 		}
-	}
+	} else this.active = new imm.Map();
 	if (info.Status) {
 		if (info.Status in statuscache) {
 			this.status = statuscache[info.Status];
 		} else {
-			statuscache[info.Status] = this.status = {};
-			var statuses = info.Status.split('+');
-			for (var i = 0; i < statuses.length; i++) {
-				var status = statuses[i].split('=');
-				this.status[status[0]] = status.length == 1 || parseInt(status[1]);
+			this.status = new imm.Map();
+			for (const status of util.iterSplit(info.Status, '+')) {
+				const eqidx = status.indexOf('=');
+				this.status = this.status.set(
+					~eqidx ? status.substr(0, eqidx) : status,
+					eqidx == -1 || +status.substr(eqidx + 1),
+				);
 			}
+			statuscache[info.Status] = this.status;
 		}
-	}
+	} else this.status = new imm.Map();
 }
+Object.defineProperty(Card.prototype, 'upped', {
+	get: function() {
+		return (this.code & 0x3fff) > 6999;
+	},
+});
 module.exports = Card;
 Card.prototype.attack = 0;
 Card.prototype.health = 0;
@@ -100,6 +114,3 @@ var Cards = require('./Cards');
 var etgutil = require('../etgutil');
 var skillText = require('./skillText');
 var Actives = require('./Skills');
-var statuscache = {},
-	activecache = {},
-	activecastcache = {};

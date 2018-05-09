@@ -55,10 +55,10 @@ Player.prototype.clone = function(game) {
 	function maybeClone(x) {
 		return x && x.clone(obj);
 	}
-	obj.status = util.clone(this.status);
+	obj.status = this.status;
 	obj.shield = maybeClone(this.shield);
 	obj.weapon = maybeClone(this.weapon);
-	obj.creatureslots = util.clone(this.creatureslots);
+	obj.creatureslots = this.creatureslots.slice();
 	obj.creatures = this.creatures.map(maybeClone);
 	obj.permanents = this.permanents.map(maybeClone);
 	if (this.gpull) {
@@ -125,8 +125,8 @@ Player.prototype.randomquanta = function() {
 	return candidates[this.upto(candidates.length)];
 };
 Player.prototype.canspend = function(qtype, x, cardinst) {
-	if (cardinst && cardinst.card.active && cardinst.card.active.cost)
-		x -= cardinst.card.active.cost(cardinst);
+	if (cardinst && cardinst.card.active && cardinst.card.active.has('cost'))
+		x -= cardinst.card.active.get('cost').func(cardinst);
 	if (x <= 0) return true;
 	if (!qtype) {
 		for (var i = 1; i < 13; i++) {
@@ -139,8 +139,8 @@ Player.prototype.canspend = function(qtype, x, cardinst) {
 	} else return this.quanta[qtype] >= x;
 };
 Player.prototype.spend = function(qtype, x, cardinst) {
-	if (cardinst && cardinst.card.active && cardinst.card.active.cost)
-		x -= cardinst.card.active.cost(cardinst);
+	if (cardinst && cardinst.card.active && cardinst.card.active.has('cost'))
+		x -= cardinst.card.active.get('cost').func(cardinst);
 	if (x == 0) return true;
 	if (!this.canspend(qtype, x)) return false;
 	if (!qtype) {
@@ -181,7 +181,7 @@ Player.prototype.endturn = function(discard) {
 		var cardinst = this.hand[discard];
 		var card = cardinst.card;
 		this.hand.splice(discard, 1);
-		if (card.active.discard) {
+		if (card.active.has('discard')) {
 			card.active.discard.func(cardinst, this);
 		}
 	}
@@ -245,7 +245,7 @@ Player.prototype.endturn = function(discard) {
 			if (cr.status.salvaged) {
 				delete cr.status.salvaged;
 			}
-			if (cr.active.cast == Actives.dshield) {
+			if (cr.active.get('cast') == Actives.dshield) {
 				delete cr.status.immaterial;
 				delete cr.status.psion;
 			}
