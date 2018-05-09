@@ -1938,7 +1938,7 @@ const Skills = {
 			const pl = i ? c.owner : c.owner.foe;
 			const candidates = [];
 			for (let j = 0; j < pl.deck.length; j++) {
-				if (pl.deck[j].type == etg.Creature) candidates.push(j);
+				if (pl.deck[j].card.type == etg.Creature) candidates.push(j);
 			}
 			if (candidates.length) {
 				const idx = pl.choose(candidates),
@@ -1999,7 +1999,7 @@ const Skills = {
 	},
 	trick: (c, t) => {
 		const cards = [];
-		t.owner.deck.forEach((card, i) => {
+		t.owner.deck.forEach(({card}, i) => {
 			if (
 				card.type == etg.Creature &&
 				card.asShiny(false) != t.card.asShiny(false)
