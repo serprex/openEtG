@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 'use strict';
 process.chdir(__dirname);
-const fs = require('fs/promises');
+const fs = require('fs').promises;
 const https = require('https');
 const httpoly = require('httpolyglot');
 const ws = require('ws');

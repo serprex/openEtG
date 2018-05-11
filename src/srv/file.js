@@ -1,6 +1,6 @@
 'use strict';
-const { existsSync, watch } = require('fs'),
-	fs = require('fs/promises'),
+const { existsSync, watch, promises } = require('fs'),
+	fs = promises,
 	gzip = require('./gzip'),
 	sutil = require('./sutil'),
 	etgutil = require('../etgutil'),
