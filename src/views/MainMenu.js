@@ -15,7 +15,7 @@ const etg = require('../etg'),
 	React = require('react'),
 	tipjar = [
 		'Each card in your booster pack has a 50% chance of being from the chosen element',
-		'Your arena deck will earn you 3$ per win & 1$ per loss',
+		"Earn 5$ when your arena deck is faced, & another 10$ when it wins\nEarn 25$ for submitting a new arena deck, or 250$ if it's been a week",
 		'Colosseum lets you compete in a number of daily events for extra prizes. The colosseum challenges reset daily',
 		'Be sure to try the Proving Grounds Quests for some good cards',
 		'Rarity ratings: Grey commons, green uncommons, blue rares, orange shard, & pink ultra rares',
