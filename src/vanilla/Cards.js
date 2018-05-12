@@ -50,19 +50,9 @@ function parseCsv(type, data) {
 				cardinfo[key] = carddata[i];
 			});
 			var cardcode = cardinfo.Code;
-			if (cardcode in exports.Codes) {
-				console.log(
-					cardcode +
-						' duplicate ' +
-						cardinfo.Name +
-						' ' +
-						exports.Codes[cardcode].name,
-				);
-			} else {
-				exports.Codes[cardcode] = new Card(type, cardinfo);
-				if (cardcode < 7000)
-					exports[cardinfo.Name.replace(/\W/g, '')] = exports.Codes[cardcode];
-			}
+			exports.Codes[cardcode] = new Card(type, cardinfo);
+			if (cardcode < 7000)
+				exports[cardinfo.Name.replace(/\W/g, '')] = exports.Codes[cardcode];
 		});
 	}
 }

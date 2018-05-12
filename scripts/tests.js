@@ -31,7 +31,23 @@ class TestModule {
 		console.log('pass ', name);
 	}
 }
-let M = new TestModule('Upped Alignment');
+let M = new TestModule('Card Codes');
+M.test('Codes Unique', function() {
+	const Cjson = require('../src/Cards.json');
+	const codes = new Set();
+	for (let i = 0; i<6; i++) {
+		let cdata = Cjson[i]
+		let codecol = cdata[0].indexOf('Code');
+		for (let j = 1; j<cdata.length; j++) {
+			const cdataj = cdata[j]
+			for (let k = 0; k<cdataj.length; k++) {
+				const code = cdataj[k][codecol];
+				assert.ok(!codes.has(code), "Duplicate code: " + code);
+				codes.add(code);
+			}
+		}
+	}
+});
 M.test('Upped Alignment', function() {
 	for (let key in Cards.Codes) {
 		key |= 0;

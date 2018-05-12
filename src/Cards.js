@@ -87,21 +87,11 @@ function parseCsv(type, data) {
 				cardinfo[key] = carddata[i];
 			});
 			const cardcode = cardinfo.Code;
-			if (cardcode in exports.Codes) {
-				console.log(
-					cardcode +
-						' duplicate ' +
-						cardinfo.Name +
-						' ' +
-						exports.Codes[cardcode].name,
-				);
-			} else {
-				exports.Codes[cardcode] = new Card(type, cardinfo);
-				if (cardcode < 7000)
-					exports[cardinfo.Name.replace(/\W/g, '')] = exports.Codes[cardcode];
-				cardinfo.Code = etgutil.asShiny(cardcode, true);
-				exports.Codes[cardinfo.Code] = new Card(type, cardinfo);
-			}
+			exports.Codes[cardcode] = new Card(type, cardinfo);
+			if (cardcode < 7000)
+				exports[cardinfo.Name.replace(/\W/g, '')] = exports.Codes[cardcode];
+			cardinfo.Code = etgutil.asShiny(cardcode, true);
+			exports.Codes[cardinfo.Code] = new Card(type, cardinfo);
 		});
 	}
 }
