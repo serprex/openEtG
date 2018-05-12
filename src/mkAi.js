@@ -1,4 +1,5 @@
 const etgutil = require('./etgutil'),
+	Cards = require('./Cards'),
 	Decks = require('./Decks.json'),
 	options = require('./options'),
 	RngMock = require('./RngMock'),
@@ -9,14 +10,23 @@ const etgutil = require('./etgutil'),
 	mkDeck = require('./ai/deck'),
 	mkGame = require('./mkGame');
 
-exports.mkPremade = function(level, daily) {
+function run(gamedata) {
+	if (typeof gamedata === 'function') {
+		return () => run(gamedata());
+	}
+	if (gamedata) {
+		store.store.dispatch(store.doNav(require('./views/Match'), gamedata));
+	}
+};
+
+exports.mkPremade = function mkPremade(level, daily) {
 	const name = level == 1 ? 'mage' : 'demigod';
 	return () => {
 		const urdeck = sock.getDeck(),
 			{user} = store.store.getState(),
-			minsize = user ? 31 : 11;
-		if (etgutil.decklength(urdeck) < minsize) {
-			store.store.dispatch(store.chatMsg(`Deck requires ${minsize} cards`, 'System'))
+			minsize = user ? 30 : 10;
+		if (!Cards.isDeckLegal(etgutil.decodedeck(urdeck), user, minsize)) {
+			store.store.dispatch(store.chatMsg(`Invalid deck`, 'System'))
 			return;
 		}
 		const cost = daily !== undefined ? 0 : userutil.pveCostReward[level * 2];
@@ -39,6 +49,7 @@ exports.mkPremade = function(level, daily) {
 			seed: util.randint(),
 			foename: foedata[0],
 			ai: true,
+			rematch: run(mkPremade(level)),
 		};
 		if (level == 1) {
 			gameData.p2hp = 125;
@@ -83,13 +94,13 @@ const randomNames = [
 	'Tammi',
 	'Yuriko',
 ];
-exports.mkAi = function(level, daily) {
+exports.mkAi = function mkAi(level, daily) {
 	return () => {
 		const urdeck = sock.getDeck(),
 			{user} = store.store.getState(),
-			minsize = user ? 31 : 11;
-		if (etgutil.decklength(urdeck) < minsize) {
-			store.store.dispatch(store.chatMsg(`Deck requires ${minsize} cards`, 'System'))
+			minsize = user ? 30 : 10;
+		if (!Cards.isDeckLegal(etgutil.decodedeck(urdeck), user, minsize)) {
+			store.store.dispatch(store.chatMsg(`Invalid deck`, 'System'))
 			return;
 		}
 		const cost = daily !== undefined ? 0 : userutil.pveCostReward[level * 2];
@@ -112,6 +123,7 @@ exports.mkAi = function(level, daily) {
 			foename: RngMock.choose(randomNames),
 			p2drawpower: level == 2 ? 2 : 1,
 			ai: true,
+			rematch: run(mkAi(level)),
 		};
 		if (!user) options.parsepvpstats(gameData);
 		else gameData.cost = cost;
@@ -119,11 +131,4 @@ exports.mkAi = function(level, daily) {
 		return mkGame(gameData);
 	};
 };
-exports.run = function run(gamedata) {
-	if (typeof gamedata === 'function') {
-		return () => run(gamedata());
-	}
-	if (gamedata) {
-		store.store.dispatch(store.doNav(require('./views/Match'), gamedata));
-	}
-};
+exports.run = run;

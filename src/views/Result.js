@@ -151,16 +151,12 @@ module.exports = connect(({user}) => ({user}))(class Result extends React.Compon
 		};
 	}
 
-	onkeydown = (e) => {
-		if (e.target !== document.body) return;
+	onkeydown = e => {
+		if (e.target.tagName === 'TEXTAREA') return;
 		const kc = e.which;
 		if (kc == 32 || kc == 13) this.exitFunc();
-		else if (
-			kc == 87 &&
-			!this.props.game.quest &&
-			this.props.game.daily === undefined
-		) {
-			this.rematch();
+		else if (kc == 87 && this.props.data.rematch) {
+			this.props.data.rematch();
 		}
 	}
 
@@ -193,51 +189,6 @@ module.exports = connect(({user}) => ({user}))(class Result extends React.Compon
 		}
 	}
 
-	rematch = () => {
-		const game = this.props.game,
-			data = this.props.data;
-		switch (game.level) {
-			case 0:
-				mkAi.run(mkAi.mkAi(0)());
-				break;
-			case 1:
-				mkAi.run(mkAi.mkPremade(1)());
-				break;
-			case 2:
-				mkAi.run(mkAi.mkAi(2)());
-				break;
-			case 3:
-				mkAi.run(mkAi.mkPremade(3)());
-				break;
-			case 4:
-				sock.userEmit('foearena', { lv: 0 });
-				break;
-			case 5:
-				sock.userEmit('foearena', { lv: 1 });
-				break;
-			case undefined:
-				if (game.foename == 'Custom' || game.foename == 'Test') {
-					const gameData = {
-						deck: data.deck,
-						urdeck: sock.getDeck(),
-						seed: util.randint(),
-						foename: game.foename,
-						cardreward: '',
-						ai: true,
-					};
-					if (game.foename == 'Custom') {
-						options.parsepvpstats(gameData);
-						options.parseaistats(gameData);
-					} else {
-						gameData.p2hp = data.p2hp;
-						gameData.p2markpower = data.p2markpower;
-						gameData.p2drawpower = data.p2drawpower;
-					}
-					store.store.dispatch(store.doNav(require('./Match'), mkGame(gameData)));
-				}
-		}
-	}
-
 	computeBonuses(game, data, lefttext, streakrate) {
 		if (game.endurance !== undefined) return 1;
 		const bonus = BonusList.reduce((bsum, bonus) => {
@@ -257,8 +208,7 @@ module.exports = connect(({user}) => ({user}))(class Result extends React.Compon
 
 	componentDidMount() {
 		document.addEventListener('keydown', this.onkeydown);
-		const game = this.props.game,
-			data = this.props.data;
+		const {game, data} = this.props;
 		const winner = game.winner === game.player1,
 			foeDeck = data.p2deck,
 			lefttext = [
@@ -363,7 +313,7 @@ module.exports = connect(({user}) => ({user}))(class Result extends React.Compon
 	}
 
 	render() {
-		const {game} = this.props;
+		const game = this.props;
 		const cards = [];
 		if (game.cardreward) {
 			const x0 = 470 - etgutil.decklength(game.cardreward) * 20 - 64;
@@ -380,10 +330,10 @@ module.exports = connect(({user}) => ({user}))(class Result extends React.Compon
 		}
 		return <>
 			<Components.ExitBtn x={412} y={440} onClick={this.exitFunc} />
-			{!game.quest && game.daily === undefined &&
+			{this.props.data.rematch &&
 				<input type='button'
 					value='Rematch'
-					onClick={this.rematch}
+					onClick={this.props.data.rematch}
 					style={{
 						position: 'absolute',
 						left: '412px',

@@ -63,9 +63,9 @@ module.exports = connect(({user})=>({user}))(class Trade extends React.Component
 						? () => {
 								if (this.state.offer.length) {
 									sock.userEmit('confirmtrade', {
-										cards: etgutil.encoderaw(this.state.deck),
+										cards: etgutil.encodedeck(this.state.deck),
 										g: this.state.gold,
-										oppcards: etgutil.encoderaw(this.state.offer),
+										oppcards: etgutil.encodedeck(this.state.offer),
 										gopher: this.state.gopher,
 									});
 									this.setState({ confirm: 2 });
@@ -74,7 +74,7 @@ module.exports = connect(({user})=>({user}))(class Trade extends React.Component
 						: () => {
 								if (this.state.deck.length) {
 									sock.emit('cardchosen', {
-										c: etgutil.encoderaw(this.state.deck),
+										c: etgutil.encodedeck(this.state.deck),
 										g: this.state.gold,
 									});
 									this.setState({ confirm: 1 });

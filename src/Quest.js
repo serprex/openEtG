@@ -5,7 +5,7 @@ const util = require('./util');
 const RngMock = require('./RngMock');
 const Thing = require('./Thing');
 const etgutil = require('./etgutil');
-//Quest data
+const Cards = require('./Cards');
 exports.necromancer = [
 	{
 		deck: '04531027170b52g0c52m0452n018pk',
@@ -657,8 +657,9 @@ exports.mkQuestAi = function(questname, stage, area) {
 	const playerHPstart = quest.urhp || 100;
 	const urdeck = sock.getDeck();
 	const {user} = store.store.getState();
-	if (etgutil.decklength(urdeck) < (user ? 31 : 11)) {
-		return 'ERROR: Your deck is invalid or missing! Please exit & create a valid deck in the deck editor.';
+	if (!Cards.isDeckLegal(etgutil.decodedeck(urdeck), user)) {
+		store.store.dispatch(store.chatMsg(`Invalid deck`, 'System'))
+		return;
 	}
 	const gamedata = require('./mkGame')({
 		deck: quest.deck,

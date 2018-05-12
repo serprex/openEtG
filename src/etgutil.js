@@ -53,17 +53,6 @@ exports.decklength = function(deck) {
 	return r;
 };
 exports.encodedeck = function(deck) {
-	const pool = [];
-	let out = '';
-	deck.forEach(code => {
-		pool[code] = (pool[code] || 0) + 1;
-	});
-	pool.forEach((count, code) => {
-		out += encodeCount(count) + code.toString(32);
-	});
-	return out;
-};
-exports.encoderaw = function(deck) {
 	let out = '',
 		i = 0;
 	while (i < deck.length) {

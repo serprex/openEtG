@@ -1,6 +1,7 @@
 const sock = require('../sock'),
 	Quest = require('../Quest'),
 	Components = require('../Components'),
+	mkAi = require('../mkAi'),
 	store = require('../store'),
 	{connect} = require('react-redux'),
 	React = require('react');
@@ -96,11 +97,7 @@ module.exports = connect(({user})=>({user}))(class QuestArea extends React.Compo
 									}
 								}}
 								onMouseOut={() => this.setState({ info: '' })}
-								onClick={() => {
-									const err = Quest.mkQuestAi(quest, i, this.props.area);
-									if (typeof err === 'string') this.setState({ err });
-									else store.store.dispatch(store.doNav(require('./Match'), err));
-								}}
+								onClick={() => mkAi.run(Quest.mkQuestAi(quest, i, this.props.area))}
 							/>,
 						);
 					}

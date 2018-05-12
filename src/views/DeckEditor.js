@@ -20,7 +20,7 @@ function processDeck(pool, dcode) {
 		}
 	}
 	deck.sort(Cards.codeCmp).splice(60);
-	const cardMinus = Cards.filterDeck(deck, pool);
+	const cardMinus = Cards.filterDeck(deck, pool, true);
 	return { mark, deck, cardMinus };
 }
 
@@ -204,16 +204,9 @@ module.exports = connect(({user}) => ({
 	constructor(props) {
 		super(props);
 
-		const aupped = props.acard && props.acard.upped;
-		const baseacard = props.acard && props.acard.asUpped(false).asShiny(false);
-		const pool = {};
+		const pool = [];
 		function incrpool(code, count) {
-			if (
-				code in Cards.Codes &&
-				(!props.acard ||
-					(!Cards.Codes[code].isOf(baseacard) &&
-						(aupped || !Cards.Codes[code].upped)))
-			) {
+			if (code in Cards.Codes) {
 				pool[code] = (pool[code] || 0) + count;
 			}
 		}
@@ -256,7 +249,7 @@ module.exports = connect(({user}) => ({
 			sock.userExec('setdeck', { name });
 	}
 
-	loadDeck = (name) => {
+	loadDeck = name => {
 		if (!name) return;
 		this.saveDeck(this.props.user.selectedDeck);
 		sock.userExec('setdeck', { name });
@@ -271,7 +264,7 @@ module.exports = connect(({user}) => ({
 				cardMinus={this.state.cardMinus}
 				setDeck={deck => {
 					deck.sort(Cards.codeCmp);
-					const cardMinus = Cards.filterDeck(deck, this.state.pool);
+					const cardMinus = Cards.filterDeck(deck, this.state.pool, true);
 					this.setState({deck, cardMinus});
 				}}
 				setMark={mark => this.setState({mark})}

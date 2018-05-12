@@ -12,6 +12,26 @@ const Cards = require('../Cards'),
 function RenderInfo(props) {
 	const {info, y} = props;
 	if (info) {
+		const testDeck = () => {
+			const deck = sock.getDeck();
+			if (etgutil.decklength(deck) < 9 || etgutil.decklength(adeck) < 9) {
+				store.store.dispatch(store.chatMsg('Deck too small'));
+				return;
+			}
+			const gameData = mkGame({
+				deck: adeck,
+				urdeck: deck,
+				seed: util.randint(),
+				foename: 'Test',
+				cardreward: '',
+				p2hp: info.curhp,
+				p2markpower: info.mark,
+				p2drawpower: info.draw,
+				ai: true,
+				rematch: testDeck,
+			});
+			store.store.dispatch(store.doNav(require('./Match'), gameData));
+		};
 		const card = y ? etgutil.asUpped(info.card, true) : info.card;
 		const adeck = '05' + card.toString(32) + info.deck;
 		return <>
@@ -65,25 +85,7 @@ function RenderInfo(props) {
 					left: '600px',
 					top: 224 + y + 'px',
 				}}
-				onClick={() => {
-					const deck = sock.getDeck();
-					if (etgutil.decklength(deck) < 9 || etgutil.decklength(adeck) < 9) {
-						store.store.dispatch(store.chatMsg('Deck too small'));
-						return;
-					}
-					const gameData = mkGame({
-						deck: adeck,
-						urdeck: deck,
-						seed: util.randint(),
-						foename: 'Test',
-						cardreward: '',
-						p2hp: info.curhp,
-						p2markpower: info.mark,
-						p2drawpower: info.draw,
-						ai: true,
-					});
-					store.store.dispatch(store.doNav(require('./Match'), gameData));
-				}}
+				onClick={testDeck}
 			/>
 		</>;
 	} else {

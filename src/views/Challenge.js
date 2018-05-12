@@ -1,5 +1,6 @@
 const sock = require('../sock'),
 	util = require('../util'),
+	Cards = require('../Cards'),
 	mkGame = require('../mkGame'),
 	etgutil = require('../etgutil'),
 	options = require('../options'),
@@ -11,8 +12,8 @@ const sock = require('../sock'),
 function sendChallenge(foe) {
 	const deck = sock.getDeck(),
 		{user} = store.store.getState();
-	if (etgutil.decklength(deck) < (user ? 31 : 9)) {
-		store.store.dispatch(store.doNav(require('./DeckEditor')));
+	if (!Cards.isDeckLegal(etgutil.decodedeck(urdeck), user)) {
+		store.store.dispatch(store.chatMsg(`Invalid deck`, 'System'))
 		return;
 	}
 	const gameData = {};
@@ -86,6 +87,7 @@ module.exports = connect(({user, opts}) => ({
 				foename: 'Custom',
 				cardreward: '',
 				ai: true,
+				rematch: aiClick,
 			};
 			options.parsepvpstats(gameData);
 			options.parseaistats(gameData);

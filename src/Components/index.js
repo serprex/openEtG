@@ -39,6 +39,7 @@ function CardImage(props) {
 			top: props.y + 'px',
 			whiteSpace: 'nowrap',
 			overflow: 'hidden',
+			opacity: props.opacity,
 		}}>
 		{card.name}
 		{!!card.cost && <span
@@ -149,35 +150,45 @@ exports.Card = function(props) {
 function DeckDisplay(props) {
 	let mark = -1,
 		j = -1;
-	const children = [];
+	const children = [], codeCount = [];
 	for (let i=0; i<props.deck.length; i++) {
 		const code = props.deck[i], card = Cards.Codes[code];
 		if (card) {
 			j++;
+			let opacity;
+			if (props.pool && !card.isFree()) {
+				codeCount[code] = (codeCount[code] || 0)+1;
+				if (!props.pool[code] || codeCount[code] > props.pool) {
+					opacity = '.5';
+				}
+			}
 			children.push(<CardImage
+				key={j}
 				card={card}
 				onMouseOver={props.onMouseOver && (() => props.onMouseOver(i, code))}
 				onClick={props.onClick && (() => props.onClick(i, code))}
 				x={(props.x || 0) + 100 + Math.floor(j / 10) * 99}
 				y={(props.y || 0) + 32 + (j % 10) * 19}
+				opacity={opacity}
 			/>);
 		} else {
 			const ismark = etgutil.fromTrueMark(code);
 			if (~ismark) mark = ismark;
 		}
 	}
-	if (~mark && props.renderMark) {
-		children.push(
+	return <>
+		{children}
+		{mark !== -1 && props.renderMark &&
 			<span className={'ico e' + mark}
 				style={{
 					position: 'absolute',
 					left: (props.x || 0) + 66 + 'px',
 					top: (props.y || 0) + 200 + 'px',
+					border: opacity && '2px #f00 solid',
 				}}
 			/>
-		);
-	}
-	return children;
+		}
+	</>
 }
 exports.DeckDisplay = DeckDisplay;
 
@@ -214,52 +225,40 @@ function ElementSelector(props) {
 exports.ElementSelector = ElementSelector;
 
 function CardSelectorColumn(props) {
+	function maybeShiny(code) {
+		if (props.filterboth && !props.shiny) {
+			const scode = etgutil.asShiny(code, 1);
+			if (
+				scode in props.cardpool &&
+				props.cardpool[scode] >
+				((props.cardminus && props.cardminus[scode]) ||
+					0)
+			) {
+				return scode;
+			}
+		}
+		return code;
+	}
 	const children = [], countTexts = [];
 	for (let j = 0; j < props.cards.length; j++) {
 		const y = props.y + j * 19,
-			card = props.cards[j];
-		let code = card.code;
+			card = props.cards[j],
+			code = card.code;
 		children.push(
 			<CardImage
-			x={props.x}
-			y={y}
-			card={card}
-			onClick={
-				props.onClick &&
-				function() {
-					if (props.filterboth && !props.shiny) {
-						const scode = card.asShiny(true).code;
-						if (
-							scode in props.cardpool &&
-							props.cardpool[scode] >
-							((props.cardminus && props.cardminus[scode]) ||
-								0)
-						) {
-							code = scode;
-						}
-					}
-					return props.onClick(code);
-				}}
-			onMouseOver={
-				props.onMouseOver &&
-				function() {
-					if (props.filterboth && !props.shiny) {
-						const scode = card.asShiny(true).code;
-						if (
-							scode in props.cardpool &&
-							props.cardpool[scode] >
-							((props.cardminus && props.cardminus[scode]) ||
-								0)
-						) {
-							code = scode;
-						}
-					}
-					return props.onMouseOver(code);
-				}}
+				x={props.x}
+				y={y}
+				card={card}
+				onClick={props.onClick && (() =>
+					props.onClick(maybeShiny(code))
+				)}
+				onMouseOver={props.onMouseOver && (() =>
+					props.onMouseOver(maybeShiny(code))
+				)}
 			/>
 		);
 		if (props.cardpool) {
-			const scode = etgutil.asShiny(card.code, true);
+			const scode = etgutil.asShiny(code, true);
 			const cardAmount = card.isFree()
 				? '-'
 				: code in props.cardpool

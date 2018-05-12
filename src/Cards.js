@@ -47,7 +47,7 @@ function sumCardMinus(cardMinus, code) {
 	}
 	return sum;
 }
-exports.filterDeck = function(deck, pool) {
+exports.filterDeck = function(deck, pool, preserve) {
 	const cardMinus = [];
 	for (let i = deck.length - 1; i >= 0; i--) {
 		let code = deck[i],
@@ -69,13 +69,44 @@ exports.filterDeck = function(deck, pool) {
 				} else if ((cardMinus[code] || 0) < (pool[code] || 0)) {
 					deck[i] = code;
 					cardMinus[code] = (cardMinus[code] || 0) + 1;
-				} else {
+				} else if (!preserve) {
 					deck.splice(i, 1);
 				}
 			}
 		}
 	}
 	return cardMinus;
+}
+exports.isDeckLegal = function(deck, user, minsize = 30) {
+	function incrpool(code, count) {
+		if (code in exports.Codes) {
+			pool[code] = (pool[code] || 0) + count;
+		}
+	}
+	let pool;
+	if (user) {
+		pool = [];
+		etgutil.iterraw(user.pool, incrpool);
+		etgutil.iterraw(user.accountbound, incrpool);
+	}
+	const cardMinus = [];
+	if (deck.length < minsize || deck.length > 60) return false;
+	for (let i = deck.length - 1; i >= 0; i--) {
+		let code = deck[i],
+			card = exports.Codes[code];
+		if (~etgutil.fromTrueMark(deck[i])) continue;
+		if (!card || (card.type != etg.Pillar && sumCardMinus(cardMinus, code) == 6)) {
+			return false;
+		}
+		if (!card.isFree() && pool) {
+			if ((cardMinus[code] || 0) < (pool[code] || 0)) {
+				cardMinus[code] = (cardMinus[code] || 0) + 1;
+			} else {
+				return false;
+			}
+		}
+	}
+	return true;
 }
 function parseCsv(type, data) {
 	const keys = data[0],

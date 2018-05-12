@@ -31,6 +31,7 @@ function mkDaily(type) {
 								daily: 2,
 								cardreward: '',
 							};
+				gamedata.rematch = () => !(store.store.getState().user.daily & (1<<type)) && mkAi.run(mkDaily(type))();
 				gamedata.game.addData(dataNext);
 				gamedata.game.dataNext = dataNext;
 			}
@@ -41,6 +42,7 @@ function mkDaily(type) {
 			const gamedata = mkAi.mkPremade(type == 3 ? 1 : 3, type)();
 			if (gamedata) {
 				gamedata.game.addonreward = type == 3 ? 90 : 200;
+				gamedata.rematch = undefined;
 				sock.userExec('donedaily', { daily: type });
 			}
 			mkAi.run(gamedata);
@@ -53,8 +55,8 @@ module.exports = connect(({user})=>({user}))(function Colosseum(props) {
 	const events = [
 		'Novice Endurance Fight 3 Commoners in a row without healing in between. May try until you win.',
 		'Expert Endurance: Fight 2 Champions in a row. May try until you win.',
-		'Novice Duel: Fight ' + magename + '. Only one attempt allowed.',
-		'Expert Duel: Fight ' + dgname + '. Only one attempt allowed.',
+		`Novice Duel: Fight ${magename}. Only one attempt allowed.`,
+		`Expert Duel: Fight ${dgname}. Only one attempt allowed.`,
 	];
 	const eventui = [];
 	for (let i = 1; i < 5; i++) {

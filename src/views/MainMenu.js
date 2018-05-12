@@ -206,8 +206,8 @@ module.exports = connect(({user, opts}) => ({
 			arenac = [];
 		for (let i = 0; i < 2; i++) {
 			function arenaAi(e) {
-				if (etgutil.decklength(sock.getDeck()) < 31) {
-					self.props.dispatch(store.doNav(require('./DeckEditor')));
+				if (!Cards.isDeckLegal(etgutil.decodedeck(self.props.user.deck), self.props.user)) {
+					store.store.dispatch(store.chatMsg(`Invalid deck`, 'System'))
 					return;
 				}
 				const cost = userutil.arenaCost(i);

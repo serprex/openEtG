@@ -40,7 +40,7 @@ module.exports = class Editor extends React.PureComponent {
 					newdeck.splice(i, 1);
 					this.props.setDeck(newdeck);
 				}}
-				deck={this.props.deck}
+				deck={this.props.deck} pool={this.props.pool}
 			/>
 			<Components.CardSelector
 				onMouseOver={this.setCardArt}

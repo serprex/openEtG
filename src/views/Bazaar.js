@@ -32,7 +32,7 @@ module.exports = connect(({user})=>({user}))(class Bazaar extends React.Componen
 					}}
 					onClick={() => {
 						sock.userExec('bazaar', {
-							cards: etgutil.encoderaw(this.state.deck),
+							cards: etgutil.encodedeck(this.state.deck),
 						});
 						store.store.dispatch(store.doNav(require('./MainMenu')));
 					}}
