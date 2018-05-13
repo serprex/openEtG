@@ -1,5 +1,6 @@
 'use strict';
-const Components = require('../Components'),
+const etgutil = require('../etgutil'),
+	Components = require('../Components'),
 	React = require('react');
 
 module.exports = class Editor extends React.PureComponent {
@@ -18,6 +19,23 @@ module.exports = class Editor extends React.PureComponent {
 	addCard = code => {
 		if (this.props.deck.length < 60)
 			this.props.setDeck(this.props.deck.concat([code]));
+	}
+
+	rmCard = code => {
+		const idx = this.props.deck.indexOf(code);
+		if (~idx) {
+			const newdeck = this.props.deck.slice();
+			newdeck.splice(idx, 1);
+			this.props.setDeck(newdeck);
+		} else {
+			code = etgutil.asShiny(code, 1);
+			const idx = this.props.deck.indexOf(code);
+			if (~idx) {
+				const newdeck = this.props.deck.slice();
+				newdeck.splice(idx, 1);
+				this.props.setDeck(newdeck);
+			}
+		}
 	}
 
 	render() {
@@ -45,6 +63,7 @@ module.exports = class Editor extends React.PureComponent {
 			<Components.CardSelector
 				onMouseOver={this.setCardArt}
 				onClick={this.addCard}
+				onContextMenu={this.rmCard}
 				maxedIndicator={!this.props.acard}
 				filterboth={!!this.props.pool}
 				cardpool={this.props.pool}

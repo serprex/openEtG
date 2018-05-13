@@ -30,6 +30,7 @@ function CardImage(props) {
 		className='cardslot'
 		onMouseOver={props.onMouseOver}
 		onClick={props.onClick}
+		onContextMenu={props.onContextMenu}
 		style={{
 			backgroundColor: bgcol,
 			borderColor: props.opacity ? '#f00' : bordcol,
@@ -159,8 +160,8 @@ function DeckDisplay(props) {
 			if (props.pool && !card.isFree()) {
 				const bcode = etgutil.asShiny(etgutil.asUpped(code, 0), 0);
 				codeCount[code] = (codeCount[code] || 0)+1;
-				bcodeCount[bcode] = (codeCount[bcode] || 0)+1;
-				if (codeCount[code] > (props.pool[code] || 0) || (card.type !== etg.Pillar && codeCount[bcode] > 6)) {
+				bcodeCount[bcode] = (bcodeCount[bcode] || 0)+1;
+				if (codeCount[code] > (props.pool[code] || 0) || (card.type !== etg.Pillar && bcodeCount[bcode] > 6)) {
 					opacity = '.5';
 				}
 			}
@@ -253,6 +254,10 @@ function CardSelectorColumn(props) {
 				onClick={props.onClick && (() =>
 					props.onClick(maybeShiny(code))
 				)}
+				onContextMenu={props.onContextMenu && (e => {
+					e.preventDefault();
+					props.onContextMenu(code);
+				})}
 				onMouseOver={props.onMouseOver && (() =>
 					props.onMouseOver(maybeShiny(code))
 				)}
