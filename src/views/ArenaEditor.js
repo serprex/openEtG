@@ -74,7 +74,7 @@ module.exports = connect(({user}) => ({user}))(class ArenaEditor extends React.C
 		}
 		etgutil.iterraw(props.user.pool, incrpool);
 		etgutil.iterraw(props.user.accountbound, incrpool);
-		pool[this.props.acard.code] = 0;
+		pool[this.props.acard.code] = 5;
 		let mark = 0,
 			deck = etgutil.decodedeck(props.adeck);
 		for (let i = deck.length - 1; i >= 0; i--) {
@@ -99,7 +99,9 @@ module.exports = connect(({user}) => ({user}))(class ArenaEditor extends React.C
 	setDeck = deck => {
 		deck.sort(Cards.codeCmp);
 		const cardMinus = Cards.filterDeck(deck, this.state.pool);
-		this.setState({cardMinus, deck});
+		const acode = this.props.acard.code;
+		cardMinus[acode] = 5;
+		this.setState({cardMinus, deck: deck.filter(x => x !== acode)});
 	}
 
 	render() {
