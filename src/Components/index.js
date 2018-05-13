@@ -32,7 +32,7 @@ function CardImage(props) {
 		onClick={props.onClick}
 		style={{
 			backgroundColor: bgcol,
-			borderColor: bordcol,
+			borderColor: props.opacity ? '#f00' : bordcol,
 			color: card && card.upped ? '#000' : '#fff',
 			position: 'absolute',
 			left: props.x + 'px',
@@ -150,15 +150,17 @@ exports.Card = function(props) {
 function DeckDisplay(props) {
 	let mark = -1,
 		j = -1;
-	const children = [], codeCount = [];
+	const children = [], codeCount = [], bcodeCount = [];
 	for (let i=0; i<props.deck.length; i++) {
 		const code = props.deck[i], card = Cards.Codes[code];
 		if (card) {
 			j++;
 			let opacity;
 			if (props.pool && !card.isFree()) {
+				const bcode = etgutil.asShiny(etgutil.asUpped(code, 0), 0);
 				codeCount[code] = (codeCount[code] || 0)+1;
-				if (!props.pool[code] || codeCount[code] > props.pool) {
+				bcodeCount[bcode] = (codeCount[bcode] || 0)+1;
+				if (codeCount[code] > (props.pool[code] || 0) || (card.type !== etg.Pillar && codeCount[bcode] > 6)) {
 					opacity = '.5';
 				}
 			}
@@ -184,7 +186,6 @@ function DeckDisplay(props) {
 					position: 'absolute',
 					left: (props.x || 0) + 66 + 'px',
 					top: (props.y || 0) + 200 + 'px',
-					border: opacity && '2px #f00 solid',
 				}}
 			/>
 		}

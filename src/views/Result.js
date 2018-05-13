@@ -313,7 +313,7 @@ module.exports = connect(({user}) => ({user}))(class Result extends React.Compon
 	}
 
 	render() {
-		const game = this.props;
+		const {game} = this.props;
 		const cards = [];
 		if (game.cardreward) {
 			const x0 = 470 - etgutil.decklength(game.cardreward) * 20 - 64;

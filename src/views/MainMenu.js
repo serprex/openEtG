@@ -206,7 +206,7 @@ module.exports = connect(({user, opts}) => ({
 			arenac = [];
 		for (let i = 0; i < 2; i++) {
 			function arenaAi(e) {
-				if (!Cards.isDeckLegal(etgutil.decodedeck(self.props.user.deck), self.props.user)) {
+				if (!Cards.isDeckLegal(etgutil.decodedeck(sock.getDeck()), self.props.user)) {
 					store.store.dispatch(store.chatMsg(`Invalid deck`, 'System'))
 					return;
 				}

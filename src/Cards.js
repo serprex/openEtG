@@ -52,7 +52,7 @@ exports.filterDeck = function(deck, pool, preserve) {
 	for (let i = deck.length - 1; i >= 0; i--) {
 		let code = deck[i],
 			card = exports.Codes[code];
-		if (card.type != etg.Pillar) {
+		if (!preserve && card.type != etg.Pillar) {
 			if (sumCardMinus(cardMinus, code) == 6) {
 				deck.splice(i, 1);
 				continue;
@@ -79,9 +79,7 @@ exports.filterDeck = function(deck, pool, preserve) {
 }
 exports.isDeckLegal = function(deck, user, minsize = 30) {
 	function incrpool(code, count) {
-		if (code in exports.Codes) {
-			pool[code] = (pool[code] || 0) + count;
-		}
+		pool[code] = (pool[code] || 0) + count;
 	}
 	let pool;
 	if (user) {
@@ -92,9 +90,9 @@ exports.isDeckLegal = function(deck, user, minsize = 30) {
 	const cardMinus = [];
 	if (deck.length < minsize || deck.length > 60) return false;
 	for (let i = deck.length - 1; i >= 0; i--) {
-		let code = deck[i],
-			card = exports.Codes[code];
-		if (~etgutil.fromTrueMark(deck[i])) continue;
+		const code = deck[i];
+		if (~etgutil.fromTrueMark(code)) continue;
+		const card = exports.Codes[code];
 		if (!card || (card.type != etg.Pillar && sumCardMinus(cardMinus, code) == 6)) {
 			return false;
 		}

@@ -94,6 +94,19 @@ const sockEvents = {
 			arena: data.name,
 			level: 4 + data.lv,
 			ai: true,
+			rematch: () => {
+				const {user} = store.store.getState();
+				if (!Cards.isDeckLegal(etgutil.decodedeck(exports.getDeck()), user)) {
+					store.store.dispatch(store.chatMsg(`Invalid deck`, 'System'))
+					return;
+				}
+				const cost = userutil.arenaCost(data.lv);
+				if (user.gold < cost) {
+					store.store.dispatch(store.chatMsg(`Requires ${cost}$`, 'System'));
+					return;
+				}
+				sock.userEmit('foearena', { lv: data.lv });
+			}
 		});
 		gamedata.game.cost = userutil.arenaCost(data.lv);
 		const {user} = store.store.getState();
