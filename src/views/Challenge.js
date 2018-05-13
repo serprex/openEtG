@@ -12,7 +12,7 @@ const sock = require('../sock'),
 function sendChallenge(foe) {
 	const deck = sock.getDeck(),
 		{user} = store.store.getState();
-	if (!Cards.isDeckLegal(etgutil.decodedeck(urdeck), user)) {
+	if (!Cards.isDeckLegal(etgutil.decodedeck(deck), user)) {
 		store.store.dispatch(store.chatMsg(`Invalid deck`, 'System'))
 		return;
 	}

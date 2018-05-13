@@ -144,8 +144,8 @@ Player.prototype.canspend = function(qtype, x) {
 	for (let i = 1; i < 13; i++) x -= this.quanta[i];
 	return x <= 0;
 };
-Player.prototype.spend = function(qtype, x) {
-	if (x == 0 || (x < 0 && this.flatline)) return true;
+Player.prototype.spend = function(qtype, x, scramble) {
+	if (x == 0 || (!scramble && x < 0 && this.flatline)) return true;
 	if (!this.canspend(qtype, x)) return false;
 	if (!qtype) {
 		const b = x < 0 ? -1 : 1;

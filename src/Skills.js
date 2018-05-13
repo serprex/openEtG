@@ -1711,8 +1711,8 @@ const Skills = {
 	scramble: (c, t) => {
 		if (t.type == etg.Player && !t.sanctuary) {
 			for (let i = 0; i < 9; i++) {
-				if (t.spend(etg.Chroma, 1)) {
-					t.spend(etg.Chroma, -1);
+				if (t.spend(etg.Chroma, 1, true)) {
+					t.spend(etg.Chroma, -1, true);
 				}
 			}
 		}

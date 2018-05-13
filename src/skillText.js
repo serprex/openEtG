@@ -387,8 +387,8 @@ const data = {
 	scatterhand:
 		'Target player shuffles their hand, & draws as many cards. Draw a card',
 	scramble: {
-		hit: "Randomly scramble foe's quanta on hit",
-		cast: "Randomly scramble target player's quanta",
+		hit: "Randomly scramble 9 of foe's quanta on hit",
+		cast: "Randomly scramble 9 of target player's quanta",
 	},
 	serendipity: [
 		'Generate 3 random non-pillar cards in hand. One will be 1:1',
