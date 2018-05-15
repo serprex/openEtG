@@ -105,7 +105,7 @@ const sockEvents = {
 					store.store.dispatch(store.chatMsg(`Requires ${cost}$`, 'System'));
 					return;
 				}
-				sock.userEmit('foearena', { lv: data.lv });
+				exports.userEmit('foearena', { lv: data.lv });
 			}
 		});
 		gamedata.game.cost = userutil.arenaCost(data.lv);

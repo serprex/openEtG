@@ -31,7 +31,7 @@ function mkDaily(type) {
 								daily: 2,
 								cardreward: '',
 							};
-				gamedata.rematch = () => !(store.store.getState().user.daily & (1<<type)) && mkAi.run(mkDaily(type))();
+				gamedata.rematch = () => !(store.store.getState().user.daily & (1<<type)) && mkDaily(type)();
 				gamedata.game.addData(dataNext);
 				gamedata.game.dataNext = dataNext;
 			}
