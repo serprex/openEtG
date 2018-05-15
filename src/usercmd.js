@@ -2,15 +2,6 @@ const Cards = require('./Cards'),
 	etgutil = require('./etgutil'),
 	userutil = require('./userutil');
 
-exports.bazaar = function(data, user) {
-	const cost = Math.ceil(userutil.calcWealth(data.cards, true) * 3);
-	if (user.gold >= cost) {
-		return {
-			gold: user.gold - cost,
-			pool: etgutil.mergedecks(user.pool, data.cards),
-		};
-	}
-};
 exports.sellcard = function(data, user) {
 	if (etgutil.count(user.pool, data.card)) {
 		const card = Cards.Codes[data.card];

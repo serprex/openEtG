@@ -519,18 +519,6 @@ module.exports = connect(({user, opts}) => ({
 							}}
 						/>
 						<input type='button'
-							value='Bazaar'
-							onClick={() => {
-								this.props.dispatch(store.doNav(require('./Bazaar')));
-							}}
-							onMouseOver={this.mkSetTip('Buy singles at a 300% premium')}
-							style={{
-								position: 'absolute',
-								left: '114px',
-								top: '132px',
-							}}
-						/>
-						<input type='button'
 							value='Upgrade'
 							onClick={() => {
 								this.props.dispatch(store.doNav(require('./Upgrade')));
