@@ -51,7 +51,7 @@ module.exports = connect(({user, opts}) => ({
 						this.props.user.accountbound,
 						data.cards,
 					);
-					const freepacks = this.props.freepacks && this.props.freepacks.slice();
+					const freepacks = this.props.user.freepacks && this.props.user.freepacks.slice();
 					if (freepacks) {
 						freepacks[data.packtype]--;
 						userdelta.freepacks = freepacks;
