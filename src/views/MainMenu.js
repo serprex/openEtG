@@ -432,17 +432,17 @@ module.exports = connect(({user, opts}) => ({
 					<AiButton name='Mage'
 						y={90} lv={1}
 						onClick={mkAi.run(mkAi.mkPremade(1))}
-						onMouseOver={this.mkSetTip('Commoners have no upgraded cards & mostly common cards')}
+						onMouseOver={this.mkSetTip('Mages have preconstructed decks with a couple rares')}
 					/>
 					<AiButton name='Champion'
 						y={112} lv={2}
 						onClick={mkAi.run(mkAi.mkAi(2))}
-						onMouseOver={this.mkSetTip('Commoners have no upgraded cards & mostly common cards')}
+						onMouseOver={this.mkSetTip('Champions have some upgraded cards')}
 					/>
 					<AiButton name='Demigod'
 						y={134} lv={3}
 						onClick={mkAi.run(mkAi.mkPremade(3))}
-						onMouseOver={this.mkSetTip('Commoners have no upgraded cards & mostly common cards')}
+						onMouseOver={this.mkSetTip('Demigods are extremely powerful. Come prepared for anything')}
 					/>
 					{self.props.user ? <>
 						<div style={{
