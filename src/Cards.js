@@ -88,10 +88,11 @@ exports.isDeckLegal = function(deck, user, minsize = 30) {
 		etgutil.iterraw(user.accountbound, incrpool);
 	}
 	const cardMinus = [];
-	if (deck.length < minsize || deck.length > 60) return false;
+	let dlen = 0;
 	for (let i = deck.length - 1; i >= 0; i--) {
 		const code = deck[i];
 		if (~etgutil.fromTrueMark(code)) continue;
+		dlen++;
 		const card = exports.Codes[code];
 		if (!card || (card.type != etg.Pillar && sumCardMinus(cardMinus, code) == 6)) {
 			return false;
@@ -104,6 +105,7 @@ exports.isDeckLegal = function(deck, user, minsize = 30) {
 			}
 		}
 	}
+	if (dlen < minsize || dlen > 60) return false;
 	return true;
 }
 function parseCsv(type, data) {

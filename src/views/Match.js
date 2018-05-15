@@ -655,7 +655,7 @@ module.exports = connect(({user}) => ({user}))(class Match extends React.Compone
 			tooltip:
 				<Components.Text
 					className='infobox'
-					text={obj.info() + (actinfo ? '\n' + actinfo : '')}
+					text={obj.info() + (actinfo ? '\n' + actinfo(obj, this.props.game) : '')}
 					icoprefix='te'
 					style={{
 						position: 'absolute',
