@@ -210,7 +210,6 @@ module.exports = connect(({user}) => ({user}))(class Result extends React.Compon
 		document.addEventListener('keydown', this.onkeydown);
 		const {game, data} = this.props;
 		const winner = game.winner === game.player1,
-			foeDeck = data.p2deck,
 			lefttext = [
 				<div>{game.ply} plies</div>,
 				<div>{(game.time / 1000).toFixed(1)} seconds</div>,
@@ -221,18 +220,19 @@ module.exports = connect(({user}) => ({user}))(class Result extends React.Compon
 				if (game.level !== undefined || !game.ai)
 					sock.userExec('addwin', { pvp: !game.ai });
 				if (!game.quest && game.ai) {
-					if (game.cardreward === undefined && foeDeck) {
-						let winnable = foeDeck.filter(
-								card => card.rarity > 0 && card.rarity < 4,
-							),
+					if (game.cardreward === undefined && data.deck) {
+						const foeDeck = etgutil.decodedeck(data.deck);
+						let winnable = foeDeck.filter(code => {
+								const card = Cards.Codes[code];
+								return card && card.rarity > 0 && card.rarity < 4;
+							}),
 							cardwon;
 						if (winnable.length) {
 							cardwon = RngMock.choose(winnable);
 							if (cardwon == 3 && Math.random() < 0.5)
 								cardwon = RngMock.choose(winnable);
 						} else {
-							const elewin =
-								foeDeck[Math.floor(Math.random() * foeDeck.length)];
+							const elewin = RngMock.choose(foeDeck);
 							cardwon = RngMock.randomcard(
 								elewin.upped,
 								x =>
@@ -241,11 +241,8 @@ module.exports = connect(({user}) => ({user}))(class Result extends React.Compon
 									x.rarity <= 3,
 							);
 						}
-						if (game.level !== undefined && game.level < 2) {
-							cardwon = cardwon.asUpped(false);
-						}
 						game.cardreward =
-							'01' + etgutil.asShiny(cardwon.code, false).toString(32);
+							'01' + etgutil.asShiny(cardwon, false).toString(32);
 					}
 					if (!game.goldreward) {
 						let goldwon;
