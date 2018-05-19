@@ -110,9 +110,6 @@ const sockEvents = {
 		});
 		gamedata.game.cost = userutil.arenaCost(data.lv);
 		const {user} = store.store.getState();
-		store.store.dispatch(store.updateUser({
-			gold: user.gold - gamedata.game.cost,
-		}));
 		store.store.dispatch(store.doNav(require('./views/Match'), gamedata));
 	},
 	tradegive: (data) => {

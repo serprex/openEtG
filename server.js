@@ -233,9 +233,6 @@ const sockmeta = new WeakMap();
 		foearena: function(data, user) {
 			db.zcard(`arena${data.lv ? '1' : ''}`, (err, len) => {
 				if (!len) return;
-				const cost = userutil.arenaCost(data.lv);
-				if (user.gold < cost) return;
-				user.gold -= cost;
 				const idx = RngMock.upto(Math.min(len, 20));
 				db.zrevrange('arena' + (data.lv ? '1' : ''), idx, idx, (err, aname) => {
 					if (!aname || !aname.length) {
