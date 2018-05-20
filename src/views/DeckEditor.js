@@ -1,6 +1,6 @@
 const etgutil = require('../etgutil'),
 	Cards = require('../Cards'),
-	Tutor = require('../Tutor'),
+	Tutor = require('../Components/Tutor'),
 	sock = require('../sock'),
 	store = require('../store'),
 	Editor = require('../Components/Editor'),

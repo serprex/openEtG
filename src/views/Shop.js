@@ -1,6 +1,6 @@
 const svg = require('../svg'),
 	sock = require('../sock'),
-	Tutor = require('../Tutor'),
+	Tutor = require('../Components/Tutor'),
 	etgutil = require('../etgutil'),
 	options = require('../options'),
 	Components = require('../Components'),

@@ -9,6 +9,7 @@ favicon.png
 .ninja_deps
 *pushserver.sh
 scripts/deploypem.sh
+scripts/backdb.sh
 *.pem
 bundle.*.js
 bundle.*.js.map
