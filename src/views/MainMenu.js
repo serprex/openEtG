@@ -11,6 +11,7 @@ const etg = require('../etg'),
 	RngMock = require('../RngMock'),
 	Components = require('../Components'),
 	userutil = require('../userutil'),
+	parseChat = require('../parseChat'),
 	{ connect } = require('react-redux'),
 	React = require('react'),
 	tipjar = [
@@ -371,7 +372,7 @@ module.exports = connect(({user, opts}) => ({
 						}
 						{arenac}
 					</CostRewardHeaders>
-					{ this.state.showcard ?
+					{this.state.showcard ?
 						<Components.Card x={92} y={340} card={this.state.showcard} />
 						: <>
 							<Chat channel='Main'
@@ -379,23 +380,15 @@ module.exports = connect(({user, opts}) => ({
 									position: 'absolute',
 									left: '72px',
 									top: '228px',
-									width: '224px',
+									width: '226px',
 									height: '300px',
-									overflow: 'hidden',
 									background: 'transparent',
 									fontSize: '14px',
 									opacity: '0.6',
 								}}
 							/>
-							<input
-								placeholder='Chat'
-								onKeyDown={e => {
-									if (e.which == 13) {
-										if (!e.target.value.match(/^\s*$/))
-											sock.userEmit('chat', { msg: e.target.value });
-										e.target.value = '';
-									}
-								}}
+							<input placeholder='Chat'
+								onKeyDown={parseChat}
 								style={{
 									position: 'absolute',
 									left: '99px',
