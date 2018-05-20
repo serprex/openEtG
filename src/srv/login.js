@@ -87,14 +87,12 @@ module.exports = function(sockEmit) {
 			sockEmit(this, 'login', { err: 'No name' });
 			return;
 		} else {
-			Us.load(
-				name,
-				user => loginRespond(this, user, data.p, data.a),
-				() => {
+			Us.load(name).
+				then(user => loginRespond(this, user, data.p, data.a)).
+				catch(() => {
 					const user = (Us.users[name] = { name: name, gold: 0 });
-					loginRespond(this, user, data.p, data.a);
-				},
-			);
+					return loginRespond(this, user, data.p, data.a);
+				});
 		}
 	}
 	return loginAuth;

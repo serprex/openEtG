@@ -209,7 +209,7 @@ const sockmeta = new WeakMap();
 				});
 		},
 		modarena: function(data, user) {
-			Us.load(data.aname, user => (user.gold += data.won ? 15 : 5));
+			Us.load(data.aname).then(user => (user.gold += data.won ? 15 : 5)).catch(()=>{});
 			const arena = 'arena' + (data.lv ? '1' : ''),
 				akey = (data.lv ? 'B:' : 'A:') + data.aname;
 			db.zscore(arena, data.aname, (err, score) => {
@@ -646,9 +646,8 @@ const sockmeta = new WeakMap();
 							}
 							if (json.success) {
 								const name = 'Kong:' + json.username;
-								Us.load(
-									name,
-									user => {
+								Us.load(name).
+									then(user => {
 										user.auth = data.g;
 										sockEvents.login.call(this, { u: name, a: data.g });
 										const req = https.request({
@@ -658,16 +657,15 @@ const sockmeta = new WeakMap();
 										}).on('error', e => console.log(e));
 										req.write(`user_id=${data.u}\ngame_auth_token=${data.g}\napi_key=${key}\nWealth=${user.gold + userutil.calcWealth(user.pool)}`);
 										req.end();
-									},
-									() => {
+									}).
+									catch(() => {
 										Us.users[name] = {
 											name: name,
 											gold: 0,
 											auth: data.g,
 										};
 										sockEvents.login.call(this, { u: name, a: data.g });
-									},
-								);
+									});
 							} else {
 								sockEmit(this, 'login', {
 									err: json.error + ': ' + json.error_description,
@@ -747,7 +745,7 @@ const sockmeta = new WeakMap();
 			}
 		},
 		librarywant: function(data) {
-			Us.load(data.f, user => {
+			Us.load(data.f).then(user => {
 				sockEmit(this, 'librarygive', {
 					pool: user.pool,
 					bound: user.accountbound,
@@ -757,7 +755,7 @@ const sockmeta = new WeakMap();
 					aiwins: user.aiwins,
 					ailosses: user.ailosses,
 				});
-			});
+			}).catch(()=>{});
 		},
 		arenatop: function(data) {
 			db.zrevrange(
@@ -883,13 +881,13 @@ const sockmeta = new WeakMap();
 		let func = userEvents[data.x] || usercmd[data.x];
 		if (func) {
 			const u = data.u;
-			Us.load(u, user => {
+			Us.load(u).then(user => {
 				if (data.a == user.auth) {
 					Us.socks[u] = this;
 					delete data.a;
 					Object.assign(user, func.call(this, data, user));
 				}
-			});
+			}).catch(()=>{});
 		} else if ((func = sockEvents[data.x])) {
 			func.call(this, data);
 		}

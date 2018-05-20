@@ -31,19 +31,21 @@ exports.stop = function() {
 	storeUsers();
 	db.quit();
 };
-exports.load = function(name, cb, errcb) {
-	if (users[name]) {
-		usergc.delete(name);
-		cb(users[name]);
-	} else {
-		db.hget('Users', name, (err, userstr) => {
-			if (userstr) {
-				const user = (users[name] = JSON.parse(userstr));
-				if (!user.streak) user.streak = [];
-				cb(user);
-			} else if (errcb) {
-				errcb();
-			}
-		});
-	}
+exports.load = function(name) {
+	return new Promise((resolve, reject) => {
+		if (users[name]) {
+			usergc.delete(name);
+			resolve(users[name]);
+		} else {
+			db.hget('Users', name, (err, userstr) => {
+				if (userstr) {
+					const user = (users[name] = JSON.parse(userstr));
+					if (!user.streak) user.streak = [];
+					resolve(user);
+				} else if (errcb) {
+					reject(err);
+				}
+			});
+		}
+	});
 };

@@ -1,4 +1,4 @@
-const {Text} = require('./Components'),
+const {Text} = require('./index'),
 	{ connect } = require('react-redux'),
 	React = require('react');
 
