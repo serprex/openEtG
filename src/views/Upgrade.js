@@ -164,21 +164,16 @@ module.exports = connect(({user})=>({user}))(class Upgrade extends React.Compone
 					top: '170px',
 				}}
 			/>
-			{this.state.code1 &&
-				<Components.Card
-					x={534}
-					y={8}
-					code={this.state.code1}
-				/>
-			}
-			{this.state.code2 &&
-				<Components.Card
-					x={734}
-					y={8}
-					code={this.state.code2}
-				/>
-			}
-
+			<Components.Card
+				x={534}
+				y={8}
+				code={this.state.code1}
+			/>
+			<Components.Card
+				x={734}
+				y={8}
+				code={this.state.code2}
+			/>
 			<Components.CardSelector
 				cardpool={this.state.cardpool}
 				maxedIndicator

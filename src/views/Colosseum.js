@@ -31,7 +31,7 @@ function mkDaily(type) {
 								daily: 2,
 								cardreward: '',
 							};
-				gamedata.rematch = () => !(store.store.getState().user.daily & (1<<type)) && mkDaily(type)();
+				gamedata.data.rematch = () => !(store.store.getState().user.daily & (1<<type)) && mkDaily(type)();
 				gamedata.game.addData(dataNext);
 				gamedata.game.dataNext = dataNext;
 			}
@@ -42,7 +42,7 @@ function mkDaily(type) {
 			const gamedata = mkAi.mkPremade(type == 3 ? 1 : 3, type)();
 			if (gamedata) {
 				gamedata.game.addonreward = type == 3 ? 90 : 200;
-				gamedata.rematch = undefined;
+				gamedata.data.rematch = undefined;
 				sock.userExec('donedaily', { daily: type });
 			}
 			mkAi.run(gamedata);

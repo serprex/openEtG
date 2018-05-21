@@ -378,7 +378,7 @@ const data = {
 		'Owner is healed however much creatures are damaged',
 	],
 	salvage:
-		'Restore a permanent destroyed by foe to hand once per turn. Gain 1|1 if so',
+		'Restore a permanent destroyed by foe to hand once per turn.\nGain 1|1 when a permanent is destroyed',
 	salvageoff: 'Become ready to salvage again at start of next turn',
 	sanctify: "Protection during foe's turn from hand & quanta control",
 	unsanctify: {

@@ -7,6 +7,28 @@ const Cards = require('../Cards'),
 	{connect} = require('react-redux'),
 	React = require('react');
 
+function Order({order}) {
+	return <div>{order.q} @ {order.p}</div>;
+}
+
+function OrderBook({bc}) {
+	if (!bc) return null;
+	const sells = bc.filter(x => x.p < 0);
+	const buys = bc.filter(x => x.p > 0);
+	return <>
+		<div style={{ position: 'absolute', left: '100px', top: '72px', width: '330px', height: '192px' }}>
+			{buys.map((buy, i) =>
+				<Order key={i} order={buy} />
+			)}
+		</div>
+		<div style={{ position: 'absolute', left: '430px', top: '72px', width: '330px', height: '192px' }}>
+			{sells.map((sell, i) =>
+				<Order key={i} order={sell} />
+			)}
+		</div>
+	</>;
+}
+
 module.exports = connect(({user})=>({user}))(class Bazaar extends React.Component {
 	constructor(props) {
 		super(props);
@@ -52,24 +74,31 @@ module.exports = connect(({user})=>({user}))(class Bazaar extends React.Componen
 
 	render() {
 		return <>
-			<Components.ExitBtn x={5} y={50} />
+			<Components.ExitBtn x={8} y={56} />
 			{!!this.state.bcode && this.state.bz && <>
 				<input type='button'
 					value='Sell'
 					onClick={() => {
 						sock.userEmit('bzbid', { price: -this.state.sell, cards: '01' + this.state.bcode.toString(32) });
 					}}
+					style={{ position: 'absolute', left: '100px', top: '8px' }}
 				/>
 				<input placeholder='Sell' value={this.state.sell || ''}
-					onChange={e => this.setState({sell: (+e.target.value)|0})} />
+					onChange={e => this.setState({sell: (+e.target.value)|0})}
+					style={{ position: 'absolute', left: '200px', top: '8px' }}
+				/>
 				<input type='button'
 					value='Buy'
 					onClick={() => {
 						sock.userEmit('bzbid', { price: this.state.buy, cards: '01' + this.state.bcode.toString(32) });
 					}}
+					style={{ position: 'absolute', left: '100px', top: '40px' }}
 				/>
 				<input placeholder='Buy' value={this.state.buy || ''}
-					onChange={e => this.setState({buy: (+e.target.value)|0})} />
+					onChange={e => this.setState({buy: (+e.target.value)|0})}
+					style={{ position: 'absolute', left: '200px', top: '40px' }}
+				/>
+				<OrderBook bc={this.state.bz[this.state.bcode]} />
 			</>}
 			<Components.Text
 				text={this.props.user.gold + '$'}
@@ -80,7 +109,7 @@ module.exports = connect(({user})=>({user}))(class Bazaar extends React.Componen
 				}}
 			/>
 			<Components.Card
-				x={534}
+				x={768}
 				y={8}
 				code={this.state.bcode}
 			/>

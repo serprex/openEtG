@@ -396,6 +396,7 @@ module.exports = connect(({user}) => ({user}))(class Match extends React.Compone
 								game.area,
 							);
 							newgame.game.addData(data);
+							newgame.data.rematch = this.props.data.rematch;
 							mkAi.run(newgame);
 							return;
 						} else if (
@@ -414,6 +415,7 @@ module.exports = connect(({user}) => ({user}))(class Match extends React.Compone
 							const newgame = mkAi.mkAi(game.level, true)();
 							newgame.game.addData(data);
 							newgame.game.dataNext = data;
+							newgame.data.rematch = this.props.data.rematch;
 							mkAi.run(newgame);
 							return;
 						} else {
@@ -422,10 +424,6 @@ module.exports = connect(({user}) => ({user}))(class Match extends React.Compone
 							});
 						}
 					}
-				} else if (!game.endurance && game.level !== undefined) {
-					const streak = user.streak.slice();
-					streak[game.level] = 0;
-					this.props.dispatch(store.updateUser({ streak }));
 				}
 			}
 			this.props.dispatch(store.doNav(require('./Result'), { game: game, data: this.props.data, streakback: this.streakback }));

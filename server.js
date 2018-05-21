@@ -602,20 +602,6 @@ const sockmeta = new WeakMap();
 							}
 						}
 					}
-					/* // TODO order merging
-					for (let i=0; i<bc.length; i++) {
-						const bci = bc[i];
-						if (bci.u === user.name) {
-							bci.q += count;
-							if (bci.q === 0) {
-								bc.splice(i, 1);
-								i--;
-							} else {
-								bci.p = data.price;
-							}
-							return;
-						}
-					} */
 					if (count > 0) {
 						let bidmade = false;
 						if (data.price < 0) {
@@ -630,8 +616,19 @@ const sockmeta = new WeakMap();
 							}
 						}
 						if (bidmade) {
-							bc.push({ q: count, u: user.name, p: data.price });
-							bc.sort((a,b) => a.p - b.p);
+							let hadmerge = false;
+							for (let i=0; i<bc.length; i++) {
+								const bci = bc[i];
+								if (bci.u === user.name && bci.p == data.price) {
+									bci.q += count;
+									hadmerge = true;
+									break;
+								}
+							}
+							if (!hadmerge) {
+								bc.push({ q: count, u: user.name, p: data.price });
+								bc.sort((a,b) => a.p - b.p);
+							}
 						}
 					}
 					sockEmit(this, 'bzbid', {
