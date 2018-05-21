@@ -44,8 +44,8 @@ module.exports = connect(({user})=>({user}))(class Bazaar extends React.Componen
 		if (this.state.bz && this.state.bz[code] && this.state.bz[code].length) {
 			const bc = this.state.bz[code];
 			this.setState({
-				buy: -bc[0].p,
-				sell: bc[bc.length-1].p,
+				buy: Math.max(-bc[0].p, 0),
+				sell: Math.max(bc[bc.length-1].p, 0),
 			});
 		}
 	}
