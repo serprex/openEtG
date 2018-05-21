@@ -13,7 +13,7 @@ exports.sellcard = function(data, user) {
 			return {
 				gold: user.gold + sellValue,
 				pool: etgutil.addcard(user.pool, data.card, -1),
-			}
+			};
 		}
 	}
 };

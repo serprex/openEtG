@@ -42,7 +42,7 @@ exports.load = function(name) {
 					const user = (users[name] = JSON.parse(userstr));
 					if (!user.streak) user.streak = [];
 					resolve(user);
-				} else if (errcb) {
+				} else {
 					reject(err);
 				}
 			});

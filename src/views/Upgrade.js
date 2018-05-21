@@ -13,13 +13,22 @@ module.exports = connect(({user})=>({user}))(class Upgrade extends React.Compone
 		this.state = {};
 	}
 
+	static getDerivedStateFromProps(nextProps, prevState) {
+		return {
+			cardpool: etgutil.deck2pool(
+				nextProps.user.accountbound,
+				etgutil.deck2pool(nextProps.user.pool),
+			)
+		};
+	}
+
 	render() {
 		const self = this;
 		function upgradeCard(card) {
 			if (!card.isFree()) {
 				if (card.upped) return 'You cannot upgrade upgraded cards.';
 				const use = card.rarity != -1 ? 6 : 1;
-				if (cardpool[card.code] >= use) {
+				if (self.state.cardpool[card.code] >= use) {
 					sock.userExec('upgrade', { card: card.code });
 				} else
 					return `You need at least ${use} copies to be able to upgrade this card!`;
@@ -31,14 +40,14 @@ module.exports = connect(({user})=>({user}))(class Upgrade extends React.Compone
 			if (card.rarity || (card.shiny && card.upped)) {
 				if (!card.upped) return 'You cannot downgrade downgraded cards.';
 				sock.userExec('downgrade', { card: card.code });
-			} else return 'You cannot downgrade pillars; sell it instead.';
+			} else return 'You cannot downgrade pillars.';
 		}
 		function polishCard(card) {
 			if (!card.isFree()) {
 				if (card.shiny) return 'You cannot polish shiny cards.';
 				if (card.rarity == 5) return 'You cannot polish Nymphs.';
 				const use = card.rarity != -1 ? 6 : 2;
-				if (cardpool[card.code] >= use) {
+				if (self.state.cardpool[card.code] >= use) {
 					sock.userExec('polish', { card: card.code });
 				} else
 					return `You need at least ${use} copies to be able to polish this card!`;
@@ -51,21 +60,7 @@ module.exports = connect(({user})=>({user}))(class Upgrade extends React.Compone
 				if (!card.shiny) return 'You cannot unpolish non-shiny cards.';
 				if (!card.rarity == 5) return 'You cannot unpolish Nymphs.';
 				sock.userExec('unpolish', { card: card.code });
-			} else return 'You cannot unpolish pillars; sell them instead.';
-		}
-		function sellCard(card) {
-			if (card.rarity == -1)
-				return "You really don't want to sell that, trust me.";
-			else if (card.isFree()) {
-				if (self.props.user.gold >= 300) {
-					sock.userExec('upshpillar', { c: card.code });
-				} else return 'You need 300$ to afford a shiny upgraded pillar!';
-			} else {
-				const codecount = etgutil.count(self.props.user.pool, card.code);
-				if (codecount) {
-					sock.userExec('sellcard', { card: card.code });
-				} else return 'This card is bound to your account; you cannot sell it.';
-			}
+			} else return 'You cannot unpolish pillars.';
 		}
 		function eventWrap(func) {
 			return () => {
@@ -81,10 +76,6 @@ module.exports = connect(({user})=>({user}))(class Upgrade extends React.Compone
 		function autoCardsUp() {
 			sock.userExec('upshall', { up: 1 });
 		}
-		const cardpool = etgutil.deck2pool(
-			self.props.user.accountbound,
-			etgutil.deck2pool(self.props.user.pool),
-		);
 		return <>
 			<Components.ExitBtn x={5} y={50} />
 			{self.state.canGrade &&
@@ -113,18 +104,6 @@ module.exports = connect(({user})=>({user}))(class Upgrade extends React.Compone
 					}}
 				/>
 			}
-			{self.state.canSell &&
-				<input
-					type='button'
-					value={self.state.sellText}
-					onClick={eventWrap(sellCard)}
-					style={{
-						position: 'absolute',
-						left: '150px',
-						top: '140px',
-					}}
-				/>
-			}
 			<input
 				type='button'
 				value='Autoconvert'
@@ -146,7 +125,7 @@ module.exports = connect(({user})=>({user}))(class Upgrade extends React.Compone
 				}}
 			/>
 			<Components.Text
-				text={self.props.user.gold + '$'}
+				text={this.props.user.gold + '$'}
 				style={{
 					position: 'absolute',
 					left: '5px',
@@ -154,7 +133,7 @@ module.exports = connect(({user})=>({user}))(class Upgrade extends React.Compone
 				}}
 			/>
 			<Components.Text
-				text={self.state.info1}
+				text={this.state.info1}
 				style={{
 					position: 'absolute',
 					left: '250px',
@@ -162,7 +141,7 @@ module.exports = connect(({user})=>({user}))(class Upgrade extends React.Compone
 				}}
 			/>
 			<Components.Text
-				text={self.state.info2}
+				text={this.state.info2}
 				style={{
 					position: 'absolute',
 					left: '250px',
@@ -170,7 +149,7 @@ module.exports = connect(({user})=>({user}))(class Upgrade extends React.Compone
 				}}
 			/>
 			<Components.Text
-				text={self.state.info3}
+				text={this.state.info3}
 				style={{
 					position: 'absolute',
 					left: '250px',
@@ -178,31 +157,31 @@ module.exports = connect(({user})=>({user}))(class Upgrade extends React.Compone
 				}}
 			/>
 			<Components.Text
-				text={self.state.error}
+				text={this.state.error}
 				style={{
 					position: 'absolute',
 					left: '100px',
 					top: '170px',
 				}}
 			/>
-			{self.state.code1 &&
+			{this.state.code1 &&
 				<Components.Card
 					x={534}
 					y={8}
-					code={self.state.code1}
+					code={this.state.code1}
 				/>
 			}
-			{self.state.code2 &&
+			{this.state.code2 &&
 				<Components.Card
 					x={734}
 					y={8}
-					code={self.state.code2}
+					code={this.state.code2}
 				/>
 			}
 
 			<Components.CardSelector
-				cardpool={cardpool}
-				maxedIndicator={true}
+				cardpool={this.state.cardpool}
+				maxedIndicator
 				onClick={code => {
 					const card = Cards.Codes[code];
 					const newstate = {
@@ -211,8 +190,6 @@ module.exports = connect(({user})=>({user}))(class Upgrade extends React.Compone
 						error: '',
 						canGrade: true,
 						canLish: true,
-						canSell: !!~card.rarity,
-						sellText: card.isFree() ? 'Polgrade' : 'Sell',
 					};
 					if (card.upped) {
 						newstate.info1 = card.isFree()
@@ -255,12 +232,8 @@ module.exports = connect(({user})=>({user}))(class Upgrade extends React.Compone
 							? ''
 							: card.isFree()
 								? '300$ to upgrade & polish'
-								: 'Sell for ' +
-									userutil.sellValues[card.rarity] *
-										(card.upped ? 6 : 1) *
-										(card.shiny ? 6 : 1) +
-									'$';
-					self.setState(newstate);
+								: '';
+					this.setState(newstate);
 				}}
 			/>
 		</>

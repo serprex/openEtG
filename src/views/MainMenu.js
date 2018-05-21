@@ -523,6 +523,18 @@ module.exports = connect(({user, opts}) => ({
 								top: '108px',
 							}}
 						/>
+						<input type='button'
+							value='Bazaar'
+							onClick={() => {
+								this.props.dispatch(store.doNav(require('./Bazaar')));
+							}}
+							onMouseOver={this.mkSetTip('Async trading')}
+							style={{
+								position: 'absolute',
+								left: '114px',
+								top: '132px',
+							}}
+						/>
 					</>}
 				</Rect>
 				<Rect x={616} y={300} wid={206} hei={130}>

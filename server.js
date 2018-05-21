@@ -14,6 +14,7 @@ const userutil = require('./src/userutil');
 const sutil = require('./src/srv/sutil');
 const db = require('./src/srv/db');
 const Us = require('./src/srv/Us');
+const Bz = require('./src/srv/Bz');
 
 const MAX_INT = 0x100000000;
 const rooms = {};
@@ -544,6 +545,104 @@ const sockmeta = new WeakMap();
 				genericChat(this, data);
 			}
 		},
+		bzbid: function(data, user) {
+			data.price |= 0;
+			if (!data.price) return;
+			Bz.load().then(bz => {
+				etgutil.iterraw(data.cards, (code, count) => {
+					const bc = bz[code] || (bz[code] = []);
+					const card = Cards.Codes[code];
+					if (!card) return;
+					const sellval =
+						userutil.sellValues[card.rarity] *
+						(card.upped ? 6 : 1) *
+						(card.shiny ? 6 : 1);
+					if (data.price > 0) {
+						if (data.price <= sellval) {
+							return;
+						}
+					} else  {
+						if (-data.price <= sellval) {
+							user.gold += sellval * count;
+							user.pool = etgutil.addcard(user.pool, code, -count);
+							return;
+						}
+					}
+					for (let i=0; i<bc.length; i++) {
+						const bci = bc[i],
+							amt = Math.min(bci.q, count);
+						let happened = 0;
+						if (data.price > 0) {
+							if (bci.p < 0 && -bci.p <= data.price) {
+								happened = amt;
+							}
+						} else {
+							if (bci.p > 0 && bci.p <= -data.price) {
+								happened = -amt;
+							}
+						}
+						if (happened && user.gold >= bci.p * amt && (happened < 0 || etgutil.count(user.pool, code) >= amt)) {
+							user.gold -= bci.p * amt;
+							user.pool = etgutil.addcard(user.pool, code, happened);
+							Us.load(bci.u).then(seller => {
+								if (happened < 0) {
+									seller.pool = etgutil.addcard(seller.pool, code, amt);
+								} else {
+									seller.gold += bcp.p * amt;
+								}
+							}).catch(()=>{});
+							if (bci.q > count) {
+								bci.q -= count;
+							} else {
+								bc.splice(i, 1);
+								i--;
+								count -= bci.q;
+								if (!count) break;
+								continue;
+							}
+						}
+					}
+					/* // TODO order merging
+					for (let i=0; i<bc.length; i++) {
+						const bci = bc[i];
+						if (bci.u === user.name) {
+							bci.q += count;
+							if (bci.q === 0) {
+								bc.splice(i, 1);
+								i--;
+							} else {
+								bci.p = data.price;
+							}
+							return;
+						}
+					} */
+					if (count > 0) {
+						let bidmade = false;
+						if (data.price < 0) {
+							if (etgutil.count(user.pool, code) >= count) {
+								user.pool = etgutil.addcard(user.pool, code, -count);
+								bidmade = true;
+							}
+						} else {
+							if (user.gold >= data.price) {
+								user.gold -= data.price;
+								bidmade = true;
+							}
+						}
+						if (bidmade) {
+							bc.push({ q: count, u: user.name, p: data.price });
+							bc.sort((a,b) => a.p - b.p);
+						}
+					}
+					sockEmit(this, 'bzbid', {
+						bz,
+						g: user.gold,
+						pool: user.pool,
+					});
+				});
+				Bz.store();
+			});
+		},
 		booster: function(data, user) {
 			const pack = [
 				{ amount: 10, cost: 15, rare: [] },
@@ -806,6 +905,11 @@ const sockmeta = new WeakMap();
 		who: function(data) {
 			sockEmit(this, 'chat', { mode: 1, msg: activeUsers().join(', ') });
 		},
+		bzread: function(data) {
+			Bz.load().then(bz => {
+				sockEmit(this, 'bzread', {bz});
+			});
+		},
 		challrecv: function(data) {
 			const foesock = Us.socks[data.f];
 			if (foesock && foesock.readyState == 1) {
@@ -881,13 +985,15 @@ const sockmeta = new WeakMap();
 		let func = userEvents[data.x] || usercmd[data.x];
 		if (func) {
 			const u = data.u;
-			Us.load(u).then(user => {
-				if (data.a == user.auth) {
-					Us.socks[u] = this;
-					delete data.a;
-					Object.assign(user, func.call(this, data, user));
-				}
-			}).catch(()=>{});
+			if (typeof u === 'string') {
+				Us.load(u).then(user => {
+					if (data.a == user.auth) {
+						Us.socks[u] = this;
+						delete data.a;
+						Object.assign(user, func.call(this, data, user));
+					}
+				}).catch(()=>{});
+			}
 		} else if ((func = sockEvents[data.x])) {
 			func.call(this, data);
 		}
