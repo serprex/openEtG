@@ -37,6 +37,8 @@ module.exports = connect(({user})=>({user}))(class Bazaar extends React.Componen
 			bcode: 0,
 			sell: 0,
 			buy: 0,
+			sellq: 0,
+			buyq: 0,
 		};
 	}
 
@@ -57,7 +59,6 @@ module.exports = connect(({user})=>({user}))(class Bazaar extends React.Componen
 					gold: data.g,
 					pool: data.pool,
 				}));
-				this.updateBuySell(this.state.bcode);
 			},
 		}));
 	}
@@ -79,7 +80,7 @@ module.exports = connect(({user})=>({user}))(class Bazaar extends React.Componen
 				<input type='button'
 					value='Sell'
 					onClick={() => {
-						sock.userEmit('bzbid', { price: -this.state.sell, cards: '01' + this.state.bcode.toString(32) });
+						sock.userEmit('bzbid', { price: -this.state.sell, cards: etgutil.encodeCount(this.state.sellq || 1) + this.state.bcode.toString(32) });
 					}}
 					style={{ position: 'absolute', left: '100px', top: '8px' }}
 				/>
@@ -87,16 +88,24 @@ module.exports = connect(({user})=>({user}))(class Bazaar extends React.Componen
 					onChange={e => this.setState({sell: (+e.target.value)|0})}
 					style={{ position: 'absolute', left: '200px', top: '8px' }}
 				/>
+				<input placeholder='Quantity' value={this.state.sellq || ''}
+					onChange={e => this.setState({sellq: (+e.target.value)|0})}
+					style={{ position: 'absolute', left: '360px', top: '8px' }}
+				/>
 				<input type='button'
 					value='Buy'
 					onClick={() => {
-						sock.userEmit('bzbid', { price: this.state.buy, cards: '01' + this.state.bcode.toString(32) });
+						sock.userEmit('bzbid', { price: this.state.buy, cards: etgutil.encodeCount(this.state.buyq || 1) + this.state.bcode.toString(32) });
 					}}
 					style={{ position: 'absolute', left: '100px', top: '40px' }}
 				/>
 				<input placeholder='Buy' value={this.state.buy || ''}
 					onChange={e => this.setState({buy: (+e.target.value)|0})}
 					style={{ position: 'absolute', left: '200px', top: '40px' }}
+				/>
+				<input placeholder='Quantity' value={this.state.buyq || ''}
+					onChange={e => this.setState({buyq: (+e.target.value)|0})}
+					style={{ position: 'absolute', left: '360px', top: '40px' }}
 				/>
 				<OrderBook bc={this.state.bz[this.state.bcode]} />
 			</>}
