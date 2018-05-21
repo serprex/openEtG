@@ -1,6 +1,7 @@
 const Cards = require('../Cards'),
 	etg = require('../etg'),
 	etgutil = require('../etgutil'),
+	userutil = require('../userutil'),
 	sock = require('../sock'),
 	store = require('../store'),
 	Components = require('../Components'),
@@ -13,16 +14,14 @@ function Order({order}) {
 
 function OrderBook({bc}) {
 	if (!bc) return null;
-	const sells = bc.filter(x => x.p < 0);
-	const buys = bc.filter(x => x.p > 0);
 	return <>
 		<div style={{ position: 'absolute', left: '100px', top: '72px', width: '330px', height: '192px' }}>
-			{buys.map((buy, i) =>
+			{bc.filter(x => x.p > 0).map((buy, i) =>
 				<Order key={i} order={buy} />
 			)}
 		</div>
 		<div style={{ position: 'absolute', left: '430px', top: '72px', width: '330px', height: '192px' }}>
-			{sells.map((sell, i) =>
+			{bc.filter(x => x.p < 0).map((sell, i) =>
 				<Order key={i} order={sell} />
 			)}
 		</div>
@@ -84,7 +83,7 @@ module.exports = connect(({user})=>({user}))(class Bazaar extends React.Componen
 					}}
 					style={{ position: 'absolute', left: '100px', top: '8px' }}
 				/>
-				<input placeholder='Sell' value={this.state.sell || ''}
+				<input placeholder='Price' value={this.state.sell || ''}
 					onChange={e => this.setState({sell: (+e.target.value)|0})}
 					style={{ position: 'absolute', left: '200px', top: '8px' }}
 				/>
@@ -99,7 +98,7 @@ module.exports = connect(({user})=>({user}))(class Bazaar extends React.Componen
 					}}
 					style={{ position: 'absolute', left: '100px', top: '40px' }}
 				/>
-				<input placeholder='Buy' value={this.state.buy || ''}
+				<input placeholder='Price' value={this.state.buy || ''}
 					onChange={e => this.setState({buy: (+e.target.value)|0})}
 					style={{ position: 'absolute', left: '200px', top: '40px' }}
 				/>
@@ -107,6 +106,12 @@ module.exports = connect(({user})=>({user}))(class Bazaar extends React.Componen
 					onChange={e => this.setState({buyq: (+e.target.value)|0})}
 					style={{ position: 'absolute', left: '360px', top: '40px' }}
 				/>
+				<div style={{ position: 'absolute', left: '540px', top: '8px' }}>
+					Autosell: {userutil.sellValues[Cards.Codes[this.state.bcode].rarity]}<span className="ico g" />
+				</div>
+				<div style={{ position: 'absolute', left: '540px', top: '40px' }}>
+					Wealth value: {userutil.cardValues[Cards.Codes[this.state.bcode].rarity]}<span className="ico g" />
+				</div>
 				<OrderBook bc={this.state.bz[this.state.bcode]} />
 			</>}
 			<Components.Text

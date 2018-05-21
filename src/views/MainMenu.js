@@ -528,7 +528,7 @@ module.exports = connect(({user, opts}) => ({
 							onClick={() => {
 								this.props.dispatch(store.doNav(require('./Bazaar')));
 							}}
-							onMouseOver={this.mkSetTip('Async trading')}
+							onMouseOver={this.mkSetTip("Put up cards for sale & review other players' offers")}
 							style={{
 								position: 'absolute',
 								left: '114px',

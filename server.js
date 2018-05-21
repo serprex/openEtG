@@ -631,11 +631,11 @@ const sockmeta = new WeakMap();
 							}
 						}
 					}
-					sockEmit(this, 'bzbid', {
-						bz,
-						g: user.gold,
-						pool: user.pool,
-					});
+				});
+				sockEmit(this, 'bzbid', {
+					bz,
+					g: user.gold,
+					pool: user.pool,
 				});
 				Bz.store();
 			});
