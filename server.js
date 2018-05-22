@@ -48,7 +48,7 @@ const sockmeta = new WeakMap();
 		}
 	}
 	function getAgedHp(hp, age) {
-		return Math.max(hp - age * age, hp / 2) | 0;
+		return Math.max(hp - age * age, Math.ceil(hp / 3));
 	}
 	function wilson(up, total) {
 		// from npm's wilson-score
