@@ -158,9 +158,7 @@ const Skills = {
 		c.owner.deck.push(new Thing(t.card), new Thing(t.card), new Thing(t.card));
 	},
 	boneyard: (c, t) => {
-		if (!t.card.isOf(Cards.Skeleton)) {
-			c.owner.addCrea(new Thing(c.card.as(Cards.Skeleton)));
-		}
+		c.owner.addCrea(new Thing(c.card.as(Cards.Skeleton)));
 	},
 	bow: (c, t) => {
 		return c.owner.mark == etg.Air || c.owner.mark == etg.Light ? 1 : 0;

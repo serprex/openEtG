@@ -70,13 +70,7 @@ const data = {
 	blockwithcharge: 'Block attack per stack',
 	bolsterintodeck:
 		'Push 3 copies of target creature onto own deck. Cannot ricochet',
-	boneyard: c => {
-		return (
-			'When a non-skeleton dies, summon a ' +
-			(c.upped ? '2|2' : '1|1') +
-			' Skeleton'
-		);
-	},
+	boneyard: c => `When a death occurs, summon a ${c.upped ? '2|2' : '1|1'} Skeleton`,
 	bounce: "Return to owner's hand instead of dying",
 	bravery: 'Foe draws 2 cards, draw an equal amount of cards',
 	brawl:

@@ -215,11 +215,11 @@ exports.rmdeck = function(data, user) {
 	delete result.decks[data.name];
 	return result;
 };
-exports.updatequest = function(data, user) {
+exports.setquest = function(data, user) {
 	return {
 		quests: {
 			...user.quests,
-			[data.quest]: data.newstage,
+			[data.quest]: 1,
 		}
 	};
 };

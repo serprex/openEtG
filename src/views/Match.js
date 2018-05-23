@@ -388,25 +388,15 @@ module.exports = connect(({user}) => ({user}))(class Match extends React.Compone
 				}
 				if (game.winner == game.player1) {
 					if (game.quest) {
-						if (game.autonext) {
+						if (game.quest.autonext) {
 							const data = addNoHealData(game);
-							const newgame = require('../Quest').mkQuestAi(
-								game.quest[0],
-								game.quest[1] + 1,
-								game.area,
-							);
+							const newgame = require('../Quest').mkQuestAi(game.quest.autonext);
 							newgame.game.addData(data);
 							newgame.data.rematch = this.props.data.rematch;
 							mkAi.run(newgame);
 							return;
-						} else if (
-							user.quests[game.quest[0]] <= game.quest[1] ||
-							!(game.quest[0] in user.quests)
-						) {
-							sock.userExec('updatequest', {
-								quest: game.quest[0],
-								newstage: game.quest[1] + 1,
-							});
+						} else if (!user.quests[game.quest.key]) {
+							sock.userExec('setquest', { quest: game.quest.key });
 						}
 					} else if (game.daily) {
 						if (game.endurance) {

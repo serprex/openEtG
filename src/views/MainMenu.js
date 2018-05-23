@@ -462,7 +462,7 @@ module.exports = connect(({user, opts}) => ({
 							<input type='button'
 								value='Quests'
 								onClick={() => {
-									this.props.dispatch(store.doNav(require('./QuestMain')));
+									this.props.dispatch(store.doNav(require('./Quest')));
 								}}
 								onMouseOver={this.mkSetTip('Go on an adventure')}
 							/>

@@ -175,17 +175,17 @@ module.exports = connect(({user}) => ({user}))(class Result extends React.Compon
 		const {game} = this.props;
 		if (game.quest) {
 			if (game.winner === game.player1 && game.choicerewards) {
-				store.store.dispatch(store.doNav(require('./Reward'), {
+				this.props.dispatch(store.doNav(require('./Reward'), {
 					type: game.choicerewards,
 					amount: game.rewardamount,
 				}));
 			} else {
-				store.store.dispatch(store.doNav(require('./QuestArea'), { area: game.area }));
+				this.props.dispatch(store.doNav(require('./Quest')));
 			}
 		} else if (game.daily !== undefined) {
-			store.store.dispatch(store.doNav(require('./Colosseum')));
+			this.props.dispatch(store.doNav(require('./Colosseum')));
 		} else {
-			store.store.dispatch(store.doNav(require('./MainMenu')));
+			this.props.dispatch(store.doNav(require('./MainMenu')));
 		}
 	}
 
@@ -283,7 +283,7 @@ module.exports = connect(({user}) => ({user}))(class Result extends React.Compon
 		}
 		this.setState({lefttext});
 		if (game.endurance == undefined) {
-			store.store.dispatch(store.chatMsg(
+			this.props.dispatch(store.chatMsg(
 				[
 					game.level === undefined ? -1 : game.level,
 					(game.foename || '?').replace(/,/g, ' '),
