@@ -25,11 +25,9 @@ module.exports = connect(({user})=>({user}))(class QuestView extends React.Compo
 	}
 
 	render() {
-		console.log(this.props);
 		const questAreas = [];
 		let qbag = Quest.root;
 		for (let qi = 0; qi<this.state.quest.length+1; qi++) {
-			console.log(qbag, this.state.quest, this.state.quest[qi]);
 			let y = 162;
 			for (let i = 0; i<qbag.children.length; i++) {
 				const area = qbag.children[i];
@@ -58,7 +56,6 @@ module.exports = connect(({user})=>({user}))(class QuestView extends React.Compo
 			}
 		}
 		const selectedQuest = Object.assign({}, qbag.key && Quest.quarks[qbag.key], qbag);
-		console.log(selectedQuest);
 		return <>
 			<Components.Box x={8} y={8} width={880} height={108} />
 			<Components.ExitBtn x={750} y={120} />

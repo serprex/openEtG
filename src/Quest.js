@@ -1,4 +1,5 @@
 'use strict';
+const etg = require('./etg');
 const sock = require('./sock');
 const store = require('./store');
 const util = require('./util');
@@ -132,14 +133,17 @@ quarks.spirit5 =
 		Your allies come to your aid but their forms have all been twisted. The dark lady laughs mischeviously.\
 		'You must think yourself dreaming... Well this is the nightmare realm, and I am the one in control.\
 		I think I will toy with you first... before I swallow your soul.' The shadows lunge toward you in a vicious attack.",
+		questdependencies: ['spirit5'],
 	};
-quarks.bombmaker = {children:[
+quarks.bombmaker =
 	{
 		deck: '046220f5t2065s50680d018pu',
 		name: 'Bomb Maker',
 		autonext: {
+			name: 'Bomb Maker II',
 			deck: '0f5rg045rk035ro065ru065v1067ql018pt',
 			autonext: {
+				name: 'Bomb Maker III',
 				deck: '035f4065f6025f5025f80e5oc065om025p0018po',
 				markpower: 3,
 				drawpower: 2,
@@ -148,8 +152,7 @@ quarks.bombmaker = {children:[
 			},
 		},
 		info: 'A bomb maker have set up shop nearby. He have put up a sign promising a reward if you can beat him and his bombs three times in a row.',
-	},
-]};
+	};
 quarks.blacksummoner =
 	{
 		deck: '0f7t5018pt',
@@ -593,6 +596,23 @@ exports.root = {children:[
 			},
 			{
 				key: 'chromatemple',
+			},
+		],
+	},
+	{
+		key: 'spirit',
+		children: [
+			{
+				key: 'spirit2',
+			},
+			{
+				key: 'spirit3',
+			},
+			{
+				key: 'spirit4',
+			},
+			{
+				key: 'spirit5',
 			},
 		],
 	},
