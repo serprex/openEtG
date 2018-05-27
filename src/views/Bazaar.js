@@ -9,23 +9,39 @@ const Cards = require('../Cards'),
 	React = require('react');
 
 function Order({order}) {
-	return <div>{order.q} @ {order.p}</div>;
+	return <div>{order.q} @ {Math.abs(order.p)}</div>;
 }
 
 function OrderBook({bc}) {
 	if (!bc) return null;
 	return <>
 		<div style={{ position: 'absolute', left: '100px', top: '72px', width: '330px', height: '192px' }}>
+			<div>Buys</div>
 			{bc.filter(x => x.p > 0).map((buy, i) =>
 				<Order key={i} order={buy} />
 			)}
 		</div>
 		<div style={{ position: 'absolute', left: '430px', top: '72px', width: '330px', height: '192px' }}>
+			<div>Sells</div>
 			{bc.filter(x => x.p < 0).map((sell, i) =>
 				<Order key={i} order={sell} />
 			)}
 		</div>
 	</>;
+}
+
+function OrderSummary({bz, onClick}) {
+	const Bz = [];
+	for (const k in bz) Bz[k] = bz[k];
+	return Bz.map((orders, code) => {
+		const card = Cards.Codes[code];
+		const o0 = orders[0], o1 = orders[orders.length - 1];
+		return (o0 || o1) && <div key={code} onClick={() => onClick(code)}>
+			{card.name}:&emsp;
+			{o1.p > 0 && <span>Buy: {o1.p}</span>}&emsp;
+			{o0.p < 0 && <span>Sell: {-o0.p}</span>}
+		</div>;
+	});
 }
 
 module.exports = connect(({user})=>({user}))(class Bazaar extends React.Component {
@@ -38,6 +54,7 @@ module.exports = connect(({user})=>({user}))(class Bazaar extends React.Componen
 			buy: 0,
 			sellq: 0,
 			buyq: 0,
+			showOrders: false,
 		};
 	}
 
@@ -75,6 +92,15 @@ module.exports = connect(({user})=>({user}))(class Bazaar extends React.Componen
 	render() {
 		return <>
 			<Components.ExitBtn x={8} y={56} />
+			<input type='button'
+				value='Orders'
+				onClick={() => this.setState({showOrders:!this.state.showOrders})}
+				style={{
+					position: 'absolute',
+					top: '96px',
+					left: '8px',
+				}}
+			/>
 			{!!this.state.bcode && this.state.bz && <>
 				<input type='button'
 					value='Sell'
@@ -106,11 +132,11 @@ module.exports = connect(({user})=>({user}))(class Bazaar extends React.Componen
 					onChange={e => this.setState({buyq: (+e.target.value)|0})}
 					style={{ position: 'absolute', left: '360px', top: '40px' }}
 				/>
-				<div style={{ position: 'absolute', left: '540px', top: '8px' }}>
-					Autosell: {userutil.sellValues[Cards.Codes[this.state.bcode].rarity]}<span className="ico g" />
+				<div style={{ position: 'absolute', right: '144px', top: '8px' }}>
+					Autosell: {userutil.sellValue(Cards.Codes[this.state.bcode])}<span className="ico g" />
 				</div>
-				<div style={{ position: 'absolute', left: '540px', top: '40px' }}>
-					Wealth value: {userutil.cardValues[Cards.Codes[this.state.bcode].rarity]}<span className="ico g" />
+				<div style={{ position: 'absolute', right: '144px', top: '40px' }}>
+					Wealth value: {userutil.cardValue(Cards.Codes[this.state.bcode])}<span className="ico g" />
 				</div>
 				<OrderBook bc={this.state.bz[this.state.bcode]} />
 			</>}
@@ -137,6 +163,18 @@ module.exports = connect(({user})=>({user}))(class Bazaar extends React.Componen
 					this.updateBuySell(code);
 				}}
 			/>
+			{this.state.showOrders && <div className='bgbox' style={{
+				position: 'absolute',
+				top: '270px',
+				width: '900px',
+				height: '330px',
+				columnCount: '3',
+			}}>
+				{this.state.bz && <OrderSummary bz={this.state.bz} onClick={code => {
+					this.setState({ bcode: code });
+					this.updateBuySell(code);
+				}}/>}
+			</div>}
 		</>;
 	}
 });

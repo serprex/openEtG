@@ -2,21 +2,6 @@ const Cards = require('./Cards'),
 	etgutil = require('./etgutil'),
 	userutil = require('./userutil');
 
-exports.sellcard = function(data, user) {
-	if (etgutil.count(user.pool, data.card)) {
-		const card = Cards.Codes[data.card];
-		const sellValue =
-			userutil.sellValues[card.rarity] *
-			(card.upped ? 6 : 1) *
-			(card.shiny ? 6 : 1);
-		if (sellValue) {
-			return {
-				gold: user.gold + sellValue,
-				pool: etgutil.addcard(user.pool, data.card, -1),
-			};
-		}
-	}
-};
 function transmute(user, oldcard, func, use) {
 	const poolCount = etgutil.count(user.pool, oldcard);
 	const newcard = func(oldcard, true);

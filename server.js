@@ -553,10 +553,7 @@ const sockmeta = new WeakMap();
 					const bc = bz[code] || (bz[code] = []);
 					const card = Cards.Codes[code];
 					if (!card) return;
-					const sellval =
-						userutil.sellValues[card.rarity] *
-						(card.upped ? 6 : 1) *
-						(card.shiny ? 6 : 1);
+					const sellval = userutil.sellValue(card);
 					if (data.price > 0) {
 						if (data.price <= sellval) {
 							return;
