@@ -373,7 +373,7 @@ module.exports = connect(({user, opts}) => ({
 						{arenac}
 					</CostRewardHeaders>
 					{this.state.showcard ?
-						<Components.Card x={92} y={340} card={this.state.showcard} />
+						<Components.Card x={92} y={340} code={this.state.showcard} />
 						: <>
 							<Chat channel='Main'
 								style={{

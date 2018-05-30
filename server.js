@@ -595,7 +595,6 @@ const sockmeta = new WeakMap();
 								i--;
 								count -= bci.q;
 								if (!count) break;
-								continue;
 							}
 						}
 					}

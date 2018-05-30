@@ -58,7 +58,7 @@ module.exports = class ArenaTop extends React.Component {
 				<Components.ExitBtn x={8} y={300} />
 				{this.state.card && (
 					<Components.Card
-						card={this.state.card}
+						code={this.state.card}
 						x={this.state.cardx}
 						y={this.state.cardy}
 					/>

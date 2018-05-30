@@ -86,7 +86,7 @@ module.exports = class Editor extends React.PureComponent {
 				}}
 			/>
 			{marksel}
-			<Components.Card x={734} y={8} card={this.state.card} />
+			<Components.Card x={734} y={8} code={this.state.card} />
 		</>;
 	}
 };

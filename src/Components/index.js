@@ -1,7 +1,6 @@
 'use strict';
 const ui = require('../ui'),
 	etg = require('../etg'),
-	svg = require('../svg'),
 	audio = require('../audio'),
 	Cards = require('../Cards'),
 	etgutil = require('../etgutil'),
@@ -131,21 +130,81 @@ exports.ExitBtn = function(props) {
 exports.Card = function(props) {
 	const card = props.card || (props.code && Cards.Codes[props.code]);
 	if (!card) return null;
-	const svgcard = svg.card(card);
-	return <svg
-		width={'128'}
-		height={'256'}
+	const textColor = card.upped ? '#000' : '';
+	return <div
 		style={{
 			position: 'absolute',
 			left: props.x + 'px',
 			top: props.y + 'px',
+			width: '128px',
+			height: '256px',
 			pointerEvents: 'none',
 			zIndex: '4',
-		}}
-		dangerouslySetInnerHTML={{
-			__html: svgcard.slice(svgcard.indexOf('>') + 1, -6),
-		}}
-	/>;
+			color: textColor,
+			backgroundImage: 'url("../assets/cardBacks.png")',
+			backgroundPosition: `${(card.element + card.upped * 13) * -128}px 0px`,
+			backgroundRepeat: 'no-repeat',
+			overflow: 'hidden',
+		}}>
+		<span style={{
+			position: 'absolute',
+			left: '2px',
+			top: '2px',
+			fontSize: '12px',
+		}}>
+			{card.name}
+		</span>
+		<img className={card.code & 0x4000 ? 'shiny' : ''}
+			src={`/Cards/${card.code.toString(32)}.png`}
+			style={{
+				position:'absolute',
+				top:'20px',
+				width: '128px',
+				height: '128px',
+				backgroundColor: ui.maybeLightenStr(card),
+			}}
+		/>
+		<exports.Text text={card.info()} icoprefix='te'
+			style={{
+				position: 'absolute',
+				padding: '2px',
+				top: '148px',
+				fontSize: '10px',
+				width: '128px',
+				height: '108px',
+				backgroundImage: 'url("/assets/cardBacks.png")',
+				backgroundPosition: `${(card.element + card.upped * 13) * -128}px -20px`,
+			}}
+		/>
+		{!!card.rarity &&
+			<span className={`ico r${card.rarity}`}
+				style={{
+					position:'absolute',
+					right:'30px',
+					bottom:'2px',
+				}}
+			/>
+		}
+		{!!card.cost &&
+			<span style={{
+				position:'absolute',
+				right:'2px',
+				top:'2px',
+				fontSize: '12px',
+			}}>
+				{card.cost}
+				{card.element != card.costele &&
+					<span className={`ico ce${card.costele}`} />}
+			</span>
+		}
+		<span className={`ico t${card.type}`}
+			style={{
+				position:'absolute',
+				right:'2px',
+				bottom:'2px',
+			}}
+		/>
+	</div>;
 };
 
 function DeckDisplay(props) {
