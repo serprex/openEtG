@@ -1581,7 +1581,6 @@ const Skills = {
 		}
 	},
 	reap: (c, t) => {
-		if (t.card.isOf(Cards.Skeleton)) return;
 		const atk = t.trueatk(),
 			hp = t.truehp(),
 			index = t.getIndex();
