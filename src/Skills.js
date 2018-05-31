@@ -188,7 +188,7 @@ const Skills = {
 					fcr.attackCreature(cr);
 					cr.attackCreature(fcr);
 				} else {
-					cr.attack(false, 0);
+					cr.attack();
 				}
 			}
 		});
@@ -820,7 +820,7 @@ const Skills = {
 		}
 	},
 	golemhit: (c, t) => {
-		t.attack(false, 0);
+		t.attack();
 	},
 	gpull: (c, t) => {
 		Skills.gpullspell.func(c, c);
@@ -886,8 +886,8 @@ const Skills = {
 	hitownertwice: (c, t) => {
 		if (!c.hasactive('turnstart', 'predatoroff')) {
 			c.addactive('turnstart', Skills.predatoroff);
-			c.attack(false, 0, c.owner);
-			c.attack(false, 0, c.owner);
+			c.attack(c.owner);
+			c.attack(c.owner);
 		}
 	},
 	holylight: (c, t) => {
@@ -1508,7 +1508,7 @@ const Skills = {
 		const fhand = c.owner.foe.hand;
 		if (fhand.length > 4 && !c.hasactive('turnstart', 'predatoroff')) {
 			c.addactive('turnstart', Skills.predatoroff);
-			c.attack(false, 0);
+			c.attack();
 			if (fhand.length) Skills.destroycard.func(c, fhand[fhand.length - 1]);
 		}
 	},
@@ -1782,7 +1782,7 @@ const Skills = {
 		}
 	},
 	sing: (c, t) => {
-		t.attack(false, 0, t.owner);
+		t.attack(t.owner);
 	},
 	sinkhole: (c, t) => {
 		Effect.mkText('Sinkhole', t);
@@ -1862,10 +1862,10 @@ const Skills = {
 		return c.owner.mark == etg.Life || c.owner.mark == etg.Water ? 1 : 0;
 	},
 	stasis: (c, t, attackFlags) => {
-		if (t.type === etg.Creature && !attackFlags.attackPhase) attackFlags.stasis = true;
+		if (t.type === etg.Creature && attackFlags.attackPhase && !attackFlags.stasis) attackFlags.stasis = true;
 	},
 	ownstasis: (c, t, attackFlags) => {
-		if (t.type === etg.Creature && c.owner === t.owner && !attackFlags.attackPhase) attackFlags.stasis = true;
+		if (t.type === etg.Creature && c.owner === t.owner && attackFlags.attackPhase && !attackFlags.stasis) attackFlags.stasis = true;
 	},
 	static: c => {
 		c.owner.foe.spelldmg(2);
@@ -2059,7 +2059,7 @@ const Skills = {
 			if (c.maybeDecrStatus('charges') < 2) c.remove();
 			c.owner.creatures.slice().forEach(cr => {
 				if (cr && cr != t) {
-					cr.attack(false, 0);
+					cr.attack();
 				}
 			});
 		}
@@ -2068,7 +2068,7 @@ const Skills = {
 		if (c.owner == t.owner && !c.getStatus('vindicated') && !data.vindicated) {
 			c.setStatus('vindicated', 1);
 			data.vindicated = true;
-			t.attack(false, 0);
+			t.attack();
 		}
 	},
 	unvindicate: (c, t) => {
