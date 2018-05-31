@@ -473,7 +473,10 @@ Thing.prototype.attackCreature = function(target, trueatk) {
 		target.trigger('shield', this, { dmg: dmg, blocked: 0 });
 	}
 };
-Thing.prototype.attack = function(stasis, freedomChance, target) {
+Thing.prototype.attack = function(target, attackPhase) {
+	const flags = { attackPhase, stasis: false, freedom: false };
+	this.proc('attack', flags);
+	const { stasis, freedom } = flags;
 	const isCreature = this.type === etg.Creature;
 	if (isCreature) {
 		this.dmg(this.getStatus('poison'), true);
@@ -497,11 +500,7 @@ Thing.prototype.attack = function(stasis, freedomChance, target) {
 			(this.status.get('burrowed') &&
 				this.owner.permanents.some(pr => pr && pr.status.get('tunnel')));
 		const psionic = this.status.get('psionic');
-		if (
-			freedomChance &&
-			this.status.get('airborne') &&
-			this.rng() < freedomChance
-		) {
+		if (freedom) {
 			if (momentum || psionic || (!target.shield && !target.gpull)) {
 				trueatk = Math.ceil(trueatk * 1.5);
 			} else {
@@ -537,7 +536,7 @@ Thing.prototype.attack = function(stasis, freedomChance, target) {
 		if (adrenaline) {
 			if (adrenaline < etg.countAdrenaline(this.trueatk(0))) {
 				this.incrStatus('adrenaline', 1);
-				this.attack(stasis, freedomChance, target);
+				this.attack(target, attackPhase);
 			} else {
 				this.setStatus('adrenaline', 1);
 			}

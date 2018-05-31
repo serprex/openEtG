@@ -172,18 +172,13 @@ Player.prototype.endturn = function(discard) {
 	if (poison) this.foe.dmg(poison);
 	let patienceFlag = false,
 		floodingFlag = false,
-		stasisFlag = false,
-		floodingPaidFlag = false,
-		freedomChance = 0;
+		floodingPaidFlag = false;
 	for (let i = 0; i < 16; i++) {
 		let p;
 		if ((p = this.permanents[i])) {
 			p.trigger('auto');
 			if (~p.getIndex()) {
 				p.usedactive = false;
-				if (p.getStatus('stasis')) {
-					stasisFlag = true;
-				}
 				if (p.getStatus('flooding') && !floodingPaidFlag) {
 					floodingPaidFlag = true;
 					floodingFlag = true;
@@ -193,24 +188,15 @@ Player.prototype.endturn = function(discard) {
 				}
 				if (p.getStatus('patience')) {
 					patienceFlag = true;
-					stasisFlag = true;
-				}
-				if (p.getStatus('freedom')) {
-					freedomChance++;
 				}
 				p.maybeDecrStatus('frozen');
 			}
 		}
 		if ((p = this.foe.permanents[i])) {
-			if (p.getStatus('stasis')) {
-				stasisFlag = true;
-			} else if (p.getStatus('flooding')) {
+			if (p.getStatus('flooding')) {
 				floodingFlag = true;
 			}
 		}
-	}
-	if (freedomChance) {
-		freedomChance = 1 - Math.pow(0.7, freedomChance);
 	}
 	this.creatures.slice().forEach((cr, i) => {
 		if (cr) {
@@ -219,7 +205,7 @@ Player.prototype.endturn = function(discard) {
 				cr.atk += floodbuff ? 5 : cr.getStatus('burrowed') ? 4 : 2;
 				cr.buffhp(floodbuff ? 2 : 1);
 			}
-			cr.attack(stasisFlag, freedomChance);
+			cr.attack();
 			if (
 				floodingFlag &&
 				!cr.getStatus('aquatic') &&

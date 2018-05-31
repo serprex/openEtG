@@ -118,6 +118,7 @@ const SkillsValues = Object.freeze({
 	forcedraw: -10,
 	forceplay: 2,
 	fractal: c => 3 + (9 - c.owner.hand.length) / 4,
+	freedom: 5,
 	freeze: [3, 3.5],
 	freezeperm: [3.5, 4],
 	fungusrebirth: 1,
@@ -341,7 +342,6 @@ const statusValues = Object.freeze({
 	cloak: c => !c.getStatus('charges') && c.owner == c.owner.game.turn ? 0 : 4,
 	flooding: c => c.owner.foe.countcreatures() - 3,
 	patience: c => 1 + c.owner.countcreatures() * 2,
-	freedom: 5,
 	reflective: 1,
 });
 
@@ -412,13 +412,13 @@ function calcExpectedDamage(pl, wallCharges, wallIndex) {
 	for (let i = 0; i < 16; i++) {
 		let p;
 		if ((p = pl.permanents[i])) {
-			if (!stasisFlag && (p.getStatus('stasis') || p.getStatus('patience'))) {
+			if (!stasisFlag && (p.hasactive('attack', 'stasis') || p.getStatus('patience'))) {
 				stasisFlag = true;
-			} else if (p.getStatus('freedom')) {
+			} else if (p.hasactive('attack', 'freedom')) {
 				freedomChance++;
 			}
 		}
-		if (!stasisFlag && (p = pl.foe.permanents[i]) && p.getStatus('stasis')) {
+		if (!stasisFlag && (p = pl.foe.permanents[i]) && p.hasactive('attack', 'stasis')) {
 			stasisFlag = true;
 		}
 	}

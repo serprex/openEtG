@@ -103,7 +103,7 @@ const data = {
 	counter: 'Attack attacker when attacked & able to attack',
 	countimmbur: 'Increment attack per immaterial or burrowed instance',
 	cpower: 'Target gains 1 to 5 strength & 1 to 5 health',
-	creatureupkeep: 'All creatures require upkeep',
+	creatureupkeep: 'All creatures require upkeep when attacking',
 	cseed: 'A random effect is inflicted to target creature',
 	cseed2: 'A truly random effect is inflicted to target',
 	darkness: 'Produce 1:11 per turn',
@@ -415,6 +415,7 @@ const data = {
 	soulcatch: 'When a death occurs, produce 3:2',
 	spores: ['Summon 2 spores on death', 'Summon 2 toxic spores on death'],
 	sskin: 'Increment maximum HP per 1:4 owned. Heal same',
+	stasis: 'Prevent creatures from attacking at end of turn',
 	static: 'Deal 2 spell damage to foe per attacker',
 	steal: 'Steal target permanent',
 	steam:
@@ -519,18 +520,16 @@ const statusData = {
 				(c.getStatus('stackable') ? ' stacks' : ' charges'),
 	flooding:
 		'Non aquatic creatures past first five creature slots die on turn end. Consumes 1:7. Unique',
-	freedom: '',
 	nightfall: auraText('Nocturnal creatures', '1|1', '2|1'),
 	nothrottle:
 		'Throttling does not apply to any of own creatures while equipped',
 	patience:
-		'Each turn delay own creatures. They gain 2|1. 4|1 if burrowed. 5|2 if flooded. Unique',
+		'Prevent own creatures from attacking at end of turn. They gain 2|1. 4|1 if burrowed. 5|2 if flooded. Unique',
 	poison: (c, inst) =>
 		c == inst
 			? 'Enter with ' + c.getStatus('poison') + ' poison'
 			: inst.getStatus('poison') + ' poison',
 	stackable: '',
-	stasis: 'Prevent creatures attacking at end of turn',
 	tunnel: 'Burrowed creatures bypass shields',
 	voodoo: 'Repeat to foe negative status effects & non lethal damage',
 	whetstone: auraText('Weapons & golems', '1|1', '1|2'),

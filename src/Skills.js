@@ -325,13 +325,7 @@ const Skills = {
 		t.atk += ba;
 	},
 	creatureupkeep: (c, t) => {
-		c.owner.masscc(
-			c,
-			(c, t) => {
-				Skills.upkeep.func(t);
-			},
-			true,
-		);
+		if (t.type === etg.Creature) Skills.upkeep.func(t);
 	},
 	cseed: (c, t) => {
 		Skills[
@@ -771,6 +765,9 @@ const Skills = {
 			c.owner.addCard(t.card);
 		}
 		c.owner.quanta[etg.Aether] = 0;
+	},
+	freedom: (c, t, attackFlags) => {
+		if (t.type === etg.Creature && t.getStatus('airborne') && !attackFlags.freedom && c.rng() < .3) attackFlags.freedom = true;
 	},
 	freeevade: (c, t, data) => {
 		const tgt = data.tgt;
@@ -1863,6 +1860,12 @@ const Skills = {
 	},
 	staff: (c, t) => {
 		return c.owner.mark == etg.Life || c.owner.mark == etg.Water ? 1 : 0;
+	},
+	stasis: (c, t, attackFlags) => {
+		if (t.type === etg.Creature && !attackFlags.attackPhase) attackFlags.stasis = true;
+	},
+	ownstasis: (c, t, attackFlags) => {
+		if (t.type === etg.Creature && c.owner === t.owner && !attackFlags.attackPhase) attackFlags.stasis = true;
 	},
 	static: c => {
 		c.owner.foe.spelldmg(2);
