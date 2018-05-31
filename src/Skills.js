@@ -2265,7 +2265,7 @@ function unsummon(t) {
 for (const key in Skills) {
 	Skills[key] = { name: [key], func: Skills[key], passive: false };
 }
-Skills.abomination.passive = Skills.becomearctic.passive = Skills.beguilestop.passive = Skills.bounce.passive = Skills.cell.passive = Skills.counter.passive = Skills.decrsteam.passive = Skills.deepdiveproc.passive = Skills.deepdiveproc2.passive = Skills.dshieldoff.passive = Skills.elf.passive = Skills.firebrand.passive = Skills.hitownertwice.passive = Skills.martyr.passive = Skills.mummy.passive = Skills.obsession.passive = Skills.predatoroff.passive = Skills.protectonce.passive = Skills.protectoncedmg.passive = Skills.salvage.passive = Skills.skeleton.passive = Skills.swarm.passive = Skills.virtue.passive = true;
+Skills.abomination.passive = Skills.becomearctic.passive = Skills.beguilestop.passive = Skills.bounce.passive = Skills.cell.passive = Skills.counter.passive = Skills.decrsteam.passive = Skills.deepdiveproc.passive = Skills.deepdiveproc2.passive = Skills.dshieldoff.passive = Skills.elf.passive = Skills.firebrand.passive = Skills.martyr.passive = Skills.mummy.passive = Skills.obsession.passive = Skills.predatoroff.passive = Skills.protectonce.passive = Skills.protectoncedmg.passive = Skills.salvage.passive = Skills.skeleton.passive = Skills.swarm.passive = Skills.virtue.passive = true;
 module.exports = Skills;
 var etg = require('./etg');
 var util = require('./util');
