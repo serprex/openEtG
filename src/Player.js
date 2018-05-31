@@ -205,7 +205,7 @@ Player.prototype.endturn = function(discard) {
 				cr.atk += floodbuff ? 5 : cr.getStatus('burrowed') ? 4 : 2;
 				cr.buffhp(floodbuff ? 2 : 1);
 			}
-			cr.attack();
+			cr.attack(undefined, true);
 			if (
 				floodingFlag &&
 				!cr.getStatus('aquatic') &&
@@ -220,7 +220,7 @@ Player.prototype.endturn = function(discard) {
 		this.shield.usedactive = false;
 		this.shield.trigger('auto');
 	}
-	if (this.weapon) this.weapon.attack();
+	if (this.weapon) this.weapon.attack(undefined, true);
 	if (this.foe.sosa > 0) {
 		this.foe.sosa--;
 	}
