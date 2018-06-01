@@ -84,7 +84,7 @@ if (typeof kongregateAPI === 'undefined') {
 				}}>
 					<input
 						placeholder="Username"
-						autoFocus={true}
+						autoFocus
 						tabIndex="1"
 						onKeyPress={e => this.maybeLogin(e)}
 						value={this.props.username}

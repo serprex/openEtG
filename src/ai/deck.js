@@ -181,7 +181,7 @@ module.exports = function(uprate, markpower, maxRarity) {
 			} else if (card.isOf(Cards.Georesonator)) {
 				ecost[ele[1]] -= 8;
 			} else if (card.type == etg.Creature) {
-				const auto = card.active.get('auto');
+				const auto = card.active.get('ownattack');
 				if (auto === Skills.light) ecost[etg.Light] -= 2;
 				else if (auto === Skills.fire) ecost[etg.Fire] -= 2;
 				else if (auto === Skills.air) ecost[etg.Air] -= 2;

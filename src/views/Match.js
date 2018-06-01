@@ -226,7 +226,7 @@ const ThingInst = connect(({opts}) => ({ lofiArt: opts.lofiArt }))(function Thin
 			if (obj.card.type === etg.Pillar) {
 				statText = `1:${obj.getStatus('pendstate') ? obj.owner.mark : obj.card.element} x${charges}`;
 				topText = '';
-			} else if (obj.active.get('auto') === Skills.locket) {
+			} else if (obj.active.get('ownattack') === Skills.locket) {
 				statText = `1:${obj.getStatus('mode') || obj.owner.mark}`;
 			} else {
 				statText = (charges || '').toString();

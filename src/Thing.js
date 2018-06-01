@@ -241,7 +241,7 @@ Thing.prototype.activetext = function() {
 		const a = this.active.get(akey);
 		if (a) return akey + ' ' + a.name.join(' ');
 	}
-	const aauto = this.active.get('auto');
+	const aauto = this.active.get('ownattack');
 	return aauto ? aauto.name.join(' ') : '';
 };
 Thing.prototype.place = function(owner, type, fromhand) {
@@ -475,8 +475,6 @@ Thing.prototype.attackCreature = function(target, trueatk) {
 };
 Thing.prototype.attack = function(target, attackPhase) {
 	const flags = { attackPhase, stasis: false, freedom: false };
-	this.proc('attack', flags);
-	const { stasis, freedom } = flags;
 	const isCreature = this.type === etg.Creature;
 	if (isCreature) {
 		this.dmg(this.getStatus('poison'), true);
@@ -487,8 +485,9 @@ Thing.prototype.attack = function(target, attackPhase) {
 				? this.owner
 				: this.owner.foe;
 	if (!this.status.get('frozen')) {
-		this.trigger('auto');
+		this.proc('attack', flags);
 	}
+	const { stasis, freedom } = flags;
 	this.usedactive = false;
 	let trueatk;
 	if (

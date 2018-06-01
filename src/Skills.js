@@ -44,7 +44,7 @@ const Skills = {
 	},
 	accelerationspell: (c, t) => {
 		t.lobo();
-		t.setSkill('auto', c.card.upped ? Skills.overdrive : Skills.acceleration);
+		t.setSkill('ownattack', c.card.upped ? Skills.overdrive : Skills.acceleration);
 	},
 	accretion: (c, t) => {
 		Skills.destroy.func(c, t);
@@ -808,7 +808,7 @@ const Skills = {
 	},
 	give: (c, t) => {
 		c.owner.dmg(c.card.upped ? -10 : -5);
-		if (t.type !== etg.Spell && t.hasactive('auto', 'singularity')) {
+		if (t.type !== etg.Spell && t.hasactive('ownattack', 'singularity')) {
 			t.die();
 		} else {
 			t.remove();
@@ -896,7 +896,7 @@ const Skills = {
 	},
 	hope: (c, t) => {
 		return c.owner.creatures.reduce(
-			(dr, cr) => (cr && cr.hasactive('auto', 'light') ? dr + 1 : dr),
+			(dr, cr) => (cr && cr.hasactive('ownattack', 'light') ? dr + 1 : dr),
 			0,
 		);
 	},
@@ -920,7 +920,7 @@ const Skills = {
 	},
 	immolate: (c, t) => {
 		t.die();
-		if (!t.hasactive('auto', 'singularity')) {
+		if (!t.hasactive('ownattack', 'singularity')) {
 			for (let i = 1; i < 13; i++) c.owner.spend(i, -1);
 			c.owner.spend(etg.Fire, c.card.upped ? -7 : -5);
 		}
@@ -1082,24 +1082,24 @@ const Skills = {
 			[
 				[0, '', 'poisonous'],
 				[0, '', 'adrenaline', 1],
-				[2, 'auto', 'regenerate'],
+				[2, 'ownattack', 'regenerate'],
 			],
 			[[0, 'buff', 'fiery']],
 			[[0, '', 'aquatic'], [2, 'hit', 'regen']],
 			[
-				[0, 'auto', 'light'],
+				[0, 'ownattack', 'light'],
 				[1, 'blocked', 'virtue'],
 				[2, 'owndmg', 'martyr'],
 				[3, 'ownfreeze', 'growth 2'],
 				[4, 'hit', 'disarm'],
-				[5, 'auto', 'sanctuary'],
+				[5, 'ownattack', 'sanctuary'],
 			],
 			[[0, '', 'airborne']],
 			[[1, 'hit', 'neuro']],
 			[
 				[0, '', 'nocturnal'],
 				[0, '', 'voodoo'],
-				[1, 'auto', 'siphon'],
+				[1, 'ownattack', 'siphon'],
 				[2, 'hit', 'vampire'],
 				[3, 'hit', 'reducemaxhp'],
 				[4, 'destroy', 'loot'],
@@ -1200,7 +1200,7 @@ const Skills = {
 				)
 					return;
 			}
-			x.addactive('auto', Skills.light);
+			x.addactive('ownattack', Skills.light);
 		});
 	},
 	lycanthropy: (c, t) => {
@@ -1358,7 +1358,7 @@ const Skills = {
 	},
 	nymph: (c, t) => {
 		Effect.mkText('Nymph', t);
-		const tauto = t.active.get('auto');
+		const tauto = t.active.get('ownattack');
 		const e =
 			t.card.element ||
 			(tauto == Skills.pillmat
@@ -1389,7 +1389,7 @@ const Skills = {
 	},
 	pairproduce: (c, t) => {
 		c.owner.permanents.forEach(p => {
-			if (p && p.card.type == etg.Pillar) p.trigger('auto');
+			if (p && p.card.type == etg.Pillar) p.trigger('ownattack');
 		});
 	},
 	paleomagnetism: (c, t) => {
@@ -1612,7 +1612,7 @@ const Skills = {
 	},
 	regeneratespell: (c, t) => {
 		t.lobo();
-		t.addactive('auto', Skills.regenerate);
+		t.addactive('ownattack', Skills.regenerate);
 		if (t.type == etg.Permanent || t.type == etg.Shield) {
 			t.clearStatus();
 		}
@@ -2180,7 +2180,7 @@ const Skills = {
 	despair: (c, t) => {
 		if (!t.getStatus('ranged')) {
 			const chance = c.owner.creatures.reduce((chance, cr) => {
-				return cr && cr.hasactive('auto', 'siphon') ? chance + 1 : chance;
+				return cr && cr.hasactive('ownattack', 'siphon') ? chance + 1 : chance;
 			}, 0);
 			if (c.rng() < 1.4 - Math.pow(0.95, chance)) {
 				Effect.mkText('-1|-1', t);

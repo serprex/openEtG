@@ -37,7 +37,7 @@ const etg = require('./etg'),
 const data = {
 	ablaze: x => ({
 		cast: `Gain ${x}|0`,
-		auto: `Gain ${x}|0 per turn`,
+		ownattack: `Gain ${x}|0 per turn`,
 	}),
 	abomination: 'Amiable to mutation',
 	absorber: 'Produce 3:6 per attacker',
@@ -208,7 +208,7 @@ const data = {
 			death: `When a death occurs, gain ${x}`,
 			ownfreeze: `Gains ${x} instead of freezing`,
 			cast: `Gain ${x}`,
-			auto: `Gain ${x} per turn`,
+			ownattack: `Gain ${x} per turn`,
 		};
 	},
 	guard:
@@ -299,7 +299,7 @@ const data = {
 	pacify: "Reduce target's attack to 0",
 	pairproduce: 'Activate own pillars',
 	paleomagnetism: {
-		auto: [
+		ownattack: [
 			"Summon a pillar matching mark per turn. Third chance to summon a pillar matching foe's mark",
 			"Summon a tower matching mark per turn & on play. Third chance to summon a tower matching foe's mark",
 		]
@@ -495,7 +495,7 @@ const data = {
 	['pillcar', '1:1 1:3 1:10 1:12'],
 ].forEach(x => {
 	data[x[0]] = {
-		auto: 'Produce 1 or 2 ' + x[1] + ' per turn',
+		ownattack: 'Produce 1 or 2 ' + x[1] + ' per turn',
 		ownplay: 'Produce 1 or 2 ' + x[1] + ' on play',
 	};
 });
@@ -512,7 +512,7 @@ const statusData = {
 	cloak: 'Cloaks own field',
 	charges: (c, inst) =>
 		c !== inst ||
-		Thing.prototype.hasactive.call(c, 'auto', 'losecharge') ||
+		Thing.prototype.hasactive.call(c, 'ownattack', 'losecharge') ||
 		c.getStatus('charges') == 1
 			? ''
 			: 'Enter with ' +

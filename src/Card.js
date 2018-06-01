@@ -36,7 +36,7 @@ function Card(type, info) {
 			this.active = new imm.Map();
 			for (const active of util.iterSplit(info.Skill, '+')) {
 				const eqidx = active.indexOf('=');
-				const a0 = ~eqidx ? active.substr(0, eqidx) : 'auto';
+				const a0 = ~eqidx ? active.substr(0, eqidx) : 'ownattack';
 				const cast = readCost(a0, this.element);
 				Thing.prototype.addactive.call(
 					this,

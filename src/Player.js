@@ -176,7 +176,7 @@ Player.prototype.endturn = function(discard) {
 	for (let i = 0; i < 16; i++) {
 		let p;
 		if ((p = this.permanents[i])) {
-			p.trigger('auto');
+			p.trigger('ownattack');
 			if (~p.getIndex()) {
 				p.usedactive = false;
 				if (p.getStatus('flooding') && !floodingPaidFlag) {
@@ -218,7 +218,7 @@ Player.prototype.endturn = function(discard) {
 	});
 	if (this.shield) {
 		this.shield.usedactive = false;
-		this.shield.trigger('auto');
+		this.shield.trigger('ownattack');
 	}
 	if (this.weapon) this.weapon.attack(undefined, true);
 	if (this.foe.sosa > 0) {
