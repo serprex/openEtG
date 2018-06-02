@@ -69,13 +69,13 @@ const sockmeta = new WeakMap();
 			socket.send(JSON.stringify(data));
 		}
 	}
-	function modf(func) {
+	function roleck(key, func) {
 		return function(data, user) {
-			db.sismember('Mods', data.u, (err, ismem) => {
+			db.sismember(key, data.u, (err, ismem) => {
 				if (ismem) {
 					func.call(this, data, user);
 				} else {
-					sockEmit(this, 'chat', { mode: 1, msg: 'You are not a mod' });
+					sockEmit(this, 'chat', { mode: 1, msg: `You are not a member of ${key}` });
 				}
 			});
 		};
@@ -89,22 +89,28 @@ const sockmeta = new WeakMap();
 	]);
 	let guestban = false;
 	const userEvents = {
-		modadd: modf(function(data, user) {
+		modadd: roleck('Mods', function(data, user) {
 			db.sadd('Mods', data.m);
 		}),
-		modrm: modf(function(data, user) {
+		modrm: roleck('Mods', function(data, user) {
 			db.srem('Mods', data.m);
 		}),
-		modguest: modf(function(data, user) {
+		codesmithadd: roleck('Codesmiths', function(data, user) {
+			db.sadd('Codesmiths', data.m);
+		}),
+		codesmithrm: roleck('Codesmiths', function(data, user) {
+			db.srem('Codesmiths', data.m);
+		}),
+		modguest: roleck('Mods', function(data, user) {
 			guestban = data.m == 'off';
 		}),
-		modmute: modf(function(data, user) {
+		modmute: roleck('Mods', function(data, user) {
 			broadcast({ x: 'mute', m: data.m });
 		}),
-		modclear: modf(function(data, user) {
+		modclear: roleck('Mods', function(data, user) {
 			broadcast({ x: 'clear' });
 		}),
-		modmotd: modf(function(data, user) {
+		modmotd: roleck('Mods', function(data, user) {
 			const match = data.m.match(/^(\d+) ?(.*)$/);
 			if (match) {
 				const num = match[1],
@@ -262,30 +268,24 @@ const sockmeta = new WeakMap();
 				});
 			});
 		},
-		codecreate: function(data, user) {
+		codecreate: roleck('Codesmiths', function(data, user) {
 			if (!data.t) {
 				return sockEmit(this, 'chat', {
 					mode: 1,
 					msg: `Invalid type ${data.t}`,
 				});
 			}
-			db.sismember('Codesmiths', data.u, (err, ismem) => {
-				if (ismem) {
-					db.eval(
-						"math.randomseed(ARGV[1])local c repeat c=''for i=1,8 do c=c..string.char(math.random(33,126))end until redis.call('hexists','CodeHash',c)==0 redis.call('hset','CodeHash',c,ARGV[2])return c",
-						0,
-						Math.random() * MAX_INT,
-						data.t,
-						(err, code) => {
-							if (err) console.log(err);
-							sockEmit(this, 'chat', { mode: 1, msg: data.t + ' ' + code });
-						},
-					);
-				} else {
-					sockEmit(this, 'chat', { mode: 1, msg: 'You are not a codesmith' });
-				}
-			});
-		},
+			db.eval(
+				"math.randomseed(ARGV[1])local c repeat c=''for i=1,8 do c=c..string.char(math.random(33,126))end until redis.call('hexists','CodeHash',c)==0 redis.call('hset','CodeHash',c,ARGV[2])return c",
+				0,
+				Math.random() * MAX_INT,
+				data.t,
+				(err, code) => {
+					if (err) console.log(err);
+					sockEmit(this, 'chat', { mode: 1, msg: data.t + ' ' + code });
+				},
+			);
+		}),
 		codesubmit: function(data, user) {
 			db.hget('CodeHash', data.code || '', (err, type) => {
 				if (!type) {
@@ -794,6 +794,11 @@ const sockmeta = new WeakMap();
 		},
 		mod: function(data) {
 			db.smembers('Mods', (err, mods) => {
+				sockEmit(this, 'chat', { mode: 1, msg: mods.join() });
+			});
+		},
+		codesmith: function(data) {
+			db.smembers('Codesmiths', (err, mods) => {
 				sockEmit(this, 'chat', { mode: 1, msg: mods.join() });
 			});
 		},

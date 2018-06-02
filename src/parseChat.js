@@ -79,13 +79,11 @@ function parseChat(e) {
 		} else if (msg.match(/^\/unmute /)) {
 			store.store.dispatch(store.unmute(msg.slice(8)));
 			chatmute();
-		} else if (msg == '/motd') {
-			sock.emit('motd');
-		} else if (msg == '/mod') {
-			sock.emit('mod');
+		} else if (msg.match(/^\/(motd|mod|codesmith)/)) {
+			sock.emit(msg.slice(1));
 		} else if (user && msg == '/modclear') {
 			sock.userEmit('modclear');
-		} else if (user && msg.match(/^\/mod(guest|mute|add|rm|motd) /)) {
+		} else if (user && msg.match(/^\/(mod(guest|mute|add|rm|motd)|codesmith(add|rm)) /)) {
 			const sp = msg.indexOf(' ');
 			sock.userEmit(msg.slice(1, sp), { m: msg.slice(sp + 1) });
 		} else if (msg.match(/^\/code /)) {
