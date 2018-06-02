@@ -167,7 +167,7 @@
 "quinttog":"quinttog",
 "rage":"crea",
 "readiness":"crea",
-"reap":"notskele",
+"reap":"crea",
 "regeneratespell":"crea+permnonstack",
 "regrade":"notself:notplay:all",
 "reinforce":"notself:crea",

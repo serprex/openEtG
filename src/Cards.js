@@ -155,7 +155,6 @@ const TargetFilters = {
 	play: (c, t) => t.type == etg.Player,
 	notplay: (c, t) => t.type != etg.Player,
 	sing: (c, t) => t.isMaterial(etg.Creature) && t.active.get('cast') !== c.active.get('cast'),
-	notskele: (c, t) => t.isMaterial(etg.Creature) && !t.card.isOf(exports.Skeleton),
 	butterfly: (c, t) => (
 		(t.type == etg.Creature || t.type == etg.Weapon) &&
 		!t.getStatus('immaterial') &&
