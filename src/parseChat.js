@@ -79,7 +79,7 @@ function parseChat(e) {
 		} else if (msg.match(/^\/unmute /)) {
 			store.store.dispatch(store.unmute(msg.slice(8)));
 			chatmute();
-		} else if (msg.match(/^\/(motd|mod|codesmith)/)) {
+		} else if (msg.match(/^\/(motd|mod|codesmith)$/)) {
 			sock.emit(msg.slice(1));
 		} else if (user && msg == '/modclear') {
 			sock.userEmit('modclear');
