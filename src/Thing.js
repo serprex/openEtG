@@ -484,14 +484,15 @@ Thing.prototype.attack = function(target, attackPhase) {
 			this.active.get('cast') === Skills.appease && !this.status.get('appeased')
 				? this.owner
 				: this.owner.foe;
-	if (!this.status.get('frozen')) {
+	const frozen = this.status.get('frozen');
+	if (!frozen) {
 		this.proc('attack', flags);
 	}
 	const { stasis, freedom } = flags;
 	this.usedactive = false;
 	let trueatk;
 	if (
-		!(stasis || this.status.get('frozen') || this.status.get('delayed')) &&
+		!(stasis || frozen || this.status.get('delayed')) &&
 		(trueatk = this.trueatk())
 	) {
 		let momentum =
@@ -524,20 +525,22 @@ Thing.prototype.attack = function(target, attackPhase) {
 			if (dmg != trueatk) this.trigger('blocked', target.shield, trueatk - dmg);
 		}
 	}
-	const frozen = this.maybeDecrStatus('frozen');
+	this.maybeDecrStatus('frozen');
 	this.maybeDecrStatus('delayed');
 	this.setStatus('dive', 0);
-	if (isCreature && ~this.getIndex() && this.truehp() <= 0) {
-		this.die();
-	} else if (!isCreature || ~this.getIndex()) {
-		if (!frozen) this.trigger('postauto');
-		const adrenaline = this.getStatus('adrenaline');
-		if (adrenaline) {
-			if (adrenaline < etg.countAdrenaline(this.trueatk(0))) {
-				this.incrStatus('adrenaline', 1);
-				this.attack(target, attackPhase);
-			} else {
-				this.setStatus('adrenaline', 1);
+	if (~this.getIndex()) {
+		if (isCreature && this.truehp() <= 0) {
+			this.die();
+		} else {
+			if (!frozen) this.trigger('postauto');
+			const adrenaline = this.getStatus('adrenaline');
+			if (adrenaline) {
+				if (adrenaline < etg.countAdrenaline(this.trueatk(0))) {
+					this.incrStatus('adrenaline', 1);
+					this.attack(target, attackPhase);
+				} else {
+					this.setStatus('adrenaline', 1);
+				}
 			}
 		}
 	}
