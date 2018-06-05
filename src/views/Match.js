@@ -953,9 +953,9 @@ module.exports = connect(({user}) => ({user}))(class Match extends React.Compone
 					top: '40px',
 					width: '140px',
 				}}>
-				{`${['Commoner', 'Mage', 'Champion', 'Demigod', 'Arena1', 'Arena2'][
+				{(['Commoner\n', 'Mage\n', 'Champion\n', 'Demigod\n', 'Arena1\n', 'Arena2\n'][
 					this.props.game.level
-				] || ''}\n${this.props.game.foename || '-'}`}
+				] || '') + (this.props.game.foename || '-')}
 			</div>
 			<span
 				style={{
