@@ -1345,7 +1345,7 @@ const Skills = {
 		}
 	},
 	eatspell: (c, t, data) => {
-		if (t.type == etg.Spell) {
+		if (t.type === etg.Spell && t.card.type === etg.Spell) {
 			Skills['growth 1'].func(c);
 			c.rmactive('prespell', 'eatspell');
 			data.evade = true;
@@ -1647,7 +1647,7 @@ const Skills = {
 		t.owner.deck.push(new Thing(t.card));
 	},
 	ricochet: (c, t, data) => {
-		if (t.type != etg.Spell) return;
+		if (t.type !== etg.Spell || t.card.type !== etg.Spell) return;
 		const tgting = Cards.Targeting[data.active.name[0]];
 		if (tgting) {
 			function tgttest(x) {
@@ -2199,11 +2199,11 @@ const Skills = {
 		};
 	},
 	evadespell: (c, t, data) => {
-		if (data.tgt == c && c.owner != t.owner && t.type == etg.Spell)
+		if (data.tgt == c && c.owner != t.owner && t.type === etg.Spell && t.card.type === etg.Spell)
 			data.evade = true;
 	},
 	evadecrea: (c, t, data) => {
-		if (data.tgt == c && c.owner != t.owner && t.type == etg.Creature)
+		if (data.tgt == c && c.owner != t.owner && t.type === etg.Creature)
 			data.evade = true;
 	},
 	firewall: (c, t) => {
