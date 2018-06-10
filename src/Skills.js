@@ -767,7 +767,7 @@ const Skills = {
 		c.owner.quanta[etg.Aether] = 0;
 	},
 	freedom: (c, t, attackFlags) => {
-		if (t.type === etg.Creature && t.getStatus('airborne') && !attackFlags.freedom && c.rng() < .3) attackFlags.freedom = true;
+		if (c.owner === t.owner && t.type === etg.Creature && t.getStatus('airborne') && !attackFlags.freedom && c.rng() < .3) attackFlags.freedom = true;
 	},
 	freeevade: (c, t, data) => {
 		const tgt = data.tgt;
