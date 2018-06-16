@@ -2259,7 +2259,7 @@ function unsummon(t) {
 		t.remove();
 		t.owner.addCardInstance(t);
 	} else {
-		Skills.rewind.func(c, t);
+		Skills.rewind.func(null, t);
 	}
 }
 for (const key in Skills) {
