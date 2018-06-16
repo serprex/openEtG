@@ -2255,11 +2255,11 @@ const Skills = {
 	},
 };
 function unsummon(t) {
+	t.remove();
 	if (t.owner.hand.length < 8) {
-		t.remove();
 		t.owner.addCardInstance(t);
 	} else {
-		Skills.rewind.func(null, t);
+		t.owner.deck.push(t);
 	}
 }
 for (const key in Skills) {

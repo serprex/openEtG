@@ -7,6 +7,7 @@ const lut = {
 	card: require('./card'),
 	deck: require('./deck'),
 	speed: require('./speed'),
+	collection: require('./collection'),
 };
 module.exports = function(req, res) {
 	try {
