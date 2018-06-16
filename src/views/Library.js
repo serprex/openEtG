@@ -126,7 +126,16 @@ module.exports = class Library extends React.Component {
 					this.setState({ showbound: !this.state.showbound });
 				}}
 			/>
-			<Components.ExitBtn x={8} y={8} />
+			<Components.ExitBtn x={5} y={8} />
+			<input type='button'
+				value='Export'
+				style={{
+					position: 'absolute',
+					left: '5px',
+					top: '28px',
+				}}
+				onClick={() => open('/collection/' + this.props.name, '_blank')}
+			/>
 			<Components.CardSelector
 				cardpool={this.state.showbound ? boundpool : cardpool}
 				filterboth
