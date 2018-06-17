@@ -168,9 +168,10 @@ const sockmeta = new WeakMap();
 			} else {
 				db.hmget(au, 'day', (err, res) => {
 					const day = res ? res[0] : 0,
-						today = sutil.getDay();
-					if (day !== today) {
-						user.gold += today - day > 6 ? 250 : 25;
+						today = sutil.getDay(),
+						age = today - day;
+					if (age > 0) {
+						user.gold += today - day > 6 ? 250 : age * 25;
 					}
 					db.hmset(au, {
 						day: today,
