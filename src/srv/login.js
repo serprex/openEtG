@@ -50,14 +50,15 @@ module.exports = function(sockEmit) {
 					user.dailymage = Math.floor(Math.random() * aiDecks.mage.length);
 					user.dailydg = Math.floor(Math.random() * aiDecks.demigod.length);
 				}
-				Us.socks[user.name] = socket;
+				Us.socks.set(user.name, socket);
 				socket.send(
-					'{"x":"login",' +
-						JSON.stringify(user, function(key, val) {
-							return this == user && key.match(/^(salt|iter|algo)$/)
-								? undefined
-								: val;
-						}).slice(1),
+					JSON.stringify({
+						...user,
+						x: 'login',
+						salt: undefined,
+						iter: undefined,
+						algo: undefined,
+					}),
 				);
 				if (!user.daily) user.daily = 128;
 				db.zadd(
@@ -90,7 +91,8 @@ module.exports = function(sockEmit) {
 			Us.load(name).
 				then(user => loginRespond(this, user, data.p, data.a)).
 				catch(() => {
-					const user = (Us.users[name] = { name: name, gold: 0 });
+					const user = { name, gold: 0 };
+					Us.users.set(name, user);
 					return loginRespond(this, user, data.p, data.a);
 				});
 		}

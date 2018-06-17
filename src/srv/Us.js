@@ -1,13 +1,12 @@
 'use strict';
 const db = require('./db'),
-	users = {},
+	users = new Map(),
 	usergc = new Set();
 exports.users = users;
-exports.socks = {};
+exports.socks = new Map();
 function storeUsers() {
 	const margs = ['Users'];
-	for (const u in users) {
-		const user = users[u];
+	for (const [u, user] of users) {
 		if (user.pool || user.accountbound) {
 			margs.push(u, JSON.stringify(user));
 		}
@@ -18,9 +17,9 @@ exports.storeUsers = storeUsers;
 const usergcloop = setInterval(() => {
 	storeUsers();
 	// Clear inactive users
-	for (const u in users) {
+	for (const u of users.keys()) {
 		if (usergc.delete(u)) {
-			delete users[u];
+			users.delete(u);
 		} else {
 			usergc.add(u);
 		}
@@ -33,13 +32,15 @@ exports.stop = function() {
 };
 exports.load = function(name) {
 	return new Promise((resolve, reject) => {
-		if (users[name]) {
+		const userck = users.get(name);
+		if (userck) {
 			usergc.delete(name);
-			resolve(users[name]);
+			resolve(userck);
 		} else {
 			db.hget('Users', name, (err, userstr) => {
 				if (userstr) {
-					const user = (users[name] = JSON.parse(userstr));
+					const user = JSON.parse(userstr);
+					users.set(name, user);
 					if (!user.streak) user.streak = [];
 					resolve(user);
 				} else {
