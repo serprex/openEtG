@@ -20,6 +20,7 @@ module.exports = function(req, res) {
 			func = ~idx && lut[url.slice(0, idx)];
 		if (func) {
 			cache.add(res, url, ifmod, url.slice(idx + 1), func);
+			if (func === lut.collection) cache.rm(url);
 		} else if (
 			!~url.indexOf('..') &&
 			url.match(/^(vanilla\/|cia\/)?$|\.(js(on|\.map)?|html?|css|csv|png|ogg)$/)

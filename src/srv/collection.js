@@ -9,7 +9,7 @@ module.exports = async function(url, stime) {
 		result = [],
 		pool = etgutil.deck2pool(user.pool);
 	Cards.Codes.forEach((card, code) => {
-		if (!card.upped && !card.shiny) {
+		if (!card.upped && !card.shiny && !card.getStatus('token')) {
 			result.push([
 				code,
 				card.name,
