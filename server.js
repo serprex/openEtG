@@ -553,14 +553,17 @@ const sockmeta = new WeakMap();
 					const card = Cards.Codes[code];
 					if (!card) return;
 					const sellval = userutil.sellValue(card);
+					let codeCount = etgutil.count(user.pool, code);
 					if (data.price > 0) {
 						if (data.price <= sellval) {
 							return;
 						}
 					} else  {
 						if (-data.price <= sellval) {
-							user.gold += sellval * count;
-							user.pool = etgutil.addcard(user.pool, code, -count);
+							if (codeCount >= count) {
+								user.gold += sellval * count;
+								user.pool = etgutil.addcard(user.pool, code, -count);
+							}
 							return;
 						}
 					}
@@ -577,9 +580,10 @@ const sockmeta = new WeakMap();
 								happened = -amt;
 							}
 						}
-						if (happened && user.gold >= bci.p * amt && (happened < 0 || etgutil.count(user.pool, code) >= amt)) {
+						if (happened && user.gold >= bci.p * amt && codeCount >= happened) {
 							user.gold -= bci.p * amt;
 							user.pool = etgutil.addcard(user.pool, code, happened);
+							codeCount += happened;
 							Us.load(bci.u).then(seller => {
 								if (happened < 0) {
 									seller.pool = etgutil.addcard(seller.pool, code, amt);
@@ -600,8 +604,9 @@ const sockmeta = new WeakMap();
 					if (count > 0) {
 						let bidmade = false;
 						if (data.price < 0) {
-							if (etgutil.count(user.pool, code) >= count) {
+							if (codeCount >= count) {
 								user.pool = etgutil.addcard(user.pool, code, -count);
+								codeCount -= count;
 								bidmade = true;
 							}
 						} else {
