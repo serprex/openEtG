@@ -1,7 +1,7 @@
 #!/bin/node
-const Cards = require('../Cards'),
-	etgutil = require('../etgutil'),
-	decks = require('../Decks');
+const Cards = require('../src/Cards'),
+	etgutil = require('../src/etgutil'),
+	decks = require('../src/Decks');
 let pool = '';
 function buildPool(x) {
 	pool = etgutil.mergedecks(pool, x[1]);
