@@ -232,7 +232,7 @@ const data = {
 	immolate: c =>
 		'Sacrifice a creature to produce ' +
 		(c.upped ? 7 : 5) +
-		':6 & 1 quanta of each other element',
+		':6 & 1 quanta of each element',
 	improve: 'Mutate target creature',
 	inertia: 'When own is targeted, produce 2:3',
 	infect: 'Poison target creature',
