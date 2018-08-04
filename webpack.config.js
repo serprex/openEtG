@@ -3,7 +3,7 @@ module.exports = {
 		main: './src/ui/main.js',
 		art: './src/ui/art.js',
 		mosaic: './src/ui/mosaic.js',
-		vanilla: './src/vanilla/ui.main.js',
+		vanilla: './src/vanilla/main.js',
 	},
 	output: {
 		path: __dirname,
@@ -11,6 +11,22 @@ module.exports = {
 		sourceMapFilename: 'bundle.[name].js.map',
 	},
 	devtool: 'cheap-source-map',
+	optimization: {
+		splitChunks: {
+			chunks: 'all',
+			cacheGroups: {
+				vendor: {
+					test: /[\\/]node_modules[\\/]/,
+					priority: -10,
+				},
+				commons: {
+					name: 'commons',
+					chunks: 'initial',
+					minChunks: 2,
+				},
+			},
+		},
+	},
 	module: {
 		rules: [
 			{
