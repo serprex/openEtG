@@ -7,30 +7,30 @@
     "url": "https://github.com/serprex/openEtG"
   },
   "dependencies": {
-    "bufferutil": "^3.0.5",
+    "bufferutil": "^4.0.0",
     "httpolyglot": "^0.1.2",
     "immutable": "^3.8.2",
     "redis": "^2.8.0",
     "rng.js": "^1.0.2",
-    "ws": "^5.2.0"
+    "ws": "^6.0.0"
   },
   "devDependencies": {
-    "@babel/core": "^7.0.0-beta.49",
-    "@babel/plugin-proposal-class-properties": "^7.0.0-beta.49",
-    "@babel/plugin-proposal-object-rest-spread": "^7.0.0-beta.49",
-    "@babel/plugin-transform-react-jsx": "^7.0.0-beta.49",
-    "@babel/polyfill": "^7.0.0-beta.49",
-    "@babel/preset-env": "^7.0.0-beta.49",
-    "@babel/preset-react": "^7.0.0-beta.49",
-    "babel-loader": "^8.0.0-beta.3",
+    "@babel/core": "^7.0.0-beta.56",
+    "@babel/plugin-proposal-class-properties": "^7.0.0-beta.56",
+    "@babel/plugin-proposal-object-rest-spread": "^7.0.0-beta.56",
+    "@babel/plugin-transform-react-jsx": "^7.0.0-beta.56",
+    "@babel/polyfill": "^7.0.0-beta.56",
+    "@babel/preset-env": "^7.0.0-beta.56",
+    "@babel/preset-react": "^7.0.0-beta.56",
+    "babel-loader": "^8.0.0-beta.4",
     "optipng-bin": "^4.0",
-    "prettier": "^1.13.2",
-    "react": "^16.4.0",
-    "react-dom": "^16.4.0",
+    "prettier": "^1.14.0",
+    "react": "^16.4.2",
+    "react-dom": "^16.4.2",
     "react-redux": "^5.0.7",
     "redux": "^4.0.0",
-    "webpack": "^4.10.1",
-    "webpack-cli": "^2.1.4"
+    "webpack": "^4.16.4",
+    "webpack-cli": "^2.1.5"
   },
   "scripts": {
     "start": "./server.js",
