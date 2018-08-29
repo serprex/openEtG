@@ -1,9 +1,9 @@
 module.exports = {
 	entry: {
-		main: './src/ui/main.js',
-		art: './src/ui/art.js',
-		mosaic: './src/ui/mosaic.js',
-		vanilla: './src/vanilla/main.js',
+		main: ['babel-polyfill', './src/ui/main.js'],
+		art: ['babel-polyfill', './src/ui/art.js'],
+		mosaic: ['babel-polyfill', './src/ui/mosaic.js'],
+		vanilla: ['babel-polyfill', './src/vanilla/main.js'],
 	},
 	output: {
 		path: __dirname,
@@ -37,7 +37,7 @@ module.exports = {
 					query: {
 						presets: ["@babel/preset-react", [
 							"@babel/preset-env", {
-								useBuiltIns: 'usage',
+								// useBuiltIns: 'usage',
 								targets: {
 									browsers: [
 										"firefox esr",

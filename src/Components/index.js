@@ -378,7 +378,8 @@ function CardSelectorCore(props) {
 			Cards.cardCmp,
 			props.shiny && !props.filterboth,
 		);
-		children.push(<CardSelectorColumn key={i} {...props} cards={cards} x={props.x+i*133} y={props.y} />)
+		children.push(<CardSelectorColumn key={i} {...props}
+			cards={cards} x={props.x+i*133} y={props.y} />);
 	}
 	return children;
 }
@@ -416,7 +417,7 @@ class CardSelector extends React.Component {
 				onClick={() => this.setState({ showall: !this.state.showall })}
 			/>
 			<RaritySelector x={74} y={338} value={this.state.rarity} onChange={rarity => this.setState({rarity})} />
-			<ElementSelector x={4} y={316} value={this.state.rarity} onChange={element => this.setState({element})} />
+			<ElementSelector x={4} y={316} value={this.state.element} onChange={element => this.setState({element})} />
 			<CardSelectorCore {...this.props} x={100} y={272} shiny={this.state.shiny} showall={this.state.showall} rarity={this.state.rarity} element={this.state.element} />
 		</>;
 		return children;

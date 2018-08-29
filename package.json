@@ -23,6 +23,7 @@
     "@babel/preset-env": "^7.0.0",
     "@babel/preset-react": "^7.0.0",
     "babel-loader": "^8.0.0",
+    "babel-polyfill": "^6.26.0",
     "optipng-bin": "^4.0",
     "prettier": "^1.14.2",
     "react": "^16.4.2",

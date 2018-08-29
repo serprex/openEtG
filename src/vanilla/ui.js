@@ -30,8 +30,39 @@ exports.elecols = new Uint32Array([
 	0x999999,
 	0xaaddee,
 ]);
+exports.strcols = [
+	'#a98',
+	'#a59',
+	'#768',
+	'#963',
+	'#654',
+	'#5a0',
+	'#c52',
+	'#258',
+	'#887',
+	'#38d',
+	'#ca2',
+	'#333',
+	'#5ac',
+	'#dcb',
+	'#dbc',
+	'#bac',
+	'#ca9',
+	'#ba9',
+	'#ac7',
+	'#da8',
+	'#8ac',
+	'#ccb',
+	'#9be',
+	'#ed8',
+	'#999',
+	'#ade',
+];
 exports.maybeLighten = function(card) {
 	return exports.elecols[card.element + card.upped * 13];
+};
+exports.maybeLightenStr = function(card) {
+	return exports.strcols[card.element + card.upped * 13];
 };
 var Point;
 if (typeof PIXI === 'undefined') {

@@ -1,11 +1,11 @@
 'use strict';
 exports.Targeting = null;
 exports.Codes = [];
-var etg = require('./etg');
-var Card = require('./Card');
-var etgutil = require('../etgutil');
+const etg = require('./etg'),
+	Card = require('./Card'),
+	etgutil = require('../etgutil');
 exports.codeCmp = function(x, y) {
-	var cx = exports.Codes[x],
+	const cx = exports.Codes[x],
 		cy = exports.Codes[y];
 	return (
 		cx.upped - cy.upped ||
@@ -19,16 +19,15 @@ exports.codeCmp = function(x, y) {
 exports.cardCmp = function(x, y) {
 	return exports.codeCmp(x.code, y.code);
 };
-var filtercache = [];
-exports.filter = function(upped, filter, cmp, showshiny) {
-	var cacheidx = (upped ? 1 : 0) | (showshiny ? 2 : 0);
+const filtercache = [];
+exports.filter = function(upped, filter, cmp) {
+	const cacheidx = upped ? 1 : 0;
 	if (!(cacheidx in filtercache)) {
 		filtercache[cacheidx] = [];
-		for (var key in exports.Codes) {
-			var card = exports.Codes[key];
+		for (const key in exports.Codes) {
+			const card = exports.Codes[key];
 			if (
 				card.upped == upped &&
-				!card.shiny == !showshiny &&
 				!card.status.token
 			) {
 				filtercache[cacheidx].push(card);
@@ -36,7 +35,7 @@ exports.filter = function(upped, filter, cmp, showshiny) {
 		}
 		filtercache[cacheidx].sort();
 	}
-	var keys = filtercache[cacheidx].filter(filter);
+	const keys = filtercache[cacheidx].filter(filter);
 	if (cmp) keys.sort(cmp);
 	return keys;
 };
@@ -57,7 +56,7 @@ function parseCsv(type, data) {
 	}
 }
 function parseTargeting(data) {
-	for (var key in data) {
+	for (const key in data) {
 		data[key] = getTargetFilter(data[key]);
 	}
 	exports.Targeting = data;
@@ -87,7 +86,7 @@ function getTargetFilter(str) {
 		});
 	}
 }
-var TargetFilters = {
+const TargetFilters = {
 	own: function(c, t) {
 		return c.owner == t.owner;
 	},

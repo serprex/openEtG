@@ -831,10 +831,6 @@ CardInstance.prototype.useactive = function(target) {
 	owner.spend(card.costele, card.cost, this);
 	owner.game.updateExpectedDamage();
 };
-function countAdrenaline(x) {
-	x = Math.abs(x | 0);
-	return x > 15 ? 1 : (adrtbl[x] & 7) + 1;
-}
 function casttext(cast, castele) {
 	return cast == 0 ? '0' : cast + ':' + castele;
 }

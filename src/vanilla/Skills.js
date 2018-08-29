@@ -1637,7 +1637,7 @@ var Actives = {
 		return !t.status.get('airborne') && !t.status.get('ranged');
 	},
 };
-for (var key in Actives) {
+for (const key in Actives) {
 	Actives[key] = { name: [key], func: Actives[key], passive: false };
 }
 Actives.bounce.passive = Actives.decrsteam.passive = Actives.obsession.passive = Actives.salvage.passive = Actives.siphon.passive = Actives.swarm.passive = true;

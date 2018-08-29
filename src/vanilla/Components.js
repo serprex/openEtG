@@ -29,15 +29,17 @@ function CardImage(props) {
 		className='cardslot'
 		onMouseOver={props.onMouseOver}
 		onClick={props.onClick}
+		onContextMenu={props.onContextMenu}
 		style={{
 			backgroundColor: bgcol,
-			borderColor: bordcol,
+			borderColor: props.opacity ? '#f00' : bordcol,
 			color: card && card.upped ? '#000' : '#fff',
 			position: 'absolute',
 			left: props.x + 'px',
 			top: props.y + 'px',
 			whiteSpace: 'nowrap',
 			overflow: 'hidden',
+			opacity: props.opacity,
 		}}>
 		{card.name}
 		{!!card.cost && <span
@@ -49,7 +51,7 @@ function CardImage(props) {
 			}}>
 			{card.cost}
 			{card.costele !== card.element &&
-				<span className={'ico te' + card.costele } />}
+				<span className={'ico te' + card.costele} />}
 		</span>}
 	</div>;
 }
@@ -114,7 +116,81 @@ exports.IconBtn = IconBtn;
 exports.Card = function(props) {
 	const card = props.card || (props.code && Cards.Codes[props.code]);
 	if (!card) return null;
-	return null;
+	const textColor = card.upped ? '#000' : '';
+	return <div
+		style={{
+			position: 'absolute',
+			left: props.x + 'px',
+			top: props.y + 'px',
+			width: '128px',
+			height: '256px',
+			pointerEvents: 'none',
+			zIndex: '4',
+			color: textColor,
+			backgroundImage: 'url("../assets/cardBacks.png")',
+			backgroundPosition: `${(card.element + card.upped * 13) * -128}px 0px`,
+			backgroundRepeat: 'no-repeat',
+			overflow: 'hidden',
+		}}>
+		<span style={{
+			position: 'absolute',
+			left: '2px',
+			top: '2px',
+			fontSize: '12px',
+		}}>
+			{card.name}
+		</span>
+		<img className={card.code & 0x4000 ? 'shiny' : ''}
+			src={`/Cards/${card.code.toString(32)}.png`}
+			style={{
+				position:'absolute',
+				top:'20px',
+				width: '128px',
+				height: '128px',
+				backgroundColor: ui.maybeLightenStr(card),
+			}}
+		/>
+		<exports.Text text={card.info()} icoprefix='te'
+			style={{
+				position: 'absolute',
+				padding: '2px',
+				top: '148px',
+				fontSize: '10px',
+				width: '128px',
+				height: '108px',
+				backgroundImage: 'url("/assets/cardBacks.png")',
+				backgroundPosition: `${(card.element + card.upped * 13) * -128}px -20px`,
+			}}
+		/>
+		{!!card.rarity &&
+			<span className={`ico r${card.rarity}`}
+				style={{
+					position:'absolute',
+					right:'30px',
+					bottom:'2px',
+				}}
+			/>
+		}
+		{!!card.cost &&
+			<span style={{
+				position:'absolute',
+				right:'2px',
+				top:'2px',
+				fontSize: '12px',
+			}}>
+				{card.cost}
+				{card.element != card.costele &&
+					<span className={`ico ce${card.costele}`} />}
+			</span>
+		}
+		<span className={`ico t${card.type}`}
+			style={{
+				position:'absolute',
+				right:'2px',
+				bottom:'2px',
+			}}
+		/>
+	</div>;
 };
 
 function DeckDisplay(props) {
@@ -151,166 +227,127 @@ function DeckDisplay(props) {
 }
 exports.DeckDisplay = DeckDisplay;
 
+function ElementSelector(props) {
+	const children = [];
+	for (let i = 0; i < 13; i++) {
+		children.push(
+			<IconBtn key={i}
+				e={'e' + i}
+				x={!i || i & 1 ? props.x : props.x+36}
+				y={316 + Math.floor((i - 1) / 2) * 32}
+				click={() => props.onChange(i)}
+			/>
+		);
+	}
+	return children;
+}
+exports.ElementSelector = ElementSelector;
+
+function CardSelectorColumn(props) {
+	function maybeShiny(code) {
+		if (props.filterboth && !props.shiny) {
+			const scode = etgutil.asShiny(code, 1);
+			if (
+				scode in props.cardpool &&
+				props.cardpool[scode] >
+				((props.cardminus && props.cardminus[scode]) ||
+					0)
+			) {
+				return scode;
+			}
+		}
+		return code;
+	}
+	const children = [], countTexts = [];
+	for (let j = 0; j < props.cards.length; j++) {
+		const y = props.y + j * 19,
+			card = props.cards[j],
+			code = card.code;
+		children.push(
+			<CardImage
+				x={props.x}
+				y={y}
+				card={card}
+				onClick={props.onClick && (() =>
+					props.onClick(maybeShiny(code))
+				)}
+				onContextMenu={props.onContextMenu && (e => {
+					e.preventDefault();
+					props.onContextMenu(code);
+				})}
+				onMouseOver={props.onMouseOver && (() =>
+					props.onMouseOver(maybeShiny(code))
+				)}
+			/>
+		);
+		if (props.cardpool) {
+			const scode = etgutil.asShiny(code, true);
+			const cardAmount = card.isFree()
+				? '-'
+				: code in props.cardpool
+				? props.cardpool[code] -
+				((props.cardminus && props.cardminus[code]) || 0)
+				: 0,
+				shinyAmount =
+					props.filterboth && !props.shiny && scode in props.cardpool
+					? props.cardpool[scode] -
+					((props.cardminus && props.cardminus[scode]) || 0)
+					: 0;
+			countTexts.push(
+				<div className={'selectortext' +
+					(props.maxedIndicator &&
+						card.type != etg.Pillar &&
+						cardAmount >= 6
+						? cardAmount >= 12 ? ' beigeback' : ' lightback'
+						: '')}>
+					{cardAmount + (shinyAmount ? '/' + shinyAmount : '')}
+				</div>
+			);
+		}
+	}
+	return <>
+		<div style={{
+			position: 'absolute',
+			left: `${props.x+100}px`,
+			top: `${props.y}px`,
+			textHeight: '0',
+		}}>{countTexts}</div>
+		{children}
+	</>;
+}
+function CardSelectorCore(props) {
+	const children = [];
+	for (let i = 0; i < 6; i++) {
+		const cards = Cards.filter(
+			i > 2,
+			x => (
+				x.element == props.element /* &&
+				((i % 3 == 0 && x.type == etg.Creature) ||
+					(i % 3 == 1 && x.type <= etg.Permanent) ||
+					(i % 3 == 2 && x.type == etg.Spell))*/
+			),
+			Cards.cardCmp,
+		);
+		children.push(<CardSelectorColumn key={i} {...props}
+			cards={cards} x={props.x+i*133} y={props.y} />);
+	}
+	return children;
+}
+exports.CardSelectorCore = CardSelectorCore;
+
 class CardSelector extends React.Component {
 	constructor(props) {
 		super(props);
 		this.state = {
-			shiny: false,
-			showall: false,
 			element: 0,
-			rarity: 0,
 		};
 	}
 
 	render() {
-		const self = this;
-		const children = [
-			<input type='button'
-				value='Toggle Shiny'
-				style={{
-					position: 'absolute',
-					left: '4px',
-					top: '578px',
-				}}
-				onClick={() => self.setState({ shiny: !self.state.shiny })}
-			/>,
-			<input type='button'
-				value={self.state.showall ? 'Auto Hide' : 'Show All'}
-				style={{
-					position: 'absolute',
-					left: '4px',
-					top: '530px',
-				}}
-				onClick={() => self.setState({ showall: !self.state.showall })}
-			/>,
-		];
-		for (let i = 0; i < 13; i++) {
-			children.push(
-				<IconBtn
-					e={'e' + i}
-					x={!i || i & 1 ? 4 : 40}
-					y={316 + Math.floor((i - 1) / 2) * 32}
-					click={() => self.setState({ element: i })}
-				/>
-			);
-		}
-		for (let i = 0; i < 5; i++) {
-			children.push(
-				<IconBtn
-					e={(i ? 'r' : 't') + i}
-					x={74}
-					y={338 + i * 32}
-					click={() => self.setState({ rarity: i })}
-				/>
-			);
-		}
-		for (let i = 0; i < 6; i++) {
-			const x = 100 + i * 133;
-			const column = Cards.filter(
-				i > 2,
-				function(x) {
-					return (
-						(x.element == self.state.element || self.state.rarity == 4) &&
-						((i % 3 == 0 && x.type == etg.Creature) ||
-							(i % 3 == 1 && x.type <= etg.Permanent) ||
-							(i % 3 == 2 && x.type == etg.Spell)) &&
-						(!self.props.cardpool ||
-							x.code in self.props.cardpool ||
-							(self.props.filterboth &&
-								etgutil.asShiny(x.code, true) in self.props.cardpool) ||
-							self.state.showall ||
-							x.isFree()) &&
-						(!self.state.rarity || self.state.rarity == Math.min(x.rarity, 4))
-					);
-				},
-				Cards.cardCmp,
-				this.state.shiny && !this.props.filterboth,
-			);
-			const countTexts = [];
-			for (let j = 0; j < column.length; j++) {
-				const y = 272 + j * 19,
-					card = column[j];
-				let code = card.code;
-				children.push(
-					<CardImage
-						x={x}
-						y={y}
-						card={card}
-						onClick={
-							self.props.onClick &&
-							function() {
-								if (self.props.filterboth && !self.state.shiny) {
-									const scode = card.asShiny(true).code;
-									if (
-										scode in self.props.cardpool &&
-										self.props.cardpool[scode] >
-											((self.props.cardminus && self.props.cardminus[scode]) ||
-												0)
-									) {
-										code = scode;
-									}
-								}
-								return self.props.onClick(code);
-							}}
-						onMouseOver={
-							self.props.onMouseOver &&
-							function() {
-								if (self.props.filterboth && !self.state.shiny) {
-									const scode = card.asShiny(true).code;
-									if (
-										scode in self.props.cardpool &&
-										self.props.cardpool[scode] >
-											((self.props.cardminus && self.props.cardminus[scode]) ||
-												0)
-									) {
-										code = scode;
-									}
-								}
-								return self.props.onMouseOver(code);
-							}}
-					/>
-				);
-				if (this.props.cardpool) {
-					const scode = etgutil.asShiny(card.code, true);
-					var cardAmount = card.isFree()
-							? '-'
-							: code in this.props.cardpool
-								? this.props.cardpool[code] -
-									((this.props.cardminus && this.props.cardminus[code]) || 0)
-								: 0,
-						shinyAmount = 0;
-					if (this.props.filterboth && !this.state.shiny) {
-						shinyAmount =
-							scode in this.props.cardpool
-								? this.props.cardpool[scode] -
-									((this.props.cardminus && this.props.cardminus[scode]) || 0)
-								: 0;
-					}
-					countTexts.push(
-						<div className={'selectortext' +
-							(this.props.maxedIndicator &&
-							card.type != etg.Pillar &&
-							cardAmount >= 6
-									? cardAmount >= 12 ? ' beigeback' : ' lightback'
-									: '')}>
-							{cardAmount + (shinyAmount ? '/' + shinyAmount : '')}
-						</div>
-					);
-				}
-			}
-			children.push(
-				<div
-					style={{
-						position: 'absolute',
-						left: x + 100 + 'px',
-						top: '272px',
-						textHeight: '0',
-						whiteSpace: 'pre',
-					}}
-					children={countTexts}
-				/>
-			);
-		}
+		return <>
+			<ElementSelector x={4} y={316} onChange={element => this.setState({element})} />
+			<CardSelectorCore {...this.props} x={100} y={272} element={this.state.element} />
+		</>;
 		return children;
 	}
 }
