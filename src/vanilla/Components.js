@@ -321,10 +321,10 @@ function CardSelectorCore(props) {
 		const cards = Cards.filter(
 			i > 2,
 			x => (
-				x.element == props.element /* &&
-				((i % 3 == 0 && x.type == etg.Creature) ||
-					(i % 3 == 1 && x.type <= etg.Permanent) ||
-					(i % 3 == 2 && x.type == etg.Spell))*/
+				x.element == props.element &&
+				((i % 3 == 0 && x.type == etg.CreatureEnum) ||
+					(i % 3 == 1 && x.type <= etg.PermanentEnum) ||
+					(i % 3 == 2 && x.type == etg.SpellEnum))
 			),
 			Cards.cardCmp,
 		);

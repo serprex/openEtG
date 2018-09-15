@@ -1,6 +1,7 @@
 'use strict';
 module.exports = Game;
 var etg = require('./etg');
+var smth = require('./Thing');
 var Cards = require('./Cards');
 var Effect = require('./Effect');
 var Player = require('./Player');
@@ -74,13 +75,13 @@ Game.prototype.tgtToBits = function(x) {
 		return 0;
 	} else if (x.type == etg.Player) {
 		bits = 1;
-	} else if (x instanceof etg.Weapon) {
+	} else if (x instanceof smth.Weapon) {
 		bits = 17;
-	} else if (x instanceof etg.Shield) {
+	} else if (x instanceof smth.Shield) {
 		bits = 33;
 	} else {
 		bits =
-			(x instanceof etg.Creature ? 2 : x instanceof etg.Permanent ? 4 : 5) |
+			(x instanceof smth.Creature ? 2 : x instanceof smth.Permanent ? 4 : 5) |
 			(x.getIndex() << 4);
 	}
 	if (x.owner == this.player2) {
@@ -111,7 +112,7 @@ Game.prototype.getTarget = function(src, active, cb) {
 			filter: function(t) {
 				return (
 					(t.type == etg.Player ||
-						t instanceof etg.CardInstance ||
+						t instanceof smth.CardInstance ||
 						t.owner == game.turn ||
 						t.status.cloak ||
 						!t.owner.isCloaked()) &&

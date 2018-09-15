@@ -2,9 +2,10 @@
 var etg = require("../etg");
 var Cards = require("../Cards");
 var Actives = require("../Skills");
+var smth = require('./Thing');
 var enableLogging = false, logbuff, logstack;
 function pillarval(c){
-	return c instanceof etg.CardInstance?.1:Math.sqrt(c.status.charges);
+	return c instanceof smth.CardInstance?.1:Math.sqrt(c.status.charges);
 }
 var ActivesValues = Object.freeze({
 	ablaze:3,
@@ -18,12 +19,12 @@ var ActivesValues = Object.freeze({
 	aggroskele:2,
 	air:1,
 	alphawolf:function(c){
-		return c instanceof etg.CardInstance?3:0;
+		return c instanceof smth.CardInstance?3:0;
 	},
 	animateweapon:4,
 	antimatter:12,
 	appease:function(c){
-		return c instanceof etg.CardInstance?-6:c.status.appeased?0:c.trueatk()*-1.5;
+		return c instanceof smth.CardInstance?-6:c.status.appeased?0:c.trueatk()*-1.5;
 	},
 	bblood:7,
 	blackhole:function(c){
@@ -59,12 +60,12 @@ var ActivesValues = Object.freeze({
 	},
 	deja:4,
 	deployblobs: function(c) {
-		return 2+(c instanceof etg.CardInstance ? Math.min(c.card.attack, c.card.health) : Math.min(c.trueatk(), c.truehp()))/4;
+		return 2+(c instanceof smth.CardInstance ? Math.min(c.card.attack, c.card.health) : Math.min(c.trueatk(), c.truehp()))/4;
 	},
 	destroy:8,
 	destroycard:1,
 	devour:function(c){
-		return 2+(c instanceof etg.CardInstance?c.card.health:c.truehp());
+		return 2+(c instanceof smth.CardInstance?c.card.health:c.truehp());
 	},
 	drawcopy:1,
 	disarm:function(c){
@@ -73,7 +74,7 @@ var ActivesValues = Object.freeze({
 	disfield:8,
 	disshield:7,
 	dive:function(c, ttatk){
-		return c instanceof etg.CardInstance?c.card.attack:ttatk-(c.status.dive||0)/1.5;
+		return c instanceof smth.CardInstance?c.card.attack:ttatk-(c.status.dive||0)/1.5;
 	},
 	divinity:3,
 	drainlife:10,
@@ -120,7 +121,7 @@ var ActivesValues = Object.freeze({
 		return dmg;
 	},
 	gpull:function(c){
-		return c instanceof etg.CardInstance || c != c.owner.gpull ? 2 : 0;
+		return c instanceof smth.CardInstance || c != c.owner.gpull ? 2 : 0;
 	},
 	gpullspell:3,
 	gratitude:function(c){return c.status?c.status.charges*4:4;},
@@ -130,7 +131,7 @@ var ActivesValues = Object.freeze({
 	guard:4,
 	halveatk:function(c){
 		var atk;
-		return c instanceof etg.CardInstance ? -c.card.attack/4 : ((atk = c.trueatk()) < 0)-(atk > 0);
+		return c instanceof smth.CardInstance ? -c.card.attack/4 : ((atk = c.trueatk()) < 0)-(atk > 0);
 	},
 	hasten:function(c){
 		return Math.min(c.owner.deck.length/4, 10);
@@ -212,7 +213,7 @@ var ActivesValues = Object.freeze({
 	powerdrain:6,
 	precognition:1,
 	predator:function(c, tatk){
-		return !(c instanceof etg.CardInstance) && c.owner.foe.hand.length > 4 ? tatk + Math.max(c.owner.foe.hand.length-6, 1) : 1;
+		return !(c instanceof smth.CardInstance) && c.owner.foe.hand.length > 4 ? tatk + Math.max(c.owner.foe.hand.length-6, 1) : 1;
 	},
 	protectonce:2,
 	protectall:4,
@@ -224,7 +225,7 @@ var ActivesValues = Object.freeze({
 	readiness: 3,
 	rebirth:[5, 2],
 	reducemaxhp: function(c, ttatk){
-		return (c instanceof etg.Creature ? ttatk : c.card.attack)*5/3;
+		return (c instanceof smth.Creature ? ttatk : c.card.attack)*5/3;
 	},
 	regenerate: 5,
 	regeneratespell: 5,
@@ -268,20 +269,20 @@ var ActivesValues = Object.freeze({
 	tempering:[2,3],
 	throwrock:4,
 	tick:function(c){
-		return c instanceof etg.CardInstance ? 1 : 1+(c.maxhp-c.truehp())/c.maxhp;
+		return c instanceof smth.CardInstance ? 1 : 1+(c.maxhp-c.truehp())/c.maxhp;
 	},
 	tornado:9,
 	trick:4,
 	turngolem:function(c){
-		return c instanceof etg.CardInstance ? 0 : c.status.storedpower/3;
+		return c instanceof smth.CardInstance ? 0 : c.status.storedpower/3;
 	},
 	upkeep: -.5,
 	upload:3,
 	vampire:function(c, ttatk){
-		return (c instanceof etg.CardInstance?c.card.attack:ttatk)*.7;
+		return (c instanceof smth.CardInstance?c.card.attack:ttatk)*.7;
 	},
 	virtue:function(c){
-		return c instanceof etg.CardInstance ? (c.owner.foe.shield ? Math.min(c.owner.foe.shield.dr, c.card.attack) : 0) : (c.trueatk() - getDamage(c)) / 1.5;
+		return c instanceof smth.CardInstance ? (c.owner.foe.shield ? Math.min(c.owner.foe.shield.dr, c.card.attack) : 0) : (c.trueatk() - getDamage(c)) / 1.5;
 	},
 	virusplague:1,
 	void:function(c){return c.status?c.status.charges*5:5;},
@@ -291,7 +292,7 @@ var ActivesValues = Object.freeze({
 	quantagift:4,
 	web:1,
 	wind:function(c){
-		return c instanceof etg.CardInstance ? -2 : c.status.storedAtk/2 - 2;
+		return c instanceof smth.CardInstance ? -2 : c.status.storedAtk/2 - 2;
 	},
 	wisdom:4,
 	yoink:4,
@@ -304,7 +305,7 @@ var ActivesValues = Object.freeze({
 	pillcar:pillarval,
 	absorber:5,
 	blockwithcharge:function(c){
-		return (c instanceof etg.CardInstance?c.card.status.charges:c.status.charges)/(1+c.owner.foe.countcreatures()*2);
+		return (c instanceof smth.CardInstance?c.card.status.charges:c.status.charges)/(1+c.owner.foe.countcreatures()*2);
 	},
 	cold:7,
 	despair:5,
@@ -434,7 +435,7 @@ function checkpassives(c) {
 	var score = 0, statuses = c.status;
 	for (var status in statuses)
 	{
-		if (uniqueStatuses[status] && !(c instanceof etg.CardInstance)) {
+		if (uniqueStatuses[status] && !(c instanceof smth.CardInstance)) {
 			if (!uniquesActive.has(status)) {
 				uniquesActive.add(status);
 			}
@@ -453,7 +454,7 @@ var throttled = Object.freeze({"poison 1":true, "poison 2":true, "poison 3":true
 function evalthing(c) {
 	if (!c) return 0;
 	var ttatk, hp, poison, score = 0;
-	var isCreature = c instanceof etg.Creature, isWeapon = c instanceof etg.Weapon;
+	var isCreature = c instanceof smth.Creature, isWeapon = c instanceof smth.Weapon;
 	var adrenalinefactor = c.status.adrenaline ? etg.countAdrenaline(c.trueatk()) : 1;
 	if (isWeapon || isCreature){
 		var delaymix = Math.max((c.status.frozen||0), (c.status.delayed||0))/adrenalinefactor, delayfactor = delaymix?1-Math.min(delaymix/5, .6):1;
@@ -597,7 +598,7 @@ module.exports = function(game) {
 		// Remove this if logic is updated to call endturn
 		if (player != game.turn && player.hand.length < 8 && player.deck.length > 0){
 			var code = player.deck.pop();
-			player.hand.push(new etg.CardInstance(code, player));
+			player.hand.push(new smth.CardInstance(code, player));
 			pscore += evalcardinstance(player.hand[player.hand.length-1]);
 			player.hand.pop();
 			player.deck.push(code);

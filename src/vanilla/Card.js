@@ -10,13 +10,14 @@ function Card(type, info) {
 	this.name = info.Name;
 	this.code = info.Code;
 	this.tier = info.Tier;
-	if (info.Attack) {
-		this.attack = parseInt(info.Attack);
+	this.attack = info.Attack || 0;
+	this.health = info.Health || 0;
+	if (info.Cost) {
+		[this.cost, this.costele] = readCost(info.Cost, this.element);
+	} else {
+		this.cost = 0;
+		this.costele = 0;
 	}
-	if (info.Health) {
-		this.health = parseInt(info.Health);
-	}
-	this.readCost('cost', info.Cost || '0');
 	if (info.Active) {
 		if (this.type == etg.SpellEnum) {
 			this.active = new imm.Map({ cast: Actives[info.Active] });
@@ -24,7 +25,7 @@ function Card(type, info) {
 			this.castele = this.costele;
 		} else if (info.Active in activecache) {
 			this.active = activecache[info.Active];
-			var castinfo = activecastcache[info.Active];
+			const castinfo = activecastcache[info.Active];
 			if (castinfo) {
 				[this.cast, this.castele] = castinfo;
 			}
@@ -33,13 +34,15 @@ function Card(type, info) {
 			for (const active of util.iterSplit(info.Active, '+')) {
 				const eqidx = active.indexOf('=');
 				const a0 = ~eqidx ? active.substr(0, eqidx) : 'auto';
-				const cast = this.readCost(a0, this.element);
-				if (active.length == 1) {
-					this.active = this.active.set('auto', Actives[active[0]]);
-				} else {
-					var iscast = this.readCost('cast', active[0]);
-					this.active = this.active.set(iscast ? 'cast' : active[0], Actives[active[1]]);
-					if (iscast) activecastcache[info.Active] = [this.cast, this.castele];
+				const cast = readCost(a0, this.element);
+				Thing.prototype.addactive.call(
+					this,
+					cast ? 'cast' : a0,
+					Actives[a0],
+				);
+				if (cast) {
+					[this.cast, this.castele] = cast;
+					activecastcache[info.Skill] = cast;
 				}
 			}	activecache[info.Active] = this.active;
 		}
@@ -70,19 +73,6 @@ Card.prototype.attack = 0;
 Card.prototype.health = 0;
 Card.prototype.status = {};
 Card.prototype.active = {};
-Card.prototype.readCost = function(attr, cost) {
-	if (typeof cost == 'number') {
-		this[attr] = cost;
-		this[attr + 'ele'] = this.element;
-		return false;
-	}
-	var c = cost.split(':');
-	var cost = parseInt(c[0]);
-	if (isNaN(cost)) return;
-	this[attr] = cost;
-	this[attr + 'ele'] = c.length == 1 ? this.element : parseInt(c[1]);
-	return true;
-};
 Card.prototype.info = function() {
 	if (this.type == etg.SpellEnum) {
 		return skillText(this);
@@ -108,8 +98,21 @@ Card.prototype.asUpped = function(upped) {
 Card.prototype.isOf = function(card) {
 	return card.code == etgutil.asUpped(this.code, false);
 };
+function readCost(coststr, defaultElement) {
+	if (typeof coststr == 'number')
+		return new Int8Array([coststr, defaultElement]);
+	const cidx = coststr.indexOf(':'),
+		cost = +(~cidx ? coststr.substr(0, cidx) : coststr);
+	return isNaN(cost)
+		? null
+		: new Int8Array([
+				cost,
+				~cidx ? +(coststr.substr(cidx + 1)) : defaultElement,
+			]);
+}
 
 var etg = require('./etg');
+var {Thing} = require('./Thing');
 var Cards = require('./Cards');
 var etgutil = require('../etgutil');
 var skillText = require('./skillText');

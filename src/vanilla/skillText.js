@@ -1,6 +1,7 @@
 'use strict';
 var etg = require('./etg');
 var Card = require('./Card');
+var {Thing} = require('./Thing');
 // TODO skeleton, mummy
 var data = {
 	ablaze: 'Gain 2|0',
@@ -350,7 +351,7 @@ var data = {
 	wisdom: 'Target gains 4|0. May target immaterial, granting psionic',
 };
 [['dagger', '1:2 1:11'], ['hammer', '1:3 1:4'], ['bow', '1:9']].forEach(
-	function(x) {
+	x => {
 		data[x[0]] = 'Increment damage if mark is ' + x[1];
 	},
 );
@@ -379,7 +380,7 @@ function auraText(tgts, bufftext, upbufftext) {
 var statusData = {
 	cloak: 'Cloaks own field',
 	charges: function(c) {
-		return etg.Thing.prototype.hasactive.call(c, 'auto', 'losecharge') ||
+		return Thing.prototype.hasactive.call(c, 'auto', 'losecharge') ||
 			c.status.charges == 1
 			? ''
 			: 'Enter with ' +
@@ -398,6 +399,7 @@ var statusData = {
 	voodoo: 'Repeat to foe negative status effects & non lethal damage',
 };
 function processEntry(c, event, entry) {
+	console.log(c, event, entry);
 	return typeof entry === 'string'
 		? entry
 		: entry instanceof Array
@@ -415,24 +417,24 @@ function pushEntry(list, c, event, entry) {
 }
 module.exports = function(c, event) {
 	if (c instanceof Card && c.type == etg.SpellEnum) {
-		var entry = data[c.active.get('cast').name[0]];
+		const entry = data[c.active.get('cast').name[0]];
 		return processEntry(c, 'cast', entry);
 	} else {
-		var ret = [],
+		const ret = [],
 			stext = [];
-		for (var key in c.status) {
-			if (!c.status[key]) continue;
-			var entry = statusData[key];
+		for (const [key, val] of c.status) {
+			if (!val) continue;
+			const entry = statusData[key];
 			if (entry === undefined) {
-				var text = c.status[key] === true ? key : key + ': ' + c.status[key];
+				let text = val === true || val === 1 ? key : key + ': ' + val;
 				text = text.charAt(0).toUpperCase() + text.slice(1);
 				stext.push(text);
 			} else pushEntry(ret, c, '', entry);
 		}
 		if (stext.length) ret.unshift(stext.join(', '));
-		for (var key in c.active) {
-			c.active[key].name.forEach(function(name) {
-				var entry = data[name];
+		for (const [key, val] of c.active) {
+			val.name.forEach(name => {
+				const entry = data[name];
 				if (entry === undefined) return;
 				pushEntry(ret, c, key, entry);
 				if (key == 'cast')

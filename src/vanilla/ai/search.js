@@ -1,5 +1,6 @@
 "use strict";
 var etg = require("../etg");
+var smth = require("../Thing");
 var Cards = require("../Cards");
 var evalGame = require("./eval");
 var lethal = require("./lethal");
@@ -91,7 +92,7 @@ AiSearch.prototype.step = function(game) {
 			var ch = c.hash();
 			if (ch in casthash) return;
 			else casthash[ch] = true;
-			var active = c instanceof etg.CardInstance ? c.card.type == etg.SpellEnum && c.card.active.auto : c.active.cast;
+			var active = c instanceof smth.CardInstance ? c.card.type == etg.SpellEnum && c.card.active.auto : c.active.cast;
 			var cbits = game.tgtToBits(c) ^ 8, tgthash = [];
 			function evalIter(t) {
 				if (t && t.hash){

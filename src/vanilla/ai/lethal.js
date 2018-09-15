@@ -1,5 +1,6 @@
 "use strict";
 var etg = require("../etg");
+var smth = require("../Thing");
 var Cards = require("../Cards");
 module.exports = function(game) {
 	var limit = 333, cmdct, currentEval = game.player1.hp;
@@ -9,7 +10,7 @@ module.exports = function(game) {
 			var ch = c.hash();
 			if (ch in casthash) return;
 			else casthash[ch] = true;
-			var active = c instanceof etg.CardInstance ? c.card.type == etg.SpellEnum && c.card.active.auto : c.active.cast;
+			var active = c instanceof smth.CardInstance ? c.card.type == etg.SpellEnum && c.card.active.auto : c.active.cast;
 			var cbits = game.tgtToBits(c) ^ 8;
 			function evalIter(t) {
 				if ((!game.targeting || (t && game.targeting.filter(t))) && --limit > 0) {

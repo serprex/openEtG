@@ -1,9 +1,4 @@
 'use strict';
-var Effect = require('./Effect');
-var etg = require('./etg');
-var util = require('../util');
-var Cards = require('./Cards');
-var imm = require('immutable');
 function adrenathrottle(f) {
 	return function(c) {
 		if (!c.status || (c.status.get('adrenaline') || 0) < 3) {
@@ -67,7 +62,7 @@ var Actives = {
 		if (c.truehp() > 45) {
 			c.die();
 			if (c.owner.hand.length < 8) {
-				new etg.CardInstance(
+				new smth.CardInstance(
 					Cards.BlackHole.asUpped(c.card.upped),
 					c.owner,
 				).place();
@@ -84,7 +79,7 @@ var Actives = {
 			if (
 				c.owner.permanents[i] &&
 				c.card.element == c.owner.permanents[i].card.element &&
-				c.owner.permanents[i] instanceof etg.Pillar
+				c.owner.permanents[i] instanceof smth.Pillar
 			)
 				res += c.owner.permanents[i].status.get('charges');
 		}
@@ -99,7 +94,7 @@ var Actives = {
 	},
 	air: function(c, t) {
 		Effect.mkText('1:9', c);
-		c.owner.spend(etg.Air, -1);
+		c.owner.spend(smth.Air, -1);
 	},
 	antimatter: function(c, t) {
 		Effect.mkText('Antimatter', t);
@@ -114,7 +109,7 @@ var Actives = {
 			validTargets.length = 0;
 			for (var i = 0; i < 23; i++) {
 				var cr = t.owner.creatures[i];
-				if (cr && cr != t && cr.isMaterialInstance(etg.Creature)) {
+				if (cr && cr != t && cr.isMaterialInstance(smth.Creature)) {
 					validTargets.push(i);
 				}
 			}
@@ -133,11 +128,11 @@ var Actives = {
 	},
 	becomeweapon: function(c, t) {
 		c.remove();
-		c.owner.weapon = new etg.Weapon(Cards.GadgetSword, c.owner);
+		c.owner.weapon = new smth.Weapon(Cards.GadgetSword, c.owner);
 	},
 	becomeshield: function(c, t) {
 		c.remove();
-		c.owner.shield = new etg.Shield(Cards.GadgetSword.asUpped(true), c.owner);
+		c.owner.shield = new smth.Shield(Cards.GadgetSword.asUpped(true), c.owner);
 	},
 	blackhole: function(c, t) {
 		if (!c.owner.foe.sanctuary) {
@@ -167,7 +162,7 @@ var Actives = {
 	},
 	boneyard: function(c, t) {
 		if (!t.card.isOf(Cards.Skeleton)) {
-			new etg.Creature(Cards.Skeleton.asUpped(c.card.upped), c.owner).place();
+			new smth.Creature(Cards.Skeleton.asUpped(c.card.upped), c.owner).place();
 		}
 	},
 	bow: function(c, t) {
@@ -231,7 +226,7 @@ var Actives = {
 				hp += c.owner.creatures[i].truehp();
 			}
 		}
-		var chim = new etg.Creature(c.card, c.owner);
+		var chim = new smth.Creature(c.card, c.owner);
 		chim.atk = atk;
 		chim.maxhp = hp;
 		chim.hp = hp;
@@ -246,7 +241,7 @@ var Actives = {
 		var validTargets = [];
 		for (var i = 0; i < 23; i++) {
 			var cr = t.owner.creatures[i];
-			if (cr && cr != t && cr.isMaterialInstance(etg.Creature)) {
+			if (cr && cr != t && cr.isMaterialInstance(smth.Creature)) {
 				validTargets.push(cr);
 			}
 		}
@@ -373,7 +368,7 @@ var Actives = {
 		Actives.destroy.func(c, t, false, true);
 		var healsum = 0;
 		for (var i = 0; i < 16; i++) {
-			if (c.owner.permanents[i] && c.owner.permanents[i] instanceof etg.Pillar)
+			if (c.owner.permanents[i] && c.owner.permanents[i] instanceof smth.Pillar)
 				healsum += c.owner.permanents[i].status.get('charges');
 		}
 		Effect.mkText('+' + healsum, c);
@@ -383,7 +378,7 @@ var Actives = {
 		Actives.destroy.func(c, t, false, true);
 		var healsum = 0;
 		for (var i = 0; i < 16; i++) {
-			if (c.owner.permanents[i] && c.owner.permanents[i] instanceof etg.Pillar)
+			if (c.owner.permanents[i] && c.owner.permanents[i] instanceof smth.Pillar)
 				healsum += c.owner.permanents[i].status.get('charges');
 		}
 		healsum = healsum * 2;
@@ -406,7 +401,7 @@ var Actives = {
 	},
 	duality: function(c, t) {
 		if (c.owner.foe.deck.length > 0 && c.owner.hand.length < 8) {
-			new etg.CardInstance(
+			new smth.CardInstance(
 				c.owner.foe.deck[c.owner.foe.deck.length - 1],
 				c.owner,
 			).place();
@@ -469,7 +464,7 @@ var Actives = {
 	flyingweapon: function(c, t) {
 		var wp = c.owner.weapon;
 		if (wp) {
-			var cr = new etg.Creature(wp.card, c.owner);
+			var cr = new smth.Creature(wp.card, c.owner);
 			cr.atk = wp.atk;
 			cr.active = wp.active;
 			cr.cast = wp.cast;
@@ -483,7 +478,7 @@ var Actives = {
 	fractal: function(c, t) {
 		Effect.mkText('Fractal', t);
 		for (var i = 8; i > 0; i--) {
-			new etg.CardInstance(t.card, c.owner).place();
+			new smth.CardInstance(t.card, c.owner).place();
 		}
 		c.owner.quanta[etg.Aether] = 0;
 	},
@@ -491,7 +486,7 @@ var Actives = {
 		t.freeze(c.card.upped && c.card != Cards.PandemoniumUp ? 4 : 3);
 	},
 	frightened: function(c, t) {
-		if (t instanceof etg.Creature) {
+		if (t instanceof smth.Creature) {
 			c.status = c.status.set('frightened', true);
 		}
 	},
@@ -505,7 +500,7 @@ var Actives = {
 		c.status = c.status.set('charges', c.status.get('charges') + 2);
 	},
 	gas: function(c, t) {
-		new etg.Permanent(Cards.UnstableGas.asUpped(c.card.upped), c.owner).place();
+		new smth.Permanent(Cards.UnstableGas.asUpped(c.card.upped), c.owner).place();
 	},
 	gpull: function(c, t) {
 		Effect.mkText('Pull', c);
@@ -590,7 +585,7 @@ var Actives = {
 		t.dmg(c.trueatk());
 	},
 	hydra: function(c, t) {
-		new etg.Creature(Cards.HydraHead.asUpped(c.card.upped), c.owner).place();
+		new smth.Creature(Cards.HydraHead.asUpped(c.card.upped), c.owner).place();
 	},
 	hydrahead: function(c, t) {
 		var ownshydra = false;
@@ -795,7 +790,7 @@ var Actives = {
 			active: actives,
 			cast: cost,
 		};
-		new etg.Creature(Cards.ShardGolem, c.owner).place();
+		new smth.Creature(Cards.ShardGolem, c.owner).place();
 	},
 	intensity: function(c, t, ele, amount) {
 		if (ele != 8 || amount <= 0) return;
@@ -818,7 +813,7 @@ var Actives = {
 			t.status = t.status.set('law', lawNumber);
 			t.addactive('hp', Actives.lawfree);
 		}
-		var lawPerm = new etg.Permanent(Cards.Law, c.owner);
+		var lawPerm = new smth.Permanent(Cards.Law, c.owner);
 		lawPerm.active = new imm.Map();
 		lawPerm.status = new imm.Map({ law: lawNumber });
 		lawPerm.place();
@@ -840,7 +835,7 @@ var Actives = {
 			var cr = c.owner.foe.creatures[i];
 			if (
 				cr &&
-				cr.isMaterialInstance(etg.Creature) &&
+				cr.isMaterialInstance(smth.Creature) &&
 				!cr.status.get('law') &&
 				cr.truehp() < 5
 			) {
@@ -941,7 +936,7 @@ var Actives = {
 		c.owner.hp = c.owner.maxhp - 1;
 	},
 	mitosis: function(c, t) {
-		new etg.Creature(c.card, c.owner).place();
+		new smth.Creature(c.card, c.owner).place();
 	},
 	mitosisspell: function(c, t) {
 		t.lobo();
@@ -1002,7 +997,7 @@ var Actives = {
 			Effect.mkText('Nightmare', t);
 			c.owner.dmg(-c.owner.foe.dmg(16 - c.owner.foe.hand.length * 2));
 			for (var i = c.owner.foe.hand.length; i < 8; i++) {
-				c.owner.foe.hand[i] = new etg.CardInstance(t.card, c.owner.foe);
+				c.owner.foe.hand[i] = new smth.CardInstance(t.card, c.owner.foe);
 			}
 		}
 	},
@@ -1011,7 +1006,7 @@ var Actives = {
 			c.owner.spend(i, -1);
 		}
 		if (++c.owner.nova > 2) {
-			new etg.Creature(Cards.Singularity, c.owner).place();
+			new smth.Creature(Cards.Singularity, c.owner).place();
 		}
 	},
 	nova2: function(c, t) {
@@ -1019,7 +1014,7 @@ var Actives = {
 			c.owner.spend(i, -2);
 		}
 		if (++c.owner.nova2 > 1) {
-			new etg.Creature(Cards.SingularityUp, c.owner).place();
+			new smth.Creature(Cards.SingularityUp, c.owner).place();
 		}
 	},
 	nymph: function(c, t) {
@@ -1028,7 +1023,7 @@ var Actives = {
 			(!t.card.name.match(/^Mark of /) && t.card.element) ||
 			c.owner.upto(12) + 1;
 		Actives.destroy.func(c, t, false, true);
-		new etg.Creature(
+		new smth.Creature(
 			Cards.Codes[etg.NymphList[e]].asUpped(t.card.upped),
 			t.owner,
 		).place();
@@ -1069,7 +1064,7 @@ var Actives = {
 	},
 	phoenix: function(c, t, index) {
 		if (!c.owner.creatures[index]) {
-			c.owner.creatures[index] = new etg.Creature(
+			c.owner.creatures[index] = new smth.Creature(
 				Cards.Ash.asUpped(c.card.upped),
 				c.owner,
 			);
@@ -1114,7 +1109,7 @@ var Actives = {
 		}
 	},
 	queen: function(c, t) {
-		new etg.Creature(Cards.Firefly.asUpped(c.card.upped), c.owner).place();
+		new smth.Creature(Cards.Firefly.asUpped(c.card.upped), c.owner).place();
 	},
 	quint: function(c, t) {
 		Effect.mkText('Immaterial', t);
@@ -1191,7 +1186,7 @@ var Actives = {
 			Effect.mkText('Salvage', c);
 			c.status = c.status.set('salvaged', true);
 			t.status = t.status.set('salvaged', true);
-			new etg.CardInstance(t.card, c.owner).place();
+			new smth.CardInstance(t.card, c.owner).place();
 		}
 	},
 	sanctuary: function(c, t) {
@@ -1207,7 +1202,7 @@ var Actives = {
 		}
 	},
 	scarab: function(c, t) {
-		new etg.Creature(Cards.Scarab.asUpped(c.card.upped), c.owner).place();
+		new smth.Creature(Cards.Scarab.asUpped(c.card.upped), c.owner).place();
 	},
 	scramble: function(c, t) {
 		if (t.type == etg.Player && !t.sanctuary) {
@@ -1245,7 +1240,7 @@ var Actives = {
 			anyentro |= cards[i].element == etg.Entropy;
 		}
 		for (var i = 0; i < num; i++) {
-			new etg.CardInstance(cards[i], c.owner).place();
+			new smth.CardInstance(cards[i], c.owner).place();
 		}
 	},
 	silence: function(c, t) {
@@ -1279,7 +1274,7 @@ var Actives = {
 		} else if (r > 0.2) {
 			Actives.parallel.func(c, c);
 		} else if (r > 0.1 && c.owner.weapon) {
-			c.owner.weapon = new etg.Weapon(Cards.Dagger, c.owner);
+			c.owner.weapon = new smth.Weapon(Cards.Dagger, c.owner);
 		}
 	},
 	siphon: adrenathrottle(function(c, t) {
@@ -1334,7 +1329,7 @@ var Actives = {
 	},
 	spores: function(c, t) {
 		for (var i = 0; i < 3; i++) {
-			new etg.Creature(Cards.Spore.asUpped(c.card.upped), c.owner).place();
+			new smth.Creature(Cards.Spore.asUpped(c.card.upped), c.owner).place();
 		}
 	},
 	sskin: function(c, t) {
@@ -1343,24 +1338,24 @@ var Actives = {
 	steal: function(c, t) {
 		if (t.status.get('stackable')) {
 			Actives.destroy.func(c, t, true);
-			if (t instanceof etg.Shield) {
+			if (t instanceof smth.Shield) {
 				if (c.owner.shield && c.owner.shield.card == t.card) {
 					c.owner.shield.status = c.owner.shield.status.set('charges', c.owner.shield.status.get('charges') + 1);
 				} else {
-					c.owner.shield = new etg.Shield(t.card, c.owner);
+					c.owner.shield = new smth.Shield(t.card, c.owner);
 					c.owner.shield.status = c.owner.shield.status.set('charges', 1);
 				}
-			} else if (t instanceof etg.Weapon) {
+			} else if (t instanceof smth.Weapon) {
 				if (c.owner.weapon && c.owner.weapon.card == t.card) {
 					c.owner.shield.status = c.owner.shield.status.set('charges', c.owner.shield.status.get('charges') + 1);
 				} else {
-					c.owner.weapon = new etg.Weapon(t.card, c.owner);
+					c.owner.weapon = new smth.Weapon(t.card, c.owner);
 					c.owner.shield.status = c.owner.shield.status.set('charges', 1);
 				}
-			} else if (t instanceof etg.Pillar) {
-				new etg.Pillar(t.card, c.owner).place();
+			} else if (t instanceof smth.Pillar) {
+				new smth.Pillar(t.card, c.owner).place();
 			} else {
-				new etg.Permanent(t.card, c.owner).place();
+				new smth.Permanent(t.card, c.owner).place();
 			}
 		} else {
 			t.remove();
@@ -1473,7 +1468,7 @@ var Actives = {
 	},
 	unsummon: function(c, t) {
 		if (t.owner.hand.length < 8) {
-			new etg.CardInstance(t.card, t.owner).place();
+			new smth.CardInstance(t.card, t.owner).place();
 			t.remove();
 		}
 		//note: CIA Unsummon does nothing if hand is full.
@@ -1561,7 +1556,7 @@ var Actives = {
 		for (var i = 0; i < 16; i++) {
 			if (
 				c.owner.permanents[i] &&
-				c.owner.permanents[i] instanceof etg.Pillar &&
+				c.owner.permanents[i] instanceof smth.Pillar &&
 				!c.owner.permanents[i].card.isOf(Cards.HarmonicPillar)
 			) {
 				c.owner.spend(c.owner.permanents[i].card.element, qty);
@@ -1581,7 +1576,7 @@ var Actives = {
 		return true;
 	},
 	cold: function(c, t) {
-		if (t instanceof etg.Creature && c.owner.rng() < 0.3) {
+		if (t instanceof smth.Creature && c.owner.rng() < 0.3) {
 			t.freeze(3);
 		}
 	},
@@ -1595,12 +1590,12 @@ var Actives = {
 		return c.owner.rng() < 0.5;
 	},
 	firewall: function(c, t) {
-		if (t instanceof etg.Creature) {
+		if (t instanceof smth.Creature) {
 			t.dmg(1);
 		}
 	},
 	skull: function(c, t) {
-		if (t instanceof etg.Creature && !t.card.isOf(Cards.Skeleton)) {
+		if (t instanceof smth.Creature && !t.card.isOf(Cards.Skeleton)) {
 			var thp = t.truehp();
 			if (thp == 0 || (thp > 0 && c.owner.rng() < 0.5 / thp)) {
 				var index = t.getIndex();
@@ -1609,7 +1604,7 @@ var Actives = {
 					!t.owner.creatures[index] ||
 					t.owner.creatures[index].card != Cards.MalignantCell
 				) {
-					t.owner.creatures[index] = new etg.Creature(
+					t.owner.creatures[index] = new smth.Creature(
 						Cards.Skeleton.asUpped(t.card.upped),
 						t.owner,
 					);
@@ -1618,7 +1613,7 @@ var Actives = {
 		}
 	},
 	slow: function(c, t) {
-		if (t instanceof etg.Creature) {
+		if (t instanceof smth.Creature) {
 			t.delay(2);
 		}
 	},
@@ -1626,12 +1621,12 @@ var Actives = {
 		if (!c.owner.sanctuary) c.owner.spend(etg.Light, -1);
 	},
 	thorn: function(c, t) {
-		if (t instanceof etg.Creature && c.owner.rng() < 0.75) {
+		if (t instanceof smth.Creature && c.owner.rng() < 0.75) {
 			t.addpoison(1);
 		}
 	},
 	weight: function(c, t) {
-		return t instanceof etg.Creature && t.truehp() > 5;
+		return t instanceof smth.Creature && t.truehp() > 5;
 	},
 	wings: function(c, t) {
 		return !t.status.get('airborne') && !t.status.get('ranged');
@@ -1642,3 +1637,10 @@ for (const key in Actives) {
 }
 Actives.bounce.passive = Actives.decrsteam.passive = Actives.obsession.passive = Actives.salvage.passive = Actives.siphon.passive = Actives.swarm.passive = true;
 module.exports = Actives;
+
+var Effect = require('./Effect');
+var etg = require('./etg');
+var util = require('../util');
+var Cards = require('./Cards');
+var imm = require('immutable');
+var smth = require('./Thing');

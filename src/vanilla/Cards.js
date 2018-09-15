@@ -2,6 +2,7 @@
 exports.Targeting = null;
 exports.Codes = [];
 const etg = require('./etg'),
+	smth = require('./Thing'),
 	Card = require('./Card'),
 	etgutil = require('../etgutil');
 exports.codeCmp = function(x, y) {
@@ -104,8 +105,8 @@ const TargetFilters = {
 	},
 	weap: function(c, t) {
 		return (
-			(t instanceof etg.Weapon ||
-				(t instanceof etg.Creature && t.card.type == etg.WeaponEnum)) &&
+			(t instanceof smth.Weapon ||
+				(t instanceof smth.Creature && t.card.type == etg.WeaponEnum)) &&
 			!t.status.immaterial &&
 			!t.status.burrowed
 		);
@@ -143,11 +144,11 @@ const TargetFilters = {
 		return t.isMaterialInstance(etg.Creature) && t.truehp() < t.trueatk();
 	},
 	permnonstack: function(c, t) {
-		return t instanceof etg.Permanent && !t.status.stackable;
+		return t instanceof smth.Permanent && !t.status.stackable;
 	},
 	wisdom: function(c, t) {
 		return (
-			(t instanceof etg.Creature || t instanceof etg.Weapon) &&
+			(t instanceof smth.Creature || t instanceof smth.Weapon) &&
 			!t.status.burrowed
 		);
 	},

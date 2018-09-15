@@ -1,6 +1,7 @@
 const ui = require('../ui'),
 	etg = require('../etg'),
 	sock = require('../sock'),
+	smth = require('../Thing'),
 	Card = require('../Card'),
 	Cards = require('../Cards'),
 	Effect = require('../Effect'),
@@ -298,7 +299,7 @@ module.exports = connect()(class Match extends React.Component {
 			},
 			cast: function(data) {
 				const bits = data.bits, c = game.bitsToTgt(bits & 511), t = game.bitsToTgt((bits >> 9) & 511);
-				if (c instanceof etg.CardInstance) {
+				if (c instanceof smth.CardInstance) {
 					var sprite = new PIXI.Sprite(gfx.nopic);
 					sprite.position.set((foeplays.children.length % 9) * 99, Math.floor(foeplays.children.length / 9) * 19);
 					sprite.card = c.card;

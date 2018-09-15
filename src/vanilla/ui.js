@@ -1,5 +1,6 @@
 'use strict';
 var etg = require('./etg');
+var smth = require('./Thing');
 var util = require('../util');
 var Effect = require('./Effect');
 exports.elecols = new Uint32Array([
@@ -140,23 +141,23 @@ function permanentPos(j, i) {
 	return p;
 }
 function tgtToPos(t) {
-	if (t instanceof etg.Creature) {
+	if (t instanceof smth.Creature) {
 		return creaturePos(t.owner == t.owner.game.player2, t.getIndex());
-	} else if (t instanceof etg.Weapon) {
+	} else if (t instanceof smth.Weapon) {
 		var p = new Point(666, 512);
 		if (t.owner == t.owner.game.player2) reflectPos(p);
 		return p;
-	} else if (t instanceof etg.Shield) {
+	} else if (t instanceof smth.Shield) {
 		var p = new Point(710, 532);
 		if (t.owner == t.owner.game.player2) reflectPos(p);
 		return p;
-	} else if (t instanceof etg.Permanent) {
+	} else if (t instanceof smth.Permanent) {
 		return permanentPos(t.owner == t.owner.game.player2, t.getIndex());
 	} else if (t.type == etg.Player) {
 		var p = new Point(50, 560);
 		if (t == t.owner.game.player2) reflectPos(p);
 		return p;
-	} else if (t instanceof etg.CardInstance) {
+	} else if (t instanceof smth.CardInstance) {
 		return new Point(
 			t.owner == t.owner.game.player2 ? 20 : 780,
 			(t.owner == t.owner.game.player2 ? 140 : 300) +
