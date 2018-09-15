@@ -72,7 +72,7 @@ const data = {
 		'Push 3 copies of target creature onto own deck. Cannot ricochet',
 	boneyard: c => `When a death occurs, summon a ${c.upped ? '2|2' : '1|1'} Skeleton`,
 	bounce: "Return to owner's hand instead of dying",
-	bravery: 'Foe draws 2 cards, draw an equal amount of cards',
+	bravery: 'Foe draws twice, draw an equal amount',
 	brawl:
 		'Own creatures attack. If a creature exists in opposing slot, they duel instead. Consumes remaining 1:3',
 	brew: 'Generate a random Alchemy card',
@@ -145,7 +145,7 @@ const data = {
 	eatspell: 'Absorb next spell, gaining 1|1',
 	elf: 'Become Fallen if target of Chaos Seed',
 	embezzle:
-		'Replaces target creature\'s skills with "Defender draws card on hit. On death, foe mills 3"',
+		'Replaces target creature\'s skills with "Defender draws on hit. On death, foe mills 3"',
 	embezzledeath: 'On death, foe mills 3',
 	empathy:
 		'Heal owner per creature owned per turn. Consumes 1:5 per 8 creatures',
@@ -175,7 +175,7 @@ const data = {
 		'If equiped, cast Flying Weapon on self. Otherwise cast Living Weapon on self',
 	flyingweapon: 'Target weapon becomes a flying creature',
 	foedraw: "Draw from foe's deck",
-	forcedraw: 'Defender draws card on hit',
+	forcedraw: 'Defender draws on hit',
 	forceplay: 'Owner of target activates target',
 	fractal:
 		"Generate 6 copies of target creature's card. Consumes remaining 1:12. Generate another copy per 2:12 consumed",
@@ -238,7 +238,7 @@ const data = {
 	infect: 'Poison target creature',
 	inflation: 'Increase cost of all actives by 1',
 	ink: 'Summon a Cloak which lasts 1 turn',
-	innovation: 'Discard target card, owner draws three cards',
+	innovation: 'Discard target card, owner mills one & draws 3',
 	integrity: 'Combine all shards in hand to form a Shard Golem',
 	jelly:
 		'Target creature becomes a 7|4 Pink Jelly with active Pink Jelly costing 4 of their element',
@@ -379,7 +379,7 @@ const data = {
 		ownplay: "Prevent foe's sanctification",
 	},
 	scatterhand:
-		'Target player shuffles their hand, & draws as many cards. Draw a card',
+		'Target player shuffles their hand, & draws per card shuffled. Draw',
 	scramble: {
 		hit: "Randomly scramble 9 of foe's quanta on hit",
 		cast: "Randomly scramble 9 of target player's quanta",

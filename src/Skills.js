@@ -957,6 +957,7 @@ const Skills = {
 	innovation: (c, t) => {
 		if (!t.owner.sanctuary) {
 			t.die();
+			t.owner.deck.length--;
 			for (let i = 0; i < 3; i++) {
 				t.owner.drawcard();
 			}
