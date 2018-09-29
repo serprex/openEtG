@@ -2,7 +2,7 @@
 var etg = require("../etg");
 var Cards = require("../Cards");
 var Actives = require("../Skills");
-var smth = require('./Thing');
+var smth = require('../Thing');
 var enableLogging = false, logbuff, logstack;
 function pillarval(c){
 	return c instanceof smth.CardInstance?.1:Math.sqrt(c.status.charges);

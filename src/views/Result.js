@@ -245,7 +245,7 @@ module.exports = connect(({user}) => ({user}))(class Result extends React.Compon
 							'01' + etgutil.asShiny(cardwon, false).toString(32);
 					}
 					if (!game.goldreward) {
-						let goldwon;
+						let goldwon, agetax = 0;
 						if (game.level !== undefined) {
 							if (game.daily == undefined) {
 								const streak = (this.props.streakback || 0) + 1;
@@ -258,11 +258,22 @@ module.exports = connect(({user}) => ({user}))(class Result extends React.Compon
 										{(streakrate * 100).toFixed(1)}% streak bonus
 									</TooltipText>,
 								);
+								if (game.age) {
+									agetax = Math.max(Math.min(game.age*.1 - .5, .5), 0);
+									if (agetax > 0) {
+										lefttext.push(
+											<TooltipText tip={'Old arena decks bear less fruit'} setTip={this.setTip} clearTip={this.clearTip}>
+												{(agetax * -100).toFixed(1)}% age tax
+											</TooltipText>,
+										);
+									}
+								}
 							}
-							goldwon = Math.floor(
+							goldwon = Math.round(
 								userutil.pveCostReward[game.level * 2 + 1] *
 									(1 + streakrate) *
-									this.computeBonuses(game, data, lefttext, streakrate),
+									this.computeBonuses(game, data, lefttext, streakrate) *
+									(1 - agetax),
 							);
 						} else goldwon = 0;
 						game.goldreward = goldwon;

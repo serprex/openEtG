@@ -251,11 +251,13 @@ const sockmeta = new WeakMap();
 						adeck.hp = +adeck.hp || 200;
 						adeck.mark = +adeck.mark || 1;
 						adeck.draw = +adeck.draw || data.lv + 1;
-						const curhp = getAgedHp(adeck.hp, sutil.getDay() - adeck.day);
+						const age = sutil.getDay() - adeck.day;
+						const curhp = getAgedHp(adeck.hp, age);
 						sockEmit(this, 'foearena', {
 							seed: Math.random() * MAX_INT,
 							name: aname,
 							hp: curhp,
+							age: age,
 							rank: idx,
 							mark: adeck.mark,
 							draw: adeck.draw,

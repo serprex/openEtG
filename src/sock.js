@@ -88,6 +88,7 @@ const sockEvents = {
 			seed: data.seed,
 			rank: data.rank,
 			p2hp: data.hp,
+			age: data.age,
 			foename: data.name,
 			p2drawpower: data.draw,
 			p2markpower: data.mark,
