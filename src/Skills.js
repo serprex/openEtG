@@ -955,11 +955,15 @@ const Skills = {
 		c.owner.addPerm(p);
 	},
 	innovation: (c, t) => {
-		if (!t.owner.sanctuary) {
+		const town = t.owner;
+		if (!town.sanctuary) {
 			t.die();
-			t.owner.deck.length--;
-			for (let i = 0; i < 3; i++) {
-				t.owner.drawcard();
+			if (!town.deck.length) town.game.setWinner(town.foe);
+			else {
+				town.deck.length--;
+				for (let i = 0; i < 3; i++) {
+					town.drawcard();
+				}
 			}
 		}
 	},
