@@ -399,7 +399,6 @@ var statusData = {
 	voodoo: 'Repeat to foe negative status effects & non lethal damage',
 };
 function processEntry(c, event, entry) {
-	console.log(c, event, entry);
 	return typeof entry === 'string'
 		? entry
 		: entry instanceof Array
