@@ -26,16 +26,20 @@ module.exports = connect(state => ({ deck: state.opts.deck }))(class Editor exte
 
 	static getDerivedStateFromProps(nextProps, prevState) {
 		if (nextProps.deck == prevState.deckstr) return null;
-		const cardminus = [], mark = 0, deck = nextProps.deck.split(' ');
+		const cardminus = [], deck = nextProps.deck.split(' ');
+		let mark = 0;
 		for (let i = deck.length - 1;i >= 0;i--) {
-			const code = +deck[i];
+			const code = parseInt(deck[i], 32);
 			if (!code || !(code in Cards.Codes)) {
 				const index = etgutil.fromTrueMark(code);
 				if (~index) {
 					mark = index;
 				}
 				deck.splice(i, 1);
-			}else cardminus[code] = (cardminus[code] || 0) + 1;
+			} else {
+				cardminus[code] = (cardminus[code] || 0) + 1;
+				deck[i] = code;
+			}
 		}
 		if (deck.length > 60){
 			deck.length = 60;
@@ -50,7 +54,7 @@ module.exports = connect(state => ({ deck: state.opts.deck }))(class Editor exte
 
 	saveDeck = (deck, mark) => {
 		this.props.dispatch(store.setOpt('deck',
-			deck.slice().sort(Cards.codeCmp).map(x => x.toString(32)).join(" ") +
+			deck.sort(Cards.codeCmp).map(x => x.toString(32)).join(" ") +
 			" " + etgutil.toTrueMark(mark).toString(32)
 		));
 	};
@@ -64,7 +68,7 @@ module.exports = connect(state => ({ deck: state.opts.deck }))(class Editor exte
 					e={'e' + i}
 					x={100 + i * 32}
 					y={234}
-					click={() => this.saveDeck(deck, i)}
+					click={() => this.saveDeck(deck.slice(), i)}
 				/>,
 			);
 		}
@@ -129,6 +133,7 @@ module.exports = connect(state => ({ deck: state.opts.deck }))(class Editor exte
 								return;
 							}
 						}
+						console.log(deck);
 						this.saveDeck(deck.concat([code]), mark);
 					}
 				}}

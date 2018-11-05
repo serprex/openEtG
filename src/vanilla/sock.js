@@ -1,6 +1,7 @@
 const chat = require('./chat'),
 	etgutil = require('../etgutil'),
-	mkGame = require('./mkGame');
+	mkGame = require('./mkGame'),
+	store = require('./store');
 var socket = new WebSocket('wss://' + location.hostname + ':13602');
 const buffer = [];
 let attempts = 0,
@@ -80,8 +81,8 @@ var sockEvents = {
 	},
 };
 socket.onmessage = function(msg) {
-	var data = JSON.parse(msg.data);
-	var func = sockEvents[data.x] || px.getCmd(data.x);
+	const data = JSON.parse(msg.data);
+	const func = sockEvents[data.x] || px.getCmd(data.x);
 	if (func) {
 		func.call(this, data);
 	}
@@ -99,10 +100,10 @@ socket.onopen = function() {
 socket.onclose = function reconnect() {
 	if (attemptTimeout) return;
 	if (attempts < 8) attempts++;
-	var timeout = 99 + Math.floor(99 * Math.random()) * attempts;
+	const timeout = 99 + Math.floor(99 * Math.random()) * attempts;
 	attemptTimeout = setTimeout(function() {
 		attemptTimeout = 0;
-		var oldsock = socket;
+		const oldsock = socket;
 		exports.et = socket = new WebSocket(
 			'wss://' + location.hostname + ':13602',
 		);
@@ -115,7 +116,7 @@ socket.onclose = function reconnect() {
 exports.emit = function(x, data) {
 	if (!data) data = {};
 	data.x = x;
-	var msg = JSON.stringify(data);
+	const msg = JSON.stringify(data);
 	if (socket && socket.readyState == 1) {
 		socket.send(msg);
 	} else {
@@ -123,11 +124,8 @@ exports.emit = function(x, data) {
 	}
 };
 exports.getDeck = function(limit) {
-	var deck = ~deckimport.value.indexOf(' ')
-		? deckimport.value.split(' ').map(function(x) {
-				return parseInt(x, 32);
-			})
-		: etgutil.decodedeck(deckimport.value);
+	const state = store.store.getState();
+	const deck = etgutil.decodedeck(state.opts.deck);
 	if (limit && deck.length > 60) {
 		deck.length = 60;
 	}

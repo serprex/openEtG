@@ -25,12 +25,9 @@ function processDeck(pool, dcode) {
 }
 
 const Qecks = connect(({user}) => ({user}))(class Qecks extends React.PureComponent {
-	constructor(props) {
-		super(props);
-		this.state = {
-			setQeck: false,
-		};
-	}
+	state = {
+		setQeck: false,
+	};
 
 	render() {
 		const buttons = [];
