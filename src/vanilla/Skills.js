@@ -889,11 +889,11 @@ var Actives = {
 		c.owner.dmg(-10);
 		// TODO Fix salvagers & other passive-active-still-luciable
 		c.owner.masscc(c, function(c, x) {
-			for (var key in x.active) {
+			for (var key of x.active.keys()) {
 				if (
 					key != 'ownplay' &&
 					key != 'owndiscard' &&
-					!x.active[key].name.every(function(name) {
+					!x.active.get(key).name.every(function(name) {
 						return Actives[name].passive;
 					})
 				)

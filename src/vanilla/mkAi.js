@@ -6,6 +6,17 @@ var Cards = require('./Cards');
 var etgutil = require('../etgutil');
 var aiDecks = require('./Decks.json');
 var RngMock = require('./RngMock');
+var mkGame = require('./mkGame');
+
+function run(gamedata) {
+	if (typeof gamedata === 'function') {
+		return () => run(gamedata());
+	}
+	if (gamedata) {
+		store.store.dispatch(store.doNav(require('./views/Match'), gamedata));
+	}
+};
+
 exports.mkPremade = function() {
 	return function() {
 		var urdeck = sock.getDeck();
@@ -23,7 +34,7 @@ exports.mkPremade = function() {
 		gameData.p2markpower = 3;
 		gameData.p2drawpower = 2;
 		gameData.level = 3;
-		return require('./views/Match')(gameData, true);
+		return mkGame(gameData, true);
 	};
 };
 exports.mkAi = function(level) {
@@ -74,6 +85,7 @@ exports.mkAi = function(level) {
 			p2drawpower: level == 2 ? 2 : 1,
 		};
 		gameData.level = level;
-		return require('./views/Match')(gameData, true);
+		return mkGame(gameData, true);
 	};
 };
+exports.run = run;

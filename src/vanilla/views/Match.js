@@ -764,4 +764,4 @@ module.exports = connect()(class Match extends React.Component {
 
 		return children;
 	}
-})
+});

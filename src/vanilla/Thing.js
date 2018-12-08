@@ -63,7 +63,7 @@ CardInstance.prototype.getStatus = function(key) {
 	return this.card.status.get(key) || 0;
 }
 Thing.prototype.trigger = function(name, t, param) {
-	return this.active[name] ? this.active[name].func(this, t, param) : 0;
+	return this.active.get(name) ? this.active.get(name).func(this, t, param) : 0;
 };
 Thing.prototype.proc = function(name, param) {
 	function proc(c) {
@@ -148,8 +148,8 @@ CardInstance.prototype.hash = function() {
 };
 function hashObj(obj) {
 	var hash = 0xdadac3c3;
-	for (var key in obj) {
-		hash ^= util.hashString(key + "'" + obj[key]);
+	for (var [key, val] of obj) {
+		hash ^= util.hashString(key + "'" + val);
 	}
 	return hash;
 }
@@ -159,8 +159,8 @@ Creature.prototype.hash = function() {
 		hashObj(this.status) ^
 		(this.hp * 17 + this.atk * 31 - this.maxhp - this.usedactive * 3);
 	hash ^= this.card.code;
-	for (var key in this.active) {
-		hash ^= util.hashString(key + ':' + this.active[key].name.join(':'));
+	for (var [key, val] of this.active) {
+		hash ^= util.hashString(key + ':' + val.name.join(':'));
 	}
 	if (this.active.has('cast')) {
 		hash ^= this.cast * 7 + this.castele * 23;
@@ -171,8 +171,8 @@ Permanent.prototype.hash = function() {
 	var hash = this.owner == this.owner.game.player1 ? 5351 : 5077;
 	hash ^= hashObj(this.status) ^ (this.usedactive * 3);
 	hash ^= this.card.code;
-	for (var key in this.active) {
-		hash ^= util.hashString(key + '=' + this.active[key].name.join(' '));
+	for (var [key, val] of this.active) {
+		hash ^= util.hashString(key + '=' + val.name.join(' '));
 	}
 	if (this.active.has('cast')) {
 		hash ^= this.cast * 7 + this.castele * 23;
@@ -183,8 +183,8 @@ Weapon.prototype.hash = function() {
 	var hash = this.owner == this.owner.game.player1 ? 13 : 11;
 	hash ^= hashObj(this.status) ^ (this.atk * 31 - this.usedactive * 3);
 	hash ^= this.card.code;
-	for (var key in this.active) {
-		hash ^= util.hashString(key + '-' + this.active[key].name.join(' '));
+	for (var [key, val] of this.active) {
+		hash ^= util.hashString(key + '-' + val.name.join(' '));
 	}
 	if (this.active.has('cast')) {
 		hash ^= this.cast * 7 + this.castele * 23;
@@ -195,8 +195,8 @@ Shield.prototype.hash = function() {
 	var hash = this.owner == this.owner.game.player1 ? 5009 : 4259;
 	hash ^= hashObj(this.status) ^ (this.dr * 31 - this.usedactive * 3);
 	hash ^= this.card.code;
-	for (var key in this.active) {
-		hash ^= util.hashString(key + '~' + this.active[key].name.join(' '));
+	for (var [key, val] of this.active) {
+		hash ^= util.hashString(key + '~' + val.name.join(' '));
 	}
 	if (this.active.has('cast')) {
 		hash ^= this.cast * 7 + this.castele * 23;
@@ -603,7 +603,7 @@ Thing.prototype.defstatus = function(key, def) {
 	return this.status.get(key);
 };
 Thing.prototype.hasactive = function(type, name) {
-	return type in this.active && ~this.active[type].name.indexOf(name);
+	return this.active.has(type) && this.active.get(type).name.indexOf(name);
 };
 Thing.prototype.canactive = function() {
 	return (
