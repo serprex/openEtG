@@ -5,8 +5,7 @@ var util = require('../util');
 var Cards = require('./Cards');
 var Effect = require('./Effect');
 var Actives = require('./Skills');
-var CardInstance = etg.CardInstance;
-var {Thing} = require('./Thing');
+var {Thing, CardInstance} = require('./Thing');
 function Player(game) {
 	this.type = etg.Player;
 	this.game = game;
@@ -80,10 +79,10 @@ Player.prototype.toString = function() {
 	return this == this.game.player1 ? 'p1' : 'p2';
 };
 Player.prototype.rng = function() {
-	return this.game.rng.real();
+	return this.game.rng.nextNumber();
 };
 Player.prototype.upto = function(x) {
-	return Math.floor(this.game.rng.rnd() * x);
+	return Math.floor(this.game.rng.nextNumber() * x);
 };
 Player.prototype.choose = function(x) {
 	return x[this.upto(x.length)];

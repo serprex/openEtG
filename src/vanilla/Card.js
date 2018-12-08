@@ -69,10 +69,6 @@ Object.defineProperty(Card.prototype, 'upped', {
 	},
 });
 module.exports = Card;
-Card.prototype.attack = 0;
-Card.prototype.health = 0;
-Card.prototype.status = {};
-Card.prototype.active = {};
 Card.prototype.info = function() {
 	if (this.type == etg.SpellEnum) {
 		return skillText(this);

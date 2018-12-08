@@ -1,9 +1,11 @@
 module.exports = {
 	entry: {
 		main: ['babel-polyfill', './src/ui/main.js'],
+		aivai: ['babel-polyfill', './src/aivai.js'],
 		art: ['babel-polyfill', './src/ui/art.js'],
 		mosaic: ['babel-polyfill', './src/ui/mosaic.js'],
 		vanilla: ['babel-polyfill', './src/vanilla/main.js'],
+		vaivai: ['babel-polyfill', './src/vanilla/aivai.js'],
 	},
 	output: {
 		path: __dirname,

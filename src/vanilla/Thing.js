@@ -58,6 +58,9 @@ Thing.prototype.toString = function() {
 CardInstance.prototype.toString = function() {
 	return '::' + this.card.name;
 };
+CardInstance.prototype.getStatus = function(key) {
+	return this.card.status.get(key) || 0;
+}
 Thing.prototype.trigger = function(name, t, param) {
 	return this.active[name] ? this.active[name].func(this, t, param) : 0;
 };
@@ -75,6 +78,23 @@ Thing.prototype.proc = function(name, param) {
 		proc.call(this, pl.shield);
 		proc.call(this, pl.weapon);
 	}
+};
+Thing.prototype.getStatus = function(key) {
+	return this.status.get(key) || 0;
+}
+Thing.prototype.setStatus = function(key, val) {
+	this.status = this.status.set(key, val|0);
+}
+Thing.prototype.clearStatus = function(key, val) {
+	this.status = this.status.clear();
+}
+Thing.prototype.maybeDecrStatus = function(key) {
+	const val = this.getStatus(key);
+	if (val > 0) this.setStatus(key, val-1);
+	return val;
+}
+Thing.prototype.incrStatus = function(key, val) {
+	this.setStatus(key, this.getStatus(key)+val);
 };
 
 Creature.prototype = Object.create(Thing.prototype);
