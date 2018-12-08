@@ -1,6 +1,6 @@
 'use strict';
 const ui = require('./ui'),
-	Thing = require('./Thing'),
+	{Thing} = require('./Thing'),
 	isNode = typeof global === 'undefined',
 	Components = isNode && require('./Components'),
 	h = isNode ? require('react').createElement : ()=>{};

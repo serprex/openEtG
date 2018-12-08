@@ -421,6 +421,7 @@ function calcExpectedDamage(pl, wallCharges, wallIndex) {
 }
 
 function evalactive(c, active, extra){
+	if (!active) return 0;
 	var sum = 0;
 	for(var i=0; i<active.name.length; i++){
 		var aval = ActivesValues[active.name[i]];
@@ -481,17 +482,17 @@ function evalthing(c) {
 	for (var key in c.active) {
 		var adrfactor = key in throttled ? throttlefactor : key == "disarm" ? 1 : adrenalinefactor;
 		if (key == "hit"){
-			score += evalactive(c, c.active.hit, ttatk)*(ttatk?1:c.getStatus('immaterial')?0:.3)*adrfactor*delayfactor;
+			score += evalactive(c, c.active.get('hit'), ttatk)*(ttatk?1:c.getStatus('immaterial')?0:.3)*adrfactor*delayfactor;
 		}else if(key == "auto"){
 			if (!c.getStatus('frozen')){
-				score += evalactive(c, c.active.auto, ttatk)*adrfactor;
+				score += evalactive(c, c.active.get('auto'), ttatk)*adrfactor;
 			}
 		}else if (key == "cast"){
 			if (caneventuallyactive(c.castele, c.cast, c.owner)){
-				score += evalactive(c, c.active.cast, ttatk) * delayfactor;
+				score += evalactive(c, c.active.get('cast'), ttatk) * delayfactor;
 			}
 		}else if (key != (isCreature ? "shield" : "owndeath")){
-			score += evalactive(c, c.active[key]);
+			score += evalactive(c, c.active.get('key'));
 		}
 	}
 	score += checkpassives(c);
@@ -500,7 +501,7 @@ function evalthing(c) {
 			score = (score + hp) * Math.log(hp)/4;
 			if (c.getStatus('voodoo')) score += hp;
 			if (c.active.shield && !delaymix){
-				score += evalactive(c, c.active.shield);
+				score += evalactive(c, c.active.get('shield'));
 			}
 		}else score *= hp?(c.getStatus('immaterial') || c.getStatus('burrowed') ? 1.3 : 1+Math.log(Math.min(hp, 33))/7):.2;
 	}else{
@@ -521,10 +522,10 @@ function evalcardinstance(cardInst) {
 	}
 	var score = 0;
 	if (c.type == etg.SpellEnum){
-		score += evalactive(cardInst, c.active.auto);
+		score += evalactive(cardInst, c.active.get('cast'));
 	} else {
 		for (var key in c.active) {
-			score += evalactive(cardInst, c.active[key]);
+			score += evalactive(cardInst, c.active.get('key'));
 		}
 		score += checkpassives(cardInst);
 		if (c.type == etg.CreatureEnum){

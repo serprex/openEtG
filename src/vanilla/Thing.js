@@ -1,10 +1,11 @@
-'use strict';
+const imm = require('immutable');
+
 function Thing(card, owner) {
 	this.owner = owner;
 	this.card = card;
 	if (this.status) {
 		for (const key of this.status.keys()) {
-			if (passives.has(key)) this.status = this.status.delete(key);
+			if (etg.passives.has(key)) this.status = this.status.delete(key);
 		}
 		for (const [key, val] of card.status) {
 			this.status = this.status.set(key, val);
@@ -43,7 +44,7 @@ function Shield(card, owner) {
 	Permanent.apply(this, arguments);
 }
 function Pillar(card, owner) {
-	this.status = { charges: 1 };
+	this.status = new imm.Map().set('charges', 1);
 	this.pendstate = false;
 	Thing.apply(this, arguments);
 }
@@ -262,13 +263,13 @@ Creature.prototype.place = function(fromhand) {
 	Thing.prototype.place.call(this, fromhand);
 };
 Permanent.prototype.place = function(fromhand) {
-	if (this.status.additive) {
+	if (this.status.get('additive')) {
 		for (var i = 0; i < 16; i++) {
 			if (
 				this.owner.permanents[i] &&
 				this.card.code == this.owner.permanents[i].card.code
 			) {
-				this.owner.permanents[i].status.charges += this.status.charges;
+				this.owner.permanents[i].incrStatus('charges', this.getStatus('charges'));
 				Thing.prototype.place.call(this.owner.permanents[i], fromhand);
 				return;
 			}
@@ -290,11 +291,11 @@ Pillar.prototype.place = function(fromhand) {
 };
 Weapon.prototype.place = function(fromhand) {
 	if (
-		this.status.additive &&
+		this.status.get('additive') &&
 		this.owner.weapon &&
 		this.card.as(this.owner.weapon.card) == this.card
 	) {
-		this.owner.weapon.status.charges += this.status.charges;
+		this.owner.weapon.incrStatus('charges', this.getStatus('charges'));
 	} else {
 		this.owner.weapon = this;
 	}
@@ -307,20 +308,6 @@ Shield.prototype.place = function(fromhand) {
 		this.owner.shield.card.asUpped(this.card.upped) == this.card
 	) {
 		this.owner.shield.status.set('charges', (this.owner.shield.status.get('charges')|0) + this.status.get('charges'));
-	} else if (
-		this.owner.shield &&
-		this.owner.shield.status.durability == 'usable' &&
-		this.owner.shield.card != this.card
-	) {
-		for (const [key, val] of this.status) {
-			if (!this.owner.shield.status.get(key))
-				this.owner.shield.status.set(key, val);
-		}
-		for (const [key, val] of this.active) {
-			this.owner.shield.addactive(key, val);
-		}
-		this.owner.shield.dr += this.dr;
-		this.owner.shield.status.set('durability', 'used');
 	} else this.owner.shield = this;
 	Thing.prototype.place.call(this, fromhand);
 };
@@ -613,7 +600,7 @@ Thing.prototype.defstatus = function(key, def) {
 	if (!this.status.has(key)) {
 		this.status = this.status.set(key, def);
 	}
-	return this.status.get('key');
+	return this.status.get(key);
 };
 Thing.prototype.hasactive = function(type, name) {
 	return type in this.active && ~this.active[type].name.indexOf(name);
@@ -759,17 +746,17 @@ CardInstance.prototype.useactive = function(target) {
 	var owner = this.owner,
 		card = this.card;
 	this.remove();
-	if (owner.neuro) {
+	if (owner.status.get('neuro')) {
 		owner.addpoison(1);
 	}
-	if (card.type <= PermanentEnum) {
+	if (card.type <= etg.PermanentEnum) {
 		var cons = [Pillar, Weapon, Shield, Permanent][card.type];
 		new cons(card, owner).place(true);
-	} else if (card.type == SpellEnum) {
+	} else if (card.type == etg.SpellEnum) {
 		if (!target || !target.evade(owner)) {
-			card.active.get('auto').func(this, target);
+			card.active.get('cast').func(this, target);
 		}
-	} else if (card.type == CreatureEnum) {
+	} else if (card.type == etg.CreatureEnum) {
 		new Creature(card, owner).place(true);
 	} else console.log('Unknown card type: ' + card.type);
 	owner.spend(card.costele, card.cost, this);
@@ -791,3 +778,4 @@ var Actives = require('./Skills');
 var etgutil = require('../etgutil');
 var skillText = require('./skillText');
 var Cards = require('./Cards');
+var etg = require('./etg');

@@ -29,7 +29,7 @@ exports.filter = function(upped, filter, cmp) {
 			const card = exports.Codes[key];
 			if (
 				card.upped == upped &&
-				!card.status.token
+				!card.status.get('token')
 			) {
 				filtercache[cacheidx].push(card);
 			}
@@ -107,8 +107,8 @@ const TargetFilters = {
 		return (
 			(t instanceof smth.Weapon ||
 				(t instanceof smth.Creature && t.card.type == etg.WeaponEnum)) &&
-			!t.status.immaterial &&
-			!t.status.burrowed
+			!t.status.get('immaterial') &&
+			!t.status.get('burrowed')
 		);
 	},
 	perm: function(c, t) {
@@ -144,12 +144,12 @@ const TargetFilters = {
 		return t.isMaterialInstance(etg.Creature) && t.truehp() < t.trueatk();
 	},
 	permnonstack: function(c, t) {
-		return t instanceof smth.Permanent && !t.status.stackable;
+		return t instanceof smth.Permanent && !t.status.get('stackable');
 	},
 	wisdom: function(c, t) {
 		return (
 			(t instanceof smth.Creature || t instanceof smth.Weapon) &&
-			!t.status.burrowed
+			!t.status.get('burrowed')
 		);
 	},
 };

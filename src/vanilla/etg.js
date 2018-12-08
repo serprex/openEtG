@@ -95,12 +95,12 @@ exports.Air = 9;
 exports.Time = 10;
 exports.Darkness = 11;
 exports.Aether = 12;
-exports.PillarEnum = 0;
-exports.WeaponEnum = 1;
-exports.ShieldEnum = 2;
-exports.PermanentEnum = 3;
-exports.SpellEnum = 4;
-exports.CreatureEnum = 5;
+exports.Pillar = exports.PillarEnum = 0;
+exports.Weapon = exports.WeaponEnum = 1;
+exports.Shield = exports.ShieldEnum = 2;
+exports.Permanent = exports.PermanentEnum = 3;
+exports.Spell = exports.SpellEnum = 4;
+exports.Creature = exports.CreatureEnum = 5;
 exports.PlayPhase = 0;
 exports.EndPhase = 1;
 exports.PillarList = new Uint16Array([

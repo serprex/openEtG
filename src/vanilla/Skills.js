@@ -89,7 +89,7 @@ var Actives = {
 		Effect.mkText('Aflatoxin', t);
 		t.addpoison(2);
 		if (t.type != etg.Player) {
-			t.status = t.status.set('aflatoxin', true);
+			t.setStatus('aflatoxin', 1);
 		}
 	},
 	air: function(c, t) {
@@ -990,7 +990,7 @@ var Actives = {
 	},
 	neuro: adrenathrottle(function(c, t) {
 		t.addpoison(1);
-		t.neuro = true;
+		t.status.set('neuro', 1);
 	}),
 	nightmare: function(c, t) {
 		if (!c.owner.foe.sanctuary) {
@@ -1102,7 +1102,7 @@ var Actives = {
 		t.status = t.status.poison.set('poison', t.status.get('poison') ?
 			Math.min(t.status.get('poison') - 2, -2) : -2);
 		if (t.type == etg.Player) {
-			t.neuro = false;
+			t.setStatus('neuro', 0);
 			t.sosa = 0;
 		} else {
 			t.status = t.status.delete(aflatoxin);
@@ -1113,8 +1113,8 @@ var Actives = {
 	},
 	quint: function(c, t) {
 		Effect.mkText('Immaterial', t);
-		t.status.set('immaterial', true);
-		t.status.set('frozen', 0);
+		t.setStatus('immaterial', true);
+		t.setStatus('frozen', 0);
 	},
 	rage: function(c, t) {
 		var dmg = c.card.upped ? 6 : 5;
@@ -1127,7 +1127,7 @@ var Actives = {
 		if (t.active.cast) {
 			t.cast = 0;
 			if (t.card.element == etg.Time && !t.status.get('ready')) {
-				t.status = t.status.set('ready', t.usedactive === true ? 1 : 2);
+				t.setStatus('ready', t.usedactive === true ? 1 : 2);
 				t.usedactive = false;
 				t.addactive('ownspell', Actives.ready);
 			}
@@ -1135,7 +1135,7 @@ var Actives = {
 	},
 	ready: function(c, t) {
 		if (c.status.get('ready') > 1) {
-			c.status = c.status.set('ready', c.status.get('ready')-1);
+			c.setStatus('ready', c.status.get('ready')-1);
 			c.usedactive = false;
 		}
 	},
@@ -1154,7 +1154,7 @@ var Actives = {
 		t.status = t.status.delete('stasis');
 	},
 	removemomentum: function(c, t) {
-		c.status = c.status.set('momentum', false);
+		c.setStatus('momentum', 0);
 	},
 	ren: function(c, t) {
 		if (!t.hasactive('predeath', 'bounce')) {
@@ -1184,8 +1184,8 @@ var Actives = {
 			c.owner.game.turn != c.owner
 		) {
 			Effect.mkText('Salvage', c);
-			c.status = c.status.set('salvaged', true);
-			t.status = t.status.set('salvaged', true);
+			c.status = c.status.set('salvaged', 1);
+			t.status = t.status.set('salvaged', 1);
 			new smth.CardInstance(t.card, c.owner).place();
 		}
 	},
@@ -1367,8 +1367,7 @@ var Actives = {
 	},
 	steam: function(c, t) {
 		Effect.mkText('5|0', c);
-		const steam = c.defstatus('steam', 0);
-		c.status.set('steam', steam + 5);
+		c.incrStatus('steam', 5);
 		c.atk += 5;
 		if (!c.hasactive('postauto', 'decrsteam'))
 			c.addactive('postauto', Actives.decrsteam);
@@ -1518,7 +1517,7 @@ var Actives = {
 		Effect.mkText('4|0', t);
 		t.atk += 4;
 		if (t.status.get('immaterial')) {
-			t.status.set('psion', true);
+			t.setStatus('psion', 1);
 		}
 	},
 	pillar: function(c, t) {

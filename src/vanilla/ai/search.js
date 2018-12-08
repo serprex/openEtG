@@ -14,8 +14,8 @@ function getWorstCard(game){
 		var cardinst = gclone.player2.hand[i];
 		var card = cardinst.card;
 		gclone.player2.hand.splice(i, 1);
-		if (card.active.discard) {
-			card.active.discard(cardinst, gclone.player2);
+		if (card.active.get('discard')) {
+			card.active.get('discard')(cardinst, gclone.player2);
 		}
 		var discvalue = evalGame(gclone);
 		if (discvalue < curEval){
@@ -27,24 +27,24 @@ function getWorstCard(game){
 }
 var afilter = {
 	web:function(c,t){
-		return t.status.airborne;
+		return t.status.get('airborne');
 	},
 	freeze:function(c,t){
-		return t.status.frozen < 3;
+		return t.status.get('frozen') < 3;
 	},
 	pacify:function(c,t){
 		return t.trueatk() != 0;
 	},
 	readiness:function(c,t){
-		return t.active.cast && (t.cast || t.usedactive);
+		return t.active.get('cast') && (t.cast || t.usedactive);
 	},
 	silence:function(c,t){
-		return t.active.cast && !t.usedactive;
+		return t.active.get('cast') && !t.usedactive;
 	},
 	lobotomize:function(c,t){
-		if (!t.status.momentum && !t.status.psionic) {
+		if (!t.status.get('momentum') && !t.status.get('psionic')) {
 			for (var key in t.active){
-				if (t.active[key] && key != "ownplay"){
+				if (t.active.get('key') && key != "ownplay"){
 					return true;
 				}
 			}
@@ -92,7 +92,7 @@ AiSearch.prototype.step = function(game) {
 			var ch = c.hash();
 			if (ch in casthash) return;
 			else casthash[ch] = true;
-			var active = c instanceof smth.CardInstance ? c.card.type == etg.SpellEnum && c.card.active.auto : c.active.cast;
+			var active = c instanceof smth.CardInstance ? c.card.type == etg.SpellEnum && c.card.active.get('cast') : c.active.get('cast');
 			var cbits = game.tgtToBits(c) ^ 8, tgthash = [];
 			function evalIter(t) {
 				if (t && t.hash){

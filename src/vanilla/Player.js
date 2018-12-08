@@ -1,5 +1,6 @@
 module.exports = Player;
 
+var imm = require('immutable');
 var etg = require('./etg');
 var util = require('../util');
 var Cards = require('./Cards');
@@ -12,8 +13,7 @@ function Player(game) {
 	this.owner = this;
 	this.shield = undefined;
 	this.weapon = undefined;
-	this.status = { poison: 0 };
-	this.neuro = false;
+	this.status = new imm.Map().set('poison', 0).set('neuro', 0);
 	this.sosa = 0;
 	this.silence = false;
 	this.sanctuary = false;
@@ -104,7 +104,7 @@ Player.prototype.info = function() {
 	for (var key in this.status) {
 		plinfocore(info, key, this.status[key]);
 	}
-	['nova', 'neuro', 'sosa', 'silence', 'sanctuary', 'precognition'].forEach(
+	['nova', 'sosa', 'silence', 'sanctuary', 'precognition'].forEach(
 		function(key) {
 			plinfocore(info, key, this[key]);
 		},
