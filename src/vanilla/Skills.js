@@ -109,7 +109,7 @@ var Actives = {
 			validTargets.length = 0;
 			for (var i = 0; i < 23; i++) {
 				var cr = t.owner.creatures[i];
-				if (cr && cr != t && cr.isMaterialInstance(smth.Creature)) {
+				if (cr && cr != t && cr.isMaterial(smth.Creature)) {
 					validTargets.push(i);
 				}
 			}
@@ -241,7 +241,7 @@ var Actives = {
 		var validTargets = [];
 		for (var i = 0; i < 23; i++) {
 			var cr = t.owner.creatures[i];
-			if (cr && cr != t && cr.isMaterialInstance(smth.Creature)) {
+			if (cr && cr != t && cr.isMaterial(smth.Creature)) {
 				validTargets.push(cr);
 			}
 		}
@@ -835,7 +835,7 @@ var Actives = {
 			var cr = c.owner.foe.creatures[i];
 			if (
 				cr &&
-				cr.isMaterialInstance(smth.Creature) &&
+				cr.isMaterial(smth.Creature) &&
 				!cr.status.get('law') &&
 				cr.truehp() < 5
 			) {
@@ -1287,7 +1287,7 @@ var Actives = {
 		c.owner.quanta[etg.Air] = 0;
 		for (var i = 0; i < 23; i++) {
 			var cr = c.owner.creatures[i];
-			if (cr && cr.status.get('airborne') && cr.isMaterialInstance(etg.Creature)) {
+			if (cr && cr.status.get('airborne') && cr.isMaterial(etg.Creature)) {
 				Effect.mkText('Dive', cr);
 				const dive = cr.defstatus('dive', 0);
 				cr.status = cr.status.set('dive', dive + cr.trueatk());

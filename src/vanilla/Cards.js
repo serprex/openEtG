@@ -101,7 +101,7 @@ const TargetFilters = {
 		return true;
 	},
 	pill: function(c, t) {
-		return t.isMaterialInstance(etg.Pillar);
+		return t.isMaterial(etg.Pillar);
 	},
 	weap: function(c, t) {
 		return (
@@ -112,18 +112,18 @@ const TargetFilters = {
 		);
 	},
 	perm: function(c, t) {
-		return t.isMaterialInstance(etg.Permanent);
+		return t.isMaterial(etg.Permanent);
 	},
 	crea: function(c, t) {
-		return t.isMaterialInstance(etg.Creature);
+		return t.isMaterial(etg.Creature);
 	},
 	creaonly: function(c, t) {
 		return (
-			t.isMaterialInstance(etg.Creature) && t.card.type == etg.CreatureEnum
+			t.isMaterial(etg.Creature) && t.card.type == etg.CreatureEnum
 		);
 	},
 	creanonspell: function(c, t) {
-		return t.isMaterialInstance(etg.Creature) && t.card.type != etg.SpellEnum;
+		return t.isMaterial(etg.Creature) && t.card.type != etg.SpellEnum;
 	},
 	play: function(c, t) {
 		return t.type == etg.Player;
@@ -132,16 +132,16 @@ const TargetFilters = {
 		return t.type != etg.Player;
 	},
 	butterfly: function(c, t) {
-		return t.isMaterialInstance(etg.Creature) && t.trueatk() < 3;
+		return t.isMaterial(etg.Creature) && t.trueatk() < 3;
 	},
 	devour: function(c, t) {
-		return t.isMaterialInstance(etg.Creature) && t.truehp() < c.truehp();
+		return t.isMaterial(etg.Creature) && t.truehp() < c.truehp();
 	},
 	law: function(c, t) {
-		return t.isMaterialInstance(etg.Creature) && t.truehp() < 5;
+		return t.isMaterial(etg.Creature) && t.truehp() < 5;
 	},
 	paradox: function(c, t) {
-		return t.isMaterialInstance(etg.Creature) && t.truehp() < t.trueatk();
+		return t.isMaterial(etg.Creature) && t.truehp() < t.trueatk();
 	},
 	permnonstack: function(c, t) {
 		return t instanceof smth.Permanent && !t.status.get('stackable');

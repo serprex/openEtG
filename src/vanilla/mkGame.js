@@ -1,3 +1,7 @@
+const Cards = require('./Cards'),
+	Game = require('./Game'),
+	etgutil = require('../etgutil');
+
 function deckPower(deck, amount) {
 	var res = deck;
 	for (var i = 1;i < amount;i++) {
@@ -47,6 +51,6 @@ module.exports = function(data, ai) {
 	game.turn.foe.drawhand();
 	if (data.foename) game.foename = data.foename;
 	if (ai) game.ai = true;
-	return game;
+	return { game, data };
 }
 

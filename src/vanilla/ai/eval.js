@@ -433,8 +433,8 @@ function evalactive(c, active, extra){
 }
 
 function checkpassives(c) {
-	var score = 0, statuses = c.status;
-	for (var status in statuses)
+	var score = 0;
+	for (var status of c.status.keys())
 	{
 		if (uniqueStatuses[status] && !(c instanceof smth.CardInstance)) {
 			if (!uniquesActive.has(status)) {

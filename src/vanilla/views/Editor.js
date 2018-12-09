@@ -89,22 +89,22 @@ module.exports = connect(state => ({ deck: state.opts.deck }))(class Editor exte
 			<input type="button"
 				style={{position:'absolute', left: '8px', top: '110px'}}
 				value="Commoner"
-				onClick={() => mkAi.run(mkAi.mkAi(0))}
+				onClick={() => mkAi.run(mkAi.mkAi(0))()}
 			/>
 			<input type="button"
 				style={{position:'absolute', left: '8px', top: '140px'}}
 				value="Mage"
-				onClick={() => mkAi.run(mkAi.mkAi(1))}
+				onClick={() => mkAi.run(mkAi.mkAi(1))()}
 			/>
 			<input type="button"
 				style={{position:'absolute', left: '8px', top: '170px'}}
 				value="Champion"
-				onClick={() => mkAi.run(mkAi.mkAi(2))}
+				onClick={() => mkAi.run(mkAi.mkAi(2))()}
 			/>
 			<input type="button"
 				style={{position:'absolute', left: '8px', top: '200px'}}
 				value="False God"
-				onClick={() => mkAi.run(mkAi.mkPremade())}
+				onClick={() => mkAi.run(mkAi.mkPremade())()}
 			/>
 			{ebuttons}
 			<span className={'ico e' + this.state.mark}

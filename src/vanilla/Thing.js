@@ -50,7 +50,10 @@ function Pillar(card, owner) {
 }
 function CardInstance(card, owner) {
 	this.owner = owner;
+	this.type = etg.Spell;
 	this.card = card;
+	this.active = card.active;
+	this.status = card.status;
 }
 
 Thing.prototype.toString = function() {
@@ -81,7 +84,7 @@ Thing.prototype.proc = function(name, param) {
 	}
 };
 Thing.prototype.getStatus = function(key) {
-	return this.status.get(key) || 0;
+	return (this.status && this.status.get(key)) || 0;
 }
 Thing.prototype.setStatus = function(key, val) {
 	this.status = this.status.set(key, val|0);
@@ -229,24 +232,26 @@ Pillar.prototype.info = function() {
 Thing.prototype.info = function() {
 	return skillText(this);
 };
+var activetexts = [
+	'cost',
+	'hit',
+	'death',
+	'owndeath',
+	'buff',
+	'destroy',
+	'draw',
+	'dmg',
+	'shield',
+	'postauto',
+];
 Thing.prototype.activetext = function() {
-	if (this.active.has('cast'))
-		return casttext(this.cast, this.castele) + this.active.get('cast').name.join(' ');
-	var order = [
-		'cost',
-		'hit',
-		'death',
-		'owndeath',
-		'buff',
-		'destroy',
-		'draw',
-		'dmg',
-		'shield',
-		'postauto',
-	];
-	for (var i = 0; i < order.length; i++) {
-		if (this.active[order[i]])
-			return order[i] + ' ' + this.active[order[i]].name.join(' ');
+	if (!this.active) return '';
+	const acast = this.active.get('cast');
+	if (acast)
+		return this.cast + ':' + this.castele + acast.name[0];
+	for (const akey of activetexts) {
+		const a = this.active.get(akey);
+		if (a) return akey + ' ' + a.name.join(' ');
 	}
 	return this.active.has('auto') ? this.active.get('auto').name.join(' ') : '';
 };
@@ -574,9 +579,12 @@ Shield.prototype.remove = function() {
 	delete this.owner.shield;
 	return 0;
 };
-Thing.prototype.isMaterialInstance = function(type) {
+Thing.prototype.isMaterial = function(type) {
 	return (
-		this instanceof type && !this.status.immaterial && !this.status.burrowed
+		(type == etg.Permanent
+			? this.type <= type
+			: type ? this.type == type : this.type != etg.Player) &&
+		!this.status.get('immaterial') && !this.status.get('burrowed')
 	);
 };
 Thing.prototype.addactive = function(type, active) {
@@ -608,6 +616,7 @@ Thing.prototype.hasactive = function(type, name) {
 Thing.prototype.canactive = function() {
 	return (
 		this.owner.game.turn == this.owner &&
+		this.active &&
 		this.active.has('cast') &&
 		!this.usedactive &&
 		!this.status.delayed &&
@@ -761,6 +770,9 @@ CardInstance.prototype.useactive = function(target) {
 	} else console.log('Unknown card type: ' + card.type);
 	owner.spend(card.costele, card.cost, this);
 	owner.game.updateExpectedDamage();
+};
+CardInstance.prototype.isMaterial = function() {
+	return true;
 };
 
 exports.Thing = Thing;

@@ -141,6 +141,176 @@ const activeInfo = {
 	},
 };
 
+const ThingInst = function ThingInst(props) {
+	const {obj, game} = props,
+		scale =
+			obj.type === etg.Weapon || obj.type === etg.Shield
+				? 1.2
+				: obj.type == etg.Spell ? 0.85 : 1,
+		isSpell = obj.type === etg.Spell,
+		pos = ui.tgtToPos(obj);
+	if (isSpell && obj.owner == game.player2 && !game.player1.precognition)
+	{
+		return <div
+			style={{
+				position: 'absolute',
+				left: pos.x - 32 + 'px',
+				top: pos.y - 38 + 'px',
+				width: '68px',
+				height: '80px',
+				border: 'transparent 2px solid',
+			}}
+			className={tgtclass(game, obj)}
+			onMouseOut={props.onMouseOut}
+			onClick={() => props.onClick(obj)}
+		>
+			<div className='ico cback'
+				style={{
+					left: '2px',
+					top: '2px',
+				}}
+			/>
+		</div>;
+	}
+	const children = [];
+	const visible = [
+		obj.getStatus('psionic'),
+		obj.getStatus('aflatoxin'),
+		!obj.getStatus('aflatoxin') && obj.getStatus('poison') > 0,
+		obj.getStatus('airborne') || obj.getStatus('ranged'),
+		obj.getStatus('momentum'),
+		obj.getStatus('adrenaline'),
+		obj.getStatus('poison') < 0,
+	];
+	const bordervisible = [
+		obj.getStatus('delayed'),
+		obj == obj.owner.gpull,
+		obj.getStatus('frozen'),
+	];
+	for (let k = 0; k < 7; k++) {
+		if (!isSpell && visible[k]) {
+			children.push(
+				<div className={'ico s' + k}
+					key={k}
+					style={{
+						position: 'absolute',
+						top: 64 * scale + 10 + 'px',
+						left: [32, 8, 8, 0, 24, 16, 8][k] + 'px',
+						opacity: '.6',
+					}}
+				/>
+			);
+		}
+	}
+	for (let k = 0; k < 3; k++) {
+		if (!isSpell && bordervisible[k]) {
+			children.push(
+				<div className={'ico sborder' + k}
+					key={7+k}
+					style={{
+						position: 'absolute',
+						left: '0',
+						top: '0',
+						transform: scale === 1 ? undefined : 'scale(' + scale + ')',
+					}}
+				/>
+			);
+		}
+	}
+	let statText, topText;
+	if (!isSpell) {
+		const charges = obj.getStatus('charges');
+		topText = obj.activetext();
+		if (obj.type === etg.Creature) {
+			statText = `${obj.trueatk()} | ${obj.truehp()}${charges ? ' x' + charges : ''}`;
+		} else if (obj.type === etg.Permanent) {
+			if (obj.card.type === etg.Pillar) {
+				statText = `1:${obj.getStatus('pendstate') ? obj.owner.mark : obj.card.element} x${charges}`;
+				topText = '';
+			} else if (obj.active.get('ownattack') === Skills.locket) {
+				statText = `1:${obj.getStatus('mode') || obj.owner.mark}`;
+			} else {
+				statText = (charges || '').toString();
+			}
+		} else if (obj.type === etg.Weapon) {
+			statText = `${obj.trueatk()}${charges ? ' x' + charges : ''}`;
+		} else if (obj.type === etg.Shield) {
+			statText = charges ? 'x' + charges : obj.truedr().toString();
+		}
+	} else {
+		statText = `${obj.card.cost}:${obj.card.costele}`;
+	}
+	return <div
+		style={{
+			position: 'absolute',
+			left: pos.x - 32 * scale + 'px',
+			top: pos.y - 36 * scale + 'px',
+			width: 64 * scale + 4 + 'px',
+			height: (isSpell ? 64 : 72) * scale + 4 + 'px',
+			opacity: obj.isMaterial() ? '1' : '.7',
+			color: obj.card.upped ? '#000' : '#fff',
+			fontSize: '10px',
+			border: 'transparent 2px solid',
+			zIndex: !isSpell && obj.getStatus('cloak') ? '2' : undefined,
+		}}
+		onMouseOver={props.setInfo && (e => props.setInfo(e, obj, pos.x))}
+		className={tgtclass(game, obj)}
+		onMouseOut={props.onMouseOut}
+		onClick={() => props.onClick(obj)}
+	>
+		<img key={0} className={obj.card.shiny ? 'shiny' : undefined}
+			src={'../Cards/' + obj.card.code.toString(32) + '.png'}
+			style={{
+				position: 'absolute',
+				left: '0',
+				top: isSpell ? '0' : '10px',
+				width: 64 * scale + 'px',
+				height: 64 * scale + 'px',
+				backgroundColor: ui.maybeLightenStr(obj.card),
+				pointerEvents: 'none',
+			}}
+		/>
+		{children}
+		{topText &&
+			<Components.Text
+				text={topText}
+				icoprefix='te'
+				style={{
+					position: 'absolute',
+					left: '0',
+					top: '-8px',
+					width: 64 * scale + 'px',
+					overflow: 'hidden',
+					backgroundColor: ui.maybeLightenStr(obj.card),
+				}}
+			/>
+		}
+		{statText &&
+			<Components.Text
+				text={statText}
+				icoprefix='te'
+				style={{
+					fontSize: '12px',
+					position: 'absolute',
+					top: isSpell ? '0' : '10px',
+					right: '0',
+					paddingLeft: '2px',
+					backgroundColor: ui.maybeLightenStr(obj.card),
+				}}
+			/>
+		}
+		{obj.hasactive('prespell', 'protectonce') &&
+			<div className='ico protection'
+				style={{
+					position: 'absolute',
+					left: '0',
+					top: '0',
+				}}
+			/>
+		}
+	</div>;
+};
+
 function tgtclass(game, obj) {
 	if (game.targeting) {
 		if (game.targeting.filter(obj)) return 'ants-red';
@@ -150,15 +320,15 @@ function tgtclass(game, obj) {
 module.exports = connect()(class Match extends React.Component {
 	constructor(props) {
 		super(props);
+		this.aiState = null;
+		this.aiCommand = false;
+		this.aiDelay = 0;
 		this.state = {
 			tooltip: '',
 			foeplays: [],
 			discarding: false,
 			resigning: false,
 			effects: null,
-			aiState: null,
-			aiCommand: false,
-			aiDelay: 0,
 		};
 	}
 
@@ -168,13 +338,12 @@ module.exports = connect()(class Match extends React.Component {
 			this.props.dispatch(store.doNav(require("./Result"), {game}));
 		} else if (game.turn == game.player1) {
 			if (discard == undefined && game.player1.hand.length == 8) {
-				discarding = true;
+				this.setState({ discarding: true });
 			} else {
-				discarding = false;
 				if (!game.ai) sock.emit("endturn", {bits: discard});
 				game.player1.endturn(discard);
 				game.targeting = null;
-				foeplays.removeChildren();
+				this.setState({ discarding: false, foeplays: [] });
 			}
 		}
 	}
@@ -248,30 +417,28 @@ module.exports = connect()(class Match extends React.Component {
 		const { game } = this.props;
 		if (game.turn == game.player2 && game.ai) {
 			if (game.phase == etg.PlayPhase) {
-				if (!this.state.aiCommand) {
+				if (!this.aiCommand) {
 					Effect.disable = true;
-					if (this.state.aiState) {
-						this.state.aiState.step(game);
+					if (this.aiState) {
+						this.aiState.step(game);
 					} else {
-						this.setState({aiState: new aiSearch(game)});
+						this.aiState = new aiSearch(game);
 					}
 					Effect.disable = false;
-					if (this.state.aiState.cmd) {
-						this.setState({aiCommand: true});
+					if (this.aiState.cmd) {
+						this.aiCommand = true;
 					}
 				}
 				let now;
-				if (this.state.aiCommand && (now = Date.now()) > this.state.aiDelay) {
-					cmds[this.state.aiState.cmd]({ bits: this.state.aiState.cmdct });
-					this.setState({
-						aiState: null,
-						aiCommand: false,
-						aiDelay: now + (game.turn == game.player1 ? 2000 : 200),
-					});
+				if (this.aiCommand && (now = Date.now()) > this.aiDelay) {
+					cmds[this.aiState.cmd]({ bits: this.aiState.cmdct });
+					this.aiState = null;
+					this.aiCommand = false;
+					this.aiDelay = now + (game.turn == game.player1 ? 2000 : 200);
 				}
 			}
 		}
-		Effect.next(cloakgfx.visible);
+		const effects = Effect.next(game.player2.isCloaked());
 		if (effects !== this.state.effects) {
 			this.setState({ effects });
 		}
@@ -299,12 +466,20 @@ module.exports = connect()(class Match extends React.Component {
 			},
 			cast: function(data) {
 				const bits = data.bits, c = game.bitsToTgt(bits & 511), t = game.bitsToTgt((bits >> 9) & 511);
-				if (c instanceof smth.CardInstance) {
-					var sprite = new PIXI.Sprite(gfx.nopic);
-					sprite.position.set((foeplays.children.length % 9) * 99, Math.floor(foeplays.children.length / 9) * 19);
-					sprite.card = c.card;
-					foeplays.addChild(sprite);
+				let play;
+				if (c.type == etg.Spell) {
+					play = c.card;
+				} else {
+					play = {
+						element: c.card.element,
+						costele: c.castele,
+						cost: c.cast,
+						name: c.active.get('cast').name[0],
+						upped: c.card.upped,
+						shiny: c.card.shiny,
+					};
 				}
+				this.setState({ foeplays: this.state.foeplays.concat([play]) });
 				c.useactive(t);
 				self.forceUpdate();
 			},

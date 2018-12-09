@@ -2,6 +2,7 @@ var ui = require('./ui');
 var etg = require('./etg');
 var sock = require('./sock');
 var util = require('../util');
+var store = require('./store');
 var Cards = require('./Cards');
 var etgutil = require('../etgutil');
 var aiDecks = require('./Decks.json');
@@ -9,6 +10,7 @@ var RngMock = require('./RngMock');
 var mkGame = require('./mkGame');
 
 function run(gamedata) {
+	console.log(gamedata);
 	if (typeof gamedata === 'function') {
 		return () => run(gamedata());
 	}
