@@ -2,7 +2,7 @@ const chat = require('./chat'),
 	etgutil = require('../etgutil'),
 	mkGame = require('./mkGame'),
 	store = require('./store');
-var socket = new WebSocket('wss://' + location.hostname + ':13602');
+var socket = new WebSocket((location.protocol === 'http:' ? 'ws://' : 'wss://') + location.hostname + ':13602');
 const buffer = [];
 let attempts = 0,
 	attemptTimeout = 0,

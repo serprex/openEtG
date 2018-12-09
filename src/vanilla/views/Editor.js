@@ -133,7 +133,6 @@ module.exports = connect(state => ({ deck: state.opts.deck }))(class Editor exte
 								return;
 							}
 						}
-						console.log(deck);
 						this.saveDeck(deck.concat([code]), mark);
 					}
 				}}

@@ -1,5 +1,6 @@
 'use strict';
-const redux = require('redux');
+const redux = require('redux'),
+	React = require('react');
 
 exports.doNav = (view, props) => ({ type: 'NAV', view, props });
 
@@ -15,6 +16,11 @@ exports.mute = name => ({ type: 'MUTE', name });
 exports.unmute = name => ({ type: 'UNMUTE', name });
 exports.clearChat = name => ({ type: 'CHAT_CLEAR', name });
 exports.chat = (span, name) => ({ type: 'CHAT', span, name });
+exports.chatMsg = (msg, name) => ({
+	type: 'CHAT',
+	span: <div>{msg}</div>,
+	name,
+});
 
 exports.store = redux.createStore((state, action) => {
 	switch(action.type) {

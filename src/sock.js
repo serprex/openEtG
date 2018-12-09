@@ -5,7 +5,7 @@ const Cards = require('./Cards'),
 	userutil = require('./userutil'),
 	React = require('react');
 const endpoint =
-	(/^\d+\.\d+\.\d+\.\d+$/.test(location.hostname) ? 'ws://' : 'wss://') +
+	(location.protocol === 'http:' ? 'ws://' : 'wss://') +
 	location.hostname +
 	':13602';
 const buffer = [];
