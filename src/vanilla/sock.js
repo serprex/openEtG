@@ -1,7 +1,8 @@
 const chat = require('./chat'),
 	etgutil = require('../etgutil'),
 	mkGame = require('./mkGame'),
-	store = require('./store');
+	store = require('./store'),
+	React = require('react');
 var socket = new WebSocket((location.protocol === 'http:' ? 'ws://' : 'wss://') + location.hostname + ':13602');
 const buffer = [];
 let attempts = 0,
@@ -33,32 +34,26 @@ var sockEvents = {
 		chat.addSpan(span);
 	},
 	chat: function(data) {
-		if ((muteall && !data.mode) || data.u in muteset) return;
-		var now = new Date(),
+		const state = store.store.getState();
+		if (state.opts.muteall && !data.mode) return;
+		const now = new Date(),
 			h = now.getHours(),
 			m = now.getMinutes(),
 			hs = h < 10 ? '0' + h : h.toString(),
-			ms = m < 10 ? '0' + m : m.toString();
-		var span = document.createElement('div');
-		if (data.mode != 1) span.style.color = data.mode == 2 ? '#69f' : '#ddd';
-		if (data.guest) span.style.fontStyle = 'italic';
-		span.appendChild(document.createTextNode(hs + ms + ' '));
-		if (data.u) {
-			var belly = document.createElement('b');
-			belly.appendChild(document.createTextNode(data.u + ' '));
-			span.appendChild(belly);
-		}
-		var decklink = /\b(([01][0-9a-v]{4})+)\b/g,
+			ms = m < 10 ? '0' + m : m.toString(),
+			style = {},
+			text = [];
+		if (data.mode != 1) style.color = data.mode == 2 ? '#69f' : '#ddd';
+		if (data.guest) style.fontStyle = 'italic';
+		let decklink = /\b(([01][0-9a-v]{4})+)\b/g,
 			reres,
 			lastindex = 0;
 		while ((reres = decklink.exec(data.msg))) {
 			if (reres.index != lastindex)
-				span.appendChild(
-					document.createTextNode(data.msg.slice(lastindex, reres.index)),
-				);
-			var notlink = false;
-			for (var i = 2; i < reres[0].length; i += 5) {
-				var code = reres[0].substr(i, 3);
+				text.push(data.msg.slice(lastindex, reres.index));
+			let notlink = false;
+			for (let i = 2; i < reres[0].length; i += 5) {
+				const code = parseInt(reres[0].substr(i, 3), 32);
 				if (!(code in Cards.Codes) && etgutil.fromTrueMark(code) == -1) {
 					notlink = true;
 					break;
@@ -68,16 +63,15 @@ var sockEvents = {
 				lastindex = reres.index;
 				continue;
 			}
-			var link = document.createElement('a');
-			link.href = '../deck/' + reres[0];
-			link.target = '_blank';
-			link.appendChild(document.createTextNode(reres[0]));
-			span.appendChild(link);
+			text.push(<a href={`../deck/${reres[0]}`} target='_blank'>{reres[0]}</a>);
 			lastindex = reres.index + reres[0].length;
 		}
 		if (lastindex != data.msg.length)
-			span.appendChild(document.createTextNode(data.msg.slice(lastindex)));
-		chat.addSpan(span);
+			text.push(data.msg.slice(lastindex));
+		store.store.dispatch(store.chat(<div style={style}>
+			{hs}{ms} {data.u && <b>{data.u} </b>}
+			{text}
+		</div>, data.mode == 1 ? null : 'Main'));
 	},
 };
 socket.onmessage = function(msg) {
