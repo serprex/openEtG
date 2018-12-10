@@ -140,6 +140,12 @@ function permanentPos(j, i) {
 	if (j) reflectPos(p);
 	return p;
 }
+function cardPos(j, i) {
+	return {
+		x: (j ? 36 : 793) + 66 * (i & 1),
+		y: (j ? 118 : 346) + 48 * (i >> 1),
+	};
+}
 function tgtToPos(t) {
 	if (t instanceof smth.Creature) {
 		return creaturePos(t.owner == t.owner.game.player2, t.getIndex());
@@ -158,11 +164,7 @@ function tgtToPos(t) {
 		if (t == t.owner.game.player2) reflectPos(p);
 		return p;
 	} else if (t instanceof smth.CardInstance) {
-		return new Point(
-			t.owner == t.owner.game.player2 ? 20 : 780,
-			(t.owner == t.owner.game.player2 ? 140 : 300) +
-				20 * t.owner.hand.indexOf(t),
-		);
+		return cardPos(t.owner == t.owner.game.player2, t.getIndex());
 	} else console.log('Unknown target');
 }
 var sounds = {},

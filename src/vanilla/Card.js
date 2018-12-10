@@ -94,6 +94,9 @@ Card.prototype.asUpped = function(upped) {
 Card.prototype.isOf = function(card) {
 	return card.code == etgutil.asUpped(this.code, false);
 };
+Card.prototype.getStatus = function(key) {
+	return this.status.get(key) || 0;
+}
 function readCost(coststr, defaultElement) {
 	if (typeof coststr == 'number')
 		return new Int8Array([coststr, defaultElement]);

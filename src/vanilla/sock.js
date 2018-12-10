@@ -3,17 +3,15 @@ const chat = require('./chat'),
 	mkGame = require('./mkGame'),
 	store = require('./store'),
 	React = require('react');
-var socket = new WebSocket((location.protocol === 'http:' ? 'ws://' : 'wss://') + location.hostname + ':13602');
+const endpoint = (location.protocol === 'http:' ? 'ws://' : 'wss://') + location.hostname + ':13602';
+var socket = new WebSocket(endpoint);
 const buffer = [];
 let attempts = 0,
 	attemptTimeout = 0,
 	guestname;
 var sockEvents = {
 	pvpgive: (data) => {
-		if (exports.pvp) {
-			delete exports.pvp;
-			store.store.dispatch(store.doNav(require('./views/Match'), mkGame(data)));
-		}
+		store.store.dispatch(store.doNav(require('./views/Match'), mkGame(data)));
 	},
 	roll: function(data) {
 		var span = document.createElement('div');
@@ -75,11 +73,10 @@ var sockEvents = {
 	},
 };
 socket.onmessage = function(msg) {
+	const state = store.store.getState();
 	const data = JSON.parse(msg.data);
-	const func = sockEvents[data.x] || px.getCmd(data.x);
-	if (func) {
-		func.call(this, data);
-	}
+	const func = sockEvents[data.x] || state.cmds[data.x];
+	if (func) func.call(this, data);
 };
 socket.onopen = function() {
 	attempts = 0;
@@ -98,9 +95,7 @@ socket.onclose = function reconnect() {
 	attemptTimeout = setTimeout(function() {
 		attemptTimeout = 0;
 		const oldsock = socket;
-		exports.et = socket = new WebSocket(
-			'wss://' + location.hostname + ':13602',
-		);
+		exports.et = socket = new WebSocket(endpoint);
 		socket.onopen = oldsock.onopen;
 		socket.onclose = oldsock.onclose;
 		socket.onmessage = oldsock.onmessage;
@@ -119,7 +114,7 @@ exports.emit = function(x, data) {
 };
 exports.getDeck = function(limit) {
 	const state = store.store.getState();
-	const deck = etgutil.decodedeck(state.opts.deck);
+	const deck = state.opts.deck.split(' ').map(x => parseInt(x, 32));
 	if (limit && deck.length > 60) {
 		deck.length = 60;
 	}

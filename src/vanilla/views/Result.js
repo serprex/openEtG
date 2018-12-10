@@ -1,4 +1,5 @@
-const store = require('../store');
+const store = require('../store'),
+	React = require('react');
 module.exports = function(props){
 	const {game} = props;
 	return <>

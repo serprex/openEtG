@@ -149,17 +149,10 @@ CardInstance.prototype.hash = function() {
 		(this.card.code << 1) | (this.owner == this.owner.game.player1 ? 1 : 0)
 	);
 };
-function hashObj(obj) {
-	var hash = 0xdadac3c3;
-	for (var [key, val] of obj) {
-		hash ^= util.hashString(key + "'" + val);
-	}
-	return hash;
-}
 Creature.prototype.hash = function() {
 	var hash = this.owner == this.owner.game.player1 ? 17 : 19;
 	hash ^=
-		hashObj(this.status) ^
+		this.status.hashCode() ^
 		(this.hp * 17 + this.atk * 31 - this.maxhp - this.usedactive * 3);
 	hash ^= this.card.code;
 	for (var [key, val] of this.active) {
@@ -172,7 +165,7 @@ Creature.prototype.hash = function() {
 };
 Permanent.prototype.hash = function() {
 	var hash = this.owner == this.owner.game.player1 ? 5351 : 5077;
-	hash ^= hashObj(this.status) ^ (this.usedactive * 3);
+	hash ^= this.status.hashCode() ^ (this.usedactive * 3);
 	hash ^= this.card.code;
 	for (var [key, val] of this.active) {
 		hash ^= util.hashString(key + '=' + val.name.join(' '));
@@ -184,7 +177,7 @@ Permanent.prototype.hash = function() {
 };
 Weapon.prototype.hash = function() {
 	var hash = this.owner == this.owner.game.player1 ? 13 : 11;
-	hash ^= hashObj(this.status) ^ (this.atk * 31 - this.usedactive * 3);
+	hash ^= this.status.hashCode() ^ (this.atk * 31 - this.usedactive * 3);
 	hash ^= this.card.code;
 	for (var [key, val] of this.active) {
 		hash ^= util.hashString(key + '-' + val.name.join(' '));
@@ -196,7 +189,7 @@ Weapon.prototype.hash = function() {
 };
 Shield.prototype.hash = function() {
 	var hash = this.owner == this.owner.game.player1 ? 5009 : 4259;
-	hash ^= hashObj(this.status) ^ (this.dr * 31 - this.usedactive * 3);
+	hash ^= this.status.hashCode() ^ (this.dr * 31 - this.usedactive * 3);
 	hash ^= this.card.code;
 	for (var [key, val] of this.active) {
 		hash ^= util.hashString(key + '~' + val.name.join(' '));

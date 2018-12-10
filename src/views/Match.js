@@ -588,7 +588,6 @@ module.exports = connect(({user}) => ({user}))(class Match extends React.Compone
 				}
 				this.setState({ foeplays: this.state.foeplays.concat([play]) });
 				c.useactive(t);
-				this.forceUpdate();
 			},
 			foeleft: data => {
 				if (!game.ai)
@@ -773,7 +772,6 @@ module.exports = connect(({user}) => ({user}))(class Match extends React.Compone
 						obj={pl.hand[i]}
 						game={game}
 						setGame={() => this.forceUpdate()}
-						funcEnd={() => this.endClick()}
 						setInfo={(e, obj, x) => this.setCard(e, obj.card, x)}
 						onMouseOut={this.clearCard}
 						onClick={this.thingClick}

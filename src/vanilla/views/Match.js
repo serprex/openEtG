@@ -141,7 +141,7 @@ const activeInfo = {
 	},
 };
 
-const ThingInst = function ThingInst(props) {
+function ThingInst(props) {
 	const {obj, game} = props,
 		scale =
 			obj.type === etg.Weapon || obj.type === etg.Shield
@@ -444,27 +444,41 @@ module.exports = connect()(class Match extends React.Component {
 		}
 	}
 
+	onkeydown = e => {
+		if (e.target.tagName === 'TEXTAREA') return;
+		const kc = e.which,
+			ch = String.fromCharCode(kc);
+		let chi;
+		if (kc == 27) {
+			this.resignClick();
+		} else if (ch == ' ' || kc == 13) {
+			this.endClick();
+		} else if (ch == '\b' || ch == '0') {
+			this.cancelClick();
+		} else if (~(chi = 'SW'.indexOf(ch))) {
+			this.playerClick(chi);
+		} else if (~(chi = "QA".indexOf(ch))) {
+			const { shield } = this.props.game.players(chi);
+			if (shield) this.thingClick(shield);
+		} else if (~(chi = "ED".indexOf(ch))) {
+			const { weapon } = this.props.game.players(chi);
+			if (weapon) this.thingClick(weapon);
+		} else if (~(chi = "12345678".indexOf(ch))) {
+			const card = this.props.game.player1.hand[chi];
+			if (card) this.thingClick(card);
+		} else
+			return;
+		e.preventDefault();
+	}
+
 	startMatch({game, data, dispatch}) {
-		const self = this;
 		Effect.clear();
-		function onkeydown(e) {
-			if (e.keyCode == 32) { // spc
-				endturn.click();
-			} else if (e.keyCode == 8) { // bsp
-				cancel.click();
-			} else if (e.keyCode >= 49 && e.keyCode <= 56) {
-				handsprite[0][e.keyCode-49].click();
-			} else if (e.keyCode == 83 || e.keyCode == 87) { // s/w
-				hptext[e.keyCode == 87?1:0].click();
-			} else return;
-			e.preventDefault();
-		}
 		const cmds = {
-			endturn: function(data) {
+			endturn: data => {
 				game.player2.endturn(data.bits);
-				self.forceUpdate();
+				this.forceUpdate();
 			},
-			cast: function(data) {
+			cast: data => {
 				const bits = data.bits, c = game.bitsToTgt(bits & 511), t = game.bitsToTgt((bits >> 9) & 511);
 				let play;
 				if (c.type == etg.Spell) {
@@ -481,36 +495,25 @@ module.exports = connect()(class Match extends React.Component {
 				}
 				this.setState({ foeplays: this.state.foeplays.concat([play]) });
 				c.useactive(t);
-				self.forceUpdate();
 			},
-			foeleft: function(){
+			foeleft: () => {
 				if (!game.ai) game.setWinner(game.player1);
-				self.forceUpdate();
+				this.forceUpdate();
 			}
 		};
 		this.gameStep(cmds);
 		const gameInterval = setInterval(() => this.gameStep(cmds), 30);
-		self.setState({
-			endnext: function() {
-				document.removeEventListener('keydown', onkeydown);
-				clearInterval(gameInterval);
-			},
-		});
 		dispatch(store.setCmds(cmds));
 	}
 
 	componentDidMount() {
-		if (sock.trade) {
-			sock.userEmit('canceltrade');
-			delete sock.trade;
-		}
+		document.addEventListener('keydown', this.onkeydown);
 		this.startMatch(this.props);
 	}
 
 	componentWillUnmount() {
-		if (this.state.endnext) {
-			this.state.endnext();
-		}
+		clearInterval(this.gameInterval);
+		document.removeEventListener('keydown', this.onkeydown);
 		this.props.dispatch(store.setCmds({}));
 	}
 
@@ -550,13 +553,12 @@ module.exports = connect()(class Match extends React.Component {
 	}
 
 	render() {
-		const self = this,
-			{game} = this.props,
+		const {game} = this.props,
 			children = [svgbg];
 		let turntell, endText, cancelText;
 		const cloaked = game.player2.isCloaked();
 		if (game.phase != etg.EndPhase) {
-			turntell = self.state.discarding
+			turntell = this.state.discarding
 				? 'Discard'
 				: game.targeting
 					? game.targeting.text
@@ -565,13 +567,13 @@ module.exports = connect()(class Match extends React.Component {
 							? ''
 							: game.first == game.player1 ? ', First' : ', Second');
 			if (game.turn == game.player1) {
-				endText = self.state.discarding
+				endText = this.state.discarding
 					? ''
 					: game.phase == etg.PlayPhase ? 'End Turn' : 'Accept Hand';
 				cancelText =
 					game.phase != etg.PlayPhase
 						? 'Mulligan'
-						: game.targeting || self.state.discarding || self.state.resigning
+						: game.targeting || this.state.discarding || this.state.resigning
 							? 'Cancel'
 							: '';
 			} else cancelText = endText = '';
@@ -586,8 +588,8 @@ module.exports = connect()(class Match extends React.Component {
 		if (cloaked) {
 			children.push(cloaksvg);
 		} else {
-			for (let i = 0; i < self.state.foeplays.length; i++) {
-				let play = self.state.foeplays[i];
+			for (let i = 0; i < this.state.foeplays.length; i++) {
+				let play = this.state.foeplays[i];
 				children.push(
 					<Components.CardImage
 						key={'foeplay' + i}
@@ -596,10 +598,10 @@ module.exports = connect()(class Match extends React.Component {
 						card={play}
 						onMouseOver={(e) => {
 							if (play instanceof Card) {
-								self.setCard(e, play, e.pageX);
+								this.setCard(e, play, e.pageX);
 							}
 						}}
-						onMouseOut={() => self.clearCard()}
+						onMouseOut={() => this.clearCard()}
 					/>,
 				);
 			}
@@ -619,8 +621,8 @@ module.exports = connect()(class Match extends React.Component {
 						height: '80px',
 						border: 'transparent 2px solid',
 					}}
-					onClick={() => self.playerClick(j)}
-					onMouseOver={(e) => self.setInfo(e, pl)}
+					onClick={() => this.playerClick(j)}
+					onMouseOver={(e) => this.setInfo(e, pl)}
 				/>,
 				<span className={'ico e' + pl.mark}
 					style={{
@@ -671,11 +673,10 @@ module.exports = connect()(class Match extends React.Component {
 					<ThingInst
 						obj={pl.hand[i]}
 						game={game}
-						setGame={() => self.forceUpdate()}
-						funcEnd={self.endClick.bind(self)}
-						setInfo={(e, obj, x) => self.setCard(e, obj.card, x)}
-						onMouseOut={() => self.clearCard()}
-						onClick={obj => self.thingClick(obj)}
+						setGame={() => this.forceUpdate()}
+						setInfo={(e, obj, x) => this.setCard(e, obj.card, x)}
+						onMouseOut={() => this.clearCard()}
+						onClick={obj => this.thingClick(obj)}
 					/>
 				);
 			}
@@ -688,10 +689,10 @@ module.exports = connect()(class Match extends React.Component {
 							key={i}
 							obj={cr}
 							game={game}
-							setGame={() => self.forceUpdate()}
-							setInfo={(e, obj, x) => self.setInfo(e, obj, x)}
-							onMouseOut={() => self.clearCard()}
-							onClick={obj => self.thingClick(obj)}
+							setGame={() => this.forceUpdate()}
+							setInfo={(e, obj, x) => this.setInfo(e, obj, x)}
+							onMouseOut={() => this.clearCard()}
+							onClick={obj => this.thingClick(obj)}
 						/>
 					);
 				}
@@ -705,10 +706,10 @@ module.exports = connect()(class Match extends React.Component {
 							key={i}
 							obj={pr}
 							game={game}
-							setGame={() => self.forceUpdate()}
-							setInfo={(e, obj, x) => self.setInfo(e, obj, x)}
-							onMouseOut={() => self.clearCard()}
-							onClick={obj => self.thingClick(obj)}
+							setGame={() => this.forceUpdate()}
+							setInfo={(e, obj, x) => this.setInfo(e, obj, x)}
+							onMouseOut={() => this.clearCard()}
+							onClick={obj => this.thingClick(obj)}
 						/>
 					);
 				}
@@ -724,10 +725,10 @@ module.exports = connect()(class Match extends React.Component {
 					<ThingInst
 						obj={wp}
 						game={game}
-						setGame={() => self.forceUpdate()}
-						setInfo={(e, obj, x) => self.setInfo(e, obj, x)}
-						onMouseOut={() => self.clearCard()}
-						onClick={obj => self.thingClick(obj)}
+						setGame={() => this.forceUpdate()}
+						setInfo={(e, obj, x) => this.setInfo(e, obj, x)}
+						onMouseOut={() => this.clearCard()}
+						onClick={obj => this.thingClick(obj)}
 					/>
 				);
 			}
@@ -737,10 +738,10 @@ module.exports = connect()(class Match extends React.Component {
 					<ThingInst
 						obj={sh}
 						game={game}
-						setGame={() => self.forceUpdate()}
-						setInfo={(e, obj, x) => self.setInfo(e, obj, x)}
-						onMouseOut={() => self.clearCard()}
-						onClick={obj => self.thingClick(obj)}
+						setGame={() => this.forceUpdate()}
+						setInfo={(e, obj, x) => this.setInfo(e, obj, x)}
+						onMouseOut={() => this.clearCard()}
+						onClick={obj => this.thingClick(obj)}
 					/>
 				);
 			}
@@ -873,36 +874,34 @@ module.exports = connect()(class Match extends React.Component {
 				{turntell}
 			</span>
 		);
-		if (self.state.effects) {
-			children.push(self.state.effects);
-		}
-		if (self.state.hovercode) {
+		children.push(this.state.effects);
+		if (this.state.hovercode) {
 			children.push(
 				<Components.Card
-					x={self.state.hoverx}
-					y={self.state.hovery}
-					code={self.state.hovercode}
+					x={this.state.hoverx}
+					y={this.state.hovery}
+					code={this.state.hovercode}
 				/>
 			);
 		}
-		if (self.state.tooltip) {
+		if (this.state.tooltip) {
 			children.push(
 				<Components.Text
 					className='infobox'
-					text={self.state.tooltip}
+					text={this.state.tooltip}
 					icoprefix='te'
 					style={{
 						position: 'absolute',
-						left: self.state.toolx + 'px',
-						top: self.state.tooly + 'px',
+						left: this.state.toolx + 'px',
+						top: this.state.tooly + 'px',
 					}}
 				/>
 			);
 		}
 		children.push(
 			<input type='button'
-				value={self.state.resigning ? 'Confirm' : 'Resign'}
-				onClick={() => self.resignClick()}
+				value={this.state.resigning ? 'Confirm' : 'Resign'}
+				onClick={() => this.resignClick()}
 				style={{
 					position: 'absolute',
 					left: '8px',
@@ -914,7 +913,7 @@ module.exports = connect()(class Match extends React.Component {
 			children.push(
 				<input type='button'
 					value={cancelText}
-					onClick={() => self.cancelClick()}
+					onClick={() => this.cancelClick()}
 					style={{
 						position: 'absolute',
 						left: '800px',
@@ -927,7 +926,7 @@ module.exports = connect()(class Match extends React.Component {
 			children.push(
 				<input type='button'
 					value={endText}
-					onClick={() => self.endClick()}
+					onClick={() => this.endClick()}
 					style={{
 						position: 'absolute',
 						left: '800px',

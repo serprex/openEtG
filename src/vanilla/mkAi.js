@@ -10,7 +10,6 @@ var RngMock = require('./RngMock');
 var mkGame = require('./mkGame');
 
 function run(gamedata) {
-	console.log(gamedata);
 	if (typeof gamedata === 'function') {
 		return () => run(gamedata());
 	}
