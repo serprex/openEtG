@@ -1,8 +1,8 @@
 'use strict';
 function adrenathrottle(f) {
-	return function(c) {
-		if (!c.status || (c.status.get('adrenaline') || 0) < 3) {
-			return f.apply(null, arguments);
+	return function(c, ...args) {
+		if (c.getStatus('adrenaline') < 3) {
+			return f(c, ...args);
 		}
 	};
 }

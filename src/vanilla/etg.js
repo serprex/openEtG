@@ -80,6 +80,12 @@ function casttext(cast, castele) {
 exports.Player = 6;
 exports.passives = passives;
 exports.countAdrenaline = countAdrenaline;
+exports.calcAdrenaline = function(y, dmg) {
+	if (y < 2) return dmg;
+	const row = adrtbl[Math.abs(dmg)];
+	if (y - 2 >= (row & 7)) return 0;
+	return ((row >> ((y - 1) * 3)) & 7) * ((dmg > 0) - (dmg < 0));
+};
 exports.getAdrenalRow = getAdrenalRow;
 exports.casttext = casttext;
 exports.Other = 0;

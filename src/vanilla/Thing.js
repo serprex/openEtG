@@ -323,14 +323,14 @@ Creature.prototype.addpoison = function(x) {
 Weapon.prototype.buffhp = function() {};
 Weapon.prototype.delay = Creature.prototype.delay = function(x) {
 	this.defstatus('delayed', 0);
-	this.status.set('delayed', this.status.get('delayed') + x);
+	this.incrStatus('delayed', x);
 	if (this.status.get('voodoo')) this.owner.foe.delay(x);
 };
 Weapon.prototype.freeze = Creature.prototype.freeze = function(x) {
 	if (!this.active.has('ownfreeze') || this.active.get('ownfreeze').func(this)) {
 		Effect.mkText('Freeze', this);
 		this.defstatus('frozen', 0);
-		if (x > this.status.get('frozen')) this.status.set('frozen', x);
+		if (x > this.status.get('frozen')) this.setStatus('frozen', x);
 		if (this.status.get('voodoo')) this.owner.foe.freeze(x);
 	}
 };
@@ -512,14 +512,11 @@ Weapon.prototype.trueatk = Creature.prototype.trueatk = function(adrenaline) {
 	var dmg = this.atk;
 	if (this.status.get('dive')) dmg += this.status.get('dive');
 	dmg += this.trigger('buff');
-	if (this instanceof Creature) {
+	if (this.type === etg.Creature) {
 		dmg += this.calcEclipse();
 	}
 	var y = adrenaline || this.status.get('adrenaline') || 0;
-	if (y < 2) return dmg;
-	var row = adrtbl[Math.abs(dmg)];
-	if (y - 2 >= (row & 7)) return 0;
-	return ((row >> ((y - 1) * 3)) & 7) * ((dmg > 0) - (dmg < 0));
+	return etg.calcAdrenaline(y, dmg);
 };
 Weapon.prototype.truehp = function() {
 	return this.card.health;
@@ -539,7 +536,7 @@ Permanent.prototype.die = function() {
 };
 Weapon.prototype.remove = function() {
 	if (this.owner.weapon != this) return -1;
-	this.owner.owner = null;
+	this.owner.weapon = null;
 	return 0;
 };
 Shield.prototype.remove = function() {
@@ -587,8 +584,8 @@ Thing.prototype.canactive = function() {
 		this.active &&
 		this.active.has('cast') &&
 		!this.usedactive &&
-		!this.status.delayed &&
-		!this.status.frozen &&
+		!this.status.get('delayed') &&
+		!this.status.get('frozen') &&
 		this.owner.canspend(this.castele, this.cast)
 	);
 };
@@ -609,11 +606,11 @@ Weapon.prototype.attack = Creature.prototype.attack = function(
 ) {
 	var isCreature = this instanceof Creature;
 	if (isCreature) {
-		this.dmg(this.status.poison, true);
+		this.dmg(this.getStatus('poison'), true);
 	}
 	var target = this.owner.foe;
 	if (
-		!this.status.frozen ||
+		!this.status.get('frozen') ||
 		this.active.get('auto') == Actives.overdrive ||
 		this.active.get('auto') == Actives.acceleration
 	) {
@@ -624,23 +621,23 @@ Weapon.prototype.attack = Creature.prototype.attack = function(
 	if (
 		!(
 			stasis ||
-			this.status.frozen ||
-			this.status.delayed ||
-			this.status.frightened ||
-			this.status.law
+			this.status.get('frozen') ||
+			this.status.get('delayed') ||
+			this.status.get('frightened') ||
+			this.status.get('law')
 		) &&
 		(trueatk = this.trueatk()) != 0
 	) {
-		var momentum = this.status.momentum;
+		var momentum = this.getStatus('momentum');
 		if (
-			this.status.airborne &&
+			this.status.get('airborne') &&
 			freedomChance &&
 			this.owner.rng() < freedomChance
 		) {
 			momentum = true;
 			trueatk = Math.ceil(trueatk * 1.5);
 		}
-		if (this.status.psion) {
+		if (this.status.get('psion')) {
 			target.spelldmg(trueatk);
 		} else if (momentum || trueatk < 0) {
 			var stillblock = false,
@@ -679,26 +676,24 @@ Weapon.prototype.attack = Creature.prototype.attack = function(
 			}
 		}
 	}
-	if (this.status.frozen) {
-		this.status.frozen--;
+	this.maybeDecrStatus('frozen');
+	this.maybeDecrStatus('delayed');
+	if (this.status.get('frightened')) {
+		this.setStatus('frightened', 0);
 	}
-	if (this.status.delayed) {
-		this.status.delayed--;
+	if (this.status.get('dive')) {
+		this.setStatus('dive', 0);
 	}
-	if (this.status.frightened) {
-		this.status.frightened = false;
-	}
-	delete this.status.dive;
 	if (isCreature && ~this.getIndex() && this.truehp() <= 0) {
 		this.die();
 	} else if (!isCreature || ~this.getIndex()) {
 		this.trigger('postauto');
-		if (this.status.adrenaline) {
-			if (this.status.adrenaline < countAdrenaline(this.trueatk(0))) {
-				this.status.adrenaline++;
+		if (this.status.get('adrenaline')) {
+			if (this.status.get('adrenaline') < etg.countAdrenaline(this.trueatk(0))) {
+				this.incrStatus('adrenaline', 1);
 				this.attack(stasis, freedomChance);
 			} else {
-				this.status.adrenaline = 1;
+				this.setStatus('adrenaline', 1);
 			}
 		}
 	}
