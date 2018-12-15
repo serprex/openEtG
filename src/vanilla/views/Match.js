@@ -227,8 +227,6 @@ function ThingInst(props) {
 			if (obj.card.type === etg.Pillar) {
 				statText = `1:${obj.getStatus('pendstate') ? obj.owner.mark : obj.card.element} x${charges}`;
 				topText = '';
-			} else if (obj.active.get('ownattack') === Skills.locket) {
-				statText = `1:${obj.getStatus('mode') || obj.owner.mark}`;
 			} else {
 				statText = (charges || '').toString();
 			}
@@ -296,15 +294,6 @@ function ThingInst(props) {
 					right: '0',
 					paddingLeft: '2px',
 					backgroundColor: ui.maybeLightenStr(obj.card),
-				}}
-			/>
-		}
-		{obj.hasactive('prespell', 'protectonce') &&
-			<div className='ico protection'
-				style={{
-					position: 'absolute',
-					left: '0',
-					top: '0',
 				}}
 			/>
 		}
@@ -585,12 +574,12 @@ module.exports = connect()(class Match extends React.Component {
 			endText = 'Continue';
 			cancelText = '';
 		}
-		if (cloaked) {
-			children.push(cloaksvg);
-		} else {
+		children.push(cloaked && cloaksvg);
+		if (!cloaked) {
+			const foeplaydom = [];
 			for (let i = 0; i < this.state.foeplays.length; i++) {
 				let play = this.state.foeplays[i];
-				children.push(
+				foeplaydom.push(
 					<Components.CardImage
 						key={'foeplay' + i}
 						x={(i & 7) * 99}
@@ -605,6 +594,7 @@ module.exports = connect()(class Match extends React.Component {
 					/>,
 				);
 			}
+			children.push(foeplaydom);
 		}
 		let floodvisible = false;
 		for (let j = 0; j < 2; j++) {
@@ -638,18 +628,16 @@ module.exports = connect()(class Match extends React.Component {
 					{pl.markpower !== 1 && pl.markpower}
 				</span>
 			);
-			if (pl.sosa) {
-				children.push(
-					<div className={'ico sacrifice'}
-						style={{
-							position: 'absolute',
-							left: j ? '800px' : '0',
-							top: j ? '7px' : '502px',
-							pointerEvents: 'none',
-						}}
-					/>
-				);
-			}
+			children.push(pl.sosa &&
+				<div className={'ico sacrifice'}
+					style={{
+						position: 'absolute',
+						left: j ? '800px' : '0',
+						top: j ? '7px' : '502px',
+						pointerEvents: 'none',
+					}}
+				/>
+			);
 			const handOverlay = pl.usedactive
 				? 'ico silence'
 				: pl.sanctuary
@@ -657,19 +645,18 @@ module.exports = connect()(class Match extends React.Component {
 					: pl.nova >= 3 && pl.hand.some(c => c.card.isOf(Cards.Nova))
 						? 'ico singularity'
 						: '';
-			if (handOverlay) {
-				children.push(
-					<span className={handOverlay}
-						style={{
-							position: 'absolute',
-							left: j ? '3px' : '759px',
-							top: j ? '75px' : '305px',
-						}}
-					/>
-				);
-			}
+			children.push(handOverlay &&
+				<span className={handOverlay}
+					style={{
+						position: 'absolute',
+						left: j ? '3px' : '759px',
+						top: j ? '75px' : '305px',
+					}}
+				/>
+			);
+			const handdom = [];
 			for (let i = 0; i < pl.hand.length; i++) {
-				children.push(
+				handdom.push(
 					<ThingInst
 						obj={pl.hand[i]}
 						game={game}
@@ -680,6 +667,7 @@ module.exports = connect()(class Match extends React.Component {
 					/>
 				);
 			}
+			children.push(handdom);
 			const creatures = [], perms = [];
 			for (let i = 0; i < 23; i++) {
 				const cr = pl.creatures[i];
@@ -720,31 +708,27 @@ module.exports = connect()(class Match extends React.Component {
 			}
 			children.push(creatures, perms);
 			const wp = pl.weapon;
-			if (wp && !(j == 1 && cloaked)) {
-				children.push(
-					<ThingInst
-						obj={wp}
-						game={game}
-						setGame={() => this.forceUpdate()}
-						setInfo={(e, obj, x) => this.setInfo(e, obj, x)}
-						onMouseOut={() => this.clearCard()}
-						onClick={obj => this.thingClick(obj)}
-					/>
-				);
-			}
+			children.push(wp && !(j == 1 && cloaked) &&
+				<ThingInst
+					obj={wp}
+					game={game}
+					setGame={() => this.forceUpdate()}
+					setInfo={(e, obj, x) => this.setInfo(e, obj, x)}
+					onMouseOut={() => this.clearCard()}
+					onClick={obj => this.thingClick(obj)}
+				/>
+			);
 			const sh = pl.shield;
-			if (sh && !(j == 1 && cloaked)) {
-				children.push(
-					<ThingInst
-						obj={sh}
-						game={game}
-						setGame={() => this.forceUpdate()}
-						setInfo={(e, obj, x) => this.setInfo(e, obj, x)}
-						onMouseOut={() => this.clearCard()}
-						onClick={obj => this.thingClick(obj)}
-					/>
-				);
-			}
+			children.push(sh && !(j == 1 && cloaked) &&
+				<ThingInst
+					obj={sh}
+					game={game}
+					setGame={() => this.forceUpdate()}
+					setInfo={(e, obj, x) => this.setInfo(e, obj, x)}
+					onMouseOut={() => this.clearCard()}
+					onClick={obj => this.thingClick(obj)}
+				/>
+			);
 			const qx = j ? 792 : 0,
 				qy = j ? 106 : 308;
 			for (let k = 1; k < 13; k++) {
@@ -781,8 +765,9 @@ module.exports = connect()(class Match extends React.Component {
 					}}
 				/>
 			);
+			const hpdom = [];
 			if (pl.hp > 0) {
-				children.push(
+				hpdom.push(
 					<div
 						style={{
 							backgroundColor: ui.strcols[etg.Life],
@@ -799,7 +784,7 @@ module.exports = connect()(class Match extends React.Component {
 					const x1 = 80 * pl.hp / pl.maxhp;
 					const x2 =
 						x1 - 80 * Math.min(game.expectedDamage[j], pl.hp) / pl.maxhp;
-					children.push(
+					hpdom.push(
 						<div
 							style={{
 								backgroundColor:
@@ -819,6 +804,7 @@ module.exports = connect()(class Match extends React.Component {
 					);
 				}
 			}
+			children.push(hpdom);
 			const poison = pl.status.get('poison'),
 				poisoninfo =
 					(poison > 0 ? poison + ' 1:2' : poison < 0 ? -poison + ' 1:7' : '') +
@@ -850,9 +836,8 @@ module.exports = connect()(class Match extends React.Component {
 				/>,
 			);
 		}
-		if (floodvisible) children.push(floodsvg);
-
 		children.push(
+			floodvisible && floodsvg,
 			<div
 				style={{
 					whiteSpace: 'pre-wrap',
@@ -872,32 +857,28 @@ module.exports = connect()(class Match extends React.Component {
 					pointerEvents: 'none',
 				}}>
 				{turntell}
-			</span>
+			</span>,
+			this.state.effects,
 		);
-		children.push(this.state.effects);
-		if (this.state.hovercode) {
-			children.push(
-				<Components.Card
-					x={this.state.hoverx}
-					y={this.state.hovery}
-					code={this.state.hovercode}
-				/>
-			);
-		}
-		if (this.state.tooltip) {
-			children.push(
-				<Components.Text
-					className='infobox'
-					text={this.state.tooltip}
-					icoprefix='te'
-					style={{
-						position: 'absolute',
-						left: this.state.toolx + 'px',
-						top: this.state.tooly + 'px',
-					}}
-				/>
-			);
-		}
+		children.push(this.state.hovercode &&
+			<Components.Card
+				x={this.state.hoverx}
+				y={this.state.hovery}
+				code={this.state.hovercode}
+			/>
+		);
+		children.push(this.state.tooltip &&
+			<Components.Text
+				className='infobox'
+				text={this.state.tooltip}
+				icoprefix='te'
+				style={{
+					position: 'absolute',
+					left: this.state.toolx + 'px',
+					top: this.state.tooly + 'px',
+				}}
+			/>
+		);
 		children.push(
 			<input type='button'
 				value={this.state.resigning ? 'Confirm' : 'Resign'}
@@ -909,32 +890,28 @@ module.exports = connect()(class Match extends React.Component {
 				}}
 			/>
 		);
-		if (cancelText) {
-			children.push(
-				<input type='button'
-					value={cancelText}
-					onClick={() => this.cancelClick()}
-					style={{
-						position: 'absolute',
-						left: '800px',
-						top: '560px',
-					}}
-				/>
-			);
-		}
-		if (endText) {
-			children.push(
-				<input type='button'
-					value={endText}
-					onClick={() => this.endClick()}
-					style={{
-						position: 'absolute',
-						left: '800px',
-						top: '530px',
-					}}
-				/>
-			);
-		}
+		children.push(cancelText &&
+			<input type='button'
+				value={cancelText}
+				onClick={() => this.cancelClick()}
+				style={{
+					position: 'absolute',
+					left: '800px',
+					top: '560px',
+				}}
+			/>
+		);
+		children.push(endText &&
+			<input type='button'
+				value={endText}
+				onClick={() => this.endClick()}
+				style={{
+					position: 'absolute',
+					left: '800px',
+					top: '530px',
+				}}
+			/>
+		);
 
 		return children;
 	}

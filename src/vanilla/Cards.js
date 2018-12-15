@@ -101,7 +101,7 @@ const TargetFilters = {
 		return true;
 	},
 	pill: function(c, t) {
-		return t.isMaterial(etg.Pillar);
+		return t.isMaterial(etg.Permanent) && t.card.type === etg.Pillar;
 	},
 	weap: function(c, t) {
 		return (
@@ -148,7 +148,7 @@ const TargetFilters = {
 	},
 	wisdom: function(c, t) {
 		return (
-			(t instanceof smth.Creature || t instanceof smth.Weapon) &&
+			t instanceof smth.Creature &&
 			!t.status.get('burrowed')
 		);
 	},

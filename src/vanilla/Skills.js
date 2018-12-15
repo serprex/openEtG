@@ -79,7 +79,7 @@ var Actives = {
 			if (
 				c.owner.permanents[i] &&
 				c.card.element == c.owner.permanents[i].card.element &&
-				c.owner.permanents[i] instanceof smth.Pillar
+				c.owner.permanents[i].card.type === etg.Pillar
 			)
 				res += c.owner.permanents[i].status.get('charges');
 		}
@@ -368,7 +368,7 @@ var Actives = {
 		Actives.destroy.func(c, t, false, true);
 		var healsum = 0;
 		for (var i = 0; i < 16; i++) {
-			if (c.owner.permanents[i] && c.owner.permanents[i] instanceof smth.Pillar)
+			if (c.owner.permanents[i] && c.owner.permanents[i].card.type === etg.Pillar)
 				healsum += c.owner.permanents[i].status.get('charges');
 		}
 		Effect.mkText('+' + healsum, c);
@@ -378,7 +378,7 @@ var Actives = {
 		Actives.destroy.func(c, t, false, true);
 		var healsum = 0;
 		for (var i = 0; i < 16; i++) {
-			if (c.owner.permanents[i] && c.owner.permanents[i] instanceof smth.Pillar)
+			if (c.owner.permanents[i] && c.owner.permanents[i].card.type === etg.Pillar)
 				healsum += c.owner.permanents[i].status.get('charges');
 		}
 		healsum = healsum * 2;
@@ -1225,7 +1225,7 @@ var Actives = {
 			// Don't accept Marks/Nymphs
 			cards[i] = c.owner.randomcard(c.card.upped, function(x) {
 				return (
-					(x.type != etg.PillarEnum || !x.name.match(/^Mark/)) &&
+					(x.type != etg.Pillar || !x.name.match(/^Mark/)) &&
 					!x.isOf(Cards.Relic) &&
 					!x.isOf(Cards.Miracle) &&
 					!etg.ShardList.some(function(shard) {
@@ -1352,8 +1352,6 @@ var Actives = {
 					c.owner.weapon = new smth.Weapon(t.card, c.owner);
 					c.owner.shield.status = c.owner.shield.status.set('charges', 1);
 				}
-			} else if (t instanceof smth.Pillar) {
-				new smth.Pillar(t.card, c.owner).place();
 			} else {
 				new smth.Permanent(t.card, c.owner).place();
 			}
@@ -1521,27 +1519,27 @@ var Actives = {
 		}
 	},
 	pillar: function(c, t) {
+		console.log(c, t, c.status.get('charges'));
 		if (!t)
 			c.owner.spend(
 				c.card.element,
-				-c.status.get('charges') * (c.card.element > 0 ? 1 : 3),
+				c.status.get('charges') * (c.card.element > 0 ? -1 : -3),
 			);
 		else if (c == t)
-			c.owner.spend(c.card.element, -(c.card.element > 0 ? 1 : 3));
+			c.owner.spend(c.card.element, -(c.card.element > 0 ? -1 : -3));
 	},
 	pend: function(c, t) {
-		var ele = c.pendstate ? c.owner.mark : c.card.element;
+		var ele = c.getStatus('pendstate') ? c.owner.mark : c.card.element;
 		c.owner.spend(ele, -c.status.get('charges') * (ele > 0 ? 1 : 3));
-		c.pendstate ^= true;
+		c.setStatus('pendstate', +!c.getStatus('pendstate'));
 	},
 	pendvoid: function(c, t) {
-		if (c.pendstate) {
+		if (c.getStatus('pendstate')) {
 			c.owner.spend(c.owner.mark, -c.status.get('charges'));
 		} else {
 			c.owner.foe.spend(etg.Other, c.status.get('charges'));
 		}
-
-		c.pendstate ^= true;
+		c.setStatus('pendstate', +!c.getStatus('pendstate'));
 	},
 	pendvoiddestroy: function(c, t) {
 		if (!t) c.owner.foe.spend(etg.Other, c.status.get('charges'));
@@ -1555,7 +1553,7 @@ var Actives = {
 		for (var i = 0; i < 16; i++) {
 			if (
 				c.owner.permanents[i] &&
-				c.owner.permanents[i] instanceof smth.Pillar &&
+				c.owner.permanents[i].card.type === etg.Pillar &&
 				!c.owner.permanents[i].card.isOf(Cards.HarmonicPillar)
 			) {
 				c.owner.spend(c.owner.permanents[i].card.element, qty);

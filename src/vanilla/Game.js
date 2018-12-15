@@ -15,6 +15,7 @@ function Game(seed, flip) {
 	this.player1.foe = this.player2;
 	this.player2.foe = this.player1;
 	this.turn = (seed & 1) ^ !flip ? this.player1 : this.player2;
+	this.first = this.turn;
 	this.expectedDamage = [0, 0];
 	this.time = Date.now();
 }
@@ -31,7 +32,8 @@ Game.prototype.clone = function() {
 	obj.player2 = this.player2.clone(obj);
 	obj.player1.foe = obj.player2;
 	obj.player2.foe = obj.player1;
-	obj.turn = this.turn == this.player1 ? obj.player1 : obj.player2;
+	obj.turn = this.turn === this.player1 ? obj.player1 : obj.player2;
+	obj.first = this.first === this.player1 ? obj.player1 : obj.player2;
 	obj.targeting = this.targeting;
 	return obj;
 };
@@ -46,7 +48,7 @@ Game.prototype.setWinner = function(play) {
 	}
 };
 function removeSoPa(p) {
-	if (p) delete p.status.patience;
+	if (p) p.clearStatus('patience');
 }
 Game.prototype.updateExpectedDamage = function() {
 	if (this.expectedDamage) {
@@ -114,7 +116,7 @@ Game.prototype.getTarget = function(src, active, cb) {
 					(t.type == etg.Player ||
 						t instanceof smth.CardInstance ||
 						t.owner == game.turn ||
-						t.status.cloak ||
+						t.status.get('cloak') ||
 						!t.owner.isCloaked()) &&
 					targetingFilter(src, t)
 				);

@@ -43,11 +43,6 @@ function Shield(card, owner) {
 	this.dr = card.health;
 	Permanent.apply(this, arguments);
 }
-function Pillar(card, owner) {
-	this.status = new imm.Map().set('charges', 1);
-	this.pendstate = false;
-	Thing.apply(this, arguments);
-}
 function CardInstance(card, owner) {
 	this.owner = owner;
 	this.type = etg.Spell;
@@ -105,7 +100,6 @@ Creature.prototype = Object.create(Thing.prototype);
 Permanent.prototype = Object.create(Thing.prototype);
 Weapon.prototype = Object.create(Permanent.prototype);
 Shield.prototype = Object.create(Permanent.prototype);
-Pillar.prototype = Object.create(Permanent.prototype);
 CardInstance.prototype = Object.create(Thing.prototype);
 
 CardInstance.prototype.clone = function(owner) {
@@ -128,7 +122,7 @@ function combineactive(a1, a2) {
 	};
 }
 
-var thingtypes = [Creature, Permanent, Weapon, Shield, Pillar];
+var thingtypes = [Creature, Permanent, Weapon, Shield];
 thingtypes.forEach(function(type) {
 	var proto = type.prototype;
 	proto.clone = function(owner) {
@@ -214,14 +208,6 @@ Weapon.prototype.info = function() {
 Shield.prototype.info = function() {
 	return infocore(this, this.dr + 'DR');
 };
-Pillar.prototype.info = function() {
-	return infocore(
-		this,
-		this.status.charges +
-			' 1:' +
-			(this.pendstate ? this.owner.mark : this.card.element),
-	);
-};
 Thing.prototype.info = function() {
 	return skillText(this);
 };
@@ -275,17 +261,6 @@ Permanent.prototype.place = function(fromhand) {
 	}
 	util.place(this.owner.permanents, this);
 	Thing.prototype.place.call(this, fromhand);
-};
-Pillar.prototype.place = function(fromhand) {
-	if (
-		this.card.name.match(/^Mark/) &&
-		this.card.element == this.owner.mark &&
-		!this.card.upped
-	) {
-		this.owner.markpower++;
-		return;
-	}
-	Permanent.prototype.place.call(this, fromhand);
 };
 Weapon.prototype.place = function(fromhand) {
 	if (
@@ -564,12 +539,12 @@ Permanent.prototype.die = function() {
 };
 Weapon.prototype.remove = function() {
 	if (this.owner.weapon != this) return -1;
-	delete this.owner.weapon;
+	this.owner.owner = null;
 	return 0;
 };
 Shield.prototype.remove = function() {
 	if (this.owner.shield != this) return -1;
-	delete this.owner.shield;
+	this.owner.shield = null;
 	return 0;
 };
 Thing.prototype.isMaterial = function(type) {
@@ -752,7 +727,7 @@ CardInstance.prototype.useactive = function(target) {
 		owner.addpoison(1);
 	}
 	if (card.type <= etg.PermanentEnum) {
-		var cons = [Pillar, Weapon, Shield, Permanent][card.type];
+		var cons = [Weapon, Shield, Permanent][card.type ? card.type-1 : 2];
 		new cons(card, owner).place(true);
 	} else if (card.type == etg.SpellEnum) {
 		if (!target || !target.evade(owner)) {
@@ -764,13 +739,12 @@ CardInstance.prototype.useactive = function(target) {
 	owner.spend(card.costele, card.cost, this);
 	owner.game.updateExpectedDamage();
 };
-CardInstance.prototype.isMaterial = function() {
-	return true;
+CardInstance.prototype.isMaterial = function(type) {
+	return type === undefined || type == etg.Spell;
 };
 
 exports.Thing = Thing;
 exports.CardInstance = CardInstance;
-exports.Pillar = Pillar;
 exports.Weapon = Weapon;
 exports.Shield = Shield;
 exports.Permanent = Permanent;

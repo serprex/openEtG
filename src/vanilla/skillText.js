@@ -11,11 +11,8 @@ var data = {
 		"Destroy target permanent & gain 0|15. Return to owner's hand as a Blackhole if health exceeds 45",
 	adrenaline:
 		'Target creature attacks multiple times per turn. Weaker creatures gain more attacks',
-	affinity: function(c) {
-		return (
-			'Cost is lowered by 1 for each 1:' + c.element + ' pillar you control'
-		);
-	},
+	affinity: c =>
+		'Cost is lowered by 1 for each 1:' + c.element + ' pillar you control',
 	aflatoxin:
 		'Apply 2 poison to target. When target dies, it turns into a malignant cell',
 	air: 'Produce 1:9',
