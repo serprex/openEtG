@@ -575,8 +575,8 @@ module.exports = connect()(class Match extends React.Component {
 			cancelText = '';
 		}
 		children.push(cloaked && cloaksvg);
+		const foeplaydom = [];
 		if (!cloaked) {
-			const foeplaydom = [];
 			for (let i = 0; i < this.state.foeplays.length; i++) {
 				let play = this.state.foeplays[i];
 				foeplaydom.push(
@@ -594,8 +594,8 @@ module.exports = connect()(class Match extends React.Component {
 					/>,
 				);
 			}
-			children.push(foeplaydom);
 		}
+		children.push(foeplaydom);
 		let floodvisible = false;
 		for (let j = 0; j < 2; j++) {
 			const pl = game.players(j);
@@ -628,7 +628,7 @@ module.exports = connect()(class Match extends React.Component {
 					{pl.markpower !== 1 && pl.markpower}
 				</span>
 			);
-			children.push(pl.sosa &&
+			children.push(!!pl.sosa &&
 				<div className={'ico sacrifice'}
 					style={{
 						position: 'absolute',
@@ -860,7 +860,7 @@ module.exports = connect()(class Match extends React.Component {
 			</span>,
 			this.state.effects,
 		);
-		children.push(this.state.hovercode &&
+		children.push(!!this.state.hovercode &&
 			<Components.Card
 				x={this.state.hoverx}
 				y={this.state.hovery}
