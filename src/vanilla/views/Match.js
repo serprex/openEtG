@@ -233,7 +233,7 @@ function ThingInst(props) {
 		} else if (obj.type === etg.Weapon) {
 			statText = `${obj.trueatk()}${charges ? ' x' + charges : ''}`;
 		} else if (obj.type === etg.Shield) {
-			statText = charges ? 'x' + charges : obj.truedr().toString();
+			statText = charges ? 'x' + charges : obj.dr.toString();
 		}
 	} else {
 		statText = `${obj.card.cost}:${obj.card.costele}`;

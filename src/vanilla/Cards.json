@@ -35,7 +35,7 @@
 	[["Thorn Carapace",5507,7,"shield=thorn",0,"",3],["Spine Carapace",7507,7,"shield=thorn",1,"",17],["Emerald Shield",5508,5,"",1,"immaterial+reflect",4],["Jade Shield",7508,7,"",2,"immaterial+reflect",17]],
 	[["Fire Shield",5605,6,"shield=firewall",0,"",3],["Fire Buckler",7605,4,"shield=firewall",0,"",17]],
 	[["Ice Shield",5705,6,"shield=cold",1,"",3],["Permafrost Shield",7705,7,"shield=cold",2,"",17]],
-	[["Solar Shield",5805,3,"shield=solar",1,"",3],["Solar Buckler",7805,2,"shield=solar",1,"",17],["Reflective Shield",5808,1,"",0,"immaterial+reflect",4],["Mirror Shield",7808,2,"",1,"immaterial+reflect",17],["Hope",5812,7,"auto=hope",0,"immaterial",3],["Hope",7812,8,"auto=hope",1,"immaterial",17]],
+	[["Solar Shield",5805,3,"shield=solar",1,"",3],["Solar Buckler",7805,2,"shield=solar",1,"",17],["Reflective Shield",5808,1,"",0,"immaterial+reflect",4],["Mirror Shield",7808,2,"",1,"immaterial+reflect",17],["Hope",5812,7,"hope",0,"immaterial",3],["Hope",7812,8,"hope",1,"immaterial",17]],
 	[["Fog Shield",5904,2,"shield=evade40",0,"",3],["Improved Fog",7904,1,"shield=evade40",0,"",17],["Wings",5912,4,"shield=wings+losecharge",0,"charges=5",3],["Wings",7912,3,"shield=wings+losecharge",0,"charges=5",17]],
 	[["Procrastination",6003,6,"shield=slow",0,"",3],["Turtle Shield",8003,4,"shield=slow",0,"",17]],
 	[["Dusk Mantle",6104,6,"shield=evade50",0,"",3],["Improved Dusk",8104,4,"shield=evade50",0,"",17]],

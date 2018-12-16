@@ -1,4 +1,4 @@
-require("./Effect").disable = true;
+var Effect = require('./Effect');
 var Cards = require("./Cards");
 var Game = require("./Game");
 var etg = require("./etg");
@@ -23,7 +23,7 @@ function mkGame(seed, decks){
 			} else if (~(idx = etgutil.fromTrueMark(code))) {
 				pl.mark = idx;
 			} else {
-				result.textContet = "Unknown card code: " + code.toString(32);
+				result.textContent = "Unknown card code: " + code.toString(32);
 				return;
 			}
 		}
@@ -50,6 +50,7 @@ function fightItOut(){
 	});
 	var seed = parseInt(seedput.value) || util.randint();
 	var game = mkGame(seed, decks);
+	if (!game) return;
 	result.textContent = "";
 	var aiState = undefined;
 	var realp1 = game.player1;
@@ -75,6 +76,7 @@ function fightItOut(){
 			game.player2 = p1;
 		}
 		if (game.phase == etg.PlayPhase) {
+			Effect.disable = true;
 			if (aiState) {
 				aiState.step(game);
 			} else {
@@ -94,6 +96,7 @@ function fightItOut(){
 				fc[(game.winner != realp1)|0]++;
 				result.textContent = fc[0] + " : " + fc[1] + "(" + (fc[0]/(fc[0]+fc[1])*100).toFixed(2) + "%)";
 				game = mkGame(util.randint(), decks);
+				if (!game) return;
 				realp1 = game.player1;
 				if (!stopFight) setTimeout(gameStep, 0);
 				else {

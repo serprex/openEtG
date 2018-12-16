@@ -89,7 +89,7 @@ Player.prototype.choose = function(x) {
 };
 Player.prototype.isCloaked = function() {
 	for (var i = 0; i < 16; i++) {
-		if (this.permanents[i] && this.permanents[i].status.cloak) {
+		if (this.permanents[i] && this.permanents[i].status.get('cloak')) {
 			return true;
 		}
 	}
@@ -181,12 +181,12 @@ Player.prototype.endturn = function(discard) {
 		var card = cardinst.card;
 		this.hand.splice(discard, 1);
 		if (card.active.has('discard')) {
-			card.active.discard.func(cardinst, this);
+			card.active.get('discard').func(cardinst, this);
 		}
 	}
 	this.spend(this.mark, this.markpower * (this.mark > 0 ? -1 : -3));
-	if (this.foe.status.poison) {
-		this.foe.dmg(this.foe.status.poison);
+	if (this.foe.status.get('poison') > 0) {
+		this.foe.dmg(this.foe.status.get('poison'));
 	}
 	var patienceFlag = false,
 		floodingFlag = false,
@@ -197,21 +197,21 @@ Player.prototype.endturn = function(discard) {
 		if ((p = this.permanents[i])) {
 			if (~p.getIndex()) {
 				p.usedactive = false;
-				if (p.status.stasis) {
+				if (p.status.get('stasis')) {
 					stasisFlag = true;
-				} else if (p.status.flooding) {
+				} else if (p.status.get('flooding')) {
 					floodingFlag = true;
-				} else if (p.status.patience) {
+				} else if (p.status.get('patience')) {
 					patienceFlag = true;
-				} else if (p.status.freedom) {
-					freedomChance += p.status.charges * 0.25;
+				} else if (p.status.get('freedom')) {
+					freedomChance += p.status.get('charges') * 0.25;
 				}
 			}
 		}
 		if ((p = this.foe.permanents[i])) {
-			if (p.status.stasis) {
+			if (p.status.get('stasis')) {
 				stasisFlag = true;
-			} else if (p.status.flooding) {
+			} else if (p.status.get('flooding')) {
 				floodingFlag = true;
 			}
 		}
@@ -225,7 +225,7 @@ Player.prototype.endturn = function(discard) {
 					floodingFlag && i > 4 && cr.card.element == etg.Water ? 5 : 2;
 				cr.atk += floodbuff;
 				cr.buffhp(floodbuff);
-				if (!cr.status.delayed) cr.delay(1);
+				if (!cr.status.get('delayed')) cr.delay(1);
 			}
 			cr.attack(stasisFlag, Math.min(freedomChance, 1));
 			if (
@@ -233,20 +233,20 @@ Player.prototype.endturn = function(discard) {
 				floodingFlag &&
 				cr.card.element != etg.Water &&
 				cr.card.element &&
-				!cr.status.immaterial &&
-				!cr.status.burrowed &&
+				!cr.status.get('immaterial') &&
+				!cr.status.get('burrowed') &&
 				~cr.getIndex()
 			) {
 				cr.die();
 			}
 		}
 		if ((cr = this.foe.creatures[i])) {
-			if (cr.status.salvaged) {
-				delete cr.status.salvaged;
+			if (cr.status.has('salvaged')) {
+				cr.clearStatus('salvaged');
 			}
 			if (cr.active.get('cast') == Actives.dshield) {
-				delete cr.status.immaterial;
-				delete cr.status.psion;
+				cr.clearStatus('immaterial');
+				cr.clearStatus('psion');
 			}
 		}
 	}
@@ -282,7 +282,7 @@ Player.prototype.drawcard = function() {
 			this.hand[this.hand.length] = new CardInstance(this.deck.pop(), this);
 			this.proc('draw');
 			if (this.deck.length == 0 && this.game.player1 == this)
-				Effect.mkSpriteFadeText(['Last card!', 32, '#fff', '#000']);
+				Effect.mkSpriteFadeText('Last card!', { x: 450, y: 300 });
 		} else this.game.setWinner(this.foe);
 	}
 };
@@ -304,12 +304,12 @@ Player.prototype.drawhand = function() {
 Player.prototype.masscc = function(caster, func, massmass, saveowncloak) {
 	for (var i = 0; i < 16; i++) {
 		var pr = this.permanents[i];
-		if (pr && pr.status.cloak) {
+		if (pr && pr.status.get('cloak')) {
 			Actives.destroy(this, pr);
 		}
 		if (massmass) {
 			pr = this.foe.permanents[i];
-			if (pr && pr.status.cloak && !saveowncloak) {
+			if (pr && pr.status.get('cloak') && !saveowncloak) {
 				Actives.destroy(this, pr);
 			}
 		}
@@ -322,16 +322,16 @@ Player.prototype.masscc = function(caster, func, massmass, saveowncloak) {
 	for (var i = 0; i < 23; i++) {
 		if (
 			crs[i] &&
-			!crs[i].status.immaterial &&
-			(!crs[i].status.burrowed || func.affectBurrowed)
+			!crs[i].status.get('immaterial') &&
+			(!crs[i].status.get('burrowed') || func.affectBurrowed)
 		) {
 			func(caster, crs[i]);
 		}
 		if (
 			crsfoe &&
 			crsfoe[i] &&
-			!crsfoe[i].status.immaterial &&
-			(!crsfoe[i].status.burrowed || func.affectBurrowed)
+			!crsfoe[i].status.get('immaterial') &&
+			(!crsfoe[i].status.get('burrowed') || func.affectBurrowed)
 		) {
 			func(caster, crsfoe[i]);
 		}
@@ -356,7 +356,7 @@ Player.prototype.dmg = function(x, ignoresosa) {
 	}
 };
 Player.prototype.spelldmg = function(x) {
-	return (!this.shield || !this.shield.status.reflect ? this : this.foe).dmg(x);
+	return (!this.shield || !this.shield.status.get('reflect') ? this : this.foe).dmg(x);
 };
 Player.prototype.delay = function(x) {
 	if (this.weapon) this.weapon.delay(x);
@@ -365,7 +365,7 @@ Player.prototype.freeze = function(x) {
 	if (this.weapon) this.weapon.freeze(x);
 };
 Player.prototype.addpoison = function(x) {
-	this.status.poison += x;
+	this.incrStatus('poison', x);
 };
 Player.prototype.truehp = function() {
 	return this.hp;

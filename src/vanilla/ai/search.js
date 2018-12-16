@@ -1,7 +1,7 @@
 "use strict";
 var etg = require("../etg");
-var smth = require("../Thing");
 var Cards = require("../Cards");
+var Skills = require('../Skills');
 var evalGame = require("./eval");
 var lethal = require("./lethal");
 function getWorstCard(game){
@@ -16,8 +16,8 @@ function getWorstCard(game){
 		var cardinst = gclone.player2.hand[i];
 		var card = cardinst.card;
 		gclone.player2.hand.splice(i, 1);
-		if (card.active.get('discard')) {
-			card.active.get('discard')(cardinst, gclone.player2);
+		if (card.active.has('discard')) {
+			card.active.get('discard').func(cardinst, gclone.player2);
 		}
 		var discvalue = evalGame(gclone);
 		if (discvalue < curEval){
@@ -94,7 +94,7 @@ AiSearch.prototype.step = function(game) {
 			var ch = c.hash();
 			if (casthash.has(ch)) return;
 			casthash.add(ch);
-			var active = c instanceof smth.CardInstance ? c.card.type == etg.SpellEnum && c.card.active.get('cast') : c.active.get('cast');
+			var active = c.type === etg.Spell ? c.card.type == etg.SpellEnum && c.card.active.get('cast') : c.active.get('cast');
 			var cbits = game.tgtToBits(c) ^ 8, tgthash = new Set();
 			function evalIter(t) {
 				if (t && t.hash){

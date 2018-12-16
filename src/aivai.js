@@ -1,4 +1,4 @@
-require("./Effect").disable = true;
+var Effect = require("./Effect");
 var Cards = require("./Cards");
 var Game = require("./Game");
 var Thing = require("./Thing");
@@ -24,7 +24,7 @@ function mkGame(seed, decks){
 			} else if (~(idx = etgutil.fromTrueMark(code))) {
 				pl.mark = idx;
 			} else {
-				result.textContet = "Unknown card code: " + code.toString(32);
+				result.textContent = "Unknown card code: " + code.toString(32);
 				return;
 			}
 		}
@@ -77,6 +77,7 @@ function fightItOut(){
 			game.player2 = p1;
 		}
 		if (game.phase == etg.PlayPhase) {
+			Effect.disable = true;
 			if (aiState) {
 				aiState.step(game);
 			} else {

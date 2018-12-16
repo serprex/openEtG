@@ -188,7 +188,7 @@ M.test('Earthquake', function() {
 	}
 	assert.equal(this.player1.hand.length, 3, 'handlength');
 	const pillars = this.player1.permanents[0];
-	assert.ok(pillars instanceof etg.Pillar, 'ispillar');
+	assert.ok(pillars && pillars.card.type === etg.Pillar, 'ispillar');
 	assert.equal(pillars.status.get('charges'), 5, '5 charges');
 	Actives.earthquake.func(this.player2, pillars);
 	assert.equal(pillars.status.get('charges'), 2, '2 charges');
@@ -241,10 +241,10 @@ M.test('Hope', function() {
 M.test('Lobotomize', function() {
 	const dev = new smth.Creature(Cards.Devourer, this.player1);
 	assert.ok(dev.active.get('auto'), 'Siphon');
-	assert.ok(dev.active.cast, 'Burrow');
+	assert.ok(dev.active.get('cast'), 'Burrow');
 	Actives.lobotomize.func(this.player1, dev);
 	assert.ok(dev.active.get('auto'), 'Siphon');
-	assert.ok(!dev.active.cast, 'No Burrow');
+	assert.ok(!dev.active.get('cast'), 'No Burrow');
 });
 M.test('Obsession', function() {
 	initHand(

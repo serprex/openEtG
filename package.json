@@ -35,7 +35,7 @@
   },
   "scripts": {
     "start": "./server.js",
-    "test": "./scripts/tests.js && ./vanilla/_tests.js",
+    "test": "./scripts/tests.js && ./src/vanilla/_tests.js",
     "dev": "webpack --mode=development --watch",
     "build": "webpack -p",
     "build-atlas-png": "optipng -o2 -strip all assets/atlas.png",

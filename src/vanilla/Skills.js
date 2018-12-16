@@ -1096,7 +1096,7 @@ var Actives = {
 		c.owner.drawcard();
 	},
 	purify: function(c, t) {
-		t.status = t.status.poison.set('poison', t.status.get('poison') ?
+		t.status = t.status.set('poison', t.status.get('poison') ?
 			Math.min(t.status.get('poison') - 2, -2) : -2);
 		if (t.type == etg.Player) {
 			t.setStatus('neuro', 0);

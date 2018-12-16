@@ -319,7 +319,7 @@ Creature.prototype.getIndex = function() {
 };
 Creature.prototype.addpoison = function(x) {
 	this.defstatus('poison', 0);
-	this.status.set('poison', this.status.get('poison') + x);
+	this.incrStatus('poison', x);
 	if (this.status.get('voodoo')) {
 		this.owner.foe.addpoison(x);
 	}
@@ -384,7 +384,7 @@ Creature.prototype.deatheffect = Weapon.prototype.deatheffect = function(
 Creature.prototype.die = function() {
 	var index = this.remove();
 	if (~index) {
-		if (this.status.aflatoxin && !this.card.isOf(Cards.MalignantCell)) {
+		if (this.status.get('aflatoxin') && !this.card.isOf(Cards.MalignantCell)) {
 			this.owner.creatures[index] = new Creature(
 				Cards.MalignantCell,
 				this.owner,
@@ -407,7 +407,7 @@ Creature.prototype.transform = Weapon.prototype.transform = function(
 	this.cast = card.cast;
 	this.castele = card.castele;
 	Thing.call(this, card, owner || this.owner);
-	if (this.status.mutant) {
+	if (this.status.get('mutant')) {
 		var buff = this.owner.upto(25);
 		this.buffhp(Math.floor(buff / 5));
 		this.atk += buff % 5;
@@ -416,13 +416,13 @@ Creature.prototype.transform = Weapon.prototype.transform = function(
 };
 Shield.prototype.transform = function(card, owner) {
 	Shield.call(this, card, owner || this.owner);
-	if (this.status.mutant) {
+	if (this.status.get('mutant')) {
 		this.mutantactive();
 	}
 };
 Permanent.prototype.transform = function(card, owner) {
 	Permanent.call(this, card, owner || this.owner);
-	if (this.status.mutant) {
+	if (this.status.get('mutant')) {
 		this.mutantactive();
 	}
 };
@@ -580,7 +580,7 @@ Thing.prototype.defstatus = function(key, def) {
 	return this.status.get(key);
 };
 Thing.prototype.hasactive = function(type, name) {
-	return this.active.has(type) && this.active.get(type).name.indexOf(name);
+	return this.active.has(type) && ~this.active.get(type).name.indexOf(name);
 };
 Thing.prototype.canactive = function() {
 	return (
