@@ -292,7 +292,7 @@ var Actives = {
 		}
 	},
 	deja: function(c, t) {
-		delete c.active.cast;
+		c.active = c.active.delete('cast');
 		Actives.parallel.func(c, c);
 	},
 	dessication: function(c, t) {
@@ -507,9 +507,7 @@ var Actives = {
 		c.owner.gpull = c;
 	},
 	gpullspell: function(c, t) {
-		if (t.type == etg.Player) {
-			delete t.gpull;
-		} else Actives.gpull.func(t);
+		Actives.gpull.func(t);
 	},
 	gratitude: function(c, t) {
 		var b = (c.owner.mark == etg.Life ? -5 : -3) * c.status.get('charges');
@@ -906,7 +904,7 @@ var Actives = {
 		Effect.mkText('5|5', c);
 		c.buffhp(5);
 		c.atk += 5;
-		delete c.active.cast;
+		c.rmactive('cast', 'lycanthropy');
 	},
 	mend: function(c, t) {
 		var target = t || c;
@@ -964,7 +962,6 @@ var Actives = {
 			var rnd = c.owner.randomcard(false, function(x) {
 				return x.type == etg.CreatureEnum && !~bans.indexOf(x);
 			});
-			console.log(rnd);
 			while (!rnd.active.cast) {
 				rnd = c.owner.randomcard(false, function(x) {
 					return x.type == etg.CreatureEnum && !~bans.indexOf(x);
@@ -1373,7 +1370,7 @@ var Actives = {
 	stoneform: function(c, t) {
 		Effect.mkText('0|20', c);
 		c.buffhp(20);
-		delete c.active.cast;
+		c.active = c.active.delete('cast');
 	},
 	storm2: function(c, t) {
 		c.owner.foe.masscc(c, function(c, x) {
@@ -1519,7 +1516,6 @@ var Actives = {
 		}
 	},
 	pillar: function(c, t) {
-		console.log(c, t, c.status.get('charges'));
 		if (!t)
 			c.owner.spend(
 				c.card.element,
@@ -1564,11 +1560,11 @@ var Actives = {
 		}
 	},
 	blockwithcharge: function(c, t) {
-		const charges = c.status.charges.get('charges');
-		if (c.status.get('charges') <= 1) {
+		const charges = c.getStatus('charges');
+		if (charges <= 1) {
 			c.owner.shield = undefined;
 		} else {
-			c.status = c.status.charges.set('charges', charges - 1);
+			c.status = c.status.set('charges', charges - 1);
 		}
 		return true;
 	},

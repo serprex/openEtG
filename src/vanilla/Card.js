@@ -19,7 +19,7 @@ function Card(type, info) {
 		this.costele = 0;
 	}
 	if (info.Active) {
-		if (this.type == etg.SpellEnum) {
+		if (this.type === etg.SpellEnum) {
 			this.active = new imm.Map({ cast: Actives[info.Active] });
 			this.cast = this.cost;
 			this.castele = this.costele;
@@ -38,13 +38,14 @@ function Card(type, info) {
 				Thing.prototype.addactive.call(
 					this,
 					cast ? 'cast' : a0,
-					Actives[a0],
+					Actives[active.substr(eqidx + 1)],
 				);
 				if (cast) {
 					[this.cast, this.castele] = cast;
 					activecastcache[info.Skill] = cast;
 				}
-			}	activecache[info.Active] = this.active;
+			}
+			activecache[info.Active] = this.active;
 		}
 	} else this.active = new imm.Map();
 	if (info.Status) {

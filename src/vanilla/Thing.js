@@ -112,7 +112,7 @@ function combineactive(a1, a2) {
 	}
 	return {
 		func: function(c, t, data) {
-			var v1 = a1.func(c, t, data),
+			const v1 = a1.func(c, t, data),
 				v2 = a2.func(c, t, data);
 			return v1 === undefined
 				? v2
@@ -553,7 +553,7 @@ Thing.prototype.isMaterial = function(type) {
 	);
 };
 Thing.prototype.addactive = function(type, active) {
-	this.active[type] = combineactive(this.active[type], active);
+	this.active = this.active.update(type, v => combineactive(v, active));
 };
 Thing.prototype.rmactive = function(type, name) {
 	if (!this.active.has(type)) return;

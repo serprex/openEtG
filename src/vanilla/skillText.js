@@ -169,7 +169,7 @@ var data = {
 	locket: 'Produce quanta of mark',
 	locketshift: "Now produces quanta of target's element",
 	losecharge: function(c, inst) {
-		var charges = c.status.charges;
+		var charges = c.getStatus('charges');
 		return 'Lasts ' + charges + ' turn' + (charges == 1 ? '' : 's');
 	},
 	luciferin: 'All your creatures without skills produce 1:8. Heal owner 10',
@@ -378,11 +378,11 @@ var statusData = {
 	cloak: 'Cloaks own field',
 	charges: function(c) {
 		return Thing.prototype.hasactive.call(c, 'auto', 'losecharge') ||
-			c.status.charges == 1
+			c.getStatus('charges') === 1
 			? ''
 			: 'Enter with ' +
-					c.status.charges +
-					(c.status.stackable ? ' stacks' : ' charges');
+					c.getStatus('charges') +
+					(c.status.get('stackable') ? ' stacks' : ' charges');
 	},
 	flooding:
 		'Non aquatic creatures past first five creature slots die on turn end. Consumes 1:7. Unique',
