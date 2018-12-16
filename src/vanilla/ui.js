@@ -65,14 +65,11 @@ exports.maybeLighten = function(card) {
 exports.maybeLightenStr = function(card) {
 	return exports.strcols[card.element + card.upped * 13];
 };
-var Point;
-if (typeof PIXI === 'undefined') {
-	Point = function(x, y) {
-		this.x = x;
-		this.y = y;
-	};
-	Point.prototype.set = Point;
-} else Point = PIXI.math.Point;
+function Point(x, y) {
+	this.x = x;
+	this.y = y;
+};
+Point.prototype.set = Point;
 function reflectPos(obj) {
 	var pos = obj instanceof Point ? obj : obj.position;
 	pos.set(900 - pos.x, 600 - pos.y);
@@ -147,25 +144,25 @@ function cardPos(j, i) {
 	};
 }
 function tgtToPos(t) {
-	if (t instanceof smth.Creature) {
+	if (t.type === etg.Creature) {
 		return creaturePos(t.owner == t.owner.game.player2, t.getIndex());
-	} else if (t instanceof smth.Weapon) {
+	} else if (t.type === etg.Weapon) {
 		var p = new Point(666, 512);
 		if (t.owner == t.owner.game.player2) reflectPos(p);
 		return p;
-	} else if (t instanceof smth.Shield) {
+	} else if (t.type === etg.Shield) {
 		var p = new Point(710, 532);
 		if (t.owner == t.owner.game.player2) reflectPos(p);
 		return p;
-	} else if (t instanceof smth.Permanent) {
+	} else if (t.type === etg.Permanent) {
 		return permanentPos(t.owner == t.owner.game.player2, t.getIndex());
 	} else if (t.type == etg.Player) {
 		var p = new Point(50, 560);
 		if (t == t.owner.game.player2) reflectPos(p);
 		return p;
-	} else if (t instanceof smth.CardInstance) {
+	} else if (t.type === etg.Spell) {
 		return cardPos(t.owner == t.owner.game.player2, t.getIndex());
-	} else console.log('Unknown target');
+	} else console.log('Unknown target', t);
 }
 var sounds = {},
 	musics = {},

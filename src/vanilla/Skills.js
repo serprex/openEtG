@@ -486,7 +486,7 @@ var Actives = {
 		t.freeze(c.card.upped && c.card != Cards.PandemoniumUp ? 4 : 3);
 	},
 	frightened: function(c, t) {
-		if (t instanceof smth.Creature) {
+		if (t.type === etg.Creature) {
 			c.status = c.status.set('frightened', true);
 		}
 	},
@@ -1335,14 +1335,14 @@ var Actives = {
 	steal: function(c, t) {
 		if (t.status.get('stackable')) {
 			Actives.destroy.func(c, t, true);
-			if (t instanceof smth.Shield) {
+			if (t.type === etg.Shield) {
 				if (c.owner.shield && c.owner.shield.card == t.card) {
 					c.owner.shield.status = c.owner.shield.status.set('charges', c.owner.shield.status.get('charges') + 1);
 				} else {
 					c.owner.shield = new smth.Shield(t.card, c.owner);
 					c.owner.shield.status = c.owner.shield.status.set('charges', 1);
 				}
-			} else if (t instanceof smth.Weapon) {
+			} else if (t.type === etg.Weapon) {
 				if (c.owner.weapon && c.owner.weapon.card == t.card) {
 					c.owner.shield.status = c.owner.shield.status.set('charges', c.owner.shield.status.get('charges') + 1);
 				} else {
@@ -1522,7 +1522,7 @@ var Actives = {
 				c.status.get('charges') * (c.card.element > 0 ? -1 : -3),
 			);
 		else if (c == t)
-			c.owner.spend(c.card.element, -(c.card.element > 0 ? -1 : -3));
+			c.owner.spend(c.card.element, (c.card.element > 0 ? -1 : -3));
 	},
 	pend: function(c, t) {
 		var ele = c.getStatus('pendstate') ? c.owner.mark : c.card.element;
@@ -1569,7 +1569,7 @@ var Actives = {
 		return true;
 	},
 	cold: function(c, t) {
-		if (t instanceof smth.Creature && c.owner.rng() < 0.3) {
+		if (t.type === etg.Creature && c.owner.rng() < 0.3) {
 			t.freeze(3);
 		}
 	},
@@ -1583,12 +1583,12 @@ var Actives = {
 		return c.owner.rng() < 0.5;
 	},
 	firewall: function(c, t) {
-		if (t instanceof smth.Creature) {
+		if (t.type === etg.Creature) {
 			t.dmg(1);
 		}
 	},
 	skull: function(c, t) {
-		if (t instanceof smth.Creature && !t.card.isOf(Cards.Skeleton)) {
+		if (t.type === etg.Creature && !t.card.isOf(Cards.Skeleton)) {
 			var thp = t.truehp();
 			if (thp == 0 || (thp > 0 && c.owner.rng() < 0.5 / thp)) {
 				var index = t.getIndex();
@@ -1606,7 +1606,7 @@ var Actives = {
 		}
 	},
 	slow: function(c, t) {
-		if (t instanceof smth.Creature) {
+		if (t.type === etg.Creature) {
 			t.delay(2);
 		}
 	},
@@ -1614,12 +1614,12 @@ var Actives = {
 		if (!c.owner.sanctuary) c.owner.spend(etg.Light, -1);
 	},
 	thorn: function(c, t) {
-		if (t instanceof smth.Creature && c.owner.rng() < 0.75) {
+		if (t.type === etg.Creature && c.owner.rng() < 0.75) {
 			t.addpoison(1);
 		}
 	},
 	weight: function(c, t) {
-		return t instanceof smth.Creature && t.truehp() > 5;
+		return t.type === etg.Creature && t.truehp() > 5;
 	},
 	wings: function(c, t) {
 		return !t.status.get('airborne') && !t.status.get('ranged');

@@ -8,8 +8,8 @@ module.exports = function(game) {
 		function iterCore(c) {
 			if (!c || !c.canactive()) return;
 			const ch = c.hash();
-			if (ch in casthash) return;
-			else casthash[ch] = true;
+			if (casthash.has(ch)) return;
+			casthash.add(ch);
 			const active = c.active.get('cast');
 			const cbits = game.tgtToBits(c) ^ 8;
 			function evalIter(t) {
@@ -49,7 +49,7 @@ module.exports = function(game) {
 			}
 		}
 		const p2 = game.player2,
-			casthash = [];
+			casthash = new Set();
 		p2.hand.forEach(iterCore);
 		p2.permanents.forEach(iterCore);
 		p2.creatures.forEach(iterCore);

@@ -99,8 +99,8 @@ AiSearch.prototype.step = function(game) {
 			function evalIter(t) {
 				if (t && t.hash){
 					var th = t.hash();
-					if (th in tgthash) return;
-					else tgthash[th] = true;
+					if (tgthash.has(th)) return;
+					tgthash.add(th)
 				}
 				if ((!game.targeting || (t && game.targeting.filter(t) && searchActive(active, c, t))) && (n || --self.limit > 0)) {
 					var tbits = game.tgtToBits(t) ^ 8;
@@ -145,11 +145,11 @@ AiSearch.prototype.step = function(game) {
 				for (var j = 0;j < 2;j++) {
 					var pl = j == 0 ? c.owner : c.owner.foe;
 					evalIter(pl);
-					evalIter(pl.weapon);
-					evalIter(pl.shield);
-					pl.creatures.forEach(evalIter);
-					pl.permanents.forEach(evalIter);
-					pl.hand.forEach(evalIter);
+					if (pl.weapon) evalIter(pl.weapon);
+					if (pl.shield) evalIter(pl.shield);
+					pl.creatures.forEach(c => c && evalIter(c));
+					pl.permanents.forEach(p => p && evalIter(p));
+					pl.hand.forEach(h => h && evalIter(h));
 				}
 				game.targeting = null;
 			}else{

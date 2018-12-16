@@ -16,6 +16,7 @@ function Thing(card, owner) {
 	this.active = card.active.delete('discard');
 }
 function Creature(card, owner) {
+	this.type = etg.Creature;
 	this.usedactive = 2;
 	if (card == Cards.ShardGolem) {
 		this.card = card;
@@ -30,6 +31,7 @@ function Creature(card, owner) {
 	} else this.transform(card, owner);
 }
 function Permanent(card, owner) {
+	this.type = etg.Permanent;
 	this.usedactive = 2;
 	this.cast = card.cast;
 	this.castele = card.castele;
@@ -38,10 +40,12 @@ function Permanent(card, owner) {
 function Weapon(card, owner) {
 	this.atk = card.attack;
 	Permanent.apply(this, arguments);
+	this.type = etg.Weapon;
 }
 function Shield(card, owner) {
 	this.dr = card.health;
 	Permanent.apply(this, arguments);
+	this.type = etg.Shield;
 }
 function CardInstance(card, owner) {
 	this.owner = owner;
@@ -594,6 +598,7 @@ Thing.prototype.useactive = function(t) {
 	var castele = this.castele,
 		cast = this.cast;
 	if (!t || !t.evade(this.owner)) {
+		console.log(this, t);
 		this.active.get('cast').func(this, t);
 		this.proc('spell');
 	} else if (t) Effect.mkText('Evade', t);
@@ -721,14 +726,14 @@ CardInstance.prototype.useactive = function(target) {
 	if (owner.status.get('neuro')) {
 		owner.addpoison(1);
 	}
-	if (card.type <= etg.PermanentEnum) {
+	if (card.type <= etg.Permanent) {
 		var cons = [Weapon, Shield, Permanent][card.type ? card.type-1 : 2];
 		new cons(card, owner).place(true);
-	} else if (card.type == etg.SpellEnum) {
+	} else if (card.type == etg.Spell) {
 		if (!target || !target.evade(owner)) {
 			card.active.get('cast').func(this, target);
 		}
-	} else if (card.type == etg.CreatureEnum) {
+	} else if (card.type == etg.Creature) {
 		new Creature(card, owner).place(true);
 	} else console.log('Unknown card type: ' + card.type);
 	owner.spend(card.costele, card.cost, this);

@@ -77,13 +77,13 @@ Game.prototype.tgtToBits = function(x) {
 		return 0;
 	} else if (x.type == etg.Player) {
 		bits = 1;
-	} else if (x instanceof smth.Weapon) {
+	} else if (x.type === etg.Weapon) {
 		bits = 17;
-	} else if (x instanceof smth.Shield) {
+	} else if (x.type === etg.Shield) {
 		bits = 33;
 	} else {
 		bits =
-			(x instanceof smth.Creature ? 2 : x instanceof smth.Permanent ? 4 : 5) |
+			(x.type === etg.Creature ? 2 : x.type === etg.Permanent ? 4 : 5) |
 			(x.getIndex() << 4);
 	}
 	if (x.owner == this.player2) {
@@ -109,21 +109,20 @@ Game.prototype.bitsToTgt = function(x) {
 Game.prototype.getTarget = function(src, active, cb) {
 	var targetingFilter = Cards.Targeting[active.name[0]];
 	if (targetingFilter) {
-		var game = this;
 		this.targeting = {
-			filter: function(t) {
+			filter: (t) => {
 				return (
 					(t.type == etg.Player ||
-						t instanceof smth.CardInstance ||
-						t.owner == game.turn ||
+						t.type == etg.Spell ||
+						t.owner == this.turn ||
 						t.status.get('cloak') ||
 						!t.owner.isCloaked()) &&
 					targetingFilter(src, t)
 				);
 			},
-			cb: function() {
-				cb.apply(null, arguments);
-				game.targeting = null;
+			cb: (...args) => {
+				cb(...args);
+				this.targeting = null;
 			},
 			text: active.name[0],
 			src: src,

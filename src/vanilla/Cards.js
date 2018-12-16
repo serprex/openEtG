@@ -105,8 +105,8 @@ const TargetFilters = {
 	},
 	weap: function(c, t) {
 		return (
-			(t instanceof smth.Weapon ||
-				(t instanceof smth.Creature && t.card.type == etg.WeaponEnum)) &&
+			(t.type === etg.Weapon ||
+				(t.type === etg.Creature && t.card.type == etg.WeaponEnum)) &&
 			!t.status.get('immaterial') &&
 			!t.status.get('burrowed')
 		);
@@ -144,11 +144,11 @@ const TargetFilters = {
 		return t.isMaterial(etg.Creature) && t.truehp() < t.trueatk();
 	},
 	permnonstack: function(c, t) {
-		return t instanceof smth.Permanent && !t.status.get('stackable');
+		return t.type === etg.Permanent && !t.status.get('stackable');
 	},
 	wisdom: function(c, t) {
 		return (
-			t instanceof smth.Creature &&
+			t.type === etg.Creature &&
 			!t.status.get('burrowed')
 		);
 	},

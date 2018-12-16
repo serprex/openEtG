@@ -3,14 +3,14 @@ var etg = require("../etg");
 var smth = require("../Thing");
 var Cards = require("../Cards");
 module.exports = function(game) {
-	var limit = 333, cmdct, currentEval = game.player1.hp;
+	let limit = 333, cmdct, currentEval = game.player1.hp;
 	function iterLoop(game, cmdct0){
 		function iterCore(c) {
 			if (!c || !c.canactive()) return;
-			var ch = c.hash();
-			if (ch in casthash) return;
-			else casthash[ch] = true;
-			var active = c instanceof smth.CardInstance ? c.card.type == etg.SpellEnum && c.card.active.auto : c.active.cast;
+			const ch = c.hash();
+			if (casthash.has(ch)) return;
+			casthash.add(ch);
+			var active = c.active.get('cast');
 			var cbits = game.tgtToBits(c) ^ 8;
 			function evalIter(t) {
 				if ((!game.targeting || (t && game.targeting.filter(t))) && --limit > 0) {
@@ -29,15 +29,17 @@ module.exports = function(game) {
 			}
 			if (active && active.name[0] in Cards.Targeting) {
 				game.getTarget(c, active);
-				if (c.owner.shield && c.owner.shield.status.reflect) evalIter(c.owner);
+				if (c.owner.shield && c.owner.shield.status.get('reflect')) evalIter(c.owner);
 				evalIter(c.owner.foe);
-				c.owner.creatures.forEach(function(cr){ if (cr && cr.status.voodoo) evalIter(cr) });
+				c.owner.creatures.forEach(cr => {
+					if (cr && cr.status.get('voodoo')) evalIter(cr)
+				});
 				game.targeting = null;
 			}else{
 				evalIter();
 			}
 		}
-		var p2 = game.player2, casthash = [];
+		var p2 = game.player2, casthash = new Set();
 		p2.hand.forEach(iterCore);
 		p2.permanents.forEach(iterCore);
 		p2.creatures.forEach(iterCore);
