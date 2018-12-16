@@ -25,7 +25,7 @@ function Creature(card, owner) {
 		this.atk = golem.atkStat;
 		this.maxhp = this.hp = golem.hpStat;
 		this.cast = golem.cast;
-		this.castele = Earth;
+		this.castele = etg.Earth;
 		this.active = golem.active;
 		this.status = golem.status;
 	} else this.transform(card, owner);
@@ -433,7 +433,7 @@ Creature.prototype.evade = function(sender) {
 	if (
 		sender != this.owner &&
 		this.status.get('airborne') &&
-		this.card.element == Air
+		this.card.element == etg.Air
 	) {
 		var freedomChance = 0;
 		for (var i = 0; i < 16; i++) {
@@ -445,7 +445,7 @@ Creature.prototype.evade = function(sender) {
 	}
 };
 Creature.prototype.calcEclipse = function() {
-	if (!this.status.nocturnal) {
+	if (!this.status.get('nocturnal')) {
 		return 0;
 	}
 	var bonus = 0;
@@ -598,7 +598,6 @@ Thing.prototype.useactive = function(t) {
 	var castele = this.castele,
 		cast = this.cast;
 	if (!t || !t.evade(this.owner)) {
-		console.log(this, t);
 		this.active.get('cast').func(this, t);
 		this.proc('spell');
 	} else if (t) Effect.mkText('Evade', t);
