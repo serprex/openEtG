@@ -1068,7 +1068,7 @@ var Actives = {
 		Effect.mkText('2:5', c);
 		c.owner.spend(etg.Life, -2);
 		if (c.cast > 0) {
-			c.usedactive = false;
+			c.casts = 1;
 		}
 	},
 	plague: function(c, t) {
@@ -1121,8 +1121,8 @@ var Actives = {
 		if (t.active.get('cast')) {
 			t.cast = 0;
 			if (t.card.element == etg.Time && !t.status.get('ready')) {
-				t.setStatus('ready', t.usedactive === true ? 1 : 2);
-				t.usedactive = false;
+				t.setStatus('ready', 1);
+				t.casts = 2;
 				t.addactive('ownspell', Actives.ready);
 			}
 		}
@@ -1130,7 +1130,7 @@ var Actives = {
 	ready: function(c, t) {
 		if (c.status.get('ready') > 1) {
 			c.setStatus('ready', c.status.get('ready')-1);
-			c.usedactive = false;
+			c.casts++;
 		}
 	},
 	rebirth: function(c, t) {
@@ -1192,7 +1192,7 @@ var Actives = {
 		Effect.mkText('-1', t);
 		t.spelldmg(1);
 		if (c.cast > 0) {
-			c.usedactive = false;
+			c.casts = 1;
 		}
 	},
 	scarab: function(c, t) {
@@ -1352,7 +1352,7 @@ var Actives = {
 		} else {
 			t.remove();
 			t.owner = c.owner;
-			t.usedactive = true;
+			t.casts = 0;
 			if (t.card.isOf(Cards.Sundial)) t.status = t.status.set('charges', t.status.get('charges')+1);
 			t.place();
 		}
@@ -1444,7 +1444,7 @@ var Actives = {
 	},
 	swift: function(c, t) {
 		Effect.mkText('Ready', c);
-		c.usedactive = false;
+		c.casts = 1;
 	},
 	tremors: function(c, t) {
 		function tremor(c, t) {

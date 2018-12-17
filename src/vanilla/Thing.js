@@ -17,7 +17,7 @@ function Thing(card, owner) {
 }
 function Creature(card, owner) {
 	this.type = etg.Creature;
-	this.usedactive = 2;
+	this.casts = 0;
 	if (card == Cards.ShardGolem) {
 		this.card = card;
 		this.owner = owner;
@@ -32,7 +32,7 @@ function Creature(card, owner) {
 }
 function Permanent(card, owner) {
 	this.type = etg.Permanent;
-	this.usedactive = 2;
+	this.casts = 0;
 	this.cast = card.cast;
 	this.castele = card.castele;
 	Thing.apply(this, arguments);
@@ -151,7 +151,7 @@ Creature.prototype.hash = function() {
 	var hash = this.owner == this.owner.game.player1 ? 17 : 19;
 	hash ^=
 		this.status.hashCode() ^
-		(this.hp * 17 + this.atk * 31 - this.maxhp - this.usedactive * 3);
+		(this.hp * 17 + this.atk * 31 - this.maxhp - this.casts * 3);
 	hash ^= this.card.code;
 	for (var [key, val] of this.active) {
 		hash ^= util.hashString(key + ':' + val.name.join(':'));
@@ -163,7 +163,7 @@ Creature.prototype.hash = function() {
 };
 Permanent.prototype.hash = function() {
 	var hash = this.owner == this.owner.game.player1 ? 5351 : 5077;
-	hash ^= this.status.hashCode() ^ (this.usedactive * 3);
+	hash ^= this.status.hashCode() ^ (this.casts * 3);
 	hash ^= this.card.code;
 	for (var [key, val] of this.active) {
 		hash ^= util.hashString(key + '=' + val.name.join(' '));
@@ -175,7 +175,7 @@ Permanent.prototype.hash = function() {
 };
 Weapon.prototype.hash = function() {
 	var hash = this.owner == this.owner.game.player1 ? 13 : 11;
-	hash ^= this.status.hashCode() ^ (this.atk * 31 - this.usedactive * 3);
+	hash ^= this.status.hashCode() ^ (this.atk * 31 - this.casts * 3);
 	hash ^= this.card.code;
 	for (var [key, val] of this.active) {
 		hash ^= util.hashString(key + '-' + val.name.join(' '));
@@ -187,7 +187,7 @@ Weapon.prototype.hash = function() {
 };
 Shield.prototype.hash = function() {
 	var hash = this.owner == this.owner.game.player1 ? 5009 : 4259;
-	hash ^= this.status.hashCode() ^ (this.dr * 31 - this.usedactive * 3);
+	hash ^= this.status.hashCode() ^ (this.dr * 31 - this.casts * 3);
 	hash ^= this.card.code;
 	for (var [key, val] of this.active) {
 		hash ^= util.hashString(key + '~' + val.name.join(' '));
@@ -587,14 +587,14 @@ Thing.prototype.canactive = function() {
 		this.owner.game.turn == this.owner &&
 		this.active &&
 		this.active.has('cast') &&
-		!this.usedactive &&
+		this.casts &&
 		!this.status.get('delayed') &&
 		!this.status.get('frozen') &&
 		this.owner.canspend(this.castele, this.cast)
 	);
 };
 Thing.prototype.useactive = function(t) {
-	this.usedactive = true;
+	this.casts--;
 	var castele = this.castele,
 		cast = this.cast;
 	if (!t || !t.evade(this.owner)) {
@@ -620,7 +620,8 @@ Weapon.prototype.attack = Creature.prototype.attack = function(
 	) {
 		this.trigger('auto');
 	}
-	this.usedactive = false;
+	this.casts = 1;
+	this.clearStatus('ready');
 	var trueatk;
 	if (
 		!(

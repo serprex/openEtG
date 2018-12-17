@@ -196,7 +196,7 @@ Player.prototype.endturn = function(discard) {
 		var p;
 		if ((p = this.permanents[i])) {
 			if (~p.getIndex()) {
-				p.usedactive = false;
+				p.casts = 1;
 				if (p.status.get('stasis')) {
 					stasisFlag = true;
 				} else if (p.status.get('flooding')) {
@@ -254,7 +254,7 @@ Player.prototype.endturn = function(discard) {
 		if (p) p.trigger('auto');
 	});
 	if (this.shield) {
-		this.shield.usedactive = false;
+		this.shield.casts = 1;
 		this.shield.trigger('auto');
 	}
 	if (this.weapon) this.weapon.attack();

@@ -338,7 +338,7 @@ M.test('Steal', function() {
 });
 M.test('Steam', function() {
 	const steam = new smth.Creature(Cards.SteamMachine, this.player1);
-	steam.usedactive = false;
+	steam.casts = 1;
 	steam.place();
 	assert.equal(steam.trueatk(), 0, '0');
 	steam.useactive();

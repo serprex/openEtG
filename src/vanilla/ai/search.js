@@ -34,14 +34,8 @@ var afilter = {
 	freeze:function(c,t){
 		return t.status.get('frozen') < 3;
 	},
-	pacify:function(c,t){
-		return t.trueatk();
-	},
 	readiness:function(c,t){
-		return t.active.get('cast') && (t.cast || t.usedactive);
-	},
-	silence:function(c,t){
-		return t.active.get('cast') && !t.usedactive;
+		return t.active.get('cast');
 	},
 	lobotomize:function(c,t){
 		if (!t.status.get('momentum') && !t.status.get('psionic')) {

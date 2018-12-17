@@ -638,7 +638,7 @@ module.exports = connect()(class Match extends React.Component {
 					}}
 				/>
 			);
-			const handOverlay = pl.usedactive
+			const handOverlay = pl.silence
 				? 'ico silence'
 				: pl.sanctuary
 					? 'ico sanctuary'
