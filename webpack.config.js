@@ -4,8 +4,10 @@ module.exports = {
 		aivai: ['babel-polyfill', './src/aivai.js'],
 		art: ['babel-polyfill', './src/ui/art.js'],
 		mosaic: ['babel-polyfill', './src/ui/mosaic.js'],
-		vanilla: ['babel-polyfill', './src/vanilla/main.js'],
-		vaivai: ['babel-polyfill', './src/vanilla/aivai.js'],
+		vanilla: ['babel-polyfill', './src/vanilla/ui/main.js'],
+		vaivai: ['babel-polyfill', './src/vanilla/ui/aivai.js'],
+		vnamegame: ['babel-polyfill', './src/vanilla/ui/namegame.js'],
+		vspeed: ['babel-polyfill', './src/vanilla/ui/speed.js'],
 	},
 	output: {
 		path: __dirname,

@@ -1,10 +1,10 @@
-var Effect = require('./Effect');
-var Cards = require("./Cards");
-var Game = require("./Game");
-var etg = require("./etg");
-var etgutil = require("../etgutil");
-var aiSearch = require("./ai/search");
-var util = require("../util");
+var Effect = require('../Effect');
+var Cards = require("../Cards");
+var Game = require("../Game");
+var etg = require("../etg");
+var etgutil = require("../../etgutil");
+var aiSearch = require("../ai/search");
+var util = require("../../util");
 var deckeles = [document.getElementById("deck1"), document.getElementById("deck2")];
 var seedput = document.getElementById("seed");
 var result = document.getElementById("result");
