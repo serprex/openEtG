@@ -54,7 +54,7 @@ var Actives = {
 	},
 	accelerationspell: function(c, t) {
 		t.lobo();
-		t.active.auto = Actives.acceleration;
+		t.active = t.active.set('auto', Actives.acceleration);
 	},
 	accretion: function(c, t) {
 		Actives.destroy.func(c, t);
@@ -183,13 +183,13 @@ var Actives = {
 	},
 	burrow: function(c, t) {
 		c.status = c.status.set('burrowed', true);
-		c.active.cast = Actives.unburrow;
+		c.active = c.active.set('cast', Actives.unburrow);
 		c.cast = 0;
 		c.atk = Math.floor(c.atk / 2);
 	},
 	butterfly: function(c, t) {
 		t.lobo();
-		t.active.cast = Actives.destroy;
+		t.active = t.active.set('cast', Actives.destroy);
 		t.cast = 3;
 		t.castele = etg.Entropy;
 	},
@@ -860,7 +860,7 @@ var Actives = {
 	liquid: function(c, t) {
 		Effect.mkText('Liquid', t);
 		t.lobo();
-		t.active.hit = Actives.vampire;
+		t.active = t.active.set('hit', Actives.vampire);
 		t.addpoison(1);
 	},
 	lobotomize: function(c, t) {
@@ -891,9 +891,9 @@ var Actives = {
 				if (
 					key != 'ownplay' &&
 					key != 'owndiscard' &&
-					!x.active.get(key).name.every(function(name) {
-						return Actives[name].passive;
-					})
+					!x.active.get(key).name.every(name =>
+						Actives[name].passive
+					)
 				)
 					return;
 			}
@@ -938,7 +938,7 @@ var Actives = {
 	},
 	mitosisspell: function(c, t) {
 		t.lobo();
-		t.active.cast = Actives.mitosis;
+		t.active = t.active.set('cast', Actives.mitosis);
 		t.castele = t.card.element;
 		t.cast = t.card.cost;
 	},
@@ -946,32 +946,32 @@ var Actives = {
 		Effect.mkText('Momentum', t);
 		t.atk += 1;
 		t.buffhp(1);
-		t.status = t.status.set('momentum', true);
+		t.setStatus('momentum', 1);
 	},
 	mutate: function(c, t) {
 		Effect.mkText('Mutate', c);
 		if (!c.mutantactive()) {
-			var bans = [
+			const bans = new Set([
 				Cards.ShardofFocus,
 				Cards.FateEgg,
 				Cards.Immortal,
 				Cards.Scarab,
 				Cards.DevonianDragon,
 				Cards.Chimera,
-			];
+			]);
 			var rnd = c.owner.randomcard(false, function(x) {
-				return x.type == etg.CreatureEnum && !~bans.indexOf(x);
+				return x.type == etg.Creature && !bans.has(x);
 			});
-			while (!rnd.active.cast) {
+			while (!rnd.active.get('cast')) {
 				rnd = c.owner.randomcard(false, function(x) {
-					return x.type == etg.CreatureEnum && !~bans.indexOf(x);
+					return x.type == etg.Creature && !bans.has(x);
 				});
 			}
-			c.active.cast = rnd.active.cast;
+			c.active = c.active.set('cast', rnd.active.get('cast'));
 			c.cast = c.owner.upto(2) + 1;
 		}
 		c.castele = c.owner.upto(13);
-		c.status = c.status.set('mutant', true);
+		c.setStatus('mutant', 1);
 	},
 	mutation: function(c, t) {
 		var rnd = c.owner.rng();
@@ -1035,7 +1035,7 @@ var Actives = {
 	},
 	overdrivespell: function(c, t) {
 		t.lobo();
-		t.active.auto = Actives.overdrive;
+		t.active = t.active.set('auto', Actives.overdrive);
 	},
 	pandemonium: function(c, t) {
 		c.owner.foe.masscc(c, Actives.cseed.func, !c.card.upped);
@@ -1121,7 +1121,7 @@ var Actives = {
 	},
 	readiness: function(c, t) {
 		Effect.mkText('Ready', t);
-		if (t.active.cast) {
+		if (t.active.get('cast')) {
 			t.cast = 0;
 			if (t.card.element == etg.Time && !t.status.get('ready')) {
 				t.setStatus('ready', t.usedactive === true ? 1 : 2);
@@ -1419,16 +1419,19 @@ var Actives = {
 		}
 	},
 	swarm: function(c, t) {
-		var hp = 0;
-		for (var i = 0; i < 23; i++) {
+		let hp = -1;
+		for (let i = 0; i < 23; i++) {
 			if (
 				c.owner.creatures[i] &&
-				c.owner.creatures[i].active.hp == Actives.swarm
+				c.owner.creatures[i].hasactive('auto', 'swarm')
 			) {
 				hp++;
 			}
 		}
-		return hp;
+		c.setStatus('swarmhp', hp);
+	},
+	swarmhp: function(c, t) {
+		return c.getStatus('swarmhp');
 	},
 	swave: function(c, t) {
 		if (t.status.get('frozen')) {

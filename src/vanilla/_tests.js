@@ -359,3 +359,22 @@ M.test('Voodoo', function() {
 	assert.equal(voodoo.hp, 1, 'holy dmg');
 	assert.equal(this.player2.hp, 85, 'foe holy dmg');
 });
+M.test('Scarab', function() {
+	const scarabs = [
+		new smth.Creature(Cards.Scarab, this.player1),
+		new smth.Creature(Cards.Scarab, this.player1),
+		new smth.Creature(Cards.Scarab, this.player1),
+	];
+	scarabs[0].place();
+	scarabs[1].place();
+	assert.equal(scarabs[0].truehp(), 1);
+	this.player1.endturn();
+	assert.equal(scarabs[0].truehp(), 2);
+	scarabs[2].place();
+	assert.equal(scarabs[0].truehp(), 2);
+	Actives.devour.func(scarabs[0], scarabs[2]);
+	assert.equal(scarabs[0].truehp(), 3);
+	this.player1.endturn();
+	assert.equal(scarabs[0].truehp(), 3);
+	assert.equal(scarabs[1].truehp(), 2);
+});
