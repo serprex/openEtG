@@ -19,7 +19,7 @@ function Card(type, info) {
 		this.costele = 0;
 	}
 	if (info.Active) {
-		if (this.type === etg.SpellEnum) {
+		if (this.type === etg.Spell) {
 			this.active = new imm.Map({ cast: Actives[info.Active] });
 			this.cast = this.cost;
 			this.castele = this.costele;
@@ -42,7 +42,7 @@ function Card(type, info) {
 				);
 				if (cast) {
 					[this.cast, this.castele] = cast;
-					activecastcache[info.Skill] = cast;
+					activecastcache[info.Active] = cast;
 				}
 			}
 			activecache[info.Active] = this.active;
@@ -71,13 +71,13 @@ Object.defineProperty(Card.prototype, 'upped', {
 });
 module.exports = Card;
 Card.prototype.info = function() {
-	if (this.type == etg.SpellEnum) {
+	if (this.type == etg.Spell) {
 		return skillText(this);
 	} else {
 		var text = [];
-		if (this.type == etg.ShieldEnum && this.health)
+		if (this.type == etg.Shield && this.health)
 			text.push('Reduce damage by ' + this.health);
-		else if (this.type == etg.CreatureEnum || this.type == etg.WeaponEnum)
+		else if (this.type == etg.Creature || this.type == etg.Weapon)
 			text.push(this.attack + '|' + this.health);
 		var skills = skillText(this);
 		if (skills) text.push(skills);
