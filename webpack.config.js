@@ -8,6 +8,7 @@ module.exports = {
 		vaivai: ['babel-polyfill', './src/vanilla/ui/aivai.js'],
 		vnamegame: ['babel-polyfill', './src/vanilla/ui/namegame.js'],
 		vspeed: ['babel-polyfill', './src/vanilla/ui/speed.js'],
+		vdeckinfo: ['babel-polyfill', './src/vanilla/ui/deckinfo.js'],
 	},
 	output: {
 		path: __dirname,
