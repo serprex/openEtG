@@ -876,11 +876,8 @@ var Actives = {
 		c.status.set('mode', t.type == etg.Player ? t.mark : t.card.element);
 	},
 	losecharge: function(c, t) {
-		const charges = c.status.get('charges');
-		if (c.status.charges <= 1) {
+		if (!c.maybeDecrStatus('charges')) {
 			c.remove();
-		} else {
-			c.status = c.status.set('charges', charges - 1);
 		}
 	},
 	luciferin: function(c, t) {
