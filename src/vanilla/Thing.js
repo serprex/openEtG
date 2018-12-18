@@ -88,8 +88,8 @@ Thing.prototype.getStatus = function(key) {
 Thing.prototype.setStatus = function(key, val) {
 	this.status = this.status.set(key, val|0);
 }
-Thing.prototype.clearStatus = function(key, val) {
-	this.status = this.status.clear();
+Thing.prototype.clearStatus = function(key) {
+	this.status = this.status.delete(key);
 }
 Thing.prototype.maybeDecrStatus = function(key) {
 	const val = this.getStatus(key);
