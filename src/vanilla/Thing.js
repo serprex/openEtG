@@ -720,8 +720,7 @@ CardInstance.prototype.useactive = function(target) {
 		);
 		return;
 	}
-	var owner = this.owner,
-		card = this.card;
+	const {owner, card} = this;
 	this.remove();
 	if (owner.status.get('neuro')) {
 		owner.addpoison(1);

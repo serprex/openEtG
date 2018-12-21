@@ -197,7 +197,7 @@ Player.prototype.endturn = function(discard) {
 		if ((p = this.permanents[i])) {
 			if (~p.getIndex()) {
 				p.casts = 1;
-				if (p.status.get('stasis')) {
+				if (p.status.get('stasis') && p.status.get('charges') > 0) {
 					stasisFlag = true;
 				} else if (p.status.get('flooding')) {
 					floodingFlag = true;
