@@ -94,7 +94,7 @@ var Actives = {
 	},
 	air: function(c, t) {
 		Effect.mkText('1:9', c);
-		c.owner.spend(smth.Air, -1);
+		c.owner.spend(etg.Air, -1);
 	},
 	antimatter: function(c, t) {
 		Effect.mkText('Antimatter', t);
@@ -1093,13 +1093,12 @@ var Actives = {
 		c.owner.drawcard();
 	},
 	purify: function(c, t) {
-		t.status = t.status.set('poison', t.status.get('poison') ?
-			Math.min(t.status.get('poison') - 2, -2) : -2);
+		t.status = t.status.set('poison', Math.min(t.getStatus('poison') - 2, -2));
 		if (t.type == etg.Player) {
 			t.setStatus('neuro', 0);
 			t.sosa = 0;
 		} else {
-			t.status = t.status.delete(aflatoxin);
+			t.status = t.status.delete('aflatoxin');
 		}
 	},
 	queen: function(c, t) {
