@@ -1165,6 +1165,9 @@ var Actives = {
 			t.transform(Cards.Pharaoh.asUpped(t.card.upped));
 		} else {
 			Effect.mkText('Rewind', t);
+			if (t.status.get('voodoo') && t.status.get('poison') < 0) {
+				t.owner.foe.addpoison(-t.status.get('poison'));
+			}
 			t.remove();
 			t.owner.deck.push(t.card);
 		}
