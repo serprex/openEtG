@@ -3,8 +3,10 @@ const etg = require("../etg"),
 	Cards = require("../Cards"),
 	Components = require('../Components'),
 	mkAi = require("../mkAi"),
+	mkGame = require('../mkGame'),
 	etgutil = require("../../etgutil"),
 	store = require('../store'),
+	util = require('../../util'),
 	{connect} = require('react-redux'),
 	React = require('react');
 
@@ -16,7 +18,7 @@ function sumCardMinus(cardminus, code){
 	return sum;
 }
 
-module.exports = connect(state => ({ deck: state.opts.deck }))(class Editor extends React.Component {
+module.exports = connect(state => ({ deck: state.opts.deck, aideck: state.opts.aideck }))(class Editor extends React.Component {
 	state = {
 		deckstr: '',
 		deck: [],
@@ -79,12 +81,28 @@ module.exports = connect(state => ({ deck: state.opts.deck }))(class Editor exte
 				placeholder="Deck"
 				style={{left:'0px',top:'600px',width:'900px',position:'absolute'}}
 			/>
+			<input type="text"
+				value={this.props.aideck}
+				onChange={e => this.props.dispatch(store.setOpt('aideck', e.target.value))}
+				placeholder="AI Deck"
+				style={{left:'0px',top:'624px',width:'900px',position:'absolute'}}
+			/>
 			<input type="button"
 				value="Clear"
 				style={{ position: 'absolute', left: '8px', top: '32px' }}
 				onClick={() => {
 					this.props.dispatch(store.setOpt('deck', ''));
 				}}
+			/>
+			<input type="button"
+				style={{position:'absolute', left: '8px', top: '80px'}}
+				value="Custom"
+				onClick={() => mkAi.run(mkGame({
+					deck: this.props.aideck.split(' ').map(x => parseInt(x, 32)),
+					urdeck: this.props.deck.split(' ').map(x => parseInt(x, 32)),
+					seed: util.randint(),
+					foename: 'Custom',
+				}, true))}
 			/>
 			<input type="button"
 				style={{position:'absolute', left: '8px', top: '110px'}}

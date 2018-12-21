@@ -288,15 +288,15 @@ Player.prototype.drawcard = function() {
 };
 Player.prototype.drawhand = function() {
 	this.shuffle(this.deck);
-	var haszerocost = false;
-	for (var i = 0; i < 7; i++) {
-		var card = Cards.Codes[this.deck.pop()];
+	let haszerocost = false;
+	for (let i = 0; i < 7; i++) {
+		const card = Cards.Codes[this.deck.pop()];
 		new CardInstance(card, this).place();
 		if (!card.cost) haszerocost = true;
 	}
 	if (!haszerocost) {
 		while (this.hand.length) this.deck.push(this.hand.pop().card);
-		for (var i = 0; i < 7; i++) {
+		for (let i = 0; i < 7; i++) {
 			new CardInstance(this.deck.shift(), this).place();
 		}
 	}

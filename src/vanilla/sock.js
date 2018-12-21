@@ -115,8 +115,8 @@ exports.emit = function(x, data) {
 exports.getDeck = function(limit) {
 	const state = store.store.getState();
 	const deck = state.opts.deck.split(' ').map(x => parseInt(x, 32));
-	if (limit && deck.length > 60) {
-		deck.length = 60;
+	if (limit && deck.length > 61) {
+		deck.length = 61;
 	}
 	return deck;
 };

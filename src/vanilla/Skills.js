@@ -984,7 +984,7 @@ var Actives = {
 	},
 	neuro: adrenathrottle(function(c, t) {
 		t.addpoison(1);
-		t.status.set('neuro', 1);
+		if (t.type === etg.Player) t.setStatus('neuro', 1);
 	}),
 	nightmare: function(c, t) {
 		if (!c.owner.foe.sanctuary) {
