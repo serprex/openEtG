@@ -1202,8 +1202,8 @@ var Actives = {
 	},
 	scramble: function(c, t) {
 		if (t.type == etg.Player && !t.sanctuary) {
-			var n = 0;
-			for (var i = 0; i < 9; i++) {
+			let n = 0;
+			for (let i = 0; i < 9; i++) {
 				if (t.spend(etg.Other, 1)) {
 					n++;
 				} else break;

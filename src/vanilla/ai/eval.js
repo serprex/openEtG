@@ -23,9 +23,6 @@ var ActivesValues = Object.freeze({
 	},
 	animateweapon:4,
 	antimatter:12,
-	appease:function(c){
-		return c instanceof smth.CardInstance?-6:c.getStatus('appeased')?0:c.trueatk()*-1.5;
-	},
 	bblood:7,
 	blackhole:function(c){
 		var a=0, fq=c.owner.foe.quanta;
@@ -40,9 +37,6 @@ var ActivesValues = Object.freeze({
 		return c.card.cost+(c.card.upped?1:0);
 	},
 	bravery:3,
-	brawl:8,
-	brew:4,
-	brokenmirror:2,
 	burrow:1,
 	butterfly:12,
 	catapult:6,
@@ -54,7 +48,6 @@ var ActivesValues = Object.freeze({
 	cpower:4,
 	darkness:1,
 	deadalive:2,
-	deathwish:1,
 	deckblast:function(c){
 		return c.owner.deck.length/2;
 	},
@@ -84,21 +77,16 @@ var ActivesValues = Object.freeze({
 	duality:4,
 	earth:1,
 	earthquake:4,
-	eatspell:3,
 	empathy:function(c){
 		return c.owner.countcreatures();
 	},
 	enchant:6,
 	endow:4,
-	envenom:3,
 	epidemic:4,
-	epoch:2,
 	evolve:2,
 	feed:6,
-	fickle:3,
 	fire:1,
 	firebolt:10,
-	flatline:1,
 	flyingweapon:7,
 	foedraw:8,
 	forceplay:2,
@@ -108,7 +96,6 @@ var ActivesValues = Object.freeze({
 	freeze:[3,3.5],
 	fungusrebirth:1,
 	gas:5,
-	give:1,
 	golemhit:function(c){
 		var dmg = 0;
 		for(var i=0; i<23; i++){
@@ -125,7 +112,6 @@ var ActivesValues = Object.freeze({
 	},
 	gpullspell:3,
 	gratitude:function(c){return c.status?c.getStatus('charges')*4:4;},
-	grave:1,
 	"growth 1":3,
 	"growth 2":5,
 	guard:4,
@@ -150,8 +136,6 @@ var ActivesValues = Object.freeze({
 	ink:3,
 	innovation:3,
 	integrity:4,
-	jetstream:2.5,
-	layegg:5,
 	light:1,
 	lightning:7,
 	liquid:5,
@@ -162,8 +146,6 @@ var ActivesValues = Object.freeze({
 	lycanthropy:4,
 	mend:3,
 	metamorph: 2,
-	midas:6,
-	mimic:3,
 	miracle:function(c){
 		return c.owner.maxhp/8;
 	},
@@ -175,9 +157,6 @@ var ActivesValues = Object.freeze({
 	mutation:4,
 	neuro:function(c) {
 		return c.owner.foe.neuro?evalactive(c, Actives.poison)+.1:6;
-	},
-	neurofy:function(c) {
-		return c.owner.foe.neuro?1:5;
 	},
 	nightmare:function(c){
 		var val = 24-c.owner.foe.hand.length;
@@ -224,9 +203,6 @@ var ActivesValues = Object.freeze({
 	rage:[5, 6],
 	readiness: 3,
 	rebirth:[5, 2],
-	reducemaxhp: function(c, ttatk){
-		return (c instanceof smth.Creature ? ttatk : c.card.attack)*5/3;
-	},
 	regenerate: 5,
 	regeneratespell: 5,
 	regrade:3,
@@ -246,8 +222,6 @@ var ActivesValues = Object.freeze({
 		return a;
 	},
 	serendepity: 4,
-	shadow: 5,
-	shtriga:6,
 	silence:1,
 	singularity:-20,
 	sinkhole:3,
@@ -266,16 +240,6 @@ var ActivesValues = Object.freeze({
 	storm2:6,
 	storm3:12,
 	swave:6,
-	tempering:[2,3],
-	throwrock:4,
-	tick:function(c){
-		return c instanceof smth.CardInstance ? 1 : 1+(c.maxhp-c.truehp())/c.maxhp;
-	},
-	tornado:9,
-	trick:4,
-	turngolem:function(c){
-		return c instanceof smth.CardInstance ? 0 : c.getStatus('storedpower')/3;
-	},
 	upkeep: -.5,
 	upload:3,
 	vampire:function(c, ttatk){
@@ -295,9 +259,6 @@ var ActivesValues = Object.freeze({
 		return c instanceof smth.CardInstance ? -2 : c.getStatus('storedAtk')/2 - 2;
 	},
 	wisdom:4,
-	yoink:4,
-	vengeance:2,
-	vindicate:3,
 	pillar:pillarval,
 	pend:pillarval,
 	pillmat:pillarval,
@@ -348,7 +309,7 @@ var statusValues = Object.freeze({
 })
 
 function getDamage(c){
-	return damageHash[c.hash()] || 0;
+	return damageHash.get(c.hash()) || 0;
 }
 function estimateDamage(c, freedomChance, wallCharges, wallIndex) {
 	if (!c || c.getStatus('frozen') || c.getStatus('delayed')){
@@ -383,7 +344,7 @@ function estimateDamage(c, freedomChance, wallCharges, wallIndex) {
 		atk += Math.ceil(atk/2) * freedomChance;
 	}
 	if (c.owner.foe.sosa) atk *= -1;
-	damageHash[c.hash()] = atk;
+	damageHash.set(c.hash(), atk);
 	return atk;
 }
 function calcExpectedDamage(pl, wallCharges, wallIndex) {
@@ -433,8 +394,8 @@ function evalactive(c, active, extra){
 }
 
 function checkpassives(c) {
-	var score = 0;
-	for (var status of c.status.keys())
+	let score = 0;
+	for (const status of c.status.keys())
 	{
 		if (uniqueStatuses[status] && !(c instanceof smth.CardInstance)) {
 			if (!uniquesActive.has(status)) {
@@ -451,7 +412,7 @@ function checkpassives(c) {
 	return score;
 }
 
-var throttled = Object.freeze({"poison 1":true, "poison 2":true, "poison 3":true, neuro:true, regen:true, siphon:true});
+var throttled = Object.freeze(new Set(["poison1", "poison2", "poison3", "neuro", "siphon"]));
 function evalthing(c) {
 	if (!c) return 0;
 	var ttatk, hp, poison, score = 0;
@@ -479,8 +440,8 @@ function evalthing(c) {
 		score += ttatk*delayfactor;
 	}else ttatk = 0;
 	var throttlefactor = adrenalinefactor < 3 || (isCreature && c.owner.weapon && c.owner.weapon.getStatus('nothrottle')) ? adrenalinefactor : 2;
-	for (var key in c.active) {
-		var adrfactor = key in throttled ? throttlefactor : key == "disarm" ? 1 : adrenalinefactor;
+	for (const [key, act] of c.active) {
+		var adrfactor = throttled.has(key) ? throttlefactor : adrenalinefactor;
 		if (key == "hit"){
 			score += evalactive(c, c.active.get('hit'), ttatk)*(ttatk?1:c.getStatus('immaterial')?0:.3)*adrfactor*delayfactor;
 		}else if(key == "auto"){
@@ -492,7 +453,7 @@ function evalthing(c) {
 				score += evalactive(c, c.active.get('cast'), ttatk) * delayfactor;
 			}
 		}else if (key != (isCreature ? "shield" : "owndeath")){
-			score += evalactive(c, c.active.get('key'));
+			score += evalactive(c, act);
 		}
 	}
 	score += checkpassives(c);
@@ -521,14 +482,14 @@ function evalcardinstance(cardInst) {
 		return c.active.discard == Actives.obsession ? (c.upped?-7:-6) : 0;
 	}
 	var score = 0;
-	if (c.type == etg.SpellEnum){
+	if (c.type == etg.Spell){
 		score += evalactive(cardInst, c.active.get('cast'));
 	} else {
-		for (var key in c.active) {
-			score += evalactive(cardInst, c.active.get('key'));
+		for (const act of c.active.values()) {
+			score += evalactive(cardInst, act);
 		}
 		score += checkpassives(cardInst);
-		if (c.type == etg.CreatureEnum){
+		if (c.type == etg.Creature){
 			score += c.attack;
 			var hp = Math.max(c.health, 0), poison = c.getStatus('poison');
 			if (poison > 0){
@@ -538,12 +499,12 @@ function evalcardinstance(cardInst) {
 				hp += Math.min(-poison, c.maxhp-c.hp);
 			}
 			score *= hp?(c.getStatus('immaterial') || c.getStatus('burrowed') ? 1.3 : 1+Math.log(Math.min(hp, 33))/7):.5;
-		}else if (c.type == etg.WeaponEnum){
+		}else if (c.type == etg.Weapon){
 			score += c.attack;
-			if (cardInst.owner.weapon || cardInst.owner.hand.some(function(cinst){ return cinst.card.type == etg.WeaponEnum })) score /= 2;
-		}else if (c.type == etg.ShieldEnum){
+			if (cardInst.owner.weapon || cardInst.owner.hand.some(function(cinst){ return cinst.card.type == etg.Weapon })) score /= 2;
+		}else if (c.type == etg.Shield){
 			score += c.health*c.health;
-			if (cardInst.owner.shield || cardInst.owner.hand.some(function(cinst){ return cinst.card.type == etg.ShieldEnum })) score /= 2;
+			if (cardInst.owner.shield || cardInst.owner.hand.some(function(cinst){ return cinst.card.type == etg.Shield })) score /= 2;
 		}
 	}
 	score *= !cardInst.card.cost ? .8 : (cardInst.canactive() ? .6 : .5) * (!cardInst.card.costele?1:.9+Math.log(1+cardInst.owner.quanta[cardInst.card.costele])/50);
@@ -553,7 +514,7 @@ function evalcardinstance(cardInst) {
 function caneventuallyactive(element, cost, pl){
 	if (!cost || !element || pl.quanta[element] || !pl.mark || pl.mark == element) return true;
 	return pl.permanents.some(function(pr){
-		return pr && ((pr.card.type == etg.PillarEnum && (!pr.card.element || pr.card.element == element)));
+		return pr && ((pr.card.type == etg.Pillar && (!pr.card.element || pr.card.element == element)));
 	});
 }
 
@@ -568,7 +529,7 @@ module.exports = function(game) {
 		return -99999990;
 	}
 	var wallCharges = new Int32Array([0, 0]);
-	damageHash = [];
+	damageHash = new Map();
 	uniquesActive = new Set();
 	var expectedDamage = calcExpectedDamage(game.player2, wallCharges, 0);
 	if (expectedDamage > game.player1.hp){

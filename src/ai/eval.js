@@ -561,7 +561,7 @@ function evalthing(c) {
 		const adrfactor =
 			throttled.has(key)
 				? throttlefactor
-				: key == 'disarm' ? 1 : adrenalinefactor;
+				: adrenalinefactor;
 		if (key == 'hit') {
 			score +=
 				evalactive(c, act, ttatk) *
