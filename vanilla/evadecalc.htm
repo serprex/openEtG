@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>Evade Calculator</title>
+	<link href="../forum/Smileys/default/darkness.png" rel="shortcut icon" />
+	<style>
+		body{
+			background-color:black;
+			color:white;
+			margin:0;
+		}
+		a{
+			color:#6699FF;
+			text-decoration:none;
+		}
+	</style>
+</head>
+<body>
+	<input id="dmginput" type="text" placeholder="Damage"><br>
+	<div id="infobox"></div>
+	<script>
+	"use strict";
+	var infobox = document.getElementById("infobox"), dmginput = document.getElementById("dmginput");
+	function mkTable(x){
+		var tbl = document.createElement("table");
+		for(var i=0; i<x.length; i++){
+			var row = document.createElement("tr");
+			var data = x[i];
+			for(var j=0; j<data.length; j++){
+				var col = document.createElement("td");
+				col.appendChild(document.createTextNode(data[j]));
+				row.appendChild(col);
+			}
+			tbl.appendChild(row);
+		}
+		return tbl;
+	}
+	function updateTable(e){
+		if (e.keyCode != 13) return;
+		while (infobox.firstChild) infobox.firstChild.remove();
+		var dmg = dmginput.value.split(' ').map(function(x) { return +x; });
+		var dmgmap = new Map([[0, [100, 100]]]);
+		for (var i=0; i<dmg.length; i++) {
+			var nextdmg = new Map();
+			for (const [d, [dp, fp]] of dmgmap) {
+				var hitd = d+dmg[i];
+				var dval = nextdmg.get(d) || [0, 0];
+				var hitdval = nextdmg.get(hitd) || [0, 0];
+				dval[0] += dp/2;
+				hitdval[0] += dp/2;
+				dval[1] += fp*.4;
+				hitdval[1] += fp*.6;
+				nextdmg.set(d, dval);
+				nextdmg.set(hitd, hitdval);
+			}
+			dmgmap = nextdmg;
+		}
+		var dmglist = Array.from(dmgmap, ([a,[b,c]]) => [a,b,c]).sort((a, b) => a[0] - b[0]);
+		for (var i=dmglist.length-2; i>=0; i--) {
+			dmglist[i][1] += dmglist[i+1][1];
+			dmglist[i][2] += dmglist[i+1][2];
+		}
+		for (var i=0; i<dmglist.length; i++) {
+			dmglist[i][1] = dmglist[i][1].toFixed(2);
+			dmglist[i][2] = dmglist[i][2].toFixed(2);
+		}
+		var result = [['Dmg', 'Dusk', 'Fog']].concat(dmglist);
+		infobox.appendChild(mkTable(result));
+	}
+	dmginput.addEventListener("keydown", updateTable);
+	</script>
+</body>
+</html>

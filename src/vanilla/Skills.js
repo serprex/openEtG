@@ -8,15 +8,15 @@ function adrenathrottle(f) {
 }
 function quadpillarFactory(ele) {
 	return function(c, t) {
-		var n = c == t ? 1 : c.status.get('charges');
-		for (var i = 0; i < n; i++) {
-			var r = c.owner.upto(16);
+		const n = c == t ? 1 : c.status.get('charges');
+		for (let i = 0; i < n; i++) {
+			const r = c.owner.upto(16);
 			c.owner.spend((ele >> ((r & 3) << 2)) & 15, -1);
 			c.owner.spend((ele >> (r & 12)) & 15, -1);
 		}
 	};
 }
-var adjacent = new Uint8Array([
+const adjacent = new Uint8Array([
 	3 | (1 << 5),
 	4 | (1 << 5),
 	3 | (3 << 5),
@@ -41,7 +41,7 @@ var adjacent = new Uint8Array([
 	13 | (1 << 5),
 	14,
 ]);
-var Actives = {
+const Actives = {
 	noluci: function() {},
 	ablaze: function(c, t) {
 		Effect.mkText('2|0', c);
@@ -1043,11 +1043,11 @@ var Actives = {
 	},
 	parallel: function(c, t) {
 		Effect.mkText('Parallel', t);
-		var copy = t.clone(c.owner);
+		const copy = t.clone(c.owner);
 		copy.place();
-		copy.status = copy.status.set('airborne', copy.card.status.get('airborne'));
+		copy.setStatus('airborne', copy.card.status.get('airborne'));
 		if (copy.status.get('mutant')) {
-			var buff = t.owner.upto(25);
+			const buff = t.owner.upto(25);
 			t.buffhp(Math.floor(buff / 5));
 			t.atk += buff % 5;
 			t.mutantactive();
@@ -1055,6 +1055,7 @@ var Actives = {
 		if (copy.status.get('voodoo')) {
 			copy.owner.foe.dmg(copy.maxhp - copy.hp);
 		}
+		copy.casts = 0;
 	},
 	phoenix: function(c, t, index) {
 		if (!c.owner.creatures[index]) {

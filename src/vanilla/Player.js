@@ -185,9 +185,8 @@ Player.prototype.endturn = function(discard) {
 		}
 	}
 	this.spend(this.mark, this.markpower * (this.mark > 0 ? -1 : -3));
-	if (this.foe.status.get('poison') > 0) {
-		this.foe.dmg(this.foe.status.get('poison'));
-	}
+	const poison = this.foe.getStatus('poison');
+	if (poison) this.foe.dmg(poison);
 	var patienceFlag = false,
 		floodingFlag = false,
 		stasisFlag = false,

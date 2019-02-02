@@ -266,7 +266,7 @@ var ActivesValues = Object.freeze({
 	pillcar:pillarval,
 	absorber:5,
 	blockwithcharge:function(c){
-		return c.getStatus.get('charges')/(1+c.owner.foe.countcreatures()*2);
+		return c.getStatus('charges')/(1+c.owner.foe.countcreatures()*2);
 	},
 	cold:7,
 	despair:5,
