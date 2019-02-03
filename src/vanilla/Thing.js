@@ -654,7 +654,7 @@ Weapon.prototype.attack = Creature.prototype.attack = function(
 				(fsha = fsh.active.get('shield')) &&
 				(fsha == Actives.wings || fsha == Actives.weight)
 			) {
-				stillblock = fsha(fsh, this);
+				stillblock = fsha.func(fsh, this);
 			}
 			if (!stillblock) {
 				target.dmg(trueatk);
