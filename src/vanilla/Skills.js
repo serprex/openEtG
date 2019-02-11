@@ -483,7 +483,7 @@ const Actives = {
 		c.owner.quanta[etg.Aether] = 0;
 	},
 	freeze: function(c, t) {
-		t.freeze(c.card.upped && c.card != Cards.PandemoniumUp ? 4 : 3);
+		t.freeze(c.card.upped && c.card != Cards.Pandemonium.asUpped(true) ? 4 : 3);
 	},
 	frightened: function(c, t) {
 		if (t.type === etg.Creature) {
@@ -1007,7 +1007,7 @@ const Actives = {
 			c.owner.spend(i, -2);
 		}
 		if (++c.owner.nova2 > 1) {
-			new smth.Creature(Cards.SingularityUp, c.owner).place();
+			new smth.Creature(Cards.Singularity.asUpped(true), c.owner).place();
 		}
 	},
 	nymph: function(c, t) {
