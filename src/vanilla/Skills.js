@@ -760,9 +760,8 @@ const Actives = {
 				active = shardSkills[i][num - 1];
 			}
 		}
-		var actives = new imm.Map(),
+		var actives = new imm.Map().set(cost < 0 ? activeType[~cost] : 'cast', Actives[active]),
 			cost = shardCosts[active];
-		actives[cost < 0 ? activeType[~cost] : 'cast'] = Actives[active];
 		var status = new imm.Map();
 		if (shardTally[etg.Air] > 0) {
 			status = status.set('airborne', true);
@@ -1250,28 +1249,22 @@ const Actives = {
 			Actives.antimatter.func(c, c);
 			return;
 		}
-		var r = c.owner.rng();
-		if (r > 0.9) {
-			c.status = c.status.set('adrenaline', 1);
-		} else if (r > 0.8) {
-			c.active = c.active.set('hit', Actives.vampire);
-		} else if (r > 0.7) {
-			Actives.quint.func(c, c);
-		} else if (r > 0.6) {
-			Actives.scramble.func(c, c.owner);
-		} else if (r > 0.5) {
-			Actives.blackhole.func(c.owner.foe, c.owner);
-		} else if (r > 0.4) {
-			var buff = c.owner.upto(25);
-			c.buffhp(Math.floor(buff / 5) + 1);
-			c.atk -= buff % 5 + 1;
-		} else if (r > 0.3) {
+		const r = c.owner.upto(12);
+		if (r === 0) {
 			Actives.nova.func(c.owner.foe);
 			c.owner.foe.nova = 0;
-		} else if (r > 0.2) {
+		} else if (r < 3) {
+			c.active = c.active.set('hit', Actives.vampire);
+		} else if (r < 5) {
+			Actives.quint.func(c, c);
+		} else if (r < 7) {
+			const buff = c.owner.upto(25);
+			c.buffhp(Math.floor(buff / 5) + 1);
+			c.atk -= buff % 5 + 1;
+		} else if (r < 9) {
+			c.status = c.status.set('adrenaline', 1);
+		} else if (r < 11) {
 			Actives.parallel.func(c, c);
-		} else if (r > 0.1 && c.owner.weapon) {
-			c.owner.weapon = new smth.Weapon(Cards.Dagger, c.owner);
 		}
 	},
 	siphon: adrenathrottle(function(c, t) {
