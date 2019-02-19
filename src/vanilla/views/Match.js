@@ -508,7 +508,7 @@ module.exports = connect()(class Match extends React.Component {
 
 	UNSAFE_componentWillReceiveProps(props) {
 		if (props.game !== this.props.game) {
-			this.componentWillUnmount();
+			clearInterval(this.gameInterval);
 			this.startMatch(props);
 		}
 	}

@@ -27,7 +27,6 @@ module.exports = connect(state => ({
 }))(function Rightpane(props) {
 	function challengeClick() {
 		var deck = sock.getDeck();
-		console.log(props, deck);
 		if (deck.length < 31) {
 			return;
 		}
@@ -38,7 +37,6 @@ module.exports = connect(state => ({
 		parseInput(gameData, 'p1deck', +props.pvpdeck);
 		gameData.deck = deck;
 		gameData.room = props.room;
-		console.log(gameData);
 		sock.emit('pvpwant', gameData);
 	}
 
