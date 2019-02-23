@@ -513,14 +513,14 @@ Thing.prototype.mutantactive = function() {
 };
 
 Weapon.prototype.trueatk = Creature.prototype.trueatk = function(adrenaline) {
+	if (adrenaline === undefined) adrenaline = this.getStatus('adrenaline');
 	var dmg = this.atk;
 	if (this.status.get('dive')) dmg += this.status.get('dive');
 	dmg += this.trigger('buff');
 	if (this.type === etg.Creature) {
 		dmg += this.calcEclipse();
 	}
-	var y = adrenaline || this.status.get('adrenaline') || 0;
-	return etg.calcAdrenaline(y, dmg);
+	return etg.calcAdrenaline(adrenaline, dmg);
 };
 Weapon.prototype.truehp = function() {
 	return this.card.health;

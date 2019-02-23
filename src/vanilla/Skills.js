@@ -469,7 +469,6 @@ const Actives = {
 			cr.active = wp.active;
 			cr.cast = wp.cast;
 			cr.castele = wp.castele;
-			cr.status = wp.status;
 			cr.status = cr.status.set('airborne', true);
 			cr.place();
 			c.owner.weapon = undefined;
