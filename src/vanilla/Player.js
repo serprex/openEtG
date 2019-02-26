@@ -304,12 +304,12 @@ Player.prototype.masscc = function(caster, func, massmass, saveowncloak) {
 	for (var i = 0; i < 16; i++) {
 		var pr = this.permanents[i];
 		if (pr && pr.status.get('cloak')) {
-			Actives.destroy(this, pr);
+			Actives.destroy.func(this, pr);
 		}
 		if (massmass) {
 			pr = this.foe.permanents[i];
 			if (pr && pr.status.get('cloak') && !saveowncloak) {
-				Actives.destroy(this, pr);
+				Actives.destroy.func(this, pr);
 			}
 		}
 	}
