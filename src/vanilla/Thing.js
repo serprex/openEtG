@@ -275,7 +275,7 @@ Weapon.prototype.place = function(fromhand) {
 		this.owner.weapon.incrStatus('charges', this.getStatus('charges'));
 	} else {
 		if (this.owner.weapon) {
-			this.setStatus('frozen', this.owner.weapon.get('frozen'));
+			this.setStatus('frozen', this.owner.weapon.status.get('frozen'));
 		}
 		this.owner.weapon = this;
 	}

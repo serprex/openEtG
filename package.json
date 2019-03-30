@@ -12,26 +12,26 @@
     "immutable": "^4.0.0-rc.12",
     "redis": "^2.8.0",
     "rng.js": "^1.0.2",
-    "ws": "^6.1.4"
+    "ws": "^6.2.1"
   },
   "devDependencies": {
-    "@babel/core": "^7.3.3",
-    "@babel/plugin-proposal-class-properties": "^7.3.3",
-    "@babel/plugin-proposal-object-rest-spread": "^7.3.2",
+    "@babel/core": "^7.4.0",
+    "@babel/plugin-proposal-class-properties": "^7.4.0",
+    "@babel/plugin-proposal-object-rest-spread": "^7.4.0",
     "@babel/plugin-transform-react-jsx": "^7.3.0",
-    "@babel/polyfill": "^7.2.5",
-    "@babel/preset-env": "^7.3.1",
+    "@babel/polyfill": "^7.4.0",
+    "@babel/preset-env": "^7.4.2",
     "@babel/preset-react": "^7.0.0",
     "babel-loader": "^8.0.5",
     "babel-polyfill": "^6.26.0",
     "optipng-bin": "^5.1.0",
     "prettier": "^1.16.4",
-    "react": "^16.8.2",
-    "react-dom": "^16.8.2",
-    "react-redux": "^6.0.0",
+    "react": "^16.8.6",
+    "react-dom": "^16.8.6",
+    "react-redux": "^6.0.1",
     "redux": "^4.0.1",
-    "webpack": "^4.29.5",
-    "webpack-cli": "^3.2.3"
+    "webpack": "^4.29.6",
+    "webpack-cli": "^3.3.0"
   },
   "scripts": {
     "start": "./server.js",
