@@ -38,7 +38,20 @@
 	function updateTable(e){
 		if (e.keyCode != 13) return;
 		while (infobox.firstChild) infobox.firstChild.remove();
-		var dmg = dmginput.value.split(' ').map(function(x) { return +x; });
+		var dmg = [], dmgtext = dmginput.value.split(' ');
+		for (var i=0; i<dmgtext.length; i++) {
+			var dt = dmgtext[i];
+			if (~dt.indexOf('x')) {
+				var dts = dt.split('x'),
+					d = +dts[0],
+					n = +dts[1];
+				for (var j=0; j<n; j++) {
+					dmg.push(d);
+				}
+			} else {
+				dmg.push(+dmgtext[i]);
+			}
+		}
 		var dmgmap = new Map([[0, [100, 100]]]);
 		for (var i=0; i<dmg.length; i++) {
 			var nextdmg = new Map();
