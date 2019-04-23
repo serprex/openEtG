@@ -258,8 +258,6 @@ module.exports = connect(({user, opts}) => ({
 			}
 			self.props.dispatch(store.doNav(require('./Login')));
 		}
-		audio.changeSound(this.props.enableSound);
-		audio.changeMusic(this.props.enableMusic);
 		const quickslots = [];
 		if (self.props.user) {
 			for (let i = 0; i < 10; i++) {
@@ -688,8 +686,11 @@ module.exports = connect(({user, opts}) => ({
 								top: '88px',
 							}}>
 							<input type='checkbox'
-								value={this.props.enableSound}
-								onChange={e => this.props.dispatch(store.setOpt('enableSound', e.target.value))}
+								checked={this.props.enableSound}
+								onChange={e => {
+									audio.changeSound(e.target.checked);
+									this.props.dispatch(store.setOpt('enableSound', e.target.checked));
+								}}
 							/>
 							Enable sound
 						</label>
@@ -700,8 +701,11 @@ module.exports = connect(({user, opts}) => ({
 								top: '53px',
 							}}>
 							<input type='checkbox'
-								value={this.props.enableMusic}
-								onChange={e => this.props.dispatch(store.setOpt('enableMusic', e.target.value))}
+								checked={this.props.enableMusic}
+								onChange={e => {
+									audio.changeMusic(e.target.checked);
+									this.props.dispatch(store.setOpt('enableMusic', e.target.checked));
+								}}
 							/>
 							Enable music
 						</label>

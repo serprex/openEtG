@@ -1,8 +1,8 @@
 'use strict';
 function hookRowMouseover(tr) {
 	tr.addEventListener('mouseover', function(e) {
-		for (var i = 1; i < this.children.length; i++) {
-			var child = this.children[i].children[0];
+		for (let i = 1; i < this.children.length; i++) {
+			const child = this.children[i].children[0];
 			if (child.href && child.href.match(/\/Cards\/...\.png$/)) {
 				imgs[i - 1].src = child.href;
 				imgs[i - 1].style.visibility = '';
@@ -14,25 +14,25 @@ function hookRowMouseover(tr) {
 	});
 }
 const CardData = require('../Cards.json');
-const Cards = {};
+const Cards = new Map();
 for (let i = 0; i < CardData.length - 1; i++) {
 	const Cardi = CardData[i];
 	for (let j = 1; j < Cardi.length; j++) {
 		const Cardj = Cardi[j];
 		for (let k = 0; k < Cardj.length; k++) {
 			const [name, code] = Cardj[k];
-			Cards[code.toString(32)] = name;
-			Cards[(code | 0x4000).toString(32)] = name;
+			Cards.set(code.toString(32), name);
+			Cards.set((code | 0x4000).toString(32), name);
 		}
 	}
 }
 const imgs = new Array(8),
 	imgdiv = document.getElementById('imgdiv');
-for (var i = 0; i < 8; i++) imgdiv.appendChild((imgs[i] = new Image()));
-var table = document.createElement('table');
+for (let i = 0; i < 8; i++) imgdiv.appendChild((imgs[i] = new Image()));
+const table = document.createElement('table');
 [
 	[
-		['andretimpa', '//andretimpa.deviantart.com'],
+		['andretimpa', 'https://andretimpa.deviantart.com'],
 		['Opening Music', 'sound/openingMusic.ogg'],
 		[
 			'4sa',
@@ -66,16 +66,17 @@ var table = document.createElement('table');
 			'6ub',
 		],
 	],
-	[['artimies', '//elementscommunity.org/forum/profile/?u=140'], ['593']],
-	[['Cryotube', '//cryotube.deviantart.com'], ['566', '597', '5fe', '5lr']],
-	[['Dawn to Dusk', '?'], ['505', 'ls9', '5sa', '62f', '6ul']],
-	[['Hawanja', '//hawanja.deviantart.com'], ['4vs']],
+
+	[['artimies', 'http://elementscommunity.org/forum/profile/?u=140'], ['593']],
+	[['Cryotube', 'https://cryotube.deviantart.com'], ['566', '597', '5fe', '5lr']],
+	[['Dawn to Dusk', 'http://elementscommunity.org/forum/profile/?u=5119'], ['505', 'ls9', '5sa', '62f', '6ul']],
+	[['Hawanja', 'https://hawanja.deviantart.com'], ['4vs']],
 	[
-		['jarozaoz', '//elementscommunity.org/forum/profile/?u=6364'],
+		['jarozaoz', 'http://elementscommunity.org/forum/profile/?u=6364'],
 		['4t3', '4vn', '532', '5le', '5op'],
 	],
 	[
-		['kae', '//willowdream.deviantart.com'],
+		['kae', 'https://willowdream.deviantart.com'],
 		[
 			'4sd',
 			'4sg',
@@ -161,10 +162,10 @@ var table = document.createElement('table');
 		['Lost in Nowhere', '/forum/index.php?action=profile;u=38'],
 		['4vd', '4vg', '539', '5it', '5fh'],
 	],
-	[['mega plini', '//elementscommunity.org/forum/profile/?u=202'], ['5ig']],
-	[['moomoose', '//elementscommunity.org/forum/profile/?u=40'], ['5i6']],
+	[['mega plini', 'http://elementscommunity.org/forum/profile/?u=202'], ['5ig']],
+	[['moomoose', 'http://elementscommunity.org/forum/profile/?u=40'], ['5i6']],
 	[
-		['OdinVanguard', '//elementscommunity.org/forum/profile/?u=232'],
+		['OdinVanguard', 'http://elementscommunity.org/forum/profile/?u=232'],
 		[
 			'4se',
 			'4sf',
@@ -240,11 +241,11 @@ var table = document.createElement('table');
 		],
 	],
 	[
-		['pepokish', '//theowlettenest.com'],
+		['pepokish', 'http://theowlettenest.com'],
 		['52g', '58o', '5bv', '5f0', '5i4', '5ie', '5l8', '5lb', '5oj'],
 	],
 	[
-		['Ravizant', '//elementscommunity.org/forum/profile/?u=8037'],
+		['Ravizant', 'http://elementscommunity.org/forum/profile/?u=8037'],
 		['Card Backgrounds', 'assets/cardBacks.png'],
 		[
 			'4sc',
@@ -406,15 +407,35 @@ var table = document.createElement('table');
 		],
 	],
 	[
-		['Thalas', '//elementscommunity.org/forum/profile/?u=103'],
+		['Sovereign', 'https://soundcloud.com/the_sovereign'],
+		['Mulligan', 'sound/mulligan.ogg'],
+		['Click', 'sound/click.ogg'],
+		['creaPlay', 'sound/creaPlay.ogg'],
+		['permPlay', 'sound/permPlay.ogg'],
+		['Devour', 'sound/devour.ogg'],
+		['Dive', 'sound/dive.ogg'],
+		['Draw1', 'sound/draw1.ogg'],
+		['Draw2', 'sound/draw2.ogg'],
+		['Draw3', 'sound/draw3.ogg'],
+		['Draw4', 'sound/draw4.ogg'],
+		['Freeze', 'sound/freeze.ogg'],
+		['Lobotomize', 'sound/lobo.ogg'],
+		['Poison', 'sound/poison.ogg'],
+		['Shuffle', 'sound/shuffle.ogg'],
+		['Skelify', 'sound/skelify.ogg'],
+		['Stasis', 'sound/stasis.ogg'],
+		[]
+	],
+	[
+		['Thalas', 'http://elementscommunity.org/forum/profile/?u=103'],
 		['5i9', '5if', '7dl'],
 	],
-	[['TheManuz', '//elementscommunity.org/forum/profile?u=75'], ['502', '5ot']],
+	[['TheManuz', 'http://elementscommunity.org/forum/profile/?u=75'], ['502', '5ot']],
 	[
-		['vrt', '//vrt-designs.com'],
+		['vrt', 'http://elementscommunity.org/forum/profile/?u=16'],
 		[
 			'Donation thread',
-			'//elementscommunity.org/forum/card-art/help-support-an-artist',
+			'http://elementscommunity.org/forum/card-art/help-support-an-artist',
 		],
 		[
 			'4sb',
@@ -462,16 +483,16 @@ var table = document.createElement('table');
 			'590',
 		],
 	],
-	[['NASA', '//nasa.gov'], ['5p2']],
-	[['freeSFX', '//freesfx.co.uk'], []],
-].forEach(function(credit) {
-	var tr = document.createElement('tr');
+	[['NASA', 'https://nasa.gov'], ['5p2']],
+	[['freeSFX', 'https://freesfx.co.uk'], []],
+].forEach((credit) => {
+	let tr = document.createElement('tr');
 	hookRowMouseover(tr);
 	tr.className = 'padtop';
-	var x = 0;
+	let x = 0;
 	function incx(text, link) {
-		var td = document.createElement('td');
-		var a = document.createElement('a');
+		let td = document.createElement('td');
+		const a = document.createElement('a');
 		a.href = link;
 		a.appendChild(document.createTextNode(text));
 		td.appendChild(a);
@@ -484,12 +505,12 @@ var table = document.createElement('table');
 			x = 1;
 		}
 	}
-	for (var i = 0; i < credit.length - 1; i++) {
+	for (let i = 0; i < credit.length - 1; i++) {
 		incx(credit[i][0], credit[i][1]);
 	}
-	var codes = credit[credit.length - 1];
+	const codes = credit[credit.length - 1];
 	if (codes.length) {
-		codes.forEach((code, i) => incx(Cards[code], 'Cards/' + code + '.png'));
+		codes.forEach((code, i) => incx(Cards.get(code), `Cards/${code}.png`));
 	}
 	table.appendChild(tr);
 });

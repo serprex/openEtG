@@ -25,6 +25,7 @@ function Thing(card) {
 	this.active = card.active;
 }
 module.exports = Thing;
+const sfx = require('./audio');
 
 Thing.prototype.toString = function() {
 	return this.card.name;
@@ -269,6 +270,7 @@ Thing.prototype.spelldmg = function(x, dontdie) {
 Thing.prototype.addpoison = function(x) {
 	if (this.type == etg.Weapon) this.owner.addpoison(x);
 	else if (!this.active.has('ownpoison') || this.trigger('ownpoison')) {
+		sfx.playSound('poison');
 		this.incrStatus('poison', x);
 		if (this.status.get('voodoo')) {
 			this.owner.foe.addpoison(x);
@@ -276,12 +278,15 @@ Thing.prototype.addpoison = function(x) {
 	}
 };
 Thing.prototype.delay = function(x) {
+	Effect.mkText('Delay', this);
+	sfx.playSound('stasis');
 	this.incrStatus('delayed', x);
 	if (this.status.get('voodoo')) this.owner.foe.delay(x);
 };
 Thing.prototype.freeze = function(x) {
 	if (!this.active.has('ownfreeze') || this.trigger('ownfreeze')) {
 		Effect.mkText('Freeze', this);
+		sfx.playSound('freeze');
 		if (x > this.getStatus('frozen')) this.setStatus('frozen', x);
 		if (this.status.get('voodoo')) this.owner.foe.freeze(x);
 	}

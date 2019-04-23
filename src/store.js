@@ -2,12 +2,15 @@
 const usercmd = require('./usercmd'),
 	redux = require('redux'),
 	React = require('react'),
+	sfx = require('./audio'),
 	opts = { channel: 'Main' };
 
 let hasLocalStorage = true;
 try {
 	for (const key in localStorage)
 		if (localStorage.hasOwnProperty(key)) opts[key] = localStorage[key];
+	audio.changeSound(opts.enableSound);
+	audio.changeMusic(opts.enableMusic);
 } catch (e) {
 	hasLocalStorage = false;
 }

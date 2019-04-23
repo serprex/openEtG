@@ -104,7 +104,7 @@ function IconBtn(props) {
 			top: props.y + 'px',
 		}}
 		onClick={(e) => {
-			audio.playSound('buttonClick');
+			audio.playSound('click');
 			if (props.click) props.click.call(e.target, e);
 		}}
 		onMouseOver={props.onMouseOver}

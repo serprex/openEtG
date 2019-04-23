@@ -11,6 +11,7 @@ const ui = require('../ui'),
 	aiSearch = require('../ai/search'),
 	Components = require('../Components'),
 	store = require('../store'),
+	sfx = require('../audio'),
 	{connect} = require('react-redux'),
 	React = require('react');
 
@@ -435,6 +436,7 @@ module.exports = connect(({user}) => ({user}))(class Match extends React.Compone
 			this.setState({ resigning: false });
 		} else if (game.turn == game.player1) {
 			if (game.phase === etg.MulliganPhase && game.player1.hand.length) {
+				sfx.playSound('mulligan');
 				game.player1.drawhand(game.player1.hand.length - 1);
 				if (!game.ai) sock.emit('mulligan');
 				this.forceUpdate();
@@ -599,6 +601,7 @@ module.exports = connect(({user}) => ({user}))(class Match extends React.Compone
 					game.progressMulligan();
 				} else {
 					const pl = data.spectate == 1 ? game.player1 : game.player2;
+					sfx.playSound('mulligan');
 					pl.drawhand(pl.hand.length - 1);
 				}
 				this.forceUpdate();

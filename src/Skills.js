@@ -1,4 +1,5 @@
-const imm = require('immutable');
+const imm = require('immutable'),
+	sfx = require('./audio');
 function adrenathrottle(f) {
 	return (c, t, data) => {
 		if (
@@ -460,6 +461,7 @@ const Skills = {
 	},
 	devour: (c, t) => {
 		Effect.mkText('1|1', c);
+		sfx.playSound('devour');
 		c.buffhp(1);
 		c.atk += 1;
 		if (t.getStatus('poisonous')) c.addpoison(1);
@@ -499,6 +501,7 @@ const Skills = {
 	},
 	dive: (c, t) => {
 		Effect.mkText('Dive', c);
+		sfx.playSound('dive');
 		c.setStatus('dive', c.trueatk());
 	},
 	divinity: (c, t) => {
@@ -1163,6 +1166,7 @@ const Skills = {
 	},
 	lobotomize: (c, t) => {
 		Effect.mkText('Lobotomize', t);
+		sfx.playSound('lobo');
 		t.lobo();
 		t.setStatus('psionic', 0);
 	},
@@ -1867,7 +1871,10 @@ const Skills = {
 		return c.owner.mark == etg.Life || c.owner.mark == etg.Water ? 1 : 0;
 	},
 	stasis: (c, t, attackFlags) => {
-		if (t.type === etg.Creature && attackFlags.attackPhase && !attackFlags.stasis) attackFlags.stasis = true;
+		if (t.type === etg.Creature && attackFlags.attackPhase && !attackFlags.stasis) {
+			sfx.playSound('stasis');
+			attackFlags.stasis = true;
+		}
 	},
 	ownstasis: (c, t, attackFlags) => {
 		if (t.type === etg.Creature && c.owner === t.owner && attackFlags.attackPhase && !attackFlags.stasis) attackFlags.stasis = true;
@@ -2227,6 +2234,7 @@ const Skills = {
 					!t.owner.creatures[index] ||
 					t.owner.creatures[index].card != Cards.MalignantCell
 				) {
+					sfx.playSound('skelify');
 					const skele = (t.owner.creatures[index] = new Thing(
 						t.card.as(Cards.Skeleton),
 					));
