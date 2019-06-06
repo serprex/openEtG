@@ -24,6 +24,10 @@ function quadpillarFactory(ele) {
 		}
 	};
 }
+function passive(f) {
+	f.passive = true;
+	return f;
+}
 const Skills = {
 	ablaze: x => {
 		const n = +x;
@@ -32,12 +36,12 @@ const Skills = {
 			c.atk += n;
 		};
 	},
-	abomination: (c, t, data) => {
+	abomination: passive((c, t, data) => {
 		if (data.tgt == c && data.active == Skills.mutation) {
 			Skills.improve.func(c, c);
 			data.evade = true;
 		}
-	},
+	}),
 	acceleration: (c, t) => {
 		Effect.mkText('2|-1', c);
 		c.atk += 2;
@@ -123,21 +127,21 @@ const Skills = {
 		t.buffhp(20);
 		t.delay(5);
 	},
-	becomearctic: (c, t) => {
+	becomearctic: passive((c, t) => {
 		c.transform(c.card.as(Cards.ArcticSquid));
-	},
+	}),
 	beguile: (c, t) => {
 		t.remove();
 		t.owner = t.owner.foe;
 		t.owner.addCrea(t);
 		if (c != t) t.addactive('turnstart', Skills.beguilestop);
 	},
-	beguilestop: (c, t) => {
+	beguilestop: passive((c, t) => {
 		if (t == c.owner) {
 			c.rmactive('turnstart', 'beguilestop');
 			Skills.beguile.func(c, c);
 		}
-	},
+	}),
 	bellweb: (c, t) => {
 		Skills.web.func(c, t);
 		t.setStatus('aquatic', 1);
@@ -164,11 +168,11 @@ const Skills = {
 	bow: (c, t) => {
 		return c.owner.mark == etg.Air || c.owner.mark == etg.Light ? 1 : 0;
 	},
-	bounce: (c, t) => {
+	bounce: passive((c, t) => {
 		c.hp = c.maxhp;
 		unsummon(c);
 		return true;
-	},
+	}),
 	bravery: (c, t) => {
 		if (!c.owner.foe.sanctuary) {
 			for (
@@ -242,9 +246,9 @@ const Skills = {
 			c.owner.creatures[data.index] = cl;
 		}
 	},
-	cell: (c, t) => {
+	cell: passive((c, t) => {
 		c.transform(c.card.as(Cards.MalignantCell));
-	},
+	}),
 	chimera: (c, t) => {
 		let atk = 0,
 			hp = 0;
@@ -298,7 +302,7 @@ const Skills = {
 		const poison = t.getStatus('poison') + t.getStatus('poisonous');
 		if (poison) c.owner.foe.addpoison(poison);
 	},
-	counter: (c, t, data) => {
+	counter: passive((c, t, data) => {
 		if (
 			!c.getStatus('frozen') &&
 			!c.getStatus('delayed') &&
@@ -307,7 +311,7 @@ const Skills = {
 		) {
 			c.attackCreature(t);
 		}
-	},
+	}),
 	countimmbur: c => {
 		let n = 0;
 		function test(x) {
@@ -388,11 +392,11 @@ const Skills = {
 			return (data.tgt = c);
 		}
 	},
-	decrsteam: c => {
+	decrsteam: passive(c => {
 		if (c.maybeDecrStatus('steam')) {
 			c.atk--;
 		}
-	},
+	}),
 	deckblast: (c, t) => {
 		c.owner.foe.spelldmg(Math.ceil(c.owner.deck.length / c.owner.deckpower));
 		c.owner.deck.length = 0;
@@ -404,7 +408,7 @@ const Skills = {
 		c.setStatus('burrowed', 1);
 		c.addactive('turnstart', Skills.deepdiveproc);
 	},
-	deepdiveproc: (c, t) => {
+	deepdiveproc: passive((c, t) => {
 		if (t == c.owner) {
 			c.rmactive('turnstart', 'deepdiveproc');
 			c.addactive('turnstart', Skills.deepdiveproc2);
@@ -412,13 +416,13 @@ const Skills = {
 			c.setStatus('burrowed', 0);
 			c.setStatus('dive', c.trueatk() * 2);
 		}
-	},
-	deepdiveproc2: (c, t) => {
+	}),
+	deepdiveproc2: passive((c, t) => {
 		c.rmactive('turnstart', 'deepdiveproc2');
 		c.setSkill('cast', Skills.deepdive);
 		c.castele = etg.Water;
 		c.setStatus('airborne', false);
-	},
+	}),
 	deja: (c, t) => {
 		c.active = c.active.delete('cast');
 		Skills.parallel.func(c, c);
@@ -561,12 +565,12 @@ const Skills = {
 		c.setStatus('immaterial', 1);
 		c.addactive('turnstart', Skills.dshieldoff);
 	},
-	dshieldoff: (c, t) => {
+	dshieldoff: passive((c, t) => {
 		if (c.owner == t) {
 			c.setStatus('immaterial', 0);
 			c.rmactive('turnstart', 'dshieldoff');
 		}
-	},
+	}),
 	duality: (c, t) => {
 		if (c.owner.foe.deck.length && c.owner.hand.length < 8) {
 			c.owner.addCardInstance(c.owner.foe.deck[c.owner.foe.deck.length - 1].clone(c.owner));
@@ -585,12 +589,12 @@ const Skills = {
 		}
 		t.proc('destroy', {});
 	},
-	elf: (c, t, data) => {
+	elf: passive((c, t, data) => {
 		if (data.tgt == c && data.active == Skills.cseed) {
 			c.transform(c.card.as(Cards.FallenElf));
 			data.evade = true;
 		}
-	},
+	}),
 	embezzle: (c, t) => {
 		Effect.mkText('Embezzle', t);
 		t.lobo();
@@ -694,11 +698,11 @@ const Skills = {
 			t.setStatus('frozen', 0);
 		}
 	},
-	firebrand: (c, t, data) => {
+	firebrand: passive((c, t, data) => {
 		if (data.tgt == c && data.active == Skills.tempering) {
 			c.incrStatus('charges', 1);
 		}
-	},
+	}),
 	flatline: (c, t) => {
 		if (!c.owner.foe.sanctuary) {
 			c.owner.foe.flatline = true;
@@ -1219,9 +1223,9 @@ const Skills = {
 		c.active = c.active.delete('cast');
 		c.setStatus('nocturnal', 1);
 	},
-	martyr: (c, t, dmg) => {
+	martyr: passive((c, t, dmg) => {
 		if (dmg > 0) c.atk += dmg;
-	},
+	}),
 	mend: (c, t) => {
 		t.dmg(-10);
 	},
@@ -1276,12 +1280,12 @@ const Skills = {
 		t.buffhp(1);
 		t.setStatus('momentum', 1);
 	},
-	mummy: (c, t, data) => {
+	mummy: passive((c, t, data) => {
 		if (data.tgt == c && data.active == Skills.rewind) {
 			c.transform(c.card.as(Cards.Pharaoh));
 			data.evade = true;
 		}
-	},
+	}),
 	mutant: (c, t) => {
 		if (!c.mutantactive()) {
 			c.setSkill('cast', Skills.web);
@@ -1380,9 +1384,9 @@ const Skills = {
 		Skills.destroy.func(c, t, true, true);
 		t.owner.addCrea(new Thing(t.card.as(Cards.Codes[etg.NymphList[e]])));
 	},
-	obsession: (c, t) => {
+	obsession: passive((c, t) => {
 		c.owner.spelldmg(c.card.upped ? 10 : 8);
-	},
+	}),
 	ouija: (c, t) => {
 		if (!c.owner.foe.sanctuary && c.owner.foe.hand.length < 8) {
 			c.owner.foe.addCard(Cards.OuijaEssence);
@@ -1521,9 +1525,9 @@ const Skills = {
 			if (fhand.length) Skills.destroycard.func(c, fhand[fhand.length - 1]);
 		}
 	},
-	predatoroff: (c, t) => {
+	predatoroff: passive((c, t) => {
 		c.rmactive('turnstart', 'predatoroff');
-	},
+	}),
 	protectall: (c, t) => {
 		function protect(p) {
 			if (p && p.isMaterial()) {
@@ -1534,13 +1538,13 @@ const Skills = {
 		c.owner.creatures.forEach(protect);
 		c.owner.permanents.forEach(protect);
 	},
-	protectonce: (c, t, data) => {
+	protectonce: passive((c, t, data) => {
 		if (data.tgt == c && c.owner != t.owner) {
 			c.rmactive('prespell', 'protectonce');
 			c.rmactive('spelldmg', 'protectoncedmg');
 			data.evade = true;
 		}
-	},
+	}),
 	protectoncedmg: (c, t) => {
 		c.rmactive('prespell', 'protectonce');
 		c.rmactive('spelldmg', 'protectoncedmg');
@@ -1684,7 +1688,7 @@ const Skills = {
 			c.owner.dmg(-dmg);
 		}
 	},
-	salvage: (c, t, data) => {
+	salvage: passive((c, t, data) => {
 		Skills['growth 1'].func(c);
 		if (
 			!data.salvaged &&
@@ -1696,7 +1700,7 @@ const Skills = {
 			c.owner.addCard(t.card);
 			c.addactive('turnstart', Skills.salvageoff);
 		}
-	},
+	}),
 	salvageoff: (c, t) => {
 		c.rmactive('turnstart', 'salvageoff');
 	},
@@ -1826,12 +1830,12 @@ const Skills = {
 		t.atk--;
 		c.atk++;
 	},
-	skeleton: (c, t, data) => {
+	skeleton: passive((c, t, data) => {
 		if (data.tgt == c && data.active == Skills.rewind) {
 			Skills.hatch.func(c);
 			data.evade = true;
 		}
-	},
+	}),
 	skyblitz: (c, t) => {
 		c.owner.quanta[etg.Air] = 0;
 		c.owner.creatures.forEach(cr => {
@@ -1922,12 +1926,12 @@ const Skills = {
 			c.owner.addCrea(new Thing(c.card.as(Cards[name])));
 		};
 	},
-	swarm: (c, t) => {
+	swarm: passive((c, t) => {
 		return c.owner.creatures.reduce(
 			(hp, cr) => (cr && cr.hasactive('hp', 'swarm') ? hp + 1 : hp),
 			0,
 		);
-	},
+	}),
 	swave: (c, t) => {
 		if (t.getStatus('frozen')) {
 			Effect.mkText('Death', t);
@@ -2086,9 +2090,9 @@ const Skills = {
 	unvindicate: (c, t) => {
 		c.setStatus('vindicated', 0);
 	},
-	virtue: (c, t, blocked) => {
+	virtue: passive((c, t, blocked) => {
 		c.owner.buffhp(blocked);
-	},
+	}),
 	virusinfect: (c, t) => {
 		c.die();
 		Skills.infect.func(c, t);
@@ -2278,7 +2282,6 @@ function unsummon(t) {
 for (const key in Skills) {
 	Skills[key] = { name: [key], func: Skills[key], passive: false };
 }
-Skills.abomination.passive = Skills.becomearctic.passive = Skills.beguilestop.passive = Skills.bounce.passive = Skills.cell.passive = Skills.counter.passive = Skills.decrsteam.passive = Skills.deepdiveproc.passive = Skills.deepdiveproc2.passive = Skills.dshieldoff.passive = Skills.elf.passive = Skills.firebrand.passive = Skills.martyr.passive = Skills.mummy.passive = Skills.obsession.passive = Skills.predatoroff.passive = Skills.protectonce.passive = Skills.protectoncedmg.passive = Skills.salvage.passive = Skills.skeleton.passive = Skills.swarm.passive = Skills.virtue.passive = true;
 module.exports = Skills;
 var etg = require('./etg');
 var util = require('./util');

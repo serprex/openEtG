@@ -230,9 +230,7 @@ const data = {
 		'Deal 2 spell damage to target. Increment damage per 5:7 owned. May freeze target',
 	ignite: 'Deal 20 spell damage to foe & 1 spell damage to all creatures',
 	immolate: c =>
-		'Sacrifice a creature to produce ' +
-		(c.upped ? 7 : 5) +
-		':6 & 1 quanta of each element',
+		`Sacrifice a creature to produce ${c.upped ? 7 : 5}:6 & 1 quanta of each element`,
 	improve: 'Mutate target creature',
 	inertia: 'When own is targeted, produce 2:3',
 	infect: 'Poison target creature',
@@ -255,7 +253,7 @@ const data = {
 	loot: 'Steal a random permanent from foe when own permanent is destroyed',
 	losecharge: (c, inst) => {
 		const charges = c.getStatus('charges');
-		return 'Lasts ' + charges + ' turn' + (charges == 1 ? '' : 's');
+		return `Lasts ${charges} turn${charges == 1 ? '' : 's'}`;
 	},
 	luciferin:
 		'All own creatures without skills produce 1:8 per turn. Heal owner 10',
@@ -272,7 +270,7 @@ const data = {
 	mitosisspell:
 		'Creature gains 0|1 & active "Cast own card" costing target\'s card\'s cost',
 	momentum: 'Target ignores shield effects & gains 1|1',
-	mummy: 'Become a Pharaoh if target of Reverse Time',
+	mummy: 'Become a Pharaoh if target of Rewind',
 	mutation:
 		'Mutate target creature into an abomination, or maybe something more. Slight chance of death',
 	mutant: 'Enter with mutant abilities',
@@ -280,9 +278,7 @@ const data = {
 		'Apply poison on hit, also inflicting neurotoxin. Neurotoxin applies poison per card played by victim. Throttled',
 	neuroify: 'Gives foe neurotoxin status if they are already poisoned',
 	nightmare: c =>
-		"Fill foe's hand with copies of target creature's card. Drain " +
-		(c.upped ? '2' : '1') +
-		'HP per added card',
+		`Fill foe's hand with copies of target creature's card. Drain ${c.upped ? '2' : '1'} HP per added card`,
 	nightshade:
 		'Target creatures becomes nocturnal, gains 5|5, & has their active cleared',
 	nova:
@@ -314,18 +310,15 @@ const data = {
 	photosynthesis: 'Produce 2:5. May activate multiple times',
 	pillar: c => `Produce ${c.element ? 1 : 3}:${c.element} per turn`,
 	pend: c =>
-		'Oscilliate between producing ' +
-		(c.element ? 1 : 3) +
-		':' +
-		c.element +
-		' & quanta of mark',
+		`Oscilliate between producing ${c.element ? 1 : 3}:${c.element} & quanta of mark`,
 	plague: "Poison target player's creatures. Removes cloak",
 	platearmor: ['Target gains 0|4', 'Target gains 0|6'],
 	poison: x => {
-		x = 'Apply ' + (x === '1' ? '' : x + ' ') + 'poison ';
+		x = `Apply ${x === '1' ? '' : x + ' '}poison `;
 		return {
-			hit: x + 'on hit. Throttled',
-			cast: x + 'to foe',
+			hit: `${x} on hit. Throttled`,
+			cast: `${x} to foe`,
+			death: `${x} on death`,
 		};
 	},
 	poisonfoe: 'May apply poison to foe on play',
@@ -401,7 +394,7 @@ const data = {
 	siphon: 'Siphon 1:0 from foe as 1:11. Throttled',
 	siphonactive: "Steal target creature's skills. May activate again this turn",
 	siphonstrength: 'Absorb 1|0 from target creature',
-	skeleton: 'Become a random creature if target of Reverse Time',
+	skeleton: 'Become a random creature if target of Rewind',
 	skull:
 		'Attacking creatures may die & become skeletons. Smaller creatures are more likely to die',
 	skyblitz: 'Dive all own airborne creatures. Consumes remaining 1:9',
