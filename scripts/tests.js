@@ -250,10 +250,14 @@ M.test('Hope', function() {
 });
 M.test('Lobotomize', function() {
 	this.player1.addCrea(new Thing(Cards.Devourer));
-	const dev = this.player1.creatures[0];
-	assert.ok(dev.active.size, 'Skills');
+	this.player1.addCrea(new Thing(Cards.Abomination));
+	const [dev, abom] = this.player1.creatures;
+	assert.ok(dev.active.size, 'Dev Skills');
+	assert.ok(abom.active.size, 'Abom Skills');
 	Skills.lobotomize.func(dev, dev);
-	assert.ok(!dev.active.size, 'No more');
+	Skills.lobotomize.func(abom, abom);
+	assert.ok(!dev.active.size, 'Dev no more');
+	assert.ok(abom.active.size, 'Abom still');
 });
 M.test('Obsession', function() {
 	initHand(

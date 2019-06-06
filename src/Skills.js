@@ -24,8 +24,9 @@ function quadpillarFactory(ele) {
 		}
 	};
 }
+const passiveSet = new Set();
 function passive(f) {
-	f.passive = true;
+	passiveSet.add(f);
 	return f;
 }
 const Skills = {
@@ -2280,7 +2281,7 @@ function unsummon(t) {
 	}
 }
 for (const key in Skills) {
-	Skills[key] = { name: [key], func: Skills[key], passive: false };
+	Skills[key] = { name: [key], func: Skills[key], passive: passiveSet.has(Skills[key]) };
 }
 module.exports = Skills;
 var etg = require('./etg');
