@@ -1223,12 +1223,8 @@ const Actives = {
 					(x.type != etg.Pillar || !x.name.match(/^Mark/)) &&
 					!x.isOf(Cards.Relic) &&
 					!x.isOf(Cards.Miracle) &&
-					!etg.ShardList.some(function(shard) {
-						shard && x.isOf(shard);
-					}) &&
-					!etg.NymphList.some(function(nymph) {
-						nymph && x.isOf(nymph);
-					}) &&
+					!etg.ShardList.some(shard => shard && x.isOf(shard)) &&
+					!etg.NymphList.some(nymph => nymph && x.isOf(nymph)) &&
 					(i > 0 || anyentro || x.element == etg.Entropy)
 				);
 			});
