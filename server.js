@@ -555,7 +555,7 @@ const sockmeta = new WeakMap();
 					const card = Cards.Codes[code];
 					if (!card) return;
 					const sellval = userutil.sellValue(card);
-					let codeCount = etgutil.count(user.pool, code);
+					let codeCount = data.price > 0 ? 0 : etgutil.count(user.pool, code);
 					if (data.price > 0) {
 						if (data.price <= sellval) {
 							return;
@@ -582,38 +582,53 @@ const sockmeta = new WeakMap();
 								happened = -amt;
 							}
 						}
-						if (happened && user.gold >= bci.p * amt && codeCount >= happened) {
-							user.gold -= bci.p * amt;
+						if (happened && (data.price > 0 ? user.gold >= bci.p * happened : codeCount >= happened)) {
+							user.gold += bci.p * happened;
 							user.pool = etgutil.addcard(user.pool, code, happened);
 							codeCount += happened;
-							Us.load(bci.u).then(seller => {
-								if (happened < 0) {
-									seller.pool = etgutil.addcard(seller.pool, code, amt);
+							const SellFunc = seller => {
+								const msg = {};
+								if (data.price > 0) {
+									msg.msg = `${user.name} bought ${amt} of ${card.name} @ ${-bci.p} from you.`
+									msg.g = -bci.p * amt;
+									seller.gold += msg.g;
 								} else {
-									seller.gold += bcp.p * amt;
+									msg.msg = `${user.name} sold you ${amt} of ${card.name} @ ${bci.p}`
+									msg.c = etgutil.encodeCount(amt) + code.toString(32);
+									seller.pool = etgutil.addcard(seller.pool, code, amt);
 								}
-							}).catch(()=>{});
+								const sellerSock = Us.socks.get(seller.name);
+								if (sellerSock) {
+									sockEmit(sellerSock, 'bzgive', msg);
+								}
+							};
+							if (bci.u == user.name) {
+								SellFunc(user);
+							} else {
+								Us.load(bci.u).then(SellFunc).catch(()=>{});
+							}
 							if (bci.q > count) {
 								bci.q -= count;
+								count = 0;
 							} else {
-								bc.splice(i, 1);
-								i--;
+								bc.splice(i--, 1);
+								if (!bc.length) delete bz[code];
 								count -= bci.q;
-								if (!count) break;
 							}
+							if (!count) break;
 						}
 					}
 					if (count > 0) {
 						let bidmade = false;
-						if (data.price < 0) {
-							if (codeCount >= count) {
-								user.pool = etgutil.addcard(user.pool, code, -count);
-								codeCount -= count;
+						if (data.price > 0) {
+							if (user.gold >= data.price) {
+								user.gold -= data.price;
 								bidmade = true;
 							}
 						} else {
-							if (user.gold >= data.price) {
-								user.gold -= data.price;
+							if (codeCount >= count) {
+								user.pool = etgutil.addcard(user.pool, code, -count);
+								codeCount -= count;
 								bidmade = true;
 							}
 						}

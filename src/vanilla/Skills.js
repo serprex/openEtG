@@ -865,6 +865,7 @@ const Actives = {
 		Effect.mkText('Lobotomize', t);
 		t.lobo();
 		t.status = t.status.delete('momentum').delete('psion').delete('mutant');
+		t.casts = 0;
 	},
 	locket: function(c, t) {
 		var ele = c.status.get('mode') === undefined ? c.owner.mark : c.status.get('mode');

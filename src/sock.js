@@ -145,6 +145,10 @@ const sockEvents = {
 		</div>));
 		exports.emit('challrecv', { f: data.f, pvp: data.pvp });
 	},
+	bzgive: (data) => {
+		store.store.dispatch(store.userCmd(data.g ? 'addgold' : 'addcards', data));
+		store.store.dispatch(store.chatMsg(data.msg, 'System'));
+	},
 };
 socket.onmessage = function(msg) {
 	const state = store.store.getState();
