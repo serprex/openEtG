@@ -20,9 +20,11 @@ module.exports = class Library extends React.Component {
 
 	componentDidMount() {
 		sock.emit('librarywant', { f: this.props.name });
-		store.store.dispatch(store.setCmds({
-			librarygive: data => this.setState(data),
-		}));
+		store.store.dispatch(
+			store.setCmds({
+				librarygive: data => this.setState(data),
+			}),
+		);
 	}
 
 	render() {
@@ -43,15 +45,10 @@ module.exports = class Library extends React.Component {
 			reprog = [],
 			reprogmax = [];
 		Cards.Codes.forEach((card, code) => {
-			if (
-				!card.upped &&
-				!card.shiny &&
-				card.type &&
-				!card.getStatus('token')
-			) {
+			if (!card.upped && !card.shiny && card.type && !card.getStatus('token')) {
 				progressmax += 42;
 				const prog = codeprog(code);
-				const idx = card.rarity*13+card.element;
+				const idx = card.rarity * 13 + card.element;
 				reprog[idx] = (reprog[idx] || 0) + prog;
 				reprogmax[idx] = (reprogmax[idx] || 0) + 42;
 				progress += prog;
@@ -59,91 +56,109 @@ module.exports = class Library extends React.Component {
 			}
 		});
 		const children = [];
-		for (let e=0; e<13; e++) {
+		for (let e = 0; e < 13; e++) {
 			children.push(
-				<span className={`ico e${e}`} style={{
-					position: 'absolute',
-					left: `${36+e*53}px`,
-					top: '54px',
-				}} />
+				<span
+					className={`ico e${e}`}
+					style={{
+						position: 'absolute',
+						left: `${36 + e * 53}px`,
+						top: '54px',
+					}}
+				/>,
 			);
 		}
-		for (let r=1; r<5; r++) {
+		for (let r = 1; r < 5; r++) {
 			children.push(
-				<span className={`ico r${r}`} style={{
-					position: 'absolute',
-					left: '8px',
-					top: `${64+r*32}px`,
-				}} />
-			);
-			for (let e=0; e<13; e++) {
-				const idx = r*13+e;
-				children.push(
-					<span style={{
+				<span
+					className={`ico r${r}`}
+					style={{
 						position: 'absolute',
-						left: `${36+e*53}px`,
-						top: `${64+r*32}px`,
-						fontSize: '12px',
-					}}>{reprog[idx] || 0} / {reprogmax[idx] || 0}</span>
+						left: '8px',
+						top: `${64 + r * 32}px`,
+					}}
+				/>,
+			);
+			for (let e = 0; e < 13; e++) {
+				const idx = r * 13 + e;
+				children.push(
+					<span
+						style={{
+							position: 'absolute',
+							left: `${36 + e * 53}px`,
+							top: `${64 + r * 32}px`,
+							fontSize: '12px',
+						}}>
+						{reprog[idx] || 0} / {reprogmax[idx] || 0}
+					</span>,
 				);
 			}
 		}
-		return <>
-			<span style={{
-				position: 'absolute',
-				left: '100px',
-				top: '8px',
-			}}>
-				Wealth {this.state.gold + Math.round(userutil.calcWealth(cardpool))}
-			</span>
-			<span style={{
-				position: 'absolute',
-				left: '320px',
-				top: '8px',
-				whiteSpace: 'pre',
-			}}>
-				ZE Progress {progress} / {progressmax}
-				{'\nSZE Progress '}{shinyprogress} / {progressmax}
-			</span>
-			<span style={{
-				position: 'absolute',
-				left: '540px',
-				top: '8px',
-				whiteSpace: 'pre',
-			}}>
-				PvE {this.state.aiwins} - {this.state.ailosses}
-				{'\nPvP '}{this.state.pvpwins} - {this.state.pvplosses}
-			</span>
-			<Components.Card x={734} y={8} code={this.state.code} />
-			<input type='button'
-				value='Toggle Bound'
-				style={{
-					position: 'absolute',
-					left: '5px',
-					top: '554px',
-				}}
-				onClick={() => {
-					this.setState({ showbound: !this.state.showbound });
-				}}
-			/>
-			<Components.ExitBtn x={5} y={8} />
-			<input type='button'
-				value='Export'
-				style={{
-					position: 'absolute',
-					left: '5px',
-					top: '28px',
-				}}
-				onClick={() => open('/collection/' + this.props.name, '_blank')}
-			/>
-			<Components.CardSelector
-				cardpool={this.state.showbound ? boundpool : cardpool}
-				filterboth
-				onMouseOver={code => {
-					code != this.state.code && this.setState({ code });
-				}}
-			/>
-			{children}
-		</>;
+		return (
+			<>
+				<span
+					style={{
+						position: 'absolute',
+						left: '100px',
+						top: '8px',
+					}}>
+					Wealth {this.state.gold + Math.round(userutil.calcWealth(cardpool))}
+				</span>
+				<span
+					style={{
+						position: 'absolute',
+						left: '320px',
+						top: '8px',
+						whiteSpace: 'pre',
+					}}>
+					ZE Progress {progress} / {progressmax}
+					{'\nSZE Progress '}
+					{shinyprogress} / {progressmax}
+				</span>
+				<span
+					style={{
+						position: 'absolute',
+						left: '540px',
+						top: '8px',
+						whiteSpace: 'pre',
+					}}>
+					PvE {this.state.aiwins} - {this.state.ailosses}
+					{'\nPvP '}
+					{this.state.pvpwins} - {this.state.pvplosses}
+				</span>
+				<Components.Card x={734} y={8} code={this.state.code} />
+				<input
+					type="button"
+					value="Toggle Bound"
+					style={{
+						position: 'absolute',
+						left: '5px',
+						top: '554px',
+					}}
+					onClick={() => {
+						this.setState({ showbound: !this.state.showbound });
+					}}
+				/>
+				<Components.ExitBtn x={5} y={8} />
+				<input
+					type="button"
+					value="Export"
+					style={{
+						position: 'absolute',
+						left: '5px',
+						top: '28px',
+					}}
+					onClick={() => open('/collection/' + this.props.name, '_blank')}
+				/>
+				<Components.CardSelector
+					cardpool={this.state.showbound ? boundpool : cardpool}
+					filterboth
+					onMouseOver={code => {
+						code != this.state.code && this.setState({ code });
+					}}
+				/>
+				{children}
+			</>
+		);
 	}
 };

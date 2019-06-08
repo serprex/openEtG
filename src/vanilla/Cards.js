@@ -27,10 +27,7 @@ exports.filter = function(upped, filter, cmp) {
 		filtercache[cacheidx] = [];
 		for (const key in exports.Codes) {
 			const card = exports.Codes[key];
-			if (
-				card.upped == upped &&
-				!card.status.get('token')
-			) {
+			if (card.upped == upped && !card.status.get('token')) {
 				filtercache[cacheidx].push(card);
 			}
 		}
@@ -118,9 +115,7 @@ const TargetFilters = {
 		return t.isMaterial(etg.Creature);
 	},
 	creaonly: function(c, t) {
-		return (
-			t.isMaterial(etg.Creature) && t.card.type == etg.CreatureEnum
-		);
+		return t.isMaterial(etg.Creature) && t.card.type == etg.CreatureEnum;
 	},
 	creanonspell: function(c, t) {
 		return t.isMaterial(etg.Creature) && t.card.type != etg.SpellEnum;
@@ -147,10 +142,7 @@ const TargetFilters = {
 		return t.type === etg.Permanent && !t.status.get('stackable');
 	},
 	wisdom: function(c, t) {
-		return (
-			t.type === etg.Creature &&
-			!t.status.get('burrowed')
-		);
+		return t.type === etg.Creature && !t.status.get('burrowed');
 	},
 };
 

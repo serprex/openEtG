@@ -90,7 +90,10 @@ Game.prototype.updateExpectedDamage = function() {
 				const gclone = this.clone();
 				gclone.player1.permanents.forEach(removeSoPa);
 				gclone.player2.permanents.forEach(removeSoPa);
-				gclone.rng.setSeed(gclone.rng.highState ^ (i * 997), gclone.rng.lowState ^ (i * 650));
+				gclone.rng.setSeed(
+					gclone.rng.highState ^ (i * 997),
+					gclone.rng.lowState ^ (i * 650),
+				);
 				gclone.turn.endturn();
 				if (!gclone.winner) gclone.turn.endturn();
 				this.expectedDamage[0] += this.player1.hp - gclone.player1.hp;
@@ -108,11 +111,11 @@ Game.prototype.tgtToBits = function(x) {
 		x.type == etg.Player
 			? 1
 			: x.type == etg.Weapon
-				? 17
-				: x.type == etg.Shield
-					? 33
-					: (x.type == etg.Creature ? 2 : x.type == etg.Permanent ? 4 : 5) |
-						(x.getIndex() << 4);
+			? 17
+			: x.type == etg.Shield
+			? 33
+			: (x.type == etg.Creature ? 2 : x.type == etg.Permanent ? 4 : 5) |
+			  (x.getIndex() << 4);
 	return x.owner == this.player2 ? bits | 8 : bits;
 };
 Game.prototype.bitsToTgt = function(x) {
@@ -122,20 +125,20 @@ Game.prototype.bitsToTgt = function(x) {
 	return tgtop == 0
 		? undefined
 		: tgtop == 1
-			? player[['owner', 'weapon', 'shield'][x4]]
-			: tgtop == 2
-				? player.creatures[x4]
-				: tgtop == 4
-					? player.permanents[x4]
-					: tgtop == 5
-						? player.hand[x4]
-						: console.log('Unknown tgtop: ' + tgtop + ', ' + x4);
+		? player[['owner', 'weapon', 'shield'][x4]]
+		: tgtop == 2
+		? player.creatures[x4]
+		: tgtop == 4
+		? player.permanents[x4]
+		: tgtop == 5
+		? player.hand[x4]
+		: console.log('Unknown tgtop: ' + tgtop + ', ' + x4);
 };
 Game.prototype.getTarget = function(src, active, cb) {
 	const targetingFilter = Cards.Targeting[active.name[0]];
 	if (targetingFilter) {
 		this.targeting = {
-			filter: (t) => {
+			filter: t => {
 				return (
 					(t.type == etg.Player ||
 						t.type == etg.Spell ||

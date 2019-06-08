@@ -74,7 +74,10 @@ const sockmeta = new WeakMap();
 				if (ismem) {
 					func.call(this, data, user);
 				} else {
-					sockEmit(this, 'chat', { mode: 1, msg: `You are not a member of ${key}` });
+					sockEmit(this, 'chat', {
+						mode: 1,
+						msg: `You are not a member of ${key}`,
+					});
 				}
 			});
 		};
@@ -143,12 +146,12 @@ const sockmeta = new WeakMap();
 			user.streak = [];
 			sockEvents.login.call(this, { u: user.name, a: user.auth });
 		},
-		logout: function({u}, user) {
+		logout: function({ u }, user) {
 			db.hset('Users', u, JSON.stringify(user));
 			Us.users.delete(u);
 			Us.socks.delete(u);
 		},
-		delete: function({u}, user) {
+		delete: function({ u }, user) {
 			db.hdel('Users', u);
 			Us.users.delete(u);
 			Us.socks.delete(u);
@@ -188,33 +191,31 @@ const sockmeta = new WeakMap();
 			}
 		},
 		arenainfo: function(data, user) {
-			db
-				.batch([
-					['hgetall', 'A:' + data.u],
-					['hgetall', 'B:' + data.u],
-					['zrevrank', 'arena', data.u],
-					['zrevrank', 'arena1', data.u],
-				])
-				.exec((err, res) => {
-					const day = sutil.getDay();
-					function process(obj, rank) {
-						if (!obj) return;
-						obj.day = day - obj.day;
-						obj.curhp = getAgedHp(obj.hp, obj.day);
-						if (rank !== null) obj.rank = rank;
-						['draw', 'hp', 'loss', 'mark', 'win', 'card'].forEach(function(
-							key,
-						) {
-							obj[key] = +obj[key];
-						});
-					}
-					process(res[0], res[2]);
-					process(res[1], res[3]);
-					sockEmit(this, 'arenainfo', { A: res[0], B: res[1] });
-				});
+			db.batch([
+				['hgetall', 'A:' + data.u],
+				['hgetall', 'B:' + data.u],
+				['zrevrank', 'arena', data.u],
+				['zrevrank', 'arena1', data.u],
+			]).exec((err, res) => {
+				const day = sutil.getDay();
+				function process(obj, rank) {
+					if (!obj) return;
+					obj.day = day - obj.day;
+					obj.curhp = getAgedHp(obj.hp, obj.day);
+					if (rank !== null) obj.rank = rank;
+					['draw', 'hp', 'loss', 'mark', 'win', 'card'].forEach(function(key) {
+						obj[key] = +obj[key];
+					});
+				}
+				process(res[0], res[2]);
+				process(res[1], res[3]);
+				sockEmit(this, 'arenainfo', { A: res[0], B: res[1] });
+			});
 		},
 		modarena: function(data, user) {
-			Us.load(data.aname).then(user => (user.gold += data.won ? 15 : 5)).catch(()=>{});
+			Us.load(data.aname)
+				.then(user => (user.gold += data.won ? 15 : 5))
+				.catch(() => {});
 			const arena = 'arena' + (data.lv ? '1' : ''),
 				akey = (data.lv ? 'B:' : 'A:') + data.aname;
 			db.zscore(arena, data.aname, (err, score) => {
@@ -370,7 +371,12 @@ const sockmeta = new WeakMap();
 					foemeta.foe = this;
 					const deck0 = foemeta.deck,
 						deck1 = thismeta.deck;
-					const owndata = { seed: seed, deck: deck0, urdeck: deck1, foename: f };
+					const owndata = {
+						seed: seed,
+						deck: deck0,
+						urdeck: deck1,
+						foename: f,
+					};
 					const foedata = {
 						flip: true,
 						seed: seed,
@@ -405,7 +411,8 @@ const sockmeta = new WeakMap();
 			}
 		},
 		spectate: function(data, user) {
-			const tgt = Us.socks.get(data.f), tgtmeta = sockmeta.get(tgt);
+			const tgt = Us.socks.get(data.f),
+				tgtmeta = sockmeta.get(tgt);
 			if (tgt && tgtmeta.duel) {
 				sockEmit(tgt, 'chat', { mode: 1, msg: `${data.u} is spectating.` });
 				if (!tgtmeta.spectators) tgtmeta.spectators = [];
@@ -415,7 +422,8 @@ const sockmeta = new WeakMap();
 		canceltrade: function(data) {
 			const info = sockmeta.get(this);
 			if (info.trade) {
-				const foesock = Us.socks.get(info.trade.foe), foemeta = sockmeta.get(foesock);
+				const foesock = Us.socks.get(info.trade.foe),
+					foemeta = sockmeta.get(foesock);
 				if (foesock) {
 					sockEmit(foesock, 'tradecanceled');
 					sockEmit(foesock, 'chat', {
@@ -436,10 +444,11 @@ const sockmeta = new WeakMap();
 				return;
 			}
 			thistrade.tradecards = data.cards;
-			thistrade.g = Math.abs(data.g|0);
+			thistrade.g = Math.abs(data.g | 0);
 			thistrade.oppcards = data.oppcards;
-			thistrade.gopher = Math.abs(data.gopher|0);
-			const thatsock = Us.socks.get(thistrade.foe), thatmeta = thatsock && sockmeta.get(thatsock);
+			thistrade.gopher = Math.abs(data.gopher | 0);
+			const thatsock = Us.socks.get(thistrade.foe),
+				thatmeta = thatsock && sockmeta.get(thatsock);
 			const thattrade = thatmeta && thatmeta.trade;
 			const otherUser = Us.users.get(thistrade.foe);
 			if (!thattrade || !otherUser) {
@@ -451,8 +460,8 @@ const sockmeta = new WeakMap();
 					player2Cards = thattrade.tradecards,
 					player1Gold = thistrade.g,
 					player2Gold = thattrade.g,
-					p1gdelta = (player2Gold - player1Gold)|0,
-					p2gdelta = (player1Gold - player2Gold)|0;
+					p1gdelta = (player2Gold - player1Gold) | 0,
+					p2gdelta = (player1Gold - player2Gold) | 0;
 				if (
 					player1Cards !== thattrade.oppcards ||
 					player2Cards !== thistrade.oppcards ||
@@ -531,7 +540,7 @@ const sockmeta = new WeakMap();
 			}
 		},
 		chat: function(data) {
-			const {to} = data;
+			const { to } = data;
 			if (to) {
 				const sockto = Us.socks.get(to);
 				if (sockto && sockto.readyState == 1) {
@@ -560,7 +569,7 @@ const sockmeta = new WeakMap();
 						if (data.price <= sellval) {
 							return;
 						}
-					} else  {
+					} else {
 						if (-data.price <= sellval) {
 							if (codeCount >= count) {
 								user.gold += sellval * count;
@@ -569,7 +578,7 @@ const sockmeta = new WeakMap();
 							return;
 						}
 					}
-					for (let i=0; i<bc.length; i++) {
+					for (let i = 0; i < bc.length; i++) {
 						const bci = bc[i],
 							amt = Math.min(bci.q, count);
 						let happened = 0;
@@ -582,18 +591,25 @@ const sockmeta = new WeakMap();
 								happened = -amt;
 							}
 						}
-						if (happened && (data.price > 0 ? user.gold >= bci.p * happened : codeCount >= happened)) {
+						if (
+							happened &&
+							(data.price > 0
+								? user.gold >= bci.p * happened
+								: codeCount >= happened)
+						) {
 							user.gold += bci.p * happened;
 							user.pool = etgutil.addcard(user.pool, code, happened);
 							codeCount += happened;
 							const SellFunc = seller => {
 								const msg = {};
 								if (data.price > 0) {
-									msg.msg = `${user.name} bought ${amt} of ${card.name} @ ${-bci.p} from you.`
+									msg.msg = `${user.name} bought ${amt} of ${
+										card.name
+									} @ ${-bci.p} from you.`;
 									msg.g = -bci.p * amt;
 									seller.gold += msg.g;
 								} else {
-									msg.msg = `${user.name} sold you ${amt} of ${card.name} @ ${bci.p}`
+									msg.msg = `${user.name} sold you ${amt} of ${card.name} @ ${bci.p}`;
 									msg.c = etgutil.encodeCount(amt) + code.toString(32);
 									seller.pool = etgutil.addcard(seller.pool, code, amt);
 								}
@@ -605,7 +621,9 @@ const sockmeta = new WeakMap();
 							if (bci.u == user.name) {
 								SellFunc(user);
 							} else {
-								Us.load(bci.u).then(SellFunc).catch(()=>{});
+								Us.load(bci.u)
+									.then(SellFunc)
+									.catch(() => {});
 							}
 							if (bci.q > count) {
 								bci.q -= count;
@@ -634,7 +652,7 @@ const sockmeta = new WeakMap();
 						}
 						if (bidmade) {
 							let hadmerge = false;
-							for (let i=0; i<bc.length; i++) {
+							for (let i = 0; i < bc.length; i++) {
 								const bci = bc[i];
 								if (bci.u === user.name && bci.p == data.price) {
 									bci.q += count;
@@ -644,7 +662,7 @@ const sockmeta = new WeakMap();
 							}
 							if (!hadmerge) {
 								bc.push({ q: count, u: user.name, p: data.price });
-								bc.sort((a,b) => a.p - b.p);
+								bc.sort((a, b) => a.p - b.p);
 							}
 						}
 					}
@@ -746,47 +764,58 @@ const sockmeta = new WeakMap();
 					sockEmit(this, 'login', { err: 'Global error: no kong api in db' });
 					return;
 				}
-				https.get(
-					`https://api.kongregate.com/api/authenticate.json?user_id=${data.u}&game_auth_token=${data.g}&api_key=${key}`,
-					res => {
-						const chunks = [];
-						res.on('data', chunk => chunks.push(chunk));
-						res.on('end', () => {
-							const json = sutil.parseJSON(Buffer.concat(chunks).toString());
-							if (!json) {
-								sockEmit(this, 'login', { err: 'Kong returned invalid JSON' });
-								return;
-							}
-							if (json.success) {
-								const name = 'Kong:' + json.username;
-								Us.load(name).
-									then(user => {
-										user.auth = data.g;
-										sockEvents.login.call(this, { u: name, a: data.g });
-										const req = https.request({
-											hostname: 'www.kongregate.com',
-											path: '/api/submit_statistics.json',
-											method: 'POST',
-										}).on('error', e => console.log(e));
-										req.write(`user_id=${data.u}\ngame_auth_token=${data.g}\napi_key=${key}\nWealth=${user.gold + userutil.calcWealth(user.pool)}`);
-										req.end();
-									}).
-									catch(() => {
-										Us.users.set(name, {
-											name,
-											gold: 0,
-											auth: data.g,
-										});
-										sockEvents.login.call(this, { u: name, a: data.g });
+				https
+					.get(
+						`https://api.kongregate.com/api/authenticate.json?user_id=${data.u}&game_auth_token=${data.g}&api_key=${key}`,
+						res => {
+							const chunks = [];
+							res.on('data', chunk => chunks.push(chunk));
+							res.on('end', () => {
+								const json = sutil.parseJSON(Buffer.concat(chunks).toString());
+								if (!json) {
+									sockEmit(this, 'login', {
+										err: 'Kong returned invalid JSON',
 									});
-							} else {
-								sockEmit(this, 'login', {
-									err: json.error + ': ' + json.error_description,
-								});
-							}
-						});
-					},
-				).on('error', e => console.log(e));
+									return;
+								}
+								if (json.success) {
+									const name = 'Kong:' + json.username;
+									Us.load(name)
+										.then(user => {
+											user.auth = data.g;
+											sockEvents.login.call(this, { u: name, a: data.g });
+											const req = https
+												.request({
+													hostname: 'www.kongregate.com',
+													path: '/api/submit_statistics.json',
+													method: 'POST',
+												})
+												.on('error', e => console.log(e));
+											req.write(
+												`user_id=${data.u}\ngame_auth_token=${
+													data.g
+												}\napi_key=${key}\nWealth=${user.gold +
+													userutil.calcWealth(user.pool)}`,
+											);
+											req.end();
+										})
+										.catch(() => {
+											Us.users.set(name, {
+												name,
+												gold: 0,
+												auth: data.g,
+											});
+											sockEvents.login.call(this, { u: name, a: data.g });
+										});
+								} else {
+									sockEmit(this, 'login', {
+										err: json.error + ': ' + json.error_description,
+									});
+								}
+							});
+						},
+					)
+					.on('error', e => console.log(e));
 			});
 		},
 		guestchat: function(data) {
@@ -808,8 +837,11 @@ const sockmeta = new WeakMap();
 		motd: function(data) {
 			db.zrange('Motd', 0, -1, 'withscores', (err, ms) => {
 				if (err) return;
-				for (let i=0; i<ms.length; i+=2) {
-					sockEmit(this, 'chat', { mode: 1, msg: `motd ${ms[i+1]} ${ms[i]}` });
+				for (let i = 0; i < ms.length; i += 2) {
+					sockEmit(this, 'chat', {
+						mode: 1,
+						msg: `motd ${ms[i + 1]} ${ms[i]}`,
+					});
 				}
 			});
 		},
@@ -863,17 +895,19 @@ const sockmeta = new WeakMap();
 			}
 		},
 		librarywant: function(data) {
-			Us.load(data.f).then(user => {
-				sockEmit(this, 'librarygive', {
-					pool: user.pool,
-					bound: user.accountbound,
-					gold: user.gold,
-					pvpwins: user.pvpwins,
-					pvplosses: user.pvplosses,
-					aiwins: user.aiwins,
-					ailosses: user.ailosses,
-				});
-			}).catch(()=>{});
+			Us.load(data.f)
+				.then(user => {
+					sockEmit(this, 'librarygive', {
+						pool: user.pool,
+						bound: user.accountbound,
+						gold: user.gold,
+						pvpwins: user.pvpwins,
+						pvplosses: user.pvplosses,
+						aiwins: user.aiwins,
+						ailosses: user.ailosses,
+					});
+				})
+				.catch(() => {});
 		},
 		arenatop: function(data) {
 			db.zrevrange(
@@ -926,7 +960,7 @@ const sockmeta = new WeakMap();
 		},
 		bzread: async function(data) {
 			const bz = await Bz.load();
-			sockEmit(this, 'bzread', {bz});
+			sockEmit(this, 'bzread', { bz });
 		},
 		challrecv: function(data) {
 			const foesock = Us.socks.get(data.f);
@@ -935,7 +969,9 @@ const sockmeta = new WeakMap();
 					foename = data.pvp ? info.duel : info.trade ? info.trade.foe : '';
 				sockEmit(foesock, 'chat', {
 					mode: 1,
-					msg: `You have sent a ${data.pvp ? 'PvP' : 'trade'} request to ${foename}!`,
+					msg: `You have sent a ${
+						data.pvp ? 'PvP' : 'trade'
+					} request to ${foename}!`,
 				});
 			}
 		},
@@ -960,7 +996,11 @@ const sockmeta = new WeakMap();
 				const foesock = Us.socks.get(info.trade.foe);
 				if (foesock && foesock.readyState == 1) {
 					const foeinfo = sockmeta.get(foesock);
-					if (foeinfo && foeinfo.trade && Us.socks.get(foeinfo.trade.foe) === this) {
+					if (
+						foeinfo &&
+						foeinfo.trade &&
+						Us.socks.get(foeinfo.trade.foe) === this
+					) {
 						sockEmit(foesock, 'tradecanceled');
 						delete foeinfo.trade;
 					}
@@ -981,7 +1021,9 @@ const sockmeta = new WeakMap();
 		console.log(data.u, data.x);
 		if (echoEvents.has(data.x)) {
 			const thismeta = sockmeta.get(this);
-			const foe = thismeta.trade ? Us.socks.get(thismeta.trade.foe) : thismeta.foe;
+			const foe = thismeta.trade
+				? Us.socks.get(thismeta.trade.foe)
+				: thismeta.foe;
 			if (foe && foe.readyState == 1) {
 				foe.send(rawdata);
 				for (let i = 1; i <= 2; i++) {
@@ -1045,4 +1087,8 @@ const sockmeta = new WeakMap();
 		Us.stop();
 	}
 	process.on('SIGTERM', stop).on('SIGINT', stop);
-})().catch(e => setImmediate(() => {throw e;}));
+})().catch(e =>
+	setImmediate(() => {
+		throw e;
+	}),
+);

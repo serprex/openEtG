@@ -68,8 +68,14 @@ const table = document.createElement('table');
 	],
 
 	[['artimies', 'http://elementscommunity.org/forum/profile/?u=140'], ['593']],
-	[['Cryotube', 'https://cryotube.deviantart.com'], ['566', '597', '5fe', '5lr']],
-	[['Dawn to Dusk', 'http://elementscommunity.org/forum/profile/?u=5119'], ['505', 'ls9', '5sa', '62f', '6ul']],
+	[
+		['Cryotube', 'https://cryotube.deviantart.com'],
+		['566', '597', '5fe', '5lr'],
+	],
+	[
+		['Dawn to Dusk', 'http://elementscommunity.org/forum/profile/?u=5119'],
+		['505', 'ls9', '5sa', '62f', '6ul'],
+	],
 	[['Hawanja', 'https://hawanja.deviantart.com'], ['4vs']],
 	[
 		['jarozaoz', 'http://elementscommunity.org/forum/profile/?u=6364'],
@@ -162,7 +168,10 @@ const table = document.createElement('table');
 		['Lost in Nowhere', '/forum/index.php?action=profile;u=38'],
 		['4vd', '4vg', '539', '5it', '5fh'],
 	],
-	[['mega plini', 'http://elementscommunity.org/forum/profile/?u=202'], ['5ig']],
+	[
+		['mega plini', 'http://elementscommunity.org/forum/profile/?u=202'],
+		['5ig'],
+	],
 	[['moomoose', 'http://elementscommunity.org/forum/profile/?u=40'], ['5i6']],
 	[
 		['OdinVanguard', 'http://elementscommunity.org/forum/profile/?u=232'],
@@ -424,13 +433,16 @@ const table = document.createElement('table');
 		['Shuffle', 'sound/shuffle.ogg'],
 		['Skelify', 'sound/skelify.ogg'],
 		['Stasis', 'sound/stasis.ogg'],
-		[]
+		[],
 	],
 	[
 		['Thalas', 'http://elementscommunity.org/forum/profile/?u=103'],
 		['5i9', '5if', '7dl'],
 	],
-	[['TheManuz', 'http://elementscommunity.org/forum/profile/?u=75'], ['502', '5ot']],
+	[
+		['TheManuz', 'http://elementscommunity.org/forum/profile/?u=75'],
+		['502', '5ot'],
+	],
 	[
 		['vrt', 'http://elementscommunity.org/forum/profile/?u=16'],
 		[
@@ -485,7 +497,7 @@ const table = document.createElement('table');
 	],
 	[['NASA', 'https://nasa.gov'], ['5p2']],
 	[['freeSFX', 'https://freesfx.co.uk'], []],
-].forEach((credit) => {
+].forEach(credit => {
 	let tr = document.createElement('tr');
 	hookRowMouseover(tr);
 	tr.className = 'padtop';

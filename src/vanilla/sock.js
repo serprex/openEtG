@@ -3,14 +3,17 @@ const chat = require('./chat'),
 	mkGame = require('./mkGame'),
 	store = require('./store'),
 	React = require('react');
-const endpoint = (location.protocol === 'http:' ? 'ws://' : 'wss://') + location.hostname + ':13602';
+const endpoint =
+	(location.protocol === 'http:' ? 'ws://' : 'wss://') +
+	location.hostname +
+	':13602';
 var socket = new WebSocket(endpoint);
 const buffer = [];
 let attempts = 0,
 	attemptTimeout = 0,
 	guestname;
 var sockEvents = {
-	pvpgive: (data) => {
+	pvpgive: data => {
 		store.store.dispatch(store.doNav(require('./views/Match'), mkGame(data)));
 	},
 	roll: function(data) {
@@ -61,15 +64,24 @@ var sockEvents = {
 				lastindex = reres.index;
 				continue;
 			}
-			text.push(<a href={`../deck/${reres[0]}`} target='_blank'>{reres[0]}</a>);
+			text.push(
+				<a href={`../deck/${reres[0]}`} target="_blank">
+					{reres[0]}
+				</a>,
+			);
 			lastindex = reres.index + reres[0].length;
 		}
-		if (lastindex != data.msg.length)
-			text.push(data.msg.slice(lastindex));
-		store.store.dispatch(store.chat(<div style={style}>
-			{hs}{ms} {data.u && <b>{data.u} </b>}
-			{text}
-		</div>, data.mode == 1 ? null : 'Main'));
+		if (lastindex != data.msg.length) text.push(data.msg.slice(lastindex));
+		store.store.dispatch(
+			store.chat(
+				<div style={style}>
+					{hs}
+					{ms} {data.u && <b>{data.u} </b>}
+					{text}
+				</div>,
+				data.mode == 1 ? null : 'Main',
+			),
+		);
 	},
 };
 socket.onmessage = function(msg) {

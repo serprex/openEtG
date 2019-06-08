@@ -5,10 +5,14 @@ const sock = require('./sock'),
 let guestname;
 function chatmute() {
 	const state = store.store.getState();
-	store.store.dispatch(store.chatMsg(
-		`${state.opts.muteall ? 'You have chat muted. ' : ''}Muted: ${Array.from(state.muted).join(', ')}`,
-		'System',
-	));
+	store.store.dispatch(
+		store.chatMsg(
+			`${state.opts.muteall ? 'You have chat muted. ' : ''}Muted: ${Array.from(
+				state.muted,
+			).join(', ')}`,
+			'System',
+		),
+	);
 }
 function parseChat(e) {
 	e.cancelBubble = true;
@@ -30,7 +34,9 @@ function parseChat(e) {
 				store.store.dispatch(store.chatMsg(`${cmd} ${cmds[cmd]}`));
 			}
 		} else if (msg == '/clear') {
-			store.store.dispatch(store.clearChat(store.store.getState().opts.channel));
+			store.store.dispatch(
+				store.clearChat(store.store.getState().opts.channel),
+			);
 		} else if (msg == '/who') {
 			sock.emit('who');
 		} else if (msg.match(/^\/roll( |$)\d*d?\d*$/)) {
@@ -62,7 +68,7 @@ function parseChat(e) {
 			const name =
 				store.store.getState().opts.username ||
 				guestname ||
-				(guestname = 10000 + (Math.random()*89999|0) + '');
+				(guestname = 10000 + ((Math.random() * 89999) | 0) + '');
 			if (!msg.match(/^\s*$/)) sock.emit('guestchat', { msg: msg, u: name });
 		} else store.store.dispatch(store.chatMsg('Not a command: ' + msg));
 	}

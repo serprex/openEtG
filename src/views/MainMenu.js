@@ -16,7 +16,7 @@ const etg = require('../etg'),
 	React = require('react'),
 	tipjar = [
 		'Each card in your booster pack has a 50% chance of being from the chosen element',
-		"Earn 5$ when your deck is faced, & another 10$ when it wins\nEarn 25$ per age of current deck for a new deck, or 250$ if over a week old",
+		'Earn 5$ when your deck is faced, & another 10$ when it wins\nEarn 25$ per age of current deck for a new deck, or 250$ if over a week old',
 		'Colosseum lets you compete in a number of daily events for extra prizes. The colosseum challenges reset daily',
 		'Be sure to try the Proving Grounds Quests for some good cards',
 		'Rarity ratings: Grey commons, green uncommons, blue rares, orange shard, & pink ultra rares',
@@ -46,93 +46,106 @@ const etg = require('../etg'),
 	];
 
 function Rect(props) {
-	return <div style={{
-		position: 'absolute',
-		left: props.x + 'px',
-		top: props.y + 'px',
-		width: props.wid + 'px',
-		height: props.hei + 'px',
-	}}>
-		{props.children}
-	</div>;
-};
+	return (
+		<div
+			style={{
+				position: 'absolute',
+				left: props.x + 'px',
+				top: props.y + 'px',
+				width: props.wid + 'px',
+				height: props.hei + 'px',
+			}}>
+			{props.children}
+		</div>
+	);
+}
 
 function CostRewardHeaders(props) {
-	return <Rect
-		x={props.x}
-		y={props.y}
-		wid={props.wid}
-		hei={props.hei}
-	>
-		{props.children}
-		<span style={{
-			position: 'absolute',
-			top: '24px',
-			right: '114px',
-		}}>Cost</span>
-		<span style={{
-			position: 'absolute',
-			top: '24px',
-			right: '4px',
-		}}>Base Reward</span>
-	</Rect>;
+	return (
+		<Rect x={props.x} y={props.y} wid={props.wid} hei={props.hei}>
+			{props.children}
+			<span
+				style={{
+					position: 'absolute',
+					top: '24px',
+					right: '114px',
+				}}>
+				Cost
+			</span>
+			<span
+				style={{
+					position: 'absolute',
+					top: '24px',
+					right: '4px',
+				}}>
+				Base Reward
+			</span>
+		</Rect>
+	);
 }
 function LabelText(props) {
-	return <Components.Text
-		text={props.text}
-		style={{
-			fontSize: '14px',
-			pointerEvents: 'none',
-			...props.style,
-		}}
-	/>;
+	return (
+		<Components.Text
+			text={props.text}
+			style={{
+				fontSize: '14px',
+				pointerEvents: 'none',
+				...props.style,
+			}}
+		/>
+	);
 }
 function CostText(props) {
-	return <LabelText
-		text={userutil.pveCostReward[props.lv * 2 + props.n] + '$'}
-		style={props.style}
-	/>
+	return (
+		<LabelText
+			text={userutil.pveCostReward[props.lv * 2 + props.n] + '$'}
+			style={props.style}
+		/>
+	);
 }
 function TitleText(props) {
-	return <div style={{ fontSize: '20px', textAlign: 'center' }}>
-		{props.text}
-	</div>;
+	return (
+		<div style={{ fontSize: '20px', textAlign: 'center' }}>{props.text}</div>
+	);
 }
 function AiButton(props) {
 	const { name, onClick, onMouseOver, y, lv } = props;
-	return <>
-		<input type='button'
-			value={name}
-			onClick={onClick}
-			onMouseOver={onMouseOver}
-			style={{
-				position: 'absolute',
-				left: '4px',
-				top: `${y}px`,
-			}}
-		/>
-		<CostText
-			n={0}
-			lv={lv}
-			style={{
-				position: 'absolute',
-				top: `${y}px`,
-				right: '114px',
-			}}
-		/>
-		<CostText
-			n={1}
-			lv={lv}
-			style={{
-				position: 'absolute',
-				top: `${y}px`,
-				right: '4px',
-			}}
-		/>
-	</>;
+	return (
+		<>
+			<input
+				type="button"
+				value={name}
+				onClick={onClick}
+				onMouseOver={onMouseOver}
+				style={{
+					position: 'absolute',
+					left: '4px',
+					top: `${y}px`,
+				}}
+			/>
+			<CostText
+				n={0}
+				lv={lv}
+				style={{
+					position: 'absolute',
+					top: `${y}px`,
+					right: '114px',
+				}}
+			/>
+			<CostText
+				n={1}
+				lv={lv}
+				style={{
+					position: 'absolute',
+					top: `${y}px`,
+					right: '4px',
+				}}
+			/>
+		</>
+	);
 }
 
-module.exports = connect(({user, opts}) => ({
+module.exports = connect(({ user, opts }) => ({
 	user,
 	remember: opts.remember,
 	foename: opts.foename,
@@ -141,615 +154,769 @@ module.exports = connect(({user, opts}) => ({
 	hideRightpane: opts.hideRightpane,
 	disableTut: opts.disableTut,
 	lofiArt: opts.lofiArt,
-}))(class MainMenu extends React.Component {
-	constructor(props) {
-		super(props);
-		this.state = {
-			showcard:
-				props.nymph || (props.user && !props.user.daily && props.user.ocard),
-			showsettings: false,
-			changepass: false,
-			newpass: '',
-			newpass2: '',
-			tipNumber: RngMock.upto(tipjar.length),
-			tipText: '',
-		};
+}))(
+	class MainMenu extends React.Component {
+		constructor(props) {
+			super(props);
+			this.state = {
+				showcard:
+					props.nymph || (props.user && !props.user.daily && props.user.ocard),
+				showsettings: false,
+				changepass: false,
+				newpass: '',
+				newpass2: '',
+				tipNumber: RngMock.upto(tipjar.length),
+				tipText: '',
+			};
 
-		this.resetTip = e => {
-			if (e.target.tagName && e.target.tagName.match(/^(DIV|CANVAS|HTML)$/)) {
-				const tipText = this.props.user
-					? tipjar[this.state.tipNumber]
-					: "To register, just type desired username & password in the fields to the right, then click 'Login'";
-				if (tipText !== this.state.tipText) this.setState({ tipText });
-			}
-		};
-	}
-
-	componentWillUnmount() {
-		document.removeEventListener('mousemove', this.resetTip);
-	}
-
-	componentDidMount() {
-		if (this.props.user && this.props.user.daily == 0 && this.props.user.ocard) {
-			this.props.dispatch(store.updateUser({ daily: 128 }));
+			this.resetTip = e => {
+				if (e.target.tagName && e.target.tagName.match(/^(DIV|CANVAS|HTML)$/)) {
+					const tipText = this.props.user
+						? tipjar[this.state.tipNumber]
+						: "To register, just type desired username & password in the fields to the right, then click 'Login'";
+					if (tipText !== this.state.tipText) this.setState({ tipText });
+				}
+			};
 		}
-		document.addEventListener('mousemove', this.resetTip);
-		this.props.dispatch(store.setCmds({
-			codecard: data => {
-				this.props.dispatch(store.doNav(require('./Reward'), {
-					type: data.type,
-					amount: data.num,
-					code: this.props.foename,
-				}));
-			},
-			codegold: data => {
-				this.props.dispatch(store.updateUser({ gold: this.props.user.gold + data.g }));
-				this.props.dispatch(store.chat(<div>{data.g}<span className='ico gold' /> added!</div>));
-			},
-			codecode: data => {
-				this.props.dispatch(store.updateUser({ pool: etgutil.addcard(this.props.user.pool, data.card) }));
-				this.props.dispatch(store.chatMsg(Cards.Codes[data.card].name + ' added!', 'System'));
-			},
-		}));
-	}
 
-	mkSetTip(text) {
-		return () => {
-			if (this.state.tipText != text) {
-				this.setState({ tipText: text });
-			}
-		};
-	}
+		componentWillUnmount() {
+			document.removeEventListener('mousemove', this.resetTip);
+		}
 
-	render() {
-		const self = this,
-			leadc = [],
-			arenac = [];
-		for (let i = 0; i < 2; i++) {
-			function arenaAi(e) {
-				if (!Cards.isDeckLegal(etgutil.decodedeck(sock.getDeck()), self.props.user)) {
-					store.store.dispatch(store.chatMsg(`Invalid deck`, 'System'))
-					return;
-				}
-				const cost = userutil.arenaCost(i);
-				if (self.props.user.gold < cost) {
-					self.props.dispatch(store.chatMsg(`Requires ${cost}$`, 'System'));
-					return;
-				}
-				sock.userEmit('foearena', { lv: i });
-				e.target.style.display = 'none';
+		componentDidMount() {
+			if (
+				this.props.user &&
+				this.props.user.daily == 0 &&
+				this.props.user.ocard
+			) {
+				this.props.dispatch(store.updateUser({ daily: 128 }));
 			}
-			if (self.props.user) {
-				arenac.push(
-					<AiButton name={'Arena' + (i + 1) + ' AI'}
-						key={i}
-						onClick={arenaAi}
-						onMouseOver={this.mkSetTip(
-							'In the arena you will face decks from other players',
-						)}
-						y={46+i*22}
-						lv={4+i}
-					/>
-				);
-			}
-			leadc.push(
-				<input type='button'
-					key={i}
-					value={'Arena' + (i + 1) + ' T20'}
-					onClick={() => {
-						this.props.dispatch(store.doNav(require('./ArenaTop'), { lv: i }));
-					}}
-					onMouseOver={this.mkSetTip(
-						'See who the top players in arena are right now',
-					)}
-					style={{
-						position: 'absolute',
-						left: i ? '100px' : '10px',
-					}}
-				/>,
+			document.addEventListener('mousemove', this.resetTip);
+			this.props.dispatch(
+				store.setCmds({
+					codecard: data => {
+						this.props.dispatch(
+							store.doNav(require('./Reward'), {
+								type: data.type,
+								amount: data.num,
+								code: this.props.foename,
+							}),
+						);
+					},
+					codegold: data => {
+						this.props.dispatch(
+							store.updateUser({ gold: this.props.user.gold + data.g }),
+						);
+						this.props.dispatch(
+							store.chat(
+								<div>
+									{data.g}
+									<span className="ico gold" /> added!
+								</div>,
+							),
+						);
+					},
+					codecode: data => {
+						this.props.dispatch(
+							store.updateUser({
+								pool: etgutil.addcard(this.props.user.pool, data.card),
+							}),
+						);
+						this.props.dispatch(
+							store.chatMsg(Cards.Codes[data.card].name + ' added!', 'System'),
+						);
+					},
+				}),
 			);
 		}
 
-		function logout(cmd) {
-			if (self.props.user) {
-				sock.userEmit(cmd);
-				self.props.dispatch(store.setUser(null));
-				self.props.dispatch(store.setOpt('remember', false));
-			}
-			self.props.dispatch(store.doNav(require('./Login')));
+		mkSetTip(text) {
+			return () => {
+				if (this.state.tipText != text) {
+					this.setState({ tipText: text });
+				}
+			};
 		}
-		const quickslots = [];
-		if (self.props.user) {
-			for (let i = 0; i < 10; i++) {
-				quickslots.push(
-					<input type='button'
+
+		render() {
+			const self = this,
+				leadc = [],
+				arenac = [];
+			for (let i = 0; i < 2; i++) {
+				function arenaAi(e) {
+					if (
+						!Cards.isDeckLegal(
+							etgutil.decodedeck(sock.getDeck()),
+							self.props.user,
+						)
+					) {
+						store.store.dispatch(store.chatMsg(`Invalid deck`, 'System'));
+						return;
+					}
+					const cost = userutil.arenaCost(i);
+					if (self.props.user.gold < cost) {
+						self.props.dispatch(store.chatMsg(`Requires ${cost}$`, 'System'));
+						return;
+					}
+					sock.userEmit('foearena', { lv: i });
+					e.target.style.display = 'none';
+				}
+				if (self.props.user) {
+					arenac.push(
+						<AiButton
+							name={'Arena' + (i + 1) + ' AI'}
+							key={i}
+							onClick={arenaAi}
+							onMouseOver={this.mkSetTip(
+								'In the arena you will face decks from other players',
+							)}
+							y={46 + i * 22}
+							lv={4 + i}
+						/>,
+					);
+				}
+				leadc.push(
+					<input
+						type="button"
 						key={i}
-						value={i + 1}
-						className={
-							'editbtn' +
-							(self.props.user.selectedDeck == self.props.user.qecks[i]
-								? ' selectedbutton'
-								: '')}
+						value={'Arena' + (i + 1) + ' T20'}
 						onClick={() => {
-							sock.userExec('setdeck', { name: self.props.user.qecks[i] || '' });
-							self.props.dispatch(store.setOpt('deck', sock.getDeck()));
+							this.props.dispatch(
+								store.doNav(require('./ArenaTop'), { lv: i }),
+							);
+						}}
+						onMouseOver={this.mkSetTip(
+							'See who the top players in arena are right now',
+						)}
+						style={{
+							position: 'absolute',
+							left: i ? '100px' : '10px',
 						}}
 					/>,
 				);
 			}
-		}
-		function changeFunc() {
-			if (self.state.newpass === self.state.newpass2) {
-				sock.userEmit('passchange', { p: self.state.newpass });
-				self.setState({ changepass: false, newpass: '', newpass2: '' });
-			} else {
-				self.setState({ newpass: '', newpass2: '' });
-				self.props.dispatch(store.chatMsg('Passwords do not match', 'System'));
+
+			function logout(cmd) {
+				if (self.props.user) {
+					sock.userEmit(cmd);
+					self.props.dispatch(store.setUser(null));
+					self.props.dispatch(store.setOpt('remember', false));
+				}
+				self.props.dispatch(store.doNav(require('./Login')));
 			}
-		}
-		const customAi = (
-			<div style={{
-				width: '45%',
-				float: 'right',
-				marginTop: self.props.user ? undefined : '128px',
-			}}>
-				<input type='button'
-					value='Custom AI'
-					onClick={() => {
-						this.props.dispatch(store.doNav(require('./Challenge'), { pvp: false }));
-					}}
-					onMouseOver={this.mkSetTip(
-						'Play versus any deck you want, with custom stats for you & the AI',
-					)}
-				/>
-				<LabelText text='Duel a custom AI' />
-			</div>
-		);
-		return <div className='bg_main'>
-			<>
-				<Rect x={196} y={4} wid={504} hei={48}>
-					<Components.Text text={this.state.tipText } />
-					<input type='button'
-						value='Next Tip'
-						onClick={() => {
-							const newTipNumber = (this.state.tipNumber + 1) % tipjar.length;
-							this.setState({
-								tipNumber: newTipNumber,
-								tipText: tipjar[newTipNumber],
-							});
-						}}
-						style={{
-							position: 'absolute',
-							right: '2px',
-							bottom: '2px',
-						}}
-					/>
-				</Rect>
-				{self.props.user && <>
-					<input type='button'
-						value='Settings'
-						style={{
-							position: 'absolute',
-							left: '620px',
-							top: '558px',
-						}}
-						onClick={() => {
-							this.setState({ showsettings: !this.state.showsettings, changepass: false, newpass: '', newpass2: '' });
-						}}
-					/>
-					<Rect
-						x={86}
-						y={92}
-						wid={196}
-						hei={120}
-					>
-						<TitleText text='Stats' />
-						<Components.Text
-							text={
-								`${self.props.user.gold}$ ${self.props.user.name}` +
-								`\nPvE ${self.props.user.aiwins} - ${self.props.user.ailosses}` +
-								`\nPvP ${self.props.user.pvpwins} - ${self.props.user.pvplosses}`
+			const quickslots = [];
+			if (self.props.user) {
+				for (let i = 0; i < 10; i++) {
+					quickslots.push(
+						<input
+							type="button"
+							key={i}
+							value={i + 1}
+							className={
+								'editbtn' +
+								(self.props.user.selectedDeck == self.props.user.qecks[i]
+									? ' selectedbutton'
+									: '')
 							}
-						/>
-					</Rect>
-					<CostRewardHeaders x={304} y={380} wid={292} hei={130}>
-						<TitleText text='Arena' />
-						{self.props.user &&
-							<input type='button'
-								value='Arena Deck'
+							onClick={() => {
+								sock.userExec('setdeck', {
+									name: self.props.user.qecks[i] || '',
+								});
+								self.props.dispatch(store.setOpt('deck', sock.getDeck()));
+							}}
+						/>,
+					);
+				}
+			}
+			function changeFunc() {
+				if (self.state.newpass === self.state.newpass2) {
+					sock.userEmit('passchange', { p: self.state.newpass });
+					self.setState({ changepass: false, newpass: '', newpass2: '' });
+				} else {
+					self.setState({ newpass: '', newpass2: '' });
+					self.props.dispatch(
+						store.chatMsg('Passwords do not match', 'System'),
+					);
+				}
+			}
+			const customAi = (
+				<div
+					style={{
+						width: '45%',
+						float: 'right',
+						marginTop: self.props.user ? undefined : '128px',
+					}}>
+					<input
+						type="button"
+						value="Custom AI"
+						onClick={() => {
+							this.props.dispatch(
+								store.doNav(require('./Challenge'), { pvp: false }),
+							);
+						}}
+						onMouseOver={this.mkSetTip(
+							'Play versus any deck you want, with custom stats for you & the AI',
+						)}
+					/>
+					<LabelText text="Duel a custom AI" />
+				</div>
+			);
+			return (
+				<div className="bg_main">
+					<>
+						<Rect x={196} y={4} wid={504} hei={48}>
+							<Components.Text text={this.state.tipText} />
+							<input
+								type="button"
+								value="Next Tip"
 								onClick={() => {
-									this.props.dispatch(store.doNav(require('./ArenaInfo')));
+									const newTipNumber =
+										(this.state.tipNumber + 1) % tipjar.length;
+									this.setState({
+										tipNumber: newTipNumber,
+										tipText: tipjar[newTipNumber],
+									});
 								}}
-								onMouseOver={this.mkSetTip('Check how your arena decks are doing')}
 								style={{
 									position: 'absolute',
-									left: '20px',
+									right: '2px',
+									bottom: '2px',
+								}}
+							/>
+						</Rect>
+						{self.props.user && (
+							<>
+								<input
+									type="button"
+									value="Settings"
+									style={{
+										position: 'absolute',
+										left: '620px',
+										top: '558px',
+									}}
+									onClick={() => {
+										this.setState({
+											showsettings: !this.state.showsettings,
+											changepass: false,
+											newpass: '',
+											newpass2: '',
+										});
+									}}
+								/>
+								<Rect x={86} y={92} wid={196} hei={120}>
+									<TitleText text="Stats" />
+									<Components.Text
+										text={
+											`${self.props.user.gold}$ ${self.props.user.name}` +
+											`\nPvE ${self.props.user.aiwins} - ${self.props.user.ailosses}` +
+											`\nPvP ${self.props.user.pvpwins} - ${self.props.user.pvplosses}`
+										}
+									/>
+								</Rect>
+								<CostRewardHeaders x={304} y={380} wid={292} hei={130}>
+									<TitleText text="Arena" />
+									{self.props.user && (
+										<input
+											type="button"
+											value="Arena Deck"
+											onClick={() => {
+												this.props.dispatch(
+													store.doNav(require('./ArenaInfo')),
+												);
+											}}
+											onMouseOver={this.mkSetTip(
+												'Check how your arena decks are doing',
+											)}
+											style={{
+												position: 'absolute',
+												left: '20px',
+												top: '100px',
+											}}
+										/>
+									)}
+									{arenac}
+								</CostRewardHeaders>
+								{this.state.showcard ? (
+									<Components.Card x={92} y={340} code={this.state.showcard} />
+								) : (
+									<>
+										<Chat
+											channel="Main"
+											style={{
+												position: 'absolute',
+												left: '72px',
+												top: '228px',
+												width: '226px',
+												height: '300px',
+												background: 'transparent',
+												fontSize: '14px',
+												opacity: '0.6',
+											}}
+										/>
+										<input
+											placeholder="Chat"
+											onKeyDown={parseChat}
+											style={{
+												position: 'absolute',
+												left: '99px',
+												top: '532px',
+											}}
+										/>
+									</>
+								)}
+							</>
+						)}
+						<Rect x={626} y={436} wid={196} hei={120}>
+							<TitleText text="Leaderboards" />
+							<input
+								type="button"
+								value="Wealth T50"
+								onClick={() => {
+									this.props.dispatch(store.doNav(require('./WealthTop')));
+								}}
+								onMouseOver={this.mkSetTip(
+									"See who's collected the most wealth",
+								)}
+								style={{
+									position: 'absolute',
+									left: '52px',
+								}}
+							/>
+							<br />
+							{leadc}
+						</Rect>
+						<CostRewardHeaders x={304} y={120} wid={292} hei={240}>
+							<TitleText text="AI Battle" />
+							<AiButton
+								name="Commoner"
+								y={68}
+								lv={0}
+								onClick={mkAi.run(mkAi.mkAi(0))}
+								onMouseOver={this.mkSetTip(
+									'Commoners have no upgraded cards & mostly common cards',
+								)}
+							/>
+							<AiButton
+								name="Mage"
+								y={90}
+								lv={1}
+								onClick={mkAi.run(mkAi.mkPremade(1))}
+								onMouseOver={this.mkSetTip(
+									'Mages have preconstructed decks with a couple rares',
+								)}
+							/>
+							<AiButton
+								name="Champion"
+								y={112}
+								lv={2}
+								onClick={mkAi.run(mkAi.mkAi(2))}
+								onMouseOver={this.mkSetTip(
+									'Champions have some upgraded cards',
+								)}
+							/>
+							<AiButton
+								name="Demigod"
+								y={134}
+								lv={3}
+								onClick={mkAi.run(mkAi.mkPremade(3))}
+								onMouseOver={this.mkSetTip(
+									'Demigods are extremely powerful. Come prepared for anything',
+								)}
+							/>
+							{self.props.user ? (
+								<>
+									<div
+										style={{
+											marginTop: '132px',
+											width: '45%',
+											float: 'left',
+											textAlign: 'right',
+										}}>
+										<input
+											type="button"
+											value="Colosseum"
+											onClick={() => {
+												this.props.dispatch(
+													store.doNav(require('./Colosseum')),
+												);
+											}}
+											onMouseOver={this.mkSetTip(
+												'Try some daily challenges in the Colosseum',
+											)}
+										/>
+										<LabelText text="Daily Challenges" />
+									</div>
+									<div
+										style={{
+											marginTop: '132px',
+											width: '45%',
+											float: 'right',
+										}}>
+										<input
+											type="button"
+											value="Quests"
+											onClick={() => {
+												this.props.dispatch(store.doNav(require('./Quest')));
+											}}
+											onMouseOver={this.mkSetTip('Go on an adventure')}
+										/>
+										<LabelText text="Go on an adventure" />
+									</div>
+									{customAi}
+								</>
+							) : (
+								customAi
+							)}
+						</CostRewardHeaders>
+						<Rect x={620} y={92} wid={196} hei={176}>
+							<TitleText text="Cards & Decks" />
+							<input
+								type="button"
+								value="Editor"
+								onClick={() => {
+									this.props.dispatch(
+										store.doNav(
+											self.props.user
+												? require('./DeckEditor')
+												: require('./SandboxEditor'),
+										),
+									);
+								}}
+								onMouseOver={this.mkSetTip('Edit & manage your decks')}
+								style={{
+									position: 'absolute',
+									left: '14px',
+									top: '108px',
+								}}
+							/>
+							{self.props.user && (
+								<>
+									<LabelText
+										text={'Deck: ' + self.props.user.selectedDeck}
+										style={{
+											width: '180px',
+											overflow: 'hidden',
+											textOverflow: 'ellipsis',
+											whiteSpace: 'nowrap',
+											marginLeft: '16px',
+										}}
+									/>
+									<div style={{ textAlign: 'center' }}>{quickslots}</div>
+									<input
+										type="button"
+										value="Shop"
+										onClick={() => {
+											this.props.dispatch(store.doNav(require('./Shop')));
+										}}
+										onMouseOver={this.mkSetTip(
+											'Buy booster packs which contain cards from the elements you choose',
+										)}
+										style={{
+											position: 'absolute',
+											left: '14px',
+											top: '132px',
+										}}
+									/>
+									<input
+										type="button"
+										value="Upgrade"
+										onClick={() => {
+											this.props.dispatch(store.doNav(require('./Upgrade')));
+										}}
+										onMouseOver={this.mkSetTip('Upgrade or sell cards')}
+										style={{
+											position: 'absolute',
+											left: '114px',
+											top: '108px',
+										}}
+									/>
+									<input
+										type="button"
+										value="Bazaar"
+										onClick={() => {
+											this.props.dispatch(store.doNav(require('./Bazaar')));
+										}}
+										onMouseOver={this.mkSetTip(
+											"Put up cards for sale & review other players' offers",
+										)}
+										style={{
+											position: 'absolute',
+											left: '114px',
+											top: '132px',
+										}}
+									/>
+								</>
+							)}
+						</Rect>
+						<Rect x={616} y={300} wid={206} hei={130}>
+							<TitleText text="Players" />
+							<input
+								placeholder="Trade/Library"
+								value={this.props.foename}
+								onChange={e =>
+									this.props.dispatch(
+										store.setOptTemp('foename', e.target.value),
+									)
+								}
+								style={{ marginLeft: '24px' }}
+							/>
+							<input
+								type="button"
+								value="PvP"
+								onClick={() => {
+									this.props.dispatch(
+										store.doNav(require('./Challenge'), { pvp: true }),
+									);
+								}}
+								style={{
+									position: 'absolute',
+									left: '10px',
 									top: '100px',
 								}}
 							/>
-						}
-						{arenac}
-					</CostRewardHeaders>
-					{this.state.showcard ?
-						<Components.Card x={92} y={340} code={this.state.showcard} />
-						: <>
-							<Chat channel='Main'
+							<input
+								type="button"
+								value="Library"
+								onClick={() => {
+									const name =
+										self.props.foename ||
+										(self.props.user && self.props.user.name);
+									if (name)
+										this.props.dispatch(
+											store.doNav(require('./Library'), { name }),
+										);
+								}}
+								onMouseOver={this.mkSetTip(
+									'See exactly what cards you or others own',
+								)}
 								style={{
 									position: 'absolute',
-									left: '72px',
-									top: '228px',
-									width: '226px',
-									height: '300px',
-									background: 'transparent',
-									fontSize: '14px',
-									opacity: '0.6',
+									left: '120px',
+									top: '75px',
 								}}
 							/>
-							<input placeholder='Chat'
-								onKeyDown={parseChat}
+							{self.props.user && (
+								<>
+									<input
+										type="button"
+										value="Trade"
+										onClick={foe => {
+											sock.trade =
+												typeof foe === 'string' ? foe : self.props.foename;
+											sock.userEmit('tradewant', { f: sock.trade });
+										}}
+										onMouseOver={this.mkSetTip(
+											'Initiate trading cards with another player',
+										)}
+										style={{
+											position: 'absolute',
+											left: '10px',
+											top: '75px',
+										}}
+									/>
+									<input
+										type="button"
+										value="Reward"
+										onClick={() => {
+											sock.userEmit('codesubmit', { code: self.props.foename });
+										}}
+										onMouseOver={this.mkSetTip('Redeem a reward code')}
+										style={{
+											position: 'absolute',
+											left: '120px',
+											top: '100px',
+										}}
+									/>
+								</>
+							)}
+						</Rect>
+						{typeof kongregateAPI === 'undefined' && (
+							<input
+								type="button"
+								value="Logout"
+								onClick={() => logout('logout')}
+								onMouseOver={this.mkSetTip('Click here to log out')}
 								style={{
 									position: 'absolute',
-									left: '99px',
-									top: '532px',
+									left: '744px',
+									top: '558px',
 								}}
 							/>
-						</>
-					}
+						)}
+						{this.state.showsettings && (
+							<Components.Box x={585} y={380} width={267} height={156}>
+								<input
+									type="button"
+									value="Wipe Account"
+									onClick={() => {
+										if (
+											this.props.foename ==
+											self.props.user.name + 'yesdelete'
+										) {
+											logout('delete');
+										} else {
+											self.props.dispatch(
+												store.chatMsg(
+													`Input '${self.props.user.name}yesdelete' into Trade/Library to delete your account`,
+													'System',
+												),
+											);
+										}
+									}}
+									onMouseOver={this.mkSetTip(
+										'Click here to permanently remove your account',
+									)}
+									style={{
+										position: 'absolute',
+										left: '184px',
+										top: '8px',
+									}}
+								/>
+								{this.state.changepass ? (
+									<>
+										<input
+											placeholder="New Password"
+											value={this.state.newpass}
+											onChange={e => this.setState({ newpass: e.target.value })}
+											onKeyPress={e => {
+												if (e.which == 13) changeFunc();
+											}}
+											style={{
+												position: 'absolute',
+												left: '8px',
+												top: '4px',
+											}}
+										/>
+										<input
+											placeholder="Confirm New"
+											value={this.state.newpass2}
+											onChange={e =>
+												this.setState({ newpass2: e.target.value })
+											}
+											onKeyPress={e => {
+												if (e.which == 13) changeFunc();
+											}}
+											style={{
+												position: 'absolute',
+												left: '8px',
+												top: '32px',
+											}}
+										/>
+										<input
+											type="button"
+											value="Change Pass"
+											onClick={changeFunc}
+											style={{
+												position: 'absolute',
+												left: '8px',
+												top: '56px',
+											}}
+										/>
+									</>
+								) : (
+									<input
+										type="button"
+										value="Change Pass"
+										onClick={() => this.setState({ changepass: true })}
+										style={{
+											position: 'absolute',
+											left: '8px',
+											top: '8px',
+										}}
+									/>
+								)}
+								<label
+									style={{
+										position: 'absolute',
+										left: '135px',
+										top: '88px',
+									}}>
+									<input
+										type="checkbox"
+										checked={this.props.enableSound}
+										onChange={e => {
+											audio.changeSound(e.target.checked);
+											this.props.dispatch(
+												store.setOpt('enableSound', e.target.checked),
+											);
+										}}
+									/>
+									Enable sound
+								</label>
+								<label
+									style={{
+										position: 'absolute',
+										left: '135px',
+										top: '53px',
+									}}>
+									<input
+										type="checkbox"
+										checked={this.props.enableMusic}
+										onChange={e => {
+											audio.changeMusic(e.target.checked);
+											this.props.dispatch(
+												store.setOpt('enableMusic', e.target.checked),
+											);
+										}}
+									/>
+									Enable music
+								</label>
+								<label
+									style={{
+										position: 'absolute',
+										left: '8px',
+										top: '88px',
+									}}>
+									<input
+										type="checkbox"
+										checked={this.props.hideRightpane}
+										onChange={e =>
+											this.props.dispatch(
+												store.setOpt('hideRightpane', e.target.checked),
+											)
+										}
+									/>
+									Hide rightpane
+								</label>
+								<label
+									style={{
+										position: 'absolute',
+										left: '8px',
+										top: '123px',
+									}}>
+									<input
+										type="checkbox"
+										checked={this.props.disableTut}
+										onChange={e =>
+											this.props.dispatch(
+												store.setOpt('disableTut', e.target.checked),
+											)
+										}
+									/>
+									Disable tutorial
+								</label>
+								<label
+									style={{
+										position: 'absolute',
+										left: '135px',
+										top: '123px',
+									}}>
+									<input
+										type="checkbox"
+										checked={this.props.lofiArt}
+										onChange={e =>
+											this.props.dispatch(
+												store.setOpt('lofiArt', e.target.checked),
+											)
+										}
+									/>
+									Lofi Art
+								</label>
+							</Components.Box>
+						)}
 					</>
-				}
-				<Rect x={626} y={436} wid={196} hei={120}>
-					<TitleText text='Leaderboards' />
-					<input type='button'
-						value='Wealth T50'
-						onClick={() => {
-							this.props.dispatch(store.doNav(require('./WealthTop')));
-						}}
-						onMouseOver={this.mkSetTip("See who's collected the most wealth")}
-						style={{
-							position: 'absolute',
-							left: '52px',
-						}}
-					/>
-					<br />
-					{leadc}
-				</Rect>
-				<CostRewardHeaders x={304} y={120} wid={292} hei={240}>
-					<TitleText text='AI Battle' />
-					<AiButton name='Commoner'
-						y={68} lv={0}
-						onClick={mkAi.run(mkAi.mkAi(0))}
-						onMouseOver={this.mkSetTip('Commoners have no upgraded cards & mostly common cards')}
-					/>
-					<AiButton name='Mage'
-						y={90} lv={1}
-						onClick={mkAi.run(mkAi.mkPremade(1))}
-						onMouseOver={this.mkSetTip('Mages have preconstructed decks with a couple rares')}
-					/>
-					<AiButton name='Champion'
-						y={112} lv={2}
-						onClick={mkAi.run(mkAi.mkAi(2))}
-						onMouseOver={this.mkSetTip('Champions have some upgraded cards')}
-					/>
-					<AiButton name='Demigod'
-						y={134} lv={3}
-						onClick={mkAi.run(mkAi.mkPremade(3))}
-						onMouseOver={this.mkSetTip('Demigods are extremely powerful. Come prepared for anything')}
-					/>
-					{self.props.user ? <>
-						<div style={{
-							marginTop: '132px',
-							width: '45%',
-							float: 'left',
-							textAlign: 'right',
-						}}>
-							<input
-								type='button'
-								value='Colosseum'
-								onClick={() => {
-									this.props.dispatch(store.doNav(require('./Colosseum')));
-								}}
-								onMouseOver={this.mkSetTip('Try some daily challenges in the Colosseum')}
-							/>
-							<LabelText text='Daily Challenges' />
-						</div>
-						<div style={{
-							marginTop: '132px',
-							width: '45%',
-							float: 'right',
-						}}>
-							<input type='button'
-								value='Quests'
-								onClick={() => {
-									this.props.dispatch(store.doNav(require('./Quest')));
-								}}
-								onMouseOver={this.mkSetTip('Go on an adventure')}
-							/>
-							<LabelText text='Go on an adventure' />
-						</div>
-						{customAi}
-					</> : customAi}
-				</CostRewardHeaders>
-				<Rect x={620} y={92} wid={196} hei={176}>
-					<TitleText text='Cards & Decks' />
-					<input type='button'
-						value='Editor'
-						onClick={() => {
-							this.props.dispatch(store.doNav(self.props.user ? require('./DeckEditor') : require('./SandboxEditor')));
-						}}
-						onMouseOver={this.mkSetTip('Edit & manage your decks')}
-						style={{
-							position: 'absolute',
-							left: '14px',
-							top: '108px',
-						}}
-					/>
-					{self.props.user && <>
-						<LabelText
-							text={'Deck: ' + self.props.user.selectedDeck}
-							style={{
-								width: '180px',
-								overflow: 'hidden',
-								textOverflow: 'ellipsis',
-								whiteSpace: 'nowrap',
-								marginLeft: '16px',
-							}}
-						/>
-						<div style={{ textAlign: 'center' }}>{quickslots}</div>
-						<input type='button'
-							value='Shop'
-							onClick={() => {
-								this.props.dispatch(store.doNav(require('./Shop')));
-							}}
-							onMouseOver={this.mkSetTip(
-								'Buy booster packs which contain cards from the elements you choose',
-							)}
-							style={{
-								position: 'absolute',
-								left: '14px',
-								top: '132px',
-							}}
-						/>
-						<input type='button'
-							value='Upgrade'
-							onClick={() => {
-								this.props.dispatch(store.doNav(require('./Upgrade')));
-							}}
-							onMouseOver={this.mkSetTip('Upgrade or sell cards')}
-							style={{
-								position: 'absolute',
-								left: '114px',
-								top: '108px',
-							}}
-						/>
-						<input type='button'
-							value='Bazaar'
-							onClick={() => {
-								this.props.dispatch(store.doNav(require('./Bazaar')));
-							}}
-							onMouseOver={this.mkSetTip("Put up cards for sale & review other players' offers")}
-							style={{
-								position: 'absolute',
-								left: '114px',
-								top: '132px',
-							}}
-						/>
-					</>}
-				</Rect>
-				<Rect x={616} y={300} wid={206} hei={130}>
-					<TitleText text='Players' />
-					<input
-						placeholder='Trade/Library'
-						value={this.props.foename}
-						onChange={e => this.props.dispatch(store.setOptTemp('foename', e.target.value))}
-						style={{ marginLeft: '24px' }}
-					/>
-					<input type='button'
-						value='PvP'
-						onClick={() => {
-							this.props.dispatch(store.doNav(require('./Challenge'), { pvp: true }));
-						}}
-						style={{
-							position: 'absolute',
-							left: '10px',
-							top: '100px',
-						}}
-					/>
-					<input type='button'
-						value='Library'
-						onClick={() => {
-							const name = self.props.foename || (self.props.user && self.props.user.name);
-							if (name) this.props.dispatch(store.doNav(require('./Library'), { name }));
-						}}
-						onMouseOver={this.mkSetTip('See exactly what cards you or others own')}
-						style={{
-							position: 'absolute',
-							left: '120px',
-							top: '75px',
-						}}
-					/>
-					{self.props.user && <>
-						<input type='button'
-							value='Trade'
-							onClick={foe => {
-								sock.trade = typeof foe === 'string' ? foe : self.props.foename;
-								sock.userEmit('tradewant', { f: sock.trade });
-							}}
-							onMouseOver={this.mkSetTip('Initiate trading cards with another player')}
-							style={{
-								position: 'absolute',
-								left: '10px',
-								top: '75px',
-							}}
-						/>
-						<input type='button'
-							value='Reward'
-							onClick={() => {
-								sock.userEmit('codesubmit', { code: self.props.foename });
-							}}
-							onMouseOver={this.mkSetTip('Redeem a reward code')}
-							style={{
-								position: 'absolute',
-								left: '120px',
-								top: '100px',
-							}}
-						/>
-					</>}
-				</Rect>
-				{typeof kongregateAPI === 'undefined' &&
-					<input type='button'
-						value='Logout'
-						onClick={() => logout('logout')}
-						onMouseOver={this.mkSetTip('Click here to log out')}
-						style={{
-							position: 'absolute',
-							left: '744px',
-							top: '558px',
-						}}
-					/>
-				}
-				{this.state.showsettings &&
-					<Components.Box x={585} y={380} width={267} height={156}>
-						<input
-							type='button'
-							value='Wipe Account'
-							onClick={() => {
-								if (this.props.foename == self.props.user.name + 'yesdelete') {
-									logout('delete');
-								} else {
-									self.props.dispatch(store.chatMsg(
-										`Input '${self.props.user.name}yesdelete' into Trade/Library to delete your account`,
-										'System',
-									));
-								}
-							}}
-							onMouseOver={this.mkSetTip(
-								'Click here to permanently remove your account',
-							)}
-							style={{
-								position: 'absolute',
-								left: '184px',
-								top: '8px',
-							}}
-						/>
-						{this.state.changepass ? <>
-							<input
-								placeholder='New Password'
-								value={this.state.newpass}
-								onChange={e => this.setState({ newpass: e.target.value })}
-								onKeyPress={(e) => {
-									if (e.which == 13) changeFunc();
-								}}
-								style={{
-									position: 'absolute',
-									left: '8px',
-									top: '4px',
-								}}
-							/>
-							<input
-								placeholder='Confirm New'
-								value={this.state.newpass2}
-								onChange={e => this.setState({ newpass2: e.target.value })}
-								onKeyPress={(e) => {
-									if (e.which == 13) changeFunc();
-								}}
-								style={{
-									position: 'absolute',
-									left: '8px',
-									top: '32px',
-								}}
-							/>
-							<input
-								type='button'
-								value='Change Pass'
-								onClick={changeFunc}
-								style={{
-									position: 'absolute',
-									left: '8px',
-									top: '56px',
-								}}
-							/>
-						</> :
-						<input
-							type='button'
-							value='Change Pass'
-							onClick={() => this.setState({ changepass: true })}
-							style={{
-								position: 'absolute',
-								left: '8px',
-								top: '8px',
-							}}
-						/>}
-						<label
-							style={{
-								position: 'absolute',
-								left: '135px',
-								top: '88px',
-							}}>
-							<input type='checkbox'
-								checked={this.props.enableSound}
-								onChange={e => {
-									audio.changeSound(e.target.checked);
-									this.props.dispatch(store.setOpt('enableSound', e.target.checked));
-								}}
-							/>
-							Enable sound
-						</label>
-						<label
-							style={{
-								position: 'absolute',
-								left: '135px',
-								top: '53px',
-							}}>
-							<input type='checkbox'
-								checked={this.props.enableMusic}
-								onChange={e => {
-									audio.changeMusic(e.target.checked);
-									this.props.dispatch(store.setOpt('enableMusic', e.target.checked));
-								}}
-							/>
-							Enable music
-						</label>
-						<label
-							style={{
-								position: 'absolute',
-								left: '8px',
-								top: '88px',
-							}}>
-							<input type='checkbox'
-								checked={this.props.hideRightpane}
-								onChange={e => this.props.dispatch(store.setOpt('hideRightpane', e.target.checked))}
-							/>
-							Hide rightpane
-						</label>
-						<label
-							style={{
-								position: 'absolute',
-								left: '8px',
-								top: '123px',
-							}}>
-							<input
-								type='checkbox'
-								checked={this.props.disableTut}
-								onChange={e => this.props.dispatch(store.setOpt('disableTut', e.target.checked))}
-							/>
-							Disable tutorial
-						</label>
-						<label
-							style={{
-								position: 'absolute',
-								left: '135px',
-								top: '123px',
-							}}>
-							<input
-								type='checkbox'
-								checked={this.props.lofiArt}
-								onChange={e => this.props.dispatch(store.setOpt('lofiArt', e.target.checked))}
-							/>
-							Lofi Art
-						</label>
-					</Components.Box>
-				}
-			</>
-		</div>;
-	}
-});
+				</div>
+			);
+		}
+	},
+);

@@ -26,10 +26,10 @@ exports.pveCostReward = new Uint8Array([
 ]);
 exports.cardValue = function(card) {
 	return cardValues[card.rarity] * (card.upped ? 6 : 1) * (card.shiny ? 6 : 1);
-}
+};
 exports.sellValue = function(card) {
 	return sellValues[card.rarity] * (card.upped ? 6 : 1) * (card.shiny ? 6 : 1);
-}
+};
 exports.arenaCost = function(lv) {
 	return exports.pveCostReward[lv ? 10 : 8];
 };
@@ -51,8 +51,8 @@ exports.calcWealth = function(cardpool, isDecoded) {
 	} else {
 		cardpool.forEach(
 			isDecoded
-				? (code) => wealthIter(code, 1)
-				: (count, code) => wealthIter(code, count)
+				? code => wealthIter(code, 1)
+				: (count, code) => wealthIter(code, count),
 		);
 	}
 	return wealth;

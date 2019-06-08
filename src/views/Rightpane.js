@@ -2,13 +2,22 @@ const Chat = require('../Components/Chat'),
 	sock = require('../sock'),
 	store = require('../store'),
 	parseChat = require('../parseChat'),
-	{connect} = require('react-redux'),
+	{ connect } = require('react-redux'),
 	React = require('react');
 
-const ChannelTab = connect(({opts}) => ({ selected: opts.channel }))(function ChannelTab(props) {
-	return <span className={props.selected == props.channel ? 'tabsel' : 'tab'}
-		onClick={e => props.dispatch(store.setOptTemp('channel', props.channel))}>{props.channel}</span>;
-})
+const ChannelTab = connect(({ opts }) => ({ selected: opts.channel }))(
+	function ChannelTab(props) {
+		return (
+			<span
+				className={props.selected == props.channel ? 'tabsel' : 'tab'}
+				onClick={e =>
+					props.dispatch(store.setOptTemp('channel', props.channel))
+				}>
+				{props.channel}
+			</span>
+		);
+	},
+);
 
 module.exports = connect(state => ({
 	wantpvp: state.opts.wantpvp,
@@ -17,35 +26,68 @@ module.exports = connect(state => ({
 	showRightpane: !state.opts.hideRightpane,
 	channel: state.opts.channel,
 }))(function Rightpane(props) {
-	return props.showRightpane && <>
-		<div style={{ marginBottom: '8px' }}>
-			<a href="artcredit.htm" target="_blank">Art credits</a>&emsp;&emsp;<a href="forum" target="_blank">Forum</a>&emsp;&emsp;<a href="https://discordapp.com/invite/qAmfB8T" target="_blank">Discord</a>
-		</div>
-		<label><input type="checkbox" checked={props.offline}
-			onChange={e => {
-				sock.emit('chatus', { hide: e.target.checked });
-				props.dispatch(store.setOpt('offline', e.target.checked))
-			}} />
-			Appear Offline</label>{' '}
-		<label><input type="checkbox" checked={props.afk}
-			onChange={e => {
-				sock.emit('chatus', { afk: e.target.checked });
-				props.dispatch(store.setOptTemp('afk', e.target.checked))
-			}} />
-			Afk</label>{' '}
-		<label><input type="checkbox" checked={props.wantpvp}
-			onChange={e => {
-				sock.emit('chatus', { want: e.target.checked });
-				props.dispatch(store.setOpt('wantpvp', e.target.checked))
-			}} />
-			Seeking PvP</label>
-		<div>
-			<ChannelTab channel='Main' />
-			<ChannelTab channel='System' />
-			<ChannelTab channel='Stats' />
-			<ChannelTab channel='Packs' />
-		</div>
-		<Chat channel={props.channel} />
-		<textarea className="chatinput" placeholder="Chat" onKeyPress={parseChat} />
-	</>;
+	return (
+		props.showRightpane && (
+			<>
+				<div style={{ marginBottom: '8px' }}>
+					<a href="artcredit.htm" target="_blank">
+						Art credits
+					</a>
+					&emsp;&emsp;
+					<a href="forum" target="_blank">
+						Forum
+					</a>
+					&emsp;&emsp;
+					<a href="https://discordapp.com/invite/qAmfB8T" target="_blank">
+						Discord
+					</a>
+				</div>
+				<label>
+					<input
+						type="checkbox"
+						checked={props.offline}
+						onChange={e => {
+							sock.emit('chatus', { hide: e.target.checked });
+							props.dispatch(store.setOpt('offline', e.target.checked));
+						}}
+					/>
+					Appear Offline
+				</label>{' '}
+				<label>
+					<input
+						type="checkbox"
+						checked={props.afk}
+						onChange={e => {
+							sock.emit('chatus', { afk: e.target.checked });
+							props.dispatch(store.setOptTemp('afk', e.target.checked));
+						}}
+					/>
+					Afk
+				</label>{' '}
+				<label>
+					<input
+						type="checkbox"
+						checked={props.wantpvp}
+						onChange={e => {
+							sock.emit('chatus', { want: e.target.checked });
+							props.dispatch(store.setOpt('wantpvp', e.target.checked));
+						}}
+					/>
+					Seeking PvP
+				</label>
+				<div>
+					<ChannelTab channel="Main" />
+					<ChannelTab channel="System" />
+					<ChannelTab channel="Stats" />
+					<ChannelTab channel="Packs" />
+				</div>
+				<Chat channel={props.channel} />
+				<textarea
+					className="chatinput"
+					placeholder="Chat"
+					onKeyPress={parseChat}
+				/>
+			</>
+		)
+	);
 });

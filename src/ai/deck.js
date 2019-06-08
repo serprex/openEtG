@@ -211,16 +211,16 @@ module.exports = function(uprate, markpower, maxRarity) {
 				(eles[1] == etg.Air || eles[1] == etg.Light
 					? Cards.ShortBow
 					: eles[1] == etg.Gravity || eles[1] == etg.Earth
-						? Cards.Hammer
-						: eles[1] == etg.Water || eles[1] == etg.Life
-							? Cards.Wand
-							: eles[1] == etg.Darkness || eles[1] == etg.Death
-								? Cards.Dagger
-								: eles[1] == etg.Entropy || eles[1] == etg.Aether
-									? Cards.Disc
-									: eles[1] == etg.Fire || eles[1] == etg.Time
-										? Cards.BattleAxe
-										: Cards.ShortSword
+					? Cards.Hammer
+					: eles[1] == etg.Water || eles[1] == etg.Life
+					? Cards.Wand
+					: eles[1] == etg.Darkness || eles[1] == etg.Death
+					? Cards.Dagger
+					: eles[1] == etg.Entropy || eles[1] == etg.Aether
+					? Cards.Disc
+					: eles[1] == etg.Fire || eles[1] == etg.Time
+					? Cards.BattleAxe
+					: Cards.ShortSword
 				).code,
 			),
 		);

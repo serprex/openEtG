@@ -6,7 +6,7 @@ var util = require('../util');
 var Cards = require('./Cards');
 var Effect = require('./Effect');
 var Actives = require('./Skills');
-var {Thing, CardInstance} = require('./Thing');
+var { Thing, CardInstance } = require('./Thing');
 function Player(game) {
 	this.type = etg.Player;
 	this.game = game;
@@ -104,12 +104,12 @@ Player.prototype.info = function() {
 	for (var key in this.status) {
 		plinfocore(info, key, this.status[key]);
 	}
-	['nova', 'sosa', 'silence', 'sanctuary', 'precognition'].forEach(
-		function(key) {
-			plinfocore(info, key, this[key]);
-		},
-		this,
-	);
+	['nova', 'sosa', 'silence', 'sanctuary', 'precognition'].forEach(function(
+		key,
+	) {
+		plinfocore(info, key, this[key]);
+	},
+	this);
 	if (this.gpull) info.push('gpull');
 	return info.join('\n');
 };
@@ -355,7 +355,10 @@ Player.prototype.dmg = function(x, ignoresosa) {
 	}
 };
 Player.prototype.spelldmg = function(x) {
-	return (!this.shield || !this.shield.status.get('reflect') ? this : this.foe).dmg(x);
+	return (!this.shield || !this.shield.status.get('reflect')
+		? this
+		: this.foe
+	).dmg(x);
 };
 Player.prototype.delay = function(x) {
 	if (this.weapon) this.weapon.delay(x);

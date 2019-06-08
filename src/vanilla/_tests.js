@@ -28,14 +28,14 @@ let M = new TestModule('Card Codes');
 M.test('Codes Unique', function() {
 	const Cjson = require('./Cards.json');
 	const codes = new Set();
-	for (let i = 0; i<6; i++) {
-		let cdata = Cjson[i]
+	for (let i = 0; i < 6; i++) {
+		let cdata = Cjson[i];
 		let codecol = cdata[0].indexOf('Code');
-		for (let j = 1; j<cdata.length; j++) {
-			const cdataj = cdata[j]
-			for (let k = 0; k<cdataj.length; k++) {
+		for (let j = 1; j < cdata.length; j++) {
+			const cdataj = cdata[j];
+			for (let k = 0; k < cdataj.length; k++) {
 				const code = cdataj[k][codecol];
-				assert.ok(!codes.has(code), "Duplicate code: " + code);
+				assert.ok(!codes.has(code), 'Duplicate code: ' + code);
 				codes.add(code);
 			}
 		}
@@ -136,7 +136,11 @@ M.test('Destroy', function() {
 	while (this.player1.hand.length) {
 		this.player1.hand[0].useactive();
 	}
-	assert.equal(this.player1.permanents[0].status.get('charges'), 2, '2 charges');
+	assert.equal(
+		this.player1.permanents[0].status.get('charges'),
+		2,
+		'2 charges',
+	);
 	Actives.destroy.func(this.player2, this.player1.permanents[0]);
 	assert.equal(this.player1.permanents[0].status.get('charges'), 1, '1 charge');
 	Actives.destroy.func(this.player2, this.player1.permanents[0]);
@@ -273,7 +277,8 @@ M.test('Parallel', function() {
 	);
 	Actives.web.func(this.player1, damsel);
 	assert.ok(
-		!damsel.status.get('airborne') && this.player1.creatures[1].status.get('airborne'),
+		!damsel.status.get('airborne') &&
+			this.player1.creatures[1].status.get('airborne'),
 		"Web'd",
 	);
 });

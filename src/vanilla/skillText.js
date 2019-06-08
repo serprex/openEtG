@@ -1,7 +1,7 @@
 'use strict';
 var etg = require('./etg');
 var Card = require('./Card');
-var {Thing} = require('./Thing');
+var { Thing } = require('./Thing');
 // TODO skeleton, mummy
 var data = {
 	ablaze: 'Gain 2|0',
@@ -347,11 +347,9 @@ var data = {
 	wings: 'Evade non-airborne & non-ranged attackers',
 	wisdom: 'Target gains 4|0. May target immaterial, granting psionic',
 };
-[['dagger', '1:2 1:11'], ['hammer', '1:3 1:4'], ['bow', '1:9']].forEach(
-	x => {
-		data[x[0]] = 'Increment damage if mark is ' + x[1];
-	},
-);
+[['dagger', '1:2 1:11'], ['hammer', '1:3 1:4'], ['bow', '1:9']].forEach(x => {
+	data[x[0]] = 'Increment damage if mark is ' + x[1];
+});
 [
 	['pillmat', '1:4 1:6 1:7 1:9'],
 	['pillspi', '1:2 1:5 1:8 1:11'],
@@ -399,10 +397,12 @@ function processEntry(c, event, entry) {
 	return typeof entry === 'string'
 		? entry
 		: entry instanceof Array
-			? entry[asCard(c).upped ? 1 : 0]
-			: entry instanceof Function
-				? entry(asCard(c), c)
-				: event in entry ? processEntry(c, event, entry[event]) : '';
+		? entry[asCard(c).upped ? 1 : 0]
+		: entry instanceof Function
+		? entry(asCard(c), c)
+		: event in entry
+		? processEntry(c, event, entry[event])
+		: '';
 }
 function asCard(c) {
 	return c instanceof Card ? c : c.card;

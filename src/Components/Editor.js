@@ -12,14 +12,13 @@ module.exports = class Editor extends React.PureComponent {
 	}
 
 	setCardArt = code => {
-		if (this.state.card != code)
-			this.setState({ card: code });
-	}
+		if (this.state.card != code) this.setState({ card: code });
+	};
 
 	addCard = code => {
 		if (this.props.deck.length < 60)
 			this.props.setDeck(this.props.deck.concat([code]));
-	}
+	};
 
 	rmCard = code => {
 		const idx = this.props.deck.indexOf(code);
@@ -36,13 +35,14 @@ module.exports = class Editor extends React.PureComponent {
 				this.props.setDeck(newdeck);
 			}
 		}
-	}
+	};
 
 	render() {
 		const marksel = [];
 		for (let i = 0; i < 13; i++) {
 			marksel.push(
-				<Components.IconBtn key={i}
+				<Components.IconBtn
+					key={i}
 					e={'e' + i}
 					x={100 + i * 32}
 					y={234}
@@ -50,43 +50,48 @@ module.exports = class Editor extends React.PureComponent {
 				/>,
 			);
 		}
-		return <>
-			<Components.DeckDisplay
-				onMouseOver={(_, code) => this.setCardArt(code)}
-				onClick={(i, code) => {
-					const newdeck = this.props.deck.slice();
-					newdeck.splice(i, 1);
-					this.props.setDeck(newdeck);
-				}}
-				deck={this.props.deck} pool={this.props.pool}
-			/>
-			<Components.CardSelector
-				onMouseOver={this.setCardArt}
-				onClick={this.addCard}
-				onContextMenu={this.rmCard}
-				maxedIndicator={!this.props.acard}
-				filterboth={!!this.props.pool}
-				cardpool={this.props.pool}
-				cardminus={this.props.cardMinus}
-			/>
-			<input type='button'
-				value='Clear'
-				onClick={() => this.props.setDeck([])}
-				style={{
-					position: 'absolute',
-					left: '8px',
-					top: '32px',
-				}}
-			/>
-			<span className={'ico e' + this.props.mark}
-				style={{
-					position: 'absolute',
-					left: '66px',
-					top: '200px',
-				}}
-			/>
-			{marksel}
-			<Components.Card x={734} y={8} code={this.state.card} />
-		</>;
+		return (
+			<>
+				<Components.DeckDisplay
+					onMouseOver={(_, code) => this.setCardArt(code)}
+					onClick={(i, code) => {
+						const newdeck = this.props.deck.slice();
+						newdeck.splice(i, 1);
+						this.props.setDeck(newdeck);
+					}}
+					deck={this.props.deck}
+					pool={this.props.pool}
+				/>
+				<Components.CardSelector
+					onMouseOver={this.setCardArt}
+					onClick={this.addCard}
+					onContextMenu={this.rmCard}
+					maxedIndicator={!this.props.acard}
+					filterboth={!!this.props.pool}
+					cardpool={this.props.pool}
+					cardminus={this.props.cardMinus}
+				/>
+				<input
+					type="button"
+					value="Clear"
+					onClick={() => this.props.setDeck([])}
+					style={{
+						position: 'absolute',
+						left: '8px',
+						top: '32px',
+					}}
+				/>
+				<span
+					className={'ico e' + this.props.mark}
+					style={{
+						position: 'absolute',
+						left: '66px',
+						top: '200px',
+					}}
+				/>
+				{marksel}
+				<Components.Card x={734} y={8} code={this.state.card} />
+			</>
+		);
 	}
 };

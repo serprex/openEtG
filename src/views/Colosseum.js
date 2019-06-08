@@ -6,7 +6,7 @@ const etg = require('../etg'),
 	RngMock = require('../RngMock'),
 	Components = require('../Components'),
 	store = require('../store'),
-	{connect} = require('react-redux'),
+	{ connect } = require('react-redux'),
 	React = require('react');
 
 function mkDaily(type) {
@@ -23,15 +23,16 @@ function mkDaily(type) {
 								daily: 1,
 								cardreward: '',
 								noheal: true,
-							}
+						  }
 						: {
 								goldreward: 500,
 								endurance: 1,
 								cost: 0,
 								daily: 2,
 								cardreward: '',
-							};
-				gamedata.data.rematch = () => !(store.store.getState().user.daily & (1<<type)) && mkDaily(type)();
+						  };
+				gamedata.data.rematch = () =>
+					!(store.store.getState().user.daily & (1 << type)) && mkDaily(type)();
 				gamedata.game.addData(dataNext);
 				gamedata.game.dataNext = dataNext;
 			}
@@ -49,7 +50,7 @@ function mkDaily(type) {
 		};
 	}
 }
-module.exports = connect(({user})=>({user}))(function Colosseum(props) {
+module.exports = connect(({ user }) => ({ user }))(function Colosseum(props) {
 	const magename = Decks.mage[props.user.dailymage][0],
 		dgname = Decks.demigod[props.user.dailydg][0];
 	const events = [
@@ -61,48 +62,60 @@ module.exports = connect(({user})=>({user}))(function Colosseum(props) {
 	const eventui = [];
 	for (let i = 1; i < 5; i++) {
 		const active = !(props.user.daily & (1 << i));
-		eventui.push(<React.Fragment key={i}>
-			{active &&
-				<input type='button'
-				value='Fight!'
-				style={{
-					position: 'absolute',
-						left: '50px',
+		eventui.push(
+			<React.Fragment key={i}>
+				{active && (
+					<input
+						type="button"
+						value="Fight!"
+						style={{
+							position: 'absolute',
+							left: '50px',
+							top: 100 + 30 * i + 'px',
+						}}
+						onClick={mkDaily(i)}
+					/>
+				)}
+				<span
+					style={{
+						position: 'absolute',
+						left: '130px',
 						top: 100 + 30 * i + 'px',
-				}}
-				onClick={mkDaily(i)}
-				/>
-			}
-			<span style={{
-				position: 'absolute',
-					left: '130px',
-					top: 100 + 30 * i + 'px',
-			}}>
-			{active ? events[i - 1]
-				: i > 2 ?
-				props.user.daily & (i == 3 ? 1 : 32)
-				? 'You defeated this already today.'
-				: 'You failed this today. Better luck tomorrow!'
-				: 'Completed.'}
-			</span>
-			</React.Fragment>);
+					}}>
+					{active
+						? events[i - 1]
+						: i > 2
+						? props.user.daily & (i == 3 ? 1 : 32)
+							? 'You defeated this already today.'
+							: 'You failed this today. Better luck tomorrow!'
+						: 'Completed.'}
+				</span>
+			</React.Fragment>,
+		);
 	}
-	return <>
-		<Components.ExitBtn x={50} y={50} />
-		{eventui}
-		{props.user.daily == 191 && <>
-			<input type='button'
-				value='Nymph!'
-				style={{ position: 'absolute', left: '50px', top: '280px' }}
-				onClick={() => {
-					const nymph = etg.NymphList[RngMock.upto(12) + 1];
-					sock.userExec('donedaily', { daily: 6, c: nymph });
-					store.store.dispatch(store.doNav(require('./MainMenu'), { nymph }));
-				}}
-			/>
-			<span style={{ position: 'absolute', left: '130px', top: '280px' }}>
-				You successfully completed all tasks.
-			</span>
-		</>}
-	</>;
+	return (
+		<>
+			<Components.ExitBtn x={50} y={50} />
+			{eventui}
+			{props.user.daily == 191 && (
+				<>
+					<input
+						type="button"
+						value="Nymph!"
+						style={{ position: 'absolute', left: '50px', top: '280px' }}
+						onClick={() => {
+							const nymph = etg.NymphList[RngMock.upto(12) + 1];
+							sock.userExec('donedaily', { daily: 6, c: nymph });
+							store.store.dispatch(
+								store.doNav(require('./MainMenu'), { nymph }),
+							);
+						}}
+					/>
+					<span style={{ position: 'absolute', left: '130px', top: '280px' }}>
+						You successfully completed all tasks.
+					</span>
+				</>
+			)}
+		</>
+	);
 });

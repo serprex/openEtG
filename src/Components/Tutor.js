@@ -1,51 +1,62 @@
-const {Text} = require('./index'),
+const { Text } = require('./index'),
 	{ connect } = require('react-redux'),
 	React = require('react');
 
-const connector = connect(({opts}) => ({ disableTut: opts.disableTut }))
+const connector = connect(({ opts }) => ({ disableTut: opts.disableTut }));
 const mkTutor = function(data) {
-	const splash = <div className="tutorialbg">
-		{data.map((info, i) => {
-			const style = {
-				position: 'absolute',
-				left: info[0] + 'px',
-				top: info[1] + 'px',
-			};
-			if (info.length > 2) style.width = info[2] + 'px';
-			if (info.length > 3) style.height = info[3] + 'px';
-			return <Text key={i} className='tutorialbox'
-				text={info[info.length - 1]}
-				style={style}
-			/>;
-		})}
-	</div>;
-	return connector(class Tutor extends React.Component {
-		constructor(props) {
-			super(props);
-			this.state = { showtut: false };
-		}
+	const splash = (
+		<div className="tutorialbg">
+			{data.map((info, i) => {
+				const style = {
+					position: 'absolute',
+					left: info[0] + 'px',
+					top: info[1] + 'px',
+				};
+				if (info.length > 2) style.width = info[2] + 'px';
+				if (info.length > 3) style.height = info[3] + 'px';
+				return (
+					<Text
+						key={i}
+						className="tutorialbox"
+						text={info[info.length - 1]}
+						style={style}
+					/>
+				);
+			})}
+		</div>
+	);
+	return connector(
+		class Tutor extends React.Component {
+			constructor(props) {
+				super(props);
+				this.state = { showtut: false };
+			}
 
-		render() {
-			if (this.props.disableTut) return null;
-			return <>
-				<span className="imgb ico e13"
-					onMouseEnter={() => {
-						this.setState({ showtut: true });
-					}}
-					onMouseLeave={() => {
-						this.setState({ showtut: false });
-					}}
-					style={{
-						position: 'absolute',
-						left: this.props.x + 'px',
-						top: this.props.y + 'px',
-					}}
-				/>
-				{this.state.showtut && splash}
-			</>;
-		}
-	});
-}
+			render() {
+				if (this.props.disableTut) return null;
+				return (
+					<>
+						<span
+							className="imgb ico e13"
+							onMouseEnter={() => {
+								this.setState({ showtut: true });
+							}}
+							onMouseLeave={() => {
+								this.setState({ showtut: false });
+							}}
+							style={{
+								position: 'absolute',
+								left: this.props.x + 'px',
+								top: this.props.y + 'px',
+							}}
+						/>
+						{this.state.showtut && splash}
+					</>
+				);
+			}
+		},
+	);
+};
 
 exports.Editor = mkTutor([
 	[

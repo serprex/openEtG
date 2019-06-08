@@ -1,29 +1,32 @@
 var Effect = require('../Effect');
-var Cards = require("../Cards");
-var Game = require("../Game");
-var etg = require("../etg");
-var etgutil = require("../../etgutil");
-var aiSearch = require("../ai/search");
-var util = require("../../util");
-var deckeles = [document.getElementById("deck1"), document.getElementById("deck2")];
-var seedput = document.getElementById("seed");
-var result = document.getElementById("result");
-var fight = document.getElementById("fight");
-var fight1000 = document.getElementById("fight1000");
-fight.addEventListener("click", fightItOut);
-fight1000.addEventListener("click", fightItOut);
-function mkGame(seed, decks){
+var Cards = require('../Cards');
+var Game = require('../Game');
+var etg = require('../etg');
+var etgutil = require('../../etgutil');
+var aiSearch = require('../ai/search');
+var util = require('../../util');
+var deckeles = [
+	document.getElementById('deck1'),
+	document.getElementById('deck2'),
+];
+var seedput = document.getElementById('seed');
+var result = document.getElementById('result');
+var fight = document.getElementById('fight');
+var fight1000 = document.getElementById('fight1000');
+fight.addEventListener('click', fightItOut);
+fight1000.addEventListener('click', fightItOut);
+function mkGame(seed, decks) {
 	var game = new Game(seed, 0);
 	var idx, code;
-	for (var j = 0;j < 2;j++) {
+	for (var j = 0; j < 2; j++) {
 		var pl = game.players(j);
-		for (var i = 0;i < decks[j].length; i++) {
-			if (Cards.Codes[code = decks[j][i]]) {
+		for (var i = 0; i < decks[j].length; i++) {
+			if (Cards.Codes[(code = decks[j][i])]) {
 				pl.deck.push(Cards.Codes[code]);
 			} else if (~(idx = etgutil.fromTrueMark(code))) {
 				pl.mark = idx;
 			} else {
-				result.textContent = "Unknown card code: " + code.toString(32);
+				result.textContent = 'Unknown card code: ' + code.toString(32);
 				return;
 			}
 		}
@@ -33,43 +36,54 @@ function mkGame(seed, decks){
 	return game;
 }
 var stopFight = false;
-function fightItOut(){
+function fightItOut() {
 	var start = Date.now();
-	var mode = this, fc = new Uint16Array(2);
+	var mode = this,
+		fc = new Uint16Array(2);
 	if (mode == fight1000) {
 		if (fight1000.value.match(/^Stop/)) {
 			stopFight = true;
-			fight1000.value = "Stopping..";
+			fight1000.value = 'Stopping..';
 			return;
 		} else {
-			fight1000.value = "Stop";
+			fight1000.value = 'Stop';
 		}
 	}
-	var decks = deckeles.map(function(item){
-		return item.value.split(" ").map(function(x){return parseInt(x,32);});
+	var decks = deckeles.map(function(item) {
+		return item.value.split(' ').map(function(x) {
+			return parseInt(x, 32);
+		});
 	});
 	var seed = parseInt(seedput.value) || util.randint();
 	var game = mkGame(seed, decks);
 	if (!game) return;
-	result.textContent = "";
+	result.textContent = '';
 	var aiState = undefined;
 	var realp1 = game.player1;
 	var cmds = {
 		endturn: function(data) {
 			if (mode == fight) {
-				result.textContent += (game.turn == realp1 ? 1 : 2) + "\tEND TURN" + game.ply + "\n";
+				result.textContent +=
+					(game.turn == realp1 ? 1 : 2) + '\tEND TURN' + game.ply + '\n';
 			}
 			game.player2.endturn(data.bits);
 		},
 		cast: function(data) {
-			var bits = data.bits, c = game.bitsToTgt(bits & 511), t = game.bitsToTgt((bits >> 9) & 511);
+			var bits = data.bits,
+				c = game.bitsToTgt(bits & 511),
+				t = game.bitsToTgt((bits >> 9) & 511);
 			if (mode == fight) {
-				result.textContent += (game.turn == realp1 ? 1 : 2) + "\t" + c + (t ? " targets " + t : "") + "\n";
+				result.textContent +=
+					(game.turn == realp1 ? 1 : 2) +
+					'\t' +
+					c +
+					(t ? ' targets ' + t : '') +
+					'\n';
 			}
 			c.useactive(t);
 		},
 	};
-	function gameStep(){
+	function gameStep() {
 		if (game.turn == game.player1) {
 			var p1 = game.player1;
 			game.player1 = game.player2;
@@ -91,17 +105,29 @@ function fightItOut(){
 		else {
 			if (mode == fight) {
 				console.log(Date.now() - start);
-				result.textContent = "Player " + (game.winner == realp1 ? 1 : 2) + " wins." + game.ply + "\n" + result.textContent;
+				result.textContent =
+					'Player ' +
+					(game.winner == realp1 ? 1 : 2) +
+					' wins.' +
+					game.ply +
+					'\n' +
+					result.textContent;
 			} else {
-				fc[(game.winner != realp1)|0]++;
-				result.textContent = fc[0] + " : " + fc[1] + "(" + (fc[0]/(fc[0]+fc[1])*100).toFixed(2) + "%)";
+				fc[(game.winner != realp1) | 0]++;
+				result.textContent =
+					fc[0] +
+					' : ' +
+					fc[1] +
+					'(' +
+					((fc[0] / (fc[0] + fc[1])) * 100).toFixed(2) +
+					'%)';
 				game = mkGame(util.randint(), decks);
 				if (!game) return;
 				realp1 = game.player1;
 				if (!stopFight) setTimeout(gameStep, 0);
 				else {
 					stopFight = false;
-					fight1000.value = "Fight!!";
+					fight1000.value = 'Fight!!';
 				}
 			}
 		}

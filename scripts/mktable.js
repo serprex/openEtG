@@ -3,8 +3,7 @@
 const write = process.stdout.write.bind(process.stdout);
 function writetd(...args) {
 	write('[tr]');
-	for (const arg of args)
-		if (arg !== undefined) write(`[td]${arg}[/td]`);
+	for (const arg of args) if (arg !== undefined) write(`[td]${arg}[/td]`);
 	write('[/tr]');
 }
 if (process.argv.length < 3) {
@@ -30,7 +29,7 @@ if (process.argv.length < 3) {
 		});
 		writetd(
 			ofele.length,
-			":" + require('../ui').eleNames[i].toLowerCase(),
+			':' + require('../ui').eleNames[i].toLowerCase(),
 			creas,
 			perms,
 			spels,
@@ -46,8 +45,6 @@ if (process.argv.length < 3) {
 } else {
 	const decks = require('../Decks')[process.argv[2]];
 	if (decks) {
-		decks.forEach(deck =>
-			write(`[deck title=${deck[0]}]${deck[1]}[/deck]`),
-		);
+		decks.forEach(deck => write(`[deck title=${deck[0]}]${deck[1]}[/deck]`));
 	}
 }

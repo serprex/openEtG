@@ -68,7 +68,7 @@ exports.maybeLightenStr = function(card) {
 function Point(x, y) {
 	this.x = x;
 	this.y = y;
-};
+}
 Point.prototype.set = Point;
 function reflectPos(obj) {
 	var pos = obj instanceof Point ? obj : obj.position;
@@ -169,18 +169,12 @@ var sounds = {},
 	currentMusic;
 var soundEnabled = false,
 	musicEnabled = false;
-function loadSounds() {
-}
-function loadMusics() {
-}
-function playSound(name, dontreset) {
-}
-function playMusic(name) {
-}
-function changeSound(enabled) {
-}
-function changeMusic(enabled) {
-}
+function loadSounds() {}
+function loadMusics() {}
+function playSound(name, dontreset) {}
+function playMusic(name) {}
+function changeSound(enabled) {}
+function changeMusic(enabled) {}
 function parseInput(data, key, value, limit) {
 	var value = parseInt(value);
 	if (value === 0 || value > 0) data[key] = Math.min(value, limit || Infinity);

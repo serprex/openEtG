@@ -1,14 +1,14 @@
-"use strict";
-var etg = require("../etg");
-var Cards = require("../Cards");
+'use strict';
+var etg = require('../etg');
+var Cards = require('../Cards');
 var Skills = require('../Skills');
-var evalGame = require("./eval");
-var lethal = require("./lethal");
-function getWorstCard(game){
+var evalGame = require('./eval');
+var lethal = require('./lethal');
+function getWorstCard(game) {
 	let worstcard = 0,
 		curEval = 0x7fffffff;
 	const hash = new Set();
-	for (let i=0; i<8; i++){
+	for (let i = 0; i < 8; i++) {
 		var code = game.player2.hand[i].card.code;
 		if (hash.has(code)) continue;
 		hash.add(code);
@@ -20,7 +20,7 @@ function getWorstCard(game){
 			card.active.get('discard').func(cardinst, gclone.player2);
 		}
 		var discvalue = evalGame(gclone);
-		if (discvalue < curEval){
+		if (discvalue < curEval) {
 			curEval = discvalue;
 			worstcard = i;
 		}
@@ -28,19 +28,19 @@ function getWorstCard(game){
 	return [worstcard, curEval];
 }
 var afilter = {
-	web:function(c,t){
+	web: function(c, t) {
 		return t.status.get('airborne');
 	},
-	freeze:function(c,t){
+	freeze: function(c, t) {
 		return t.status.get('frozen') < 3;
 	},
-	readiness:function(c,t){
+	readiness: function(c, t) {
 		return t.active.get('cast');
 	},
-	lobotomize:function(c,t){
+	lobotomize: function(c, t) {
 		if (!t.status.get('momentum') && !t.status.get('psionic')) {
-			for (var key in t.active){
-				if (t.active.get('key') && key != "ownplay"){
+			for (var key in t.active) {
+				if (t.active.get('key') && key != 'ownplay') {
 					return true;
 				}
 			}
@@ -49,12 +49,12 @@ var afilter = {
 		return true;
 	},
 };
-function AiSearch(game){
+function AiSearch(game) {
 	var currentEval, worstcard;
-	if (game.player2.hand.length < 8){
+	if (game.player2.hand.length < 8) {
 		worstcard = undefined;
 		currentEval = evalGame(game);
-	}else{
+	} else {
 		var worst_eval = getWorstCard(game);
 		worstcard = worst_eval[0];
 		currentEval = worst_eval[1];
@@ -67,19 +67,24 @@ function AiSearch(game){
 	this.limit = 99;
 	this.worstcard = worstcard;
 	var lethalResult = lethal(game);
-	this.cmd = lethalResult[0] >= 0 ? "" :
-		lethalResult[1] !== undefined ? ((this.cmdct = lethalResult[1]), "cast") :
-		((this.cmdct = worstcard), "endturn");
+	this.cmd =
+		lethalResult[0] >= 0
+			? ''
+			: lethalResult[1] !== undefined
+			? ((this.cmdct = lethalResult[1]), 'cast')
+			: ((this.cmdct = worstcard), 'endturn');
 }
-function searchActive(active, c, t){
+function searchActive(active, c, t) {
 	const func = afilter[active.name[0]];
 	return !func || t.type == etg.Player || func(c, t);
 }
 AiSearch.prototype.step = function(game) {
-	var self = this, currentEval = this.eval,
-		nth = this.nth, tend = Date.now() + 30;
+	var self = this,
+		currentEval = this.eval,
+		nth = this.nth,
+		tend = Date.now() + 30;
 	function iterLoop(game, n, cmdct0, casthash) {
-		function incnth(tgt){
+		function incnth(tgt) {
 			nth++;
 			return iterCore(tgt) && Date.now() > tend;
 		}
@@ -88,15 +93,23 @@ AiSearch.prototype.step = function(game) {
 			var ch = c.hash();
 			if (casthash.has(ch)) return;
 			casthash.add(ch);
-			var active = c.type === etg.Spell ? c.card.type == etg.SpellEnum && c.card.active.get('cast') : c.active.get('cast');
-			var cbits = game.tgtToBits(c) ^ 8, tgthash = new Set();
+			var active =
+				c.type === etg.Spell
+					? c.card.type == etg.SpellEnum && c.card.active.get('cast')
+					: c.active.get('cast');
+			var cbits = game.tgtToBits(c) ^ 8,
+				tgthash = new Set();
 			function evalIter(t) {
-				if (t && t.hash){
+				if (t && t.hash) {
 					var th = t.hash();
 					if (tgthash.has(th)) return;
-					tgthash.add(th)
+					tgthash.add(th);
 				}
-				if ((!game.targeting || (t && game.targeting.filter(t) && searchActive(active, c, t))) && (n || --self.limit > 0)) {
+				if (
+					(!game.targeting ||
+						(t && game.targeting.filter(t) && searchActive(active, c, t))) &&
+					(n || --self.limit > 0)
+				) {
 					var tbits = game.tgtToBits(t) ^ 8;
 					var gameClone = game.clone();
 					gameClone.bitsToTgt(cbits).useactive(gameClone.bitsToTgt(tbits));
@@ -117,26 +130,26 @@ AiSearch.prototype.step = function(game) {
 						}
 					}
 					let v, wc;
-					if (gameClone.player2.hand.length < 8){
+					if (gameClone.player2.hand.length < 8) {
 						v = evalGame(gameClone);
-					}else{
+					} else {
 						[wc, v] = getWorstCard(gameClone);
 					}
 					if (v < currentEval || (v == currentEval && n > self.cdepth)) {
-						self.cmdct = ~cmdct0 ? cmdct0 : (cbits | tbits << 9);
+						self.cmdct = ~cmdct0 ? cmdct0 : cbits | (tbits << 9);
 						self.worstcard = wc;
 						self.cdepth = n;
 						currentEval = v;
 					}
-					if (n && v-currentEval < 24) {
-						iterLoop(gameClone, 0, cbits | tbits << 9, new Set());
+					if (n && v - currentEval < 24) {
+						iterLoop(gameClone, 0, cbits | (tbits << 9), new Set());
 					}
 				}
 			}
 			var preEval = currentEval;
 			if (active && active.name[0] in Cards.Targeting) {
 				game.getTarget(c, active);
-				for (var j = 0;j < 2;j++) {
+				for (var j = 0; j < 2; j++) {
 					var pl = j == 0 ? c.owner : c.owner.foe;
 					evalIter(pl);
 					if (pl.weapon) evalIter(pl.weapon);
@@ -146,44 +159,44 @@ AiSearch.prototype.step = function(game) {
 					pl.hand.forEach(h => h && evalIter(h));
 				}
 				game.targeting = null;
-			}else{
+			} else {
 				evalIter();
 			}
 			return true;
 		}
 		var p2 = game.player2;
-		if (n){
-			if (nth == 0 && incnth(p2.weapon)){
+		if (n) {
+			if (nth == 0 && incnth(p2.weapon)) {
 				return true;
 			}
-			if (nth == 1 && incnth(p2.shield)){
+			if (nth == 1 && incnth(p2.shield)) {
 				return true;
 			}
 			var nbase = 2;
 			if (nth >= nbase && nth < nbase + p2.hand.length) {
 				for (var i = nth - nbase; i < p2.hand.length; i++) {
-					if (incnth(p2.hand[i])){
+					if (incnth(p2.hand[i])) {
 						return true;
 					}
 				}
 			}
 			nbase += p2.hand.length;
 			if (nth >= nbase && nth < nbase + 16) {
-				for (var i = nth - nbase;i < 16;i++) {
-					if (incnth(p2.permanents[i])){
+				for (var i = nth - nbase; i < 16; i++) {
+					if (incnth(p2.permanents[i])) {
 						return true;
 					}
 				}
 			}
 			nbase += 16;
 			if (nth >= nbase && nth < nbase + 23) {
-				for (var i = nth - nbase;i < 23;i++) {
-					if (incnth(p2.creatures[i])){
+				for (var i = nth - nbase; i < 23; i++) {
+					if (incnth(p2.creatures[i])) {
 						return true;
 					}
 				}
 			}
-		}else{
+		} else {
 			iterCore(p2.weapon);
 			iterCore(p2.shield);
 			p2.hand.forEach(iterCore);
@@ -193,14 +206,14 @@ AiSearch.prototype.step = function(game) {
 		return false;
 	}
 	var ret = iterLoop(game, 1, -1, this.casthash);
-	if (ret){
+	if (ret) {
 		this.nth = nth;
 		this.eval = currentEval;
 	} else if (~this.cmdct) {
-		this.cmd = "cast";
+		this.cmd = 'cast';
 	} else {
-		this.cmd = "endturn";
+		this.cmd = 'endturn';
 		this.cmdct = game.player2.hand.length == 8 ? this.worstcard : undefined;
 	}
-}
+};
 module.exports = AiSearch;

@@ -6,15 +6,19 @@ const etgutil = require('./etgutil'),
 
 function chatmute() {
 	const state = store.store.getState();
-	store.store.dispatch(store.chatMsg(
-		`${state.opts.muteall ? 'You have chat muted. ' : ''}Muted: ${Array.from(state.muted).join(', ')}`,
-		'System',
-	));
+	store.store.dispatch(
+		store.chatMsg(
+			`${state.opts.muteall ? 'You have chat muted. ' : ''}Muted: ${Array.from(
+				state.muted,
+			).join(', ')}`,
+			'System',
+		),
+	);
 }
 function parseChat(e) {
 	e.cancelBubble = true;
 	const kc = e.which || e.keyCode,
-		{user} = store.store.getState();
+		{ user } = store.store.getState();
 	if (kc == 13) {
 		e.preventDefault();
 		let chatinput = e.target,
@@ -35,7 +39,9 @@ function parseChat(e) {
 				store.store.dispatch(store.chatMsg(`${cmd} ${cmds[cmd]}`));
 			}
 		} else if (msg == '/clear') {
-			store.store.dispatch(store.clearChat(store.store.getState().opts.channel));
+			store.store.dispatch(
+				store.clearChat(store.store.getState().opts.channel),
+			);
 		} else if (msg == '/who') {
 			sock.emit('who');
 		} else if (msg.match(/^\/roll( |$)\d*d?\d*$/)) {
@@ -55,18 +61,33 @@ function parseChat(e) {
 				if (rx) {
 					names = names.filter(name => name.match(rx));
 				}
-			} catch (_e) {
-			}
-			store.store.dispatch(store.chat(names.sort().map(name => {
-				const deck = user.decks[name];
-				return <div>
-					<a href={`deck/${deck}`} target='_blank' className={'ico ce' + etgutil.fromTrueMark(parseInt(deck.slice(-3), 32))} />
-					<span onClick={e => {
-						sock.userExec('setdeck', { name });
-						store.store.dispatch(store.setOpt('deck', deck));
-					}}>{name}</span>
-				</div>;
-			})));
+			} catch (_e) {}
+			store.store.dispatch(
+				store.chat(
+					names.sort().map(name => {
+						const deck = user.decks[name];
+						return (
+							<div>
+								<a
+									href={`deck/${deck}`}
+									target="_blank"
+									className={
+										'ico ce' +
+										etgutil.fromTrueMark(parseInt(deck.slice(-3), 32))
+									}
+								/>
+								<span
+									onClick={e => {
+										sock.userExec('setdeck', { name });
+										store.store.dispatch(store.setOpt('deck', deck));
+									}}>
+									{name}
+								</span>
+							</div>
+						);
+					}),
+				),
+			);
 		} else if (msg == '/mute') {
 			store.store.dispatch(store.setOptTemp('muteall', true));
 			chatmute();
@@ -83,7 +104,10 @@ function parseChat(e) {
 			sock.emit(msg.slice(1));
 		} else if (user && msg == '/modclear') {
 			sock.userEmit('modclear');
-		} else if (user && msg.match(/^\/(mod(guest|mute|add|rm|motd)|codesmith(add|rm)) /)) {
+		} else if (
+			user &&
+			msg.match(/^\/(mod(guest|mute|add|rm|motd)|codesmith(add|rm)) /)
+		) {
 			const sp = msg.indexOf(' ');
 			sock.userEmit(msg.slice(1, sp), { m: msg.slice(sp + 1) });
 		} else if (msg.match(/^\/code /)) {

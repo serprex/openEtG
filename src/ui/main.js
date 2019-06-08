@@ -19,11 +19,11 @@ reactDOM.render(
 	<Provider store={store.store}>
 		<App />
 	</Provider>,
-	document.getElementById("leftpane"),
+	document.getElementById('leftpane'),
 );
 reactDOM.render(
 	<Provider store={store.store}>
 		<Rightpane />
 	</Provider>,
-	document.getElementById("rightpane"),
+	document.getElementById('rightpane'),
 );

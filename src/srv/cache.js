@@ -33,10 +33,5 @@ exports.try = function(res, url, ifmod) {
 exports.add = function(res, url, ifmod, path, func) {
 	const datathunk = func(path, stime);
 	cache.set(url, datathunk);
-	respond(
-		url,
-		res,
-		datathunk,
-		ifmod,
-	);
+	respond(url, res, datathunk, ifmod);
 };

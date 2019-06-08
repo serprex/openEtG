@@ -28,12 +28,20 @@ function untransmute(user, oldcard, func, use) {
 		const boundCount = etgutil.count(user.accountbound, oldcard);
 		if (boundCount) {
 			return {
-				accountbound: etgutil.addcard(etgutil.addcard(user.accountbound, oldcard, -1), newcard, use),
+				accountbound: etgutil.addcard(
+					etgutil.addcard(user.accountbound, oldcard, -1),
+					newcard,
+					use,
+				),
 			};
 		}
 	} else {
 		return {
-			pool: etgutil.addcard(etgutil.addcard(user.pool, oldcard, -1), newcard, use),
+			pool: etgutil.addcard(
+				etgutil.addcard(user.pool, oldcard, -1),
+				newcard,
+				use,
+			),
 		};
 	}
 }
@@ -144,7 +152,7 @@ exports.addgold = function(data, user) {
 exports.addloss = function(data, user) {
 	const losses = data.pvp ? 'pvplosses' : 'ailosses';
 	const result = {
-		[losses]: user[losses]+1,
+		[losses]: user[losses] + 1,
 	};
 	if (data.l !== undefined) {
 		result.streak = user.streak.slice();
@@ -156,8 +164,8 @@ exports.addloss = function(data, user) {
 exports.addwin = function(data, user) {
 	const prefix = data.pvp ? 'pvp' : 'ai';
 	return {
-		[`${prefix}wins`]: user[`${prefix}wins`]+1,
-		[`${prefix}losses`]: user[`${prefix}losses`]-1,
+		[`${prefix}wins`]: user[`${prefix}wins`] + 1,
+		[`${prefix}losses`]: user[`${prefix}losses`] - 1,
 	};
 };
 exports.setstreak = function(data, user) {
@@ -176,7 +184,7 @@ exports.donedaily = function(data, user) {
 	if (data.daily == 6 && !(user.daily & 64)) {
 		result.pool = etgutil.addcard(user.pool, data.c);
 	}
-	result.daily = user.daily | 1 << data.daily;
+	result.daily = user.daily | (1 << data.daily);
 	return result;
 };
 exports.changeqeck = function(data, user) {
@@ -205,6 +213,6 @@ exports.setquest = function(data, user) {
 		quests: {
 			...user.quests,
 			[data.quest]: 1,
-		}
+		},
 	};
 };

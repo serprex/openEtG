@@ -71,7 +71,7 @@ function make(cons) {
 				const effect = Object.create(cons.prototype);
 				const effectOverride = cons.apply(effect, arguments);
 				anims.push(effectOverride || effect);
-			};
+		  };
 }
 if (isNode) {
 	exports.disable = true;
@@ -86,7 +86,9 @@ if (isNode) {
 		for (let i = anims.length - 1; i >= 0; i--) {
 			const anim = anims[i];
 			if (anim.position && p2cloaked) {
-				const { position: { x, y } } = anim;
+				const {
+					position: { x, y },
+				} = anim;
 				if (x > 130 && x < 660 && y > 20 && y < 280) {
 					anims.splice(i, 1);
 				}
@@ -118,7 +120,7 @@ if (isNode) {
 			style: {
 				position: 'absolute',
 				left: this.position.x + 'px',
-				top: (this.position.y - this.step*2) + 'px',
+				top: this.position.y - this.step * 2 + 'px',
 				opacity: 1 - Math.sqrt(this.step) / 6,
 				fontSize: '16px',
 			},

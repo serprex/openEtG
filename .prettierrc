@@ -1,5 +1,5 @@
 {
-	"parser": "babylon",
+	"parser": "babel",
 	"useTabs": true,
 	"jsxBracketSameLine": true,
 	"trailingComma": "all",

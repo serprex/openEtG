@@ -2,7 +2,7 @@ const etgutil = require('../etgutil'),
 	store = require('../store'),
 	Cards = require('../Cards'),
 	Editor = require('../Components/Editor'),
-	{connect} = require('react-redux'),
+	{ connect } = require('react-redux'),
 	React = require('react');
 
 function processDeck(dcode) {
@@ -23,55 +23,65 @@ function processDeck(dcode) {
 
 module.exports = connect(state => ({
 	deck: state.opts.deck,
-}))(class SandboxEditor extends React.Component {
-	constructor(props) {
-		super(props);
+}))(
+	class SandboxEditor extends React.Component {
+		constructor(props) {
+			super(props);
 
-		this.deckRef = React.createRef();
-		this.state = processDeck(props.deck);
-	}
+			this.deckRef = React.createRef();
+			this.state = processDeck(props.deck);
+		}
 
-	componentDidMount() {
-		this.deckRef.current.setSelectionRange(0, 999);
-	}
+		componentDidMount() {
+			this.deckRef.current.setSelectionRange(0, 999);
+		}
 
-	currentDeckCode() {
-		return etgutil.encodedeck(this.state.deck) +
-			etgutil.toTrueMarkSuffix(this.state.mark);
-	}
+		currentDeckCode() {
+			return (
+				etgutil.encodedeck(this.state.deck) +
+				etgutil.toTrueMarkSuffix(this.state.mark)
+			);
+		}
 
-	render() {
-		return  <>
-			<Editor deck={this.state.deck} mark={this.state.mark} pool={this.state.pool}
-				setDeck={deck => this.setState({deck:deck.sort(Cards.codeCmp)})}
-				setMark={mark => this.setState({mark})}
-			/>
-			<input placeholder='Deck'
-				autoFocus
-				value={this.currentDeckCode()}
-				style={{
-					position: 'absolute',
-					left: '520px',
-					top: '238px',
-					width: '190px',
-				}}
-				onChange={e => this.setState(processDeck(e.target.value))}
-				ref={this.deckRef}
-				onClick={e => e.target.setSelectionRange(0, 999)}
-			/>
-			<input type='button'
-				value='Save & Exit'
-				onClick={() => {
-					this.props.dispatch(store.setOpt('deck', this.currentDeckCode()));
-					this.props.dispatch(store.doNav(require('../views/MainMenu')));
-				}}
-				style={{
-					position: 'absolute',
-					left: '8px',
-					top: '58px',
-				}}
-			/>
-		</>;
-	}
-});
-
+		render() {
+			return (
+				<>
+					<Editor
+						deck={this.state.deck}
+						mark={this.state.mark}
+						pool={this.state.pool}
+						setDeck={deck => this.setState({ deck: deck.sort(Cards.codeCmp) })}
+						setMark={mark => this.setState({ mark })}
+					/>
+					<input
+						placeholder="Deck"
+						autoFocus
+						value={this.currentDeckCode()}
+						style={{
+							position: 'absolute',
+							left: '520px',
+							top: '238px',
+							width: '190px',
+						}}
+						onChange={e => this.setState(processDeck(e.target.value))}
+						ref={this.deckRef}
+						onClick={e => e.target.setSelectionRange(0, 999)}
+					/>
+					<input
+						type="button"
+						value="Save & Exit"
+						onClick={() => {
+							this.props.dispatch(store.setOpt('deck', this.currentDeckCode()));
+							this.props.dispatch(store.doNav(require('../views/MainMenu')));
+						}}
+						style={{
+							position: 'absolute',
+							left: '8px',
+							top: '58px',
+						}}
+					/>
+				</>
+			);
+		}
+	},
+);

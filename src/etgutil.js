@@ -2,7 +2,9 @@
 function encodeCount(count) {
 	return count <= 0
 		? '00'
-		: count >= 1023 ? 'vv' : (count < 32 ? '0' : '') + count.toString(32);
+		: count >= 1023
+		? 'vv'
+		: (count < 32 ? '0' : '') + count.toString(32);
 }
 exports.encodeCount = encodeCount;
 exports.asUpped = function(code, upped) {

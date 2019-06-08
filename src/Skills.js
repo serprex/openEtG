@@ -50,7 +50,10 @@ const Skills = {
 	},
 	accelerationspell: (c, t) => {
 		t.lobo();
-		t.setSkill('ownattack', c.card.upped ? Skills.overdrive : Skills.acceleration);
+		t.setSkill(
+			'ownattack',
+			c.card.upped ? Skills.overdrive : Skills.acceleration,
+		);
 	},
 	accretion: (c, t) => {
 		Skills.destroy.func(c, t);
@@ -228,7 +231,7 @@ const Skills = {
 		t.die();
 		c.owner.foe.dmg(
 			Math.ceil(
-				t.truehp() * (t.getStatus('frozen') ? 150 : 100) / (t.truehp() + 100),
+				(t.truehp() * (t.getStatus('frozen') ? 150 : 100)) / (t.truehp() + 100),
 			),
 		);
 		const poison = t.getStatus('poison');
@@ -325,7 +328,7 @@ const Skills = {
 	cpower: (c, t) => {
 		const buff = t.owner.upto(25),
 			bh = ((buff / 5) | 0) + 1,
-			ba = buff % 5 + 1;
+			ba = (buff % 5) + 1;
 		Effect.mkText(ba + '|' + bh, t);
 		t.buffhp(bh);
 		t.atk += ba;
@@ -528,7 +531,8 @@ const Skills = {
 		if (isborne) {
 			Effect.mkText('3|0', t);
 			t.atk += 3;
-			if (t.getSkill('cast') === Skills.burrow) t.active = t.active.remove('cast');
+			if (t.getSkill('cast') === Skills.burrow)
+				t.active = t.active.remove('cast');
 		} else {
 			t.spelldmg(3);
 		}
@@ -574,7 +578,9 @@ const Skills = {
 	}),
 	duality: (c, t) => {
 		if (c.owner.foe.deck.length && c.owner.hand.length < 8) {
-			c.owner.addCardInstance(c.owner.foe.deck[c.owner.foe.deck.length - 1].clone(c.owner));
+			c.owner.addCardInstance(
+				c.owner.foe.deck[c.owner.foe.deck.length - 1].clone(c.owner),
+			);
 		}
 	},
 	earth: (c, t) => {
@@ -667,7 +673,7 @@ const Skills = {
 			return;
 		}
 		const cards = [];
-		t.owner.deck.forEach(({card}, i) => {
+		t.owner.deck.forEach(({ card }, i) => {
 			let cost = card.cost;
 			if (!card.element || card.element == c.castele) cost += c.cast;
 			if (t.owner.canspend(card.costele, cost)) {
@@ -775,7 +781,14 @@ const Skills = {
 		c.owner.quanta[etg.Aether] = 0;
 	},
 	freedom: (c, t, attackFlags) => {
-		if (c.owner === t.owner && t.type === etg.Creature && t.getStatus('airborne') && !attackFlags.freedom && c.rng() < .3) attackFlags.freedom = true;
+		if (
+			c.owner === t.owner &&
+			t.type === etg.Creature &&
+			t.getStatus('airborne') &&
+			!attackFlags.freedom &&
+			c.rng() < 0.3
+		)
+			attackFlags.freedom = true;
 	},
 	freeevade: (c, t, data) => {
 		const tgt = data.tgt;
@@ -1126,7 +1139,10 @@ const Skills = {
 				const data = slist[j];
 				if (ishards <= data[0]) return;
 				if (!data[1]) {
-					shardgolem.status = shardgolem.status.set(data[2], data[3] === undefined ? 1 : data[3]);
+					shardgolem.status = shardgolem.status.set(
+						data[2],
+						data[3] === undefined ? 1 : data[3],
+					);
 				} else {
 					addSkill(data[1], data[2]);
 				}
@@ -1381,10 +1397,10 @@ const Skills = {
 			(tauto == Skills.pillmat
 				? c.choose([etg.Earth, etg.Fire, etg.Water, etg.Air])
 				: tauto == Skills.pillspi
-					? c.choose([etg.Death, etg.Life, etg.Light, etg.Darkness])
-					: tauto == Skills.pillcar
-						? c.choose([etg.Entropy, etg.Gravity, etg.Time, etg.Aether])
-						: c.owner.upto(12) + 1);
+				? c.choose([etg.Death, etg.Life, etg.Light, etg.Darkness])
+				: tauto == Skills.pillcar
+				? c.choose([etg.Entropy, etg.Gravity, etg.Time, etg.Aether])
+				: c.owner.upto(12) + 1);
 		Skills.destroy.func(c, t, true, true);
 		t.owner.addCrea(new Thing(t.card.as(Cards.Codes[etg.NymphList[e]])));
 	},
@@ -1411,12 +1427,10 @@ const Skills = {
 	},
 	paleomagnetism: (c, t) => {
 		const e = c.owner.upto(6);
-		const list = e&1 ? etg.PillarList : etg.PendList;
+		const list = e & 1 ? etg.PillarList : etg.PendList;
 		c.owner.addPerm(
 			new Thing(
-				c.card.as(
-					Cards.Codes[list[e < 4 ? c.owner.mark : c.owner.foe.mark]],
-				),
+				c.card.as(Cards.Codes[list[e < 4 ? c.owner.mark : c.owner.foe.mark]]),
 			),
 		);
 	},
@@ -1764,7 +1778,11 @@ const Skills = {
 	},
 	shuffle3: (c, t) => {
 		for (let i = 0; i < 3; i++)
-			c.owner.deck.splice(c.owner.upto(c.owner.deck.length), 0, new Thing(t.card));
+			c.owner.deck.splice(
+				c.owner.upto(c.owner.deck.length),
+				0,
+				new Thing(t.card),
+			);
 	},
 	silence: (c, t) => {
 		if (t.type != etg.Player || !t.sanctuary) t.usedactive = true;
@@ -1788,7 +1806,7 @@ const Skills = {
 		} else if (r > 0.4) {
 			const buff = c.owner.upto(25);
 			c.buffhp(Math.floor(buff / 5) + 1);
-			c.atk -= buff % 5 + 1;
+			c.atk -= (buff % 5) + 1;
 		} else if (r > 0.3) {
 			Skills.nova.func(c.owner.foe);
 			c.owner.foe.nova = 0;
@@ -1861,7 +1879,7 @@ const Skills = {
 			}
 		}
 		const n = c.card.upped ? 40 : 48;
-		c.owner.dmg(Math.max(Math.ceil(c.owner.maxhp * n / 100), n), true);
+		c.owner.dmg(Math.max(Math.ceil((c.owner.maxhp * n) / 100), n), true);
 	},
 	soulcatch: (c, t) => {
 		Effect.mkText('Soul', c);
@@ -1879,13 +1897,23 @@ const Skills = {
 		return c.owner.mark == etg.Life || c.owner.mark == etg.Water ? 1 : 0;
 	},
 	stasis: (c, t, attackFlags) => {
-		if (t.type === etg.Creature && attackFlags.attackPhase && !attackFlags.stasis) {
+		if (
+			t.type === etg.Creature &&
+			attackFlags.attackPhase &&
+			!attackFlags.stasis
+		) {
 			sfx.playSound('stasis');
 			attackFlags.stasis = true;
 		}
 	},
 	ownstasis: (c, t, attackFlags) => {
-		if (t.type === etg.Creature && c.owner === t.owner && attackFlags.attackPhase && !attackFlags.stasis) attackFlags.stasis = true;
+		if (
+			t.type === etg.Creature &&
+			c.owner === t.owner &&
+			attackFlags.attackPhase &&
+			!attackFlags.stasis
+		)
+			attackFlags.stasis = true;
 	},
 	static: c => {
 		c.owner.foe.spelldmg(2);
@@ -2020,7 +2048,7 @@ const Skills = {
 	},
 	trick: (c, t) => {
 		const cards = [];
-		t.owner.deck.forEach(({card}, i) => {
+		t.owner.deck.forEach(({ card }, i) => {
 			if (
 				card.type == etg.Creature &&
 				card.asShiny(false) != t.card.asShiny(false)
@@ -2219,7 +2247,12 @@ const Skills = {
 		};
 	},
 	evadespell: (c, t, data) => {
-		if (data.tgt == c && c.owner != t.owner && t.type === etg.Spell && t.card.type === etg.Spell)
+		if (
+			data.tgt == c &&
+			c.owner != t.owner &&
+			t.type === etg.Spell &&
+			t.card.type === etg.Spell
+		)
 			data.evade = true;
 	},
 	evadecrea: (c, t, data) => {
@@ -2284,7 +2317,11 @@ function unsummon(t) {
 	}
 }
 for (const key in Skills) {
-	Skills[key] = { name: [key], func: Skills[key], passive: passiveSet.has(Skills[key]) };
+	Skills[key] = {
+		name: [key],
+		func: Skills[key],
+		passive: passiveSet.has(Skills[key]),
+	};
 }
 module.exports = Skills;
 var etg = require('./etg');

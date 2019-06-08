@@ -17,16 +17,16 @@ function run(gamedata) {
 	if (gamedata) {
 		store.store.dispatch(store.doNav(require('./views/Match'), gamedata));
 	}
-};
+}
 
 exports.mkPremade = function mkPremade(level, daily) {
 	const name = level == 1 ? 'mage' : 'demigod';
 	return () => {
 		const urdeck = sock.getDeck(),
-			{user} = store.store.getState(),
+			{ user } = store.store.getState(),
 			minsize = user ? 30 : 10;
 		if (!Cards.isDeckLegal(etgutil.decodedeck(urdeck), user, minsize)) {
-			store.store.dispatch(store.chatMsg(`Invalid deck`, 'System'))
+			store.store.dispatch(store.chatMsg(`Invalid deck`, 'System'));
 			return;
 		}
 		const cost = daily !== undefined ? 0 : userutil.pveCostReward[level * 2];
@@ -97,10 +97,10 @@ const randomNames = [
 exports.mkAi = function mkAi(level, daily) {
 	return () => {
 		const urdeck = sock.getDeck(),
-			{user} = store.store.getState(),
+			{ user } = store.store.getState(),
 			minsize = user ? 30 : 10;
 		if (!Cards.isDeckLegal(etgutil.decodedeck(urdeck), user, minsize)) {
-			store.store.dispatch(store.chatMsg(`Invalid deck`, 'System'))
+			store.store.dispatch(store.chatMsg(`Invalid deck`, 'System'));
 			return;
 		}
 		const cost = daily !== undefined ? 0 : userutil.pveCostReward[level * 2];

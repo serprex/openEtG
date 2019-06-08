@@ -10,17 +10,19 @@ module.exports = async function(url, stime) {
 		pool = etgutil.deck2pool(user.pool);
 	Cards.Codes.forEach((card, code) => {
 		if (!card.upped && !card.shiny && !card.getStatus('token')) {
-			result.push([
-				code,
-				card.name,
-				pool[code] || 0,
-				pool[etgutil.asUpped(code, true)] || 0,
-				pool[etgutil.asShiny(code, true)] || 0,
-				pool[etgutil.asShiny(etgutil.asUpped(code, true), true)] || 0,
-				card.element,
-				card.rarity,
-				card.type,
-			].join(','));
+			result.push(
+				[
+					code,
+					card.name,
+					pool[code] || 0,
+					pool[etgutil.asUpped(code, true)] || 0,
+					pool[etgutil.asShiny(code, true)] || 0,
+					pool[etgutil.asShiny(etgutil.asUpped(code, true), true)] || 0,
+					card.element,
+					card.rarity,
+					card.type,
+				].join(','),
+			);
 		}
 	});
 	return {
@@ -28,4 +30,4 @@ module.exports = async function(url, stime) {
 		head: { 'Content-Encoding': 'gzip', 'Content-Type': 'text/plain' },
 		date: new Date(),
 	};
-}
+};

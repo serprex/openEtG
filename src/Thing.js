@@ -51,13 +51,19 @@ Thing.prototype.transform = function(card) {
 };
 Thing.prototype.getIndex = function() {
 	return this.type == etg.Weapon
-		? this.owner.weapon == this ? 0 : -1
+		? this.owner.weapon == this
+			? 0
+			: -1
 		: this.type == etg.Shield
-			? this.owner.shield == this ? 0 : -1
-			: (this.type == etg.Creature
-					? this.owner.creatures
-					: this.type == etg.Permanent ? this.owner.permanents : this.owner.hand
-				).indexOf(this);
+		? this.owner.shield == this
+			? 0
+			: -1
+		: (this.type == etg.Creature
+				? this.owner.creatures
+				: this.type == etg.Permanent
+				? this.owner.permanents
+				: this.owner.hand
+		  ).indexOf(this);
 };
 Thing.prototype.remove = function(index) {
 	if (this.type == etg.Weapon) {
@@ -216,8 +222,10 @@ Thing.prototype.info = function() {
 		this.type == etg.Creature
 			? this.trueatk() + '|' + this.truehp() + '/' + this.maxhp
 			: this.type == etg.Weapon
-				? this.trueatk().toString()
-				: this.type == etg.Shield ? this.truedr().toString() : '';
+			? this.trueatk().toString()
+			: this.type == etg.Shield
+			? this.truedr().toString()
+			: '';
 	const stext = skillText(this);
 	return !info ? stext : stext ? info + '\n' + stext : info;
 };
@@ -236,8 +244,7 @@ const activetexts = [
 ];
 Thing.prototype.activetext = function() {
 	const acast = this.active.get('cast');
-	if (acast)
-		return this.cast + ':' + this.castele + acast.name[0];
+	if (acast) return this.cast + ':' + this.castele + acast.name[0];
 	for (const akey of activetexts) {
 		const a = this.active.get(akey);
 		if (a) return akey + ' ' + a.name.join(' ');
@@ -344,7 +351,9 @@ Thing.prototype.isMaterial = function(type) {
 	return (
 		(type == etg.Permanent
 			? this.type <= type
-			: type ? this.type == type : this.type != etg.Player) &&
+			: type
+			? this.type == type
+			: this.type != etg.Player) &&
 		!this.status.get('immaterial') &&
 		!this.status.get('burrowed')
 	);
@@ -359,7 +368,11 @@ function combineactive(a1, a2) {
 				v2 = a2.func(c, t, data);
 			return v1 === undefined
 				? v2
-				: v2 === undefined ? v1 : v1 === true || v2 === true ? true : v1 + v2;
+				: v2 === undefined
+				? v1
+				: v1 === true || v2 === true
+				? true
+				: v1 + v2;
 		},
 		name: a1.name.concat(a2.name),
 	};
@@ -369,23 +382,27 @@ Thing.prototype.addactive = function(type, active) {
 };
 Thing.prototype.getSkill = function(type) {
 	return this.active.get(type);
-}
+};
 Thing.prototype.setSkill = function(type, sk) {
 	this.active = this.active.set(type, sk);
-}
+};
 Thing.prototype.rmactive = function(type, name) {
 	const atype = this.active.get(type);
 	if (!atype) return;
 	const actives = atype.name;
 	const idx = actives.indexOf(name);
 	if (~idx) {
-		this.active = actives.length === 1 ?
-			this.active.delete(type) :
-			this.active.set(type, actives.reduce(
-				(previous, current, i) =>
-					i == idx ? previous : combineactive(previous, Skills[current]),
-				null,
-			));
+		this.active =
+			actives.length === 1
+				? this.active.delete(type)
+				: this.active.set(
+						type,
+						actives.reduce(
+							(previous, current, i) =>
+								i == idx ? previous : combineactive(previous, Skills[current]),
+							null,
+						),
+				  );
 	}
 };
 Thing.prototype.hasactive = function(type, name) {
@@ -426,7 +443,7 @@ Thing.prototype.castSpell = function(tgt, active, nospell) {
 	}
 };
 Thing.prototype.play = function(tgt, fromhand) {
-	const {owner, card} = this;
+	const { owner, card } = this;
 	this.remove();
 	if (card.type == etg.Spell) {
 		this.castSpell(tgt, this.active.get('cast'));
@@ -440,7 +457,7 @@ Thing.prototype.play = function(tgt, fromhand) {
 	}
 };
 Thing.prototype.useactive = function(t) {
-	const {owner} = this;
+	const { owner } = this;
 	if (this.type == etg.Spell) {
 		if (!this.canactive(true)) {
 			return console.log(`${owner} cannot cast ${this}`);
@@ -466,7 +483,11 @@ Thing.prototype.truehp = function() {
 };
 Thing.prototype.trueatk = function(adrenaline) {
 	if (adrenaline === undefined) adrenaline = this.getStatus('adrenaline');
-	let dmg = this.atk + this.getStatus('dive') + this.trigger('buff') + this.calcBonusAtk();
+	let dmg =
+		this.atk +
+		this.getStatus('dive') +
+		this.trigger('buff') +
+		this.calcBonusAtk();
 	if (this.status.get('burrowed')) dmg = Math.ceil(dmg / 2);
 	return etg.calcAdrenaline(adrenaline, dmg);
 };
@@ -585,20 +606,20 @@ Thing.prototype.buffhp = function(x) {
 };
 Thing.prototype.getStatus = function(key) {
 	return this.status.get(key) || 0;
-}
+};
 Thing.prototype.setStatus = function(key, val) {
-	this.status = this.status.set(key, val|0);
-}
+	this.status = this.status.set(key, val | 0);
+};
 Thing.prototype.clearStatus = function(key, val) {
 	this.status = this.status.clear();
-}
+};
 Thing.prototype.maybeDecrStatus = function(key) {
 	const val = this.getStatus(key);
-	if (val > 0) this.setStatus(key, val-1);
+	if (val > 0) this.setStatus(key, val - 1);
 	return val;
-}
+};
 Thing.prototype.incrStatus = function(key, val) {
-	this.setStatus(key, this.getStatus(key)+val);
+	this.setStatus(key, this.getStatus(key) + val);
 };
 
 var ui = require('./ui');

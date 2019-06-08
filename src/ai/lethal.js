@@ -24,8 +24,8 @@ module.exports = function(game) {
 						gameClone.winner == gameClone.player2
 							? -999
 							: gameClone.winner == gameClone.player1
-								? 999
-								: gameClone.player1.hp;
+							? 999
+							: gameClone.player1.hp;
 					if (v < currentEval) {
 						cmdct = cmdct0 || cbits | (tbits << 9);
 						currentEval = v;

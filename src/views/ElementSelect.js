@@ -26,19 +26,21 @@ module.exports = class ElementSelect extends React.Component {
 	constructor(props) {
 		super(props);
 		this.state = {
-			eledesc: 'Select your starter element'
+			eledesc: 'Select your starter element',
 		};
 	}
 
 	componentDidMount() {
-		store.store.dispatch(store.setCmds({
-			login: data => {
-				delete data.x;
-				store.store.dispatch(store.setUser(data));
-				store.store.dispatch(store.setOptTemp('deck', sock.getDeck()));
-				store.store.dispatch(store.doNav(require('./MainMenu')));
-			}
-		}));
+		store.store.dispatch(
+			store.setCmds({
+				login: data => {
+					delete data.x;
+					store.store.dispatch(store.setUser(data));
+					store.store.dispatch(store.setOptTemp('deck', sock.getDeck()));
+					store.store.dispatch(store.doNav(require('./MainMenu')));
+				},
+			}),
+		);
 	}
 
 	render() {
@@ -59,33 +61,37 @@ module.exports = class ElementSelect extends React.Component {
 						sock.emit('inituser', msg);
 					}}
 					onMouseOver={() =>
-						this.setState({ eledesc: ui.eleNames[i] + '\n\n' + descriptions[i - 1], })
+						this.setState({
+							eledesc: ui.eleNames[i] + '\n\n' + descriptions[i - 1],
+						})
 					}
 				/>,
 			);
 		}
-		return <>
-			<div
-				style={{
-					position: 'absolute',
-					left: '100px',
-					top: '300px',
-					width: '700px',
-					whiteSpace: 'pre-wrap',
-				}}>
-				{this.state.eledesc}
-			</div>
-			<Components.ExitBtn
-				x={100}
-				y={450}
-				onClick={() => {
-					sock.userEmit('delete');
-					store.store.dispatch(store.setUser(null));
-					store.store.dispatch(store.setOpt('remember', false));
-					store.store.dispatch(store.doNav(require('./Login')));
-				}}
-			/>
-			{mainc}
-		</>
+		return (
+			<>
+				<div
+					style={{
+						position: 'absolute',
+						left: '100px',
+						top: '300px',
+						width: '700px',
+						whiteSpace: 'pre-wrap',
+					}}>
+					{this.state.eledesc}
+				</div>
+				<Components.ExitBtn
+					x={100}
+					y={450}
+					onClick={() => {
+						sock.userEmit('delete');
+						store.store.dispatch(store.setUser(null));
+						store.store.dispatch(store.setOpt('remember', false));
+						store.store.dispatch(store.doNav(require('./Login')));
+					}}
+				/>
+				{mainc}
+			</>
+		);
 	}
 };

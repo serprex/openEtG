@@ -97,7 +97,7 @@ Card.prototype.isOf = function(card) {
 };
 Card.prototype.getStatus = function(key) {
 	return this.status.get(key) || 0;
-}
+};
 function readCost(coststr, defaultElement) {
 	if (typeof coststr == 'number')
 		return new Int8Array([coststr, defaultElement]);
@@ -105,14 +105,11 @@ function readCost(coststr, defaultElement) {
 		cost = +(~cidx ? coststr.substr(0, cidx) : coststr);
 	return isNaN(cost)
 		? null
-		: new Int8Array([
-				cost,
-				~cidx ? +(coststr.substr(cidx + 1)) : defaultElement,
-			]);
+		: new Int8Array([cost, ~cidx ? +coststr.substr(cidx + 1) : defaultElement]);
 }
 
 var etg = require('./etg');
-var {Thing} = require('./Thing');
+var { Thing } = require('./Thing');
 var Cards = require('./Cards');
 var etgutil = require('../etgutil');
 var skillText = require('./skillText');

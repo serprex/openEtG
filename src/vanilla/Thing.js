@@ -63,7 +63,7 @@ CardInstance.prototype.toString = function() {
 };
 CardInstance.prototype.getStatus = function(key) {
 	return this.card.status.get(key) || 0;
-}
+};
 Thing.prototype.trigger = function(name, t, param) {
 	return this.active.get(name) ? this.active.get(name).func(this, t, param) : 0;
 };
@@ -84,20 +84,20 @@ Thing.prototype.proc = function(name, param) {
 };
 Thing.prototype.getStatus = function(key) {
 	return (this.status && this.status.get(key)) || 0;
-}
+};
 Thing.prototype.setStatus = function(key, val) {
-	this.status = this.status.set(key, val|0);
-}
+	this.status = this.status.set(key, val | 0);
+};
 Thing.prototype.clearStatus = function(key) {
 	this.status = this.status.delete(key);
-}
+};
 Thing.prototype.maybeDecrStatus = function(key) {
 	const val = this.getStatus(key);
-	if (val > 0) this.setStatus(key, val-1);
+	if (val > 0) this.setStatus(key, val - 1);
 	return val;
-}
+};
 Thing.prototype.incrStatus = function(key, val) {
-	this.setStatus(key, this.getStatus(key)+val);
+	this.setStatus(key, this.getStatus(key) + val);
 };
 
 Creature.prototype = Object.create(Thing.prototype);
@@ -120,7 +120,11 @@ function combineactive(a1, a2) {
 				v2 = a2.func(c, t, data);
 			return v1 === undefined
 				? v2
-				: v2 === undefined ? v1 : v1 === true || v2 === true ? true : v1 + v2;
+				: v2 === undefined
+				? v1
+				: v1 === true || v2 === true
+				? true
+				: v1 + v2;
 		},
 		name: a1.name.concat(a2.name),
 	};
@@ -230,8 +234,7 @@ var activetexts = [
 Thing.prototype.activetext = function() {
 	if (!this.active) return '';
 	const acast = this.active.get('cast');
-	if (acast)
-		return this.cast + ':' + this.castele + acast.name[0];
+	if (acast) return this.cast + ':' + this.castele + acast.name[0];
 	for (const akey of activetexts) {
 		const a = this.active.get(akey);
 		if (a) return akey + ' ' + a.name.join(' ');
@@ -257,7 +260,10 @@ Permanent.prototype.place = function(fromhand) {
 				this.owner.permanents[i] &&
 				this.card.code == this.owner.permanents[i].card.code
 			) {
-				this.owner.permanents[i].incrStatus('charges', this.getStatus('charges'));
+				this.owner.permanents[i].incrStatus(
+					'charges',
+					this.getStatus('charges'),
+				);
 				Thing.prototype.place.call(this.owner.permanents[i], fromhand);
 				return;
 			}
@@ -287,7 +293,11 @@ Shield.prototype.place = function(fromhand) {
 		this.owner.shield &&
 		this.owner.shield.card.asUpped(this.card.upped) == this.card
 	) {
-		this.owner.shield.status.set('charges', (this.owner.shield.status.get('charges')|0) + this.status.get('charges'));
+		this.owner.shield.status.set(
+			'charges',
+			(this.owner.shield.status.get('charges') | 0) +
+				this.status.get('charges'),
+		);
 	} else this.owner.shield = this;
 	Thing.prototype.place.call(this, fromhand);
 };
@@ -334,7 +344,10 @@ Weapon.prototype.delay = Creature.prototype.delay = function(x) {
 	if (this.status.get('voodoo')) this.owner.foe.delay(x);
 };
 Weapon.prototype.freeze = Creature.prototype.freeze = function(x) {
-	if (!this.active.has('ownfreeze') || this.active.get('ownfreeze').func(this)) {
+	if (
+		!this.active.has('ownfreeze') ||
+		this.active.get('ownfreeze').func(this)
+	) {
 		Effect.mkText('Freeze', this);
 		this.defstatus('frozen', 0);
 		if (x > this.status.get('frozen')) this.setStatus('frozen', x);
@@ -440,7 +453,10 @@ Creature.prototype.evade = function(sender) {
 	) {
 		var freedomChance = 0;
 		for (var i = 0; i < 16; i++) {
-			if (this.owner.permanents[i] && this.owner.permanents[i].status.get('freedom')) {
+			if (
+				this.owner.permanents[i] &&
+				this.owner.permanents[i].status.get('freedom')
+			) {
 				freedomChance += 0.25 * this.owner.permanents[i].status.get('charges');
 			}
 		}
@@ -555,8 +571,11 @@ Thing.prototype.isMaterial = function(type) {
 	return (
 		(type == etg.Permanent
 			? this.type <= type
-			: type ? this.type == type : this.type != etg.Player) &&
-		!this.status.get('immaterial') && !this.status.get('burrowed')
+			: type
+			? this.type == type
+			: this.type != etg.Player) &&
+		!this.status.get('immaterial') &&
+		!this.status.get('burrowed')
 	);
 };
 Thing.prototype.addactive = function(type, active) {
@@ -570,9 +589,14 @@ Thing.prototype.rmactive = function(type, name) {
 		if (actives.length == 1) {
 			this.active = this.active.delete(type);
 		} else {
-			this.active = this.active.set(type, actives.reduce(function(previous, current, i) {
-				return i == idx ? previous : combineactive(previous, Actives[current]);
-			}, null));
+			this.active = this.active.set(
+				type,
+				actives.reduce(function(previous, current, i) {
+					return i == idx
+						? previous
+						: combineactive(previous, Actives[current]);
+				}, null),
+			);
 		}
 	}
 };
@@ -697,7 +721,9 @@ Weapon.prototype.attack = Creature.prototype.attack = function(
 	} else if (!isCreature || ~this.getIndex()) {
 		this.trigger('postauto');
 		if (this.status.get('adrenaline')) {
-			if (this.status.get('adrenaline') < etg.countAdrenaline(this.trueatk(0))) {
+			if (
+				this.status.get('adrenaline') < etg.countAdrenaline(this.trueatk(0))
+			) {
 				this.incrStatus('adrenaline', 1);
 				this.attack(stasis, freedomChance);
 			} else {
@@ -723,13 +749,13 @@ CardInstance.prototype.useactive = function(target) {
 		);
 		return;
 	}
-	const {owner, card} = this;
+	const { owner, card } = this;
 	this.remove();
 	if (owner.status.get('neuro')) {
 		owner.addpoison(1);
 	}
 	if (card.type <= etg.Permanent) {
-		var cons = [Weapon, Shield, Permanent][card.type ? card.type-1 : 2];
+		var cons = [Weapon, Shield, Permanent][card.type ? card.type - 1 : 2];
 		new cons(card, owner).place(true);
 	} else if (card.type == etg.Spell) {
 		if (!target || !target.evade(owner)) {

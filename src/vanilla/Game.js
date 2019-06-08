@@ -59,7 +59,10 @@ Game.prototype.updateExpectedDamage = function() {
 				var gclone = this.clone();
 				gclone.player1.permanents.forEach(removeSoPa);
 				gclone.player2.permanents.forEach(removeSoPa);
-				gclone.rng.setSeed(gclone.rng.highState ^ (i * 997), gclone.rng.lowState ^ (i * 650));
+				gclone.rng.setSeed(
+					gclone.rng.highState ^ (i * 997),
+					gclone.rng.lowState ^ (i * 650),
+				);
 				gclone.turn.endturn();
 				if (!gclone.winner) gclone.turn.endturn();
 				this.expectedDamage[0] += this.player1.hp - gclone.player1.hp;
@@ -110,7 +113,7 @@ Game.prototype.getTarget = function(src, active, cb) {
 	var targetingFilter = Cards.Targeting[active.name[0]];
 	if (targetingFilter) {
 		this.targeting = {
-			filter: (t) => {
+			filter: t => {
 				return (
 					(t.type == etg.Player ||
 						t.type == etg.Spell ||

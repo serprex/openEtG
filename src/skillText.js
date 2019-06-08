@@ -42,7 +42,9 @@ const data = {
 	abomination: 'Amiable to mutation',
 	absorber: 'Produce 3:6 per attacker',
 	accelerationspell: c =>
-		`Replaces target creature\'s skills with "Gain +${c.upped ? 3 : 2}|-1 per turn"`,
+		`Replaces target creature\'s skills with "Gain +${
+			c.upped ? 3 : 2
+		}|-1 per turn"`,
 	accretion:
 		"Destroy target permanent & gain 0|10. Return to owner's hand as a Blackhole if larger than 30",
 	accumulation: 'Increment damage reduction per stack',
@@ -70,7 +72,8 @@ const data = {
 	blockwithcharge: 'Block attack per stack',
 	bolsterintodeck:
 		'Push 3 copies of target creature onto own deck. Cannot ricochet',
-	boneyard: c => `When a death occurs, summon a ${c.upped ? '2|2' : '1|1'} Skeleton`,
+	boneyard: c =>
+		`When a death occurs, summon a ${c.upped ? '2|2' : '1|1'} Skeleton`,
 	bounce: "Return to owner's hand instead of dying",
 	bravery: 'Foe draws twice, draw an equal amount',
 	brawl:
@@ -87,10 +90,9 @@ const data = {
 		'Sacrifice target creature to damage foe 100HP/(100+HP). Frozen targets deal 1.5x more. Poisoned creatures transfer poison',
 	catlife: 'On death, regenerate with 1 fewer life',
 	cell: 'Become Malignant if poisoned',
-	chaos: c => (
+	chaos: c =>
 		(c.upped ? '20% chance to evade. ' : '') +
-		'Non-ranged attacking creatures have a 30% chance to have a random effect cast on them'
-	),
+		'Non-ranged attacking creatures have a 30% chance to have a random effect cast on them',
 	chimera:
 		'Combine all own creatures to form a Chimera with momentum & gravity pull',
 	chromastat: 'Generate 1:0 per strength & health on hit',
@@ -131,7 +133,8 @@ const data = {
 	divinity: 'Add 24 to maximum health & heal 16',
 	dive: 'Double strength until next attack. Does not stack',
 	dmgproduce: 'Generate 1:0 per damage dealt',
-	draft: 'Target airborne creature loses airborne status, or vice versa. Becoming airborne gains 3|0, losing airborne deals 3 spell damage',
+	draft:
+		'Target airborne creature loses airborne status, or vice versa. Becoming airborne gains 3|0, losing airborne deals 3 spell damage',
 	drainlife: 'Drains 2HP from target. Increment drain per 5:11 owned',
 	drawcopy: 'When foe discards a card, generate a copy',
 	drawequip: 'Draw next weapon or shield',
@@ -196,8 +199,12 @@ const data = {
 	},
 	gaintimecharge: 'Gain a stack per own non-drawstep draw, up to 4 per turn',
 	gas: 'Summon an Unstable Gas',
-	grave: "When a death occurs, unburrowed & become of dying's kind. Maintain nocturnal",
-	give: c => `Give own target to foe. Heal self ${c.upped ? 10 : 5}. Ignore sanctuary, may target immaterial`,
+	grave:
+		"When a death occurs, unburrowed & become of dying's kind. Maintain nocturnal",
+	give: c =>
+		`Give own target to foe. Heal self ${
+			c.upped ? 10 : 5
+		}. Ignore sanctuary, may target immaterial`,
 	golemhit: 'Target golem attacks. May target immaterial',
 	gpull: 'Intercept attacks directed to owner',
 	gpullspell: 'Target creature intercepts attacks directed to its owner',
@@ -230,7 +237,9 @@ const data = {
 		'Deal 2 spell damage to target. Increment damage per 5:7 owned. May freeze target',
 	ignite: 'Deal 20 spell damage to foe & 1 spell damage to all creatures',
 	immolate: c =>
-		`Sacrifice a creature to produce ${c.upped ? 7 : 5}:6 & 1 quanta of each element`,
+		`Sacrifice a creature to produce ${
+			c.upped ? 7 : 5
+		}:6 & 1 quanta of each element`,
 	improve: 'Mutate target creature',
 	inertia: 'When own is targeted, produce 2:3',
 	infect: 'Poison target creature',
@@ -276,9 +285,12 @@ const data = {
 	mutant: 'Enter with mutant abilities',
 	neuro:
 		'Apply poison on hit, also inflicting neurotoxin. Neurotoxin applies poison per card played by victim. Throttled',
-	neuroify: 'Gives foe neurotoxin status if they are already poisoned. Remove purify counters',
+	neuroify:
+		'Gives foe neurotoxin status if they are already poisoned. Remove purify counters',
 	nightmare: c =>
-		`Fill foe's hand with copies of target creature's card. Drain ${c.upped ? '2' : '1'} HP per added card`,
+		`Fill foe's hand with copies of target creature's card. Drain ${
+			c.upped ? '2' : '1'
+		} HP per added card`,
 	nightshade:
 		'Target creatures becomes nocturnal, gains 5|5, & has their active cleared',
 	nova:
@@ -298,7 +310,7 @@ const data = {
 		ownattack: [
 			"Summon a pillar matching mark per turn. Third chance to summon a pillar matching foe's mark",
 			"Summon a tower matching mark per turn & on play. Third chance to summon a tower matching foe's mark",
-		]
+		],
 	},
 	pandemonium: 'Random effects are inflicted to all creatures. Removes cloak',
 	pandemonium2:
@@ -310,7 +322,9 @@ const data = {
 	photosynthesis: 'Produce 2:5. May activate multiple times',
 	pillar: c => `Produce ${c.element ? 1 : 3}:${c.element} per turn`,
 	pend: c =>
-		`Oscilliate between producing ${c.element ? 1 : 3}:${c.element} & quanta of mark`,
+		`Oscilliate between producing ${c.element ? 1 : 3}:${
+			c.element
+		} & quanta of mark`,
 	plague: "Poison target player's creatures. Removes cloak",
 	platearmor: ['Target gains 0|4', 'Target gains 0|6'],
 	poison: x => {
@@ -339,8 +353,7 @@ const data = {
 		'Target creature gains +5|-5. Thaws',
 		'Target creature gains +6|-6. Thaws',
 	],
-	randomdr: c =>
-		`Damage reduction becomes 0 to ${c.upped ? 3 : 2} on play`,
+	randomdr: c => `Damage reduction becomes 0 to ${c.upped ? 3 : 2} on play`,
 	readiness:
 		"Target creature's active becomes costless. Skill can be reactivated",
 	readyequip: 'Remove summoning sickness when equipment becomes equipped',
@@ -382,7 +395,8 @@ const data = {
 		'Generate 3 random non-pillar upgraded cards in hand. One will be 1:1',
 	],
 	shtriga: 'Become immaterial at start of turn',
-	shuffle3: "Shuffle 3 copies of target creature or opponent's instance into own deck",
+	shuffle3:
+		"Shuffle 3 copies of target creature or opponent's instance into own deck",
 	silence:
 		'Target player cannot play cards until their turn ends, or target creature gains summoning sickness',
 	sing: 'Target creature without Sing attacks owner',
@@ -430,7 +444,8 @@ const data = {
 		'Target weapon deals an additional 3 damage per turn. Thaws',
 		'Target weapon deals an additional 5 damage per turn. Thaws',
 	],
-	tesseractsummon: 'Summon 2 creatures from own deck, foe summons 1 creature from their deck. Freeze summoned creatures by a quarter of their cost, rounded up',
+	tesseractsummon:
+		'Summon 2 creatures from own deck, foe summons 1 creature from their deck. Freeze summoned creatures by a quarter of their cost, rounded up',
 	thorn: '75% chance to poison non-ranged attackers',
 	throwrock: [
 		"Deal 3 damage to target creature, then shuffle Throw Rock into target's deck",
@@ -509,8 +524,8 @@ const statusData = {
 		c.getStatus('charges') == 1
 			? ''
 			: 'Enter with ' +
-				c.getStatus('charges') +
-				(c.getStatus('stackable') ? ' stacks' : ' charges'),
+			  c.getStatus('charges') +
+			  (c.getStatus('stackable') ? ' stacks' : ' charges'),
 	flooding:
 		'Non aquatic creatures past first five creature slots die on turn end. Consumes 1:7. Unique',
 	nightfall: auraText('Nocturnal creatures', '1|1', '2|1'),
@@ -531,10 +546,12 @@ function processEntry(c, event, entry) {
 	return typeof entry === 'string'
 		? entry
 		: entry instanceof Array
-			? entry[asCard(c).upped ? 1 : 0]
-			: entry instanceof Function
-				? entry(asCard(c), c)
-				: event in entry ? processEntry(c, event, entry[event]) : '';
+		? entry[asCard(c).upped ? 1 : 0]
+		: entry instanceof Function
+		? entry(asCard(c), c)
+		: event in entry
+		? processEntry(c, event, entry[event])
+		: '';
 }
 function asCard(c) {
 	return c instanceof Card ? c : c.card;

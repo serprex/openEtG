@@ -2,8 +2,7 @@
 const ui = require('./ui'),
 	Cards = require('./Cards'),
 	etgutil = require('./etgutil'),
-	cssPrefix =
-		"<style type='text/css'><![CDATA[text{font:12px sans-serif}",
+	cssPrefix = "<style type='text/css'><![CDATA[text{font:12px sans-serif}",
 	svgPrefix = "<svg xmlns='http://www.w3.org/2000/svg'";
 function eleChar(card) {
 	return String.fromCharCode(97 + card.element + (card.upped ? 13 : 0));
@@ -58,11 +57,11 @@ exports.card = function(code) {
 			: '') +
 		(card.cost
 			? "<span style='position:absolute;right:2px;top:-150px'>" +
-				card.cost +
-				(card.element != card.costele
+			  card.cost +
+			  (card.element != card.costele
 					? "<span class='ico ce" + card.costele + "'></span>"
 					: '') +
-				'</span>'
+			  '</span>'
 			: '') +
 		`<span class='ico t${card.type}' style='position:absolute;right:2px;bottom:2px'></span></p></foreignObject></svg>`
 	);
@@ -111,7 +110,11 @@ exports.deck = function(deck) {
 	if (mark !== undefined) {
 		const cls = String.fromCharCode(97 + mark);
 		classes[cls] = 'fill:' + ui.strcols[mark];
-		suffix = `<path class='${cls}' d='M0 0h16v160H0'/><text x='5' y='-4' transform='rotate(90)' ${~[0, 8, 10, 12].indexOf(mark) ? '' : " fill='#fff'"}>${ui.eleNames[mark]}</text></svg>`;
+		suffix = `<path class='${cls}' d='M0 0h16v160H0'/><text x='5' y='-4' transform='rotate(90)' ${
+			~[0, 8, 10, 12].indexOf(mark) ? '' : " fill='#fff'"
+		}>${ui.eleNames[mark]}</text></svg>`;
 	} else suffix = '</svg>';
-	return `${svgPrefix} height='160' width='${y ? x + 100 : x}'>${cssPrefix}${classString()}]]></style>${pathsvg}${texts}${suffix}`;
+	return `${svgPrefix} height='160' width='${
+		y ? x + 100 : x
+	}'>${cssPrefix}${classString()}]]></style>${pathsvg}${texts}${suffix}`;
 };

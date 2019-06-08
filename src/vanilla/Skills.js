@@ -113,7 +113,10 @@ const Actives = {
 					validTargets.push(i);
 				}
 			}
-			if (t != t.owner && (!t.owner.shield || !t.owner.shield.status.get('reflect'))) {
+			if (
+				t != t.owner &&
+				(!t.owner.shield || !t.owner.shield.status.get('reflect'))
+			) {
 				validTargets.push(-1);
 			}
 			if (!validTargets.length) return;
@@ -198,7 +201,8 @@ const Actives = {
 		t.die();
 		c.owner.foe.dmg(
 			Math.ceil(
-				t.truehp() * (t.status.get('frozen') ? 150 : 100) / (t.truehp() + 100),
+				(t.truehp() * (t.status.get('frozen') ? 150 : 100)) /
+					(t.truehp() + 100),
 			),
 		);
 		if (t.status.get('poison')) {
@@ -255,7 +259,7 @@ const Actives = {
 	cpower: function(c, t) {
 		var buff = t.owner.upto(25);
 		t.buffhp(Math.floor(buff / 5) + 1);
-		t.atk += buff % 5 + 1;
+		t.atk += (buff % 5) + 1;
 	},
 	cseed: function(c, t) {
 		return Actives[
@@ -288,7 +292,7 @@ const Actives = {
 		const steam = c.defstatus('steam', 0);
 		if (steam > 0) {
 			c.atk--;
-			c.status = c.status.set('steam', steam-1);
+			c.status = c.status.set('steam', steam - 1);
 		}
 	},
 	deja: function(c, t) {
@@ -368,7 +372,10 @@ const Actives = {
 		Actives.destroy.func(c, t, false, true);
 		var healsum = 0;
 		for (var i = 0; i < 16; i++) {
-			if (c.owner.permanents[i] && c.owner.permanents[i].card.type === etg.Pillar)
+			if (
+				c.owner.permanents[i] &&
+				c.owner.permanents[i].card.type === etg.Pillar
+			)
 				healsum += c.owner.permanents[i].status.get('charges');
 		}
 		Effect.mkText('+' + healsum, c);
@@ -378,7 +385,10 @@ const Actives = {
 		Actives.destroy.func(c, t, false, true);
 		var healsum = 0;
 		for (var i = 0; i < 16; i++) {
-			if (c.owner.permanents[i] && c.owner.permanents[i].card.type === etg.Pillar)
+			if (
+				c.owner.permanents[i] &&
+				c.owner.permanents[i].card.type === etg.Pillar
+			)
 				healsum += c.owner.permanents[i].status.get('charges');
 		}
 		healsum = healsum * 2;
@@ -408,7 +418,8 @@ const Actives = {
 		}
 	},
 	durability: function(c, t) {
-		if (!c.owner.shield || c.owner.shield.status.get('durability') == 'used') return;
+		if (!c.owner.shield || c.owner.shield.status.get('durability') == 'used')
+			return;
 		c.owner.shield.status = c.owner.shield.status.set('durability', 'usable');
 	},
 	earth: function(c, t) {
@@ -499,7 +510,10 @@ const Actives = {
 		c.status = c.status.set('charges', c.status.get('charges') + 2);
 	},
 	gas: function(c, t) {
-		new smth.Permanent(Cards.UnstableGas.asUpped(c.card.upped), c.owner).place();
+		new smth.Permanent(
+			Cards.UnstableGas.asUpped(c.card.upped),
+			c.owner,
+		).place();
 	},
 	gpull: function(c, t) {
 		Effect.mkText('Pull', c);
@@ -759,7 +773,10 @@ const Actives = {
 				active = shardSkills[i][num - 1];
 			}
 		}
-		var actives = new imm.Map().set(cost < 0 ? activeType[~cost] : 'cast', Actives[active]),
+		var actives = new imm.Map().set(
+				cost < 0 ? activeType[~cost] : 'cast',
+				Actives[active],
+			),
 			cost = shardCosts[active];
 		var status = new imm.Map();
 		if (shardTally[etg.Air] > 0) {
@@ -800,11 +817,13 @@ const Actives = {
 		} else {
 			for (var i = 0; i < 23; i++) {
 				var cr = t.owner.creatures[i];
-				if (cr && cr.status.get('law') > lawNumber) lawNumber = cr.status.get('law') + 1;
+				if (cr && cr.status.get('law') > lawNumber)
+					lawNumber = cr.status.get('law') + 1;
 			}
 			for (var i = 0; i < 16; i++) {
 				var pr = c.owner.permanents[i];
-				if (pr && pr.status.get('law') > lawNumber) lawNumber = pr.status.get('law') + 1;
+				if (pr && pr.status.get('law') > lawNumber)
+					lawNumber = pr.status.get('law') + 1;
 			}
 			t.status = t.status.set('law', lawNumber);
 			t.addactive('hp', Actives.lawfree);
@@ -864,11 +883,15 @@ const Actives = {
 	lobotomize: function(c, t) {
 		Effect.mkText('Lobotomize', t);
 		t.lobo();
-		t.status = t.status.delete('momentum').delete('psion').delete('mutant');
+		t.status = t.status
+			.delete('momentum')
+			.delete('psion')
+			.delete('mutant');
 		t.casts = 0;
 	},
 	locket: function(c, t) {
-		var ele = c.status.get('mode') === undefined ? c.owner.mark : c.status.get('mode');
+		var ele =
+			c.status.get('mode') === undefined ? c.owner.mark : c.status.get('mode');
 		c.owner.spend(ele, ele > 0 ? -1 : -3);
 	},
 	locketshift: function(c, t) {
@@ -887,9 +910,7 @@ const Actives = {
 				if (
 					key != 'ownplay' &&
 					key != 'owndiscard' &&
-					!x.active.get(key).name.every(name =>
-						Actives[name].passive
-					)
+					!x.active.get(key).name.every(name => Actives[name].passive)
 				)
 					return;
 			}
@@ -1128,7 +1149,7 @@ const Actives = {
 	},
 	ready: function(c, t) {
 		if (c.status.get('ready') > 1) {
-			c.setStatus('ready', c.status.get('ready')-1);
+			c.setStatus('ready', c.status.get('ready') - 1);
 			c.casts++;
 		}
 	},
@@ -1256,7 +1277,7 @@ const Actives = {
 		} else if (r < 7) {
 			const buff = c.owner.upto(25);
 			c.buffhp(Math.floor(buff / 5) + 1);
-			c.atk -= buff % 5 + 1;
+			c.atk -= (buff % 5) + 1;
 		} else if (r < 9) {
 			c.status = c.status.set('adrenaline', 1);
 		} else if (r < 11) {
@@ -1302,7 +1323,8 @@ const Actives = {
 		if (~c.getIndex() && c.getIndex() < 5) {
 			for (var i = 0; i < 16; i++) {
 				if (
-					(c.owner.permanents[i] && c.owner.permanents[i].status.get('flooding')) ||
+					(c.owner.permanents[i] &&
+						c.owner.permanents[i].status.get('flooding')) ||
 					(c.owner.foe.permanents[i] &&
 						c.owner.foe.permanents[i].status.get('flooding'))
 				) {
@@ -1326,14 +1348,20 @@ const Actives = {
 			Actives.destroy.func(c, t, true);
 			if (t.type === etg.Shield) {
 				if (c.owner.shield && c.owner.shield.card == t.card) {
-					c.owner.shield.status = c.owner.shield.status.set('charges', c.owner.shield.status.get('charges') + 1);
+					c.owner.shield.status = c.owner.shield.status.set(
+						'charges',
+						c.owner.shield.status.get('charges') + 1,
+					);
 				} else {
 					c.owner.shield = new smth.Shield(t.card, c.owner);
 					c.owner.shield.status = c.owner.shield.status.set('charges', 1);
 				}
 			} else if (t.type === etg.Weapon) {
 				if (c.owner.weapon && c.owner.weapon.card == t.card) {
-					c.owner.shield.status = c.owner.shield.status.set('charges', c.owner.shield.status.get('charges') + 1);
+					c.owner.shield.status = c.owner.shield.status.set(
+						'charges',
+						c.owner.shield.status.get('charges') + 1,
+					);
 				} else {
 					c.owner.weapon = new smth.Weapon(t.card, c.owner);
 					c.owner.shield.status = c.owner.shield.status.set('charges', 1);
@@ -1345,7 +1373,8 @@ const Actives = {
 			t.remove();
 			t.owner = c.owner;
 			t.casts = 0;
-			if (t.card.isOf(Cards.Sundial)) t.status = t.status.set('charges', t.status.get('charges')+1);
+			if (t.card.isOf(Cards.Sundial))
+				t.status = t.status.set('charges', t.status.get('charges') + 1);
 			t.place();
 		}
 	},
@@ -1514,7 +1543,7 @@ const Actives = {
 				c.status.get('charges') * (c.card.element > 0 ? -1 : -3),
 			);
 		else if (c == t)
-			c.owner.spend(c.card.element, (c.card.element > 0 ? -1 : -3));
+			c.owner.spend(c.card.element, c.card.element > 0 ? -1 : -3);
 	},
 	pend: function(c, t) {
 		var ele = c.getStatus('pendstate') ? c.owner.mark : c.card.element;

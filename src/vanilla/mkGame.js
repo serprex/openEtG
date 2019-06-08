@@ -4,7 +4,7 @@ const Cards = require('./Cards'),
 
 function deckPower(deck, amount) {
 	var res = deck;
-	for (var i = 1;i < amount;i++) {
+	for (var i = 1; i < amount; i++) {
 		res = res.concat(deck);
 	}
 	return res;
@@ -30,11 +30,13 @@ module.exports = function(data, ai) {
 		game.player2.drawpower = data.p2drawpower;
 	}
 	var deckpower = [data.p1deckpower, data.p2deckpower];
-	var idx, code, decks = [data.urdeck, data.deck];
-	for (var j = 0;j < 2;j++) {
+	var idx,
+		code,
+		decks = [data.urdeck, data.deck];
+	for (var j = 0; j < 2; j++) {
 		var pl = game.players(j);
-		for (var i = 0;i < decks[j].length;i++) {
-			if (Cards.Codes[code = decks[j][i]]) {
+		for (var i = 0; i < decks[j].length; i++) {
+			if (Cards.Codes[(code = decks[j][i])]) {
 				pl.deck.push(Cards.Codes[code]);
 			} else if (~(idx = etgutil.fromTrueMark(code))) {
 				pl.mark = idx;
@@ -42,8 +44,7 @@ module.exports = function(data, ai) {
 		}
 		if (deckpower[j]) {
 			pl.deck = deckPower(pl.deck, deckpower[j]);
-		}
-		else if (pl.drawpower > 1){
+		} else if (pl.drawpower > 1) {
 			pl.deck = deckPower(pl.deck, 2);
 		}
 	}
@@ -52,5 +53,4 @@ module.exports = function(data, ai) {
 	if (data.foename) game.foename = data.foename;
 	if (ai) game.ai = true;
 	return { game, data };
-}
-
+};

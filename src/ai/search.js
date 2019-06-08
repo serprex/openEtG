@@ -32,7 +32,10 @@ const afilter = {
 	lobotomize: (c, t) => {
 		if (!t.getStatus('psionic')) {
 			for (const [key, act] of t.active) {
-				if (key != 'ownplay' && act.name.some(name => !parseSkill(name).passive)) {
+				if (
+					key != 'ownplay' &&
+					act.name.some(name => !parseSkill(name).passive)
+				) {
 					return true;
 				}
 			}
@@ -60,8 +63,8 @@ function AiSearch(game) {
 		lethalResult[0] >= 0
 			? ''
 			: lethalResult[1] !== undefined
-				? ((this.cmdct = lethalResult[1]), 'cast')
-				: ((this.cmdct = worstcard), 'endturn');
+			? ((this.cmdct = lethalResult[1]), 'cast')
+			: ((this.cmdct = worstcard), 'endturn');
 }
 function searchSkill(active, c, t) {
 	const func = afilter[active.name[0]];
@@ -86,7 +89,9 @@ AiSearch.prototype.step = function(game, previous) {
 			const ch = c.hash();
 			if (casthash.has(ch)) return;
 			casthash.add(ch);
-			const active = (c.type !== etg.Spell || c.card.type === etg.Spell) && c.active.get('cast');
+			const active =
+				(c.type !== etg.Spell || c.card.type === etg.Spell) &&
+				c.active.get('cast');
 			const cbits = game.tgtToBits(c) ^ 8,
 				tgthash = new Set();
 			const evalIter = t => {

@@ -51,16 +51,20 @@ module.exports = async function(url) {
 	return Promise.all([
 		fs.stat(url),
 		fs.readFile(url).then(buf => gzip(buf, { level: 9 })),
-	]).then(([stat, zbuf]) => {
-		watch(url, { persistent: false }, function(_e) {
-			cache.rm(url);
-			this.close();
+	])
+		.then(([stat, zbuf]) => {
+			watch(url, { persistent: false }, function(_e) {
+				cache.rm(url);
+				this.close();
+			});
+			stat.mtime.setMilliseconds(0);
+			return {
+				head: { 'Content-Encoding': 'gzip', 'Content-Type': contentType },
+				date: stat.mtime,
+				buf: zbuf,
+			};
+		})
+		.catch(err => {
+			throw err.message;
 		});
-		stat.mtime.setMilliseconds(0);
-		return {
-			head: { 'Content-Encoding': 'gzip', 'Content-Type': contentType },
-			date: stat.mtime,
-			buf: zbuf,
-		};
-	}).catch(err => { throw err.message; });
 };

@@ -42,8 +42,7 @@ exports.filter = function(upped, filter, cmp, showshiny) {
 function sumCardMinus(cardMinus, code) {
 	let sum = 0;
 	for (let i = 0; i < 4; i++) {
-		sum +=
-			cardMinus[etgutil.asShiny(etgutil.asUpped(code, i & 1), i & 2)] || 0;
+		sum += cardMinus[etgutil.asShiny(etgutil.asUpped(code, i & 1), i & 2)] || 0;
 	}
 	return sum;
 }
@@ -76,7 +75,7 @@ exports.filterDeck = function(deck, pool, preserve) {
 		}
 	}
 	return cardMinus;
-}
+};
 exports.isDeckLegal = function(deck, user, minsize = 30) {
 	function incrpool(code, count) {
 		pool[code] = (pool[code] || 0) + count;
@@ -94,7 +93,10 @@ exports.isDeckLegal = function(deck, user, minsize = 30) {
 		if (~etgutil.fromTrueMark(code)) continue;
 		dlen++;
 		const card = exports.Codes[code];
-		if (!card || (card.type != etg.Pillar && sumCardMinus(cardMinus, code) == 6)) {
+		if (
+			!card ||
+			(card.type != etg.Pillar && sumCardMinus(cardMinus, code) == 6)
+		) {
 			return false;
 		}
 		if (!card.isFree() && pool) {
@@ -107,7 +109,7 @@ exports.isDeckLegal = function(deck, user, minsize = 30) {
 	}
 	if (dlen < minsize || dlen > 60) return false;
 	return true;
-}
+};
 function parseCsv(type, data) {
 	const keys = data[0],
 		cardinfo = {};
@@ -141,37 +143,39 @@ const TargetFilters = {
 	pill: (c, t) => t.isMaterial(etg.Permanent) && t.card.type == etg.Pillar,
 	weap: (c, t) =>
 		t.isMaterial() &&
-			(t.type == etg.Weapon ||
-				(t.type != etg.Spell && t.card.type == etg.Weapon)),
+		(t.type == etg.Weapon ||
+			(t.type != etg.Spell && t.card.type == etg.Weapon)),
 	shie: (c, t) =>
 		t.isMaterial() &&
-			(t.type == etg.Shield ||
-				(t.type != etg.Spell && t.card.type == etg.Shield)),
+		(t.type == etg.Shield ||
+			(t.type != etg.Spell && t.card.type == etg.Shield)),
 	playerweap: (c, t) => t.type == etg.Weapon,
 	perm: (c, t) => t.isMaterial(etg.Permanent),
-	permnonstack: (c, t) => t.isMaterial(etg.Permanent) && !t.getStatus('stackable'),
+	permnonstack: (c, t) =>
+		t.isMaterial(etg.Permanent) && !t.getStatus('stackable'),
 	stack: (c, t) => t.isMaterial(etg.Permanent) && t.getStatus('stackable'),
 	crea: (c, t) => t.isMaterial(etg.Creature),
 	play: (c, t) => t.type == etg.Player,
 	notplay: (c, t) => t.type != etg.Player,
-	sing: (c, t) => t.isMaterial(etg.Creature) && t.active.get('cast') !== c.active.get('cast'),
-	butterfly: (c, t) => (
+	sing: (c, t) =>
+		t.isMaterial(etg.Creature) && t.active.get('cast') !== c.active.get('cast'),
+	butterfly: (c, t) =>
 		(t.type == etg.Creature || t.type == etg.Weapon) &&
 		!t.getStatus('immaterial') &&
 		!t.getStatus('burrowed') &&
-		(t.trueatk() < 3 || (t.type == etg.Creature && t.truehp() < 3))
-	),
+		(t.trueatk() < 3 || (t.type == etg.Creature && t.truehp() < 3)),
 	devour: (c, t) => t.isMaterial(etg.Creature) && t.truehp() < c.truehp(),
 	paradox: (c, t) => t.isMaterial(etg.Creature) && t.truehp() < t.trueatk(),
-	forceplay: (c, t) => t.type == etg.Spell || (t.isMaterial() && t.active.get('cast')),
-	shuffle3: (c, t) => t.isMaterial() && (t.type == etg.Creature || t.owner != c.owner),
+	forceplay: (c, t) =>
+		t.type == etg.Spell || (t.isMaterial() && t.active.get('cast')),
+	shuffle3: (c, t) =>
+		t.isMaterial() && (t.type == etg.Creature || t.owner != c.owner),
 	airbornecrea: (c, t) => t.isMaterial(etg.Creature) && t.getStatus('airborne'),
 	golem: (c, t) => t.getStatus('golem') && t.attack,
 	groundcrea: (c, t) => t.isMaterial(etg.Creature) && !t.getStatus('airborne'),
-	wisdom: (c, t) => (
+	wisdom: (c, t) =>
 		(t.type == etg.Creature || t.type == etg.Weapon) &&
-		!t.getStatus('burrowed')
-	),
+		!t.getStatus('burrowed'),
 	quinttog: (c, t) => t.type == etg.Creature && !t.getStatus('burrowed'),
 };
 function getTargetFilter(str) {
