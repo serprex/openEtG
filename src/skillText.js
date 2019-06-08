@@ -41,12 +41,13 @@ const data = {
 	}),
 	abomination: 'Amiable to mutation',
 	absorber: 'Produce 3:6 per attacker',
+	acceleration: x => `Gain ${x}|-1 per turn`,
 	accelerationspell: c =>
 		`Replaces target creature\'s skills with "Gain +${
 			c.upped ? 3 : 2
 		}|-1 per turn"`,
 	accretion:
-		"Destroy target permanent & gain 0|10. Return to owner's hand as a Blackhole if larger than 30",
+		"Destroy target permanent & gain 0|10. Return to owner's hand as a Blackhole if HP exceeds 30",
 	accumulation: 'Increment damage reduction per stack',
 	adrenaline:
 		'Target creature attacks multiple times per turn. Weaker creatures gain more attacks',
@@ -84,11 +85,11 @@ const data = {
 		'When foe plays a creature from hand, summon a 2|1 Phantom',
 	],
 	butterfly:
-		'Target something smaller than, or weaker than, 3. Replace target\'s skills with "3:1 Destroy target permanent"',
+		'Target with strength less than 3, or HP less than 3, has skills replaced with "3:1 Destroy target permanent"',
 	burrow: 'Burrow. Burrowed creatures attack with half strength',
 	catapult:
 		'Sacrifice target creature to damage foe 100HP/(100+HP). Frozen targets deal 1.5x more. Poisoned creatures transfer poison',
-	catlife: 'On death, regenerate with 1 fewer life',
+	catlife: 'On death, exchange a life to revive with 1 HP',
 	cell: 'Become Malignant if poisoned',
 	chaos: c =>
 		(c.upped ? '20% chance to evade. ' : '') +
@@ -123,8 +124,8 @@ const data = {
 		'Non-ranged attackers have a 40%, plus 5% per 1:11 producing creature possessed, chance to gain -1|-1',
 	destroy: 'Destroy target permanent',
 	destroycard: 'Discard target card, or mill target player',
-	detain: 'Drain 1|1 from target smaller creature, & burrow them',
-	devour: 'Kill smaller target creature & gain 1|1',
+	detain: 'Drain 1|1 from target creature with less HP, & burrow them',
+	devour: 'Kill target creature with less HP & gain 1|1',
 	die: 'Sacrifice',
 	disarm: "Return foe's weapon to their hand on hit",
 	discping: 'Deal 1 damage to target creature & return to hand',
@@ -316,7 +317,7 @@ const data = {
 	pandemonium2:
 		"Random effects are inflicted to target player's creatures. Removes cloak",
 	pandemonium3: 'Truly random effects are inflicted to all. Removes cloak',
-	paradox: 'Kill target creature which is stronger than it is large',
+	paradox: 'Kill target creature with greater strength than it has HP',
 	parallel: 'Duplicate target creature',
 	phoenix: ['Become an Ash on death', 'Become a Minor Ash on death'],
 	photosynthesis: 'Produce 2:5. May activate multiple times',
@@ -409,7 +410,7 @@ const data = {
 	siphonstrength: 'Absorb 1|0 from target creature',
 	skeleton: 'Become a random creature if target of Rewind',
 	skull:
-		'Attacking creatures may die & become skeletons. Smaller creatures are more likely to die',
+		'Attacking creatures may die & become skeletons. Creatures with lower HP more likely to die',
 	skyblitz: 'Dive all own airborne creatures. Consumes remaining 1:9',
 	slow: 'Delay non-ranged attackers',
 	snipe: 'Deal 3 damage to target creature',
@@ -481,7 +482,7 @@ const data = {
 	void: "Reduce foe's maximum HP by 3",
 	voidshell: 'Absorb damage. Reduce maximum HP per damage absorbed',
 	web: 'Target creature loses airborne',
-	weight: 'Evade creatures larger than 5',
+	weight: 'Evade creatures with more than 5 HP',
 	wind: 'Restore attack',
 	wings: 'Evade non-airborne & non-ranged attackers',
 	wisdom: 'Target gains 3|0. May target immaterial, granting psionic',

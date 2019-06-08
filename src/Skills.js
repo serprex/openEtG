@@ -43,17 +43,17 @@ const Skills = {
 			data.evade = true;
 		}
 	}),
-	acceleration: (c, t) => {
-		Effect.mkText('2|-1', c);
-		c.atk += 2;
-		c.dmg(1, true);
+	acceleration: x => {
+		const n = +x;
+		return (c, t) => {
+			Effect.mkText(`${n}|-1`, c);
+			c.atk += n;
+			c.dmg(1, true);
+		};
 	},
 	accelerationspell: (c, t) => {
 		t.lobo();
-		t.setSkill(
-			'ownattack',
-			c.card.upped ? Skills.overdrive : Skills.acceleration,
-		);
+		t.setSkill('ownattack', parseSkill(`acceleration ${c.card.upped ? 3 : 2}`));
 	},
 	accretion: (c, t) => {
 		Skills.destroy.func(c, t);
@@ -245,8 +245,7 @@ const Skills = {
 			if (!lives) return;
 			Effect.mkText(lives - 1 + ' lives', c);
 			const cl = c.clone(c.owner);
-			cl.hp = Math.min(cl.maxhp, c.card.health);
-			cl.atk = c.card.attack;
+			cl.hp = 1;
 			c.owner.creatures[data.index] = cl;
 		}
 	}),
@@ -867,7 +866,7 @@ const Skills = {
 	growth: x => {
 		const n = +x;
 		return (c, t) => {
-			Effect.mkText(n + '|' + n, c);
+			Effect.mkText(`${n}|${n}`, c);
 			c.buffhp(n);
 			c.atk += n;
 		};
@@ -1411,11 +1410,6 @@ const Skills = {
 		if (!c.owner.foe.sanctuary && c.owner.foe.hand.length < 8) {
 			c.owner.foe.addCard(Cards.OuijaEssence);
 		}
-	},
-	overdrive: (c, t) => {
-		Effect.mkText('3|-1', c);
-		c.atk += 3;
-		c.dmg(1, true);
 	},
 	pacify: (c, t) => {
 		t.atk -= t.trueatk();

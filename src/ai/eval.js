@@ -10,7 +10,8 @@ const SkillsValues = Object.freeze({
 	'ablaze 1': 1,
 	'ablaze 2': 3,
 	accelerationspell: 5,
-	acceleration: c => c.truehp() - 2,
+	'acceleration 1': c => c.truehp() - 2,
+	'acceleration 2': c => c.truehp() - 1,
 	accretion: 8,
 	adrenaline: 8,
 	aflatoxin: 5,
@@ -144,6 +145,7 @@ const SkillsValues = Object.freeze({
 	grave: 1,
 	'growth 1': 2,
 	'growth 2': 5,
+	'growth 3': 7,
 	guard: 4,
 	halveatk: c => {
 		let atk;
@@ -205,7 +207,6 @@ const SkillsValues = Object.freeze({
 	nullspell: 4,
 	nymph: 7,
 	ouija: 3,
-	overdrive: c => c.truehp() - 1,
 	pacify: 5,
 	pairproduce: 2,
 	paleomagnetism: [4, 5],
