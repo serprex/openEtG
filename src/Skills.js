@@ -18,7 +18,7 @@ function quadpillarFactory(ele) {
 		for (let i = 0; i < n; i++) {
 			const r = c.owner.upto(16);
 			c.owner.spend((ele >> ((r & 3) << 2)) & 15, -1);
-			if (c.rng() < 0.6) {
+			if (c.rng() < 2 / 3) {
 				c.owner.spend((ele >> (r & 12)) & 15, -1);
 			}
 		}
@@ -1513,6 +1513,9 @@ const Skills = {
 		return adrenathrottle((c, t) => {
 			(t || c.owner.foe).addpoison(n);
 		});
+	},
+	virusdeath: (c, t) => {
+		c.owner.foe.addpoison(1);
 	},
 	poisonfoe: c => {
 		if (c.rng() < 0.7) c.owner.foe.addpoison(1);

@@ -332,7 +332,6 @@ const data = {
 		return {
 			hit: `${x} on hit. Throttled`,
 			cast: `${x} to foe`,
-			death: `${x} on death`,
 		};
 	},
 	poisonfoe: 'May apply poison to foe on play',
@@ -476,6 +475,7 @@ const data = {
 		"When an ally death occurs, during foe's turn, expend a stack & ally creatures attack",
 	vindicate: 'When an ally death occurs, it attacks again. Unready',
 	virtue: "Increment owner's maximum health by damge blocked when attacking",
+	virusdeath: 'Apply 1 poison to foe on death',
 	virusinfect: 'Sacrifice self & poison target',
 	virusplague: "Sacrifice self & poison target player's creatures",
 	void: "Reduce foe's maximum HP by 3",
