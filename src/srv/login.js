@@ -30,6 +30,11 @@ module.exports = function(sockEmit) {
 			if (socket.readyState == 1) {
 				const day = sutil.getDay();
 				if (user.oracle < day) {
+					if (user.ostreakday !== day - 1) {
+						user.ostreak = 0;
+					}
+					user.ostreakday = 0;
+					user.ostreakday2 = day;
 					user.oracle = day;
 					const ocardnymph = Math.random() < 0.03;
 					const card = RngMock.randomcard(

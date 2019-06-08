@@ -52,9 +52,11 @@ function mkDaily(type) {
 		};
 	}
 }
-module.exports = connect(({ user }) => ({ user }))(function Colosseum(props) {
-	const magename = Decks.mage[props.user.dailymage][0],
-		dgname = Decks.demigod[props.user.dailydg][0];
+module.exports = connect(({ user }) => ({ user }))(function Colosseum({
+	user,
+}) {
+	const magename = Decks.mage[user.dailymage][0],
+		dgname = Decks.demigod[user.dailydg][0];
 	const events = [
 		'Novice Endurance Fight 3 Commoners in a row without healing in between. May try until you win.',
 		'Expert Endurance: Fight 2 Champions in a row. May try until you win.',
@@ -63,7 +65,7 @@ module.exports = connect(({ user }) => ({ user }))(function Colosseum(props) {
 	];
 	const eventui = [];
 	for (let i = 1; i < 5; i++) {
-		const active = !(props.user.daily & (1 << i));
+		const active = !(user.daily & (1 << i));
 		eventui.push(
 			<React.Fragment key={i}>
 				{active && (
@@ -87,7 +89,7 @@ module.exports = connect(({ user }) => ({ user }))(function Colosseum(props) {
 					{active
 						? events[i - 1]
 						: i > 2
-						? props.user.daily & (i == 3 ? 1 : 32)
+						? user.daily & (i == 3 ? 1 : 32)
 							? 'You defeated this already today.'
 							: 'You failed this today. Better luck tomorrow!'
 						: 'Completed.'}
@@ -99,7 +101,25 @@ module.exports = connect(({ user }) => ({ user }))(function Colosseum(props) {
 		<>
 			<Components.ExitBtn x={50} y={50} />
 			{eventui}
-			{props.user.daily == 191 && (
+			<Components.Text
+				style={{ position: 'absolute', left: '56px', top: '300px' }}
+				text={
+					'Completing any colosseum event contributes to a 5 day reward cycle.\n' +
+					'At the end of the cycle, your streak is reset.\n\n' +
+					`Reward Cycle: 15$, 25$, 77$, 100$, 250$\n\n${
+						user.ostreak
+							? `You currently have a ${user.ostreak} day colosseum streak.`
+							: "You'ven't begun a streak."
+					}\n${
+						user.ostreakday
+							? `You've redeemed ${
+									[250, 15, 25, 77, 100][user.ostreak % 5]
+							  }$ today.`
+							: "You've'nt redeemed a colosseum streak today."
+					}`
+				}
+			/>
+			{user.daily == 191 && (
 				<>
 					<input
 						type="button"

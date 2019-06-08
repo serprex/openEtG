@@ -181,6 +181,12 @@ exports.addbound = function(data, user) {
 };
 exports.donedaily = function(data, user) {
 	const result = {};
+	if ((data.daily < 3 || data.daily == 5) && !user.ostreakday) {
+		result.gold = user.gold + [15, 25, 77, 100, 250][user.ostreak % 5];
+		result.ostreak = user.ostreak + 1;
+		result.ostreakday = user.ostreakday2;
+		result.ostreakday2 = 0;
+	}
 	if (data.daily == 6 && !(user.daily & 64)) {
 		result.pool = etgutil.addcard(user.pool, data.c);
 	}
