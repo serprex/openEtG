@@ -276,7 +276,7 @@ const data = {
 	mutant: 'Enter with mutant abilities',
 	neuro:
 		'Apply poison on hit, also inflicting neurotoxin. Neurotoxin applies poison per card played by victim. Throttled',
-	neuroify: 'Gives foe neurotoxin status if they are already poisoned',
+	neuroify: 'Gives foe neurotoxin status if they are already poisoned. Remove purify counters',
 	nightmare: c =>
 		`Fill foe's hand with copies of target creature's card. Drain ${c.upped ? '2' : '1'} HP per added card`,
 	nightshade:
@@ -343,7 +343,7 @@ const data = {
 		`Damage reduction becomes 0 to ${c.upped ? 3 : 2} on play`,
 	readiness:
 		"Target creature's active becomes costless. Skill can be reactivated",
-	readyequip: 'Equipment enters without summoning sickness',
+	readyequip: 'Remove summoning sickness when equipment becomes equipped',
 	reap: 'Target creature dies & is reborn a skeleton with same stats',
 	rebirth: ['Become a Phoenix', 'Become a Minor Phoenix'],
 	reducemaxhp: 'Reduce maximum HP per damage dealt',

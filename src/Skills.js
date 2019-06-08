@@ -1312,8 +1312,11 @@ const Skills = {
 		t.setStatus('neuro', 1);
 	}),
 	neuroify: (c, t) => {
-		if (t.getStatus('poison') > 0) {
+		const poison = t.getStatus('poison');
+		if (poison > 0) {
 			t.setStatus('neuro', 1);
+		} else if (poison < 0) {
+			t.setStatus('poison', 0);
 		}
 	},
 	nightmare: (c, t) => {

@@ -26,6 +26,43 @@ const packdata = [
 	{ cost: 250, type: 'Nymph', info: '1 Nymph', color: '#69b' },
 ];
 
+function PackDisplay({cards}) {
+	const dlen = etgutil.decklength(cards);
+	let cardchildren;
+	if (dlen < 11) {
+		cardchildren = [];
+		etgutil.iterdeck(cards, (code, i) => {
+			const x = i % 5,
+				y = Math.floor(i / 5);
+			cardchildren.push(
+				<Components.Card
+					key={i}
+					x={7 + x * 140}
+					y={y ? 298 : 14}
+					code={code}
+				/>
+			);
+		});
+	} else if (dlen < 61) {
+		cardchildren = <Components.DeckDisplay
+			deck={etgutil.decodedeck(cards)}
+		/>;
+	} else {
+		const deck = etgutil.decodedeck(cards);
+		cardchildren = <>
+			<Components.DeckDisplay deck={deck.slice(0, 60)} />
+			<Components.DeckDisplay y={244} deck={deck.slice(60)} />
+		</>;
+	}
+	return <Components.Box
+		x={40}
+		y={16}
+		width={710}
+		height={568}>
+		{cardchildren}
+	</Components.Box>;
+}
+
 module.exports = connect(({user, opts}) => ({
 	user,
 	bulk: typeof opts.bulk === 'string' ? opts.bulk : '1'
@@ -37,7 +74,7 @@ module.exports = connect(({user, opts}) => ({
 			info2: 'Select which type of booster you want.',
 			packele: -1,
 			packrarity: -1,
-			showbuy: false,
+			showbuy: true,
 			cards: '',
 		};
 	}
@@ -74,33 +111,69 @@ module.exports = connect(({user, opts}) => ({
 		}));
 	}
 
+	 buyPack = () => {
+		const pack = packdata[this.state.packrarity];
+		const boostdata = {
+			pack: this.state.packrarity,
+			element: this.state.packele,
+		};
+		options.parseInput(boostdata, 'bulk', this.props.bulk, 99);
+		if (
+			this.props.user.gold >= pack.cost * (boostdata.bulk || 1) ||
+			(this.props.user.freepacks && this.props.user.freepacks[this.state.packrarity] > 0)
+		) {
+			sock.userEmit('booster', boostdata);
+			this.setState({ showbuy: false });
+		} else {
+			this.setState({ info2: "You can't afford that!" });
+		}
+	};
+
 	render() {
-		const self = this;
-		const children = [
+		const hasFreePacks = this.props.user.freepacks && this.props.user.freepacks[this.state.packrarity];
+		const elebuttons = [];
+		for (let i = 0; i < 14; i++) {
+			elebuttons.push(
+				<Components.IconBtn
+					key={i}
+					e={'e' + i}
+					x={75 + (i >> 1) * 64}
+					y={117 + (i & 1) * 75}
+					click={() => {
+						const update = {
+							packele: i,
+							info1: 'Selected Element: ' + (i == 13 ? 'Random' : '1:' + i),
+						};
+						this.setState(update);
+					}}
+				/>
+			);
+		}
+		return <>
 			<Components.Box
 				x={40}
 				y={16}
 				width={820}
 				height={60}
-			/>,
+			/>
 			<Components.Box
 				x={40}
 				y={89}
 				width={494}
 				height={168}
-			/>,
+			/>
 			<Components.Box
 				x={40}
 				y={270}
 				width={620}
 				height={168}
-			/>,
+			/>
 			<Components.Box
 				x={770}
 				y={90}
 				width={90}
 				height={184}
-			/>,
+			/>
 			<Components.Text
 				text={this.props.user.gold + '$'}
 				style={{
@@ -108,7 +181,7 @@ module.exports = connect(({user, opts}) => ({
 					left: '775px',
 					top: '101px',
 				}}
-			/>,
+			/>
 			<Components.Text
 				text={this.state.info1}
 				style={{
@@ -116,88 +189,62 @@ module.exports = connect(({user, opts}) => ({
 					left: '50px',
 					top: '25px',
 				}}
-			/>,
+			/>
 			<span
 				style={{
 					position: 'absolute',
 					left: '50px',
 					top: '50px',
-				}}>{this.state.info2}</span>,
-			<Components.ExitBtn x={775} y={246} />,
-		];
-
-		if (this.props.user.freepacks) {
-			children.push(
+				}}>{this.state.info2}</span>
+			<Components.ExitBtn x={775} y={246} />
+			{hasFreePacks &&
 				<span
 					style={{
 						position: 'absolute',
 						left: '350px',
 						top: '26px',
 					}}>{
-					this.props.user.freepacks[self.state.packrarity]
+					this.props.user.freepacks[this.state.packrarity]
 						? 'Free ' +
-							packdata[self.state.packrarity].type +
+							packdata[this.state.packrarity].type +
 							' packs left: ' +
-							this.props.user.freepacks[self.state.packrarity]
+							this.props.user.freepacks[this.state.packrarity]
 						: ''
 					}
-				</span>,
-			);
-		}
-
-		const bget =
-			self.state.cards &&
-			<input type='button'
-				value='Take Cards'
-				onClick={() => {
-					self.setState({ showbuy: true, hideget: true, cards: '' });
-				}}
-				style={{
-					position: 'absolute',
-					left: '775px',
-					top: '156px',
-				}}
-			/>;
-
-		function buyPack() {
-			const pack = packdata[self.state.packrarity];
-			const boostdata = {
-				pack: self.state.packrarity,
-				element: self.state.packele,
-			};
-			options.parseInput(boostdata, 'bulk', self.props.bulk, 99);
-			if (
-				self.props.user.gold >= pack.cost * (boostdata.bulk || 1) ||
-				(self.props.user.freepacks && self.props.user.freepacks[self.state.packrarity] > 0)
-			) {
-				sock.userEmit('booster', boostdata);
-				self.setState({ showbuy: false });
-			} else {
-				self.setState({ info2: "You can't afford that!" });
+				</span>
 			}
-		}
-		const bbuy =
-			self.state.showbuy &&
-			<input type='button'
-				value='Buy Pack'
-				onClick={buyPack}
-				style={{
-					position: 'absolute',
-					left: '775px',
-					top: '156px',
-				}}
-			/>;
-		children.push(bget, bbuy);
-		packdata.forEach((pack, n) => {
-			children.push(
-				<div className='imgb'
+			{this.state.cards &&
+				<input type='button'
+					value='Take Cards'
+					onClick={() => {
+						this.setState({ showbuy: true, hideget: true, cards: '' });
+					}}
+					style={{
+						position: 'absolute',
+						left: '775px',
+						top: '156px',
+					}}
+				/>
+			}
+			{this.state.showbuy && !!~this.state.packele && !!~this.state.packrarity &&
+				<input type='button'
+					value='Buy Pack'
+					onClick={this.buyPack}
+					style={{
+						position: 'absolute',
+						left: '775px',
+						top: '156px',
+					}}
+				/>
+			}
+			{packdata.map((pack, n) =>
+				<div key={pack.type} className='imgb'
 					onClick={() => {
 						const update = {
 							packrarity: n,
 							info2: pack.type + ' Pack: ' + pack.info,
 						};
-						if (~self.state.packele) update.showbuy = true;
-						self.setState(update);
+						this.setState(update);
 					}}
 					style={{
 						color: '#000',
@@ -226,80 +273,26 @@ module.exports = connect(({user, opts}) => ({
 						}}
 					/>
 				</div>
-			);
-		});
-
-		for (let i = 0; i < 14; i++) {
-			children.push(
-				<Components.IconBtn
-					e={'e' + i}
-					x={75 + (i >> 1) * 64}
-					y={117 + (i & 1) * 75}
-					click={() => {
-						const update = {
-							packele: i,
-							info1: 'Selected Element: ' + (i == 13 ? 'Random' : '1:' + i),
-						};
-						if (~self.state.packrarity) update.showbuy = true;
-						self.setState(update);
+			)}
+			{elebuttons}
+			{this.state.cards && <PackDisplay cards={this.state.cards} />}
+			{!hasFreePacks &&
+				<input type='number'
+					placeholder='Bulk'
+					value={this.props.bulk}
+					onChange={e => this.props.dispatch(store.setOptTemp('bulk', e.target.value))}
+					onKeyPress={e => {
+						if (e.which == 13) this.buyPack();
+					}}
+					style={{
+						position: 'absolute',
+						top: '184px',
+						left: '777px',
+						width: '64px',
 					}}
 				/>
-			);
-		}
-
-		if (this.state.cards) {
-			const dlen = etgutil.decklength(this.state.cards);
-			let cardchildren;
-			if (dlen < 11) {
-				cardchildren = [];
-				etgutil.iterdeck(this.state.cards, (code, i) => {
-					const x = i % 5,
-						y = Math.floor(i / 5);
-					cardchildren.push(
-						<Components.Card
-							x={7 + x * 140}
-							y={y ? 298 : 14}
-							code={code}
-						/>
-					);
-				});
-			} else if (dlen < 61) {
-				cardchildren = <Components.DeckDisplay
-					deck={etgutil.decodedeck(this.state.cards)}
-				/>;
-			} else {
-				const deck = etgutil.decodedeck(this.state.cards);
-				cardchildren = <>
-					<Components.DeckDisplay deck={deck.slice(0, 60)} />
-					<Components.DeckDisplay y={244} deck={deck.slice(60)} />
-				</>;
 			}
-			children.push(
-				<Components.Box
-					x={40}
-					y={16}
-					width={710}
-					height={568}>
-					{cardchildren}
-				</Components.Box>
-			);
-		}
-
-		const packmulti = <input type='number'
-			placeholder='Bulk'
-			value={this.props.bulk}
-			onChange={e => this.props.dispatch(store.setOptTemp('bulk', e.target.value))}
-			onKeyPress={e => {
-				if (e.which == 13) buyPack();
-			}}
-			style={{
-				position: 'absolute',
-				top: '184px',
-				left: '777px',
-				width: '64px',
-			}}
-		/>;
-		children.push(packmulti, <Tutor.Shop x={8} y={500} />);
-		return children;
+			<Tutor.Shop x={8} y={500} />
+		</>;
 	}
 });

@@ -25,19 +25,20 @@
     "babel-loader": "^8.0.6",
     "babel-polyfill": "^6.26.0",
     "optipng-bin": "^6.0.0",
-    "prettier": "^1.17.1",
+    "prettier": "^1.18.2",
     "react": "^16.8.6",
     "react-dom": "^16.8.6",
     "react-redux": "^7.0.3",
     "redux": "^4.0.1",
     "webpack": "^4.33.0",
-    "webpack-cli": "^3.3.2"
+    "webpack-cli": "^3.3.3"
   },
   "scripts": {
     "start": "./server.js",
     "test": "./scripts/tests.js && ./src/vanilla/_tests.js",
     "dev": "webpack --mode=development --watch",
     "build": "webpack -p",
+    "build-dev": "webpack --mode=development",
     "build-atlas-png": "optipng -o2 -strip all assets/atlas.png",
     "build-atlas-css": "./scripts/mkatlascss.js"
   },
