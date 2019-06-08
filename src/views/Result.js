@@ -167,8 +167,13 @@ module.exports = connect(({ user }) => ({ user }))(
 			if (e.target.tagName === 'TEXTAREA') return;
 			const kc = e.which;
 			if (kc == 32 || kc == 13) this.exitFunc();
-			else if (kc == 87 && this.props.data.rematch) {
-				this.props.data.rematch();
+			else if (
+				kc == 87 &&
+				this.props.data.rematch &&
+				(!this.props.data.rematchFilter ||
+					this.props.data.rematchFilter(this.props))
+			) {
+				this.props.data.rematch(this.props);
 			}
 		};
 
@@ -372,18 +377,20 @@ module.exports = connect(({ user }) => ({ user }))(
 			return (
 				<>
 					<Components.ExitBtn x={412} y={440} onClick={this.exitFunc} />
-					{this.props.data.rematch && (
-						<input
-							type="button"
-							value="Rematch"
-							onClick={this.props.data.rematch}
-							style={{
-								position: 'absolute',
-								left: '412px',
-								top: '490px',
-							}}
-						/>
-					)}
+					{this.props.data.rematch &&
+						(!this.props.data.rematchFilter ||
+							this.props.data.rematchFilter(this.props)) && (
+							<input
+								type="button"
+								value="Rematch"
+								onClick={() => this.props.data.rematch(this.props)}
+								style={{
+									position: 'absolute',
+									left: '412px',
+									top: '490px',
+								}}
+							/>
+						)}
 					{this.props.user && (
 						<>
 							{game.winner == game.player1 && (

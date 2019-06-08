@@ -427,6 +427,7 @@ module.exports = connect(({ user }) => ({ user }))(
 								);
 								newgame.game.addData(data);
 								newgame.data.rematch = this.props.data.rematch;
+								newgame.data.rematchFilter = this.props.data.rematchFilter;
 								mkAi.run(newgame);
 								return;
 							} else if (!user.quests[game.quest.key]) {
@@ -440,6 +441,7 @@ module.exports = connect(({ user }) => ({ user }))(
 								newgame.game.addData(data);
 								newgame.game.dataNext = data;
 								newgame.data.rematch = this.props.data.rematch;
+								newgame.data.rematchFilter = this.props.data.rematchFilter;
 								mkAi.run(newgame);
 								return;
 							} else {

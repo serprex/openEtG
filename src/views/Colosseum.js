@@ -31,8 +31,10 @@ function mkDaily(type) {
 								daily: 2,
 								cardreward: '',
 						  };
-				gamedata.data.rematch = () =>
-					!(store.store.getState().user.daily & (1 << type)) && mkDaily(type)();
+				gamedata.data.rematch = props =>
+					!(props.user.daily & (1 << type)) && mkDaily(type)();
+				gamedata.data.rematchFilter = props =>
+					props.game.winner !== props.game.player1;
 				gamedata.game.addData(dataNext);
 				gamedata.game.dataNext = dataNext;
 			}

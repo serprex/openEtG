@@ -239,17 +239,17 @@ const Skills = {
 		const frozen = t.getStatus('frozen');
 		if (frozen) c.owner.foe.freeze(frozen);
 	},
-	catlife: (c, t, data) => {
+	catlife: passive((c, t, data) => {
 		if (!c.owner.creatures[data.index]) {
 			const lives = c.maybeDecrStatus('lives');
 			if (!lives) return;
 			Effect.mkText(lives - 1 + ' lives', c);
 			const cl = c.clone(c.owner);
-			cl.hp = cl.maxhp = c.card.health;
+			cl.hp = Math.min(cl.maxhp, c.card.health);
 			cl.atk = c.card.attack;
 			c.owner.creatures[data.index] = cl;
 		}
-	},
+	}),
 	cell: passive((c, t) => {
 		c.transform(c.card.as(Cards.MalignantCell));
 	}),
