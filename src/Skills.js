@@ -1508,9 +1508,6 @@ const Skills = {
 			(t || c.owner.foe).addpoison(n);
 		});
 	},
-	virusdeath: (c, t) => {
-		c.owner.foe.addpoison(1);
-	},
 	poisonfoe: c => {
 		if (c.rng() < 0.7) c.owner.foe.addpoison(1);
 	},

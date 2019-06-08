@@ -92,7 +92,8 @@ const BonusList = [
 	{
 		name: 'Head Hunter',
 		desc: "Defeat arena's top 7 decks",
-		func: (game, data) => [1, 0.5, 0.25, 0.12, 0.06, 0.03, 0.01][data.rank],
+		func: (game, data) =>
+			[1, 1 / 2, 1 / 4, 1 / 8, 1 / 16, 1 / 32, 1 / 64][data.rank],
 	},
 	{
 		name: 'Last point',
