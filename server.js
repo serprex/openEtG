@@ -269,6 +269,15 @@ const sockmeta = new WeakMap();
 				});
 			});
 		},
+		setgold: roleck('Codesmiths', function(data, user) {
+			Us.load(data.t).then(tgt => {
+				sockEmit(this, 'chat', {
+					mode: 1,
+					msg: `Set ${tgt.name} from ${tgt.gold}$ to ${data.g}$`,
+				});
+				tgt.gold = data.g;
+			});
+		}),
 		codecreate: roleck('Codesmiths', function(data, user) {
 			if (!data.t) {
 				return sockEmit(this, 'chat', {
