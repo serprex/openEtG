@@ -101,27 +101,7 @@ module.exports = connect(({ user }) => ({ user }))(function Colosseum({
 		<>
 			<Components.ExitBtn x={50} y={50} />
 			{eventui}
-			{typeof user.ostreak === 'number' && (
-				<Components.Text
-					style={{ position: 'absolute', left: '56px', top: '300px' }}
-					text={
-						'Completing any colosseum event contributes to a 5 day reward cycle.\n' +
-						'At the end of the cycle, your streak is reset.\n\n' +
-						`Reward Cycle: 15$, 25$, 77$, 100$, 250$\n\n${
-							user.ostreak
-								? `You currently have a ${user.ostreak} day colosseum streak.`
-								: "You'ven't begun a streak."
-						}\n${
-							user.ostreakday
-								? `You've redeemed ${
-										[250, 15, 25, 77, 100][user.ostreak % 5]
-								  }$ today.`
-								: "You'ven't redeemed a colosseum streak today."
-						}`
-					}
-				/>
-			)}
-			{user.daily == 191 && (
+			{user.daily == 191 ? (
 				<>
 					<input
 						type="button"
@@ -139,6 +119,27 @@ module.exports = connect(({ user }) => ({ user }))(function Colosseum({
 						You successfully completed all tasks.
 					</span>
 				</>
+			) : (
+				typeof user.ostreak === 'number' && (
+					<Components.Text
+						style={{ position: 'absolute', left: '56px', top: '300px' }}
+						text={
+							'Completing any colosseum event contributes to a 5 day reward cycle.\n' +
+							'At the end of the cycle, your streak is reset.\n\n' +
+							`Reward Cycle: 15$, 25$, 77$, 100$, 250$\n\n${
+								user.ostreak
+									? `You currently have a ${user.ostreak} day colosseum streak.`
+									: "You'ven't begun a streak."
+							}\n${
+								user.ostreakday
+									? `You've redeemed ${
+											[250, 15, 25, 77, 100][user.ostreak % 5]
+									  }$ today.`
+									: "You'ven't redeemed a colosseum streak today."
+							}`
+						}
+					/>
+				)
 			)}
 		</>
 	);
