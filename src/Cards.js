@@ -51,7 +51,7 @@ exports.filterDeck = function(deck, pool, preserve) {
 	for (let i = deck.length - 1; i >= 0; i--) {
 		let code = deck[i],
 			card = exports.Codes[code];
-		if (!preserve && card.type != etg.Pillar) {
+		if (card.type !== etg.Pillar) {
 			if (sumCardMinus(cardMinus, code) == 6) {
 				deck.splice(i, 1);
 				continue;

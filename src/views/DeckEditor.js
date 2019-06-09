@@ -38,12 +38,11 @@ const Qecks = connect(({ user }) => ({ user }))(
 						type="button"
 						key={i}
 						value={`${i + 1}`}
-						className={
-							'editbtn' +
-							(this.props.user.selectedDeck == this.props.user.qecks[i]
+						className={`editbtn${
+							this.props.user.selectedDeck == this.props.user.qecks[i]
 								? ' selectedbutton'
-								: '')
-						}
+								: ''
+						}`}
 						onClick={() => {
 							if (this.state.setQeck) {
 								sock.userExec('changeqeck', {
