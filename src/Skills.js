@@ -245,7 +245,8 @@ const Skills = {
 			if (!lives) return;
 			Effect.mkText(lives - 1 + ' lives', c);
 			const cl = c.clone(c.owner);
-			cl.hp = 1;
+			cl.hp = cl.maxhp = c.card.health;
+			cl.atk = c.card.attack;
 			c.owner.creatures[data.index] = cl;
 		}
 	}),

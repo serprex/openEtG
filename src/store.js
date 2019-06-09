@@ -9,11 +9,11 @@ let hasLocalStorage = true;
 try {
 	for (const key in localStorage)
 		if (localStorage.hasOwnProperty(key)) opts[key] = localStorage[key];
-	audio.changeSound(opts.enableSound);
-	audio.changeMusic(opts.enableMusic);
 } catch (e) {
 	hasLocalStorage = false;
 }
+sfx.changeSound(opts.enableSound);
+sfx.changeMusic(opts.enableMusic);
 
 exports.doNav = (view, props) => ({ type: 'NAV', view, props });
 

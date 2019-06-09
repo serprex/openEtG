@@ -116,7 +116,7 @@ module.exports = connect(({ user }) => ({ user }))(function Colosseum({
 								? `You've redeemed ${
 										[250, 15, 25, 77, 100][user.ostreak % 5]
 								  }$ today.`
-								: "You've'nt redeemed a colosseum streak today."
+								: "You'ven't redeemed a colosseum streak today."
 						}`
 					}
 				/>

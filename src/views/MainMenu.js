@@ -152,6 +152,7 @@ module.exports = connect(({ user, opts }) => ({
 	enableSound: opts.enableSound,
 	enableMusic: opts.enableMusic,
 	hideRightpane: opts.hideRightpane,
+	hideMainchat: opts.hideMainchat,
 	disableTut: opts.disableTut,
 	lofiArt: opts.lofiArt,
 }))(
@@ -439,30 +440,32 @@ module.exports = connect(({ user, opts }) => ({
 								{this.state.showcard ? (
 									<Components.Card x={92} y={340} code={this.state.showcard} />
 								) : (
-									<>
-										<Chat
-											channel="Main"
-											style={{
-												position: 'absolute',
-												left: '72px',
-												top: '228px',
-												width: '226px',
-												height: '300px',
-												background: 'transparent',
-												fontSize: '14px',
-												opacity: '0.6',
-											}}
-										/>
-										<input
-											placeholder="Chat"
-											onKeyDown={parseChat}
-											style={{
-												position: 'absolute',
-												left: '99px',
-												top: '532px',
-											}}
-										/>
-									</>
+									!this.props.hideMainchat && (
+										<>
+											<Chat
+												channel="Main"
+												style={{
+													position: 'absolute',
+													left: '72px',
+													top: '228px',
+													width: '226px',
+													height: '300px',
+													background: 'transparent',
+													fontSize: '14px',
+													opacity: '0.6',
+												}}
+											/>
+											<input
+												placeholder="Chat"
+												onKeyDown={parseChat}
+												style={{
+													position: 'absolute',
+													left: '99px',
+													top: '532px',
+												}}
+											/>
+										</>
+									)
 								)}
 							</>
 						)}
@@ -755,9 +758,9 @@ module.exports = connect(({ user, opts }) => ({
 										) {
 											logout('delete');
 										} else {
-											self.props.dispatch(
+											this.props.dispatch(
 												store.chatMsg(
-													`Input '${self.props.user.name}yesdelete' into Trade/Library to delete your account`,
+													`Input '${this.props.user.name}yesdelete' into Trade/Library to delete your account`,
 													'System',
 												),
 											);
@@ -860,6 +863,23 @@ module.exports = connect(({ user, opts }) => ({
 										}}
 									/>
 									Enable music
+								</label>
+								<label
+									style={{
+										position: 'absolute',
+										left: '8px',
+										top: '53px',
+									}}>
+									<input
+										type="checkbox"
+										checked={this.props.hideMainchat}
+										onChange={e =>
+											this.props.dispatch(
+												store.setOpt('hideMainchat', e.target.checked),
+											)
+										}
+									/>
+									Hide mainchat
 								</label>
 								<label
 									style={{
