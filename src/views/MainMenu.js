@@ -265,7 +265,7 @@ module.exports = connect(({ user, opts }) => ({
 				if (self.props.user) {
 					arenac.push(
 						<AiButton
-							name={'Arena' + (i + 1) + ' AI'}
+							name={`Arena${i + 1} AI`}
 							key={i}
 							onClick={arenaAi}
 							onMouseOver={this.mkSetTip(
@@ -280,7 +280,7 @@ module.exports = connect(({ user, opts }) => ({
 					<input
 						type="button"
 						key={i}
-						value={'Arena' + (i + 1) + ' T20'}
+						value={`Arena${i + 1} T20`}
 						onClick={() => {
 							this.props.dispatch(
 								store.doNav(require('./ArenaTop'), { lv: i }),

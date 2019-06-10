@@ -105,7 +105,7 @@ function plinfocore(info, key, val) {
 	else if (val) info.push(val + key);
 }
 Player.prototype.info = function() {
-	const info = [this.hp + '/' + this.maxhp + ' ' + this.deck.length + 'cards'];
+	const info = [`${this.hp}/${this.maxhp} ${this.deck.length}cards`];
 	for (const [k, v] of this.status) {
 		plinfocore(info, k, v);
 	}

@@ -213,9 +213,7 @@ socket.onclose = function() {
 		socket.onclose = oldsock.onclose;
 		socket.onmessage = oldsock.onmessage;
 	}, timeout);
-	store.store.dispatch(
-		store.chatMsg('Reconnecting in ' + timeout + 'ms', 'System'),
-	);
+	store.store.dispatch(store.chatMsg(`Reconnecting in ${timeout}ms`, 'System'));
 };
 exports.userEmit = function(x, data) {
 	if (!data) data = {};

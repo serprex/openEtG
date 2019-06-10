@@ -132,7 +132,7 @@ Game.prototype.bitsToTgt = function(x) {
 		? player.permanents[x4]
 		: tgtop == 5
 		? player.hand[x4]
-		: console.log('Unknown tgtop: ' + tgtop + ', ' + x4);
+		: console.log(`Unknown tgtop: ${tgtop}, ${x4}`);
 };
 Game.prototype.getTarget = function(src, active, cb) {
 	const targetingFilter = Cards.Targeting[active.name[0]];

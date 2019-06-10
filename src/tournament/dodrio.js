@@ -1,12 +1,23 @@
+const ui = require('../ui');
+
+const bannedCards = new Set([
+	'4vj',
+	'4vl',
+	'55v',
+	'593',
+	'5f9',
+	'5ik',
+	'5ig',
+	'5io',
+]);
 module.exports = function(deck) {
-	var bannedCards = ['4vj', '4vl', '55v', '593', '5f9', '5ik', '5ig', '5io'];
-	var elementList = [];
-	var eleCount, rareElement;
-	for (var i = 0; i < deck.length; i++) {
-		var card = deck[i];
+	const elementList = [];
+	let eleCount, rareElement;
+	for (let i = 0; i < deck.length; i++) {
+		const card = deck[i];
 		if (card.upped) return 'Your deck contains at least one upgraded card';
-		if (~bannedCards.indexOf(card.code)) return card.name + ' is banned';
-		var ele = card.element;
+		if (~bannedCards.has(card.code)) return card.name + ' is banned';
+		const ele = card.element;
 		if (ele) {
 			if (!elementList[ele]) {
 				elementList[ele] = 0;
@@ -21,11 +32,11 @@ module.exports = function(deck) {
 				return 'Your deck contains rare cards from more than one element';
 		}
 	}
-	for (var i = 0; i < elementList.length; i++) {
+	for (let i = 0; i < elementList.length; i++) {
 		if (elementList[i] && elementList[i] < 6)
-			return 'You have too few ' + require('../ui').eleNames[i] + ' cards';
+			return `You have too few ${ui.eleNames[i]} cards`;
 	}
 	if (eleCount < 3)
-		return 'Your deck contains too few elements (only ' + eleCount + ')';
+		return `Your deck contains too few elements (only ${eleCount})`;
 	return 'Legal';
 };

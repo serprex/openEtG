@@ -429,14 +429,8 @@ const data = {
 		'Gain 5 steam. Increment strength per steam. Steam decrements after attacking',
 	stoneform: 'Gain 0|20 & become a golem',
 	storm: x =>
-		'Deals ' + x + " spell damage to target player's creatures. Removes cloak",
-	summon: x => {
-		const card1 = Cards[x],
-			card2 = card1.asUpped(true);
-		return card1.name == card2.name
-			? 'Summon a ' + card1.name
-			: ['Summon a ' + card1.name, 'Summon a ' + card2.name];
-	},
+		`Deals ${x} spell damage to target player's creatures. Removes cloak`,
+	summon: x => c => `Summon a ${c.name}`,
 	swarm: 'Base health is equal to count of ally scarabs',
 	swave:
 		'Deals 4 spell damage to target. Instantly kill creature or destroy weapon if frozen',
@@ -504,8 +498,8 @@ const data = {
 	['pillcar', '1:1 1:3 1:10 1:12'],
 ].forEach(x => {
 	data[x[0]] = {
-		ownattack: 'Produce 1 or 2 ' + x[1] + ' per turn',
-		ownplay: 'Produce 1 or 2 ' + x[1] + ' on play',
+		ownattack: `Produce 1 or 2 ${x[1]} per turn`,
+		ownplay: `Produce 1 or 2 ${x[1]} on play`,
 	};
 });
 function auraText(tgts, bufftext, upbufftext) {
@@ -536,7 +530,7 @@ const statusData = {
 		'Prevent own creatures from attacking at end of turn. They gain 2|1. 4|1 if burrowed. 5|2 if flooded. Unique',
 	poison: (c, inst) =>
 		c == inst
-			? 'Enter with ' + c.getStatus('poison') + ' poison'
+			? `Enter with ${c.getStatus('poison')} poison`
 			: inst.getStatus('poison') + ' poison',
 	stackable: '',
 	tunnel: 'Burrowed creatures bypass shields',
@@ -558,12 +552,12 @@ function asCard(c) {
 	return c instanceof Card ? c : c.card;
 }
 function pushEntry(list, c, event, entry) {
-	var x = processEntry(c, event, entry);
+	const x = processEntry(c, event, entry);
 	if (x) list.push(x);
 }
 function getDataFromName(name) {
 	if (name in data) return data[name];
-	var spidx = name.indexOf(' ');
+	const spidx = name.indexOf(' ');
 	return ~spidx
 		? (data[name] = data[name.slice(0, spidx)](name.slice(spidx + 1)))
 		: data[name];

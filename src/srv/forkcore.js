@@ -33,10 +33,10 @@ module.exports = function(req, res) {
 				file,
 			);
 		} else if (url == 'vanilla' || url == 'cia') {
-			res.writeHead(302, { Location: '/' + url + '/' });
+			res.writeHead(302, { Location: `/${url}/` });
 			res.end();
 		} else if (url == 'speed') {
-			res.writeHead(302, { Location: '/speed/' + util.readint() });
+			res.writeHead(302, { Location: `/speed/${util.readint()}` });
 			res.end();
 		} else {
 			res.writeHead(404, { Connection: 'close' });

@@ -192,8 +192,8 @@ const sockmeta = new WeakMap();
 		},
 		arenainfo: function(data, user) {
 			db.batch([
-				['hgetall', 'A:' + data.u],
-				['hgetall', 'B:' + data.u],
+				['hgetall', `A:${data.u}`],
+				['hgetall', `B:${data.u}`],
 				['zrevrank', 'arena', data.u],
 				['zrevrank', 'arena1', data.u],
 			]).exec((err, res) => {
@@ -216,7 +216,7 @@ const sockmeta = new WeakMap();
 			Us.load(data.aname)
 				.then(user => (user.gold += data.won ? 15 : 5))
 				.catch(() => {});
-			const arena = 'arena' + (data.lv ? '1' : ''),
+			const arena = `arena${data.lv ? '1' : ''}`,
 				akey = (data.lv ? 'B:' : 'A:') + data.aname;
 			db.zscore(arena, data.aname, (err, score) => {
 				if (score === null) return;
@@ -240,13 +240,13 @@ const sockmeta = new WeakMap();
 			db.zcard(`arena${data.lv ? '1' : ''}`, (err, len) => {
 				if (!len) return;
 				const idx = RngMock.upto(Math.min(len, 20));
-				db.zrevrange('arena' + (data.lv ? '1' : ''), idx, idx, (err, aname) => {
+				db.zrevrange(`arena${data.lv ? '1' : ''}`, idx, idx, (err, aname) => {
 					if (!aname || !aname.length) {
-						console.log('No arena ' + idx);
+						console.log('No arena', idx);
 						return;
 					}
 					aname = aname[0];
-					db.hgetall((data.lv ? 'B:' : 'A:') + aname, (err, adeck) => {
+					db.hgetall(`${data.lv ? 'B:' : 'A:'}${aname}`, (err, adeck) => {
 						adeck.card = +adeck.card;
 						if (data.lv) adeck.card = etgutil.asUpped(adeck.card, true);
 						adeck.hp = +adeck.hp || 200;
@@ -262,7 +262,7 @@ const sockmeta = new WeakMap();
 							rank: idx,
 							mark: adeck.mark,
 							draw: adeck.draw,
-							deck: adeck.deck + '05' + adeck.card.toString(32),
+							deck: `${adeck.deck}05${adeck.card.toString(32)}`,
 							lv: data.lv,
 						});
 					});
@@ -292,7 +292,7 @@ const sockmeta = new WeakMap();
 				data.t,
 				(err, code) => {
 					if (err) console.log(err);
-					sockEmit(this, 'chat', { mode: 1, msg: data.t + ' ' + code });
+					sockEmit(this, 'chat', { mode: 1, msg: `${data.t} ${code}` });
 				},
 			);
 		}),
@@ -818,7 +818,7 @@ const sockmeta = new WeakMap();
 										});
 								} else {
 									sockEmit(this, 'login', {
-										err: json.error + ': ' + json.error_description,
+										err: `${json.error}: ${json.error_description}`,
 									});
 								}
 							});
@@ -889,12 +889,12 @@ const sockmeta = new WeakMap();
 				const stat = thismeta.pvpstats,
 					foestat = pendmeta.pvpstats;
 				for (const key in stat) {
-					owndata['p1' + key] = stat[key];
-					foedata['p2' + key] = stat[key];
+					owndata[`p1${key}`] = stat[key];
+					foedata[`p2${key}`] = stat[key];
 				}
 				for (const key in foestat) {
-					owndata['p2' + key] = foestat[key];
-					foedata['p1' + key] = foestat[key];
+					owndata[`p2${key}`] = foestat[key];
+					foedata[`p1${key}`] = foestat[key];
 				}
 				sockEmit(this, 'pvpgive', owndata);
 				sockEmit(pendinggame, 'pvpgive', foedata);

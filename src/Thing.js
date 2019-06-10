@@ -220,7 +220,7 @@ Thing.prototype.calcBonusHp = function() {
 Thing.prototype.info = function() {
 	const info =
 		this.type == etg.Creature
-			? this.trueatk() + '|' + this.truehp() + '/' + this.maxhp
+			? `${this.trueatk()}|${this.truehp()}/${this.maxhp}`
 			: this.type == etg.Weapon
 			? this.trueatk().toString()
 			: this.type == etg.Shield

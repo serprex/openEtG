@@ -135,7 +135,7 @@ const activeInfo = {
 		const bolts = Math.floor(
 			(game.player1.quanta[etg.Water] - game.targeting.src.card.cost) / 5,
 		);
-		return 2 + bolts + ' ' + (35 + bolts * 5) + '%';
+		return `${2 + bolts} ${35 + bolts * 5}%`;
 	},
 	catapult: t =>
 		Math.ceil(
@@ -207,7 +207,7 @@ const ThingInst = connect(({ opts }) => ({ lofiArt: opts.lofiArt }))(
 			if (!isSpell && visible[k]) {
 				children.push(
 					<div
-						className={'ico s' + k}
+						className={`ico s${k}`}
 						key={k}
 						style={{
 							position: 'absolute',
@@ -223,13 +223,13 @@ const ThingInst = connect(({ opts }) => ({ lofiArt: opts.lofiArt }))(
 			if (!isSpell && bordervisible[k]) {
 				children.push(
 					<div
-						className={'ico sborder' + k}
+						className={`ico sborder${k}`}
 						key={7 + k}
 						style={{
 							position: 'absolute',
 							left: '0',
 							top: '0',
-							transform: scale === 1 ? undefined : 'scale(' + scale + ')',
+							transform: scale === 1 ? undefined : `scale(${scale})`,
 						}}
 					/>,
 				);
@@ -241,7 +241,7 @@ const ThingInst = connect(({ opts }) => ({ lofiArt: opts.lofiArt }))(
 			topText = obj.activetext();
 			if (obj.type === etg.Creature) {
 				statText = `${obj.trueatk()} | ${obj.truehp()}${
-					charges ? ' x' + charges : ''
+					charges ? ` x${charges}` : ''
 				}`;
 			} else if (obj.type === etg.Permanent) {
 				if (obj.card.type === etg.Pillar) {
@@ -255,7 +255,7 @@ const ThingInst = connect(({ opts }) => ({ lofiArt: opts.lofiArt }))(
 					statText = (charges || '').toString();
 				}
 			} else if (obj.type === etg.Weapon) {
-				statText = `${obj.trueatk()}${charges ? ' x' + charges : ''}`;
+				statText = `${obj.trueatk()}${charges ? ` x${charges}` : ''}`;
 			} else if (obj.type === etg.Shield) {
 				statText = charges ? 'x' + charges : obj.truedr().toString();
 			}
@@ -299,7 +299,7 @@ const ThingInst = connect(({ opts }) => ({ lofiArt: opts.lofiArt }))(
 					<img
 						key={0}
 						className={obj.card.shiny ? 'shiny' : undefined}
-						src={'/Cards/' + obj.card.code.toString(32) + '.png'}
+						src={`/Cards/${obj.card.code.toString(32)}.png`}
 						style={{
 							position: 'absolute',
 							left: '0',

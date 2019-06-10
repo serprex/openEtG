@@ -96,7 +96,7 @@ exports.deck = function(deck) {
 		classes[elech] = 'fill:' + ui.maybeLightenStr(card);
 		const textColor = card.upped ? '' : " fill='#fff'";
 		if (!paths[elecls]) paths[elecls] = '';
-		paths[elecls] += 'M' + x + ' ' + y + 'h100v16h-100';
+		paths[elecls] += `M${x} ${y}h100v16h-100`;
 		texts += `<text x='${x + 2}' y='${y + 13}'${textColor}>${card.name}</text>`;
 		y += 16;
 		if (y == 160) {

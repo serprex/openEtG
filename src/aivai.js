@@ -1,27 +1,27 @@
-var Effect = require('./Effect');
-var Cards = require('./Cards');
-var Game = require('./Game');
-var Thing = require('./Thing');
-var etg = require('./etg');
-var etgutil = require('./etgutil');
-var aiSearch = require('./ai/search');
-var util = require('./util');
-var deckeles = [
+const Effect = require('./Effect');
+const Cards = require('./Cards');
+const Game = require('./Game');
+const Thing = require('./Thing');
+const etg = require('./etg');
+const etgutil = require('./etgutil');
+const aiSearch = require('./ai/search');
+const util = require('./util');
+const deckeles = [
 	document.getElementById('deck1'),
 	document.getElementById('deck2'),
 ];
-var seedput = document.getElementById('seed');
-var result = document.getElementById('result');
-var fight = document.getElementById('fight');
-var fight1000 = document.getElementById('fight1000');
+const seedput = document.getElementById('seed'),
+	result = document.getElementById('result'),
+	fight = document.getElementById('fight'),
+	fight1000 = document.getElementById('fight1000');
 fight.addEventListener('click', fightItOut);
 fight1000.addEventListener('click', fightItOut);
 function mkGame(seed, decks) {
-	var game = new Game(seed, 0);
-	var idx, code;
-	for (var j = 0; j < 2; j++) {
-		var pl = game.players(j);
-		for (var i = 0; i < decks[j].length; i++) {
+	const game = new Game(seed, 0);
+	let idx, code;
+	for (let j = 0; j < 2; j++) {
+		const pl = game.players(j);
+		for (let i = 0; i < decks[j].length; i++) {
 			if (Cards.Codes[(code = decks[j][i])]) {
 				pl.deck.push(new Thing(Cards.Codes[code]));
 			} else if (~(idx = etgutil.fromTrueMark(code))) {
@@ -37,10 +37,10 @@ function mkGame(seed, decks) {
 	game.phase = etg.PlayPhase;
 	return game;
 }
-var stopFight = false;
+let stopFight = false;
 function fightItOut() {
-	var start = Date.now();
-	var mode = this,
+	const start = Date.now();
+	let mode = this,
 		fc = new Uint16Array(2);
 	if (mode == fight1000) {
 		if (fight1000.value.match(/^Stop/)) {
@@ -51,15 +51,15 @@ function fightItOut() {
 			fight1000.value = 'Stop';
 		}
 	}
-	var decks = deckeles.map(function(item) {
-		return item.value.split(' ').map(x => parseInt(x, 32));
-	});
-	var seed = parseInt(seedput.value) || util.randint();
-	var game = mkGame(seed, decks);
+	const decks = deckeles.map(item =>
+		item.value.split(' ').map(x => parseInt(x, 32)),
+	);
+	const seed = parseInt(seedput.value) || util.randint();
+	let game = mkGame(seed, decks),
+		realp1 = game.player1;
 	result.textContent = '';
-	var aiState = undefined;
-	var realp1 = game.player1;
-	var cmds = {
+	let aiState = undefined;
+	const cmds = {
 		endturn: function(data) {
 			if (mode == fight) {
 				result.textContent += (game.turn == realp1 ? 1 : 2) + '\tEND TURN\n';
@@ -67,25 +67,20 @@ function fightItOut() {
 			game.player2.endturn(data.bits);
 		},
 		cast: function(data) {
-			var bits = data.bits,
+			const bits = data.bits,
 				c = game.bitsToTgt(bits & 511),
 				t = game.bitsToTgt((bits >> 9) & 511);
 			if (mode == fight) {
-				result.textContent +=
-					(game.turn == realp1 ? 1 : 2) +
-					'\t' +
-					c +
-					(t ? ' targets ' + t : '') +
-					'\n';
+				result.textContent += `${game.turn == realp1 ? 1 : 2}\t${c}${
+					t ? ' targets ' + t : ''
+				}\n`;
 			}
 			c.useactive(t);
 		},
 	};
 	function gameStep() {
 		if (game.turn == game.player1) {
-			var p1 = game.player1;
-			game.player1 = game.player2;
-			game.player2 = p1;
+			[game.player1, game.player2] = [game.player2, game.player1];
 		}
 		if (game.phase == etg.PlayPhase) {
 			Effect.disable = true;

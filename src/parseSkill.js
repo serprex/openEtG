@@ -3,7 +3,7 @@ module.exports = function(name) {
 	if (name in Skills) {
 		return Skills[name];
 	} else {
-		var spidx = name.indexOf(' ');
+		const spidx = name.indexOf(' ');
 		if (~spidx) {
 			return (Skills[name] = {
 				func: Skills[name.slice(0, spidx)].func(name.slice(spidx + 1)),
