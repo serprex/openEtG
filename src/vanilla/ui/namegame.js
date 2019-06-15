@@ -1,26 +1,22 @@
-var Cards = require('../Cards');
-var infobox = document.getElementById('infobox');
+const Cards = require('../Cards'),
+	infobox = document.getElementById('infobox');
 document.getElementById('nameinput').addEventListener('keydown', printstat);
 function printstat(e) {
 	if (e.keyCode != 13) return;
-	var letter,
-		hide = new Set(
-			['pillar', 'mark', 'shard', 'rare', 'nymph'].filter(
-				x => document.getElementById('hide' + x).checked,
-			),
+	const hide = new Set(
+		['pillar', 'mark', 'shard', 'rare', 'nymph'].filter(
+			x => document.getElementById('hide' + x).checked,
 		),
-		ignore = function(name) {
-			return name;
-		};
+	);
+	let letter,
+		ignore = name => name;
 	['Elite', 'Improved', 'Shard', 'Mark'].forEach(function(x) {
 		if (document.getElementById('ignore' + x).checked) {
-			var oldignore = ignore;
-			ignore = function(name) {
-				return oldignore(name).replace(new RegExp('^' + x + '( of)? '), '');
-			};
+			const oldignore = ignore;
+			ignore = name => oldignore(name).replace(new RegExp(`^${x}( of)? `), '');
 		}
 	});
-	var upped = document.querySelector("input[name='upped']:checked").value;
+	const upped = document.querySelector("input[name='upped']:checked").value;
 	function cardfilter(card) {
 		if (ignore(card.name).charAt(0) != letter) return false;
 		if (hide.has('pillar') && !card.type) return false;
@@ -35,9 +31,9 @@ function printstat(e) {
 		return true;
 	}
 	while (infobox.firstChild) infobox.firstChild.remove();
-	var deck = [],
+	const deck = [],
 		letters = new Set();
-	for (var i = 0; i < this.value.length; i++) {
+	for (let i = 0; i < this.value.length; i++) {
 		letter = this.value.charAt(i).toUpperCase();
 		if (letters.has(letter)) continue;
 		letters.add(letter);
@@ -47,11 +43,9 @@ function printstat(e) {
 			Array.prototype.push.apply(deck, Cards.filter(true, cardfilter));
 	}
 	if (document.getElementById('sortele').checked)
-		deck.sort(function(x, y) {
-			return x.element - y.element;
-		});
-	for (var i = 0; i < deck.length; i += 70) {
-		var img = document.createElement('img');
+		deck.sort((x, y) => x.element - y.element);
+	for (let i = 0; i < deck.length; i += 70) {
+		const img = document.createElement('img');
 		img.src =
 			'http://dek.im/deck/' +
 			deck

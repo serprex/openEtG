@@ -30,7 +30,9 @@ const BonusList = [
 		name: 'Are we idle yet?',
 		desc: 'Take longer than 3 minutes to win',
 		func: game =>
-			game.time > 180000 ? Math.min((game.time - 180000) / 60000, 0.2) : 0,
+			game.bonusstats.time > 180000
+				? Math.min((game.bonusstats.time - 180000) / 60000, 0.2)
+				: 0,
 	},
 	{
 		name: 'Creature Domination',
@@ -243,8 +245,8 @@ module.exports = connect(({ user }) => ({ user }))(
 			const { game, data } = this.props;
 			const winner = game.winner === game.player1,
 				lefttext = [
-					<div>{game.ply} plies</div>,
-					<div>{(game.time / 1000).toFixed(1)} seconds</div>,
+					<div>{game.bonusstats.ply} plies</div>,
+					<div>{(game.bonusstats.time / 1000).toFixed(1)} seconds</div>,
 				];
 			let streakrate = 0;
 			if (winner) {
@@ -342,8 +344,8 @@ module.exports = connect(({ user }) => ({ user }))(
 							game.level === undefined ? -1 : game.level,
 							(game.foename || '?').replace(/,/g, ' '),
 							winner ? 'W' : 'L',
-							game.ply,
-							game.time,
+							game.bonusstats.ply,
+							game.bonusstats.time,
 							game.player1.hp,
 							game.player1.maxhp,
 							(game.goldreward || 0) - (game.cost || 0),

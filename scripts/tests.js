@@ -6,18 +6,18 @@ const assert = require('assert'),
 	Game = require('../src/Game'),
 	Cards = require('../src/Cards'),
 	Thing = require('../src/Thing'),
-	Skills = require('../src/Skills'),
+	parseSkill = require('../src/parseSkill'),
 	etgutil = require('../src/etgutil');
 
 function initHand(pl, ...args) {
+	const hand = [];
 	for (let i = 0; i < args.length; i++) {
-		const cardinst = (pl.hand[i] = new Thing(args[i]));
+		const cardinst = pl.newThing(args[i]);
 		cardinst.owner = pl;
 		cardinst.type = etg.Spell;
+		hand[i] = cardinst.id;
 	}
-}
-function initDeck(...args) {
-	return args.map(x => new Thing(x));
+	pl.handIds = hand;
 }
 class TestModule {
 	constructor(name, opts) {
@@ -60,17 +60,19 @@ M.test('Upped Alignment', function() {
 M = new TestModule('Cards', {
 	beforeEach: function() {
 		this.game = new Game(5489);
+		this.cast = (skill, ...args) => parseSkill(skill).func(this.game, ...args);
+		this.initDeck = (...args) => args.map(x => this.game.newThing(x));
 		this.player1 = this.game.player1;
 		this.player2 = this.game.player2;
-		this.game.turn = this.player1;
+		this.game.turn = this.player1Id;
 		this.game.phase = etg.PlayPhase;
 		this.player1.mark = this.player2.mark = etg.Entropy;
-		this.player1.deck = initDeck(
+		this.player1.deck = this.initDeck(
 			Cards.AmethystPillar,
 			Cards.AmethystPillar,
 			Cards.AmethystPillar,
 		);
-		this.player2.deck = initDeck(
+		this.player2.deck = this.initDeck(
 			Cards.BonePillar,
 			Cards.BonePillar,
 			Cards.BonePillar,
@@ -142,30 +144,30 @@ M.test('Destroy', function() {
 		this.player1.hand[0].useactive();
 	}
 	assert.equal(this.player1.permanents[0].getStatus('charges'), 2, '2 charges');
-	Skills.destroy.func(this.player2, this.player1.permanents[0]);
+	this.cast('destroy', this.player2, this.player1.permanents[0]);
 	assert.equal(this.player1.permanents[0].getStatus('charges'), 1, '1 charge');
-	Skills.destroy.func(this.player2, this.player1.permanents[0]);
+	this.cast('destroy', this.player2, this.player1.permanents[0]);
 	assert.ok(!this.player1.permanents[0], 'poof');
 	assert.equal(
 		this.player1.permanents[1].card,
 		Cards.SoulCatcher,
 		'SoulCatcher',
 	);
-	Skills.destroy.func(this.player2, this.player1.permanents[1]);
+	this.cast('destroy', this.player2, this.player1.permanents[1]);
 	assert.ok(!this.player1.permanents[1], 'SoulCatcher gone');
 	assert.equal(this.player1.shield.card, Cards.Shield, 'Shield');
-	Skills.destroy.func(this.player2, this.player1.shield);
+	this.cast('destroy', this.player2, this.player1.shield);
 	assert.ok(!this.player1.shield, 'Shield gone');
 	assert.equal(this.player1.weapon.card, Cards.Dagger, 'Dagger');
-	Skills.destroy.func(this.player2, this.player1.weapon);
+	this.cast('destroy', this.player2, this.player1.weapon);
 	assert.ok(!this.player1.weapon, 'Dagger gone');
 	initHand(this.player1, Cards.BoneWall);
 	this.player1.hand[0].useactive();
 	assert.equal(this.player1.shield.getStatus('charges'), 7, '7 bones');
-	Skills.destroy.func(this.player2, this.player1.shield);
+	this.cast('destroy', this.player2, this.player1.shield);
 	assert.equal(this.player1.shield.getStatus('charges'), 6, '6 bones');
 	for (let i = 0; i < 6; i++) {
-		Skills.destroy.func(this.player2, this.player1.shield);
+		this.cast('destroy', this.player2, this.player1.shield);
 	}
 	assert.ok(!this.player1.shield, 'This town is all in hell');
 });
@@ -202,14 +204,14 @@ M.test('Earthquake', function() {
 	const pillars = this.player1.permanents[0];
 	assert.ok(pillars.card.type == etg.Pillar, 'ispillar');
 	assert.equal(pillars.getStatus('charges'), 5, '5 charges');
-	Skills.earthquake.func(this.player2, pillars);
+	this.cast('earthquake', this.player2, pillars);
 	assert.equal(pillars.getStatus('charges'), 2, '2 charges');
-	Skills.earthquake.func(this.player2, pillars);
+	this.cast('earthquake', this.player2, pillars);
 	assert.ok(!this.player1.permanents[0], 'poof');
 });
 M.test('Eclipse', function() {
-	this.player1.deck = initDeck(Cards.Ash, Cards.Ash, Cards.Ash);
-	this.player2.deck = initDeck(Cards.Ash, Cards.Ash, Cards.Ash);
+	this.player1.deck = this.initDeck(Cards.Ash, Cards.Ash, Cards.Ash);
+	this.player2.deck = this.initDeck(Cards.Ash, Cards.Ash, Cards.Ash);
 	for (let i = 0; i < 2; i++)
 		this.player1.addCrea(new Thing(Cards.MinorVampire.asUpped(true)));
 	this.player1.hp = 50;
@@ -225,13 +227,17 @@ M.test('Eclipse', function() {
 });
 M.test('Gpull', function() {
 	this.player2.addCrea(new Thing(Cards.ColossalDragon));
-	this.player2.gpull = this.player2.creatures[0];
+	this.player2.gpull = this.player2.creatureIds[0];
 	this.player1.addCrea(new Thing(Cards.Scorpion));
-	this.player2.deck = initDeck(Cards.ColossalDragon);
+	this.player2.deck = this.initDeck(Cards.ColossalDragon);
 	this.player1.endturn();
-	assert.equal(this.player2.gpull.hp, 24, 'dmg redirected');
-	assert.equal(this.player2.gpull.getStatus('poison'), 1, 'psn redirected');
-	this.player2.gpull.die();
+	assert.equal(this.game.get(this.player2.gpull, 'hp'), 24, 'dmg redirected');
+	assert.equal(
+		this.game.byId(this.player2.gpull).getStatus('poison'),
+		1,
+		'psn redirected',
+	);
+	this.game.byId(this.player2.gpull).die();
 	assert.ok(!this.player2.gpull, 'gpull death poof');
 });
 M.test('Hope', function() {
@@ -250,8 +256,8 @@ M.test('Lobotomize', function() {
 	const [dev, abom] = this.player1.creatures;
 	assert.ok(dev.active.size, 'Dev Skills');
 	assert.ok(abom.active.size, 'Abom Skills');
-	Skills.lobotomize.func(dev, dev);
-	Skills.lobotomize.func(abom, abom);
+	this.cast('lobotomize', dev, dev);
+	this.cast('lobotomize', abom, abom);
 	assert.ok(!dev.active.size, 'Dev no more');
 	assert.ok(abom.active.size, 'Abom still');
 });
@@ -274,9 +280,9 @@ M.test('Obsession', function() {
 M.test('Parallel', function() {
 	this.player1.addCrea(new Thing(Cards.Dragonfly));
 	const damsel = this.player1.creatures[0];
-	Skills.parallel.func(damsel, damsel);
+	this.cast('parallel', damsel, damsel);
 	assert.equal(this.player1.creatures[1].card, Cards.Dragonfly, "PU'd");
-	Skills.web.func(this.player1, damsel);
+	this.cast('web', this.player1, damsel);
 	assert.ok(
 		!damsel.getStatus('airborne') &&
 			this.player1.creatures[1].getStatus('airborne'),
@@ -286,27 +292,27 @@ M.test('Parallel', function() {
 M.test('Phoenix', function() {
 	this.player1.addCrea(new Thing(Cards.Phoenix));
 	const phoenix = this.player1.creatures[0];
-	Skills.lightning.func(this.player1, phoenix);
+	this.cast('lightning', this.player1, phoenix);
 	assert.equal(this.player1.creatures[0].card, Cards.Ash, 'Ash');
 });
 M.test('Purify', function() {
-	Skills['poison 3'].func(this.player1);
+	this.cast('poison 3', this.player1, this.player2);
 	assert.equal(this.player2.getStatus('poison'), 3, '3');
-	Skills['poison 3'].func(this.player1, this.player2);
+	this.cast('poison 3', this.player1, this.player2);
 	assert.equal(this.player2.getStatus('poison'), 6, '6');
-	Skills.purify.func(this.player1, this.player2);
+	this.cast('purify', this.player1, this.player2);
 	assert.equal(this.player2.getStatus('poison'), -2, '-2');
-	Skills.purify.func(this.player1, this.player2);
+	this.cast('purify', this.player1, this.player2);
 	assert.equal(this.player2.getStatus('poison'), -4, '-4');
 });
 M.test('Reflect', function() {
-	Skills.lightning.func(this.player1, this.player2);
+	this.cast('lightning', this.player1, this.player2);
 	assert.ok(this.player1.hp == 100 && this.player2.hp == 95, 'Plain spell');
 	this.player2.setShield(new Thing(Cards.MirrorShield));
-	Skills.lightning.func(this.player1, this.player2);
+	this.cast('lightning', this.player1, this.player2);
 	assert.ok(this.player1.hp == 95 && this.player2.hp == 95, 'Reflected spell');
 	this.player1.setShield(new Thing(Cards.MirrorShield));
-	Skills.lightning.func(this.player1, this.player2);
+	this.cast('lightning', this.player1, this.player2);
 	assert.ok(
 		this.player1.hp == 90 && this.player2.hp == 95,
 		'Unreflected reflected spell',
@@ -315,7 +321,7 @@ M.test('Reflect', function() {
 M.test('Steal', function() {
 	this.player1.setShield(new Thing(Cards.BoneWall));
 	this.player1.shield.setStatus('charges', 3);
-	Skills.steal.func(this.player2, this.player1.shield);
+	this.cast('steal', this.player2, this.player1.shield);
 	assert.ok(
 		this.player1.shield && this.player1.shield.getStatus('charges') == 2,
 		'Wish bones',
@@ -324,7 +330,7 @@ M.test('Steal', function() {
 		this.player2.shield && this.player2.shield.getStatus('charges') == 1,
 		'stole 1',
 	);
-	Skills.steal.func(this.player2, this.player1.shield);
+	this.cast('steal', this.player2, this.player1.shield);
 	assert.ok(
 		this.player1.shield && this.player1.shield.getStatus('charges') == 1,
 		'Lone bone',
@@ -333,7 +339,7 @@ M.test('Steal', function() {
 		this.player2.shield && this.player2.shield.getStatus('charges') == 1,
 		'stole 2',
 	);
-	Skills.steal.func(this.player2, this.player1.shield);
+	this.cast('steal', this.player2, this.player1.shield);
 	assert.ok(!this.player1.shield, 'This town is all in hell');
 	assert.ok(
 		this.player2.shield && this.player2.shield.getStatus('charges') == 1,
@@ -362,13 +368,13 @@ M.test('Transform No Sick', function() {
 M.test('Voodoo', function() {
 	const voodoo = new Thing(Cards.VoodooDoll);
 	this.player1.addCrea(voodoo);
-	Skills.lightning.func(this.player1, voodoo);
-	Skills.infect.func(this.player1, voodoo);
+	this.cast('lightning', this.player1, voodoo);
+	this.cast('infect', this.player1, voodoo);
 	assert.equal(voodoo.hp, 11, 'dmg');
 	assert.equal(this.player2.hp, 95, 'foe dmg');
 	assert.equal(voodoo.getStatus('poison'), 1, 'psn');
 	assert.equal(this.player2.getStatus('poison'), 1, 'foe psn');
-	Skills.holylight.func(this.player1, voodoo);
+	this.cast('holylight', this.player1, voodoo);
 	assert.equal(voodoo.hp, 1, 'holy dmg');
 	assert.equal(this.player2.hp, 85, 'foe holy dmg');
 });

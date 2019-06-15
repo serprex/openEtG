@@ -1,20 +1,20 @@
 [![Build](https://travis-ci.org/serprex/openEtG.svg?branch=master)](https://travis-ci.org/serprex/openEtG)
 
-# openEtG: An OpenWeb CCG
+# openEtG
 
-openEtG is an unofficial Open Web fork of the Flash game [Elements](http://elementsthegame.com).
+openEtG is an open source fork of the Flash ccg [Elements](http://elementsthegame.com).
 
 ## Developer Instructions
 
 ### Mac Installation
 
-Open Terminal. All `commands` will be done in Terminal. You must have [XCode](https://developer.apple.com/xcode/) installed.
+Open Terminal. All `commands` will be done in Terminal. You must have [XCode](https://developer.apple.com/xcode) installed.
 
-1. Install [Homebrew](https://brew.sh/)
+1. Install [Homebrew](https://brew.sh)
 1. Install required software: `brew install git node redis`
-1. Clone the repository: `git clone https://github.com/serprex/openEtG.git && cd openEtG`
+1. Clone the repository: `git clone https://github.com/serprex/openEtG && cd openEtG`
 1. Install atlas files: `curl --compressed 'https://etg.dek.im/assets/{atlas.js,atlas.png,atlas.css}' -o 'assets/#1'`
-1. Install npm modules and build project: `npm install && npm run build`
+1. Install npm modules and build project: `npm install && npm run dev`
 
 #### Mac Start/Stop OpenEtG
 
@@ -26,7 +26,7 @@ Open Terminal. All `commands` will be done in Terminal. You must have [XCode](ht
 
 ### Windows Installation
 
-1. Download and Install the following:
+1. Download & Install the following:
   * [node.js](https://nodejs.org)
   * [redis](https://github.com/MSOpenTech/redis/releases)
   * [git](https://git-scm.com/download/win)
@@ -35,15 +35,12 @@ Open Terminal. All `commands` will be done in Terminal. You must have [XCode](ht
   1. Right-click inside the folder where you want the game files to go
   1. Click `Git Clone` to create an `openEtG` folder
   1. When prompted, use this URL: `https://github.com/serprex/openEtG.git`
+1. Start redis-server
 1. Install npm modules and global npm binaries:
   1. Shift+Right-Click on your `openEtG` folder
   1. Click `Open command window here`
-  1. Run the command: `npm install; npm install -g spritesheet-js`
+  1. Run the command: `npm install; npm start`
   1. Leave this command window open for later
-  1. Run `npm run build`
+  1. Run `npm run dev`
   1. Download [atlas.js](https://etg.dek.im/assets/atlas.js), [atlas.png](https://etg.dek.im/assets/atlas.png) and [atlas.css](https://etg.dek.im/assets/atlas.css) and move them to the `assets` folder
-1. Start redis-server
-1. In the command window from previously, run the command: `npm start`
 1. Browse to [http://127.0.0.1:13602](http://127.0.0.1:13602) and the game should work!
-
-Note: When you edit code you need to `npm run build` to update the bundle.

@@ -200,7 +200,7 @@ const ThingInst = connect(({ opts }) => ({ lofiArt: opts.lofiArt }))(
 		];
 		const bordervisible = [
 			obj.getStatus('delayed'),
-			obj == obj.owner.gpull,
+			obj.id == obj.owner.gpull,
 			obj.getStatus('frozen'),
 		];
 		for (let k = 0; k < 7; k++) {
@@ -406,7 +406,7 @@ module.exports = connect(({ user }) => ({ user }))(
 
 		endClick = discard => {
 			const { game, user } = this.props;
-			if (game.turn == game.player1 && game.phase === etg.MulliganPhase) {
+			if (game.turn == game.player1.id && game.phase === etg.MulliganPhase) {
 				if (!game.ai) sock.emit('mulligan', { draw: true });
 				game.progressMulligan();
 			} else if (game.winner) {
@@ -414,11 +414,11 @@ module.exports = connect(({ user }) => ({ user }))(
 					if (game.arena) {
 						sock.userEmit('modarena', {
 							aname: game.arena,
-							won: game.winner == game.player2,
+							won: game.winner == game.player2.id,
 							lv: game.level - 4,
 						});
 					}
-					if (game.winner == game.player1) {
+					if (game.winner == game.player1.id) {
 						if (game.quest) {
 							if (game.quest.autonext) {
 								const data = addNoHealData(game);
@@ -459,7 +459,7 @@ module.exports = connect(({ user }) => ({ user }))(
 						streakback: this.streakback,
 					}),
 				);
-			} else if (game.turn == game.player1) {
+			} else if (game.turn == game.player1.id) {
 				if (discard == undefined && game.player1.hand.length == 8) {
 					this.setState({ discarding: true });
 				} else {
@@ -475,7 +475,7 @@ module.exports = connect(({ user }) => ({ user }))(
 			const { game } = this.props;
 			if (this.state.resigning) {
 				this.setState({ resigning: false });
-			} else if (game.turn == game.player1) {
+			} else if (game.turn == game.player1.id) {
 				if (game.phase === etg.MulliganPhase && game.player1.hand.length) {
 					sfx.playSound('mulligan');
 					game.player1.drawhand(game.player1.hand.length - 1);
@@ -492,7 +492,7 @@ module.exports = connect(({ user }) => ({ user }))(
 			const { game } = this.props;
 			if (this.state.resigning) {
 				if (!game.ai) sock.emit('foeleft');
-				game.setWinner(game.player2);
+				game.setWinner(game.player2.id);
 				this.endClick();
 			} else {
 				this.setState({ resigning: true });
@@ -543,7 +543,7 @@ module.exports = connect(({ user }) => ({ user }))(
 
 		gameStep(cmds) {
 			const { game } = this.props;
-			if (game.turn == game.player2 && game.ai) {
+			if (game.turn == game.player2.id && game.ai) {
 				if (game.phase == etg.PlayPhase) {
 					let now;
 					if (!this.aiCommand) {
@@ -561,7 +561,7 @@ module.exports = connect(({ user }) => ({ user }))(
 						cmds[this.aiState.cmd]({ bits: this.aiState.cmdct });
 						this.aiState = null;
 						this.aiCommand = false;
-						this.aiDelay = now + (game.turn == game.player1 ? 2000 : 200);
+						this.aiDelay = now + (game.turn == game.player1.id ? 2000 : 200);
 					}
 				} else if (game.phase === etg.MulliganPhase) {
 					cmds.mulligan({ draw: require('../ai/mulligan')(game.player2) });
@@ -641,7 +641,9 @@ module.exports = connect(({ user }) => ({ user }))(
 				},
 				foeleft: data => {
 					if (!game.ai)
-						game.setWinner(data.spectate == 1 ? game.player2 : game.player1);
+						game.setWinner(
+							data.spectate == 1 ? game.player2.id : game.player1.id,
+						);
 					this.forceUpdate();
 				},
 				mulligan: data => {
@@ -733,23 +735,23 @@ module.exports = connect(({ user }) => ({ user }))(
 					? 'Discard'
 					: game.targeting
 					? game.targeting.text
-					: `${game.turn == game.player1 ? 'Your' : 'Their'} Turn` +
+					: `${game.turn == game.player1.id ? 'Your' : 'Their'} Turn` +
 					  (game.phase > etg.MulliganPhase
 							? ''
 							: game.first == game.player1
 							? ', First'
 							: ', Second');
-				if (game.turn == game.player1) {
+				if (game.turn == game.player1.id) {
 					endText = this.state.discarding
 						? ''
 						: game.phase == etg.PlayPhase
 						? 'End Turn'
-						: game.turn == game.player1
+						: game.turn == game.player1.id
 						? 'Accept Hand'
 						: '';
 					cancelText =
 						game.phase != etg.PlayPhase
-							? game.turn == game.player1
+							? game.turn == game.player1.id
 								? 'Mulligan'
 								: ''
 							: game.targeting || this.state.discarding || this.state.resigning
@@ -757,8 +759,8 @@ module.exports = connect(({ user }) => ({ user }))(
 							: '';
 				} else cancelText = endText = '';
 			} else {
-				turntell = `${game.turn == game.player1 ? 'Your' : 'Their'} Turn, ${
-					game.winner == game.player1 ? 'Won' : 'Lost'
+				turntell = `${game.turn == game.player1.id ? 'Your' : 'Their'} Turn, ${
+					game.winner == game.player1.id ? 'Won' : 'Lost'
 				}`;
 				endText = 'Continue';
 				cancelText = '';
@@ -923,15 +925,15 @@ module.exports = connect(({ user }) => ({ user }))(
 							className={'ico e' + k}
 							style={{
 								position: 'absolute',
-								left: qx + (k & 1 ? 0 : 54) + 'px',
-								top: qy + Math.floor((k - 1) / 2) * 32 + 'px',
+								left: `${qx + (k & 1 ? 0 : 54)}px`,
+								top: `${qy + Math.floor((k - 1) / 2) * 32}px`,
 							}}
 						/>,
 						<span
 							style={{
 								position: 'absolute',
-								left: qx + (k & 1 ? 32 : 86) + 'px',
-								top: qy + Math.floor((k - 1) / 2) * 32 + 4 + 'px',
+								left: `${qx + (k & 1 ? 32 : 86)}px`,
+								top: `${qy + Math.floor((k - 1) / 2) * 32 + 4}px`,
 								fontSize: '16px',
 								pointerEvents: 'none',
 							}}>
@@ -944,7 +946,7 @@ module.exports = connect(({ user }) => ({ user }))(
 						style={{
 							backgroundColor: '#000',
 							position: 'absolute',
-							left: plpos.x - 41 + 'px',
+							left: `${plpos.x - 41}px`,
 							top: j ? '36px' : '531px',
 							width: '82px',
 							height: '16px',
@@ -956,18 +958,14 @@ module.exports = connect(({ user }) => ({ user }))(
 				const x2 =
 					x1 - (80 * Math.min(game.expectedDamage[j], pl.hp)) / pl.maxhp;
 				const poison = pl.getStatus('poison'),
-					poisoninfo =
-						(poison > 0
-							? poison + ' 1:2'
-							: poison < 0
-							? -poison + ' 1:7'
-							: '') + (pl.getStatus('neuro') ? ' 1:10' : '');
-				const hptext =
-					`${pl.hp}/${pl.maxhp}\n${pl.deck.length}cards` +
-					(!cloaked && game.expectedDamage[j]
-						? '\nDmg: ' + game.expectedDamage[j]
-						: '') +
-					(poisoninfo ? '\n' + poisoninfo : '');
+					poisoninfo = `${
+						poison > 0 ? poison + ' 1:2' : poison < 0 ? -poison + ' 1:7' : ''
+					} ${pl.getStatus('neuro') ? ' 1:10' : ''}`;
+				const hptext = `${pl.hp}/${pl.maxhp}\n${pl.deck.length}cards${
+					!cloaked && game.expectedDamage[j]
+						? `\nDmg: ${game.expectedDamage[j]}`
+						: ''
+				} ${poisoninfo ? `\n${poisoninfo}` : ''}`;
 				children.push(
 					pl.hp > 0 && (
 						<>
@@ -1078,7 +1076,7 @@ module.exports = connect(({ user }) => ({ user }))(
 						}}
 					/>
 					{!this.props.data.spectate &&
-						(game.turn == game.player1 || game.winner) && (
+						(game.turn == game.player1.id || game.winner) && (
 							<>
 								{cancelText && (
 									<input

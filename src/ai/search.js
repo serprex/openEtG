@@ -86,7 +86,7 @@ AiSearch.prototype.step = function(game, previous) {
 		};
 		const iterCore = c => {
 			if (!c || !c.canactive()) return;
-			const ch = c.hash();
+			const ch = game.props.get(c.id).hashCode();
 			if (casthash.has(ch)) return;
 			casthash.add(ch);
 			const active =
@@ -95,8 +95,8 @@ AiSearch.prototype.step = function(game, previous) {
 			const cbits = game.tgtToBits(c) ^ 8,
 				tgthash = new Set();
 			const evalIter = t => {
-				if (t && t.hash) {
-					const th = t.hash();
+				if (t) {
+					const th = game.props.get(t.id).hashCode();
 					if (tgthash.has(th)) return;
 					tgthash.add(th);
 				}
@@ -112,7 +112,7 @@ AiSearch.prototype.step = function(game, previous) {
 						c.type === etg.Permanent &&
 						c.getStatus('patience') &&
 						c.active.get('cast') === Skills.die &&
-						c.owner === game.player2
+						c.ownerId === game.player2Id
 					) {
 						for (let i = 0; i < 16; i++) {
 							const pr = gameClone.player2.permanents[i];

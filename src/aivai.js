@@ -32,9 +32,9 @@ function mkGame(seed, decks) {
 			}
 		}
 	}
-	game.turn.drawhand();
-	game.turn.foe.drawhand();
-	game.phase = etg.PlayPhase;
+	game.byId(turn).drawhand();
+	game.byId(turn).foe.drawhand();
+	game.set(game.id, 'phase', etg.PlayPhase);
 	return game;
 }
 let stopFight = false;
@@ -56,13 +56,13 @@ function fightItOut() {
 	);
 	const seed = parseInt(seedput.value) || util.randint();
 	let game = mkGame(seed, decks),
-		realp1 = game.player1;
+		realp1 = game.player1.id;
 	result.textContent = '';
 	let aiState = undefined;
 	const cmds = {
 		endturn: function(data) {
 			if (mode == fight) {
-				result.textContent += (game.turn == realp1 ? 1 : 2) + '\tEND TURN\n';
+				result.textContent += `${game.turn == realp1 ? 1 : 2}\tEND TURN\n`;
 			}
 			game.player2.endturn(data.bits);
 		},
@@ -113,7 +113,7 @@ function fightItOut() {
 					((fc[0] / (fc[0] + fc[1])) * 100).toFixed(2) +
 					'%)';
 				game = mkGame(util.randint(), decks);
-				realp1 = game.player1;
+				realp1 = game.player1.id;
 				if (!stopFight) setTimeout(gameStep, 0);
 				else {
 					stopFight = false;

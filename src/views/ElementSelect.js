@@ -49,7 +49,7 @@ module.exports = class ElementSelect extends React.Component {
 			mainc.push(
 				<Components.IconBtn
 					key={i}
-					e={'e' + (i < 13 ? i : i == 13 ? 14 : 13)}
+					e={`e${i < 13 ? i : i == 13 ? 14 : 13}`}
 					x={100 + Math.floor((i - 1) / 2) * 64}
 					y={180 + ((i - 1) & 1) * 64}
 					click={() => {

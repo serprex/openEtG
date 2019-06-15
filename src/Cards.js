@@ -135,11 +135,11 @@ function parseTargeting(data) {
 	exports.Targeting = data;
 }
 const TargetFilters = {
-	own: (c, t) => c.owner == t.owner,
-	foe: (c, t) => c.owner != t.owner,
-	notself: (c, t) => c != t,
+	own: (c, t) => c.ownerId == t.ownerId,
+	foe: (c, t) => c.ownerId != t.ownerId,
+	notself: (c, t) => c.id != t.id,
 	all: (c, t) => true,
-	card: (c, t) => c != t && t.type == etg.Spell,
+	card: (c, t) => c.id != t.id && t.type == etg.Spell,
 	pill: (c, t) => t.isMaterial(etg.Permanent) && t.card.type == etg.Pillar,
 	weap: (c, t) =>
 		t.isMaterial() &&
@@ -169,7 +169,7 @@ const TargetFilters = {
 	forceplay: (c, t) =>
 		t.type == etg.Spell || (t.isMaterial() && t.active.get('cast')),
 	shuffle3: (c, t) =>
-		t.isMaterial() && (t.type == etg.Creature || t.owner != c.owner),
+		t.isMaterial() && (t.type == etg.Creature || t.ownerId != c.ownerId),
 	airbornecrea: (c, t) => t.isMaterial(etg.Creature) && t.getStatus('airborne'),
 	golem: (c, t) => t.getStatus('golem') && t.attack,
 	groundcrea: (c, t) => t.isMaterial(etg.Creature) && !t.getStatus('airborne'),

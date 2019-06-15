@@ -1,14 +1,15 @@
 module.exports = {
 	entry: {
-		main: ['babel-polyfill', './src/ui/main.js'],
 		aivai: ['babel-polyfill', './src/aivai.js'],
 		art: ['babel-polyfill', './src/ui/art.js'],
+		cia: ['babel-polyfill', './src/ui/vanilla/ui/cia.js'],
+		main: ['babel-polyfill', './src/ui/main.js'],
 		mosaic: ['babel-polyfill', './src/ui/mosaic.js'],
 		vanilla: ['babel-polyfill', './src/vanilla/ui/main.js'],
 		vaivai: ['babel-polyfill', './src/vanilla/ui/aivai.js'],
+		vdeckinfo: ['babel-polyfill', './src/vanilla/ui/deckinfo.js'],
 		vnamegame: ['babel-polyfill', './src/vanilla/ui/namegame.js'],
 		vspeed: ['babel-polyfill', './src/vanilla/ui/speed.js'],
-		vdeckinfo: ['babel-polyfill', './src/vanilla/ui/deckinfo.js'],
 	},
 	output: {
 		path: __dirname,

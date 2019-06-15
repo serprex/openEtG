@@ -21,7 +21,7 @@ exports.toTrueMark = function(n) {
 	return n + 9010;
 };
 exports.toTrueMarkSuffix = function(n) {
-	return '01' + (n + 9010).toString(32);
+	return `01${(n + 9010).toString(32)}`;
 };
 exports.iterdeck = function(deck, func) {
 	let len = 0;

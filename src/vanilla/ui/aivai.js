@@ -1,18 +1,18 @@
-var Effect = require('../Effect');
-var Cards = require('../Cards');
-var Game = require('../Game');
-var etg = require('../etg');
-var etgutil = require('../../etgutil');
-var aiSearch = require('../ai/search');
-var util = require('../../util');
-var deckeles = [
-	document.getElementById('deck1'),
-	document.getElementById('deck2'),
-];
-var seedput = document.getElementById('seed');
-var result = document.getElementById('result');
-var fight = document.getElementById('fight');
-var fight1000 = document.getElementById('fight1000');
+const Effect = require('../Effect'),
+	Cards = require('../Cards'),
+	Game = require('../Game'),
+	etg = require('../etg'),
+	etgutil = require('../../etgutil'),
+	aiSearch = require('../ai/search'),
+	util = require('../../util'),
+	deckeles = [
+		document.getElementById('deck1'),
+		document.getElementById('deck2'),
+	],
+	seedput = document.getElementById('seed'),
+	result = document.getElementById('result'),
+	fight = document.getElementById('fight'),
+	fight1000 = document.getElementById('fight1000');
 fight.addEventListener('click', fightItOut);
 fight1000.addEventListener('click', fightItOut);
 function mkGame(seed, decks) {
@@ -49,11 +49,7 @@ function fightItOut() {
 			fight1000.value = 'Stop';
 		}
 	}
-	var decks = deckeles.map(function(item) {
-		return item.value.split(' ').map(function(x) {
-			return parseInt(x, 32);
-		});
-	});
+	var decks = deckeles.map(item => item.value.split(' ').map(x => parseInt(x, 32)));
 	var seed = parseInt(seedput.value) || util.randint();
 	var game = mkGame(seed, decks);
 	if (!game) return;

@@ -7,8 +7,7 @@ atlas.png
 favicon.png
 .ninja_log
 .ninja_deps
-*pushserver.sh
-scripts/*.sh
+*.sh
 *.pem
 bundle.*.js
 bundle.*.js.map

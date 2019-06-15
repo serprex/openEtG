@@ -23,7 +23,7 @@ const SkillsValues = Object.freeze({
 	appease: c =>
 		c.type == etg.Spell ? -6 : c.getStatus('appeased') ? 0 : c.trueatk() * -1.5,
 	bblood: 7,
-	beguilestop: c => -getDamage(c),
+	beguilestop: c => -getDamage(c.game, c),
 	bellweb: 1,
 	blackhole: c => {
 		let a = 0,
@@ -133,13 +133,13 @@ const SkillsValues = Object.freeze({
 				!cr.getStatus('delayed') &&
 				!cr.getStatus('frozen')
 			) {
-				const atk = getDamage(cr);
+				const atk = getDamage(cr.game, cr);
 				if (atk > dmg) dmg = atk;
 			}
 		}
 		return dmg;
 	},
-	gpull: c => (c.type == etg.Spell || c != c.owner.gpull ? 2 : 0),
+	gpull: c => (c.type == etg.Spell || c.id != c.owner.gpull ? 2 : 0),
 	gpullspell: 3,
 	gratitude: 4,
 	grave: 1,
@@ -298,7 +298,7 @@ const SkillsValues = Object.freeze({
 			? c.owner.foe.shield
 				? Math.min(c.owner.foe.shield.truedr(), c.card.attack)
 				: 0
-			: (c.trueatk() - getDamage(c)) / 1.5,
+			: (c.trueatk() - getDamage(c.game, c)) / 1.5,
 	virusplague: 1,
 	void: 5,
 	voidshell: c => (c.owner.maxhp - c.owner.hp) / 10,
@@ -320,7 +320,7 @@ const SkillsValues = Object.freeze({
 	cold: 7,
 	despair: 5,
 	evade100: c =>
-		!c.getStatus('charges') && c.owner == c.owner.game.turn ? 0 : 1,
+		!c.getStatus('charges') && c.ownerId == c.game.turn ? 0 : 1,
 	'evade 40': 1,
 	'evade 50': 1,
 	firewall: 7,
@@ -333,7 +333,7 @@ const SkillsValues = Object.freeze({
 	},
 	thorn: 5,
 	weight: 5,
-	wings: c => (!c.getStatus('charges') && c.owner == c.owner.game.turn ? 0 : 6),
+	wings: c => (!c.getStatus('charges') && c.ownerId == c.game.turn ? 0 : 6),
 });
 const statusValues = Object.freeze({
 	airborne: 0.2,
@@ -341,16 +341,16 @@ const statusValues = Object.freeze({
 	voodoo: 1,
 	swarm: 1,
 	tunnel: 3,
-	cloak: c => (!c.getStatus('charges') && c.owner == c.owner.game.turn ? 0 : 4),
+	cloak: c => (!c.getStatus('charges') && c.ownerId == c.game.turn ? 0 : 4),
 	flooding: c => c.owner.foe.countcreatures() - 3,
 	patience: c => 1 + c.owner.countcreatures() * 2,
 	reflective: 1,
 });
 
-function getDamage(c) {
-	return damageHash.get(c.hash()) || 0;
+function getDamage(game, c) {
+	return damageHash.get(game.props.get(c.id).hashCode()) || 0;
 }
-function estimateDamage(c, freedomChance, wallCharges, wallIndex) {
+function estimateDamage(game, c, freedomChance, wallCharges, wallIndex) {
 	if (!c || c.getStatus('frozen') || c.getStatus('delayed')) {
 		return 0;
 	}
@@ -363,7 +363,7 @@ function estimateDamage(c, freedomChance, wallCharges, wallIndex) {
 			fshactive &&
 			(~fshactive.name.indexOf('weight') || ~fshactive.name.indexOf('wings'))
 		) {
-			fshactive.func(c.owner.foe.shield, c, data);
+			fshactive.func(c.game, c.owner.foe.shield, c, data);
 			if (!data.dmg) return 0;
 		} else if (wallCharges[wallIndex]) {
 			wallCharges[wallIndex]--;
@@ -406,7 +406,7 @@ function estimateDamage(c, freedomChance, wallCharges, wallIndex) {
 		atk += Math.ceil(atk / 2) * freedomChance;
 	}
 	if (c.owner.foe.sosa) atk *= -1;
-	damageHash.set(c.hash(), atk);
+	damageHash.set(game.props.get(c.id).hashCode(), atk);
 	return atk;
 }
 function calcExpectedDamage(pl, wallCharges, wallIndex) {
@@ -486,7 +486,7 @@ function checkpassives(c) {
 			!(
 				status == 'cloak' &&
 				!c.getStatus('charges') &&
-				c.owner == c.owner.game.turn
+				c.ownerId == c.game.turn
 			)
 		) {
 			if (!uniquesSkill.has(status)) {
@@ -505,9 +505,10 @@ const throttled = Object.freeze(
 	new Set(['poison 1', 'poison 2', 'poison 3', 'neuro', 'regen', 'siphon']),
 );
 
-function evalthing(c) {
+function evalthing(game, c) {
 	if (!c) return 0;
 	let ttatk,
+		game,
 		hp,
 		poison,
 		ctrueatk,
@@ -528,7 +529,7 @@ function evalthing(c) {
 			Math.max(c.getStatus('frozen'), c.getStatus('delayed')) /
 			adrenalinefactor;
 		delayfactor = delaymix ? 1 - Math.min(delaymix / 5, 0.6) : 1;
-		ttatk = getDamage(c);
+		ttatk = getDamage(game, c);
 		if (
 			c.getStatus('psionic') &&
 			c.owner.foe.shield &&
@@ -599,7 +600,7 @@ function evalthing(c) {
 	}
 	score += checkpassives(c);
 	if (isCreature) {
-		if (hp && c.owner.gpull == c) {
+		if (hp && c.owner.gpull == c.id) {
 			score = ((score + hp) * Math.log(hp)) / 4;
 			if (c.getStatus('voodoo')) score += hp;
 			if (c.active.get('shield') && !delaymix) {
@@ -738,13 +739,13 @@ module.exports = function(game) {
 		}
 		const player = game.players(j);
 		let pscore = wallCharges[j] * 4 + player.markpower;
-		pscore += evalthing(player.weapon);
-		pscore += evalthing(player.shield);
+		pscore += evalthing(game, player.weapon);
+		pscore += evalthing(game, player.shield);
 		for (let i = 0; i < 23; i++) {
-			pscore += evalthing(player.creatures[i]);
+			pscore += evalthing(game, player.creatures[i]);
 		}
 		for (let i = 0; i < 16; i++) {
-			pscore += evalthing(player.permanents[i]);
+			pscore += evalthing(game, player.permanents[i]);
 		}
 		for (let i = 0; i < player.hand.length; i++) {
 			pscore += evalcardinstance(player.hand[i]);
