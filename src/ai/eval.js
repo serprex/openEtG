@@ -508,7 +508,6 @@ const throttled = Object.freeze(
 function evalthing(game, c) {
 	if (!c) return 0;
 	let ttatk,
-		game,
 		hp,
 		poison,
 		ctrueatk,

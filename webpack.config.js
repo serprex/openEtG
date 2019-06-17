@@ -2,7 +2,7 @@ module.exports = {
 	entry: {
 		aivai: ['babel-polyfill', './src/aivai.js'],
 		art: ['babel-polyfill', './src/ui/art.js'],
-		cia: ['babel-polyfill', './src/ui/vanilla/ui/cia.js'],
+		cia: ['babel-polyfill', './src/vanilla/ui/cia.js'],
 		main: ['babel-polyfill', './src/ui/main.js'],
 		mosaic: ['babel-polyfill', './src/ui/mosaic.js'],
 		vanilla: ['babel-polyfill', './src/vanilla/ui/main.js'],

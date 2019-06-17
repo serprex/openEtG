@@ -71,7 +71,7 @@ Object.defineProperty(Game.prototype, 'player2', {
 });
 
 function defineProp(key) {
-	Object.defineProperty(Player.prototype, key, {
+	Object.defineProperty(Game.prototype, key, {
 		get: function() {
 			return this.game.get(this.id, key);
 		},
@@ -92,7 +92,7 @@ Game.prototype.clone = function() {
 	obj.props = this.props;
 	return obj;
 };
-Thing.prototype.rng = function() {
+Game.prototype.rng = function() {
 	const rng = this.props.getIn([this.id, 'rng']);
 	const rngInst = new Rng(rng.get('lowSeed'), rng.get('highSeed'));
 	rngInst.lowConstant = rng.get('lowConstant');
@@ -110,7 +110,7 @@ Thing.prototype.rng = function() {
 	}));
 	return val;
 };
-Thing.prototype.upto = function(x) {
+Game.prototype.upto = function(x) {
 	return (this.rng() * x) | 0;
 };
 Game.prototype.players = function(n) {
@@ -263,3 +263,4 @@ var etg = require('./etg');
 var Cards = require('./Cards');
 var Effect = require('./Effect');
 var Player = require('./Player');
+var Thing = require('./Thing');
