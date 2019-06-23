@@ -553,11 +553,14 @@ const Skills = {
 		if (c.ownerId != t.ownerId) c.owner.addCardInstance(t.clone(c.owner));
 	},
 	drawequip: (ctx, c, t) => {
+		const deck = c.owner.deck;
 		for (let i = c.owner.deckIds.length - 1; i > -1; i--) {
-			const card = c.owner.deck[i];
+			const card = deck[i];
 			if (card.card.type == etg.Weapon || card.card.type == etg.Shield) {
 				if (~c.owner.addCardInstance(card)) {
-					c.owner.deck.splice(i, 1);
+					const deckIds = Array.from(c.owner.deck);
+					deckIds.splice(i, 1);
+					c.owner.deckIds = deckIds;
 					c.owner.proc('draw');
 				}
 				return;
@@ -1088,17 +1091,19 @@ const Skills = {
 			lobotomize: 2,
 			quint: 2,
 		};
-		let stat = c.card.upped ? 0.5 : 0;
-		for (let i = c.owner.handIds.length - 1; ~i; i--) {
-			const card = c.owner.hand[i].card;
+		let stat = c.card.upped ? 0.5 : 0,
+			handIds = c.owner.handIds;
+		for (let i = handIds.length - 1; ~i; i--) {
+			const card = ctx.byId(handIds[i]).card;
 			if (etg.ShardList.some(x => x && card.isOf(Cards.Codes[x]))) {
 				if (card.upped) {
 					stat += 0.5;
 				}
 				tally[card.element]++;
-				c.owner.hand.splice(i, 1);
+				handIds.splice(i, 1);
 			}
 		}
+		c.owner.handIds = handIds;
 		let num = 0,
 			shlist = [];
 		for (let i = 1; i < 13; i++) {
@@ -1796,12 +1801,14 @@ const Skills = {
 		if (c.ownerId == t) c.setStatus('immaterial', 1);
 	},
 	shuffle3: (ctx, c, t) => {
+		const deckIds = Array.from(c.owner.deckIds);
 		for (let i = 0; i < 3; i++)
-			c.owner.deck.splice(
+			deckIds.splice(
 				c.owner.upto(c.owner.deckIds.length),
 				0,
-				ctx.newThing(t.card),
+				ctx.newThing(t.card).id,
 			);
+		c.owner.deckIds = deckIds;
 	},
 	silence: (ctx, c, t) => {
 		if (t.type != etg.Player || !t.sanctuary) t.usedactive = true;
@@ -1999,16 +2006,20 @@ const Skills = {
 	},
 	tesseractsummon: (ctx, c, t) => {
 		for (let i = 0; i < 3; i++) {
-			const pl = i ? c.owner : c.owner.foe;
-			const candidates = [];
-			for (let j = 0; j < pl.deckIds.length; j++) {
-				if (pl.deck[j].card.type == etg.Creature) candidates.push(j);
+			const pl = i ? c.owner : c.owner.foe,
+				candidates = [],
+				deckIds = Array.from(pl.deckIds);
+
+			for (let j = 0; j < deckIds.length; j++) {
+				if (ctx.byId(deckIds[j]).card.type == etg.Creature) candidates.push(j);
 			}
 			if (candidates.length) {
 				const idx = pl.choose(candidates),
-					[cr] = pl.deck.splice(idx, 1);
+					[crid] = deckIds.splice(idx, 1),
+					cr = ctx.byId(crid);
 				pl.addCrea(cr);
 				cr.freeze(Math.ceil(cr.card.cost / 4));
+				pl.deckIds = deckIds;
 			}
 		}
 	},
@@ -2016,11 +2027,13 @@ const Skills = {
 		const dmg = c.card.upped ? 4 : 3;
 		Effect.mkText('-' + dmg, t);
 		t.dmg(dmg);
-		t.owner.deck.splice(
-			c.owner.upto(t.owner.deckIds.length),
+		const deckIds = Array.from(t.owner.deckIds);
+		deckIds.splice(
+			ctx.upto(t.owner.deckIds.length),
 			0,
-			ctx.newThing(c.card.as(Cards.ThrowRock)),
+			t.owner.newThing(c.card.as(Cards.ThrowRock)).id,
 		);
+		t.owner.deckIds = deckIds;
 	},
 	tick: (ctx, c, t) => {
 		c.dmg(c.card.upped ? 3 : 1);
@@ -2047,19 +2060,16 @@ const Skills = {
 				if (c.card.upped) return;
 				else pl = c.owner;
 			}
-			const perms = pl.permanents.filter(x => {
-				return x && x.isMaterial();
-			});
+			const perms = pl.permanents.filter(x => x && x.isMaterial());
 			if (pl.weapon && pl.weapon.isMaterial()) perms.push(pl.weapon);
 			if (pl.shield && pl.shield.isMaterial()) perms.push(pl.shield);
 			if (perms.length) {
 				const pr = pl.choose(perms);
 				const newpl = pl.upto(2) ? pl : pl.foe;
-				newpl.deck.splice(
-					newpl.upto(newpl.deckIds.length),
-					0,
-					ctx.newThing(pr.card),
-				);
+				const deckIds = Array.from(newpl.deckIds);
+				pr.ownerId = newpl.id;
+				deckIds.splice(newpl.upto(newpl.deckIds.length), 0, pr.id);
+				newpl.deckIds = deckIds;
 				Effect.mkText('Shuffled', pr);
 				Skills.destroy.func(ctx, c, pr, true, true);
 			}
