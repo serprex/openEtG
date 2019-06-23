@@ -4,7 +4,7 @@ module.exports = function(game) {
 	let limit = 333,
 		cmdct,
 		currentEval = game.player1.hp;
-	function iterLoop(game, cmdct0) {
+	function iterLoop(game, cmdct0 = -1) {
 		function iterCore(c) {
 			if (!c || !c.canactive()) return;
 			const ch = game.props.get(c.id).hashCode();
@@ -21,13 +21,13 @@ module.exports = function(game) {
 					const gameClone = game.clone();
 					gameClone.bitsToTgt(cbits).useactive(gameClone.bitsToTgt(tbits));
 					const v =
-						gameClone.winner == gameClone.player2
+						gameClone.winner === gameClone.player2Id
 							? -999
-							: gameClone.winner == gameClone.player1
+							: gameClone.winner === gameClone.player1Id
 							? 999
 							: gameClone.player1.hp;
 					if (v < currentEval) {
-						cmdct = cmdct0 || cbits | (tbits << 9);
+						cmdct = ~cmdct0 ? cmdct0 : cbits | (tbits << 9);
 						currentEval = v;
 						if (!gameClone.winner) {
 							iterLoop(gameClone, cmdct);

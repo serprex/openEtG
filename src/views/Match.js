@@ -165,7 +165,7 @@ const ThingInst = connect(({ opts }) => ({ lofiArt: opts.lofiArt }))(
 			pos = ui.tgtToPos(obj);
 		if (
 			isSpell &&
-			obj.ownerId == game.player2Id &&
+			obj.ownerId === game.player2Id &&
 			!game.player1.precognition
 		) {
 			return (
@@ -410,7 +410,7 @@ module.exports = connect(({ user }) => ({ user }))(
 
 		endClick = discard => {
 			const { game, user } = this.props;
-			if (game.turn == game.player1.id && game.phase === etg.MulliganPhase) {
+			if (game.turn === game.player1Id && game.phase === etg.MulliganPhase) {
 				if (!game.ai) sock.emit('mulligan', { draw: true });
 				game.progressMulligan();
 			} else if (game.winner) {
@@ -418,11 +418,11 @@ module.exports = connect(({ user }) => ({ user }))(
 					if (game.arena) {
 						sock.userEmit('modarena', {
 							aname: game.arena,
-							won: game.winner == game.player2.id,
+							won: game.winner === game.player2Id,
 							lv: game.level - 4,
 						});
 					}
-					if (game.winner == game.player1.id) {
+					if (game.winner === game.player1Id) {
 						if (game.quest) {
 							if (game.quest.autonext) {
 								const data = addNoHealData(game);
@@ -463,7 +463,7 @@ module.exports = connect(({ user }) => ({ user }))(
 						streakback: this.streakback,
 					}),
 				);
-			} else if (game.turn == game.player1.id) {
+			} else if (game.turn === game.player1Id) {
 				if (discard == undefined && game.player1.handIds.length == 8) {
 					this.setState({ discarding: true });
 				} else {
@@ -479,7 +479,7 @@ module.exports = connect(({ user }) => ({ user }))(
 			const { game } = this.props;
 			if (this.state.resigning) {
 				this.setState({ resigning: false });
-			} else if (game.turn == game.player1.id) {
+			} else if (game.turn === game.player1Id) {
 				if (game.phase === etg.MulliganPhase && game.player1.handIds.length) {
 					sfx.playSound('mulligan');
 					game.player1.drawhand(game.player1.handIds.length - 1);
@@ -547,7 +547,7 @@ module.exports = connect(({ user }) => ({ user }))(
 
 		gameStep(cmds) {
 			const { game } = this.props;
-			if (game.turn == game.player2.id && game.ai) {
+			if (game.turn === game.player2Id && game.ai) {
 				if (game.phase == etg.PlayPhase) {
 					let now;
 					if (!this.aiCommand) {
@@ -565,7 +565,7 @@ module.exports = connect(({ user }) => ({ user }))(
 						cmds[this.aiState.cmd]({ bits: this.aiState.cmdct });
 						this.aiState = null;
 						this.aiCommand = false;
-						this.aiDelay = now + (game.turn == game.player1.id ? 2000 : 200);
+						this.aiDelay = now + (game.turn === game.player1Id ? 2000 : 200);
 					}
 				} else if (game.phase === etg.MulliganPhase) {
 					cmds.mulligan({ draw: require('../ai/mulligan')(game.player2) });
@@ -739,48 +739,48 @@ module.exports = connect(({ user }) => ({ user }))(
 					? 'Discard'
 					: game.targeting
 					? game.targeting.text
-					: `${game.turn == game.player1.id ? 'Your' : 'Their'} Turn` +
-					  (game.phase > etg.MulliganPhase
-							? ''
-							: game.first == game.player1
-							? ', First'
-							: ', Second');
-				if (game.turn == game.player1.id) {
+					: `${game.turn === game.player1Id ? 'Your' : 'Their'} Turn${
+							game.phase > etg.MulliganPhase
+								? ''
+								: game.first === game.player1Id
+								? ', First'
+								: ', Second'
+					  }`;
+				if (game.turn === game.player1Id) {
 					endText = this.state.discarding
 						? ''
-						: game.phase == etg.PlayPhase
+						: game.phase === etg.PlayPhase
 						? 'End Turn'
-						: game.turn == game.player1.id
+						: game.turn === game.player1Id
 						? 'Accept Hand'
 						: '';
-					cancelText =
-						game.phase != etg.PlayPhase
-							? game.turn == game.player1.id
-								? 'Mulligan'
-								: ''
-							: game.targeting || this.state.discarding || this.state.resigning
+					if (game.phase != etg.PlayPhase) {
+						cancelText = game.turn === game.player1Id ? 'Mulligan' : '';
+					} else {
+						cancelText = '';
+						game.targeting || this.state.discarding || this.state.resigning
 							? 'Cancel'
 							: '';
+					}
 				} else cancelText = endText = '';
 			} else {
-				turntell = `${game.turn == game.player1.id ? 'Your' : 'Their'} Turn, ${
-					game.winner == game.player1.id ? 'Won' : 'Lost'
+				turntell = `${game.turn === game.player1Id ? 'Your' : 'Their'} Turn, ${
+					game.winner == game.player1Id ? 'Won' : 'Lost'
 				}`;
 				endText = 'Continue';
 				cancelText = '';
 			}
 			let floodvisible = false;
 			for (let j = 0; j < 2; j++) {
-				const pl = game.players(j);
-
-				const plpos = ui.tgtToPos(pl);
-				const handOverlay = pl.usedactive
-					? 'ico silence'
-					: pl.sanctuary
-					? 'ico sanctuary'
-					: pl.nova >= 3 && pl.hand.some(c => c.card.isOf(Cards.Nova))
-					? 'ico singularity'
-					: '';
+				const pl = game.players(j),
+					plpos = ui.tgtToPos(pl),
+					handOverlay = pl.usedactive
+						? 'ico silence'
+						: pl.sanctuary
+						? 'ico sanctuary'
+						: pl.nova >= 3 && pl.hand.some(c => c.card.isOf(Cards.Nova))
+						? 'ico singularity'
+						: '';
 				children.push(
 					<div
 						className={tgtclass(game, pl)}
@@ -845,10 +845,11 @@ module.exports = connect(({ user }) => ({ user }))(
 					creatures = [],
 					perms = [];
 				for (let i = 0; i < pl.handIds.length; i++) {
+					const inst = pl.hand[i];
 					cards.push(
 						<ThingInst
-							key={i}
-							obj={pl.hand[i]}
+							key={inst.id}
+							obj={inst}
 							game={game}
 							setGame={() => this.forceUpdate()}
 							setInfo={(e, obj, x) => this.setCard(e, obj.card, x)}
@@ -862,7 +863,7 @@ module.exports = connect(({ user }) => ({ user }))(
 					if (cr && !(j == 1 && cloaked)) {
 						creatures.push(
 							<ThingInst
-								key={i}
+								key={cr.id}
 								obj={cr}
 								game={game}
 								setGame={() => this.forceUpdate()}
@@ -879,7 +880,7 @@ module.exports = connect(({ user }) => ({ user }))(
 					if (pr && !(j == 1 && cloaked && !pr.getStatus('cloak'))) {
 						perms.push(
 							<ThingInst
-								key={i}
+								key={pr.id}
 								obj={pr}
 								game={game}
 								setGame={() => this.forceUpdate()}
@@ -899,6 +900,7 @@ module.exports = connect(({ user }) => ({ user }))(
 				children.push(
 					wp && !(j == 1 && cloaked) && (
 						<ThingInst
+							key={wp.id}
 							obj={wp}
 							game={game}
 							setGame={() => this.forceUpdate()}
@@ -912,6 +914,7 @@ module.exports = connect(({ user }) => ({ user }))(
 				children.push(
 					sh && !(j == 1 && cloaked) && (
 						<ThingInst
+							key={sh.id}
 							obj={sh}
 							game={game}
 							setGame={() => this.forceUpdate()}
@@ -1080,7 +1083,7 @@ module.exports = connect(({ user }) => ({ user }))(
 						}}
 					/>
 					{!this.props.data.spectate &&
-						(game.turn == game.player1.id || game.winner) && (
+						(game.turn === game.player1Id || game.winner) && (
 							<>
 								{cancelText && (
 									<input

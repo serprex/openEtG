@@ -13,7 +13,10 @@ const passives = new Set([
 	'golem',
 ]);
 function Thing(game, id) {
-	if (!id || typeof id !== 'number') throw new Error(`Invalid id ${id}`);
+	if (!id || typeof id !== 'number') {
+		console.trace();
+		throw new Error(`Invalid id ${id}`);
+	}
 	this.game = game;
 	this.id = id;
 }
@@ -32,6 +35,7 @@ Object.defineProperty(Thing.prototype, 'ownerId', {
 		return this.game.get(this.id, 'owner');
 	},
 	set: function(val) {
+		if (val && typeof val !== 'number') throw new Error(`Invalid id: ${val}`);
 		this.game.set(this.id, 'owner', val);
 	},
 });
@@ -121,21 +125,23 @@ Thing.prototype.remove = function(index) {
 		return 0;
 	}
 	if (index === undefined) index = this.getIndex();
-	let arrName = undefined;
-	if (this.type == etg.Creature) {
-		if (this.owner.gpull == this.id) this.owner.gpull = 0;
-		arrName = 'creatures';
-	} else if (this.type == etg.Permanent) {
-		arrName = 'permanents';
-	}
-	if (arrName != undefined) {
-		const arr = Array.from(this.game.get(this.ownerId, arrName));
-		arr[index] = undefined;
-		this.game.set(this.ownerId, arrName, arr);
-	} else if (this.type == etg.Spell && ~index) {
-		const hand = Array.from(this.game.get(this.ownerId, 'hand'));
-		hand.splice(index, 1);
-		this.game.set(this.ownerId, 'hand', hand);
+	if (index !== -1) {
+		let arrName = undefined;
+		if (this.type == etg.Creature) {
+			if (this.owner.gpull == this.id) this.owner.gpull = 0;
+			arrName = 'creatures';
+		} else if (this.type == etg.Permanent) {
+			arrName = 'permanents';
+		}
+		if (arrName) {
+			const arr = new Uint32Array(this.game.get(this.ownerId, arrName));
+			arr[index] = 0;
+			this.game.set(this.ownerId, arrName, arr);
+		} else {
+			const hand = Array.from(this.game.get(this.ownerId, 'hand'));
+			hand.splice(index, 1);
+			this.game.set(this.ownerId, 'hand', hand);
+		}
 	}
 	return index;
 };
@@ -274,7 +280,7 @@ Thing.prototype.activetext = function() {
 	return aauto ? aauto.name.join(' ') : '';
 };
 Thing.prototype.place = function(owner, type, fromhand) {
-	this.game.set(this.id, 'owner', owner);
+	this.game.set(this.id, 'owner', owner.id);
 	this.game.set(this.id, 'type', type);
 	this.proc('play', fromhand);
 };

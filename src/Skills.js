@@ -469,7 +469,7 @@ const Skills = {
 	destroycard: (ctx, c, t) => {
 		if (t.type == etg.Player) {
 			if (!t.deckIds.length) ctx.setWinner(t.foeId);
-			else t.deckIds.length--;
+			else t._draw();
 		} else if (!t.owner.sanctuary) {
 			t.die();
 		}
@@ -1002,7 +1002,7 @@ const Skills = {
 			t.die();
 			if (!town.deckIds.length) ctx.setWinner(town.foeId);
 			else {
-				town.deckIds.length--;
+				town._draw();
 				for (let i = 0; i < 3; i++) {
 					town.drawcard();
 				}
@@ -1289,7 +1289,7 @@ const Skills = {
 			t.deckIds.length &&
 			t.deck[t.deckIds.length - 1].card.type == etg.Pillar
 		)
-			t.deckIds.length--;
+			t._draw();
 	},
 	mimic: (ctx, c, t) => {
 		if (c != t && t.type == etg.Creature) {

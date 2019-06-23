@@ -1,14 +1,10 @@
 'use strict';
 const etg = require('../etg'),
-	mkAi = require('../mkAi'),
 	sock = require('../sock'),
-	util = require('../util'),
 	Cards = require('../Cards'),
 	etgutil = require('../etgutil'),
-	options = require('../options'),
 	RngMock = require('../RngMock'),
 	userutil = require('../userutil'),
-	mkGame = require('../mkGame'),
 	Components = require('../Components'),
 	store = require('../store'),
 	{ connect } = require('react-redux'),
@@ -30,8 +26,8 @@ const BonusList = [
 		name: 'Are we idle yet?',
 		desc: 'Take longer than 3 minutes to win',
 		func: game =>
-			game.bonusstats.time > 180000
-				? Math.min((game.bonusstats.time - 180000) / 60000, 0.2)
+			game.bonusstats.get('time') > 180000
+				? Math.min((game.bonusstats.get('time') - 180000) / 60000, 0.2)
 				: 0,
 	},
 	{
@@ -45,7 +41,7 @@ const BonusList = [
 	{
 		name: 'Creatureless',
 		desc: 'Never play a creature',
-		func: game => (game.bonusstats.creaturesplaced == 0 ? 0.1 : 0),
+		func: game => (game.bonusstats.get('creaturesplaced') == 0 ? 0.1 : 0),
 	},
 	{
 		name: 'Current Health',
@@ -110,7 +106,7 @@ const BonusList = [
 	{
 		name: 'Murderer',
 		desc: 'Kill over 5 creatures',
-		func: game => (game.bonusstats.creatureskilled > 5 ? 0.15 : 0),
+		func: game => (game.bonusstats.get('creatureskilled') > 5 ? 0.15 : 0),
 	},
 	{
 		name: 'Perfect Damage',
@@ -120,7 +116,7 @@ const BonusList = [
 	{
 		name: 'Pillarless',
 		desc: 'Never play a pillar',
-		func: game => (game.bonusstats.cardsplayed[0] == 0 ? 0.05 : 0),
+		func: game => (game.bonusstats.get('cardsplayed')[0] == 0 ? 0.05 : 0),
 	},
 	{
 		name: 'Size matters',
@@ -147,12 +143,12 @@ const BonusList = [
 	{
 		name: 'Waiter',
 		desc: 'Won with 0 cards in deck',
-		func: game => (game.player1.deck.length == 0 ? 0.3 : 0),
+		func: game => (game.player1.deckIds.length == 0 ? 0.3 : 0),
 	},
 	{
 		name: 'Weapon Master',
 		desc: 'Play over 2 weapons',
-		func: game => (game.bonusstats.cardsplayed[1] > 2 ? 0.1 : 0),
+		func: game => (game.bonusstats.get('cardsplayed')[1] > 2 ? 0.1 : 0),
 	},
 ];
 
@@ -243,10 +239,10 @@ module.exports = connect(({ user }) => ({ user }))(
 		componentDidMount() {
 			document.addEventListener('keydown', this.onkeydown);
 			const { game, data } = this.props;
-			const winner = game.winner === game.player1,
+			const winner = game.winner === game.player1Id,
 				lefttext = [
-					<div>{game.bonusstats.ply} plies</div>,
-					<div>{(game.bonusstats.time / 1000).toFixed(1)} seconds</div>,
+					<div>{game.bonusstats.get('ply')} plies</div>,
+					<div>{(game.bonusstats.get('time') / 1000).toFixed(1)} seconds</div>,
 				];
 			let streakrate = 0;
 			if (winner) {
@@ -344,8 +340,8 @@ module.exports = connect(({ user }) => ({ user }))(
 							game.level === undefined ? -1 : game.level,
 							(game.foename || '?').replace(/,/g, ' '),
 							winner ? 'W' : 'L',
-							game.bonusstats.ply,
-							game.bonusstats.time,
+							game.bonusstats.get('ply'),
+							game.bonusstats.get('time'),
 							game.player1.hp,
 							game.player1.maxhp,
 							(game.goldreward || 0) - (game.cost || 0),
@@ -396,7 +392,7 @@ module.exports = connect(({ user }) => ({ user }))(
 						)}
 					{this.props.user && (
 						<>
-							{game.winner == game.player1 && (
+							{game.winner == game.player1Id && (
 								<>
 									{game.goldreward > 0 && (
 										<Components.Text

@@ -226,19 +226,18 @@ Player.prototype.setCrea = function(idx, x) {
 Player.prototype.addPerm = function(x, fromhand) {
 	if (typeof x === 'number') x = this.game.byId(x);
 	if (x.getStatus('additive')) {
-		const dullcode = etgutil.asShiny(x.card.code, false);
+		const dullcode = etgutil.asShiny(x.card.code, false),
+			perms = this.permanents;
 		for (let i = 0; i < 16; i++) {
-			if (
-				this.permanents[i] &&
-				etgutil.asShiny(this.permanents[i].card.code, false) == dullcode
-			) {
-				this.permanents[i].incrStatus('charges', x.getStatus('charges'));
-				this.permanents[i].place(this, etg.Permanent, fromhand);
+			const pr = perms[i];
+			if (pr && etgutil.asShiny(pr.card.code, false) === dullcode) {
+				pr.incrStatus('charges', x.getStatus('charges'));
+				pr.place(this, etg.Permanent, fromhand);
 				return;
 			}
 		}
 	}
-	if (this.place('permanents', x.id)) {
+	if (~this.place('permanents', x.id)) {
 		x.place(this, etg.Permanent, fromhand);
 	}
 };

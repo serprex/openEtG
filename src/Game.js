@@ -4,7 +4,9 @@ const Rng = require('rng.js'),
 function Game(seed, flip) {
 	const first = (seed & 1) + 2,
 		second = first ^ 1,
-		rng = new Rng(seed, ~seed);
+		rng = new Rng(seed, ~seed),
+		player1 = flip ? second : first,
+		player2 = flip ? first : second;
 	this.props = new imm.Map()
 		.set(
 			1,
@@ -13,8 +15,8 @@ function Game(seed, flip) {
 				phase: 0,
 				first: first,
 				turn: first,
-				player1: flip ? second : first,
-				player2: flip ? first : second,
+				player1: player1,
+				player2: player2,
 				seed: seed,
 				bonusstats: new imm.Map({
 					ply: 0,
@@ -33,8 +35,11 @@ function Game(seed, flip) {
 		)
 		.set(first, new imm.Map({ foe: second }))
 		.set(second, new imm.Map({ foe: first }));
-	this.player1.init();
-	this.player2.init();
+	this.cache = new Map([
+		[this.id, this],
+		[player1, new Player(this, player1).init()],
+		[player2, new Player(this, player2).init()],
+	]);
 	this.targeting = null;
 	this.expectedDamage = new Int16Array(2);
 }
@@ -81,6 +86,11 @@ defineProp('ai');
 
 Game.prototype.clone = function() {
 	const obj = Object.create(Game.prototype);
+	obj.cache = new Map([
+		[this.id, obj],
+		[this.player1Id, new Player(obj, this.player1Id)],
+		[this.player2Id, new Player(obj, this.player2Id)],
+	]);
 	obj.targeting = null;
 	obj.expectedDamage = null;
 	obj.props = this.props;
@@ -116,10 +126,12 @@ Game.prototype.playerIds = function(n) {
 };
 Game.prototype.byId = function(id) {
 	if (!id) return id;
-	if (id === this.id) return this;
-	if (id === this.player1Id || id === this.player2Id)
-		return new Player(this, id);
-	return new Thing(this, id);
+	let inst = this.cache.get(id);
+	if (!inst) {
+		inst = new Thing(this, id);
+		this.cache.set(id, inst);
+	}
+	return inst;
 };
 Game.prototype.newId = function() {
 	const newId = this.get(this.id, 'id') + 1;
@@ -144,7 +156,9 @@ Game.prototype.setWinner = function(play) {
 	if (!this.winner) {
 		this.winner = play;
 		this.phase = etg.EndPhase;
-		if (this.time) this.time = Date.now() - this.time;
+		this.update(this.id, game =>
+			game.updateIn(['bonusstats', 'time'], time => Date.now() - time),
+		);
 	}
 };
 Game.prototype.progressMulligan = function() {
@@ -191,8 +205,8 @@ Game.prototype.updateExpectedDamage = function() {
 					.updateIn(['rng', 'highState'], state => state ^ (i * 997))
 					.updateIn(['rng', 'lowState'], state => state ^ (i * 650)),
 			);
-			this.byId(gclone.turn).endturn();
-			if (!gclone.winner) this.byId(gclone.turn).endturn();
+			gclone.byId(gclone.turn).endturn();
+			if (!gclone.winner) gclone.byId(gclone.turn).endturn();
 			expectedDamage[0] += this.player1.hp - gclone.player1.hp;
 			expectedDamage[1] += this.player2.hp - gclone.player2.hp;
 		}
@@ -203,7 +217,7 @@ Game.prototype.updateExpectedDamage = function() {
 	}
 };
 Game.prototype.tgtToBits = function(x) {
-	if (x === undefined) return 0;
+	if (!x) return 0;
 	const bits =
 		x.type == etg.Player
 			? 1
@@ -235,16 +249,13 @@ Game.prototype.getTarget = function(src, active, cb) {
 	const targetingFilter = Cards.Targeting[active.name[0]];
 	if (targetingFilter) {
 		this.targeting = {
-			filter: t => {
-				return (
-					(t.type == etg.Player ||
-						t.type == etg.Spell ||
-						t.ownerId == this.turn ||
-						t.getStatus('cloak') ||
-						!t.owner.isCloaked()) &&
-					targetingFilter(src, t)
-				);
-			},
+			filter: t =>
+				(t.type == etg.Player ||
+					t.type == etg.Spell ||
+					t.ownerId == this.turn ||
+					t.getStatus('cloak') ||
+					!t.owner.isCloaked()) &&
+				targetingFilter(src, t),
 			cb: (...args) => {
 				cb(...args);
 				this.targeting = null;
