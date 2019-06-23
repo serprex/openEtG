@@ -1,7 +1,7 @@
+'use strict';
 const Effect = require('./Effect');
 const Cards = require('./Cards');
 const Game = require('./Game');
-const Thing = require('./Thing');
 const etg = require('./etg');
 const etgutil = require('./etgutil');
 const aiSearch = require('./ai/search');
@@ -20,10 +20,13 @@ function mkGame(seed, decks) {
 	const game = new Game(seed, 0);
 	let idx, code;
 	for (let j = 0; j < 2; j++) {
-		const pl = game.players(j);
+		const pl = game.players(j),
+			deck = [];
 		for (let i = 0; i < decks[j].length; i++) {
 			if (Cards.Codes[(code = decks[j][i])]) {
-				pl.deck.push(new Thing(Cards.Codes[code]));
+				const cardinst = game.newThing(Cards.Codes[code]);
+				cardinst.ownerId = pl.id;
+				deck.push(cardinst.id);
 			} else if (~(idx = etgutil.fromTrueMark(code))) {
 				pl.mark = idx;
 			} else {
@@ -31,9 +34,10 @@ function mkGame(seed, decks) {
 				return;
 			}
 		}
+		pl.deckIds = deck;
 	}
-	game.byId(turn).drawhand();
-	game.byId(turn).foe.drawhand();
+	game.byId(game.turn).drawhand();
+	game.byId(game.turn).foe.drawhand();
 	game.set(game.id, 'phase', etg.PlayPhase);
 	return game;
 }

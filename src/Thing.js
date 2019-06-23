@@ -13,7 +13,7 @@ const passives = new Set([
 	'golem',
 ]);
 function Thing(game, id) {
-	if (!id) throw new Error("id cannot be 0");
+	if (!id || typeof id !== 'number') throw new Error(`Invalid id ${id}`);
 	this.game = game;
 	this.id = id;
 }
@@ -37,12 +37,10 @@ Object.defineProperty(Thing.prototype, 'ownerId', {
 });
 Object.defineProperty(Thing.prototype, 'owner', {
 	get: function() {
-		return new Player(this.game, this.game.get(this.id, 'owner'));
-	},
-	set: function(val) {
-		this.ownerId = val ? val.id : null;
+		return this.game.byId(this.game.get(this.id, 'owner'));
 	},
 });
+defineProp('card');
 defineProp('cast');
 defineProp('castele');
 defineProp('maxhp');
@@ -54,7 +52,7 @@ defineProp('type');
 defineProp('active');
 
 Thing.prototype.init = function(card) {
-	this.owner = null;
+	this.ownerId = null;
 	this.card = card;
 	this.cast = card.cast;
 	this.castele = card.castele;
@@ -93,20 +91,23 @@ Thing.prototype.transform = function(card) {
 	}
 };
 Thing.prototype.getIndex = function() {
-	return this.type == etg.Weapon
-		? this.owner.weaponId == this.id
-			? 0
-			: -1
-		: this.type == etg.Shield
-		? this.owner.shieldId == this.id
-			? 0
-			: -1
-		: (this.type == etg.Creature
-				? this.owner.creatureIds
-				: this.type == etg.Permanent
-				? this.owner.permanentIds
-				: this.owner.handIds
-		  ).indexOf(this.id);
+	const { id, owner, type } = this;
+	let arrName;
+	switch (type) {
+		case etg.Weapon:
+			return owner.weaponId == id ? 0 : -1;
+		case etg.Shield:
+			return owner.shieldId == id ? 0 : -1;
+		case etg.Creature:
+			arrName = 'creatures';
+			break;
+		case etg.Permanent:
+			arrName = 'permanents';
+			break;
+		default:
+			arrName = 'hand';
+	}
+	return this.game.get(owner.id, arrName).indexOf(id);
 };
 Thing.prototype.remove = function(index) {
 	if (this.type == etg.Weapon) {
@@ -127,7 +128,7 @@ Thing.prototype.remove = function(index) {
 	} else if (this.type == etg.Permanent) {
 		arrName = 'permanents';
 	}
-	if (arr != undefined) {
+	if (arrName != undefined) {
 		const arr = Array.from(this.game.get(this.ownerId, arrName));
 		arr[index] = undefined;
 		this.game.set(this.ownerId, arrName, arr);
@@ -147,19 +148,17 @@ Thing.prototype.die = function() {
 		this.proc('discard');
 	} else if (this.type == etg.Creature && !this.trigger('predeath')) {
 		if (this.status.get('aflatoxin') & !this.card.isOf(Cards.MalignantCell)) {
-			const cell = this.game.newThing(
-				this.card.as(Cards.MalignantCell),
-			);
+			const cell = this.game.newThing(this.card.as(Cards.MalignantCell));
 			const creatures = Array.from(this.owner.creatureIds);
 			creatures[idx] = cell.id;
 			this.game.set(this.ownerId, 'creatures', creatures);
-			cell.owner = this.owner;
+			cell.ownerId = this.ownerId;
 			cell.type = etg.Creature;
 		}
-		if (
-			this.ownerId == this.game.player2Id
-		)
-			this.game.update(this.game.id, game => game.updateIn(['bonusstats', 'creatureskilled'], x => (x|0)+1));
+		if (this.ownerId == this.game.player2Id)
+			this.game.update(this.game.id, game =>
+				game.updateIn(['bonusstats', 'creatureskilled'], x => (x | 0) + 1),
+			);
 		this.deatheffect(idx);
 	}
 };
@@ -184,6 +183,9 @@ Thing.prototype.proc = function(name, param) {
 	}
 	for (let i = 0; i < 2; i++) {
 		const pl = i == 0 ? this.owner : this.owner.foe;
+		if (!pl.creatures || !pl.permanents) {
+			console.trace(pl);
+		}
 		pl.creatures.forEach(proc, this);
 		pl.permanents.forEach(proc, this);
 		proc.call(this, pl.shield);
@@ -408,8 +410,8 @@ Thing.prototype.setSkill = function(type, sk) {
 Thing.prototype.rmactive = function(type, name) {
 	const atype = this.active.get(type);
 	if (!atype) return;
-	const actives = atype.name;
-	const idx = actives.indexOf(name);
+	const actives = atype.name,
+		idx = actives.indexOf(name);
 	if (~idx) {
 		this.active =
 			actives.length === 1
@@ -429,10 +431,7 @@ Thing.prototype.hasactive = function(type, name) {
 	return !!(atype && ~atype.name.indexOf(name));
 };
 Thing.prototype.canactive = function(spend) {
-	if (
-		this.game.turn != this.ownerId ||
-		this.game.phase !== etg.PlayPhase
-	)
+	if (this.game.turn != this.ownerId || this.game.phase !== etg.PlayPhase)
 		return false;
 	else if (this.type == etg.Spell) {
 		return (
@@ -452,6 +451,7 @@ Thing.prototype.canactive = function(spend) {
 		);
 };
 Thing.prototype.castSpell = function(tgt, active, nospell) {
+	if (typeof tgt === 'number') tgt = this.game.byId(tgt);
 	const data = { tgt, active };
 	this.proc('prespell', data);
 	if (data.evade) {
@@ -482,7 +482,7 @@ Thing.prototype.useactive = function(t) {
 			return console.log(`${owner} cannot cast ${this}`);
 		}
 		this.remove();
-		if (owner.status.get('neuro')) owner.addpoison(1);
+		if (owner.getStatus('neuro')) owner.addpoison(1);
 		this.play(t, true);
 		this.proc('cardplay');
 		if (this.ownerId == this.game.player1Id)
@@ -491,11 +491,11 @@ Thing.prototype.useactive = function(t) {
 					const a = new Int32Array(x || 6);
 					a[this.card.type]++;
 					return a;
-				})
+				}),
 			);
 	} else if (owner.spend(this.castele, this.cast)) {
 		this.usedactive = true;
-		if (this.status.get('neuro')) this.addpoison(1);
+		if (this.getStatus('neuro')) this.addpoison(1);
 		this.castSpell(t, this.active.get('cast'));
 	}
 	this.game.updateExpectedDamage();
@@ -564,7 +564,7 @@ Thing.prototype.attack = function(target, attackPhase) {
 			target.dmg(trueatk);
 			this.trigger('hit', target, trueatk);
 		} else if (target.gpull) {
-			this.attackCreature(new Thing(this.game, target.gpull), trueatk);
+			this.attackCreature(this.game.byId(target.gpull), trueatk);
 		} else {
 			const truedr = target.shield
 				? Math.min(target.shield.truedr(), trueatk)
@@ -610,12 +610,10 @@ Thing.prototype.randomcard = function(upped, filter) {
 	return keys && keys.length && Cards.Codes[this.choose(keys)];
 };
 Thing.prototype.shuffle = function(array) {
-	let counter = array.length,
-		temp,
-		index;
+	let counter = array.length;
 	while (counter--) {
-		index = this.upto(counter) | 0;
-		temp = array[counter];
+		const index = this.upto(counter),
+			temp = array[counter];
 		array[counter] = array[index];
 		array[index] = temp;
 	}

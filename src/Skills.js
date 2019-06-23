@@ -66,7 +66,7 @@ const Skills = {
 		c.buffhp(10);
 		if (c.truehp() > 30) {
 			c.die();
-			if (c.owner.hand.length < 8) {
+			if (c.owner.handIds.length < 8) {
 				c.owner.addCard(c.card.as(Cards.BlackHole));
 			}
 		}
@@ -142,7 +142,7 @@ const Skills = {
 	}),
 	beguile: (ctx, c, t) => {
 		t.remove();
-		t.owner = t.owner.foe;
+		t.ownerId = t.owner.foeId;
 		t.owner.addCrea(t);
 		if (c != t) t.addactive('turnstart', Skills.beguilestop);
 	},
@@ -172,10 +172,10 @@ const Skills = {
 		t.buffhp(3);
 	},
 	bolsterintodeck: (ctx, c, t) => {
-		c.owner.deck.push(
-			ctx.newThing(t.card),
-			ctx.newThing(t.card),
-			ctx.newThing(t.card),
+		c.owner.deckpush(
+			ctx.newThing(t.card).id,
+			ctx.newThing(t.card).id,
+			ctx.newThing(t.card).id,
 		);
 	},
 	boneyard: (ctx, c, t) => {
@@ -193,7 +193,7 @@ const Skills = {
 		if (!c.owner.foe.sanctuary) {
 			for (
 				let i = 0;
-				i < 2 && c.owner.hand.length < 8 && c.owner.foe.hand.length < 8;
+				i < 2 && c.owner.handIds.length < 8 && c.owner.foe.handIds.length < 8;
 				i++
 			) {
 				c.owner.drawcard();
@@ -277,13 +277,13 @@ const Skills = {
 			}
 		});
 		const chim = ctx.newThing(c.card.as(Cards.Chimera));
-		chim.owner = c.owner;
+		chim.ownerId = c.ownerId;
 		chim.atk = atk;
 		chim.maxhp = chim.hp = hp;
 		chim.setStatus('momentum', 1);
 		chim.setStatus('airborne', 1);
 		chim.type = etg.Creature;
-		const newCreatures = new Array(23);
+		const newCreatures = new Uint32Array(23);
 		newCreatures[0] = chim.id;
 		ctx.set(c.ownerId, 'creatures', newCreatures);
 		c.owner.gpull = chim.id;
@@ -416,8 +416,8 @@ const Skills = {
 		}
 	}),
 	deckblast: (ctx, c, t) => {
-		c.owner.foe.spelldmg(Math.ceil(c.owner.deck.length / c.owner.deckpower));
-		c.owner.deck.length = 0;
+		c.owner.foe.spelldmg(Math.ceil(c.owner.deckIds.length / c.owner.deckpower));
+		c.owner.deckIds.length = 0;
 	},
 	deepdive: (ctx, c, t) => {
 		c.setSkill('cast', Skills.freezeperm);
@@ -468,8 +468,8 @@ const Skills = {
 	},
 	destroycard: (ctx, c, t) => {
 		if (t.type == etg.Player) {
-			if (!t.deck.length) ctx.setWinner(t.foe);
-			else t.deck.length--;
+			if (!t.deckIds.length) ctx.setWinner(t.foeId);
+			else t.deckIds.length--;
 		} else if (!t.owner.sanctuary) {
 			t.die();
 		}
@@ -553,7 +553,7 @@ const Skills = {
 		if (c.ownerId != t.ownerId) c.owner.addCardInstance(t.clone(c.owner));
 	},
 	drawequip: (ctx, c, t) => {
-		for (let i = c.owner.deck.length - 1; i > -1; i--) {
+		for (let i = c.owner.deckIds.length - 1; i > -1; i--) {
 			const card = c.owner.deck[i];
 			if (card.card.type == etg.Weapon || card.card.type == etg.Shield) {
 				if (~c.owner.addCardInstance(card)) {
@@ -589,9 +589,9 @@ const Skills = {
 		}
 	}),
 	duality: (ctx, c, t) => {
-		if (c.owner.foe.deck.length && c.owner.hand.length < 8) {
+		if (c.owner.foe.deckIds.length && c.owner.handIds.length < 8) {
 			c.owner.addCardInstance(
-				c.owner.foe.deck[c.owner.foe.deck.length - 1].clone(c.owner),
+				c.owner.foe.deck[c.owner.foe.deckIds.length - 1].clone(c.owner),
 			);
 		}
 	},
@@ -621,11 +621,11 @@ const Skills = {
 		t.addactive('owndeath', Skills.embezzledeath);
 	},
 	embezzledeath: (ctx, c, t) => {
-		if (c.owner.foe.deck.length < 3) {
-			c.owner.foe.deck.length = 0;
-			ctx.setWinner(c.owner);
+		if (c.owner.foe.deckIds.length < 3) {
+			c.owner.foe.deckIds.length = 0;
+			ctx.setWinner(c.ownerId);
 		} else {
-			c.owner.foe.deck.length -= 3;
+			c.owner.foe.deckIds.length -= 3;
 		}
 	},
 	empathy: (ctx, c, t) => {
@@ -695,14 +695,14 @@ const Skills = {
 		if (cards.length) {
 			const pick = t.choose(cards);
 			const card = t.owner.deck[pick];
-			const hand = Array.from(t.owner.hand);
+			const hand = Array.from(t.owner.handIds);
 			hand[t.getIndex()] = card.id;
-			t.hand = hand;
+			t.handIds = hand;
 			card.type = etg.Spell;
-			card.owner = t.owner;
-			const deck = Array.from(t.owner.deck);
+			card.ownerId = t.ownerId;
+			const deck = Array.from(t.owner.deckIds);
 			deck[pick] = t.id;
-			t.owner.deck = deck;
+			t.owner.deckIds = deck;
 		}
 	},
 	fiery: (ctx, c, t) => {
@@ -746,10 +746,10 @@ const Skills = {
 		t.owner.addCrea(t);
 	},
 	foedraw: (ctx, c, t) => {
-		if (c.owner.hand.length < 8) {
-			if (!c.owner.foe.deck.length) ctx.setWinner(c.owner);
+		if (c.owner.handIds.length < 8) {
+			if (!c.owner.foe.deckIds.length) ctx.setWinner(c.ownerId);
 			else {
-				c.owner.deck.push(c.owner.foe.deck.pop());
+				c.owner.deckpush(c.owner.foe._draw());
 				c.owner.drawcard();
 			}
 		}
@@ -1000,9 +1000,9 @@ const Skills = {
 		const town = t.owner;
 		if (!town.sanctuary) {
 			t.die();
-			if (!town.deck.length) ctx.setWinner(town.foe);
+			if (!town.deckIds.length) ctx.setWinner(town.foeId);
 			else {
-				town.deck.length--;
+				town.deckIds.length--;
 				for (let i = 0; i < 3; i++) {
 					town.drawcard();
 				}
@@ -1089,7 +1089,7 @@ const Skills = {
 			quint: 2,
 		};
 		let stat = c.card.upped ? 0.5 : 0;
-		for (let i = c.owner.hand.length - 1; ~i; i--) {
+		for (let i = c.owner.handIds.length - 1; ~i; i--) {
 			const card = c.owner.hand[i].card;
 			if (etg.ShardList.some(x => x && card.isOf(Cards.Codes[x]))) {
 				if (card.upped) {
@@ -1285,8 +1285,11 @@ const Skills = {
 		}
 	},
 	millpillar: (ctx, c, t) => {
-		if (t.deck.length && t.deck[t.deck.length - 1].card.type == etg.Pillar)
-			t.deck.length--;
+		if (
+			t.deckIds.length &&
+			t.deck[t.deckIds.length - 1].card.type == etg.Pillar
+		)
+			t.deckIds.length--;
 	},
 	mimic: (ctx, c, t) => {
 		if (c != t && t.type == etg.Creature) {
@@ -1303,9 +1306,7 @@ const Skills = {
 		}
 	},
 	mitosis: (ctx, c, t) => {
-		const inst = ctx.newThing(c.card);
-		inst.owner = c.owner;
-		inst.play(c);
+		c.owner.newThing(c.card).play(c);
 	},
 	mitosisspell: (ctx, c, t) => {
 		t.setSkill('cast', Skills.mitosis);
@@ -1362,10 +1363,10 @@ const Skills = {
 			Effect.mkText('Nightmare', t);
 			c.owner.dmg(
 				-c.owner.foe.spelldmg(
-					(8 - c.owner.foe.hand.length) * (c.card.upped ? 2 : 1),
+					(8 - c.owner.foe.handIds.length) * (c.card.upped ? 2 : 1),
 				),
 			);
-			for (let i = c.owner.foe.hand.length; i < 8; i++) {
+			for (let i = c.owner.foe.handIds.length; i < 8; i++) {
 				c.owner.foe.addCard(t.card);
 			}
 		}
@@ -1430,7 +1431,7 @@ const Skills = {
 		c.owner.spelldmg(c.card.upped ? 10 : 8);
 	}),
 	ouija: (ctx, c, t) => {
-		if (!c.owner.foe.sanctuary && c.owner.foe.hand.length < 8) {
+		if (!c.owner.foe.sanctuary && c.owner.foe.handIds.length < 8) {
 			c.owner.foe.addCard(Cards.OuijaEssence);
 		}
 	},
@@ -1506,7 +1507,7 @@ const Skills = {
 	phoenix: (ctx, c, t, data) => {
 		if (!c.owner.creatures[data.index]) {
 			const ash = ctx.newThing(c.card.as(Cards.Ash));
-			ash.owner = c.owner;
+			ash.ownerId = c.ownerId;
 			ash.type = etg.Creature;
 			const creatures = c.owner.creatureIds;
 			creatures[data.index] = ash.id;
@@ -1640,7 +1641,7 @@ const Skills = {
 			const creatures = Array.from(t.owner.creatureIds);
 			creatures[index] = skele.id;
 			t.owner.creatures = creatureIds;
-			skele.owner = t.owner;
+			skele.ownerId = t.ownerId;
 			skele.type = etg.Creature;
 			skele.atk = atk;
 			skele.maxhp = skele.hp = hp;
@@ -1695,7 +1696,7 @@ const Skills = {
 	rewind: (ctx, c, t) => {
 		Effect.mkText('Rewind', t);
 		t.remove();
-		t.owner.deck.push(ctx.newThing(t.card));
+		t.owner.deckpush(ctx.newThing(t.card));
 	},
 	ricochet: (ctx, c, t, data) => {
 		if (t.type !== etg.Spell || t.card.type !== etg.Spell) return;
@@ -1703,8 +1704,8 @@ const Skills = {
 		if (tgting) {
 			function tgttest(x) {
 				if (x) {
-					if (tgting(t.owner, x)) tgts.push([x, t.owner]);
-					if (tgting(t.owner.foe, x)) tgts.push([x, t.owner.foe]);
+					if (tgting(t.owner, x)) tgts.push([x.id, t.ownerId]);
+					if (tgting(t.owner.foe, x)) tgts.push([x.id, t.owner.foeId]);
 				}
 			}
 			const tgts = [];
@@ -1714,10 +1715,10 @@ const Skills = {
 			}
 			if (tgts.length) {
 				const tgt = c.choose(tgts),
-					town = t.owner;
-				t.owner = tgt[1];
+					town = t.ownerId;
+				t.ownerId = tgt[1];
 				t.castSpell(tgt[0], data.active, true);
-				t.owner = town;
+				t.ownerId = town;
 			}
 		}
 	},
@@ -1750,7 +1751,7 @@ const Skills = {
 	},
 	scatterhand: (ctx, c, t) => {
 		if (!t.sanctuary) {
-			t.drawhand(t.hand.length);
+			t.drawhand(t.handIds.length);
 			c.owner.drawcard();
 		}
 	},
@@ -1764,7 +1765,7 @@ const Skills = {
 		}
 	},
 	serendipity: (ctx, c) => {
-		const num = Math.min(8 - c.owner.hand.length, 3);
+		const num = Math.min(8 - c.owner.handIds.length, 3);
 		let anyentro = false;
 		for (let i = num - 1; ~i; i--) {
 			const card = c.randomcard(c.card.upped, x => {
@@ -1797,7 +1798,7 @@ const Skills = {
 	shuffle3: (ctx, c, t) => {
 		for (let i = 0; i < 3; i++)
 			c.owner.deck.splice(
-				c.owner.upto(c.owner.deck.length),
+				c.owner.upto(c.owner.deckIds.length),
 				0,
 				ctx.newThing(t.card),
 			);
@@ -2000,7 +2001,7 @@ const Skills = {
 		for (let i = 0; i < 3; i++) {
 			const pl = i ? c.owner : c.owner.foe;
 			const candidates = [];
-			for (let j = 0; j < pl.deck.length; j++) {
+			for (let j = 0; j < pl.deckIds.length; j++) {
 				if (pl.deck[j].card.type == etg.Creature) candidates.push(j);
 			}
 			if (candidates.length) {
@@ -2016,7 +2017,7 @@ const Skills = {
 		Effect.mkText('-' + dmg, t);
 		t.dmg(dmg);
 		t.owner.deck.splice(
-			c.owner.upto(t.owner.deck.length),
+			c.owner.upto(t.owner.deckIds.length),
 			0,
 			ctx.newThing(c.card.as(Cards.ThrowRock)),
 		);
@@ -2055,7 +2056,7 @@ const Skills = {
 				const pr = pl.choose(perms);
 				const newpl = pl.upto(2) ? pl : pl.foe;
 				newpl.deck.splice(
-					newpl.upto(newpl.deck.length),
+					newpl.upto(newpl.deckIds.length),
 					0,
 					ctx.newThing(pr.card),
 				);
@@ -2078,8 +2079,8 @@ const Skills = {
 			const pick = t.choose(cards);
 			t.owner.setCrea(t.getIndex(), t.owner.deck[pick]);
 			const deck = Array.from(t.owner.deck);
-			deck[pick] = t;
-			t.owner.deck = deck;
+			deck[pick] = t.id;
+			t.owner.deckIds = deck;
 		}
 	},
 	turngolem: (ctx, c, t) => {
@@ -2101,7 +2102,7 @@ const Skills = {
 		c.cast = 1;
 	},
 	unsummon: (ctx, c, t) => {
-		if (t.owner.hand.length < 8) {
+		if (t.owner.handIds.length < 8) {
 			t.remove();
 			t.owner.addCard(t.card);
 		} else {
@@ -2133,7 +2134,11 @@ const Skills = {
 		}
 	},
 	vindicate: (ctx, c, t, data) => {
-		if (c.ownerId == t.ownerId && !c.getStatus('vindicated') && !data.vindicated) {
+		if (
+			c.ownerId == t.ownerId &&
+			!c.getStatus('vindicated') &&
+			!data.vindicated
+		) {
 			c.setStatus('vindicated', 1);
 			data.vindicated = true;
 			t.attack();
@@ -2196,8 +2201,8 @@ const Skills = {
 			Skills.foedraw.func(ctx, c);
 		} else if (!t.owner.sanctuary) {
 			t.remove();
-			if (c.owner.hand.length < 8) {
-				t.owner = c.owner;
+			if (c.owner.handIds.length < 8) {
+				t.ownerId = c.ownerId;
 				c.owner.hand.push(t);
 			}
 		}
@@ -2296,10 +2301,8 @@ const Skills = {
 					t.owner.creatures[index].card != Cards.MalignantCell
 				) {
 					sfx.playSound('skelify');
-					const skele = ( ctx.newThing(
-						t.card.as(Cards.Skeleton),
-					));
-					skele.owner = t.owner;
+					const skele = ctx.newThing(t.card.as(Cards.Skeleton));
+					skele.ownerId = t.ownerId;
 					skele.type = etg.Creature;
 					const creatures = Array.from(ctx.get(t.ownerId, 'creatures'));
 					creatures[index] = skele;
@@ -2333,10 +2336,10 @@ const Skills = {
 };
 function unsummon(t) {
 	t.remove();
-	if (t.owner.hand.length < 8) {
+	if (t.owner.handIds.length < 8) {
 		t.owner.addCardInstance(t);
 	} else {
-		t.owner.deck.push(t);
+		t.owner.deckpush(t);
 	}
 }
 for (const key in Skills) {

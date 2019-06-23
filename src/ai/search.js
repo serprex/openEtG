@@ -46,7 +46,7 @@ const afilter = {
 };
 function AiSearch(game) {
 	let worstcard;
-	if (game.player2.hand.length < 8) {
+	if (game.player2.handIds.length < 8) {
 		worstcard = undefined;
 		this.eval = evalGame(game);
 	} else {
@@ -125,7 +125,7 @@ AiSearch.prototype.step = function(game, previous) {
 						}
 					}
 					let v, wc;
-					if (gameClone.player2.hand.length < 8) {
+					if (gameClone.player2.handIds.length < 8) {
 						v = evalGame(gameClone);
 					} else {
 						[wc, v] = getWorstCard(gameClone);
@@ -163,14 +163,14 @@ AiSearch.prototype.step = function(game, previous) {
 				return true;
 			}
 			let nbase = 2;
-			if (nth >= nbase && nth < nbase + p2.hand.length) {
-				for (let i = nth - nbase; i < p2.hand.length; i++) {
+			if (nth >= nbase && nth < nbase + p2.handIds.length) {
+				for (let i = nth - nbase; i < p2.handIds.length; i++) {
 					if (incnth(p2.hand[i])) {
 						return true;
 					}
 				}
 			}
-			nbase += p2.hand.length;
+			nbase += p2.handIds.length;
 			if (nth >= nbase && nth < nbase + 16) {
 				for (let i = nth - nbase; i < 16; i++) {
 					if (incnth(p2.permanents[i])) {
@@ -203,7 +203,7 @@ AiSearch.prototype.step = function(game, previous) {
 		this.cmd = 'cast';
 	} else {
 		this.cmd = 'endturn';
-		this.cmdct = game.player2.hand.length == 8 ? this.worstcard : undefined;
+		this.cmdct = game.player2.handIds.length == 8 ? this.worstcard : undefined;
 	}
 };
 module.exports = AiSearch;

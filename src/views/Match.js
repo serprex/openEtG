@@ -6,7 +6,6 @@ const ui = require('../ui'),
 	Card = require('../Card'),
 	Cards = require('../Cards'),
 	Effect = require('../Effect'),
-	Game = require('../Game'),
 	Skills = require('../Skills'),
 	aiSearch = require('../ai/search'),
 	Components = require('../Components'),
@@ -149,7 +148,7 @@ const activeInfo = {
 				Math.floor(
 					(game.player1.quanta[etg.Aether] - game.targeting.src.card.cost) / 2,
 				),
-			9 - game.player1.hand.length,
+			9 - game.player1.handIds.length,
 		),
 };
 
@@ -164,7 +163,11 @@ const ThingInst = connect(({ opts }) => ({ lofiArt: opts.lofiArt }))(
 					: 1,
 			isSpell = obj.type === etg.Spell,
 			pos = ui.tgtToPos(obj);
-		if (isSpell && obj.owner == game.player2 && !game.player1.precognition) {
+		if (
+			isSpell &&
+			obj.ownerId == game.player2Id &&
+			!game.player1.precognition
+		) {
 			return (
 				<div
 					style={{
@@ -367,7 +370,8 @@ function addNoHealData(game) {
 function tgtclass(game, obj) {
 	if (game.targeting) {
 		if (game.targeting.filter(obj)) return 'ants-red';
-	} else if (obj.owner === game.player1 && obj.canactive()) return 'canactive';
+	} else if (obj.ownerId === game.player1Id && obj.canactive())
+		return 'canactive';
 }
 
 function FoePlays({ foeplays, setCard, clearCard }) {
@@ -460,7 +464,7 @@ module.exports = connect(({ user }) => ({ user }))(
 					}),
 				);
 			} else if (game.turn == game.player1.id) {
-				if (discard == undefined && game.player1.hand.length == 8) {
+				if (discard == undefined && game.player1.handIds.length == 8) {
 					this.setState({ discarding: true });
 				} else {
 					if (!game.ai) sock.emit('endturn', { bits: discard });
@@ -476,9 +480,9 @@ module.exports = connect(({ user }) => ({ user }))(
 			if (this.state.resigning) {
 				this.setState({ resigning: false });
 			} else if (game.turn == game.player1.id) {
-				if (game.phase === etg.MulliganPhase && game.player1.hand.length) {
+				if (game.phase === etg.MulliganPhase && game.player1.handIds.length) {
 					sfx.playSound('mulligan');
-					game.player1.drawhand(game.player1.hand.length - 1);
+					game.player1.drawhand(game.player1.handIds.length - 1);
 					if (!game.ai) sock.emit('mulligan');
 					this.forceUpdate();
 				} else if (game.targeting) {
@@ -492,7 +496,7 @@ module.exports = connect(({ user }) => ({ user }))(
 			const { game } = this.props;
 			if (this.state.resigning) {
 				if (!game.ai) sock.emit('foeleft');
-				game.setWinner(game.player2.id);
+				game.setWinner(game.player2Id);
 				this.endClick();
 			} else {
 				this.setState({ resigning: true });
@@ -515,14 +519,14 @@ module.exports = connect(({ user }) => ({ user }))(
 			const { game } = this.props;
 			this.clearCard();
 			if (game.phase != etg.PlayPhase) return;
-			if (obj.owner == game.player1 && this.state.discarding) {
+			if (obj.ownerId == game.player1Id && this.state.discarding) {
 				if (obj.type == etg.Spell) this.endClick(obj.getIndex());
 			} else if (game.targeting) {
 				if (game.targeting.filter(obj)) {
 					game.targeting.cb(obj);
 					this.forceUpdate();
 				}
-			} else if (obj.owner == game.player1 && obj.canactive()) {
+			} else if (obj.ownerId == game.player1Id && obj.canactive()) {
 				const cb = tgt => {
 					if (!game.ai) {
 						sock.emit('cast', {
@@ -642,7 +646,7 @@ module.exports = connect(({ user }) => ({ user }))(
 				foeleft: data => {
 					if (!game.ai)
 						game.setWinner(
-							data.spectate == 1 ? game.player2.id : game.player1.id,
+							data.spectate == 1 ? game.player2Id : game.player1Id,
 						);
 					this.forceUpdate();
 				},
@@ -652,7 +656,7 @@ module.exports = connect(({ user }) => ({ user }))(
 					} else {
 						const pl = data.spectate == 1 ? game.player1 : game.player2;
 						sfx.playSound('mulligan');
-						pl.drawhand(pl.hand.length - 1);
+						pl.drawhand(pl.handIds.length - 1);
 					}
 					this.forceUpdate();
 				},
@@ -840,7 +844,7 @@ module.exports = connect(({ user }) => ({ user }))(
 				const cards = [],
 					creatures = [],
 					perms = [];
-				for (let i = 0; i < pl.hand.length; i++) {
+				for (let i = 0; i < pl.handIds.length; i++) {
 					cards.push(
 						<ThingInst
 							key={i}
@@ -961,7 +965,7 @@ module.exports = connect(({ user }) => ({ user }))(
 					poisoninfo = `${
 						poison > 0 ? poison + ' 1:2' : poison < 0 ? -poison + ' 1:7' : ''
 					} ${pl.getStatus('neuro') ? ' 1:10' : ''}`;
-				const hptext = `${pl.hp}/${pl.maxhp}\n${pl.deck.length}cards${
+				const hptext = `${pl.hp}/${pl.maxhp}\n${pl.deckIds.length}cards${
 					!cloaked && game.expectedDamage[j]
 						? `\nDmg: ${game.expectedDamage[j]}`
 						: ''

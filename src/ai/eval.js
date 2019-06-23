@@ -37,7 +37,10 @@ const SkillsValues = Object.freeze({
 	boneyard: 3,
 	bounce: c => c.card.cost + (c.card.upped ? 1 : 0),
 	bravery: c =>
-		Math.min(4, 8 - Math.max(c.owner.hand.length - 1, c.owner.foe.hand.length)),
+		Math.min(
+			4,
+			8 - Math.max(c.owner.handIds.length - 1, c.owner.foe.handIds.length),
+		),
 	brawl: 8,
 	brew: 4,
 	brokenmirror: c =>
@@ -80,7 +83,7 @@ const SkillsValues = Object.freeze({
 	disarm: c =>
 		!c.owner.foe.weapon
 			? 0.1
-			: c.owner.foe.hand.length == 8
+			: c.owner.foe.handIds.length == 8
 			? 0.5
 			: c.owner.foe.weapon.card.cost,
 	disfield: 8,
@@ -116,7 +119,7 @@ const SkillsValues = Object.freeze({
 	foedraw: 8,
 	forcedraw: -10,
 	forceplay: 2,
-	fractal: c => 3 + (9 - c.owner.hand.length) / 4,
+	fractal: c => 3 + (9 - c.owner.handIds.length) / 4,
 	freedom: 5,
 	freeze: [3, 3.5],
 	freezeperm: [3.5, 4],
@@ -199,7 +202,7 @@ const SkillsValues = Object.freeze({
 		c.owner.hand.forEach(inst => {
 			if (inst.card.isOf(Cards.Nightmare)) n++;
 		});
-		return (24 - c.owner.foe.hand.length) >> n;
+		return (24 - c.owner.foe.handIds.length) >> n;
 	},
 	nightshade: 6,
 	nova: 4,
@@ -226,8 +229,8 @@ const SkillsValues = Object.freeze({
 	powerdrain: 6,
 	precognition: 1,
 	predator: (c, tatk) =>
-		c.type != etg.Spell && c.owner.foe.hand.length > 4
-			? tatk + Math.max(c.owner.foe.hand.length - 6, 1)
+		c.type != etg.Spell && c.owner.foe.handIds.length > 4
+			? tatk + Math.max(c.owner.foe.handIds.length - 6, 1)
 			: 1,
 	protectonce: 2,
 	protectall: 4,
@@ -319,8 +322,7 @@ const SkillsValues = Object.freeze({
 		c.getStatus('charges') / (1 + c.owner.foe.countcreatures() * 2),
 	cold: 7,
 	despair: 5,
-	evade100: c =>
-		!c.getStatus('charges') && c.ownerId == c.game.turn ? 0 : 1,
+	evade100: c => (!c.getStatus('charges') && c.ownerId == c.game.turn ? 0 : 1),
 	'evade 40': 1,
 	'evade 50': 1,
 	firewall: 7,
@@ -714,7 +716,7 @@ module.exports = function(game) {
 	if (game.winner) {
 		return game.winner == game.player1 ? 99999999 : -99999999;
 	}
-	if (game.player1.deck.length == 0 && game.player1.hand.length < 8) {
+	if (game.player1.deck.length == 0 && game.player1.handIds.length < 8) {
 		return -99999990;
 	}
 	const wallCharges = new Int32Array([0, 0]);
@@ -746,23 +748,26 @@ module.exports = function(game) {
 		for (let i = 0; i < 16; i++) {
 			pscore += evalthing(game, player.permanents[i]);
 		}
-		for (let i = 0; i < player.hand.length; i++) {
+		for (let i = 0; i < player.handIds.length; i++) {
 			pscore += evalcardinstance(player.hand[i]);
 		}
-		if (player != game.turn && player.hand.length < 8 && player.deck.length) {
-			player.addCardInstance(player.deck.pop());
-			pscore += evalcardinstance(player.hand[player.hand.length - 1]);
-			player.deck.push(player.hand.pop());
+		if (
+			player != game.turn &&
+			player.handIds.length < 8 &&
+			player.deck.length
+		) {
+			pscore += evalcardinstance(player.deck[player.deckIds.length - 1]);
 		}
 		pscore +=
-			Math.min(8 - player.hand.length, player.drawpower) * 2 +
+			Math.min(8 - player.handIds.length, player.drawpower) * 2 +
 			Math.sqrt(player.hp) * 4 -
 			player.getStatus('poison');
 		if (player.precognition) pscore += 0.5;
 		if (!player.weapon) pscore += 1;
 		if (!player.shield) pscore += 1;
 		if (player.usedactive)
-			pscore -= (player.hand.length + (player.hand.length > 6 ? 7 : 4)) / 4;
+			pscore -=
+				(player.handIds.length + (player.handIds.length > 6 ? 7 : 4)) / 4;
 		if (player.flatline) pscore -= 1;
 		if (player.getStatus('neuro')) pscore -= 5;
 		gamevalue += pscore * (j ? -1 : 1);

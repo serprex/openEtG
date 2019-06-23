@@ -1,12 +1,9 @@
 const ui = require('../ui'),
 	etg = require('../etg'),
 	sock = require('../sock'),
-	smth = require('../Thing'),
 	Card = require('../Card'),
 	Cards = require('../Cards'),
 	Effect = require('../Effect'),
-	Game = require('../Game'),
-	Skills = require('../Skills'),
 	aiSearch = require('../ai/search'),
 	Components = require('../Components'),
 	store = require('../store'),
@@ -140,7 +137,7 @@ const activeInfo = {
 	},
 	icebolt: (t, game) => {
 		const bolts = Math.floor(game.player1.quanta[etg.Water] / 5);
-		return 2 + bolts + ' ' + (35 + bolts * 5) + '%';
+		return `${2 + bolts} ${35 + bolts * 5}%`;
 	},
 	catapult: (t, game) => {
 		return Math.ceil(

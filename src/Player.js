@@ -1,7 +1,7 @@
 'use strict';
 const imm = require('immutable');
 function Player(game, id) {
-	if (!id) throw new Error("id cannot be 0");
+	if (!id || typeof id !== 'number') throw new Error(`Invalid id: ${id}`);
 	this.game = game;
 	this.id = id;
 }
@@ -9,6 +9,15 @@ function Player(game, id) {
 module.exports = Player;
 const Thing = require('./Thing');
 Player.prototype = Object.create(Thing.prototype);
+
+function assertIds(val) {
+	for (let i = 0; i < val.length; i++) {
+		if (val[i] && typeof val[i] !== 'number') {
+			console.trace(val, i, val[i]);
+			throw new Error('Invalid id');
+		}
+	}
+}
 
 Object.defineProperty(Player.prototype, 'ownerId', {
 	get: function() {
@@ -26,17 +35,17 @@ Object.defineProperty(Player.prototype, 'foeId', {
 	},
 	set: function(val) {
 		this.game.set(this.id, 'foe', val);
-	}
+	},
 });
 Object.defineProperty(Player.prototype, 'foe', {
 	get: function() {
 		return new Player(this.game, this.game.get(this.id, 'foe'));
-	}
+	},
 });
 Object.defineProperty(Player.prototype, 'type', {
 	get: function() {
 		return etg.Player;
-	}
+	},
 });
 Object.defineProperty(Player.prototype, 'weaponId', {
 	get: function() {
@@ -44,7 +53,7 @@ Object.defineProperty(Player.prototype, 'weaponId', {
 	},
 	set: function(val) {
 		this.game.set(this.id, 'weapon', val);
-	}
+	},
 });
 Object.defineProperty(Player.prototype, 'shieldId', {
 	get: function() {
@@ -52,56 +61,77 @@ Object.defineProperty(Player.prototype, 'shieldId', {
 	},
 	set: function(val) {
 		this.game.set(this.id, 'shield', val);
-	}
+	},
 });
 Object.defineProperty(Player.prototype, 'weapon', {
 	get: function() {
-		return new Thing(this.game, this.game.get(this.id, 'weapon'));
-	}
+		return this.game.byId(this.game.get(this.id, 'weapon'));
+	},
 });
 Object.defineProperty(Player.prototype, 'shield', {
 	get: function() {
-		return new Thing(this.game, this.game.get(this.id, 'shield'));
-	}
+		return this.game.byId(this.game.get(this.id, 'shield'));
+	},
 });
 Object.defineProperty(Player.prototype, 'creatureIds', {
 	get: function() {
 		return this.game.get(this.id, 'creatures');
 	},
-	set: function(val){
+	set: function(val) {
+		assertIds(val);
 		this.game.set(this.id, 'creatures', val);
-	}
+	},
 });
 Object.defineProperty(Player.prototype, 'creatures', {
 	get: function() {
-		return Object.freeze(Array.from(this.creatureIds, id => new Thing(this.game, id)));
-	}
+		return Object.freeze(
+			Array.from(this.creatureIds, id => this.game.byId(id)),
+		);
+	},
 });
 Object.defineProperty(Player.prototype, 'permanentIds', {
 	get: function() {
 		return this.game.get(this.id, 'permanents');
 	},
-	set: function(val){
+	set: function(val) {
+		assertIds(val);
 		this.game.set(this.id, 'permanents', val);
-	}
+	},
 });
 Object.defineProperty(Player.prototype, 'permanents', {
 	get: function() {
-		return Object.freeze(Array.from(this.permanentIds, id => new Thing(this.game, id)));
-	}
+		return Object.freeze(
+			Array.from(this.permanentIds, id => this.game.byId(id)),
+		);
+	},
 });
 Object.defineProperty(Player.prototype, 'handIds', {
 	get: function() {
 		return this.game.get(this.id, 'hand');
 	},
-	set: function(val){
+	set: function(val) {
+		assertIds(val);
 		this.game.set(this.id, 'hand', val);
-	}
+	},
 });
 Object.defineProperty(Player.prototype, 'hand', {
 	get: function() {
-		return Object.freeze(Array.from(this.handIds, id => new Thing(this.game, id)));
-	}
+		return Object.freeze(Array.from(this.handIds, id => this.game.byId(id)));
+	},
+});
+Object.defineProperty(Player.prototype, 'deckIds', {
+	get: function() {
+		return this.game.get(this.id, 'deck');
+	},
+	set: function(val) {
+		assertIds(val);
+		this.game.set(this.id, 'deck', val);
+	},
+});
+Object.defineProperty(Player.prototype, 'deck', {
+	get: function() {
+		return Object.freeze(Array.from(this.deckIds, id => this.game.byId(id)));
+	},
 });
 
 function defineProp(key) {
@@ -136,10 +166,10 @@ Player.prototype.init = function() {
 	this.atk = 0;
 	this.status = new imm.Map();
 	this.active = new imm.Map();
-	this.creatures = new Array(23);
-	this.permanents = new Array(16);
-	this.hand = [];
-	this.deck = [];
+	this.creatureIds = new Uint32Array(23);
+	this.permanentIds = new Uint32Array(16);
+	this.handIds = [];
+	this.deckIds = [];
 	this.quanta = new Int8Array(13);
 	this.sosa = 0;
 	this.sanctuary = false;
@@ -153,14 +183,14 @@ Player.prototype.init = function() {
 	return this;
 };
 Player.prototype.toString = function() {
-	return this == this.game.player1 ? 'p1' : 'p2';
+	return this.id == this.game.player1Id ? 'p1' : 'p2';
 };
 Player.prototype.isCloaked = function() {
 	return this.permanents.some(pr => pr && pr.getStatus('cloak'));
 };
 Player.prototype.place = function(prop, item) {
 	let a = this.game.get(this.id, prop);
-	for (let i=0; i<a.length; i++) {
+	for (let i = 0; i < a.length; i++) {
 		if (!a[i]) {
 			a = Array.from(a);
 			a[i] = item;
@@ -169,22 +199,32 @@ Player.prototype.place = function(prop, item) {
 		}
 	}
 	return -1;
-}
+};
+Player.prototype.newThing = function(card) {
+	const inst = this.game.newThing(card);
+	inst.ownerId = this.id;
+	return inst;
+};
 Player.prototype.addCrea = function(x, fromhand) {
+	if (typeof x === 'number') x = this.game.byId(x);
 	if (~this.place('creatures', x.id)) {
-		if (fromhand && this.game.bonusstats != null && this == this.game.player1){
-			this.game.update(this.game.id, game => game.updateIn(['bonusstats', 'creaturesplaced'], x => (x|0)+1));
+		if (fromhand && this.game.bonusstats != null && this == this.game.player1) {
+			this.game.update(this.game.id, game =>
+				game.updateIn(['bonusstats', 'creaturesplaced'], x => (x | 0) + 1),
+			);
 		}
 		x.place(this, etg.Creature, fromhand);
 	}
 };
 Player.prototype.setCrea = function(idx, x) {
+	if (typeof x === 'number') x = this.game.byId(x);
 	const creatures = Array.from(this.game.get(this.id, 'creatures'));
-	creatures[idx] = c;
+	creatures[idx] = x;
 	this.game.set(this.id, 'creatures', creatures);
 	x.place(this, etg.Creature, false);
 };
 Player.prototype.addPerm = function(x, fromhand) {
+	if (typeof x === 'number') x = this.game.byId(x);
 	if (x.getStatus('additive')) {
 		const dullcode = etgutil.asShiny(x.card.code, false);
 		for (let i = 0; i < 16; i++) {
@@ -203,25 +243,28 @@ Player.prototype.addPerm = function(x, fromhand) {
 	}
 };
 Player.prototype.setWeapon = function(x, fromhand) {
-	this.weapon = x;
+	if (typeof x === 'number') x = this.game.byId(x);
+	this.weaponId = x.id;
 	x.place(this, etg.Weapon, fromhand);
 };
 Player.prototype.setShield = function(x, fromhand) {
+	if (typeof x === 'number') x = this.game.byId(x);
 	if (
 		x.getStatus('additive') &&
 		this.shield &&
-		x.card.as(this.shield.card) == x.card
+		x.card.as(this.shield.card) === x.card
 	) {
 		this.shield.incrStatus('charges', x.getStatus('charges'));
-	} else this.shield = x;
+	} else this.shieldId = x.id;
 	x.place(this, etg.Shield, fromhand);
 };
 Player.prototype.addCardInstance = function(x) {
-	if (this.hand.length < 8) {
-		x.owner = this;
+	if (this.handIds.length < 8) {
+		if (typeof x === 'number') x = this.game.byId(x);
+		x.ownerId = this.id;
 		x.type = etg.Spell;
 		const hand = Array.from(this.game.get(this.id, 'hand'));
-		hand.push(x);
+		hand.push(x.id);
 		this.game.set(this.id, 'hand', hand);
 	}
 };
@@ -240,7 +283,7 @@ function plinfocore(info, key, val) {
 	else if (val) info.push(val + key);
 }
 Player.prototype.info = function() {
-	const info = [`${this.hp}/${this.maxhp} ${this.deck.length}cards`];
+	const info = [`${this.hp}/${this.maxhp} ${this.deckIds.length}cards`];
 	for (const [k, v] of this.status) {
 		plinfocore(info, k, v);
 	}
@@ -297,7 +340,7 @@ Player.prototype.zeroQuanta = function(qtype) {
 	const quanta = new Int8Array(this.game.get(this.id, 'quanta'));
 	quanta[qtype] = 0;
 	this.game.set(this.id, 'quanta', quanta);
-}
+};
 Player.prototype.countcreatures = function() {
 	return this.creatures.reduce((count, cr) => count + !!cr, 0);
 };
@@ -305,7 +348,9 @@ Player.prototype.countpermanents = function() {
 	return this.permanents.reduce((count, pr) => count + !!pr, 0);
 };
 Player.prototype.endturn = function(discard) {
-	this.game.update(this.game.id, game => game.updateIn(['bonusstats', 'ply'], x => (x|0)+1));
+	this.game.update(this.game.id, game =>
+		game.updateIn(['bonusstats', 'ply'], x => (x | 0) + 1),
+	);
 	if (discard != undefined) {
 		this.hand[discard].die();
 	}
@@ -376,28 +421,38 @@ Player.prototype.endturn = function(discard) {
 	this.foe.proc('turnstart');
 	this.game.updateExpectedDamage();
 };
+Player.prototype.deckpush = function(...args) {
+	this.game.update(this.id, pl => pl.update('deck', deck => deck.concat(args)));
+};
+Player.prototype._draw = function() {
+	const deckIds = this.deckIds;
+	const id = deckIds[deckIds.length - 1];
+	this.deckIds = deckIds.slice(0, -1);
+	return id;
+};
 Player.prototype.drawcard = function(drawstep) {
-	if (this.hand.length < 8) {
-		if (this.deck.length > 0) {
-			if (~this.addCardInstance(this.deck.pop())) {
+	if (this.handIds.length < 8) {
+		if (this.deckIds.length > 0) {
+			if (~this.addCardInstance(this._draw())) {
 				this.proc('draw', drawstep);
 				if (
-					this.deck.length == 0 &&
+					this.deckIds.length == 0 &&
 					this.game.player1 == this &&
 					!Effect.disable
 				)
 					Effect.mkSpriteFadeText('Last card!', { x: 450, y: 300 });
 			}
-		} else this.game.setWinner(this.foe);
+		} else this.game.setWinner(this.foeId);
 	}
 };
 Player.prototype.drawhand = function(x) {
-	this.deck.push(...this.hand);
-	this.hand.length = 0;
-	this.shuffle(this.deck);
-	if (x > this.deck.length) x = deck.length;
-	for (let i = 0; i < x; i++) {
-		this.addCardInstance(this.deck.pop());
+	const deckIds = this.shuffle(this.deckIds.concat(this.handIds));
+	this.handIds = [];
+	if (x > deckIds.length) x = deckIds.length;
+	const toHand = deckIds.splice(0, x);
+	this.deckIds = deckIds;
+	for (let i = 0; i < toHand.length; i++) {
+		this.addCardInstance(toHand[i]);
 	}
 };
 function destroyCloak(pr) {
@@ -406,8 +461,8 @@ function destroyCloak(pr) {
 Player.prototype.masscc = function(caster, func, massmass) {
 	this.permanents.forEach(destroyCloak);
 	if (massmass) this.foe.permanents.forEach(destroyCloak);
-	const crs = this.creatures.slice(),
-		crsfoe = massmass && this.foe.creatures.slice();
+	const crs = this.creatures,
+		crsfoe = massmass && this.foe.creatures;
 	for (let i = 0; i < 23; i++) {
 		if (crs[i] && crs[i].isMaterial()) {
 			func(caster, crs[i]);
@@ -436,7 +491,7 @@ Player.prototype.dmg = function(x, ignoresosa) {
 	} else {
 		this.hp -= x;
 		if (this.hp <= 0) {
-			this.game.setWinner(this.foe);
+			this.game.setWinner(this.foeId);
 		}
 		return sosa ? -x : x;
 	}

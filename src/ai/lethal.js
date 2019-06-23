@@ -7,7 +7,7 @@ module.exports = function(game) {
 	function iterLoop(game, cmdct0) {
 		function iterCore(c) {
 			if (!c || !c.canactive()) return;
-			const ch = c.hash();
+			const ch = game.props.get(c.id).hashCode();
 			if (casthash.has(ch)) return;
 			casthash.add(ch);
 			const active = c.active.get('cast');

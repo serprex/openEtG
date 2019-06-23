@@ -4,7 +4,6 @@ const sock = require('./sock');
 const store = require('./store');
 const util = require('./util');
 const RngMock = require('./RngMock');
-const Thing = require('./Thing');
 const etgutil = require('./etgutil');
 const Cards = require('./Cards');
 
@@ -640,8 +639,8 @@ exports.mkQuestAi = function(quest) {
 	});
 	const game = gamedata.game;
 	if (quest.morph) {
-		game.player1.deck = game.player1.deck.map(
-			x => new Thing(quest.morph(x.card)),
+		game.player1.deckIds = game.player1.deck.map(
+			x => game.player1.newThing(quest.morph(x.card)).id,
 		);
 	}
 	game.quest = quest;

@@ -1,14 +1,15 @@
 'use strict';
 const Game = require('./Game'),
 	Cards = require('./Cards'),
-	Thing = require('./Thing'),
 	etgutil = require('./etgutil');
 
-function deckPower(deck, amount) {
-	const res = [];
-	for (let i = 0; i < amount; i++) {
+function deckPower(pl, deck) {
+	const res = [],
+		{ deckpower } = pl;
+	console.log(pl, deckpower);
+	for (let i = 0; i < deckpower; i++) {
 		for (let j = 0; j < deck.length; j++) {
-			res.push(new Thing(deck[j]));
+			res.push(pl.newThing(deck[j]).id);
 		}
 	}
 	return res;
@@ -18,8 +19,8 @@ module.exports = function(data) {
 	game.addData(data);
 	game.player1.maxhp = game.player1.hp;
 	game.player2.maxhp = game.player2.hp;
-	const deckpower = [data.p1deckpower, data.p2deckpower];
-	const decks = [data.urdeck, data.deck];
+	const deckpower = [data.p1deckpower, data.p2deckpower],
+		decks = [data.urdeck, data.deck];
 	for (let j = 0; j < 2; j++) {
 		const pl = game.players(j),
 			deck = [];
@@ -32,9 +33,9 @@ module.exports = function(data) {
 			}
 		});
 		pl.deckpower = deckpower[j] || (pl.drawpower > 1 ? 2 : 1);
-		pl.deck = deckPower(deck, pl.deckpower);
+		pl.deckIds = deckPower(pl, deck);
 	}
-	game.turn.drawhand(7);
-	game.turn.foe.drawhand(7);
+	game.byId(game.turn).drawhand(7);
+	game.byId(game.turn).foe.drawhand(7);
 	return { game, data };
 };

@@ -5,78 +5,71 @@ function Game(seed, flip) {
 	const first = (seed & 1) + 2,
 		second = first ^ 1,
 		rng = new Rng(seed, ~seed);
-	this.props = new imm.Map().set(
-		1,
-		new imm.Map({
-			id: 4,
-			phase: 0,
-			first: first,
-			turn: first,
-			player1: flip ? second : first,
-			player2: flip ? first : second,
-			bonusstats: new imm.Map({
-				ply: 0,
-				cardsplayed: new Int32Array(6),
-				creaturesplaced: 0,
-				creatureskilled: 0,
-				time: Date.now(),
+	this.props = new imm.Map()
+		.set(
+			1,
+			new imm.Map({
+				id: 4,
+				phase: 0,
+				first: first,
+				turn: first,
+				player1: flip ? second : first,
+				player2: flip ? first : second,
+				seed: seed,
+				bonusstats: new imm.Map({
+					ply: 0,
+					cardsplayed: new Int32Array(6),
+					creaturesplaced: 0,
+					creatureskilled: 0,
+					time: Date.now(),
+				}),
+				rng: new imm.Map({
+					lowConstant: rng.lowConstant,
+					highConstant: rng.highConstant,
+					lowStateCount: rng.lowStateCount,
+					highStateCount: rng.highStateCount,
+				}),
 			}),
-			rng: new imm.Map({
-				lowSeed: seed,
-				highSeed: ~seed,
-				lowConstant: rng.lowConstant,
-				highConstant: rng.highConstant,
-				lowStateCount: rng.lowStateCount,
-				highStateCount: rng.highStateCount,
-			})
-		}),
-	).set(first, new imm.Map({foeId: second}))
-	.set(second, new imm.Map({foeId: first}));
+		)
+		.set(first, new imm.Map({ foe: second }))
+		.set(second, new imm.Map({ foe: first }));
 	this.player1.init();
 	this.player2.init();
 	this.targeting = null;
 	this.expectedDamage = new Int16Array(2);
 }
-module.exports = Game;
-
-// Hard coded ids
 Game.prototype.id = 1;
+module.exports = Game;
 
 Object.defineProperty(Game.prototype, 'player1Id', {
 	get: function() {
 		return this.get(this.id, 'player1');
 	},
-	set: function(val) {
-		return this.set(this.id, 'player1', val)
-	}
 });
 Object.defineProperty(Game.prototype, 'player2Id', {
 	get: function() {
 		return this.get(this.id, 'player2');
 	},
-	set: function(val) {
-		return this.set(this.id, 'player2', val);
-	}
 });
 
 Object.defineProperty(Game.prototype, 'player1', {
 	get: function() {
 		return new Player(this, this.get(this.id, 'player1'));
-	}
+	},
 });
 Object.defineProperty(Game.prototype, 'player2', {
 	get: function() {
 		return new Player(this, this.get(this.id, 'player2'));
-	}
+	},
 });
 
 function defineProp(key) {
 	Object.defineProperty(Game.prototype, key, {
 		get: function() {
-			return this.game.get(this.id, key);
+			return this.get(this.id, key);
 		},
 		set: function(val) {
-			this.game.set(this.id, key, val);
+			this.set(this.id, key, val);
 		},
 	});
 }
@@ -84,6 +77,7 @@ defineProp('phase');
 defineProp('bonusstats');
 defineProp('turn');
 defineProp('first');
+defineProp('ai');
 
 Game.prototype.clone = function() {
 	const obj = Object.create(Game.prototype);
@@ -93,21 +87,22 @@ Game.prototype.clone = function() {
 	return obj;
 };
 Game.prototype.rng = function() {
-	const rng = this.props.getIn([this.id, 'rng']);
-	const rngInst = new Rng(rng.get('lowSeed'), rng.get('highSeed'));
-	rngInst.lowConstant = rng.get('lowConstant');
-	rngInst.highConstant = rng.get('highConstant');
-	rngInst.lowStateCount = rng.get('lowStateCount');
-	rngInst.highStateCount = rng.get('highStateCount');
-	const val = rngInst.nextNumber();
-	this.props = this.props.setIn([this.id, 'rng'], new imm.Map({
-		lowSeed: rng.lowSeed,
-		highSeed: rng.highSeed,
-		lowConstant: rng.lowConstant,
-		highConstant: rng.highConstant,
-		lowStateCount: rng.lowStateCount,
-		highStateCount: rng.highStateCount,
-	}));
+	const seed = this.props.getIn([this.id, 'seed']);
+	let val;
+	this.props = this.props.updateIn([this.id, 'rng'], rng => {
+		const rngInst = new Rng(seed, ~seed);
+		rngInst.lowConstant = rng.get('lowConstant');
+		rngInst.highConstant = rng.get('highConstant');
+		rngInst.lowStateCount = rng.get('lowStateCount');
+		rngInst.highStateCount = rng.get('highStateCount');
+		val = rngInst.nextNumber();
+		return new imm.Map({
+			lowConstant: rng.get('lowConstant'),
+			highConstant: rng.get('highConstant'),
+			lowStateCount: rng.get('lowStateCount'),
+			highStateCount: rng.get('highStateCount'),
+		});
+	});
 	return val;
 };
 Game.prototype.upto = function(x) {
@@ -120,9 +115,10 @@ Game.prototype.playerIds = function(n) {
 	return n ? this.player2Id : this.player1Id;
 };
 Game.prototype.byId = function(id) {
-	if (id === game.id) return this;
-	if (id === game.player1.id) return game.player1;
-	if (id === game.player2.id) return game.player2;
+	if (!id) return id;
+	if (id === this.id) return this;
+	if (id === this.player1Id || id === this.player2Id)
+		return new Player(this, id);
 	return new Thing(this, id);
 };
 Game.prototype.newId = function() {
@@ -131,8 +127,7 @@ Game.prototype.newId = function() {
 	return newId;
 };
 Game.prototype.newThing = function(card) {
-	const id = this.newId();
-	return new Thing(this, id);
+	return new Thing(this, this.newId()).init(card);
 };
 Game.prototype.get = function(id, key) {
 	const ent = this.props.get(id);
@@ -143,7 +138,7 @@ Game.prototype.set = function(id, key, val) {
 	return (this.props = this.props.set(id, ent.set(key, val)));
 };
 Game.prototype.update = function(id, func) {
-	return this.props.update(id, func);
+	this.props = this.props.update(id, func);
 };
 Game.prototype.setWinner = function(play) {
 	if (!this.winner) {
@@ -184,7 +179,7 @@ function removeSoPa(p) {
 }
 Game.prototype.updateExpectedDamage = function() {
 	if (this.expectedDamage && !this.winner) {
-		const expectedDamage = new Int16(2),
+		const expectedDamage = new Int16Array(2),
 			disable = Effect.disable;
 		Effect.disable = true;
 		for (let i = 0; i < 3; i++) {
@@ -192,8 +187,9 @@ Game.prototype.updateExpectedDamage = function() {
 			gclone.player1.permanents.forEach(removeSoPa);
 			gclone.player2.permanents.forEach(removeSoPa);
 			gclone.update(gclone.id, game =>
-				game.updateIn(['rng', 'highState'], state => state ^ (i * 997)).
-					updateIn(['rng', 'lowState'], state => state ^ (i * 650))
+				game
+					.updateIn(['rng', 'highState'], state => state ^ (i * 997))
+					.updateIn(['rng', 'lowState'], state => state ^ (i * 650)),
 			);
 			this.byId(gclone.turn).endturn();
 			if (!gclone.winner) this.byId(gclone.turn).endturn();
