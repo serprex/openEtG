@@ -97,10 +97,11 @@ const floodsvg = (
 			top: '0',
 			zIndex: '1',
 			pointerEvents: 'none',
+			opacity: '.4',
 		}}>
 		<path
 			d="M149 146l644 0l0 64l-400 0l0 64l-244 0zM107 454l644 0l0-128l-244 0l0 64l-400 0z"
-			fill="#0486"
+			fill="#048"
 		/>
 	</svg>
 );
@@ -167,7 +168,7 @@ const ThingInst = connect(({ opts }) => ({ lofiArt: opts.lofiArt }))(
 		if (
 			isSpell &&
 			obj.ownerId === game.player2Id &&
-			!game.player1.precognition
+			!game.player1.getStatus('precognition')
 		) {
 			return (
 				<Motion style={{ x: spring(pos.x), y: spring(pos.y) }}>
@@ -422,6 +423,7 @@ module.exports = connect(({ user }) => ({ user }))(
 			if (game.turn === game.player1Id && game.phase === etg.MulliganPhase) {
 				if (!game.ai) sock.emit('mulligan', { draw: true });
 				game.progressMulligan();
+				this.forceUpdate();
 			} else if (game.winner) {
 				if (user) {
 					if (game.arena) {
@@ -476,7 +478,7 @@ module.exports = connect(({ user }) => ({ user }))(
 				if (discard == undefined && game.player1.handIds.length == 8) {
 					this.setState({ discarding: true });
 				} else {
-					if (!game.ai) sock.emit('endturn', { bits: discard });
+					if (!game.ai) sock.emit('endturn', { t: discard });
 					game.player1.endturn(discard);
 					game.targeting = null;
 					this.setState({ discarding: false, foeplays: [] });
@@ -539,7 +541,8 @@ module.exports = connect(({ user }) => ({ user }))(
 				const cb = tgt => {
 					if (!game.ai) {
 						sock.emit('cast', {
-							bits: game.tgtToBits(obj) | (game.tgtToBits(tgt) << 9),
+							c: obj.id,
+							t: tgt && tgt.id,
 						});
 					}
 					obj.useactive(tgt);
@@ -571,7 +574,7 @@ module.exports = connect(({ user }) => ({ user }))(
 							this.aiCommand = true;
 						}
 					} else if ((now = Date.now()) > this.aiDelay) {
-						cmds[this.aiState.cmd]({ bits: this.aiState.cmdct });
+						cmds[this.aiState.cmd](this.aiState.cmdct);
 						this.aiState = null;
 						this.aiCommand = false;
 						this.aiDelay = now + (game.turn === game.player1Id ? 2000 : 200);
@@ -628,14 +631,13 @@ module.exports = connect(({ user }) => ({ user }))(
 			Effect.clear();
 			const cmds = {
 				endturn: data => {
-					(data.spectate == 1 ? game.player1 : game.player2).endturn(data.bits);
+					(data.spectate == 1 ? game.player1 : game.player2).endturn(data.t);
 					if (data.spectate) this.setState({ foeplays: [] });
 					this.forceUpdate();
 				},
 				cast: data => {
-					const bits = data.spectate == 1 ? data.bits ^ 4104 : data.bits,
-						c = game.bitsToTgt(bits & 511),
-						t = game.bitsToTgt((bits >> 9) & 511);
+					const c = game.byId(data.c),
+						t = game.byId(data.t);
 					let play;
 					if (c.type == etg.Spell) {
 						play = c.card;
@@ -785,9 +787,10 @@ module.exports = connect(({ user }) => ({ user }))(
 					plpos = ui.tgtToPos(pl),
 					handOverlay = pl.usedactive
 						? 'ico silence'
-						: pl.sanctuary
+						: pl.getStatus('sanctuary')
 						? 'ico sanctuary'
-						: pl.nova >= 3 && pl.hand.some(c => c.card.isOf(Cards.Nova))
+						: pl.getStatus('nova') >= 3 &&
+						  pl.hand.some(c => c.card.isOf(Cards.Nova))
 						? 'ico singularity'
 						: '';
 				children.push(
@@ -818,7 +821,7 @@ module.exports = connect(({ user }) => ({ user }))(
 						}}>
 						{pl.markpower !== 1 && pl.markpower}
 					</span>,
-					!!pl.sosa && (
+					!!pl.getStatus('sosa') && (
 						<div
 							className={'ico sacrifice'}
 							style={{
@@ -829,7 +832,7 @@ module.exports = connect(({ user }) => ({ user }))(
 							}}
 						/>
 					),
-					!!pl.flatline && (
+					!!pl.getStatus('flatline') && (
 						<span
 							className="ico sabbath"
 							style={{
@@ -904,9 +907,11 @@ module.exports = connect(({ user }) => ({ user }))(
 					creatures.reverse();
 					perms.reverse();
 				}
-				children.push(...things, ...creatures, ...perms);
-				const wp = pl.weapon;
-				children.push(
+				things.push(...creatures);
+				things.push(...perms);
+				const wp = pl.weapon,
+					sh = pl.shield;
+				things.push(
 					wp && !(j == 1 && cloaked) && (
 						<ThingInst
 							key={wp.id}
@@ -918,9 +923,6 @@ module.exports = connect(({ user }) => ({ user }))(
 							onClick={this.thingClick}
 						/>
 					),
-				);
-				const sh = pl.shield;
-				children.push(
 					sh && !(j == 1 && cloaked) && (
 						<ThingInst
 							key={sh.id}
@@ -933,6 +935,7 @@ module.exports = connect(({ user }) => ({ user }))(
 						/>
 					),
 				);
+				children.push(things);
 				const qx = j ? 792 : 0,
 					qy = j ? 106 : 308;
 				for (let k = 1; k < 13; k++) {
@@ -970,9 +973,8 @@ module.exports = connect(({ user }) => ({ user }))(
 						}}
 					/>,
 				);
-				const x1 = (80 * pl.hp) / pl.maxhp;
-				const x2 =
-					x1 - (80 * Math.min(game.expectedDamage[j], pl.hp)) / pl.maxhp;
+				const x1 = Math.max(80 * (pl.hp / pl.maxhp), 0);
+				const x2 = Math.max(x1 - 80 * (game.expectedDamage[j] / pl.maxhp), 0);
 				const poison = pl.getStatus('poison'),
 					poisoninfo = `${
 						poison > 0 ? poison + ' 1:2' : poison < 0 ? -poison + ' 1:7' : ''
@@ -983,41 +985,43 @@ module.exports = connect(({ user }) => ({ user }))(
 						: ''
 				} ${poisoninfo ? `\n${poisoninfo}` : ''}`;
 				children.push(
-					pl.hp > 0 && (
-						<>
-							<div
-								style={{
-									backgroundColor: ui.strcols[etg.Life],
-									position: 'absolute',
-									left: plpos.x - 40 + 'px',
-									top: j ? '37px' : '532px',
-									width: (80 * pl.hp) / pl.maxhp + 'px',
-									height: '14px',
-									pointerEvents: 'none',
-								}}
-							/>
-							{!cloaked && game.expectedDamage[j] !== 0 && (
+					<Motion style={{ x1: spring(x1), x2: spring(x2) }}>
+						{({ x1, x2 }) => (
+							<>
 								<div
 									style={{
-										backgroundColor:
-											ui.strcols[
-												game.expectedDamage[j] >= pl.hp
-													? etg.Fire
-													: game.expectedDamage[j] > 0
-													? etg.Time
-													: etg.Water
-											],
+										backgroundColor: ui.strcols[etg.Life],
 										position: 'absolute',
-										left: plpos.x - 40 + Math.min(x1, x2),
+										left: `${plpos.x - 40}px`,
 										top: j ? '37px' : '532px',
-										width: Math.max(x1, x2) - Math.min(x1, x2) + 'px',
+										width: `${x1}px`,
 										height: '14px',
 										pointerEvents: 'none',
 									}}
 								/>
-							)}
-						</>
-					),
+								{!cloaked && game.expectedDamage[j] !== 0 && (
+									<div
+										style={{
+											backgroundColor:
+												ui.strcols[
+													game.expectedDamage[j] >= pl.hp
+														? etg.Fire
+														: game.expectedDamage[j] > 0
+														? etg.Time
+														: etg.Water
+												],
+											position: 'absolute',
+											left: plpos.x - 40 + Math.min(x1, x2),
+											top: j ? '37px' : '532px',
+											width: Math.max(x1, x2) - Math.min(x1, x2) + 'px',
+											height: '14px',
+											pointerEvents: 'none',
+										}}
+									/>
+								)}
+							</>
+						)}
+					</Motion>,
 					<Components.Text
 						text={hptext}
 						style={{

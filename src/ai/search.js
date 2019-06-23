@@ -53,7 +53,7 @@ function AiSearch(game) {
 		[worstcard, this.eval] = getWorstCard(game);
 	}
 	this.nth = 0;
-	this.cmdct = -1;
+	this.cmdct = null;
 	this.cdepth = 2;
 	this.casthash = new Set();
 	this.limit = 648;
@@ -92,8 +92,7 @@ AiSearch.prototype.step = function(game, previous) {
 			const active =
 				(c.type !== etg.Spell || c.card.type === etg.Spell) &&
 				c.active.get('cast');
-			const cbits = game.tgtToBits(c) ^ 8,
-				tgthash = new Set();
+			const tgthash = new Set();
 			const evalIter = t => {
 				if (t) {
 					const th = game.props.get(t.id).hashCode();
@@ -105,9 +104,8 @@ AiSearch.prototype.step = function(game, previous) {
 						(t && game.targeting.filter(t) && searchSkill(active, c, t))) &&
 					(n || --this.limit > 0)
 				) {
-					const tbits = game.tgtToBits(t) ^ 8,
-						gameClone = game.clone();
-					gameClone.bitsToTgt(cbits).useactive(gameClone.bitsToTgt(tbits));
+					const gameClone = game.clone();
+					gameClone.byId(c.id).useactive(t && gameClone.byId(t.id));
 					if (
 						c.type === etg.Permanent &&
 						c.getStatus('patience') &&
@@ -131,13 +129,13 @@ AiSearch.prototype.step = function(game, previous) {
 						[wc, v] = getWorstCard(gameClone);
 					}
 					if (v < currentEval || (v == currentEval && n > this.cdepth)) {
-						this.cmdct = ~cmdct0 ? cmdct0 : cbits | (tbits << 9);
+						this.cmdct = cmdct0 || { c: c.id, t: t && t.id };
 						this.worstcard = wc;
 						this.cdepth = n;
 						currentEval = v;
 					}
 					if (n && v - currentEval < 24) {
-						iterLoop(gameClone, 0, cbits | (tbits << 9), new Set());
+						iterLoop(gameClone, 0, { c: c.id, t: t && t.id }, new Set());
 					}
 				}
 			};
@@ -195,15 +193,15 @@ AiSearch.prototype.step = function(game, previous) {
 		}
 		return false;
 	};
-	const ret = iterLoop(game, 1, -1, this.casthash);
+	const ret = iterLoop(game, 1, null, this.casthash);
 	if (ret) {
 		this.nth = nth;
 		this.eval = currentEval;
-	} else if (~this.cmdct) {
+	} else if (this.cmdct) {
 		this.cmd = 'cast';
 	} else {
 		this.cmd = 'endturn';
-		this.cmdct = game.player2.handIds.length == 8 ? this.worstcard : undefined;
+		this.cmdct = game.player2.handIds.length == 8 ? { t: this.worstcard } : {};
 	}
 };
 module.exports = AiSearch;

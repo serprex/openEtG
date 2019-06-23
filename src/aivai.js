@@ -71,9 +71,8 @@ function fightItOut() {
 			game.player2.endturn(data.bits);
 		},
 		cast: function(data) {
-			const bits = data.bits,
-				c = game.bitsToTgt(bits & 511),
-				t = game.bitsToTgt((bits >> 9) & 511);
+			const c = game.byId(data.c),
+				t = game.byId(data.t);
 			if (mode == fight) {
 				result.textContent += `${game.turn == realp1 ? 1 : 2}\t${c}${
 					t ? ' targets ' + t : ''
@@ -94,7 +93,7 @@ function fightItOut() {
 				aiState = new aiSearch(game);
 			}
 			if (aiState.cmd) {
-				cmds[aiState.cmd]({ bits: aiState.cmdct });
+				cmds[aiState.cmd](aiState.cmdct);
 				aiState = undefined;
 			}
 		}

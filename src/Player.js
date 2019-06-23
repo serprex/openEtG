@@ -13,7 +13,6 @@ Player.prototype = Object.create(Thing.prototype);
 function assertIds(val) {
 	for (let i = 0; i < val.length; i++) {
 		if (val[i] && typeof val[i] !== 'number') {
-			console.trace(val, i, val[i]);
 			throw new Error('Invalid id');
 		}
 	}
@@ -151,10 +150,6 @@ defineProp('atk');
 defineProp('active');
 defineProp('gpull');
 defineProp('quanta');
-defineProp('sosa');
-defineProp('sanctuary');
-defineProp('precognition');
-defineProp('nova');
 defineProp('deckpower');
 defineProp('drawpower');
 defineProp('markpower');
@@ -171,10 +166,6 @@ Player.prototype.init = function() {
 	this.handIds = [];
 	this.deckIds = [];
 	this.quanta = new Int8Array(13);
-	this.sosa = 0;
-	this.sanctuary = false;
-	this.precognition = false;
-	this.nova = 0;
 	this.deckpower = 1;
 	this.drawpower = 1;
 	this.markpower = 1;
@@ -192,7 +183,7 @@ Player.prototype.place = function(prop, item) {
 	let a = this.game.get(this.id, prop);
 	for (let i = 0; i < a.length; i++) {
 		if (!a[i]) {
-			a = Array.from(a);
+			a = new Uint32Array(a);
 			a[i] = item;
 			this.game.set(this.id, prop, a);
 			return i;
@@ -210,7 +201,7 @@ Player.prototype.addCrea = function(x, fromhand) {
 	if (~this.place('creatures', x.id)) {
 		if (fromhand && this.game.bonusstats && this.id == this.game.player1Id) {
 			this.game.update(this.game.id, game =>
-				game.updateIn(['bonusstats', 'creaturesplaced'], x => (x | 0) + 1),
+				game.updateIn(['bonusstats', 'creaturesplaced'], (x = 0) => x + 1),
 			);
 		}
 		x.place(this, etg.Creature, fromhand);
@@ -218,8 +209,8 @@ Player.prototype.addCrea = function(x, fromhand) {
 };
 Player.prototype.setCrea = function(idx, x) {
 	if (typeof x === 'number') x = this.game.byId(x);
-	const creatures = Array.from(this.game.get(this.id, 'creatures'));
-	creatures[idx] = x;
+	const creatures = new Uint32Array(this.game.get(this.id, 'creatures'));
+	creatures[idx] = x.id;
 	this.game.set(this.id, 'creatures', creatures);
 	x.place(this, etg.Creature, false);
 };
@@ -268,7 +259,7 @@ Player.prototype.addCardInstance = function(x) {
 	}
 };
 Player.prototype.addCard = function(card) {
-	this.addCardInstance(this.game.newThing(card));
+	this.addCardInstance(this.newThing(card));
 };
 Player.prototype.forEach = function(func, dohand) {
 	func(this.weapon);
@@ -286,17 +277,7 @@ Player.prototype.info = function() {
 	for (const [k, v] of this.status) {
 		plinfocore(info, k, v);
 	}
-	[
-		'nova',
-		'neuro',
-		'sosa',
-		'usedactive',
-		'sanctuary',
-		'flatline',
-		'precognition',
-	].forEach(key => {
-		plinfocore(info, key, this[key]);
-	});
+	plinfocore(info, 'usedactive', this.usedactive);
 	if (this.gpull) info.push('gpull');
 	return info.join('\n');
 };
@@ -305,7 +286,7 @@ Player.prototype.randomquanta = function() {
 	for (let i = 1; i < 13; i++) {
 		nonzero += this.quanta[i];
 	}
-	if (nonzero == 0) {
+	if (nonzero === 0) {
 		return -1;
 	}
 	nonzero = 1 + this.upto(nonzero);
@@ -369,7 +350,7 @@ Player.prototype.endturn = function(discard) {
 					floodingPaidFlag = true;
 					floodingFlag = true;
 					if (!this.spend(etg.Water, 1)) {
-						this.permanents[i].die();
+						p.die();
 					}
 				}
 				if (p.getStatus('patience')) {
@@ -384,7 +365,7 @@ Player.prototype.endturn = function(discard) {
 			}
 		}
 	}
-	this.creatures.slice().forEach((cr, i) => {
+	this.creatures.forEach((cr, i) => {
 		if (cr) {
 			if (patienceFlag) {
 				const floodbuff = floodingFlag && i > 4;
@@ -407,12 +388,12 @@ Player.prototype.endturn = function(discard) {
 		this.shield.trigger('ownattack');
 	}
 	if (this.weapon) this.weapon.attack(undefined, true);
-	if (this.foe.sosa > 0) {
-		this.foe.sosa--;
-	}
-	this.nova = 0;
-	this.flatline = this.usedactive = false;
-	this.foe.precognition = this.foe.sanctuary = false;
+	this.usedactive = false;
+	this.foe.maybeDecrStatus('sosa');
+	this.foe.setStatus('nova', 0);
+	this.foe.setStatus('sanctuary', 0);
+	this.foe.setStatus('flatline', 0);
+	this.foe.setStatus('precognition', 0);
 	for (let i = this.foe.drawpower; i > 0; i--) {
 		this.foe.drawcard(true);
 	}
@@ -479,7 +460,7 @@ Player.prototype.freeze = function(x) {
 };
 Player.prototype.dmg = function(x, ignoresosa) {
 	if (!x) return 0;
-	const sosa = this.sosa && !ignoresosa;
+	const sosa = this.getStatus('sosa') && !ignoresosa;
 	if (sosa) {
 		x *= -1;
 	}

@@ -253,7 +253,7 @@ const SkillsValues = Object.freeze({
 	ricochet: 2,
 	sadism: 5,
 	salvage: 2,
-	sanctuary: 6,
+	sanctify: 2,
 	scramble: c => {
 		let a = 0,
 			fq = c.owner.foe.quanta;
@@ -407,7 +407,7 @@ function estimateDamage(game, c, freedomChance, wallCharges, wallIndex) {
 	if (!fsh && freedomChance && c.getStatus('airborne')) {
 		atk += Math.ceil(atk / 2) * freedomChance;
 	}
-	if (c.owner.foe.sosa) atk *= -1;
+	if (c.owner.foe.getStatus('sosa')) atk *= -1;
 	damageHash.set(game.props.get(c.id).hashCode(), atk);
 	return atk;
 }
@@ -762,13 +762,13 @@ module.exports = function(game) {
 			Math.min(8 - player.handIds.length, player.drawpower) * 2 +
 			Math.sqrt(player.hp) * 4 -
 			player.getStatus('poison');
-		if (player.precognition) pscore += 0.5;
+		if (player.getStatus('precognition')) pscore += 0.5;
 		if (!player.weapon) pscore += 1;
 		if (!player.shield) pscore += 1;
 		if (player.usedactive)
 			pscore -=
 				(player.handIds.length + (player.handIds.length > 6 ? 7 : 4)) / 4;
-		if (player.flatline) pscore -= 1;
+		if (player.getStatus('flatline')) pscore -= 1;
 		if (player.getStatus('neuro')) pscore -= 5;
 		gamevalue += pscore * (j ? -1 : 1);
 	}

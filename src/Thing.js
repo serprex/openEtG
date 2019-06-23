@@ -14,7 +14,6 @@ const passives = new Set([
 ]);
 function Thing(game, id) {
 	if (!id || typeof id !== 'number') {
-		console.trace();
 		throw new Error(`Invalid id ${id}`);
 	}
 	this.game = game;
@@ -197,9 +196,6 @@ Thing.prototype.proc = function(name, param) {
 	}
 	for (let i = 0; i < 2; i++) {
 		const pl = i == 0 ? this.owner : this.owner.foe;
-		if (!pl.creatures || !pl.permanents) {
-			console.trace(pl);
-		}
 		pl.creatures.forEach(proc, this);
 		pl.permanents.forEach(proc, this);
 		proc.call(this, pl.shield);
@@ -367,7 +363,7 @@ const mutantabilities = [
 ];
 Thing.prototype.mutantactive = function() {
 	this.lobo();
-	const index = this.owner.upto(mutantabilities.length + 2) - 2;
+	const index = this.upto(mutantabilities.length + 2) - 2;
 	if (index < 0) {
 		this.setStatus(['momentum', 'immaterial'][~index], 1);
 	} else {
@@ -376,7 +372,7 @@ Thing.prototype.mutantactive = function() {
 			this.addactive('death', active);
 		} else {
 			this.active = this.active.set('cast', active);
-			this.cast = 1 + this.owner.upto(2);
+			this.cast = 1 + this.upto(2);
 			this.castele = this.card.element;
 			return true;
 		}

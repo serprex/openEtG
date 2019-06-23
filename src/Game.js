@@ -25,20 +25,15 @@ function Game(seed, flip) {
 					creatureskilled: 0,
 					time: Date.now(),
 				}),
-				rng: new imm.Map({
-					lowConstant: rng.lowConstant,
-					highConstant: rng.highConstant,
-					lowStateCount: rng.lowStateCount,
-					highStateCount: rng.highStateCount,
-				}),
+				rng: rng.getStateCount(),
 			}),
 		)
-		.set(first, new imm.Map({ foe: second }))
-		.set(second, new imm.Map({ foe: first }));
+		.set(first, new imm.Map({ owner: first, foe: second }))
+		.set(second, new imm.Map({ owner: second, foe: first }));
 	this.cache = new Map([
 		[this.id, this],
-		[player1, new Player(this, player1).init()],
-		[player2, new Player(this, player2).init()],
+		[first, new Player(this, first).init()],
+		[second, new Player(this, second).init()],
 	]);
 	this.targeting = null;
 	this.expectedDamage = new Int16Array(2);
@@ -101,17 +96,9 @@ Game.prototype.rng = function() {
 	let val;
 	this.props = this.props.updateIn([this.id, 'rng'], rng => {
 		const rngInst = new Rng(seed, ~seed);
-		rngInst.lowConstant = rng.get('lowConstant');
-		rngInst.highConstant = rng.get('highConstant');
-		rngInst.lowStateCount = rng.get('lowStateCount');
-		rngInst.highStateCount = rng.get('highStateCount');
+		rngInst.setStateCount(...rng);
 		val = rngInst.nextNumber();
-		return new imm.Map({
-			lowConstant: rng.get('lowConstant'),
-			highConstant: rng.get('highConstant'),
-			lowStateCount: rng.get('lowStateCount'),
-			highStateCount: rng.get('highStateCount'),
-		});
+		return rngInst.getStateCount();
 	});
 	return val;
 };
@@ -134,8 +121,13 @@ Game.prototype.byId = function(id) {
 	return inst;
 };
 Game.prototype.newId = function() {
-	const newId = this.get(this.id, 'id') + 1;
-	this.set(this.id, 'id', newId);
+	let newId;
+	this.update(this.id, game =>
+		game.update('id', id => {
+			newId = id;
+			return id + 1;
+		}),
+	);
 	return newId;
 };
 Game.prototype.newThing = function(card) {
@@ -215,35 +207,6 @@ Game.prototype.updateExpectedDamage = function() {
 		expectedDamage[1] = (expectedDamage[1] / 3) | 0;
 		this.expectedDamage = expectedDamage;
 	}
-};
-Game.prototype.tgtToBits = function(x) {
-	if (!x) return 0;
-	const bits =
-		x.type == etg.Player
-			? 1
-			: x.type == etg.Weapon
-			? 17
-			: x.type == etg.Shield
-			? 33
-			: (x.type == etg.Creature ? 2 : x.type == etg.Permanent ? 4 : 5) |
-			  (x.getIndex() << 4);
-	return x.ownerId == this.player2Id ? bits | 8 : bits;
-};
-Game.prototype.bitsToTgt = function(x) {
-	const tgtop = x & 7,
-		x4 = x >> 4,
-		player = this.players(!(x & 8));
-	return tgtop == 0
-		? undefined
-		: tgtop == 1
-		? player[['owner', 'weapon', 'shield'][x4]]
-		: tgtop == 2
-		? player.creatures[x4]
-		: tgtop == 4
-		? player.permanents[x4]
-		: tgtop == 5
-		? player.hand[x4]
-		: console.log(`Unknown tgtop: ${tgtop}, ${x4}`);
 };
 Game.prototype.getTarget = function(src, active, cb) {
 	const targetingFilter = Cards.Targeting[active.name[0]];
