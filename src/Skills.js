@@ -14,7 +14,7 @@ function adrenathrottle(f) {
 }
 function quadpillarFactory(ele) {
 	return (ctx, c, t) => {
-		const n = c.id == t.id ? 1 : c.getStatus('charges');
+		const n = c.getStatus('charges');
 		for (let i = 0; i < n; i++) {
 			const r = c.owner.upto(16);
 			c.owner.spend((ele >> ((r & 3) << 2)) & 15, -1);
@@ -310,13 +310,7 @@ const Skills = {
 	corpseexplosion: (ctx, c, t) => {
 		const dmg = 1 + Math.floor(t.truehp() / 8);
 		t.die();
-		c.owner.foe.masscc(
-			c,
-			(c, t) => {
-				t.spelldmg(dmg);
-			},
-			!c.card.upped,
-		);
+		c.owner.foe.masscc(c, (ctx, c, t) => t.spelldmg(dmg), !c.card.upped);
 		const poison = t.getStatus('poison') + t.getStatus('poisonous');
 		if (poison) c.owner.foe.addpoison(poison);
 	},
@@ -575,9 +569,7 @@ const Skills = {
 	dryspell: (ctx, c, t) => {
 		c.owner.foe.masscc(
 			c.owner,
-			(c, t) => {
-				c.spend(etg.Water, -t.spelldmg(1));
-			},
+			(ctx, c, t) => c.spend(etg.Water, -t.spelldmg(1)),
 			true,
 		);
 	},
@@ -955,13 +947,7 @@ const Skills = {
 	ignite: (ctx, c, t) => {
 		c.die();
 		c.owner.foe.spelldmg(20);
-		c.owner.foe.masscc(
-			c,
-			(c, x) => {
-				x.spelldmg(1);
-			},
-			true,
-		);
+		c.owner.foe.masscc(c, (ctx, c, x) => x.spelldmg(1), true);
 	},
 	immolate: (ctx, c, t) => {
 		t.die();
@@ -1248,7 +1234,7 @@ const Skills = {
 	},
 	luciferin: (ctx, c, t) => {
 		c.owner.dmg(-10);
-		c.owner.masscc(c, (c, x) => {
+		c.owner.masscc(c, (ctx, c, x) => {
 			for (const [key, act] of x.active) {
 				if (
 					key != 'ownplay' &&
@@ -1972,7 +1958,7 @@ const Skills = {
 	storm: x => {
 		const n = +x;
 		return (ctx, c, t) => {
-			t.masscc(c, (c, x) => x.spelldmg(n));
+			t.masscc(c, (ctx, c, x) => x.spelldmg(n));
 		};
 	},
 	summon: name => {
@@ -2039,14 +2025,14 @@ const Skills = {
 		c.dmg(c.card.upped ? 3 : 1);
 		if (c.hp <= 0) {
 			if (c.card.upped)
-				c.owner.foe.masscc(c, (c, x) => {
+				c.owner.foe.masscc(c, (ctx, c, x) => {
 					x.dmg(4);
 				});
 			else c.owner.foe.spelldmg(18);
 		}
 	},
 	tidalhealing: (ctx, c, t) => {
-		c.owner.masscc(c, (c, t) => {
+		c.owner.masscc(c, (ctx, c, t) => {
 			if (t.getStatus('poison') > 0) t.setStatus('poison', 0);
 			if (t.getStatus('frozen')) t.setStatus('frozen', 0);
 			if (t.getStatus('aquatic') && !t.hasactive('hit', 'regen'))

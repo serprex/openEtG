@@ -464,10 +464,10 @@ Player.prototype.masscc = function(caster, func, massmass) {
 		crsfoe = massmass && this.foe.creatures;
 	for (let i = 0; i < 23; i++) {
 		if (crs[i] && crs[i].isMaterial()) {
-			func(caster, crs[i]);
+			func(this.game, caster, crs[i]);
 		}
 		if (crsfoe && crsfoe[i] && crsfoe[i].isMaterial()) {
-			func(caster, crsfoe[i]);
+			func(this.game, caster, crsfoe[i]);
 		}
 	}
 };

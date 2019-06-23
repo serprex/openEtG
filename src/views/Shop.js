@@ -148,9 +148,10 @@ module.exports = connect(({ user, opts }) => ({
 		};
 
 		render() {
-			const hasFreePacks =
+			const hasFreePacks = !!(
 				this.props.user.freepacks &&
-				this.props.user.freepacks[this.state.packrarity];
+				this.props.user.freepacks[this.state.packrarity]
+			);
 			const elebuttons = [];
 			for (let i = 0; i < 14; i++) {
 				elebuttons.push(

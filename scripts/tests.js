@@ -92,13 +92,22 @@ M.test('Adrenaline', function() {
 });
 M.test('Aflatoxin', function() {
 	this.player1.addCrea(this.game.newThing(Cards.Devourer));
-	this.player1.creatures[0].setStatus('aflatoxin', 1);
+	this.cast('aflatoxin', this.player1, this.player1.creatures[0]);
+	assert.ok(this.player1.creatures[0].getStatus('poison'), 'Is poisoned');
 	this.player1.creatures[0].die();
 	assert.ok(this.player1.creatures[0], 'Something');
 	assert.equal(
 		this.player1.creatures[0].card,
 		Cards.MalignantCell,
 		'Malignant',
+	);
+	this.player1.addCrea(this.game.newThing(Cards.Phoenix));
+	this.cast('aflatoxin', this.player1, this.player1.creatures[1]);
+	this.player1.creatures[1].die();
+	assert.equal(
+		this.player1.creatures[1].card,
+		Cards.MalignantCell,
+		'Malignant, not Ash',
 	);
 });
 M.test('BoneWall', function() {
@@ -294,6 +303,15 @@ M.test('Phoenix', function() {
 	this.cast('lightning', this.player1, phoenix);
 	assert.equal(this.player1.creatures[0].card, Cards.Ash, 'Ash');
 });
+M.test('Plague', function() {
+	this.player1.setQuanta(etg.Death, 8);
+	initHand(this.player1, Cards.Plague);
+	this.player1.addCrea(this.game.newThing(Cards.Rustler));
+	this.player1.hand[0].useactive(this.player1);
+	assert.ok(this.player1.creatures[0].getStatus('poison'), 'Poisoned Rustler');
+	this.player1.endturn();
+	assert.ok(!this.player1.creatureIds[0], 'No Rustler');
+});
 M.test('Purify', function() {
 	this.cast('poison 3', this.player1, this.player2);
 	assert.equal(this.player2.getStatus('poison'), 3, '3');
@@ -316,6 +334,16 @@ M.test('Reflect', function() {
 		this.player1.hp == 90 && this.player2.hp == 95,
 		'Unreflected reflected spell',
 	);
+});
+M.test('Rustler', function() {
+	this.player1.setQuanta(etg.Light, 3);
+	this.player1.addCrea(this.game.newThing(Cards.Rustler));
+	this.player1.endturn();
+	this.player2.endturn();
+	this.player1.creatures[0].useactive();
+	this.player1.creatures[0].useactive();
+	assert.equal(this.player1.quanta[etg.Light], 1, '1 Light');
+	assert.equal(this.player1.quanta[etg.Life], 4, '4 Life');
 });
 M.test('Steal', function() {
 	this.player1.setShield(this.game.newThing(Cards.BoneWall));

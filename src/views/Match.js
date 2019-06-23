@@ -175,8 +175,8 @@ const ThingInst = connect(({ opts }) => ({ lofiArt: opts.lofiArt }))(
 						<div
 							style={{
 								position: 'absolute',
-								left: pos.x - 32 + 'px',
-								top: pos.y - 38 + 'px',
+								left: `${pos.x - 32}px`,
+								top: `${pos.y - 38}px`,
 								width: '68px',
 								height: '80px',
 								border: 'transparent 2px solid',
@@ -766,10 +766,10 @@ module.exports = connect(({ user }) => ({ user }))(
 					if (game.phase != etg.PlayPhase) {
 						cancelText = game.turn === game.player1Id ? 'Mulligan' : '';
 					} else {
-						cancelText = '';
-						game.targeting || this.state.discarding || this.state.resigning
-							? 'Cancel'
-							: '';
+						cancelText =
+							game.targeting || this.state.discarding || this.state.resigning
+								? 'Cancel'
+								: '';
 					}
 				} else cancelText = endText = '';
 			} else {
