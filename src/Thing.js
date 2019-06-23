@@ -20,6 +20,7 @@ function Thing(game, id) {
 	this.game = game;
 	this.id = id;
 }
+module.exports = Thing;
 function defineProp(key) {
 	Object.defineProperty(Thing.prototype, key, {
 		get: function() {
@@ -68,7 +69,14 @@ Thing.prototype.init = function(card) {
 	this.active = card.active;
 	return this;
 };
-module.exports = Thing;
+Thing.prototype.clone = function(ownerId) {
+	const newId = this.game.newId();
+	this.game.props = this.game.props.set(
+		newId,
+		this.game.props.get(this.id).set('owner', ownerId),
+	);
+	return this.game.byId(newId);
+};
 const sfx = require('./audio');
 
 Thing.prototype.toString = function() {
@@ -437,9 +445,9 @@ Thing.prototype.hasactive = function(type, name) {
 	return !!(atype && ~atype.name.indexOf(name));
 };
 Thing.prototype.canactive = function(spend) {
-	if (this.game.turn != this.ownerId || this.game.phase !== etg.PlayPhase)
+	if (this.game.turn !== this.ownerId || this.game.phase !== etg.PlayPhase) {
 		return false;
-	else if (this.type == etg.Spell) {
+	} else if (this.type === etg.Spell) {
 		return (
 			!this.owner.usedactive &&
 			this.owner[spend ? 'spend' : 'canspend'](
@@ -447,7 +455,7 @@ Thing.prototype.canactive = function(spend) {
 				this.card.cost,
 			)
 		);
-	} else
+	} else {
 		return (
 			this.active.has('cast') &&
 			!this.usedactive &&
@@ -455,6 +463,7 @@ Thing.prototype.canactive = function(spend) {
 			!this.status.get('frozen') &&
 			this.owner.canspend(this.castele, this.cast)
 		);
+	}
 };
 Thing.prototype.castSpell = function(tgt, active, nospell) {
 	if (typeof tgt === 'number') tgt = this.game.byId(tgt);
@@ -483,7 +492,7 @@ Thing.prototype.play = function(tgt, fromhand) {
 };
 Thing.prototype.useactive = function(t) {
 	const { owner } = this;
-	if (this.type == etg.Spell) {
+	if (this.type === etg.Spell) {
 		if (!this.canactive(true)) {
 			return console.log(`${owner} cannot cast ${this}`);
 		}
@@ -634,21 +643,30 @@ Thing.prototype.buffhp = function(x) {
 	return this.dmg(-x);
 };
 Thing.prototype.getStatus = function(key) {
-	return this.status.get(key) || 0;
+	return this.game.props.getIn([this.id, 'status', key], 0);
 };
 Thing.prototype.setStatus = function(key, val) {
-	this.status = this.status.set(key, val | 0);
+	this.game.update(this.id, smth => smth.setIn(['status', key], val | 0));
 };
 Thing.prototype.clearStatus = function() {
-	this.status = this.status.clear();
+	this.game.update(this.id, smth =>
+		smth.update('status', status => status.clear()),
+	);
 };
 Thing.prototype.maybeDecrStatus = function(key) {
-	const val = this.getStatus(key);
-	if (val > 0) this.setStatus(key, val - 1);
+	let val;
+	this.game.update(this.id, smth =>
+		smth.update('status', status => {
+			val = status.get(key, 0);
+			return val > 0 ? status.set(key, val - 1) : status;
+		}),
+	);
 	return val;
 };
 Thing.prototype.incrStatus = function(key, val) {
-	this.setStatus(key, this.getStatus(key) + val);
+	this.game.update(this.id, smth =>
+		smth.updateIn(['status', key], (x = 0) => x + val),
+	);
 };
 
 var ui = require('./ui');

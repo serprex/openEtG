@@ -213,7 +213,7 @@ const Skills = {
 				}
 			}
 		});
-		c.owner.zeroQuanta(etg.Gravity);
+		c.owner.setQuanta(etg.Gravity);
 	},
 	brew: (ctx, c, t) => {
 		Effect.mkText('Brew', c);
@@ -255,8 +255,8 @@ const Skills = {
 		if (!c.owner.creatures[data.index]) {
 			const lives = c.maybeDecrStatus('lives');
 			if (!lives) return;
-			Effect.mkText(lives - 1 + ' lives', c);
-			const cl = c.clone(c.owner);
+			Effect.mkText(`${lives - 1} lives`, c);
+			const cl = c.clone(c.ownerId);
 			cl.hp = cl.maxhp = c.card.health;
 			cl.atk = c.card.attack;
 			const creatures = Array.from(c.owner.creatureIds);
@@ -514,7 +514,7 @@ const Skills = {
 	},
 	disshield: (ctx, c, t, data) => {
 		if (!c.owner.spend(etg.Entropy, Math.ceil(data.dmg / 3))) {
-			c.owner.zeroQuanta(etg.Entropy);
+			c.owner.setQuanta(etg.Entropy);
 			c.remove();
 		}
 		data.dmg = 0;
@@ -550,7 +550,7 @@ const Skills = {
 		}
 	},
 	drawcopy: (ctx, c, t) => {
-		if (c.ownerId != t.ownerId) c.owner.addCardInstance(t.clone(c.owner));
+		if (c.ownerId != t.ownerId) c.owner.addCardInstance(t.clone(c.ownerId));
 	},
 	drawequip: (ctx, c, t) => {
 		const deck = c.owner.deck;
@@ -594,7 +594,7 @@ const Skills = {
 	duality: (ctx, c, t) => {
 		if (c.owner.foe.deckIds.length && c.owner.handIds.length < 8) {
 			c.owner.addCardInstance(
-				c.owner.foe.deck[c.owner.foe.deckIds.length - 1].clone(c.owner),
+				c.owner.foe.deck[c.owner.foe.deckIds.length - 1].clone(c.ownerId),
 			);
 		}
 	},
@@ -636,7 +636,7 @@ const Skills = {
 		Effect.mkText('+' + healsum, c);
 		c.owner.dmg(-healsum);
 		if (!c.owner.spend(etg.Life, Math.floor(healsum / 8))) {
-			c.owner.zeroQuanta(etg.Life);
+			c.owner.setQuanta(etg.Life);
 			c.die();
 		}
 	},
@@ -802,7 +802,7 @@ const Skills = {
 		for (let i = 6 + Math.floor(c.owner.quanta[etg.Aether] / 2); i > 0; i--) {
 			c.owner.addCard(t.card);
 		}
-		c.owner.zeroQuanta(etg.Aether);
+		c.owner.setQuanta(etg.Aether);
 	},
 	freedom: (ctx, c, t, attackFlags) => {
 		if (
@@ -1303,7 +1303,7 @@ const Skills = {
 		}
 	},
 	miracle: (ctx, c, t) => {
-		c.owner.zeroQuanta(etg.Light);
+		c.owner.setQuanta(etg.Light);
 		if (c.owner.sosa) {
 			c.owner.hp = 1;
 		} else if (c.owner.hp < c.owner.maxhp) {
@@ -1489,7 +1489,7 @@ const Skills = {
 			Skills.chimera.func(ctx, c);
 			return;
 		}
-		const copy = t.clone(c.owner);
+		const copy = t.clone(c.ownerId);
 		c.owner.addCrea(copy);
 		if (copy.getStatus('mutant')) {
 			const buff = c.owner.upto(25);
@@ -1885,7 +1885,7 @@ const Skills = {
 		}
 	}),
 	skyblitz: (ctx, c, t) => {
-		c.owner.zeroQuanta(etg.Air);
+		c.owner.setQuanta(etg.Air);
 		c.owner.creatures.forEach(cr => {
 			if (cr && cr.getStatus('airborne')) {
 				Effect.mkText('Dive', cr);
@@ -1944,7 +1944,7 @@ const Skills = {
 	},
 	steal: (ctx, c, t) => {
 		if (t.getStatus('stackable')) {
-			const inst = t.clone();
+			const inst = t.clone(c.ownerId);
 			inst.setStatus('charges', 1);
 			Skills.destroy.func(ctx, c, t, true);
 			t = inst;
@@ -2218,13 +2218,10 @@ const Skills = {
 		}
 	},
 	pillar: (ctx, c, t) => {
-		if (!t)
-			c.owner.spend(
-				c.card.element,
-				c.getStatus('charges') * (c.card.element > 0 ? -1 : -3),
-			);
-		else if (c.id == t.id)
-			c.owner.spend(c.card.element, c.card.element > 0 ? -1 : -3);
+		c.owner.spend(
+			c.card.element,
+			c.getStatus('charges') * (c.card.element > 0 ? -1 : -3),
+		);
 	},
 	pend: (ctx, c, t) => {
 		const pendstate = c.getStatus('pendstate');

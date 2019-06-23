@@ -2,7 +2,6 @@
 'use strict';
 const assert = require('assert'),
 	etg = require('../src/etg'),
-	util = require('../src/util'),
 	Game = require('../src/Game'),
 	Cards = require('../src/Cards'),
 	parseSkill = require('../src/parseSkill'),
@@ -62,6 +61,8 @@ M = new TestModule('Cards', {
 		this.initDeck = (...args) => args.map(x => this.game.newThing(x).id);
 		this.player1 = this.game.player1;
 		this.player2 = this.game.player2;
+		this.player1Id = this.game.player1Id;
+		this.player2Id = this.game.player2Id;
 		this.game.turn = this.player1Id;
 		this.game.phase = etg.PlayPhase;
 		this.player1.mark = this.player2.mark = etg.Entropy;
@@ -83,7 +84,7 @@ M.test('Adrenaline', function() {
 	this.player1.addCrea(this.game.newThing(Cards.CrimsonDragon.asUpped(true)));
 	for (let i = 0; i < 3; i++)
 		this.player1.creatures[i].setStatus('adrenaline', 1);
-	this.player2.quanta[etg.Life] = 3;
+	this.player2.setQuanta(etg.Life, 3);
 	this.player1.endturn();
 	assert.equal(this.player2.hp, 68, 'dmg');
 	assert.equal(this.player1.quanta[etg.Darkness], 2, 'Absorbed');
@@ -101,7 +102,7 @@ M.test('Aflatoxin', function() {
 	);
 });
 M.test('BoneWall', function() {
-	this.player1.quanta[etg.Death] = 8;
+	this.player1.setQuanta(etg.Death, 8);
 	initHand(this.player1, Cards.BoneWall);
 	this.player1.hand[0].useactive();
 	this.player2.addCrea(this.game.newThing(Cards.CrimsonDragon));
@@ -125,11 +126,11 @@ M.test('Boneyard', function() {
 M.test('Deckout', function() {
 	this.player2.deckIds = [];
 	this.player1.endturn();
-	assert.equal(this.game.winner, this.player1);
+	assert.equal(this.game.winner, this.player1Id);
 });
 M.test('Destroy', function() {
-	this.game.turn = this.player1;
-	this.player1.quanta[etg.Death] = 10;
+	this.game.turn = this.player1Id;
+	this.player1.setQuanta(etg.Death, 10);
 	initHand(
 		this.player1,
 		Cards.AmethystPillar,
@@ -171,7 +172,7 @@ M.test('Destroy', function() {
 });
 M.test('Devourer', function() {
 	this.player1.addCrea(this.game.newThing(Cards.Devourer));
-	this.player2.quanta[etg.Light] = 1;
+	this.player2.setQuanta(etg.Light, 1);
 	this.player1.endturn();
 	assert.equal(this.player2.quanta[etg.Light], 0, 'Light');
 	assert.equal(this.player1.quanta[etg.Darkness], 1, 'Darkness');
@@ -347,7 +348,7 @@ M.test('Steal', function() {
 M.test('Steam', function() {
 	this.player1.addCrea(this.game.newThing(Cards.SteamMachine));
 	const steam = this.player1.creatures[0];
-	this.player1.quanta[etg.Fire] = 8;
+	this.player1.setQuanta(etg.Fire, 8);
 	steam.usedactive = false;
 	assert.equal(steam.trueatk(), 0, '0');
 	steam.useactive();
@@ -356,7 +357,7 @@ M.test('Steam', function() {
 	assert.equal(steam.trueatk(), 4, '4');
 });
 M.test('Transform No Sick', function() {
-	this.player1.quanta[etg.Entropy] = 8;
+	this.player1.setQuanta(etg.Entropy, 8);
 	this.player1.addCrea(this.game.newThing(Cards.Pixie));
 	const pixie = this.player1.creatures[0];
 	pixie.usedactive = false;

@@ -208,7 +208,7 @@ Player.prototype.newThing = function(card) {
 Player.prototype.addCrea = function(x, fromhand) {
 	if (typeof x === 'number') x = this.game.byId(x);
 	if (~this.place('creatures', x.id)) {
-		if (fromhand && this.game.bonusstats != null && this == this.game.player1) {
+		if (fromhand && this.game.bonusstats && this.id == this.game.player1Id) {
 			this.game.update(this.game.id, game =>
 				game.updateIn(['bonusstats', 'creaturesplaced'], x => (x | 0) + 1),
 			);
@@ -335,9 +335,9 @@ Player.prototype.spend = function(qtype, x, scramble) {
 	this.game.set(this.id, 'quanta', quanta);
 	return true;
 };
-Player.prototype.zeroQuanta = function(qtype) {
+Player.prototype.setQuanta = function(qtype, val = 0) {
 	const quanta = new Int8Array(this.game.get(this.id, 'quanta'));
-	quanta[qtype] = 0;
+	quanta[qtype] = val;
 	this.game.set(this.id, 'quanta', quanta);
 };
 Player.prototype.countcreatures = function() {
