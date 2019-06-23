@@ -163,7 +163,7 @@ Thing.prototype.die = function() {
 	} else if (this.type == etg.Creature && !this.trigger('predeath')) {
 		if (this.status.get('aflatoxin') & !this.card.isOf(Cards.MalignantCell)) {
 			const cell = this.game.newThing(this.card.as(Cards.MalignantCell));
-			const creatures = Array.from(this.owner.creatureIds);
+			const creatures = new Uint32Array(this.owner.creatureIds);
 			creatures[idx] = cell.id;
 			this.game.set(this.ownerId, 'creatures', creatures);
 			cell.ownerId = this.ownerId;
@@ -171,7 +171,7 @@ Thing.prototype.die = function() {
 		}
 		if (this.ownerId == this.game.player2Id)
 			this.game.update(this.game.id, game =>
-				game.updateIn(['bonusstats', 'creatureskilled'], x => (x | 0) + 1),
+				game.updateIn(['bonusstats', 'creatureskilled'], (x = 0) => x + 1),
 			);
 		this.deatheffect(idx);
 	}

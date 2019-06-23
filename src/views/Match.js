@@ -12,6 +12,7 @@ const ui = require('../ui'),
 	store = require('../store'),
 	sfx = require('../audio'),
 	{ connect } = require('react-redux'),
+	{ Motion, spring } = require('react-motion'),
 	React = require('react');
 
 const svgbg = (() => {
@@ -169,26 +170,30 @@ const ThingInst = connect(({ opts }) => ({ lofiArt: opts.lofiArt }))(
 			!game.player1.precognition
 		) {
 			return (
-				<div
-					style={{
-						position: 'absolute',
-						left: pos.x - 32 + 'px',
-						top: pos.y - 38 + 'px',
-						width: '68px',
-						height: '80px',
-						border: 'transparent 2px solid',
-					}}
-					className={tgtclass(game, obj)}
-					onMouseOut={props.onMouseOut}
-					onClick={() => props.onClick(obj)}>
-					<div
-						className="ico cback"
-						style={{
-							left: '2px',
-							top: '2px',
-						}}
-					/>
-				</div>
+				<Motion style={{ x: spring(pos.x), y: spring(pos.y) }}>
+					{pos => (
+						<div
+							style={{
+								position: 'absolute',
+								left: pos.x - 32 + 'px',
+								top: pos.y - 38 + 'px',
+								width: '68px',
+								height: '80px',
+								border: 'transparent 2px solid',
+							}}
+							className={tgtclass(game, obj)}
+							onMouseOut={props.onMouseOut}
+							onClick={() => props.onClick(obj)}>
+							<div
+								className="ico cback"
+								style={{
+									left: '2px',
+									top: '2px',
+								}}
+							/>
+						</div>
+					)}
+				</Motion>
 			);
 		}
 		const children = [];
@@ -266,94 +271,98 @@ const ThingInst = connect(({ opts }) => ({ lofiArt: opts.lofiArt }))(
 			statText = `${obj.card.cost}:${obj.card.costele}`;
 		}
 		return (
-			<div
-				style={{
-					position: 'absolute',
-					left: pos.x - 32 * scale + 'px',
-					top: pos.y - 36 * scale + 'px',
-					width: 64 * scale + 4 + 'px',
-					height: (isSpell ? 64 : 72) * scale + 4 + 'px',
-					opacity: obj.isMaterial() ? '1' : '.7',
-					color: obj.card.upped ? '#000' : '#fff',
-					fontSize: '10px',
-					border: 'transparent 2px solid',
-					zIndex: !isSpell && obj.getStatus('cloak') ? '2' : undefined,
-				}}
-				onMouseOver={props.setInfo && (e => props.setInfo(e, obj, pos.x))}
-				className={tgtclass(game, obj)}
-				onMouseOut={props.onMouseOut}
-				onClick={() => props.onClick(obj)}>
-				{props.lofiArt ? (
+			<Motion style={{ x: spring(pos.x), y: spring(pos.y) }}>
+				{pos => (
 					<div
-						key={0}
-						className={obj.card.shiny ? 'shiny' : undefined}
 						style={{
 							position: 'absolute',
-							left: '0',
-							top: isSpell ? '0' : '10px',
-							width: 64 * scale + 'px',
-							height: 64 * scale + 'px',
-							backgroundColor: ui.maybeLightenStr(obj.card),
-							pointerEvents: 'none',
-						}}>
-						{obj.card ? obj.card.name : obj.name}
+							left: pos.x - 32 * scale + 'px',
+							top: pos.y - 36 * scale + 'px',
+							width: 64 * scale + 4 + 'px',
+							height: (isSpell ? 64 : 72) * scale + 4 + 'px',
+							opacity: obj.isMaterial() ? '1' : '.7',
+							color: obj.card.upped ? '#000' : '#fff',
+							fontSize: '10px',
+							border: 'transparent 2px solid',
+							zIndex: !isSpell && obj.getStatus('cloak') ? '2' : undefined,
+						}}
+						onMouseOver={props.setInfo && (e => props.setInfo(e, obj, pos.x))}
+						className={tgtclass(game, obj)}
+						onMouseOut={props.onMouseOut}
+						onClick={() => props.onClick(obj)}>
+						{props.lofiArt ? (
+							<div
+								key={0}
+								className={obj.card.shiny ? 'shiny' : undefined}
+								style={{
+									position: 'absolute',
+									left: '0',
+									top: isSpell ? '0' : '10px',
+									width: 64 * scale + 'px',
+									height: 64 * scale + 'px',
+									backgroundColor: ui.maybeLightenStr(obj.card),
+									pointerEvents: 'none',
+								}}>
+								{obj.card ? obj.card.name : obj.name}
+							</div>
+						) : (
+							<img
+								key={0}
+								className={obj.card.shiny ? 'shiny' : undefined}
+								src={`/Cards/${obj.card.code.toString(32)}.png`}
+								style={{
+									position: 'absolute',
+									left: '0',
+									top: isSpell ? '0' : '10px',
+									width: 64 * scale + 'px',
+									height: 64 * scale + 'px',
+									backgroundColor: ui.maybeLightenStr(obj.card),
+									pointerEvents: 'none',
+								}}
+							/>
+						)}
+						{children}
+						{topText && (
+							<Components.Text
+								text={topText}
+								icoprefix="te"
+								style={{
+									position: 'absolute',
+									left: '0',
+									top: '-8px',
+									width: 64 * scale + 'px',
+									overflow: 'hidden',
+									backgroundColor: ui.maybeLightenStr(obj.card),
+								}}
+							/>
+						)}
+						{statText && (
+							<Components.Text
+								text={statText}
+								icoprefix="te"
+								style={{
+									fontSize: '12px',
+									position: 'absolute',
+									top: isSpell ? '0' : '10px',
+									right: '0',
+									paddingLeft: '2px',
+									backgroundColor: ui.maybeLightenStr(obj.card),
+								}}
+							/>
+						)}
+						{obj.hasactive('prespell', 'protectonce') && (
+							<div
+								className="ico protection"
+								style={{
+									position: 'absolute',
+									left: '0',
+									top: '0',
+								}}
+							/>
+						)}
 					</div>
-				) : (
-					<img
-						key={0}
-						className={obj.card.shiny ? 'shiny' : undefined}
-						src={`/Cards/${obj.card.code.toString(32)}.png`}
-						style={{
-							position: 'absolute',
-							left: '0',
-							top: isSpell ? '0' : '10px',
-							width: 64 * scale + 'px',
-							height: 64 * scale + 'px',
-							backgroundColor: ui.maybeLightenStr(obj.card),
-							pointerEvents: 'none',
-						}}
-					/>
 				)}
-				{children}
-				{topText && (
-					<Components.Text
-						text={topText}
-						icoprefix="te"
-						style={{
-							position: 'absolute',
-							left: '0',
-							top: '-8px',
-							width: 64 * scale + 'px',
-							overflow: 'hidden',
-							backgroundColor: ui.maybeLightenStr(obj.card),
-						}}
-					/>
-				)}
-				{statText && (
-					<Components.Text
-						text={statText}
-						icoprefix="te"
-						style={{
-							fontSize: '12px',
-							position: 'absolute',
-							top: isSpell ? '0' : '10px',
-							right: '0',
-							paddingLeft: '2px',
-							backgroundColor: ui.maybeLightenStr(obj.card),
-						}}
-					/>
-				)}
-				{obj.hasactive('prespell', 'protectonce') && (
-					<div
-						className="ico protection"
-						style={{
-							position: 'absolute',
-							left: '0',
-							top: '0',
-						}}
-					/>
-				)}
-			</div>
+			</Motion>
 		);
 	},
 );
@@ -841,12 +850,12 @@ module.exports = connect(({ user }) => ({ user }))(
 						/>
 					),
 				);
-				const cards = [],
+				const things = [],
 					creatures = [],
 					perms = [];
 				for (let i = 0; i < pl.handIds.length; i++) {
 					const inst = pl.hand[i];
-					cards.push(
+					things.push(
 						<ThingInst
 							key={inst.id}
 							obj={inst}
@@ -895,7 +904,7 @@ module.exports = connect(({ user }) => ({ user }))(
 					creatures.reverse();
 					perms.reverse();
 				}
-				children.push(cards, creatures, perms);
+				children.push(...things, ...creatures, ...perms);
 				const wp = pl.weapon;
 				children.push(
 					wp && !(j == 1 && cloaked) && (

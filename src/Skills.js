@@ -259,7 +259,7 @@ const Skills = {
 			const cl = c.clone(c.ownerId);
 			cl.hp = cl.maxhp = c.card.health;
 			cl.atk = c.card.attack;
-			const creatures = Array.from(c.owner.creatureIds);
+			const creatures = new Uint32Array(c.owner.creatureIds);
 			creatures[data.index] = cl.id;
 			c.owner.creatureIds = creatures;
 		}
@@ -1643,7 +1643,7 @@ const Skills = {
 			t.owner.creatures[index].card != Cards.MalignantCell
 		) {
 			const skele = ctx.newThing(t.card.as(Cards.Skeleton));
-			const creatures = Array.from(t.owner.creatureIds);
+			const creatures = new Uint32Array(t.owner.creatureIds);
 			creatures[index] = skele.id;
 			t.owner.creatures = creatureIds;
 			skele.ownerId = t.ownerId;
