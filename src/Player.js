@@ -322,10 +322,10 @@ Player.prototype.setQuanta = function(qtype, val = 0) {
 	this.game.set(this.id, 'quanta', quanta);
 };
 Player.prototype.countcreatures = function() {
-	return this.creatures.reduce((count, cr) => count + !!cr, 0);
+	return this.creatureIds.reduce((count, cr) => count + !!cr, 0);
 };
 Player.prototype.countpermanents = function() {
-	return this.permanents.reduce((count, pr) => count + !!pr, 0);
+	return this.permanentIds.reduce((count, pr) => count + !!pr, 0);
 };
 Player.prototype.endturn = function(discard) {
 	this.game.update(this.game.id, game =>

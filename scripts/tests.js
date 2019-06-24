@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 'use strict';
-const assert = require('assert'),
+const assert = require('assert').strict,
 	etg = require('../src/etg'),
 	Game = require('../src/Game'),
 	Cards = require('../src/Cards'),
@@ -25,7 +25,7 @@ class TestModule {
 		const ctx = {};
 		if (this.opts.beforeEach) this.opts.beforeEach.call(ctx, this);
 		func.call(ctx, this);
-		console.log('pass ', name);
+		console.log('pass', name);
 	}
 }
 let M = new TestModule('Card Codes');
@@ -58,7 +58,8 @@ M = new TestModule('Cards', {
 	beforeEach: function() {
 		this.game = new Game(5489);
 		this.cast = (skill, ...args) => parseSkill(skill).func(this.game, ...args);
-		this.initDeck = (...args) => args.map(x => this.game.newThing(x).id);
+		this.initDeck = (pl, ...args) =>
+			(pl.deckIds = args.map(x => pl.newThing(x).id));
 		this.player1 = this.game.player1;
 		this.player2 = this.game.player2;
 		this.player1Id = this.game.player1Id;
@@ -66,12 +67,14 @@ M = new TestModule('Cards', {
 		this.game.turn = this.player1Id;
 		this.game.phase = etg.PlayPhase;
 		this.player1.mark = this.player2.mark = etg.Entropy;
-		this.player1.deckIds = this.initDeck(
+		this.initDeck(
+			this.player1,
 			Cards.AmethystPillar,
 			Cards.AmethystPillar,
 			Cards.AmethystPillar,
 		);
-		this.player2.deckIds = this.initDeck(
+		this.initDeck(
+			this.player2,
 			Cards.BonePillar,
 			Cards.BonePillar,
 			Cards.BonePillar,
@@ -218,8 +221,8 @@ M.test('Earthquake', function() {
 	assert.ok(!this.player1.permanents[0], 'poof');
 });
 M.test('Eclipse', function() {
-	this.player1.deckIds = this.initDeck(Cards.Ash, Cards.Ash, Cards.Ash);
-	this.player2.deckIds = this.initDeck(Cards.Ash, Cards.Ash, Cards.Ash);
+	this.initDeck(this.player1, Cards.Ash, Cards.Ash, Cards.Ash);
+	this.initDeck(this.player2, Cards.Ash, Cards.Ash, Cards.Ash);
 	for (let i = 0; i < 2; i++)
 		this.player1.addCrea(this.game.newThing(Cards.MinorVampire.asUpped(true)));
 	this.player1.hp = 50;
@@ -237,7 +240,7 @@ M.test('Gpull', function() {
 	this.player2.addCrea(this.game.newThing(Cards.ColossalDragon));
 	this.player2.gpull = this.player2.creatureIds[0];
 	this.player1.addCrea(this.game.newThing(Cards.Scorpion));
-	this.player2.deckIds = this.initDeck(Cards.ColossalDragon);
+	this.initDeck(this.player2, Cards.ColossalDragon);
 	this.player1.endturn();
 	assert.equal(this.game.get(this.player2.gpull, 'hp'), 24, 'dmg redirected');
 	assert.equal(
@@ -393,7 +396,7 @@ M.test('Transform No Sick', function() {
 	assert.ok(pixie.canactive(), 'canactive');
 });
 M.test('Voodoo', function() {
-	const voodoo = this.game.newThing(Cards.VoodooDoll);
+	const voodoo = this.player1.newThing(Cards.VoodooDoll);
 	this.player1.addCrea(voodoo);
 	this.cast('lightning', this.player1, voodoo);
 	this.cast('infect', this.player1, voodoo);
@@ -404,4 +407,16 @@ M.test('Voodoo', function() {
 	this.cast('holylight', this.player1, voodoo);
 	assert.equal(voodoo.hp, 1, 'holy dmg');
 	assert.equal(this.player2.hp, 85, 'foe holy dmg');
+});
+M.test('Whim', function() {
+	const whim = this.player1.newThing(Cards.Whim),
+		tstorm = this.player1.newThing(Cards.Thunderstorm),
+		dfly = this.player1.newThing(Cards.Dragonfly);
+	this.player1.addCrea(whim);
+	this.player1.deckpush(dfly.id);
+	this.player1.setQuanta(etg.Air, 3);
+	this.player1.addCardInstance(tstorm);
+	whim.useactive(tstorm);
+	assert.ok(~this.player1.deckIds.indexOf(tstorm.id), 'Storm on deck');
+	assert.ok(~this.player1.handIds.indexOf(dfly.id), 'Fly in hand');
 });

@@ -255,12 +255,12 @@ const SkillsValues = Object.freeze({
 	salvage: 2,
 	sanctify: 2,
 	scramble: c => {
-		let a = 0,
+		let a = 13,
 			fq = c.owner.foe.quanta;
 		for (let i = 1; i < 13; i++) {
-			if (!fq[i]) a++;
+			if (!fq[i]) a--;
 		}
-		return a;
+		return a / 2;
 	},
 	serendepity: 4,
 	shtriga: 6,
@@ -356,6 +356,17 @@ function estimateDamage(game, c, freedomChance, wallCharges, wallIndex) {
 	if (!c || c.getStatus('frozen') || c.getStatus('delayed')) {
 		return 0;
 	}
+	const tatk = c.trueatk(),
+		fsh = c.owner.foe.shield,
+		fshactive = fsh && fsh.active.get('shield'),
+		momentum =
+			!fsh ||
+			tatk <= 0 ||
+			c.getStatus('momentum') ||
+			c.getStatus('psionic') ||
+			(c.getStatus('burrowed') &&
+				c.owner.permanents.some(pr => pr && pr.getStatus('tunnel'))),
+		dr = momentum ? 0 : fsh.truedr();
 	function estimateAttack(tatk) {
 		const data = { dmg: tatk, blocked: 0 };
 		if (momentum) {
@@ -373,17 +384,6 @@ function estimateDamage(game, c, freedomChance, wallCharges, wallIndex) {
 		}
 		return Math.max(tatk - dr, 0);
 	}
-	const tatk = c.trueatk(),
-		fsh = c.owner.foe.shield,
-		fshactive = fsh && fsh.active.get('shield');
-	const momentum =
-		!fsh ||
-		tatk <= 0 ||
-		c.getStatus('momentum') ||
-		c.getStatus('psionic') ||
-		(c.getStatus('burrowed') &&
-			c.owner.permanents.some(pr => pr && pr.getStatus('tunnel')));
-	const dr = momentum ? 0 : fsh.truedr();
 	let atk = estimateAttack(tatk);
 	if (c.getStatus('adrenaline')) {
 		const attacks = etg.countAdrenaline(tatk);
@@ -507,8 +507,16 @@ const throttled = Object.freeze(
 	new Set(['poison 1', 'poison 2', 'poison 3', 'neuro', 'regen', 'siphon']),
 );
 
-function evalthing(game, c) {
+function evalthing(game, c, inHand) {
 	if (!c) return 0;
+	const { card } = c;
+	if (inHand && !caneventuallyactive(card.costele, card.cost, c.owner)) {
+		return card.active.get('discard') !== Skills.obsession
+			? 0
+			: card.upped
+			? -7
+			: -6;
+	}
 	let ttatk,
 		hp,
 		poison,
@@ -517,10 +525,11 @@ function evalthing(game, c) {
 		delayfactor,
 		adrenalinefactor,
 		score = 0;
-	const isCreature =
-			(c.type == etg.Spell ? c.card.type : c.type) == etg.Creature,
-		isAttacker =
-			isCreature || (c.type == etg.Spell ? c.card.type : c.type) == etg.Weapon;
+	if (inHand && card.type === etg.Spell) {
+		return evalactive(c, card.active.get('cast'));
+	}
+	const isCreature = (inHand ? card.type : c.type) === etg.Creature,
+		isAttacker = isCreature || (inHand ? card.type : c.type) === etg.Weapon;
 	if (isAttacker) {
 		ctrueatk = c.trueatk();
 		adrenalinefactor = c.getStatus('adrenaline')
@@ -624,64 +633,7 @@ function evalthing(game, c) {
 		);
 		score *= 1 - (12 * delayed) / (12 + delayed) / 16;
 	}
-	return score;
-}
-
-function evalcardinstance(cardInst) {
-	const c = cardInst.card;
-	if (!caneventuallyactive(c.costele, c.cost, cardInst.owner)) {
-		return c.active.get('discard') == Skills.obsession
-			? c.upped
-				? -7
-				: -6
-			: 0;
-	}
-	let score = 0;
-	if (c.type == etg.Spell) {
-		score += evalactive(cardInst, c.active.get('cast'));
-	} else {
-		for (const act of c.active.values()) {
-			score += evalactive(cardInst, act);
-		}
-		score += checkpassives(cardInst);
-		if (c.type == etg.Creature) {
-			score += c.getStatus('frozen') || c.getStatus('delayed') ? 0 : c.attack;
-			let hp = Math.max(c.health, 0),
-				poison = c.getStatus('poison');
-			if (poison > 0) {
-				hp = Math.max(hp - poison * 2, 0);
-				if (c.getStatus('aflatoxin')) score -= 2;
-			} else if (poison < 0) {
-				hp += Math.min(-poison, c.maxhp - c.hp);
-			}
-			score *= hp
-				? c.getStatus('immaterial') || c.getStatus('burrowed')
-					? 1.3
-					: 1 + Math.log(Math.min(hp, 33)) / 7
-				: 0.5;
-		} else if (c.type == etg.Weapon) {
-			score += c.attack;
-			if (
-				cardInst.owner.weapon ||
-				cardInst.owner.hand.some(cinst => cinst.card.type == etg.Weapon)
-			)
-				score /= 2;
-		} else if (c.type == etg.Shield) {
-			score += c.health * c.health;
-			if (
-				cardInst.owner.shield ||
-				cardInst.owner.hand.some(cinst => cinst.card.type == etg.Shield)
-			)
-				score /= 2;
-		}
-	}
-	score *= !cardInst.card.cost
-		? 0.8
-		: (cardInst.canactive() ? 0.6 : 0.5) *
-		  (!cardInst.card.costele
-				? 1
-				: 0.9 +
-				  Math.log(1 + cardInst.owner.quanta[cardInst.card.costele]) / 50);
+	if (inHand) score *= card.cost ? 0.1 : 0.4;
 	return score;
 }
 
@@ -714,7 +666,7 @@ let uniquesSkill, damageHash;
 
 module.exports = function(game) {
 	if (game.winner) {
-		return game.winner == game.player1 ? 99999999 : -99999999;
+		return game.winner === game.player1Id ? 99999999 : -99999999;
 	}
 	if (game.player1.deck.length == 0 && game.player1.handIds.length < 8) {
 		return -99999990;
@@ -742,21 +694,15 @@ module.exports = function(game) {
 		let pscore = wallCharges[j] * 4 + player.markpower;
 		pscore += evalthing(game, player.weapon);
 		pscore += evalthing(game, player.shield);
-		for (let i = 0; i < 23; i++) {
-			pscore += evalthing(game, player.creatures[i]);
-		}
-		for (let i = 0; i < 16; i++) {
-			pscore += evalthing(game, player.permanents[i]);
-		}
-		for (let i = 0; i < player.handIds.length; i++) {
-			pscore += evalcardinstance(player.hand[i]);
-		}
+		player.creatures.forEach(cr => (pscore += evalthing(game, cr)));
+		player.permanents.forEach(pr => (pscore += evalthing(game, pr)));
+		player.hand.forEach(cinst => (pscore += evalthing(game, cinst, true)));
 		if (
 			player != game.turn &&
 			player.handIds.length < 8 &&
-			player.deck.length
+			player.deckIds.length
 		) {
-			pscore += evalcardinstance(player.deck[player.deckIds.length - 1]);
+			pscore += evalthing(game, player.deck[player.deckIds.length - 1], true);
 		}
 		pscore +=
 			Math.min(8 - player.handIds.length, player.drawpower) * 2 +
