@@ -2191,13 +2191,13 @@ const Skills = {
 		}
 	},
 	yoink: (ctx, c, t) => {
-		if (t.type == etg.Player) {
+		if (t.type === etg.Player) {
 			Skills.foedraw.func(ctx, c);
 		} else if (!t.owner.getStatus('sanctuary')) {
 			t.remove();
 			if (c.owner.handIds.length < 8) {
 				t.ownerId = c.ownerId;
-				c.owner.hand.push(t);
+				c.owner.addCardInstance(t);
 			}
 		}
 	},
