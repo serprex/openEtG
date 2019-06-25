@@ -284,7 +284,7 @@ M.test('Obsession', function() {
 		Cards.GhostofthePast,
 		Cards.GhostofthePast,
 	);
-	this.player1.endturn(0);
+	this.player1.endturn(this.player1.handIds[0]);
 	assert.equal(this.player1.hp, 92, 'Damage');
 	assert.equal(this.player1.handIds.length, 7, 'Discarded');
 });
