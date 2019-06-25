@@ -18,7 +18,7 @@ function RenderInfo(props) {
 				store.store.dispatch(store.chatMsg('Deck too small'));
 				return;
 			}
-			const gameData = mkGame({
+			const game = mkGame({
 				deck: adeck,
 				urdeck: deck,
 				seed: util.randint(),
@@ -27,10 +27,10 @@ function RenderInfo(props) {
 				p2hp: info.curhp,
 				p2markpower: info.mark,
 				p2drawpower: info.draw,
-				ai: true,
+				ai: 1,
 				rematch: testDeck,
 			});
-			store.store.dispatch(store.doNav(require('./Match'), gameData));
+			store.store.dispatch(store.doNav(require('./Match'), { game }));
 		};
 		const card = y ? etgutil.asUpped(info.card, true) : info.card;
 		const adeck = '05' + card.toString(32) + info.deck;

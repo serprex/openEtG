@@ -68,7 +68,7 @@ exports.Text = function(props) {
 	if (!props.text) return null;
 	const text = props.text.toString().replace(/\|/g, ' / ');
 	const sep = /\d\d?:\d\d?|\$|\n/g;
-	const icoprefix = 'ico ' + (props.icoprefix || 'ce');
+	const icoprefix = `ico ${props.icoprefix || 'ce'}`;
 	let reres,
 		lastindex = 0;
 	const elec = [];

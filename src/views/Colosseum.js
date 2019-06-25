@@ -10,47 +10,42 @@ const etg = require('../etg'),
 	React = require('react');
 
 function mkDaily(type) {
+	let game;
 	if (type < 3) {
-		return () => {
-			const gamedata = mkAi.mkAi(type == 1 ? 0 : 2, type)();
-			if (gamedata) {
-				const dataNext =
-					type == 1
-						? {
-								goldreward: 200,
-								endurance: 2,
-								cost: 0,
-								daily: 1,
-								cardreward: '',
-								noheal: true,
-						  }
-						: {
-								goldreward: 500,
-								endurance: 1,
-								cost: 0,
-								daily: 2,
-								cardreward: '',
-						  };
-				gamedata.data.rematch = props =>
-					!(props.user.daily & (1 << type)) && mkDaily(type)();
-				gamedata.data.rematchFilter = props =>
-					props.game.winner !== props.game.player1;
-				gamedata.game.addData(dataNext);
-				gamedata.game.dataNext = dataNext;
-			}
-			mkAi.run(gamedata);
-		};
+		game = mkAi.mkAi(type == 1 ? 0 : 2, type, data => {
+			const dataNext =
+				type == 1
+					? {
+							goldreward: 200,
+							endurance: 2,
+							cost: 0,
+							daily: 1,
+							cardreward: '',
+							noheal: true,
+					  }
+					: {
+							goldreward: 500,
+							endurance: 1,
+							cost: 0,
+							daily: 2,
+							cardreward: '',
+							rematch: props =>
+								!(props.user.daily & (1 << type)) && mkDaily(type),
+							rematchFilter: props =>
+								props.game.winner !== props.game.player1Id,
+					  };
+			dataNext.dataNext = dataNext;
+			return Object.assign(data, dataNext);
+		});
 	} else {
-		return () => {
-			const gamedata = mkAi.mkPremade(type == 3 ? 1 : 3, type)();
-			if (gamedata) {
-				gamedata.game.addonreward = type == 3 ? 90 : 200;
-				gamedata.data.rematch = undefined;
-				sock.userExec('donedaily', { daily: type });
-			}
-			mkAi.run(gamedata);
-		};
+		game = mkAi.mkPremade(type == 3 ? 1 : 3, type, data => {
+			data.colobonus = type == 3 ? 4 : 1;
+			data.rematch = undefined;
+			sock.userExec('donedaily', { daily: type });
+			return data;
+		});
 	}
+	mkAi.run(game);
 }
 module.exports = connect(({ user }) => ({ user }))(function Colosseum({
 	user,
@@ -75,16 +70,16 @@ module.exports = connect(({ user }) => ({ user }))(function Colosseum({
 						style={{
 							position: 'absolute',
 							left: '50px',
-							top: 100 + 30 * i + 'px',
+							top: `${100 + 30 * i}px`,
 						}}
-						onClick={mkDaily(i)}
+						onClick={() => mkDaily(i)}
 					/>
 				)}
 				<span
 					style={{
 						position: 'absolute',
 						left: '130px',
-						top: 100 + 30 * i + 'px',
+						top: `${100 + 30 * i}px`,
 					}}>
 					{active
 						? events[i - 1]

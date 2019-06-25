@@ -90,7 +90,7 @@ exports.deck = function(deck) {
 		}
 		const card = Cards.Codes[code],
 			elech = eleChar(card),
-			elecls = (card.shiny ? 'A' : 'B') + ' ' + elech;
+			elecls = `${card.shiny ? 'A' : 'B'} ${elech}`;
 		if (card.shiny) classes.A = 'stroke:#da2;stroke-width:.5';
 		else classes.B = 'stroke:#000;stroke-width:.5';
 		classes[elech] = 'fill:' + ui.maybeLightenStr(card);

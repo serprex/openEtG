@@ -7,27 +7,25 @@ module.exports = function(game) {
 	function iterLoop(game, cmdct0) {
 		function iterCore(c) {
 			if (!c || !c.canactive()) return;
-			const ch = c.hash();
+			const ch = game.props.get(c.id).hashCode();
 			if (casthash.has(ch)) return;
 			casthash.add(ch);
 			const active = c.active.get('cast');
-			const cbits = game.tgtToBits(c) ^ 8;
 			function evalIter(t) {
 				if (
 					(!game.targeting || (t && game.targeting.filter(t))) &&
 					--limit > 0
 				) {
-					const tbits = game.tgtToBits(t) ^ 8;
 					const gameClone = game.clone();
-					gameClone.bitsToTgt(cbits).useactive(gameClone.bitsToTgt(tbits));
+					gameClone.byId(c.id).useactive(t && gameClone.byId(t.id));
 					const v =
-						gameClone.winner == gameClone.player2
+						gameClone.winner === gameClone.player2Id
 							? -999
-							: gameClone.winner == gameClone.player1
+							: gameClone.winner === gameClone.player1Id
 							? 999
 							: gameClone.player1.hp;
 					if (v < currentEval) {
-						cmdct = cmdct0 || cbits | (tbits << 9);
+						cmdct = cmdct0 || { c: c.id, t: t && t.id };
 						currentEval = v;
 						if (!gameClone.winner) {
 							iterLoop(gameClone, cmdct);

@@ -148,9 +148,10 @@ module.exports = connect(({ user, opts }) => ({
 		};
 
 		render() {
-			const hasFreePacks =
+			const hasFreePacks = !!(
 				this.props.user.freepacks &&
-				this.props.user.freepacks[this.state.packrarity];
+				this.props.user.freepacks[this.state.packrarity]
+			);
 			const elebuttons = [];
 			for (let i = 0; i < 14; i++) {
 				elebuttons.push(
@@ -162,7 +163,7 @@ module.exports = connect(({ user, opts }) => ({
 						click={() => {
 							const update = {
 								packele: i,
-								info1: 'Selected Element: ' + (i == 13 ? 'Random' : '1:' + i),
+								info1: `Selected Element: ${i == 13 ? 'Random' : '1:' + i}`,
 							};
 							this.setState(update);
 						}}

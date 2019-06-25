@@ -109,23 +109,23 @@ function cardPos(j, i) {
 }
 function tgtToPos(t) {
 	if (t.type == etg.Creature) {
-		return creaturePos(t.owner == t.owner.game.player2, t.getIndex());
+		return creaturePos(t.ownerId == t.game.player2Id, t.getIndex());
 	} else if (t.type == etg.Weapon) {
 		const p = { x: 666, y: 508 };
-		if (t.owner == t.owner.game.player2) reflectPos(p);
+		if (t.ownerId == t.game.player2Id) reflectPos(p);
 		return p;
 	} else if (t.type == etg.Shield) {
 		const p = { x: 710, y: 540 };
-		if (t.owner == t.owner.game.player2) reflectPos(p);
+		if (t.ownerId == t.game.player2Id) reflectPos(p);
 		return p;
 	} else if (t.type == etg.Permanent) {
-		return permanentPos(t.owner == t.owner.game.player2, t.getIndex());
+		return permanentPos(t.ownerId == t.game.player2Id, t.getIndex());
 	} else if (t.type == etg.Player) {
 		const p = { x: 50, y: 560 };
-		if (t == t.owner.game.player2) reflectPos(p);
+		if (t.id == t.game.player2Id) reflectPos(p);
 		return p;
 	} else if (t.type == etg.Spell) {
-		return cardPos(t.owner == t.owner.game.player2, t.getIndex());
+		return cardPos(t.ownerId == t.game.player2Id, t.getIndex());
 	} else {
 		return { x: -999, y: -999 };
 	}

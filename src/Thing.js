@@ -12,8 +12,51 @@ const passives = new Set([
 	'poisonous',
 	'golem',
 ]);
-function Thing(card) {
-	this.owner = null;
+function Thing(game, id) {
+	if (!id || typeof id !== 'number') {
+		throw new Error(`Invalid id ${id}`);
+	}
+	this.game = game;
+	this.id = id;
+}
+module.exports = Thing;
+function defineProp(key) {
+	Object.defineProperty(Thing.prototype, key, {
+		get: function() {
+			return this.game.get(this.id, key);
+		},
+		set: function(val) {
+			this.game.set(this.id, key, val);
+		},
+	});
+}
+Object.defineProperty(Thing.prototype, 'ownerId', {
+	get: function() {
+		return this.game.get(this.id, 'owner');
+	},
+	set: function(val) {
+		if (val && typeof val !== 'number') throw new Error(`Invalid id: ${val}`);
+		this.game.set(this.id, 'owner', val);
+	},
+});
+Object.defineProperty(Thing.prototype, 'owner', {
+	get: function() {
+		return this.game.byId(this.game.get(this.id, 'owner'));
+	},
+});
+defineProp('card');
+defineProp('cast');
+defineProp('castele');
+defineProp('maxhp');
+defineProp('hp');
+defineProp('atk');
+defineProp('status');
+defineProp('usedactive');
+defineProp('type');
+defineProp('active');
+
+Thing.prototype.init = function(card) {
+	this.ownerId = null;
 	this.card = card;
 	this.cast = card.cast;
 	this.castele = card.castele;
@@ -23,8 +66,16 @@ function Thing(card) {
 	this.usedactive = true;
 	this.type = 0;
 	this.active = card.active;
-}
-module.exports = Thing;
+	return this;
+};
+Thing.prototype.clone = function(ownerId) {
+	const newId = this.game.newId();
+	this.game.props = this.game.props.set(
+		newId,
+		this.game.props.get(this.id).set('owner', ownerId),
+	);
+	return this.game.byId(newId);
+};
 const sfx = require('./audio');
 
 Thing.prototype.toString = function() {
@@ -34,10 +85,11 @@ Thing.prototype.transform = function(card) {
 	this.card = card;
 	this.maxhp = this.hp = card.health;
 	this.atk = card.attack;
-	this.status = this.status.filter((_v, k) => !passives.has(k));
+	let status = this.status.filter((_v, k) => !passives.has(k));
 	for (const [key, val] of card.status) {
-		if (!this.getStatus(key)) this.status = this.status.set(key, val);
+		if (!status.get(key)) status = status.set(key, val);
 	}
+	this.status = status;
 	this.active = card.active;
 	if (this.status.get('mutant')) {
 		const buff = this.upto(25);
@@ -50,44 +102,53 @@ Thing.prototype.transform = function(card) {
 	}
 };
 Thing.prototype.getIndex = function() {
-	return this.type == etg.Weapon
-		? this.owner.weapon == this
-			? 0
-			: -1
-		: this.type == etg.Shield
-		? this.owner.shield == this
-			? 0
-			: -1
-		: (this.type == etg.Creature
-				? this.owner.creatures
-				: this.type == etg.Permanent
-				? this.owner.permanents
-				: this.owner.hand
-		  ).indexOf(this);
+	const { id, owner, type } = this;
+	let arrName;
+	switch (type) {
+		case etg.Weapon:
+			return owner.weaponId == id ? 0 : -1;
+		case etg.Shield:
+			return owner.shieldId == id ? 0 : -1;
+		case etg.Creature:
+			arrName = 'creatures';
+			break;
+		case etg.Permanent:
+			arrName = 'permanents';
+			break;
+		default:
+			arrName = 'hand';
+	}
+	return this.game.get(owner.id, arrName).indexOf(id);
 };
 Thing.prototype.remove = function(index) {
 	if (this.type == etg.Weapon) {
-		if (this.owner.weapon != this) return -1;
-		this.owner.weapon = undefined;
+		if (this.owner.weaponId != this.id) return -1;
+		this.owner.weaponId = 0;
 		return 0;
 	}
 	if (this.type == etg.Shield) {
-		if (this.owner.shield != this) return -1;
-		this.owner.shield = undefined;
+		if (this.owner.shieldId != this.id) return -1;
+		this.owner.shieldId = 0;
 		return 0;
 	}
 	if (index === undefined) index = this.getIndex();
-	let arr = undefined;
-	if (this.type == etg.Creature) {
-		if (this.owner.gpull == this) this.owner.gpull = undefined;
-		arr = this.owner.creatures;
-	} else if (this.type == etg.Permanent) {
-		arr = this.owner.permanents;
-	}
-	if (arr != undefined) {
-		arr[index] = undefined;
-	} else if (this.type == etg.Spell && ~index) {
-		this.owner.hand.splice(index, 1);
+	if (index !== -1) {
+		let arrName = undefined;
+		if (this.type == etg.Creature) {
+			if (this.owner.gpull == this.id) this.owner.gpull = 0;
+			arrName = 'creatures';
+		} else if (this.type == etg.Permanent) {
+			arrName = 'permanents';
+		}
+		if (arrName) {
+			const arr = new Uint32Array(this.game.get(this.ownerId, arrName));
+			arr[index] = 0;
+			this.game.set(this.ownerId, arrName, arr);
+		} else {
+			const hand = Array.from(this.game.get(this.ownerId, 'hand'));
+			hand.splice(index, 1);
+			this.game.set(this.ownerId, 'hand', hand);
+		}
 	}
 	return index;
 };
@@ -100,75 +161,45 @@ Thing.prototype.die = function() {
 		this.proc('discard');
 	} else if (this.type == etg.Creature && !this.trigger('predeath')) {
 		if (this.status.get('aflatoxin') & !this.card.isOf(Cards.MalignantCell)) {
-			const cell = (this.owner.creatures[idx] = new Thing(
-				this.card.as(Cards.MalignantCell),
-			));
-			cell.owner = this.owner;
+			const cell = this.game.newThing(this.card.as(Cards.MalignantCell));
+			const creatures = new Uint32Array(this.owner.creatureIds);
+			creatures[idx] = cell.id;
+			this.game.set(this.ownerId, 'creatures', creatures);
+			cell.ownerId = this.ownerId;
 			cell.type = etg.Creature;
 		}
-		if (
-			this.owner.game.bonusstats != null &&
-			this.owner == this.owner.game.player2
-		)
-			this.owner.game.bonusstats.creatureskilled++;
+		if (this.ownerId == this.game.player2Id)
+			this.game.update(this.game.id, game =>
+				game.updateIn(['bonusstats', 'creatureskilled'], (x = 0) => x + 1),
+			);
 		this.deatheffect(idx);
 	}
 };
 Thing.prototype.deatheffect = function(index) {
-	const data = { index: index };
+	const data = { index };
 	this.proc('death', data);
 	if (~index)
 		Effect.mkDeath(
-			ui.creaturePos(this.owner == this.owner.game.player1 ? 0 : 1, index),
+			ui.creaturePos(this.ownerId == this.game.player1Id ? 0 : 1, index),
 		);
-};
-Thing.prototype.clone = function(owner) {
-	const obj = Object.create(Thing.prototype);
-	obj.owner = owner;
-	obj.card = this.card;
-	obj.cast = this.cast;
-	obj.castele = this.castele;
-	obj.hp = this.hp;
-	obj.maxhp = this.maxhp;
-	obj.atk = this.atk;
-	obj.status = this.status;
-	obj.usedactive = this.usedactive;
-	obj.type = this.type;
-	obj.active = this.active;
-	return obj;
-};
-Thing.prototype.hash = function() {
-	let hash =
-		(this.owner == this.owner.game.player1 ? 17 : 19) ^
-		(this.type * 0x8888888) ^
-		(this.card.code & 0x3fff) ^
-		this.status.hashCode() ^
-		(this.hp * 17 + this.atk * 31 - this.maxhp - this.usedactive * 3);
-	for (const [k, v] of this.active) {
-		hash ^= util.hashString(k + ':' + v.name.join(' '));
-	}
-	if (this.active.has('cast')) {
-		hash ^= (this.castele | (this.cast << 16)) * 7;
-	}
-	return hash & 0x7ffffff;
 };
 Thing.prototype.trigger = function(name, t, param) {
 	const a = this.active.get(name);
-	return a ? a.func(this, t, param) : 0;
+	return a ? a.func(this.game, this, t, param) : 0;
 };
 Thing.prototype.proc = function(name, param) {
 	function proc(c) {
-		if (c) c.trigger(name, this, param);
+		if (c) this.game.byId(c).trigger(name, this, param);
 	}
 	if (this.active) {
 		this.trigger('own' + name, this, param);
 	}
 	for (let i = 0; i < 2; i++) {
 		const pl = i == 0 ? this.owner : this.owner.foe;
-		pl.creatures.forEach(proc, this);
-		pl.permanents.forEach(proc, this);
-		proc.call(this, pl.shield);
-		proc.call(this, pl.weapon);
+		pl.creatureIds.forEach(proc, this);
+		pl.permanentIds.forEach(proc, this);
+		proc.call(this, pl.shieldId);
+		proc.call(this, pl.weaponId);
 	}
 };
 Thing.prototype.calcCore = function(prefix, filterstat) {
@@ -253,8 +284,8 @@ Thing.prototype.activetext = function() {
 	return aauto ? aauto.name.join(' ') : '';
 };
 Thing.prototype.place = function(owner, type, fromhand) {
-	this.owner = owner;
-	this.type = type;
+	this.game.set(this.id, 'owner', owner.id);
+	this.game.set(this.id, 'type', type);
 	this.proc('play', fromhand);
 };
 Thing.prototype.dmg = function(x, dontdie) {
@@ -332,7 +363,7 @@ const mutantabilities = [
 ];
 Thing.prototype.mutantactive = function() {
 	this.lobo();
-	const index = this.owner.upto(mutantabilities.length + 2) - 2;
+	const index = this.upto(mutantabilities.length + 2) - 2;
 	if (index < 0) {
 		this.setStatus(['momentum', 'immaterial'][~index], 1);
 	} else {
@@ -341,7 +372,7 @@ Thing.prototype.mutantactive = function() {
 			this.addactive('death', active);
 		} else {
 			this.active = this.active.set('cast', active);
-			this.cast = 1 + this.owner.upto(2);
+			this.cast = 1 + this.upto(2);
 			this.castele = this.card.element;
 			return true;
 		}
@@ -363,9 +394,9 @@ function combineactive(a1, a2) {
 		return a2;
 	}
 	return {
-		func: function(c, t, data) {
-			const v1 = a1.func(c, t, data),
-				v2 = a2.func(c, t, data);
+		func: (ctx, c, t, data) => {
+			const v1 = a1.func(ctx, c, t, data),
+				v2 = a2.func(ctx, c, t, data);
 			return v1 === undefined
 				? v2
 				: v2 === undefined
@@ -389,8 +420,8 @@ Thing.prototype.setSkill = function(type, sk) {
 Thing.prototype.rmactive = function(type, name) {
 	const atype = this.active.get(type);
 	if (!atype) return;
-	const actives = atype.name;
-	const idx = actives.indexOf(name);
+	const actives = atype.name,
+		idx = actives.indexOf(name);
 	if (~idx) {
 		this.active =
 			actives.length === 1
@@ -410,12 +441,9 @@ Thing.prototype.hasactive = function(type, name) {
 	return !!(atype && ~atype.name.indexOf(name));
 };
 Thing.prototype.canactive = function(spend) {
-	if (
-		this.owner.game.turn != this.owner ||
-		this.owner.game.phase !== etg.PlayPhase
-	)
+	if (this.game.turn !== this.ownerId || this.game.phase !== etg.PlayPhase) {
 		return false;
-	else if (this.type == etg.Spell) {
+	} else if (this.type === etg.Spell) {
 		return (
 			!this.owner.usedactive &&
 			this.owner[spend ? 'spend' : 'canspend'](
@@ -423,7 +451,7 @@ Thing.prototype.canactive = function(spend) {
 				this.card.cost,
 			)
 		);
-	} else
+	} else {
 		return (
 			this.active.has('cast') &&
 			!this.usedactive &&
@@ -431,14 +459,16 @@ Thing.prototype.canactive = function(spend) {
 			!this.status.get('frozen') &&
 			this.owner.canspend(this.castele, this.cast)
 		);
+	}
 };
 Thing.prototype.castSpell = function(tgt, active, nospell) {
+	if (typeof tgt === 'number') tgt = this.game.byId(tgt);
 	const data = { tgt, active };
 	this.proc('prespell', data);
 	if (data.evade) {
 		if (tgt) Effect.mkText('Evade', tgt);
 	} else {
-		active.func(this, data.tgt);
+		active.func(this.game, this, data.tgt);
 		if (!nospell) this.proc('spell', data);
 	}
 };
@@ -458,22 +488,28 @@ Thing.prototype.play = function(tgt, fromhand) {
 };
 Thing.prototype.useactive = function(t) {
 	const { owner } = this;
-	if (this.type == etg.Spell) {
+	if (this.type === etg.Spell) {
 		if (!this.canactive(true)) {
 			return console.log(`${owner} cannot cast ${this}`);
 		}
 		this.remove();
-		if (owner.status.get('neuro')) owner.addpoison(1);
+		if (owner.getStatus('neuro')) owner.addpoison(1);
 		this.play(t, true);
 		this.proc('cardplay');
-		if (owner.game.bonusstats != null && owner == owner.game.player1)
-			owner.game.bonusstats.cardsplayed[this.card.type]++;
+		if (this.ownerId == this.game.player1Id)
+			this.game.update(this.game.id, game =>
+				game.updateIn(['bonusstats', 'cardsplayed'], x => {
+					const a = new Int32Array(x || 6);
+					a[this.card.type]++;
+					return a;
+				}),
+			);
 	} else if (owner.spend(this.castele, this.cast)) {
 		this.usedactive = true;
-		if (this.status.get('neuro')) this.addpoison(1);
+		if (this.getStatus('neuro')) this.addpoison(1);
 		this.castSpell(t, this.active.get('cast'));
 	}
-	owner.game.updateExpectedDamage();
+	this.game.updateExpectedDamage();
 };
 Thing.prototype.truedr = function() {
 	return this.hp + this.trigger('buff');
@@ -539,7 +575,7 @@ Thing.prototype.attack = function(target, attackPhase) {
 			target.dmg(trueatk);
 			this.trigger('hit', target, trueatk);
 		} else if (target.gpull) {
-			this.attackCreature(target.gpull, trueatk);
+			this.attackCreature(this.game.byId(target.gpull), trueatk);
 		} else {
 			const truedr = target.shield
 				? Math.min(target.shield.truedr(), trueatk)
@@ -572,10 +608,10 @@ Thing.prototype.attack = function(target, attackPhase) {
 	}
 };
 Thing.prototype.rng = function() {
-	return this.owner.game.rng.nextNumber();
+	return this.game.rng();
 };
 Thing.prototype.upto = function(x) {
-	return (this.owner.game.rng.nextNumber() * x) | 0;
+	return this.game.upto(x);
 };
 Thing.prototype.choose = function(x) {
 	return x[this.upto(x.length)];
@@ -585,12 +621,10 @@ Thing.prototype.randomcard = function(upped, filter) {
 	return keys && keys.length && Cards.Codes[this.choose(keys)];
 };
 Thing.prototype.shuffle = function(array) {
-	let counter = array.length,
-		temp,
-		index;
+	let counter = array.length;
 	while (counter--) {
-		index = this.upto(counter) | 0;
-		temp = array[counter];
+		const index = this.upto(counter),
+			temp = array[counter];
 		array[counter] = array[index];
 		array[index] = temp;
 	}
@@ -605,21 +639,30 @@ Thing.prototype.buffhp = function(x) {
 	return this.dmg(-x);
 };
 Thing.prototype.getStatus = function(key) {
-	return this.status.get(key) || 0;
+	return this.game.props.getIn([this.id, 'status', key], 0);
 };
 Thing.prototype.setStatus = function(key, val) {
-	this.status = this.status.set(key, val | 0);
+	this.game.update(this.id, smth => smth.setIn(['status', key], val | 0));
 };
-Thing.prototype.clearStatus = function(key, val) {
-	this.status = this.status.clear();
+Thing.prototype.clearStatus = function() {
+	this.game.update(this.id, smth =>
+		smth.update('status', status => status.clear()),
+	);
 };
 Thing.prototype.maybeDecrStatus = function(key) {
-	const val = this.getStatus(key);
-	if (val > 0) this.setStatus(key, val - 1);
+	let val;
+	this.game.update(this.id, smth =>
+		smth.update('status', status => {
+			val = status.get(key, 0);
+			return val > 0 ? status.set(key, val - 1) : status;
+		}),
+	);
 	return val;
 };
 Thing.prototype.incrStatus = function(key, val) {
-	this.setStatus(key, this.getStatus(key) + val);
+	this.game.update(this.id, smth =>
+		smth.updateIn(['status', key], (x = 0) => x + val),
+	);
 };
 
 var ui = require('./ui');

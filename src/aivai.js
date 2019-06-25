@@ -1,7 +1,7 @@
+'use strict';
 const Effect = require('./Effect');
 const Cards = require('./Cards');
 const Game = require('./Game');
-const Thing = require('./Thing');
 const etg = require('./etg');
 const etgutil = require('./etgutil');
 const aiSearch = require('./ai/search');
@@ -20,10 +20,13 @@ function mkGame(seed, decks) {
 	const game = new Game(seed, 0);
 	let idx, code;
 	for (let j = 0; j < 2; j++) {
-		const pl = game.players(j);
+		const pl = game.players(j),
+			deck = [];
 		for (let i = 0; i < decks[j].length; i++) {
 			if (Cards.Codes[(code = decks[j][i])]) {
-				pl.deck.push(new Thing(Cards.Codes[code]));
+				const cardinst = game.newThing(Cards.Codes[code]);
+				cardinst.ownerId = pl.id;
+				deck.push(cardinst.id);
 			} else if (~(idx = etgutil.fromTrueMark(code))) {
 				pl.mark = idx;
 			} else {
@@ -31,10 +34,11 @@ function mkGame(seed, decks) {
 				return;
 			}
 		}
+		pl.deckIds = deck;
 	}
-	game.turn.drawhand();
-	game.turn.foe.drawhand();
-	game.phase = etg.PlayPhase;
+	game.byId(game.turn).drawhand();
+	game.byId(game.turn).foe.drawhand();
+	game.set(game.id, 'phase', etg.PlayPhase);
 	return game;
 }
 let stopFight = false;
@@ -56,20 +60,19 @@ function fightItOut() {
 	);
 	const seed = parseInt(seedput.value) || util.randint();
 	let game = mkGame(seed, decks),
-		realp1 = game.player1;
+		realp1 = game.player1.id;
 	result.textContent = '';
 	let aiState = undefined;
 	const cmds = {
 		endturn: function(data) {
 			if (mode == fight) {
-				result.textContent += (game.turn == realp1 ? 1 : 2) + '\tEND TURN\n';
+				result.textContent += `${game.turn == realp1 ? 1 : 2}\tEND TURN\n`;
 			}
 			game.player2.endturn(data.bits);
 		},
 		cast: function(data) {
-			const bits = data.bits,
-				c = game.bitsToTgt(bits & 511),
-				t = game.bitsToTgt((bits >> 9) & 511);
+			const c = game.byId(data.c),
+				t = game.byId(data.t);
 			if (mode == fight) {
 				result.textContent += `${game.turn == realp1 ? 1 : 2}\t${c}${
 					t ? ' targets ' + t : ''
@@ -90,7 +93,7 @@ function fightItOut() {
 				aiState = new aiSearch(game);
 			}
 			if (aiState.cmd) {
-				cmds[aiState.cmd]({ bits: aiState.cmdct });
+				cmds[aiState.cmd](aiState.cmdct);
 				aiState = undefined;
 			}
 		}
@@ -113,7 +116,7 @@ function fightItOut() {
 					((fc[0] / (fc[0] + fc[1])) * 100).toFixed(2) +
 					'%)';
 				game = mkGame(util.randint(), decks);
-				realp1 = game.player1;
+				realp1 = game.player1.id;
 				if (!stopFight) setTimeout(gameStep, 0);
 				else {
 					stopFight = false;

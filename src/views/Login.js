@@ -109,7 +109,7 @@ if (typeof kongregateAPI === 'undefined') {
 							style={{ position: 'absolute', left: '270px', top: '350px' }}
 						/>
 						<input
-							onInput={e => this.setState({ password: e.target.value })}
+							onChange={e => this.setState({ password: e.target.value })}
 							value={this.state.password}
 							type="password"
 							placeholder="Password"

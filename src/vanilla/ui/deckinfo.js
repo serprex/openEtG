@@ -1,8 +1,8 @@
-var infobox = document.getElementById('infobox');
+const infobox = document.getElementById('infobox');
 function setInfo(x) {
 	infobox.appendChild(typeof x === 'string' ? document.createTextNode(x) : x);
 }
-var Cards = require('../Cards');
+const Cards = require('../Cards');
 document.getElementById('deckinput').addEventListener('keydown', printstat);
 function mkTable() {
 	var tbl = document.createElement('table');
@@ -22,7 +22,7 @@ function printstat(e) {
 	if (e.keyCode != 13) return;
 	document.getElementById('deckpreview').src =
 		'http://dek.im/deck/' + this.value;
-	var summon = 0,
+	let summon = 0,
 		buy = 0,
 		norarebuy = 0,
 		sell = 0,

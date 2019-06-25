@@ -1,18 +1,19 @@
 'use strict';
-const ui = require('../ui'),
+const imm = require('immutable'),
+	ui = require('../ui'),
 	etg = require('../etg'),
 	mkAi = require('../mkAi'),
 	sock = require('../sock'),
 	Card = require('../Card'),
 	Cards = require('../Cards'),
 	Effect = require('../Effect'),
-	Game = require('../Game'),
 	Skills = require('../Skills'),
 	aiSearch = require('../ai/search'),
 	Components = require('../Components'),
 	store = require('../store'),
 	sfx = require('../audio'),
 	{ connect } = require('react-redux'),
+	{ Motion, spring } = require('react-motion'),
 	React = require('react');
 
 const svgbg = (() => {
@@ -97,10 +98,11 @@ const floodsvg = (
 			top: '0',
 			zIndex: '1',
 			pointerEvents: 'none',
+			opacity: '.4',
 		}}>
 		<path
 			d="M149 146l644 0l0 64l-400 0l0 64l-244 0zM107 454l644 0l0-128l-244 0l0 64l-400 0z"
-			fill="#0486"
+			fill="#048"
 		/>
 	</svg>
 );
@@ -149,7 +151,7 @@ const activeInfo = {
 				Math.floor(
 					(game.player1.quanta[etg.Aether] - game.targeting.src.card.cost) / 2,
 				),
-			9 - game.player1.hand.length,
+			9 - game.player1.handIds.length,
 		),
 };
 
@@ -164,28 +166,36 @@ const ThingInst = connect(({ opts }) => ({ lofiArt: opts.lofiArt }))(
 					: 1,
 			isSpell = obj.type === etg.Spell,
 			pos = ui.tgtToPos(obj);
-		if (isSpell && obj.owner == game.player2 && !game.player1.precognition) {
+		if (
+			isSpell &&
+			obj.ownerId === game.player2Id &&
+			!game.player1.getStatus('precognition')
+		) {
 			return (
-				<div
-					style={{
-						position: 'absolute',
-						left: pos.x - 32 + 'px',
-						top: pos.y - 38 + 'px',
-						width: '68px',
-						height: '80px',
-						border: 'transparent 2px solid',
-					}}
-					className={tgtclass(game, obj)}
-					onMouseOut={props.onMouseOut}
-					onClick={() => props.onClick(obj)}>
-					<div
-						className="ico cback"
-						style={{
-							left: '2px',
-							top: '2px',
-						}}
-					/>
-				</div>
+				<Motion style={{ x: spring(pos.x), y: spring(pos.y) }}>
+					{pos => (
+						<div
+							style={{
+								position: 'absolute',
+								left: `${pos.x - 32}px`,
+								top: `${pos.y - 38}px`,
+								width: '68px',
+								height: '80px',
+								border: 'transparent 2px solid',
+							}}
+							className={tgtclass(game, obj)}
+							onMouseOut={props.onMouseOut}
+							onClick={() => props.onClick(obj)}>
+							<div
+								className="ico cback"
+								style={{
+									left: '2px',
+									top: '2px',
+								}}
+							/>
+						</div>
+					)}
+				</Motion>
 			);
 		}
 		const children = [];
@@ -200,7 +210,7 @@ const ThingInst = connect(({ opts }) => ({ lofiArt: opts.lofiArt }))(
 		];
 		const bordervisible = [
 			obj.getStatus('delayed'),
-			obj == obj.owner.gpull,
+			obj.id == obj.owner.gpull,
 			obj.getStatus('frozen'),
 		];
 		for (let k = 0; k < 7; k++) {
@@ -263,111 +273,117 @@ const ThingInst = connect(({ opts }) => ({ lofiArt: opts.lofiArt }))(
 			statText = `${obj.card.cost}:${obj.card.costele}`;
 		}
 		return (
-			<div
-				style={{
-					position: 'absolute',
-					left: pos.x - 32 * scale + 'px',
-					top: pos.y - 36 * scale + 'px',
-					width: 64 * scale + 4 + 'px',
-					height: (isSpell ? 64 : 72) * scale + 4 + 'px',
-					opacity: obj.isMaterial() ? '1' : '.7',
-					color: obj.card.upped ? '#000' : '#fff',
-					fontSize: '10px',
-					border: 'transparent 2px solid',
-					zIndex: !isSpell && obj.getStatus('cloak') ? '2' : undefined,
-				}}
-				onMouseOver={props.setInfo && (e => props.setInfo(e, obj, pos.x))}
-				className={tgtclass(game, obj)}
-				onMouseOut={props.onMouseOut}
-				onClick={() => props.onClick(obj)}>
-				{props.lofiArt ? (
+			<Motion style={{ x: spring(pos.x), y: spring(pos.y) }}>
+				{pos => (
 					<div
-						key={0}
-						className={obj.card.shiny ? 'shiny' : undefined}
 						style={{
 							position: 'absolute',
-							left: '0',
-							top: isSpell ? '0' : '10px',
-							width: 64 * scale + 'px',
-							height: 64 * scale + 'px',
-							backgroundColor: ui.maybeLightenStr(obj.card),
-							pointerEvents: 'none',
-						}}>
-						{obj.card ? obj.card.name : obj.name}
+							left: pos.x - 32 * scale + 'px',
+							top: pos.y - 36 * scale + 'px',
+							width: 64 * scale + 4 + 'px',
+							height: (isSpell ? 64 : 72) * scale + 4 + 'px',
+							opacity: obj.isMaterial() ? '1' : '.7',
+							color: obj.card.upped ? '#000' : '#fff',
+							fontSize: '10px',
+							border: 'transparent 2px solid',
+							zIndex: !isSpell && obj.getStatus('cloak') ? '2' : undefined,
+						}}
+						onMouseOver={props.setInfo && (e => props.setInfo(e, obj, pos.x))}
+						className={tgtclass(game, obj)}
+						onMouseOut={props.onMouseOut}
+						onClick={() => props.onClick(obj)}>
+						{props.lofiArt ? (
+							<div
+								key={0}
+								className={obj.card.shiny ? 'shiny' : undefined}
+								style={{
+									position: 'absolute',
+									left: '0',
+									top: isSpell ? '0' : '10px',
+									width: 64 * scale + 'px',
+									height: 64 * scale + 'px',
+									backgroundColor: ui.maybeLightenStr(obj.card),
+									pointerEvents: 'none',
+								}}>
+								{obj.card ? obj.card.name : obj.name}
+							</div>
+						) : (
+							<img
+								key={0}
+								className={obj.card.shiny ? 'shiny' : undefined}
+								src={`/Cards/${obj.card.code.toString(32)}.png`}
+								style={{
+									position: 'absolute',
+									left: '0',
+									top: isSpell ? '0' : '10px',
+									width: 64 * scale + 'px',
+									height: 64 * scale + 'px',
+									backgroundColor: ui.maybeLightenStr(obj.card),
+									pointerEvents: 'none',
+								}}
+							/>
+						)}
+						{children}
+						{topText && (
+							<Components.Text
+								text={topText}
+								icoprefix="te"
+								style={{
+									position: 'absolute',
+									left: '0',
+									top: '-8px',
+									width: 64 * scale + 'px',
+									overflow: 'hidden',
+									backgroundColor: ui.maybeLightenStr(obj.card),
+								}}
+							/>
+						)}
+						{statText && (
+							<Components.Text
+								text={statText}
+								icoprefix="te"
+								style={{
+									fontSize: '12px',
+									position: 'absolute',
+									top: isSpell ? '0' : '10px',
+									right: '0',
+									paddingLeft: '2px',
+									backgroundColor: ui.maybeLightenStr(obj.card),
+								}}
+							/>
+						)}
+						{obj.hasactive('prespell', 'protectonce') && (
+							<div
+								className="ico protection"
+								style={{
+									position: 'absolute',
+									left: '0',
+									top: '0',
+								}}
+							/>
+						)}
 					</div>
-				) : (
-					<img
-						key={0}
-						className={obj.card.shiny ? 'shiny' : undefined}
-						src={`/Cards/${obj.card.code.toString(32)}.png`}
-						style={{
-							position: 'absolute',
-							left: '0',
-							top: isSpell ? '0' : '10px',
-							width: 64 * scale + 'px',
-							height: 64 * scale + 'px',
-							backgroundColor: ui.maybeLightenStr(obj.card),
-							pointerEvents: 'none',
-						}}
-					/>
 				)}
-				{children}
-				{topText && (
-					<Components.Text
-						text={topText}
-						icoprefix="te"
-						style={{
-							position: 'absolute',
-							left: '0',
-							top: '-8px',
-							width: 64 * scale + 'px',
-							overflow: 'hidden',
-							backgroundColor: ui.maybeLightenStr(obj.card),
-						}}
-					/>
-				)}
-				{statText && (
-					<Components.Text
-						text={statText}
-						icoprefix="te"
-						style={{
-							fontSize: '12px',
-							position: 'absolute',
-							top: isSpell ? '0' : '10px',
-							right: '0',
-							paddingLeft: '2px',
-							backgroundColor: ui.maybeLightenStr(obj.card),
-						}}
-					/>
-				)}
-				{obj.hasactive('prespell', 'protectonce') && (
-					<div
-						className="ico protection"
-						style={{
-							position: 'absolute',
-							left: '0',
-							top: '0',
-						}}
-					/>
-				)}
-			</div>
+			</Motion>
 		);
 	},
 );
 
 function addNoHealData(game) {
-	const data = game.dataNext || {};
-	if (game.noheal) {
-		data.p1hp = Math.max(game.player1.hp, 1);
-		data.p1maxhp = game.player1.maxhp;
+	const data = game.get(game.id, 'data'),
+		dataNext = { ...data.get('dataNext') };
+	if (data.get('noheal')) {
+		dataNext.p1hp = Math.max(game.player1.hp, 1);
+		dataNext.p1maxhp = game.player1.maxhp;
 	}
-	return data;
+	return dataNext;
 }
 
 function tgtclass(game, obj) {
 	if (game.targeting) {
 		if (game.targeting.filter(obj)) return 'ants-red';
-	} else if (obj.owner === game.player1 && obj.canactive()) return 'canactive';
+	} else if (obj.ownerId === game.player1Id && obj.canactive())
+		return 'canactive';
 }
 
 function FoePlays({ foeplays, setCard, clearCard }) {
@@ -404,49 +420,52 @@ module.exports = connect(({ user }) => ({ user }))(
 			};
 		}
 
-		endClick = discard => {
+		endClick = (discard = 0) => {
 			const { game, user } = this.props;
-			if (game.turn == game.player1 && game.phase === etg.MulliganPhase) {
+			if (game.turn === game.player1Id && game.phase === etg.MulliganPhase) {
 				if (!game.ai) sock.emit('mulligan', { draw: true });
 				game.progressMulligan();
+				this.forceUpdate();
 			} else if (game.winner) {
 				if (user) {
-					if (game.arena) {
+					if (game.data.get('arena')) {
 						sock.userEmit('modarena', {
-							aname: game.arena,
-							won: game.winner == game.player2,
+							aname: game.data.get('arena'),
+							won: game.winner === game.player2Id,
 							lv: game.level - 4,
 						});
 					}
-					if (game.winner == game.player1) {
-						if (game.quest) {
-							if (game.quest.autonext) {
+					if (game.winner === game.player1Id) {
+						if (game.data.get('quest')) {
+							if (game.data.get('quest').autonext) {
 								const data = addNoHealData(game);
-								const newgame = require('../Quest').mkQuestAi(
-									game.quest.autonext,
+								mkAi.run(
+									require('../Quest').mkQuestAi(
+										game.data.get('quest').autonext,
+										qdata => Object.assign(qdata, data),
+									),
 								);
-								newgame.game.addData(data);
-								newgame.data.rematch = this.props.data.rematch;
-								newgame.data.rematchFilter = this.props.data.rematchFilter;
-								mkAi.run(newgame);
 								return;
-							} else if (!user.quests[game.quest.key]) {
-								sock.userExec('setquest', { quest: game.quest.key });
+							} else if (!user.quests[game.data.get('quest').key]) {
+								sock.userExec('setquest', {
+									quest: game.data.get('quest').key,
+								});
 							}
-						} else if (game.daily) {
-							if (game.endurance) {
+						} else if (game.data.get('daily')) {
+							if (game.data.get('endurance')) {
 								const data = addNoHealData(game);
 								data.endurance--;
-								const newgame = mkAi.mkAi(game.level, true)();
-								newgame.game.addData(data);
-								newgame.game.dataNext = data;
-								newgame.data.rematch = this.props.data.rematch;
-								newgame.data.rematchFilter = this.props.data.rematchFilter;
-								mkAi.run(newgame);
+								data.dataNext = data;
+								mkAi.run(
+									mkAi.mkAi(game.data.get('level'), true, gdata =>
+										Object.assign(gdata, data),
+									),
+								);
 								return;
 							} else {
+								const daily = game.data.get('daily');
 								sock.userExec('donedaily', {
-									daily: game.daily == 4 ? 5 : game.daily == 3 ? 0 : game.daily,
+									daily: daily == 4 ? 5 : daily === 3 ? 0 : daily,
 								});
 							}
 						}
@@ -455,15 +474,14 @@ module.exports = connect(({ user }) => ({ user }))(
 				this.props.dispatch(
 					store.doNav(require('./Result'), {
 						game: game,
-						data: this.props.data,
 						streakback: this.streakback,
 					}),
 				);
-			} else if (game.turn == game.player1) {
-				if (discard == undefined && game.player1.hand.length == 8) {
+			} else if (game.turn === game.player1Id) {
+				if (discard === 0 && game.player1.handIds.length == 8) {
 					this.setState({ discarding: true });
 				} else {
-					if (!game.ai) sock.emit('endturn', { bits: discard });
+					if (!game.ai) sock.emit('endturn', { c: game.player1Id, t: discard });
 					game.player1.endturn(discard);
 					game.targeting = null;
 					this.setState({ discarding: false, foeplays: [] });
@@ -475,10 +493,10 @@ module.exports = connect(({ user }) => ({ user }))(
 			const { game } = this.props;
 			if (this.state.resigning) {
 				this.setState({ resigning: false });
-			} else if (game.turn == game.player1) {
-				if (game.phase === etg.MulliganPhase && game.player1.hand.length) {
+			} else if (game.turn === game.player1Id) {
+				if (game.phase === etg.MulliganPhase && game.player1.handIds.length) {
 					sfx.playSound('mulligan');
-					game.player1.drawhand(game.player1.hand.length - 1);
+					game.player1.drawhand(game.player1.handIds.length - 1);
 					if (!game.ai) sock.emit('mulligan');
 					this.forceUpdate();
 				} else if (game.targeting) {
@@ -492,7 +510,7 @@ module.exports = connect(({ user }) => ({ user }))(
 			const { game } = this.props;
 			if (this.state.resigning) {
 				if (!game.ai) sock.emit('foeleft');
-				game.setWinner(game.player2);
+				game.setWinner(game.player2Id);
 				this.endClick();
 			} else {
 				this.setState({ resigning: true });
@@ -515,18 +533,19 @@ module.exports = connect(({ user }) => ({ user }))(
 			const { game } = this.props;
 			this.clearCard();
 			if (game.phase != etg.PlayPhase) return;
-			if (obj.owner == game.player1 && this.state.discarding) {
-				if (obj.type == etg.Spell) this.endClick(obj.getIndex());
+			if (obj.ownerId == game.player1Id && this.state.discarding) {
+				if (obj.type == etg.Spell) this.endClick(obj.id);
 			} else if (game.targeting) {
 				if (game.targeting.filter(obj)) {
 					game.targeting.cb(obj);
 					this.forceUpdate();
 				}
-			} else if (obj.owner == game.player1 && obj.canactive()) {
+			} else if (obj.ownerId == game.player1Id && obj.canactive()) {
 				const cb = tgt => {
 					if (!game.ai) {
 						sock.emit('cast', {
-							bits: game.tgtToBits(obj) | (game.tgtToBits(tgt) << 9),
+							c: obj.id,
+							t: tgt && tgt.id,
 						});
 					}
 					obj.useactive(tgt);
@@ -543,28 +562,37 @@ module.exports = connect(({ user }) => ({ user }))(
 
 		gameStep(cmds) {
 			const { game } = this.props;
-			if (game.turn == game.player2 && game.ai) {
-				if (game.phase == etg.PlayPhase) {
-					let now;
-					if (!this.aiCommand) {
-						Effect.disable = true;
-						if (this.aiState) {
-							this.aiState.step(game);
-						} else {
-							this.aiState = new aiSearch(game);
+			if (game.turn === game.player2Id) {
+				if (game.ai === 1) {
+					if (game.phase == etg.PlayPhase) {
+						let now;
+						if (!this.aiCommand) {
+							Effect.disable = true;
+							if (this.aiState) {
+								this.aiState.step(game);
+							} else {
+								this.aiState = new aiSearch(game);
+							}
+							Effect.disable = false;
+							if (this.aiState.cmd) {
+								this.aiCommand = true;
+							}
+						} else if ((now = Date.now()) > this.aiDelay) {
+							cmds[this.aiState.cmd](this.aiState.cmdct);
+							this.aiState = null;
+							this.aiCommand = false;
+							this.aiDelay = now + (game.turn === game.player1Id ? 2000 : 200);
 						}
-						Effect.disable = false;
-						if (this.aiState.cmd) {
-							this.aiCommand = true;
-						}
-					} else if ((now = Date.now()) > this.aiDelay) {
-						cmds[this.aiState.cmd]({ bits: this.aiState.cmdct });
-						this.aiState = null;
-						this.aiCommand = false;
-						this.aiDelay = now + (game.turn == game.player1 ? 2000 : 200);
+					} else if (game.phase === etg.MulliganPhase) {
+						cmds.mulligan({ draw: require('../ai/mulligan')(game.player2) });
 					}
-				} else if (game.phase === etg.MulliganPhase) {
-					cmds.mulligan({ draw: require('../ai/mulligan')(game.player2) });
+				} else if (game.ai === 2) {
+					game.update(game.id, game => {
+						const p1 = game.get('player1'),
+							p2 = game.get('player2');
+						return game.set('player1', p2).set('player2', p1);
+					});
+					this.forceUpdate();
 				}
 			}
 			const effects = Effect.next(game.player2.isCloaked());
@@ -599,30 +627,28 @@ module.exports = connect(({ user }) => ({ user }))(
 			e.preventDefault();
 		};
 
-		startMatch({ game, data, dispatch }) {
+		startMatch({ game, dispatch }) {
 			if (
 				this.props.user &&
-				!game.endurance &&
-				(game.level !== undefined || !game.ai)
+				!game.data.get('endurance') &&
+				(game.data.get('level') !== undefined || !game.ai)
 			) {
 				sock.userExec('addloss', {
 					pvp: !game.ai,
-					l: game.level,
-					g: -game.cost,
+					l: game.data.get('level'),
+					g: -game.data.get('cost'),
 				});
-				this.streakback = this.props.user.streak[game.level];
+				this.streakback = this.props.user.streak[game.data.get('level')];
 			}
 			Effect.clear();
 			const cmds = {
 				endturn: data => {
-					(data.spectate == 1 ? game.player1 : game.player2).endturn(data.bits);
-					if (data.spectate) this.setState({ foeplays: [] });
+					game.byId(data.c).endturn(data.t);
 					this.forceUpdate();
 				},
 				cast: data => {
-					const bits = data.spectate == 1 ? data.bits ^ 4104 : data.bits,
-						c = game.bitsToTgt(bits & 511),
-						t = game.bitsToTgt((bits >> 9) & 511);
+					const c = game.byId(data.c),
+						t = game.byId(data.t);
 					let play;
 					if (c.type == etg.Spell) {
 						play = c.card;
@@ -640,17 +666,20 @@ module.exports = connect(({ user }) => ({ user }))(
 					c.useactive(t);
 				},
 				foeleft: data => {
-					if (!game.ai)
-						game.setWinner(data.spectate == 1 ? game.player2 : game.player1);
-					this.forceUpdate();
+					if (!game.ai) {
+						game.setWinner(
+							data.spectate == 1 ? game.player2Id : game.player1Id,
+						);
+						this.forceUpdate();
+					}
 				},
 				mulligan: data => {
 					if (data.draw === true) {
 						game.progressMulligan();
 					} else {
-						const pl = data.spectate == 1 ? game.player1 : game.player2;
+						const pl = game.byId(game.turn);
 						sfx.playSound('mulligan');
-						pl.drawhand(pl.hand.length - 1);
+						pl.drawhand(pl.handIds.length - 1);
 					}
 					this.forceUpdate();
 				},
@@ -665,7 +694,7 @@ module.exports = connect(({ user }) => ({ user }))(
 				sock.userEmit('canceltrade');
 				delete sock.trade;
 			}
-			if (!this.props.data.spectate) {
+			if (!this.props.game.data.get('spectate')) {
 				document.addEventListener('keydown', this.onkeydown);
 			}
 			this.startMatch(this.props);
@@ -733,48 +762,49 @@ module.exports = connect(({ user }) => ({ user }))(
 					? 'Discard'
 					: game.targeting
 					? game.targeting.text
-					: `${game.turn == game.player1 ? 'Your' : 'Their'} Turn` +
-					  (game.phase > etg.MulliganPhase
-							? ''
-							: game.first == game.player1
-							? ', First'
-							: ', Second');
-				if (game.turn == game.player1) {
+					: `${game.turn === game.player1Id ? 'Your' : 'Their'} Turn${
+							game.phase > etg.MulliganPhase
+								? ''
+								: game.first === game.player1Id
+								? ', First'
+								: ', Second'
+					  }`;
+				if (game.turn === game.player1Id) {
 					endText = this.state.discarding
 						? ''
-						: game.phase == etg.PlayPhase
+						: game.phase === etg.PlayPhase
 						? 'End Turn'
-						: game.turn == game.player1
+						: game.turn === game.player1Id
 						? 'Accept Hand'
 						: '';
-					cancelText =
-						game.phase != etg.PlayPhase
-							? game.turn == game.player1
-								? 'Mulligan'
-								: ''
-							: game.targeting || this.state.discarding || this.state.resigning
-							? 'Cancel'
-							: '';
+					if (game.phase != etg.PlayPhase) {
+						cancelText = game.turn === game.player1Id ? 'Mulligan' : '';
+					} else {
+						cancelText =
+							game.targeting || this.state.discarding || this.state.resigning
+								? 'Cancel'
+								: '';
+					}
 				} else cancelText = endText = '';
 			} else {
-				turntell = `${game.turn == game.player1 ? 'Your' : 'Their'} Turn, ${
-					game.winner == game.player1 ? 'Won' : 'Lost'
+				turntell = `${game.turn === game.player1Id ? 'Your' : 'Their'} Turn, ${
+					game.winner == game.player1Id ? 'Won' : 'Lost'
 				}`;
 				endText = 'Continue';
 				cancelText = '';
 			}
 			let floodvisible = false;
 			for (let j = 0; j < 2; j++) {
-				const pl = game.players(j);
-
-				const plpos = ui.tgtToPos(pl);
-				const handOverlay = pl.usedactive
-					? 'ico silence'
-					: pl.sanctuary
-					? 'ico sanctuary'
-					: pl.nova >= 3 && pl.hand.some(c => c.card.isOf(Cards.Nova))
-					? 'ico singularity'
-					: '';
+				const pl = game.players(j),
+					plpos = ui.tgtToPos(pl),
+					handOverlay = pl.usedactive
+						? 'ico silence'
+						: pl.getStatus('sanctuary')
+						? 'ico sanctuary'
+						: pl.getStatus('nova') >= 3 &&
+						  pl.hand.some(c => c.card.isOf(Cards.Nova))
+						? 'ico singularity'
+						: '';
 				children.push(
 					<div
 						className={tgtclass(game, pl)}
@@ -803,7 +833,7 @@ module.exports = connect(({ user }) => ({ user }))(
 						}}>
 						{pl.markpower !== 1 && pl.markpower}
 					</span>,
-					!!pl.sosa && (
+					!!pl.getStatus('sosa') && (
 						<div
 							className={'ico sacrifice'}
 							style={{
@@ -814,7 +844,7 @@ module.exports = connect(({ user }) => ({ user }))(
 							}}
 						/>
 					),
-					!!pl.flatline && (
+					!!pl.getStatus('flatline') && (
 						<span
 							className="ico sabbath"
 							style={{
@@ -835,14 +865,15 @@ module.exports = connect(({ user }) => ({ user }))(
 						/>
 					),
 				);
-				const cards = [],
+				const things = [],
 					creatures = [],
 					perms = [];
-				for (let i = 0; i < pl.hand.length; i++) {
-					cards.push(
+				for (let i = 0; i < pl.handIds.length; i++) {
+					const inst = pl.hand[i];
+					things.push(
 						<ThingInst
-							key={i}
-							obj={pl.hand[i]}
+							key={inst.id}
+							obj={inst}
 							game={game}
 							setGame={() => this.forceUpdate()}
 							setInfo={(e, obj, x) => this.setCard(e, obj.card, x)}
@@ -856,7 +887,7 @@ module.exports = connect(({ user }) => ({ user }))(
 					if (cr && !(j == 1 && cloaked)) {
 						creatures.push(
 							<ThingInst
-								key={i}
+								key={cr.id}
 								obj={cr}
 								game={game}
 								setGame={() => this.forceUpdate()}
@@ -873,7 +904,7 @@ module.exports = connect(({ user }) => ({ user }))(
 					if (pr && !(j == 1 && cloaked && !pr.getStatus('cloak'))) {
 						perms.push(
 							<ThingInst
-								key={i}
+								key={pr.id}
 								obj={pr}
 								game={game}
 								setGame={() => this.forceUpdate()}
@@ -888,11 +919,14 @@ module.exports = connect(({ user }) => ({ user }))(
 					creatures.reverse();
 					perms.reverse();
 				}
-				children.push(cards, creatures, perms);
-				const wp = pl.weapon;
-				children.push(
+				things.push(...creatures);
+				things.push(...perms);
+				const wp = pl.weapon,
+					sh = pl.shield;
+				things.push(
 					wp && !(j == 1 && cloaked) && (
 						<ThingInst
+							key={wp.id}
 							obj={wp}
 							game={game}
 							setGame={() => this.forceUpdate()}
@@ -901,11 +935,9 @@ module.exports = connect(({ user }) => ({ user }))(
 							onClick={this.thingClick}
 						/>
 					),
-				);
-				const sh = pl.shield;
-				children.push(
 					sh && !(j == 1 && cloaked) && (
 						<ThingInst
+							key={sh.id}
 							obj={sh}
 							game={game}
 							setGame={() => this.forceUpdate()}
@@ -915,6 +947,7 @@ module.exports = connect(({ user }) => ({ user }))(
 						/>
 					),
 				);
+				children.push(things);
 				const qx = j ? 792 : 0,
 					qy = j ? 106 : 308;
 				for (let k = 1; k < 13; k++) {
@@ -923,15 +956,15 @@ module.exports = connect(({ user }) => ({ user }))(
 							className={'ico e' + k}
 							style={{
 								position: 'absolute',
-								left: qx + (k & 1 ? 0 : 54) + 'px',
-								top: qy + Math.floor((k - 1) / 2) * 32 + 'px',
+								left: `${qx + (k & 1 ? 0 : 54)}px`,
+								top: `${qy + Math.floor((k - 1) / 2) * 32}px`,
 							}}
 						/>,
 						<span
 							style={{
 								position: 'absolute',
-								left: qx + (k & 1 ? 32 : 86) + 'px',
-								top: qy + Math.floor((k - 1) / 2) * 32 + 4 + 'px',
+								left: `${qx + (k & 1 ? 32 : 86)}px`,
+								top: `${qy + Math.floor((k - 1) / 2) * 32 + 4}px`,
 								fontSize: '16px',
 								pointerEvents: 'none',
 							}}>
@@ -944,7 +977,7 @@ module.exports = connect(({ user }) => ({ user }))(
 						style={{
 							backgroundColor: '#000',
 							position: 'absolute',
-							left: plpos.x - 41 + 'px',
+							left: `${plpos.x - 41}px`,
 							top: j ? '36px' : '531px',
 							width: '82px',
 							height: '16px',
@@ -952,58 +985,55 @@ module.exports = connect(({ user }) => ({ user }))(
 						}}
 					/>,
 				);
-				const x1 = (80 * pl.hp) / pl.maxhp;
-				const x2 =
-					x1 - (80 * Math.min(game.expectedDamage[j], pl.hp)) / pl.maxhp;
+				const x1 = Math.max(80 * (pl.hp / pl.maxhp), 0);
+				const x2 = Math.max(x1 - 80 * (game.expectedDamage[j] / pl.maxhp), 0);
 				const poison = pl.getStatus('poison'),
-					poisoninfo =
-						(poison > 0
-							? poison + ' 1:2'
-							: poison < 0
-							? -poison + ' 1:7'
-							: '') + (pl.getStatus('neuro') ? ' 1:10' : '');
-				const hptext =
-					`${pl.hp}/${pl.maxhp}\n${pl.deck.length}cards` +
-					(!cloaked && game.expectedDamage[j]
-						? '\nDmg: ' + game.expectedDamage[j]
-						: '') +
-					(poisoninfo ? '\n' + poisoninfo : '');
+					poisoninfo = `${
+						poison > 0 ? poison + ' 1:2' : poison < 0 ? -poison + ' 1:7' : ''
+					} ${pl.getStatus('neuro') ? ' 1:10' : ''}`;
+				const hptext = `${pl.hp}/${pl.maxhp}\n${pl.deckIds.length}cards${
+					!cloaked && game.expectedDamage[j]
+						? `\nDmg: ${game.expectedDamage[j]}`
+						: ''
+				} ${poisoninfo ? `\n${poisoninfo}` : ''}`;
 				children.push(
-					pl.hp > 0 && (
-						<>
-							<div
-								style={{
-									backgroundColor: ui.strcols[etg.Life],
-									position: 'absolute',
-									left: plpos.x - 40 + 'px',
-									top: j ? '37px' : '532px',
-									width: (80 * pl.hp) / pl.maxhp + 'px',
-									height: '14px',
-									pointerEvents: 'none',
-								}}
-							/>
-							{!cloaked && game.expectedDamage[j] !== 0 && (
+					<Motion style={{ x1: spring(x1), x2: spring(x2) }}>
+						{({ x1, x2 }) => (
+							<>
 								<div
 									style={{
-										backgroundColor:
-											ui.strcols[
-												game.expectedDamage[j] >= pl.hp
-													? etg.Fire
-													: game.expectedDamage[j] > 0
-													? etg.Time
-													: etg.Water
-											],
+										backgroundColor: ui.strcols[etg.Life],
 										position: 'absolute',
-										left: plpos.x - 40 + Math.min(x1, x2),
+										left: `${plpos.x - 40}px`,
 										top: j ? '37px' : '532px',
-										width: Math.max(x1, x2) - Math.min(x1, x2) + 'px',
+										width: `${x1}px`,
 										height: '14px',
 										pointerEvents: 'none',
 									}}
 								/>
-							)}
-						</>
-					),
+								{!cloaked && game.expectedDamage[j] !== 0 && (
+									<div
+										style={{
+											backgroundColor:
+												ui.strcols[
+													game.expectedDamage[j] >= pl.hp
+														? etg.Fire
+														: game.expectedDamage[j] > 0
+														? etg.Time
+														: etg.Water
+												],
+											position: 'absolute',
+											left: plpos.x - 40 + Math.min(x1, x2),
+											top: j ? '37px' : '532px',
+											width: Math.max(x1, x2) - Math.min(x1, x2) + 'px',
+											height: '14px',
+											pointerEvents: 'none',
+										}}
+									/>
+								)}
+							</>
+						)}
+					</Motion>,
 					<Components.Text
 						text={hptext}
 						style={{
@@ -1049,7 +1079,8 @@ module.exports = connect(({ user }) => ({ user }))(
 							'Demigod\n',
 							'Arena1\n',
 							'Arena2\n',
-						][this.props.game.level] || '') + (this.props.game.foename || '-')}
+						][this.props.game.data.get('level')] || '') +
+							(this.props.game.data.get('foename') || '-')}
 					</div>
 					<span
 						style={{
@@ -1077,8 +1108,8 @@ module.exports = connect(({ user }) => ({ user }))(
 							top: '20px',
 						}}
 					/>
-					{!this.props.data.spectate &&
-						(game.turn == game.player1 || game.winner) && (
+					{!this.props.game.data.get('spectate') &&
+						(game.turn === game.player1Id || game.winner) && (
 							<>
 								{cancelText && (
 									<input

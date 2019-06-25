@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 'use strict';
-const assert = require('assert'),
+const assert = require('assert').strict,
 	etg = require('./etg'),
 	smth = require('./Thing'),
 	Game = require('./Game'),
@@ -21,7 +21,7 @@ class TestModule {
 		const ctx = {};
 		if (this.opts.beforeEach) this.opts.beforeEach.call(ctx, this);
 		func.call(ctx, this);
-		console.log('pass ', name);
+		console.log('pass', name);
 	}
 }
 let M = new TestModule('Card Codes');
