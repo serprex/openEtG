@@ -16,7 +16,7 @@ function deckPower(pl, deck) {
 module.exports = function(data) {
 	const game = new Game(data.seed, data.flip);
 	game.addData(data);
-	game.player1.maxhp = game.player1.hp;
+	if (!data.noheal) game.player1.maxhp = game.player1.hp;
 	game.player2.maxhp = game.player2.hp;
 	for (let j = 0; j < 2; j++) {
 		const pl = j ? game.byId(game.first).foe : game.byId(game.first),
