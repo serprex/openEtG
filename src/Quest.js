@@ -626,7 +626,10 @@ exports.mkQuestAi = function(quest) {
 			return;
 		}
 	}
-	const gamedata = require('./mkGame')({
+	const data = {
+		quest,
+		wintext: quest.wintext || '',
+		noheal: quest.noheal,
 		deck: quest.deck,
 		urdeck: urdeck,
 		seed: util.randint(),
@@ -636,21 +639,19 @@ exports.mkQuestAi = function(quest) {
 		p1hp: playerHPstart,
 		p2drawpower: drawpower,
 		ai: true,
-	});
-	const game = gamedata.game;
+	};
+	if (!user.quests[quest.key]) {
+		data.cardreward = quest.cardreward;
+		data.goldreward = quest.goldreward;
+		data.choicerewards = quest.choicerewards;
+		data.rewardamount = quest.rewardamount;
+	}
+	const gamedata = require('./mkGame')(data);
 	if (quest.morph) {
+		const game = gamedata.game;
 		game.player1.deckIds = game.player1.deck.map(
 			x => game.player1.newThing(quest.morph(x.card)).id,
 		);
-	}
-	game.quest = quest;
-	game.wintext = quest.wintext || '';
-	game.noheal = quest.noheal;
-	if (!user.quests[quest.key]) {
-		game.cardreward = quest.cardreward;
-		game.goldreward = quest.goldreward;
-		game.choicerewards = quest.choicerewards;
-		game.rewardamount = quest.rewardamount;
 	}
 	return gamedata;
 };

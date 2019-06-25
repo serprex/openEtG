@@ -732,8 +732,7 @@ const Skills = {
 		);
 	},
 	flyingweapon: (ctx, c, t) => {
-		t.owner.weapon = undefined;
-		t.type = etg.Creature;
+		t.remove();
 		t.setStatus('airborne', 1);
 		t.owner.addCrea(t);
 	},
@@ -1684,7 +1683,7 @@ const Skills = {
 	rewind: (ctx, c, t) => {
 		Effect.mkText('Rewind', t);
 		t.remove();
-		t.owner.deckpush(t.owner.newThing(t.card));
+		t.owner.deckpush(t.owner.newThing(t.card).id);
 	},
 	ricochet: (ctx, c, t, data) => {
 		if (t.type !== etg.Spell || t.card.type !== etg.Spell) return;
@@ -1976,7 +1975,7 @@ const Skills = {
 			Effect.mkText('Death', t);
 			t.die();
 		} else {
-			if (t.type == etg.Player && t.weapon && t.weapon.getStatus('frozen')) {
+			if (t.type === etg.Player && t.weaponId && t.weapon.getStatus('frozen')) {
 				Skills.destroy.func(ctx, c, t.weapon);
 			}
 			Effect.mkText('-4', t);
@@ -2330,7 +2329,7 @@ function unsummon(t) {
 	if (t.owner.handIds.length < 8) {
 		t.owner.addCardInstance(t);
 	} else {
-		t.owner.deckpush(t);
+		t.owner.deckpush(t.id);
 	}
 }
 for (const key in Skills) {
@@ -2342,7 +2341,6 @@ for (const key in Skills) {
 }
 module.exports = Skills;
 var etg = require('./etg');
-var util = require('./util');
 var Cards = require('./Cards');
 var Thing = require('./Thing');
 var Effect = require('./Effect');

@@ -75,7 +75,7 @@ function searchSkill(active, c, t) {
 		func(c, t)
 	);
 }
-AiSearch.prototype.step = function(game, previous) {
+AiSearch.prototype.step = function(game) {
 	const tend = Date.now() + 30;
 	let currentEval = this.eval,
 		nth = this.nth;
@@ -162,24 +162,27 @@ AiSearch.prototype.step = function(game, previous) {
 			}
 			let nbase = 2;
 			if (nth >= nbase && nth < nbase + p2.handIds.length) {
+				const { hand } = p2;
 				for (let i = nth - nbase; i < p2.handIds.length; i++) {
-					if (incnth(p2.hand[i])) {
+					if (incnth(hand[i])) {
 						return true;
 					}
 				}
 			}
 			nbase += p2.handIds.length;
 			if (nth >= nbase && nth < nbase + 16) {
+				const { permanents } = p2;
 				for (let i = nth - nbase; i < 16; i++) {
-					if (incnth(p2.permanents[i])) {
+					if (incnth(permanents[i])) {
 						return true;
 					}
 				}
 			}
 			nbase += 16;
 			if (nth >= nbase && nth < nbase + 23) {
+				const { creatures } = p2;
 				for (let i = nth - nbase; i < 23; i++) {
-					if (incnth(p2.creatures[i])) {
+					if (incnth(creatures[i])) {
 						return true;
 					}
 				}

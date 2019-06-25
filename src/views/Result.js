@@ -56,13 +56,13 @@ const BonusList = [
 	{
 		name: 'Full Health',
 		desc: 'Hp equal to maxhp',
-		func: game => (game.player1.hp == game.player1.maxhp ? 0.2 : 0),
+		func: game => (game.player1.hp === game.player1.maxhp ? 0.2 : 0),
 	},
 	{
 		name: 'Deckout',
 		desc: 'Win through deckout',
 		func: game =>
-			game.player2.deck.length == 0 && game.player2.hp > 0 ? 0.5 : 0,
+			game.player2.deckIds.length == 0 && game.player2.hp > 0 ? 0.5 : 0,
 	},
 	{
 		name: 'Double Kill',
@@ -72,13 +72,14 @@ const BonusList = [
 	{
 		name: 'Equipped',
 		desc: 'End match wielding a weapon & shield',
-		func: game => (game.player1.weapon && game.player1.shield ? 0.05 : 0),
+		func: game => (game.player1.weaponId && game.player1.shieldId ? 0.05 : 0),
 	},
 	{
 		name: 'First past the post',
 		desc: 'Win with non-positive hp, or foe loses from damage with positive hp',
 		func: game =>
-			game.player2.deck.length && (game.player1.hp <= 0 || game.player2.hp > 0)
+			game.player2.deckIds.length &&
+			(game.player1.hp <= 0 || game.player2.hp > 0)
 				? 0.1
 				: 0,
 	},
@@ -101,7 +102,7 @@ const BonusList = [
 	{
 		name: 'Mid Turn',
 		desc: 'Defeat foe with game ended still on own turn',
-		func: game => (game.turn == game.player1 ? 0.1 : 0),
+		func: game => (game.turn == game.player1Id ? 0.1 : 0),
 	},
 	{
 		name: 'Murderer',
@@ -111,7 +112,7 @@ const BonusList = [
 	{
 		name: 'Perfect Damage',
 		desc: 'Foe lost with 0hp',
-		func: game => (game.player2.hp == 0 ? 0.1 : 0),
+		func: game => (game.player2.hp === 0 ? 0.1 : 0),
 	},
 	{
 		name: 'Pillarless',
@@ -143,7 +144,7 @@ const BonusList = [
 	{
 		name: 'Waiter',
 		desc: 'Won with 0 cards in deck',
-		func: game => (game.player1.deckIds.length == 0 ? 0.3 : 0),
+		func: game => (game.player1.deckIds.length === 0 ? 0.3 : 0),
 	},
 	{
 		name: 'Weapon Master',
@@ -194,18 +195,18 @@ module.exports = connect(({ user }) => ({ user }))(
 
 		exitFunc = () => {
 			const { game } = this.props;
-			if (game.quest) {
-				if (game.winner === game.player1 && game.choicerewards) {
+			if (game.data.get('quest')) {
+				if (game.winner === game.player1Id && game.data.get('choicerewards')) {
 					this.props.dispatch(
 						store.doNav(require('./Reward'), {
-							type: game.choicerewards,
-							amount: game.rewardamount,
+							type: game.data.get('choicerewards'),
+							amount: game.data.get('rewardamount'),
 						}),
 					);
 				} else {
 					this.props.dispatch(store.doNav(require('./Quest')));
 				}
-			} else if (game.daily !== undefined) {
+			} else if (game.data.get('daily') !== undefined) {
 				this.props.dispatch(store.doNav(require('./Colosseum')));
 			} else {
 				this.props.dispatch(store.doNav(require('./MainMenu')));
@@ -213,7 +214,7 @@ module.exports = connect(({ user }) => ({ user }))(
 		};
 
 		computeBonuses(game, data, lefttext, streakrate) {
-			if (game.endurance !== undefined) return 1;
+			if (game.data.get('endurance') !== undefined) return 1;
 			const bonus = BonusList.reduce((bsum, bonus) => {
 				const b = bonus.func(game, data);
 				if (b > 0) {
@@ -238,8 +239,9 @@ module.exports = connect(({ user }) => ({ user }))(
 
 		componentDidMount() {
 			document.addEventListener('keydown', this.onkeydown);
-			const { game, data } = this.props;
-			const winner = game.winner === game.player1Id,
+			const { game, data } = this.props,
+				level = game.data.get('level'),
+				winner = game.winner === game.player1Id,
 				lefttext = [
 					<div>{game.bonusstats.get('ply')} plies</div>,
 					<div>{(game.bonusstats.get('time') / 1000).toFixed(1)} seconds</div>,
@@ -247,10 +249,10 @@ module.exports = connect(({ user }) => ({ user }))(
 			let streakrate = 0;
 			if (winner) {
 				if (this.props.user) {
-					if (game.level !== undefined || !game.ai)
+					if (level !== undefined || !game.ai)
 						sock.userExec('addwin', { pvp: !game.ai });
-					if (!game.quest && game.ai) {
-						if (game.cardreward === undefined && data.deck) {
+					if (!game.data.get('quest') && game.ai) {
+						if (game.data.get('cardreward') === undefined && data.deck) {
 							const foeDeck = etgutil.decodedeck(data.deck);
 							let winnable = foeDeck.filter(code => {
 									const card = Cards.Codes[code];
@@ -271,22 +273,21 @@ module.exports = connect(({ user }) => ({ user }))(
 										x.rarity <= 3,
 								);
 							}
-							game.cardreward =
-								'01' + etgutil.asShiny(cardwon, false).toString(32);
+							game.props = game.props.setIn(
+								[game.id, 'data', 'cardreward'],
+								'01' + etgutil.asShiny(cardwon, false).toString(32),
+							);
 						}
-						if (!game.goldreward) {
+						if (!game.data.get('goldreward')) {
 							let goldwon,
 								agetax = 0;
-							if (game.level !== undefined) {
-								if (game.daily == undefined) {
+							if (level !== undefined) {
+								if (game.data.get('daily') === undefined) {
 									const streak = (this.props.streakback || 0) + 1;
-									if (streak !== this.props.user.streak[game.level]) {
-										sock.userExec('setstreak', { l: game.level, n: streak });
+									if (streak !== this.props.user.streak[level]) {
+										sock.userExec('setstreak', { l: level, n: streak });
 									}
-									streakrate = Math.min(
-										(streak200[game.level] * streak) / 200,
-										1,
-									);
+									streakrate = Math.min((streak200[level] * streak) / 200, 1);
 									lefttext.push(
 										<TooltipText
 											tip={streak + ' win streak'}
@@ -295,8 +296,11 @@ module.exports = connect(({ user }) => ({ user }))(
 											{(streakrate * 100).toFixed(1)}% streak bonus
 										</TooltipText>,
 									);
-									if (game.age) {
-										agetax = Math.max(Math.min(game.age * 0.1 - 0.5, 0.5), 0);
+									if (game.data.get('age')) {
+										agetax = Math.max(
+											Math.min(game.data.get('age') * 0.1 - 0.5, 0.5),
+											0,
+										);
 										if (agetax > 0) {
 											lefttext.push(
 												<TooltipText
@@ -310,46 +314,52 @@ module.exports = connect(({ user }) => ({ user }))(
 									}
 								}
 								goldwon = Math.round(
-									userutil.pveCostReward[game.level * 2 + 1] *
+									userutil.pveCostReward[level * 2 + 1] *
 										(1 + streakrate) *
 										this.computeBonuses(game, data, lefttext, streakrate) *
 										(1 - agetax),
 								);
 							} else goldwon = 0;
-							game.goldreward = goldwon;
+							game.props = game.props.setIn(
+								[game.id, 'data', 'goldreward'],
+								goldwon,
+							);
 						}
 					}
-					if (game.addonreward) {
-						game.goldreward = (game.goldreward || 0) + game.addonreward;
+					if (game.data.get('addonreward')) {
+						game.props = game.props.updateIn(
+							[game.id, 'data', 'goldreward'],
+							(reward = 0) => reward + game.data.get('addonreward'),
+						);
 					}
-					if (game.goldreward) {
-						sock.userExec('addgold', { g: game.goldreward });
+					if (game.data.get('goldreward')) {
+						sock.userExec('addgold', { g: game.data.get('goldreward') });
 					}
-					if (game.cardreward) {
-						sock.userExec(game.quest ? 'addbound' : 'addcards', {
-							c: game.cardreward,
+					if (game.data.get('cardreward')) {
+						sock.userExec(game.data.get('quest') ? 'addbound' : 'addcards', {
+							c: game.data.get('cardreward'),
 						});
 					}
 				}
 			}
 			this.setState({ lefttext });
-			if (game.endurance == undefined) {
+			if (game.get('endurance') == undefined) {
 				this.props.dispatch(
 					store.chatMsg(
 						[
-							game.level === undefined ? -1 : game.level,
-							(game.foename || '?').replace(/,/g, ' '),
+							level === undefined ? -1 : level,
+							(game.data.get('foename') || '?').replace(/,/g, ' '),
 							winner ? 'W' : 'L',
 							game.bonusstats.get('ply'),
 							game.bonusstats.get('time'),
 							game.player1.hp,
 							game.player1.maxhp,
-							(game.goldreward || 0) - (game.cost || 0),
-							game.cardreward || '-',
-							userutil.calcWealth(game.cardreward),
-							!this.props.user || game.level === undefined
+							game.data.get('goldreward', 0) - game.data.get('cost', 0),
+							game.data.get('cardreward') || '-',
+							userutil.calcWealth(game.data.get('cardreward')),
+							!this.props.user || level === undefined
 								? -1
-								: this.props.user.streak[game.level],
+								: this.props.user.streak[level],
 							streakrate.toFixed(3).replace(/\.?0+$/, ''),
 						].join(),
 						'Stats',
@@ -363,11 +373,12 @@ module.exports = connect(({ user }) => ({ user }))(
 		}
 
 		render() {
-			const { game } = this.props;
-			const cards = [];
-			if (game.cardreward) {
-				const x0 = 470 - etgutil.decklength(game.cardreward) * 20 - 64;
-				etgutil.iterdeck(game.cardreward, (code, i) =>
+			const { game } = this.props,
+				cards = [],
+				cardreward = game.data.get('cardreward');
+			if (cardreward) {
+				const x0 = 470 - etgutil.decklength(cardreward) * 20 - 64;
+				etgutil.iterdeck(cardreward, (code, i) =>
 					cards.push(
 						<Components.Card key={i} x={x0 + i * 40} y={170} code={code} />,
 					),
@@ -394,9 +405,10 @@ module.exports = connect(({ user }) => ({ user }))(
 						<>
 							{game.winner == game.player1Id && (
 								<>
-									{game.goldreward > 0 && (
+									{game.data.get('goldreward') > 0 && (
 										<Components.Text
-											text={game.goldreward - (game.cost || 0) + '$'}
+											text={`${game.data.get('goldreward') -
+												(game.data.get('cost') || 0)}$`}
 											style={{
 												textAlign: 'center',
 												width: '900px',
@@ -408,13 +420,17 @@ module.exports = connect(({ user }) => ({ user }))(
 									)}
 									{cards.length > 0 && cards}
 									<Components.Text
-										text={game.quest ? game.wintext : 'You won!'}
+										text={
+											game.data.get('quest')
+												? game.data.get('wintext')
+												: 'You won!'
+										}
 										style={{
 											textAlign: 'center',
 											width: '900px',
 											position: 'absolute',
 											left: '0px',
-											top: game.cardreward ? '100px' : '250px',
+											top: game.data.get('cardreward') ? '100px' : '250px',
 										}}
 									/>
 								</>

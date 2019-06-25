@@ -31,12 +31,12 @@ function mkDaily(type) {
 								daily: 2,
 								cardreward: '',
 						  };
+				dataNext.dataNext = dataNext;
 				gamedata.data.rematch = props =>
 					!(props.user.daily & (1 << type)) && mkDaily(type)();
 				gamedata.data.rematchFilter = props =>
 					props.game.winner !== props.game.player1;
 				gamedata.game.addData(dataNext);
-				gamedata.game.dataNext = dataNext;
 			}
 			mkAi.run(gamedata);
 		};
@@ -44,7 +44,7 @@ function mkDaily(type) {
 		return () => {
 			const gamedata = mkAi.mkPremade(type == 3 ? 1 : 3, type)();
 			if (gamedata) {
-				gamedata.game.addonreward = type == 3 ? 90 : 200;
+				gamedata.data.addonreward = type == 3 ? 90 : 200;
 				gamedata.data.rematch = undefined;
 				sock.userExec('donedaily', { daily: type });
 			}

@@ -1,5 +1,6 @@
 'use strict';
-const ui = require('../ui'),
+const imm = require('immutable'),
+	ui = require('../ui'),
 	etg = require('../etg'),
 	mkAi = require('../mkAi'),
 	sock = require('../sock'),
@@ -369,12 +370,13 @@ const ThingInst = connect(({ opts }) => ({ lofiArt: opts.lofiArt }))(
 );
 
 function addNoHealData(game) {
-	const data = game.dataNext || {};
-	if (game.noheal) {
-		data.p1hp = Math.max(game.player1.hp, 1);
-		data.p1maxhp = game.player1.maxhp;
+	const data = game.get(game.id, 'data'),
+		dataNext = { ...data.get('dataNext') };
+	if (data.get('noheal')) {
+		dataNext.p1hp = Math.max(game.player1.hp, 1);
+		dataNext.p1maxhp = game.player1.maxhp;
 	}
-	return data;
+	return dataNext;
 }
 
 function tgtclass(game, obj) {
@@ -434,34 +436,35 @@ module.exports = connect(({ user }) => ({ user }))(
 						});
 					}
 					if (game.winner === game.player1Id) {
-						if (game.quest) {
-							if (game.quest.autonext) {
+						if (game.data.get('quest')) {
+							if (game.data('quest').autonext) {
 								const data = addNoHealData(game);
+								data.rematch = this.props.data.rematch;
+								data.rematchFilter = this.props.data.rematchFilter;
 								const newgame = require('../Quest').mkQuestAi(
-									game.quest.autonext,
+									game.data.get('quest').autonext,
 								);
 								newgame.game.addData(data);
-								newgame.data.rematch = this.props.data.rematch;
-								newgame.data.rematchFilter = this.props.data.rematchFilter;
 								mkAi.run(newgame);
 								return;
 							} else if (!user.quests[game.quest.key]) {
 								sock.userExec('setquest', { quest: game.quest.key });
 							}
-						} else if (game.daily) {
-							if (game.endurance) {
+						} else if (game.data.get('daily')) {
+							if (game.data.get('endurance')) {
 								const data = addNoHealData(game);
 								data.endurance--;
-								const newgame = mkAi.mkAi(game.level, true)();
+								data.dataNext = data;
+								data.rematch = this.props.data.rematch;
+								data.rematchFilter = this.props.data.rematchFilter;
+								const newgame = mkAi.mkAi(game.data.get('level'), true)();
 								newgame.game.addData(data);
-								newgame.game.dataNext = data;
-								newgame.data.rematch = this.props.data.rematch;
-								newgame.data.rematchFilter = this.props.data.rematchFilter;
 								mkAi.run(newgame);
 								return;
 							} else {
+								const daily = game.data.get('daily');
 								sock.userExec('donedaily', {
-									daily: game.daily == 4 ? 5 : game.daily == 3 ? 0 : game.daily,
+									daily: daily == 4 ? 5 : daily === 3 ? 0 : daily,
 								});
 							}
 						}

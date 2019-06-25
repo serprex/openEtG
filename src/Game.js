@@ -25,6 +25,7 @@ function Game(seed, flip) {
 					creatureskilled: 0,
 					time: Date.now(),
 				}),
+				data: new imm.Map(),
 				rng: rng.getStateCount(),
 			}),
 		)
@@ -62,6 +63,14 @@ Object.defineProperty(Game.prototype, 'player2', {
 		return new Player(this, this.get(this.id, 'player2'));
 	},
 });
+Object.defineProperty(Game.prototype, 'ai', {
+	get: function() {
+		return this.props.getIn([this.id, 'data', 'ai']);
+	},
+	set: function(val) {
+		this.props = this.props.setIn([this.id, 'data', 'ai'], val);
+	},
+});
 
 function defineProp(key) {
 	Object.defineProperty(Game.prototype, key, {
@@ -75,9 +84,10 @@ function defineProp(key) {
 }
 defineProp('phase');
 defineProp('bonusstats');
+defineProp('data');
 defineProp('turn');
 defineProp('first');
-defineProp('ai');
+defineProp('winner');
 
 Game.prototype.clone = function() {
 	const obj = Object.create(Game.prototype);
@@ -175,8 +185,10 @@ Game.prototype.addData = function(data) {
 		if (!blacklist.has(key)) {
 			const p1or2 = key.match(/^p(1|2)/);
 			if (p1or2) {
-				this['player' + p1or2[1]][key.slice(2)] = data[key];
-			} else this[key] = data[key];
+				this.set(this[`player${p1or2[1]}Id`], key.slice(2), data[key]);
+			} else {
+				this.props = this.props.setIn([this.id, 'data', key], data[key]);
+			}
 		}
 	}
 };

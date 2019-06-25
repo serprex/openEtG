@@ -678,7 +678,7 @@ module.exports = function(game) {
 	if (expectedDamage > game.player1.hp) {
 		return Math.min(expectedDamage - game.player1.hp, 500) * -999;
 	}
-	if (game.player2.deck.length == 0) {
+	if (game.player2.deckIds.length == 0) {
 		return 99999980;
 	}
 	expectedDamage = calcExpectedDamage(game.player1, wallCharges, 1); // Call to fill damageHash
