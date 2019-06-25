@@ -189,17 +189,17 @@ Thing.prototype.trigger = function(name, t, param) {
 };
 Thing.prototype.proc = function(name, param) {
 	function proc(c) {
-		if (c) c.trigger(name, this, param);
+		if (c) this.game.byId(c).trigger(name, this, param);
 	}
 	if (this.active) {
 		this.trigger('own' + name, this, param);
 	}
 	for (let i = 0; i < 2; i++) {
 		const pl = i == 0 ? this.owner : this.owner.foe;
-		pl.creatures.forEach(proc, this);
-		pl.permanents.forEach(proc, this);
-		proc.call(this, pl.shield);
-		proc.call(this, pl.weapon);
+		pl.creatureIds.forEach(proc, this);
+		pl.permanentIds.forEach(proc, this);
+		proc.call(this, pl.shieldId);
+		proc.call(this, pl.weaponId);
 	}
 };
 Thing.prototype.calcCore = function(prefix, filterstat) {

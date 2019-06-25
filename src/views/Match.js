@@ -478,7 +478,7 @@ module.exports = connect(({ user }) => ({ user }))(
 					}),
 				);
 			} else if (game.turn === game.player1Id) {
-				if (discard == undefined && game.player1.handIds.length == 8) {
+				if (discard === 0 && game.player1.handIds.length == 8) {
 					this.setState({ discarding: true });
 				} else {
 					if (!game.ai) sock.emit('endturn', { c: game.player1Id, t: discard });
