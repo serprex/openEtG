@@ -89,12 +89,12 @@ defineProp('winner');
 
 Game.prototype.clone = function() {
 	const obj = Object.create(Game.prototype);
+	obj.props = this.props;
 	obj.cache = new Map([
 		[this.id, obj],
 		[this.player1Id, new Player(obj, this.player1Id)],
 		[this.player2Id, new Player(obj, this.player2Id)],
 	]);
-	obj.props = this.props;
 	return obj;
 };
 Game.prototype.rng = function() {
