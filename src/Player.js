@@ -331,8 +331,8 @@ Player.prototype.endturn = function(discard) {
 	this.game.update(this.game.id, game =>
 		game.updateIn(['bonusstats', 'ply'], x => (x | 0) + 1),
 	);
-	if (discard != undefined) {
-		this.hand[discard].die();
+	if (discard) {
+		this.game.byId(discard).die();
 	}
 	this.spend(this.mark, this.markpower * (this.mark > 0 ? -1 : -3));
 	const poison = this.foe.getStatus('poison');

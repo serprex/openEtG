@@ -709,8 +709,6 @@ module.exports = function(game) {
 			Math.sqrt(player.hp) * 4 -
 			player.getStatus('poison');
 		if (player.getStatus('precognition')) pscore += 0.5;
-		if (!player.weapon) pscore += 1;
-		if (!player.shield) pscore += 1;
 		if (player.usedactive)
 			pscore -=
 				(player.handIds.length + (player.handIds.length > 6 ? 7 : 4)) / 4;

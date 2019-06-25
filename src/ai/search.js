@@ -5,20 +5,22 @@ const etg = require('../etg'),
 	parseSkill = require('../parseSkill'),
 	evalGame = require('./eval'),
 	lethal = require('./lethal');
-function getWorstCard(game) {
+function getWorstCard(game, player) {
 	let worstcard = 0,
-		curEval = 0x7fffffff;
+		curEval = 0x7fffffff,
+		hand = player.hand;
 	const hash = new Set();
 	for (let i = 0; i < 8; i++) {
-		const code = game.player2.hand[i].card.code;
+		const code = hand[i].card.code,
+			handId = hand[i].id;
 		if (hash.has(code)) continue;
 		hash.add(code);
 		const gclone = game.clone();
-		gclone.player2.hand[i].die();
+		gclone.byId(handId).die();
 		const discvalue = evalGame(gclone);
 		if (discvalue < curEval) {
 			curEval = discvalue;
-			worstcard = i;
+			worstcard = handId;
 		}
 	}
 	return [worstcard, curEval];
@@ -50,7 +52,7 @@ function AiSearch(game) {
 		worstcard = undefined;
 		this.eval = evalGame(game);
 	} else {
-		[worstcard, this.eval] = getWorstCard(game);
+		[worstcard, this.eval] = getWorstCard(game, game.player2);
 	}
 	this.nth = 0;
 	this.cmdct = null;
@@ -64,7 +66,7 @@ function AiSearch(game) {
 			? ''
 			: lethalResult[1] !== undefined
 			? ((this.cmdct = lethalResult[1]), 'cast')
-			: ((this.cmdct = worstcard), 'endturn');
+			: ((this.cmdct = { c: game.player2Id, t: worstcard }), 'endturn');
 }
 function searchSkill(active, c, t) {
 	const func = afilter[active.name[0]];
@@ -126,7 +128,7 @@ AiSearch.prototype.step = function(game) {
 					if (gameClone.player2.handIds.length < 8) {
 						v = evalGame(gameClone);
 					} else {
-						[wc, v] = getWorstCard(gameClone);
+						[wc, v] = getWorstCard(gameClone, gameClone.player2);
 					}
 					if (v < currentEval || (v == currentEval && n > this.cdepth)) {
 						this.cmdct = cmdct0 || { c: c.id, t: t && t.id };
@@ -204,7 +206,10 @@ AiSearch.prototype.step = function(game) {
 		this.cmd = 'cast';
 	} else {
 		this.cmd = 'endturn';
-		this.cmdct = game.player2.handIds.length == 8 ? { t: this.worstcard } : {};
+		this.cmdct =
+			game.player2.handIds.length == 8
+				? { c: game.player2Id, t: this.worstcard }
+				: {};
 	}
 };
 module.exports = AiSearch;

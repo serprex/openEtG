@@ -437,7 +437,7 @@ module.exports = connect(({ user }) => ({ user }))(
 					}
 					if (game.winner === game.player1Id) {
 						if (game.data.get('quest')) {
-							if (game.data('quest').autonext) {
+							if (game.data.get('quest').autonext) {
 								const data = addNoHealData(game);
 								data.rematch = this.props.data.rematch;
 								data.rematchFilter = this.props.data.rematchFilter;
@@ -447,8 +447,10 @@ module.exports = connect(({ user }) => ({ user }))(
 								newgame.game.addData(data);
 								mkAi.run(newgame);
 								return;
-							} else if (!user.quests[game.quest.key]) {
-								sock.userExec('setquest', { quest: game.quest.key });
+							} else if (!user.quests[game.data.get('quest').key]) {
+								sock.userExec('setquest', {
+									quest: game.data.get('quest').key,
+								});
 							}
 						} else if (game.data.get('daily')) {
 							if (game.data.get('endurance')) {
@@ -481,7 +483,7 @@ module.exports = connect(({ user }) => ({ user }))(
 				if (discard == undefined && game.player1.handIds.length == 8) {
 					this.setState({ discarding: true });
 				} else {
-					if (!game.ai) sock.emit('endturn', { t: discard });
+					if (!game.ai) sock.emit('endturn', { c: game.player1Id, t: discard });
 					game.player1.endturn(discard);
 					game.targeting = null;
 					this.setState({ discarding: false, foeplays: [] });
@@ -534,7 +536,7 @@ module.exports = connect(({ user }) => ({ user }))(
 			this.clearCard();
 			if (game.phase != etg.PlayPhase) return;
 			if (obj.ownerId == game.player1Id && this.state.discarding) {
-				if (obj.type == etg.Spell) this.endClick(obj.getIndex());
+				if (obj.type == etg.Spell) this.endClick(obj.id);
 			} else if (game.targeting) {
 				if (game.targeting.filter(obj)) {
 					game.targeting.cb(obj);
@@ -562,28 +564,37 @@ module.exports = connect(({ user }) => ({ user }))(
 
 		gameStep(cmds) {
 			const { game } = this.props;
-			if (game.turn === game.player2Id && game.ai) {
-				if (game.phase == etg.PlayPhase) {
-					let now;
-					if (!this.aiCommand) {
-						Effect.disable = true;
-						if (this.aiState) {
-							this.aiState.step(game);
-						} else {
-							this.aiState = new aiSearch(game);
+			if (game.turn === game.player2Id) {
+				if (game.ai === 1) {
+					if (game.phase == etg.PlayPhase) {
+						let now;
+						if (!this.aiCommand) {
+							Effect.disable = true;
+							if (this.aiState) {
+								this.aiState.step(game);
+							} else {
+								this.aiState = new aiSearch(game);
+							}
+							Effect.disable = false;
+							if (this.aiState.cmd) {
+								this.aiCommand = true;
+							}
+						} else if ((now = Date.now()) > this.aiDelay) {
+							cmds[this.aiState.cmd](this.aiState.cmdct);
+							this.aiState = null;
+							this.aiCommand = false;
+							this.aiDelay = now + (game.turn === game.player1Id ? 2000 : 200);
 						}
-						Effect.disable = false;
-						if (this.aiState.cmd) {
-							this.aiCommand = true;
-						}
-					} else if ((now = Date.now()) > this.aiDelay) {
-						cmds[this.aiState.cmd](this.aiState.cmdct);
-						this.aiState = null;
-						this.aiCommand = false;
-						this.aiDelay = now + (game.turn === game.player1Id ? 2000 : 200);
+					} else if (game.phase === etg.MulliganPhase) {
+						cmds.mulligan({ draw: require('../ai/mulligan')(game.player2) });
 					}
-				} else if (game.phase === etg.MulliganPhase) {
-					cmds.mulligan({ draw: require('../ai/mulligan')(game.player2) });
+				} else if (game.ai === 2) {
+					game.update(game.id, game => {
+						const p1 = game.get('player1'),
+							p2 = game.get('player2');
+						return game.set('player1', p2).set('player2', p1);
+					});
+					this.forceUpdate();
 				}
 			}
 			const effects = Effect.next(game.player2.isCloaked());
@@ -621,21 +632,20 @@ module.exports = connect(({ user }) => ({ user }))(
 		startMatch({ game, data, dispatch }) {
 			if (
 				this.props.user &&
-				!game.endurance &&
-				(game.level !== undefined || !game.ai)
+				!game.data.get('endurance') &&
+				(game.data.get('level') !== undefined || !game.ai)
 			) {
 				sock.userExec('addloss', {
 					pvp: !game.ai,
-					l: game.level,
-					g: -game.cost,
+					l: game.data.get('level'),
+					g: -game.data.get('cost'),
 				});
-				this.streakback = this.props.user.streak[game.level];
+				this.streakback = this.props.user.streak[game.data.get('level')];
 			}
 			Effect.clear();
 			const cmds = {
 				endturn: data => {
-					(data.spectate == 1 ? game.player1 : game.player2).endturn(data.t);
-					if (data.spectate) this.setState({ foeplays: [] });
+					game.byId(data.c).endturn(data.t);
 					this.forceUpdate();
 				},
 				cast: data => {
@@ -658,17 +668,18 @@ module.exports = connect(({ user }) => ({ user }))(
 					c.useactive(t);
 				},
 				foeleft: data => {
-					if (!game.ai)
+					if (!game.ai) {
 						game.setWinner(
 							data.spectate == 1 ? game.player2Id : game.player1Id,
 						);
-					this.forceUpdate();
+						this.forceUpdate();
+					}
 				},
 				mulligan: data => {
 					if (data.draw === true) {
 						game.progressMulligan();
 					} else {
-						const pl = data.spectate == 1 ? game.player1 : game.player2;
+						const pl = game.byId(game.turn);
 						sfx.playSound('mulligan');
 						pl.drawhand(pl.handIds.length - 1);
 					}

@@ -89,7 +89,6 @@ const sockmeta = new WeakMap();
 		'mulligan',
 		'cardchosen',
 	]);
-	let guestban = false;
 	const userEvents = {
 		modadd: roleck('Mods', function(data, user) {
 			db.sadd('Mods', data.m);
@@ -104,7 +103,7 @@ const sockmeta = new WeakMap();
 			db.srem('Codesmiths', data.m);
 		}),
 		modguest: roleck('Mods', function(data, user) {
-			guestban = data.m == 'off';
+			db.set('GuestsBanned', data.m === 'off' ? '1' : '');
 		}),
 		modmute: roleck('Mods', function(data, user) {
 			broadcast({ x: 'mute', m: data.m });
@@ -828,10 +827,13 @@ const sockmeta = new WeakMap();
 			});
 		},
 		guestchat: function(data) {
-			if (guestban) return;
-			data.guest = true;
-			data.u = 'Guest_' + data.u;
-			genericChat(this, data);
+			db.get('GuestsBanned', (err, isBanned) => {
+				if (!isBanned) {
+					data.guest = true;
+					data.u = 'Guest_' + data.u;
+					genericChat(this, data);
+				}
+			});
 		},
 		roll: function(data) {
 			const A = Math.min(data.A || 1, 99),
