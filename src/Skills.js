@@ -1377,7 +1377,7 @@ const Skills = {
 			c.owner.spend(i, -2);
 		}
 		c.owner.incrStatus('nova', 3);
-		if (c.owner.get('nova') >= 6) {
+		if (c.owner.getStatus('nova') >= 6) {
 			c.owner.addCrea(
 				c.owner.newThing(Cards.Singularity.asUpped(true).asShiny(c.card.shiny)),
 			);
@@ -2295,7 +2295,7 @@ const Skills = {
 					const skele = t.owner.newThing(t.card.as(Cards.Skeleton));
 					skele.type = etg.Creature;
 					const creatures = new Uint32Array(ctx.get(t.ownerId, 'creatures'));
-					creatures[index] = skele;
+					creatures[index] = skele.id;
 					ctx.set(t.ownerId, 'creatures', creatures);
 				}
 			}
