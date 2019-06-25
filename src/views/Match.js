@@ -417,7 +417,19 @@ module.exports = connect(({ user }) => ({ user }))(
 				discarding: false,
 				resigning: false,
 				effects: null,
+				gameProps: null,
+				expectedDamage: new Int16Array(2),
 			};
+		}
+
+		static getDerivedStateFromProps(nextProps, prevState) {
+			if (nextProps.game.props !== prevState.gameProps) {
+				return {
+					gameProps: nextProps.game.props,
+					expectedDamage: nextProps.game.expectedDamage(),
+				};
+			}
+			return null;
 		}
 
 		endClick = (discard = 0) => {
@@ -986,14 +998,17 @@ module.exports = connect(({ user }) => ({ user }))(
 					/>,
 				);
 				const x1 = Math.max(80 * (pl.hp / pl.maxhp), 0);
-				const x2 = Math.max(x1 - 80 * (game.expectedDamage[j] / pl.maxhp), 0);
+				const x2 = Math.max(
+					x1 - 80 * (this.state.expectedDamage[j] / pl.maxhp),
+					0,
+				);
 				const poison = pl.getStatus('poison'),
 					poisoninfo = `${
 						poison > 0 ? poison + ' 1:2' : poison < 0 ? -poison + ' 1:7' : ''
 					} ${pl.getStatus('neuro') ? ' 1:10' : ''}`;
 				const hptext = `${pl.hp}/${pl.maxhp}\n${pl.deckIds.length}cards${
-					!cloaked && game.expectedDamage[j]
-						? `\nDmg: ${game.expectedDamage[j]}`
+					!cloaked && this.state.expectedDamage[j]
+						? `\nDmg: ${this.state.expectedDamage[j]}`
 						: ''
 				} ${poisoninfo ? `\n${poisoninfo}` : ''}`;
 				children.push(
@@ -1011,14 +1026,14 @@ module.exports = connect(({ user }) => ({ user }))(
 										pointerEvents: 'none',
 									}}
 								/>
-								{!cloaked && game.expectedDamage[j] !== 0 && (
+								{!cloaked && this.state.expectedDamage[j] !== 0 && (
 									<div
 										style={{
 											backgroundColor:
 												ui.strcols[
-													game.expectedDamage[j] >= pl.hp
+													this.state.expectedDamage[j] >= pl.hp
 														? etg.Fire
-														: game.expectedDamage[j] > 0
+														: this.state.expectedDamage[j] > 0
 														? etg.Time
 														: etg.Water
 												],

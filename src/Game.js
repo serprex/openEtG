@@ -37,7 +37,6 @@ function Game(seed, flip) {
 		[second, new Player(this, second).init()],
 	]);
 	this.targeting = null;
-	this.expectedDamage = new Int16Array(2);
 }
 Game.prototype.id = 1;
 module.exports = Game;
@@ -97,7 +96,6 @@ Game.prototype.clone = function() {
 		[this.player2Id, new Player(obj, this.player2Id)],
 	]);
 	obj.targeting = null;
-	obj.expectedDamage = null;
 	obj.props = this.props;
 	return obj;
 };
@@ -194,10 +192,10 @@ Game.prototype.addData = function(data) {
 function removeSoPa(p) {
 	if (p) p.setStatus('patience', 0);
 }
-Game.prototype.updateExpectedDamage = function() {
-	if (this.expectedDamage && !this.winner) {
-		const expectedDamage = new Int16Array(2),
-			disable = Effect.disable;
+Game.prototype.expectedDamage = function() {
+	const expectedDamage = new Int16Array(2);
+	if (!this.winner) {
+		const disable = Effect.disable;
 		Effect.disable = true;
 		for (let i = 0; i < 3; i++) {
 			const gclone = this.clone();
@@ -216,8 +214,8 @@ Game.prototype.updateExpectedDamage = function() {
 		Effect.disable = disable;
 		expectedDamage[0] = (expectedDamage[0] / 3) | 0;
 		expectedDamage[1] = (expectedDamage[1] / 3) | 0;
-		this.expectedDamage = expectedDamage;
 	}
+	return expectedDamage;
 };
 Game.prototype.getTarget = function(src, active, cb) {
 	const targetingFilter = Cards.Targeting[active.name[0]];

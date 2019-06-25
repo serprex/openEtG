@@ -394,7 +394,6 @@ Player.prototype.endturn = function(discard) {
 	}
 	this.game.set(this.game.id, 'turn', this.foe.id);
 	this.foe.proc('turnstart');
-	this.game.updateExpectedDamage();
 };
 Player.prototype.deckpush = function(...args) {
 	this.game.update(this.id, pl => pl.update('deck', deck => deck.concat(args)));

@@ -509,7 +509,6 @@ Thing.prototype.useactive = function(t) {
 		if (this.getStatus('neuro')) this.addpoison(1);
 		this.castSpell(t, this.active.get('cast'));
 	}
-	this.game.updateExpectedDamage();
 };
 Thing.prototype.truedr = function() {
 	return this.hp + this.trigger('buff');

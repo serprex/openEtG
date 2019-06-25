@@ -178,7 +178,7 @@ module.exports = connect(({ user }) => ({ user }))(
 				(!this.props.game.data.get('rematchFilter') ||
 					this.props.game.data.get('rematchFilter')(this.props))
 			) {
-				this.props.data.get('rematch')(this.props);
+				this.props.game.data.get('rematch')(this.props);
 			}
 		};
 
