@@ -95,15 +95,15 @@ AiSearch.prototype.step = function(game) {
 				(c.type !== etg.Spell || c.card.type === etg.Spell) &&
 				c.active.get('cast');
 			const tgthash = new Set();
-			const evalIter = t => {
+			const evalIter = (t, targetFilter) => {
 				if (t) {
 					const th = game.props.get(t.id).hashCode();
 					if (tgthash.has(th)) return;
 					tgthash.add(th);
 				}
 				if (
-					(!game.targeting ||
-						(t && game.targeting.filter(t) && searchSkill(active, c, t))) &&
+					(!targetFilter ||
+						(t && targetFilter(t) && searchSkill(active, c, t))) &&
 					(n || --this.limit > 0)
 				) {
 					const gameClone = game.clone();
@@ -142,13 +142,12 @@ AiSearch.prototype.step = function(game) {
 				}
 			};
 			if (active && active.name[0] in Cards.Targeting) {
-				game.getTarget(c, active);
+				const targetFilter = game.targetFilter(c, active);
 				for (let j = 0; j < 2; j++) {
 					const pl = j == 0 ? c.owner : c.owner.foe;
-					evalIter(pl);
-					pl.forEach(evalIter);
+					evalIter(pl, targetFilter);
+					pl.forEach(inst => evalIter(inst, targetFilter));
 				}
-				game.targeting = null;
 			} else {
 				evalIter();
 			}

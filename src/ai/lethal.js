@@ -11,11 +11,8 @@ module.exports = function(game) {
 			if (casthash.has(ch)) return;
 			casthash.add(ch);
 			const active = c.active.get('cast');
-			function evalIter(t) {
-				if (
-					(!game.targeting || (t && game.targeting.filter(t))) &&
-					--limit > 0
-				) {
+			function evalIter(t, targetFilter) {
+				if ((!targetFilter || (t && targetFilter(t))) && --limit > 0) {
 					const gameClone = game.clone();
 					gameClone.byId(c.id).useactive(t && gameClone.byId(t.id));
 					const v =
@@ -34,14 +31,13 @@ module.exports = function(game) {
 				}
 			}
 			if (active && active.name[0] in Cards.Targeting) {
-				game.getTarget(c, active);
+				const targetFilter = game.targetFilter(c, active);
 				if (c.owner.shield && c.owner.shield.getStatus('reflective'))
-					evalIter(c.owner);
-				evalIter(c.owner.foe);
+					evalIter(c.owner, targetFilter);
+				evalIter(c.owner.foe, targetFilter);
 				c.owner.creatures.forEach(cr => {
-					if (cr && cr.getStatus('voodoo')) evalIter(cr);
+					if (cr && cr.getStatus('voodoo')) evalIter(cr, targetFilter);
 				});
-				game.targeting = null;
 			} else {
 				evalIter();
 			}

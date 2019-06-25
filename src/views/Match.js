@@ -123,19 +123,17 @@ const cloaksvg = (
 );
 
 const activeInfo = {
-	firebolt: (t, game) =>
+	firebolt: (t, game, targeting) =>
 		3 +
-		Math.floor(
-			(game.player1.quanta[etg.Fire] - game.targeting.src.card.cost) / 4,
-		),
-	drainlife: (t, game) =>
+		Math.floor((game.player1.quanta[etg.Fire] - targeting.src.card.cost) / 4),
+	drainlife: (t, game, targeting) =>
 		2 +
 		Math.floor(
-			(game.player1.quanta[etg.Darkness] - game.targeting.src.card.cost) / 5,
+			(game.player1.quanta[etg.Darkness] - targeting.src.card.cost) / 5,
 		),
-	icebolt: (t, game) => {
+	icebolt: (t, game, targeting) => {
 		const bolts = Math.floor(
-			(game.player1.quanta[etg.Water] - game.targeting.src.card.cost) / 5,
+			(game.player1.quanta[etg.Water] - targeting.src.card.cost) / 5,
 		);
 		return `${2 + bolts} ${35 + bolts * 5}%`;
 	},
@@ -144,12 +142,12 @@ const activeInfo = {
 			(t.truehp() * (t.getStatus('frozen') ? 150 : 100)) / (t.truehp() + 100),
 		),
 	adrenaline: t => 'Extra: ' + etg.getAdrenalRow(t.trueatk()),
-	fractal: (t, game) =>
+	fractal: (t, game, targeting) =>
 		'Copies: ' +
 		Math.min(
 			6 +
 				Math.floor(
-					(game.player1.quanta[etg.Aether] - game.targeting.src.card.cost) / 2,
+					(game.player1.quanta[etg.Aether] - targeting.src.card.cost) / 2,
 				),
 			9 - game.player1.handIds.length,
 		),
@@ -183,7 +181,7 @@ const ThingInst = connect(({ opts }) => ({ lofiArt: opts.lofiArt }))(
 								height: '80px',
 								border: 'transparent 2px solid',
 							}}
-							className={tgtclass(game, obj)}
+							className={tgtclass(game, obj, props.targeting)}
 							onMouseOut={props.onMouseOut}
 							onClick={() => props.onClick(obj)}>
 							<div
@@ -289,7 +287,7 @@ const ThingInst = connect(({ opts }) => ({ lofiArt: opts.lofiArt }))(
 							zIndex: !isSpell && obj.getStatus('cloak') ? '2' : undefined,
 						}}
 						onMouseOver={props.setInfo && (e => props.setInfo(e, obj, pos.x))}
-						className={tgtclass(game, obj)}
+						className={tgtclass(game, obj, props.targeting)}
 						onMouseOut={props.onMouseOut}
 						onClick={() => props.onClick(obj)}>
 						{props.lofiArt ? (
@@ -379,9 +377,9 @@ function addNoHealData(game) {
 	return dataNext;
 }
 
-function tgtclass(game, obj) {
-	if (game.targeting) {
-		if (game.targeting.filter(obj)) return 'ants-red';
+function tgtclass(game, obj, targeting) {
+	if (targeting) {
+		if (targeting.filter(obj)) return 'ants-red';
 	} else if (obj.ownerId === game.player1Id && obj.canactive())
 		return 'canactive';
 }
@@ -495,8 +493,7 @@ module.exports = connect(({ user }) => ({ user }))(
 				} else {
 					if (!game.ai) sock.emit('endturn', { c: game.player1Id, t: discard });
 					game.player1.endturn(discard);
-					game.targeting = null;
-					this.setState({ discarding: false, foeplays: [] });
+					this.setState({ targeting: null, discarding: false, foeplays: [] });
 				}
 			}
 		};
@@ -511,9 +508,8 @@ module.exports = connect(({ user }) => ({ user }))(
 					game.player1.drawhand(game.player1.handIds.length - 1);
 					if (!game.ai) sock.emit('mulligan');
 					this.forceUpdate();
-				} else if (game.targeting) {
-					game.targeting = null;
-					this.forceUpdate();
+				} else if (this.state.targeting) {
+					this.setState({ targeting: null });
 				} else this.setState({ discarding: false });
 			}
 		};
@@ -533,11 +529,10 @@ module.exports = connect(({ user }) => ({ user }))(
 			const { game } = this.props;
 			if (
 				game.phase == etg.PlayPhase &&
-				game.targeting &&
-				game.targeting.filter(game.players(j))
+				this.state.targeting &&
+				this.state.targeting.filter(game.players(j))
 			) {
-				game.targeting.cb(game.players(j));
-				this.forceUpdate();
+				this.state.targeting.cb(game.players(j));
 			}
 		}
 
@@ -547,10 +542,9 @@ module.exports = connect(({ user }) => ({ user }))(
 			if (game.phase != etg.PlayPhase) return;
 			if (obj.ownerId == game.player1Id && this.state.discarding) {
 				if (obj.type == etg.Spell) this.endClick(obj.id);
-			} else if (game.targeting) {
-				if (game.targeting.filter(obj)) {
-					game.targeting.cb(obj);
-					this.forceUpdate();
+			} else if (this.state.targeting) {
+				if (this.state.targeting.filter(obj)) {
+					this.state.targeting.cb(obj);
 				}
 			} else if (obj.ownerId == game.player1Id && obj.canactive()) {
 				const cb = tgt => {
@@ -566,8 +560,23 @@ module.exports = connect(({ user }) => ({ user }))(
 				if (obj.type === etg.Spell && obj.card.type !== etg.Spell) {
 					cb();
 				} else {
-					game.getTarget(obj, obj.active.get('cast'), cb);
-					this.forceUpdate();
+					const active = obj.active.get('cast'),
+						targetFilter = game.targetFilter(obj, active);
+					if (!targetFilter) {
+						cb();
+					} else {
+						this.setState({
+							targeting: {
+								filter: targetFilter,
+								cb: tgt => {
+									cb(tgt);
+									this.setState({ targeting: null });
+								},
+								text: active.name[0],
+								src: obj,
+							},
+						});
+					}
 				}
 			}
 		};
@@ -727,9 +736,9 @@ module.exports = connect(({ user }) => ({ user }))(
 
 		setInfo(e, obj, x) {
 			const actinfo =
-				this.props.game.targeting &&
-				this.props.game.targeting.filter(obj) &&
-				activeInfo[this.props.game.targeting.text];
+				this.state.targeting &&
+				this.state.targeting.filter(obj) &&
+				activeInfo[this.state.targeting.text];
 			this.setState({
 				tooltip: (
 					<Components.Text
@@ -772,8 +781,8 @@ module.exports = connect(({ user }) => ({ user }))(
 			if (game.phase != etg.EndPhase) {
 				turntell = this.state.discarding
 					? 'Discard'
-					: game.targeting
-					? game.targeting.text
+					: this.state.targeting
+					? this.state.targeting.text
 					: `${game.turn === game.player1Id ? 'Your' : 'Their'} Turn${
 							game.phase > etg.MulliganPhase
 								? ''
@@ -793,7 +802,9 @@ module.exports = connect(({ user }) => ({ user }))(
 						cancelText = game.turn === game.player1Id ? 'Mulligan' : '';
 					} else {
 						cancelText =
-							game.targeting || this.state.discarding || this.state.resigning
+							this.state.targeting ||
+							this.state.discarding ||
+							this.state.resigning
 								? 'Cancel'
 								: '';
 					}
@@ -819,7 +830,7 @@ module.exports = connect(({ user }) => ({ user }))(
 						: '';
 				children.push(
 					<div
-						className={tgtclass(game, pl)}
+						className={tgtclass(game, pl, this.state.targeting)}
 						style={{
 							position: 'absolute',
 							left: plpos.x - 48 + 'px',
@@ -891,6 +902,7 @@ module.exports = connect(({ user }) => ({ user }))(
 							setInfo={(e, obj, x) => this.setCard(e, obj.card, x)}
 							onMouseOut={this.clearCard}
 							onClick={this.thingClick}
+							targeting={this.state.targeting}
 						/>,
 					);
 				}
@@ -906,6 +918,7 @@ module.exports = connect(({ user }) => ({ user }))(
 								setInfo={(e, obj, x) => this.setInfo(e, obj, x)}
 								onMouseOut={this.clearCard}
 								onClick={this.thingClick}
+								targeting={this.state.targeting}
 							/>,
 						);
 					}
@@ -923,6 +936,7 @@ module.exports = connect(({ user }) => ({ user }))(
 								setInfo={(e, obj, x) => this.setInfo(e, obj, x)}
 								onMouseOut={this.clearCard}
 								onClick={this.thingClick}
+								targeting={this.state.targeting}
 							/>,
 						);
 					}
@@ -945,6 +959,7 @@ module.exports = connect(({ user }) => ({ user }))(
 							setInfo={(e, obj, x) => this.setInfo(e, obj, x)}
 							onMouseOut={this.clearCard}
 							onClick={this.thingClick}
+							targeting={this.state.targeting}
 						/>
 					),
 					sh && !(j == 1 && cloaked) && (
@@ -956,6 +971,7 @@ module.exports = connect(({ user }) => ({ user }))(
 							setInfo={(e, obj, x) => this.setInfo(e, obj, x)}
 							onMouseOut={this.clearCard}
 							onClick={this.thingClick}
+							targeting={this.state.targeting}
 						/>
 					),
 				);

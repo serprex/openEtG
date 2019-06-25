@@ -36,7 +36,6 @@ function Game(seed, flip) {
 		[first, new Player(this, first).init()],
 		[second, new Player(this, second).init()],
 	]);
-	this.targeting = null;
 }
 Game.prototype.id = 1;
 module.exports = Game;
@@ -95,7 +94,6 @@ Game.prototype.clone = function() {
 		[this.player1Id, new Player(obj, this.player1Id)],
 		[this.player2Id, new Player(obj, this.player2Id)],
 	]);
-	obj.targeting = null;
 	obj.props = this.props;
 	return obj;
 };
@@ -217,25 +215,18 @@ Game.prototype.expectedDamage = function() {
 	}
 	return expectedDamage;
 };
-Game.prototype.getTarget = function(src, active, cb) {
+Game.prototype.targetFilter = function(src, active) {
 	const targetingFilter = Cards.Targeting[active.name[0]];
-	if (targetingFilter) {
-		this.targeting = {
-			filter: t =>
-				(t.type == etg.Player ||
-					t.type == etg.Spell ||
-					t.ownerId == this.turn ||
-					t.getStatus('cloak') ||
-					!t.owner.isCloaked()) &&
-				targetingFilter(src, t),
-			cb: (...args) => {
-				cb(...args);
-				this.targeting = null;
-			},
-			text: active.name[0],
-			src: src,
-		};
-	} else cb();
+	return (
+		targetingFilter &&
+		(t =>
+			(t.type === etg.Player ||
+				t.type === etg.Spell ||
+				t.ownerId === this.turn ||
+				t.getStatus('cloak') ||
+				!t.owner.isCloaked()) &&
+			targetingFilter(src, t))
+	);
 };
 
 var etg = require('./etg');
