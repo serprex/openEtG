@@ -97,7 +97,9 @@ module.exports = connect(({ user, opts }) => ({
 				};
 				options.parsepvpstats(gameData);
 				options.parseaistats(gameData);
-				self.props.dispatch(store.doNav(require('./Match'), mkGame(gameData)));
+				self.props.dispatch(
+					store.doNav(require('./Match'), { game: mkGame(gameData) }),
+				);
 			}
 			function maybeChallenge(e) {
 				e.cancelBubble = true;

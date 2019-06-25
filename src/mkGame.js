@@ -37,5 +37,5 @@ module.exports = function(data) {
 		pl.deckIds = deckPower(pl, deck);
 		pl.drawhand(7);
 	}
-	return { game, data };
+	return game;
 };

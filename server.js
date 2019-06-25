@@ -159,7 +159,7 @@ const sockmeta = new WeakMap();
 			if (!user.ocard || !data.d) {
 				return;
 			}
-			const au = (data.lv ? 'B:' : 'A:') + data.u;
+			const au = `${data.lv ? 'B:' : 'A:'}${data.u}`;
 			if (data.mod) {
 				db.hmset(au, {
 					deck: data.d,

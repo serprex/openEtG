@@ -209,7 +209,7 @@ AiSearch.prototype.step = function(game) {
 		this.cmdct =
 			game.player2.handIds.length == 8
 				? { c: game.player2Id, t: this.worstcard }
-				: {};
+				: { c: game.player2Id, t: 0 };
 	}
 };
 module.exports = AiSearch;

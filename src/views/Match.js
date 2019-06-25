@@ -420,7 +420,7 @@ module.exports = connect(({ user }) => ({ user }))(
 			};
 		}
 
-		endClick = discard => {
+		endClick = (discard = 0) => {
 			const { game, user } = this.props;
 			if (game.turn === game.player1Id && game.phase === etg.MulliganPhase) {
 				if (!game.ai) sock.emit('mulligan', { draw: true });
@@ -439,13 +439,12 @@ module.exports = connect(({ user }) => ({ user }))(
 						if (game.data.get('quest')) {
 							if (game.data.get('quest').autonext) {
 								const data = addNoHealData(game);
-								data.rematch = this.props.data.rematch;
-								data.rematchFilter = this.props.data.rematchFilter;
-								const newgame = require('../Quest').mkQuestAi(
-									game.data.get('quest').autonext,
+								mkAi.run(
+									require('../Quest').mkQuestAi(
+										game.data.get('quest').autonext,
+										qdata => Object.assign(qdata, data),
+									),
 								);
-								newgame.game.addData(data);
-								mkAi.run(newgame);
 								return;
 							} else if (!user.quests[game.data.get('quest').key]) {
 								sock.userExec('setquest', {
@@ -457,11 +456,11 @@ module.exports = connect(({ user }) => ({ user }))(
 								const data = addNoHealData(game);
 								data.endurance--;
 								data.dataNext = data;
-								data.rematch = this.props.data.rematch;
-								data.rematchFilter = this.props.data.rematchFilter;
-								const newgame = mkAi.mkAi(game.data.get('level'), true)();
-								newgame.game.addData(data);
-								mkAi.run(newgame);
+								mkAi.run(
+									mkAi.mkAi(game.data.get('level'), true, gdata =>
+										Object.assign(gdata, data),
+									),
+								);
 								return;
 							} else {
 								const daily = game.data.get('daily');
@@ -475,7 +474,6 @@ module.exports = connect(({ user }) => ({ user }))(
 				this.props.dispatch(
 					store.doNav(require('./Result'), {
 						game: game,
-						data: this.props.data,
 						streakback: this.streakback,
 					}),
 				);
@@ -629,7 +627,7 @@ module.exports = connect(({ user }) => ({ user }))(
 			e.preventDefault();
 		};
 
-		startMatch({ game, data, dispatch }) {
+		startMatch({ game, dispatch }) {
 			if (
 				this.props.user &&
 				!game.data.get('endurance') &&
@@ -696,7 +694,7 @@ module.exports = connect(({ user }) => ({ user }))(
 				sock.userEmit('canceltrade');
 				delete sock.trade;
 			}
-			if (!this.props.data.spectate) {
+			if (!this.props.game.data.get('spectate')) {
 				document.addEventListener('keydown', this.onkeydown);
 			}
 			this.startMatch(this.props);
@@ -1081,7 +1079,8 @@ module.exports = connect(({ user }) => ({ user }))(
 							'Demigod\n',
 							'Arena1\n',
 							'Arena2\n',
-						][this.props.game.level] || '') + (this.props.game.foename || '-')}
+						][this.props.game.data.get('level')] || '') +
+							(this.props.game.data.get('foename') || '-')}
 					</div>
 					<span
 						style={{
@@ -1109,7 +1108,7 @@ module.exports = connect(({ user }) => ({ user }))(
 							top: '20px',
 						}}
 					/>
-					{!this.props.data.spectate &&
+					{!this.props.game.data.get('spectate') &&
 						(game.turn === game.player1Id || game.winner) && (
 							<>
 								{cancelText && (

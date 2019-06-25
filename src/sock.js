@@ -111,7 +111,7 @@ const sockEvents = {
 			p2markpower: data.mark,
 			arena: data.name,
 			level: 4 + data.lv,
-			ai: true,
+			ai: 1,
 			rematch: () => {
 				const { user } = store.store.getState();
 				if (!Cards.isDeckLegal(etgutil.decodedeck(exports.getDeck()), user)) {

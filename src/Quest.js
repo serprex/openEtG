@@ -612,7 +612,7 @@ exports.root = {
 	],
 };
 exports.quarks = quarks;
-exports.mkQuestAi = function(quest) {
+exports.mkQuestAi = function(quest, datafn) {
 	const markpower = quest.markpower || 1;
 	const drawpower = quest.drawpower || 1;
 	const hp = quest.hp || 100;
@@ -638,7 +638,7 @@ exports.mkQuestAi = function(quest) {
 		foename: quest.name,
 		p1hp: playerHPstart,
 		p2drawpower: drawpower,
-		ai: true,
+		ai: 1,
 	};
 	if (!user.quests[quest.key]) {
 		data.cardreward = quest.cardreward;
@@ -646,12 +646,11 @@ exports.mkQuestAi = function(quest) {
 		data.choicerewards = quest.choicerewards;
 		data.rewardamount = quest.rewardamount;
 	}
-	const gamedata = require('./mkGame')(data);
+	const game = require('./mkGame')(datafn ? datafn(data) : data);
 	if (quest.morph) {
-		const game = gamedata.game;
 		game.player1.deckIds = game.player1.deck.map(
 			x => game.player1.newThing(quest.morph(x.card)).id,
 		);
 	}
-	return gamedata;
+	return game;
 };

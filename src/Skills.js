@@ -2072,7 +2072,7 @@ const Skills = {
 		if (cards.length) {
 			const pick = t.choose(cards);
 			t.owner.setCrea(t.getIndex(), t.owner.deck[pick]);
-			const deck = Array.from(t.owner.deck);
+			const deck = Array.from(t.owner.deckIds);
 			deck[pick] = t.id;
 			t.owner.deckIds = deck;
 		}

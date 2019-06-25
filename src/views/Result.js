@@ -31,6 +31,11 @@ const BonusList = [
 				: 0,
 	},
 	{
+		name: 'Colosseum Bonus',
+		desc: 'Bonus from winning Colosseum Duels',
+		func: game => game.data.get('colobonus', 0),
+	},
+	{
 		name: 'Creature Domination',
 		desc: 'More than twice as many creatures than foe',
 		func: game =>
@@ -47,16 +52,6 @@ const BonusList = [
 		name: 'Current Health',
 		desc: '1% per 3hp',
 		func: game => game.player1.hp / 300,
-	},
-	{
-		name: 'Max Health',
-		desc: '1% per 6 maxhp over 100',
-		func: game => (game.player1.maxhp - 100) / 600,
-	},
-	{
-		name: 'Full Health',
-		desc: 'Hp equal to maxhp',
-		func: game => (game.player1.hp === game.player1.maxhp ? 0.2 : 0),
 	},
 	{
 		name: 'Deckout',
@@ -84,6 +79,11 @@ const BonusList = [
 				: 0,
 	},
 	{
+		name: 'Full Health',
+		desc: 'Hp equal to maxhp',
+		func: game => (game.player1.hp === game.player1.maxhp ? 0.2 : 0),
+	},
+	{
 		name: 'Grounds Keeper',
 		desc: '2.5% per permanent over 8',
 		func: game => (game.player1.countpermanents() - 8) / 40,
@@ -91,13 +91,18 @@ const BonusList = [
 	{
 		name: 'Head Hunter',
 		desc: "Defeat arena's top 7 decks",
-		func: (game, data) =>
-			[1, 1 / 2, 1 / 4, 1 / 8, 1 / 16, 1 / 32, 1 / 64][data.rank],
+		func: game =>
+			[1, 1 / 2, 1 / 4, 1 / 8, 1 / 16, 1 / 32, 1 / 64][game.data.get('rank')],
 	},
 	{
 		name: 'Last point',
 		desc: 'End with 1hp',
 		func: game => (game.player1.hp == 1 ? 0.3 : 0),
+	},
+	{
+		name: 'Max Health',
+		desc: '1% per 6 maxhp over 100',
+		func: game => (game.player1.maxhp - 100) / 600,
 	},
 	{
 		name: 'Mid Turn',
@@ -169,11 +174,11 @@ module.exports = connect(({ user }) => ({ user }))(
 			if (kc == 32 || kc == 13) this.exitFunc();
 			else if (
 				kc == 87 &&
-				this.props.data.rematch &&
-				(!this.props.data.rematchFilter ||
-					this.props.data.rematchFilter(this.props))
+				this.props.game.data.get('rematch') &&
+				(!this.props.game.data.get('rematchFilter') ||
+					this.props.game.data.get('rematchFilter')(this.props))
 			) {
-				this.props.data.rematch(this.props);
+				this.props.data.get('rematch')(this.props);
 			}
 		};
 
@@ -213,10 +218,10 @@ module.exports = connect(({ user }) => ({ user }))(
 			}
 		};
 
-		computeBonuses(game, data, lefttext, streakrate) {
+		computeBonuses(game, lefttext, streakrate) {
 			if (game.data.get('endurance') !== undefined) return 1;
 			const bonus = BonusList.reduce((bsum, bonus) => {
-				const b = bonus.func(game, data);
+				const b = bonus.func(game);
 				if (b > 0) {
 					lefttext.push(
 						<TooltipText
@@ -239,7 +244,7 @@ module.exports = connect(({ user }) => ({ user }))(
 
 		componentDidMount() {
 			document.addEventListener('keydown', this.onkeydown);
-			const { game, data } = this.props,
+			const { game } = this.props,
 				level = game.data.get('level'),
 				winner = game.winner === game.player1Id,
 				lefttext = [
@@ -252,8 +257,11 @@ module.exports = connect(({ user }) => ({ user }))(
 					if (level !== undefined || !game.ai)
 						sock.userExec('addwin', { pvp: !game.ai });
 					if (!game.data.get('quest') && game.ai) {
-						if (game.data.get('cardreward') === undefined && data.deck) {
-							const foeDeck = etgutil.decodedeck(data.deck);
+						if (
+							game.data.get('cardreward') === undefined &&
+							game.data.get('deck')
+						) {
+							const foeDeck = etgutil.decodedeck(game.data.get('deck'));
 							let winnable = foeDeck.filter(code => {
 									const card = Cards.Codes[code];
 									return card && card.rarity > 0 && card.rarity < 4;
@@ -316,7 +324,7 @@ module.exports = connect(({ user }) => ({ user }))(
 								goldwon = Math.round(
 									userutil.pveCostReward[level * 2 + 1] *
 										(1 + streakrate) *
-										this.computeBonuses(game, data, lefttext, streakrate) *
+										this.computeBonuses(game, lefttext, streakrate) *
 										(1 - agetax),
 								);
 							} else goldwon = 0;
@@ -387,13 +395,13 @@ module.exports = connect(({ user }) => ({ user }))(
 			return (
 				<>
 					<Components.ExitBtn x={412} y={440} onClick={this.exitFunc} />
-					{this.props.data.rematch &&
-						(!this.props.data.rematchFilter ||
-							this.props.data.rematchFilter(this.props)) && (
+					{game.data.get('rematch') &&
+						(!game.data.get('rematchFilter') ||
+							game.data.get('rematchFilter')(this.props)) && (
 							<input
 								type="button"
 								value="Rematch"
-								onClick={() => this.props.data.rematch(this.props)}
+								onClick={() => game.data.get('rematch')(this.props)}
 								style={{
 									position: 'absolute',
 									left: '412px',

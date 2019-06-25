@@ -494,7 +494,7 @@ module.exports = connect(({ user, opts }) => ({
 								name="Commoner"
 								y={68}
 								lv={0}
-								onClick={mkAi.run(mkAi.mkAi(0))}
+								onClick={() => mkAi.run(mkAi.mkAi(0))}
 								onMouseOver={this.mkSetTip(
 									'Commoners have no upgraded cards & mostly common cards',
 								)}
@@ -503,7 +503,7 @@ module.exports = connect(({ user, opts }) => ({
 								name="Mage"
 								y={90}
 								lv={1}
-								onClick={mkAi.run(mkAi.mkPremade(1))}
+								onClick={() => mkAi.run(mkAi.mkPremade(1))}
 								onMouseOver={this.mkSetTip(
 									'Mages have preconstructed decks with a couple rares',
 								)}
@@ -512,7 +512,7 @@ module.exports = connect(({ user, opts }) => ({
 								name="Champion"
 								y={112}
 								lv={2}
-								onClick={mkAi.run(mkAi.mkAi(2))}
+								onClick={() => mkAi.run(mkAi.mkAi(2))}
 								onMouseOver={this.mkSetTip(
 									'Champions have some upgraded cards',
 								)}
@@ -521,7 +521,7 @@ module.exports = connect(({ user, opts }) => ({
 								name="Demigod"
 								y={134}
 								lv={3}
-								onClick={mkAi.run(mkAi.mkPremade(3))}
+								onClick={() => mkAi.run(mkAi.mkPremade(3))}
 								onMouseOver={this.mkSetTip(
 									'Demigods are extremely powerful. Come prepared for anything',
 								)}
