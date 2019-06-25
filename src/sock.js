@@ -99,7 +99,7 @@ const sockEvents = {
 		);
 	},
 	foearena: data => {
-		const gamedata = mkGame({
+		const game = mkGame({
 			deck: data.deck,
 			urdeck: exports.getDeck(),
 			seed: data.seed,
@@ -111,6 +111,7 @@ const sockEvents = {
 			p2markpower: data.mark,
 			arena: data.name,
 			level: 4 + data.lv,
+			cost: userutil.arenaCost(data.lv),
 			ai: 1,
 			rematch: () => {
 				const { user } = store.store.getState();
@@ -126,9 +127,7 @@ const sockEvents = {
 				exports.userEmit('foearena', { lv: data.lv });
 			},
 		});
-		gamedata.game.cost = userutil.arenaCost(data.lv);
-		const { user } = store.store.getState();
-		store.store.dispatch(store.doNav(require('./views/Match'), gamedata));
+		store.store.dispatch(store.doNav(require('./views/Match'), { game }));
 	},
 	tradegive: data => {
 		if (exports.trade) {

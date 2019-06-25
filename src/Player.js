@@ -4,6 +4,7 @@ function Player(game, id) {
 	if (!id || typeof id !== 'number') throw new Error(`Invalid id: ${id}`);
 	this.game = game;
 	this.id = id;
+	this.cache = new WeakMap();
 }
 
 module.exports = Player;
@@ -81,13 +82,6 @@ Object.defineProperty(Player.prototype, 'creatureIds', {
 		this.game.set(this.id, 'creatures', val);
 	},
 });
-Object.defineProperty(Player.prototype, 'creatures', {
-	get: function() {
-		return Object.freeze(
-			Array.from(this.creatureIds, id => this.game.byId(id)),
-		);
-	},
-});
 Object.defineProperty(Player.prototype, 'permanentIds', {
 	get: function() {
 		return this.game.get(this.id, 'permanents');
@@ -95,13 +89,6 @@ Object.defineProperty(Player.prototype, 'permanentIds', {
 	set: function(val) {
 		assertIds(val);
 		this.game.set(this.id, 'permanents', val);
-	},
-});
-Object.defineProperty(Player.prototype, 'permanents', {
-	get: function() {
-		return Object.freeze(
-			Array.from(this.permanentIds, id => this.game.byId(id)),
-		);
 	},
 });
 Object.defineProperty(Player.prototype, 'handIds', {
@@ -113,11 +100,6 @@ Object.defineProperty(Player.prototype, 'handIds', {
 		this.game.set(this.id, 'hand', val);
 	},
 });
-Object.defineProperty(Player.prototype, 'hand', {
-	get: function() {
-		return Object.freeze(Array.from(this.handIds, id => this.game.byId(id)));
-	},
-});
 Object.defineProperty(Player.prototype, 'deckIds', {
 	get: function() {
 		return this.game.get(this.id, 'deck');
@@ -127,11 +109,23 @@ Object.defineProperty(Player.prototype, 'deckIds', {
 		this.game.set(this.id, 'deck', val);
 	},
 });
-Object.defineProperty(Player.prototype, 'deck', {
-	get: function() {
-		return Object.freeze(Array.from(this.deckIds, id => this.game.byId(id)));
-	},
-});
+
+function defineInstArray(key) {
+	Object.defineProperty(Player.prototype, key, {
+		get: function() {
+			const ids = this.game.get(this.id, key),
+				cache = this.cache.get(ids);
+			if (cache) return cache;
+			const a = Object.freeze(Array.from(ids, this.game.byId, this.game));
+			this.cache.set(ids, a);
+			return a;
+		},
+	});
+}
+defineInstArray('creatures');
+defineInstArray('permanents');
+defineInstArray('hand');
+defineInstArray('deck');
 
 function defineProp(key) {
 	Object.defineProperty(Player.prototype, key, {
@@ -157,6 +151,7 @@ defineProp('mark');
 defineProp('shardgolem');
 
 Player.prototype.init = function() {
+	this.game.set(this.id, 'type', etg.Player);
 	this.maxhp = this.hp = 100;
 	this.atk = 0;
 	this.status = new imm.Map();

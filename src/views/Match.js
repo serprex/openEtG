@@ -428,9 +428,9 @@ module.exports = connect(({ user }) => ({ user }))(
 				this.forceUpdate();
 			} else if (game.winner) {
 				if (user) {
-					if (game.arena) {
+					if (game.data.get('arena')) {
 						sock.userEmit('modarena', {
-							aname: game.arena,
+							aname: game.data.get('arena'),
 							won: game.winner === game.player2Id,
 							lv: game.level - 4,
 						});

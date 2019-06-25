@@ -177,7 +177,6 @@ const blacklist = new Set([
 	'seed',
 	'p1deckpower',
 	'p2deckpower',
-	'deck',
 	'urdeck',
 ]);
 Game.prototype.addData = function(data) {

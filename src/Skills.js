@@ -547,9 +547,9 @@ const Skills = {
 		const deck = c.owner.deck;
 		for (let i = c.owner.deckIds.length - 1; i > -1; i--) {
 			const card = deck[i];
-			if (card.card.type == etg.Weapon || card.card.type == etg.Shield) {
+			if (card.card.type === etg.Weapon || card.card.type === etg.Shield) {
 				if (~c.owner.addCardInstance(card)) {
-					const deckIds = Array.from(c.owner.deck);
+					const deckIds = Array.from(c.owner.deckIds);
 					deckIds.splice(i, 1);
 					c.owner.deckIds = deckIds;
 					c.owner.proc('draw');

@@ -256,7 +256,7 @@ module.exports = connect(({ user }) => ({ user }))(
 				if (this.props.user) {
 					if (level !== undefined || !game.ai)
 						sock.userExec('addwin', { pvp: !game.ai });
-					if (!game.data.get('quest') && game.ai) {
+					if (!game.data.get('quest') && game.ai === 1) {
 						if (
 							game.data.get('cardreward') === undefined &&
 							game.data.get('deck')
