@@ -376,7 +376,7 @@ function estimateDamage(game, c, freedomChance, wallCharges, wallIndex) {
 			fshactive &&
 			(~fshactive.name.indexOf('weight') || ~fshactive.name.indexOf('wings'))
 		) {
-			fshactive.func(c.game, c.owner.foe.shield, c, data);
+			fshactive.func(game, c.owner.foe.shield, c, data);
 			if (!data.dmg) return 0;
 		} else if (wallCharges[wallIndex]) {
 			wallCharges[wallIndex]--;
@@ -442,7 +442,13 @@ function calcExpectedDamage(pl, wallCharges, wallIndex) {
 	if (!stasisFlag) {
 		pl.creatures.forEach(c => {
 			if (c) {
-				const dmg = estimateDamage(c, freedomChance, wallCharges, wallIndex);
+				const dmg = estimateDamage(
+					pl.game,
+					c,
+					freedomChance,
+					wallCharges,
+					wallIndex,
+				);
 				if (
 					!(
 						c.getStatus('psionic') &&
@@ -456,7 +462,7 @@ function calcExpectedDamage(pl, wallCharges, wallIndex) {
 	}
 	return (
 		totalDamage +
-		estimateDamage(pl.weapon, freedomChance, wallCharges, wallIndex) +
+		estimateDamage(pl.game, pl.weapon, freedomChance, wallCharges, wallIndex) +
 		pl.foe.getStatus('poison')
 	);
 }
@@ -633,7 +639,7 @@ function evalthing(game, c, inHand) {
 		);
 		score *= 1 - (12 * delayed) / (12 + delayed) / 16;
 	}
-	if (inHand) score *= card.cost ? 0.1 : 0.4;
+	if (inHand) score *= card.cost ? 0.4 : 0.6;
 	return score;
 }
 
