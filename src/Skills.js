@@ -1076,7 +1076,7 @@ const Skills = {
 		let stat = c.card.upped ? 0.5 : 0,
 			handIds = c.owner.handIds;
 		for (let i = handIds.length - 1; ~i; i--) {
-			const card = ctx.byId(handIds[i]).card;
+			const card = ctx.get(handIds[i], 'card');
 			if (etg.ShardList.some(x => x && card.isOf(Cards.Codes[x]))) {
 				if (card.upped) {
 					stat += 0.5;
@@ -1159,7 +1159,7 @@ const Skills = {
 		if (tally[etg.Death] > 0) {
 			addSkill('hit', 'poison ' + tally[etg.Death]);
 		}
-		ctx.set(c.owner, 'shardgolem', new imm.Map(shardgolem));
+		ctx.set(c.ownerId, 'shardgolem', new imm.Map(shardgolem));
 		c.owner.addCrea(c.owner.newThing(c.card.as(Cards.ShardGolem)), true);
 	},
 	jelly: (ctx, c, t) => {
@@ -1767,16 +1767,16 @@ const Skills = {
 		}
 	},
 	shardgolem: (ctx, c, t) => {
-		if (!ctx.get(c, 'maxhp')) {
-			const golem = ctx.get(c.owner, 'shardgolem') || defaultShardGolem;
-			ctx.set(c, 'cast', golem.get('cast'));
-			ctx.set(c, 'castele', etg.Earth);
+		if (!ctx.get(c.id, 'maxhp')) {
+			const golem = ctx.get(c.ownerId, 'shardgolem') || defaultShardGolem;
+			ctx.set(c.id, 'cast', golem.get('cast'));
+			ctx.set(c.id, 'castele', etg.Earth);
 			const stat = golem.get('stat');
-			ctx.set(c, 'atk', stat);
-			ctx.set(c, 'maxhp', stat);
-			ctx.set(c, 'hp', stat);
-			ctx.set(c, 'status', golem.get('status'));
-			ctx.set(c, 'active', golem.get('active'));
+			ctx.set(c.id, 'atk', stat);
+			ctx.set(c.id, 'maxhp', stat);
+			ctx.set(c.id, 'hp', stat);
+			ctx.set(c.id, 'status', golem.get('status'));
+			ctx.set(c.id, 'active', golem.get('active'));
 		}
 	},
 	shtriga: (ctx, c, t) => {
