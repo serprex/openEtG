@@ -70,10 +70,7 @@ Thing.prototype.init = function(card) {
 };
 Thing.prototype.clone = function(ownerId) {
 	const newId = this.game.newId();
-	this.game.props = this.game.props.set(
-		newId,
-		this.game.props.get(this.id).set('owner', ownerId),
-	);
+	this.game.update(newId, clone => clone.set('owner', ownerId));
 	return this.game.byId(newId);
 };
 const sfx = require('./audio');
@@ -141,13 +138,21 @@ Thing.prototype.remove = function(index) {
 			arrName = 'permanents';
 		}
 		if (arrName) {
-			const arr = new Uint32Array(this.game.get(this.ownerId, arrName));
-			arr[index] = 0;
-			this.game.set(this.ownerId, arrName, arr);
+			this.game.update(this.ownerId, pl =>
+				pl.update(arrName, a => {
+					const arr = new Uint32Array(a);
+					arr[index] = 0;
+					return arr;
+				}),
+			);
 		} else {
-			const hand = Array.from(this.game.get(this.ownerId, 'hand'));
-			hand.splice(index, 1);
-			this.game.set(this.ownerId, 'hand', hand);
+			this.game.update(this.ownerId, pl =>
+				pl.update('hand', hand => {
+					const arr = Array.from(hand);
+					arr.splice(index, 1);
+					return arr;
+				}),
+			);
 		}
 	}
 	return index;

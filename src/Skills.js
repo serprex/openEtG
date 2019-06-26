@@ -257,9 +257,7 @@ const Skills = {
 			const cl = c.clone(c.ownerId);
 			cl.hp = cl.maxhp = c.card.health;
 			cl.atk = c.card.attack;
-			const creatures = new Uint32Array(c.owner.creatureIds);
-			creatures[data.index] = cl.id;
-			c.owner.creatureIds = creatures;
+			c.owner.setCrea(data.index, cl.id);
 		}
 	}),
 	cell: passive((ctx, c, t) => {
@@ -334,7 +332,7 @@ const Skills = {
 		const buff = ctx.upto(25),
 			bh = ((buff / 5) | 0) + 1,
 			ba = (buff % 5) + 1;
-		Effect.mkText(ba + '|' + bh, t);
+		Effect.mkText(`${ba}|${bh}`, t);
 		t.buffhp(bh);
 		t.atk += ba;
 	},
@@ -1626,12 +1624,9 @@ const Skills = {
 			t.owner.creatures[index].card !== Cards.MalignantCell
 		) {
 			const skele = t.owner.newThing(t.card.as(Cards.Skeleton));
-			skele.type = etg.Creature;
 			skele.atk = atk;
 			skele.maxhp = skele.hp = hp;
-			const creatures = new Uint32Array(t.owner.creatureIds);
-			creatures[index] = skele.id;
-			t.owner.creatureIds = creatures;
+			c.owner.setCrea(index, skele.id);
 		}
 	},
 	rebirth: (ctx, c, t) => {
@@ -1930,7 +1925,7 @@ const Skills = {
 		if (t.getStatus('stackable')) {
 			const inst = t.clone(c.ownerId);
 			inst.setStatus('charges', 1);
-			Skills.destroy.func(ctx, c, t, true);
+			Skills.destroy.func(ctx, c, t, true, true);
 			t = inst;
 		} else {
 			t.remove();
@@ -2045,23 +2040,27 @@ const Skills = {
 				else pl = c.owner;
 			}
 			const perms = pl.permanents.filter(x => x && x.isMaterial());
-			if (pl.weapon && pl.weapon.isMaterial()) perms.push(pl.weapon);
-			if (pl.shield && pl.shield.isMaterial()) perms.push(pl.shield);
+			if (pl.weaponId && pl.weapon.isMaterial()) perms.push(pl.weapon);
+			if (pl.shieldId && pl.shield.isMaterial()) perms.push(pl.shield);
 			if (perms.length) {
 				const pr = pl.choose(perms);
+				Effect.mkText('Shuffled', pr);
 				const newpl = ctx.upto(2) ? pl : pl.foe;
 				const deckIds = Array.from(newpl.deckIds);
-				pr.ownerId = newpl.id;
-				deckIds.splice(ctx.upto(newpl.deckIds.length), 0, pr.id);
+				deckIds.splice(
+					ctx.upto(newpl.deckIds.length),
+					0,
+					newpl.newThing(pr.card).id,
+				);
 				newpl.deckIds = deckIds;
-				Effect.mkText('Shuffled', pr);
 				Skills.destroy.func(ctx, c, pr, true, true);
 			}
 		}
 	},
 	trick: (ctx, c, t) => {
 		const cards = [];
-		t.owner.deck.forEach(({ card }, i) => {
+		t.owner.deckIds.forEach((id, i) => {
+			const card = ctx.get(id, 'card');
 			if (
 				card.type === etg.Creature &&
 				card.asShiny(false) !== t.card.asShiny(false)
@@ -2071,7 +2070,7 @@ const Skills = {
 		});
 		if (cards.length) {
 			const pick = t.choose(cards);
-			t.owner.setCrea(t.getIndex(), t.owner.deck[pick]);
+			t.owner.setCrea(t.getIndex(), t.owner.deckIds[pick]);
 			const deck = Array.from(t.owner.deckIds);
 			deck[pick] = t.id;
 			t.owner.deckIds = deck;
@@ -2272,11 +2271,7 @@ const Skills = {
 			data.evade = true;
 	},
 	evadecrea: (ctx, c, t, data) => {
-		if (
-			data.tgt === c.id &&
-			c.ownerId !== t.ownerId &&
-			t.type === etg.Creature
-		)
+		if (data.tgt === c.id && c.ownerId !== t.ownerId && t.type === etg.Creature)
 			data.evade = true;
 	},
 	firewall: (ctx, c, t) => {
@@ -2297,10 +2292,7 @@ const Skills = {
 				) {
 					sfx.playSound('skelify');
 					const skele = t.owner.newThing(t.card.as(Cards.Skeleton));
-					skele.type = etg.Creature;
-					const creatures = new Uint32Array(ctx.get(t.ownerId, 'creatures'));
-					creatures[index] = skele.id;
-					ctx.set(t.ownerId, 'creatures', creatures);
+					t.owner.setCrea(index, skele.id);
 				}
 			}
 		}

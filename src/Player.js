@@ -202,12 +202,11 @@ Player.prototype.addCrea = function(x, fromhand) {
 		x.place(this, etg.Creature, fromhand);
 	}
 };
-Player.prototype.setCrea = function(idx, x) {
-	if (typeof x === 'number') x = this.game.byId(x);
+Player.prototype.setCrea = function(idx, id) {
 	const creatures = new Uint32Array(this.game.get(this.id, 'creatures'));
-	creatures[idx] = x.id;
+	creatures[idx] = id;
 	this.game.set(this.id, 'creatures', creatures);
-	x.place(this, etg.Creature, false);
+	this.game.byId(id).place(this, etg.Creature, false);
 };
 Player.prototype.addPerm = function(x, fromhand) {
 	if (typeof x === 'number') x = this.game.byId(x);
