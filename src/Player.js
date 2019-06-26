@@ -169,7 +169,7 @@ Player.prototype.init = function() {
 	return this;
 };
 Player.prototype.toString = function() {
-	return this.id == this.game.player1Id ? 'p1' : 'p2';
+	return this.id === this.game.player1Id ? 'p1' : 'p2';
 };
 Player.prototype.isCloaked = function() {
 	return this.permanents.some(pr => pr && pr.getStatus('cloak'));
@@ -194,7 +194,7 @@ Player.prototype.newThing = function(card) {
 Player.prototype.addCrea = function(x, fromhand) {
 	if (typeof x === 'number') x = this.game.byId(x);
 	if (~this.place('creatures', x.id)) {
-		if (fromhand && this.game.bonusstats && this.id == this.game.player1Id) {
+		if (fromhand && this.game.bonusstats && this.id === this.game.player1Id) {
 			this.game.update(this.game.id, game =>
 				game.updateIn(['bonusstats', 'creaturesplaced'], (x = 0) => x + 1),
 			);
@@ -298,13 +298,14 @@ Player.prototype.canspend = function(qtype, x) {
 	return x <= 0;
 };
 Player.prototype.spend = function(qtype, x, scramble) {
-	if (x == 0 || (!scramble && x < 0 && this.getStatus('flatline'))) return true;
+	if (x === 0 || (!scramble && x < 0 && this.getStatus('flatline')))
+		return true;
 	if (!this.canspend(qtype, x)) return false;
 	const quanta = new Int8Array(this.game.get(this.id, 'quanta'));
 	if (!qtype) {
 		const b = x < 0 ? -1 : 1;
 		for (let i = x * b; i > 0; i--) {
-			const q = b == -1 ? 1 + this.upto(12) : this.randomquanta();
+			const q = b === -1 ? 1 + this.upto(12) : this.randomquanta();
 			quanta[q] = Math.min(quanta[q] - b, 99);
 		}
 	} else quanta[qtype] = Math.min(quanta[qtype] - x, 99);
@@ -410,8 +411,8 @@ Player.prototype.drawcard = function(drawstep) {
 			if (~this.addCardInstance(this._draw())) {
 				this.proc('draw', drawstep);
 				if (
-					this.deckIds.length == 0 &&
-					this.game.player1 == this &&
+					this.deckIds.length === 0 &&
+					this.game.player1Id === this.id &&
 					!Effect.disable
 				)
 					Effect.mkSpriteFadeText('Last card!', { x: 450, y: 300 });

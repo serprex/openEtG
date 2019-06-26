@@ -4,7 +4,7 @@ const etg = require('../etg'),
 	Skills = require('../Skills'),
 	parseSkill = require('../parseSkill');
 function pillarval(c) {
-	return c.type == etg.Spell ? 0.1 : Math.sqrt(c.getStatus('charges'));
+	return c.type === etg.Spell ? 0.1 : Math.sqrt(c.getStatus('charges'));
 }
 const SkillsValues = Object.freeze({
 	'ablaze 1': 1,
@@ -17,11 +17,15 @@ const SkillsValues = Object.freeze({
 	aflatoxin: 5,
 	aggroskele: 2,
 	air: 1,
-	alphawolf: c => (c.type == etg.Spell ? 3 : 0),
+	alphawolf: c => (c.type === etg.Spell ? 3 : 0),
 	animateweapon: 4,
 	antimatter: 12,
 	appease: c =>
-		c.type == etg.Spell ? -6 : c.getStatus('appeased') ? 0 : c.trueatk() * -1.5,
+		c.type === etg.Spell
+			? -6
+			: c.getStatus('appeased')
+			? 0
+			: c.trueatk() * -1.5,
 	bblood: 7,
 	beguilestop: c => -getDamage(c.game, c),
 	bellweb: 1,
@@ -51,7 +55,7 @@ const SkillsValues = Object.freeze({
 	chimera: 4,
 	chromastat: c =>
 		1 +
-		(c.type == etg.Spell
+		(c.type === etg.Spell
 			? c.card.health + c.card.attack
 			: c.trueatk() + c.truehp()) /
 			3,
@@ -68,28 +72,28 @@ const SkillsValues = Object.freeze({
 	deadalive: 2,
 	deathwish: 1,
 	deckblast: c => c.owner.deck.length / 2,
-	deepdive: (c, ttatk) => (c.type == etg.Spell ? c.card.attack : ttatk / 1.5),
-	deepdiveproc: (c, ttatk) => (c.type == etg.Spell ? c.card.attack : ttatk),
+	deepdive: (c, ttatk) => (c.type === etg.Spell ? c.card.attack : ttatk / 1.5),
+	deepdiveproc: (c, ttatk) => (c.type === etg.Spell ? c.card.attack : ttatk),
 	deja: 4,
 	deployblobs: c =>
 		2 +
-		(c.type == etg.Spell
+		(c.type === etg.Spell
 			? Math.min(c.card.attack, c.card.health)
 			: Math.min(c.trueatk(), c.truehp())) /
 			4,
 	destroy: 8,
 	destroycard: 1,
-	devour: c => 2 + (c.type == etg.Spell ? c.card.health : c.truehp()),
+	devour: c => 2 + (c.type === etg.Spell ? c.card.health : c.truehp()),
 	disarm: c =>
 		!c.owner.foe.weapon
 			? 0.1
-			: c.owner.foe.handIds.length == 8
+			: c.owner.foe.handIds.length === 8
 			? 0.5
 			: c.owner.foe.weapon.card.cost,
 	disfield: 8,
 	disshield: 7,
 	dive: (c, ttatk) =>
-		c.type == etg.Spell ? c.card.attack : ttatk - c.getStatus('dive') / 1.5,
+		c.type === etg.Spell ? c.card.attack : ttatk - c.getStatus('dive') / 1.5,
 	divinity: 3,
 	drainlife: 10,
 	draft: 1,
@@ -142,7 +146,7 @@ const SkillsValues = Object.freeze({
 		}
 		return dmg;
 	},
-	gpull: c => (c.type == etg.Spell || c.id != c.owner.gpull ? 2 : 0),
+	gpull: c => (c.type === etg.Spell || c.id !== c.owner.gpull ? 2 : 0),
 	gpullspell: 3,
 	gratitude: 4,
 	grave: 1,
@@ -152,7 +156,7 @@ const SkillsValues = Object.freeze({
 	guard: 4,
 	halveatk: c => {
 		let atk;
-		return c.type == etg.Spell
+		return c.type === etg.Spell
 			? -c.card.attack / 4
 			: ((atk = c.trueatk()) < 0) - (atk > 0);
 	},
@@ -160,7 +164,7 @@ const SkillsValues = Object.freeze({
 	hatch: 3,
 	heal: 8,
 	heatmirror: 2,
-	hitownertwice: c => (c.type == etg.Spell ? c.card.attack : c.trueatk()) * -2,
+	hitownertwice: c => (c.type === etg.Spell ? c.card.attack : c.trueatk()) * -2,
 	holylight: 3,
 	hope: 2,
 	icebolt: 10,
@@ -229,7 +233,7 @@ const SkillsValues = Object.freeze({
 	powerdrain: 6,
 	precognition: 1,
 	predator: (c, tatk) =>
-		c.type != etg.Spell && c.owner.foe.handIds.length > 4
+		c.type !== etg.Spell && c.owner.foe.handIds.length > 4
 			? tatk + Math.max(c.owner.foe.handIds.length - 6, 1)
 			: 1,
 	protectonce: 2,
@@ -242,7 +246,7 @@ const SkillsValues = Object.freeze({
 	reap: 7,
 	rebirth: [5, 2],
 	reducemaxhp: (c, ttatk) =>
-		((ttatk == undefined ? c.card.attack : ttatk) * 5) / 3,
+		((ttatk === undefined ? c.card.attack : ttatk) * 5) / 3,
 	regenerate: 5,
 	regeneratespell: 5,
 	regrade: 3,
@@ -289,15 +293,15 @@ const SkillsValues = Object.freeze({
 	tempering: [2, 3],
 	tesseractsummon: 3,
 	throwrock: 4,
-	tick: c => (c.type == etg.Spell ? 1 : 1 + (c.maxhp - c.truehp()) / c.maxhp),
+	tick: c => (c.type === etg.Spell ? 1 : 1 + (c.maxhp - c.truehp()) / c.maxhp),
 	tornado: 9,
 	trick: 4,
 	turngolem: c => c.getStatus('storedpower') >> 1,
 	upkeep: -0.5,
 	upload: 3,
-	vampire: (c, ttatk) => (c.type == etg.Spell ? c.card.attack : ttatk) * 0.7,
+	vampire: (c, ttatk) => (c.type === etg.Spell ? c.card.attack : ttatk) * 0.7,
 	virtue: c =>
-		c.type == etg.Spell
+		c.type === etg.Spell
 			? c.owner.foe.shield
 				? Math.min(c.owner.foe.shield.truedr(), c.card.attack)
 				: 0
@@ -322,7 +326,7 @@ const SkillsValues = Object.freeze({
 		c.getStatus('charges') / (1 + c.owner.foe.countcreatures() * 2),
 	cold: 7,
 	despair: 5,
-	evade100: c => (!c.getStatus('charges') && c.ownerId == c.game.turn ? 0 : 1),
+	evade100: c => (!c.getStatus('charges') && c.ownerId === c.game.turn ? 0 : 1),
 	'evade 40': 1,
 	'evade 50': 1,
 	firewall: 7,
@@ -335,7 +339,7 @@ const SkillsValues = Object.freeze({
 	},
 	thorn: 5,
 	weight: 5,
-	wings: c => (!c.getStatus('charges') && c.ownerId == c.game.turn ? 0 : 6),
+	wings: c => (!c.getStatus('charges') && c.ownerId === c.game.turn ? 0 : 6),
 });
 const statusValues = Object.freeze({
 	airborne: 0.2,
@@ -343,7 +347,7 @@ const statusValues = Object.freeze({
 	voodoo: 1,
 	swarm: 1,
 	tunnel: 3,
-	cloak: c => (!c.getStatus('charges') && c.ownerId == c.game.turn ? 0 : 4),
+	cloak: c => (!c.getStatus('charges') && c.ownerId === c.game.turn ? 0 : 4),
 	flooding: c => c.owner.foe.countcreatures() - 3,
 	patience: c => 1 + c.owner.countcreatures() * 2,
 	reflective: 1,
@@ -490,11 +494,11 @@ function checkpassives(c) {
 		if (
 			val &&
 			uniqueStatuses.has(status) &&
-			c.type == etg.Spell &&
+			c.type === etg.Spell &&
 			!(
-				status == 'cloak' &&
+				status === 'cloak' &&
 				!c.getStatus('charges') &&
-				c.ownerId == c.game.turn
+				c.ownerId === c.game.turn
 			)
 		) {
 			if (!uniquesSkill.has(status)) {
@@ -569,7 +573,7 @@ function evalthing(game, c, inHand) {
 		} else if (poison < 0) {
 			hp = Math.max(Math.min(hp - poison, c.maxhp), 0);
 		}
-		if (hp == 0) {
+		if (hp === 0) {
 			for (let j = 0; j < 2; j++) {
 				const pl = j ? c.owner : c.owner.foe;
 				for (let i = 0; i < 23; i++) {
@@ -596,27 +600,27 @@ function evalthing(game, c, inHand) {
 			: 2;
 	for (const [key, act] of c.active) {
 		const adrfactor = throttled.has(key) ? throttlefactor : adrenalinefactor;
-		if (key == 'hit') {
+		if (key === 'hit') {
 			score +=
 				evalactive(c, act, ttatk) *
 				(ttatk ? 1 : c.getStatus('immaterial') ? 0 : 0.3) *
 				adrfactor *
 				delayfactor;
-		} else if (key == 'ownattack') {
+		} else if (key === 'ownattack') {
 			if (!c.getStatus('frozen')) {
 				score += evalactive(c, act, ttatk) * adrfactor;
 			}
-		} else if (key == 'cast') {
+		} else if (key === 'cast') {
 			if (caneventuallyactive(c.castele, c.cast, c.owner)) {
 				score += evalactive(c, act, ttatk) * delayfactor;
 			}
-		} else if (key != (isCreature ? 'shield' : 'owndeath')) {
+		} else if (key !== (isCreature ? 'shield' : 'owndeath')) {
 			score += evalactive(c, act);
 		}
 	}
 	score += checkpassives(c);
 	if (isCreature) {
-		if (hp && c.owner.gpull == c.id) {
+		if (hp && c.owner.gpull === c.id) {
 			score = ((score + hp) * Math.log(hp)) / 4;
 			if (c.getStatus('voodoo')) score += hp;
 			if (c.active.get('shield') && !delaymix) {
@@ -649,11 +653,11 @@ function caneventuallyactive(element, cost, pl) {
 		!element ||
 		pl.quanta[element] > 0 ||
 		!pl.mark ||
-		pl.mark == element ||
+		pl.mark === element ||
 		pl.permanents.some(
 			pr =>
 				pr &&
-				((pr.card.type == etg.Pillar &&
+				((pr.card.type === etg.Pillar &&
 					(!pr.card.element || pr.card.element === element)) ||
 					(pr.active.get('cast') === Skills.locket &&
 						pr.getStatus('mode') === element)),
@@ -674,7 +678,7 @@ module.exports = function(game) {
 	if (game.winner) {
 		return game.winner === game.player1Id ? 99999999 : -99999999;
 	}
-	if (game.player1.deck.length == 0 && game.player1.handIds.length < 8) {
+	if (game.player1.deck.length === 0 && game.player1.handIds.length < 8) {
 		return -99999990;
 	}
 	const wallCharges = new Int32Array([0, 0]);
@@ -684,13 +688,13 @@ module.exports = function(game) {
 	if (expectedDamage > game.player1.hp) {
 		return Math.min(expectedDamage - game.player1.hp, 500) * -999;
 	}
-	if (game.player2.deckIds.length == 0) {
+	if (game.player2.deckIds.length === 0) {
 		return 99999980;
 	}
 	expectedDamage = calcExpectedDamage(game.player1, wallCharges, 1); // Call to fill damageHash
 	let gamevalue = expectedDamage > game.player2.hp ? 999 : 0;
 	for (let j = 0; j < 2; j++) {
-		if (j == 1) {
+		if (j === 1) {
 			// Reset non global effects
 			uniquesSkill.delete('tunnel');
 			uniquesSkill.delete('patience');
@@ -704,7 +708,7 @@ module.exports = function(game) {
 		player.permanents.forEach(pr => (pscore += evalthing(game, pr)));
 		player.hand.forEach(cinst => (pscore += evalthing(game, cinst, true)));
 		if (
-			player != game.turn &&
+			player.id !== game.turn &&
 			player.handIds.length < 8 &&
 			player.deckIds.length
 		) {

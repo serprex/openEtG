@@ -744,7 +744,10 @@ module.exports = connect(({ user }) => ({ user }))(
 					<Components.Text
 						className="infobox"
 						text={
-							obj.info() + (actinfo ? '\n' + actinfo(obj, this.props.game) : '')
+							obj.info() +
+							(actinfo
+								? '\n' + actinfo(obj, this.props.game, this.state.targeting)
+								: '')
 						}
 						icoprefix="te"
 						style={{
@@ -778,7 +781,7 @@ module.exports = connect(({ user }) => ({ user }))(
 			let turntell, endText, cancelText;
 			const cloaked = game.player2.isCloaked();
 
-			if (game.phase != etg.EndPhase) {
+			if (game.phase !== etg.EndPhase) {
 				turntell = this.state.discarding
 					? 'Discard'
 					: this.state.targeting
@@ -811,7 +814,7 @@ module.exports = connect(({ user }) => ({ user }))(
 				} else cancelText = endText = '';
 			} else {
 				turntell = `${game.turn === game.player1Id ? 'Your' : 'Their'} Turn, ${
-					game.winner == game.player1Id ? 'Won' : 'Lost'
+					game.winner === game.player1Id ? 'Won' : 'Lost'
 				}`;
 				endText = 'Continue';
 				cancelText = '';

@@ -118,7 +118,7 @@ Game.prototype.playerIds = function(n) {
 	return n ? this.player2Id : this.player1Id;
 };
 Game.prototype.byId = function(id) {
-	if (!id) return id;
+	if (!id) return null;
 	let inst = this.cache.get(id);
 	if (!inst) {
 		inst = new Thing(this, id);

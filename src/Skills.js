@@ -4,7 +4,7 @@ function adrenathrottle(f) {
 	return (ctx, c, ...rest) => {
 		if (
 			c.getStatus('adrenaline') < 3 ||
-			(c.type == etg.Creature &&
+			(c.type === etg.Creature &&
 				c.owner.weapon &&
 				c.owner.weapon.getStatus('nothrottle'))
 		) {
@@ -44,7 +44,7 @@ const Skills = {
 		};
 	},
 	abomination: passive((ctx, c, t, data) => {
-		if (data.tgt == c && data.active == Skills.mutation) {
+		if (data.tgt.id === c.id && data.active === Skills.mutation) {
 			Skills.improve.func(ctx, c, c);
 			data.evade = true;
 		}
@@ -127,7 +127,7 @@ const Skills = {
 		if (t.getSkill('cast') === Skills.burrow) Skills.burrow.func(ctx, t);
 	},
 	axe: (ctx, c, t) => {
-		return c.owner.mark == etg.Fire || c.owner.mark == etg.Time ? 1 : 0;
+		return c.owner.mark === etg.Fire || c.owner.mark === etg.Time ? 1 : 0;
 	},
 	axedraw: (ctx, c, t) => {
 		c.incrStatus('dive', 1);
@@ -144,10 +144,10 @@ const Skills = {
 		t.remove();
 		t.ownerId = t.owner.foeId;
 		t.owner.addCrea(t);
-		if (c != t) t.addactive('turnstart', Skills.beguilestop);
+		if (c.id !== t.id) t.addactive('turnstart', Skills.beguilestop);
 	},
 	beguilestop: passive((ctx, c, t) => {
-		if (t.id == c.ownerId) {
+		if (t.id === c.ownerId) {
 			c.rmactive('turnstart', 'beguilestop');
 			Skills.beguile.func(ctx, c, c);
 		}
@@ -182,7 +182,7 @@ const Skills = {
 		c.owner.addCrea(c.owner.newThing(c.card.as(Cards.Skeleton)));
 	},
 	bow: (ctx, c, t) => {
-		return c.owner.mark == etg.Air || c.owner.mark == etg.Light ? 1 : 0;
+		return c.owner.mark === etg.Air || c.owner.mark === etg.Light ? 1 : 0;
 	},
 	bounce: passive((ctx, c, t) => {
 		c.hp = c.maxhp;
@@ -220,7 +220,7 @@ const Skills = {
 		c.owner.addCard(c.card.as(Cards.Codes[etg.AlchemyList[ctx.upto(12) + 1]]));
 	},
 	brokenmirror: (ctx, c, t, fromhand) => {
-		if (fromhand && t.type == etg.Creature && c.ownerId != t.ownerId) {
+		if (fromhand && t.type === etg.Creature && c.ownerId !== t.ownerId) {
 			c.owner.addCrea(c.owner.newThing(c.card.as(Cards.Phantom)));
 		}
 	},
@@ -362,7 +362,7 @@ const Skills = {
 	cseed2: (ctx, c, t) => {
 		const choice = c.choose(
 			Cards.filter(ctx.upto(2), c => {
-				if (c.type != etg.Spell) return false;
+				if (c.type !== etg.Spell) return false;
 				const tgting = Cards.Targeting[c.active.get('cast').name[0]];
 				return tgting && tgting(c, t);
 			}),
@@ -371,7 +371,7 @@ const Skills = {
 		c.castSpell(t, choice.active.get('cast'));
 	},
 	dagger: (ctx, c) => {
-		let buff = c.owner.mark == etg.Darkness || c.owner.mark == etg.Death;
+		let buff = c.owner.mark === etg.Darkness || c.owner.mark === etg.Death;
 		c.owner.permanents.forEach(p => {
 			if (p && p.getStatus('cloak')) buff++;
 		});
@@ -386,9 +386,9 @@ const Skills = {
 			!tgt ||
 			c.getStatus('frozen') ||
 			c.getStatus('delayed') ||
-			c.ownerId == t.ownerId ||
-			tgt.ownerId != c.ownerId ||
-			tgt.type != etg.Creature ||
+			c.ownerId === t.ownerId ||
+			tgt.ownerId !== c.ownerId ||
+			tgt.type !== etg.Creature ||
 			!Cards.Targeting[data.active.name[0]](t, c)
 		)
 			return;
@@ -418,7 +418,7 @@ const Skills = {
 		c.addactive('turnstart', Skills.deepdiveproc);
 	},
 	deepdiveproc: passive((ctx, c, t) => {
-		if (t.id == c.ownerId) {
+		if (t.id === c.ownerId) {
 			c.rmactive('turnstart', 'deepdiveproc');
 			c.addactive('turnstart', Skills.deepdiveproc2);
 			c.setStatus('airborne', 1);
@@ -458,7 +458,7 @@ const Skills = {
 		}
 	},
 	destroycard: (ctx, c, t) => {
-		if (t.type == etg.Player) {
+		if (t.type === etg.Player) {
 			if (!t.deckIds.length) ctx.setWinner(t.foeId);
 			else t._draw();
 		} else if (!t.owner.getStatus('sanctuary')) {
@@ -484,12 +484,12 @@ const Skills = {
 		c.die();
 	},
 	disarm: (ctx, c, t) => {
-		if (t.type == etg.Player && t.weapon) {
+		if (t.type === etg.Player && t.weapon) {
 			unsummon(t.weapon);
 		}
 	},
 	disc: (ctx, c, t) => {
-		return c.owner.mark == etg.Entropy || c.owner.mark == etg.Aether ? 1 : 0;
+		return c.owner.mark === etg.Entropy || c.owner.mark === etg.Aether ? 1 : 0;
 	},
 	discping: (ctx, c, t) => {
 		t.dmg(1);
@@ -541,7 +541,7 @@ const Skills = {
 		}
 	},
 	drawcopy: (ctx, c, t) => {
-		if (c.ownerId != t.ownerId) c.owner.addCardInstance(t.clone(c.ownerId));
+		if (c.ownerId !== t.ownerId) c.owner.addCardInstance(t.clone(c.ownerId));
 	},
 	drawequip: (ctx, c, t) => {
 		const deck = c.owner.deck;
@@ -560,7 +560,7 @@ const Skills = {
 	},
 	drawpillar: (ctx, c, t) => {
 		const deck = c.owner.deck;
-		if (deck.length && deck[deck.length - 1].card.type == etg.Pillar)
+		if (deck.length && deck[deck.length - 1].card.type === etg.Pillar)
 			Skills.hasten.func(ctx, c, t);
 	},
 	dryspell: (ctx, c, t) => {
@@ -575,7 +575,7 @@ const Skills = {
 		c.addactive('turnstart', Skills.dshieldoff);
 	},
 	dshieldoff: passive((ctx, c, t) => {
-		if (c.ownerId == t.id) {
+		if (c.ownerId === t.id) {
 			c.setStatus('immaterial', 0);
 			c.rmactive('turnstart', 'dshieldoff');
 		}
@@ -601,7 +601,7 @@ const Skills = {
 		t.proc('destroy', {});
 	},
 	elf: passive((ctx, c, t, data) => {
-		if (data.tgt == c && data.active == Skills.cseed) {
+		if (data.tgt.id === c.id && data.active === Skills.cseed) {
 			c.transform(c.card.as(Cards.FallenElf));
 			data.evade = true;
 		}
@@ -636,7 +636,7 @@ const Skills = {
 	endow: (ctx, c, t) => {
 		Effect.mkText('Endow', t);
 		for (const [key, val] of t.status) {
-			c.incrStatus(key, key == 'adrenaline' && val > 1 ? 1 : val);
+			c.incrStatus(key, key === 'adrenaline' && val > 1 ? 1 : val);
 		}
 		if (t.active.get('cast') === Skills.endow) {
 			c.active = c.active.delete('cast');
@@ -673,13 +673,13 @@ const Skills = {
 		c.setStatus('immaterial', 0);
 	},
 	fickle: (ctx, c, t) => {
-		if (t.ownerId != c.ownerId && t.owner.getStatus('sanctuary')) {
+		if (t.ownerId !== c.ownerId && t.owner.getStatus('sanctuary')) {
 			return;
 		}
 		const cards = [];
 		t.owner.deck.forEach(({ card }, i) => {
 			let cost = card.cost;
-			if (!card.element || card.element == c.castele) cost += c.cast;
+			if (!card.element || card.element === c.castele) cost += c.cast;
 			if (t.owner.canspend(card.costele, cost)) {
 				cards.push(i);
 			}
@@ -706,7 +706,7 @@ const Skills = {
 	},
 	firebolt: (ctx, c, t) => {
 		t.spelldmg(3 + Math.floor(c.owner.quanta[etg.Fire] / 4));
-		if (t.type == etg.Player) {
+		if (t.type === etg.Player) {
 			if (t.weapon) {
 				t.weapon.setStatus('frozen', 0);
 			}
@@ -715,7 +715,7 @@ const Skills = {
 		}
 	},
 	firebrand: passive((ctx, c, t, data) => {
-		if (data.tgt == c && data.active == Skills.tempering) {
+		if (data.tgt.id === c.id && data.active === Skills.tempering) {
 			c.incrStatus('charges', 1);
 		}
 	}),
@@ -725,7 +725,7 @@ const Skills = {
 		}
 	},
 	flyself: (ctx, c, t) => {
-		Skills[c.type == etg.Weapon ? 'flyingweapon' : 'livingweapon'].func(
+		Skills[c.type === etg.Weapon ? 'flyingweapon' : 'livingweapon'].func(
 			ctx,
 			c,
 			c,
@@ -759,21 +759,21 @@ const Skills = {
 			}
 			const tgts = [];
 			for (let i = 0; i < 2; i++) {
-				const pl = i == 0 ? c.owner : c.owner.foe;
+				const pl = i === 0 ? c.owner : c.owner.foe;
 				tgttest(pl);
 				pl.forEach(tgttest, true);
 			}
-			return tgts.length == 0 ? undefined : c.choose(tgts);
+			return tgts.length === 0 ? undefined : c.choose(tgts);
 		}
 		let tgting, tgt;
-		if (t.type == etg.Spell) {
+		if (t.type === etg.Spell) {
 			const card = t.card;
 			Effect.mkSpriteFadeHandImage(t.card, t, {
 				x: t.ownerId === ctx.player2Id ? -1 : 1,
 				y: 0,
 			});
 			if (t.owner.getStatus('sanctuary')) return;
-			if (card.type == etg.Spell) {
+			if (card.type === etg.Spell) {
 				tgting = Cards.Targeting[card.active.get('cast').name[0]];
 			}
 		} else if (t.active.has('cast')) {
@@ -806,9 +806,9 @@ const Skills = {
 		const tgt = data.tgt;
 		if (
 			tgt &&
-			tgt.type == etg.Creature &&
-			tgt.ownerId == c.ownerId &&
-			tgt.ownerId != t.ownerId &&
+			tgt.type === etg.Creature &&
+			tgt.ownerId === c.ownerId &&
+			tgt.ownerId !== t.ownerId &&
 			tgt.getStatus('airborne') &&
 			!tgt.getStatus('frozen') &&
 			c.rng() > 0.8
@@ -826,12 +826,12 @@ const Skills = {
 		c.transform(c.card.as(Cards.Fungus));
 	},
 	gaincharge2: (ctx, c, t) => {
-		if (c != t) {
+		if (c.id !== t.id) {
 			c.incrStatus('charges', 2);
 		}
 	},
 	gaintimecharge: (ctx, c, t, drawstep) => {
-		if (!drawstep && c.ownerId == t && c.getStatus('chargecap') < 4) {
+		if (!drawstep && c.ownerId === t && c.getStatus('chargecap') < 4) {
 			c.incrStatus('chargecap', 1);
 			c.incrStatus('charges', 1);
 		}
@@ -845,10 +845,10 @@ const Skills = {
 			t.die();
 		} else {
 			t.remove();
-			if (t.type == etg.Permanent) c.owner.foe.addPerm(t);
-			else if (t.type == etg.Creature) c.owner.foe.addCrea(t);
-			else if (t.type == etg.Shield) c.owner.foe.setShield(t);
-			else if (t.type == etg.Weapon) c.owner.foe.setWeapon(t);
+			if (t.type === etg.Permanent) c.owner.foe.addPerm(t);
+			else if (t.type === etg.Creature) c.owner.foe.addCrea(t);
+			else if (t.type === etg.Shield) c.owner.foe.setShield(t);
+			else if (t.type === etg.Weapon) c.owner.foe.setWeapon(t);
 			else c.owner.foe.addCard(t.card);
 		}
 	},
@@ -859,7 +859,7 @@ const Skills = {
 		Skills.gpullspell.func(ctx, c, c);
 	},
 	gpullspell: (ctx, c, t) => {
-		if (t.type == etg.Creature) {
+		if (t.type === etg.Creature) {
 			t.owner.gpull = t.id;
 		} else {
 			t = t.owner;
@@ -899,20 +899,20 @@ const Skills = {
 		t.atk -= storedatk;
 	},
 	hammer: (ctx, c, t) => {
-		return c.owner.mark == etg.Gravity || c.owner.mark == etg.Earth ? 1 : 0;
+		return c.owner.mark === etg.Gravity || c.owner.mark === etg.Earth ? 1 : 0;
 	},
 	hasten: (ctx, c, t) => {
 		c.owner.drawcard();
 	},
 	hatch: (ctx, c, t) => {
 		Effect.mkText('Hatch', c);
-		c.transform(c.randomcard(c.card.upped, x => x.type == etg.Creature));
+		c.transform(c.randomcard(c.card.upped, x => x.type === etg.Creature));
 	},
 	heal: (ctx, c, t) => {
 		t.dmg(-20);
 	},
 	heatmirror: (ctx, c, t, fromhand) => {
-		if (fromhand && t.type == etg.Creature && c.ownerId != t.ownerId) {
+		if (fromhand && t.type === etg.Creature && c.ownerId !== t.ownerId) {
 			c.owner.addCrea(c.owner.newThing(c.card.as(Cards.Spark)));
 		}
 	},
@@ -955,10 +955,10 @@ const Skills = {
 	improve: (ctx, c, t) => {
 		Effect.mkText('Improve', t);
 		t.setStatus('mutant', 1);
-		t.transform(t.randomcard(false, x => x.type == etg.Creature));
+		t.transform(t.randomcard(false, x => x.type === etg.Creature));
 	},
 	inertia: (ctx, c, t, data) => {
-		if (data.tgt && c.ownerId == data.tgt.ownerId) {
+		if (data.tgt && c.ownerId === data.tgt.ownerId) {
 			c.owner.spend(etg.Gravity, -2);
 		}
 	},
@@ -1094,7 +1094,7 @@ const Skills = {
 				num = tally[i];
 				shlist.length = 0;
 				shlist[0] = i;
-			} else if (num != 0 && tally[i] == num) {
+			} else if (num !== 0 && tally[i] === num) {
 				shlist.push(i);
 			}
 		}
@@ -1205,10 +1205,10 @@ const Skills = {
 		c.owner.spend(ele, ele > 0 ? -1 : -3);
 	},
 	locketshift: (ctx, c, t) => {
-		c.setStatus('mode', t.type == etg.Player ? t.mark : t.card.element);
+		c.setStatus('mode', t.type === etg.Player ? t.mark : t.card.element);
 	},
 	loot: (ctx, c, t) => {
-		if (c.ownerId == t.ownerId && !c.hasactive('turnstart', 'salvageoff')) {
+		if (c.ownerId === t.ownerId && !c.hasactive('turnstart', 'salvageoff')) {
 			const foe = c.owner.foe,
 				perms = foe.permanents.filter(x => {
 					return x && x.isMaterial();
@@ -1224,7 +1224,7 @@ const Skills = {
 	},
 	losecharge: (ctx, c, t) => {
 		if (!c.maybeDecrStatus('charges')) {
-			if (c.type == etg.Creature) c.die();
+			if (c.type === etg.Creature) c.die();
 			else c.remove();
 		}
 	},
@@ -1233,8 +1233,8 @@ const Skills = {
 		c.owner.masscc(c, (ctx, c, x) => {
 			for (const [key, act] of x.active) {
 				if (
-					key != 'ownplay' &&
-					key != 'owndiscard' &&
+					key !== 'ownplay' &&
+					key !== 'owndiscard' &&
 					!act.name.every(name => parseSkill(name).passive)
 				)
 					return;
@@ -1256,7 +1256,7 @@ const Skills = {
 		t.dmg(-10);
 	},
 	metamorph: (ctx, c, t) => {
-		c.owner.mark = t.type == etg.Player ? t.mark : t.card.element;
+		c.owner.mark = t.type === etg.Player ? t.mark : t.card.element;
 		c.owner.markpower++;
 	},
 	midas: (ctx, c, t) => {
@@ -1274,12 +1274,12 @@ const Skills = {
 	millpillar: (ctx, c, t) => {
 		if (
 			t.deckIds.length &&
-			t.deck[t.deckIds.length - 1].card.type == etg.Pillar
+			t.deck[t.deckIds.length - 1].card.type === etg.Pillar
 		)
 			t._draw();
 	},
 	mimic: (ctx, c, t) => {
-		if (c != t && t.type == etg.Creature) {
+		if (c.id !== t.id && t.type === etg.Creature) {
 			c.transform(t.card);
 			c.addactive('play', Skills.mimic);
 		}
@@ -1308,7 +1308,7 @@ const Skills = {
 		t.setStatus('momentum', 1);
 	},
 	mummy: passive((ctx, c, t, data) => {
-		if (data.tgt == c && data.active == Skills.rewind) {
+		if (data.tgt.id === c.id && data.active === Skills.rewind) {
 			c.transform(c.card.as(Cards.Pharaoh));
 			data.evade = true;
 		}
@@ -1397,7 +1397,7 @@ const Skills = {
 		}
 	},
 	noeatspell: (ctx, c, t) => {
-		if (t.id == c.ownerId) {
+		if (t.id === c.ownerId) {
 			c.rmactive('prespell', 'eatspell');
 		}
 	},
@@ -1406,11 +1406,11 @@ const Skills = {
 		const tauto = t.active.get('ownattack');
 		const e =
 			t.card.element ||
-			(tauto == Skills.pillmat
+			(tauto === Skills.pillmat
 				? c.choose([etg.Earth, etg.Fire, etg.Water, etg.Air])
-				: tauto == Skills.pillspi
+				: tauto === Skills.pillspi
 				? c.choose([etg.Death, etg.Life, etg.Light, etg.Darkness])
-				: tauto == Skills.pillcar
+				: tauto === Skills.pillcar
 				? c.choose([etg.Entropy, etg.Gravity, etg.Time, etg.Aether])
 				: ctx.upto(12) + 1);
 		Skills.destroy.func(ctx, c, t, true, true);
@@ -1429,7 +1429,7 @@ const Skills = {
 	},
 	pairproduce: (ctx, c, t) => {
 		c.owner.permanents.forEach(p => {
-			if (p && p.card.type == etg.Pillar) p.trigger('ownattack');
+			if (p && p.card.type === etg.Pillar) p.trigger('ownattack');
 		});
 	},
 	paleomagnetism: (ctx, c, t) => {
@@ -1565,7 +1565,7 @@ const Skills = {
 		c.owner.permanents.forEach(protect);
 	},
 	protectonce: passive((ctx, c, t, data) => {
-		if (data.tgt == c && c.ownerId != t.ownerId) {
+		if (data.tgt.id === c.id && c.ownerId !== t.ownerId) {
 			c.rmactive('prespell', 'protectonce');
 			c.rmactive('spelldmg', 'protectoncedmg');
 			data.evade = true;
@@ -1581,7 +1581,7 @@ const Skills = {
 		t.setStatus('poison', poison < 0 ? poison - 2 : -2);
 		t.setStatus('aflatoxin', 0);
 		t.setStatus('neuro', 0);
-		if (t.type == etg.Player) t.setStatus('sosa', 0);
+		if (t.type === etg.Player) t.setStatus('sosa', 0);
 	},
 	quint: (ctx, c, t) => {
 		Effect.mkText('Immaterial', t);
@@ -1595,7 +1595,7 @@ const Skills = {
 		} else Skills.quint.func(ctx, c, t);
 	},
 	randomdr: (ctx, c, t) => {
-		if (c.id == t.id) c.maxhp = c.hp = ctx.upto(c.card.upped ? 4 : 3);
+		if (c.id === t.id) c.maxhp = c.hp = ctx.upto(c.card.upped ? 4 : 3);
 	},
 	rage: (ctx, c, t) => {
 		const dmg = c.card.upped ? 6 : 5;
@@ -1623,7 +1623,7 @@ const Skills = {
 		t.die();
 		if (
 			!t.owner.creatures[index] ||
-			t.owner.creatures[index].card != Cards.MalignantCell
+			t.owner.creatures[index].card !== Cards.MalignantCell
 		) {
 			const skele = t.owner.newThing(t.card.as(Cards.Skeleton));
 			skele.type = etg.Creature;
@@ -1639,7 +1639,7 @@ const Skills = {
 	},
 	reducemaxhp: (ctx, c, t, dmg) => {
 		t.maxhp = Math.max(t.maxhp - dmg, 1);
-		if (t.maxhp > 500 && t.type == etg.Player) t.maxhp = 500;
+		if (t.maxhp > 500 && t.type === etg.Player) t.maxhp = 500;
 		if (t.hp > t.maxhp) t.dmg(t.hp - t.maxhp);
 	},
 	regen: adrenathrottle((ctx, c, t) => {
@@ -1652,7 +1652,7 @@ const Skills = {
 	regeneratespell: (ctx, c, t) => {
 		t.lobo();
 		t.addactive('ownattack', Skills.regenerate);
-		if (t.type == etg.Permanent || t.type == etg.Shield) {
+		if (t.type === etg.Permanent || t.type === etg.Shield) {
 			t.clearStatus();
 		}
 	},
@@ -1697,7 +1697,7 @@ const Skills = {
 			}
 			const tgts = [];
 			for (let i = 0; i < 2; i++) {
-				const pl = i == 0 ? c.owner : c.owner.foe;
+				const pl = i === 0 ? c.owner : c.owner.foe;
 				pl.forEach(tgttest, true);
 			}
 			if (tgts.length) {
@@ -1710,7 +1710,7 @@ const Skills = {
 		}
 	},
 	sadism: (ctx, c, t, dmg) => {
-		if (dmg > 0 && (!c.card.upped || c.ownerId == t.ownerId)) {
+		if (dmg > 0 && (!c.card.upped || c.ownerId === t.ownerId)) {
 			c.owner.dmg(-dmg);
 		}
 	},
@@ -1719,7 +1719,7 @@ const Skills = {
 		if (
 			!data.salvaged &&
 			!c.hasactive('turnstart', 'salvageoff') &&
-			ctx.turn != c.owner
+			ctx.turn !== c.ownerId
 		) {
 			Effect.mkText('Salvage', c);
 			data.salvaged = true;
@@ -1743,7 +1743,7 @@ const Skills = {
 		}
 	},
 	scramble: (ctx, c, t) => {
-		if (t.type == etg.Player && !t.getStatus('sanctuary')) {
+		if (t.type === etg.Player && !t.getStatus('sanctuary')) {
 			for (let i = 0; i < 9; i++) {
 				if (t.spend(etg.Chroma, 1, true)) {
 					t.spend(etg.Chroma, -1, true);
@@ -1757,12 +1757,12 @@ const Skills = {
 		for (let i = num - 1; ~i; i--) {
 			const card = c.randomcard(c.card.upped, x => {
 				return (
-					x.type != etg.Pillar &&
+					x.type !== etg.Pillar &&
 					x.rarity < 4 &&
-					(i > 0 || anyentro || x.element == etg.Entropy)
+					(i > 0 || anyentro || x.element === etg.Entropy)
 				);
 			});
-			anyentro |= card.element == etg.Entropy;
+			anyentro |= card.element === etg.Entropy;
 			c.owner.addCard(card.asShiny(c.card.shiny));
 		}
 	},
@@ -1780,7 +1780,7 @@ const Skills = {
 		}
 	},
 	shtriga: (ctx, c, t) => {
-		if (c.ownerId == t) c.setStatus('immaterial', 1);
+		if (c.ownerId === t) c.setStatus('immaterial', 1);
 	},
 	shuffle3: (ctx, c, t) => {
 		const deckIds = Array.from(c.owner.deckIds);
@@ -1793,7 +1793,7 @@ const Skills = {
 		c.owner.deckIds = deckIds;
 	},
 	silence: (ctx, c, t) => {
-		if (t.type != etg.Player || !t.getStatus('sanctuary')) t.usedactive = true;
+		if (t.type !== etg.Player || !t.getStatus('sanctuary')) t.usedactive = true;
 	},
 	singularity: (ctx, c, t) => {
 		if (c.trueatk() > 0) {
@@ -1863,7 +1863,7 @@ const Skills = {
 		c.atk++;
 	},
 	skeleton: passive((ctx, c, t, data) => {
-		if (data.tgt == c && data.active == Skills.rewind) {
+		if (data.tgt.id === c.id && data.active === Skills.rewind) {
 			Skills.hatch.func(ctx, c);
 			data.evade = true;
 		}
@@ -1902,7 +1902,7 @@ const Skills = {
 		c.owner.buffhp(c.owner.quanta[etg.Earth]);
 	},
 	staff: (ctx, c, t) => {
-		return c.owner.mark == etg.Life || c.owner.mark == etg.Water ? 1 : 0;
+		return c.owner.mark === etg.Life || c.owner.mark === etg.Water ? 1 : 0;
 	},
 	stasis: (ctx, c, t, attackFlags) => {
 		if (
@@ -1936,8 +1936,8 @@ const Skills = {
 			t.remove();
 		}
 		t.usedactive = true;
-		if (t.type == etg.Permanent) c.owner.addPerm(t);
-		else if (t.type == etg.Weapon) c.owner.setWeapon(t);
+		if (t.type === etg.Permanent) c.owner.addPerm(t);
+		else if (t.type === etg.Weapon) c.owner.setWeapon(t);
 		else c.owner.setShield(t);
 	},
 	steam: (ctx, c, t) => {
@@ -1995,7 +1995,7 @@ const Skills = {
 				deckIds = Array.from(pl.deckIds);
 
 			for (let j = 0; j < deckIds.length; j++) {
-				if (ctx.byId(deckIds[j]).card.type == etg.Creature) candidates.push(j);
+				if (ctx.byId(deckIds[j]).card.type === etg.Creature) candidates.push(j);
 			}
 			if (candidates.length) {
 				const idx = pl.choose(candidates),
@@ -2040,7 +2040,7 @@ const Skills = {
 	tornado: (ctx, c, t) => {
 		let pl = c.owner.foe;
 		for (let i = 0; i < 3; i++) {
-			if (i == 2) {
+			if (i === 2) {
 				if (c.card.upped) return;
 				else pl = c.owner;
 			}
@@ -2063,8 +2063,8 @@ const Skills = {
 		const cards = [];
 		t.owner.deck.forEach(({ card }, i) => {
 			if (
-				card.type == etg.Creature &&
-				card.asShiny(false) != t.card.asShiny(false)
+				card.type === etg.Creature &&
+				card.asShiny(false) !== t.card.asShiny(false)
 			) {
 				cards.push(i);
 			}
@@ -2118,10 +2118,10 @@ const Skills = {
 		c.die();
 	},
 	vengeance: (ctx, c, t) => {
-		if (c.ownerId == t.ownerId && c.ownerId == ctx.byId(ctx.turn).foe) {
+		if (c.ownerId === t.ownerId && c.ownerId === ctx.byId(ctx.turn).foe) {
 			if (c.maybeDecrStatus('charges') < 2) c.remove();
 			c.owner.creatures.slice().forEach(cr => {
-				if (cr && cr != t) {
+				if (cr && cr !== t) {
 					cr.attack();
 				}
 			});
@@ -2129,7 +2129,7 @@ const Skills = {
 	},
 	vindicate: (ctx, c, t, data) => {
 		if (
-			c.ownerId == t.ownerId &&
+			c.ownerId === t.ownerId &&
 			!c.getStatus('vindicated') &&
 			!data.vindicated
 		) {
@@ -2170,7 +2170,7 @@ const Skills = {
 		data.dmg = 0;
 	},
 	quantagift: (ctx, c, t) => {
-		if (c.owner.mark != etg.Water) {
+		if (c.owner.mark !== etg.Water) {
 			c.owner.spend(etg.Water, -2);
 			c.owner.spend(c.owner.mark, c.owner.mark ? -2 : -6);
 		} else c.owner.spend(etg.Water, -3);
@@ -2231,7 +2231,7 @@ const Skills = {
 	chaos: (ctx, c, t) => {
 		const randomchance = c.rng();
 		if (randomchance < 0.3) {
-			if (t.type == etg.Creature && !t.getStatus('ranged')) {
+			if (t.type === etg.Creature && !t.getStatus('ranged')) {
 				Skills.cseed.func(ctx, c, t);
 			}
 		} else return c.card.upped && randomchance < 0.5;
@@ -2264,15 +2264,15 @@ const Skills = {
 	},
 	evadespell: (ctx, c, t, data) => {
 		if (
-			data.tgt == c &&
-			c.ownerId != t.ownerId &&
+			data.tgt.id === c.id &&
+			c.ownerId !== t.ownerId &&
 			t.type === etg.Spell &&
 			t.card.type === etg.Spell
 		)
 			data.evade = true;
 	},
 	evadecrea: (ctx, c, t, data) => {
-		if (data.tgt == c && c.ownerId != t.ownerId && t.type === etg.Creature)
+		if (data.tgt.id === c.id && c.ownerId !== t.ownerId && t.type === etg.Creature)
 			data.evade = true;
 	},
 	firewall: (ctx, c, t) => {
@@ -2282,14 +2282,14 @@ const Skills = {
 		}
 	},
 	skull: (ctx, c, t) => {
-		if (t.type == etg.Creature && !t.card.isOf(Cards.Skeleton)) {
+		if (t.type === etg.Creature && !t.card.isOf(Cards.Skeleton)) {
 			const thp = t.truehp();
 			if (thp <= 0 || c.rng() < 0.5 / thp) {
 				const index = t.getIndex();
 				t.die();
 				if (
 					!t.owner.creatures[index] ||
-					t.owner.creatures[index].card != Cards.MalignantCell
+					t.owner.creatures[index].card !== Cards.MalignantCell
 				) {
 					sfx.playSound('skelify');
 					const skele = t.owner.newThing(t.card.as(Cards.Skeleton));
@@ -2318,7 +2318,7 @@ const Skills = {
 		}
 	},
 	weight: (ctx, c, t, data) => {
-		if (t.type == etg.Creature && t.truehp() > 5) data.dmg = 0;
+		if (t.type === etg.Creature && t.truehp() > 5) data.dmg = 0;
 	},
 	wings: (ctx, c, t, data) => {
 		if (!t.getStatus('airborne') && !t.getStatus('ranged')) data.dmg = 0;

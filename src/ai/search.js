@@ -35,7 +35,7 @@ const afilter = {
 		if (!t.getStatus('psionic')) {
 			for (const [key, act] of t.active) {
 				if (
-					key != 'ownplay' &&
+					key !== 'ownplay' &&
 					act.name.some(name => !parseSkill(name).passive)
 				) {
 					return true;
@@ -72,7 +72,7 @@ function searchSkill(active, c, t) {
 	const func = afilter[active.name[0]];
 	return (
 		!func ||
-		t.type == etg.Player ||
+		t.type === etg.Player ||
 		t.hasactive('prespell', 'protectonce') ||
 		func(c, t)
 	);
@@ -130,7 +130,7 @@ AiSearch.prototype.step = function(game) {
 					} else {
 						[wc, v] = getWorstCard(gameClone, gameClone.player2);
 					}
-					if (v < currentEval || (v == currentEval && n > this.cdepth)) {
+					if (v < currentEval || (v === currentEval && n > this.cdepth)) {
 						this.cmdct = cmdct0 || { c: c.id, t: t && t.id };
 						this.worstcard = wc;
 						this.cdepth = n;
@@ -144,7 +144,7 @@ AiSearch.prototype.step = function(game) {
 			if (active && active.name[0] in Cards.Targeting) {
 				const targetFilter = game.targetFilter(c, active);
 				for (let j = 0; j < 2; j++) {
-					const pl = j == 0 ? c.owner : c.owner.foe;
+					const pl = j === 0 ? c.owner : c.owner.foe;
 					evalIter(pl, targetFilter);
 					pl.forEach(inst => evalIter(inst, targetFilter));
 				}
@@ -155,10 +155,10 @@ AiSearch.prototype.step = function(game) {
 		};
 		const p2 = game.player2;
 		if (n) {
-			if (nth == 0 && incnth(p2.weapon)) {
+			if (nth === 0 && incnth(p2.weapon)) {
 				return true;
 			}
-			if (nth == 1 && incnth(p2.shield)) {
+			if (nth === 1 && incnth(p2.shield)) {
 				return true;
 			}
 			let nbase = 2;
@@ -206,7 +206,7 @@ AiSearch.prototype.step = function(game) {
 	} else {
 		this.cmd = 'endturn';
 		this.cmdct =
-			game.player2.handIds.length == 8
+			game.player2.handIds.length === 8
 				? { c: game.player2Id, t: this.worstcard }
 				: { c: game.player2Id, t: 0 };
 	}

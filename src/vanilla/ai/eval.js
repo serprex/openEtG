@@ -75,7 +75,7 @@ var ActivesValues = Object.freeze({
 	disarm: function(c) {
 		return !c.owner.foe.weapon
 			? 0.1
-			: c.owner.foe.hand.length == 8
+			: c.owner.foe.hand.length === 8
 			? 0.5
 			: c.owner.foe.weapon.card.cost;
 	},
@@ -130,7 +130,7 @@ var ActivesValues = Object.freeze({
 		return dmg;
 	},
 	gpull: function(c) {
-		return c instanceof smth.CardInstance || c != c.owner.gpull ? 2 : 0;
+		return c instanceof smth.CardInstance || c !== c.owner.gpull ? 2 : 0;
 	},
 	gpullspell: 3,
 	gratitude: function(c) {
@@ -309,7 +309,7 @@ var ActivesValues = Object.freeze({
 	despair: 5,
 	evade100: function(c) {
 		return c.status
-			? c.getStatus('charges') == 0 && c.owner == c.owner.game.turn
+			? c.getStatus('charges') === 0 && c.owner === c.owner.game.turn
 				? 0
 				: 1
 			: 1;
@@ -328,7 +328,7 @@ var ActivesValues = Object.freeze({
 	weight: 5,
 	wings: function(c) {
 		return c.status
-			? c.getStatus('charges') == 0 && c.owner == c.owner.game.turn
+			? c.getStatus('charges') === 0 && c.owner === c.owner.game.turn
 				? 0
 				: 6
 			: 6;
@@ -342,7 +342,7 @@ var statusValues = Object.freeze({
 	tunnel: 3,
 	cloak: function(c) {
 		return c.status
-			? c.getStatus('charges') == 0 && c.owner == c.owner.game.turn
+			? c.getStatus('charges') === 0 && c.owner === c.owner.game.turn
 				? 0
 				: 4
 			: 0;
@@ -370,7 +370,7 @@ function estimateDamage(c, freedomChance, wallCharges, wallIndex) {
 		if (momentum) {
 			return tatk;
 		} else if (
-			(fshactive == Actives.weight || fshactive == Actives.wings) &&
+			(fshactive === Actives.weight || fshactive === Actives.wings) &&
 			fshactive.func(c.owner.foe.shield, c)
 		) {
 			return 0;
@@ -403,13 +403,13 @@ function estimateDamage(c, freedomChance, wallCharges, wallIndex) {
 	}
 	if (!momentum) {
 		atk *=
-			fshactive == Actives.evade100
+			fshactive === Actives.evade100
 				? 0
-				: fshactive == Actives.evade50
+				: fshactive === Actives.evade50
 				? 0.5
-				: fshactive == Actives.evade40
+				: fshactive === Actives.evade40
 				? 0.6
-				: fshactive == Actives.chaos && fsh.card.upped
+				: fshactive === Actives.chaos && fsh.card.upped
 				? 0.8
 				: 1;
 	}
@@ -552,27 +552,27 @@ function evalthing(c) {
 			: 2;
 	for (const [key, act] of c.active) {
 		var adrfactor = throttled.has(key) ? throttlefactor : adrenalinefactor;
-		if (key == 'hit') {
+		if (key === 'hit') {
 			score +=
 				evalactive(c, c.active.get('hit'), ttatk) *
 				(ttatk ? 1 : c.getStatus('immaterial') ? 0 : 0.3) *
 				adrfactor *
 				delayfactor;
-		} else if (key == 'auto') {
+		} else if (key === 'auto') {
 			if (!c.getStatus('frozen')) {
 				score += evalactive(c, c.active.get('auto'), ttatk) * adrfactor;
 			}
-		} else if (key == 'cast') {
+		} else if (key === 'cast') {
 			if (caneventuallyactive(c.castele, c.cast, c.owner)) {
 				score += evalactive(c, c.active.get('cast'), ttatk) * delayfactor;
 			}
-		} else if (key != (isCreature ? 'shield' : 'owndeath')) {
+		} else if (key !== (isCreature ? 'shield' : 'owndeath')) {
 			score += evalactive(c, act);
 		}
 	}
 	score += checkpassives(c);
 	if (isCreature) {
-		if (hp && c.owner.gpull == c) {
+		if (hp && c.owner.gpull === c) {
 			score = ((score + hp) * Math.log(hp)) / 4;
 			if (c.getStatus('voodoo')) score += hp;
 			if (c.active.shield && !delaymix) {
@@ -602,17 +602,17 @@ function evalcardinstance(cardInst) {
 	if (!cardInst) return 0;
 	var c = cardInst.card;
 	if (!caneventuallyactive(c.costele, c.cost, cardInst.owner)) {
-		return c.active.discard == Actives.obsession ? (c.upped ? -7 : -6) : 0;
+		return c.active.discard === Actives.obsession ? (c.upped ? -7 : -6) : 0;
 	}
 	var score = 0;
-	if (c.type == etg.Spell) {
+	if (c.type === etg.Spell) {
 		score += evalactive(cardInst, c.active.get('cast'));
 	} else {
 		for (const act of c.active.values()) {
 			score += evalactive(cardInst, act);
 		}
 		score += checkpassives(cardInst);
-		if (c.type == etg.Creature) {
+		if (c.type === etg.Creature) {
 			score += c.attack;
 			var hp = Math.max(c.health, 0),
 				poison = c.getStatus('poison');
@@ -627,21 +627,21 @@ function evalcardinstance(cardInst) {
 					? 1.3
 					: 1 + Math.log(Math.min(hp, 33)) / 7
 				: 0.5;
-		} else if (c.type == etg.Weapon) {
+		} else if (c.type === etg.Weapon) {
 			score += c.attack;
 			if (
 				cardInst.owner.weapon ||
 				cardInst.owner.hand.some(function(cinst) {
-					return cinst.card.type == etg.Weapon;
+					return cinst.card.type === etg.Weapon;
 				})
 			)
 				score /= 2;
-		} else if (c.type == etg.Shield) {
+		} else if (c.type === etg.Shield) {
 			score += c.health * c.health;
 			if (
 				cardInst.owner.shield ||
 				cardInst.owner.hand.some(function(cinst) {
-					return cinst.card.type == etg.Shield;
+					return cinst.card.type === etg.Shield;
 				})
 			)
 				score /= 2;
@@ -658,13 +658,19 @@ function evalcardinstance(cardInst) {
 }
 
 function caneventuallyactive(element, cost, pl) {
-	if (!cost || !element || pl.quanta[element] || !pl.mark || pl.mark == element)
+	if (
+		!cost ||
+		!element ||
+		pl.quanta[element] ||
+		!pl.mark ||
+		pl.mark === element
+	)
 		return true;
 	return pl.permanents.some(function(pr) {
 		return (
 			pr &&
-			(pr.card.type == etg.Pillar &&
-				(!pr.card.element || pr.card.element == element))
+			(pr.card.type === etg.Pillar &&
+				(!pr.card.element || pr.card.element === element))
 		);
 	});
 }
@@ -680,9 +686,9 @@ var uniquesActive, damageHash;
 
 module.exports = function(game) {
 	if (game.winner) {
-		return game.winner == game.player1 ? 99999999 : -99999999;
+		return game.winner === game.player1 ? 99999999 : -99999999;
 	}
-	if (game.player1.deck.length == 0 && game.player1.hand.length < 8) {
+	if (game.player1.deck.length === 0 && game.player1.hand.length < 8) {
 		return -99999990;
 	}
 	var wallCharges = new Int32Array([0, 0]);
@@ -692,14 +698,14 @@ module.exports = function(game) {
 	if (expectedDamage > game.player1.hp) {
 		return Math.min(expectedDamage - game.player1.hp, 500) * -999;
 	}
-	if (game.player2.deck.length == 0) {
+	if (game.player2.deck.length === 0) {
 		return 99999980;
 	}
 	expectedDamage = calcExpectedDamage(game.player1, wallCharges, 1); // Call to fill damageHash
 	var gamevalue = expectedDamage > game.player2.hp ? 999 : 0;
 	for (var j = 0; j < 2; j++) {
 		for (var key in uniqueStatuses) {
-			if (uniqueStatuses[key] == 'self') uniquesActive.delete(key);
+			if (uniqueStatuses[key] === 'self') uniquesActive.delete(key);
 		}
 		var pscore = wallCharges[j] * 4,
 			player = game.players(j);
@@ -716,7 +722,7 @@ module.exports = function(game) {
 		}
 		// Remove this if logic is updated to call endturn
 		if (
-			player != game.turn &&
+			player !== game.turn &&
 			player.hand.length < 8 &&
 			player.deck.length > 0
 		) {
