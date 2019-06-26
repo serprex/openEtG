@@ -69,9 +69,7 @@ Thing.prototype.init = function(card) {
 	return this;
 };
 Thing.prototype.clone = function(ownerId) {
-	const newId = this.game.newId();
-	this.game.update(newId, clone => clone.set('owner', ownerId));
-	return this.game.byId(newId);
+	return this.game.cloneInstance(this, ownerId);
 };
 const sfx = require('./audio');
 

@@ -150,6 +150,14 @@ Game.prototype.set = function(id, key, val) {
 Game.prototype.update = function(id, func) {
 	this.props = this.props.update(id, func);
 };
+Game.prototype.cloneInstance = function(inst, ownerId) {
+	const newId = this.newId();
+	this.props = this.props.set(
+		newId,
+		this.props.get(inst.id).set('owner', ownerId),
+	);
+	return this.byId(newId);
+};
 Game.prototype.setWinner = function(play) {
 	if (!this.winner) {
 		this.winner = play;
