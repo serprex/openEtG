@@ -1,8 +1,6 @@
 'use strict';
-const etg = require('../etg'),
-	Chat = require('../Components/Chat'),
+const Chat = require('../Components/Chat'),
 	sock = require('../sock'),
-	util = require('../util'),
 	mkAi = require('../mkAi'),
 	audio = require('../audio'),
 	Cards = require('../Cards'),

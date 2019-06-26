@@ -406,13 +406,11 @@ module.exports = connect(({ user }) => ({ user }))(
 		constructor(props) {
 			super(props);
 			this.aiState = null;
-			this.aiCommand = false;
 			this.aiDelay = 0;
 			this.streakback = 0;
 			this.state = {
 				tooltip: null,
 				foeplays: [],
-				discarding: false,
 				resigning: false,
 				effects: null,
 				gameProps: null,
@@ -496,11 +494,22 @@ module.exports = connect(({ user }) => ({ user }))(
 				);
 			} else if (game.turn === game.player1Id) {
 				if (discard === 0 && game.player1.handIds.length == 8) {
-					this.setState({ discarding: true });
+					this.setState({
+						targeting: {
+							filter: obj =>
+								obj.type === etg.Spell && obj.ownerId == game.player1Id,
+							cb: tgt => {
+								this.endClick(tgt.id);
+								this.setState({ targeting: null });
+							},
+							text: 'Discard',
+							src: null,
+						},
+					});
 				} else {
 					if (!game.ai) sock.emit('endturn', { c: game.player1Id, t: discard });
 					game.player1.endturn(discard);
-					this.setState({ targeting: null, discarding: false, foeplays: [] });
+					this.setState({ targeting: null, foeplays: [] });
 				}
 			}
 		};
@@ -517,7 +526,7 @@ module.exports = connect(({ user }) => ({ user }))(
 					this.forceUpdate();
 				} else if (this.state.targeting) {
 					this.setState({ targeting: null });
-				} else this.setState({ discarding: false });
+				}
 			}
 		};
 
@@ -532,28 +541,25 @@ module.exports = connect(({ user }) => ({ user }))(
 			}
 		};
 
-		playerClick(j) {
-			const { game } = this.props;
+		playerClick(pl) {
 			if (
-				game.phase == etg.PlayPhase &&
+				this.props.game.phase === etg.PlayPhase &&
 				this.state.targeting &&
-				this.state.targeting.filter(game.players(j))
+				this.state.targeting.filter(pl)
 			) {
-				this.state.targeting.cb(game.players(j));
+				this.state.targeting.cb(pl);
 			}
 		}
 
 		thingClick = obj => {
 			const { game } = this.props;
 			this.clearCard();
-			if (game.phase != etg.PlayPhase) return;
-			if (obj.ownerId == game.player1Id && this.state.discarding) {
-				if (obj.type == etg.Spell) this.endClick(obj.id);
-			} else if (this.state.targeting) {
+			if (game.phase !== etg.PlayPhase) return;
+			if (this.state.targeting) {
 				if (this.state.targeting.filter(obj)) {
 					this.state.targeting.cb(obj);
 				}
-			} else if (obj.ownerId == game.player1Id && obj.canactive()) {
+			} else if (obj.ownerId === game.player1Id && obj.canactive()) {
 				const cb = tgt => {
 					if (!game.ai) {
 						sock.emit('cast', {
@@ -594,7 +600,7 @@ module.exports = connect(({ user }) => ({ user }))(
 				if (game.ai === 1) {
 					if (game.phase === etg.PlayPhase) {
 						let now;
-						if (!this.aiCommand) {
+						if (!this.aiState || !this.aiState.cmd) {
 							Effect.disable = true;
 							if (this.aiState) {
 								this.aiState.step(game);
@@ -602,13 +608,14 @@ module.exports = connect(({ user }) => ({ user }))(
 								this.aiState = new aiSearch(game);
 							}
 							Effect.disable = false;
-							if (this.aiState.cmd) {
-								this.aiCommand = true;
-							}
-						} else if ((now = Date.now()) > this.aiDelay) {
+						}
+						if (
+							this.aiState &&
+							this.aiState.cmd &&
+							(now = Date.now()) > this.aiDelay
+						) {
 							cmds[this.aiState.cmd](this.aiState.cmdct);
 							this.aiState = null;
-							this.aiCommand = false;
 							this.aiDelay = now + (game.turn === game.player1Id ? 2000 : 200);
 						}
 					} else if (game.phase === etg.MulliganPhase) {
@@ -641,7 +648,7 @@ module.exports = connect(({ user }) => ({ user }))(
 			} else if (ch == '\b' || ch == '0') {
 				this.cancelClick();
 			} else if (~(chi = 'SW'.indexOf(ch))) {
-				this.playerClick(chi);
+				this.playerClick(this.props.game.players(chi));
 			} else if (~(chi = 'QA'.indexOf(ch))) {
 				const { shield } = this.props.game.players(chi);
 				if (shield) this.thingClick(shield);
@@ -789,9 +796,7 @@ module.exports = connect(({ user }) => ({ user }))(
 			const cloaked = game.player2.isCloaked();
 
 			if (game.phase !== etg.EndPhase) {
-				turntell = this.state.discarding
-					? 'Discard'
-					: this.state.targeting
+				turntell = this.state.targeting
 					? this.state.targeting.text
 					: `${game.turn === game.player1Id ? 'Your' : 'Their'} Turn${
 							game.phase > etg.MulliganPhase
@@ -801,7 +806,7 @@ module.exports = connect(({ user }) => ({ user }))(
 								: ', Second'
 					  }`;
 				if (game.turn === game.player1Id) {
-					endText = this.state.discarding
+					endText = this.state.targeting
 						? ''
 						: game.phase === etg.PlayPhase
 						? 'End Turn'
@@ -812,11 +817,7 @@ module.exports = connect(({ user }) => ({ user }))(
 						cancelText = game.turn === game.player1Id ? 'Mulligan' : '';
 					} else {
 						cancelText =
-							this.state.targeting ||
-							this.state.discarding ||
-							this.state.resigning
-								? 'Cancel'
-								: '';
+							this.state.targeting || this.state.resigning ? 'Cancel' : '';
 					}
 				} else cancelText = endText = '';
 			} else {
@@ -849,7 +850,7 @@ module.exports = connect(({ user }) => ({ user }))(
 							height: '80px',
 							border: 'transparent 2px solid',
 						}}
-						onClick={() => this.playerClick(j)}
+						onClick={() => this.playerClick(pl)}
 						onMouseOver={e => this.setInfo(e, pl)}
 					/>,
 					<span

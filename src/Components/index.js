@@ -350,6 +350,7 @@ function CardSelectorColumn(props) {
 			code = card.code;
 		children.push(
 			<CardImage
+				key={code}
 				x={props.x}
 				y={y}
 				card={card}
@@ -381,6 +382,7 @@ function CardSelectorColumn(props) {
 						: 0;
 			countTexts.push(
 				<div
+					key={countTexts.length}
 					className={
 						'selectortext' +
 						(props.maxedIndicator && card.type != etg.Pillar && cardAmount >= 6

@@ -3,10 +3,9 @@ const ui = require('./ui'),
 	etg = require('./etg'),
 	Cards = require('./Cards'),
 	etgutil = require('../etgutil'),
-	store = require('./store'),
 	React = require('react');
 
-exports.Box = function(props) {
+exports.Box = function Box(props) {
 	return (
 		<div
 			className="bgbox"
@@ -64,48 +63,79 @@ function CardImage(props) {
 }
 exports.CardImage = CardImage;
 
-exports.Text = function(props) {
-	if (!props.text) return null;
-	const text = props.text.toString().replace(/\|/g, ' / ');
-	const sep = /\d\d?:\d\d?|\$|\n/g;
-	const icoprefix = 'ico ' + (props.icoprefix || 'ce');
-	let reres,
-		lastindex = 0;
-	const elec = [];
-	while ((reres = sep.exec(text))) {
-		const piece = reres[0];
-		if (reres.index != lastindex) {
-			elec.push(text.slice(lastindex, reres.index));
-		}
-		if (piece == '\n') {
-			elec.push(<br />);
-		} else if (piece == '$') {
-			elec.push(<span className="ico gold" />);
-		} else if (/^\d\d?:\d\d?$/.test(piece)) {
-			const parse = piece.split(':');
-			const num = parseInt(parse[0]);
-			if (num == 0) {
-				elec.push('0');
-			} else if (num < 4) {
-				const icon = <span className={icoprefix + parse[1]} />;
-				for (let j = 0; j < num; j++) {
-					elec.push(icon);
-				}
-			} else {
-				elec.push(parse[0], <span className={icoprefix + parse[1]} />);
+class Text extends React.Component {
+	constructor(props) {
+		super(props);
+		this.state = {
+			text: null,
+			icoprefix: null,
+			vdom: null,
+		};
+	}
+
+	static getDerivedStateFromProps(props, prevState) {
+		if (
+			prevState.text !== props.text ||
+			prevState.icoprefix !== props.icoprefix
+		) {
+			if (!props.text) {
+				return {
+					text: props.text,
+					icoprefix: props.icoprefix,
+					vdom: null,
+				};
 			}
+			const elec = [],
+				text = props.text.toString().replace(/\|/g, ' / '),
+				sep = /\d\d?:\d\d?|\$|\n/g,
+				icoprefix = `ico ${props.icoprefix || 'ce'}`;
+			let reres,
+				lastindex = 0;
+			while ((reres = sep.exec(text))) {
+				const piece = reres[0];
+				if (reres.index != lastindex) {
+					elec.push(text.slice(lastindex, reres.index));
+				}
+				if (piece == '\n') {
+					elec.push(<br />);
+				} else if (piece == '$') {
+					elec.push(<span className="ico gold" />);
+				} else if (/^\d\d?:\d\d?$/.test(piece)) {
+					const parse = piece.split(':');
+					const num = parseInt(parse[0]);
+					if (num == 0) {
+						elec.push('0');
+					} else if (num < 4) {
+						const icon = <span className={icoprefix + parse[1]} />;
+						for (let j = 0; j < num; j++) {
+							elec.push(icon);
+						}
+					} else {
+						elec.push(parse[0], <span className={icoprefix + parse[1]} />);
+					}
+				}
+				lastindex = reres.index + piece.length;
+			}
+			if (lastindex != text.length) {
+				elec.push(text.slice(lastindex));
+			}
+			return {
+				text: props.text,
+				vdom: elec,
+			};
 		}
-		lastindex = reres.index + piece.length;
+		return null;
 	}
-	if (lastindex != text.length) {
-		elec.push(text.slice(lastindex));
+
+	render() {
+		return (
+			<div className={this.props.className} style={this.props.style}>
+				{this.state.elec}
+			</div>
+		);
 	}
-	return (
-		<div className={props.className} style={props.style}>
-			{elec}
-		</div>
-	);
-};
+}
+exports.Text = Text;
 
 function IconBtn(props) {
 	return (
@@ -125,7 +155,7 @@ function IconBtn(props) {
 }
 exports.IconBtn = IconBtn;
 
-exports.Card = function(props) {
+exports.Card = function Card(props) {
 	const card = props.card || (props.code && Cards.Codes[props.code]);
 	if (!card) return null;
 	const textColor = card.upped ? '#000' : '';
@@ -219,37 +249,42 @@ exports.Card = function(props) {
 function DeckDisplay(props) {
 	let mark = -1,
 		j = -1;
-	const children = props.deck.map((code, i) => {
-		const card = Cards.Codes[code];
-		if (card) {
-			j++;
-			return (
-				<CardImage
-					card={card}
-					onMouseOver={props.onMouseOver && (() => props.onMouseOver(i, code))}
-					onClick={props.onClick && (() => props.onClick(i, code))}
-					x={(props.x || 0) + 100 + Math.floor(j / 10) * 99}
-					y={(props.y || 0) + 32 + (j % 10) * 19}
+	return (
+		<>
+			{props.deck.map((code, i) => {
+				const card = Cards.Codes[code];
+				if (card) {
+					j++;
+					return (
+						<CardImage
+							key={j}
+							card={card}
+							onMouseOver={
+								props.onMouseOver && (() => props.onMouseOver(i, code))
+							}
+							onClick={props.onClick && (() => props.onClick(i, code))}
+							x={(props.x || 0) + 100 + Math.floor(j / 10) * 99}
+							y={(props.y || 0) + 32 + (j % 10) * 19}
+						/>
+					);
+				} else {
+					const ismark = etgutil.fromTrueMark(code);
+					if (~ismark) mark = ismark;
+				}
+			})}
+			{!!(~mark && props.renderMark) && (
+				<span
+					key={children.length}
+					className={'ico e' + mark}
+					style={{
+						position: 'absolute',
+						left: (props.x || 0) + 66 + 'px',
+						top: (props.y || 0) + 200 + 'px',
+					}}
 				/>
-			);
-		} else {
-			const ismark = etgutil.fromTrueMark(code);
-			if (~ismark) mark = ismark;
-		}
-	});
-	if (~mark && props.renderMark) {
-		children.push(
-			<span
-				className={'ico e' + mark}
-				style={{
-					position: 'absolute',
-					left: (props.x || 0) + 66 + 'px',
-					top: (props.y || 0) + 200 + 'px',
-				}}
-			/>,
-		);
-	}
-	return children;
+			)}
+		</>
+	);
 }
 exports.DeckDisplay = DeckDisplay;
 
@@ -401,7 +436,6 @@ class CardSelector extends React.Component {
 				/>
 			</>
 		);
-		return children;
 	}
 }
 exports.CardSelector = CardSelector;
