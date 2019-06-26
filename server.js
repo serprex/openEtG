@@ -568,9 +568,9 @@ const sockmeta = new WeakMap();
 			if (!data.price) return;
 			Bz.load().then(bz => {
 				etgutil.iterraw(data.cards, (code, count) => {
-					const bc = bz[code] || (bz[code] = []);
 					const card = Cards.Codes[code];
 					if (!card) return;
+					const bc = bz[code] || (bz[code] = []);
 					const sellval = userutil.sellValue(card);
 					let codeCount = data.price > 0 ? 0 : etgutil.count(user.pool, code);
 					if (data.price > 0) {
@@ -599,13 +599,12 @@ const sockmeta = new WeakMap();
 								happened = -amt;
 							}
 						}
+						const cost = Math.abs(bci.p) * happened;
 						if (
 							happened &&
-							(data.price > 0
-								? user.gold >= bci.p * happened
-								: codeCount >= happened)
+							(data.price > 0 ? user.gold >= cost : codeCount >= happened)
 						) {
-							user.gold += bci.p * happened;
+							user.gold -= cost;
 							user.pool = etgutil.addcard(user.pool, code, happened);
 							codeCount += happened;
 							const SellFunc = seller => {
@@ -614,8 +613,8 @@ const sockmeta = new WeakMap();
 									msg.msg = `${user.name} bought ${amt} of ${
 										card.name
 									} @ ${-bci.p} from you.`;
-									msg.g = -bci.p * amt;
-									seller.gold += msg.g;
+									msg.g = cost;
+									seller.gold += cost;
 								} else {
 									msg.msg = `${user.name} sold you ${amt} of ${card.name} @ ${bci.p}`;
 									msg.c = etgutil.encodeCount(amt) + code.toString(32);
