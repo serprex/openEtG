@@ -18,22 +18,21 @@ function mkDaily(type) {
 					? {
 							goldreward: 200,
 							endurance: 2,
-							cost: 0,
 							daily: 1,
-							cardreward: '',
 							noheal: true,
 					  }
 					: {
 							goldreward: 500,
 							endurance: 1,
-							cost: 0,
 							daily: 2,
-							cardreward: '',
-							rematch: props =>
-								!(props.user.daily & (1 << type)) && mkDaily(type),
-							rematchFilter: props =>
-								props.game.winner !== props.game.player1Id,
 					  };
+			dataNext.ai = 1;
+			dataNext.cost = 0;
+			dataNext.cardreward = '';
+			dataNext.rematch = props =>
+				!(props.user.daily & (1 << type)) && mkDaily(type);
+			dataNext.rematchFilter = props =>
+				props.game.winner !== props.game.player1Id;
 			dataNext.dataNext = dataNext;
 			return Object.assign(data, dataNext);
 		});

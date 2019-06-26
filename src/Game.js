@@ -5,8 +5,8 @@ function Game(seed, flip) {
 	const first = (seed & 1) + 2,
 		second = first ^ 1,
 		rng = new Rng(seed, ~seed),
-		player1 = flip ? second : first,
-		player2 = flip ? first : second;
+		player1 = (seed & 1) ^ flip ? second : first,
+		player2 = (seed & 1) ^ flip ? first : second;
 	this.props = new imm.Map()
 		.set(
 			1,

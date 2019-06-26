@@ -44,7 +44,7 @@ const Skills = {
 		};
 	},
 	abomination: passive((ctx, c, t, data) => {
-		if (data.tgt.id === c.id && data.active === Skills.mutation) {
+		if (data.tgt === c.id && data.active === Skills.mutation) {
 			Skills.improve.func(ctx, c, c);
 			data.evade = true;
 		}
@@ -368,7 +368,7 @@ const Skills = {
 			}),
 		);
 		Effect.mkText(choice.name, t);
-		c.castSpell(t, choice.active.get('cast'));
+		c.castSpell(t.id, choice.active.get('cast'));
 	},
 	dagger: (ctx, c) => {
 		let buff = c.owner.mark === etg.Darkness || c.owner.mark === etg.Death;
@@ -381,7 +381,7 @@ const Skills = {
 		c.deatheffect(c.getIndex());
 	},
 	deathwish: (ctx, c, t, data) => {
-		const tgt = data.tgt;
+		const tgt = ctx.byId(data.tgt);
 		if (
 			!tgt ||
 			c.getStatus('frozen') ||
@@ -392,13 +392,13 @@ const Skills = {
 			!Cards.Targeting[data.active.name[0]](t, c)
 		)
 			return;
-		if (!tgt.hasactive('prespell', 'deathwish')) return (data.tgt = c);
+		if (!tgt.hasactive('prespell', 'deathwish')) return (data.tgt = c.id);
 		let totaldw = 0;
 		c.owner.creatures.forEach(cr => {
 			if (cr && cr.hasactive('prespell', 'deathwish')) totaldw++;
 		});
 		if (c.rng() < 1 / totaldw) {
-			return (data.tgt = c);
+			return (data.tgt = c.id);
 		}
 	},
 	decrsteam: passive((ctx, c) => {
@@ -601,7 +601,7 @@ const Skills = {
 		t.proc('destroy', {});
 	},
 	elf: passive((ctx, c, t, data) => {
-		if (data.tgt.id === c.id && data.active === Skills.cseed) {
+		if (data.tgt === c.id && data.active === Skills.cseed) {
 			c.transform(c.card.as(Cards.FallenElf));
 			data.evade = true;
 		}
@@ -715,7 +715,7 @@ const Skills = {
 		}
 	},
 	firebrand: passive((ctx, c, t, data) => {
-		if (data.tgt.id === c.id && data.active === Skills.tempering) {
+		if (data.tgt === c.id && data.active === Skills.tempering) {
 			c.incrStatus('charges', 1);
 		}
 	}),
@@ -803,7 +803,7 @@ const Skills = {
 			attackFlags.freedom = true;
 	},
 	freeevade: (ctx, c, t, data) => {
-		const tgt = data.tgt;
+		const tgt = ctx.byId(data.tgt);
 		if (
 			tgt &&
 			tgt.type === etg.Creature &&
@@ -958,7 +958,7 @@ const Skills = {
 		t.transform(t.randomcard(false, x => x.type === etg.Creature));
 	},
 	inertia: (ctx, c, t, data) => {
-		if (data.tgt && c.ownerId === data.tgt.ownerId) {
+		if (data.tgt && c.ownerId === ctx.get(data.tgt, 'owner')) {
 			c.owner.spend(etg.Gravity, -2);
 		}
 	},
@@ -1308,7 +1308,7 @@ const Skills = {
 		t.setStatus('momentum', 1);
 	},
 	mummy: passive((ctx, c, t, data) => {
-		if (data.tgt.id === c.id && data.active === Skills.rewind) {
+		if (data.tgt === c.id && data.active === Skills.rewind) {
 			c.transform(c.card.as(Cards.Pharaoh));
 			data.evade = true;
 		}
@@ -1565,7 +1565,7 @@ const Skills = {
 		c.owner.permanents.forEach(protect);
 	},
 	protectonce: passive((ctx, c, t, data) => {
-		if (data.tgt.id === c.id && c.ownerId !== t.ownerId) {
+		if (data.tgt === c.id && c.ownerId !== t.ownerId) {
 			c.rmactive('prespell', 'protectonce');
 			c.rmactive('spelldmg', 'protectoncedmg');
 			data.evade = true;
@@ -1863,7 +1863,7 @@ const Skills = {
 		c.atk++;
 	},
 	skeleton: passive((ctx, c, t, data) => {
-		if (data.tgt.id === c.id && data.active === Skills.rewind) {
+		if (data.tgt === c.id && data.active === Skills.rewind) {
 			Skills.hatch.func(ctx, c);
 			data.evade = true;
 		}
@@ -2264,7 +2264,7 @@ const Skills = {
 	},
 	evadespell: (ctx, c, t, data) => {
 		if (
-			data.tgt.id === c.id &&
+			data.tgt === c.id &&
 			c.ownerId !== t.ownerId &&
 			t.type === etg.Spell &&
 			t.card.type === etg.Spell
@@ -2272,7 +2272,11 @@ const Skills = {
 			data.evade = true;
 	},
 	evadecrea: (ctx, c, t, data) => {
-		if (data.tgt.id === c.id && c.ownerId !== t.ownerId && t.type === etg.Creature)
+		if (
+			data.tgt === c.id &&
+			c.ownerId !== t.ownerId &&
+			t.type === etg.Creature
+		)
 			data.evade = true;
 	},
 	firewall: (ctx, c, t) => {

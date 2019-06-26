@@ -462,13 +462,12 @@ Thing.prototype.canactive = function(spend) {
 	}
 };
 Thing.prototype.castSpell = function(tgt, active, nospell) {
-	if (typeof tgt === 'number') tgt = this.game.byId(tgt);
 	const data = { tgt, active };
 	this.proc('prespell', data);
 	if (data.evade) {
-		if (tgt) Effect.mkText('Evade', tgt);
+		if (tgt) Effect.mkText('Evade', this.game.byId(tgt));
 	} else {
-		active.func(this.game, this, data.tgt);
+		active.func(this.game, this, this.game.byId(data.tgt));
 		if (!nospell) this.proc('spell', data);
 	}
 };
@@ -476,7 +475,7 @@ Thing.prototype.play = function(tgt, fromhand) {
 	const { owner, card } = this;
 	this.remove();
 	if (card.type === etg.Spell) {
-		this.castSpell(tgt, this.active.get('cast'));
+		this.castSpell(tgt ? tgt.id : 0, this.active.get('cast'));
 	} else {
 		audio.playSound(card.type <= etg.Permanent ? 'permPlay' : 'creaturePlay');
 		if (card.type === etg.Creature) owner.addCrea(this, fromhand);
@@ -507,7 +506,7 @@ Thing.prototype.useactive = function(t) {
 	} else if (owner.spend(this.castele, this.cast)) {
 		this.usedactive = true;
 		if (this.getStatus('neuro')) this.addpoison(1);
-		this.castSpell(t, this.active.get('cast'));
+		this.castSpell(t ? t.id : 0, this.active.get('cast'));
 	}
 };
 Thing.prototype.truedr = function() {

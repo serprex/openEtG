@@ -421,7 +421,14 @@ module.exports = connect(({ user }) => ({ user }))(
 		}
 
 		static getDerivedStateFromProps(nextProps, prevState) {
-			if (nextProps.game.props !== prevState.gameProps) {
+			if (prevState.resetInterval && nextProps.game !== prevState._game) {
+				prevState.resetInterval(nextProps);
+				return {
+					_game: nextProps.game,
+					gameProps: nextProps.game.props,
+					expectedDamage: new Int16Array(2),
+				};
+			} else if (nextProps.game.props !== prevState.gameProps) {
 				return {
 					gameProps: nextProps.game.props,
 					expectedDamage: nextProps.game.expectedDamage(),
@@ -585,7 +592,7 @@ module.exports = connect(({ user }) => ({ user }))(
 			const { game } = this.props;
 			if (game.turn === game.player2Id) {
 				if (game.ai === 1) {
-					if (game.phase == etg.PlayPhase) {
+					if (game.phase === etg.PlayPhase) {
 						let now;
 						if (!this.aiCommand) {
 							Effect.disable = true;
@@ -689,7 +696,7 @@ module.exports = connect(({ user }) => ({ user }))(
 				foeleft: data => {
 					if (!game.ai) {
 						game.setWinner(
-							data.spectate == 1 ? game.player2Id : game.player1Id,
+							data.spectate === 1 ? game.player2Id : game.player1Id,
 						);
 						this.forceUpdate();
 					}
@@ -707,6 +714,13 @@ module.exports = connect(({ user }) => ({ user }))(
 			};
 			this.gameStep(cmds);
 			this.gameInterval = setInterval(() => this.gameStep(cmds), 30);
+			this.setState({
+				_game: game,
+				resetInterval: props => {
+					clearInterval(this.gameInterval);
+					this.startMatch(props);
+				},
+			});
 			dispatch(store.setCmds(cmds));
 		}
 
@@ -725,13 +739,6 @@ module.exports = connect(({ user }) => ({ user }))(
 			clearInterval(this.gameInterval);
 			document.removeEventListener('keydown', this.onkeydown);
 			this.props.dispatch(store.setCmds({}));
-		}
-
-		UNSAFE_componentWillReceiveProps(props) {
-			if (props.game !== this.props.game) {
-				clearInterval(this.gameInterval);
-				this.startMatch(props);
-			}
 		}
 
 		setInfo(e, obj, x) {
@@ -911,7 +918,7 @@ module.exports = connect(({ user }) => ({ user }))(
 				}
 				for (let i = 0; i < 23; i++) {
 					const cr = pl.creatures[i];
-					if (cr && !(j == 1 && cloaked)) {
+					if (cr && !(j === 1 && cloaked)) {
 						creatures.push(
 							<ThingInst
 								key={cr.id}
@@ -929,7 +936,7 @@ module.exports = connect(({ user }) => ({ user }))(
 				for (let i = 0; i < 16; i++) {
 					const pr = pl.permanents[i];
 					if (pr && pr.getStatus('flooding')) floodvisible = true;
-					if (pr && !(j == 1 && cloaked && !pr.getStatus('cloak'))) {
+					if (pr && !(j === 1 && cloaked && !pr.getStatus('cloak'))) {
 						perms.push(
 							<ThingInst
 								key={pr.id}
@@ -944,7 +951,7 @@ module.exports = connect(({ user }) => ({ user }))(
 						);
 					}
 				}
-				if (j == 1) {
+				if (j === 1) {
 					creatures.reverse();
 					perms.reverse();
 				}
@@ -953,7 +960,7 @@ module.exports = connect(({ user }) => ({ user }))(
 				const wp = pl.weapon,
 					sh = pl.shield;
 				things.push(
-					wp && !(j == 1 && cloaked) && (
+					wp && !(j === 1 && cloaked) && (
 						<ThingInst
 							key={wp.id}
 							obj={wp}
@@ -965,7 +972,7 @@ module.exports = connect(({ user }) => ({ user }))(
 							targeting={this.state.targeting}
 						/>
 					),
-					sh && !(j == 1 && cloaked) && (
+					sh && !(j === 1 && cloaked) && (
 						<ThingInst
 							key={sh.id}
 							obj={sh}
