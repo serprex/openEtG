@@ -669,7 +669,10 @@ const sockmeta = new WeakMap();
 							}
 							if (!hadmerge) {
 								bc.push({ q: count, u: user.name, p: data.price });
-								bc.sort((a, b) => a.p - b.p);
+								bc.sort(
+									(a, b) =>
+										(a.p > 0) - (b.p > 0) || Math.abs(a.p) - Math.abs(b.p),
+								);
 							}
 						}
 					}
