@@ -65,8 +65,83 @@ module.exports = connect(({ user, opts }) => ({
 	class Challenge extends React.Component {
 		constructor(props) {
 			super(props);
-			this.state = {};
+			this.state = {
+				challenge: null,
+				replay: '',
+			};
 		}
+
+		aiClick = () => {
+			if (!this.props.aideck) return;
+			const deck = sock.getDeck();
+			if (
+				etgutil.decklength(deck) < 9 ||
+				etgutil.decklength(this.props.aideck) < 9
+			) {
+				this.props.dispatch(store.doNav(require('./DeckEditor')));
+				return;
+			}
+			const gameData = {
+				deck: this.props.aideck,
+				urdeck: deck,
+				seed: util.randint(),
+				foename: 'Custom',
+				cardreward: '',
+				ai: this.props.aimanual ? 2 : 1,
+				rematch: this.aiClick,
+			};
+			options.parsepvpstats(gameData);
+			options.parseaistats(gameData);
+			this.props.dispatch(
+				store.doNav(require('./Match'), { game: mkGame(gameData) }),
+			);
+		};
+
+		replayClick = () => {
+			let replay;
+			try {
+				replay = JSON.parse(this.state.replay);
+				if (!replay || typeof replay !== 'object') {
+					return console.log('Invalid object');
+				}
+				if (!Array.isArray(replay.players)) {
+					return console.log('Replay players are not an array');
+				}
+				if (!Array.isArray(replay.moves)) {
+					return console.log('Replay moves are not an array');
+				}
+			} catch {
+				return console.log('Invalid JSON');
+			}
+			const data = {
+				seed: replay.seed,
+				level: undefined,
+				cost: 0,
+				ai: 3,
+				spectate: 0,
+				cardreward: '',
+				goldreward: 0,
+			};
+			for (let i = 0; i < replay.players.length; i++) {
+				const pl = replay.players[i];
+				for (const key in pl) {
+					if (key == 'deck') {
+						data[i ? 'deck' : 'urdeck'] = pl[key];
+					} else {
+						data[`p${i + 1}${key}`] = pl[key];
+					}
+				}
+			}
+			const game = mkGame(data);
+			game.setIn([game.id, 'player1'], 2);
+			game.setIn([game.id, 'player2'], 3);
+			this.props.dispatch(
+				store.doNav(require('./Match'), {
+					replay,
+					game,
+				}),
+			);
+		};
 
 		render() {
 			const self = this;
@@ -76,32 +151,7 @@ module.exports = connect(({ user, opts }) => ({
 				self.setState({ challenge: foe });
 			}
 			function maybeCustomAi(e) {
-				if (e.which == 13) aiClick();
-			}
-			function aiClick() {
-				if (!self.props.aideck) return;
-				const deck = sock.getDeck();
-				if (
-					etgutil.decklength(deck) < 9 ||
-					etgutil.decklength(self.props.aideck) < 9
-				) {
-					self.props.dispatch(store.doNav(require('./DeckEditor')));
-					return;
-				}
-				const gameData = {
-					deck: self.props.aideck,
-					urdeck: deck,
-					seed: util.randint(),
-					foename: 'Custom',
-					cardreward: '',
-					ai: self.props.aimanual ? 2 : 1,
-					rematch: aiClick,
-				};
-				options.parsepvpstats(gameData);
-				options.parseaistats(gameData);
-				self.props.dispatch(
-					store.doNav(require('./Match'), { game: mkGame(gameData) }),
-				);
+				if (e.which == 13) self.aiClick();
 			}
 			function maybeChallenge(e) {
 				e.cancelBubble = true;
@@ -245,8 +295,29 @@ module.exports = connect(({ user, opts }) => ({
 						<>
 							<input
 								type="button"
+								value="Replay"
+								onClick={this.replayClick}
+								style={{
+									position: 'absolute',
+									left: '360px',
+									top: '350px',
+								}}
+							/>
+							<textarea
+								className="chatinput"
+								placeholder="Replay"
+								value={this.state.replay || ''}
+								onChange={e => this.setState({ replay: e.target.value })}
+								style={{
+									position: 'absolute',
+									left: '440px',
+									top: '325px',
+								}}
+							/>
+							<input
+								type="button"
 								value="Custom AI"
-								onClick={aiClick}
+								onClick={self.aiClick}
 								style={{
 									position: 'absolute',
 									left: '360px',

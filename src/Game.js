@@ -84,7 +84,6 @@ defineProp('phase');
 defineProp('bonusstats');
 defineProp('data');
 defineProp('turn');
-defineProp('first');
 defineProp('winner');
 
 Game.prototype.clone = function() {
@@ -208,27 +207,19 @@ Game.prototype.next = function(event) {
 	}
 	return nextHandler[event.x].call(this, event);
 };
-const blacklist = new Set([
-	'spectate',
-	'flip',
-	'seed',
-	'p1deckpower',
-	'p2deckpower',
-]);
 Game.prototype.addData = function(data) {
+	this.setIn([this.id, 'data'], new imm.Map(data));
 	for (const key in data) {
-		if (!blacklist.has(key)) {
-			const p1or2 = key.match(/^p(1|2)/);
-			if (p1or2) {
-				this.set(this[`player${p1or2[1]}Id`], key.slice(2), data[key]);
-			} else {
-				this.props = this.props.setIn([this.id, 'data', key], data[key]);
-			}
+		const p1or2 = key.match(/^p(1|2)/);
+		if (p1or2) {
+			this.set(this[`player${p1or2[1]}Id`], key.slice(2), data[key]);
 		}
 	}
 };
-function removeSoPa(p) {
-	if (p) p.setStatus('patience', 0);
+function removeSoPa(id) {
+	if (id && this.get(id, 'status', 'patience')) {
+		this.setIn([id, 'status', 'patience'], 0);
+	}
 }
 Game.prototype.expectedDamage = function() {
 	const expectedDamage = new Int16Array(2);
@@ -237,8 +228,8 @@ Game.prototype.expectedDamage = function() {
 		Effect.disable = true;
 		for (let i = 0; i < 3; i++) {
 			const gclone = this.clone();
-			gclone.player1.permanents.forEach(removeSoPa);
-			gclone.player2.permanents.forEach(removeSoPa);
+			gclone.player1.permanentIds.forEach(removeSoPa, gclone);
+			gclone.player2.permanentIds.forEach(removeSoPa, gclone);
 			gclone.updateIn([gclone.id, 'rng'], rng => rng.map(ri => ri ^ (i * 997)));
 			gclone.byId(gclone.turn).endturn();
 			if (!gclone.winner) gclone.byId(gclone.turn).endturn();

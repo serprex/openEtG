@@ -1,6 +1,5 @@
 'use strict';
-const imm = require('immutable'),
-	ui = require('../ui'),
+const ui = require('../ui'),
 	etg = require('../etg'),
 	mkAi = require('../mkAi'),
 	sock = require('../sock'),
@@ -416,6 +415,8 @@ module.exports = connect(({ user }) => ({ user }))(
 				effects: null,
 				gameProps: null,
 				expectedDamage: new Int16Array(2),
+				replayindex: 0,
+				replayhistory: [props.game],
 			};
 		}
 
@@ -455,7 +456,8 @@ module.exports = connect(({ user }) => ({ user }))(
 				return {
 					_game: nextProps.game,
 					gameProps: nextProps.game.props,
-					expectedDamage: new Int16Array(2),
+					expectedDamage: nextProps.game.expectedDamage(),
+					replayhistory: [nextProps.game],
 				};
 			} else if (nextProps.game.props !== prevState.gameProps) {
 				return {
@@ -465,6 +467,56 @@ module.exports = connect(({ user }) => ({ user }))(
 			}
 			return null;
 		}
+
+		setReplayIndex = (state, idx) => {
+			const newstate = { replayindex: idx };
+			if (idx >= state.replayhistory.length) {
+				const history = state.replayhistory.slice();
+				newstate.replayhistory = history;
+				while (idx >= history.length) {
+					const gclone = history[history.length - 1].clone();
+					gclone.cache = new Map([
+						[1, gclone],
+						[2, gclone.byId(2)],
+						[3, gclone.byId(3)],
+					]);
+					gclone.next(this.props.replay.moves[history.length - 1]);
+					gclone.setIn([gclone.id, 'player1'], gclone.turn);
+					gclone.setIn([gclone.id, 'player2'], gclone.get(gclone.turn, 'foe'));
+					history.push(gclone);
+				}
+			}
+			return newstate;
+		};
+
+		replayNext = () =>
+			this.setState(state => this.setReplayIndex(state, state.replayindex + 1));
+		replayPrev = () =>
+			this.setState(state => this.setReplayIndex(state, state.replayindex - 1));
+		replayNextPly = () =>
+			this.setState(state => {
+				const len = this.props.replay.moves.length;
+				let idx = state.replayindex + 1;
+				for (; idx < len; idx++) {
+					const { x } = this.props.replay.moves[idx];
+					if (x === 'end' || x === 'mulligan') break;
+				}
+				return this.setReplayIndex(state, Math.min(idx, len));
+			});
+		replayPrevPly = () =>
+			this.setState(state => {
+				let idx = state.replayindex - 1;
+				for (; idx >= 1; idx--) {
+					const { x } = this.props.replay.moves[idx - 1];
+					if (x === 'end' || x === 'mulligan') break;
+				}
+				return this.setReplayIndex(state, Math.max(idx, 0));
+			});
+
+		getGame = () =>
+			this.props.replay
+				? this.state.replayhistory[this.state.replayindex]
+				: this.props.game;
 
 		endClick = (discard = 0) => {
 			const { game, user } = this.props;
@@ -566,6 +618,10 @@ module.exports = connect(({ user }) => ({ user }))(
 		};
 
 		resignClick = () => {
+			if (this.props.replay) {
+				this.props.dispatch(store.doNav(require('./Challenge'), {}));
+				return;
+			}
 			const { game } = this.props;
 			if (this.state.resigning) {
 				const event = { x: 'resign', c: game.player1Id };
@@ -579,6 +635,7 @@ module.exports = connect(({ user }) => ({ user }))(
 
 		playerClick(pl) {
 			if (
+				!this.props.replay &&
 				this.props.game.phase === etg.PlayPhase &&
 				this.state.targeting &&
 				this.state.targeting.filter(pl)
@@ -590,7 +647,7 @@ module.exports = connect(({ user }) => ({ user }))(
 		thingClick = obj => {
 			const { game } = this.props;
 			this.clearCard();
-			if (game.phase !== etg.PlayPhase) return;
+			if (this.props.replay || game.phase !== etg.PlayPhase) return;
 			if (this.state.targeting) {
 				if (this.state.targeting.filter(obj)) {
 					this.state.targeting.cb(obj);
@@ -742,10 +799,12 @@ module.exports = connect(({ user }) => ({ user }))(
 				sock.userEmit('canceltrade');
 				delete sock.trade;
 			}
-			if (!this.props.game.data.get('spectate')) {
-				document.addEventListener('keydown', this.onkeydown);
+			if (!this.props.replay) {
+				if (!this.props.game.data.get('spectate')) {
+					document.addEventListener('keydown', this.onkeydown);
+				}
+				this.startMatch(this.props);
 			}
-			this.startMatch(this.props);
 		}
 
 		componentWillUnmount() {
@@ -796,7 +855,7 @@ module.exports = connect(({ user }) => ({ user }))(
 		}
 
 		render() {
-			const { game } = this.props,
+			const game = this.getGame(),
 				children = [];
 			let turntell, endText, cancelText;
 			const cloaked = game.player2.isCloaked();
@@ -1122,8 +1181,8 @@ module.exports = connect(({ user }) => ({ user }))(
 							'Demigod\n',
 							'Arena1\n',
 							'Arena2\n',
-						][this.props.game.data.get('level')] || '') +
-							(this.props.game.data.get('foename') || '-')}
+						][game.data.get('level')] || '') +
+							(game.data.get('foename') || '-')}
 					</div>
 					<span
 						style={{
@@ -1151,7 +1210,8 @@ module.exports = connect(({ user }) => ({ user }))(
 							top: '20px',
 						}}
 					/>
-					{!this.props.game.data.get('spectate') &&
+					{!this.props.replay &&
+						!game.data.get('spectate') &&
 						(game.turn === game.player1Id || game.winner) && (
 							<>
 								{cancelText && (
@@ -1180,6 +1240,86 @@ module.exports = connect(({ user }) => ({ user }))(
 								)}
 							</>
 						)}
+					{this.props.replay && (
+						<>
+							<span
+								style={{
+									position: 'absolute',
+									left: '760px',
+									top: '520px',
+								}}>
+								{this.state.replayindex}
+							</span>
+							<span
+								style={{
+									position: 'absolute',
+									left: '860px',
+									top: '520px',
+								}}>
+								{this.props.replay.moves.length}
+							</span>
+							<span
+								style={{
+									position: 'absolute',
+									left: '760px',
+									top: '540px',
+								}}>
+								{game.bonusstats.get('ply')}
+							</span>
+							{!!this.state.replayindex && (
+								<input
+									type="button"
+									value="<"
+									onClick={() => this.replayPrev()}
+									style={{
+										position: 'absolute',
+										left: '800px',
+										top: '520px',
+										width: '20px',
+									}}
+								/>
+							)}
+							{!game.winner && (
+								<input
+									type="button"
+									value=">"
+									onClick={() => this.replayNext()}
+									style={{
+										position: 'absolute',
+										left: '830px',
+										top: '520px',
+										width: '20px',
+									}}
+								/>
+							)}
+							{!!this.state.replayindex && (
+								<input
+									type="button"
+									value="<<"
+									onClick={() => this.replayPrevPly()}
+									style={{
+										position: 'absolute',
+										left: '800px',
+										top: '540px',
+										width: '20px',
+									}}
+								/>
+							)}
+							{!game.winner && (
+								<input
+									type="button"
+									value=">>"
+									onClick={() => this.replayNextPly()}
+									style={{
+										position: 'absolute',
+										left: '830px',
+										top: '540px',
+										width: '20px',
+									}}
+								/>
+							)}
+						</>
+					)}
 				</>
 			);
 		}

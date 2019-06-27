@@ -251,33 +251,37 @@ module.exports = connect(({ user }) => ({ user }))(
 					<div>{game.bonusstats.get('ply')} plies</div>,
 					<div>{(game.bonusstats.get('time') / 1000).toFixed(1)} seconds</div>,
 				];
+
 			this.props.dispatch(store.clearChat('Replay'));
-			const replay = game.get(game.id, 'bonusstats', 'replay'),
-				pfirst = game.byId(2),
-				psecond = game.byId(3);
-			function playerjson(pl) {
-				const isp1 = pl.id === game.player1Id;
-				return {
-					name: isp1 ? user.name : `${game.data.get('foename')}`,
-					hp: game.data.get(`p${isp1 ? 1 : 2}hp`, 100),
-					maxhp: game.data.get(`p${isp1 ? 1 : 2}maxhp`, 100),
-					markpower: game.data.get(`p${isp1 ? 1 : 2}markpower`),
-					drawpower: game.data.get(`p${isp1 ? 1 : 2}drawpower`),
-					deck: game.data.get(isp1 ? 'urdeck' : 'deck'),
-				};
+			if (!game.data.get('quest')) {
+				const replay = game.get(game.id, 'bonusstats', 'replay');
+				function playerjson(id) {
+					const pl = game.byId(id),
+						isp1 = pl.id === game.player1Id;
+					return {
+						name: isp1 ? user.name : `${game.data.get('foename')}`,
+						hp: game.data.get(`p${isp1 ? 1 : 2}hp`, 100),
+						maxhp: game.data.get(`p${isp1 ? 1 : 2}maxhp`, 100),
+						markpower: game.data.get(`p${isp1 ? 1 : 2}markpower`),
+						deckpower: pl.deckpower,
+						drawpower: game.data.get(`p${isp1 ? 1 : 2}drawpower`),
+						deck: game.data.get(isp1 ? 'urdeck' : 'deck'),
+					};
+				}
+				this.props.dispatch(
+					store.chat(
+						JSON.stringify({
+							date: game.bonusstats.time,
+							seed: game.get(game.id, 'seed'),
+							first: game.first,
+							players: [playerjson(2), playerjson(3)],
+							moves: Array.from(replay || []),
+						}),
+						'Replay',
+					),
+				);
 			}
-			this.props.dispatch(
-				store.chat(
-					JSON.stringify({
-						date: game.bonusstats.time,
-						seed: game.get(game.id, 'seed'),
-						first: game.first,
-						players: [playerjson(pfirst), playerjson(psecond)],
-						moves: Array.from(replay || []),
-					}),
-					'Replay',
-				),
-			);
+
 			let streakrate = 0;
 			if (winner) {
 				if (this.props.user) {
