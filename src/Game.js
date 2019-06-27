@@ -239,8 +239,7 @@ Game.prototype.expectedDamage = function() {
 			const gclone = this.clone();
 			gclone.player1.permanents.forEach(removeSoPa);
 			gclone.player2.permanents.forEach(removeSoPa);
-			this.updateIn([this.id, 'rng', 'highState'], state => state ^ (i * 997));
-			this.updateIn([this.id, 'rng', 'lowState'], state => state ^ (i * 650));
+			gclone.updateIn([gclone.id, 'rng'], rng => rng.map(ri => ri ^ (i * 997)));
 			gclone.byId(gclone.turn).endturn();
 			if (!gclone.winner) gclone.byId(gclone.turn).endturn();
 			expectedDamage[0] += this.player1.hp - gclone.player1.hp;
