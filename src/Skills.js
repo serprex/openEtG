@@ -1104,7 +1104,9 @@ const Skills = {
 			cast: shardCosts[active],
 		};
 		function addSkill(event, active) {
-			Thing.prototype.addactive.call(shardgolem, event, parseSkill(active));
+			shardgolem.active = shardgolem.active.update(event, a =>
+				etg.combineactive(a, parseSkill(active)),
+			);
 		}
 		[
 			[[2, 'hit', 'scramble']],

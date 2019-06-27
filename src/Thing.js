@@ -1,4 +1,5 @@
 'use strict';
+const imm = require('immutable');
 const passives = new Set([
 	'airborne',
 	'aquatic',
@@ -136,21 +137,17 @@ Thing.prototype.remove = function(index) {
 			arrName = 'permanents';
 		}
 		if (arrName) {
-			this.game.update(this.ownerId, pl =>
-				pl.update(arrName, a => {
-					const arr = new Uint32Array(a);
-					arr[index] = 0;
-					return arr;
-				}),
-			);
+			this.game.updateIn([this.ownerId, arrName], a => {
+				const arr = new Uint32Array(a);
+				arr[index] = 0;
+				return arr;
+			});
 		} else {
-			this.game.update(this.ownerId, pl =>
-				pl.update('hand', hand => {
-					const arr = Array.from(hand);
-					arr.splice(index, 1);
-					return arr;
-				}),
-			);
+			this.game.updateIn([this.ownerId, 'hand'], hand => {
+				const arr = Array.from(hand);
+				arr.splice(index, 1);
+				return arr;
+			});
 		}
 	}
 	return index;
@@ -171,10 +168,12 @@ Thing.prototype.die = function() {
 			cell.ownerId = this.ownerId;
 			cell.type = etg.Creature;
 		}
-		if (this.ownerId === this.game.player2Id)
-			this.game.update(this.game.id, game =>
-				game.updateIn(['bonusstats', 'creatureskilled'], (x = 0) => x + 1),
+		if (this.game.bonusstats && this.ownerId === this.game.player2Id) {
+			this.game.updateIn(
+				[this.game.id, 'bonusstats', 'creatureskilled'],
+				(x = 0) => x + 1,
 			);
+		}
 		this.deatheffect(idx);
 	}
 };
@@ -392,27 +391,10 @@ Thing.prototype.isMaterial = function(type) {
 		!this.status.get('burrowed')
 	);
 };
-function combineactive(a1, a2) {
-	if (!a1) {
-		return a2;
-	}
-	return {
-		func: (ctx, c, t, data) => {
-			const v1 = a1.func(ctx, c, t, data),
-				v2 = a2.func(ctx, c, t, data);
-			return v1 === undefined
-				? v2
-				: v2 === undefined
-				? v1
-				: v1 === true || v2 === true
-				? true
-				: v1 + v2;
-		},
-		name: a1.name.concat(a2.name),
-	};
-}
 Thing.prototype.addactive = function(type, active) {
-	this.active = this.active.update(type, v => combineactive(v, active));
+	this.game.updateIn([this.id, 'active', type], v =>
+		etg.combineactive(v, active),
+	);
 };
 Thing.prototype.getSkill = function(type) {
 	return this.active.get(type);
@@ -498,14 +480,16 @@ Thing.prototype.useactive = function(t) {
 		if (owner.getStatus('neuro')) owner.addpoison(1);
 		this.play(t, true);
 		this.proc('cardplay');
-		if (this.ownerId === this.game.player1Id)
-			this.game.update(this.game.id, game =>
-				game.updateIn(['bonusstats', 'cardsplayed'], x => {
-					const a = new Int32Array(x || 6);
+		if (this.game.bonusstats && this.ownerId === this.game.player1Id) {
+			this.game.updateIn(
+				[this.game.id, 'bonusstats', 'cardsplayed'],
+				(x = 6) => {
+					const a = new Int32Array(x);
 					a[this.card.type]++;
 					return a;
-				}),
+				},
 			);
+		}
 	} else if (owner.spend(this.castele, this.cast)) {
 		this.usedactive = true;
 		if (this.getStatus('neuro')) this.addpoison(1);
@@ -641,30 +625,24 @@ Thing.prototype.buffhp = function(x) {
 	return this.dmg(-x);
 };
 Thing.prototype.getStatus = function(key) {
-	return this.game.props.getIn([this.id, 'status', key], 0);
+	return this.game.getStatus(this.id, key);
 };
 Thing.prototype.setStatus = function(key, val) {
-	this.game.update(this.id, smth => smth.setIn(['status', key], val | 0));
+	return this.game.setStatus(this.id, key, val);
 };
 Thing.prototype.clearStatus = function() {
-	this.game.update(this.id, smth =>
-		smth.update('status', status => status.clear()),
-	);
+	this.game.setIn([this.id, 'status'], new imm.Map());
 };
 Thing.prototype.maybeDecrStatus = function(key) {
-	let val;
-	this.game.update(this.id, smth =>
-		smth.update('status', status => {
-			val = status.get(key, 0);
-			return val > 0 ? status.set(key, val - 1) : status;
-		}),
-	);
-	return val;
+	let oldval;
+	this.game.updateIn([this.id, 'status', key], (val = 0) => {
+		oldval = val;
+		return val > 0 ? val - 1 : 0;
+	});
+	return oldval;
 };
 Thing.prototype.incrStatus = function(key, val) {
-	this.game.update(this.id, smth =>
-		smth.updateIn(['status', key], (x = 0) => x + val),
-	);
+	this.game.updateIn([this.id, 'status', key], (x = 0) => x + val);
 };
 
 var ui = require('./ui');

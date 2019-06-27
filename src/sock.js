@@ -11,8 +11,7 @@ const endpoint =
 const buffer = [];
 let socket = new WebSocket(endpoint),
 	attempts = 0,
-	attemptTimeout = 0,
-	guestname;
+	attemptTimeout = 0;
 const sockEvents = {
 	clear: () => store.store.dispatch(store.clearChat('Main')),
 	passchange: data => {
@@ -214,16 +213,14 @@ socket.onclose = function() {
 	}, timeout);
 	store.store.dispatch(store.chatMsg(`Reconnecting in ${timeout}ms`, 'System'));
 };
-exports.userEmit = function(x, data) {
-	if (!data) data = {};
+exports.userEmit = function(x, data = {}) {
 	const { user } = store.store.getState();
+	data.x = x;
 	data.u = user.name;
 	data.a = user.auth;
-	exports.emit(x, data);
+	exports.emit(data);
 };
-exports.emit = function(x, data) {
-	if (!data) data = {};
-	data.x = x;
+exports.emit = function(data) {
 	const msg = JSON.stringify(data);
 	if (socket && socket.readyState == 1) {
 		socket.send(msg);
@@ -231,8 +228,7 @@ exports.emit = function(x, data) {
 		buffer.push(msg);
 	}
 };
-exports.userExec = function(x, data) {
-	if (!data) data = {};
+exports.userExec = function(x, data = {}) {
 	exports.userEmit(x, data);
 	store.store.dispatch(store.userCmd(x, data));
 };

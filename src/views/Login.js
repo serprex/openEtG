@@ -76,10 +76,10 @@ if (typeof kongregateAPI === 'undefined') {
 
 			loginClick(auth) {
 				if (this.props.username) {
-					const data = { u: this.props.username };
+					const data = { x: 'login', u: this.props.username };
 					if (auth) data.a = auth;
 					else data.p = this.state.password;
-					sock.emit('login', data);
+					sock.emit(data);
 				}
 			}
 
@@ -171,7 +171,8 @@ if (typeof kongregateAPI === 'undefined') {
 					if (kong.services.isGuest()) {
 						this.props.dispatch(store.doNav(require('./MainMenu')));
 					} else {
-						sock.emit('konglogin', {
+						sock.emit({
+							x: 'konglogin',
 							u: kong.services.getUserId(),
 							g: kong.services.getGameAuthToken(),
 						});

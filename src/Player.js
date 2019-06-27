@@ -195,8 +195,9 @@ Player.prototype.addCrea = function(x, fromhand) {
 	if (typeof x === 'number') x = this.game.byId(x);
 	if (~this.place('creatures', x.id)) {
 		if (fromhand && this.game.bonusstats && this.id === this.game.player1Id) {
-			this.game.update(this.game.id, game =>
-				game.updateIn(['bonusstats', 'creaturesplaced'], (x = 0) => x + 1),
+			this.game.updateIn(
+				[this.game.id, 'bonusstats', 'creaturesplaced'],
+				(x = 0) => x + 1,
 			);
 		}
 		x.place(this, etg.Creature, fromhand);
@@ -323,9 +324,9 @@ Player.prototype.countpermanents = function() {
 	return this.permanentIds.reduce((count, pr) => count + !!pr, 0);
 };
 Player.prototype.endturn = function(discard) {
-	this.game.update(this.game.id, game =>
-		game.updateIn(['bonusstats', 'ply'], x => (x | 0) + 1),
-	);
+	if (this.game.bonusstats) {
+		this.game.updateIn([this.game.id, 'bonusstats', 'ply'], (x = 0) => x + 1);
+	}
 	if (discard) {
 		this.game.byId(discard).die();
 	}
@@ -396,7 +397,7 @@ Player.prototype.endturn = function(discard) {
 	this.foe.proc('turnstart');
 };
 Player.prototype.deckpush = function(...args) {
-	this.game.update(this.id, pl => pl.update('deck', deck => deck.concat(args)));
+	this.game.updateIn([this.id, 'deck'], deck => deck.concat(args));
 };
 Player.prototype._draw = function() {
 	const deckIds = this.deckIds;
@@ -429,12 +430,14 @@ Player.prototype.drawhand = function(x) {
 		this.addCardInstance(toHand[i]);
 	}
 };
-function destroyCloak(pr) {
-	if (pr && pr.getStatus('cloak')) pr.die();
+function destroyCloak(id) {
+	if (id && this.props.getIn([id, 'status', 'cloak'], 0)) {
+		this.byId(id).die();
+	}
 }
 Player.prototype.masscc = function(caster, func, massmass) {
-	this.permanents.forEach(destroyCloak);
-	if (massmass) this.foe.permanents.forEach(destroyCloak);
+	this.permanentIds.forEach(destroyCloak, this.game);
+	if (massmass) this.foe.permanentIds.forEach(destroyCloak, this.game);
 	const crs = this.creatures,
 		crsfoe = massmass && this.foe.creatures;
 	for (let i = 0; i < 23; i++) {
@@ -447,10 +450,10 @@ Player.prototype.masscc = function(caster, func, massmass) {
 	}
 };
 Player.prototype.delay = function(x) {
-	if (this.weapon) this.weapon.delay(x);
+	if (this.weaponId) this.weapon.delay(x);
 };
 Player.prototype.freeze = function(x) {
-	if (this.weapon) this.weapon.freeze(x);
+	if (this.weaponId) this.weapon.freeze(x);
 };
 Player.prototype.dmg = function(x, ignoresosa) {
 	if (!x) return 0;

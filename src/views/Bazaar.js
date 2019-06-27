@@ -93,7 +93,7 @@ module.exports = connect(({ user }) => ({ user }))(
 		}
 
 		componentDidMount() {
-			sock.emit('bzread');
+			sock.emit({ x: 'bzread' });
 			this.props.dispatch(
 				store.setCmds({
 					bzread: data => {

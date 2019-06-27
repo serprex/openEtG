@@ -19,12 +19,14 @@ function sendChallenge(foe) {
 	const gameData = {};
 	options.parsepvpstats(gameData);
 	if (user) {
+		gameData.x = 'foewant';
 		gameData.f = foe;
-		sock.userEmit('foewant', gameData);
+		sock.userEmit(gameData);
 	} else {
+		gameData.x = 'pvpwant';
 		gameData.deck = deck;
 		gameData.room = foe;
-		sock.emit('pvpwant', gameData);
+		sock.emit(gameData);
 	}
 	sock.pvp = foe;
 }
@@ -108,7 +110,7 @@ module.exports = connect(({ user, opts }) => ({
 			function exitClick() {
 				if (sock.pvp) {
 					if (self.props.hasUser) sock.userEmit('foecancel');
-					else sock.emit('roomcancel', { room: sock.pvp });
+					else sock.emit({ x: 'roomcancel', room: sock.pvp });
 					delete sock.pvp;
 				}
 				self.props.dispatch(store.doNav(require('./MainMenu')));
@@ -116,7 +118,7 @@ module.exports = connect(({ user, opts }) => ({
 			function cancelClick() {
 				if (sock.pvp) {
 					if (self.props.hasUser) sock.userEmit('foecancel');
-					else sock.emit('roomcancel', { room: sock.pvp });
+					else sock.emit({ x: 'roomcancel', room: sock.pvp });
 					delete sock.pvp;
 				}
 				delete sock.spectate;

@@ -72,7 +72,7 @@ function AiSearch(game) {
 			? ''
 			: lethalResult[1] !== undefined
 			? ((this.cmdct = lethalResult[1]), 'cast')
-			: ((this.cmdct = worstcard), 'endturn');
+			: ((this.cmdct = worstcard), 'end');
 }
 function searchActive(active, c, t) {
 	const func = afilter[active.name[0]];
@@ -212,7 +212,7 @@ AiSearch.prototype.step = function(game) {
 	} else if (~this.cmdct) {
 		this.cmd = 'cast';
 	} else {
-		this.cmd = 'endturn';
+		this.cmd = 'end';
 		this.cmdct = game.player2.hand.length == 8 ? this.worstcard : undefined;
 	}
 };

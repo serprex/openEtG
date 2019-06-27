@@ -19,5 +19,5 @@ exports.hashString = function(str) {
 	return hash;
 };
 exports.randint = function() {
-	return Math.random() * 0x100000000;
+	return (Math.random() * 0x100000000) | 0;
 };

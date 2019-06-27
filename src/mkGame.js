@@ -19,7 +19,7 @@ module.exports = function(data) {
 	if (!data.noheal) game.player1.maxhp = game.player1.hp;
 	game.player2.maxhp = game.player2.hp;
 	for (let j = 0; j < 2; j++) {
-		const pl = j ? game.byId(game.first).foe : game.byId(game.first),
+		const pl = game.byId(2 + j),
 			deck = [],
 			deckdata =
 				pl.id == game.player1Id

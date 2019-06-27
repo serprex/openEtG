@@ -81,28 +81,31 @@ module.exports = connect(({ user }) => ({ user }))(
 													gopher: this.state.gopher,
 												});
 												this.setState({ confirm: 2 });
-											} else
+											} else {
 												this.props.dispatch(
 													store.chatMsg(
 														'Wait for your friend to choose!',
 														'System',
 													),
 												);
+											}
 									  }
 									: () => {
 											if (this.state.deck.length) {
-												sock.emit('cardchosen', {
+												sock.emit({
+													x: 'cardchosen',
 													c: etgutil.encodedeck(this.state.deck),
 													g: this.state.gold,
 												});
 												this.setState({ confirm: 1 });
-											} else
+											} else {
 												this.props.dispatch(
 													store.chatMsg(
 														'You have to choose at least a card!',
 														'System',
 													),
 												);
+											}
 									  }
 							}
 							style={{

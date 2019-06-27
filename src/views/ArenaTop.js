@@ -12,7 +12,7 @@ module.exports = class ArenaTop extends React.Component {
 	}
 
 	componentDidMount() {
-		sock.emit('arenatop', { lv: this.props.lv });
+		sock.emit({ x: 'arenatop', lv: this.props.lv });
 		store.store.dispatch(
 			store.setCmds({
 				arenatop: info => this.setState(info),

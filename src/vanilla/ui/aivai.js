@@ -49,7 +49,9 @@ function fightItOut() {
 			fight1000.value = 'Stop';
 		}
 	}
-	var decks = deckeles.map(item => item.value.split(' ').map(x => parseInt(x, 32)));
+	var decks = deckeles.map(item =>
+		item.value.split(' ').map(x => parseInt(x, 32)),
+	);
 	var seed = parseInt(seedput.value) || util.randint();
 	var game = mkGame(seed, decks);
 	if (!game) return;
@@ -57,7 +59,7 @@ function fightItOut() {
 	var aiState = undefined;
 	var realp1 = game.player1;
 	var cmds = {
-		endturn: function(data) {
+		end: function(data) {
 			if (mode == fight) {
 				result.textContent +=
 					(game.turn == realp1 ? 1 : 2) + '\tEND TURN' + game.ply + '\n';

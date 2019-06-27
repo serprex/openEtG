@@ -14,7 +14,7 @@ window.onerror = function(...args) {
 		lastError = now;
 	}
 };
-sock.emit('motd');
+sock.emit({ x: 'motd' });
 reactDOM.render(
 	<Provider store={store.store}>
 		<App />

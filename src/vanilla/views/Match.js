@@ -350,7 +350,7 @@ module.exports = connect()(
 				if (discard == undefined && game.player1.hand.length == 8) {
 					this.setState({ discarding: true });
 				} else {
-					if (!game.ai) sock.emit('endturn', { bits: discard });
+					if (!game.ai) sock.emit('end', { bits: discard });
 					game.player1.endturn(discard);
 					game.targeting = null;
 					this.setState({ discarding: false, foeplays: [] });
@@ -373,7 +373,7 @@ module.exports = connect()(
 		resignClick() {
 			const { game } = this.props;
 			if (this.state.resigning) {
-				if (!game.ai) sock.emit('foeleft');
+				if (!game.ai) sock.emit('resign');
 				game.setWinner(game.player2);
 				this.endClick();
 			} else {
@@ -483,7 +483,7 @@ module.exports = connect()(
 		startMatch({ game, data, dispatch }) {
 			Effect.clear();
 			const cmds = {
-				endturn: data => {
+				end: data => {
 					game.player2.endturn(data.bits);
 					this.forceUpdate();
 				},
@@ -506,6 +506,10 @@ module.exports = connect()(
 					}
 					this.setState({ foeplays: this.state.foeplays.concat([play]) });
 					c.useactive(t);
+				},
+				resign: data => {
+					game.setWinner(data.c);
+					this.forceUpdate();
 				},
 				foeleft: () => {
 					if (!game.ai) game.setWinner(game.player1);

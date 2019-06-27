@@ -7,7 +7,7 @@ const sock = require('../sock'),
 module.exports = class WealthTop extends React.Component {
 	constructor(props) {
 		super(props);
-		this.state = {};
+		this.state = { top: null };
 	}
 
 	componentDidMount() {
@@ -16,7 +16,7 @@ module.exports = class WealthTop extends React.Component {
 				wealthtop: info => this.setState(info),
 			}),
 		);
-		sock.emit('wealthtop');
+		sock.emit({ x: 'wealthtop' });
 	}
 
 	render() {

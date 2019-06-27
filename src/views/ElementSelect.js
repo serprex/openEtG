@@ -53,12 +53,12 @@ module.exports = class ElementSelect extends React.Component {
 					x={100 + Math.floor((i - 1) / 2) * 64}
 					y={180 + ((i - 1) & 1) * 64}
 					click={() => {
-						const msg = {
+						sock.emit({
+							x: 'inituser',
 							u: this.props.user.name,
 							a: this.props.user.auth,
 							e: i == 14 ? RngMock.upto(12) + 1 : i,
-						};
-						sock.emit('inituser', msg);
+						});
 					}}
 					onMouseOver={() =>
 						this.setState({

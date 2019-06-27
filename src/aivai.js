@@ -64,7 +64,7 @@ function fightItOut() {
 	result.textContent = '';
 	let aiState = undefined;
 	const cmds = {
-		endturn: function(data) {
+		end: function(data) {
 			if (mode == fight) {
 				result.textContent += `${game.turn == realp1 ? 1 : 2}\tEND TURN\n`;
 			}

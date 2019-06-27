@@ -19,7 +19,7 @@ module.exports = class Library extends React.Component {
 	}
 
 	componentDidMount() {
-		sock.emit('librarywant', { f: this.props.name });
+		sock.emit({ x: 'librarywant', f: this.props.name });
 		store.store.dispatch(
 			store.setCmds({
 				librarygive: data => this.setState(data),

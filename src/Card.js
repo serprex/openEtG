@@ -2,9 +2,9 @@
 const imm = require('immutable'),
 	etg = require('./etg'),
 	util = require('./util'),
-	statuscache = {},
-	activecache = {},
-	activecastcache = {};
+	statuscache = new Map(),
+	activecache = new Map(),
+	activecastcache = new Map();
 function Card(type, info) {
 	this.type = type;
 	this.element = info.E;
@@ -22,13 +22,13 @@ function Card(type, info) {
 	this.cast = 0;
 	this.castele = 0;
 	if (info.Skill) {
-		if (this.type == etg.Spell) {
+		if (this.type === etg.Spell) {
 			this.active = new imm.Map({ cast: parseSkill(info.Skill) });
 			this.cast = this.cost;
 			this.castele = this.costele;
-		} else if (info.Skill in activecache) {
-			this.active = activecache[info.Skill];
-			const castinfo = activecastcache[info.Skill];
+		} else if (activecache.has(info.Skill)) {
+			this.active = activecache.get(info.Skill);
+			const castinfo = activecastcache.get(info.Skill);
 			if (castinfo) {
 				[this.cast, this.castele] = castinfo;
 			}
@@ -38,39 +38,37 @@ function Card(type, info) {
 				const eqidx = active.indexOf('=');
 				const a0 = ~eqidx ? active.substr(0, eqidx) : 'ownattack';
 				const cast = readCost(a0, this.element);
-				Thing.prototype.addactive.call(
-					this,
-					cast ? 'cast' : a0,
-					parseSkill(active.substr(eqidx + 1)),
+				this.active = this.active.update(cast ? 'cast' : a0, a =>
+					etg.combineactive(a, parseSkill(active.substr(eqidx + 1))),
 				);
 				if (cast) {
 					[this.cast, this.castele] = cast;
-					activecastcache[info.Skill] = cast;
+					activecastcache.set(info.Skill, cast);
 				}
 			}
-			activecache[info.Skill] = this.active;
+			activecache.set(info.Skill, this.active);
 		}
 	} else this.active = new imm.Map();
 	if (info.Status) {
-		if (info.Status in statuscache) {
-			this.status = statuscache[info.Status];
+		if (statuscache.has(info.Status)) {
+			this.status = statuscache.get(info.Status);
 		} else {
 			this.status = new imm.Map();
 			for (const status of util.iterSplit(info.Status, '+')) {
 				const eqidx = status.indexOf('=');
 				this.status = this.status.set(
 					~eqidx ? status.substr(0, eqidx) : status,
-					eqidx == -1 || +status.substr(eqidx + 1),
+					eqidx === -1 || +status.substr(eqidx + 1),
 				);
 			}
-			statuscache[info.Status] = this.status;
+			statuscache.set(info.Status, this.status);
 		}
 	} else this.status = new imm.Map();
 	Object.freeze(this);
 }
 Object.defineProperty(Card.prototype, 'shiny', {
 	get: function() {
-		return this.code & 16384;
+		return !!(this.code & 16384);
 	},
 });
 Object.defineProperty(Card.prototype, 'upped', {
@@ -84,16 +82,16 @@ Card.prototype.as = function(card) {
 	return card.asUpped(this.upped).asShiny(this.shiny);
 };
 Card.prototype.isFree = function() {
-	return this.type == etg.Pillar && !this.upped && !this.rarity && !this.shiny;
+	return this.type === etg.Pillar && !this.upped && !this.rarity && !this.shiny;
 };
 Card.prototype.info = function() {
-	if (this.type == etg.Spell) {
+	if (this.type === etg.Spell) {
 		return skillText(this);
 	} else {
 		const text = [];
-		if (this.type == etg.Shield && this.health)
+		if (this.type === etg.Shield && this.health)
 			text.push('Reduce damage by ' + this.health);
-		else if (this.type == etg.Creature || this.type == etg.Weapon)
+		else if (this.type === etg.Creature || this.type === etg.Weapon)
 			text.push(this.attack + '|' + this.health);
 		const skills = skillText(this);
 		if (skills) text.push(skills);
@@ -104,23 +102,25 @@ Card.prototype.toString = function() {
 	return this.code;
 };
 Card.prototype.asUpped = function(upped) {
-	return this.upped == upped
+	return this.upped === !!upped
 		? this
 		: Cards.Codes[etgutil.asUpped(this.code, upped)];
 };
 Card.prototype.asShiny = function(shiny) {
-	return !this.shiny == !shiny
+	return this.shiny === !!shiny
 		? this
 		: Cards.Codes[etgutil.asShiny(this.code, shiny)];
 };
 Card.prototype.isOf = function(card) {
-	return card.code == etgutil.asShiny(etgutil.asUpped(this.code, false), false);
+	return (
+		card.code === etgutil.asShiny(etgutil.asUpped(this.code, false), false)
+	);
 };
 Card.prototype.getStatus = function(key) {
-	return this.status.get(key) || 0;
+	return this.status.get(key, 0);
 };
 function readCost(coststr, defaultElement) {
-	if (typeof coststr == 'number')
+	if (typeof coststr === 'number')
 		return new Int8Array([coststr, defaultElement]);
 	const cidx = coststr.indexOf(':'),
 		cost = +(~cidx ? coststr.substr(0, cidx) : coststr);
@@ -129,7 +129,6 @@ function readCost(coststr, defaultElement) {
 		: new Int8Array([cost, ~cidx ? +coststr.substr(cidx + 1) : defaultElement]);
 }
 
-var audio = require('./audio');
 var Cards = require('./Cards');
 var Thing = require('./Thing');
 var etgutil = require('./etgutil');

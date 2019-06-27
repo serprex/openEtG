@@ -9,6 +9,7 @@ const imm = require('immutable'),
 	Effect = require('../Effect'),
 	Skills = require('../Skills'),
 	aiSearch = require('../ai/search'),
+	aiMulligan = require('../ai/mulligan'),
 	Components = require('../Components'),
 	store = require('../store'),
 	sfx = require('../audio'),
@@ -438,8 +439,9 @@ module.exports = connect(({ user }) => ({ user }))(
 		endClick = (discard = 0) => {
 			const { game, user } = this.props;
 			if (game.turn === game.player1Id && game.phase === etg.MulliganPhase) {
-				if (!game.ai) sock.emit('mulligan', { draw: true });
-				game.progressMulligan();
+				const event = { x: 'accept' };
+				if (!game.ai) sock.emit(event);
+				game.next(event);
 				this.forceUpdate();
 			} else if (game.winner) {
 				if (user) {
@@ -507,8 +509,13 @@ module.exports = connect(({ user }) => ({ user }))(
 						},
 					});
 				} else {
-					if (!game.ai) sock.emit('endturn', { c: game.player1Id, t: discard });
-					game.player1.endturn(discard);
+					const event = {
+						x: 'end',
+						c: game.player1Id,
+						t: discard || undefined,
+					};
+					if (!game.ai) sock.emit(event);
+					game.next(event);
 					this.setState({ targeting: null, foeplays: [] });
 				}
 			}
@@ -521,8 +528,9 @@ module.exports = connect(({ user }) => ({ user }))(
 			} else if (game.turn === game.player1Id) {
 				if (game.phase === etg.MulliganPhase && game.player1.handIds.length) {
 					sfx.playSound('mulligan');
-					game.player1.drawhand(game.player1.handIds.length - 1);
-					if (!game.ai) sock.emit('mulligan');
+					const event = { x: 'mulligan' };
+					if (!game.ai) sock.emit(event);
+					game.next(event);
 					this.forceUpdate();
 				} else if (this.state.targeting) {
 					this.setState({ targeting: null });
@@ -533,8 +541,9 @@ module.exports = connect(({ user }) => ({ user }))(
 		resignClick = () => {
 			const { game } = this.props;
 			if (this.state.resigning) {
-				if (!game.ai) sock.emit('foeleft');
-				game.setWinner(game.player2Id);
+				const event = { x: 'resign', c: game.player2Id };
+				if (!game.ai) sock.emit(event);
+				game.next(event);
 				this.endClick();
 			} else {
 				this.setState({ resigning: true });
@@ -561,13 +570,11 @@ module.exports = connect(({ user }) => ({ user }))(
 				}
 			} else if (obj.ownerId === game.player1Id && obj.canactive()) {
 				const cb = tgt => {
+					const event = { x: 'cast', c: obj.id, t: tgt && tgt.id };
 					if (!game.ai) {
-						sock.emit('cast', {
-							c: obj.id,
-							t: tgt && tgt.id,
-						});
+						sock.emit(event);
 					}
-					obj.useactive(tgt);
+					game.next(event);
 					this.forceUpdate();
 				};
 				if (obj.type === etg.Spell && obj.card.type !== etg.Spell) {
@@ -614,12 +621,14 @@ module.exports = connect(({ user }) => ({ user }))(
 							this.aiState.cmd &&
 							(now = Date.now()) > this.aiDelay
 						) {
-							cmds[this.aiState.cmd](this.aiState.cmdct);
+							game.next(this.aiState.cmd);
 							this.aiState = null;
 							this.aiDelay = now + (game.turn === game.player1Id ? 2000 : 200);
+							this.forceUpdate();
 						}
 					} else if (game.phase === etg.MulliganPhase) {
-						cmds.mulligan({ draw: require('../ai/mulligan')(game.player2) });
+						game.next({ x: aiMulligan(game.player2) ? 'accept' : 'mulligan' });
+						this.forceUpdate();
 					}
 				} else if (game.ai === 2) {
 					game.update(game.id, game => {
@@ -662,9 +671,9 @@ module.exports = connect(({ user }) => ({ user }))(
 			e.preventDefault();
 		};
 
-		startMatch({ game, dispatch }) {
+		startMatch({ user, game, dispatch }) {
 			if (
-				this.props.user &&
+				user &&
 				!game.data.get('endurance') &&
 				(game.data.get('level') !== undefined || !game.ai)
 			) {
@@ -673,17 +682,16 @@ module.exports = connect(({ user }) => ({ user }))(
 					l: game.data.get('level'),
 					g: -game.data.get('cost'),
 				});
-				this.streakback = this.props.user.streak[game.data.get('level')];
+				this.streakback = user.streak[game.data.get('level')];
 			}
 			Effect.clear();
 			const cmds = {
-				endturn: data => {
-					game.byId(data.c).endturn(data.t);
+				end: data => {
+					game.next(data);
 					this.forceUpdate();
 				},
 				cast: data => {
-					const c = game.byId(data.c),
-						t = game.byId(data.t);
+					const c = game.byId(data.c);
 					let play;
 					if (c.type == etg.Spell) {
 						play = c.card;
@@ -697,26 +705,27 @@ module.exports = connect(({ user }) => ({ user }))(
 							shiny: c.card.shiny,
 						};
 					}
+					game.next(data);
 					this.setState({ foeplays: this.state.foeplays.concat([play]) });
-					c.useactive(t);
 				},
-				foeleft: data => {
-					if (!game.ai) {
-						game.setWinner(
-							data.spectate === 1 ? game.player2Id : game.player1Id,
-						);
-						this.forceUpdate();
-					}
+				accept: data => {
+					game.next(data);
+					this.forceUpdate();
 				},
 				mulligan: data => {
-					if (data.draw === true) {
-						game.progressMulligan();
-					} else {
-						const pl = game.byId(game.turn);
-						sfx.playSound('mulligan');
-						pl.drawhand(pl.handIds.length - 1);
-					}
+					sfx.playSound('mulligan');
+					game.next(data);
 					this.forceUpdate();
+				},
+				resign: data => {
+					game.next(data);
+					this.forceUpdate();
+				},
+				foeleft: _data => {
+					if (!game.ai) {
+						game.setWinner(game.player1Id);
+						this.forceUpdate();
+					}
 				},
 			};
 			this.gameStep(cmds);
@@ -909,7 +918,6 @@ module.exports = connect(({ user }) => ({ user }))(
 							key={inst.id}
 							obj={inst}
 							game={game}
-							setGame={() => this.forceUpdate()}
 							setInfo={(e, obj, x) => this.setCard(e, obj.card, x)}
 							onMouseOut={this.clearCard}
 							onClick={this.thingClick}
@@ -925,7 +933,6 @@ module.exports = connect(({ user }) => ({ user }))(
 								key={cr.id}
 								obj={cr}
 								game={game}
-								setGame={() => this.forceUpdate()}
 								setInfo={(e, obj, x) => this.setInfo(e, obj, x)}
 								onMouseOut={this.clearCard}
 								onClick={this.thingClick}
@@ -943,7 +950,6 @@ module.exports = connect(({ user }) => ({ user }))(
 								key={pr.id}
 								obj={pr}
 								game={game}
-								setGame={() => this.forceUpdate()}
 								setInfo={(e, obj, x) => this.setInfo(e, obj, x)}
 								onMouseOut={this.clearCard}
 								onClick={this.thingClick}
@@ -966,7 +972,6 @@ module.exports = connect(({ user }) => ({ user }))(
 							key={wp.id}
 							obj={wp}
 							game={game}
-							setGame={() => this.forceUpdate()}
 							setInfo={(e, obj, x) => this.setInfo(e, obj, x)}
 							onMouseOut={this.clearCard}
 							onClick={this.thingClick}
@@ -978,7 +983,6 @@ module.exports = connect(({ user }) => ({ user }))(
 							key={sh.id}
 							obj={sh}
 							game={game}
-							setGame={() => this.forceUpdate()}
 							setInfo={(e, obj, x) => this.setInfo(e, obj, x)}
 							onMouseOut={this.clearCard}
 							onClick={this.thingClick}

@@ -43,7 +43,7 @@ function parseChat(e) {
 				store.clearChat(store.store.getState().opts.channel),
 			);
 		} else if (msg == '/who') {
-			sock.emit('who');
+			sock.emit({ x: 'who' });
 		} else if (msg.match(/^\/roll( |$)\d*d?\d*$/)) {
 			const data = { u: user ? user.name : '' };
 			const ndn = msg.slice(6).split('d');
@@ -53,7 +53,7 @@ function parseChat(e) {
 				data.A = +ndn[0];
 				data.X = +ndn[1];
 			}
-			sock.emit('roll', data);
+			sock.emit({ ...data, x: 'roll' });
 		} else if (msg.match(/^\/decks/) && user) {
 			let names = Object.keys(user.decks);
 			try {
@@ -101,9 +101,9 @@ function parseChat(e) {
 			store.store.dispatch(store.unmute(msg.slice(8)));
 			chatmute();
 		} else if (msg.match(/^\/(motd|mod|codesmith)$/)) {
-			sock.emit(msg.slice(1));
+			sock.emit({ x: msg.slice(1) });
 		} else if (user && msg == '/modclear') {
-			sock.userEmit('modclear');
+			sock.userEmit({ x: 'modclear' });
 		} else if (
 			user &&
 			msg.match(/^\/(mod(guest|mute|add|rm|motd)|codesmith(add|rm)) /)
@@ -133,7 +133,8 @@ function parseChat(e) {
 					store.store.getState().opts.username ||
 					guestname ||
 					(guestname = 10000 + RngMock.upto(89999) + '');
-				if (!msg.match(/^\s*$/)) sock.emit('guestchat', { msg: msg, u: name });
+				if (!msg.match(/^\s*$/))
+					sock.emit({ x: 'guestchat', msg: msg, u: name });
 			}
 		} else store.store.dispatch(store.chatMsg('Not a command: ' + msg));
 	}

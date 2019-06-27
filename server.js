@@ -83,10 +83,11 @@ const sockmeta = new WeakMap();
 		};
 	}
 	const echoEvents = new Set([
-		'endturn',
+		'end',
 		'cast',
-		'foeleft',
+		'accept',
 		'mulligan',
+		'resign',
 		'cardchosen',
 	]);
 	const userEvents = {

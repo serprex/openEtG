@@ -47,7 +47,7 @@ module.exports = connect(state => ({
 						type="checkbox"
 						checked={props.offline}
 						onChange={e => {
-							sock.emit('chatus', { hide: e.target.checked });
+							sock.emit({ x: 'chatus', hide: e.target.checked });
 							props.dispatch(store.setOpt('offline', e.target.checked));
 						}}
 					/>
@@ -58,7 +58,7 @@ module.exports = connect(state => ({
 						type="checkbox"
 						checked={props.afk}
 						onChange={e => {
-							sock.emit('chatus', { afk: e.target.checked });
+							sock.emit({ x: 'chatus', afk: e.target.checked });
 							props.dispatch(store.setOptTemp('afk', e.target.checked));
 						}}
 					/>
@@ -69,7 +69,7 @@ module.exports = connect(state => ({
 						type="checkbox"
 						checked={props.wantpvp}
 						onChange={e => {
-							sock.emit('chatus', { want: e.target.checked });
+							sock.emit({ x: 'chatus', want: e.target.checked });
 							props.dispatch(store.setOpt('wantpvp', e.target.checked));
 						}}
 					/>
@@ -80,6 +80,7 @@ module.exports = connect(state => ({
 					<ChannelTab channel="System" />
 					<ChannelTab channel="Stats" />
 					<ChannelTab channel="Packs" />
+					<ChannelTab channel="Replay" />
 				</div>
 				<Chat channel={props.channel} />
 				<textarea

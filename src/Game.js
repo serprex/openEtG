@@ -2,8 +2,8 @@
 const Rng = require('rng.js'),
 	imm = require('immutable');
 function Game(seed, flip) {
-	const first = (seed & 1) + 2,
-		second = first ^ 1,
+	const first = 2,
+		second = 3,
 		rng = new Rng(seed, ~seed),
 		player1 = (seed & 1) ^ flip ? second : first,
 		player2 = (seed & 1) ^ flip ? first : second;
@@ -13,7 +13,6 @@ function Game(seed, flip) {
 			new imm.Map({
 				id: 4,
 				phase: 0,
-				first: first,
 				turn: first,
 				player1: player1,
 				player2: player2,
@@ -24,6 +23,7 @@ function Game(seed, flip) {
 					creaturesplaced: 0,
 					creatureskilled: 0,
 					time: Date.now(),
+					replay: new imm.List(),
 				}),
 				data: new imm.Map(),
 				rng: rng.getStateCount(),
@@ -89,7 +89,7 @@ defineProp('winner');
 
 Game.prototype.clone = function() {
 	const obj = Object.create(Game.prototype);
-	obj.props = this.props;
+	obj.props = this.props.delete('bonusstats');
 	obj.cache = new Map([
 		[this.id, obj],
 		[this.player1Id, new Player(obj, this.player1Id)],
@@ -128,27 +128,39 @@ Game.prototype.byId = function(id) {
 };
 Game.prototype.newId = function() {
 	let newId;
-	this.update(this.id, game =>
-		game.update('id', id => {
-			newId = id;
-			return id + 1;
-		}),
-	);
+	this.updateIn([this.id, 'id'], id => {
+		newId = id;
+		return id + 1;
+	});
 	return newId;
 };
 Game.prototype.newThing = function(card) {
 	return new Thing(this, this.newId()).init(card);
 };
-Game.prototype.get = function(id, key) {
-	const ent = this.props.get(id);
-	return ent && ent.get(key);
+Game.prototype.get = function(...args) {
+	return this.props.getIn(args);
+};
+Game.prototype.getIn = function(path, def) {
+	return this.props.getIn(path, def);
 };
 Game.prototype.set = function(id, key, val) {
 	const ent = this.props.get(id) || new imm.Map();
 	return (this.props = this.props.set(id, ent.set(key, val)));
 };
+Game.prototype.setIn = function(path, key, val) {
+	this.props = this.props.setIn(path, key, val);
+};
+Game.prototype.getStatus = function(id, key) {
+	return this.props.getIn([id, 'status', key], 0);
+};
+Game.prototype.setStatus = function(id, key, val) {
+	this.props = this.props.setIn([id, 'status', key], val | 0);
+};
 Game.prototype.update = function(id, func) {
 	this.props = this.props.update(id, func);
+};
+Game.prototype.updateIn = function(path, func) {
+	this.props = this.props.updateIn(path, func);
 };
 Game.prototype.cloneInstance = function(inst, ownerId) {
 	const newId = this.newId();
@@ -162,18 +174,39 @@ Game.prototype.setWinner = function(play) {
 	if (!this.winner) {
 		this.winner = play;
 		this.phase = etg.EndPhase;
-		this.update(this.id, game =>
-			game.updateIn(['bonusstats', 'time'], time => Date.now() - time),
-		);
+		this.updateIn([this.id, 'bonusstats', 'time'], time => Date.now() - time);
 	}
 };
-Game.prototype.progressMulligan = function() {
-	if (this.phase === etg.MulliganPhase) {
-		this.turn = this.get(this.turn, 'foe');
-		if (this.turn === this.first) {
-			this.phase = etg.PlayPhase;
+const nextHandler = {
+	end: function({ c, t }) {
+		this.byId(c).endturn(t);
+	},
+	cast: function({ c, t }) {
+		this.byId(c).useactive(t && this.byId(t));
+	},
+	accept: function(_data) {
+		if (this.phase === etg.MulliganPhase) {
+			this.turn = this.get(this.turn, 'foe');
+			if (this.turn === 2) {
+				this.phase = etg.PlayPhase;
+			}
 		}
+	},
+	mulligan: function(_data) {
+		const pl = this.byId(this.turn);
+		pl.drawhand(pl.handIds.length - 1);
+	},
+	resign: function(data) {
+		this.setWinner(this.get(data.c, 'foe'));
+	},
+};
+Game.prototype.next = function(event) {
+	if (this.bonusstats) {
+		this.updateIn([this.id, 'bonusstats', 'replay'], replay =>
+			replay.push(event),
+		);
 	}
+	return nextHandler[event.x].call(this, event);
 };
 const blacklist = new Set([
 	'spectate',
@@ -181,7 +214,6 @@ const blacklist = new Set([
 	'seed',
 	'p1deckpower',
 	'p2deckpower',
-	'urdeck',
 ]);
 Game.prototype.addData = function(data) {
 	for (const key in data) {
@@ -207,11 +239,8 @@ Game.prototype.expectedDamage = function() {
 			const gclone = this.clone();
 			gclone.player1.permanents.forEach(removeSoPa);
 			gclone.player2.permanents.forEach(removeSoPa);
-			gclone.update(gclone.id, game =>
-				game
-					.updateIn(['rng', 'highState'], state => state ^ (i * 997))
-					.updateIn(['rng', 'lowState'], state => state ^ (i * 650)),
-			);
+			this.updateIn([this.id, 'rng', 'highState'], state => state ^ (i * 997));
+			this.updateIn([this.id, 'rng', 'lowState'], state => state ^ (i * 650));
 			gclone.byId(gclone.turn).endturn();
 			if (!gclone.winner) gclone.byId(gclone.turn).endturn();
 			expectedDamage[0] += this.player1.hp - gclone.player1.hp;

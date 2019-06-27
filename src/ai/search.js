@@ -63,10 +63,11 @@ function AiSearch(game) {
 	const lethalResult = lethal(game);
 	this.cmd =
 		lethalResult[0] >= 0
-			? ''
+			? null
 			: lethalResult[1] !== undefined
-			? ((this.cmdct = lethalResult[1]), 'cast')
-			: ((this.cmdct = { c: game.player2Id, t: worstcard }), 'endturn');
+			? ((this.cmdct = lethalResult[1]), { x: 'cast', ...this.cmdct })
+			: ((this.cmdct = { c: game.player2Id, t: worstcard }),
+			  { x: 'end', ...this.cmdct });
 }
 function searchSkill(active, c, t) {
 	const func = afilter[active.name[0]];
@@ -202,13 +203,14 @@ AiSearch.prototype.step = function(game) {
 		this.nth = nth;
 		this.eval = currentEval;
 	} else if (this.cmdct) {
-		this.cmd = 'cast';
+		this.cmd = { x: 'cast', ...this.cmdct };
 	} else {
-		this.cmd = 'endturn';
-		this.cmdct =
-			game.player2.handIds.length === 8
+		this.cmd = {
+			x: 'end',
+			...(game.player2.handIds.length === 0
 				? { c: game.player2Id, t: this.worstcard }
-				: { c: game.player2Id, t: 0 };
+				: { c: game.player2Id }),
+		};
 	}
 };
 module.exports = AiSearch;
