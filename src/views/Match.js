@@ -541,7 +541,7 @@ module.exports = connect(({ user }) => ({ user }))(
 		resignClick = () => {
 			const { game } = this.props;
 			if (this.state.resigning) {
-				const event = { x: 'resign', c: game.player2Id };
+				const event = { x: 'resign', c: game.player1Id };
 				if (!game.ai) sock.emit(event);
 				game.next(event);
 				this.endClick();
