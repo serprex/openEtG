@@ -415,7 +415,7 @@ Thing.prototype.rmactive = function(type, name) {
 						type,
 						actives.reduce(
 							(previous, current, i) =>
-								i === idx ? previous : combineactive(previous, Skills[current]),
+								i === idx ? previous : etg.combineactive(previous, Skills[current]),
 							null,
 						),
 				  );
