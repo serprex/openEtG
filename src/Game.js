@@ -178,8 +178,8 @@ Game.prototype.setWinner = function(play) {
 	}
 };
 const nextHandler = {
-	end: function({ c, t }) {
-		this.byId(c).endturn(t);
+	end: function({ t }) {
+		this.byId(this.turn).endturn(t);
 	},
 	cast: function({ c, t }) {
 		this.byId(c).useactive(t && this.byId(t));

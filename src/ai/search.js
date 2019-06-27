@@ -207,9 +207,7 @@ AiSearch.prototype.step = function(game) {
 	} else {
 		this.cmd = {
 			x: 'end',
-			...(game.player2.handIds.length === 0
-				? { c: game.player2Id, t: this.worstcard }
-				: { c: game.player2Id }),
+			...(game.player2.handIds.length === 8 ? { t: this.worstcard } : {}),
 		};
 	}
 };

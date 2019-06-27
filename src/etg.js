@@ -154,9 +154,7 @@ exports.combineactive = function combineactive(a1, a2) {
 				? v2
 				: v2 === undefined
 				? v1
-				: v1 === true || v2 === true
-				? true
-				: v1 + v2;
+				: v1 === true || v2 === true || v1 + v2;
 		},
 		name: a1.name.concat(a2.name),
 	};

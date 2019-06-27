@@ -419,6 +419,36 @@ module.exports = connect(({ user }) => ({ user }))(
 			};
 		}
 
+		applyNext = data => {
+			const { game } = this.props;
+			if (data.x === 'cast' && game.turn === game.player2Id) {
+				const c = game.byId(data.c);
+				const play =
+					c.type == etg.Spell
+						? c.card
+						: {
+								element: c.card.element,
+								costele: c.castele,
+								cost: c.cast,
+								name: c.active.get('cast').name[0],
+								upped: c.card.upped,
+								shiny: c.card.shiny,
+						  };
+				this.setState(state => ({ foeplays: state.foeplays.concat([play]) }));
+			}
+			game.next(data);
+			switch (data.x) {
+				case 'cast':
+					break;
+				case 'mulligan':
+					sfx.playSound('mulligan');
+					this.forceUpdate();
+					break;
+				default:
+					this.forceUpdate();
+			}
+		};
+
 		static getDerivedStateFromProps(nextProps, prevState) {
 			if (prevState.resetInterval && nextProps.game !== prevState._game) {
 				prevState.resetInterval(nextProps);
@@ -441,8 +471,7 @@ module.exports = connect(({ user }) => ({ user }))(
 			if (game.turn === game.player1Id && game.phase === etg.MulliganPhase) {
 				const event = { x: 'accept' };
 				if (!game.ai) sock.emit(event);
-				game.next(event);
-				this.forceUpdate();
+				this.applyNext(event);
 			} else if (game.winner) {
 				if (user) {
 					if (game.data.get('arena')) {
@@ -511,11 +540,10 @@ module.exports = connect(({ user }) => ({ user }))(
 				} else {
 					const event = {
 						x: 'end',
-						c: game.player1Id,
 						t: discard || undefined,
 					};
 					if (!game.ai) sock.emit(event);
-					game.next(event);
+					this.applyNext(event);
 					this.setState({ targeting: null, foeplays: [] });
 				}
 			}
@@ -530,8 +558,7 @@ module.exports = connect(({ user }) => ({ user }))(
 					sfx.playSound('mulligan');
 					const event = { x: 'mulligan' };
 					if (!game.ai) sock.emit(event);
-					game.next(event);
-					this.forceUpdate();
+					this.applyNext(event);
 				} else if (this.state.targeting) {
 					this.setState({ targeting: null });
 				}
@@ -543,7 +570,7 @@ module.exports = connect(({ user }) => ({ user }))(
 			if (this.state.resigning) {
 				const event = { x: 'resign', c: game.player1Id };
 				if (!game.ai) sock.emit(event);
-				game.next(event);
+				this.applyNext(event);
 				this.endClick();
 			} else {
 				this.setState({ resigning: true });
@@ -574,8 +601,7 @@ module.exports = connect(({ user }) => ({ user }))(
 					if (!game.ai) {
 						sock.emit(event);
 					}
-					game.next(event);
-					this.forceUpdate();
+					this.applyNext(event);
 				};
 				if (obj.type === etg.Spell && obj.card.type !== etg.Spell) {
 					cb();
@@ -601,7 +627,7 @@ module.exports = connect(({ user }) => ({ user }))(
 			}
 		};
 
-		gameStep(cmds) {
+		gameStep() {
 			const { game } = this.props;
 			if (game.turn === game.player2Id) {
 				if (game.ai === 1) {
@@ -621,14 +647,14 @@ module.exports = connect(({ user }) => ({ user }))(
 							this.aiState.cmd &&
 							(now = Date.now()) > this.aiDelay
 						) {
-							game.next(this.aiState.cmd);
+							this.applyNext(this.aiState.cmd);
 							this.aiState = null;
 							this.aiDelay = now + (game.turn === game.player1Id ? 2000 : 200);
-							this.forceUpdate();
 						}
 					} else if (game.phase === etg.MulliganPhase) {
-						game.next({ x: aiMulligan(game.player2) ? 'accept' : 'mulligan' });
-						this.forceUpdate();
+						this.applyNext({
+							x: aiMulligan(game.player2) ? 'accept' : 'mulligan',
+						});
 					}
 				} else if (game.ai === 2) {
 					game.update(game.id, game => {
@@ -685,42 +711,13 @@ module.exports = connect(({ user }) => ({ user }))(
 				this.streakback = user.streak[game.data.get('level')];
 			}
 			Effect.clear();
+			const gameEvent = data => this.applyNext(data);
 			const cmds = {
-				end: data => {
-					game.next(data);
-					this.forceUpdate();
-				},
-				cast: data => {
-					const c = game.byId(data.c);
-					let play;
-					if (c.type == etg.Spell) {
-						play = c.card;
-					} else {
-						play = {
-							element: c.card.element,
-							costele: c.castele,
-							cost: c.cast,
-							name: c.active.get('cast').name[0],
-							upped: c.card.upped,
-							shiny: c.card.shiny,
-						};
-					}
-					game.next(data);
-					this.setState({ foeplays: this.state.foeplays.concat([play]) });
-				},
-				accept: data => {
-					game.next(data);
-					this.forceUpdate();
-				},
-				mulligan: data => {
-					sfx.playSound('mulligan');
-					game.next(data);
-					this.forceUpdate();
-				},
-				resign: data => {
-					game.next(data);
-					this.forceUpdate();
-				},
+				end: gameEvent,
+				cast: gameEvent,
+				accept: gameEvent,
+				mulligan: gameEvent,
+				resign: gameEvent,
 				foeleft: _data => {
 					if (!game.ai) {
 						game.setWinner(game.player1Id);
@@ -728,8 +725,8 @@ module.exports = connect(({ user }) => ({ user }))(
 					}
 				},
 			};
-			this.gameStep(cmds);
-			this.gameInterval = setInterval(() => this.gameStep(cmds), 30);
+			this.gameStep();
+			this.gameInterval = setInterval(() => this.gameStep(), 30);
 			this.setState({
 				_game: game,
 				resetInterval: props => {
