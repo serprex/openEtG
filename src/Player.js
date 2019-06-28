@@ -276,21 +276,21 @@ Player.prototype.info = function() {
 	if (this.gpull) info.push('gpull');
 	return info.join('\n');
 };
-Player.prototype.randomquanta = function() {
+function randomquanta(ctx, quanta) {
 	let nonzero = 0;
 	for (let i = 1; i < 13; i++) {
-		nonzero += this.quanta[i];
+		nonzero += quanta[i];
 	}
 	if (nonzero === 0) {
 		return -1;
 	}
-	nonzero = 1 + this.upto(nonzero);
+	nonzero = ctx.upto(nonzero) + 1;
 	for (let i = 1; i < 13; i++) {
-		if ((nonzero -= this.quanta[i]) <= 0) {
+		if ((nonzero -= quanta[i]) <= 0) {
 			return i;
 		}
 	}
-};
+}
 Player.prototype.canspend = function(qtype, x) {
 	if (x <= 0) return true;
 	if (qtype) return this.quanta[qtype] >= x;
@@ -305,7 +305,7 @@ Player.prototype.spend = function(qtype, x, scramble) {
 	if (!qtype) {
 		const b = x < 0 ? -1 : 1;
 		for (let i = x * b; i > 0; i--) {
-			const q = b === -1 ? 1 + this.upto(12) : this.randomquanta();
+			const q = b === -1 ? 1 + this.upto(12) : randomquanta(this.game, quanta);
 			quanta[q] = Math.min(quanta[q] - b, 99);
 		}
 	} else quanta[qtype] = Math.min(quanta[qtype] - x, 99);
