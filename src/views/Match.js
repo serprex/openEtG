@@ -437,17 +437,11 @@ module.exports = connect(({ user }) => ({ user }))(
 						  };
 				this.setState(state => ({ foeplays: state.foeplays.concat([play]) }));
 			}
-			game.next(data);
-			switch (data.x) {
-				case 'cast':
-					break;
-				case 'mulligan':
-					sfx.playSound('mulligan');
-					this.forceUpdate();
-					break;
-				default:
-					this.forceUpdate();
+			if (data.x === 'mulligan') {
+				sfx.playSound('mulligan');
 			}
+			game.next(data);
+			this.forceUpdate();
 		};
 
 		static getDerivedStateFromProps(nextProps, prevState) {
