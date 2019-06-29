@@ -10,13 +10,13 @@ const Cards = require('../Cards'),
 
 function Order({ order, onClick }) {
 	return (
-		<div onClick={e => onClick(Math.abs(order.p), order.q)}>
+		<div onClick={_e => onClick(Math.abs(order.p), order.q)}>
 			{order.q} @ {Math.abs(order.p)}
 		</div>
 	);
 }
 
-function OrderBook({ bc, onClickBuy, onClickSell }) {
+function CardOrders({ bc, onClickBuy, onClickSell }) {
 	if (!bc) return null;
 	return (
 		<>
@@ -54,24 +54,162 @@ function OrderBook({ bc, onClickBuy, onClickSell }) {
 	);
 }
 
-function OrderSummary({ bz, onClick }) {
-	const Bz = [];
-	for (const k in bz) Bz[k] = bz[k];
-	return Bz.map((orders, code) => {
-		const card = Cards.Codes[code];
-		const o0 = orders[0],
-			o1 = orders[orders.length - 1];
-		return (
-			(o0 || o1) && (
-				<div key={code} onClick={() => onClick(code)}>
-					{card.name}:&emsp;
-					{o1.p > 0 && <span>Buy: {o1.p}</span>}&emsp;
-					{o0.p < 0 && <span>Sell: {-o0.p}</span>}
-				</div>
-			)
-		);
-	});
+class OrderSummary extends React.Component {
+	constructor(props) {
+		super(props);
+
+		this.state = {
+			bz: null,
+			props: {},
+		};
+	}
+
+	static getDerivedStateFromProps(props, state) {
+		const Bz = props.bz;
+		if (
+			Bz !== state.props.bz ||
+			props.showDeal !== state.props.showDeal ||
+			props.showBuy !== state.props.showBuy ||
+			props.showSell !== state.props.showSell
+		) {
+			if (!Bz) {
+				return {
+					props,
+					bz: null,
+				};
+			}
+			const bz = [];
+			for (const k in Bz) {
+				const bzv = Bz[k];
+				if (!bzv.length) continue;
+				const o0 = bzv[0],
+					o1 = bzv[bzv.length - 1],
+					card = Cards.Codes[k];
+				if (!((props.showSell && o0.p < 0) || (props.showBuy && o1.p > 0)))
+					continue;
+				if (props.showDeal) {
+					const worth = userutil.cardValue(card);
+					if (
+						!(
+							(props.showSell && o0.p < 0 && -o0.p < worth) ||
+							(props.showBuy && o1.p > 0 && o1.p > worth)
+						)
+					)
+						continue;
+				}
+				bz.push({
+					code: +k,
+					name: `${card.upped ? '^' : ''}${card.shiny ? '$' : ''}${card.name}`,
+					orders: bzv,
+				});
+			}
+
+			return {
+				props,
+				bz: bz.sort((a, b) =>
+					Cards.Codes[a.code].name.localeCompare(Cards.Codes[b.code].name),
+				),
+			};
+		}
+		return null;
+	}
+
+	render() {
+		const { onClick } = this.props;
+		return this.state.bz.map(({ code, name, orders }) => {
+			const o0 = orders[0],
+				o1 = orders[orders.length - 1];
+			return (
+				(o0 || o1) && (
+					<div
+						key={code}
+						style={{ width: '288px' }}
+						onClick={() => onClick(code)}>
+						<div
+							style={{
+								display: 'inline-block',
+								width: '192px',
+								textOverflow: 'ellipsis',
+							}}>
+							{name}
+						</div>
+						<div
+							style={{ display: 'inline-block', color: '#4f8', width: '48px' }}>
+							{o1.p > 0 ? o1.p : ' '}
+						</div>
+						<div
+							style={{ display: 'inline-block', color: '#f84', width: '48px' }}>
+							{o0.p < 0 ? -o0.p : ' '}
+						</div>
+					</div>
+				)
+			);
+		});
+	}
 }
+
+function defVal(x, y) {
+	return x === undefined ? y : x;
+}
+const OrderBook = connect(({ opts }) => ({
+	deal: defVal(opts.orderFilter_Deal, true),
+	buy: defVal(opts.orderFilter_Buy, true),
+	sell: defVal(opts.orderFilter_Sell, true),
+}))(function OrderBook({ dispatch, bz, onClick, deal, buy, sell }) {
+	return (
+		<div
+			className="bgbox"
+			style={{
+				position: 'absolute',
+				top: '270px',
+				width: '900px',
+				height: '330px',
+				overflowY: 'auto',
+			}}>
+			<label style={{ display: 'inline-block', width: '200px' }}>
+				<input
+					type="checkbox"
+					checked={deal}
+					onChange={e =>
+						dispatch(store.setOptTemp('orderFilter_Deal', e.target.checked))
+					}
+				/>{' '}
+				Deals
+			</label>
+			<label style={{ display: 'inline-block', width: '200px' }}>
+				<input
+					type="checkbox"
+					checked={buy}
+					onChange={e =>
+						dispatch(store.setOptTemp('orderFilter_Buy', e.target.checked))
+					}
+				/>{' '}
+				Buys
+			</label>
+			<label style={{ display: 'inline-block', width: '200px' }}>
+				<input
+					type="checkbox"
+					checked={sell}
+					onChange={e =>
+						dispatch(store.setOptTemp('orderFilter_Sell', e.target.checked))
+					}
+				/>{' '}
+				Sells
+			</label>
+			{bz && (
+				<div style={{ columnCount: '3', width: '890px' }}>
+					<OrderSummary
+						bz={bz}
+						showDeal={deal}
+						showBuy={buy}
+						showSell={sell}
+						onClick={onClick}
+					/>
+				</div>
+			)}
+		</div>
+	);
+});
 
 module.exports = connect(({ user }) => ({ user }))(
 	class Bazaar extends React.Component {
@@ -190,7 +328,7 @@ module.exports = connect(({ user }) => ({ user }))(
 								{userutil.cardValue(Cards.Codes[this.state.bcode])}
 								<span className="ico g" />
 							</div>
-							<OrderBook
+							<CardOrders
 								bc={this.state.bz[this.state.bcode]}
 								onClickBuy={(sell, sellq) => this.setState({ sell, sellq })}
 								onClickSell={(buy, buyq) => this.setState({ buy, buyq })}
@@ -222,26 +360,12 @@ module.exports = connect(({ user }) => ({ user }))(
 						}}
 					/>
 					{this.state.showOrders && (
-						<div
-							className="bgbox"
-							style={{
-								position: 'absolute',
-								top: '270px',
-								width: '900px',
-								height: '330px',
-								overflowY: 'auto',
-							}}>
-							<div style={{ columnCount: '3', width: '890px' }}>
-								{this.state.bz && (
-									<OrderSummary
-										bz={this.state.bz}
-										onClick={code => {
-											this.setState({ bcode: code });
-										}}
-									/>
-								)}
-							</div>
-						</div>
+						<OrderBook
+							bz={this.state.bz}
+							onClick={code => {
+								this.setState({ bcode: code });
+							}}
+						/>
 					)}
 				</>
 			);

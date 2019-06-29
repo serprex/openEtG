@@ -335,10 +335,12 @@ Player.prototype.endturn = function(discard) {
 	if (poison) this.foe.dmg(poison);
 	let patienceFlag = false,
 		floodingFlag = false,
-		floodingPaidFlag = false;
+		floodingPaidFlag = false,
+		permanents = this.permanents,
+		foepermanents = this.foe.permanents;
 	for (let i = 0; i < 16; i++) {
 		let p;
-		if ((p = this.permanents[i])) {
+		if ((p = permanents[i])) {
 			p.trigger('ownattack');
 			if (~p.getIndex()) {
 				p.usedactive = false;
@@ -355,7 +357,7 @@ Player.prototype.endturn = function(discard) {
 				p.maybeDecrStatus('frozen');
 			}
 		}
-		if ((p = this.foe.permanents[i])) {
+		if ((p = foepermanents[i])) {
 			if (p.getStatus('flooding')) {
 				floodingFlag = true;
 			}

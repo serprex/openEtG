@@ -716,9 +716,9 @@ const sockmeta = new WeakMap();
 									: RngMock.upto(12) + 1
 							];
 					} else {
-						let notFromElement = Math.random() > 0.5,
-							bumprarity = rarity + (Math.random() < bumprate),
-							card = undefined;
+						const notFromElement = Math.random() > 0.5,
+							bumprarity = rarity + (Math.random() < bumprate);
+						let card = undefined;
 						if (data.element < 13)
 							card = RngMock.randomcard(
 								false,
@@ -726,16 +726,16 @@ const sockmeta = new WeakMap();
 									(x.element == data.element) ^ notFromElement &&
 									x.rarity == bumprarity,
 							);
-						if (!card)
-							card = RngMock.randomcard(false, x => x.rarity == bumprarity);
-						cardcode = card.code;
+						cardcode = (
+							card || RngMock.randomcard(false, x => x.rarity == bumprarity)
+						).code;
 					}
 					newCards = etgutil.addcard(newCards, cardcode);
 				}
 				if (bound) {
 					user.freepacks[data.pack]--;
 					user.accountbound = etgutil.mergedecks(user.accountbound, newCards);
-					if (user.freepacks.every(x => x == 0)) {
+					if (user.freepacks.every(x => x === 0)) {
 						delete user.freepacks;
 					}
 				} else {
@@ -758,7 +758,7 @@ const sockmeta = new WeakMap();
 					sockEmit(foesock, 'foeleft');
 					sockEmit(foesock, 'chat', {
 						mode: 1,
-						msg: data.u + ' has canceled the duel.',
+						msg: `${data.u} has canceled the duel.`,
 					});
 					if (foemeta.duel == data.u) delete foemeta.duel;
 				}
