@@ -115,6 +115,7 @@ module.exports = connect(({ user, opts }) => ({
 			}
 			const data = {
 				seed: replay.seed,
+				flip: replay.seed & 1,
 				level: undefined,
 				cost: 0,
 				ai: 3,

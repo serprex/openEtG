@@ -48,11 +48,12 @@ const afilter = {
 };
 function AiSearch(game) {
 	let worstcard;
-	if (game.player2.handIds.length < 8) {
+	this.player = game.byId(game.turn);
+	if (this.player.handIds.length < 8) {
 		worstcard = undefined;
 		this.eval = evalGame(game);
 	} else {
-		[worstcard, this.eval] = getWorstCard(game, game.player2);
+		[worstcard, this.eval] = getWorstCard(game, this.player);
 	}
 	this.nth = 0;
 	this.cmdct = null;
@@ -66,8 +67,7 @@ function AiSearch(game) {
 			? null
 			: lethalResult[1] !== undefined
 			? ((this.cmdct = lethalResult[1]), { x: 'cast', ...this.cmdct })
-			: ((this.cmdct = { c: game.player2Id, t: worstcard }),
-			  { x: 'end', ...this.cmdct });
+			: ((this.cmdct = { t: worstcard }), { x: 'end', ...this.cmdct });
 }
 function searchSkill(active, c, t) {
 	const func = afilter[active.name[0]];
@@ -107,29 +107,28 @@ AiSearch.prototype.step = function(game) {
 						(t && targetFilter(t) && searchSkill(active, c, t))) &&
 					(n || --this.limit > 0)
 				) {
-					const gameClone = game.clone();
+					const gameClone = game.clone(),
+						playerClone = gameClone.byId(this.player.id);
 					gameClone.byId(c.id).useactive(t && gameClone.byId(t.id));
 					if (
 						c.type === etg.Permanent &&
 						c.getStatus('patience') &&
 						c.active.get('cast') === Skills.die &&
-						c.ownerId === game.player2Id
+						c.ownerId === this.player.id
 					) {
-						for (let i = 0; i < 16; i++) {
-							const pr = gameClone.player2.permanents[i];
-							if (
+						playerClone.permanents.forEach(
+							pr =>
 								pr &&
 								pr.getStatus('patience') &&
-								pr.active.get('cast') === Skills.die
-							)
-								pr.useactive();
-						}
+								pr.active.get('cast') === Skills.die &&
+								pr.useactive(),
+						);
 					}
 					let v, wc;
-					if (gameClone.player2.handIds.length < 8) {
+					if (playerClone.handIds.length < 8) {
 						v = evalGame(gameClone);
 					} else {
-						[wc, v] = getWorstCard(gameClone, gameClone.player2);
+						[wc, v] = getWorstCard(gameClone, playerClone);
 					}
 					if (v < currentEval || (v === currentEval && n > this.cdepth)) {
 						this.cmdct = cmdct0 || { c: c.id, t: t && t.id };
@@ -154,7 +153,7 @@ AiSearch.prototype.step = function(game) {
 			}
 			return true;
 		};
-		const p2 = game.player2;
+		const p2 = game.byId(this.player.id);
 		if (n) {
 			if (nth === 0 && incnth(p2.weapon)) {
 				return true;
@@ -207,7 +206,7 @@ AiSearch.prototype.step = function(game) {
 	} else {
 		this.cmd = {
 			x: 'end',
-			...(game.player2.handIds.length === 8 ? { t: this.worstcard } : {}),
+			...(this.player.handIds.length === 8 ? { t: this.worstcard } : {}),
 		};
 	}
 };

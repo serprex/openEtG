@@ -9,7 +9,7 @@ exports.rewardwords = {
 	nymph: 5,
 };
 const cardValues = new Float32Array([25 / 3, 1.375, 5, 30, 35, 250]),
-	sellValues = new Uint8Array([5, 1, 3, 15, 20, 240]);
+	sellValues = new Uint8Array([5, 1, 3, 15, 20, 150]);
 exports.pveCostReward = new Uint8Array([
 	0,
 	10,
@@ -25,10 +25,14 @@ exports.pveCostReward = new Uint8Array([
 	111,
 ]);
 exports.cardValue = function(card) {
-	return cardValues[card.rarity] * (card.upped ? 6 : 1) * (card.shiny ? 6 : 1);
+	return ~card.rarity
+		? cardValues[card.rarity] * (card.upped ? 6 : 1) * (card.shiny ? 6 : 1)
+		: 0;
 };
 exports.sellValue = function(card) {
-	return sellValues[card.rarity] * (card.upped ? 6 : 1) * (card.shiny ? 6 : 1);
+	return ~card.rarity
+		? sellValues[card.rarity] * (card.upped ? 6 : 1) * (card.shiny ? 6 : 1)
+		: 0;
 };
 exports.arenaCost = function(lv) {
 	return exports.pveCostReward[lv ? 10 : 8];

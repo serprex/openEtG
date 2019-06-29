@@ -132,8 +132,7 @@ const SkillsValues = Object.freeze({
 	give: 1,
 	golemhit: c => {
 		let dmg = 0;
-		for (let i = 0; i < 23; i++) {
-			const cr = c.owner.creatures[i];
+		c.owner.creatures.forEach(cr => {
 			if (
 				cr &&
 				cr.getStatus('golem') &&
@@ -143,7 +142,7 @@ const SkillsValues = Object.freeze({
 				const atk = getDamage(cr.game, cr);
 				if (atk > dmg) dmg = atk;
 			}
-		}
+		});
 		return dmg;
 	},
 	gpull: c => (c.type === etg.Spell || c.id !== c.owner.gpull ? 2 : 0),
@@ -202,10 +201,10 @@ const SkillsValues = Object.freeze({
 			: 6,
 	neuroify: c => (c.owner.foe.getStatus('neuro') ? 1 : 5),
 	nightmare: c => {
-		let n = 0;
-		c.owner.hand.forEach(inst => {
-			if (inst.card.isOf(Cards.Nightmare)) n++;
-		});
+		const n = c.owner.hand.reduce(
+			(n, inst) => n + !!inst.card.isOf(Cards.Nightmare),
+			0,
+		);
 		return (24 - c.owner.foe.handIds.length) >> n;
 	},
 	nightshade: 6,
@@ -419,9 +418,11 @@ function calcExpectedDamage(pl, wallCharges, wallIndex) {
 	let totalDamage = 0,
 		stasisFlag = false,
 		freedomChance = 0;
+	const plpermanents = pl.permanents,
+		foepermanents = pl.foe.permanents;
 	for (let i = 0; i < 16; i++) {
 		let p;
-		if ((p = pl.permanents[i])) {
+		if ((p = plpermanents[i])) {
 			if (
 				!stasisFlag &&
 				(p.hasactive('attack', 'stasis') || p.getStatus('patience'))
@@ -433,14 +434,14 @@ function calcExpectedDamage(pl, wallCharges, wallIndex) {
 		}
 		if (
 			!stasisFlag &&
-			(p = pl.foe.permanents[i]) &&
+			(p = foepermanents[i]) &&
 			p.hasactive('attack', 'stasis')
 		) {
 			stasisFlag = true;
 		}
 	}
 	if (freedomChance) freedomChance = 1 - Math.pow(0.7, freedomChance);
-	if (pl.foe.shield && pl.foe.shield.hasactive('shield', 'blockwithcharge')) {
+	if (pl.foe.shieldId && pl.foe.shield.hasactive('shield', 'blockwithcharge')) {
 		wallCharges[wallIndex] = pl.foe.shield.getStatus('charges');
 	}
 	if (!stasisFlag) {
@@ -456,7 +457,7 @@ function calcExpectedDamage(pl, wallCharges, wallIndex) {
 				if (
 					!(
 						c.getStatus('psionic') &&
-						pl.foe.shield &&
+						pl.foe.shieldId &&
 						pl.foe.shield.getStatus('reflective')
 					)
 				)
@@ -574,22 +575,28 @@ function evalthing(game, c, inHand) {
 			hp = Math.max(Math.min(hp - poison, c.maxhp), 0);
 		}
 		if (hp === 0) {
+			if (c.active.get('owndeath')) {
+				score += evalactive(c, c.active.get('owndeath'), ttatk) * 3;
+			}
 			for (let j = 0; j < 2; j++) {
 				const pl = j ? c.owner : c.owner.foe;
-				for (let i = 0; i < 23; i++) {
-					const cr = pl.creatures[i];
-					if (cr && cr.active.get('death')) {
-						score +=
-							evalactive(cr, cr.active.get('death'), ttatk) * (j ? 3 : -3);
-					}
-				}
-				for (let i = 0; i < 16; i++) {
-					const pr = pl.permanents[i];
-					if (pr && pr.active.get('death')) {
-						score +=
-							evalactive(pr, pr.active.get('death'), ttatk) * (j ? 3 : -3);
-					}
-				}
+				score +=
+					pl.creatures.reduce(
+						(acc, cr) =>
+							acc +
+							(cr && cr.active.get('death')
+								? evalactive(cr, cr.active.get('death'), ttatk) * (j ? 3 : -3)
+								: 0),
+						0,
+					) +
+					pl.permanents.reduce(
+						(acc, pr) =>
+							acc +
+							(pr && pr.active.get('death')
+								? evalactive(pr, pr.active.get('death'), ttatk) * (j ? 3 : -3)
+								: 0),
+						0,
+					);
 			}
 		}
 	}
@@ -643,13 +650,12 @@ function evalthing(game, c, inHand) {
 		);
 		score *= 1 - (12 * delayed) / (12 + delayed) / 16;
 	}
-	if (inHand) score *= card.cost ? 0.4 : 0.6;
-	return score;
+	return inHand ? score * (card.cost > 0 ? 0.7 : 0.9) : score;
 }
 
 function caneventuallyactive(element, cost, pl) {
 	return (
-		!cost ||
+		cost <= 0 ||
 		!element ||
 		pl.quanta[element] > 0 ||
 		!pl.mark ||
@@ -675,24 +681,26 @@ const uniqueStatuses = new Set([
 let uniquesSkill, damageHash;
 
 module.exports = function(game) {
+	const player = game.byId(game.turn),
+		foe = player.foe;
 	if (game.winner) {
-		return game.winner === game.player1Id ? 99999999 : -99999999;
+		return game.winner === player.id ? 99999999 : -99999999;
 	}
-	if (game.player1.deck.length === 0 && game.player1.handIds.length < 8) {
-		return -99999990;
+	if (foe.deckIds.length === 0 && foe.handIds.length < 8) {
+		return 99999990;
 	}
 	const wallCharges = new Int32Array([0, 0]);
 	damageHash = new Map();
 	uniquesSkill = new Set();
-	let expectedDamage = calcExpectedDamage(game.player2, wallCharges, 0);
-	if (expectedDamage > game.player1.hp) {
-		return Math.min(expectedDamage - game.player1.hp, 500) * -999;
+	let expectedDamage = calcExpectedDamage(player, wallCharges, 0);
+	if (expectedDamage > foe.hp) {
+		return Math.min(expectedDamage - foe.hp, 500) * -999;
 	}
-	if (game.player2.deckIds.length === 0) {
-		return 99999980;
+	if (player.deckIds.length === 0) {
+		return -99999980;
 	}
-	expectedDamage = calcExpectedDamage(game.player1, wallCharges, 1); // Call to fill damageHash
-	let gamevalue = expectedDamage > game.player2.hp ? 999 : 0;
+	expectedDamage = calcExpectedDamage(foe, wallCharges, 1);
+	let gamevalue = expectedDamage > player.hp ? 999 : 0;
 	for (let j = 0; j < 2; j++) {
 		if (j === 1) {
 			// Reset non global effects
@@ -700,30 +708,32 @@ module.exports = function(game) {
 			uniquesSkill.delete('patience');
 			uniquesSkill.delete('cloak');
 		}
-		const player = game.players(j);
-		let pscore = wallCharges[j] * 4 + player.markpower;
-		pscore += evalthing(game, player.weapon);
-		pscore += evalthing(game, player.shield);
-		player.creatures.forEach(cr => (pscore += evalthing(game, cr)));
-		player.permanents.forEach(pr => (pscore += evalthing(game, pr)));
-		player.hand.forEach(cinst => (pscore += evalthing(game, cinst, true)));
-		if (
-			player.id !== game.turn &&
-			player.handIds.length < 8 &&
-			player.deckIds.length
-		) {
-			pscore += evalthing(game, player.deck[player.deckIds.length - 1], true);
+		const pl = j ? player : foe;
+		let pscore = wallCharges[j] * 4 + pl.markpower;
+		pscore += evalthing(game, pl.weapon);
+		pscore += evalthing(game, pl.shield);
+		pl.creatures.forEach(cr => (pscore += evalthing(game, cr)));
+		pl.permanents.forEach(pr => (pscore += evalthing(game, pr)));
+		pl.hand.forEach(cinst => (pscore += evalthing(game, cinst, true)));
+		for (let draw = 1; draw <= pl.drawpower; draw++) {
+			if (
+				pl.id !== game.turn &&
+				pl.handIds.length + draw <= 8 &&
+				pl.deckIds.length >= draw
+			) {
+				pscore += evalthing(
+					game,
+					game.byId(pl.deckIds[pl.deckIds.length - draw]),
+					true,
+				);
+			}
 		}
-		pscore +=
-			Math.min(8 - player.handIds.length, player.drawpower) * 2 +
-			Math.sqrt(player.hp) * 4 -
-			player.getStatus('poison');
-		if (player.getStatus('precognition')) pscore += 0.5;
-		if (player.usedactive)
-			pscore -=
-				(player.handIds.length + (player.handIds.length > 6 ? 7 : 4)) / 4;
-		if (player.getStatus('flatline')) pscore -= 1;
-		if (player.getStatus('neuro')) pscore -= 5;
+		pscore += Math.sqrt(pl.hp) * 4 - pl.getStatus('poison');
+		if (pl.getStatus('precognition')) pscore += 0.5;
+		if (pl.usedactive)
+			pscore -= (pl.handIds.length + (pl.handIds.length > 6 ? 7 : 4)) / 4;
+		if (pl.getStatus('flatline')) pscore -= 1;
+		if (pl.getStatus('neuro')) pscore -= 5;
 		gamevalue += pscore * (j ? -1 : 1);
 	}
 	damageHash = uniquesSkill = null;

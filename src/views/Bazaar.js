@@ -206,7 +206,7 @@ const OrderBook = connect(({ opts }) => ({
 	deal: defVal(opts.orderFilter_Deal, true),
 	buy: defVal(opts.orderFilter_Buy, true),
 	sell: defVal(opts.orderFilter_Sell, true),
-	mine: defVal(console.log(opts) || opts.orderFilter_Mine, false),
+	mine: defVal(opts.orderFilter_Mine, false),
 }))(function OrderBook({ dispatch, bz, onClick, deal, buy, sell, mine }) {
 	return (
 		<div
@@ -415,12 +415,7 @@ module.exports = connect(({ user }) => ({ user }))(
 						maxedIndicator
 						onClick={code => {
 							const card = Cards.Codes[code];
-							if (
-								card.rarity !== -1 &&
-								card.type !== etg.Pillar &&
-								card.rarity <= 4 &&
-								!card.isFree()
-							) {
+							if (~card.rarity && card.type !== etg.Pillar && !card.isFree()) {
 								this.setState({ bcode: code });
 							}
 						}}

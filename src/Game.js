@@ -91,8 +91,8 @@ Game.prototype.clone = function() {
 	obj.props = this.props.delete('bonusstats');
 	obj.cache = new Map([
 		[this.id, obj],
-		[this.player1Id, new Player(obj, this.player1Id)],
-		[this.player2Id, new Player(obj, this.player2Id)],
+		[2, new Player(obj, 2)],
+		[3, new Player(obj, 3)],
 	]);
 	return obj;
 };

@@ -381,16 +381,16 @@ Player.prototype.endturn = function(discard) {
 			}
 		}
 	});
-	if (this.shield) {
+	if (this.shieldId) {
 		this.shield.usedactive = false;
 		this.shield.trigger('ownattack');
 	}
-	if (this.weapon) this.weapon.attack(undefined, true);
+	if (this.weaponId) this.weapon.attack(undefined, true);
 	this.usedactive = false;
+	this.setStatus('flatline', 0);
 	this.foe.maybeDecrStatus('sosa');
 	this.foe.setStatus('nova', 0);
 	this.foe.setStatus('sanctuary', 0);
-	this.foe.setStatus('flatline', 0);
 	this.foe.setStatus('precognition', 0);
 	for (let i = this.foe.drawpower; i > 0; i--) {
 		this.foe.drawcard(true);

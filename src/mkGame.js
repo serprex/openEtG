@@ -16,13 +16,13 @@ function deckPower(pl, deck) {
 module.exports = function(data) {
 	const game = new Game(data.seed, data.flip);
 	game.addData(data);
-	if (!data.noheal) game.player1.maxhp = game.player1.hp;
-	game.player2.maxhp = game.player2.hp;
+	if (!data.p1maxhp) game.player1.maxhp = game.player1.hp;
+	if (!data.p2maxhp) game.player2.maxhp = game.player2.hp;
 	for (let j = 0; j < 2; j++) {
 		const pl = game.byId(2 + j),
 			deck = [],
 			deckdata =
-				pl.id == game.player1Id
+				pl.id === game.player1Id
 					? { deck: data.urdeck, power: data.p1deckpower }
 					: { deck: data.deck, power: data.p2deckpower };
 		etgutil.iterdeck(deckdata.deck, code => {

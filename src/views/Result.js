@@ -253,17 +253,17 @@ module.exports = connect(({ user }) => ({ user }))(
 				];
 
 			this.props.dispatch(store.clearChat('Replay'));
-			if (!game.data.get('quest')) {
-				const replay = game.get(game.id, 'bonusstats', 'replay');
+			const replay = game.get(game.id, 'bonusstats', 'replay');
+			if (replay && !game.data.get('quest')) {
 				function playerjson(id) {
-					const pl = game.byId(id),
-						isp1 = pl.id === game.player1Id;
+					const isp1 = id === game.player1Id,
+						deckpower = game.get(id, 'deckpower');
 					return {
 						name: isp1 ? user.name : `${game.data.get('foename')}`,
-						hp: game.data.get(`p${isp1 ? 1 : 2}hp`, 100),
-						maxhp: game.data.get(`p${isp1 ? 1 : 2}maxhp`, 100),
+						hp: game.data.get(`p${isp1 ? 1 : 2}hp`),
+						maxhp: game.data.get(`p${isp1 ? 1 : 2}maxhp`),
 						markpower: game.data.get(`p${isp1 ? 1 : 2}markpower`),
-						deckpower: pl.deckpower,
+						deckpower: deckpower === 1 ? undefined : deckpower,
 						drawpower: game.data.get(`p${isp1 ? 1 : 2}drawpower`),
 						deck: game.data.get(isp1 ? 'urdeck' : 'deck'),
 					};
@@ -271,11 +271,10 @@ module.exports = connect(({ user }) => ({ user }))(
 				this.props.dispatch(
 					store.chat(
 						JSON.stringify({
-							date: game.bonusstats.time,
+							date: game.get(game.id, 'bonusstats', 'time'),
 							seed: game.get(game.id, 'seed'),
-							first: game.first,
 							players: [playerjson(2), playerjson(3)],
-							moves: Array.from(replay || []),
+							moves: Array.from(replay),
 						}),
 						'Replay',
 					),

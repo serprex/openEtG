@@ -6,6 +6,7 @@ const etg = require('./etg');
 const etgutil = require('./etgutil');
 const aiSearch = require('./ai/search');
 const util = require('./util');
+Effect.disable = true;
 const deckeles = [
 	document.getElementById('deck1'),
 	document.getElementById('deck2'),
@@ -55,20 +56,17 @@ function fightItOut() {
 			fight1000.value = 'Stop';
 		}
 	}
-	const decks = deckeles.map(item =>
-		item.value.split(' ').map(x => parseInt(x, 32)),
-	);
+	const decks = deckeles.map(item => etgutil.decodedeck(item.value));
 	const seed = parseInt(seedput.value) || util.randint();
 	let game = mkGame(seed, decks),
-		realp1 = game.player1.id;
+		realp1 = game.player1Id;
 	result.textContent = '';
 	let aiState = undefined;
 	const cmds = {
 		end: function(data) {
-			if (mode == fight) {
+			if (mode === fight) {
 				result.textContent += `${game.turn == realp1 ? 1 : 2}\tEND TURN\n`;
 			}
-			game.player2.endturn(data.bits);
 		},
 		cast: function(data) {
 			const c = game.byId(data.c),
@@ -78,22 +76,20 @@ function fightItOut() {
 					t ? ' targets ' + t : ''
 				}\n`;
 			}
-			c.useactive(t);
 		},
 	};
 	function gameStep() {
-		if (game.turn == game.player1) {
-			[game.player1, game.player2] = [game.player2, game.player1];
-		}
-		if (game.phase == etg.PlayPhase) {
-			Effect.disable = true;
+		if (game.phase === etg.PlayPhase) {
 			if (aiState) {
 				aiState.step(game);
 			} else {
 				aiState = new aiSearch(game);
 			}
 			if (aiState.cmd) {
-				cmds[aiState.cmd](aiState.cmdct);
+				if (aiState.cmd.x in cmds) {
+					cmds[aiState.cmd.x](aiState.cmd);
+				}
+				game.next(aiState.cmd);
 				aiState = undefined;
 			}
 		}
@@ -101,22 +97,17 @@ function fightItOut() {
 		else {
 			if (mode == fight) {
 				console.log(Date.now() - start);
-				result.textContent =
-					'Player ' +
-					(game.winner == realp1 ? 1 : 2) +
-					' wins.\n' +
-					result.textContent;
+				result.textContent = `Player ${game.winner === realp1 ? 1 : 2} wins.\n${
+					result.textContent
+				}`;
 			} else {
-				fc[(game.winner != realp1) | 0]++;
-				result.textContent =
-					fc[0] +
-					' : ' +
-					fc[1] +
-					'(' +
-					((fc[0] / (fc[0] + fc[1])) * 100).toFixed(2) +
-					'%)';
+				fc[(game.winner !== realp1) | 0]++;
+				result.textContent = `${fc[0]} : ${fc[1]} (${(
+					(fc[0] / (fc[0] + fc[1])) *
+					100
+				).toFixed(2)}%)`;
 				game = mkGame(util.randint(), decks);
-				realp1 = game.player1.id;
+				realp1 = game.player1Id;
 				if (!stopFight) setTimeout(gameStep, 0);
 				else {
 					stopFight = false;

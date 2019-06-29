@@ -1,9 +1,11 @@
 'use strict';
 const Cards = require('../Cards');
 module.exports = function(game) {
+	const pl = game.byId(game.turn),
+		foe = pl.foe;
 	let limit = 333,
 		cmdct,
-		currentEval = game.player1.hp;
+		currentEval = foe.hp;
 	function iterLoop(game, cmdct0) {
 		function iterCore(c) {
 			if (!c || !c.canactive()) return;
@@ -16,11 +18,11 @@ module.exports = function(game) {
 					const gameClone = game.clone();
 					gameClone.byId(c.id).useactive(t && gameClone.byId(t.id));
 					const v =
-						gameClone.winner === gameClone.player2Id
+						gameClone.winner === pl.id
 							? -999
-							: gameClone.winner === gameClone.player1Id
+							: gameClone.winner === foe.id
 							? 999
-							: gameClone.player1.hp;
+							: gameClone.byId(foe.id).hp;
 					if (v < currentEval) {
 						cmdct = cmdct0 || { c: c.id, t: t && t.id };
 						currentEval = v;
@@ -42,11 +44,10 @@ module.exports = function(game) {
 				evalIter();
 			}
 		}
-		const p2 = game.player2,
-			casthash = new Set();
-		p2.hand.forEach(iterCore);
-		p2.permanents.forEach(iterCore);
-		p2.creatures.forEach(iterCore);
+		const casthash = new Set();
+		pl.hand.forEach(iterCore);
+		pl.permanents.forEach(iterCore);
+		pl.creatures.forEach(iterCore);
 	}
 	iterLoop(game);
 	return [currentEval, cmdct];
