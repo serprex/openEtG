@@ -27,7 +27,7 @@ const sockmeta = new WeakMap();
 	function activeUsers() {
 		const activeusers = [];
 		for (let [name, sock] of Us.socks) {
-			if (sock.readyState == 1) {
+			if (sock.readyState === 1) {
 				if (sockmeta.get(sock).offline) continue;
 				if (sockmeta.get(sock).afk) name += ' (afk)';
 				else if (sockmeta.get(sock).wantpvp) name += '\xb6';
@@ -62,7 +62,7 @@ const sockmeta = new WeakMap();
 		);
 	}
 	function sockEmit(socket, event, data) {
-		if (socket.readyState == 1) {
+		if (socket.readyState === 1) {
 			if (!data) data = {};
 			data.x = event;
 			socket.send(JSON.stringify(data));
@@ -300,7 +300,7 @@ const sockmeta = new WeakMap();
 			db.hget('CodeHash', data.code || '', (err, type) => {
 				if (!type) {
 					sockEmit(this, 'chat', { mode: 1, msg: 'Code does not exist' });
-				} else if (type.charAt(0) == 'G') {
+				} else if (type.charAt(0) === 'G') {
 					const g = +type.slice(1);
 					if (isNaN(g)) {
 						sockEmit(this, 'chat', {
@@ -312,7 +312,7 @@ const sockmeta = new WeakMap();
 						sockEmit(this, 'codegold', { g });
 						db.hdel('CodeHash', data.code);
 					}
-				} else if (type.charAt(0) == 'C') {
+				} else if (type.charAt(0) === 'C') {
 					const c = parseInt(type.slice(1), 32);
 					if (c in Cards.Codes) {
 						user.pool = etgutil.addcard(user.pool, c);
@@ -338,8 +338,8 @@ const sockmeta = new WeakMap();
 					const card = Cards.Codes[data.card];
 					if (
 						card &&
-						card.rarity == userutil.rewardwords[type.replace(/^!/, '')] &&
-						card.shiny ^ (type.charAt(0) != '!')
+						card.rarity === userutil.rewardwords[type.replace(/^!/, '')] &&
+						card.shiny ^ (type.charAt(0) !== '!')
 					) {
 						user.pool = etgutil.addcard(user.pool, data.card);
 						sockEmit(this, 'codedone', { card: data.card });
@@ -356,7 +356,7 @@ const sockmeta = new WeakMap();
 		foewant: function(data, user) {
 			const u = data.u,
 				f = data.f;
-			if (u == f) {
+			if (u === f) {
 				return;
 			}
 			console.log(`${u} requesting ${f}`);
@@ -371,9 +371,9 @@ const sockmeta = new WeakMap();
 				drawpower: data.p1drawpower,
 			};
 			const foesock = Us.socks.get(f);
-			if (foesock && foesock.readyState == 1) {
+			if (foesock && foesock.readyState === 1) {
 				const foemeta = sockmeta.get(foesock);
-				if (foemeta.duel == u) {
+				if (foemeta.duel === u) {
 					delete foemeta.duel;
 					const seed = Math.random() * MAX_INT;
 					thismeta.foe = foesock;
@@ -408,7 +408,7 @@ const sockmeta = new WeakMap();
 					if (foemeta.spectators) {
 						foemeta.spectators.forEach(uname => {
 							const sock = Us.socks.get(uname);
-							if (sock && sock.readyState == 1) {
+							if (sock && sock.readyState === 1) {
 								sockEmit(sock, 'spectategive', foedata);
 							}
 						});
@@ -439,7 +439,7 @@ const sockmeta = new WeakMap();
 						mode: 1,
 						msg: `${data.u} has canceled the trade.`,
 					});
-					if (foemeta.trade && foemeta.trade.foe == data.u)
+					if (foemeta.trade && foemeta.trade.foe === data.u)
 						delete foemeta.trade;
 				}
 				delete info.trade;
@@ -510,15 +510,15 @@ const sockmeta = new WeakMap();
 		tradewant: function(data) {
 			const u = data.u,
 				f = data.f;
-			if (u == f) {
+			if (u === f) {
 				return;
 			}
 			console.log(`${u} requesting ${f}`);
 			const foesock = Us.socks.get(f);
-			if (foesock && foesock.readyState == 1) {
+			if (foesock && foesock.readyState === 1) {
 				sockmeta.get(this).trade = { foe: f };
 				const foetrade = sockmeta.get(foesock).trade;
-				if (foetrade && foetrade.foe == u) {
+				if (foetrade && foetrade.foe === u) {
 					sockEmit(this, 'tradegive');
 					sockEmit(foesock, 'tradegive');
 				} else {
@@ -552,7 +552,7 @@ const sockmeta = new WeakMap();
 			const { to } = data;
 			if (to) {
 				const sockto = Us.socks.get(to);
-				if (sockto && sockto.readyState == 1) {
+				if (sockto && sockto.readyState === 1) {
 					sockEmit(sockto, 'chat', { msg: data.msg, mode: 2, u: data.u });
 					sockEmit(this, 'chat', { msg: data.msg, mode: 2, u: 'To ' + to });
 				} else
@@ -563,6 +563,33 @@ const sockmeta = new WeakMap();
 			} else {
 				genericChat(this, data);
 			}
+		},
+		bzcancel: function(data, user) {
+			Bz.load().then(bz => {
+				const code = data.c | 0,
+					bids = bz[code];
+				if (bids) {
+					for (let i = bids.length - 1; i >= 0; i--) {
+						const bid = bids[i];
+						console.log(bid.u === user.name, user.name, bid);
+						if (bid.u === user.name) {
+							const { q, p } = bid;
+							if (p > 0) {
+								user.gold += p * q;
+							} else {
+								user.pool = etgutil.addcard(user.pool, code, q);
+							}
+							bids.splice(i, 1);
+						}
+					}
+					sockEmit(this, 'bzbid', {
+						bz,
+						g: user.gold,
+						pool: user.pool,
+					});
+					Bz.store();
+				}
+			});
 		},
 		bzbid: function(data, user) {
 			data.price |= 0;
@@ -626,7 +653,7 @@ const sockmeta = new WeakMap();
 									sockEmit(sellerSock, 'bzgive', msg);
 								}
 							};
-							if (bci.u == user.name) {
+							if (bci.u === user.name) {
 								SellFunc(user);
 							} else {
 								Us.load(bci.u)
@@ -662,7 +689,7 @@ const sockmeta = new WeakMap();
 							let hadmerge = false;
 							for (let i = 0; i < bc.length; i++) {
 								const bci = bc[i];
-								if (bci.u === user.name && bci.p == data.price) {
+								if (bci.u === user.name && bci.p === data.price) {
 									bci.q += count;
 									hadmerge = true;
 									break;
@@ -706,9 +733,9 @@ const sockmeta = new WeakMap();
 				let newCards = '',
 					rarity = 1;
 				for (let i = 0; i < pack.amount; i++) {
-					while (i == pack.rare[rarity - 1]) rarity++;
+					while (i === pack.rare[rarity - 1]) rarity++;
 					let cardcode;
-					if (rarity == 5) {
+					if (rarity === 5) {
 						cardcode =
 							etg.NymphList[
 								data.element > 0 && data.element < 13
@@ -723,11 +750,11 @@ const sockmeta = new WeakMap();
 							card = RngMock.randomcard(
 								false,
 								x =>
-									(x.element == data.element) ^ notFromElement &&
-									x.rarity == bumprarity,
+									(x.element === data.element) ^ notFromElement &&
+									x.rarity === bumprarity,
 							);
 						cardcode = (
-							card || RngMock.randomcard(false, x => x.rarity == bumprarity)
+							card || RngMock.randomcard(false, x => x.rarity === bumprarity)
 						).code;
 					}
 					newCards = etgutil.addcard(newCards, cardcode);
@@ -760,7 +787,7 @@ const sockmeta = new WeakMap();
 						mode: 1,
 						msg: `${data.u} has canceled the duel.`,
 					});
-					if (foemeta.duel == data.u) delete foemeta.duel;
+					if (foemeta.duel === data.u) delete foemeta.duel;
 				}
 				delete info.duel;
 				delete info.spectators;
@@ -882,7 +909,7 @@ const sockmeta = new WeakMap();
 			if (this === pendinggame) {
 				return;
 			}
-			if (pendinggame && pendinggame.readyState == 1) {
+			if (pendinggame && pendinggame.readyState === 1) {
 				const seed = Math.random() * MAX_INT;
 				const pendmeta = sockmeta.get(pendinggame);
 				thismeta.foe = pendinggame;
@@ -978,7 +1005,7 @@ const sockmeta = new WeakMap();
 		},
 		challrecv: function(data) {
 			const foesock = Us.socks.get(data.f);
-			if (foesock && foesock.readyState == 1) {
+			if (foesock && foesock.readyState === 1) {
 				const info = sockmeta.get(foesock),
 					foename = data.pvp ? info.duel : info.trade ? info.trade.foe : '';
 				sockEmit(foesock, 'chat', {
@@ -1008,7 +1035,7 @@ const sockmeta = new WeakMap();
 		if (info) {
 			if (info.trade) {
 				const foesock = Us.socks.get(info.trade.foe);
-				if (foesock && foesock.readyState == 1) {
+				if (foesock && foesock.readyState === 1) {
 					const foeinfo = sockmeta.get(foesock);
 					if (
 						foeinfo &&
@@ -1022,7 +1049,7 @@ const sockmeta = new WeakMap();
 			}
 			if (info.foe) {
 				const foeinfo = sockmeta.get(info.foe);
-				if (foeinfo && foeinfo.foe == this) {
+				if (foeinfo && foeinfo.foe === this) {
 					sockEmit(info.foe, 'foeleft');
 					delete foeinfo.foe;
 				}
@@ -1031,23 +1058,23 @@ const sockmeta = new WeakMap();
 	}
 	async function onSocketMessage(rawdata) {
 		const data = sutil.parseJSON(rawdata);
-		if (!data) return;
+		if (!data || typeof data !== 'object' || typeof data.x !== 'string') return;
 		console.log(data.u, data.x);
 		if (echoEvents.has(data.x)) {
 			const thismeta = sockmeta.get(this);
 			const foe = thismeta.trade
 				? Us.socks.get(thismeta.trade.foe)
 				: thismeta.foe;
-			if (foe && foe.readyState == 1) {
+			if (foe && foe.readyState === 1) {
 				foe.send(rawdata);
 				for (let i = 1; i <= 2; i++) {
-					const spectators = (i == 1 ? thismeta : sockmeta.get(foe)).spectators;
+					const { spectators } = i === 1 ? thismeta : sockmeta.get(foe);
 					if (spectators) {
 						data.spectate = i;
 						const rawmsg = JSON.stringify(data);
 						spectators.forEach(uname => {
 							const sock = Us.socks.get(uname);
-							if (sock && sock.readyState == 1) {
+							if (sock && sock.readyState === 1) {
 								sock.send(rawmsg);
 							}
 						});
@@ -1058,16 +1085,18 @@ const sockmeta = new WeakMap();
 		}
 		let func = userEvents[data.x] || usercmd[data.x];
 		if (func) {
-			const u = data.u;
+			const { u } = data;
 			if (typeof u === 'string') {
 				try {
 					const user = await Us.load(u);
-					if (data.a == user.auth) {
+					if (data.a === user.auth) {
 						Us.socks.set(u, this);
 						delete data.a;
 						Object.assign(user, func.call(this, data, user));
 					}
-				} catch {}
+				} catch (err) {
+					console.log(err);
+				}
 			}
 		} else if ((func = sockEvents[data.x])) {
 			func.call(this, data);

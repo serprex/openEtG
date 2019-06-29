@@ -15,138 +15,189 @@ function Order({ order, onClick }) {
 		</div>
 	);
 }
+const CardOrders = connect(({ user }) => ({ uname: user.name }))(
+	function CardOrders({ uname, bc, onClickBuy, onClickSell, onClickCancel }) {
+		if (!bc) return null;
+		const hasMine = bc.some(({ u }) => u === uname);
+		return (
+			<>
+				<div
+					style={{
+						position: 'absolute',
+						left: '100px',
+						top: '72px',
+						width: '230px',
+						height: '192px',
+						color: '#4f8',
+					}}>
+					<div>Buys</div>
+					{bc
+						.filter(x => x.p > 0 && x.u !== uname)
+						.map((buy, i) => (
+							<Order key={i} order={buy} onClick={onClickBuy} />
+						))}
+				</div>
+				<div
+					style={{
+						position: 'absolute',
+						left: '330px',
+						top: '72px',
+						width: '230px',
+						height: '192px',
+						color: '#f84',
+					}}>
+					<div>Sells</div>
+					{bc
+						.filter(x => x.p < 0 && x.u !== uname)
+						.map((sell, i) => (
+							<Order key={i} order={sell} onClick={onClickSell} />
+						))}
+				</div>
+				{hasMine && (
+					<div
+						style={{
+							position: 'absolute',
+							left: '560px',
+							top: '72px',
+							width: '230px',
+							height: '192px',
+						}}>
+						{bc
+							.filter(x => x.u === uname)
+							.map((order, i) => (
+								<div key={i} style={{ color: order.p > 0 ? '#4f8' : '#f84' }}>
+									{order.q} @ {Math.abs(order.p)}
+								</div>
+							))}
+						<input
+							type="button"
+							value="Cancel"
+							style={{ display: 'block' }}
+							onClick={onClickCancel}
+						/>
+					</div>
+				)}
+			</>
+		);
+	},
+);
 
-function CardOrders({ bc, onClickBuy, onClickSell }) {
-	if (!bc) return null;
-	return (
-		<>
-			<div
-				style={{
-					position: 'absolute',
-					left: '100px',
-					top: '72px',
-					width: '330px',
-					height: '192px',
-				}}>
-				<div>Buys</div>
-				{bc
-					.filter(x => x.p > 0)
-					.map((buy, i) => (
-						<Order key={i} order={buy} onClick={onClickBuy} />
-					))}
-			</div>
-			<div
-				style={{
-					position: 'absolute',
-					left: '430px',
-					top: '72px',
-					width: '330px',
-					height: '192px',
-				}}>
-				<div>Sells</div>
-				{bc
-					.filter(x => x.p < 0)
-					.map((sell, i) => (
-						<Order key={i} order={sell} onClick={onClickSell} />
-					))}
-			</div>
-		</>
-	);
-}
+const OrderSummary = connect(({ user }) => ({ uname: user.name }))(
+	class OrderSummary extends React.Component {
+		constructor(props) {
+			super(props);
 
-class OrderSummary extends React.Component {
-	constructor(props) {
-		super(props);
-
-		this.state = {
-			bz: null,
-			props: {},
-		};
-	}
-
-	static getDerivedStateFromProps(props, state) {
-		const Bz = props.bz;
-		if (
-			Bz !== state.props.bz ||
-			props.showDeal !== state.props.showDeal ||
-			props.showBuy !== state.props.showBuy ||
-			props.showSell !== state.props.showSell
-		) {
-			if (!Bz) {
-				return {
-					props,
-					bz: null,
-				};
-			}
-			const bz = [];
-			for (const k in Bz) {
-				const bzv = Bz[k];
-				if (!bzv.length) continue;
-				const o0 = bzv[0],
-					o1 = bzv[bzv.length - 1],
-					card = Cards.Codes[k];
-				if (!((props.showSell && o0.p < 0) || (props.showBuy && o1.p > 0)))
-					continue;
-				if (props.showDeal) {
-					const worth = userutil.cardValue(card);
-					if (
-						!(
-							(props.showSell && o0.p < 0 && -o0.p < worth) ||
-							(props.showBuy && o1.p > 0 && o1.p > worth)
-						)
-					)
-						continue;
-				}
-				bz.push({
-					code: +k,
-					name: `${card.upped ? '^' : ''}${card.shiny ? '$' : ''}${card.name}`,
-					orders: bzv,
-				});
-			}
-
-			return {
-				props,
-				bz: bz.sort((a, b) =>
-					Cards.Codes[a.code].name.localeCompare(Cards.Codes[b.code].name),
-				),
+			this.state = {
+				bz: null,
+				props: {},
 			};
 		}
-		return null;
-	}
 
-	render() {
-		const { onClick } = this.props;
-		return this.state.bz.map(({ code, name, orders }) => {
-			const o0 = orders[0],
-				o1 = orders[orders.length - 1];
-			return (
-				(o0 || o1) && (
-					<div
-						key={code}
-						style={{ width: '288px' }}
-						onClick={() => onClick(code)}>
+		static getDerivedStateFromProps(props, state) {
+			const Bz = props.bz;
+			if (
+				Bz !== state.props.bz ||
+				props.showDeal !== state.props.showDeal ||
+				props.showBuy !== state.props.showBuy ||
+				props.showSell !== state.props.showSell ||
+				props.showMine !== state.props.showMine ||
+				props.uname !== state.props.uname
+			) {
+				if (!Bz) {
+					return {
+						props,
+						bz: null,
+					};
+				}
+				const bz = [];
+				for (const k in Bz) {
+					const bzv = Bz[k];
+					if (!bzv.length) continue;
+					const o0 = bzv[0],
+						o1 = bzv[bzv.length - 1],
+						card = Cards.Codes[k];
+					if (!((props.showSell && o0.p < 0) || (props.showBuy && o1.p > 0))) {
+						continue;
+					}
+					if (props.showDeal) {
+						const worth = userutil.cardValue(card);
+						if (
+							!(
+								(props.showSell && o0.p < 0 && -o0.p < worth) ||
+								(props.showBuy && o1.p > 0 && o1.p > worth)
+							)
+						) {
+							continue;
+						}
+					}
+					if (
+						props.showMine
+							? bzv.every(({ u }) => u !== props.uname)
+							: bzv.some(({ u }) => u === props.uname)
+					) {
+						continue;
+					}
+					bz.push({
+						code: +k,
+						name: `${card.upped ? '^' : ''}${card.shiny ? '$' : ''}${
+							card.name
+						}`,
+						orders: bzv,
+					});
+				}
+
+				return {
+					props,
+					bz: bz.sort((a, b) =>
+						Cards.Codes[a.code].name.localeCompare(Cards.Codes[b.code].name),
+					),
+				};
+			}
+			return null;
+		}
+
+		render() {
+			const { onClick } = this.props;
+			return this.state.bz.map(({ code, name, orders }) => {
+				const o0 = orders[0],
+					o1 = orders[orders.length - 1];
+				return (
+					(o0 || o1) && (
 						<div
-							style={{
-								display: 'inline-block',
-								width: '192px',
-								textOverflow: 'ellipsis',
-							}}>
-							{name}
+							key={code}
+							style={{ width: '288px' }}
+							onClick={() => onClick(code)}>
+							<div
+								style={{
+									display: 'inline-block',
+									width: '192px',
+									textOverflow: 'ellipsis',
+								}}>
+								{name}
+							</div>
+							<div
+								style={{
+									display: 'inline-block',
+									color: '#4f8',
+									width: '48px',
+								}}>
+								{o1.p > 0 ? o1.p : ' '}
+							</div>
+							<div
+								style={{
+									display: 'inline-block',
+									color: '#f84',
+									width: '48px',
+								}}>
+								{o0.p < 0 ? -o0.p : ' '}
+							</div>
 						</div>
-						<div
-							style={{ display: 'inline-block', color: '#4f8', width: '48px' }}>
-							{o1.p > 0 ? o1.p : ' '}
-						</div>
-						<div
-							style={{ display: 'inline-block', color: '#f84', width: '48px' }}>
-							{o0.p < 0 ? -o0.p : ' '}
-						</div>
-					</div>
-				)
-			);
-		});
-	}
-}
+					)
+				);
+			});
+		}
+	},
+);
 
 function defVal(x, y) {
 	return x === undefined ? y : x;
@@ -155,7 +206,8 @@ const OrderBook = connect(({ opts }) => ({
 	deal: defVal(opts.orderFilter_Deal, true),
 	buy: defVal(opts.orderFilter_Buy, true),
 	sell: defVal(opts.orderFilter_Sell, true),
-}))(function OrderBook({ dispatch, bz, onClick, deal, buy, sell }) {
+	mine: defVal(console.log(opts) || opts.orderFilter_Mine, false),
+}))(function OrderBook({ dispatch, bz, onClick, deal, buy, sell, mine }) {
 	return (
 		<div
 			className="bgbox"
@@ -196,6 +248,16 @@ const OrderBook = connect(({ opts }) => ({
 				/>{' '}
 				Sells
 			</label>
+			<label style={{ display: 'inline-block', width: '200px' }}>
+				<input
+					type="checkbox"
+					checked={mine}
+					onChange={e =>
+						dispatch(store.setOptTemp('orderFilter_Mine', e.target.checked))
+					}
+				/>{' '}
+				Mine
+			</label>
 			{bz && (
 				<div style={{ columnCount: '3', width: '890px' }}>
 					<OrderSummary
@@ -203,6 +265,7 @@ const OrderBook = connect(({ opts }) => ({
 						showDeal={deal}
 						showBuy={buy}
 						showSell={sell}
+						showMine={mine}
 						onClick={onClick}
 					/>
 				</div>
@@ -332,6 +395,9 @@ module.exports = connect(({ user }) => ({ user }))(
 								bc={this.state.bz[this.state.bcode]}
 								onClickBuy={(sell, sellq) => this.setState({ sell, sellq })}
 								onClickSell={(buy, buyq) => this.setState({ buy, buyq })}
+								onClickCancel={() =>
+									sock.userEmit('bzcancel', { c: this.state.bcode })
+								}
 							/>
 						</>
 					)}
@@ -350,13 +416,13 @@ module.exports = connect(({ user }) => ({ user }))(
 						onClick={code => {
 							const card = Cards.Codes[code];
 							if (
-								card.rarity === -1 ||
-								card.type === etg.Pillar ||
-								card.rarity > 4 ||
-								card.isFree()
-							)
-								return;
-							this.setState({ bcode: code });
+								card.rarity !== -1 &&
+								card.type !== etg.Pillar &&
+								card.rarity <= 4 &&
+								!card.isFree()
+							) {
+								this.setState({ bcode: code });
+							}
 						}}
 					/>
 					{this.state.showOrders && (
