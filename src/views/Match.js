@@ -431,7 +431,7 @@ module.exports = connect(({ user }) => ({ user }))(
 								element: c.card.element,
 								costele: c.castele,
 								cost: c.cast,
-								name: c.active.get('cast').name[0],
+								name: c.active.get('cast').toString(),
 								upped: c.card.upped,
 								shiny: c.card.shiny,
 						  };
@@ -669,7 +669,7 @@ module.exports = connect(({ user }) => ({ user }))(
 									cb(tgt);
 									this.setState({ targeting: null });
 								},
-								text: active.name[0],
+								text: active.toString(),
 								src: obj,
 							},
 						});

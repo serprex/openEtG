@@ -141,21 +141,3 @@ exports.ShardList = new Uint16Array([
 	6130,
 	6230,
 ]);
-
-exports.combineactive = function combineactive(a1, a2) {
-	if (!a1) {
-		return a2;
-	}
-	return {
-		func: (ctx, c, t, data) => {
-			const v1 = a1.func(ctx, c, t, data),
-				v2 = a2.func(ctx, c, t, data);
-			return v1 === undefined
-				? v2
-				: v2 === undefined
-				? v1
-				: v1 === true || v2 === true || v1 + v2;
-		},
-		name: a1.name.concat(a2.name),
-	};
-};

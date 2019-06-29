@@ -1,5 +1,7 @@
 'use strict';
-const imm = require('immutable');
+const imm = require('immutable'),
+	etg = require('./etg'),
+	Skill = require('./Skill');
 const passives = new Set([
 	'airborne',
 	'aquatic',
@@ -277,13 +279,13 @@ const activetexts = [
 ];
 Thing.prototype.activetext = function() {
 	const acast = this.active.get('cast');
-	if (acast) return this.cast + ':' + this.castele + acast.name[0];
+	if (acast) return `${this.cast}:${this.castele}${acast.name.get(0)}`;
 	for (const akey of activetexts) {
 		const a = this.active.get(akey);
-		if (a) return akey + ' ' + a.name.join(' ');
+		if (a) return `${akey} ${a}`;
 	}
 	const aauto = this.active.get('ownattack');
-	return aauto ? aauto.name.join(' ') : '';
+	return `${aauto || ''}`;
 };
 Thing.prototype.place = function(owner, type, fromhand) {
 	this.game.set(this.id, 'owner', owner.id);
@@ -392,9 +394,7 @@ Thing.prototype.isMaterial = function(type) {
 	);
 };
 Thing.prototype.addactive = function(type, active) {
-	this.game.updateIn([this.id, 'active', type], v =>
-		etg.combineactive(v, active),
-	);
+	this.game.updateIn([this.id, 'active', type], v => Skill.combine(v, active));
 };
 Thing.prototype.getSkill = function(type) {
 	return this.active.get(type);
@@ -409,13 +409,15 @@ Thing.prototype.rmactive = function(type, name) {
 		idx = actives.indexOf(name);
 	if (~idx) {
 		this.active =
-			actives.length === 1
+			actives.size === 1
 				? this.active.delete(type)
 				: this.active.set(
 						type,
 						actives.reduce(
 							(previous, current, i) =>
-								i === idx ? previous : etg.combineactive(previous, Skills[current]),
+								i === idx
+									? previous
+									: Skill.combine(previous, parseSkill(current)),
 							null,
 						),
 				  );
@@ -646,8 +648,6 @@ Thing.prototype.incrStatus = function(key, val) {
 };
 
 var ui = require('./ui');
-var etg = require('./etg');
-var util = require('./util');
 var audio = require('./audio');
 var Cards = require('./Cards');
 var Effect = require('./Effect');

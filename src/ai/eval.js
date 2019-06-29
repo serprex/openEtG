@@ -474,8 +474,8 @@ function calcExpectedDamage(pl, wallCharges, wallIndex) {
 
 function evalactive(c, active, extra) {
 	let sum = 0;
-	for (let i = 0; i < active.name.length; i++) {
-		const aval = SkillsValues[active.name[i]];
+	for (let i = 0; i < active.name.size; i++) {
+		const aval = SkillsValues[active.name.get(i)];
 		sum +=
 			aval === undefined
 				? 0

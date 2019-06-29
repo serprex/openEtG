@@ -1,7 +1,7 @@
 'use strict';
-module.exports = function(c, event) {
+module.exports = function(c) {
 	if (c instanceof Card && c.type == etg.Spell) {
-		const entry = getDataFromName(c.active.get('cast').name[0]);
+		const entry = getDataFromName(c.active.get('cast').name.get(0));
 		return processEntry(c, 'cast', entry);
 	} else {
 		const ret = [],
@@ -31,7 +31,6 @@ module.exports = function(c, event) {
 
 const etg = require('./etg'),
 	Card = require('./Card'),
-	Cards = require('./Cards'),
 	Thing = require('./Thing');
 
 const data = {

@@ -25,13 +25,16 @@ function getWorstCard(game, player) {
 	}
 	return [worstcard, curEval];
 }
-const afilter = {
-	web: (c, t) => t.getStatus('airborne'),
-	freeze: (c, t) => t.getStatus('frozen') < 3,
-	pacify: (c, t) => t.trueatk(),
-	readiness: (c, t) => t.active.get('cast') && (t.cast || t.usedactive),
-	silence: (c, t) => t.active.get('cast') && !t.usedactive,
-	lobotomize: (c, t) => {
+const afilter = new Map()
+	.set(Skills.web, (c, t) => t.getStatus('airborne'))
+	.set(Skills.freeze, (c, t) => t.getStatus('frozen') < 3)
+	.set(Skills.pacify, (c, t) => t.trueatk())
+	.set(
+		Skills.readiness,
+		(c, t) => t.active.get('cast') && (t.cast || t.usedactive),
+	)
+	.set(Skills.silence, (c, t) => t.active.get('cast') && !t.usedactive)
+	.set(Skills.lobotomize, (c, t) => {
 		if (!t.getStatus('psionic')) {
 			for (const [key, act] of t.active) {
 				if (
@@ -44,8 +47,7 @@ const afilter = {
 			return false;
 		}
 		return true;
-	},
-};
+	});
 function AiSearch(game) {
 	let worstcard;
 	this.player = game.byId(game.turn);
@@ -70,7 +72,7 @@ function AiSearch(game) {
 			: ((this.cmdct = { t: worstcard }), { x: 'end', ...this.cmdct });
 }
 function searchSkill(active, c, t) {
-	const func = afilter[active.name[0]];
+	const func = afilter.get(active);
 	return (
 		!func ||
 		t.type === etg.Player ||
@@ -141,7 +143,7 @@ AiSearch.prototype.step = function(game) {
 					}
 				}
 			};
-			if (active && active.name[0] in Cards.Targeting) {
+			if (active && active.name.get(0) in Cards.Targeting) {
 				const targetFilter = game.targetFilter(c, active);
 				for (let j = 0; j < 2; j++) {
 					const pl = j === 0 ? c.owner : c.owner.foe;

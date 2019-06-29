@@ -243,7 +243,7 @@ Game.prototype.expectedDamage = function() {
 	return expectedDamage;
 };
 Game.prototype.targetFilter = function(src, active) {
-	const targetingFilter = Cards.Targeting[active.name[0]];
+	const targetingFilter = Cards.Targeting[active.name.get(0)];
 	return (
 		targetingFilter &&
 		(t =>

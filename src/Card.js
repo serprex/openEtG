@@ -2,6 +2,7 @@
 const imm = require('immutable'),
 	etg = require('./etg'),
 	util = require('./util'),
+	Skill = require('./Skill'),
 	statuscache = new Map(),
 	activecache = new Map(),
 	activecastcache = new Map();
@@ -39,7 +40,7 @@ function Card(type, info) {
 				const a0 = ~eqidx ? active.substr(0, eqidx) : 'ownattack';
 				const cast = readCost(a0, this.element);
 				this.active = this.active.update(cast ? 'cast' : a0, a =>
-					etg.combineactive(a, parseSkill(active.substr(eqidx + 1))),
+					Skill.combine(a, parseSkill(active.substr(eqidx + 1))),
 				);
 				if (cast) {
 					[this.cast, this.castele] = cast;
@@ -77,6 +78,13 @@ Object.defineProperty(Card.prototype, 'upped', {
 	},
 });
 module.exports = Card;
+
+Card.prototype.hashCode = function() {
+	return this.code;
+};
+Card.prototype.valueOf = function() {
+	return this.code;
+};
 
 Card.prototype.as = function(card) {
 	return card.asUpped(this.upped).asShiny(this.shiny);
