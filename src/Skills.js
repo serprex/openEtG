@@ -408,7 +408,7 @@ const Skills = {
 	}),
 	deckblast: (ctx, c, t) => {
 		c.owner.foe.spelldmg(Math.ceil(c.owner.deckIds.length / c.owner.deckpower));
-		c.owner.deckIds.length = 0;
+		c.owner.deckIds = [];
 	},
 	deepdive: (ctx, c, t) => {
 		c.setSkill('cast', exports.freezeperm);
