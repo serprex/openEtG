@@ -48,6 +48,7 @@ module.exports = function(game) {
 		pl.hand.forEach(iterCore);
 		pl.permanents.forEach(iterCore);
 		pl.creatures.forEach(iterCore);
+		iterCore(pl.weapon);
 	}
 	iterLoop(game);
 	return [currentEval, cmdct];

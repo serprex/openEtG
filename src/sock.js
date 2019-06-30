@@ -190,7 +190,8 @@ socket.onopen = function() {
 	}
 	const { opts } = store.store.getState();
 	if (opts.offline || opts.wantpvp || opts.afk)
-		exports.emit('chatus', {
+		exports.emit({
+			x: 'chatus',
 			hide: !!opts.offline,
 			wantpvp: !!opts.wantpvp,
 			afk: !!opts.afk,
