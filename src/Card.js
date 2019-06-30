@@ -65,7 +65,6 @@ function Card(type, info) {
 			statuscache.set(info.Status, this.status);
 		}
 	} else this.status = new imm.Map();
-	Object.freeze(this);
 }
 Object.defineProperty(Card.prototype, 'shiny', {
 	get: function() {

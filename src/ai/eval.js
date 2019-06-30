@@ -6,7 +6,7 @@ const etg = require('../etg'),
 function pillarval(c) {
 	return c.type === etg.Spell ? 0.1 : Math.sqrt(c.getStatus('charges'));
 }
-const SkillsValues = Object.freeze({
+const SkillsValues = {
 	'ablaze 1': 1,
 	'ablaze 2': 3,
 	accelerationspell: 5,
@@ -339,8 +339,8 @@ const SkillsValues = Object.freeze({
 	thorn: 5,
 	weight: 5,
 	wings: c => (!c.getStatus('charges') && c.ownerId === c.game.turn ? 0 : 6),
-});
-const statusValues = Object.freeze({
+};
+const statusValues = {
 	airborne: 0.2,
 	ranged: 0.2,
 	voodoo: 1,
@@ -350,7 +350,7 @@ const statusValues = Object.freeze({
 	flooding: c => c.owner.foe.countcreatures() - 3,
 	patience: c => 1 + c.owner.countcreatures() * 2,
 	reflective: 1,
-});
+};
 
 function getDamage(game, c) {
 	return damageHash.get(game.props.get(c.id).hashCode()) || 0;
@@ -514,9 +514,14 @@ function checkpassives(c) {
 	return score;
 }
 
-const throttled = Object.freeze(
-	new Set(['poison 1', 'poison 2', 'poison 3', 'neuro', 'regen', 'siphon']),
-);
+const throttled = new Set([
+	'poison 1',
+	'poison 2',
+	'poison 3',
+	'neuro',
+	'regen',
+	'siphon',
+]);
 
 function evalthing(game, c, inHand) {
 	if (!c) return 0;

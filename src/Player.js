@@ -116,7 +116,7 @@ function defineInstArray(key) {
 			const ids = this.game.get(this.id, key),
 				cache = this.cache.get(ids);
 			if (cache) return cache;
-			const a = Object.freeze(Array.from(ids, this.game.byId, this.game));
+			const a = Array.from(ids, this.game.byId, this.game);
 			this.cache.set(ids, a);
 			return a;
 		},
