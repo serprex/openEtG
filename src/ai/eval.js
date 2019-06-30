@@ -678,7 +678,8 @@ const uniqueStatuses = new Set([
 	'patience',
 	'cloak',
 ]);
-let uniquesSkill, damageHash;
+const uniquesSkill = new Set(),
+	damageHash = new Map();
 
 module.exports = function(game) {
 	const player = game.byId(game.turn),
@@ -690,17 +691,17 @@ module.exports = function(game) {
 		return 99999990;
 	}
 	const wallCharges = new Int32Array([0, 0]);
-	damageHash = new Map();
-	uniquesSkill = new Set();
+	damageHash.clear();
+	uniquesSkill.clear();
 	let expectedDamage = calcExpectedDamage(player, wallCharges, 0);
 	if (expectedDamage > foe.hp) {
-		return Math.min(expectedDamage - foe.hp, 500) * -999;
+		return Math.min(expectedDamage - foe.hp, 500) * 999;
 	}
 	if (player.deckIds.length === 0) {
 		return -99999980;
 	}
 	expectedDamage = calcExpectedDamage(foe, wallCharges, 1);
-	let gamevalue = expectedDamage > player.hp ? 999 : 0;
+	let gamevalue = expectedDamage > player.hp ? -999 : 0;
 	for (let j = 0; j < 2; j++) {
 		if (j === 1) {
 			// Reset non global effects
@@ -734,8 +735,7 @@ module.exports = function(game) {
 			pscore -= (pl.handIds.length + (pl.handIds.length > 6 ? 7 : 4)) / 4;
 		if (pl.getStatus('flatline')) pscore -= 1;
 		if (pl.getStatus('neuro')) pscore -= 5;
-		gamevalue += pscore * (j ? -1 : 1);
+		gamevalue += pscore * (j ? 1 : -1);
 	}
-	damageHash = uniquesSkill = null;
 	return gamevalue;
 };

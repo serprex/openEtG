@@ -7,9 +7,9 @@ const etg = require('../etg'),
 	lethal = require('./lethal');
 function getWorstCard(game, player) {
 	let worstcard = 0,
-		curEval = 0x7fffffff,
+		curEval = -0x7fffffff;
+	const hash = new Set(),
 		hand = player.hand;
-	const hash = new Set();
 	for (let i = 0; i < 8; i++) {
 		const code = hand[i].card.code,
 			handId = hand[i].id;
@@ -18,7 +18,7 @@ function getWorstCard(game, player) {
 		const gclone = game.clone();
 		gclone.byId(handId).die();
 		const discvalue = evalGame(gclone);
-		if (discvalue < curEval) {
+		if (discvalue > curEval) {
 			curEval = discvalue;
 			worstcard = handId;
 		}
@@ -111,12 +111,11 @@ AiSearch.prototype.step = function(game) {
 				) {
 					const gameClone = game.clone(),
 						playerClone = gameClone.byId(this.player.id);
-					gameClone.byId(c.id).useactive(t && gameClone.byId(t.id));
 					if (
 						c.type === etg.Permanent &&
 						c.getStatus('patience') &&
-						c.active.get('cast') === Skills.die &&
-						c.ownerId === this.player.id
+						c.ownerId === this.player.id &&
+						c.active.get('cast') === Skills.die
 					) {
 						playerClone.permanents.forEach(
 							pr =>
@@ -125,6 +124,8 @@ AiSearch.prototype.step = function(game) {
 								pr.active.get('cast') === Skills.die &&
 								pr.useactive(),
 						);
+					} else {
+						gameClone.byId(c.id).useactive(t && gameClone.byId(t.id));
 					}
 					let v, wc;
 					if (playerClone.handIds.length < 8) {
@@ -132,13 +133,13 @@ AiSearch.prototype.step = function(game) {
 					} else {
 						[wc, v] = getWorstCard(gameClone, playerClone);
 					}
-					if (v < currentEval || (v === currentEval && n > this.cdepth)) {
+					if (v > currentEval || (v === currentEval && n > this.cdepth)) {
 						this.cmdct = cmdct0 || { c: c.id, t: t && t.id };
 						this.worstcard = wc;
 						this.cdepth = n;
 						currentEval = v;
 					}
-					if (n && v - currentEval < 24) {
+					if (n && currentEval - v < 24) {
 						iterLoop(gameClone, 0, { c: c.id, t: t && t.id }, new Set());
 					}
 				}

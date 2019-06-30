@@ -7,7 +7,7 @@ const etgutil = require('./etgutil'),
 	store = require('./store'),
 	userutil = require('./userutil'),
 	util = require('./util'),
-	mkDeck = require('./ai/deck'),
+	mkDeck = require('./deckgen/index'),
 	mkGame = require('./mkGame');
 
 function run(game) {
