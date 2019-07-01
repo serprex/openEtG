@@ -1,14 +1,13 @@
 const etgutil = require('./etgutil'),
 	Cards = require('./Cards'),
 	Decks = require('./Decks.json'),
-	options = require('./options'),
 	RngMock = require('./RngMock'),
 	sock = require('./sock'),
 	store = require('./store'),
 	userutil = require('./userutil'),
 	util = require('./util'),
 	mkDeck = require('./deckgen/index'),
-	mkGame = require('./mkGame');
+	Game = require('./Game');
 
 function run(game) {
 	if (game) {
@@ -38,26 +37,36 @@ exports.mkPremade = function mkPremade(level, daily, datafn = null) {
 		}
 	}
 	if (!foedata) foedata = RngMock.choose(Decks[name]);
-	const gameData = {
+	const data = {
 		level: level,
-		deck: foedata[1],
-		urdeck: urdeck,
 		seed: util.randint(),
-		foename: foedata[0],
-		ai: 1,
+		cost,
 		rematch: () => run(mkPremade(level)),
+		players: [
+			{
+				idx: 1,
+				name: user && user.name,
+				user: user ? user.name : '',
+				deck: urdeck,
+			},
+			{
+				idx: 2,
+				ai: 1,
+				name: foedata[0],
+				deck: foedata[1],
+			},
+		],
 	};
 	if (level == 1) {
-		gameData.p2hp = 125;
+		data.players[1].hp = 125;
 	} else {
-		gameData.p2hp = 200;
-		gameData.p2markpower = 3;
-		gameData.p2drawpower = 2;
+		data.players[1].hp = 200;
+		data.players[1].markpower = 3;
+		data.players[1].drawpower = 2;
 	}
-	if (!user) options.parsepvpstats(gameData);
-	else gameData.cost = cost;
-	if (daily !== undefined) gameData.daily = daily;
-	return mkGame(datafn ? datafn(gameData) : gameData);
+	RngMock.shuffle(data.players);
+	if (daily !== undefined) data.daily = daily;
+	return new Game(datafn ? datafn(data) : data);
 };
 const randomNames = [
 	'Adrienne',
@@ -94,34 +103,37 @@ exports.mkAi = function mkAi(level, daily, datafn = null) {
 		{ user } = store.store.getState(),
 		minsize = user ? 30 : 10;
 	if (!Cards.isDeckLegal(etgutil.decodedeck(urdeck), user, minsize)) {
-		store.store.dispatch(store.chatMsg(`Invalid deck`, 'System'));
+		store.store.dispatch(store.chatMsg('Invalid deck', 'System'));
 		return;
 	}
 	const cost = daily !== undefined ? 0 : userutil.pveCostReward[level * 2];
-	if (user && cost) {
-		if (user.gold < cost) {
-			store.store.dispatch(store.chatMsg(`Requires ${cost}$`, 'System'));
-			return;
-		}
+	if (user && cost && user.gold < cost) {
+		store.store.dispatch(store.chatMsg(`Requires ${cost}$`, 'System'));
+		return;
 	}
 	const deck = level == 0 ? mkDeck(0, 1, 2) : mkDeck(0.4, 2, 4);
 	store.store.dispatch(store.setOptTemp('aideck', deck));
 
-	const gameData = {
+	const data = {
 		level: level,
-		deck: deck,
-		urdeck: urdeck,
 		seed: util.randint(),
-		p2hp: level == 0 ? 100 : level == 1 ? 125 : 150,
-		p2markpower: level > 1 ? 2 : 1,
-		foename: RngMock.choose(randomNames),
-		p2drawpower: level == 2 ? 2 : 1,
-		ai: 1,
+		cost,
 		rematch: () => run(mkAi(level)),
+		players: [
+			{ idx: 1, name: user.name, user: user ? user.name : '', deck: urdeck },
+			{
+				idx: 2,
+				ai: 1,
+				name: RngMock.choose(randomNames),
+				deck: deck,
+				hp: level === 0 ? 100 : level === 1 ? 125 : 150,
+				drawpower: level > 1 ? 2 : 1,
+				markpower: level > 1 ? 2 : 1,
+			},
+		],
 	};
-	if (!user) options.parsepvpstats(gameData);
-	else gameData.cost = cost;
-	if (daily !== undefined) gameData.daily = daily;
-	return mkGame(datafn ? datafn(gameData) : gameData);
+	if (daily !== undefined) data.daily = daily;
+	RngMock.shuffle(data.players);
+	return new Game(datafn ? datafn(data) : data);
 };
 exports.run = run;

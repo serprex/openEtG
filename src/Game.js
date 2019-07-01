@@ -1,85 +1,67 @@
 'use strict';
 const Rng = require('rng.js'),
 	imm = require('immutable');
-function Game(seed, flip) {
-	const first = 2,
-		second = 3,
-		rng = new Rng(seed, ~seed),
-		player1 = (seed & 1) ^ flip ? second : first,
-		player2 = (seed & 1) ^ flip ? first : second;
-	this.props = new imm.Map()
-		.set(
-			1,
-			new imm.Map({
-				id: 4,
-				phase: 0,
-				turn: first,
-				player1: player1,
-				player2: player2,
-				seed: seed,
-				bonusstats: new imm.Map({
-					ply: 0,
-					cardsplayed: new Int32Array(6),
-					creaturesplaced: 0,
-					creatureskilled: 0,
-					time: Date.now(),
-					replay: new imm.List(),
-				}),
-				data: new imm.Map(),
-				rng: rng.getStateCount(),
+
+function Game(data) {
+	const { seed } = data,
+		rng = new Rng(seed, ~seed);
+	this.props = new imm.Map().set(
+		1,
+		new imm.Map({
+			id: 2,
+			phase: 0,
+			turn: 2,
+			players: new imm.List(),
+			bonusstats: new imm.Map({
+				ply: 0,
+				cardsplayed: new imm.Map(),
+				creaturesplaced: new imm.Map(),
+				creatureskilled: new imm.Map(),
+				time: Date.now(),
+				replay: new imm.List(),
 			}),
-		)
-		.set(first, new imm.Map({ owner: first, foe: second }))
-		.set(second, new imm.Map({ owner: second, foe: first }));
-	this.cache = new Map([
-		[this.id, this],
-		[first, new Player(this, first).init()],
-		[second, new Player(this, second).init()],
-	]);
+			data: new imm.Map(data),
+			rng: rng.getStateCount(),
+		}),
+	);
+	this.cache = new Map([[this.id, this]]);
+	this.effects = [];
+	for (let i = 0; i < data.players.length; i++) {
+		const id = this.newId();
+		this.cache.set(id, new Player(this, id));
+		this.players = this.players.push(id);
+	}
+	for (let i = 0; i < data.players.length; i++) {
+		const id = this.players.get(i);
+		this.byId(id).init(
+			this.players.get((i + 1) % data.players.length),
+			data.players[i],
+		);
+	}
 }
 Game.prototype.id = 1;
 module.exports = Game;
 
-Object.defineProperty(Game.prototype, 'player1Id', {
-	get: function() {
-		return this.get(this.id, 'player1');
-	},
-});
-Object.defineProperty(Game.prototype, 'player2Id', {
-	get: function() {
-		return this.get(this.id, 'player2');
-	},
-});
-
-Object.defineProperty(Game.prototype, 'player1', {
-	get: function() {
-		return new Player(this, this.get(this.id, 'player1'));
-	},
-});
-Object.defineProperty(Game.prototype, 'player2', {
-	get: function() {
-		return new Player(this, this.get(this.id, 'player2'));
-	},
-});
 Object.defineProperty(Game.prototype, 'ai', {
-	get: function() {
+	get() {
 		return this.props.getIn([this.id, 'data', 'ai']);
 	},
-	set: function(val) {
+	set(val) {
 		this.props = this.props.setIn([this.id, 'data', 'ai'], val);
 	},
 });
 
 function defineProp(key) {
 	Object.defineProperty(Game.prototype, key, {
-		get: function() {
+		get() {
 			return this.get(this.id, key);
 		},
-		set: function(val) {
+		set(val) {
 			this.set(this.id, key, val);
 		},
 	});
 }
+defineProp('players');
 defineProp('phase');
 defineProp('bonusstats');
 defineProp('data');
@@ -89,15 +71,15 @@ defineProp('winner');
 Game.prototype.clone = function() {
 	const obj = Object.create(Game.prototype);
 	obj.props = this.props.delete('bonusstats');
-	obj.cache = new Map([
-		[this.id, obj],
-		[2, new Player(obj, 2)],
-		[3, new Player(obj, 3)],
-	]);
+	obj.cache = new Map([[this.id, obj]]);
+	obj.effects = null;
+	for (const id of this.players) {
+		obj.cache.set(id, new Player(obj, id));
+	}
 	return obj;
 };
 Game.prototype.rng = function() {
-	const seed = this.props.getIn([this.id, 'seed']);
+	const seed = this.props.getIn([this.id, 'data', 'seed']);
 	let val;
 	this.props = this.props.updateIn([this.id, 'rng'], rng => {
 		const rngInst = new Rng(seed, ~seed);
@@ -110,12 +92,6 @@ Game.prototype.rng = function() {
 Game.prototype.upto = function(x) {
 	return (this.rng() * x) | 0;
 };
-Game.prototype.players = function(n) {
-	return n ? this.player2 : this.player1;
-};
-Game.prototype.playerIds = function(n) {
-	return n ? this.player2Id : this.player1Id;
-};
 Game.prototype.byId = function(id) {
 	if (!id) return null;
 	let inst = this.cache.get(id);
@@ -124,6 +100,15 @@ Game.prototype.byId = function(id) {
 		this.cache.set(id, inst);
 	}
 	return inst;
+};
+Game.prototype.byUser = function(name) {
+	const pldata = this.data.get('players');
+	for (let i = 0; i < pldata.length; i++) {
+		if (pldata[i].user === name) {
+			return this.byId(this.players.get(i));
+		}
+	}
+	return null;
 };
 Game.prototype.newId = function() {
 	let newId;
@@ -146,8 +131,8 @@ Game.prototype.set = function(id, key, val) {
 	const ent = this.props.get(id) || new imm.Map();
 	return (this.props = this.props.set(id, ent.set(key, val)));
 };
-Game.prototype.setIn = function(path, key, val) {
-	this.props = this.props.setIn(path, key, val);
+Game.prototype.setIn = function(path, val) {
+	this.props = this.props.setIn(path, val);
 };
 Game.prototype.getStatus = function(id, key) {
 	return this.props.getIn([id, 'status', key], 0);
@@ -169,21 +154,29 @@ Game.prototype.cloneInstance = function(inst, ownerId) {
 	);
 	return this.byId(newId);
 };
-Game.prototype.setWinner = function(play) {
+Game.prototype.nextPlayer = function(id) {
+	let next = false;
+	for (const pl of this.players) {
+		if (next) return pl;
+		if (pl === id) next = true;
+	}
+	return this.players.get(0);
+};
+Game.prototype.setWinner = function(id) {
 	if (!this.winner) {
-		this.winner = play;
+		this.winner = id;
 		this.phase = etg.EndPhase;
 		this.updateIn([this.id, 'bonusstats', 'time'], time => Date.now() - time);
 	}
 };
 const nextHandler = {
-	end: function({ t }) {
+	end({ t }) {
 		this.byId(this.turn).endturn(t);
 	},
-	cast: function({ c, t }) {
+	cast({ c, t }) {
 		this.byId(c).useactive(t && this.byId(t));
 	},
-	accept: function(_data) {
+	accept(_data) {
 		if (this.phase === etg.MulliganPhase) {
 			this.turn = this.get(this.turn, 'foe');
 			if (this.turn === 2) {
@@ -191,11 +184,11 @@ const nextHandler = {
 			}
 		}
 	},
-	mulligan: function(_data) {
+	mulligan(_data) {
 		const pl = this.byId(this.turn);
 		pl.drawhand(pl.handIds.length - 1);
 	},
-	resign: function(data) {
+	resign(data) {
 		this.setWinner(this.get(data.c, 'foe'));
 	},
 };
@@ -207,38 +200,32 @@ Game.prototype.next = function(event) {
 	}
 	return nextHandler[event.x].call(this, event);
 };
-Game.prototype.addData = function(data) {
-	this.setIn([this.id, 'data'], new imm.Map(data));
-	for (const key in data) {
-		const p1or2 = key.match(/^p(1|2)/);
-		if (p1or2) {
-			this.set(this[`player${p1or2[1]}Id`], key.slice(2), data[key]);
-		}
-	}
-};
 function removeSoPa(id) {
 	if (id && this.get(id, 'status', 'patience')) {
 		this.setIn([id, 'status', 'patience'], 0);
 	}
 }
 Game.prototype.expectedDamage = function() {
-	const expectedDamage = new Int16Array(2);
+	const expectedDamage = new Int16Array(this.players.size);
 	if (!this.winner) {
 		const disable = Effect.disable;
 		Effect.disable = true;
 		for (let i = 0; i < 3; i++) {
 			const gclone = this.clone();
-			gclone.player1.permanentIds.forEach(removeSoPa, gclone);
-			gclone.player2.permanentIds.forEach(removeSoPa, gclone);
+			gclone.players.forEach(pid =>
+				gclone.get(pid, 'permanents').forEach(removeSoPa, gclone),
+			);
 			gclone.updateIn([gclone.id, 'rng'], rng => rng.map(ri => ri ^ (i * 997)));
 			gclone.byId(gclone.turn).endturn();
 			if (!gclone.winner) gclone.byId(gclone.turn).endturn();
-			expectedDamage[0] += this.player1.hp - gclone.player1.hp;
-			expectedDamage[1] += this.player2.hp - gclone.player2.hp;
+			this.players.forEach((id, i) => {
+				expectedDamage[i] += this.get(id, 'hp') - gclone.get(id, 'hp');
+			});
 		}
 		Effect.disable = disable;
-		expectedDamage[0] = (expectedDamage[0] / 3) | 0;
-		expectedDamage[1] = (expectedDamage[1] / 3) | 0;
+		for (let i = 0; i < expectedDamage.length; i++) {
+			expectedDamage[i] /= 3;
+		}
 	}
 	return expectedDamage;
 };
@@ -254,6 +241,9 @@ Game.prototype.targetFilter = function(src, active) {
 				!t.owner.isCloaked()) &&
 			targetingFilter(src, t))
 	);
+};
+Game.prototype.effect = function(effect) {
+	if (!Effect.disable && this.effects) this.effects.push(effect);
 };
 
 var etg = require('./etg');

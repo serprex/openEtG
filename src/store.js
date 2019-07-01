@@ -95,12 +95,15 @@ exports.store = redux.createStore(
 				return { ...state, chat };
 			}
 			case 'CHAT': {
-				const chat = new Map(state.chat);
-				const name = action.name || state.opts.channel;
-				chat.set(name, (chat.get(name) || []).concat([action.span]));
+				const chat = new Map(state.chat),
+					name = action.name || state.opts.channel,
+					span = (
+						<React.Fragment key={state.chatid}>{action.span}</React.Fragment>
+					);
+				chat.set(name, (chat.get(name) || []).concat([span]));
 				if (action.name === 'System')
-					chat.set('Main', (chat.get('Main') || []).concat([action.span]));
-				return { ...state, chat };
+					chat.set('Main', (chat.get('Main') || []).concat([span]));
+				return { ...state, chat, chatid: state.chatid + 1 };
 			}
 		}
 		return state;
@@ -110,13 +113,10 @@ exports.store = redux.createStore(
 		opts,
 		cmds: {},
 		chat: new Map(),
+		chatid: 1,
 		muted: new Set(),
 	},
-	redux.applyMiddleware(({ dispatch, getState }) => next => action => {
-		if (typeof action === 'function') {
-			return action(dispatch, getState);
-		} else {
-			return next(action);
-		}
-	}),
+	redux.applyMiddleware(({ dispatch, getState }) => next => action =>
+		typeof action === 'function' ? action(dispatch, getState) : next(action),
+	),
 );

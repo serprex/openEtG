@@ -285,7 +285,7 @@ function DeckDisplay(props) {
 					style={{
 						position: 'absolute',
 						left: (props.x || 0) + 66 + 'px',
-						top: (props.y || 0) + 200 + 'px',
+						top: (props.y || 0) + 188 + 'px',
 					}}
 				/>
 			)}
@@ -502,7 +502,6 @@ class CardSelector extends React.Component {
 				/>
 			</>
 		);
-		return children;
 	}
 }
 exports.CardSelector = CardSelector;

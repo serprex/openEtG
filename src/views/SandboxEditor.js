@@ -69,9 +69,11 @@ module.exports = connect(state => ({
 					/>
 					<input
 						type="button"
-						value="Save & Exit"
+						value="Save &amp; Exit"
 						onClick={() => {
-							this.props.dispatch(store.setOpt('deck', this.currentDeckCode()));
+							this.props.dispatch(
+								store.setOptTemp('deck', this.currentDeckCode()),
+							);
 							this.props.dispatch(store.doNav(require('../views/MainMenu')));
 						}}
 						style={{

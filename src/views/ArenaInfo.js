@@ -1,16 +1,17 @@
 'use strict';
 const Cards = require('../Cards'),
-	mkGame = require('../mkGame'),
+	Game = require('../Game'),
 	sock = require('../sock'),
 	store = require('../store'),
 	util = require('../util'),
 	etgutil = require('../etgutil'),
 	Components = require('../Components'),
+	RngMock = require('../RngMock'),
 	{ connect } = require('react-redux'),
 	React = require('react');
 
 function RenderInfo(props) {
-	const { info, y } = props;
+	const { info, y, name } = props;
 	if (info) {
 		const testDeck = () => {
 			const deck = sock.getDeck();
@@ -18,17 +19,22 @@ function RenderInfo(props) {
 				store.store.dispatch(store.chatMsg('Deck too small'));
 				return;
 			}
-			const game = mkGame({
-				deck: adeck,
-				urdeck: deck,
+			const game = new Game({
 				seed: util.randint(),
-				foename: 'Test',
 				cardreward: '',
-				p2hp: info.curhp,
-				p2markpower: info.mark,
-				p2drawpower: info.draw,
-				ai: 1,
 				rematch: testDeck,
+				players: RngMock.shuffle([
+					{ idx: 1, name, user: name, deck },
+					{
+						idx: 2,
+						ai: 1,
+						name: 'Test',
+						deck: adeck,
+						hp: info.curhp,
+						markpower: info.mark,
+						drawpower: info.draw,
+					},
+				]),
 			});
 			store.store.dispatch(store.doNav(require('./Match'), { game }));
 		};
@@ -137,7 +143,10 @@ function ArenaCard(props) {
 	);
 }
 
-module.exports = connect(({ user }) => ({ ocard: user.ocard }))(
+module.exports = connect(({ user }) => ({
+	name: user.name,
+	ocard: user.ocard,
+}))(
 	class ArenaInfo extends React.Component {
 		constructor(props) {
 			super(props);
@@ -163,8 +172,8 @@ module.exports = connect(({ user }) => ({ ocard: user.ocard }))(
 						}
 					/>
 					<Components.ExitBtn x={8} y={300} />
-					<RenderInfo info={this.state.A} y={0} />
-					<RenderInfo info={this.state.B} y={300} />
+					<RenderInfo info={this.state.A} y={0} name={this.props.name} />
+					<RenderInfo info={this.state.B} y={300} name={this.props.name} />
 					{!!this.props.ocard && (
 						<>
 							<ArenaCard

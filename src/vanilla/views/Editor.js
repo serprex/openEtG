@@ -93,7 +93,7 @@ module.exports = connect(state => ({
 						type="text"
 						value={this.props.deck}
 						onChange={e =>
-							this.props.dispatch(store.setOpt('deck', e.target.value))
+							this.props.dispatch(store.setOptTemp('deck', e.target.value))
 						}
 						placeholder="Deck"
 						style={{
@@ -122,7 +122,7 @@ module.exports = connect(state => ({
 						value="Clear"
 						style={{ position: 'absolute', left: '8px', top: '32px' }}
 						onClick={() => {
-							this.props.dispatch(store.setOpt('deck', ''));
+							this.props.dispatch(store.setOptTemp('deck', ''));
 						}}
 					/>
 					<input

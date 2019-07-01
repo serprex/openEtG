@@ -14,7 +14,6 @@ const Chat = require('../Components/Chat'),
 	React = require('react'),
 	tipjar = [
 		'Each card in your booster pack has a 50% chance of being from the chosen element',
-		'Earn 5$ when your deck is faced, & another 10$ when it wins\nEarn 25$ per age of current deck for a new deck, or 250$ if over a week old',
 		'Colosseum lets you compete in a number of daily events for extra prizes. The colosseum challenges reset daily',
 		'Be sure to try the Proving Grounds Quests for some good cards',
 		'Rarity ratings: Grey commons, green uncommons, blue rares, orange shard, & pink ultra rares',
@@ -28,7 +27,7 @@ const Chat = require('../Components/Chat'),
 		'You may mulligan at the start of the game to shuffle & redraw your hand with one less card',
 		'Your account name is case sensitive',
 		'Arena Tier 1 is unupgraded, while Tier 2 is upgraded. All decks in a tier have the same number of points',
-		"Typing '/who' in chat you will get a list of the users who are online. '/w username message' will send your message only to one user",
+		"Typing '/who' in chat you will get a list of the users who are online. '/w user message' whispers that user",
 		"Typing '/help' in chat will list all commands",
 		'Keyboard shortcuts: space ends turn, backspace cancels, w targets opponent, s targets yourself, 1 through 8 cast cards in hand',
 		'Remember that you may use the logout button to enter sandbox mode to review the card pool, check rarities & try out new decks',
@@ -39,7 +38,7 @@ const Chat = require('../Components/Chat'),
 		'Mark cards are only obtainable through PvP events. A tournament deck verifier is at tournament.htm',
 		"After an AI battle you will win a random common, uncommon, or rare from your opponent's deck",
 		'Cards in packs have a (45/packsize)% chance to increment rarity',
-		"At Wealth T50 you can see which players have the highest wealth. Wealth is a combination of current gold & one's cardpool",
+		'At Wealth T50 you can see which players have the highest wealth. Wealth is a combination of current gold & cardpool',
 		'Throttling means that the effect is limited to 2 procs when attacking multiple times with adrenaline',
 	];
 
@@ -76,7 +75,7 @@ function CostRewardHeaders(props) {
 					top: '24px',
 					right: '4px',
 				}}>
-				Base Reward
+				Reward
 			</span>
 		</Rect>
 	);
@@ -142,6 +141,17 @@ function AiButton(props) {
 		</>
 	);
 }
+
+const chatStyle = {
+	position: 'absolute',
+	left: '72px',
+	top: '228px',
+	width: '226px',
+	height: '300px',
+	background: 'transparent',
+	fontSize: '14px',
+	opacity: '0.6',
+};
 
 module.exports = connect(({ user, opts }) => ({
 	user,
@@ -263,13 +273,13 @@ module.exports = connect(({ user, opts }) => ({
 				if (self.props.user) {
 					arenac.push(
 						<AiButton
-							name={`Arena${i + 1} AI`}
+							name={`Arena ${i + 1}`}
 							key={i}
 							onClick={arenaAi}
 							onMouseOver={this.mkSetTip(
 								'In the arena you will face decks from other players',
 							)}
-							y={46 + i * 22}
+							y={144 + i * 24}
 							lv={4 + i}
 						/>,
 					);
@@ -289,7 +299,7 @@ module.exports = connect(({ user, opts }) => ({
 						)}
 						style={{
 							position: 'absolute',
-							left: i ? '100px' : '10px',
+							left: i ? '92px' : '10px',
 						}}
 					/>,
 				);
@@ -311,17 +321,16 @@ module.exports = connect(({ user, opts }) => ({
 							type="button"
 							key={i}
 							value={i + 1}
-							className={
-								'editbtn' +
-								(self.props.user.selectedDeck == self.props.user.qecks[i]
+							className={`editbtn ${
+								self.props.user.selectedDeck == self.props.user.qecks[i]
 									? ' selectedbutton'
-									: '')
-							}
+									: ''
+							}`}
 							onClick={() => {
 								sock.userExec('setdeck', {
 									name: self.props.user.qecks[i] || '',
 								});
-								self.props.dispatch(store.setOpt('deck', sock.getDeck()));
+								self.props.dispatch(store.setOptTemp('deck', sock.getDeck()));
 							}}
 						/>,
 					);
@@ -338,28 +347,6 @@ module.exports = connect(({ user, opts }) => ({
 					);
 				}
 			}
-			const customAi = (
-				<div
-					style={{
-						width: '45%',
-						float: 'right',
-						marginTop: self.props.user ? undefined : '128px',
-					}}>
-					<input
-						type="button"
-						value="Custom AI"
-						onClick={() => {
-							this.props.dispatch(
-								store.doNav(require('./Challenge'), { pvp: false }),
-							);
-						}}
-						onMouseOver={this.mkSetTip(
-							'Play versus any deck you want, with custom stats for you & the AI',
-						)}
-					/>
-					<LabelText text="Duel a custom AI" />
-				</div>
-			);
 			return (
 				<div className="bg_main">
 					<>
@@ -412,123 +399,10 @@ module.exports = connect(({ user, opts }) => ({
 										}
 									/>
 								</Rect>
-								<CostRewardHeaders x={304} y={380} wid={292} hei={130}>
-									<TitleText text="Arena" />
-									{self.props.user && (
-										<input
-											type="button"
-											value="Arena Deck"
-											onClick={() => {
-												this.props.dispatch(
-													store.doNav(require('./ArenaInfo')),
-												);
-											}}
-											onMouseOver={this.mkSetTip(
-												'Check how your arena decks are doing',
-											)}
-											style={{
-												position: 'absolute',
-												left: '20px',
-												top: '100px',
-											}}
-										/>
-									)}
-									{arenac}
-								</CostRewardHeaders>
-								{this.state.showcard ? (
-									<Components.Card x={92} y={340} code={this.state.showcard} />
-								) : (
-									!this.props.hideMainchat && (
-										<>
-											<Chat
-												channel="Main"
-												style={{
-													position: 'absolute',
-													left: '72px',
-													top: '228px',
-													width: '226px',
-													height: '300px',
-													background: 'transparent',
-													fontSize: '14px',
-													opacity: '0.6',
-												}}
-											/>
-											<input
-												placeholder="Chat"
-												onKeyDown={parseChat}
-												style={{
-													position: 'absolute',
-													left: '99px',
-													top: '532px',
-												}}
-											/>
-										</>
-									)
-								)}
-							</>
-						)}
-						<Rect x={626} y={436} wid={196} hei={120}>
-							<TitleText text="Leaderboards" />
-							<input
-								type="button"
-								value="Wealth T50"
-								onClick={() => {
-									this.props.dispatch(store.doNav(require('./WealthTop')));
-								}}
-								onMouseOver={this.mkSetTip(
-									"See who's collected the most wealth",
-								)}
-								style={{
-									position: 'absolute',
-									left: '52px',
-								}}
-							/>
-							<br />
-							{leadc}
-						</Rect>
-						<CostRewardHeaders x={304} y={120} wid={292} hei={240}>
-							<TitleText text="AI Battle" />
-							<AiButton
-								name="Commoner"
-								y={68}
-								lv={0}
-								onClick={() => mkAi.run(mkAi.mkAi(0))}
-								onMouseOver={this.mkSetTip(
-									'Commoners have no upgraded cards & mostly common cards',
-								)}
-							/>
-							<AiButton
-								name="Mage"
-								y={90}
-								lv={1}
-								onClick={() => mkAi.run(mkAi.mkPremade(1))}
-								onMouseOver={this.mkSetTip(
-									'Mages have preconstructed decks with a couple rares',
-								)}
-							/>
-							<AiButton
-								name="Champion"
-								y={112}
-								lv={2}
-								onClick={() => mkAi.run(mkAi.mkAi(2))}
-								onMouseOver={this.mkSetTip(
-									'Champions have some upgraded cards',
-								)}
-							/>
-							<AiButton
-								name="Demigod"
-								y={134}
-								lv={3}
-								onClick={() => mkAi.run(mkAi.mkPremade(3))}
-								onMouseOver={this.mkSetTip(
-									'Demigods are extremely powerful. Come prepared for anything',
-								)}
-							/>
-							{self.props.user ? (
-								<>
+								<Rect x={304} y={380} wid={292} hei={130}>
+									<TitleText text="??" />
 									<div
 										style={{
-											marginTop: '132px',
 											width: '45%',
 											float: 'left',
 											textAlign: 'right',
@@ -545,11 +419,9 @@ module.exports = connect(({ user, opts }) => ({
 												'Try some daily challenges in the Colosseum',
 											)}
 										/>
-										<LabelText text="Daily Challenges" />
 									</div>
 									<div
 										style={{
-											marginTop: '132px',
 											width: '45%',
 											float: 'right',
 										}}>
@@ -561,16 +433,126 @@ module.exports = connect(({ user, opts }) => ({
 											}}
 											onMouseOver={this.mkSetTip('Go on an adventure')}
 										/>
-										<LabelText text="Go on an adventure" />
 									</div>
-									{customAi}
-								</>
-							) : (
-								customAi
-							)}
+									<div
+										style={{
+											marginTop: '12px',
+											width: '45%',
+											float: 'left',
+											textAlign: 'right',
+										}}>
+										<input
+											type="button"
+											value="Arena Deck"
+											onClick={() => {
+												this.props.dispatch(
+													store.doNav(require('./ArenaInfo')),
+												);
+											}}
+											onMouseOver={this.mkSetTip(
+												'Check how your arena decks are doing',
+											)}
+										/>
+									</div>
+									<div
+										style={{
+											marginTop: '12px',
+											width: '45%',
+											float: 'right',
+										}}>
+										<input
+											type="button"
+											value="Custom"
+											onClick={() => {
+												this.props.dispatch(
+													store.doNav(require('./Challenge'), { pvp: false }),
+												);
+											}}
+											onMouseOver={this.mkSetTip(
+												'Setup custom games vs AI or other players',
+											)}
+										/>
+									</div>
+								</Rect>
+								{this.state.showcard ? (
+									<Components.Card x={92} y={340} code={this.state.showcard} />
+								) : (
+									!this.props.hideMainchat && (
+										<>
+											<Chat channel="Main" style={chatStyle} />
+											<input
+												placeholder="Chat"
+												onKeyDown={parseChat}
+												style={{
+													position: 'absolute',
+													left: '99px',
+													top: '532px',
+												}}
+											/>
+										</>
+									)
+								)}
+							</>
+						)}
+						<Rect x={626} y={420} wid={196} hei={120}>
+							<TitleText text="Leaderboards" />
+							<input
+								type="button"
+								value="Wealth T50"
+								onClick={() => {
+									this.props.dispatch(store.doNav(require('./WealthTop')));
+								}}
+								onMouseOver={this.mkSetTip(
+									"See who's collected the most wealth",
+								)}
+								style={{
+									marginLeft: '25%',
+								}}
+							/>
+							<div style={{ marginTop: '4px' }}>{leadc}</div>
+						</Rect>
+						<CostRewardHeaders x={304} y={120} wid={292} hei={240}>
+							<TitleText text="Battle" />
+							<AiButton
+								name="Commoner"
+								y={48}
+								lv={0}
+								onClick={() => mkAi.run(mkAi.mkAi(0))}
+								onMouseOver={this.mkSetTip(
+									'Commoners have no upgraded cards & mostly common cards',
+								)}
+							/>
+							<AiButton
+								name="Mage"
+								y={72}
+								lv={1}
+								onClick={() => mkAi.run(mkAi.mkPremade(1))}
+								onMouseOver={this.mkSetTip(
+									'Mages have preconstructed decks with a couple rares',
+								)}
+							/>
+							<AiButton
+								name="Champion"
+								y={96}
+								lv={2}
+								onClick={() => mkAi.run(mkAi.mkAi(2))}
+								onMouseOver={this.mkSetTip(
+									'Champions have some upgraded cards',
+								)}
+							/>
+							<AiButton
+								name="Demigod"
+								y={120}
+								lv={3}
+								onClick={() => mkAi.run(mkAi.mkPremade(3))}
+								onMouseOver={this.mkSetTip(
+									'Demigods are extremely powerful. Come prepared for anything',
+								)}
+							/>
+							{self.props.user && arenac}
 						</CostRewardHeaders>
 						<Rect x={620} y={92} wid={196} hei={176}>
-							<TitleText text="Cards & Decks" />
+							<TitleText text="Cards" />
 							<input
 								type="button"
 								value="Editor"
@@ -627,7 +609,7 @@ module.exports = connect(({ user, opts }) => ({
 										onMouseOver={this.mkSetTip('Upgrade or sell cards')}
 										style={{
 											position: 'absolute',
-											left: '114px',
+											left: '102px',
 											top: '108px',
 										}}
 									/>
@@ -642,7 +624,7 @@ module.exports = connect(({ user, opts }) => ({
 										)}
 										style={{
 											position: 'absolute',
-											left: '114px',
+											left: '102px',
 											top: '132px',
 										}}
 									/>
@@ -663,20 +645,6 @@ module.exports = connect(({ user, opts }) => ({
 							/>
 							<input
 								type="button"
-								value="PvP"
-								onClick={() => {
-									this.props.dispatch(
-										store.doNav(require('./Challenge'), { pvp: true }),
-									);
-								}}
-								style={{
-									position: 'absolute',
-									left: '10px',
-									top: '100px',
-								}}
-							/>
-							<input
-								type="button"
 								value="Library"
 								onClick={() => {
 									const name =
@@ -692,8 +660,8 @@ module.exports = connect(({ user, opts }) => ({
 								)}
 								style={{
 									position: 'absolute',
-									left: '120px',
-									top: '75px',
+									left: '112px',
+									top: '64px',
 								}}
 							/>
 							{self.props.user && (
@@ -712,7 +680,7 @@ module.exports = connect(({ user, opts }) => ({
 										style={{
 											position: 'absolute',
 											left: '10px',
-											top: '75px',
+											top: '64px',
 										}}
 									/>
 									<input
@@ -724,8 +692,8 @@ module.exports = connect(({ user, opts }) => ({
 										onMouseOver={this.mkSetTip('Redeem a reward code')}
 										style={{
 											position: 'absolute',
-											left: '120px',
-											top: '100px',
+											left: '112px',
+											top: '88px',
 										}}
 									/>
 								</>
@@ -769,7 +737,7 @@ module.exports = connect(({ user, opts }) => ({
 									)}
 									style={{
 										position: 'absolute',
-										left: '184px',
+										left: '172px',
 										top: '8px',
 									}}
 								/>

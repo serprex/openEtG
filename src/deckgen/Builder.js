@@ -81,6 +81,26 @@ function scorpion(card, deck) {
 	}
 }
 const filters = {
+	5114: function dingercat(card, deck) {
+		let n = 0;
+		for (let i = 0; i < deck.length; i++) {
+			const c = Cards.Codes[deck[i]],
+				cast = c.active.get('cast');
+			if (
+				cast &&
+				(cast === Skills.mutation ||
+					cast === Skills.improve ||
+					cast === Skills.jelly ||
+					cast === Skills.trick ||
+					cast === Skills.immolate ||
+					cast === Skills.appease)
+			) {
+				n++;
+			}
+			if (c.active.get('death')) n++;
+		}
+		return n > 3;
+	},
 	5214: scorpion,
 	5325: function tidalHealing(card, deck) {
 		let aquaticCount = 0;

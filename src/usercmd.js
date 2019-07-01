@@ -1,6 +1,5 @@
 const Cards = require('./Cards'),
-	etgutil = require('./etgutil'),
-	userutil = require('./userutil');
+	etgutil = require('./etgutil');
 
 function transmute(user, oldcard, func, use) {
 	const poolCount = etgutil.count(user.pool, oldcard);
@@ -147,7 +146,7 @@ exports.upshall = function(data, user) {
 	return { pool: newpool };
 };
 exports.addgold = function(data, user) {
-	return { gold: user.gold + data.g };
+	return { gold: user.gold + (data.g | 0) };
 };
 exports.addloss = function(data, user) {
 	const losses = data.pvp ? 'pvplosses' : 'ailosses';
@@ -158,7 +157,7 @@ exports.addloss = function(data, user) {
 		result.streak = user.streak.slice();
 		result.streak[data.l] = 0;
 	}
-	if (data.g) result.gold = user.gold + data.g;
+	if (data.g) result.gold = user.gold + (data.g | 0);
 	return result;
 };
 exports.addwin = function(data, user) {

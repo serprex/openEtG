@@ -79,7 +79,7 @@ function parseChat(e) {
 								<span
 									onClick={e => {
 										sock.userExec('setdeck', { name });
-										store.store.dispatch(store.setOpt('deck', deck));
+										store.store.dispatch(store.setOptTemp('deck', deck));
 									}}>
 									{name}
 								</span>

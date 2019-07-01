@@ -1,5 +1,4 @@
-const svg = require('../svg'),
-	sock = require('../sock'),
+const sock = require('../sock'),
 	Tutor = require('../Components/Tutor'),
 	etgutil = require('../etgutil'),
 	options = require('../options'),
@@ -69,8 +68,8 @@ module.exports = connect(({ user, opts }) => ({
 		constructor(props) {
 			super(props);
 			this.state = {
-				info1: 'Select from which element you want.',
-				info2: 'Select which type of booster you want.',
+				info1: 'Select from which element you want',
+				info2: 'Select which type of pack you want',
 				packele: -1,
 				packrarity: -1,
 				showbuy: true,
@@ -208,12 +207,10 @@ module.exports = connect(({ user, opts }) => ({
 								left: '350px',
 								top: '26px',
 							}}>
-							{this.props.user.freepacks[this.state.packrarity]
-								? 'Free ' +
-								  packdata[this.state.packrarity].type +
-								  ' packs left: ' +
-								  this.props.user.freepacks[this.state.packrarity]
-								: ''}
+							{!!this.props.user.freepacks[this.state.packrarity] &&
+								`Free ${packdata[this.state.packrarity].type} packs left: ${
+									this.props.user.freepacks[this.state.packrarity]
+								}`}
 						</span>
 					)}
 					{this.state.cards && (

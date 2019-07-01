@@ -17,34 +17,6 @@ exports.eleNames = [
 	'Build your own',
 	'Random',
 ];
-exports.elecols = new Uint32Array([
-	0xaa9988,
-	0xaa5599,
-	0x776688,
-	0x996633,
-	0x665544,
-	0x55aa00,
-	0xcc5522,
-	0x225588,
-	0x888877,
-	0x3388dd,
-	0xccaa22,
-	0x333333,
-	0x55aacc,
-	0xddccbb,
-	0xddbbcc,
-	0xbbaacc,
-	0xccbb99,
-	0xbbaa99,
-	0xaacc77,
-	0xddaa88,
-	0x88aacc,
-	0xccccbb,
-	0x99bbee,
-	0xeedd88,
-	0x999999,
-	0xaaddee,
-]);
 exports.strcols = [
 	'#a98',
 	'#a59',
@@ -73,9 +45,6 @@ exports.strcols = [
 	'#999',
 	'#ade',
 ];
-exports.maybeLighten = function(card) {
-	return exports.elecols[card.element + card.upped * 13];
-};
 exports.maybeLightenStr = function(card) {
 	return exports.strcols[card.element + card.upped * 13];
 };
@@ -107,25 +76,25 @@ function cardPos(j, i) {
 		y: (j ? 118 : 346) + 48 * (i >> 1),
 	};
 }
-function tgtToPos(t) {
+function tgtToPos(t, p1id) {
 	if (t.type == etg.Creature) {
-		return creaturePos(t.ownerId == t.game.player2Id, t.getIndex());
-	} else if (t.type == etg.Weapon) {
+		return creaturePos(t.ownerId !== p1id, t.getIndex());
+	} else if (t.type === etg.Weapon) {
 		const p = { x: 666, y: 508 };
-		if (t.ownerId == t.game.player2Id) reflectPos(p);
+		if (t.ownerId !== p1id) reflectPos(p);
 		return p;
-	} else if (t.type == etg.Shield) {
+	} else if (t.type === etg.Shield) {
 		const p = { x: 710, y: 540 };
-		if (t.ownerId == t.game.player2Id) reflectPos(p);
+		if (t.ownerId !== p1id) reflectPos(p);
 		return p;
-	} else if (t.type == etg.Permanent) {
-		return permanentPos(t.ownerId == t.game.player2Id, t.getIndex());
-	} else if (t.type == etg.Player) {
+	} else if (t.type === etg.Permanent) {
+		return permanentPos(t.ownerId !== p1id, t.getIndex());
+	} else if (t.type === etg.Player) {
 		const p = { x: 50, y: 560 };
-		if (t.id == t.game.player2Id) reflectPos(p);
+		if (t.id !== p1id) reflectPos(p);
 		return p;
-	} else if (t.type == etg.Spell) {
-		return cardPos(t.ownerId == t.game.player2Id, t.getIndex());
+	} else if (t.type === etg.Spell) {
+		return cardPos(t.ownerId !== p1id, t.getIndex());
 	} else {
 		return { x: -999, y: -999 };
 	}

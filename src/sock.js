@@ -1,8 +1,9 @@
 const Cards = require('./Cards'),
 	etgutil = require('./etgutil'),
-	mkGame = require('./mkGame'),
+	Game = require('./Game'),
 	store = require('./store'),
 	userutil = require('./userutil'),
+	RngMock = require('./RngMock'),
 	React = require('react');
 const endpoint =
 	(location.protocol === 'http:' ? 'ws://' : 'wss://') +
@@ -89,8 +90,8 @@ const sockEvents = {
 		store.store.dispatch(
 			store.chat(
 				<div style={style}>
-					{hs}
-					{ms} {data.u && <b>{data.u} </b>}
+					{`${hs}${ms} `}
+					{data.u && <b>{data.u} </b>}
 					{text}
 				</div>,
 				data.mode == 1 ? null : 'Main',
@@ -98,20 +99,31 @@ const sockEvents = {
 		);
 	},
 	foearena: data => {
-		const game = mkGame({
-			deck: data.deck,
-			urdeck: exports.getDeck(),
+		const { user } = store.store.getState();
+		const game = new Game({
+			players: RngMock.shuffle([
+				{
+					idx: 1,
+					name: user && user.name,
+					user: user ? user.name : '',
+					deck: exports.getDeck(),
+				},
+				{
+					idx: 2,
+					ai: 1,
+					name: data.name,
+					deck: data.deck,
+					hp: data.hp,
+					drawpower: data.draw,
+					markpower: data.mark,
+				},
+			]),
 			seed: data.seed,
 			rank: data.rank,
-			p2hp: data.hp,
 			age: data.age,
-			foename: data.name,
-			p2drawpower: data.draw,
-			p2markpower: data.mark,
 			arena: data.name,
 			level: 4 + data.lv,
 			cost: userutil.arenaCost(data.lv),
-			ai: 1,
 			rematch: () => {
 				const { user } = store.store.getState();
 				if (!Cards.isDeckLegal(etgutil.decodedeck(exports.getDeck()), user)) {
@@ -137,15 +149,33 @@ const sockEvents = {
 	pvpgive: data => {
 		if (exports.pvp) {
 			delete exports.pvp;
-			store.store.dispatch(store.doNav(require('./views/Match'), mkGame(data)));
+			store.store.dispatch(
+				store.doNav(require('./views/Match'), { game: new Game(data.data) }),
+			);
 		}
 	},
 	spectategive: data => {
 		if (exports.spectate) {
 			delete exports.spectate;
 			data.spectate = true;
-			store.store.dispatch(store.doNav(require('./views/Match'), mkGame(data)));
+			store.store.dispatch(
+				store.doNav(require('./views/Match'), { game: new Game(data.data) }),
+			);
 		}
+	},
+	matchinvite: data => {
+		store.store.dispatch(
+			store.chat(
+				<div
+					style={{ cursor: 'pointer', color: '#69f' }}
+					onClick={() => {
+						store.store.dispatch(store.doNav(require('./views/Challenge')));
+						exports.userEmit('matchjoin', { host: data.u });
+					}}>
+					{`${data.u} invites you`}
+				</div>,
+			),
+		);
 	},
 	challenge: data => {
 		store.store.dispatch(
@@ -154,17 +184,12 @@ const sockEvents = {
 					style={{ cursor: 'pointer', color: '#69f' }}
 					onClick={() => {
 						if (data.pvp) {
-							require('./views/Challenge').sendChallenge(
-								(exports.pvp = data.f),
-							);
+							exports.sendChallenge((exports.pvp = data.f));
 						} else {
 							exports.userEmit('tradewant', { f: (exports.trade = data.f) });
 						}
 					}}>
-					{data.f}
-					{data.pvp
-						? ' challenges you to a duel!'
-						: ' wants to trade with you!'}
+					{`${data.f} offers to ${data.pvp ? 'duel' : 'trade with'} you!`}
 				</div>,
 			),
 		);
@@ -238,4 +263,15 @@ exports.getDeck = function() {
 	return state.user
 		? state.user.decks[state.user.selectedDeck] || ''
 		: state.opts.deck;
+};
+exports.sendChallenge = function(foe) {
+	const deck = exports.getDeck(),
+		{ user } = store.store.getState();
+	if (!Cards.isDeckLegal(etgutil.decodedeck(deck), user)) {
+		store.store.dispatch(store.chatMsg(`Invalid deck`, 'System'));
+		return;
+	}
+	const msg = { f: foe };
+	exports.userEmit('foewant', msg);
+	exports.pvp = foe;
 };

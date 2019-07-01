@@ -1,36 +1,5 @@
 'use strict';
 var etg = require('./etg');
-var smth = require('./Thing');
-var util = require('../util');
-var Effect = require('./Effect');
-exports.elecols = new Uint32Array([
-	0xaa9988,
-	0xaa5599,
-	0x776688,
-	0x996633,
-	0x665544,
-	0x55aa00,
-	0xcc5522,
-	0x225588,
-	0x888877,
-	0x3388dd,
-	0xccaa22,
-	0x333333,
-	0x55aacc,
-	0xddccbb,
-	0xddbbcc,
-	0xbbaacc,
-	0xccbb99,
-	0xbbaa99,
-	0xaacc77,
-	0xddaa88,
-	0x88aacc,
-	0xccccbb,
-	0x99bbee,
-	0xeedd88,
-	0x999999,
-	0xaaddee,
-]);
 exports.strcols = [
 	'#a98',
 	'#a59',
@@ -59,9 +28,6 @@ exports.strcols = [
 	'#999',
 	'#ade',
 ];
-exports.maybeLighten = function(card) {
-	return exports.elecols[card.element + card.upped * 13];
-};
 exports.maybeLightenStr = function(card) {
 	return exports.strcols[card.element + card.upped * 13];
 };

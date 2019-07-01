@@ -55,30 +55,22 @@ M.test('Upped Alignment', function() {
 	}
 });
 M = new TestModule('Cards', {
-	beforeEach: function() {
-		this.game = new Game(5489);
+	beforeEach() {
+		const data = {
+			seed: 5489,
+			players: [{ user: 'p1', deck: '104vc' }, { user: 'p2', deck: '104vc' }],
+		};
+		this.game = new Game(data);
 		this.cast = (skill, ...args) => parseSkill(skill).func(this.game, ...args);
 		this.initDeck = (pl, ...args) =>
 			(pl.deckIds = args.map(x => pl.newThing(x).id));
-		this.player1 = this.game.player1;
-		this.player2 = this.game.player2;
-		this.player1Id = this.game.player1Id;
-		this.player2Id = this.game.player2Id;
-		this.game.turn = this.player1Id;
+		this.player1 = this.game.byUser('p1');
+		this.player2 = this.game.byUser('p2');
+		this.player1.handIds = this.player2.handIds = [];
+		this.player1Id = this.player1.id;
+		this.player2Id = this.player2.id;
 		this.game.phase = etg.PlayPhase;
 		this.player1.mark = this.player2.mark = etg.Entropy;
-		this.initDeck(
-			this.player1,
-			Cards.AmethystPillar,
-			Cards.AmethystPillar,
-			Cards.AmethystPillar,
-		);
-		this.initDeck(
-			this.player2,
-			Cards.BonePillar,
-			Cards.BonePillar,
-			Cards.BonePillar,
-		);
 	},
 });
 M.test('Adrenaline', function() {
@@ -303,6 +295,7 @@ M.test('Parallel', function() {
 M.test('Phoenix', function() {
 	this.player1.addCrea(this.game.newThing(Cards.Phoenix));
 	const phoenix = this.player1.creatures[0];
+	assert.equal(this.player1.creatures[0].card, Cards.Phoenix, 'Phoenix');
 	this.cast('lightning', this.player1, phoenix);
 	assert.equal(this.player1.creatures[0].card, Cards.Ash, 'Ash');
 });
@@ -387,6 +380,24 @@ M.test('Steam', function() {
 	steam.attack();
 	assert.equal(steam.trueatk(), 4, '4');
 });
+M.test('Time Barrier', function() {
+	const barrier = this.player2.newThing(Cards.TimeBarrier);
+	this.player2.shieldId = barrier.id;
+	this.player1.endturn();
+	assert.equal(barrier.getStatus('charges'), 5, 'No charge on drawstep');
+	this.cast('hasten', this.player2);
+	assert.equal(barrier.getStatus('charges'), 6, 'Yes charge on hasten');
+	this.cast('hasten', this.player2);
+	this.cast('hasten', this.player2);
+	this.cast('hasten', this.player2);
+	assert.equal(barrier.getStatus('charges'), 9, '9 charges');
+	this.cast('hasten', this.player2);
+	assert.equal(barrier.getStatus('charges'), 9, 'No more');
+	this.player2.endturn();
+	this.player1.endturn();
+	this.cast('hasten', this.player2);
+	assert.equal(barrier.getStatus('charges'), 10, 'New turn, now 10');
+});
 M.test('Transform No Sick', function() {
 	this.player1.setQuanta(etg.Entropy, 8);
 	this.player1.addCrea(this.game.newThing(Cards.Pixie));
@@ -409,13 +420,14 @@ M.test('Voodoo', function() {
 	assert.equal(this.player2.hp, 85, 'foe holy dmg');
 });
 M.test('Whim', function() {
+	this.player1.deckIds = [];
 	const whim = this.player1.newThing(Cards.Whim),
 		tstorm = this.player1.newThing(Cards.Thunderstorm),
 		dfly = this.player1.newThing(Cards.Dragonfly);
 	this.player1.addCrea(whim);
 	this.player1.deckpush(dfly.id);
 	this.player1.setQuanta(etg.Air, 3);
-	this.player1.addCardInstance(tstorm);
+	this.player1.addCard(tstorm);
 	whim.useactive(tstorm);
 	assert.ok(~this.player1.deckIds.indexOf(tstorm.id), 'Storm on deck');
 	assert.ok(~this.player1.handIds.indexOf(dfly.id), 'Fly in hand');

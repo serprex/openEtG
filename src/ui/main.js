@@ -14,7 +14,6 @@ window.onerror = function(...args) {
 		lastError = now;
 	}
 };
-sock.emit({ x: 'motd' });
 reactDOM.render(
 	<Provider store={store.store}>
 		<App />
@@ -27,3 +26,4 @@ reactDOM.render(
 	</Provider>,
 	document.getElementById('rightpane'),
 );
+sock.emit({ x: 'motd' });

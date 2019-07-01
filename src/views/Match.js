@@ -3,7 +3,6 @@ const ui = require('../ui'),
 	etg = require('../etg'),
 	mkAi = require('../mkAi'),
 	sock = require('../sock'),
-	Card = require('../Card'),
 	Cards = require('../Cards'),
 	Effect = require('../Effect'),
 	Skills = require('../Skills'),
@@ -14,6 +13,7 @@ const ui = require('../ui'),
 	sfx = require('../audio'),
 	{ connect } = require('react-redux'),
 	{ Motion, spring } = require('react-motion'),
+	imm = require('immutable'),
 	React = require('react');
 
 const svgbg = (() => {
@@ -123,128 +123,150 @@ const cloaksvg = (
 );
 
 const activeInfo = {
-	firebolt: (t, game, targeting) =>
-		3 +
-		Math.floor((game.player1.quanta[etg.Fire] - targeting.src.card.cost) / 4),
-	drainlife: (t, game, targeting) =>
-		2 +
-		Math.floor(
-			(game.player1.quanta[etg.Darkness] - targeting.src.card.cost) / 5,
-		),
-	icebolt: (t, game, targeting) => {
-		const bolts = Math.floor(
-			(game.player1.quanta[etg.Water] - targeting.src.card.cost) / 5,
-		);
+	firebolt: (c, t) =>
+		3 + Math.floor((c.owner.quanta[etg.Fire] - c.card.cost) / 4),
+	drainlife: (c, t) =>
+		2 + Math.floor((c.owner.quanta[etg.Darkness] - c.card.cost) / 5),
+	icebolt: (c, t) => {
+		const bolts = Math.floor((c.owner.quanta[etg.Water] - c.card.cost) / 5);
 		return `${2 + bolts} ${35 + bolts * 5}%`;
 	},
-	catapult: t =>
+	catapult: (c, t) =>
 		Math.ceil(
 			(t.truehp() * (t.getStatus('frozen') ? 150 : 100)) / (t.truehp() + 100),
 		),
-	adrenaline: t => 'Extra: ' + etg.getAdrenalRow(t.trueatk()),
-	fractal: (t, game, targeting) =>
-		'Copies: ' +
-		Math.min(
-			6 +
-				Math.floor(
-					(game.player1.quanta[etg.Aether] - targeting.src.card.cost) / 2,
-				),
-			9 - game.player1.handIds.length,
-		),
+	adrenaline: (c, t) => `Extra: ${etg.getAdrenalRow(t.trueatk())}`,
+	fractal: (c, t) =>
+		`Copies: ${Math.min(
+			6 + Math.floor((c.owner.quanta[etg.Aether] - c.card.cost) / 2),
+			9 - c.owner.handIds.length,
+		)}`,
 };
+const TrackIdCtx = React.createContext({
+	value: new imm.Map(),
+	update: (id, pos) => {},
+});
+class IdTracker extends React.Component {
+	constructor(props) {
+		super(props);
 
-const ThingInst = connect(({ opts }) => ({ lofiArt: opts.lofiArt }))(
-	function ThingInst(props) {
-		const { obj, game } = props,
+		this.state = {
+			value: new imm.Map(),
+			update: (id, pos) =>
+				this.setState(state => ({
+					value: state.value.set(id, pos),
+				})),
+		};
+	}
+
+	render() {
+		return (
+			<TrackIdCtx.Provider value={this.state}>
+				{this.props.children}
+			</TrackIdCtx.Provider>
+		);
+	}
+}
+function TrackIdPos({ id, pos, children }) {
+	const { value, update } = React.useContext(TrackIdCtx);
+	const v = value.get(id);
+	if (!v || (v.x !== pos.x && v.y !== pos.y)) {
+		update(id, pos);
+	}
+	return children || null;
+}
+function GetIdPos(props) {
+	const { value } = React.useContext(TrackIdCtx);
+	return props.children(value.get(props.id, null));
+}
+
+const ThingInstCore = connect(({ opts }) => ({ lofiArt: opts.lofiArt }))(
+	function ThingInstCore(props) {
+		const { obj, player1, pos } = props,
+			isSpell = obj.type === etg.Spell,
 			scale =
 				obj.type === etg.Weapon || obj.type === etg.Shield
 					? 1.2
-					: obj.type == etg.Spell
+					: isSpell
 					? 0.85
-					: 1,
-			isSpell = obj.type === etg.Spell,
-			pos = ui.tgtToPos(obj);
+					: 1;
 		if (
 			isSpell &&
-			obj.ownerId === game.player2Id &&
-			!game.player1.getStatus('precognition')
+			obj.ownerId !== player1.id &&
+			!player1.getStatus('precognition')
 		) {
 			return (
-				<Motion style={{ x: spring(pos.x), y: spring(pos.y) }}>
-					{pos => (
-						<div
-							style={{
-								position: 'absolute',
-								left: `${pos.x - 32}px`,
-								top: `${pos.y - 38}px`,
-								width: '68px',
-								height: '80px',
-								border: 'transparent 2px solid',
-							}}
-							className={tgtclass(game, obj, props.targeting)}
-							onMouseOut={props.onMouseOut}
-							onClick={() => props.onClick(obj)}>
-							<div
-								className="ico cback"
-								style={{
-									left: '2px',
-									top: '2px',
-								}}
-							/>
-						</div>
-					)}
-				</Motion>
+				<div
+					style={{
+						position: 'absolute',
+						left: `${pos.x - 32}px`,
+						top: `${pos.y - 38}px`,
+						width: '68px',
+						height: '80px',
+						border: 'transparent 2px solid',
+					}}
+					className={tgtclass(player1, obj, props.targeting)}
+					onMouseOut={props.onMouseOut}
+					onClick={() => props.onClick(obj)}>
+					<div
+						className="ico cback"
+						style={{
+							left: '2px',
+							top: '2px',
+						}}
+					/>
+				</div>
 			);
 		}
 		const children = [];
-		const visible = [
-			obj.getStatus('psionic'),
-			obj.getStatus('aflatoxin'),
-			!obj.getStatus('aflatoxin') && obj.getStatus('poison') > 0,
-			obj.getStatus('airborne') || obj.getStatus('ranged'),
-			obj.getStatus('momentum'),
-			obj.getStatus('adrenaline'),
-			obj.getStatus('poison') < 0,
-		];
-		const bordervisible = [
-			obj.getStatus('delayed'),
-			obj.id == obj.owner.gpull,
-			obj.getStatus('frozen'),
-		];
-		for (let k = 0; k < 7; k++) {
-			if (!isSpell && visible[k]) {
-				children.push(
-					<div
-						className={`ico s${k}`}
-						key={k}
-						style={{
-							position: 'absolute',
-							top: 64 * scale + 10 + 'px',
-							left: [32, 8, 8, 0, 24, 16, 8][k] + 'px',
-							opacity: '.6',
-						}}
-					/>,
-				);
-			}
-		}
-		for (let k = 0; k < 3; k++) {
-			if (!isSpell && bordervisible[k]) {
-				children.push(
-					<div
-						className={`ico sborder${k}`}
-						key={7 + k}
-						style={{
-							position: 'absolute',
-							left: '0',
-							top: '0',
-							transform: scale === 1 ? undefined : `scale(${scale})`,
-						}}
-					/>,
-				);
-			}
-		}
 		let statText, topText;
 		if (!isSpell) {
+			const visible = [
+				obj.getStatus('psionic'),
+				obj.getStatus('aflatoxin'),
+				!obj.getStatus('aflatoxin') && obj.getStatus('poison') > 0,
+				obj.getStatus('airborne') || obj.getStatus('ranged'),
+				obj.getStatus('momentum'),
+				obj.getStatus('adrenaline'),
+				obj.getStatus('poison') < 0,
+			];
+			const bordervisible = [
+				obj.getStatus('delayed'),
+				obj.id === obj.owner.gpull,
+				obj.getStatus('frozen'),
+			];
+			for (let k = 0; k < 7; k++) {
+				if (visible[k]) {
+					children.push(
+						<div
+							className={`ico s${k}`}
+							key={k}
+							style={{
+								position: 'absolute',
+								top: 64 * scale + 10 + 'px',
+								left: [32, 8, 8, 0, 24, 16, 8][k] + 'px',
+								opacity: '.6',
+							}}
+						/>,
+					);
+				}
+			}
+			for (let k = 0; k < 3; k++) {
+				if (bordervisible[k]) {
+					children.push(
+						<div
+							className={`ico sborder${k}`}
+							key={7 + k}
+							style={{
+								position: 'absolute',
+								left: '0',
+								top: '0',
+								transform: scale === 1 ? undefined : `scale(${scale})`,
+							}}
+						/>,
+					);
+				}
+			}
 			const charges = obj.getStatus('charges');
 			topText = obj.activetext();
 			if (obj.type === etg.Creature) {
@@ -271,120 +293,140 @@ const ThingInst = connect(({ opts }) => ({ lofiArt: opts.lofiArt }))(
 			statText = `${obj.card.cost}:${obj.card.costele}`;
 		}
 		return (
-			<Motion style={{ x: spring(pos.x), y: spring(pos.y) }}>
-				{pos => (
+			<div
+				style={{
+					position: 'absolute',
+					left: pos.x - 32 * scale + 'px',
+					top: pos.y - 36 * scale + 'px',
+					width: 64 * scale + 4 + 'px',
+					height: (isSpell ? 64 : 72) * scale + 4 + 'px',
+					opacity: obj.isMaterial() ? '1' : '.7',
+					color: obj.card.upped ? '#000' : '#fff',
+					fontSize: '10px',
+					border: 'transparent 2px solid',
+					zIndex: !isSpell && obj.getStatus('cloak') ? '2' : undefined,
+				}}
+				onMouseOver={props.setInfo && (e => props.setInfo(e, obj, pos.x))}
+				className={tgtclass(player1, obj, props.targeting)}
+				onMouseOut={props.onMouseOut}
+				onClick={() => props.onClick(obj)}>
+				{props.lofiArt ? (
 					<div
+						key={0}
+						className={obj.card.shiny ? 'shiny' : undefined}
 						style={{
 							position: 'absolute',
-							left: pos.x - 32 * scale + 'px',
-							top: pos.y - 36 * scale + 'px',
-							width: 64 * scale + 4 + 'px',
-							height: (isSpell ? 64 : 72) * scale + 4 + 'px',
-							opacity: obj.isMaterial() ? '1' : '.7',
-							color: obj.card.upped ? '#000' : '#fff',
-							fontSize: '10px',
-							border: 'transparent 2px solid',
-							zIndex: !isSpell && obj.getStatus('cloak') ? '2' : undefined,
-						}}
-						onMouseOver={props.setInfo && (e => props.setInfo(e, obj, pos.x))}
-						className={tgtclass(game, obj, props.targeting)}
-						onMouseOut={props.onMouseOut}
-						onClick={() => props.onClick(obj)}>
-						{props.lofiArt ? (
-							<div
-								key={0}
-								className={obj.card.shiny ? 'shiny' : undefined}
-								style={{
-									position: 'absolute',
-									left: '0',
-									top: isSpell ? '0' : '10px',
-									width: 64 * scale + 'px',
-									height: 64 * scale + 'px',
-									backgroundColor: ui.maybeLightenStr(obj.card),
-									pointerEvents: 'none',
-								}}>
-								{obj.card ? obj.card.name : obj.name}
-							</div>
-						) : (
-							<img
-								key={0}
-								className={obj.card.shiny ? 'shiny' : undefined}
-								src={`/Cards/${obj.card.code.toString(32)}.png`}
-								style={{
-									position: 'absolute',
-									left: '0',
-									top: isSpell ? '0' : '10px',
-									width: 64 * scale + 'px',
-									height: 64 * scale + 'px',
-									backgroundColor: ui.maybeLightenStr(obj.card),
-									pointerEvents: 'none',
-								}}
-							/>
-						)}
-						{children}
-						{topText && (
-							<Components.Text
-								text={topText}
-								icoprefix="te"
-								style={{
-									position: 'absolute',
-									left: '0',
-									top: '-8px',
-									width: 64 * scale + 'px',
-									overflow: 'hidden',
-									backgroundColor: ui.maybeLightenStr(obj.card),
-								}}
-							/>
-						)}
-						{statText && (
-							<Components.Text
-								text={statText}
-								icoprefix="te"
-								style={{
-									fontSize: '12px',
-									position: 'absolute',
-									top: isSpell ? '0' : '10px',
-									right: '0',
-									paddingLeft: '2px',
-									backgroundColor: ui.maybeLightenStr(obj.card),
-								}}
-							/>
-						)}
-						{obj.hasactive('prespell', 'protectonce') && (
-							<div
-								className="ico protection"
-								style={{
-									position: 'absolute',
-									left: '0',
-									top: '0',
-								}}
-							/>
-						)}
+							left: '0',
+							top: isSpell ? '0' : '10px',
+							width: 64 * scale + 'px',
+							height: 64 * scale + 'px',
+							backgroundColor: ui.maybeLightenStr(obj.card),
+							pointerEvents: 'none',
+						}}>
+						{obj.card.name}
 					</div>
+				) : (
+					<img
+						key={0}
+						className={obj.card.shiny ? 'shiny' : undefined}
+						src={`/Cards/${obj.card.code.toString(32)}.png`}
+						style={{
+							position: 'absolute',
+							left: '0',
+							top: isSpell ? '0' : '10px',
+							width: 64 * scale + 'px',
+							height: 64 * scale + 'px',
+							backgroundColor: ui.maybeLightenStr(obj.card),
+							pointerEvents: 'none',
+						}}
+					/>
 				)}
-			</Motion>
+				{children}
+				{topText && (
+					<Components.Text
+						text={topText}
+						icoprefix="te"
+						style={{
+							position: 'absolute',
+							left: '0',
+							top: '-8px',
+							width: 64 * scale + 'px',
+							overflow: 'hidden',
+							backgroundColor: ui.maybeLightenStr(obj.card),
+						}}
+					/>
+				)}
+				{statText && (
+					<Components.Text
+						text={statText}
+						icoprefix="te"
+						style={{
+							fontSize: '12px',
+							position: 'absolute',
+							top: isSpell ? '0' : '10px',
+							right: '0',
+							paddingLeft: '2px',
+							backgroundColor: ui.maybeLightenStr(obj.card),
+						}}
+					/>
+				)}
+				{obj.hasactive('prespell', 'protectonce') && (
+					<div
+						className="ico protection"
+						style={{
+							position: 'absolute',
+							left: '0',
+							top: '0',
+						}}
+					/>
+				)}
+			</div>
 		);
 	},
 );
-
-function addNoHealData(game) {
-	const data = game.get(game.id, 'data'),
-		dataNext = { ...data.get('dataNext') };
-	if (data.get('noheal')) {
-		dataNext.p1hp = Math.max(game.player1.hp, 1);
-		dataNext.p1maxhp = game.player1.maxhp;
-	}
-	return dataNext;
+function ThingInst(props) {
+	const idtrack = React.useContext(TrackIdCtx).value,
+		pos = ui.tgtToPos(props.obj, props.player1.id);
+	return (
+		<TrackIdPos id={props.obj.id} pos={pos}>
+			<Motion
+				defaultStyle={idtrack.get(props.startpos)}
+				style={{ x: spring(pos.x), y: spring(pos.y) }}>
+				{pos => <ThingInstCore {...props} pos={pos} />}
+			</Motion>
+		</TrackIdPos>
+	);
 }
 
-function tgtclass(game, obj, targeting) {
+function addNoHealData(game, newdata) {
+	const dataNext = { ...game.get(game.id, 'data', 'dataNext') };
+	if (dataNext.endurance) dataNext.endurance--;
+	if (dataNext.noheal) {
+		for (const { user } of game.data.get('players')) {
+			if (user) {
+				for (let i = 0; i < newdata.players.length; i++) {
+					const pldata = newdata.players[i];
+					if (pldata.user === user) {
+						const pl = game.byUser(user);
+						pldata.hp = Math.max(pl.hp, 1);
+						pldata.maxhp = pl.maxhp;
+					}
+				}
+			}
+		}
+	}
+	dataNext.dataNext = dataNext;
+	return Object.assign(newdata, dataNext);
+}
+
+function tgtclass(p1, obj, targeting) {
 	if (targeting) {
 		if (targeting.filter(obj)) return 'ants-red';
-	} else if (obj.ownerId === game.player1Id && obj.canactive())
-		return 'canactive';
+	} else if (obj.ownerId === p1.id && obj.canactive()) return 'canactive';
 }
 
-function FoePlays({ foeplays, setCard, clearCard }) {
+function FoePlays({ foeplays, setCard, setLine, clearCard }) {
+	const idtrack = React.useContext(TrackIdCtx).value;
 	return foeplays.map((play, i) => (
 		<Components.CardImage
 			key={i}
@@ -392,8 +434,9 @@ function FoePlays({ foeplays, setCard, clearCard }) {
 			y={(i >> 3) * 19}
 			card={play}
 			onMouseOver={e => {
-				if (play instanceof Card) {
-					setCard(e, play, e.pageX);
+				setCard(e, play.card);
+				if (play.t) {
+					setLine(idtrack.get(play.c), idtrack.get(play.t));
 				}
 			}}
 			onMouseOut={clearCard}
@@ -408,6 +451,9 @@ module.exports = connect(({ user }) => ({ user }))(
 			this.aiState = null;
 			this.aiDelay = 0;
 			this.streakback = 0;
+			const player1 = props.replay
+				? props.game.byId(props.game.turn)
+				: props.game.byUser(props.user ? props.user.name : '');
 			this.state = {
 				tooltip: null,
 				foeplays: [],
@@ -417,46 +463,243 @@ module.exports = connect(({ user }) => ({ user }))(
 				expectedDamage: new Int16Array(2),
 				replayindex: 0,
 				replayhistory: [props.game],
+				player1,
+				player2: player1.foe,
+				fxid: 0,
+				startPos: new imm.Map(),
+				effects: [],
 			};
 		}
 
-		applyNext = data => {
+		Text = ({ id, text, fxid }) => (
+			<GetIdPos id={id} key={fxid}>
+				{pos =>
+					pos && (
+						<Motion
+							defaultStyle={{ fade: 1, ...pos }}
+							style={{
+								x: pos.x,
+								y: spring(pos.y - 36, { stiffness: 84, dampen: 12 }),
+								fade: spring(0, { stiffness: 108, dampen: 12 }),
+							}}
+							onRest={() => {
+								this.setState(state => {
+									const newfx = state.effects.slice();
+									newfx.splice(state.effects.indexOf(Text), 1);
+									return { effects: newfx };
+								});
+							}}>
+							{pos => (
+								<Components.Text
+									text={text}
+									style={{
+										position: 'absolute',
+										left: `${pos.x}px`,
+										top: `${pos.y}px`,
+										opacity: `${pos.fade}`,
+									}}
+								/>
+							)}
+						</Motion>
+					)
+				}
+			</GetIdPos>
+		);
+
+		applyNext = (data, iscmd) => {
 			const { game } = this.props;
-			if (data.x === 'cast' && game.turn === game.player2Id) {
-				const c = game.byId(data.c);
-				const play =
-					c.type == etg.Spell
-						? c.card
-						: {
-								element: c.card.element,
-								costele: c.castele,
-								cost: c.cast,
-								name: c.active.get('cast').toString(),
-								upped: c.card.upped,
-								shiny: c.card.shiny,
-						  };
+			if (
+				!iscmd &&
+				game.data
+					.get('players')
+					.some(pl => pl.user && pl.user !== this.props.user.name)
+			)
+				sock.emit({ x: 'move', data });
+			if (data.x === 'cast' && game.turn === this.state.player2.id) {
+				const c = game.byId(data.c),
+					isSpell = c.type === etg.Spell;
+				const play = {
+					card: c.card,
+					element: c.card.element,
+					costele: isSpell ? c.card.costele : c.castele,
+					cost: isSpell ? c.card.cost : c.cast,
+					name: isSpell ? c.card.name : c.active.get('cast').toString(),
+					upped: c.card.upped,
+					shiny: c.card.shiny,
+					c: data.c,
+					t: data.t,
+				};
 				this.setState(state => ({ foeplays: state.foeplays.concat([play]) }));
 			}
 			if (data.x === 'mulligan') {
 				sfx.playSound('mulligan');
 			}
 			game.next(data);
-			this.forceUpdate();
+			this.setState(state => {
+				if (!game.effects || !game.effects.length) return {};
+				const newstate = {};
+				for (const effect of game.effects) {
+					switch (effect.x) {
+						case 'StartPos':
+							newstate.startPos = (newstate.startPos || state.startPos).set(
+								effect.id,
+								effect.src,
+							);
+							break;
+						case 'Poison':
+							newstate.fxid = (newstate.fxid || state.fxid) + 1;
+							newstate.effects = (newstate.effects || state.effects).concat([
+								this.Text({
+									fxid: newstate.fxid,
+									id: effect.id,
+									text: `Poison ${effect.amt}`,
+								}),
+							]);
+							break;
+						case 'Death':
+							newstate.fxid = (newstate.fxid || state.fxid) + 1;
+							newstate.effects = (newstate.effects || state.effects).concat([
+								this.Text({
+									fxid: newstate.fxid,
+									id: effect.id,
+									text: 'Death',
+								}),
+							]);
+							break;
+						case 'Delay':
+							newstate.fxid = (newstate.fxid || state.fxid) + 1;
+							newstate.effects = (newstate.effects || state.effects).concat([
+								this.Text({
+									fxid: newstate.fxid,
+									id: effect.id,
+									text: `Delay ${effect.amt}`,
+								}),
+							]);
+							break;
+						case 'Dive':
+							newstate.fxid = (newstate.fxid || state.fxid) + 1;
+							newstate.effects = (newstate.effects || state.effects).concat([
+								this.Text({
+									fxid: newstate.fxid,
+									id: effect.id,
+									text: 'Dive',
+								}),
+							]);
+							break;
+						case 'Free':
+							newstate.fxid = (newstate.fxid || state.fxid) + 1;
+							newstate.effects = (newstate.effects || state.effects).concat([
+								this.Text({
+									fxid: newstate.fxid,
+									id: effect.id,
+									text: 'Free',
+								}),
+							]);
+							break;
+						case 'Freeze':
+							newstate.fxid = (newstate.fxid || state.fxid) + 1;
+							newstate.effects = (newstate.effects || state.effects).concat([
+								this.Text({
+									fxid: newstate.fxid,
+									id: effect.id,
+									text: `Freeze ${effect.amt}`,
+								}),
+							]);
+							break;
+						case 'Text':
+							newstate.fxid = (newstate.fxid || state.fxid) + 1;
+							newstate.effects = (newstate.effects || state.effects).concat([
+								this.Text({ fxid: newstate.fxid, ...effect }),
+							]);
+							break;
+						case 'Dmg':
+							newstate.fxid = (newstate.fxid || state.fxid) + 1;
+							newstate.effects = (newstate.effects || state.effects).concat([
+								this.Text({
+									fxid: newstate.fxid,
+									id: effect.id,
+									text: `0|${-effect.amt}`,
+								}),
+							]);
+							break;
+						case 'Atk':
+							newstate.fxid = (newstate.fxid || state.fxid) + 1;
+							newstate.effects = (newstate.effects || state.effects).concat([
+								this.Text({
+									fxid: newstate.fxid,
+									id: effect.id,
+									text: `${effect.amt}|0`,
+								}),
+							]);
+							break;
+						case 'LastCard':
+							{
+								newstate.fxid = (newstate.fxid || state.fxid) + 1;
+								const Text = (
+									<Motion
+										key={newstate.fxid}
+										defaultStyle={{ fade: 1 }}
+										style={{ fade: 0 }}
+										onRest={() => {
+											this.setState(state => {
+												const newfx = state.effects.slice();
+												newfx.splice(state.effects.indexOf(Text), 1);
+												return { effects: newfx };
+											});
+										}}>
+										{({ fade }) => (
+											<div
+												style={{
+													position: 'absolute',
+													left: '450px',
+													top: '300px',
+													transform: 'translate(-50%,-50%)',
+													fontSize: '16px',
+													color: '#fff',
+													backgroundColor: '#000',
+													padding: '18px',
+													opacity: `${fade}`,
+												}}>
+												Last card for {game.byId(effect.id).name}
+											</div>
+										)}
+									</Motion>
+								);
+								newstate.effects = (newstate.effects || state.effects).concat([
+									Text,
+								]);
+							}
+							break;
+						default:
+							console.log('Unknown effect', effect.x);
+					}
+				}
+				game.effects.length = 0;
+				return newstate;
+			});
 		};
 
-		static getDerivedStateFromProps(nextProps, prevState) {
-			if (prevState.resetInterval && nextProps.game !== prevState._game) {
-				prevState.resetInterval(nextProps);
+		static getDerivedStateFromProps(props, state) {
+			if (state.resetInterval && props.game !== state._game) {
+				state.resetInterval(props);
+				const player1 = props.game.byUser(props.user ? props.user.name : '');
 				return {
-					_game: nextProps.game,
-					gameProps: nextProps.game.props,
-					expectedDamage: nextProps.game.expectedDamage(),
-					replayhistory: [nextProps.game],
+					_game: props.game,
+					gameProps: props.game.props,
+					expectedDamage: props.game.expectedDamage(),
+					replayhistory: [props.game],
+					player1,
+					player2: player1.foe,
 				};
-			} else if (nextProps.game.props !== prevState.gameProps) {
+			} else if (props.game.props !== state.gameProps) {
+				const player1 = props.replay
+					? props.game.byId(props.game.turn)
+					: props.game.byUser(props.user ? props.user.name : '');
 				return {
-					gameProps: nextProps.game.props,
-					expectedDamage: nextProps.game.expectedDamage(),
+					gameProps: props.game.props,
+					expectedDamage: props.game.expectedDamage(),
+					player1,
+					player2: player1.foe,
 				};
 			}
 			return null;
@@ -469,17 +712,13 @@ module.exports = connect(({ user }) => ({ user }))(
 				newstate.replayhistory = history;
 				while (idx >= history.length) {
 					const gclone = history[history.length - 1].clone();
-					gclone.cache = new Map([
-						[1, gclone],
-						[2, gclone.byId(2)],
-						[3, gclone.byId(3)],
-					]);
 					gclone.next(this.props.replay.moves[history.length - 1]);
-					gclone.setIn([gclone.id, 'player1'], gclone.turn);
-					gclone.setIn([gclone.id, 'player2'], gclone.get(gclone.turn, 'foe'));
 					history.push(gclone);
 				}
 			}
+			const game = (newstate.replayhistory || state.replayhistory)[idx];
+			newstate.player1 = game.byId(game.turn);
+			newstate.player2 = newstate.player1.foe;
 			return newstate;
 		};
 
@@ -514,27 +753,27 @@ module.exports = connect(({ user }) => ({ user }))(
 
 		endClick = (discard = 0) => {
 			const { game, user } = this.props;
-			if (game.turn === game.player1Id && game.phase === etg.MulliganPhase) {
-				const event = { x: 'accept' };
-				if (!game.ai) sock.emit(event);
-				this.applyNext(event);
+			if (
+				game.turn === this.state.player1.id &&
+				game.phase === etg.MulliganPhase
+			) {
+				this.applyNext({ x: 'accept' });
 			} else if (game.winner) {
 				if (user) {
 					if (game.data.get('arena')) {
 						sock.userEmit('modarena', {
 							aname: game.data.get('arena'),
-							won: game.winner === game.player2Id,
+							won: game.winner !== this.state.player1.id,
 							lv: game.level - 4,
 						});
 					}
-					if (game.winner === game.player1Id) {
+					if (game.winner === this.state.player1.id) {
 						if (game.data.get('quest')) {
 							if (game.data.get('quest').autonext) {
-								const data = addNoHealData(game);
 								mkAi.run(
 									require('../Quest').mkQuestAi(
 										game.data.get('quest').autonext,
-										qdata => Object.assign(qdata, data),
+										qdata => addNoHealData(game, qdata),
 									),
 								);
 								return;
@@ -544,20 +783,18 @@ module.exports = connect(({ user }) => ({ user }))(
 								});
 							}
 						} else if (game.data.get('daily')) {
-							if (game.data.get('endurance')) {
-								const data = addNoHealData(game);
-								data.endurance--;
-								data.dataNext = data;
+							const endurance = game.data.get('endurance');
+							if (endurance !== undefined && endurance > 0) {
 								mkAi.run(
 									mkAi.mkAi(game.data.get('level'), true, gdata =>
-										Object.assign(gdata, data),
+										addNoHealData(game, gdata),
 									),
 								);
 								return;
 							} else {
 								const daily = game.data.get('daily');
 								sock.userExec('donedaily', {
-									daily: daily == 4 ? 5 : daily === 3 ? 0 : daily,
+									daily: daily === 4 ? 5 : daily === 3 ? 0 : daily,
 								});
 							}
 						}
@@ -569,12 +806,12 @@ module.exports = connect(({ user }) => ({ user }))(
 						streakback: this.streakback,
 					}),
 				);
-			} else if (game.turn === game.player1Id) {
-				if (discard === 0 && game.player1.handIds.length == 8) {
+			} else if (game.turn === this.state.player1.id) {
+				if (discard === 0 && this.state.player1.handIds.length === 8) {
 					this.setState({
 						targeting: {
 							filter: obj =>
-								obj.type === etg.Spell && obj.ownerId == game.player1Id,
+								obj.type === etg.Spell && obj.ownerId === this.state.player1.id,
 							cb: tgt => {
 								this.endClick(tgt.id);
 								this.setState({ targeting: null });
@@ -584,12 +821,10 @@ module.exports = connect(({ user }) => ({ user }))(
 						},
 					});
 				} else {
-					const event = {
+					this.applyNext({
 						x: 'end',
 						t: discard || undefined,
-					};
-					if (!game.ai) sock.emit(event);
-					this.applyNext(event);
+					});
 					this.setState({ targeting: null, foeplays: [] });
 				}
 			}
@@ -599,12 +834,13 @@ module.exports = connect(({ user }) => ({ user }))(
 			const { game } = this.props;
 			if (this.state.resigning) {
 				this.setState({ resigning: false });
-			} else if (game.turn === game.player1Id) {
-				if (game.phase === etg.MulliganPhase && game.player1.handIds.length) {
+			} else if (game.turn === this.state.player1.id) {
+				if (
+					game.phase === etg.MulliganPhase &&
+					this.state.player1.handIds.length
+				) {
 					sfx.playSound('mulligan');
-					const event = { x: 'mulligan' };
-					if (!game.ai) sock.emit(event);
-					this.applyNext(event);
+					this.applyNext({ x: 'mulligan' });
 				} else if (this.state.targeting) {
 					this.setState({ targeting: null });
 				}
@@ -616,27 +852,13 @@ module.exports = connect(({ user }) => ({ user }))(
 				this.props.dispatch(store.doNav(require('./Challenge'), {}));
 				return;
 			}
-			const { game } = this.props;
 			if (this.state.resigning) {
-				const event = { x: 'resign', c: game.player1Id };
-				if (!game.ai) sock.emit(event);
-				this.applyNext(event);
+				this.applyNext({ x: 'resign', c: this.state.player1.id });
 				this.endClick();
 			} else {
 				this.setState({ resigning: true });
 			}
 		};
-
-		playerClick(pl) {
-			if (
-				!this.props.replay &&
-				this.props.game.phase === etg.PlayPhase &&
-				this.state.targeting &&
-				this.state.targeting.filter(pl)
-			) {
-				this.state.targeting.cb(pl);
-			}
-		}
 
 		thingClick = obj => {
 			const { game } = this.props;
@@ -646,13 +868,9 @@ module.exports = connect(({ user }) => ({ user }))(
 				if (this.state.targeting.filter(obj)) {
 					this.state.targeting.cb(obj);
 				}
-			} else if (obj.ownerId === game.player1Id && obj.canactive()) {
+			} else if (obj.ownerId === this.state.player1.id && obj.canactive()) {
 				const cb = tgt => {
-					const event = { x: 'cast', c: obj.id, t: tgt && tgt.id };
-					if (!game.ai) {
-						sock.emit(event);
-					}
-					this.applyNext(event);
+					this.applyNext({ x: 'cast', c: obj.id, t: tgt && tgt.id });
 				};
 				if (obj.type === etg.Spell && obj.card.type !== etg.Spell) {
 					cb();
@@ -679,46 +897,43 @@ module.exports = connect(({ user }) => ({ user }))(
 		};
 
 		gameStep() {
-			const { game } = this.props;
-			if (game.turn === game.player2Id) {
-				if (game.ai === 1) {
-					if (game.phase === etg.PlayPhase) {
-						let now;
-						if (!this.aiState || !this.aiState.cmd) {
-							Effect.disable = true;
-							if (this.aiState) {
-								this.aiState.step(game);
-							} else {
-								this.aiState = new aiSearch(game);
-							}
-							Effect.disable = false;
+			const { game } = this.props,
+				turn = game.byId(game.turn);
+			if (turn.data.ai === 1) {
+				if (game.phase === etg.PlayPhase) {
+					let now;
+					if (!this.aiState || !this.aiState.cmd) {
+						Effect.disable = true;
+						if (this.aiState) {
+							this.aiState.step(game);
+						} else {
+							this.aiState = new aiSearch(game);
 						}
-						if (
-							this.aiState &&
-							this.aiState.cmd &&
-							(now = Date.now()) > this.aiDelay
-						) {
-							this.applyNext(this.aiState.cmd);
-							this.aiState = null;
-							this.aiDelay = now + (game.turn === game.player1Id ? 2000 : 200);
-						}
-					} else if (game.phase === etg.MulliganPhase) {
-						this.applyNext({
-							x: aiMulligan(game.player2) ? 'accept' : 'mulligan',
-						});
+						Effect.disable = false;
 					}
-				} else if (game.ai === 2) {
-					game.update(game.id, game => {
-						const p1 = game.get('player1'),
-							p2 = game.get('player2');
-						return game.set('player1', p2).set('player2', p1);
-					});
-					this.forceUpdate();
+					if (
+						this.aiState &&
+						this.aiState.cmd &&
+						(now = Date.now()) > this.aiDelay
+					) {
+						this.applyNext(this.aiState.cmd, true);
+						this.aiState = null;
+						this.aiDelay =
+							now + (game.turn === this.state.player1.id ? 2000 : 200);
+					}
+				} else if (game.phase === etg.MulliganPhase) {
+					this.applyNext(
+						{
+							x: aiMulligan(turn) ? 'accept' : 'mulligan',
+						},
+						true,
+					);
 				}
-			}
-			const effects = Effect.next(game.player2.isCloaked());
-			if (effects !== this.state.effects) {
-				this.setState({ effects });
+			} else if (turn.data.ai === 2) {
+				this.setState({
+					player1: turn,
+					player2: turn.foe,
+				});
 			}
 		}
 
@@ -727,55 +942,41 @@ module.exports = connect(({ user }) => ({ user }))(
 			const kc = e.which,
 				ch = String.fromCharCode(kc);
 			let chi;
-			if (kc == 27) {
+			if (kc === 27) {
 				this.resignClick();
-			} else if (ch == ' ' || kc == 13) {
+			} else if (ch === ' ' || kc === 13) {
 				this.endClick();
-			} else if (ch == '\b' || ch == '0') {
+			} else if (ch === '\b' || ch === '0') {
 				this.cancelClick();
 			} else if (~(chi = 'SW'.indexOf(ch))) {
-				this.playerClick(this.props.game.players(chi));
+				this.thingClick(chi ? this.state.player2 : this.state.player1);
 			} else if (~(chi = 'QA'.indexOf(ch))) {
-				const { shield } = this.props.game.players(chi);
+				const { shield } = chi ? this.state.player2 : this.state.player1;
 				if (shield) this.thingClick(shield);
 			} else if (~(chi = 'ED'.indexOf(ch))) {
-				const { weapon } = this.props.game.players(chi);
+				const { weapon } = chi ? this.state.player2 : this.state.player1;
 				if (weapon) this.thingClick(weapon);
 			} else if (~(chi = '12345678'.indexOf(ch))) {
-				const card = this.props.game.player1.hand[chi];
+				const card = this.state.player1.hand[chi];
 				if (card) this.thingClick(card);
 			} else return;
 			e.preventDefault();
 		};
 
 		startMatch({ user, game, dispatch }) {
+			const wasPvP = game.data.get('players').every(pd => !pd.ai);
 			if (
 				user &&
 				!game.data.get('endurance') &&
-				(game.data.get('level') !== undefined || !game.ai)
+				(game.data.get('level') !== undefined || wasPvP)
 			) {
 				sock.userExec('addloss', {
-					pvp: !game.ai,
+					pvp: wasPvP,
 					l: game.data.get('level'),
-					g: -game.data.get('cost'),
+					g: -game.data.get('cost', 0),
 				});
 				this.streakback = user.streak[game.data.get('level')];
 			}
-			Effect.clear();
-			const gameEvent = data => this.applyNext(data);
-			const cmds = {
-				end: gameEvent,
-				cast: gameEvent,
-				accept: gameEvent,
-				mulligan: gameEvent,
-				resign: gameEvent,
-				foeleft: _data => {
-					if (!game.ai) {
-						game.setWinner(game.player1Id);
-						this.forceUpdate();
-					}
-				},
-			};
 			this.gameStep();
 			this.gameInterval = setInterval(() => this.gameStep(), 30);
 			this.setState({
@@ -785,7 +986,11 @@ module.exports = connect(({ user }) => ({ user }))(
 					this.startMatch(props);
 				},
 			});
-			dispatch(store.setCmds(cmds));
+			dispatch(
+				store.setCmds({
+					move: ({ data }) => this.applyNext(data, true),
+				}),
+			);
 		}
 
 		componentDidMount() {
@@ -816,17 +1021,14 @@ module.exports = connect(({ user }) => ({ user }))(
 				tooltip: (
 					<Components.Text
 						className="infobox"
-						text={
-							obj.info() +
-							(actinfo
-								? '\n' + actinfo(obj, this.props.game, this.state.targeting)
-								: '')
-						}
+						text={`${obj.info()}${
+							actinfo ? '\n' + actinfo(this.state.targeting.src, obj) : ''
+						}`}
 						icoprefix="te"
 						style={{
 							position: 'absolute',
-							left: e.pageX + 'px',
-							top: e.pageY + 'px',
+							left: `${e.pageX}px`,
+							top: `${e.pageY}px`,
 						}}
 					/>
 				),
@@ -837,7 +1039,7 @@ module.exports = connect(({ user }) => ({ user }))(
 		}
 
 		clearCard = () => {
-			this.setState({ hovercode: 0, tooltip: null });
+			this.setState({ hovercode: 0, tooltip: null, line0: null, line1: null });
 		};
 
 		setCard(e, card, x) {
@@ -852,44 +1054,45 @@ module.exports = connect(({ user }) => ({ user }))(
 			const game = this.getGame(),
 				children = [];
 			let turntell, endText, cancelText;
-			const cloaked = game.player2.isCloaked();
+			const cloaked = this.state.player2.isCloaked();
 
 			if (game.phase !== etg.EndPhase) {
 				turntell = this.state.targeting
 					? this.state.targeting.text
-					: `${game.turn === game.player1Id ? 'Your' : 'Their'} Turn${
+					: `${game.turn === this.state.player1.id ? 'Your' : 'Their'} Turn${
 							game.phase > etg.MulliganPhase
 								? ''
-								: game.first === game.player1Id
+								: game.players.get(0) === this.state.player1.id
 								? ', First'
 								: ', Second'
 					  }`;
-				if (game.turn === game.player1Id) {
+				if (game.turn === this.state.player1.id) {
 					endText = this.state.targeting
 						? ''
 						: game.phase === etg.PlayPhase
 						? 'End Turn'
-						: game.turn === game.player1Id
+						: game.turn === this.state.player1.id
 						? 'Accept Hand'
 						: '';
 					if (game.phase != etg.PlayPhase) {
-						cancelText = game.turn === game.player1Id ? 'Mulligan' : '';
+						cancelText = game.turn === this.state.player1.id ? 'Mulligan' : '';
 					} else {
 						cancelText =
 							this.state.targeting || this.state.resigning ? 'Cancel' : '';
 					}
 				} else cancelText = endText = '';
 			} else {
-				turntell = `${game.turn === game.player1Id ? 'Your' : 'Their'} Turn, ${
-					game.winner === game.player1Id ? 'Won' : 'Lost'
-				}`;
+				turntell = `${
+					game.turn === this.state.player1.id ? 'Your' : 'Their'
+				} Turn, ${game.winner === this.state.player1.id ? 'Won' : 'Lost'}`;
 				endText = 'Continue';
 				cancelText = '';
 			}
 			let floodvisible = false;
+			const things = [];
 			for (let j = 0; j < 2; j++) {
-				const pl = game.players(j),
-					plpos = ui.tgtToPos(pl),
+				const pl = j ? this.state.player2 : this.state.player1,
+					plpos = ui.tgtToPos(pl, this.state.player1.id),
 					handOverlay = pl.usedactive
 						? 'ico silence'
 						: pl.getStatus('sanctuary')
@@ -899,19 +1102,21 @@ module.exports = connect(({ user }) => ({ user }))(
 						? 'ico singularity'
 						: '';
 				children.push(
-					<div
-						className={tgtclass(game, pl, this.state.targeting)}
-						style={{
-							position: 'absolute',
-							left: plpos.x - 48 + 'px',
-							top: plpos.y - 40 + 'px',
-							width: '96px',
-							height: '80px',
-							border: 'transparent 2px solid',
-						}}
-						onClick={() => this.playerClick(pl)}
-						onMouseOver={e => this.setInfo(e, pl)}
-					/>,
+					<TrackIdPos id={pl.id} pos={plpos}>
+						<div
+							className={tgtclass(this.state.player1, pl, this.state.targeting)}
+							style={{
+								position: 'absolute',
+								left: `${plpos.x - 48}px`,
+								top: `${plpos.y - 40}px`,
+								width: '96px',
+								height: '80px',
+								border: 'transparent 2px solid',
+							}}
+							onClick={() => this.thingClick(pl)}
+							onMouseOver={e => this.setInfo(e, pl)}
+						/>
+					</TrackIdPos>,
 					<span
 						className={'ico e' + pl.mark}
 						style={{
@@ -958,8 +1163,7 @@ module.exports = connect(({ user }) => ({ user }))(
 						/>
 					),
 				);
-				const things = [],
-					creatures = [],
+				const creatures = [],
 					perms = [];
 				for (let i = 0; i < pl.handIds.length; i++) {
 					const inst = pl.hand[i];
@@ -967,7 +1171,8 @@ module.exports = connect(({ user }) => ({ user }))(
 						<ThingInst
 							key={inst.id}
 							obj={inst}
-							game={game}
+							player1={this.state.player1}
+							startpos={this.state.startPos.get(inst.id)}
 							setInfo={(e, obj, x) => this.setCard(e, obj.card, x)}
 							onMouseOut={this.clearCard}
 							onClick={this.thingClick}
@@ -982,7 +1187,8 @@ module.exports = connect(({ user }) => ({ user }))(
 							<ThingInst
 								key={cr.id}
 								obj={cr}
-								game={game}
+								player1={this.state.player1}
+								startpos={this.state.startPos.get(cr.id)}
 								setInfo={(e, obj, x) => this.setInfo(e, obj, x)}
 								onMouseOut={this.clearCard}
 								onClick={this.thingClick}
@@ -999,7 +1205,8 @@ module.exports = connect(({ user }) => ({ user }))(
 							<ThingInst
 								key={pr.id}
 								obj={pr}
-								game={game}
+								player1={this.state.player1}
+								startpos={this.state.startPos.get(pr.id)}
 								setInfo={(e, obj, x) => this.setInfo(e, obj, x)}
 								onMouseOut={this.clearCard}
 								onClick={this.thingClick}
@@ -1021,7 +1228,8 @@ module.exports = connect(({ user }) => ({ user }))(
 						<ThingInst
 							key={wp.id}
 							obj={wp}
-							game={game}
+							player1={this.state.player1}
+							startpos={this.state.startPos.get(wp.id)}
 							setInfo={(e, obj, x) => this.setInfo(e, obj, x)}
 							onMouseOut={this.clearCard}
 							onClick={this.thingClick}
@@ -1032,7 +1240,8 @@ module.exports = connect(({ user }) => ({ user }))(
 						<ThingInst
 							key={sh.id}
 							obj={sh}
-							game={game}
+							player1={this.state.player1}
+							startpos={this.state.startPos.get(sh.id)}
 							setInfo={(e, obj, x) => this.setInfo(e, obj, x)}
 							onMouseOut={this.clearCard}
 							onClick={this.thingClick}
@@ -1040,7 +1249,6 @@ module.exports = connect(({ user }) => ({ user }))(
 						/>
 					),
 				);
-				children.push(things);
 				const qx = j ? 792 : 0,
 					qy = j ? 106 : 308;
 				for (let k = 1; k < 13; k++) {
@@ -1078,19 +1286,15 @@ module.exports = connect(({ user }) => ({ user }))(
 						}}
 					/>,
 				);
+				const expectedDamage = this.state.expectedDamage[pl.getIndex()];
 				const x1 = Math.max(80 * (pl.hp / pl.maxhp), 0);
-				const x2 = Math.max(
-					x1 - 80 * (this.state.expectedDamage[j] / pl.maxhp),
-					0,
-				);
+				const x2 = Math.max(x1 - 80 * (expectedDamage / pl.maxhp), 0);
 				const poison = pl.getStatus('poison'),
 					poisoninfo = `${
 						poison > 0 ? poison + ' 1:2' : poison < 0 ? -poison + ' 1:7' : ''
 					} ${pl.getStatus('neuro') ? ' 1:10' : ''}`;
 				const hptext = `${pl.hp}/${pl.maxhp}\n${pl.deckIds.length}cards${
-					!cloaked && this.state.expectedDamage[j]
-						? `\nDmg: ${this.state.expectedDamage[j]}`
-						: ''
+					!cloaked && expectedDamage ? `\nDmg: ${expectedDamage}` : ''
 				} ${poisoninfo ? `\n${poisoninfo}` : ''}`;
 				children.push(
 					<Motion style={{ x1: spring(x1), x2: spring(x2) }}>
@@ -1107,14 +1311,14 @@ module.exports = connect(({ user }) => ({ user }))(
 										pointerEvents: 'none',
 									}}
 								/>
-								{!cloaked && this.state.expectedDamage[j] !== 0 && (
+								{!cloaked && expectedDamage !== 0 && (
 									<div
 										style={{
 											backgroundColor:
 												ui.strcols[
-													this.state.expectedDamage[j] >= pl.hp
+													expectedDamage >= pl.hp
 														? etg.Fire
-														: this.state.expectedDamage[j] > 0
+														: expectedDamage > 0
 														? etg.Time
 														: etg.Water
 												],
@@ -1146,18 +1350,20 @@ module.exports = connect(({ user }) => ({ user }))(
 				);
 			}
 			return (
-				<>
+				<IdTracker>
 					{svgbg}
 					{cloaked ? (
 						cloaksvg
 					) : (
 						<FoePlays
 							foeplays={this.state.foeplays}
-							setCard={(e, play, x) => this.setCard(e, play, e.pageX)}
+							setCard={(e, play) => this.setCard(e, play, e.pageX)}
+							setLine={(line0, line1) => this.setState({ line0, line1 })}
 							clearCard={this.clearCard}
 						/>
 					)}
 					{children}
+					{things}
 					{floodvisible && floodsvg}
 					<div
 						style={{
@@ -1168,15 +1374,15 @@ module.exports = connect(({ user }) => ({ user }))(
 							top: '40px',
 							width: '140px',
 						}}>
-						{([
+						{`${[
 							'Commoner\n',
 							'Mage\n',
 							'Champion\n',
 							'Demigod\n',
 							'Arena1\n',
 							'Arena2\n',
-						][game.data.get('level')] || '') +
-							(game.data.get('foename') || '-')}
+						][game.data.get('level')] || ''}${this.state.player2.data.name ||
+							'-'}`}
 					</div>
 					<span
 						style={{
@@ -1188,6 +1394,24 @@ module.exports = connect(({ user }) => ({ user }))(
 						{turntell}
 					</span>
 					{this.state.effects}
+					{this.state.line0 && this.state.line1 && (
+						<svg
+							width="900"
+							height="600"
+							style={{
+								position: 'absolute',
+								left: '0',
+								top: '0',
+								zIndex: '3',
+								pointerEvents: 'none',
+							}}>
+							<path
+								d={`M${this.state.line0.x} ${this.state.line0.y}L${this.state.line1.x} ${this.state.line1.y}`}
+								stroke="#f84"
+								strokeWidth="8"
+							/>
+						</svg>
+					)}
 					<Components.Card
 						x={this.state.hoverx}
 						y={this.state.hovery}
@@ -1206,7 +1430,7 @@ module.exports = connect(({ user }) => ({ user }))(
 					/>
 					{!this.props.replay &&
 						!game.data.get('spectate') &&
-						(game.turn === game.player1Id || game.winner) && (
+						(game.turn === this.state.player1.id || game.winner) && (
 							<>
 								{cancelText && (
 									<input
@@ -1314,7 +1538,7 @@ module.exports = connect(({ user }) => ({ user }))(
 							)}
 						</>
 					)}
-				</>
+				</IdTracker>
 			);
 		}
 	},

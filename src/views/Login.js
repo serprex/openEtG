@@ -1,5 +1,4 @@
-const Components = require('../Components'),
-	sock = require('../sock'),
+const sock = require('../sock'),
 	store = require('../store'),
 	{ connect } = require('react-redux'),
 	React = require('react');
@@ -102,7 +101,7 @@ if (typeof kongregateAPI === 'undefined') {
 							autoFocus
 							tabIndex="1"
 							onKeyPress={e => this.maybeLogin(e)}
-							value={this.props.username}
+							value={this.props.username || ''}
 							onChange={e =>
 								this.props.dispatch(store.setOpt('username', e.target.value))
 							}
@@ -121,7 +120,7 @@ if (typeof kongregateAPI === 'undefined') {
 							style={{ position: 'absolute', left: '430px', top: '380px' }}>
 							<input
 								type="checkbox"
-								checked={this.props.remember}
+								checked={this.props.remember || false}
 								onChange={e => {
 									if (
 										typeof localStorage !== 'undefined' &&

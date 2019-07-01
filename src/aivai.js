@@ -21,7 +21,7 @@ function mkGame(seed, decks) {
 	const game = new Game(seed, 0);
 	let idx, code;
 	for (let j = 0; j < 2; j++) {
-		const pl = game.players(j),
+		const pl = j ? game.byId(game.turn) : game.byId(game.turn).foe,
 			deck = [];
 		for (let i = 0; i < decks[j].length; i++) {
 			if (Cards.Codes[(code = decks[j][i])]) {
@@ -63,12 +63,12 @@ function fightItOut() {
 	result.textContent = '';
 	let aiState = undefined;
 	const cmds = {
-		end: function(data) {
+		end(data) {
 			if (mode === fight) {
 				result.textContent += `${game.turn == realp1 ? 1 : 2}\tEND TURN\n`;
 			}
 		},
-		cast: function(data) {
+		cast(data) {
 			const c = game.byId(data.c),
 				t = game.byId(data.t);
 			if (mode == fight) {

@@ -1,99 +1,291 @@
 const sock = require('../sock'),
 	util = require('../util'),
-	Cards = require('../Cards'),
-	mkGame = require('../mkGame'),
+	imm = require('immutable'),
+	Game = require('../Game'),
 	etgutil = require('../etgutil'),
-	options = require('../options'),
+	{ parseInput } = require('../options'),
 	Components = require('../Components'),
 	store = require('../store'),
+	RngMock = require('../RngMock'),
 	{ connect } = require('react-redux'),
 	React = require('react');
 
-function sendChallenge(foe) {
-	const deck = sock.getDeck(),
-		{ user } = store.store.getState();
-	if (!Cards.isDeckLegal(etgutil.decodedeck(deck), user)) {
-		store.store.dispatch(store.chatMsg(`Invalid deck`, 'System'));
-		return;
+class PlayerEditor extends React.Component {
+	constructor(props) {
+		super(props);
+		this.state = {
+			deck: props.player.deck,
+			hp: props.player.hp,
+			mark: props.player.markpower,
+			draw: props.player.drawpower,
+			deckpower: props.player.deckpower,
+		};
 	}
-	const gameData = {};
-	options.parsepvpstats(gameData);
-	if (user) {
-		gameData.x = 'foewant';
-		gameData.f = foe;
-		sock.userEmit(gameData);
-	} else {
-		gameData.x = 'pvpwant';
-		gameData.deck = deck;
-		gameData.room = foe;
-		sock.emit(gameData);
+
+	render() {
+		const { props, state } = this;
+		return (
+			<div>
+				<input
+					placeholder="HP"
+					className="numput"
+					value={state.hp}
+					onChange={e => this.setState({ hp: e.target.value })}
+				/>
+				<input
+					placeholder="Mark"
+					className="numput"
+					value={state.mark}
+					onChange={e => this.setState({ mark: e.target.value })}
+				/>
+				<input
+					placeholder="Draw"
+					className="numput"
+					value={state.draw}
+					onChange={e => this.setState({ draw: e.target.value })}
+				/>
+				<input
+					placeholder="Deck"
+					className="numput"
+					value={state.deckpower}
+					onChange={e => this.setState({ deckpower: e.target.value })}
+				/>
+				<input
+					type="button"
+					value="Ok"
+					className="editbtn"
+					onClick={() => {
+						const data = {};
+						if (state.deck) data.deck = state.deck;
+						parseInput(data, 'hp', state.hp);
+						parseInput(data, 'markpower', state.mark);
+						parseInput(data, 'drawpower', state.draw);
+						parseInput(data, 'deckpower', state.deckpower);
+						props.updatePlayer(data);
+					}}
+				/>
+				<input
+					style={{ display: 'block' }}
+					placeholder="Deck"
+					value={state.deck}
+					onChange={e => this.setState({ deck: e.target.value })}
+				/>
+			</div>
+		);
 	}
-	sock.pvp = foe;
 }
 
-function LabelText(props) {
-	return (
-		<span
-			style={{
-				fontSize: '18px',
-				color: '#fff',
-				pointerEvents: 'none',
-				position: 'absolute',
-				left: props.x + 'px',
-				top: props.y + 'px',
-			}}>
-			{props.children}
-		</span>
-	);
+class Group extends React.Component {
+	constructor(props) {
+		super(props);
+		this.state = { invite: '', editing: new imm.Set() };
+	}
+
+	updatePlayer = (i, pl) => {
+		const players = this.props.players.slice(),
+			{ idx } = players[i];
+		players[i] = { ...this.props.players[i], ...pl };
+		this.props.updatePlayers(players);
+		this.setState(state => ({ editing: state.editing.delete(idx) }));
+	};
+
+	render() {
+		const { props, state } = this;
+		return (
+			<div className="bgbox" style={{ width: '300px', marginBottom: '8px' }}>
+				{props.players.map((pl, i) => (
+					<div key={pl.idx} style={{ minHeight: '24px' }}>
+						<span
+							onClick={() => {
+								this.setState(state => ({
+									editing: state.editing.has(pl.idx)
+										? state.editing.delete(pl.idx)
+										: state.editing.add(pl.idx),
+								}));
+							}}>
+							{pl.user || 'AI'}
+							{pl.pending === 2 && '...'}
+						</span>
+						{pl.user !== props.host && (
+							<input
+								type="button"
+								value="-"
+								className="editbtn"
+								style={{ float: 'right' }}
+								onClick={() => {
+									const players = props.players.slice(),
+										[pl] = players.splice(i, 1);
+									props.updatePlayers(players);
+									this.setState(state => ({
+										editing: state.editing.delete(pl.idx),
+									}));
+								}}
+							/>
+						)}
+						{state.editing.has(pl.idx) && (
+							<PlayerEditor
+								player={pl}
+								updatePlayer={pl => this.updatePlayer(i, pl)}
+							/>
+						)}
+					</div>
+				))}
+				<div>
+					<input
+						type="button"
+						value="+Player"
+						onClick={() => {
+							const { invite } = this.state;
+							if (!invite) {
+								props.updatePlayers(
+									props.players.concat([{ idx: props.getNextIdx() }]),
+								);
+							} else {
+								if (!props.hasUserAsPlayer(invite)) {
+									props.updatePlayers(
+										props.players.concat([
+											{ idx: props.getNextIdx(), user: invite, pending: 2 },
+										]),
+									);
+								}
+								props.invitePlayer(invite);
+							}
+							this.setState({ invite: '' });
+						}}
+					/>
+					<input
+						style={{ marginLeft: '8px' }}
+						value={this.state.invite}
+						onChange={e => this.setState({ invite: e.target.value })}
+					/>
+					{(!props.players.length || props.players[0].user !== props.host) && (
+						<input
+							type="button"
+							value="-"
+							className="editbtn"
+							style={{ float: 'right' }}
+							onClick={props.removeGroup}
+						/>
+					)}
+				</div>
+			</div>
+		);
+	}
 }
 
 module.exports = connect(({ user, opts }) => ({
-	hasUser: !!user,
-	aideck: opts.aideck,
-	foename: opts.foename,
-	pvphp: opts.pvphp,
-	pvpmark: opts.pvpmark,
-	pvpdraw: opts.pvpdraw,
-	pvpdeck: opts.pvpdeck,
-	aideck: opts.aideck,
-	aihp: opts.aihp,
-	aimark: opts.aimark,
-	aidraw: opts.aidraw,
-	aideckpower: opts.aideckpower,
-	aimanual: opts.aimanual,
+	username: user.name,
 }))(
 	class Challenge extends React.Component {
 		constructor(props) {
 			super(props);
+
+			this.nextIdx = 2;
 			this.state = {
-				challenge: null,
+				groups: [[{ user: props.username, idx: 1, pending: 1 }], []],
 				replay: '',
 			};
 		}
 
+		componentDidMount() {
+			this.props.dispatch(
+				store.setCmds({
+					matchbegin: data => {
+						this.props.dispatch(
+							store.doNav(require('./Match'), { game: new Game(data.data) }),
+						);
+					},
+					matchcancel: () => {
+						console.log('Match cancelled');
+						this.toMainMenu();
+					},
+					matchleave: data => {
+						if (data.name === this.props.username) {
+							console.log('You have been removed');
+							this.toMainMenu();
+						}
+						const groups = this.state.groups.slice();
+						for (let j = 0; j < groups.length; j++) {
+							let group = groups[j],
+								g = group;
+							for (let i = group.length - 1; ~i; i--) {
+								const player = group[i];
+								if (player.user === data.name) {
+									if (g === group) {
+										groups[j] = g = group.slice();
+									}
+									g.splice(i, 1);
+								}
+							}
+						}
+						this.setState({ groups });
+					},
+					matchready: data => {
+						const groups = this.state.groups.slice();
+						for (let j = 0; j < groups.length; j++) {
+							let group = groups[j],
+								g = group;
+							for (let i = group.length - 1; ~i; i--) {
+								const player = group[i];
+								if (player.user === data.name) {
+									if (g === group) {
+										groups[j] = g = group.slice();
+									}
+									g[i] = { ...player, pending: data.pending };
+								}
+							}
+						}
+						this.setState({ groups });
+					},
+					matchconfig: data => {
+						this.setState({ groups: data.data });
+					},
+				}),
+			);
+		}
+
+		getNextIdx = () => this.nextIdx++;
+
+		playersAsData = deck => {
+			const players = [];
+			let idx = 1;
+			for (const group of this.state.groups) {
+				if (!group.length) continue;
+				const leader = idx;
+				for (const player of group) {
+					const data = {
+						idx: idx++,
+						name: player.user || 'AI',
+						user: player.user,
+						leader: leader,
+						deck: player.deck || deck,
+						markpower: player.markpower,
+						deckpower: player.deckpower,
+						drawpower: player.drawpower,
+					};
+					if (!player.user) data.ai = 1;
+					players.push(data);
+				}
+			}
+			return players;
+		};
+		allReady = () => this.state.groups.every(g => g.every(p => !p.pending));
+
 		aiClick = () => {
-			if (!this.props.aideck) return;
-			const deck = sock.getDeck();
-			if (
-				etgutil.decklength(deck) < 9 ||
-				etgutil.decklength(this.props.aideck) < 9
-			) {
+			const deck = this.state.groups[0][0].deck || sock.getDeck();
+			if (etgutil.decklength(deck) < 9) {
 				this.props.dispatch(store.doNav(require('./DeckEditor')));
 				return;
 			}
 			const gameData = {
-				deck: this.props.aideck,
-				urdeck: deck,
 				seed: util.randint(),
-				foename: 'Custom',
 				cardreward: '',
-				ai: this.props.aimanual ? 2 : 1,
 				rematch: this.aiClick,
+				players: this.playersAsData(deck),
 			};
-			options.parsepvpstats(gameData);
-			options.parseaistats(gameData);
+			RngMock.shuffle(gameData.players);
 			this.props.dispatch(
-				store.doNav(require('./Match'), { game: mkGame(gameData) }),
+				store.doNav(require('./Match'), { game: new Game(gameData) }),
 			);
 		};
 
@@ -115,309 +307,167 @@ module.exports = connect(({ user, opts }) => ({
 			}
 			const data = {
 				seed: replay.seed,
-				flip: replay.seed & 1,
-				level: undefined,
-				cost: 0,
-				ai: 3,
-				spectate: 0,
 				cardreward: '',
 				goldreward: 0,
+				players: replay.players,
 			};
-			for (let i = 0; i < replay.players.length; i++) {
-				const pl = replay.players[i];
-				for (const key in pl) {
-					if (key == 'deck') {
-						data[i ? 'deck' : 'urdeck'] = pl[key];
-					} else {
-						data[`p${i + 1}${key}`] = pl[key];
-					}
-				}
-			}
-			const game = mkGame(data);
-			game.setIn([game.id, 'player1'], 2);
-			game.setIn([game.id, 'player2'], 3);
 			this.props.dispatch(
 				store.doNav(require('./Match'), {
 					replay,
-					game,
+					game: new Game(data),
 				}),
 			);
 		};
 
+		exitClick = () => {
+			if (this.isMultiplayer()) {
+				if (this.props.username === this.state.groups[0][0].user) {
+					sock.userEmit('matchcancel');
+				} else {
+					sock.userEmit('matchleave');
+				}
+			}
+			this.toMainMenu();
+		};
+		toMainMenu = () => this.props.dispatch(store.doNav(require('./MainMenu')));
+		sendConfig = () => {
+			if (this.props.username === this.state.groups[0][0].user) {
+				sock.userEmit('matchconfig', { data: this.state.groups });
+			}
+		};
+		addGroup = () => {
+			this.setState(
+				state => ({ groups: state.groups.concat([[]]) }),
+				this.sendConfig,
+			);
+		};
+		updatePlayers = (i, p) =>
+			this.setState(state => {
+				const newgroups = state.groups.slice();
+				newgroups[i] = p;
+				return { groups: newgroups };
+			}, this.sendConfig);
+		invitePlayer = u => {
+			sock.userEmit('matchinvite', { invite: u });
+		};
+		removeGroup = i => {
+			this.setState(state => {
+				const newgroups = state.groups.slice();
+				newgroups.splice(i, 1);
+				return { groups: newgroups };
+			}, this.sendConfig);
+		};
+		loadMyData = () => {
+			for (const group of this.state.groups) {
+				for (const player of group) {
+					if (player.user === this.props.username) {
+						return player;
+					}
+				}
+			}
+			return null;
+		};
+		isMultiplayer = () =>
+			this.state.groups.some(g =>
+				g.some(p => p.user && p.user !== this.props.username),
+			);
+
 		render() {
-			const self = this;
-			function makeChallenge(foe) {
-				if (!foe) return;
-				sendChallenge(self.props.foename);
-				self.setState({ challenge: foe });
-			}
-			function maybeCustomAi(e) {
-				if (e.which == 13) self.aiClick();
-			}
-			function maybeChallenge(e) {
-				e.cancelBubble = true;
-				if (e.which == 13) makeChallenge(self.props.foename);
-			}
-			function exitClick() {
-				if (sock.pvp) {
-					if (self.props.hasUser) sock.userEmit('foecancel');
-					else sock.emit({ x: 'roomcancel', room: sock.pvp });
-					delete sock.pvp;
-				}
-				self.props.dispatch(store.doNav(require('./MainMenu')));
-			}
-			function cancelClick() {
-				if (sock.pvp) {
-					if (self.props.hasUser) sock.userEmit('foecancel');
-					else sock.emit({ x: 'roomcancel', room: sock.pvp });
-					delete sock.pvp;
-				}
-				delete sock.spectate;
-				self.setState({ challenge: null });
-			}
-			const deck = etgutil.decodedeck(sock.getDeck());
+			const mydata = this.loadMyData(),
+				amhost = this.props.username === this.state.groups[0][0].user,
+				isMultiplayer = this.isMultiplayer(),
+				allReady = amhost && (!isMultiplayer || this.allReady());
 			return (
 				<>
-					<Components.DeckDisplay deck={deck} renderMark />
-					<Components.ExitBtn x={190} y={300} onClick={exitClick} />
-					<LabelText x={190} y={400}>
-						Own stats
-					</LabelText>
-					{self.state.challenge && (
-						<>
-							<input
-								placeholder="HP"
-								value={this.props.pvphp}
-								onChange={e =>
-									this.props.dispatch(store.setOptTemp('pvphp', e.target.value))
-								}
-								className="numput"
-								style={{
-									position: 'absolute',
-									left: '190px',
-									top: '425px',
-								}}
-							/>
-							<input
-								placeholder="Mark"
-								value={this.props.pvpmark}
-								onChange={e =>
-									this.props.dispatch(
-										store.setOptTemp('pvpmark', e.target.value),
-									)
-								}
-								className="numput"
-								style={{
-									position: 'absolute',
-									left: '190px',
-									top: '450px',
-								}}
-							/>
-							<input
-								placeholder="Draw"
-								value={this.props.pvpdraw}
-								onChange={e =>
-									this.props.dispatch(
-										store.setOptTemp('pvpdraw', e.target.value),
-									)
-								}
-								className="numput"
-								style={{
-									position: 'absolute',
-									left: '190px',
-									top: '475px',
-								}}
-							/>
-							<input
-								placeholder="Deck"
-								value={this.props.pvpdeck}
-								onChange={e =>
-									this.props.dispatch(
-										store.setOptTemp('pvpdeck', e.target.value),
-									)
-								}
-								className="numput"
-								style={{
-									position: 'absolute',
-									left: '190px',
-									top: '500px',
-								}}
-							/>
-						</>
+					<div style={{ position: 'absolute', left: '320px', top: '200px' }}>
+						Warning: Lobby feature is still in development
+					</div>
+					{mydata && mydata.deck && (
+						<Components.DeckDisplay
+							x={206}
+							y={377}
+							deck={mydata.deck || sock.getDeck()}
+							renderMark
+						/>
 					)}
-					{self.props.pvp ? (
-						<>
+					<input
+						type="button"
+						value="Replay"
+						onClick={this.replayClick}
+						style={{
+							position: 'absolute',
+							left: '540px',
+							top: '8px',
+						}}
+					/>
+					<textarea
+						className="chatinput"
+						placeholder="Replay"
+						value={this.state.replay || ''}
+						onChange={e => this.setState({ replay: e.target.value })}
+						style={{
+							position: 'absolute',
+							left: '540px',
+							top: '32px',
+						}}
+					/>
+					{this.state.groups.map((players, i) => (
+						<Group
+							key={i}
+							players={players}
+							host={this.props.username}
+							hasUserAsPlayer={name =>
+								this.state.groups.some(g => g.some(p => p.user === name))
+							}
+							updatePlayers={p => this.updatePlayers(i, p)}
+							invitePlayer={this.invitePlayer}
+							removeGroup={() => this.removeGroup(i)}
+							getNextIdx={this.getNextIdx}
+						/>
+					))}
+					<div style={{ width: '300px' }}>
+						<input type="button" value="+Group" onClick={this.addGroup} />
+						{allReady ? (
 							<input
-								placeholder="Challenge"
-								value={this.props.foename}
-								onChange={e =>
-									this.props.dispatch(
-										store.setOptTemp('foename', e.target.value),
-									)
-								}
-								onKeyPress={maybeChallenge}
-								style={{
-									position: 'absolute',
-									left: '190px',
-									top: '375px',
-								}}
-							/>
-							{!self.state.challenge ? (
-								<>
-									<input
-										type="button"
-										value="PvP"
-										onClick={() => makeChallenge(self.props.foename)}
-										style={{
-											position: 'absolute',
-											left: '110px',
-											top: '375px',
-										}}
-									/>
-									<input
-										type="button"
-										value="Cancel"
-										onClick={cancelClick}
-										style={{
-											position: 'absolute',
-											left: '110px',
-											top: '400px',
-										}}
-									/>{' '}
-								</>
-							) : (
-								<div
-									style={{ position: 'absolute', left: '190px', top: '375px' }}>
-									You have challenged {self.state.challenge}
-								</div>
-							)}
-						</>
-					) : (
-						<>
-							<input
+								style={{ float: 'right' }}
 								type="button"
-								value="Replay"
-								onClick={this.replayClick}
-								style={{
-									position: 'absolute',
-									left: '360px',
-									top: '350px',
-								}}
-							/>
-							<textarea
-								className="chatinput"
-								placeholder="Replay"
-								value={this.state.replay || ''}
-								onChange={e => this.setState({ replay: e.target.value })}
-								style={{
-									position: 'absolute',
-									left: '440px',
-									top: '325px',
-								}}
-							/>
-							<input
-								type="button"
-								value="Custom AI"
-								onClick={self.aiClick}
-								style={{
-									position: 'absolute',
-									left: '360px',
-									top: '375px',
-								}}
-							/>
-							<input
-								placeholder="AI Deck"
-								value={this.props.aideck}
-								onChange={e =>
-									this.props.dispatch(store.setOpt('aideck', e.target.value))
-								}
-								onKeyPress={maybeCustomAi}
-								onClick={e => e.target.setSelectionRange(0, 999)}
-								style={{
-									position: 'absolute',
-									left: '440px',
-									top: '375px',
-								}}
-							/>
-							<LabelText x={440} y={400}>
-								AI's stats:
-							</LabelText>
-							<input
-								placeholder="HP"
-								value={this.props.aihp}
-								onChange={e =>
-									this.props.dispatch(store.setOpt('aihp', e.target.value))
-								}
-								className="numput"
-								style={{
-									position: 'absolute',
-									left: '440px',
-									top: '425px',
-								}}
-							/>
-							<input
-								placeholder="Mark"
-								value={this.props.aimark}
-								onChange={e =>
-									this.props.dispatch(store.setOpt('aimark', e.target.value))
-								}
-								className="numput"
-								style={{
-									position: 'absolute',
-									left: '440px',
-									top: '450px',
-								}}
-							/>
-							<input
-								placeholder="Draw"
-								value={this.props.aidraw}
-								onChange={e =>
-									this.props.dispatch(store.setOpt('aidraw', e.target.value))
-								}
-								className="numput"
-								style={{
-									position: 'absolute',
-									left: '440px',
-									top: '475px',
-								}}
-							/>
-							<input
-								placeholder="Deck"
-								value={this.props.aideckpower}
-								onChange={e =>
-									this.props.dispatch(
-										store.setOptTemp('aideckpower', e.target.value),
-									)
-								}
-								className="numput"
-								style={{
-									position: 'absolute',
-									left: '440px',
-									top: '500px',
-								}}
-							/>
-							<label
-								style={{
-									position: 'absolute',
-									left: '440px',
-									top: '525px',
-								}}>
-								<input
-									type="checkbox"
-									value={this.props.aimanual}
-									onChange={e =>
-										this.props.dispatch(
-											store.setOptTemp('aimanual', e.target.checked),
-										)
+								value="Start"
+								onClick={() => {
+									if (isMultiplayer) {
+										sock.userEmit('matchbegin');
+									} else {
+										this.aiClick();
 									}
-								/>{' '}
-								Manual
-							</label>
-						</>
-					)}
+								}}
+							/>
+						) : (
+							mydata &&
+							mydata.pending && (
+								<input
+									style={{ float: 'right' }}
+									type="button"
+									value="Ready"
+									onClick={() => {
+										sock.userEmit('matchready', {
+											data: { deck: sock.getDeck() },
+										});
+									}}
+								/>
+							)
+						)}
+					</div>
+					<input
+						style={{
+							position: 'absolute',
+							left: '800px',
+							top: '8px',
+						}}
+						type="button"
+						value="Exit"
+						onClick={this.exitClick}
+					/>
 				</>
 			);
 		}
 	},
 );
-module.exports.sendChallenge = sendChallenge;

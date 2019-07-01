@@ -632,18 +632,24 @@ function evalthing(game, c, inHand) {
 	}
 	score += checkpassives(c);
 	if (isCreature) {
+		if (c.getStatus('voodoo') && c.isMaterial()) {
+			score += hp / 10;
+		}
 		if (hp && c.owner.gpull === c.id) {
-			score = ((score + hp) * Math.log(hp)) / 4;
 			if (c.getStatus('voodoo')) score += hp;
+			score = ((score + hp) * Math.log(hp)) / 4;
 			if (c.active.get('shield') && !delaymix) {
 				score += evalactive(c, c.active.get('shield'));
 			}
-		} else
+		} else {
 			score *= hp
-				? c.getStatus('immaterial') || c.getStatus('burrowed')
+				? !c.isMaterial()
 					? 1.3
 					: 1 + Math.log(Math.min(hp, 33)) / 7
+				: inHand
+				? 0.4
 				: 0.2;
+		}
 	} else {
 		score *= c.getStatus('immaterial') ? 1.35 : 1.25;
 	}

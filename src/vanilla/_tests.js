@@ -51,7 +51,7 @@ M.test('Upped Alignment', function() {
 	}
 });
 M = new TestModule('Cards', {
-	beforeEach: function() {
+	beforeEach() {
 		this.game = new Game(5489);
 		this.player1 = this.game.player1;
 		this.player2 = this.game.player2;

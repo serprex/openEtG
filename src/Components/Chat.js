@@ -4,7 +4,7 @@ const { connect } = require('react-redux'),
 module.exports = connect(state => ({
 	chat: state.chat,
 }))(
-	class Chat extends React.Component {
+	class Chat extends React.PureComponent {
 		constructor(props) {
 			super(props);
 			this.chatRef = React.createRef();

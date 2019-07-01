@@ -1,5 +1,4 @@
 const React = require('react'),
-	store = require('../store'),
 	{ connect } = require('react-redux');
 
 module.exports = connect(state => ({

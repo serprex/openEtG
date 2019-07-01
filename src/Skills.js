@@ -14,6 +14,18 @@ function adrenathrottle(f) {
 		}
 	};
 }
+function quadpillarFactory1(ele) {
+	return (ctx, c, t) => {
+		const n = 1;
+		for (let i = 0; i < n; i++) {
+			const r = ctx.upto(16);
+			c.owner.spend((ele >> ((r & 3) << 2)) & 15, -1);
+			if (c.rng() < 2 / 3) {
+				c.owner.spend((ele >> (r & 12)) & 15, -1);
+			}
+		}
+	};
+}
 function quadpillarFactory(ele) {
 	return (ctx, c, t) => {
 		const n = c.getStatus('charges');
@@ -40,10 +52,7 @@ function passive(f) {
 const Skills = {
 	ablaze: x => {
 		const n = +x;
-		return (ctx, c, t) => {
-			Effect.mkText(n + '|0', c);
-			c.atk += n;
-		};
+		return (ctx, c, t) => c.incrAtk(n);
 	},
 	abomination: passive((ctx, c, t, data) => {
 		if (data.tgt === c.id && data.active === exports.mutation) {
@@ -54,8 +63,7 @@ const Skills = {
 	acceleration: x => {
 		const n = +x;
 		return (ctx, c, t) => {
-			Effect.mkText(`${n}|-1`, c);
-			c.atk += n;
+			c.incrAtk(n);
 			c.dmg(1, true);
 		};
 	},
@@ -67,25 +75,24 @@ const Skills = {
 		Skills.destroy(ctx, c, t);
 		c.buffhp(10);
 		if (c.truehp() > 30) {
-			c.die();
-			if (c.owner.handIds.length < 8) {
-				c.owner.addCard(c.card.as(Cards.BlackHole));
-			}
+			c.remove();
+			c.transform(c.card.as('BlackHole'));
+			c.owner.addCard(c);
 		}
 	},
 	accumulation: (ctx, c, t) => {
 		return c.getStatus('charges');
 	},
 	adrenaline: (ctx, c, t) => {
-		Effect.mkText('Adrenaline', t);
+		ctx.effect({ x: 'Text', text: 'Adrenaline', id: t.id });
 		t.setStatus('adrenaline', 1);
 	},
 	aether: (ctx, c, t) => {
-		Effect.mkText('1:12', c);
+		ctx.effect({ x: 'Text', text: '1:12', id: c.id });
 		c.owner.spend(etg.Aether, -1);
 	},
 	aflatoxin: (ctx, c, t) => {
-		Effect.mkText('Aflatoxin', t);
+		ctx.effect({ x: 'Text', text: 'Aflatoxin', id: t.id });
 		t.addpoison(2);
 		t.setStatus('aflatoxin', 1);
 	},
@@ -96,21 +103,22 @@ const Skills = {
 				cr && cr.card.isOf(Cards.Skeleton) ? dmg + cr.trueatk() : dmg,
 			0,
 		);
-		Effect.mkText(`-${dmg}`, t);
 		t.dmg(dmg);
 	},
 	air: (ctx, c, t) => {
-		Effect.mkText('1:9', c);
+		ctx.effect({ x: 'Text', text: '1:9', id: c.id });
 		c.owner.spend(etg.Air, -1);
 	},
 	alphawolf: (ctx, c, t) => {
 		const pwolf = c.card.as(Cards.PackWolf);
-		c.owner.addCrea(c.owner.newThing(pwolf));
-		c.owner.addCrea(c.owner.newThing(pwolf));
+		for (let i = 0; i < 2; i++) {
+			const wolf = c.owner.newThing(pwolf);
+			ctx.effect({ x: 'StartPos', id: wolf.id, src: c.id });
+			c.owner.addCrea(wolf);
+		}
 	},
 	antimatter: (ctx, c, t) => {
-		Effect.mkText('Antimatter', t);
-		t.atk -= t.trueatk() * 2;
+		t.incrAtk(t.trueatk() * 2);
 	},
 	appease: (ctx, c, t) => {
 		Skills.devour(ctx, c, t);
@@ -135,7 +143,6 @@ const Skills = {
 		c.incrStatus('dive', 1);
 	},
 	bblood: (ctx, c, t) => {
-		Effect.mkText('0|20', t);
 		t.buffhp(20);
 		t.delay(5);
 	},
@@ -169,8 +176,7 @@ const Skills = {
 		}
 	},
 	bless: (ctx, c, t) => {
-		Effect.mkText('3|3', t);
-		t.atk += 3;
+		t.incrAtk(3);
 		t.buffhp(3);
 	},
 	bolsterintodeck: (ctx, c, t) => {
@@ -218,12 +224,17 @@ const Skills = {
 		c.owner.setQuanta(etg.Gravity);
 	},
 	brew: (ctx, c, t) => {
-		Effect.mkText('Brew', c);
-		c.owner.addCard(c.card.as(Cards.Codes[etg.AlchemyList[ctx.upto(12) + 1]]));
+		const inst = c.owner.newThing(
+			c.card.as(Cards.Codes[etg.AlchemyList[ctx.upto(12) + 1]]),
+		);
+		ctx.effect({ x: 'StartPos', id: inst.id, src: c.id });
+		c.owner.addCard(inst);
 	},
 	brokenmirror: (ctx, c, t, fromhand) => {
 		if (fromhand && t.type === etg.Creature && c.ownerId !== t.ownerId) {
-			c.owner.addCrea(c.owner.newThing(c.card.as(Cards.Phantom)));
+			const phantom = c.owner.newThing(c.card.as(Cards.Phantom));
+			ctx.effect({ x: 'StartPos', id: phantom.id, src: c.id });
+			c.owner.addCrea(phantom);
 		}
 	},
 	burrow: (ctx, c, t) => {
@@ -239,7 +250,7 @@ const Skills = {
 		t.castele = etg.Entropy;
 	},
 	catapult: (ctx, c, t) => {
-		Effect.mkText('Catapult', t);
+		ctx.effect({ x: 'Text', text: 'Catapult', id: t.id });
 		t.die();
 		c.owner.foe.dmg(
 			Math.ceil(
@@ -255,7 +266,7 @@ const Skills = {
 		if (!c.owner.creatures[data.index]) {
 			const lives = c.maybeDecrStatus('lives');
 			if (!lives) return;
-			Effect.mkText(`${lives - 1} lives`, c);
+			ctx.effect({ x: 'Text', text: `${lives - 1} lives`, id: c.id });
 			const cl = c.clone(c.ownerId);
 			cl.hp = cl.maxhp = c.card.health;
 			cl.atk = c.card.attack;
@@ -287,11 +298,11 @@ const Skills = {
 	},
 	chromastat: (ctx, c, t) => {
 		const n = c.truehp() + c.trueatk();
-		Effect.mkText(n + ':0', c);
+		ctx.effect({ x: 'Text', text: `${n}:0`, id: c.id });
 		c.owner.spend(0, -n);
 	},
 	clear: (ctx, c, t) => {
-		Effect.mkText('Clear', t);
+		ctx.effect({ x: 'Text', text: 'Clear', id: c.id });
 		t.setStatus('poison', 0);
 		t.setStatus('adrenaline', 0);
 		t.setStatus('aflatoxin', 0);
@@ -334,9 +345,8 @@ const Skills = {
 		const buff = ctx.upto(25),
 			bh = ((buff / 5) | 0) + 1,
 			ba = (buff % 5) + 1;
-		Effect.mkText(`${ba}|${bh}`, t);
 		t.buffhp(bh);
-		t.atk += ba;
+		t.incrAtk(ba);
 	},
 	creatureupkeep: (ctx, c, t) => {
 		if (t.type === etg.Creature) Skills.upkeep(ctx, t);
@@ -367,7 +377,7 @@ const Skills = {
 				return tgting && tgting(c, t);
 			}),
 		);
-		Effect.mkText(choice.name, t);
+		ctx.effect({ x: 'Text', text: choice.name, id: t.id });
 		c.castSpell(t.id, choice.active.get('cast'));
 	},
 	dagger: (ctx, c) => {
@@ -439,14 +449,16 @@ const Skills = {
 	deployblobs: (ctx, c, t) => {
 		const blob = c.card.as(Cards.Blob);
 		for (let i = 0; i < 3; i++) {
-			c.owner.addCrea(c.owner.newThing(blob));
+			const inst = c.owner.newThing(blob);
+			ctx.effect({ x: 'StartPos', id: inst.id, src: c.id });
+			c.owner.addCrea(inst);
 		}
-		c.atk -= 2;
+		c.incrAtk(-2);
 		c.dmg(2);
 	},
 	destroy: (ctx, c, t, dontsalvage, donttalk) => {
 		if (!donttalk) {
-			Effect.mkText('Destroy', t);
+			ctx.effect({ x: 'Text', text: 'Destroy', id: t.id });
 		}
 		if (t.getStatus('stackable')) {
 			if (t.maybeDecrStatus('charges') < 2) {
@@ -473,10 +485,10 @@ const Skills = {
 		t.setStatus('burrowed', 1);
 	},
 	devour: (ctx, c, t) => {
-		Effect.mkText('1|1', c);
+		ctx.effect({ x: 'Text', text: 'Devoured', id: t.id });
 		sfx.playSound('devour');
 		c.buffhp(1);
-		c.atk += 1;
+		c.incrAtk(1);
 		if (t.getStatus('poisonous')) c.addpoison(1);
 		t.die();
 	},
@@ -494,7 +506,7 @@ const Skills = {
 	discping: (ctx, c, t) => {
 		t.dmg(1);
 		c.remove();
-		c.owner.addCardInstance(c);
+		c.owner.addCard(c);
 	},
 	disfield: (ctx, c, t, data) => {
 		if (!c.owner.spend(etg.Chroma, data.dmg)) {
@@ -511,7 +523,7 @@ const Skills = {
 		data.dmg = 0;
 	},
 	dive: (ctx, c, t) => {
-		Effect.mkText('Dive', c);
+		ctx.effect({ x: 'Dive', id: c.id });
 		sfx.playSound('dive');
 		c.setStatus('dive', c.trueatk());
 	},
@@ -528,12 +540,11 @@ const Skills = {
 		c.owner.dmg(-t.spelldmg(2 + Math.floor(c.owner.quanta[etg.Darkness] / 5)));
 	},
 	draft: (ctx, c, t) => {
-		Effect.mkText('Draft', t);
+		ctx.effect({ x: 'Text', text: 'Draft', id: t.id });
 		const isborne = !t.getStatus('airborne');
 		t.setStatus('airborne', isborne);
 		if (isborne) {
-			Effect.mkText('3|0', t);
-			t.atk += 3;
+			t.incrAtk(3);
 			if (t.getSkill('cast') === exports.burrow)
 				t.active = t.active.delete('cast');
 		} else {
@@ -541,14 +552,14 @@ const Skills = {
 		}
 	},
 	drawcopy: (ctx, c, t) => {
-		if (c.ownerId !== t.ownerId) c.owner.addCardInstance(t.clone(c.ownerId));
+		if (c.ownerId !== t.ownerId) c.owner.addCard(t.clone(c.ownerId));
 	},
 	drawequip: (ctx, c, t) => {
 		const deck = c.owner.deck;
 		for (let i = c.owner.deckIds.length - 1; i > -1; i--) {
 			const card = deck[i];
 			if (card.card.type === etg.Weapon || card.card.type === etg.Shield) {
-				if (~c.owner.addCardInstance(card)) {
+				if (~c.owner.addCard(card)) {
 					const deckIds = Array.from(c.owner.deckIds);
 					deckIds.splice(i, 1);
 					c.owner.deckIds = deckIds;
@@ -582,17 +593,17 @@ const Skills = {
 	}),
 	duality: (ctx, c, t) => {
 		if (c.owner.foe.deckIds.length && c.owner.handIds.length < 8) {
-			c.owner.addCardInstance(
+			c.owner.addCard(
 				c.owner.foe.deck[c.owner.foe.deckIds.length - 1].clone(c.ownerId),
 			);
 		}
 	},
 	earth: (ctx, c, t) => {
-		Effect.mkText('1:4', c);
+		ctx.effect({ x: 'Text', text: '1:4', id: c.id });
 		c.owner.spend(etg.Earth, -1);
 	},
 	earthquake: (ctx, c, t) => {
-		Effect.mkText('Earthquake', t);
+		ctx.effect({ x: 'Text', text: 'Earthquake', id: t.id });
 		if (t.getStatus('charges') > 3) {
 			t.incrStatus('charges', -3);
 		} else {
@@ -607,7 +618,7 @@ const Skills = {
 		}
 	}),
 	embezzle: (ctx, c, t) => {
-		Effect.mkText('Embezzle', t);
+		ctx.effect({ x: 'Text', text: 'Embezzle', id: t.id });
 		t.lobo();
 		t.addactive('hit', exports.forcedraw);
 		t.addactive('owndeath', exports.embezzledeath);
@@ -622,7 +633,7 @@ const Skills = {
 	},
 	empathy: (ctx, c, t) => {
 		const healsum = c.owner.countcreatures();
-		Effect.mkText('+' + healsum, c);
+		ctx.effect({ x: 'Text', text: `+${healsum}`, id: c.id });
 		c.owner.dmg(-healsum);
 		if (!c.owner.spend(etg.Life, Math.floor(healsum / 8))) {
 			c.owner.setQuanta(etg.Life);
@@ -630,11 +641,11 @@ const Skills = {
 		}
 	},
 	enchant: (ctx, c, t) => {
-		Effect.mkText('Enchant', t);
+		ctx.effect({ x: 'Text', text: 'Enchant', id: t.id });
 		t.setStatus('immaterial', 1);
 	},
 	endow: (ctx, c, t) => {
-		Effect.mkText('Endow', t);
+		ctx.effect({ x: 'Text', text: 'Endow', id: t.id });
 		for (const [key, val] of t.status) {
 			c.incrStatus(key, key === 'adrenaline' && val > 1 ? 1 : val);
 		}
@@ -645,7 +656,7 @@ const Skills = {
 			c.cast = t.cast;
 			c.castele = t.castele;
 		}
-		c.atk += t.trueatk() - t.trigger('buff');
+		c.incrAtk(t.trueatk() - t.trigger('buff'));
 		c.buffhp(2);
 	},
 	envenom: (ctx, c, t) => {
@@ -701,7 +712,7 @@ const Skills = {
 		return Math.floor(c.owner.quanta[etg.Fire] / 5);
 	},
 	fire: (ctx, c, t) => {
-		Effect.mkText('1:6', c);
+		ctx.effect({ x: 'Text', text: '1:6', id: c.id });
 		c.owner.spend(etg.Fire, -1);
 	},
 	firebolt: (ctx, c, t) => {
@@ -764,10 +775,7 @@ const Skills = {
 		let tgting, tgt;
 		if (t.type === etg.Spell) {
 			const card = t.card;
-			Effect.mkSpriteFadeHandImage(t.card, t, {
-				x: t.ownerId === ctx.player2Id ? -1 : 1,
-				y: 0,
-			});
+			ctx.effect({ x: 'SpriteFadeHandImage', id: t.id });
 			if (t.owner.getStatus('sanctuary')) return;
 			if (card.type === etg.Spell) {
 				tgting = Cards.Targeting[card.active.get('cast').name.get(0)];
@@ -776,15 +784,18 @@ const Skills = {
 			tgting = Cards.Targeting[t.active.get('cast').name.get(0)];
 		}
 		if (tgting && !(tgt = findtgt(tgting))) return;
+		ctx.effect({ x: 'Text', text: 'Forced', id: t.id });
 		const realturn = ctx.turn;
-		ctx.turn = t.owner;
+		ctx.turn = t.ownerId;
 		t.useactive(tgt);
 		ctx.turn = realturn;
 	},
 	fractal: (ctx, c, t) => {
-		Effect.mkText('Fractal', t);
+		ctx.effect({ x: 'Text', text: 'Fractal', t: t.id });
 		for (let i = 6 + Math.floor(c.owner.quanta[etg.Aether] / 2); i > 0; i--) {
-			c.owner.addCard(t.card);
+			const inst = t.owner.newThing(t.card);
+			ctx.effect({ x: 'StartPos', id: inst.id, src: t.id });
+			c.owner.addCard(inst);
 		}
 		c.owner.setQuanta(etg.Aether);
 	},
@@ -794,9 +805,11 @@ const Skills = {
 			t.type === etg.Creature &&
 			t.getStatus('airborne') &&
 			!attackFlags.freedom &&
-			c.rng() < 0.3
-		)
+			ctx.rng() < 0.3
+		) {
+			ctx.effect({ x: 'Free', id: t.id });
 			attackFlags.freedom = true;
+		}
 	},
 	freeevade: (ctx, c, t, data) => {
 		const tgt = ctx.byId(data.tgt);
@@ -815,9 +828,7 @@ const Skills = {
 	freeze: (ctx, c, t) => {
 		t.freeze(c.card.upped ? 4 : 3);
 	},
-	freezeperm: (ctx, c, t) => {
-		Skills.freeze(ctx, c, t);
-	},
+	freezeperm: (ctx, c, t) => Skills.freeze(ctx, c, t),
 	fungusrebirth: (ctx, c, t) => {
 		c.transform(c.card.as(Cards.Fungus));
 	},
@@ -827,7 +838,7 @@ const Skills = {
 		}
 	},
 	gaintimecharge: (ctx, c, t, drawstep) => {
-		if (!drawstep && c.ownerId === t && c.getStatus('chargecap') < 4) {
+		if (!drawstep && c.ownerId === t.id && c.getStatus('chargecap') < 4) {
 			c.incrStatus('chargecap', 1);
 			c.incrStatus('charges', 1);
 		}
@@ -845,7 +856,7 @@ const Skills = {
 			else if (t.type === etg.Creature) c.owner.foe.addCrea(t);
 			else if (t.type === etg.Shield) c.owner.foe.setShield(t);
 			else if (t.type === etg.Weapon) c.owner.foe.setWeapon(t);
-			else c.owner.foe.addCard(t.card);
+			else c.owner.foe.addCard(t);
 		}
 	},
 	golemhit: (ctx, c, t) => {
@@ -861,10 +872,9 @@ const Skills = {
 			t = t.owner;
 			t.gpull = 0;
 		}
-		Effect.mkText('Pull', t);
+		ctx.effect({ x: 'Text', text: 'Pull', id: t.id });
 	},
 	gratitude: (ctx, c, t) => {
-		Effect.mkText('+4', c);
 		c.owner.dmg(-4);
 	},
 	grave: (ctx, c, t) => {
@@ -875,13 +885,11 @@ const Skills = {
 	growth: x => {
 		const n = +x;
 		return (ctx, c, t) => {
-			Effect.mkText(`${n}|${n}`, c);
 			c.buffhp(n);
-			c.atk += n;
+			c.incrAtk(n);
 		};
 	},
 	guard: (ctx, c, t) => {
-		Effect.mkText('Guard', t);
 		c.delay(1);
 		t.delay(1);
 		if (c.getStatus('airborne') || !t.getStatus('airborne')) {
@@ -892,7 +900,7 @@ const Skills = {
 		t = t || c;
 		const storedatk = Math.ceil(t.atk / 2);
 		t.incrStatus('storedAtk', storedatk);
-		t.atk -= storedatk;
+		t.incrAtk(-storedatk);
 	},
 	hammer: (ctx, c, t) => {
 		return c.owner.mark === etg.Gravity || c.owner.mark === etg.Earth ? 1 : 0;
@@ -901,7 +909,7 @@ const Skills = {
 		c.owner.drawcard();
 	},
 	hatch: (ctx, c, t) => {
-		Effect.mkText('Hatch', c);
+		ctx.effect({ x: 'Text', text: 'Hatch', id: c.id });
 		c.transform(c.randomcard(c.card.upped, x => x.type === etg.Creature));
 	},
 	heal: (ctx, c, t) => {
@@ -909,7 +917,9 @@ const Skills = {
 	},
 	heatmirror: (ctx, c, t, fromhand) => {
 		if (fromhand && t.type === etg.Creature && c.ownerId !== t.ownerId) {
-			c.owner.addCrea(c.owner.newThing(c.card.as(Cards.Spark)));
+			const spark = c.owner.newThing(c.card.as(Cards.Spark));
+			ctx.effect({ x: 'StartPos', id: spark.id, src: c.id });
+			c.owner.addCrea(spark);
 		}
 	},
 	hitownertwice: (ctx, c, t) => {
@@ -949,7 +959,7 @@ const Skills = {
 		}
 	},
 	improve: (ctx, c, t) => {
-		Effect.mkText('Improve', t);
+		ctx.effect({ x: 'Text', text: 'Improve', id: t.id });
 		t.setStatus('mutant', 1);
 		t.transform(t.randomcard(false, x => x.type === etg.Creature));
 	},
@@ -959,7 +969,6 @@ const Skills = {
 		}
 	},
 	infect: (ctx, c, t) => {
-		Effect.mkText('Infect', t);
 		t.addpoison(1);
 	},
 	inflation: (ctx, c, t) => {
@@ -1173,15 +1182,14 @@ const Skills = {
 		t.atk += 3;
 	},
 	light: (ctx, c, t) => {
-		Effect.mkText('1:8', c);
+		ctx.effect({ x: 'Text', text: '1:8', id: c.id });
 		c.owner.spend(etg.Light, -1);
 	},
 	lightning: (ctx, c, t) => {
-		Effect.mkText('-5', t);
 		t.spelldmg(5);
 	},
 	liquid: (ctx, c, t) => {
-		Effect.mkText('Liquid', t);
+		ctx.effect({ x: 'Text', text: 'Liquid', id: t.id });
 		t.lobo();
 		t.setSkill('hit', exports.vampire);
 		t.addpoison(1);
@@ -1193,7 +1201,7 @@ const Skills = {
 		t.owner.setWeapon(t);
 	},
 	lobotomize: (ctx, c, t) => {
-		Effect.mkText('Lobotomize', t);
+		ctx.effect({ x: 'Text', text: 'Lobotomize', id: t.id });
 		sfx.playSound('lobo');
 		t.lobo();
 		t.setStatus('psionic', 0);
@@ -1214,7 +1222,7 @@ const Skills = {
 			if (foe.weapon && foe.weapon.isMaterial()) perms.push(foe.weapon);
 			if (foe.shield && foe.shield.isMaterial()) perms.push(foe.shield);
 			if (perms.length) {
-				Effect.mkText('Looted', c);
+				ctx.effect({ x: 'Text', text: 'Looted', id: c.id });
 				Skills.steal(ctx, c, foe.choose(perms));
 				c.addactive('turnstart', exports.salvageoff);
 			}
@@ -1241,9 +1249,8 @@ const Skills = {
 		});
 	},
 	lycanthropy: (ctx, c, t) => {
-		Effect.mkText('5|5', c);
 		c.buffhp(5);
-		c.atk += 5;
+		c.incrAtk(5);
 		c.active = c.active.delete('cast');
 		c.setStatus('nocturnal', 1);
 	},
@@ -1291,7 +1298,9 @@ const Skills = {
 		}
 	},
 	mitosis: (ctx, c, t) => {
-		c.owner.newThing(c.card).play(c);
+		const child = c.owner.newThing(c.card);
+		ctx.effect({ x: 'StartPos', id: child.id, src: c.id });
+		child.play(c);
 	},
 	mitosisspell: (ctx, c, t) => {
 		t.setSkill('cast', exports.mitosis);
@@ -1300,7 +1309,7 @@ const Skills = {
 		t.buffhp(1);
 	},
 	momentum: (ctx, c, t) => {
-		Effect.mkText('Momentum', t);
+		ctx.effect({ x: 'Text', text: 'Momentum', id: t.id });
 		t.atk += 1;
 		t.buffhp(1);
 		t.setStatus('momentum', 1);
@@ -1322,12 +1331,12 @@ const Skills = {
 	mutation: (ctx, c, t) => {
 		const rnd = c.rng();
 		if (rnd < 0.1) {
-			Effect.mkText('Death', t);
+			ctx.effect({ x: 'Text', text: 'Oops', id: t.id });
 			t.die();
 		} else if (rnd < 0.5) {
 			Skills.improve(ctx, c, t);
 		} else {
-			Effect.mkText('Abomination', t);
+			ctx.effect({ x: 'Text', text: 'Abomination', id: t.id });
 			t.transform(Cards.Abomination.asShiny(t.card.shiny));
 		}
 	},
@@ -1345,14 +1354,16 @@ const Skills = {
 	},
 	nightmare: (ctx, c, t) => {
 		if (!c.owner.foe.getStatus('sanctuary')) {
-			Effect.mkText('Nightmare', t);
+			ctx.effect({ x: 'Text', text: 'Nightmare', id: t.id });
 			c.owner.dmg(
 				-c.owner.foe.spelldmg(
 					(8 - c.owner.foe.handIds.length) * (c.card.upped ? 2 : 1),
 				),
 			);
 			for (let i = c.owner.foe.handIds.length; i < 8; i++) {
-				c.owner.foe.addCard(t.card);
+				const inst = t.owner.newThing(t.card);
+				ctx.effect({ x: 'StartPos', id: inst.id, src: t.id });
+				c.owner.foe.addCard(inst);
 			}
 		}
 	},
@@ -1365,9 +1376,8 @@ const Skills = {
 		}
 		c.owner.incrStatus('nova', 2);
 		if (c.owner.getStatus('nova') >= 6) {
-			c.owner.addCrea(
-				c.owner.newThing(Cards.Singularity.asShiny(c.card.shiny)),
-			);
+			c.transform(Cards.Singularity.asShiny(c.card.shiny));
+			c.owner.addCrea(c);
 		}
 	},
 	nova2: (ctx, c, t) => {
@@ -1376,9 +1386,8 @@ const Skills = {
 		}
 		c.owner.incrStatus('nova', 3);
 		if (c.owner.getStatus('nova') >= 6) {
-			c.owner.addCrea(
-				c.owner.newThing(Cards.Singularity.asUpped(true).asShiny(c.card.shiny)),
-			);
+			c.transform(Cards.Singularity.asUpped(true).asShiny(c.card.shiny));
+			c.owner.addCrea(c);
 		}
 	},
 	nullspell: (ctx, c, t) => {
@@ -1400,7 +1409,7 @@ const Skills = {
 		}
 	},
 	nymph: (ctx, c, t) => {
-		Effect.mkText('Nymph', t);
+		ctx.effect({ x: 'Text', text: 'Nymph', id: t.id });
 		const tauto = t.active.get('ownattack');
 		const e =
 			t.card.element ||
@@ -1412,18 +1421,23 @@ const Skills = {
 				? c.choose([etg.Entropy, etg.Gravity, etg.Time, etg.Aether])
 				: ctx.upto(12) + 1);
 		Skills.destroy(ctx, c, t, true, true);
-		t.owner.addCrea(t.owner.newThing(t.card.as(Cards.Codes[etg.NymphList[e]])));
+		const nymph = t.owner.newThing(t.card.as(Cards.Codes[etg.NymphList[e]]));
+		ctx.effect({ x: 'StartPos', id: nymph.id, src: t.id });
+		t.owner.addCrea(nymph);
 	},
 	obsession: passive((ctx, c, t) => {
 		c.owner.spelldmg(c.card.upped ? 10 : 8);
 	}),
 	ouija: (ctx, c, t) => {
-		if (!c.owner.foe.getStatus('sanctuary') && c.owner.foe.handIds.length < 8) {
-			c.owner.foe.addCard(Cards.OuijaEssence);
+		const { foe } = c.owner;
+		if (!foe.getStatus('sanctuary') && foe.handIds.length < 8) {
+			const inst = foe.newThing(Cards.OuijaEssence);
+			ctx.effect({ x: 'StartPos', id: inst.id, src: c.id });
+			foe.addCard(inst);
 		}
 	},
 	pacify: (ctx, c, t) => {
-		t.atk -= t.trueatk();
+		t.incrAtk(-t.trueatk());
 	},
 	pairproduce: (ctx, c, t) => {
 		c.owner.permanents.forEach(p => {
@@ -1462,16 +1476,17 @@ const Skills = {
 		}
 	},
 	paradox: (ctx, c, t) => {
-		Effect.mkText('Paradox', t);
+		ctx.effect({ x: 'Text', text: 'Paradox', id: t.id });
 		t.die();
 	},
 	parallel: (ctx, c, t) => {
-		Effect.mkText('Parallel', t);
+		ctx.effect({ x: 'Text', text: 'Parallel', id: t.id });
 		if (t.card.isOf(Cards.Chimera)) {
 			Skills.chimera(ctx, c);
 			return;
 		}
 		const copy = t.clone(c.ownerId);
+		ctx.effect({ x: 'StartPos', id: copy.id, src: t.id });
 		c.owner.addCrea(copy);
 		if (copy.getStatus('mutant')) {
 			const buff = ctx.upto(25);
@@ -1495,13 +1510,13 @@ const Skills = {
 		if (!c.owner.creatures[data.index]) {
 			const ash = c.owner.newThing(c.card.as(Cards.Ash));
 			ash.type = etg.Creature;
-			const creatures = c.owner.creatureIds;
+			const creatures = new Uint32Array(c.owner.creatureIds);
 			creatures[data.index] = ash.id;
 			c.owner.creatureIds = creatures;
 		}
 	},
 	photosynthesis: (ctx, c, t) => {
-		Effect.mkText('2:5', c);
+		ctx.effect({ x: 'Text', text: '2:5', id: c.id });
 		c.owner.spend(etg.Life, -2);
 		if (c.cast > 0) c.usedactive = false;
 	},
@@ -1509,9 +1524,7 @@ const Skills = {
 		t.masscc(c, Skills.infect);
 	},
 	platearmor: (ctx, c, t) => {
-		const buff = c.card.upped ? 6 : 4;
-		Effect.mkText('0|' + buff, t);
-		t.buffhp(buff);
+		t.buffhp(c.card.upped ? 6 : 4);
 	},
 	poison: x => {
 		const n = +x;
@@ -1531,9 +1544,9 @@ const Skills = {
 		const tgt = c.owner.creatures[c.choose(ti)],
 			halfatk = Math.floor(t.trueatk() / 2),
 			halfhp = Math.floor(t.truehp() / 2);
-		t.atk -= halfatk;
+		t.incrAtk(-halfatk);
 		t.buffhp(-halfhp);
-		tgt.atk += halfatk;
+		tgt.incrAtk(halfatk);
 		tgt.buffhp(halfhp);
 	},
 	precognition: (ctx, c, t) => {
@@ -1581,13 +1594,13 @@ const Skills = {
 		if (t.type === etg.Player) t.setStatus('sosa', 0);
 	},
 	quint: (ctx, c, t) => {
-		Effect.mkText('Immaterial', t);
+		ctx.effect({ x: 'Text', text: 'Immaterial', id: t.id });
 		t.setStatus('immaterial', 1);
 		t.setStatus('frozen', 0);
 	},
 	quinttog: (ctx, c, t) => {
 		if (t.getStatus('immaterial')) {
-			Effect.mkText('Materialize', t);
+			ctx.effect({ x: 'Text', text: 'Material', id: t.id });
 			t.setStatus('immaterial', 0);
 		} else Skills.quint(ctx, c, t);
 	},
@@ -1596,13 +1609,12 @@ const Skills = {
 	},
 	rage: (ctx, c, t) => {
 		const dmg = c.card.upped ? 6 : 5;
-		Effect.mkText(dmg + '|-' + dmg, t);
-		t.atk += dmg;
+		t.incrAtk(dmg);
 		t.spelldmg(dmg);
 		t.setStatus('frozen', 0);
 	},
 	readiness: (ctx, c, t) => {
-		Effect.mkText('Ready', t);
+		ctx.effect({ x: 'Text', text: 'Ready', id: t.id });
 		if (t.active.has('cast')) {
 			t.cast = 0;
 			t.usedactive = false;
@@ -1625,7 +1637,7 @@ const Skills = {
 			const skele = t.owner.newThing(t.card.as(Cards.Skeleton));
 			skele.atk = atk;
 			skele.maxhp = skele.hp = hp;
-			c.owner.setCrea(index, skele.id);
+			t.owner.setCrea(index, skele.id);
 		}
 	},
 	rebirth: (ctx, c, t) => {
@@ -1640,7 +1652,7 @@ const Skills = {
 		c.owner.incrStatus('poison', -1);
 	}),
 	regenerate: (ctx, c, t) => {
-		Effect.mkText('+5', c);
+		ctx.effect({ x: 'Text', text: '+5', id: c.id });
 		c.owner.dmg(-5);
 	},
 	regeneratespell: (ctx, c, t) => {
@@ -1657,14 +1669,13 @@ const Skills = {
 	reinforce: (ctx, c, t) => {
 		const atk = c.trueatk(),
 			hp = c.truehp();
-		Effect.mkText(atk + '|' + hp, t);
-		t.atk += atk;
+		t.incrAtk(atk);
 		t.buffhp(hp);
 		c.remove();
 	},
 	ren: (ctx, c, t) => {
 		if (!t.hasactive('predeath', 'bounce')) {
-			Effect.mkText('Ren', t);
+			ctx.effect({ x: 'Text', text: 'Ren', id: t.id });
 			t.addactive('predeath', exports.bounce);
 		}
 	},
@@ -1675,7 +1686,7 @@ const Skills = {
 		c.owner.setStatus('precognition', 1);
 	},
 	rewind: (ctx, c, t) => {
-		Effect.mkText('Rewind', t);
+		ctx.effect({ x: 'Text', text: 'Rewind', id: t.id });
 		t.remove();
 		t.owner.deckpush(t.owner.newThing(t.card).id);
 	},
@@ -1715,9 +1726,11 @@ const Skills = {
 			!c.hasactive('turnstart', 'salvageoff') &&
 			ctx.turn !== c.ownerId
 		) {
-			Effect.mkText('Salvage', c);
+			ctx.effect({ x: 'Text', text: 'Salvage', id: c.id });
 			data.salvaged = true;
-			c.owner.addCard(t.card);
+			const inst = c.owner.newThing(t.card);
+			ctx.effect({ x: 'StartPos', id: inst.id, src: t.id });
+			c.owner.addCard(inst);
 			c.addactive('turnstart', exports.salvageoff);
 		}
 	}),
@@ -1757,7 +1770,9 @@ const Skills = {
 				);
 			});
 			anyentro |= card.element === etg.Entropy;
-			c.owner.addCard(card.asShiny(c.card.shiny));
+			const inst = c.owner.newThing(card.asShiny(c.card.shiny));
+			ctx.effect({ x: 'StartPos', id: inst.id, src: c.id });
+			c.owner.addCard(inst);
 		}
 	},
 	shardgolem: (ctx, c, t) => {
@@ -1774,7 +1789,7 @@ const Skills = {
 		}
 	},
 	shtriga: (ctx, c, t) => {
-		if (c.ownerId === t) c.setStatus('immaterial', 1);
+		if (c.ownerId === t.id) c.setStatus('immaterial', 1);
 	},
 	shuffle3: (ctx, c, t) => {
 		const deckIds = Array.from(c.owner.deckIds);
@@ -1808,9 +1823,9 @@ const Skills = {
 		} else if (r > 0.4) {
 			const buff = ctx.upto(25);
 			c.buffhp(Math.floor(buff / 5) + 1);
-			c.atk -= (buff % 5) + 1;
+			c.incrAtk(-(buff % 5) - 1);
 		} else if (r > 0.3) {
-			Skills.nova(ctx, c.owner.foe);
+			c.owner.spend(etg.Chroma, -12);
 		} else if (r > 0.2) {
 			Skills.parallel(ctx, c, c);
 		} else if (r > 0.1) {
@@ -1821,7 +1836,7 @@ const Skills = {
 		t.attack(t.owner);
 	},
 	sinkhole: (ctx, c, t) => {
-		Effect.mkText('Sinkhole', t);
+		ctx.effect({ x: 'Text', text: 'Sinkhole', id: c.id });
 		t.setStatus('burrowed', 1);
 		t.setStatus('airborne', 0);
 		t.lobo();
@@ -1835,12 +1850,12 @@ const Skills = {
 			!c.owner.foe.getStatus('sanctuary') &&
 			c.owner.foe.spend(etg.Chroma, 1)
 		) {
-			Effect.mkText('1:11', c);
+			ctx.effect({ x: 'Text', text: '1:11', id: c.id });
 			c.owner.spend(etg.Darkness, -1);
 		}
 	}),
 	siphonactive: (ctx, c, t) => {
-		Effect.mkText('Siphon', t);
+		ctx.effect({ x: 'Text', text: 'Siphon', id: c.id });
 		c.lobo();
 		for (const [key, act] of t.active) {
 			if (!act.passive) c.setSkill(key, act);
@@ -1851,10 +1866,8 @@ const Skills = {
 		t.lobo();
 	},
 	siphonstrength: (ctx, c, t) => {
-		Effect.mkText('+1|0', c);
-		Effect.mkText('-1|0', t);
-		t.atk--;
-		c.atk++;
+		t.incrAtk(-1);
+		c.incrAtk(1);
 	},
 	skeleton: passive((ctx, c, t, data) => {
 		if (data.tgt === c.id && data.active === exports.rewind) {
@@ -1866,31 +1879,34 @@ const Skills = {
 		c.owner.setQuanta(etg.Air);
 		c.owner.creatures.forEach(cr => {
 			if (cr && cr.getStatus('airborne')) {
-				Effect.mkText('Dive', cr);
+				ctx.effect({ x: 'Dive', id: cr.id });
 				cr.incrStatus('dive', cr.trueatk());
 			}
 		});
 	},
 	snipe: (ctx, c, t) => {
-		Effect.mkText('-3', t);
 		t.dmg(3);
 	},
 	sosa: (ctx, c, t) => {
-		c.owner.setStatus('sosa', 2);
 		const quanta = new Int8Array(13);
 		quanta[etg.Death] = c.owner.quanta[etg.Death];
 		ctx.set(c.ownerId, 'quanta', quanta);
 		const n = c.card.upped ? 40 : 48;
+		c.owner.setStatus('sosa', 0);
 		c.owner.dmg(Math.max(Math.ceil((c.owner.maxhp * n) / 100), n), true);
+		c.owner.setStatus('sosa', 2);
 	},
 	soulcatch: (ctx, c, t) => {
-		Effect.mkText('Soul', c);
+		ctx.effect({ x: 'Text', text: '3:2', id: c.id });
 		c.owner.spend(etg.Death, -3);
 	},
 	spores: (ctx, c, t) => {
 		const spore = c.card.as(Cards.Spore);
-		c.owner.addCrea(c.owner.newThing(spore));
-		c.owner.addCrea(c.owner.newThing(spore));
+		for (let i = 0; i < 2; i++) {
+			const inst = c.owner.newThing(spore);
+			ctx.effect({ x: 'StartPos', id: inst.id, src: c.id });
+			c.owner.addCrea(inst);
+		}
 	},
 	sskin: (ctx, c, t) => {
 		c.owner.buffhp(c.owner.quanta[etg.Earth]);
@@ -1925,6 +1941,7 @@ const Skills = {
 			const inst = t.clone(c.ownerId);
 			inst.setStatus('charges', 1);
 			Skills.destroy(ctx, c, t, true, true);
+			ctx.effect({ x: 'StartPos', id: inst.id, src: t.id });
 			t = inst;
 		} else {
 			t.remove();
@@ -1935,14 +1952,12 @@ const Skills = {
 		else c.owner.setShield(t);
 	},
 	steam: (ctx, c, t) => {
-		Effect.mkText('5|0', c);
 		c.incrStatus('steam', 5);
-		c.atk += 5;
+		c.incrAtk(5);
 		if (!c.hasactive('postauto', 'decrsteam'))
 			c.addactive('postauto', exports.decrsteam);
 	},
 	stoneform: (ctx, c, t) => {
-		Effect.mkText('0|20', c);
 		c.buffhp(20);
 		c.active = c.active.delete('cast');
 		c.setStatus('golem', 1);
@@ -1955,7 +1970,9 @@ const Skills = {
 	},
 	summon: name => {
 		return (ctx, c, t) => {
-			c.owner.addCrea(c.owner.newThing(c.card.as(Cards[name])));
+			const inst = c.owner.newThing(c.card.as(Cards[name]));
+			ctx.effect({ x: 'StartPos', id: inst.id, src: c.id });
+			c.owner.addCrea(inst);
 		};
 	},
 	swarm: passive((ctx, c, t) => {
@@ -1966,20 +1983,17 @@ const Skills = {
 	}),
 	swave: (ctx, c, t) => {
 		if (t.getStatus('frozen')) {
-			Effect.mkText('Death', t);
+			ctx.effect({ x: 'Text', text: 'Shatter', id: t.id });
 			t.die();
 		} else {
 			if (t.type === etg.Player && t.weaponId && t.weapon.getStatus('frozen')) {
 				Skills.destroy(ctx, c, t.weapon);
 			}
-			Effect.mkText('-4', t);
 			t.spelldmg(4);
 		}
 	},
 	tempering: (ctx, c, t) => {
-		const atk = c.card.upped ? 5 : 3;
-		Effect.mkText(atk + '|0', t);
-		t.atk += atk;
+		t.incrAtk(c.card.upped ? 5 : 3);
 		t.setStatus('frozen', 0);
 	},
 	tesseractsummon: (ctx, c, t) => {
@@ -1995,6 +2009,7 @@ const Skills = {
 				const idx = pl.choose(candidates),
 					[crid] = deckIds.splice(idx, 1),
 					cr = ctx.byId(crid);
+				ctx.effect({ x: 'StartPos', id: cr.id, src: c.id });
 				pl.addCrea(cr);
 				cr.freeze(Math.ceil(cr.card.cost / 4));
 				pl.deckIds = deckIds;
@@ -2003,7 +2018,6 @@ const Skills = {
 	},
 	throwrock: (ctx, c, t) => {
 		const dmg = c.card.upped ? 4 : 3;
-		Effect.mkText('-' + dmg, t);
 		t.dmg(dmg);
 		const deckIds = Array.from(t.owner.deckIds);
 		deckIds.splice(
@@ -2043,7 +2057,7 @@ const Skills = {
 			if (pl.shieldId && pl.shield.isMaterial()) perms.push(pl.shield);
 			if (perms.length) {
 				const pr = pl.choose(perms);
-				Effect.mkText('Shuffled', pr);
+				ctx.effect({ x: 'Text', text: 'Shuffled', id: pr.id });
 				const newpl = ctx.upto(2) ? pl : pl.foe;
 				const deckIds = Array.from(newpl.deckIds);
 				deckIds.splice(
@@ -2096,7 +2110,9 @@ const Skills = {
 	unsummon: (ctx, c, t) => {
 		if (t.owner.handIds.length < 8) {
 			t.remove();
-			t.owner.addCard(t.card);
+			const inst = t.owner.newThing(t.card);
+			ctx.effect({ x: 'StartPos', id: inst.id, src: c.id });
+			t.owner.addCard(inst);
 		} else {
 			Skills.rewind(ctx, c, t);
 		}
@@ -2105,10 +2121,10 @@ const Skills = {
 		if (!c.owner.spend(c.card.element, 1)) c.die();
 	},
 	upload: (ctx, c, t) => {
-		Effect.mkText('2|0', t);
-		t.atk += c.dmg(2);
+		t.incrAtk(c.dmg(2));
 	},
 	vampire: (ctx, c, t, dmg) => {
+		ctx.effect({ x: 'Text', text: `+${dmg}`, id: c.id });
 		c.owner.dmg(-dmg);
 	},
 	vend: (ctx, c) => {
@@ -2174,7 +2190,7 @@ const Skills = {
 		} else c.owner.spend(etg.Water, -3);
 	},
 	web: (ctx, c, t) => {
-		Effect.mkText('Web', t);
+		ctx.effect({ x: 'Text', text: 'Web', id: t.id });
 		t.setStatus('airborne', 0);
 	},
 	wind: (ctx, c, t) => {
@@ -2182,8 +2198,7 @@ const Skills = {
 		c.setStatus('storedAtk', 0);
 	},
 	wisdom: (ctx, c, t) => {
-		Effect.mkText('3|0', t);
-		t.atk += 3;
+		t.incrAtk(3);
 		if (t.getStatus('immaterial')) {
 			t.setStatus('psionic', 1);
 		}
@@ -2195,7 +2210,7 @@ const Skills = {
 			t.remove();
 			if (c.owner.handIds.length < 8) {
 				t.ownerId = c.ownerId;
-				c.owner.addCardInstance(t);
+				c.owner.addCard(t);
 			}
 		}
 	},
@@ -2214,6 +2229,9 @@ const Skills = {
 	pillmat: quadpillarFactory(18041), //4,6,7,9
 	pillspi: quadpillarFactory(9611), //2,5,8,11
 	pillcar: quadpillarFactory(5036), //1,3,10,12
+	pillmat1: quadpillarFactory1(18041), //4,6,7,9
+	pillspi1: quadpillarFactory1(9611), //2,5,8,11
+	pillcar1: quadpillarFactory1(5036), //1,3,10,12
 	absorbdmg: (ctx, c, t, data) => {
 		c.incrStatus('storedpower', data.blocked);
 	},
@@ -2245,8 +2263,7 @@ const Skills = {
 				return cr && cr.hasactive('ownattack', 'siphon') ? chance + 1 : chance;
 			}, 0);
 			if (c.rng() < 1.4 - Math.pow(0.95, chance)) {
-				Effect.mkText('-1|-1', t);
-				t.atk--;
+				t.incrAtk(-1);
 				t.dmg(1);
 			}
 		}
@@ -2275,7 +2292,6 @@ const Skills = {
 	},
 	firewall: (ctx, c, t) => {
 		if (!t.getStatus('ranged')) {
-			Effect.mkText('-1', t);
 			t.dmg(1);
 		}
 	},
@@ -2322,7 +2338,7 @@ const Skills = {
 function unsummon(t) {
 	t.remove();
 	if (t.owner.handIds.length < 8) {
-		t.owner.addCardInstance(t);
+		t.owner.addCard(t);
 	} else {
 		t.owner.deckpush(t.id);
 	}
@@ -2335,5 +2351,4 @@ for (const key in Skills) {
 	);
 }
 var Cards = require('./Cards');
-var Effect = require('./Effect');
 var parseSkill = require('./parseSkill');

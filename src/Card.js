@@ -67,12 +67,12 @@ function Card(type, info) {
 	} else this.status = new imm.Map();
 }
 Object.defineProperty(Card.prototype, 'shiny', {
-	get: function() {
+	get() {
 		return !!(this.code & 16384);
 	},
 });
 Object.defineProperty(Card.prototype, 'upped', {
-	get: function() {
+	get() {
 		return (this.code & 0x3fff) > 6999;
 	},
 });

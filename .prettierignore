@@ -1,5 +1,5 @@
-bundle.js
+bundle/*
+node_modules/*
 *.min.js
-*ify.js
 *.css
 *.json

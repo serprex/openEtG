@@ -9,9 +9,7 @@ favicon.png
 .ninja_deps
 *.sh
 *.pem
-bundle.*.js
-bundle.*.js.map
-*.min.*
+bundle/*
 *.exe
 *.gz
 *.rdb

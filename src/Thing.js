@@ -25,25 +25,25 @@ function Thing(game, id) {
 module.exports = Thing;
 function defineProp(key) {
 	Object.defineProperty(Thing.prototype, key, {
-		get: function() {
+		get() {
 			return this.game.get(this.id, key);
 		},
-		set: function(val) {
+		set(val) {
 			this.game.set(this.id, key, val);
 		},
 	});
 }
 Object.defineProperty(Thing.prototype, 'ownerId', {
-	get: function() {
+	get() {
 		return this.game.get(this.id, 'owner');
 	},
-	set: function(val) {
+	set(val) {
 		if (val && typeof val !== 'number') throw new Error(`Invalid id: ${val}`);
 		this.game.set(this.id, 'owner', val);
 	},
 });
 Object.defineProperty(Thing.prototype, 'owner', {
-	get: function() {
+	get() {
 		return this.game.byId(this.game.get(this.id, 'owner'));
 	},
 });
@@ -77,7 +77,7 @@ Thing.prototype.clone = function(ownerId) {
 const sfx = require('./audio');
 
 Thing.prototype.toString = function() {
-	return this.card.name;
+	return this.card && this.card.name;
 };
 Thing.prototype.transform = function(card) {
 	this.card = card;
@@ -92,7 +92,7 @@ Thing.prototype.transform = function(card) {
 	if (this.status.get('mutant')) {
 		const buff = this.upto(25);
 		this.buffhp(Math.floor(buff / 5));
-		this.atk += buff % 5;
+		this.incrAtk(buff % 5);
 		this.mutantactive();
 	} else {
 		this.cast = card.cast;
@@ -103,6 +103,8 @@ Thing.prototype.getIndex = function() {
 	const { id, owner, type } = this;
 	let arrName;
 	switch (type) {
+		case etg.Player:
+			return this.game.players.indexOf(this.id);
 		case etg.Weapon:
 			return owner.weaponId === id ? 0 : -1;
 		case etg.Shield:
@@ -170,9 +172,9 @@ Thing.prototype.die = function() {
 			cell.ownerId = this.ownerId;
 			cell.type = etg.Creature;
 		}
-		if (this.game.bonusstats && this.ownerId === this.game.player2Id) {
+		if (this.game.bonusstats) {
 			this.game.updateIn(
-				[this.game.id, 'bonusstats', 'creatureskilled'],
+				[this.game.id, 'bonusstats', 'creatureskilled', this.id],
 				(x = 0) => x + 1,
 			);
 		}
@@ -182,10 +184,9 @@ Thing.prototype.die = function() {
 Thing.prototype.deatheffect = function(index) {
 	const data = { index };
 	this.proc('death', data);
-	if (~index)
-		Effect.mkDeath(
-			ui.creaturePos(this.ownerId === this.game.player1Id ? 0 : 1, index),
-		);
+	if (~index) {
+		this.game.effect({ x: 'Death', id: this.id });
+	}
 };
 Thing.prototype.trigger = function(name, t, param) {
 	const a = this.active.get(name);
@@ -292,6 +293,10 @@ Thing.prototype.place = function(owner, type, fromhand) {
 	this.game.set(this.id, 'type', type);
 	this.proc('play', fromhand);
 };
+Thing.prototype.incrAtk = function(x) {
+	this.game.effect({ x: 'Atk', id: this.id, amt: x });
+	this.atk += x;
+};
 Thing.prototype.dmg = function(x, dontdie) {
 	if (!x) return 0;
 	else if (this.type === etg.Weapon) return x < 0 ? 0 : this.owner.dmg(x);
@@ -299,6 +304,7 @@ Thing.prototype.dmg = function(x, dontdie) {
 		const dmg =
 			x < 0 ? Math.max(this.hp - this.maxhp, x) : Math.min(this.truehp(), x);
 		this.hp -= dmg;
+		this.game.effect({ x: 'Dmg', id: this.id, amt: dmg });
 		this.proc('dmg', dmg);
 		if (this.truehp() <= 0) {
 			if (!dontdie) this.die();
@@ -312,6 +318,7 @@ Thing.prototype.spelldmg = function(x, dontdie) {
 Thing.prototype.addpoison = function(x) {
 	if (this.type === etg.Weapon) this.owner.addpoison(x);
 	else if (!this.active.has('ownpoison') || this.trigger('ownpoison')) {
+		this.game.effect({ x: 'Poison', id: this.id, amt: x });
 		sfx.playSound('poison');
 		this.incrStatus('poison', x);
 		if (this.status.get('voodoo')) {
@@ -320,14 +327,14 @@ Thing.prototype.addpoison = function(x) {
 	}
 };
 Thing.prototype.delay = function(x) {
-	Effect.mkText('Delay', this);
+	this.game.effect({ x: 'Delay', id: this.id, amt: x });
 	sfx.playSound('stasis');
 	this.incrStatus('delayed', x);
 	if (this.status.get('voodoo')) this.owner.foe.delay(x);
 };
 Thing.prototype.freeze = function(x) {
 	if (!this.active.has('ownfreeze') || this.trigger('ownfreeze')) {
-		Effect.mkText('Freeze', this);
+		this.game.effect({ x: 'Freeze', id: this.id, amt: x });
 		sfx.playSound('freeze');
 		if (x > this.getStatus('frozen')) this.setStatus('frozen', x);
 		if (this.status.get('voodoo')) this.owner.foe.freeze(x);
@@ -352,11 +359,11 @@ const mutantabilities = [
 	'mend',
 	'paradox',
 	'lycanthropy',
-	'growth 1',
 	'infect',
 	'gpull',
 	'devour',
 	'mutation',
+	'growth 1',
 	'growth 2',
 	'ablaze 2',
 	'poison 1',
@@ -371,7 +378,7 @@ Thing.prototype.mutantactive = function() {
 	if (index < 0) {
 		this.setStatus(['momentum', 'immaterial'][~index], 1);
 	} else {
-		const active = Skills[mutantabilities[index]];
+		const active = parseSkill(mutantabilities[index]);
 		if (mutantabilities[index] === 'growth 1') {
 			this.addactive('death', active);
 		} else {
@@ -452,7 +459,7 @@ Thing.prototype.castSpell = function(tgt, active, nospell) {
 	const data = { tgt, active };
 	this.proc('prespell', data);
 	if (data.evade) {
-		if (tgt) Effect.mkText('Evade', this.game.byId(tgt));
+		if (tgt) this.game.effect({ x: 'Text', text: 'Evade', id: tgt });
 	} else {
 		active.func(this.game, this, this.game.byId(data.tgt));
 		if (!nospell) this.proc('spell', data);
@@ -482,9 +489,9 @@ Thing.prototype.useactive = function(t) {
 		if (owner.getStatus('neuro')) owner.addpoison(1);
 		this.play(t, true);
 		this.proc('cardplay');
-		if (this.game.bonusstats && this.ownerId === this.game.player1Id) {
+		if (this.game.bonusstats) {
 			this.game.updateIn(
-				[this.game.id, 'bonusstats', 'cardsplayed'],
+				[this.game.id, 'bonusstats', 'cardsplayed', this.id],
 				(x = 6) => {
 					const a = new Int32Array(x);
 					a[this.card.type]++;
@@ -647,10 +654,8 @@ Thing.prototype.incrStatus = function(key, val) {
 	this.game.updateIn([this.id, 'status', key], (x = 0) => x + val);
 };
 
-var ui = require('./ui');
 var audio = require('./audio');
 var Cards = require('./Cards');
-var Effect = require('./Effect');
 var Skills = require('./Skills');
 var skillText = require('./skillText');
 var parseSkill = require('./parseSkill');

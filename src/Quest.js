@@ -6,6 +6,7 @@ const util = require('./util');
 const RngMock = require('./RngMock');
 const etgutil = require('./etgutil');
 const Cards = require('./Cards');
+const Game = require('./Game');
 
 exports.requireQuest = function(quest, user) {
 	return quest.questdependencies.every(dependency => user.quests[dependency]);
@@ -108,10 +109,10 @@ quarks.spirit4 = {
 quarks.spirit5 = {
 	deck: '0b606015ur025us035up025uu025v2035vb015uo025uv015v8025ul018pi',
 	name: 'Spirit of the Dark Maiden',
-	morph: card =>
-		RngMock.randomcard(
+	morph: (inst, card) =>
+		inst.randomcard(
 			card.upped,
-			x => x.element == etg.Darkness && x.type == card.type,
+			x => x.element === etg.Darkness && x.type === card.type,
 		),
 	wintext:
 		"As the maiden falls, your powers return to normal, and your allies settle back into their original forms.\
@@ -630,15 +631,25 @@ exports.mkQuestAi = function(quest, datafn) {
 		quest,
 		wintext: quest.wintext || '',
 		noheal: quest.noheal,
-		deck: quest.deck,
-		urdeck: urdeck,
 		seed: util.randint(),
-		p2hp: hp,
-		p2markpower: markpower,
-		foename: quest.name,
-		p1hp: playerHPstart,
-		p2drawpower: drawpower,
-		ai: 1,
+		players: [
+			{
+				idx: 1,
+				name: user.name,
+				user: user.name,
+				deck: urdeck,
+				hp: playerHPstart,
+			},
+			{
+				idx: 2,
+				ai: 1,
+				name: quest.name,
+				deck: quest.deck,
+				hp: hp,
+				markpower: markpower,
+				drawpower: drawpower,
+			},
+		],
 	};
 	if (!user.quests[quest.key]) {
 		data.cardreward = quest.cardreward;
@@ -646,11 +657,11 @@ exports.mkQuestAi = function(quest, datafn) {
 		data.choicerewards = quest.choicerewards;
 		data.rewardamount = quest.rewardamount;
 	}
-	const game = require('./mkGame')(datafn ? datafn(data) : data);
+	RngMock.shuffle(data.players);
+	const game = new Game(datafn ? datafn(data) : data);
 	if (quest.morph) {
-		game.player1.deckIds = game.player1.deck.map(
-			x => game.player1.newThing(quest.morph(x.card)).id,
-		);
+		const pl = game.byUser(user.name);
+		pl.deckIds = pl.deck.map(x => pl.newThing(quest.morph(x.card)).id);
 	}
 	return game;
 };

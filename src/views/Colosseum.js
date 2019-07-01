@@ -26,13 +26,11 @@ function mkDaily(type) {
 							endurance: 1,
 							daily: 2,
 					  };
-			dataNext.ai = 1;
 			dataNext.cost = 0;
 			dataNext.cardreward = '';
 			dataNext.rematch = props =>
 				!(props.user.daily & (1 << type)) && mkDaily(type);
-			dataNext.rematchFilter = props =>
-				props.game.winner !== props.game.player1Id;
+			dataNext.rematchFilter = (props, p1id) => props.game.winner !== p1id;
 			dataNext.dataNext = dataNext;
 			return Object.assign(data, dataNext);
 		});
@@ -40,9 +38,9 @@ function mkDaily(type) {
 		game = mkAi.mkPremade(type == 3 ? 1 : 3, type, data => {
 			data.colobonus = type == 3 ? 4 : 1;
 			data.rematch = undefined;
-			sock.userExec('donedaily', { daily: type });
 			return data;
 		});
+		sock.userExec('donedaily', { daily: type });
 	}
 	mkAi.run(game);
 }
