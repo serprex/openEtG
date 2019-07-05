@@ -76,7 +76,7 @@ const Skills = {
 		c.buffhp(10);
 		if (c.truehp() > 30) {
 			c.remove();
-			c.transform(c.card.as('BlackHole'));
+			c.transform(c.card.as(Cards.BlackHole));
 			c.owner.addCard(c);
 		}
 	},
