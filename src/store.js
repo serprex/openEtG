@@ -1,5 +1,6 @@
 'use strict';
-const usercmd = require('./usercmd'),
+const imm = require('immutable'),
+	usercmd = require('./usercmd'),
 	redux = require('redux'),
 	React = require('react'),
 	sfx = require('./audio'),
@@ -100,9 +101,9 @@ exports.store = redux.createStore(
 					span = (
 						<React.Fragment key={state.chatid}>{action.span}</React.Fragment>
 					);
-				chat.set(name, (chat.get(name) || []).concat([span]));
+				chat.set(name, (chat.get(name) || new imm.List()).push(span));
 				if (action.name === 'System')
-					chat.set('Main', (chat.get('Main') || []).concat([span]));
+					chat.set('Main', (chat.get('Main') || new List()).push(span));
 				return { ...state, chat, chatid: state.chatid + 1 };
 			}
 		}

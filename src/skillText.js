@@ -245,7 +245,7 @@ const data = {
 	infect: 'Poison target creature',
 	inflation: 'Increase cost of all actives by 1',
 	ink: 'Summon a Cloak which lasts 1 turn',
-	innovation: 'Discard target card, owner mills one & draws 3',
+	innovation: 'Discard target card, owner draws 3. Mill self one',
 	integrity: 'Combine all shards in hand to form a Shard Golem',
 	jelly:
 		'Target creature becomes a 7|4 Pink Jelly with active Pink Jelly costing 4 of their element',

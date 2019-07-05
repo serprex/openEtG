@@ -376,7 +376,9 @@ const ThingInstCore = connect(({ opts }) => ({ lofiArt: opts.lofiArt }))(
 						style={{
 							position: 'absolute',
 							left: '0',
-							top: '0',
+							top: isSpell ? '0' : '10px',
+							width: 64 * scale + 'px',
+							height: 64 * scale + 'px',
 						}}
 					/>
 				)}
@@ -458,7 +460,6 @@ module.exports = connect(({ user }) => ({ user }))(
 				tooltip: null,
 				foeplays: [],
 				resigning: false,
-				effects: null,
 				gameProps: null,
 				expectedDamage: new Int16Array(2),
 				replayindex: 0,
@@ -467,44 +468,91 @@ module.exports = connect(({ user }) => ({ user }))(
 				player2: player1.foe,
 				fxid: 0,
 				startPos: new imm.Map(),
-				effects: [],
+				fxTextPos: new imm.Map(),
+				fxStatChange: new imm.Map(),
+				effects: new imm.OrderedSet(),
 			};
 		}
 
-		Text = ({ id, text, fxid }) => (
-			<GetIdPos id={id} key={fxid}>
-				{pos =>
-					pos && (
-						<Motion
-							defaultStyle={{ fade: 1, ...pos }}
-							style={{
-								x: pos.x,
-								y: spring(pos.y - 36, { stiffness: 84, dampen: 12 }),
-								fade: spring(0, { stiffness: 108, dampen: 12 }),
-							}}
-							onRest={() => {
-								this.setState(state => {
-									const newfx = state.effects.slice();
-									newfx.splice(state.effects.indexOf(Text), 1);
-									return { effects: newfx };
-								});
-							}}>
-							{pos => (
-								<Components.Text
-									text={text}
-									style={{
-										position: 'absolute',
-										left: `${pos.x}px`,
-										top: `${pos.y}px`,
-										opacity: `${pos.fade}`,
-									}}
-								/>
-							)}
-						</Motion>
-					)
-				}
-			</GetIdPos>
-		);
+		Text = (state, newstate, { id, text, onRest }) => {
+			let offset;
+			const { fxid } = newstate;
+			newstate.fxTextPos = (newstate.fxTextPos || state.fxTextPos).update(
+				id,
+				(pos = 0) => (offset = pos) + 16,
+			);
+			return (
+				<GetIdPos id={id} key={fxid}>
+					{pos =>
+						pos && (
+							<Motion
+								defaultStyle={{ fade: 1, x: pos.x, y: pos.y + offset }}
+								style={{
+									x: pos.x,
+									y: spring(pos.y - 36, { stiffness: 84, dampen: 12 }),
+									fade: spring(0, { stiffness: 108, dampen: 12 }),
+								}}
+								onRest={() => {
+									this.setState(state => {
+										const st = {
+											fxTextPos: state.fxTextPos.update(
+												id,
+												pos => pos && pos - 16,
+											),
+											effects: state.effects.delete(Text),
+										};
+										return onRest ? onRest(state, st) : st;
+									});
+								}}>
+								{pos => (
+									<Components.Text
+										text={text}
+										style={{
+											position: 'absolute',
+											left: `${pos.x}px`,
+											top: `${pos.y}px`,
+											opacity: `${pos.fade}`,
+											transform: 'translate(-50%,-50%)',
+											textAlign: 'center',
+											pointerEvents: 'none',
+											textShadow: '1px 1px 2px #000',
+										}}
+									/>
+								)}
+							</Motion>
+						)
+					}
+				</GetIdPos>
+			);
+		};
+
+		StatChange = (state, newstate, id, hp, atk) => {
+			if (!newstate.fxStatChange) newstate.fxStatChange = state.fxStatChange;
+			let oldentry, newentry;
+			newstate.fxStatChange = newstate.fxStatChange.update(id, e => {
+				oldentry = e;
+				newentry = e ? { ...e } : { atk: 0, hp: 0, dom: null };
+				newentry.hp += hp;
+				newentry.atk += atk;
+				newentry.dom = this.Text(state, newstate, {
+					id: id,
+					text: `${newentry.atk > 0 ? '+' : ''}${newentry.atk}|${
+						newentry.hp > 0 ? '+' : ''
+					}${newentry.hp}`,
+					onRest: (state, st) => {
+						st.fxStatChange = state.fxStatChange.delete(id);
+						return st;
+					},
+				});
+				return newentry;
+			});
+			if (oldentry) {
+				newstate.effects = (newstate.effects || state.effects).delete(
+					oldentry.dom,
+				);
+			}
+			newstate.effects = (newstate.effects || state.effects).add(newentry.dom);
+		};
 
 		applyNext = (data, iscmd) => {
 			const { game } = this.props;
@@ -547,128 +595,94 @@ module.exports = connect(({ user }) => ({ user }))(
 							);
 							break;
 						case 'Poison':
-							newstate.fxid = (newstate.fxid || state.fxid) + 1;
-							newstate.effects = (newstate.effects || state.effects).concat([
-								this.Text({
-									fxid: newstate.fxid,
+							newstate.effects = (newstate.effects || state.effects).add(
+								this.Text(state, newstate, {
 									id: effect.id,
 									text: `Poison ${effect.amt}`,
 								}),
-							]);
+							);
 							break;
 						case 'Death':
-							newstate.fxid = (newstate.fxid || state.fxid) + 1;
-							newstate.effects = (newstate.effects || state.effects).concat([
-								this.Text({
-									fxid: newstate.fxid,
+							newstate.effects = (newstate.effects || state.effects).add(
+								this.Text(state, newstate, {
 									id: effect.id,
 									text: 'Death',
 								}),
-							]);
+							);
 							break;
 						case 'Delay':
-							newstate.fxid = (newstate.fxid || state.fxid) + 1;
-							newstate.effects = (newstate.effects || state.effects).concat([
-								this.Text({
-									fxid: newstate.fxid,
+							newstate.effects = (newstate.effects || state.effects).add(
+								this.Text(state, newstate, {
 									id: effect.id,
 									text: `Delay ${effect.amt}`,
 								}),
-							]);
+							);
 							break;
 						case 'Dive':
-							newstate.fxid = (newstate.fxid || state.fxid) + 1;
-							newstate.effects = (newstate.effects || state.effects).concat([
-								this.Text({
-									fxid: newstate.fxid,
+							newstate.effects = (newstate.effects || state.effects).add(
+								this.Text(state, newstate, {
 									id: effect.id,
 									text: 'Dive',
 								}),
-							]);
+							);
 							break;
 						case 'Free':
-							newstate.fxid = (newstate.fxid || state.fxid) + 1;
-							newstate.effects = (newstate.effects || state.effects).concat([
-								this.Text({
-									fxid: newstate.fxid,
+							newstate.effects = (newstate.effects || state.effects).add(
+								this.Text(state, newstate, {
 									id: effect.id,
 									text: 'Free',
 								}),
-							]);
+							);
 							break;
 						case 'Freeze':
-							newstate.fxid = (newstate.fxid || state.fxid) + 1;
-							newstate.effects = (newstate.effects || state.effects).concat([
-								this.Text({
-									fxid: newstate.fxid,
+							newstate.effects = (newstate.effects || state.effects).add(
+								this.Text(state, newstate, {
 									id: effect.id,
 									text: `Freeze ${effect.amt}`,
 								}),
-							]);
+							);
 							break;
 						case 'Text':
-							newstate.fxid = (newstate.fxid || state.fxid) + 1;
-							newstate.effects = (newstate.effects || state.effects).concat([
-								this.Text({ fxid: newstate.fxid, ...effect }),
-							]);
+							newstate.effects = (newstate.effects || state.effects).add(
+								this.Text(state, newstate, effect),
+							);
 							break;
 						case 'Dmg':
-							newstate.fxid = (newstate.fxid || state.fxid) + 1;
-							newstate.effects = (newstate.effects || state.effects).concat([
-								this.Text({
-									fxid: newstate.fxid,
-									id: effect.id,
-									text: `0|${-effect.amt}`,
-								}),
-							]);
+							this.StatChange(state, newstate, effect.id, -effect.amt, 0);
 							break;
 						case 'Atk':
-							newstate.fxid = (newstate.fxid || state.fxid) + 1;
-							newstate.effects = (newstate.effects || state.effects).concat([
-								this.Text({
-									fxid: newstate.fxid,
-									id: effect.id,
-									text: `${effect.amt}|0`,
-								}),
-							]);
+							this.StatChange(state, newstate, effect.id, 0, effect.amt);
 							break;
 						case 'LastCard':
-							{
-								newstate.fxid = (newstate.fxid || state.fxid) + 1;
-								const Text = (
-									<Motion
-										key={newstate.fxid}
-										defaultStyle={{ fade: 1 }}
-										style={{ fade: 0 }}
-										onRest={() => {
-											this.setState(state => {
-												const newfx = state.effects.slice();
-												newfx.splice(state.effects.indexOf(Text), 1);
-												return { effects: newfx };
-											});
-										}}>
-										{({ fade }) => (
-											<div
-												style={{
-													position: 'absolute',
-													left: '450px',
-													top: '300px',
-													transform: 'translate(-50%,-50%)',
-													fontSize: '16px',
-													color: '#fff',
-													backgroundColor: '#000',
-													padding: '18px',
-													opacity: `${fade}`,
-												}}>
-												Last card for {game.byId(effect.id).name}
-											</div>
-										)}
-									</Motion>
-								);
-								newstate.effects = (newstate.effects || state.effects).concat([
-									Text,
-								]);
-							}
+							newstate.fxid = (newstate.fxid || state.fxid) + 1;
+							newstate.effects = (newstate.effects || state.effects).add(
+								<Motion
+									key={newstate.fxid}
+									defaultStyle={{ fade: 1 }}
+									style={{ fade: 0 }}
+									onRest={() => {
+										this.setState(state => ({
+											effects: state.effects.delete(Text),
+										}));
+									}}>
+									{({ fade }) => (
+										<div
+											style={{
+												position: 'absolute',
+												left: '450px',
+												top: '300px',
+												transform: 'translate(-50%,-50%)',
+												fontSize: '16px',
+												color: '#fff',
+												backgroundColor: '#000',
+												padding: '18px',
+												opacity: `${fade}`,
+											}}>
+											Last card for {game.byId(effect.id).name}
+										</div>
+									)}
+								</Motion>,
+							);
 							break;
 						default:
 							console.log('Unknown effect', effect.x);

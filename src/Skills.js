@@ -118,7 +118,7 @@ const Skills = {
 		}
 	},
 	antimatter: (ctx, c, t) => {
-		t.incrAtk(t.trueatk() * 2);
+		t.incrAtk(t.trueatk() * -2);
 	},
 	appease: (ctx, c, t) => {
 		Skills.devour(ctx, c, t);
@@ -990,14 +990,12 @@ const Skills = {
 		const town = t.owner;
 		if (!town.getStatus('sanctuary')) {
 			t.die();
-			if (!town.deckIds.length) ctx.setWinner(town.foeId);
-			else {
-				town._draw();
-				for (let i = 0; i < 3; i++) {
-					town.drawcard();
-				}
+			for (let i = 0; i < 3; i++) {
+				town.drawcard();
 			}
 		}
+		if (!c.owner.deckIds.length) ctx.setWinner(c.owner.foeId);
+		else c.owner._draw();
 	},
 	integrity: (ctx, c, t) => {
 		const tally = [0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0];
@@ -1207,8 +1205,7 @@ const Skills = {
 		t.setStatus('psionic', 0);
 	},
 	locket: (ctx, c, t) => {
-		const ele = c.getStatus('mode') || c.owner.mark;
-		c.owner.spend(ele, ele > 0 ? -1 : -3);
+		c.owner.spend(c.getStatus('mode') || c.owner.mark, -1);
 	},
 	locketshift: (ctx, c, t) => {
 		c.setStatus('mode', t.type === etg.Player ? t.mark : t.card.element);
