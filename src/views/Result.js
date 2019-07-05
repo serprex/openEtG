@@ -315,89 +315,87 @@ module.exports = connect(({ user }) => ({ user }))(
 				cardreward: this.state.cardreward,
 				goldreward: this.state.goldreward,
 			};
-			if (winner) {
-				if (this.props.user) {
-					const wasPvP = game.data.get('players').every(pd => !pd.ai);
-					if (level !== undefined || wasPvP)
-						sock.userExec('addwin', { pvp: wasPvP });
-					if (game.data.get('level')) {
-						const foedecks = game.data.get('players').filter(pd => !pd.user),
-							foedeck = RngMock.choose(foedecks);
-						if (this.state.cardreward === undefined && foedeck) {
-							const foeDeck = etgutil.decodedeck(foedeck.deck);
-							let winnable = foeDeck.filter(code => {
-									const card = Cards.Codes[code];
-									return card && card.rarity > 0 && card.rarity < 3;
-								}),
-								cardwon;
-							if (winnable.length) {
-								cardwon = RngMock.choose(winnable);
-							} else {
-								const elewin = Cards.Codes[RngMock.choose(foeDeck)];
-								cardwon = RngMock.randomcard(
-									elewin.upped,
-									x =>
-										x.element === elewin.element &&
-										x.type !== etg.Pillar &&
-										x.rarity <= 3,
-								);
-							}
-							state.cardreward =
-								'01' + etgutil.asShiny(cardwon, false).toString(32);
+			if (winner && this.props.user) {
+				const wasPvP = game.data.get('players').every(pd => !pd.ai);
+				if (level !== undefined || wasPvP)
+					sock.userExec('addwin', { pvp: wasPvP });
+				if (level !== undefined) {
+					const foedecks = game.data.get('players').filter(pd => !pd.user),
+						foedeck = RngMock.choose(foedecks);
+					if (state.cardreward === undefined && foedeck) {
+						const foeDeck = etgutil.decodedeck(foedeck.deck);
+						let winnable = foeDeck.filter(code => {
+								const card = Cards.Codes[code];
+								return card && card.rarity > 0 && card.rarity < 3;
+							}),
+							cardwon;
+						if (winnable.length) {
+							cardwon = RngMock.choose(winnable);
+						} else {
+							const elewin = Cards.Codes[RngMock.choose(foeDeck)];
+							cardwon = RngMock.randomcard(
+								elewin.upped,
+								x =>
+									x.element === elewin.element &&
+									x.type !== etg.Pillar &&
+									x.rarity <= 3,
+							);
 						}
-						if (this.state.goldreward === undefined) {
-							let agetax = 0;
-							if (level !== undefined) {
-								if (game.data.get('daily') === undefined) {
-									const streak = (this.props.streakback || 0) + 1;
-									if (streak !== this.props.user.streak[level]) {
-										sock.userExec('setstreak', { l: level, n: streak });
-									}
-									streakrate = Math.min((streak200[level] * streak) / 200, 1);
-									lefttext.push(
-										<TooltipText
-											key={lefttext.length}
-											tip={streak + ' win streak'}
-											setTip={this.setTip}
-											clearTip={this.clearTip}>
-											{(streakrate * 100).toFixed(1)}% streak bonus
-										</TooltipText>,
+						state.cardreward =
+							'01' + etgutil.asShiny(cardwon, false).toString(32);
+					}
+					if (state.goldreward === undefined) {
+						let agetax = 0;
+						if (level !== undefined) {
+							if (game.data.get('daily') === undefined) {
+								const streak = (this.props.streakback || 0) + 1;
+								if (streak !== this.props.user.streak[level]) {
+									sock.userExec('setstreak', { l: level, n: streak });
+								}
+								streakrate = Math.min((streak200[level] * streak) / 200, 1);
+								lefttext.push(
+									<TooltipText
+										key={lefttext.length}
+										tip={streak + ' win streak'}
+										setTip={this.setTip}
+										clearTip={this.clearTip}>
+										{(streakrate * 100).toFixed(1)}% streak bonus
+									</TooltipText>,
+								);
+								if (game.data.get('age')) {
+									agetax = Math.max(
+										Math.min(game.data.get('age') * 0.1 - 0.5, 0.5),
+										0,
 									);
-									if (game.data.get('age')) {
-										agetax = Math.max(
-											Math.min(game.data.get('age') * 0.1 - 0.5, 0.5),
-											0,
+									if (agetax > 0) {
+										lefttext.push(
+											<TooltipText
+												key={lefttext.length}
+												tip={'Old arena decks bear less fruit'}
+												setTip={this.setTip}
+												clearTip={this.clearTip}>
+												{(agetax * -100).toFixed(1)}% age tax
+											</TooltipText>,
 										);
-										if (agetax > 0) {
-											lefttext.push(
-												<TooltipText
-													key={lefttext.length}
-													tip={'Old arena decks bear less fruit'}
-													setTip={this.setTip}
-													clearTip={this.clearTip}>
-													{(agetax * -100).toFixed(1)}% age tax
-												</TooltipText>,
-											);
-										}
 									}
 								}
-								state.goldreward = Math.round(
-									userutil.pveCostReward[level * 2 + 1] *
-										(1 + streakrate) *
-										this.computeBonuses(game, lefttext, streakrate) *
-										(1 - agetax),
-								);
 							}
+							state.goldreward = Math.round(
+								userutil.pveCostReward[level * 2 + 1] *
+									(1 + streakrate) *
+									this.computeBonuses(game, lefttext, streakrate) *
+									(1 - agetax),
+							);
 						}
 					}
-					if (state.goldreward) {
-						sock.userExec('addgold', { g: this.state.goldreward });
-					}
-					if (state.cardreward) {
-						sock.userExec(game.data.get('quest') ? 'addbound' : 'addcards', {
-							c: state.cardreward,
-						});
-					}
+				}
+				if (state.goldreward) {
+					sock.userExec('addgold', { g: state.goldreward });
+				}
+				if (state.cardreward) {
+					sock.userExec(game.data.get('quest') ? 'addbound' : 'addcards', {
+						c: state.cardreward,
+					});
 				}
 			}
 			this.setState(state);
