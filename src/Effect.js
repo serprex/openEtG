@@ -1,2 +1,1 @@
-'use strict';
-exports.disable = false;
+export default { disable: false };

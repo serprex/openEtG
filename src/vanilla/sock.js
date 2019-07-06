@@ -1,20 +1,21 @@
-const chat = require('./chat'),
-	etgutil = require('../etgutil'),
-	mkGame = require('./mkGame'),
-	store = require('./store'),
-	React = require('react');
-const endpoint =
-	(location.protocol === 'http:' ? 'ws://' : 'wss://') +
-	location.hostname +
-	':13602';
-var socket = new WebSocket(endpoint);
+import React from 'react';
+
+import chat from './chat.js';
+import * as etgutil from '../etgutil.js';
+import mkGame from './mkGame.js';
+import * as store from './store.js';
+
+const endpoint = `${location.protocol === 'http:' ? 'ws://' : 'wss://'}${
+	location.hostname
+}:13602`;
+let socket = new WebSocket(endpoint);
+export let et = socket;
 const buffer = [];
 let attempts = 0,
-	attemptTimeout = 0,
-	guestname;
-var sockEvents = {
+	attemptTimeout = 0;
+const sockEvents = {
 	pvpgive: data => {
-		store.store.dispatch(store.doNav(require('./views/Match'), mkGame(data)));
+		store.store.dispatch(store.doNav(import('./views/Match'), mkGame(data)));
 	},
 	roll: function(data) {
 		var span = document.createElement('div');
@@ -107,14 +108,14 @@ socket.onclose = function reconnect() {
 	attemptTimeout = setTimeout(function() {
 		attemptTimeout = 0;
 		const oldsock = socket;
-		exports.et = socket = new WebSocket(endpoint);
+		et = socket = new WebSocket(endpoint);
 		socket.onopen = oldsock.onopen;
 		socket.onclose = oldsock.onclose;
 		socket.onmessage = oldsock.onmessage;
 	}, timeout);
 	chat('Reconnecting in ' + timeout + 'ms');
 };
-exports.emit = function(x, data) {
+export function emit(x, data) {
 	if (!data) data = {};
 	data.x = x;
 	const msg = JSON.stringify(data);
@@ -123,12 +124,12 @@ exports.emit = function(x, data) {
 	} else {
 		buffer.push(msg);
 	}
-};
-exports.getDeck = function(limit) {
+}
+export function getDeck(limit) {
 	const state = store.store.getState();
 	const deck = state.opts.deck.split(' ').map(x => parseInt(x, 32));
 	if (limit && deck.length > 61) {
 		deck.length = 61;
 	}
 	return deck;
-};
+}

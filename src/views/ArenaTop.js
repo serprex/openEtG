@@ -1,11 +1,11 @@
-'use strict';
-const Cards = require('../Cards'),
-	Components = require('../Components'),
-	sock = require('../sock'),
-	store = require('../store'),
-	React = require('react');
+import React from 'react';
 
-module.exports = class ArenaTop extends React.Component {
+import * as Cards from '../Cards.js';
+import * as Components from '../Components/index.js';
+import * as sock from '../sock.js';
+import * as store from '../store.js';
+
+export default class ArenaTop extends React.Component {
 	constructor(props) {
 		super(props);
 		this.state = {};
@@ -68,4 +68,4 @@ module.exports = class ArenaTop extends React.Component {
 			</>
 		);
 	}
-};
+}

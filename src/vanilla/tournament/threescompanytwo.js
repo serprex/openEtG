@@ -1,4 +1,4 @@
-module.exports = function(deck) {
+export default function(deck) {
 	var cardtypes = [],
 		typecount = 0,
 		cardcount = {},

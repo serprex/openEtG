@@ -1,14 +1,14 @@
-'use strict';
-const crypto = require('crypto'),
-	sutil = require('./sutil'),
-	db = require('./db'),
-	Us = require('./Us'),
-	etg = require('../etg'),
-	aiDecks = require('../Decks'),
-	etgutil = require('../etgutil'),
-	RngMock = require('../RngMock'),
-	userutil = require('../userutil');
-module.exports = function(sockEmit) {
+import crypto from 'crypto';
+import * as sutil from './sutil.js';
+import db from './db.js';
+import * as Us from './Us.js';
+import * as etg from '../etg.js';
+import aiDecks from '../Decks.json';
+import * as etgutil from '../etgutil.js';
+import RngMock from '../RngMock.js';
+import * as userutil from '../userutil.js';
+
+export default function login(sockEmit) {
 	function loginRespond(socket, user, pass, authkey) {
 		function postHash(err, key) {
 			if (err) {
@@ -100,4 +100,4 @@ module.exports = function(sockEmit) {
 		}
 	}
 	return loginAuth;
-};
+}

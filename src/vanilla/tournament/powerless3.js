@@ -1,4 +1,4 @@
-module.exports = function(deck) {
+export default function(deck) {
 	var elements = [],
 		anyupped = false,
 		disco = false;
@@ -11,7 +11,7 @@ module.exports = function(deck) {
 			return card.name + ' is a Shard';
 		if (card.type != etg.PillarEnum) elements[card.element] = 1;
 		if (card.upped) anyupped = true;
-		if (card.isOf(Cards.Discord)) disco = true;
+		if (card.isOf(Cards.Names.Discord)) disco = true;
 	}
 	var elementCount = 0,
 		ret = '';
@@ -30,4 +30,4 @@ module.exports = function(deck) {
 	if (elementCount < 3 && disco)
 		ret += '. This deck is only legal if you are Quartz';
 	return 'Legal. You are using ' + ret;
-};
+}

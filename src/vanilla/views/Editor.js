@@ -1,14 +1,14 @@
-const etg = require('../etg'),
-	sock = require('../sock'),
-	Cards = require('../Cards'),
-	Components = require('../Components'),
-	mkAi = require('../mkAi'),
-	mkGame = require('../mkGame'),
-	etgutil = require('../../etgutil'),
-	store = require('../store'),
-	util = require('../../util'),
-	{ connect } = require('react-redux'),
-	React = require('react');
+import React from 'react';
+import { connect } from 'react-redux';
+
+import * as etg from '../etg.js';
+import * as Cards from '../Cards.js';
+import * as Components from '../Components.js';
+import * as mkAi from '../mkAi.js';
+import mkGame from '../mkGame.js';
+import * as etgutil from '../../etgutil.js';
+import * as store from '../store.js';
+import * as util from '../../util.js';
 
 function sumCardMinus(cardminus, code) {
 	let sum = 0;
@@ -18,7 +18,7 @@ function sumCardMinus(cardminus, code) {
 	return sum;
 }
 
-module.exports = connect(state => ({
+export default connect(state => ({
 	deck: state.opts.deck,
 	aideck: state.opts.aideck,
 }))(

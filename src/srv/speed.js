@@ -1,8 +1,8 @@
-'use strict';
-const deck = require('./deck'),
-	Cards = require('../Cards'),
-	Rng = require('rng.js');
-module.exports = function(url, stime) {
+import Rng from 'rng.js';
+import deck from './deck.js';
+import * as Cards from '../Cards.js';
+
+export default function(url, stime) {
 	let hash = 0;
 	for (let i = 0; i < url.length; i++) {
 		hash = (hash * 31 + url.charCodeAt(i)) & 0x7fffffff;
@@ -29,4 +29,4 @@ module.exports = function(url, stime) {
 		code += '01' + cards[i].toString(32);
 	}
 	return deck(code, stime);
-};
+}

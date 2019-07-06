@@ -37,7 +37,7 @@ function rationality(deck) {
 		return '. Must have 2 non-weapon, non-shield, non-pillar permanents';
 	return true;
 }
-module.exports = function(deck) {
+export default function(deck) {
 	var sup = superstitious(deck),
 		rat = rationality(deck);
 	return sup === true && rat === true

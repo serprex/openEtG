@@ -1,8 +1,9 @@
-const React = require('react'),
-	{ connect } = require('react-redux');
+import React from 'react';
+import { connect } from 'react-redux';
+import Login from './Login';
 
-module.exports = connect(state => ({
-	view: state.nav.view || require('./Login'),
+export default connect(state => ({
+	view: state.nav.view || Login,
 	props: state.nav.props,
 }))(function App(props) {
 	return React.createElement(props.view, props.props);

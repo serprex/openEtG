@@ -1,4 +1,4 @@
-class Skill {
+export default class Skill {
 	constructor(name, func, passive) {
 		this.name = name;
 		this.func = func;
@@ -38,4 +38,3 @@ class Skill {
 		);
 	}
 }
-module.exports = Skill;

@@ -1,18 +1,17 @@
-'use strict';
-const etg = require('./etg');
-const sock = require('./sock');
-const store = require('./store');
-const util = require('./util');
-const RngMock = require('./RngMock');
-const etgutil = require('./etgutil');
-const Cards = require('./Cards');
-const Game = require('./Game');
+import * as etg from './etg.js';
+import * as sock from './sock.js';
+import * as store from './store.js';
+import * as util from './util.js';
+import RngMock from './RngMock.js';
+import * as etgutil from './etgutil.js';
+import * as Cards from './Cards.js';
+import Game from './Game.js';
 
-exports.requireQuest = function(quest, user) {
+export function requireQuest(quest, user) {
 	return quest.questdependencies.every(dependency => user.quests[dependency]);
-};
+}
 
-const quarks = {};
+export const quarks = {};
 quarks.necromancer = {
 	deck: '04531027170b52g0c52m0452n018pk',
 	name: 'Skeleton Horde',
@@ -478,7 +477,7 @@ quarks.chromatemple = {
 	info:
 		'You walk up to the steps of the last temple, the Chroma Temple. It was harsh getting here, but well worth it. This is it.',
 };
-exports.root = {
+export const root = {
 	children: [
 		{
 			key: 'necromancer',
@@ -612,8 +611,7 @@ exports.root = {
 		},
 	],
 };
-exports.quarks = quarks;
-exports.mkQuestAi = function(quest, datafn) {
+export function mkQuestAi(quest, datafn) {
 	const markpower = quest.markpower || 1;
 	const drawpower = quest.drawpower || 1;
 	const hp = quest.hp || 100;
@@ -664,4 +662,4 @@ exports.mkQuestAi = function(quest, datafn) {
 		pl.deckIds = pl.deck.map(x => pl.newThing(quest.morph(x.card)).id);
 	}
 	return game;
-};
+}

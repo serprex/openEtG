@@ -1,5 +1,5 @@
-const Cards = require('./Cards'),
-	etgutil = require('./etgutil');
+import * as Cards from './Cards.js';
+import * as etgutil from './etgutil.js';
 
 function transmute(user, oldcard, func, use) {
 	const poolCount = etgutil.count(user.pool, oldcard);
@@ -44,30 +44,30 @@ function untransmute(user, oldcard, func, use) {
 		};
 	}
 }
-exports.upgrade = function(data, user) {
+export function upgrade(data, user) {
 	const card = Cards.Codes[data.card];
 	if (!card || card.upped) return;
 	const use = ~card.rarity ? 6 : 1;
 	return transmute(user, card.code, etgutil.asUpped, use);
-};
-exports.downgrade = function(data, user) {
+}
+export function downgrade(data, user) {
 	const card = Cards.Codes[data.card];
 	if (!card || !card.upped) return;
 	const use = ~card.rarity ? 6 : 1;
 	return untransmute(user, card.code, etgutil.asUpped, use);
-};
-exports.polish = function(data, user) {
+}
+export function polish(data, user) {
 	const card = Cards.Codes[data.card];
 	if (!card || card.shiny || card.rarity == 5) return;
 	const use = ~card.rarity ? 6 : 2;
 	return transmute(user, card.code, etgutil.asShiny, use);
-};
-exports.unpolish = function(data, user) {
+}
+export function unpolish(data, user) {
 	const card = Cards.Codes[data.card];
 	if (!card || !card.shiny || card.rarity == 5) return;
 	const use = ~card.rarity ? 6 : 2;
 	return untransmute(user, card.code, etgutil.asShiny, use);
-};
+}
 function upshpi(cost, func) {
 	return (data, user) => {
 		const card = Cards.Codes[data.c];
@@ -79,12 +79,12 @@ function upshpi(cost, func) {
 		}
 	};
 }
-exports.uppillar = upshpi(50, code => etgutil.asUpped(code, true));
-exports.shpillar = upshpi(50, code => etgutil.asShiny(code, true));
-exports.upshpillar = upshpi(300, code =>
+export const uppillar = upshpi(50, code => etgutil.asUpped(code, true));
+export const shpillar = upshpi(50, code => etgutil.asShiny(code, true));
+export const upshpillar = upshpi(300, code =>
 	etgutil.asUpped(etgutil.asShiny(code, true), true),
 );
-exports.upshall = function(data, user) {
+export function upshall(data, user) {
 	const pool = etgutil.deck2pool(user.pool);
 	const bound = etgutil.deck2pool(user.accountbound);
 	pool.forEach((count, code) => {
@@ -144,11 +144,11 @@ exports.upshall = function(data, user) {
 		if (count) newpool = etgutil.addcard(newpool, code, count);
 	});
 	return { pool: newpool };
-};
-exports.addgold = function(data, user) {
+}
+export function addgold(data, user) {
 	return { gold: user.gold + (data.g | 0) };
-};
-exports.addloss = function(data, user) {
+}
+export function addloss(data, user) {
 	const losses = data.pvp ? 'pvplosses' : 'ailosses';
 	const result = {
 		[losses]: user[losses] + 1,
@@ -159,26 +159,26 @@ exports.addloss = function(data, user) {
 	}
 	if (data.g) result.gold = user.gold + (data.g | 0);
 	return result;
-};
-exports.addwin = function(data, user) {
+}
+export function addwin(data, user) {
 	const prefix = data.pvp ? 'pvp' : 'ai';
 	return {
 		[`${prefix}wins`]: user[`${prefix}wins`] + 1,
 		[`${prefix}losses`]: user[`${prefix}losses`] - 1,
 	};
-};
-exports.setstreak = function(data, user) {
+}
+export function setstreak(data, user) {
 	const streak = user.streak.slice();
 	streak[data.l] = data.n;
 	return { streak };
-};
-exports.addcards = function(data, user) {
+}
+export function addcards(data, user) {
 	return { pool: etgutil.mergedecks(user.pool, data.c) };
-};
-exports.addbound = function(data, user) {
+}
+export function addbound(data, user) {
 	return { accountbound: etgutil.mergedecks(user.accountbound, data.c) };
-};
-exports.donedaily = function(data, user) {
+}
+export function donedaily(data, user) {
 	const result = {};
 	if (
 		typeof user.ostreak === 'number' &&
@@ -195,13 +195,13 @@ exports.donedaily = function(data, user) {
 	}
 	result.daily = user.daily | (1 << data.daily);
 	return result;
-};
-exports.changeqeck = function(data, user) {
+}
+export function changeqeck(data, user) {
 	const qecks = user.qecks.slice();
 	qecks[data.number] = data.name;
 	return { qecks };
-};
-exports.setdeck = function(data, user) {
+}
+export function setdeck(data, user) {
 	const result = {};
 	if (data.d !== undefined) {
 		result.decks = {
@@ -211,17 +211,17 @@ exports.setdeck = function(data, user) {
 	}
 	result.selectedDeck = data.name;
 	return result;
-};
-exports.rmdeck = function(data, user) {
+}
+export function rmdeck(data, user) {
 	const result = { decks: { ...user.decks } };
 	delete result.decks[data.name];
 	return result;
-};
-exports.setquest = function(data, user) {
+}
+export function setquest(data, user) {
 	return {
 		quests: {
 			...user.quests,
 			[data.quest]: 1,
 		},
 	};
-};
+}

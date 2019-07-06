@@ -1,11 +1,12 @@
-const sock = require('../sock'),
-	Tutor = require('../Components/Tutor'),
-	etgutil = require('../etgutil'),
-	options = require('../options'),
-	Components = require('../Components'),
-	store = require('../store'),
-	{ connect } = require('react-redux'),
-	React = require('react');
+import { connect } from 'react-redux';
+import React from 'react';
+
+import * as sock from '../sock.js';
+import * as Tutor from '../Components/Tutor.js';
+import * as etgutil from '../etgutil.js';
+import * as options from '../options.js';
+import * as Components from '../Components/index.js';
+import * as store from '../store.js';
 
 const packdata = [
 	{ cost: 15, type: 'Bronze', info: '10 Commons', color: '#c73' },
@@ -60,7 +61,7 @@ function PackDisplay({ cards }) {
 	);
 }
 
-module.exports = connect(({ user, opts }) => ({
+export default connect(({ user, opts }) => ({
 	user,
 	bulk: typeof opts.bulk === 'string' ? opts.bulk : '1',
 }))(

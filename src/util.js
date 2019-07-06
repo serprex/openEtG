@@ -1,5 +1,4 @@
-'use strict';
-exports.iterSplit = function*(src, str) {
+export function* iterSplit(src, str) {
 	let i = 0;
 	while (true) {
 		const j = src.indexOf(str, i);
@@ -7,17 +6,17 @@ exports.iterSplit = function*(src, str) {
 		if (j == -1) return;
 		i = j + str.length;
 	}
-};
-exports.place = function(array, item) {
+}
+export function place(array, item) {
 	for (let i = 0; i < array.length; i++)
 		if (!array[i]) return (array[i] = item);
-};
-exports.hashString = function(str) {
+}
+export function hashString(str) {
 	let hash = 5381;
 	for (let i = 0; i < str.length; i++)
 		hash = (hash * 33 + str.charCodeAt(i)) & 0x7fffffff;
 	return hash;
-};
-exports.randint = function() {
+}
+export function randint() {
 	return (Math.random() * 0x100000000) | 0;
-};
+}

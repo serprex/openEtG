@@ -1,8 +1,6 @@
-'use strict';
-var etg = require('../etg');
-var smth = require('../Thing');
-var Cards = require('../Cards');
-module.exports = function(game) {
+import * as Cards from '../Cards';
+
+export default function(game) {
 	let limit = 333,
 		cmdct,
 		currentEval = game.player1.hp;
@@ -58,4 +56,4 @@ module.exports = function(game) {
 	}
 	iterLoop(game);
 	return [currentEval, cmdct];
-};
+}

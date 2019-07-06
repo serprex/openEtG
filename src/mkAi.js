@@ -1,21 +1,21 @@
-const etgutil = require('./etgutil'),
-	Cards = require('./Cards'),
-	Decks = require('./Decks.json'),
-	RngMock = require('./RngMock'),
-	sock = require('./sock'),
-	store = require('./store'),
-	userutil = require('./userutil'),
-	util = require('./util'),
-	mkDeck = require('./deckgen/index'),
-	Game = require('./Game');
+import * as etgutil from './etgutil.js';
+import * as Cards from './Cards.js';
+import Decks from './Decks.json';
+import RngMock from './RngMock.js';
+import * as sock from './sock.js';
+import * as store from './store.js';
+import * as userutil from './userutil.js';
+import * as util from './util.js';
+import deckgen from './deckgen/index.js';
+import Game from './Game.js';
 
-function run(game) {
+export function run(game) {
 	if (game) {
-		store.store.dispatch(store.doNav(require('./views/Match'), { game }));
+		store.store.dispatch(store.doNav(import('./views/Match'), { game }));
 	}
 }
 
-exports.mkPremade = function mkPremade(level, daily, datafn = null) {
+export function mkPremade(level, daily, datafn = null) {
 	const name = level == 1 ? 'mage' : 'demigod';
 	const urdeck = sock.getDeck(),
 		{ user } = store.store.getState(),
@@ -67,7 +67,7 @@ exports.mkPremade = function mkPremade(level, daily, datafn = null) {
 	RngMock.shuffle(data.players);
 	if (daily !== undefined) data.daily = daily;
 	return new Game(datafn ? datafn(data) : data);
-};
+}
 const randomNames = [
 	'Adrienne',
 	'Audrie',
@@ -98,7 +98,7 @@ const randomNames = [
 	'Tammi',
 	'Yuriko',
 ];
-exports.mkAi = function mkAi(level, daily, datafn = null) {
+export function mkAi(level, daily, datafn = null) {
 	const urdeck = sock.getDeck(),
 		{ user } = store.store.getState(),
 		minsize = user ? 30 : 10;
@@ -111,7 +111,7 @@ exports.mkAi = function mkAi(level, daily, datafn = null) {
 		store.store.dispatch(store.chatMsg(`Requires ${cost}$`, 'System'));
 		return;
 	}
-	const deck = level == 0 ? mkDeck(0, 1, 2) : mkDeck(0.4, 2, 4);
+	const deck = level == 0 ? deckgen(0, 1, 2) : deckgen(0.4, 2, 4);
 	store.store.dispatch(store.setOptTemp('aideck', deck));
 
 	const data = {
@@ -135,5 +135,4 @@ exports.mkAi = function mkAi(level, daily, datafn = null) {
 	if (daily !== undefined) data.daily = daily;
 	RngMock.shuffle(data.players);
 	return new Game(datafn ? datafn(data) : data);
-};
-exports.run = run;
+}

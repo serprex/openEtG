@@ -1,7 +1,7 @@
-'use strict';
-const gzip = require('./gzip'),
-	svg = require('../svg');
-module.exports = async function(url, stime) {
+import gzip from './gzip.js';
+import * as svg from '../svg.js';
+
+export default async function(url, stime) {
 	const deck = url.replace(/\.svg$/, '');
 	if (deck.length % 5) {
 		throw 'Unaligned deck';
@@ -11,4 +11,4 @@ module.exports = async function(url, stime) {
 		head: { 'Content-Encoding': 'gzip', 'Content-Type': 'image/svg+xml' },
 		date: stime,
 	};
-};
+}

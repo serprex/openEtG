@@ -1,27 +1,4 @@
-'use strict';
-
-var Other = 0;
-var Entropy = 1;
-var Death = 2;
-var Gravity = 3;
-var Earth = 4;
-var Life = 5;
-var Fire = 6;
-var Water = 7;
-var Light = 8;
-var Air = 9;
-var Time = 10;
-var Darkness = 11;
-var Aether = 12;
-var PillarEnum = 0;
-var WeaponEnum = 1;
-var ShieldEnum = 2;
-var PermanentEnum = 3;
-var SpellEnum = 4;
-var CreatureEnum = 5;
-var PlayPhase = 0;
-var EndPhase = 1;
-var passives = new Set([
+export const passives = new Set([
 	'airborne',
 	'nocturnal',
 	'voodoo',
@@ -39,7 +16,7 @@ var passives = new Set([
 ]);
 // adrtbl is a bitpacked 2d array
 // [[0,0,0,0],[1,1,1],[2,2,2],[3,3,3],[3,2],[4,2],[4,2],[5,3],[6,3],[3],[4],[4],[4],[5],[5],[5]]
-var adrtbl = new Uint16Array([
+const adrtbl = new Uint16Array([
 	4,
 	587,
 	1171,
@@ -57,11 +34,11 @@ var adrtbl = new Uint16Array([
 	41,
 	41,
 ]);
-function countAdrenaline(x) {
+export function countAdrenaline(x) {
 	x = Math.abs(x | 0);
 	return x > 15 ? 1 : (adrtbl[x] & 7) + 1;
 }
-function getAdrenalRow(x) {
+export function getAdrenalRow(x) {
 	x |= 0;
 	var sign = (x > 0) - (x < 0);
 	x = Math.abs(x);
@@ -74,42 +51,44 @@ function getAdrenalRow(x) {
 	}
 	return ret;
 }
-function casttext(cast, castele) {
+export function casttext(cast, castele) {
 	return cast == 0 ? '0' : cast + ':' + castele;
 }
-exports.Player = 6;
-exports.passives = passives;
-exports.countAdrenaline = countAdrenaline;
-exports.calcAdrenaline = function(y, dmg) {
+export const Player = 6;
+export function calcAdrenaline(y, dmg) {
 	if (y < 2) return dmg;
 	const row = adrtbl[Math.abs(dmg)];
 	if (y - 2 >= (row & 7)) return 0;
 	return ((row >> ((y - 1) * 3)) & 7) * ((dmg > 0) - (dmg < 0));
-};
-exports.getAdrenalRow = getAdrenalRow;
-exports.casttext = casttext;
-exports.Other = 0;
-exports.Entropy = 1;
-exports.Death = 2;
-exports.Gravity = 3;
-exports.Earth = 4;
-exports.Life = 5;
-exports.Fire = 6;
-exports.Water = 7;
-exports.Light = 8;
-exports.Air = 9;
-exports.Time = 10;
-exports.Darkness = 11;
-exports.Aether = 12;
-exports.Pillar = exports.PillarEnum = 0;
-exports.Weapon = exports.WeaponEnum = 1;
-exports.Shield = exports.ShieldEnum = 2;
-exports.Permanent = exports.PermanentEnum = 3;
-exports.Spell = exports.SpellEnum = 4;
-exports.Creature = exports.CreatureEnum = 5;
-exports.PlayPhase = 0;
-exports.EndPhase = 1;
-exports.PillarList = new Uint16Array([
+}
+export const Other = 0;
+export const Entropy = 1;
+export const Death = 2;
+export const Gravity = 3;
+export const Earth = 4;
+export const Life = 5;
+export const Fire = 6;
+export const Water = 7;
+export const Light = 8;
+export const Air = 9;
+export const Time = 10;
+export const Darkness = 11;
+export const Aether = 12;
+export const Pillar = 0;
+export const PillarEnum = 0;
+export const Weapon = 1;
+export const WeaponEnum = 1;
+export const Shield = 2;
+export const ShieldEnum = 2;
+export const Permanent = 3;
+export const PermanentEnum = 3;
+export const Spell = 4;
+export const SpellEnum = 4;
+export const Creature = 5;
+export const CreatureEnum = 5;
+export const PlayPhase = 0;
+export const EndPhase = 1;
+export const PillarList = new Uint16Array([
 	5002,
 	5100,
 	5200,
@@ -124,7 +103,7 @@ exports.PillarList = new Uint16Array([
 	6100,
 	6200,
 ]);
-exports.PendList = new Uint16Array([
+export const PendList = new Uint16Array([
 	5004,
 	5150,
 	5250,
@@ -139,7 +118,7 @@ exports.PendList = new Uint16Array([
 	6150,
 	6250,
 ]);
-exports.NymphList = new Uint16Array([
+export const NymphList = new Uint16Array([
 	0,
 	5120,
 	5220,
@@ -154,7 +133,7 @@ exports.NymphList = new Uint16Array([
 	6120,
 	6220,
 ]);
-exports.AlchemyList = new Uint16Array([
+export const AlchemyList = new Uint16Array([
 	0,
 	5111,
 	5212,
@@ -169,7 +148,7 @@ exports.AlchemyList = new Uint16Array([
 	6110,
 	6209,
 ]);
-exports.ShardList = new Uint16Array([
+export const ShardList = new Uint16Array([
 	0,
 	5130,
 	5230,
@@ -184,7 +163,7 @@ exports.ShardList = new Uint16Array([
 	6130,
 	6230,
 ]);
-exports.eleNames = [
+export const eleNames = [
 	'Chroma',
 	'Entropy',
 	'Death',

@@ -1,6 +1,6 @@
-'use strict';
-var etg = require('./etg');
-exports.strcols = [
+import * as etg from './etg.js';
+
+export const strcols = [
 	'#a98',
 	'#a59',
 	'#768',
@@ -28,15 +28,15 @@ exports.strcols = [
 	'#999',
 	'#ade',
 ];
-exports.maybeLightenStr = function(card) {
-	return exports.strcols[card.element + card.upped * 13];
-};
+export function maybeLightenStr(card) {
+	return strcols[card.element + card.upped * 13];
+}
 function Point(x, y) {
 	this.x = x;
 	this.y = y;
 }
 Point.prototype.set = Point;
-function reflectPos(obj) {
+export function reflectPos(obj) {
 	var pos = obj instanceof Point ? obj : obj.position;
 	pos.set(900 - pos.x, 600 - pos.y);
 }
@@ -88,7 +88,7 @@ var crpos = new Uint8Array([
 	7,
 	0,
 ]);
-function creaturePos(j, i) {
+export function creaturePos(j, i) {
 	var column = crpos[i * 2],
 		row = crpos[i * 2 + 1];
 	var p = new Point(
@@ -98,18 +98,18 @@ function creaturePos(j, i) {
 	if (j) reflectPos(p);
 	return p;
 }
-function permanentPos(j, i) {
+export function permanentPos(j, i) {
 	var p = new Point(140 + (i % 8) * 64, 504 + Math.floor(i / 8) * 40);
 	if (j) reflectPos(p);
 	return p;
 }
-function cardPos(j, i) {
+export function cardPos(j, i) {
 	return {
 		x: (j ? 36 : 793) + 66 * (i & 1),
 		y: (j ? 118 : 346) + 48 * (i >> 1),
 	};
 }
-function tgtToPos(t) {
+export function tgtToPos(t) {
 	if (t.type === etg.Creature) {
 		return creaturePos(t.owner == t.owner.game.player2, t.getIndex());
 	} else if (t.type === etg.Weapon) {
@@ -135,38 +135,25 @@ var sounds = {},
 	currentMusic;
 var soundEnabled = false,
 	musicEnabled = false;
-function loadSounds() {}
-function loadMusics() {}
-function playSound(name, dontreset) {}
-function playMusic(name) {}
-function changeSound(enabled) {}
-function changeMusic(enabled) {}
-function parseInput(data, key, value, limit) {
+export function loadSounds() {}
+export function loadMusics() {}
+export function playSound(name, dontreset) {}
+export function playMusic(name) {}
+export function changeSound(enabled) {}
+export function changeMusic(enabled) {}
+export function parseInput(data, key, value, limit) {
 	var value = parseInt(value);
 	if (value === 0 || value > 0) data[key] = Math.min(value, limit || Infinity);
 }
-function parsepvpstats(data) {
+export function parsepvpstats(data) {
 	parseInput(data, 'p1hp', options.pvphp);
 	parseInput(data, 'p1drawpower', options.pvpdraw, 8);
 	parseInput(data, 'p1markpower', options.pvpmark, 1188);
 	parseInput(data, 'p1deckpower', options.pvpdeck);
 }
-function parseaistats(data) {
+export function parseaistats(data) {
 	parseInput(data, 'p2hp', options.aihp);
 	parseInput(data, 'p2drawpower', options.aidraw, 8);
 	parseInput(data, 'p2markpower', options.aimark, 1188);
 	parseInput(data, 'p2deckpower', options.aideckpower);
 }
-exports.reflectPos = reflectPos;
-exports.creaturePos = creaturePos;
-exports.permanentPos = permanentPos;
-exports.tgtToPos = tgtToPos;
-exports.loadSounds = loadSounds;
-exports.loadMusics = loadMusics;
-exports.playSound = playSound;
-exports.playMusic = playMusic;
-exports.changeSound = changeSound;
-exports.changeMusic = changeMusic;
-exports.parseInput = parseInput;
-exports.parsepvpstats = parsepvpstats;
-exports.parseaistats = parseaistats;

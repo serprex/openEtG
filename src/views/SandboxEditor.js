@@ -1,9 +1,10 @@
-const etgutil = require('../etgutil'),
-	store = require('../store'),
-	Cards = require('../Cards'),
-	Editor = require('../Components/Editor'),
-	{ connect } = require('react-redux'),
-	React = require('react');
+import React from 'react';
+import { connect } from 'react-redux';
+
+import * as etgutil from '../etgutil.js';
+import * as store from '../store.js';
+import * as Cards from '../Cards.js';
+import Editor from '../Components/Editor.js';
 
 function processDeck(dcode) {
 	let mark = 0,
@@ -21,7 +22,7 @@ function processDeck(dcode) {
 	return { mark, deck };
 }
 
-module.exports = connect(state => ({
+export default connect(state => ({
 	deck: state.opts.deck,
 }))(
 	class SandboxEditor extends React.Component {
@@ -74,7 +75,7 @@ module.exports = connect(state => ({
 							this.props.dispatch(
 								store.setOptTemp('deck', this.currentDeckCode()),
 							);
-							this.props.dispatch(store.doNav(require('../views/MainMenu')));
+							this.props.dispatch(store.doNav(import('../views/MainMenu')));
 						}}
 						style={{
 							position: 'absolute',

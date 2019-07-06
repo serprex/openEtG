@@ -1,10 +1,10 @@
-const Effect = require('./Effect'),
-	sounds = new Map(),
+import Effect from './Effect.js';
+const sounds = new Map(),
 	musics = new Map();
 let currentMusic,
 	soundEnabled = false,
 	musicEnabled = false;
-exports.playSound = function(name, dontreset) {
+export function playSound(name, dontreset) {
 	if (soundEnabled && !Effect.disable) {
 		let sound = sounds.get(name);
 		if (!sound) {
@@ -14,8 +14,8 @@ exports.playSound = function(name, dontreset) {
 		if (!dontreset && sound.duration) sound.currentTime = 0;
 		sound.play();
 	}
-};
-exports.playMusic = function(name) {
+}
+export function playMusic(name) {
 	if (name == currentMusic || Effect.disable) return;
 	let music;
 	if (musicEnabled && (music = musics.get(currentMusic))) music.pause();
@@ -29,16 +29,16 @@ exports.playMusic = function(name) {
 		}
 		music.play();
 	}
-};
-exports.changeSound = function(enabled) {
+}
+export function changeSound(enabled) {
 	soundEnabled = enabled;
 	if (!soundEnabled) {
 		for (const sound of sounds.values()) {
 			sound.pause();
 		}
 	}
-};
-exports.changeMusic = function(enabled) {
+}
+export function changeMusic(enabled) {
 	musicEnabled = enabled;
 	if (!musicEnabled) {
 		const music = musics.get(currentMusic);
@@ -48,4 +48,4 @@ exports.changeMusic = function(enabled) {
 		currentMusic = null;
 		exports.playMusic(name);
 	}
-};
+}

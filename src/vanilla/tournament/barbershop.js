@@ -1,20 +1,20 @@
-module.exports = function(deck) {
+export default function(deck) {
 	if (deck.length & 3)
 		return 'Deck size must be a multiple of 4. Deck size: ' + deck.length;
 	var banlist = [
-		Cards.QuantumPillar,
-		Cards.Immolation,
-		Cards.Nova,
-		Cards.Discord,
-		Cards.Earthquake,
-		Cards.Trident,
-		Cards.BlackHole,
-		Cards.BlackHole,
-		Cards.NymphsTears,
-		Cards.NymphQueen,
-		Cards.AmberNymph,
-		Cards.ShardofPatience,
-		Cards.ShardofFocus,
+		Cards.Names.QuantumPillar,
+		Cards.Names.Immolation,
+		Cards.Names.Nova,
+		Cards.Names.Discord,
+		Cards.Names.Earthquake,
+		Cards.Names.Trident,
+		Cards.Names.BlackHole,
+		Cards.Names.BlackHole,
+		Cards.Names.NymphsTears,
+		Cards.Names.NymphQueen,
+		Cards.Names.AmberNymph,
+		Cards.Names.ShardofPatience,
+		Cards.Names.ShardofFocus,
 	];
 	var eles = {},
 		eleCount = 0,
@@ -47,4 +47,4 @@ module.exports = function(deck) {
 	if (eleCount != 4)
 		return 'You used ' + eleCount + ' elements. You must only use 4';
 	return 'Legal';
-};
+}

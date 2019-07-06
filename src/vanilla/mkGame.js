@@ -1,6 +1,6 @@
-const Cards = require('./Cards'),
-	Game = require('./Game'),
-	etgutil = require('../etgutil');
+import * as Cards from './Cards.js';
+import Game from './Game.js';
+import * as etgutil from '../etgutil.js';
 
 function deckPower(deck, amount) {
 	var res = deck;
@@ -9,7 +9,7 @@ function deckPower(deck, amount) {
 	}
 	return res;
 }
-module.exports = function(data, ai) {
+export default function(data, ai) {
 	var game = new Game(data.seed, data.flip);
 	if (data.p1hp) {
 		game.player1.maxhp = game.player1.hp = data.p1hp;
@@ -53,4 +53,4 @@ module.exports = function(data, ai) {
 	if (data.foename) game.foename = data.foename;
 	if (ai) game.ai = true;
 	return { game, data };
-};
+}

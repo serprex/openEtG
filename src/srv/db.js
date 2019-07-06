@@ -1,2 +1,2 @@
-'use strict';
-module.exports = require('redis').createClient();
+import redis from 'redis';
+export default redis.createClient();

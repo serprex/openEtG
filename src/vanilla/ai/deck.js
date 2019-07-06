@@ -1,10 +1,8 @@
-'use strict';
-var etg = require('../etg');
-var util = require('../../util');
-var Cards = require('../Cards');
-var Actives = require('../Skills');
-var etgutil = require('../../etgutil');
-var RngMock = require('../RngMock');
+import * as etg from '../etg';
+import * as Cards from '../Cards.js';
+import Actives from '../Skills.js';
+import * as etgutil from '../../etgutil.js';
+import RngMock from '../RngMock.js';
 
 var hasBuff = new Uint16Array([
 	5125,
@@ -74,7 +72,7 @@ var canInfect = new Uint16Array([
 var hasBurrow = new Uint16Array([5408, 5409, 5416, 5401]);
 var hasLight = new Uint16Array([5811, 5820, 5908, 7811, 7801, 7820]);
 function scorpion(card, deck) {
-	var isDeath = card.isOf(Cards.Deathstalker); // Scan for Nightfall
+	var isDeath = card.isOf(Cards.Names.Deathstalker); // Scan for Nightfall
 	for (var i = 0; i < deck.length; i++) {
 		if (
 			~hasBuff.indexOf(deck[i]) ||
@@ -117,7 +115,7 @@ var filters = {
 	},
 };
 
-module.exports = function(level) {
+export default function(level) {
 	var uprate = level == 0 ? 0 : level == 1 ? 0.1 : 0.3;
 	function upCode(x) {
 		return uprate ? etgutil.asUpped(x, Math.random() < uprate) : x;
@@ -141,7 +139,7 @@ module.exports = function(level) {
 					cardcount[x.code] != 6 &&
 					!(x.type == etg.ShieldEnum && anyshield == 3) &&
 					!(x.type == etg.WeaponEnum && anyweapon == 3) &&
-					!x.isOf(Cards.Precognition)
+					!x.isOf(Cards.Names.Precognition)
 				);
 			});
 			deck.push(card.code);
@@ -158,7 +156,7 @@ module.exports = function(level) {
 			if (card.cast) {
 				ecost[card.castele] += card.cast * 1.5;
 			}
-			if (card.isOf(Cards.Nova)) {
+			if (card.isOf(Cards.Names.Nova)) {
 				for (var k = 1; k < 13; k++) {
 					ecost[k] -= card.upped ? 2 : 1;
 				}
@@ -175,7 +173,7 @@ module.exports = function(level) {
 	for (var i = deck.length - 1; ~i; i--) {
 		var filterFunc = filters[etgutil.asUpped(deck[i], false)];
 		if (filterFunc) {
-			var card = Cards.Codes[deck[i]];
+			var card = Cards.Names.Codes[deck[i]];
 			if (!filterFunc(card, deck, ecost)) {
 				ecost[card.element] -= card.cost;
 				deck.splice(i, 1);
@@ -184,19 +182,19 @@ module.exports = function(level) {
 		}
 	}
 	if (!anyshield) {
-		deck.push(upCode(Cards.Shield.code));
+		deck.push(upCode(Cards.Names.Shield.code));
 		ecost[0] += Cards.Codes[deck[deck.length - 1]].cost;
 	}
 	if (!anyweapon) {
 		deck.push(
 			upCode(
 				(eles[1] == etg.Air || eles[1] == etg.Light
-					? Cards.ShortBow
+					? Cards.Names.ShortBow
 					: eles[1] == etg.Gravity || eles[1] == etg.Earth
-					? Cards.Hammer
+					? Cards.Names.Hammer
 					: eles[1] == etg.Darkness || eles[1] == etg.Death
-					? Cards.Dagger
-					: Cards.ShortSword
+					? Cards.Names.Dagger
+					: Cards.Names.ShortSword
 				).code,
 			),
 		);
@@ -216,7 +214,7 @@ module.exports = function(level) {
 	if (qpe >= (ismono ? 3 : 2)) {
 		qpesum /= qpe + (ismono ? 2 : 1);
 		for (var i = 0; i < qpesum * 0.8; i++) {
-			deck.push(upCode(Cards.QuantumPillar.code));
+			deck.push(upCode(Cards.Names.QuantumPillar.code));
 			qpe++;
 		}
 	} else qpesum = 0;
@@ -229,4 +227,4 @@ module.exports = function(level) {
 	}
 	deck.push(etgutil.toTrueMark(eles[1]));
 	return deck;
-};
+}

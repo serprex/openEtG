@@ -1,7 +1,7 @@
-#!/bin/node
-const Cards = require('../src/Cards'),
-	etgutil = require('../src/etgutil'),
-	decks = require('../src/Decks');
+#!/bin/node --experimental-modules
+import * as Cards from '../src/Cards.js';
+import * as etgutil from '../src/etgutil.js';
+import decks from '../src/Decks.json';
 let pool = '';
 function buildPool(x) {
 	pool = etgutil.mergedecks(pool, x[1]);

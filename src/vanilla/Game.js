@@ -1,12 +1,10 @@
-'use strict';
-module.exports = Game;
-var etg = require('./etg');
-var smth = require('./Thing');
-var Cards = require('./Cards');
-var Effect = require('./Effect');
-var Player = require('./Player');
-const Rng = require('rng.js');
-function Game(seed, flip) {
+import Rng from 'rng.js';
+import * as etg from './etg.js';
+import * as Cards from './Cards.js';
+import Effect from './Effect.js';
+import Player from './Player.js';
+
+export default function Game(seed, flip) {
 	this.rng = new Rng(seed, ~seed);
 	this.phase = etg.PlayPhase;
 	this.ply = 0;

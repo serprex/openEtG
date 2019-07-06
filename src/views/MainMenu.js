@@ -1,46 +1,47 @@
-'use strict';
-const Chat = require('../Components/Chat'),
-	sock = require('../sock'),
-	mkAi = require('../mkAi'),
-	audio = require('../audio'),
-	Cards = require('../Cards'),
-	etgutil = require('../etgutil'),
-	store = require('../store'),
-	RngMock = require('../RngMock'),
-	Components = require('../Components'),
-	userutil = require('../userutil'),
-	parseChat = require('../parseChat'),
-	{ connect } = require('react-redux'),
-	React = require('react'),
-	tipjar = [
-		'Each card in your booster pack has a 50% chance of being from the chosen element',
-		'Colosseum lets you compete in a number of daily events for extra prizes. The colosseum challenges reset daily',
-		'Be sure to try the Proving Grounds Quests for some good cards',
-		'Rarity ratings: Grey commons, green uncommons, blue rares, orange shard, & pink ultra rares',
-		"The Library button allows you to see all of a user's cards & progress",
-		'If you are a new user, be sure to get the free Bronze & Silver packs from the Shop',
-		'Starter decks, cards from free packs, & all non-Common Daily Cards are account-bound; they cannot be traded or sold',
-		'If you include account-bound cards in an upgrade, the upgrade will also be account-bound',
-		"You'll receive a Daily Card upon logging in after midnight GMT0. If you submit an Arena deck, it contain 5 copies of that card",
-		'Cards sell for around half as much as they cost to buy from a pack',
-		'Quests are free to try, & you always face the same deck. Keep trying until you collect your reward',
-		'You may mulligan at the start of the game to shuffle & redraw your hand with one less card',
-		'Your account name is case sensitive',
-		'Arena Tier 1 is unupgraded, while Tier 2 is upgraded. All decks in a tier have the same number of points',
-		"Typing '/who' in chat you will get a list of the users who are online. '/w user message' whispers that user",
-		"Typing '/help' in chat will list all commands",
-		'Keyboard shortcuts: space ends turn, backspace cancels, w targets opponent, s targets yourself, 1 through 8 cast cards in hand',
-		'Remember that you may use the logout button to enter sandbox mode to review the card pool, check rarities & try out new decks',
-		'Commoner & Mage are unupped, Champion has some upped, & Demigod is fully upped',
-		'Decks submitted to arena lose hp exponentially per day, down to a minimum of a quarter of their original hp',
-		"Rarity doesn't necessarily relate to card strength. You can go a long ways with commons & uncommons",
-		'A ply is half a turn',
-		'Mark cards are only obtainable through PvP events. A tournament deck verifier is at tournament.htm',
-		"After an AI battle you will win a random common, uncommon, or rare from your opponent's deck",
-		'Cards in packs have a (45/packsize)% chance to increment rarity',
-		'At Wealth T50 you can see which players have the highest wealth. Wealth is a combination of current gold & cardpool',
-		'Throttling means that the effect is limited to 2 procs when attacking multiple times with adrenaline',
-	];
+import React from 'react';
+import { connect } from 'react-redux';
+
+import * as audio from '../audio.js';
+import Chat from '../Components/Chat.js';
+import * as sock from '../sock.js';
+import * as mkAi from '../mkAi.js';
+import * as Cards from '../Cards.js';
+import * as etgutil from '../etgutil.js';
+import * as store from '../store.js';
+import RngMock from '../RngMock.js';
+import * as Components from '../Components/index.js';
+import * as userutil from '../userutil.js';
+import parseChat from '../parseChat.js';
+
+const tipjar = [
+	'Each card in your booster pack has a 50% chance of being from the chosen element',
+	'Colosseum lets you compete in a number of daily events for extra prizes. The colosseum challenges reset daily',
+	'Be sure to try the Proving Grounds Quests for some good cards',
+	'Rarity ratings: Grey commons, green uncommons, blue rares, orange shard, & pink ultra rares',
+	"The Library button allows you to see all of a user's cards & progress",
+	'If you are a new user, be sure to get the free Bronze & Silver packs from the Shop',
+	'Starter decks, cards from free packs, & all non-Common Daily Cards are account-bound; they cannot be traded or sold',
+	'If you include account-bound cards in an upgrade, the upgrade will also be account-bound',
+	"You'll receive a Daily Card upon logging in after midnight GMT0. If you submit an Arena deck, it contain 5 copies of that card",
+	'Cards sell for around half as much as they cost to buy from a pack',
+	'Quests are free to try, & you always face the same deck. Keep trying until you collect your reward',
+	'You may mulligan at the start of the game to shuffle & redraw your hand with one less card',
+	'Your account name is case sensitive',
+	'Arena Tier 1 is unupgraded, while Tier 2 is upgraded. All decks in a tier have the same number of points',
+	"Typing '/who' in chat you will get a list of the users who are online. '/w user message' whispers that user",
+	"Typing '/help' in chat will list all commands",
+	'Keyboard shortcuts: space ends turn, backspace cancels, w targets opponent, s targets yourself, 1 through 8 cast cards in hand',
+	'Remember that you may use the logout button to enter sandbox mode to review the card pool, check rarities & try out new decks',
+	'Commoner & Mage are unupped, Champion has some upped, & Demigod is fully upped',
+	'Decks submitted to arena lose hp exponentially per day, down to a minimum of a quarter of their original hp',
+	"Rarity doesn't necessarily relate to card strength. You can go a long ways with commons & uncommons",
+	'A ply is half a turn',
+	'Mark cards are only obtainable through PvP events. A tournament deck verifier is at tournament.htm',
+	"After an AI battle you will win a random common, uncommon, or rare from your opponent's deck",
+	'Cards in packs have a (45/packsize)% chance to increment rarity',
+	'At Wealth T50 you can see which players have the highest wealth. Wealth is a combination of current gold & cardpool',
+	'Throttling means that the effect is limited to 2 procs when attacking multiple times with adrenaline',
+];
 
 function Rect(props) {
 	return (
@@ -153,7 +154,7 @@ const chatStyle = {
 	opacity: '0.6',
 };
 
-module.exports = connect(({ user, opts }) => ({
+export default connect(({ user, opts }) => ({
 	user,
 	remember: opts.remember,
 	foename: opts.foename,
@@ -205,7 +206,7 @@ module.exports = connect(({ user, opts }) => ({
 				store.setCmds({
 					codecard: data => {
 						this.props.dispatch(
-							store.doNav(require('./Reward'), {
+							store.doNav(import('./Reward'), {
 								type: data.type,
 								amount: data.num,
 								code: this.props.foename,
@@ -290,9 +291,7 @@ module.exports = connect(({ user, opts }) => ({
 						key={i}
 						value={`Arena${i + 1} T20`}
 						onClick={() => {
-							this.props.dispatch(
-								store.doNav(require('./ArenaTop'), { lv: i }),
-							);
+							this.props.dispatch(store.doNav(import('./ArenaTop'), { lv: i }));
 						}}
 						onMouseOver={this.mkSetTip(
 							'See who the top players in arena are right now',
@@ -311,7 +310,7 @@ module.exports = connect(({ user, opts }) => ({
 					self.props.dispatch(store.setUser(null));
 					self.props.dispatch(store.setOpt('remember', false));
 				}
-				self.props.dispatch(store.doNav(require('./Login')));
+				self.props.dispatch(store.doNav(import('./Login')));
 			}
 			const quickslots = [];
 			if (self.props.user) {
@@ -411,9 +410,7 @@ module.exports = connect(({ user, opts }) => ({
 											type="button"
 											value="Colosseum"
 											onClick={() => {
-												this.props.dispatch(
-													store.doNav(require('./Colosseum')),
-												);
+												this.props.dispatch(store.doNav(import('./Colosseum')));
 											}}
 											onMouseOver={this.mkSetTip(
 												'Try some daily challenges in the Colosseum',
@@ -429,7 +426,7 @@ module.exports = connect(({ user, opts }) => ({
 											type="button"
 											value="Quests"
 											onClick={() => {
-												this.props.dispatch(store.doNav(require('./Quest')));
+												this.props.dispatch(store.doNav(import('./Quest')));
 											}}
 											onMouseOver={this.mkSetTip('Go on an adventure')}
 										/>
@@ -445,9 +442,7 @@ module.exports = connect(({ user, opts }) => ({
 											type="button"
 											value="Arena Deck"
 											onClick={() => {
-												this.props.dispatch(
-													store.doNav(require('./ArenaInfo')),
-												);
+												this.props.dispatch(store.doNav(import('./ArenaInfo')));
 											}}
 											onMouseOver={this.mkSetTip(
 												'Check how your arena decks are doing',
@@ -465,7 +460,7 @@ module.exports = connect(({ user, opts }) => ({
 											value="Custom"
 											onClick={() => {
 												this.props.dispatch(
-													store.doNav(require('./Challenge'), { pvp: false }),
+													store.doNav(import('./Challenge'), { pvp: false }),
 												);
 											}}
 											onMouseOver={this.mkSetTip(
@@ -500,7 +495,7 @@ module.exports = connect(({ user, opts }) => ({
 								type="button"
 								value="Wealth T50"
 								onClick={() => {
-									this.props.dispatch(store.doNav(require('./WealthTop')));
+									this.props.dispatch(store.doNav(import('./WealthTop')));
 								}}
 								onMouseOver={this.mkSetTip(
 									"See who's collected the most wealth",
@@ -560,8 +555,8 @@ module.exports = connect(({ user, opts }) => ({
 									this.props.dispatch(
 										store.doNav(
 											self.props.user
-												? require('./DeckEditor')
-												: require('./SandboxEditor'),
+												? import('./DeckEditor')
+												: import('./SandboxEditor'),
 										),
 									);
 								}}
@@ -589,7 +584,7 @@ module.exports = connect(({ user, opts }) => ({
 										type="button"
 										value="Shop"
 										onClick={() => {
-											this.props.dispatch(store.doNav(require('./Shop')));
+											this.props.dispatch(store.doNav(import('./Shop')));
 										}}
 										onMouseOver={this.mkSetTip(
 											'Buy booster packs which contain cards from the elements you choose',
@@ -604,7 +599,7 @@ module.exports = connect(({ user, opts }) => ({
 										type="button"
 										value="Upgrade"
 										onClick={() => {
-											this.props.dispatch(store.doNav(require('./Upgrade')));
+											this.props.dispatch(store.doNav(import('./Upgrade')));
 										}}
 										onMouseOver={this.mkSetTip('Upgrade or sell cards')}
 										style={{
@@ -617,7 +612,7 @@ module.exports = connect(({ user, opts }) => ({
 										type="button"
 										value="Bazaar"
 										onClick={() => {
-											this.props.dispatch(store.doNav(require('./Bazaar')));
+											this.props.dispatch(store.doNav(import('./Bazaar')));
 										}}
 										onMouseOver={this.mkSetTip(
 											"Put up cards for sale & review other players' offers",
@@ -652,7 +647,7 @@ module.exports = connect(({ user, opts }) => ({
 										(self.props.user && self.props.user.name);
 									if (name)
 										this.props.dispatch(
-											store.doNav(require('./Library'), { name }),
+											store.doNav(import('./Library'), { name }),
 										);
 								}}
 								onMouseOver={this.mkSetTip(

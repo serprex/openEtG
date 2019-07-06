@@ -1,8 +1,6 @@
-const sock = require('./sock'),
-	store = require('./store'),
-	React = require('react');
+import * as sock from './sock.js';
+import * as store from './store.js';
 
-let guestname;
 function chatmute() {
 	const state = store.store.getState();
 	store.store.dispatch(
@@ -14,7 +12,7 @@ function chatmute() {
 		),
 	);
 }
-function parseChat(e) {
+export default function parseChat(e) {
 	e.cancelBubble = true;
 	const kc = e.which || e.keyCode;
 	if (kc == 13) {
@@ -73,4 +71,3 @@ function parseChat(e) {
 		} else store.store.dispatch(store.chatMsg('Not a command: ' + msg));
 	}
 }
-module.exports = parseChat;

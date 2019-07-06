@@ -1,4 +1,3 @@
-'use strict';
 function hookRowMouseover(tr) {
 	tr.addEventListener('mouseover', function(e) {
 		for (let i = 1; i < this.children.length; i++) {
@@ -13,7 +12,7 @@ function hookRowMouseover(tr) {
 		}
 	});
 }
-const CardData = require('../Cards.json');
+import CardData from '../Cards.json';
 const Cards = new Map();
 for (let i = 0; i < CardData.length - 1; i++) {
 	const Cardi = CardData[i];

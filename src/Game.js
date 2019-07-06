@@ -1,8 +1,13 @@
-'use strict';
-const Rng = require('rng.js'),
-	imm = require('immutable');
+import Rng from 'rng.js';
+import imm from 'immutable';
 
-function Game(data) {
+import * as etg from './etg.js';
+import Effect from './Effect.js';
+import * as Cards from './Cards.js';
+import Player from './Player.js';
+import Thing from './Thing.js';
+
+export default function Game(data) {
 	const { seed } = data,
 		rng = new Rng(seed, ~seed);
 	this.props = new imm.Map().set(
@@ -40,7 +45,6 @@ function Game(data) {
 	}
 }
 Game.prototype.id = 1;
-module.exports = Game;
 
 Object.defineProperty(Game.prototype, 'ai', {
 	get() {
@@ -245,9 +249,3 @@ Game.prototype.targetFilter = function(src, active) {
 Game.prototype.effect = function(effect) {
 	if (!Effect.disable && this.effects) this.effects.push(effect);
 };
-
-var etg = require('./etg');
-var Cards = require('./Cards');
-var Effect = require('./Effect');
-var Player = require('./Player');
-var Thing = require('./Thing');

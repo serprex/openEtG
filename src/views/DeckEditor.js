@@ -1,11 +1,12 @@
-const etgutil = require('../etgutil'),
-	Cards = require('../Cards'),
-	Tutor = require('../Components/Tutor'),
-	sock = require('../sock'),
-	store = require('../store'),
-	Editor = require('../Components/Editor'),
-	{ connect } = require('react-redux'),
-	React = require('react');
+import { connect } from 'react-redux';
+import React from 'react';
+
+import * as etgutil from '../etgutil';
+import * as Cards from '../Cards';
+import * as Tutor from '../Components/Tutor';
+import * as sock from '../sock';
+import * as store from '../store';
+import Editor from '../Components/Editor';
 
 function processDeck(pool, dcode) {
 	let mark = 0,
@@ -263,7 +264,7 @@ const DeckSelector = connect(({ user }) => ({ user }))(
 	},
 );
 
-module.exports = connect(({ user }) => ({
+export default connect(({ user }) => ({
 	user,
 }))(
 	class DeckEditor extends React.Component {
@@ -394,7 +395,7 @@ module.exports = connect(({ user }) => ({
 						value="Exit"
 						onClick={() => {
 							this.saveDeck(this.props.user.selectedDeck, true);
-							this.props.dispatch(store.doNav(require('../views/MainMenu')));
+							this.props.dispatch(store.doNav(import('../views/MainMenu')));
 						}}
 						style={{
 							position: 'absolute',

@@ -1,14 +1,16 @@
-'use strict';
-const imm = require('immutable');
-function Player(game, id) {
+import imm from 'immutable';
+import Thing from './Thing.js';
+import * as etg from './etg.js';
+import * as etgutil from './etgutil.js';
+import * as Cards from './Cards.js';
+
+export default function Player(game, id) {
 	if (!id || typeof id !== 'number') throw new Error(`Invalid id: ${id}`);
 	this.game = game;
 	this.id = id;
 	this.cache = new WeakMap();
 }
 
-module.exports = Player;
-const Thing = require('./Thing');
 Player.prototype = Object.create(Thing.prototype);
 
 function assertIds(val) {
@@ -500,7 +502,3 @@ Player.prototype.spelldmg = function(x) {
 		: this
 	).dmg(x);
 };
-
-var etg = require('./etg');
-var etgutil = require('./etgutil');
-var Cards = require('./Cards');

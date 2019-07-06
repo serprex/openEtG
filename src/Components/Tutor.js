@@ -1,6 +1,6 @@
-const { Text } = require('./index'),
-	{ connect } = require('react-redux'),
-	React = require('react');
+import React from 'react';
+import { connect } from 'react-redux';
+import { Text } from './index';
 
 const connector = connect(({ opts }) => ({ disableTut: opts.disableTut }));
 const mkTutor = function(data) {
@@ -58,7 +58,7 @@ const mkTutor = function(data) {
 	);
 };
 
-exports.Editor = mkTutor([
+export const Editor = mkTutor([
 	[
 		100,
 		48,
@@ -80,7 +80,7 @@ exports.Editor = mkTutor([
 	[88, 530, ": Shows all cards, including those you don't own"],
 	[88, 575, ": Don't show shiny cards"],
 ]);
-exports.Shop = mkTutor([
+export const Shop = mkTutor([
 	[
 		45,
 		97,

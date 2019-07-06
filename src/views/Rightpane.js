@@ -1,9 +1,10 @@
-const Chat = require('../Components/Chat'),
-	sock = require('../sock'),
-	store = require('../store'),
-	parseChat = require('../parseChat'),
-	{ connect } = require('react-redux'),
-	React = require('react');
+import React from 'react';
+import { connect } from 'react-redux';
+
+import Chat from '../Components/Chat';
+import * as sock from '../sock';
+import * as store from '../store';
+import parseChat from '../parseChat';
 
 const ChannelTab = connect(({ opts }) => ({ selected: opts.channel }))(
 	function ChannelTab(props) {
@@ -19,7 +20,7 @@ const ChannelTab = connect(({ opts }) => ({ selected: opts.channel }))(
 	},
 );
 
-module.exports = connect(state => ({
+export default connect(state => ({
 	wantpvp: state.opts.wantpvp,
 	offline: state.opts.offline,
 	afk: state.opts.afk,

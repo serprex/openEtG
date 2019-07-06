@@ -1,18 +1,20 @@
-const Cards = require('./Cards'),
-	etgutil = require('./etgutil'),
-	Game = require('./Game'),
-	store = require('./store'),
-	userutil = require('./userutil'),
-	RngMock = require('./RngMock'),
-	React = require('react');
-const endpoint =
-	(location.protocol === 'http:' ? 'ws://' : 'wss://') +
-	location.hostname +
-	':13602';
+import React from 'react';
+
+import * as Cards from './Cards.js';
+import * as etgutil from './etgutil.js';
+import Game from './Game.js';
+import * as store from './store.js';
+import * as userutil from './userutil.js';
+import RngMock from './RngMock.js';
+
+const endpoint = `${location.protocol === 'http:' ? 'ws://' : 'wss://'}
+	${location.hostname}:13602`;
 const buffer = [];
 let socket = new WebSocket(endpoint),
 	attempts = 0,
-	attemptTimeout = 0;
+	attemptTimeout = 0,
+	pvp = false;
+export let trade = false;
 const sockEvents = {
 	clear: () => store.store.dispatch(store.clearChat('Main')),
 	passchange: data => {
@@ -106,7 +108,7 @@ const sockEvents = {
 					idx: 1,
 					name: user && user.name,
 					user: user ? user.name : '',
-					deck: exports.getDeck(),
+					deck: getDeck(),
 				},
 				{
 					idx: 2,
@@ -126,7 +128,7 @@ const sockEvents = {
 			cost: userutil.arenaCost(data.lv),
 			rematch: () => {
 				const { user } = store.store.getState();
-				if (!Cards.isDeckLegal(etgutil.decodedeck(exports.getDeck()), user)) {
+				if (!Cards.isDeckLegal(etgutil.decodedeck(getDeck()), user)) {
 					store.store.dispatch(store.chatMsg(`Invalid deck`, 'System'));
 					return;
 				}
@@ -135,31 +137,22 @@ const sockEvents = {
 					store.store.dispatch(store.chatMsg(`Requires ${cost}$`, 'System'));
 					return;
 				}
-				exports.userEmit('foearena', { lv: data.lv });
+				userEmit('foearena', { lv: data.lv });
 			},
 		});
-		store.store.dispatch(store.doNav(require('./views/Match'), { game }));
+		store.store.dispatch(store.doNav(import('./views/Match'), { game }));
 	},
 	tradegive: data => {
-		if (exports.trade) {
-			delete exports.trade;
-			store.store.dispatch(store.doNav(require('./views/Trade')));
+		if (trade) {
+			trade = false;
+			store.store.dispatch(store.doNav(import('./views/Trade')));
 		}
 	},
 	pvpgive: data => {
-		if (exports.pvp) {
-			delete exports.pvp;
+		if (pvp) {
+			pvp = false;
 			store.store.dispatch(
-				store.doNav(require('./views/Match'), { game: new Game(data.data) }),
-			);
-		}
-	},
-	spectategive: data => {
-		if (exports.spectate) {
-			delete exports.spectate;
-			data.spectate = true;
-			store.store.dispatch(
-				store.doNav(require('./views/Match'), { game: new Game(data.data) }),
+				store.doNav(import('./views/Match'), { game: new Game(data.data) }),
 			);
 		}
 	},
@@ -169,8 +162,8 @@ const sockEvents = {
 				<div
 					style={{ cursor: 'pointer', color: '#69f' }}
 					onClick={() => {
-						store.store.dispatch(store.doNav(require('./views/Challenge')));
-						exports.userEmit('matchjoin', { host: data.u });
+						store.store.dispatch(store.doNav(import('./views/Challenge')));
+						userEmit('matchjoin', { host: data.u });
 					}}>
 					{`${data.u} invites you`}
 				</div>,
@@ -184,16 +177,16 @@ const sockEvents = {
 					style={{ cursor: 'pointer', color: '#69f' }}
 					onClick={() => {
 						if (data.pvp) {
-							exports.sendChallenge((exports.pvp = data.f));
+							sendChallenge((pvp = data.f));
 						} else {
-							exports.userEmit('tradewant', { f: (exports.trade = data.f) });
+							userEmit('tradewant', { f: (trade = data.f) });
 						}
 					}}>
 					{`${data.f} offers to ${data.pvp ? 'duel' : 'trade with'} you!`}
 				</div>,
 			),
 		);
-		exports.emit('challrecv', { f: data.f, pvp: data.pvp });
+		emit({ x: 'challrecv', f: data.f, pvp: data.pvp });
 	},
 	bzgive: data => {
 		store.store.dispatch(store.userCmd(data.g ? 'addgold' : 'addcards', data));
@@ -215,7 +208,7 @@ socket.onopen = function() {
 	}
 	const { opts } = store.store.getState();
 	if (opts.offline || opts.wantpvp || opts.afk)
-		exports.emit({
+		emit({
 			x: 'chatus',
 			hide: !!opts.offline,
 			wantpvp: !!opts.wantpvp,
@@ -239,39 +232,39 @@ socket.onclose = function() {
 	}, timeout);
 	store.store.dispatch(store.chatMsg(`Reconnecting in ${timeout}ms`, 'System'));
 };
-exports.userEmit = function(x, data = {}) {
-	const { user } = store.store.getState();
-	data.x = x;
-	data.u = user.name;
-	data.a = user.auth;
-	exports.emit(data);
-};
-exports.emit = function(data) {
+export function emit(data) {
 	const msg = JSON.stringify(data);
 	if (socket && socket.readyState == 1) {
 		socket.send(msg);
 	} else {
 		buffer.push(msg);
 	}
-};
-exports.userExec = function(x, data = {}) {
-	exports.userEmit(x, data);
+}
+export function userEmit(x, data = {}) {
+	const { user } = store.store.getState();
+	data.x = x;
+	data.u = user.name;
+	data.a = user.auth;
+	emit(data);
+}
+export function userExec(x, data = {}) {
+	userEmit(x, data);
 	store.store.dispatch(store.userCmd(x, data));
-};
-exports.getDeck = function() {
+}
+export function getDeck() {
 	const state = store.store.getState();
 	return state.user
 		? state.user.decks[state.user.selectedDeck] || ''
 		: state.opts.deck;
-};
-exports.sendChallenge = function(foe) {
-	const deck = exports.getDeck(),
+}
+export function sendChallenge(foe) {
+	const deck = getDeck(),
 		{ user } = store.store.getState();
 	if (!Cards.isDeckLegal(etgutil.decodedeck(deck), user)) {
 		store.store.dispatch(store.chatMsg(`Invalid deck`, 'System'));
 		return;
 	}
 	const msg = { f: foe };
-	exports.userEmit('foewant', msg);
-	exports.pvp = foe;
-};
+	userEmit('foewant', msg);
+	pvp = foe;
+}

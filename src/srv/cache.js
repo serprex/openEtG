@@ -1,4 +1,3 @@
-'use strict';
 const cache = new Map(),
 	stime = new Date();
 stime.setMilliseconds(0);
@@ -23,15 +22,18 @@ async function respond(url, res, datathunk, ifmod) {
 		} catch {}
 	}
 }
-exports.rm = url => cache.delete(url);
-exports.try = function(res, url, ifmod) {
+export function rm(url) {
+	return cache.delete(url);
+}
+export function _try(res, url, ifmod) {
 	const data = cache.get(url);
 	if (!data) return false;
 	respond(url, res, data, ifmod);
 	return true;
-};
-exports.add = function(res, url, ifmod, path, func) {
+}
+
+export function add(res, url, ifmod, path, func) {
 	const datathunk = func(path, stime);
 	cache.set(url, datathunk);
 	respond(url, res, datathunk, ifmod);
-};
+}

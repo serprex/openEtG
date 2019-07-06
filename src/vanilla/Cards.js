@@ -1,13 +1,12 @@
-'use strict';
-exports.Targeting = null;
-exports.Codes = [];
-const etg = require('./etg'),
-	smth = require('./Thing'),
-	Card = require('./Card'),
-	etgutil = require('../etgutil');
-exports.codeCmp = function(x, y) {
-	const cx = exports.Codes[x],
-		cy = exports.Codes[y];
+export const Targeting = {};
+export const Codes = [];
+import * as etg from './etg.js';
+import Card from './Card.js';
+import CardsJson from './Cards.json';
+export const Names = {};
+export function codeCmp(x, y) {
+	const cx = Codes[x],
+		cy = Codes[y];
 	return (
 		cx.upped - cy.upped ||
 		cx.element - cy.element ||
@@ -16,17 +15,17 @@ exports.codeCmp = function(x, y) {
 		(cx.code > cy.code) - (cx.code < cy.code) ||
 		(x > y) - (x < y)
 	);
-};
-exports.cardCmp = function(x, y) {
-	return exports.codeCmp(x.code, y.code);
-};
+}
+export function cardCmp(x, y) {
+	return codeCmp(x.code, y.code);
+}
 const filtercache = [];
-exports.filter = function(upped, filter, cmp) {
+export function filter(upped, filter, cmp) {
 	const cacheidx = upped ? 1 : 0;
 	if (!(cacheidx in filtercache)) {
 		filtercache[cacheidx] = [];
-		for (const key in exports.Codes) {
-			const card = exports.Codes[key];
+		for (const key in Codes) {
+			const card = Codes[key];
 			if (card.upped == upped && !card.status.get('token')) {
 				filtercache[cacheidx].push(card);
 			}
@@ -36,7 +35,7 @@ exports.filter = function(upped, filter, cmp) {
 	const keys = filtercache[cacheidx].filter(filter);
 	if (cmp) keys.sort(cmp);
 	return keys;
-};
+}
 function parseCsv(type, data) {
 	var keys = data[0],
 		cardinfo = {};
@@ -47,17 +46,16 @@ function parseCsv(type, data) {
 				cardinfo[key] = carddata[i];
 			});
 			var cardcode = cardinfo.Code;
-			exports.Codes[cardcode] = new Card(type, cardinfo);
+			Codes[cardcode] = new Card(type, cardinfo);
 			if (cardcode < 7000)
-				exports[cardinfo.Name.replace(/\W/g, '')] = exports.Codes[cardcode];
+				Names[cardinfo.Name.replace(/\W/g, '')] = Codes[cardcode];
 		});
 	}
 }
 function parseTargeting(data) {
 	for (const key in data) {
-		data[key] = getTargetFilter(data[key]);
+		Targeting[key] = getTargetFilter(data[key]);
 	}
-	exports.Targeting = data;
 }
 function getTargetFilter(str) {
 	function getFilterFunc(funcname) {
@@ -146,7 +144,7 @@ const TargetFilters = {
 	},
 };
 
-require('./Cards.json').forEach(function(cards, type) {
+CardsJson.forEach(function(cards, type) {
 	if (type == 6) parseTargeting(cards);
 	else parseCsv(type, cards);
 });

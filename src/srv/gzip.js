@@ -1,2 +1,3 @@
-'use strict';
-module.exports = require('util').promisify(require('zlib').gzip);
+import { gzip } from 'zlib';
+import { promisify } from 'util';
+export default promisify(gzip);

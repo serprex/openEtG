@@ -1,6 +1,6 @@
-'use strict';
-const crypto = require('crypto');
-exports.mkTask = function(cb) {
+import crypto from 'crypto';
+
+export function mkTask(cb) {
 	const params = {};
 	let cbCount = 1;
 	function cbCheck() {
@@ -21,21 +21,21 @@ exports.mkTask = function(cb) {
 			};
 		}
 	};
-};
-exports.initsalt = function(user) {
+}
+export function initsalt(user) {
 	if (!user.salt) {
 		user.salt = crypto.pseudoRandomBytes(15).toString('base64');
 		user.iter = 99999;
 		user.algo = 'SHA512';
 	}
-};
-exports.getDay = function() {
+}
+export function getDay() {
 	return Math.floor(Date.now() / 86400000);
-};
-exports.parseJSON = function(x) {
+}
+export function parseJSON(x) {
 	try {
 		return JSON.parse(x);
 	} catch (e) {
 		return null;
 	}
-};
+}

@@ -1,7 +1,6 @@
-'use strict';
-var etg = require('./etg');
-var Card = require('./Card');
-var { Thing } = require('./Thing');
+import * as etg from './etg.js';
+import Card from './Card.js';
+import { Thing } from './Thing.js';
 // TODO skeleton, mummy
 var data = {
 	ablaze: 'Gain 2|0',
@@ -411,7 +410,7 @@ function pushEntry(list, c, event, entry) {
 	var x = processEntry(c, event, entry);
 	if (x) list.push(x);
 }
-module.exports = function(c, event) {
+export default function skillText(c, event) {
 	if (c instanceof Card && c.type == etg.SpellEnum) {
 		const entry = data[c.active.get('cast').name[0]];
 		return processEntry(c, 'cast', entry);
@@ -440,4 +439,4 @@ module.exports = function(c, event) {
 		}
 		return ret.join('\n');
 	}
-};
+}

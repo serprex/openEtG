@@ -1,7 +1,7 @@
-const { connect } = require('react-redux'),
-	React = require('react');
+import React from 'react';
+import { connect } from 'react-redux';
 
-module.exports = connect(state => ({
+export default connect(state => ({
 	chat: state.chat,
 }))(
 	class Chat extends React.PureComponent {

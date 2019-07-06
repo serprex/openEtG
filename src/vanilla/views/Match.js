@@ -1,14 +1,15 @@
-const ui = require('../ui'),
-	etg = require('../etg'),
-	sock = require('../sock'),
-	Card = require('../Card'),
-	Cards = require('../Cards'),
-	Effect = require('../Effect'),
-	aiSearch = require('../ai/search'),
-	Components = require('../Components'),
-	store = require('../store'),
-	{ connect } = require('react-redux'),
-	React = require('react');
+import React from 'react';
+import { connect } from 'react-redux';
+
+import * as ui from '../ui.js';
+import * as etg from '../etg.js';
+import * as sock from '../sock.js';
+import Card from '../Card.js';
+import * as Cards from '../Cards.js';
+import Effect from '../Effect.js';
+import aiSearch from '../ai/search.js';
+import * as Components from '../Components.js';
+import * as store from '../store.js';
 
 const svgbg = (() => {
 	const redhor = new Uint16Array([
@@ -129,22 +130,22 @@ const cloaksvg = (
 );
 
 const activeInfo = {
-	firebolt: (t, game) => {
+	firebolt(t, game) {
 		return 3 + Math.floor(game.player1.quanta[etg.Fire] / 4);
 	},
-	drainlife: (t, game) => {
+	drainlife(t, game) {
 		return 2 + Math.floor(game.player1.quanta[etg.Darkness] / 5);
 	},
-	icebolt: (t, game) => {
+	icebolt(t, game) {
 		const bolts = Math.floor(game.player1.quanta[etg.Water] / 5);
 		return `${2 + bolts} ${35 + bolts * 5}%`;
 	},
-	catapult: (t, game) => {
+	catapult(t, game) {
 		return Math.ceil(
 			(t.truehp() * (t.status.get('frozen') ? 150 : 100)) / (t.truehp() + 100),
 		);
 	},
-	adrenaline: (t, game) => {
+	adrenaline(t, game) {
 		return 'Extra: ' + etg.getAdrenalRow(t.trueatk());
 	},
 };
@@ -326,7 +327,7 @@ function tgtclass(game, obj) {
 	} else if (obj.owner === game.player1 && obj.canactive()) return 'canactive';
 }
 
-module.exports = connect()(
+export default connect()(
 	class Match extends React.Component {
 		constructor(props) {
 			super(props);
@@ -345,7 +346,7 @@ module.exports = connect()(
 		endClick(discard) {
 			const { game } = this.props;
 			if (game.winner) {
-				this.props.dispatch(store.doNav(require('./Result'), { game }));
+				this.props.dispatch(store.doNav(import('./Result'), { game }));
 			} else if (game.turn == game.player1) {
 				if (discard == undefined && game.player1.hand.length == 8) {
 					this.setState({ discarding: true });
@@ -577,12 +578,9 @@ module.exports = connect()(
 					? 'Discard'
 					: game.targeting
 					? game.targeting.text
-					: (game.turn == game.player1 ? 'Your Turn' : 'Their Turn') +
-					  (game.phase > etg.MulliganPhase
-							? ''
-							: game.first == game.player1
-							? ', First'
-							: ', Second');
+					: game.turn == game.player1
+					? 'Your Turn'
+					: 'Their Turn';
 				if (game.turn == game.player1) {
 					endText = this.state.discarding
 						? ''
@@ -677,7 +675,7 @@ module.exports = connect()(
 					? 'ico silence'
 					: pl.sanctuary
 					? 'ico sanctuary'
-					: pl.nova >= 3 && pl.hand.some(c => c.card.isOf(Cards.Nova))
+					: pl.nova >= 3 && pl.hand.some(c => c.card.isOf(Cards.Names.Nova))
 					? 'ico singularity'
 					: '';
 				children.push(

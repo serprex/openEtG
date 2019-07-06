@@ -1,4 +1,4 @@
-const ui = require('../ui');
+import { eleNames } from '../ui.js';
 
 const bannedCards = new Set([
 	'4vj',
@@ -10,7 +10,7 @@ const bannedCards = new Set([
 	'5ig',
 	'5io',
 ]);
-module.exports = function(deck) {
+export default function(deck) {
 	const elementList = [];
 	let eleCount, rareElement;
 	for (let i = 0; i < deck.length; i++) {
@@ -34,9 +34,9 @@ module.exports = function(deck) {
 	}
 	for (let i = 0; i < elementList.length; i++) {
 		if (elementList[i] && elementList[i] < 6)
-			return `You have too few ${ui.eleNames[i]} cards`;
+			return `You have too few ${eleNames[i]} cards`;
 	}
 	if (eleCount < 3)
 		return `Your deck contains too few elements (only ${eleCount})`;
 	return 'Legal';
-};
+}

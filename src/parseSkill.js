@@ -1,8 +1,9 @@
-'use strict';
-const cache = new Map(),
-	imm = require('immutable'),
-	Skill = require('./Skill');
-module.exports = function(name) {
+import imm from 'immutable';
+import Skill from './Skill.js';
+import Skills from './Skills.js';
+
+const cache = new Map();
+export default function(name) {
 	if (name in Skills) {
 		return Skills[name];
 	} else if (cache.has(name)) {
@@ -19,5 +20,4 @@ module.exports = function(name) {
 	);
 	cache.set(name, s);
 	return s;
-};
-var Skills = require('./Skills');
+}

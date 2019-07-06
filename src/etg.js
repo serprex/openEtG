@@ -1,4 +1,3 @@
-'use strict';
 // adrtbl is a bitpacked 2d array
 // [[0,0,0,0],[1,1,1],[2,2,2],[3,3,3],[3,2],[4,2],[4,2],[5,3],[6,3],[3],[4],[4],[4],[5],[5],[5]]
 const adrtbl = new Uint16Array([
@@ -19,7 +18,7 @@ const adrtbl = new Uint16Array([
 	41,
 	41,
 ]);
-exports.getAdrenalRow = function(x) {
+export function getAdrenalRow(x) {
 	x |= 0;
 	const sign = (x > 0) - (x < 0);
 	x = Math.abs(x);
@@ -32,41 +31,41 @@ exports.getAdrenalRow = function(x) {
 		ret += (i ? ', ' : '') + (row & 7) * sign;
 	}
 	return ret;
-};
-exports.countAdrenaline = function(x) {
+}
+export function countAdrenaline(x) {
 	x = Math.abs(x | 0);
 	return x > 15 ? 1 : (adrtbl[x] & 7) + 1;
-};
-exports.calcAdrenaline = function(y, dmg) {
+}
+export function calcAdrenaline(y, dmg) {
 	if (y < 2) return dmg;
 	const row = adrtbl[Math.abs(dmg)];
 	if (y - 2 >= (row & 7)) return 0;
 	return ((row >> ((y - 1) * 3)) & 7) * ((dmg > 0) - (dmg < 0));
-};
-exports.Chroma = 0;
-exports.Entropy = 1;
-exports.Death = 2;
-exports.Gravity = 3;
-exports.Earth = 4;
-exports.Life = 5;
-exports.Fire = 6;
-exports.Water = 7;
-exports.Light = 8;
-exports.Air = 9;
-exports.Time = 10;
-exports.Darkness = 11;
-exports.Aether = 12;
-exports.Pillar = 0;
-exports.Weapon = 1;
-exports.Shield = 2;
-exports.Permanent = 3;
-exports.Spell = 4;
-exports.Creature = 5;
-exports.Player = 6;
-exports.MulliganPhase = 0;
-exports.PlayPhase = 1;
-exports.EndPhase = 2;
-exports.PillarList = new Uint16Array([
+}
+export const Chroma = 0;
+export const Entropy = 1;
+export const Death = 2;
+export const Gravity = 3;
+export const Earth = 4;
+export const Life = 5;
+export const Fire = 6;
+export const Water = 7;
+export const Light = 8;
+export const Air = 9;
+export const Time = 10;
+export const Darkness = 11;
+export const Aether = 12;
+export const Pillar = 0;
+export const Weapon = 1;
+export const Shield = 2;
+export const Permanent = 3;
+export const Spell = 4;
+export const Creature = 5;
+export const Player = 6;
+export const MulliganPhase = 0;
+export const PlayPhase = 1;
+export const EndPhase = 2;
+export const PillarList = new Uint16Array([
 	5002,
 	5100,
 	5200,
@@ -81,7 +80,7 @@ exports.PillarList = new Uint16Array([
 	6100,
 	6200,
 ]);
-exports.PendList = new Uint16Array([
+export const PendList = new Uint16Array([
 	5004,
 	5150,
 	5250,
@@ -96,7 +95,7 @@ exports.PendList = new Uint16Array([
 	6150,
 	6250,
 ]);
-exports.NymphList = new Uint16Array([
+export const NymphList = new Uint16Array([
 	0,
 	5120,
 	5220,
@@ -111,7 +110,7 @@ exports.NymphList = new Uint16Array([
 	6120,
 	6220,
 ]);
-exports.AlchemyList = new Uint16Array([
+export const AlchemyList = new Uint16Array([
 	0,
 	5111,
 	5212,
@@ -126,7 +125,7 @@ exports.AlchemyList = new Uint16Array([
 	6110,
 	6209,
 ]);
-exports.ShardList = new Uint16Array([
+export const ShardList = new Uint16Array([
 	0,
 	5130,
 	5230,

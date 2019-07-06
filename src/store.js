@@ -1,11 +1,11 @@
-'use strict';
-const imm = require('immutable'),
-	usercmd = require('./usercmd'),
-	redux = require('redux'),
-	React = require('react'),
-	sfx = require('./audio'),
-	opts = { channel: 'Main' };
+import React from 'react';
+import * as redux from 'redux';
+import imm from 'immutable';
 
+import * as usercmd from './usercmd';
+import * as sfx from './audio';
+
+const opts = { channel: 'Main' };
 let hasLocalStorage = true;
 try {
 	for (const key in localStorage)
@@ -16,44 +16,69 @@ try {
 sfx.changeSound(opts.enableSound);
 sfx.changeMusic(opts.enableMusic);
 
-exports.doNav = (view, props) => ({ type: 'NAV', view, props });
+export function doNav(view, props) {
+	return dispatch =>
+		view.then(view => dispatch({ type: 'NAV', view: view.default, props }));
+}
 
-exports.setOptTemp = (key, val) => dispatch => {
-	if (hasLocalStorage && !val) delete localStorage[key];
-	dispatch({
-		type: 'OPT',
-		key,
-		val,
-	});
-};
+export function doNavDirect(view, props) {
+	dispatch({ type: 'NAV', view, props });
+}
 
-exports.setOpt = hasLocalStorage
+export function setOptTemp(key, val) {
+	return dispatch => {
+		if (hasLocalStorage && !val) delete localStorage[key];
+		dispatch({
+			type: 'OPT',
+			key,
+			val,
+		});
+	};
+}
+
+export const setOpt = hasLocalStorage
 	? (key, val) => dispatch => {
 			if (hasLocalStorage) {
 				if (val) localStorage[key] = val;
 				else delete localStorage[key];
 			}
-			dispatch(exports.setOptTemp(key, val));
+			dispatch(setOptTemp(key, val));
 	  }
-	: exports.setOptTemp;
+	: setOptTemp;
 
-exports.setCmds = cmds => ({ type: 'CMD', cmds });
+export function setCmds(cmds) {
+	return { type: 'CMD', cmds };
+}
+export function mute(name) {
+	return { type: 'MUTE', name };
+}
+export function unmute(name) {
+	return { type: 'UNMUTE', name };
+}
+export function clearChat(name) {
+	return { type: 'CHAT_CLEAR', name };
+}
+export function chat(span, name) {
+	return { type: 'CHAT', span, name };
+}
+export function chatMsg(msg, name) {
+	return {
+		type: 'CHAT',
+		span: <div>{msg}</div>,
+		name,
+	};
+}
+export function setUser(user) {
+	return { type: 'USER_SET', user };
+}
+export function userCmd(cmd, data) {
+	return { type: 'USER_CMD', cmd, data };
+}
+export function updateUser(data) {
+	return { type: 'USER_UPDATE', data };
+}
 
-exports.mute = name => ({ type: 'MUTE', name });
-exports.unmute = name => ({ type: 'UNMUTE', name });
-exports.clearChat = name => ({ type: 'CHAT_CLEAR', name });
-exports.chat = (span, name) => ({ type: 'CHAT', span, name });
-exports.chatMsg = (msg, name) => ({
-	type: 'CHAT',
-	span: <div>{msg}</div>,
-	name,
-});
-
-exports.setUser = user => ({ type: 'USER_SET', user });
-exports.userCmd = (cmd, data) => ({ type: 'USER_CMD', cmd, data });
-exports.updateUser = data => ({ type: 'USER_UPDATE', data });
-
-exports.store = redux.createStore(
+export const store = redux.createStore(
 	(state, action) => {
 		switch (action.type) {
 			case 'NAV':
@@ -103,7 +128,7 @@ exports.store = redux.createStore(
 					);
 				chat.set(name, (chat.get(name) || new imm.List()).push(span));
 				if (action.name === 'System')
-					chat.set('Main', (chat.get('Main') || new List()).push(span));
+					chat.set('Main', (chat.get('Main') || new imm.List()).push(span));
 				return { ...state, chat, chatid: state.chatid + 1 };
 			}
 		}

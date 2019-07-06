@@ -1,11 +1,10 @@
-'using strict';
-module.exports = chat;
-const store = require('./store'),
-	React = require('react');
+import React from 'react';
+import * as store from './store.js';
+
 function addSpan(span, name) {
 	store.store.dispatch(store.chat(span, name));
 }
-function chat(msg, fontcolor, name) {
+export default function chat(msg, fontcolor, name) {
 	if (name === undefined) {
 		name = fontcolor;
 		fontcolor = undefined;

@@ -1,20 +1,20 @@
-const etg = require('../etg'),
-	Cards = require('../Cards'),
-	RngMock = require('../RngMock'),
-	Builder = require('./Builder'),
-	duo = require('./duo');
+import * as etg from '../etg.js';
+import * as Cards from '../Cards.js';
+import RngMock from '../RngMock.js';
+import Builder from './Builder.js';
+import duo from './duo.js';
 
-module.exports = function(uprate, markpower, maxRarity) {
+export default function bow(uprate, markpower, maxRarity) {
 	let build;
 	if (Math.random() < uprate / 2) {
 		build = new Builder(etg.Entropy, uprate, markpower);
 		for (let i = 0; i < 5 + RngMock.upto(1); i++) {
-			build.addCard(Cards.Nova.asUpped(true));
+			build.addCard(Cards.Names.Nova.asUpped(true));
 		}
 	} else {
 		build = new Builder(etg.Chroma, uprate, markpower);
 		for (let i = 0; i < RngMock.upto(12) - 6; i++) {
-			build.addCard(Cards.Nova);
+			build.addCard(Cards.Names.Nova);
 		}
 	}
 	for (let ele = 1; ele <= 12; ele++) {
@@ -29,9 +29,9 @@ module.exports = function(uprate, markpower, maxRarity) {
 					build.cardcount[x.code] !== 6 &&
 					!(x.type === etg.Shield && build.anyshield >= 3) &&
 					!(x.type === etg.Weapon && build.anyweapon >= 3) &&
-					!x.isOf(Cards.Give) &&
-					!x.isOf(Cards.GiftofOceanus) &&
-					!x.isOf(Cards.Precognition),
+					!x.isOf(Cards.Names.Give) &&
+					!x.isOf(Cards.Names.GiftofOceanus) &&
+					!x.isOf(Cards.Names.Precognition),
 			);
 			if (build.ecost[ele] + card.cost < 10) {
 				build.addCard(card);
@@ -44,9 +44,9 @@ module.exports = function(uprate, markpower, maxRarity) {
 		cost += build.ecost[i];
 	}
 	for (let i = 0; i < cost; i += 12) {
-		build.deck.push(build.upCode(Cards.QuantumPillar.code));
+		build.deck.push(build.upCode(Cards.Names.QuantumPillar.code));
 	}
 	return build.deck.length < 30
 		? duo(uprate, markpower, maxRarity)
 		: build.finish();
-};
+}

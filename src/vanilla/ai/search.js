@@ -1,9 +1,9 @@
-'use strict';
-var etg = require('../etg');
-var Cards = require('../Cards');
-var Skills = require('../Skills');
-var evalGame = require('./eval');
-var lethal = require('./lethal');
+import * as etg from '../etg.js';
+import * as Cards from '../Cards.js';
+import Skills from '../Skills';
+import evalGame from './eval';
+import lethal from './lethal';
+
 function getWorstCard(game) {
 	let worstcard = 0,
 		curEval = 0x7fffffff;
@@ -216,4 +216,4 @@ AiSearch.prototype.step = function(game) {
 		this.cmdct = game.player2.hand.length == 8 ? this.worstcard : undefined;
 	}
 };
-module.exports = AiSearch;
+export default AiSearch;

@@ -1,6 +1,5 @@
-'use strict';
-const etg = require('./etg');
-exports.eleNames = [
+import * as etg from './etg.js';
+export const eleNames = [
 	'Chroma',
 	'Entropy',
 	'Death',
@@ -17,7 +16,7 @@ exports.eleNames = [
 	'Build your own',
 	'Random',
 ];
-exports.strcols = [
+export const strcols = [
 	'#a98',
 	'#a59',
 	'#768',
@@ -45,14 +44,14 @@ exports.strcols = [
 	'#999',
 	'#ade',
 ];
-exports.maybeLightenStr = function(card) {
-	return exports.strcols[card.element + card.upped * 13];
-};
-function reflectPos(pos) {
+export function maybeLightenStr(card) {
+	return strcols[card.element + card.upped * 13];
+}
+export function reflectPos(pos) {
 	pos.x = 900 - pos.x;
 	pos.y = 600 - pos.y;
 }
-function creaturePos(j, i) {
+export function creaturePos(j, i) {
 	const row = i < 8 ? 0 : i < 15 ? 1 : 2;
 	const column = row == 2 ? (i + 1) % 8 : i % 8;
 	const p = {
@@ -62,7 +61,7 @@ function creaturePos(j, i) {
 	if (j) reflectPos(p);
 	return p;
 }
-function permanentPos(j, i) {
+export function permanentPos(j, i) {
 	const p = {
 		x: 142 + ((i & 7) << 6),
 		y: 498 + (i >> 3) * (j ? 50 : 62),
@@ -70,13 +69,13 @@ function permanentPos(j, i) {
 	if (j) reflectPos(p);
 	return p;
 }
-function cardPos(j, i) {
+export function cardPos(j, i) {
 	return {
 		x: (j ? 36 : 793) + 66 * (i & 1),
 		y: (j ? 118 : 346) + 48 * (i >> 1),
 	};
 }
-function tgtToPos(t, p1id) {
+export function tgtToPos(t, p1id) {
 	if (t.type == etg.Creature) {
 		return creaturePos(t.ownerId !== p1id, t.getIndex());
 	} else if (t.type === etg.Weapon) {
@@ -99,7 +98,3 @@ function tgtToPos(t, p1id) {
 		return { x: -999, y: -999 };
 	}
 }
-exports.creaturePos = creaturePos;
-exports.permanentPos = permanentPos;
-exports.cardPos = cardPos;
-exports.tgtToPos = tgtToPos;

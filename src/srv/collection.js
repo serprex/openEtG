@@ -1,10 +1,9 @@
-'use strict';
-const gzip = require('./gzip'),
-	Cards = require('../Cards'),
-	Us = require('./Us'),
-	etgutil = require('../etgutil');
+import gzip from './gzip.js';
+import * as Cards from '../Cards.js';
+import * as Us from './Us.js';
+import * as etgutil from '../etgutil.js';
 
-module.exports = async function(url, stime) {
+export default async function(url, stime) {
 	const user = await Us.load(url),
 		result = [],
 		pool = etgutil.deck2pool(user.pool),
@@ -35,4 +34,4 @@ module.exports = async function(url, stime) {
 		head: { 'Content-Encoding': 'gzip', 'Content-Type': 'text/plain' },
 		date: new Date(),
 	};
-};
+}

@@ -1,12 +1,13 @@
-const Cards = require('../Cards'),
-	etg = require('../etg'),
-	etgutil = require('../etgutil'),
-	userutil = require('../userutil'),
-	sock = require('../sock'),
-	store = require('../store'),
-	Components = require('../Components'),
-	{ connect } = require('react-redux'),
-	React = require('react');
+import React from 'react';
+import { connect } from 'react-redux';
+
+import * as Cards from '../Cards.js';
+import * as etg from '../etg.js';
+import * as etgutil from '../etgutil.js';
+import * as userutil from '../userutil.js';
+import * as sock from '../sock.js';
+import * as store from '../store.js';
+import * as Components from '../Components/index.js';
 
 function Order({ order, onClick }) {
 	return (
@@ -274,7 +275,7 @@ const OrderBook = connect(({ opts }) => ({
 	);
 });
 
-module.exports = connect(({ user }) => ({ user }))(
+export default connect(({ user }) => ({ user }))(
 	class Bazaar extends React.Component {
 		constructor(props) {
 			super(props);

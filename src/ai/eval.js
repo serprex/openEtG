@@ -1,8 +1,8 @@
-'use strict';
-const etg = require('../etg'),
-	Cards = require('../Cards'),
-	Skills = require('../Skills'),
-	parseSkill = require('../parseSkill');
+import * as etg from '../etg.js';
+import * as Cards from '../Cards.js';
+import Skills from '../Skills';
+import parseSkill from '../parseSkill';
+
 function pillarval(c) {
 	return c.type === etg.Spell ? 0.1 : Math.sqrt(c.getStatus('charges'));
 }
@@ -202,7 +202,7 @@ const SkillsValues = {
 	neuroify: c => (c.owner.foe.getStatus('neuro') ? 1 : 5),
 	nightmare: c => {
 		const n = c.owner.hand.reduce(
-			(n, inst) => n + !!inst.card.isOf(Cards.Nightmare),
+			(n, inst) => n + !!inst.card.isOf(Cards.Names.Nightmare),
 			0,
 		);
 		return (24 - c.owner.foe.handIds.length) >> n;
@@ -692,7 +692,7 @@ const uniqueStatuses = new Set([
 const uniquesSkill = new Set(),
 	damageHash = new Map();
 
-module.exports = function(game) {
+export default function(game) {
 	const player = game.byId(game.turn),
 		foe = player.foe;
 	if (game.winner) {
@@ -749,4 +749,4 @@ module.exports = function(game) {
 		gamevalue += pscore * (j ? 1 : -1);
 	}
 	return gamevalue;
-};
+}

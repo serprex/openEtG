@@ -1,15 +1,16 @@
-'use strict';
-const etg = require('../etg'),
-	sock = require('../sock'),
-	Cards = require('../Cards'),
-	etgutil = require('../etgutil'),
-	RngMock = require('../RngMock'),
-	userutil = require('../userutil'),
-	Components = require('../Components'),
-	store = require('../store'),
-	{ connect } = require('react-redux'),
-	React = require('react'),
-	streak200 = new Uint8Array([10, 10, 15, 20, 15, 20]);
+import React from 'react';
+import { connect } from 'react-redux';
+
+import * as etg from '../etg.js';
+import * as sock from '../sock.js';
+import * as Cards from '../Cards.js';
+import * as etgutil from '../etgutil.js';
+import RngMock from '../RngMock.js';
+import * as userutil from '../userutil.js';
+import * as Components from '../Components/index.js';
+import * as store from '../store.js';
+
+const streak200 = new Uint8Array([10, 10, 15, 20, 15, 20]);
 
 function TooltipText(props) {
 	return (
@@ -169,7 +170,7 @@ const BonusList = [
 	},
 ];
 
-module.exports = connect(({ user }) => ({ user }))(
+export default connect(({ user }) => ({ user }))(
 	class Result extends React.Component {
 		constructor(props) {
 			super(props);
@@ -237,18 +238,18 @@ module.exports = connect(({ user }) => ({ user }))(
 					game.data.get('choicerewards')
 				) {
 					this.props.dispatch(
-						store.doNav(require('./Reward'), {
+						store.doNav(import('./Reward'), {
 							type: game.data.get('choicerewards'),
 							amount: game.data.get('rewardamount'),
 						}),
 					);
 				} else {
-					this.props.dispatch(store.doNav(require('./Quest')));
+					this.props.dispatch(store.doNav(import('./Quest')));
 				}
 			} else if (game.data.get('daily') !== undefined) {
-				this.props.dispatch(store.doNav(require('./Colosseum')));
+				this.props.dispatch(store.doNav(import('./Colosseum')));
 			} else {
-				this.props.dispatch(store.doNav(require('./MainMenu')));
+				this.props.dispatch(store.doNav(import('./MainMenu')));
 			}
 		};
 

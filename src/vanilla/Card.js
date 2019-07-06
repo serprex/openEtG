@@ -1,10 +1,16 @@
-'use strict';
-const imm = require('immutable'),
-	util = require('../util'),
-	statuscache = {},
+import imm from 'immutable';
+import * as util from '../util.js';
+import * as etg from './etg.js';
+import { Thing } from './Thing.js';
+import * as Cards from './Cards.js';
+import * as etgutil from '../etgutil.js';
+import skillText from './skillText.js';
+import Actives from './Skills.js';
+
+const statuscache = {},
 	activecache = {},
 	activecastcache = {};
-function Card(type, info) {
+export default function Card(type, info) {
 	this.type = type;
 	this.element = info.E;
 	this.name = info.Name;
@@ -69,7 +75,6 @@ Object.defineProperty(Card.prototype, 'upped', {
 		return (this.code & 0x3fff) > 6999;
 	},
 });
-module.exports = Card;
 Card.prototype.info = function() {
 	if (this.type == etg.Spell) {
 		return skillText(this);
@@ -107,10 +112,3 @@ function readCost(coststr, defaultElement) {
 		? null
 		: new Int8Array([cost, ~cidx ? +coststr.substr(cidx + 1) : defaultElement]);
 }
-
-var etg = require('./etg');
-var { Thing } = require('./Thing');
-var Cards = require('./Cards');
-var etgutil = require('../etgutil');
-var skillText = require('./skillText');
-var Actives = require('./Skills');

@@ -1,11 +1,14 @@
-'use strict';
-const etg = require('./etg'),
-	etgutil = require('./etgutil');
-exports.Codes = [];
-exports.Targeting = null;
-exports.codeCmp = function(x, y) {
-	const cx = exports.Codes[etgutil.asShiny(x, false)],
-		cy = exports.Codes[etgutil.asShiny(y, false)];
+import * as etg from './etg.js';
+import * as etgutil from './etgutil.js';
+import Card from './Card.js';
+import CardsJson from './Cards.json';
+
+export const Codes = [];
+export const Names = {};
+export const Targeting = {};
+export function codeCmp(x, y) {
+	const cx = Codes[etgutil.asShiny(x, false)],
+		cy = Codes[etgutil.asShiny(y, false)];
 	return (
 		cx.upped - cy.upped ||
 		cx.element - cy.element ||
@@ -14,17 +17,17 @@ exports.codeCmp = function(x, y) {
 		(cx.code > cy.code) - (cx.code < cy.code) ||
 		(x > y) - (x < y)
 	);
-};
-exports.cardCmp = function(x, y) {
-	return exports.codeCmp(x.code, y.code);
-};
+}
+export function cardCmp(x, y) {
+	return codeCmp(x.code, y.code);
+}
 const filtercache = [];
-exports.filter = function(upped, filter, cmp, showshiny) {
+export function filter(upped, filter, cmp, showshiny) {
 	const cacheidx = (upped ? 1 : 0) | (showshiny ? 2 : 0);
 	if (!(cacheidx in filtercache)) {
 		filtercache[cacheidx] = [];
-		for (const key in exports.Codes) {
-			const card = exports.Codes[key];
+		for (const key in Codes) {
+			const card = Codes[key];
 			if (
 				card.upped == upped &&
 				!card.shiny == !showshiny &&
@@ -38,7 +41,7 @@ exports.filter = function(upped, filter, cmp, showshiny) {
 	const keys = filtercache[cacheidx].filter(filter);
 	if (cmp) keys.sort(cmp);
 	return keys;
-};
+}
 function sumCardMinus(cardMinus, code) {
 	let sum = 0;
 	for (let i = 0; i < 4; i++) {
@@ -46,11 +49,11 @@ function sumCardMinus(cardMinus, code) {
 	}
 	return sum;
 }
-exports.filterDeck = function(deck, pool, preserve) {
+export function filterDeck(deck, pool, preserve) {
 	const cardMinus = [];
 	for (let i = deck.length - 1; i >= 0; i--) {
 		let code = deck[i],
-			card = exports.Codes[code];
+			card = Codes[code];
 		if (card.type !== etg.Pillar) {
 			if (sumCardMinus(cardMinus, code) == 6) {
 				deck.splice(i, 1);
@@ -62,7 +65,7 @@ exports.filterDeck = function(deck, pool, preserve) {
 				cardMinus[code] = (cardMinus[code] || 0) + 1;
 			} else {
 				code = etgutil.asShiny(code, !card.shiny);
-				card = exports.Codes[code];
+				card = Codes[code];
 				if (card.isFree()) {
 					deck[i] = code;
 				} else if ((cardMinus[code] || 0) < (pool[code] || 0)) {
@@ -75,8 +78,8 @@ exports.filterDeck = function(deck, pool, preserve) {
 		}
 	}
 	return cardMinus;
-};
-exports.isDeckLegal = function(deck, user, minsize = 30) {
+}
+export function isDeckLegal(deck, user, minsize = 30) {
 	function incrpool(code, count) {
 		pool[code] = (pool[code] || 0) + count;
 	}
@@ -92,7 +95,7 @@ exports.isDeckLegal = function(deck, user, minsize = 30) {
 		const code = deck[i];
 		if (~etgutil.fromTrueMark(code)) continue;
 		dlen++;
-		const card = exports.Codes[code];
+		const card = Codes[code];
 		if (
 			!card ||
 			(card.type != etg.Pillar && sumCardMinus(cardMinus, code) == 6)
@@ -109,7 +112,7 @@ exports.isDeckLegal = function(deck, user, minsize = 30) {
 	}
 	if (dlen < minsize || dlen > 60) return false;
 	return true;
-};
+}
 function parseCsv(type, data) {
 	const keys = data[0],
 		cardinfo = {};
@@ -120,19 +123,18 @@ function parseCsv(type, data) {
 				cardinfo[key] = carddata[i];
 			});
 			const cardcode = cardinfo.Code;
-			exports.Codes[cardcode] = new Card(type, cardinfo);
+			Codes[cardcode] = new Card(type, cardinfo);
 			if (cardcode < 7000)
-				exports[cardinfo.Name.replace(/\W/g, '')] = exports.Codes[cardcode];
+				Names[cardinfo.Name.replace(/\W/g, '')] = Codes[cardcode];
 			cardinfo.Code = etgutil.asShiny(cardcode, true);
-			exports.Codes[cardinfo.Code] = new Card(type, cardinfo);
+			Codes[cardinfo.Code] = new Card(type, cardinfo);
 		});
 	}
 }
 function parseTargeting(data) {
 	for (const key in data) {
-		data[key] = getTargetFilter(data[key]);
+		Targeting[key] = getTargetFilter(data[key]);
 	}
-	exports.Targeting = data;
 }
 const TargetFilters = {
 	own: (c, t) => c.ownerId == t.ownerId,
@@ -203,9 +205,8 @@ function getTargetFilter(str) {
 		});
 	}
 }
-var Card = require('./Card');
 
-require('./Cards.json').forEach((cards, type) => {
+CardsJson.forEach((cards, type) => {
 	if (type == 6) parseTargeting(cards);
 	else parseCsv(type, cards);
 });

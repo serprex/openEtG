@@ -1,10 +1,10 @@
-'use strict';
-const etg = require('../etg'),
-	Cards = require('../Cards'),
-	Skills = require('../Skills'),
-	parseSkill = require('../parseSkill'),
-	evalGame = require('./eval'),
-	lethal = require('./lethal');
+import * as etg from '../etg.js';
+import * as Cards from '../Cards.js';
+import Skills from '../Skills.js';
+import parseSkill from '../parseSkill.js';
+import evalGame from './eval.js';
+import lethal from './lethal.js';
+
 function getWorstCard(game, player) {
 	let worstcard = 0,
 		curEval = -0x7fffffff;
@@ -48,7 +48,7 @@ const afilter = new Map()
 		}
 		return true;
 	});
-function AiSearch(game) {
+export default function AiSearch(game) {
 	let worstcard;
 	this.player = game.byId(game.turn);
 	if (this.player.handIds.length < 8) {
@@ -213,4 +213,3 @@ AiSearch.prototype.step = function(game) {
 		};
 	}
 };
-module.exports = AiSearch;

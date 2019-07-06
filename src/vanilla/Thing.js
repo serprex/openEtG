@@ -1,6 +1,4 @@
-const imm = require('immutable');
-
-function Thing(card, owner) {
+export function Thing(card, owner) {
 	this.owner = owner;
 	this.card = card;
 	if (this.status) {
@@ -15,10 +13,10 @@ function Thing(card, owner) {
 	}
 	this.active = card.active.delete('discard');
 }
-function Creature(card, owner) {
+export function Creature(card, owner) {
 	this.type = etg.Creature;
 	this.casts = 0;
-	if (card == Cards.ShardGolem) {
+	if (card == Cards.Names.ShardGolem) {
 		this.card = card;
 		this.owner = owner;
 		var golem = owner.shardgolem || { hpStat: 1, atkStat: 1, cast: 0 };
@@ -30,24 +28,24 @@ function Creature(card, owner) {
 		this.status = golem.status;
 	} else this.transform(card, owner);
 }
-function Permanent(card, owner) {
+export function Permanent(card, owner) {
 	this.type = etg.Permanent;
 	this.casts = 0;
 	this.cast = card.cast;
 	this.castele = card.castele;
 	Thing.apply(this, arguments);
 }
-function Weapon(card, owner) {
+export function Weapon(card, owner) {
 	this.atk = card.attack;
 	Permanent.apply(this, arguments);
 	this.type = etg.Weapon;
 }
-function Shield(card, owner) {
+export function Shield(card, owner) {
 	this.dr = card.health;
 	Permanent.apply(this, arguments);
 	this.type = etg.Shield;
 }
-function CardInstance(card, owner) {
+export function CardInstance(card, owner) {
 	this.owner = owner;
 	this.type = etg.Spell;
 	this.card = card;
@@ -276,7 +274,7 @@ Weapon.prototype.place = function(fromhand) {
 	if (
 		this.status.get('additive') &&
 		this.owner.weapon &&
-		this.card.as(this.owner.weapon.card) == this.card
+		this.card.as(this.owner.weapon.card) === this.card
 	) {
 		this.owner.weapon.incrStatus('charges', this.getStatus('charges'));
 	} else {
@@ -400,9 +398,12 @@ Creature.prototype.deatheffect = Weapon.prototype.deatheffect = function(
 Creature.prototype.die = function() {
 	var index = this.remove();
 	if (~index) {
-		if (this.status.get('aflatoxin') && !this.card.isOf(Cards.MalignantCell)) {
+		if (
+			this.status.get('aflatoxin') &&
+			!this.card.isOf(Cards.Names.MalignantCell)
+		) {
 			this.owner.creatures[index] = new Creature(
-				Cards.MalignantCell,
+				Cards.Names.MalignantCell,
 				this.owner,
 			);
 		}
@@ -471,7 +472,10 @@ Creature.prototype.calcEclipse = function() {
 	for (var j = 0; j < 2; j++) {
 		var pl = j == 0 ? this.owner : this.owner.foe;
 		for (var i = 0; i < 16; i++) {
-			if (pl.permanents[i] && pl.permanents[i].card.isOf(Cards.Nightfall)) {
+			if (
+				pl.permanents[i] &&
+				pl.permanents[i].card.isOf(Cards.Names.Nightfall)
+			) {
 				if (pl.permanents[i].card.upped) {
 					return 2;
 				} else {
@@ -771,18 +775,10 @@ CardInstance.prototype.isMaterial = function(type) {
 	return type === undefined || type == etg.Spell;
 };
 
-exports.Thing = Thing;
-exports.CardInstance = CardInstance;
-exports.Weapon = Weapon;
-exports.Shield = Shield;
-exports.Permanent = Permanent;
-exports.Creature = Creature;
-
-var ui = require('./ui');
-var util = require('../util');
-var Effect = require('./Effect');
-var Actives = require('./Skills');
-var etgutil = require('../etgutil');
-var skillText = require('./skillText');
-var Cards = require('./Cards');
-var etg = require('./etg');
+import * as ui from './ui.js';
+import * as util from '../util.js';
+import Effect from './Effect.js';
+import Actives from './Skills.js';
+import skillText from './skillText.js';
+import * as Cards from './Cards.js';
+import * as etg from './etg.js';

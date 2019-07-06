@@ -1,10 +1,11 @@
-const Cards = require('../Cards'),
-	etgutil = require('../etgutil'),
-	sock = require('../sock'),
-	store = require('../store'),
-	Editor = require('../Components/Editor'),
-	{ connect } = require('react-redux'),
-	React = require('react');
+import React from 'react';
+import { connect } from 'react-redux';
+
+import * as Cards from '../Cards';
+import * as etgutil from '../etgutil.js';
+import * as sock from '../sock.js';
+import * as store from '../store.js';
+import Editor from '../Components/Editor.js';
 
 const artable = {
 	hp: { min: 65, max: 200, incr: 45, cost: 1 },
@@ -68,7 +69,7 @@ function AttrUi({ y, name, value, sumscore, arpts, onChange }) {
 	);
 }
 
-module.exports = connect(({ user }) => ({ user }))(
+export default connect(({ user }) => ({ user }))(
 	class ArenaEditor extends React.Component {
 		constructor(props) {
 			super(props);
@@ -203,7 +204,7 @@ module.exports = connect(({ user }) => ({ user }))(
 							this.props.dispatch(
 								store.chatMsg('Arena deck submitted', 'System'),
 							);
-							this.props.dispatch(store.doNav(require('../views/MainMenu')));
+							this.props.dispatch(store.doNav(import('../views/MainMenu')));
 						}}
 						style={{
 							position: 'absolute',
@@ -215,7 +216,7 @@ module.exports = connect(({ user }) => ({ user }))(
 						type="button"
 						value="Exit"
 						onClick={() => {
-							this.props.dispatch(store.doNav(require('../views/ArenaInfo')));
+							this.props.dispatch(store.doNav(import('../views/ArenaInfo')));
 						}}
 						style={{
 							position: 'absolute',

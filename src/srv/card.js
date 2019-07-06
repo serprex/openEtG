@@ -1,8 +1,8 @@
-'use strict';
-const gzip = require('./gzip'),
-	Cards = require('../Cards'),
-	svg = require('../svg');
-module.exports = async function(url, stime) {
+import gzip from './gzip.js';
+import * as Cards from '../Cards.js';
+import * as svg from '../svg.js';
+
+export default async function card(url, stime) {
 	const code = parseInt(url.slice(0, 3), 32);
 	if (!(code in Cards.Codes)) {
 		throw `${code} undefined`;
@@ -12,4 +12,4 @@ module.exports = async function(url, stime) {
 		head: { 'Content-Encoding': 'gzip', 'Content-Type': 'image/svg+xml' },
 		date: stime,
 	};
-};
+}

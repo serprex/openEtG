@@ -1,19 +1,21 @@
 module.exports = {
 	entry: {
-		aivai: ['./src/aivai.js'],
-		art: ['./src/ui/art.js'],
-		cia: ['./src/vanilla/ui/cia.js'],
-		main: ['./src/ui/main.js'],
-		mosaic: ['./src/ui/mosaic.js'],
-		vanilla: ['./src/vanilla/ui/main.js'],
-		vaivai: ['./src/vanilla/ui/aivai.js'],
-		vdeckinfo: ['./src/vanilla/ui/deckinfo.js'],
-		vnamegame: ['./src/vanilla/ui/namegame.js'],
-		vspeed: ['./src/vanilla/ui/speed.js'],
+		aivai: './src/aivai.js',
+		art: './src/ui/art.js',
+		cia: './src/vanilla/ui/cia.js',
+		main: './src/ui/main.js',
+		mosaic: './src/ui/mosaic.js',
+		vanilla: './src/vanilla/ui/main.js',
+		vaivai: './src/vanilla/ui/aivai.js',
+		vdeckinfo: './src/vanilla/ui/deckinfo.js',
+		vnamegame: './src/vanilla/ui/namegame.js',
+		vspeed: './src/vanilla/ui/speed.js',
 	},
 	output: {
 		path: __dirname,
+		publicPath: '/',
 		filename: 'bundle/[name].js',
+		chunkFilename: 'bundle/[name].js',
 		sourceMapFilename: 'bundle/[name].js.map',
 	},
 	devtool: 'cheap-source-map',
@@ -41,7 +43,6 @@ module.exports = {
 				use: {
 					loader: 'babel-loader',
 					query: {
-						sourceType: 'unambiguous',
 						presets: [
 							'@babel/preset-react',
 							[
@@ -62,6 +63,7 @@ module.exports = {
 							],
 						],
 						plugins: [
+							'@babel/plugin-syntax-dynamic-import',
 							'@babel/plugin-transform-react-jsx',
 							'@babel/plugin-proposal-class-properties',
 							'@babel/plugin-proposal-object-rest-spread',

@@ -1,13 +1,13 @@
-'use strict';
-const Cards = require('../Cards'),
-	etgutil = require('../etgutil'),
-	userutil = require('../userutil'),
-	Components = require('../Components'),
-	sock = require('../sock'),
-	store = require('../store'),
-	React = require('react');
+import React from 'react';
 
-module.exports = class Reward extends React.Component {
+import * as Cards from '../Cards.js';
+import * as etgutil from '../etgutil.js';
+import * as userutil from '../userutil.js';
+import * as Components from '../Components/index.js';
+import * as sock from '../sock.js';
+import * as store from '../store.js';
+
+export default class Reward extends React.Component {
 	constructor(props) {
 		super(props);
 		let reward = props.type,
@@ -41,7 +41,7 @@ module.exports = class Reward extends React.Component {
 						store.store.dispatch(
 							store.chatMsg(Cards.Codes[data.card].name + ' added!', 'System'),
 						);
-						store.store.dispatch(store.doNav(require('./MainMenu')));
+						store.store.dispatch(store.doNav(import('./MainMenu')));
 					},
 				}),
 			);
@@ -49,7 +49,7 @@ module.exports = class Reward extends React.Component {
 			store.store.dispatch(
 				store.chatMsg('Unknown reward ${this.props.type}', 'System'),
 			);
-			store.store.dispatch(store.doNav(require('./MainMenu')));
+			store.store.dispatch(store.doNav(import('./MainMenu')));
 		}
 	}
 
@@ -72,7 +72,7 @@ module.exports = class Reward extends React.Component {
 											etgutil.encodeCount(numberofcopies) +
 											this.state.chosenReward.toString(32),
 									});
-									store.store.dispatch(store.doNav(require('./MainMenu')));
+									store.store.dispatch(store.doNav(import('./MainMenu')));
 								} else {
 									sock.userEmit('codesubmit2', {
 										code: code,
@@ -115,4 +115,4 @@ module.exports = class Reward extends React.Component {
 			)
 		);
 	}
-};
+}

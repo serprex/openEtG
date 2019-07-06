@@ -1,14 +1,14 @@
-'use strict';
-const Cards = require('../Cards'),
-	Game = require('../Game'),
-	sock = require('../sock'),
-	store = require('../store'),
-	util = require('../util'),
-	etgutil = require('../etgutil'),
-	Components = require('../Components'),
-	RngMock = require('../RngMock'),
-	{ connect } = require('react-redux'),
-	React = require('react');
+import React from 'react';
+import { connect } from 'react-redux';
+
+import * as Cards from '../Cards.js';
+import Game from '../Game.js';
+import * as sock from '../sock.js';
+import * as store from '../store.js';
+import * as util from '../util.js';
+import * as etgutil from '../etgutil.js';
+import * as Components from '../Components';
+import RngMock from '../RngMock.js';
 
 function RenderInfo(props) {
 	const { info, y, name } = props;
@@ -36,7 +36,7 @@ function RenderInfo(props) {
 					},
 				]),
 			});
-			store.store.dispatch(store.doNav(require('./Match'), { game }));
+			store.store.dispatch(store.doNav(import('./Match'), { game }));
 		};
 		const card = y ? etgutil.asUpped(info.card, true) : info.card;
 		const adeck = '05' + card.toString(32) + info.deck;
@@ -91,7 +91,7 @@ function RenderInfo(props) {
 					}}
 					onClick={() => {
 						store.store.dispatch(
-							store.doNav(require('./ArenaEditor'), {
+							store.doNav(import('./ArenaEditor'), {
 								adeck: info.deck,
 								acard: Cards.Codes[card],
 								ainfo: info,
@@ -129,7 +129,7 @@ function ArenaCard(props) {
 				}}
 				onClick={() => {
 					store.store.dispatch(
-						store.doNav(require('./ArenaEditor'), {
+						store.doNav(import('./ArenaEditor'), {
 							adeck: '',
 							acard: Cards.Codes[code],
 							ainfo: { day: info ? info.day : 8 },
@@ -143,7 +143,7 @@ function ArenaCard(props) {
 	);
 }
 
-module.exports = connect(({ user }) => ({
+export default connect(({ user }) => ({
 	name: user.name,
 	ocard: user.ocard,
 }))(

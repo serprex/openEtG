@@ -1,14 +1,15 @@
-const sock = require('../sock'),
-	util = require('../util'),
-	imm = require('immutable'),
-	Game = require('../Game'),
-	etgutil = require('../etgutil'),
-	{ parseInput } = require('../options'),
-	Components = require('../Components'),
-	store = require('../store'),
-	RngMock = require('../RngMock'),
-	{ connect } = require('react-redux'),
-	React = require('react');
+import React from 'react';
+import { connect } from 'react-redux';
+import imm from 'immutable';
+
+import * as sock from '../sock.js';
+import * as util from '../util.js';
+import Game from '../Game.js';
+import * as etgutil from '../etgutil.js';
+import { parseInput } from '../options.js';
+import * as Components from '../Components/index.js';
+import * as store from '../store.js';
+import RngMock from '../RngMock.js';
 
 class PlayerEditor extends React.Component {
 	constructor(props) {
@@ -173,7 +174,7 @@ class Group extends React.Component {
 	}
 }
 
-module.exports = connect(({ user, opts }) => ({
+export default connect(({ user, opts }) => ({
 	username: user.name,
 }))(
 	class Challenge extends React.Component {
@@ -192,7 +193,7 @@ module.exports = connect(({ user, opts }) => ({
 				store.setCmds({
 					matchbegin: data => {
 						this.props.dispatch(
-							store.doNav(require('./Match'), { game: new Game(data.data) }),
+							store.doNav(import('./Match'), { game: new Game(data.data) }),
 						);
 					},
 					matchcancel: () => {
@@ -274,7 +275,7 @@ module.exports = connect(({ user, opts }) => ({
 		aiClick = () => {
 			const deck = this.state.groups[0][0].deck || sock.getDeck();
 			if (etgutil.decklength(deck) < 9) {
-				this.props.dispatch(store.doNav(require('./DeckEditor')));
+				this.props.dispatch(store.doNav(import('./DeckEditor')));
 				return;
 			}
 			const gameData = {
@@ -285,7 +286,7 @@ module.exports = connect(({ user, opts }) => ({
 			};
 			RngMock.shuffle(gameData.players);
 			this.props.dispatch(
-				store.doNav(require('./Match'), { game: new Game(gameData) }),
+				store.doNav(import('./Match'), { game: new Game(gameData) }),
 			);
 		};
 
@@ -312,7 +313,7 @@ module.exports = connect(({ user, opts }) => ({
 				players: replay.players,
 			};
 			this.props.dispatch(
-				store.doNav(require('./Match'), {
+				store.doNav(import('./Match'), {
 					replay,
 					game: new Game(data),
 				}),
@@ -329,7 +330,7 @@ module.exports = connect(({ user, opts }) => ({
 			}
 			this.toMainMenu();
 		};
-		toMainMenu = () => this.props.dispatch(store.doNav(require('./MainMenu')));
+		toMainMenu = () => this.props.dispatch(store.doNav(import('./MainMenu')));
 		sendConfig = () => {
 			if (this.props.username === this.state.groups[0][0].user) {
 				sock.userEmit('matchconfig', { data: this.state.groups });

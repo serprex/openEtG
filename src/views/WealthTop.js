@@ -1,10 +1,9 @@
-'use strict';
-const sock = require('../sock'),
-	Components = require('../Components'),
-	store = require('../store'),
-	React = require('react');
+import React from 'react';
+import * as sock from '../sock.js';
+import * as Components from '../Components/index.js';
+import * as store from '../store.js';
 
-module.exports = class WealthTop extends React.Component {
+export default class WealthTop extends React.Component {
 	constructor(props) {
 		super(props);
 		this.state = { top: null };
@@ -59,4 +58,4 @@ module.exports = class WealthTop extends React.Component {
 			</>
 		);
 	}
-};
+}

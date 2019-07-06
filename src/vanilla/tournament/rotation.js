@@ -1,4 +1,4 @@
-module.exports = function(deck, mark) {
+export default function(deck, mark) {
 	function prevMark() {
 		if (mark == 1) return etg.eleNames[12];
 		return etg.eleNames[mark - 1];
@@ -7,11 +7,11 @@ module.exports = function(deck, mark) {
 	var markCards = [];
 	var elementCount = [];
 	bannedCards = [
-		Cards.DimensionalShield,
-		Cards.Fractal,
-		Cards.ShardofPatience,
-		Cards.Trident,
-		Cards.Earthquake,
+		Cards.Names.DimensionalShield,
+		Cards.Names.Fractal,
+		Cards.Names.ShardofPatience,
+		Cards.Names.Trident,
+		Cards.Names.Earthquake,
 	];
 	for (var i = 0; i < deck.length; i++) {
 		var card = deck[i];
@@ -40,4 +40,4 @@ module.exports = function(deck, mark) {
 			' elements, you have to use one or two'
 		);
 	return 'Legal if your previous mark was ' + prevMark();
-};
+}

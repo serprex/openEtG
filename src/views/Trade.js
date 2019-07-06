@@ -1,14 +1,14 @@
-'use strict';
-const Cards = require('../Cards'),
-	etgutil = require('../etgutil'),
-	userutil = require('../userutil'),
-	Components = require('../Components'),
-	sock = require('../sock'),
-	store = require('../store'),
-	{ connect } = require('react-redux'),
-	React = require('react');
+import React from 'react';
+import { connect } from 'react-redux';
 
-module.exports = connect(({ user }) => ({ user }))(
+import * as Cards from '../Cards.js';
+import * as etgutil from '../etgutil.js';
+import * as userutil from '../userutil.js';
+import * as Components from '../Components/index.js';
+import * as sock from '../sock.js';
+import * as store from '../store.js';
+
+export default connect(({ user }) => ({ user }))(
 	class Trade extends React.Component {
 		constructor(props) {
 			super(props);
@@ -44,10 +44,10 @@ module.exports = connect(({ user }) => ({ user }))(
 								gold: this.props.user.gold + data.g,
 							}),
 						);
-						this.props.dispatch(store.doNav(require('./MainMenu')));
+						this.props.dispatch(store.doNav(import('./MainMenu')));
 					},
 					tradecanceled: () => {
-						this.props.dispatch(store.doNav(require('./MainMenu')));
+						this.props.dispatch(store.doNav(import('./MainMenu')));
 					},
 				}),
 			);
@@ -168,7 +168,7 @@ module.exports = connect(({ user }) => ({ user }))(
 						value="Cancel"
 						onClick={() => {
 							sock.userEmit('canceltrade');
-							this.props.dispatch(store.doNav(require('./MainMenu')));
+							this.props.dispatch(store.doNav(import('./MainMenu')));
 						}}
 						style={{
 							position: 'absolute',

@@ -1,19 +1,19 @@
-module.exports = function(deck) {
+export default function(deck) {
 	function pushElement(ele) {
 		if (!~elements.indexOf(ele)) {
 			elements.push(ele);
 		}
 	}
 	var bannedCards = [
-		Cards.Discord,
-		Cards.Trident,
-		Cards.ShardofSacrifice,
-		Cards.ShardofFocus,
-		Cards.Earthquake,
-		Cards.ShardofPatience,
-		Cards.ShardofFreedom,
-		Cards.Fractal,
-		Cards.BlueNymph,
+		Cards.Names.Discord,
+		Cards.Names.Trident,
+		Cards.Names.ShardofSacrifice,
+		Cards.Names.ShardofFocus,
+		Cards.Names.Earthquake,
+		Cards.Names.ShardofPatience,
+		Cards.Names.ShardofFreedom,
+		Cards.Names.Fractal,
+		Cards.Names.BlueNymph,
 	];
 	var elements = [];
 	for (var i = 0; i < deck.length; i++) {
@@ -45,4 +45,4 @@ module.exports = function(deck) {
 			})
 			.join(' ')
 	);
-};
+}

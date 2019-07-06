@@ -1,7 +1,7 @@
-'use strict';
-const Cards = require('./Cards'),
-	etgutil = require('./etgutil');
-exports.rewardwords = {
+import * as Cards from './Cards.js';
+import * as etgutil from './etgutil.js';
+
+export const rewardwords = {
 	mark: -1,
 	pillar: 0,
 	rare: 3,
@@ -10,7 +10,7 @@ exports.rewardwords = {
 };
 const cardValues = new Float32Array([25 / 3, 1.375, 5, 30, 35, 250]),
 	sellValues = new Uint8Array([5, 1, 3, 15, 20, 150]);
-exports.pveCostReward = new Uint8Array([
+export const pveCostReward = new Uint8Array([
 	0,
 	10,
 	5,
@@ -24,20 +24,20 @@ exports.pveCostReward = new Uint8Array([
 	20,
 	111,
 ]);
-exports.cardValue = function(card) {
+export function cardValue(card) {
 	return ~card.rarity
 		? cardValues[card.rarity] * (card.upped ? 6 : 1) * (card.shiny ? 6 : 1)
 		: 0;
-};
-exports.sellValue = function(card) {
+}
+export function sellValue(card) {
 	return ~card.rarity
 		? sellValues[card.rarity] * (card.upped ? 6 : 1) * (card.shiny ? 6 : 1)
 		: 0;
-};
-exports.arenaCost = function(lv) {
-	return exports.pveCostReward[lv ? 10 : 8];
-};
-exports.calcWealth = function(cardpool, isDecoded) {
+}
+export function arenaCost(lv) {
+	return pveCostReward[lv ? 10 : 8];
+}
+export function calcWealth(cardpool, isDecoded) {
 	if (!cardpool) return 0;
 	let wealth = 0;
 	function wealthIter(code, count) {
@@ -47,7 +47,7 @@ exports.calcWealth = function(cardpool, isDecoded) {
 			card.rarity != -1 &&
 			(card.rarity || card.upped || card.shiny)
 		) {
-			wealth += exports.cardValue(card) * count;
+			wealth += cardValue(card) * count;
 		}
 	}
 	if (typeof cardpool === 'string') {
@@ -60,4 +60,4 @@ exports.calcWealth = function(cardpool, isDecoded) {
 		);
 	}
 	return wealth;
-};
+}

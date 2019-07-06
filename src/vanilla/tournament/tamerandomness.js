@@ -1,28 +1,28 @@
-module.exports = function(deck) {
+export default function(deck) {
 	var bannedCards = [
-		Cards.Blackhole,
-		Cards.AmberNymph,
-		Cards.ShardofFocus,
-		Cards.Earthquake,
-		Cards.Trident,
-		Cards.Miracle,
-		Cards.ShardofDivinity,
+		Cards.Names.Blackhole,
+		Cards.Names.AmberNymph,
+		Cards.Names.ShardofFocus,
+		Cards.Names.Earthquake,
+		Cards.Names.Trident,
+		Cards.Names.Miracle,
+		Cards.Names.ShardofDivinity,
 	];
 	var rngCards = [
-		Cards.ChaosSeed,
-		Cards.Mutation,
-		Cards.Discord,
-		Cards.FallenElf,
-		Cards.Pandemonium,
-		Cards.ShardofSerendipity,
-		Cards.SkullShield,
-		Cards.ThornCarapace,
-		Cards.IceBolt,
-		Cards.IceShield,
-		Cards.FogShield,
-		Cards.FateEgg,
-		Cards.DuskMantle,
-		Cards.Mindgate,
+		Cards.Names.ChaosSeed,
+		Cards.Names.Mutation,
+		Cards.Names.Discord,
+		Cards.Names.FallenElf,
+		Cards.Names.Pandemonium,
+		Cards.Names.ShardofSerendipity,
+		Cards.Names.SkullShield,
+		Cards.Names.ThornCarapace,
+		Cards.Names.IceBolt,
+		Cards.Names.IceShield,
+		Cards.Names.FogShield,
+		Cards.Names.FateEgg,
+		Cards.Names.DuskMantle,
+		Cards.Names.Mindgate,
 	];
 	var rngCount = 0,
 		pillCount = 0;
@@ -38,4 +38,4 @@ module.exports = function(deck) {
 	if (rngCount < rngNeeded)
 		return 'Too few random cards: ' + rngCount + ' / ' + rngNeeded;
 	return 'Legal';
-};
+}

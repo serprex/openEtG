@@ -1,4 +1,4 @@
-module.exports = function(deck) {
+export default function(deck) {
 	var bannedCards = ['4vl', '55v', '593', '5ih', '5ig', '5oi'];
 	var legsCount = {
 		1: ['5le', '5ru', '625', '626'],

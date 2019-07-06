@@ -1,11 +1,11 @@
-'use strict';
-const ui = require('./ui'),
-	etg = require('./etg'),
-	Cards = require('./Cards'),
-	etgutil = require('../etgutil'),
-	React = require('react');
+import React from 'react';
 
-exports.Box = function Box(props) {
+import * as ui from './ui.js';
+import * as etg from './etg.js';
+import * as Cards from './Cards';
+import * as etgutil from '../etgutil';
+
+export function Box(props) {
 	return (
 		<div
 			className="bgbox"
@@ -20,9 +20,9 @@ exports.Box = function Box(props) {
 			{props.children || null}
 		</div>
 	);
-};
+}
 
-function CardImage(props) {
+export function CardImage(props) {
 	const card = props.card,
 		bordcol = card && card.shiny ? '#daa520' : '#222',
 		bgcol = card ? ui.maybeLightenStr(card) : card === null ? '#876' : '#111';
@@ -61,9 +61,8 @@ function CardImage(props) {
 		</div>
 	);
 }
-exports.CardImage = CardImage;
 
-class Text extends React.Component {
+export class Text extends React.Component {
 	constructor(props) {
 		super(props);
 		this.state = {
@@ -135,9 +134,8 @@ class Text extends React.Component {
 		);
 	}
 }
-exports.Text = Text;
 
-function IconBtn(props) {
+export function IconBtn(props) {
 	return (
 		<span
 			className={'imgb ico ' + props.e}
@@ -153,9 +151,8 @@ function IconBtn(props) {
 		/>
 	);
 }
-exports.IconBtn = IconBtn;
 
-exports.Card = function Card(props) {
+export function Card(props) {
 	const card = props.card || (props.code && Cards.Codes[props.code]);
 	if (!card) return null;
 	const textColor = card.upped ? '#000' : '';
@@ -195,7 +192,7 @@ exports.Card = function Card(props) {
 					backgroundColor: ui.maybeLightenStr(card),
 				}}
 			/>
-			<exports.Text
+			<Text
 				text={card.info()}
 				icoprefix="te"
 				style={{
@@ -244,9 +241,9 @@ exports.Card = function Card(props) {
 			/>
 		</div>
 	);
-};
+}
 
-function DeckDisplay(props) {
+export function DeckDisplay(props) {
 	let mark = -1,
 		j = -1;
 	return (
@@ -286,9 +283,8 @@ function DeckDisplay(props) {
 		</>
 	);
 }
-exports.DeckDisplay = DeckDisplay;
 
-function ElementSelector(props) {
+export function ElementSelector(props) {
 	const children = [];
 	for (let i = 0; i < 13; i++) {
 		children.push(
@@ -303,7 +299,6 @@ function ElementSelector(props) {
 	}
 	return children;
 }
-exports.ElementSelector = ElementSelector;
 
 function CardSelectorColumn(props) {
 	function maybeShiny(code) {
@@ -386,7 +381,8 @@ function CardSelectorColumn(props) {
 		</>
 	);
 }
-function CardSelectorCore(props) {
+
+export function CardSelectorCore(props) {
 	const children = [];
 	for (let i = 0; i < 6; i++) {
 		const cards = Cards.filter(
@@ -410,9 +406,8 @@ function CardSelectorCore(props) {
 	}
 	return children;
 }
-exports.CardSelectorCore = CardSelectorCore;
 
-class CardSelector extends React.Component {
+export class CardSelector extends React.Component {
 	constructor(props) {
 		super(props);
 		this.state = {
@@ -438,4 +433,3 @@ class CardSelector extends React.Component {
 		);
 	}
 }
-exports.CardSelector = CardSelector;

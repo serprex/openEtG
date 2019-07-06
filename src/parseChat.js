@@ -1,8 +1,9 @@
-const etgutil = require('./etgutil'),
-	RngMock = require('./RngMock'),
-	sock = require('./sock'),
-	store = require('./store'),
-	React = require('react');
+import React from 'react';
+
+import * as etgutil from './etgutil.js';
+import RngMock from './RngMock.js';
+import * as sock from './sock.js';
+import * as store from './store.js';
 
 function chatmute() {
 	const state = store.store.getState();
@@ -15,7 +16,7 @@ function chatmute() {
 		),
 	);
 }
-function parseChat(e) {
+export default function parseChat(e) {
 	e.cancelBubble = true;
 	const kc = e.which || e.keyCode,
 		{ user } = store.store.getState();
@@ -139,4 +140,3 @@ function parseChat(e) {
 		} else store.store.dispatch(store.chatMsg('Not a command: ' + msg));
 	}
 }
-module.exports = parseChat;

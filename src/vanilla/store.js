@@ -1,28 +1,44 @@
-'use strict';
-const redux = require('redux'),
-	React = require('react');
+import * as redux from 'redux';
+import React from 'react';
 
-exports.doNav = (view, props) => ({ type: 'NAV', view, props });
+export function doNav(view, props) {
+	return { type: 'NAV', view, props };
+}
 
-exports.setCmds = cmds => ({ type: 'CMD', cmds });
+export function setCmds(cmds) {
+	return { type: 'CMD', cmds };
+}
 
-exports.setOpt = exports.setOptTemp = (key, val) => ({
-	type: 'OPT',
-	key,
-	val,
-});
+export function setOptTemp(key, val) {
+	return {
+		type: 'OPT',
+		key,
+		val,
+	};
+}
+export const setOpt = setOptTemp;
 
-exports.mute = name => ({ type: 'MUTE', name });
-exports.unmute = name => ({ type: 'UNMUTE', name });
-exports.clearChat = name => ({ type: 'CHAT_CLEAR', name });
-exports.chat = (span, name) => ({ type: 'CHAT', span, name });
-exports.chatMsg = (msg, name) => ({
-	type: 'CHAT',
-	span: <div>{msg}</div>,
-	name,
-});
+export function mute(name) {
+	return { type: 'MUTE', name };
+}
+export function unmute(name) {
+	return { type: 'UNMUTE', name };
+}
+export function clearChat(name) {
+	return { type: 'CHAT_CLEAR', name };
+}
+export function chat(span, name) {
+	return { type: 'CHAT', span, name };
+}
+export function chatMsg(msg, name) {
+	return {
+		type: 'CHAT',
+		span: <div>{msg}</div>,
+		name,
+	};
+}
 
-exports.store = redux.createStore(
+export const store = redux.createStore(
 	(state, action) => {
 		switch (action.type) {
 			case 'NAV':

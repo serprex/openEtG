@@ -1,7 +1,7 @@
-const store = require('../store'),
-	React = require('react');
-module.exports = function(props) {
-	const { game } = props;
+import React from 'react';
+import * as store from '../store';
+
+export default function({ game }) {
 	return (
 		<>
 			<div
@@ -22,7 +22,7 @@ module.exports = function(props) {
 					left: '412px',
 					top: '440px',
 				}}
-				onClick={() => store.store.dispatch(store.doNav(require('./Editor')))}
+				onClick={() => store.store.dispatch(store.doNav(import('./Editor')))}
 			/>
 			{game.winner == game.player1 && (
 				<div
@@ -38,4 +38,4 @@ module.exports = function(props) {
 			)}
 		</>
 	);
-};
+}

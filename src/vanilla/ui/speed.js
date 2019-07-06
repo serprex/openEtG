@@ -1,5 +1,5 @@
-const Cards = require('../Cards'),
-	infobox = document.getElementById('infobox');
+import * as Cards from '../Cards';
+const infobox = document.getElementById('infobox');
 function prValue(id, sid) {
 	document.getElementById(id).addEventListener('input', function() {
 		document.getElementById(sid).textContent = this.value;
@@ -35,7 +35,7 @@ function printstat() {
 	}
 	for (let i = 0; i < elements.length; i++) {
 		const ele = elements[i],
-			cards = Cards.filter(false, (x) => x.element == ele && cardfilter(x));
+			cards = Cards.filter(false, x => x.element == ele && cardfilter(x));
 		while (many < cards.length) {
 			cards.splice((Math.random() * cards.length) | 0, 1);
 		}
@@ -55,11 +55,7 @@ function printstat() {
 	if (!deck.length) infobox.appendChild(document.createTextNode('No matches'));
 	else
 		infobox.appendChild(
-			document.createTextNode(
-				deck
-					.map(x => x.code.toString(32))
-					.join(' '),
-			),
+			document.createTextNode(deck.map(x => x.code.toString(32)).join(' ')),
 		);
 }
 printstat();

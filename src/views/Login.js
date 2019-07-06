@@ -1,10 +1,13 @@
-const sock = require('../sock'),
-	store = require('../store'),
-	{ connect } = require('react-redux'),
-	React = require('react');
+import React from 'react';
+import { connect } from 'react-redux';
 
+import * as sock from '../sock';
+import * as store from '../store';
+const MainMenu = import('./MainMenu');
+
+let View;
 if (typeof kongregateAPI === 'undefined') {
-	module.exports = connect(({ opts }) => ({
+	View = connect(({ opts }) => ({
 		remember: opts.remember,
 		username: opts.username,
 	}))(
@@ -29,11 +32,11 @@ if (typeof kongregateAPI === 'undefined') {
 								}
 								if (!data.accountbound && !data.pool) {
 									this.props.dispatch(
-										store.doNav(require('./ElementSelect'), { user: data }),
+										store.doNav(import('./ElementSelect'), { user: data }),
 									);
 								} else {
 									this.props.dispatch(store.setOptTemp('deck', sock.getDeck()));
-									this.props.dispatch(store.doNav(require('./MainMenu')));
+									this.props.dispatch(store.doNav(MainMenu));
 								}
 							} else {
 								this.props.dispatch(store.chatMsg(data.err));
@@ -150,9 +153,7 @@ if (typeof kongregateAPI === 'undefined') {
 						<input
 							type="button"
 							value="Sandbox"
-							onClick={() =>
-								this.props.dispatch(store.doNav(require('./MainMenu')))
-							}
+							onClick={() => this.props.dispatch(store.doNav(MainMenu))}
 							style={{ position: 'absolute', left: '530px', top: '350px' }}
 						/>
 						{this.state.commit}
@@ -162,13 +163,13 @@ if (typeof kongregateAPI === 'undefined') {
 		},
 	);
 } else {
-	module.exports = connect()(
+	View = connect()(
 		class Login extends React.Component {
 			componentDidMount() {
 				kongregateAPI.loadAPI(() => {
 					const kong = kongregateAPI.getAPI();
 					if (kong.services.isGuest()) {
-						this.props.dispatch(store.doNav(require('./MainMenu')));
+						this.props.dispatch(store.doNav(MainMenu));
 					} else {
 						sock.emit({
 							x: 'konglogin',
@@ -182,11 +183,13 @@ if (typeof kongregateAPI === 'undefined') {
 										delete data.x;
 										this.props.dispatch(store.setUser(data));
 										if (!data.accountbound && !data.pool) {
-											this.props.dispatch(
-												store.doNav(require('./ElementSelect'), { user: data }),
+											import('./ElementSelect').then(ElementSelect =>
+												this.props.dispatch(
+													store.doNav(ElementSelect.default, { user: data }),
+												),
 											);
 										} else {
-											this.props.dispatch(store.doNav(require('./MainMenu')));
+											this.props.dispatch(store.doNav(MainMenu));
 										}
 									} else {
 										alert(data.err);
@@ -204,3 +207,4 @@ if (typeof kongregateAPI === 'undefined') {
 		},
 	);
 }
+export default View;

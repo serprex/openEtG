@@ -1,6 +1,6 @@
-'use strict';
-const Cards = require('../Cards');
-module.exports = function(game) {
+import * as Cards from '../Cards';
+
+export default function lethal(game) {
 	const pl = game.byId(game.turn),
 		foe = pl.foe;
 	let limit = 333,
@@ -52,4 +52,4 @@ module.exports = function(game) {
 	}
 	iterLoop(game);
 	return [currentEval, cmdct];
-};
+}

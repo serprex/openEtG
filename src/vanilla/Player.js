@@ -1,13 +1,11 @@
-module.exports = Player;
+import imm from 'immutable';
+import * as etg from './etg.js';
+import * as Cards from './Cards.js';
+import Effect from './Effect.js';
+import Actives from './Skills.js';
+import { Thing, CardInstance } from './Thing.js';
 
-var imm = require('immutable');
-var etg = require('./etg');
-var util = require('../util');
-var Cards = require('./Cards');
-var Effect = require('./Effect');
-var Actives = require('./Skills');
-var { Thing, CardInstance } = require('./Thing');
-function Player(game) {
+export default function Player(game) {
 	this.type = etg.Player;
 	this.game = game;
 	this.owner = this;

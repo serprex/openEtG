@@ -1,5 +1,6 @@
-const Cards = require('../Cards'),
-	infobox = document.getElementById('infobox');
+import * as Cards from '../Cards.js';
+
+const infobox = document.getElementById('infobox');
 document.getElementById('nameinput').addEventListener('keydown', printstat);
 function printstat(e) {
 	if (e.keyCode != 13) return;
@@ -50,9 +51,7 @@ function printstat(e) {
 			'http://dek.im/deck/' +
 			deck
 				.slice(i, i + 70)
-				.map(function(x) {
-					return x.code.toString(32);
-				})
+				.map(x => x.code.toString(32))
 				.join(' ');
 		infobox.appendChild(img);
 	}

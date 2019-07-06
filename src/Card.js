@@ -1,12 +1,17 @@
-'use strict';
-const imm = require('immutable'),
-	etg = require('./etg'),
-	util = require('./util'),
-	Skill = require('./Skill'),
-	statuscache = new Map(),
+import imm from 'immutable';
+import * as etg from './etg.js';
+import * as util from './util.js';
+import Skill from './Skill.js';
+import { Codes } from './Cards.js';
+import * as etgutil from './etgutil.js';
+import skillText from './skillText.js';
+import parseSkill from './parseSkill.js';
+
+const statuscache = new Map(),
 	activecache = new Map(),
 	activecastcache = new Map();
-function Card(type, info) {
+
+export default function Card(type, info) {
 	this.type = type;
 	this.element = info.E;
 	this.name = info.Name;
@@ -76,7 +81,6 @@ Object.defineProperty(Card.prototype, 'upped', {
 		return (this.code & 0x3fff) > 6999;
 	},
 });
-module.exports = Card;
 
 Card.prototype.hashCode = function() {
 	return this.code;
@@ -111,12 +115,12 @@ Card.prototype.toString = function() {
 Card.prototype.asUpped = function(upped) {
 	return this.upped === !!upped
 		? this
-		: Cards.Codes[etgutil.asUpped(this.code, upped)];
+		: Codes[etgutil.asUpped(this.code, upped)];
 };
 Card.prototype.asShiny = function(shiny) {
 	return this.shiny === !!shiny
 		? this
-		: Cards.Codes[etgutil.asShiny(this.code, shiny)];
+		: Codes[etgutil.asShiny(this.code, shiny)];
 };
 Card.prototype.isOf = function(card) {
 	return (
@@ -135,9 +139,3 @@ function readCost(coststr, defaultElement) {
 		? null
 		: new Int8Array([cost, ~cidx ? +coststr.substr(cidx + 1) : defaultElement]);
 }
-
-var Cards = require('./Cards');
-var Thing = require('./Thing');
-var etgutil = require('./etgutil');
-var skillText = require('./skillText');
-var parseSkill = require('./parseSkill');

@@ -1,15 +1,15 @@
-module.exports = function(deck) {
+export default function(deck) {
 	var bannedCards = [
-		Cards.Blackhole,
-		Cards.AmberNymph,
-		Cards.Earthquake,
-		Cards.ShardofFocus,
-		Cards.ShardofWisdom,
-		Cards.Pandemonium,
-		Cards.Miracle,
-		Cards.NymphsTears,
-		Cards.BlueNymph,
-		Cards.NymphQueen,
+		Cards.Names.Blackhole,
+		Cards.Names.AmberNymph,
+		Cards.Names.Earthquake,
+		Cards.Names.ShardofFocus,
+		Cards.Names.ShardofWisdom,
+		Cards.Names.Pandemonium,
+		Cards.Names.Miracle,
+		Cards.Names.NymphsTears,
+		Cards.Names.BlueNymph,
+		Cards.Names.NymphQueen,
 	];
 	var mindGateCount = 0;
 	cardCount = {};
@@ -17,9 +17,9 @@ module.exports = function(deck) {
 		var card = deck[i];
 		if (card.upped) return 'Upgraded cards are banned';
 		if (~bannedCards.indexOf(card)) return card.name + ' is banned';
-		if (card.isOf(Cards.Mindgate)) mindGateCount++;
+		if (card.isOf(Cards.Names.Mindgate)) mindGateCount++;
 		else if (
-			(card.type == etg.SpellEnum && !card.isOf(Cards.Chimera)) ||
+			(card.type == etg.SpellEnum && !card.isOf(Cards.Names.Chimera)) ||
 			card.type == etg.PermanentEnum
 		) {
 			if (cardCount[card.code]) {
@@ -32,4 +32,4 @@ module.exports = function(deck) {
 	if (mindGateCount < 6)
 		return 'You have only ' + mindGateCount + ' Mind Gates. You need 6';
 	return 'Legal';
-};
+}

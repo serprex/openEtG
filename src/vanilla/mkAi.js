@@ -1,24 +1,22 @@
-var ui = require('./ui');
-var etg = require('./etg');
-var sock = require('./sock');
-var util = require('../util');
-var store = require('./store');
-var Cards = require('./Cards');
-var etgutil = require('../etgutil');
-var aiDecks = require('./Decks.json');
-var RngMock = require('./RngMock');
-var mkGame = require('./mkGame');
+import * as sock from './sock.js';
+import * as util from '../util.js';
+import * as store from './store.js';
+import * as etgutil from '../etgutil';
+import aiDecks from './Decks.json';
+import RngMock from './RngMock.js';
+import mkGame from './mkGame.js';
+import deckgen from './ai/deck.js';
 
-function run(gamedata) {
+export function run(gamedata) {
 	if (typeof gamedata === 'function') {
 		return () => run(gamedata());
 	}
 	if (gamedata) {
-		store.store.dispatch(store.doNav(require('./views/Match'), gamedata));
+		store.store.dispatch(store.doNav(import('./views/Match'), gamedata));
 	}
 }
 
-exports.mkPremade = function() {
+export function mkPremade() {
 	return function() {
 		var urdeck = sock.getDeck();
 		if (urdeck.length < 9) {
@@ -37,11 +35,11 @@ exports.mkPremade = function() {
 		gameData.level = 3;
 		return mkGame(gameData, true);
 	};
-};
-exports.mkAi = function(level) {
+}
+export function mkAi(level) {
 	return function() {
 		var urdeck = sock.getDeck();
-		var deck = require('./ai/deck')(level);
+		var deck = deckgen(level);
 		if (urdeck.length < 9) {
 			return;
 		}
@@ -88,5 +86,4 @@ exports.mkAi = function(level) {
 		gameData.level = level;
 		return mkGame(gameData, true);
 	};
-};
-exports.run = run;
+}

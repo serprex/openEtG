@@ -1,5 +1,8 @@
-'use strict';
-module.exports = function(c) {
+import * as etg from './etg.js';
+import Card from './Card.js';
+import Thing from './Thing.js';
+
+export default function skillText(c) {
 	if (c instanceof Card && c.type == etg.Spell) {
 		const entry = getDataFromName(c.active.get('cast').name.get(0));
 		return processEntry(c, 'cast', entry);
@@ -27,11 +30,7 @@ module.exports = function(c) {
 		}
 		return ret.join('\n');
 	}
-};
-
-const etg = require('./etg'),
-	Card = require('./Card'),
-	Thing = require('./Thing');
+}
 
 const data = {
 	ablaze: x => ({

@@ -1,20 +1,21 @@
-'use strict';
-const ui = require('../ui'),
-	etg = require('../etg'),
-	mkAi = require('../mkAi'),
-	sock = require('../sock'),
-	Cards = require('../Cards'),
-	Effect = require('../Effect'),
-	Skills = require('../Skills'),
-	aiSearch = require('../ai/search'),
-	aiMulligan = require('../ai/mulligan'),
-	Components = require('../Components'),
-	store = require('../store'),
-	sfx = require('../audio'),
-	{ connect } = require('react-redux'),
-	{ Motion, spring } = require('react-motion'),
-	imm = require('immutable'),
-	React = require('react');
+import React from 'react';
+import { connect } from 'react-redux';
+import { Motion, spring } from 'react-motion';
+import imm from 'immutable';
+
+import Effect from '../Effect.js';
+import * as sfx from '../audio.js';
+import * as ui from '../ui.js';
+import * as etg from '../etg.js';
+import * as mkAi from '../mkAi.js';
+import * as sock from '../sock.js';
+import * as Cards from '../Cards.js';
+import Skills from '../Skills.js';
+import aiSearch from '../ai/search.js';
+import aiMulligan from '../ai/mulligan.js';
+import * as Components from '../Components/index.js';
+import * as store from '../store.js';
+import { mkQuestAi } from '../Quest.js';
 
 const svgbg = (() => {
 	const redhor = new Uint16Array([
@@ -446,7 +447,7 @@ function FoePlays({ foeplays, setCard, setLine, clearCard }) {
 	));
 }
 
-module.exports = connect(({ user }) => ({ user }))(
+export default connect(({ user }) => ({ user }))(
 	class Match extends React.Component {
 		constructor(props) {
 			super(props);
@@ -785,9 +786,8 @@ module.exports = connect(({ user }) => ({ user }))(
 						if (game.data.get('quest')) {
 							if (game.data.get('quest').autonext) {
 								mkAi.run(
-									require('../Quest').mkQuestAi(
-										game.data.get('quest').autonext,
-										qdata => addNoHealData(game, qdata),
+									mkQuestAi(game.data.get('quest').autonext, qdata =>
+										addNoHealData(game, qdata),
 									),
 								);
 								return;
@@ -815,7 +815,7 @@ module.exports = connect(({ user }) => ({ user }))(
 					}
 				}
 				this.props.dispatch(
-					store.doNav(require('./Result'), {
+					store.doNav(import('./Result'), {
 						game: game,
 						streakback: this.streakback,
 					}),
@@ -863,7 +863,7 @@ module.exports = connect(({ user }) => ({ user }))(
 
 		resignClick = () => {
 			if (this.props.replay) {
-				this.props.dispatch(store.doNav(require('./Challenge'), {}));
+				this.props.dispatch(store.doNav(import('./Challenge'), {}));
 				return;
 			}
 			if (this.state.resigning) {
@@ -1112,7 +1112,7 @@ module.exports = connect(({ user }) => ({ user }))(
 						: pl.getStatus('sanctuary')
 						? 'ico sanctuary'
 						: pl.getStatus('nova') >= 3 &&
-						  pl.hand.some(c => c.card.isOf(Cards.Nova))
+						  pl.hand.some(c => c.card.isOf(Cards.Names.Nova))
 						? 'ico singularity'
 						: '';
 				children.push(

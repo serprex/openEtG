@@ -1,20 +1,31 @@
-#!/usr/bin/env node
-'use strict';
+#!/usr/bin/node --experimental-modules
+import path from 'path';
+import { fileURLToPath } from 'url';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 process.chdir(__dirname);
-const fs = require('fs').promises;
-const https = require('https');
-const httpoly = require('httpolyglot');
-const ws = require('ws');
-const etg = require('./src/etg');
-const Cards = require('./src/Cards');
-const RngMock = require('./src/RngMock');
-const etgutil = require('./src/etgutil');
-const usercmd = require('./src/usercmd');
-const userutil = require('./src/userutil');
-const sutil = require('./src/srv/sutil');
-const db = require('./src/srv/db');
-const Us = require('./src/srv/Us');
-const Bz = require('./src/srv/Bz');
+
+import fsCb from 'fs';
+const fs = fsCb.promises;
+
+import crypto from  'crypto';
+import https from 'https';
+import httpoly from 'httpolyglot';
+import ws from 'ws';
+import * as etg from './src/etg.js';
+import * as Cards from './src/Cards.js';
+import RngMock from './src/RngMock.js';
+import * as etgutil from './src/etgutil.js';
+import * as usercmd from './src/usercmd.js';
+import * as userutil from './src/userutil.js';
+import * as sutil from './src/srv/sutil.js';
+import db from './src/srv/db.js';
+import * as Us from './src/srv/Us.js';
+import * as Bz from './src/srv/Bz.js';
+import starter from './src/srv/starter.json';
+import forkcore from './src/srv/forkcore.js';
+import login from './src/srv/login.js';
 
 const MAX_INT = 0x100000000;
 const sockmeta = new WeakMap();
@@ -119,7 +130,6 @@ const sockmeta = new WeakMap();
 			}
 		}),
 		inituser(data, user) {
-			const starter = require('./src/srv/starter.json');
 			if (data.e < 1 || data.e > 13) return;
 			const sid = (data.e - 1) * 6;
 			user.pvpwins = user.pvplosses = user.aiwins = user.ailosses = 0;
@@ -513,7 +523,7 @@ const sockmeta = new WeakMap();
 				sockEmit(this, 'passchange', { auth: '' });
 			} else {
 				sutil.initsalt(user);
-				require('crypto').pbkdf2(
+				crypto.pbkdf2(
 					data.p,
 					user.salt,
 					user.iter,
@@ -970,7 +980,7 @@ const sockmeta = new WeakMap();
 		},
 	};
 	const sockEvents = {
-		login: require('./src/srv/login')(sockEmit),
+		login: login(sockEmit),
 		konglogin(data) {
 			db.get('kongapi', (err, key) => {
 				if (!key) {
@@ -1225,7 +1235,7 @@ const sockmeta = new WeakMap();
 				key: keypem,
 				cert: certpem,
 			},
-			require('./src/srv/forkcore'),
+			forkcore,
 		)
 		.listen(13602)
 		.on('clientError', () => {});

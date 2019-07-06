@@ -1,9 +1,9 @@
-module.exports = function(deck) {
+export default function(deck) {
 	bannedCards = [
-		Cards.ShardofFreedom,
-		Cards.ShardofDivinity,
-		Cards.Earthquake,
-		Cards.Trident,
+		Cards.Names.ShardofFreedom,
+		Cards.Names.ShardofDivinity,
+		Cards.Names.Earthquake,
+		Cards.Names.Trident,
 	];
 	var summerElements = [etg.Fire, etg.Light, etg.Earth, etg.Life];
 	var winterElements = [etg.Water, etg.Darkness, etg.Air, etg.Death];
@@ -28,4 +28,4 @@ module.exports = function(deck) {
 		}
 	}
 	return 'Legal' + (side ? ' if you are ' + side : '');
-};
+}

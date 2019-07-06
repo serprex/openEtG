@@ -1,7 +1,21 @@
-'use strict';
-const imm = require('immutable'),
-	etg = require('./etg'),
-	Skill = require('./Skill');
+import imm from 'immutable';
+
+export default function Thing(game, id) {
+	if (!id || typeof id !== 'number') {
+		throw new Error(`Invalid id ${id}`);
+	}
+	this.game = game;
+	this.id = id;
+}
+
+import * as etg from './etg.js';
+import Skill from './Skill.js';
+import * as sfx from './audio.js';
+import * as Cards from './Cards.js';
+import Skills from './Skills.js';
+import skillText from './skillText.js';
+import parseSkill from './parseSkill.js';
+
 const passives = new Set([
 	'airborne',
 	'aquatic',
@@ -15,14 +29,6 @@ const passives = new Set([
 	'poisonous',
 	'golem',
 ]);
-function Thing(game, id) {
-	if (!id || typeof id !== 'number') {
-		throw new Error(`Invalid id ${id}`);
-	}
-	this.game = game;
-	this.id = id;
-}
-module.exports = Thing;
 function defineProp(key) {
 	Object.defineProperty(Thing.prototype, key, {
 		get() {
@@ -74,7 +80,6 @@ Thing.prototype.init = function(card) {
 Thing.prototype.clone = function(ownerId) {
 	return this.game.cloneInstance(this, ownerId);
 };
-const sfx = require('./audio');
 
 Thing.prototype.toString = function() {
 	return this.card && this.card.name;
@@ -164,8 +169,10 @@ Thing.prototype.die = function() {
 	} else if (this.type === etg.Spell) {
 		this.proc('discard');
 	} else if (this.type === etg.Creature && !this.trigger('predeath')) {
-		if (this.status.get('aflatoxin') & !this.card.isOf(Cards.MalignantCell)) {
-			const cell = this.game.newThing(this.card.as(Cards.MalignantCell));
+		if (
+			this.status.get('aflatoxin') & !this.card.isOf(Cards.Names.MalignantCell)
+		) {
+			const cell = this.game.newThing(this.card.as(Cards.Names.MalignantCell));
 			const creatures = new Uint32Array(this.owner.creatureIds);
 			creatures[idx] = cell.id;
 			this.game.set(this.ownerId, 'creatures', creatures);
@@ -471,7 +478,7 @@ Thing.prototype.play = function(tgt, fromhand) {
 	if (card.type === etg.Spell) {
 		this.castSpell(tgt ? tgt.id : 0, this.active.get('cast'));
 	} else {
-		audio.playSound(card.type <= etg.Permanent ? 'permPlay' : 'creaturePlay');
+		sfx.playSound(card.type <= etg.Permanent ? 'permPlay' : 'creaturePlay');
 		if (card.type === etg.Creature) owner.addCrea(this, fromhand);
 		else if (card.type === etg.Permanent || card.type === etg.Pillar)
 			owner.addPerm(this, fromhand);
@@ -653,9 +660,3 @@ Thing.prototype.maybeDecrStatus = function(key) {
 Thing.prototype.incrStatus = function(key, val) {
 	this.game.updateIn([this.id, 'status', key], (x = 0) => x + val);
 };
-
-var audio = require('./audio');
-var Cards = require('./Cards');
-var Skills = require('./Skills');
-var skillText = require('./skillText');
-var parseSkill = require('./parseSkill');

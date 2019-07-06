@@ -1,9 +1,9 @@
-'use strict';
-const etgutil = require('../etgutil'),
-	Components = require('../Components'),
-	React = require('react');
+import React from 'react';
 
-module.exports = class Editor extends React.PureComponent {
+import * as Components from '../Components/index.js';
+import * as etgutil from '../etgutil.js';
+
+export default class Editor extends React.PureComponent {
 	constructor(props) {
 		super(props);
 		this.state = {
@@ -94,4 +94,4 @@ module.exports = class Editor extends React.PureComponent {
 			</>
 		);
 	}
-};
+}

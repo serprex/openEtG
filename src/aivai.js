@@ -1,11 +1,10 @@
-'use strict';
-const Effect = require('./Effect');
-const Cards = require('./Cards');
-const Game = require('./Game');
-const etg = require('./etg');
-const etgutil = require('./etgutil');
-const aiSearch = require('./ai/search');
-const util = require('./util');
+import Effect from './Effect.js';
+import * as Cards from './Cards.js';
+import Game from './Game.js';
+import * as etg from './etg.js';
+import * as etgutil from './etgutil.js';
+import aiSearch from './ai/search.js';
+import * as util from './util.js';
 Effect.disable = true;
 const deckeles = [
 	document.getElementById('deck1'),

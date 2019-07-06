@@ -1,6 +1,6 @@
-#!/bin/env node
-'use strict';
-const db = require('redis').createClient();
+#!/bin/node --experimental-modules
+import redis from 'redis';
+const db = redis.createClient();
 
 db.hgetall('Users', function(users) {
 	for (const name in users) {

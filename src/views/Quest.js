@@ -1,9 +1,10 @@
-const Quest = require('../Quest'),
-	Components = require('../Components'),
-	mkAi = require('../mkAi'),
-	store = require('../store'),
-	{ connect } = require('react-redux'),
-	React = require('react');
+import React from 'react';
+import { connect } from 'react-redux';
+
+import * as Quest from '../Quest.js';
+import * as Components from '../Components/index.js';
+import * as mkAi from '../mkAi.js';
+import * as store from '../store.js';
 
 function QuestButton({ sel, x, y, area, user, onClick }) {
 	return (
@@ -22,7 +23,7 @@ function QuestButton({ sel, x, y, area, user, onClick }) {
 	);
 }
 
-module.exports = connect(({ user, opts }) => ({ user, oquest: opts.quest }))(
+export default connect(({ user, opts }) => ({ user, oquest: opts.quest }))(
 	function QuestView({ user, oquest, dispatch }) {
 		const questAreas = [],
 			quest = oquest || [];

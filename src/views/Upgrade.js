@@ -1,13 +1,12 @@
-'use strict';
-const sock = require('../sock'),
-	Cards = require('../Cards'),
-	etgutil = require('../etgutil'),
-	userutil = require('../userutil'),
-	Components = require('../Components'),
-	{ connect } = require('react-redux'),
-	React = require('react');
+import React from 'react';
+import { connect } from 'react-redux';
 
-module.exports = connect(({ user }) => ({ user }))(
+import * as sock from '../sock.js';
+import * as Cards from '../Cards.js';
+import * as etgutil from '../etgutil.js';
+import * as Components from '../Components/index.js';
+
+export default connect(({ user }) => ({ user }))(
 	class Upgrade extends React.Component {
 		constructor(props) {
 			super(props);

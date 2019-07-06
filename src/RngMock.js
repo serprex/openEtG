@@ -1,7 +1,7 @@
-'use strict';
-const RngMock = Object.create(require('./Thing').prototype);
+import Thing from './Thing.js';
+const RngMock = Object.create(Thing.prototype);
 RngMock.rng = Math.random;
 RngMock.upto = function(x) {
 	return Math.floor(Math.random() * x);
 };
-module.exports = RngMock;
+export default RngMock;

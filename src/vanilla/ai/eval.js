@@ -1,17 +1,14 @@
-'use strict';
-var etg = require('../etg');
-var Cards = require('../Cards');
-var Actives = require('../Skills');
-var smth = require('../Thing');
-var enableLogging = false,
-	logbuff,
-	logstack;
+import * as etg from '../etg.js';
+import * as Cards from '../Cards.js';
+import Actives from '../Skills.js';
+import * as smth from '../Thing.js';
+
 function pillarval(c) {
 	return c instanceof smth.CardInstance
 		? 0.1
 		: Math.sqrt(c.getStatus('charges'));
 }
-var ActivesValues = Object.freeze({
+const ActivesValues = Object.freeze({
 	ablaze: 3,
 	accelerationspell: 5,
 	acceleration: function(c) {
@@ -187,7 +184,7 @@ var ActivesValues = Object.freeze({
 	nightmare: function(c) {
 		var val = 24 - c.owner.foe.hand.length;
 		c.owner.hand.forEach(function(inst) {
-			if (inst.card.isOf(Cards.Nightmare)) val /= 2;
+			if (inst.card.isOf(Cards.Names.Nightmare)) val /= 2;
 		});
 		return val;
 	},
@@ -684,7 +681,7 @@ var uniqueStatuses = Object.freeze({
 });
 var uniquesActive, damageHash;
 
-module.exports = function(game) {
+export default function(game) {
 	if (game.winner) {
 		return game.winner === game.player1 ? 99999999 : -99999999;
 	}
@@ -746,4 +743,4 @@ module.exports = function(game) {
 	}
 	damageHash = uniquesActive = null;
 	return gamevalue;
-};
+}

@@ -1,7 +1,7 @@
-const etg = require('../etg'),
-	Cards = require('../Cards'),
-	etgutil = require('../etgutil'),
-	Skills = require('../Skills');
+import * as etg from '../etg.js';
+import * as Cards from '../Cards.js';
+import * as etgutil from '../etgutil.js';
+import Skills from '../Skills.js';
 
 const hasBuff = new Uint16Array([
 	5125,
@@ -71,7 +71,7 @@ const canInfect = new Uint16Array([
 const hasBurrow = new Uint16Array([5408, 5409, 5416, 5401]);
 const hasLight = new Uint16Array([5811, 5820, 5908, 7811, 7801, 7820]);
 function scorpion(card, deck) {
-	const isDeath = card.isOf(Cards.Deathstalker); // Scan for Nightfall
+	const isDeath = card.isOf(Cards.Names.Deathstalker); // Scan for Nightfall
 	for (let i = 0; i < deck.length; i++) {
 		if (
 			~hasBuff.indexOf(deck[i]) ||
@@ -149,7 +149,7 @@ const filters = {
 const material = new Set([4, 6, 7, 9]),
 	spiritual = new Set([4, 6, 7, 9]),
 	cardinal = new Set([1, 3, 10, 12]);
-class Builder {
+export default class Builder {
 	constructor(mark, uprate, markpower) {
 		this.mark = mark;
 		this.cardcount = [];
@@ -196,18 +196,18 @@ class Builder {
 		if (card.type !== etg.Spell && card.cast) {
 			ecost[card.castele] += card.cast * 1.5;
 		}
-		if (card.isOf(Cards.Nova)) {
+		if (card.isOf(Cards.Names.Nova)) {
 			ecost[0] -= card.upped ? 24 : 12;
-		} else if (card.isOf(Cards.Immolation)) {
+		} else if (card.isOf(Cards.Names.Immolation)) {
 			ecost[0] -= 12;
 			ecost[etg.Fire] -= card.upped ? 7 : 5;
-		} else if (card.isOf(Cards.GiftofOceanus)) {
+		} else if (card.isOf(Cards.Names.GiftofOceanus)) {
 			if (this.mark === etg.Water) ecost[etg.Water] -= 3;
 			else {
 				ecost[etg.Water] -= 2;
 				ecost[this.mark] -= 2;
 			}
-		} else if (card.isOf(Cards.Georesonator)) {
+		} else if (card.isOf(Cards.Names.Georesonator)) {
 			ecost[this.mark] -= 6;
 			ecost[0] -= 4;
 		}
@@ -236,22 +236,22 @@ class Builder {
 			}
 			if (qc.length > 2) {
 				if (qc.every(x => material.has(x))) {
-					deck.push(this.upCode(Cards.MaterialPillar.code));
+					deck.push(this.upCode(Cards.Names.MaterialPillar.code));
 					for (const e of material) {
 						ecost[e] -= 2;
 					}
 				} else if (qc.every(x => spiritual.has(x))) {
-					deck.push(this.upCode(Cards.SpiritualPillar.code));
+					deck.push(this.upCode(Cards.Names.SpiritualPillar.code));
 					for (const e of spiritual) {
 						ecost[e] -= 2;
 					}
 				} else if (qc.every(x => cardinal.has(x))) {
-					deck.push(this.upCode(Cards.CardinalPillar.code));
+					deck.push(this.upCode(Cards.Names.CardinalPillar.code));
 					for (const e of cardinal) {
 						ecost[e] -= 2;
 					}
 				}
-				deck.push(this.upCode(Cards.QuantumPillar.code));
+				deck.push(this.upCode(Cards.Names.QuantumPillar.code));
 				for (let i = 1; i < 13; i++) {
 					ecost[i] -= 1.25;
 				}
@@ -277,7 +277,7 @@ class Builder {
 
 	addEquipment() {
 		if (!this.anyshield) {
-			this.addCard(this.upCard(Cards.Shield));
+			this.addCard(this.upCard(Cards.Names.Shield));
 		}
 		if (!this.anyweapon) {
 			this.addCard(this.defaultWeapon());
@@ -288,18 +288,18 @@ class Builder {
 		const e = this.mark;
 		return this.upCard(
 			e === etg.Air || e === etg.Light
-				? Cards.ShortBow
+				? Cards.Names.ShortBow
 				: e === etg.Gravity || e === etg.Earth
-				? Cards.Hammer
+				? Cards.Names.Hammer
 				: e === etg.Water || e === etg.Life
-				? Cards.Wand
+				? Cards.Names.Wand
 				: e === etg.Darkness || e === etg.Death
-				? Cards.Dagger
+				? Cards.Names.Dagger
 				: e === etg.Entropy || e === etg.Aether
-				? Cards.Disc
+				? Cards.Names.Disc
 				: e === etg.Fire || e === etg.Time
-				? Cards.BattleAxe
-				: Cards.ShortSword,
+				? Cards.Names.BattleAxe
+				: Cards.Names.ShortSword,
 		);
 	}
 
@@ -308,4 +308,3 @@ class Builder {
 		return etgutil.encodedeck(this.deck);
 	}
 }
-module.exports = Builder;

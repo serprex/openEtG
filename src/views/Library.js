@@ -1,13 +1,13 @@
-'use strict';
-const Cards = require('../Cards'),
-	sock = require('../sock'),
-	store = require('../store'),
-	etgutil = require('../etgutil'),
-	userutil = require('../userutil'),
-	Components = require('../Components'),
-	React = require('react');
+import React from 'react';
 
-module.exports = class Library extends React.Component {
+import * as Cards from '../Cards.js';
+import * as sock from '../sock.js';
+import * as store from '../store.js';
+import * as etgutil from '../etgutil.js';
+import * as userutil from '../userutil.js';
+import * as Components from '../Components/index.js';
+
+export default class Library extends React.Component {
 	constructor(props) {
 		super(props);
 		this.state = {
@@ -161,4 +161,4 @@ module.exports = class Library extends React.Component {
 			</>
 		);
 	}
-};
+}

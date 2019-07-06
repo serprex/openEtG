@@ -1,7 +1,6 @@
-const vanillaCards = require('../Cards.json'),
-	ciaCards = require('../../../cia/Cards.json');
-for (let i=0; i<vanillaCards.length; i++)
-{
+import vanillaCards from '../Cards.json';
+import ciaCards from '../../../cia/Cards.json';
+for (let i = 0; i < vanillaCards.length; i++) {
 	vanillaCards[i] = ciaCards[i];
 }
-require('./main');
+import './main.js';

@@ -1,13 +1,13 @@
-'use strict';
-const ui = require('../ui'),
-	etg = require('../etg'),
-	audio = require('../audio'),
-	Cards = require('../Cards'),
-	etgutil = require('../etgutil'),
-	store = require('../store'),
-	React = require('react');
+import React from 'react';
 
-exports.Box = function(props) {
+import * as audio from '../audio.js';
+import * as Cards from '../Cards.js';
+import * as etg from '../etg.js';
+import * as etgutil from '../etgutil.js';
+import * as store from '../store.js';
+import * as ui from '../ui.js';
+
+export function Box(props) {
 	return (
 		<div
 			className="bgbox"
@@ -21,9 +21,9 @@ exports.Box = function(props) {
 			{props.children || null}
 		</div>
 	);
-};
+}
 
-function CardImage(props) {
+export function CardImage(props) {
 	const card = props.card,
 		bordcol = card && card.shiny ? '#daa520' : '#222',
 		bgcol = card ? ui.maybeLightenStr(card) : card === null ? '#876' : '#111';
@@ -62,52 +62,67 @@ function CardImage(props) {
 		</div>
 	);
 }
-exports.CardImage = CardImage;
 
-exports.Text = function(props) {
-	if (!props.text) return null;
-	const text = props.text.toString().replace(/\|/g, ' / ');
-	const sep = /\d\d?:\d\d?|\$|\n/g;
-	const icoprefix = `ico ${props.icoprefix || 'ce'}`;
-	let reres,
-		lastindex = 0;
-	const elec = [];
-	while ((reres = sep.exec(text))) {
-		const piece = reres[0];
-		if (reres.index != lastindex) {
-			elec.push(text.slice(lastindex, reres.index));
-		}
-		if (piece == '\n') {
-			elec.push(<br />);
-		} else if (piece == '$') {
-			elec.push(<span className="ico gold" />);
-		} else if (/^\d\d?:\d\d?$/.test(piece)) {
-			const parse = piece.split(':');
-			const num = +parse[0];
-			if (num == 0) {
-				elec.push('0');
-			} else if (num < 4) {
-				const icon = <span className={icoprefix + parse[1]} />;
-				for (let j = 0; j < num; j++) {
-					elec.push(icon);
-				}
-			} else {
-				elec.push(parse[0], <span className={icoprefix + parse[1]} />);
+export class Text extends React.PureComponent {
+	render() {
+		const { props } = this;
+		if (!props.text) return null;
+		const text = props.text.toString().replace(/\|/g, ' / ');
+		const sep = /\d\d?:\d\d?|\$|\n/g;
+		const icoprefix = `ico ${props.icoprefix || 'ce'}`;
+		let reres,
+			lastindex = 0;
+		const elec = [];
+		while ((reres = sep.exec(text))) {
+			const piece = reres[0];
+			if (reres.index != lastindex) {
+				elec.push(
+					<React.Fragment key={elec.length}>
+						{text.slice(lastindex, reres.index)}
+					</React.Fragment>,
+				);
 			}
+			if (piece == '\n') {
+				elec.push(<br key={elec.length} />);
+			} else if (piece == '$') {
+				elec.push(<span key={elec.length} className="ico gold" />);
+			} else if (/^\d\d?:\d\d?$/.test(piece)) {
+				const parse = piece.split(':');
+				const num = +parse[0];
+				if (num == 0) {
+					elec.push(<React.Fragment key={elec.length}>0</React.Fragment>);
+				} else if (num < 4) {
+					const icon = <span className={icoprefix + parse[1]} />;
+					for (let j = 0; j < num; j++) {
+						elec.push(
+							<React.Fragment key={elec.length}>{icon}</React.Fragment>,
+						);
+					}
+				} else {
+					elec.push(
+						parse[0],
+						<span key={elec.length} className={icoprefix + parse[1]} />,
+					);
+				}
+			}
+			lastindex = reres.index + piece.length;
 		}
-		lastindex = reres.index + piece.length;
+		if (lastindex != text.length) {
+			elec.push(
+				<React.Fragment key={elec.length}>
+					{text.slice(lastindex)}
+				</React.Fragment>,
+			);
+		}
+		return (
+			<div className={props.className} style={props.style}>
+				{elec}
+			</div>
+		);
 	}
-	if (lastindex != text.length) {
-		elec.push(text.slice(lastindex));
-	}
-	return (
-		<div className={props.className} style={props.style}>
-			{elec}
-		</div>
-	);
-};
+}
 
-function IconBtn(props) {
+export function IconBtn(props) {
 	return (
 		<span
 			className={'imgb ico ' + props.e}
@@ -124,9 +139,8 @@ function IconBtn(props) {
 		/>
 	);
 }
-exports.IconBtn = IconBtn;
 
-exports.ExitBtn = function(props) {
+export function ExitBtn(props) {
 	return (
 		<input
 			type="button"
@@ -134,7 +148,7 @@ exports.ExitBtn = function(props) {
 			onClick={
 				props.onClick ||
 				(() => {
-					store.store.dispatch(store.doNav(require('../views/MainMenu')));
+					store.store.dispatch(store.doNav(import('../views/MainMenu')));
 				})
 			}
 			style={{
@@ -144,9 +158,9 @@ exports.ExitBtn = function(props) {
 			}}
 		/>
 	);
-};
+}
 
-exports.Card = function(props) {
+export function Card(props) {
 	const card = props.card || (props.code && Cards.Codes[props.code]);
 	if (!card) return null;
 	const textColor = card.upped ? '#000' : '';
@@ -186,7 +200,7 @@ exports.Card = function(props) {
 					backgroundColor: ui.maybeLightenStr(card),
 				}}
 			/>
-			<exports.Text
+			<Text
 				text={card.info()}
 				icoprefix="te"
 				style={{
@@ -235,9 +249,9 @@ exports.Card = function(props) {
 			/>
 		</div>
 	);
-};
+}
 
-function DeckDisplay(props) {
+export function DeckDisplay(props) {
 	let mark = -1,
 		j = -1;
 	const children = [],
@@ -292,9 +306,8 @@ function DeckDisplay(props) {
 		</>
 	);
 }
-exports.DeckDisplay = DeckDisplay;
 
-function RaritySelector(props) {
+export function RaritySelector(props) {
 	const children = [];
 	for (let i = 0; i < 5; i++) {
 		children.push(
@@ -309,9 +322,8 @@ function RaritySelector(props) {
 	}
 	return children;
 }
-exports.RaritySelector = RaritySelector;
 
-function ElementSelector(props) {
+export function ElementSelector(props) {
 	const children = [];
 	for (let i = 0; i < 13; i++) {
 		children.push(
@@ -326,7 +338,6 @@ function ElementSelector(props) {
 	}
 	return children;
 }
-exports.ElementSelector = ElementSelector;
 
 function CardSelectorColumn(props) {
 	function maybeShiny(code) {
@@ -411,7 +422,7 @@ function CardSelectorColumn(props) {
 		</>
 	);
 }
-function CardSelectorCore(props) {
+export function CardSelectorCore(props) {
 	const children = [];
 	for (let i = 0; i < 6; i++) {
 		const cards = Cards.filter(
@@ -443,9 +454,8 @@ function CardSelectorCore(props) {
 	}
 	return children;
 }
-exports.CardSelectorCore = CardSelectorCore;
 
-class CardSelector extends React.Component {
+export class CardSelector extends React.Component {
 	constructor(props) {
 		super(props);
 		this.state = {
@@ -504,4 +514,3 @@ class CardSelector extends React.Component {
 		);
 	}
 }
-exports.CardSelector = CardSelector;

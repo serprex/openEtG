@@ -1,9 +1,9 @@
-const etg = require('../etg'),
-	Cards = require('../Cards'),
-	RngMock = require('../RngMock'),
-	Builder = require('./Builder');
+import * as etg from '../etg.js';
+import * as Cards from '../Cards.js';
+import RngMock from '../RngMock.js';
+import Builder from './Builder.js';
 
-module.exports = function(uprate, markpower, maxRarity) {
+export default function duo(uprate, markpower, maxRarity) {
 	const eles = new Uint8Array([RngMock.upto(12) + 1, RngMock.upto(12) + 1]),
 		build = new Builder(eles[1], uprate, markpower);
 	for (let j = 0; j < 2; j++) {
@@ -18,8 +18,8 @@ module.exports = function(uprate, markpower, maxRarity) {
 					build.cardcount[x.code] !== 6 &&
 					!(x.type === etg.Shield && build.anyshield >= 3) &&
 					!(x.type === etg.Weapon && build.anyweapon >= 3) &&
-					!x.isOf(Cards.Give) &&
-					!x.isOf(Cards.Precognition),
+					!x.isOf(Cards.Names.Give) &&
+					!x.isOf(Cards.Names.Precognition),
 			);
 			build.addCard(card);
 		}
@@ -28,4 +28,4 @@ module.exports = function(uprate, markpower, maxRarity) {
 	build.addEquipment();
 	build.addPillars();
 	return build.finish();
-};
+}

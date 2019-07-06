@@ -1,10 +1,9 @@
-'use strict';
-const db = require('./db'),
-	users = new Map(),
-	usergc = new Set();
-exports.users = users;
-exports.socks = new Map();
-function storeUsers() {
+import db from './db.js';
+
+const usergc = new Set();
+export const users = new Map();
+export const socks = new Map();
+export function storeUsers() {
 	const margs = ['Users'];
 	for (const [u, user] of users) {
 		if (user.pool || user.accountbound) {
@@ -13,7 +12,6 @@ function storeUsers() {
 	}
 	if (margs.length > 1) db.send_command('hmset', margs);
 }
-exports.storeUsers = storeUsers;
 const usergcloop = setInterval(() => {
 	storeUsers();
 	// Clear inactive users
@@ -25,12 +23,12 @@ const usergcloop = setInterval(() => {
 		}
 	}
 }, 300000);
-exports.stop = function() {
+export function stop() {
 	clearInterval(usergcloop);
 	storeUsers();
 	db.quit();
-};
-exports.load = function(name) {
+}
+export function load(name) {
 	return new Promise((resolve, reject) => {
 		const userck = users.get(name);
 		if (userck) {
@@ -49,4 +47,4 @@ exports.load = function(name) {
 			});
 		}
 	});
-};
+}

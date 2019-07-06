@@ -1,13 +1,12 @@
-'use strict';
-const etg = require('../etg'),
-	mkAi = require('../mkAi'),
-	sock = require('../sock'),
-	Decks = require('../Decks.json'),
-	RngMock = require('../RngMock'),
-	Components = require('../Components'),
-	store = require('../store'),
-	{ connect } = require('react-redux'),
-	React = require('react');
+import { connect } from 'react-redux';
+import React from 'react';
+import * as etg from '../etg.js';
+import * as mkAi from '../mkAi.js';
+import * as sock from '../sock.js';
+import Decks from '../Decks.json';
+import RngMock from '../RngMock.js';
+import * as Components from '../Components/index.js';
+import * as store from '../store.js';
 
 function mkDaily(type) {
 	let game;
@@ -34,19 +33,19 @@ function mkDaily(type) {
 			dataNext.dataNext = dataNext;
 			return Object.assign(data, dataNext);
 		});
+		if (!game) return;
 	} else {
 		game = mkAi.mkPremade(type == 3 ? 1 : 3, type, data => {
 			data.colobonus = type == 3 ? 4 : 1;
 			data.rematch = undefined;
 			return data;
 		});
+		if (!game) return;
 		sock.userExec('donedaily', { daily: type });
 	}
 	mkAi.run(game);
 }
-module.exports = connect(({ user }) => ({ user }))(function Colosseum({
-	user,
-}) {
+export default connect(({ user }) => ({ user }))(function Colosseum({ user }) {
 	const magename = Decks.mage[user.dailymage][0],
 		dgname = Decks.demigod[user.dailydg][0];
 	const events = [
@@ -103,7 +102,7 @@ module.exports = connect(({ user }) => ({ user }))(function Colosseum({
 							const nymph = etg.NymphList[RngMock.upto(12) + 1];
 							sock.userExec('donedaily', { daily: 6, c: nymph });
 							store.store.dispatch(
-								store.doNav(require('./MainMenu'), { nymph }),
+								store.doNav(import('./MainMenu'), { nymph }),
 							);
 						}}
 					/>

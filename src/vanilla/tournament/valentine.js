@@ -1,4 +1,4 @@
-module.exports = function(deck) {
+export default function(deck) {
 	deck.sort(function(x, y) {
 		return (x.code > y.code) - (x.code < y.code);
 	});

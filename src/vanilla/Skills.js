@@ -1,4 +1,5 @@
-'use strict';
+import imm from 'immutable';
+
 function adrenathrottle(f) {
 	return function(c, ...args) {
 		if (c.getStatus('adrenaline') < 3) {
@@ -63,7 +64,7 @@ const Actives = {
 			c.die();
 			if (c.owner.hand.length < 8) {
 				new smth.CardInstance(
-					Cards.BlackHole.asUpped(c.card.upped),
+					Cards.Names.BlackHole.asUpped(c.card.upped),
 					c.owner,
 				).place();
 			}
@@ -131,11 +132,14 @@ const Actives = {
 	},
 	becomeweapon: function(c, t) {
 		c.remove();
-		c.owner.weapon = new smth.Weapon(Cards.GadgetSword, c.owner);
+		c.owner.weapon = new smth.Weapon(Cards.Names.GadgetSword, c.owner);
 	},
 	becomeshield: function(c, t) {
 		c.remove();
-		c.owner.shield = new smth.Shield(Cards.GadgetSword.asUpped(true), c.owner);
+		c.owner.shield = new smth.Shield(
+			Cards.Names.GadgetSword.asUpped(true),
+			c.owner,
+		);
 	},
 	blackhole: function(c, t) {
 		if (!c.owner.foe.sanctuary) {
@@ -164,8 +168,11 @@ const Actives = {
 		return true;
 	},
 	boneyard: function(c, t) {
-		if (!t.card.isOf(Cards.Skeleton)) {
-			new smth.Creature(Cards.Skeleton.asUpped(c.card.upped), c.owner).place();
+		if (!t.card.isOf(Cards.Names.Skeleton)) {
+			new smth.Creature(
+				Cards.Names.Skeleton.asUpped(c.card.upped),
+				c.owner,
+			).place();
 		}
 	},
 	bow: function(c, t) {
@@ -360,7 +367,8 @@ const Actives = {
 		c.owner.buffhp(c.owner.mark == etg.Light ? 24 : 16);
 	},
 	downgrade: function(c, t) {
-		if (t.card == Cards.GadgetSword.asUpped(true)) Actives.becomeweapon.func(t);
+		if (t.card == Cards.Names.GadgetSword.asUpped(true))
+			Actives.becomeweapon.func(t);
 		else t.transform(t.card.asUpped(false));
 	},
 	drainlife: function(c, t) {
@@ -455,7 +463,7 @@ const Actives = {
 		c.buffhp(2);
 	},
 	evolve: function(c, t) {
-		c.transform(Cards.Shrieker.asUpped(c.card.upped));
+		c.transform(Cards.Names.Shrieker.asUpped(c.card.upped));
 		c.status = c.status.delete('burrowed');
 	},
 	extract: function(c, t) {
@@ -493,7 +501,9 @@ const Actives = {
 		c.owner.quanta[etg.Aether] = 0;
 	},
 	freeze: function(c, t) {
-		t.freeze(c.card.upped && c.card != Cards.Pandemonium.asUpped(true) ? 4 : 3);
+		t.freeze(
+			c.card.upped && c.card != Cards.Names.Pandemonium.asUpped(true) ? 4 : 3,
+		);
 	},
 	frightened: function(c, t) {
 		if (t.type === etg.Creature) {
@@ -504,14 +514,14 @@ const Actives = {
 		t.addactive('play', Actives.frightened);
 	},
 	fungusrebirth: function(c, t) {
-		c.transform(Cards.Fungus.asUpped(c.card.upped));
+		c.transform(Cards.Names.Fungus.asUpped(c.card.upped));
 	},
 	gaincharge2: function(c, t) {
 		c.status = c.status.set('charges', c.status.get('charges') + 2);
 	},
 	gas: function(c, t) {
 		new smth.Permanent(
-			Cards.UnstableGas.asUpped(c.card.upped),
+			Cards.Names.UnstableGas.asUpped(c.card.upped),
 			c.owner,
 		).place();
 	},
@@ -554,12 +564,12 @@ const Actives = {
 	hatch: function(c, t) {
 		Effect.mkText('Hatch', c);
 		var bans = [
-			Cards.ShardofFocus,
-			Cards.FateEgg,
-			Cards.Immortal,
-			Cards.Scarab,
-			Cards.DevonianDragon,
-			Cards.Chimera,
+			Cards.Names.ShardofFocus,
+			Cards.Names.FateEgg,
+			Cards.Names.Immortal,
+			Cards.Names.Scarab,
+			Cards.Names.DevonianDragon,
+			Cards.Names.Chimera,
 		];
 		c.transform(
 			c.owner.randomcard(c.card.upped, function(x) {
@@ -596,12 +606,18 @@ const Actives = {
 		t.dmg(c.trueatk());
 	},
 	hydra: function(c, t) {
-		new smth.Creature(Cards.HydraHead.asUpped(c.card.upped), c.owner).place();
+		new smth.Creature(
+			Cards.Names.HydraHead.asUpped(c.card.upped),
+			c.owner,
+		).place();
 	},
 	hydrahead: function(c, t) {
 		var ownshydra = false;
 		for (var i = 0; i < 23; i++) {
-			if (c.owner.creatures[i] && c.owner.creatures[i].card.isOf(Cards.Hydra)) {
+			if (
+				c.owner.creatures[i] &&
+				c.owner.creatures[i].card.isOf(Cards.Names.Hydra)
+			) {
 				ownshydra = true;
 				break;
 			}
@@ -638,12 +654,12 @@ const Actives = {
 	improve: function(c, t) {
 		Effect.mkText('Improve', t);
 		var bans = [
-			Cards.ShardofFocus,
-			Cards.FateEgg,
-			Cards.Immortal,
-			Cards.Scarab,
-			Cards.DevonianDragon,
-			Cards.Chimera,
+			Cards.Names.ShardofFocus,
+			Cards.Names.FateEgg,
+			Cards.Names.Immortal,
+			Cards.Names.Scarab,
+			Cards.Names.DevonianDragon,
+			Cards.Names.Chimera,
 		];
 		t.transform(
 			c.owner.randomcard(false, function(x) {
@@ -745,8 +761,8 @@ const Actives = {
 			hpBuff = [];
 		atkBuff[etg.Earth] = 1;
 		hpBuff[etg.Earth] = 4;
-		atkBuff[etg.Focus] = 0;
-		hpBuff[etg.Focus] = 6;
+		atkBuff[etg.Gravity] = 0;
+		hpBuff[etg.Gravity] = 6;
 		atkBuff[etg.Fire] = 3;
 		hpBuff[etg.Fire] = 0;
 		var hpStat = c.card.upped ? 2 : 1,
@@ -755,7 +771,7 @@ const Actives = {
 			var card = c.owner.hand[i].card;
 			if (
 				etg.ShardList.some(function(x) {
-					return x && card.isOf(Cards.Codes[x]);
+					return x && card.isOf(Cards.Names.Codes[x]);
 				})
 			) {
 				atkStat += (atkBuff[e] || 2) + card.upped;
@@ -803,7 +819,7 @@ const Actives = {
 			active: actives,
 			cast: cost,
 		};
-		new smth.Creature(Cards.ShardGolem, c.owner).place();
+		new smth.Creature(Cards.Names.ShardGolem, c.owner).place();
 	},
 	intensity: function(c, t, ele, amount) {
 		if (ele != 8 || amount <= 0) return;
@@ -828,7 +844,7 @@ const Actives = {
 			t.status = t.status.set('law', lawNumber);
 			t.addactive('hp', Actives.lawfree);
 		}
-		var lawPerm = new smth.Permanent(Cards.Law, c.owner);
+		var lawPerm = new smth.Permanent(Cards.Names.Law, c.owner);
 		lawPerm.active = new imm.Map();
 		lawPerm.status = new imm.Map({ law: lawNumber });
 		lawPerm.place();
@@ -862,7 +878,7 @@ const Actives = {
 			c.owner.deck.splice(
 				c.owner.upto(c.owner.deck.length),
 				0,
-				Cards.Law.asUpped(true),
+				Cards.Names.Law.asUpped(true),
 			);
 		}
 	},
@@ -969,12 +985,12 @@ const Actives = {
 		Effect.mkText('Mutate', c);
 		if (!c.mutantactive()) {
 			const bans = new Set([
-				Cards.ShardofFocus,
-				Cards.FateEgg,
-				Cards.Immortal,
-				Cards.Scarab,
-				Cards.DevonianDragon,
-				Cards.Chimera,
+				Cards.Names.ShardofFocus,
+				Cards.Names.FateEgg,
+				Cards.Names.Immortal,
+				Cards.Names.Scarab,
+				Cards.Names.DevonianDragon,
+				Cards.Names.Chimera,
 			]);
 			var rnd = c.owner.randomcard(false, function(x) {
 				return x.type == etg.Creature && !bans.has(x);
@@ -999,7 +1015,7 @@ const Actives = {
 			Actives.improve.func(c, t);
 		} else {
 			Effect.mkText('Abomination', t);
-			t.transform(Cards.Abomination);
+			t.transform(Cards.Names.Abomination);
 		}
 	},
 	neuro: adrenathrottle(function(c, t) {
@@ -1020,7 +1036,7 @@ const Actives = {
 			c.owner.spend(i, -1);
 		}
 		if (++c.owner.nova > 2) {
-			new smth.Creature(Cards.Singularity, c.owner).place();
+			new smth.Creature(Cards.Names.Singularity, c.owner).place();
 		}
 	},
 	nova2: function(c, t) {
@@ -1028,7 +1044,7 @@ const Actives = {
 			c.owner.spend(i, -2);
 		}
 		if (++c.owner.nova2 > 1) {
-			new smth.Creature(Cards.Singularity.asUpped(true), c.owner).place();
+			new smth.Creature(Cards.Names.Singularity.asUpped(true), c.owner).place();
 		}
 	},
 	nymph: function(c, t) {
@@ -1080,7 +1096,7 @@ const Actives = {
 	phoenix: function(c, t, index) {
 		if (!c.owner.creatures[index]) {
 			c.owner.creatures[index] = new smth.Creature(
-				Cards.Ash.asUpped(c.card.upped),
+				Cards.Names.Ash.asUpped(c.card.upped),
 				c.owner,
 			);
 		}
@@ -1123,7 +1139,10 @@ const Actives = {
 		}
 	},
 	queen: function(c, t) {
-		new smth.Creature(Cards.Firefly.asUpped(c.card.upped), c.owner).place();
+		new smth.Creature(
+			Cards.Names.Firefly.asUpped(c.card.upped),
+			c.owner,
+		).place();
 	},
 	quint: function(c, t) {
 		Effect.mkText('Immaterial', t);
@@ -1154,7 +1173,7 @@ const Actives = {
 		}
 	},
 	rebirth: function(c, t) {
-		c.transform(Cards.Phoenix.asUpped(c.card.upped));
+		c.transform(Cards.Names.Phoenix.asUpped(c.card.upped));
 	},
 	regenerate: function(c, t) {
 		if (!c.status.get('delayed')) {
@@ -1180,10 +1199,10 @@ const Actives = {
 		c.place();
 	},
 	rewind: function(c, t) {
-		if (t.card.isOf(Cards.Skeleton)) {
+		if (t.card.isOf(Cards.Names.Skeleton)) {
 			Actives.hatch.func(t);
-		} else if (t.card.isOf(Cards.Mummy)) {
-			t.transform(Cards.Pharaoh.asUpped(t.card.upped));
+		} else if (t.card.isOf(Cards.Names.Mummy)) {
+			t.transform(Cards.Names.Pharaoh.asUpped(t.card.upped));
 		} else {
 			Effect.mkText('Rewind', t);
 			if (t.status.get('voodoo') && t.status.get('poison') < 0) {
@@ -1219,7 +1238,10 @@ const Actives = {
 		}
 	},
 	scarab: function(c, t) {
-		new smth.Creature(Cards.Scarab.asUpped(c.card.upped), c.owner).place();
+		new smth.Creature(
+			Cards.Names.Scarab.asUpped(c.card.upped),
+			c.owner,
+		).place();
 	},
 	scramble: function(c, t) {
 		if (t.type == etg.Player && !t.sanctuary) {
@@ -1243,8 +1265,8 @@ const Actives = {
 			cards[i] = c.owner.randomcard(c.card.upped, function(x) {
 				return (
 					(x.type != etg.Pillar || !x.name.match(/^Mark/)) &&
-					!x.isOf(Cards.Relic) &&
-					!x.isOf(Cards.Miracle) &&
+					!x.isOf(Cards.Names.Relic) &&
+					!x.isOf(Cards.Names.Miracle) &&
 					!etg.ShardList.some(shard => shard && x.isOf(shard)) &&
 					!etg.NymphList.some(nymph => nymph && x.isOf(nymph)) &&
 					(i > 0 || anyentro || x.element == etg.Entropy)
@@ -1337,7 +1359,10 @@ const Actives = {
 	},
 	spores: function(c, t) {
 		for (var i = 0; i < 3; i++) {
-			new smth.Creature(Cards.Spore.asUpped(c.card.upped), c.owner).place();
+			new smth.Creature(
+				Cards.Names.Spore.asUpped(c.card.upped),
+				c.owner,
+			).place();
 		}
 	},
 	sskin: function(c, t) {
@@ -1373,7 +1398,7 @@ const Actives = {
 			t.remove();
 			t.owner = c.owner;
 			t.casts = 0;
-			if (t.card.isOf(Cards.Sundial))
+			if (t.card.isOf(Cards.Names.Sundial))
 				t.status = t.status.set('charges', t.status.get('charges') + 1);
 			t.place();
 		}
@@ -1489,7 +1514,7 @@ const Actives = {
 		//note: CIA Unsummon does nothing if hand is full.
 	},
 	upgrade: function(c, t) {
-		if (t.card == Cards.GadgetSword) Actives.becomeshield.func(t);
+		if (t.card == Cards.Names.GadgetSword) Actives.becomeshield.func(t);
 		else t.transform(t.card.asUpped(true));
 	},
 	upkeep: function(c, t) {
@@ -1571,7 +1596,7 @@ const Actives = {
 			if (
 				c.owner.permanents[i] &&
 				c.owner.permanents[i].card.type === etg.Pillar &&
-				!c.owner.permanents[i].card.isOf(Cards.HarmonicPillar)
+				!c.owner.permanents[i].card.isOf(Cards.Names.HarmonicPillar)
 			) {
 				c.owner.spend(c.owner.permanents[i].card.element, qty);
 			}
@@ -1609,17 +1634,17 @@ const Actives = {
 		}
 	},
 	skull: function(c, t) {
-		if (t.type === etg.Creature && !t.card.isOf(Cards.Skeleton)) {
+		if (t.type === etg.Creature && !t.card.isOf(Cards.Names.Skeleton)) {
 			var thp = t.truehp();
 			if (thp == 0 || (thp > 0 && c.owner.rng() < 0.5 / thp)) {
 				var index = t.getIndex();
 				t.die();
 				if (
 					!t.owner.creatures[index] ||
-					t.owner.creatures[index].card != Cards.MalignantCell
+					t.owner.creatures[index].card != Cards.Names.MalignantCell
 				) {
 					t.owner.creatures[index] = new smth.Creature(
-						Cards.Skeleton.asUpped(t.card.upped),
+						Cards.Names.Skeleton.asUpped(t.card.upped),
 						t.owner,
 					);
 				}
@@ -1650,11 +1675,9 @@ for (const key in Actives) {
 	Actives[key] = { name: [key], func: Actives[key], passive: false };
 }
 Actives.bounce.passive = Actives.decrsteam.passive = Actives.obsession.passive = Actives.salvage.passive = Actives.siphon.passive = Actives.swarm.passive = true;
-module.exports = Actives;
+export default Actives;
 
-var Effect = require('./Effect');
-var etg = require('./etg');
-var util = require('../util');
-var Cards = require('./Cards');
-var imm = require('immutable');
-var smth = require('./Thing');
+import Effect from './Effect.js';
+import * as etg from './etg.js';
+import * as Cards from './Cards.js';
+import * as smth from './Thing.js';
