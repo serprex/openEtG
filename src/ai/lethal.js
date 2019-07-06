@@ -1,12 +1,12 @@
-import * as Cards from '../Cards';
+import * as Cards from '../Cards.js';
 
 export default function lethal(game) {
-	const pl = game.byId(game.turn),
-		foe = pl.foe;
 	let limit = 333,
 		cmdct,
-		currentEval = foe.hp;
+		currentEval = game.get(game.get(game.turn, 'foe'), 'hp');
 	function iterLoop(game, cmdct0) {
+		const pl = game.byId(game.turn),
+			foe = pl.foe;
 		function iterCore(c) {
 			if (!c || !c.canactive()) return;
 			const ch = game.props.get(c.id).hashCode();

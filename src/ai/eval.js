@@ -1,7 +1,7 @@
 import * as etg from '../etg.js';
 import * as Cards from '../Cards.js';
-import Skills from '../Skills';
-import parseSkill from '../parseSkill';
+import Skills from '../Skills.js';
+import parseSkill from '../parseSkill.js';
 
 function pillarval(c) {
 	return c.type === etg.Spell ? 0.1 : Math.sqrt(c.getStatus('charges'));
