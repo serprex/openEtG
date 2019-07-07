@@ -518,7 +518,7 @@ const Skills = {
 	disfield: (ctx, c, t, data) => {
 		if (!c.owner.spend(etg.Chroma, data.dmg)) {
 			ctx.set(c.ownerId, 'quanta', new Int8Array(13));
-			c.owner.shield = undefined;
+			c.remove();
 		}
 		data.dmg = 0;
 	},

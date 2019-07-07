@@ -9,7 +9,7 @@ process.chdir(__dirname);
 import fsCb from 'fs';
 const fs = fsCb.promises;
 
-import crypto from  'crypto';
+import crypto from 'crypto';
 import https from 'https';
 import httpoly from 'httpolyglot';
 import ws from 'ws';
