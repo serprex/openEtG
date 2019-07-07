@@ -3,14 +3,14 @@ import { hashString } from './util.js';
 export function hashArray(a) {
 	let r = a.length * 108;
 	for (let i = 0; i < a.length; i++) {
-		r ^= (i * 967) ^ (hash(a[i]) * 619);
+		r = ((r * 63) ^ hash(a[i])) & 0x7fffffff;
 	}
 	return r;
 }
 
 function hash(obj) {
 	if (!obj) return 0;
-	if (typeof obj === 'number') return obj;
+	if (typeof obj === 'number') return obj & 0x7fffffff;
 	if (typeof obj === 'string') return hashString(obj);
 	if (obj instanceof Array) return hashArray(obj);
 	if (obj.hashCode) return obj.hashCode();
@@ -19,6 +19,7 @@ function hash(obj) {
 
 function iMap(args) {
 	this.data = new Map();
+	this.hash = null;
 	for (const k in args) {
 		this.data.set(k, args[k]);
 	}
@@ -26,6 +27,7 @@ function iMap(args) {
 function cloneMap(x) {
 	const newMap = Object.create(iMap.prototype);
 	newMap.data = new Map(x.data);
+	newMap.hash = null;
 	return newMap;
 }
 Object.defineProperty(iMap.prototype, 'size', {
@@ -34,11 +36,14 @@ Object.defineProperty(iMap.prototype, 'size', {
 	},
 });
 iMap.prototype.hashCode = function() {
-	let r = 69105;
-	for (const [k, v] of this.data) {
-		r ^= hash(k) ^ (hash(v) * 929);
+	if (this.hash === null) {
+		let r = 69105;
+		for (const [k, v] of this.data) {
+			r ^= hash(k) ^ (hash(v) * 929);
+		}
+		this.hash = r;
 	}
-	return r;
+	return this.hash;
 };
 iMap.prototype.has = function(k) {
 	return this.data.has(k);
@@ -102,6 +107,7 @@ iMap.prototype.filter = function(f) {
 	}
 	const a = Object.create(iMap.prototype);
 	a.data = data;
+	a.hash = null;
 	return a;
 };
 

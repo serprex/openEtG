@@ -1,14 +1,22 @@
-import { hashArray } from './immutable.js';
+import { hashString } from './util.js';
 
 export default class Skill {
 	constructor(name, func, passive) {
 		this.name = name;
 		this.func = func;
 		this.passive = passive;
+		this.hash = null;
 	}
 
 	hashCode() {
-		return hashArray(this.name);
+		if (this.hash === null) {
+			let r = 78457;
+			for (let i = 0; i < this.name.length; i++) {
+				r = ((r * 17) ^ hashString(this.name[i])) & 0x7fffffff;
+			}
+			this.hash = r;
+		}
+		return this.hash;
 	}
 
 	get castName() {

@@ -218,7 +218,8 @@ Thing.prototype.calcCore = function(prefix, filterstat) {
 	if (!prefix(this)) return 0;
 	for (let j = 0; j < 2; j++) {
 		const pl = j === 0 ? this.owner : this.owner.foe;
-		if (pl.permanents.some(pr => pr && pr.status.get(filterstat))) return 1;
+		if (pl.permanentIds.some(pr => pr && this.game.getStatus(pr, filterstat)))
+			return 1;
 	}
 	return 0;
 };
@@ -226,10 +227,11 @@ Thing.prototype.calcCore2 = function(prefix, filterstat) {
 	if (!prefix(this)) return 0;
 	let bonus = 0;
 	for (let j = 0; j < 2; j++) {
-		let pl = j === 0 ? this.owner : this.owner.foe,
-			pr;
+		const pl = j === 0 ? this.owner : this.owner.foe,
+			perms = pl.permanents;
 		for (let i = 0; i < 16; i++) {
-			if ((pr = pl.permanents[i]) && pr.status.get(filterstat)) {
+			let pr = perms[i];
+			if (pr && pr.status.get(filterstat)) {
 				if (pr.card.upped) return 2;
 				else bonus = 1;
 			}
