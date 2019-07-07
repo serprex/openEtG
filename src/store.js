@@ -1,6 +1,6 @@
 import React from 'react';
 import * as redux from 'redux';
-import imm from 'immutable';
+import imm from './immutable.js';
 
 import * as usercmd from './usercmd';
 import * as sfx from './audio';

@@ -1,4 +1,4 @@
-import imm from 'immutable';
+import imm from './immutable.js';
 
 import * as sfx from './audio.js';
 import * as etg from './etg.js';

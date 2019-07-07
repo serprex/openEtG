@@ -128,13 +128,7 @@ const BonusList = [
 		name: 'Size matters',
 		desc: '0.666..% per card in deck over 36',
 		func: (game, p1, p2) => {
-			return (
-				(etgutil.decklength(
-					game.data.getIn(['players', p1.getIndex(), 'deck']),
-				) -
-					36) /
-				150
-			);
+			return (etgutil.decklength(p1.data.deck) - 36) / 150;
 		},
 	},
 	{
@@ -147,13 +141,10 @@ const BonusList = [
 		desc: '0.333..% per unupped card in deck',
 		func: (game, p1, p2) => {
 			let unupnu = 0;
-			etgutil.iterraw(
-				game.data.getIn(['players', p1.getIndex(), 'deck']),
-				(code, count) => {
-					const card = Cards.Codes[code];
-					if (card && !card.upped) unupnu += count;
-				},
-			);
+			etgutil.iterraw(p1.data.deck, (code, count) => {
+				const card = Cards.Codes[code];
+				if (card && !card.upped) unupnu += count;
+			});
 			return unupnu / 300;
 		},
 	},

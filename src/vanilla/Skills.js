@@ -1,4 +1,4 @@
-import imm from 'immutable';
+import imm from '../immutable.js';
 
 function adrenathrottle(f) {
 	return function(c, ...args) {

@@ -10,7 +10,6 @@
   "dependencies": {
     "bufferutil": "^4.0.1",
     "httpolyglot": "^0.1.2",
-    "immutable": "^4.0.0-rc.12",
     "redis": "^2.8.0",
     "rng.js": "^1.0.2",
     "ws": "^7.0.1"

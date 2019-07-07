@@ -1,4 +1,4 @@
-import imm from 'immutable';
+import imm from './immutable.js';
 import Thing from './Thing.js';
 import * as etg from './etg.js';
 import * as etgutil from './etgutil.js';
@@ -113,7 +113,7 @@ Object.defineProperty(Player.prototype, 'deckIds', {
 });
 Object.defineProperty(Player.prototype, 'data', {
 	get() {
-		return this.game.getIn([this.game.id, 'data', 'players', this.getIndex()]);
+		return this.game.data.get('players')[this.getIndex()];
 	},
 });
 
@@ -214,9 +214,7 @@ Player.prototype.place = function(prop, item) {
 	return -1;
 };
 Player.prototype.newThing = function(card) {
-	const inst = this.game.newThing(card);
-	inst.ownerId = this.id;
-	return inst;
+	return this.game.newThing(card, this.id);
 };
 Player.prototype.addCrea = function(x, fromhand) {
 	if (typeof x === 'number') x = this.game.byId(x);
@@ -454,7 +452,7 @@ Player.prototype.drawhand = function(x) {
 	}
 };
 function destroyCloak(id) {
-	if (id && this.props.getIn([id, 'status', 'cloak'], 0)) {
+	if (id && this.getStatus(id, 'cloak')) {
 		this.byId(id).die();
 	}
 }

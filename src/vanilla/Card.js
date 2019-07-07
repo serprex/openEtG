@@ -1,4 +1,4 @@
-import imm from 'immutable';
+import imm from '../immutable.js';
 import * as util from '../util.js';
 import * as etg from './etg.js';
 import { Thing } from './Thing.js';
@@ -16,8 +16,8 @@ export default function Card(type, info) {
 	this.name = info.Name;
 	this.code = info.Code;
 	this.tier = info.Tier;
-	this.attack = info.Attack || 0;
-	this.health = info.Health || 0;
+	this.attack = info.Attack | 0;
+	this.health = info.Health | 0;
 	if (info.Cost) {
 		[this.cost, this.costele] = readCost(info.Cost, this.element);
 	} else {

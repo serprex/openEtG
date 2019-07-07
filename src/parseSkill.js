@@ -1,4 +1,4 @@
-import imm from 'immutable';
+import imm from './immutable.js';
 import Skill from './Skill.js';
 import Skills from './Skills.js';
 

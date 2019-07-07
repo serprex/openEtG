@@ -1,4 +1,4 @@
-import imm from 'immutable';
+import imm from './immutable.js';
 
 export default function Thing(game, id) {
 	if (!id || typeof id !== 'number') {
@@ -64,8 +64,8 @@ defineProp('usedactive');
 defineProp('type');
 defineProp('active');
 
-Thing.prototype.init = function(card) {
-	this.ownerId = null;
+Thing.prototype.init = function(card, owner) {
+	this.ownerId = owner;
 	this.card = card;
 	this.cast = card.cast;
 	this.castele = card.castele;

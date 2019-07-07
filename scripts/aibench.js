@@ -14,7 +14,6 @@ function bench(name) {
 	const timing = [];
 	for (let m = 0; m < moves.length; m++) {
 		const start = performance.now();
-		game.next(moves[m]);
 		if (game.phase === etg.PlayPhase) {
 			const aiState = new aiSearch(game);
 			while (!aiState.cmd) {
@@ -22,7 +21,16 @@ function bench(name) {
 			}
 			const end = performance.now();
 			timing.push(end - start);
+			if (game.byId(game.turn).data.ai === 1) {
+				for (const k in moves[m]) {
+					if (moves[m][k] !== aiState.cmd[k]) {
+						console.log(m, moves[m], aiState.cmd);
+						break;
+					}
+				}
+			}
 		}
+		game.next(moves[m]);
 	}
 	let totalTime = 0;
 	for (const t of timing) {

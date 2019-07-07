@@ -1,4 +1,4 @@
-import imm from 'immutable';
+import imm from '../immutable.js';
 import * as etg from './etg.js';
 import * as Cards from './Cards.js';
 import Effect from './Effect.js';
@@ -28,7 +28,7 @@ export default function Player(game) {
 	this.permanents = new Array(16);
 	this.mark = 0;
 	this.quanta = [];
-	for (var i = 1; i < 13; i++) this.quanta[i] = 0;
+	for (let i = 0; i < 13; i++) this.quanta[i] = 0;
 	this.shardgolem = undefined;
 }
 

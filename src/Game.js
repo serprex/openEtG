@@ -1,5 +1,5 @@
 import Rng from 'rng.js';
-import imm from 'immutable';
+import imm from './immutable.js';
 
 import * as etg from './etg.js';
 import Effect from './Effect.js';
@@ -46,15 +46,6 @@ export default function Game(data) {
 }
 Game.prototype.id = 1;
 
-Object.defineProperty(Game.prototype, 'ai', {
-	get() {
-		return this.props.getIn([this.id, 'data', 'ai']);
-	},
-	set(val) {
-		this.props = this.props.setIn([this.id, 'data', 'ai'], val);
-	},
-});
-
 function defineProp(key) {
 	Object.defineProperty(Game.prototype, key, {
 		get() {
@@ -83,9 +74,9 @@ Game.prototype.clone = function() {
 	return obj;
 };
 Game.prototype.rng = function() {
-	const seed = this.props.getIn([this.id, 'data', 'seed']);
+	const seed = this.data.get('seed');
 	let val;
-	this.props = this.props.updateIn([this.id, 'rng'], rng => {
+	this.updateIn([this.id, 'rng'], rng => {
 		const rngInst = new Rng(seed, ~seed);
 		rngInst.setStateCount(...rng);
 		val = rngInst.nextNumber();
@@ -115,31 +106,28 @@ Game.prototype.byUser = function(name) {
 	return null;
 };
 Game.prototype.newId = function() {
-	let newId;
-	this.updateIn([this.id, 'id'], id => {
-		newId = id;
-		return id + 1;
-	});
+	const newId = this.props.get(this.id).get('id');
+	this.set(this.id, 'id', newId + 1);
 	return newId;
 };
-Game.prototype.newThing = function(card) {
-	return new Thing(this, this.newId()).init(card);
+Game.prototype.newThing = function(card, owner) {
+	return new Thing(this, this.newId()).init(card, owner);
 };
 Game.prototype.get = function(...args) {
 	return this.props.getIn(args);
 };
-Game.prototype.getIn = function(path, def) {
-	return this.props.getIn(path, def);
-};
 Game.prototype.set = function(id, key, val) {
 	const ent = this.props.get(id) || new imm.Map();
-	return (this.props = this.props.set(id, ent.set(key, val)));
+	this.props = this.props.set(id, ent.set(key, val));
 };
 Game.prototype.setIn = function(path, val) {
 	this.props = this.props.setIn(path, val);
 };
 Game.prototype.getStatus = function(id, key) {
-	return this.props.getIn([id, 'status', key], 0);
+	return this.props
+		.get(id)
+		.get('status')
+		.get(key, 0);
 };
 Game.prototype.setStatus = function(id, key, val) {
 	this.props = this.props.setIn([id, 'status', key], val | 0);

@@ -1,6 +1,6 @@
 import React from 'react';
 import { connect } from 'react-redux';
-import imm from 'immutable';
+import imm from '../immutable.js';
 
 import * as sock from '../sock.js';
 import * as util from '../util.js';
