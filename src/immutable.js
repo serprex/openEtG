@@ -169,6 +169,15 @@ iList.prototype.filter = function(f, self) {
 iList.prototype.join = function(sep = ',') {
 	return this.data.join(sep);
 };
+iList.prototype.some = function(f) {
+	return this.data.some(f);
+};
+iList.prototype.every = function(f) {
+	return this.data.every(f);
+};
+iList.prototype.reduce = function(f, z) {
+	return this.data.reduce(f, z);
+};
 
 function iSet(args) {
 	this.data = new Set(args);
