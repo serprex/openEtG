@@ -46,6 +46,6 @@ export function changeMusic(enabled) {
 	} else {
 		const name = currentMusic;
 		currentMusic = null;
-		exports.playMusic(name);
+		playMusic(name);
 	}
 }

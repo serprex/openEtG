@@ -4,7 +4,7 @@ import React from 'react';
 import * as sock from '../sock.js';
 import * as Tutor from '../Components/Tutor.js';
 import * as etgutil from '../etgutil.js';
-import * as options from '../options.js';
+import { parseInput } from '../util.js';
 import * as Components from '../Components/index.js';
 import * as store from '../store.js';
 
@@ -96,7 +96,7 @@ export default connect(({ user, opts }) => ({
 							}
 						} else {
 							const bdata = {};
-							options.parseInput(bdata, 'bulk', this.props.bulk, 99);
+							parseInput(bdata, 'bulk', this.props.bulk, 99);
 							userdelta.pool = etgutil.mergedecks(
 								this.props.user.pool,
 								data.cards,
@@ -134,7 +134,7 @@ export default connect(({ user, opts }) => ({
 				pack: this.state.packrarity,
 				element: this.state.packele,
 			};
-			options.parseInput(boostdata, 'bulk', this.props.bulk, 99);
+			parseInput(boostdata, 'bulk', this.props.bulk, 99);
 			if (
 				this.props.user.gold >= pack.cost * (boostdata.bulk || 1) ||
 				(this.props.user.freepacks &&

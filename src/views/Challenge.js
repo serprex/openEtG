@@ -1,12 +1,10 @@
 import React from 'react';
 import { connect } from 'react-redux';
 
-import * as imm from '../immutable.js';
 import * as sock from '../sock.js';
-import * as util from '../util.js';
+import { parseInput, randint } from '../util.js';
 import Game from '../Game.js';
 import * as etgutil from '../etgutil.js';
-import { parseInput } from '../options.js';
 import * as Components from '../Components/index.js';
 import * as store from '../store.js';
 import RngMock from '../RngMock.js';
@@ -289,7 +287,7 @@ export default connect(({ user, opts }) => ({
 				return;
 			}
 			const gameData = {
-				seed: util.randint(),
+				seed: randint(),
 				cardreward: '',
 				rematch: this.aiClick,
 				players: this.playersAsData(deck),

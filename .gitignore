@@ -13,3 +13,4 @@ bundle/*
 *.exe
 *.gz
 *.rdb
+*.log
