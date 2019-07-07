@@ -766,7 +766,7 @@ const Skills = {
 	forceplay: (ctx, c, t) => {
 		function findtgt(tgting) {
 			function tgttest(x) {
-				if (x && tgting(t.owner, x)) {
+				if (x && tgting(t, x)) {
 					tgts.push(x);
 				}
 			}
@@ -781,7 +781,6 @@ const Skills = {
 		let tgting, tgt;
 		if (t.type === etg.Spell) {
 			const card = t.card;
-			ctx.effect({ x: 'SpriteFadeHandImage', id: t.id });
 			if (t.owner.getStatus('sanctuary')) return;
 			if (card.type === etg.Spell) {
 				tgting = Cards.Targeting[card.active.get('cast').castName];
@@ -789,11 +788,12 @@ const Skills = {
 		} else if (t.active.has('cast')) {
 			tgting = Cards.Targeting[t.active.get('cast').castName];
 		}
-		if (tgting && !(tgt = findtgt(tgting))) return;
-		ctx.effect({ x: 'Text', text: 'Forced', id: t.id });
 		const realturn = ctx.turn;
 		ctx.turn = t.ownerId;
-		t.useactive(tgt);
+		if (!tgting || (tgt = findtgt(tgting))) {
+			ctx.effect({ x: 'Text', text: 'Forced', id: t.id });
+			t.useactive(tgt);
+		}
 		ctx.turn = realturn;
 	},
 	fractal: (ctx, c, t) => {
