@@ -20,7 +20,7 @@ export function hashString(str) {
 export function randint() {
 	return (Math.random() * 0x100000000) | 0;
 }
-export default function parseInput(data, key, value, limit) {
+export function parseInput(data, key, value, limit) {
 	const val = parseInt(value, 10);
 	if (val === 0 || val > 0) data[key] = limit ? Math.min(val, limit) : val;
 }
