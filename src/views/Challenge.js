@@ -79,7 +79,7 @@ class PlayerEditor extends React.Component {
 class Group extends React.Component {
 	constructor(props) {
 		super(props);
-		this.state = { invite: '', editing: new imm.Set() };
+		this.state = { invite: '', editing: new Set() };
 	}
 
 	updatePlayer = (i, pl) => {
@@ -87,7 +87,11 @@ class Group extends React.Component {
 			{ idx } = players[i];
 		players[i] = { ...this.props.players[i], ...pl };
 		this.props.updatePlayers(players);
-		this.setState(state => ({ editing: state.editing.delete(idx) }));
+		this.setState(state => {
+			const editing = new Set(state.editing);
+			editing.delete(idx);
+			return { editing };
+		});
 	};
 
 	render() {
@@ -98,11 +102,15 @@ class Group extends React.Component {
 					<div key={pl.idx} style={{ minHeight: '24px' }}>
 						<span
 							onClick={() => {
-								this.setState(state => ({
-									editing: state.editing.has(pl.idx)
-										? state.editing.delete(pl.idx)
-										: state.editing.add(pl.idx),
-								}));
+								this.setState(state => {
+									const editing = new Set(state);
+									if (state.editing.has(pl.idx)) {
+										state.editing.delete(pl.idx);
+									} else {
+										state.editing.add(pl.idx);
+									}
+									return { editing };
+								});
 							}}>
 							{pl.user || 'AI'}
 							{pl.pending === 2 && '...'}
@@ -117,9 +125,11 @@ class Group extends React.Component {
 									const players = props.players.slice(),
 										[pl] = players.splice(i, 1);
 									props.updatePlayers(players);
-									this.setState(state => ({
-										editing: state.editing.delete(pl.idx),
-									}));
+									this.setState(state => {
+										const editing = new Set(editing);
+										editing.delete(pl.idx);
+										return { editing };
+									});
 								}}
 							/>
 						)}

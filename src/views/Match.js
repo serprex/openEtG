@@ -471,7 +471,7 @@ export default connect(({ user }) => ({ user }))(
 				startPos: new imm.Map(),
 				fxTextPos: new imm.Map(),
 				fxStatChange: new imm.Map(),
-				effects: new imm.Set(),
+				effects: new Set(),
 			};
 		}
 
@@ -495,12 +495,14 @@ export default connect(({ user }) => ({ user }))(
 								}}
 								onRest={() => {
 									this.setState(state => {
+										const effects = new Set(state.effects);
+										effects.delete(Text);
 										const st = {
 											fxTextPos: state.fxTextPos.update(
 												id,
 												pos => pos && pos - 16,
 											),
-											effects: state.effects.delete(Text),
+											effects,
 										};
 										return onRest ? onRest(state, st) : st;
 									});
@@ -547,12 +549,11 @@ export default connect(({ user }) => ({ user }))(
 				});
 				return newentry;
 			});
+			if (!newstate.effects) newstate.effects = new Set(state.effects);
 			if (oldentry) {
-				newstate.effects = (newstate.effects || state.effects).delete(
-					oldentry.dom,
-				);
+				newstate.effects.delete(oldentry.dom);
 			}
-			newstate.effects = (newstate.effects || state.effects).add(newentry.dom);
+			newstate.effects.add(newentry.dom);
 		};
 
 		applyNext = (data, iscmd) => {
@@ -596,7 +597,8 @@ export default connect(({ user }) => ({ user }))(
 							);
 							break;
 						case 'Poison':
-							newstate.effects = (newstate.effects || state.effects).add(
+							if (!newstate.effects) newstate.effects = new Set(state.effects);
+							newstate.effects.add(
 								this.Text(state, newstate, {
 									id: effect.id,
 									text: `Poison ${effect.amt}`,
@@ -604,7 +606,8 @@ export default connect(({ user }) => ({ user }))(
 							);
 							break;
 						case 'Death':
-							newstate.effects = (newstate.effects || state.effects).add(
+							if (!newstate.effects) newstate.effects = new Set(state.effects);
+							newstate.effects.add(
 								this.Text(state, newstate, {
 									id: effect.id,
 									text: 'Death',
@@ -612,7 +615,8 @@ export default connect(({ user }) => ({ user }))(
 							);
 							break;
 						case 'Delay':
-							newstate.effects = (newstate.effects || state.effects).add(
+							if (!newstate.effects) newstate.effects = new Set(state.effects);
+							newstate.effects.add(
 								this.Text(state, newstate, {
 									id: effect.id,
 									text: `Delay ${effect.amt}`,
@@ -620,7 +624,8 @@ export default connect(({ user }) => ({ user }))(
 							);
 							break;
 						case 'Dive':
-							newstate.effects = (newstate.effects || state.effects).add(
+							if (!newstate.effects) newstate.effects = new Set(state.effects);
+							newstate.effects.add(
 								this.Text(state, newstate, {
 									id: effect.id,
 									text: 'Dive',
@@ -628,7 +633,8 @@ export default connect(({ user }) => ({ user }))(
 							);
 							break;
 						case 'Free':
-							newstate.effects = (newstate.effects || state.effects).add(
+							if (!newstate.effects) newstate.effects = new Set(state.effects);
+							newstate.effects.add(
 								this.Text(state, newstate, {
 									id: effect.id,
 									text: 'Free',
@@ -636,7 +642,8 @@ export default connect(({ user }) => ({ user }))(
 							);
 							break;
 						case 'Freeze':
-							newstate.effects = (newstate.effects || state.effects).add(
+							if (!newstate.effects) newstate.effects = new Set(state.effects);
+							newstate.effects.add(
 								this.Text(state, newstate, {
 									id: effect.id,
 									text: `Freeze ${effect.amt}`,
@@ -644,9 +651,8 @@ export default connect(({ user }) => ({ user }))(
 							);
 							break;
 						case 'Text':
-							newstate.effects = (newstate.effects || state.effects).add(
-								this.Text(state, newstate, effect),
-							);
+							if (!newstate.effects) newstate.effects = new Set(state.effects);
+							newstate.effects.add(this.Text(state, newstate, effect));
 							break;
 						case 'Dmg':
 							this.StatChange(state, newstate, effect.id, -effect.amt, 0);
@@ -656,7 +662,8 @@ export default connect(({ user }) => ({ user }))(
 							break;
 						case 'LastCard':
 							newstate.fxid = (newstate.fxid || state.fxid) + 1;
-							newstate.effects = (newstate.effects || state.effects).add(
+							if (!newstate.effects) newstate.effects = new Set(state.effects);
+							newstate.effects.add(
 								<Motion
 									key={newstate.fxid}
 									defaultStyle={{ fade: 1 }}
@@ -1076,7 +1083,7 @@ export default connect(({ user }) => ({ user }))(
 					: `${game.turn === this.state.player1.id ? 'Your' : 'Their'} Turn${
 							game.phase > etg.MulliganPhase
 								? ''
-								: game.players.get(0) === this.state.player1.id
+								: game.players[0] === this.state.player1.id
 								? ', First'
 								: ', Second'
 					  }`;

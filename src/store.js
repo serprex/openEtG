@@ -126,9 +126,9 @@ export const store = redux.createStore(
 					span = (
 						<React.Fragment key={state.chatid}>{action.span}</React.Fragment>
 					);
-				chat.set(name, (chat.get(name) || new imm.List()).push(span));
+				chat.set(name, (chat.get(name) || []).concat([span]));
 				if (action.name === 'System')
-					chat.set('Main', (chat.get('Main') || new imm.List()).push(span));
+					chat.set('Main', (chat.get('Main') || []).concat([span]));
 				return { ...state, chat, chatid: state.chatid + 1 };
 			}
 		}

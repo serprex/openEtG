@@ -294,7 +294,7 @@ export default connect(({ user }) => ({ user }))(
 							date: game.get(game.id, 'bonusstats', 'time'),
 							seed: game.get(game.id, 'data', 'seed'),
 							players: game.data.get('players'),
-							moves: Array.from(replay),
+							moves: replay,
 						}),
 						'Replay',
 					),

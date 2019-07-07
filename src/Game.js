@@ -16,14 +16,14 @@ export default function Game(data) {
 			id: 2,
 			phase: 0,
 			turn: 2,
-			players: new imm.List(),
+			players: [],
 			bonusstats: new imm.Map({
 				ply: 0,
 				cardsplayed: new imm.Map(),
 				creaturesplaced: new imm.Map(),
 				creatureskilled: new imm.Map(),
 				time: Date.now(),
-				replay: new imm.List(),
+				replay: [],
 			}),
 			data: new imm.Map(data),
 			rng: rng.getStateCount(),
@@ -34,12 +34,12 @@ export default function Game(data) {
 	for (let i = 0; i < data.players.length; i++) {
 		const id = this.newId();
 		this.cache.set(id, new Player(this, id));
-		this.players = this.players.push(id);
+		this.players = this.players.concat([id]);
 	}
 	for (let i = 0; i < data.players.length; i++) {
-		const id = this.players.get(i);
+		const id = this.players[i];
 		this.byId(id).init(
-			this.players.get((i + 1) % data.players.length),
+			this.players[(i + 1) % data.players.length],
 			data.players[i],
 		);
 	}
@@ -100,7 +100,7 @@ Game.prototype.byUser = function(name) {
 	const pldata = this.data.get('players');
 	for (let i = 0; i < pldata.length; i++) {
 		if (pldata[i].user === name) {
-			return this.byId(this.players.get(i));
+			return this.byId(this.players[i]);
 		}
 	}
 	return null;
@@ -152,7 +152,7 @@ Game.prototype.nextPlayer = function(id) {
 		if (next) return pl;
 		if (pl === id) next = true;
 	}
-	return this.players.get(0);
+	return this.players[0];
 };
 Game.prototype.setWinner = function(id) {
 	if (!this.winner) {
@@ -187,7 +187,7 @@ const nextHandler = {
 Game.prototype.next = function(event) {
 	if (this.bonusstats) {
 		this.updateIn([this.id, 'bonusstats', 'replay'], replay =>
-			replay.push(event),
+			replay.concat([event]),
 		);
 	}
 	return nextHandler[event.x].call(this, event);
@@ -198,7 +198,7 @@ function removeSoPa(id) {
 	}
 }
 Game.prototype.expectedDamage = function() {
-	const expectedDamage = new Int16Array(this.players.size);
+	const expectedDamage = new Int16Array(this.players.length);
 	if (!this.winner) {
 		const disable = Effect.disable;
 		Effect.disable = true;
