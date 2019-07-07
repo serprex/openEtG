@@ -9,13 +9,6 @@ export default class Skill {
 		return this.name.hashCode();
 	}
 
-	equals(x) {
-		if (x && x instanceof Skill) {
-			return this.name.equals(x.name);
-		}
-		return false;
-	}
-
 	toString() {
 		return this.name.join(' ');
 	}
