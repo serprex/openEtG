@@ -328,7 +328,11 @@ const SkillsValues = {
 	evade100: c => (!c.getStatus('charges') && c.ownerId === c.game.turn ? 0 : 1),
 	'evade 40': 1,
 	'evade 50': 1,
-	firewall: 7,
+	firewall: c =>
+		c.owner.foe.creatures.reduce(
+			(acc, c) => acc + (c ? Math.log(Math.max(6 - c.hp, 2)) : 0),
+			8,
+		) / 2,
 	chaos: [8, 9],
 	skull: 5,
 	slow: 6,
@@ -474,8 +478,8 @@ function calcExpectedDamage(pl, wallCharges, wallIndex) {
 
 function evalactive(c, active, extra) {
 	let sum = 0;
-	for (let i = 0; i < active.name.size; i++) {
-		const aval = SkillsValues[active.name.get(i)];
+	for (let i = 0; i < active.name.length; i++) {
+		const aval = SkillsValues[active.name[i]];
 		sum +=
 			aval === undefined
 				? 0

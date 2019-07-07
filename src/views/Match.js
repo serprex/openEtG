@@ -1,7 +1,7 @@
 import React from 'react';
 import { connect } from 'react-redux';
 import { Motion, spring } from 'react-motion';
-import imm from '../immutable.js';
+import * as imm from '../immutable.js';
 
 import Effect from '../Effect.js';
 import * as sfx from '../audio.js';
@@ -471,7 +471,7 @@ export default connect(({ user }) => ({ user }))(
 				startPos: new imm.Map(),
 				fxTextPos: new imm.Map(),
 				fxStatChange: new imm.Map(),
-				effects: new imm.OrderedSet(),
+				effects: new imm.Set(),
 			};
 		}
 

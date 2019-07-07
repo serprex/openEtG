@@ -1,4 +1,4 @@
-import imm from '../immutable.js';
+import * as imm from '../immutable.js';
 import * as util from '../util.js';
 import * as etg from './etg.js';
 import { Thing } from './Thing.js';

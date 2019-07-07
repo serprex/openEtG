@@ -1,3 +1,5 @@
+import { hashArray } from './immutable.js';
+
 export default class Skill {
 	constructor(name, func, passive) {
 		this.name = name;
@@ -6,7 +8,11 @@ export default class Skill {
 	}
 
 	hashCode() {
-		return this.name.hashCode();
+		return hashArray(this.name);
+	}
+
+	get castName() {
+		return this.name[0];
 	}
 
 	toString() {

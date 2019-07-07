@@ -144,7 +144,7 @@ AiSearch.prototype.step = function(game) {
 					}
 				}
 			};
-			if (active && active.name.get(0) in Cards.Targeting) {
+			if (active && active.castName in Cards.Targeting) {
 				const targetFilter = game.targetFilter(c, active);
 				for (let j = 0; j < 2; j++) {
 					const pl = j === 0 ? c.owner : c.owner.foe;

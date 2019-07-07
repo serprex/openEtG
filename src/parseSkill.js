@@ -1,4 +1,3 @@
-import imm from './immutable.js';
 import Skill from './Skill.js';
 import Skills from './Skills.js';
 
@@ -14,7 +13,7 @@ export default function(name) {
 		return console.log('Unknown active', name);
 	}
 	const s = new Skill(
-		new imm.List().push(name),
+		[name],
 		Skills[name.slice(0, spidx)].func(name.slice(spidx + 1)),
 		false,
 	);

@@ -1,5 +1,5 @@
 import Rng from 'rng.js';
-import imm from './immutable.js';
+import * as imm from './immutable.js';
 
 import * as etg from './etg.js';
 import Effect from './Effect.js';
@@ -202,7 +202,7 @@ Game.prototype.expectedDamage = function() {
 	if (!this.winner) {
 		const disable = Effect.disable;
 		Effect.disable = true;
-		for (let i = 0; i < 3; i++) {
+		for (let i = 0; i < 5; i++) {
 			const gclone = this.clone();
 			gclone.players.forEach(pid =>
 				gclone.get(pid, 'permanents').forEach(removeSoPa, gclone),
@@ -216,13 +216,13 @@ Game.prototype.expectedDamage = function() {
 		}
 		Effect.disable = disable;
 		for (let i = 0; i < expectedDamage.length; i++) {
-			expectedDamage[i] /= 3;
+			expectedDamage[i] /= 5;
 		}
 	}
 	return expectedDamage;
 };
 Game.prototype.targetFilter = function(src, active) {
-	const targetingFilter = Cards.Targeting[active.name.get(0)];
+	const targetingFilter = Cards.Targeting[active.castName];
 	return (
 		targetingFilter &&
 		(t =>

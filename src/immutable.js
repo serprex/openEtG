@@ -1,6 +1,6 @@
 import { hashString } from './util.js';
 
-function hashArray(a) {
+export function hashArray(a) {
 	let r = a.length * 108;
 	for (let i = 0; i < a.length; i++) {
 		r ^= (i * 967) ^ (hash(a[i]) * 619);
@@ -219,9 +219,6 @@ iMap.prototype[Symbol.iterator] = iList.prototype[
 	return this.data[Symbol.iterator]();
 };
 
-export default {
-	Map: iMap,
-	List: iList,
-	Set: iSet,
-	OrderedSet: iSet,
-};
+export { iMap as Map };
+export { iSet as Set };
+export { iList as List };

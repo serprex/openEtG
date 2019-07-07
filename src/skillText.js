@@ -4,7 +4,7 @@ import Thing from './Thing.js';
 
 export default function skillText(c) {
 	if (c instanceof Card && c.type == etg.Spell) {
-		const entry = getDataFromName(c.active.get('cast').name.get(0));
+		const entry = getDataFromName(c.active.get('cast').castName);
 		return processEntry(c, 'cast', entry);
 	} else {
 		const ret = [],

@@ -1,5 +1,4 @@
-import imm from './immutable.js';
-
+import * as imm from './immutable.js';
 import * as sfx from './audio.js';
 import * as etg from './etg.js';
 import Skill from './Skill.js';
@@ -380,7 +379,7 @@ const Skills = {
 		const choice = c.choose(
 			Cards.filter(ctx.upto(2), c => {
 				if (c.type !== etg.Spell) return false;
-				const tgting = Cards.Targeting[c.active.get('cast').name.get(0)];
+				const tgting = Cards.Targeting[c.active.get('cast').castName];
 				return tgting && tgting(c, t);
 			}),
 		);
@@ -406,7 +405,7 @@ const Skills = {
 			c.ownerId === t.ownerId ||
 			tgt.ownerId !== c.ownerId ||
 			tgt.type !== etg.Creature ||
-			!Cards.Targeting[data.active.name.get(0)](t, c)
+			!Cards.Targeting[data.active.castName](t, c)
 		)
 			return;
 		if (!tgt.hasactive('prespell', 'deathwish')) return (data.tgt = c.id);
@@ -785,10 +784,10 @@ const Skills = {
 			ctx.effect({ x: 'SpriteFadeHandImage', id: t.id });
 			if (t.owner.getStatus('sanctuary')) return;
 			if (card.type === etg.Spell) {
-				tgting = Cards.Targeting[card.active.get('cast').name.get(0)];
+				tgting = Cards.Targeting[card.active.get('cast').castName];
 			}
 		} else if (t.active.has('cast')) {
-			tgting = Cards.Targeting[t.active.get('cast').name.get(0)];
+			tgting = Cards.Targeting[t.active.get('cast').castName];
 		}
 		if (tgting && !(tgt = findtgt(tgting))) return;
 		ctx.effect({ x: 'Text', text: 'Forced', id: t.id });
@@ -1696,7 +1695,7 @@ const Skills = {
 	},
 	ricochet: (ctx, c, t, data) => {
 		if (t.type !== etg.Spell || t.card.type !== etg.Spell) return;
-		const tgting = Cards.Targeting[data.active.name.get(0)];
+		const tgting = Cards.Targeting[data.active.castName];
 		if (tgting) {
 			function tgttest(x) {
 				if (x) {
@@ -1833,7 +1832,9 @@ const Skills = {
 		} else if (r > 0.2) {
 			Skills.parallel(ctx, c, c);
 		} else if (r > 0.1) {
-			c.owner.setWeapon(c.owner.newThing(Cards.Names.Dagger.asShiny(c.card.shiny)));
+			c.owner.setWeapon(
+				c.owner.newThing(Cards.Names.Dagger.asShiny(c.card.shiny)),
+			);
 		}
 	},
 	sing: (ctx, c, t) => {
@@ -2348,9 +2349,5 @@ function unsummon(t) {
 	}
 }
 for (const key in Skills) {
-	exports[key] = new Skill(
-		new imm.List().push(key),
-		Skills[key],
-		passiveSet.has(Skills[key]),
-	);
+	exports[key] = new Skill([key], Skills[key], passiveSet.has(Skills[key]));
 }

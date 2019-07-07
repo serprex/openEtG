@@ -1,4 +1,4 @@
-import imm from './immutable.js';
+import * as imm from './immutable.js';
 import * as etg from './etg.js';
 import * as util from './util.js';
 import Skill from './Skill.js';

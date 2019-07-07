@@ -1,4 +1,4 @@
-import imm from './immutable.js';
+import * as imm from './immutable.js';
 
 export default function Thing(game, id) {
 	if (!id || typeof id !== 'number') {
@@ -287,7 +287,7 @@ const activetexts = [
 ];
 Thing.prototype.activetext = function() {
 	const acast = this.active.get('cast');
-	if (acast) return `${this.cast}:${this.castele}${acast.name.get(0)}`;
+	if (acast) return `${this.cast}:${this.castele}${acast.castName}`;
 	for (const akey of activetexts) {
 		const a = this.active.get(akey);
 		if (a) return `${akey} ${a}`;
@@ -423,7 +423,7 @@ Thing.prototype.rmactive = function(type, name) {
 		idx = actives.indexOf(name);
 	if (~idx) {
 		this.active =
-			actives.size === 1
+			actives.length === 1
 				? this.active.delete(type)
 				: this.active.set(
 						type,
