@@ -667,11 +667,13 @@ export default connect(({ user }) => ({ user }))(
 								<Motion
 									key={newstate.fxid}
 									defaultStyle={{ fade: 1 }}
-									style={{ fade: 0 }}
+									style={{ fade: spring(0) }}
 									onRest={() => {
-										this.setState(state => ({
-											effects: state.effects.delete(Text),
-										}));
+										this.setState(state => {
+											const effects = new Set(state.effects);
+											effects.delete(Text);
+											return { effects };
+										});
 									}}>
 									{({ fade }) => (
 										<div

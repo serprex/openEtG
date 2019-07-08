@@ -449,10 +449,6 @@ export default connect()(
 					}
 				}
 			}
-			const effects = Effect.next(game.player2.isCloaked());
-			if (effects !== this.state.effects) {
-				this.setState({ effects });
-			}
 		}
 
 		onkeydown = e => {
@@ -905,7 +901,6 @@ export default connect()(
 					}}>
 					{turntell}
 				</span>,
-				this.state.effects,
 			);
 			children.push(
 				!!this.state.hovercode && (
