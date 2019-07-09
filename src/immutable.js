@@ -88,18 +88,6 @@ iMap.prototype.updateIn = function(path, f) {
 iMap.prototype.setIn = function(path, val) {
 	return this.updateIn(path, () => val);
 };
-iMap.prototype.getIn = function(path) {
-	let o = this;
-	for (const p of path) {
-		if (o instanceof iMap) {
-			o = o.data.get(p);
-		} else {
-			o = o[p];
-		}
-		if (!o) return o;
-	}
-	return o;
-};
 iMap.prototype.filter = function(f) {
 	const data = new Map();
 	for (const [k, v] of this.data) {

@@ -49,7 +49,7 @@ Game.prototype.id = 1;
 function defineProp(key) {
 	Object.defineProperty(Game.prototype, key, {
 		get() {
-			return this.get(this.id, key);
+			return this.get(this.id).get(key);
 		},
 		set(val) {
 			this.set(this.id, key, val);
@@ -111,10 +111,13 @@ Game.prototype.newId = function() {
 	return newId;
 };
 Game.prototype.newThing = function(card, owner) {
-	return new Thing(this, this.newId()).init(card, owner);
+	const id = this.newId(),
+		inst = new Thing(this, id);
+	this.cache.set(id, inst);
+	return inst.init(card, owner);
 };
-Game.prototype.get = function(...args) {
-	return this.props.getIn(args);
+Game.prototype.get = function(key) {
+	return this.props.get(key);
 };
 Game.prototype.set = function(id, key, val) {
 	const ent = this.props.get(id) || new imm.Map();
@@ -175,7 +178,7 @@ const nextHandler = {
 	},
 	accept(_data) {
 		if (this.phase === etg.MulliganPhase) {
-			this.turn = this.get(this.turn, 'foe');
+			this.turn = this.get(this.turn).get('foe');
 			if (this.turn === 2) {
 				this.phase = etg.PlayPhase;
 			}
@@ -186,7 +189,7 @@ const nextHandler = {
 		pl.drawhand(pl.handIds.length - 1);
 	},
 	resign(data) {
-		this.setWinner(this.get(data.c, 'foe'));
+		this.setWinner(this.get(data.c).get('foe'));
 	},
 };
 Game.prototype.next = function(event) {
@@ -198,8 +201,8 @@ Game.prototype.next = function(event) {
 	return nextHandler[event.x].call(this, event);
 };
 function removeSoPa(id) {
-	if (id && this.get(id, 'status', 'patience')) {
-		this.setIn([id, 'status', 'patience'], 0);
+	if (id && this.getStatus(id, 'patience')) {
+		this.setStatus(id, 'patience', 0);
 	}
 }
 Game.prototype.expectedDamage = function() {
@@ -210,13 +213,16 @@ Game.prototype.expectedDamage = function() {
 		for (let i = 0; i < 5; i++) {
 			const gclone = this.clone();
 			gclone.players.forEach(pid =>
-				gclone.get(pid, 'permanents').forEach(removeSoPa, gclone),
+				gclone
+					.get(pid)
+					.get('permanents')
+					.forEach(removeSoPa, gclone),
 			);
 			gclone.updateIn([gclone.id, 'rng'], rng => rng.map(ri => ri ^ (i * 997)));
 			gclone.byId(gclone.turn).endturn();
 			if (!gclone.winner) gclone.byId(gclone.turn).endturn();
 			this.players.forEach((id, i) => {
-				expectedDamage[i] += this.get(id, 'hp') - gclone.get(id, 'hp');
+				expectedDamage[i] += this.get(id).get('hp') - gclone.get(id).get('hp');
 			});
 		}
 		Effect.disable = disable;

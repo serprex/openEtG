@@ -402,7 +402,12 @@ function ThingInst(props) {
 }
 
 function addNoHealData(game, newdata) {
-	const dataNext = { ...game.get(game.id, 'data', 'dataNext') };
+	const dataNext = {
+		...game
+			.get(game.id)
+			.get('data')
+			.get('dataNext'),
+	};
 	if (dataNext.endurance) dataNext.endurance--;
 	if (dataNext.noheal) {
 		for (const { user } of game.data.get('players')) {

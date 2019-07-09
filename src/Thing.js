@@ -32,7 +32,7 @@ const passives = new Set([
 function defineProp(key) {
 	Object.defineProperty(Thing.prototype, key, {
 		get() {
-			return this.game.get(this.id, key);
+			return this.game.get(this.id).get(key);
 		},
 		set(val) {
 			this.game.set(this.id, key, val);
@@ -41,7 +41,7 @@ function defineProp(key) {
 }
 Object.defineProperty(Thing.prototype, 'ownerId', {
 	get() {
-		return this.game.get(this.id, 'owner');
+		return this.game.get(this.id).get('owner');
 	},
 	set(val) {
 		if (val && typeof val !== 'number') throw new Error(`Invalid id: ${val}`);
@@ -50,7 +50,7 @@ Object.defineProperty(Thing.prototype, 'ownerId', {
 });
 Object.defineProperty(Thing.prototype, 'owner', {
 	get() {
-		return this.game.byId(this.game.get(this.id, 'owner'));
+		return this.game.byId(this.game.get(this.id).get('owner'));
 	},
 });
 defineProp('card');
@@ -123,7 +123,10 @@ Thing.prototype.getIndex = function() {
 		default:
 			arrName = 'hand';
 	}
-	return this.game.get(owner.id, arrName).indexOf(id);
+	return this.game
+		.get(owner.id)
+		.get(arrName)
+		.indexOf(id);
 };
 Thing.prototype.remove = function(index) {
 	if (this.type === etg.Weapon) {

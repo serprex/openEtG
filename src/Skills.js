@@ -173,7 +173,7 @@ const Skills = {
 	},
 	blackhole: (ctx, c, t) => {
 		if (!t.getStatus('sanctuary')) {
-			const quanta = new Int8Array(ctx.get(t.id, 'quanta'));
+			const quanta = new Int8Array(ctx.get(t.id).get('quanta'));
 			for (let q = 1; q < 13; q++) {
 				c.owner.dmg(-Math.min(t.quanta[q], 3));
 				quanta[q] = Math.max(quanta[q] - 3, 0);
@@ -970,7 +970,7 @@ const Skills = {
 		t.transform(t.randomcard(false, x => x.type === etg.Creature));
 	},
 	inertia: (ctx, c, t, data) => {
-		if (data.tgt && c.ownerId === ctx.get(data.tgt, 'owner')) {
+		if (data.tgt && c.ownerId === ctx.get(data.tgt).get('owner')) {
 			c.owner.spend(etg.Gravity, -2);
 		}
 	},
@@ -1085,7 +1085,7 @@ const Skills = {
 		let stat = c.card.upped ? 0.5 : 0,
 			handIds = c.owner.handIds;
 		for (let i = handIds.length - 1; ~i; i--) {
-			const card = ctx.get(handIds[i], 'card');
+			const card = ctx.get(handIds[i]).get('card');
 			if (etg.ShardList.some(x => x && card.isOf(Cards.Codes[x]))) {
 				if (card.upped) {
 					stat += 0.5;
@@ -1444,7 +1444,7 @@ const Skills = {
 	},
 	pairproduce: (ctx, c, t) => {
 		for (const p of c.owner.permanentIds) {
-			if (p && ctx.get(p, 'card', 'type') === etg.Pillar) {
+			if (p && ctx.get(p).get('card').type === etg.Pillar) {
 				ctx.trigger(p, 'ownattack');
 			}
 		}
@@ -1781,8 +1781,8 @@ const Skills = {
 		}
 	},
 	shardgolem: (ctx, c, t) => {
-		if (!ctx.get(c.id, 'maxhp')) {
-			const golem = ctx.get(c.ownerId, 'shardgolem') || defaultShardGolem;
+		if (!ctx.get(c.id).get('maxhp')) {
+			const golem = ctx.get(c.ownerId).get('shardgolem') || defaultShardGolem;
 			ctx.set(c.id, 'cast', golem.get('cast'));
 			ctx.set(c.id, 'castele', etg.Earth);
 			const stat = golem.get('stat');
@@ -2080,7 +2080,7 @@ const Skills = {
 	trick: (ctx, c, t) => {
 		const cards = [];
 		t.owner.deckIds.forEach((id, i) => {
-			const card = ctx.get(id, 'card');
+			const card = ctx.get(id).get('card');
 			if (
 				card.type === etg.Creature &&
 				card.asShiny(false) !== t.card.asShiny(false)

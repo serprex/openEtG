@@ -3,7 +3,7 @@ import * as Cards from '../Cards.js';
 export default function lethal(game) {
 	let limit = 333,
 		cmdct,
-		currentEval = game.get(game.get(game.turn, 'foe'), 'hp');
+		currentEval = game.get(game.get(game.turn).get('foe')).get('hp');
 	function iterLoop(game, cmdct0) {
 		const pl = game.byId(game.turn),
 			foe = pl.foe;

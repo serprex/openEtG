@@ -33,7 +33,7 @@ Object.defineProperty(Player.prototype, 'owner', {
 });
 Object.defineProperty(Player.prototype, 'foeId', {
 	get() {
-		return this.game.get(this.id, 'foe');
+		return this.game.get(this.id).get('foe');
 	},
 	set(val) {
 		this.game.set(this.id, 'foe', val);
@@ -41,7 +41,7 @@ Object.defineProperty(Player.prototype, 'foeId', {
 });
 Object.defineProperty(Player.prototype, 'foe', {
 	get() {
-		return new Player(this.game, this.game.get(this.id, 'foe'));
+		return this.game.byId(this.foeId);
 	},
 });
 Object.defineProperty(Player.prototype, 'type', {
@@ -51,7 +51,7 @@ Object.defineProperty(Player.prototype, 'type', {
 });
 Object.defineProperty(Player.prototype, 'weaponId', {
 	get() {
-		return this.game.get(this.id, 'weapon');
+		return this.game.get(this.id).get('weapon');
 	},
 	set(val) {
 		this.game.set(this.id, 'weapon', val);
@@ -59,7 +59,7 @@ Object.defineProperty(Player.prototype, 'weaponId', {
 });
 Object.defineProperty(Player.prototype, 'shieldId', {
 	get() {
-		return this.game.get(this.id, 'shield');
+		return this.game.get(this.id).get('shield');
 	},
 	set(val) {
 		this.game.set(this.id, 'shield', val);
@@ -67,17 +67,17 @@ Object.defineProperty(Player.prototype, 'shieldId', {
 });
 Object.defineProperty(Player.prototype, 'weapon', {
 	get() {
-		return this.game.byId(this.game.get(this.id, 'weapon'));
+		return this.game.byId(this.game.get(this.id).get('weapon'));
 	},
 });
 Object.defineProperty(Player.prototype, 'shield', {
 	get() {
-		return this.game.byId(this.game.get(this.id, 'shield'));
+		return this.game.byId(this.game.get(this.id).get('shield'));
 	},
 });
 Object.defineProperty(Player.prototype, 'creatureIds', {
 	get() {
-		return this.game.get(this.id, 'creatures');
+		return this.game.get(this.id).get('creatures');
 	},
 	set(val) {
 		assertIds(val);
@@ -86,7 +86,7 @@ Object.defineProperty(Player.prototype, 'creatureIds', {
 });
 Object.defineProperty(Player.prototype, 'permanentIds', {
 	get() {
-		return this.game.get(this.id, 'permanents');
+		return this.game.get(this.id).get('permanents');
 	},
 	set(val) {
 		assertIds(val);
@@ -95,7 +95,7 @@ Object.defineProperty(Player.prototype, 'permanentIds', {
 });
 Object.defineProperty(Player.prototype, 'handIds', {
 	get() {
-		return this.game.get(this.id, 'hand');
+		return this.game.get(this.id).get('hand');
 	},
 	set(val) {
 		assertIds(val);
@@ -104,7 +104,7 @@ Object.defineProperty(Player.prototype, 'handIds', {
 });
 Object.defineProperty(Player.prototype, 'deckIds', {
 	get() {
-		return this.game.get(this.id, 'deck');
+		return this.game.get(this.id).get('deck');
 	},
 	set(val) {
 		assertIds(val);
@@ -120,7 +120,7 @@ Object.defineProperty(Player.prototype, 'data', {
 function defineInstArray(key) {
 	Object.defineProperty(Player.prototype, key, {
 		get() {
-			const ids = this.game.get(this.id, key),
+			const ids = this.game.get(this.id).get(key),
 				cache = this.cache.get(ids);
 			if (cache) return cache;
 			const a = Array.from(ids, this.game.byId, this.game);
@@ -137,7 +137,7 @@ defineInstArray('deck');
 function defineProp(key) {
 	Object.defineProperty(Player.prototype, key, {
 		get() {
-			return this.game.get(this.id, key);
+			return this.game.get(this.id).get(key);
 		},
 		set(val) {
 			this.game.set(this.id, key, val);
@@ -202,7 +202,7 @@ Player.prototype.isCloaked = function() {
 	return this.permanents.some(pr => pr && pr.getStatus('cloak'));
 };
 Player.prototype.place = function(prop, item) {
-	let a = this.game.get(this.id, prop);
+	let a = this.game.get(this.id).get(prop);
 	for (let i = 0; i < a.length; i++) {
 		if (!a[i]) {
 			a = new Uint32Array(a);
@@ -229,7 +229,7 @@ Player.prototype.addCrea = function(x, fromhand) {
 	}
 };
 Player.prototype.setCrea = function(idx, id) {
-	const creatures = new Uint32Array(this.game.get(this.id, 'creatures'));
+	const creatures = new Uint32Array(this.game.get(this.id).get('creatures'));
 	creatures[idx] = id;
 	this.game.set(this.id, 'creatures', creatures);
 	this.game.byId(id).place(this, etg.Creature, false);
@@ -273,7 +273,7 @@ Player.prototype.addCard = function(x) {
 		if (typeof x === 'number') x = this.game.byId(x);
 		x.ownerId = this.id;
 		x.type = etg.Spell;
-		const hand = Array.from(this.game.get(this.id, 'hand'));
+		const hand = Array.from(this.game.get(this.id).get('hand'));
 		hand.push(x.id);
 		this.game.set(this.id, 'hand', hand);
 	}
@@ -323,7 +323,7 @@ Player.prototype.spend = function(qtype, x, scramble) {
 	if (x === 0 || (!scramble && x < 0 && this.getStatus('flatline')))
 		return true;
 	if (!this.canspend(qtype, x)) return false;
-	const quanta = new Int8Array(this.game.get(this.id, 'quanta'));
+	const quanta = new Int8Array(this.game.get(this.id).get('quanta'));
 	if (!qtype) {
 		const b = x < 0 ? -1 : 1;
 		for (let i = x * b; i > 0; i--) {
@@ -335,7 +335,7 @@ Player.prototype.spend = function(qtype, x, scramble) {
 	return true;
 };
 Player.prototype.setQuanta = function(qtype, val = 0) {
-	const quanta = new Int8Array(this.game.get(this.id, 'quanta'));
+	const quanta = new Int8Array(this.game.get(this.id).get('quanta'));
 	quanta[qtype] = val;
 	this.game.set(this.id, 'quanta', quanta);
 };

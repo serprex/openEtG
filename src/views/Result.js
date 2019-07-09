@@ -120,7 +120,7 @@ const BonusList = [
 		name: 'Pillarless',
 		desc: 'Never play a pillar',
 		func: (game, p1, p2) => {
-			const cardsplayed = game.bonusstats.get('cardsplayed', p1.id);
+			const cardsplayed = game.bonusstats.get('cardsplayed').get(p1.id);
 			return cardsplayed && cardsplayed[0] ? 0 : 0.05;
 		},
 	},
@@ -156,8 +156,10 @@ const BonusList = [
 	{
 		name: 'Weapon Master',
 		desc: 'Play over 2 weapons',
-		func: (game, p1, p2) =>
-			game.bonusstats.get('cardsplayed', p1.id)[1] > 2 ? 0.1 : 0,
+		func: (game, p1, p2) => {
+			const cardsplayed = game.bonusstats.get('cardsplayed').get(p1.id);
+			return cardsplayed && cardsplayed[1] > 2 ? 0.1 : 0;
+		},
 	},
 ];
 
@@ -282,7 +284,10 @@ export default connect(({ user }) => ({ user }))(
 				];
 
 			this.props.dispatch(store.clearChat('Replay'));
-			const replay = game.get(game.id, 'bonusstats', 'replay');
+			const replay = game
+				.get(game.id)
+				.get('bonusstats')
+				.get('replay');
 			if (
 				replay &&
 				game.data.get('endurance') === undefined &&
@@ -291,8 +296,14 @@ export default connect(({ user }) => ({ user }))(
 				this.props.dispatch(
 					store.chat(
 						JSON.stringify({
-							date: game.get(game.id, 'bonusstats', 'time'),
-							seed: game.get(game.id, 'data', 'seed'),
+							date: game
+								.get(game.id)
+								.get('bonusstats')
+								.get('time'),
+							seed: game
+								.get(game.id)
+								.get('data')
+								.get('seed'),
 							players: game.data.get('players'),
 							moves: replay,
 						}),

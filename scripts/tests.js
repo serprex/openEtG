@@ -256,7 +256,11 @@ M.test('Gpull', function() {
 	this.player1.addCrea(this.player1.newThing(Cards.Names.Scorpion));
 	this.initDeck(this.player2, Cards.Names.ColossalDragon);
 	this.player1.endturn();
-	assert.equal(this.game.get(this.player2.gpull, 'hp'), 24, 'dmg redirected');
+	assert.equal(
+		this.game.get(this.player2.gpull).get('hp'),
+		24,
+		'dmg redirected',
+	);
 	assert.equal(
 		this.game.byId(this.player2.gpull).getStatus('poison'),
 		1,
