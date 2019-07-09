@@ -245,12 +245,12 @@ const sockmeta = new WeakMap();
 			const len = await db.zcard(`arena${data.lv ? '1' : ''}`);
 			if (!len) return;
 			const idx = RngMock.upto(Math.min(len, 20));
-			const aname = await db.zrevrange(`arena${data.lv ? '1' : ''}`, idx, idx);
-			if (!aname || !aname.length) {
+			const anames = await db.zrevrange(`arena${data.lv ? '1' : ''}`, idx, idx);
+			if (!anames || !anames.length) {
 				console.log('No arena', idx);
 				return;
 			}
-			aname = aname[0];
+			const aname = anames[0];
 			const adeck = await db.hgetall(`${data.lv ? 'B:' : 'A:'}${aname}`);
 			adeck.card = +adeck.card;
 			if (data.lv) adeck.card = etgutil.asUpped(adeck.card, true);

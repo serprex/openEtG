@@ -64,7 +64,7 @@ export default function Card(type, info) {
 				const eqidx = status.indexOf('=');
 				this.status = this.status.set(
 					~eqidx ? status.substr(0, eqidx) : status,
-					eqidx === -1 || +status.substr(eqidx + 1),
+					+(eqidx === -1 || status.substr(eqidx + 1)),
 				);
 			}
 			statuscache.set(info.Status, this.status);
