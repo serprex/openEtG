@@ -357,10 +357,10 @@ Player.prototype.endturn = function(discard) {
 		floodingFlag = false,
 		floodingPaidFlag = false,
 		permanents = this.permanents,
-		foepermanents = this.foe.permanents;
+		foepermanentIds = this.foe.permanentIds;
 	for (let i = 0; i < 16; i++) {
-		let p;
-		if ((p = permanents[i])) {
+		const p = permanents[i];
+		if (p) {
 			p.trigger('ownattack');
 			if (~p.getIndex()) {
 				p.usedactive = false;
@@ -377,10 +377,9 @@ Player.prototype.endturn = function(discard) {
 				p.maybeDecrStatus('frozen');
 			}
 		}
-		if ((p = foepermanents[i])) {
-			if (p.getStatus('flooding')) {
-				floodingFlag = true;
-			}
+		const fp = foepermanentIds[i];
+		if (fp && this.game.getStatus(fp, 'flooding')) {
+			floodingFlag = true;
 		}
 	}
 	this.creatures.forEach((cr, i) => {
@@ -402,8 +401,8 @@ Player.prototype.endturn = function(discard) {
 		}
 	});
 	if (this.shieldId) {
-		this.shield.usedactive = false;
-		this.shield.trigger('ownattack');
+		this.game.set(this.shieldId, 'usedactive', false);
+		this.game.trigger(this.shieldId, 'ownattack');
 	}
 	if (this.weaponId) this.weapon.attack(undefined, true);
 	this.usedactive = false;
@@ -495,7 +494,7 @@ Player.prototype.dmg = function(x) {
 	}
 };
 Player.prototype.spelldmg = function(x) {
-	return (this.shield && this.shield.getStatus('reflective')
+	return (this.shieldId && this.game.getStatus(this.shieldId, 'reflective')
 		? this.foe
 		: this
 	).dmg(x);

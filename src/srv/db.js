@@ -1,2 +1,2 @@
-import redis from 'redis';
-export default redis.createClient();
+import redis from 'ioredis';
+export default new redis();

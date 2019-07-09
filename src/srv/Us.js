@@ -3,48 +3,47 @@ import db from './db.js';
 const usergc = new Set();
 export const users = new Map();
 export const socks = new Map();
-export function storeUsers() {
-	const margs = ['Users'];
+export async function storeUsers() {
+	const margs = [];
 	for (const [u, user] of users) {
 		if (user.pool || user.accountbound) {
 			margs.push(u, JSON.stringify(user));
 		}
 	}
-	if (margs.length > 1) db.send_command('hmset', margs);
+	if (margs.length > 0) return db.hmset('Users', margs);
 }
 const usergcloop = setInterval(() => {
-	storeUsers();
-	// Clear inactive users
-	for (const u of users.keys()) {
-		if (usergc.delete(u)) {
-			users.delete(u);
-		} else {
-			usergc.add(u);
+	storeUsers().then(() => {
+		// Clear inactive users
+		for (const u of users.keys()) {
+			if (usergc.delete(u)) {
+				users.delete(u);
+			} else {
+				usergc.add(u);
+			}
 		}
-	}
+	});
 }, 300000);
 export function stop() {
 	clearInterval(usergcloop);
-	storeUsers();
-	db.quit();
+	storeUsers()
+		.then(() => db.quit())
+		.catch(e => console.error(e.message));
 }
-export function load(name) {
-	return new Promise((resolve, reject) => {
-		const userck = users.get(name);
-		if (userck) {
-			usergc.delete(name);
-			resolve(userck);
+export async function load(name) {
+	const userck = users.get(name);
+	if (userck) {
+		usergc.delete(name);
+		return userck;
+	} else {
+		const userstr = await db.hget('Users', name);
+		if (userstr) {
+			const user = JSON.parse(userstr);
+			users.set(name, user);
+			if (!user.streak) user.streak = [];
+			return user;
 		} else {
-			db.hget('Users', name, (err, userstr) => {
-				if (userstr) {
-					const user = JSON.parse(userstr);
-					users.set(name, user);
-					if (!user.streak) user.streak = [];
-					resolve(user);
-				} else {
-					reject(err);
-				}
-			});
+			throw new Error('User not found');
 		}
-	});
+	}
 }

@@ -10,7 +10,7 @@
   "dependencies": {
     "bufferutil": "^4.0.1",
     "httpolyglot": "^0.1.2",
-    "redis": "^2.8.0",
+    "ioredis": "^4.11.1",
     "rng.js": "^1.0.2",
     "ws": "^7.0.1"
   },
@@ -35,13 +35,13 @@
     "webpack-cli": "^3.3.5"
   },
   "scripts": {
-    "start": "./server.js",
-    "test": "./scripts/tests.js && ./src/vanilla/_tests.js",
+    "start": "node --experimental-modules ./server.js",
+    "test": "node --experimental-modules ./scripts/tests.js && node --experimental-modules ./src/vanilla/_tests.js",
     "dev": "webpack --mode=development --watch",
     "build": "webpack -p",
     "build-dev": "webpack --mode=development",
     "build-atlas-png": "optipng -o2 -strip all assets/atlas.png",
-    "build-atlas-css": "./scripts/mkatlascss.js"
+    "build-atlas-css": "node --experimental-modules ./scripts/mkatlascss.js"
   },
   "license": "MIT"
 }

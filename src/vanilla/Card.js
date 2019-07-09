@@ -1,7 +1,7 @@
 import * as imm from '../immutable.js';
-import * as util from '../util.js';
 import * as etg from './etg.js';
-import { Thing } from './Thing.js';
+import * as util from '../util.js';
+import Skill from '../Skill.js';
 import * as Cards from './Cards.js';
 import * as etgutil from '../etgutil.js';
 import skillText from './skillText.js';
@@ -41,10 +41,8 @@ export default function Card(type, info) {
 				const eqidx = active.indexOf('=');
 				const a0 = ~eqidx ? active.substr(0, eqidx) : 'auto';
 				const cast = readCost(a0, this.element);
-				Thing.prototype.addactive.call(
-					this,
-					cast ? 'cast' : a0,
-					Actives[active.substr(eqidx + 1)],
+				this.active = this.active.update(cast ? 'cast' : a0, a =>
+					Skill.combine(a, Actives[active.substr(eqidx + 1)]),
 				);
 				if (cast) {
 					[this.cast, this.castele] = cast;

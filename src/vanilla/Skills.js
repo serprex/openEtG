@@ -1,4 +1,5 @@
 import * as imm from '../immutable.js';
+import Skill from '../Skill.js';
 
 function adrenathrottle(f) {
 	return function(c, ...args) {
@@ -1672,7 +1673,7 @@ const Actives = {
 	},
 };
 for (const key in Actives) {
-	Actives[key] = { name: [key], func: Actives[key], passive: false };
+	Actives[key] = new Skill([key], Actives[key], false);
 }
 Actives.bounce.passive = Actives.decrsteam.passive = Actives.obsession.passive = Actives.salvage.passive = Actives.siphon.passive = Actives.swarm.passive = true;
 export default Actives;

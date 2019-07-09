@@ -201,11 +201,9 @@ Thing.prototype.trigger = function(name, t, param) {
 };
 Thing.prototype.proc = function(name, param) {
 	function proc(c) {
-		if (c) this.game.byId(c).trigger(name, this, param);
+		if (c) this.game.trigger(c, name, this, param);
 	}
-	if (this.active) {
-		this.trigger('own' + name, this, param);
-	}
+	this.trigger('own' + name, this, param);
 	for (let i = 0; i < 2; i++) {
 		const pl = i === 0 ? this.owner : this.owner.foe;
 		pl.creatureIds.forEach(proc, this);

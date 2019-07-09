@@ -3,7 +3,7 @@ import Card from './Card.js';
 import Thing from './Thing.js';
 
 export default function skillText(c) {
-	if (c instanceof Card && c.type == etg.Spell) {
+	if (c instanceof Card && c.type === etg.Spell) {
 		const entry = getDataFromName(c.active.get('cast').castName);
 		return processEntry(c, 'cast', entry);
 	} else {
@@ -13,7 +13,7 @@ export default function skillText(c) {
 			if (!val) continue;
 			const entry = statusData[key];
 			if (entry === undefined) {
-				let text = val == 1 ? key : val + key;
+				let text = val === 1 ? key : val + key;
 				text = text.charAt(0).toUpperCase() + text.slice(1);
 				stext.push(text);
 			} else pushEntry(ret, c, '', entry);
@@ -24,7 +24,7 @@ export default function skillText(c) {
 				const entry = getDataFromName(name);
 				if (entry === undefined) return;
 				pushEntry(ret, c, k, entry);
-				if (k == 'cast')
+				if (k === 'cast')
 					ret[ret.length - 1] = `${c.cast}:${c.castele} ${ret[ret.length - 1]}`;
 			});
 		}
@@ -261,7 +261,7 @@ const data = {
 	loot: 'Steal a random permanent from foe when own permanent is destroyed',
 	losecharge: (c, inst) => {
 		const charges = c.getStatus('charges');
-		return `Lasts ${charges} turn${charges == 1 ? '' : 's'}`;
+		return `Lasts ${charges} turn${charges === 1 ? '' : 's'}`;
 	},
 	luciferin:
 		'All own creatures without skills produce 1:8 per turn. Heal owner 10',
@@ -480,45 +480,41 @@ const data = {
 	wisdom: 'Target gains 3|0. May target immaterial, granting psionic',
 	yoink: "Steal foe's target card, or draw from foe's target player's deck",
 };
-[
+for (const [key, text] of [
 	['dagger', '1:2 1:11. Increment damage per own cloak'],
 	['hammer', '1:3 1:4'],
 	['bow', '1:8 1:9'],
 	['staff', '1:5 1:7'],
 	['disc', '1:1 1:12'],
 	['axe', '1:6 1:10'],
-].forEach(x => {
-	data[x[0]] = 'Increment damage if mark is ' + x[1];
-});
-[
+]) {
+	data[key] = 'Increment damage if mark is ' + text;
+}
+for (const [key, text] of [
 	['pillmat', '1:4 1:6 1:7 1:9'],
 	['pillspi', '1:2 1:5 1:8 1:11'],
 	['pillcar', '1:1 1:3 1:10 1:12'],
-].forEach(x => {
-	data[x[0]] = {
-		ownattack: `Produce 1 or 2 ${x[1]} per turn`,
-		ownplay: `Produce 1 or 2 ${x[1]} on play`,
+]) {
+	data[key] = {
+		ownattack: `Produce 1 or 2 ${text} per turn`,
+		ownplay: `Produce 1 or 2 ${text} on play`,
 	};
-});
+}
 function auraText(tgts, bufftext, upbufftext) {
 	return c =>
-		tgts +
-		' gain ' +
-		(c.upped ? upbufftext : bufftext) +
-		' while ' +
-		c.name +
-		' in play. Unique';
+		`${tgts} gain ${c.upped ? upbufftext : bufftext} while ${
+			c.name
+		} in play. Unique`;
 }
 const statusData = {
 	cloak: 'Cloaks own field',
 	charges: (c, inst) =>
 		c !== inst ||
 		Thing.prototype.hasactive.call(c, 'ownattack', 'losecharge') ||
-		c.getStatus('charges') == 1
+		c.getStatus('charges') === 1
 			? ''
-			: 'Enter with ' +
-			  c.getStatus('charges') +
-			  (c.getStatus('stackable') ? ' stacks' : ' charges'),
+			: `Enter with ${c.getStatus('charges') +
+					(c.getStatus('stackable') ? ' stacks' : ' charges')}`,
 	flooding:
 		'Non aquatic creatures past first five creature slots die on turn end. Consumes 1:7. Unique',
 	nightfall: auraText('Nocturnal creatures', '1|1', '2|1'),
@@ -527,7 +523,7 @@ const statusData = {
 	patience:
 		'Prevent own creatures from attacking at end of turn. They gain 2|1. 4|1 if burrowed. 5|2 if flooded. Unique',
 	poison: (c, inst) =>
-		c == inst
+		c === inst
 			? `Enter with ${c.getStatus('poison')} poison`
 			: inst.getStatus('poison') + ' poison',
 	stackable: '',

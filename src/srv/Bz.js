@@ -1,13 +1,10 @@
 import db from './db.js';
 let Bz = null;
 
-export function load() {
-	return new Promise((resolve, reject) => {
-		if (Bz) return resolve(Bz);
-		db.get('Bazaar', (err, bzjson) =>
-			resolve((Bz = bzjson ? JSON.parse(bzjson) : {})),
-		);
-	});
+export async function load() {
+	if (Bz) return Bz;
+	const bzjson = await db.get('Bazaar');
+	return (Bz = bzjson ? JSON.parse(bzjson) : {});
 }
 
 export function store() {

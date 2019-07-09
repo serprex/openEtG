@@ -10,7 +10,9 @@ import fsCb from 'fs';
 const fs = fsCb.promises;
 
 import crypto from 'crypto';
+import http from 'http';
 import https from 'https';
+import qs from 'querystring';
 import httpoly from 'httpolyglot';
 import ws from 'ws';
 import * as etg from './src/etg.js';
@@ -80,34 +82,33 @@ const sockmeta = new WeakMap();
 		}
 	}
 	function roleck(key, func) {
-		return function(data, user) {
-			db.sismember(key, data.u, (err, ismem) => {
-				if (ismem) {
-					func.call(this, data, user);
-				} else {
-					sockEmit(this, 'chat', {
-						mode: 1,
-						msg: `You aren't a member of ${key}`,
-					});
-				}
-			});
+		return async function(data, user, meta) {
+			const ismem = await db.sismember(key, data.u);
+			if (ismem) {
+				return func.call(this, data, user, meta);
+			} else {
+				sockEmit(this, 'chat', {
+					mode: 1,
+					msg: `You aren't a member of ${key}`,
+				});
+			}
 		};
 	}
 	const userEvents = {
 		modadd: roleck('Mods', function(data, user) {
-			db.sadd('Mods', data.m);
+			return db.sadd('Mods', data.m);
 		}),
 		modrm: roleck('Mods', function(data, user) {
-			db.srem('Mods', data.m);
+			return db.srem('Mods', data.m);
 		}),
 		codesmithadd: roleck('Codesmiths', function(data, user) {
-			db.sadd('Codesmiths', data.m);
+			return db.sadd('Codesmiths', data.m);
 		}),
 		codesmithrm: roleck('Codesmiths', function(data, user) {
-			db.srem('Codesmiths', data.m);
+			return db.srem('Codesmiths', data.m);
 		}),
 		modguest: roleck('Mods', function(data, user) {
-			db.set('GuestsBanned', data.m === 'off' ? '1' : '');
+			return db.set('GuestsBanned', data.m === 'off' ? '1' : '');
 		}),
 		modmute: roleck('Mods', function(data, user) {
 			broadcast({ x: 'mute', m: data.m });
@@ -121,9 +122,9 @@ const sockmeta = new WeakMap();
 				const num = match[1],
 					text = match[2];
 				if (text) {
-					db.zadd('Motd', num, text);
+					return db.zadd('Motd', num, text);
 				} else {
-					db.zremrangebyscore('Motd', num, num);
+					return db.zremrangebyscore('Motd', num, num);
 				}
 			} else {
 				sockEmit(this, 'chat', { mode: 1, msg: 'Invalid format' });
@@ -149,36 +150,38 @@ const sockmeta = new WeakMap();
 			sockEvents.login.call(this, { u: user.name, a: user.auth });
 		},
 		logout({ u }, user) {
-			db.hset('Users', u, JSON.stringify(user));
 			Us.users.delete(u);
 			Us.socks.delete(u);
+			return db.hset('Users', u, JSON.stringify(user));
 		},
 		delete({ u }, user) {
-			db.hdel('Users', u);
 			Us.users.delete(u);
 			Us.socks.delete(u);
+			return db.hdel('Users', u);
 		},
-		setarena(data, user) {
+		async setarena(data, user) {
 			if (!user.ocard || !data.d) {
 				return;
 			}
 			const au = `${data.lv ? 'B:' : 'A:'}${data.u}`;
 			if (data.mod) {
-				db.hmset(au, {
+				return db.hmset(au, {
 					deck: data.d,
 					hp: data.hp,
 					draw: data.draw,
 					mark: data.mark,
 				});
 			} else {
-				db.hmget(au, 'day', (err, res) => {
-					const day = res ? res[0] : 0,
-						today = sutil.getDay(),
-						age = today - day;
-					if (age > 0) {
-						user.gold += today - day > 6 ? 250 : age * 25;
-					}
-					db.hmset(au, {
+				const res = await db.hmget(au, 'day');
+				const day = res ? res[0] : 0,
+					today = sutil.getDay(),
+					age = today - day;
+				if (age > 0) {
+					user.gold += today - day > 6 ? 250 : age * 25;
+				}
+				return db
+					.pipeline()
+					.hmset(au, {
 						day: today,
 						deck: data.d,
 						card: user.ocard,
@@ -187,181 +190,172 @@ const sockmeta = new WeakMap();
 						hp: data.hp,
 						draw: data.draw,
 						mark: data.mark,
-					});
-					db.zadd(`arena${data.lv ? '1' : ''}`, 200, data.u);
-				});
+					})
+					.zadd(`arena${data.lv ? '1' : ''}`, 200, data.u)
+					.exec();
 			}
 		},
-		arenainfo(data, user) {
-			db.batch([
-				['hgetall', `A:${data.u}`],
-				['hgetall', `B:${data.u}`],
-				['zrevrank', 'arena', data.u],
-				['zrevrank', 'arena1', data.u],
-			]).exec((err, res) => {
-				const day = sutil.getDay();
-				function process(obj, rank) {
-					if (!obj) return;
-					obj.day = day - obj.day;
-					obj.curhp = getAgedHp(obj.hp, obj.day);
-					if (rank !== null) obj.rank = rank;
-					['draw', 'hp', 'loss', 'mark', 'win', 'card'].forEach(function(key) {
-						obj[key] = +obj[key];
-					});
+		async arenainfo(data, user) {
+			const res = await db
+				.pipeline([
+					['hgetall', `A:${data.u}`],
+					['hgetall', `B:${data.u}`],
+					['zrevrank', 'arena', data.u],
+					['zrevrank', 'arena1', data.u],
+				])
+				.exec();
+			const day = sutil.getDay();
+			function process(obj, rank) {
+				if (!obj || !obj.day) return null;
+				obj.day = day - obj.day;
+				obj.curhp = getAgedHp(obj.hp, obj.day);
+				if (rank !== null) obj.rank = rank;
+				for (const key of ['draw', 'hp', 'loss', 'mark', 'win', 'card']) {
+					obj[key] = +obj[key];
 				}
-				process(res[0], res[2]);
-				process(res[1], res[3]);
-				sockEmit(this, 'arenainfo', { A: res[0], B: res[1] });
+				return obj;
+			}
+			sockEmit(this, 'arenainfo', {
+				A: process(res[0][1], res[2][1]),
+				B: process(res[1][1], res[3][1]),
 			});
 		},
-		modarena(data, user) {
+		async modarena(data, user) {
 			Us.load(data.aname)
 				.then(user => (user.gold += data.won ? 15 : 5))
 				.catch(() => {});
 			const arena = `arena${data.lv ? '1' : ''}`,
 				akey = (data.lv ? 'B:' : 'A:') + data.aname;
-			db.zscore(arena, data.aname, (err, score) => {
-				if (score === null) return;
-				const task = sutil.mkTask(wld => {
-					if (wld.err) return;
-					const won = +(data.won ? wld.incr : wld.mget[0]),
-						loss = +(data.won ? wld.mget[0] : wld.incr),
-						day = +wld.mget[1];
-					db.zadd(
-						arena,
-						wilson(won + 1, won + loss + 1) * 1000 - (sutil.getDay() - day),
-						data.aname,
-					);
-				});
-				db.hincrby(akey, data.won ? 'win' : 'loss', 1, task('incr'));
-				db.hmget(akey, data.won ? 'loss' : 'win', 'day', task('mget'));
-				task();
+			const score = await db.zscore(arena, data.aname);
+			if (score === null) return;
+			const [incr, mget] = await Promise.all([
+				db.hincrby(akey, data.won ? 'win' : 'loss', 1),
+				db.hmget(akey, data.won ? 'loss' : 'win', 'day'),
+			]);
+			const won = +(data.won ? incr : mget[0]),
+				loss = +(data.won ? mget[0] : incr),
+				day = +mget[1];
+			return db.zadd(
+				arena,
+				wilson(won + 1, won + loss + 1) * 1000 - (sutil.getDay() - day),
+				data.aname,
+			);
+		},
+		async foearena(data, user) {
+			const len = await db.zcard(`arena${data.lv ? '1' : ''}`);
+			if (!len) return;
+			const idx = RngMock.upto(Math.min(len, 20));
+			const aname = await db.zrevrange(`arena${data.lv ? '1' : ''}`, idx, idx);
+			if (!aname || !aname.length) {
+				console.log('No arena', idx);
+				return;
+			}
+			aname = aname[0];
+			const adeck = await db.hgetall(`${data.lv ? 'B:' : 'A:'}${aname}`);
+			adeck.card = +adeck.card;
+			if (data.lv) adeck.card = etgutil.asUpped(adeck.card, true);
+			adeck.hp = +adeck.hp || 200;
+			adeck.mark = +adeck.mark || 1;
+			adeck.draw = +adeck.draw || data.lv + 1;
+			const age = sutil.getDay() - adeck.day;
+			const curhp = getAgedHp(adeck.hp, age);
+			sockEmit(this, 'foearena', {
+				seed: (Math.random() * MAX_INT) | 0,
+				name: aname,
+				hp: curhp,
+				age: age,
+				rank: idx,
+				mark: adeck.mark,
+				draw: adeck.draw,
+				deck: `${adeck.deck}05${adeck.card.toString(32)}`,
+				lv: data.lv,
 			});
 		},
-		foearena(data, user) {
-			db.zcard(`arena${data.lv ? '1' : ''}`, (err, len) => {
-				if (!len) return;
-				const idx = RngMock.upto(Math.min(len, 20));
-				db.zrevrange(`arena${data.lv ? '1' : ''}`, idx, idx, (err, aname) => {
-					if (!aname || !aname.length) {
-						console.log('No arena', idx);
-						return;
-					}
-					aname = aname[0];
-					db.hgetall(`${data.lv ? 'B:' : 'A:'}${aname}`, (err, adeck) => {
-						adeck.card = +adeck.card;
-						if (data.lv) adeck.card = etgutil.asUpped(adeck.card, true);
-						adeck.hp = +adeck.hp || 200;
-						adeck.mark = +adeck.mark || 1;
-						adeck.draw = +adeck.draw || data.lv + 1;
-						const age = sutil.getDay() - adeck.day;
-						const curhp = getAgedHp(adeck.hp, age);
-						sockEmit(this, 'foearena', {
-							seed: (Math.random() * MAX_INT) | 0,
-							name: aname,
-							hp: curhp,
-							age: age,
-							rank: idx,
-							mark: adeck.mark,
-							draw: adeck.draw,
-							deck: `${adeck.deck}05${adeck.card.toString(32)}`,
-							lv: data.lv,
-						});
-					});
-				});
+		setgold: roleck('Codesmiths', async function(data, user) {
+			const tgt = await Us.load(data.t);
+			sockEmit(this, 'chat', {
+				mode: 1,
+				msg: `Set ${tgt.name} from ${tgt.gold}$ to ${data.g}$`,
 			});
-		},
-		setgold: roleck('Codesmiths', function(data, user) {
-			Us.load(data.t).then(tgt => {
-				sockEmit(this, 'chat', {
-					mode: 1,
-					msg: `Set ${tgt.name} from ${tgt.gold}$ to ${data.g}$`,
-				});
-				tgt.gold = data.g;
-			});
+			tgt.gold = data.g;
 		}),
-		codecreate: roleck('Codesmiths', function(data, user) {
+		codecreate: roleck('Codesmiths', async function(data, user) {
 			if (!data.t) {
 				return sockEmit(this, 'chat', {
 					mode: 1,
 					msg: `Invalid type ${data.t}`,
 				});
 			}
-			db.eval(
+			const code = await db.eval(
 				"math.randomseed(ARGV[1])local c repeat c=''for i=1,8 do c=c..string.char(math.random(33,126))end until redis.call('hexists','CodeHash',c)==0 redis.call('hset','CodeHash',c,ARGV[2])return c",
 				0,
 				Math.random() * MAX_INT,
 				data.t,
-				(err, code) => {
-					if (err) console.log(err);
-					sockEmit(this, 'chat', { mode: 1, msg: `${data.t} ${code}` });
-				},
 			);
+			sockEmit(this, 'chat', { mode: 1, msg: `${data.t} ${code}` });
 		}),
-		codesubmit(data, user) {
-			db.hget('CodeHash', data.code || '', (err, type) => {
-				if (!type) {
-					sockEmit(this, 'chat', { mode: 1, msg: 'Code does not exist' });
-				} else if (type.charAt(0) === 'G') {
-					const g = +type.slice(1);
-					if (isNaN(g)) {
-						sockEmit(this, 'chat', {
-							mode: 1,
-							msg: `Invalid gold code type: ${type}`,
-						});
-					} else {
-						user.gold += g;
-						sockEmit(this, 'codegold', { g });
-						db.hdel('CodeHash', data.code);
-					}
-				} else if (type.charAt(0) === 'C') {
-					const c = parseInt(type.slice(1), 32);
-					if (c in Cards.Codes) {
-						user.pool = etgutil.addcard(user.pool, c);
-						sockEmit(this, 'codecode', { card: c });
-						db.hdel('CodeHash', data.code);
-					} else
-						sockEmit(this, 'chat', { mode: 1, msg: `Unknown card: ${type}` });
-				} else if (type.replace(/^!?(upped)?/, '') in userutil.rewardwords) {
-					sockEmit(this, 'codecard', { type });
-				} else {
+		async codesubmit(data, user) {
+			const type = await db.hget('CodeHash', data.code || '');
+			if (!type) {
+				sockEmit(this, 'chat', { mode: 1, msg: 'Code does not exist' });
+			} else if (type.charAt(0) === 'G') {
+				const g = +type.slice(1);
+				if (isNaN(g)) {
 					sockEmit(this, 'chat', {
 						mode: 1,
-						msg: `Unknown code type: ${type}`,
+						msg: `Invalid gold code type: ${type}`,
 					});
-				}
-			});
-		},
-		codesubmit2(data, user) {
-			db.hget('CodeHash', data.code || '', (err, type) => {
-				if (!type) {
-					sockEmit(this, 'chat', { mode: 1, msg: 'Code does not exist' });
-				} else if (type.replace(/^!/, '') in userutil.rewardwords) {
-					const card = Cards.Codes[data.card];
-					if (
-						card &&
-						card.rarity === userutil.rewardwords[type.replace(/^!/, '')] &&
-						card.shiny ^ (type.charAt(0) !== '!')
-					) {
-						user.pool = etgutil.addcard(user.pool, data.card);
-						sockEmit(this, 'codedone', { card: data.card });
-						db.hdel('CodeHash', data.code);
-					}
 				} else {
-					sockEmit(this, 'chat', {
-						mode: 1,
-						msg: 'Unknown code type: ' + type,
-					});
+					user.gold += g;
+					sockEmit(this, 'codegold', { g });
+					return db.hdel('CodeHash', data.code);
 				}
-			});
+			} else if (type.charAt(0) === 'C') {
+				const c = parseInt(type.slice(1), 32);
+				if (c in Cards.Codes) {
+					user.pool = etgutil.addcard(user.pool, c);
+					sockEmit(this, 'codecode', { card: c });
+					return db.hdel('CodeHash', data.code);
+				} else {
+					sockEmit(this, 'chat', { mode: 1, msg: `Unknown card: ${type}` });
+				}
+			} else if (type.replace(/^!?(upped)?/, '') in userutil.rewardwords) {
+				sockEmit(this, 'codecard', { type });
+			} else {
+				sockEmit(this, 'chat', {
+					mode: 1,
+					msg: `Unknown code type: ${type}`,
+				});
+			}
 		},
-		foewant(data, user) {
+		async codesubmit2(data, user) {
+			const type = await db.hget('CodeHash', data.code || '');
+			if (!type) {
+				sockEmit(this, 'chat', { mode: 1, msg: 'Code does not exist' });
+			} else if (type.replace(/^!/, '') in userutil.rewardwords) {
+				const card = Cards.Codes[data.card];
+				if (
+					card &&
+					card.rarity === userutil.rewardwords[type.replace(/^!/, '')] &&
+					card.shiny ^ (type.charAt(0) !== '!')
+				) {
+					user.pool = etgutil.addcard(user.pool, data.card);
+					sockEmit(this, 'codedone', { card: data.card });
+					return db.hdel('CodeHash', data.code);
+				}
+			} else {
+				sockEmit(this, 'chat', {
+					mode: 1,
+					msg: 'Unknown code type: ' + type,
+				});
+			}
+		},
+		foewant(data, user, thismeta) {
 			const { u, f } = data;
 			if (u === f) return;
 			console.log(`${u} requesting ${f}`);
 			const deck = user.decks[user.selectedDeck];
 			if (!deck) return;
-			const thismeta = sockmeta.get(this);
 			thismeta.deck = deck;
 			thismeta.pvpstats = {
 				hp: data.hp | 0,
@@ -418,8 +412,7 @@ const sockmeta = new WeakMap();
 				tgtmeta.spectators.push(data.u);
 			}
 		},
-		canceltrade(data) {
-			const info = sockmeta.get(this);
+		canceltrade(data, user, info) {
 			if (info.trade) {
 				const foesock = Us.socks.get(info.trade.foe),
 					foemeta = sockmeta.get(foesock);
@@ -435,10 +428,8 @@ const sockmeta = new WeakMap();
 				delete info.trade;
 			}
 		},
-		confirmtrade(data, user) {
-			const u = data.u,
-				thismeta = sockmeta.get(this),
-				thistrade = thismeta.trade;
+		confirmtrade(data, user, thismeta) {
+			const thistrade = thismeta.trade;
 			if (!thistrade) {
 				return;
 			}
@@ -497,16 +488,15 @@ const sockmeta = new WeakMap();
 				thistrade.accepted = true;
 			}
 		},
-		tradewant(data) {
-			const u = data.u,
-				f = data.f;
+		tradewant(data, user, thismeta) {
+			const { u, f } = data;
 			if (u === f) {
 				return;
 			}
 			console.log(`${u} requesting ${f}`);
 			const foesock = Us.socks.get(f);
 			if (foesock && foesock.readyState === 1) {
-				sockmeta.get(this).trade = { foe: f };
+				thismeta.trade = { foe: f };
 				const foetrade = sockmeta.get(foesock).trade;
 				if (foetrade && foetrade.foe === u) {
 					sockEmit(this, 'tradegive');
@@ -515,6 +505,70 @@ const sockmeta = new WeakMap();
 					sockEmit(foesock, 'challenge', { f: u });
 				}
 			}
+		},
+		importoriginal(data, user) {
+			sockEmit(this, 'chat', {
+				msg: 'This feature is in development',
+				mode: 1,
+			});
+			const reqdata = `user=${encodeURIComponent(
+				data.name,
+			)}&psw=${encodeURIComponent(data.pass)}&errorcode=%2D1`;
+			const req = http
+				.request(
+					'http://www.elementsthegame.com/testo5.php',
+					{
+						method: 'POST',
+						headers: {
+							'Content-Type': 'application/x-www-form-urlencoded',
+							'Content-Length': reqdata.length,
+							Origin: 'http://elementsthegame.com',
+							Referrer: 'http://elementsthegame.com/elt1327.swf',
+						},
+					},
+					res => {
+						const chunks = [];
+						res.on('error', e => console.error(e.message));
+						res.on('data', chunk => chunks.push(chunk));
+						res.on('end', () => {
+							const opts = qs.parse(Buffer.concat(chunks).toString());
+							if (!opts || !opts.decka) {
+								sockEmit(this, 'chat', {
+									msg: `Failed to load cardpool. Error code: ${opts &&
+										opts.error}`,
+									mode: 1,
+								});
+								return;
+							}
+							const { decka } = opts;
+							for (let i = 1; i < decka.length; i += 7) {
+								const code = parseInt(decka.substring(i, i + 4), 10) + 5000,
+									count = parseInt(decka.substring(i + 4, i + 7), 10),
+									card = Cards.Codes[code];
+								if (card) {
+									if (~etg.NymphList.indexOf(etgutil.asUpped(code, false))) {
+										sockEmit(this, 'chat', {
+											msg: `${code} ${Cards.Codes[code].name} ${count}`,
+											mode: 1,
+										});
+									}
+									if (card.rarity === -1) {
+										sockEmit(this, 'chat', {
+											msg: `${code} ${Cards.Codes[code].name} ${count}`,
+											mode: 1,
+										});
+									}
+								}
+							}
+						});
+					},
+				)
+				.on('error', err => {
+					console.error(err);
+					sockEmit(this, 'chat', { msg: err.message, mode: 1 });
+				});
+			req.write(reqdata);
+			req.end();
 		},
 		passchange(data, user) {
 			user.salt = '';
@@ -765,8 +819,7 @@ const sockmeta = new WeakMap();
 				});
 			}
 		},
-		foecancel(data) {
-			const info = sockmeta.get(this);
+		foecancel(data, user, info) {
 			if (info.duel) {
 				const foesock = Us.socks.get(info.duel);
 				if (foesock) {
@@ -782,9 +835,8 @@ const sockmeta = new WeakMap();
 				delete info.spectators;
 			}
 		},
-		matchconfig(data, user) {
-			const info = sockmeta.get(this),
-				{ match } = info;
+		matchconfig(data, user, info) {
+			const { match } = info;
 			if (!match) {
 				info.host = user.name;
 				info.match = {
@@ -803,8 +855,7 @@ const sockmeta = new WeakMap();
 				}
 			}
 		},
-		matchinvite(data, user) {
-			const info = sockmeta.get(this);
+		matchinvite(data, user, info) {
 			let { match } = info;
 			const invitedsock = Us.socks.get(data.invite);
 			if (invitedsock) {
@@ -823,9 +874,8 @@ const sockmeta = new WeakMap();
 				sockEmit(this, 'chat', { mode: 1, msg: `${data.invite} isn't online` });
 			}
 		},
-		matchcancel(data, user) {
-			const info = sockmeta.get(this),
-				{ match } = info;
+		matchcancel(data, user, info) {
+			const { match } = info;
 			if (match) {
 				for (const u of match.room) {
 					const s = Us.socks.get(u);
@@ -834,9 +884,8 @@ const sockmeta = new WeakMap();
 				delete info.match;
 			}
 		},
-		matchleave(data, user) {
-			const info = sockmeta.get(this),
-				{ host } = info;
+		matchleave(data, user, info) {
+			const { host } = info;
 			if (!host) return;
 			const hostsock = Us.socks.get(host),
 				hostmeta = sockmeta.get(hostsock);
@@ -849,9 +898,8 @@ const sockmeta = new WeakMap();
 				sockEmit(s, 'matchleave', { name: user.name });
 			}
 		},
-		matchremove(data, user) {
-			const info = sockmeta.get(this),
-				{ match } = info;
+		matchremove(data, user, info) {
+			const { match } = info;
 			if (match) {
 				for (const u of match.room) {
 					const s = Us.socks.get(u);
@@ -860,7 +908,7 @@ const sockmeta = new WeakMap();
 				delete info.match;
 			}
 		},
-		matchjoin(data, user) {
+		matchjoin(data, user, info) {
 			const hostsock = Us.socks.get(data.host),
 				hostmeta = sockmeta.get(hostsock);
 			if (!hostmeta) {
@@ -876,7 +924,6 @@ const sockmeta = new WeakMap();
 				sockEmit(this, 'chat', { mode: 1, msg: `${host} hasn't invited you` });
 				return;
 			}
-			const info = sockmeta.get(this);
 			info.host = data.host;
 			for (const group of hostmeta.match.config) {
 				for (const player of group) {
@@ -892,8 +939,8 @@ const sockmeta = new WeakMap();
 			hostmeta.match.room.add(user.name);
 			sockEmit(this, 'matchconfig', { data: match.config });
 		},
-		matchready(data, user) {
-			const { host } = sockmeta.get(this);
+		matchready(data, user, info) {
+			const { host } = info;
 			if (!host) {
 				sockEmit(this, 'chat', { mode: 1, msg: "You aren't in a lobby" });
 				return;
@@ -922,8 +969,8 @@ const sockmeta = new WeakMap();
 				sockEmit(s, 'matchready', { name: user.name });
 			}
 		},
-		matchbegin(data, user) {
-			const hostmeta = sockmeta.get(this),
+		matchbegin(data, user, info) {
+			const hostmeta = info,
 				{ match } = hostmeta;
 			if (!match) {
 				sockEmit(this, 'chat', { mode: 1, msg: "You aren't hosting" });
@@ -959,9 +1006,8 @@ const sockmeta = new WeakMap();
 				sockEmit(s, 'matchbegin', { data: gameData });
 			}
 		},
-		move(data, user) {
-			const info = sockmeta.get(this),
-				{ host } = info;
+		move(data, user, info) {
+			const { host } = info;
 			if (!host) {
 				sockEmit(this, { mode: 1, msg: "You aren't in a match" });
 			}
@@ -981,74 +1027,72 @@ const sockmeta = new WeakMap();
 	};
 	const sockEvents = {
 		login: login(sockEmit),
-		konglogin(data) {
-			db.get('kongapi', (err, key) => {
-				if (!key) {
-					sockEmit(this, 'login', { err: 'Global error: no kong api in db' });
-					return;
-				}
-				https
-					.get(
-						`https://api.kongregate.com/api/authenticate.json?user_id=${data.u}&game_auth_token=${data.g}&api_key=${key}`,
-						res => {
-							const chunks = [];
-							res.on('data', chunk => chunks.push(chunk));
-							res.on('end', () => {
-								const json = sutil.parseJSON(Buffer.concat(chunks).toString());
-								if (!json) {
-									sockEmit(this, 'login', {
-										err: 'Kong returned invalid JSON',
-									});
-									return;
-								}
-								if (json.success) {
-									const name = 'Kong:' + json.username;
-									Us.load(name)
-										.then(user => {
-											user.auth = data.g;
-											sockEvents.login.call(this, { u: name, a: data.g });
-											const req = https
-												.request({
-													hostname: 'www.kongregate.com',
-													path: '/api/submit_statistics.json',
-													method: 'POST',
-												})
-												.on('error', e => console.log(e));
-											req.write(
-												`user_id=${data.u}\ngame_auth_token=${
-													data.g
-												}\napi_key=${key}\nWealth=${user.gold +
-													userutil.calcWealth(user.pool)}`,
-											);
-											req.end();
-										})
-										.catch(() => {
-											Us.users.set(name, {
-												name,
-												gold: 0,
-												auth: data.g,
-											});
-											sockEvents.login.call(this, { u: name, a: data.g });
+		async konglogin(data) {
+			const key = await db.get('kongapi');
+			if (!key) {
+				sockEmit(this, 'login', { err: 'Global error: no kong api in db' });
+				return;
+			}
+			https
+				.get(
+					`https://api.kongregate.com/api/authenticate.json?user_id=${data.u}&game_auth_token=${data.g}&api_key=${key}`,
+					res => {
+						const chunks = [];
+						res.on('data', chunk => chunks.push(chunk));
+						res.on('end', () => {
+							const json = sutil.parseJSON(Buffer.concat(chunks).toString());
+							if (!json) {
+								sockEmit(this, 'login', {
+									err: 'Kong returned invalid JSON',
+								});
+								return;
+							}
+							if (json.success) {
+								const name = 'Kong:' + json.username;
+								Us.load(name)
+									.then(user => {
+										user.auth = data.g;
+										sockEvents.login.call(this, { u: name, a: data.g });
+										const req = https
+											.request({
+												hostname: 'www.kongregate.com',
+												path: '/api/submit_statistics.json',
+												method: 'POST',
+											})
+											.on('error', e => console.log(e));
+										req.write(
+											`user_id=${data.u}\ngame_auth_token=${
+												data.g
+											}\napi_key=${key}\nWealth=${user.gold +
+												userutil.calcWealth(user.pool)}`,
+										);
+										req.end();
+									})
+									.catch(() => {
+										Us.users.set(name, {
+											name,
+											gold: 0,
+											auth: data.g,
 										});
-								} else {
-									sockEmit(this, 'login', {
-										err: `${json.error}: ${json.error_description}`,
+										sockEvents.login.call(this, { u: name, a: data.g });
 									});
-								}
-							});
-						},
-					)
-					.on('error', e => console.log(e));
-			});
+							} else {
+								sockEmit(this, 'login', {
+									err: `${json.error}: ${json.error_description}`,
+								});
+							}
+						});
+					},
+				)
+				.on('error', e => console.log(e));
 		},
-		guestchat(data) {
-			db.get('GuestsBanned', (err, isBanned) => {
-				if (!isBanned) {
-					data.guest = true;
-					data.u = `Guest_${data.u}`;
-					genericChat(this, data);
-				}
-			});
+		async guestchat(data) {
+			const isBanned = await db.get('GuestsBanned');
+			if (!isBanned) {
+				data.guest = true;
+				data.u = `Guest_${data.u}`;
+				genericChat(this, data);
+			}
 		},
 		roll(data) {
 			const A = Math.min(data.A || 1, 99),
@@ -1060,29 +1104,25 @@ const sockmeta = new WeakMap();
 			data.sum = sum;
 			broadcast(data);
 		},
-		motd(data) {
-			db.zrange('Motd', 0, -1, 'withscores', (err, ms) => {
-				if (err) return;
-				for (let i = 0; i < ms.length; i += 2) {
-					sockEmit(this, 'chat', {
-						mode: 1,
-						msg: `motd ${ms[i + 1]} ${ms[i]}`,
-					});
-				}
-			});
+		async motd(data) {
+			const ms = await db.zrange('Motd', 0, -1, 'withscores');
+			for (let i = 0; i < ms.length; i += 2) {
+				sockEmit(this, 'chat', {
+					mode: 1,
+					msg: `motd ${ms[i + 1]} ${ms[i]}`,
+				});
+			}
 		},
-		mod(data) {
-			db.smembers('Mods', (err, mods) => {
-				sockEmit(this, 'chat', { mode: 1, msg: mods.join() });
-			});
+		async mod(data) {
+			const mods = await db.smembers('Mods');
+			sockEmit(this, 'chat', { mode: 1, msg: mods.join() });
 		},
-		codesmith(data) {
-			db.smembers('Codesmiths', (err, mods) => {
-				sockEmit(this, 'chat', { mode: 1, msg: mods.join() });
-			});
+		async codesmith(data) {
+			const mods = await db.smembers('Codesmiths');
+			sockEmit(this, 'chat', { mode: 1, msg: mods.join() });
 		},
 		librarywant(data) {
-			Us.load(data.f)
+			return Us.load(data.f)
 				.then(user => {
 					sockEmit(this, 'librarygive', {
 						pool: user.pool,
@@ -1096,45 +1136,39 @@ const sockmeta = new WeakMap();
 				})
 				.catch(() => {});
 		},
-		arenatop(data) {
-			db.zrevrange(
+		async arenatop(data) {
+			const obj = await db.zrevrange(
 				`arena${data.lv ? '1' : ''}`,
 				0,
 				19,
 				'withscores',
-				(err, obj) => {
-					if (err) return;
-					const task = sutil.mkTask(res => {
-						let i = 0,
-							t20 = [],
-							day = sutil.getDay();
-						while (res[i]) {
-							const wl = res[i];
-							wl[2] = day - wl[2];
-							wl[3] = +wl[3];
-							t20.push([obj[i * 2], Math.floor(obj[i * 2 + 1])].concat(wl));
-							i++;
-						}
-						sockEmit(this, 'arenatop', { top: t20, lv: data.lv });
-					});
-					for (let i = 0; i < obj.length; i += 2) {
-						db.hmget(
-							`${data.lv ? 'B:' : 'A:'}${obj[i]}`,
-							'win',
-							'loss',
-							'day',
-							'card',
-							task(i / 2),
-						);
-					}
-					task();
-				},
 			);
+			const tasks = [];
+			for (let i = 0; i < obj.length; i += 2) {
+				tasks.push(
+					db.hmget(
+						`${data.lv ? 'B:' : 'A:'}${obj[i]}`,
+						'win',
+						'loss',
+						'day',
+						'card',
+					),
+				);
+			}
+			const res = await Promise.all(tasks);
+			let t20 = [],
+				day = sutil.getDay();
+			for (let i = 0; i < res.length; i++) {
+				const wl = res[i];
+				wl[2] = day - wl[2];
+				wl[3] = +wl[3];
+				t20.push([obj[i * 2], Math.floor(obj[i * 2 + 1])].concat(wl));
+			}
+			sockEmit(this, 'arenatop', { top: t20, lv: data.lv });
 		},
-		wealthtop(data) {
-			db.zrevrange('wealth', 0, 49, 'withscores', (err, obj) => {
-				if (!err) sockEmit(this, 'wealthtop', { top: obj });
-			});
+		async wealthtop(data) {
+			const obj = await db.zrevrange('wealth', 0, 49, 'withscores');
+			sockEmit(this, 'wealthtop', { top: obj });
 		},
 		chatus(data) {
 			const thismeta = sockmeta.get(this);
@@ -1145,8 +1179,9 @@ const sockmeta = new WeakMap();
 		who(data) {
 			sockEmit(this, 'chat', { mode: 1, msg: activeUsers().join(', ') });
 		},
-		bzread(data) {
-			Bz.load().then(bz => sockEmit(this, 'bzread', { bz }));
+		async bzread(data) {
+			const bz = await Bz.load();
+			sockEmit(this, 'bzread', { bz });
 		},
 		challrecv(data) {
 			const foesock = Us.socks.get(data.f);
@@ -1214,7 +1249,12 @@ const sockmeta = new WeakMap();
 						meta.name = u;
 						Us.socks.set(u, this);
 						delete data.a;
-						Object.assign(user, func.call(this, data, user));
+						const res = await Promise.resolve(
+							func.call(this, data, user, meta),
+						);
+						if (res && func === usercmd[data.x]) {
+							Object.assign(user, res);
+						}
 					}
 				} catch (err) {
 					console.log(err);
@@ -1226,8 +1266,7 @@ const sockmeta = new WeakMap();
 	}
 	function onSocketConnection(socket) {
 		sockmeta.set(socket, {});
-		socket.on('close', onSocketClose);
-		socket.on('message', onSocketMessage);
+		socket.on('close', onSocketClose).on('message', onSocketMessage);
 	}
 	const app = httpoly
 		.createServer(
@@ -1246,12 +1285,12 @@ const sockmeta = new WeakMap();
 	})
 		.on('error', e => console.log(e))
 		.on('connection', onSocketConnection);
-	function stop() {
+	process.once('SIGINT', () => {
+		console.log('Shutting down');
 		app.close();
 		wss.close();
 		Us.stop();
-	}
-	process.on('SIGTERM', stop).on('SIGINT', stop);
+	});
 })().catch(e =>
 	setImmediate(() => {
 		throw e;

@@ -124,13 +124,22 @@ Game.prototype.setIn = function(path, val) {
 	this.props = this.props.setIn(path, val);
 };
 Game.prototype.getStatus = function(id, key) {
-	return this.props
-		.get(id)
-		.get('status')
-		.get(key, 0);
+	return (
+		this.props
+			.get(id)
+			.get('status')
+			.get(key) | 0
+	);
 };
 Game.prototype.setStatus = function(id, key, val) {
 	this.props = this.props.setIn([id, 'status', key], val | 0);
+};
+Game.prototype.trigger = function(id, name, t, param) {
+	const a = this.props
+		.get(id)
+		.get('active')
+		.get(name);
+	return a ? a.func(this, this.byId(id), t, param) : 0;
 };
 Game.prototype.update = function(id, func) {
 	this.props = this.props.update(id, func);
@@ -147,12 +156,8 @@ Game.prototype.cloneInstance = function(inst, ownerId) {
 	return this.byId(newId);
 };
 Game.prototype.nextPlayer = function(id) {
-	let next = false;
-	for (const pl of this.players) {
-		if (next) return pl;
-		if (pl === id) next = true;
-	}
-	return this.players[0];
+	const { players } = this;
+	return players[(players.indexOf(id) + 1) % players.length];
 };
 Game.prototype.setWinner = function(id) {
 	if (!this.winner) {

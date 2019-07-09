@@ -247,9 +247,9 @@ Player.prototype.endturn = function(discard) {
 			}
 		}
 	}
-	this.permanents.forEach(function(p) {
+	for (const p of this.permanents) {
 		if (p) p.trigger('auto');
-	});
+	}
 	if (this.shield) {
 		this.shield.casts = 1;
 		this.shield.trigger('auto');

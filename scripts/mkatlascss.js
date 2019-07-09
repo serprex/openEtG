@@ -1,6 +1,5 @@
-#!/usr/bin/env node
-'use strict';
-const fs = require('fs');
+#!/usr/bin/node --experimental-modules
+import fs from 'fs';
 let pngw = 0,
 	pngh = 0,
 	pngp = 0;

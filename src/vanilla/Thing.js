@@ -108,26 +108,6 @@ CardInstance.prototype.clone = function(owner) {
 	return new CardInstance(this.card, owner);
 };
 
-function combineactive(a1, a2) {
-	if (!a1) {
-		return a2;
-	}
-	return {
-		func: function(c, t, data) {
-			const v1 = a1.func(c, t, data),
-				v2 = a2.func(c, t, data);
-			return v1 === undefined
-				? v2
-				: v2 === undefined
-				? v1
-				: v1 === true || v2 === true
-				? true
-				: v1 + v2;
-		},
-		name: a1.name.concat(a2.name),
-	};
-}
-
 var thingtypes = [Creature, Permanent, Weapon, Shield];
 thingtypes.forEach(function(type) {
 	var proto = type.prototype;
@@ -583,7 +563,7 @@ Thing.prototype.isMaterial = function(type) {
 	);
 };
 Thing.prototype.addactive = function(type, active) {
-	this.active = this.active.update(type, v => combineactive(v, active));
+	this.active = this.active.update(type, v => Skill.combine(v, active));
 };
 Thing.prototype.rmactive = function(type, name) {
 	if (!this.active.has(type)) return;
@@ -595,10 +575,10 @@ Thing.prototype.rmactive = function(type, name) {
 		} else {
 			this.active = this.active.set(
 				type,
-				actives.reduce(function(previous, current, i) {
+				actives.reduce((previous, current, i) => {
 					return i == idx
 						? previous
-						: combineactive(previous, Actives[current]);
+						: Skill.combine(previous, Actives[current]);
 				}, null),
 			);
 		}
@@ -779,6 +759,7 @@ import * as ui from './ui.js';
 import * as util from '../util.js';
 import Effect from './Effect.js';
 import Actives from './Skills.js';
+import Skill from '../Skill.js';
 import skillText from './skillText.js';
 import * as Cards from './Cards.js';
 import * as etg from './etg.js';

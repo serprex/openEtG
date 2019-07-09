@@ -1443,9 +1443,11 @@ const Skills = {
 		t.incrAtk(-t.trueatk());
 	},
 	pairproduce: (ctx, c, t) => {
-		c.owner.permanents.forEach(p => {
-			if (p && p.card.type === etg.Pillar) p.trigger('ownattack');
-		});
+		for (const p of c.owner.permanentIds) {
+			if (p && ctx.get(p, 'card', 'type') === etg.Pillar) {
+				ctx.trigger(p, 'ownattack');
+			}
+		}
 	},
 	paleomagnetism: (ctx, c, t) => {
 		const e = ctx.upto(6);

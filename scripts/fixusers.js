@@ -1,8 +1,8 @@
 #!/bin/node --experimental-modules
-import redis from 'redis';
-const db = redis.createClient();
+import redis from 'ioredis';
+const db = new redis();
 
-db.hgetall('Users', function(users) {
+db.hgetall('Users').then(users => {
 	for (const name in users) {
 		const user = JSON.parse(users[name]);
 		if (!user.qecks) {
@@ -10,8 +10,5 @@ db.hgetall('Users', function(users) {
 			users[name] = JSON.stringify(user);
 		}
 	}
-	db.hmset('Users', users, function(err) {
-		console.log(err);
-		db.quit();
-	});
+	return db.hmset('Users', users).then(() => db.quit());
 });
