@@ -46,6 +46,20 @@ const Qecks = connect(({ user }) => ({ user }))(
 						}`}
 						onClick={() => {
 							if (this.state.setQeck) {
+								let swap = -1;
+								for (let i = 0; i < 10; i++) {
+									if (
+										this.props.user.qecks[i] === this.props.user.selectedDeck
+									) {
+										swap = i;
+									}
+								}
+								if (~swap) {
+									sock.userExec('changeqeck', {
+										number: swap,
+										name: this.props.user.qecks[i],
+									});
+								}
 								sock.userExec('changeqeck', {
 									number: i,
 									name: this.props.user.selectedDeck,
@@ -62,12 +76,12 @@ const Qecks = connect(({ user }) => ({ user }))(
 				<>
 					<input
 						type="button"
-						value="Save to #"
+						value="Bind to #"
 						className={this.state.setQeck ? 'selectedbutton' : undefined}
 						onClick={() => this.setState({ setQeck: !this.state.setQeck })}
 						style={{
 							position: 'absolute',
-							left: '220px',
+							left: '200px',
 							top: '8px',
 						}}
 					/>

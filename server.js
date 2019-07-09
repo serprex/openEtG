@@ -149,15 +149,15 @@ const sockmeta = new WeakMap();
 			user.streak = [];
 			sockEvents.login.call(this, { u: user.name, a: user.auth });
 		},
-		logout({ u }, user) {
+		async logout({ u }, user) {
+			await db.hset('Users', u, JSON.stringify(user));
 			Us.users.delete(u);
 			Us.socks.delete(u);
-			return db.hset('Users', u, JSON.stringify(user));
 		},
-		delete({ u }, user) {
+		async delete({ u }, user) {
+			await db.hdel('Users', u);
 			Us.users.delete(u);
 			Us.socks.delete(u);
-			return db.hdel('Users', u);
 		},
 		async setarena(data, user) {
 			if (!user.ocard || !data.d) {
