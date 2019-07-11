@@ -1,4 +1,5 @@
-import Rng from 'rng.js';
+import RngModule from './rng.js';
+const Rng = RngModule.exports;
 import * as imm from './immutable.js';
 
 import * as etg from './etg.js';
@@ -8,8 +9,8 @@ import Player from './Player.js';
 import Thing from './Thing.js';
 
 export default function Game(data) {
-	const { seed } = data,
-		rng = new Rng(seed, ~seed);
+	const { seed } = data;
+	Rng.initState(seed);
 	this.props = new imm.Map().set(
 		1,
 		new imm.Map({
@@ -26,7 +27,12 @@ export default function Game(data) {
 				replay: [],
 			}),
 			data: new imm.Map(data),
-			rng: rng.getStateCount(),
+			rng: [
+				Rng.getStateLoLo(),
+				Rng.getStateLoHi(),
+				Rng.getStateHiLo(),
+				Rng.getStateHiHi(),
+			],
 		}),
 	);
 	this.cache = new Map([[this.id, this]]);
@@ -74,13 +80,16 @@ Game.prototype.clone = function() {
 	return obj;
 };
 Game.prototype.rng = function() {
-	const seed = this.data.get('seed');
 	let val;
 	this.updateIn([this.id, 'rng'], rng => {
-		const rngInst = new Rng(seed, ~seed);
-		rngInst.setStateCount(...rng);
-		val = rngInst.nextNumber();
-		return rngInst.getStateCount();
+		Rng.setState(...rng);
+		val = Rng.next();
+		return [
+			Rng.getStateLoLo(),
+			Rng.getStateLoHi(),
+			Rng.getStateHiLo(),
+			Rng.getStateHiHi(),
+		];
 	});
 	return val;
 };

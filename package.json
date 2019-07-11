@@ -11,17 +11,16 @@
     "bufferutil": "^4.0.1",
     "httpolyglot": "^0.1.2",
     "ioredis": "^4.11.1",
-    "rng.js": "^1.0.2",
-    "ws": "^7.0.1"
+    "ws": "^7.1.0"
   },
   "devDependencies": {
-    "@babel/core": "^7.5.0",
+    "@babel/core": "^7.5.4",
     "@babel/plugin-proposal-class-properties": "^7.5.0",
-    "@babel/plugin-proposal-object-rest-spread": "^7.5.1",
+    "@babel/plugin-proposal-object-rest-spread": "^7.5.4",
     "@babel/plugin-transform-react-jsx": "^7.3.0",
-    "@babel/preset-env": "^7.5.0",
+    "@babel/preset-env": "^7.5.4",
     "@babel/preset-react": "^7.0.0",
-    "@babel/runtime-corejs3": "^7.5.1",
+    "@babel/runtime-corejs3": "^7.5.4",
     "babel-loader": "^8.0.6",
     "core-js": "^3.1.4",
     "optipng-bin": "^6.0.0",
@@ -30,18 +29,19 @@
     "react-dom": "^16.8.6",
     "react-motion": "^0.5.2",
     "react-redux": "^7.1.0",
-    "redux": "^4.0.1",
-    "webpack": "^4.35.0",
+    "redux": "^4.0.4",
+    "webpack": "^4.35.3",
     "webpack-cli": "^3.3.5"
   },
   "scripts": {
-    "start": "node --experimental-modules ./server.js",
+    "start": "node --experimental-modules --experimental-wasm-modules ./server.js",
     "test": "node --experimental-modules ./scripts/tests.js && node --experimental-modules ./src/vanilla/_tests.js",
     "dev": "webpack --mode=development --watch",
     "build": "webpack -p",
     "build-dev": "webpack --mode=development",
     "build-atlas-png": "optipng -o2 -strip all assets/atlas.png",
-    "build-atlas-css": "node --experimental-modules ./scripts/mkatlascss.js"
+		"build-atlas-css": "node --experimental-modules ./scripts/mkatlascss.js",
+		"build-rng-js": "node --experimental-modules ./scripts/mkrng.js ./src/rng.wasm ./src/rng.js"
   },
   "license": "MIT"
 }

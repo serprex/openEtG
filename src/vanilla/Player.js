@@ -77,10 +77,10 @@ Player.prototype.toString = function() {
 	return this == this.game.player1 ? 'p1' : 'p2';
 };
 Player.prototype.rng = function() {
-	return this.game.rng.nextNumber();
+	return this.game.rngNext();
 };
 Player.prototype.upto = function(x) {
-	return Math.floor(this.game.rng.nextNumber() * x);
+	return Math.floor(this.rng() * x);
 };
 Player.prototype.choose = function(x) {
 	return x[this.upto(x.length)];

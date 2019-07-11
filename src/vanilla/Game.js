@@ -1,11 +1,17 @@
-import Rng from 'rng.js';
+import Rng from '../rng.js';
 import * as etg from './etg.js';
 import * as Cards from './Cards.js';
 import Effect from './Effect.js';
 import Player from './Player.js';
 
 export default function Game(seed, flip) {
-	this.rng = new Rng(seed, ~seed);
+	Rng.initState(seed);
+	this.rng = [
+		Rng.getStateLoLo(),
+		Rng.getStateLoHi(),
+		Rng.getStateHiLo(),
+		Rng.getStateHiHi(),
+	];
 	this.phase = etg.PlayPhase;
 	this.ply = 0;
 	this.player1 = new Player(this);
@@ -19,11 +25,7 @@ export default function Game(seed, flip) {
 }
 Game.prototype.clone = function() {
 	const obj = Object.create(Game.prototype);
-	obj.rng = new Rng(this.rng.lowSeed, this.rng.highSeed);
-	obj.rng.lowConstant = this.rng.lowConstant;
-	obj.rng.highConstant = this.rng.highConstant;
-	obj.rng.lowStateCount = this.rng.lowStateCount;
-	obj.rng.highStateCount = this.rng.highStateCount;
+	obj.rng = this.rng;
 	obj.phase = this.phase;
 	obj.ply = this.ply;
 	obj.player1 = this.player1.clone(obj);
@@ -48,6 +50,10 @@ Game.prototype.setWinner = function(play) {
 function removeSoPa(p) {
 	if (p) p.clearStatus('patience');
 }
+Game.prototype.rngNext = function() {
+	Rng.setState(...this.rng);
+	return Rng.next();
+};
 Game.prototype.updateExpectedDamage = function() {
 	if (this.expectedDamage) {
 		this.expectedDamage[0] = this.expectedDamage[1] = 0;
@@ -57,10 +63,7 @@ Game.prototype.updateExpectedDamage = function() {
 				var gclone = this.clone();
 				gclone.player1.permanents.forEach(removeSoPa);
 				gclone.player2.permanents.forEach(removeSoPa);
-				gclone.rng.setSeed(
-					gclone.rng.highState ^ (i * 997),
-					gclone.rng.lowState ^ (i * 650),
-				);
+				gclone.rng = this.rng.map(ri => ri ^ (i * 997));
 				gclone.turn.endturn();
 				if (!gclone.winner) gclone.turn.endturn();
 				this.expectedDamage[0] += this.player1.hp - gclone.player1.hp;
