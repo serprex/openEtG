@@ -65,7 +65,6 @@ export function mkPremade(level, daily, datafn = null) {
 		data.players[1].drawpower = 2;
 	}
 	RngMock.shuffle(data.players);
-	if (daily !== undefined) data.daily = daily;
 	return new Game(datafn ? datafn(data) : data);
 }
 const randomNames = [

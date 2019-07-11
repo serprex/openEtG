@@ -1017,6 +1017,14 @@ export default connect(({ user }) => ({ user }))(
 			dispatch(
 				store.setCmds({
 					move: ({ data }) => this.applyNext(data, true),
+					foeleft: ({ data }) => {
+						const players = game.data.get('players');
+						for (let i = 0; i < players.length; i++) {
+							if (players[i].user === data.name) {
+								game.byId(game.get('players')).die();
+							}
+						}
+					},
 				}),
 			);
 		}

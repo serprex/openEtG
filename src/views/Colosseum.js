@@ -36,6 +36,7 @@ function mkDaily(type) {
 		if (!game) return;
 	} else {
 		game = mkAi.mkPremade(type == 3 ? 1 : 3, type, data => {
+			data.daily = type;
 			data.colobonus = type == 3 ? 4 : 1;
 			data.rematch = undefined;
 			return data;

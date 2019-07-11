@@ -895,7 +895,7 @@ const sockmeta = new WeakMap();
 			hostmeta.match.room.delete(user.name);
 			for (const u of hostmeta.match.room) {
 				const s = Us.socks.get(u);
-				sockEmit(s, 'matchleave', { name: user.name });
+				sockEmit(s, 'foeleft', { name: user.name });
 			}
 		},
 		matchremove(data, user, info) {
@@ -903,7 +903,7 @@ const sockmeta = new WeakMap();
 			if (match) {
 				for (const u of match.room) {
 					const s = Us.socks.get(u);
-					sockEmit(s, 'matchleave', { name: data.name });
+					sockEmit(s, 'foeleft', { name: data.name });
 				}
 				delete info.match;
 			}
@@ -1222,6 +1222,20 @@ const sockmeta = new WeakMap();
 					) {
 						sockEmit(foesock, 'tradecanceled');
 						delete foeinfo.trade;
+					}
+				}
+			}
+			if (info.host) {
+				const hostinfo = sockmeta.get(info.host);
+				if (hostinfo) {
+					const { match } = hostinfo,
+						{ name } = info;
+					if (match && name) {
+						match.room.delete(user.name);
+						for (const u of match.room) {
+							const s = Us.socks.get(u);
+							sockEmit(s, 'foeleft', { name: user.name });
+						}
 					}
 				}
 			}

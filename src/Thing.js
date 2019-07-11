@@ -229,11 +229,11 @@ Thing.prototype.calcCore2 = function(prefix, filterstat) {
 	let bonus = 0;
 	for (let j = 0; j < 2; j++) {
 		const pl = j === 0 ? this.owner : this.owner.foe,
-			perms = pl.permanents;
+			perms = pl.permanentIds;
 		for (let i = 0; i < 16; i++) {
-			let pr = perms[i];
-			if (pr && pr.status.get(filterstat)) {
-				if (pr.card.upped) return 2;
+			const pr = perms[i];
+			if (pr && this.game.getStatus(pr, filterstat)) {
+				if (this.game.get(pr).get('card').upped) return 2;
 				else bonus = 1;
 			}
 		}
@@ -247,7 +247,7 @@ function isWhetCandidate(c) {
 	return (
 		c.status.get('golem') ||
 		c.type === etg.Weapon ||
-		(c.type !== etg.Player && c.card.type === etg.Weapon)
+		(c.type === etg.Creature && c.card.type === etg.Weapon)
 	);
 }
 Thing.prototype.calcBonusAtk = function() {

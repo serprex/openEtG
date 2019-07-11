@@ -477,8 +477,7 @@ const Skills = {
 	},
 	destroycard: (ctx, c, t) => {
 		if (t.type === etg.Player) {
-			if (!t.deckIds.length) ctx.setWinner(t.foeId);
-			else t._draw();
+			t._draw();
 		} else if (!t.owner.getStatus('sanctuary')) {
 			t.die();
 		}
@@ -630,11 +629,12 @@ const Skills = {
 		t.addactive('owndeath', exports.embezzledeath);
 	},
 	embezzledeath: (ctx, c, t) => {
-		if (c.owner.foe.deckIds.length < 3) {
-			c.owner.foe.deckIds.length = 0;
-			ctx.setWinner(c.ownerId);
+		const { foe } = c.owner;
+		if (foe.deckIds.length < 3) {
+			foe.deckIds.length = 0;
+			foe.die();
 		} else {
-			c.owner.foe.deckIds.length -= 3;
+			foe.deckIds = foe.deckIds.slice(0, -3);
 		}
 	},
 	empathy: (ctx, c, t) => {
@@ -751,9 +751,9 @@ const Skills = {
 	},
 	foedraw: (ctx, c, t) => {
 		if (c.owner.handIds.length < 8) {
-			if (!c.owner.foe.deckIds.length) ctx.setWinner(c.ownerId);
-			else {
-				c.owner.deckpush(c.owner.foe._draw());
+			const inst = c.owner.foe._draw();
+			if (inst) {
+				c.owner.deckpush(inst);
 				c.owner.drawcard();
 			}
 		}
@@ -1000,8 +1000,7 @@ const Skills = {
 				town.drawcard();
 			}
 		}
-		if (!c.owner.deckIds.length) ctx.setWinner(c.owner.foeId);
-		else c.owner._draw();
+		c.owner._draw();
 	},
 	integrity: (ctx, c, t) => {
 		const tally = [0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0];
@@ -1282,7 +1281,7 @@ const Skills = {
 	millpillar: (ctx, c, t) => {
 		if (
 			t.deckIds.length &&
-			t.deck[t.deckIds.length - 1].card.type === etg.Pillar
+			ctx.get(t.deckIds[t.deckIds.length - 1]).get('card').type === etg.Pillar
 		)
 			t._draw();
 	},

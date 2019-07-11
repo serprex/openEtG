@@ -57,8 +57,8 @@ class PlayerEditor extends React.Component {
 						const data = {};
 						if (state.deck) data.deck = state.deck;
 						parseInput(data, 'hp', state.hp);
-						parseInput(data, 'markpower', state.mark);
-						parseInput(data, 'drawpower', state.draw);
+						parseInput(data, 'markpower', state.mark, 1188);
+						parseInput(data, 'drawpower', state.draw, 8);
 						parseInput(data, 'deckpower', state.deckpower);
 						props.updatePlayer(data);
 					}}
@@ -101,11 +101,11 @@ class Group extends React.Component {
 						<span
 							onClick={() => {
 								this.setState(state => {
-									const editing = new Set(state);
-									if (state.editing.has(pl.idx)) {
-										state.editing.delete(pl.idx);
+									const editing = new Set(state.editing);
+									if (editing.has(pl.idx)) {
+										editing.delete(pl.idx);
 									} else {
-										state.editing.add(pl.idx);
+										editing.add(pl.idx);
 									}
 									return { editing };
 								});
@@ -124,7 +124,7 @@ class Group extends React.Component {
 										[pl] = players.splice(i, 1);
 									props.updatePlayers(players);
 									this.setState(state => {
-										const editing = new Set(editing);
+										const editing = new Set(state.editing);
 										editing.delete(pl.idx);
 										return { editing };
 									});
@@ -145,16 +145,17 @@ class Group extends React.Component {
 						value="+Player"
 						onClick={() => {
 							const { invite } = this.state;
+							const idx = props.getNextIdx();
 							if (!invite) {
-								props.updatePlayers(
-									props.players.concat([{ idx: props.getNextIdx() }]),
-								);
+								this.setState(state => {
+									const editing = new Set(state.editing).add(idx);
+									return { editing };
+								});
+								props.updatePlayers(props.players.concat([{ idx }]));
 							} else {
 								if (!props.hasUserAsPlayer(invite)) {
 									props.updatePlayers(
-										props.players.concat([
-											{ idx: props.getNextIdx(), user: invite, pending: 2 },
-										]),
+										props.players.concat([{ idx, user: invite, pending: 2 }]),
 									);
 								}
 								props.invitePlayer(invite);
@@ -208,7 +209,7 @@ export default connect(({ user, opts }) => ({
 						console.log('Match cancelled');
 						this.toMainMenu();
 					},
-					matchleave: data => {
+					foeleft: data => {
 						if (data.name === this.props.username) {
 							console.log('You have been removed');
 							this.toMainMenu();
@@ -267,6 +268,7 @@ export default connect(({ user, opts }) => ({
 						name: player.user || 'AI',
 						user: player.user,
 						leader: leader,
+						hp: player.hp,
 						deck: player.deck || deck,
 						markpower: player.markpower,
 						deckpower: player.deckpower,
@@ -333,7 +335,7 @@ export default connect(({ user, opts }) => ({
 				if (this.props.username === this.state.groups[0][0].user) {
 					sock.userEmit('matchcancel');
 				} else {
-					sock.userEmit('matchleave');
+					sock.userEmit('foeleft');
 				}
 			}
 			this.toMainMenu();

@@ -156,6 +156,7 @@ defineProp('drawpower');
 defineProp('markpower');
 defineProp('mark');
 defineProp('shardgolem');
+defineProp('out');
 
 Player.prototype.init = function(foe, data) {
 	this.game.set(this.id, 'type', etg.Player);
@@ -175,6 +176,7 @@ Player.prototype.init = function(foe, data) {
 	this.markpower = data.markpower === undefined ? 1 : data.markpower;
 	this.mark = 0;
 	this.shardgolem = null;
+	this.out = false;
 	const deck = [];
 	etgutil.iterdeck(data.deck, code => {
 		let idx;
@@ -199,7 +201,7 @@ Player.prototype.instantiateDeck = function(deck) {
 	return res;
 };
 Player.prototype.isCloaked = function() {
-	return this.permanents.some(pr => pr && pr.getStatus('cloak'));
+	return this.permanentIds.some(pr => pr && this.game.getStatus(pr, 'cloak'));
 };
 Player.prototype.place = function(prop, item) {
 	let a = this.game.get(this.id).get(prop);
@@ -420,12 +422,19 @@ Player.prototype.endturn = function(discard) {
 	this.game.set(this.game.id, 'turn', next.id);
 	next.proc('turnstart');
 };
+Player.prototype.die = function() {
+	this.out = true;
+	this.game.setWinner();
+};
 Player.prototype.deckpush = function(...args) {
 	this.game.updateIn([this.id, 'deck'], deck => deck.concat(args));
 };
 Player.prototype._draw = function() {
 	const deckIds = this.deckIds;
-	if (deckIds.length === 1) {
+	if (deckIds.length === 0) {
+		this.die();
+		return 0;
+	} else if (deckIds.length === 1) {
 		this.game.effect({ x: 'LastCard', id: this.id });
 	}
 	const id = deckIds[deckIds.length - 1];
@@ -434,11 +443,10 @@ Player.prototype._draw = function() {
 };
 Player.prototype.drawcard = function(drawstep) {
 	if (this.handIds.length < 8) {
-		if (this.deckIds.length > 0) {
-			if (~this.addCard(this._draw())) {
-				this.proc('draw', drawstep);
-			}
-		} else this.game.setWinner(this.foeId);
+		const inst = this._draw();
+		if (inst && ~this.addCard(inst)) {
+			this.proc('draw', drawstep);
+		}
 	}
 };
 Player.prototype.drawhand = function(x) {
@@ -488,7 +496,7 @@ Player.prototype.dmg = function(x) {
 	} else {
 		this.hp -= x;
 		if (this.hp <= 0) {
-			this.game.setWinner(this.foeId);
+			this.die();
 		}
 		return sosa ? -x : x;
 	}

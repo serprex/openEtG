@@ -169,22 +169,24 @@ const DeckNames = connect(({ user }) => ({ user }))(function DeckNames({
 						top: '4px',
 						width: '552px',
 					}}>
-					{page > 0 && (
-						<input
-							type="button"
-							className="editbtn"
-							value="<<"
-							onClick={() => setPage(page - 1)}
-						/>
-					)}
-					{page + 1 < pages && (
-						<input
-							type="button"
-							className="editbtn"
-							value=">>"
-							onClick={() => setPage(page + 1)}
-						/>
-					)}
+					<input
+						type="button"
+						className="editbtn"
+						value="<<"
+						onClick={() => setPage(page - 1)}
+						style={{
+							visibility: page > 0 ? 'visible' : 'hidden',
+						}}
+					/>
+					<input
+						type="button"
+						className="editbtn"
+						value=">>"
+						onClick={() => setPage(page + 1)}
+						style={{
+							visibility: page + 1 < pages ? 'visible' : 'hidden',
+						}}
+					/>
 					{pagebtns}
 				</div>
 			)}

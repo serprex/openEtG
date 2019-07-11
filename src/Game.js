@@ -162,11 +162,24 @@ Game.prototype.nextPlayer = function(id) {
 	const { players } = this;
 	return players[(players.indexOf(id) + 1) % players.length];
 };
-Game.prototype.setWinner = function(id) {
+Game.prototype.setWinner = function() {
 	if (!this.winner) {
-		this.winner = id;
-		this.phase = etg.EndPhase;
-		this.updateIn([this.id, 'bonusstats', 'time'], time => Date.now() - time);
+		const pldata = this.data.get('players'),
+			{ players } = this;
+		const winners = new Set();
+		for (let i = 0; i < players.length; i++) {
+			if (!this.get(players[i]).get('out')) {
+				const { leader } = pldata[i];
+				winners.add(leader === undefined ? i : leader);
+			}
+		}
+		if (winners.size === 1) {
+			for (const idx of winners) {
+				this.winner = players[idx];
+			}
+			this.phase = etg.EndPhase;
+			this.updateIn([this.id, 'bonusstats', 'time'], time => Date.now() - time);
+		}
 	}
 };
 const nextHandler = {
@@ -189,7 +202,7 @@ const nextHandler = {
 		pl.drawhand(pl.handIds.length - 1);
 	},
 	resign(data) {
-		this.setWinner(this.get(data.c).get('foe'));
+		this.byId(data.c).die();
 	},
 };
 Game.prototype.next = function(event) {
