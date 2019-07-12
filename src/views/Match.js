@@ -1495,10 +1495,23 @@ export default connect(({ user }) => ({ user }))(
 								zIndex: '3',
 								pointerEvents: 'none',
 							}}>
+							<defs>
+								<marker
+									id="h"
+									orient="auto"
+									markerWidth="3"
+									markerHeight="4"
+									refX="0.1"
+									refY="2">
+									<path d="M0 0L1 2L0 4L3 2Z" fill="#f84" />
+								</marker>
+							</defs>
 							<path
+								markerEnd="url(#h)"
 								d={`M${this.state.line0.x} ${this.state.line0.y}L${this.state.line1.x} ${this.state.line1.y}`}
 								stroke="#f84"
-								strokeWidth="8"
+								strokeWidth="4"
+								opacity="0.7"
 							/>
 						</svg>
 					)}
