@@ -119,7 +119,12 @@ export function mkAi(level, daily, datafn = null) {
 		cost,
 		rematch: () => run(mkAi(level)),
 		players: [
-			{ idx: 1, name: user.name, user: user ? user.name : '', deck: urdeck },
+			{
+				idx: 1,
+				name: user && user.name,
+				user: user ? user.name : '',
+				deck: urdeck,
+			},
 			{
 				idx: 2,
 				ai: 1,

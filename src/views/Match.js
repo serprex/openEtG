@@ -412,7 +412,7 @@ function addNoHealData(game, newdata) {
 				for (let i = 0; i < newdata.players.length; i++) {
 					const pldata = newdata.players[i];
 					if (pldata.user === user) {
-						const pl = game.byUser(user);
+						const pl = game.byId(game.players[i]);
 						pldata.hp = Math.max(pl.hp, 1);
 						pldata.maxhp = pl.maxhp;
 					}
@@ -432,21 +432,24 @@ function tgtclass(p1, obj, targeting) {
 
 function FoePlays({ foeplays, setCard, setLine, clearCard }) {
 	const idtrack = React.useContext(TrackIdCtx).value;
-	return foeplays.map((play, i) => (
-		<Components.CardImage
-			key={i}
-			x={(i & 7) * 99}
-			y={(i >> 3) * 19}
-			card={play}
-			onMouseOver={e => {
-				setCard(e, play.card);
-				if (play.t) {
-					setLine(idtrack.get(play.c), idtrack.get(play.t));
-				}
-			}}
-			onMouseOut={clearCard}
-		/>
-	));
+	return (
+		!!foeplays &&
+		foeplays.map((play, i) => (
+			<Components.CardImage
+				key={i}
+				x={(i & 7) * 99}
+				y={(i >> 3) * 19}
+				card={play}
+				onMouseOver={e => {
+					setCard(e, play.card);
+					if (play.t) {
+						setLine(idtrack.get(play.c), idtrack.get(play.t));
+					}
+				}}
+				onMouseOut={clearCard}
+			/>
+		))
+	);
 }
 
 export default connect(({ user }) => ({ user }))(
@@ -461,7 +464,7 @@ export default connect(({ user }) => ({ user }))(
 				: props.game.byUser(props.user ? props.user.name : '');
 			this.state = {
 				tooltip: null,
-				foeplays: [],
+				foeplays: new Map(),
 				resigning: false,
 				gameProps: null,
 				expectedDamage: new Int16Array(2),
@@ -559,15 +562,17 @@ export default connect(({ user }) => ({ user }))(
 		};
 
 		applyNext = (data, iscmd) => {
-			const { game } = this.props;
+			const { game } = this.props,
+				{ turn } = game;
 			if (
 				!iscmd &&
 				game.data.players.some(
 					pl => pl.user && pl.user !== this.props.user.name,
 				)
-			)
+			) {
 				sock.emit({ x: 'move', data });
-			if (data.x === 'cast' && game.turn === this.state.player2.id) {
+			}
+			if (data.x === 'cast') {
 				const c = game.byId(data.c),
 					isSpell = c.type === etg.Spell;
 				const play = {
@@ -581,12 +586,27 @@ export default connect(({ user }) => ({ user }))(
 					c: data.c,
 					t: data.t,
 				};
-				this.setState(state => ({ foeplays: state.foeplays.concat([play]) }));
+				this.setState(state => {
+					const foeplays = new Map(state.foeplays);
+					if (!foeplays.has(turn)) foeplays.set(turn, []);
+					foeplays.set(turn, foeplays.get(turn).concat([play]));
+					return { foeplays };
+				});
 			}
 			if (data.x === 'mulligan') {
 				sfx.playSound('mulligan');
 			}
 			game.next(data);
+			const newTurn = game.turn;
+			if (newTurn !== turn) {
+				const pl = game.byId(newTurn);
+				if (pl.data.user === (this.props.user ? this.props.user.name : '')) {
+					this.setState({ player1: pl });
+				}
+				this.setState(state => ({
+					foeplays: new Map(state.foeplays).set(newTurn, []),
+				}));
+			}
 			this.setState(state => {
 				if (!game.effects || !game.effects.length) return {};
 				const newstate = {};
@@ -725,7 +745,6 @@ export default connect(({ user }) => ({ user }))(
 					gameProps: props.game.props,
 					expectedDamage: props.game.expectedDamage(),
 					player1,
-					player2: player1.foe,
 				};
 			}
 			return null;
@@ -777,7 +796,7 @@ export default connect(({ user }) => ({ user }))(
 				? this.state.replayhistory[this.state.replayindex]
 				: this.props.game;
 
-		gotoResults = () => {
+		gotoResult = () => {
 			const { game, user } = this.props;
 			if (user) {
 				if (game.data.arena) {
@@ -835,7 +854,7 @@ export default connect(({ user }) => ({ user }))(
 			) {
 				this.applyNext({ x: 'accept' });
 			} else if (game.winner) {
-				this.gotoResults();
+				this.gotoResult();
 			} else if (game.turn === this.state.player1.id) {
 				if (discard === 0 && this.state.player1.handIds.length === 8) {
 					this.setState({
@@ -855,7 +874,7 @@ export default connect(({ user }) => ({ user }))(
 						x: 'end',
 						t: discard || undefined,
 					});
-					this.setState({ targeting: null, foeplays: [] });
+					this.setState({ targeting: null });
 				}
 			}
 		};
@@ -961,18 +980,13 @@ export default connect(({ user }) => ({ user }))(
 						true,
 					);
 				}
-			} else if (turn.data.ai === 2) {
-				this.setState({
-					player1: turn,
-					player2: turn.foe,
-				});
 			}
 		}
 
 		onkeydown = e => {
 			if (e.target.tagName === 'TEXTAREA') return;
 			const kc = e.which,
-				ch = String.fromCharCode(kc);
+				ch = kc < 128 ? String.fromCharCode(kc) : e.key;
 			let chi;
 			if (kc === 27) {
 				this.resignClick();
@@ -991,6 +1005,35 @@ export default connect(({ user }) => ({ user }))(
 			} else if (~(chi = '12345678'.indexOf(ch))) {
 				const card = this.state.player1.hand[chi];
 				if (card) this.thingClick(card);
+			} else if (ch === 'P') {
+				if (
+					this.props.game.turn === this.state.player1.id &&
+					this.state.player2.id !== this.state.player1.foeId
+				) {
+					this.applyNext({ x: 'foe', t: this.state.player2.id });
+				}
+			} else if (~(chi = '[]'.indexOf(ch))) {
+				this.setState(state => {
+					const { players } = this.props.game,
+						dir = chi ? players.length + 1 : 1;
+					let nextId,
+						i = 1;
+					for (; i < players.length; i++) {
+						nextId =
+							players[(state.player2.getIndex() + i * dir) % players.length];
+						if (
+							nextId !== this.state.player1.id &&
+							!this.props.game.get(nextId).get('out')
+						) {
+							break;
+						}
+					}
+					return i === players.length
+						? null
+						: {
+								player2: this.props.game.byId(nextId),
+						  };
+				});
 			} else return;
 			e.preventDefault();
 		};
@@ -1022,10 +1065,10 @@ export default connect(({ user }) => ({ user }))(
 				store.setCmds({
 					move: ({ data }) => this.applyNext(data, true),
 					foeleft: ({ data }) => {
-						const players = game.data.players;
+						const { players } = game.data;
 						for (let i = 0; i < players.length; i++) {
 							if (players[i].user === data.name) {
-								game.byId(game.players[i]).die();
+								this.applyNext({ x: 'resign', c: game.players[i] }, true);
 							}
 						}
 					},
@@ -1335,7 +1378,11 @@ export default connect(({ user }) => ({ user }))(
 					} ${pl.getStatus('neuro') ? ' 1:10' : ''}`;
 				const hptext = `${pl.hp}/${pl.maxhp}\n${pl.deckIds.length}cards${
 					!cloaked && expectedDamage ? `\nDmg: ${expectedDamage}` : ''
-				} ${poisoninfo ? `\n${poisoninfo}` : ''}`;
+				} ${poisoninfo ? `\n${poisoninfo}` : ''}${
+					pl.id !== this.state.player1.id && pl.id !== this.state.player1.foeId
+						? '\n(Not targetted)'
+						: ''
+				}`;
 				children.push(
 					<Motion style={{ x1: spring(x1), x2: spring(x2) }}>
 						{({ x1, x2 }) => (
@@ -1396,7 +1443,7 @@ export default connect(({ user }) => ({ user }))(
 						cloaksvg
 					) : (
 						<FoePlays
-							foeplays={this.state.foeplays}
+							foeplays={this.state.foeplays.get(this.state.player2.id)}
 							setCard={(e, play) => this.setCard(e, play, e.pageX)}
 							setLine={(line0, line1) => this.setState({ line0, line1 })}
 							clearCard={this.clearCard}
@@ -1421,7 +1468,11 @@ export default connect(({ user }) => ({ user }))(
 							'Demigod\n',
 							'Arena1\n',
 							'Arena2\n',
-						][game.data.level] || ''}${this.state.player2.data.name || '-'}`}
+						][game.data.level] ||
+							(this.state.player2.data.leader !== undefined
+								? `${game.playerDataByIdx(this.state.player2.data.leader)
+										.name || this.state.player2.data.leader}\n`
+								: '')}${this.state.player2.data.name || '-'}`}
 					</div>
 					<span
 						style={{

@@ -114,6 +114,15 @@ Game.prototype.byUser = function(name) {
 	}
 	return null;
 };
+Game.prototype.playerDataByIdx = function(idx) {
+	const pldata = this.data.players;
+	for (let i = 0; i < pldata.length; i++) {
+		if (pldata[i].idx === idx) {
+			return pldata;
+		}
+	}
+	return null;
+};
 Game.prototype.newId = function() {
 	const newId = this.props.get(this.id).get('id');
 	this.set(this.id, 'id', newId + 1);
@@ -237,6 +246,9 @@ const nextHandler = {
 	mulligan(_data) {
 		const pl = this.byId(this.turn);
 		pl.drawhand(pl.handIds.length - 1);
+	},
+	foe(data) {
+		this.set(this.turn, 'foe', data.t);
 	},
 	resign(data) {
 		if (this.turn === data.c) {

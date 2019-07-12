@@ -66,8 +66,8 @@ M = new TestModule('Cards', {
 		this.cast = (skill, ...args) => parseSkill(skill).func(this.game, ...args);
 		this.initDeck = (pl, ...args) =>
 			(pl.deckIds = args.map(x => pl.newThing(x).id));
-		this.player1 = this.game.byUser('p1');
-		this.player2 = this.game.byUser('p2');
+		this.player1 = this.game.byId(this.game.players[0]);
+		this.player2 = this.game.byId(this.game.players[1]);
 		this.player1.handIds = this.player2.handIds = [];
 		this.player1Id = this.player1.id;
 		this.player2Id = this.player2.id;

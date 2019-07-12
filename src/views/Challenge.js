@@ -241,7 +241,7 @@ class Group extends React.Component {
 						value={this.state.invite}
 						onChange={e => this.setState({ invite: e.target.value })}
 					/>
-					{(!props.players.length || props.players[0].user !== props.host) && (
+					{props.removeGroup && (
 						<input
 							type="button"
 							value="-"
@@ -339,7 +339,7 @@ export default connect(({ user, opts }) => ({
 				for (const player of group) {
 					const data = {
 						idx: idx++,
-						name: player.user || 'AI',
+						name: player.name,
 						user: player.user,
 						leader: leader,
 						hp: player.hp,
@@ -424,7 +424,7 @@ export default connect(({ user, opts }) => ({
 			this.setState(
 				state => ({
 					groups: state.groups.concat([[]]),
-					editing: state.editing.concat([Set()]),
+					editing: state.editing.concat([new Set()]),
 				}),
 				this.sendConfig,
 			);
@@ -511,7 +511,7 @@ export default connect(({ user, opts }) => ({
 							}
 							updatePlayers={p => this.updatePlayers(i, p)}
 							invitePlayer={this.invitePlayer}
-							removeGroup={() => this.removeGroup(i)}
+							removeGroup={i > 0 && (() => this.removeGroup(i))}
 							getNextIdx={this.getNextIdx}
 							editing={this.state.editing[i]}
 							addEditing={idx =>
