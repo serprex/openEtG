@@ -34,7 +34,7 @@ const BonusList = [
 	{
 		name: 'Colosseum Bonus',
 		desc: 'Bonus from winning Colosseum Duels',
-		func: (game, p1, p2) => game.data.get('colobonus', 0),
+		func: (game, p1, p2) => game.data.colobonus,
 	},
 	{
 		name: 'Creature Domination',
@@ -46,7 +46,7 @@ const BonusList = [
 		name: 'Creatureless',
 		desc: 'Never play a creature',
 		func: (game, p1, p2) =>
-			game.bonusstats.get('creaturesplaced', p1.id) ? 0 : 0.1,
+			game.bonusstats.get('creaturesplaced').get(p1.id) ? 0 : 0.1,
 	},
 	{
 		name: 'Current Health',
@@ -88,7 +88,7 @@ const BonusList = [
 		name: 'Head Hunter',
 		desc: "Defeat arena's top 7 decks",
 		func: (game, p1, p2) =>
-			[1, 1 / 2, 1 / 4, 1 / 8, 1 / 16, 1 / 32, 1 / 64][game.data.get('rank')],
+			[1, 1 / 2, 1 / 4, 1 / 8, 1 / 16, 1 / 32, 1 / 64][game.data.rank],
 	},
 	{
 		name: 'Last point',
@@ -109,7 +109,7 @@ const BonusList = [
 		name: 'Murderer',
 		desc: 'Kill over 5 creatures',
 		func: (game, p1, p2) =>
-			game.bonusstats.get('creatureskilled', p1.id) > 5 ? 0.15 : 0,
+			game.bonusstats.get('creatureskilled').get(p1.id) > 5 ? 0.15 : 0,
 	},
 	{
 		name: 'Perfect Damage',
@@ -173,8 +173,8 @@ export default connect(({ user }) => ({ user }))(
 				game: props.game,
 				username: props.user && props.user.name,
 				player1: props.game.byUser(props.user ? props.user.name : ''),
-				goldreward: props.game.data.get('goldreward'),
-				cardreward: props.game.data.get('cardreward'),
+				goldreward: props.game.data.goldreward,
+				cardreward: props.game.data.cardreward,
 			};
 		}
 
@@ -199,11 +199,11 @@ export default connect(({ user }) => ({ user }))(
 			if (kc === 32 || kc === 13) this.exitFunc();
 			else if (
 				kc === 87 &&
-				this.props.game.data.get('rematch') &&
-				(!this.props.game.data.get('rematchFilter') ||
-					this.props.game.data.get('rematchFilter')(this.props))
+				this.props.game.data.rematch &&
+				(!this.props.game.data.rematchFilter ||
+					this.props.game.data.rematchFilter(this.props))
 			) {
-				this.props.game.data.get('rematch')(this.props);
+				this.props.game.data.rematch(this.props);
 			}
 		};
 
@@ -225,21 +225,18 @@ export default connect(({ user }) => ({ user }))(
 
 		exitFunc = () => {
 			const { game } = this.props;
-			if (game.data.get('quest')) {
-				if (
-					game.winner === this.state.player1.id &&
-					game.data.get('choicerewards')
-				) {
+			if (game.data.quest) {
+				if (game.winner === this.state.player1.id && game.data.choicerewards) {
 					this.props.dispatch(
 						store.doNav(import('./Reward'), {
-							type: game.data.get('choicerewards'),
-							amount: game.data.get('rewardamount'),
+							type: game.data.choicerewards,
+							amount: game.data.rewardamount,
 						}),
 					);
 				} else {
 					this.props.dispatch(store.doNav(import('./Quest')));
 				}
-			} else if (game.data.get('daily') !== undefined) {
+			} else if (game.data.daily !== undefined) {
 				this.props.dispatch(store.doNav(import('./Colosseum')));
 			} else {
 				this.props.dispatch(store.doNav(import('./MainMenu')));
@@ -247,7 +244,7 @@ export default connect(({ user }) => ({ user }))(
 		};
 
 		computeBonuses(game, lefttext, streakrate) {
-			if (game.data.get('endurance') !== undefined) return 1;
+			if (game.data.endurance !== undefined) return 1;
 			const bonus = BonusList.reduce((bsum, bonus) => {
 				const b = bonus.func(game, this.state.player1, this.state.player1.foe);
 				if (b > 0) {
@@ -274,7 +271,7 @@ export default connect(({ user }) => ({ user }))(
 		componentDidMount() {
 			document.addEventListener('keydown', this.onkeydown);
 			const { game } = this.props,
-				level = game.data.get('level'),
+				level = game.data.level,
 				winner = game.winner === this.state.player1.id,
 				lefttext = [
 					<div key="0">{game.bonusstats.get('ply')} plies</div>,
@@ -284,27 +281,18 @@ export default connect(({ user }) => ({ user }))(
 				];
 
 			this.props.dispatch(store.clearChat('Replay'));
-			const replay = game
-				.get(game.id)
-				.get('bonusstats')
-				.get('replay');
+			const replay = game.bonusstats.get('replay');
 			if (
 				replay &&
-				game.data.get('endurance') === undefined &&
-				!game.data.get('quest')
+				game.data.endurance === undefined &&
+				game.data.quest === undefined
 			) {
 				this.props.dispatch(
 					store.chat(
 						JSON.stringify({
-							date: game
-								.get(game.id)
-								.get('bonusstats')
-								.get('time'),
-							seed: game
-								.get(game.id)
-								.get('data')
-								.get('seed'),
-							players: game.data.get('players'),
+							date: game.bonusstats.get('time'),
+							seed: game.data.seed,
+							players: game.data.players,
 							moves: replay,
 						}),
 						'Replay',
@@ -319,11 +307,11 @@ export default connect(({ user }) => ({ user }))(
 				goldreward: this.state.goldreward,
 			};
 			if (winner && this.props.user) {
-				const wasPvP = game.data.get('players').every(pd => !pd.ai);
+				const wasPvP = game.data.players.every(pd => !pd.ai);
 				if (level !== undefined || wasPvP)
 					sock.userExec('addwin', { pvp: wasPvP });
 				if (level !== undefined) {
-					const foedecks = game.data.get('players').filter(pd => !pd.user),
+					const foedecks = game.data.players.filter(pd => !pd.user),
 						foedeck = RngMock.choose(foedecks);
 					if (state.cardreward === undefined && foedeck) {
 						const foeDeck = etgutil.decodedeck(foedeck.deck);
@@ -350,7 +338,7 @@ export default connect(({ user }) => ({ user }))(
 					if (state.goldreward === undefined) {
 						let agetax = 0;
 						if (level !== undefined) {
-							if (game.data.get('daily') === undefined) {
+							if (game.data.daily === undefined) {
 								const streak = (this.props.streakback || 0) + 1;
 								if (streak !== this.props.user.streak[level]) {
 									sock.userExec('setstreak', { l: level, n: streak });
@@ -365,9 +353,9 @@ export default connect(({ user }) => ({ user }))(
 										{(streakrate * 100).toFixed(1)}% streak bonus
 									</TooltipText>,
 								);
-								if (game.data.get('age')) {
+								if (game.data.age) {
 									agetax = Math.max(
-										Math.min(game.data.get('age') * 0.1 - 0.5, 0.5),
+										Math.min(game.data.age * 0.1 - 0.5, 0.5),
 										0,
 									);
 									if (agetax > 0) {
@@ -396,13 +384,13 @@ export default connect(({ user }) => ({ user }))(
 					sock.userExec('addgold', { g: state.goldreward });
 				}
 				if (state.cardreward) {
-					sock.userExec(game.data.get('quest') ? 'addbound' : 'addcards', {
+					sock.userExec(game.data.quest ? 'addbound' : 'addcards', {
 						c: state.cardreward,
 					});
 				}
 			}
 			this.setState(state);
-			if (game.data.get('endurance') === undefined) {
+			if (game.data.endurance === undefined) {
 				this.props.dispatch(
 					store.chatMsg(
 						[
@@ -413,8 +401,8 @@ export default connect(({ user }) => ({ user }))(
 							game.bonusstats.get('time'),
 							this.state.player1.hp,
 							this.state.player1.maxhp,
-							(this.state.goldreward || 0) - game.data.get('cost', 0),
-							this.state.cardreward || '-',
+							(state.goldreward | 0) - (game.data.cost | 0),
+							state.cardreward || '-',
 							userutil.calcWealth(this.state.cardreward),
 							!this.props.user || level === undefined
 								? -1
@@ -446,16 +434,13 @@ export default connect(({ user }) => ({ user }))(
 			return (
 				<>
 					<Components.ExitBtn x={412} y={440} onClick={this.exitFunc} />
-					{game.data.get('rematch') &&
-						(!game.data.get('rematchFilter') ||
-							game.data.get('rematchFilter')(
-								this.props,
-								this.state.player1.id,
-							)) && (
+					{game.data.rematch &&
+						(!game.data.rematchFilter ||
+							game.data.rematchFilter(this.props, this.state.player1.id)) && (
 							<input
 								type="button"
 								value="Rematch"
-								onClick={() => game.data.get('rematch')(this.props)}
+								onClick={() => game.data.rematch(this.props)}
 								style={{
 									position: 'absolute',
 									left: '412px',
@@ -469,8 +454,7 @@ export default connect(({ user }) => ({ user }))(
 								<>
 									{this.state.goldreward > 0 && (
 										<Components.Text
-											text={`${this.state.goldreward -
-												game.data.get('cost', 0)}$`}
+											text={`${this.state.goldreward - (game.data.cost | 0)}$`}
 											style={{
 												textAlign: 'center',
 												width: '900px',
@@ -482,11 +466,7 @@ export default connect(({ user }) => ({ user }))(
 									)}
 									{cards.length > 0 && cards}
 									<Components.Text
-										text={
-											game.data.get('quest')
-												? game.data.get('wintext')
-												: 'You won!'
-										}
+										text={game.data.wintext || 'You won!'}
 										style={{
 											textAlign: 'center',
 											width: '900px',

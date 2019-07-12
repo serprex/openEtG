@@ -184,8 +184,12 @@ Thing.prototype.die = function() {
 		}
 		if (this.game.bonusstats) {
 			this.game.updateIn(
-				[this.game.id, 'bonusstats', 'creatureskilled', this.id],
-				(x = 0) => x + 1,
+				[this.game.id, 'bonusstats', 'creatureskilled'],
+				creatureskilled => {
+					creatureskilled = new Map(creatureskilled);
+					creatureskilled.set(this.id, (creatureskilled.get(this.id) | 0) + 1);
+					return creatureskilled;
+				},
 			);
 		}
 		this.deatheffect(idx);
@@ -501,11 +505,13 @@ Thing.prototype.useactive = function(t) {
 		this.proc('cardplay');
 		if (this.game.bonusstats) {
 			this.game.updateIn(
-				[this.game.id, 'bonusstats', 'cardsplayed', this.id],
-				(x = 6) => {
-					const a = new Int32Array(x);
+				[this.game.id, 'bonusstats', 'cardsplayed'],
+				cardsplayed => {
+					cardsplayed = new Map(cardsplayed);
+					const a = new Int32Array(cardsplayed.get(this.id) || 6);
 					a[this.card.type]++;
-					return a;
+					cardsplayed.set(this.id, a);
+					return cardsplayed;
 				},
 			);
 		}

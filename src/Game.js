@@ -20,13 +20,13 @@ export default function Game(data) {
 			players: [],
 			bonusstats: new imm.Map({
 				ply: 0,
-				cardsplayed: new imm.Map(),
-				creaturesplaced: new imm.Map(),
-				creatureskilled: new imm.Map(),
+				cardsplayed: new Map(),
+				creaturesplaced: new Map(),
+				creatureskilled: new Map(),
 				time: Date.now(),
 				replay: [],
 			}),
-			data: new imm.Map(data),
+			data: data,
 			rng: [
 				Rng.getStateLoLo(),
 				Rng.getStateLoHi(),
@@ -106,7 +106,7 @@ Game.prototype.byId = function(id) {
 	return inst;
 };
 Game.prototype.byUser = function(name) {
-	const pldata = this.data.get('players');
+	const pldata = this.data.players;
 	for (let i = 0; i < pldata.length; i++) {
 		if (pldata[i].user === name) {
 			return this.byId(this.players[i]);
@@ -173,7 +173,7 @@ Game.prototype.nextPlayer = function(id) {
 };
 Game.prototype.setWinner = function() {
 	if (!this.winner) {
-		const pldata = this.data.get('players'),
+		const pldata = this.data.players,
 			{ players } = this;
 		const winners = new Set();
 		for (let i = 0; i < players.length; i++) {

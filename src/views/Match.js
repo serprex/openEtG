@@ -403,14 +403,11 @@ function ThingInst(props) {
 
 function addNoHealData(game, newdata) {
 	const dataNext = {
-		...game
-			.get(game.id)
-			.get('data')
-			.get('dataNext'),
+		...game.data.dataNext
 	};
 	if (dataNext.endurance) dataNext.endurance--;
 	if (dataNext.noheal) {
-		for (const { user } of game.data.get('players')) {
+		for (const { user } of game.data.players) {
 			if (user) {
 				for (let i = 0; i < newdata.players.length; i++) {
 					const pldata = newdata.players[i];
@@ -565,9 +562,9 @@ export default connect(({ user }) => ({ user }))(
 			const { game } = this.props;
 			if (
 				!iscmd &&
-				game.data
-					.get('players')
-					.some(pl => pl.user && pl.user !== this.props.user.name)
+				game.data.players.some(
+					pl => pl.user && pl.user !== this.props.user.name,
+				)
 			)
 				sock.emit({ x: 'move', data });
 			if (data.x === 'cast' && game.turn === this.state.player2.id) {
@@ -789,38 +786,38 @@ export default connect(({ user }) => ({ user }))(
 				this.applyNext({ x: 'accept' });
 			} else if (game.winner) {
 				if (user) {
-					if (game.data.get('arena')) {
+					if (game.data.arena) {
 						sock.userEmit('modarena', {
-							aname: game.data.get('arena'),
+							aname: game.data.arena,
 							won: game.winner !== this.state.player1.id,
 							lv: game.level - 4,
 						});
 					}
 					if (game.winner === this.state.player1.id) {
-						if (game.data.get('quest')) {
-							if (game.data.get('quest').autonext) {
+						if (game.data.quest !== undefined) {
+							if (game.data.quest.autonext) {
 								mkAi.run(
-									mkQuestAi(game.data.get('quest').autonext, qdata =>
+									mkQuestAi(game.data.quest.autonext, qdata =>
 										addNoHealData(game, qdata),
 									),
 								);
 								return;
-							} else if (!user.quests[game.data.get('quest').key]) {
+							} else if (!user.quests[game.data.quest.key]) {
 								sock.userExec('setquest', {
-									quest: game.data.get('quest').key,
+									quest: game.data.quest.key,
 								});
 							}
-						} else if (game.data.get('daily')) {
-							const endurance = game.data.get('endurance');
+						} else if (game.data.daily) {
+							const endurance = game.data.endurance;
 							if (endurance !== undefined && endurance > 0) {
 								mkAi.run(
-									mkAi.mkAi(game.data.get('level'), true, gdata =>
+									mkAi.mkAi(game.data.level, true, gdata =>
 										addNoHealData(game, gdata),
 									),
 								);
 								return;
 							} else {
-								const daily = game.data.get('daily');
+								const daily = game.data.daily;
 								sock.userExec('donedaily', {
 									daily: daily === 4 ? 5 : daily === 3 ? 0 : daily,
 								});
@@ -992,18 +989,18 @@ export default connect(({ user }) => ({ user }))(
 		};
 
 		startMatch({ user, game, dispatch }) {
-			const wasPvP = game.data.get('players').every(pd => !pd.ai);
+			const wasPvP = game.data.players.every(pd => !pd.ai);
 			if (
 				user &&
-				!game.data.get('endurance') &&
-				(game.data.get('level') !== undefined || wasPvP)
+				!game.data.endurance &&
+				(game.data.level !== undefined || wasPvP)
 			) {
 				sock.userExec('addloss', {
 					pvp: wasPvP,
-					l: game.data.get('level'),
-					g: -game.data.get('cost', 0),
+					l: game.data.level,
+					g: -(game.data.cost | 0),
 				});
-				this.streakback = user.streak[game.data.get('level')];
+				this.streakback = user.streak[game.data.level];
 			}
 			this.gameStep();
 			this.gameInterval = setInterval(() => this.gameStep(), 30);
@@ -1018,10 +1015,10 @@ export default connect(({ user }) => ({ user }))(
 				store.setCmds({
 					move: ({ data }) => this.applyNext(data, true),
 					foeleft: ({ data }) => {
-						const players = game.data.get('players');
+						const players = game.data.players;
 						for (let i = 0; i < players.length; i++) {
 							if (players[i].user === data.name) {
-								game.byId(game.get('players')).die();
+								game.byId(game.players[i]).die();
 							}
 						}
 					},
@@ -1035,7 +1032,7 @@ export default connect(({ user }) => ({ user }))(
 				delete sock.trade;
 			}
 			if (!this.props.replay) {
-				if (!this.props.game.data.get('spectate')) {
+				if (!this.props.game.data.spectate) {
 					document.addEventListener('keydown', this.onkeydown);
 				}
 				this.startMatch(this.props);
@@ -1417,8 +1414,7 @@ export default connect(({ user }) => ({ user }))(
 							'Demigod\n',
 							'Arena1\n',
 							'Arena2\n',
-						][game.data.get('level')] || ''}${this.state.player2.data.name ||
-							'-'}`}
+						][game.data.level] || ''}${this.state.player2.data.name || '-'}`}
 					</div>
 					<span
 						style={{
@@ -1465,7 +1461,7 @@ export default connect(({ user }) => ({ user }))(
 						}}
 					/>
 					{!this.props.replay &&
-						!game.data.get('spectate') &&
+						!game.data.spectate &&
 						(game.turn === this.state.player1.id || game.winner) && (
 							<>
 								{cancelText && (

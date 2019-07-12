@@ -52,7 +52,14 @@ function removeSoPa(p) {
 }
 Game.prototype.rngNext = function() {
 	Rng.setState(...this.rng);
-	return Rng.next();
+	const val = Rng.next();
+	this.rng = [
+		Rng.getStateLoLo(),
+		Rng.getStateLoHi(),
+		Rng.getStateHiLo(),
+		Rng.getStateHiHi(),
+	];
+	return val;
 };
 Game.prototype.updateExpectedDamage = function() {
 	if (this.expectedDamage) {

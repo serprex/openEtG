@@ -113,7 +113,7 @@ Object.defineProperty(Player.prototype, 'deckIds', {
 });
 Object.defineProperty(Player.prototype, 'data', {
 	get() {
-		return this.game.data.get('players')[this.getIndex()];
+		return this.game.data.players[this.getIndex()];
 	},
 });
 
@@ -223,8 +223,12 @@ Player.prototype.addCrea = function(x, fromhand) {
 	if (~this.place('creatures', x.id)) {
 		if (fromhand && this.game.bonusstats) {
 			this.game.updateIn(
-				[this.game.id, 'bonusstats', 'creaturesplaced', this.id],
-				(x = 0) => x + 1,
+				[this.game.id, 'bonusstats', 'creaturesplaced'],
+				creaturesplaced => {
+					creaturesplaced = new Map(creaturesplaced);
+					creaturesplaced.set(this.id, (creaturesplaced.get(this.id) | 0) + 1);
+					return creaturesplaced;
+				},
 			);
 		}
 		x.place(this, etg.Creature, fromhand);
