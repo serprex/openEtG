@@ -630,12 +630,9 @@ const Skills = {
 	},
 	embezzledeath: (ctx, c, t) => {
 		const { foe } = c.owner;
-		if (foe.deckIds.length < 3) {
-			foe.deckIds.length = 0;
-			foe.die();
-		} else {
-			foe.deckIds = foe.deckIds.slice(0, -3);
-		}
+		foe._draw();
+		foe._draw();
+		foe._draw();
 	},
 	empathy: (ctx, c, t) => {
 		const healsum = c.owner.countcreatures();

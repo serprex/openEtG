@@ -168,8 +168,36 @@ Game.prototype.cloneInstance = function(inst, ownerId) {
 	return this.byId(newId);
 };
 Game.prototype.nextPlayer = function(id) {
-	const { players } = this;
-	return players[(players.indexOf(id) + 1) % players.length];
+	const { players } = this,
+		idx = players.indexOf(id);
+	for (let i = 1; i < players.length; i++) {
+		const pidx = (idx + i) % players.length;
+		if (!this.get(players[pidx]).get('out')) {
+			return players[pidx];
+		}
+	}
+	return id;
+};
+Game.prototype.nextTurn = function() {
+	const { turn } = this;
+	const next = this.byId(this.nextPlayer(turn));
+	if (next.id !== turn) {
+		const poison = next.getStatus('poison');
+		if (poison) next.dmg(poison);
+		next.maybeDecrStatus('sosa');
+		next.setStatus('nova', 0);
+		next.setStatus('sanctuary', 0);
+		next.setStatus('precognition', 0);
+		for (let i = next.drawpower; i > 0; i--) {
+			next.drawcard(true);
+		}
+		this.set(this.id, 'turn', next.id);
+		next.proc('turnstart');
+		if (this.get(next.id).get('resigned')) {
+			next.die();
+			this.nextTurn();
+		}
+	}
 };
 Game.prototype.setWinner = function() {
 	if (!this.winner) {
@@ -211,7 +239,22 @@ const nextHandler = {
 		pl.drawhand(pl.handIds.length - 1);
 	},
 	resign(data) {
-		this.byId(data.c).die();
+		if (this.turn === data.c) {
+			this.byId(data.c).die();
+			this.nextTurn();
+		}
+		const { players } = this;
+		let left = new Set();
+		for (let i = 0; i < players.length; i++) {
+			if (players[i] !== data.c && !this.get(players[i]).get('out')) {
+				left.add(players[i].leader || i);
+			}
+		}
+		if (left.size === 1) {
+			this.byId(data.c).die();
+		} else {
+			this.set(data.c, 'resigned', true);
+		}
 	},
 };
 Game.prototype.next = function(event) {

@@ -413,18 +413,7 @@ Player.prototype.endturn = function(discard) {
 	if (this.weaponId) this.weapon.attack(undefined, true);
 	this.usedactive = false;
 	this.setStatus('flatline', 0);
-	const next = this.game.byId(this.game.nextPlayer(this.id));
-	const poison = next.getStatus('poison');
-	if (poison) next.dmg(poison);
-	next.maybeDecrStatus('sosa');
-	next.setStatus('nova', 0);
-	next.setStatus('sanctuary', 0);
-	next.setStatus('precognition', 0);
-	for (let i = next.drawpower; i > 0; i--) {
-		next.drawcard(true);
-	}
-	this.game.set(this.game.id, 'turn', next.id);
-	next.proc('turnstart');
+	this.game.nextTurn();
 };
 Player.prototype.die = function() {
 	this.out = true;

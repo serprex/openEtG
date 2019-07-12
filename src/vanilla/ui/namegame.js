@@ -39,9 +39,9 @@ function printstat(e) {
 		if (letters.has(letter)) continue;
 		letters.add(letter);
 		if (upped == 'no' || upped == 'both')
-			Array.prototype.push.apply(deck, Cards.filter(false, cardfilter));
+			deck.push(...Cards.filter(false, cardfilter));
 		if (upped == 'yes' || upped == 'both')
-			Array.prototype.push.apply(deck, Cards.filter(true, cardfilter));
+			deck.push(...Cards.filter(true, cardfilter));
 	}
 	if (document.getElementById('sortele').checked)
 		deck.sort((x, y) => x.element - y.element);

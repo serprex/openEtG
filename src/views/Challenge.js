@@ -8,16 +8,79 @@ import * as etgutil from '../etgutil.js';
 import * as Components from '../Components/index.js';
 import * as store from '../store.js';
 import RngMock from '../RngMock.js';
+import aiDecks from '../Decks.json';
+
+class PremadePicker extends React.Component {
+	constructor(props) {
+		super(props);
+		this.state = { search: '' };
+	}
+
+	render() {
+		const { onClick } = this.props;
+		const { mage, demigod } = aiDecks;
+		return (
+			<div
+				className="bgbox"
+				style={{
+					position: 'absolute',
+					zIndex: '10',
+					left: '200px',
+					top: '150px',
+					height: '300px',
+					width: '500px',
+					overflow: 'auto',
+				}}>
+				<input
+					style={{ display: 'block' }}
+					placeholder="Search"
+					value={this.state.search}
+					onChange={e => this.setState({ search: e.target.value })}
+				/>
+				<div
+					style={{
+						display: 'inline-block',
+						width: '50%',
+						verticalAlign: 'top',
+					}}>
+					{mage
+						.filter(x => !this.state.search || ~x[0].indexOf(this.state.search))
+						.map(([name, deck]) => (
+							<div key={name} onClick={() => onClick(name, deck, false)}>
+								{name}
+							</div>
+						))}
+				</div>
+				<div
+					style={{
+						display: 'inline-block',
+						width: '50%',
+						verticalAlign: 'top',
+					}}>
+					{demigod
+						.filter(x => !this.state.search || ~x[0].indexOf(this.state.search))
+						.map(([name, deck]) => (
+							<div key={name} onClick={() => onClick(name, deck, true)}>
+								{name}
+							</div>
+						))}
+				</div>
+			</div>
+		);
+	}
+}
 
 class PlayerEditor extends React.Component {
 	constructor(props) {
 		super(props);
 		this.state = {
-			deck: props.player.deck,
-			hp: props.player.hp,
-			mark: props.player.markpower,
-			draw: props.player.drawpower,
-			deckpower: props.player.deckpower,
+			deck: props.player.deck || '',
+			name: props.player.name || '',
+			hp: props.player.hp || '',
+			mark: props.player.markpower || '',
+			draw: props.player.drawpower || '',
+			deckpower: props.player.deckpower || '',
+			premade: false,
 		};
 	}
 
@@ -25,50 +88,82 @@ class PlayerEditor extends React.Component {
 		const { props, state } = this;
 		return (
 			<div>
-				<input
-					placeholder="HP"
-					className="numput"
-					value={state.hp}
-					onChange={e => this.setState({ hp: e.target.value })}
-				/>
-				<input
-					placeholder="Mark"
-					className="numput"
-					value={state.mark}
-					onChange={e => this.setState({ mark: e.target.value })}
-				/>
-				<input
-					placeholder="Draw"
-					className="numput"
-					value={state.draw}
-					onChange={e => this.setState({ draw: e.target.value })}
-				/>
-				<input
-					placeholder="Deck"
-					className="numput"
-					value={state.deckpower}
-					onChange={e => this.setState({ deckpower: e.target.value })}
-				/>
-				<input
-					type="button"
-					value="Ok"
-					className="editbtn"
-					onClick={() => {
-						const data = {};
-						if (state.deck) data.deck = state.deck;
-						parseInput(data, 'hp', state.hp);
-						parseInput(data, 'markpower', state.mark, 1188);
-						parseInput(data, 'drawpower', state.draw, 8);
-						parseInput(data, 'deckpower', state.deckpower);
-						props.updatePlayer(data);
-					}}
-				/>
-				<input
-					style={{ display: 'block' }}
-					placeholder="Deck"
-					value={state.deck}
-					onChange={e => this.setState({ deck: e.target.value })}
-				/>
+				<div>
+					<input
+						placeholder="HP"
+						className="numput"
+						value={state.hp}
+						onChange={e => this.setState({ hp: e.target.value })}
+					/>
+					<input
+						placeholder="Mark"
+						className="numput"
+						value={state.mark}
+						onChange={e => this.setState({ mark: e.target.value })}
+					/>
+					<input
+						placeholder="Draw"
+						className="numput"
+						value={state.draw}
+						onChange={e => this.setState({ draw: e.target.value })}
+					/>
+					<input
+						placeholder="Deck"
+						className="numput"
+						value={state.deckpower}
+						onChange={e => this.setState({ deckpower: e.target.value })}
+					/>
+					<input
+						type="button"
+						value="Ok"
+						className="editbtn"
+						onClick={() => {
+							const data = {};
+							if (state.name) data.name = state.name;
+							if (state.deck) data.deck = state.deck;
+							parseInput(data, 'hp', state.hp);
+							parseInput(data, 'markpower', state.mark, 1188);
+							parseInput(data, 'drawpower', state.draw, 8);
+							parseInput(data, 'deckpower', state.deckpower);
+							props.updatePlayer(data);
+						}}
+					/>
+				</div>
+				<div>
+					<input
+						placeholder="Deck"
+						value={state.deck}
+						onChange={e => this.setState({ deck: e.target.value })}
+					/>
+					&emsp;
+					<input
+						type="button"
+						value="Premade"
+						onClick={() => this.setState({ premade: true })}
+					/>
+				</div>
+				<div>
+					<input
+						placeholder="Name"
+						value={state.name}
+						onChange={e => this.setState({ name: e.target.value })}
+					/>
+				</div>
+				{this.state.premade && (
+					<PremadePicker
+						onClick={(name, deck, isdg) => {
+							const state = { name, deck, premade: false };
+							if (isdg) {
+								state.hp = 200;
+								state.draw = 2;
+								state.mark = 3;
+							} else {
+								state.hp = 125;
+							}
+							this.setState(state);
+						}}
+					/>
+				)}
 			</div>
 		);
 	}
@@ -77,7 +172,7 @@ class PlayerEditor extends React.Component {
 class Group extends React.Component {
 	constructor(props) {
 		super(props);
-		this.state = { invite: '', editing: new Set() };
+		this.state = { invite: '' };
 	}
 
 	updatePlayer = (i, pl) => {
@@ -85,11 +180,7 @@ class Group extends React.Component {
 			{ idx } = players[i];
 		players[i] = { ...this.props.players[i], ...pl };
 		this.props.updatePlayers(players);
-		this.setState(state => {
-			const editing = new Set(state.editing);
-			editing.delete(idx);
-			return { editing };
-		});
+		this.props.removeEditing(idx);
 	};
 
 	render() {
@@ -98,19 +189,8 @@ class Group extends React.Component {
 			<div className="bgbox" style={{ width: '300px', marginBottom: '8px' }}>
 				{props.players.map((pl, i) => (
 					<div key={pl.idx} style={{ minHeight: '24px' }}>
-						<span
-							onClick={() => {
-								this.setState(state => {
-									const editing = new Set(state.editing);
-									if (editing.has(pl.idx)) {
-										editing.delete(pl.idx);
-									} else {
-										editing.add(pl.idx);
-									}
-									return { editing };
-								});
-							}}>
-							{pl.user || 'AI'}
+						<span onClick={() => this.props.toggleEditing(pl.idx)}>
+							{pl.name || ''} <i>{pl.user || 'AI'}</i>
 							{pl.pending === 2 && '...'}
 						</span>
 						{pl.user !== props.host && (
@@ -123,15 +203,11 @@ class Group extends React.Component {
 									const players = props.players.slice(),
 										[pl] = players.splice(i, 1);
 									props.updatePlayers(players);
-									this.setState(state => {
-										const editing = new Set(state.editing);
-										editing.delete(pl.idx);
-										return { editing };
-									});
+									props.removeEditing(pl.idx);
 								}}
 							/>
 						)}
-						{state.editing.has(pl.idx) && (
+						{props.editing.has(pl.idx) && (
 							<PlayerEditor
 								player={pl}
 								updatePlayer={pl => this.updatePlayer(i, pl)}
@@ -147,11 +223,8 @@ class Group extends React.Component {
 							const { invite } = this.state;
 							const idx = props.getNextIdx();
 							if (!invite) {
-								this.setState(state => {
-									const editing = new Set(state.editing).add(idx);
-									return { editing };
-								});
 								props.updatePlayers(props.players.concat([{ idx }]));
+								props.addEditing(idx);
 							} else {
 								if (!props.hasUserAsPlayer(invite)) {
 									props.updatePlayers(
@@ -193,6 +266,7 @@ export default connect(({ user, opts }) => ({
 			this.nextIdx = 2;
 			this.state = {
 				groups: [[{ user: props.username, idx: 1, pending: 1 }], []],
+				editing: [new Set(), new Set()],
 				replay: '',
 			};
 		}
@@ -348,7 +422,10 @@ export default connect(({ user, opts }) => ({
 		};
 		addGroup = () => {
 			this.setState(
-				state => ({ groups: state.groups.concat([[]]) }),
+				state => ({
+					groups: state.groups.concat([[]]),
+					editing: state.editing.concat([Set()]),
+				}),
 				this.sendConfig,
 			);
 		};
@@ -363,9 +440,11 @@ export default connect(({ user, opts }) => ({
 		};
 		removeGroup = i => {
 			this.setState(state => {
-				const newgroups = state.groups.slice();
+				const newgroups = state.groups.slice(),
+					newediting = state.editing.slice();
 				newgroups.splice(i, 1);
-				return { groups: newgroups };
+				newediting.splice(i, 1);
+				return { groups: newgroups, editing: newediting };
 			}, this.sendConfig);
 		};
 		loadMyData = () => {
@@ -434,38 +513,68 @@ export default connect(({ user, opts }) => ({
 							invitePlayer={this.invitePlayer}
 							removeGroup={() => this.removeGroup(i)}
 							getNextIdx={this.getNextIdx}
+							editing={this.state.editing[i]}
+							addEditing={idx =>
+								this.setState(state => {
+									const newediting = state.editing.slice();
+									newediting[i] = new Set(newediting[i]).add(idx);
+									return { editing: newediting };
+								})
+							}
+							toggleEditing={idx =>
+								this.setState(state => {
+									const newediting = state.editing.slice();
+									newediting[i] = new Set(newediting[i]);
+									if (newediting[i].has(idx)) {
+										newediting[i].delete(idx);
+									} else {
+										newediting[i].add(idx);
+									}
+									return { editing: newediting };
+								})
+							}
+							removeEditing={idx =>
+								this.setState(state => {
+									const newediting = state.editing.slice();
+									newediting[i] = new Set(newediting[i]);
+									newediting[i].delete(idx);
+									return { editing: newediting };
+								})
+							}
 						/>
 					))}
 					<div style={{ width: '300px' }}>
 						<input type="button" value="+Group" onClick={this.addGroup} />
-						{allReady ? (
-							<input
-								style={{ float: 'right' }}
-								type="button"
-								value="Start"
-								onClick={() => {
-									if (isMultiplayer) {
-										sock.userEmit('matchbegin');
-									} else {
-										this.aiClick();
-									}
-								}}
-							/>
-						) : (
-							mydata &&
-							mydata.pending && (
-								<input
-									style={{ float: 'right' }}
-									type="button"
-									value="Ready"
-									onClick={() => {
-										sock.userEmit('matchready', {
-											data: { deck: sock.getDeck() },
-										});
-									}}
-								/>
-							)
-						)}
+						{allReady
+							? this.state.groups.length > 1 &&
+							  this.state.groups.every(x => x.length) &&
+							  this.state.editing.every(x => !x.size) && (
+									<input
+										style={{ float: 'right' }}
+										type="button"
+										value="Start"
+										onClick={() => {
+											if (isMultiplayer) {
+												sock.userEmit('matchbegin');
+											} else {
+												this.aiClick();
+											}
+										}}
+									/>
+							  )
+							: mydata &&
+							  mydata.pending && (
+									<input
+										style={{ float: 'right' }}
+										type="button"
+										value="Ready"
+										onClick={() => {
+											sock.userEmit('matchready', {
+												data: { deck: sock.getDeck() },
+											});
+										}}
+									/>
+							  )}
 					</div>
 					<input
 						style={{

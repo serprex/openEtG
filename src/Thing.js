@@ -187,7 +187,10 @@ Thing.prototype.die = function() {
 				[this.game.id, 'bonusstats', 'creatureskilled'],
 				creatureskilled => {
 					creatureskilled = new Map(creatureskilled);
-					creatureskilled.set(this.id, (creatureskilled.get(this.id) | 0) + 1);
+					creatureskilled.set(
+						this.game.turn,
+						(creatureskilled.get(this.id) | 0) + 1,
+					);
 					return creatureskilled;
 				},
 			);
@@ -510,7 +513,7 @@ Thing.prototype.useactive = function(t) {
 					cardsplayed = new Map(cardsplayed);
 					const a = new Int32Array(cardsplayed.get(this.id) || 6);
 					a[this.card.type]++;
-					cardsplayed.set(this.id, a);
+					cardsplayed.set(this.ownerId, a);
 					return cardsplayed;
 				},
 			);

@@ -403,7 +403,7 @@ function ThingInst(props) {
 
 function addNoHealData(game, newdata) {
 	const dataNext = {
-		...game.data.dataNext
+		...game.data.dataNext,
 	};
 	if (dataNext.endurance) dataNext.endurance--;
 	if (dataNext.noheal) {
@@ -777,60 +777,65 @@ export default connect(({ user }) => ({ user }))(
 				? this.state.replayhistory[this.state.replayindex]
 				: this.props.game;
 
-		endClick = (discard = 0) => {
+		gotoResults = () => {
 			const { game, user } = this.props;
+			if (user) {
+				if (game.data.arena) {
+					sock.userEmit('modarena', {
+						aname: game.data.arena,
+						won: game.winner !== this.state.player1.id,
+						lv: game.level - 4,
+					});
+				}
+				if (game.winner === this.state.player1.id) {
+					if (game.data.quest !== undefined) {
+						if (game.data.quest.autonext) {
+							mkAi.run(
+								mkQuestAi(game.data.quest.autonext, qdata =>
+									addNoHealData(game, qdata),
+								),
+							);
+							return;
+						} else if (!user.quests[game.data.quest.key]) {
+							sock.userExec('setquest', {
+								quest: game.data.quest.key,
+							});
+						}
+					} else if (game.data.daily) {
+						const endurance = game.data.endurance;
+						if (endurance !== undefined && endurance > 0) {
+							mkAi.run(
+								mkAi.mkAi(game.data.level, true, gdata =>
+									addNoHealData(game, gdata),
+								),
+							);
+							return;
+						} else {
+							const daily = game.data.daily;
+							sock.userExec('donedaily', {
+								daily: daily === 4 ? 5 : daily === 3 ? 0 : daily,
+							});
+						}
+					}
+				}
+			}
+			this.props.dispatch(
+				store.doNav(import('./Result'), {
+					game: game,
+					streakback: this.streakback,
+				}),
+			);
+		};
+
+		endClick = (discard = 0) => {
+			const { game } = this.props;
 			if (
 				game.turn === this.state.player1.id &&
 				game.phase === etg.MulliganPhase
 			) {
 				this.applyNext({ x: 'accept' });
 			} else if (game.winner) {
-				if (user) {
-					if (game.data.arena) {
-						sock.userEmit('modarena', {
-							aname: game.data.arena,
-							won: game.winner !== this.state.player1.id,
-							lv: game.level - 4,
-						});
-					}
-					if (game.winner === this.state.player1.id) {
-						if (game.data.quest !== undefined) {
-							if (game.data.quest.autonext) {
-								mkAi.run(
-									mkQuestAi(game.data.quest.autonext, qdata =>
-										addNoHealData(game, qdata),
-									),
-								);
-								return;
-							} else if (!user.quests[game.data.quest.key]) {
-								sock.userExec('setquest', {
-									quest: game.data.quest.key,
-								});
-							}
-						} else if (game.data.daily) {
-							const endurance = game.data.endurance;
-							if (endurance !== undefined && endurance > 0) {
-								mkAi.run(
-									mkAi.mkAi(game.data.level, true, gdata =>
-										addNoHealData(game, gdata),
-									),
-								);
-								return;
-							} else {
-								const daily = game.data.daily;
-								sock.userExec('donedaily', {
-									daily: daily === 4 ? 5 : daily === 3 ? 0 : daily,
-								});
-							}
-						}
-					}
-				}
-				this.props.dispatch(
-					store.doNav(import('./Result'), {
-						game: game,
-						streakback: this.streakback,
-					}),
-				);
+				this.gotoResults();
 			} else if (game.turn === this.state.player1.id) {
 				if (discard === 0 && this.state.player1.handIds.length === 8) {
 					this.setState({
@@ -879,7 +884,9 @@ export default connect(({ user }) => ({ user }))(
 			}
 			if (this.state.resigning) {
 				this.applyNext({ x: 'resign', c: this.state.player1.id });
-				this.endClick();
+				if (this.props.game.winner) {
+					this.gotoResult();
+				}
 			} else {
 				this.setState({ resigning: true });
 			}
