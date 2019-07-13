@@ -177,7 +177,7 @@ const sockEvents = {
 					style={{ cursor: 'pointer', color: '#69f' }}
 					onClick={() => {
 						if (data.pvp) {
-							sendChallenge((pvp = data.f));
+							sendChallenge(data.f);
 						} else {
 							userEmit('tradewant', { f: (trade = data.f) });
 						}

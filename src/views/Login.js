@@ -123,7 +123,7 @@ if (typeof kongregateAPI === 'undefined') {
 							style={{ position: 'absolute', left: '430px', top: '380px' }}>
 							<input
 								type="checkbox"
-								checked={this.props.remember || false}
+								checked={!!this.props.remember}
 								onChange={e => {
 									if (
 										typeof localStorage !== 'undefined' &&

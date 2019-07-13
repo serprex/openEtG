@@ -96,6 +96,23 @@ Game.prototype.rng = function() {
 Game.prototype.upto = function(x) {
 	return (this.rng() * x) | 0;
 };
+Game.prototype.choose = function(x) {
+	return x[this.upto(x.length)];
+};
+Game.prototype.randomcard = function(upped, filter) {
+	const keys = Cards.filter(upped, filter);
+	return keys && keys.length && Cards.Codes[this.choose(keys)];
+};
+Game.prototype.shuffle = function(array) {
+	let counter = array.length;
+	while (counter) {
+		const index = this.upto(counter--),
+			temp = array[counter];
+		array[counter] = array[index];
+		array[index] = temp;
+	}
+	return array;
+};
 Game.prototype.byId = function(id) {
 	if (!id) return null;
 	let inst = this.cache.get(id);

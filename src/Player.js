@@ -157,6 +157,7 @@ defineProp('markpower');
 defineProp('mark');
 defineProp('shardgolem');
 defineProp('out');
+defineProp('resigning');
 
 Player.prototype.init = function(foe, data) {
 	this.game.set(this.id, 'type', etg.Player);

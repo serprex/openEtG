@@ -628,21 +628,13 @@ Thing.prototype.upto = function(x) {
 	return this.game.upto(x);
 };
 Thing.prototype.choose = function(x) {
-	return x[this.upto(x.length)];
+	return this.game.choose(x);
 };
 Thing.prototype.randomcard = function(upped, filter) {
-	const keys = Cards.filter(upped, filter);
-	return keys && keys.length && Cards.Codes[this.choose(keys)];
+	return this.game.randomcard(upped, filter);
 };
 Thing.prototype.shuffle = function(array) {
-	let counter = array.length;
-	while (counter--) {
-		const index = this.upto(counter),
-			temp = array[counter];
-		array[counter] = array[index];
-		array[index] = temp;
-	}
-	return array;
+	return this.game.shuffle(array);
 };
 Thing.prototype.buffhp = function(x) {
 	if (this.type !== etg.Weapon) {

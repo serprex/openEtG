@@ -39,8 +39,8 @@ Player.prototype.shuffle = function(array) {
 	var counter = array.length,
 		temp,
 		index;
-	while (counter--) {
-		index = this.upto(counter) | 0;
+	while (counter) {
+		index = this.upto(counter--);
 		temp = array[counter];
 		array[counter] = array[index];
 		array[index] = temp;

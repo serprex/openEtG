@@ -357,46 +357,30 @@ const sockmeta = new WeakMap();
 			const deck = user.decks[user.selectedDeck];
 			if (!deck) return;
 			thismeta.deck = deck;
-			thismeta.pvpstats = {
-				hp: data.hp | 0,
-				markpower: data.markpower | 0,
-				deckpower: data.deckpower | 0,
-				drawpower: data.drawpower | 0,
-			};
 			const foesock = Us.socks.get(f);
 			if (foesock && foesock.readyState === 1) {
 				const foemeta = sockmeta.get(foesock);
 				if (foemeta.duel === u) {
-					delete foemeta.duel;
-					thismeta.foe = foesock;
-					foemeta.foe = this;
+					thismeta.duel = f;
 					const data = {
 						seed: (Math.random() * MAX_INT) | 0,
 						players: RngMock.shuffle([
 							{
-								...thismeta.pvpstats,
 								deck: thismeta.deck,
 								name: u,
 								user: u,
+								markpower: 1,
 							},
 							{
-								...foemeta.pvpstats,
 								deck: foemeta.deck,
 								name: f,
 								user: f,
+								markpower: 1,
 							},
 						]),
 					};
 					sockEmit(this, 'pvpgive', { data });
 					sockEmit(foesock, 'pvpgive', { data });
-					if (foemeta.spectators) {
-						foemeta.spectators.forEach(uname => {
-							const sock = Us.socks.get(uname);
-							if (sock && sock.readyState === 1) {
-								sockEmit(sock, 'spectategive', { data });
-							}
-						});
-					}
 				} else {
 					thismeta.duel = f;
 					sockEmit(foesock, 'challenge', { f: u, pvp: true });
@@ -1009,6 +993,12 @@ const sockmeta = new WeakMap();
 		move(data, user, info) {
 			const { host } = info;
 			if (!host) {
+				const { duel } = info;
+				if (duel) {
+					const foesock = Us.socks.get(duel);
+					sockEmit(foesock, 'move', data);
+					return;
+				}
 				sockEmit(this, { mode: 1, msg: "You aren't in a match" });
 			}
 			const hostsock = Us.socks.get(host),
@@ -1016,11 +1006,12 @@ const sockmeta = new WeakMap();
 				match = hostmeta && hostmeta.match;
 			if (!match) {
 				sockEmit(this, { mode: 1, msg: `${host} isn't hosting` });
-			}
-			for (const u of match.room) {
-				if (u !== user.name) {
-					const s = Us.socks.get(u);
-					sockEmit(s, 'move', data);
+			} else {
+				for (const u of match.room) {
+					if (u !== user.name) {
+						const s = Us.socks.get(u);
+						sockEmit(s, 'move', data);
+					}
 				}
 			}
 		},

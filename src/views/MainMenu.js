@@ -156,14 +156,13 @@ const chatStyle = {
 
 export default connect(({ user, opts }) => ({
 	user,
-	remember: opts.remember,
-	foename: opts.foename,
-	enableSound: opts.enableSound,
-	enableMusic: opts.enableMusic,
-	hideRightpane: opts.hideRightpane,
-	hideMainchat: opts.hideMainchat,
-	disableTut: opts.disableTut,
-	lofiArt: opts.lofiArt,
+	foename: opts.foename || '',
+	enableSound: !!opts.enableSound,
+	enableMusic: !!opts.enableMusic,
+	hideRightpane: !!opts.hideRightpane,
+	hideMainchat: !!opts.hideMainchat,
+	disableTut: !!opts.disableTut,
+	lofiArt: !!opts.lofiArt,
 }))(
 	class MainMenu extends React.Component {
 		constructor(props) {
@@ -661,6 +660,18 @@ export default connect(({ user, opts }) => ({
 							/>
 							{self.props.user && (
 								<>
+									<input
+										type="button"
+										value="PvP"
+										onClick={() => {
+											sock.sendChallenge(self.props.foename);
+										}}
+										style={{
+											position: 'absolute',
+											left: '10px',
+											top: '88px',
+										}}
+									/>
 									<input
 										type="button"
 										value="Trade"

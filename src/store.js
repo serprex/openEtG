@@ -82,7 +82,14 @@ export const store = redux.createStore(
 	(state, action) => {
 		switch (action.type) {
 			case 'NAV':
-				return { ...state, nav: { view: action.view, props: action.props } };
+				return {
+					...state,
+					nav: {
+						view: action.view,
+						props: { ...action.props, key: state.nav.key + 1 },
+						key: state.nav.key + 1,
+					},
+				};
 			case 'OPT':
 				return { ...state, opts: { ...state.opts, [action.key]: action.val } };
 			case 'CMD':
@@ -135,7 +142,7 @@ export const store = redux.createStore(
 		return state;
 	},
 	{
-		nav: {},
+		nav: { key: 0 },
 		opts,
 		cmds: {},
 		chat: new Map(),

@@ -113,10 +113,10 @@ class PlayerEditor extends React.Component {
 						value={state.deckpower}
 						onChange={e => this.setState({ deckpower: e.target.value })}
 					/>
+					&emsp;
 					<input
 						type="button"
 						value="Ok"
-						className="editbtn"
 						onClick={() => {
 							const data = {};
 							if (state.name) data.name = state.name;

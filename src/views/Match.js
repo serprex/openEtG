@@ -136,6 +136,7 @@ const activeInfo = {
 		Math.ceil(
 			(t.truehp() * (t.getStatus('frozen') ? 150 : 100)) / (t.truehp() + 100),
 		),
+	corpseexplosion: (c, t) => 1 + Math.floor(c.truehp() / 8),
 	adrenaline: (c, t) => `Extra: ${etg.getAdrenalRow(t.trueatk())}`,
 	fractal: (c, t) =>
 		`Copies: ${Math.min(
@@ -144,25 +145,31 @@ const activeInfo = {
 		)}`,
 };
 const TrackIdCtx = React.createContext({
-	value: new imm.Map(),
 	update: (id, pos) => {},
+	value: new Map(),
 });
 class IdTracker extends React.Component {
 	constructor(props) {
 		super(props);
 
-		this.state = {
-			value: new imm.Map(),
-			update: (id, pos) =>
-				this.setState(state => ({
-					value: state.value.set(id, pos),
-				})),
+		this._ctx = {
+			update: (id, pos) => this._ctx.value.set(id, pos),
+			value: new Map(),
 		};
+		this.state = { game: props.game, ctx: this._ctx };
+	}
+
+	static getDerivedStateFromProps(props, state) {
+		if (props.game !== state.game) {
+			state.ctx.value.clear();
+			return { game: props.game };
+		}
+		return null;
 	}
 
 	render() {
 		return (
-			<TrackIdCtx.Provider value={this.state}>
+			<TrackIdCtx.Provider value={this._ctx}>
 				{this.props.children}
 			</TrackIdCtx.Provider>
 		);
@@ -171,14 +178,14 @@ class IdTracker extends React.Component {
 function TrackIdPos({ id, pos, children }) {
 	const { value, update } = React.useContext(TrackIdCtx);
 	const v = value.get(id);
-	if (!v || (v.x !== pos.x && v.y !== pos.y)) {
+	if (!v || v.x !== pos.x || v.y !== pos.y) {
 		update(id, pos);
 	}
 	return children || null;
 }
 function GetIdPos(props) {
 	const { value } = React.useContext(TrackIdCtx);
-	return props.children(value.get(props.id, null));
+	return props.children(value.get(props.id) || null);
 }
 
 const ThingInstCore = connect(({ opts }) => ({ lofiArt: opts.lofiArt }))(
@@ -407,12 +414,13 @@ function addNoHealData(game, newdata) {
 	};
 	if (dataNext.endurance) dataNext.endurance--;
 	if (dataNext.noheal) {
-		for (const { user } of game.data.players) {
+		for (let gi = 0; gi < game.data.players.length; gi++) {
+			const { user } = game.data.players[gi];
 			if (user) {
 				for (let i = 0; i < newdata.players.length; i++) {
 					const pldata = newdata.players[i];
 					if (pldata.user === user) {
-						const pl = game.byId(game.players[i]);
+						const pl = game.byId(game.players[gi]);
 						pldata.hp = Math.max(pl.hp, 1);
 						pldata.maxhp = pl.maxhp;
 					}
@@ -470,13 +478,18 @@ export default connect(({ user }) => ({ user }))(
 				expectedDamage: new Int16Array(2),
 				replayindex: 0,
 				replayhistory: [props.game],
-				player1,
-				player2: player1.foe,
+				player1: player1.id,
+				player2: player1.foeId,
 				fxid: 0,
 				startPos: new imm.Map(),
 				fxTextPos: new imm.Map(),
 				fxStatChange: new imm.Map(),
 				effects: new Set(),
+				hovercode: 0,
+				hoverx: null,
+				hovery: null,
+				line0: null,
+				line1: null,
 			};
 		}
 
@@ -570,7 +583,7 @@ export default connect(({ user }) => ({ user }))(
 					pl => pl.user && pl.user !== this.props.user.name,
 				)
 			) {
-				sock.emit({ x: 'move', data });
+				sock.userEmit('move', { data });
 			}
 			if (data.x === 'cast') {
 				const c = game.byId(data.c),
@@ -601,7 +614,7 @@ export default connect(({ user }) => ({ user }))(
 			if (newTurn !== turn) {
 				const pl = game.byId(newTurn);
 				if (pl.data.user === (this.props.user ? this.props.user.name : '')) {
-					this.setState({ player1: pl });
+					this.setState({ player1: newTurn });
 				}
 				this.setState(state => ({
 					foeplays: new Map(state.foeplays).set(newTurn, []),
@@ -717,7 +730,7 @@ export default connect(({ user }) => ({ user }))(
 							);
 							break;
 						default:
-							console.log('Unknown effect', effect.x);
+							console.log('Unknown effect', effect);
 					}
 				}
 				game.effects.length = 0;
@@ -726,25 +739,14 @@ export default connect(({ user }) => ({ user }))(
 		};
 
 		static getDerivedStateFromProps(props, state) {
-			if (state.resetInterval && props.game !== state._game) {
-				state.resetInterval(props);
-				const player1 = props.game.byUser(props.user ? props.user.name : '');
-				return {
-					_game: props.game,
-					gameProps: props.game.props,
-					expectedDamage: props.game.expectedDamage(),
-					replayhistory: [props.game],
-					player1,
-					player2: player1.foe,
-				};
-			} else if (props.game.props !== state.gameProps) {
-				const player1 = props.replay
-					? props.game.byId(props.game.turn)
-					: props.game.byUser(props.user ? props.user.name : '');
+			if (props.game.props !== state.gameProps) {
+				const player1 = props.game.byId(
+					props.replay ? props.game.turn : state.player1,
+				);
 				return {
 					gameProps: props.game.props,
 					expectedDamage: props.game.expectedDamage(),
-					player1,
+					player1: player1.id,
 				};
 			}
 			return null;
@@ -762,8 +764,8 @@ export default connect(({ user }) => ({ user }))(
 				}
 			}
 			const game = (newstate.replayhistory || state.replayhistory)[idx];
-			newstate.player1 = game.byId(game.turn);
-			newstate.player2 = newstate.player1.foe;
+			newstate.player1 = game.turn;
+			newstate.player2 = game.get(game.turn).get('foe');
 			return newstate;
 		};
 
@@ -802,11 +804,11 @@ export default connect(({ user }) => ({ user }))(
 				if (game.data.arena) {
 					sock.userEmit('modarena', {
 						aname: game.data.arena,
-						won: game.winner !== this.state.player1.id,
+						won: game.winner !== this.state.player1,
 						lv: game.level - 4,
 					});
 				}
-				if (game.winner === this.state.player1.id) {
+				if (game.winner === this.state.player1) {
 					if (game.data.quest !== undefined) {
 						if (game.data.quest.autonext) {
 							mkAi.run(
@@ -849,18 +851,21 @@ export default connect(({ user }) => ({ user }))(
 		endClick = (discard = 0) => {
 			const { game } = this.props;
 			if (
-				game.turn === this.state.player1.id &&
+				game.turn === this.state.player1 &&
 				game.phase === etg.MulliganPhase
 			) {
 				this.applyNext({ x: 'accept' });
 			} else if (game.winner) {
 				this.gotoResult();
-			} else if (game.turn === this.state.player1.id) {
-				if (discard === 0 && this.state.player1.handIds.length === 8) {
+			} else if (game.turn === this.state.player1) {
+				if (
+					discard === 0 &&
+					game.get(this.state.player1).get('hand').length === 8
+				) {
 					this.setState({
 						targeting: {
 							filter: obj =>
-								obj.type === etg.Spell && obj.ownerId === this.state.player1.id,
+								obj.type === etg.Spell && obj.ownerId === this.state.player1,
 							cb: tgt => {
 								this.endClick(tgt.id);
 								this.setState({ targeting: null });
@@ -883,10 +888,10 @@ export default connect(({ user }) => ({ user }))(
 			const { game } = this.props;
 			if (this.state.resigning) {
 				this.setState({ resigning: false });
-			} else if (game.turn === this.state.player1.id) {
+			} else if (game.turn === this.state.player1) {
 				if (
 					game.phase === etg.MulliganPhase &&
-					this.state.player1.handIds.length
+					game.get(this.state.player1).get('hand').length
 				) {
 					sfx.playSound('mulligan');
 					this.applyNext({ x: 'mulligan' });
@@ -902,9 +907,13 @@ export default connect(({ user }) => ({ user }))(
 				return;
 			}
 			if (this.state.resigning) {
-				this.applyNext({ x: 'resign', c: this.state.player1.id });
-				if (this.props.game.winner) {
+				if (this.props.game.get(this.state.player1).get('resigning')) {
 					this.gotoResult();
+				} else {
+					this.applyNext({ x: 'resign', c: this.state.player1 });
+					if (this.props.game.winner) {
+						this.gotoResult();
+					}
 				}
 			} else {
 				this.setState({ resigning: true });
@@ -919,7 +928,7 @@ export default connect(({ user }) => ({ user }))(
 				if (this.state.targeting.filter(obj)) {
 					this.state.targeting.cb(obj);
 				}
-			} else if (obj.ownerId === this.state.player1.id && obj.canactive()) {
+			} else if (obj.ownerId === this.state.player1 && obj.canactive()) {
 				const cb = tgt => {
 					this.applyNext({ x: 'cast', c: obj.id, t: tgt && tgt.id });
 				};
@@ -970,7 +979,7 @@ export default connect(({ user }) => ({ user }))(
 						this.applyNext(this.aiState.cmd, true);
 						this.aiState = null;
 						this.aiDelay =
-							now + (game.turn === this.state.player1.id ? 2000 : 200);
+							now + (game.turn === this.state.player1 ? 2000 : 200);
 					}
 				} else if (game.phase === etg.MulliganPhase) {
 					this.applyNext(
@@ -995,15 +1004,21 @@ export default connect(({ user }) => ({ user }))(
 			} else if (ch === '\b' || ch === '0') {
 				this.cancelClick();
 			} else if (~(chi = 'SW'.indexOf(ch))) {
-				this.thingClick(chi ? this.state.player2 : this.state.player1);
+				this.thingClick(
+					this.props.game.byId(chi ? this.state.player2 : this.state.player1),
+				);
 			} else if (~(chi = 'QA'.indexOf(ch))) {
-				const { shield } = chi ? this.state.player2 : this.state.player1;
+				const { shield } = this.props.game.byId(
+					chi ? this.state.player2 : this.state.player1,
+				);
 				if (shield) this.thingClick(shield);
 			} else if (~(chi = 'ED'.indexOf(ch))) {
-				const { weapon } = chi ? this.state.player2 : this.state.player1;
+				const { weapon } = this.props.game.byId(
+					chi ? this.state.player2 : this.state.player1,
+				);
 				if (weapon) this.thingClick(weapon);
 			} else if (~(chi = '12345678'.indexOf(ch))) {
-				const card = this.state.player1.hand[chi];
+				const card = this.game.byId(this.state.player1).hand[chi];
 				if (card) this.thingClick(card);
 			} else if (ch === 'P') {
 				if (
@@ -1028,11 +1043,7 @@ export default connect(({ user }) => ({ user }))(
 							break;
 						}
 					}
-					return i === players.length
-						? null
-						: {
-								player2: this.props.game.byId(nextId),
-						  };
+					return i === players.length ? null : { player2: nextId };
 				});
 			} else return;
 			e.preventDefault();
@@ -1054,13 +1065,6 @@ export default connect(({ user }) => ({ user }))(
 			}
 			this.gameStep();
 			this.gameInterval = setInterval(() => this.gameStep(), 30);
-			this.setState({
-				_game: game,
-				resetInterval: props => {
-					clearInterval(this.gameInterval);
-					this.startMatch(props);
-				},
-			});
 			dispatch(
 				store.setCmds({
 					move: ({ data }) => this.applyNext(data, true),
@@ -1135,47 +1139,49 @@ export default connect(({ user }) => ({ user }))(
 
 		render() {
 			const game = this.getGame(),
-				children = [];
+				children = [],
+				player1 = game.byId(this.state.player1),
+				player2 = game.byId(this.state.player2);
 			let turntell, endText, cancelText;
-			const cloaked = this.state.player2.isCloaked();
+			const cloaked = player2.isCloaked();
 
 			if (game.phase !== etg.EndPhase) {
 				turntell = this.state.targeting
 					? this.state.targeting.text
-					: `${game.turn === this.state.player1.id ? 'Your' : 'Their'} Turn${
+					: `${game.turn === player1.id ? 'Your' : 'Their'} Turn${
 							game.phase > etg.MulliganPhase
 								? ''
-								: game.players[0] === this.state.player1.id
+								: game.players[0] === player1.id
 								? ', First'
 								: ', Second'
 					  }`;
-				if (game.turn === this.state.player1.id) {
+				if (game.turn === player1.id) {
 					endText = this.state.targeting
 						? ''
 						: game.phase === etg.PlayPhase
 						? 'End Turn'
-						: game.turn === this.state.player1.id
+						: game.turn === player1.id
 						? 'Accept Hand'
 						: '';
 					if (game.phase != etg.PlayPhase) {
-						cancelText = game.turn === this.state.player1.id ? 'Mulligan' : '';
+						cancelText = game.turn === player1.id ? 'Mulligan' : '';
 					} else {
 						cancelText =
 							this.state.targeting || this.state.resigning ? 'Cancel' : '';
 					}
 				} else cancelText = endText = '';
 			} else {
-				turntell = `${
-					game.turn === this.state.player1.id ? 'Your' : 'Their'
-				} Turn, ${game.winner === this.state.player1.id ? 'Won' : 'Lost'}`;
+				turntell = `${game.turn === player1.id ? 'Your' : 'Their'} Turn, ${
+					game.winner === player1.id ? 'Won' : 'Lost'
+				}`;
 				endText = 'Continue';
 				cancelText = '';
 			}
 			let floodvisible = false;
 			const things = [];
 			for (let j = 0; j < 2; j++) {
-				const pl = j ? this.state.player2 : this.state.player1,
-					plpos = ui.tgtToPos(pl, this.state.player1.id),
+				const pl = j ? player2 : player1,
+					plpos = ui.tgtToPos(pl, player1.id),
 					handOverlay = pl.usedactive
 						? 'ico silence'
 						: pl.getStatus('sanctuary')
@@ -1187,7 +1193,7 @@ export default connect(({ user }) => ({ user }))(
 				children.push(
 					<TrackIdPos id={pl.id} pos={plpos}>
 						<div
-							className={tgtclass(this.state.player1, pl, this.state.targeting)}
+							className={tgtclass(player1, pl, this.state.targeting)}
 							style={{
 								position: 'absolute',
 								left: `${plpos.x - 48}px`,
@@ -1254,7 +1260,7 @@ export default connect(({ user }) => ({ user }))(
 						<ThingInst
 							key={inst.id}
 							obj={inst}
-							player1={this.state.player1}
+							player1={player1}
 							startpos={this.state.startPos.get(inst.id)}
 							setInfo={(e, obj, x) => this.setCard(e, obj.card, x)}
 							onMouseOut={this.clearCard}
@@ -1270,7 +1276,7 @@ export default connect(({ user }) => ({ user }))(
 							<ThingInst
 								key={cr.id}
 								obj={cr}
-								player1={this.state.player1}
+								player1={player1}
 								startpos={this.state.startPos.get(cr.id)}
 								setInfo={(e, obj, x) => this.setInfo(e, obj, x)}
 								onMouseOut={this.clearCard}
@@ -1288,7 +1294,7 @@ export default connect(({ user }) => ({ user }))(
 							<ThingInst
 								key={pr.id}
 								obj={pr}
-								player1={this.state.player1}
+								player1={player1}
 								startpos={this.state.startPos.get(pr.id)}
 								setInfo={(e, obj, x) => this.setInfo(e, obj, x)}
 								onMouseOut={this.clearCard}
@@ -1311,7 +1317,7 @@ export default connect(({ user }) => ({ user }))(
 						<ThingInst
 							key={wp.id}
 							obj={wp}
-							player1={this.state.player1}
+							player1={player1}
 							startpos={this.state.startPos.get(wp.id)}
 							setInfo={(e, obj, x) => this.setInfo(e, obj, x)}
 							onMouseOut={this.clearCard}
@@ -1323,7 +1329,7 @@ export default connect(({ user }) => ({ user }))(
 						<ThingInst
 							key={sh.id}
 							obj={sh}
-							player1={this.state.player1}
+							player1={player1}
 							startpos={this.state.startPos.get(sh.id)}
 							setInfo={(e, obj, x) => this.setInfo(e, obj, x)}
 							onMouseOut={this.clearCard}
@@ -1379,7 +1385,7 @@ export default connect(({ user }) => ({ user }))(
 				const hptext = `${pl.hp}/${pl.maxhp}\n${pl.deckIds.length}cards${
 					!cloaked && expectedDamage ? `\nDmg: ${expectedDamage}` : ''
 				} ${poisoninfo ? `\n${poisoninfo}` : ''}${
-					pl.id !== this.state.player1.id && pl.id !== this.state.player1.foeId
+					pl.id !== player1.id && pl.id !== player1.foeId
 						? '\n(Not targetted)'
 						: ''
 				}`;
@@ -1437,13 +1443,13 @@ export default connect(({ user }) => ({ user }))(
 				);
 			}
 			return (
-				<IdTracker>
+				<IdTracker game={game}>
 					{svgbg}
 					{cloaked ? (
 						cloaksvg
 					) : (
 						<FoePlays
-							foeplays={this.state.foeplays.get(this.state.player2.id)}
+							foeplays={this.state.foeplays.get(player2.id)}
 							setCard={(e, play) => this.setCard(e, play, e.pageX)}
 							setLine={(line0, line1) => this.setState({ line0, line1 })}
 							clearCard={this.clearCard}
@@ -1469,10 +1475,10 @@ export default connect(({ user }) => ({ user }))(
 							'Arena1\n',
 							'Arena2\n',
 						][game.data.level] ||
-							(this.state.player2.data.leader !== undefined
-								? `${game.playerDataByIdx(this.state.player2.data.leader)
-										.name || this.state.player2.data.leader}\n`
-								: '')}${this.state.player2.data.name || '-'}`}
+							(player2.data.leader !== undefined
+								? `${game.playerDataByIdx(player2.data.leader).name ||
+										player2.data.leader}\n`
+								: '')}${player2.data.name || '-'}`}
 					</div>
 					<span
 						style={{
@@ -1533,7 +1539,7 @@ export default connect(({ user }) => ({ user }))(
 					/>
 					{!this.props.replay &&
 						!game.data.spectate &&
-						(game.turn === this.state.player1.id || game.winner) && (
+						(game.turn === player1.id || game.winner) && (
 							<>
 								{cancelText && (
 									<input
