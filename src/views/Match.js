@@ -1018,7 +1018,7 @@ export default connect(({ user }) => ({ user }))(
 				);
 				if (weapon) this.thingClick(weapon);
 			} else if (~(chi = '12345678'.indexOf(ch))) {
-				const card = this.game.byId(this.state.player1).hand[chi];
+				const card = this.props.game.byId(this.state.player1).hand[chi];
 				if (card) this.thingClick(card);
 			} else if (ch === 'P') {
 				if (
