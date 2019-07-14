@@ -88,6 +88,8 @@ export default class Library extends React.Component {
 							left: `${36 + e * 53}px`,
 							top: `${64 + r * 32}px`,
 							fontSize: '12px',
+							textShadow:
+								reprog[idx] === reprogmax[idx] ? '1px 1px 2px #fff' : undefined,
 						}}>
 						{reprog[idx] || 0} / {reprogmax[idx] || 0}
 					</span>,
