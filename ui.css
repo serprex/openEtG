@@ -141,13 +141,28 @@ input[type="text"],input[type="password"],input[type="number"],input:not([type])
 	0% { filter:hue-rotate(90deg) }
 	100% { filter:hue-rotate(270deg) }
 }
-@keyframes ants { to { background-position:100% 100% } }
-.ants-red {
-	background:linear-gradient(#fff, #fff) padding-box,
-		repeating-linear-gradient(-45deg, red 0, red 25%, #fff 0, #fff 50%) 0 / .6em .6em;
-	animation:ants 8s linear infinite;
+.inst {
+	width: 68px;
+	height: 68px;
+	font-size: 8px;
+	border: transparent 2px solid;
 }
+.handinst {
+	transition: transform .5s;
+}
+.handinst.canactive {
+	transform: translate(-4px);
+}
+.handinst.cantarget {
+	transform: translate(-4px);
+}
+.handinst:hover {
+	transform: translate(-8px);
+}
+.cantarget { border:2px #f00 solid!important;box-shadow:0 0 5px #f00 }
+.cantarget:hover { border:2px #ff0 solid!important;box-shadow:0 0 5px #ff0 }
 .canactive { border:2px #000 solid!important;box-shadow:0 0 5px #fff }
+.canactive:hover { border:2px #00f solid!important;box-shadow:0 0 5px #fff }
 .shiny {
 	animation:animatedShiny 8s linear infinite alternate-reverse;
 }

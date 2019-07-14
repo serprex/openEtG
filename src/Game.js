@@ -205,24 +205,27 @@ Game.prototype.nextPlayer = function(id) {
 	return id;
 };
 Game.prototype.nextTurn = function() {
-	const { turn } = this;
-	const next = this.byId(this.nextPlayer(turn));
-	if (next.id !== turn) {
-		const poison = next.getStatus('poison');
-		if (poison) next.dmg(poison);
-		next.maybeDecrStatus('sosa');
-		next.setStatus('nova', 0);
-		next.setStatus('sanctuary', 0);
-		next.setStatus('precognition', 0);
-		for (let i = next.drawpower; i > 0; i--) {
-			next.drawcard(true);
+	for (;;) {
+		const { turn } = this,
+			next = this.byId(this.nextPlayer(turn));
+		if (next.id !== turn) {
+			const poison = next.getStatus('poison');
+			if (poison) next.dmg(poison);
+			next.maybeDecrStatus('sosa');
+			next.setStatus('nova', 0);
+			next.setStatus('sanctuary', 0);
+			next.setStatus('precognition', 0);
+			for (let i = next.drawpower; i > 0; i--) {
+				next.drawcard(true);
+			}
+			this.set(this.id, 'turn', next.id);
+			next.proc('turnstart');
+			if (this.get(next.id).get('resigned')) {
+				next.die();
+				continue;
+			}
 		}
-		this.set(this.id, 'turn', next.id);
-		next.proc('turnstart');
-		if (this.get(next.id).get('resigned')) {
-			next.die();
-			this.nextTurn();
-		}
+		return;
 	}
 };
 Game.prototype.setWinner = function() {

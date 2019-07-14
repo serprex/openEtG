@@ -437,8 +437,9 @@ Player.prototype._draw = function() {
 };
 Player.prototype.drawcard = function(drawstep) {
 	if (this.handIds.length < 8) {
-		const inst = this._draw();
-		if (inst && ~this.addCard(inst)) {
+		const id = this._draw();
+		if (id && ~this.addCard(id)) {
+			this.game.effect({ x: 'Draw', id });
 			this.proc('draw', drawstep);
 		}
 	}

@@ -24,7 +24,7 @@ export function Box(props) {
 }
 
 export function CardImage(props) {
-	const card = props.card,
+	const { card } = props,
 		bordcol = card && card.shiny ? '#daa520' : '#222',
 		bgcol = card ? ui.maybeLightenStr(card) : card === null ? '#876' : '#111';
 	return (
@@ -63,13 +63,25 @@ export function CardImage(props) {
 	);
 }
 
-export class Text extends React.PureComponent {
-	render() {
-		const { props } = this;
-		if (!props.text) return null;
-		const text = props.text.toString().replace(/\|/g, ' / ');
+export class Text extends React.Component {
+	constructor(props) {
+		super(props);
+
+		this.state = {
+			text: '',
+			icoprefix: 'ce',
+			elec: null,
+		};
+	}
+
+	static getDerivedStateFromProps(props, state) {
+		let { text, icoprefix = 'ce' } = props;
+		text = text ? text.toString() : '';
+		if (text === state.text && icoprefix === props.icoprefix) {
+			return null;
+		}
 		const sep = /\d\d?:\d\d?|\$|\n/g;
-		const icoprefix = `ico ${props.icoprefix || 'ce'}`;
+		const ico = `ico ${icoprefix}`;
 		let reres,
 			lastindex = 0;
 		const elec = [];
@@ -92,7 +104,7 @@ export class Text extends React.PureComponent {
 				if (num == 0) {
 					elec.push(<React.Fragment key={elec.length}>0</React.Fragment>);
 				} else if (num < 4) {
-					const icon = <span className={icoprefix + parse[1]} />;
+					const icon = <span className={ico + parse[1]} />;
 					for (let j = 0; j < num; j++) {
 						elec.push(
 							<React.Fragment key={elec.length}>{icon}</React.Fragment>,
@@ -101,7 +113,7 @@ export class Text extends React.PureComponent {
 				} else {
 					elec.push(
 						parse[0],
-						<span key={elec.length} className={icoprefix + parse[1]} />,
+						<span key={elec.length} className={ico + parse[1]} />,
 					);
 				}
 			}
@@ -114,9 +126,13 @@ export class Text extends React.PureComponent {
 				</React.Fragment>,
 			);
 		}
+		return { text, icoprefix, elec };
+	}
+
+	render() {
 		return (
-			<div className={props.className} style={props.style}>
-				{elec}
+			<div className={this.props.className} style={this.props.style}>
+				{this.state.elec}
 			</div>
 		);
 	}

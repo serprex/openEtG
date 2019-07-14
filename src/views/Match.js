@@ -18,42 +18,20 @@ import * as store from '../store.js';
 import { mkQuestAi } from '../Quest.js';
 
 const svgbg = (() => {
+	// prettier-ignore
 	const redhor = new Uint16Array([
-			12,
-			0,
-			900,
-			144,
-			145,
-			796,
-			301,
-			103,
-			796,
-			459,
-			103,
-			754,
+			12, 0, 900,
+			150, 172, 900,
+			307, 172, 900,
+			459, 172, 900,
 		]),
 		redver = new Uint16Array([
-			103,
-			301,
-			600,
-			144,
-			12,
-			301,
-			275,
-			12,
-			144,
-			624,
-			459,
-			600,
-			754,
-			301,
-			600,
-			796,
-			12,
-			301,
+			170, 12, 600,
+			244, 12, 148,
+			244, 459, 600,
 		]);
 	const redren = [];
-	for (let j = 0; j < 3; j++) {
+	for (let j = 0; j < 2; j++) {
 		let path = '';
 		for (let i = 0; i < redhor.length; i += 3) {
 			path += `M${redhor[i + 1]} ${redhor[i] - j}L${redhor[i + 2]} ${redhor[i] -
@@ -65,12 +43,7 @@ const svgbg = (() => {
 			}`;
 		}
 		redren.push(
-			<path
-				key={j}
-				d={path}
-				stroke={['#111', '#6a2e0d', '#8a3e1d'][j]}
-				strokeWidth="3"
-			/>,
+			<path key={j} d={path} stroke={['#421', '#842'][j]} strokeWidth="1" />,
 		);
 	}
 	return (
@@ -191,13 +164,7 @@ function GetIdPos(props) {
 const ThingInstCore = connect(({ opts }) => ({ lofiArt: opts.lofiArt }))(
 	function ThingInstCore(props) {
 		const { obj, player1, pos } = props,
-			isSpell = obj.type === etg.Spell,
-			scale =
-				obj.type === etg.Weapon || obj.type === etg.Shield
-					? 1.2
-					: isSpell
-					? 0.85
-					: 1;
+			isSpell = obj.type === etg.Spell;
 		if (
 			isSpell &&
 			obj.ownerId !== player1.id &&
@@ -205,15 +172,12 @@ const ThingInstCore = connect(({ opts }) => ({ lofiArt: opts.lofiArt }))(
 		) {
 			return (
 				<div
+					className={'inst handinst ' + tgtclass(player1, obj, props.targeting)}
 					style={{
 						position: 'absolute',
-						left: `${pos.x - 32}px`,
-						top: `${pos.y - 38}px`,
-						width: '68px',
-						height: '80px',
-						border: 'transparent 2px solid',
+						left: pos.x - 32 + 'px',
+						top: pos.y - 36 + 'px',
 					}}
-					className={tgtclass(player1, obj, props.targeting)}
 					onMouseOut={props.onMouseOut}
 					onClick={() => props.onClick(obj)}>
 					<div
@@ -226,7 +190,8 @@ const ThingInstCore = connect(({ opts }) => ({ lofiArt: opts.lofiArt }))(
 				</div>
 			);
 		}
-		const children = [];
+		const children = [],
+			bgcolor = ui.maybeLightenStr(obj.card);
 		let statText, topText;
 		if (!isSpell) {
 			const visible = [
@@ -251,9 +216,8 @@ const ThingInstCore = connect(({ opts }) => ({ lofiArt: opts.lofiArt }))(
 							key={k}
 							style={{
 								position: 'absolute',
-								top: 64 * scale + 10 + 'px',
+								bottom: '0',
 								left: [32, 8, 8, 0, 24, 16, 8][k] + 'px',
-								opacity: '.6',
 							}}
 						/>,
 					);
@@ -269,7 +233,8 @@ const ThingInstCore = connect(({ opts }) => ({ lofiArt: opts.lofiArt }))(
 								position: 'absolute',
 								left: '0',
 								top: '0',
-								transform: scale === 1 ? undefined : `scale(${scale})`,
+								width: '64px',
+								height: '64px',
 							}}
 						/>,
 					);
@@ -279,13 +244,13 @@ const ThingInstCore = connect(({ opts }) => ({ lofiArt: opts.lofiArt }))(
 			topText = obj.activetext();
 			if (obj.type === etg.Creature) {
 				statText = `${obj.trueatk()} | ${obj.truehp()}${
-					charges ? ` x${charges}` : ''
+					charges ? ` \u00d7${charges}` : ''
 				}`;
 			} else if (obj.type === etg.Permanent) {
 				if (obj.card.type === etg.Pillar) {
 					statText = `1:${
 						obj.getStatus('pendstate') ? obj.owner.mark : obj.card.element
-					} x${charges}`;
+					}\u00d7${charges}`;
 					topText = '';
 				} else if (obj.active.get('ownattack') === Skills.locket) {
 					statText = `1:${obj.getStatus('mode') || obj.owner.mark}`;
@@ -293,103 +258,79 @@ const ThingInstCore = connect(({ opts }) => ({ lofiArt: opts.lofiArt }))(
 					statText = (charges || '').toString();
 				}
 			} else if (obj.type === etg.Weapon) {
-				statText = `${obj.trueatk()}${charges ? ` x${charges}` : ''}`;
+				statText = `${obj.trueatk()}${charges ? ` \u00d7${charges}` : ''}`;
 			} else if (obj.type === etg.Shield) {
-				statText = charges ? 'x' + charges : obj.truedr().toString();
+				statText = charges ? '\u00d7' + charges : obj.truedr().toString();
 			}
 		} else {
+			topText = obj.card.name;
 			statText = `${obj.card.cost}:${obj.card.costele}`;
 		}
 		return (
 			<div
+				className={`inst ${isSpell ? 'handinst ' : ''}
+					${tgtclass(player1, obj, props.targeting)}`}
 				style={{
 					position: 'absolute',
-					left: pos.x - 32 * scale + 'px',
-					top: pos.y - 36 * scale + 'px',
-					width: 64 * scale + 4 + 'px',
-					height: (isSpell ? 64 : 72) * scale + 4 + 'px',
+					left: pos.x - 32 + 'px',
+					top: pos.y - 32 + 'px',
 					opacity: obj.isMaterial() ? '1' : '.7',
 					color: obj.card.upped ? '#000' : '#fff',
-					fontSize: '10px',
-					border: 'transparent 2px solid',
 					zIndex: !isSpell && obj.getStatus('cloak') ? '2' : undefined,
 				}}
 				onMouseOver={props.setInfo && (e => props.setInfo(e, obj, pos.x))}
-				className={tgtclass(player1, obj, props.targeting)}
 				onMouseOut={props.onMouseOut}
 				onClick={() => props.onClick(obj)}>
-				{props.lofiArt ? (
+				<div
+					style={{
+						width: '64px',
+						height: '64px',
+						backgroundColor: bgcolor,
+						backgroundSize: 'contain',
+						backgroundImage: props.lofiArt
+							? undefined
+							: `url(/Cards/${obj.card.code.toString(32)}.png)`,
+					}}>
+					{children}
 					<div
-						key={0}
-						className={obj.card.shiny ? 'shiny' : undefined}
 						style={{
 							position: 'absolute',
-							left: '0',
-							top: isSpell ? '0' : '10px',
-							width: 64 * scale + 'px',
-							height: 64 * scale + 'px',
-							backgroundColor: ui.maybeLightenStr(obj.card),
-							pointerEvents: 'none',
+							top: '0',
+							width: '64px',
 						}}>
-						{obj.card.name}
+						{topText && (
+							<Components.Text
+								text={topText}
+								icoprefix="te"
+								style={{
+									width: '64px',
+									whiteSpace: 'nowrap',
+									overflow: 'hidden',
+									backgroundColor: bgcolor,
+								}}
+							/>
+						)}
+						{statText && (
+							<Components.Text
+								text={statText}
+								icoprefix="te"
+								style={{ float: 'right', backgroundColor: bgcolor }}
+							/>
+						)}
 					</div>
-				) : (
-					<img
-						key={0}
-						className={obj.card.shiny ? 'shiny' : undefined}
-						src={`/Cards/${obj.card.code.toString(32)}.png`}
-						style={{
-							position: 'absolute',
-							left: '0',
-							top: isSpell ? '0' : '10px',
-							width: 64 * scale + 'px',
-							height: 64 * scale + 'px',
-							backgroundColor: ui.maybeLightenStr(obj.card),
-							pointerEvents: 'none',
-						}}
-					/>
-				)}
-				{children}
-				{topText && (
-					<Components.Text
-						text={topText}
-						icoprefix="te"
-						style={{
-							position: 'absolute',
-							left: '0',
-							top: '-8px',
-							width: 64 * scale + 'px',
-							overflow: 'hidden',
-							backgroundColor: ui.maybeLightenStr(obj.card),
-						}}
-					/>
-				)}
-				{statText && (
-					<Components.Text
-						text={statText}
-						icoprefix="te"
-						style={{
-							fontSize: '12px',
-							position: 'absolute',
-							top: isSpell ? '0' : '10px',
-							right: '0',
-							paddingLeft: '2px',
-							backgroundColor: ui.maybeLightenStr(obj.card),
-						}}
-					/>
-				)}
-				{obj.hasactive('prespell', 'protectonce') && (
-					<div
-						className="ico protection"
-						style={{
-							position: 'absolute',
-							left: '0',
-							top: isSpell ? '0' : '10px',
-							width: 64 * scale + 'px',
-							height: 64 * scale + 'px',
-						}}
-					/>
-				)}
+					{obj.hasactive('prespell', 'protectonce') && (
+						<div
+							className="ico protection"
+							style={{
+								position: 'absolute',
+								left: '0',
+								top: isSpell ? '0' : '10px',
+								width: '64px',
+								height: '64px',
+							}}
+						/>
+					)}
+				</div>
 			</div>
 		);
 	},
@@ -400,7 +341,11 @@ function ThingInst(props) {
 	return (
 		<TrackIdPos id={props.obj.id} pos={pos}>
 			<Motion
-				defaultStyle={idtrack.get(props.startpos)}
+				defaultStyle={
+					props.startpos === -1
+						? { x: 103, y: props.obj.ownerId === props.player1.id ? 551 : 258 }
+						: idtrack.get(props.startpos)
+				}
 				style={{ x: spring(pos.x), y: spring(pos.y) }}>
 				{pos => <ThingInstCore {...props} pos={pos} />}
 			</Motion>
@@ -434,7 +379,7 @@ function addNoHealData(game, newdata) {
 
 function tgtclass(p1, obj, targeting) {
 	if (targeting) {
-		if (targeting.filter(obj)) return 'ants-red';
+		if (targeting.filter(obj)) return 'cantarget';
 	} else if (obj.ownerId === p1.id && obj.canactive()) return 'canactive';
 }
 
@@ -625,6 +570,12 @@ export default connect(({ user }) => ({ user }))(
 				const newstate = {};
 				for (const effect of game.effects) {
 					switch (effect.x) {
+						case 'Draw':
+							newstate.startPos = (newstate.startPos || state.startPos).set(
+								effect.id,
+								-1,
+							);
+							break;
 						case 'StartPos':
 							newstate.startPos = (newstate.startPos || state.startPos).set(
 								effect.id,
@@ -1027,6 +978,10 @@ export default connect(({ user }) => ({ user }))(
 				) {
 					this.applyNext({ x: 'foe', t: this.state.player2.id });
 				}
+			} else if (ch === '-') {
+				this.props.dispatch(
+					store.setOpt('lofiArt', !store.store.getState().opts.lofiArt),
+				);
 			} else if (~(chi = '[]'.indexOf(ch))) {
 				this.setState(state => {
 					const { players } = this.props.game,
@@ -1035,9 +990,11 @@ export default connect(({ user }) => ({ user }))(
 						i = 1;
 					for (; i < players.length; i++) {
 						nextId =
-							players[(state.player2.getIndex() + i * dir) % players.length];
+							players[
+								(players.indexOf(state.player2) + i * dir) % players.length
+							];
 						if (
-							nextId !== this.state.player1.id &&
+							nextId !== this.state.player1 &&
 							!this.props.game.get(nextId).get('out')
 						) {
 							break;
@@ -1148,12 +1105,12 @@ export default connect(({ user }) => ({ user }))(
 			if (game.phase !== etg.EndPhase) {
 				turntell = this.state.targeting
 					? this.state.targeting.text
-					: `${game.turn === player1.id ? 'Your' : 'Their'} Turn${
+					: `${game.turn === player1.id ? 'Your' : 'Their'} turn${
 							game.phase > etg.MulliganPhase
 								? ''
 								: game.players[0] === player1.id
-								? ', First'
-								: ', Second'
+								? "\nYou're first"
+								: "\nYou're second"
 					  }`;
 				if (game.turn === player1.id) {
 					endText = this.state.targeting
@@ -1161,7 +1118,7 @@ export default connect(({ user }) => ({ user }))(
 						: game.phase === etg.PlayPhase
 						? 'End Turn'
 						: game.turn === player1.id
-						? 'Accept Hand'
+						? 'Accept'
 						: '';
 					if (game.phase != etg.PlayPhase) {
 						cancelText = game.turn === player1.id ? 'Mulligan' : '';
@@ -1171,7 +1128,7 @@ export default connect(({ user }) => ({ user }))(
 					}
 				} else cancelText = endText = '';
 			} else {
-				turntell = `${game.turn === player1.id ? 'Your' : 'Their'} Turn, ${
+				turntell = `${game.turn === player1.id ? 'Your' : 'Their'} Turn\n${
 					game.winner === player1.id ? 'Won' : 'Lost'
 				}`;
 				endText = 'Continue';
@@ -1210,8 +1167,8 @@ export default connect(({ user }) => ({ user }))(
 						className={'ico e' + pl.mark}
 						style={{
 							position: 'absolute',
-							left: j ? '160px' : '740px',
-							top: j ? '130px' : '470px',
+							left: '32px',
+							top: j ? '228px' : '430px',
 							transform: 'translate(-50%,-50%)',
 							textAlign: 'center',
 							pointerEvents: 'none',
@@ -1247,7 +1204,7 @@ export default connect(({ user }) => ({ user }))(
 							style={{
 								position: 'absolute',
 								left: j ? '3px' : '759px',
-								top: j ? '75px' : '305px',
+								top: j ? '96px' : '305px',
 							}}
 						/>
 					),
@@ -1338,23 +1295,23 @@ export default connect(({ user }) => ({ user }))(
 						/>
 					),
 				);
-				const qx = j ? 792 : 0,
+				const qx = 0,
 					qy = j ? 106 : 308;
 				for (let k = 1; k < 13; k++) {
 					children.push(
 						<span
-							className={'ico e' + k}
+							className={'ico ce' + k}
 							style={{
 								position: 'absolute',
-								left: `${qx + (k & 1 ? 0 : 54)}px`,
-								top: `${qy + Math.floor((k - 1) / 2) * 32}px`,
+								left: `${qx + (k & 1 ? 2 : 48)}px`,
+								top: `${qy + Math.floor((k - 1) / 2) * 18}px`,
 							}}
 						/>,
 						<span
 							style={{
 								position: 'absolute',
-								left: `${qx + (k & 1 ? 32 : 86)}px`,
-								top: `${qy + Math.floor((k - 1) / 2) * 32 + 4}px`,
+								left: `${qx + (k & 1 ? 20 : 66)}px`,
+								top: `${qy + Math.floor((k - 1) / 2) * 18 - 2}px`,
 								fontSize: '16px',
 								pointerEvents: 'none',
 							}}>
@@ -1367,24 +1324,24 @@ export default connect(({ user }) => ({ user }))(
 						style={{
 							backgroundColor: '#000',
 							position: 'absolute',
-							left: `${plpos.x - 41}px`,
+							left: '2px',
 							top: j ? '36px' : '531px',
-							width: '82px',
-							height: '16px',
+							width: '98px',
+							height: '22px',
 							pointerEvents: 'none',
 						}}
 					/>,
 				);
 				const expectedDamage = this.state.expectedDamage[pl.getIndex()];
-				const x1 = Math.max(80 * (pl.hp / pl.maxhp), 0);
-				const x2 = Math.max(x1 - 80 * (expectedDamage / pl.maxhp), 0);
+				const x1 = Math.max(96 * (pl.hp / pl.maxhp), 0);
+				const x2 = Math.max(x1 - 96 * (expectedDamage / pl.maxhp), 0);
 				const poison = pl.getStatus('poison'),
 					poisoninfo = `${
 						poison > 0 ? poison + ' 1:2' : poison < 0 ? -poison + ' 1:7' : ''
 					} ${pl.getStatus('neuro') ? ' 1:10' : ''}`;
-				const hptext = `${pl.hp}/${pl.maxhp}\n${pl.deckIds.length}cards${
-					!cloaked && expectedDamage ? `\nDmg: ${expectedDamage}` : ''
-				} ${poisoninfo ? `\n${poisoninfo}` : ''}${
+				const hptext = `${pl.hp}/${pl.maxhp} ${
+					!cloaked && expectedDamage ? `(${expectedDamage})` : ''
+				}\n${poisoninfo ? `\n${poisoninfo}` : ''}${
 					pl.id !== player1.id && pl.id !== player1.foeId
 						? '\n(Not targetted)'
 						: ''
@@ -1397,10 +1354,10 @@ export default connect(({ user }) => ({ user }))(
 									style={{
 										backgroundColor: ui.strcols[etg.Life],
 										position: 'absolute',
-										left: `${plpos.x - 40}px`,
+										left: '3px',
 										top: j ? '37px' : '532px',
 										width: `${x1}px`,
-										height: '14px',
+										height: '20px',
 										pointerEvents: 'none',
 									}}
 								/>
@@ -1416,10 +1373,10 @@ export default connect(({ user }) => ({ user }))(
 														: etg.Water
 												],
 											position: 'absolute',
-											left: plpos.x - 40 + Math.min(x1, x2),
+											left: plpos.x - 48 + Math.min(x1, x2),
 											top: j ? '37px' : '532px',
 											width: Math.max(x1, x2) - Math.min(x1, x2) + 'px',
-											height: '14px',
+											height: '20px',
 											pointerEvents: 'none',
 										}}
 									/>
@@ -1436,10 +1393,27 @@ export default connect(({ user }) => ({ user }))(
 							fontSize: '12px',
 							lineHeight: '1.1',
 							position: 'absolute',
-							left: j ? '800px' : '0px',
-							top: j ? '36px' : '531px',
+							left: '0',
+							top: j ? '40px' : '535px',
+							textShadow: '2px 2px 1px #000,2px 2px 2px #000',
 						}}
 					/>,
+					<div
+						className={pl.deckIds.length ? 'ico cback' : ''}
+						style={{
+							position: 'absolute',
+							left: '103px',
+							top: j ? '258px' : '551px',
+							textAlign: 'center',
+							paddingTop: '14px',
+							pointerEvents: 'none',
+							fontSize: '18px',
+							textShadow: '2px 2px 1px #000,2px 2px 2px #000',
+							width: '32px',
+							height: '36px',
+						}}>
+						{pl.deckIds.length || '0!!'}
+					</div>,
 				);
 			}
 			return (
@@ -1463,7 +1437,7 @@ export default connect(({ user }) => ({ user }))(
 							whiteSpace: 'pre-wrap',
 							textAlign: 'center',
 							position: 'absolute',
-							left: '0px',
+							left: '780px',
 							top: '40px',
 							width: '140px',
 						}}>
@@ -1483,9 +1457,12 @@ export default connect(({ user }) => ({ user }))(
 					<span
 						style={{
 							position: 'absolute',
-							left: '762px',
-							top: '580px',
+							left: '780px',
+							top: '560px',
+							width: '120px',
+							textAlign: 'center',
 							pointerEvents: 'none',
+							whiteSpace: 'pre',
 						}}>
 						{turntell}
 					</span>
@@ -1533,26 +1510,14 @@ export default connect(({ user }) => ({ user }))(
 						onClick={this.resignClick}
 						style={{
 							position: 'absolute',
-							left: '8px',
-							top: '20px',
+							left: '816px',
+							top: '15px',
 						}}
 					/>
 					{!this.props.replay &&
 						!game.data.spectate &&
 						(game.turn === player1.id || game.winner) && (
 							<>
-								{cancelText && (
-									<input
-										type="button"
-										value={cancelText}
-										onClick={this.cancelClick}
-										style={{
-											position: 'absolute',
-											left: '800px',
-											top: '560px',
-										}}
-									/>
-								)}
 								{endText && (
 									<input
 										type="button"
@@ -1560,8 +1525,20 @@ export default connect(({ user }) => ({ user }))(
 										onClick={() => this.endClick()}
 										style={{
 											position: 'absolute',
-											left: '800px',
-											top: '530px',
+											left: '10px',
+											top: '460px',
+										}}
+									/>
+								)}
+								{cancelText && (
+									<input
+										type="button"
+										value={cancelText}
+										onClick={this.cancelClick}
+										style={{
+											position: 'absolute',
+											left: '10px',
+											top: '490px',
 										}}
 									/>
 								)}
