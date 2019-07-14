@@ -424,7 +424,7 @@ Player.prototype.deckpush = function(...args) {
 	this.game.updateIn([this.id, 'deck'], deck => deck.concat(args));
 };
 Player.prototype._draw = function() {
-	const deckIds = this.deckIds;
+	const { deckIds } = this;
 	if (deckIds.length === 0) {
 		this.die();
 		return 0;

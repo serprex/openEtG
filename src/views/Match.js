@@ -75,7 +75,7 @@ const floodsvg = (
 			opacity: '.4',
 		}}>
 		<path
-			d="M149 146l644 0l0 64l-400 0l0 64l-244 0zM107 454l644 0l0-128l-244 0l0 64l-400 0z"
+			d="M900 150v307h-700Q162 416 200 375h395Q615 307 595 232h-395Q162 191 200 150"
 			fill="#048"
 		/>
 	</svg>
@@ -85,10 +85,10 @@ const cloaksvg = (
 	<div
 		style={{
 			position: 'absolute',
-			left: '130px',
-			top: '20px',
-			width: '660px',
-			height: '280px',
+			left: '172px',
+			top: '12px',
+			width: '728px',
+			height: '293px',
 			backgroundColor: '#000',
 			zIndex: '1',
 			pointerEvents: 'none',
@@ -381,6 +381,7 @@ function tgtclass(p1, obj, targeting) {
 	if (targeting) {
 		if (targeting.filter(obj)) return 'cantarget';
 	} else if (obj.ownerId === p1.id && obj.canactive()) return 'canactive';
+	return '';
 }
 
 function FoePlays({ foeplays, setCard, setLine, clearCard }) {
@@ -1373,7 +1374,7 @@ export default connect(({ user }) => ({ user }))(
 														: etg.Water
 												],
 											position: 'absolute',
-											left: plpos.x - 48 + Math.min(x1, x2),
+											left: `${3 + Math.min(x1, x2)}px`,
 											top: j ? '37px' : '532px',
 											width: Math.max(x1, x2) - Math.min(x1, x2) + 'px',
 											height: '20px',
