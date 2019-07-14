@@ -1395,7 +1395,7 @@ export default connect(({ user }) => ({ user }))(
 							position: 'absolute',
 							left: '0',
 							top: j ? '40px' : '535px',
-							textShadow: '2px 2px 1px #000,2px 2px 2px #000',
+							textShadow: '1px 1px 1px #000,2px 2px 2px #000',
 						}}
 					/>,
 					<div
