@@ -48,7 +48,7 @@ export function maybeLightenStr(card) {
 	return strcols[card.element + card.upped * 13];
 }
 function reflectPos(j, pos) {
-	if (j) pos.y = 602 - pos.y;
+	if (j) pos.y = 594 - pos.y;
 	return pos;
 }
 export function creaturePos(j, i) {
@@ -56,7 +56,7 @@ export function creaturePos(j, i) {
 	const column = row == 2 ? (i + 1) % 8 : i % 8;
 	return reflectPos(j, {
 		x: 204 + column * 90 + (row == 1 ? 45 : 0),
-		y: 340 + row * 48,
+		y: 334 + row * 48,
 	});
 }
 export function permanentPos(j, i) {
@@ -68,16 +68,16 @@ export function permanentPos(j, i) {
 export function cardPos(j, i) {
 	return {
 		x: 132,
-		y: (j ? 50 : 340) + 24 * i,
+		y: (j ? 36 : 336) + 28 * i,
 	};
 }
 export function tgtToPos(t, p1id) {
 	if (t.type == etg.Creature) {
 		return creaturePos(t.ownerId !== p1id, t.getIndex());
 	} else if (t.type === etg.Weapon) {
-		return reflectPos(t.ownerId !== p1id, { x: 206, y: 492 });
+		return reflectPos(t.ownerId !== p1id, { x: 207, y: 492 });
 	} else if (t.type === etg.Shield) {
-		return reflectPos(t.ownerId !== p1id, { x: 206, y: 562 });
+		return reflectPos(t.ownerId !== p1id, { x: 207, y: 562 });
 	} else if (t.type === etg.Permanent) {
 		return permanentPos(t.ownerId !== p1id, t.getIndex());
 	} else if (t.type === etg.Player) {

@@ -20,17 +20,16 @@ import { mkQuestAi } from '../Quest.js';
 const svgbg = (() => {
 	// prettier-ignore
 	const redhor = new Uint16Array([
-			12, 0, 900,
-			150, 172, 900,
-			307, 172, 900,
-			459, 172, 900,
+			140, 172, 900,
+			300, 172, 900,
+			460, 172, 900,
 		]),
 		redver = new Uint16Array([
-			170, 12, 600,
-			244, 12, 148,
-			244, 459, 600,
-		]);
-	const redren = [];
+			170, 0, 600,
+			246, 0, 139,
+			246, 459, 600,
+		]),
+		redren = [];
 	for (let j = 0; j < 2; j++) {
 		let path = '';
 		for (let i = 0; i < redhor.length; i += 3) {
@@ -75,7 +74,7 @@ const floodsvg = (
 			opacity: '.4',
 		}}>
 		<path
-			d="M900 150v307h-700Q162 416 200 375h395Q615 307 595 232h-395Q162 191 200 150"
+			d="M900 141v317h-700Q162 416 200 375h395Q615 300 595 226h-395Q162 191 200 141"
 			fill="#048"
 		/>
 	</svg>
@@ -86,9 +85,9 @@ const cloaksvg = (
 		style={{
 			position: 'absolute',
 			left: '172px',
-			top: '12px',
+			top: '0',
 			width: '728px',
-			height: '293px',
+			height: '299px',
 			backgroundColor: '#000',
 			zIndex: '1',
 			pointerEvents: 'none',
@@ -216,8 +215,9 @@ const ThingInstCore = connect(({ opts }) => ({ lofiArt: opts.lofiArt }))(
 							key={k}
 							style={{
 								position: 'absolute',
-								bottom: '0',
+								bottom: '-8px',
 								left: [32, 8, 8, 0, 24, 16, 8][k] + 'px',
+								opacity: '.6',
 							}}
 						/>,
 					);
@@ -418,6 +418,7 @@ export default connect(({ user }) => ({ user }))(
 				: props.game.byUser(props.user ? props.user.name : '');
 			this.state = {
 				tooltip: null,
+				showFoeplays: false,
 				foeplays: new Map(),
 				resigning: false,
 				gameProps: null,
@@ -556,16 +557,6 @@ export default connect(({ user }) => ({ user }))(
 				sfx.playSound('mulligan');
 			}
 			game.next(data);
-			const newTurn = game.turn;
-			if (newTurn !== turn) {
-				const pl = game.byId(newTurn);
-				if (pl.data.user === (this.props.user ? this.props.user.name : '')) {
-					this.setState({ player1: newTurn });
-				}
-				this.setState(state => ({
-					foeplays: new Map(state.foeplays).set(newTurn, []),
-				}));
-			}
 			this.setState(state => {
 				if (!game.effects || !game.effects.length) return {};
 				const newstate = {};
@@ -688,6 +679,16 @@ export default connect(({ user }) => ({ user }))(
 				game.effects.length = 0;
 				return newstate;
 			});
+			const newTurn = game.turn;
+			if (newTurn !== turn) {
+				const pl = game.byId(newTurn);
+				if (pl.data.user === (this.props.user ? this.props.user.name : '')) {
+					this.setState({ player1: newTurn });
+				}
+				this.setState(state => ({
+					foeplays: new Map(state.foeplays).set(newTurn, []),
+				}));
+			}
 		};
 
 		static getDerivedStateFromProps(props, state) {
@@ -1204,8 +1205,8 @@ export default connect(({ user }) => ({ user }))(
 							className={handOverlay}
 							style={{
 								position: 'absolute',
-								left: j ? '3px' : '759px',
-								top: j ? '96px' : '305px',
+								left: '60px',
+								top: j ? '5px' : '305px',
 							}}
 						/>
 					),
@@ -1334,8 +1335,8 @@ export default connect(({ user }) => ({ user }))(
 					/>,
 				);
 				const expectedDamage = this.state.expectedDamage[pl.getIndex()];
-				const x1 = Math.max(96 * (pl.hp / pl.maxhp), 0);
-				const x2 = Math.max(x1 - 96 * (expectedDamage / pl.maxhp), 0);
+				const x1 = Math.max(Math.round(96 * (pl.hp / pl.maxhp)), 0),
+					x2 = Math.max(x1 - Math.round(96 * (expectedDamage / pl.maxhp)), 0);
 				const poison = pl.getStatus('poison'),
 					poisoninfo = `${
 						poison > 0 ? poison + ' 1:2' : poison < 0 ? -poison + ' 1:7' : ''
@@ -1420,16 +1421,16 @@ export default connect(({ user }) => ({ user }))(
 			return (
 				<IdTracker game={game}>
 					{svgbg}
-					{cloaked ? (
-						cloaksvg
-					) : (
-						<FoePlays
-							foeplays={this.state.foeplays.get(player2.id)}
-							setCard={(e, play) => this.setCard(e, play, e.pageX)}
-							setLine={(line0, line1) => this.setState({ line0, line1 })}
-							clearCard={this.clearCard}
-						/>
-					)}
+					{cloaked
+						? cloaksvg
+						: this.state.showFoeplays && (
+								<FoePlays
+									foeplays={this.state.foeplays.get(player2.id)}
+									setCard={(e, play) => this.setCard(e, play, e.pageX)}
+									setLine={(line0, line1) => this.setState({ line0, line1 })}
+									clearCard={this.clearCard}
+								/>
+						  )}
 					{children}
 					{things}
 					{floodvisible && floodsvg}
@@ -1440,7 +1441,7 @@ export default connect(({ user }) => ({ user }))(
 							position: 'absolute',
 							left: '780px',
 							top: '40px',
-							width: '140px',
+							width: '120px',
 						}}>
 						{`${[
 							'Commoner\n',
@@ -1505,6 +1506,23 @@ export default connect(({ user }) => ({ user }))(
 						code={this.state.hovercode}
 					/>
 					{this.state.tooltip}
+					{this.state.foeplays.has(player2.id) &&
+						!!this.state.foeplays.get(player2.id).length && (
+							<input
+								type="button"
+								value={`History ${this.state.foeplays.get(player2.id).length}`}
+								style={{
+									position: 'absolute',
+									left: '2px',
+									top: '270px',
+								}}
+								onClick={() =>
+									this.setState(state => ({
+										showFoeplays: !state.showFoeplays,
+									}))
+								}
+							/>
+						)}
 					<input
 						type="button"
 						value={this.state.resigning ? 'Confirm' : 'Resign'}
