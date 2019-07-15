@@ -168,7 +168,7 @@ function ThingInst(props) {
 					left: pos.x - 32 + 'px',
 					top: pos.y - 38 + 'px',
 					width: '68px',
-					height: '80px',
+					height: '78px',
 					border: 'transparent 2px solid',
 				}}
 				className={tgtclass(game, obj)}
@@ -323,7 +323,7 @@ function ThingInst(props) {
 
 function tgtclass(game, obj) {
 	if (game.targeting) {
-		if (game.targeting.filter(obj)) return 'ants-red';
+		if (game.targeting.filter(obj)) return 'cantarget';
 	} else if (obj.owner === game.player1 && obj.canactive()) return 'canactive';
 }
 

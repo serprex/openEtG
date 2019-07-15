@@ -1446,13 +1446,13 @@ const Skills = {
 		}
 	},
 	paleomagnetism: (ctx, c, t) => {
-		const e = ctx.upto(6);
-		const list = e & 1 ? etg.PillarList : etg.PendList;
-		c.owner.addPerm(
-			c.owner.newThing(
+		const e = ctx.upto(6),
+			list = e & 1 ? etg.PillarList : etg.PendList,
+			inst = c.owner.newThing(
 				c.card.as(Cards.Codes[list[e < 4 ? c.owner.mark : c.owner.foe.mark]]),
-			),
-		);
+			);
+		ctx.effect({ x: 'StartPos', id: inst.id, src: c.id });
+		c.owner.addPerm(inst);
 	},
 	pandemonium: (ctx, c, t) => {
 		c.owner.foe.masscc(c, Skills.cseed, true);
@@ -2189,7 +2189,7 @@ const Skills = {
 	quantagift: (ctx, c, t) => {
 		if (c.owner.mark !== etg.Water) {
 			c.owner.spend(etg.Water, -2);
-			c.owner.spend(c.owner.mark, c.owner.mark ? -2 : -6);
+			c.owner.spend(c.owner.mark, -2);
 		} else c.owner.spend(etg.Water, -3);
 	},
 	web: (ctx, c, t) => {

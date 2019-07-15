@@ -40,8 +40,8 @@
     "build": "webpack -p",
     "build-dev": "webpack --mode=development",
     "build-atlas-png": "optipng -o2 -strip all assets/atlas.png",
-		"build-atlas-css": "node --experimental-modules ./scripts/mkatlascss.js",
-		"build-rng-js": "node --experimental-modules ./scripts/mkrng.js ./src/rng.wasm ./src/rng.js"
+    "build-atlas-css": "node --experimental-modules ./scripts/mkatlascss.js",
+    "build-rng-js": "node --experimental-modules ./scripts/mkrng.js ./src/rng.wasm ./src/rng.js"
   },
   "license": "MIT"
 }

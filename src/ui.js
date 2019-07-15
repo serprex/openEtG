@@ -47,51 +47,41 @@ export const strcols = [
 export function maybeLightenStr(card) {
 	return strcols[card.element + card.upped * 13];
 }
-export function reflectPos(pos) {
-	pos.x = 900 - pos.x;
-	pos.y = 600 - pos.y;
+function reflectPos(j, pos) {
+	if (j) pos.y = 594 - pos.y;
+	return pos;
 }
 export function creaturePos(j, i) {
 	const row = i < 8 ? 0 : i < 15 ? 1 : 2;
 	const column = row == 2 ? (i + 1) % 8 : i % 8;
-	const p = {
-		x: 151 + column * 79 + (row == 1 ? 79 / 2 : 0),
-		y: 344 + row * 33,
-	};
-	if (j) reflectPos(p);
-	return p;
+	return reflectPos(j, {
+		x: 204 + column * 90 + (row == 1 ? 45 : 0),
+		y: 334 + row * 48,
+	});
 }
 export function permanentPos(j, i) {
-	const p = {
-		x: 142 + ((i & 7) << 6),
-		y: 498 + (i >> 3) * (j ? 50 : 62),
-	};
-	if (j) reflectPos(p);
-	return p;
+	return reflectPos(j, {
+		x: 280 + (i % 9) * 70,
+		y: 492 + Math.floor(i / 9) * 70,
+	});
 }
 export function cardPos(j, i) {
 	return {
-		x: (j ? 36 : 793) + 66 * (i & 1),
-		y: (j ? 118 : 346) + 48 * (i >> 1),
+		x: 132,
+		y: (j ? 36 : 336) + 28 * i,
 	};
 }
 export function tgtToPos(t, p1id) {
 	if (t.type == etg.Creature) {
 		return creaturePos(t.ownerId !== p1id, t.getIndex());
 	} else if (t.type === etg.Weapon) {
-		const p = { x: 666, y: 508 };
-		if (t.ownerId !== p1id) reflectPos(p);
-		return p;
+		return reflectPos(t.ownerId !== p1id, { x: 207, y: 492 });
 	} else if (t.type === etg.Shield) {
-		const p = { x: 710, y: 540 };
-		if (t.ownerId !== p1id) reflectPos(p);
-		return p;
+		return reflectPos(t.ownerId !== p1id, { x: 207, y: 562 });
 	} else if (t.type === etg.Permanent) {
 		return permanentPos(t.ownerId !== p1id, t.getIndex());
 	} else if (t.type === etg.Player) {
-		const p = { x: 50, y: 560 };
-		if (t.id !== p1id) reflectPos(p);
-		return p;
+		return reflectPos(t.id !== p1id, { x: 50, y: 560 });
 	} else if (t.type === etg.Spell) {
 		return cardPos(t.ownerId !== p1id, t.getIndex());
 	} else {

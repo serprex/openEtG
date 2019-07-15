@@ -30,14 +30,10 @@ Open Terminal. All `commands` will be done in Terminal. You must have [XCode](ht
   * [node.js](https://nodejs.org)
   * [redis](https://github.com/MSOpenTech/redis/releases)
   * [git](https://git-scm.com/download/win)
-  * [tortoisegit](https://tortoisegit.org)
-1. Clone the repository:
-  1. Right-click inside the folder where you want the game files to go
-  1. Click `Git Clone` to create an `openEtG` folder
-  1. When prompted, use this URL: `https://github.com/serprex/openEtG.git`
+1. Clone the repository
 1. Start redis-server
 1. Install npm modules and global npm binaries:
-  1. Shift+Right-Click on your `openEtG` folder
+  1. Shift+Right-Click on your repository folder
   1. Click `Open command window here`
   1. Run the command: `npm install; npm start`
   1. Leave this command window open for later
