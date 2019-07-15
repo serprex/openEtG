@@ -12,6 +12,201 @@ export function requireQuest(quest, user) {
 }
 
 export const quarks = {};
+quarks.basic_damage = {
+	name: 'Damage',
+	info: 'Tutorial - Basic 1/10 - Damage',
+	urdeck: '0a52m0a5l90a61p018pi',
+	deck: '0a52m0k5i6018pp',
+	hp: 10,
+	goldreward: 10,
+	opentext: [
+		'Welcome to openEtG!\n\n' +
+			'To exit this tutorial, lose any battle (or resign), and then click "Exit" twice until you get back to the main menu.\n\n' +
+			'To resume or replay this tutorial, select "Quests" from the main menu and select "Tutorial".',
+		'To win a game of openEtG, you need to defeat your opponent before they defeat you. This is usually done by doing damage until their health reaches zero. The easiest way to do damage is with creatures.\n\n' +
+			'Every creature has two numbers listed at the top of the card text box (when viewing the full card), and shown in the lower right when the card is in play.\n\n' +
+			"The first of those two numbers is the creature's strength, or attack power. At the end of your turn, all of your creatures will attack the opponent, doing damage equal to their attack power.\n\n" +
+			"The second of those numbers is the creature's largeness, or health. That represents the amount of damage a creature can take before dying. Creatures cannot directly attack each other, but there are a variety of options available to damage your opponent's creatures before they can kill you.",
+		"For this battle, you have a deck full of creatures. You and your opponent will each start with seven cards in your hand. If you don't like your hand, you can mulligan to shuffle it back into your deck and draw a new hand with one less card. Every turn (except the first turn for whoever goes first), you will draw a card. If you end your turn with eight cards in your hand, you will have to discard.\n\n" +
+			'When you draw a creature, you can play it from your hand by clicking on it.\n\n' +
+			'Defeat your opponent before they defeat you!',
+	],
+	wintext:
+		"Congratulations! Here's a few gold for your victory.\n\n" +
+		'You can also defeat your opponent if they try to draw a card but have no cards remaining in the deck, but more on that later.\n\n' +
+		'For the next lesson, you will learn about "quanta", the energy that lets you summon more powerful creatures and other effects.',
+};
+quarks.basic_quanta = {
+	name: 'Quanta',
+	info: 'Tutorial - Basic 2/10 - Quanta',
+	urdeck: '0o5l8065la018pq',
+	deck: '0a52m0k5i6018pp',
+	hp: 30,
+	goldreward: 15,
+	opentext: [
+		'To play most cards and activate most abilities, you will need to spend "quanta".\n\n' +
+			'You start the game with your "mark" of one element. You will gain one quanta matching your mark at the end of your turn.\n\n' +
+			'One of the best ways to get more quanta is by playing pillars. They are free, and every pillar you have will also generate one quanta of its corresponding element at the end of your turn.',
+		'This time, your deck is full of pillars and dragons, which cost a lot of quanta to summon. Play your pillars, store up your quanta, and unleash your dragons before your opponent can bring you down!',
+	],
+	wintext:
+		"Congratulations! Have a few more gold. Next time, we'll learn about pendulums, another way to generate quanta.",
+};
+quarks.basic_duos = {
+	name: 'Duos',
+	info: 'Tutorial - Basic 3/10 - Duos',
+	urdeck: '0k5jm055id055la018pq',
+	deck: '0a52m0k5i6018pp',
+	hp: 30,
+	goldreward: 20,
+	opentext: [
+		'Last time, we learned about generating quanta with pillars. They\'re the easiest (and usually fastest) way to generate quanta of a single element. Playing with a single element makes it very easy to build your deck, since you\'ll only need one kind of pillar. "Mono" decks (those with only one element) are usually stable and have far fewer problems with not drawing enough quanta to play their cards.\n\n' +
+			"However, mono decks can only use cards from a single element, and a single element often won't have all the cards you want to use. Sometimes, you'll find you want to use more than one element in your deck to have access to more complex strategies or to cover the weaknesses of a single element.\n\n" +
+			"You could do this by just using some pillars from each element, but there's another way. Pendulums work like pillars, in that at the end of the turn you play them, they will generate one quanta of their element. However, on the second turn, the pendulum will swing to your mark's element and generate one of those at the end of the turn. After that, the pendulum will swing back to its element, and will continue to switch between its element and your mark's element every turn.\n\n" +
+			'This is a great way to make sure you receive quanta from two different elements.',
+		'For this battle, your deck is again full of dragons, but this time they are split between two different elements! Fortunately, your pillars have been replaced with pendulums. Try it out and see if you get the quanta you need to play your dragons.',
+	],
+	wintext:
+		'Congratulations! You\'ve learned how to play monos, with only a single element. And now, you\'ve played a "duo", using cards from two different elements. But what if you want to play with ALL the elements?',
+};
+quarks.basic_rainbows = {
+	name: 'Rainbows',
+	info: 'Tutorial - Basic 4/10 - Rainbows',
+	urdeck:
+		'0i4sa014vf0152h0155o0158r015bt015f2015id015la015of015rm015ul0161v018pi',
+	deck: '0a52m0k5i6018pp',
+	hp: 50,
+	goldreward: 25,
+	opentext: [
+		'Monos and duos aren\'t the only types of deck. There are trios and quads, which can be much more difficult and may not be the best place to start if you\'re new to the game, though feel free to give it a shot! Quads in particular can be made easier by using "cardinal", "material", or "spiritual" pillars, which generate quanta from four different elements each.\n\n' +
+			"However, there are also quantum pillars. They generate three quanta every turn. In exchange for the speed of gaining quanta being tripled, the quanta they generate is random, so you'll be able to use cards from every element as long as your quantum pillars generate what you need.\n\n" +
+			'You can use quantum pendulums as well, if you want to use cards of every element while still focusing on a single one. Like regular pendulums, quantum pendulums will alternate between generating three random quanta and one quanta matching your mark.\n\n' +
+			'Of course, you could set your mark to "chroma", and then you\'d generate three random per turn from that as well!\n\n' +
+			'"Rainbow" decks (which is what decks that use most or all elements are called) can be very strong because they have cards available to cover every weakness, but they are also at the mercy of pillars that may not produce what they want.',
+
+		"This time, your deck has one of every dragon, and a lot of quantum pillars. It may be a little while before you can play your first dragon, but you'll likely be able to play several in a short period of time once you get there. Good luck!",
+	],
+	wintext:
+		"Well done! You've explored pillars and pendulums and various different ways to build your deck. There are also cards within the various elements that can generate quanta on your own. You can build decks that don't use any pillars and pendulums at all!\n\n" +
+		"Now that you have a feel for how to get what you need to play cards, and have seen most of the different elements, you should know that creatures can do things besides just attack every turn. Next time, we'll take a look at active skills.",
+};
+quarks.basic_skills = {
+	name: 'Active Skills',
+	info: 'Tutorial - Basic 5/10 - Active Skills',
+	urdeck: '075uk07606085un085v3018pk',
+	deck: '0f55k0f56f018pl',
+	hp: 30,
+	goldreward: 50,
+	opentext: [
+		'Some creatures have abilities that you can use once a turn. These are generally called "skills" or "actives". They will be listed as "(quanta cost):effect". Abilities will often cost quanta matching their element, but they can require quanta from any element. They can cost any amount, or even be free! No matter how much quanta you have, you can only use an active once a turn on each creature, and you can\'t use an active the turn a creature comes into play. If an active has a cost listed in chroma quanta, anything can be used to pay it, and it will be taken from your available quanta pool randomly.',
+		"For this battle, you have a darkness deck with two different creatures: parasite and shadling. Both have abilities you will need to use to defeat your opponent. While every card in your deck is darkness, your mark is death. Parasite's ability costs death, so you'll need some death quanta to use it.\n\n" +
+			"Parasite has an active ability that will poison opposing creatures (or your own). A poisoned creature will take one damage per poison every turn after they attack. If a creature's health reaches zero, it dies.\n\n" +
+			"Shadling, however, has an active ability that will steal your opponent's attack points and add them to shadling, weakening your opponent's creatures while increasing your own damage every turn.\n\n" +
+			"Be careful not to use your parasite to poison EVERY enemy creature to death, or your shadlings won't have anyone to absorb attack from. You can steal attack with your shadlings from creatures that are poisoned - they won't catch the poison. But you could also let one of the opponent's creatures live and just steal from it. You can steal so much attack that the opposing creature drops below zero. Negative attack will heal you!",
+	],
+	wintext:
+		'Good job! Creatures attack every turn, and most of them will also have additional abilities.\n\n' +
+		'In addition to actives, creatures can have "passive" abilities, which may automatically have an effect every turn, or may take effect in response to other actions by you or your opponent, or even always be in effect!\n\n' +
+		"However, most of the time, creatures' abilities can't be TOO strong, because they're also attacking every turn. Some creatures have very powerful abilities along with low attack or health. But if you want some of the strongest abilities, you'll have to look at cards that don't attack every turn.",
+};
+quarks.basic_permanents = {
+	name: 'Permanents',
+	info: 'Tutorial - Basic 6/10 - Permanents',
+	urdeck: '0i5oc0c5om018po',
+	deck: '0f55k0f56f018pl',
+	hp: 50,
+	goldreward: 40,
+	opentext: [
+		'"Permanents" are another kind of card. Actually, you have already seen some permanents. Pillars and pendulums are considered permanents, but they aren\'t the only kind. Other permanents have active abilities like creatures do, and some of these abilities are extremely powerful!',
+		'For this battle, you have a deck without any creatures at all! Take a look at the permanents you draw, and see if you can figure out how to defeat your opponent.\n\n' +
+			"Be careful, though. Your opponent is learning too. They've thrown away their skeletons and crawlers and have switched to a \"mono gravity\" deck. Their creatures are now using abilities, as well. Take a look, they'll get bigger every turn like your shadlings. But these don't need to pay to use their ability, and you won't stop them just by not having any creatures to steal from.\n\n" +
+			'Good luck!',
+	],
+	wintext:
+		"Well done! You're getting the hang of this.\n\n" +
+		"But I bet you miss getting to attack every turn. Don't worry, though. Even though I said permanets don't attack every turn, there are special types of permanents that do.",
+};
+quarks.basic_equipment = {
+	name: 'Equipment',
+	info: 'Tutorial - Basic 7/10 - Equipment',
+	urdeck: '065oi0c5uk065ur045uo025ul018pr',
+	deck: '0f52g0652m0552h045f6018po',
+	hp: 50,
+	goldreward: 50,
+	opentext: [
+		'Permanents that attack are called weapons. You can only use one weapon at a time, but it will attack every turn. Many of them also have extra abilities, both active and passive. Because you can only use one at a time, these can be very strong!\n\n' +
+			'Weapons are a special type of permanent called "equipment". In addition to weapons, there are also shields. You can only use one of these at a time, as well, but they will usually block some damage from every one of your opponent\'s creatures.\n\n' +
+			'While you can only use one weapon at a time, there are cards that allow you to "fly" weapons, turning them into creatures but retaining their abilities. Once your weapon "flies", your hands will be free so you can play another weapon.',
+		'Try to defeat your opponent using weapons. Watch out, though! There are cards that can destroy any permanent, and your opponent just might have some!\n\n' +
+			"Besides permanents and creatures, there are cards called \"spells\". These cards take effect as soon as they are played, and their effects can be quite strong. They don't stick around, though, so once they're played, that card is gone and doesn't have any further effect.\n\n" +
+			"If your weapons are flying, they aren't permanents anymore, so they'll be safe from these destructive cards.",
+	],
+	wintext:
+		"Good job! You've seen the different kinds of cards you can put into play. Over time, you'll obtain much stronger cards than the ones you've used so far.",
+};
+quarks.basic_upgrades = {
+	name: 'Upgrades',
+	info: 'Tutorial - Basic 8/10 - Upgrades',
+	urdeck:
+		'0d6qq016rk016rs016tv01711017480177b017ad017di017gt017jq017mv037qb017q6017t50180f018pi',
+	deck:
+		'0i4sa014vf0152h0155o0158r015bt015f2015id015la015of015rm015ul0161v018pi',
+	hp: 100,
+	goldreward: 70,
+	opentext: [
+		"Whew! We've learned a lot. Let's take a moment to take a look at the cards you'll be able to get after you've gotten your collection going.\n\n" +
+			'Every card you\'ve seen so far can be "upgraded". Most upgraded cards are made by combining six "unupgraded" cards into a single "upgraded" card. But don\'t worry, they\'ll get a lot stronger when you upgrade. You are also free to downgrade any upgraded card back into six unupgraded copies freely at any time. There\'s no cost.\n\n' +
+			"Pillars and pendulums are the only exception. Since your collection will start with unlimited copies of all unupgraded pillars and pendulums, you'll need to pay 50 gold apiece to upgrade them.",
+		'This time, your opponent stole your rainbow dragon deck! And they have as much health as you! Watch out!\n\n' +
+			'I\'ll let you borrow an upgraded rainbow dragon to try. Every card is upgraded. Upgraded pillars are called "towers" and will generate their quanta as soon as you play them (in addition to at the end of every turn). Pendulums will do the same, giving you a quick head start. All the dragons will be stronger, as well.\n\n' +
+			'Good luck!',
+	],
+	wintext:
+		"Well done. You can see how strong cards can become when they've been upgraded. But you'll have to collect quite a few to build fully upgraded decks, so time to start saving up!",
+};
+quarks.basic_colosseum = {
+	name: 'Colosseum',
+	info: 'Tutorial - Basic 9/10 - Colosseum',
+	urdeck:
+		'0i4sa014vf0152h0155o0158r015bt015f2015id015la015of015rm015ul0161v018pi',
+	deck: '024tc0c55k0655n0656f0255s0255o018pl',
+	hp: 100,
+	goldreward: 90,
+	opentext: [
+		"You'll generally get a handful of gold from every battle you win. How much you get will vary depending on how hard your opponent is and how well you play. Some battles won't give any rewards, such as player vs player (pvp) or custom games. They're just for fun.\n\n" +
+			"In addition to your gold reward, most games you'll win a card from your opponent's deck as well. There are some cards that are so rare you can't win them from your opponent, so you'll need to find them in packs. But more on that later.\n\n" +
+			'Besides the rewards you get from defeating your opponent, a very good way to get gold is the "colosseum", which you can find on the main menu. The colosseum holds a number of events that can only be completed once a day, but which will give much larger rewards than normal battles. It\'s a great way to get a boost.\n\n' +
+			'There are two kinds of colosseum events: "duel" and "endurance".',
+		"Endurance battles require you to defeat multiple decks in a row. If you lose before defeating all the opponents, you won't receive a reward. Fortunately, you can retry endurance events as many times as you want until you've defeated them, and there's no cost or penalty for losing.\n\n" +
+			'"Novice endurance" requires you to defeat three commoners in a row. These are the easiest opponent, and they each have an unupgraded deck full of random cards. You won\'t heal between matches, so they can still be tough.\n\n' +
+			'"Expert endurance" requires you to defeat two champions. It\'s only two, but these are much stronger. Their decks are still random, but can contain upgraded cards, which you know are a lot more powerful. You will heal between battles, but it can still be extremely difficult.',
+		"Duels can only be attempted once a day, win or lose. You don't lose anything if your opponent wins, but you don't gain anything either. It's a quick fight either way so it's worth a try every day, and the rewards are much larger than normal. You'll also know your opponent ahead of time, so if you're clever you can build a deck designed to counter your opponent.\n\n" +
+			'"Novice duel" will let you fight a mage. This is an opponent using a pre-built unupgraded deck that will usually use cards that work very well together. Their cards will compliment each other, so they can be a lot harder than the random cards used by commoners.\n\n' +
+			'"Expert duel" will require you to defeat a demigod. These are the strongest opponents, using pre-built decks that are completely upgraded! They are the most difficult regular opponent, so it may be a little while before you can defeat one. Remember there\'s no cost in the colosseum, so it\'s worth a try even if you lose.',
+		"For this battle, you've got your unupgraded rainbow dragons back, and you're going to have a \"duel\". Don't worry, though. Unlike a colosseum duel, you can try this one as many times as you'd like.\n\n" +
+			"Like a colosseum duel, you know who you're going to be fighting. It's your opponent's boar deck again. But they've learned from playing with your dragons, and this time they've added some of their own, along with some other cards.\n\n" +
+			'Good luck!',
+	],
+	wintext:
+		'Good job! Enjoy your reward.\n\n' +
+		"If you defeat every colosseum event in a single day, you'll get a special bonus reward!",
+};
+quarks.basic_quests = {
+	name: 'Quests',
+	info: 'Tutorial - Basic 10/10 - Quests',
+	urdeck: '014tc0b5bs025c5055bu055c0065cr018pn',
+	deck: '0a52g0652i0452k0252n0452r0461q018pu',
+	hp: 100,
+	goldreward: 150,
+	opentext: [
+		'This is the last battle in the basic tutorial.\n\n' +
+			'Besides the four types of opponent mentioned in the last battle, there is another type of AI battle: quests. Quests are diverse battles that often tell a story. Some quests are many battles long, and many quests will give you rewards. They are all free to try and can be retried until you defeat them, so they can be a good way to get cards early on. The opponents will always use the same decks, too, so if you lose on your first try, remember what beat you and try to build a deck to counter it.',
+		"Let's go on a quick quest. You are a life elemental, with a deck full of forest creatures. You encounter a necromancer! Their deck is about pestilence and death. Good luck in your battle of life against death!",
+	],
+	wintext:
+		"Well done! You have completed the basic tutorial. You've been earning rewards for every battle, so don't forget to spend your gold on more cards and keep improving your deck. From here, you can learn more advanced topics, you can go on some quests, you can play the AI, you can buy cards and improve your deck, or you can even find another player and fight a live battle! We hope you're enjoying the game!",
+};
+
 quarks.necromancer = {
 	deck: '04531027170b52g0c52m0452n018pk',
 	name: 'Skeleton Horde',
@@ -480,133 +675,67 @@ quarks.chromatemple = {
 export const root = {
 	children: [
 		{
-			key: 'necromancer',
+			name: 'Tutorial',
 			children: [
-				{
-					key: 'necromancer2',
-				},
-				{
-					key: 'necromancer3',
-				},
-			],
-		},
-		{
-			key: 'blacksummoner',
-		},
-		{
-			key: 'inventor',
-			children: [
-				{
-					key: 'inventor2',
-				},
-				{
-					key: 'inventor3',
-				},
-			],
-		},
-		{
-			key: 'bombmaker',
-		},
-		{
-			key: 'icecave',
-			children: [
-				{
-					key: 'icecave2',
-					children: [
-						{
-							key: 'icecave3',
-							children: [
-								{
-									key: 'icecave4',
-								},
-							],
-						},
-					],
-				},
+				{ key: 'basic_damage' },
+				{ key: 'basic_quanta' },
+				{ key: 'basic_duos' },
+				{ key: 'basic_rainbows' },
+				{ key: 'basic_skills' },
+				{ key: 'basic_permanents' },
+				{ key: 'basic_equipment' },
+				{ key: 'basic_upgrades' },
+				{ key: 'basic_colosseum' },
+				{ key: 'basic_quests' },
 			],
 		},
 		{
 			name: 'Proving Grounds',
 			children: [
-				{
-					key: 'pgdragon',
-				},
-				{
-					key: 'pgrare',
-				},
-				{
-					key: 'pgshard',
-				},
-				{
-					key: 'pgfarmer',
-				},
-				{
-					key: 'pggeomancer',
-				},
-				{
-					key: 'pgnymph',
-				},
+				{ key: 'pgdragon' },
+				{ key: 'pgrare' },
+				{ key: 'pgshard' },
+				{ key: 'pgfarmer' },
+				{ key: 'pggeomancer' },
+				{ key: 'pgnymph' },
 			],
+		},
+		{
+			key: 'necromancer',
+			children: [{ key: 'necromancer2' }, { key: 'necromancer3' }],
+		},
+		{ key: 'blacksummoner' },
+		{ key: 'inventor', children: [{ key: 'inventor2' }, { key: 'inventor3' }] },
+		{ key: 'bombmaker' },
+		{
+			key: 'icecave',
+			children: [{ key: 'icecave2' }, { key: 'icecave3' }, { key: 'icecave4' }],
 		},
 		{
 			key: 'elementalshrine',
 			children: [
-				{
-					key: 'aethertemple',
-				},
-				{
-					key: 'airtemple',
-				},
-				{
-					key: 'darktemple',
-				},
-				{
-					key: 'deathtemple',
-				},
-				{
-					key: 'earthtemple',
-				},
-				{
-					key: 'entropytemple',
-				},
-				{
-					key: 'firetemple',
-				},
-				{
-					key: 'gravitytemple',
-				},
-				{
-					key: 'lifetemple',
-				},
-				{
-					key: 'lighttemple',
-				},
-				{
-					key: 'timetemple',
-				},
-				{
-					key: 'watertemple',
-				},
-				{
-					key: 'chromatemple',
-				},
+				{ key: 'aethertemple' },
+				{ key: 'airtemple' },
+				{ key: 'darktemple' },
+				{ key: 'deathtemple' },
+				{ key: 'earthtemple' },
+				{ key: 'entropytemple' },
+				{ key: 'firetemple' },
+				{ key: 'gravitytemple' },
+				{ key: 'lifetemple' },
+				{ key: 'lighttemple' },
+				{ key: 'timetemple' },
+				{ key: 'watertemple' },
+				{ key: 'chromatemple' },
 			],
 		},
 		{
 			key: 'spirit',
 			children: [
-				{
-					key: 'spirit2',
-				},
-				{
-					key: 'spirit3',
-				},
-				{
-					key: 'spirit4',
-				},
-				{
-					key: 'spirit5',
-				},
+				{ key: 'spirit2' },
+				{ key: 'spirit3' },
+				{ key: 'spirit4' },
+				{ key: 'spirit5' },
 			],
 		},
 	],
@@ -621,7 +750,7 @@ export function mkQuestAi(quest, datafn) {
 	if (!urdeck) {
 		urdeck = sock.getDeck();
 		if (!Cards.isDeckLegal(etgutil.decodedeck(urdeck), user)) {
-			store.store.dispatch(store.chatMsg(`Invalid deck`, 'System'));
+			store.store.dispatch(store.chatMsg('Invalid deck', 'System'));
 			return;
 		}
 	}

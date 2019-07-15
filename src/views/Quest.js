@@ -13,9 +13,9 @@ function QuestButton({ sel, x, y, area, user, onClick }) {
 				position: 'absolute',
 				left: `${x}px`,
 				top: `${y}px`,
-				color:
-					(area.key && !user.quests[area.key] ? '#f' : '#a') +
-					(sel ? 'ff' : 'aa'),
+				color: `${area.key && !user.quests[area.key] ? '#f' : '#a'}${
+					sel ? 'ff' : 'aa'
+				}`,
 			}}
 			onClick={onClick}>
 			{(area.key && Quest.quarks[area.key].name) || area.name}

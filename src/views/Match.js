@@ -116,6 +116,52 @@ const activeInfo = {
 			9 - c.owner.handIds.length,
 		)}`,
 };
+
+function PagedModal(props) {
+	return (
+		<div
+			className="bgbox"
+			style={{
+				whiteSpace: 'pre-wrap',
+				zIndex: '9',
+				position: 'absolute',
+				left: '450px',
+				top: '300px',
+				maxWidth: '900px',
+				transform: 'translate(-50%,-50%)',
+			}}>
+			<div>
+				<input
+					value="Prev"
+					type="button"
+					style={{ visibility: props.idx > 0 ? 'visible' : 'hidden' }}
+					onClick={() => props.setPage(props.idx - 1)}
+				/>
+				&emsp;
+				{props.idx < props.pages.length - 1 && (
+					<>
+						<input
+							value="Next"
+							type="button"
+							onClick={() => props.setPage(props.idx + 1)}
+						/>
+						&emsp;
+					</>
+				)}
+				<input
+					value={props.idx < props.pages.length - 1 ? 'Skip' : 'Okay'}
+					type="button"
+					onClick={props.onClose}
+				/>
+				<span className="floatRight">
+					{`${props.idx + 1} / ${props.pages.length}`}
+				</span>
+			</div>
+			{props.pages[props.idx]}
+		</div>
+	);
+}
+
 const TrackIdCtx = React.createContext({
 	update: (id, pos) => {},
 	value: new Map(),
@@ -437,6 +483,8 @@ export default connect(({ user }) => ({ user }))(
 				hovery: null,
 				line0: null,
 				line1: null,
+				popup: props.game.data.quest && props.game.data.quest.opentext,
+				popupidx: 0,
 			};
 		}
 
@@ -1420,6 +1468,14 @@ export default connect(({ user }) => ({ user }))(
 			}
 			return (
 				<IdTracker game={game}>
+					{this.state.popup && (
+						<PagedModal
+							pages={this.state.popup}
+							idx={this.state.popupidx}
+							setPage={idx => this.setState({ popupidx: idx })}
+							onClose={() => this.setState({ popup: null })}
+						/>
+					)}
 					{svgbg}
 					{cloaked
 						? cloaksvg

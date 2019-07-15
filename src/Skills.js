@@ -1391,6 +1391,7 @@ const Skills = {
 	},
 	nullspell: (ctx, c, t) => {
 		if (!c.hasactive('prespell', 'eatspell')) {
+			ctx.effect({x:'Text', text: 'Null Spell', id: c.id});
 			c.addactive('prespell', exports.eatspell);
 			c.addactive('turnstart', exports.noeatspell);
 		}
