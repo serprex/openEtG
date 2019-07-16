@@ -551,7 +551,11 @@ function getDataFromName(name) {
 	if (name in data) return data[name];
 	if (cache.has(name)) return cache.get(name);
 	const [base, ...args] = name.split(' ');
-	const r = data[base](...args);
-	cache.set(name, r);
-	return r;
+	if (base in data) {
+		const r = data[base](...args);
+		cache.set(name, r);
+		return r;
+	}
+	cache.set(name, undefined);
+	return undefined;
 }
