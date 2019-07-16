@@ -10,7 +10,7 @@
   "dependencies": {
     "bufferutil": "^4.0.1",
     "httpolyglot": "^0.1.2",
-    "ioredis": "^4.11.1",
+    "ioredis": "^4.11.2",
     "ws": "^7.1.0"
   },
   "devDependencies": {
@@ -31,7 +31,7 @@
     "react-redux": "^7.1.0",
     "redux": "^4.0.4",
     "webpack": "^4.35.3",
-    "webpack-cli": "^3.3.5"
+    "webpack-cli": "^3.3.6"
   },
   "scripts": {
     "start": "node --experimental-modules --experimental-wasm-modules ./server.js",
