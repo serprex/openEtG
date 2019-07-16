@@ -72,19 +72,20 @@ export function cardPos(j, i) {
 	};
 }
 export function tgtToPos(t, p1id) {
-	if (t.type == etg.Creature) {
-		return creaturePos(t.ownerId !== p1id, t.getIndex());
-	} else if (t.type === etg.Weapon) {
-		return reflectPos(t.ownerId !== p1id, { x: 207, y: 492 });
-	} else if (t.type === etg.Shield) {
-		return reflectPos(t.ownerId !== p1id, { x: 207, y: 562 });
-	} else if (t.type === etg.Permanent) {
-		return permanentPos(t.ownerId !== p1id, t.getIndex());
-	} else if (t.type === etg.Player) {
-		return reflectPos(t.id !== p1id, { x: 50, y: 560 });
-	} else if (t.type === etg.Spell) {
-		return cardPos(t.ownerId !== p1id, t.getIndex());
-	} else {
-		return { x: -999, y: -999 };
+	switch (t.type) {
+		case etg.Creature:
+			return creaturePos(t.ownerId !== p1id, t.getIndex());
+		case etg.Weapon:
+			return reflectPos(t.ownerId !== p1id, { x: 207, y: 492 });
+		case etg.Shield:
+			return reflectPos(t.ownerId !== p1id, { x: 207, y: 562 });
+		case etg.Permanent:
+			return permanentPos(t.ownerId !== p1id, t.getIndex());
+		case etg.Player:
+			return reflectPos(t.id !== p1id, { x: 50, y: 560 });
+		case etg.Spell:
+			return cardPos(t.ownerId !== p1id, t.getIndex());
+		default:
+			return { x: -999, y: -999 };
 	}
 }

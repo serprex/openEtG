@@ -206,18 +206,172 @@ function GetIdPos(props) {
 	return props.children(value.get(props.id) || null);
 }
 
-const ThingInstCore = connect(({ opts }) => ({ lofiArt: opts.lofiArt }))(
-	function ThingInstCore(props) {
-		const { obj, player1, pos } = props,
+class ThingInstCore extends React.Component {
+	constructor(props) {
+		super(props);
+
+		this.state = {
+			instprops: null,
+			isgpull: null,
+			instdom: null,
+		};
+	}
+
+	static getDerivedStateFromProps(props, state) {
+		const { game, obj } = props;
+		const instprops = game.props.get(obj.id),
+			isgpull = obj.id === obj.owner.gpull;
+		if (instprops !== state.instprops || isgpull !== state.isgpull) {
+			const children = [],
+				isSpell = obj.type === etg.Spell,
+				bgcolor = ui.maybeLightenStr(obj.card);
+			let statText, topText;
+			if (!isSpell) {
+				const visible = [
+					obj.getStatus('psionic'),
+					obj.getStatus('aflatoxin'),
+					!obj.getStatus('aflatoxin') && obj.getStatus('poison') > 0,
+					obj.getStatus('airborne') || obj.getStatus('ranged'),
+					obj.getStatus('momentum'),
+					obj.getStatus('adrenaline'),
+					obj.getStatus('poison') < 0,
+				];
+				const bordervisible = [
+					obj.getStatus('delayed'),
+					obj.id === obj.owner.gpull,
+					obj.getStatus('frozen'),
+				];
+				for (let k = 0; k < 7; k++) {
+					if (visible[k]) {
+						children.push(
+							<div
+								className={`ico s${k}`}
+								key={k}
+								style={{
+									position: 'absolute',
+									bottom: '-8px',
+									left: [32, 8, 8, 0, 24, 16, 8][k] + 'px',
+									opacity: '.6',
+								}}
+							/>,
+						);
+					}
+				}
+				for (let k = 0; k < 3; k++) {
+					if (bordervisible[k]) {
+						children.push(
+							<div
+								className={`ico sborder${k}`}
+								key={7 + k}
+								style={{
+									position: 'absolute',
+									left: '0',
+									top: '0',
+									width: '64px',
+									height: '64px',
+								}}
+							/>,
+						);
+					}
+				}
+				const charges = obj.getStatus('charges');
+				topText = obj.activetext();
+				if (obj.type === etg.Creature) {
+					statText = `${obj.trueatk()} | ${obj.truehp()}${
+						charges ? ` \u00d7${charges}` : ''
+					}`;
+				} else if (obj.type === etg.Permanent) {
+					if (obj.card.type === etg.Pillar) {
+						statText = `1:${
+							obj.getStatus('pendstate') ? obj.owner.mark : obj.card.element
+						}\u00d7${charges}`;
+						topText = '';
+					} else if (obj.active.get('ownattack') === Skills.locket) {
+						statText = `1:${obj.getStatus('mode') || obj.owner.mark}`;
+					} else {
+						statText = (charges || '').toString();
+					}
+				} else if (obj.type === etg.Weapon) {
+					statText = `${obj.trueatk()}${charges ? ` \u00d7${charges}` : ''}`;
+				} else if (obj.type === etg.Shield) {
+					statText = charges ? '\u00d7' + charges : obj.truedr().toString();
+				}
+			} else {
+				topText = obj.card.name;
+				statText = `${obj.card.cost}:${obj.card.costele}`;
+			}
+			return {
+				instprops,
+				isgpull,
+				instdom: (
+					<div
+						style={{
+							width: '64px',
+							height: '64px',
+							backgroundColor: bgcolor,
+							backgroundSize: 'contain',
+							backgroundImage: props.lofiArt
+								? undefined
+								: `url(/Cards/${obj.card.code.toString(32)}.png)`,
+						}}>
+						{children}
+						<div
+							style={{
+								position: 'absolute',
+								top: '0',
+								width: '64px',
+							}}>
+							{topText && (
+								<Components.Text
+									text={topText}
+									icoprefix="te"
+									style={{
+										width: '64px',
+										whiteSpace: 'nowrap',
+										overflow: 'hidden',
+										backgroundColor: bgcolor,
+									}}
+								/>
+							)}
+							{statText && (
+								<Components.Text
+									text={statText}
+									icoprefix="te"
+									style={{ float: 'right', backgroundColor: bgcolor }}
+								/>
+							)}
+						</div>
+						{obj.hasactive('prespell', 'protectonce') && (
+							<div
+								className="ico protection"
+								style={{
+									position: 'absolute',
+									left: '0',
+									top: isSpell ? '0' : '10px',
+									width: '64px',
+									height: '64px',
+								}}
+							/>
+						)}
+					</div>
+				),
+			};
+		}
+		return null;
+	}
+
+	render() {
+		const { props } = this,
+			{ game, obj, p1id, pos } = props,
 			isSpell = obj.type === etg.Spell;
 		if (
 			isSpell &&
-			obj.ownerId !== player1.id &&
-			!player1.getStatus('precognition')
+			obj.ownerId !== p1id &&
+			!game.getStatus(p1id, 'precognition')
 		) {
 			return (
 				<div
-					className={'inst handinst ' + tgtclass(player1, obj, props.targeting)}
+					className={'inst handinst ' + tgtclass(p1id, obj, props.targeting)}
 					style={{
 						position: 'absolute',
 						left: pos.x - 32 + 'px',
@@ -235,87 +389,10 @@ const ThingInstCore = connect(({ opts }) => ({ lofiArt: opts.lofiArt }))(
 				</div>
 			);
 		}
-		const children = [],
-			bgcolor = ui.maybeLightenStr(obj.card);
-		let statText, topText;
-		if (!isSpell) {
-			const visible = [
-				obj.getStatus('psionic'),
-				obj.getStatus('aflatoxin'),
-				!obj.getStatus('aflatoxin') && obj.getStatus('poison') > 0,
-				obj.getStatus('airborne') || obj.getStatus('ranged'),
-				obj.getStatus('momentum'),
-				obj.getStatus('adrenaline'),
-				obj.getStatus('poison') < 0,
-			];
-			const bordervisible = [
-				obj.getStatus('delayed'),
-				obj.id === obj.owner.gpull,
-				obj.getStatus('frozen'),
-			];
-			for (let k = 0; k < 7; k++) {
-				if (visible[k]) {
-					children.push(
-						<div
-							className={`ico s${k}`}
-							key={k}
-							style={{
-								position: 'absolute',
-								bottom: '-8px',
-								left: [32, 8, 8, 0, 24, 16, 8][k] + 'px',
-								opacity: '.6',
-							}}
-						/>,
-					);
-				}
-			}
-			for (let k = 0; k < 3; k++) {
-				if (bordervisible[k]) {
-					children.push(
-						<div
-							className={`ico sborder${k}`}
-							key={7 + k}
-							style={{
-								position: 'absolute',
-								left: '0',
-								top: '0',
-								width: '64px',
-								height: '64px',
-							}}
-						/>,
-					);
-				}
-			}
-			const charges = obj.getStatus('charges');
-			topText = obj.activetext();
-			if (obj.type === etg.Creature) {
-				statText = `${obj.trueatk()} | ${obj.truehp()}${
-					charges ? ` \u00d7${charges}` : ''
-				}`;
-			} else if (obj.type === etg.Permanent) {
-				if (obj.card.type === etg.Pillar) {
-					statText = `1:${
-						obj.getStatus('pendstate') ? obj.owner.mark : obj.card.element
-					}\u00d7${charges}`;
-					topText = '';
-				} else if (obj.active.get('ownattack') === Skills.locket) {
-					statText = `1:${obj.getStatus('mode') || obj.owner.mark}`;
-				} else {
-					statText = (charges || '').toString();
-				}
-			} else if (obj.type === etg.Weapon) {
-				statText = `${obj.trueatk()}${charges ? ` \u00d7${charges}` : ''}`;
-			} else if (obj.type === etg.Shield) {
-				statText = charges ? '\u00d7' + charges : obj.truedr().toString();
-			}
-		} else {
-			topText = obj.card.name;
-			statText = `${obj.card.cost}:${obj.card.costele}`;
-		}
 		return (
 			<div
 				className={`inst ${isSpell ? 'handinst ' : ''}
-					${tgtclass(player1, obj, props.targeting)}`}
+					${tgtclass(p1id, obj, props.targeting)}`}
 				style={{
 					position: 'absolute',
 					left: pos.x - 32 + 'px',
@@ -327,77 +404,34 @@ const ThingInstCore = connect(({ opts }) => ({ lofiArt: opts.lofiArt }))(
 				onMouseOver={props.setInfo && (e => props.setInfo(e, obj, pos.x))}
 				onMouseOut={props.onMouseOut}
 				onClick={() => props.onClick(obj)}>
-				<div
-					style={{
-						width: '64px',
-						height: '64px',
-						backgroundColor: bgcolor,
-						backgroundSize: 'contain',
-						backgroundImage: props.lofiArt
-							? undefined
-							: `url(/Cards/${obj.card.code.toString(32)}.png)`,
-					}}>
-					{children}
-					<div
-						style={{
-							position: 'absolute',
-							top: '0',
-							width: '64px',
-						}}>
-						{topText && (
-							<Components.Text
-								text={topText}
-								icoprefix="te"
-								style={{
-									width: '64px',
-									whiteSpace: 'nowrap',
-									overflow: 'hidden',
-									backgroundColor: bgcolor,
-								}}
-							/>
-						)}
-						{statText && (
-							<Components.Text
-								text={statText}
-								icoprefix="te"
-								style={{ float: 'right', backgroundColor: bgcolor }}
-							/>
-						)}
-					</div>
-					{obj.hasactive('prespell', 'protectonce') && (
-						<div
-							className="ico protection"
-							style={{
-								position: 'absolute',
-								left: '0',
-								top: isSpell ? '0' : '10px',
-								width: '64px',
-								height: '64px',
-							}}
-						/>
-					)}
-				</div>
+				{this.state.instdom}
 			</div>
+		);
+	}
+}
+
+const ThingInst = connect(({ opts }) => ({ lofiArt: opts.lofiArt }))(
+	function ThingInst(props) {
+		const idtrack = React.useContext(TrackIdCtx).value,
+			pos = ui.tgtToPos(props.obj, props.p1id);
+		return (
+			<TrackIdPos id={props.obj.id} pos={pos}>
+				<Motion
+					defaultStyle={
+						props.startpos === -1
+							? {
+									x: 103,
+									y: props.obj.ownerId === props.p1id ? 551 : 258,
+							  }
+							: idtrack.get(props.startpos)
+					}
+					style={{ x: spring(pos.x), y: spring(pos.y) }}>
+					{pos => <ThingInstCore {...props} pos={pos} />}
+				</Motion>
+			</TrackIdPos>
 		);
 	},
 );
-function ThingInst(props) {
-	const idtrack = React.useContext(TrackIdCtx).value,
-		pos = ui.tgtToPos(props.obj, props.player1.id);
-	return (
-		<TrackIdPos id={props.obj.id} pos={pos}>
-			<Motion
-				defaultStyle={
-					props.startpos === -1
-						? { x: 103, y: props.obj.ownerId === props.player1.id ? 551 : 258 }
-						: idtrack.get(props.startpos)
-				}
-				style={{ x: spring(pos.x), y: spring(pos.y) }}>
-				{pos => <ThingInstCore {...props} pos={pos} />}
-			</Motion>
-		</TrackIdPos>
-	);
-}
 
 function addNoHealData(game, newdata) {
 	const dataNext = {
@@ -423,10 +457,10 @@ function addNoHealData(game, newdata) {
 	return Object.assign(newdata, dataNext);
 }
 
-function tgtclass(p1, obj, targeting) {
+function tgtclass(p1id, obj, targeting) {
 	if (targeting) {
 		if (targeting.filter(obj)) return 'cantarget';
-	} else if (obj.ownerId === p1.id && obj.canactive()) return 'canactive';
+	} else if (obj.ownerId === p1id && obj.canactive()) return 'canactive';
 	return '';
 }
 
@@ -1200,7 +1234,7 @@ export default connect(({ user }) => ({ user }))(
 				children.push(
 					<TrackIdPos id={pl.id} pos={plpos}>
 						<div
-							className={tgtclass(player1, pl, this.state.targeting)}
+							className={tgtclass(player1.id, pl, this.state.targeting)}
 							style={{
 								position: 'absolute',
 								left: `${plpos.x - 48}px`,
@@ -1266,8 +1300,9 @@ export default connect(({ user }) => ({ user }))(
 					things.push(
 						<ThingInst
 							key={inst.id}
+							game={game}
 							obj={inst}
-							player1={player1}
+							p1id={player1.id}
 							startpos={this.state.startPos.get(inst.id)}
 							setInfo={(e, obj, x) => this.setCard(e, obj.card, x)}
 							onMouseOut={this.clearCard}
@@ -1282,8 +1317,9 @@ export default connect(({ user }) => ({ user }))(
 						creatures.push(
 							<ThingInst
 								key={cr.id}
+								game={game}
 								obj={cr}
-								player1={player1}
+								p1id={player1.id}
 								startpos={this.state.startPos.get(cr.id)}
 								setInfo={(e, obj, x) => this.setInfo(e, obj, x)}
 								onMouseOut={this.clearCard}
@@ -1300,8 +1336,9 @@ export default connect(({ user }) => ({ user }))(
 						perms.push(
 							<ThingInst
 								key={pr.id}
+								game={game}
 								obj={pr}
-								player1={player1}
+								p1id={player1.id}
 								startpos={this.state.startPos.get(pr.id)}
 								setInfo={(e, obj, x) => this.setInfo(e, obj, x)}
 								onMouseOut={this.clearCard}
@@ -1323,8 +1360,9 @@ export default connect(({ user }) => ({ user }))(
 					wp && !(j === 1 && cloaked) && (
 						<ThingInst
 							key={wp.id}
+							game={game}
 							obj={wp}
-							player1={player1}
+							p1id={player1.id}
 							startpos={this.state.startPos.get(wp.id)}
 							setInfo={(e, obj, x) => this.setInfo(e, obj, x)}
 							onMouseOut={this.clearCard}
@@ -1335,8 +1373,9 @@ export default connect(({ user }) => ({ user }))(
 					sh && !(j === 1 && cloaked) && (
 						<ThingInst
 							key={sh.id}
+							game={game}
 							obj={sh}
-							player1={player1}
+							p1id={player1.id}
 							startpos={this.state.startPos.get(sh.id)}
 							setInfo={(e, obj, x) => this.setInfo(e, obj, x)}
 							onMouseOut={this.clearCard}
