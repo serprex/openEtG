@@ -469,9 +469,9 @@ export default connect(({ user }) => ({ user }))(
 										text={game.data.wintext || 'You won!'}
 										style={{
 											textAlign: 'center',
-											width: '900px',
+											width: '700px',
 											position: 'absolute',
-											left: '0px',
+											left: '100px',
 											top: this.state.cardreward ? '100px' : '250px',
 										}}
 									/>

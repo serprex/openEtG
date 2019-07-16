@@ -1,10 +1,12 @@
 import React from 'react';
 
 import * as ui from '../ui.js';
+import { run } from '../mkAi.js';
 import * as sock from '../sock.js';
 import RngMock from '../RngMock.js';
 import * as Components from '../Components/index.js';
 import * as store from '../store.js';
+import { mkQuestAi, quarks } from '../Quest.js';
 
 const descriptions = [
 	'Element of randomness. Trade off consistency for cost effectiveness, make use of all elements, spawn mutants, & seek turn advantages into disadvantages.',
@@ -28,6 +30,7 @@ export default class ElementSelect extends React.Component {
 		super(props);
 		this.state = {
 			eledesc: 'Select your starter element',
+			skiptut: false,
 		};
 	}
 
@@ -38,7 +41,12 @@ export default class ElementSelect extends React.Component {
 					delete data.x;
 					store.store.dispatch(store.setUser(data));
 					store.store.dispatch(store.setOptTemp('deck', sock.getDeck()));
-					store.store.dispatch(store.doNav(import('./MainMenu')));
+					if (this.state.skiptut) {
+						store.store.dispatch(store.doNav(import('./MainMenu')));
+					} else {
+						store.store.dispatch(store.setOptTemp('quest', [0]));
+						run(mkQuestAi(quarks.basic_damage));
+					}
 				},
 			}),
 		);
@@ -63,7 +71,7 @@ export default class ElementSelect extends React.Component {
 					}}
 					onMouseOver={() =>
 						this.setState({
-							eledesc: ui.eleNames[i] + '\n\n' + descriptions[i - 1],
+							eledesc: `${ui.eleNames[i]}\n\n${descriptions[i - 1]}`,
 						})
 					}
 				/>,
@@ -91,6 +99,20 @@ export default class ElementSelect extends React.Component {
 						store.store.dispatch(store.doNav(import('./Login')));
 					}}
 				/>
+				<label
+					style={{
+						position: 'absolute',
+						top: '100px',
+						left: '100px',
+					}}>
+					<input
+						type="checkbox"
+						checked={this.state.skiptut}
+						onChange={e => this.setState({ skiptut: e.target.checked })}
+					/>{' '}
+					Skip Tutorial{' '}
+					<i>(you can access the Tutorial through Quests at any time)</i>
+				</label>
 				{mainc}
 			</>
 		);

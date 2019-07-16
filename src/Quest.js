@@ -672,6 +672,9 @@ quarks.chromatemple = {
 	info:
 		'You walk up to the steps of the last temple, the Chroma Temple. It was harsh getting here, but well worth it. This is it.',
 };
+for (const key in quarks) {
+	quarks[key].key = key;
+}
 export const root = {
 	children: [
 		{
