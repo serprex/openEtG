@@ -2,7 +2,7 @@ export function Thing(card, owner) {
 	this.owner = owner;
 	this.card = card;
 	if (this.status) {
-		for (const key of this.status.keys()) {
+		for (const [key, val] of this.status) {
 			if (etg.passives.has(key)) this.status = this.status.delete(key);
 		}
 		for (const [key, val] of card.status) {

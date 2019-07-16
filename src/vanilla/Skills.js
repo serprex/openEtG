@@ -770,11 +770,7 @@ const Actives = {
 			atkStat = hpStat + 3;
 		for (var i = c.owner.hand.length - 1; i >= 0; i--) {
 			var card = c.owner.hand[i].card;
-			if (
-				etg.ShardList.some(function(x) {
-					return x && card.isOf(Cards.Names.Codes[x]);
-				})
-			) {
+			if (etg.ShardList.some(x => x && card.isOf(Cards.Codes[x]))) {
 				atkStat += (atkBuff[e] || 2) + card.upped;
 				hpStat += (hpBuff[e] || 2) + card.upped;
 				shardTally[card.element]++;

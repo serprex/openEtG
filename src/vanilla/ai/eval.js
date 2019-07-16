@@ -484,7 +484,7 @@ function evalactive(c, active, extra) {
 
 function checkpassives(c) {
 	let score = 0;
-	for (const status of c.status.keys()) {
+	for (const [status, val] of c.status) {
 		if (uniqueStatuses[status] && !(c instanceof smth.CardInstance)) {
 			if (!uniquesActive.has(status)) {
 				uniquesActive.add(status);
@@ -605,7 +605,7 @@ function evalcardinstance(cardInst) {
 	if (c.type === etg.Spell) {
 		score += evalactive(cardInst, c.active.get('cast'));
 	} else {
-		for (const act of c.active.values()) {
+		for (const act of c.active.data.values()) {
 			score += evalactive(cardInst, act);
 		}
 		score += checkpassives(cardInst);

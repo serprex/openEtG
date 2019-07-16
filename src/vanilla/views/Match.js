@@ -477,7 +477,7 @@ export default connect()(
 			e.preventDefault();
 		};
 
-		startMatch({ game, data, dispatch }) {
+		startMatch({ game, dispatch }) {
 			Effect.clear();
 			const cmds = {
 				end: data => {

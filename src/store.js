@@ -1,7 +1,6 @@
 import React from 'react';
 import * as redux from 'redux';
 
-import * as imm from './immutable.js';
 import * as usercmd from './usercmd';
 import * as sfx from './audio';
 
@@ -19,10 +18,6 @@ sfx.changeMusic(opts.enableMusic);
 export function doNav(view, props) {
 	return dispatch =>
 		view.then(view => dispatch({ type: 'NAV', view: view.default, props }));
-}
-
-export function doNavDirect(view, props) {
-	dispatch({ type: 'NAV', view, props });
 }
 
 export function setOptTemp(key, val) {

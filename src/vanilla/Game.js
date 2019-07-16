@@ -1,4 +1,5 @@
-import Rng from '../rng.js';
+import RngModule from '../rng.js';
+const Rng = RngModule.exports;
 import * as etg from './etg.js';
 import * as Cards from './Cards.js';
 import Effect from './Effect.js';

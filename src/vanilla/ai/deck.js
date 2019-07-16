@@ -173,7 +173,7 @@ export default function(level) {
 	for (var i = deck.length - 1; ~i; i--) {
 		var filterFunc = filters[etgutil.asUpped(deck[i], false)];
 		if (filterFunc) {
-			var card = Cards.Names.Codes[deck[i]];
+			var card = Cards.Codes[deck[i]];
 			if (!filterFunc(card, deck, ecost)) {
 				ecost[card.element] -= card.cost;
 				deck.splice(i, 1);

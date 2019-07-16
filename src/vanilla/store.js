@@ -2,7 +2,8 @@ import * as redux from 'redux';
 import React from 'react';
 
 export function doNav(view, props) {
-	return { type: 'NAV', view, props };
+	return dispatch =>
+		view.then(view => dispatch({ type: 'NAV', view: view.default, props }));
 }
 
 export function setCmds(cmds) {
@@ -42,29 +43,28 @@ export const store = redux.createStore(
 	(state, action) => {
 		switch (action.type) {
 			case 'NAV':
-				return Object.assign({}, state, {
-					nav: { view: action.view, props: action.props },
-				});
+				return { ...state, nav: { view: action.view, props: action.props } };
 			case 'OPT':
-				return Object.assign({}, state, {
-					opts: Object.assign({}, state.opts, { [action.key]: action.val }),
-				});
+				return {
+					...state,
+					opts: { ...state.opts, [action.key]: action.val },
+				};
 			case 'CMD':
-				return Object.assign({}, state, { cmds: action.cmds });
+				return { ...state, cmds: action.cmds };
 			case 'MUTE': {
 				const muted = new Set(state.muted);
 				muted.add(action.name);
-				return Object.assign({}, state, { muted });
+				return { ...state, muted };
 			}
 			case 'UNMUTE': {
 				const muted = new Set(state.muted);
 				muted.delete(action.name);
-				return Object.assign({}, state, { muted });
+				return { ...state, muted };
 			}
 			case 'CHAT_CLEAR': {
 				const chat = new Map(state.chat);
 				chat.delete(action.name);
-				return Object.assign({}, state, { chat });
+				return { ...state, chat };
 			}
 			case 'CHAT': {
 				const chat = new Map(state.chat);
@@ -72,7 +72,7 @@ export const store = redux.createStore(
 				chat.set(name, (chat.get(name) || []).concat([action.span]));
 				if (action.name === 'System')
 					chat.set('Main', (chat.get('Main') || []).concat([action.span]));
-				return Object.assign({}, state, { chat });
+				return { ...state, chat };
 			}
 		}
 		return state;

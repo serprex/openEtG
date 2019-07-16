@@ -52,5 +52,6 @@ export default function(data, ai) {
 	game.turn.foe.drawhand();
 	if (data.foename) game.foename = data.foename;
 	if (ai) game.ai = true;
-	return { game, data };
+	game.data = data;
+	return game;
 }

@@ -66,64 +66,65 @@ export class Text extends React.Component {
 	constructor(props) {
 		super(props);
 		this.state = {
-			text: null,
-			icoprefix: null,
-			vdom: null,
+			text: '',
+			icoprefix: 'ce',
+			elec: null,
 		};
 	}
 
-	static getDerivedStateFromProps(props, prevState) {
-		if (
-			prevState.text !== props.text ||
-			prevState.icoprefix !== props.icoprefix
-		) {
-			if (!props.text) {
-				return {
-					text: props.text,
-					icoprefix: props.icoprefix,
-					vdom: null,
-				};
-			}
-			const elec = [],
-				text = props.text.toString().replace(/\|/g, ' / '),
-				sep = /\d\d?:\d\d?|\$|\n/g,
-				icoprefix = `ico ${props.icoprefix || 'ce'}`;
-			let reres,
-				lastindex = 0;
-			while ((reres = sep.exec(text))) {
-				const piece = reres[0];
-				if (reres.index != lastindex) {
-					elec.push(text.slice(lastindex, reres.index));
-				}
-				if (piece == '\n') {
-					elec.push(<br />);
-				} else if (piece == '$') {
-					elec.push(<span className="ico gold" />);
-				} else if (/^\d\d?:\d\d?$/.test(piece)) {
-					const parse = piece.split(':');
-					const num = parseInt(parse[0]);
-					if (num == 0) {
-						elec.push('0');
-					} else if (num < 4) {
-						const icon = <span className={icoprefix + parse[1]} />;
-						for (let j = 0; j < num; j++) {
-							elec.push(icon);
-						}
-					} else {
-						elec.push(parse[0], <span className={icoprefix + parse[1]} />);
-					}
-				}
-				lastindex = reres.index + piece.length;
-			}
-			if (lastindex != text.length) {
-				elec.push(text.slice(lastindex));
-			}
-			return {
-				text: props.text,
-				vdom: elec,
-			};
+	static getDerivedStateFromProps(props, state) {
+		let { text, icoprefix = 'ce' } = props;
+		text = text ? text.toString() : '';
+		if (text === state.text && icoprefix === props.icoprefix) {
+			return null;
 		}
-		return null;
+		const sep = /\d\d?:\d\d?|\$|\n/g;
+		const ico = `ico ${icoprefix}`;
+		let reres,
+			lastindex = 0;
+		const elec = [];
+		while ((reres = sep.exec(text))) {
+			const piece = reres[0];
+			if (reres.index != lastindex) {
+				elec.push(
+					<React.Fragment key={elec.length}>
+						{text.slice(lastindex, reres.index)}
+					</React.Fragment>,
+				);
+			}
+			if (piece == '\n') {
+				elec.push(<br key={elec.length} />);
+			} else if (piece == '$') {
+				elec.push(<span key={elec.length} className="ico gold" />);
+			} else if (/^\d\d?:\d\d?$/.test(piece)) {
+				const parse = piece.split(':');
+				const num = +parse[0];
+				if (num == 0) {
+					elec.push(<React.Fragment key={elec.length}>0</React.Fragment>);
+				} else if (num < 4) {
+					const icon = <span className={ico + parse[1]} />;
+					for (let j = 0; j < num; j++) {
+						elec.push(
+							<React.Fragment key={elec.length}>{icon}</React.Fragment>,
+						);
+					}
+				} else {
+					elec.push(
+						parse[0],
+						<span key={elec.length} className={ico + parse[1]} />,
+					);
+				}
+			}
+			lastindex = reres.index + piece.length;
+		}
+		if (lastindex != text.length) {
+			elec.push(
+				<React.Fragment key={elec.length}>
+					{text.slice(lastindex)}
+				</React.Fragment>,
+			);
+		}
+		return { text, icoprefix, elec };
 	}
 
 	render() {
