@@ -56,10 +56,6 @@ function passive(f) {
 	return f;
 }
 const Skills = {
-	ablaze: x => {
-		const n = +x;
-		return (ctx, c, t) => c.incrAtk(n);
-	},
 	abomination: passive((ctx, c, t, data) => {
 		if (data.tgt === c.id && data.active === exports.mutation) {
 			Skills.improve(ctx, c, c);
@@ -885,11 +881,12 @@ const Skills = {
 		c.transform(t.card);
 		c.setStatus('nocturnal', 1);
 	},
-	growth: x => {
-		const n = +x;
+	growth: (atk, hp = atk) => {
+		atk |= 0;
+		hp |= 0;
 		return (ctx, c, t) => {
-			c.buffhp(n);
-			c.incrAtk(n);
+			c.buffhp(hp);
+			c.incrAtk(atk);
 		};
 	},
 	guard: (ctx, c, t) => {
@@ -1014,7 +1011,7 @@ const Skills = {
 				'adrenaline',
 				'mitosis',
 			],
-			['ablaze 1', 'ablaze 2', 'tempering', 'destroy', 'destroy', 'rage'],
+			['growth 1 0', 'growth 2 0', 'tempering', 'destroy', 'destroy', 'rage'],
 			['steam', 'steam', 'freeze', 'freeze', 'nymph', 'nymph'],
 			['mend', 'endow', 'endow', 'luciferin', 'luciferin', 'luciferin'],
 			['summon Firefly', 'summon Firefly', 'snipe', 'dive', 'gas', 'gas'],
@@ -1053,8 +1050,8 @@ const Skills = {
 			'growth 2': 2,
 			adrenaline: 2,
 			mitosis: 3,
-			'ablaze 1': 1,
-			'ablaze 2': 1,
+			'growth 1 0': 1,
+			'growth 2 0': 1,
 			tempering: c.card.upped ? 2 : 1,
 			destroy: 3,
 			rage: 2,
@@ -1179,7 +1176,7 @@ const Skills = {
 	},
 	jetstream: (ctx, c, t) => {
 		t.dmg(1);
-		t.atk += 3;
+		t.incrAtk(3);
 	},
 	light: (ctx, c, t) => {
 		ctx.effect({ x: 'Text', text: '1:8', id: c.id });
@@ -1254,7 +1251,7 @@ const Skills = {
 		c.setStatus('nocturnal', 1);
 	},
 	martyr: passive((ctx, c, t, dmg) => {
-		if (dmg > 0) c.atk += dmg;
+		if (dmg > 0) c.incrAtk(dmg);
 	}),
 	mend: (ctx, c, t) => {
 		t.dmg(-10);
@@ -1309,7 +1306,7 @@ const Skills = {
 	},
 	momentum: (ctx, c, t) => {
 		ctx.effect({ x: 'Text', text: 'Momentum', id: t.id });
-		t.atk += 1;
+		t.incrAtk(1);
 		t.buffhp(1);
 		t.setStatus('momentum', 1);
 	},
@@ -1391,7 +1388,7 @@ const Skills = {
 	},
 	nullspell: (ctx, c, t) => {
 		if (!c.hasactive('prespell', 'eatspell')) {
-			ctx.effect({x:'Text', text: 'Null Spell', id: c.id});
+			ctx.effect({ x: 'Text', text: 'Null Spell', id: c.id });
 			c.addactive('prespell', exports.eatspell);
 			c.addactive('turnstart', exports.noeatspell);
 		}
@@ -1493,7 +1490,7 @@ const Skills = {
 		if (copy.getStatus('mutant')) {
 			const buff = ctx.upto(25);
 			copy.buffhp(Math.floor(buff / 5));
-			copy.atk += buff % 5;
+			copy.incrAtk(buff % 5);
 			copy.mutantactive();
 		}
 		if (copy.getStatus('voodoo')) {
@@ -2198,7 +2195,7 @@ const Skills = {
 		t.setStatus('airborne', 0);
 	},
 	wind: (ctx, c, t) => {
-		c.atk += c.getStatus('storedAtk');
+		c.incrAtk(c.getStatus('storedAtk'));
 		c.setStatus('storedAtk', 0);
 	},
 	wisdom: (ctx, c, t) => {

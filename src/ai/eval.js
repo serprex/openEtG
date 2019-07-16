@@ -7,8 +7,6 @@ function pillarval(c) {
 	return c.type === etg.Spell ? 0.1 : Math.sqrt(c.getStatus('charges'));
 }
 const SkillsValues = {
-	'ablaze 1': 1,
-	'ablaze 2': 3,
 	accelerationspell: 5,
 	'acceleration 1': c => c.truehp() - 2,
 	'acceleration 2': c => c.truehp() - 1,
@@ -152,6 +150,8 @@ const SkillsValues = {
 	'growth 1': 2,
 	'growth 2': 5,
 	'growth 3': 7,
+	'growth 1 0': 1,
+	'growth 2 0': 3,
 	guard: 4,
 	halveatk: c => {
 		let atk;

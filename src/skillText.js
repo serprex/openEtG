@@ -34,10 +34,6 @@ export default function skillText(c) {
 }
 
 const data = {
-	ablaze: x => ({
-		cast: `Gain ${x}|0`,
-		ownattack: `Gain ${x}|0 per turn`,
-	}),
 	abomination: 'Amiable to mutation',
 	absorber: 'Produce 3:6 per attacker',
 	acceleration: x => `Gain ${x}|-1 per turn`,
@@ -209,8 +205,8 @@ const data = {
 	gpull: 'Intercept attacks directed to owner',
 	gpullspell: 'Target creature intercepts attacks directed to its owner',
 	gratitude: 'Heal owner 4',
-	growth: x => {
-		x = `${x}|${x}`;
+	growth: (atk, hp = atk) => {
+		const x = `${atk}|${hp}`;
 		return {
 			death: `When a death occurs, gain ${x}`,
 			ownfreeze: `Gains ${x} instead of freezing`,
@@ -550,10 +546,12 @@ function pushEntry(list, c, event, entry) {
 	const x = processEntry(c, event, entry);
 	if (x) list.push(x);
 }
+const cache = new Map();
 function getDataFromName(name) {
 	if (name in data) return data[name];
-	const spidx = name.indexOf(' ');
-	return ~spidx
-		? (data[name] = data[name.slice(0, spidx)](name.slice(spidx + 1)))
-		: data[name];
+	if (cache.has(name)) return cache.get(name);
+	const [base, ...args] = name.split(' ');
+	const r = data[base](...args);
+	cache.set(name, r);
+	return r;
 }

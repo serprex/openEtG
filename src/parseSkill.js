@@ -8,15 +8,11 @@ export default function(name) {
 	} else if (cache.has(name)) {
 		return cache.get(name);
 	}
-	const spidx = name.indexOf(' ');
-	if (spidx === -1) {
-		return console.log('Unknown active', name);
+	const [base, ...args] = name.split(' ');
+	if (!(base in Skills)) {
+		throw new Error(`Unknown active ${base}`);
 	}
-	const s = new Skill(
-		[name],
-		Skills[name.slice(0, spidx)].func(name.slice(spidx + 1)),
-		false,
-	);
+	const s = new Skill([name], Skills[base].func(...args), false);
 	cache.set(name, s);
 	return s;
 }

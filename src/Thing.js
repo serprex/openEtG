@@ -382,7 +382,7 @@ const mutantabilities = [
 	'mutation',
 	'growth 1',
 	'growth 2',
-	'ablaze 2',
+	'growth 2 0',
 	'poison 1',
 	'deja',
 	'endow',
