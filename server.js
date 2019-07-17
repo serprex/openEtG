@@ -493,6 +493,13 @@ const importlocks = new Map();
 			}
 		},
 		importoriginal(data, user) {
+			if (user.origName && user.origName !== data.name) {
+				sockEmit(this, 'chat', {
+					msg: `Your account is already bound to ${user.origName}`,
+					mode: 1,
+				});
+				return;
+			}
 			const reqdata = `user=${encodeURIComponent(
 				data.name,
 			)}&psw=${encodeURIComponent(data.pass)}&errorcode=%2D1`;
@@ -546,40 +553,46 @@ const importlocks = new Map();
 								lock = new Lock();
 								importlocks.set(data.name, lock);
 							}
-							lock.exec(async () => {
-								const oldimport = await db.hget('ImportOriginal', data.name),
-									impdata = sutil.parseJSON(oldimport) || {};
-								let newbound, newpool;
-								if (impdata.name && impdata.name !== user.name) {
-									sockEmit(this, 'chat', {
-										msg: `${data.name} is bound to ${impdata.name}`,
-										mode: 1,
+							lock
+								.exec(async () => {
+									const oldimport = await db.hget('ImportOriginal', data.name),
+										impdata = sutil.parseJSON(oldimport) || {};
+									let newbound, newpool;
+									if (impdata.name && impdata.name !== user.name) {
+										sockEmit(this, 'chat', {
+											msg: `${data.name} is bound to ${impdata.name}`,
+											mode: 1,
+										});
+										return;
+									} else {
+										newbound = etgutil.removedecks(
+											tobound,
+											impdata.bound || '',
+										);
+										newpool = etgutil.removedecks(topool, impdata.pool || '');
+									}
+									user.origName = data.name;
+									user.pool = etgutil.mergedecks(user.pool, newpool);
+									user.accountbound = etgutil.mergedecks(
+										user.accountbound,
+										newbound,
+									);
+									sockEmit(this, 'addpools', {
+										c: newpool,
+										b: newbound,
+										msg: `Imported ${newpool}${newbound}`,
 									});
-									return;
-								} else {
-									newbound = etgutil.removedecks(tobound, impdata.bound || '');
-									newpool = etgutil.removedecks(topool, impdata.pool || '');
-								}
-								user.pool = etgutil.mergedecks(user.pool, newpool);
-								user.accountbound = etgutil.mergedecks(
-									user.accountbound,
-									newbound,
-								);
-								sockEmit(this, 'addpools', {
-									c: newpool,
-									b: newbound,
-									msg: `Imported ${newpool}${newbound}`,
-								});
-								return db.hset(
-									'ImportOriginal',
-									data.name,
-									JSON.stringify({
-										name: user.name,
-										bound: newbound,
-										pool: newpool,
-									}),
-								);
-							});
+									return db.hset(
+										'ImportOriginal',
+										data.name,
+										JSON.stringify({
+											name: user.name,
+											bound: newbound,
+											pool: newpool,
+										}),
+									);
+								})
+								.then(() => lock.q.size || importlocks.delete(data.name));
 						});
 					},
 				)
