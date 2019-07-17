@@ -79,7 +79,7 @@ export function deck(deck) {
 		paths = {},
 		suffix,
 		pathsvg = '';
-	etgutil.iterdeck(deck, code => {
+	for (const code of etgutil.iterdeck(deck)) {
 		if (!(code in Cards.Codes)) {
 			const ismark = etgutil.fromTrueMark(code);
 			if (~ismark) mark = ismark;
@@ -100,7 +100,7 @@ export function deck(deck) {
 			y = 0;
 			x += 100;
 		}
-	});
+	}
 	for (const elecls in paths) {
 		pathsvg += `<path class='${elecls}' d='${paths[elecls]}'/>`;
 	}

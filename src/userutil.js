@@ -51,7 +51,9 @@ export function calcWealth(cardpool, isDecoded) {
 		}
 	}
 	if (typeof cardpool === 'string') {
-		etgutil.iterraw(cardpool, wealthIter);
+		for (const [code, count] of etgutil.iterraw(cardpool)) {
+			wealthIter(code, count);
+		}
 	} else {
 		cardpool.forEach(
 			isDecoded

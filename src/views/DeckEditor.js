@@ -6,6 +6,7 @@ import * as Cards from '../Cards';
 import * as Tutor from '../Components/Tutor';
 import * as sock from '../sock';
 import * as store from '../store';
+import { chain } from '../util.js';
 import Editor from '../Components/Editor';
 
 function processDeck(pool, dcode) {
@@ -288,13 +289,14 @@ export default connect(({ user }) => ({
 			super(props);
 
 			const pool = [];
-			function incrpool(code, count) {
+			for (const [code, count] of chain(
+				etgutil.iterraw(props.user.pool),
+				etgutil.iterraw(props.user.accountbound),
+			)) {
 				if (code in Cards.Codes) {
 					pool[code] = (pool[code] || 0) + count;
 				}
 			}
-			etgutil.iterraw(props.user.pool, incrpool);
-			etgutil.iterraw(props.user.accountbound, incrpool);
 			this.deckRef = React.createRef();
 			this.state = {
 				pool: pool,

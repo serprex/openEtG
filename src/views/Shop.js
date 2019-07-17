@@ -31,8 +31,9 @@ function PackDisplay({ cards }) {
 	let cardchildren;
 	if (dlen < 11) {
 		cardchildren = [];
-		etgutil.iterdeck(cards, (code, i) => {
-			const x = i % 5,
+		for (const code of etgutil.iterdeck(cards)) {
+			const i = cardchildren.length,
+				x = i % 5,
 				y = Math.floor(i / 5);
 			cardchildren.push(
 				<Components.Card
@@ -42,7 +43,7 @@ function PackDisplay({ cards }) {
 					code={code}
 				/>,
 			);
-		});
+		}
 	} else if (dlen < 61) {
 		cardchildren = <Components.DeckDisplay deck={etgutil.decodedeck(cards)} />;
 	} else {

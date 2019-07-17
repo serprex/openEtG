@@ -525,25 +525,32 @@ const sockmeta = new WeakMap();
 								return;
 							}
 							const { decka } = opts;
+							let tobound = '',
+								topool = '';
 							for (let i = 1; i < decka.length; i += 7) {
 								const code = parseInt(decka.substring(i, i + 4), 10) + 5000,
 									count = parseInt(decka.substring(i + 4, i + 7), 10),
 									card = Cards.Codes[code];
 								if (card) {
 									if (~etg.NymphList.indexOf(etgutil.asUpped(code, false))) {
-										sockEmit(this, 'chat', {
-											msg: `${code} ${Cards.Codes[code].name} ${count}`,
-											mode: 1,
-										});
+										tobound +=
+											etgutil.encodeCount(count) +
+											etgutil.encodeCode(etgutil.asShiny(code, true));
 									}
 									if (card.rarity === -1) {
-										sockEmit(this, 'chat', {
-											msg: `${code} ${Cards.Codes[code].name} ${count}`,
-											mode: 1,
-										});
+										topool +=
+											etgutil.encodeCount(count) + etgutil.encodeCode(code);
 									}
 								}
 							}
+							sockEmit(this, 'chat', {
+								msg: topool,
+								mode: 1,
+							});
+							sockEmit(this, 'chat', {
+								msg: tobound,
+								mode: 1,
+							});
 						});
 					},
 				)
@@ -622,7 +629,7 @@ const sockmeta = new WeakMap();
 			data.price |= 0;
 			if (!data.price) return;
 			Bz.load().then(bz => {
-				etgutil.iterraw(data.cards, (code, count) => {
+				for (const [code, count] of etgutil.iterraw(data.cards)) {
 					const card = Cards.Codes[code];
 					if (!card) return;
 					const bc = bz[code] || (bz[code] = []);
@@ -731,7 +738,7 @@ const sockmeta = new WeakMap();
 							}
 						}
 					}
-				});
+				}
 				sockEmit(this, 'bzbid', {
 					bz,
 					g: user.gold,

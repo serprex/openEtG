@@ -179,14 +179,14 @@ Player.prototype.init = function(foe, data) {
 	this.shardgolem = null;
 	this.out = false;
 	const deck = [];
-	etgutil.iterdeck(data.deck, code => {
+	for (const code of etgutil.iterdeck(data.deck)) {
 		let idx;
 		if (code in Cards.Codes) {
 			deck.push(Cards.Codes[code]);
 		} else if (~(idx = etgutil.fromTrueMark(code))) {
 			this.mark = idx;
 		}
-	});
+	}
 	this.deckIds = this.instantiateDeck(deck);
 	this.drawhand(7);
 	return this;
