@@ -1,6 +1,7 @@
 import db from './db.js';
 
 const usergc = new Set();
+const userps = new Map();
 export const users = new Map();
 export const socks = new Map();
 export async function storeUsers() {
@@ -30,20 +31,28 @@ export function stop() {
 		.then(() => db.quit())
 		.catch(e => console.error(e.message));
 }
+async function _load(name) {
+	const userstr = await db.hget('Users', name);
+	if (userstr) {
+		const user = JSON.parse(userstr);
+		users.set(name, user);
+		userps.delete(name);
+		if (!user.streak) user.streak = [];
+		return user;
+	} else {
+		throw new Error('User not found');
+	}
+}
 export async function load(name) {
 	const userck = users.get(name);
 	if (userck) {
 		usergc.delete(name);
 		return userck;
 	} else {
-		const userstr = await db.hget('Users', name);
-		if (userstr) {
-			const user = JSON.parse(userstr);
-			users.set(name, user);
-			if (!user.streak) user.streak = [];
-			return user;
-		} else {
-			throw new Error('User not found');
-		}
+		const userpck = userps.get(name);
+		if (userpck) return userpck;
+		const p = _load(name);
+		userps.set(name, p);
+		return p;
 	}
 }

@@ -28,9 +28,11 @@ import * as Bz from './src/srv/Bz.js';
 import starter from './src/srv/starter.json';
 import forkcore from './src/srv/forkcore.js';
 import login from './src/srv/login.js';
+import Lock from './src/srv/Lock.js';
 
 const MAX_INT = 0x100000000;
 const sockmeta = new WeakMap();
+const importlocks = new Map();
 (async () => {
 	const [keypem, certpem] = await Promise.all([
 		fs.readFile('../certs/oetg-key.pem'),
@@ -491,10 +493,6 @@ const sockmeta = new WeakMap();
 			}
 		},
 		importoriginal(data, user) {
-			sockEmit(this, 'chat', {
-				msg: 'This feature is in development',
-				mode: 1,
-			});
 			const reqdata = `user=${encodeURIComponent(
 				data.name,
 			)}&psw=${encodeURIComponent(data.pass)}&errorcode=%2D1`;
@@ -543,13 +541,44 @@ const sockmeta = new WeakMap();
 									}
 								}
 							}
-							sockEmit(this, 'chat', {
-								msg: topool,
-								mode: 1,
-							});
-							sockEmit(this, 'chat', {
-								msg: tobound,
-								mode: 1,
+							let lock = importlocks.get(data.name);
+							if (!lock) {
+								lock = new Lock();
+								importlocks.set(data.name, lock);
+							}
+							lock.exec(async () => {
+								const oldimport = await db.hget('ImportOriginal', data.name),
+									impdata = sutil.parseJSON(oldimport) || {};
+								let newbound, newpool;
+								if (impdata.name && impdata.name !== user.name) {
+									sockEmit(this, 'chat', {
+										msg: `${data.name} is bound to ${impdata.name}`,
+										mode: 1,
+									});
+									return;
+								} else {
+									newbound = etgutil.removedecks(tobound, impdata.bound || '');
+									newpool = etgutil.removedecks(topool, impdata.pool || '');
+								}
+								user.pool = etgutil.mergedecks(user.pool, newpool);
+								user.accountbound = etgutil.mergedecks(
+									user.accountbound,
+									newbound,
+								);
+								sockEmit(this, 'addpools', {
+									c: newpool,
+									b: newbound,
+									msg: `Imported ${newpool}${newbound}`,
+								});
+								return db.hset(
+									'ImportOriginal',
+									data.name,
+									JSON.stringify({
+										name: user.name,
+										bound: newbound,
+										pool: newpool,
+									}),
+								);
 							});
 						});
 					},

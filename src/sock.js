@@ -192,6 +192,11 @@ const sockEvents = {
 		store.store.dispatch(store.userCmd(data.g ? 'addgold' : 'addcards', data));
 		store.store.dispatch(store.chatMsg(data.msg, 'System'));
 	},
+	addpools: data => {
+		store.store.dispatch(store.userCmd('addcards', { c: data.c }));
+		store.store.dispatch(store.userCmd('addbound', { c: data.b }));
+		store.store.dispatch(store.chatMsg(data.msg, 'System'));
+	},
 };
 socket.onmessage = function(msg) {
 	const state = store.store.getState();
