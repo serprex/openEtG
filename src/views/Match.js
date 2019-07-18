@@ -224,7 +224,8 @@ class ThingInstCore extends React.Component {
 		if (instprops !== state.instprops || isgpull !== state.isgpull) {
 			const children = [],
 				isSpell = obj.type === etg.Spell,
-				bgcolor = ui.maybeLightenStr(obj.card);
+				{ card } = obj,
+				bgcolor = ui.maybeLightenStr(card);
 			let statText, topText;
 			if (!isSpell) {
 				const visible = [
@@ -281,9 +282,9 @@ class ThingInstCore extends React.Component {
 						charges ? ` \u00d7${charges}` : ''
 					}`;
 				} else if (obj.type === etg.Permanent) {
-					if (obj.card.type === etg.Pillar) {
+					if (card.type === etg.Pillar) {
 						statText = `1:${
-							obj.getStatus('pendstate') ? obj.owner.mark : obj.card.element
+							obj.getStatus('pendstate') ? obj.owner.mark : card.element
 						}\u00d7${charges}`;
 						topText = '';
 					} else if (obj.active.get('ownattack') === Skills.locket) {
@@ -297,8 +298,8 @@ class ThingInstCore extends React.Component {
 					statText = charges ? '\u00d7' + charges : obj.truedr().toString();
 				}
 			} else {
-				topText = obj.card.name;
-				statText = `${obj.card.cost}:${obj.card.costele}`;
+				topText = card.name;
+				statText = `${card.cost}:${card.costele}`;
 			}
 			return {
 				instprops,
@@ -312,9 +313,8 @@ class ThingInstCore extends React.Component {
 							backgroundSize: 'contain',
 							backgroundImage: props.lofiArt
 								? undefined
-								: `url(/Cards/${obj.card.code.toString(32)}.png)`,
+								: `url(/Cards/${card.code.toString(32)}.png)`,
 						}}>
-						{children}
 						<div
 							style={{
 								position: 'absolute',
@@ -341,6 +341,7 @@ class ThingInstCore extends React.Component {
 								/>
 							)}
 						</div>
+						{children}
 						{obj.hasactive('prespell', 'protectonce') && (
 							<div
 								className="ico protection"
@@ -1293,8 +1294,6 @@ export default connect(({ user }) => ({ user }))(
 						/>
 					),
 				);
-				const creatures = [],
-					perms = [];
 				for (let i = 0; i < pl.handIds.length; i++) {
 					const inst = pl.hand[i];
 					things.push(
@@ -1311,10 +1310,10 @@ export default connect(({ user }) => ({ user }))(
 						/>,
 					);
 				}
-				for (let i = 0; i < 23; i++) {
+				for (let i = j ? 0 : 22; i >= 0 && i < 23; i += j || -1) {
 					const cr = pl.creatures[i];
 					if (cr && !(j === 1 && cloaked)) {
-						creatures.push(
+						things.push(
 							<ThingInst
 								key={cr.id}
 								game={game}
@@ -1333,7 +1332,7 @@ export default connect(({ user }) => ({ user }))(
 					const pr = pl.permanents[i];
 					if (pr && pr.getStatus('flooding')) floodvisible = true;
 					if (pr && !(j === 1 && cloaked && !pr.getStatus('cloak'))) {
-						perms.push(
+						things.push(
 							<ThingInst
 								key={pr.id}
 								game={game}
@@ -1348,16 +1347,10 @@ export default connect(({ user }) => ({ user }))(
 						);
 					}
 				}
-				if (j === 1) {
-					creatures.reverse();
-					perms.reverse();
-				}
-				things.push(...creatures);
-				things.push(...perms);
 				const wp = pl.weapon,
 					sh = pl.shield;
-				things.push(
-					wp && !(j === 1 && cloaked) && (
+				if (wp && !(j === 1 && cloaked)) {
+					things.push(
 						<ThingInst
 							key={wp.id}
 							game={game}
@@ -1368,9 +1361,11 @@ export default connect(({ user }) => ({ user }))(
 							onMouseOut={this.clearCard}
 							onClick={this.thingClick}
 							targeting={this.state.targeting}
-						/>
-					),
-					sh && !(j === 1 && cloaked) && (
+						/>,
+					);
+				}
+				if (sh && !(j === 1 && cloaked)) {
+					things.push(
 						<ThingInst
 							key={sh.id}
 							game={game}
@@ -1381,9 +1376,9 @@ export default connect(({ user }) => ({ user }))(
 							onMouseOut={this.clearCard}
 							onClick={this.thingClick}
 							targeting={this.state.targeting}
-						/>
-					),
-				);
+						/>,
+					);
+				}
 				const qx = 0,
 					qy = j ? 106 : 308;
 				for (let k = 1; k < 13; k++) {

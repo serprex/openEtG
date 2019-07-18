@@ -212,12 +212,13 @@ const Skills = {
 		}
 	},
 	brawl: (ctx, c, t) => {
-		c.owner.creatures.slice().forEach((cr, i) => {
+		const foeCreatures = c.owner.foe.creatures;
+		c.owner.creatures.forEach((cr, i) => {
 			if (cr) {
-				const fcr = c.owner.foe.creatures[i];
+				const fcr = foeCreatures[i];
 				if (fcr) {
-					fcr.attackCreature(cr);
 					cr.attackCreature(fcr);
+					fcr.attackCreature(cr);
 				} else {
 					cr.attack();
 				}
@@ -265,7 +266,7 @@ const Skills = {
 		if (frozen) c.owner.foe.freeze(frozen);
 	},
 	catlife: passive((ctx, c, t, data) => {
-		if (!c.owner.creatures[data.index]) {
+		if (!c.owner.creatureIds[data.index]) {
 			const lives = c.maybeDecrStatus('lives');
 			if (!lives) return;
 			ctx.effect({ x: 'Text', text: `${lives - 1} lives`, id: c.id });
@@ -281,12 +282,12 @@ const Skills = {
 	chimera: (ctx, c, t) => {
 		let atk = 0,
 			hp = 0;
-		c.owner.creatures.forEach(cr => {
+		for (const cr of c.owner.creatures) {
 			if (cr) {
 				atk += cr.trueatk();
 				hp += cr.truehp();
 			}
-		});
+		}
 		const chim = c.owner.newThing(c.card.as(Cards.Names.Chimera));
 		chim.atk = atk;
 		chim.maxhp = chim.hp = hp;
@@ -384,9 +385,9 @@ const Skills = {
 	},
 	dagger: (ctx, c) => {
 		let buff = c.owner.mark === etg.Darkness || c.owner.mark === etg.Death;
-		c.owner.permanents.forEach(p => {
-			if (p && p.getStatus('cloak')) buff++;
-		});
+		for (const p of c.owner.permanentIds) {
+			if (p && ctx.getStatus(p, 'cloak')) buff++;
+		}
 		return buff;
 	},
 	deadalive: (ctx, c) => {
@@ -406,10 +407,10 @@ const Skills = {
 			return;
 		if (!tgt.hasactive('prespell', 'deathwish')) return (data.tgt = c.id);
 		let totaldw = 0;
-		c.owner.creatures.forEach(cr => {
+		for (const cr of c.owner.creatures) {
 			if (cr && cr.hasactive('prespell', 'deathwish')) totaldw++;
-		});
-		if (c.rng() < 1 / totaldw) {
+		}
+		if (ctx.rng() < 1 / totaldw) {
 			return (data.tgt = c.id);
 		}
 	},
@@ -2133,13 +2134,16 @@ const Skills = {
 		c.die();
 	},
 	vengeance: (ctx, c, t) => {
-		if (c.ownerId === t.ownerId && c.ownerId === ctx.byId(ctx.turn).foe) {
+		if (
+			c.ownerId === t.ownerId &&
+			c.owner.leader !== ctx.get(ctx.turn).get('leader')
+		) {
 			if (c.maybeDecrStatus('charges') < 2) c.remove();
-			c.owner.creatures.slice().forEach(cr => {
-				if (cr && cr !== t) {
+			for (const cr of c.owner.creatures) {
+				if (cr && cr.id !== t.id) {
 					cr.attack();
 				}
-			});
+			}
 		}
 	},
 	vindicate: (ctx, c, t, data) => {

@@ -37,17 +37,26 @@ export default function Game(data) {
 	);
 	this.cache = new Map([[this.id, this]]);
 	this.effects = [];
+	const players = [];
+	const playersByIdx = new Map();
 	for (let i = 0; i < data.players.length; i++) {
-		const id = this.newId();
+		const id = this.newId(),
+			pdata = data.players[i];
+		players.push(id);
+		playersByIdx.set(pdata.idx, id);
 		this.cache.set(id, new Player(this, id));
-		this.players = this.players.concat([id]);
 	}
-	for (let i = 0; i < data.players.length; i++) {
-		const id = this.players[i];
-		this.byId(id).init(
-			this.players[(i + 1) % data.players.length],
-			data.players[i],
+	for (let i = 0; i < players.length; i++) {
+		const pdata = data.players[i];
+		this.set(
+			players[i],
+			'leader',
+			playersByIdx.get(pdata.leader === undefined ? i : pdata.leader),
 		);
+	}
+	this.players = players;
+	for (let i = 0; i < players.length; i++) {
+		this.byId(players[i]).init(data.players[i]);
 	}
 }
 Game.prototype.id = 1;
