@@ -704,19 +704,29 @@ export const root = {
 			],
 		},
 		{
-			key: 'necromancer',
-			children: [{ key: 'necromancer2' }, { key: 'necromancer3' }],
+			name: 'The Necromancer',
+			children: [{ key: 'necromancer'}, { key: 'necromancer2' }, { key: 'necromancer3' }],
 		},
-		{ key: 'blacksummoner' },
-		{ key: 'inventor', children: [{ key: 'inventor2' }, { key: 'inventor3' }] },
-		{ key: 'bombmaker' },
-		{
-			key: 'icecave',
-			children: [{ key: 'icecave2' }, { key: 'icecave3' }, { key: 'icecave4' }],
+		{ 
+			name: 'Black Summoner',
+			children: [{ key: 'blacksummoner'}],
+		},
+		{ 
+			name: 'The Inventor', 
+			children: [{key: 'inventor'}, { key: 'inventor2' }, { key: 'inventor3' }] 
+		},
+		{ 
+			name: 'The Bomb Maker',
+			children: [{ key: 'bombmaker' }],
 		},
 		{
-			key: 'elementalshrine',
+			name: 'The Ice Cave',
+			children: [{ key: 'icecave' }, { key: 'icecave2' }, { key: 'icecave3' }, { key: 'icecave4' }],
+		},
+		{
+			name: 'The Elemental Shrine',
 			children: [
+				{ key: 'elementalshrine'},
 				{ key: 'aethertemple' },
 				{ key: 'airtemple' },
 				{ key: 'darktemple' },
@@ -733,8 +743,9 @@ export const root = {
 			],
 		},
 		{
-			key: 'spirit',
+			name: ' The Dark Spirit',
 			children: [
+				{ key: 'spirit'},
 				{ key: 'spirit2' },
 				{ key: 'spirit3' },
 				{ key: 'spirit4' },
