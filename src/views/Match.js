@@ -840,7 +840,7 @@ export default connect(({ user }) => ({ user }))(
 					sock.userEmit('modarena', {
 						aname: game.data.arena,
 						won: game.winner !== this.state.player1,
-						lv: game.level - 4,
+						lv: game.data.level - 4,
 					});
 				}
 				if (game.winner === this.state.player1) {

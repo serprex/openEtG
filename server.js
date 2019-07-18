@@ -571,26 +571,33 @@ const importlocks = new Map();
 										);
 										newpool = etgutil.removedecks(topool, impdata.pool || '');
 									}
-									user.origName = data.name;
-									user.pool = etgutil.mergedecks(user.pool, newpool);
-									user.accountbound = etgutil.mergedecks(
-										user.accountbound,
-										newbound,
-									);
-									sockEmit(this, 'addpools', {
-										c: newpool,
-										b: newbound,
-										msg: `Imported ${newpool}${newbound}`,
-									});
-									return db.hset(
-										'ImportOriginal',
-										data.name,
-										JSON.stringify({
-											name: user.name,
-											bound: newbound,
-											pool: newpool,
-										}),
-									);
+									if (false) {
+										user.origName = data.name;
+										user.pool = etgutil.mergedecks(user.pool, newpool);
+										user.accountbound = etgutil.mergedecks(
+											user.accountbound,
+											newbound,
+										);
+										sockEmit(this, 'addpools', {
+											c: newpool,
+											b: newbound,
+											msg: `Imported ${newpool}${newbound}`,
+										});
+										return db.hset(
+											'ImportOriginal',
+											data.name,
+											JSON.stringify({
+												name: user.name,
+												bound: newbound,
+												pool: newpool,
+											}),
+										);
+									} else {
+										sockEmit(this, 'chat', {
+											msg: `Feature in development. Would import: ${newpool} ${newbound}`,
+											mode: 1,
+										});
+									}
 								})
 								.then(() => lock.q.size || importlocks.delete(data.name));
 						});
