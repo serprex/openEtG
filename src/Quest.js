@@ -348,7 +348,7 @@ quarks.bombmaker = {
 };
 quarks.blacksummoner = {
 	deck: '0f7t5018pt',
-	name: 'The Black Summoner',
+	name: 'Dark Summoner',
 	markpower: 12,
 	cardreward: '027t5',
 	wintext:
@@ -704,29 +704,42 @@ export const root = {
 			],
 		},
 		{
-			name: 'The Necromancer',
-			children: [{ key: 'necromancer'}, { key: 'necromancer2' }, { key: 'necromancer3' }],
+			name: 'Necromancer',
+			children: [
+				{ key: 'necromancer' },
+				{ key: 'necromancer2' },
+				{ key: 'necromancer3' },
+			],
 		},
-		{ 
-			name: 'Black Summoner',
-			children: [{ key: 'blacksummoner'}],
+		{
+			name: 'Dark Summoner',
+			children: [{ key: 'blacksummoner' }],
 		},
-		{ 
-			name: 'The Inventor', 
-			children: [{key: 'inventor'}, { key: 'inventor2' }, { key: 'inventor3' }] 
+		{
+			name: 'Inventor',
+			children: [
+				{ key: 'inventor' },
+				{ key: 'inventor2' },
+				{ key: 'inventor3' },
+			],
 		},
-		{ 
-			name: 'The Bomb Maker',
+		{
+			name: 'Bomb Maker',
 			children: [{ key: 'bombmaker' }],
 		},
 		{
-			name: 'The Ice Cave',
-			children: [{ key: 'icecave' }, { key: 'icecave2' }, { key: 'icecave3' }, { key: 'icecave4' }],
+			name: 'Ice Cave',
+			children: [
+				{ key: 'icecave' },
+				{ key: 'icecave2' },
+				{ key: 'icecave3' },
+				{ key: 'icecave4' },
+			],
 		},
 		{
-			name: 'The Elemental Shrine',
+			name: 'Elemental Shrine',
 			children: [
-				{ key: 'elementalshrine'},
+				{ key: 'elementalshrine' },
 				{ key: 'aethertemple' },
 				{ key: 'airtemple' },
 				{ key: 'darktemple' },
@@ -743,9 +756,9 @@ export const root = {
 			],
 		},
 		{
-			name: ' The Dark Spirit',
+			name: 'Dark Spirit',
 			children: [
-				{ key: 'spirit'},
+				{ key: 'spirit' },
 				{ key: 'spirit2' },
 				{ key: 'spirit3' },
 				{ key: 'spirit4' },
