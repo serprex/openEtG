@@ -340,6 +340,21 @@ class ThingInstCore extends React.Component {
 									style={{ float: 'right', backgroundColor: bgcolor }}
 								/>
 							)}
+							{!isSpell && (
+								<Components.Text
+									text={card.name}
+									icoprefix="te"
+									style={{
+										position: 'absolute',
+										top: '54px',
+										height: '10px',
+										width: '64px',
+										overflow: 'hidden',
+										whiteSpace: 'nowrap',
+										backgroundColor: bgcolor,
+									}}
+								/>
+							)}
 						</div>
 						{children}
 						{obj.hasactive('prespell', 'protectonce') && (
@@ -465,25 +480,34 @@ function tgtclass(p1id, obj, targeting) {
 	return '';
 }
 
-function FoePlays({ foeplays, setCard, setLine, clearCard }) {
+function FoePlays({ foeplays, setCard, setLine, clearCard, showGame }) {
 	const idtrack = React.useContext(TrackIdCtx).value;
 	return (
-		!!foeplays &&
-		foeplays.map((play, i) => (
-			<Components.CardImage
-				key={i}
-				x={(i & 7) * 99}
-				y={(i >> 3) * 19}
-				card={play}
-				onMouseOver={e => {
-					setCard(e, play.card);
-					if (play.t) {
-						setLine(idtrack.get(play.c), idtrack.get(play.t));
-					}
-				}}
-				onMouseOut={clearCard}
-			/>
-		))
+		!!foeplays && (
+			<div
+				style={{
+					position: 'absolute',
+					left: '8px',
+					top: '300px',
+					zIndex: 5,
+				}}>
+				{foeplays.map((play, i) => (
+					<Components.CardImage
+						key={i}
+						card={play}
+						onMouseOver={e => {
+							if (play.card) setCard(e, play.card);
+							else clearCard();
+							if (play.t) {
+								setLine(idtrack.get(play.c), idtrack.get(play.t));
+							}
+						}}
+						onClick={() => showGame(play.game)}
+						onMouseOut={clearCard}
+					/>
+				))}
+			</div>
+		)
 	);
 }
 
@@ -498,6 +522,7 @@ export default connect(({ user }) => ({ user }))(
 				? props.game.byId(props.game.turn)
 				: props.game.byUser(props.user ? props.user.name : '');
 			this.state = {
+				game: null,
 				tooltip: null,
 				showFoeplays: false,
 				foeplays: new Map(),
@@ -615,20 +640,37 @@ export default connect(({ user }) => ({ user }))(
 			) {
 				sock.userEmit('move', { data });
 			}
-			if (data.x === 'cast') {
-				const c = game.byId(data.c),
-					isSpell = c.type === etg.Spell;
-				const play = {
-					card: c.card,
-					element: c.card.element,
-					costele: isSpell ? c.card.costele : c.castele,
-					cost: isSpell ? c.card.cost : c.cast,
-					name: isSpell ? c.card.name : c.active.get('cast').toString(),
-					upped: c.card.upped,
-					shiny: c.card.shiny,
-					c: data.c,
-					t: data.t,
-				};
+			if (data.x === 'cast' || data.x === 'end') {
+				let play;
+				if (data.x === 'cast') {
+					const c = game.byId(data.c),
+						isSpell = c.type === etg.Spell;
+					play = {
+						card: c.card,
+						element: c.card.element,
+						costele: isSpell ? c.card.costele : c.castele,
+						cost: isSpell ? c.card.cost : c.cast,
+						name: isSpell ? c.card.name : c.active.get('cast').toString(),
+						upped: c.card.upped,
+						shiny: c.card.shiny,
+						c: data.c,
+						t: data.t,
+						game: game.clone(),
+					};
+				} else {
+					play = {
+						card: null,
+						element: 0,
+						costele: 0,
+						cost: 0,
+						name: 'endturn',
+						upped: false,
+						shiny: false,
+						c: 0,
+						t: 0,
+						game: game.clone(),
+					};
+				}
 				this.setState(state => {
 					const foeplays = new Map(state.foeplays);
 					if (!foeplays.has(turn)) foeplays.set(turn, []);
@@ -832,7 +874,7 @@ export default connect(({ user }) => ({ user }))(
 		getGame = () =>
 			this.props.replay
 				? this.state.replayhistory[this.state.replayindex]
-				: this.props.game;
+				: this.state.game || this.props.game;
 
 		gotoResult = () => {
 			const { game, user } = this.props;
@@ -1519,6 +1561,7 @@ export default connect(({ user }) => ({ user }))(
 									setCard={(e, play) => this.setCard(e, play, e.pageX)}
 									setLine={(line0, line1) => this.setState({ line0, line1 })}
 									clearCard={this.clearCard}
+									showGame={game => this.setState({ game })}
 								/>
 						  )}
 					{children}
@@ -1583,7 +1626,9 @@ export default connect(({ user }) => ({ user }))(
 							</defs>
 							<path
 								markerEnd="url(#h)"
-								d={`M${this.state.line0.x} ${this.state.line0.y}L${this.state.line1.x} ${this.state.line1.y}`}
+								d={`M${this.state.line0.x} ${this.state.line0.y}L${
+									this.state.line1.x
+								} ${this.state.line1.y}`}
 								stroke="#f84"
 								strokeWidth="4"
 								opacity="0.7"
@@ -1608,6 +1653,7 @@ export default connect(({ user }) => ({ user }))(
 								}}
 								onClick={() =>
 									this.setState(state => ({
+										game: null,
 										showFoeplays: !state.showFoeplays,
 									}))
 								}

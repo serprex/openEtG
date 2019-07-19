@@ -233,6 +233,8 @@ Game.prototype.nextTurn = function() {
 				next.die();
 				continue;
 			}
+		} else {
+			this.setIn([this.id, 'bonusstats', 'nomidturn'], true);
 		}
 		return;
 	}

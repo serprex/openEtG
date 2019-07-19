@@ -12,7 +12,7 @@ export function encodeCode(code) {
 }
 export function asUpped(code, upped) {
 	const isUpped = (code & 0x3fff) > 6999;
-	return isUpped === upped ? code : code + (isUpped ? -2000 : 2000);
+	return isUpped === !!upped ? code : code + (isUpped ? -2000 : 2000);
 }
 export function asShiny(code, shiny) {
 	return shiny ? code | 0x4000 : code & 0x3fff;
@@ -81,7 +81,7 @@ export function deck2pool(deck, pool) {
 	return pool;
 }
 export function addcard(deck, card, x = 1) {
-	if (deck === undefined) deck = '';
+	if (!deck) deck = '';
 	for (let i = 0; i < deck.length; i += 5) {
 		const code = parseInt(deck.substr(i + 2, 3), 32);
 		if (code === card) {

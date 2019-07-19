@@ -103,7 +103,7 @@ const BonusList = [
 	{
 		name: 'Mid Turn',
 		desc: 'Defeat foe with game ended still on own turn',
-		func: (game, p1, p2) => (game.turn === p1.id ? 0.1 : 0),
+		func: (game, p1, p2) => (game.bonusstats.get('nomidturn') ? 0 : 0.1),
 	},
 	{
 		name: 'Murderer',

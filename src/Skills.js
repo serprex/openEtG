@@ -1213,9 +1213,7 @@ const Skills = {
 	loot: (ctx, c, t) => {
 		if (c.ownerId === t.ownerId && !c.hasactive('turnstart', 'salvageoff')) {
 			const foe = c.owner.foe,
-				perms = foe.permanents.filter(x => {
-					return x && x.isMaterial();
-				});
+				perms = foe.permanents.filter(x => x && x.isMaterial());
 			if (foe.weapon && foe.weapon.isMaterial()) perms.push(foe.weapon);
 			if (foe.shield && foe.shield.isMaterial()) perms.push(foe.shield);
 			if (perms.length) {
