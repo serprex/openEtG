@@ -33,10 +33,10 @@ export function stop() {
 }
 async function _load(name) {
 	const userstr = await db.hget('Users', name);
+	userps.delete(name);
 	if (userstr) {
 		const user = JSON.parse(userstr);
 		users.set(name, user);
-		userps.delete(name);
 		if (!user.streak) user.streak = [];
 		return user;
 	} else {

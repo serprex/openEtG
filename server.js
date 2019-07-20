@@ -1299,11 +1299,11 @@ const importlocks = new Map();
 		const data = sutil.parseJSON(rawdata);
 		if (!data || typeof data !== 'object' || typeof data.x !== 'string') return;
 		console.log(data.u, data.x);
-		let func = userEvents[data.x] || usercmd[data.x];
-		if (func) {
-			const { u } = data;
-			if (typeof u === 'string') {
-				try {
+		try {
+			let func = userEvents[data.x] || usercmd[data.x];
+			if (func) {
+				const { u } = data;
+				if (typeof u === 'string') {
 					const user = await Us.load(u);
 					if (data.a === user.auth) {
 						const meta = sockmeta.get(this);
@@ -1317,12 +1317,12 @@ const importlocks = new Map();
 							Object.assign(user, res);
 						}
 					}
-				} catch (err) {
-					console.log(err);
 				}
+			} else if ((func = sockEvents[data.x])) {
+				func.call(this, data);
 			}
-		} else if ((func = sockEvents[data.x])) {
-			func.call(this, data);
+		} catch (err) {
+			console.log(err);
 		}
 	}
 	function onSocketConnection(socket) {
