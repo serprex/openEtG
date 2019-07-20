@@ -83,7 +83,7 @@ export function deck(deck) {
 		if (!(code in Cards.Codes)) {
 			const ismark = etgutil.fromTrueMark(code);
 			if (~ismark) mark = ismark;
-			return;
+			continue;
 		}
 		const card = Cards.Codes[code],
 			elech = eleChar(card),
