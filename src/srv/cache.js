@@ -19,7 +19,9 @@ async function respond(url, res, datathunk, ifmod) {
 		try {
 			res.writeHead('404');
 			res.end(err);
-		} catch {}
+		} catch {
+			console.err(err);
+		}
 	}
 }
 export function rm(url) {
