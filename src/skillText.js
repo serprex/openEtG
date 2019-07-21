@@ -36,8 +36,7 @@ export default function skillText(c) {
 const data = {
 	abomination: 'Amiable to mutation',
 	absorber: 'Produce 3:6 per attacker',
-	acceleration: x => `Gain ${x}|-1 per turn`,
-	accelerationspell: c =>
+	acceleration: c =>
 		`Replaces target creature\'s skills with "Gain +${
 			c.upped ? 3 : 2
 		}|-1 per turn"`,

@@ -62,16 +62,9 @@ const Skills = {
 			data.evade = true;
 		}
 	}),
-	acceleration: x => {
-		const n = +x;
-		return (ctx, c, t) => {
-			c.incrAtk(n);
-			c.dmg(1, true);
-		};
-	},
-	accelerationspell: (ctx, c, t) => {
+	acceleration: (ctx, c, t) => {
 		t.lobo();
-		t.setSkill('ownattack', parseSkill(`acceleration ${c.card.upped ? 3 : 2}`));
+		t.setSkill('ownattack', parseSkill(`growth ${c.card.upped ? 3 : 2} -1`));
 	},
 	accretion: (ctx, c, t) => {
 		Skills.destroy(ctx, c, t);

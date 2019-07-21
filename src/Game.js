@@ -246,13 +246,12 @@ Game.prototype.setWinner = function() {
 		const winners = new Set();
 		for (let i = 0; i < players.length; i++) {
 			if (!this.get(players[i]).get('out')) {
-				const { leader } = pldata[i];
-				winners.add(leader === undefined ? i : leader);
+				winners.add(this.get(players[i]).get('leader'));
 			}
 		}
 		if (winners.size === 1) {
-			for (const idx of winners) {
-				this.winner = players[idx];
+			for (const id of winners) {
+				this.winner = id;
 			}
 			this.phase = etg.EndPhase;
 			this.updateIn([this.id, 'bonusstats', 'time'], time => Date.now() - time);

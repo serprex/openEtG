@@ -178,7 +178,6 @@ Player.prototype.init = function(data) {
 			break;
 		}
 	}
-	console.log(this.foe);
 	this.hp = data.hp || 100;
 	this.maxhp = data.maxhp || this.hp;
 	this.atk = 0;

@@ -44,9 +44,8 @@ export function CardImage(props) {
 				<span
 					style={{
 						position: 'absolute',
-						right: '0',
+						right: '2px',
 						backgroundColor: bgcol,
-						padding: '0 2px 0 2px',
 					}}>
 					{card.cost}
 					{card.costele !== card.element && (

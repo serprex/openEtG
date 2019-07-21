@@ -33,7 +33,7 @@ input[type="text"],input[type="password"],input[type="number"],input:not([type])
 .atop2{display:inline-block;width:48px;text-align:right}
 .atop3{display:inline-block;width:48px}
 .atop4{display:inline-block;width:48px;text-align:right;margin-right:32px}
-.cardslot{font-size:11px;height:20px;width:100px;line-height:20px;border:1px solid;overflow:hidden;white-space:nowrap}
+.cardslot{font-size:11px;height:20px;width:100px;line-height:16px;padding:2px;border:1px solid;overflow:hidden;white-space:nowrap}
 .infobox{
 	opacity:.7;
 	background-color:#000;
