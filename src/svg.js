@@ -71,13 +71,13 @@ export function deck(deck) {
 		}
 		return ret;
 	}
-	let texts = new Map(),
-		textml = '',
-		textrl = '',
+	let textml = '',
 		x = 16,
 		y = 0,
 		classes = {},
 		mark,
+		paths = {},
+		pathsvg = '',
 		suffix;
 	for (const code of etgutil.iterdeck(deck)) {
 		if (!(code in Cards.Codes)) {
@@ -92,18 +92,18 @@ export function deck(deck) {
 		else classes.B = 'stroke:#000;stroke-width:.5';
 		classes[elech] = `fill:${ui.maybeLightenStr(card)}`;
 		const textColor = card.upped ? '' : " fill='#fff'";
-		let textId = texts.get(card.code);
-		if (!textId) {
-			textId = `N${texts.size}`;
-			texts.set(card.code, textId);
-			textml += `<symbol id='${textId}' width='100' height='16' viewBox='0 0 100 16'><path d='M0 0H100V16H0' class='${elecls}'/><text clip-path='polygon(0 0, 96px 0,96px 14px,0 14px)' x='2' y='13'${textColor}>${card.name}</text></symbol>`;
-		}
-		textrl += `<use href='#${textId}' x='${x}' y='${y}'/>`;
+		if (!paths[elecls]) paths[elecls] = '';
+		paths[elecls] += `M${x} ${y}h100v16h-100`;
+		textml += `<text clip-path='polygon(0 0, 96px 0,96px 14px,0 14px)' x='${x +
+			2}' y='${y + 13}'${textColor}>${card.name}</text>`;
 		y += 16;
 		if (y == 160) {
 			y = 0;
 			x += 100;
 		}
+	}
+	for (const elecls in paths) {
+		pathsvg += `<path class='${elecls}' d='${paths[elecls]}'/>`;
 	}
 	if (mark !== undefined) {
 		const cls = String.fromCharCode(97 + mark);
@@ -114,5 +114,5 @@ export function deck(deck) {
 	} else suffix = '</svg>';
 	return `${svgPrefix} height='160' width='${
 		y ? x + 100 : x
-	}'>${cssPrefix}${classString()}]]></style><defs>${textml}</defs>${textrl}${suffix}`;
+	}'>${cssPrefix}${classString()}]]></style>${pathsvg}${textml}${suffix}`;
 }
