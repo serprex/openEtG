@@ -33,4 +33,4 @@ export default function(deck) {
 			'You have ' + legs + ' legs. This is too ' + (legs > 30 ? 'many' : 'few')
 		);
 	return 'Legal';
-};
+}

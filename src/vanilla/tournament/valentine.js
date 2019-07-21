@@ -47,4 +47,4 @@ export default function(deck) {
 		if (nymphs[ele] > 4) return 'Too many singles in ' + etg.eleNames[ele];
 	}
 	return 'Legal';
-};
+}

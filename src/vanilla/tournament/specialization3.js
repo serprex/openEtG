@@ -43,4 +43,4 @@ export default function(deck) {
 	if (!hasSpecial)
 		return 'You have to have at least 1 card from the special list in your deck';
 	return 'Legal';
-};
+}

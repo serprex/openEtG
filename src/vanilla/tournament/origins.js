@@ -10,4 +10,4 @@ export default function(deck) {
 		if (!~allowedCards.indexOf(card.code)) return card.name + ' is not allowed';
 	}
 	return 'Legal';
-};
+}

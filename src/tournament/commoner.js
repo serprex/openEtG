@@ -5,4 +5,4 @@ export default function(deck) {
 		if (card.upped) return 'Your deck contains at least one upgraded card';
 	}
 	return 'Legal';
-};
+}

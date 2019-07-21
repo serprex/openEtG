@@ -337,7 +337,10 @@ class ThingInstCore extends React.Component {
 								<Components.Text
 									text={statText}
 									icoprefix="te"
-									style={{ float: 'right', backgroundColor: bgcolor }}
+									style={{
+										float: 'right',
+										backgroundColor: bgcolor,
+									}}
 								/>
 							)}
 							{!isSpell && (
@@ -560,11 +563,21 @@ export default connect(({ user }) => ({ user }))(
 					{pos =>
 						pos && (
 							<Motion
-								defaultStyle={{ fade: 1, x: pos.x, y: pos.y + offset }}
+								defaultStyle={{
+									fade: 1,
+									x: pos.x,
+									y: pos.y + offset,
+								}}
 								style={{
 									x: pos.x,
-									y: spring(pos.y - 36, { stiffness: 84, dampen: 12 }),
-									fade: spring(0, { stiffness: 108, dampen: 12 }),
+									y: spring(pos.y - 36, {
+										stiffness: 84,
+										dampen: 12,
+									}),
+									fade: spring(0, {
+										stiffness: 108,
+										dampen: 12,
+									}),
 								}}
 								onRest={() => {
 									this.setState(state => {
@@ -1210,7 +1223,12 @@ export default connect(({ user }) => ({ user }))(
 		}
 
 		clearCard = () => {
-			this.setState({ hovercode: 0, tooltip: null, line0: null, line1: null });
+			this.setState({
+				hovercode: 0,
+				tooltip: null,
+				line0: null,
+				line1: null,
+			});
 		};
 
 		setCard(e, card, x) {
@@ -1352,7 +1370,7 @@ export default connect(({ user }) => ({ user }))(
 						/>,
 					);
 				}
-				for (let i = j ? 0 : 22; i >= 0 && i < 23; i += j || -1) {
+				for (let i = j ? 22 : 0; i >= 0 && i < 23; i += j ? -1 : 1) {
 					const cr = pl.creatures[i];
 					if (cr && !(j === 1 && cloaked)) {
 						things.push(
@@ -1626,9 +1644,7 @@ export default connect(({ user }) => ({ user }))(
 							</defs>
 							<path
 								markerEnd="url(#h)"
-								d={`M${this.state.line0.x} ${this.state.line0.y}L${
-									this.state.line1.x
-								} ${this.state.line1.y}`}
+								d={`M${this.state.line0.x} ${this.state.line0.y}L${this.state.line1.x} ${this.state.line1.y}`}
 								stroke="#f84"
 								strokeWidth="4"
 								opacity="0.7"

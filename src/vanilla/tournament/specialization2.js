@@ -35,4 +35,4 @@ export default function(deck) {
 		}
 	}
 	return ret.length ? 'Legal for ' + ret.join(', ') : 'Illegal';
-};
+}
