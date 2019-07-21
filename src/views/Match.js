@@ -1178,10 +1178,7 @@ export default connect(({ user }) => ({ user }))(
 		}
 
 		componentDidMount() {
-			if (sock.trade) {
-				sock.userEmit('canceltrade');
-				delete sock.trade;
-			}
+			sock.cancelTrade();
 			if (!this.props.replay) {
 				if (!this.props.game.data.spectate) {
 					document.addEventListener('keydown', this.onkeydown);
