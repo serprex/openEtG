@@ -56,7 +56,7 @@ export function creaturePos(j, i) {
 	const column = row == 2 ? (i + 1) % 8 : i % 8;
 	return reflectPos(j, {
 		x: 204 + column * 90 + (row == 1 ? 45 : 0),
-		y: 334 + row * 48,
+		y: 334 + row * 44,
 	});
 }
 export function permanentPos(j, i) {

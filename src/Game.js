@@ -51,7 +51,7 @@ export default function Game(data) {
 		this.set(
 			players[i],
 			'leader',
-			playersByIdx.get(pdata.leader === undefined ? i : pdata.leader),
+			playersByIdx.get(pdata.leader === undefined ? pdata.idx : pdata.leader),
 		);
 	}
 	this.players = players;
@@ -307,11 +307,6 @@ Game.prototype.next = function(event) {
 	}
 	return nextHandler[event.x].call(this, event);
 };
-function removeSoPa(id) {
-	if (id && this.getStatus(id, 'patience')) {
-		this.setStatus(id, 'patience', 0);
-	}
-}
 Game.prototype.expectedDamage = function() {
 	const expectedDamage = new Int16Array(this.players.length);
 	if (!this.winner) {
@@ -319,12 +314,13 @@ Game.prototype.expectedDamage = function() {
 		Effect.disable = true;
 		for (let i = 0; i < 5; i++) {
 			const gclone = this.clone();
-			gclone.players.forEach(pid =>
-				gclone
-					.get(pid)
-					.get('permanents')
-					.forEach(removeSoPa, gclone),
-			);
+			for (const pid of gclone.players) {
+				for (const id of gclone.get(pid).get('permanents')) {
+					if (id && gclone.getStatus(id, 'patience')) {
+						gclone.byId(id).remove();
+					}
+				}
+			}
 			gclone.updateIn([gclone.id, 'rng'], rng => rng.map(ri => ri ^ (i * 997)));
 			gclone.byId(gclone.turn).endturn();
 			if (!gclone.winner) gclone.byId(gclone.turn).endturn();
