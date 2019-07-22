@@ -319,7 +319,10 @@ const importlocks = new Map();
 					sockEmit(this, 'codecode', { card: c });
 					return db.hdel('CodeHash', data.code);
 				} else {
-					sockEmit(this, 'chat', { mode: 1, msg: `Unknown card: ${type}` });
+					sockEmit(this, 'chat', {
+						mode: 1,
+						msg: `Unknown card: ${type}`,
+					});
 				}
 			} else if (type.replace(/^!?(upped)?/, '') in userutil.rewardwords) {
 				sockEmit(this, 'codecard', { type });
@@ -393,7 +396,10 @@ const importlocks = new Map();
 			const tgt = Us.socks.get(data.f),
 				tgtmeta = sockmeta.get(tgt);
 			if (tgt && tgtmeta.duel) {
-				sockEmit(tgt, 'chat', { mode: 1, msg: `${data.u} is spectating.` });
+				sockEmit(tgt, 'chat', {
+					mode: 1,
+					msg: `${data.u} is spectating.`,
+				});
 				if (!tgtmeta.spectators) tgtmeta.spectators = [];
 				tgtmeta.spectators.push(data.u);
 			}
@@ -447,9 +453,15 @@ const importlocks = new Map();
 					otherUser.gold + p2gdelta < 0
 				) {
 					sockEmit(this, 'tradecanceled');
-					sockEmit(this, 'chat', { mode: 1, msg: 'Trade disagreement.' });
+					sockEmit(this, 'chat', {
+						mode: 1,
+						msg: 'Trade disagreement.',
+					});
 					sockEmit(thatsock, 'tradecanceled');
-					sockEmit(thatsock, 'chat', { mode: 1, msg: 'Trade disagreement.' });
+					sockEmit(thatsock, 'chat', {
+						mode: 1,
+						msg: 'Trade disagreement.',
+					});
 					return;
 				}
 				sockEmit(this, 'tradedone', {
@@ -637,8 +649,16 @@ const importlocks = new Map();
 			if (to) {
 				const sockto = Us.socks.get(to);
 				if (sockto && sockto.readyState === 1) {
-					sockEmit(sockto, 'chat', { msg: data.msg, mode: 2, u: data.u });
-					sockEmit(this, 'chat', { msg: data.msg, mode: 2, u: 'To ' + to });
+					sockEmit(sockto, 'chat', {
+						msg: data.msg,
+						mode: 2,
+						u: data.u,
+					});
+					sockEmit(this, 'chat', {
+						msg: data.msg,
+						mode: 2,
+						u: 'To ' + to,
+					});
 				} else
 					sockEmit(this, 'chat', {
 						mode: 1,
@@ -680,13 +700,13 @@ const importlocks = new Map();
 			Bz.load().then(bz => {
 				for (const [code, count] of etgutil.iterraw(data.cards)) {
 					const card = Cards.Codes[code];
-					if (!card) return;
+					if (!card) continue;
 					const bc = bz[code] || (bz[code] = []);
 					const sellval = userutil.sellValue(card);
 					let codeCount = data.price > 0 ? 0 : etgutil.count(user.pool, code);
 					if (data.price > 0) {
 						if (data.price <= sellval) {
-							return;
+							continue;
 						}
 					} else {
 						if (-data.price <= sellval) {
@@ -694,7 +714,7 @@ const importlocks = new Map();
 								user.gold += sellval * count;
 								user.pool = etgutil.addcard(user.pool, code, -count);
 							}
-							return;
+							continue;
 						}
 					}
 					for (let i = 0; i < bc.length; i++) {
@@ -779,7 +799,11 @@ const importlocks = new Map();
 								}
 							}
 							if (!hadmerge) {
-								bc.push({ q: count, u: user.name, p: data.price });
+								bc.push({
+									q: count,
+									u: user.name,
+									p: data.price,
+								});
 								bc.sort(
 									(a, b) =>
 										(a.p > 0) - (b.p > 0) || Math.abs(a.p) - Math.abs(b.p),
@@ -911,7 +935,10 @@ const importlocks = new Map();
 				match.invites.add(data.invite);
 				sockEmit(invitedsock, 'matchinvite', { u: user.name });
 			} else {
-				sockEmit(this, 'chat', { mode: 1, msg: `${data.invite} isn't online` });
+				sockEmit(this, 'chat', {
+					mode: 1,
+					msg: `${data.invite} isn't online`,
+				});
 			}
 		},
 		matchcancel(data, user, info) {
@@ -952,16 +979,25 @@ const importlocks = new Map();
 			const hostsock = Us.socks.get(data.host),
 				hostmeta = sockmeta.get(hostsock);
 			if (!hostmeta) {
-				sockEmit(this, 'chat', { mode: 1, msg: `${host} isn't online` });
+				sockEmit(this, 'chat', {
+					mode: 1,
+					msg: `${host} isn't online`,
+				});
 				return;
 			}
 			const { match } = hostmeta;
 			if (!match) {
-				sockEmit(this, 'chat', { mode: 1, msg: `${host} isn't hosting` });
+				sockEmit(this, 'chat', {
+					mode: 1,
+					msg: `${host} isn't hosting`,
+				});
 				return;
 			}
 			if (!hostmeta.match.invites.delete(user.name)) {
-				sockEmit(this, 'chat', { mode: 1, msg: `${host} hasn't invited you` });
+				sockEmit(this, 'chat', {
+					mode: 1,
+					msg: `${host} hasn't invited you`,
+				});
 				return;
 			}
 			info.host = data.host;
@@ -982,18 +1018,27 @@ const importlocks = new Map();
 		matchready(data, user, info) {
 			const { host } = info;
 			if (!host) {
-				sockEmit(this, 'chat', { mode: 1, msg: "You aren't in a lobby" });
+				sockEmit(this, 'chat', {
+					mode: 1,
+					msg: "You aren't in a lobby",
+				});
 				return;
 			}
 			const hostsock = Us.socks.get(host),
 				hostmeta = sockmeta.get(hostsock);
 			if (!hostmeta) {
-				sockEmit(this, 'chat', { mode: 1, msg: `${host} isn't online` });
+				sockEmit(this, 'chat', {
+					mode: 1,
+					msg: `${host} isn't online`,
+				});
 				return;
 			}
 			const { match } = hostmeta;
 			if (!match) {
-				sockEmit(this, 'chat', { mode: 1, msg: `${host} isn't hosting` });
+				sockEmit(this, 'chat', {
+					mode: 1,
+					msg: `${host} isn't hosting`,
+				});
 				return;
 			}
 			hostmeta.match.data.set(user.name, data.data);
@@ -1077,7 +1122,9 @@ const importlocks = new Map();
 		async konglogin(data) {
 			const key = await db.get('kongapi');
 			if (!key) {
-				sockEmit(this, 'login', { err: 'Global error: no kong api in db' });
+				sockEmit(this, 'login', {
+					err: 'Global error: no kong api in db',
+				});
 				return;
 			}
 			https
@@ -1099,7 +1146,10 @@ const importlocks = new Map();
 								Us.load(name)
 									.then(user => {
 										user.auth = data.g;
-										sockEvents.login.call(this, { u: name, a: data.g });
+										sockEvents.login.call(this, {
+											u: name,
+											a: data.g,
+										});
 										const req = https
 											.request({
 												hostname: 'www.kongregate.com',
@@ -1121,7 +1171,10 @@ const importlocks = new Map();
 											gold: 0,
 											auth: data.g,
 										});
-										sockEvents.login.call(this, { u: name, a: data.g });
+										sockEvents.login.call(this, {
+											u: name,
+											a: data.g,
+										});
 									});
 							} else {
 								sockEmit(this, 'login', {

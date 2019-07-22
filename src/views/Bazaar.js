@@ -66,7 +66,11 @@ const CardOrders = connect(({ user }) => ({ uname: user.name }))(
 						{bc
 							.filter(x => x.u === uname)
 							.map((order, i) => (
-								<div key={i} style={{ color: order.p > 0 ? '#4f8' : '#f84' }}>
+								<div
+									key={i}
+									style={{
+										color: order.p > 0 ? '#4f8' : '#f84',
+									}}>
 									{order.q} @ {Math.abs(order.p)}
 								</div>
 							))}
@@ -322,7 +326,9 @@ export default connect(({ user }) => ({ user }))(
 						type="button"
 						value="Orders"
 						onClick={() =>
-							this.setState({ showOrders: !this.state.showOrders })
+							this.setState({
+								showOrders: !this.state.showOrders,
+							})
 						}
 						style={{
 							position: 'absolute',
@@ -343,19 +349,35 @@ export default connect(({ user }) => ({ user }))(
 											this.state.bcode.toString(32),
 									});
 								}}
-								style={{ position: 'absolute', left: '100px', top: '8px' }}
+								style={{
+									position: 'absolute',
+									left: '100px',
+									top: '8px',
+								}}
 							/>
 							<input
 								placeholder="Price"
 								value={this.state.sell || ''}
 								onChange={e => this.setState({ sell: +e.target.value | 0 })}
-								style={{ position: 'absolute', left: '200px', top: '8px' }}
+								style={{
+									position: 'absolute',
+									left: '200px',
+									top: '8px',
+								}}
 							/>
 							<input
 								placeholder="Quantity"
 								value={this.state.sellq || ''}
-								onChange={e => this.setState({ sellq: +e.target.value | 0 })}
-								style={{ position: 'absolute', left: '360px', top: '8px' }}
+								onChange={e =>
+									this.setState({
+										sellq: +e.target.value | 0,
+									})
+								}
+								style={{
+									position: 'absolute',
+									left: '360px',
+									top: '8px',
+								}}
 							/>
 							<input
 								type="button"
@@ -368,26 +390,52 @@ export default connect(({ user }) => ({ user }))(
 											this.state.bcode.toString(32),
 									});
 								}}
-								style={{ position: 'absolute', left: '100px', top: '40px' }}
+								style={{
+									position: 'absolute',
+									left: '100px',
+									top: '40px',
+								}}
 							/>
 							<input
 								placeholder="Price"
 								value={this.state.buy || ''}
 								onChange={e => this.setState({ buy: +e.target.value | 0 })}
-								style={{ position: 'absolute', left: '200px', top: '40px' }}
+								style={{
+									position: 'absolute',
+									left: '200px',
+									top: '40px',
+								}}
 							/>
 							<input
 								placeholder="Quantity"
 								value={this.state.buyq || ''}
 								onChange={e => this.setState({ buyq: +e.target.value | 0 })}
-								style={{ position: 'absolute', left: '360px', top: '40px' }}
+								style={{
+									position: 'absolute',
+									left: '360px',
+									top: '40px',
+								}}
 							/>
-							<div style={{ position: 'absolute', right: '144px', top: '8px' }}>
+							<div
+								style={{
+									position: 'absolute',
+									right: '144px',
+									top: '8px',
+								}}
+								onClick={() =>
+									this.setState({
+										sell: userutil.sellValue(Cards.Codes[this.state.bcode]),
+									})
+								}>
 								Autosell: {userutil.sellValue(Cards.Codes[this.state.bcode])}
 								<span className="ico g" />
 							</div>
 							<div
-								style={{ position: 'absolute', right: '144px', top: '40px' }}>
+								style={{
+									position: 'absolute',
+									right: '144px',
+									top: '40px',
+								}}>
 								Wealth value:{' '}
 								{userutil.cardValue(Cards.Codes[this.state.bcode])}
 								<span className="ico g" />
@@ -397,7 +445,9 @@ export default connect(({ user }) => ({ user }))(
 								onClickBuy={(sell, sellq) => this.setState({ sell, sellq })}
 								onClickSell={(buy, buyq) => this.setState({ buy, buyq })}
 								onClickCancel={() =>
-									sock.userEmit('bzcancel', { c: this.state.bcode })
+									sock.userEmit('bzcancel', {
+										c: this.state.bcode,
+									})
 								}
 							/>
 						</>
