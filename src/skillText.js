@@ -552,12 +552,12 @@ const data = {
 		'Gain 5|0. This creature loses 1|0 of the strength gained in this way after each attack.',
 	stoneform: 'Gain 0|20. Become a golem.',
 	storm: x =>
-		`Deal ${x} spell damage to all of target player's creatures. Removes cloak.`,
+		`Deal ${x} spell damage to all of target player\'s creatures. Removes cloak.`,
 	summon: x => c =>
-		`Summon a ${
+		`Put a ${
 			(c instanceof Card ? c.Cards : c.game.Cards).Names[x]
 				.name
-		}.`,
+		} into play.`,
 	swarm:
 		'Base HP is equal to the number of Scarabs you control, including this one.',
 	swave:
