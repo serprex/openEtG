@@ -16,9 +16,7 @@ export default function skillText(c) {
 			const entry = statusData[key];
 			if (entry === undefined) {
 				let text = val === 1 ? key : val + key;
-				text =
-					text.charAt(0).toUpperCase() +
-					text.slice(1);
+				text = text.charAt(0).toUpperCase() + text.slice(1);
 				stext.push(text);
 			} else pushEntry(ret, c, '', entry);
 		}
@@ -29,9 +27,9 @@ export default function skillText(c) {
 				if (entry === undefined) return;
 				pushEntry(ret, c, k, entry);
 				if (k === 'cast')
-					ret[ret.length - 1] = `${c.cast}:${
-						c.castele
-					} ${ret[ret.length - 1]}`;
+					ret[ret.length - 1] = `${c.cast}:${c.castele} ${
+						ret[ret.length - 1]
+					}`;
 			});
 		}
 		return ret.join('\n');
@@ -41,7 +39,7 @@ export default function skillText(c) {
 const data = {
 	abomination:
 		'If targeted with mutation, this will always become an improved mutant.',
-	absorber: 'Produces 3:6 for every creature it “blocks”.',
+	absorber: 'Generates 3:6 for each attacker.',
 	acceleration: c =>
 		`Replaces target creature\'s skills with "Gains +${
 			c.upped ? 3 : 2
@@ -62,8 +60,7 @@ const data = {
 	appease:
 		'Sacrifice target creature you own and gain 1|1. If this ability is not used, this creature will attack its owner. This creature attacks normally the turn it is played or if it loses this ability.',
 	atk2hp: "Set target's HP equal to its strength.",
-	autoburrow:
-		'Until end of turn, creatures with burrow enter play burrowed.',
+	autoburrow: 'Until end of turn, creatures with burrow enter play burrowed.',
 	axedraw:
 		'Gains 1 strength for every card drawn by any player. Strength gained is removed after attack.',
 	bblood: 'Give target creature 0|20 and delay it for 5 turns.',
@@ -214,15 +211,13 @@ const data = {
 	firebolt:
 		'Deal 3 spell damage plus one per 4:6 owned. If target is frozen, it loses frozen status.',
 	firewall: 'Deals 1 damage to each non-ranged attacking creature.',
-	flatline:
-		'Opponent cannot gain quanta through the end of their next turn.',
+	flatline: 'Opponent cannot gain quanta through the end of their next turn.',
 	flyself:
 		'If this card is equipped as a weapon, it casts Flying Weapon on itself. If this card is a creature, it casts Living Weapon on itself.',
 	flyingweapon:
 		"Target weapon becomes a flying creature. It still counts as a weapon even though it isn't in a weapon slot.",
 	foedraw: "Draw from opponent's deck",
-	forcedraw:
-		'When this creature damages a player, that player draws a card.',
+	forcedraw: 'When this creature damages a player, that player draws a card.',
 	forceplay:
 		"The owner of target card in hand plays that card on a random target if they are able, or the owner of target card in play activates that card's ability on a random target if they are able.",
 	fractal:
@@ -243,8 +238,7 @@ const data = {
 	],
 	gaincharge2: {
 		death: 'Whenever any creature dies, gain two stacks.',
-		destroy:
-			'Whenever any other permanent is destroyed, gain two stacks.',
+		destroy: 'Whenever any other permanent is destroyed, gain two stacks.',
 	},
 	gaintimecharge:
 		'Up to 4 times per turn, gain one stack for every card you draw. Does not gain a stack from your draw at the start of your turn.',
@@ -300,8 +294,7 @@ const data = {
 		}:6 plus 1 quanta of each other element.`,
 	improve:
 		'Transform a target creature into a random mutant creature. Mutant creatures gain a random ability, 0-4 strength, and 0-4 hp.',
-	inertia:
-		'When any card you own is targeted by either player, gain 2:3.',
+	inertia: 'When any card you own is targeted by either player, gain 2:3.',
 	infect: 'Poison target creature.',
 	inflation: 'Increase the cost of all active abilities by 1.',
 	ink: 'Put a Cloak that lasts 1 turn into play.',
@@ -326,9 +319,7 @@ const data = {
 	losecharge: (c, inst) => {
 		const charges = c.getStatus('charges');
 		return charages
-			? `Lasts for ${charges} more turn${
-					charges == 1 ? '' : 's'
-			  }.`
+			? `Lasts for ${charges} more turn${charges == 1 ? '' : 's'}.`
 			: 'Expires at end of turn';
 	},
 	luciferin:
@@ -377,8 +368,7 @@ const data = {
 		'When this card is discarded, the discarding player receives 8 spell damage.',
 		'When this card is discarded, the discarding player receives 10 spell damage.',
 	],
-	ouija:
-		"Whenever a creature dies, add an Ouija Essence to opoonent's hand.",
+	ouija: "Whenever a creature dies, add an Ouija Essence to opoonent's hand.",
 	pacify: "Set target creature or weapon's strength to 0.",
 	pairproduce: 'Your pillars, pendulums, and towers produce quanta.',
 	paleomagnetism: {
@@ -394,8 +384,7 @@ const data = {
 	pandemonium3:
 		'Inflict a random effect on every card in play or any hand. All existing effects are possible. Removes cloak.',
 	paradox: 'Target creature with more strength than HP dies.',
-	parallel:
-		'Put an exact copy of target creature into play on your side.',
+	parallel: 'Put an exact copy of target creature into play on your side.',
 	phoenix: [
 		'When this creature dies, transform it into an Ash.',
 		'When this creature dies, transform it into a Minor Ash.',
@@ -424,8 +413,7 @@ const data = {
 		'When this card enters play, 70% chance to apply 1 poison to opponent.',
 	powerdrain:
 		"Remove half of target creature's strength and HP. Add an equal amount of strength and HP to a random creature you control.",
-	precognition:
-		"Reveal opponent's hand until the end of their turn. Draw",
+	precognition: "Reveal opponent's hand until the end of their turn. Draw",
 	predator:
 		'If opponent has more than four cards in their hand, this card attacks a second time and opponent discards the last card in their hand.',
 	protectall:
@@ -488,8 +476,7 @@ const data = {
 	],
 	salvage:
 		'Whenever a permanent is destroyed, gain 1|1. Once per turn, when opponent destroys a permanent, add a copy of that permanent to your hand.',
-	salvageoff:
-		'Cannot salvage another destroyed permanent until next turn.',
+	salvageoff: 'Cannot salvage another destroyed permanent until next turn.',
 	sanctify:
 		"During your opponent's turn, your hand and quanta pool cannot be modified. Does not affect Dissipation Field.",
 	unsanctify: {
@@ -555,8 +542,7 @@ const data = {
 		`Deal ${x} spell damage to all of target player\'s creatures. Removes cloak.`,
 	summon: x => c =>
 		`Put a ${
-			(c instanceof Card ? c.Cards : c.game.Cards).Names[x]
-				.name
+			(c instanceof Card ? c.Cards : c.game.Cards).Names[x].name
 		} into play.`,
 	swarm:
 		'Base HP is equal to the number of Scarabs you control, including this one.',
@@ -638,12 +624,8 @@ const data = {
 	['pillcar', '1:1 1:3 1:10 1:12'],
 ].forEach(x => {
 	data[x[0]] = {
-		ownattack: `Randomly gain 1-2 ${
-			x[1]
-		} each turn. ⅔ chance to gain 2.`,
-		ownplay: `Randomly gain 1-2 ${
-			x[1]
-		} when played. ⅔ chance to gain 2.`,
+		ownattack: `Randomly gain 1-2 ${x[1]} each turn. ⅔ chance to gain 2.`,
+		ownplay: `Randomly gain 1-2 ${x[1]} when played. ⅔ chance to gain 2.`,
 	};
 });
 function auraText(tgts, bufftext, upbufftext) {
@@ -664,9 +646,7 @@ const statusData = {
 		c.getStatus('charges') == 1
 			? ''
 			: `Enters play with ${c.getStatus('charges')} ${
-					c.getStatus('stackable')
-						? 'stacks'
-						: 'charges'
+					c.getStatus('stackable') ? 'stacks' : 'charges'
 			  }`,
 	flooding:
 		"Each player's non-aquatic creatures past their first five creature slots die at the end of that player's turn. Consumes 1:7 each turn. Does not stack.",
@@ -677,9 +657,7 @@ const statusData = {
 		'Prevent your creatures from attacking at the end of your turn. At the end of your turn, your creatures gain 2|1. If they are burrowed, they instead gain 4|1. If they are affected by Flooding, they instead gain 5|2. Does not stack.',
 	poison: (c, inst) =>
 		c == inst
-			? `Enters play with ${c.getStatus(
-					'poison',
-			  )} poison counters.`
+			? `Enters play with ${c.getStatus('poison')} poison counters.`
 			: inst.getStatus('poison') + ' poison',
 	stackable: '',
 	tunnel: 'Any of your creatures that are burrowed bypass shields.',
