@@ -55,7 +55,6 @@ const data = {
 		'Apply 2 poison to target. When the target dies, it becomes a Malignant Cell.',
 	aggroskele:
 		'Summon a Skeleton. All of your skeletons deal their damage to target creature.',
-	air: 'Produces 1:9 when it attacks.',
 	alphawolf: 'Summon two 2|1 Pack Wolves when this enters play.',
 	antimatter:
 		"If target creature's attack is positive, it becomes negative. If target creature's attack is negative, it becomes positive.",
@@ -219,7 +218,7 @@ const data = {
 	flyself:
 		'If this card is equipped as a weapon, it casts Flying Weapon on itself. If this card is a creature, it casts Living Weapon on itself.',
 	flyingweapon:
-		"Target weapon becomes a flying creature. It still counts as a weapon even though it isn't in a weapon slot.",
+		"Target weapon becomes a flying creature. It still counts as a weapon even though it isn't in your weapon slot.",
 	foedraw: "Draw from opponent's deck",
 	forcedraw:
 		'When this creature damages a player, that player draws a card.',
@@ -378,7 +377,7 @@ const data = {
 		'When this card is discarded, the discarding player receives 10 spell damage.',
 	],
 	ouija:
-		"Whenever a creature dies, add an Ouija Essence to opoonent's hand.",
+		"Whenever a creature dies, add an Ouija Essence to opponent's hand.",
 	pacify: "Set target creature or weapon's strength to 0.",
 	pairproduce: 'Your pillars, pendulums, and towers produce quanta.',
 	paleomagnetism: {
@@ -593,9 +592,7 @@ const data = {
 	unvindicate:
 		'Cannot activate vindicate again until the start of its next turn.',
 	upkeep: c =>
-		'Whenever a creature attacks, its owner must pay 1:' +
-		c.element +
-		' or the creature is destroyed.',
+		`Whenever a creature attacks, its owner must pay 1:${c.element} or the creature is destroyed.`,
 	upload: 'Target creature or weapon gains 2|0. This creature loses 0|2.',
 	vampire: 'Heal yourself equal to the damage dealt by this card.',
 	vend: 'Sacrifice this card. Draw a card.',
