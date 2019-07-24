@@ -260,7 +260,7 @@ const data = {
 		const x = `${atk}|${hp}`;
 		return {
 			death: `When any creature dies, gain ${x}.`,
-			ownfreeze: `When this creature would be frozen, instead gain ${x}.`,
+            ownfreeze: `When this card would be frozen, instead gain ${x}.`,
 			cast: `Gain ${x}.`,
 			ownattack: `This creature gains ${x} when it attacks.`,
 		};
