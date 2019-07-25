@@ -3,6 +3,7 @@ module.exports = {
 		aivai: './src/aivai.js',
 		art: './src/ui/art.js',
 		cia: './src/vanilla/ui/cia.js',
+		deck: './src/ui/deck.js',
 		main: './src/ui/main.js',
 		mosaic: './src/ui/mosaic.js',
 		vanilla: './src/vanilla/ui/main.js',
@@ -19,22 +20,6 @@ module.exports = {
 		sourceMapFilename: 'bundle/[name].js.map',
 	},
 	devtool: 'cheap-source-map',
-	optimization: {
-		splitChunks: {
-			chunks: 'all',
-			cacheGroups: {
-				vendor: {
-					test: /[\\/]node_modules[\\/]/,
-					priority: -10,
-				},
-				commons: {
-					name: 'commons',
-					chunks: 'initial',
-					minChunks: 2,
-				},
-			},
-		},
-	},
 	module: {
 		rules: [
 			{

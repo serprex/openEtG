@@ -20,7 +20,7 @@ async function respond(url, res, datathunk, ifmod) {
 			res.writeHead('404');
 			res.end(err);
 		} catch {
-			console.err(err);
+			console.error(err);
 		}
 	}
 }
