@@ -1,6 +1,6 @@
 import React from 'react';
 import { connect } from 'react-redux';
-import { Motion, spring } from 'react-motion';
+import { Motion, TransitionMotion, spring } from 'react-motion';
 import * as imm from '../immutable.js';
 
 import Effect from '../Effect.js';
@@ -1527,7 +1527,22 @@ export default connect(({ user }) => ({ user }))(
 								/>
 						  )}
 					{children}
-					{things}
+					<TransitionMotion
+						defaultStyles={ things.filter(t => t != null).map( t => ({ key: parseInt(t.key), style: { opacity: 0 }, data: t }) )}
+						styles={ things.filter(t => t != null).map( t => ({ key: parseInt(t.key), style: { opacity: spring(1) }, data: t }) )}
+						willLeave={() => ({ opacity: spring(0) })}>
+						{
+							interpStyles =>
+							{
+								return (
+								<div>
+								{
+									interpStyles.map( item => { return <div key={item.key} style={item.style}>{item.data}</div> } )
+								}
+								</div>)
+							}
+						}
+					</TransitionMotion>
 					{floodvisible && floodsvg}
 					<div
 						style={{
