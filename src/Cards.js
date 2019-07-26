@@ -2,6 +2,7 @@ import * as etg from './etg.js';
 import * as etgutil from './etgutil.js';
 import Card from './Card.js';
 import CardsJson from './Cards.json';
+import { chain } from './util.js';
 
 export const Codes = [];
 export const Names = {};
@@ -80,15 +81,8 @@ export function filterDeck(deck, pool, preserve) {
 	return cardMinus;
 }
 export function isDeckLegal(deck, user, minsize = 30) {
-	function incrpool(code, count) {
-		pool[code] = (pool[code] || 0) + count;
-	}
-	let pool;
-	if (user) {
-		pool = [];
-		etgutil.iterraw(user.pool, incrpool);
-		etgutil.iterraw(user.accountbound, incrpool);
-	}
+	let pool =
+		user && etgutil.deck2pool(user.accountbound, etgutil.deck2pool(user.pool));
 	const cardMinus = [];
 	let dlen = 0;
 	for (let i = deck.length - 1; i >= 0; i--) {

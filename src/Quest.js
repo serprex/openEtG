@@ -94,7 +94,7 @@ quarks.basic_skills = {
 	name: 'Active Skills',
 	info: 'Tutorial - Basic 5/10 - Active Skills',
 	urdeck: '075uk07606085un085v3018pk',
-	deck: '0f55k0f56f018pl',
+	deck: '0a52m0k5i6018pp',
 	hp: 30,
 	goldreward: 50,
 	opentext: [
@@ -168,7 +168,7 @@ quarks.basic_colosseum = {
 	name: 'Colosseum',
 	info: 'Tutorial - Basic 9/10 - Colosseum',
 	urdeck:
-		'0i4sa014vf0152h0155o0158r015bt015f2015id015la015of015rm015ul0161v018pi',
+		'0d6qq016rk016rs016tv01711017480177b017ad017di017gt017jq017mv037qb017q6017t50180f018pi',
 	deck: '024tc0c55k0655n0656f0255s0255o018pl',
 	hp: 100,
 	goldreward: 90,
@@ -183,7 +183,7 @@ quarks.basic_colosseum = {
 		"Duels can only be attempted once a day, win or lose. You don't lose anything if your opponent wins, but you don't gain anything either. It's a quick fight either way so it's worth a try every day, and the rewards are much larger than normal. You'll also know your opponent ahead of time, so if you're clever you can build a deck designed to counter your opponent.\n\n" +
 			'"Novice duel" will let you fight a mage. This is an opponent using a pre-built unupgraded deck that will usually use cards that work very well together. Their cards will compliment each other, so they can be a lot harder than the random cards used by commoners.\n\n' +
 			'"Expert duel" will require you to defeat a demigod. These are the strongest opponents, using pre-built decks that are completely upgraded! They are the most difficult regular opponent, so it may be a little while before you can defeat one. Remember there\'s no cost in the colosseum, so it\'s worth a try even if you lose.',
-		"For this battle, you've got your unupgraded rainbow dragons back, and you're going to have a \"duel\". Don't worry, though. Unlike a colosseum duel, you can try this one as many times as you'd like.\n\n" +
+		"For this battle, you've got your rainbow dragons back, and you're going to have a \"duel\". Don't worry, though. Unlike a colosseum duel, you can try this one as many times as you'd like.\n\n" +
 			"Like a colosseum duel, you know who you're going to be fighting. It's your opponent's boar deck again. But they've learned from playing with your dragons, and this time they've added some of their own, along with some other cards.\n\n" +
 			'Good luck!',
 	],
@@ -348,7 +348,7 @@ quarks.bombmaker = {
 };
 quarks.blacksummoner = {
 	deck: '0f7t5018pt',
-	name: 'The Black Summoner',
+	name: 'Dark Summoner',
 	markpower: 12,
 	cardreward: '027t5',
 	wintext:
@@ -704,19 +704,42 @@ export const root = {
 			],
 		},
 		{
-			key: 'necromancer',
-			children: [{ key: 'necromancer2' }, { key: 'necromancer3' }],
-		},
-		{ key: 'blacksummoner' },
-		{ key: 'inventor', children: [{ key: 'inventor2' }, { key: 'inventor3' }] },
-		{ key: 'bombmaker' },
-		{
-			key: 'icecave',
-			children: [{ key: 'icecave2' }, { key: 'icecave3' }, { key: 'icecave4' }],
-		},
-		{
-			key: 'elementalshrine',
+			name: 'Necromancer',
 			children: [
+				{ key: 'necromancer' },
+				{ key: 'necromancer2' },
+				{ key: 'necromancer3' },
+			],
+		},
+		{
+			name: 'Dark Summoner',
+			children: [{ key: 'blacksummoner' }],
+		},
+		{
+			name: 'Inventor',
+			children: [
+				{ key: 'inventor' },
+				{ key: 'inventor2' },
+				{ key: 'inventor3' },
+			],
+		},
+		{
+			name: 'Bomb Maker',
+			children: [{ key: 'bombmaker' }],
+		},
+		{
+			name: 'Ice Cave',
+			children: [
+				{ key: 'icecave' },
+				{ key: 'icecave2' },
+				{ key: 'icecave3' },
+				{ key: 'icecave4' },
+			],
+		},
+		{
+			name: 'Elemental Shrine',
+			children: [
+				{ key: 'elementalshrine' },
 				{ key: 'aethertemple' },
 				{ key: 'airtemple' },
 				{ key: 'darktemple' },
@@ -733,8 +756,9 @@ export const root = {
 			],
 		},
 		{
-			key: 'spirit',
+			name: 'Dark Spirit',
 			children: [
+				{ key: 'spirit' },
 				{ key: 'spirit2' },
 				{ key: 'spirit3' },
 				{ key: 'spirit4' },

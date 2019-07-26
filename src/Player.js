@@ -44,6 +44,11 @@ Object.defineProperty(Player.prototype, 'foe', {
 		return this.game.byId(this.foeId);
 	},
 });
+Object.defineProperty(Player.prototype, 'leader', {
+	get() {
+		return this.game.get(this.id).get('leader');
+	},
+});
 Object.defineProperty(Player.prototype, 'type', {
 	get() {
 		return etg.Player;
@@ -159,10 +164,20 @@ defineProp('shardgolem');
 defineProp('out');
 defineProp('resigning');
 
-Player.prototype.init = function(foe, data) {
+Player.prototype.init = function(data) {
 	this.game.set(this.id, 'type', etg.Player);
 	this.game.set(this.id, 'owner', this.id);
-	this.game.set(this.id, 'foe', foe);
+	const lead = this.game.get(this.id).get('leader');
+	const idx = this.getIndex();
+	for (let i = 1; i < this.game.players.length; i++) {
+		const pidx = (idx + i) % this.game.players.length,
+			pid = this.game.players[pidx],
+			plead = this.game.get(pid).get('leader');
+		if (plead !== lead) {
+			this.game.set(this.id, 'foe', pid);
+			break;
+		}
+	}
 	this.hp = data.hp || 100;
 	this.maxhp = data.maxhp || this.hp;
 	this.atk = 0;
@@ -179,14 +194,14 @@ Player.prototype.init = function(foe, data) {
 	this.shardgolem = null;
 	this.out = false;
 	const deck = [];
-	etgutil.iterdeck(data.deck, code => {
+	for (const code of etgutil.iterdeck(data.deck)) {
 		let idx;
 		if (code in Cards.Codes) {
 			deck.push(Cards.Codes[code]);
 		} else if (~(idx = etgutil.fromTrueMark(code))) {
 			this.mark = idx;
 		}
-	});
+	}
 	this.deckIds = this.instantiateDeck(deck);
 	this.drawhand(7);
 	return this;

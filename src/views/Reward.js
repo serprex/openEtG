@@ -104,8 +104,11 @@ export default class Reward extends React.Component {
 					{this.state.rewardList.map((reward, i) => (
 						<Components.CardImage
 							key={i}
-							x={100 + Math.floor(i / 12) * 108}
-							y={272 + (i % 12) * 20}
+							style={{
+								position: 'absolute',
+								left: `${100 + Math.floor(i / 12) * 108}px`,
+								top: `${272 + (i % 12) * 20}px`,
+							}}
 							card={Cards.Codes[reward]}
 							onClick={() => this.setState({ chosenReward: reward })}
 						/>

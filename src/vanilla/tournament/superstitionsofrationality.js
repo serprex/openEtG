@@ -47,4 +47,4 @@ export default function(deck) {
 		: rat === true
 		? 'Rationality'
 		: 'Illegal' + sup + rat;
-};
+}

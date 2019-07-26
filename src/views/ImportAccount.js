@@ -1,6 +1,7 @@
 import React from 'react';
 
 import * as sock from '../sock.js';
+import { ExitBtn } from '../Components/index.js';
 
 export default class ImportAccount extends React.Component {
 	constructor(props) {
@@ -14,7 +15,7 @@ export default class ImportAccount extends React.Component {
 
 	render() {
 		return (
-			<div>
+			<div style={{ margin: '48px' }}>
 				<input
 					placeholder="Username"
 					value={this.state.name}
@@ -36,6 +37,7 @@ export default class ImportAccount extends React.Component {
 						});
 					}}
 				/>
+				<ExitBtn x={100} y={100} />
 			</div>
 		);
 	}

@@ -37,17 +37,26 @@ export default function Game(data) {
 	);
 	this.cache = new Map([[this.id, this]]);
 	this.effects = [];
+	const players = [];
+	const playersByIdx = new Map();
 	for (let i = 0; i < data.players.length; i++) {
-		const id = this.newId();
+		const id = this.newId(),
+			pdata = data.players[i];
+		players.push(id);
+		playersByIdx.set(pdata.idx, id);
 		this.cache.set(id, new Player(this, id));
-		this.players = this.players.concat([id]);
 	}
-	for (let i = 0; i < data.players.length; i++) {
-		const id = this.players[i];
-		this.byId(id).init(
-			this.players[(i + 1) % data.players.length],
-			data.players[i],
+	for (let i = 0; i < players.length; i++) {
+		const pdata = data.players[i];
+		this.set(
+			players[i],
+			'leader',
+			playersByIdx.get(pdata.leader === undefined ? pdata.idx : pdata.leader),
 		);
+	}
+	this.players = players;
+	for (let i = 0; i < players.length; i++) {
+		this.byId(players[i]).init(data.players[i]);
 	}
 }
 Game.prototype.id = 1;
@@ -224,6 +233,8 @@ Game.prototype.nextTurn = function() {
 				next.die();
 				continue;
 			}
+		} else {
+			this.setIn([this.id, 'bonusstats', 'nomidturn'], true);
 		}
 		return;
 	}
@@ -235,13 +246,12 @@ Game.prototype.setWinner = function() {
 		const winners = new Set();
 		for (let i = 0; i < players.length; i++) {
 			if (!this.get(players[i]).get('out')) {
-				const { leader } = pldata[i];
-				winners.add(leader === undefined ? i : leader);
+				winners.add(this.get(players[i]).get('leader'));
 			}
 		}
 		if (winners.size === 1) {
-			for (const idx of winners) {
-				this.winner = players[idx];
+			for (const id of winners) {
+				this.winner = id;
 			}
 			this.phase = etg.EndPhase;
 			this.updateIn([this.id, 'bonusstats', 'time'], time => Date.now() - time);
@@ -297,11 +307,6 @@ Game.prototype.next = function(event) {
 	}
 	return nextHandler[event.x].call(this, event);
 };
-function removeSoPa(id) {
-	if (id && this.getStatus(id, 'patience')) {
-		this.setStatus(id, 'patience', 0);
-	}
-}
 Game.prototype.expectedDamage = function() {
 	const expectedDamage = new Int16Array(this.players.length);
 	if (!this.winner) {
@@ -309,12 +314,13 @@ Game.prototype.expectedDamage = function() {
 		Effect.disable = true;
 		for (let i = 0; i < 5; i++) {
 			const gclone = this.clone();
-			gclone.players.forEach(pid =>
-				gclone
-					.get(pid)
-					.get('permanents')
-					.forEach(removeSoPa, gclone),
-			);
+			for (const pid of gclone.players) {
+				for (const id of gclone.get(pid).get('permanents')) {
+					if (id && gclone.getStatus(id, 'patience')) {
+						gclone.byId(id).remove();
+					}
+				}
+			}
 			gclone.updateIn([gclone.id, 'rng'], rng => rng.map(ri => ri ^ (i * 997)));
 			gclone.byId(gclone.turn).endturn();
 			if (!gclone.winner) gclone.byId(gclone.turn).endturn();

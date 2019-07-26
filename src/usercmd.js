@@ -47,13 +47,13 @@ function untransmute(user, oldcard, func, use) {
 export function upgrade(data, user) {
 	const card = Cards.Codes[data.card];
 	if (!card || card.upped) return;
-	const use = ~card.rarity ? 6 : 1;
+	const use = ~card.rarity && !(card.rarity === 5 && card.shiny) ? 6 : 1;
 	return transmute(user, card.code, etgutil.asUpped, use);
 }
 export function downgrade(data, user) {
 	const card = Cards.Codes[data.card];
 	if (!card || !card.upped) return;
-	const use = ~card.rarity ? 6 : 1;
+	const use = ~card.rarity && !(card.rarity === 5 && card.shiny) ? 6 : 1;
 	return untransmute(user, card.code, etgutil.asUpped, use);
 }
 export function polish(data, user) {

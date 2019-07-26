@@ -25,8 +25,8 @@ export function Box(props) {
 
 export function CardImage(props) {
 	const { card } = props,
-		bordcol = card && card.shiny ? '#daa520' : '#222',
-		bgcol = card ? ui.maybeLightenStr(card) : card === null ? '#876' : '#111';
+		bordcol = card.shiny ? '#daa520' : '#222',
+		bgcol = ui.maybeLightenStr(card);
 	return (
 		<div
 			className="cardslot"
@@ -36,22 +36,16 @@ export function CardImage(props) {
 			style={{
 				backgroundColor: bgcol,
 				borderColor: props.opacity ? '#f00' : bordcol,
-				color: card && card.upped ? '#000' : '#fff',
-				position: 'absolute',
-				left: props.x + 'px',
-				top: props.y + 'px',
-				whiteSpace: 'nowrap',
-				overflow: 'hidden',
-				opacity: props.opacity,
+				color: card.upped ? '#000' : '#fff',
+				...props.style,
 			}}>
 			{card.name}
 			{!!card.cost && (
 				<span
 					style={{
 						position: 'absolute',
-						right: '0',
+						right: '2px',
 						backgroundColor: bgcol,
-						paddingLeft: '2px',
 					}}>
 					{card.cost}
 					{card.costele !== card.element && (
@@ -296,9 +290,12 @@ export function DeckDisplay(props) {
 					card={card}
 					onMouseOver={props.onMouseOver && (() => props.onMouseOver(i, code))}
 					onClick={props.onClick && (() => props.onClick(i, code))}
-					x={(props.x || 0) + 100 + Math.floor(j / 10) * 99}
-					y={(props.y || 0) + 32 + (j % 10) * 19}
-					opacity={opacity}
+					style={{
+						position: 'absolute',
+						left: `${(props.x || 0) + 100 + Math.floor(j / 10) * 99}px`,
+						top: `${(props.y || 0) + 32 + (j % 10) * 19}px`,
+						opacity,
+					}}
 				/>,
 			);
 		} else {
@@ -378,8 +375,11 @@ function CardSelectorColumn(props) {
 		children.push(
 			<CardImage
 				key={code}
-				x={props.x}
-				y={y}
+				style={{
+					position: 'absolute',
+					left: `${props.x}px`,
+					top: `${y}px`,
+				}}
 				card={card}
 				onClick={props.onClick && (() => props.onClick(maybeShiny(code)))}
 				onContextMenu={

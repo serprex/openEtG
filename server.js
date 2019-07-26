@@ -28,9 +28,11 @@ import * as Bz from './src/srv/Bz.js';
 import starter from './src/srv/starter.json';
 import forkcore from './src/srv/forkcore.js';
 import login from './src/srv/login.js';
+import Lock from './src/srv/Lock.js';
 
 const MAX_INT = 0x100000000;
 const sockmeta = new WeakMap();
+const importlocks = new Map();
 (async () => {
 	const [keypem, certpem] = await Promise.all([
 		fs.readFile('../certs/oetg-key.pem'),
@@ -317,7 +319,10 @@ const sockmeta = new WeakMap();
 					sockEmit(this, 'codecode', { card: c });
 					return db.hdel('CodeHash', data.code);
 				} else {
-					sockEmit(this, 'chat', { mode: 1, msg: `Unknown card: ${type}` });
+					sockEmit(this, 'chat', {
+						mode: 1,
+						msg: `Unknown card: ${type}`,
+					});
 				}
 			} else if (type.replace(/^!?(upped)?/, '') in userutil.rewardwords) {
 				sockEmit(this, 'codecard', { type });
@@ -391,7 +396,10 @@ const sockmeta = new WeakMap();
 			const tgt = Us.socks.get(data.f),
 				tgtmeta = sockmeta.get(tgt);
 			if (tgt && tgtmeta.duel) {
-				sockEmit(tgt, 'chat', { mode: 1, msg: `${data.u} is spectating.` });
+				sockEmit(tgt, 'chat', {
+					mode: 1,
+					msg: `${data.u} is spectating.`,
+				});
 				if (!tgtmeta.spectators) tgtmeta.spectators = [];
 				tgtmeta.spectators.push(data.u);
 			}
@@ -445,9 +453,15 @@ const sockmeta = new WeakMap();
 					otherUser.gold + p2gdelta < 0
 				) {
 					sockEmit(this, 'tradecanceled');
-					sockEmit(this, 'chat', { mode: 1, msg: 'Trade disagreement.' });
+					sockEmit(this, 'chat', {
+						mode: 1,
+						msg: 'Trade disagreement.',
+					});
 					sockEmit(thatsock, 'tradecanceled');
-					sockEmit(thatsock, 'chat', { mode: 1, msg: 'Trade disagreement.' });
+					sockEmit(thatsock, 'chat', {
+						mode: 1,
+						msg: 'Trade disagreement.',
+					});
 					return;
 				}
 				sockEmit(this, 'tradedone', {
@@ -491,10 +505,13 @@ const sockmeta = new WeakMap();
 			}
 		},
 		importoriginal(data, user) {
-			sockEmit(this, 'chat', {
-				msg: 'This feature is in development',
-				mode: 1,
-			});
+			if (user.origName && user.origName !== data.name) {
+				sockEmit(this, 'chat', {
+					msg: `Your account is already bound to ${user.origName}`,
+					mode: 1,
+				});
+				return;
+			}
 			const reqdata = `user=${encodeURIComponent(
 				data.name,
 			)}&psw=${encodeURIComponent(data.pass)}&errorcode=%2D1`;
@@ -525,25 +542,76 @@ const sockmeta = new WeakMap();
 								return;
 							}
 							const { decka } = opts;
+							let tobound = '',
+								topool = '';
 							for (let i = 1; i < decka.length; i += 7) {
 								const code = parseInt(decka.substring(i, i + 4), 10) + 5000,
 									count = parseInt(decka.substring(i + 4, i + 7), 10),
 									card = Cards.Codes[code];
 								if (card) {
 									if (~etg.NymphList.indexOf(etgutil.asUpped(code, false))) {
-										sockEmit(this, 'chat', {
-											msg: `${code} ${Cards.Codes[code].name} ${count}`,
-											mode: 1,
-										});
+										tobound +=
+											etgutil.encodeCount(count) +
+											etgutil.encodeCode(etgutil.asShiny(code, true));
 									}
 									if (card.rarity === -1) {
-										sockEmit(this, 'chat', {
-											msg: `${code} ${Cards.Codes[code].name} ${count}`,
-											mode: 1,
-										});
+										topool +=
+											etgutil.encodeCount(count) + etgutil.encodeCode(code);
 									}
 								}
 							}
+							let lock = importlocks.get(data.name);
+							if (!lock) {
+								lock = new Lock();
+								importlocks.set(data.name, lock);
+							}
+							lock
+								.exec(async () => {
+									const oldimport = await db.hget('ImportOriginal', data.name),
+										impdata = sutil.parseJSON(oldimport) || {};
+									let newbound, newpool;
+									if (impdata.name && impdata.name !== user.name) {
+										sockEmit(this, 'chat', {
+											msg: `${data.name} is bound to ${impdata.name}`,
+											mode: 1,
+										});
+										return;
+									} else {
+										newbound = etgutil.removedecks(
+											tobound,
+											impdata.bound || '',
+										);
+										newpool = etgutil.removedecks(topool, impdata.pool || '');
+									}
+									if (false) {
+										user.origName = data.name;
+										user.pool = etgutil.mergedecks(user.pool, newpool);
+										user.accountbound = etgutil.mergedecks(
+											user.accountbound,
+											newbound,
+										);
+										sockEmit(this, 'addpools', {
+											c: newpool,
+											b: newbound,
+											msg: `Imported ${newpool}${newbound}`,
+										});
+										return db.hset(
+											'ImportOriginal',
+											data.name,
+											JSON.stringify({
+												name: user.name,
+												bound: newbound,
+												pool: newpool,
+											}),
+										);
+									} else {
+										sockEmit(this, 'chat', {
+											msg: `Feature in development. Would import: ${newpool} ${newbound}`,
+											mode: 1,
+										});
+									}
+								})
+								.then(() => lock.q.size || importlocks.delete(data.name));
 						});
 					},
 				)
@@ -581,8 +649,16 @@ const sockmeta = new WeakMap();
 			if (to) {
 				const sockto = Us.socks.get(to);
 				if (sockto && sockto.readyState === 1) {
-					sockEmit(sockto, 'chat', { msg: data.msg, mode: 2, u: data.u });
-					sockEmit(this, 'chat', { msg: data.msg, mode: 2, u: 'To ' + to });
+					sockEmit(sockto, 'chat', {
+						msg: data.msg,
+						mode: 2,
+						u: data.u,
+					});
+					sockEmit(this, 'chat', {
+						msg: data.msg,
+						mode: 2,
+						u: 'To ' + to,
+					});
 				} else
 					sockEmit(this, 'chat', {
 						mode: 1,
@@ -622,15 +698,15 @@ const sockmeta = new WeakMap();
 			data.price |= 0;
 			if (!data.price) return;
 			Bz.load().then(bz => {
-				etgutil.iterraw(data.cards, (code, count) => {
+				for (const [code, count] of etgutil.iterraw(data.cards)) {
 					const card = Cards.Codes[code];
-					if (!card) return;
+					if (!card) continue;
 					const bc = bz[code] || (bz[code] = []);
 					const sellval = userutil.sellValue(card);
 					let codeCount = data.price > 0 ? 0 : etgutil.count(user.pool, code);
 					if (data.price > 0) {
 						if (data.price <= sellval) {
-							return;
+							continue;
 						}
 					} else {
 						if (-data.price <= sellval) {
@@ -638,7 +714,7 @@ const sockmeta = new WeakMap();
 								user.gold += sellval * count;
 								user.pool = etgutil.addcard(user.pool, code, -count);
 							}
-							return;
+							continue;
 						}
 					}
 					for (let i = 0; i < bc.length; i++) {
@@ -723,7 +799,11 @@ const sockmeta = new WeakMap();
 								}
 							}
 							if (!hadmerge) {
-								bc.push({ q: count, u: user.name, p: data.price });
+								bc.push({
+									q: count,
+									u: user.name,
+									p: data.price,
+								});
 								bc.sort(
 									(a, b) =>
 										(a.p > 0) - (b.p > 0) || Math.abs(a.p) - Math.abs(b.p),
@@ -731,7 +811,7 @@ const sockmeta = new WeakMap();
 							}
 						}
 					}
-				});
+				}
 				sockEmit(this, 'bzbid', {
 					bz,
 					g: user.gold,
@@ -855,7 +935,10 @@ const sockmeta = new WeakMap();
 				match.invites.add(data.invite);
 				sockEmit(invitedsock, 'matchinvite', { u: user.name });
 			} else {
-				sockEmit(this, 'chat', { mode: 1, msg: `${data.invite} isn't online` });
+				sockEmit(this, 'chat', {
+					mode: 1,
+					msg: `${data.invite} isn't online`,
+				});
 			}
 		},
 		matchcancel(data, user, info) {
@@ -896,16 +979,25 @@ const sockmeta = new WeakMap();
 			const hostsock = Us.socks.get(data.host),
 				hostmeta = sockmeta.get(hostsock);
 			if (!hostmeta) {
-				sockEmit(this, 'chat', { mode: 1, msg: `${host} isn't online` });
+				sockEmit(this, 'chat', {
+					mode: 1,
+					msg: `${host} isn't online`,
+				});
 				return;
 			}
 			const { match } = hostmeta;
 			if (!match) {
-				sockEmit(this, 'chat', { mode: 1, msg: `${host} isn't hosting` });
+				sockEmit(this, 'chat', {
+					mode: 1,
+					msg: `${host} isn't hosting`,
+				});
 				return;
 			}
 			if (!hostmeta.match.invites.delete(user.name)) {
-				sockEmit(this, 'chat', { mode: 1, msg: `${host} hasn't invited you` });
+				sockEmit(this, 'chat', {
+					mode: 1,
+					msg: `${host} hasn't invited you`,
+				});
 				return;
 			}
 			info.host = data.host;
@@ -926,18 +1018,27 @@ const sockmeta = new WeakMap();
 		matchready(data, user, info) {
 			const { host } = info;
 			if (!host) {
-				sockEmit(this, 'chat', { mode: 1, msg: "You aren't in a lobby" });
+				sockEmit(this, 'chat', {
+					mode: 1,
+					msg: "You aren't in a lobby",
+				});
 				return;
 			}
 			const hostsock = Us.socks.get(host),
 				hostmeta = sockmeta.get(hostsock);
 			if (!hostmeta) {
-				sockEmit(this, 'chat', { mode: 1, msg: `${host} isn't online` });
+				sockEmit(this, 'chat', {
+					mode: 1,
+					msg: `${host} isn't online`,
+				});
 				return;
 			}
 			const { match } = hostmeta;
 			if (!match) {
-				sockEmit(this, 'chat', { mode: 1, msg: `${host} isn't hosting` });
+				sockEmit(this, 'chat', {
+					mode: 1,
+					msg: `${host} isn't hosting`,
+				});
 				return;
 			}
 			hostmeta.match.data.set(user.name, data.data);
@@ -1021,7 +1122,9 @@ const sockmeta = new WeakMap();
 		async konglogin(data) {
 			const key = await db.get('kongapi');
 			if (!key) {
-				sockEmit(this, 'login', { err: 'Global error: no kong api in db' });
+				sockEmit(this, 'login', {
+					err: 'Global error: no kong api in db',
+				});
 				return;
 			}
 			https
@@ -1043,7 +1146,10 @@ const sockmeta = new WeakMap();
 								Us.load(name)
 									.then(user => {
 										user.auth = data.g;
-										sockEvents.login.call(this, { u: name, a: data.g });
+										sockEvents.login.call(this, {
+											u: name,
+											a: data.g,
+										});
 										const req = https
 											.request({
 												hostname: 'www.kongregate.com',
@@ -1065,7 +1171,10 @@ const sockmeta = new WeakMap();
 											gold: 0,
 											auth: data.g,
 										});
-										sockEvents.login.call(this, { u: name, a: data.g });
+										sockEvents.login.call(this, {
+											u: name,
+											a: data.g,
+										});
 									});
 							} else {
 								sockEmit(this, 'login', {
@@ -1243,11 +1352,11 @@ const sockmeta = new WeakMap();
 		const data = sutil.parseJSON(rawdata);
 		if (!data || typeof data !== 'object' || typeof data.x !== 'string') return;
 		console.log(data.u, data.x);
-		let func = userEvents[data.x] || usercmd[data.x];
-		if (func) {
-			const { u } = data;
-			if (typeof u === 'string') {
-				try {
+		try {
+			let func = userEvents[data.x] || usercmd[data.x];
+			if (func) {
+				const { u } = data;
+				if (typeof u === 'string') {
 					const user = await Us.load(u);
 					if (data.a === user.auth) {
 						const meta = sockmeta.get(this);
@@ -1261,12 +1370,12 @@ const sockmeta = new WeakMap();
 							Object.assign(user, res);
 						}
 					}
-				} catch (err) {
-					console.log(err);
 				}
+			} else if ((func = sockEvents[data.x])) {
+				func.call(this, data);
 			}
-		} else if ((func = sockEvents[data.x])) {
-			func.call(this, data);
+		} catch (err) {
+			console.log(err);
 		}
 	}
 	function onSocketConnection(socket) {

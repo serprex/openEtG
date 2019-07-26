@@ -103,7 +103,7 @@ const BonusList = [
 	{
 		name: 'Mid Turn',
 		desc: 'Defeat foe with game ended still on own turn',
-		func: (game, p1, p2) => (game.turn === p1.id ? 0.1 : 0),
+		func: (game, p1, p2) => (game.bonusstats.get('nomidturn') ? 0 : 0.1),
 	},
 	{
 		name: 'Murderer',
@@ -141,10 +141,10 @@ const BonusList = [
 		desc: '0.333..% per unupped card in deck',
 		func: (game, p1, p2) => {
 			let unupnu = 0;
-			etgutil.iterraw(p1.data.deck, (code, count) => {
+			for (const [code, count] of etgutil.iterraw(p1.data.deck)) {
 				const card = Cards.Codes[code];
 				if (card && !card.upped) unupnu += count;
-			});
+			}
 			return unupnu / 300;
 		},
 	},
@@ -424,12 +424,13 @@ export default connect(({ user }) => ({ user }))(
 				{ cardreward } = this.state,
 				cards = [];
 			if (cardreward) {
-				const x0 = 470 - etgutil.decklength(cardreward) * 20 - 64;
-				etgutil.iterdeck(cardreward, (code, i) =>
+				let x0 = 470 - etgutil.decklength(cardreward) * 20 - 64;
+				for (const code of etgutil.iterdeck(cardreward)) {
 					cards.push(
-						<Components.Card key={i} x={x0 + i * 40} y={170} code={code} />,
-					),
-				);
+						<Components.Card key={cards.length} x={x0} y={170} code={code} />,
+					);
+					x0 += 40;
+				}
 			}
 			return (
 				<>

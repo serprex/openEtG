@@ -43,4 +43,4 @@ export default function(deck) {
 			);
 	}
 	return 'Legal';
-};
+}

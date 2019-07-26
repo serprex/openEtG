@@ -50,4 +50,4 @@ export default function(deck) {
 		}
 	}
 	return races.length ? races.join(', ') : 'Illegal';
-};
+}

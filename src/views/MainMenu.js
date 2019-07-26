@@ -214,7 +214,9 @@ export default connect(({ user, opts }) => ({
 					},
 					codegold: data => {
 						this.props.dispatch(
-							store.updateUser({ gold: this.props.user.gold + data.g }),
+							store.updateUser({
+								gold: this.props.user.gold + data.g,
+							}),
 						);
 						this.props.dispatch(
 							store.chat(
@@ -337,7 +339,11 @@ export default connect(({ user, opts }) => ({
 			function changeFunc() {
 				if (self.state.newpass === self.state.newpass2) {
 					sock.userEmit('passchange', { p: self.state.newpass });
-					self.setState({ changepass: false, newpass: '', newpass2: '' });
+					self.setState({
+						changepass: false,
+						newpass: '',
+						newpass2: '',
+					});
 				} else {
 					self.setState({ newpass: '', newpass2: '' });
 					self.props.dispatch(
@@ -646,7 +652,9 @@ export default connect(({ user, opts }) => ({
 										(self.props.user && self.props.user.name);
 									if (name)
 										this.props.dispatch(
-											store.doNav(import('./Library'), { name }),
+											store.doNav(import('./Library'), {
+												name,
+											}),
 										);
 								}}
 								onMouseOver={this.mkSetTip(
@@ -675,11 +683,11 @@ export default connect(({ user, opts }) => ({
 									<input
 										type="button"
 										value="Trade"
-										onClick={foe => {
-											sock.trade =
-												typeof foe === 'string' ? foe : self.props.foename;
-											sock.userEmit('tradewant', { f: sock.trade });
-										}}
+										onClick={foe =>
+											sock.offerTrade(
+												typeof foe === 'string' ? foe : self.props.foename,
+											)
+										}
 										onMouseOver={this.mkSetTip(
 											'Initiate trading cards with another player',
 										)}
@@ -693,7 +701,9 @@ export default connect(({ user, opts }) => ({
 										type="button"
 										value="Reward"
 										onClick={() => {
-											sock.userEmit('codesubmit', { code: self.props.foename });
+											sock.userEmit('codesubmit', {
+												code: self.props.foename,
+											});
 										}}
 										onMouseOver={this.mkSetTip('Redeem a reward code')}
 										style={{
@@ -752,7 +762,11 @@ export default connect(({ user, opts }) => ({
 										<input
 											placeholder="New Password"
 											value={this.state.newpass}
-											onChange={e => this.setState({ newpass: e.target.value })}
+											onChange={e =>
+												this.setState({
+													newpass: e.target.value,
+												})
+											}
 											onKeyPress={e => {
 												if (e.which == 13) changeFunc();
 											}}
@@ -766,7 +780,9 @@ export default connect(({ user, opts }) => ({
 											placeholder="Confirm New"
 											value={this.state.newpass2}
 											onChange={e =>
-												this.setState({ newpass2: e.target.value })
+												this.setState({
+													newpass2: e.target.value,
+												})
 											}
 											onKeyPress={e => {
 												if (e.which == 13) changeFunc();

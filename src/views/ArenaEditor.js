@@ -5,6 +5,7 @@ import * as Cards from '../Cards';
 import * as etgutil from '../etgutil.js';
 import * as sock from '../sock.js';
 import * as store from '../store.js';
+import { chain } from '../util.js';
 import Editor from '../Components/Editor.js';
 
 const artable = {
@@ -75,7 +76,10 @@ export default connect(({ user }) => ({ user }))(
 			super(props);
 			const baseacard = props.acard.asUpped(false).asShiny(false);
 			const pool = [];
-			function incrpool(code, count) {
+			for (const [code, count] of chain(
+				etgutil.iterraw(props.user.pool),
+				etgutil.iterraw(props.user.accountbound),
+			)) {
 				if (
 					code in Cards.Codes &&
 					(!props.acard ||
@@ -85,8 +89,6 @@ export default connect(({ user }) => ({ user }))(
 					pool[code] = (pool[code] || 0) + count;
 				}
 			}
-			etgutil.iterraw(props.user.pool, incrpool);
-			etgutil.iterraw(props.user.accountbound, incrpool);
 			pool[this.props.acard.code] = 5;
 			let mark = 0,
 				deck = etgutil.decodedeck(props.adeck);

@@ -13,8 +13,8 @@ const buffer = [];
 let socket = new WebSocket(endpoint),
 	attempts = 0,
 	attemptTimeout = 0,
-	pvp = false;
-export let trade = false;
+	pvp = null;
+export let trade = null;
 const sockEvents = {
 	clear: () => store.store.dispatch(store.clearChat('Main')),
 	passchange: data => {
@@ -150,9 +150,11 @@ const sockEvents = {
 	},
 	pvpgive: data => {
 		if (pvp) {
-			pvp = false;
+			pvp = null;
 			store.store.dispatch(
-				store.doNav(import('./views/Match'), { game: new Game(data.data) }),
+				store.doNav(import('./views/Match'), {
+					game: new Game(data.data),
+				}),
 			);
 		}
 	},
@@ -190,6 +192,11 @@ const sockEvents = {
 	},
 	bzgive: data => {
 		store.store.dispatch(store.userCmd(data.g ? 'addgold' : 'addcards', data));
+		store.store.dispatch(store.chatMsg(data.msg, 'System'));
+	},
+	addpools: data => {
+		store.store.dispatch(store.userCmd('addcards', { c: data.c }));
+		store.store.dispatch(store.userCmd('addbound', { c: data.b }));
 		store.store.dispatch(store.chatMsg(data.msg, 'System'));
 	},
 };
@@ -267,4 +274,14 @@ export function sendChallenge(foe) {
 	const msg = { f: foe };
 	userEmit('foewant', msg);
 	pvp = foe;
+}
+export function offerTrade(f) {
+	trade = f;
+	userEmit('tradewant', { f });
+}
+export function cancelTrade() {
+	if (trade) {
+		trade = null;
+		sock.userEmit('canceltrade');
+	}
 }

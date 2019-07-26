@@ -224,7 +224,8 @@ class ThingInstCore extends React.Component {
 		if (instprops !== state.instprops || isgpull !== state.isgpull) {
 			const children = [],
 				isSpell = obj.type === etg.Spell,
-				bgcolor = ui.maybeLightenStr(obj.card);
+				{ card } = obj,
+				bgcolor = ui.maybeLightenStr(card);
 			let statText, topText;
 			if (!isSpell) {
 				const visible = [
@@ -281,9 +282,9 @@ class ThingInstCore extends React.Component {
 						charges ? ` \u00d7${charges}` : ''
 					}`;
 				} else if (obj.type === etg.Permanent) {
-					if (obj.card.type === etg.Pillar) {
+					if (card.type === etg.Pillar) {
 						statText = `1:${
-							obj.getStatus('pendstate') ? obj.owner.mark : obj.card.element
+							obj.getStatus('pendstate') ? obj.owner.mark : card.element
 						}\u00d7${charges}`;
 						topText = '';
 					} else if (obj.active.get('ownattack') === Skills.locket) {
@@ -297,8 +298,8 @@ class ThingInstCore extends React.Component {
 					statText = charges ? '\u00d7' + charges : obj.truedr().toString();
 				}
 			} else {
-				topText = obj.card.name;
-				statText = `${obj.card.cost}:${obj.card.costele}`;
+				topText = card.name;
+				statText = `${card.cost}:${card.costele}`;
 			}
 			return {
 				instprops,
@@ -312,9 +313,8 @@ class ThingInstCore extends React.Component {
 							backgroundSize: 'contain',
 							backgroundImage: props.lofiArt
 								? undefined
-								: `url(/Cards/${obj.card.code.toString(32)}.png)`,
+								: `url(/Cards/${card.code.toString(32)}.png)`,
 						}}>
-						{children}
 						<div
 							style={{
 								position: 'absolute',
@@ -337,10 +337,29 @@ class ThingInstCore extends React.Component {
 								<Components.Text
 									text={statText}
 									icoprefix="te"
-									style={{ float: 'right', backgroundColor: bgcolor }}
+									style={{
+										float: 'right',
+										backgroundColor: bgcolor,
+									}}
+								/>
+							)}
+							{!isSpell && (
+								<Components.Text
+									text={card.name}
+									icoprefix="te"
+									style={{
+										position: 'absolute',
+										top: '54px',
+										height: '10px',
+										width: '64px',
+										overflow: 'hidden',
+										whiteSpace: 'nowrap',
+										backgroundColor: bgcolor,
+									}}
 								/>
 							)}
 						</div>
+						{children}
 						{obj.hasactive('prespell', 'protectonce') && (
 							<div
 								className="ico protection"
@@ -464,25 +483,34 @@ function tgtclass(p1id, obj, targeting) {
 	return '';
 }
 
-function FoePlays({ foeplays, setCard, setLine, clearCard }) {
+function FoePlays({ foeplays, setCard, setLine, clearCard, showGame }) {
 	const idtrack = React.useContext(TrackIdCtx).value;
 	return (
-		!!foeplays &&
-		foeplays.map((play, i) => (
-			<Components.CardImage
-				key={i}
-				x={(i & 7) * 99}
-				y={(i >> 3) * 19}
-				card={play}
-				onMouseOver={e => {
-					setCard(e, play.card);
-					if (play.t) {
-						setLine(idtrack.get(play.c), idtrack.get(play.t));
-					}
-				}}
-				onMouseOut={clearCard}
-			/>
-		))
+		!!foeplays && (
+			<div
+				style={{
+					position: 'absolute',
+					left: '8px',
+					top: '300px',
+					zIndex: 5,
+				}}>
+				{foeplays.map((play, i) => (
+					<Components.CardImage
+						key={i}
+						card={play}
+						onMouseOver={e => {
+							if (play.card) setCard(e, play.card);
+							else clearCard();
+							if (play.t) {
+								setLine(idtrack.get(play.c), idtrack.get(play.t));
+							}
+						}}
+						onClick={() => showGame(play.game)}
+						onMouseOut={clearCard}
+					/>
+				))}
+			</div>
+		)
 	);
 }
 
@@ -497,6 +525,7 @@ export default connect(({ user }) => ({ user }))(
 				? props.game.byId(props.game.turn)
 				: props.game.byUser(props.user ? props.user.name : '');
 			this.state = {
+				game: null,
 				tooltip: null,
 				showFoeplays: false,
 				foeplays: new Map(),
@@ -534,11 +563,21 @@ export default connect(({ user }) => ({ user }))(
 					{pos =>
 						pos && (
 							<Motion
-								defaultStyle={{ fade: 1, x: pos.x, y: pos.y + offset }}
+								defaultStyle={{
+									fade: 1,
+									x: pos.x,
+									y: pos.y + offset,
+								}}
 								style={{
 									x: pos.x,
-									y: spring(pos.y - 36, { stiffness: 84, dampen: 12 }),
-									fade: spring(0, { stiffness: 108, dampen: 12 }),
+									y: spring(pos.y - 36, {
+										stiffness: 84,
+										dampen: 12,
+									}),
+									fade: spring(0, {
+										stiffness: 108,
+										dampen: 12,
+									}),
 								}}
 								onRest={() => {
 									this.setState(state => {
@@ -614,20 +653,37 @@ export default connect(({ user }) => ({ user }))(
 			) {
 				sock.userEmit('move', { data });
 			}
-			if (data.x === 'cast') {
-				const c = game.byId(data.c),
-					isSpell = c.type === etg.Spell;
-				const play = {
-					card: c.card,
-					element: c.card.element,
-					costele: isSpell ? c.card.costele : c.castele,
-					cost: isSpell ? c.card.cost : c.cast,
-					name: isSpell ? c.card.name : c.active.get('cast').toString(),
-					upped: c.card.upped,
-					shiny: c.card.shiny,
-					c: data.c,
-					t: data.t,
-				};
+			if (data.x === 'cast' || data.x === 'end') {
+				let play;
+				if (data.x === 'cast') {
+					const c = game.byId(data.c),
+						isSpell = c.type === etg.Spell;
+					play = {
+						card: c.card,
+						element: c.card.element,
+						costele: isSpell ? c.card.costele : c.castele,
+						cost: isSpell ? c.card.cost : c.cast,
+						name: isSpell ? c.card.name : c.active.get('cast').toString(),
+						upped: c.card.upped,
+						shiny: c.card.shiny,
+						c: data.c,
+						t: data.t,
+						game: game.clone(),
+					};
+				} else {
+					play = {
+						card: null,
+						element: 0,
+						costele: 0,
+						cost: 0,
+						name: 'endturn',
+						upped: false,
+						shiny: false,
+						c: 0,
+						t: 0,
+						game: game.clone(),
+					};
+				}
 				this.setState(state => {
 					const foeplays = new Map(state.foeplays);
 					if (!foeplays.has(turn)) foeplays.set(turn, []);
@@ -831,7 +887,7 @@ export default connect(({ user }) => ({ user }))(
 		getGame = () =>
 			this.props.replay
 				? this.state.replayhistory[this.state.replayindex]
-				: this.props.game;
+				: this.state.game || this.props.game;
 
 		gotoResult = () => {
 			const { game, user } = this.props;
@@ -840,7 +896,7 @@ export default connect(({ user }) => ({ user }))(
 					sock.userEmit('modarena', {
 						aname: game.data.arena,
 						won: game.winner !== this.state.player1,
-						lv: game.level - 4,
+						lv: game.data.level - 4,
 					});
 				}
 				if (game.winner === this.state.player1) {
@@ -1122,10 +1178,7 @@ export default connect(({ user }) => ({ user }))(
 		}
 
 		componentDidMount() {
-			if (sock.trade) {
-				sock.userEmit('canceltrade');
-				delete sock.trade;
-			}
+			sock.cancelTrade();
 			if (!this.props.replay) {
 				if (!this.props.game.data.spectate) {
 					document.addEventListener('keydown', this.onkeydown);
@@ -1167,7 +1220,12 @@ export default connect(({ user }) => ({ user }))(
 		}
 
 		clearCard = () => {
-			this.setState({ hovercode: 0, tooltip: null, line0: null, line1: null });
+			this.setState({
+				hovercode: 0,
+				tooltip: null,
+				line0: null,
+				line1: null,
+			});
 		};
 
 		setCard(e, card, x) {
@@ -1293,8 +1351,6 @@ export default connect(({ user }) => ({ user }))(
 						/>
 					),
 				);
-				const creatures = [],
-					perms = [];
 				for (let i = 0; i < pl.handIds.length; i++) {
 					const inst = pl.hand[i];
 					things.push(
@@ -1311,10 +1367,10 @@ export default connect(({ user }) => ({ user }))(
 						/>,
 					);
 				}
-				for (let i = 0; i < 23; i++) {
+				for (let i = j ? 22 : 0; i >= 0 && i < 23; i += j ? -1 : 1) {
 					const cr = pl.creatures[i];
 					if (cr && !(j === 1 && cloaked)) {
-						creatures.push(
+						things.push(
 							<ThingInst
 								key={cr.id}
 								game={game}
@@ -1333,7 +1389,7 @@ export default connect(({ user }) => ({ user }))(
 					const pr = pl.permanents[i];
 					if (pr && pr.getStatus('flooding')) floodvisible = true;
 					if (pr && !(j === 1 && cloaked && !pr.getStatus('cloak'))) {
-						perms.push(
+						things.push(
 							<ThingInst
 								key={pr.id}
 								game={game}
@@ -1348,16 +1404,10 @@ export default connect(({ user }) => ({ user }))(
 						);
 					}
 				}
-				if (j === 1) {
-					creatures.reverse();
-					perms.reverse();
-				}
-				things.push(...creatures);
-				things.push(...perms);
 				const wp = pl.weapon,
 					sh = pl.shield;
-				things.push(
-					wp && !(j === 1 && cloaked) && (
+				if (wp && !(j === 1 && cloaked)) {
+					things.push(
 						<ThingInst
 							key={wp.id}
 							game={game}
@@ -1368,9 +1418,11 @@ export default connect(({ user }) => ({ user }))(
 							onMouseOut={this.clearCard}
 							onClick={this.thingClick}
 							targeting={this.state.targeting}
-						/>
-					),
-					sh && !(j === 1 && cloaked) && (
+						/>,
+					);
+				}
+				if (sh && !(j === 1 && cloaked)) {
+					things.push(
 						<ThingInst
 							key={sh.id}
 							game={game}
@@ -1381,9 +1433,9 @@ export default connect(({ user }) => ({ user }))(
 							onMouseOut={this.clearCard}
 							onClick={this.thingClick}
 							targeting={this.state.targeting}
-						/>
-					),
-				);
+						/>,
+					);
+				}
 				const qx = 0,
 					qy = j ? 106 : 308;
 				for (let k = 1; k < 13; k++) {
@@ -1524,6 +1576,7 @@ export default connect(({ user }) => ({ user }))(
 									setCard={(e, play) => this.setCard(e, play, e.pageX)}
 									setLine={(line0, line1) => this.setState({ line0, line1 })}
 									clearCard={this.clearCard}
+									showGame={game => this.setState({ game })}
 								/>
 						  )}
 					{children}
@@ -1628,6 +1681,7 @@ export default connect(({ user }) => ({ user }))(
 								}}
 								onClick={() =>
 									this.setState(state => ({
+										game: null,
 										showFoeplays: !state.showFoeplays,
 									}))
 								}
