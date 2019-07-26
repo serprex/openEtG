@@ -395,6 +395,7 @@ class ThingInstCore extends React.Component {
 						position: 'absolute',
 						left: pos.x - 32 + 'px',
 						top: pos.y - 36 + 'px',
+						opacity: props.opacity,
 					}}
 					onMouseOut={props.onMouseOut}
 					onClick={() => props.onClick(obj)}>
@@ -416,7 +417,7 @@ class ThingInstCore extends React.Component {
 					position: 'absolute',
 					left: pos.x - 32 + 'px',
 					top: pos.y - 32 + 'px',
-					opacity: obj.isMaterial() ? '1' : '.7',
+					opacity: (obj.isMaterial() ? 1 : 0.7) * props.opacity,
 					color: obj.card.upped ? '#000' : '#fff',
 					zIndex: !isSpell && obj.getStatus('cloak') ? '2' : undefined,
 				}}
@@ -1353,88 +1354,28 @@ export default connect(({ user }) => ({ user }))(
 				);
 				for (let i = 0; i < pl.handIds.length; i++) {
 					const inst = pl.hand[i];
-					things.push(
-						<ThingInst
-							key={inst.id}
-							game={game}
-							obj={inst}
-							p1id={player1.id}
-							startpos={this.state.startPos.get(inst.id)}
-							setInfo={(e, obj, x) => this.setCard(e, obj.card, x)}
-							onMouseOut={this.clearCard}
-							onClick={this.thingClick}
-							targeting={this.state.targeting}
-						/>,
-					);
+					things.push(inst);
 				}
 				for (let i = j ? 22 : 0; i >= 0 && i < 23; i += j ? -1 : 1) {
 					const cr = pl.creatures[i];
 					if (cr && !(j === 1 && cloaked)) {
-						things.push(
-							<ThingInst
-								key={cr.id}
-								game={game}
-								obj={cr}
-								p1id={player1.id}
-								startpos={this.state.startPos.get(cr.id)}
-								setInfo={(e, obj, x) => this.setInfo(e, obj, x)}
-								onMouseOut={this.clearCard}
-								onClick={this.thingClick}
-								targeting={this.state.targeting}
-							/>,
-						);
+						things.push(cr);
 					}
 				}
 				for (let i = 0; i < 16; i++) {
 					const pr = pl.permanents[i];
 					if (pr && pr.getStatus('flooding')) floodvisible = true;
 					if (pr && !(j === 1 && cloaked && !pr.getStatus('cloak'))) {
-						things.push(
-							<ThingInst
-								key={pr.id}
-								game={game}
-								obj={pr}
-								p1id={player1.id}
-								startpos={this.state.startPos.get(pr.id)}
-								setInfo={(e, obj, x) => this.setInfo(e, obj, x)}
-								onMouseOut={this.clearCard}
-								onClick={this.thingClick}
-								targeting={this.state.targeting}
-							/>,
-						);
+						things.push(pr);
 					}
 				}
 				const wp = pl.weapon,
 					sh = pl.shield;
 				if (wp && !(j === 1 && cloaked)) {
-					things.push(
-						<ThingInst
-							key={wp.id}
-							game={game}
-							obj={wp}
-							p1id={player1.id}
-							startpos={this.state.startPos.get(wp.id)}
-							setInfo={(e, obj, x) => this.setInfo(e, obj, x)}
-							onMouseOut={this.clearCard}
-							onClick={this.thingClick}
-							targeting={this.state.targeting}
-						/>,
-					);
+					things.push(wp);
 				}
 				if (sh && !(j === 1 && cloaked)) {
-					things.push(
-						<ThingInst
-							key={sh.id}
-							game={game}
-							obj={sh}
-							p1id={player1.id}
-							startpos={this.state.startPos.get(sh.id)}
-							setInfo={(e, obj, x) => this.setInfo(e, obj, x)}
-							onMouseOut={this.clearCard}
-							onClick={this.thingClick}
-							targeting={this.state.targeting}
-						/>,
-					);
+					things.push(sh);
 				}
 				const qx = 0,
 					qy = j ? 106 : 308;
@@ -1581,20 +1522,39 @@ export default connect(({ user }) => ({ user }))(
 						  )}
 					{children}
 					<TransitionMotion
-						defaultStyles={ things.filter(t => t != null).map( t => ({ key: parseInt(t.key), style: { opacity: 0 }, data: t }) )}
-						styles={ things.filter(t => t != null).map( t => ({ key: parseInt(t.key), style: { opacity: spring(1) }, data: t }) )}
+						defaultStyles={things
+							.filter(t => t != null)
+							.map(t => ({
+								key: t.id,
+								style: { opacity: 0 },
+								data: t,
+							}))}
+						styles={things
+							.filter(t => t != null)
+							.map(t => ({
+								key: t.id,
+								style: { opacity: spring(1) },
+								data: t,
+							}))}
 						willLeave={() => ({ opacity: spring(0) })}>
-						{
-							interpStyles =>
-							{
-								return (
-								<div>
-								{
-									interpStyles.map( item => { return <div key={item.key} style={item.style}>{item.data}</div> } )
-								}
-								</div>)
-							}
-						}
+						{interpStyles => (
+							<>
+								{interpStyles.map(item => (
+									<ThingInst
+										key={item.data.id}
+										game={game}
+										obj={item.data}
+										p1id={player1.id}
+										startpos={this.state.startPos.get(item.data.id)}
+										setInfo={(e, obj, x) => this.setInfo(e, obj, x)}
+										onMouseOut={this.clearCard}
+										onClick={this.thingClick}
+										targeting={this.state.targeting}
+										opacity={item.style.opacity}
+									/>
+								))}
+							</>
+						)}
 					</TransitionMotion>
 					{floodvisible && floodsvg}
 					<div
