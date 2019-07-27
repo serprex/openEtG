@@ -163,13 +163,19 @@ const sockEvents = {
 			store.chat(
 				<div
 					style={{ cursor: 'pointer', color: '#69f' }}
-					onClick={() => {
-						store.store.dispatch(store.doNav(import('./views/Challenge')));
-						userEmit('matchjoin', { host: data.u });
-					}}>
+					onClick={() => userEmit('matchjoin', { host: data.u })}>
 					{`${data.u} invites you`}
 				</div>,
 			),
+		);
+	},
+	matchgive: data => {
+		console.log(data);
+		store.store.dispatch(
+			store.doNav(import('./views/Challenge'), {
+				groups: data.groups,
+				set: data.set,
+			}),
 		);
 	},
 	challenge: data => {

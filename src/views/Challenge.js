@@ -193,7 +193,7 @@ class Group extends React.Component {
 							{pl.name || ''} <i>{pl.user || 'AI'}</i>
 							{pl.pending === 2 && '...'}
 						</span>
-						{pl.user !== props.host && (
+						{props.addEditing && pl.user !== props.host && (
 							<input
 								type="button"
 								value="-"
@@ -215,42 +215,50 @@ class Group extends React.Component {
 						)}
 					</div>
 				))}
-				<div>
-					<input
-						type="button"
-						value="+Player"
-						onClick={() => {
-							const { invite } = this.state;
-							const idx = props.getNextIdx();
-							if (!invite) {
-								props.updatePlayers(props.players.concat([{ idx }]));
-								props.addEditing(idx);
-							} else {
-								if (!props.hasUserAsPlayer(invite)) {
-									props.updatePlayers(
-										props.players.concat([{ idx, user: invite, pending: 2 }]),
-									);
-								}
-								props.invitePlayer(invite);
-							}
-							this.setState({ invite: '' });
-						}}
-					/>
-					<input
-						style={{ marginLeft: '8px' }}
-						value={this.state.invite}
-						onChange={e => this.setState({ invite: e.target.value })}
-					/>
-					{props.removeGroup && (
+				{props.addEditing && (
+					<div>
 						<input
 							type="button"
-							value="-"
-							className="editbtn"
-							style={{ float: 'right' }}
-							onClick={props.removeGroup}
+							value="+Player"
+							onClick={() => {
+								const { invite } = this.state;
+								const idx = props.getNextIdx();
+								if (!invite) {
+									props.updatePlayers(props.players.concat([{ idx }]));
+									props.addEditing(idx);
+								} else {
+									if (!props.hasUserAsPlayer(invite)) {
+										props.updatePlayers(
+											props.players.concat([
+												{
+													idx,
+													user: invite,
+													pending: 2,
+												},
+											]),
+										);
+									}
+									props.invitePlayer(invite);
+								}
+								this.setState({ invite: '' });
+							}}
 						/>
-					)}
-				</div>
+						<input
+							style={{ marginLeft: '8px' }}
+							value={this.state.invite}
+							onChange={e => this.setState({ invite: e.target.value })}
+						/>
+						{props.removeGroup && (
+							<input
+								type="button"
+								value="-"
+								className="editbtn"
+								style={{ float: 'right' }}
+								onClick={props.removeGroup}
+							/>
+						)}
+					</div>
+				)}
 			</div>
 		);
 	}
@@ -265,7 +273,11 @@ export default connect(({ user, opts }) => ({
 
 			this.nextIdx = 2;
 			this.state = {
-				groups: [[{ user: props.username, idx: 1, pending: 1 }], []],
+				groups: props.groups || [
+					[{ user: props.username, idx: 1, pending: 1 }],
+					[],
+				],
+				set: props.set || '',
 				editing: [new Set(), new Set()],
 				replay: '',
 			};
@@ -276,7 +288,9 @@ export default connect(({ user, opts }) => ({
 				store.setCmds({
 					matchbegin: data => {
 						this.props.dispatch(
-							store.doNav(import('./Match'), { game: new Game(data.data) }),
+							store.doNav(import('./Match'), {
+								game: new Game(data.data),
+							}),
 						);
 					},
 					matchcancel: () => {
@@ -322,7 +336,7 @@ export default connect(({ user, opts }) => ({
 						this.setState({ groups });
 					},
 					matchconfig: data => {
-						this.setState({ groups: data.data });
+						this.setState({ groups: data.data, set: data.set });
 					},
 				}),
 			);
@@ -417,7 +431,10 @@ export default connect(({ user, opts }) => ({
 		toMainMenu = () => this.props.dispatch(store.doNav(import('./MainMenu')));
 		sendConfig = () => {
 			if (this.props.username === this.state.groups[0][0].user) {
-				sock.userEmit('matchconfig', { data: this.state.groups });
+				sock.userEmit('matchconfig', {
+					data: this.state.groups,
+					set: this.state.set,
+				});
 			}
 		};
 		addGroup = () => {
@@ -436,6 +453,10 @@ export default connect(({ user, opts }) => ({
 				return { groups: newgroups };
 			}, this.sendConfig);
 		invitePlayer = u => {
+			sock.userEmit('matchconfig', {
+				data: this.state.groups,
+				set: this.state.set,
+			});
 			sock.userEmit('matchinvite', { invite: u });
 		};
 		removeGroup = i => {
@@ -469,7 +490,12 @@ export default connect(({ user, opts }) => ({
 				allReady = amhost && (!isMultiplayer || this.allReady());
 			return (
 				<>
-					<div style={{ position: 'absolute', left: '320px', top: '200px' }}>
+					<div
+						style={{
+							position: 'absolute',
+							left: '320px',
+							top: '200px',
+						}}>
 						Warning: Lobby feature is still in development
 					</div>
 					{mydata && mydata.deck && (
@@ -514,12 +540,14 @@ export default connect(({ user, opts }) => ({
 							removeGroup={i > 0 && (() => this.removeGroup(i))}
 							getNextIdx={this.getNextIdx}
 							editing={this.state.editing[i]}
-							addEditing={idx =>
-								this.setState(state => {
-									const newediting = state.editing.slice();
-									newediting[i] = new Set(newediting[i]).add(idx);
-									return { editing: newediting };
-								})
+							addEditing={
+								amhost &&
+								(idx =>
+									this.setState(state => {
+										const newediting = state.editing.slice();
+										newediting[i] = new Set(newediting[i]).add(idx);
+										return { editing: newediting };
+									}))
 							}
 							toggleEditing={idx =>
 								this.setState(state => {
@@ -544,7 +572,9 @@ export default connect(({ user, opts }) => ({
 						/>
 					))}
 					<div style={{ width: '300px' }}>
-						<input type="button" value="+Group" onClick={this.addGroup} />
+						{amhost && (
+							<input type="button" value="+Group" onClick={this.addGroup} />
+						)}
 						{allReady
 							? this.state.groups.length > 1 &&
 							  this.state.groups.every(x => x.length) &&
@@ -576,6 +606,30 @@ export default connect(({ user, opts }) => ({
 									/>
 							  )}
 					</div>
+					{amhost ? (
+						<select
+							value={this.state.set}
+							style={{
+								position: 'absolute',
+								left: '350px',
+								top: '8px',
+							}}
+							onChange={e =>
+								this.setState({ set: e.target.value }, this.sendConfig)
+							}>
+							<option value="">Standard</option>
+							<option value="Original">Original</option>
+						</select>
+					) : (
+						<div
+							style={{
+								position: 'absolute',
+								left: '350px',
+								top: '8px',
+							}}>
+							{this.state.set || 'Standard'}
+						</div>
+					)}
 					<input
 						style={{
 							position: 'absolute',

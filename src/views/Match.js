@@ -1521,26 +1521,22 @@ export default connect(({ user }) => ({ user }))(
 						  )}
 					{children}
 					<TransitionMotion
-						defaultStyles={things
-							.filter(t => t != null)
-							.map(t => ({
-								key: t.id,
-								style: { opacity: 0 },
-								data: t,
-							}))}
-						styles={things
-							.filter(t => t != null)
-							.map(t => ({
-								key: t.id,
-								style: { opacity: spring(1) },
-								data: t,
-							}))}
+						defaultStyles={things.map(t => ({
+							key: `${t.id}`,
+							style: { opacity: 0 },
+							data: t,
+						}))}
+						styles={things.map(t => ({
+							key: `${t.id}`,
+							style: { opacity: spring(1) },
+							data: t,
+						}))}
 						willLeave={() => ({ opacity: spring(0) })}>
 						{interpStyles => (
 							<>
 								{interpStyles.map(item => (
 									<ThingInst
-										key={item.data.id}
+										key={item.key}
 										game={game}
 										obj={item.data}
 										p1id={player1.id}

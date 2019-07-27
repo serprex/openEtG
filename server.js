@@ -908,14 +908,19 @@ const importlocks = new Map();
 					invites: new Set(),
 					config: data.data,
 					data: new Map(),
+					set: data.set,
 				};
 				return;
 			}
 			match.config = data.data;
+			match.set = data.set;
 			for (const u of match.room) {
 				if (u !== user.name) {
 					const s = Us.socks.get(u);
-					sockEmit(s, 'matchconfig', { data: match.config });
+					sockEmit(s, 'matchconfig', {
+						data: match.config,
+						set: match.set,
+					});
 				}
 			}
 		},
@@ -981,7 +986,7 @@ const importlocks = new Map();
 			if (!hostmeta) {
 				sockEmit(this, 'chat', {
 					mode: 1,
-					msg: `${host} isn't online`,
+					msg: `${data.host} isn't online`,
 				});
 				return;
 			}
@@ -989,31 +994,34 @@ const importlocks = new Map();
 			if (!match) {
 				sockEmit(this, 'chat', {
 					mode: 1,
-					msg: `${host} isn't hosting`,
+					msg: `${data.host} isn't hosting`,
 				});
 				return;
 			}
-			if (!hostmeta.match.invites.delete(user.name)) {
+			if (!match.invites.delete(user.name)) {
 				sockEmit(this, 'chat', {
 					mode: 1,
-					msg: `${host} hasn't invited you`,
+					msg: `${data.host} hasn't invited you`,
 				});
 				return;
 			}
 			info.host = data.host;
-			for (const group of hostmeta.match.config) {
+			for (const group of match.config) {
 				for (const player of group) {
 					if (player.user === user.name) {
 						player.pending = 1;
 					}
 				}
 			}
-			for (const u of hostmeta.match.room) {
+			for (const u of match.room) {
 				const s = Us.socks.get(u);
 				sockEmit(s, 'matchready', { name: user.name, pending: 1 });
 			}
-			hostmeta.match.room.add(user.name);
-			sockEmit(this, 'matchconfig', { data: match.config });
+			match.room.add(user.name);
+			sockEmit(this, 'matchgive', {
+				groups: match.config,
+				set: match.set,
+			});
 		},
 		matchready(data, user, info) {
 			const { host } = info;
@@ -1073,7 +1081,7 @@ const importlocks = new Map();
 						idx: idx++,
 						leader: leader,
 					};
-					if (player.deck) pldata.deck = deck;
+					if (player.deck) pldata.deck = player.deck;
 					if (player.markpower) pldata.markpower = player.markpower;
 					if (player.deckpower) pldata.deckpower = player.deckpower;
 					if (player.drawpower) pldata.drawpower = player.drawpower;
@@ -1085,8 +1093,9 @@ const importlocks = new Map();
 				cardreward: '',
 				seed: (Math.random() * MAX_INT) | 0,
 				players: RngMock.shuffle(players),
+				set: match.set,
 			};
-			for (const u of hostmeta.match.room) {
+			for (const u of match.room) {
 				const s = Us.socks.get(u);
 				sockEmit(s, 'matchbegin', { data: gameData });
 			}

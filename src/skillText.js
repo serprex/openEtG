@@ -4,7 +4,7 @@ import Thing from './Thing.js';
 import originalSkillText from './vanilla/skillText.js';
 
 export default function skillText(c) {
-	if (c.Cards.Names.Relic) return originalSkillText(c);
+	if (asCard(c).Cards.Names.Relic) return originalSkillText(c);
 	if (c instanceof Card && c.type === etg.Spell) {
 		const entry = getDataFromName(c.active.get('cast').castName);
 		return processEntry(c, 'cast', entry);
