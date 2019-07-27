@@ -320,6 +320,13 @@ Player.prototype.info = function() {
 	return info.join('\n');
 };
 function randomquanta(ctx, quanta) {
+	if (ctx.Cards.Names.Relic) {
+		const q = [];
+		for (let i = 1; i < 13; i++) {
+			if (quanta[i]) q.push(i);
+		}
+		return q.length ? ctx.choose(q) : -1;
+	}
 	let nonzero = 0;
 	for (let i = 1; i < 13; i++) {
 		nonzero += quanta[i];
@@ -373,6 +380,14 @@ Player.prototype.endturn = function(discard) {
 	if (discard) {
 		this.game.byId(discard).die();
 	}
+	if (this.game.Cards.Names.Relic) {
+		this.v_endturn(discard);
+	} else {
+		this.o_endturn(discard);
+	}
+	this.game.nextTurn();
+};
+Player.prototype.o_endturn = function(discard) {
 	this.spend(this.mark, this.markpower * (this.mark > 0 ? -1 : -3));
 	let patienceFlag = false,
 		floodingFlag = false,
@@ -428,7 +443,98 @@ Player.prototype.endturn = function(discard) {
 	if (this.weaponId) this.weapon.attack(undefined, true);
 	this.usedactive = false;
 	this.setStatus('flatline', 0);
-	this.game.nextTurn();
+};
+Player.prototype.v_endturn = function(discard) {
+	this.spend(this.mark, this.markpower * (this.mark > 0 ? -1 : -3));
+	const poison = this.foe.getStatus('poison');
+	if (poison) this.foe.dmg(poison);
+	var patienceFlag = false,
+		floodingFlag = false,
+		stasisFlag = false,
+		freedomChance = 0;
+	for (var i = 0; i < 16; i++) {
+		var p;
+		if ((p = this.permanents[i])) {
+			if (~p.getIndex()) {
+				p.casts = 1;
+				if (p.status.get('stasis') && p.status.get('charges') > 0) {
+					stasisFlag = true;
+				} else if (p.status.get('flooding')) {
+					floodingFlag = true;
+				} else if (p.status.get('patience')) {
+					patienceFlag = true;
+				} else if (p.status.get('freedom')) {
+					freedomChance += p.status.get('charges') * 0.25;
+				}
+			}
+		}
+		if ((p = this.foe.permanents[i])) {
+			if (p.status.get('stasis')) {
+				stasisFlag = true;
+			} else if (p.status.get('flooding')) {
+				floodingFlag = true;
+			}
+		}
+	}
+	this.creatures.forEach((cr, i) => {
+		if (cr) {
+			if (patienceFlag) {
+				const floodbuff =
+					floodingFlag && i > 4 && cr.card.element == etg.Water ? 5 : 2;
+				cr.atk += floodbuff;
+				cr.buffhp(floodbuff);
+				if (!cr.getStatus('delayed')) cr.delay(1);
+			}
+			cr.v_attack(stasisFlag, Math.min(freedomChance, 1));
+			if (
+				i > 4 &&
+				floodingFlag &&
+				cr.card.element != etg.Water &&
+				cr.card.element &&
+				!cr.status.get('immaterial') &&
+				!cr.status.get('burrowed') &&
+				~cr.getIndex()
+			) {
+				cr.die();
+			}
+		}
+	});
+	this.foe.creatures.forEach((cr, i) => {
+		if (cr) {
+			if (cr.getStatus('salvaged')) {
+				cr.setStatus('salvaged', 0);
+			}
+			if (
+				cr.active.get('cast') &&
+				cr.active.get('cast').castName === 'v_dshield'
+			) {
+				cr.setStatus('immaterial', 0);
+				cr.setStatus('psion', 0);
+			}
+		}
+	});
+	for (const p of this.permanents) {
+		if (p) p.trigger('ownattack');
+	}
+	if (this.shieldId) {
+		this.shield.casts = 1;
+		this.game.trigger(this.shieldId, 'ownattack');
+	}
+	if (this.weaponId) this.weapon.attack();
+	if (this.foe.sosa > 0) {
+		this.foe.sosa--;
+	}
+	this.nova = this.nova2 = 0;
+	for (
+		var i = this.foe.drawpower !== undefined ? this.foe.drawpower : 1;
+		i > 0;
+		i--
+	) {
+		this.foe.drawcard();
+	}
+
+	this.silence = false;
+	this.foe.precognition = this.foe.sanctuary = false;
 };
 Player.prototype.die = function() {
 	this.out = true;
@@ -465,6 +571,13 @@ Player.prototype.drawhand = function(x) {
 	this.deckIds = deckIds;
 	for (let i = 0; i < toHand.length; i++) {
 		this.addCard(toHand[i]);
+	}
+	if (this.game.Cards.Names.Relic && !this.hand.some(c => !c.cost)) {
+		this.deckIds = this.deckIds.concat(this.handIds);
+		const toHand2 = deckIds.splice(0, x);
+		for (let i = 0; i < 7; i++) {
+			this.addCard(toHand2[i]);
+		}
 	}
 };
 function destroyCloak(id) {

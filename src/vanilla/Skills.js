@@ -3,7 +3,7 @@ import Skill from '../Skill.js';
 import * as etg from '../etg.js';
 
 function vadrenathrottle(f) {
-	return function(c, ...args) {
+	return function(ctx, c, ...args) {
 		if (c.getStatus('adrenaline') < 3) {
 			return f(c, ...args);
 		}
@@ -20,19 +20,16 @@ const Actives = {
 	},
 	accelerationspell: (ctx, c, t) => {
 		t.lobo();
-		t.active = t.active.set('auto', Actives.acceleration);
+		t.active = t.active.set('ownattack', Actives.acceleration);
 	},
 	accretion: (ctx, c, t) => {
 		Actives.destroy.func(ctx, ctx, c, t);
 		c.buffhp(15);
 		if (c.truehp() > 45) {
 			c.die();
-			if (c.owner.hand.length < 8) {
-				new smth.CardInstance(
-					ctx.Cards.Names.BlackHole.asUpped(c.card.upped),
-					c.owner,
-				).place();
-			}
+			c.remove();
+			c.transform(c.card.as(ctx.Cards.Names.BlackHole));
+			c.owner.addCard(c);
 		}
 	},
 	adrenaline: (ctx, c, t) => {
@@ -52,13 +49,13 @@ const Actives = {
 	},
 	bblood: (ctx, c, t) => {
 		t.buffhp(20);
-		t.status = t.status.set('delayed', 6);
+		t.setStatus('delayed', 6);
 	},
 	blackhole: (ctx, c, t) => {
 		if (!c.owner.foe.sanctuary) {
 			for (var q = 1; q < 13; q++) {
 				c.owner.dmg(-Math.min(c.owner.foe.quanta[q], 3));
-				c.owner.foe.quanta[q] = Math.max(c.owner.foe.quanta[q] - 3, 0);
+				c.owner.foe.setQuanta(q, Math.max(c.owner.foe.quanta[q] - 3, 0));
 			}
 		}
 	},
@@ -68,17 +65,14 @@ const Actives = {
 	},
 	boneyard: (ctx, c, t) => {
 		if (!t.card.isOf(ctx.Cards.Names.Skeleton)) {
-			new smth.Creature(
-				ctx.Cards.Names.Skeleton.asUpped(c.card.upped),
-				c.owner,
-			).place();
+			c.owner.addCrea(c.owner.newThing(c.card.as(ctx.Cards.Names.Skeleton)));
 		}
 	},
 	bow: (ctx, c, t) => {
 		return c.owner.mark == etg.Air ? 1 : 0;
 	},
 	bravery: (ctx, c, t) => {
-		if (!c.owner.foe.sanctuary) {
+		if (!c.owner.foe.getStatus('sanctuary')) {
 			var n = c.owner.mark == etg.Fire ? 3 : 2;
 			for (
 				var i = 0;
@@ -91,7 +85,7 @@ const Actives = {
 		}
 	},
 	burrow: (ctx, c, t) => {
-		c.status = c.status.set('burrowed', true);
+		c.setStatus('burrowed', 1);
 		c.active = c.active.set('cast', Actives.unburrow);
 		c.cast = 0;
 		c.atk = Math.floor(c.atk / 2);
@@ -117,14 +111,6 @@ const Actives = {
 			c.owner.foe.freeze(3);
 		}
 	},
-	charge: (ctx, c, t) => {
-		c.defstatus('dive', 0);
-		c.status = c.status.set('dive', c.status.get('dive') + 2);
-		if (!c.status.get('momentum')) {
-			c.status = c.status.set('momentum', true);
-			c.addactive('postauto', Actives.removemomentum);
-		}
-	},
 	chimera: (ctx, c, t) => {
 		var atk = 0,
 			hp = 0;
@@ -134,16 +120,16 @@ const Actives = {
 				hp += c.owner.creatures[i].truehp();
 			}
 		}
-		var chim = new smth.Creature(c.card, c.owner);
+		const chim = c.owner.newThing(c.card.as(ctx.Cards.Names.Chimera));
 		chim.atk = atk;
 		chim.maxhp = hp;
 		chim.hp = hp;
 		chim.active = new imm.Map();
-		chim.status = chim.status.set('momentum', true);
-		c.owner.creatures[0] = chim.id;
-		c.owner.creatures.length = 1;
-		c.owner.creatures.length = 23;
-		c.owner.gpull = chim;
+		chim.setStatus('momentum', 1);
+		const newCreatures = new Uint32Array(23);
+		newCreatures[0] = chim.id;
+		ctx.set(c.ownerId, 'creatures', newCreatures);
+		c.owner.gpull = chim.id;
 	},
 	cpower: (ctx, c, t) => {
 		var buff = t.owner.upto(25);
@@ -177,11 +163,9 @@ const Actives = {
 	deadalive: (ctx, c, t) => {
 		c.deatheffect(c.getIndex());
 	},
-	decrsteam: c => {
-		const steam = c.defstatus('steam', 0);
-		if (steam > 0) {
-			c.atk--;
-			c.status = c.status.set('steam', steam - 1);
+	decrsteam: (ctx, c) => {
+		if (c.maybeDecrStatus('steam')) {
+			c.incrAtk(-1);
 		}
 	},
 	deja: (ctx, c, t) => {
@@ -224,23 +208,22 @@ const Actives = {
 		if (c.owner.sanctuary) return false;
 		if (!c.owner.spend(etg.Chroma, dmg)) {
 			for (var i = 1; i < 13; i++) {
-				c.owner.quanta[i] = 0;
+				c.owner.setQuanta(i, 0);
 			}
-			c.owner.shield = undefined;
+			c.remove();
 		}
 		return true;
 	},
 	disshield: (ctx, c, t, dmg) => {
 		if (c.owner.sanctuary) return false;
 		if (!c.owner.spend(etg.Entropy, Math.ceil(dmg / 3))) {
-			c.owner.quanta[etg.Entropy] = 0;
-			c.owner.shield = undefined;
+			c.owner.setQuanta(etg.Entropy, 0);
+			c.remove();
 		}
 		return true;
 	},
 	dive: (ctx, c, t) => {
-		c.defstatus('dive', 0);
-		c.status = c.status.set('dive', c.status.get('dive') + c.trueatk());
+		c.setStatus('dive', c.getStatus('dive') + c.trueatk());
 	},
 	divinity: (ctx, c, t) => {
 		c.owner.buffhp(c.owner.mark == etg.Light ? 24 : 16);
@@ -261,10 +244,9 @@ const Actives = {
 	},
 	duality: (ctx, c, t) => {
 		if (c.owner.foe.deck.length > 0 && c.owner.hand.length < 8) {
-			new smth.CardInstance(
-				c.owner.foe.deck[c.owner.foe.deck.length - 1],
-				c.owner,
-			).place();
+			c.owner.addCard(
+				c.owner.foe.deck[c.owner.foe.deckIds.length - 1].clone(c.ownerId),
+			);
 		}
 	},
 	durability: (ctx, c, t) => {
@@ -317,23 +299,25 @@ const Actives = {
 		t.spelldmg(3 + 3 * Math.floor(c.owner.quanta[etg.Fire] / 10));
 	},
 	flyingweapon: (ctx, c, t) => {
-		var wp = c.owner.weapon;
+		const wp = c.owner.weapon;
 		if (wp) {
-			var cr = new smth.Creature(wp.card, c.owner);
+			wp.remove();
+			const cr = c.owner.newThing(wp.card);
 			cr.atk = wp.atk;
 			cr.active = wp.active;
 			cr.cast = wp.cast;
 			cr.castele = wp.castele;
-			cr.status = cr.status.set('airborne', true);
+			cr.setStatus('airborne', 1);
 			cr.place();
-			c.owner.weapon = undefined;
 		}
 	},
 	fractal: (ctx, c, t) => {
 		for (var i = 8; i > 0; i--) {
-			new smth.CardInstance(t.card, c.owner).place();
+			const inst = t.owner.newThing(t.card);
+			ctx.effect({ x: 'StartPos', id: inst.id, src: t.id });
+			c.owner.addCard(inst);
 		}
-		c.owner.quanta[etg.Aether] = 0;
+		c.owner.setQuanta(etg.Aether, 0);
 	},
 	freeze: (ctx, c, t) => {
 		t.freeze(
@@ -342,20 +326,11 @@ const Actives = {
 				: 3,
 		);
 	},
-	frightener: (ctx, c, t) => {
-		t.addactive('play', Actives.frightened);
-	},
-	fungusrebirth: (ctx, c, t) => {
-		c.transform(ctx.Cards.Names.Fungus.asUpped(c.card.upped));
-	},
 	gaincharge2: (ctx, c, t) => {
-		c.status = c.status.set('charges', c.status.get('charges') + 2);
+		c.incrStatus('charges', 2);
 	},
 	gas: (ctx, c, t) => {
-		new smth.Permanent(
-			ctx.Cards.Names.UnstableGas.asUpped(c.card.upped),
-			c.owner,
-		).place();
+		c.owner.addPerm(c.owner.newThing(c.card.as(ctx.Cards.Names.UnstableGas)));
 	},
 	gpull: (ctx, c, t) => {
 		c.owner.gpull = c.id;
@@ -411,16 +386,19 @@ const Actives = {
 		t.dmg(t.type != etg.Player && t.status.get('nocturnal') ? 10 : -10);
 	},
 	hope: (ctx, c, t) => {
-		var dr = c.card.upped ? 1 : 0;
-		for (var i = 0; i < 23; i++) {
+		let dr = 0;
+		for (let i = 0; i < 23; i++) {
 			if (
 				c.owner.creatures[i] &&
-				c.owner.creatures[i].hasactive('auto', 'light')
+				c.owner.creatures[i].hasactive('ownattack', 'v_light')
 			) {
 				dr++;
 			}
 		}
-		c.dr = dr;
+		c.setStatus('hope', dr);
+	},
+	hopedr: (ctx, c, t) => {
+		return c.getStatus('hope');
 	},
 	icebolt: (ctx, c, t) => {
 		var bolts = Math.floor(c.owner.quanta[etg.Water] / 10);
@@ -443,7 +421,7 @@ const Actives = {
 	},
 	immolate: (ctx, c, t) => {
 		t.die();
-		if (!t.hasactive('auto', 'singularity')) {
+		if (!t.hasactive('ownattack', 'v_singularity')) {
 			for (var i = 1; i < 13; i++) c.owner.spend(i, -1);
 			c.owner.spend(etg.Fire, c.card.upped ? -7 : -5);
 		}
@@ -471,7 +449,7 @@ const Actives = {
 		t.addpoison(1);
 	},
 	integrity: (ctx, c, t) => {
-		var activeType = ['auto', 'hit', 'buff', 'death'];
+		var activeType = ['ownattack', 'hit', 'buff', 'death'];
 		var shardTally = [0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0];
 		var shardSkills = [
 			[],
@@ -581,7 +559,7 @@ const Actives = {
 		if (shardTally[etg.Darkness] > 1) {
 			status = status.set('voodoo', true);
 		} else if (shardTally[etg.Darkness] > 0) {
-			actives = actives.set('auto', Actives.siphon);
+			actives = actives.set('ownattack', Actives.siphon);
 		}
 		if (shardTally[etg.Aether] > 1) {
 			status = status.set('immaterial', true);
@@ -599,7 +577,7 @@ const Actives = {
 			active: actives,
 			cast: cost,
 		};
-		new smth.Creature(ctx.Cards.Names.ShardGolem, c.owner).place();
+		c.owner.addCrea(c.owner.newThing(ctx.Cards.Names.ShardGolem));
 	},
 	light: (ctx, c, t) => {
 		c.owner.spend(etg.Light, -1);
@@ -614,10 +592,9 @@ const Actives = {
 	},
 	lobotomize: (ctx, c, t) => {
 		t.lobo();
-		t.status = t.status
-			.delete('momentum')
-			.delete('psion')
-			.delete('mutant');
+		t.setStatus('momentum', 0);
+		t.setStatus('psion', 0);
+		t.setStatus('mutant', 0);
 		t.casts = 0;
 	},
 	locket: (ctx, c, t) => {
@@ -645,7 +622,7 @@ const Actives = {
 				)
 					return;
 			}
-			x.addactive('auto', Actives.light);
+			x.addactive('ownattack', Actives.light);
 		});
 	},
 	lycanthropy: (ctx, c, t) => {
@@ -658,14 +635,14 @@ const Actives = {
 		target.dmg(-5);
 	},
 	miracle: (ctx, c, t) => {
-		c.owner.quanta[etg.Light] = 0;
+		c.owner.setQuanta(etg.Light);
 		if (c.owner.sosa) {
 			c.owner.hp = 1;
 		}
 		c.owner.hp = c.owner.maxhp - 1;
 	},
 	mitosis: (ctx, c, t) => {
-		new smth.Creature(c.card, c.owner).place();
+		c.owner.addCrea(c.owner.newThing(c.card));
 	},
 	mitosisspell: (ctx, c, t) => {
 		t.lobo();
@@ -712,7 +689,7 @@ const Actives = {
 			t.transform(ctx.Cards.Names.Abomination);
 		}
 	},
-	neuro: vadrenathrottle(function(c, t) {
+	neuro: vadrenathrottle((ctx, c, t) => {
 		t.addpoison(1);
 		if (t.type === etg.Player) t.setStatus('neuro', 1);
 	}),
@@ -720,7 +697,7 @@ const Actives = {
 		if (!c.owner.foe.sanctuary) {
 			c.owner.dmg(-c.owner.foe.dmg(16 - c.owner.foe.hand.length * 2));
 			for (var i = c.owner.foe.hand.length; i < 8; i++) {
-				c.owner.foe.hand[i] = new smth.CardInstance(t.card, c.owner.foe);
+				c.owner.foe.addCard(c.owner.foe.newThing(t.card));
 			}
 		}
 	},
@@ -729,7 +706,7 @@ const Actives = {
 			c.owner.spend(i, -1);
 		}
 		if (++c.owner.nova > 2) {
-			new smth.Creature(ctx.Cards.Names.Singularity, c.owner).place();
+			c.owner.addCrea(c.owner.newThing(ctx.Cards.Names.Singularity));
 		}
 	},
 	nova2: (ctx, c, t) => {
@@ -737,10 +714,9 @@ const Actives = {
 			c.owner.spend(i, -2);
 		}
 		if (++c.owner.nova2 > 1) {
-			new smth.Creature(
-				ctx.Cards.Names.Singularity.asUpped(true),
-				c.owner,
-			).place();
+			c.owner.addCrea(
+				c.owner.newThing(ctx.Cards.Names.Singularity.asUpped(true)),
+			);
 		}
 	},
 	nymph: (ctx, c, t) => {
@@ -748,13 +724,14 @@ const Actives = {
 			(!t.card.name.match(/^Mark of /) && t.card.element) ||
 			c.owner.upto(12) + 1;
 		Actives.destroy.func(ctx, c, t, false, true);
-		new smth.Creature(
-			ctx.Cards.Codes[etg.NymphList[e]].asUpped(t.card.upped),
-			t.owner,
-		).place();
+		const nymph = t.owner.newThing(
+			t.card.as(ctx.Cards.Codes[etg.NymphList[e]]),
+		);
+		ctx.effect({ x: 'StartPos', id: nymph.id, src: t.id });
+		t.owner.addCrea(nymph);
 	},
 	obsession: (ctx, c, t) => {
-		t.dmg(c.card.upped ? 13 : 10);
+		c.owner.dmg(c.card.upped ? 13 : 10);
 	},
 	overdrive: (ctx, c, t) => {
 		c.atk += 3;
@@ -762,7 +739,7 @@ const Actives = {
 	},
 	overdrivespell: (ctx, c, t) => {
 		t.lobo();
-		t.active = t.active.set('auto', Actives.overdrive);
+		t.active = t.active.set('ownattack', Actives.overdrive);
 	},
 	pandemonium: (ctx, c, t) => {
 		c.owner.foe.masscc(c, Actives.cseed.func, !c.card.upped);
@@ -771,8 +748,12 @@ const Actives = {
 		t.die();
 	},
 	parallel: (ctx, c, t) => {
+		if (t.card.isOf(ctx.Cards.Names.Chimera)) {
+			Actives.chimera(ctx, c);
+			return;
+		}
 		const copy = t.clone(c.owner);
-		copy.place();
+		c.owner.addCrea(copy);
 		copy.setStatus('airborne', copy.card.status.get('airborne'));
 		if (copy.status.get('mutant')) {
 			const buff = t.owner.upto(25);
@@ -785,12 +766,13 @@ const Actives = {
 		}
 		copy.casts = 0;
 	},
-	phoenix: (ctx, c, t, index) => {
-		if (!c.owner.creatures[index]) {
-			c.owner.creatures[index] = new smth.Creature(
-				ctx.Cards.Names.Ash.asUpped(c.card.upped),
-				c.owner,
-			);
+	phoenix: (ctx, c, t, data) => {
+		if (!c.owner.creatures[data.index]) {
+			const ash = c.owner.newThing(c.card.as(ctx.Cards.Names.Ash));
+			ash.type = etg.Creature;
+			const creatures = new Uint32Array(c.owner.creatureIds);
+			creatures[data.index] = ash.id;
+			c.owner.creatureIds = creatures;
 		}
 	},
 	photosynthesis: (ctx, c, t) => {
@@ -806,10 +788,10 @@ const Actives = {
 		var buff = c.card.upped ? 6 : 3;
 		t.buffhp(buff);
 	},
-	poison: vadrenathrottle(function(c, t) {
+	poison: vadrenathrottle((ctx, c, t) => {
 		(t || c.owner.foe).addpoison(1);
 	}),
-	poison2: vadrenathrottle(function(c, t) {
+	poison2: vadrenathrottle((ctx, c, t) => {
 		(t || c.owner.foe).addpoison(2);
 	}),
 	poison3: (ctx, c, t) => {
@@ -829,10 +811,9 @@ const Actives = {
 		}
 	},
 	queen: (ctx, c, t) => {
-		new smth.Creature(
-			ctx.Cards.Names.Firefly.asUpped(c.card.upped),
-			c.owner,
-		).place();
+		c.owner.addCrea(
+			c.owner.newThing(ctx.Cards.Names.Firefly.asUpped(c.card.upped)),
+		);
 	},
 	quint: (ctx, c, t) => {
 		t.setStatus('immaterial', true);
@@ -869,11 +850,8 @@ const Actives = {
 	},
 	regeneratespell: (ctx, c, t) => {
 		t.lobo();
-		t.active = t.active.set('auto', Actives.regenerate);
+		t.active = t.active.set('ownattack', Actives.regenerate);
 		t.status = t.status.delete('stasis');
-	},
-	removemomentum: (ctx, c, t) => {
-		c.setStatus('momentum', 0);
 	},
 	relic: (ctx, c, t) => {
 		c.place();
@@ -900,7 +878,7 @@ const Actives = {
 		) {
 			c.status = c.status.set('salvaged', 1);
 			t.status = t.status.set('salvaged', 1);
-			new smth.CardInstance(t.card, c.owner).place();
+			c.owner.addCard(c.owner.newThing(t.card));
 		}
 	},
 	sanctuary: (ctx, c, t) => {
@@ -908,10 +886,9 @@ const Actives = {
 		c.owner.dmg(-4);
 	},
 	scarab: (ctx, c, t) => {
-		new smth.Creature(
-			ctx.Cards.Names.Scarab.asUpped(c.card.upped),
-			c.owner,
-		).place();
+		c.owner.addCard(
+			c.owner.newThing(ctx.Cards.Names.Scarab.asUpped(c.card.upped)),
+		);
 	},
 	scramble: (ctx, c, t) => {
 		if (t.type == etg.Player && !t.sanctuary) {
@@ -945,7 +922,7 @@ const Actives = {
 			anyentro |= cards[i].element == etg.Entropy;
 		}
 		for (var i = 0; i < num; i++) {
-			new smth.CardInstance(cards[i], c.owner).place();
+			c.owner.addCard(c.owner.newThing(cards[i]));
 		}
 	},
 	silence: (ctx, c, t) => {
@@ -976,18 +953,22 @@ const Actives = {
 			Actives.parallel.func(ctx, c, c);
 		}
 	},
-	siphon: vadrenathrottle(function(c, t) {
-		if (!c.owner.foe.sanctuary && c.owner.foe.spend(etg.Chroma, 1)) {
+	siphon: vadrenathrottle((ctx, c, t) => {
+		if (
+			!c.owner.foe.getStatus('sanctuary') &&
+			c.owner.foe.spend(etg.Chroma, 1)
+		) {
 			c.owner.spend(etg.Darkness, -1);
 		}
 	}),
 	skyblitz: (ctx, c, t) => {
-		c.owner.quanta[etg.Air] = 0;
+		c.owner.setQuanta(etg.Air, 0);
 		for (var i = 0; i < 23; i++) {
 			var cr = c.owner.creatures[i];
 			if (cr && cr.status.get('airborne') && cr.isMaterial(etg.Creature)) {
-				const dive = cr.defstatus('dive', 0);
-				cr.status = cr.status.set('dive', dive + cr.trueatk());
+				cr.incrStatus('dive', cr.trueatk());
+				const dive = cr.getStatus('dive');
+				cr.setStatus('dive', dive + cr.trueatk());
 			}
 		}
 	},
@@ -995,13 +976,13 @@ const Actives = {
 		t.dmg(3);
 	},
 	sosa: (ctx, c, t) => {
-		c.owner.sosa += 2;
-		for (var i = 1; i < 13; i++) {
-			if (i != etg.Death) {
-				c.owner.quanta[i] = 0;
-			}
-		}
-		c.owner.dmg(c.card.upped ? 40 : 48, true);
+		const sosa = c.owner.getStatus('sosa');
+		const quanta = new Int8Array(13);
+		quanta[etg.Death] = c.owner.quanta[etg.Death];
+		ctx.set(c.ownerId, 'quanta', quanta);
+		c.owner.setStatus('sosa', 0);
+		c.owner.dmg(c.card.upped ? 40 : 48);
+		c.owner.setStatus('sosa', sosa + 2);
 	},
 	soulcatch: (ctx, c, t) => {
 		c.owner.spend(etg.Death, c.card.upped ? -3 : -2);
@@ -1019,35 +1000,25 @@ const Actives = {
 						c.owner.shield.status.get('charges') + 1,
 					);
 				} else {
-					c.owner.shield = new smth.Shield(t.card, c.owner);
-					c.owner.shield.status = c.owner.shield.status.set('charges', 1);
-				}
-			} else if (t.type === etg.Weapon) {
-				if (c.owner.weapon && c.owner.weapon.card == t.card) {
-					c.owner.shield.status = c.owner.shield.status.set(
-						'charges',
-						c.owner.shield.status.get('charges') + 1,
-					);
-				} else {
-					c.owner.weapon = new smth.Weapon(t.card, c.owner);
+					c.owner.setShield(c.owner.newThing(t.card));
 					c.owner.shield.status = c.owner.shield.status.set('charges', 1);
 				}
 			} else {
-				new smth.Permanent(t.card, c.owner).place();
+				c.owner.addPerm(c.owner.newThing(t.card));
 			}
 		} else {
 			t.remove();
 			t.owner = c.owner;
 			t.casts = 0;
 			if (t.card.isOf(ctx.Cards.Names.Sundial))
-				t.status = t.status.set('charges', t.status.get('charges') + 1);
+				t.setStatus('charges', t.status.get('charges') + 1);
 			t.place();
 		}
 	},
 	steam: (ctx, c, t) => {
 		c.incrStatus('steam', 5);
-		c.atk += 5;
-		if (!c.hasactive('postauto', 'decrsteam'))
+		c.incrAtk(5);
+		if (!c.hasactive('postauto', 'v_decrsteam'))
 			c.addactive('postauto', Actives.decrsteam);
 	},
 	stoneform: (ctx, c, t) => {
@@ -1067,7 +1038,7 @@ const Actives = {
 		for (let i = 0; i < 23; i++) {
 			if (
 				c.owner.creatures[i] &&
-				c.owner.creatures[i].hasactive('auto', 'swarm')
+				c.owner.creatures[i].hasactive('ownattack', 'v_swarm')
 			) {
 				hp++;
 			}
@@ -1095,7 +1066,6 @@ const Actives = {
 	},
 	upkeep: (ctx, c, t) => {
 		if (!c.owner.spend(c.card.element, 1)) {
-			c.owner.quanta[c.card.element] = 0;
 			c.die();
 		}
 	},
@@ -1181,10 +1151,8 @@ const Actives = {
 					!t.owner.creatures[index] ||
 					t.owner.creatures[index].card != ctx.Cards.Names.MalignantCell
 				) {
-					t.owner.creatures[index] = new smth.Creature(
-						ctx.Cards.Names.Skeleton.asUpped(t.card.upped),
-						t.owner,
-					);
+					const skele = t.owner.newThing(t.card.as(ctx.Cards.Names.Skeleton));
+					t.owner.setCrea(index, skele.id);
 				}
 			}
 		}
@@ -1217,6 +1185,6 @@ const passives = new Set([
 	'swarm',
 ]);
 for (const key in Actives) {
-	Actives[key] = new Skill([key], Actives[key], passives.has(key));
+	Actives[key] = new Skill(['v_' + key], Actives[key], passives.has(key));
 }
 export default Actives;

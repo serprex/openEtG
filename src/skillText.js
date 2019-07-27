@@ -1,8 +1,10 @@
 import * as etg from './etg.js';
 import Card from './Card.js';
 import Thing from './Thing.js';
+import originalSkillText from './vanilla/skillText.js';
 
 export default function skillText(c) {
+	if (c.Cards.Names.Relic) return originalSkillText(c);
 	if (c instanceof Card && c.type === etg.Spell) {
 		const entry = getDataFromName(c.active.get('cast').castName);
 		return processEntry(c, 'cast', entry);
@@ -509,8 +511,9 @@ const statusData = {
 		Thing.prototype.hasactive.call(c, 'ownattack', 'losecharge') ||
 		c.getStatus('charges') === 1
 			? ''
-			: `Enter with ${c.getStatus('charges') +
-					(c.getStatus('stackable') ? ' stacks' : ' charges')}`,
+			: `Enter with ${c.getStatus('charges')} ${
+					c.getStatus('stackable') ? ' stacks' : ' charges'
+			  }`,
 	flooding:
 		'Non aquatic creatures past first five creature slots die on turn end. Consumes 1:7. Unique',
 	nightfall: auraText('Nocturnal creatures', '1|1', '2|1'),

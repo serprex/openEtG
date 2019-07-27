@@ -17,7 +17,7 @@ export default function Game(data) {
 		new imm.Map({
 			id: 2,
 			Cards: data.set === 'Original' ? OriginalCards : StandardCards,
-			phase: 0,
+			phase: data.set === 'Original' ? etg.PlayPhase : etg.MulliganPhase,
 			turn: 2,
 			players: [],
 			bonusstats: new imm.Map({

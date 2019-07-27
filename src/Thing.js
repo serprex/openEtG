@@ -363,6 +363,7 @@ Thing.prototype.lobo = function() {
 	for (const [k, v] of this.active) {
 		v.name.forEach(name => {
 			if (!parseSkill(name).passive) {
+				console.log(k, name);
 				this.rmactive(k, name);
 			}
 		});
@@ -623,6 +624,98 @@ Thing.prototype.attack = function(target, attackPhase) {
 		}
 	}
 };
+Thing.prototype.v_attack = function(stasis, freedomChance) {
+	const isCreature = this.type === etg.Creature;
+	if (isCreature) {
+		this.dmg(this.getStatus('poison'), true);
+	}
+	const target = this.owner.foe;
+	if (
+		!this.status.get('frozen') ||
+		this.active.get('ownattack') === Skills.v_overdrive ||
+		this.active.get('ownattack') === Skills.v_acceleration
+	) {
+		this.proc('attack');
+	}
+	this.casts = 1;
+	this.setStatus('ready', 0);
+	let trueatk;
+	if (
+		!(stasis || this.status.get('frozen') || this.status.get('delayed')) &&
+		(trueatk = this.trueatk()) != 0
+	) {
+		let momentum = this.getStatus('momentum');
+		if (
+			this.status.get('airborne') &&
+			freedomChance &&
+			this.owner.rng() < freedomChance
+		) {
+			momentum = true;
+			trueatk = Math.ceil(trueatk * 1.5);
+		}
+		if (this.status.get('psion')) {
+			target.spelldmg(trueatk);
+		} else if (momentum || trueatk < 0) {
+			let stillblock = false,
+				fsh,
+				fsha;
+			if (
+				!momentum &&
+				(fsh = target.shield) &&
+				(fsha = fsh.active.get('shield')) &&
+				(fsha == Skills.v_wings || fsha == Skills.v_weight)
+			) {
+				stillblock = fsha.func(fsh, this);
+			}
+			if (!stillblock) {
+				target.dmg(trueatk);
+				this.trigger('hit', target, trueatk);
+			}
+		} else if (isCreature && target.gpull && trueatk > 0) {
+			const gpull = this.game.byId(target.gpull);
+			const dmg = gpull.dmg(trueatk);
+			if (this.hasactive('hit', 'vampirism')) {
+				this.owner.dmg(-dmg);
+			}
+		} else {
+			const truedr = target.shield ? target.shield.dr : 0;
+			const tryDmg = Math.max(trueatk - truedr, 0);
+			if (
+				!target.shield ||
+				!target.shield.active.get('shield') ||
+				!target.shield.trigger('shield', this, tryDmg)
+			) {
+				if (tryDmg > 0) {
+					const dmg = target.dmg(tryDmg);
+					this.trigger('hit', target, dmg);
+				}
+			}
+		}
+	}
+	this.maybeDecrStatus('frozen');
+	this.maybeDecrStatus('delayed');
+	if (this.status.get('dive')) {
+		this.setStatus('dive', 0);
+	}
+	if (~this.getIndex()) {
+		if (isCreature && this.truehp() <= 0) {
+			this.die();
+		} else {
+			this.trigger('postauto');
+			if (this.status.get('adrenaline')) {
+				if (
+					this.status.get('adrenaline') < etg.countAdrenaline(this.trueatk(0))
+				) {
+					this.incrStatus('adrenaline', 1);
+					this.v_attack(stasis, freedomChance);
+				} else {
+					this.setStatus('adrenaline', 1);
+				}
+			}
+		}
+	}
+};
+
 Thing.prototype.rng = function() {
 	return this.game.rng();
 };

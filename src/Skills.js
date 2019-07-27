@@ -19,29 +19,20 @@ function adrenathrottle(f) {
 		}
 	};
 }
-function quadpillarFactory1(ele) {
-	return (ctx, c, t) => {
-		const n = 1;
-		for (let i = 0; i < n; i++) {
-			const r = ctx.upto(16);
-			c.owner.spend((ele >> ((r & 3) << 2)) & 15, -1);
-			if (c.rng() < 2 / 3) {
-				c.owner.spend((ele >> (r & 12)) & 15, -1);
-			}
+function quadPillarCore(ctx, ele, c, n) {
+	for (let i = 0; i < n; i++) {
+		const r = ctx.upto(16);
+		c.owner.spend((ele >> ((r & 3) << 2)) & 15, -1);
+		if (c.rng() < 2 / 3) {
+			c.owner.spend((ele >> (r & 12)) & 15, -1);
 		}
-	};
+	}
+}
+function quadpillarFactory1(ele) {
+	return (ctx, c, t) => quadPillarCore(ctx, ele, c, 1);
 }
 function quadpillarFactory(ele) {
-	return (ctx, c, t) => {
-		const n = c.getStatus('charges');
-		for (let i = 0; i < n; i++) {
-			const r = ctx.upto(16);
-			c.owner.spend((ele >> ((r & 3) << 2)) & 15, -1);
-			if (c.rng() < 2 / 3) {
-				c.owner.spend((ele >> (r & 12)) & 15, -1);
-			}
-		}
-	};
+	return (ctx, c, t) => quadPillarCore(ctx, ele, c, c.getStatus('charges'));
 }
 const defaultShardGolem = new imm.Map({
 	stat: 1,
@@ -408,7 +399,7 @@ const Skills = {
 	},
 	decrsteam: passive((ctx, c) => {
 		if (c.maybeDecrStatus('steam')) {
-			c.atk--;
+			c.incrAtk(-1);
 		}
 	}),
 	deckblast: (ctx, c, t) => {
@@ -1894,7 +1885,7 @@ const Skills = {
 		ctx.set(c.ownerId, 'quanta', quanta);
 		const n = c.card.upped ? 40 : 48;
 		c.owner.setStatus('sosa', 0);
-		c.owner.dmg(Math.max(Math.ceil((c.owner.maxhp * n) / 100), n), true);
+		c.owner.dmg(Math.max(Math.ceil((c.owner.maxhp * n) / 100), n));
 		c.owner.setStatus('sosa', 2);
 	},
 	soulcatch: (ctx, c, t) => {

@@ -5,8 +5,9 @@ const assert = assertSoft.strict;
 
 import * as etg from '../etg.js';
 import Game from '../Game.js';
-import * as etgutil from '../etgutil.js';
 import Cards from './Cards.js';
+import parseSkill from '../parseSkill.js';
+import * as etgutil from '../etgutil.js';
 import Cjson from './Cards.json';
 
 function initHand(pl, ...args) {
@@ -86,13 +87,12 @@ M.test('Adrenaline', function() {
 	this.player2.setQuanta(etg.Life, 3);
 	this.player1.endturn();
 	assert.equal(this.player2.hp, 68, 'dmg');
-	console.log(this.player1.quanta);
 	assert.equal(this.player1.quanta[etg.Darkness], 2, 'Absorbed');
 	assert.equal(this.player2.quanta[etg.Life], 1, 'Lone Life');
 });
 M.test('Aflatoxin', function() {
 	this.player1.addCrea(this.player1.newThing(Cards.Names.Devourer));
-	this.cast('aflatoxin', this.player1, this.player1.creatures[0]);
+	this.cast('v_aflatoxin', this.player1, this.player1.creatures[0]);
 	this.player1.creatures[0].die();
 	assert.ok(this.player1.creatures[0], 'Something');
 	assert.equal(
@@ -101,7 +101,7 @@ M.test('Aflatoxin', function() {
 		'Malignant',
 	);
 	this.player1.addCrea(this.player1.newThing(Cards.Names.Phoenix));
-	this.cast('aflatoxin', this.player1, this.player1.creatures[1]);
+	this.cast('v_aflatoxin', this.player1, this.player1.creatures[1]);
 	this.player1.creatures[1].die();
 	assert.equal(
 		this.player1.creatures[1].card,
@@ -158,30 +158,30 @@ M.test('Destroy', function() {
 		2,
 		'2 charges',
 	);
-	this.cast('destroy', this.player2, this.player1.permanents[0]);
+	this.cast('v_destroy', this.player2, this.player1.permanents[0]);
 	assert.equal(this.player1.permanents[0].status.get('charges'), 1, '1 charge');
-	this.cast('destroy', this.player2, this.player1.permanents[0]);
+	this.cast('v_destroy', this.player2, this.player1.permanents[0]);
 	assert.ok(!this.player1.permanents[0], 'poof');
 	assert.equal(
 		this.player1.permanents[1].card,
 		Cards.Names.SoulCatcher,
 		'SoulCatcher',
 	);
-	this.cast('destroy', this.player2, this.player1.permanents[1]);
+	this.cast('v_destroy', this.player2, this.player1.permanents[1]);
 	assert.ok(!this.player1.permanents[1], 'SoulCatcher gone');
 	assert.equal(this.player1.shield.card, Cards.Names.Shield, 'Shield');
-	this.cast('destroy', this.player2, this.player1.shield);
+	this.cast('v_destroy', this.player2, this.player1.shield);
 	assert.ok(!this.player1.shield, 'Shield gone');
 	assert.equal(this.player1.weapon.card, Cards.Names.Dagger, 'Dagger');
-	this.cast('destroy', this.player2, this.player1.weapon);
+	this.cast('v_destroy', this.player2, this.player1.weapon);
 	assert.ok(!this.player1.weapon, 'Dagger gone');
 	initHand(this.player1, Cards.Names.BoneWall);
 	this.player1.hand[0].useactive();
 	assert.equal(this.player1.shield.status.get('charges'), 7, '7 bones');
-	this.cast('destroy', this.player2, this.player1.shield);
+	this.cast('v_destroy', this.player2, this.player1.shield);
 	assert.equal(this.player1.shield.status.get('charges'), 6, '6 bones');
 	for (let i = 0; i < 6; i++) {
-		this.cast('destroy', this.player2, this.player1.shield);
+		this.cast('v_destroy', this.player2, this.player1.shield);
 	}
 	assert.ok(!this.player1.shield, 'This town is all in hell');
 });
@@ -211,9 +211,9 @@ M.test('Earthquake', function() {
 	const pillars = this.player1.permanents[0];
 	assert.ok(pillars && pillars.card.type === etg.Pillar, 'ispillar');
 	assert.equal(pillars.status.get('charges'), 5, '5 charges');
-	this.cast('earthquake', this.player2, pillars);
+	this.cast('v_earthquake', this.player2, pillars);
 	assert.equal(pillars.status.get('charges'), 2, '2 charges');
-	this.cast('earthquake', this.player2, pillars);
+	this.cast('v_earthquake', this.player2, pillars);
 	assert.ok(!this.player1.permanents[0], 'poof');
 });
 M.test('Eclipse', function() {
@@ -249,11 +249,11 @@ M.test('Eclipse', function() {
 M.test('Gpull', function() {
 	this.player2.addCrea(this.player2.newThing(Cards.Names.ColossalDragon));
 	this.player2.gpull = this.player2.creatureIds[0];
-	this.player1.addCrea(this.player1.newThing(Cards.Names.Scorpion));
+	this.player1.addCrea(this.player1.newThing(Cards.Names.ForestScorpion));
 	this.player1.endturn();
 	assert.equal(
 		this.game.get(this.player2.gpull).get('hp'),
-		29,
+		14,
 		'dmg redirected',
 	);
 	assert.equal(
@@ -273,15 +273,16 @@ M.test('Hope', function() {
 		);
 	}
 	this.player1.endturn();
-	assert.equal(this.player1.shield.dr, 3, 'DR');
+	assert.equal(this.player1.shield.truedr(), 3, 'DR');
 	assert.equal(this.player1.quanta[etg.Light], 3, 'RoL');
 });
 M.test('Lobotomize', function() {
 	this.player1.addCrea(this.player1.newThing(Cards.Names.Devourer));
-	assert.ok(dev.active.get('auto'), 'Siphon');
+	const dev = this.player1.creatures[0];
+	assert.ok(dev.active.get('ownattack'), 'Siphon');
 	assert.ok(dev.active.get('cast'), 'Burrow');
-	this.cast('lobotomize', this.player1, dev);
-	assert.ok(dev.active.get('auto'), 'Siphon');
+	this.cast('v_lobotomize', this.player1, dev);
+	assert.ok(dev.active.get('ownattack'), 'Siphon');
 	assert.ok(!dev.active.get('cast'), 'No Burrow');
 });
 M.test('Obsession', function() {
@@ -303,9 +304,9 @@ M.test('Obsession', function() {
 M.test('Parallel', function() {
 	this.player1.addCrea(this.player1.newThing(Cards.Names.Dragonfly));
 	const damsel = this.player1.creatures[0];
-	this.cast('parallel', damsel, damsel);
+	this.cast('v_parallel', damsel, damsel);
 	assert.equal(this.player1.creatures[1].card, Cards.Names.Dragonfly, "PU'd");
-	this.cast('web', this.player1, damsel);
+	this.cast('v_web', this.player1, damsel);
 	assert.ok(
 		!damsel.getStatus('airborne') &&
 			this.player1.creatures[1].getStatus('airborne'),
@@ -316,26 +317,26 @@ M.test('Phoenix', function() {
 	this.player1.addCrea(this.player1.newThing(Cards.Names.Phoenix));
 	const phoenix = this.player1.creatures[0];
 	assert.equal(this.player1.creatures[0].card, Cards.Names.Phoenix, 'Phoenix');
-	this.cast('lightning', this.player1, phoenix);
+	this.cast('v_lightning', this.player1, phoenix);
 });
 M.test('Purify', function() {
-	this.cast('poison3', this.player1);
+	this.cast('v_poison3', this.player1);
 	assert.equal(this.player2.status.get('poison'), 3, '3');
-	this.cast('poison3', this.player1, this.player2);
+	this.cast('v_poison3', this.player1, this.player2);
 	assert.equal(this.player2.status.get('poison'), 6, '6');
-	this.cast('purify', this.player1, this.player2);
+	this.cast('v_purify', this.player1, this.player2);
 	assert.equal(this.player2.status.get('poison'), -2, '-2');
-	this.cast('purify', this.player1, this.player2);
+	this.cast('v_purify', this.player1, this.player2);
 	assert.equal(this.player2.status.get('poison'), -4, '-4');
 });
 M.test('Reflect', function() {
-	this.cast('lightning', this.player1, this.player2);
+	this.cast('v_lightning', this.player1, this.player2);
 	assert.ok(this.player1.hp == 100 && this.player2.hp == 95, 'Plain spell');
-	this.player2.setShield(this.player2.newThing(Cards.Names.MirrorShield));
-	this.cast('lightning', this.player1, this.player2);
+	this.player2.setShield(this.player2.newThing(Cards.Names.ReflectiveShield));
+	this.cast('v_lightning', this.player1, this.player2);
 	assert.ok(this.player1.hp == 95 && this.player2.hp == 95, 'Reflected spell');
-	this.player1.setShield(this.player1.newThing(Cards.Names.MirrorShield));
-	this.cast('lightning', this.player1, this.player2);
+	this.player1.setShield(this.player1.newThing(Cards.Names.ReflectiveShield));
+	this.cast('v_lightning', this.player1, this.player2);
 	assert.ok(
 		this.player1.hp == 90 && this.player2.hp == 95,
 		'Unreflected reflected spell',
@@ -344,7 +345,7 @@ M.test('Reflect', function() {
 M.test('Steal', function() {
 	this.player1.setShield(this.player1.newThing(Cards.Names.BoneWall));
 	this.player1.shield.setStatus('charges', 3);
-	this.cast('steal', this.player2, this.player1.shield);
+	this.cast('v_steal', this.player2, this.player1.shield);
 	assert.ok(
 		this.player1.shield && this.player1.shield.status.get('charges') == 2,
 		'Wish bones',
@@ -353,7 +354,7 @@ M.test('Steal', function() {
 		this.player2.shield && this.player2.shield.status.get('charges') == 1,
 		'stole 1',
 	);
-	this.cast('steal', this.player2, this.player1.shield);
+	this.cast('v_steal', this.player2, this.player1.shield);
 	assert.ok(
 		this.player1.shield && this.player1.shield.status.get('charges') == 1,
 		'Lone bone',
@@ -362,7 +363,7 @@ M.test('Steal', function() {
 		this.player2.shield && this.player2.shield.status.get('charges') == 2,
 		'stole 2',
 	);
-	this.cast('steal', this.player2, this.player1.shield);
+	this.cast('v_steal', this.player2, this.player1.shield);
 	assert.ok(!this.player1.shield, 'This town is all in hell');
 	assert.ok(
 		this.player2.shield && this.player2.shield.status.get('charges') == 3,
@@ -381,14 +382,15 @@ M.test('Steam', function() {
 	assert.equal(steam.trueatk(), 4, '4');
 });
 M.test('Voodoo', function() {
-	this.player1.addCrea(this.player1.newThing(Cards.Names.SteamMachine));
-	this.cast('lightning', this.player1, voodoo);
-	this.cast('infect', this.player1, voodoo);
+	this.player1.addCrea(this.player1.newThing(Cards.Names.VoodooDoll));
+	const voodoo = this.player1.creatures[0];
+	this.cast('v_lightning', this.player1, voodoo);
+	this.cast('v_infect', this.player1, voodoo);
 	assert.equal(voodoo.hp, 11, 'dmg');
 	assert.equal(this.player2.hp, 95, 'foe dmg');
 	assert.equal(voodoo.status.get('poison'), 1, 'psn');
 	assert.equal(this.player2.status.get('poison'), 1, 'foe psn');
-	this.cast('holylight', this.player1, voodoo);
+	this.cast('v_holylight', this.player1, voodoo);
 	assert.equal(voodoo.hp, 1, 'holy dmg');
 	assert.equal(this.player2.hp, 85, 'foe holy dmg');
 });
@@ -405,7 +407,7 @@ M.test('Scarab', function() {
 	assert.equal(scarabs[0].truehp(), 2);
 	this.player1.addCrea(scarabs[2]);
 	assert.equal(scarabs[0].truehp(), 2);
-	this.cast('devour', scarabs[0], scarabs[2]);
+	this.cast('v_devour', scarabs[0], scarabs[2]);
 	assert.equal(scarabs[0].truehp(), 3);
 	this.player1.endturn();
 	assert.equal(scarabs[0].truehp(), 3);
